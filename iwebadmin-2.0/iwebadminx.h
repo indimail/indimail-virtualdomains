@@ -17,37 +17,16 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 #include <sys/types.h>
-#include <unistd.h>
-#include <stdio.h>
+#include <iwebadmin.h>
 
-extern char     Username[MAX_BUFF];
-extern char     Domain[MAX_BUFF];
-extern char     Password[MAX_BUFF];
-extern char     Gecos[MAX_BUFF];
-extern char     Quota[MAX_BUFF];
-extern char     Time[MAX_BUFF];
-extern char     ActionUser[MAX_BUFF];
-extern char     Newu[MAX_BUFF];
-extern char     Password1[MAX_BUFF];
-extern char     Password2[MAX_BUFF];
-extern char     Crypted[MAX_BUFF];
-extern char     Alias[MAX_BUFF];
-extern char     LineData[MAX_BUFF];
-extern char     Action[MAX_BUFF];
-extern char     Message[MAX_BIG_BUFF];
-extern char     StatusMessage[MAX_BIG_BUFF];
+extern stralloc Username, Domain, Password, Gecos, Quota, Time, ActionUser, Newu,
+				Password1, Password2, Crypted, Alias, LineData, Action, Message,
+				StatusMessage, SearchUser, TmpBuf, RealDir, line;
 extern int      CGIValues[256];
-extern char     Pagenumber[MAX_BUFF];
-extern char     SearchUser[MAX_BUFF];
-extern time_t   Mytime;
+extern time_t   mytime;
+extern char     Pagenumber[];
 extern char    *TmpCGI;
-extern char     TmpBuf[MAX_BIG_BUFF];
-extern char     TmpBuf1[MAX_BUFF];
-extern char     TmpBuf2[MAX_BUFF];
-extern char     TmpBuf3[MAX_BUFF];
-extern char     TempBuf[MAX_BUFF];
-extern int      Compressed;
-extern FILE    *actout;
+extern int      Compressed, actout;
 extern char    *html_text[MAX_LANG_STR + 1];
 
 extern struct vlimits Limits;
@@ -75,6 +54,4 @@ extern int      CurMailingLists;
 
 extern int      Uid;
 extern int      Gid;
-extern char     RealDir[156];
-
 extern char     Lang[40];

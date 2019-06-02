@@ -18,16 +18,7 @@
  */
 
 #include <time.h>
-
-/*
- * Some platforms use '.maildir' instead of 'Maildir' as the mail directory
- * * name.  Furture versions of Vpopmail might define it.  Until then, change
- * * it below.
- */
-#ifndef MAILDIR
-#define MAILDIR "Maildir"
-#endif
-
+#include <stralloc.h>
 /*
  * max # of forwards a user can set on the Modify User screen 
  */
@@ -61,12 +52,12 @@
 #define ACTION_MODIFY 1
 #define ACTION_DELETE 2
 
-void            del_id_files(char *);
 void            init_globals();
 void            quickAction(char *username, int action);
+void            del_id_files(stralloc *);
 
 /*
  * copied from maildirquota.c in vpopmail
- * * it really needs to get into vpopmail.h somehow
+ * it really needs to get into vpopmail.h somehow
  */
 int             readuserquota(const char *dir, long *sizep, int *cntp);

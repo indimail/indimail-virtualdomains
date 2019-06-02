@@ -1,10 +1,12 @@
 /*
  * $Id: util.h,v 1.1 2010-04-26 12:08:13+05:30 Cprogrammer Exp mbhangui $
  */
+#include <stralloc.h>
 
 int             check_local_user(char *user);
 int             fixup_local_name(char *addr);
 int             check_email_addr(char *addr);
+int             check_indimail_alias(char *, stralloc *);
 int             open_lang(char *lang);
 int             open_colortable();
 char           *strstart(char *sstr, char *tstr);

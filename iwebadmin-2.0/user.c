@@ -16,46 +16,40 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
-
-#include <indimail_config.h>
-#undef PACKAGE
-#undef VERSION
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_URL
-#include <indimail.h>
-#undef PACKAGE
-#undef VERSION
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_URL
+#ifdef HAVE_CONFIG_H
 #include "config.h"
-
-#include <stdlib.h>
-#include <string.h>
+#endif
+#include <indimail_config.h>
+#include <indimail.h>
+#include <indimail_compat.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
 #include <sys/stat.h>
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
-#include <unistd.h>
+#endif
+#ifdef HAVE_PWD_H
 #include <pwd.h>
-#include <dirent.h>
-#include <errno.h>
-/*
- * undef some macros that get redefined in config.h below 
- */
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_URL
+#endif
+#ifdef HAVE_QMAIL
+#include <open.h>
+#include <alloc.h>
+#include <str.h>
+#include <fmt.h>
+#include <scan.h>
+#include <substdio.h>
+#include <getln.h>
+#include <strerr.h>
+#include <error.h>
+#include <case.h>
+#endif
 #include "alias.h"
 #include "cgi.h"
 #include "config.h"
@@ -67,7 +61,7 @@
 #include "template.h"
 #include "user.h"
 #include "util.h"
-
+#include "common.h"
 
 #define HOOKS 1
 
@@ -89,7 +83,7 @@
 extern int create_flag;
 
 void
-show_users(char *Username, char *Domain, time_t Mytime)
+show_users(char *user, char *domain, time_t mytime)
 {
 	if (MaxPopAccounts == 0)
 		return;
@@ -100,277 +94,299 @@ show_users(char *Username, char *Domain, time_t Mytime)
 int
 show_user_lines(char *user, char *dom, time_t mytime, char *dir)
 {
-	int             i, j, k, startnumber, moreusers = 1;
-	FILE           *fs;
+	int             fd, i, k, startnumber, moreusers = 1, totalpages,
+					bounced, colspan = 7, allowdelete, bars, match;
 	struct passwd  *pw;
-	int             totalpages;
-	int             bounced;
-	int             colspan = 7;
-	int             allowdelete;
-	char            qconvert[11];
-	int             bars;
+	char            qconvert[FMT_DOUBLE], strnum[FMT_ULONG];
+	static stralloc line = {0}, dest = {0}, path = {0};
+	char            inbuf[1024];
+	struct substdio ssin;
 
 	if (MaxPopAccounts == 0)
 		return 0;
 
-/*
- * Get the default catchall box name 
- */
-	if ((fs = fopen(".qmail-default", "r")) == NULL) {
-	/*
-	 * report error opening .qmail-default and exit 
-	 */
-		printf("<tr><td colspan=\"%i\">%s .qmail-default</tr></td>", colspan, html_text[144]);
-		vclose();
+	/*- Get the default catchall box name */
+	if ((fd = open_read(".qmail-default")) == -1) {
+		/*- report error opening .qmail-default and exit */
+		out("<tr><td colspan=\"");
+		strnum[fmt_int(strnum, colspan)] = 0;
+		out(strnum);
+		out("\">");
+		out(html_text[144]);
+		out(" .qmail-default</tr></td>");
+		flush();
+		iclose();
 		exit(0);
 	}
+	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	if (getln(&ssin, &line, &match, '\n') == -1) {
+		strerr_warn1("show_user_lines: read: .qmail-default: ", &strerr_sys);
+		out(html_text[144]);
+		out(" .qmail-default 1<BR>\n");
+		flush();
+		return (1);
+	}
+	if (match) {
+		line.len--;
+		line.s[line.len] = 0;
+	} else {
+		if (!stralloc_0(&line))
+			die_nomem();
+		line.len--;
+	}
+	close(fd);
 
-	(void) fgets(TmpBuf, sizeof (TmpBuf), fs);
-	fclose(fs);
-
-	if (*SearchUser) {
-		pw = vauth_getall(dom, 1, 1);
-		for (k = 0; pw != NULL; k++) {
-			if ((!SearchUser[1] && *pw->pw_name >= *SearchUser) || ((!strcmp(SearchUser, pw->pw_name)))) {
+	if (SearchUser.len) {
+		pw = sql_getall(dom, 1, 1);
+		for (k = 0; pw; k++) {
+			if ((!SearchUser.s[1] && pw->pw_name[0] >= SearchUser.s[0]) || !str_diff(SearchUser.s, pw->pw_name))
 				break;
-			}
-
-			pw = vauth_getall(dom, 0, 0);
+			pw = sql_getall(dom, 0, 0);
 		}
-
 		if (k == 0)
-			strcpy(Pagenumber, "1");
+			str_copy(Pagenumber, "1");
 		else
-			sprintf(Pagenumber, "%d", (k / MAXUSERSPERPAGE) + 1);
+			Pagenumber[fmt_int(Pagenumber, (k / MAXUSERSPERPAGE) + 1)] = 0;
 	}
 
-/*
- * Determine number of pages 
- */
-	pw = vauth_getall(dom, 1, 1);
-	for (k = 0; pw != NULL; k++)
-		pw = vauth_getall(dom, 0, 0);
-
+	if (!stralloc_copyb(&TmpBuf, "where pw_domain=\"", 17) ||
+			!stralloc_cats(&TmpBuf, dom) ||
+			!stralloc_append(&TmpBuf, "\"") ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	k = count_table("indimail", TmpBuf.s) + count_table("indibak", TmpBuf.s);
+	/*- Determine number of pages */
 	if (k == 0)
 		totalpages = 1;
 	else
-		totalpages = ((k / MAXUSERSPERPAGE) + 1);
-
-/*
- * End determine number of pages 
- */
-	if (atoi(Pagenumber) == 0)
-		*Pagenumber = '1';
-
-	if (strstr(TmpBuf, " bounce-no-mailbox\n") != NULL) {
+		totalpages = (k / MAXUSERSPERPAGE) + 1;
+	/*- End determine number of pages */
+	scan_int(Pagenumber, &i);
+	if (i == 0)
+		str_copy(Pagenumber, "1");
+	if (str_str(line.s, " bounce-no-mailbox\n")) {
 		bounced = 1;
-	} else if (strstr(TmpBuf, "@") != NULL) {
+	} else
+	if (str_str(line.s, "@")) {
 		bounced = 0;
-	/*
-	 * check for local user to forward to 
-	 */
-		if (strstr(TmpBuf, dom) != NULL) {
-			i = strlen(TmpBuf);
-			--i;
-			TmpBuf[i] = 0;		/* take off newline */
-			for (; TmpBuf[i] != ' '; --i);
-			for (j = 0, ++i; TmpBuf[i] != 0 && TmpBuf[i] != '@'; ++j, ++i)
-				TmpBuf3[j] = TmpBuf[i];
-			TmpBuf3[j] = 0;
+		i = str_rchr(line.s, ' ');
+		if (line.s[i] == ' ') {
+			if (!stralloc_copyb(&dest, line.s + i + 1, line.len - (i + 1)) ||
+					!stralloc_0(&dest))
+				die_nomem();
+			dest.len--;
 		}
 	} else {
-	/*
-	 * Maildir type catchall 
-	 */
+		/*- Maildir type catchall */
 		bounced = 0;
-		i = strlen(TmpBuf);
-		--i;
-		TmpBuf[i] = 0;			/* take off newline */
-		for (; TmpBuf[i] != '/'; --i);
-		for (j = 0, ++i; TmpBuf[i] != 0; ++j, ++i)
-			TmpBuf3[j] = TmpBuf[i];
-		TmpBuf3[j] = 0;
+		if (!stralloc_copy(&dest, &line) ||
+				!stralloc_0(&dest))
+			die_nomem();
+		dest.len--;
 	}
+	scan_int(Pagenumber, &i);
+	startnumber = MAXUSERSPERPAGE * (i - 1);
 
-	startnumber = MAXUSERSPERPAGE * (atoi(Pagenumber) - 1);
-
-/*
- * check to see if there are any users to list, 
- * otherwise repeat previous page
- *  
- */
-	pw = vauth_getall(dom, 1, 1);
-	if (AdminType == DOMAIN_ADMIN || (AdminType == USER_ADMIN && strcmp(pw->pw_name, Username) == 0)) {
-
-		for (k = 0; k < startnumber; ++k) {
-			pw = vauth_getall(dom, 0, 0);
-		}
+	/*
+	 * check to see if there are any users to list, 
+	 * otherwise repeat previous page
+	 *  
+	 */
+	pw = sql_getall(dom, 1, 1);
+	if (AdminType == DOMAIN_ADMIN || (AdminType == USER_ADMIN && !str_diffn(pw->pw_name, Username.s, Username.len))) {
+		for (k = 0; k < startnumber; ++k)
+			pw = sql_getall(dom, 0, 0);
 	}
-
 	if (pw == NULL) {
-		printf("<tr><td colspan=\"%i\" bgcolor=%s>%s</td></tr>\n", colspan, get_color_text("000"), html_text[131]);
+		out("<tr><td colspan=\"");
+		strnum[fmt_int(strnum, colspan)] = 0;
+		out(strnum);
+		out("\" bgcolor=");
+		out(get_color_text("000"));
+		out(">");
+		out(html_text[131]);
+		out("</td></tr>\n");
 		moreusers = 0;
 	} else {
-		char            path[256];
-		while ((pw != NULL)
-			   && ((k < MAXUSERSPERPAGE + startnumber)
-				   || (AdminType != DOMAIN_ADMIN || AdminType != DOMAIN_ADMIN
-					   || (AdminType == USER_ADMIN && strcmp(pw->pw_name, Username) == 0)))) {
-			if (AdminType == DOMAIN_ADMIN || (AdminType == USER_ADMIN && strcmp(pw->pw_name, Username) == 0)) {
+		while ((pw) &&
+				((k < MAXUSERSPERPAGE + startnumber) ||
+				 (AdminType != DOMAIN_ADMIN || AdminType != DOMAIN_ADMIN ||
+				  (AdminType == USER_ADMIN && !str_diffn(pw->pw_name, Username.s, Username.len)))))
+		{
+			if (AdminType == DOMAIN_ADMIN || (AdminType == USER_ADMIN && !str_diffn(pw->pw_name, Username.s, Username.len))) {
 				mdir_t          diskquota = 0;
 				mdir_t          maxmsg = 0;
 
-			/*
-			 * display account name and user name 
-			 */
-				printf("<tr bgcolor=%s>", get_color_text("000"));
+				/*- display account name and user name */
+				out("<tr bgcolor=");
+				out(get_color_text("000"));
+				out(">");
 				printh("<td align=\"left\">%H</td>", pw->pw_name);
 				printh("<td align=\"left\">%H</td>", pw->pw_gecos);
 
-			/*
-			 * display user's quota 
-			 */
-				snprintf(path, sizeof (path), "%s/" MAILDIR, pw->pw_dir);
-				diskquota = check_quota(path, &maxmsg);
-				printf("<td align=\"right\">%-2.2lf&nbsp;/&nbsp;</td>", ((double) diskquota) / 1048576.0);	/* Convert to MB */
-				if (strncmp(pw->pw_shell, "NOQUOTA", 2) != 0) {
+				/*- display user's quota */
+				if (!stralloc_copys(&path, pw->pw_dir) ||
+						!stralloc_catb(&path, "/Maildir", 8) ||
+						!stralloc_0(&path))
+					die_nomem();
+				diskquota = check_quota(path.s, &maxmsg);
+				out("<td align=\"right\">");
+				strnum[fmt_double(strnum, ((double) diskquota) / 1048576.0, 2)] = 0; /* Convert to MB */
+				out(strnum);
+				out("&nbsp;/&nbsp;</td>");
+				if (str_diffn(pw->pw_shell, "NOQUOTA", 7)) {
 					if (quota_to_megabytes(qconvert, pw->pw_shell)) {
-						printf("<td align=\"left\">(BAD)</td>");
+						out("<td align=\"left\">(BAD)</td>");
 					} else {
-						printf("<td align=\"left\">%s</td>", qconvert);
+						out("<td align=\"left\">");
+						out(qconvert);
+						out("</td>");
 					}
 				} else {
-					printf("<td align=\"left\">%s</td>", html_text[229]);
+					out("<td align=\"left\">");
+					out(html_text[229]);
+					out("</td>");
 				}
 
-			/*
-			 * display button to modify user 
-			 */
-				printf("<td align=\"center\">");
+				/*- display button to modify user */
+				out("<td align=\"center\">");
 				printh("<a href=\"%s&moduser=%C\">", cgiurl("moduser"), pw->pw_name);
-				printf("<img src=\"%s/modify.png\" border=\"0\"></a>", IMAGEURL);
-				printf("</td>");
-
-			/*
-			 * if the user has admin privileges and pw->pw_name is not 
-			 * * the user or postmaster, allow deleting 
-			 */
-				if (AdminType == DOMAIN_ADMIN && strcmp(pw->pw_name, Username) != 0 && strcmp(pw->pw_name, "postmaster") != 0) {
-					allowdelete = 1;
+				out("<img src=\"");
+				out(IMAGEURL);
+				out("/modify.png\" border=\"0\"></a>");
+				out("</td>");
 
 				/*
-				 * else, don't allow deleting 
+				 * if the user has admin privileges and pw->pw_name is not 
+				 * the user or postmaster, allow deleting 
 				 */
-				} else {
+				if (AdminType == DOMAIN_ADMIN && str_diffn(pw->pw_name, Username.s, Username.len) && str_diff(pw->pw_name, "postmaster")) {
+					allowdelete = 1;
+				} else { /*- else, don't allow deleting */
 					allowdelete = 0;
 				}
 
-			/*
-			 * display trashcan for delete, or nothing if delete not allowed 
-			 */
-				printf("<td align=\"center\">");
+				/*
+				 * display trashcan for delete, or nothing if delete not allowed 
+				 */
+				out("<td align=\"center\">");
 				if (allowdelete) {
 					printh("<a href=\"%s&deluser=%C\">", cgiurl("deluser"), pw->pw_name);
-					printf("<img src=\"%s/trash.png\" border=\"0\"></a>", IMAGEURL);
+					out("<img src=\"");
+					out(IMAGEURL);
+					out("/trash.png\" border=\"0\"></a>");
 				} else {
-				/*
-				 * printf ("<img src=\"%s/disabled.png\" border=\"0\">", IMAGEURL); 
-				 */
+					/*- printf ("<img src=\"%s/disabled.png\" border=\"0\">", IMAGEURL); */
 				}
-				printf("</td>");
+				out("</td>");
 
-			/*
-			 * display button in the 'set catchall' column 
-			 */
-				printf("<td align=\"center\">");
-				if (bounced == 0 && strncmp(pw->pw_name, TmpBuf3, sizeof (TmpBuf3)) == 0) {
-					printf("<img src=\"%s/radio-on.png\" border=\"0\"></a>", IMAGEURL);
+				/*- display button in the 'set catchall' column */
+				out("<td align=\"center\">");
+				if (bounced == 0 && !str_diffn(pw->pw_name, dest.s, dest.len)) {
+					out("<img src=\"");
+					out(IMAGEURL);
+					out("/radio-on.png\" border=\"0\"></a>");
 #ifdef CATCHALL_ENABLED
-				} else if (AdminType == DOMAIN_ADMIN) {
+				} else
+				if (AdminType == DOMAIN_ADMIN) {
 					printh("<a href=\"%s&deluser=%C&page=%s\">", cgiurl("setdefault"), pw->pw_name, Pagenumber);
-					printf("<img src=\"%s/radio-off.png\" border=\"0\"></a>", IMAGEURL);
+					out("<img src=\"");
+					out(IMAGEURL);
+					out("/radio-off.png\" border=\"0\"></a>");
 #endif
 				} else {
-					printf("<img src=\"%s/disabled.png\" border=\"0\">", IMAGEURL);
+					out("<img src=\"");
+					out(IMAGEURL);
+					out("/disabled.png\" border=\"0\">");
 				}
-				printf("</td>");
-				printf("</tr>\n");
+				out("</td>");
+				out("</tr>\n");
 			}
-			pw = vauth_getall(dom, 0, 0);
+			pw = sql_getall(dom, 0, 0);
 			++k;
 		}
 	}
 
 	if (AdminType == DOMAIN_ADMIN) {
 		print_user_index("showusers", colspan, user, dom, mytime);
-
-		printf("<tr bgcolor=%s>", get_color_text("000"));
-		printf("<td colspan=\"%i\" align=\"right\">", colspan);
-		printf("<font size=\"2\"><b>");
-		printf("[&nbsp;");
+		out("<tr bgcolor=");
+		out(get_color_text("000"));
+		out(">");
+		out("<td colspan=\"");
+		strnum[fmt_int(strnum, colspan)] = 0;
+		out(strnum);
+		out("\" align=\"right\">");
+		out("<font size=\"2\"><b>");
+		out("[&nbsp;");
 		bars = 0;
 #ifdef USER_INDEX
-	/*
-	 * only display "previous page" if pagenumber > 1 
-	 */
-		if (atoi(Pagenumber) > 1) {
+		/*- only display "previous page" if pagenumber > 1 */
+		scan_int(Pagenumber, &i);
+		if (i > 1) {
 			printh("<a href=\"%s&page=%d\">%s</a>", cgiurl("showusers"),
-				   atoi(Pagenumber) - 1 ? atoi(Pagenumber) - 1 : atoi(Pagenumber), html_text[135]);
+				   i - 1 ? i - 1 : i, html_text[135]);
 			bars = 1;
 		}
-
-		if (moreusers && atoi(Pagenumber) < totalpages) {
+		if (moreusers && i < totalpages) {
 			if (bars)
-				printf("&nbsp;|&nbsp;");
-			printh("<a href=\"%s&page=%d\">%s</a>", cgiurl("showusers"), atoi(Pagenumber) + 1, html_text[137]);
+				out("&nbsp;|&nbsp;");
+			printh("<a href=\"%s&page=%d\">%s</a>", cgiurl("showusers"), i + 1, html_text[137]);
 			bars = 1;
 		}
 #endif
 #ifdef CATCHALL_ENABLED
 		if (bars)
-			printf("&nbsp;|&nbsp;");
+			out("&nbsp;|&nbsp;");
 		printh("<a href=\"%s\">%s</a>", cgiurl("deleteall"), html_text[235]);
-		printf("&nbsp;|&nbsp;");
+		out("&nbsp;|&nbsp;");
 		printh("<a href=\"%s\">%s</a>", cgiurl("bounceall"), html_text[134]);
-		printf("&nbsp;|&nbsp;");
+		out("&nbsp;|&nbsp;");
 		printh("<a href=\"%s\">%s</a>", cgiurl("setremotecatchall"), html_text[206]);
 #endif
-		printf("&nbsp;]");
-		printf("</b></font>");
-		printf("</td></tr>\n");
+		out("&nbsp;]");
+		out("</b></font>");
+		out("</td></tr>\n");
 	}
+	flush();
 	return 0;
 }
 
 void
 adduser()
 {
+	char            strnum[FMT_ULONG];
+
 	count_users();
 	load_limits();
-
 	if (AdminType != DOMAIN_ADMIN) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[142]);
-		vclose();
+		out(html_text[142]);
+		out("\n");
+		flush();
+		iclose();
 		exit(0);
 	}
-
 	if (MaxPopAccounts != -1 && CurPopAccounts >= MaxPopAccounts) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s %d\n", html_text[199], MaxPopAccounts);
-		show_menu(Username, Domain, Mytime);
-		vclose();
+		if (!stralloc_copys(&StatusMessage, html_text[199]) ||
+				!stralloc_append(&StatusMessage, " ") ||
+				!stralloc_catb(&StatusMessage, strnum, fmt_int(strnum, MaxPopAccounts)) ||
+				!stralloc_0(&StatusMessage))
+			die_nomem();
+		StatusMessage.len--;
+		show_menu(Username.s, Domain.s, mytime);
+		iclose();
 		exit(0);
 	}
-
 	send_template("add_user.html");
-
 }
 
 void
 moduser()
 {
-	if (!(AdminType == DOMAIN_ADMIN || (AdminType == USER_ADMIN && strcmp(ActionUser, Username) == 0))) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[142]);
-		vclose();
+	if (!(AdminType == DOMAIN_ADMIN ||
+				(AdminType == USER_ADMIN &&
+				 !str_diffn(ActionUser.s, Username.s, ActionUser.len > Username.len ? ActionUser.len : Username.len)))) {
+		copy_status_mesg(html_text[142]);
+		iclose();
 		exit(0);
 	}
 	send_template("mod_user.html");
@@ -379,116 +395,134 @@ moduser()
 void
 addusernow()
 {
-	int             cnt = 0, num;
-	char           *c_num;
+	int             cnt = 0, num, pid, error, len, plen;
 	char          **mailingListNames;
-	char           *tmp;
-	char           *email;
+	static stralloc email = {0}, tmp1 = {0}, tmp2 = {0};
 #ifdef MODIFY_QUOTA
 	char            qconvert[11];
 #endif
-	int             pid;
-	int             error;
+	char            strnum[FMT_ULONG];
 	struct passwd  *mypw;
-
-	c_num = malloc(MAX_BUFF);
-	email = malloc(128);
-	tmp = malloc(MAX_BUFF);
 
 	count_users();
 	load_limits();
-
 	if (AdminType != DOMAIN_ADMIN) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[142]);
-		vclose();
+		copy_status_mesg(html_text[142]);
+		iclose();
 		exit(0);
 	}
 
 	if (MaxPopAccounts != -1 && CurPopAccounts >= MaxPopAccounts) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s %d\n", html_text[199], MaxPopAccounts);
-		show_menu(Username, Domain, Mytime);
-		vclose();
+		copy_status_mesg(html_text[199]);
+		if (!stralloc_append(&StatusMessage, " ") ||
+				!stralloc_catb(&StatusMessage, strnum, fmt_int(strnum, MaxPopAccounts)) ||
+				!stralloc_0(&StatusMessage))
+			die_nomem();
+		StatusMessage.len--;
+		show_menu(Username.s, Domain.s, mytime);
+		iclose();
 		exit(0);
 	}
-
-	GetValue(TmpCGI, Newu, "newu=", sizeof (Newu));
-
-	if (fixup_local_name(Newu)) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s %s\n", html_text[148], Newu);
+	GetValue(TmpCGI, &Newu, "newu=");
+	if (fixup_local_name(Newu.s)) {
+		copy_status_mesg(html_text[148]);
+		if (!stralloc_cat(&StatusMessage, &Newu) ||
+				!stralloc_0(&StatusMessage))
+			die_nomem();
+		StatusMessage.len--;
 		adduser();
-		vclose();
+		iclose();
 		exit(0);
 	}
-
-	if (check_local_user(Newu)) {
-		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[175], Newu);
+	if (check_local_user(Newu.s)) {
+		len = str_len(html_text[175]) + Newu.len + 28;
+		for (plen = 0;;) {
+			if (!stralloc_ready(&StatusMessage, len))
+				die_nomem();
+			plen = snprinth(StatusMessage.s, len, "%s %H\n", html_text[175], Newu.s);
+			if (plen < len) {
+				StatusMessage.len = plen;
+				break;
+			}
+			len = plen + 28;
+		}
 		adduser();
-		vclose();
+		iclose();
 		exit(0);
 	}
-// Coded added by jhopper
 #ifdef MODIFY_QUOTA
-	GetValue(TmpCGI, Quota, "quota=", sizeof (Quota));
+	GetValue(TmpCGI, &Quota, "quota=");
 #endif
-	GetValue(TmpCGI, Password1, "password1=", sizeof (Password1));
-	GetValue(TmpCGI, Password2, "password2=", sizeof (Password2));
-	if (strcmp(Password1, Password2) != 0) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s\n", html_text[200]);
+	GetValue(TmpCGI, &Password1, "password1=");
+	GetValue(TmpCGI, &Password2, "password2=");
+	if (str_diffn(Password1.s, Password2.s, Password1.len > Password2.len ? Password1.len : Password2.len)) {
+		copy_status_mesg(html_text[200]);
 		adduser();
-		vclose();
+		iclose();
 		exit(0);
 	}
 #ifndef TRIVIAL_PASSWORD_ENABLED
-	if (strstr(Newu, Password1) != NULL) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s\n", html_text[320]);
+	if (str_str(Newu.s, Password1.s)) {
+		copy_status_mesg(html_text[320]);
 		adduser();
-		vclose();
+		iclose();
 		exit(0);
 	}
 #endif
 
 #ifndef ENABLE_LEARN_PASSWORDS
-	if (strlen(Password1) <= 0) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s\n", html_text[234]);
+	if (!Password1.len) {
+		copy_status_mesg(html_text[234]);
 		adduser();
-		vclose();
+		iclose();
 		exit(0);
 	}
 #endif
-
-	snprintf(email, 128, "%s@%s", Newu, Domain);
-
-	GetValue(TmpCGI, Gecos, "gecos=", sizeof (Gecos));
-	if (strlen(Gecos) == 0) {
-		strcpy(Gecos, Newu);
+	if (!stralloc_copy(&email, &Newu) ||
+			!stralloc_append(&email, "@") ||
+			!stralloc_cat(&email, &Domain) ||
+			!stralloc_0(&email))
+		die_nomem();
+	email.len--;
+	GetValue(TmpCGI, &Gecos, "gecos=");
+	if (!Gecos.len) {
+		if (!stralloc_copy(&Gecos, &Newu) ||
+				!stralloc_0(&Gecos))
+			die_nomem();
+		Gecos.len--;
 	}
 
-	GetValue(TmpCGI, c_num, "number_of_mailinglist=", MAX_BUFF);
-	num = atoi(c_num);
+	GetValue(TmpCGI, &TmpBuf, "number_of_mailinglist=");
+	scan_int(TmpBuf.s, &num);
 	if (num > 0) {
-		if (!(mailingListNames = malloc(sizeof (char *) * num))) {
-			snprintf(StatusMessage, sizeof (StatusMessage), "%s\n", html_text[201]);
-			vclose();
+		if (!(mailingListNames = (char **) alloc(sizeof (char *) * num))) {
+			copy_status_mesg(html_text[201]);
+			iclose();
 			exit(0);
 		} else {
 			for (cnt = 0; cnt < num; cnt++) {
-				if (!(mailingListNames[cnt] = malloc(MAX_BUFF))) {
-					snprintf(StatusMessage, sizeof (StatusMessage), "%s\n", html_text[201]);
-					vclose();
-					exit(0);
-				}
-			}
-
-			for (cnt = 0; cnt < num; cnt++) {
-				sprintf(tmp, "subscribe%d=", cnt);
-				error = GetValue(TmpCGI, mailingListNames[cnt], tmp, MAX_BUFF);
-				if (error != -1) {
-					pid = fork();
-
-					if (pid == 0) {
-						sprintf(TmpBuf1, "%s/ezmlm-sub", EZMLMDIR);
-						sprintf(TmpBuf2, "%s/%s", RealDir, mailingListNames[cnt]);
-						execl(TmpBuf1, "ezmlm-sub", TmpBuf2, email, NULL);
+				if (!stralloc_copys(&tmp1, "subscribe") ||
+						!stralloc_catb(&tmp1, strnum, fmt_int(strnum, cnt)) ||
+						!stralloc_0(&tmp1))
+					die_nomem();
+				if ((error = GetValue(TmpCGI, &tmp2, tmp1.s)) != -1) {
+					if (!(pid = fork())) {
+						if (!(mailingListNames[cnt] = (char *) alloc(tmp2.len + 1))) {
+							copy_status_mesg(html_text[201]);
+							iclose();
+							exit(0);
+						}
+						str_copyb(mailingListNames[cnt], tmp2.s, tmp2.len + 1);
+						if (!stralloc_copys(&tmp1, EZMLMDIR) ||
+								!stralloc_catb(&tmp1, "/ezmlm-sub", 10) ||
+								!stralloc_0(&tmp1))
+							die_nomem();
+						if (!stralloc_copy(&tmp2, &RealDir) ||
+								!stralloc_append(&tmp2, "/") ||
+								!stralloc_cats(&tmp2, mailingListNames[cnt]) ||
+								!stralloc_0(&tmp2))
+							die_nomem();
+						execl(tmp1.s, "ezmlm-sub", tmp2.s, email.s, NULL);
 						exit(127);
 					} else {
 						wait(&pid);
@@ -499,114 +533,147 @@ addusernow()
 	}
 	/*- add the user then get the vpopmail password structure */
 	create_flag = 1;
-	if (vadduser(Newu, Domain, 0, Password1, Gecos, 0, 0, USE_POP, 1) == 0 &&
+	if (iadduser(Newu.s, Domain.s, 0, Password1.s, Gecos.s, 0, 0, USE_POP, 1) == 0 &&
 #ifdef MYSQL_REPLICATION
 		!sleep(2) &&
 #endif
-		(mypw = vauth_getpw(Newu, Domain)) != NULL) {
-	/*
-	 * vadduser() in vpopmail 5.3.29 and later sets the default
-	 * quota, so we only need to change it if the user enters
-	 * something in the Quota field.
-	 */
-
+		(mypw = sql_getpw(Newu.s, Domain.s))) {
+		/*
+		 * iadduser() in indimail sets the default
+		 * quota, so we only need to change it if the user enters
+		 * something in the Quota field.
+		 */
 #ifdef MODIFY_QUOTA
-		if (strcmp(Quota, "NOQUOTA") == 0) {
-			vsetuserquota(Newu, Domain, "NOQUOTA");
-		} else if (Quota[0] != 0) {
-			if (quota_to_bytes(qconvert, Quota)) {
-				snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[314]);
-			} else {
-				vsetuserquota(Newu, Domain, qconvert);
-			}
+		if (!str_diffn(Quota.s, "NOQUOTA", 8)) {
+			setuserquota(Newu.s, Domain.s, "NOQUOTA");
+		} else
+		if (Quota.len) {
+			if (quota_to_bytes(qconvert, Quota.s))
+				copy_status_mesg(html_text[314]);
+			else
+				setuserquota(Newu.s, Domain.s, qconvert);
 		}
 #endif
-
-	/*
-	 * report success 
-	 */
-		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H@%H (%H) %s", html_text[2], Newu, Domain, Gecos, html_text[119]);
-
+		/*- report success */
+		len = str_len(html_text[2]) + str_len(html_text[119]) + Newu.len + Domain.len + Gecos.len + 28;
+		for (plen = 0;;) {
+			plen = snprinth(StatusMessage.s, len, "%s %H@%H (%H) %s", html_text[2], Newu.s, Domain.s, Gecos.s, html_text[119]);
+			if (plen < len) {
+				StatusMessage.len = plen;
+				break;
+			}
+			len = plen + 28;
+		}
 	} else {
-	/*
-	 * otherwise, report error 
-	 */
-		snprinth(StatusMessage, sizeof (StatusMessage), "<font color=\"red\">%s %H@%H (%H) %s</font>", html_text[2], Newu, Domain,
-				 Gecos, html_text[120]);
+		len = str_len(html_text[2]) + str_len(html_text[120]) + Newu.len + Domain.len + Gecos.len + 28;
+		/*- otherwise, report error */
+		for (plen = 0;;) {
+			plen = snprinth(StatusMessage.s, len, "<font color=\"red\">%s %H@%H (%H) %s</font>",
+				html_text[2], Newu.s, Domain.s, Gecos.s, html_text[120]);
+			if (plen < len) {
+				StatusMessage.len = plen;
+				break;
+			}
+			len = plen + 28;
+		}
 	}
-
-	call_hooks(HOOK_ADDUSER, Newu, Domain, Password1, Gecos);
-
-/*
- * After we add the user, show the user page
- * * people like to visually verify the results
- */
-	show_users(Username, Domain, Mytime);
-
+	call_hooks(HOOK_ADDUSER, Newu.s, Domain.s, Password1.s, Gecos.s);
+	/*
+	 * After we add the user, show the user page
+	 * people like to visually verify the results
+	 */
+	show_users(Username.s, Domain.s, mytime);
 }
 
 int
 call_hooks(char *hook_type, char *p1, char *p2, char *p3, char *p4)
 {
-	FILE           *fs = NULL;
-	int             pid;
-	char            hooks_path[MAX_BUFF];
-	char           *cmd = NULL;
-	char           *tmpstr;
+	int             fd, pid, match;
+	char           *cmd = 0, *ptr;
+	static stralloc hooks_path = {0}, line = {0};
+	char            inbuf[1024];
+	struct substdio ssin;
 
-	/*
- 	 * first look in directory for domain 
- 	 */
-	sprintf(hooks_path, "%s/.iwebadmin-hooks", RealDir);
-	if ((fs = fopen(hooks_path, "r")) == NULL) {
-		/*
-		 * then try ~vpopmail/etc 
-		 */
-		sprintf(hooks_path, "%s/etc/.iwebadmin-hooks", INDIMAILDIR);
-		if ((fs = fopen(hooks_path, "r")) == NULL) {
+	/*- first look in directory for domain */
+	if (!stralloc_copy(&hooks_path, &RealDir) ||
+			!stralloc_catb(&hooks_path, "/.iwebadmin-hooks", 17) ||
+			!stralloc_0(&hooks_path))
+		die_nomem();
+	if ((fd = open_read(hooks_path.s)) == -1) {
+		/*- then try /etc/indimail */
+		if (!stralloc_copys(&hooks_path, SYSCONFDIR) ||
+				!stralloc_catb(&hooks_path, "/.iwebadmin-hooks", 17) ||
+				!stralloc_0(&hooks_path))
+			die_nomem();
+		if ((fd = open_read(hooks_path.s)) == -1)
+			return (0);
+	}
+	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	for (;;) {
+		if (getln(&ssin, &line, &match, '\n') == -1) {
+			strerr_warn3("show_user_lines: read: ", hooks_path.s, ": ", &strerr_sys);
+			out(html_text[144]);
+			out(" .iwebadmin-hooks 1<BR>\n");
+			flush();
 			return (0);
 		}
-	}
-
-	while (fgets(TmpBuf, sizeof (TmpBuf), fs) != NULL) {
-		if ((*TmpBuf == '#') || (*TmpBuf == '\0'))
+		if (match) {
+			line.len--;
+			line.s[line.len] = 0;
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
+		}
+		match = str_chr(line.s, '#');
+		if (line.s[match])
+			line.s[match] = 0;
+		for (ptr = line.s; *ptr && isspace(*ptr); ptr++);
+		if (!*ptr)
 			continue;
-		tmpstr = strtok(TmpBuf, " :\t\n");
-		if (tmpstr == NULL)
-			continue;
-
-		if (strcmp(tmpstr, hook_type) == 0) {
-			tmpstr = strtok(NULL, " :\t\n");
-
-			if ((tmpstr == NULL) || (*tmpstr == '\0'))
-				continue;
-
-			cmd = strdup(tmpstr);
-
+		match = str_chr(ptr, ' ');
+		if (ptr[match] && !str_diffn(ptr, hook_type, match + 1)) {
+			ptr += match;
+			for (;*ptr && isspace(*ptr); ptr++);
+			cmd = ptr;
+			if (!*cmd)
+				cmd = 0;
 			break;
 		}
 	}
-
-	fclose(fs);
-
-	if (cmd == NULL)
-		return 0;				/* don't have a hook for this type */
-
+	close(fd);
+	if (!cmd)
+		return (0); /* don't have a hook for this type */
 	pid = fork();
-
 	if (pid == 0) {
-	/*
-	 * Second param to execl should actually be just the program name,
-	 * without the path information.  Add a pointer to point into cmd
-	 * at the start of the program name only.    BUG 2003-12 
-	 */
+		/*
+		 * Second param to execl should actually be just the program name,
+		 * without the path information.  Add a pointer to point into cmd
+		 * at the start of the program name only.    BUG 2003-12 
+		 */
 		execl(cmd, cmd, p1, p2, p3, p4, NULL);
-		printf("Error %d %s \"%s\", %s, %s, %s, %s, %s\n", errno, html_text[202], cmd, hook_type, p1, p2, p3, p4);
+		out("cmd=[");
+		out(cmd);
+		out("] ");
+		out(html_text[202]);
+		out(" ");
+		out("type = ");
+		out(hook_type);
+		out(" ");
+		out(p1);
+		out(" ");
+		out(p2);
+		out(" ");
+		out(p3);
+		out(" ");
+		out(p4);
+		out(": ");
+		out(error_str(errno));
+		out("\n");
+		flush();
 		exit(127);
-	} else {
+	} else
 		wait(&pid);
-	}
-
 	return (0);
 }
 
@@ -619,48 +686,67 @@ deluser()
 void
 delusergo()
 {
-	static char     forward[200] = "";
-	static char     forwardto[200] = "";
+	static stralloc forward = {0}, forwardto = {0};
+	int             len, plen;
 
 	if (AdminType != DOMAIN_ADMIN) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[142]);
-		vclose();
+		copy_status_mesg(html_text[142]);
+		iclose();
 		exit(0);
 	}
+	deluser(ActionUser.s, Domain.s, 1);
+	len = ActionUser.len + str_len(html_text[141]) + 28;
+	for (plen = 0;;) {
+		if (!stralloc_ready(&StatusMessage, len))
+			die_nomem();
+		plen = snprinth(StatusMessage.s, len, "%H %s", ActionUser.s, html_text[141]);
+		if (plen < len) {
+			StatusMessage.len = plen;
+			break;
+		}
+		len = plen + 28;
+	}
+	/*-
+	 * Start create forward when delete - 
+	 * Code added by Eugene Teo 6 June 2000 
+	 * Modified by Jeff Hedlund (jeff.hedlund@matrixsi.com) 4 June 2003 
+	 */
 
-	vdeluser(ActionUser, Domain, 1);
-
-	snprinth(StatusMessage, sizeof (StatusMessage), "%H %s", ActionUser, html_text[141]);
-
-/*
- * Start create forward when delete - 
- * * Code added by Eugene Teo 6 June 2000 
- * * Modified by Jeff Hedlund (jeff.hedlund@matrixsi.com) 4 June 2003 
- */
-
-	GetValue(TmpCGI, forward, "forward=", sizeof (forward));
-	if (strcmp(forward, "on") == 0) {
-		GetValue(TmpCGI, forwardto, "forwardto=", sizeof (forwardto));
-		if (adddotqmail_shared(ActionUser, forwardto, -1) != 0) {
-			snprintf(StatusMessage, sizeof (StatusMessage), html_text[315], forwardto);
+	GetValue(TmpCGI, &forward, "forward=");
+	if (!str_diffn(forward.s, "on", 3)) {
+		GetValue(TmpCGI, &forwardto, "forwardto=");
+		if (adddotqmail_shared(ActionUser.s, &forwardto, -1) != 0) {
+			if (!stralloc_copys(&StatusMessage, html_text[315]))
+				die_nomem();
+			StatusMessage.len -= 5; /*- remove '%s'. */
+			if (!stralloc_cat(&StatusMessage, &forwardto) ||
+					!stralloc_0(&StatusMessage))
+				die_nomem();
 		}
 	}
-
-	call_hooks(HOOK_DELUSER, ActionUser, Domain, forwardto, "");
-	show_users(Username, Domain, Mytime);
+	call_hooks(HOOK_DELUSER, ActionUser.s, Domain.s, forwardto.s, "");
+	show_users(Username.s, Domain.s, mytime);
 }
 
 void
 count_users()
 {
+	if (!stralloc_copyb(&TmpBuf, "where pw_domain=\"", 17) ||
+			!stralloc_cat(&TmpBuf, &Domain) ||
+			!stralloc_append(&TmpBuf, "\"") ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	CurPopAccounts = count_table("indimail", TmpBuf.s) + count_table("indibak", TmpBuf.s);
+#if 0
 	struct passwd  *pw;
 
 	CurPopAccounts = 0;
-	pw = vauth_getall(Domain, 1, 0);
+	pw = sql_getall(Domain.s, 1, 0);
 	while (pw != NULL) {
 		++CurPopAccounts;
-		pw = vauth_getall(Domain, 0, 0);
+		pw = sql_getall(Domain.s, 0, 0);
 	}
+#endif
 }
 
 void
@@ -672,52 +758,105 @@ setremotecatchall()
 void
 set_qmaildefault(char *opt)
 {
-	FILE           *fs;
-	int             use_vfilter = 0;
-	char            buffer[MAX_BUFF];
+	int             fd, match, use_vfilter = 0;
+	static stralloc line = {0};
+	char            inbuf[1024], outbuf[512];
+	char           *ptr;
+	struct substdio ssin, ssout;
 
-	if ((fs = fopen(".qmail-default", "r"))) {
-		fscanf(fs, "%s", buffer);
-		use_vfilter = strstr(buffer, "vfilter") ? 1: 0;
-		fclose(fs);
+	if ((fd = open_read(".qmail-default")) == -1) {
+		out(html_text[144]);
+		out(" .qmail-default<br>\n");
+		flush();
 	}
-	if ((fs = fopen(".qmail-default", "w")) == NULL) {
-		printf("%s %s<br>\n", html_text[144], ".qmail-default");
+	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	if (getln(&ssin, &line, &match, '\n') == -1) {
+		strerr_warn1("set_qmaildefault: read: .qmail-default", &strerr_sys);
+		out(html_text[144]);
+		out(" .qmail-default 1<BR>\n");
+		flush();
+		return;
+	}
+	if (match) {
+		line.len--;
+		line.s[line.len] = 0;
 	} else {
-		fprintf(fs, "| %s/sbin/%s '' %s\n", INDIMAILDIR,
-			use_vfilter ? "vfilter" : "vdelivermail", opt);
-		fclose(fs);
+		if (!stralloc_0(&line))
+			die_nomem();
+		line.len--;
 	}
-	show_users(Username, Domain, Mytime);
-	vclose();
+	match = str_chr(line.s, '#');
+	if (line.s[match])
+		line.s[match] = 0;
+	for (ptr = line.s; *ptr && isspace(*ptr); ptr++);
+	if (!*ptr) {
+		out(html_text[159]);
+		out(" .qmail-default 1<BR>\n");
+		flush();
+		return;
+	}
+	close(fd);
+	use_vfilter = str_str(ptr, "vfilter") ? 1 : 0;
+
+	if ((fd = open_trunc(".qmail-default")) == -1) {
+		strerr_warn1("set_qmaildefault: open_trunc: .qmail-default: ", &strerr_sys);
+		out(html_text[144]);
+		out(" .qmail-default<br>\n");
+		flush();
+	} else {
+		substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+		if (substdio_put(&ssout, "| ", 2) ||
+				substdio_puts(&ssout, INDIMAILDIR) ||
+				substdio_put(&ssout, "/sbin/", 6) ||
+				substdio_put(&ssout, use_vfilter ? "vfilter" : "vdelivermail", use_vfilter ? 7 : 12) ||
+				substdio_put(&ssout, " '' ", 4) ||
+				substdio_puts(&ssout, opt) ||
+				substdio_put(&ssout, "\n", 1) ||
+				substdio_flush(&ssout))
+		{
+			strerr_warn1("set_qmaildefault: write: ", &strerr_sys);
+			out(html_text[144]);
+			out(" .qmail-default<br>\n");
+			flush();
+		}
+		close(fd);
+	}
+	show_users(Username.s, Domain.s, mytime);
+	iclose();
 	exit(0);
 }
 
 void
 setremotecatchallnow()
 {
-	char           *fwdaddr;
+	static stralloc fwdaddr = {0};
+	int             len, plen;
 
-	GetValue(TmpCGI, Newu, "newu=", sizeof (Newu));
-
-	if (check_email_addr(Newu)) {
-		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[148], Newu);
+	GetValue(TmpCGI, &Newu, "newu=");
+	if (check_email_addr(Newu.s)) {
+		len = str_len(html_text[148]) + Newu.len + 28;
+		for (plen = 0;;) {
+			if (!stralloc_ready(&StatusMessage, len))
+				die_nomem();
+			plen = snprinth(StatusMessage.s, len, "%s %H\n", html_text[148], Newu.s);
+			if (plen < len) {
+				StatusMessage.len = plen;
+				break;
+			}
+			len = plen + 28;
+		}
 		setremotecatchall();
 		exit(0);
 	}
-	if (*Newu == '@') {
-	/*
-	 * forward all mail to external domain 
-	 */
-		fwdaddr = malloc(strlen(Newu) + 4 + 1);
-		if (fwdaddr != NULL) {
-			sprintf(fwdaddr, "$EXT%s", Newu);
-			set_qmaildefault(fwdaddr);
-			free(fwdaddr);
-		}
-	} else {
-		set_qmaildefault(Newu);
-	}
+	if (Newu.s[0] == '@') {
+		/*- forward all mail to external domain */
+		if (!stralloc_copyb(&fwdaddr, "$EXT", 4) ||
+				!stralloc_cat(&fwdaddr, &Newu) ||
+				!stralloc_0(&fwdaddr))
+			die_nomem();
+		set_qmaildefault(fwdaddr.s);
+	} else
+		set_qmaildefault(Newu.s);
 }
 
 void
@@ -735,157 +874,250 @@ deleteall()
 int
 get_catchall()
 {
-	int             i, j;
-	FILE           *fs;
+	int             fd, i, match;
+	static stralloc line = {0};
+	char            inbuf[1024];
+	char           *ptr;
+	struct substdio ssin;
 
-/*
- * Get the default catchall box name 
- */
-	if ((fs = fopen(".qmail-default", "r")) == NULL) {
-		printf("<tr><td colspan=\"5\">%s %s</td><tr>\n", html_text[144], ".qmail-default");
-		vclose();
+	/*- Get the default catchall box name */
+	if ((fd = open_read(".qmail-default")) == -1) {
+		out("<tr><td colspan=\"5\">");
+		out(html_text[144]);
+		out(" .qmail-default</td><tr>\n");
+		flush();
+		iclose();
 		exit(0);
 	}
-	(void) fgets(TmpBuf, sizeof (TmpBuf), fs);
-	fclose(fs);
-
-	if (strstr(TmpBuf, " bounce-no-mailbox\n") != NULL) {
-		printf("<b>%s</b>", html_text[130]);
-
-	} else if (strstr(TmpBuf, " delete\n") != NULL) {
-		printf("<b>%s</b>", html_text[236]);
-
-	} else if (strstr(TmpBuf, "@") != NULL) {
-		i = strlen(TmpBuf);
-		for (; TmpBuf[i - 1] != ' '; --i);
-		if (strncmp(&TmpBuf[i], "$EXT@", 5) == 0) {
-		/*
-		 * forward to an entire domain 
-		 */
-			printh("<b>%s <I>user</I>%H</b>", html_text[62], &TmpBuf[i + 4]);
-		} else {
-			printh("<b>%s %H</b>", html_text[62], &TmpBuf[i]);
-		}
+	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	if (getln(&ssin, &line, &match, '\n') == -1) {
+		strerr_warn1("get_catchall: read: .qmail-default", &strerr_sys);
+		out(html_text[144]);
+		out(" .qmail-default 1<BR>\n");
+		flush();
+		iclose();
+		exit(0);
+	}
+	if (match) {
+		line.len--;
+		line.s[line.len] = 0;
 	} else {
-		i = strlen(TmpBuf) - 1;
-		for (; TmpBuf[i] != '/'; --i);
-		for (++i, j = 0; TmpBuf[i] != 0; ++j, ++i)
-			TmpBuf2[j] = TmpBuf[i];
-		TmpBuf2[j--] = '\0';
-
-	/*
-	 * take off newline 
-	 */
-		i = strlen(TmpBuf2);
-		--i;
-		TmpBuf2[i] = 0;			/* take off newline */
-		printh("<b>%s %H</b>", html_text[62], TmpBuf2);
+		if (!stralloc_0(&line))
+			die_nomem();
+		line.len--;
+	}
+	match = str_chr(line.s, '#');
+	if (line.s[match])
+		line.s[match] = 0;
+	for (ptr = line.s; *ptr && isspace(*ptr); ptr++);
+	if (!*ptr) {
+		out(html_text[159]);
+		out(" .qmail-default 1<BR>\n");
+		flush();
+		iclose();
+		exit(0);
+	}
+	close(fd);
+	if (str_str(line.s, " bounce-no-mailbox\n")) {
+		out("<b>");
+		out(html_text[130]);
+		out("</b>");
+		flush();
+	} else
+	if (str_str(line.s, " delete\n")) {
+		out("<b>");
+		out(html_text[236]);
+		out("</b>");
+		flush();
+	} else
+	if (str_str(ptr, "@")) {
+		i = str_rchr(ptr, ' ');
+		if (ptr[i] && !str_diffn(ptr + 1, "$EXT@", 5))
+			printh("<b>%s <I>user</I>%H</b>", html_text[62], ptr + i + 5);
+		else
+			printh("<b>%s %H</b>", html_text[62], ptr + i + 1);
+	} else {
+		i = str_rchr(ptr, '/');
+		if (ptr[i]) {
+			i++;
+			if (line.s[line.len - 1] == '/') {
+				line.s[line.len - 1] = 0;
+				line.len--;
+			}
+			printh("<b>%s %H</b>", html_text[62], ptr + i);
+		} else
+			printh("<b>%s invalid</b>", html_text[62]);
 	}
 	return 0;
 }
 
 int
-makevacation(FILE * d, char *dir)
+makevacation(substdio *out, char *dir)
 {
-	char            subject[80];
-	FILE           *f;
-	char            fn[156];
+	static stralloc subject = {0};
+	int             fd;
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG], outbuf[512];
+	struct substdio ssout;
 
-	GetValue(TmpCGI, subject, "vsubject=", sizeof (subject));
+	GetValue(TmpCGI, &subject, "vsubject=");
 	/*- if no subject, error */
-	if ((subject == NULL) || (*subject == '\0')) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s\n", html_text[216]);
+	if (!subject.len || !subject.s[0]) {
+		copy_status_mesg(html_text[216]);
 		return 1;
 	}
 	/*- make the vacation directory */
-	snprintf(fn, sizeof (fn), "%s/vacation/%s", dir, ActionUser);
-	if (r_mkdir(fn, 0750, Uid, Gid)) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[143]);
-		fprintf(stderr, "%s: uid=%d, gid=%d: %s\n", TmpBuf, getuid(), getgid(), strerror(errno));
+	if (!stralloc_copys(&TmpBuf, dir) ||
+			!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+			!stralloc_cat(&TmpBuf, &ActionUser) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	if (r_mkdir(TmpBuf.s, 0750, Uid, Gid)) {
+		copy_status_mesg(html_text[143]);
+		strnum1[fmt_uint(strnum1, getuid())] = 0;
+		strnum2[fmt_uint(strnum2, getgid())] = 0;
+		strerr_warn7("makevacation: ", TmpBuf.s, ": uid =", strnum1, ", gid=", strnum2, ": ", &strerr_sys);
 		return (1);
 	}
-	snprintf(fn, sizeof (fn), "%s/content-type", dir);
-	if (access(fn, R_OK))
-		fprintf(d, "| %s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s\n",
-			INDIMAILDIR, dir, ActionUser, dir, ActionUser);
-	else
-		fprintf(d, "| %s/bin/autoresponder -q -T %s/content-type %s/vacation/%s/.vacation.msg %s/vacation/%s\n",
-			INDIMAILDIR, dir, dir, ActionUser, dir, ActionUser);
+	if (!stralloc_copys(&TmpBuf, dir) ||
+			!stralloc_catb(&TmpBuf, "/content-type", 13) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	if (access(TmpBuf.s, R_OK)) {
+		if (substdio_puts(out, INDIMAILDIR) ||
+				substdio_put(out, "/bin/autoresponder -q ", 22) ||
+				substdio_puts(out, dir) ||
+				substdio_put(out, "/vacation", 9) ||
+				substdio_put(out, ActionUser.s, ActionUser.len) ||
+				substdio_put(out, "/.vacation.msg ", 15) ||
+				substdio_puts(out, dir) ||
+				substdio_put(out, "/vacation/", 10) ||
+				substdio_put(out, ActionUser.s, ActionUser.len) ||
+				substdio_put(out, "\n", 1) ||
+				substdio_flush(out))
+		{
+			copy_status_mesg(html_text[144]);
+			strerr_warn3("makevacation: write: ", TmpBuf.s, ": ", &strerr_sys);
+			return (1);
+		}
+	} else {
+		if (substdio_puts(out, INDIMAILDIR) ||
+				substdio_put(out, "/bin/autoresponder -q -T ", 25) ||
+				substdio_puts(out, dir) ||
+				substdio_put(out, "/content-type ", 14) ||
+				substdio_puts(out, dir) ||
+				substdio_put(out, "/vacation", 9) ||
+				substdio_put(out, ActionUser.s, ActionUser.len) ||
+				substdio_put(out, "/.vacation.msg ", 15) ||
+				substdio_puts(out, dir) ||
+				substdio_put(out, "/vacation/", 10) ||
+				substdio_put(out, ActionUser.s, ActionUser.len) ||
+				substdio_put(out, "\n", 1) ||
+				substdio_flush(out))
+		{
+			copy_status_mesg(html_text[144]);
+			strerr_warn3("makevacation: write: ", TmpBuf.s, ": ", &strerr_sys);
+			return (1);
+		}
+	}
+	GetValue(TmpCGI, &Message, "vmessage=");
 	/*- set up the message file */
-	snprintf(fn, sizeof (fn), "%s/vacation/%s/.vacation.msg", dir, ActionUser);
-	GetValue(TmpCGI, Message, "vmessage=", sizeof (Message));
-	if ((f = fopen(fn, "w")) == NULL) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s %s\n", html_text[150], fn);
+	if (!stralloc_copys(&TmpBuf, dir) ||
+			!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+			!stralloc_cat(&TmpBuf, &ActionUser) ||
+			!stralloc_catb(&TmpBuf, "/.vacation.msg", 14) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	TmpBuf.len--;
+	if ((fd = open_trunc(TmpBuf.s)) == -1) {
+		copy_status_mesg(html_text[150]);
+		if (!stralloc_append(&StatusMessage, " ") ||
+				!stralloc_cat(&StatusMessage, &TmpBuf) ||
+				!stralloc_append(&StatusMessage, "\n") ||
+				!stralloc_0(&StatusMessage))
+			die_nomem();
 		return 1;
 	}
-	fprintf(f, "Reference: %s\n", subject);
-	fprintf(f, "Subject: This is an autoresponse From: %s@%s Re: %s\n", ActionUser, Domain, subject);
-	fprintf(f, "\n%s\n", Message);
-	fclose(f);
+	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	if (substdio_put(&ssout, "Reference: ", 11) ||
+			substdio_put(&ssout, subject.s, subject.len) ||
+			substdio_put(&ssout, "\n", 1) ||
+			substdio_put(&ssout, "Subject: This is an autoresponse From: ", 39) ||
+			substdio_put(&ssout, ActionUser.s, ActionUser.len) ||
+			substdio_put(&ssout, "@", 1) ||
+			substdio_put(&ssout, Domain.s, Domain.len) ||
+			substdio_put(&ssout, " Re: ", 5) ||
+			substdio_put(&ssout, subject.s, subject.len) ||
+			substdio_put(&ssout, "\n\n", 2) ||
+			substdio_put(&ssout, Message.s, Message.len) ||
+			substdio_put(&ssout, "\n", 1) ||
+			substdio_flush(&ssout))
+	{
+		copy_status_mesg(html_text[144]);
+		strerr_warn3("makevacation: write: ", TmpBuf.s, ": ", &strerr_sys);
+		return (1);
+	}
+	close(fd);
 	return 0;
 }
 
 void
 modusergo()
 {
-	char           *tmpstr;
-	int             ret_code;
-	struct passwd  *vpw = NULL;
-	static char     box[500];
-	char            cforward[50];
-	static char     NewBuf[156];
-	char            dotqmailfn[156];
+	char           *tmpstr, *ptr, *cptr;
+	long            q;
+	int             fd, ret_code, count, vacation = 0, saveacopy = 0, emptydotqmail, err, i;
+	struct passwd  *vpw = 0;
+	static stralloc box = {0}, cforward = {0}, dotqmailfn = {0}, triv_pass = {0};
+	char           *olddotqmail = 0;
 #ifdef MODIFY_QUOTA
 	char           *quotaptr;
 	char            qconvert[11];
 #endif
-	int             count;
-	FILE           *fs;
-#if 0
-	int             spam_check = 0;
-#endif
-	int             vacation = 0, saveacopy = 0, emptydotqmail, err, i;
-	char           *olddotqmail = NULL, *dotqmailline;
-	char            triv_pass[MAX_BUFF];
 	struct stat     sb;
 	extern int      encrypt_flag;
 	const char     *flagfields[] = { "zeroflag=", "oneflag=", "twoflag=", "threeflag=" };
 	const gid_t     gidflags[] = { V_USER0, V_USER1, V_USER2, V_USER3 };
 	gid_t           orig_gid;
+	char            outbuf[512], strnum[FMT_ULONG];
+	struct substdio ssout;
 
-	if (!(AdminType == DOMAIN_ADMIN || (AdminType == USER_ADMIN && strcmp(ActionUser, Username) == 0))) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[142]);
-		vclose();
+	if (!(AdminType == DOMAIN_ADMIN ||
+			(AdminType == USER_ADMIN && !str_diffn(ActionUser.s, Username.s, ActionUser.len > Username.len ? ActionUser.len : Username.len)))) {
+		copy_status_mesg(html_text[142]);
+		iclose();
 		exit(0);
 	}
-	if (strlen(Password1) > 0 && strlen(Password2) > 0) {
-		if (strcmp(Password1, Password2) != 0) {
-			snprintf(StatusMessage, sizeof (StatusMessage), "%s\n", html_text[200]);
+	if (Password1.len && Password2.len) {
+		if (str_diff(Password1.s, Password2.s)) {
+			copy_status_mesg(html_text[200]);
 			moduser();
-			vclose();
+			iclose();
 			exit(0);
 		}
 #ifndef TRIVIAL_PASSWORD_ENABLED
-		if (strstr(ActionUser, Password1) != NULL) {
-			snprintf(StatusMessage, sizeof (StatusMessage), "%s\n", html_text[320]);
+		if (str_str(ActionUser.s, Password1.s)) {
+			copy_status_mesg(html_text[320]);
 			moduser();
-			vclose();
+			iclose();
 			exit(0);
 		}
 #endif
-		snprintf(triv_pass, MAX_BUFF, "%s/.trivial_passwords", RealDir);
-		if (!access(triv_pass, F_OK))
+		if (!stralloc_copy(&triv_pass, &RealDir) ||
+				!stralloc_catb(&triv_pass, "/.trivial_passwords", 19) ||
+				!stralloc_0(&triv_pass))
+			die_nomem();
+		if (!access(triv_pass.s, F_OK))
 			encrypt_flag = 1;
-		ret_code = vpasswd(ActionUser, Domain, Password1, USE_POP);
+		ret_code = ipasswd(ActionUser.s, Domain.s, Password1.s, USE_POP);
 		if (ret_code != 1) {
-			snprintf(StatusMessage, sizeof (StatusMessage), "%s (error code %d)", html_text[140], ret_code);
-		} else {
-			/*
-			 * snprinth (StatusMessage, sizeof(StatusMessage), "%s %H@%H.", html_text[139], 
-			 * ActionUser, Domain ); 
-			 */
-			strcpy(StatusMessage, html_text[139]);
-		}
+			copy_status_mesg(html_text[140]);
+			if (!stralloc_catb(&StatusMessage, " (error code ", 13) ||
+					!stralloc_catb(&StatusMessage, strnum, fmt_int(strnum, ret_code)) ||
+					!stralloc_append(&StatusMessage, ")") ||
+					!stralloc_0(&StatusMessage))
+				die_nomem();
+		} else
+			copy_status_mesg(html_text[139]);
 	}
 #ifdef MODIFY_QUOTA
 	/*
@@ -893,121 +1125,124 @@ modusergo()
 	 * 309 = "Quota set to %s bytes"
 	 */
 	if (AdminType == DOMAIN_ADMIN) {
-		GetValue(TmpCGI, Quota, "quota=", sizeof (Quota));
-		vpw = vauth_getpw(ActionUser, Domain);
-		if ((strlen(Quota) == 0) || (strcmp(vpw->pw_shell, Quota) == 0)) {
-		/*
-		 * Blank or no change, do nothing 
-		 */
+		GetValue(TmpCGI, &Quota, "quota=");
+		scan_long(Quota.s, &q);
+		vpw = sql_getpw(ActionUser.s, Domain.s);
+		if (!Quota.len || !str_diff(vpw->pw_shell, Quota.s)) {
+		/*- Blank or no change, do nothing */
 		} else
-		if (strncmp(Quota, "NOQUOTA", 2) == 0) {
-			if (vsetuserquota(ActionUser, Domain, Quota) == -1)
-				snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[307]);	/* invalid quota */
+		if (!str_diffn(Quota.s, "NOQUOTA", 8)) {
+			if (setuserquota(ActionUser.s, Domain.s, Quota.s) == -1)
+				copy_status_mesg(html_text[307]);
 			else
-				snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[308]);
+				copy_status_mesg(html_text[308]);
 		} else
-		if (atoi(Quota)) {
-			quotaptr = Quota;
-			if (quota_to_bytes(qconvert, quotaptr)) {
-				snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[307]);
-			} else
-			if (strcmp(qconvert, vpw->pw_shell) == 0) {
-			/*
-			 * unchanged, do nothing 
-			 */
-			} else
-			if ((err = vsetuserquota(ActionUser, Domain, qconvert)) == -1)
-				snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[307]);
+		if (q) {
+			quotaptr = Quota.s;
+			if (quota_to_bytes(qconvert, quotaptr))
+				copy_status_mesg(html_text[307]);
 			else
-				snprintf(StatusMessage, sizeof (StatusMessage), html_text[309], qconvert);
+			if (!str_diff(qconvert, vpw->pw_shell)) {
+				/*- unchanged, do nothing */
+			} else
+			if ((err = setuserquota(ActionUser.s, Domain.s, qconvert)) == -1)
+				copy_status_mesg(html_text[307]);
+			else {
+				if (!stralloc_copyb(&StatusMessage, "Quota set to ", 13) ||
+						!stralloc_cats(&StatusMessage, qconvert) ||
+						!stralloc_catb(&StatusMessage, " bytes", 6) ||
+						!stralloc_0(&StatusMessage))
+					die_nomem(); /*- html_text[309] */
+			}
 		} else
-			snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[307]);
+			copy_status_mesg(html_text[307]);
 	}
 #endif
-	GetValue(TmpCGI, Gecos, "gecos=", sizeof (Gecos));
-	vpw = vauth_getpw(ActionUser, Domain);
+	GetValue(TmpCGI, &Gecos, "gecos=");
+	vpw = sql_getpw(ActionUser.s, Domain.s);
 	/*- check for the V_USERx flags and set accordingly */
 	/*- new code by Tom Collins <tom@tomlogic.com>, Dec 2004 */
 	/*- replaces code by James Raftery <james@now.ie>, 12 Dec. 2002 */
 	orig_gid = vpw->pw_gid;
 	for (i = 0; i < 4; i++) {
-		GetValue(TmpCGI, box, (char *) flagfields[i], sizeof (box));
-		if (strcmp(box, "on") == 0)
+		GetValue(TmpCGI, &box, (char *) flagfields[i]);
+		if (!str_diff(box.s, "on"))
 			vpw->pw_gid |= gidflags[i];
 		else
-		if (strcmp(box, "off") == 0)
+		if (!str_diff(box.s, "off"))
 			vpw->pw_gid &= ~gidflags[i];
 	}
 	/*
 	 * we're trying to cut down on unnecessary updates to the password entry
 	 * we accomplish this by only updating if the pw_gid or gecos changed
 	 */
-	if ((*Gecos != '\0') && (strcmp(Gecos, vpw->pw_gecos) != 0)) {
-		vpw->pw_gecos = Gecos;
-		vauth_setpw(vpw, Domain);
+	if (Gecos.len && str_diff(Gecos.s, vpw->pw_gecos)) {
+		vpw->pw_gecos = Gecos.s;
+		sql_setpw(vpw, Domain.s);
 	} else 
 	if (vpw->pw_gid != orig_gid)
-		vauth_setpw(vpw, Domain);
-
-#if 0
-	/*
-	 * get value of the spam filter box 
-	 */
-	GetValue(TmpCGI, box, "spamcheck=", sizeof (box));
-	if (strcmp(box, "on") == 0)
-		spam_check = 1;
-#endif
-
+		sql_setpw(vpw, Domain.s);
 	/*- get the value of the vacation checkbox */
-	GetValue(TmpCGI, box, "vacation=", sizeof (box));
-	if (strcmp(box, "on") == 0)
+	GetValue(TmpCGI, &box, "vacation=");
+	if (!str_diff(box.s, "on"))
 		vacation = 1;
-
 	/*- if they want to save a copy */
-	GetValue(TmpCGI, box, "fsaved=", sizeof (box));
-	if (strcmp(box, "on") == 0)
+	GetValue(TmpCGI, &box, "fsaved=");
+	if (!str_diff(box.s, "on"))
 		saveacopy = 1;
-
 	/*- get the value of the cforward radio button */
-	GetValue(TmpCGI, cforward, "cforward=", sizeof (cforward));
-	if (strcmp(cforward, "vacation") == 0)
+	GetValue(TmpCGI, &cforward, "cforward=");
+	if (!str_diff(cforward.s, "vacation"))
 		vacation = 1;
 	/*- open old .qmail file if it exists and load it into memory */
-	snprintf(dotqmailfn, sizeof (dotqmailfn), "%s/.qmail", vpw->pw_dir);
-	err = stat(dotqmailfn, &sb);
-	if (err == 0) {
-		olddotqmail = malloc(sb.st_size);
-		if (olddotqmail != NULL) {
-			fs = fopen(dotqmailfn, "r");
-			if (fs != NULL) {
-				(void) fread(olddotqmail, sb.st_size, 1, fs);
-				(void) fclose(fs);
+	if (!stralloc_copys(&dotqmailfn, vpw->pw_dir) ||
+			!stralloc_catb(&dotqmailfn, "/.qmail", 7) ||
+			!stralloc_0(&dotqmailfn))
+		die_nomem();
+	if (!(err = stat(dotqmailfn.s, &sb))) {
+		if ((olddotqmail = (char *) alloc(sb.st_size))) {
+			if ((fd = open_read(dotqmailfn.s)) != -1) {
+				read(fd, olddotqmail, sb.st_size);
+				close(fd);
 			}
 		}
 	}
-	if (!(fs = fopen(dotqmailfn, "w")))
-	{
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s (error code %s)", html_text[150], strerror(errno));
-		printf("<h3>%s %s: %s</h3>\n", html_text[150], dotqmailfn, strerror(errno));
-		vclose();
+	if ((fd = open_trunc(dotqmailfn.s)) == -1) {
+		copy_status_mesg(html_text[150]);
+		if (!stralloc_catb(&StatusMessage, ": ", 2) ||
+				!stralloc_cats(&StatusMessage, error_str(errno)) ||
+				!stralloc_0(&StatusMessage))
+			die_nomem();
+		out("<h3>");
+		out(dotqmailfn.s);
+		out(" ");
+		out(html_text[150]);
+		out(": ");
+		out(error_str(errno));
+		out("</h3>\n");
+		flush();
+		iclose();
 		exit(0);
 	}
+	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
 	/*
 	 * Scan through old .qmail and write out any unrecognized program delivery
 	 * lines to the new .qmail file.
 	 */
 	emptydotqmail = 1;
-	if (olddotqmail != NULL) {
-		dotqmailline = strtok(olddotqmail, "\n");
-		while (dotqmailline) {
-			if ((*dotqmailline == '|') && (strstr(dotqmailline, "/true delete") == NULL)
-				&& (strstr(dotqmailline, "/autoresponder ") == NULL) ) {
-				fprintf(fs, "%s\n", dotqmailline);
-				emptydotqmail = 0;
+	if (olddotqmail) {
+		for (ptr = cptr = olddotqmail; *cptr; cptr++) {
+			if (*cptr == '\n') {
+				*cptr = 0;
+				if (*ptr == '|' && !str_str(ptr, "/true delete") &&
+						!str_str(ptr, "/autoresponder ")) {
+					substdio_puts(&ssout, ptr);
+					substdio_put(&ssout, "\n", 1);
+					ptr = cptr + 1;
+				}
 			}
-			dotqmailline = strtok(NULL, "\n");
 		}
-		free(olddotqmail);
+		alloc_free(olddotqmail);
 	}
 	/*
 	 * Decide on what to write to the new .qmail file after any old program
@@ -1019,59 +1254,71 @@ modusergo()
 	 * since it can be removed.
 	 */
 	/*- if they want to forward */
-	if (strcmp(cforward, "forward") == 0) {
+	if (!str_diff(cforward.s, "forward")) {
 		/*- get the value of the foward */
-		GetValue(TmpCGI, box, "nforward=", sizeof (box));
+		GetValue(TmpCGI, &box, "nforward=");
 		/*- If nothing was entered, error */
-		if (box[0] == 0) {
-			snprintf(StatusMessage, sizeof (StatusMessage), "%s\n", html_text[215]);
+		if (!box.len) {
+			copy_status_mesg(html_text[215]);
 			err = 1;
 		} else {
-			tmpstr = strtok(box, " ,;\n");
+			tmpstr = str_tok(box.s, " ,;\n");
 			/*- tmpstr points to first non-token */
 			count = 0;
 			while (tmpstr != NULL && count < MAX_FORWARD_PER_USER) {
 				if ((*tmpstr != '|') && (*tmpstr != '/')) {
-					if (strchr(tmpstr, '@') == NULL) {
-						fprintf(fs, "&%s@%s\n", tmpstr, Domain);
+					i = str_chr(tmpstr, '@');
+					if (!tmpstr[i]) {
+						substdio_put(&ssout, "&", 1);
+						substdio_puts(&ssout, tmpstr);
+						substdio_put(&ssout, "@", 1);
+						substdio_put(&ssout, Domain.s, Domain.len);
+						substdio_put(&ssout, "\n", 1);
 					} else {
-						fprintf(fs, "&%s\n", tmpstr);
+						substdio_put(&ssout, "&", 1);
+						substdio_puts(&ssout, tmpstr);
+						substdio_put(&ssout, "\n", 1);
 					}
 					emptydotqmail = 0;
 					++count;
 				}
-				tmpstr = strtok(NULL, " ,;\n");
+				tmpstr = str_tok(NULL, " ,;\n");
 			}
 		}
 	}
-	if ((strcmp(cforward, "forward") != 0) || saveacopy) {
-		if (strcmp(cforward, "blackhole") == 0) {
-			fprintf(fs, "# delete\n");
+	if (str_diff(cforward.s, "forward") || saveacopy) {
+		if (!str_diff(cforward.s, "blackhole")) {
+			substdio_put(&ssout, "# delete\n", 9);
 			emptydotqmail = 0;
-		} else
-			fprintf(fs, "%s/" MAILDIR "/\n", vpw->pw_dir);
-			/*- this isn't enough to consider the .qmail file non-empty */
+		} else {
+			substdio_puts(&ssout, vpw->pw_dir);
+			substdio_put(&ssout, "/Maildir/\n", 10);
+		}
+		/*- this isn't enough to consider the .qmail file non-empty */
 	}
 	if (vacation) {
-		err = makevacation(fs, RealDir);
+		err = makevacation(&ssout, RealDir.s);
 		emptydotqmail = 0;
 	} else {
 		/*- delete old vacation directory */
-		snprintf(NewBuf, sizeof (NewBuf), "%s/vacation/%s", RealDir, ActionUser);
-		vdelfiles(NewBuf, ActionUser, Domain);
+		if (!stralloc_copy(&TmpBuf, &RealDir) ||
+				!stralloc_catb(&TmpBuf, "/vacation", 9) ||
+				!stralloc_cat(&TmpBuf, &ActionUser) ||
+				!stralloc_0(&TmpBuf))
+			die_nomem();
+		vdelfiles(TmpBuf.s, ActionUser.s, Domain.s);
 	}
-	fclose(fs);
+	close(fd);
 	if (emptydotqmail)
-		unlink(dotqmailfn);
+		unlink(dotqmailfn.s);
 	if (err) {
 		moduser();
-		vclose();
+		iclose();
 		exit(0);
 	}
-	call_hooks(HOOK_MODUSER, ActionUser, Domain, Password1, Gecos);
+	call_hooks(HOOK_MODUSER, ActionUser.s, Domain.s, Password1.s, Gecos.s);
 	moduser();
 }
-
 
 /*
  * display ##i0 - ##i9 macros 
@@ -1079,14 +1326,15 @@ modusergo()
 void
 parse_users_dotqmail(char newchar)
 {
-	static struct passwd *vpw = NULL;
-	static FILE    *fs1 = NULL;	/* for the .qmail file */
-	static FILE    *fs2 = NULL;	/* for the vacation message file */
-	int             i, j;
-	char            fn[500], linebuf[256];
+	static struct passwd *vpw = 0;
+	char           *ptr;
+	static int      fd1 = -1, fd2 = -1;
+	int             match, j;
+	static stralloc fn1 = {0}, fn2 = {0}, line = {0};
 	int             inheader;
-
 	static unsigned int dotqmail_flags = 0;
+	char            inbuf1[1024], inbuf2[1024];
+	struct substdio ssin1, ssin2;
 #define DOTQMAIL_STANDARD	(1<<0)
 #define DOTQMAIL_FORWARD	(1<<1)
 #define DOTQMAIL_SAVECOPY	(1<<3)
@@ -1094,214 +1342,237 @@ parse_users_dotqmail(char newchar)
 #define DOTQMAIL_BLACKHOLE	(1<<8)
 #define DOTQMAIL_OTHERPGM	(1<<14)
 
-
-	if (vpw == NULL)
-		vpw = vauth_getpw(ActionUser, Domain);
-	if (vpw == NULL)
+	if (!vpw)
+		vpw = sql_getpw(ActionUser.s, Domain.s);
+	if (!vpw)
 		return;
-
-	if (fs1 == NULL) {
-
-		snprintf(fn, sizeof (fn), "%s/.qmail", vpw->pw_dir);
-		fs1 = fopen(fn, "r");
-		if (fs1 == NULL) {
-		/*
-		 * no .qmail file, standard delivery 
-		 */
+	if (fd1 == -1) {
+		if (!stralloc_copys(&fn1, vpw->pw_dir) ||
+				!stralloc_catb(&fn1, "/.qmail", 7) ||
+				!stralloc_0(&fn1))
+			die_nomem();
+		fd1 = open_read(fn1.s);
+		if (fd1 == -1) {
+			/*- no .qmail file, standard delivery */
 			dotqmail_flags = DOTQMAIL_STANDARD;
 		} else {
-			while (fgets(linebuf, sizeof (linebuf), fs1) != NULL) {
-				i = strlen(linebuf);
-			/*
-			 * strip trailing newline if any 
-			 */
-				if (i && (linebuf[i - 1] == '\n'))
-					linebuf[i - 1] = '\0';
-
-				switch (*linebuf) {
-				case '\0':		/* blank line, ignore */
+			substdio_fdbuf(&ssin1, read, fd1, inbuf1, sizeof(inbuf1));
+			for (;;) {
+				if (getln(&ssin1, &line, &match, '\n') == -1) {
+					strerr_warn3("parse_users_dotqmail: read: ", fn1.s, ": ", &strerr_sys);
+					out(html_text[144]);
+					out(" ");
+					out(fn1.s);
+					out(" 1<BR>\n");
+					flush();
+					iclose();
+					exit(0);
+				}
+				if (match) {
+					line.len--;
+					line.s[line.len] = 0;
+				} else {
+					if (!stralloc_0(&line))
+						die_nomem();
+					line.len--;
+				}
+				switch (line.s[0])
+				{
+				case 0:	 /* blank line, ignore */
 					break;
-
 				case '.':
-				case '/':		/* maildir delivery */
-				/*
-				 * see if it's the user's maildir 
-				 */
+				case '/': /* maildir delivery */
+					/*- see if it's the user's maildir */
 					if (1)
 						dotqmail_flags |= DOTQMAIL_SAVECOPY;
 					break;
-
 				case '|':		/* program delivery */
-				/*
-				 * in older versions of QmailAdmin, we used "|/bin/true delete"
-				 * * for blackhole accounts.  Since the path to true may vary,
-				 * * just check for the end of the string
-				 */
-					if (strstr(linebuf, "/true delete") != NULL)
+					/*-
+					 * in older versions of QmailAdmin, we used "|/bin/true delete"
+					 * for blackhole accounts.  Since the path to true may vary,
+					 * just check for the end of the string
+					 */
+					if (str_str(line.s, "/true delete"))
 						dotqmail_flags |= DOTQMAIL_BLACKHOLE;
 					else
-					if (strstr(linebuf, "/autoresponder ") != NULL) {
+					if (str_str(line.s, "/autoresponder ") != NULL) {
 						dotqmail_flags |= DOTQMAIL_VACATION;
-						snprintf(fn, sizeof (fn), "%s/vacation/%s/.vacation.msg", RealDir, ActionUser);
-						fs2 = fopen(fn, "r");
-					}
-					else		/* unrecognized program delivery, set a flag so we don't blackhole */
+						if (!stralloc_copy(&fn2, &RealDir) ||
+								!stralloc_catb(&fn2, "/vacation/", 10) ||
+								!stralloc_cat(&fn2, &ActionUser) ||
+								!stralloc_catb(&fn2, "/.vacation.msg", 14) ||
+								!stralloc_0(&fn2))
+							die_nomem();
+						fd2 = open_read(fn2.s);
+					} else /* unrecognized program delivery, set a flag so we don't blackhole */
 						dotqmail_flags |= DOTQMAIL_OTHERPGM;
-
 					break;
-
-				case '#':		/* comment */
-				/*
-				 * ignore unless it's our 'blackhole' comment 
-				 */
-					if (strcmp(linebuf, "# delete") == 0)
+				case '#': /* comment */
+					/*- ignore unless it's our 'blackhole' comment */
+					if (!str_diff(line.s, "# delete"))
 						dotqmail_flags |= DOTQMAIL_BLACKHOLE;
 					break;
-
-				default:		/* email address delivery */
+				default: /* email address delivery */
 					dotqmail_flags |= DOTQMAIL_FORWARD;
-
 				}
 			}
-
-		/*
-		 * if other flags were set, in addition to blackhole, clear blackhole flag 
-		 */
+			/*
+			 * if other flags were set, in addition to blackhole, clear blackhole flag 
+			 */
 			if (dotqmail_flags & (DOTQMAIL_FORWARD | DOTQMAIL_SAVECOPY))
 				dotqmail_flags &= ~DOTQMAIL_BLACKHOLE;
-
-		/*
-		 * if no flags were set (.qmail file without delivery), it's a blackhole 
-		 */
+			/*
+			 * if no flags were set (.qmail file without delivery), it's a blackhole 
+			 */
 			if (dotqmail_flags == 0)
 				dotqmail_flags = DOTQMAIL_BLACKHOLE;
-
-		/*
-		 * clear OTHERPGM flag, as it tells us nothing at this point 
-		 */
+			/*
+			 * clear OTHERPGM flag, as it tells us nothing at this point 
+			 */
 			dotqmail_flags &= ~DOTQMAIL_OTHERPGM;
-
-		/*
-		 * if forward and save-a-copy are set, it will actually set the spam flag 
-		 */
+			/*
+			 * if forward and save-a-copy are set, it will actually set the spam flag 
+			 */
 			if ((dotqmail_flags & DOTQMAIL_FORWARD))
 				dotqmail_flags |= DOTQMAIL_SAVECOPY;
-
-		/*
-		 * if forward is not set, clear save-a-copy 
-		 */
+			/*- if forward is not set, clear save-a-copy */
 			if (!(dotqmail_flags & DOTQMAIL_FORWARD))
 				dotqmail_flags &= ~DOTQMAIL_SAVECOPY;
-
 		}
-
-	/*
-	 * if deleted and forward aren't set, 
-	 */
-	/*
-	 * default to standard delivery 
-	 */
+		/*-
+		 * if deleted and forward aren't set, 
+		 * default to standard delivery 
+		 */
 		if (!(dotqmail_flags & (DOTQMAIL_BLACKHOLE | DOTQMAIL_FORWARD)))
 			dotqmail_flags |= DOTQMAIL_STANDARD;
 	}
-
-	switch (newchar) {
-	case '0':					/* standard delivery checkbox */
-	case '1':					/* forward delivery checkbox */
-	case '3':					/* save-a-copy checkbox */
-	case '4':					/* vacation checkbox */
-	case '8':					/* blackhole checkbox */
-	case '9':					/* spam check checkbox */
-		if (dotqmail_flags & (1 << (newchar - '0')))
-			printf("checked ");
-		break;
-
-	case '2':					/* forwarding addresses */
-		if (fs1 != NULL) {
-			rewind(fs1);
-			j = 0;
-			while (fgets(linebuf, sizeof (linebuf), fs1) != NULL) {
-				i = strlen(linebuf);
-			/*
-			 * strip trailing newline if any 
-			 */
-				if (i && (linebuf[i - 1] == '\n'))
-					linebuf[i - 1] = '\0';
-				switch (*linebuf) {
-				case '\0':		/* blank line */
-				case '/':		/* maildir delivery */
-				case '|':		/* program delivery */
-				case '#':		/* comment */
-				/*
-				 * ignore 
-				 */
-					break;
-
-				default:		/* email address delivery */
-				/*
-				 * print address, skipping over '&' if necessary 
-				 */
-					if (j++)
-						printf(", ");
-					printh("%H", &linebuf[(*linebuf == '&' ? 1 : 0)], "\n");
+	switch (newchar)
+	{
+		case '0': /* standard delivery checkbox */
+		case '1': /* forward delivery checkbox */
+		case '3': /* save-a-copy checkbox */
+		case '4': /* vacation checkbox */
+		case '8': /* blackhole checkbox */
+		case '9': /* spam check checkbox */
+			if (dotqmail_flags & (1 << (newchar - '0'))) {
+				out("checked ");
+				flush();
+			}
+			break;
+		case '2': /* forwarding addresses */
+			if (fd1 != -1) {
+				lseek(fd1, 0, SEEK_SET);
+				ssin1.p = 0;
+				ssin1.n = sizeof(inbuf1);
+				j = 0;
+				for (;;) {
+					if (getln(&ssin1, &line, &match, '\n') == -1) {
+						strerr_warn3("parse_users_dotqmail: read: ", fn1.s, ": ", &strerr_sys);
+						out(html_text[144]);
+						out(" ");
+						out(fn1.s);
+						out(" 1<BR>\n");
+						flush();
+						iclose();
+						exit(0);
+					}
+					if (match) {
+						line.len--;
+						line.s[line.len] = 0;
+					} else {
+						if (!stralloc_0(&line))
+							die_nomem();
+						line.len--;
+					}
+					switch (line.s[0])
+					{
+					case 0: /* blank line */
+					case '/': /* maildir delivery */
+					case '|': /* program delivery */
+					case '#': /* comment */
+						/*- ignore */
+						break;
+					default: /* email address delivery */
+						/*- print address, skipping over '&' if necessary */
+						if (j++)
+							out(", ");
+						printh("%H\n", line.s + (line.s[0] == '&' ? 1 : 0));
+						flush();
+					}
 				}
 			}
-		}
-		break;
-
-	case '5':					/* vacation subject */
-		if (fs2 != NULL) {
-			rewind(fs2);
-
-		/*
-		 * scan headers for Subject 
-		 */
-			while (fgets(linebuf, sizeof (linebuf), fs2) != NULL) {
-				if (*linebuf == '\n')
-					break;
-				if (strncasecmp(linebuf, "Subject: ", 9) == 0) {
-					char *ptr;
-					if ((ptr = strstr(linebuf, "Subject: This is an autoresponse From:"))) {
-						if ((ptr = strstr(linebuf, "Re: ")))
-							ptr += 4;
-						else
-							ptr += 39;
-						printh("%H", ptr);
-					} else
-						printh("%H", &linebuf[9]);
+			break;
+		case '5': /* vacation subject */
+			if (fd2 != -1) {
+				substdio_fdbuf(&ssin2, read, fd2, inbuf2, sizeof(inbuf2));
+				lseek(fd2, 0, SEEK_SET);
+				ssin2.p = 0;
+				ssin2.n = sizeof(inbuf2);
+				/*- scan headers for Subject */
+				for (;;) {
+					if (getln(&ssin2, &line, &match, '\n') == -1) {
+						strerr_warn3("parse_users_dotqmail: read: ", fn2.s, ": ", &strerr_sys);
+						out(html_text[144]);
+						out(" ");
+						out(fn2.s);
+						out(" 1<BR>\n");
+						flush();
+						iclose();
+						exit(0);
+					}
+					if (line.s[0] == '\n')
+						break;
+					if (match) {
+						line.len--;
+						line.s[line.len] = 0;
+					} else {
+						if (!stralloc_0(&line))
+							die_nomem();
+						line.len--;
+					}
+					if (!case_diffb(line.s, 9, "Subject: ")) {
+						if ((ptr = str_str(line.s, "Subject: This is an autoresponse From:"))) {
+							if ((ptr = str_str(line.s, "Re: ")))
+								ptr += 4;
+							else
+								ptr += 39;
+							printh("%H", ptr);
+						} else
+							printh("%H", line.s + 9);
+					}
+					if (!case_diffb(line.s, 11, "Reference: "))
+						printh("%H", line.s + 11);
 				}
-				if (strncasecmp(linebuf, "Reference: ", 11) == 0)
-					printh("%H", &linebuf[11]);
 			}
-		}
-		break;
-
-	case '6':					/* vacation message */
-		if (fs2 != NULL) {
-			rewind(fs2);
-
-		/*
-		 * read from file, skipping headers (look for first blank line) 
-		 */
-			inheader = 1;
-			while (fgets(linebuf, sizeof (linebuf), fs2) != NULL) {
-				if (!inheader)
-					printh("%H", linebuf);
-				if (*linebuf == '\n')
-					inheader = 0;
+			break;
+		case '6': /* vacation message */
+			if (fd2 != -1) {
+				substdio_fdbuf(&ssin2, read, fd2, inbuf2, sizeof(inbuf2));
+				lseek(fd2, 0, SEEK_SET);
+				ssin2.p = 0;
+				ssin2.n = sizeof(inbuf2);
+				/* read from file, skipping headers (look for first blank line) */
+				inheader = 1;
+				for (;;) {
+					if (getln(&ssin2, &line, &match, '\n') == -1) {
+						strerr_warn3("parse_users_dotqmail: read: ", fn2.s, ": ", &strerr_sys);
+						out(html_text[144]);
+						out(" ");
+						out(fn2.s);
+						out(" 1<BR>\n");
+						flush();
+						iclose();
+						exit(0);
+					}
+					if (!inheader)
+						printh("%H", line.s);
+					if (line.s[0] == '\n')
+						inheader = 0;
+				}
 			}
-		}
-		break;
-
-	case '7':					/* gecos (real name) */
-		printh("%H", vpw->pw_gecos);
-		break;
+			break;
+		case '7': /* gecos (real name) */
+			printh("%H", vpw->pw_gecos);
+			break;
 	}
-
-}
-
-void
-getversion_qauser_c()
-{
-	printf("%s\n", sccsidh);
 }

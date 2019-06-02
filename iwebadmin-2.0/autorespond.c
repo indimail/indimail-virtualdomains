@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.10 2019-05-01 23:25:07+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.9 2017-04-03 14:35:17+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,37 +16,29 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
-
-#include <indimail_config.h>
-#undef PACKAGE
-#undef VERSION
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_URL
-#include <indimail.h>
-#undef PACKAGE
-#undef VERSION
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_URL
-#include "config.h"
-
-#include <ctype.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include <indimail.h>
+#include <indimail_compat.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#endif
+#ifdef HAVE_PWD_H
 #include <pwd.h>
+#endif
+#ifdef HAVE_DIRENT_H
 #include <dirent.h>
-#include <errno.h>
+#endif
+#ifdef HAVE_QMAIL
+#include <fmt.h>
+#include <error.h>
+#include <str.h>
+#include <strerr.h>
+#include <substdio.h>
+#include <open.h>
+#endif
 #include "autorespond.h"
 #include "limits.h"
 #include "printh.h"
@@ -55,19 +47,19 @@
 #include "show.h"
 #include "template.h"
 #include "util.h"
+#include "common.h"
 
 void
 show_autoresponders(user, dom, mytime)
-	char           *user;
-	char           *dom;
+	char           *user, *dom;
 	time_t          mytime;
 {
 	if (MaxAutoResponders == 0)
 		return;
 	count_autoresponders();
 	if (CurAutoResponders == 0) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[233]);
-		show_menu(Username, Domain, Mytime);
+		copy_status_mesg(html_text[233]);
+		show_menu(Username.s, Domain.s, mytime);
 	} else {
 		send_template("show_autorespond.html");
 	}
@@ -83,55 +75,78 @@ show_autorespond_line(char *user, char *dom, time_t mytime, char *dir)
 	struct passwd  *vpw;
 
 	sort_init();
-	sprintf(TmpBuf, "%s/vacation", RealDir);
-	if ((mydir = opendir(TmpBuf)) == NULL) {
-		printf("<tr><td>%s %d</tr><td>", html_text[233], 1);
+	if (!stralloc_copy(&TmpBuf, &RealDir) ||
+			!stralloc_catb(&TmpBuf, "/vacation", 9) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	if (access(TmpBuf.s, F_OK) && errno == 2)
+		return;
+	if (!(mydir = opendir(TmpBuf.s))) {
+		out("<tr><td>");
+		out("unable to open directory ");
+		out(TmpBuf.s);
+		out(": ");
+		out(error_str(errno));
+		out(" 1</tr><td>");
+		flush();
 		return;
 	}
-	while ((mydirent = readdir(mydir)) != NULL) {
+	while ((mydirent = readdir(mydir))) {
 		if (mydirent->d_name[0] == '.')
 			continue;
 		sort_add_entry(mydirent->d_name, 0);
 	}
-	if ((domptr = strrchr(RealDir, '/')))
-		domptr++;
+	i = str_rchr(RealDir.s, '/');
+	if (RealDir.s[i])
+		domptr = RealDir.s + i + 1;
 	else
 		domptr = dom;
 	sort_dosort();
 	for (i = 0; (addr = (char *) sort_get_entry(i)); ++i) {
-		printf("<tr>");
-		printf("<td align=\"center\">");
+		out("<tr>");
+		out("<td align=\"center\">");
 		printh("<a href=\"%s&modu=%C\">", cgiurl("delautorespond"), addr);
-		printf("<img src=\"%s/trash.png\" border=\"0\"></a>", IMAGEURL);
-		printf("</td>");
-		printf("<td align=\"center\">");
-		if ((vpw = vauth_getpw(addr, domptr)))
+		out("<img src=\"");
+		out(IMAGEURL);
+		out("/trash.png\" border=\"0\"></a>");
+		out("</td>");
+		out("<td align=\"center\">");
+		if ((vpw = sql_getpw(addr, domptr)))
 			printh("<a href=\"%s&moduser=%C\">", cgiurl("moduser"), addr);
 		else
 			printh("<a href=\"%s&modu=%C\">", cgiurl("modautorespond"), addr);
-		printf("<img src=\"%s/modify.png\" border=\"0\"></a>", IMAGEURL);
-		printf("</td>");
-		printh("<td align=\"left\">%H@%H</td>", addr, Domain);
-		printf("</tr>\n");
+		out("<img src=\"");
+		out(IMAGEURL);
+		out("/modify.png\" border=\"0\"></a>");
+		out("</td>");
+		printh("<td align=\"left\">%H@%H</td>", addr, Domain.s);
+		out("</tr>\n");
 	}
+	flush();
 	sort_cleanup();
 }
 
 void
 addautorespond()
 {
+	char            strnum[FMT_ULONG];
 
 	if (AdminType != DOMAIN_ADMIN) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[142]);
-		vclose();
+		copy_status_mesg(html_text[142]);
+		iclose();
 		exit(0);
 	}
 	count_autoresponders();
 	load_limits();
 	if (MaxAutoResponders != -1 && CurAutoResponders >= MaxAutoResponders) {
-		printf("%s %d\n", html_text[158], MaxAutoResponders);
-		show_menu(Username, Domain, Mytime);
-		vclose();
+		out(html_text[158]);
+		out(" ");
+		strnum[fmt_uint(strnum, MaxAutoResponders)] = 0;
+		out(strnum);
+		out("\n");
+		flush();
+		show_menu(Username.s, Domain.s, mytime);
+		iclose();
 		exit(0);
 	}
 	send_template("add_autorespond.html");
@@ -141,97 +156,225 @@ addautorespond()
 void
 addautorespondnow()
 {
-	int             i = 0;
-	FILE           *fs;
+	int             i = 0, len, plen, fd;
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG], outbuf[1024];
+	struct substdio ssout;
 
 	if (AdminType != DOMAIN_ADMIN) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[142]);
-		vclose();
+		copy_status_mesg(html_text[142]);
+		iclose();
 		exit(0);
 	}
 	count_autoresponders();
 	load_limits();
 	if (MaxAutoResponders != -1 && CurAutoResponders >= MaxAutoResponders) {
-		printf("%s %d\n", html_text[158], MaxAutoResponders);
-		show_menu(Username, Domain, Mytime);
-		vclose();
+		out(html_text[158]);
+		out(" ");
+		strnum1[fmt_uint(strnum1, MaxAutoResponders)] = 0;
+		out(strnum1);
+		out("\n");
+		flush();
+		show_menu(Username.s, Domain.s, mytime);
+		iclose();
 		exit(0);
 	}
-	*StatusMessage = '\0';
-	if (fixup_local_name(ActionUser))
-		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[174], ActionUser);
+	if (fixup_local_name(ActionUser.s)) {
+		len = str_len(html_text[174]) + ActionUser.len + 28;
+		for (plen = 0;;) {
+			if (!stralloc_ready(&StatusMessage, len))
+				die_nomem();
+			plen = snprinth(StatusMessage.s, len, "%s %H\n", html_text[174], ActionUser.s);
+			if (plen < len) {
+				StatusMessage.len = plen;
+				break;
+			}
+			len = plen + 28;
+		}
+	} else
+	if (check_local_user(ActionUser.s)) {
+		len = str_len(html_text[175]) + ActionUser.len + 28;
+		for (plen = 0;;) {
+			if (!stralloc_ready(&StatusMessage, len))
+				die_nomem();
+			plen = snprinth(StatusMessage.s, len, "%s %H\n", html_text[175], ActionUser.s);
+			if (plen < len) {
+				StatusMessage.len = plen;
+				break;
+			}
+			len = plen + 28;
+		}
+	} else
+	if (!ActionUser.len)
+		copy_status_mesg(html_text[176]);
 	else
-	if (check_local_user(ActionUser))
-		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[175], ActionUser);
-	else
-	if (strlen(ActionUser) == 0)
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s\n", html_text[176]);
-	else
-	if (strlen(Newu) > 0 && check_email_addr(Newu))
-		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[177], Newu);
-	else
-	if (strlen(Alias) <= 1)
-		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[178], ActionUser);
-	else
-	if (strlen(Message) <= 1)
-		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[179], ActionUser);
+	if (Newu.len > 0 && check_email_addr(Newu.s)) {
+		len = str_len(html_text[177]) + Newu.len + 28;
+		for (plen = 0;;) {
+			if (!stralloc_ready(&StatusMessage, len))
+				die_nomem();
+			plen = snprinth(StatusMessage.s, len, "%s %H\n", html_text[177], Newu.s);
+			if (plen < len) {
+				StatusMessage.len = plen;
+				break;
+			}
+			len = plen + 28;
+		}
+	} else
+	if (!Alias.len) {
+		len = str_len(html_text[178]) + ActionUser.len + 28;
+		for (plen = 0;;) {
+			if (!stralloc_ready(&StatusMessage, len))
+				die_nomem();
+			plen = snprinth(StatusMessage.s, len, "%s %H\n", html_text[178], ActionUser.s);
+			if (plen < len) {
+				StatusMessage.len = plen;
+				break;
+			}
+			len = plen + 28;
+		}
+	} else
+	if (!Message.len) {
+		len = str_len(html_text[179]) + ActionUser.len + 28;
+		for (plen = 0;;) {
+			if (!stralloc_ready(&StatusMessage, len))
+				die_nomem();
+			plen = snprinth(StatusMessage.s, len, "%s %H\n", html_text[179], ActionUser.s);
+			if (plen < len) {
+				StatusMessage.len = plen;
+				break;
+			}
+			len = plen + 28;
+		}
+	}
 	/*- if there was an error, go back to the add screen */
-	if (*StatusMessage != '\0') {
+	if (StatusMessage.len) {
 		addautorespond();
-		vclose();
+		iclose();
 		exit(0);
 	}
 	/*- Make the autoresponder directory */
-	sprintf(TmpBuf, "%s/vacation/%s", RealDir, ActionUser);
-	if (r_mkdir(TmpBuf, 0750, Uid, Gid)) {
-		fprintf(stderr, "%s: uid=%d, gid=%d: %s\n", TmpBuf, getuid(), getgid(), strerror(errno));
-		ack("143", TmpBuf);
+	if (!stralloc_copy(&TmpBuf, &RealDir) ||
+			!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+			!stralloc_cat(&TmpBuf, &ActionUser) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	TmpBuf.len--;
+	if (r_mkdir(TmpBuf.s, 0750, Uid, Gid)) {
+		strnum1[fmt_uint(strnum1, getuid())] = 0;
+		strnum2[fmt_uint(strnum2, getgid())] = 0;
+		strerr_warn7("mkdir: ", TmpBuf.s, ": uid=", strnum1, ", gid=", strnum2, ": ", &strerr_sys);
+		ack("143", TmpBuf.s);
 	}
 	/*- Make the autoresponder message file */
-	sprintf(TmpBuf, "%s/vacation/%s/.vacation.msg", RealDir, ActionUser);
-	if ((fs = fopen(TmpBuf, "w")) == NULL) {
-		fprintf(stderr, "%s: uid=%d, gid=%d: %s\n", TmpBuf, getuid(), getgid(), strerror(errno));
-		ack("150", TmpBuf);
+	if (!stralloc_catb(&TmpBuf, "/.vacation.msg", 14) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	TmpBuf.len--;
+	if ((fd = open_trunc(TmpBuf.s)) == -1) {
+		strerr_warn3("open: ", TmpBuf.s, ": ", &strerr_sys);
+		ack("150", TmpBuf.s);
 	}
+	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
 	/*- subject in iwebadmin autoresponder panel */
-	fprintf(fs, "Reference: %s\n", Alias);
-	fprintf(fs, "Subject: This is an autoresponse From: %s@%s Re: %s\n", ActionUser, Domain, Alias);
+	if (substdio_put(&ssout, "Reference: ", 11) ||
+			substdio_put(&ssout, Alias.s, Alias.len) ||
+			substdio_put(&ssout, "\n", 1) ||
+			substdio_put(&ssout, "Subject: This is an autoresponse From: ", 39) ||
+			substdio_put(&ssout, ActionUser.s, ActionUser.len) ||
+			substdio_put(&ssout, "@", 1) ||
+			substdio_put(&ssout, Domain.s, Domain.len) ||
+			substdio_put(&ssout, " Re: ", 5) ||
+			substdio_put(&ssout, Alias.s, Alias.len) ||
+			substdio_put(&ssout, "\n", 1))
+	{
+		strerr_warn3("write: ", TmpBuf.s, ": ", &strerr_sys);
+		ack("150", TmpBuf.s);
+	}
 	for (i = 400; i < 450; i++) {
 		if (html_text[i] == NULL)
 			break;
 		if ((*(html_text[i]) == ' ') || (*(html_text[i]) == '\t') || 
 			(*(html_text[i]) == '\r') || (*(html_text[i]) == '\n') || (!(*(html_text[i]))))
 			continue;
-		fprintf(fs, "%s\n", html_text[i]);
+		if (substdio_puts(&ssout, html_text[i])) {
+			strerr_warn3("write: ", TmpBuf.s, ": ", &strerr_sys);
+			ack("150", TmpBuf.s);
+		}
 	}
-	fprintf(fs, "MIME-Version: 1.0\n");
-	fprintf(fs, "\n%s\n", Message);
-	fclose(fs);
+	if (substdio_put(&ssout, "MIME-Version: 1.0\n", 18) ||
+			substdio_put(&ssout, "\n", 1) ||
+			substdio_put(&ssout, Message.s, Message.len) ||
+			substdio_put(&ssout, "\n", 1) ||
+			substdio_flush(&ssout))
+	{
+		strerr_warn3("write: ", TmpBuf.s, ": ", &strerr_sys);
+		ack("150", TmpBuf.s);
+	}
+	close(fd);
 	/*- Make the autoresponder .qmail file */
-	valias_delete(ActionUser, Domain, 0);
-	if (strlen(Newu) > 0) {
-		sprintf(TmpBuf, "&%s", Newu);
-		valias_insert(ActionUser, Domain, TmpBuf, 1);
+	valias_delete(ActionUser.s, Domain.s, 0);
+	if (Newu.len > 0) {
+		if (!stralloc_copyb(&TmpBuf, "&", 1) ||
+				!stralloc_cat(&TmpBuf, &Newu) ||
+				!stralloc_0(&TmpBuf))
+			die_nomem();
+		valias_insert(ActionUser.s, Domain.s, TmpBuf.s, 1);
 	}
-	sprintf(TmpBuf, "%s/content-type", RealDir);
-	if (access(TmpBuf, R_OK))
-		sprintf(TmpBuf, "|%s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s",
-			INDIMAILDIR, RealDir, ActionUser, RealDir, ActionUser);
-	else
-		sprintf(TmpBuf, "|%s/bin/autoresponder -q -T %s/content-type %s/vacation/%s/.vacation.msg %s/vacation/%s",
-			INDIMAILDIR, RealDir, RealDir, ActionUser, RealDir, ActionUser);
-	valias_insert(ActionUser, Domain, TmpBuf, 1);
+	if (!stralloc_copy(&TmpBuf, &RealDir) ||
+			!stralloc_catb(&TmpBuf, "/content-type", 13) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	if (access(TmpBuf.s, R_OK)) {
+		if (!stralloc_copyb(&TmpBuf, "|", 1) ||
+				!stralloc_cats(&TmpBuf, INDIMAILDIR) ||
+				!stralloc_catb(&TmpBuf, "/bin/autoresponder -q ", 22) ||
+				!stralloc_cat(&TmpBuf, &RealDir) ||
+				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+				!stralloc_cat(&TmpBuf, &ActionUser) ||
+				!stralloc_catb(&TmpBuf, "/.vacation.msg ", 15) ||
+				!stralloc_cat(&TmpBuf, &RealDir) ||
+				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+				!stralloc_cat(&TmpBuf, &ActionUser) ||
+				!stralloc_0(&TmpBuf))
+			die_nomem();
+	} else {
+		if (!stralloc_copyb(&TmpBuf, "|", 1) ||
+				!stralloc_cats(&TmpBuf, INDIMAILDIR) ||
+				!stralloc_catb(&TmpBuf, "/bin/autoresponder -q -T ", 25) ||
+				!stralloc_cat(&TmpBuf, &RealDir) ||
+				!stralloc_catb(&TmpBuf, "/content-type ", 14) ||
+				!stralloc_cat(&TmpBuf, &RealDir) ||
+				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+				!stralloc_cat(&TmpBuf, &ActionUser) ||
+				!stralloc_catb(&TmpBuf, "/.vacation.msg ", 15) ||
+				!stralloc_cat(&TmpBuf, &RealDir) ||
+				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+				!stralloc_cat(&TmpBuf, &ActionUser) ||
+				!stralloc_0(&TmpBuf))
+			die_nomem();
+	}
+	valias_insert(ActionUser.s, Domain.s, TmpBuf.s, 1);
 	/*- Report success */
-	snprinth(StatusMessage, sizeof (StatusMessage), "%s %H@%H\n", html_text[180], ActionUser, Domain);
-	show_autoresponders(Username, Domain, Mytime);
+	len = str_len(html_text[180]) + ActionUser.len + Domain.len + 28;
+	for (plen = 0;;) {
+		if (!stralloc_ready(&StatusMessage, len))
+			die_nomem();
+		plen = snprinth(StatusMessage.s, len, "%s %H@%H\n", html_text[180], ActionUser.s, Domain.s);
+		if (plen < len) {
+			StatusMessage.len = plen;
+			break;
+		}
+		len = plen + 28;
+	}
+	show_autoresponders(Username.s, Domain.s, mytime);
 }
 
 void
 delautorespond()
 {
 	if (AdminType != DOMAIN_ADMIN) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[142]);
-		vclose();
+		copy_status_mesg(html_text[142]);
+		iclose();
 		exit(0);
 	}
 	send_template("del_autorespond_confirm.html");
@@ -240,31 +383,45 @@ delautorespond()
 void
 delautorespondnow()
 {
+	int             len, plen;
 	if (AdminType != DOMAIN_ADMIN) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[142]);
-		vclose();
+		copy_status_mesg(html_text[142]);
+		iclose();
 		exit(0);
 	}
 	/*- delete the alias */
-	valias_delete(ActionUser, Domain, 0);
+	valias_delete(ActionUser.s, Domain.s, 0);
 	/*- delete the autoresponder directory */
-	sprintf(TmpBuf, "%s/vacation/%s", RealDir, ActionUser);
-	vdelfiles(TmpBuf, ActionUser, Domain);
-	snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[182], ActionUser);
-	count_autoresponders();
-	if (CurAutoResponders == 0) {
-		show_menu(Username, Domain, Mytime);
-	} else {
-		send_template("show_autorespond.html");
+	if (!stralloc_copy(&TmpBuf, &RealDir) ||
+			!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+			!stralloc_cat(&TmpBuf, &ActionUser) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	vdelfiles(TmpBuf.s, ActionUser.s, Domain.s);
+	len = str_len(html_text[182]) + ActionUser.len + 28;
+	for (plen = 0;;) {
+		if (!stralloc_ready(&StatusMessage, len))
+			die_nomem();
+		plen = snprinth(StatusMessage.s, len, "%s %H\n", html_text[182], ActionUser.s);
+		if (plen < len) {
+			StatusMessage.len = plen;
+			break;
+		}
+		len = plen + 28;
 	}
+	count_autoresponders();
+	if (CurAutoResponders == 0)
+		show_menu(Username.s, Domain.s, mytime);
+	else
+		send_template("show_autorespond.html");
 }
 
 void
 modautorespond()
 {
 	if (AdminType != DOMAIN_ADMIN) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[142]);
-		vclose();
+		copy_status_mesg(html_text[142]);
+		iclose();
 		exit(0);
 	}
 	/*- send_template("show_forwards.html"); -*/
@@ -278,90 +435,197 @@ modautorespond()
 void
 modautorespondnow()
 {
-	FILE           *fs;
+	int             fd, len, plen;
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG], outbuf[1024];
+	struct substdio ssout;
 
 	if (AdminType != DOMAIN_ADMIN) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[142]);
-		vclose();
+		copy_status_mesg(html_text[142]);
+		iclose();
 		exit(0);
 	}
-	*StatusMessage = '\0';
-	if (fixup_local_name(ActionUser))
-		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[174], ActionUser);
-	else
-	if (strlen(Newu) > 0 && check_email_addr(Newu))
-		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[177], Newu);
-	else
-	if (strlen(Alias) <= 1)
-		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[178], ActionUser);
-	else
-	if (strlen(Message) <= 1)
-		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H\n", html_text[179], ActionUser);
+	if (fixup_local_name(ActionUser.s)) {
+		len = str_len(html_text[174]) + ActionUser.len;
+		for (plen = 0;;) {
+			if (!stralloc_ready(&StatusMessage, len))
+				die_nomem();
+			plen = snprinth(StatusMessage.s, len, "%s %H\n", html_text[174], ActionUser.s);
+			if (plen < len) {
+				StatusMessage.len = plen;
+				break;
+			}
+			len = plen + 28;
+		}
+	} else
+	if (Newu.len > 0 && check_email_addr(Newu.s)) {
+		len = str_len(html_text[177]) + Newu.len;
+		for (plen = 0;;) {
+			if (!stralloc_ready(&StatusMessage, len))
+				die_nomem();
+			plen = snprinth(StatusMessage.s, len, "%s %H\n", html_text[177], Newu.s);
+			if (plen < len) {
+				StatusMessage.len = plen;
+				break;
+			}
+			len = plen + 28;
+		}
+	} else
+	if (!Alias.len) {
+		len = str_len(html_text[178]) + ActionUser.len;
+		for (plen = 0;;) {
+			if (!stralloc_ready(&StatusMessage, len))
+				die_nomem();
+			plen = snprinth(StatusMessage.s, len, "%s %H\n", html_text[178], ActionUser.s);
+			if (plen < len) {
+				StatusMessage.len = plen;
+				break;
+			}
+			len = plen + 28;
+		}
+	} else
+	if (!Message.len) {
+		len = str_len(html_text[179]) + ActionUser.len;
+		for (plen = 0;;) {
+			if (!stralloc_ready(&StatusMessage, len))
+				die_nomem();
+			plen = snprinth(StatusMessage.s, len, "%s %H\n", html_text[179], ActionUser.s);
+			if (plen < len) {
+				StatusMessage.len = plen;
+				break;
+			}
+			len = plen + 28;
+		}
+	}
 	/*- exit on errors */
-	if (*StatusMessage != '\0') {
+	if (StatusMessage.len) {
 		modautorespond();
-		vclose();
+		iclose();
 		exit(0);
 	}
 	/*- Make the autoresponder directory */
-	sprintf(TmpBuf, "%s/vacation/%s", RealDir, ActionUser);
-	if (r_mkdir(TmpBuf, 0750, Uid, Gid)) {
-		ack("143", TmpBuf);
-		fprintf(stderr, "%s: uid=%d, gid=%d: %s\n", TmpBuf, getuid(), getgid(), strerror(errno));
+	if (!stralloc_copy(&TmpBuf, &RealDir) ||
+			!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+			!stralloc_cat(&TmpBuf, &ActionUser) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	TmpBuf.len--;
+	if (r_mkdir(TmpBuf.s, 0750, Uid, Gid)) {
+		strnum1[fmt_uint(strnum1, getuid())] = 0;
+		strnum2[fmt_uint(strnum2, getgid())] = 0;
+		strerr_warn7("mkdir: ", TmpBuf.s, ": uid=", strnum1, ", gid=", strnum2, ": ", &strerr_sys);
+		ack("143", TmpBuf.s);
 	}
 	/*- Make the autoresponder message file */
-	sprintf(TmpBuf, "%s/vacation/%s/.vacation.msg", RealDir, ActionUser);
-	if ((fs = fopen(TmpBuf, "w")) == NULL) {
-		fprintf(stderr, "%s: uid=%d, gid=%d: %s\n", TmpBuf, getuid(), getgid(), strerror(errno));
-		ack("150", TmpBuf);
+	if (!stralloc_catb(&TmpBuf, "/.vacation.msg", 14) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	TmpBuf.len--;
+	if ((fd = open_trunc(TmpBuf.s)) == -1) {
+		strerr_warn3("open: ", TmpBuf.s, ": ", &strerr_sys);
+		ack("150", TmpBuf.s);
 	}
-	/*- subject in iwebadmin autoresponder panel */
-	fprintf(fs, "Reference: %s\n", Alias);
-	fprintf(fs, "Subject: This is an autoresponse From: %s@%s Re: %s\n", ActionUser, Domain, Alias);
-	fprintf(fs, "\n%s\n", Message);
-	fclose(fs);
+	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	if (substdio_put(&ssout, "Reference: ", 11) ||
+			substdio_put(&ssout, Alias.s, Alias.len) ||
+			substdio_put(&ssout, "Subject: This is an autoresponse From: ", 39) ||
+			substdio_put(&ssout, ActionUser.s, ActionUser.len) ||
+			substdio_put(&ssout, "@", 1) ||
+			substdio_put(&ssout, Domain.s, Domain.len) ||
+			substdio_put(&ssout, " Re: ", 5) ||
+			substdio_put(&ssout, Alias.s, Alias.len) ||
+			substdio_put(&ssout, "\n\n", 2) || 
+			substdio_put(&ssout, Message.s, Message.len) ||
+			substdio_put(&ssout, "\n", 1) ||
+			substdio_flush(&ssout))
+	{
+		strerr_warn3("write: ", TmpBuf.s, ": ", &strerr_sys);
+		ack("150", TmpBuf.s);
+	}
+	close(fd);
 	/*- Make the autoresponder .qmail file */
-	valias_delete(ActionUser, Domain, 0);
-	if (strlen(Newu) > 0) {
-		sprintf(TmpBuf, "&%s", Newu);
-		valias_insert(ActionUser, Domain, TmpBuf, 1);
+	valias_delete(ActionUser.s, Domain.s, 0);
+	if (Newu.len > 0) {
+		if (!stralloc_copyb(&TmpBuf, "&", 1) ||
+				!stralloc_cat(&TmpBuf, &Newu) ||
+				!stralloc_0(&TmpBuf))
+			die_nomem();
+		valias_insert(ActionUser.s, Domain.s, TmpBuf.s, 1);
 	}
-	sprintf(TmpBuf, "%s/content-type", RealDir);
-	if (access(TmpBuf, R_OK))
-		sprintf(TmpBuf, "|%s/bin/autoresponder -q %s/vacation/%s/.vacation.msg %s/vacation/%s",
-			INDIMAILDIR, RealDir, ActionUser, RealDir, ActionUser);
-	else
-		sprintf(TmpBuf, "|%s/bin/autoresponder -q -T %s/content-type %s/vacation/%s/.vacation.msg %s/vacation/%s",
-			INDIMAILDIR, RealDir, RealDir, ActionUser, RealDir, ActionUser);
-	valias_insert(ActionUser, Domain, TmpBuf, 1);
+	if (!stralloc_copy(&TmpBuf, &RealDir) ||
+			!stralloc_catb(&TmpBuf, "/content-type", 13) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	if (access(TmpBuf.s, R_OK)) {
+		if (!stralloc_copyb(&TmpBuf, "|", 1) ||
+				!stralloc_cats(&TmpBuf, INDIMAILDIR) ||
+				!stralloc_catb(&TmpBuf, "/bin/autoresponder -q ", 22) ||
+				!stralloc_cat(&TmpBuf, &RealDir) ||
+				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+				!stralloc_cat(&TmpBuf, &ActionUser) ||
+				!stralloc_catb(&TmpBuf, "/.vacation.msg ", 15) ||
+				!stralloc_cat(&TmpBuf, &RealDir) ||
+				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+				!stralloc_cat(&TmpBuf, &ActionUser) ||
+				!stralloc_0(&TmpBuf))
+			die_nomem();
+	} else {
+		if (!stralloc_copyb(&TmpBuf, "|", 1) ||
+				!stralloc_cats(&TmpBuf, INDIMAILDIR) ||
+				!stralloc_catb(&TmpBuf, "/bin/autoresponder -q -T ", 25) ||
+				!stralloc_cat(&TmpBuf, &RealDir) ||
+				!stralloc_catb(&TmpBuf, "/content-type ", 14) ||
+				!stralloc_cat(&TmpBuf, &RealDir) ||
+				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+				!stralloc_cat(&TmpBuf, &ActionUser) ||
+				!stralloc_catb(&TmpBuf, "/.vacation.msg ", 15) ||
+				!stralloc_cat(&TmpBuf, &RealDir) ||
+				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+				!stralloc_cat(&TmpBuf, &ActionUser) ||
+				!stralloc_0(&TmpBuf))
+			die_nomem();
+	}
+	valias_insert(ActionUser.s, Domain.s, TmpBuf.s, 1);
 	/*- Report success */
-	snprinth(StatusMessage, sizeof (StatusMessage), "%s %H@%H\n", html_text[183], ActionUser, Domain);
-	show_autoresponders(Username, Domain, Mytime);
+	len = str_len(html_text[183]) + ActionUser.len + Domain.len + 28;
+	for (plen = 0;;) {
+		if (!stralloc_ready(&StatusMessage, len))
+			die_nomem();
+		plen = snprinth(StatusMessage.s, len, "%s %H@%H\n", html_text[183], ActionUser.s, Domain.s);
+		if (plen < len) {
+			StatusMessage.len = plen;
+			break;
+		}
+		len = plen + 28;
+	}
+	show_autoresponders(Username.s, Domain.s, mytime);
 }
 
 void
 count_autoresponders()
 {
-#if 0
-	char            alias_name[MAX_FILE_NAME];
+	static stralloc alias_name = {0};
 	char           *alias_line;
-#endif
 	DIR            *mydir;
 	struct dirent  *mydirent;
 
 	CurAutoResponders = 0;
-#if 0
-	for (;;)
-	{
-		if (!(alias_line = valias_select_all(alias_name, Domain, MAX_BUFF)))
+	for (;;) {
+		if (!(alias_line = valias_select_all(&alias_name, &Domain)))
 			break;
-		if (strstr(alias_line, "/autoresponder ") != 0)
+		if (str_str(alias_line, "/autoresponder ") != 0)
 			CurAutoResponders++;
 	}
-#endif
-	sprintf(TmpBuf, "%s/vacation", RealDir);
-	if ((mydir = opendir(TmpBuf)) == NULL) {
-		printf("<tr><td>%s %d</tr><td>", html_text[233], 1);
+	if (!stralloc_copy(&TmpBuf, &RealDir) ||
+			!stralloc_catb(&TmpBuf, "/vacation", 9) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	if (access(TmpBuf.s, F_OK) && errno == 2)
+		return;
+	if (!(mydir = opendir(TmpBuf.s))) {
+		out("<tr><td>");
+		out(html_text[143]);
+		out(" 1</tr><td>");
+		flush();
 		return;
 	}
 	while ((mydirent = readdir(mydir)) != NULL) {
@@ -369,10 +633,4 @@ count_autoresponders()
 			continue;
 		CurAutoResponders++;
 	}
-}
-
-void
-getversion_qaautorespond_c()
-{
-	printf("%s\n", sccsidh);
 }
