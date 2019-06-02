@@ -1,5 +1,6 @@
 @SET_MAKE@
 ACLOCAL_AMFLAGS=-I m4
+DEFS=@DEFS@ -fno-strict-aliasing -I. @auth_incs@
 
 EXTRA_DIST=BUGS FAQ TRANSLATORS html lang images contrib
 
@@ -25,6 +26,7 @@ iwebadmin_DEPENDENCIES=$(COMMONDEPENDENCIES)
 COMMONSOURCES=iwebadmin.c alias.c autorespond.c forward.c mailinglist.c \
 	      user.c util.c printh.c auth.c template.c \
 	      command.c show.c cgi.c limits.c dotqmail.c \
+		  common.c \
 	      iwebadmin.h iwebadminx.h
 
 iwebadmin_SOURCES=$(COMMONSOURCES) 
@@ -72,8 +74,6 @@ obs.mk: debian/obs.mk.in
 	$(edit) debian/$@.in > debian/$@;/bin/rm -f $@;ln -s debian/$@ $@
 iwebadmin_perm_list: iwebadmin_perm_list.in
 	$(edit) $@.in > $@
-
-DEFS=-I. @auth_incs@
 
 # Maintainer stuff
 

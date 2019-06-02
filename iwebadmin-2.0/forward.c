@@ -16,34 +16,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
-
-#include <indimail_config.h>
-#undef PACKAGE
-#undef VERSION
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_URL
-#include <indimail.h>
-#undef PACKAGE
-#undef VERSION
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_URL
+#ifdef HAVE_CONFIG_H
 #include "config.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <pwd.h>
-#include <dirent.h>
+#endif
+#include <indimail.h>
+#include <indimail_compat.h>
+#ifdef HAVE_QMAIL
+#include <stralloc.h>
+#include <str.h>
+#endif
 #include "alias.h"
 #include "forward.h"
 #include "iwebadmin.h"
@@ -51,20 +32,21 @@
 #include "template.h"
 #include "show.h"
 #include "util.h"
+#include "common.h"
 
 int
 show_forwards(char *user, char *dom, time_t mytime)
 {
 	if (AdminType != DOMAIN_ADMIN) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[142]);
-		vclose();
+		copy_status_mesg(html_text[142]);
+		iclose();
 		exit(0);
 	}
 	count_forwards();
 	if (CurForwards == 0 && CurBlackholes == 0) {
-		snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[232]);
-		show_menu(Username, Domain, Mytime);
-		vclose();
+		copy_status_mesg(html_text[232]);
+		show_menu(Username.s, Domain.s, mytime);
+		iclose();
 		exit(0);
 	} else {
 		send_template("show_forwards.html");
@@ -75,30 +57,37 @@ show_forwards(char *user, char *dom, time_t mytime)
 void
 count_forwards()
 {
-	char           *alias_line;
-	char            alias_name[MAX_FILE_NAME];
-	char            this_alias[MAX_FILE_NAME];
-	char           *p1, *p2;
-	int             isforward;
+	char           *alias_line, *p1, *p2;
+	static stralloc alias_name = {0}, domain = {0}, this_alias = {0};
+	int             isforward, i;
 
 	CurForwards = 0;
 	CurBlackholes = 0;
-	alias_line = valias_select_all(alias_name, Domain, MAX_BUFF);
-	while (alias_line != NULL) {
-		strcpy(this_alias, alias_name);
-		if (*alias_line == '#') {
+	if (!stralloc_copy(&domain, &Domain) || !stralloc_0(&domain))
+		die_nomem();
+	domain.len--;
+	alias_line = valias_select_all(&alias_name, &domain);
+	while (alias_line) {
+		if (!stralloc_copy(&this_alias, &alias_name) || !stralloc_0(&this_alias))
+			die_nomem();
+		this_alias.len--;
+		if (*alias_line == '#')
 			CurBlackholes++;
-		} else {
+		else {
 			isforward = 1;
-			while (isforward && (alias_line != NULL)
-				   && (strcmp(this_alias, alias_name) == 0)) {
-				p1 = strstr(alias_line, "/ezmlm-");
-				p2 = strchr(alias_line, ' ');
-				if ((p1 != NULL) && (p2 == NULL || p1 < p2))
+			while (isforward && alias_line &&
+					!str_diffn(this_alias.s, alias_name.s, this_alias.len > alias_name.len ? this_alias.len : alias_name.len)) {
+				p1 = str_str(alias_line, "/ezmlm-");
+				i = str_chr(alias_line, ' ');
+				if (alias_line[i])
+					p2 = alias_line + i;
+				else
+					p2 = (char *) 0;
+				if (p1 && (!p2 || p1 < p2))
 					isforward = 0;
-				if (strstr(alias_line, "/autorespond "))
+				if (str_str(alias_line, "/autorespond "))
 					isforward = 0;
-				alias_line = valias_select_all(alias_name, Domain, MAX_BUFF);
+				alias_line = valias_select_all(&alias_name, &domain);
 			}
 			if (isforward)
 				CurForwards++;
@@ -106,15 +95,10 @@ count_forwards()
 		/*
 		 * burn through remaining lines for this alias, if necessary 
 		 */
-		while ((alias_line != NULL) && (strcmp(this_alias, alias_name) == 0)) {
-			alias_line = valias_select_all(alias_name, Domain, MAX_BUFF);
+		while (alias_line &&
+				!str_diffn(this_alias.s, alias_name.s, this_alias.len > alias_name.len ? this_alias.len : alias_name.len)) {
+			alias_line = valias_select_all(&alias_name, &domain);
 		}
 	}
 	return;
-}
-
-void
-getversion_qaforward_c()
-{
-	printf("%s\n", sccsidh);
 }

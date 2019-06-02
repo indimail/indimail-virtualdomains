@@ -3,6 +3,7 @@
  */
 
 #include <time.h>
+#include <stralloc.h>
 
 void            addlistgroup(char *template);
 void            addlistgroupnow(int mod);
@@ -23,4 +24,4 @@ void            show_mailing_list_line(char *user, char *dom, time_t mytime, cha
 void            show_mailing_list_line2(char *user, char *dom, time_t mytime, char *dir);
 void            show_list_group_now(int mod);
 void            show_current_list_values();
-int             get_mailinglist_prefix(char *prefix);
+int             get_mailinglist_prefix(stralloc *prefix);

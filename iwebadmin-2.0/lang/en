@@ -4,19 +4,21 @@
 003 Add Mail AutoResponder:
 004 Mail Autoresponder Name:
 005 Send copy to:
-006 Subject: 
+006 Subject:
 007 Add Forward Account:
-008 Forward Email Address: 
+008 Forward Email Address:
 009 Local Name:
 010 (Account name to forward to<br>OR<br>full email address if forwarding to another domain)
 011 Add List Moderator
 012 Add Moderator to mailing list
 013 Email Address:
-014 Add Subscriber to mailing list 
+014 Add Subscriber to mailing list
 015 Add Mailing List
 016 Mailing List Name:
-017 List owner email address: 
+017 List owner email address:
 018 Archived
+019 Unable to get domain details from assign file
+020 You don't have permission to change password
 039 Respond to administrative requests and allow archive retrieval.
 053 Enable MySQL support
 054 Host
@@ -41,7 +43,7 @@
 073 Add New Alias
 074 Forward Accounts
 075 Forward
-076 Add New Forward 
+076 Add New Forward
 077 Mail Autoresponders
 078 Mail Autoresponder
 079 New Mail Autoresponder
@@ -59,7 +61,7 @@
 091 Password (again):
 092 Real name
 093 List name
-094 Subscribe user 
+094 Subscribe user
 095 Subscribe the new user to the following mailing lists
 096 Delete alias
 097 Confirm delete
@@ -78,7 +80,7 @@
 110 New Password
 111 Modify User
 112 User Account
-113 Domain Name 
+113 Domain Name
 114 Login
 115 Redirects for user
 116 Current redirects
@@ -99,17 +101,17 @@
 131 No users left to view, please return to the previous page
 132 Default
 133 Index:
-134 Set catchall bounced 
+134 Set catchall bounced
 135 Previous Page
 136 Refresh Page
-137 Next Page 
+137 Next Page
 138 Type in password
 139 Email Account password changed successfully
 140 Failed to change password.
 141 user deleted successfully
 142 No Authorization
 143 directory permission error
-144 file permission error
+144 file open/read/write/permission error
 145 Invalid User Internal Error
 146 Cannot Do redirect
 147 Redirect Now
@@ -122,7 +124,7 @@
 154 Alias added successfully
 155 Invalid Action
 156 Maximum number of aliases reached
-157 Maximum number of forwards reached 
+157 Maximum number of forwards reached
 158 Maximum number of Mail Autoresponders reached
 159 Invalid DotQmail Type: adddotqmail()
 160 Invalid alias
@@ -133,13 +135,13 @@
 165 Error adding Alias for Email Account
 166 Alias for Email Account added successfully
 167 Error deleting alias/forward for Email Account.
-168 Alias/Forward for Email Account deleted successfully. 
+168 Alias/Forward for Email Account deleted successfully.
 169 Error deleting redirect/forward for Email Account
 170 Redirect/forward for Email Account deleted successfully
-171 Error: could not change to directory 
+171 Error: could not change to directory
 172 Only one person can log in as system postmaster at one time. Someone else has logged in. Please only have one login at a time.
 173 login expired, please log in again
-174 Invalid Mail Autoresponder name 
+174 Invalid Mail Autoresponder name
 175 Name already used
 176 Please fill in Mail Autoresponder name
 177 Invalid Owner Email Address
@@ -148,7 +150,7 @@
 180 Mail Autoresponder for added successfully
 181 could not delete Mail Autoresponder
 182 Successfully deleted Mail Autoresponder
-183 Mail Autoresponder modified successfully 
+183 Mail Autoresponder modified successfully
 184 Maximum number of mailing lists reached
 185 Could not delete file
 186 Successfully deleted mailing list
@@ -168,7 +170,7 @@
 200 Passwords don't match, try again
 201 Out of memory
 202 Where the parameters are:
-203 removed from mailing list 
+203 removed from mailing list
 204 Go user
 205 Standard (No Forwarding)
 206 Set remote catch all account
@@ -200,14 +202,14 @@
 232 No Aliases/Forwards to Display
 233 No Mail Autoresponder to Display
 234 Please enter a password
-235 Set catchall email deleted 
+235 Set catchall email deleted
 236 CatchAll: Deleted
 237 Add<br>Digest Subscriber
 238 Delete<br>Digest Subscriber
 239 Show<br>Digest Subscribers
 240 added as a digest subscriber to mailing list
-241 Add Digest Subscriber to mailing list 
-242 removed from digest mailing list 
+241 Add Digest Subscriber to mailing list
+242 removed from digest mailing list
 243 Delete digest subscriber from mailing list
 244 Total Digest Subscribers:
 245 Delete<br>Digest Subscriber

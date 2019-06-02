@@ -16,36 +16,35 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
-#include <indimail_config.h>
-#undef PACKAGE
-#undef VERSION
-#undef PACKAGE_NAME
-#undef PACKAGE_TARNAME
-#undef PACKAGE_STRING
-#undef PACKAGE_VERSION
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_URL
-#include <indimail.h>
-#undef PACKAGE
-#undef VERSION
-#undef PACKAGE_NAME
-#undef PACKAGE_TARNAME
-#undef PACKAGE_STRING
-#undef PACKAGE_VERSION
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_URL
+#ifdef HAVE_CONFIG_H
 #include "config.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
+#endif
+#include <indimail.h>
+#include <indimail_compat.h>
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_PWD_H
 #include <pwd.h>
-#include <dirent.h>
-#include <errno.h>
+#endif
+#ifdef HAVE_QMAIL
+#include <stralloc.h>
+#include <str.h>
+#include <scan.h>
+#include <env.h>
+#include <subfd.h>
+#include <substdio.h>
+#include <getln.h>
+#include <open.h>
+#include <fmt.h>
+#include <strerr.h>
+#endif
 #include "alias.h"
 #include "autorespond.h"
 #include "cgi.h"
@@ -58,11 +57,12 @@
 #include "template.h"
 #include "user.h"
 #include "util.h"
+#include "common.h"
 
 static char     dchar[4];
 void            check_mailbox_flags(char newchar);
-void            transmit_block(FILE * fs);
-void            ignore_to_end_tag(FILE * fs);
+void            transmit_block(substdio *ss);
+void            ignore_to_end_tag(substdio *ss);
 void            get_calling_host();
 char           *get_session_val(char *session_var);
 
@@ -79,424 +79,493 @@ send_template(char *actualfile)
 }
 
 int
+getch(substdio *ss)
+{
+	int             r;
+	char            buf[1];
+
+	if ((r = substdio_get(ss, buf, 1)) == 1)
+		return (buf[0]);
+	return (r);
+}
+
+int
+putch(int ch, substdio *ss)
+{
+	if (substdio_put(ss, (char *) &ch, 1) == -1)
+		return (-1);
+	return (1);
+}
+
+int
 send_template_now(char *filename)
 {
-	FILE           *fs;
-	int             i;
-	int             j;
-	int             inchar;
-	char           *tmpstr;
+	int             i, fd, match, inchar;
+	char           *ptr, *alias_line, *qnote = " MB";
 	struct stat     mystat;
-	char            qconvert[11];
-	char           *qnote = " MB";
+	char            qconvert[FMT_ULONG], inbuf[1024], strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	struct passwd  *vpw;
-	char            value[MAX_BUFF];
-	char            value2[MAX_BUFF];
+	static stralloc value1 = {0}, value2 = {0};
+	struct substdio ssin;
 
-	if (strstr(filename, "/") != NULL || strstr(filename, "..") != NULL) {
-		printf("warning: invalid file name %s\n", filename);
+	if (str_str(filename, "/") || str_str(filename, "..")) {
+		out("warning: invalid file name ");
+		out(filename);
+		out("\n");
+		flush();
 		return (-1);
 	}
-
-
-	tmpstr = getenv(QMAILADMIN_TEMPLATEDIR);
-	if (tmpstr == NULL)
-		tmpstr = HTMLLIBDIR;
-	snprintf(TmpBuf2, (sizeof (TmpBuf2) - 1), "%s/html/%s", tmpstr, filename);
-
-	if (lstat(TmpBuf2, &mystat) == -1) {
-		printf("Warning: cannot lstat '%s', check permissions.<BR>\n", TmpBuf2);
+	if (!(ptr = env_get(QMAILADMIN_TEMPLATEDIR)))
+		ptr = HTMLLIBDIR;
+	if (!stralloc_copys(&TmpBuf, ptr) ||
+			!stralloc_catb(&TmpBuf, "/html/", 6) ||
+			!stralloc_cats(&TmpBuf, filename) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	if (lstat(TmpBuf.s, &mystat) == -1) {
+		out("Warning: cannot lstat '");
+		out(TmpBuf.s);
+		out("', check permissions.<BR>\n");
+		flush();
 		return (-1);
 	}
 	if (S_ISLNK(mystat.st_mode)) {
-		printf("Warning: '%s' is a symbolic link.<BR>\n", TmpBuf2);
+		out("Warning: '");
+		out(TmpBuf.s);
+		out("' is a symbolic link.<BR>\n");
+		flush();
 		return (-1);
 	}
-
 	/* open the template */
-	fs = fopen(TmpBuf2, "r");
-	if (fs == NULL) {
-		printf("%s %s<br>\n", html_text[144], TmpBuf2);
+	if ((fd = open_read(TmpBuf.s)) == -1) {
+		strerr_warn3("send_template: open: ", TmpBuf.s, ": ", &strerr_sys);
+		out(html_text[144]);
+		out(" ");
+		out(TmpBuf.s);
+		out("<br>\n");
+		flush();
 		return 0;
 	}
-
+	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	/* parse the template looking for "##" pattern */
-	while ((inchar = fgetc(fs)) >= 0) {
+	for (;;) {
+		if ((inchar = getch(&ssin)) == -1) {
+			strerr_warn3("send_template: read: ", TmpBuf.s, ": ", &strerr_sys);
+			out(html_text[144]);
+			out(" ");
+			out(TmpBuf.s);
+			out("<br>\n");
+			flush();
+			return 0;
+		} else
+		if (!inchar)
+			break;
 		/* if not '#' then send it */
 		if (inchar != '#') {
-			fputc(inchar, actout);
+			putch(inchar, subfdoutsmall);
 		} else { /* found a '#' */
 			/* look for a second '#' */
-			inchar = fgetc(fs);
-			if (inchar < 0) {
+			inchar = getch(&ssin);
+			if (!inchar)
 				break;
-			/* found a tag */
-			} else
+			else /* found a tag */
 			if (inchar == '#') {
-				inchar = fgetc(fs);
-				if (inchar < 0)
+				inchar = getch(&ssin);
+				if (!inchar)
 					break;
-
 				/* switch on the tag */
-				switch (inchar) {
+				switch (inchar)
+				{
 				case '&': /* send stock (user, dom, time) cgi parameters */
-					printh("user=%C&dom=%C&time=%d&", Username, Domain, Mytime);
+					printh("user=%C&dom=%C&time=%d&", Username.s, Domain.s, mytime);
 					break;
-
 				case '~':
-					printf("%s", Lang);
+					out(Lang);
 					break;
 				case 'A': /* send the action user parameter */
-					printh("%H", ActionUser);
+					printh("%H", ActionUser.s);
 					break;
-
 				case 'a': /* send the Alias parameter */
-					printh("%H", Alias);
+					printh("%H", Alias.s);
 					break;
-
 				case 'B': /* show number of pop accounts */
 					load_limits();
 					count_users();
 					if (MaxPopAccounts > -1) {
-						printf("%d/%d", CurPopAccounts, MaxPopAccounts);
+						strnum1[fmt_int(strnum1, CurPopAccounts)] = 0;
+						out(strnum1);
+						out("/");
+						strnum1[fmt_int(strnum1, MaxPopAccounts)] = 0;
 					} else {
-						printf("%d/%s", CurPopAccounts, html_text[229]);
+						strnum1[fmt_int(strnum1, CurPopAccounts)] = 0;
+						out(strnum1);
+						out("/");
+						out(html_text[229]);
 					}
 					break;
-
 				case 'b': /* show the lines inside a alias table (not used, see ##d) */
-					show_dotqmail_lines(Username, Domain, Mytime);
+					show_dotqmail_lines(Username.s, Domain.s, mytime);
 					break;
-
 				case 'C': /* send the CGIPATH parameter */
-					printf("%s", CGIPATH);
+					out(CGIPATH);
 					break;
-
 				case 'c': /* show the lines inside a mailing list table */
-					show_mailing_list_line2(Username, Domain, Mytime, RealDir);
+					show_mailing_list_line2(Username.s, Domain.s, mytime, RealDir.s);
 					break;
-
 				case 'D': /* send the domain parameter */
-					printh("%H", Domain);
+					if (Domain.len)
+						printh("%H", Domain.s);
 					break;
-
 				case 'd': /* show the lines inside a forward table */
-					show_dotqmail_lines(Username, Domain, Mytime);
+					show_dotqmail_lines(Username.s, Domain.s, mytime);
 					break;
-
 				case 'E': /* this will be used to parse mod_mailinglist-idx.html */
 					show_current_list_values();
 					break;
-
 				case 'e': /* show the lines inside a mailing list table */
-					show_mailing_list_line(Username, Domain, Mytime, RealDir);
+					show_mailing_list_line(Username.s, Domain.s, mytime, RealDir.s);
 					break;
-
 				case 'F': /* display a file (used for mod_autorespond ONLY) */
-					{
-					FILE           *fs;
-					char           *alias_line;
-
-					/*
-					alias_line = valias_select(ActionUser, Domain);
-					*/
 					/* should verify here that alias_line contains "/autorespond " */
-					if ((alias_line = valias_select(ActionUser, Domain))) {
-						strcpy(TmpBuf2, alias_line);
-						/*- See if it's a Maildir path rather than address */
-						i = strlen(TmpBuf2) - 1;
-						if (TmpBuf2[i] == '/') {
-							--i;
-							for (; TmpBuf2[i] != '/'; --i);
-							--i;
-							for (; TmpBuf2[i] != '/'; --i);
-							for (++i, j = 0; TmpBuf2[i] != '/'; ++j, ++i) {
-								TmpBuf3[j] = TmpBuf2[i];
-							}
-							TmpBuf3[j] = '\0';
-							printh("value=\"%H@%H\"></td>\n", TmpBuf3, Domain);
-						} else {
-							printh("value=\"%H\"></td>\n", &TmpBuf2[1]);
+					{
+					char            inbuf[1024];
+					int             fd;
+					struct substdio ssin;
+
+					if ((alias_line = valias_select(ActionUser.s, Domain.s))) {
+						i = str_rchr(alias_line, '/');
+						if (alias_line[i])
+							for (ptr = alias_line + i - 1; ptr != alias_line && *ptr != '/'; ptr--);
+						if (*ptr == '/')
+							printh("value=\"%H@%H\"></td>\n", ptr + 1, Domain.s);
+						else
+							printh("value=\"%H\"></td>\n", *alias_line == '&' ? alias_line + 1 : alias_line);
+					}
+					if (!stralloc_copyb(&TmpBuf, "vacation/", 9) ||
+							!stralloc_cat(&TmpBuf, &ActionUser) ||
+							!stralloc_catb(&TmpBuf, "/.vacation.msg", 14) ||
+							!stralloc_0(&TmpBuf))
+						die_nomem();
+					if ((fd = open_read(TmpBuf.s)) == -1) {
+						strnum1[fmt_uint(strnum1, getuid())] = 0;
+						strnum2[fmt_uint(strnum2, getgid())] = 0;
+						strerr_warn7("send_template_now: ", TmpBuf.s, ": uid=", strnum1, ", gid=", strnum2, ": ", &strerr_sys);
+						ack("150", TmpBuf.s);
+					}
+					substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+					/*- read Reference: and Subjec: line */
+					for (i = 0; i < 2; i++) {
+						if (getln(&ssin, &line, &match, '\n') == -1) {
+							strerr_warn3("send_template_now: ", TmpBuf.s, ": ", &strerr_sys);
+							out(html_text[144]);
+							out(" ");
+							out(TmpBuf.s);
+							out(" 1<BR>\n");
+							close(fd);
+							flush();
+							return (1);
 						}
+						if (!line.len)
+							break;
 					}
-					sprintf(TmpBuf, "vacation/%s/.vacation.msg", ActionUser);
-					if ((fs = fopen(TmpBuf, "r")) == NULL) {
-						fprintf(stderr, "%s: uid=%d, gid=%d: %s\n", TmpBuf, getuid(), getgid(), strerror(errno));
-						ack("150", TmpBuf);
+					if (match) {
+						line.len--;
+						line.s[line.len] = 0;
+					} else {
+						if (!stralloc_0(&line))
+							die_nomem();
+						line.len--;
 					}
-
-					fgets(TmpBuf2, sizeof (TmpBuf2), fs);
-					fgets(TmpBuf2, sizeof (TmpBuf2), fs);
-					printf("         <td>&nbsp;</td>\n");
-					printf("         </tr>\n");
-					printf("         <tr>\n");
-					printf("         <td align=right><b>%s</b></td>\n", html_text[6]);
-
-					/*- take off newline */
-					i = strlen(TmpBuf2);
-					--i;
-					TmpBuf2[i] = 0;
+					out("         <td>&nbsp;</td>\n");
+					out("         </tr>\n");
+					out("         <tr>\n");
+					out("         <td align=right><b>");
+					out(html_text[6]);
+					out("</b></td>\n");
 					printh("         <td><input type=\"text\" size=40 name=\"alias\" maxlength=128 value=\"%H\"></td>\n",
-						   &TmpBuf2[9]);
-					printf("         <td>&nbsp;</td>\n");
-					printf("        </tr>\n");
-					printf("       </table>\n");
-					printf("       <textarea cols=80 rows=40 name=\"message\">");
+						   line.s + 9);
+					out("         <td>&nbsp;</td>\n");
+					out("        </tr>\n");
+					out("       </table>\n");
+					out("       <textarea cols=80 rows=40 name=\"message\">");
 
 					/*- Skip custom headers */
 					while(1) {
-						fgets(TmpBuf2, sizeof(TmpBuf2), fs);
-						if ((*TmpBuf2 == '\r') || (*TmpBuf2 == '\n'))
+						if (getln(&ssin, &line, &match, '\n') == -1) {
+							strerr_warn3("send_template_now: ", TmpBuf.s, ": ", &strerr_sys);
+							out(html_text[144]);
+							out(" ");
+							out(TmpBuf.s);
+							out(" 1<BR>\n");
+							flush();
+							close(fd);
+							return (1);
+						}
+						if (!line.len || line.s[0] == '\r' || line.s[0] == '\n')
 							break;
 					}
-					printf("%s", TmpBuf2);
-					while (fgets(TmpBuf2, sizeof (TmpBuf2), fs)) {
-						printf("%s", TmpBuf2);
+					out(line.s);
+					for (;;) {
+						if (getln(&ssin, &line, &match, '\n') == -1) {
+							strerr_warn3("send_template_now: ", TmpBuf.s, ": ", &strerr_sys);
+							out(html_text[144]);
+							out(" ");
+							out(TmpBuf.s);
+							out(" 1<BR>\n");
+							flush();
+							close(fd);
+							return (1);
+						}
+						if (!line.len)
+							break;
+						substdio_put(subfdoutsmall, line.s, line.len);
 					}
-					printf("</textarea>");
-					fclose(fs);
+					close(fd);
+					out("</textarea>");
+					flush();
 					}
 					break;
-
 				case 'f': /* show the forwards */
-					if (AdminType == DOMAIN_ADMIN) {
-						show_forwards(Username, Domain, Mytime);
-					}
+					if (AdminType == DOMAIN_ADMIN)
+						show_forwards(Username.s, Domain.s, mytime);
 					break;
-
 				case 'G': /*- show the mailing list digest subscribers */
-					if (AdminType == DOMAIN_ADMIN) {
+					if (AdminType == DOMAIN_ADMIN)
 						show_list_group_now(2);
-					}
 					break;
-
 				case 'g': /* show the lines inside a autorespond table */
-					show_autorespond_line(Username, Domain, Mytime, RealDir);
+					show_autorespond_line(Username.s, Domain.s, mytime, RealDir.s);
 					break;
-
 				case 'H': /* show returnhttp (from TmpCGI) */
-					GetValue(TmpCGI, value, "returnhttp=", sizeof (value));
-					printh("%C", value);
+					GetValue(TmpCGI, &value1, "returnhttp=");
+					printh("%C", value1.s);
 					break;
-
 				case 'h': /* show the counts */
 					show_counts();
 					break;
-
 				case 'I':
-					show_dotqmail_file(ActionUser);
+					show_dotqmail_file(ActionUser.s);
 					break;
-
 				case 'i': /* check for user forward and forward/store vacation */
-					parse_users_dotqmail(fgetc(fs));
+					parse_users_dotqmail(getch(&ssin));
 					break;
-
 				case 'J': /* show mailbox flag status */
-					check_mailbox_flags(fgetc(fs));
+					check_mailbox_flags(getch(&ssin));
 					break;
-
 				case 'j': /* show number of mailing lists */
 					load_limits();
 					count_mailinglists();
 					if (MaxMailingLists > -1) {
-						printf("%d/%d", CurMailingLists, MaxMailingLists);
+						strnum1[fmt_int(strnum1, CurMailingLists)] = 0;
+						strnum2[fmt_int(strnum2, MaxMailingLists)] = 0;
+						out(strnum1);
+						out("/");
+						out(strnum1);
 					} else {
-						printf("%d/%s", CurMailingLists, html_text[229]);
+						strnum1[fmt_int(strnum1, CurMailingLists)] = 0;
+						out(strnum1);
+						out("/");
+						out(html_text[229]);
 					}
 					break;
-
 				case 'k': /* show number of forwards */
 					load_limits();
 					count_forwards();
 					if (MaxForwards > -1) {
-						printf("%d/%d", CurForwards, MaxForwards);
+						strnum1[fmt_int(strnum1, CurForwards)] = 0;
+						strnum2[fmt_int(strnum2, MaxForwards)] = 0;
+						out(strnum1);
+						out("/");
+						out(strnum1);
 					} else {
-						printf("%d/%s", CurForwards, html_text[229]);
+						strnum1[fmt_int(strnum1, CurForwards)] = 0;
+						out(strnum1);
+						out("/");
+						out(html_text[229]);
 					}
 					break;
 				case 'K': /* show number of autoresponders */
 					load_limits();
 					count_autoresponders();
 					if (MaxAutoResponders > -1) {
-						printf("%d/%d", CurAutoResponders, MaxAutoResponders);
+						strnum1[fmt_int(strnum1, CurAutoResponders)] = 0;
+						strnum2[fmt_int(strnum2, MaxAutoResponders)] = 0;
+						out(strnum1);
+						out("/");
+						out(strnum1);
 					} else {
-						printf("%d/%s", CurAutoResponders, html_text[229]);
+						strnum1[fmt_int(strnum1, CurAutoResponders)] = 0;
+						out(strnum1);
+						out("/");
+						out(html_text[229]);
 					}
 					break;
-
 				case 'l': /* show the aliases stuff */
-					if (AdminType == DOMAIN_ADMIN) {
+					if (AdminType == DOMAIN_ADMIN)
 						show_aliases();
-					}
 					break;
-
 				case 'L': /* login username */
-					if (strlen(Username) > 0) {
-						printh("%H", Username);
-					} else if (TmpCGI && GetValue(TmpCGI, value, "user=", sizeof (value)) == 0) {
-						printh("%H", value);
-					} else
-						printf("postmaster");
+					if (Username.len)
+						printh("%H", Username.s);
+					else
+					if (TmpCGI && GetValue(TmpCGI, &value1, "user=") == 0)
+						printh("%H", value1.s);
+					else
+						out("postmaster");
 					break;
-
 				case 'M': /* show the mailing list subscribers */
-					if (AdminType == DOMAIN_ADMIN) {
+					if (AdminType == DOMAIN_ADMIN)
 						show_list_group_now(0);
-					}
 					break;
-
 				case 'm': /* show the mailing lists */
-					if (AdminType == DOMAIN_ADMIN) {
-						show_mailing_lists(Username, Domain, Mytime);
-					}
+					if (AdminType == DOMAIN_ADMIN)
+						show_mailing_lists(Username.s, Domain.s, mytime);
 					break;
-
 				case 'N': /* parse include files */
-					i = 0;
-					TmpBuf[i] = fgetc(fs);
-					if (TmpBuf[i] == '/') {
-						printf("%s", html_text[144]);
-					} else {
-						for (; TmpBuf[i] != '\0' && TmpBuf[i] != '#' && i < sizeof (TmpBuf) - 1;) {
-							TmpBuf[++i] = fgetc(fs);
+					i = getch(&ssin);
+					if (i == '/')
+						out(html_text[144]);
+					else
+					if (i > 0) {
+						TmpBuf.len = 0;
+						for (;;) {
+							if (!(i = getch(&ssin)))
+								break;
+							if (i != '#' && !stralloc_append(&TmpBuf, (char *) &i))
+								die_nomem();
 						}
-						TmpBuf[i] = '\0';
-						if ((strstr(TmpBuf, "../")) != NULL) {
-							printf("%s: %s", html_text[144], TmpBuf);
-						} else if ((strcmp(TmpBuf, filename)) != 0) {
-							send_template_now(TmpBuf);
-						}
+						if (!stralloc_0(&TmpBuf))
+							die_nomem();
+						TmpBuf.len--;
+						if ((str_str(TmpBuf.s, "../"))) {
+							out(html_text[144]);
+							out(" ");
+							out(TmpBuf.s);
+						} else
+						if (str_diff(TmpBuf.s, filename))
+							send_template_now(TmpBuf.s);
 					}
 					break;
-
 				case 'n': /* show returntext (from TmpCGI) */
-					GetValue(TmpCGI, value, "returntext=", sizeof (value));
-					printh("%H", value);
+					GetValue(TmpCGI, &value1, "returntext=");
+					printh("%H", value1.s);
 					break;
-
 				case 'O': /* build a pulldown menu of all POP/IMAP users */
-				{
-					struct passwd  *pw;
+					{
+						struct passwd  *pw;
 
-					pw = vauth_getall(Domain, 1, 1);
-					while (pw != NULL) {
-						printh("<option value=\"%H\">%H</option>\n", pw->pw_name, pw->pw_name);
-						pw = vauth_getall(Domain, 0, 0);
+						pw = sql_getall(Domain.s, 1, 1);
+						while (pw) {
+							printh("<option value=\"%H\">%H</option>\n", pw->pw_name, pw->pw_name);
+							pw = sql_getall(Domain.s, 0, 0);
+						}
 					}
-				}
 					break;
-
 				case 'o': /* show the mailing list moderators */
-					if (AdminType == DOMAIN_ADMIN) {
+					if (AdminType == DOMAIN_ADMIN)
 						show_list_group_now(1);
-					}
 					break;
-
 				case 'P': /* display mailing list prefix */
-				{
-					TmpBuf3[0] = '\0';
-					get_mailinglist_prefix(TmpBuf3);
-					printh("%H", TmpBuf3);
-				}
+					get_mailinglist_prefix(&TmpBuf);
+					printh("%H", TmpBuf.s);
 					break;
-
 				case 'p': /* show POP/IMAP users */
-					show_user_lines(Username, Domain, Mytime, RealDir);
+					show_user_lines(Username.s, Domain.s, mytime, RealDir.s);
 					break;
-
 				case 'Q': /* show quota usage */
-					vpw = vauth_getpw(ActionUser, Domain);
-					if (strncmp(vpw->pw_shell, "NOQUOTA", 2) != 0) {
+					vpw = sql_getpw(ActionUser.s, Domain.s);
+					if (str_diffn(vpw->pw_shell, "NOQUOTA", 8)) {
 						mdir_t          diskquota = 0;
 						mdir_t          maxmsg = 0;
-						char            path[256];
 
 						quota_to_megabytes(qconvert, vpw->pw_shell);
-						snprintf(path, sizeof (path), "%s/" MAILDIR, vpw->pw_dir);
-						diskquota = check_quota(path, &maxmsg);
-						printf("%-2.2lf /", ((double) diskquota) / 1048576.0);	/* Convert to MB */
+						if (!stralloc_copys(&TmpBuf, vpw->pw_dir) ||
+								!stralloc_0(&TmpBuf))
+							die_nomem();
+						diskquota = check_quota(TmpBuf.s, &maxmsg);
+						strnum1[fmt_double(strnum1, diskquota/1048576.0, 2)] = 0; /* Convert to MB */
+						out(strnum1);
+						out(" /");
 					}
 					break;
-
 				case 'q': /* display user's quota (mod user page) */
-					vpw = vauth_getpw(ActionUser, Domain);
-					if (strncmp(vpw->pw_shell, "NOQUOTA", 2) != 0) {
+					vpw = sql_getpw(ActionUser.s, Domain.s);
+					if (str_diffn(vpw->pw_shell, "NOQUOTA", 8)) {
 						quota_to_megabytes(qconvert, vpw->pw_shell);
-						printf("%s", qconvert);
+						out(qconvert);
 					} else {
 						if (AdminType == DOMAIN_ADMIN)
-							printf("NOQUOTA");
+							out("NOQUOTA");
 						else
-							printf("%s", html_text[229]);
+							out(html_text[229]);
 					}
 					break;
-
 				case 'R': /* show returntext/returnhttp if set in CGI vars */
-					GetValue(TmpCGI, value, "returntext=", sizeof (value));
-					GetValue(TmpCGI, value2, "returnhttp=", sizeof (value2));
-					if (*value != '\0') {
-						printh("<A HREF=\"%C\">%H</A>", value2, value);
-					}
+					GetValue(TmpCGI, &value1, "returntext=");
+					GetValue(TmpCGI, &value2, "returnhttp=");
+					if (value1.len)
+						printh("<A HREF=\"%C\">%H</A>", value2.s, value1.s);
 					break;
-
 				case 'r': /* show the autoresponder stuff */
-					if (AdminType == DOMAIN_ADMIN) {
-						show_autoresponders(Username, Domain, Mytime);
-					}
+					if (AdminType == DOMAIN_ADMIN)
+						show_autoresponders(Username.s, Domain.s, mytime);
 					break;
-
 				case 'S': /* send the status message parameter */
-					printf("%s", StatusMessage);
+					out(StatusMessage.s);
 					break;
-
 				case 's': /* show the catchall name */
 					get_catchall();
 					break;
-
 				case 'T': /* send the time parameter */
-					printf("%u", (unsigned int) Mytime);
+					strnum1[fmt_ulong(strnum1, (unsigned long) mytime)] = 0;
+					out(strnum1);
 					break;
-
 				case 't': /* transmit block?  */
-					transmit_block(fs);
+					transmit_block(&ssin);
 					break;
-
 				case 'U': /* send the username parameter */
-					printh("%H", Username);
+					printh("%H", Username.s);
 					break;
-
 				case 'u': /* show the users */
-					show_users(Username, Domain, Mytime);
+					show_users(Username.s, Domain.s, mytime);
 					break;
-
 				case 'V': /* show version number */
-					printf("<a href=\"http://sourceforge.net/projects/indimail/\">%s</a> %s<BR>", PACKAGE, VERSION);
-					printf("<a href=\"http://localhost://mailmrtg/\">IndiMail MRTG Graphs</a><BR>");
+					out("<a href=\"http://sourceforge.net/projects/indimail/\">");
+					out(PACKAGE);
+					out("</a> ");
+					out(VERSION);
+					out("<BR>");
+					out("<a href=\"http://localhost://mailmrtg/\">IndiMail MRTG Graphs</a><BR>");
 					break;
-
 				case 'v': /* display the main menu */
-					printh("<font size=\"2\" color=\"#000000\"><b>%H</b></font><br><br>", Domain);
-					printf("<font size=\"2\" color=\"#ff0000\"><b>%s</b></font><br>", html_text[1]);
+					printh("<font size=\"2\" color=\"#000000\"><b>%H</b></font><br><br>", Domain.s);
+					out("<font size=\"2\" color=\"#ff0000\"><b>");
+					out(html_text[1]);
+					out("</b></font><br>");
 					if (AdminType == DOMAIN_ADMIN) {
-
 						if (MaxPopAccounts != 0) {
 							printh("<a href=\"%s\">", cgiurl("showusers"));
-							printf("<font size=\"2\" color=\"#000000\"><b>%s</b></font></a><br>", html_text[61]);
+							out("<font size=\"2\" color=\"#000000\"><b>");
+							out(html_text[61]);
+							out("</b></font></a><br>");
 						}
-
 						if (MaxForwards != 0 || MaxAliases != 0) {
 							printh("<a href=\"%s\">", cgiurl("showforwards"));
-							printf("<font size=\"2\" color=\"#000000\"><b>%s</b></font></a><br>", html_text[122]);
+							out("<font size=\"2\" color=\"#000000\"><b>");
+							out(html_text[122]);
+							out("</b></font></a><br>");
 						}
-
 						if (MaxAutoResponders != 0) {
 							printh("<a href=\"%s\">", cgiurl("showautoresponders"));
-							printf("<font size=\"2\" color=\"#000000\"><b>%s</b></a></font><br>", html_text[77]);
+							out("<font size=\"2\" color=\"#000000\"><b>");
+							out(html_text[77]);
+							out("</b></a></font><br>");
 						}
-
 						if (*EZMLMDIR != 'n' && MaxMailingLists != 0) {
 							printh("<a href=\"%s\">", cgiurl("showmailinglists"));
-							printf("<font size=\"2\" color=\"#000000\"><b>%s</b></font></a><br>", html_text[80]);
+							out("<font size=\"2\" color=\"#000000\"><b>");
+							out(html_text[80]);
+							out("</b></font></a><br>");
 						}
 					} else {
 						/*
@@ -506,101 +575,110 @@ send_template_now(char *filename)
 						 */
 						mdir_t          diskquota = 0;
 						mdir_t          maxmsg = 0;
-						char            path[256];
-						vpw = vauth_getpw(Username, Domain);
 
-						printh("<a href=\"%s&moduser=%C\">", cgiurl("moduser"), Username);
-						printh("<font size=\"2\" color=\"#000000\"><b>%s %H</b></font></a><br><br>", html_text[111], Username);
-						if (strncmp(vpw->pw_shell, "NOQUOTA", 2) != 0) {
+						vpw = sql_getpw(Username.s, Domain.s);
+						printh("<a href=\"%s&moduser=%C\">", cgiurl("moduser"), Username.s);
+						printh("<font size=\"2\" color=\"#000000\"><b>%s %H</b></font></a><br><br>", html_text[111], Username.s);
+						if (str_diffn(vpw->pw_shell, "NOQUOTA", 8)) {
 							quota_to_megabytes(qconvert, vpw->pw_shell);
 						} else {
-							sprintf(qconvert, "%s", html_text[229]);
+							str_copy(qconvert, html_text[229]);
 							qnote = "";
 						}
-						printf("<font size=\"2\" color=\"#000000\"><b>%s:</b><br>%s %s %s", html_text[249], html_text[253],
-							   qconvert, qnote);
-						printf("<br>%s ", html_text[254]);
-						snprintf(path, sizeof (path), "%s/" MAILDIR, vpw->pw_dir);
-						diskquota = check_quota(path, &maxmsg);
-						printf("%-2.2lf MB</font><br>", ((double) diskquota) / 1048576.0);	/* Convert to MB */
+						out("<font size=\"2\" color=\"#000000\"><b>");
+						out(html_text[249]);
+						out(":</b><br>");
+						out(html_text[253]);
+						out(" ");
+						out(qconvert);
+						out(" ");
+						out(qnote);
+						out("<br>");
+						out(html_text[254]);
+						if (!stralloc_copys(&TmpBuf, vpw->pw_dir) ||
+								!stralloc_catb(&TmpBuf, "/Maildir", 8) ||
+								!stralloc_0(&TmpBuf))
+							die_nomem();
+						diskquota = check_quota(TmpBuf.s, &maxmsg);
+						strnum1[fmt_double(strnum1, (double) diskquota/1048576.0, 2)] = 0;
+						out(strnum1);
+						out(" MB</font><br>");	/* Convert to MB */
 					}
-
 					if (AdminType == DOMAIN_ADMIN) {
-						printf("<br>");
-
+						out("<br>");
 						if (MaxPopAccounts != 0) {
 							printh("<a href=\"%s\">", cgiurl("adduser"));
-							printf("<font size=\"2\" color=\"#000000\"><b>%s</b></font></a><br>", html_text[125]);
+							out("<font size=\"2\" color=\"#000000\"><b>");
+							out(html_text[125]);
+							out("</b></font></a><br>");
 						}
-
 						if (MaxForwards != 0) {
 							printh("<a href=\"%s\">", cgiurl("adddotqmail"));
-							printf("<font size=\"2\" color=\"#000000\"><b>%s</b></font></a><br>", html_text[127]);
+							out("<font size=\"2\" color=\"#000000\"><b>");
+							out(html_text[127]);
+							out("</b></font></a><br>");
 						}
-
 						if (MaxAutoResponders != 0) {
 							printh("<a href=\"%s\">", cgiurl("addautorespond"));
-							printf("<font size=\"2\" color=\"#000000\"><b>%s</b></a></font><br>", html_text[128]);
+							out("<font size=\"2\" color=\"#000000\"><b>");
+							out(html_text[128]);
+							out("</b></a></font><br>");
 						}
-
 						if (*EZMLMDIR != 'n' && MaxMailingLists != 0) {
 							printh("<a href=\"%s\">", cgiurl("addmailinglist"));
-							printf("<font size=\"2\" color=\"#000000\"><b>%s</b></font></a><br>", html_text[129]);
+							out("<font size=\"2\" color=\"#000000\"><b>");
+							out(html_text[129]);
+							out("</b></font></a><br>");
 						}
 					}
 					break;
-
 				case 'W': /* Password */
-					printh("%H", Password);
+					printh("%H", Password.s);
 					break;
-
 				case 'X': /* dictionary entry, followed by three more chars for the entry # */
 					for (i = 0; i < 3; ++i)
-						dchar[i] = fgetc(fs);
+						dchar[i] = getch(&ssin);
 					dchar[i] = 0;
-					i = atoi(dchar);
+					scan_int(dchar, &i);
 					if ((i >= 0) && (i <= MAX_LANG_STR))
-						printf("%s", html_text[atoi(dchar)]);
+						out(html_text[i]);
 					break;
-
 				case 'x': /* exit / logout link/text */
-					strcpy(value, get_session_val("returntext="));
-					if (strlen(value) > 0) {
-						printh("<a href=\"%C\">%H", get_session_val("returnhttp="), value);
-					} else {
+					if (!stralloc_copys(&value1, get_session_val("returntext=")) ||
+							!stralloc_0(&value1))
+						die_nomem();
+					value1.len--;
+					if (value1.len)
+						printh("<a href=\"%C\">%H", get_session_val("returnhttp="), value1.s);
+					else
 						printh("<a href=\"%s\">%s", cgiurl("logout"), html_text[218]);
-					}
-					printf("</a>\n");
+					out("</a>\n");
 					break;
-
 				case 'y': /* returnhttp */
 					printh("%C", get_session_val("returnhttp="));
 					break;
-
 				case 'Y': /* returntext */
 					printh("%H", get_session_val("returntext="));
 					break;
-
 				case 'Z': /* send the image URL directory */
-					printf("%s", IMAGEURL);
+					out(IMAGEURL);
 					break;
-
 				case 'z':
 					/*
 					 * display domain on login page (last used, value of dom in URL,
 					 * or guess from hostname in URL).
 					 */
-					if (strlen(Domain) > 0) {
-						printh("%H", Domain);
-					} else if (TmpCGI && GetValue(TmpCGI, value, "dom=", sizeof (value)) == 0) {
-						printh("%H", value);
+					if (Domain.len)
+						printh("%H", Domain.s);
+					else
+					if (TmpCGI && GetValue(TmpCGI, &value1, "dom=") == 0) {
+						printh("%H", value1.s);
 #ifdef DOMAIN_AUTOFILL
 					} else {
 						get_calling_host();
 #endif
 					}
 					break;
-
 				default:
 					break;
 				}
@@ -609,15 +687,14 @@ send_template_now(char *filename)
 				 * didn't find a tag, so send out the first '#' and 
 				 * the current character
 				 */
-				fputc('#', actout);
-				fputc(inchar, actout);
+				putch('#', subfdoutsmall);
+				putch(inchar, subfdoutsmall);
 			}
 		}
 	}
-	fclose(fs);
-	fflush(actout);
-	vclose();
-
+	close(fd);
+	substdio_flush(subfdoutsmall);
+	iclose();
 	return 0;
 }
 
@@ -632,55 +709,46 @@ check_mailbox_flags(char newchar)
 {
 	static struct passwd *vpw = NULL;
 
-	if (vpw == NULL)
-		vpw = vauth_getpw(ActionUser, Domain);
-
-	switch (newchar) {
-
+	if (!vpw)
+		vpw = sql_getpw(ActionUser.s, Domain.s);
+	switch (newchar)
+	{
 	case '1': /* "checked" if V_USER0 is set */
 		if (vpw->pw_gid & V_USER0)
-			printf("checked");
+			out("checked");
 		break;
-
 	case '2': /* "checked" if V_USER0 is unset */
 		if (!(vpw->pw_gid & V_USER0))
-			printf("checked");
+			out("checked");
 		break;
-
 	case '3': /* "checked" if V_USER1 is set */
 		if (vpw->pw_gid & V_USER1)
-			printf("checked");
+			out("checked");
 		break;
-
 	case '4': /* "checked" if V_USER1 is unset */
 		if (!(vpw->pw_gid & V_USER1))
-			printf("checked");
+			out("checked");
 		break;
-
 	case '5': /* "checked" if V_USER2 is set */
 		if (vpw->pw_gid & V_USER2)
-			printf("checked");
+			out("checked");
 		break;
-
 	case '6': /* "checked" if V_USER2 is unset */
 		if (!(vpw->pw_gid & V_USER2))
-			printf("checked");
+			out("checked");
 		break;
-
 	case '7': /* "checked" if V_USER3 is set */
 		if (vpw->pw_gid & V_USER3)
-			printf("checked");
+			out("checked");
 		break;
-
 	case '8': /* "checked" if V_USER3 is unset */
 		if (!(vpw->pw_gid & V_USER3))
-			printf("checked");
+			out("checked");
 		break;
-
 	default:
 		break;
 	}
-
+	flush();
 	return;
 }
 
@@ -691,42 +759,42 @@ check_mailbox_flags(char newchar)
  * jeff.hedlund@matrixsi.com                                        
  */
 void
-transmit_block(FILE * fs)
+transmit_block(substdio *ss)
 {
 	char            inchar;
 
-	inchar = fgetc(fs);
-	switch (inchar) {
+	inchar = getch(ss);
+	switch (inchar)
+	{
 	case 'a': /* administrative commands */
-		if (AdminType != DOMAIN_ADMIN) {
-			ignore_to_end_tag(fs);
-		}
+		if (AdminType != DOMAIN_ADMIN)
+			ignore_to_end_tag(ss);
 		break;
 	case 'h':
 #ifndef HELP
-		ignore_to_end_tag(fs);
+		ignore_to_end_tag(ss);
 #endif
 		break;
 	case 'm':
 #ifndef ENABLE_MYSQL
-		ignore_to_end_tag(fs);
+		ignore_to_end_tag(ss);
 #endif
 		break;
 	case 'q':
 #ifndef MODIFY_QUOTA
-		ignore_to_end_tag(fs);
+		ignore_to_end_tag(ss);
 #endif
 		break;
 	case 's':
 #ifndef MODIFY_SPAM
-		ignore_to_end_tag(fs);
+		ignore_to_end_tag(ss);
 #endif
 		break;
 	case 't': /* explicitly break if it was ##tt, that's an end tag */
 		break;
 	case 'u': /* user (not administrative) */
 		if (AdminType != USER_ADMIN) {
-			ignore_to_end_tag(fs);
+			ignore_to_end_tag(ss);
 		}
 		break;
 	}
@@ -738,19 +806,19 @@ transmit_block(FILE * fs)
  * jeff.hedlund@matrixsi.com                                       
  */
 void
-ignore_to_end_tag(FILE * fs)
+ignore_to_end_tag(substdio *ss)
 {
 	int             nested = 0;
 	int             inchar;
 
-	inchar = fgetc(fs);
+	inchar = getch(ss);
 	while (inchar >= 0) {
 		if (inchar == '#') {
-			inchar = fgetc(fs);
+			inchar = getch(ss);
 			if (inchar == '#') {
-				inchar = fgetc(fs);
+				inchar = getch(ss);
 				if (inchar == 't') {
-					inchar = fgetc(fs);
+					inchar = getch(ss);
 					if (inchar == 't' && nested == 0)
 						return;
 					else if (inchar != 't')
@@ -760,7 +828,7 @@ ignore_to_end_tag(FILE * fs)
 				}
 			}
 		}
-		inchar = fgetc(fs);
+		inchar = getch(ss);
 	}
 }
 
@@ -770,37 +838,61 @@ ignore_to_end_tag(FILE * fs)
 void
 get_calling_host()
 {
-	char           *srvnam;
-	char           *domptr;
-	int             count = 0;
-	int             l;
-	FILE           *fs;
-	char            dombuf[255];
+	char           *srvnam, *domptr;
+	int             fd, match;
+	char            inbuf[1024];
+	struct substdio ssin;
 
-	sprintf(dombuf, "%s/control/virtualdomains", QMAILDIR);
-
-	fs = fopen(dombuf, "r");
-	if (fs != NULL) {
-		if ((srvnam = getenv("HTTP_HOST")) != NULL) {
-			lowerit(srvnam);
-			while (fgets(TmpBuf, sizeof (TmpBuf), fs) != NULL && count == 0) {
-				/* strip off newline */
-				l = strlen(TmpBuf);
-				l--;
-				TmpBuf[l] = 0;
-				/* virtualdomains format:  "domain:domain", get to second one */
-				domptr = TmpBuf;
-				for (; *domptr != 0 && *domptr != ':'; domptr++);
-				domptr++;
-				lowerit(domptr);
-				if (strstr(srvnam, domptr) != NULL) {
-					printh("%H", domptr);
-					count = 1;
-				}
-			}
-			fclose(fs);
+	if (!stralloc_copys(&TmpBuf, SYSCONFDIR) ||
+			!stralloc_catb(&TmpBuf, "/control/virtualdomains", 23) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	if ((srvnam = env_get("HTTP_HOST")))
+		lowerit(srvnam);
+	if ((fd = open_read(TmpBuf.s)) == -1) {
+		strerr_warn3("get_calling_host: open: ", TmpBuf.s, ": ", &strerr_sys);
+		out(html_text[144]);
+		out(" ");
+		out(TmpBuf.s);
+		out(" 1<BR>\n");
+		flush();
+		return;
+	}
+	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	/*- read Reference: and Subjec: line */
+	for (;;) {
+		if (getln(&ssin, &line, &match, '\n') == -1) {
+			strerr_warn3("get_calling_host: read: ", TmpBuf.s, ": ", &strerr_sys);
+			out(html_text[144]);
+			out(" ");
+			out(TmpBuf.s);
+			out(" 1<BR>\n");
+			close(fd);
+			flush();
+			return;
+		}
+		if (!line.len)
+			break;
+		if (match) {
+			line.len--;
+			line.s[line.len] = 0;
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
+		}
+		if (!line.len)
+			continue;
+		domptr = line.s;
+		for (; *domptr && *domptr != ':'; domptr++);
+		domptr++;
+		lowerit(domptr);
+		if (str_str(srvnam, domptr)) {
+			printh("%H", domptr);
+			break;
 		}
 	}
+	close(fd);
 }
 
 /*
@@ -811,34 +903,46 @@ get_calling_host()
 char           *
 get_session_val(char *session_var)
 {
-	static char     value[MAX_BUFF];
-	char            dir[MAX_BUFF];
+	static stralloc value = {0};
+	int             fd, match;
 	char           *retval;
-	FILE           *fs_qw;
+	char            strnum[1024], inbuf[1024];
 	struct passwd  *vpw;
-	memset(value, 0, sizeof (value));
-	memset(dir, 0, sizeof (dir));
-	retval = "";
-	if ((vpw = vauth_getpw(Username, Domain)) != NULL) {
-		sprintf(dir, "%s/" MAILDIR "/%u.qw", vpw->pw_dir, (unsigned int) Mytime);
-		fs_qw = fopen(dir, "r");
-		if (fs_qw != NULL) {
-			memset(TmpBuf, 0, sizeof (TmpBuf));
-			if (fgets(TmpBuf, sizeof (TmpBuf), fs_qw) != NULL) {
-				if (GetValue(TmpBuf, value, session_var, sizeof (value)) == 0)
-					retval = value;
-			}
-			fclose(fs_qw);
-		}
-	} else if (TmpCGI) {
-		if (GetValue(TmpCGI, value, session_var, sizeof (value)) == 0)
-			retval = value;
-	}
-	return (retval);
-}
+	struct substdio ssin;
 
-void
-getversion_qatemplate_c()
-{
-	printf("%s\n", sccsidh);
+	retval = "";
+	if ((vpw = sql_getpw(Username.s, Domain.s))) {
+		if (!stralloc_copys(&TmpBuf, vpw->pw_dir) ||
+				!stralloc_catb(&TmpBuf, "/Maildir/", 9) ||
+				!stralloc_catb(&TmpBuf, strnum, fmt_ulong(strnum, (unsigned long) mytime)) ||
+				!stralloc_catb(&TmpBuf, ".qw", 3) ||
+				!stralloc_0(&TmpBuf))
+			die_nomem();
+		if ((fd = open_read(TmpBuf.s)) == -1) {
+			strerr_warn3("get_session_val: open: ", TmpBuf.s, ": ", &strerr_sys);
+			out(html_text[144]);
+			out(" ");
+			out(TmpBuf.s);
+			out(" 1<BR>\n");
+			flush();
+			return (retval);
+		}
+		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		if (getln(&ssin, &line, &match, '\n') == -1) {
+			strerr_warn3("get_session_val: read: ", TmpBuf.s, ": ", &strerr_sys);
+			out(html_text[144]);
+			out(" ");
+			out(TmpBuf.s);
+			out(" 1<BR>\n");
+			flush();
+			close(fd);
+			return (retval);
+		}
+		if (line.len && !GetValue(line.s, &value, session_var))
+			retval = value.s;
+		close(fd);
+	} else
+	if (TmpCGI && !GetValue(TmpCGI, &value, session_var))
+		retval = value.s;
+	return (retval);
 }

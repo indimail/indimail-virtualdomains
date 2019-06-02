@@ -16,25 +16,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
-#include <indimail_config.h>
-#undef PACKAGE
-#undef VERSION
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_URL
-#include <indimail.h>
-#undef PACKAGE
-#undef VERSION
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_URL
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+#include <indimail.h>
+#include <indimail_compat.h>
 
 #include "iwebadmin.h"
 #include "iwebadminx.h"
@@ -44,17 +30,12 @@ void
 load_limits()
 {
 	int             gid = 0;
-	vget_limits(Domain, &Limits);
+
+	vget_limits(Domain.s, &Limits);
 	MaxPopAccounts = Limits.maxpopaccounts;
 	MaxAliases = Limits.maxaliases;
 	MaxForwards = Limits.maxforwards;
 	MaxAutoResponders = Limits.maxautoresponders;
 	MaxMailingLists = Limits.maxmailinglists;
 	gid |= vlimits_get_flag_mask(&Limits);
-}
-
-void
-getversion_qalimit_c()
-{
-	printf("%s\n", sccsidh);
 }

@@ -16,35 +16,28 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
-
-#include <indimail_config.h>
-#undef PACKAGE
-#undef VERSION
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_URL
-#include <indimail.h>
-#undef PACKAGE
-#undef VERSION
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_URL
+#ifdef HAVE_CONFIG_H
 #include "config.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#endif
+#include <indimail.h>
+#include <indimail_compat.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#endif
+#ifdef HAVE_PWD_H
 #include <pwd.h>
-#include <dirent.h>
+#endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
+#ifdef HAVE_QMAIL
+#include <stralloc.h>
+#include <str.h>
+#include <strerr.h>
+#include <substdio.h>
+#include <getln.h>
+#include <open.h>
+#endif
 #include "alias.h"
 #include "autorespond.h"
 #include "cgi.h"
@@ -57,259 +50,267 @@
 #include "show.h"
 #include "user.h"
 #include "util.h"
+#include "common.h"
 
 void
-process_commands()
+process_commands(char *cmmd)
 {
-	if (strcmp(TmpBuf2, "showmenu") == 0) {
-		show_menu(Username, Domain, Mytime);
+	static stralloc tmp = {0};
+
+	if (!str_diff(cmmd, "showmenu")) {
+		show_menu(Username.s, Domain.s, mytime);
 	} else
-	if (strcmp(TmpBuf2, "quick") == 0) {
+	if (!str_diff(cmmd, "quick")) {
 		/*
 		 * This feature sponsored by PinkRoccade Public Sector, Sept 2004 
 		 */
-		char            moddel[20];
 		/*
 		 * we use global ActionUser here because the functions that
 		 * quickAction calls expect the username in that global.
 		 */
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
-		lowerit(ActionUser);	/* convert username to lower case */
-		GetValue(TmpCGI, moddel, "MODIFY=", sizeof (moddel));
-		if (*moddel) {
-			quickAction(ActionUser, ACTION_MODIFY);
-		} else {
-			GetValue(TmpCGI, moddel, "DELETE=", sizeof (moddel));
-			if (*moddel) {
-				quickAction(ActionUser, ACTION_DELETE);
-			} else {
-			/*
-			 * malformed request -- missing fields 
-			 */
-				show_menu(Username, Domain, Mytime);
-				vclose();
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		lowerit(ActionUser.s);	/* convert username to lower case */
+		GetValue(TmpCGI, &tmp, "MODIFY=");
+		if (tmp.len)
+			quickAction(ActionUser.s, ACTION_MODIFY);
+		else {
+			GetValue(TmpCGI, &tmp, "DELETE=");
+			if (tmp.len)
+				quickAction(ActionUser.s, ACTION_DELETE);
+			else {
+				/*- malformed request -- missing fields */
+				show_menu(Username.s, Domain.s, mytime);
+				iclose();
 				exit(0);
 			}
 		}
 	} else
-	if (strcmp(TmpBuf2, "showusers") == 0) {
-		GetValue(TmpCGI, Pagenumber, "page=", sizeof (Pagenumber));
-		GetValue(TmpCGI, SearchUser, "searchuser=", sizeof (SearchUser));
-		show_users(Username, Domain, Mytime);
+	if (!str_diff(cmmd, "showusers")) {
+		GetValue(TmpCGI, &tmp, "page=");
+		str_copy(Pagenumber, tmp.s);
+		GetValue(TmpCGI, &SearchUser, "searchuser=");
+		show_users(Username.s, Domain.s, mytime);
 	} else
-	if (strcmp(TmpBuf2, "showaliases") == 0) {
-		GetValue(TmpCGI, Pagenumber, "page=", sizeof (Pagenumber));
+	if (!str_diff(cmmd, "showaliases")) {
+		GetValue(TmpCGI, &tmp, "page=");
+		str_copy(Pagenumber, tmp.s);
 		show_aliases();
 	} else
-	if (strcmp(TmpBuf2, "showforwards") == 0) {
-		GetValue(TmpCGI, Pagenumber, "page=", sizeof (Pagenumber));
-		GetValue(TmpCGI, SearchUser, "searchuser=", sizeof (SearchUser));
-		show_forwards(Username, Domain, Mytime);
+	if (!str_diff(cmmd, "showforwards")) {
+		GetValue(TmpCGI, &tmp, "page=");
+		str_copy(Pagenumber, tmp.s);
+		GetValue(TmpCGI, &SearchUser, "searchuser=");
+		show_forwards(Username.s, Domain.s, mytime);
 	} else
-	if (strcmp(TmpBuf2, "showmailinglists") == 0) {
-		show_mailing_lists(Username, Domain, Mytime);
-	} else
-	if (strcmp(TmpBuf2, "showautoresponders") == 0) {
-		show_autoresponders(Username, Domain, Mytime);
-	} else
-	if (strcmp(TmpBuf2, "adduser") == 0) {
+	if (!str_diff(cmmd, "showmailinglists"))
+		show_mailing_lists(Username.s, Domain.s, mytime);
+	else
+	if (!str_diff(cmmd, "showautoresponders"))
+		show_autoresponders(Username.s, Domain.s, mytime);
+	else
+	if (!str_diff(cmmd, "adduser"))
 		adduser();
-	} else
-	if (strcmp(TmpBuf2, "addusernow") == 0) {
+	else
+	if (!str_diff(cmmd, "addusernow"))
 		addusernow();
 #ifdef CATCHALL_ENABLED
-	} else
-	if (strcmp(TmpBuf2, "setdefault") == 0) {
-		GetValue(TmpCGI, ActionUser, "deluser=", sizeof (ActionUser));
-		GetValue(TmpCGI, Pagenumber, "page=", sizeof (Pagenumber));
+	else
+	if (!str_diff(cmmd, "setdefault")) {
+		GetValue(TmpCGI, &ActionUser, "deluser=");
+		GetValue(TmpCGI, &tmp, "page=");
+		str_copy(Pagenumber, tmp.s);
 		setdefaultaccount();
 	} else
-	if (strcmp(TmpBuf2, "bounceall") == 0) {
+	if (!str_diff(cmmd, "bounceall"))
 		bounceall();
-	} else
-	if (strcmp(TmpBuf2, "deleteall") == 0) {
+	else
+	if (!str_diff(cmmd, "deleteall"))
 		deleteall();
-	} else
-	if (strcmp(TmpBuf2, "setremotecatchall") == 0) {
+	else
+	if (!str_diff(cmmd, "setremotecatchall"))
 		setremotecatchall();
-	} else
-	if (strcmp(TmpBuf2, "setremotecatchallnow") == 0) {
+	else
+	if (!str_diff(cmmd, "setremotecatchallnow"))
 		setremotecatchallnow();
 #endif
-	} else
-	if (strcmp(TmpBuf2, "addlistmodnow") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
-		GetValue(TmpCGI, Newu, "newu=", sizeof (Newu));
+	else
+	if (!str_diff(cmmd, "addlistmodnow")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		GetValue(TmpCGI, &Newu, "newu=");
 		addlistgroupnow(1);
 	} else
-	if (strcmp(TmpBuf2, "dellistmod") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "dellistmod")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		dellistgroup("del_listmod.html");
 	} else
-	if (strcmp(TmpBuf2, "dellistmodnow") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
-		GetValue(TmpCGI, Newu, "newu=", sizeof (Newu));
+	if (!str_diff(cmmd, "dellistmodnow")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		GetValue(TmpCGI, &Newu, "newu=");
 		dellistgroupnow(1);
 	} else
-	if (strcmp(TmpBuf2, "addlistmod") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "addlistmod")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		addlistgroup("add_listmod.html");
 	} else
-	if (strcmp(TmpBuf2, "showlistmod") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "showlistmod")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		show_list_group("show_moderators.html");
 	} else
-	if (strcmp(TmpBuf2, "addlistdig") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "addlistdig")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		addlistgroup("add_listdig.html");
 	} else
-	if (strcmp(TmpBuf2, "addlistdignow") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
-		GetValue(TmpCGI, Newu, "newu=", sizeof (Newu));
+	if (!str_diff(cmmd, "addlistdignow")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		GetValue(TmpCGI, &Newu, "newu=");
 		addlistgroupnow(2);
 	} else
-	if (strcmp(TmpBuf2, "dellistdig") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "dellistdig")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		dellistgroup("del_listdig.html");
 	} else
-	if (strcmp(TmpBuf2, "dellistdignow") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
-		GetValue(TmpCGI, Newu, "newu=", sizeof (Newu));
+	if (!str_diff(cmmd, "dellistdignow")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		GetValue(TmpCGI, &Newu, "newu=");
 		dellistgroupnow(2);
 	} else
-	if (strcmp(TmpBuf2, "showlistdig") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "showlistdig")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		show_list_group("show_digest_subscribers.html");
 	} else
-	if (strcmp(TmpBuf2, "moduser") == 0) {
-		GetValue(TmpCGI, ActionUser, "moduser=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "moduser")) {
+		GetValue(TmpCGI, &ActionUser, "moduser=");
 		moduser();
 	} else
-	if (strcmp(TmpBuf2, "modusernow") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
-		GetValue(TmpCGI, Password1, "password1=", sizeof (Password1));
-		GetValue(TmpCGI, Password2, "password2=", sizeof (Password2));
-		GetValue(TmpCGI, Gecos, "gecos=", sizeof (Gecos));
+	if (!str_diff(cmmd, "modusernow")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		GetValue(TmpCGI, &Password1, "password1=");
+		GetValue(TmpCGI, &Password2, "password2=");
+		GetValue(TmpCGI, &Gecos, "gecos=");
 		modusergo();
 	} else
-	if (strcmp(TmpBuf2, "deluser") == 0) {
-		GetValue(TmpCGI, ActionUser, "deluser=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "deluser")) {
+		GetValue(TmpCGI, &ActionUser, "deluser=");
 		deluser();
 	} else
-	if (strcmp(TmpBuf2, "delusernow") == 0) {
-		GetValue(TmpCGI, ActionUser, "deluser=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "delusernow")) {
+		GetValue(TmpCGI, &ActionUser, "deluser=");
 		delusergo();
 	} else
-	if (strcmp(TmpBuf2, "moddotqmail") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "moddotqmail")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		moddotqmail();
 	} else
-	if (strcmp(TmpBuf2, "moddotqmailnow") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
-		GetValue(TmpCGI, Newu, "newu=", sizeof (Newu));
-		GetValue(TmpCGI, LineData, "linedata=", sizeof (LineData));
-		GetValue(TmpCGI, Action, "action=", sizeof (Action));
+	if (!str_diff(cmmd, "moddotqmailnow")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		GetValue(TmpCGI, &Newu, "newu=");
+		GetValue(TmpCGI, &LineData, "linedata=");
+		GetValue(TmpCGI, &Action, "action=");
 		moddotqmailnow();
 	} else
-	if (strcmp(TmpBuf2, "deldotqmail") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "deldotqmail")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		deldotqmail();
 	} else
-	if (strcmp(TmpBuf2, "deldotqmailnow") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "deldotqmailnow")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		deldotqmailnow();
 	} else
-	if (strcmp(TmpBuf2, "adddotqmail") == 0) {
+	if (!str_diff(cmmd, "adddotqmail"))
 		adddotqmail();
-	} else
-	if (strcmp(TmpBuf2, "adddotqmailnow") == 0) {
-		GetValue(TmpCGI, ActionUser, "newu=", sizeof (ActionUser));
-		GetValue(TmpCGI, Alias, "alias=", sizeof (Alias));
+	else
+	if (!str_diff(cmmd, "adddotqmailnow")) {
+		GetValue(TmpCGI, &ActionUser, "newu=");
+		GetValue(TmpCGI, &Alias, "alias=");
 		adddotqmailnow();
 	} else
-	if (strcmp(TmpBuf2, "addmailinglist") == 0) {
+	if (!str_diff(cmmd, "addmailinglist"))
 		addmailinglist();
-	} else
-	if (strcmp(TmpBuf2, "delmailinglist") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	else
+	if (!str_diff(cmmd, "delmailinglist")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		delmailinglist();
 	} else
-	if (strcmp(TmpBuf2, "delmailinglistnow") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "delmailinglistnow")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		delmailinglistnow();
 	} else
-	if (strcmp(TmpBuf2, "addlistusernow") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
-		GetValue(TmpCGI, Newu, "newu=", sizeof (Newu));
+	if (!str_diff(cmmd, "addlistusernow")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		GetValue(TmpCGI, &Newu, "newu=");
 		addlistgroupnow(0);
 	} else
-	if (strcmp(TmpBuf2, "dellistuser") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "dellistuser")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		dellistgroup("del_listuser.html");
 	} else
-	if (strcmp(TmpBuf2, "dellistusernow") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
-		GetValue(TmpCGI, Newu, "newu=", sizeof (Newu));
+	if (!str_diff(cmmd, "dellistusernow")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		GetValue(TmpCGI, &Newu, "newu=");
 		dellistgroupnow(0);
 	} else
-	if (strcmp(TmpBuf2, "addlistuser") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "addlistuser")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		addlistgroup("add_listuser.html");
 	} else
-	if (strcmp(TmpBuf2, "addmailinglistnow") == 0) {
-		GetValue(TmpCGI, ActionUser, "newu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "addmailinglistnow")) {
+		GetValue(TmpCGI, &ActionUser, "newu=");
 		addmailinglistnow();
 	} else
-	if (strcmp(TmpBuf2, "modmailinglist") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "modmailinglist")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		modmailinglist();
 	} else
-	if (strcmp(TmpBuf2, "modmailinglistnow") == 0) {
-		GetValue(TmpCGI, ActionUser, "newu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "modmailinglistnow")) {
+		GetValue(TmpCGI, &ActionUser, "newu=");
 		modmailinglistnow();
 	} else
-	if (strcmp(TmpBuf2, "modautorespond") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "modautorespond")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		modautorespond();
 	} else
-	if (strcmp(TmpBuf2, "addautorespond") == 0) {
+	if (!str_diff(cmmd, "addautorespond"))
 		addautorespond();
-	} else
-	if (strcmp(TmpBuf2, "addautorespondnow") == 0) {
-		GetValue(TmpCGI, ActionUser, "newu=", sizeof (ActionUser));
-		GetValue(TmpCGI, Alias, "alias=", sizeof (Alias)); /* subject */
-		GetValue(TmpCGI, Message, "message=", sizeof (Message));
-		GetValue(TmpCGI, Newu, "owner=", sizeof (Newu));
+	else
+	if (!str_diff(cmmd, "addautorespondnow")) {
+		GetValue(TmpCGI, &ActionUser, "newu=");
+		GetValue(TmpCGI, &Alias, "alias="); /* subject */
+		GetValue(TmpCGI, &Message, "message=");
+		GetValue(TmpCGI, &Newu, "owner=");
 		addautorespondnow();
 	} else
-	if (strcmp(TmpBuf2, "modautorespondnow") == 0) {
-		GetValue(TmpCGI, ActionUser, "newu=", sizeof (ActionUser));
-		GetValue(TmpCGI, Alias, "alias=", sizeof (Alias)); /* subject */
-		GetValue(TmpCGI, Message, "message=", sizeof (Message));
-		GetValue(TmpCGI, Newu, "owner=", sizeof (Newu));
+	if (!str_diff(cmmd, "modautorespondnow")) {
+		GetValue(TmpCGI, &ActionUser, "newu=");
+		GetValue(TmpCGI, &Alias, "alias="); /* subject */
+		GetValue(TmpCGI, &Message, "message=");
+		GetValue(TmpCGI, &Newu, "owner=");
 		modautorespondnow();
 	} else
-	if (strcmp(TmpBuf2, "showlistusers") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "showlistusers")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		show_list_group("show_subscribers.html");
 	} else
-	if (strcmp(TmpBuf2, "delautorespond") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "delautorespond")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		delautorespond();
 	} else
-	if (strcmp(TmpBuf2, "delautorespondnow") == 0) {
-		GetValue(TmpCGI, ActionUser, "modu=", sizeof (ActionUser));
+	if (!str_diff(cmmd, "delautorespondnow")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
 		delautorespondnow();
 	} else
-	if (strcmp(TmpBuf2, "logout") == 0) {
-		sprintf(TmpBuf, "%s/%s/" MAILDIR, RealDir, Username);
-		del_id_files(TmpBuf);
+	if (!str_diff(cmmd, "logout")) {
+		if (!stralloc_copy(&TmpBuf, &RealDir) ||
+				!stralloc_append(&TmpBuf, "/") ||
+				!stralloc_cat(&TmpBuf, &Username) ||
+				!stralloc_catb(&TmpBuf, "/Maildir", 8) ||
+				!stralloc_0(&TmpBuf))
+			die_nomem();
+		del_id_files(&TmpBuf);
 		show_login();
 	} else
-	if (strcmp(TmpBuf2, "showcounts") == 0) {
+	if (!str_diff(cmmd, "showcounts"))
 		show_counts();
-	}
-	vclose();
+	iclose();
 	exit(0);
 }
 
@@ -317,34 +318,87 @@ void
 setdefaultaccount()
 {
 	struct passwd  *pw;
-	FILE           *fs;
-	int             use_vfilter = 0;
-	char            buffer[MAX_BUFF];
+	int             fd, use_vfilter = 0, match, len, plen;
+	char            inbuf[1024], outbuf[512];
+	char           *ptr;
+	struct substdio ssin, ssout;
 
-	if ((fs = fopen(".qmail-default", "r"))) {
-		fscanf(fs, "%s", buffer);
-		use_vfilter = strstr(buffer, "vfilter") ? 1: 0;
-		fclose(fs);
+	if ((fd = open_read(".qmail-default")) == -1) {
+		out(html_text[144]);
+		out(" .qmail-default<br>\n");
+		flush();
+		return;
 	}
-
-	if ((pw = vauth_getpw(ActionUser, Domain)) == NULL) {
-		snprinth(StatusMessage, sizeof (StatusMessage), "%s %H@%H", html_text[223], ActionUser, Domain);
+	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	if (getln(&ssin, &line, &match, '\n') == -1) {
+		strerr_warn1("setdefaultaccount: read: .qmail-default", &strerr_sys);
+		out(html_text[144]);
+		out(" .qmail-default 1<BR>\n");
+		flush();
+		return;
+	}
+	if (match) {
+		line.len--;
+		line.s[line.len] = 0;
 	} else {
-		if ((fs = fopen(".qmail-default", "w")) == NULL) {
-			snprintf(StatusMessage, sizeof (StatusMessage), "%s", html_text[82]);
+		if (!stralloc_0(&line))
+			die_nomem();
+		line.len--;
+	}
+	match = str_chr(line.s, '#');
+	if (line.s[match])
+		line.s[match] = 0;
+	for (ptr = line.s; *ptr && isspace(*ptr); ptr++);
+	if (!*ptr) {
+		out(html_text[159]);
+		out(" .qmail-default 1<BR>\n");
+		flush();
+		return;
+	}
+	close(fd);
+	use_vfilter = str_str(ptr, "vfilter") ? 1 : 0;
+	if (!(pw = sql_getpw(ActionUser.s, Domain.s))) {
+		len = str_len(html_text[223]) + ActionUser.len + Domain.len + 28;
+		for (plen = 0;;) {
+			if (!stralloc_ready(&StatusMessage, len))
+				die_nomem();
+			plen = snprinth(StatusMessage.s, len, "%s %H@%H", html_text[223], ActionUser.s, Domain.s);
+			if (plen < len) {
+				StatusMessage.len = plen;
+				break;
+			}
+			len = plen + 28;
+		}
+	} else {
+		if ((fd = open_trunc(".qmail-default")) == -1) {
+			strerr_warn1("setdefaultaccount: open_trunc: .qmail-default: ", &strerr_sys);
+			out(html_text[144]);
+			out(" .qmail-default<br>\n");
+			flush();
+			return;
 		} else {
-			fprintf(fs, "| %s/sbin/%s '' %s@%s\n", INDIMAILDIR, 
-				use_vfilter ? "vfilter" : "vdelivermail", ActionUser, Domain);
-			fclose(fs);
+			substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+			if (substdio_put(&ssout, "| ", 2) ||
+					substdio_puts(&ssout, INDIMAILDIR) ||
+					substdio_put(&ssout, "/sbin/", 6) ||
+					substdio_put(&ssout, use_vfilter ? "vfilter" : "vdelivermail", use_vfilter ? 7 : 12) ||
+					substdio_put(&ssout, " '' ", 4) ||
+					substdio_put(&ssout, ActionUser.s, ActionUser.len) ||
+					substdio_put(&ssout, "@", 1) ||
+					substdio_put(&ssout, Domain.s, Domain.len)||
+					substdio_put(&ssout, "\n", 1) ||
+					substdio_flush(&ssout))
+			{
+				strerr_warn1("set_qmaildefault: write: ", &strerr_sys);
+				out(html_text[144]);
+				out(" .qmail-default<br>\n");
+				flush();
+				return;
+			}
+			close(fd);
 		}
 	}
-	show_users(Username, Domain, Mytime);
-	vclose();
+	show_users(Username.s, Domain.s, mytime);
+	iclose();
 	exit(0);
-}
-
-void
-getversion_qacommand_c()
-{
-	printf("%s\n", sccsidh);
 }

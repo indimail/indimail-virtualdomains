@@ -18,6 +18,8 @@
  */
 
 #include "printh.h"
+#include <subfd.h>
+#include <substdio.h>
 /*
  * included from printh.h:
  * #include <stdlib.h>
@@ -64,15 +66,12 @@ int
 vsnprinth(char *buffer, size_t size, const char *format, va_list ap)
 {
 	const char      hex[] = "0123456789abcdef";
-
 	int             printed;	/* number of characters that would have been printed */
 	const char     *f;			/* current position in format string */
 	char           *b;			/* current position in output buffer */
 	char            n[20];		/* buffer to hold string representation of number */
-
 	char           *s;			/* pointer to string to insert */
 	char           *copy;		/* pointer to replacement string for special char */
-
 	int             stringtype;
 #define SPRINTH_NORMAL 0
 #define SPRINTH_HTML 1
@@ -80,7 +79,6 @@ vsnprinth(char *buffer, size_t size, const char *format, va_list ap)
 
 	if (buffer == NULL && size > 0)
 		return -1;
-
 	printed = 0;
 	b = buffer;
 	for (f = format; *f != '\0'; f++) {
@@ -144,11 +142,9 @@ vsnprinth(char *buffer, size_t size, const char *format, va_list ap)
 				strcpy(n, "*");
 			}
 
-		/*
-		 * now copy the string parameter into the buffer 
-		 */
+			/*- now copy the string parameter into the buffer */
 			while (*s != '\0') {
-				copy = NULL;	/* default to no special handling */
+				copy = (char *) 0; /* default to no special handling */
 				if (stringtype == SPRINTH_HTML) {
 					switch (*s) {
 					case '"':
@@ -164,21 +160,21 @@ vsnprinth(char *buffer, size_t size, const char *format, va_list ap)
 						copy = "&amp;";
 						break;
 					}
-				} else if (stringtype == SPRINTH_CGI) {
+				} else
+				if (stringtype == SPRINTH_CGI) {
 					if (*s == ' ')
 						copy = strcpy(n, "+");
-					else if (!isalnum(*s) && (strchr("._-", *s) == NULL)) {
+					else
+					if (!isalnum(*s) && (strchr("._-", *s) == NULL)) {
 						copy = n;
 						sprintf(n, "%%%c%c", hex[*s >> 4 & 0x0F], hex[*s & 0x0F]);
 					}
 				}
-				if (copy == NULL) {
+				if (!copy) {
 					if (++printed < size)
 						*b++ = *s;
 				} else {
-				/*
-				 * replace *s with buffer pointed to by copy 
-				 */
+					/*- replace *s with buffer pointed to by copy */
 					while (*copy != '\0') {
 						if (++printed < size)
 							*b++ = *copy;
@@ -189,16 +185,10 @@ vsnprinth(char *buffer, size_t size, const char *format, va_list ap)
 			}
 		}
 	}
-
 	*b = '\0';
-
-/*
- * If the formatted string doesn't fit in the buffer, zero out the buffer. 
- */
-	if (printed >= size) {
-		memset(buffer, '\0', size);
-	}
-
+	/*- If the formatted string doesn't fit in the buffer, zero out the buffer.  */
+	if (printed >= size)
+		buffer[size - 1] = 0;
 	return printed;
 }
 
@@ -206,13 +196,11 @@ int
 snprinth(char *buffer, size_t size, const char *format, ...)
 {
 	int             ret;
-
 	va_list         argp;
 
 	va_start(argp, format);
 	ret = vsnprinth(buffer, size, format, argp);
 	va_end(argp);
-
 	return ret;
 }
 
@@ -221,14 +209,12 @@ printh(const char *format, ...)
 {
 	int             ret;
 	char            buffer[1024];
-
 	va_list         argp;
 
 	va_start(argp, format);
 	ret = vsnprinth(buffer, sizeof (buffer), format, argp);
 	va_end(argp);
-
-	printf("%s", buffer);
-
+	substdio_puts(subfdoutsmall, buffer);
+	substdio_flush(subfdoutsmall);
 	return ret;
 }

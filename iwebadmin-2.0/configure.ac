@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([iwebadmin],1.3,[Manvendra Bhangui manvendra@indimail.org],iwebadmin, [http://www.indimail.org])
+AC_INIT([iwebadmin],2.0,[Manvendra Bhangui manvendra@indimail.org],iwebadmin, [http://www.indimail.org])
 AC_CANONICAL_TARGET
 VERSION=$PACKAGE_VERSION
 PACKAGE=$PACKAGE_NAME
@@ -23,6 +23,8 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AC_ISC_POSIX
 
+AC_HEADER_STDC
+AC_CHECK_HEADERS([pwd.h ctype.h stdlib.h sys/wait.h])
 dnl Checks for libraries.
 AC_CHECK_LIB(ssl, SSL_CTX_new,     [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
 AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
@@ -177,6 +179,15 @@ fi
 AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",
 	AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
 auth_incs="-I$prefix/include/indimail -I$mysql_incdir"
+CFLAGS="${CFLAGS} -Dlint -I$mysql_incdir -I/usr/include/qmail"
+AC_CHECK_HEADERS(mysql.h)
+
+AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],nqmail=t,)
+if test " $noqmail" = " t"
+then
+  AC_MSG_ERROR(Could not find qmail library.)
+fi
+
 if test -f /usr/bin/lsb_release
 then
 DISTRIB_ID=$(lsb_release -si)
@@ -190,10 +201,10 @@ AC_SUBST(DISTRIB_VERSION)
 #libdir=$prefix/$acl_libdirstem
 case "$host" in
 	*-*-darwin*)
-	auth_libs="-L. -L$libdir -lindimail -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL"
+	auth_libs="-L. -L$libdir -lindimail $LIB_CRYPT -L$mysql_libdir $LIB_QMAIL -lmysqlclient $LIB_SSL"
 	;;
 	*)
-	auth_libs="-L. -L$libdir -Xlinker -R -Xlinker $libdir -lindimail -lcdb $LIB_CRYPT -L$mysql_libdir -lmysqlclient $LIB_SSL"
+	auth_libs="-L. -L$libdir -Xlinker -R -Xlinker $libdir -lindimail $LIB_CRYPT $LIB_QMAIL -L$mysql_libdir -lmysqlclient $LIB_SSL"
 	;;
 esac
 sys_libdir=${acl_libdirstem}

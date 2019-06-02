@@ -16,32 +16,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
-
-#include <indimail_config.h>
-#undef PACKAGE
-#undef VERSION
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_URL
-#include <indimail.h>
-#undef PACKAGE
-#undef VERSION
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_URL
+#ifdef HAVE_CONFIG_H
 #include "config.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/stat.h>
+#endif
+#include <indimail.h>
+#include <indimail_compat.h>
 #include "dotqmail.h"
 #include "iwebadmin.h"
 #include "iwebadminx.h"
@@ -50,24 +29,18 @@
 int
 dotqmail_delete_files(char *user)
 {
-	return (!valias_delete(user, Domain, 0));
+	return (!valias_delete(user, Domain.s, 0));
 }
 
 int
 dotqmail_add_line(char *user, char *line)
 {
-	return (valias_insert(user, Domain, line, 1));
+	return (valias_insert(user, Domain.s, line, 1));
 }
 
 int
 dotqmail_del_line(char *user, char *line)
 {
-	return (valias_delete(user, Domain, line));
+	return (valias_delete(user, Domain.s, line));
 }
 #endif
-
-void
-getversion_qadotqmail_c()
-{
-	printf("%s\n", sccsidh);
-}
