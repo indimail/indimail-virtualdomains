@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.191 2019-05-24 14:12:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.192 2019-06-02 16:14:11+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -323,15 +323,6 @@ new message to a central server using QMQP.
 %{see_base}
 
 %prep
-echo "---------------- INFORMATION ------------------------"
-echo target        %_target
-echo target_alias  %_target_alias
-echo target_cpu    %_target_cpu
-echo target_os     %_target_os
-echo target_vendor %_target_vendor
-echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist disttag %disttag libs %{_lib} %{_libdir}
-echo "------------------------------------------------------"
-
 for i in %{name}-%{version} ucspi-tcp-%{ucspi_version} \
 libdkim-%{libdkim_version} libsrs2-%{libsrs2_version}
 do
@@ -376,6 +367,17 @@ done
 
 %build
 ID=$(id -u)
+(
+echo "---------------- INFORMATION ------------------------"
+echo target        %_target
+echo target_alias  %_target_alias
+echo target_cpu    %_target_cpu
+echo target_os     %_target_os
+echo target_vendor %_target_vendor
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist disttag %disttag libs %{_lib} %{_libdir}
+echo "------------------------------------------------------"
+) > %{name}-rpm.info
+
 (
 echo "NAME=%{name}"
 echo "Description=\"IndiMail MTA\""
@@ -524,6 +526,7 @@ done
 
 #copy files not copied by setup
 install -m 0644 %{name}-release %{buildroot}%{qsysconfdir}/%{name}-release
+install -m 0644 %{name}-rpm.info %{buildroot}%{qsysconfdir}/%{name}-rpm.info
 %{__mkdir_p} %{buildroot}%{shareddir}/doc
 %{__mkdir_p} %{buildroot}%{libexecdir}
 %{__mkdir_p} %{buildroot}%{qsysconfdir}
@@ -721,6 +724,7 @@ done
 %attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/leapsecs.dat
 %attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/leapsecs.txt
 %attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/%{name}-release
+%attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/%{name}-rpm.info
 %attr(644,root,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/nodnscheck
 %attr(644,root,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/level2-tlds
 %attr(644,root,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/level3-tlds
