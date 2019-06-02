@@ -226,3 +226,5 @@ doc/README-CLUSTER
 doc/ChangeLog.indimail
 debian/indimail.dsc
 .deps
+vpurge
+indimail_config.h
