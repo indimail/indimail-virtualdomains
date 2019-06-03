@@ -24,7 +24,9 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_ISC_POSIX
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS([pwd.h ctype.h stdlib.h sys/wait.h])
+CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/include/qmail"
+AC_CHECK_HEADERS([mysql.h errno.h signal.h unistd.h])
+AC_CHECK_HEADERS([pwd.h ctype.h time.h stdlib.h sys/wait.h])
 dnl Checks for libraries.
 AC_CHECK_LIB(ssl, SSL_CTX_new,     [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
 AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
@@ -106,82 +108,6 @@ else
 fi
 RPATH_LIB="$acl_libdirstem"
 
-AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directory.],[mysql_prefix=$enableval],[mysql_prefix=""])
-
-if test "$mysql_prefix" = ""
-then
-mysql_incdir=""
-for f in /usr/include/mysql /usr/local/mysql/include/mysql /usr/local/mysql/include
-do
-	if test -d $f
-	then
-		mysql_incdir=$f
-		break
-	fi
-done
-
-AC_ARG_ENABLE(mysqlincdir, [  --enable-mysqlincdir=""       directory where auth include files are.],
-mysql_incdir="$enableval",
-[
-	if test "$mysql_incdir" = ""
-	then
-		AC_MSG_ERROR([Unable to find your inc dir, specify --enable-mysqlincdir.])
-	fi
-])
-
-mysql_libdir=""
-for f in /usr/lib64/mysql /usr/local/mysql/lib64/mysql /usr/local/mysql/lib64 /usr/lib/mysql /usr/local/mysql/lib/mysql /usr/local/mysql/lib
-do
-	if test -d $f
-	then
-		mysql_libdir=$f
-		break
-	fi
-done
-AC_ARG_ENABLE(mysqllibdir, [  --enable-mysqllibdir=path-to-auth-libs directory where auth libs are.],
-mysql_libdir="$enableval",
-[
-	if test "$mysql_libdir" = ""
-	then
-		AC_MSG_ERROR([Unable to find your sql libraries dir, specify --enable-mysqllibdir.])
-	fi
-])
-mysqlPrefix="`dirname $mysql_libdir`"
-mysqlPrefix="`dirname $mysqlPrefix`"
-else
-	if test -f $mysql_prefix/include/mysql/mysql.h
-	then
-		mysql_incdir=$mysql_prefix/include/mysql
-	elif test -f $mysql_prefix/include/mysql.h
-	then
-		mysql_incdir=$mysql_prefix/include
-	else
-		mysql_incdir=$mysql_prefix/include/mysql
-	fi
-
-	if test -d $mysql_prefix/lib64/mysql
-	then
-		mysql_libdir=$mysql_prefix/lib64/mysql
-	elif test -d $mysql_prefix/lib64
-	then
-		mysql_libdir=$mysql_prefix/lib64
-	elif test -d $mysql_prefix/lib/mysql
-	then
-		mysql_libdir=$mysql_prefix/lib/mysql
-	elif test -d $mysql_prefix/lib
-	then
-		mysql_libdir=$mysql_prefix/lib
-	else
-		mysql_libdir=$mysql_prefix/lib/mysql
-	fi
-fi
-
-AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",
-	AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
-auth_incs="-I$prefix/include/indimail -I$mysql_incdir"
-CFLAGS="${CFLAGS} -Dlint -I$mysql_incdir -I/usr/include/qmail"
-AC_CHECK_HEADERS(mysql.h)
-
 AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],nqmail=t,)
 if test " $noqmail" = " t"
 then
@@ -199,18 +125,16 @@ fi
 AC_SUBST(DISTRIB_ID)
 AC_SUBST(DISTRIB_VERSION)
 #libdir=$prefix/$acl_libdirstem
+auth_incs="-I$prefix/include/indimail -I$prefix/include/qmail"
 case "$host" in
 	*-*-darwin*)
-	auth_libs="-L. -L$libdir -lindimail $LIB_CRYPT -L$mysql_libdir $LIB_QMAIL -lmysqlclient $LIB_SSL"
+	auth_libs="-L. -L$libdir -lindimail $LIB_CRYPT $LIB_QMAIL $LIB_SSL"
 	;;
 	*)
-	auth_libs="-L. -L$libdir -Xlinker -R -Xlinker $libdir -lindimail $LIB_CRYPT $LIB_QMAIL -L$mysql_libdir -lmysqlclient $LIB_SSL"
+	auth_libs="-L. -L$libdir -Xlinker -R -Xlinker $libdir -lindimail $LIB_CRYPT $LIB_QMAIL $LIB_SSL"
 	;;
 esac
 sys_libdir=${acl_libdirstem}
-AC_SUBST(mysql_prefix)
-AC_SUBST(mysql_incdir)
-AC_SUBST(mysql_libdir)
 AC_SUBST(auth_incs)
 AC_SUBST(auth_libs)
 AC_SUBST(sys_libdir)
@@ -353,16 +277,16 @@ AC_ARG_ENABLE(indimailgroup, [  --enable-indimailgroup=GROUP      Group indimail
 AC_DEFINE_UNQUOTED(INDIMAILGROUP,"$indimailgroup","")
 AC_SUBST(indimailgroup)
 
-mysql=yes
+ezmlm_mysql=yes
 AC_ARG_ENABLE(ezmlm-mysql, [  --disable-ezmlm-mysql         Disable MySQL options for mailing lists.],
-    mysql="$enableval",)
+    ezmlm_mysql="$enableval",)
 case $mysql in
 1*|y*|Y*)
-	mysql=yes
+	ezmlm_mysql=yes
         AC_DEFINE_UNQUOTED(ENABLE_MYSQL,1,"")
         ;;
 *)
-        mysql=no
+        ezmlm_mysql=no
         ;;
 esac
 
@@ -537,11 +461,8 @@ echo "      template dir = "$htmllibdir""
 echo "         ezmlm dir = "$ezmlmdir""
 echo "    system lib dir = "$sys_libdir""
 echo "         ezmlm idx = "$ezmlmidx""
-echo "   mysql for ezmlm = "$mysql""
+echo "   mysql for ezmlm = "$ezmlm_mysql""
 echo "              help = "$enable_help""
-echo "      mysql prefix = "$mysql_prefix""
-echo "      mysql incdir = "$mysql_incdir""
-echo "      mysql incdir = "$mysql_libdir""
 echo "            libdir = "$libdir""
 echo "          auth_inc = "$auth_incs""
 echo "          auth_lib = "$auth_libs""
