@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.29 2018-05-21 18:00:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.30 2019-06-03 06:48:27+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -19,13 +19,6 @@
 %define _prefix            @prefix@
 %define sysconfdir         @sysconfdir@
 %define see_base           For a description of IndiMail visit http://www.indimail.org
-
-%if %build_on_obs != 0
-# change mysqlPrefix to /usr for openSUSE buildservice
-%define mysqlPrefix        /usr
-%else
-%define mysqlPrefix        @mysql_prefix@
-%endif
 
 Summary: Web Administration GUI for IndiMail User Administration
 Name: iwebadmin
@@ -81,11 +74,10 @@ iwebadmin provides a Web frontend for administering IndiMail Users
 
 %build
 autoreconf -fiv
-./configure --prefix=%{_prefix} \
+%configure --prefix=%{_prefix} \
   --sysconfdir=%{sysconfdir} \
   --libdir=%{_libdir} \
   --enable-ezmlmdir=%{_prefix}/bin --disable-ipauth --disable-trivial-password \
-  --enable-mysqlprefix=%{mysqlPrefix} \
   --enable-modify-quota \
   --enable-htmldir=@htmldir@ \
   --enable-cgibindir=@cgibindir@ \
