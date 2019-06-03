@@ -1,5 +1,5 @@
 /*
- * $Id: alias.h,v 1.1 2010-04-26 12:08:19+05:30 Cprogrammer Exp mbhangui $
+ * $Id: alias.h,v 1.2 2019-06-03 06:45:55+05:30 Cprogrammer Exp mbhangui $
  */
 #ifndef ALIAS_H_H
 #define ALIAS_H_H

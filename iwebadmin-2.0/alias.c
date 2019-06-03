@@ -1,5 +1,5 @@
 /*
- * $Id: alias.c,v 1.3 2011-11-17 22:09:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: alias.c,v 1.4 2019-06-03 06:45:34+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify

@@ -1,5 +1,5 @@
 /*
- * $Id: dotqmail.c,v 1.3 2011-11-17 22:10:27+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotqmail.c,v 1.4 2019-06-03 06:46:46+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies 
  *
  * This program is free software; you can redistribute it and/or modify

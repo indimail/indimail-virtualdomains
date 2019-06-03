@@ -1,5 +1,5 @@
 /*
- * $Id: cgi.h,v 1.1 2010-04-26 12:07:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: cgi.h,v 1.2 2019-06-03 06:46:17+05:30 Cprogrammer Exp mbhangui $
  */
 #ifndef HAVE_CGI_H
 #define HAVE_CGI_H
