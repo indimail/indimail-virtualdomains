@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.h,v 1.2 2017-04-03 13:03:41+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.h,v 1.3 2019-06-03 06:47:37+05:30 Cprogrammer Exp mbhangui $
  */
 
 #include <time.h>
