@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 1.3  2019-06-03 06:50:32+05:30  Cprogrammer
+ * replaced config.h with indimail_config.h
+ *
  * Revision 1.2  2019-05-28 17:39:27+05:30  Cprogrammer
  * added load_mysql.h for mysql interceptor function prototypes
  *
@@ -11,11 +14,11 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 1.2 2019-05-28 17:39:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 1.3 2019-06-03 06:50:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include "indimail_config.h"
 #endif
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
