@@ -1,5 +1,8 @@
 /*
  * $Log: FifoCreate.c,v $
+ * Revision 1.2  2019-06-03 06:50:06+05:30  Cprogrammer
+ * fixed permissions of inquery fifo
+ *
  * Revision 1.1  2019-04-18 07:48:31+05:30  Cprogrammer
  * Initial revision
  *
@@ -26,7 +29,7 @@
 #include "r_mkdir.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: FifoCreate.c,v 1.1 2019-04-18 07:48:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: FifoCreate.c,v 1.2 2019-06-03 06:50:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
