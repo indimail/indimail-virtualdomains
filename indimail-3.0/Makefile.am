@@ -74,22 +74,23 @@ include_HEADERS = addaliasdomain.h add_control.h add_domain_assign.h addressToke
 				  ip_map.h is_alias_domain.h is_already_running.h is_distributed_domain.h \
 				  islocalif.h ismaildup.h isnum.h is_user_present.h isvalid_domain.h \
 				  isvirtualdomain.h layout.h LoadBMF.h LoadDbInfo.h lockfile.h Login_Tasks.h \
-				  lowerit.h maildir_to_domain.h maildir_to_email.h MailQuotaWarn.h MakeArgs.h \
-				  makesalt.h makeseekable.h make_user_dir.h md5.h mdaMySQLConnect.h mgmtpassfuncs.h \
-				  mkpasswd3.h monkey.h MoveFile.h munch_domain.h mysql_stack.h next_big_dir.h \
-				  no_of_days.h open_big_dir.h open_master.h open_smtp_relay.h parseAddress.h \
-				  parse_email.h parse_quota.h passwd_policy.h pathToFilesystem.h pipe_exec.h \
-				  post_handle.h print_control.h ProcessInFifo.h proxylogin.h purge_files.h \
-				  pw_comp.h pwcomp.h PwdInLookup.h qmail_remote.h recalc_quota.h RelayInLookup.h \
-				  relay_select.h RemoteBulkMail.h remove_line.h remove_quotes.h renameuser.h \
-				  replacestr.h ripemd.h r_mkdir.h runcmmd.h SendWelcomeMail.h set_mysql_options.h \
-				  setuserid.h setuserquota.h sha1.h skip_relay.h skip_system_files.h sockwrite.h spam.h \
-				  sql_active.h sql_adddomain.h sql_adduser.h sql_delaliasdomain.h sql_deldomain.h \
-				  sql_deluser.h sql_getall.h sql_getflags.h sql_gethostid.h sql_getip.h sql_getpw.h \
-				  sql_get_realdomain.h sql_init.h sql_insertaliasdomain.h sqlOpen_user.h sql_passwd.h \
-				  sql_renamedomain.h SqlServer.h sql_setpw.h sql_setquota.h sql_updateflag.h \
-				  storeHeader.h strToPw.h tcpbind.h tcpopen.h tls.h trashpurge.h typesx.h udpopen.h \
-				  update_file.h update_local_hostid.h update_newu.h update_quota.h update_rules.h \
+				  load_mysql.h lowerit.h maildir_to_domain.h maildir_to_email.h MailQuotaWarn.h \
+				  MakeArgs.h makesalt.h makeseekable.h make_user_dir.h md5.h mdaMySQLConnect.h \
+				  mgmtpassfuncs.h mkpasswd3.h monkey.h MoveFile.h munch_domain.h mysql_stack.h \
+				  next_big_dir.h no_of_days.h open_big_dir.h open_master.h open_smtp_relay.h \
+				  parseAddress.h parse_email.h parse_quota.h passwd_policy.h pathToFilesystem.h \
+				  pipe_exec.h post_handle.h print_control.h ProcessInFifo.h proxylogin.h \
+				  purge_files.h pw_comp.h pwcomp.h PwdInLookup.h qmail_remote.h recalc_quota.h \
+				  RelayInLookup.h relay_select.h RemoteBulkMail.h remove_line.h remove_quotes.h \
+				  renameuser.h replacestr.h ripemd.h r_mkdir.h runcmmd.h SendWelcomeMail.h \
+				  set_mysql_options.h setuserid.h setuserquota.h sha1.h skip_relay.h \
+				  skip_system_files.h sockwrite.h spam.h sql_active.h sql_adddomain.h sql_adduser.h \
+				  sql_delaliasdomain.h sql_deldomain.h sql_deluser.h sql_getall.h sql_getflags.h \
+				  sql_gethostid.h sql_getip.h sql_getpw.h sql_get_realdomain.h sql_init.h \
+				  sql_insertaliasdomain.h sqlOpen_user.h sql_passwd.h sql_renamedomain.h \
+				  SqlServer.h sql_setpw.h sql_setquota.h sql_updateflag.h storeHeader.h \
+				  strToPw.h tcpbind.h tcpopen.h tls.h trashpurge.h typesx.h udpopen.h update_file.h \
+				  update_local_hostid.h update_newu.h update_quota.h update_rules.h \
 				  updusercntrl.h userinfo.h UserInLookup.h user_over_quota.h valiasCount.h \
 				  valias_delete_domain.h valias_delete.h valiasinfo.h valias_insert.h \
 				  valias_select.h valias_update.h variables.h vdelfiles.h vfilter_delete.h \
@@ -186,6 +187,7 @@ iauth.la: $(iauth_la_OBJECTS) $(iauth_la_DEPENDENCIES)
 iauth.lo: iauth.c
 	$(LIBTOOL) --mode=compile gcc $(DEFS) -c $^
 
+all: config.h indimail_config.h
 all-local: libindimail.la iauth.la
 
 indimailbin_PROGRAMS = vadddomain vdeldomain vadduser vdeluser vuserinfo \
@@ -237,11 +239,11 @@ indimail_config.h
 
 #DISTCLEANFILES=.gitignore
 
-vadddomain_SOURCES = vadddomain.c 
+vadddomain_SOURCES = vadddomain.c
 vadddomain_LDADD = @auth_libs@ isvalid_domain.lo
 vadddomain_DEPENDENCIES = isvalid_domain.lo $(top_builddir)/libindimail.la
 
-vaddaliasdomain_SOURCES = vaddaliasdomain.c 
+vaddaliasdomain_SOURCES = vaddaliasdomain.c
 vaddaliasdomain_LDADD = @auth_libs@
 vaddaliasdomain_DEPENDENCIES = $(top_builddir)/libindimail.la
 
@@ -265,7 +267,7 @@ vgroup_SOURCES = vgroup.c
 vgroup_LDADD = @auth_libs@
 vgroup_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-vpasswd_SOURCES = vpasswd.c 
+vpasswd_SOURCES = vpasswd.c
 vpasswd_LDADD = @auth_libs@
 vpasswd_DEPENDENCIES = $(top_builddir)/libindimail.la
 
@@ -295,29 +297,29 @@ vdominfo.lo = get_assign.h common.h setuserid.h check_group.h iclose.h \
 	get_local_ip.h
 vdominfo_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-hostcntrl_SOURCES = hostcntrl.c 
+hostcntrl_SOURCES = hostcntrl.c
 hostcntrl_LDADD = @auth_libs@
 hostcntrl_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-vhostid_SOURCES = vhostid.c 
+vhostid_SOURCES = vhostid.c
 vhostid_LDADD = @auth_libs@
 vhostid_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-vsmtp_SOURCES = vsmtp.c 
+vsmtp_SOURCES = vsmtp.c
 vsmtp_LDADD = @auth_libs@
 vsmtp_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-inlookup_SOURCES = inlookup.c 
+inlookup_SOURCES = inlookup.c
 inlookup_LDADD = @auth_libs@ ProcessInFifo.lo AliasInLookup.lo PwdInLookup.lo \
 	RelayInLookup.lo UserInLookup.lo VlimitInLookup.lo libindimail.la -ldl
 inlookup_DEPENDENCIES = ProcessInFifo.lo AliasInLookup.lo PwdInLookup.lo RelayInLookup.lo \
 	UserInLookup.lo VlimitInLookup.lo $(top_builddir)/libindimail.la
 
-printdir_SOURCES = printdir.c 
+printdir_SOURCES = printdir.c
 printdir_LDADD = @auth_libs@
 printdir_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-vdelivermail_SOURCES = vdelivermail.c 
+vdelivermail_SOURCES = vdelivermail.c
 vdelivermail_LDADD = @auth_libs@ deliver_mail.lo qmail_remote.lo \
 					 udpopen.lo
 vdelivermail_DEPENDENCIES = deliver_mail.lo qmail_remote.lo udpopen.lo $(top_builddir)/libindimail.la
@@ -333,12 +335,12 @@ vcfilter_SOURCES=vcfilter.c
 vcfilter_LDADD= @auth_libs@
 vcfilter_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-ismaildup_SOURCES = ismaildup.c 
+ismaildup_SOURCES = ismaildup.c
 ismaildup_LDADD = @auth_libs@
 ismaildup_CFLAGS = -DMAIN
 ismaildup_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-valias_SOURCES = valias.c 
+valias_SOURCES = valias.c
 valias_LDADD = @auth_libs@
 valias_DEPENDENCIES = $(top_builddir)/libindimail.la
 
@@ -350,11 +352,11 @@ clearopensmtp_SOURCES = clearopensmtp.c
 clearopensmtp_LDADD = @auth_libs@ clear_open_smtp.lo
 clearopensmtp_DEPENDENCIES = clear_open_smtp.lo $(top_builddir)/libindimail.la
 
-updaterules_SOURCES = updaterules.c 
+updaterules_SOURCES = updaterules.c
 updaterules_LDADD = @auth_libs@
 updaterules_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-inquerytest_SOURCES = inquerytest.c 
+inquerytest_SOURCES = inquerytest.c
 inquerytest_LDADD = @auth_libs@ ProcessInFifo.lo  AliasInLookup.lo PwdInLookup.lo \
 	RelayInLookup.lo UserInLookup.lo VlimitInLookup.lo -ldl
 inquerytest_DEPENDENCIES = ProcessInFifo.lo  AliasInLookup.lo PwdInLookup.lo RelayInLookup.lo \
@@ -372,7 +374,7 @@ vtable_SOURCES = vtable.c
 vtable_LDADD = @auth_libs@
 vtable_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-hostsync_SOURCES = hostsync.c 
+hostsync_SOURCES = hostsync.c
 hostsync_LDADD = @auth_libs@
 hostsync_DEPENDENCIES = $(top_builddir)/libindimail.la
 
@@ -384,31 +386,31 @@ initsvc_SOURCES = initsvc.c
 initsvc_LDADD = common.lo getEnvConfig.lo fappend.lo $(LIB_QMAIL)
 initsvc_DEPENDENCIES = getEnvConfig.lo common.lo fappend.lo
 
-mgmtpass_SOURCES = mgmtpass.c 
+mgmtpass_SOURCES = mgmtpass.c
 mgmtpass_LDADD = @auth_libs@
 mgmtpass_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-systpass_SOURCES = systpass.c 
+systpass_SOURCES = systpass.c
 systpass_LDADD = @auth_libs@
 systpass_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-authindi_SOURCES = authindi.c 
+authindi_SOURCES = authindi.c
 authindi_LDADD = @auth_libs@
 authindi_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-vchkpass_SOURCES = vchkpass.c 
+vchkpass_SOURCES = vchkpass.c
 vchkpass_LDADD = @auth_libs@
 vchkpass_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-vsetpass_SOURCES = vsetpass.c 
+vsetpass_SOURCES = vsetpass.c
 vsetpass_LDADD = @auth_libs@
 vsetpass_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-vsetuserquota_SOURCES = vsetuserquota.c 
+vsetuserquota_SOURCES = vsetuserquota.c
 vsetuserquota_LDADD = @auth_libs@
 vsetuserquota_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-vacation_SOURCES = vacation.c 
+vacation_SOURCES = vacation.c
 vacation_LDADD = @auth_libs@
 vacation_DEPENDENCIES = $(top_builddir)/libindimail.la
 
@@ -416,7 +418,7 @@ sq_vacation_SOURCES = sq_vacation.c
 sq_vacation_LDADD = @auth_libs@
 sq_vacation_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-vatrn_SOURCES = vatrn.c 
+vatrn_SOURCES = vatrn.c
 vatrn_LDADD = @auth_libs@
 vatrn_DEPENDENCIES = $(top_builddir)/libindimail.la
 
@@ -428,7 +430,7 @@ vrenameuser_SOURCES = vrenameuser.c
 vrenameuser_LDADD = @auth_libs@
 vrenameuser_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-vipmap_SOURCES = vipmap.c 
+vipmap_SOURCES = vipmap.c
 vipmap_LDADD = @auth_libs@
 vipmap_DEPENDENCIES = $(top_builddir)/libindimail.la
 
@@ -436,12 +438,12 @@ vlimit_SOURCES = vlimit.c
 vlimit_LDADD = @auth_libs@
 vlimit_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-vpriv_SOURCES = vpriv.c 
+vpriv_SOURCES = vpriv.c
 vpriv_LDADD = @auth_libs@
 vpriv_DEPENDENCIES = $(top_builddir)/libindimail.la
 
 crc_SOURCES=crc.c
-crc_LDADD = @auth_libs@ 
+crc_LDADD = @auth_libs@
 crc_DEPENDENCIES = $(top_builddir)/libindimail.la
 
 crcdiff_SOURCES=crcdiff.c
@@ -454,35 +456,35 @@ crypt_SOURCES = crypt.c
 crypt_LDADD = @auth_libs@ @LIB_CRYPT@
 crypt_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-ipchange_SOURCES = ipchange.c 
+ipchange_SOURCES = ipchange.c
 ipchange_LDADD = @auth_libs@
 ipchange_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-resetquota_SOURCES = resetquota.c 
+resetquota_SOURCES = resetquota.c
 resetquota_LDADD = @auth_libs@
 resetquota_DEPENDENCIES = $(top_builddir)/libindimail.la
 
-sslerator_SOURCES = sslerator.c 
+sslerator_SOURCES = sslerator.c
 sslerator_LDADD = @auth_libs@ sockwrite.lo $(shell cat socket.lib 2>/dev/null)
 sslerator_DEPENDENCIES = sockwrite.lo $(top_builddir)/libindimail.la
 
-proxyimap_SOURCES = proxyimap.c 
+proxyimap_SOURCES = proxyimap.c
 proxyimap_LDADD = @auth_libs@ proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
 				  monkey.lo sockwrite.lo
 proxyimap_DEPENDENCIES = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
 						 monkey.lo sockwrite.lo $(top_builddir)/libindimail.la
 
-proxypop3_SOURCES = proxypop3.c 
+proxypop3_SOURCES = proxypop3.c
 proxypop3_LDADD = @auth_libs@ proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
 				  monkey.lo sockwrite.lo
 proxypop3_DEPENDENCIES = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
 						 monkey.lo sockwrite.lo $(top_builddir)/libindimail.la
 
-vproxy_SOURCES = vproxy.c 
+vproxy_SOURCES = vproxy.c
 vproxy_LDADD = monkey.lo sockwrite.lo @auth_libs@
 vproxy_DEPENDENCIES = monkey.lo sockwrite.lo $(top_builddir)/libindimail.la
 
-vbulletin_SOURCES = vbulletin.c 
+vbulletin_SOURCES = vbulletin.c
 vbulletin_LDADD = bulletin.lo @auth_libs@
 vbulletin_DEPENDENCIES = bulletin.lo $(top_builddir)/libindimail.la
 
@@ -490,11 +492,11 @@ adminclient_SOURCES = adminclient.c
 adminclient_LDADD = @auth_libs@ tls.lo auth_admin.lo adminCmmd.lo
 adminclient_DEPENDENCIES = tls.lo auth_admin.lo adminCmmd.lo $(top_builddir)/libindimail.la
 
-indisrvr_SOURCES = indisrvr.c 
+indisrvr_SOURCES = indisrvr.c
 indisrvr_LDADD = @auth_libs@ sockwrite.lo checkPerm.lo $(shell cat socket.lib 2>/dev/null)
 indisrvr_DEPENDENCIES = sockwrite.lo checkPerm.lo $(top_builddir)/libindimail.la
 
-vdeloldusers_SOURCES = vdeloldusers.c 
+vdeloldusers_SOURCES = vdeloldusers.c
 vdeloldusers_LDADD = @auth_libs@ delunreadmails.lo getlastauth.lo \
 					 trashpurge.lo getindimail.lo
 vdeloldusers_DEPENDENCIES = delunreadmails.lo getlastauth.lo \
@@ -818,7 +820,7 @@ usr.sbin.clamd: usr.sbin.clamd.in
 usr.bin.freshclam: usr.bin.freshclam.in
 	$(edit) $@.in > $@
 indimail_config.h: config.h
-	egrep -v "PACKAGE|VERSION" config.h > indimail_config.h
+	egrep -v "#define PACKAGE" config.h > indimail_config.h
 
 debian/Makefile: debian/Makefile.in
 	$(edit) $@.in > $@;
@@ -920,7 +922,7 @@ indimail.spec iauth.la indimail.te indimail.fc usr.sbin.mysqld usr.sbin.clamd us
 
 # This is the last step in indimail installation. Post this installation will start in qmail
 # Hence we still cannot start svscan.
-install-data-hook: 
+install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)@prefix@/lib/indimail/modules || exit 1
 	$(INSTALL_DATA) $(DESTDIR)@libdir@/iauth.so  $(DESTDIR)@prefix@/lib/indimail/modules || exit 1
 	/bin/rm -f $(DESTDIR)@libdir@/iauth.* || exit 1
