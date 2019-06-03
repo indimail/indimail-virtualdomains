@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.2  2019-06-03 06:50:56+05:30  Cprogrammer
+ * use RTLD_NODELETE
+ *
  * Revision 1.1  2019-05-28 16:17:27+05:30  Cprogrammer
  * Initial revision
  *
@@ -14,7 +17,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.1 2019-05-28 16:17:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.2 2019-06-03 06:50:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
