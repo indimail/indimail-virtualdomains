@@ -1,5 +1,8 @@
 /*
  * $Log: hostcntrl.c,v $
+ * Revision 1.4  2019-06-07 15:59:31+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.3  2019-04-22 23:10:49+05:30  Cprogrammer
  * replaced atol() with scan_ulong()
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: hostcntrl.c,v 1.3 2019-04-22 23:10:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: hostcntrl.c,v 1.4 2019-06-07 15:59:31+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -71,7 +74,7 @@ get_options(int argc, char **argv, char **email, char **hostid, int *action)
 	verbose = 0;
 	*action = -1;
 	*hostid = *email = 0;
-	while ((c = getopt(argc, argv, "vlsd:i:m:")) != -1) {
+	while ((c = getopt(argc, argv, "vlsd:i:m:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
