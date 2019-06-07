@@ -1,5 +1,8 @@
 /*
  * $Log: vreorg.c,v $
+ * Revision 1.3  2019-06-07 15:41:57+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
  * Revision 1.2  2019-04-22 23:20:15+05:30  Cprogrammer
  * replaced atoi() with scan_int()
  *
@@ -44,7 +47,7 @@
 #include "next_big_dir.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vreorg.c,v 1.2 2019-04-22 23:20:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vreorg.c,v 1.3 2019-06-07 15:41:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vreorg: fatal: "
@@ -63,7 +66,7 @@ get_options(int argc, char **argv, char **domain, char **listfile, int *reset_di
 	int             c;
 	*listfile = *domain = 0;
 	*reset_dir = 0;
-	while ((c = getopt(argc, argv, "vrRd:")) != -1) {
+	while ((c = getopt(argc, argv, "vrRd:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
