@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 1.2  2019-06-07 15:53:04+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-18 15:51:43+05:30  Cprogrammer
  * Initial revision
  *
@@ -47,7 +50,7 @@
 #include "vsmtp_select.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 1.1 2019-04-18 15:51:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 1.2 2019-06-07 15:53:04+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define VDOMTOKENS ":\n"
@@ -100,7 +103,7 @@ get_options(int argc, char **argv, int *DisplayName, int *DisplayUid, int *Displ
 	*DisplayPort = 0;
 #endif
 	Domain->len = 0;
-	while ((c = getopt(argc, argv, "vanugdbtpl")) != -1) {
+	while ((c = getopt(argc, argv, "vanugdbtpl")) != opteof) {
 		switch (c)
 		{
 		case 'n':
