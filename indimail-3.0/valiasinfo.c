@@ -1,5 +1,9 @@
 /*
  * $Log: valiasinfo.c,v $
+ * Revision 1.2  2019-06-07 14:23:56+05:30  Cprogrammer
+ * fixed directory length
+ * added missing new line
+ *
  * Revision 1.1  2019-04-15 12:04:44+05:30  Cprogrammer
  * Initial revision
  *
@@ -35,7 +39,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valiasinfo.c,v 1.1 2019-04-15 12:04:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valiasinfo.c,v 1.2 2019-06-07 14:23:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -66,6 +70,7 @@ valiasinfo(char *user, char *domain)
 				!stralloc_catb(&Dir, "/alias", 6) ||
 				!stralloc_0(&Dir))
 			die_nomem();
+		Dir.len--;
 	} else
 	if (!get_assign(domain, &Dir, &uid, &gid))
 		Dir.len = 0;
@@ -106,6 +111,7 @@ valiasinfo(char *user, char *domain)
 					continue;
 				out("valiasinfo", !flag1++ ? "Forwarding    : " : "              : ");
 				out("valiasinfo", *ptr == '&' ? ptr + 1 : ptr);
+				out("valiasinfo", "\n");
 			}
 			close(fd);
 			if (!flag1++) {
