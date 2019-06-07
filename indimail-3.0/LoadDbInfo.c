@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbInfo.c,v $
+ * Revision 1.4  2019-06-07 10:51:50+05:30  Cprogrammer
+ * fix SIGSEGV on hosts with mcdfile missing (non-distributed domains)
+ *
  * Revision 1.3  2019-05-27 20:34:37+05:30  Cprogrammer
  * initialize socket & port after allocating dbinfo structure
  *
@@ -68,7 +71,7 @@
 #include "check_group.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.3 2019-05-27 20:34:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.4 2019-06-07 10:51:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static DBINFO **loadMCDInfo(int *);
@@ -855,7 +858,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 	getEnvConfigStr(&mysql_database, "MYSQL_DATABASE", MYSQL_DATABASE);
 	if (!count) { /*- no extra domains found in assign file */
 		close(fd);
-		if (total) {
+		if (total && *total) {
 			/*- 
 			 * remember that total is one less than the actual number of records allocated
 			 * in loadMCDInfo(). So for one more record we have to allocate total + 1 + 1
