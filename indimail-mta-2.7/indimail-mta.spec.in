@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.192 2019-06-02 16:14:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.193 2019-06-07 11:42:09+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -1306,7 +1306,6 @@ done
 %attr(755,root,root)                    %{_prefix}/bin/qfilelog
 %attr(755,root,root)                    %{_prefix}/bin/multipipe
 %attr(755,root,root)                    %{_prefix}/bin/teepipe
-%attr(755,root,root)                    %{_prefix}/bin/multitail
 %attr(755,root,root)                    %{_prefix}/bin/logselect
 %attr(755,root,root)                    %{_prefix}/bin/qlogselect
 %attr(755,root,root)                    %{_prefix}/sbin/svscan
@@ -1480,7 +1479,6 @@ done
 %attr(555,root,root)                    %{_prefix}/bin/qfilelog
 %attr(555,root,root)                    %{_prefix}/bin/multipipe
 %attr(555,root,root)                    %{_prefix}/bin/teepipe
-%attr(555,root,root)                    %{_prefix}/bin/multitail
 %attr(555,root,root)                    %{_prefix}/bin/logselect
 %attr(555,root,root)                    %{_prefix}/bin/qlogselect
 %attr(755,root,root)                    %{_prefix}/bin/qmailctl
@@ -1503,7 +1501,6 @@ done
 %attr(0644,root,root)                   %{mandir}/man1/qfilelog.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/multipipe.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/teepipe.1.gz
-%attr(0644,root,root)                   %{mandir}/man1/multitail.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/qlogselect.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/tai2tai64n.1.gz
 %attr(0644,root,root)                   %{mandir}/man1/tai64n2tai.1.gz

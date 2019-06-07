@@ -1490,7 +1490,7 @@ qtools: \
 822fields checkaddr checkdomain filterto \
 condtomaildir iftoccfrom ifaddr replier replier-config
 
-qlog: spipe qfilelog multipipe teepipe multitail qlogselect
+qlog: spipe qfilelog multipipe teepipe qlogselect
 
 load: \
 make-load warn-auto.sh systype
@@ -4998,12 +4998,6 @@ multipipe: load multipipe.o svcfns.o
 
 multipipe.o: compile multipipe.c select.h direntry.h bool.h svcfns.h
 	./compile multipipe.c
-
-multitail: load multitail.o
-	./load multitail
-
-multitail.o: compile multitail.c systime.h bool.h
-	./compile multitail.c
 
 teepipe: load teepipe.o
 	./load teepipe
