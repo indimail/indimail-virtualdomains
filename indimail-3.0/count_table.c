@@ -1,5 +1,8 @@
 /*
  * $Log: count_table.c,v $
+ * Revision 1.3  2019-06-07 16:04:47+05:30  Cprogrammer
+ * added include file indimail.h
+ *
  * Revision 1.2  2019-05-02 14:36:41+05:30  Cprogrammer
  * added argument to specify a 'where clause'
  *
@@ -20,11 +23,12 @@
 #endif
 #include <mysql.h>
 #include <mysqld_error.h>
+#include "indimail.h"
 #include "iopen.h"
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: count_table.c,v 1.2 2019-05-02 14:36:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: count_table.c,v 1.3 2019-06-07 16:04:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -56,7 +60,7 @@ count_table(char *table, char *condition)
 	}
 	if (!stralloc_0(&SqlBuf))
 		die_nomem();
-	if (mysql_query(&mysql[1], SqlBuf.s)) {
+	if (in_mysql_query(&mysql[1], SqlBuf.s)) {
 		if (in_mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
 			return (0);
 		strerr_warn4("count_table: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[0]), 0);
