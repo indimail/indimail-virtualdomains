@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 1.2  2019-06-07 15:44:30+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-14 18:29:31+05:30  Cprogrammer
  * Initial revision
  *
@@ -31,7 +34,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.1 2019-04-14 18:29:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.2 2019-06-07 15:44:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -56,7 +59,7 @@ get_options(int argc, char **argv, char **email, char **passwd, int *apop)
 	*email = *passwd = 0;
 	*apop = USE_POP;
 	Random = 0;
-	while ((c = getopt(argc, argv, "vrae")) != -1) {
+	while ((c = getopt(argc, argv, "vrae")) != opteof) {
 		switch (c)
 		{
 		case 'v':
