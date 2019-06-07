@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 1.3  2019-06-07 15:52:44+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.2  2019-04-22 23:17:07+05:30  Cprogrammer
  * added missing strerr.h
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 1.2 2019-04-22 23:17:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 1.3 2019-06-07 15:52:44+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -152,7 +155,7 @@ execMda(char **argptr, char **mda)
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 1.2 $", *mda;
+	char           *revision = "$Revision: 1.3 $", *mda;
 	static stralloc XFilter = {0};
 	pid_t           pid;
 	int             i, tmp_stat, wait_status;
@@ -372,7 +375,7 @@ get_options(int argc, char **argv, char **bounce, stralloc *emailid, stralloc *u
 		 *
 		 */
 		interactive = 1;
-		while ((c = getopt(argc, argv, "v")) != -1)
+		while ((c = getopt(argc, argv, "v")) != opteof)
 		{
 			switch (c)
 			{
