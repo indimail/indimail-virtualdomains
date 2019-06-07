@@ -15,7 +15,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.3 2019-06-07 16:00:18+05:30 mbhangui Exp $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.3 2019-06-07 16:00:18+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
