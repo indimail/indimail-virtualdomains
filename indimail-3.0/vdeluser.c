@@ -1,5 +1,8 @@
 /*
  * $Log: vdeluser.c,v $
+ * Revision 1.2  2019-06-07 15:53:23+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-18 08:15:41+05:30  Cprogrammer
  * Initial revision
  *
@@ -34,7 +37,7 @@
 #include "check_group.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeluser.c,v 1.1 2019-04-18 08:15:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeluser.c,v 1.2 2019-06-07 15:53:23+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define WARN    "vdeluser: warning: "
@@ -58,7 +61,7 @@ get_options(int argc, char **argv, stralloc *email)
 {
 	int             c;
 
-	while ((c = getopt(argc, argv, "v")) != -1) {
+	while ((c = getopt(argc, argv, "v")) != opteof) {
 		switch (c)
 		{
 		case 'v':
