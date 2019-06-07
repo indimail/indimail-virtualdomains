@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfo.c,v $
+ * Revision 1.3  2019-06-07 15:59:13+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.2  2019-04-22 23:10:07+05:30  Cprogrammer
  * added missing header strerr.h
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfo.c,v 1.2 2019-04-22 23:10:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbinfo.c,v 1.3 2019-06-07 15:59:13+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -107,7 +110,7 @@ get_options(int argc, char **argv, int *option, int *distributed, char **mysql_s
 	*option = *mysql_port = -1;
 	*use_ssl = 1;
 	*mysql_server = *mysql_database = *mysql_user = *mysql_pass = *mdahost = *domain = *filename = 0;
-	while ((c = getopt(argc, argv, "viurseld:cS:p:o:D:U:P:m:")) != -1) {
+	while ((c = getopt(argc, argv, "viurseld:cS:p:o:D:U:P:m:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
