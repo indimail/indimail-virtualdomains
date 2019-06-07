@@ -1,5 +1,8 @@
 /*
  * $Log: clearopensmtp.c,v $
+ * Revision 1.3  2019-06-07 15:58:53+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.2  2019-04-22 23:09:52+05:30  Cprogrammer
  * added missing header strerr.h
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: clearopensmtp.c,v 1.2 2019-04-22 23:09:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: clearopensmtp.c,v 1.3 2019-06-07 15:58:53+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY
@@ -73,7 +76,7 @@ main(int argc, char **argv)
 	/*-
 	 * default is to clear both MySQL relay table and cdb
 	 */
-	while ((c = getopt(argc, argv, "ts")) != -1) {
+	while ((c = getopt(argc, argv, "ts")) != opteof) {
 		switch (c)
 		{
 		case 'C':
