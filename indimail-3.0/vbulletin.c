@@ -1,5 +1,8 @@
 /*
  * $Log: vbulletin.c,v $
+ * Revision 1.2  2019-06-07 15:54:44+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-18 08:38:42+05:30  Cprogrammer
  * Initial revision
  *
@@ -57,7 +60,7 @@
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vbulletin.c,v 1.1 2019-04-18 08:38:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vbulletin.c,v 1.2 2019-06-07 15:54:44+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL            "vbulletin: fatal: "
@@ -93,7 +96,7 @@ get_options(int argc, char **argv, char **email, char **domain, char **emailFile
 	*email = *domain = *emailFile = *excludeFile = *subscriberList = 0;
 	verbose = 0;
 	DoNothing = 0;
-	while ((c = getopt(argc, argv, "VcshnaS:f:e:")) != -1) {
+	while ((c = getopt(argc, argv, "VcshnaS:f:e:")) != opteof) {
 		switch (c)
 		{
 		case 'V':
