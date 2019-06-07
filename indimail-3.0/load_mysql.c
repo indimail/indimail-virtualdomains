@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.4  2019-06-07 17:31:29+05:30  Cprogrammer
+ * changed scope of closeLibrary() to global
+ *
  * Revision 1.3  2019-06-07 16:07:56+05:30  Cprogrammer
  * fix for missing mysql_get_option() in new versions of libmariadb
  *
@@ -20,7 +23,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.3 2019-06-07 16:07:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.4 2019-06-07 17:31:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
@@ -225,7 +228,7 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 	return (*handle);
 }
 
-static void
+void
 closeLibrary(void **handle)
 {
 	if (*handle) {
