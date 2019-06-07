@@ -1,5 +1,8 @@
 /*
  * $Log: valias.c,v $
+ * Revision 1.3  2019-06-07 15:55:21+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.2  2019-04-22 23:16:22+05:30  Cprogrammer
  * added missing strerr.h
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias.c,v 1.2 2019-04-22 23:16:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valias.c,v 1.3 2019-06-07 15:55:21+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -26,7 +29,6 @@ static char     sccsid[] = "$Id: valias.c,v 1.2 2019-04-22 23:16:22+05:30 Cprogr
 #include <sgetopt.h>
 #include <stralloc.h>
 #include <strerr.h>
-#include <sgetopt.h>
 #include <fmt.h>
 #endif
 #include "iopen.h"
@@ -72,7 +74,7 @@ get_options(int argc, char **argv, char **email, stralloc *alias, stralloc *doma
 
 	*email = *aliasLine = 0;
 	*aliasAction = VALIAS_SELECT;
-	while ((c = getopt(argc, argv, "vmsSu:d:i:")) != -1) {
+	while ((c = getopt(argc, argv, "vmsSu:d:i:")) != opteof) {
 		switch (c)
 		{
 #ifdef CLUSTERED_SITE
