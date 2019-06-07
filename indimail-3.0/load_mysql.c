@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.3  2019-06-07 16:07:56+05:30  Cprogrammer
+ * fix for missing mysql_get_option() in new versions of libmariadb
+ *
  * Revision 1.2  2019-06-03 06:50:56+05:30  Cprogrammer
  * use RTLD_NODELETE
  *
@@ -17,7 +20,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.2 2019-06-03 06:50:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.3 2019-06-07 16:07:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
@@ -32,6 +35,9 @@ static char     sccsid[] = "$Id: load_mysql.c,v 1.2 2019-06-03 06:50:56+05:30 Cp
 #include <getln.h>
 #include <open.h>
 #endif
+#ifdef LIBMARIADB
+typedef char bool;
+#endif
 
 MYSQL          *(*in_mysql_init) (MYSQL *);
 MYSQL          *(*in_mysql_real_connect) (MYSQL *, const char *, const char *, const char *, const char *, unsigned int, const char *, unsigned long);
@@ -39,6 +45,9 @@ const char     *(*in_mysql_error) (MYSQL *);
 unsigned int    (*in_mysql_errno) (MYSQL *);
 void            (*in_mysql_close) (MYSQL *);
 int             (*in_mysql_options) (MYSQL *, enum mysql_option, const void *);
+#if MYSQL_VERSION_ID >= 50703 && !defined(MARIADB_BASE_VERSION)
+int             (*in_mysql_get_option) (MYSQL *, enum mysql_option, void *);
+#endif
 int             (*in_mysql_query) (MYSQL *, const char *);
 MYSQL_RES      *(*in_mysql_store_result) (MYSQL *);
 MYSQL_ROW       (*in_mysql_fetch_row) (MYSQL_RES *);
@@ -247,7 +256,11 @@ getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 	if ((ptr = dlerror()) && !stralloc_cats(&errbuf, ptr)) {
 		if (errstr)
 			*errstr = memerr;
-	}
+	} else
+	if (!stralloc_0(&errbuf)) {
+		if (errstr)
+			*errstr = memerr;
+	} else
 	if (errstr)
 		*errstr = errbuf.s;
 	return (i);
@@ -288,6 +301,11 @@ initMySQLlibrary(char **errstr)
 	else
 	if (!(in_mysql_options = getlibObject(ptr, &phandle, "mysql_options", errstr)))
 		return (1);
+#if MYSQL_VERSION_ID >= 50703 && !defined(MARIADB_BASE_VERSION)
+	else
+	if (!(in_mysql_get_option = getlibObject(ptr, &phandle, "mysql_get_option", errstr)))
+		return (1);
+#endif
 	else
 	if (!(in_mysql_query = getlibObject(ptr, &phandle, "mysql_query", errstr)))
 		return (1);
@@ -352,6 +370,10 @@ mysql_Init(MYSQL *mysql)
 	return (in_mysql_init(mysql));
 }
 #else /*- DLOPEN_LIBMYSQLCLIENT */
+#ifdef LIBMARIADB
+typedef char bool;
+#endif
+
 MYSQL *
 mysql_Init(MYSQL *mysql)
 {
@@ -389,6 +411,14 @@ in_mysql_options(MYSQL *mysql, enum mysql_option option, const void *arg)
 {
 	return (mysql_options(mysql, option, arg));
 }
+
+#if MYSQL_VERSION_ID >= 50703 && !defined(MARIADB_BASE_VERSION)
+int
+in_mysql_get_option(MYSQL *mysql, enum mysql_option option, void *arg)
+{
+	return (mysql_get_option(mysql, option, arg));
+}
+#endif
 
 int
 in_mysql_query(MYSQL *mysql, const char *q)
