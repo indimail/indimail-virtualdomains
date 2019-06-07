@@ -1,5 +1,8 @@
 /*
  * $Log: vtable.c,v $
+ * Revision 1.3  2019-06-07 15:40:14+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
  * Revision 1.2  2019-05-28 17:42:54+05:30  Cprogrammer
  * added load_mysql.h for mysql interceptor function prototypes
  *
@@ -33,7 +36,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vtable.c,v 1.2 2019-05-28 17:42:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vtable.c,v 1.3 2019-06-07 15:40:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -58,7 +61,7 @@ get_options(int argc, char **argv, char **mysql_server, char **mysql_socket, cha
 	int             c;
 
 	*mysql_port = *mysql_server = *mysql_database = *mysql_socket = *mysql_user = *mysql_pass = 0;
-	while ((c = getopt(argc, argv, "vS:p:s:D:U:P:")) != -1) {
+	while ((c = getopt(argc, argv, "vS:p:s:D:U:P:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
