@@ -1,5 +1,8 @@
 /*
  * $Log: vdeloldusers.c,v $
+ * Revision 1.2  2019-06-07 15:53:48+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-18 08:39:54+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeloldusers.c,v 1.1 2019-04-18 08:39:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeloldusers.c,v 1.2 2019-06-07 15:53:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING
@@ -104,7 +107,7 @@ get_options(int argc, char **argv, char **Domain, int *Age, int *mailAge,
 	*mailAge = DEFAULTMAIL_AGE;
 	*purge_db = 0;
 	c_option = i_option = p_option = 0;
-	while ((c = getopt(argc, argv, "vrpicfd:a:u:t:m:s:")) != -1) {
+	while ((c = getopt(argc, argv, "vrpicfd:a:u:t:m:s:")) != opteof) {
 		switch (c)
 		{
 		case 'd':
