@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.2 2019-06-02 16:13:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.3 2019-06-07 16:05:14+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1535,6 +1535,7 @@ done
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/vsmtp_update.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/vupdate_rules.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/wildmat.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/load_mysql.h
 
 %if %nocourierimap == 0
 %attr(644,root,qmail)                   %{_prefix}/include/courier-unicode.h
