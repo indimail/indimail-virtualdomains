@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.5  2019-06-07 15:55:52+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.4  2019-04-22 23:16:17+05:30  Cprogrammer
  * replaced atoi() with scan_int()
  *
@@ -73,7 +76,7 @@
 #include "get_indimailuidgid.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.4 2019-04-22 23:16:17+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.5 2019-06-07 15:55:52+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -461,7 +464,7 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 	s += fmt_strn(s, "f", 1);
 #endif
 	*s++ = 0;
-	while ((c = getopt(argc, argv, optbuf)) != -1) {
+	while ((c = getopt(argc, argv, optbuf)) != opteof) {
 		switch (c)
 		{
 		case 'B':
