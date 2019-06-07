@@ -1,5 +1,8 @@
 /*
  * $Log: bulletin.c,v $
+ * Revision 1.2  2019-06-07 15:58:03+05:30  mbhangui
+ * added include file stdlib.h
+ *
  * Revision 1.1  2019-04-15 09:45:57+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,6 +12,9 @@
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
 #endif
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -50,7 +56,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: bulletin.c,v 1.1 2019-04-15 09:45:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: bulletin.c,v 1.2 2019-06-07 15:58:03+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
