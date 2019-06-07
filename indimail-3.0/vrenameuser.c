@@ -1,5 +1,8 @@
 /*
  * $Log: vrenameuser.c,v $
+ * Revision 1.2  2019-06-07 15:42:29+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-18 08:33:39+05:30  Cprogrammer
  * Initial revision
  *
@@ -19,6 +22,7 @@
 #include <env.h>
 #include <strerr.h>
 #include <fmt.h>
+#include <sgetopt.h>
 #endif
 #include "parse_email.h"
 #include "get_assign.h"
@@ -31,7 +35,7 @@
 #include "setuserid.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenameuser.c,v 1.1 2019-04-18 08:33:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vrenameuser.c,v 1.2 2019-06-07 15:42:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vrenameuser: fatal: "
@@ -49,7 +53,7 @@ get_options(int argc, char **argv, char **oldEmail, char **newEmail)
 	int             c;
 
 	*oldEmail = *newEmail = 0;
-	while ((c = getopt(argc, argv, "v")) != -1) {
+	while ((c = getopt(argc, argv, "v")) != opteof) {
 		switch (c)
 		{
 		case 'v':
