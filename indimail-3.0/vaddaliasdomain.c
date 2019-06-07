@@ -1,5 +1,8 @@
 /*
  * $Log: vaddaliasdomain.c,v $
+ * Revision 1.2  2019-06-07 15:56:08+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-14 21:01:29+05:30  Cprogrammer
  * Initial revision
  *
@@ -29,7 +32,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vaddaliasdomain.c,v 1.1 2019-04-14 21:01:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vaddaliasdomain.c,v 1.2 2019-06-07 15:56:08+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL   "vaddaliasdomain: fatal: "
@@ -48,7 +51,7 @@ get_options(int argc, char **argv, char **domain_new, char **domain_old)
 	int             c;
 
 	*domain_old = *domain_new = 0;
-	while ((c = getopt(argc, argv, "v")) != -1) {
+	while ((c = getopt(argc, argv, "v")) != opteof) {
 		switch (c)
 		{
 		case 'v':
