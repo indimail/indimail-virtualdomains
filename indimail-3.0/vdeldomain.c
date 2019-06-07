@@ -1,5 +1,8 @@
 /*
  * $Log: vdeldomain.c,v $
+ * Revision 1.2  2019-06-07 15:54:18+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-18 08:14:54+05:30  Cprogrammer
  * Initial revision
  *
@@ -45,7 +48,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeldomain.c,v 1.1 2019-04-18 08:14:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeldomain.c,v 1.2 2019-06-07 15:54:18+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static char    *usage =
@@ -70,7 +73,7 @@ get_options(int argc, char **argv, stralloc *Domain, int *mcd_remove)
 {
 	int             c;
 
-	while ((c = getopt(argc, argv, "cTv")) != -1) {
+	while ((c = getopt(argc, argv, "cTv")) != opteof) {
 		switch (c)
 		{
 		case 'v':
