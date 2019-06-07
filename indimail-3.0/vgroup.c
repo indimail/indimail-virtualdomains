@@ -1,5 +1,8 @@
 /*
  * $Log: vgroup.c,v $
+ * Revision 1.3  2019-06-07 15:51:55+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.2  2019-04-22 23:19:29+05:30  Cprogrammer
  * added missing strerr.h
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 1.2 2019-04-22 23:19:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 1.3 2019-06-07 15:51:55+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -78,7 +81,7 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos, char
 	*group = *gecos = *member = *old_member = *passwd = *hostid = *mdahost = *quota = 0;
 	*option = -1;
 	*ignore = 0;
-	while ((c = getopt(argc, argv, "vaIc:i:d:o:u:h:m:q:")) != -1) {
+	while ((c = getopt(argc, argv, "vaIc:i:d:o:u:h:m:q:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
