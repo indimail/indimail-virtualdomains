@@ -1,5 +1,8 @@
 /*
  * $Log: vhostid.c,v $
+ * Revision 1.3  2019-06-07 15:50:40+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.2  2019-04-22 23:19:34+05:30  Cprogrammer
  * added missing strerr.h
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vhostid.c,v 1.2 2019-04-22 23:19:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vhostid.c,v 1.3 2019-06-07 15:50:40+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -65,7 +68,7 @@ get_options(int argc, char **argv, char **hostid, char **ipaddr, int *hostaction
 
 	*hostid = *ipaddr = 0;
 	*hostaction = HOST_SELECT;
-	while ((c = getopt(argc, argv, "vsSdu:i:")) != -1) {
+	while ((c = getopt(argc, argv, "vsSdu:i:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
