@@ -1,5 +1,8 @@
 /*
  * $Log: updatefile.c,v $
+ * Revision 1.2  2019-06-07 16:10:05+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-18 08:33:41+05:30  Cprogrammer
  * Initial revision
  *
@@ -25,7 +28,7 @@
 #include "update_file.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: updatefile.c,v 1.1 2019-04-18 08:33:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: updatefile.c,v 1.2 2019-06-07 16:10:05+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL   "updatefile: fatal: "
@@ -48,7 +51,7 @@ get_options(int argc, char **argv, char **filename, char **updateLine, char **de
 	*all = 0;*filename = *updateLine = *deleteLine = 0;
 	*mode = 0644;
 	*display = 0;
-	while ((c = getopt(argc, argv, "vsau:d:m:")) != -1) {
+	while ((c = getopt(argc, argv, "vsau:d:m:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
