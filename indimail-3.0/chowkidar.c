@@ -93,9 +93,9 @@ main(int argc, char **argv)
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	relative = *controldir == '/' ? 0 : 1;
 #ifdef CLUSTERED_SITE
-	while ((c = getopt(argc, argv, "f:t:b:s:n:o:BTSVrqv")) != -1)
+	while ((c = getopt(argc, argv, "f:t:b:s:n:o:BTSVrqv")) != opteof)
 #else
-	while ((c = getopt(argc, argv, "f:t:b:s:n:o:BTSVqv")) != -1)
+	while ((c = getopt(argc, argv, "f:t:b:s:n:o:BTSVqv")) != opteof)
 #endif
 	{
 		switch (c)
