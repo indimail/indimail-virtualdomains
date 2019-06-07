@@ -1,5 +1,8 @@
 /*
  * $Log: ipchange.c,v $
+ * Revision 1.3  2019-06-07 16:06:32+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
  * Revision 1.2  2019-04-22 23:12:47+05:30  Cprogrammer
  * added missing strerr.h
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ipchange.c,v 1.2 2019-04-22 23:12:47+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ipchange.c,v 1.3 2019-06-07 16:06:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -25,6 +28,7 @@ static char     sccsid[] = "$Id: ipchange.c,v 1.2 2019-04-22 23:12:47+05:30 Cpro
 #include <stralloc.h>
 #include <strerr.h>
 #include <fmt.h>
+#include <sgetopt.h>
 #endif
 #include "variables.h"
 #include "open_master.h"
@@ -52,7 +56,7 @@ get_options(int argc, char **argv, char **old_ip, char **new_ip,
 	*column_name = *old_ip = *new_ip = *table_name = 0;
 	*which = ON_LOCAL;
 	verbose = 0;
-	while ((c = getopt(argc, argv, "vmc:o:n:")) != -1) {
+	while ((c = getopt(argc, argv, "vmc:o:n:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
