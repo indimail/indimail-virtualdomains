@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 1.3  2019-06-07 16:02:39+05:30  mbhangui
+ * replaced getenv() with env_get()
+ *
  * Revision 1.2  2019-04-22 23:14:42+05:30  Cprogrammer
  * replaced atoi() with scan_int()
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 1.2 2019-04-22 23:14:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 1.3 2019-06-07 16:02:39+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -550,7 +553,7 @@ imapd_capability()
 	out("proxylogin", "* CAPABILITY ");
 	if ((p = env_get("IMAP_TLS")))
 		scan_int(p, &t);
-	if (p && t && (p = getenv("IMAP_CAPABILITY_TLS")) && *p)
+	if (p && t && (p = env_get("IMAP_CAPABILITY_TLS")) && *p)
 		out("proxylogin", p);
 	else
 	if ((p = env_get("IMAP_CAPABILITY")) != 0 && *p)
