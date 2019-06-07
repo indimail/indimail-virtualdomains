@@ -1,5 +1,9 @@
 /*
  * $Log: load_mysql.h,v $
+ * Revision 1.2  2019-06-07 16:09:24+05:30  Cprogrammer
+ * fix for missing mysql_get_option() in new versions of libmariadb
+ * fixes for libmariadb
+ *
  * Revision 1.1  2019-05-28 16:39:11+05:30  Cprogrammer
  * Initial revision
  *
@@ -11,10 +15,15 @@
 #endif
 #include <mysql.h>
 
-typedef struct MYSQL_RES res;
 typedef unsigned int i_uint;
 typedef unsigned long i_ulong;
 typedef const char i_char;
+#ifdef LIBMARIADB
+typedef char bool;
+typedef struct st_mysql_res res;
+#else
+typedef struct MYSQL_RES res;
+#endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
 extern MYSQL   *mysql_Init(MYSQL *);
@@ -24,6 +33,9 @@ extern i_char  *(*in_mysql_error) (MYSQL *);
 extern i_uint   (*in_mysql_errno) (MYSQL *mysql);
 extern void     (*in_mysql_close) (MYSQL *);
 extern int      (*in_mysql_options) (MYSQL *, enum mysql_option, const void *);
+#if MYSQL_VERSION_ID >= 50703 && !defined(MARIADB_BASE_VERSION)
+extern int      (*in_mysql_get_option) (MYSQL *, enum mysql_option, void *);
+#endif
 extern int      (*in_mysql_query) (MYSQL *, const char *);
 extern res     *(*in_mysql_store_result) (MYSQL *);
 extern char   **(*in_mysql_fetch_row) (MYSQL_RES *);
@@ -53,6 +65,9 @@ extern i_char  *in_mysql_error(MYSQL *);
 extern i_uint   in_mysql_errno(MYSQL *mysql);
 extern void     in_mysql_close(MYSQL *);
 extern int      in_mysql_options(MYSQL *, enum mysql_option, const void *);
+#if MYSQL_VERSION_ID >= 50703 && !defined(MARIADB_BASE_VERSION)
+extern int      in_mysql_get_option(MYSQL *, enum mysql_option, void *);
+#endif
 extern int      in_mysql_query(MYSQL *, const char *);
 extern res     *in_mysql_store_result(MYSQL *);
 extern char   **in_mysql_fetch_row(MYSQL_RES *);
