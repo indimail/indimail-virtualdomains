@@ -72,10 +72,10 @@ initMySQLlibrary(char **errstr)
 				return(-1);
 		}
 		ptr = libfn.s;
-		if (access_ptr, R_OK)
+		if (access(ptr, R_OK))
 			return (0);
 	} else {
-		if (access_ptr, R_OK)
+		if (access(ptr, R_OK))
 			return (0);
 		ptr = "MYSQL_LIB";
 	}
