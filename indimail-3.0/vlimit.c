@@ -1,5 +1,8 @@
 /*
  * $Log: vlimit.c,v $
+ * Revision 1.4  2019-06-07 15:46:15+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
  * Revision 1.3  2019-05-02 14:39:12+05:30  Cprogrammer
  * fixed SIGSEGV
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vlimit.c,v 1.3 2019-05-02 14:39:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vlimit.c,v 1.4 2019-06-07 15:46:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -133,7 +136,7 @@ get_options(int argc, char **argv, char **Domain, char **DomainQuota, char **Def
 	*domain_expiry = *passwd_expiry = 0l;
 
 	flag[0] = flag[1] = flag[2] = flag[3] = 0;
-	while ((c = getopt(argc, argv, "vst:e:n:N:DQ:q:M:m:P:A:F:R:L:g:p:a:f:r:l:u:o:x:z:h")) != -1) {
+	while ((c = getopt(argc, argv, "vst:e:n:N:DQ:q:M:m:P:A:F:R:L:g:p:a:f:r:l:u:o:x:z:h")) != opteof) {
 		switch (c)
 		{
 		case 'v':
