@@ -95,10 +95,10 @@ getuserinfo(char *username, stralloc *homedir, stralloc *user, stralloc *domain)
 		real_domain = domain->s;
 	if (!(mypw = sql_getpw(user->s, real_domain))) {
 		if(!userNotFound)
-			exit(111);
+			_exit(111);
 		strerr_warn4("vacation: no such user ", user->s, "@", real_domain, 0);
 		iclose();
-		exit(100);
+		_exit(100);
 	}
 	iclose();
 	if (!stralloc_copys(homedir, mypw->pw_dir) ||
