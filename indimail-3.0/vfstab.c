@@ -1,5 +1,8 @@
 /*
  * $Log: vfstab.c,v $
+ * Revision 1.3  2019-06-07 15:52:18+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.2  2019-04-22 23:19:02+05:30  Cprogrammer
  * replaced atol() with scan_int()
  *
@@ -22,13 +25,14 @@
 #include <qprintf.h>
 #include <fmt.h>
 #include <scan.h>
+#include <sgetopt.h>
 #endif
 #include "variables.h"
 #include "vfstab.h"
 #include "getFreeFS.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfstab.c,v 1.2 2019-04-22 23:19:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfstab.c,v 1.3 2019-06-07 15:52:18+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL         "vfstab: fatal: "
@@ -65,7 +69,7 @@ get_options(int argc, char **argv, int *fstabAction, int *FStabstatus, char **md
 
 	*mdaHost = *fileSystem = 0;
 	*fstabAction = FSTAB_SELECT;
-	while ((c = getopt(argc, argv, "vdiusblo:m:q:n:")) != -1) {
+	while ((c = getopt(argc, argv, "vdiusblo:m:q:n:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
