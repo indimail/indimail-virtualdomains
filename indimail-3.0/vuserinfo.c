@@ -1,5 +1,8 @@
 /*
  * $Log: vuserinfo.c,v $
+ * Revision 1.2  2019-06-07 15:39:32+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-14 18:30:52+05:30  Cprogrammer
  * Initial revision
  *
@@ -25,6 +28,7 @@
 #include <stralloc.h>
 #include <strerr.h>
 #include <fmt.h>
+#include <sgetopt.h>
 #endif
 #include "common.h"
 #include "userinfo.h"
@@ -38,7 +42,7 @@
 #define FATAL   "vuserinfo: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vuserinfo.c,v 1.1 2019-04-14 18:30:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vuserinfo.c,v 1.2 2019-06-07 15:39:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char           *usage =
@@ -91,7 +95,7 @@ main(argc, argv)
 #ifdef VFILTER
 	s += fmt_strn(s, "f", 1);
 #endif
-	while ((c = getopt(argc, argv, opt_str)) != -1) {
+	while ((c = getopt(argc, argv, opt_str)) != opteof) {
 		switch (c)
 		{
 		case 'a':
