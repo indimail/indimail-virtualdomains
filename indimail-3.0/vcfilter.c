@@ -1,5 +1,8 @@
 /*
  * $Log: vcfilter.c,v $
+ * Revision 1.3  2019-06-07 15:54:31+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.2  2019-04-22 23:16:58+05:30  Cprogrammer
  * added missing strerr.h
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 1.2 2019-04-22 23:16:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 1.3 2019-06-07 15:54:31+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -200,7 +203,7 @@ get_options(int argc, char **argv, char **email, stralloc *faddr,
 	max_header--;
 	max_comparision--;
 	*cluster_conn = 0;
-	while ((c = getopt(argc, argv, "vCsird:u:h:c:b:k:f:t:")) != -1) {
+	while ((c = getopt(argc, argv, "vCsird:u:h:c:b:k:f:t:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
