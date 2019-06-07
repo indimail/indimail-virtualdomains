@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 1.4  2019-06-07 16:10:55+05:30  mbhangui
+ * fix for missing mysql_get_option() in new versions of libmariadb
+ *
  * Revision 1.3  2019-05-28 17:37:26+05:30  Cprogrammer
  * added load_mysql.h for mysql interceptor function prototypes
  *
@@ -39,7 +42,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 1.3 2019-05-28 17:37:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 1.4 2019-06-07 16:10:55+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static MYSQL   *is_duplicate_conn(MYSQL **, DBINFO **);
@@ -171,8 +174,8 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 		(*ptr)->failed_attempts++;
 		return (1);
 	}
-#ifdef HAVE_MYSQL_OPT_SSL_ENFORCE
-	if (mysql_get_option(*mysqlptr, MYSQL_OPT_SSL_ENFORCE, &use_ssl)) {
+#if MYSQL_VERSION_ID >= 50703 && !defined(MARIADB_BASE_VERSION) && defined(HAVE_MYSQL_OPT_SSL_ENFORCE)
+	if (in_mysql_get_option(*mysqlptr, MYSQL_OPT_SSL_ENFORCE, &use_ssl)) {
 		strerr_warn2("dbload: mysql_get_option: MYSQL_OPT_SSL_ENFORCE: ", (char *) in_mysql_error(*mysqlptr), 0);
 		return (1);
 	}
