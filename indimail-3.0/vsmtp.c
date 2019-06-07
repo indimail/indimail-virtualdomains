@@ -1,5 +1,8 @@
 /*
  * $Log: vsmtp.c,v $
+ * Revision 1.3  2019-06-07 15:40:32+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
  * Revision 1.2  2019-04-22 23:20:25+05:30  Cprogrammer
  * added missing strerr.h
  *
@@ -34,7 +37,7 @@
 #include "get_smtp_service_port.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsmtp.c,v 1.2 2019-04-22 23:20:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsmtp.c,v 1.3 2019-06-07 15:40:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vsmtp: fatal: "
@@ -76,7 +79,7 @@ get_options(int argc, char **argv, char **mdahost, char **mta, stralloc *hostid,
 	*mta = *mdahost = 0;
 	*port = -1;
 	SmtpAction = SMTP_SELECT;
-	while ((c = getopt(argc, argv, "vsdi:u:m:")) != -1) {
+	while ((c = getopt(argc, argv, "vsdi:u:m:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
