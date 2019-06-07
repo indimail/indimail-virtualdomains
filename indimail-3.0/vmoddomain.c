@@ -1,5 +1,8 @@
 /*
  * $Log: vmoddomain.c,v $
+ * Revision 1.2  2019-06-07 15:45:51+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-18 08:34:04+05:30  Cprogrammer
  * Initial revision
  *
@@ -39,7 +42,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomain.c,v 1.1 2019-04-18 08:34:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoddomain.c,v 1.2 2019-06-07 15:45:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vmoddomain: warning: "
@@ -89,7 +92,7 @@ get_options(int argc, char **argv, int *use_vfilter, int *domain_limits,
 	*use_vfilter = -1;
 	*domain_limits = -1;
 	*handler = *domain = 0;
-	while ((c = getopt(argc, argv, "avf:h:l:")) != -1) {
+	while ((c = getopt(argc, argv, "avf:h:l:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
