@@ -1,5 +1,8 @@
 /*
  * $Log: resetquota.c,v $
+ * Revision 1.2  2019-06-07 16:01:45+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-18 08:36:21+05:30  Cprogrammer
  * Initial revision
  *
@@ -35,7 +38,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: resetquota.c,v 1.1 2019-04-18 08:36:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: resetquota.c,v 1.2 2019-06-07 16:01:45+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL         "resetquota: fatal: "
@@ -64,7 +67,7 @@ get_options(int argc, char **argv, char **user, char **group, char **perm, char 
 
 	*user = *group = *perm = *quota = 0;
 	verbose = 0;
-	while ((c = getopt(argc, argv, "vu:g:p:q:")) != -1) {
+	while ((c = getopt(argc, argv, "vu:g:p:q:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
