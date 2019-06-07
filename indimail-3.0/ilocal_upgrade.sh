@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: ilocal_upgrade.sh,v $
+# Revision 2.24  2019-06-07 19:21:49+05:30  Cprogrammer
+# set mysql_lib control file
+#
 # Revision 2.23  2018-03-25 22:19:07+05:30  Cprogrammer
 # removed chmod of variables directory as it is redundant now with read perm for indimail group
 #
@@ -70,7 +73,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: ilocal_upgrade.sh,v 2.23 2018-03-25 22:19:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.24 2019-06-07 19:21:49+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -90,7 +93,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: ilocal_upgrade.sh,v 2.23 2018-03-25 22:19:07+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: ilocal_upgrade.sh,v 2.24 2019-06-07 19:21:49+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do
@@ -127,7 +130,36 @@ if [ -f /etc/indimail/cronlist.i -a -d /etc/cron.d ] ; then
 		$cp /etc/indimail/cronlist.i /etc/cron.d/cronlist.i
 	fi
 fi
+
+# upgrade MYSQL_LIB for dynamic loading of libmysqlclient
+prev_num=0
+for i in `ls -t /usr/lib*/libmysqlclient.so.*.*.* 2>/dev/null`
+do
+	file=`basename $i`
+	num=`echo $file | cut -d. -f3`
+	if [ $num -gt $prev_num ] ; then
+		prev_num=$num
+		mysqllib=$i
+	fi
+done
+if [ -z "$mysqllib" ] ; then
+for i in `ls -t /usr/lib*/mysql/libmysqlclient.so.*.*.* 2>/dev/null`
+do
+	file=`basename $i`
+	num=`echo $file | cut -d. -f3`
+	if [ $num -gt $prev_num ] ; then
+		prev_num=$num
+		mysqllib=$i
+	fi
+done
+fi
+if [ -n "$mysqllib" -a -f $mysqllib ] ; then
+	check_update_if_diff /etc/indimail/control/mysql_lib $mysqllib
+else
+	/bin/rm -f /etc/indimail/control/mysql_lib
+fi
 } 
+
 case $1 in
 	post|posttrans)
 	do_post_upgrade $1
