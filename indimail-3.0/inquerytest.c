@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 1.2  2019-06-07 16:05:57+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-18 08:19:53+05:30  Cprogrammer
  * Initial revision
  *
@@ -45,7 +48,7 @@
 #include "vlimits.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 1.1 2019-04-18 08:19:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 1.2 2019-06-07 16:05:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "inquerytest: fatal: "
@@ -202,7 +205,7 @@ main(int argc, char **argv)
 	int             c, query_type = -1, fd = -1, status;
 	pid_t           pid;
 
-	while ((c = getopt(argc, argv, "vq:i:")) != -1) {
+	while ((c = getopt(argc, argv, "vq:i:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
