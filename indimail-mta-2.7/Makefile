@@ -2216,11 +2216,13 @@ load qmail-qread.o fmtqfn.o readsubdir.o date822fmt.o datetime.a \
 open.a getln.a stralloc.a alloc.a substdio.a error.a str.a fs.a \
 auto_qmail.o auto_split.o envread.o str_diffn.o variables.o control.o \
 stralloc_copy.o stralloc_cat.o now.o envdir_set.o pathexec_env.o \
+sgetopt.o subgetopt.o substdo.o subfderr.o \
 auto_control.o pathexec_run.o openreadclose.o strerr_die.o strerr_sys.o
 	./load qmail-qread fmtqfn.o readsubdir.o date822fmt.o \
 	control.o stralloc_copy.o stralloc_cat.o str_diffn.o \
 	auto_qmail.o auto_split.o envread.o variables.o now.o \
 	envdir_set.o pathexec_env.o pathexec_run.o \
+	sgetopt.o subgetopt.o substdo.o subfderr.o \
 	auto_control.o openreadclose.o strerr_die.o strerr_sys.o \
 	datetime.a open.a getln.a stralloc.a alloc.a substdio.a \
 	error.a str.a fs.a
@@ -2234,7 +2236,7 @@ compile qmail-qread.c stralloc.h gen_alloc.h substdio.h subfd.h \
 fmt.h str.h getln.h fmtqfn.h readsubdir.h direntry.h \
 control.h auto_qmail.h open.h datetime.h date822fmt.h error.h \
 scan.h exit.h env.h envdir.h pathexec.h variables.h \
-conf-queue auto_control.h
+sgetopt.h conf-queue auto_control.h
 	if test -f conf-queue ; then \
 	./compile -DMULTI_QUEUE -DQUEUE_COUNT=`cat conf-queue` qmail-qread.c; \
 	else \
@@ -2349,16 +2351,18 @@ dktrace.o: compile dktrace.c dktrace.h str.h case.h conf-domainkeys
 
 dktest: load dktest.o scan_ulong.o domainkeys.o dktrace.o \
 dns.o ip.o strsalloc.o error.o ipalloc.o fmt_ulong.o fmt_xlong.o \
+sgetopt.o subgetopt.o subfderr.o substdo.o \
 scan_xlong.o socket_v4mappedprefix.o socket_v6any.o fmt_hexbytes.o \
 tlsarralloc.o dns_text.o case_diffs.o case_diffb.o fmt_str.o \
 stralloc.a alloc.a str.a dns.lib
 	./load dktest scan_ulong.o domainkeys.o dktrace.o \
 	dns.o ip.o strsalloc.o error.o ipalloc.o fmt_ulong.o fmt_xlong.o \
+	sgetopt.o subgetopt.o subfderr.o substdo.o \
 	scan_xlong.o socket_v4mappedprefix.o socket_v6any.o fmt_hexbytes.o \
 	tlsarralloc.o dns_text.o case_diffs.o case_diffb.o fmt_str.o \
 	stralloc.a alloc.a str.a -lcrypto `cat dns.lib`
 
-dktest.o: compile dktest.c domainkeys.h conf-domainkeys
+dktest.o: compile dktest.c domainkeys.h sgetopt.h conf-domainkeys
 	./compile `grep -h -v "^#" conf-domainkeys` dktest.c
 
 testtrace: load testtrace.o dns.o case_diffs.o case_diffb.o domainkeys.o dktrace.o \
@@ -3776,11 +3780,13 @@ sig.h str.h strerr.h substdio.h env.h
 	./compile maildirdeliver.c
 
 qmail-rm: load qmail-rm.o auto_split.o auto_qmail.o error_str.o \
-	error.o fmt_str.o control.o envread.o scan_ulong.o now.o \
-	auto_control.o open_read.o getln.o getln2.o variables.o open_write.o \
-	lock_exnb.o fmt_ulong.o stralloc.a substdio.a str.a alloc.a
+error.o fmt_str.o control.o envread.o scan_ulong.o now.o \
+auto_control.o open_read.o getln.o getln2.o variables.o open_write.o \
+sgetopt.o subgetopt.o substdo.o subfderr.o \
+lock_exnb.o fmt_ulong.o stralloc.a substdio.a str.a alloc.a
 	./load qmail-rm auto_split.o auto_qmail.o error_str.o \
 	error.o fmt_str.o control.o envread.o scan_ulong.o now.o \
+	sgetopt.o subgetopt.o substdo.o subfderr.o \
 	auto_control.o open_read.o getln.o getln2.o variables.o open_write.o \
 	lock_exnb.o fmt_ulong.o stralloc.a substdio.a str.a alloc.a
 
