@@ -1,5 +1,8 @@
 /*
  * $Log: sslerator.c,v $
+ * Revision 1.2  2019-06-07 16:07:19+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-18 08:37:55+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: sslerator.c,v 1.1 2019-04-18 08:37:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sslerator.c,v 1.2 2019-06-07 16:07:19+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef HAVE_SSL
@@ -218,7 +221,7 @@ get_options(int argc, char **argv, int *err_to_net, char ***pgargs)
 
 	certfile = 0;
 	*err_to_net = 0;
-	while ((c = getopt(argc, argv, "vn:")) != -1) {
+	while ((c = getopt(argc, argv, "vn:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
