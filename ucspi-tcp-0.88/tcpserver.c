@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.61  2019-06-07 19:20:54+05:30  Cprogrammer
+ * print MySQL load status
+ *
  * Revision 1.60  2019-05-26 12:04:50+05:30  Cprogrammer
  * use /etc/indimail/control as controldir
  *
@@ -203,7 +206,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.60 2019-05-26 12:04:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.61 2019-06-07 19:20:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1070,7 +1073,7 @@ printstatus(void)
 		return;
 	strnum[fmt_ulong(strnum, numchildren)] = 0;
 	strnum2[fmt_ulong(strnum2, limit)] = 0;
-	strerr_warn4("tcpserver: status: ", strnum, "/", strnum2, 0);
+	strerr_warn5("tcpserver: status: ", strnum, "/", strnum2, use_sql ? " sql: 1" : " sql: 0", 0);
 }
 
 void
