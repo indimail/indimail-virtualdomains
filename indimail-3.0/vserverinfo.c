@@ -1,5 +1,8 @@
 /*
  * $Log: vserverinfo.c,v $
+ * Revision 1.2  2019-06-07 15:41:24+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-18 08:37:38+05:30  Cprogrammer
  * Initial revision
  *
@@ -27,7 +30,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vserverinfo.c,v 1.1 2019-04-18 08:37:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vserverinfo.c,v 1.2 2019-06-07 15:41:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      display_user, display_passwd, display_database, display_port,
@@ -41,7 +44,7 @@ get_options(int argc, char **argv, char **mdahost, char **server, char **domain,
 	*email = *mdahost = *server = *domain = (char *) 0;
 	display_all = 0;
 	display_user = display_passwd = display_server = display_mdahost = display_port = display_database = 0;
-	while ((c = getopt(argc, argv, "vdsmupPD:M:S:a")) != -1) {
+	while ((c = getopt(argc, argv, "vdsmupPD:M:S:a")) != opteof) {
 		switch (c)
 		{
 		case 'v':
