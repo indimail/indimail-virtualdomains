@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.5  2019-06-07 19:22:07+05:30  Cprogrammer
+ * treat missing libmysqlclient as error
+ *
  * Revision 1.4  2019-06-07 17:31:29+05:30  Cprogrammer
  * changed scope of closeLibrary() to global
  *
@@ -23,7 +26,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.4 2019-06-07 17:31:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.5 2019-06-07 19:22:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
@@ -184,7 +187,7 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 		*errflag = -1;
 	if (errstr)
 		*errstr = (char *) 0;
-	if (access(ptr, R_OK)) {
+	if (*libenv != '/' && access(ptr, R_OK)) {
 		if (errflag)
 			*errflag = errno;
 		if (!stralloc_copys(&errbuf, error_str(errno))) {
@@ -204,12 +207,6 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 #else
 	if (!(*handle = dlopen(ptr, RTLD_NOW|RTLD_GLOBAL))) {
 #endif
-		if (errno == 2 && errflag) {
-			*errflag = 0;
-			if (errstr)
-				*errstr = (char *) 0;
-			return ((void *) 0);
-		}
 		if (!stralloc_copys(&errbuf, dlerror())) {
 			if (errstr)
 				*errstr = memerr;
@@ -249,22 +246,24 @@ getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 	if (!*handle)
 		return ((void *) 0);
 	i = dlsym(*handle, plugin_symb);
-	if (!stralloc_copyb(&errbuf, "getlibObject: ", 14) ||
+	if (!i && (!stralloc_copyb(&errbuf, "getlibObject: ", 14) ||
 			!stralloc_cats(&errbuf, plugin_symb) ||
-			!stralloc_catb(&errbuf, ": ", 2))
+			!stralloc_catb(&errbuf, ": ", 2)))
 	{
 		if (errstr)
 			*errstr = memerr;
 	}
-	if ((ptr = dlerror()) && !stralloc_cats(&errbuf, ptr)) {
+	if (!i && (ptr = dlerror()) && !stralloc_cats(&errbuf, ptr)) {
 		if (errstr)
 			*errstr = memerr;
 	} else
-	if (!stralloc_0(&errbuf)) {
+	if (!i)
+		errbuf.len--; /*- remove trailing colon */
+	if (!i && !stralloc_0(&errbuf)) {
 		if (errstr)
 			*errstr = memerr;
-	} else
-	if (errstr)
+	}
+	if (!i && errstr)
 		*errstr = errbuf.s;
 	return (i);
 }
