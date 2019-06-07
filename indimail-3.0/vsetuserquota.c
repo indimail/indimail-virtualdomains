@@ -1,5 +1,8 @@
 /*
  * $Log: vsetuserquota.c,v $
+ * Revision 1.2  2019-06-07 15:40:53+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-14 18:28:07+05:30  Cprogrammer
  * Initial revision
  *
@@ -20,6 +23,7 @@
 #include <stralloc.h>
 #include <strerr.h>
 #include <env.h>
+#include <sgetopt.h>
 #endif
 #include "get_indimailuidgid.h"
 #include "lowerit.h"
@@ -36,7 +40,7 @@
 #include "setuserquota.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsetuserquota.c,v 1.1 2019-04-14 18:28:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetuserquota.c,v 1.2 2019-06-07 15:40:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vsetuserquota: fatal: "
@@ -55,7 +59,7 @@ get_options(int argc, char **argv, char **email, char **quota)
 	int             c;
 
 	*email = *quota = 0;
-	while ((c = getopt(argc, argv, "v")) != -1) {
+	while ((c = getopt(argc, argv, "v")) != opteof) {
 		switch (c)
 		{
 		case 'v':
