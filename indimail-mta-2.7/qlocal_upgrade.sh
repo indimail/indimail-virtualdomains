@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.25  2019-06-07 19:19:28+05:30  Cprogrammer
+# set mysql_lib control file
+#
 # Revision 1.24  2019-05-27 12:36:48+05:30  Cprogrammer
 # create libindimail control file
 #
@@ -70,7 +73,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.24 2019-05-27 12:36:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.25 2019-06-07 19:19:28+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -95,7 +98,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.24 2019-05-27 12:36:48+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.25 2019-06-07 19:19:28+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -281,15 +284,34 @@ if [ -f /etc/indimail/scan.conf -o -f /etc/indimail/scan.conf.disabled ] ; then
 fi
 
 # upgrade MYSQL_LIB for dynamic loading of libmysqlclient
-mysqllib=`ls -d /usr/lib*/libmysqlclient.so.*.*.* 2>/dev/null`
+prev_num=0
+for i in `ls -t /usr/lib*/libmysqlclient.so.*.*.* 2>/dev/null`
+do
+	file=`basename $i`
+	num=`echo $file | cut -d. -f3`
+	if [ $num -gt $prev_num ] ; then
+		prev_num=$num
+		mysqllib=$i
+	fi
+done
 if [ -z "$mysqllib" ] ; then
-	mysqllib=`ls -d /usr/lib*/mysql/libmysqlclient.so.*.*.* 2>/dev/null`
+for i in `ls -t /usr/lib*/mysql/libmysqlclient.so.*.*.* 2>/dev/null`
+do
+	file=`basename $i`
+	num=`echo $file | cut -d. -f3`
+	if [ $num -gt $prev_num ] ; then
+		prev_num=$num
+		mysqllib=$i
+	fi
+done
 fi
 if [ -n "$mysqllib" -a -f $mysqllib ] ; then
 	check_update_if_diff /etc/indimail/control/mysql_lib $mysqllib
 else
 	/bin/rm -f /etc/indimail/control/mysql_lib
 fi
+
+# upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 indlib=`ls -d /usr/lib*/libindimail.so.*.*.* 2>/dev/null`
 if [ -n "$indlib" -a -f "$indlib" ] ; then
 	check_update_if_diff /etc/indimail/control/libindimail $indlib
