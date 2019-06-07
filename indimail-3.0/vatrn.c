@@ -1,5 +1,8 @@
 /*
  * $Log: vatrn.c,v $
+ * Revision 1.2  2019-06-07 15:55:03+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-15 10:29:56+05:30  Cprogrammer
  * Initial revision
  *
@@ -15,13 +18,14 @@
 #include <strerr.h>
 #include <qprintf.h>
 #include <subfd.h>
+#include <sgetopt.h>
 #endif
 #include "variables.h"
 #include "atrn_map.h"
 #include "parse_email.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vatrn.c,v 1.1 2019-04-15 10:29:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vatrn.c,v 1.2 2019-06-07 15:55:03+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL     "vatrn: fatal: "
@@ -50,7 +54,7 @@ get_options(int argc, char **argv, int *Action, char **emailid,
 	/*- Action = PRINT_IT; -*/
 	*Action = -1;
 	*emailid = *domain_list = *old_domain = 0;
-	while ((c = getopt(argc, argv, "vsd:i:u:n:")) != -1) {
+	while ((c = getopt(argc, argv, "vsd:i:u:n:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
