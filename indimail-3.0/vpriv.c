@@ -1,5 +1,8 @@
 /*
  * $Log: vpriv.c,v $
+ * Revision 1.3  2019-06-07 15:44:10+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
  * Revision 1.2  2019-04-22 23:19:52+05:30  Cprogrammer
  * added missing strerr.h
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpriv.c,v 1.2 2019-04-22 23:19:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpriv.c,v 1.3 2019-06-07 15:44:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -23,6 +26,7 @@ static char     sccsid[] = "$Id: vpriv.c,v 1.2 2019-04-22 23:19:52+05:30 Cprogra
 #include <fmt.h>
 #include <strerr.h>
 #include <subfd.h>
+#include <sgetopt.h>
 #endif
 #include "get_indimailuidgid.h"
 #include "variables.h"
@@ -63,7 +67,7 @@ get_options(int argc, char **argv, char **user, char **program,
 	verbose = 0;
 	*action = -1;
 	*user = *program = *cmdargs = 0;
-	while ((c = getopt(argc, argv, "vasDd:i:m:")) != -1)
+	while ((c = getopt(argc, argv, "vasDd:i:m:")) != opteof)
 	{
 		switch (c)
 		{
