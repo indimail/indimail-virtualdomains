@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.2  2019-06-07 15:44:54+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
  * Revision 1.1  2019-04-14 22:41:20+05:30  Cprogrammer
  * Initial revision
  *
@@ -51,7 +54,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.1 2019-04-14 22:41:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.2 2019-06-07 15:44:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -110,9 +113,9 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 	*toggle = *ClearFlags = 0;
 	*QuotaFlag = 0;
 #ifdef ENABLE_AUTH_LOGGING
-	while ((c = getopt(argc, argv, "avutnxD:c:q:dpwisobr0123he:l:P:")) != -1) 
+	while ((c = getopt(argc, argv, "avutnxD:c:q:dpwisobr0123he:l:P:")) != opteof) 
 #else
-	while ((c = getopt(argc, argv, "avuxD:c:q:dpwisobr0123he:l:P:")) != -1) 
+	while ((c = getopt(argc, argv, "avuxD:c:q:dpwisobr0123he:l:P:")) != opteof) 
 #endif
 	{
 		switch (c)
