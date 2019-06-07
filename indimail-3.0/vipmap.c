@@ -1,5 +1,8 @@
 /*
  * $Log: vipmap.c,v $
+ * Revision 1.3  2019-06-07 15:46:28+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
  * Revision 1.2  2019-04-22 23:19:40+05:30  Cprogrammer
  * added missing strerr.h
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vipmap.c,v 1.2 2019-04-22 23:19:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vipmap.c,v 1.3 2019-06-07 15:46:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IP_ALIAS_DOMAINS
@@ -53,7 +56,7 @@ get_options(int argc, char **argv, int *action, char **ip, char **domain)
 
 	*action = PRINT_IT;
 	*ip = *domain = 0;
-	while ((c = getopt(argc, argv, "vsd:i:u:")) != -1) {
+	while ((c = getopt(argc, argv, "vsd:i:u:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
