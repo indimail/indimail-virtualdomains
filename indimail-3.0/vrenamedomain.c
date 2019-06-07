@@ -1,5 +1,8 @@
 /*
  * $Log: vrenamedomain.c,v $
+ * Revision 1.2  2019-06-07 15:43:14+05:30  Cprogrammer
+ * removed not needed sgetopt.h include file
+ *
  * Revision 1.1  2019-04-18 08:33:38+05:30  Cprogrammer
  * Initial revision
  *
@@ -27,7 +30,6 @@
 #include <substdio.h>
 #include <subfd.h>
 #include <stralloc.h>
-#include <sgetopt.h>
 #include <error.h>
 #include <strerr.h>
 #include <str.h>
@@ -54,7 +56,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenamedomain.c,v 1.1 2019-04-18 08:33:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vrenamedomain.c,v 1.2 2019-06-07 15:43:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vrenamedomain: warning: "
