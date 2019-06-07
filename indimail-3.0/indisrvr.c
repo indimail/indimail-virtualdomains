@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.3  2019-06-07 16:00:18+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.2  2019-04-22 23:11:33+05:30  Cprogrammer
  * replaced atoi() with scan_int()
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.2 2019-04-22 23:11:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.3 2019-06-07 16:00:18+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -699,9 +702,9 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 	*ipaddr = *port = 0;
 	*backlog = -1;
 #ifdef HAVE_SSL
-	while ((c = getopt(argc, argv, "vi:p:b:n:")) != -1)
+	while ((c = getopt(argc, argv, "vi:p:b:n:")) != opteof)
 #else
-	while ((c = getopt(argc, argv, "vi:p:b:")) != -1)
+	while ((c = getopt(argc, argv, "vi:p:b:")) != opteof)
 #endif
 	{
 		switch (c)
