@@ -1,5 +1,8 @@
 /*
  * $Log: hostsync.c,v $
+ * Revision 1.3  2019-06-07 15:59:55+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
  * Revision 1.2  2019-04-22 23:11:15+05:30  Cprogrammer
  * added missing strerr.h header
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: hostsync.c,v 1.2 2019-04-22 23:11:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: hostsync.c,v 1.3 2019-06-07 15:59:55+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -26,6 +29,7 @@ static char     sccsid[] = "$Id: hostsync.c,v 1.2 2019-04-22 23:11:15+05:30 Cpro
 #include <stralloc.h>
 #include <strerr.h>
 #include <fmt.h>
+#include <sgetopt.h>
 #endif
 #include "is_already_running.h"
 #include "is_distributed_domain.h"
@@ -52,7 +56,7 @@ get_options(int argc, char **argv, char **domain)
 	int             c;
 
 	*domain = 0;
-	while ((c = getopt(argc, argv, "vd:")) != -1) {
+	while ((c = getopt(argc, argv, "vd:")) != opteof) {
 		switch (c)
 		{
 		case 'd':
