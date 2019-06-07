@@ -1,5 +1,8 @@
 /*
  * $Log: vacation.c,v $
+ * Revision 1.2  2019-06-07 15:57:12+05:30  mbhangui
+ * use _exit() instead of exit()
+ *
  * Revision 1.1  2019-04-18 08:38:40+05:30  Cprogrammer
  * Initial revision
  *
@@ -42,7 +45,7 @@
 #include "runcmmd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vacation.c,v 1.1 2019-04-18 08:38:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vacation.c,v 1.2 2019-06-07 15:57:12+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
