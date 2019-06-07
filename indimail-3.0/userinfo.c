@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 1.3  2019-06-07 16:10:48+05:30  mbhangui
+ * fix for missing mysql_get_option() in new versions of libmariadb
+ *
  * Revision 1.2  2019-04-17 17:54:35+05:30  Cprogrammer
  * display db server info only for root
  *
@@ -68,7 +71,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 1.2 2019-04-17 17:54:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 1.3 2019-06-07 16:10:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -449,8 +452,8 @@ userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid
 			strnum[fmt_ulong(strnum, mptr->port)] = 0;
 			out("userinfo", strnum);
 			out("userinfo", "\n");
-#ifdef HAVE_MYSQL_OPT_SSL_MODE
-			if (mysql_get_option(mptr, MYSQL_OPT_SSL_MODE, &use_ssl)) {
+#if MYSQL_VERSION_ID >= 50703 && !defined(MARIADB_BASE_VERSION) && defined(HAVE_MYSQL_OPT_SSL_MODE)
+			if (in_mysql_get_option(mptr, MYSQL_OPT_SSL_MODE, &use_ssl)) {
 				strerr_warn2("userinfo: mysql_get_option: MYSQL_OPT_SSL_MODE: ", (char *) in_mysql_error(mptr), 0);
 				flush("userinfo");
 				return (1);
