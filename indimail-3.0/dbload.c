@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 1.5  2019-06-07 17:30:53+05:30  Cprogrammer
+ * fixed unused variable warning
+ *
  * Revision 1.4  2019-06-07 16:10:55+05:30  mbhangui
  * fix for missing mysql_get_option() in new versions of libmariadb
  *
@@ -42,7 +45,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 1.4 2019-06-07 16:10:55+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 1.5 2019-06-07 17:30:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static MYSQL   *is_duplicate_conn(MYSQL **, DBINFO **);
@@ -62,7 +65,7 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 	char           *sysconfdir, *controldir, *mcdfile, *server, *str;
 	int             maxattempts, retry_interval, count, protocol;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG], strnum3[FMT_ULONG];
-#ifdef HAVE_MYSQL_OPT_SSL_ENFORCE
+#if MYSQL_VERSION_ID >= 50703 && !defined(MARIADB_BASE_VERSION) && defined(HAVE_MYSQL_OPT_SSL_ENFORCE)
 	int             use_ssl = 0;
 #endif
 	unsigned int    flags;
