@@ -12,7 +12,7 @@
 
 # This is the debhelper compatibility version to use.
 # export DH_COMPAT=4
-CFLAGS=-g
+CFLAGS=-g -DOBS_BUILD
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
 	CFLAGS += -O0 -fno-strict-aliasing -Wno-unused-result -Wno-unused-result
 else
@@ -105,7 +105,6 @@ build-stamp:
 	#
 	# run make
 	#
-	if [ -d ../BUILD ] ; then CFLAGS += -DOBS_BUILD; fi
 	if [ -d indimail-$(version) ] ; then \
 		FAKED_MODE=1;export FAKED_MODE; \
 		$(MAKE) -s -C indimail-$(version) DESTDIR=$(DESTDIR); \
