@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.30 2019-06-03 06:48:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.31 2019-06-08 18:14:45+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -39,7 +39,7 @@ AutoReqProv: No
 BuildRequires: rpm gcc make binutils coreutils grep
 BuildRequires: glibc glibc-devel procps cpio
 BuildRequires: sed gettext-devel
-BuildRequires: findutils
+BuildRequires: findutils libqmail-devel libqmail
 BuildRequires: gzip autoconf automake libtool indimail-devel libindimail
 BuildRequires: mysql-devel
 %if %{undefined rhel_version}
@@ -77,7 +77,10 @@ autoreconf -fiv
 %configure --prefix=%{_prefix} \
   --sysconfdir=%{sysconfdir} \
   --libdir=%{_libdir} \
-  --enable-ezmlmdir=%{_prefix}/bin --disable-ipauth --disable-trivial-password \
+  --disable-ipauth \
+  --disable-trivial-password \
+  --enable-ezmlmdir=%{_prefix}/bin \
+  --enable-domain-autofill \
   --enable-modify-quota \
   --enable-htmldir=@htmldir@ \
   --enable-cgibindir=@cgibindir@ \
