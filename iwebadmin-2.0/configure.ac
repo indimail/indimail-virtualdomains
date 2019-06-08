@@ -276,14 +276,12 @@ AC_SUBST(indimailgroup)
 ezmlm_mysql=yes
 AC_ARG_ENABLE(ezmlm-mysql, [  --disable-ezmlm-mysql         Disable MySQL options for mailing lists.],
     ezmlm_mysql="$enableval",)
-case $mysql in
-1*|y*|Y*)
-	ezmlm_mysql=yes
-        AC_DEFINE_UNQUOTED(ENABLE_MYSQL,1,"")
-        ;;
-*)
-        ezmlm_mysql=no
-        ;;
+case $ezmlm_mysql in
+	1*|y*|Y*)
+	AC_DEFINE_UNQUOTED(ENABLE_MYSQL,1,"")
+	;;
+	*)
+	;;
 esac
 
 maxusersperpage=15
@@ -301,14 +299,14 @@ AC_ARG_ENABLE(no-cache, [  --enable-no-cache   Prohibit caching via http headers
     NO_CACHE="$enableval",)
 
 case $NO_CACHE in
-1*|y*|Y*)
+	1*|y*|Y*)
 	NO_CACHE=1
-        AC_DEFINE_UNQUOTED(NO_CACHE,$NO_CACHE,"")
-        echo "checking whether we should prohibit caching... yes"
-        ;;
-*)
-        echo "checking whether we should prohibit caching... no"
-        ;;
+	AC_DEFINE_UNQUOTED(NO_CACHE,$NO_CACHE,"")
+	echo "checking whether we should prohibit caching... yes"
+	;;
+	*)
+	echo "checking whether we should prohibit caching... no"
+	;;
 esac
 
 IPAUTH=yes
@@ -316,29 +314,27 @@ AC_ARG_ENABLE(ipauth, [  --disable-ipauth    Disable IP address checks (NAT/prox
     IPAUTH="$enableval",)
 
 case $IPAUTH in
-1*|y*|Y*)
+	1*|y*|Y*)
 	IPAUTH=1
-        AC_DEFINE_UNQUOTED(IPAUTH,$IPAUTH,"")
-        echo "checking whether to require ip authentication... yes"
-        ;;
-*)
-        echo "checking whether to require ip authentication... no"
-        ;;
+	AC_DEFINE_UNQUOTED(IPAUTH,$IPAUTH,"")
+	echo "checking whether to require ip authentication... yes"
+	;;
+	*)
+	echo "checking whether to require ip authentication... no"
+	;;
 esac
 
 USER_INDEX=yes
-AC_ARG_ENABLE(user-index, [  --disable-user-index   Don't display user index on show users page.],
-    USER_INDEX="$enableval",)
-
+AC_ARG_ENABLE(user-index, [  --disable-user-index   Don't display user index on show users page.], USER_INDEX="$enableval",)
 case $USER_INDEX in
 1*|y*|Y*)
 	USER_INDEX=1
-        AC_DEFINE_UNQUOTED(USER_INDEX,$USER_INDEX,"")
-        echo "checking whether to display user index... yes"
-        ;;
-*)
-        echo "checking whether to display user index... no"
-        ;;
+	AC_DEFINE_UNQUOTED(USER_INDEX,$USER_INDEX,"")
+	echo "checking whether to display user index... yes"
+	;;
+	*)
+	echo "checking whether to display user index... no"
+	;;
 esac
 
 AC_ARG_ENABLE(modify-quota, [  --enable-modify-quota  Allow domain admin (postmaster) to modify user quotas.],
@@ -422,24 +418,24 @@ case $HELP in
         ;;
 esac
 
-
 EZMLMIDX=no
+AC_ARG_ENABLE(ezmlmidx, [  --enable-ezmlmidx Enable ezmlmidx.], EZMLMIDX="$enableval",)
 if test -f $ezmlmdir/ezmlm-moderate
 then
 	EZMLMIDX=yes
 fi
 
 case $EZMLMIDX in
-1*|y*|Y*)
-                EZMLMIDX=1
-                AC_DEFINE_UNQUOTED(EZMLMIDX,$EZMLMIDX,"")
-		echo "checking for ezmlm-idx... yes"
-		ezmlmidx="yes"
-        ;;
-*)
-		echo "checking for ezmlm-idx... no"
-		ezmlmidx="no"
-        ;;
+	1*|y*|Y*)
+	EZMLMIDX=1
+	AC_DEFINE_UNQUOTED(EZMLMIDX,$EZMLMIDX,"")
+	echo "checking for ezmlm-idx... yes"
+	ezmlmidx="yes"
+	;;
+	*)
+	echo "checking for ezmlm-idx... no"
+	ezmlmidx="no"
+	;;
 esac
 
 AC_OUTPUT(Makefile)
@@ -457,11 +453,15 @@ echo "      template dir = "$htmllibdir""
 echo "         ezmlm dir = "$ezmlmdir""
 echo "    system lib dir = "$sys_libdir""
 echo "         ezmlm idx = "$ezmlmidx""
-echo "   mysql for ezmlm = "$ezmlm_mysql""
+echo "   ezmlm for MySQL = "$ezmlm_mysql""
 echo "              help = "$enable_help""
 echo "            libdir = "$libdir""
 echo "          auth_inc = "$auth_incs""
 echo "          auth_lib = "$auth_libs""
 echo "      modify quota = "$MODIFY_QUOTA""
 echo "   domain autofill = "$DOMAIN_AUTOFILL""
+echo "          No Cache = "$NO_CACHE""
+echo "           IP Auth = "$IPAUTH""
+echo "        User Index = "$USER_INDEX""
+echo "  Trivial Password = "$TRIVIAL_PASSWORD_ENABLED""
 echo " catchall accounts = "$CATCHALL_ENABLED""
