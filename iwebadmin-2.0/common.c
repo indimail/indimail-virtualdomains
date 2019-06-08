@@ -1,5 +1,8 @@
 /*
  * $Log: common.c,v $
+ * Revision 1.1  2019-06-08 18:15:55+05:30  Cprogrammer
+ * Initial revision
+ *
  * Revision 1.1  2019-04-14 20:57:45+05:30  Cprogrammer
  * Initial revision
  *
@@ -12,6 +15,9 @@
 #include <indimail_compat.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
 #endif
 #include <substdio.h>
 #include <stralloc.h>
