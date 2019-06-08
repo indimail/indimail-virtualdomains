@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.6  2019-06-08 18:10:50+05:30  Cprogrammer
+ * define bool unconditionally as older mariadb devel package don't have #ifdef LIBMARIADB
+ *
  * Revision 1.5  2019-06-07 19:22:07+05:30  Cprogrammer
  * treat missing libmysqlclient as error
  *
@@ -26,7 +29,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.5 2019-06-07 19:22:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.6 2019-06-08 18:10:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
@@ -41,9 +44,7 @@ static char     sccsid[] = "$Id: load_mysql.c,v 1.5 2019-06-07 19:22:07+05:30 Cp
 #include <getln.h>
 #include <open.h>
 #endif
-#ifdef LIBMARIADB
 typedef char bool;
-#endif
 
 MYSQL          *(*in_mysql_init) (MYSQL *);
 MYSQL          *(*in_mysql_real_connect) (MYSQL *, const char *, const char *, const char *, const char *, unsigned int, const char *, unsigned long);
