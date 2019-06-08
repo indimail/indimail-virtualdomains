@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.32 2019-06-08 23:12:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.33 2019-06-08 23:22:19+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -9,6 +9,7 @@
 %define build_on_obs       1
 %global reconfigure_mode   0
 %global build_cflags       "-DOBS_BUILD %{build_cflags}"
+%global debug_package %{nil}
 %else
 %define _project           local
 %define build_on_obs       0
