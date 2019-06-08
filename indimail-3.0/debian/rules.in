@@ -105,6 +105,7 @@ build-stamp:
 	#
 	# run make
 	#
+	if [ -d ../BUILD ] ; then CFLAGS += -DOBS_BUILD; fi
 	if [ -d indimail-$(version) ] ; then \
 		FAKED_MODE=1;export FAKED_MODE; \
 		$(MAKE) -s -C indimail-$(version) DESTDIR=$(DESTDIR); \
