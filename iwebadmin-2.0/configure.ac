@@ -2,9 +2,6 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT([iwebadmin],2.0,[Manvendra Bhangui manvendra@indimail.org],iwebadmin, [http://www.indimail.org])
 AC_CANONICAL_TARGET
-VERSION=$PACKAGE_VERSION
-PACKAGE=$PACKAGE_NAME
-VERSION=$PACKAGE_VERSION
 LT_INIT
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
@@ -24,13 +21,18 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_ISC_POSIX
 
 AC_HEADER_STDC
-CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/include/qmail"
+CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/include/indimail -I/usr/include/qmail"
 AC_CHECK_HEADERS([mysql.h errno.h signal.h unistd.h])
 AC_CHECK_HEADERS([pwd.h ctype.h time.h stdlib.h sys/wait.h])
 dnl Checks for libraries.
 AC_CHECK_LIB(ssl, SSL_CTX_new,     [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
 AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
 AC_CHECK_LIB(dl, dlsym)
+AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],nqmail=t,)
+if test " $noqmail" = " t"
+then
+  AC_MSG_ERROR(Could not find qmail library.)
+fi
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -107,12 +109,6 @@ else
 	ilibdir=$libdir
 fi
 RPATH_LIB="$acl_libdirstem"
-
-AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],nqmail=t,)
-if test " $noqmail" = " t"
-then
-  AC_MSG_ERROR(Could not find qmail library.)
-fi
 
 if test -f /usr/bin/lsb_release
 then
@@ -449,7 +445,7 @@ esac
 AC_OUTPUT(Makefile)
 
 echo ""
-echo "            $QA_PACKAGE $QA_VERSION"
+echo "            $PACKAGE $VERSION"
 echo "            Current settings"
 echo "---------------------------------------"
 echo "       exec_prefix = "$exec_prefix""
