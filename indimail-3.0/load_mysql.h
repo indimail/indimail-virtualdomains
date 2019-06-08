@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.h,v $
+ * Revision 1.3  2019-06-08 18:10:44+05:30  Cprogrammer
+ * define bool unconditionally as older mariadb devel package don't have #ifdef LIBMARIADB
+ *
  * Revision 1.2  2019-06-07 16:09:24+05:30  Cprogrammer
  * fix for missing mysql_get_option() in new versions of libmariadb
  * fixes for libmariadb
@@ -18,8 +21,8 @@
 typedef unsigned int i_uint;
 typedef unsigned long i_ulong;
 typedef const char i_char;
-#ifdef LIBMARIADB
 typedef char bool;
+#ifdef LIBMARIADB
 typedef struct st_mysql_res res;
 #else
 typedef struct MYSQL_RES res;
