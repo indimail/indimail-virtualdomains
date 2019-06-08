@@ -41,8 +41,10 @@ build-stamp:
 	./configure --prefix=${prefix} \
 		--sysconfdir=${sysconfdir} \
 		--libdir=$(libdir) \
-		--enable-ezmlmdir=${prefix}/bin --disable-ipauth \
+		--disable-ipauth \
 		--disable-trivial-password \
+		--enable-ezmlmdir=${prefix}/bin \
+  		--enable-ezmlmidx \
 		--enable-mysqlprefix=${mysql_prefix} \
 		--enable-modify-quota \
 		--enable-htmldir=@htmldir@ \
