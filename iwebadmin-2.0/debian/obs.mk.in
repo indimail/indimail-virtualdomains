@@ -11,7 +11,7 @@ sysconfdir=@sysconfdir@
 #
 
 all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
-	iwebadmin.dsc
+	iwebadmin.dsc iwebadmin-Debian_9.0.dsc
 
 clean:
 	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz _service
@@ -35,6 +35,8 @@ postinst: postinst.in obs.mk
 postrm: postrm.in obs.mk
 	$(edit) $@.in > $@;
 iwebadmin.dsc: iwebadmin.dsc.in
+	$(edit) $@.in > $@
+iwebadmin-Debian_9.0.dsc: iwebadmin-Debian_9.0.dsc.in
 	$(edit) $@.in > $@
 changelog:changelog.in
 	$(edit) $@.in > $@
