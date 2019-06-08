@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.7 2019-06-03 06:47:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.8 2019-06-08 18:16:22+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -563,13 +563,14 @@ ezmlm_make(int newlist)
 {
 	int             pid, len, plen, fd;
 	struct substdio ssout;
+	int             i;
 #ifdef EZMLMIDX
 	static stralloc list_owner = {0}, owneremail = {0};
-	int             i;
+	char           *t;
 #endif
 	static stralloc loop_ch = {0}, tmp1 = {0}, tmp2 = {0}, tmp3 = {0};
 	char            options[128], outbuf[1024];
-	char           *s, *t;
+	char           *s;
 	char           *arguments[MAX_BUFF];
 	int             argc, loop;
 	/*-
