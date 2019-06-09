@@ -29,6 +29,7 @@ AC_CHECK_HEADERS([ctype.h fcntl.h stdlib.h string.h sys/wait.h sys/types.h sys/s
 saveCPPFLAGS="$CPPFLAGS"
 CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/include/qmail"
 AC_CHECK_HEADERS([mysql.h pwd.h grp.h stdarg.h varargs.h errno.h signal.h netdb.h netinet/in.h arpa/inet.h])
+AC_CHECK_TYPE([bool],AC_DEFINE(HAVE_BOOL, 1, have bool typedef),,[#include <mysql.h>])
 CPPFLAGS=$saveCPPFLAGS
 AC_CHECK_HEADERS([dirent.h limits.h utime.h sys/ioctl.h net/if.h linux/sockios.h sys/sockio.h])
 AC_CHECK_HEADERS([openssl/evp.h sys/syscall.h sys/select.h sys/un.h])
