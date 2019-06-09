@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.h,v $
+ * Revision 1.4  2019-06-09 17:39:38+05:30  Cprogrammer
+ * conditional compilation of bool typedef
+ *
  * Revision 1.3  2019-06-08 18:10:44+05:30  Cprogrammer
  * define bool unconditionally as older mariadb devel package don't have #ifdef LIBMARIADB
  *
@@ -21,7 +24,9 @@
 typedef unsigned int i_uint;
 typedef unsigned long i_ulong;
 typedef const char i_char;
+#ifndef HAVE_BOOL
 typedef char bool;
+#endif
 #ifdef LIBMARIADB
 typedef struct st_mysql_res res;
 #else
