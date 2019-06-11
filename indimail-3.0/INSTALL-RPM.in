@@ -32,9 +32,9 @@ https://software.opensuse.org/download.html?project=home%3Aindimail&package=indi
 or
 https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail
 
-# yum install indimail
+# yum -y install indimail
    or
-# dnf install indimail
+# dnf -y install indimail
 
 What happens during installation?
 ---------------------------------
