@@ -195,7 +195,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                .
                                . libdkim-1.5         (4.0  Mb)
                                . indimail-@version@  (20   Mb)
-                               . indimail-mta-2.4    (18   Mb)
+                               . indimail-mta-2.7    (18   Mb)
                                . ucspi-tcp-0.88      (4.0  Mb)
                                . nssd-1.1            (2.0  Mb)
                                . pam-multi-1.1       (3.0  Mb)
@@ -208,7 +208,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . courier-imap-4.18.2 (23   Mb)
                                . bogofilter-1.2.4    (11.6 Mb)
                                . fetchmail-6.4.0     (10.5 Mb)
-                               . iwebadmin-1.3       (3.0  Mb)
+                               . iwebadmin-2.0       (3.0  Mb)
                                ------------------------------
                                  Total               (200  Mb)
 
@@ -328,7 +328,7 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/Quick-INSTALL
     % wget http://downloads.sourceforge.net/indimail/package.checksums # MD5 sum of all the packages
     % wget http://downloads.sourceforge.net/indimail/indimail-@version@.tar.gz
-    % wget http://downloads.sourceforge.net/indimail/indimail-mta-2.4.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/indimail-mta-2.7.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libdkim-1.5.tar.gz
     % wget http://downloads.sourceforge.net/indimail/libsrs2-1.0.18.tar.gz
     % wget http://downloads.sourceforge.net/courier/courier-imap-4.18.2.tar.bz2
@@ -341,7 +341,7 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/nssd-1.1.tar.gz
     % wget http://downloads.sourceforge.net/indimail/pam-multi-1.1.tar.gz
     % wget http://downloads.sourceforge.net/indimail/logalert-0.3.tar.gz
-    % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.2.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/iwebadmin-2.0.tar.gz
 
     You may omit STEP 1 if you already have a working installation of MySQL and would want to use
     the existing MySQL installation with IndiMail. You may also omit STEP 2 in cause you do not
@@ -375,7 +375,7 @@ the installation.
     http://forge.mysql.com/wiki/Autotools_to_CMake_Transition_Guide
 
     ##### STEP 2  ##### Install libdkim-1.5 ###################
-    Install libdkim-1.5 (libdkim-1.5.tar.bz2) MD5 bbf3ec94370ee0ac6ad8796811ec2f8e
+    Install libdkim-1.5 (libdkim-1.5.tar.bz2) MD5 037fb982862d7814ca5b0a9a1a28202d
     current working directory /home/local/src
     Download the libdkim package. The latest tested libdkim package is
     libdkim-1.5.tar.bz2
@@ -392,7 +392,7 @@ the installation.
     by doing ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 3  ##### Install libsrs2-1.0.18 ################
-    Install libsrs2-1.0.18 (libsrs2-1.0.18.tar.gz MD5 994194fe64b959a7ecdb2e5814bac7cb
+    Install libsrs2-1.0.18 (libsrs2-1.0.18.tar.gz MD5 bb32c4ae0e8c3dd58bb3ef7db229dd2e
     current working directory /home/local/src
     Download the libsrs2 package. The latest tested libsrs2 package is
     libsrs2-1.0.18.tar.gz
@@ -406,18 +406,18 @@ the installation.
     % cd ..
 
     ##### STEP 4  ##### indimail-mta ##########################
-    Install indimail-mta MD5 8a1a7cf86d311a3d195276995fbdb0b3
+    Install indimail-mta MD5 2a5808a4c8c3a48876d26bc0e960f643
     current working directory /home/local/src
-    Download the indimail-mta package. The latest published ucspi-tcp package is indimail-mta-2.4.tar.gz.
+    Download the indimail-mta package. The latest published ucspi-tcp package is indimail-mta-2.7.tar.gz.
 
-    % gunzip -c indimail-mta-2.4.tar.gz | tar xf -
-    % cd indimail-mta-2.4
+    % gunzip -c indimail-mta-2.7.tar.gz | tar xf -
+    % cd indimail-mta-2.7
 
-    change first line in indimail-mta-2.4/conf-qmail to @indimaildir@
-    change first line in indimail-mta-2.4/conf-shared to @shareddir@
-    change first line in indimail-mta-2.4/conf-prefix to @prefix@
-    change first line in indimail-mta-2.4/conf-libexec to @libexecdir@
-    change first line in indimail-mta-2.4/conf-sysconfdir to @sysconfdir@
+    change first line in indimail-mta-2.7/conf-qmail to @indimaildir@
+    change first line in indimail-mta-2.7/conf-shared to @shareddir@
+    change first line in indimail-mta-2.7/conf-prefix to @prefix@
+    change first line in indimail-mta-2.7/conf-libexec to @libexecdir@
+    change first line in indimail-mta-2.7/conf-sysconfdir to @sysconfdir@
 
     % make -s
 
@@ -494,8 +494,10 @@ the installation.
 
     NOTES: To get a complete list of configure options type: ./configure --help
     If you change --enable-indiuser or --enable-indigroup to something different from
-    indimail:indimail, change conf-users or conf-groups in indimail-mta-2.4 subdirectory
-    and recompile/install indimail-mta-2.4
+    indimail:indimail, change conf-users or conf-groups in indimail-mta-2.7 subdirectory
+    and recompile/install indimail-mta-2.7
+    Use --enable-dlload-mysql=no if you want to link libmsqlclient with indimail binaries
+    and libindimail at runtime.
 
     % make -s [DESTDIR=staging_directory]
 
@@ -521,9 +523,8 @@ the installation.
     Download the ucspi-tcp package. The latest published ucspi-tcp package is ucspi-tcp-0.88.tar.gz.
     % wget http://cr.yp.to/ucspi-tcp/ucspi-tcp-0.88.tar.gz
     % gunzip -c ucspi-tcp-0.88.tar.gz | tar xf -
-    % gunzip -c indimail-@version@/patches/ucspi-tcp-0.88.patch.gz | patch -p0
-    NOTE: if patches subdir is missing, download the patch from
-          https://sourceforge.net/projects/indimail/files/Patches-2.0
+    % gunzip -c ucspi-tcp-0.88.patch.gz | patch -p0
+    NOTE: download the patch from https://sourceforge.net/projects/indimail/files/Patches-2.0
 
     ensure that mysql_config is in the path. This is needed by ucspi-tcp to detect
     MySQL libraries.
@@ -542,17 +543,16 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 7  ##### Courier IMAP/POP3 #####################
-    Install courier-imap (courier-imap-4.18.2.tar.bz2) MD5 6af3e78d3206518aab5510638cd620c2
+    Install courier-imap (courier-imap-5.0.7.tar.bz2) MD5 d93fd9b3807070086c930823e63b2d82
     current working directory /home/local/src
     Download the courier-imap package. The latest tested courier-imap package is
-    courier-imap-4.18.2.tar.bz2. The patch brings up the version upto courier-imap to be
+    courier-imap-5.0.7.tar.bz2. The patch brings up the version upto courier-imap to be
     compatible with IndiMail.
 
-    % wget http://downloads.sourceforge.net/courier/courier-imap-4.18.2.tar.bz2
-    % bzip2 -d -c courier-imap-4.18.2.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/patches/courier-imap-4.18.2.patch.gz | patch -p0
-    NOTE: if patches subdir is missing, download the patch from
-          https://sourceforge.net/projects/indimail/files/Patches-2.0
+    % wget http://downloads.sourceforge.net/courier/courier-imap-5.0.7.tar.bz2
+    % bzip2 -d -c courier-imap-5.0.7.tar.bz2 | tar xf -
+    % gunzip -c courier-imap-5.0.7.patch.gz | patch -p0
+    NOTE: download the patch from https://sourceforge.net/projects/indimail/files/Patches-2.0
     % cd courier-imap-4.18.2
 
     % ./configure --prefix=@prefix@ --disable-root-check --bindir=@prefix@/bin \
@@ -586,9 +586,8 @@ the installation.
 
     % wget http://downloads.sourceforge.net/bogofilter/bogofilter-1.2.4.tar.bz2
     % bzip2 -d -c bogofilter-1.2.4.tar.bz2 | tar xf -
-    % gunzip -c indimail-@version@/patches/bogofilter-1.2.4.patch.gz | patch -p0
-    NOTE: if patches subdir is missing, download the patch from
-          https://sourceforge.net/projects/indimail/files/Patches-2.0
+    % gunzip -c bogofilter-1.2.4.patch.gz | patch -p0
+    NOTE: download the patch from https://sourceforge.net/projects/indimail/files/Patches-2.0
     % cd bogofilter-1.2.4
     % autoreconf -fi
     % ./configure --prefix=@prefix@ --sysconfdir=@sysconfdir@ --enable-indimail \
@@ -649,9 +648,8 @@ the installation.
     ##################### Do not carry out the below patch instruction ###########
     do not carry out this patch instruction as the patch has been applied to
     fetchmail-6.4.0.tar.bz2 downloaded from obs subdir
-    % gunzip -c indimail-@version@/patches/fetchmail-6.4.0.patch.gz | patch -p0
-    NOTE: if patches subdir is missing, download the patch from
-          https://sourceforge.net/projects/indimail/files/Patches-2.0
+    % gunzip -c fetchmail-6.4.0.patch.gz | patch -p0
+    NOTE: download the patch from https://sourceforge.net/projects/indimail/files/Patches-2.0
     ##############################################################################
     % cd fetchmail-6.4.0
     % autoreconf -fi
@@ -673,7 +671,7 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 10 ## Optional STEP ## nssd ####################
-    Install nssd MD5 d101ab93b04ead2ceebf4bc69982e254
+    Install nssd MD5 c64269a4e29f97430220546e8f6f989b
     current working directory /home/local/src
     Download the nssd package from http://www.indimail.org
 
@@ -694,20 +692,23 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 11 ## Optional STEP ## iwebadmin ###############
-    Install iwebadmin MD5 7a83a7b1977be0639c1d6826e78ee797
-    % wget http://downloads.sourceforge.net/indimail/iwebadmin-1.3.tar.gz
-    % gunzip -c iwebadmin-1.3.tar.gz | tar xf -
-    % cd iwebadmin-1.3
+    Install iwebadmin MD5 7e0a28992e25e09c8bfe4252776e1046
+    % wget http://downloads.sourceforge.net/indimail/iwebadmin-2.0.tar.gz
+    % gunzip -c iwebadmin-2.0.tar.gz | tar xf -
+    % cd iwebadmin-2.0
     % ./configure --prefix=/usr \
         --sysconfdir=@sysconfdir@ \
-        --enable-ezmlmdir=@indimaildir@ \
-        --disable-ipauth --disable-trivial-password \
+        --disable-ipauth \
+        --disable-trivial-password \
+        --enable-ezmlmdir=@prefix@/bin \
+        --enable-ezmlmidx \
+        --enable-domain-autofill \
         --enable-modify-quota \
-        --enable-mysqlprefix=@mysql_prefix@ \
         --enable-htmldir=/var/www/html \
         --enable-cgibindir=/var/www/cgi-bin \
         --enable-imagedir=/var/www/html/images/iwebadmin \
-        --enable-htmllibdir=@shareddir@/iwebadmin
+        --enable-htmllibdir=/usr/share/iwebadmin
+
     % make -s [DESTDIR=staging_directory]
     % sudo make -s install-strip [DESTDIR=staging_directory]
     % cd ..
@@ -758,6 +759,18 @@ the installation.
     % sudo @prefix@/sbin/svctool --mysql=3306 --servicedir=@servicedir@ \
         --mysqlPrefix=@mysql_prefix@ --databasedir=@indimaildir@/mysqldb \
         --config=@sysconfdir@/indimail.cnf --default-domain=indimail.org
+
+    If you had given --enable-dlload-mysql=yes while configuring IndiMail, you should
+    Create /etc/indimail/control/mysql_lib. This should point to the the shared mysql
+    client library.  e.g.
+
+    % ls -ld /usr/lib*/libmysqlclient*.so.*.*.*
+    ls: cannot access '/usr/lib*/libmysqlclient.so.*.*.*': No such file or directory
+
+    % ls -ld /usr/lib*/mysql/libmysqlclient.so.*.*.*
+    -rwxr-xr-x. 1 root root 15100376 May  3 03:36 /usr/lib64/mysql/libmysqlclient.so.21.0.16
+
+    % sudo sh -c "echo /usr/lib64/mysql/libmysqlclient.so.21.0.16 > /etc/indimail/control/mysql_lib"
 
     ##### STEP 3  ## Default Control Files ##################
     The command below creates all necessary configuration for running a domain 'indimail.org' on
