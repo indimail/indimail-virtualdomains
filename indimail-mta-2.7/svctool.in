@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -1690,7 +1690,7 @@ echo  $fifo_path > $conf_dir/LOGFILTER
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-logfifo/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# $prog_args"
 echo ""
 echo "LOGFILTER=\`/bin/cat $SERVICEDIR/qmail-logfifo/variables/LOGFILTER\`"
@@ -1711,7 +1711,7 @@ fi
 #qmail-logfifo log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2078,7 +2078,7 @@ esac
 echo "$QmailBinPrefix/sbin/vchkpass $QmailBinPrefix/sbin/systpass" > $conf_dir/AUTHMODULES
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2141,7 +2141,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2454,7 +2454,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2495,7 +2495,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2569,7 +2569,7 @@ fi
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2587,7 +2587,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2660,7 +2660,7 @@ CONTEXT_FILE=$CONTROLDIR/$CONTEXT_FILE
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2678,7 +2678,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2759,7 +2759,7 @@ CONTEXT_FILE=$CONTROLDIR/$CONTEXT_FILE
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2782,7 +2782,7 @@ if [ ! -d $LOGDIR ] ; then
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2900,7 +2900,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -2956,7 +2956,7 @@ fi
 # qmail-[imapd|pop3d] log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3387,7 +3387,7 @@ fi
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3415,7 +3415,7 @@ fi
 # indisrvr log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3466,7 +3466,7 @@ $chown qscand "$DESTDIR"$SERVICEDIR/qscanq
 # qscanq script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3486,7 +3486,7 @@ fi
 # qscanq log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3534,7 +3534,7 @@ fi
 # clamd script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3599,7 +3599,7 @@ fi
 # clamd log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3629,7 +3629,7 @@ qsysconfdir=/etc # weird tha clamd and freshclam do not share the same dir for c
 # freshclam script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3681,7 +3681,7 @@ fi
 # freshclam log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3749,7 +3749,7 @@ fi
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3765,7 +3765,7 @@ fi
 # pwdlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3916,7 +3916,7 @@ echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -3933,7 +3933,7 @@ fi
 # inlookup log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4153,7 +4153,7 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 	fi
 	if ( /bin/mkdir -p "$DESTDIR"$databasedir/data && /bin/mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 		(
-		echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+		echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 		echo "# generated on $host on `date`"
 		echo ""
 		echo "$prog_args"
@@ -4288,6 +4288,7 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 				echo "Creating GRANTS" 1>&2
 				(
 				mecho "GRANT ALL on *.* to mysql;"
+				mecho "GRANT USAGE ON *.* TO mysql WITH GRANT OPTION;"
 				mecho "GRANT SELECT,CREATE,ALTER,INDEX,INSERT,UPDATE,DELETE,CREATE TEMPORARY TABLES,LOCK TABLES ON indimail.* to indimail;"
 				mecho "GRANT RELOAD,SHUTDOWN,PROCESS,SUPER on *.* to admin;"
 				mecho "GRANT REPLICATION SLAVE on *.* to repl;"
@@ -4310,7 +4311,7 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 		create_mysql_rootuser $mysql_version $mariadb $pass_str $auth_str $plugin_str \
 			| eval "$mysqlPrefix/$mysqld $opt_str"
 		#
-		# Start MySql daemon
+		# Start MySQL daemon
 		#
 		echo "Creating MySQL indimail User for Database in "$DESTDIR"$databasedir/data"
 		echo -n "$mysqlPrefix/$mysqld --pid-file="$DESTDIR"$databasedir/mysqld.pid"
@@ -4449,16 +4450,16 @@ create_mysql_rootuser()
 	fi
 	echo "use mysql;"
 	# Create mysql user by replacing auto created user root
-	mecho "delete from user where user='';"
-	mecho "drop database if exists test;"
-	mecho "delete from db where db like 'test%';"
+	mecho "DELETE from user where user='';"
+	mecho "DROP database if exists test;"
+	mecho "DELETE from db where db like 'test%';"
 	#
 	# there is a race at oracle between the monkeys there to introduce
 	# incompatibilities from one version to another. You will not
 	# be surprised to see columns dissapear from system tables.
 	# 
 	c_d=""
-	c_d="$c_d update user set host='%', "
+	c_d="$c_d UPDATE user set host='%', "
 	if [ $pass_str -eq 1 ] ; then
 		c_d="$c_d Password=Password('$PRIV_PASS'), "
 	fi
@@ -4473,7 +4474,7 @@ create_mysql_rootuser()
 	c_d="$c_d user='mysql' where host='localhost' and user='root';"
 	mecho $c_d
 	c_d=""
-	c_d="$c_d delete from user where host != '%' and user != 'mysql.sys';"
+	c_d="$c_d DELETE from user where host != '%' and user != 'mysql.sys';"
 	mecho $c_d
 }
 
@@ -4490,7 +4491,7 @@ create_mysql_user()
 	esac
 	mecho "use mysql;"
 	if [ $mariadb -eq 1 ] ; then
-		mecho "create database indimail;"
+		mecho "CREATE database indimail;"
 	fi
 	mecho "CREATE USER 'indimail'@'%' identified by '$MYSQL_PASS';"
 	mecho "CREATE USER 'admin'@'%'    identified by '$ADMIN_PASS';"
@@ -4630,7 +4631,7 @@ fi
 /bin/chmod 500 $conf_dir
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4684,7 +4685,7 @@ echo "--pid-file=\$PIDFILE 2>&1"
 
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4701,7 +4702,7 @@ fi
 # mysql log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4900,7 +4901,7 @@ echo "nameserver 127.0.0.1"
 # svscan run script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4921,7 +4922,7 @@ fi
 # svscan log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4952,7 +4953,7 @@ echo "$prog_args" > $conf_dir/.options
 # resolvconf run script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -4997,7 +4998,7 @@ echo "wait"
 # resolvconf log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5155,7 +5156,7 @@ case "$dkverify_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5177,7 +5178,7 @@ fi
 # fetchmail log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5276,7 +5277,7 @@ else
 fi
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5317,7 +5318,7 @@ fi
 # qmail-poppass log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5552,7 +5553,7 @@ case "$dksign_option" in
 esac
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -5569,7 +5570,7 @@ fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/log
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -7841,7 +7842,7 @@ sed "s{MRTGHOSTNAME{`hostname`{;  s{HTMLDIR{$htmldir\/{" \
 # mrtg run script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -7869,7 +7870,7 @@ fi
 # mrtg log script
 (
 echo "#!/bin/sh"
-echo "# \$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+echo "# \$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 echo "# generated on $host on `date`"
 echo "# $prog_args"
 echo ""
@@ -8377,7 +8378,7 @@ while test $# -gt 0; do
 	;;
 
 	--version)
-	echo "\$Id: svctool.in,v 2.436 2019-06-11 21:04:44+05:30 Cprogrammer Exp mbhangui $"
+	echo "\$Id: svctool.in,v 2.437 2019-06-12 08:14:35+05:30 Cprogrammer Exp mbhangui $"
 	exit 0
 	;;
 
