@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.h,v $
+ * Revision 1.5  2019-06-13 19:15:09+05:30  Cprogrammer
+ * added wrappers for mysql_next_result(), mysql_fetch_lengths(), mysql_num_fields()
+ *
  * Revision 1.4  2019-06-09 17:39:38+05:30  Cprogrammer
  * conditional compilation of bool typedef
  *
@@ -38,7 +41,8 @@ extern MYSQL   *mysql_Init(MYSQL *);
 extern MYSQL   *(*in_mysql_init) (MYSQL *);
 extern MYSQL   *(*in_mysql_real_connect) (MYSQL *, const char *, const char *, const char *, const char *, unsigned int, const char *, unsigned long);
 extern i_char  *(*in_mysql_error) (MYSQL *);
-extern i_uint   (*in_mysql_errno) (MYSQL *mysql);
+extern i_uint   (*in_mysql_errno) (MYSQL *);
+extern int      (*in_mysql_next_result) (MYSQL *);
 extern void     (*in_mysql_close) (MYSQL *);
 extern int      (*in_mysql_options) (MYSQL *, enum mysql_option, const void *);
 #if MYSQL_VERSION_ID >= 50703 && !defined(MARIADB_BASE_VERSION)
@@ -47,7 +51,9 @@ extern int      (*in_mysql_get_option) (MYSQL *, enum mysql_option, void *);
 extern int      (*in_mysql_query) (MYSQL *, const char *);
 extern res     *(*in_mysql_store_result) (MYSQL *);
 extern char   **(*in_mysql_fetch_row) (MYSQL_RES *);
-extern my_ulonglong (*in_mysql_num_rows)(MYSQL_RES *);
+unsigned long  *(*in_mysql_fetch_lengths) (MYSQL_RES *);
+extern my_ulonglong (*in_mysql_num_rows) (MYSQL_RES *);
+extern unsigned int (*in_mysql_num_fields) (MYSQL_RES *res);
 extern my_ulonglong (*in_mysql_affected_rows) (MYSQL *);
 extern void     (*in_mysql_free_result) (MYSQL_RES *);
 extern char    *(*in_mysql_stat) (MYSQL *);
@@ -71,6 +77,7 @@ extern MYSQL   *in_mysql_init(MYSQL *);
 extern MYSQL   *in_mysql_real_connect(MYSQL *, const char *, const char *, const char *, const char *, unsigned int, const char *, unsigned long);
 extern i_char  *in_mysql_error(MYSQL *);
 extern i_uint   in_mysql_errno(MYSQL *mysql);
+extern int      in_mysql_next_result(MYSQL *);
 extern void     in_mysql_close(MYSQL *);
 extern int      in_mysql_options(MYSQL *, enum mysql_option, const void *);
 #if MYSQL_VERSION_ID >= 50703 && !defined(MARIADB_BASE_VERSION)
@@ -79,7 +86,9 @@ extern int      in_mysql_get_option(MYSQL *, enum mysql_option, void *);
 extern int      in_mysql_query(MYSQL *, const char *);
 extern res     *in_mysql_store_result(MYSQL *);
 extern char   **in_mysql_fetch_row(MYSQL_RES *);
+unsigned long  *in_mysql_fetch_lengths(MYSQL_RES *);
 extern my_ulonglong in_mysql_num_rows(MYSQL_RES *);
+extern unsigned int in_mysql_num_fields(MYSQL_RES *);
 extern my_ulonglong in_mysql_affected_rows(MYSQL *);
 extern void     in_mysql_free_result(MYSQL_RES *);
 extern char    *in_mysql_stat(MYSQL *);

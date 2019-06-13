@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.8  2019-06-13 19:14:35+05:30  Cprogrammer
+ * added wrappers for mysql_next_result(), mysql_fetch_lengths(), mysql_num_fields()
+ *
  * Revision 1.7  2019-06-09 17:39:16+05:30  Cprogrammer
  * conditional compilation of bool typedef
  *
@@ -32,7 +35,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.7 2019-06-09 17:39:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.8 2019-06-13 19:14:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
@@ -55,6 +58,7 @@ MYSQL          *(*in_mysql_init) (MYSQL *);
 MYSQL          *(*in_mysql_real_connect) (MYSQL *, const char *, const char *, const char *, const char *, unsigned int, const char *, unsigned long);
 const char     *(*in_mysql_error) (MYSQL *);
 unsigned int    (*in_mysql_errno) (MYSQL *);
+int             (*in_mysql_next_result) (MYSQL *);
 void            (*in_mysql_close) (MYSQL *);
 int             (*in_mysql_options) (MYSQL *, enum mysql_option, const void *);
 #if MYSQL_VERSION_ID >= 50703 && !defined(MARIADB_BASE_VERSION)
@@ -63,7 +67,9 @@ int             (*in_mysql_get_option) (MYSQL *, enum mysql_option, void *);
 int             (*in_mysql_query) (MYSQL *, const char *);
 MYSQL_RES      *(*in_mysql_store_result) (MYSQL *);
 MYSQL_ROW       (*in_mysql_fetch_row) (MYSQL_RES *);
+unsigned long  *(*in_mysql_fetch_lengths) (MYSQL_RES *);
 my_ulonglong    (*in_mysql_num_rows) (MYSQL_RES *);
+unsigned int    (*in_mysql_num_fields)(MYSQL_RES *);
 my_ulonglong    (*in_mysql_affected_rows) (MYSQL *);
 void            (*in_mysql_free_result) (MYSQL_RES *);
 const char     *(*in_mysql_stat) (MYSQL *);
@@ -279,7 +285,7 @@ initMySQLlibrary(char **errstr)
 {
 	static void    *phandle = (void *) 0;
 	char           *ptr;
-	int             i;
+	int             i = -1;
 
 	if (phandle)
 		return (0);
@@ -304,6 +310,9 @@ initMySQLlibrary(char **errstr)
 	if (!(in_mysql_errno = getlibObject(ptr, &phandle, "mysql_errno", errstr)))
 		return (1);
 	else
+	if (!(in_mysql_next_result = getlibObject(ptr, &phandle, "mysql_next_result", errstr)))
+		return (1);
+	else
 	if (!(in_mysql_close = getlibObject(ptr, &phandle, "mysql_close", errstr)))
 		return (1);
 	else
@@ -324,7 +333,13 @@ initMySQLlibrary(char **errstr)
 	if (!(in_mysql_fetch_row = getlibObject(ptr, &phandle, "mysql_fetch_row", errstr)))
 		return (1);
 	else
+	if (!(in_mysql_fetch_lengths = getlibObject(ptr, &phandle, "mysql_fetch_lengths", errstr)))
+		return (1);
+	else
 	if (!(in_mysql_num_rows = getlibObject(ptr, &phandle, "mysql_num_rows", errstr)))
+		return (1);
+	else
+	if (!(in_mysql_num_fields = getlibObject(ptr, &phandle, "mysql_num_fields", errstr)))
 		return (1);
 	else
 	if (!(in_mysql_affected_rows = getlibObject(ptr, &phandle, "mysql_affected_rows", errstr)))
@@ -407,6 +422,12 @@ in_mysql_errno(MYSQL *mysql)
 	return (mysql_errno(mysql));
 }
 
+int
+in_mysql_next_result(MYSQL *mysql)
+{
+	return (mysql_next_result(mysql));
+}
+
 void
 in_mysql_close(MYSQL *mysql)
 {
@@ -446,10 +467,22 @@ in_mysql_fetch_row(MYSQL_RES *result)
 	return (mysql_fetch_row(result));
 }
 
+unsigned long  *
+in_mysql_fetch_lengths(MYSQL_RES *result)
+{
+	return (mysql_fetch_lengths(result));
+}
+
 my_ulonglong
 in_mysql_num_rows(MYSQL_RES *result)
 {
 	return (mysql_num_rows(result));
+}
+
+unsigned int
+in_mysql_num_fields(MYSQL_RES *result)
+{
+	return(mysql_num_fields(result));
 }
 
 my_ulonglong
