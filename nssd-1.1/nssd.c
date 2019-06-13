@@ -19,7 +19,7 @@
 /*- A SIGNIFICANT PORTION OF THIS CODE IS BASED ON GNU NSCD */
 
 /*
- * $Id: nssd.c,v 1.3 2018-11-12 17:43:46+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: nssd.c,v 1.4 2019-06-13 21:23:19+05:30 Cprogrammer Exp mbhangui $ 
  */
 #include "common.h"
 #include <errno.h>
@@ -39,12 +39,13 @@
 #include <unistd.h>
 #include <limits.h>
 #include "nssd.h"
+#include "load_mysql.h"
 
 #define XMYSQL_FREE_RESULT(n)                                                \
 do {                                                                         \
   if (n)                                                                     \
     {                                                                        \
-      mysql_free_result (n);                                                 \
+      in_mysql_free_result (n);                                                 \
       (n) = '\0';                                                            \
     }                                                                        \
   } while (0)
@@ -94,31 +95,31 @@ init_connection(int th_num)
 	if (connections[th_num].connected)
 		return 1;
 	nssd_log(LOG_DEBUG, "%s: Initializing MySQL connection #%d ...", __FUNCTION__, th_num);
-	if (!mysql_init(&connections[th_num].mysql)) {
-		nssd_log(LOG_ALERT, "%s: mysql_init: %s", __FUNCTION__, mysql_error(&connections[th_num].mysql));
+	if (!mysql_Init(&connections[th_num].mysql)) {
+		nssd_log(LOG_ALERT, "%s: mysql_init: %s", __FUNCTION__, in_mysql_error(&connections[th_num].mysql));
 		return 0;
 	}
-	if (mysql_options(&connections[th_num].mysql, MYSQL_OPT_CONNECT_TIMEOUT, (const char *) &default_timeout)) {
-		nssd_log(LOG_ALERT, "%s: mysql_options: %s", __FUNCTION__, mysql_error(&connections[th_num].mysql));
+	if (in_mysql_options(&connections[th_num].mysql, MYSQL_OPT_CONNECT_TIMEOUT, (const char *) &default_timeout)) {
+		nssd_log(LOG_ALERT, "%s: mysql_options: %s", __FUNCTION__, in_mysql_error(&connections[th_num].mysql));
 		return 0;
 	}
-	if (mysql_options(&connections[th_num].mysql, MYSQL_READ_DEFAULT_GROUP, "nssd")) {
-		nssd_log(LOG_ALERT, "%s: mysql_options: %s", __FUNCTION__, mysql_error(&connections[th_num].mysql));
+	if (in_mysql_options(&connections[th_num].mysql, MYSQL_READ_DEFAULT_GROUP, "nssd")) {
+		nssd_log(LOG_ALERT, "%s: mysql_options: %s", __FUNCTION__, in_mysql_error(&connections[th_num].mysql));
 		return 0;
 	}
 #if MYSQL_VERSION_ID >= 50013
-	if (mysql_options(&connections[th_num].mysql, MYSQL_OPT_RECONNECT, (const char *) &reconnect)) {
-		nssd_log(LOG_ALERT, "%s: mysql_options: %s", __FUNCTION__, mysql_error(&connections[th_num].mysql));
+	if (in_mysql_options(&connections[th_num].mysql, MYSQL_OPT_RECONNECT, (const char *) &reconnect)) {
+		nssd_log(LOG_ALERT, "%s: mysql_options: %s", __FUNCTION__, in_mysql_error(&connections[th_num].mysql));
 		return 0;
 	}
 #else
 	connections[th_num].mysql.reconnect = (ns_bool) 1;
 #endif
 
-	if (!mysql_real_connect
-		(&connections[th_num].mysql, conf.host, conf.username[0] ? conf.username : NULL, conf.password[0] ? conf.password : NULL,
+	if (!in_mysql_real_connect(&connections[th_num].mysql, conf.host,
+				conf.username[0] ? conf.username : NULL, conf.password[0] ? conf.password : NULL,
 		 conf.database, conf.port, conf.socket[0] ? conf.socket : NULL, 0)) {
-		nssd_log(LOG_ALERT, "%s: mysql_real_connect: %s", __FUNCTION__, mysql_error(&connections[th_num].mysql));
+		nssd_log(LOG_ALERT, "%s: mysql_real_connect: %s", __FUNCTION__, in_mysql_error(&connections[th_num].mysql));
 		return 0;
 	}
 	connections[th_num].result = NULL;
@@ -137,7 +138,7 @@ run_query(int32_t type, char *key, int th_num)
 		return 0;
 	/*- If we have a key, then use snprintf () */
 	if (key && *key) {
-		mysql_real_escape_string(&connections[th_num].mysql, ekey, key, strlen(key));
+		in_mysql_real_escape_string(&connections[th_num].mysql, ekey, key, strlen(key));
 		if ((p = strchr(ekey, '@'))) {
 			*p = 0;
 			p++;
@@ -152,8 +153,8 @@ run_query(int32_t type, char *key, int th_num)
 		strncpy(query, query_conf[type].query, sizeof (query) - 1);
 	nssd_log(LOG_DEBUG, "%s: query: %s", __FUNCTION__, query);
 	/*- Run the query */
-	if (mysql_query(&connections[th_num].mysql, query)) {
-		nssd_log(LOG_ALERT, "%s: mysql_query: %s", __FUNCTION__, mysql_error(&connections[th_num].mysql));
+	if (in_mysql_query(&connections[th_num].mysql, query)) {
+		nssd_log(LOG_ALERT, "%s: mysql_query: %s", __FUNCTION__, in_mysql_error(&connections[th_num].mysql));
 		return 0;
 	}
 	return 1;
@@ -168,17 +169,17 @@ get_response_size(int th_num)
 	int             i;
 	unsigned int    num_fields;
 
-	num_fields = mysql_num_fields(connections[th_num].result);
-	while ((row = mysql_fetch_row(connections[th_num].result)) != NULL) {
+	num_fields = in_mysql_num_fields(connections[th_num].result);
+	while ((row = in_mysql_fetch_row(connections[th_num].result)) != NULL) {
 		/*- This row size = size of response_data struct + size of all fields */
-		lengths = mysql_fetch_lengths(connections[th_num].result);
+		lengths = in_mysql_fetch_lengths(connections[th_num].result);
 		response_size += RDS;
 		for (i = 0; i < num_fields; i++)
 			response_size += lengths[i] + 1;
 	}
-	if (mysql_errno(&connections[th_num].mysql))
-		nssd_log(LOG_ALERT, "%s: mysql_fetch_row: %s", __FUNCTION__, mysql_error(&connections[th_num].mysql));
-	mysql_data_seek(connections[th_num].result, 0);
+	if (in_mysql_errno(&connections[th_num].mysql))
+		nssd_log(LOG_ALERT, "%s: mysql_fetch_row: %s", __FUNCTION__, in_mysql_error(&connections[th_num].mysql));
+	in_mysql_data_seek(connections[th_num].result, 0);
 	return response_size;
 }
 
@@ -194,7 +195,7 @@ build_response(int th_num, int32_t type, response_header_t * response_header, st
 	int32_t         response_size;
 
 	/*- Make sure we have all the fields we need */
-	num_fields = mysql_num_fields(connections[th_num].result);
+	num_fields = in_mysql_num_fields(connections[th_num].result);
 	if (num_fields != query_conf[type].num_fields) {
 		nssd_log(LOG_ALERT, "%s: Expecting %d fields, got %d", __FUNCTION__, query_conf[type].num_fields, num_fields);
 		return data;
@@ -222,10 +223,10 @@ build_response(int th_num, int32_t type, response_header_t * response_header, st
 		data = (struct response_data *) realloc(data, response_header->response_size);
 		dp = (struct response_data *) &(((char *) data)[response_header->response_size - response_size]);
 	}
-	while ((row = mysql_fetch_row(connections[th_num].result)) != NULL) {
+	while ((row = in_mysql_fetch_row(connections[th_num].result)) != NULL) {
 		/*- Load string data starting at dp->strdata */
 		sp = dp->strdata;
-		lengths = mysql_fetch_lengths(connections[th_num].result);
+		lengths = in_mysql_fetch_lengths(connections[th_num].result);
 		/*- This row size = size of response_data struct + size of all fields */
 		dp->header.record_size = RDS;
 		for (i = 0; i < num_fields; i++) {
@@ -244,16 +245,16 @@ build_response(int th_num, int32_t type, response_header_t * response_header, st
 		/*- Move data pointer to next record */
 		dp = (struct response_data *) &(((char *) dp)[dp->header.record_size]);
 	}
-	response_header->count += mysql_num_rows(connections[th_num].result);
+	response_header->count += in_mysql_num_rows(connections[th_num].result);
 	return data;
 }
 
 static struct response_data *
 process_result(int th_num, int32_t type, response_header_t * response_header, struct response_data *data)
 {
-	connections[th_num].result = mysql_store_result(&connections[th_num].mysql);
+	connections[th_num].result = in_mysql_store_result(&connections[th_num].mysql);
 	if (connections[th_num].result == NULL)
-		nssd_log(LOG_ALERT, "%s: mysql_store_result: %s", __FUNCTION__, mysql_error(&connections[th_num].mysql));
+		nssd_log(LOG_ALERT, "%s: mysql_store_result: %s", __FUNCTION__, in_mysql_error(&connections[th_num].mysql));
 	else
 		data = build_response(th_num, type, response_header, data);
 	return data;
@@ -398,7 +399,7 @@ main_loop(void *p)
 						data = process_result(th_num, req.type, &response_header, data);
 						XMYSQL_FREE_RESULT(connections[th_num].result);
 #if MYSQL_VERSION_ID >= 40107
-					} while (!mysql_next_result(&connections[th_num].mysql));
+					} while (!in_mysql_next_result(&connections[th_num].mysql));
 #else
 					} while (0);
 #endif
@@ -459,7 +460,7 @@ termination_handler(int signum)
 	for (i = 0; i < conf.threads; ++i) {
 		XMYSQL_FREE_RESULT(connections[i].result);
 		if (connections[i].connected)
-			mysql_close(&connections[i].mysql);
+			in_mysql_close(&connections[i].mysql);
 	}
 	_safe_memset(connections, 0, sizeof (connections));
 	_safe_memset(&conf, 0, sizeof (conf));
