@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.5 2019-06-08 23:09:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.6 2019-06-13 21:17:47+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -104,8 +104,10 @@ Requires: group(qmail)
 Requires: group(nofiles)
 Requires: group(qscand)
 Requires: group(indimail)
+%if %build_on_obs == 0
 Requires(pre): shadow-utils
 Requires(postun): shadow-utils
+%endif
 
 %if %build_on_obs == 1
 License: GPL-3.0+
@@ -172,11 +174,7 @@ Patch9: http://downloads.sourceforge.net/%{name}/Patches-2.0/fetchmail-%{fetchma
 %endif
 
 URL: http://www.indimail.org
-%if %build_on_obs == 1
-AutoReqProv: No
-%else
 AutoReqProv: Yes
-%endif
 # few binaries were moved to sbin and indimail >= 2.5 depends on that
 Requires: indimail-mta > 2.6
 Conflicts: %{name} < 2.0
