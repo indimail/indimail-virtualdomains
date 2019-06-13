@@ -1,5 +1,8 @@
 /*
  * $Log: check_getpw.c,v $
+ * Revision 1.3  2019-06-13 21:22:20+05:30  Cprogrammer
+ * removed getversion_check_getpw_c function
+ *
  * Revision 1.2  2018-11-06 11:28:41+05:30  Cprogrammer
  * fixed warning message
  *
@@ -15,7 +18,7 @@
 #include <shadow.h>
 
 #ifndef	lint
-static char     rcsid[] = "$Id: check_getpw.c,v 1.2 2018-11-06 11:28:41+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: check_getpw.c,v 1.3 2019-06-13 21:22:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -47,10 +50,4 @@ main(int argc, char **argv)
 		printf("%d:%d:%s:%s:%s\n", pw->pw_uid, pw->pw_gid, pw->pw_gecos, pw->pw_dir, pw->pw_shell);
 	}
 	return(0);
-}
-
-void
-getversion_check_getpw_c()
-{
-	printf("%s\n", rcsid);
 }
