@@ -102,26 +102,48 @@ AC_CHECK_FUNCS(strerror_r getgrouplist)
 #FIND_MYSQL()
 ACX_PTHREAD()
 
+AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],nqmail=t,)
+if test " $noqmail" = " t"
+then
+  AC_MSG_ERROR(Could not find qmail library.)
+fi
 AC_CHECK_LIB(socket, getsockname)
 AC_CHECK_LIB(nsl, gethostbyname)
 AC_CHECK_LIB(m, floor)
 AC_CHECK_LIB(dl, dlsym)
 AC_CHECK_LIB(z, compress)
 
-#mysql=""
-#AC_ARG_ENABLE(mysql,     [--enable-mysql=DIR                        Location of your MySQL installation],
-#	mysql="$enableval",
-#	[
-#		if test "$mysql" = ""
-#		then
-#			AC_MSG_ERROR([Unable to find your MySQL directory, specify --enable-mysql.])
-#		fi
-#	])
-#MYSQL_LIB_DIR=$mysql;export MYSQL_LIB_DIR
-#AC_DEFINE_UNQUOTED(MYSQL_LIB_DIR,"$mysql", MySQL Library Path)
-#---------------------------------------------------------------------
-AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directory.],[mysql_prefix=$enableval],[mysql_prefix=""])
+controldir="$sysconfdir/control"
+AC_ARG_ENABLE(controldir, [  --enable-controldir=dir       directory for control files.],
+	controdir="$enableval",
+	[
+	 	if test "$domaindir" != ""
+		then
+			AC_DEFINE_UNQUOTED(CONTROLDIR,"$controldir", Directory for control files)
+		fi
+	])
+AC_DEFINE_UNQUOTED(CONTROLDIR, "$controldir", Directory for control files)
 
+saveCPPFLAGS="$CPPFLAGS"
+CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/include/qmail"
+AC_CHECK_HEADERS([mysql.h])
+AC_CHECK_TYPE([bool],AC_DEFINE(HAVE_BOOL, 1, have bool typedef),,[#include <mysql.h>])
+CPPFLAGS=$saveCPPFLAGS
+
+AC_ARG_ENABLE(dlload-mysql,   [  --enable-dlload-mysql=yes|no Turn off (n, default) or on (y) use dlopen to load libmysqlclient],
+dlload_mysql="$enableval", 
+[
+case $dlload_mysql in
+	1*|y*|Y*)
+	dlload_mysql="yes"
+	;;
+	*)
+	dlload_mysql="no"
+	;;
+esac
+])
+
+AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directory.],[mysql_prefix=$enableval],[mysql_prefix=""])
 if test "$mysql_prefix" = ""
 then
 mysql_incdir=""
@@ -133,7 +155,6 @@ do
 		break
 	fi
 done
-
 AC_ARG_ENABLE(mysqlincdir, [  --enable-mysqlincdir=""       directory where auth include files are.],
 mysql_incdir="$enableval",
 [
@@ -141,8 +162,10 @@ mysql_incdir="$enableval",
 	then
 		AC_MSG_ERROR([Unable to find your inc dir, specify --enable-mysqlincdir.])
 	fi
-] )
+])
 
+if test "$dlload_mysql" = "no"
+then
 mysql_libdir=""
 for f in /usr/local/mysql/lib64/mysql /usr/local/mysql/lib64 /usr/local/mysql/lib/mysql /usr/local/mysql/lib /usr/lib/mysql
 do
@@ -159,42 +182,87 @@ mysql_libdir="$enableval",
 	then
 		AC_MSG_ERROR([Unable to find your sql libraries dir, specify --enable-mysqllibdir.])
 	fi
-] )
-else
-	if test -d $mysql_prefix/include
-	then
-		mysql_incdir=$mysql_prefix/include
-	else
-		mysql_incdir=/usr/include/mysql
-	fi
-
-	if test -d $mysql_prefix/lib64/mysql
-	then
-		mysql_libdir=$mysql_prefix/lib64/mysql
-	elif test -d $mysql_prefix/lib64
-	then
-		mysql_libdir=$mysql_prefix/lib64
-	elif test -d $mysql_prefix/lib/mysql
-	then
-		mysql_libdir=$mysql_prefix/lib/mysql
-	elif test -d $mysql_prefix/lib
-	then
-		mysql_libdir=$mysql_prefix/lib
-	else
-		mysql_libdir=$mysql_prefix/lib/mysql
-	fi
-	mysqlbindir=$mysql_prefix/bin
+])
 fi
 
-AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",
+mysqlbindir=""
+for f in /usr/local/mysql/bin/mysql /usr/bin/mysql
+do
+if test -f $f
+then
+	mysqlbindir="`dirname $f`"
+	break
+	fi
+done
+AC_ARG_ENABLE(mysqlbindir, [  --enable-mysqlbindir=""       directory where mysql binary are.],
+mysqlbindir="$enableval",
+[
+	if test "$mysqlbindir" = ""
+	then
+		AC_MSG_ERROR([Unable to find your sql bin dir, specify --enable-mysqlbindir.])
+	fi
+])
+mysql_prefix=`dirname $mysqlbindir`
+else
+	for f in $mysql_prefix/include/mysql.h $mysql_prefix/include/mysql/mysql.h
+	do
+		if test -f $f
+		then
+			mysql_incdir=`dirname $f`
+			break
+		fi
+	done
+
+	if test "$dlload_mysql" = "no"
+	then
+		if test -d $mysql_prefix/lib64/mysql
+		then
+			mysql_libdir=$mysql_prefix/lib64/mysql
+		elif test -d $mysql_prefix/lib64
+		then
+			mysql_libdir=$mysql_prefix/lib64
+		elif test -d $mysql_prefix/lib/mysql
+		then
+			mysql_libdir=$mysql_prefix/lib/mysql
+		elif test -d $mysql_prefix/lib
+		then
+			mysql_libdir=$mysql_prefix/lib
+		else
+			mysql_libdir=$mysql_prefix/lib/mysql
+		fi
+		mysqlbindir=$mysql_prefix/bin
+	fi
+fi
+
+if test "$dlload_mysql" = "no"
+then
+	saveLIBS="$LIBS"
+	AC_CHECK_LIB(mysqlclient -L$mysql_libdir, mysql_real_connect,[AC_SUBST([LIB_MYSQL], ["-L$mysql_libdir -lmysqlclient"])], 
 	AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
-auth_inc="-I$indimaildir/include -I$mysql_incdir -I$mysql_incdir/mysql"
+	dnl AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient", AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
+	AC_CHECK_FUNC(mysql_optionsv, have_mysqloptionsv=1)
+	LIBS=$saveLIBS
+else
+	AC_DEFINE_UNQUOTED(DLOPEN_LIBMYSQLCLIENT, "1", "if libmysqlclient is loaded using dlopen")
+fi
+
+auth_inc="-I/usr/include/qmail -I$mysql_incdir -I$mysql_incdir/mysql"
 case "$host" in
 	*-*-darwin*)
-	auth_libs="-L$mysql_libdir -lmysqlclient"
+	if test "$dlload_mysql" = "no"
+	then
+		auth_libs="-L. $LIB_MYSQL $LIB_QMAIL"
+	else
+		auth_libs="-L. $LIB_QMAIL"
+	fi
 	;;
 	*)
-	auth_libs="-L$mysql_libdir -lmysqlclient"
+	if test "$dlload_mysql" = "no"
+	then
+		auth_libs="-L. $LIB_MYSQL $LIB_QMAIL"
+	else
+		auth_libs="-L. $LIB_QMAIL"
+	fi
 	;;
 esac
 #---------------------------------------------------------------------
@@ -250,9 +318,13 @@ echo "LDFLAGS            = $LDFLAGS"
 echo "            Current settings"
 echo "---------------------------------------"
 echo "    default domain = $defaultdomain --enable-default-domain=$defaultdomain"
-#echo "       mysql  path = $mysql --enable-mysql=$mysql"
 echo "       include dir = $mysql_incdir --enable-mysqlincdir=$mysql_incdir"
+if test "$dlload_mysql" = "no"
+then
 echo "     MySQL lib dir = $mysql_libdir --enable-mysqllibdir=$mysql_libdir"
+else
+echo "     MySQL lib dir = loaded using dlopen"
+fi
 echo "       socket Path = $socket_path --enable-nssd-socket-path=$socket_path"
 echo "       config Path = $config_path --enable-nssd-config-path=$config_path"
 ) | tee nssd.settings
