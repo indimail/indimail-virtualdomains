@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.c,v $
+ * Revision 1.23  2019-06-14 21:24:59+05:30  Cprogrammer
+ * BUG - honor body length tag in verification
+ *
  * Revision 1.22  2019-01-13 10:10:27+05:30  Cprogrammer
  * added missing usage string for allowing unsigned subject.
  *
@@ -554,6 +557,7 @@ main(int argc, char **argv)
 		switch (ch)
 		{
 		case 'l': /*- body length tag */
+			vopts.nHonorBodyLengthTag = 1;
 			opts.nIncludeBodyLengthTag = 1;
 			break;
 		case 'q': /*- query method tag */
@@ -861,7 +865,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.22 2019-01-13 10:10:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.c,v 1.23 2019-06-14 21:24:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
