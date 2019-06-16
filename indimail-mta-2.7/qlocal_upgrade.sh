@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qlocal_upgrade.sh,v $
+# Revision 1.26  2019-06-16 19:12:53+05:30  Cprogrammer
+# look for libmariadb in addition to libmysqlclient
+#
 # Revision 1.25  2019-06-07 19:19:28+05:30  Cprogrammer
 # set mysql_lib control file
 #
@@ -73,7 +76,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.sh,v 1.25 2019-06-07 19:19:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.26 2019-06-16 19:12:53+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -98,7 +101,7 @@ check_update_if_diff()
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.25 2019-06-07 19:19:28+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: qlocal_upgrade.sh,v 1.26 2019-06-16 19:12:53+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
   systemctl is-enabled svscan >/dev/null 2>&1
   if [ $? -ne 0 ] ; then
@@ -294,16 +297,32 @@ do
 		mysqllib=$i
 	fi
 done
+#
+# this is crazy. Both mariadb and oracle are breaking things
+# around
+# MariaDB-shared, mariadb-connector-c
+# MariaDB-Compat
+# mysql-community-libs
+#
 if [ -z "$mysqllib" ] ; then
-for i in `ls -t /usr/lib*/mysql/libmysqlclient.so.*.*.* 2>/dev/null`
-do
-	file=`basename $i`
-	num=`echo $file | cut -d. -f3`
-	if [ $num -gt $prev_num ] ; then
-		prev_num=$num
-		mysqllib=$i
+	if [ -d /etc/debian_version ] ; then
+		dir="/usr/lib/*-linux-gnu/libmysqlclient.so.*.*.* \
+			/usr/lib/*-linux-gnu/libmariadbclient.so.*.*.* \
+			/usr/lib*/mysql/libmariadbclient.so.*.*.*"
+	else
+		dir="/usr/lib*/libmariadb.so.* \
+			/usr/lib*/libmysqlclient.so.*.*.* \
+			/usr/lib*/mysql/libmysqlclient.so.*.*.*"
 	fi
-done
+	for i in `ls -t $dir 2>/dev/null`
+	do
+		file=`basename $i`
+		num=`echo $file | cut -d. -f3`
+		if [ $num -gt $prev_num ] ; then
+			prev_num=$num
+			mysqllib=$i
+		fi
+	done
 fi
 if [ -n "$mysqllib" -a -f $mysqllib ] ; then
 	check_update_if_diff /etc/indimail/control/mysql_lib $mysqllib
