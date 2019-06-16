@@ -115,6 +115,9 @@
 
        NOTE: user and password are the userid and password of a privileged user in your
        existing MySQL Database)
+	   NOTE: If you are using mysql-community-server 8.x and you have old MySQL clients
+	   connecting to this db, then you might want to do this
+	   mysql> ALTER USER 'indimail'@'%' IDENTIFIED WITH mysql_native_password BY 'ssh-1.5-';
 
 The information for IndiMail to connect to IndiMail is maintained in the file
 
