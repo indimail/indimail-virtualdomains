@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.438 2019-06-15 09:36:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.439 2019-06-16 19:12:14+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -32,7 +32,7 @@ mysqlSocket=/var/run/mysqld/mysqld.sock
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.438 2019-06-15 09:36:50+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.439 2019-06-16 19:12:14+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -4005,7 +4005,6 @@ else
 	fi
 fi
 cd "$DESTDIR"$databasedir/ssl
-echo "Creating MariaDB SSL/TLS Certificates"
 echo pass@@xxx > passinput
 /usr/bin/openssl genrsa 2048 > ca-key.pem
 if [ $? -ne 0 ] ; then
@@ -4061,7 +4060,6 @@ if [ $? -ne 0 ] ; then
 	echo "failed to create client-cert.pem" 1>&2
 	return 1
 fi
-/usr/bin/openssl verify -CAfile ca.pem server-cert.pem client-cert.pem
 }
 
 mecho()
@@ -4203,7 +4201,9 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 				$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data
 			fi
 		elif [ $mariadb -eq 1 ] ; then
+			echo "Creating MariaDB SSL/TLS Certificates" 1>&2
 			mariadb_ssl_rsa_setup "$DESTDIR"$databasedir
+			/usr/bin/openssl verify -CAfile ca.pem server-cert.pem client-cert.pem
 		fi
 		$chown -R mysql:mysql "$DESTDIR"$databasedir
 		#
@@ -4754,7 +4754,9 @@ if [ -x $mysqlPrefix/bin/mysql_ssl_rsa_setup ] ; then
 	echo "$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data" 1>&2
 	$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data
 elif [ $mariadb -eq 1 ] ; then
+	echo "Creating MariaDB SSL/TLS Certificates" 1>&2
 	mariadb_ssl_rsa_setup "$DESTDIR"$databasedir
+	/usr/bin/openssl verify -CAfile ca.pem server-cert.pem client-cert.pem 1>&2
 fi
 $chown -R mysql:mysql "$DESTDIR"$databasedir
 
@@ -9029,7 +9031,9 @@ case $option in
 			usage 1
 			exit 1
 		fi
+		echo "Creating MariaDB SSL/TLS Certificates"
 		mariadb_ssl_rsa_setup "$DESTDIR"$databasedir
+		/usr/bin/openssl verify -CAfile ca.pem server-cert.pem client-cert.pem
 		$chown mysql:mysql "$DESTDIR"$databasedir/ssl
 		;;
 
