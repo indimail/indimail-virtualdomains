@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 1.4  2019-06-17 23:23:07+05:30  Cprogrammer
+ * fixed SIGSEGV when tmpdate.s was null
+ *
  * Revision 1.3  2019-04-22 23:10:19+05:30  Cprogrammer
  * fixed strptime format
  *
@@ -68,7 +71,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 1.3 2019-04-22 23:10:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 1.4 2019-06-17 23:23:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -346,7 +349,7 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
-	for (pos = 0;;) {
+	for (pos = 0, tmpdate.len = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("deliver_mail: read: ", fileName.s, ": ", &strerr_sys);
 			close(fd);
@@ -385,7 +388,7 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
 	 * delivered on a date. Else this is
 	 * the first time mail is being delivered
 	 */
-	if (!str_diffn(tmpdate.s, datebuf, 10)) {
+	if (tmpdate.len && !str_diffn(tmpdate.s, datebuf, 10)) {
 		if (lseek(fd, 0 - pos, SEEK_END) == -1) {
 			strerr_warn3("deliver_mail: lseek: ", fileName.s, ": ", &strerr_sys);
 			close(fd);
@@ -769,7 +772,7 @@ format_local_filename(stralloc *file, stralloc *file_new, char *address,
 		die_nomem();
 	if (!stralloc_copy(file_new, file))
 		die_nomem();
-	str_copyb(file_new->s + i - 4, "cur", 3);
+	str_copyb(file_new->s + i - 4, "new", 3);
 }
 
 /* 
