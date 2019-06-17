@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 1.5  2019-06-17 23:24:18+05:30  Cprogrammer
+ * fixed SMTPROUTE, QMTPROUTE env variable
+ *
  * Revision 1.4  2019-04-22 23:18:56+05:30  Cprogrammer
  * replaced exit with _exit
  *
@@ -78,7 +81,7 @@
 #include "get_message_size.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 1.4 2019-04-22 23:18:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 1.5 2019-06-17 23:24:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vdelivermail: fatal: "
@@ -890,12 +893,12 @@ main(int argc, char **argv)
 					vdl_exit(111);
 				} else /* avoid looping of mails */
 				if (str_diff(remote_hostid, local_hostid)) {
-					if ((ptr = env_get("ROUTES")) && (*ptr && !byte_diff(ptr, 4, "smtp")))
-						ptr = "SMTP";
+					if ((ptr = env_get("ROUTES")) && (*ptr && !byte_diff(ptr, 4, "qmtp")))
+						ptr = "QMTPROUTE";
 					else
-						ptr = "QMTP";
+						ptr = "SMTPROUTE";
 					if (!env_put2(ptr, ip))
-						strerr_die5sys(111, FATAL, "env_put2: ", ptr, "ROUTE=", ip);
+						strerr_die5sys(111, FATAL, "env_put2: ", ptr, "=", ip);
 					switch (qmail_remote(TheUser, TheDomain))
 					{
 					case -1:
