@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: ilocal_upgrade.sh,v $
+# Revision 2.25  2019-06-17 18:15:33+05:30  Cprogrammer
+# update with mysql_lib control file with either libmsyqlclient or libmariadbclient
+#
 # Revision 2.24  2019-06-07 19:21:49+05:30  Cprogrammer
 # set mysql_lib control file
 #
@@ -73,7 +76,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: ilocal_upgrade.sh,v 2.24 2019-06-07 19:21:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.25 2019-06-17 18:15:33+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -90,10 +93,75 @@ check_update_if_diff()
 	fi
 }
 
+check_libmysqlclient_lib()
+{
+	if [ -f /etc/indimail/control/mysql_lib ] ; then
+		mysqllib=`cat /etc/indimail/control/mysql_lib 2>/dev/null`
+		if [ -f $mysqllib ] ; then
+			return 0
+		fi
+	fi
+	# upgrade MYSQL_LIB for dynamic loading of libmysqlclient
+	prev_num=0
+	for i in `ls -t /usr/lib*/libmysqlclient.so.*.*.* 2>/dev/null`
+	do
+		file=`basename $i`
+		num=`echo $file | cut -d. -f3`
+		if [ $num -gt $prev_num ] ; then
+			prev_num=$num
+			mysqllib=$i
+		fi
+	done
+	if [ -z "$mysqllib" -a -f /etc/debian_version ] ; then
+	# upgrade MYSQL_LIB for dynamic loading of libmysqlclient
+	prev_num=0
+	for i in `ls -t /usr/lib/*-linux-gnu/libmariadbclient.so.*.*.* 2>/dev/null`
+	do
+		file=`basename $i`
+		num=`echo $file | cut -d. -f3`
+		if [ $num -gt $prev_num ] ; then
+			prev_num=$num
+			mysqllib=$i
+		fi
+	done
+	fi
+	#
+	# this is crazy. Both mariadb and oracle are breaking things
+	# around
+	# MariaDB-shared, mariadb-connector-c
+	# MariaDB-Compat
+	# mysql-community-libs
+	#
+	if [ -z "$mysqllib" ] ; then
+		if [ -d /etc/debian_version ] ; then
+			dir="/usr/lib/*-linux-gnu/libmysqlclient.so.*.*.* \
+				/usr/lib/*-linux-gnu/libmariadbclient.so.*.*.* \
+				/usr/lib*/mysql/libmariadbclient.so.*.*.*"
+		else
+			dir="/usr/lib*/libmariadb.so.* \
+				/usr/lib*/libmysqlclient.so.*.*.* \
+				/usr/lib*/mysql/libmysqlclient.so.*.*.*"
+		fi
+		for i in `ls -t $dir 2>/dev/null`
+		do
+			file=`basename $i`
+			num=`echo $file | cut -d. -f3`
+			if [ $num -gt $prev_num ] ; then
+				prev_num=$num
+				mysqllib=$i
+			fi
+		done
+	fi
+	if [ -n "$mysqllib" -a -f $mysqllib ] ; then
+		check_update_if_diff /etc/indimail/control/mysql_lib $mysqllib
+	fi
+	return 0
+}
+
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: ilocal_upgrade.sh,v 2.24 2019-06-07 19:21:49+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 - $Id: ilocal_upgrade.sh,v 2.25 2019-06-17 18:15:33+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do
@@ -123,6 +191,7 @@ if [ -f /etc/indimail/control/spamignore ] ; then
 	$chgrp apache /etc/indimail/control/spamignore
 	$chmod 664 /etc/indimail/control/spamignore
 fi
+
 # copy updated cron entries
 if [ -f /etc/indimail/cronlist.i -a -d /etc/cron.d ] ; then
 	diff /etc/indimail/cronlist.i /etc/cron.d/cronlist.i >/dev/null 2>&1
@@ -131,33 +200,8 @@ if [ -f /etc/indimail/cronlist.i -a -d /etc/cron.d ] ; then
 	fi
 fi
 
-# upgrade MYSQL_LIB for dynamic loading of libmysqlclient
-prev_num=0
-for i in `ls -t /usr/lib*/libmysqlclient.so.*.*.* 2>/dev/null`
-do
-	file=`basename $i`
-	num=`echo $file | cut -d. -f3`
-	if [ $num -gt $prev_num ] ; then
-		prev_num=$num
-		mysqllib=$i
-	fi
-done
-if [ -z "$mysqllib" ] ; then
-for i in `ls -t /usr/lib*/mysql/libmysqlclient.so.*.*.* 2>/dev/null`
-do
-	file=`basename $i`
-	num=`echo $file | cut -d. -f3`
-	if [ $num -gt $prev_num ] ; then
-		prev_num=$num
-		mysqllib=$i
-	fi
-done
-fi
-if [ -n "$mysqllib" -a -f $mysqllib ] ; then
-	check_update_if_diff /etc/indimail/control/mysql_lib $mysqllib
-else
-	/bin/rm -f /etc/indimail/control/mysql_lib
-fi
+# upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
+check_libmysqlclient_lib
 } 
 
 case $1 in
