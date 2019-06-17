@@ -1,5 +1,8 @@
 /*
  * $Log: get_smtp_service_port.c,v $
+ * Revision 1.3  2019-06-17 23:26:17+05:30  Cprogrammer
+ * set default port as PORT_SMTP
+ *
  * Revision 1.2  2019-04-17 17:44:42+05:30  Cprogrammer
  * set default port as PORT_SMTP
  *
@@ -31,7 +34,7 @@
 #include "create_table.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_smtp_service_port.c,v 1.2 2019-04-17 17:44:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_smtp_service_port.c,v 1.3 2019-06-17 23:26:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -58,7 +61,7 @@ get_smtp_service_port(char *srchost, char *domain, char *hostid)
 		if (!str_diffn(ptr, "qmtp", 4))
 			default_port = PORT_QMTP;
 		else
-			return (-1);
+			default_port = PORT_SMTP;
 	} else
 		default_port = PORT_SMTP;
 	if (open_central_db(0))
