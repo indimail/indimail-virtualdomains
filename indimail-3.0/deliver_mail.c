@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 1.5  2019-06-18 09:57:41+05:30  Cprogrammer
+ * added comments
+ *
  * Revision 1.4  2019-06-17 23:23:07+05:30  Cprogrammer
  * fixed SIGSEGV when tmpdate.s was null
  *
@@ -71,7 +74,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 1.4 2019-06-17 23:23:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 1.5 2019-06-18 09:57:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -349,6 +352,10 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	/*
+	 * read lines with the following format
+	 * date total_mailcount total_mailsize
+	 */
 	for (pos = 0, tmpdate.len = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("deliver_mail: read: ", fileName.s, ": ", &strerr_sys);
@@ -358,10 +365,8 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
 #endif
 			return (-2);
 		}
-		if (!line.len)
+		if (!line.len || !match)
 			break;
-		if (!match)
-			continue;
 		if (!stralloc_0(&line))
 			die_nomem();
 		line.len--;
