@@ -1,5 +1,5 @@
 /*
- * $Log: get_smtp_service_port.c,v $
+ * $Log: smtp_port.c,v $
  * Revision 1.3  2019-06-17 23:26:17+05:30  Cprogrammer
  * set default port as PORT_SMTP
  *
@@ -34,18 +34,18 @@
 #include "create_table.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_smtp_service_port.c,v 1.3 2019-06-17 23:26:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: smtp_port.c,v 1.3 2019-06-17 23:26:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
 die_nomem()
 {
-	strerr_warn1("get_smtp_service_port: out of memory", 0);
+	strerr_warn1("smtp_port: out of memory", 0);
 	_exit(111);
 }
 
 int
-get_smtp_service_port(char *srchost, char *domain, char *hostid)
+smtp_port(char *srchost, char *domain, char *hostid)
 {
 	static stralloc Domain = {0}, SqlBuf = {0};
 	char           *ptr, *srchost_t;
@@ -92,13 +92,13 @@ get_smtp_service_port(char *srchost, char *domain, char *hostid)
 		if (in_mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE)
 			create_table(ON_MASTER, "smtp_port", SMTP_TABLE_LAYOUT);
 		else {
-			strerr_warn4("get_smtp_service_port: ", SqlBuf.s, ": ",
+			strerr_warn4("smtp_port: ", SqlBuf.s, ": ",
 				(char *) in_mysql_error(&mysql[0]), 0);
 		}
 		return (default_port);
 	}
 	if (!(res = in_mysql_store_result(&mysql[0]))) {
-			strerr_warn2("get_smtp_service_port: in_mysql_store_result: ",
+			strerr_warn2("smtp_port: in_mysql_store_result: ",
 				(char *) in_mysql_error(&mysql[0]), 0);
 		return (default_port);
 	}

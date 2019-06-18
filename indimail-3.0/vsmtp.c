@@ -34,7 +34,7 @@
 #include "vsmtp_delete.h"
 #include "variables.h"
 #include "sql_getip.h"
-#include "get_smtp_service_port.h"
+#include "smtp_port.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: vsmtp.c,v 1.3 2019-06-07 15:40:32+05:30 Cprogrammer Exp mbhangui $";
@@ -194,7 +194,7 @@ main(argc, argv)
 			err = vsmtp_delete(hostid.s, mta, domain.s, port);
 		break;
 	case SMTP_UPDATE:
-			if ((oldport = get_smtp_service_port(mta, domain.s, hostid.s)) == -1) {
+			if ((oldport = smtp_port(mta, domain.s, hostid.s)) == -1) {
 				strerr_warn1("vsmtp: failed to get Old Port", 0);
 				err = 1;
 			} else

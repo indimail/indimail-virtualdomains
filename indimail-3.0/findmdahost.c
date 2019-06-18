@@ -24,7 +24,7 @@
 #include "LoadDbInfo.h"
 #include "get_real_domain.h"
 #include "findhost.h"
-#include "get_smtp_service_port.h"
+#include "smtp_port.h"
 #include "GetSMTProute.h"
 #include "is_distributed_domain.h"
 #include "variables.h"
@@ -138,7 +138,7 @@ findmdahost(char *email, int *total)
 		} else {
 			is_open = 0; /* prevent closing of connection by iclose */
 			if (is_dist == 1)
-				port = get_smtp_service_port(0, real_domain, (*rhostsptr)->mdahost);
+				port = smtp_port(0, real_domain, (*rhostsptr)->mdahost);
 			else
 				port = GetSMTProute(real_domain);
 			if (port == -1)

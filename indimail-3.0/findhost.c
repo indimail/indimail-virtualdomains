@@ -29,7 +29,7 @@
 #include "create_table.h"
 #include "SqlServer.h"
 #include "sql_getip.h"
-#include "get_smtp_service_port.h"
+#include "smtp_port.h"
 #include "iopen.h"
 #include "load_mysql.h"
 
@@ -425,7 +425,7 @@ again:
 			return ((char *) 0);
 		}
 	}
-	if ((port = get_smtp_service_port(0, real_domain, hostid.s)) == -1) {
+	if ((port = smtp_port(0, real_domain, hostid.s)) == -1) {
 		strerr_warn4("findhost: failed to get smtp port for ", real_domain, " ", hostid.s, 0);
 		return ((char *) 0);
 	} else
