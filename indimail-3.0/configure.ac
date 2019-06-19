@@ -1195,8 +1195,8 @@ else
   DISTRIB_ID=$(sh ./lsb_release -si)
   DISTRIB_VERSION=$(sh ./lsb_release -sr)
 fi
-LIBVER=2:0:0
-MODVER=2:0:0
+LIBVER=3:0:0
+MODVER=3:0:0
 AC_DEFINE_UNQUOTED(PREFIX, "$prefix",Installation Prefix)
 AC_DEFINE_UNQUOTED(LIBVER, "$LIBVER", Library Version)
 AC_DEFINE_UNQUOTED(MODVER, "$MODVER", iauth module version)
