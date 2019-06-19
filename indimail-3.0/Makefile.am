@@ -68,7 +68,7 @@ include_HEADERS = addaliasdomain.h add_control.h add_domain_assign.h addressToke
 				  getAddressBook.h get_assign.h getEnvConfig.h getFreeFS.h getindimail.h \
 				  get_indimailuidgid.h getlastauth.h get_local_hostid.h get_local_ip.h \
 				  get_localtime.h get_message_size.h get_Mplexdir.h getpeer.h GetPrefix.h \
-				  get_real_domain.h GetSMTProute.h get_smtp_service_port.h getuidgid.h global.h \
+				  get_real_domain.h GetSMTProute.h getuidgid.h global.h \
 				  hmac.h hostcntrl_select.h host_in_locals.h iadddomain.h iadduser.h iclose.h \
 				  in_bsearch.h in_crypt.h indimail_compat.h indimail.h inquery.h iopen.h ipasswd.h \
 				  ip_map.h is_alias_domain.h is_already_running.h is_distributed_domain.h \
@@ -84,10 +84,10 @@ include_HEADERS = addaliasdomain.h add_control.h add_domain_assign.h addressToke
 				  RelayInLookup.h relay_select.h RemoteBulkMail.h remove_line.h remove_quotes.h \
 				  renameuser.h replacestr.h ripemd.h r_mkdir.h runcmmd.h SendWelcomeMail.h \
 				  set_mysql_options.h setuserid.h setuserquota.h sha1.h skip_relay.h \
-				  skip_system_files.h sockwrite.h spam.h sql_active.h sql_adddomain.h sql_adduser.h \
-				  sql_delaliasdomain.h sql_deldomain.h sql_deluser.h sql_getall.h sql_getflags.h \
-				  sql_gethostid.h sql_getip.h sql_getpw.h sql_get_realdomain.h sql_init.h \
-				  sql_insertaliasdomain.h sqlOpen_user.h sql_passwd.h sql_renamedomain.h \
+				  skip_system_files.h sockwrite.h smtp_port.h spam.h sql_active.h sql_adddomain.h \
+				  sql_adduser.h sql_delaliasdomain.h sql_deldomain.h sql_deluser.h sql_getall.h \
+				  sql_getflags.h sql_gethostid.h sql_getip.h sql_getpw.h sql_get_realdomain.h \
+				  sql_init.h sql_insertaliasdomain.h sqlOpen_user.h sql_passwd.h sql_renamedomain.h \
 				  SqlServer.h sql_setpw.h sql_setquota.h sql_updateflag.h storeHeader.h \
 				  strToPw.h tcpbind.h tcpopen.h tls.h trashpurge.h typesx.h udpopen.h update_file.h \
 				  update_local_hostid.h update_newu.h update_quota.h update_rules.h \
@@ -137,7 +137,7 @@ COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.
 				getactualpath.c get_assign.c getDbLock.c getEnvConfig.c \
 				get_indimailuidgid.c get_local_hostid.c get_local_ip.c get_localtime.c \
 				get_message_size.c get_Mplexdir.c getpeer.c GetPrefix.c get_real_domain.c \
-				GetSMTProute.c get_smtp_service_port.c hmac_md5.c hmac_ripemd.c \
+				GetSMTProute.c hmac_md5.c hmac_ripemd.c \
 				hmac_sha1.c hmac_sha256.c hmac_sha512.c hostcntrl_select.c \
 				host_in_locals.c iadddomain.c iadduser.c iclose.c inc_dir.c \
 				inc_dir_control.c in_crypt.c init_dir_control.c inquery.c iopen.c \
@@ -154,7 +154,7 @@ COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.
 				remove_quotes.c renameuser.c replacestr.c ripemd.c r_mkdir.c runcmmd.c \
 				SendWelcomeMail.c set_mysql_options.c setuserid.c setuserquota.c \
 				sha256_crypt.c sha512_crypt.c show_atrn_map.c show_ip_map.c skip_relay.c \
-				skip_system_files.c sql_active.c sql_adddomain.c sql_adduser.c \
+				skip_system_files.c smtp_port.c sql_active.c sql_adddomain.c sql_adduser.c \
 				sql_delaliasdomain.c sql_deldomain.c sql_deluser.c sql_getall.c \
 				sql_getflags.c sql_gethostid.c sql_getip.c sql_getpw.c \
 				sql_get_realdomain.c sql_init.c sql_insertaliasdomain.c sqlOpen_user.c \
