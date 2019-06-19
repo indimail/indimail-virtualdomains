@@ -1,14 +1,6 @@
 #!/bin/sh
-#if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
-#autoreconf -fiv
-#fi
-if [ -d /lib64/security ] ; then
-	pam_module_dir=/lib64/security
-elif [ -d /lib/security ] ;then
-	pam_module_dir=/lib/security
-else
-	echo "could not find pam module directory" 1>&2
-	exit 1
+if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
+  autoreconf -fiv
 fi
 if [ -d /usr/lib64 ] ; then
 	libdir=/usr/lib64
