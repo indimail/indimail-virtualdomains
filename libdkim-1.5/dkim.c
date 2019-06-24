@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.c,v $
+ * Revision 1.24  2019-06-24 23:14:33+05:30  Cprogrammer
+ * fixed return value interpretation of DKIMVERIFY
+ *
  * Revision 1.23  2019-06-14 21:24:59+05:30  Cprogrammer
  * BUG - honor body length tag in verification
  *
@@ -847,13 +850,19 @@ main(int argc, char **argv)
 			if (ret < 0) {
 				if (dkimverify[str_chr(dkimverify, 'F' - ret)])
 					ret = 14; /*- return permanent error */
+				else
 				if (dkimverify[str_chr(dkimverify, 'f' - ret)])
 					ret = 88; /*- return temporary error */
+				else
+					ret = 0;
 			} else {
 				if (dkimverify[str_chr(dkimverify, 'A' + ret)])
 					ret = 14; /*- return permanent error */
+				else
 				if (dkimverify[str_chr(dkimverify, 'a' + ret)])
 					ret = 88; /*- return temporary error */
+				else
+					ret = 0;
 			}
 		}
 		return (ret);
@@ -865,7 +874,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.23 2019-06-14 21:24:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.c,v 1.24 2019-06-24 23:14:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
