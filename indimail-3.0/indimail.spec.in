@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.6 2019-06-13 21:17:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.7 2019-06-19 07:33:37+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1254,8 +1254,8 @@ done
 %{_libdir}/libeps.so.1.0.0
 %{_libdir}/libflash.so.1
 %{_libdir}/libflash.so.1.0.0
-%{_libdir}/libindimail.so.2
-%{_libdir}/libindimail.so.2.0.0
+%{_libdir}/libindimail.so.3
+%{_libdir}/libindimail.so.3.0.0
 
 %if %nonssd == 0
                                         %{_libdir}/libnss_nssd.so.2
@@ -1368,7 +1368,7 @@ done
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/GetPrefix.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/get_real_domain.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/GetSMTProute.h
-%attr(644,root,qmail)                   %{_prefix}/include/indimail/get_smtp_service_port.h
+%attr(644,root,qmail)                   %{_prefix}/include/indimail/smtp_port.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/getuidgid.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/global.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/hmac.h
@@ -1566,8 +1566,8 @@ done
 %{_libdir}/libeps.so.1.0.0
 %{_libdir}/libflash.so.1
 %{_libdir}/libflash.so.1.0.0
-%{_libdir}/libindimail.so.2
-%{_libdir}/libindimail.so.2.0.0
+%{_libdir}/libindimail.so.3
+%{_libdir}/libindimail.so.3.0.0
 
 %if %nonssd == 0
                                         %{_libdir}/libnss_nssd.so.2
