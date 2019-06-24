@@ -1,5 +1,8 @@
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.22  2019-06-24 23:19:57+05:30  Cprogrammer
+# added code for -d option in DKIMSIGNOPTIONS
+#
 # Revision 1.21  2019-01-14 00:10:00+05:30  Cprogrammer
 # added -S, -f option to verify signatures with unsigned subject, unsigned from
 #
@@ -66,7 +69,7 @@
 # Revision 1.1  2009-04-02 14:52:27+05:30  Cprogrammer
 # Initial revision
 #
-# $Id: dk-filter.sh,v 1.21 2019-01-14 00:10:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.22 2019-06-24 23:19:57+05:30 Cprogrammer Exp mbhangui $
 #
 if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
@@ -210,6 +213,11 @@ if [ $dkimsign -eq 1 ] ; then
 		shift
 		;;
 
+		-d)
+		dkimopts="$dkimopts -d $2"
+		shift
+		;;
+
 		-i)
 		dkimopts="$dkimopts -i $2"
 		shift
@@ -275,6 +283,7 @@ if [ $dksign -eq 1 ] ; then
 		-h)
 		dkopts="$dkopts -h"
 		;;
+
 		-r)
 		dkopts="$dkopts -r"
 		;;
