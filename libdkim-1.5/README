@@ -39,22 +39,24 @@ Changes for IndiMail
 18. libdkim - dns.cpp. fixed double free of dnresult causing SIGSEGV
 12/08/2018
 19. dkim.c - fix for multiple DKIM-Signature header
-24/06/2019
-20. dkim.c - fixed return value interpretation of DKIMVERIFY
-14/06/2019
-21. libdkim - dkim.c, dkimverify.h, dkimbase.cpp, dkimverify.cpp - BUG
-    verfication was not honoring body length tag
-21/05/2019
-22. dkimverify.cpp - Increased buffer length for dns result
-23. dns.cpp - fixed pointer after realloc
-24. configure.ac, dkimverify.cpp, dkimverify.h - fix for 32 bit systems
-    where time_t is 4 bytes & encounters year 2038 issue
-17/02/2019
-25. dkimverify.cpp - made scope of sFromDomain static
-13/01/2019
-26. dkim.c - Added missing usage string for allowing unsigned subject
 27/08/2018
-27. Fixed dkimsign issue with round parenthesis.
+20. Fixed dkimsign issue with round parenthesis.
+13/01/2019
+21. dkim.c - Added missing usage string for allowing unsigned subject
+17/02/2019
+22. dkimverify.cpp - made scope of sFromDomain static
+21/05/2019
+23. dkimverify.cpp - Increased buffer length for dns result
+24. dns.cpp - fixed pointer after realloc
+25. configure.ac, dkimverify.cpp, dkimverify.h - fix for 32 bit systems
+    where time_t is 4 bytes & encounters year 2038 issue
+24/06/2019
+26. dkim.c - fixed return value interpretation of DKIMVERIFY
+14/06/2019
+27. libdkim - dkim.c, dkimverify.h, dkimbase.cpp, dkimverify.cpp - BUG
+    verfication was not honoring body length tag
+26/06/2019
+28. dkimsign.cpp - use X-Bounced-Address domain for DKIM signing for bounces
 
 ----------------------
 1.0.21 
