@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.15  2019-06-26 19:08:18+05:30  Cprogrammer
+ * added sOrigRecipient variable for X-Original-Recepient header added by qmail-send for bounces
+ *
  * Revision 1.14  2019-06-24 22:22:15+05:30  Cprogrammer
  * use DKIMDOMAIN only if Return-Path, From, Sender header are empty
  *
@@ -276,6 +279,9 @@ ConvertHeaderToQuotedPrintable(const char *source, char *dest)
 void
 CDKIMSign::GetHeaderParams(const string & sHdr)
 {
+	if (_strnicmp(sHdr.c_str(), "X-Original-Recipient:", 21) == 0)
+		sOrigRecipient.assign(sHdr.c_str() + 21);
+	else
 	if (_strnicmp(sHdr.c_str(), "X", 1) == 0)
 		return;
 	if (_strnicmp(sHdr.c_str(), "From:", 5) == 0)
@@ -476,6 +482,9 @@ bool CDKIMSign::ParseFromAddress(void)
 	else
 	if (!sFrom.empty())
 		sAddress.assign(sFrom);
+	else /* use indimail's X-Original-Recipient header to find the domain that injected the bounce */
+	if (!sOrigRecipient.empty())
+		sAddress.assign(sOrigRecipient);
 	else
 		return false;
 	// simple for now, beef it up later
@@ -1006,7 +1015,7 @@ int CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.14 2019-06-24 22:22:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.15 2019-06-26 19:08:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
