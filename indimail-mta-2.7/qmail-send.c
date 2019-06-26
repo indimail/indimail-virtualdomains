@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-send.c,v $
  * Revision 1.65  2019-06-26 18:45:51+05:30  Cprogrammer
- * insert X-Original-Recipient header for bounces
+ * insert X-Bounced-Address header for bounces
  *
  * Revision 1.64  2018-07-03 01:59:03+05:30  Cprogrammer
  * fixed indentation
@@ -1326,7 +1326,7 @@ injectbounce(id)
 			nomem();
 		qmail_put(&qqt, newfield_date.s, newfield_date.len);
 		if (orig_recip.len) {
-			qmail_put(&qqt, "X-Original-Recipient: ", 22);
+			qmail_put(&qqt, "X-Bounced-Address: ", 19);
 			qmail_put(&qqt, orig_recip.s, orig_recip.len);
 		}
 		qmail_put(&qqt, "From: ", 6);
