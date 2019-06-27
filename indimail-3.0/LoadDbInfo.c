@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbInfo.c,v $
+ * Revision 1.5  2019-06-27 10:46:31+05:30  Cprogrammer
+ * use newline as a separator between records
+ *
  * Revision 1.4  2019-06-07 10:51:50+05:30  Cprogrammer
  * fix SIGSEGV on hosts with mcdfile missing (non-distributed domains)
  *
@@ -71,7 +74,7 @@
 #include "check_group.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.4 2019-06-07 10:51:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.5 2019-06-27 10:46:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static DBINFO **loadMCDInfo(int *);
@@ -182,7 +185,7 @@ writemcdinfo(DBINFO **rhostsptr, time_t mtime)
 			substdio_put(&ssout, "\n", 1) ||
 			substdio_put(&ssout, "pass     ", 9) ||
 			substdio_puts(&ssout, (*ptr)->password) ||
-			substdio_put(&ssout, "\n", 1) ||
+			substdio_put(&ssout, "\n\n", 2) ||
 			substdio_flush(&ssout))
 			strerr_die3sys(111, "LoadDbInfo: write error: ", mcdFile.s, ": ");
 	}
