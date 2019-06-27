@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 1.7  2019-06-27 19:59:42+05:30  Cprogrammer
+ * provide default cnf file and group to set_mysql_options
+ *
  * Revision 1.6  2019-06-27 10:45:05+05:30  Cprogrammer
  * display ssl setting for mysql_real_connect() error
  *
@@ -48,7 +51,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 1.6 2019-06-27 10:45:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 1.7 2019-06-27 19:59:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static MYSQL   *is_duplicate_conn(MYSQL **, DBINFO **);
@@ -134,11 +137,7 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 	 * if MYSQL_READ_DEFAULT_FILE is used
 	 * mysql_real_connect fails by connecting with a null unix domain socket
 	 */
-	if ((count = set_mysql_options(*mysqlptr, 
-		(*ptr)->port > 0 || (*ptr)->socket ? 0 : "indimail.cnf",
-		(*ptr)->port > 0 || (*ptr)->socket ? 0 : "indimail",
-		&flags)))
-	{
+	if ((count = set_mysql_options(*mysqlptr, "indimail.cnf", "indimail", &flags))) {
 		strnum1[fmt_uint(strnum1, count)] = 0;
 		strerr_die4x(111, "mysql_options(", strnum1, "): ", (str = error_mysql_options_str(count)) ? str : "unknown error");
 	}

@@ -1,5 +1,8 @@
 /*
  * $Log: iopen.c,v $
+ * Revision 1.7  2019-06-27 20:00:29+05:30  Cprogrammer
+ * provide default cnf file and group to set_mysql_options
+ *
  * Revision 1.6  2019-06-27 10:45:41+05:30  Cprogrammer
  * display ssl setting for mysql_real_connect() error
  *
@@ -51,7 +54,7 @@
 #include "set_mysql_options.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iopen.c,v 1.6 2019-06-27 10:45:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iopen.c,v 1.7 2019-06-27 20:00:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -188,10 +191,7 @@ iopen(char *dbhost)
 		 * if MYSQL_READ_DEFAULT_FILE is used
 		 * mysql_real_connect fails by connecting with a null unix domain socket
 		 */
-		if ((count = set_mysql_options(&mysql[1], 
-				mysqlport > 0 || mysql_socket ? 0 : "indimail.cnf",
-				mysqlport > 0 || mysql_socket ? 0 : "indimail",
-				&flags))) {
+		if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags))) {
 			strnum[fmt_uint(strnum, count)] = 0;
 			strerr_warn4("iopen: mysql_options(", strnum, "): error setting ",
 				(ptr = error_mysql_options_str(count)) ? ptr : "unknown error", 0);
