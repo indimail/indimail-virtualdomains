@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 1.5  2019-06-27 10:45:31+05:30  Cprogrammer
+ * display ssl setting for mysql_real_connect() error
+ *
  * Revision 1.4  2019-05-28 17:39:09+05:30  Cprogrammer
  * added load_mysql.h for mysql interceptor function prototypes
  *
@@ -34,7 +37,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 1.4 2019-05-28 17:39:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 1.5 2019-06-27 10:45:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -247,7 +250,8 @@ open_central_db(char *dbhost)
 				return (-1);
 			}
 		}
-		if (!(in_mysql_real_connect(&mysql[0], cntrl_host.s, mysql_user, mysql_passwd, mysql_database, mysqlport, cntrl_socket, flags))) {
+		if (!(in_mysql_real_connect(&mysql[0], cntrl_host.s, mysql_user, mysql_passwd,
+					mysql_database, mysqlport, cntrl_socket, flags))) {
 			flags = use_ssl;
 			if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags))) {
 				strnum[fmt_uint(strnum, count)] = 0;
@@ -255,8 +259,11 @@ open_central_db(char *dbhost)
 					(ptr = error_mysql_options_str(count)) ? ptr : "unknown error", 0);
 				return (-1);
 			}
-			if (!(in_mysql_real_connect(&mysql[0], cntrl_host.s, mysql_user, mysql_passwd, NULL, mysqlport, cntrl_socket, flags))) {
-				strerr_warn4("open_central_db: mysql_real_connect: ", cntrl_host.s, ": ",
+			if (!(in_mysql_real_connect(&mysql[0], cntrl_host.s, mysql_user, mysql_passwd,
+					NULL, mysqlport, cntrl_socket, flags))) {
+				strerr_warn10("open_central_db: mysql_real_connect: ", cntrl_host.s, " user ", mysql_user,
+					" port ", cntrl_port, " socket ", cntrl_socket ? cntrl_socket : "TCP/IP",
+					!cntrl_socket && use_ssl ? ": use_ssl=1" : ": use_ssl=0: ",
 					(char *) in_mysql_error(&mysql[0]), 0);
 				return (-1);
 			}
