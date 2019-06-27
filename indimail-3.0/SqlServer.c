@@ -1,5 +1,8 @@
 /*
  * $Log: SqlServer.c,v $
+ * Revision 1.3  2019-06-27 16:30:23+05:30  Cprogrammer
+ * set ssl parameter in the returned mysql connection string
+ *
  * Revision 1.2  2019-04-17 17:47:36+05:30  Cprogrammer
  * use stralloc variable for returning result
  *
@@ -25,7 +28,7 @@
 #include "LoadDbInfo.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: SqlServer.c,v 1.2 2019-04-17 17:47:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: SqlServer.c,v 1.3 2019-06-27 16:30:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -57,11 +60,17 @@ SqlServer(char *mdahost, char *domain)
 					!stralloc_append(&hostbuf, ":") ||
 					!stralloc_cats(&hostbuf, (*rhostsptr)->password))
 				die_nomem();
-			if (str_diffn((*rhostsptr)->server, "localhost", 10) && (*rhostsptr)->port != 3306) {
+			if ((*rhostsptr)->socket) {
+				if (!stralloc_append(&hostbuf, ":") ||
+					!stralloc_cats(&hostbuf, (*rhostsptr)->socket))
+				die_nomem();
+			} else {
 				if (!stralloc_append(&hostbuf, ":") ||
 					!stralloc_catb(&hostbuf, strnum, fmt_uint(strnum, (*rhostsptr)->port)))
 				die_nomem();
 			}
+			if (!stralloc_cats(&hostbuf, (*rhostsptr)->use_ssl ? ":ssl" : ":nossl"))
+				die_nomem();
 			if (!stralloc_0(&hostbuf))
 				die_nomem();
 			return (hostbuf.s);
