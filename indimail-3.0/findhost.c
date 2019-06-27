@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 1.6  2019-06-27 20:00:23+05:30  Cprogrammer
+ * provide default cnf file and group to set_mysql_options
+ *
  * Revision 1.5  2019-06-27 10:45:31+05:30  Cprogrammer
  * display ssl setting for mysql_real_connect() error
  *
@@ -37,7 +40,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 1.5 2019-06-27 10:45:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 1.6 2019-06-27 20:00:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -228,10 +231,7 @@ open_central_db(char *dbhost)
 		 * if MYSQL_READ_DEFAULT_FILE is used
 		 * mysql_real_connect fails by connecting with a null unix domain socket
 		 */
-		if ((count = set_mysql_options(&mysql[0], 
-				mysqlport > 0 || cntrl_socket ? 0 : "indimail.cnf",
-				mysqlport > 0 || cntrl_socket ? 0 : "indimail",
-				&flags))) {
+		if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags))) {
 			strnum[fmt_uint(strnum, count)] = 0;
 			strerr_warn4("open_central_db: mysql_options(", strnum, "): ",
 				(ptr = error_mysql_options_str(count)) ? ptr : "unknown error", 0);
@@ -263,7 +263,7 @@ open_central_db(char *dbhost)
 					NULL, mysqlport, cntrl_socket, flags))) {
 				strerr_warn10("open_central_db: mysql_real_connect: ", cntrl_host.s, " user ", mysql_user,
 					" port ", cntrl_port, " socket ", cntrl_socket ? cntrl_socket : "TCP/IP",
-					!cntrl_socket && use_ssl ? ": use_ssl=1" : ": use_ssl=0: ",
+					!cntrl_socket && use_ssl ? ": use_ssl=1: " : ": use_ssl=0: ",
 					(char *) in_mysql_error(&mysql[0]), 0);
 				return (-1);
 			}
