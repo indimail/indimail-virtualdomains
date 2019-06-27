@@ -1,5 +1,8 @@
 /*
  * $Log: iopen.c,v $
+ * Revision 1.6  2019-06-27 10:45:41+05:30  Cprogrammer
+ * display ssl setting for mysql_real_connect() error
+ *
  * Revision 1.5  2019-05-28 23:28:23+05:30  Cprogrammer
  * fixed error message for mysql_real_connect failure
  *
@@ -48,7 +51,7 @@
 #include "set_mysql_options.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iopen.c,v 1.5 2019-05-28 23:28:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iopen.c,v 1.6 2019-06-27 10:45:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -218,16 +221,19 @@ iopen(char *dbhost)
 				return (-1);
 			}
 			if ((count = in_mysql_errno(&mysql[1])) != ER_DATABASE_NAME) {
-				strerr_warn12("iopen: mysql_real_connect: ", server, "@", mysql_database,
+				strerr_warn12("iopen: mysql_real_connect: ", mysql_database, "@", server,
 					" user ", mysql_user, " port ", indi_port, " socket ",
-					mysql_socket ? mysql_socket : "TCP/IP", ": ", (char *) in_mysql_error(&mysql[1]), 0);
+					mysql_socket ? mysql_socket : "TCP/IP",
+					!mysql_socket && use_ssl ? ": use_ssl=1: " : ": use_ssl=0: ",
+					(char *) in_mysql_error(&mysql[1]), 0);
 				return (-1);
 			} 
 			if (!(in_mysql_real_connect(&mysql[1], server, mysql_user, mysql_passwd, NULL,
 				mysqlport, mysql_socket, flags))) {
 				strerr_warn10("iopen: mysql_real_connect: ", server, " user ", mysql_user,
 					" port ", indi_port, " socket ", mysql_socket ? mysql_socket : "TCP/IP",
-					": ", (char *) in_mysql_error(&mysql[1]), 0);
+					!mysql_socket && use_ssl ? ": use_ssl=1" : ": use_ssl=0: ",
+					(char *) in_mysql_error(&mysql[1]), 0);
 				return (-1);
 			}
 			if (!stralloc_copyb(&SqlBuf, "CREATE DATABASE ", 16) ||

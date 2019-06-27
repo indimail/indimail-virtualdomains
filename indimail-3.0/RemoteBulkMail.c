@@ -1,5 +1,8 @@
 /*
  * $Log: RemoteBulkMail.c,v $
+ * Revision 1.2  2019-06-27 10:45:55+05:30  Cprogrammer
+ * display ssl setting for mysql_real_connect() error
+ *
  * Revision 1.1  2019-04-15 11:46:10+05:30  Cprogrammer
  * Initial revision
  *
@@ -31,7 +34,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RemoteBulkMail.c,v 1.1 2019-04-15 11:46:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: RemoteBulkMail.c,v 1.2 2019-06-27 10:45:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -123,6 +126,11 @@ bulk_host_connect()
 				bulk_database, bulk_port, bulk_socket, flags)))
 			return (&bulkMySql);
 		else
+			strerr_warn12("bulk_host_connect: mysql_real_connect: ", bulk_database, "@", bulk_host,
+				" user ", bulk_user, " port ", port, " socket ",
+				bulk_socket ? bulk_socket : "TCP/IP",
+				!bulk_socket && use_ssl ? ": use_ssl=1: " : ": use_ssl=0: ",
+				(char *) in_mysql_error(&bulkMySql), 0);
 			return ((MYSQL *) 0);
 	}
 }
