@@ -1,5 +1,8 @@
 /*
  * $Log: clear_open_smtp.c,v $
+ * Revision 1.3  2019-06-30 10:13:43+05:30  Cprogrammer
+ * seperate fields in error string by commas
+ *
  * Revision 1.2  2019-05-28 17:34:47+05:30  Cprogrammer
  * added load_mysql.h for mysql interceptor function prototypes
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: clear_open_smtp.c,v 1.2 2019-05-28 17:34:47+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: clear_open_smtp.c,v 1.3 2019-06-30 10:13:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY
@@ -100,8 +103,8 @@ clear_open_smtp(time_t clear_seconds, int connect_all)
 		if ((*ptr)->fd == -1) {
 			strnum[fmt_uint(strnum, (*ptr)->port)] = 0;
 			strerr_warn16("in_mysql_real_connect: ", (*ptr)->database, "@", (*ptr)->server,
-					" domain ", (*ptr)->domain, " mdahost ", (*ptr)->mdahost, " user ",
-					(*ptr)->user, " port ", strnum, " socket ",
+					", domain ", (*ptr)->domain, ", mdahost ", (*ptr)->mdahost, ", user ",
+					(*ptr)->user, ", port ", strnum, ", socket ",
 					(*ptr)->socket ? (*ptr)->socket : "TCP/IP", ": ", (char *) in_mysql_error(*mysqlptr), 0);
 			continue;
 		}
@@ -121,8 +124,8 @@ clear_open_smtp(time_t clear_seconds, int connect_all)
 			}
 			strnum[fmt_uint(strnum, (*ptr)->port)] = 0;
 			strerr_warn16("in_mysql_real_connect: ", (*ptr)->database, "@", (*ptr)->server,
-					" domain ", (*ptr)->domain, " mdahost ", (*ptr)->mdahost, " user ",
-					(*ptr)->user, " port ", strnum, " socket ",
+					", domain ", (*ptr)->domain, ", mdahost ", (*ptr)->mdahost, ", user ",
+					(*ptr)->user, ", port ", strnum, ", socket ",
 					(*ptr)->socket ? (*ptr)->socket : "TCP/IP", ": ", (char *) in_mysql_error(*mysqlptr), 0);
 			err = 1;
 			continue;

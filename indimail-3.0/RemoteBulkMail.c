@@ -1,5 +1,8 @@
 /*
  * $Log: RemoteBulkMail.c,v $
+ * Revision 1.4  2019-06-30 10:14:30+05:30  Cprogrammer
+ * seperate fields in error string by commas
+ *
  * Revision 1.3  2019-06-27 20:00:34+05:30  Cprogrammer
  * provide default cnf file and group to set_mysql_options
  *
@@ -37,7 +40,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RemoteBulkMail.c,v 1.3 2019-06-27 20:00:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: RemoteBulkMail.c,v 1.4 2019-06-30 10:14:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -127,7 +130,7 @@ bulk_host_connect()
 			return (&bulkMySql);
 		else
 			strerr_warn12("bulk_host_connect: mysql_real_connect: ", bulk_database, "@", bulk_host,
-				" user ", bulk_user, " port ", port, " socket ",
+				", user ", bulk_user, ", port ", port, ", socket ",
 				bulk_socket ? bulk_socket : "TCP/IP",
 				!bulk_socket && use_ssl ? ": use_ssl=1: " : ": use_ssl=0: ",
 				(char *) in_mysql_error(&bulkMySql), 0);

@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 1.7  2019-06-30 10:14:19+05:30  Cprogrammer
+ * seperate fields in error string by commas
+ *
  * Revision 1.6  2019-06-27 20:00:23+05:30  Cprogrammer
  * provide default cnf file and group to set_mysql_options
  *
@@ -40,7 +43,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 1.6 2019-06-27 20:00:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 1.7 2019-06-30 10:14:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -262,7 +265,7 @@ open_central_db(char *dbhost)
 			if (!(in_mysql_real_connect(&mysql[0], cntrl_host.s, mysql_user, mysql_passwd,
 					NULL, mysqlport, cntrl_socket, flags))) {
 				strerr_warn10("open_central_db: mysql_real_connect: ", cntrl_host.s, " user ", mysql_user,
-					" port ", cntrl_port, " socket ", cntrl_socket ? cntrl_socket : "TCP/IP",
+					", port ", cntrl_port, ", socket ", cntrl_socket ? cntrl_socket : "TCP/IP",
 					!cntrl_socket && use_ssl ? ": use_ssl=1: " : ": use_ssl=0: ",
 					(char *) in_mysql_error(&mysql[0]), 0);
 				return (-1);

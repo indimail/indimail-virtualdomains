@@ -1,5 +1,8 @@
 /*
  * $Log: iopen.c,v $
+ * Revision 1.8  2019-06-30 10:14:25+05:30  Cprogrammer
+ * seperate fields in error string by commas
+ *
  * Revision 1.7  2019-06-27 20:00:29+05:30  Cprogrammer
  * provide default cnf file and group to set_mysql_options
  *
@@ -54,7 +57,7 @@
 #include "set_mysql_options.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iopen.c,v 1.7 2019-06-27 20:00:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iopen.c,v 1.8 2019-06-30 10:14:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -186,15 +189,10 @@ iopen(char *dbhost)
 	if (!isopen_cntrl || str_diffn(cntrl_host.s, mysql_host.s, mysql_host.len) || str_diffn(cntrl_port, indi_port, FMT_ULONG)) {
 #endif
 		flags = use_ssl;
-		/*- 
-		 * mysql_options bug
-		 * if MYSQL_READ_DEFAULT_FILE is used
-		 * mysql_real_connect fails by connecting with a null unix domain socket
-		 */
 		if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags))) {
 			strnum[fmt_uint(strnum, count)] = 0;
 			strerr_warn4("iopen: mysql_options(", strnum, "): error setting ",
-				(ptr = error_mysql_options_str(count)) ? ptr : "unknown error", 0);
+				(ptr = error_mysql_options_str(count)) ? ptr : "mysql options", 0);
 			return (-1);
 		}
 		server = (mysql_socket && islocalif(mysql_host.s) ? "localhost" : mysql_host.s);
@@ -217,12 +215,12 @@ iopen(char *dbhost)
 			if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags))) {
 				strnum[fmt_uint(strnum, count)] = 0;
 				strerr_warn4("iopen: mysql_options(", strnum, "): error setting ",
-					(ptr = error_mysql_options_str(count)) ? ptr : "unknown error", 0);
+					(ptr = error_mysql_options_str(count)) ? ptr : "mysql options", 0);
 				return (-1);
 			}
 			if ((count = in_mysql_errno(&mysql[1])) != ER_DATABASE_NAME) {
 				strerr_warn12("iopen: mysql_real_connect: ", mysql_database, "@", server,
-					" user ", mysql_user, " port ", indi_port, " socket ",
+					" user ", mysql_user, ", port ", indi_port, ", socket ",
 					mysql_socket ? mysql_socket : "TCP/IP",
 					!mysql_socket && use_ssl ? ": use_ssl=1: " : ": use_ssl=0: ",
 					(char *) in_mysql_error(&mysql[1]), 0);
@@ -231,7 +229,7 @@ iopen(char *dbhost)
 			if (!(in_mysql_real_connect(&mysql[1], server, mysql_user, mysql_passwd, NULL,
 				mysqlport, mysql_socket, flags))) {
 				strerr_warn10("iopen: mysql_real_connect: ", server, " user ", mysql_user,
-					" port ", indi_port, " socket ", mysql_socket ? mysql_socket : "TCP/IP",
+					", port ", indi_port, ", socket ", mysql_socket ? mysql_socket : "TCP/IP",
 					!mysql_socket && use_ssl ? ": use_ssl=1" : ": use_ssl=0: ",
 					(char *) in_mysql_error(&mysql[1]), 0);
 				return (-1);

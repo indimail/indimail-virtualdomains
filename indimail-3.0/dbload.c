@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 1.8  2019-06-30 10:14:14+05:30  Cprogrammer
+ * seperate fields in error string by commas
+ *
  * Revision 1.7  2019-06-27 19:59:42+05:30  Cprogrammer
  * provide default cnf file and group to set_mysql_options
  *
@@ -51,7 +54,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 1.7 2019-06-27 19:59:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 1.8 2019-06-30 10:14:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static MYSQL   *is_duplicate_conn(MYSQL **, DBINFO **);
@@ -172,8 +175,8 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 		if (verbose) {
 			strnum1[fmt_uint(strnum1, (*ptr)->port)] = 0;
 			strerr_warn14("dbload: MySQLConnect: ", (*ptr)->database, "@", server,
-					": domain ", (*ptr)->domain, " user ", (*ptr)->user, " port ", strnum1,
-					" socket ", (*ptr)->socket ? (*ptr)->socket : "TCP/IP", 
+					", domain ", (*ptr)->domain, ", user ", (*ptr)->user, ", port ", strnum1,
+					", socket ", (*ptr)->socket ? (*ptr)->socket : "TCP/IP", 
 					!(*ptr)->socket && (*ptr)->use_ssl ?  ": use_ssl=1: " : ": use_ssl=0: ",
 					(char *) in_mysql_error(*mysqlptr), 0);
 		}
