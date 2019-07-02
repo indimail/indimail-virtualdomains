@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbInfo.c,v $
+ * Revision 1.6  2019-07-02 09:51:38+05:30  Cprogrammer
+ * Null terminate RelayHosts before calling writemcdinfo
+ *
  * Revision 1.5  2019-06-27 10:46:31+05:30  Cprogrammer
  * use newline as a separator between records
  *
@@ -74,7 +77,7 @@
 #include "check_group.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.5 2019-06-27 10:46:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.6 2019-07-02 09:51:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static DBINFO **loadMCDInfo(int *);
@@ -111,7 +114,7 @@ writemcdinfo(DBINFO **rhostsptr, time_t mtime)
 {
 	char           *sysconfdir, *mcdfile, *controldir;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
-	int             fd;
+	int             fd, idx;
 	uid_t           uid, uidtmp;
 	gid_t           gid, gidtmp;
 	struct utimbuf  ubuf;
@@ -160,7 +163,7 @@ writemcdinfo(DBINFO **rhostsptr, time_t mtime)
 	}
 	if (fchown(fd, uid, gid))
 		strerr_die3sys(111, "writemcdinfo: fchown: ", mcdFile.s, ": ");
-	for (ptr = rhostsptr;(*ptr);ptr++) {
+	for (ptr = rhostsptr, idx = 0;(*ptr);idx++, ptr++) {
 		if ((*ptr)->isLocal)
 			continue;
 		if (substdio_put(&ssout, "domain   ", 9) ||
@@ -447,12 +450,12 @@ LoadDbInfo_TXT(int *total)
 			(*ptr)->failed_attempts = 0;
 			(*ptr)->isLocal = 0;
 		}
+		(*ptr) = (DBINFO *) 0;
+		in_mysql_free_result(res);
  		/* write dbinfo records to mcdinfo and set file modification time to mcd_time */
 		if (writemcdinfo(relayhosts, mcd_time)) {
 			strerr_warn1("LoadDbInfo: writemcdinfo failed", 0);
 		}
-		(*ptr) = (DBINFO *) 0;
-		in_mysql_free_result(res);
 		return (relayhosts);
 	} else
 	if (verbose) {
