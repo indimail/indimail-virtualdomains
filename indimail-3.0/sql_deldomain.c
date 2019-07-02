@@ -1,5 +1,8 @@
 /*
  * $Log: sql_deldomain.c,v $
+ * Revision 1.2  2019-07-02 17:06:02+05:30  Cprogrammer
+ * open master db before deleting from hostcntrl
+ *
  * Revision 1.1  2019-04-14 22:52:18+05:30  Cprogrammer
  * Initial revision
  *
@@ -25,10 +28,11 @@
 #include "delusercntrl.h"
 #include "valias_delete_domain.h"
 #include "vsmtp_delete_domain.h"
+#include "open_master.h"
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_deldomain.c,v 1.1 2019-04-14 22:52:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_deldomain.c,v 1.2 2019-07-02 17:06:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <mysqld_error.h>
@@ -119,6 +123,10 @@ sql_deldomain(char *domain)
 				err = 1;
 			strerr_warn1("sql_deldomain: get_local_hostid: Unable to get hostid", 0);
 			return (err);
+		}
+		if (open_master()) {
+			strerr_warn1("sql_deldomain: failed to open master db", 0);
+			return (-1);
 		}
 		if (!stralloc_copyb(&SqlBuf, "delete low_priority from hostcntrl where pw_domain = \"", 54) ||
 				!stralloc_cats(&SqlBuf, domain) ||
