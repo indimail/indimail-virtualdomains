@@ -1,5 +1,8 @@
 /*
  * $Log: deldomain.c,v $
+ * Revision 1.2  2019-07-02 09:48:07+05:30  Cprogrammer
+ * return success while deleting if a domain is not found in assign file
+ *
  * Revision 1.1  2019-04-18 08:16:56+05:30  Cprogrammer
  * Initial revision
  *
@@ -46,7 +49,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deldomain.c,v 1.1 2019-04-18 08:16:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deldomain.c,v 1.2 2019-07-02 09:48:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -120,7 +123,7 @@ deldomain(char *domain)
 	}
 	if (!get_assign(domain, &Dir, &uid, &gid)) {
 		strerr_warn3("deldomain: domain ", domain, " does not exist", 0);
-		return (-1);
+		return (0);
 	}
 	if (!stralloc_copy(&tmpbuf, &Dir) ||
 			!stralloc_catb(&tmpbuf, "/.base_path", 11) || !stralloc_0(&tmpbuf))
