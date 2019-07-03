@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.9  2019-07-03 19:37:17+05:30  Cprogrammer
+ * added getversion_load_mysql_c()
+ *
  * Revision 1.8  2019-06-13 19:14:35+05:30  Cprogrammer
  * added wrappers for mysql_next_result(), mysql_fetch_lengths(), mysql_num_fields()
  *
@@ -35,7 +38,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.8 2019-06-13 19:14:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.9 2019-07-03 19:37:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
