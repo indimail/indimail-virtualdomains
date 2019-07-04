@@ -1,5 +1,8 @@
 /*
  * $Log: update_file.c,v $
+ * Revision 1.2  2019-07-04 00:02:05+05:30  Cprogrammer
+ * delete locks on each and every exit
+ *
  * Revision 1.1  2019-04-18 08:33:42+05:30  Cprogrammer
  * Initial revision
  *
@@ -34,7 +37,7 @@
 #include "dblock.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: update_file.c,v 1.1 2019-04-18 08:33:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: update_file.c,v 1.2 2019-07-04 00:02:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -48,7 +51,7 @@ int
 update_file(char *filename, char *update_line, mode_t mode)
 {
 	struct substdio ssin, ssout;
-	int             fd1, fd2, i, found, user_assign = 0, match;
+	int             fd1, fd2, i, found = 0, user_assign = 0, match;
 	char            strnum[FMT_ULONG], inbuf[4096], outbuf[4096];
 	static stralloc fname = {0}, line = {0};
 	struct stat     statbuf;
@@ -58,7 +61,7 @@ update_file(char *filename, char *update_line, mode_t mode)
 
 #ifdef FILE_LOCKING
 	if ((fd = getDbLock(filename, 1)) == -1) {
-		strerr_warn3("update_file: get_write_lock(", filename, "): ", &strerr_sys);
+		strerr_warn3("update_file: getDbLock(", filename, "): ", &strerr_sys);
 		return (-1);
 	}
 #endif
@@ -77,7 +80,7 @@ update_file(char *filename, char *update_line, mode_t mode)
 	/*- get permission from the original file */
 	if (stat(filename, &statbuf)) {
 		if (errno != error_noent) {
-			strerr_warn3("update_file: open: ", filename, ": ", &strerr_sys);
+			strerr_warn3("update_file: stat: ", filename, ": ", &strerr_sys);
 #ifdef FILE_LOCKING
 			delDbLock(fd, filename, 1);
 #endif
@@ -100,27 +103,37 @@ update_file(char *filename, char *update_line, mode_t mode)
 	if (access(filename, F_OK)) {
 		if (substdio_puts(&ssout, update_line) || substdio_put(&ssout, "\n", 1)) {
 			strerr_warn3("update_file: write error: ", fname.s, ": ", &strerr_sys);
+#ifdef FILE_LOCKING
+			delDbLock(fd, filename, 1);
+#endif
 			close(fd2);
 			unlink(fname.s);
 			return (-1);
 		}
 		if (substdio_flush(&ssout)) {
 			strerr_warn3("update_file: write error: ", fname.s, ": ", &strerr_sys);
+#ifdef FILE_LOCKING
+			delDbLock(fd, filename, 1);
+#endif
 			close(fd2);
 			unlink(fname.s);
 			return (-1);
 		}
+#ifdef FILE_LOCKING
+		delDbLock(fd, filename, 1);
+#endif
+		close(fd2);
+		unlink(fname.s);
+		return (0);
 	}
 	if ((fd1 = open_read(filename)) == -1) {
-		if (errno != error_noent) {
-			strerr_warn3("update_file: open: ", filename, ": ", &strerr_sys);
-			close(fd2);
+		strerr_warn3("update_file: open: ", filename, ": ", &strerr_sys);
 #ifdef FILE_LOCKING
-			delDbLock(fd, filename, 1);
+		delDbLock(fd, filename, 1);
 #endif
-			unlink(fname.s);
-		}
-		found = 0;
+		close(fd2);
+		unlink(fname.s);
+		return (-1);
 	} else {
 		substdio_fdbuf(&ssin, read, fd1, inbuf, sizeof(inbuf));
 		for (found = 0;;) {
@@ -147,6 +160,9 @@ update_file(char *filename, char *update_line, mode_t mode)
 				found = 1;
 				if (substdio_puts(&ssout, update_line) || substdio_put(&ssout, "\n", 1)) {
 					strerr_warn3("update_file: write error: ", fname.s, ": ", &strerr_sys);
+#ifdef FILE_LOCKING
+					delDbLock(fd, filename, 1);
+#endif
 					close(fd2);
 					unlink(fname.s);
 					return (-1);
@@ -154,6 +170,9 @@ update_file(char *filename, char *update_line, mode_t mode)
 			} else {
 				if (substdio_put(&ssout, line.s, line.len)) {
 					strerr_warn3("update_file: write error: ", fname.s, ": ", &strerr_sys);
+#ifdef FILE_LOCKING
+					delDbLock(fd, filename, 1);
+#endif
 					close(fd2);
 					unlink(fname.s);
 					return (-1);
@@ -165,6 +184,9 @@ update_file(char *filename, char *update_line, mode_t mode)
 	if (!found) { /*- Append */
 		if (substdio_puts(&ssout, update_line) || substdio_put(&ssout, "\n", 1)) {
 			strerr_warn3("update_file: write error: ", fname.s, ": ", &strerr_sys);
+#ifdef FILE_LOCKING
+			delDbLock(fd, filename, 1);
+#endif
 			close(fd2);
 			unlink(fname.s);
 			return (-1);
@@ -173,6 +195,9 @@ update_file(char *filename, char *update_line, mode_t mode)
 	if (user_assign) {
 		if (substdio_put(&ssout, ".\n", 2)) {
 			strerr_warn3("update_file: write error: ", fname.s, ": ", &strerr_sys);
+#ifdef FILE_LOCKING
+			delDbLock(fd, filename, 1);
+#endif
 			close(fd2);
 			unlink(fname.s);
 			return (-1);
@@ -180,6 +205,9 @@ update_file(char *filename, char *update_line, mode_t mode)
 	}
 	if (substdio_flush(&ssout)) {
 		strerr_warn3("update_file: write error: ", fname.s, ": ", &strerr_sys);
+#ifdef FILE_LOCKING
+		delDbLock(fd, filename, 1);
+#endif
 		close(fd2);
 		unlink(fname.s);
 		return (-1);
