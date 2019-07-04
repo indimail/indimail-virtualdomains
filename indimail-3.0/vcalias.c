@@ -1,5 +1,8 @@
 /*
  * $Log: vcalias.c,v $
+ * Revision 1.3  2019-07-04 10:14:26+05:30  Cprogrammer
+ * fixed incorrect initialization by replacing stralloc_cats() with stralloc_copys()
+ *
  * Revision 1.2  2019-04-22 23:16:52+05:30  Cprogrammer
  * added missing strerr.h
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcalias.c,v 1.2 2019-04-22 23:16:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcalias.c,v 1.3 2019-07-04 10:14:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #if defined(VALIAS)
@@ -136,7 +139,7 @@ main(int argc, char **argv)
 			if (!*ptr)
 				continue;
 			if (!flag) {
-				if (!stralloc_cats(&tmp, dp->d_name + 7) ||
+				if (!stralloc_copys(&tmp, dp->d_name + 7) ||
 						!stralloc_append(&tmp, "@") ||
 						!stralloc_cats(&tmp, Domain) ||
 						!stralloc_0(&tmp))
