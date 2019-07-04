@@ -1,5 +1,8 @@
 /*
  * $Log: vwrite_dir_control.c,v $
+ * Revision 1.3  2019-07-04 00:02:32+05:30  Cprogrammer
+ * fixed filename
+ *
  * Revision 1.2  2019-04-15 22:00:52+05:30  Cprogrammer
  * added dir_control.h for vdir struct definition
  *
@@ -30,7 +33,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vwrite_dir_control.c,v 1.2 2019-04-15 22:00:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vwrite_dir_control.c,v 1.3 2019-07-04 00:02:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -112,7 +115,7 @@ vwrite_dir_control(char *table_name, vdir_type *vdir, char *domain, uid_t dummy1
 		}
 	}
 	if (ptr) {
-		if (!stralloc_cats(&tmpbuf, ptr) ||
+		if (!stralloc_copys(&tmpbuf, ptr) ||
 				!stralloc_catb(&tmpbuf, "/.filesystems", 13) || !stralloc_0(&tmpbuf))
 			die_nomem();
 		if (update_file(tmpbuf.s, table_name, 0640))

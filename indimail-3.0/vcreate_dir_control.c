@@ -1,5 +1,8 @@
 /*
  * $Log: vcreate_dir_control.c,v $
+ * Revision 1.2  2019-07-04 00:02:44+05:30  Cprogrammer
+ * fixed filename
+ *
  * Revision 1.1  2019-04-20 08:23:06+05:30  Cprogrammer
  * Initial revision
  *
@@ -23,7 +26,7 @@
 #include "dir_control.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcreate_dir_control.c,v 1.1 2019-04-20 08:23:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcreate_dir_control.c,v 1.2 2019-07-04 00:02:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -89,7 +92,7 @@ vcreate_dir_control(char *filename, char *domain)
 		return (1);
 	}
 	if (ptr) {
-		if (!stralloc_cats(&tmpbuf, ptr) ||
+		if (!stralloc_copys(&tmpbuf, ptr) ||
 				!stralloc_catb(&tmpbuf, "/.filesystems", 13) || !stralloc_0(&tmpbuf))
 			die_nomem();
 		if (update_file(tmpbuf.s, filename, 0640))
