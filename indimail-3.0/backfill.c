@@ -1,5 +1,8 @@
 /*
  * $Log: backfill.c,v $
+ * Revision 1.2  2019-07-04 09:19:02+05:30  Cprogrammer
+ * initialize filename by using stralloc_copys insteadd of stralloc_cats
+ *
  * Revision 1.1  2019-04-18 08:25:25+05:30  Cprogrammer
  * Initial revision
  *
@@ -34,7 +37,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: backfill.c,v 1.1 2019-04-18 08:25:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: backfill.c,v 1.2 2019-07-04 09:19:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -63,7 +66,7 @@ backfill(char *username, char *domain, char *path, int operation)
 	}
 	if (!(filesys_prefix = GetPrefix(username, path)))
 		return ((char *) 0);
-	if (!stralloc_cats(&filename, ptr) ||
+	if (!stralloc_copys(&filename, ptr) ||
 			!stralloc_catb(&filename, "/.", 2) ||
 			!stralloc_cats(&filename, filesys_prefix) ||
 			!stralloc_0(&filename))
