@@ -1,5 +1,8 @@
 /*
  * $Log: get_local_ip.c,v $
+ * Revision 1.2  2019-07-04 10:05:36+05:30  Cprogrammer
+ * collapsed multiple if statements
+ *
  * Revision 1.1  2019-04-14 18:32:24+05:30  Cprogrammer
  * Initial revision
  *
@@ -38,7 +41,7 @@
 #include "getEnvConfig.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_local_ip.c,v 1.1 2019-04-14 18:32:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_local_ip.c,v 1.2 2019-07-04 10:05:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc hostbuf = { 0 };
@@ -72,26 +75,13 @@ get_local_ip(int family)
 		return (hostbuf.s);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/') {
-		if (!stralloc_copys(&TmpBuf, controldir))
-			die_nomem();
-		else
-		if (!stralloc_catb(&TmpBuf, "/localiphost", 12))
-			die_nomem();
-		else
-		if (!stralloc_0(&TmpBuf))
+		if (!stralloc_copys(&TmpBuf, controldir) || !stralloc_catb(&TmpBuf, "/localiphost", 12) ||
+				!stralloc_0(&TmpBuf))
 			die_nomem();
 	} else {
 		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
-		if (!stralloc_copys(&TmpBuf, sysconfdir))
-			die_nomem();
-		else
-		if (!stralloc_catb(&TmpBuf, "/", 1))
-			die_nomem();
-		else
-		if (!stralloc_cats(&TmpBuf, controldir))
-			die_nomem();
-		else
-		if (!stralloc_catb(&TmpBuf, "/localiphost", 12))
+		if (!stralloc_copys(&TmpBuf, sysconfdir) || !stralloc_catb(&TmpBuf, "/", 1) ||
+				!stralloc_cats(&TmpBuf, controldir) || !stralloc_catb(&TmpBuf, "/localiphost", 12))
 			die_nomem();
 	}
 	if ((fd = open_read(TmpBuf.s)) == -1 && errno != error_noent) {
