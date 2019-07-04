@@ -1,5 +1,8 @@
 /*
  * $Log: Login_Tasks.c,v $
+ * Revision 1.2  2019-07-04 09:17:29+05:30  Cprogrammer
+ * collapsed multiple if statements
+ *
  * Revision 1.1  2019-04-20 08:14:46+05:30  Cprogrammer
  * Initial revision
  *
@@ -57,7 +60,7 @@
 #include "vset_lastdeliver.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: Login_Tasks.c,v 1.1 2019-04-20 08:14:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: Login_Tasks.c,v 1.2 2019-07-04 09:17:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -117,9 +120,8 @@ Login_Tasks(pw, User, ServiceType)
 			int    year;
 			tm = localtime(&inact_time);
 			year = tm->tm_year + 1900;
-			if (!stralloc_copyb(&Subject, "Your IndiMail Account was de-activated on ", 42))
-				return (1);
-			if (!stralloc_catb(&Subject, strnum1, fmt_uint(strnum1, tm->tm_mday)) ||
+			if (!stralloc_copyb(&Subject, "Your IndiMail Account was de-activated on ", 42) ||
+					!stralloc_catb(&Subject, strnum1, fmt_uint(strnum1, tm->tm_mday)) ||
 					!stralloc_append(&Subject, "-") ||
 					!stralloc_catb(&Subject, strnum1, fmt_uint(strnum1, tm->tm_mon)) ||
 					!stralloc_append(&Subject, "-") ||
