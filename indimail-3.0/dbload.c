@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 1.9  2019-07-04 10:03:30+05:30  Cprogrammer
+ * removed left over code
+ *
  * Revision 1.8  2019-06-30 10:14:14+05:30  Cprogrammer
  * seperate fields in error string by commas
  *
@@ -54,7 +57,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 1.8 2019-06-30 10:14:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 1.9 2019-07-04 10:03:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static MYSQL   *is_duplicate_conn(MYSQL **, DBINFO **);
@@ -67,7 +70,6 @@ die_nomem()
 	_exit(111);
 }
 
-static stralloc mcdFile = {0};
 int
 connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 {
@@ -94,42 +96,6 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 						strnum3, " secs [", (*ptr)->last_error ? (*ptr)->last_error : "?", "]", 0);
 				return 1;
 			}
-		}
-	}
-	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
-	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
-	if (*mcdfile == '/' || *mcdfile == '.') {
-		if (!stralloc_copys(&mcdFile, mcdfile))
-			die_nomem();
-		else
-		if (!stralloc_0(&mcdFile))
-			die_nomem();
-	} else {
-		if (*controldir == '/') {
-			if (!stralloc_copys(&mcdFile, controldir))
-				die_nomem();
-			else
-			if (!stralloc_append(&mcdFile, "/"))
-				die_nomem();
-			else
-			if (!stralloc_cats(&mcdFile, mcdfile))
-				die_nomem();
-		} else {
-			getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
-			if (!stralloc_copys(&mcdFile, sysconfdir))
-				die_nomem();
-			else
-			if (!stralloc_append(&mcdFile, "/"))
-				die_nomem();
-			else
-			if (!stralloc_cats(&mcdFile, controldir))
-				die_nomem();
-			else
-			if (!stralloc_append(&mcdFile, "/"))
-				die_nomem();
-			else
-			if (!stralloc_cats(&mcdFile, mcdfile))
-				die_nomem();
 		}
 	}
 	if (!mysql_Init(*mysqlptr))
