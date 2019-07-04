@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 1.4  2019-07-04 10:08:13+05:30  Cprogrammer
+ * collapsed multiple if statements
+ *
  * Revision 1.3  2019-05-29 09:24:33+05:30  Cprogrammer
  * use mysql_options() when using dlopen of libmysqlclient
  *
@@ -25,7 +28,7 @@
 #include "getEnvConfig.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 1.3 2019-05-29 09:24:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 1.4 2019-07-04 10:08:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define max_mysql_option_err_num 21
@@ -118,16 +121,8 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	if (file) {
 #if defined(LIBMARIADB) || defined(MARIADB_BASE_VERSION) /*- full path required in mariadb */
 		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
-		if (!stralloc_copys(&fpath, sysconfdir))
-			strerr_die1sys(111, "out of memory: ");
-		else
-		if (!stralloc_append(&fpath, "/"))
-			strerr_die1sys(111, "out of memory: ");
-		else
-		if (!stralloc_cats(&fpath, file))
-			strerr_die1sys(111, "out of memory: ");
-		else
-		if (!stralloc_0(&fpath))
+		if (!stralloc_copys(&fpath, sysconfdir) || !stralloc_append(&fpath, "/") ||
+				!stralloc_cats(&fpath, file) || !stralloc_0(&fpath))
 			strerr_die1sys(111, "out of memory: ");
 		getEnvConfigStr(&default_file, "MYSQL_READ_DEFAULT_FILE", fpath.s);
 #else
