@@ -1,5 +1,8 @@
 /*
  * $Log: islocalif.c,v $
+ * Revision 1.2  2019-07-04 10:06:33+05:30  Cprogrammer
+ * collapsed multiple if statements
+ *
  * Revision 1.1  2019-04-11 00:42:56+05:30  Cprogrammer
  * Initial revision
  *
@@ -64,7 +67,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: islocalif.c,v 1.1 2019-04-11 00:42:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: islocalif.c,v 1.2 2019-07-04 10:06:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -118,29 +121,14 @@ islocalif(char *hostptr)
 
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/') {
-		if (!stralloc_copys(&filename, controldir))
-			die_nomem();
-		else
-		if (!stralloc_catb(&filename, "/localiphost", 12))
-			die_nomem();
-		else
-		if (!stralloc_0(&filename))
+		if (!stralloc_copys(&filename, controldir) || !stralloc_catb(&filename, "/localiphost", 12) ||
+				!stralloc_0(&filename))
 			die_nomem();
 	} else {
 		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
-		if (!stralloc_copys(&filename, sysconfdir))
-			die_nomem();
-		else
-		if (!stralloc_append(&filename, "/"))
-			die_nomem();
-		else
-		if (!stralloc_cats(&filename, controldir))
-			die_nomem();
-		else
-		if (!stralloc_catb(&filename, "/localiphost", 12))
-			die_nomem();
-		else
-		if (!stralloc_0(&filename))
+		if (!stralloc_copys(&filename, sysconfdir) || !stralloc_append(&filename, "/") ||
+				!stralloc_cats(&filename, controldir) || !stralloc_catb(&filename, "/localiphost", 12) ||
+				!stralloc_0(&filename))
 			die_nomem();
 	}
 	if ((fd = open_read(filename.s)) == -1 && errno != error_noent)
