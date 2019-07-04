@@ -1,5 +1,8 @@
 /*
  * $Log: makeseekable.c,v $
+ * Revision 1.2  2019-07-04 10:07:41+05:30  Cprogrammer
+ * collapsed multiple if statements
+ *
  * Revision 1.1  2019-04-18 08:31:34+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: makeseekable.c,v 1.1 2019-04-18 08:31:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: makeseekable.c,v 1.2 2019-07-04 10:07:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef MAKE_SEEKABLE
@@ -54,13 +57,9 @@ makeseekable(int seekfd)
 		return (0);
 	if (!(tmpdir = env_get("TMPDIR")))
 		tmpdir = "/tmp";
-	if (!stralloc_copys(&tmpFile, tmpdir))
-		die_nomem();
-	if (!stralloc_cats(&tmpFile, "/vdeliverXXXXXX"))
-		die_nomem();
-	if (!stralloc_catb(&tmpFile, strnum, fmt_ulong(strnum, (unsigned long) getpid())))
-		die_nomem();
-	if (!stralloc_0(&tmpFile))
+	if (!stralloc_copys(&tmpFile, tmpdir) || !stralloc_cats(&tmpFile, "/vdeliverXXXXXX") ||
+			!stralloc_catb(&tmpFile, strnum, fmt_ulong(strnum, (unsigned long) getpid())) ||
+			!stralloc_0(&tmpFile))
 		die_nomem();
 	if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1) {
 		strerr_warn3("makeseekable: read error: ", tmpFile.s, ": ", &strerr_sys);
