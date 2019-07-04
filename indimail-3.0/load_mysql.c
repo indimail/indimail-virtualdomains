@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.9  2019-07-04 10:07:07+05:30  Cprogrammer
+ * collapsed multiple if statements
+ *
  * Revision 1.8  2019-06-13 19:14:35+05:30  Cprogrammer
  * added wrappers for mysql_next_result(), mysql_fetch_lengths(), mysql_num_fields()
  *
@@ -35,7 +38,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.8 2019-06-13 19:14:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.9 2019-07-04 10:07:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
@@ -131,9 +134,7 @@ control_readline(sa, fn)
 		if (!stralloc_cats(&controlfile, fn))
 			return(-1);
 	} else
-	if (!stralloc_copys(&controlfile, fn))
-		return(-1);
-	if (!stralloc_0(&controlfile))
+	if (!stralloc_copys(&controlfile, fn) || !stralloc_0(&controlfile))
 		return(-1);
 	if ((fd = open_read(controlfile.s)) == -1) {
 		if (errno == error_noent)
