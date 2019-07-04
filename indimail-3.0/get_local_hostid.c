@@ -1,5 +1,8 @@
 /*
  * $Log: get_local_hostid.c,v $
+ * Revision 1.2  2019-07-04 10:04:40+05:30  Cprogrammer
+ * collapsed multiple if statements
+ *
  * Revision 1.1  2019-04-14 18:32:29+05:30  Cprogrammer
  * Initial revision
  *
@@ -22,7 +25,7 @@
 #include "getEnvConfig.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_local_hostid.c,v 1.1 2019-04-14 18:32:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_local_hostid.c,v 1.2 2019-07-04 10:04:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc filename = { 0 };
@@ -48,26 +51,16 @@ get_local_hostid()
 
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/') {
-		if (!stralloc_copys(&filename, controldir))
-			die_nomem("get_local_hostid");
-		else
-		if (!stralloc_catb(&filename, "/hostid", 7))
-			die_nomem("get_local_hostid");
-		else
-		if (!stralloc_0(&filename))
+		if (!stralloc_copys(&filename, controldir) || !stralloc_catb(&filename, "/hostid", 7) ||
+				!stralloc_0(&filename))
 			die_nomem("get_local_hostid");
 	} else {
 		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 		if (!stralloc_copys(&filename, sysconfdir))
 			die_nomem("get_local_hostid");
 		else
-		if (!stralloc_append(&filename, "/"))
-			die_nomem("get_local_hostid");
-		else
-		if (!stralloc_cats(&filename, controldir))
-			die_nomem("get_local_hostid");
-		else
-		if (!stralloc_catb(&filename, "/hostid", 7))
+		if (!stralloc_append(&filename, "/") || !stralloc_cats(&filename, controldir) ||
+				!stralloc_catb(&filename, "/hostid", 7))
 			die_nomem("get_local_hostid");
 	}
 	if ((fd = open_read(filename.s)) == -1) {
