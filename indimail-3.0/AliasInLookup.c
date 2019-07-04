@@ -1,5 +1,8 @@
 /*
  * $Log: AliasInLookup.c,v $
+ * Revision 1.2  2019-07-04 09:15:20+05:30  Cprogrammer
+ * BUG - aliasbuffer wasn't initialized
+ *
  * Revision 1.1  2019-04-18 07:56:13+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: AliasInLookup.c,v 1.1 2019-04-18 07:56:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: AliasInLookup.c,v 1.2 2019-07-04 09:15:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -53,7 +56,7 @@ AliasInLookup(char *email)
 	parse_email(email, &user, &domain);
 	if (!(real_domain = get_real_domain(domain.s)))
 		real_domain = domain.s;
-	for (;;) {
+	for (aliasbuf.len = 0;;) {
 		if (!(ptr = valias_select(user.s, real_domain)))
 			break;
 		if (!stralloc_cats(&aliasbuf, ptr) || !stralloc_append(&aliasbuf, "\n"))
