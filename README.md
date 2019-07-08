@@ -6,36 +6,58 @@ Look at doc/README for details
 Look at doc/INSTALL for Source Installation instructions
 
 Compile libqmail-0.1
+
  $ cd /usr/local/src
+ 
  $ git clone https://github.com/mbhangui/libqmail
+ 
  $ cd libqmail-0.1
+ 
  $ ./default.configure
+ 
  $ make
+ 
  $ sudo make install-strip
    
 Download indimail, indimail-mta and components
+
  $ git clone https://github.com/mbhangui/indimail.git
 
 Compile libdkim-1.4 (with dynamic libaries)
+
  $ cd /usr/local/src/libdkim-1.4
+ 
  $ ./default.configure
+ 
  $ make
+ 
  $ sudo make -s install-strip
 
 Compile libsrs2-1.0.18 (with dynamic libaries)
+
  $ cd /usr/local/src/libsrs2-1.0.18
+ 
  $ ./defaualt.configure
+ 
  $ make
+ 
  $ sudo make install-strip
+ 
 
 Build ucspi-tcp-0.88 (with all patches applied)
+
  $ cd /usr/local/src/ucspi-tcp-0.88
+ 
  $ make
+ 
  $ sudo make install-strip
   
 Build indimail-mta-2.7
+
  $ cd /usr/local/src/indimail-mta-2.7
+ 
  $ make
+ 
  $ sudo make install-strip
 
 Setup & Configuration
@@ -46,12 +68,17 @@ Setup & Configuration
  /lib/systemd/system
 
  $ cd /usr/local/src/indimail-mta-2.7
- $ sudo sh ./create_services --servicedir=/services
---qbase=/var/indimail/queue
+ 
+ $ sudo sh ./create_services --servicedir=/services --qbase=/var/indimail/queue
+
  $ sudo service indimail start
+ 
      or
+     
  $ /etc/init.d/indimail start
+ 
      or
+     
  $ /usr/bin/qmailctl start
 
 
