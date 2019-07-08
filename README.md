@@ -73,25 +73,29 @@ Setup & Configuration
 
  $ sudo service indimail start
  
-     or
+ or
      
  $ /etc/init.d/indimail start
  
-     or
-     
+ or
+ 
  $ /usr/bin/qmailctl start
 
 
 Some Notes on directory structure
-==========================
+=================================
 indimail-mta has files in standard unix directories. You can change
 the locationsby editing the following files in indimail-mta source
 directory
 
 conf-prefix       - this is where bin, sbin go
+
 conf-shared       - this is where boot, doc go (conf-prefix/share/indimail)
+
 conf-sysconfdir   - this is where etc, control, users go
+
 conf-libexec      - this is where private scripts/executables go
+
 conf-qmail        - domains, alias, queue, autoturn, qscanq, symlinks
                     for control, users, bin and sbin
 
@@ -102,7 +106,6 @@ directory /usr/lib/indimail in build scripts
 /usr/lib/indimail - plugins, modules (architecture-dependent files)
 
 Some settings
-=============
 
 conf-shared       - /usr/share/indimail
 
