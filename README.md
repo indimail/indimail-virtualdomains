@@ -102,10 +102,14 @@ directory /usr/lib/indimail in build scripts
 /usr/lib/indimail - plugins, modules (architecture-dependent files)
 
 Some settings
-===========
+=============
 
 conf-shared       - /usr/share/indimail
+
 conf-prefix       - /usr
+
 conf-sysconfdir   - /etc/indimail
+
 conf-libexec      - /usr/libexec/indimail
+
 conf-qmail        - /var/indimail
