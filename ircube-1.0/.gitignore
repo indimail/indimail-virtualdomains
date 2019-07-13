@@ -9,3 +9,4 @@ missing
 depcomp
 m4
 install-sh
+autom4te.cache

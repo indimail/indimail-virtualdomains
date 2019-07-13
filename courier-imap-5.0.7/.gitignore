@@ -167,9 +167,7 @@ libs/authlib/config.h
 libs/authlib/config.log
 libs/authlib/config.status
 libs/authlib/installlist
-libs/authlib/libauth.la
-libs/authlib/libauthmod.la
-libs/authlib/libauthshadow.la
+*.la
 libs/authlib/libtool
 libs/authlib/modulelist
 libs/bdbobj/.deps/
@@ -179,7 +177,6 @@ libs/bdbobj/autom4te.cache/
 libs/bdbobj/config.h
 libs/bdbobj/config.log
 libs/bdbobj/config.status
-libs/bdbobj/libbdbobj.la
 libs/bdbobj/libtool
 libs/bdbobj/testbdb
 libs/gdbmobj/.deps/
@@ -189,7 +186,6 @@ libs/gdbmobj/autom4te.cache/
 libs/gdbmobj/config.h
 libs/gdbmobj/config.log
 libs/gdbmobj/config.status
-libs/gdbmobj/libgdbmobj.la
 libs/gdbmobj/libtool
 libs/gdbmobj/testgdbm
 libs/imap/.deps/
@@ -208,9 +204,6 @@ libs/imap/imapd.dist
 libs/imap/imapd.html
 libs/imap/imapd.pam
 libs/imap/imaplogin
-libs/imap/libimapd.la
-libs/imap/libimaplogin.la
-libs/imap/libpop3d.la
 libs/imap/libtool
 libs/imap/makeimapaccess.html
 libs/imap/mkdhparams.html
@@ -227,7 +220,6 @@ libs/libhmac/autom4te.cache/
 libs/libhmac/config.h
 libs/libhmac/config.log
 libs/libhmac/config.status
-libs/libhmac/libhmac.la
 libs/libhmac/libtool
 libs/libhmac/md5hmactest
 libs/libhmac/sha1hmactest
@@ -238,7 +230,6 @@ libs/liblock/autom4te.cache/
 libs/liblock/config.h
 libs/liblock/config.log
 libs/liblock/config.status
-libs/liblock/liblock.la
 libs/liblock/libtool
 libs/liblock/lockmail
 libs/maildir/.deps/
@@ -252,7 +243,6 @@ libs/maildir/config.status
 libs/maildir/deliverquota
 libs/maildir/deliverquota.8
 libs/maildir/deliverquota.html
-libs/maildir/libmaildir.la
 libs/maildir/libtool
 libs/maildir/mailbot.h
 libs/maildir/maildir.libdeps
@@ -284,7 +274,6 @@ libs/md5/autom4te.cache/
 libs/md5/config.h
 libs/md5/config.log
 libs/md5/config.status
-libs/md5/libmd5.la
 libs/md5/libtool
 libs/md5/md5test
 libs/numlib/.deps/
@@ -294,7 +283,6 @@ libs/numlib/autom4te.cache/
 libs/numlib/config.h
 libs/numlib/config.log
 libs/numlib/config.status
-libs/numlib/libnumlib.la
 libs/numlib/libtool
 libs/random128/.deps/
 libs/random128/.libs/
@@ -303,7 +291,6 @@ libs/random128/autom4te.cache/
 libs/random128/config.h
 libs/random128/config.log
 libs/random128/config.status
-libs/random128/librandom128.la
 libs/random128/libtool
 libs/rfc1035/.deps/
 libs/rfc1035/Makefile
@@ -322,7 +309,6 @@ libs/rfc2045/autom4te.cache/
 libs/rfc2045/config.log
 libs/rfc2045/config.status
 libs/rfc2045/headercheck
-libs/rfc2045/librfc2045.la
 libs/rfc2045/libtool
 libs/rfc2045/makemime
 libs/rfc2045/reformime
@@ -337,8 +323,6 @@ libs/rfc822/autom4te.cache/
 libs/rfc822/config.h
 libs/rfc822/config.log
 libs/rfc822/config.status
-libs/rfc822/libencode.la
-libs/rfc822/librfc822.la
 libs/rfc822/libtool
 libs/rfc822/reftest
 libs/rfc822/rfc822.config
@@ -355,7 +339,6 @@ libs/sha1/autom4te.cache/
 libs/sha1/config.h
 libs/sha1/config.log
 libs/sha1/config.status
-libs/sha1/libsha1.la
 libs/sha1/libtool
 libs/sha1/testsuite
 libs/soxwrap/.deps/
@@ -377,10 +360,6 @@ libs/tcpd/config.status
 libs/tcpd/couriertcpd
 libs/tcpd/couriertls
 libs/tcpd/couriertls.config
-libs/tcpd/libcouriertls.la
-libs/tcpd/libcouriertlsopenssl.la
-libs/tcpd/libspipe.la
-libs/tcpd/libtlsclient.la
 libs/tcpd/libtool
 libs/tcpd/tlscachetest
 libs/unicode/.deps/
@@ -393,7 +372,6 @@ libs/unicode/courier-unicode.spec
 libs/unicode/enttest
 libs/unicode/graphemetest
 libs/unicode/libtool
-libs/unicode/libunicode.la
 libs/unicode/linebreaktest
 libs/unicode/scripttest
 libs/unicode/unicode_config.h
