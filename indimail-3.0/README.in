@@ -19,25 +19,28 @@ Clam AntiVirus - GPL anti-virus toolkit for UNIX,
 Fetchmail,
 and other useful utilities (mpack, unpack, altermime, ripmime, fortune, flash).
 
-IndiMail consists of two packages - indimail-mta and indimail. indimail-mta is
-a re-engineered version of qmail (http://cr.yp.to/qmail.html). The
+IndiMail consists of two main packages - indimail-mta and indimail.
+indimail-mta is a re-engineered version of qmail (http://cr.yp.to/qmail.html).
 indimail-mta provides you a MTA with all the functions of qmail with
-additional features.
+additional features. This document will refer to IndiMail as a combined
+package of indimail, indimail-mta & other tools part of indimail, indimali-mta
+package.
 
-When you install IndiMail package along with indimail-mta, a shared library
-from IndiMail package are dynamically loaded to provide virtual domain
-functionality along with the ability to work with IMAP/POP3 retrieval daemons.
+When you install indimail package along with indimail-mta, a shared library
+from indimail package is dynamically loaded by indimail-mta to provide virtual
+domain support in indimail-mta, along with the ability to work with IMAP/POP3
+retrieval daemons.
 
-IndiMail also provides programs to manage virtual domains. IndiMail allows extending a domain
-across multiple servers. IndiMail can act as an SMTP router/interceptor. This is a very
-powerful feature which allows IndiMail to provide native horizontal scalability. It knows the
-location of each and every user and can distribute mails for any user residing on any server
-located anywhere on the net. If one uses IndiMail, one can simply add one more server and cater
-to more users without changing any configuration, software or hardware on existing servers.
-The architecture allows IndiMail to do away with costly NAS storage (i.e you don't require a
-common shared storage across servers). This allows you to scale IndiMail easily to serve
-millions of users using commodity hardware. You can read the feature list to get an idea of
-the changes and new features that have been added over the original packages.
+indimail provides programs to manage virtual domains. IndiMail allows extending a domain
+across multiple servers. indimail-mta can act as an SMTP router/interceptor. This is a very
+powerful feature which allows IndiMail to provide native horizontal scalability. It knows
+the location of each and every user and can distribute mails for any user residing on any
+server located anywhere on the net. If one uses IndiMail, one can simply add one more server
+and cater to more users without changing any configuration, software or hardware on existing
+servers. The architecture allows IndiMail to do away with costly NAS storage (i.e you don't
+require a common shared storage across servers). This allows you to scale indimail easily
+to serve millions of users using commodity hardware. You can read the feature list to get
+an idea of the changes and new features that have been added over the original packages.
 
 You can see a pictorial representation of the architecture at
 
@@ -71,7 +74,7 @@ To migrate from an existing proprietary mail server like MS Exchange requires 5 
   utility hostcntrl).
 4.Modify your user's mail configuration to use SMTP, IMAP Proxy, POP3 Proxy on the IndiMail
   server (proxypop3, proxyimap)
-5.Change the MX to point to the IndiMail server.
+5.Change the MX to point to the indimail-mta server.
 
 IndiMail is highly configurable. No hardcoded directories like /var/qmail/control or
 /var/qmail/queue. All directories are configurable at run time. IndiMail has multiple queues
@@ -313,6 +316,10 @@ Some of the features available in this package
 79. roundcube support for password, autoresponder through roundcube plugin
     iwebadmin
 80. ezmlm-idx mailing list manager from https://untroubled.org/ezmlm/
+81. tcpserver - enable mysql support by loading mysql library configured in
+    /etc/indimail/control/mysql_lib
+82. indimail-mta - enable virtual domain support by loading indimail shared
+    library configured in /etc/indimail/control/libindimail
 
 You can take a detailed look at the feature list at
 
