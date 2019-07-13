@@ -193,7 +193,6 @@ vuserinfo
 autom4te.cache
 *.la
 .libs
-README.vmware
 aclocal.m4
 cdb-1.0/aclocal.m4
 cdb-1.0/config.h.in
