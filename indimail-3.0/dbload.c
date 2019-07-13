@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 1.10  2019-07-08 13:03:37+05:30  Cprogrammer
+ * removed unused variables/functions
+ *
  * Revision 1.9  2019-07-04 10:03:30+05:30  Cprogrammer
  * removed left over code
  *
@@ -57,23 +60,16 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 1.9 2019-07-04 10:03:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 1.10 2019-07-08 13:03:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static MYSQL   *is_duplicate_conn(MYSQL **, DBINFO **);
 int             int_mysql_options(MYSQL *, enum mysql_option, const void *);
 
-static void
-die_nomem()
-{
-	strerr_warn1("dbload: out of memory", 0);
-	_exit(111);
-}
-
 int
 connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 {
-	char           *sysconfdir, *controldir, *mcdfile, *server, *str;
+	char           *server, *str;
 	int             maxattempts, retry_interval, count, protocol;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG], strnum3[FMT_ULONG];
 #if MYSQL_VERSION_ID >= 50703 && !defined(MARIADB_BASE_VERSION) && defined(HAVE_MYSQL_OPT_SSL_ENFORCE)
