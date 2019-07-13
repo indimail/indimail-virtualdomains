@@ -1,5 +1,8 @@
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.14  2019-07-03 19:35:49+05:30  Cprogrammer
+ * load libmysqlclient/libmariadb dynamically using load_mysql.c
+ *
  * Revision 1.13  2018-09-12 12:55:04+05:30  Cprogrammer
  * fixed SIGSEGV in _pam_log()
  *
@@ -90,7 +93,7 @@
 #include <shadow.h>
 #endif
 #ifdef USE_MYSQL
-#include <mysql.h>
+#include "load_mysql.h"
 #endif
 #ifdef HAVE_DLFCN_H
 #include <dlfcn.h>
@@ -175,7 +178,7 @@ static int      update_passwd(pam_handle_t *, const char *, const char *);
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.13 2018-09-12 12:55:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.14 2019-07-03 19:35:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -317,19 +320,19 @@ run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_data
 	*qresult = (char *) 0;
 	if (nitems)
 		*nitems = 0;
-	if (!mysql_init(&mysql)) {
-		_pam_log(LOG_ERR, "mysql_init: %s", mysql_error(&mysql));
+	if (!mysql_Init(&mysql)) {
+		_pam_log(LOG_ERR, "mysql_init: %s", in_mysql_error(&mysql));
 		return (PAM_SERVICE_ERR);
 	}
-	if (!(mysql_real_connect(&mysql, mysql_host, mysql_user, mysql_pass, mysql_database, mysql_port, NULL, 0))) {
-		_pam_log(LOG_ERR, "mysql_real_connect: %s", mysql_error(&mysql));
+	if (!(in_mysql_real_connect(&mysql, mysql_host, mysql_user, mysql_pass, mysql_database, mysql_port, NULL, 0))) {
+		_pam_log(LOG_ERR, "mysql_real_connect: %s", in_mysql_error(&mysql));
 		return (PAM_SERVICE_ERR);
 	}
 	if (!(escapeUser = malloc(sizeof (char) * (strlen(user) * 2) + 1))) {
 		_pam_log(LOG_ERR, "malloc: %s", strerror(errno));
 		return PAM_BUF_ERR;
 	}
-	mysql_real_escape_string(&mysql, escapeUser, user, strlen(user));
+	in_mysql_real_escape_string(&mysql, escapeUser, user, strlen(user));
 	for (q = (char *) user; *q && *q != '@'; q++);
 	if (*q) {
 		*q = 0;
@@ -346,7 +349,7 @@ run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_data
 	user_length = strlen(escapeUser);
 	if (!(sql = (char *) malloc(sizeof (char) * (MAX_QUERY_LENGTH + 1)))) {
 		_pam_log(LOG_ERR, "malloc: %s", strerror(errno));
-		mysql_close(&mysql);
+		in_mysql_close(&mysql);
 		return PAM_BUF_ERR;
 	}
 	len = strlen(query_str);
@@ -358,7 +361,7 @@ run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_data
 			case 'U':
 				if ((j + user_length) >= MAX_QUERY_LENGTH) {
 					_pam_log(LOG_ERR, "pam_db: query too long");
-					mysql_close(&mysql);
+					in_mysql_close(&mysql);
 					return PAM_BUF_ERR;
 				}
 				strcpy(sql + j, user);
@@ -368,7 +371,7 @@ run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_data
 			case 'u':
 				if ((j + user_length) >= MAX_QUERY_LENGTH) {
 					_pam_log(LOG_ERR, "pam_db: query too long");
-					mysql_close(&mysql);
+					in_mysql_close(&mysql);
 					return PAM_BUF_ERR;
 				}
 				strcpy(sql + j, escapeUser);
@@ -378,7 +381,7 @@ run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_data
 			case 'D':
 				if ((j + domain_length) >= MAX_QUERY_LENGTH) {
 					_pam_log(LOG_ERR, "pam_db: query too long");
-					mysql_close(&mysql);
+					in_mysql_close(&mysql);
 					return PAM_BUF_ERR;
 				}
 				strcpy(sql + j, q);
@@ -388,7 +391,7 @@ run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_data
 			case 'd':
 				if ((j + domain_length) >= MAX_QUERY_LENGTH) {
 					_pam_log(LOG_ERR, "pam_db: query too long");
-					mysql_close(&mysql);
+					in_mysql_close(&mysql);
 					return PAM_BUF_ERR;
 				}
 				strcpy(sql + j, p);
@@ -401,7 +404,7 @@ run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_data
 				sql[j++] = thischar;
 				if (j > MAX_QUERY_LENGTH) {
 					_pam_log(LOG_ERR, "pam_db: query too long");
-					mysql_close(&mysql);
+					in_mysql_close(&mysql);
 					return PAM_BUF_ERR;
 				}
 				break;
@@ -411,7 +414,7 @@ run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_data
 				sql[j++] = thischar;
 			if (j > MAX_QUERY_LENGTH) {
 				_pam_log(LOG_ERR, "pam_db: query too long");
-				mysql_close(&mysql);
+				in_mysql_close(&mysql);
 				return PAM_BUF_ERR;
 			}
 			lastchar = thischar;
@@ -421,36 +424,36 @@ run_mysql(char *mysql_user, char *mysql_pass, char *mysql_host, char *mysql_data
 	if (debug)
 		_pam_log(LOG_INFO, "run_mysql user[%s],pass[%s],host[%s], database[%s], port[%d], query[%s], User[%s]", mysql_user, mysql_pass,
 			 mysql_host, mysql_database, mysql_port, sql, user);
-	if (mysql_query(&mysql, sql)) {
-		_pam_log(LOG_ERR, "mysql_query: %s: %s", sql, mysql_error(&mysql));
-		mysql_close(&mysql);
+	if (in_mysql_query(&mysql, sql)) {
+		_pam_log(LOG_ERR, "mysql_query: %s: %s", sql, in_mysql_error(&mysql));
+		in_mysql_close(&mysql);
 		return (PAM_SERVICE_ERR);
 	}
-	if (!(result = mysql_store_result(&mysql))) {
-		_pam_log(LOG_ERR, "mysql_store_result: %s", mysql_error(&mysql));
-		mysql_close(&mysql);
+	if (!(result = in_mysql_store_result(&mysql))) {
+		_pam_log(LOG_ERR, "mysql_store_result: %s", in_mysql_error(&mysql));
+		in_mysql_close(&mysql);
 		return (PAM_SERVICE_ERR);
 	}
-	if (!(row_count = mysql_num_rows(result))) {
-		mysql_free_result(result);
-		mysql_close(&mysql);
+	if (!(row_count = in_mysql_num_rows(result))) {
+		in_mysql_free_result(result);
+		in_mysql_close(&mysql);
 		return (PAM_AUTH_ERR);
 	}
-	mysql_close(&mysql);
-	if ((row = mysql_fetch_row(result))) {
+	in_mysql_close(&mysql);
+	if ((row = in_mysql_fetch_row(result))) {
 		if (!(*qresult = (char *) malloc((len = strlen(row[0]) + 1)))) {
 			_pam_log(LOG_ERR, "malloc: %s", strerror(errno));
-			mysql_free_result(result);
+			in_mysql_free_result(result);
 			return (PAM_BUF_ERR);
 		} else {
 			if (nitems)
 				*nitems = 1;
 			strncpy(*qresult, row[0], len);
-			mysql_free_result(result);
+			in_mysql_free_result(result);
 			return (PAM_SUCCESS);
 		}
 	} else
-		mysql_free_result(result);
+		in_mysql_free_result(result);
 	return (PAM_AUTH_ERR);
 }
 

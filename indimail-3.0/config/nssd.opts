@@ -1,0 +1,2 @@
+--enable-default-domain=indimail.org
+--enable-dlload-mysql=yes

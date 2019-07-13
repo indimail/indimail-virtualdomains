@@ -3,13 +3,15 @@ if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
 autoreconf -fiv
 fi
 if [ -d /usr/lib64 ] ; then
-	libdir=/usr/lib64
+  libdir=/usr/lib64
 else
-	libdir=/usr/lib
+  libdir=/usr/lib
 fi
-./configure --prefix=/usr --sysconfdir=/etc/indimail \
-  --mandir=/usr/share/man --libexecdir=/usr/libexec/indimail \
+./configure --prefix=/usr \
+  --sysconfdir=/etc/indimail \
+  --mandir=/usr/share/man \
+  --libexecdir=/usr/libexec/indimail \
+  --enable-dlload-mysql=yes \
   --enable-mysqlprefix=/usr \
   --libdir=$libdir \
   --enable-default-domain=`uname -n`
-
