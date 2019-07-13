@@ -11,4 +11,5 @@ VERSION
 MTA_VERSION
 patches
 cscope.*
-.gitignore
+*.BAK
+RCS
