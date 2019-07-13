@@ -1,5 +1,8 @@
 /*
  * $Log: systpass.c,v $
+ * Revision 1.2  2019-07-10 12:57:59+05:30  Cprogrammer
+ * print more error information in print_error
+ *
  * Revision 1.1  2019-04-18 08:36:28+05:30  Cprogrammer
  * Initial revision
  *
@@ -34,15 +37,17 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: systpass.c,v 1.1 2019-04-18 08:36:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: systpass.c,v 1.2 2019-07-10 12:57:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             authlen = 512;
 
 void
-print_error()
+print_error(char *str)
 {
-	out("syspass", "454- ");
+	out("syspass", "454-");
+	out("vchkpass", str);
+	out("vchkpass", ": ");
 	out("syspass", error_str(errno));
 	out("syspass", " (#4.3.0)\r\n");
 	flush("syspass");
@@ -64,7 +69,7 @@ main(int argc, char **argv)
 	if (argc < 2)
 		_exit(2);
 	if (!(tmpbuf = alloc((authlen + 1) * sizeof(char)))) {
-		print_error();
+		print_error("out of memory");
 		strnum[fmt_uint(strnum, (unsigned int) authlen + 1)] = 0;
 		strerr_warn3("alloc-", strnum, ": ", &strerr_sys);
 		_exit(111);
@@ -79,7 +84,7 @@ main(int argc, char **argv)
 		} while(count == -1 && errno == EINTR);
 #endif
 		if (count == -1) {
-			print_error();
+			print_error("read error");
 			strerr_warn1("syspass: read: ", &strerr_sys);
 			_exit(111);
 		}
@@ -109,7 +114,7 @@ main(int argc, char **argv)
 			pipe_exec(argv, tmpbuf, offset);
 		else
 			strerr_warn1("syspass: getpwnam: ", &strerr_sys);
-		print_error();
+		print_error("getpwnam");
 		_exit (111);
 	}
 	stored = pw->pw_passwd;
@@ -119,7 +124,7 @@ main(int argc, char **argv)
 			pipe_exec(argv, tmpbuf, offset);
 		else
 			strerr_warn1("syspass: getspnam: ", &strerr_sys);
-		print_error();
+		print_error("getspnam");
 		_exit (111);
 	}
 	stored = spw->sp_pwdp;
@@ -133,7 +138,7 @@ main(int argc, char **argv)
 		(unsigned char *) (*response ? response : challenge), 0))
 	{
 		pipe_exec(argv, tmpbuf, offset);
-		print_error();
+		print_error("exec");
 		_exit (111);
 	}
 	status = 0;
@@ -159,7 +164,7 @@ main(int argc, char **argv)
 		_exit(2);
 	execvp(argv[1], argv + 1);
 	strerr_warn1("syspass: ", argv[1], ": ", &strerr_sys);
-	print_error();
+	print_error("exec");
 	_exit(111);
 	/*- Not reached */
 	return (0);
