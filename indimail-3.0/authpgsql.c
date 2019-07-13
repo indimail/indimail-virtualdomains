@@ -1,5 +1,8 @@
 /*
  * $Log: authpgsql.c,v $
+ * Revision 1.3  2019-07-10 12:57:26+05:30  Cprogrammer
+ * print more error information in print_error
+ *
  * Revision 1.2  2019-04-22 22:24:30+05:30  Cprogrammer
  * added missing strerr.h
  *
@@ -42,7 +45,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authpgsql.c,v 1.2 2019-04-22 22:24:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authpgsql.c,v 1.3 2019-07-10 12:57:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_PGSQL
@@ -153,9 +156,11 @@ pg_getpw(char *user, char *domain)
 }
 
 void
-print_error()
+print_error(char *str)
 {
-	out("authpgsql", "454- ");
+	out("authpgsql", "454-");
+	out("authpgsql", str);
+	out("authpgsql", ": ");
 	out("authpgsql", error_str(errno));
 	out("authpgsql", " (#4.3.0)\r\n");
 	flush("authpgsql");
@@ -176,7 +181,7 @@ main(int argc, char **argv)
 	if (argc < 2)
 		_exit(2);
 	if (!(authstr = calloc(1, (authlen + 1) * sizeof (char)))) {
-		print_error();
+		print_error("out of memory");
 		strnum[fmt_uint(strnum, (unsigned int) authlen + 1)] = 0;
 		strerr_warn3("alloc-", strnum, ": ", &strerr_sys);
 		_exit(111);
@@ -190,7 +195,7 @@ main(int argc, char **argv)
 		} while (count == -1 && errno == EINTR);
 #endif
 		if (count == -1) {
-			print_error();
+			print_error("read error");
 			strerr_warn1("authpgsql: read: ", &strerr_sys);
 			_exit(111);
 		} else if (!count)
@@ -268,7 +273,7 @@ main(int argc, char **argv)
 			pipe_exec(argv, authstr, offset);
 		else
 			strerr_warn1("authpgsql: pg_getpw: ", &strerr_sys);
-		print_error();
+		print_error("pg_gepw");
 		_exit(111);
 	} else
 	if (pw->pw_gid & NO_SMTP) {
@@ -292,7 +297,7 @@ main(int argc, char **argv)
 	if (pw_comp((unsigned char *) ologin, (unsigned char *) crypt_pass, (unsigned char *) (*response ? challenge : 0),
 		 (unsigned char *) (*response ? response : challenge), auth_method)) {
 		pipe_exec(argv, authstr, offset);
-		print_error();
+		print_error("exec");
 		_exit(111);
 	}
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -355,9 +360,11 @@ main(int argc, char **argv)
 #warning "not compiled with -DHAVE_PGSQL"
 
 void
-print_error()
+print_error(char *str)
 {
-	out("authpgsql", "454- ");
+	out("authpgsql", "454-");
+	out("authpgsql", str);
+	out("authpgsql", ": ");
 	out("authpgsql", error_str(errno));
 	out("authpgsql", " (#4.3.0)\r\n");
 	flush("authpgsql");
@@ -367,7 +374,7 @@ int
 main(int argc, char **argv)
 {
 	execvp(argv[1], argv + 1);
-	print_error();
+	print_error("exec");
 	strerr_warn3("authpgsql: execvp: ", argv[1], ": ", &strerr_sys);
 }
 #endif
