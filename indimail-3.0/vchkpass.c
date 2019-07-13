@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.2  2019-07-10 12:58:04+05:30  Cprogrammer
+ * print more error information in print_error
+ *
  * Revision 1.1  2019-04-18 08:14:23+05:30  Cprogrammer
  * Initial revision
  *
@@ -42,7 +45,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.1 2019-04-18 08:14:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.2 2019-07-10 12:58:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -55,9 +58,11 @@ static char     sccsid[] = "$Id: vchkpass.c,v 1.1 2019-04-18 08:14:23+05:30 Cpro
 int             authlen = AUTH_SIZE;
 
 void
-print_error()
+print_error(char *str)
 {
-	out("vchkpass", "454- ");
+	out("vchkpass", "454-");
+	out("vchkpass", str);
+	out("vchkpass", ": ");
 	out("vchkpass", error_str(errno));
 	out("vchkpass", " (#4.3.0)\r\n");
 	flush("vchkpass");
@@ -86,7 +91,7 @@ main(int argc, char **argv)
 	if (argc < 2)
 		_exit(2);
 	if (!(authstr = alloc((authlen + 1) * sizeof(char)))) {
-		print_error();
+		print_error("out of memory");
 		strnum[fmt_uint(strnum, (unsigned int) authlen + 1)] = 0;
 		strerr_warn3("alloc-", strnum, ": ", &strerr_sys);
 		_exit(111);
@@ -100,7 +105,7 @@ main(int argc, char **argv)
 		} while (count == -1 && errno == EINTR);
 #endif
 		if (count == -1) {
-			print_error();
+			print_error("read error");
 			strerr_warn1("syspass: read: ", &strerr_sys);
 			_exit(111);
 		} else
@@ -223,7 +228,7 @@ main(int argc, char **argv)
 			pipe_exec(argv, authstr, offset);
 		else
 			strerr_warn3("vchkpass: ", ptr, ": ", &strerr_sys);
-		print_error();
+		print_error(ptr);
 		_exit (111);
 	} else
 	if (pw->pw_gid & NO_SMTP) {
@@ -248,7 +253,7 @@ main(int argc, char **argv)
 		(unsigned char *) (*response ? challenge : 0),
 		(unsigned char *) (*response ? response : challenge), auth_method)) {
 		pipe_exec(argv, authstr, offset);
-		print_error();
+		print_error("exec");
 		_exit (111);
 	}
 #ifdef ENABLE_DOMAIN_LIMITS
