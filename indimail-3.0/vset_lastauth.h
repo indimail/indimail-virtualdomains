@@ -1,0 +1,18 @@
+/*
+ * $Log: vset_lastauth.h,v $
+ * Revision 1.1  2019-04-13 23:39:28+05:30  Cprogrammer
+ * vset_lastauth.h
+ *
+ */
+#ifndef VSET_LASTAUTH_H
+#define VSET_LASTAUTH_H
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+
+int             vset_lastauth(char *, char *, char *, char *, char *, int);
+
+#endif

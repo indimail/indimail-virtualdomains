@@ -28,8 +28,14 @@ AC_PROG_MAKE_SET
 
 AC_ISC_POSIX
 AC_HEADER_STDC
-AC_CHECK_HEADERS([arpa/inet.h netinet/in.h netdb.h string.h strings.h sys/socket.h sys/types.h sys/stat.h sys/param.h fcntl.h syslog.h unistd.h stdarg.h errno.h crypt.h shadow.h dlfcn.h])
-AC_HEADER_STDBOOL
+saveCPPFLAGS="$CPPFLAGS"
+CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/include/qmail"
+AC_CHECK_HEADERS([arpa/inet.h netinet/in.h netdb.h string.h strings.h sys/socket.h sys/types.h sys/stat.h])
+AC_CHECK_HEADERS([sys/param.h fcntl.h syslog.h unistd.h stdarg.h errno.h crypt.h shadow.h dlfcn.h mysql.h])
+AC_CHECK_TYPE([bool],AC_DEFINE(HAVE_BOOL, 1, have bool typedef),,[#include <mysql.h>])
+CPPFLAGS=$saveCPPFLAGS
+
+dnl AC_HEADER_STDBOOL
 AC_C_CONST
 AC_C_INLINE
 AC_TYPE_SIZE_T
@@ -96,6 +102,11 @@ then
 	ac_configure_args="$ac_configure_args --prefix=$prefix"
 fi
 
+AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],nqmail=t,)
+if test " $noqmail" = " t"
+then
+  AC_MSG_ERROR(Could not find qmail library.)
+fi
 AC_CHECK_LIB(dl, dlopen, [AC_SUBST([LIB_DL], ["-ldl"]) AC_DEFINE([HAVE_DL], [1],[Dynamic Link Library])],,-ldl)
 AC_CHECK_LIB(pam, pam_start, [AC_SUBST([LIB_PAM], ["-lpam"]) AC_DEFINE([HAVE_PAM], [1],[PAM Library])],,-lpam)
 AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
@@ -134,12 +145,36 @@ do
     break
   fi
 done
-AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directory.],[mysql_prefix=$enableval],[mysql_prefix=""])
 
+controldir="$sysconfdir/control"
+AC_ARG_ENABLE(controldir, [  --enable-controldir=dir       directory for control files.],
+	controdir="$enableval",
+	[
+	 	if test "$domaindir" != ""
+		then
+			AC_DEFINE_UNQUOTED(CONTROLDIR,"$controldir", Directory for control files)
+		fi
+	])
+AC_DEFINE_UNQUOTED(CONTROLDIR, "$controldir", Directory for control files)
+
+AC_ARG_ENABLE(dlload-mysql,   [  --enable-dlload-mysql=yes|no Turn off (n, default) or on (y) use dlopen to load libmysqlclient],
+dlload_mysql="$enableval", 
+[
+case $dlload_mysql in
+	1*|y*|Y*)
+	dlload_mysql="yes"
+	;;
+	*)
+	dlload_mysql="no"
+	;;
+esac
+])
+
+AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directory.],[mysql_prefix=$enableval],[mysql_prefix=""])
 if test "$mysql_prefix" = ""
 then
 mysql_incdir=""
-for f in /usr/local/mysql/include /usr/local/mysql/include/mysql /usr/include/mysql
+for f in /usr/local/mysql/include /usr/include/mysql
 do
 	if test -d $f
 	then
@@ -147,7 +182,6 @@ do
 		break
 	fi
 done
-
 AC_ARG_ENABLE(mysqlincdir, [  --enable-mysqlincdir=""       directory where auth include files are.],
 mysql_incdir="$enableval",
 [
@@ -157,6 +191,8 @@ mysql_incdir="$enableval",
 	fi
 ])
 
+if test "$dlload_mysql" = "no"
+then
 mysql_libdir=""
 for f in /usr/local/mysql/lib64/mysql /usr/local/mysql/lib64 /usr/local/mysql/lib/mysql /usr/local/mysql/lib /usr/lib/mysql
 do
@@ -174,6 +210,7 @@ mysql_libdir="$enableval",
 		AC_MSG_ERROR([Unable to find your sql libraries dir, specify --enable-mysqllibdir.])
 	fi
 ])
+fi
 
 mysqlbindir=""
 for f in /usr/local/mysql/bin/mysql /usr/bin/mysql
@@ -184,7 +221,6 @@ then
 	break
 	fi
 done
-
 AC_ARG_ENABLE(mysqlbindir, [  --enable-mysqlbindir=""       directory where mysql binary are.],
 mysqlbindir="$enableval",
 [
@@ -195,39 +231,78 @@ mysqlbindir="$enableval",
 ])
 mysql_prefix=`dirname $mysqlbindir`
 else
-	if test -d $mysql_prefix/include
-	then
-		mysql_incdir=$mysql_prefix/include
-	fi
+	for f in $mysql_prefix/include/mysql.h $mysql_prefix/include/mysql/mysql.h
+	do
+		if test -f $f
+		then
+			mysql_incdir=`dirname $f`
+			break
+		fi
+	done
 
-	if test -d $mysql_prefix/lib64/mysql
+	if test "$dlload_mysql" = "no"
 	then
-		mysql_libdir=$mysql_prefix/lib64/mysql
-	elif test -d $mysql_prefix/lib64
-	then
-		mysql_libdir=$mysql_prefix/lib64
-	elif test -d $mysql_prefix/lib/mysql
-	then
-		mysql_libdir=$mysql_prefix/lib/mysql
-	elif test -d $mysql_prefix/lib
-	then
-		mysql_libdir=$mysql_prefix/lib
-	else
-		mysql_libdir=$mysql_prefix/lib/mysql
+		if test -d $mysql_prefix/lib64/mysql
+		then
+			mysql_libdir=$mysql_prefix/lib64/mysql
+		elif test -d $mysql_prefix/lib64
+		then
+			mysql_libdir=$mysql_prefix/lib64
+		elif test -d $mysql_prefix/lib/mysql
+		then
+			mysql_libdir=$mysql_prefix/lib/mysql
+		elif test -d $mysql_prefix/lib
+		then
+			mysql_libdir=$mysql_prefix/lib
+		else
+			mysql_libdir=$mysql_prefix/lib/mysql
+		fi
+		mysqlbindir=$mysql_prefix/bin
 	fi
-	mysqlbindir=$mysql_prefix/bin
 fi
-AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",
-	AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
 AC_DEFINE_UNQUOTED(MYSQLBINDIR,"$mysqlbindir",full path to MySQL binaries)
+if test "$dlload_mysql" = "no"
+then
+	saveLIBS="$LIBS"
+	AC_CHECK_LIB(mysqlclient -L$mysql_libdir, mysql_real_connect,[AC_SUBST([LIB_MYSQL], ["-L$mysql_libdir -lmysqlclient"])], 
+	AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
+	dnl AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient", AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
+	AC_CHECK_FUNC(mysql_optionsv, have_mysqloptionsv=1)
+	LIBS=$saveLIBS
+else
+	AC_DEFINE_UNQUOTED(DLOPEN_LIBMYSQLCLIENT, "1", "if libmysqlclient is loaded using dlopen")
+fi
+
+AC_EGREP_HEADER(MYSQL_OPT_LOCAL_INFILE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_LOCAL_INFILE, 1, "local INFILE support"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_VERIFY_SERVER_CERT, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_VERIFY_SERVER_CERT, 1, "verify server cert"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_KEY, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_KEY, 1, "ssl key"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_CERT, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CERT, 1, "ssl cert"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_CA, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CA, 1, "ssl ca"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_CAPATH, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CAPATH, 1, "ssl capath"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_CIPHER, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CIPHER, 1, "ssl cipher"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_CRL, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CRL, 1, "ssl cert revocation list"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_CRLPATH, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_CRLPATH, 1, "ssl cert revocation list path"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_ENFORCE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_ENFORCE, 1, "enforce ssl/tls"))
+AC_EGREP_HEADER(MYSQL_OPT_TLS_VERSION, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_TLS_VERSION, 1, "tls version"))
+AC_EGREP_HEADER(MYSQL_OPT_SSL_MODE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_MODE, 1, "ssl mmode"))
 
 auth_inc="-I$mysql_incdir -I$mysql_incdir/mysql"
 case "$host" in
 	*-*-darwin*)
-	auth_libs="-L. -L$mysql_libdir -lmysqlclient"
+	if test "$dlload_mysql" = "no"
+  then
+	  auth_libs="-L. -L$mysql_libdir -lmysqlclient $LIB_QMAIL"
+  else
+	  auth_libs=""
+  fi
 	;;
 	*)
-	auth_libs="-L. -Xlinker -R -Xlinker $mysql_libdir -L$mysql_libdir -lmysqlclient"
+	if test "$dlload_mysql" = "no"
+	then
+	  auth_libs="-L. -Xlinker -R -Xlinker $mysql_libdir -L$mysql_libdir -lmysqlclient $LIB_QMAIL"
+	else
+		auth_libs=""
+	fi
 	;;
 esac
 
@@ -255,7 +330,12 @@ echo "---------------------------------------"
 echo "    default domain = $defaultdomain --enable-default-domain=$defaultdomain"
 echo "MySQL bin directory= $mysqlbindir --enable-mysqlbindir=$mysqlbindir"
 echo "       include dir = $mysql_incdir --enable-mysqlincdir=$mysql_incdir"
+if test "$dlload_mysql" = "no"
+then
 echo "     MySQL lib dir = $mysql_libdir --enable-mysqllibdir=$mysql_libdir"
+else
+echo "     MySQL lib dir = loaded using dlopen"
+fi
 echo "         libraries = $libs $LIBS"
 echo "  module directory = $moduledir"
 echo "          auth inc = $auth_inc"

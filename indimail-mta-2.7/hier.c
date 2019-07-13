@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.256  2019-06-07 11:42:02+05:30  Cprogrammer
+ * removed multitail program
+ *
  * Revision 1.255  2019-05-24 14:12:12+05:30  Cprogrammer
  * added control/cache directory and level2-tlds, level3-tlds files for surbl filter
  *
@@ -1075,7 +1078,6 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "bin", "qfilelog", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "multipipe", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "teepipe", auto_uido, 0, moder_x);
-	c(auto_prefix, "bin", "multitail", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "logselect", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "qlogselect", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "udpclient", auto_uido, 0, moder_x);
@@ -1486,7 +1488,6 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir,          "man/man1", "qfilelog.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "multipipe.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "teepipe.1", uidr, gidr, moder_f);
-	c(mandir,          "man/man1", "multitail.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man8", "logselect.8", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "qlogselect.1", uidr, gidr, moder_f);
 	c(mandir,          "man/man1", "tai2tai64n.1", uidr, gidr, moder_f);
@@ -1660,7 +1661,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.255 2019-05-24 14:12:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.256 2019-06-07 11:42:02+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
