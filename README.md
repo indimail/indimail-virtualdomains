@@ -1,7 +1,7 @@
 # indimail
 Messaging Platform based on qmail for MTA Virtual Domains, Courier-IMAP for IMAP/POP3
 
-Look at doc/README for details
+Look at ndimail-3.x/doc/README for details
 
 Look at doc/INSTALL for Source Installation instructions
 
@@ -22,6 +22,7 @@ Compile libqmail-0.1
 Download indimail, indimail-mta and components
 
  $ git clone https://github.com/mbhangui/indimail.git
+ $ git clone https://github.com/mbhangui/indimail-mta.git
 
 Compile libdkim-1.4 (with dynamic libaries)
 
@@ -58,6 +59,16 @@ Build indimail-mta-2.7
  
  $ make
  
+ $ sudo make install-strip
+
+Build indimail-3.x
+
+ $ cd /usr/local/src/indimail-3.0
+
+ $ ./default.configure
+
+ $ make
+
  $ sudo make install-strip
 
 Setup & Configuration
