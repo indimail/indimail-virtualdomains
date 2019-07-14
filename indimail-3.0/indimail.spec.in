@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.7 2019-06-19 07:33:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.9 2019-07-14 07:43:07+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -827,7 +827,7 @@ done
 %endif
 
 #
-# setuid Binaries
+# setuid binaries
 #
 %attr(4555,root,root)                   %{_prefix}/bin/vrenameuser
 %attr(4555,root,root)                   %{_prefix}/bin/vmoveuser
@@ -935,6 +935,7 @@ done
 %attr(755,root,qmail)                   %{libexecdir}/vrenameuser
 %attr(755,root,qmail)                   %{libexecdir}/overquota.sh
 %attr(755,root,qmail)                   %{libexecdir}/qmailmrtg7
+# setuid binary
 %attr(4755,root,qmail)                  %{libexecdir}/sq_vacation
 
 %if %nocourierimap == 0
@@ -2039,9 +2040,9 @@ if [ %nobogofilter -eq 0 ] ; then
 fi
 
 # rebuild cdb
-for i in smtp qmtp qmqp imap pop3 poppass
+for i in imap pop3 poppass
 do
-  for j in `/bin/ls %{sysconfdir}/tcp*.$i 2>/dev/null`
+  for j in `/bin/ls %{sysconfdir}/tcp/tcp*.$i 2>/dev/null`
   do
     t1=`date +'%s' -r $j`
     if [ -f $j.cdb ] ; then
