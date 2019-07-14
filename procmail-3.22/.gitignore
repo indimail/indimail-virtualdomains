@@ -51,3 +51,5 @@ m4
 missing
 obs.mk
 INSTALL
+*.o
+autom4te.cache

@@ -1,0 +1,35 @@
+#!/bin/sh
+if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
+  autoreconf -fiv
+fi
+if [ -d /usr/lib64 ] ; then
+	libdir=/usr/lib64
+elif [ -d /usr/lib ] ;then
+	libdir=/usr/lib
+else
+	echo "could not find libdir " 1>&2
+	exit 1
+fi
+prefix=/usr
+sysconfdir=/etc/indimail
+./configure \
+  --prefix=$prefix \
+  --datarootdir=$prefix/share/indimail \
+  --mandir=$prefix/share/man \
+  --enable-qmaildir=/var/indimail \
+  --enable-servicedir=/service \
+  --libdir=$libdir \
+  --libexecdir=$prefix/libexec/indimail \
+  --enable-shareddir=$prefix/share/indimail \
+  --enable-domaindir=/var/indimail \
+  --sysconfdir=$sysconfdir \
+  --enable-controldir=$sysconfdir/control \
+  --enable-assigndir=$sysconfdir/users \
+  --enable-tcpserver-file=$sysconfdir/tcp/tcp.smtp \
+  --with-pkgconfigdir=$prefix/lib64/pkgconfig \
+  --enable-mysqlprefix=$prefix \
+  --enable-logdir=/var/log/svc \
+  --enable-basepath=/home/mail \
+  --enable-tcprules-prog=$prefix/bin/tcprules \
+  --enable-default-domain=`uname -n` \
+  `cat config/indimail.opts`

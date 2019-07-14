@@ -15,6 +15,7 @@ crypt
 flash
 install-sh
 *.la
+*.a
 .libs
 libtool
 *.lo

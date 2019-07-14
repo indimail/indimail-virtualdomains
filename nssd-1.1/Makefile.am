@@ -10,22 +10,21 @@ INSTALL_SCRIPT = ${INSTALL}
 install_sh_SCRIPT = $(install_sh) -c
 INSTALL_STRIP_PROGRAM = $(install_sh) -c $(STRIP_OPT)
 
-COMMONSOURCES= pwd.c spwd.c grp.c sock.c misc.c util.c
+DEFS=@DEFS@ -Dlint -I. -I/usr/include/qmail @auth_inc@
+COMMONSOURCES= pwd.c spwd.c grp.c sock.c misc.c util.c load_mysql.c
 
 libnss_nssddir=@libdir@
 libnss_nssd_LTLIBRARIES = libnss_nssd.la
 libnss_nssd_la_SOURCES=$(COMMONSOURCES) 
-libnss_nssd_la_LIBADD =
+libnss_nssd_la_LIBADD = $(LIB_QMAIL)
 libnss_nssd_la_DEPENDENCIES = common.h config.h nsvs.h
 libnss_nssd_la_LDFLAGS = -module -version-info @LIBVER@:0:0 -export-symbols $(srcdir)/@OS@.sym
 
 nssdsbindir=@prefix@/sbin
 nssdsbin_PROGRAMS = nssd
-nssd_SOURCES = nssd.c nssd_misc.c util.c config.c
-#nssd_CFLAGS  = -Wall @MYSQL_CFLAGS@ @PTHREAD_CFLAGS@
+nssd_SOURCES = nssd.c nssd_misc.c util.c config.c load_mysql.c
 nssd_CFLAGS  = -Wall @auth_inc@ @PTHREAD_CFLAGS@
 nssd_LDFLAGS = @auth_libs@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@
-#nssd_LDFLAGS = @MYSQL_LIBS@ @PTHREAD_CFLAGS@ @PTHREAD_LIBS@
 nssd_LDADD = 
 nssd_DEPENDENCIES = config.h
 
@@ -43,6 +42,7 @@ misc.$(OBJEXT): nsvs.h common.h config.h
 sock.$(OBJEXT): nsvs.h common.h config.h
 spwd.$(OBJEXT): nsvs.h common.h config.h
 util.$(OBJEXT): common.h config.h
+load_mysql.$(OBJEXT): config.h load_mysql.c
 
 nssd-nssd.$(OBJEXT): nssd.h common.h config.h
 nssd-config.$(OBJEXT): nssd.h common.h config.h

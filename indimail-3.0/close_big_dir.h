@@ -1,0 +1,18 @@
+/*
+ * $Log: close_big_dir.h,v $
+ * Revision 1.1  2019-04-13 23:39:26+05:30  Cprogrammer
+ * close_big_dir.h
+ *
+ */
+#ifndef CLOSE_BIG_DIR_H
+#define CLOSE_BIG_DIR_H
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+int             close_big_dir(char *, char *, uid_t, gid_t);
+
+#endif
