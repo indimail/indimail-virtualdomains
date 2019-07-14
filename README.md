@@ -1,11 +1,13 @@
 # indimail
 Messaging Platform based on qmail for MTA Virtual Domains, Courier-IMAP for IMAP/POP3
 
-Look at ndimail-3.x/doc/README for details
+Look at indimail-3.x/doc/README for details. indimail needs indimail-mta to be installed. Look at 
+https://github.com/mbhangui/indimail-mta
+for details on installing indimail-mta
 
-Look at doc/INSTALL for Source Installation instructions
+Look at indimail-3.x/doc/INSTALL for Source Installation instructions
 
-Compile libqmail-0.1
+# Compile libqmail-0.1
 
  $ cd /usr/local/src
  
@@ -19,12 +21,13 @@ Compile libqmail-0.1
  
  $ sudo make install-strip
    
-Download indimail, indimail-mta and components
+# Download indimail, indimail-mta and components
 
  $ git clone https://github.com/mbhangui/indimail.git
+
  $ git clone https://github.com/mbhangui/indimail-mta.git
 
-Compile libdkim-1.4 (with dynamic libaries)
+# Compile libdkim-1.4 (with dynamic libaries)
 
  $ cd /usr/local/src/libdkim-1.4
  
@@ -34,7 +37,7 @@ Compile libdkim-1.4 (with dynamic libaries)
  
  $ sudo make -s install-strip
 
-Compile libsrs2-1.0.18 (with dynamic libaries)
+# Compile libsrs2-1.0.18 (with dynamic libaries)
 
  $ cd /usr/local/src/libsrs2-1.0.18
  
@@ -45,7 +48,7 @@ Compile libsrs2-1.0.18 (with dynamic libaries)
  $ sudo make install-strip
  
 
-Build ucspi-tcp-0.88 (with all patches applied)
+# Build ucspi-tcp-0.88 (with all patches applied)
 
  $ cd /usr/local/src/ucspi-tcp-0.88
  
@@ -53,7 +56,7 @@ Build ucspi-tcp-0.88 (with all patches applied)
  
  $ sudo make install-strip
   
-Build indimail-mta-2.7
+# Build indimail-mta-2.7
 
  $ cd /usr/local/src/indimail-mta-2.7
  
@@ -61,7 +64,7 @@ Build indimail-mta-2.7
  
  $ sudo make install-strip
 
-Build indimail-3.x
+# Build indimail-3.x
 
  $ cd /usr/local/src/indimail-3.0
 
@@ -71,7 +74,7 @@ Build indimail-3.x
 
  $ sudo make install-strip
 
-Setup & Configuration
+# Setup & Configuration
 
  Setup (this uses svctool a general purpose utility to configure indimail-mta
  services. The create_services is a shell script which uses svctool to setup
@@ -91,39 +94,3 @@ Setup & Configuration
  or
  
  $ /usr/bin/qmailctl start
-
-
-Some Notes on directory structure
-=================================
-indimail-mta has files in standard unix directories. You can change
-the locationsby editing the following files in indimail-mta source
-directory
-
-conf-prefix       - this is where bin, sbin go
-
-conf-shared       - this is where boot, doc go (conf-prefix/share/indimail)
-
-conf-sysconfdir   - this is where etc, control, users go
-
-conf-libexec      - this is where private scripts/executables go
-
-conf-qmail        - domains, alias, queue, autoturn, qscanq, symlinks
-                    for control, users, bin and sbin
-
-You can have the old non-fhs behaviour by having /var/indimail in the
-above 4 files. In addition to the above, indimail uses the hardcoded
-directory /usr/lib/indimail in build scripts
-
-/usr/lib/indimail - plugins, modules (architecture-dependent files)
-
-Some settings
-
-conf-shared       - /usr/share/indimail
-
-conf-prefix       - /usr
-
-conf-sysconfdir   - /etc/indimail
-
-conf-libexec      - /usr/libexec/indimail
-
-conf-qmail        - /var/indimail
