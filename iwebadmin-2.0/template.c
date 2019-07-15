@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.11 2019-06-03 06:48:04+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.12 2019-07-15 12:54:01+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -419,7 +419,7 @@ send_template_now(char *filename)
 					break;
 				case 'm': /* show the mailing lists */
 					if (AdminType == DOMAIN_ADMIN)
-						show_mailing_lists(Username.s, Domain.s, mytime);
+						show_mailing_lists();
 					break;
 				case 'N': /* parse include files */
 					i = getch(&ssin);
