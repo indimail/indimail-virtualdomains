@@ -58,7 +58,7 @@ process_commands(char *cmmd)
 	static stralloc tmp = {0};
 
 	if (!str_diff(cmmd, "showmenu")) {
-		show_menu(Username.s, Domain.s, mytime);
+		show_menu();
 	} else
 	if (!str_diff(cmmd, "quick")) {
 		/*
@@ -79,7 +79,7 @@ process_commands(char *cmmd)
 				quickAction(ActionUser.s, ACTION_DELETE);
 			else {
 				/*- malformed request -- missing fields */
-				show_menu(Username.s, Domain.s, mytime);
+				show_menu();
 				iclose();
 				exit(0);
 			}
@@ -89,7 +89,7 @@ process_commands(char *cmmd)
 		GetValue(TmpCGI, &tmp, "page=");
 		str_copy(Pagenumber, tmp.s);
 		GetValue(TmpCGI, &SearchUser, "searchuser=");
-		show_users(Username.s, Domain.s, mytime);
+		show_users();
 	} else
 	if (!str_diff(cmmd, "showaliases")) {
 		GetValue(TmpCGI, &tmp, "page=");
@@ -103,7 +103,7 @@ process_commands(char *cmmd)
 		show_forwards(Username.s, Domain.s, mytime);
 	} else
 	if (!str_diff(cmmd, "showmailinglists"))
-		show_mailing_lists(Username.s, Domain.s, mytime);
+		show_mailing_lists();
 	else
 	if (!str_diff(cmmd, "showautoresponders"))
 		show_autoresponders(Username.s, Domain.s, mytime);
@@ -191,7 +191,7 @@ process_commands(char *cmmd)
 	} else
 	if (!str_diff(cmmd, "deluser")) {
 		GetValue(TmpCGI, &ActionUser, "deluser=");
-		deluser();
+		ideluser();
 	} else
 	if (!str_diff(cmmd, "delusernow")) {
 		GetValue(TmpCGI, &ActionUser, "deluser=");
@@ -398,7 +398,7 @@ setdefaultaccount()
 			close(fd);
 		}
 	}
-	show_users(Username.s, Domain.s, mytime);
+	show_users();
 	iclose();
 	exit(0);
 }
