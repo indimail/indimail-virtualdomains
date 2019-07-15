@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.14 2019-06-03 06:48:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.15 2019-07-15 12:55:36+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
-#include <stdio.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -155,7 +154,6 @@ show_user_lines(char *user, char *dom, time_t mytime, char *dir)
 			!stralloc_append(&TmpBuf, "\"") ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
-	fprintf(stderr, "%d %s len=[%d][%s]\n", __LINE__, __FILE__, TmpBuf.len, TmpBuf.s);
 	k = count_table("indimail", TmpBuf.s) + count_table("indibak", TmpBuf.s);
 	/*- Determine number of pages */
 	if (k == 0)
@@ -746,18 +744,7 @@ count_users()
 			!stralloc_append(&TmpBuf, "\"") ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
-	fprintf(stderr, "%d %s domlen=[%d][%s] len=[%d][%s]\n", __LINE__, __FILE__, Domain.len, Domain.s, TmpBuf.len, TmpBuf.s);
 	CurPopAccounts = count_table("indimail", TmpBuf.s) + count_table("indibak", TmpBuf.s);
-#if 0
-	struct passwd  *pw;
-
-	CurPopAccounts = 0;
-	pw = sql_getall(Domain.s, 1, 0);
-	while (pw != NULL) {
-		++CurPopAccounts;
-		pw = sql_getall(Domain.s, 0, 0);
-	}
-#endif
 }
 
 void
