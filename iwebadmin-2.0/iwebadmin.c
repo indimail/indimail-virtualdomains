@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.c,v 1.11 2019-07-15 12:45:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.12 2019-07-15 21:15:20+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -701,7 +701,8 @@ quickAction(char *username, int action)
 		else
 		if (action == ACTION_DELETE) {
 			// don't allow deletion of postmaster account
-			if (!case_diffs(username, "postmaster")) {
+			if (!case_diffs(username, "postmaster") || !case_diffs(username, "prefilt") ||
+					!case_diffs(username, "postfilt")) {
 				copy_status_mesg(html_text[317]);
 				show_menu();
 				iclose();
