@@ -1,5 +1,5 @@
 /*
- * $Id: show.c,v 1.1 2010-04-26 11:25:12+05:30 Cprogrammer Exp mbhangui $
+ * $Id: show.c,v 1.2 2019-07-15 12:53:11+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,10 +21,7 @@
 #include "show.h"
 
 void
-show_menu(user, dom, mytime)
-	char           *user;
-	char           *dom;
-	time_t          mytime;
+show_menu()
 {
 	send_template("main_menu.html");
 }
