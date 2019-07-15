@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.8 2019-06-08 18:16:22+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.9 2019-07-15 12:46:00+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -74,7 +74,7 @@ void            set_options();
 void            default_options();
 
 void
-show_mailing_lists(char *user, char *dom, time_t mytime)
+show_mailing_lists()
 {
 	if (AdminType != DOMAIN_ADMIN) {
 		out(html_text[142]);
@@ -88,7 +88,7 @@ show_mailing_lists(char *user, char *dom, time_t mytime)
 	count_mailinglists();
 	if (CurMailingLists == 0) {
 		copy_status_mesg(html_text[231]);
-		show_menu(Username.s, Domain.s, mytime);
+		show_menu();
 		iclose();
 		exit(0);
 	}
@@ -371,7 +371,7 @@ addmailinglist()
 		out(strnum);
 		out("\n");
 		flush();
-		show_menu(Username.s, Domain.s, mytime);
+		show_menu();
 		iclose();
 		exit(0);
 	}
@@ -479,9 +479,9 @@ delmailinglistnow()
 		len = plen + 28;
 	}
 	if (CurMailingLists == 0)
-		show_menu(Username.s, Domain.s, mytime);
+		show_menu();
 	else
-		show_mailing_lists(Username.s, Domain.s, mytime);
+		show_mailing_lists();
 }
 
 /*-
@@ -815,7 +815,7 @@ addmailinglistnow()
 		out(strnum);
 		out("\n");
 		flush();
-		show_menu(Username.s, Domain.s, mytime);
+		show_menu();
 		iclose();
 		exit(0);
 	}
@@ -847,7 +847,7 @@ addmailinglistnow()
 		}
 		len = plen + 28;
 	}
-	show_mailing_lists(Username.s, Domain.s, mytime);
+	show_mailing_lists();
 }
 
 /*-
@@ -1251,7 +1251,7 @@ dellistgroupnow(int mod)
 			len = plen + 28;
 		}
 	}
-	show_mailing_lists(Username.s, Domain.s, mytime);
+	show_mailing_lists();
 	iclose();
 	exit(0);
 }
@@ -1430,7 +1430,7 @@ modmailinglistnow()
 		}
 		len = plen + 28;
 	}
-	show_mailing_lists(Username.s, Domain.s, mytime);
+	show_mailing_lists();
 }
 
 void
@@ -1824,7 +1824,7 @@ show_current_list_values()
 				die_nomem();
 			plen = snprinth(listname.s, len, "%H", dotqmail_name.s);
 			if (plen < len) {
-				StatusMessage.len = plen;
+				listname.len = plen;
 				break;
 			}
 			len = plen + 28;
