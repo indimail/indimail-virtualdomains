@@ -16,6 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
+#include <stdio.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -83,7 +84,7 @@
 extern int create_flag;
 
 void
-show_users(char *user, char *domain, time_t mytime)
+show_users()
 {
 	if (MaxPopAccounts == 0)
 		return;
@@ -154,6 +155,7 @@ show_user_lines(char *user, char *dom, time_t mytime, char *dir)
 			!stralloc_append(&TmpBuf, "\"") ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
+	fprintf(stderr, "%d %s len=[%d][%s]\n", __LINE__, __FILE__, TmpBuf.len, TmpBuf.s);
 	k = count_table("indimail", TmpBuf.s) + count_table("indibak", TmpBuf.s);
 	/*- Determine number of pages */
 	if (k == 0)
@@ -372,7 +374,7 @@ adduser()
 				!stralloc_0(&StatusMessage))
 			die_nomem();
 		StatusMessage.len--;
-		show_menu(Username.s, Domain.s, mytime);
+		show_menu();
 		iclose();
 		exit(0);
 	}
@@ -419,7 +421,7 @@ addusernow()
 				!stralloc_0(&StatusMessage))
 			die_nomem();
 		StatusMessage.len--;
-		show_menu(Username.s, Domain.s, mytime);
+		show_menu();
 		iclose();
 		exit(0);
 	}
@@ -557,6 +559,8 @@ addusernow()
 		/*- report success */
 		len = str_len(html_text[2]) + str_len(html_text[119]) + Newu.len + Domain.len + Gecos.len + 28;
 		for (plen = 0;;) {
+			if (!stralloc_ready(&StatusMessage, len))
+				die_nomem();
 			plen = snprinth(StatusMessage.s, len, "%s %H@%H (%H) %s", html_text[2], Newu.s, Domain.s, Gecos.s, html_text[119]);
 			if (plen < len) {
 				StatusMessage.len = plen;
@@ -568,6 +572,8 @@ addusernow()
 		len = str_len(html_text[2]) + str_len(html_text[120]) + Newu.len + Domain.len + Gecos.len + 28;
 		/*- otherwise, report error */
 		for (plen = 0;;) {
+			if (!stralloc_ready(&StatusMessage, len))
+				die_nomem();
 			plen = snprinth(StatusMessage.s, len, "<font color=\"red\">%s %H@%H (%H) %s</font>",
 				html_text[2], Newu.s, Domain.s, Gecos.s, html_text[120]);
 			if (plen < len) {
@@ -582,7 +588,7 @@ addusernow()
 	 * After we add the user, show the user page
 	 * people like to visually verify the results
 	 */
-	show_users(Username.s, Domain.s, mytime);
+	show_users();
 }
 
 int
@@ -678,7 +684,7 @@ call_hooks(char *hook_type, char *p1, char *p2, char *p3, char *p4)
 }
 
 void
-deluser()
+ideluser()
 {
 	send_template("del_user_confirm.html");
 }
@@ -694,7 +700,11 @@ delusergo()
 		iclose();
 		exit(0);
 	}
-	deluser(ActionUser.s, Domain.s, 1);
+	if (deluser(ActionUser.s, Domain.s, 1) ) {
+		copy_status_mesg(html_text[145]);
+		iclose();
+		exit(0);
+	}
 	len = ActionUser.len + str_len(html_text[141]) + 28;
 	for (plen = 0;;) {
 		if (!stralloc_ready(&StatusMessage, len))
@@ -725,7 +735,7 @@ delusergo()
 		}
 	}
 	call_hooks(HOOK_DELUSER, ActionUser.s, Domain.s, forwardto.s, "");
-	show_users(Username.s, Domain.s, mytime);
+	show_users();
 }
 
 void
@@ -736,6 +746,7 @@ count_users()
 			!stralloc_append(&TmpBuf, "\"") ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
+	fprintf(stderr, "%d %s domlen=[%d][%s] len=[%d][%s]\n", __LINE__, __FILE__, Domain.len, Domain.s, TmpBuf.len, TmpBuf.s);
 	CurPopAccounts = count_table("indimail", TmpBuf.s) + count_table("indibak", TmpBuf.s);
 #if 0
 	struct passwd  *pw;
@@ -821,7 +832,7 @@ set_qmaildefault(char *opt)
 		}
 		close(fd);
 	}
-	show_users(Username.s, Domain.s, mytime);
+	show_users();
 	iclose();
 	exit(0);
 }
@@ -1202,7 +1213,8 @@ modusergo()
 	if (!(err = stat(dotqmailfn.s, &sb))) {
 		if ((olddotqmail = (char *) alloc(sb.st_size))) {
 			if ((fd = open_read(dotqmailfn.s)) != -1) {
-				read(fd, olddotqmail, sb.st_size);
+				if (read(fd, olddotqmail, sb.st_size) == -1)
+					strerr_warn2(dotqmailfn.s, ": read: ", &strerr_sys);
 				close(fd);
 			}
 		}
