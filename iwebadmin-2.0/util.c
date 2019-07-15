@@ -1,5 +1,5 @@
 /*
- * $Id: util.c,v 1.6 2019-06-03 06:48:15+05:30 Cprogrammer Exp mbhangui $
+ * $Id: util.c,v 1.7 2019-07-15 12:58:05+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -505,20 +505,6 @@ get_color_text(char *index)
 	return ("");
 }
 
-/*
- * bk - use maildir++ quotas now
- * char *get_quota_used(char *dir) {
- * static char tmpbuff[40];
- * double size;
- * 
- * size = get_du(dir);
- * if (size > 0) {
- * size = size / 1048576; 
- * }
- * sprintf(tmpbuff, "%.2lf", size);
- * return tmpbuff;
- * }
- */
 /*
  * quota_to_bytes: used to convert user entered quota (given in MB)
  * back to bytes for vpasswd file
