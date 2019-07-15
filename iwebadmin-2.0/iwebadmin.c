@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.c,v 1.10 2019-06-03 06:46:56+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.11 2019-07-15 12:45:10+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -362,13 +362,21 @@ main(argc, argv)
 		iwebadmin_suid(Gid, Uid);
 		/*- Authenticate a user and domain admin */
 		if (Domain.len && Username.len) {
-			(void) chdir(RealDir.s);
+			if (chdir(RealDir.s)) {
+				copy_status_mesg(html_text[171]);
+				errout("iwebadmin: ");
+				errout(RealDir.s);
+				errout(": unable to change dir\n");
+				errflush();
+				iclose();
+				exit(0);
+			}
 			load_limits();
 			if (!(pw = sql_getpw(Username.s, Domain.s))) {
 				copy_status_mesg(html_text[198]);
 				errout("iwebadmin: ");
 				errout(Username.s);
-				out(": No such user\n");
+				errout(": No such user\n");
 				errflush();
 				show_login();
 				iclose();
@@ -439,7 +447,7 @@ main(argc, argv)
 			 * for regular users 
 			 */
 			if (AdminType == DOMAIN_ADMIN)
-				show_menu(Username.s, Domain.s, mytime);
+				show_menu();
 			else {
 				if (!stralloc_copy(&ActionUser, &Username) || !stralloc_0(&ActionUser))
 					die_nomem();
@@ -628,6 +636,9 @@ init_globals()
 	out("Expires: Thu, 01 Dec 1994 16:00:00 GMT\n");
 #endif
 	out("\n");
+	if (!stralloc_ready(&SearchUser, 1) || !stralloc_0(&SearchUser))
+		die_nomem();
+	SearchUser.len--;
 }
 
 	/*
@@ -692,10 +703,10 @@ quickAction(char *username, int action)
 			// don't allow deletion of postmaster account
 			if (!case_diffs(username, "postmaster")) {
 				copy_status_mesg(html_text[317]);
-				show_menu(Username.s, Domain.s, mytime);
+				show_menu();
 				iclose();
 			} else
-				deluser();
+				ideluser();
 		}
 	} else {
 		/*
@@ -725,7 +736,7 @@ quickAction(char *username, int action)
 				}
 				len = plen + 28;
 			}
-			show_menu(Username.s, Domain.s, mytime);
+			show_menu();
 			iclose();
 		}
 	}
