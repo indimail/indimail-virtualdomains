@@ -1,5 +1,5 @@
 /*
- * $Id: alias.c,v 1.4 2019-06-03 06:45:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: alias.c,v 1.5 2019-07-15 12:40:24+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -573,7 +573,7 @@ adddotqmail()
 				!stralloc_0(&StatusMessage))
 			die_nomem();
 		StatusMessage.len--;
-		show_menu(Username.s, Domain.s, mytime);
+		show_menu();
 		iclose();
 		exit(0);
 	}
@@ -735,7 +735,7 @@ deldotqmailnow()
 
 	if (AdminType != DOMAIN_ADMIN && !(AdminType == USER_ADMIN && !str_diffn(ActionUser.s, Username.s, ActionUser.len > Username.len ? ActionUser.len : Username.len))) {
 		copy_status_mesg(html_text[142]);
-		show_menu(Username.s, Domain.s, mytime);
+		show_menu();
 		iclose();
 		exit(0);
 	}
@@ -786,7 +786,7 @@ deldotqmailnow()
 	/*- don't display aliases/forwards if we just deleted the last one */
 	count_forwards();
 	if (CurForwards == 0 && CurBlackholes == 0) {
-		show_menu(Username.s, Domain.s, mytime);
+		show_menu();
 	} else {
 		if (!stralloc_copy(&SearchUser, &ActionUser) ||
 				!stralloc_0(&SearchUser))
