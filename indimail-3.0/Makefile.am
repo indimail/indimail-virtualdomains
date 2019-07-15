@@ -862,7 +862,7 @@ vrenameuser_handle: vrenameuser_handle.in post_handle
 	$(edit) $@.in > post_handle/vrenameuser; ln -sf post_handle/vrenameuser $@
 
 indimail.spec: indimail.spec.in catChangeLog doc/ChangeLog.indimail
-	($(edit) $@.in;./catChangeLog) | $(edit) > $@
+	(cat $@.in;./catChangeLog) | $(edit) > $@
 indimail-rpmlintrc: indimail-rpmlintrc.in
 	$(edit) indimail-rpmlintrc.in > $@
 login_tasks.3: login_tasks.9
