@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_compat.h,v $
+ * Revision 1.2  2019-07-15 13:09:27+05:30  Cprogrammer
+ * include deluser.h for iwebadmin
+ *
  * Revision 1.1  2019-05-29 01:06:17+05:30  Cprogrammer
  * Initial revision
  *
@@ -37,6 +40,7 @@
 #include <setuserquota.h>
 #include <check_quota.h>
 #include <iadduser.h>
+#include <deluser.h>
 #include <vdelfiles.h>
 #include <valias_select.h>
 #include <valias_insert.h>
