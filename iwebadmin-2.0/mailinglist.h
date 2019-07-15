@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.h,v 1.3 2019-06-03 06:47:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.h,v 1.4 2019-07-15 12:47:13+05:30 Cprogrammer Exp mbhangui $
  */
 
 #include <time.h>
@@ -19,7 +19,7 @@ void            modmailinglist();
 void            modmailinglistnow();
 void            show_list_group(char *template);
 void            show_list_group_now(int mod);
-void            show_mailing_lists(char *user, char *dom, time_t mytime);
+void            show_mailing_lists();
 void            show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir);
 void            show_mailing_list_line2(char *user, char *dom, time_t mytime, char *dir);
 void            show_list_group_now(int mod);
