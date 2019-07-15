@@ -1,5 +1,5 @@
 /*
- * $Id: printh.c,v 1.2 2019-06-03 06:47:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: printh.c,v 1.3 2019-07-15 12:52:21+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 2004 Tom Logic LLC 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -81,6 +81,7 @@ vsnprinth(char *buffer, size_t size, const char *format, va_list ap)
 		return -1;
 	printed = 0;
 	b = buffer;
+	*n = 0;
 	for (f = format; *f != '\0'; f++) {
 		if (*f != '%') {
 			if (++printed < size)
@@ -89,34 +90,36 @@ vsnprinth(char *buffer, size_t size, const char *format, va_list ap)
 			f++;
 			s = n;
 			stringtype = SPRINTH_NORMAL;
-			switch (*f) {
+			switch (*f)
+			{
 			case '%':
 				strcpy(n, "%");
 				break;
 
 			case 'c':
-				snprintf(n, sizeof (n), "%c", va_arg(ap, int));
+				snprintf(n, sizeof (n) - 1, "%c", va_arg(ap, int));
 				break;
 
 			case 'd':
 			case 'i':
-				snprintf(n, sizeof (n), "%d", va_arg(ap, int));
+				snprintf(n, sizeof (n) - 1, "%d", va_arg(ap, int));
 				break;
 
 			case 'u':
-				snprintf(n, sizeof (n), "%u", va_arg(ap, unsigned int));
+				snprintf(n, sizeof (n) - 1, "%u", va_arg(ap, unsigned int));
 				break;
 
 			case 'l':
 				f++;
-				switch (*f) {
+				switch (*f)
+				{
 				case 'd':
 				case 'i':
-					snprintf(n, sizeof (n), "%ld", va_arg(ap, long));
+					snprintf(n, sizeof (n) - 1, "%ld", va_arg(ap, long));
 					break;
 
 				case 'u':
-					snprintf(n, sizeof (n), "%lu", va_arg(ap, unsigned long));
+					snprintf(n, sizeof (n) - 1, "%lu", va_arg(ap, unsigned long));
 					break;
 
 				default:
@@ -146,7 +149,8 @@ vsnprinth(char *buffer, size_t size, const char *format, va_list ap)
 			while (*s != '\0') {
 				copy = (char *) 0; /* default to no special handling */
 				if (stringtype == SPRINTH_HTML) {
-					switch (*s) {
+					switch (*s)
+					{
 					case '"':
 						copy = "&quot;";
 						break;
@@ -167,7 +171,7 @@ vsnprinth(char *buffer, size_t size, const char *format, va_list ap)
 					else
 					if (!isalnum(*s) && (strchr("._-", *s) == NULL)) {
 						copy = n;
-						sprintf(n, "%%%c%c", hex[*s >> 4 & 0x0F], hex[*s & 0x0F]);
+						snprintf(n, sizeof(n) - 1, "%%%c%c", hex[*s >> 4 & 0x0F], hex[*s & 0x0F]);
 					}
 				}
 				if (!copy) {
@@ -208,12 +212,13 @@ int
 printh(const char *format, ...)
 {
 	int             ret;
-	char            buffer[1024];
+	char            buffer[4096];
 	va_list         argp;
 
 	va_start(argp, format);
-	ret = vsnprinth(buffer, sizeof (buffer), format, argp);
+	ret = vsnprinth(buffer, sizeof (buffer) - 1, format, argp);
 	va_end(argp);
+	buffer[sizeof(buffer) - 1] = 0;
 	substdio_puts(subfdoutsmall, buffer);
 	substdio_flush(subfdoutsmall);
 	return ret;
