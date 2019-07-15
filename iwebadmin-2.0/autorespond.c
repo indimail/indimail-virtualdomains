@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.10 2019-06-03 06:46:06+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.11 2019-07-15 12:43:04+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -59,7 +59,7 @@ show_autoresponders(user, dom, mytime)
 	count_autoresponders();
 	if (CurAutoResponders == 0) {
 		copy_status_mesg(html_text[233]);
-		show_menu(Username.s, Domain.s, mytime);
+		show_menu();
 	} else {
 		send_template("show_autorespond.html");
 	}
@@ -145,7 +145,7 @@ addautorespond()
 		out(strnum);
 		out("\n");
 		flush();
-		show_menu(Username.s, Domain.s, mytime);
+		show_menu();
 		iclose();
 		exit(0);
 	}
@@ -174,7 +174,7 @@ addautorespondnow()
 		out(strnum1);
 		out("\n");
 		flush();
-		show_menu(Username.s, Domain.s, mytime);
+		show_menu();
 		iclose();
 		exit(0);
 	}
@@ -411,7 +411,7 @@ delautorespondnow()
 	}
 	count_autoresponders();
 	if (CurAutoResponders == 0)
-		show_menu(Username.s, Domain.s, mytime);
+		show_menu();
 	else
 		send_template("show_autorespond.html");
 }
