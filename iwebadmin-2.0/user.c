@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.15 2019-07-15 12:55:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.16 2019-07-15 21:14:40+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -260,11 +260,13 @@ show_user_lines(char *user, char *dom, time_t mytime, char *dir)
 				 * if the user has admin privileges and pw->pw_name is not 
 				 * the user or postmaster, allow deleting 
 				 */
-				if (AdminType == DOMAIN_ADMIN && str_diffn(pw->pw_name, Username.s, Username.len) && str_diff(pw->pw_name, "postmaster")) {
+				if (AdminType == DOMAIN_ADMIN && str_diffn(pw->pw_name, Username.s, Username.len) &&
+						str_diff(pw->pw_name, "postmaster") &&
+						str_diff(pw->pw_name, "prefilt") &&
+						str_diff(pw->pw_name, "postfilt")) {
 					allowdelete = 1;
-				} else { /*- else, don't allow deleting */
+				} else /*- else, don't allow deleting */
 					allowdelete = 0;
-				}
 
 				/*
 				 * display trashcan for delete, or nothing if delete not allowed 
