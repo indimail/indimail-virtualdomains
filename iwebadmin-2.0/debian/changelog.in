@@ -1,5 +1,12 @@
 iwebadmin (@version@-1) unstable; urgency=low
 
   * fixed vsetuserquota
+  * Replaced all functions with djb functions
+  * Link with indimail-3.0
+  * removed unused arguments to show_menu(), show_users(), show_mailing_lists()
+  * renamed deluser() to ideluser() to avoid clash with indimail deluser() function
+  * BUG - iwebadmin.c initialize SearchUser variable
+  * BUG - user.c - Fixed allocation of StatusMessage
+  * printh.c - fixes to snprintf() size parameter to have space for last null byte
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Tue, 07 Mar 2017 15:49:17 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Mon, 15 Jul 2019 13:00:14 +0530
