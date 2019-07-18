@@ -13,7 +13,7 @@ Look at indimail-3.x/doc/INSTALL for Source Installation instructions
  
  $ git clone https://github.com/mbhangui/libqmail
  
- $ cd libqmail-0.1
+ $ cd /usr/local/src/libqmail/libqmail-0.1
  
  $ ./default.configure
  
@@ -23,13 +23,15 @@ Look at indimail-3.x/doc/INSTALL for Source Installation instructions
    
 # Download indimail, indimail-mta and components
 
- $ git clone https://github.com/mbhangui/indimail.git
+ $ cd /usr/local/src
+
+ $ git clone https://github.com/mbhangui/indimail-virtualdomains.git
 
  $ git clone https://github.com/mbhangui/indimail-mta.git
 
 # Compile libdkim-1.4 (with dynamic libaries)
 
- $ cd /usr/local/src/libdkim-1.4
+ $ cd /usr/local/src/indimail-mta/libdkim-1.4
  
  $ ./default.configure
  
@@ -39,7 +41,7 @@ Look at indimail-3.x/doc/INSTALL for Source Installation instructions
 
 # Compile libsrs2-1.0.18 (with dynamic libaries)
 
- $ cd /usr/local/src/libsrs2-1.0.18
+ $ cd /usr/local/src/indimail-mta/libsrs2-1.0.18
  
  $ ./defaualt.configure
  
@@ -50,15 +52,15 @@ Look at indimail-3.x/doc/INSTALL for Source Installation instructions
 
 # Build ucspi-tcp-0.88 (with all patches applied)
 
- $ cd /usr/local/src/ucspi-tcp-0.88
+ $ cd /usr/local/src/indimail-mta/ucspi-tcp-0.88
  
  $ make
  
  $ sudo make install-strip
   
-# Build indimail-mta-2.7
+# Build indimail-mta-2.8
 
- $ cd /usr/local/src/indimail-mta-2.7
+ $ cd /usr/local/src/indimail-mta/indimail-mta-2.8
  
  $ make
  
@@ -66,7 +68,7 @@ Look at indimail-3.x/doc/INSTALL for Source Installation instructions
 
 # Build indimail-3.x
 
- $ cd /usr/local/src/indimail-3.0
+ $ cd /usr/local/src/indimail-virtualdomains/indimail-3.0
 
  $ ./default.configure
 
@@ -81,7 +83,7 @@ Look at indimail-3.x/doc/INSTALL for Source Installation instructions
  indimail-mta. It will also put a systemd unit file indimail.service in
  /lib/systemd/system
 
- $ cd /usr/local/src/indimail-mta-2.7
+ $ cd /usr/local/src/indimail-mta/indimail-mta-2.7
  
  $ sudo sh ./create_services --servicedir=/services --qbase=/var/indimail/queue
 
