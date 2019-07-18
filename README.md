@@ -11,7 +11,7 @@ Look at indimail-3.x/doc/INSTALL for Source Installation instructions
 
  $ cd /usr/local/src
  
- $ git clone https://github.com/mbhangui/libqmail-0.1
+ $ git clone https://github.com/mbhangui/libqmail-0.1.git
  
  $ cd /usr/local/src/libqmail-0.1
  
