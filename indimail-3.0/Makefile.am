@@ -834,7 +834,7 @@ INSTALL-RPM: INSTALL-RPM.in configure.ac
 INSTALL-MYSQL: INSTALL-MYSQL.in configure.ac
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 RELEASE-Notes: RELEASE-Notes.in configure.ac
-	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
+	(cat $@.in; ./catChangeLog) | $(edit) > doc/$@; rm -f $@;ln -sf doc/$@ $@
 README-CLUSTER: README-CLUSTER.in configure.ac
 	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
 README: README.in configure.ac
