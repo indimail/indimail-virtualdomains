@@ -1,5 +1,8 @@
 /*
  * $Log: MailQuotaWarn.c,v $
+ * Revision 1.3  2019-07-26 09:32:13+05:30  Cprogrammer
+ * speed up MailQuotaWarn. exit if non of QUOTAWARN env variables are defined
+ *
  * Revision 1.2  2019-04-21 16:14:08+05:30  Cprogrammer
  * remove '/' from the end
  *
@@ -36,7 +39,7 @@
 #include "runcmmd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: MailQuotaWarn.c,v 1.2 2019-04-21 16:14:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: MailQuotaWarn.c,v 1.3 2019-07-26 09:32:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -60,6 +63,16 @@ MailQuotaWarn(char *username, char *domain, char *Maildir, char *QuotaAlloted)
 	int             percent_usage_mail;
 #endif
 
+	for (i = 10; i; i--) {
+		if (!stralloc_copyb(&quotawarn, "QUOTAWARN", 9) ||
+				!stralloc_catb(&quotawarn, strnum, fmt_uint(strnum, i)) ||
+				!stralloc_0(&quotawarn))
+			die_nomem();
+		if ((ptr = env_get(quotawarn.s)))
+			break;
+	}
+	if (i == -1)
+		return (0);
 	/*-
 	 * If the age of file QuotaWarn is more than a week send warning
 	 * to user if overquota
