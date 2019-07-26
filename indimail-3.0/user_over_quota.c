@@ -1,5 +1,8 @@
 /*
  * $Log: user_over_quota.c,v $
+ * Revision 1.4  2019-07-26 09:41:45+05:30  Cprogrammer
+ * added FAST_QUOTA env variable to avoid costly disk read for quota calculations
+ *
  * Revision 1.3  2019-04-22 23:16:08+05:30  Cprogrammer
  * replaced atol() with scan_ulong()
  *
@@ -27,6 +30,7 @@
 #include <stralloc.h>
 #include <getln.h>
 #include <substdio.h>
+#include <env.h>
 #endif
 #include "indimail.h"
 #include "parse_quota.h"
@@ -34,7 +38,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: user_over_quota.c,v 1.3 2019-04-22 23:16:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: user_over_quota.c,v 1.4 2019-07-26 09:41:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -102,12 +106,12 @@ user_over_quota(char *Maildir, char *quota, int cur_msgsize)
 	} else
 		tmpQuota = quota;
 	if (!str_diffn(tmpQuota, "0S", 2))
-		return(0);
+		return (0);
 	if ((mail_size_limit = parse_quota(tmpQuota, &mail_count_limit)) == -1)
-		return(-1);
+		return (-1);
 #else
 	if (!quota || !*quota)
-		return(0);
+		return (0);
 	/*
 	 * translate the quota to a number 
 	 */
@@ -137,14 +141,16 @@ user_over_quota(char *Maildir, char *quota, int cur_msgsize)
 	CurCount = cur_mailbox_count;
 	if (cur_mailbox_size + cur_msgsize > mail_size_limit) /*- if over quota recalculate quota */
 	{
-		if ((CurBytes = cur_mailbox_size = recalc_quota(maildir.s, &cur_mailbox_count, 
-			mail_size_limit, mail_count_limit, 2)) == -1)
+		if (env_get("FAST_QUOTA"))
+			return (1);
+		if ((CurBytes = cur_mailbox_size = recalc_quota(maildir.s, &cur_mailbox_count,
+					mail_size_limit, mail_count_limit, 2)) == -1)
 			return (-1);
 		if (cur_mailbox_size + cur_msgsize > mail_size_limit)
-			return(1);
+			return (1);
 	}
 	if (mail_count_limit && (cur_mailbox_count + 1 > mail_count_limit))
-		return(1);
+		return (1);
 #else
 	if ((CurBytes = cur_mailbox_size = recalc_quota(maildir.s, 0)) == -1)
 		return (-1);
@@ -157,8 +163,8 @@ user_over_quota(char *Maildir, char *quota, int cur_msgsize)
 		if ((CurBytes = cur_mailbox_size = recalc_quota(maildir.s, 2)) == -1)
 			return (-1);
 		if (cur_mailbox_size + cur_msgsize > mail_size_limit)
-			return(1);
+			return (1);
 	}
 #endif
-	return(0);
+	return (0);
 }
