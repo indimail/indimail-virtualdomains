@@ -1,7 +1,6 @@
 /*
  * $Log: recalc_quota.c,v $
- * Revision 1.3  2019-07-26 09:34:57+05:30  Cprogrammer
- * use getDbLock() for locks
+ * Revision 1.3  2019-07-26 21:54:40+05:30  Cprogrammer
  * added FAST_QUOTA env variable to avoid costly disk read for quota calculations
  *
  * Revision 1.2  2019-04-21 16:14:17+05:30  Cprogrammer
@@ -46,10 +45,9 @@
 #include "get_indimailuidgid.h"
 #include "variables.h"
 #include "get_assign.h"
-#include "dblock.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: recalc_quota.c,v 1.3 2019-07-26 09:34:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: recalc_quota.c,v 1.3 2019-07-26 21:54:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -66,10 +64,12 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 #endif
 {
 	static mdir_t   mail_size, mail_count;
-	int             fd, i, j;
-#ifdef FILE_LOCKING
-	int             lockfd;
+#ifdef DARWIN
+	struct flock    fl = {0, 0, 0, F_WRLCK, SEEK_SET};
+#else
+	struct flock    fl = {F_WRLCK, SEEK_SET, 0, 0, 0};
 #endif
+	int             fd, i, j;
 	char            strnum1[FMT_ULONG], outbuf[512];
 	struct substdio ssout;
 #ifdef USE_MAILDIRQUOTA
@@ -135,32 +135,32 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 	} 
 	/*- recursive function, can take time for a large Maildir */
 	mail_size = count_dir(maildir.s, &mail_count); 
-#ifdef FILE_LOCKING
-	if ((lockfd = getDbLock(mdirsizefn.s, 1)) == -1) {
-		strerr_warn1("recalc_quota: getDbLock: ", &strerr_sys);
-		return (-2);
-	}
-#endif
 	if ((fd = open(mdirsizefn.s, O_CREAT | O_TRUNC | O_WRONLY, S_IWUSR | S_IRUSR)) == -1) {
 		if (errno == 2) {
 			mail_size = 0;
-#ifdef FILE_LOCKING
-			delDbLock(lockfd, mdirsizefn.s, 1);
-#endif
 			return (0);
 		}
 		strerr_warn3("recalc_quota: ", mdirsizefn.s, ": ", &strerr_sys);
-#ifdef FILE_LOCKING
-		delDbLock(lockfd, mdirsizefn.s, 1);
-#endif
 		return (-1);
 	}
+	fl.l_pid = getpid();
+	/*- lock the file */
+	for (;;) {
+		if (fcntl(fd, F_SETLKW, &fl) == -1) {
+			if (errno == EINTR)
+				continue;
+			strerr_warn3("recalc_quota: fcntl(F_SETLKW)", mdirsizefn.s, ": ", &strerr_sys);
+			close(fd);
+			return (-1);
+		}
+		break;
+	}
+	fl.l_type = F_UNLCK;
 	if (fchown(fd, uid, gid) == -1) {
 		strerr_warn3("recalc_quota: fchown", mdirsizefn.s, ": ", &strerr_sys);
+		if (fcntl(fd, F_SETLK, &fl) == -1)
+			strerr_warn3("recalc_quota: fcntl(F_SETLK)", mdirsizefn.s, ": ", &strerr_sys);
 		close(fd);
-#ifdef FILE_LOCKING
-		delDbLock(lockfd, mdirsizefn.s, 1);
-#endif
 		return (-1);
 	}
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
@@ -172,20 +172,18 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 				substdio_put(&ssout, "S,", 2) ||
 				substdio_put(&ssout, strnum2, j) || substdio_put(&ssout, "C\n", 2)) {
 			strerr_warn3("recalc_quota: write error: ", mdirsizefn.s, ": ", &strerr_sys);
+			if (fcntl(fd, F_SETLK, &fl) == -1)
+				strerr_warn3("recalc_quota: fcntl(F_SETLK)", mdirsizefn.s, ": ", &strerr_sys);
 			close(fd);
-#ifdef FILE_LOCKING
-			delDbLock(lockfd, mdirsizefn.s, 1);
-#endif
 			return (-1);
 		}
 	} else {
 		strnum1[i = fmt_ulonglong(strnum1, size_limit)] = 0;
 		if (substdio_put(&ssout, strnum1, i) || substdio_put(&ssout, "S\n", 2)) {
 			strerr_warn3("recalc_quota: write error: ", mdirsizefn.s, ": ", &strerr_sys);
+			if (fcntl(fd, F_SETLK, &fl) == -1)
+				strerr_warn3("recalc_quota: fcntl(F_SETLK)", mdirsizefn.s, ": ", &strerr_sys);
 			close(fd);
-#ifdef FILE_LOCKING
-			delDbLock(lockfd, mdirsizefn.s, 1);
-#endif
 			return (-1);
 		}
 	}
@@ -195,10 +193,9 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 		if (substdio_put(&ssout, strnum1, i) || substdio_put(&ssout, " ", 1) ||
 				substdio_put(&ssout, strnum2, j) || substdio_put(&ssout, "\n", 1)) {
 			strerr_warn3("recalc_quota: write error: ", mdirsizefn.s, ": ", &strerr_sys);
+			if (fcntl(fd, F_SETLK, &fl) == -1)
+				strerr_warn3("recalc_quota: fcntl(F_SETLK)", mdirsizefn.s, ": ", &strerr_sys);
 			close(fd);
-#ifdef FILE_LOCKING
-			delDbLock(lockfd, mdirsizefn.s, 1);
-#endif
 			return (-1);
 		}
 	}
@@ -208,25 +205,22 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 	strnum1[i = fmt_ulonglong(strnum1, mail_size)] = 0;
 	if (substdio_put(&ssout, strnum1, i) || substdio_put(&ssout, "\n", 1)) {
 		strerr_warn3("recalc_quota: write error: ", mdirsizefn.s, ": ", &strerr_sys);
+		if (fcntl(fd, F_SETLK, &fl) == -1)
+			strerr_warn3("recalc_quota: fcntl(F_SETLK)", mdirsizefn.s, ": ", &strerr_sys);
 		close(fd);
-#ifdef FILE_LOCKING
-		delDbLock(lockfd, mdirsizefn.s, 1);
-#endif
 		return (-1);
 	}
 #endif
 	if (substdio_flush(&ssout)) {
 		strerr_warn3("recalc_quota: write error: ", mdirsizefn.s, ": ", &strerr_sys);
+		if (fcntl(fd, F_SETLK, &fl) == -1)
+			strerr_warn3("recalc_quota: fcntl(F_SETLK)", mdirsizefn.s, ": ", &strerr_sys);
 		close(fd);
-#ifdef FILE_LOCKING
-		delDbLock(lockfd, mdirsizefn.s, 1);
-#endif
 		return (-1);
 	}
+	if (fcntl(fd, F_SETLK, &fl) == -1)
+		strerr_warn3("recalc_quota: fcntl(F_SETLK)", mdirsizefn.s, ": ", &strerr_sys);
 	close(fd);
-#ifdef FILE_LOCKING
-	delDbLock(lockfd, mdirsizefn.s, 1);
-#endif
 	CurCount = mail_count;
 	if (!stralloc_copy(&prevmaildir, &maildir) || !stralloc_0(&prevmaildir))
 		die_nomem();
