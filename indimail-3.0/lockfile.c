@@ -1,5 +1,8 @@
 /*
  * $Log: lockfile.c,v $
+ * Revision 1.2  2019-07-26 09:37:25+05:30  Cprogrammer
+ * use variable USE_FLOCK when using fcntl LOCKF
+ *
  * Revision 1.1  2019-04-18 08:27:50+05:30  Cprogrammer
  * Initial revision
  *
@@ -10,7 +13,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: lockfile.c,v 1.1 2019-04-18 08:27:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: lockfile.c,v 1.2 2019-07-26 09:37:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef FILE_LOCKING
@@ -408,7 +411,7 @@ RemoveLock(char *filename, char proj)
 	else
 		return (0);
 }
-#elif defined(USE_FLOCK)
+#elif defined(USE_LOCKF)
 int
 lockcreate(char *filename, char proj)
 {
@@ -459,5 +462,5 @@ RemoveLock(char *filename, char proj)
 	else
 		return (0);
 }
-#endif /*- #ifdef USE_FLOCK */
+#endif /*- #ifdef USE_LOCKF */
 #endif /*- #ifdef FILE_LOCKING */

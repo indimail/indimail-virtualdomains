@@ -989,11 +989,11 @@ case $VFILTER in
 esac
 
 AC_ARG_ENABLE(file-locking, [  --enable-file-locking=n|y|s|l|f|c  Turn on (y, default) or off (n),
-	(s) use semaphores, (l) use link, (f) use flock, (c) use fcntl default],
+	(s) use semaphores, (l) use link, (f) use lockf, (c) use fcntl default],
 	FILE_LOCKING=$enableval,
 	[
 		FILE_LOCKING=y
-		USE_FLOCK=0
+		USE_LOCKF=0
 		USE_FCNTLLOCK=1
 		USE_LINKLOCK=0
 		USE_SEMAPHORES=0
@@ -1001,7 +1001,7 @@ AC_ARG_ENABLE(file-locking, [  --enable-file-locking=n|y|s|l|f|c  Turn on (y, de
 case $FILE_LOCKING in
 1*|y*|Y*|c*|C*)
 	FILE_LOCKING=c
-	USE_FLOCK=0
+	USE_LOCKF=0
 	USE_FCNTLLOCK=1
 	USE_LINKLOCK=0
 	USE_SEMAPHORES=0
@@ -1010,16 +1010,16 @@ case $FILE_LOCKING in
 	;;
 f*|F*)
 	FILE_LOCKING=f
-	USE_FLOCK=1
+	USE_LOCKF=1
 	USE_FCNTLLOCK=0
 	USE_LINKLOCK=0
 	USE_SEMAPHORES=0
 	AC_DEFINE_UNQUOTED(FILE_LOCKING,$FILE_LOCKING,Enable File Locking Code)
-	AC_DEFINE_UNQUOTED(USE_FLOCK,$USE_FLOCK,Use flock for file locking)
+	AC_DEFINE_UNQUOTED(USE_LOCKF,$USE_LOCKF,Use lockf for file locking)
 	;;
 l*|L*)
 	FILE_LOCKING=l
-	USE_FLOCK=0
+	USE_LOCKF=0
 	USE_FCNTLLOCK=0
 	USE_LINKLOCK=1
 	USE_SEMAPHORES=0
@@ -1028,7 +1028,7 @@ l*|L*)
 	;;
 s*|S*)
 	FILE_LOCKING=s
-	USE_FLOCK=0
+	USE_LOCKF=0
 	USE_FCNTLLOCK=0
 	USE_LINKLOCK=0
 	USE_SEMAPHORES=1
@@ -1037,7 +1037,7 @@ s*|S*)
 	;;
 *)
 	FILE_LOCKING=0
-	USE_FLOCK=0
+	USE_LOCKF=0
 	USE_FCNTLLOCK=0
 	USE_LINKLOCK=0
 	USE_SEMAPHORES=0
@@ -1412,7 +1412,7 @@ case $FILE_LOCKING in
 	echo "     fcntl locking = ON  --enable-file-locking=y default (use fcntl)"
 	;;
 f*|F*)
-	echo "     flock locking = ON  --enable-file-locking=f (use flock)"
+	echo "     lockf locking = ON  --enable-file-locking=f (use lockf)"
 	;;
 l*|L*)
 	echo "      link locking = ON  --enable-file-locking=l (use link)"
