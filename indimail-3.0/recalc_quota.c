@@ -1,5 +1,8 @@
 /*
  * $Log: recalc_quota.c,v $
+ * Revision 1.4  2019-07-27 11:26:53+05:30  Cprogrammer
+ * added FAST_QUOTA, MAILDIRSIZE_MAX_SIZE, MALIDISIZE_MAX_AGE variables for improving locking on NFS mounted Maildirs
+ *
  * Revision 1.3  2019-07-26 21:54:40+05:30  Cprogrammer
  * added FAST_QUOTA env variable to avoid costly disk read for quota calculations
  *
@@ -47,7 +50,7 @@
 #include "get_assign.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: recalc_quota.c,v 1.3 2019-07-26 21:54:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: recalc_quota.c,v 1.4 2019-07-27 11:26:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -82,6 +85,7 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 	uid_t           uid;
 	gid_t           gid;
 	int             fast_quota_calc;
+	unsigned long   max_age = 43200, max_size = 8192;
 
 	if (!stralloc_copys(&maildir, Maildir) || !stralloc_0(&maildir))
 		die_nomem();
@@ -106,10 +110,14 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 		die_nomem();
 #endif
 	fast_quota_calc = env_get("FAST_QUOTA") ? 1 : 0;
+	if ((ptr = env_get("MAILDIRSIZE_MAX_AGE")))
+		scan_ulong(ptr, &max_age);
+	if ((ptr = env_get("MAILDIRSIZE_MAX_SIZE")))
+		scan_ulong(ptr, &max_size);
 	if (!force_flag || fast_quota_calc) {
 		if (!stat(mdirsizefn.s, &statbuf)) {
 			tm = time(0);
-			if (fast_quota_calc || ((tm - statbuf.st_mtime) < 43200 && statbuf.st_size <= 8192)) {
+			if (fast_quota_calc || ((tm - statbuf.st_mtime) < max_age && statbuf.st_size <= max_size)) {
 #ifdef USE_MAILDIRQUOTA
 				if (!mail_size || !mail_count)
 					mail_size = check_quota(maildir.s, &mail_count);
