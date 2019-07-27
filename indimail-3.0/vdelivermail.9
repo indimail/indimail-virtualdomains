@@ -73,8 +73,9 @@ answerme@savetrees.com.  Further, any E-Mail with a sender address containing a 
 having correct information, so if your users can modify the file in some way (e.g. shell access),
 you're relying on the goodwill of your users for the quota to work. As a trade-off between
 accuracy and performance quota recalculation happens when the size of maildirsize file reaches
-512 bytes or becomes older 43200 seconds. The command \fBvuserinfo(1)\fR also recalculates
-the quota.
+8192 bytes or update time is more than 43200 seconds. The defaults 8192 and 43200 can be changed
+by setting \fBMAILDIRSIZE_MAX_SIZE\fR & \fBMAILDIRSIZE_MAX_AGE\fR environment variales. The 
+\fBvuserinfo(1)\fR command on a user can also be used to recalculate the quota.
 
 The maildirsize file in the Maildir root directory contains both the quota limit information
 and the current quota status. It contains a header in format:
@@ -82,7 +83,7 @@ and the current quota status. It contains a header in format:
  <storage limit in bytes>S,<message count limit>C
 .EE
 If the size of the mail is within the quota, or if the size of the mail is less than
-OVERQUOTA_MAILSIZE (1000 bytes as defined in indimail.h) but would bring the user
+OVERQUOTA_MAILSIZE (1000 bytes as defined in indimail.h), but would bring the user
 overquota, the mail is delivered and the user's current quota usage updated. Else the mail is
 bounced back with Over Quota message. Also if LIBEXECDIR/overquota.sh exists, the
 command is executed with the following arguments
@@ -112,7 +113,8 @@ combination of both. e.g. 40000,2000S means quota of 40000 Bytes and 2000 mails.
 can use either \fBvsetuserquota\fR or \fBvmoduser\fR programs.
 .PP
 Additionally per day limit on deliveries per user can be set by specifying the environment
-variable \fBMAILCOUNT_LIMIT\fR. This can be set in the qmail-send run file. If the number of
+variable \fBMAILCOUNT_LIMIT\fR and \fBMAILSIZE_LIMIT\fR. This can be set in the qmail-send run file
+to limit the daily quota of number of emails, size of emails or both. If the number of
 deliveries for a user exceeds this number, the mail is bounced back to the sender with over
 quota message.
 
