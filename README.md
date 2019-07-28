@@ -67,8 +67,11 @@ Look at indimail-3.x/doc/INSTALL for Source Installation instructions
  $ sudo make install-strip
 
 # Build courier-imap
+
  $ cd /usr/local/src/indimail-virtualdomains/courier-imap-5.0.7
+ 
  $ ./default.configure
+ 
  $ sudo make install-strip
 
 # Build indimail-3.x
