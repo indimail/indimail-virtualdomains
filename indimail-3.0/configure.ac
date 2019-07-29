@@ -124,7 +124,7 @@ RPATH_LIB="$acl_libdirstem"
 dnl configure only packages for whom the subdirectories which are present
 subdir_list=""
 for i in eps-1.2 ../flash-0.9.4 ../ripmime-1.4.0.10 ../altermime-0.3.10 \
-		../mpack-1.6 ../fortune-1.1 ../pam-multi-1.1 .
+		../mpack-1.6 ../fortune-1.1 ../pam-multi-1.2 .
 do
 	if test -d $i
 	then
@@ -155,8 +155,8 @@ do
 				../fortune-1.1)
 				AC_CONFIG_SUBDIRS([../fortune-1.1])
 				;;
-				../pam-multi-1.1)
-				AC_CONFIG_SUBDIRS([../pam-multi-1.1])
+				../pam-multi-1.2)
+				AC_CONFIG_SUBDIRS([../pam-multi-1.2])
 				;;
 			esac
 		fi
@@ -1570,9 +1570,9 @@ then
 	then
 		echo "http://downloads.sourceforge.net/indimail/fortune-1.1.tar.gz"
 	fi
-	if ! test -d ../pam-multi-1.1
+	if ! test -d ../pam-multi-1.2
 	then
-		echo "http://downloads.sourceforge.net/indimail/pam-multi-1.1.tar.gz"
+		echo "http://downloads.sourceforge.net/indimail/pam-multi-1.2.tar.gz"
 	fi
 	echo
 	echo "in the directory `dirname $PWD`"

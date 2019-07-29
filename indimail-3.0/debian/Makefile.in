@@ -23,9 +23,9 @@ libsrs2_version=1.0.18
 courier_version=5.0.7
 bogofilter_version=1.2.4
 fetchmail_version=6.4.0
-nssd_version=1.1
+nssd_version=1.2
 #
-pam_multi_version=1.1
+pam_multi_version=1.2
 altermime_version=0.3.10
 ripmime_version=1.4.0.10
 flash_version=0.9.4
