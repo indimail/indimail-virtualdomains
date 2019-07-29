@@ -126,9 +126,7 @@ Look at indimail-3.x/doc/INSTALL for Source Installation instructions
 
  $ cd /usr/local/src/indimail-mta/indimail-mta-2.7
 
- $ sudo sh ./create_services --servicedir=/services --qbase=/var/indimail/queue
-   sudo sh ./create_services --qbase=/var/indimail/queue --mbase=/home/mail \
-     --mysqlPrefix=/usr
+ $ sudo sh ./create_services --servicedir=/services --mysqlPrefix=/usr
 
  $ sudo service indimail start
 
