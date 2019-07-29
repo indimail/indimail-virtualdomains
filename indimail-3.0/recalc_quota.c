@@ -1,5 +1,8 @@
 /*
  * $Log: recalc_quota.c,v $
+ * Revision 1.5  2019-07-29 14:02:12+05:30  Cprogrammer
+ * added scan.h for scan_ulong()
+ *
  * Revision 1.4  2019-07-27 11:26:53+05:30  Cprogrammer
  * added FAST_QUOTA, MAILDIRSIZE_MAX_SIZE, MALIDISIZE_MAX_AGE variables for improving locking on NFS mounted Maildirs
  *
@@ -39,6 +42,7 @@
 #include <substdio.h>
 #include <str.h>
 #include <fmt.h>
+#include <scan.h>
 #include <strerr.h>
 #include <env.h>
 #endif
@@ -50,7 +54,7 @@
 #include "get_assign.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: recalc_quota.c,v 1.4 2019-07-27 11:26:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: recalc_quota.c,v 1.5 2019-07-29 14:02:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
