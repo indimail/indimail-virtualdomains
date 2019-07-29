@@ -222,7 +222,6 @@ doc/INSTALL.indimail
 doc/INSTALL-RPM
 doc/INSTALL-MYSQL
 doc/README-CLUSTER
-doc/ChangeLog.indimail
 debian/indimail.dsc
 .deps
 vpurge
