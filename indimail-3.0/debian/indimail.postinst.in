@@ -148,7 +148,7 @@ if [ -f /tmp/indimail.upgrade ] ; then # upgrade
   fi
   if [ -f /etc/init.d/indimail ] ; then
     cmp -s ${prefix}/bin/qmailctl /etc/init.d/indimail >/dev/null 2>&1 || \
-		${cp} ${prefix}/bin/qmailctl /etc/init.d/indimail || true
+    ${cp} ${prefix}/bin/qmailctl /etc/init.d/indimail || true
   fi
   svc_list=""
   for i in mrtg mysql.3306 fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
@@ -156,16 +156,20 @@ if [ -f /tmp/indimail.upgrade ] ; then # upgrade
     proxy-pop3d.4110 proxy-pop3d-ssl.9110 indisrvr.4000 inlookup.infifo \
     pwdlookup qmail-poppass.106 
   do
-    svc_list="$svc_list ${servicedir}/$i"
+    if [ -z "$svc_list" ] ; then
+      svc_list="${servicedir}/$i"
+    else
+      svc_list="$svc_list ${servicedir}/$i"
+    fi
   done
   ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
   #update VIRTUAL_PKG_LIB for smtp service
   indlib=`ls -d /usr/lib*/libindimail.so.*.*.* 2>/dev/null`
   for port in 25 465 587
   do
-	if [ -n "$indlib" -a -f "$indlib" ] ; then
+  if [ -n "$indlib" -a -f "$indlib" ] ; then
       echo $indlib > ${servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
-	fi
+  fi
   done
   if [ -n "$indlib" -a -f "$indlib" ] ; then
     echo $indlib > ${servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
@@ -179,13 +183,13 @@ ${rm} -f /tmp/indimail.install /tmp/indimail.upgrade
 if [ ! "${prefix}" = "/usr" ] ; then
 echo "recreating ld.so cache"
 if [ -d /etc/ld.so.conf.d ] ; then
-	(
-		if [ -d ${prefix}/lib64 ] ; then
-			echo ${prefix}/lib64
-		else
-			echo ${prefix}/lib
-		fi
-	) > /etc/ld.so.conf.d/indimail-`uname -m`.conf
+(
+  if [ -d ${prefix}/lib64 ] ; then
+    echo ${prefix}/lib64
+  else
+    echo ${prefix}/lib
+  fi
+) > /etc/ld.so.conf.d/indimail-`uname -m`.conf
 fi
 /sbin/ldconfig
 fi
@@ -208,16 +212,16 @@ echo "13. Configure default cron entries"
 echo ""
 
 if [ -x /bin/touch ] ; then
-	TOUCH=/bin/touch
+  TOUCH=/bin/touch
 elif [ -x /usr/bin/touch ] ; then
-	TOUCH=/usr/bin/touch
+  TOUCH=/usr/bin/touch
 else
-	TOUCH=/bin/touch
+  TOUCH=/bin/touch
 fi
 (
 echo "Creating ${logdir}"
 if [ ! -d ${logdir} ] ; then
-	/bin/mkdir ${logdir}
+  /bin/mkdir ${logdir}
 fi
 /bin/chown -R qmaill:nofiles ${logdir}
 
@@ -232,57 +236,57 @@ else
 fi
 echo "Creating default indimail tcp access control files"
 ${prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail \
-	--mysqlpass=ssh-1.5- --mysqlsocket=${mysqlSocket}
+  --mysqlpass=ssh-1.5- --mysqlsocket=${mysqlSocket}
 
 echo "Creating Database/Service for MySQL"
 # MySQL Config Creation
 if [ -x ${mysqlPrefix}/libexec/mysqld -o -x ${mysqlPrefix}/sbin/mysqld ] ; then
-	error=`ps -e|grep mysqld|grep -v grep|wc -l`
-	${prefix}/sbin/svctool --config=mysql --mysqlPrefix=${mysqlPrefix} --mysqlsocket=${mysqlSocket} \
-		--databasedir=${indimaildir}/mysqldb
-	# MySQL Database Creation
-	${prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=${mysqlPrefix} \
-		--databasedir=${indimaildir}/mysqldb --base_path=${mbase} --mysqlsocket="${mysqlSocket}".tmp
-	# MySQL Supervise creation
-	${prefix}/sbin/svctool --mysql=3306 --servicedir=${servicedir} --mysqlPrefix=${mysqlPrefix} \
-		--databasedir=${indimaildir}/mysqldb --config=${sysconfdir}/indimail.cnf --default-domain=${default_domain}
-	if [ ! -f ${indimaildir}/mysqldb/data/indimail/indimail.frm ] ; then
-		error=1
-	fi
-	if [ $error -gt 0 ] ; then
-		echo "Disabling mysqld service"
-		$TOUCH ${servicedir}/mysql.3306/down
-	fi
+  error=`ps -e|grep mysqld|grep -v grep|wc -l`
+  ${prefix}/sbin/svctool --config=mysql --mysqlPrefix=${mysqlPrefix} --mysqlsocket=${mysqlSocket} \
+    --databasedir=${indimaildir}/mysqldb
+  # MySQL Database Creation
+  ${prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=${mysqlPrefix} \
+    --databasedir=${indimaildir}/mysqldb --base_path=${mbase} --mysqlsocket="${mysqlSocket}".tmp
+  # MySQL Supervise creation
+  ${prefix}/sbin/svctool --mysql=3306 --servicedir=${servicedir} --mysqlPrefix=${mysqlPrefix} \
+    --databasedir=${indimaildir}/mysqldb --config=${sysconfdir}/indimail.cnf --default-domain=${default_domain}
+  if [ ! -f ${indimaildir}/mysqldb/data/indimail/indimail.frm ] ; then
+    error=1
+  fi
+  if [ $error -gt 0 ] ; then
+    echo "Disabling mysqld service"
+    $TOUCH ${servicedir}/mysql.3306/down
+  fi
 else
-	echo "WARNING!!! Did not find mysqld in ${mysqlPrefix}/{libexec,sbin}. Skipping MySQL configuration" 1>&2
+  echo "WARNING!!! Did not find mysqld in ${mysqlPrefix}/{libexec,sbin}. Skipping MySQL configuration" 1>&2
 fi
 
 # MySQL apparmor
 if [ -x /etc/init.d/apparmor ] ; then
-	if [ -f ${sysconfdir}/apparmor.d/local/usr.sbin.mysqld -a -d /etc/apparmor.d/local ] ; then
-		cp ${sysconfdir}/apparmor.d/local/usr.sbin.mysqld /etc/apparmor.d/local
-	fi
-	if [ -f /etc/apparmor.d/local/usr.sbin.mysqld ] ; then
-		echo "Reloading apparmor profiles..."
-		/usr/sbin/service apparmor reload || true
-	else
-		echo "Shutting down apparmor..."
-		/usr/sbin/service apparmor stop || true
-		/usr/sbin/service apparmor teardown || true
-	fi
+ if [ -f ${sysconfdir}/apparmor.d/local/usr.sbin.mysqld -a -d /etc/apparmor.d/local ] ; then
+   cp ${sysconfdir}/apparmor.d/local/usr.sbin.mysqld /etc/apparmor.d/local
+ fi
+ if [ -f /etc/apparmor.d/local/usr.sbin.mysqld ] ; then
+   echo "Reloading apparmor profiles..."
+   /usr/sbin/service apparmor reload || true
+ else
+   echo "Shutting down apparmor..."
+   /usr/sbin/service apparmor stop || true
+   /usr/sbin/service apparmor teardown || true
+ fi
 fi
 
 a_arch=`uname -m`
 if [ " $a_arch" = " x86_64" ] ; then
-	fetchmail_mem=144857600
-	imap_pop3_mem=524288000
-	imapspop3_mem=524288000
-	poppass_mem=104857600
+ fetchmail_mem=144857600
+ imap_pop3_mem=524288000
+ imapspop3_mem=524288000
+ poppass_mem=104857600
 else
-	fetchmail_mem=72428800
-	imap_pop3_mem=52428800
-	imapspop3_mem=52428800
-	poppass_mem=52428800
+ fetchmail_mem=72428800
+ imap_pop3_mem=52428800
+ imapspop3_mem=52428800
+ poppass_mem=52428800
 fi
 # SMTP
 for port in 465 25

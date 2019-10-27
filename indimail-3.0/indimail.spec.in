@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.10 2019-07-29 13:47:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.11 2019-10-27 19:41:51+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1805,7 +1805,11 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     proxy-pop3d.4110 proxy-pop3d-ssl.9110 indisrvr.4000 inlookup.infifo \
     pwdlookup qmail-poppass.106 
   do
-    svc_list="$svc_list %{servicedir}/$i"
+    if [ -z "$svc_list" ] ; then
+      svc_list="%{servicedir}/$i"
+    else
+      svc_list="$svc_list %{servicedir}/$i"
+    fi
   done
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
   indlib=`ls -d %{_libdir}/libindimail.so.*.*.* 2>/dev/null`
