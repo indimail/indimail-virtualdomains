@@ -5,6 +5,7 @@
  */
 
 #include "config.h"
+#include "fetchmail.h"
 
 #include <sys/stat.h>
 #include <errno.h>
@@ -18,7 +19,6 @@
 #include <unistd.h>
 #endif
 
-#include "fetchmail.h"
 
 /** Save string \a str to idlist \a idl with status \a status.
  * \return Pointer to the last element of the list to help the quick,
@@ -81,21 +81,6 @@ void save_str_pair(struct idlist **idl, const char *str1, const char *str2)
 	(*end)->val.id2 = (char *)NULL;
     (*end)->next = (struct idlist *)NULL;
 }
-
-#ifdef __UNUSED__
-void free_str_pair_list(struct idlist **idl)
-/* free the given ID pair list */
-{
-    if (*idl == (struct idlist *)NULL)
-	return;
-
-    free_idpair_list(&(*idl)->next);
-    free ((*idl)->id);
-    free ((*idl)->val.id2);
-    free(*idl);
-    *idl = (struct idlist *)NULL;
-}
-#endif
 
 /** Check if ID \a str is in idlist \a idl. \return idlist entry if found,
  * NULL if not found. */

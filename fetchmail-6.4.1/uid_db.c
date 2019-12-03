@@ -8,9 +8,7 @@
 	6.3.17 release, including the OpenSSL exemption.
 */
 
-/* Have Solaris expose ffs() from strings.h: */
-#define __EXTENSIONS__
-#define _XOPEN_SOURCE 700
+#include "fetchmail.h"
 
 /*  includes */
 #include <stdio.h>
@@ -18,8 +16,9 @@
 #include <string.h>
 #include <strings.h>  /* ffs() lives here - needs #define on Solaris. */
 
-#include "xmalloc.h"
 #include "uid_db.h"
+
+#include "xmalloc.h"
 
 /*  constants */
 enum {

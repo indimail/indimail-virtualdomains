@@ -1,3 +1,4 @@
+#include "fetchmail.h"
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -7,7 +8,6 @@
 #include "ntlm.h"
 #include "smbencrypt.h"
 #include "smbbyteorder.h"
-#include "fetchmail.h"
 
 char versionString[] ="libntlm version 0.21";
 

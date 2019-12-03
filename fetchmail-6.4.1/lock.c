@@ -4,6 +4,7 @@
  * For license terms, see the file COPYING in this directory.
  */
 #include "config.h"
+#include "fetchmail.h"
 
 #include <stdio.h>
 #ifdef HAVE_STRING_H
@@ -19,7 +20,6 @@
 #include <fcntl.h>
 #include <signal.h>
 
-#include "fetchmail.h"
 #include "i18n.h"
 #include "lock.h"
 
@@ -58,7 +58,7 @@ void fm_lock_setup(struct runctl *ctl)
 	strcpy(lockfile, fmhome);
 #endif
 	strcat(lockfile, "/");
-	if (fmhome == home)
+	if (at_home)
 	   strcat(lockfile, ".");
 	strcat(lockfile, FETCHMAIL_PIDFILE);
     }

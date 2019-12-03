@@ -5,6 +5,7 @@
  * For license terms, see the file COPYING in this directory.
  */
 #include "config.h"
+#include "fetchmail.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -21,7 +22,6 @@
 #include <netdb.h>
 #include "i18n.h"
 #include "mx.h"
-#include "fetchmail.h"
 #include "getaddrinfo.h"
 
 #define MX_RETRIES	3

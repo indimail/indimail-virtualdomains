@@ -3,13 +3,13 @@ dnl Autoconfigure input file for fetchmail
 # Fetchmail automatic configuration support
 #
 # Eric S. Raymond <esr@thyrsus.com>
-# 2004 - 2012 Matthias Andree <matthias.andree@gmx.de>
+# 2004 - 2019 Matthias Andree <matthias.andree@gmx.de>
 #
 dnl Process this file with autoconf to produce a configure script.
 dnl
 
 dnl XXX - if bumping version here, check fetchmail.man, too!
-AC_INIT([fetchmail],[6.4.0],[fetchmail-users@lists.sourceforge.net])
+AC_INIT([fetchmail],[6.4.1],[fetchmail-users@lists.sourceforge.net])
 AC_CONFIG_SRCDIR([fetchmail.h])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_LIBOBJ_DIR([.])
@@ -28,7 +28,7 @@ dnl python is optional
 # to disable python detection and continue without building/installing
 # fetchmail.conf -- be sure to check README.packaging, too!
 #
-AM_PATH_PYTHON(2.0,,AC_MSG_WARN([Disabling fetchmailconf: python 2.0 or greater not found]))
+AM_PATH_PYTHON(2.3,,AC_MSG_WARN([Disabling fetchmailconf: python 2.3 or greater not found]))
 AM_CONDITIONAL([HAVE_PYTHON], [test "$PYTHON" != :])
 
 AC_USE_SYSTEM_EXTENSIONS
@@ -71,7 +71,6 @@ AC_HEADER_STDC
 AC_HEADER_TIME
 AC_TYPE_SIZE_T
 AC_TYPE_PID_T
-AC_TYPE_SIGNAL
 AC_CHECK_HEADERS([unistd.h termios.h termio.h sgtty.h stdarg.h \
 	sys/itimer.h fcntl.h sys/fcntl.h memory.h sys/wait.h \
 	arpa/inet.h arpa/nameser.h netinet/in.h net/socket.h netdb.h \
@@ -79,18 +78,12 @@ AC_CHECK_HEADERS([unistd.h termios.h termio.h sgtty.h stdarg.h \
 if test _$ac_cv_header_stdarg_h != _yes ; then
 AC_MSG_WARN([stdarg.h is not defined. Unsupported configuration, proceed at your own risk.])
 fi
-AC_CHECK_TYPE(u_int32_t,,
-	AC_DEFINE(u_int32_t,unsigned int,
-		[Define to unsigned int if <sys/types.h> does not define.]),
-	[AC_INCLUDES_DEFAULT
-#ifdef HAVE_ARPA_NAMESER_H
-#include <arpa/nameser.h>
-#endif])
+
+AC_TYPE_UINT32_T
+
 AC_CHECK_HEADERS([resolv.h],,,[
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#endif
 #ifdef HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
 #endif
@@ -141,7 +134,7 @@ AC_CACHE_SAVE
 
 dnl i18n
 AM_GNU_GETTEXT([external], [need-ngettext])
-AM_GNU_GETTEXT_VERSION([0.18.3])
+AM_GNU_GETTEXT_VERSION([0.19.8])
 dnl end i18n
 
 # Under sysV68, socket and friends are provided by the C library.
@@ -192,12 +185,8 @@ dnl INET6 is used by KAME/getnameinfo
 AC_CACHE_CHECK(for AF_INET6/PF_INET6,ac_cv_inet6,
 AC_COMPILE_IFELSE([
   AC_LANG_PROGRAM([[
-    #ifdef HAVE_SYS_TYPES_H
     #include <sys/types.h>
-    #endif
-    #ifdef HAVE_SYS_SOCKET_H
     #include <sys/socket.h>
-    #endif
   ]],[[
     int foo = AF_INET6;
     int bar = PF_INET6;
@@ -223,9 +212,7 @@ for lib in '' -lresolv; do
     LIBS="$old_LIBS $lib"
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
-#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#endif
 #ifdef HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
 #endif
@@ -240,9 +227,6 @@ extern int res_search();
      break], [AC_MSG_RESULT([not found])])
      LIBS=$old_LIBS
 done
-
-dnl Check for libcrypt -- it may live in libc or libcrypt, as on IRIX
-AC_CHECK_FUNC(crypt, , AC_CHECK_LIB(crypt,crypt))
 
 dnl Check for usable void pointer type
 AC_MSG_CHECKING(use of void pointer type)
@@ -274,9 +258,8 @@ pid = waitpid (-1, &status, 0);
 AC_MSG_CHECKING(sys_siglist declaration in signal.h or unistd.h)
 AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <signal.h>
 /* NetBSD declares sys_siglist in <unistd.h>.  */
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif]], [[char *msg = *(sys_siglist + 1);]])],[AC_DEFINE(SYS_SIGLIST_DECLARED,1,[Define if 'sys_siglist' is declared by <signal.h>.]) AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+]], [[char *msg = *(sys_siglist + 1);]])],[AC_DEFINE(SYS_SIGLIST_DECLARED,1,[Define if 'sys_siglist' is declared by <signal.h>.]) AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
 
 # Find the right directory to put the root-mode PID file in
 for dir in "/var/run" "/etc"
@@ -392,7 +375,8 @@ AM_CONDITIONAL(POP2_ENABLE, test "$with_POP2" = yes)
 
 ###	use option --disable-POP3 to omit the POP3 support
 AC_ARG_ENABLE(POP3,
-	[  --disable-POP3          don't compile in POP3 protocol support],
+	[AS_HELP_STRING([--disable-POP3],
+			[do not compile in POP3 protocol support])],
 	[with_POP3=$enableval],
 	[with_POP3=yes])
 test "$with_POP3" = "yes" && AC_DEFINE(POP3_ENABLE,1,Define if you want POP3 support compiled in)
@@ -400,7 +384,8 @@ AM_CONDITIONAL(POP3_ENABLE, test "$with_POP3" = yes)
 
 ###	use option --disable-IMAP to omit the IMAP support
 AC_ARG_ENABLE(IMAP,
-	[  --disable-IMAP          don't compile in IMAP protocol support],
+	[AS_HELP_STRING([--disable-IMAP],
+			[do not compile in IMAP protocol support])],
 	[with_IMAP=$enableval],
 	[with_IMAP=yes])
 test "$with_IMAP" = "yes" && AC_DEFINE(IMAP_ENABLE,1,Define if you want IMAP support compiled in)
@@ -408,7 +393,8 @@ AM_CONDITIONAL(IMAP_ENABLE, test "$with_IMAP" = yes)
 
 ###	use option --disable-ETRN to omit the ETRN support
 AC_ARG_ENABLE(ETRN,
-	[  --disable-ETRN          don't compile in ETRN protocol support],
+	[AS_HELP_STRING([--disable-ETRN],[do not compile in ETRN protocol
+	 support])],
 	[with_ETRN=$enableval],
 	[with_ETRN=yes])
 test "$with_ETRN" = "yes" && AC_DEFINE(ETRN_ENABLE,1,Define if you want ETRN support compiled in.)
@@ -416,7 +402,8 @@ AM_CONDITIONAL(ETRN_ENABLE, test "$with_ETRN" = yes)
 
 ###	use option --disable-ODMR to omit the ODMR support
 AC_ARG_ENABLE(ODMR,
-	[  --disable-ODMR          don't compile in ODMR protocol support],
+	[AS_HELP_STRING([--disable-ODMR],[do not compile in ODMR protocol
+	 support])],
 	[with_ODMR=$enableval],
 	[with_ODMR=yes])
 test "$with_ODMR" = "yes" && AC_DEFINE(ODMR_ENABLE,1,Define if you want ODMR support compiled in)
@@ -424,7 +411,8 @@ AM_CONDITIONAL(ODMR_ENABLE, test "$with_ODMR" = yes)
 
 ###	use option --enable-RPA to compile in the RPA support
 AC_ARG_ENABLE(RPA,
-	[  --enable-RPA            compile in RPA protocol support],
+	[AS_HELP_STRING([--enable-RPA],[compile in RPA protocol
+	 support])],
 	[with_RPA=$enableval],
 	[with_RPA=no])
 test "$with_RPA" = "yes" && AC_DEFINE(RPA_ENABLE,1,Define if you want RPA support compiled in)
@@ -440,7 +428,8 @@ AM_CONDITIONAL(INDIMAIL, test "$with_INDIMAIL" = yes)
 
 ###	use option --enable-NTLM to compile in the NTLM support
 AC_ARG_ENABLE(NTLM,
-	[  --enable-NTLM           compile in NTLM authentication support],
+	[AS_HELP_STRING([--enable-NTLM],[compile in NTLM authentication
+	 support])],
 	[with_NTLM=$enableval],
 	[with_NTLM=no])
 test "$with_NTLM" = "yes" && AC_DEFINE(NTLM_ENABLE,1,Define if you want NTLM authentication)
@@ -448,7 +437,7 @@ AM_CONDITIONAL(NTLM_ENABLE, test "$with_NTLM" = yes)
 
 ###	use option --enable-SDPS to compile in the SDPS support
 AC_ARG_ENABLE(SDPS,
-	[  --enable-SDPS           compile in SDPS protocol support],
+	[AS_HELP_STRING([--enable-SDPS],[compile in SDPS protocol support])],
 	[with_SDPS=$enableval],
 	[with_SDPS=no])
 if test "$with_SDPS" = yes ; then
@@ -468,7 +457,8 @@ AC_CACHE_SAVE
 
 ###	use option --enable-opie to compile in the OPIE support
 AC_ARG_ENABLE(opie,
-	[  --enable-opie           support OTP through the OPIE library],
+	[AS_HELP_STRING([--enable-opie],[support one-time passwords
+	 (OTP) through the OPIE library])],
 	[ AC_CHECK_HEADER(opie.h,, [AC_MSG_ERROR([cannot find <opie.h>, which is required for OPIE support.])])
           AC_CHECK_LIB(opie,opiegenerator,, [AC_MSG_ERROR([cannot find libopie, which is required for OPIE support.])])
           with_opie=$enableval],
@@ -526,10 +516,10 @@ if test "$fm_cv_getaddrinfo" = yes ; then
     gai_ts=no
     dnl we have getaddrinfo() - check if the OS is known to have a async-signal-safe implementation
     case $host_os in
-	darwin9*)				gai_ts=yes ;;
-	linux*)					gai_ts=yes ;;
-	freebsd5.5|freebsd6*|freebsd7*)		gai_ts=yes ;;
-	solaris2.8|solaris2.9|solaris2.10)	gai_ts=yes ;;
+    darwin*)				gai_ts=yes ;;
+    linux*)				gai_ts=yes ;;
+    freebsd*)				gai_ts=yes ;;
+    solaris*)				gai_ts=yes ;;
     esac
     AC_MSG_RESULT($gai_ts)
     if test $gai_ts = yes ; then
@@ -548,14 +538,15 @@ fi
 # * Move all the kerberos header mess to kerberos.h, and #include that
 #   in driver.c and kerberos.c.
 # 
-# Tested using the Heimdal Kerberos V libs, Kungliga Tekniska Högskolan (the
+# Tested using the Heimdal Kerberos V libs, Kungliga Tekniska HÃ¶gskolan (the
 # Royal Institute of Technology in Stockholm, Sweden)'s kerberos IV libs, and
 # the MIT reference implementation of KerberosV (all as packaged in Debian).
 
 ###    use option --with-kerberos5=DIR to point at a Kerberos 5 directory
 ### make sure --with-ssl is run before --with-kerberos* !
 AC_ARG_WITH(kerberos5,
-       [  --with-kerberos5=DIR    point fetchmail compilation at a Kerberos 5 directory],
+       [AS_HELP_STRING([--with-kerberos5[[=DIR]]],[point fetchmail
+	compilation at a Kerberos 5 directory])],
 [
 if test "$with_kerberos5" != "no"
 then
@@ -733,7 +724,9 @@ AM_CONDITIONAL(KERBEROS_V4_ENABLE, test "$KERBEROS_V4" = 1)
 
 ###	use option --with-ssl to compile in the SSL support
 AC_ARG_WITH(ssl,
-	[  --with-ssl=[DIR]        enable SSL support using libraries in DIR],
+	[AS_HELP_STRING([--with-ssl[[={yes|no|DIR}]]],[Use OpenSSL from
+	 DIR/include/openssl and
+	 DIR/lib (default: yes). Yes means try to find it.])],
 	[with_ssl=$withval],
 	[with_ssl=yes])
 
@@ -780,44 +773,51 @@ then
     AC_MSG_NOTICE(Enabling OpenSSL support in $with_ssl.)
     test "$with_ssl" != "/usr" && CFLAGS="$CFLAGS -I$with_ssl/include"
     ### In Red Hat 9, this file includes a reference to <krb5.h>, so we
-    ### force the Kerberos direcory onto the include path so it will build.
+    ### force the Kerberos directory onto the include path so it will build.
     CFLAGS="$CFLAGS -I/usr/kerberos/include"
     ###	OpenBSD comes with ssl headers
   else
     AC_MSG_ERROR([SSL support enabled, but OpenSSL not found])
   fi
-  LDFLAGS="$LDFLAGS -L$with_ssl/lib"
-  LIBS="$LIBS -lssl -lcrypto"
-  dnl check if -ldl is needed
-  AC_MSG_CHECKING([for additional library dependencies of SSL])
-  found=0
-  save_LIBS="$LIBS"
-  for i in "" "-ldl" ; do
-      LIBS="$LDFLAGS $save_LIBS $i"
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <openssl/ssl.h>],[SSL_connect((SSL *)0)])],[found=1; break])
-  done
-  if test $found = 0 ; then
-      AC_MSG_RESULT([error])
-      AC_MSG_ERROR([cannot link with SSL - check config.log])
-  fi
-  LIBS="$save_LIBS $i"
-  if test "$i" = "" ; then i="(none)" ; fi
-  AC_MSG_RESULT($i)
-  dnl XXX FIXME: use pkg-config if available!
+  PKG_CHECK_MODULES([SSL],[libssl libcrypto],[LIBS="$LIBS $SSL_LIBS"],[
+    AS_MESSAGE([SSL-check: pkg-config check failed, using traditional probe])
+    LDFLAGS="$LDFLAGS -L$with_ssl/lib"
+    LIBS="$LIBS -lssl -lcrypto"
+    dnl check if -ldl is needed
+    AC_MSG_CHECKING([for additional library dependencies of SSL])
+    found=0
+    save_LIBS="$LIBS"
+    for i in "" "-ldl" ; do
+        LIBS="$LDFLAGS $save_LIBS $i"
+        AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <openssl/ssl.h>],[SSL_connect((SSL *)0)])],[found=1; break])
+    done
+    if test $found = 0 ; then
+        AC_MSG_RESULT([error])
+        AC_MSG_ERROR([cannot link with SSL - check config.log])
+    fi
+    LIBS="$save_LIBS $i"
+    if test "$i" = "" ; then i="(none)" ; fi
+    AC_MSG_RESULT($i)
+  ])
   AC_DEFINE(SSL_ENABLE, 1, [Define if you want SSL support compiled in])
+  AS_MESSAGE(Enabling SSL support.)
 else
   AC_MSG_WARN(Disabling SSL support.)
   AC_MSG_WARN(Consider re-running configure --with-ssl.)
 fi
 
 case "$LIBS" in *-lssl*)
+	AC_CHECK_DECLS([TLS1_2_VERSION],,
+		       AC_MSG_ERROR([Your OpenSSL version is too old and does not support TLS v1.2. Upgrade.]),
+		       [#include <openssl/ssl.h>])
 	AC_CHECK_DECLS([SSLv3_client_method],,,[#include <openssl/ssl.h>])
 	;;
 esac
 
 ###	use option --with-socks=DIR to point at SOCKS library
 AC_ARG_WITH(socks,
-	[  --with-socks[=DIR]      add built-in SOCKS firewall access],
+	[AS_HELP_STRING([--with-socks[[=DIR]]],[add built-in SOCKS (4)
+	firewall access])],
 [
 if test "$with_socks" != no
 then
@@ -835,7 +835,8 @@ fi])
 
 ###     use option --with-socks5=DIR to point at SOCKS library
 AC_ARG_WITH(socks5,
-        [  --with-socks5[=DIR]     add built-in SOCKS5 firewall access],
+        [AS_HELP_STRING([--with-socks5[[=DIR]]],[add built-in SOCKS5
+	 firewall access])],
 [
 if test "$with_socks5" != no
 then
@@ -858,7 +859,8 @@ AC_ma_SEARCH_PACKAGE(hesiod, hesiod_getmailhost, /usr/athena /usr /usr/local,hes
 
 ###	use option --with-gssapi=DIR to compile in GSSAPI support
 AC_ARG_WITH(gssapi,
-	[  --with-gssapi[=DIR]     compile in GSSAPI support using libraries in DIR],
+	[AS_HELP_STRING([--with-gssapi[[=DIR]]],[compile in GSSAPI
+	 support using libraries in DIR])],
 [
 if test "$with_gssapi" != "no"
 then

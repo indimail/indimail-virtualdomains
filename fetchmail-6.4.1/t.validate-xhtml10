@@ -20,7 +20,7 @@ for i in "${srcdir}"/*.html ; do
 	*/fetchmail-man.html) continue ;;
 	*/Mailbox-Names-UTF7.html) continue ;;
     esac
-    xmllint --postvalid --noout "$i" || { e=1 ; fail="$i${fail:+" "}$fail" ; }
+    xmllint --nonet --postvalid --noout "$i" || { e=1 ; fail="$i${fail:+" "}$fail" ; }
 done
 if [ $e != 0 ] ; then
     echo >&2 ">>>>> Invalid XHTML in files: ${fail}."

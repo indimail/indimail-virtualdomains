@@ -23,10 +23,9 @@
 #include "sdump.h"
 
 /*
- * Machinery for handling UID lists live here.  This is mainly to support
- * RFC1725/RFC1939-conformant POP3 servers without a LAST command, but may also
- * be useful for making the IMAP4 querying logic UID-oriented, if a future
- * revision of IMAP forces me to.
+ * Machinery for handling UID lists live here.  This is currently used
+ * by POP3, but may also be useful for making the IMAP4 querying logic
+ * UID-oriented.
  *
  * These functions are also used by the rest of the code to maintain
  * string lists.
@@ -121,6 +120,7 @@ static int dump_saved_uid(struct uid_db_record *rec, void *unused)
     return 0;
 }
 
+/** Read saved IDs from \a idfile and attach to each host in \a hostlist. */
 void initialize_saved_lists(struct query *hostlist, const char *idfile)
 {
     struct stat statbuf;
@@ -347,7 +347,7 @@ static void dump_uid_db(struct uid_db *db)
 	traverse_uid_db(db, dump_uid_db_record, &n_recs);
 }
 
-/* finish a query */
+/** Finish a successful query */
 void uid_swap_lists(struct query *ctl)
 {
     /* debugging code */
@@ -390,7 +390,7 @@ void uid_swap_lists(struct query *ctl)
 	report(stdout, GT_("not swapping UID lists, no UIDs seen this query\n"));
 }
 
-/* finish a query which had errors */
+/** Finish a query which had errors */
 void uid_discard_new_list(struct query *ctl)
 {
     /* debugging code */
@@ -446,6 +446,7 @@ static int write_uid_db_record(struct uid_db_record *rec, void *arg)
     return rc < 0 ? -1 : 0;
 }
 
+/** Write new list of UIDs (state) to \a idfile. */
 void write_saved_lists(struct query *hostlist, const char *idfile)
 {
     long	idcount;
@@ -469,11 +470,13 @@ void write_saved_lists(struct query *hostlist, const char *idfile)
 	    report(stderr, GT_("Error deleting %s: %s\n"), idfile, strerror(errno));
     } else {
 	char *newnam = (char *)xmalloc(strlen(idfile) + 2);
+	mode_t old_umask;
 	strcpy(newnam, idfile);
 	strcat(newnam, "_");
 	if (outlevel >= O_DEBUG)
 	    report(stdout, GT_("Writing fetchids file.\n"));
 	(void)unlink(newnam); /* remove file/link first */
+	old_umask = umask(S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH | S_IXOTH);
 	if ((tmpfp = fopen(newnam, "w")) != (FILE *)NULL) {
 	    struct write_saved_info info;
 	    int errflg = 0;
@@ -502,7 +505,7 @@ void write_saved_lists(struct query *hostlist, const char *idfile)
 bailout:
 	    (void)fflush(tmpfp); /* return code ignored, we check ferror instead */
 	    errflg |= ferror(tmpfp);
-	    fclose(tmpfp);
+	    errflg |= fclose(tmpfp);
 	    /* if we could write successfully, move into place;
 	     * otherwise, drop */
 	    if (errflg) {
@@ -517,6 +520,7 @@ bailout:
 	    report(stderr, GT_("Cannot open fetchids file %s for writing: %s\n"), newnam, strerror(errno));
 	}
 	free(newnam);
+	(void)umask(old_umask);
     }
 }
 #endif /* POP3_ENABLE */

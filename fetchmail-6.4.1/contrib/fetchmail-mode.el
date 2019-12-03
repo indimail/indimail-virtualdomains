@@ -126,7 +126,6 @@
   (use-local-map fetchmail-mode-map)    ; This provides the local keymap.
   (setq mode-name "Fetchmail")          ; This name goes into the modeline.
   (setq major-mode 'fetchmail-mode)     ; Used by `describe-mode'
-  (run-hooks 'fetchmail-mode-hook)      ; Run each time mode is called
   (set-syntax-table fetchmail-mode-syntax-table)
 
   ;; -cc-
@@ -134,7 +133,8 @@
   (make-local-variable 'font-lock-defaults)
   (setq font-lock-defaults '(fetchmail-font-lock-keywords nil t))
 
-  (setq comment-start "#")
+  (set (make-local-variable 'comment-start) "#")
+  (run-hooks 'fetchmail-mode-hook)      ; Run each time mode is called, last
   )
 
 

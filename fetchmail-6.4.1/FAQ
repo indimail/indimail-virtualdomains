@@ -64,9 +64,10 @@ Build-time problems
 Fetchmail configuration file grammar questions
 
    F1. Why does my old .fetchmailrc no longer work?
-   F2. The .fetchmailrc parser won't accept my all-numeric user name.
-   F3. The .fetchmailrc parser won't accept my host or username beginning
-   with 'no'.
+   [DEL: F2. The .fetchmailrc parser won't accept my all-numeric user
+   name. :DEL]
+   [DEL: F3. The .fetchmailrc parser won't accept my host or username
+   beginning with 'no'. :DEL]
    F4. I'm getting a 'parse error' message I don't understand.
 
 Configuration questions
@@ -387,25 +388,23 @@ G6. Is there a mailing list for exchanging tips?
 
    There is a fetchmail-users list <fetchmail-users@lists.sourceforge.net>
    for bug reports and people who want to discuss configuration issues of
-   fetchmail. Please see G3 above for information you need to report. It's
-   a Mailman list, see
-   http://lists.sourceforge.net/mailman/listinfo/fetchmail-users for info
-   and subscription.
+   fetchmail. Please see G3 above for information you need to report.
 
-   There is a fetchmail-devel list <fetchmail-devel@lists.sourceforge.net>
-   for people who want to discuss fixes and improvements in fetchmail and
-   help co-develop it. It's a Mailman list, which you can sign up for at
-   http://lists.sourceforge.net/mailman/listinfo/fetchmail-devel.
+   Then there is a fetchmail-devel list
+   <fetchmail-devel@lists.sourceforge.net> for people who want to discuss
+   fixes and improvements in fetchmail and help co-develop it.
 
-   There is also an announcements-only list,
-   <fetchmail-announce@lists.sourceforge.net>, which you can sign up for
-   at http://lists.sourceforge.net/mailman/listinfo/fetchmail-announce.
+   Finally, there is also an announcements-only list,
+   <fetchmail-announce@lists.sourceforge.net>.
+
+   For all lists, see https://sourceforge.net/p/fetchmail/mailman/ for
+   subscription, archive and search links.
 
 G7. So, what's this I hear about a fetchmail paper?
 
    Eric S. Raymond also considered fetchmail development a sociological
-   experiment, an extended test to see if my theory about the critical
-   features of the Linux development model is correct.
+   experiment, an extended test to see if his theory about the critical
+   features of the Linux development model was correct.
 
    He considers the experiment a success. He wrote a paper about it titled
    The Cathedral and the Bazaar which was first presented at Linux
@@ -439,15 +438,14 @@ G8. What is the best server to use with fetchmail?
 
    A decent POP3/IMAP server that has recently become popular is Dovecot.
 
-   Avoid qmail, it's broken and unmaintained.
-
 G9. What is the best mail program to use with fetchmail?
 
    Fetchmail will work with all popular mail transport programs. It also
    doesn't care which user agent you use, and user agents are as a rule
    almost equally indifferent to how mail is delivered into your system
-   mailbox. So any of the popular Unix mail agents – elm, pine, mh, or
-   mutt – will work fine with fetchmail.
+   mailbox. So any of the popular Unix mail agents – elm, alpine (a
+   rewrite of pine), nmh (the successor to MH), or mutt – will work fine
+   with fetchmail.
 
    All this having been said, I can't resist putting in a discreet plug
    for mutt. Mutt's interface is only a little different from that of its
@@ -457,23 +455,16 @@ G9. What is the best mail program to use with fetchmail?
 
 G10. How can I avoid sending my password en clair?
 
-   Depending on what your mail server you are talking to, this ranges from
-   trivial to impossible. It may even be next to useless.
+   You need to ask whether password encryption alone will really address
+   your security exposure. If you think you might be snooped between
+   server and client, it's better to use end-to-end encryption such as
+   GnuPG (see below) on your whole mail stream so none of it can be read.
 
-   In general there is little point in trying to secure your fetchmail
-   transaction unless you trust the security of the server host you are
-   retrieving mail from. Your vulnerability is more likely to be an
-   insecure local network on the server end (e.g. to somebody with a
-   TCP/IP packet sniffer intercepting Ethernet traffic between the modem
-   concentrator or DSL POP you dial in to and the mailserver host).
+   Then, you can use SSL or TLS for complete end-to-end encryption if you
+   have a TLS-enabled mailserver.
 
-   Having realized this, you need to ask whether password encryption alone
-   will really address your security exposure. If you think you might be
-   snooped between server and client, it's better to use end-to-end
-   encryption such as GnuPG (see below) on your whole mail stream so none
-   of it can be read. One of the advantages of fetchmail over conventional
-   SMTP-push delivery is that you may be able to arrange encryption by
-   using ssh(1); see K3.
+   One of the advantages of fetchmail over conventional SMTP-push delivery
+   is that you may be able to arrange encryption by using ssh(1); see K3.
 
    Note that ssh is not a complete privacy solution either, as your mail
    could have been snooped in transit to your POP server from wherever it
@@ -490,9 +481,7 @@ G10. How can I avoid sending my password en clair?
    CAPABILITY query). Do a fetchmail -v to see these, or telnet direct to
    the server port (110 for POP3, 143 for IMAP).
 
-   If your mailserver is using IMAP 2000, it'll have CRAM-MD5 support
-   built in. Fetchmail autodetects this; you can skip the rest of this
-   section.
+   Your server may have CRAM-MD5 support built in.
 
    The POP3 facility you are most likely to have available is APOP. This
    is a POP3 feature supported by many servers (fetchmailconf's autoprobe
@@ -517,28 +506,12 @@ G10. How can I avoid sending my password en clair?
    RFC1731 and RFC1734. You can tell if this one is present by looking for
    AUTH=KERBEROS_V4 in the CAPABILITY response.
 
-   If you are fetching mail from a CompuServe POP3 account, you can use
-   their RPA authentication. See I1 for details. If you are fetching mail
-   from Microsoft Exchange using IMAP, you will be able to use NTLM.
-
    Your POP3 server may have the RFC1938 OTP capability to use one-time
-   passwords (if it doesn't, you can get OTP patches for the 2.2 version
-   of the Qualcomm popper from Craig Metz). To check this, look for the
-   string "otp-" in the greeting line. If you see it, and your fetchmail
-   was built with OPIE support compiled in (see the distribution INSTALL
-   file), fetchmail will detect it also. When using OTP, you will specify
-   a password but it will not be sent en clair.
-
-   You can get both POP3 and IMAP OTP patches from Craig Metz at
-   http://www.inner.net/opie.
-
-   These patches use a SASL authentication method named "X-OTP" because
-   there is not currently a standard way to do this; fetchmail also uses
-   this method, so the two will interoperate happily. They better, because
-   this is how Craig gets his mail ;-)
-
-   Finally, you can use SSL or TLS for complete end-to-end encryption if
-   you have a TLS-enabled mailserver.
+   passwords. To check this, look for the string "otp-" in the greeting
+   line. If you see it, and your fetchmail was built with OPIE support
+   compiled in (see the distribution INSTALL file), fetchmail will detect
+   it also. When using OTP, you will specify a password but it will not be
+   sent en clair.
 
 G11. Is any special configuration needed to use a dynamic IP address?
 
@@ -608,8 +581,8 @@ G12. Is any special configuration needed to use firewalls?
 
    No. You can use fetchmail with SOCKS, the standard tool for indirecting
    TCP/IP through a firewall. You can find out about SOCKS, and download
-   the SOCKS software including server and client code, at the SOCKS
-   distribution site.
+   the SOCKS software including server and client code, at the [DEL:
+   http://www.socks.nec.com/ :DEL] Link defunct SOCKS distribution site.
 
    The specific recipe for using fetchmail with a firewall is at K1
 
@@ -673,8 +646,7 @@ G16. How will fetchmail perform under heavy loads?
 [DEL: B1. Make coughs and dies when building on FreeBSD. :DEL]
 
    As of release 6.3.0, fetchmail's Makefile[.in] should work flawlessly
-   with BSD's portable make used on FreeBSD. With older releases, use GNU
-   make (usually installed as gmake; otherwise try pkg_add -r gmake).
+   with BSD's portable make used on FreeBSD.
 
 B2. Lex bombs out while building the fetchmail lexer.
 
@@ -719,6 +691,11 @@ B4. I get build failures in the intl directory.
                  Fetchmail configuration file grammar questions
 
 F1. Why does my old .fetchmailrc file no longer work?
+
+  If your file predates 6.4.0
+
+   Note that fetchmail no longer supports SSLv2, and you should avoid
+   SSLv3 or TLSv1.0 if possible.
 
   If your file predates 6.3.0
 
@@ -830,27 +807,14 @@ poll openmail protocol pop3
 
    Do similarly for any 'monitor' or 'batchlimit' options.
 
-F2. The .fetchmailrc parser won't accept my all-numeric user name.
+[DEL: F2. The .fetchmailrc parser won't accept my all-numeric user name. :DEL]
 
-   Either upgrade to a post-5.0.5 fetchmail or put string quotes around
-   it. :-)
+   This referred to an older fetchmail 5.x version. Upgrade.
 
-   The configuration file parser in older fetchmail versions treated any
-   all-numeric token as a number, which confused it when it was expecting
-   a name. String quoting forces the token's class.
+[DEL: F3. The .fetchmailrc parser won't accept my host or username beginning
+with 'no'. :DEL]
 
-   The lexical analyzer in 5.0.6 and beyond is smarter and assumes any
-   token following "username" or "password" is a string.
-
-F3. The .fetchmailrc parser won't accept my host or username beginning with
-'no'.
-
-   See F2. You're caught in an unfortunate crack between the newer-style
-   syntax for negated options ('no keep', 'no rewrite' etc.) and the older
-   style run-on syntax ('nokeep', 'norewrite' etc.).
-
-   Upgrade to a 5.0.6 or later fetchmail, or put string quotes around your
-   token.
+   This referred to an older fetchmail 5.x version. Upgrade.
 
 F4. I'm getting a 'parse error' message I don't understand.
 
@@ -1148,7 +1112,7 @@ T2. How can I use fetchmail with qmail?
 
   qmail as your local SMTP server
 
-   Avoid qmail, it's broken and unmaintained.
+   Don't! Avoid qmail and netqmail, they are broken and unmaintained.
 
    Turn on the forcecr option; qmail's listener mode doesn't like header
    or message lines terminated with bare linefeeds.
@@ -1573,38 +1537,28 @@ mda "sed -e '1s/^\t/Received: /' | formail | /usr/bin/procmail -d <user>"
    servers sometimes think that the first 45 messages have already been
    read.
 
-I5. How can I use fetchmail with Hotmail or Lycos Webmail?
+[DEL: I5. How can I use fetchmail with Hotmail or Lycos Webmail? :DEL]
 
-   You can't directly. But you can use fetchmail with hotmail or lycos
-   webmail with the help of the HotWayDaemon daemon. You don't even need
-   to install hotwayd as a daemon in inetd.conf but can use it as a
-   plugin. Your configuration should look like this:
+   It appears that both services offer POP3 or IMAP access these days.
+
+   Other than that, it might be possible to use the HotWayDaemon daemon.
+   You don't even need to install hotwayd as a daemon in inetd.conf but
+   can use it as a plugin. Your configuration should look like this:
 poll localhost protocol pop3 tracepolls
    plugin "/usr/local/sbin/hotwayd -l 0 -p yourproxy:yourproxyport"
    username "youremail@hotmail.com" password "yourpassword"
    fetchall
 
-   As a second option you may consider using gotmail.
+   As a second option you may consider using GetLive, a successor to the
+   discontinued Gotmail.
 
 I6. How can I use fetchmail with MSN?
 
-   You can't. MSN uses something that looks like POP3, except the
-   authentication part is nonstandard. And of course they don't document
-   it, so nobody but their Windows clients can speak it.
-
-   This is a customer lock-in tactic; we recommend boycotting MSN as the
-   only appropriate response.
-
-   As of 5.0.8, we have support for the client side of NTLM
-   authentication. It's possible this may enable fetchmail to talk to MSN;
-   if so, somebody should report it so this FAQ can be corrected.
+   See I5 above.
 
 I7. How can I use fetchmail with SpryNet?
 
-   The SpryNet POP3 servers mark a message queried with TOP as seen. This
-   means that if your connection drops in mid-message, it may end up
-   invisibly stuck on your mail spool. Use the fetchall flag to ensure
-   that it's recovered on the next cycle.
+   SpryNet is no more.
 
 I8. How can I use fetchmail with comcast.net or other Maillennium servers?
 
@@ -1631,7 +1585,7 @@ I9. How can I use fetchmail with GMail/Google Mail?
    a few hoops, and use web browsers for signing in. If this hinders
    access to your account through fetchmail, you may need to turn on
    access for "less secure apps" at
-   https://www.google.com/settings/security/lesssecureapps.
+   https://myaccount.google.com/lesssecureapps.
    It is disputable whether an application that does not include web
    browsing capabilities or heavy-weight libraries is "less secure" as
    Google claims.
@@ -1736,8 +1690,8 @@ K4. What do I have to do to use the IMAP-GSS protocol?
 K5. How can I use fetchmail with SSL?
 
    You'll need to have the OpenSSL libraries installed, and they should at
-   least be version 0.9.8, with 1.0.1 preferred. Configure with
-   --with-ssl. If you have the OpenSSL libraries installed in
+   least be version 1.0.2. Configure with --with-ssl (default since
+   fetchmail v6.4.0). If you have the OpenSSL libraries installed in
    commonly-used default locations, this will suffice. If you have them
    installed in a non-default location, you'll need to specify the OpenSSL
    installation directory as an argument to --with-ssl after an equal
@@ -2001,8 +1955,8 @@ R7. Fetchmail running as root stopped working after an OS upgrade
 R8. Fetchmail is timing out after fetching certain messages but before deleting
 them
 
-   There's a TCP/IP stalling problem under Redhat 6.0 (and possibly other
-   recent Linuxes) that can cause this symptom. Brian Boutel writes:
+   There's a TCP/IP stalling problem under Redhat Linux 6.0 that can cause
+   this symptom. Brian Boutel writes:
 
      TCP timestamps are turned on on my Linux boxes (I assume it's now
      the default). This uses 12 extra bytes per segment. When the tcp
@@ -2078,12 +2032,12 @@ R14. Since upgrading fetchmail/OpenSSL, I can no longer connect!
    Note: OpenSSL's c_rehash script is broken in several versions, which
    can cause malfunction if several OpenSSL tools versions are installed
    in parallel in separate directories. In such cases, you may need a
-   workaround to get things going. Assuming your OpenSSL 1.0.0 is
-   installed in /opt/openssl1.0.0 and your certificates are in
+   workaround to get things going. Assuming your OpenSSL 1.0.2 is
+   installed in /opt/openssl1.0.2 and your certificates are in
    /home/hans/certs, you'd do this (the corresponding fetchmail option is
    --sslcertpath /home/hans/certs on the commandline and sslcertpath
    /home/hans/cert in the rcfile):
-env PATH=/opt/openssl1.0.0/bin /opt/openssl1.0.0/bin/c_rehash /home/hans/certs
+env PATH=/opt/openssl1.0.2/bin /opt/openssl1.0.2/bin/c_rehash /home/hans/certs
 
 R15. Help, I'm getting Authorization failure!
 

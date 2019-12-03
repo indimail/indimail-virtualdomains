@@ -542,8 +542,9 @@ static int fetch_messages(int mailserver_socket, struct query *ctl,
 	    lastnum = num + fetchsizelimit - 1;
 	    if (lastnum > count)
 		lastnum = count;
-	    for (i = 0; i < fetchsizelimit; i++)
-		(*msgsizes)[i] = 0;
+	    if (*msgsizes)
+		for (i = 0; i < fetchsizelimit; i++)
+		    (*msgsizes)[i] = 0;
 
 	    stage = STAGE_GETSIZES;
 	    err = (ctl->server.base_protocol->getpartialsizes)(mailserver_socket, num, lastnum, *msgsizes);
@@ -1107,7 +1108,7 @@ static int do_session(
 		    &ctl->remotename) == -1)
 	{
 	    set_timeout(0);
-	    report(stderr, GT_("SSL connection failed.\n"));
+	    report(stderr, "%s: %s", ctl->sslcommonname ? ctl->sslcommonname : realhost, GT_("SSL connection failed.\n"));
 	    err = PS_SOCKET;
 	    goto cleanUp;
 	}

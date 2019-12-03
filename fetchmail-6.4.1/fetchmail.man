@@ -10,7 +10,7 @@
 .\" Load www macros to process .URL requests, this requires groff:
 .mso www.tmac
 .\"
-.TH fetchmail 1 "fetchmail 6.4.0" "fetchmail" "fetchmail reference manual"
+.TH fetchmail 1 "fetchmail 6.4.1" "fetchmail" "fetchmail reference manual"
 
 .SH NAME
 fetchmail \- fetch mail from a POP, IMAP, ETRN, or ODMR-capable server
@@ -1285,7 +1285,7 @@ different well known ports defined for the SSL encrypted services.  The
 encrypted ports will be selected automatically when SSL is enabled and
 no explicit port is specified.   Also, the \-\-sslcertck command line or
 sslcertck run control file option should be used to force strict
-certificate checking - see below.
+certificate checking with older fetchmail versions - see below.
 .PP
 If SSL is not configured, fetchmail will usually opportunistically try to use
 STARTTLS. STARTTLS can be enforced by using \-\-sslproto\~auto and
@@ -1779,7 +1779,7 @@ set idfile  	\-i	\&	T{
 Name of the file to store UID lists in.
 T}
 set    syslog	\&	\&	T{
-Do error logging through syslog(3). May be overriden by \fBset
+Do error logging through syslog(3). May be overridden by \fBset
 logfile\fP.
 T}
 set no syslog  	\&	\&	T{
@@ -1912,6 +1912,7 @@ Specify file for \fBclient side\fP public SSL certificate
 T}
 sslcertck	\&	\&	T{
 Enable strict certificate checking and abort connection on failure.
+Default only since fetchmail v6.4.0.
 T}
 no sslcertck	\&	\&	T{
 Disable strict certificate checking and permit connections to continue
@@ -2827,18 +2828,21 @@ that of the last host queried.
 
 .SH FILES
 .TP 5
-~/.fetchmailrc
-default run control file
+~/.fetchmailrc, $HOME/.fetchmailrc, $HOME_ETC/.fetchmailrc, $FETCHMAILHOME/fetchmailrc
+default run control file (location can be overridden with environment variables)
 .TP 5
-~/.fetchids
+~/.fetchids, $HOME/.fetchids, $HOME_ETC/.fetchids, $FETCHMAILHOME/.fetchids
 default location of file recording last message UIDs seen per host.
+(location can be overridden with environment variables)
 .TP 5
-~/.fetchmail.pid
-lock file to help prevent concurrent runs (non-root mode).
+~/.fetchmail.pid, $HOME/.fetchmail.pid, $HOME_ETC/.fetchmail.pid, $FETCHMAILHOME/fetchmail.pid
+default location of lock file to help prevent concurrent runs (non-root mode).
+(location can be overridden with environment variables)
 .TP 5
-~/.netrc
+~/.netrc, $HOME/.netrc, $HOME_ETC/.netrc
 your FTP run control file, which (if present) will be searched for
 passwords as a last resort before prompting for one interactively.
+(location can be overridden with environment variables)
 .TP 5
 /var/run/fetchmail.pid
 lock file to help prevent concurrent runs (root mode, Linux systems).
@@ -2850,10 +2854,10 @@ lock file to help prevent concurrent runs (root mode, systems without /var/run).
 .IP \fBFETCHMAILHOME\fP
 If this environment variable is set to a valid and
 existing directory name, fetchmail will read $FETCHMAILHOME/fetchmailrc
-(the dot is missing in this case), $FETCHMAILHOME/.fetchids and
-$FETCHMAILHOME/.fetchmail.pid rather than from the user's home
+(the dot is missing in this case), $FETCHMAILHOME/.fetchids (keeping its dot) and
+$FETCHMAILHOME/fetchmail.pid (without dot) rather than from the user's home
 directory.  The .netrc file is always looked for in the the invoking
-user's home directory regardless of FETCHMAILHOME's setting.
+user's home directory (or $HOME_ETC) regardless of FETCHMAILHOME's setting.
 
 .IP \fBFETCHMAILUSER\fP
 If this environment variable is set, it is used as the name of the
@@ -2875,19 +2879,36 @@ See fetchmail's NEWS file and fetchmail-SA-2012-01.txt for details.
 Earlier fetchmail versions (v6.3.21 and older) used to disable this 
 countermeasure, but v6.3.22 no longer does that as a safety precaution.
 
+.IP \fBFETCHMAIL_POP3_FORCE_RETR\fP
+(since v6.3.9):
+If this environment variable is defined at all (even if empty), fetchmail
+will forgo the POP3 TOP command and always use RETR. This can be
+used as a workaround when TOP does not work properly.
+
 .IP \fBFETCHMAIL_INCLUDE_DEFAULT_X509_CA_CERTS\fP
 (since v6.3.17):
 If this environment variable is set and not empty, fetchmail will always load
 the default X.509 trusted certificate locations for SSL/TLS CA certificates,
-even if \fB\-\-sslcertfile\fP and \fB\-\-sslcertpath\fP are given.  The latter locations take precedence over the system default locations.
+even if \fB\-\-sslcertfile\fP and \fB\-\-sslcertpath\fP are given.
+The latter locations take precedence over the system default locations.
 This is useful in case there are broken certificates in the system directories
 and the user has no administrator privileges to remedy the problem.
 
-.IP \fBHOME_ETC\fP
-If the HOME_ETC variable is set, fetchmail will read
-$HOME_ETC/.fetchmailrc instead of ~/.fetchmailrc.
+.IP \fBHOME\fP
+(documented since 6.4.1):
+This variable is nomally set to the user's home directory. If it is set
+to a different directory than what is the password database, HOME takes
+prececence.
 
-If HOME_ETC and FETCHMAILHOME are both set, HOME_ETC will be ignored.
+.IP \fBHOME_ETC\fP
+(documented corrected to match behaviour code since 6.4.1):
+If the HOME_ETC variable is set, it will override fetchmail's idea of $HOME,
+i. e. fetchmail will read .fetchmailrc, .fetchids, .fetchmail.pid and .netrc
+from $HOME_ETC instead of $HOME (or if HOME is also unset,
+from the passwd file's home directory location).
+
+If HOME_ETC and FETCHMAILHOME are both set, FETCHMAILHOME takes prececence
+and HOME_ETC will be ignored.
 
 .IP \fBSOCKS_CONF\fP
 (only if SOCKS support is compiled in) this variable is used by the

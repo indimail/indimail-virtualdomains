@@ -5,7 +5,6 @@
  * For license terms, see the file COPYING in this directory.
  */
 
-/* We need this for HAVE_STDARG_H, etc */
 #include "config.h"
 
 struct addrinfo;
@@ -39,14 +38,8 @@ struct addrinfo;
 #  include "trio/trio.h"
 #endif
 
-#include "uid_db.h"
-
-/* We need this for strstr */
-#if !defined(HAVE_STRSTR) && !defined(strstr)
-char *strstr(const char *, const char *);
-#endif
-
 #include "fm_strl.h"
+#include "uid_db.h"
 
 /* constants designating the various supported protocols */
 #define		P_AUTO		1
@@ -121,7 +114,7 @@ char *strstr(const char *, const char *);
 #define		MSGBUFSIZE	8192
 
 #define		NAMELEN		64	/* max username length */
-#define		PASSWORDLEN	64	/* max password length */
+#define		PASSWORDLEN	256	/* max password length */
 #define		DIGESTLEN	33	/* length of MD5 digest */
 
 /* exit code values */
@@ -468,6 +461,7 @@ extern flag versioninfo;	/* emit only version info */
 extern char *user;		/* name of invoking user */
 extern char *home;		/* home directory of invoking user */
 extern char *fmhome;		/* fetchmail home directory */
+extern int at_home;		/* normally 1, but 0 if FETCHMAILHOME overrides it */
 extern int pass;		/* number of re-polling pass */
 extern flag configdump;		/* dump control blocks as Python dictionary */
 extern const char *fetchmailhost; /* either "localhost" or an FQDN */
@@ -522,8 +516,8 @@ int do_protocol(struct query *, const struct method *);
 
 /* transact.c: transaction support */
 /** \ingroup gen_recv_split
- * Data structure to cache data between \func gen_recv_split calls,
- * must be initialized before use by calling \func gen_recv_split_init. */
+ * Data structure to cache data between gen_recv_split() calls,
+ * must be initialized before use by calling gen_recv_split_init(). */
 struct RecvSplit
 {
     char prefix[100];		/**< prefix to match/repeat when splitting lines */
@@ -688,6 +682,7 @@ char *prependdir (const char *, const char *);
 char *MD5Digest (unsigned const char *);
 void hmac_md5 (const unsigned char *, size_t, const unsigned char *, size_t, unsigned char *, size_t);
 int POP3_auth_rpa(char *, char *, int socket);
+#define RETSIGTYPE void
 typedef RETSIGTYPE (*SIGHANDLERTYPE) (int);
 void deal_with_sigchld(void);
 RETSIGTYPE null_signal_handler(int sig);

@@ -13,12 +13,12 @@
  * For license terms, see the file COPYING in this directory.
  */
 
+#include "fetchmail.h"
 #include "config.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
-#include "fetchmail.h"
 #include "i18n.h"
 
 static unsigned char unhex(unsigned char c)
@@ -459,7 +459,7 @@ int MimeBodyType(char *hdrs, int WantDecode)
 
 	/* Check Content-Type to see if this is a multipart message */
 	if ( (CntType != NULL) &&
-		((strncasecmp(CntType, "multipart/mixed", 16) == 0) ||
+		((strncasecmp(CntType, "multipart/mixed", 15) == 0) ||
 		 (strncasecmp(CntType, "message/", 8) == 0)) ) {
 
 	    char *p1 = GetBoundary(CntType);
@@ -469,7 +469,6 @@ int MimeBodyType(char *hdrs, int WantDecode)
 		   the boundary string */
 		strcpy(MultipartDelimiter, "--");
 		strlcat(MultipartDelimiter, p1, sizeof(MultipartDelimiter));
-		MultipartDelimiter[sizeof(MultipartDelimiter)-1] = '\0';
 		BodyType = (MSG_IS_8BIT | MSG_NEEDS_DECODE);
 	    }
 	}

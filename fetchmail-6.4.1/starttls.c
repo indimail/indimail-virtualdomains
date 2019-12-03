@@ -1,4 +1,4 @@
-/** \file tls.c - collect common TLS functionality 
+/** \file starttls.c - collect common TLS functionality
  * \author Matthias Andree
  * \date 2006
  */

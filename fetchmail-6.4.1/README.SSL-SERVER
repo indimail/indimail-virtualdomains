@@ -25,8 +25,9 @@ are several requirements that need to be fulfilled.
    authority (CA).
 
    If your server certificate is not directly signed by the root certification 
-   authority (root CA), then you are using intermediate CA. In this case, you 
-   *MUST* (as per the TLS standard) provide *ALL* intermediate certificates.
+   authority (root CA), then you are using an intermediate CA. In this case,
+   you *MUST* (as per the TLS standard) provide *ALL* intermediate
+   certificates.
 
    If you fail to provide intermediate certificates, clients can only connect 
    if the end user overrides/disables security warnings in his/her software, 
@@ -62,3 +63,7 @@ are several requirements that need to be fulfilled.
    readily available at least in MD5 and SHA1 formats and offer to clients and 
    be ready to answer client questions as to the fingerprints (for 
    verification) and installation in commonly used clients.
+
+   Many systems will install the Mozilla root certificate bundle in an
+   easy to find place, so if you are signing your certificates by a CA
+   that Mozilla trusts, this helps many users.

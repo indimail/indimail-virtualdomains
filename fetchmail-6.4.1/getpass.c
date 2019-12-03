@@ -72,8 +72,8 @@ char *fm_getpassword(char *prompt)
     exit(1);
 #endif
 #else
-    register char *p;
-    register int c;
+    char *p;
+    int c;
     FILE *fi;
     static char pbuf[INPUT_BUF_SIZE];
     SIGHANDLERTYPE sig = 0;	/* initialization pacifies -Wall */

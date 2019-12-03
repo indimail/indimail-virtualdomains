@@ -17,6 +17,9 @@
  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "config.h"
+#include "fetchmail.h"
+
 #include <sys/types.h>
 #include <assert.h>
 #include <string.h>

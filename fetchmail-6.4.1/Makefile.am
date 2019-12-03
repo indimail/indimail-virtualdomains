@@ -62,7 +62,7 @@ TESTS+=			t.regression
 endif
 
 fetchmail_SOURCES=	fetchmail.h getopt.h \
-		i18n.h kerberos.h fm_md5.h mx.h netrc.h smtp.h \
+		gettext.h i18n.h kerberos.h fm_md5.h mx.h netrc.h smtp.h \
 		socket.h tunable.h \
 		socket.c getpass.c \
 		fetchmail.c env.c idle.c options.c daemon.c \
@@ -232,10 +232,19 @@ dist-hook:
 rsync:  distdir $(srcdir)/.rsyncs
 	@( cat $(srcdir)/.rsyncs | sed -e 's}^}rsync -aH --delete-after $(PACKAGE)-$(VERSION)/ }; s/\($$\)/ \&/;' ; echo "wait" ) | $(SHELL) -x
 
-.PHONY: import-translations
+.PHONY: import-translations git-check
 import-translations:
 	rsync -Lrtvz translationproject.org::tp/latest/fetchmail/  $(top_srcdir)/po
 	cd $(top_builddir)/po && $(MAKE) update-po
+	@printf '\n=== You can use dist-tools/git-commit-po-updates.sh to check these updates in. ===\n\n'
+
+git-check:
+	@set -x && if test -d $(PACKAGE)-$(VERSION)-export ; then chmod -R u+rwX $(PACKAGE)-$(VERSION)-export ; fi && \
+	rm -rf $(PACKAGE)-$(VERSION)-export && \
+	mkdir $(PACKAGE)-$(VERSION)-export && \
+	( cd $(top_srcdir) && git archive --format=tar HEAD ) | tar -C $(PACKAGE)-$(VERSION)-export -xf - && \
+	cd $(PACKAGE)-$(VERSION)-export && chmod -R u+rwX . && autoreconf -i -f -s -v \
+	&& mkdir _build && cd _build && ../configure && $(MAKE) distcheck
 
 SUFFIXES = .html .txt
 .txt.html:

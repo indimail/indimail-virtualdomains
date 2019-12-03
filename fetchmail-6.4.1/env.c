@@ -29,6 +29,7 @@
 #if defined(HAVE_SETLOCALE) && defined(ENABLE_NLS) && defined(HAVE_STRFTIME)
 #include <locale.h>
 #endif
+#include <limits.h>
 
 #ifndef HAVE_DECL_GETENV
 extern char *getenv(const char *);	/* needed on sysV68 R3V7.1. */
@@ -109,14 +110,68 @@ void envquery(int argc, char **argv)
 
     endpwent();
 
+    /* This documentation added to 6.4.1,
+     * and manual page corrected.
+     *
+     * here's the home directory logic:
+     * 1. we derive home. it is taken from:
+     *   a. HOME_ETC
+     *   b. HOME
+     *   c. the user's passwd entry
+     * 2. we derive fmhome. It is normally
+     *   a. home.
+     *   b. It can be overridden from FETCHMAILHOME.
+     * If and only if fmhome != home, then the
+     * default configuration files will be expected
+     * without leading dots.
+     */
+
     /* compute user's home directory */
     home = getenv("HOME_ETC");
-    if (!home && !(home = getenv("HOME")))
+    if (!home)
+	home = getenv("HOME");
+    if (!home)
 	home = xstrdup(pwp->pw_dir);
+    /* and make it an absolute path, so we
+     * can optionally chdir("/") later in daemonize()
+     * without changing behaviour.
+     */
+    {
+	static char *_home_abs;
+	char *tmp;
+	if (_home_abs) free(_home_abs), _home_abs = 0;
+        tmp = realpath(home, NULL);
+        if (tmp) {
+		home = _home_abs = tmp;
+	} else {
+		report(stderr, GT_("Cannot find absolute path for user's home directory.\n"));
+		exit(PS_UNDEFINED);
+	}
+    }
 
     /* compute fetchmail's home directory */
-    if (!(fmhome = getenv("FETCHMAILHOME")))
+    fmhome = getenv("FETCHMAILHOME");
+    if (NULL == fmhome) {
 	fmhome = home;
+        at_home = 1;
+    }
+    /* and make it an absolute path, so we
+     * can optionally chdir("/") later in daemonize()
+     * without changing behaviour.
+     * This is to fix Debian Bug#941129 by Alex Andreotti.
+     */
+    {
+	static char *_fmhome_abs;
+	char *tmp;
+	if (_fmhome_abs) free(_fmhome_abs), _fmhome_abs = 0;
+        tmp = realpath(fmhome, NULL);
+        if (tmp) {
+		fmhome = _fmhome_abs = tmp;
+	} else {
+		report(stderr, GT_("Cannot find absolute path for fetchmail's home directory.\n"));
+		exit(PS_UNDEFINED);
+	}
+    }
 
 #define RCFILE_NAME	"fetchmailrc"
     /*
@@ -125,7 +180,7 @@ void envquery(int argc, char **argv)
      * for its files. We don't want to do that if fetchmail has its
      * own home ($FETCHMAILHOME), however.
      */
-    rcfile = (char *)xmalloc(strlen(fmhome)+sizeof(RCFILE_NAME)+(fmhome==home)+2);
+    rcfile = (char *)xmalloc(strlen(fmhome) + sizeof(RCFILE_NAME) + 3);
     /* avoid //.fetchmailrc */
     if (strcmp(fmhome, "/") != 0)
 	strcpy(rcfile, fmhome);
@@ -134,7 +189,7 @@ void envquery(int argc, char **argv)
 
     if (rcfile[strlen(rcfile) - 1] != '/')
 	strcat(rcfile, "/");
-    if (fmhome==home)
+    if (at_home)
 	strcat(rcfile, ".");
     strcat(rcfile, RCFILE_NAME);
 }

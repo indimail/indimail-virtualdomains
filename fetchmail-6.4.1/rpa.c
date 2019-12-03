@@ -16,6 +16,7 @@
 #include  "config.h"
 
 #if defined(POP3_ENABLE) && defined(RPA_ENABLE)
+#include  "fetchmail.h"
 #include  <stdio.h>
 #include  <stdlib.h>
 #include  <unistd.h>
@@ -24,7 +25,6 @@
 #include  <sys/types.h>
 
 #include  "socket.h"
-#include  "fetchmail.h"
 #include  "fm_md5.h"
 #include  "i18n.h"
 

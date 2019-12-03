@@ -20,7 +20,6 @@ struct addrinfo;
 /** Create a new client socket; returns -1 on error */
 int SockOpen(const char *host, const char *service, const char *plugin, struct addrinfo **);
 
-
 /** 
 Get a string terminated by an '\n' (matches interface of fgets).
 Pass it a valid socket, a buffer for the string, and

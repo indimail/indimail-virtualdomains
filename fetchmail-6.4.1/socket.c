@@ -1,11 +1,16 @@
 /*
  * socket.c -- socket library functions
  *
- * Copyright 1998 by Eric S. Raymond.
+ * Copyright 1998 - 2004 by Eric S. Raymond.
+ * Copyright 2004 - 2019 by Matthias Andree.
+ * Contributions by Alexander Bluhm, Earl Chew, John Beck.
+
  * For license terms, see the file COPYING in this directory.
  */
 
 #include "config.h"
+#include "fetchmail.h"
+
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
@@ -15,11 +20,7 @@
 #endif /* HAVE_MEMORY_H */
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifndef HAVE_NET_SOCKET_H
 #include <sys/socket.h>
-#else
-#include <net/socket.h>
-#endif
 #include <sys/un.h>
 #include <netinet/in.h>
 #ifdef HAVE_ARPA_INET_H
@@ -49,10 +50,10 @@
 #endif
 
 #include "socket.h"
-#include "fetchmail.h"
 #include "getaddrinfo.h"
 #include "i18n.h"
 #include "sdump.h"
+#include "uid_db.h"
 
 /* Defines to allow BeOS and Cygwin to play nice... */
 #ifdef __BEOS__
@@ -206,7 +207,7 @@ static int handle_plugin(const char *host,
 #endif /* HAVE_SOCKETPAIR */
 
 /** Set socket to SO_KEEPALIVE. \return 0 for success. */
-int SockKeepalive(int sock) {
+static int SockKeepalive(int sock) {
     int keepalive = 1;
     return setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &keepalive, sizeof keepalive);
 }
@@ -217,7 +218,7 @@ int UnixOpen(const char *path)
     struct sockaddr_un ad;
     memset(&ad, 0, sizeof(ad));
     ad.sun_family = AF_UNIX;
-    strncpy(ad.sun_path, path, sizeof(ad.sun_path)-1);
+    strlcpy(ad.sun_path, path, sizeof(ad.sun_path));
 
     sock = socket( AF_UNIX, SOCK_STREAM, 0 );
     if (sock < 0)
@@ -226,7 +227,7 @@ int UnixOpen(const char *path)
 	return -1;
     }
 
-    /* Socket opened saved. Usefull if connect timeout 
+    /* Socket opened saved. Useful if connect timeout
      * because it can be closed.
      */
     mailserver_socket_temp = sock;
@@ -247,7 +248,7 @@ int UnixOpen(const char *path)
 }
 
 int SockOpen(const char *host, const char *service,
-	     const char *plugin, struct addrinfo **ai0)
+	     const char *plugin, struct addrinfo **ai_in)
 {
     struct addrinfo *ai, req;
     int i, acterr = 0;
@@ -265,7 +266,7 @@ int SockOpen(const char *host, const char *service,
     req.ai_flags = AI_ADDRCONFIG;
 #endif
 
-    i = fm_getaddrinfo(host, service, &req, ai0);
+    i = fm_getaddrinfo(host, service, &req, ai_in);
     if (i) {
 	report(stderr, GT_("getaddrinfo(\"%s\",\"%s\") error: %s\n"),
 		host, service, gai_strerror(i));
@@ -277,7 +278,7 @@ int SockOpen(const char *host, const char *service,
     /* NOTE a Linux bug here - getaddrinfo will happily return 127.0.0.1
      * twice if no IPv6 is configured */
     i = -1;
-    for (ord = 0, ai = *ai0; ai; ord++, ai = ai->ai_next) {
+    for (ord = 0, ai = *ai_in; ai; ord++, ai = ai->ai_next) {
 	char buf[256]; /* hostname */
 	char pb[256];  /* service name */
 	int gnie;      /* getnameinfo result code */
@@ -337,8 +338,8 @@ int SockOpen(const char *host, const char *service,
 	break;
     }
 
-    fm_freeaddrinfo(*ai0);
-    *ai0 = NULL;
+    fm_freeaddrinfo(*ai_in);
+    *ai_in = NULL;
 
     if (i == -1) {
 	report(stderr, GT_("Connection errors for this poll:\n%s"), errbuf);
@@ -374,6 +375,10 @@ va_dcl {
 }
 
 #ifdef SSL_ENABLE
+/* OPENSSL_NO_SSL_INTERN: 
+   transitional feature for OpenSSL 1.0.1 up to and excluding 1.1.0 
+   to make sure we do not access internal structures! */
+#define OPENSSL_NO_SSL_INTERN 1
 #define OPENSSL_NO_DEPRECATED 23
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -616,7 +621,7 @@ SSL *SSLGetContext( int sock )
 /* ok_return (preverify_ok) is 1 if this stage of certificate verification
    passed, or 0 if it failed. This callback lets us display informative
    errors, and perform additional validation (e.g. CN matches) */
-static int SSL_verify_callback( int ok_return, X509_STORE_CTX *ctx, int strict )
+static int SSL_verify_callback(int ok_return, X509_STORE_CTX *ctx, int strict)
 {
 #define SSLverbose (((outlevel) >= O_DEBUG) || ((outlevel) >= O_VERBOSE && (depth) == 0)) 
 	char buf[257];
@@ -635,6 +640,12 @@ static int SSL_verify_callback( int ok_return, X509_STORE_CTX *ctx, int strict )
 
 	subj = X509_get_subject_name(x509_cert);
 	issuer = X509_get_issuer_name(x509_cert);
+
+	if (outlevel >= O_DEBUG) {
+		if (SSLverbose)
+			report(stdout, GT_("SSL verify callback depth %d: preverify_ok == %d, err = %d, %s\n"),
+					depth, ok_return, err, X509_verify_cert_error_string(err));
+	}
 
 	if (outlevel >= O_VERBOSE) {
 		if (depth == 0 && SSLverbose)
@@ -841,7 +852,7 @@ static int SSL_verify_callback( int ok_return, X509_STORE_CTX *ctx, int strict )
 	_verify_ok &= ok_return;
 	if (!strict)
 		ok_return = 1;
-	return (ok_return);
+	return ok_return;
 }
 
 static int SSL_nock_verify_callback( int ok_return, X509_STORE_CTX *ctx )
@@ -1102,6 +1113,7 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 		 available protocol, subject to SSL_OP_NO* constraints. */
 		_ctx[sock] = SSL_CTX_new(SSLv23_client_method());
 	}
+
 	if(_ctx[sock] == NULL) {
 		unsigned long ec = ERR_peek_last_error();
 		ERR_print_errors_fp(stderr);
@@ -1179,6 +1191,22 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 	    }
 	}
 
+	/* OpenSSL >= 1.0.2: set host name for verification */
+	/* XXX FIXME: do we need to change the function's signature and pass the akalist to
+	 * permit the other hostnames through SSL? */
+	/* https://wiki.openssl.org/index.php/Hostname_validation */
+	{
+	    int r;
+	    X509_VERIFY_PARAM *param = SSL_get0_param(_ssl_context[sock]);
+
+	    X509_VERIFY_PARAM_set_hostflags(param, X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS);
+	    if (0 == (r = X509_VERIFY_PARAM_set1_host(param, servercname, strlen(servercname)))) {
+		report(stderr, GT_("Warning: X509_VERIFY_PARAM_set1_host(%p, \"%s\") failed (code %#x), trying to continue.\n"),
+			(void *)_ssl_context[sock], servercname, r);
+		ERR_print_errors_fp(stderr);
+	    }
+	}
+
 	if( mycert || mykey ) {
 
 	/* Ok...  He has a certificate file defined, so lets declare it.  If
@@ -1203,14 +1231,17 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 	if (SSL_set_fd(_ssl_context[sock], sock) == 0 
 	    || (ssle_connect = SSL_connect(_ssl_context[sock])) < 1) {
 		int e = errno;
-		unsigned long ssle_err_from_queue = ERR_peek_error();
 		unsigned long ssle_err_from_get_error = SSL_get_error(_ssl_context[sock], ssle_connect);
+		unsigned long ssle_err_from_queue = ERR_peek_error();
 		ERR_print_errors_fp(stderr);
 		if (SSL_ERROR_SYSCALL == ssle_err_from_get_error && 0 == ssle_err_from_queue) {
 		    if (0 == ssle_connect) {
-			report(stderr, GT_("Server shut down connection prematurely during SSL_connect().\n"));
+			/* FIXME: the next line was hacked in 6.4.0-rc1 so the translation strings don't change.
+			 * The %s could be merged to the inside of GT_(). */
+			report(stderr, "%s: %s", servercname, GT_("Server shut down connection prematurely during SSL_connect().\n"));
 		    } else if (ssle_connect < 0) {
-			report(stderr, GT_("System error during SSL_connect(): %s\n"), strerror(e));
+			report(stderr, "%s: ", servercname);
+			report(stderr, GT_("System error during SSL_connect(): %s\n"), e ? strerror(e) : GT_("handshake failed at protocol or connection level."));
 		    }
 		}
 		SSL_free( _ssl_context[sock] );
@@ -1224,9 +1255,9 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 	    SSL_CIPHER const *sc;
 	    int bitsmax, bitsused;
 
-	    const char *ver;
+	    const char *vers;
 
-	    ver = SSL_get_version(_ssl_context[sock]);
+	    vers = SSL_get_version(_ssl_context[sock]);
 
 	    sc = SSL_get_current_cipher(_ssl_context[sock]);
 	    if (!sc) {
@@ -1234,7 +1265,7 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 	    } else {
 		bitsused = SSL_CIPHER_get_bits(sc, &bitsmax);
 		report(stdout, GT_("SSL/TLS: using protocol %s, cipher %s, %d/%d secret/processed bits\n"),
-			ver, SSL_CIPHER_get_name(sc), bitsused, bitsmax);
+			vers, SSL_CIPHER_get_name(sc), bitsused, bitsmax);
 	    }
 	}
 

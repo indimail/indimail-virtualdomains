@@ -21,6 +21,7 @@ MIT license.  Compile with -DMAIN to build the demonstrator.
 ******************************************************************************/
 
 #include "config.h"
+#include "fetchmail.h"
 
 #include  <stdio.h>
 #include  <ctype.h>
@@ -28,7 +29,6 @@ MIT license.  Compile with -DMAIN to build the demonstrator.
 #include  <strings.h>
 #include  <stdlib.h>
 
-#include "fetchmail.h"
 #include "sdump.h"
 
 #ifndef MAIN

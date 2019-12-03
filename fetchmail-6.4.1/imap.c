@@ -6,6 +6,8 @@
  */
 
 #include  "config.h"
+#include  "fetchmail.h"
+
 #include  <stdio.h>
 #include  <string.h>
 #include  <strings.h>
@@ -15,7 +17,6 @@
 #include  <limits.h>
 #include  <errno.h>
 #endif
-#include  "fetchmail.h"
 #include  "socket.h"
 
 #include  "i18n.h"
@@ -71,7 +72,11 @@ static int imap_untagged_response(int sock, const char *buf)
 	/* log the unexpected bye from server as we expect the
 	 * connection to be cut-off after this */
 	if (outlevel > O_SILENT)
-	    report(stderr, GT_("Received BYE response from IMAP server: %s"), buf + 5);
+	    report(stderr, GT_("Received BYE response from IMAP server: %s\n"), buf + 5);
+	return PS_SOCKET; /* tell caller to not touch the socket any longer.
+			     Note this is under stage != STAGE_LOGOUT, so when
+			     we are logging out properly, we will complete the
+			     protocol exchange. */
     }
     else if (strstr(buf, " EXISTS"))
     {
@@ -147,7 +152,9 @@ static int imap_untagged_response(int sock, const char *buf)
 		oldcount--;
 	    /* We do expect an EXISTS response immediately
 	     * after this, so this updation of recentcount is
-	     * just a precaution! */
+	     * just a precaution!
+             * XXX FIXME: per RFC 3501, 7.4.1. EXPUNGE Reponse
+	     * on Page 73, an EXISTS response is not required */
 	    if ((recentcount = count - oldcount) < 0)
 		recentcount = 0;
 	    actual_deletions++;
@@ -620,15 +627,6 @@ static int imap_getauth(int sock, struct query *ctl, char *greeting)
 	   GT_("Required NTLM capability not compiled into fetchmail\n"));
     }
 #endif /* NTLM_ENABLE */
-
-#ifdef __UNUSED__	/* The Cyrus IMAP4rev1 server chokes on this */
-    /* this handles either AUTH=LOGIN or AUTH-LOGIN */
-    if ((imap_version >= IMAP4rev1) && (!strstr(capabilities, "LOGIN")))
-    {
-	report(stderr, 
-	       GT_("Required LOGIN capability not supported by server\n"));
-    }
-#endif /* __UNUSED__ */
 
     /* 
      * We're stuck with sending the password en clair.

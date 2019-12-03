@@ -5,6 +5,7 @@ driver.c
 env.c
 etrn.c
 fetchmail.c
+fm_getaddrinfo.c
 getpass.c
 gssapi.c
 idle.c
@@ -13,9 +14,11 @@ interface.c
 kerberos.c
 lock.c
 netrc.c
+ntlmsubr.c
 odmr.c
 opie.c
 options.c
+pop2.c
 pop3.c
 rcfile_y.y
 report.c

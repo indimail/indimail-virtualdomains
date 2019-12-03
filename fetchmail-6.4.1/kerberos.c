@@ -93,16 +93,14 @@ int do_rfc1731(int sock, const char *command, const char *truename)
      * 32-bit number in network byte order.
      */
 
-    strncpy(srvinst, truename, (sizeof srvinst)-1);
-    srvinst[(sizeof srvinst)-1] = '\0';
+    strlcpy(srvinst, truename, sizeof srvinst);
     for (p = srvinst; *p; p++) {
       if (isupper((unsigned char)*p)) {
 	*p = tolower((unsigned char)*p);
       }
     }
 
-    strncpy(srvrealm, (char *)krb_realmofhost(srvinst), (sizeof srvrealm)-1);
-    srvrealm[(sizeof srvrealm)-1] = '\0';
+    strlcpy(srvrealm, (char *)krb_realmofhost(srvinst), sizeof srvrealm);
     if ((p = strchr(srvinst, '.')) != NULL) {
       *p = '\0';
     }

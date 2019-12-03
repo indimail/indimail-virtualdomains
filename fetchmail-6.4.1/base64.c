@@ -66,7 +66,7 @@ int from64tobits(void *out_, const char *in, int maxlen)
 /* maxlen limits output buffer size, set to zero to ignore */
 {
     int len = 0;
-    register unsigned char digit1, digit2, digit3, digit4;
+    unsigned char digit1, digit2, digit3, digit4;
     unsigned char *out = (unsigned char *)out_;
 
     if (in[0] == '+' && in[1] == ' ')

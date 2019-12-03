@@ -59,7 +59,7 @@ void MD5Init(struct MD5Context *ctx)
 void MD5Update(struct MD5Context *ctx, const void *buf_, unsigned len)
 {
     const unsigned char *buf = (const unsigned char *)buf_;
-    register uint32_t t;
+    uint32_t t;
 
     /* Update bitcount */
 
@@ -165,7 +165,7 @@ void MD5Final(void *digest, struct MD5Context *ctx)
  */
 void MD5Transform(uint32_t buf[4], uint32_t const in[16])
 {
-    register uint32_t a, b, c, d;
+    uint32_t a, b, c, d;
 
     a = buf[0];
     b = buf[1];

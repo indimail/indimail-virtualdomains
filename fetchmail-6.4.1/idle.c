@@ -16,12 +16,12 @@ is part of fetchmail and the Unix Cookbook, and are released under the
 MIT license.  Compile with -DMAIN to build the demonstrator.
 
 ******************************************************************************/
+#include "fetchmail.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
 #include <errno.h>
-#include <fetchmail.h>	/* for ROOT_UID */
 
 #ifndef TRUE
 #define TRUE 1

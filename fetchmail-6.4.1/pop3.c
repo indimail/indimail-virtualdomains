@@ -6,6 +6,7 @@
  */
 
 #include  "config.h"
+
 #ifdef POP3_ENABLE
 #include  <stdio.h>
 #include  <string.h>
@@ -708,22 +709,6 @@ static int pop3_getauth(int sock, struct query *ctl, char *greeting)
 	return(ok);
     }
 
-/* Disable the sleep. Based on patch by Brian Candler 2004-04-19/2004-11-08,
- * accepted by Matthias Andree.
- *
- * Rationale: the server must have locked the spool before returning +OK;
- * this sleep just wastes time and hence, for modem and GSM CSD users, money. */
-#ifdef WANT_BOGUS
-    /*
-     * Empirical experience shows some server/OS combinations
-     * may need a brief pause even after any lockfiles on the
-     * server are released, to give the server time to finish
-     * copying back very large mailfolders from the temp-file...
-     * this is only ever an issue with extremely large mailboxes.
-     */
-    sleep(3); /* to be _really_ safe, probably need sleep(5)! */
-#endif
-
     /* we're approved */
     return(PS_SUCCESS);
 }
@@ -1231,29 +1216,6 @@ static int pop3_is_old(int sock, struct query *ctl, int num)
     }
 }
 
-#ifdef UNUSED
-/*
- * We could use this to fetch headers only as we do for IMAP.  The trouble 
- * is that there's no way to fetch the body only.  So the following RETR 
- * would have to re-fetch the header.  Enough messages have longer headers
- * than bodies to make this a net loss.
- */
-static int pop_fetch_headers(int sock, struct query *ctl,int number,int *lenp)
-/* request headers of nth message */
-{
-    int ok;
-    char buf[POPBUFSIZE+1];
-
-    gen_send(sock, "TOP %d 0", number);
-    if ((ok = pop3_ok(sock, buf)) != 0)
-	return(ok);
-
-    *lenp = -1;		/* we got sizes from the LIST response */
-
-    return(PS_SUCCESS);
-}
-#endif /* UNUSED */
-
 static int pop3_fetch(int sock, struct query *ctl, int number, int *lenp)
 /* request nth message */
 {
@@ -1370,8 +1332,9 @@ static int pop3_delete(int sock, struct query *ctl, int number)
     if (ok != PS_SUCCESS)
 	return(ok);
 
-    rec = find_uid_by_num(dofastuidl ? &ctl->oldsaved : &ctl->newsaved, number);
-    rec->status = UID_DELETED;
+    if ((rec = find_uid_by_num(dofastuidl ? &ctl->oldsaved : &ctl->newsaved, number)))
+	    rec->status = UID_DELETED;
+
     return(PS_SUCCESS);
 }
 
@@ -1387,24 +1350,6 @@ static int pop3_logout(int sock, struct query *ctl)
 /* send logout command */
 {
     int ok;
-
-#ifdef __UNUSED__
-    /*
-     * We used to do this in case the server marks messages deleted when seen.
-     * (Yes, this has been reported, in the MercuryP/NLM server.
-     * It's even legal under RFC 1939 (section 8) as a site policy.)
-     * It interacted badly with UIDL, though.  Thomas Zajic wrote:
-     * "Running 'fetchmail -F -v' and checking the logs, I found out
-     * that fetchmail did in fact flush my mailbox properly, but sent
-     * a RSET just before sending QUIT to log off.  This caused the
-     * POP3 server to undo/forget about the previous DELEs, resetting
-     * my mailbox to its original (ie.  unflushed) state. The
-     * ~/.fetchids file did get flushed though, so the next time
-     * fetchmail was run it saw all the old messages as new ones ..."
-     */
-     if (ctl->keep)
-	gen_transact(sock, "RSET");
-#endif /* __UNUSED__ */
 
     ok = gen_transact(sock, "QUIT");
     if (!ok)

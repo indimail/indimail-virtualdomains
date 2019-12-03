@@ -79,6 +79,7 @@ flag versioninfo;	    /* emit only version info */
 char *user;		    /* the name of the invoking user */
 char *home;		    /* invoking user's home directory */
 char *fmhome;		    /* fetchmail's home directory */
+int at_home;	    	    /* fetchmail is running inside the user's home directory */
 const char *program_name;   /* the name to prefix error messages with */
 flag configdump;	    /* dump control blocks for configurator */
 const char *fetchmailhost;  /* either `localhost' or the host's FQDN */
@@ -145,7 +146,7 @@ static void printcopyright(FILE *fp) {
 		   "Copyright (C) 2004 Matthias Andree, Eric S. Raymond,\n"
 		   "                   Robert M. Funk, Graham Wilson\n"
 		   "Copyright (C) 2005 - 2012 Sunil Shetye\n"
-		   "Copyright (C) 2005 - 2016 Matthias Andree\n"
+		   "Copyright (C) 2005 - 2019 Matthias Andree\n"
 		   ));
 	fprintf(fp, GT_("Fetchmail comes with ABSOLUTELY NO WARRANTY. This is free software, and you\n"
 		   "are welcome to redistribute it under certain conditions. For details,\n"
@@ -220,13 +221,11 @@ int main(int argc, char **argv)
      */
     fm_lock_dispose();
 
-#ifdef HAVE_GETCWD
     /* save the current directory */
     if (getcwd (currentwd, sizeof (currentwd)) == NULL) {
 	report(stderr, GT_("could not get current working directory\n"));
 	currentwd[0] = 0;
     }
-#endif
 
     {
 	int i;
@@ -704,11 +703,9 @@ int main(int argc, char **argv)
 	{
 	    report(stdout, GT_("restarting fetchmail (%s changed)\n"), rcfile);
 
-#ifdef HAVE_GETCWD
 	    /* restore the startup directory */
 	    if (!currentwd[0] || chdir (currentwd) == -1)
 		report(stderr, GT_("attempt to re-exec may fail as directory has not been restored\n"));
-#endif
 
 	    /*
 	     * Matthias Andree: Isn't this prone to introduction of
@@ -971,7 +968,7 @@ static void optmerge(struct query *h2, struct query *h1, int force)
     list_merge(&h2->domainlist, &h1->domainlist, force);
     list_merge(&h2->antispam, &h1->antispam, force);
 
-#define FLAG_MERGE(fld) if (force ? !!h1->fld : !h2->fld) h2->fld = h1->fld
+#define FLAG_MERGE(fld) do { if (force ? !!h1->fld : !h2->fld) h2->fld = h1->fld; } while (0)
     FLAG_MERGE(server.via);
     FLAG_MERGE(server.protocol);
     FLAG_MERGE(server.service);
@@ -1534,7 +1531,7 @@ static int query_host(struct query *ctl)
 		st = query_host(ctl);
 	    } while 
 		(st == PS_REPOLL);
-	    if (st == PS_SUCCESS || st == PS_NOMAIL || st == PS_AUTHFAIL || st == PS_LOCKBUSY || st == PS_SMTP || st == PS_MAXFETCH || st == PS_DNS)
+	    if (st == PS_SUCCESS || st == PS_NOMAIL || st == PS_SOCKET || st == PS_AUTHFAIL || st == PS_LOCKBUSY || st == PS_SMTP || st == PS_MAXFETCH || st == PS_DNS)
 		break;
 	}
 	ctl->server.protocol = P_AUTO;
@@ -1588,6 +1585,7 @@ static int query_host(struct query *ctl)
     default:
 	report(stderr, GT_("unsupported protocol selected.\n"));
 	st = PS_PROTOCOL;
+	break;
     }
 
     /*

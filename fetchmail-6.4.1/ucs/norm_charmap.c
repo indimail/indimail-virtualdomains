@@ -26,6 +26,7 @@
 
 #include "config.h" /* import AC_C_CONST effects */
 #include "norm_charmap.h"
+#include "fetchmail.h"
 
 #include <string.h>
 

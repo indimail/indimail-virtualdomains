@@ -6,6 +6,7 @@
  */
 
 #include  "config.h"
+#include "fetchmail.h"
 #include  <stdio.h>
 #include  <string.h>
 #include  <ctype.h>
@@ -35,7 +36,6 @@
 
 #include "i18n.h"
 #include "socket.h"
-#include "fetchmail.h"
 
 /** Macro to clamp the argument so it is >= INT_MIN. */
 #define _FIX_INT_MIN(x) ((x) < INT_MIN ? INT_MIN : (x))
@@ -52,9 +52,9 @@
 /* session variables initialized in init_transact() */
 int suppress_tags = FALSE;	/**< emit tags in the protocol? */
 char tag[TAGLEN];		/**< buffer for the tag */
-static int tagnum;		/**< local counter for the tag */
+static unsigned int tagnum;	/**< local counter for the tag */
 /** Macro to generate the tag and store it in #tag. */
-#define GENSYM	(sprintf(tag, "A%04d", ++tagnum % TAGMOD), tag)
+#define GENSYM	(sprintf(tag, "A%04u", ++tagnum % TAGMOD), tag)
 static const struct method *protocol; /**< description of the protocol used for the current poll */
 char shroud[PASSWORDLEN*2+3];	/**< string to shroud in debug output */
 
@@ -821,8 +821,7 @@ eoh:
 	    already_has_return_path = TRUE;
 	    if (cp[0]=='\0')	/* nxtaddr() strips the brackets... */
 		cp=nulladdr;
-	    strncpy(msgblk.return_path, cp, sizeof(msgblk.return_path));
-	    msgblk.return_path[sizeof(msgblk.return_path)-1] = '\0';
+	    strlcpy(msgblk.return_path, cp, sizeof(msgblk.return_path));
 	    if (!ctl->mda) {
 		free(line);
 		continue;
@@ -888,24 +887,6 @@ eoh:
 	    sender_offs = (line - msgblk.headers);
 	else if (!strncasecmp("Resent-Sender:", line, 14) && (strchr(line, '@') || strchr(line, '!')))
 	    resent_sender_offs = (line - msgblk.headers);
-
-#ifdef __UNUSED__
- 	else if (!strncasecmp("Message-Id:", line, 11))
-	{
-	    if (ctl->server.uidl)
- 	    {
-	        char id[IDLEN+1];
-
-		line[IDLEN+12] = 0;		/* prevent stack overflow */
- 		sscanf(line+12, "%s", id);
- 	        if (!str_find( &ctl->newsaved, num))
-		{
- 		    struct idlist *newl = save_str(&ctl->newsaved,id,UID_SEEN);
-		    newl->val.status.num = num;
-		}
- 	    }
- 	}
-#endif /* __UNUSED__ */
 
 	/* if multidrop is on, gather addressee headers */
 	if (MULTIDROP(ctl))
@@ -1079,8 +1060,7 @@ process_headers:
 	else if (app_from_offs >= 0 && (ap = nxtaddr(msgblk.headers + app_from_offs))) {}
 	/* multi-line MAIL FROM addresses confuse SMTP terribly */
 	if (ap && !strchr(ap, '\n')) {
-	    strncpy(msgblk.return_path, ap, sizeof(msgblk.return_path));
-	    msgblk.return_path[sizeof(msgblk.return_path)-1] = '\0';
+	    strlcpy(msgblk.return_path, ap, sizeof(msgblk.return_path));
 	}
     }
 
@@ -1139,8 +1119,8 @@ process_headers:
 	     * they exist.  If and only if they don't, consider
 	     * the "To" addresses.
 	     */
-	    register struct addrblk *nextptr;
-	   if (outlevel >= O_DEBUG)
+	    struct addrblk *nextptr;
+	    if (outlevel >= O_DEBUG)
 		   report(stdout, GT_("No envelope recipient found, resorting to header guessing.\n"));
 	    if (resent_to_addrchain) {
 		/* delete the "To" chain and substitute it 

@@ -22,22 +22,29 @@ Internet's SDPS, or CRAM-MD5 authentication a la RFC2195.
 
 Fetchmail supports end-to-end encryption with OpenSSL, do read README.SSL for 
 details on fetchmail's configuration and README.SSL-SERVER for server-side 
-requirements.  NOTE! To be compatible with earlier releases, fetchmail 6.3's 
-default behaviour is more relaxed than dictated by the standard - add options 
-such as --sslcertck to tighten certificate checking.
+requirements.  NOTE! To be compatible with earlier releases, fetchmail 6.4
+default behaviour is more relaxed than dictated by recommendations - while it
+does away with SSLv2, only negotiates SSLv3 if forced to, it will by default
+still negotiate TLS v1.0.
 
 Portability
 -----------
 
 The fetchmail code was developed under Linux, but has also been extensively 
 tested under the BSD variants, AIX, HP-UX versions 9 and 10, SunOS, Solaris, 
-NEXTSTEP, OSF 3.2, IRIX, and Rhapsody.
+NEXTSTEP, OSF 3.2, IRIX, and Rhapsody once upon a time.
 
-It should be readily portable to other Unix variants and Unix-like operating 
-systems (it uses GNU autoconf).  It has been ported to Cygwin, LynxOS and BeOS 
-and will build there without special action.  It has also been ported to QNX; 
-to build under QNX, see the header comments in the Makefile.  It is reported to 
-build and run under AmigaOS.
+The current maintainer does not have access to these systems, and assumes that
+the system is at least Single-Unix-Specification V2 compatible, yet fetchmaiil
+should be compilable by a C89 compiler. It currently ships with a copy of the
+trio library for systems that lack snprintf().
+
+Fetchmail should be able to be compiled with C89, C99, C11, C++98, C++03,
+C++11, C++14 compilers, but not C++17 because the "register" keyword is
+used in some parts of the code.
+
+Future fetchmail releases will require modern language features such as
+"long long" and others, so this release is the last to support C89.
 
 Further reading
 ---------------
@@ -54,7 +61,7 @@ Status, source code
 
 The fetchmail code appears to be stable and free of bugs affecting normal 
 operation (that is, retrieving from POP3 or IMAP in single-drop mode and 
-forwarding via SMTP to sendmail).
+forwarding via SMTP to a local mail transfer agent).
 
 You can get the code from the fetchmail home page:
 
@@ -64,4 +71,3 @@ You can get the code from the fetchmail home page:
 Enjoy!
 
 							-- esr, ma
-

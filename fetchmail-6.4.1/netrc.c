@@ -11,13 +11,13 @@
 */
 
 #include "config.h"
+#include "fetchmail.h"
 
 #include <stdio.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "fetchmail.h"
 #include "netrc.h"
 #include "i18n.h"
 

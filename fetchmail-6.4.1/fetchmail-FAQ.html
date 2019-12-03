@@ -17,7 +17,7 @@ a much better one.
 <title>The Fetchmail FAQ</title>
 <meta name="description"
 content="Frequently asked questions about fetchmail."/>
-<meta name="keywords" content="fetchmail, POP, POP2, POP3, IMAP, remote mail"/>
+<meta name="keywords" content="fetchmail, POP3, IMAP, remote mail"/>
 </head>
 <body>
 <table width="100%" cellpadding="0" summary="Canned page footer">
@@ -42,7 +42,7 @@ case you need the new option.</p>
 
 <p>If you have a question or answer you think ought to be added to
 this FAQ list, file it to one of the trackers at <a
-    href="http://sourceforge.net/projects/fetchmail/">our SourceForge.net
+    href="https://sourceforge.net/projects/fetchmail/">our SourceForge.net
     project site</a> or post to one of the fetchmail mailing lists (see
 below).</p>
 
@@ -96,8 +96,8 @@ below).</p>
 <h2 id="C_F">Fetchmail configuration file grammar questions</h2>
 
 <a href="#F1">F1. Why does my old .fetchmailrc no longer work?</a><br/>
-<a href="#F2">F2. The .fetchmailrc parser won't accept my all-numeric user name.</a><br/>
-<a href="#F3">F3. The .fetchmailrc parser won't accept my host or username beginning with 'no'.</a><br/>
+<a href="#F2"><strike>F2. The .fetchmailrc parser won't accept my all-numeric user name.</strike></a><br/>
+<a href="#F3"><strike>F3. The .fetchmailrc parser won't accept my host or username beginning with 'no'.</strike></a><br/>
 <a href="#F4">F4. I'm getting a 'parse error' message I don't understand.</a><br/>
 
 <h2 id="C_C">Configuration questions</h2>
@@ -309,7 +309,7 @@ up to mail retrieval and rerouting for an entire client domain.
 Fetchmail is easy to configure, unobtrusive in operation, powerful,
 feature-rich, and well documented.</p>
 
-<p>Fetchmail is <a href="http://www.opensource.org/">Open Source</a>
+<p>Fetchmail is <a href="https://opensource.org/">Open Source</a>
 Software. The openness of the sources enables you to review and
 customize the code, and contribute your changes.</p>
 
@@ -322,7 +322,7 @@ fetchmail's code for years, which is a hint that open source code does
 not audit itself.</p>
 
 <p>Fetchmail is licensed under the <a
-href="http://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GNU General Public
+href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GNU General Public
 License v2</a>. Details, including an exception that allows linking
 against OpenSSL, are in the COPYING file in the fetchmail
 distribution.</p>
@@ -492,24 +492,21 @@ tips?</a></h2>
 &lt;fetchmail-users@lists.sourceforge.net&gt;
 for bug reports and people who want to discuss configuration issues of
 fetchmail. Please see <a href="#G3">G3 above for information you need to
-report.</a> It's a Mailman list, see <a
-    href="http://lists.sourceforge.net/mailman/listinfo/fetchmail-users">http://lists.sourceforge.net/mailman/listinfo/fetchmail-users</a>
-for info and subscription.</p>
-<p>There is a fetchmail-devel list
+report.</a></p>
+<p>Then there is a fetchmail-devel list
 &lt;fetchmail-devel@lists.sourceforge.net&gt; for people who want to discuss
-fixes and improvements in fetchmail and help co-develop it. It's a
-Mailman list, which you can sign up for at <a
-href="http://lists.sourceforge.net/mailman/listinfo/fetchmail-devel">http://lists.sourceforge.net/mailman/listinfo/fetchmail-devel</a>.</p>
-<p>There is also an announcements-only list,
-&lt;fetchmail-announce@lists.sourceforge.net&gt;, which you can sign up for at <a
-href="http://lists.sourceforge.net/mailman/listinfo/fetchmail-announce">http://lists.sourceforge.net/mailman/listinfo/fetchmail-announce</a>.</p>
+fixes and improvements in fetchmail and help co-develop it.</p>
+<p>Finally, there is also an announcements-only list,
+&lt;fetchmail-announce@lists.sourceforge.net&gt;.</p>
+
+<p>For all lists, see <a href="https://sourceforge.net/p/fetchmail/mailman/">https://sourceforge.net/p/fetchmail/mailman/</a> for subscription, archive and search links.</p>
 
 <h2><a id="G7" name="G7">G7. So, what's this I hear about a
 fetchmail paper?</a></h2>
 
 <p>Eric S. Raymond also considered fetchmail development a sociological
-experiment, an extended test to see if my theory about the critical
-features of the Linux development model is correct.</p>
+experiment, an extended test to see if his theory about the critical
+features of the Linux development model was correct.</p>
 
 <p>He considers the experiment a success. He wrote a paper about it titled <a
 href="http://www.catb.org/~esr/writings/cathedral.html">The
@@ -547,10 +544,7 @@ utility - unfortunately it does not detect SSL-wrapped variants).</p>
 IMAP4rev1 or UIDL-capable POP3 server.</p>
 
 <p>A decent POP3/IMAP server that has recently become popular is <a
-    href="http://dovecot.org/">Dovecot</a>.</p>
-
-<p>Avoid <a href="http://home.pages.de/~mandree/qmail-bugs.html">qmail,
-    it's broken and unmaintained.</a></p>
+    href="https://www.dovecot.org/">Dovecot</a>.</p>
 
 <h2><a id="G9" name="G9">G9. What is the best mail program to use
 with fetchmail?</a></h2>
@@ -561,9 +555,9 @@ use, and user agents are as a rule almost equally indifferent to
 how mail is delivered into your system mailbox. So any of the
 popular Unix mail agents &ndash; <a
 href="http://www.instinct.org/elm/">elm</a>, <a
-href="http://www.washington.edu/pine/">pine</a>, <a
-href="http://www.cs.indiana.edu/docproject/mail/mh.html">mh</a>, or
-<a href="http://www.mutt.org">mutt</a> &ndash; will work fine with
+href="http://alpine.x10host.com/alpine/">alpine</a> (a rewrite of pine), <a
+href="https://www.nongnu.org/nmh/">nmh</a> (the successor to MH), or
+<a href="http://www.mutt.org/">mutt</a> &ndash; will work fine with
 fetchmail.</p>
 
 <p>All this having been said, I can't resist putting in a discreet
@@ -576,22 +570,16 @@ in a class by itself. You won't need its built-in POP3 support, though.
 <h2><a id="G10" name="G10">G10. How can I avoid sending my password
 en clair?</a></h2>
 
-<p>Depending on what your mail server you are talking to, this
-ranges from trivial to impossible. It may even be next to
-useless.</p>
-
-<p>In general there is little point in trying to secure your fetchmail
-transaction unless you trust the security of the server host you are
-retrieving mail from. Your vulnerability is more likely to be an
-insecure local network on the server end (e.g. to somebody with a
-TCP/IP packet sniffer intercepting Ethernet traffic between the modem
-concentrator or DSL POP you dial in to and the mailserver host).</p>
-
-<p>Having realized this, you need to ask whether password
+<p>You need to ask whether password
 encryption alone will really address your security exposure. If you
 think you might be snooped between server and client, it's better
 to use end-to-end encryption such as GnuPG (see below) on your whole
-mail stream so none of it can be read. One of the advantages of
+mail stream so none of it can be read.</p>
+
+<p>Then, you can use <a href="#K5">SSL or TLS</a> for complete
+end-to-end encryption if you have a TLS-enabled mailserver.</p>
+
+<p>One of the advantages of
 fetchmail over conventional SMTP-push delivery is that you may be able
 to arrange encryption by using ssh(1); see <a href="#K3">K3</a>.</p>
 
@@ -599,7 +587,7 @@ to arrange encryption by using ssh(1); see <a href="#K3">K3</a>.</p>
 mail could have been snooped in transit to your POP server from
 wherever it originated. For best security, agree with your
 correspondents to use a tool such as <a
-    href="http://www.gnupg.org/">GnuPG</a> (Gnu Privacy Guard) or PGP
+    href="https://www.gnupg.org/">GnuPG</a> (Gnu Privacy Guard) or PGP
 (Pretty Good Privacy).</p>
 
 <p>If ssh/sshd isn't available, or you find it too complicated for
@@ -614,9 +602,7 @@ to a CAPABILITY query). Do a <code>fetchmail -v</code> to see
 these, or telnet direct to the server port (110 for POP3, 143 for
 IMAP).</p>
 
-<p>If your mailserver is using IMAP 2000, it'll have CRAM-MD5
-support built in. Fetchmail autodetects this; you can skip the rest
-of this section.</p>
+<p>Your server may have CRAM-MD5 support built in.</p>
 
 <p>The POP3 facility you are most likely to have available is APOP.
 This is a POP3 feature supported by many servers (fetchmailconf's
@@ -644,31 +630,12 @@ described by RFC1731 and RFC1734. You can tell if this one is
 present by looking for AUTH=KERBEROS_V4 in the CAPABILITY
 response.</p>
 
-<p>If you are fetching mail from a CompuServe POP3 account, you can
-use their RPA authentication. See <a href="#I1">I1</a> for details.
-If you are fetching mail from
-Microsoft Exchange using IMAP, you will be able to use NTLM.</p>
-
 <p>Your POP3 server may have the RFC1938 OTP capability to use
-one-time passwords (if it doesn't, you can get OTP patches for the
-2.2 version of the Qualcomm popper from <a href="#cmetz">Craig
-Metz</a>). To check this, look for the string "otp-" in the
+one-time passwords. To check this, look for the string "otp-" in the
 greeting line. If you see it, and your fetchmail was built with
 OPIE support compiled in (see the distribution INSTALL file),
 fetchmail will detect it also. When using OTP, you will specify a
 password but it will not be sent en clair.</p>
-
-<p>You can get both POP3 and IMAP OTP patches from <a id="cmetz"
-name="cmetz">Craig Metz</a> at <a
-href="http://www.inner.net/opie">http://www.inner.net/opie</a>.</p>
-
-<p>These patches use a SASL authentication method named "X-OTP"
-because there is not currently a standard way to do this; fetchmail
-also uses this method, so the two will interoperate happily. They
-better, because this is how Craig gets his mail ;-)</p>
-
-<p>Finally, you can use <a href="#K5">SSL or TLS</a> for complete
-end-to-end encryption if you have a TLS-enabled mailserver.</p>
 
 <h2><a id="G11" name="G11">G11. Is any special configuration needed
 to use a dynamic IP address?</a></h2>
@@ -753,8 +720,8 @@ to use firewalls?</a></h2>
 <p>No. You can use fetchmail with SOCKS, the standard tool for
 indirecting TCP/IP through a firewall. You can find out about
 SOCKS, and download the SOCKS software including server and client
-code, at the <a href="http://www.socks.nec.com/">SOCKS distribution
-site</a>.</p>
+code, at the <strike>http://www.socks.nec.com/</strike> <i>Link defunct</i> SOCKS distribution
+site.</p>
 
 <p>The specific recipe for using fetchmail with a firewall is at <a
 href="#K1">K1</a></p>
@@ -825,8 +792,7 @@ FreeBSD.</strike></a></h2>
 
 <p style="font-style:italic;">As of release 6.3.0, fetchmail's
 Makefile[.in] should work flawlessly with BSD's portable make used on
-FreeBSD. With older releases, use GNU make (usually installed as
-<code>gmake</code>; otherwise try <kbd>pkg_add -r gmake</kbd>).</p>
+FreeBSD.</p>
 
 <h2><a id="B2" name="B2">B2. Lex bombs out while building the
 fetchmail lexer.</a></h2>
@@ -882,6 +848,11 @@ directory.</a></h2>
 <h1>Fetchmail configuration file grammar questions</h1>
 <h2><a id="F1" name="F1">F1. Why does my old .fetchmailrc file no
 longer work?</a></h2>
+
+<h3>If your file predates 6.4.0</h3>
+
+<p>Note that fetchmail no longer supports SSLv2, and you should
+avoid SSLv3 or TLSv1.0 if possible.</p>
 
 <h3>If your file predates 6.3.0</h3>
 
@@ -1012,30 +983,15 @@ options, like '<code>protocol</code>'.</p>
 <p>Do similarly for any '<code>monitor</code>' or
 '<code>batchlimit</code>' options.</p>
 
-<h2><a id="F2" name="F2">F2. The .fetchmailrc parser won't accept
-my all-numeric user name.</a></h2>
+<h2><a id="F2" name="F2"><strike>F2. The .fetchmailrc parser won't accept
+my all-numeric user name.</strike></a></h2>
 
-<p>Either upgrade to a post-5.0.5 fetchmail or put string quotes
-around it. :-)</p>
+<p><i>This referred to an older fetchmail 5.x version. Upgrade.</i></p>
 
-<p>The configuration file parser in older fetchmail versions
-treated any all-numeric token as a number, which confused it when
-it was expecting a name. String quoting forces the token's
-class.</p>
+<h2><a id="F3" name="F3"><strike>F3. The .fetchmailrc parser won't accept
+my host or username beginning with 'no'.</strike></a></h2>
 
-<p>The lexical analyzer in 5.0.6 and beyond is smarter and assumes
-any token following "username" or "password" is a string.</p>
-
-<h2><a id="F3" name="F3">F3. The .fetchmailrc parser won't accept
-my host or username beginning with 'no'.</a></h2>
-
-<p>See <a href="#F2">F2</a>. You're caught in an unfortunate crack
-between the newer-style syntax for negated options ('no keep', 'no
-rewrite' etc.) and the older style run-on syntax ('nokeep',
-'norewrite' etc.).</p>
-
-<p>Upgrade to a 5.0.6 or later fetchmail, or put string quotes
-around your token.</p>
+<p><i>This referred to an older fetchmail 5.x version. Upgrade.</i></p>
 
 <h2><a id="F4" name="F4">F4. I'm getting a 'parse error' message I
 don't understand.</a></h2>
@@ -1230,9 +1186,8 @@ cyberspammer.com        REJECT
 <p>would refuse mail from spammer@aol.com, any user from
 cyberspammer.com (or any host within the cyberspammer.com domain),
 and any host on the 192.168.212.* network. (This feature can be
-used to do other things as well; see the <a
-href="http://www.sendmail.org/m4/anti_spam.html">sendmail
-documentation</a> for details)</p>
+used to do other things as well; see the sendmail
+documentation for details)</p>
 
 <p>To actually set up the database, run</p>
 
@@ -1415,8 +1370,7 @@ qmail?</a></h2>
 
 <h3>qmail as your local SMTP server</h3>
 
-<p>Avoid <a href="http://home.pages.de/~mandree/qmail-bugs.html">qmail,
-    it's broken and unmaintained.</a></p>
+<p>Don't! Avoid qmail and netqmail, they are broken and unmaintained.</p>
 
 <p>Turn on the <code>forcecr</code> option; qmail's listener mode
 doesn't like header or message lines terminated with bare
@@ -1556,7 +1510,7 @@ MMDF?</a></h2>
 <p>MMDF itself is difficult to configure, but it turns out that
 connecting fetchmail to MMDF's SMTP channel isn't that hard. You
 can read an <a
-href="http://aplawrence.com/Unixart/uucptofetch.html">MMDF
+href="https://aplawrence.com/Unixart/uucptofetch.html">MMDF
 recipe</a> that describes replacing a UUCP link with fetchmail
 feeding MMDF.</p>
 
@@ -1865,7 +1819,7 @@ accept mail sent to user@my-company.co.uk)</p>
 
 <p>Note that Demon may delete mail on the server which is more than
 30 days old; see their <a
-href="http://www.demon.net/helpdesk/producthelp/mail/sdps-tech.html/">POP3
+href="http://help.demon.net/help-articles/troubleshooting-and-faqs/30-day-mail-deletion-information/">POP3
 page</a> for details.</p>
 
 <h3>The SDPS extension</h3>
@@ -1931,11 +1885,12 @@ mda "sed -e '1s/^\t/Received: /' | formail | /usr/bin/procmail -d &lt;user&gt;"
 Geocities' servers sometimes think that the first 45 messages have
 already been read.</p>
 
-<h2><a id="I5" name="I5">I5. How can I use fetchmail with Hotmail or Lycos Webmail?</a></h2>
+<h2><a id="I5" name="I5"><strike>I5. How can I use fetchmail with Hotmail or Lycos Webmail?</strike></a></h2>
 
-<p>You can't directly. But you can use fetchmail with hotmail or lycos
-webmail with the help of the <a
-href='http://people.freenet.de/courierdave/'>HotWayDaemon</a>
+<p><i>It appears that both services offer POP3 or IMAP access these days.</i></p>
+<p>Other than that, it might be possible to use
+the <a
+href='https://sourceforge.net/projects/hotwayd/'>HotWayDaemon</a>
 daemon. You don't even need to install hotwayd as a daemon in
 <samp>inetd.conf</samp> but can use it as a plugin. Your
 configuration should look like this:</p>
@@ -1948,29 +1903,15 @@ poll localhost protocol pop3 tracepolls
 </pre>
 
 <p>As a second option you may consider using <a
-href="http://linux.cudeso.be/linuxdoc/gotmail.php">gotmail</a>.</p>
+href="https://sourceforge.net/projects/getlive/">GetLive</a>, a successor to the discontinued Gotmail.</p>
 
 <h2><a id="I6" name="I6">I6. How can I use fetchmail with MSN?</a></h2>
 
-<p>You can't. MSN uses something that looks like POP3, except the
-authentication part is nonstandard. And of course they don't
-document it, so nobody but their Windows clients can speak it.</p>
-
-<p>This is a customer lock-in tactic; we recommend boycotting MSN
-as the only appropriate response.</p>
-
-<p>As of 5.0.8, we have support for the client side of NTLM
-authentication. It's possible this may enable fetchmail to talk to
-MSN; if so, somebody should report it so this FAQ can be
-corrected.</p>
+<p>See <a href="#I5">I5</a> above.</p>
 
 <h2><a id="I7" name="I7">I7. How can I use fetchmail with SpryNet?</a></h2>
 
-<p>The SpryNet POP3 servers mark a message queried with TOP as
-seen. This means that if your connection drops in mid-message, it
-may end up invisibly stuck on your mail spool. Use the
-<code>fetchall</code> flag to ensure that it's recovered on the
-next cycle.</p>
+<p><i>SpryNet is no more.</i></p>
 
 <h2><a id="I8" name="I8">I8. How can I use fetchmail with comcast.net or
 	other Maillennium servers?</a></h2>
@@ -1981,8 +1922,8 @@ truncate "TOP" responses after 64&nbsp;-&nbsp;82 kB (we have varying reports),
 in violation of Internet Standard #53 aka. RFC-1939 (POP3). Don't
 mistake this for a fetchmail bug. (Reported July 2003.) Comcast
 documented they haven't understood what this is about in <a
-    href="http://lists.ccil.org/pipermail/fetchmail-friends/2004-April/008523.html">two
-messages from April 2004.</a></p>
+    href="https://www.mhonarc.org/archive/html/fetchmail-friends/2004-04/msg00054.html">two
+    messages from April 2004.</a><!-- local archive contrib/008523.html --></p>
 
 <p>Beginning with version 6.3.2, fetchmail will fall back to the RETR
 command if the greeting string contains "Maillennium POP3/PROXY server",
@@ -1999,7 +1940,7 @@ sites.)</p>
 schemes based on OAuth 2.0 that require clients and users
 to jump through quite a few hoops, and use web browsers for signing in.
 If this hinders access to your account through fetchmail, you may need to turn on access for "less secure apps" at <a
-    href="https://www.google.com/settings/security/lesssecureapps">https://www.google.com/settings/security/lesssecureapps</a>.<br/>
+    href="https://myaccount.google.com/lesssecureapps">https://myaccount.google.com/lesssecureapps</a>.<br/>
 It is disputable whether an application that does not include web
 browsing capabilities or heavy-weight libraries is "less secure" as
 Google claims.</p>
@@ -2109,7 +2050,7 @@ installed under /usr/krb5 so I run <code>configure
 
 <p>Setting up Kerberos V authentication is beyond the scope of this
 FAQ (you may find Jim Rome's paper <a
-href="http://www.ornl.gov/~jar/HowToKerb.html">How to Kerberize
+href="https://web.ornl.gov/~romeja/HowToKerb.html">How to Kerberize
 your site</a> helpful), but you'll at least need to add a
 credential for imap/[mailhost] to the keytab of the mail server
 (IMAP doesn't just use the host key). Then you'll need to have your
@@ -2128,9 +2069,9 @@ cleartext in your .fetchmailrc, or across the network.</p>
 SSL?</a></h2>
 
 <p>You'll need to have the <a
-href="http://www.openssl.org/">OpenSSL</a> libraries installed, and they
-should at least be version 0.9.8, with 1.0.1 preferred.
-Configure with --with-ssl. If you have the OpenSSL libraries
+href="https://www.openssl.org/">OpenSSL</a> libraries installed, and they
+should at least be version 1.0.2.
+Configure with --with-ssl (default since fetchmail v6.4.0). If you have the OpenSSL libraries
 installed in commonly-used default locations, this will
 suffice. If you have them installed in a non-default location,
 you'll need to specify the OpenSSL installation directory as an argument
@@ -2431,8 +2372,7 @@ systems.)</p>
 <h2><a id="R8" name="R8">R8. Fetchmail is timing out after fetching
 certain messages but before deleting them</a></h2>
 
-<p>There's a TCP/IP stalling problem under Redhat 6.0 (and possibly
-other recent Linuxes) that can cause this symptom. Brian Boutel
+<p>There's a TCP/IP stalling problem under Redhat Linux 6.0 that can cause this symptom. Brian Boutel
 writes:</p>
 
 <blockquote>
@@ -2519,14 +2459,14 @@ applications linked against older OpenSSL versions.</p>
 <p>Note: OpenSSL's <code>c_rehash</code> script is broken in several versions,
 which can cause malfunction if several OpenSSL tools versions are installed in
 parallel in separate directories. In such cases, you may need a workaround to
-get things going. Assuming your OpenSSL 1.0.0 is installed in
-<code>/opt/openssl1.0.0</code> and your certificates are in
+get things going. Assuming your OpenSSL 1.0.2 is installed in
+<code>/opt/openssl1.0.2</code> and your certificates are in
 <code>/home/hans/certs</code>, you'd do this (the corresponding fetchmail
 option is <kbd>--sslcertpath /home/hans/certs</kbd> on the commandline and
 <kbd>sslcertpath /home/hans/cert</kbd> in the rcfile):</p>
 
 <pre>
-env PATH=/opt/openssl1.0.0/bin /opt/openssl1.0.0/bin/c_rehash /home/hans/certs
+env PATH=/opt/openssl1.0.2/bin /opt/openssl1.0.2/bin/c_rehash /home/hans/certs
 </pre>
 
 <h2><a id="R15" name="R15">R15. Help, I'm getting Authorization failure!</a></h2>
@@ -2697,8 +2637,7 @@ your server mailbox forever.</p>
 <p>Workaround: add the '<code>fetchall</code>' keyword to your
 fetch options.</p>
 
-<p>Solution: switch to an <a href="http://www.imap.org/">IMAP4</a>
-server.</p>
+<p>Solution: switch to an IMAP4 server.</p>
 
 <hr/>
 <h1>Multidrop-mode problems</h1>
@@ -3312,8 +3251,8 @@ happened with Domino's incoming mail format configured to "Prefers
 MIME". Solution: switch Domino to "Keep in Sender's format".</p>
 
 <p>Reference: <a
-    href="http://lists.ccil.org/pipermail/fetchmail-friends/2006-March/010015.html">Anthony
-    Kim's list post</a>
+    href="https://www.mhonarc.org/archive/html/fetchmail-friends/2006-03/msg00000.html">Anthony
+    Kim's list post</a> <!-- local archive contrib/010015.html -->
 </p>
 
 <h2><a id="X10" name="X10">X10. Fetchmail delivers partial
@@ -3604,7 +3543,7 @@ Using A4 format reaches far more people than (formerly known as DIN A4,
 from DIN&nbsp;476) format. Besides that, A4 paper <em>is</em> available in North
 America.
 For further information on the Letter-vs-A4 story, see:</p>
-<ul><li><a href="http://www.cl.cam.ac.uk/~mgk25/iso-paper.html">Markus
+<ul><li><a href="https://www.cl.cam.ac.uk/~mgk25/iso-paper.html">Markus
 	Kuhn: "International standard paper sizes"</a></li>
     <li><a
 	href="http://betweenborders.com/wordsmithing/a4-vs-us-letter/">Brian

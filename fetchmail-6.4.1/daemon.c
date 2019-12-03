@@ -238,14 +238,15 @@ nottyDetach:
 
   if (dup(logfd) < 0						/* stdout */
 	  || ((logfd == 0 || logfd >= 3) && dup(logfd) < 0)) {	/* stderr */
-      report(stderr, "dup (%s)\n", strerror(errno));
+      report(stderr, "dup(): %s\n", strerror(errno));
       return(PS_IOERR);
   }
 
-#ifdef HAVE_GETCWD
   /* move to root directory, so we don't prevent filesystem unmounts */
-  chdir("/");
-#endif
+  if (chdir("/")) {
+	  report(stderr, "chdir(\"/\"): %s\n", strerror(errno));
+	  return PS_IOERR;
+  }
 
   /* set our umask to something reasonable (we hope) */
 #if defined(DEF_UMASK)

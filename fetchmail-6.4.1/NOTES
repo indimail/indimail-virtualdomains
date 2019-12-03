@@ -8,19 +8,20 @@ This file contains two articles reformatted from HTML.
 
 Introduction
 
-   This document is supposed to complement Eric S. Raymond's (ESR's)
-   design notes. The new maintainers don't agree with some of the
+   This document's contents were last updated in 2006, around fetchmail
+   6.3.4/6.3.5 time. It is supposed to complement Eric S. Raymond's
+   (ESR's) design notes. The new maintainers don't agree with some of the
    decisions ESR made previously, and the differences and new directions
    will be laid out in this document. It is therefore a sort of a TODO
    document, until the necessary code revisions have been made.
 
 Security
 
-   Fetchmail was handed over in a pretty poor shape, security-wise. It
-   will happily talk to the network with root privileges, use sscanf() to
-   read remotely received data into fixed-length stack-based buffers
-   without length limitation and so on. A full audit is required and
-   security concepts will have to be applied. Random bits are:
+   Fetchmail 6.2.x was handed over in a pretty poor shape, security-wise.
+   It would happily talk to the network with root privileges, used
+   sscanf() to read remotely received data into fixed-length stack-based
+   buffers without length limitation and so on. A full audit is required
+   and security concepts will have to be applied. Random bits are:
      * code talking to the network does not require root privileges and
        needs to run without root permissions
      * all input must be validated, all strings must be length checked,

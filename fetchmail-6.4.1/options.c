@@ -6,6 +6,7 @@
  */
 
 #include "config.h"
+#include "fetchmail.h"
 
 #include <stdio.h>
 #include <pwd.h>
@@ -684,7 +685,7 @@ int parsecmdline (int argc /** argument count */,
 	P(GT_("      --sslcertpath path to trusted-CA ssl certificate directory\n"));
 	P(GT_("      --sslcommonname  expect this CommonName from server (discouraged)\n"));
 	P(GT_("      --sslfingerprint fingerprint that must match that of the server's cert.\n"));
-	P(GT_("      --sslproto    force ssl protocol (SSL2/SSL3/TLS1)\n"));
+	P(GT_("      --sslproto    force ssl protocol (see manual)\n"));
 #endif
 	P(GT_("      --plugin      specify external command to open connection\n"));
 	P(GT_("      --plugout     specify external command to open smtp connection\n"));
@@ -696,7 +697,7 @@ int parsecmdline (int argc /** argument count */,
 	P(GT_("      --idle        tells the IMAP server to send notice of new messages\n"));
 	P(GT_("      --port        TCP port to connect to (obsolete, use --service)\n"));
 	P(GT_("  -P, --service     TCP service to connect to (can be numeric TCP port)\n"));
-	P(GT_("      --auth        authentication type (password/kerberos/ssh/otp)\n"));
+	P(GT_("      --auth        authentication type (see manual)\n"));
 	P(GT_("  -t, --timeout     server nonresponse timeout\n"));
 	P(GT_("  -E, --envelope    envelope address header\n"));
 	P(GT_("  -Q, --qvirtual    prefix to remove from local user id\n"));

@@ -10,6 +10,10 @@
 #ifndef fetchmail_uid_db_h
 #define fetchmail_uid_db_h
 
+/* If ffs() is missing on, for instance, Solaris, make sure that config.h or fetchmail.h
+ * contains #define __EXTENSIONS__ - autoconf should set it in config.h. */
+#include "config.h"
+
 /*  includes */
 #include <stddef.h>
 

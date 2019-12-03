@@ -11,6 +11,8 @@
  */
 
 #include  "config.h"
+#include  "fetchmail.h"
+
 #include  <stdio.h>
 #include  <errno.h>
 #include  <string.h>
@@ -31,8 +33,6 @@
 #endif
 #include  <ctype.h>
 #include  <langinfo.h>
-
-#include  "fetchmail.h"
 
 /* for W* macros after pclose() */
 #define _USE_BSD
@@ -445,18 +445,6 @@ static int handle_smtp_report(struct query *ctl, struct msgblk *msg)
 
     responses[0] = xstrdup(smtp_response);
 
-#ifdef __UNUSED__
-    /*
-     * Don't do this!  It can really mess you up if, for example, you're
-     * reporting an error with a single RCPT TO address among several;
-     * RSET discards the message body and it doesn't get sent to the
-     * valid recipients.
-     */
-    smtp_rset(ctl);    /* stay on the safe side */
-    if (outlevel >= O_DEBUG)
-	report(stdout, GT_("Saved error is still %d\n"), smtperr);
-#endif /* __UNUSED */
-
     /*
      * Note: send_bouncemail message strings are not made subject
      * to gettext translation because (a) they're going to be 
@@ -533,12 +521,6 @@ static int handle_smtp_report(struct query *ctl, struct msgblk *msg)
 	 * (b) we wouldn't want spammers to get confirmation that
 	 * this address is live, anyway.
 	 */
-#ifdef __DONT_FEED_THE_SPAMMERS__
-	if (run.bouncemail)
-	    send_bouncemail(ctl, msg, XMIT_ACCEPT,
-			"Invalid address in MAIL FROM (SMTP error 553).\r\n", 
-			1, responses);
-#endif /* __DONT_FEED_THE_SPAMMERS__ */
 	free(responses[0]);
 	return(PS_REFUSED);
 
@@ -617,10 +599,6 @@ static int handle_smtp_report_without_bounce(struct query *ctl, struct msgblk *m
 	return(PS_REFUSED);
 
     case 553: /* invalid sending domain */
-#ifdef __DONT_FEED_THE_SPAMMERS__
-	if (run.bouncemail)
-	    return(PS_SUCCESS);
-#endif /* __DONT_FEED_THE_SPAMMERS__ */
 	return(PS_REFUSED);
 
     default:
@@ -1185,18 +1163,28 @@ static int open_mda_sink(struct query *ctl, struct msgblk *msg,
 	for (dp = after, sp = before; (*dp = *sp); dp++, sp++) {
 	    if (sp[0] != '%')	continue;
 
+	    if (sp > before && sp[-1] == '\'') {
+		report(stderr, GT_("MDA option contains single-quoted %%%c expansion.\n"), sp[1]);
+		report(stderr, GT_("Refusing to deliver. Check the manual and fix your mda option.\n"));
+		free(before);
+		free(after);
+		if (from) free(from);
+		if (names) free(names);
+		return PS_SYNTAX;
+	    }
+
 	    /* need to expand? BTW, no here overflow, because in
 	    ** the worst case (end of string) sp[1] == '\0' */
 	    if (sp[1] == 's' || sp[1] == 'T') {
 		*dp++ = '\'';
-		strcpy(dp, names);
+		if (names) strcpy(dp, names);
 		dp += nameslen;
 		*dp++ = '\'';
 		sp++;	/* position sp over [sT] */
 		dp--;	/* adjust dp */
 	    } else if (sp[1] == 'F') {
 		*dp++ = '\'';
-		strcpy(dp, from);
+		if (from) strcpy(dp, from);
 		dp += fromlen;
 		*dp++ = '\'';
 		sp++;	/* position sp over F */
@@ -1491,8 +1479,16 @@ int close_sink(struct query *ctl, struct msgblk *msg, flag forward)
 		    }
 		    if (smtp_err != SM_OK)
 		    {
-			responses[errors] = xstrdup(smtp_response);
-			errors++;
+			/*
+			 * amavis returns the SMTP code from the recieving
+			 * host after the DATA-DOT. So we need to compare the
+			 * response to the antispam option here instead.
+			 */
+			if (handle_smtp_report(ctl, msg) != PS_REFUSED) {
+			    /* Only count an error if the message was not refused */
+			    responses[errors] = xstrdup(smtp_response);
+			    errors++;
+			}
 		    }
 		}
 

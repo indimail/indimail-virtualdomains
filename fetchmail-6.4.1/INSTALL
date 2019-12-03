@@ -66,11 +66,6 @@ configure option '--with-included-gettext'.
 
 Installing fetchmail is easy.  From within this directory, type:
 
-	./configure --with-ssl
-
-if you have OpenSSL (and its developer packages, if separate) installed
-on your system, or if you don't or do not need SSL/TLS support:
-
 	./configure
 
 The autoconfiguration script will spend a bit of time figuring out the
@@ -80,7 +75,7 @@ variable CC before you run configure.
 
 The configure script accepts certain standard configuration options.
 These include --prefix, --exec-prefix, --bindir, --infodir, --mandir,
-and --srcdir.  Do 'configure --help' for more.
+and --srcdir.  Run 'configure --help' for more.
 
 POP2 support is no longer compiled in by default, as POP2 is way obsolete
 and there don't seem to be any live servers for it anymore.  You can
@@ -102,15 +97,14 @@ locations (/usr, /usr/local).  If you set --with-GSSAPI=DIR
 you can direct the build to look for GSSAPI support under DIR.
 
 Hooks for the OpenSSL library (see http://www.openssl.org/) are
-included in the distribution.  To enable these, configure with
---with-ssl; they are not included in the standard build. Fetchmail's
-configure script will probe some default locations for the
-include/openssl/ssl.h file. If this doesn't work (i. e. configure prints
-"SSL support enabled, but OpenSSL not found" and aborts), you need to
-give the explicit prefix of your OpenSSL installation (specify the
-directory that contains OpenSSL's "include" subdirectory), for instance:
-"--with-ssl=/example/path" would assume that you have an
-/example/path/include/openssl/ssl.h header file.
+included in the distribution.  Fetchmail 6.4 enables these by default.
+Fetchmail's configure script will query pkg-config (pkgconf) or failing that,
+probe some default locations for the include/openssl/ssl.h file. If this
+doesn't work (i. e. configure prints "SSL support enabled, but OpenSSL not
+found" and aborts), you need to give the explicit prefix of your OpenSSL
+installation (specify the directory that contains OpenSSL's "include"
+subdirectory), for instance: "--with-ssl=/example/path" would assume that you
+have an /example/path/include/openssl/ssl.h header file.
 
 2.2 Advanced options
 
@@ -141,6 +135,13 @@ Run
 
 This should compile fetchmail for your system.  If fetchmail fails to build
 properly, see the FAQ section B on build-time problems.
+
+On multi-core computers, run
+
+	make -j8
+
+on a computer that supports 8 CPU threads at the same time (for instance,
+Octocore computers or Quad-core computers supporting two threads per core).
 
 
 4. INSTALL

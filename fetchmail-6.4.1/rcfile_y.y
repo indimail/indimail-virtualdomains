@@ -6,6 +6,7 @@
  */
 
 #include "config.h"
+#include "fetchmail.h"
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/file.h>
@@ -461,6 +462,8 @@ int prc_parse_file (const char *pathname, const flag securecheck)
 {
     prc_errflag = 0;
     querylist = hosttail = (struct query *)NULL;
+
+    (void)yytoknum; /* work around compiler warning */
 
     errno = 0;
 
