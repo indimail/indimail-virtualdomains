@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.12 2019-12-04 11:45:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.13 2019-12-04 21:58:20+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -268,14 +268,16 @@ BuildRequires: -post-build-checks
 # rpm -qlp some-file.rpm
 Requires: /usr/sbin/useradd /usr/sbin/groupadd /usr/sbin/groupdel
 Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
-Requires: binutils initscripts sed findutils pkgconfig
+Requires: binutils sed findutils pkgconfig
 Requires: coreutils grep /bin/sh glibc openssl
 Requires: pam mrtg
 
 %if 0%{?suse_version}
 Requires: mysql-community-server
+Requires: insserv-compat
 %else
 Requires: mysql-server
+Requires: initscripts
 %endif
 
 %if %{defined centos_version} || %{defined rhel_version}
