@@ -386,7 +386,8 @@ va_dcl {
 #include <openssl/x509v3.h>
 #include <openssl/rand.h>
 
-#define fm_MIN_OPENSSL_VER 0x1000200fL
+/*- #define fm_MIN_OPENSSL_VER 0x1000200fL -*/
+#define fm_MIN_OPENSSL_VER 0x00907000L
 
 #ifdef LIBRESSL_VERSION_NUMBER
 #pragma message "WARNING - LibreSSL is unsupported. Use at your own risk."
@@ -1191,6 +1192,7 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 	    }
 	}
 
+#if OPENSSL_VERSION_NUMBER >= 0x1000200fL
 	/* OpenSSL >= 1.0.2: set host name for verification */
 	/* XXX FIXME: do we need to change the function's signature and pass the akalist to
 	 * permit the other hostnames through SSL? */
@@ -1206,6 +1208,7 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 		ERR_print_errors_fp(stderr);
 	    }
 	}
+#endif
 
 	if( mycert || mykey ) {
 
