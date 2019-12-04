@@ -1,4 +1,4 @@
-* Mon Jul 15 2019 13:05:28 +0530 mbhangui@gmail.com 3.0-1.1%{?dist}
+* Tue Dec 03 2019 22:16:26 +0530 mbhangui@gmail.com 3.0-1.1%{?dist}
 Release 3.0 Start 15/05/2018
 23/05/2018
 1.  corrected fortunes cookie directory
@@ -135,3 +135,6 @@ Release 3.0 Start 15/05/2018
 80. MailQuotaWarn.c - speed up MailQuotaWarn. exit if non of QUOTAWARN env
     variables are defined
 81. recalc_quota.c - added scan.h
+03/12/2019
+82. return 0 for all domains if virtualdomains control file is absent
+83. upgraded fetchmail to 6.4.1
