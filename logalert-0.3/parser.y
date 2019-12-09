@@ -231,7 +231,7 @@ handle_conf_file(const char *file)
 	yyin = input;
 
 	yyparse();
-
+	return (0);
 }
 
 
