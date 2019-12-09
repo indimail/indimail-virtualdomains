@@ -1,4 +1,7 @@
-* Thu Feb 25 2010 mbhangui@gmail.com
+* Mon Dec 09 2019 mbhangui@gmail.com
+2019-12-09      <mbhangui@gmail.com>
+    * parser.y fixed return value of handle_conf_file()
+
 2010-02-25      <mbhangui@gmail.com>
     * parser.c, main.c, parser.y added -i option
 
