@@ -4,11 +4,7 @@ sysconfdir=@sysconfdir@
 version=@version@
 #
 
-all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
-	logalert-Debian_8.0.dsc \
-	logalert-Debian_7.0.dsc \
-	logalert-xUbuntu_16.10.dsc \
-	logalert-xUbuntu_16.04.dsc
+all: rules postinst postrm debian.tar.gz logalert.dsc dummy.tar.gz
 
 clean:
 	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz
@@ -25,15 +21,9 @@ postinst: postinst.in Makefile
 	$(edit) $@.in > $@;
 postrm: postrm.in Makefile
 	$(edit) $@.in > $@;
-logalert-Debian_8.0.dsc: logalert-Debian_8.0.dsc.in Makefile
-	$(edit) $@.in > $@
-logalert-Debian_7.0.dsc: logalert-Debian_7.0.dsc.in Makefile
-	$(edit) $@.in > $@
-logalert-xUbuntu_16.10.dsc: logalert-xUbuntu_16.10.dsc.in Makefile
-	$(edit) $@.in > $@
-logalert-xUbuntu_16.04.dsc: logalert-xUbuntu_16.04.dsc.in Makefile
-	$(edit) $@.in > $@
 changelog: changelog.in Makefile
+	$(edit) $@.in > $@
+logalert.dsc: Makefile logalert.dsc.in
 	$(edit) $@.in > $@
 
 dummy.tar.gz: README
