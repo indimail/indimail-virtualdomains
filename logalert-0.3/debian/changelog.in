@@ -1,5 +1,5 @@
 logalert (@version@-1) stable; urgency=low
 
-  * debian subdir for debian builds
+  * parser.y fixed return value of handle_conf_file()
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Fri, 06 May 2011 08:19:03 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Mon, 00 May 2019 16:55:10 +0530
