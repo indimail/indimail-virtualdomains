@@ -7,7 +7,7 @@ Release 3.0 Start 15/05/2018
 3.  remove virtual domains on uninstall
 24/06/2018
 4.  Use $HOSTNAME env variable (apart from uname -n) to set control
-    file that need hostname
+    files that need hostname
 5.  create VIRTUAL_PKG_LIB env variable for qmail-send.25 (qmail-lspawn)
 30/06/2018
 6.  fix argument expected error in spec, postinst
