@@ -149,3 +149,5 @@ Release 3.0 Start 15/05/2018
 09/12/2019
 89. logalert/parser.y - fixed return value of handle_conf_file()
 90. logalert.spec - use libtirpc, libtirpc-devel instead of sunrpc for centos8, rhel8 & above
+10/12/2019
+91. updated courier-imap to 5.0.8
