@@ -127,14 +127,25 @@ Release 3.0 Start 15/05/2018
 75. various fixes to iwebadmin
 76. count_table.c - wrong mysql descriptor beingused in mysql_error()
 77. indimail_config.h - include deluser.h for iwebadmin
-15/07/2019 ==== Released as 3.0 ======================
+15/07/2019 ==== Released as 3.0-0 ======================
 78. recalc_quota.c, update_quota.c - added FAST_QUOTA, MAILDIRSIZE_MAX_SIZE, MALIDISIZE_MAX_AGE
     variables for improving locking on NFS mounted Maildirs
 79. user_over_quota.c - added FAST_QUOTA env variable to avoid costly disk read for quota
     calculations
 80. MailQuotaWarn.c - speed up MailQuotaWarn. exit if non of QUOTAWARN env
     variables are defined
-81. recalc_quota.c - added scan.h
+29/07/2019
+81. update pam-multi to version 1.2, nssd to version 1.2
+82. recalc_quota.c - added scan.h for scan_ulong() prototype
+01/10/2019
+83. use svctool to update libindimail, mysql_lib control files
 03/12/2019
-82. return 0 for all domains if virtualdomains control file is absent
-83. upgraded fetchmail to 6.4.1
+84. isvirtualadomain.c - return 0 for all domains if virtualdomains control file is absent
+85. upgraded fetchmail to 6.4.1
+04/12/2019
+86. fetchmail/socket.c - fixed compilation error for openssl < 1.02
+87. indimail.spec - replaced initscripts with insserv-compat on openSUSE
+88. indimail.spec - use mysql-community-server for openSUSE and mysql-server for rest
+09/12/2019
+89. logalert/parser.y - fixed return value of handle_conf_file()
+90. logalert.spec - use libtirpc, libtirpc-devel instead of sunrpc for centos8, rhel8 & above
