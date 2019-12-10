@@ -1091,6 +1091,7 @@ SSL *tls_connect(SSL_CTX *ctx, int fd)
 			SSL_set_tlsext_host_name(ssl, info->peer_verify_domain);
 		}
 #endif
+#if OPENSSL_API_COMPAT >= 0x10100000L
 		if (info->peer_verify_domain)
 		{
 			char *idn_domain1;
@@ -1109,6 +1110,7 @@ SSL *tls_connect(SSL_CTX *ctx, int fd)
 			if (idn_domain1)
 				free(idn_domain1);
 		}
+#endif
 
 		if ((rc=SSL_connect(ssl)) > 0)
 		{
