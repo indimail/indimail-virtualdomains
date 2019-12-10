@@ -31,7 +31,7 @@
 %global mandir             @mandir@
 %global shareddir          @shareddir@
 %global defaultDomain      @defaultdomain@
-%global courier_version    5.0.7
+%global courier_version    5.0.8
 %global bogofilter_version 1.2.4
 %global pam_multi_version  1.2
 %global ucspi_version      0.88

@@ -20,7 +20,7 @@ version=@version@
 prefix=@prefix@
 #
 libsrs2_version=1.0.18
-courier_version=5.0.7
+courier_version=5.0.8
 bogofilter_version=1.2.4
 fetchmail_version=6.4.1
 nssd_version=1.2
