@@ -1,0 +1,43 @@
+CREDITS
+-------
+
+The credit for inspiration to write/put together this package is entire due to Dr. Daniel Bernstein.
+Had he not written qmail the way it is written, i wouldn't probably have fallen in love with the code.
+In no way is this package endorsed by DJB. Though I have put in lot of effort putting together this package,
+any bugs or flaws could be entirely due to me. So I would be glad if the community could further improve this.
+Since I have gained so much personally as well as professionally due to qmail, the least I can do is to put back
+my experiences and learnings for anyone who would be interested. I release my entire code as Open Source GPL.
+
+My contribution is miniscule compared to what I have picked up from others in building the packages. Since this
+was being done for my own personal use, over the years, I may have missed mentioning some parts of the code that
+has been written by others. In case you know that I have missed out giving credit to anyone for any of the code
+or idea, let me know and I will be glad to add it here.
+
+ACKNOWLEDGEMENTS
+================
+I acknowledge all the following people, urls, packages, code mentioned below
+
+qmail, serialmail, qmailanalog, dotforward, fastforward, mess822, daemontools,
+ucspi-tcp, Courier IMAP/POP3, Bogofilter - A Bayesian Spam Filter,
+Fetchmail, other useful utilities
+
+I thank Dr. Daniel Bernstein for the following original packages at http://cr.yp.to
+
+1. qmail-1.03
+2. dotforward
+3. fastforward
+4. qmailanalog
+5. serialmail
+6. ucspi-tcp
+7. daemontools
+8. mess822
+9. checkpassword
+
+My ex colleagues Sushant TS, Murali Panchapakesan, Govind Raghuram, Ramya Krishnan, Anuradha TP, Premnath Sah
+who came with lot of ideas and suggestion and snippets of code. A great number of bugs were identified by Ramya
+who became an expert in using strace after this. She also added the X-QHPSI, X-Quarantine-ID: and the VIRUSFORWARD
+code in qhpsi.
+
+The site http://qmail.org and the qmail mailing list for wealth of information
+
+1.  http://www.inter7.com - vpopmail - Chris Johnson, Ken Jones, Bill Shupp, Tom Collins
