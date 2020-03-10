@@ -1,5 +1,8 @@
 #
 # $Log: indimail.te,v $
+# Revision 2.29  2020-03-10 20:12:35+05:30  Cprogrammer
+# allow http service started through svscan to connect through unix domain socket
+#
 # Revision 2.28  2018-06-14 10:34:21+05:30  Cprogrammer
 # added rule for iwebadmin
 #
@@ -85,7 +88,7 @@
 # selinux module config
 #
 #
-# $Id: indimail.te,v 2.28 2018-06-14 10:34:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.29 2020-03-10 20:12:35+05:30 Cprogrammer Exp mbhangui $
 # 
 #
 # semanage permissive -a svc_start_t
@@ -100,6 +103,7 @@ require {
 	type initrc_t;
 	type httpd_t;
 	type httpd_sys_script_t;
+	type unconfined_service_t;
 	type mysqld_t;
 	type mysqld_port_t;
 	type nscd_t;
@@ -153,6 +157,7 @@ allow httpd_sys_script_t var_t:file { execute setattr read create execute_no_tra
 allow httpd_sys_script_t var_t:lnk_file read;
 allow httpd_sys_script_t mysqld_port_t:tcp_socket name_connect;
 allow httpd_sys_script_t unlabeled_t:dir search;
+allow httpd_sys_script_t unconfined_service_t:unix_stream_socket connectto;
 
 #============= mysqld_t ==============
 allow mysqld_t usr_t:file { append create rename write unlink };
