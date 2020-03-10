@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 1.3  2020-03-10 20:06:36+05:30  Cprogrammer
+ * incorrect usage of htons()
+ *
  * Revision 1.2  2019-04-22 23:15:52+05:30  Cprogrammer
  * replaced atoi() with scan_int()
  *
@@ -7,6 +10,9 @@
  * Initial revision
  *
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include <stdlib.h>
 #include <netdb.h>
 #include <unistd.h>
@@ -99,13 +105,14 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
  *           if > 0, it is the port# of server (host-byte-order)
  */
 {
-	int             resvport, fd = -1, optval, retval, i;
+	int             resvport, fd = -1, optval, retval;
 	char           *ptr, *hostptr;
 	struct servent *sp;
 #ifdef ENABLE_IPV6
 	struct addrinfo hints = {0}, *res = 0, *res0 = 0;
 	char            serv[FMT_ULONG];
 #else
+	int             i;
 	struct hostent *hp;
 #ifdef HAVE_IN_ADDR_T
 	in_addr_t       inaddr;
@@ -153,7 +160,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	hints.ai_socktype = SOCK_STREAM;
 	if (service != (char *) NULL) {
 		if (port > 0)
-			serv[fmt_ulong(serv, htons(port))] = 0;
+			serv[fmt_ulong(serv, port)] = 0;
 		else {
 			if (isnum(service))
 				byte_copy(serv, FMT_ULONG, service);
@@ -170,7 +177,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 		errno = EINVAL;
 		return (-1);
 	} else
-		serv[fmt_ulong(serv, htons(port))] = 0;
+		serv[fmt_ulong(serv, port)] = 0;
 	if ((retval = getaddrinfo(hostptr, serv, &hints, &res0)))
 		strerr_die7x(111, "tcpopen", "getadrinfo: ", hostptr, ": ", serv, ":", (char *) gai_strerror(retval));
 	for (fd = -1, res = res0; res && fd == -1; res = res->ai_next) {
