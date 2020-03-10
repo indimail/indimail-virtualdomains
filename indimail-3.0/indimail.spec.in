@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.15 2019-12-04 22:22:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.16 2020-03-10 20:11:12+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -187,7 +187,7 @@ BuildRequires: flex findutils
 BuildRequires: readline gzip autoconf automake libtool pkgconfig
 BuildRequires: xz
 BuildRequires: mysql-devel pam-devel libqmail-devel libqmail
-%if 0%{?fedora_version} > 30
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700
 BuildRequires: python3 python3-devel
 %else
 BuildRequires: python python-devel
@@ -402,7 +402,7 @@ echo target_cpu    %_target_cpu
 echo target_os     %_target_os
 echo target_vendor %_target_vendor
 echo Project       %{_project}
-%if 0%{?fedora_version} > 30
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700
 echo pythondir     %{python3_sitelib}
 %else
 echo pythondir     %{pythondir}
@@ -1140,7 +1140,7 @@ done
 #lang(pt) /usr/share/indimail/locale/pt_BR/LC_MESSAGES/fetchmail.mo
 #lang(sk) /usr/share/indimail/locale/sk/LC_MESSAGES/fetchmail.mo
 #lang(tr) /usr/share/indimail/locale/tr/LC_MESSAGES/fetchmail.mo
-%if 0%{?fedora_version} > 30
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700
 %attr(644,root,root)                    %{python3_sitelib}/__pycache__/*.pyc
 %attr(755,root,root)                    %{python3_sitelib}/fetchmailconf.py
 %else
@@ -1978,7 +1978,16 @@ if [ %nofetchmail -eq 0 ] ; then
     extra_opt="$extra_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
   fi
   if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
-    qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary"
+    if [ -d %{_sysconfdir}/clamav ] ; then
+      mysysconfdir=%{_sysconfdir}/clamav
+    elif [ -d %{_sysconfdir}/clamd.d ] ; then
+      mysysconfdir=%{_sysconfdir}/clamd.d
+    elif [ -d %{sysconfdir} ] ; then
+      mysysconfdir=%{sysconfdir}
+    else
+      mysysconfdir=%{_sysconfdir}
+    fi
+    qhpsi="/usr/bin/clamdscan %s --config=${mysysconfdir}/scan.conf --fdpass --quiet --no-summary"
     extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
   fi
   eval %{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} \
