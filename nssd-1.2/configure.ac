@@ -102,7 +102,7 @@ AC_CHECK_FUNCS(strerror_r getgrouplist)
 #FIND_MYSQL()
 ACX_PTHREAD()
 
-AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],nqmail=t,)
+AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],noqmail=t,)
 if test " $noqmail" = " t"
 then
   AC_MSG_ERROR(Could not find qmail library.)
