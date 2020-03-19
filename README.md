@@ -118,3 +118,83 @@ or
 ```
 $ /usr/bin/qmailctl start
 ```
+
+# Binary Builds
+You can get binary RPM / Debian packages at
+
+Stable Releases       - http://download.opensuse.org/repositories/home:/indimail/
+
+Experimental Releases - http://download.opensuse.org/repositories/home:/mbhangui/
+
+The corresponding install instructions for the two repositories are
+
+https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail
+
+&
+
+https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail
+
+```
+Currently, the list of supported distributions for IndiMail is
+
+    * SUSE
+          o openSUSE_Leap_15.0
+          o openSUSE_Leap_15.1
+          o openSUSE_Leap_15.2
+		  o openSUSE_Tumbleweed
+          o SUSE Linux Enterprise 15
+          o SUSE Linux Enterprise 15 SP1
+
+    * Red Hat
+          o Fedora 30
+          o Fedora 31
+          o Red Hat Enterprise Linux 6
+          o Red Hat Enterprise Linux 7
+          o CentOS 6
+          o CentOS 7
+
+    * Debian
+          o Debian 7.0
+          o Debian 8.0
+          o Debian 9.0
+          o Ubuntu 16.04
+          o Ubuntu 17.04
+          o Ubuntu 18.04
+          o Ubuntu 19.04
+          o Ubuntu 19.10
+```
+
+# Docker / Podman Repository
+The docker repository for indimail is at
+
+https://hub.docker.com/r/cprogrammer/indimail
+
+for Docker
+```
+indimail-mta - docker pull cprogrammer/indimail:tag
+```
+or
+
+for Podman
+```
+indimail-mta - podman pull cprogrammer/indimail:tag
+```
+
+where tag is one of
+xenial   for ubuntu 16.04
+
+bionic   for ubuntu 18.04
+
+disco    for ubuntu 19.04
+
+centos7  for centos7
+
+debian8  for debian8
+
+debian9  for debian9
+
+debian10 for debian10
+
+fc31     for fc31
+
+fc30     for fc30
