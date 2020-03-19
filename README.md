@@ -63,9 +63,10 @@ $ make
 $ sudo make install-strip
 ```
 
-# Build indimail-mta-2.8
+# Build indimail-mta-2.x
+(here x is the release)
 ```
-$ cd /usr/local/src/indimail-mta/indimail-mta-2.8
+$ cd /usr/local/src/indimail-mta/indimail-mta-2.x
 $ make
 $ sudo make install-strip
 $ sudo sh ./svctool --config=users --nolog
@@ -171,13 +172,13 @@ https://hub.docker.com/r/cprogrammer/indimail
 
 for Docker
 ```
-indimail-mta - docker pull cprogrammer/indimail:tag
+docker pull cprogrammer/indimail:tag
 ```
 or
 
 for Podman
 ```
-indimail-mta - podman pull cprogrammer/indimail:tag
+podman pull cprogrammer/indimail:tag
 ```
 
 where tag is one of
