@@ -1,5 +1,8 @@
 /*
  * $Log: update_file.c,v $
+ * Revision 1.3  2020-03-20 15:12:01+05:30  Cprogrammer
+ * BUG Fix. Virtualdomains not created when it doesn't exist
+ *
  * Revision 1.2  2019-07-04 00:02:05+05:30  Cprogrammer
  * delete locks on each and every exit
  *
@@ -37,7 +40,7 @@
 #include "dblock.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: update_file.c,v 1.2 2019-07-04 00:02:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: update_file.c,v 1.3 2020-03-20 15:12:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -123,6 +126,14 @@ update_file(char *filename, char *update_line, mode_t mode)
 		delDbLock(fd, filename, 1);
 #endif
 		close(fd2);
+		if (rename(fname.s, filename)) {
+			strerr_warn5("update_file: rename: ", fname.s, " --> ", filename, ": ", &strerr_sys);
+#ifdef FILE_LOCKING
+			delDbLock(fd, filename, 1);
+#endif
+			unlink(fname.s);
+			return (-1);
+		}
 		unlink(fname.s);
 		return (0);
 	}
