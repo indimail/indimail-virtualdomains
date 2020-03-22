@@ -41,8 +41,8 @@ case "$1" in
 	) >> /tmp/indimail-setup.log 2>&1
 	fi
 	(
-	if [ -f ${prefix}/sbin/initsvc -a -f /etc/init.d/indimail ] ; then
-		${prefix}/sbin/initsvc -status || /etc/init.d/indimail stop
+	if [ -f ${prefix}/sbin/initsvc -a -f /etc/init.d/svscan ] ; then
+		${prefix}/sbin/initsvc -status || /etc/init.d/svscan stop
 	fi
 	if [ -f ${prefix}/bin/svok ] ; then
 		set +e
