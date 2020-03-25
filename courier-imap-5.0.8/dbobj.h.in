@@ -10,7 +10,6 @@
 #if	@USE_GDBM@
 #include	"gdbmobj/gdbmobj.h"
 #define	DbObj	GdbmObj
-
 #define	dbobj	gdbmobj
 #define	dbobj_init	gdbmobj_init
 #define	dbobj_open	gdbmobj_open
@@ -22,12 +21,12 @@
 #define	dbobj_store	gdbmobj_store
 #define	dbobj_firstkey	gdbmobj_firstkey
 #define	dbobj_nextkey	gdbmobj_nextkey
+#define	DBNAME	"gdbm"
 #endif
 
 #if	@USE_DB@
 #include	"bdbobj/bdbobj.h"
 #define	DbObj	BDbObj
-
 #define	dbobj	bdbobj
 #define	dbobj_init	bdbobj_init
 #define	dbobj_open	bdbobj_open
@@ -39,6 +38,14 @@
 #define	dbobj_store	bdbobj_store
 #define	dbobj_firstkey	bdbobj_firstkey
 #define	dbobj_nextkey	bdbobj_nextkey
+#if	DB_VERSION_MAJOR >= 3
+#define	DBNAME	"db3"
+#else
+#if	DB_VERSION_MAJOR >= 2
+#define	DBNAME	"db2"
+#else
+#define	DBNAME	"db1"
 #endif
-
+#endif
+#endif
 #endif
