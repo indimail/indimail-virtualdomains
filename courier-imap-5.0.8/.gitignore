@@ -387,6 +387,11 @@ libs/waitlib/config.h
 libs/waitlib/config.log
 libs/waitlib/config.status
 libs/waitlib/testwait
+libs/maildrop/.deps/
+libs/maildrop/README.html
+libs/maildrop/testsuite
+libs/maildrop/uidgid
+libs/maildrop/xconfig.h
 libtool
 maildiracl
 maildiracl.1
