@@ -321,9 +321,8 @@ Some of the features available in this package
 82. indimail-mta - enable virtual domain support by loading indimail shared
     library configured in /etc/indimail/control/libindimail
 
-You can take a detailed look at the feature list at
-
-http://en.wikipedia.org/wiki/User:Mbhangui/IndiMail
+The complete list of features can be seen here
+https://sourceforge.net/p/indimail/wiki/IndiMail/
 
 IRC
 ---
@@ -379,35 +378,6 @@ https://software.opensuse.org/download.html?project=home%3Aindimail&package=indi
 &
 https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail
 
-Currently, the list of supported distributions for IndiMail is
-
-    * SUSE
-          o openSUSE_Leap_42.3
-          o openSUSE_Leap_42.2
-          o openSUSE 13.2
-          o openSUSE 13.1
-          o SUSE Linux Enterprise 12 SP2
-          o SUSE Linux Enterprise 12 SP1
-          o SUSE Linux Enterprise 12
-
-    * Red Hat
-          o Fedora 27
-          o Fedora 26
-          o Red Hat Enterprise Linux 7
-          o Red Hat Enterprise Linux 6
-          o CentOS 7
-          o CentOS 6
-
-    * Debian
-          o Debian 8.0
-          o Debian 7.0
-          o Ubuntu 17.04
-          o Ubuntu 16.10
-          o Ubuntu 16.04
-          o Ubuntu 14.04
-          o Ubuntu 12.04
-
-
 Developing IndiMail is my hobby. To continue working on IndiMail, I need people/organization
 who like the project, to support me, by buying software support from me. If you can afford to
 pay, I would urge you to ask for features and pay for it. The source code of IndiMail is
@@ -424,7 +394,7 @@ indimail     - docker pull cprogrammer/indimail
 
 GIT Repository
 --------------
-IndiMail has a git repository at http://indimail.git.sourceforge.net/
+IndiMail has a git repository at https://github.com/mbhangui/indimail-virtualdomains
 
 
 -- Manvendra Bhangui <manvendra@indimail.org>
