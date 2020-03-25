@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.18 2020-03-22 16:40:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.19 2020-03-25 16:27:05+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -957,6 +957,9 @@ done
 %attr(755,root,root)                    %{_prefix}/bin/maildiracl
 %attr(755,root,root)                    %{_prefix}/bin/imapd
 %attr(755,root,root)                    %{_prefix}/bin/pop3d
+%attr(755,root,root)                    %{_prefix}/bin/mailbot
+%attr(755,root,root)                    %{_prefix}/bin/maildrop
+%attr(755,root,root)                    %{_prefix}/bin/reformail
 %attr(755,root,root)                    %{_prefix}/sbin/imaplogin
 %attr(755,root,root)                    %{_prefix}/sbin/pop3login
 %attr(755,root,root)                    %{_prefix}/sbin/sharedindexinstall
@@ -1159,6 +1162,10 @@ done
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.indimail
 %license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.altermime
 %license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.ripmime
+%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.flash
+%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.fortune
+%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.nssd
+%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.pam-multi
 %if %nobogofilter == 0
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.bogofilter
 %endif
@@ -1168,14 +1175,14 @@ done
 %if %nofetchmail == 0
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.fetchmail
 %endif
-%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.flash
-%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.fortune
-%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.nssd
-%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.pam-multi
 %else
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING.indimail
 %attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.altermime
 %attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.ripmime
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.flash
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.fortune
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.nssd
+%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.pam-multi
 %if %nobogofilter == 0
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING.bogofilter
 %endif
@@ -1185,38 +1192,16 @@ done
 %if %nofetchmail == 0
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING.fetchmail
 %endif
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.flash
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.fortune
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.nssd
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.pam-multi
 %endif
+
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYRIGHT.flash
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYRIGHT.mpack
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.altermime
-%if %nobogofilter == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.bogofilter
-%endif
-%if %nocourierimap == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.courier-imap
-%endif
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.fortune
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.nssd
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.pam-multi
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.ripmime
-
-%if %nofetchmail == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/README-SSL-SERVER.fetchmail
-%attr(444,root,qmail)                   %{shareddir}/doc/README-SSL.fetchmail
-%attr(444,root,qmail)                   %{shareddir}/doc/README-NTLM.fetchmail
-%attr(444,root,qmail)                   %{shareddir}/doc/README.fetchmail
-%endif
 %attr(444,root,qmail)                   %{shareddir}/doc/README.altermime
-%if %nocourierimap == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/README.courier-imap
-%endif
-%if %nobogofilter == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/HOWTO.bogofilter
-%endif
 %attr(444,root,qmail)                   %{shareddir}/doc/ChangeLog.indimail
 %attr(444,root,qmail)                   %{shareddir}/doc/FAQ.pdf
 %attr(444,root,qmail)                   %{shareddir}/doc/HOWTO.sharedmaildir
@@ -1236,6 +1221,40 @@ done
 %attr(444,root,qmail)                   %{shareddir}/doc/RELEASE-Notes
 %attr(444,root,qmail)                   %{shareddir}/doc/indimail_arch.png
 %attr(444,root,qmail)                   %{shareddir}/doc/indimail_queue.png
+
+%if %nobogofilter == 0
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.bogofilter
+%attr(444,root,qmail)                   %{shareddir}/doc/HOWTO.bogofilter
+%endif
+
+%if %nocourierimap == 0
+%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.courier-imap
+%endif
+
+%if %nofetchmail == 0
+%attr(444,root,qmail)                   %{shareddir}/doc/README-SSL-SERVER.fetchmail
+%attr(444,root,qmail)                   %{shareddir}/doc/README-SSL.fetchmail
+%attr(444,root,qmail)                   %{shareddir}/doc/README-NTLM.fetchmail
+%attr(444,root,qmail)                   %{shareddir}/doc/README.fetchmail
+%endif
+
+%if %nocourierimap == 0
+%attr(444,root,qmail)                   %{shareddir}/doc/README.courier-imap
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/lockmail.html
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/mailbot.html
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildir.html
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildiracl.html
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildirkw.html
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildirmake.html
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildrop.html
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildropex.html
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildropfilter.html
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildropgdbm.html
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/makemime.html
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/manpage.css
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/reformail.html
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/reformime.html
+%endif
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
