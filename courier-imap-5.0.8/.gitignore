@@ -10,6 +10,8 @@ install-sh
 confdefs.h
 INSTALL
 INSTALL.html
+libs/imap/imapd.cnf.gnutls
+libs/imap/pop3d.cnf.gnutls
 libs/authlib/Makefile.in
 libs/authlib/aclocal.m4
 libs/authlib/config.h.in
@@ -391,3 +393,17 @@ maildiracl.1
 maildirkw
 *.BAK
 libs/unicode/courier-unicode.h
+lockmail.html
+mailbot.html
+maildiracl.html
+maildir.html
+maildirkw.html
+maildirmake.html
+maildropex.html
+maildropfilter.html
+maildropgdbm.html
+maildrop.html
+makemime.html
+NEWS.html
+reformail.html
+reformime.html
