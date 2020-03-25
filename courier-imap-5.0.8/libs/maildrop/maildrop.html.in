@@ -1,0 +1,411 @@
+<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>maildrop</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets Vsnapshot"/><link rel="home" href="#idm139907572086400" title="maildrop"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+
+Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
+information.
+
+--></head><body><div class="refentry"><a id="idm139907572086400" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>maildrop — mail delivery filter/agent</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">maildrop</code>  [option...] [-d <em class="replaceable"><code>user</code></em>] [<em class="replaceable"><code>arg</code></em>...]</p></div><div class="cmdsynopsis"><p><code class="command">maildrop</code>  [option...] [<em class="replaceable"><code>filename</code></em>] [<em class="replaceable"><code>arg</code></em>...]</p></div></div><div class="refsect1"><a id="idm139907576176096" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+<span class="command"><strong>maildrop</strong></span> is a replacement local mail delivery agent that
+includes a mail filtering language.
+The system administrator can either
+replace the existing mail delivery agent with <span class="command"><strong>maildrop</strong></span>,
+or users may
+run <span class="command"><strong>maildrop</strong></span> using the 'forward to program' mechanism of
+the existing mail delivery agent.</p><p>
+<span class="command"><strong>maildrop</strong></span> first reads the E-mail message on
+standard input.
+Trailing carriage return characters are automatically stripped.
+An E-mail message consists of header lines, followed by a blank line, followed
+by the contents of the message.</p><p>
+      <span class="command"><strong>maildrop</strong></span> does not accept an mbox-style
+      <code class="literal">From_</code>
+      line before the first header line.
+      <span class="command"><strong>maildrop</strong></span> does not accept leading empty lines before
+      the first non-blank header line. If the message can possibly start with
+      empty lines, and a
+      <code class="literal">From_</code>
+      line, use <span class="command"><strong>reformail -f0</strong></span> to remove any initial
+      empty lines, and replace a <code class="literal">From_</code> line with a
+      proper <span class="quote">“<span class="quote">Return-Path:</span>”</span> header; then pipe it to
+      <span class="command"><strong>maildrop</strong></span>.</p><p>
+If the file <code class="filename">@withetcdir@/maildroprc</code> exists, mail
+delivery or mail filtering instructions are read from that file.
+<span class="command"><strong>maildrop</strong></span>'s delivery/filtering instructions may direct
+<span class="command"><strong>maildrop</strong></span> to save the
+message in specific mailbox, discard it, return it to sender, or forward it to
+a different E-mail address.
+</p><p>
+If <code class="filename">@withetcdir@/maildroprc</code> does not exist, or
+its mail delivery instructions do not completely dispose of this message,
+<span class="command"><strong>maildrop</strong></span> then reads the mail delivery instructions
+from <code class="filename">$HOME/.mailfilter</code>.
+If it doesn't exist, or its mail delivery instructions do not completely
+dispose of the message, <span class="command"><strong>maildrop</strong></span>
+then saves the E-mail message
+in the default mailbox.</p><p>
+<span class="command"><strong>maildrop</strong></span> knows how to deliver mail to an standard mailbox
+files; it
+also knows how to deliver to maildirs. A <code class="literal">maildir</code> is a
+directory-based mail format used by the
+<a class="ulink" href="http://www.courier-mta.org" target="_top" shape="rect"><span class="application">Courier</span></a>
+and
+<span class="application"><a class="ulink" href="http://www.qmail.org" target="_top" shape="rect">Qmail</a></span>
+mail servers.
+Many other mail servers also know how to read maildirs.
+When delivering to mailbox files, <span class="command"><strong>maildrop</strong></span> will lock the
+mailbox for the duration of the delivery.</p><p>
+This is the general mail delivery behavior.
+There are minor differences in behavior depending on
+<span class="command"><strong>maildrop</strong></span> delivery mode, which is determined based on
+how
+<span class="command"><strong>maildrop</strong></span> was started.
+<span class="command"><strong>maildrop</strong></span> uses three different primary operating modes:
+</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">Manual mode</span></dt><dd><p>
+A file containing filtering instructions -
+<em class="replaceable"><code>filename</code></em>
+is specified as an argument to the <span class="command"><strong>maildrop</strong></span> command.
+<span class="command"><strong>maildrop</strong></span> reads this
+<em class="replaceable"><code>filename</code></em>
+and follows the instructions in it.
+Unless the message is explicitly forwarded, bounced,
+deleted, or delivered to a specific mailbox, it will be delivered to the
+user's system mailbox.</p></dd><dt><span class="term">Delivery mode</span></dt><dd><p>
+<span class="command"><strong>maildrop</strong></span>
+is the mail server's mail delivery agent.
+<span class="command"><strong>maildrop</strong></span> runs in
+delivery mode when no <em class="replaceable"><code>filename</code></em>
+is specified on the command line.
+<span class="command"><strong>maildrop</strong></span> changes the current directory to the user's
+home directory, then reads <code class="filename">@withetcdir@/maildroprc</code>,
+then <code class="filename">$HOME/.mailfilter</code>.</p></dd><dt><span class="term">Embedded mode</span></dt><dd><p>
+<span class="command"><strong>maildrop</strong></span> functions as a part of another application.
+The embedded mode is used by the
+<a class="ulink" href="http://www.courier-mta.org" target="_top" shape="rect"><span class="application">Courier</span></a>
+mail server to integrate mail filtering directly
+into the process of receiving mail from a remote mail relay, thus rejecting
+unwanted mail before it is even accepted for local mail delivery.
+Embedded mode is used when either the -m, or the -M, option is specified,
+and is described below.
+See below for a more extensive description of the embedded mode.</p></dd></dl></div></div><div class="refsect1"><a id="idm139907576320416" shape="rect"> </a><h2>SECURITY</h2><p>
+It is safe to install <span class="command"><strong>maildrop</strong></span> as a root setuid program.
+<a class="ulink" href="http://www.courier-mta.org" target="_top" shape="rect">The <span class="application">Courier</span> mail server</a>
+installs <span class="command"><strong>maildrop</strong></span> as a root setuid program by default,
+in order to be able to use <span class="command"><strong>maildrop</strong></span> in embedded mode.
+If root runs <span class="command"><strong>maildrop</strong></span> (or it is setuided to root)
+the <code class="option">-d</code> option may be used to
+specify the message's recipient. <span class="command"><strong>maildrop</strong></span>
+immediately resets its userid to the one specified by the
+<code class="option">-d</code> option. The
+user's
+<code class="filename">$HOME/.mailfilter</code>
+is read (if it exists), and the message
+is delivered to the indicated user.</p><p>
+The system administrator can configure <span class="command"><strong>maildrop</strong></span> to restrict
+the <code class="option">-d</code> option for everyone except the mail system
+itself.</p><p>
+If in delivery mode the user's home directory has the sticky bit set,
+<span class="command"><strong>maildrop</strong></span> immediately terminates with an exit code of
+<span class="errorcode">EX_TEMPFAIL</span>, without doing anything.
+Mail servers interpret the
+<span class="errorcode">EX_TEMPFAIL</span> exit code as a request to reschedule the
+message
+for another delivery attempt later. Setting the sticky bit allows
+<code class="filename">$HOME/.mailfilter</code> to be edited while
+temporarily holding all incoming mail.</p><p>
+<span class="command"><strong>maildrop</strong></span> also terminates with
+<span class="errorcode">EX_TEMPFAIL</span> if the user's home directory has world write
+permissions.</p><p>
+<span class="command"><strong>maildrop</strong></span> immediately terminates with
+<span class="errorcode">EX_TEMPFAIL</span> if the <code class="filename">filename</code> is
+not owned by the user,
+or if it has any group or world permissions. This includes read permissions.
+The permissions on
+<code class="filename">$HOME/.mailfilter</code> may only include read and
+write privileges to the user.</p><p>When using the special embedded mode (see below)
+<span class="command"><strong>maildrop</strong></span>
+immediately terminates with the exit code set to
+<span class="errorcode">EX_TEMPFAIL</span> if
+<code class="filename">$HOME/.mailfilters</code>
+is not owned by the user, or if it has any
+group or world permissions.</p></div><div class="refsect1"><a id="idm139907576299744" shape="rect"> </a><h2>TEMPORARY FILES</h2><p>
+<span class="command"><strong>maildrop</strong></span> is heavily optimized and tries to use as
+little resources as possible. <span class="command"><strong>maildrop</strong></span> reads small
+messages into
+memory, then filters and/or delivers the message directly from memory. For
+larger messages, <span class="command"><strong>maildrop</strong></span> accesses the message directly
+from the file.
+If the standard input is not a file, <span class="command"><strong>maildrop</strong></span> writes the
+message to a
+temporary file, then accesses the message from the temporary file. The
+temporary file is automatically removed when the message is delivered.</p></div><div class="refsect1"><a id="idm139907570960864" shape="rect"> </a><h2>OPTIONS</h2><a id="options" shape="rect"> </a><div class="variablelist"><dl class="variablelist"><dt><span class="term">-a</span></dt><dd><p>
+Makes the <span class="application">Courier</span>
+Authentication Library usage mandatory, i.e. maildrop
+will throw a temporary error code if the call to the authlib mechanism
+fails for some reason, such as authdaemon being inaccessible.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+This setting may already be the default, depending on maildrop's
+configuration.</p></div></dd><dt><span class="term">-A "<em class="replaceable"><code>Header: value</code></em>"</span></dt><dd><p>
+Adds an additional header to the message. Specifying
+<span class="emphasis"><em>-A "Foo: Bar"</em></span> effectively adds this header to the
+message being delivered.</p><p>
+The mail transport agent usually adds additional headers when delivering a
+message to a local mailbox. The way it's usually done is by the mail
+transport agent sending the message using a pipe to the local delivery
+agent - such as <span class="command"><strong>maildrop</strong></span> - and adding some additional
+headers in the
+ process.
+Because <span class="command"><strong>maildrop</strong></span> receives the message from a pipe,
+<span class="command"><strong>maildrop</strong></span> must either save the message in memory or write
+the message into a temporary file.</p><p>
+The <code class="option">-A</code> option enables the file containing the message
+to be provided to <span class="command"><strong>maildrop</strong></span> directly, as standard input,
+and the additional headers specified on the command line.
+Because the standard input is a file,
+<span class="command"><strong>maildrop</strong></span> will not need a temporary file.
+Multiple <code class="option">-A</code> options may be specified.</p></dd><dt><span class="term">-d <em class="replaceable"><code>user</code></em></span></dt><dd><p>
+Run <span class="command"><strong>maildrop</strong></span> in delivery mode for this user ID.</p><p>
+The system administrator may optionally restrict the
+<code class="option">-d</code> option to be available to the mail system only, so
+it may not be available to you.
+In all cases, the <code class="option">-d</code> option is allowed if
+<em class="replaceable"><code>user</code></em> is the same user who is running
+<span class="command"><strong>maildrop</strong></span>.
+Also, for the <code class="option">-d</code> option to work at all,
+<span class="command"><strong>maildrop</strong></span> must be executed by root, or
+<span class="command"><strong>maildrop</strong></span> must be a root-owned program with the setuid bit
+set.
+Absence of a <code class="filename">filename</code>
+on
+<span class="command"><strong>maildrop</strong></span>'s command line
+implies the <code class="option">-d</code> option for the user running
+<span class="command"><strong>maildrop</strong></span>.</p><p>
+If <code class="option">-d</code> is not specified, the first argument following all the
+options is
+a name of the file containing filtering instructions. The remaining
+arguments, if any, are assigned to the variables
+<code class="varname">$1</code>,
+<code class="varname">$2</code>, and so on (see
+<a class="ulink" href="maildropfilter.html#environment" target="_top" shape="rect">"Environment"</a> and
+
+<a class="ulink" href="maildropfilter.html#varsubst" target="_top" shape="rect">"Variable substitution"</a>).</p></dd><dt><span class="term">-f <em class="replaceable"><code>address</code></em></span></dt><dd><p>
+Sets the FROM variable (message envelope sender) to
+<em class="replaceable"><code>address</code></em>.
+The system administrator may optionally disable the
+<code class="option">-f</code> option for users, so it may not be available to you.</p></dd><dt><span class="term">-m</span></dt><dd><p>
+Run <span class="command"><strong>maildrop</strong></span> in embedded mode.
+It's possible to use both the <code class="option">-m</code>, and the
+<code class="option">-d</code> options, but it doesn't make much sense to do so.
+Even if you really wanted to run your message through someone else's
+<code class="filename">.mailfilter</code>,
+that <code class="filename">.mailfilter</code> probably has at least one
+instruction which is not allowed in the embedded mode.</p><p>
+The <code class="filename">filename</code> argument to <span class="command"><strong>maildrop</strong></span>
+should be specified.
+<code class="filename">filename</code> is a file that includes filtering
+instructions to be processed in embedded mode.
+The <code class="filename">-m</code> option is used for debugging filter files which
+are later placed in
+<code class="filename">$HOME/.mailfilters</code>, and used with the
+<code class="option">-M</code> option.</p></dd><dt><span class="term">-M <em class="replaceable"><code>filterfile</code></em></span></dt><dd><a id="moption" shape="rect"> </a><p>
+Run <span class="command"><strong>maildrop</strong></span> in a special embedded mode.
+The <code class="option">-d</code>
+option is implied when <code class="option">-M</code> is used, and if absent it defaults
+to the userid running <span class="command"><strong>maildrop</strong></span>.</p><p>
+All the requirements for the <code class="option">-d</code> option apply.
+<span class="command"><strong>maildrop</strong></span> must either
+be executed by root, or the <span class="command"><strong>maildrop</strong></span> program must be owned
+by root with the setuid bit set.
+<span class="command"><strong>maildrop</strong></span> immediately gives up root
+privileges by changing its user ID to the one specified by <code class="option">-d</code>,
+then reads
+<code class="filename">$HOME/.mailfilters/<em class="replaceable"><code>filterfile</code></em></code>. For security reasons the name of the file may not begin with a slash or include
+periods.
+<span class="command"><strong>maildrop</strong></span> is very paranoid:
+both <code class="filename">$HOME/.mailfilters</code>, and
+<code class="filename">$HOME/.mailfilters/<em class="replaceable"><code>filterfile</code></em></code>
+must be owned by the user, and may not have any group or world
+permissions.</p><p>
+The <code class="option">-M</code> option allows for some friendly cooperation between
+the user
+running the application, and the user who provides a filter for the
+embedded mode. The user running the application can use someone else's
+canned filter and be assured that the filter is not going to run amok and
+start sending mail or create files all over the place. The user who
+provides the filter can be assured that the environment variables are
+clean, and that there are no surprises.</p><p>
+<span class="command"><strong>maildrop</strong></span> supports the concept of "default" filter files.
+If the
+file specified by the <span class="command"><strong>-M</strong></span> option cannot be found in
+<code class="filename">$HOME/.mailfilters</code>,
+<span class="command"><strong>maildrop</strong></span> will try to open
+<code class="filename">$HOME/.mailfilters/<em class="replaceable"><code>filterfileprefix</code></em>-default</code>.
+<em class="replaceable"><code>filterfileprefix</code></em> is the initial part
+of <em class="replaceable"><code>filterfile</code></em> up until the last '-' character in
+<em class="replaceable"><code>filterfile</code></em>.</p><p>
+If
+<code class="filename">$HOME/.mailfilters/<em class="replaceable"><code>filterfileprefix</code></em>-default</code>
+does not exist, and there are any other dashes left in
+<em class="replaceable"><code>filterfileprefix</code></em>, maildrop
+removes the last dash and everything
+following it, then tries again.</p><p>
+As a last resort <span class="command"><strong>maildrop</strong></span>
+tries to open <code class="filename">$HOME/.mailfilters/default</code>.</p><p>
+For example, if the parameter to the <code class="option">-M</code> option is
+<span class="emphasis"><em>mailfilter-lists-maildrop</em></span>, <span class="command"><strong>maildrop</strong></span> will try to open the following files, in order:
+</p><div class="blockquote"><blockquote class="blockquote"><div class="literallayout"><p><br clear="none"/>
+<code class="filename">$HOME/.mailfilters/mailfilter-lists-maildrop</code><br clear="none"/>
+<code class="filename">$HOME/.mailfilters/mailfilter-lists-maildrop-default</code><br clear="none"/>
+<code class="filename">$HOME/.mailfilters/mailfilter-lists-default</code><br clear="none"/>
+<code class="filename">$HOME/.mailfilters/mailfilter-default</code><br clear="none"/>
+<code class="filename">$HOME/.mailfilters/default</code><br clear="none"/>
+</p></div></blockquote></div><p>
+</p><p>
+Note that <span class="command"><strong>maildrop</strong></span> looks for -default files ONLY if
+<code class="option">-M</code> is used.</p></dd><dt><span class="term">-D <em class="replaceable"><code>uuu/ggg</code></em></span></dt><dd><p>
+This option is reserved for use by the version of
+<span class="command"><strong>maildrop</strong></span> that comes integrated with the
+<a class="ulink" href="http://www.courier-mta.org" target="_top" shape="rect"><span class="application">Courier</span> mail server</a>.</p></dd><dt><span class="term">-V <em class="replaceable"><code>level</code></em></span></dt><dd><p>
+Initialize the <code class="varname">VERBOSE</code> variable to
+<em class="replaceable"><code>level</code></em>.
+Because <span class="command"><strong>maildrop</strong></span> parses the
+entire file before
+running it, this option is used to produce debugging output in the
+parsing phase. Otherwise, if <code class="filename">filename</code>
+has syntax errors, then
+no debugging output is possible because the <code class="varname">VERBOSE</code> variable
+is not yet set.</p><p>
+<code class="option">-V</code> is ignored when <span class="command"><strong>maildrop</strong></span> runs in
+delivery mode.</p></dd><dt><span class="term">-w <em class="replaceable"><code>N</code></em></span></dt><dd><p>
+The <code class="option">-w N</code> option places a warning message
+into the maildir if the maildir has a quota setting, and after
+the message was successfully delivered the maildir was at least
+<em class="replaceable"><code>N</code></em> percent full.
+	  </p></dd><dt><span class="term">-W <em class="replaceable"><code>filename</code></em></span></dt><dd><p>
+Copy the warning message from <em class="replaceable"><code>filename</code></em>, or from
+<code class="filename">@sysconfdir@/quotawarnmsg</code> if this option is not specified,
+with the addition of the
+"<code class="literal">Date:</code>" and
+"<code class="literal">Message-Id:</code>" headers.
+The warning is repeated every 24 hours (at least), until the maildir drops
+below
+<em class="replaceable"><code>N</code></em> percent full.</p></dd><dt><span class="term">-t <em class="replaceable"><code>socket</code></em></span></dt><dd><p>
+	    This option is available if maildrop is compiled with optional
+	    Dovecot authentication support. <em class="replaceable"><code>socket</code></em>
+	    specifies the location of Dovecot master authentication socket,
+	    for example <code class="filename">/var/run/dovecot/auth-master</code>.
+	  </p></dd></dl></div></div><div class="refsect1"><a id="idm139907570877360" shape="rect"> </a><h2>DELIVERY MODE</h2><p>
+If a <code class="filename">filename</code> is not specified on the command line, or
+if the <code class="option">-d</code>
+option is used, <span class="command"><strong>maildrop</strong></span> will run in delivery mode.
+In delivery mode,
+<span class="command"><strong>maildrop</strong></span> changes to the home directory of the user
+specified by the <code class="option">-d</code>
+option (or the user who is running <span class="command"><strong>maildrop</strong></span> if the
+<code class="option">-d</code> option was not
+given) and reads <code class="filename">$HOME/.mailfilter</code> for filtering
+instructions. <code class="filename">$HOME/.mailfilter</code> must be owned by the
+user, and have no group
+or global permissions (<span class="command"><strong>maildrop</strong></span> terminates if it
+does).</p><p>
+If <code class="filename">$HOME/.mailfilter</code> does not exist,
+<span class="command"><strong>maildrop</strong></span> will
+simply deliver the message to the user's mailbox.</p><p>If the file <code class="filename">@withetcdir@/maildroprc</code> exists,
+<span class="command"><strong>maildrop</strong></span> reads filtering instructions from this file first,
+before reading
+<code class="filename">$HOME/.mailfilter</code>. This allows the system administrator
+to provide global filtering instructions for all users.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+<code class="filename">@withetcdir@/maildroprc</code> is read only in
+delivery mode.</p></div></div><div class="refsect1"><a id="idm139907570865056" shape="rect"> </a><h2>VIRTUAL ACCOUNTS</h2><p>
+The <code class="option">-d</code> option can also specify a name of a virtual account
+or mailbox. See the
+<span class="citerefentry"><span class="refentrytitle">makeuserdb</span>(1)</span>
+manual page in the <span class="application">Courier</span>
+Authentication library's documentation
+for more information.</p></div><div class="refsect1"><a id="idm139907570861952" shape="rect"> </a><h2>EMBEDDED MODE</h2><a id="embedded" shape="rect"> </a><p>
+The embedded mode is used when <span class="command"><strong>maildrop</strong></span>'s filtering
+abilities are
+desired, but no actual mail delivery is needed. In embedded mode
+<span class="command"><strong>maildrop</strong></span> is executed by another application, and
+<a class="ulink" href="#options" target="_top" shape="rect">is
+passed the ‐m or the ‐M option.</a> <span class="command"><strong>maildrop</strong></span> reads the
+message, then runs the filtering rules specified in
+<code class="filename">filename</code>.</p><p>
+<code class="filename">filename</code>
+may contain any filtering instructions EXCEPT the following:
+</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">` ... `</span></dt><dd><p>
+Text strings delimited by back-tick characters (run shell
+command) are not allowed.</p></dd><dt><span class="term"><a class="ulink" href="maildropfilter.html#cc" target="_top" shape="rect">cc</a></span></dt><dd><p>
+The <span class="command"><strong>cc</strong></span> command is not allowed in embedded mode.</p></dd><dt><span class="term"><a class="ulink" href="maildropfilter.html#dotlock" target="_top" shape="rect">dotlock</a></span></dt><dd><p>
+The <span class="command"><strong>dotlock</strong></span> command is not allowed in embedded mode.</p></dd><dt><span class="term"><a class="ulink" href="maildropfilter.html#flock" target="_top" shape="rect">flock</a></span></dt><dd><p>
+The <span class="command"><strong>flock</strong></span> command is not allowed in embedded mode.</p></dd><dt><span class="term"><a class="ulink" href="maildropgdbm.html" target="_top" shape="rect">gdbmopen</a></span></dt><dd><p>
+In embedded mode, GDBM
+databases may be opened only for reading.</p></dd><dt><span class="term"><a class="ulink" href="maildropfilter.html#log" target="_top" shape="rect">log</a></span></dt><dd><p>
+The <span class="command"><strong>log</strong></span> command is not allowed in embedded mode.</p></dd><dt><span class="term"><a class="ulink" href="maildropfilter.html#log" target="_top" shape="rect">logfile</a></span></dt><dd><p>
+The <span class="command"><strong>logfile</strong></span> command is not allowed in embedded mode.</p></dd><dt><span class="term"><a class="ulink" href="maildropfilter.html#system" target="_top" shape="rect">system</a></span></dt><dd><p>
+The <span class="command"><strong>system</strong></span> command is not allowed in embedded mode.</p></dd><dt><span class="term"><a class="ulink" href="maildropfilter.html#to" target="_top" shape="rect">to</a></span></dt><dd><p>
+The <span class="command"><strong>to</strong></span> command is not allowed in embedded mode.</p></dd><dt><span class="term"><a class="ulink" href="maildropfilter.html#xfilter" target="_top" shape="rect">xfilter</a></span></dt><dd><p>
+The <span class="command"><strong>xfilter</strong></span> command is not allowed in embedded mode.</p></dd></dl></div><p>
+Normally when the <code class="filename">filename</code> does not explicitly delivers
+a message,
+<span class="command"><strong>maildrop</strong></span> will deliver the message to the user's default mailbox. This is also disabled in embedded mode.</p><p>
+The <code class="filename">filename</code> may communicate with the parent application
+by
+using the <a class="ulink" href="maildropfilter.html#echo" target="_top" shape="rect">echo</a> statement and the
+<code class="varname">EXITCODE</code> environment variable.</p><div class="refsect2"><a id="idm139907570827200" shape="rect"> </a><h3><code class="filename">@withetcdir@/maildroprcs</code></h3><p>If <span class="command"><strong>maildrop</strong></span> encounters an
+<a class="ulink" href="maildropfilter.html#include" target="_top" shape="rect">include</a>
+statement where the filename
+starts with <code class="filename">@withetcdir@/maildroprcs/</code>,
+the normal restrictions
+for the embedded mode are suspended while executing the filter file in the
+<code class="filename">@withetcdir@/maildroprcs</code> directory. The restrictions are
+also
+suspended for any additional filter files that are included from
+<code class="filename">@withetcdir@/maildroprcs</code>. The restrictions resume once
+<span class="command"><strong>maildrop</strong></span> finishes executing the file from
+<code class="filename">@withetcdir@/maildroprcs</code>.</p><p>
+This allows the system administrator to have a controlled environment for
+running external commands (via the backticks, the
+<a class="ulink" href="maildropfilter.html#system" target="_top" shape="rect">system</a>
+or the
+<a class="ulink" href="maildropfilter.html#xfilter" target="_top" shape="rect">xfilter</a> commands).</p><p>
+The name of the file may not contain any periods (so that a creative
+individual can't write <span class="emphasis"><em>include
+"@withetcdir@/maildroprcs/../../home/user/recipe"</em></span>).</p><p>
+Before executing the commands in the
+<code class="filename">@withetcdir@/maildroprcs</code>
+file, <span class="command"><strong>maildrop</strong></span> automatically resets the following variables to their
+initial values: <code class="varname">DEFAULT</code>, <code class="varname">HOME</code>,
+<code class="varname">LOCKEXT</code>, <code class="varname">LOCKSLEEP</code>,
+<code class="varname">LOCKTIMEOUT</code>, <code class="varname">LOCKREFRESH</code>,
+<code class="varname">LOGNAME</code>, <code class="varname">PATH</code>,
+<code class="varname">SENDMAIL</code>, and <code class="varname">SHELL</code>.
+Please note that the previous
+values of these variables (if they were changed) will NOT be restored once
+<span class="command"><strong>maildrop</strong></span> finishes executing the commands from
+<code class="filename">@withetcdir@/maildroprcs</code>.</p></div></div><div class="refsect1"><a id="idm139907570811296" shape="rect"> </a><h2>WATCHDOG TIMER</h2><p>
+<span class="command"><strong>maildrop</strong></span> has a watchdog timer that attempts to abort runaway
+filtering. If filtering is not complete within a predefined time interval
+(defined by the system administrator, usually five minutes),
+<span class="command"><strong>maildrop</strong></span>
+terminates.</p></div><div class="refsect1"><a id="idm139907570808896" shape="rect"> </a><h2>FILES</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="filename">/etc/passwd</code></span></dt><dd><p>
+Sets user's home directory, and related
+variables. If NIS/YP is install, that will be used as well.</p></dd><dt><span class="term"><code class="filename">@withetcdir@/maildroprc</code></span></dt><dd><p>
+Global filtering instructions for delivery mode.</p></dd><dt><span class="term"><code class="filename">/var/mail</code></span></dt><dd><p>
+System mailbox (actual directory defined by the system administrator).</p></dd><dt><span class="term"><code class="filename">/usr/lib/sendmail</code></span></dt><dd><p>
+Program to forward mail (exact program defined by the system
+administrator).</p></dd><dt><span class="term"><code class="filename">$HOME/.mailfilter</code></span></dt><dd><p>
+Filtering instructions in delivery mode.</p></dd><dt><span class="term"><code class="filename">$HOME/.mailfilters</code></span></dt><dd><p>
+Directory containing files used in special embedded mode.</p></dd></dl></div></div><div class="refsect1"><a id="idm139907570796048" shape="rect"> </a><h2>SEE ALSO</h2><p>
+<a class="ulink" href="lockmail.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">lockmail</span>(1)</span></a>,
+<a class="ulink" href="maildropfilter.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildropfilter</span>(7)</span></a>,
+<a class="ulink" href="makedat.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">makedat</span>(1)</span></a>,
+<a class="ulink" href="maildropgdbm.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildropgdbm</span>(7)</span></a>,
+<a class="ulink" href="maildropex.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildropex</span>(7)</span></a>,
+<a class="ulink" href="reformail.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">reformail</span>(1)</span></a>,
+<a class="ulink" href="makemime.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">makemime</span>(1)</span></a>,
+<a class="ulink" href="reformime.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">reformime</span>(1)</span></a>,
+<span class="citerefentry"><span class="refentrytitle">egrep</span>(1)</span>,
+<span class="citerefentry"><span class="refentrytitle">grep</span>(1)</span>,
+,
+<a class="ulink" href="courier.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">courier</span>(8)</span></a>,
+<span class="citerefentry"><span class="refentrytitle">sendmail</span>(8)</span>,
+<a class="ulink" href="http://www.qmail.org" target="_top" shape="rect">http://www.qmail.org</a>.</p></div></div></body></html>

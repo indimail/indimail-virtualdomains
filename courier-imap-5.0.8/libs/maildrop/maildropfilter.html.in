@@ -1,0 +1,1235 @@
+<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>maildropfilter</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets Vsnapshot"/><link rel="home" href="#idm46044390010000" title="maildropfilter"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+
+Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
+information.
+
+--></head><body><div class="refentry"><a id="idm46044390010000" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>maildropfilter — maildrop's filtering language</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="informalexample"><p>
+	<code class="filename">@withetcdir@/maildroprc</code>,
+	<code class="filename">$HOME/.mailfilter</code>,
+	<code class="filename">$HOME/.mailfilters/*</code>, and friends...
+      </p></div></div><div class="refsect1"><a id="idm46044394451088" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+      This manual page describes the language used by <span class="command"><strong>maildrop</strong></span>
+      to filter E-mail messages.
+      The mail filtering instructions are read from a file.
+
+      The language is loosely structured, it is based on pattern
+      matching. The language has a distinct lexical and syntactical structure,
+      very similar to Perl's, but it is important to note that it is not Perl,
+      and is very different from Perl, in certain cases.</p><p>
+      If the filtering instructions do not exist,
+      <span class="command"><strong>maildrop</strong></span> delivers the
+      message to the default mailbox without doing any additional processing,
+      making it indistinguishable from the usual mail delivery agent.</p><p>
+      It is important to note that <span class="command"><strong>maildrop</strong></span> reads and parses the
+      <code class="systemitem">filter file</code> before doing anything. If there are any errors
+      <span class="command"><strong>maildrop</strong></span> prints an error message, and terminates with the exit code
+      set to <span class="errorcode">EX_TEMPFAIL</span>. A compliant mail transport agent
+      should
+      re-queue the message for a later delivery attempt. Hopefully, most simple
+      syntax errors will not cause mail to be bounced back if the error is caught
+      and fixed quickly.</p><div class="refsect2"><a id="idm46044394503184" shape="rect"> </a><h3>Environment</h3><p>
+	<a id="environment" shape="rect"> </a>
+
+	<span class="command"><strong>maildrop</strong></span> uses variables to access and manipulate messages.
+	Variables
+	are arbitrary text accessed by referring to the name of the variable, such as
+	<code class="varname">HOME</code>, or <code class="varname">DEFAULT</code>.
+	Text is placed into a variable by
+	using an assignment statement, such as:
+      </p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+FILE="IN.junk"
+	  </pre></div></blockquote></div><p>
+	This statement puts the text "IN.junk" (without the quotes) into a variable
+	whose name is <code class="varname">FILE</code>.
+	Later, the contents of a variable are accessed by using
+	the $ symbol and the name for the variable. For example:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+to $FILE
+	  </pre></div></blockquote></div><p>
+	This will deliver the current message to the mailbox file (or a maildir
+	directory) named "IN.junk".</p><p>
+	<span class="command"><strong>maildrop</strong></span> initially creates variables from the environment
+	variables
+	of the operating system, UNLESS <span class="command"><strong>maildrop</strong></span> runs in delivery mode.
+	Each
+	operating system environment variable becomes a <span class="command"><strong>maildrop</strong></span>
+	variable.
+	When running in delivery mode, <span class="command"><strong>maildrop</strong></span> does not import the
+	environment for security reasons,
+	except for the environment variables that define the process locale
+	(<code class="varname">LANG</code>,
+	<code class="varname">LANGUAGE</code>, and
+	<code class="varname">LC_<em class="replaceable"><code>*</code></em></code>), which are still imported.
+      </p><p>
+	In all cases <span class="command"><strong>maildrop</strong></span> resets the
+	following variables to their default values: <code class="varname">HOME</code>,
+	<code class="varname">DEFAULT</code>, <code class="varname">SHELL</code>,
+	<code class="varname">PATH</code>, <code class="varname">LOCKEXT</code>,
+	<code class="varname">LOCKREFRESH</code>, <code class="varname">LOCKSLEEP</code>,
+	<code class="varname">LOCKTIMEOUT</code>, <code class="varname">MAILDIRQUOTA</code>,
+	<code class="varname">SENDMAIL</code> and <code class="varname">LOGNAME</code>.</p><p>
+	There's one exception to this rule which applies to the version of
+	<span class="command"><strong>maildrop</strong></span> that comes with the
+	<a class="ulink" href="http://www.courier-mta.org/" target="_top" shape="rect"><span class="application">Courier</span> mail server</a>.  The following
+	does not apply to the standalone version of <span class="command"><strong>maildrop</strong></span>:
+	when running in
+	delivery mode, if the <code class="option">-d</code> flag was not used, or if it specifies
+	the same userid as the one that's running <span class="command"><strong>maildrop</strong></span>:
+	the following
+	variables are automatically imported from the environment: <code class="varname">HOME</code>, <code class="varname">SHELL</code>,
+	<code class="varname">LOGNAME</code> and <code class="varname">MAILDIRQUOTA</code>.
+	These environment variables are
+	initialized by the <span class="application">Courier</span>
+	mail server prior to running <span class="command"><strong>maildrop</strong></span>.
+	Additionally, the
+	initial value for the <code class="varname">DEFAULT</code> maildrop variable is imported from
+	the <code class="varname">MAILDROPDEFAULT</code> environment variable. This is because
+	the <span class="application">Courier</span> mail server overloads the
+	DEFAULT environment variable to store the defaulted
+	portion of the local mailbox address. See the <a class="ulink" href="dot-courier.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">dot-courier</span>(5)</span></a> man page in the
+	<span class="application">Courier</span> mail server
+	distribution. You can get the <span class="application">Courier</span>
+	mail server's <code class="varname">DEFAULT</code> value by
+	using the
+	<span class="command"><strong>import</strong></span> command.
+	Note, however, that this will clobber the old
+	contents of <code class="varname">DEFAULT</code>, which is probably not what you want.
+	The right way to do this would be something like this:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+SAVEDEFAULT=$DEFAULT
+import DEFAULT
+LOCALDEFAULT=$DEFAULT
+DEFAULT=$SAVEDEFAULT
+	  </pre></div></blockquote></div><p>All internal variables are exported back as environment variables when
+	<span class="command"><strong>maildrop</strong></span> runs an external command. Changes to internal variables, made
+	by the <code class="systemitem">filter file</code>, are reflected in the exported environment.</p></div><div class="refsect2"><a id="idm46044394616512" shape="rect"> </a><h3>Lexical structure</h3><p>
+	Most whitespace is generally ignored. The <span class="token">#</span>
+	character introduces a comment
+	running to the end of the line, which is also ignored. Unlike other mail
+	filters, <span class="command"><strong>maildrop</strong></span> parses the
+	<code class="systemitem">filter file</code> before taking any action
+	with the message.
+	If there are syntax errors in the file, <span class="command"><strong>maildrop</strong></span> displays
+	an error message, and returns <span class="errorcode">EX_TEMPFAIL</span>. That should
+	cause the
+	mail message to remain in the queue, and, hopefully allow the problem to be
+	corrected, without bouncing any mail.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	  In <span class="command"><strong>maildrop</strong></span>, the end of line is a lexical token. In order to
+	  continue a long statement on the next line, terminate the line with a
+	  backslash character.</p></div></div><div class="refsect2"><a id="idm46044394609984" shape="rect"> </a><h3>Literal text</h3><p>
+	Literal text in the <span class="command"><strong>maildrop</strong></span> filtering language is
+	surrounded by
+	either single or double quotes. In order to enter a single quote into a text
+	literal surrounded by single quotes, or a double quote into a literal
+	surrounded by double quotes, prefix it with a backslash character. Use two
+	backslash characters characters to enter one backslash character in the text
+	literal.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>A backslash followed by either a backslash, or a matching quote, is
+	  the only situation where the backslash character is actually removed, leaving
+	  only the following character in the actual text literal. If a backslash
+	  character is followed by any other character, the backslash is NOT
+	  removed.</p></div><p>Multiple text literals in a row are automatically concatenated, even if
+	they use different quotes. For example:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+FOOBAR="Foo"'bar'
+	  </pre></div></blockquote></div><p>
+	This sets the variable <code class="varname">FOOBAR</code> to the text "Foobar".
+      </p></div><div class="refsect2"><a id="idm46044394590768" shape="rect"> </a><h3>Variable substitution</h3><p>
+	<a id="varsubst" shape="rect"> </a>
+
+	Variable substitution is performed on text literals that's surrounded by
+	double quotation marks. The "<span class="token">$</span>" character, followed by a variable name,
+	is replaced by that variable's contents.
+      </p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+MAILBOX="$HOME/Mailbox"
+	  </pre></div></blockquote></div><p>
+	This sets the variable <code class="varname">MAILBOX</code> to the contents of the
+	variable
+	<code class="varname">HOME</code> followed by <code class="literal">"/Mailbox"</code>.
+	Variable names must begin with an
+	uppercase letter, a lowercase letter, or an underscore.
+	Following that, all
+	letters, digits, and underscores are taken as a variable name, and its
+	contents replace the <span class="token">$</span> sign, and the variable name. It is possible to access
+	variables whose name includes other characters, by using braces as
+	follows:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+MAILBOX="${HOME-WORD}/Mailbox"
+	  </pre></div></blockquote></div><p>
+	Inserts the contents of the <code class="varname">HOME-WORD</code> variable. If the
+	variable
+	does not exist, the empty text literal is used to replace the variable name.
+	It is not possible to access variables whose names include the <span class="token">}</span>
+	character.</p><p>If the <span class="token">$</span> character is not followed by a left brace, letter, or an
+	underscore, the <span class="token">$</span> character remains unmolested in the text literal. A
+	backslash followed by the <span class="token">$</span> character results in a <span class="token">$</span> character in the text
+	literal, without doing any variable substitution.</p><p>
+	Variable substitution is not done in text literals which are surrounded by
+	single quotes (apostrophes).</p></div><div class="refsect2"><a id="idm46044394578784" shape="rect"> </a><h3>Command line arguments</h3><p>
+	<span class="command"><strong>maildrop</strong></span> initializes special variables:
+	<code class="varname">$1</code>, <code class="varname">$2</code>, and so on, with
+	additional parameters specified on the <span class="command"><strong>maildrop</strong></span>
+	command line. A <code class="systemitem">filter file</code>
+	may use those variables just like any other variables.</p></div><div class="refsect2"><a id="idm46044394574208" shape="rect"> </a><h3>Predefined variables</h3><a id="predefined" shape="rect"> </a><p>
+	The following variables are automatically defined by
+	<span class="command"><strong>maildrop</strong></span>. The
+	default values for the following variables may be changed by the system
+	administrator. For security reasons, the values of the following variables
+	are always reset to their default values, and are never imported from the
+	environment:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="varname">DEFAULT</code></span></dt><dd><p>The default mailbox to deliver the message to.
+	      If the <code class="systemitem">filter file</code> does not indicate a mailbox to deliver this message
+	      to, the message is delivered to this mailbox. The default mailbox is
+	      defined by the system administrator.
+
+	</p></dd><dt><span class="term"><code class="varname">FROM</code></span></dt><dd><p>Message envelope sender. This is usually the same
+	      address as what appears in the <code class="literal">From:</code> header, but may
+	      not be.
+	      This information may or may not be available to <span class="command"><strong>maildrop</strong></span> on your
+	      system. The message envelope sender is usually specified with the <code class="option">-f</code>
+	      option to <span class="command"><strong>maildrop</strong></span>. If the <code class="option">-f</code> option is not given, <span class="command"><strong>maildrop</strong></span>
+	      looks for the <code class="literal">Return-Path:</code> header in the message. As the last resort,
+	      <code class="literal">FROM</code> defaults to <span class="quote">“<span class="quote">MAILER-DAEMON</span>”</span>.
+	      Note that <code class="varname">FROM</code> may be empty - the message envelope sender is
+	      empty for bounce messages.
+	</p></dd><dt><span class="term"><code class="varname">HOME</code></span></dt><dd><p>Home directory of the user running
+	      <span class="command"><strong>maildrop</strong></span>.
+
+	</p></dd><dt><span class="term"><code class="varname">HOSTNAME</code></span></dt><dd><p>Network name of the machine running maildrop.
+	      Obtained from <span class="citerefentry"><span class="refentrytitle">gethostname</span>(3)</span>.
+
+	</p></dd><dt><span class="term"><code class="varname">LOCKEXT</code></span></dt><dd><p>Extension for dot-lock files (default: <code class="literal">.lock</code>).
+
+	</p></dd><dt><span class="term"><code class="varname">LOCKREFRESH</code></span></dt><dd><p>Refresh interval, in seconds, for dot-locks
+	      (default: <code class="literal">15</code>). When <span class="command"><strong>maildrop</strong></span> dot-locks a mailbox, <span class="command"><strong>maildrop</strong></span>
+	      tries to refresh the lock periodically in order to keep other programs
+	      from removing a stale dot-lock. This is only required if a dot-lock
+	      exists for a prolonged period of time, which should be discouraged
+	      anyway.
+
+	</p></dd><dt><span class="term"><code class="varname">LOCKSLEEP</code></span></dt><dd><p>Number of seconds to wait to try again to
+	      create a dot-lock file, if one already exists (default: 5).
+
+	</p></dd><dt><span class="term"><code class="varname">LOCKTIMEOUT</code></span></dt><dd><p>Number of seconds to wait before removing a
+	      stale dot-lock file (default: <code class="literal">60</code>). If a dot-lock file still exists after
+	      <code class="varname">LOCKTIMEOUT</code> seconds, <span class="command"><strong>maildrop</strong></span> assumes that the
+	      process holding the lock no longer exists, and the dot-lock file can be
+	      safely removed. After removing the dot-lock file, <span class="command"><strong>maildrop</strong></span> waits
+	      <code class="varname">LOCKSLEEP</code> seconds before trying to create its own dot-lock
+	      file, in order to avoid a race condition with another process which is
+	      also trying to remove the same stale dot-lock, at the same time.
+
+	</p></dd><dt><span class="term"><code class="varname">LOGNAME</code></span></dt><dd><p>Name of the user to who the message is being
+	      delivered.
+
+	</p></dd><dt><span class="term"><code class="varname">MAILDROP_OLD_REGEXP</code></span></dt><dd><p>
+	      Revert to using the old legacy pattern matching engine.
+	      Versions of <span class="command"><strong>maildrop</strong></span> prior to version 2.0
+	      (included in the <span class="application">Courier</span> mail server 0.51,
+	      and earlier), used a built-in pattern matching engine, instead of using the
+	      <acronym class="acronym">PCRE</acronym>
+	      library (see the
+	      <span class="quote">“<span class="quote"><a class="link" href="#patterns" shape="rect">Patterns</a></span>”</span>
+	      section).
+	      <span class="command"><strong>maildrop</strong></span> 1.x used a different syntax for patterns, which
+	      is no longer described in this manual page.
+	      The old pattern matching engine is still available, by
+	      setting <code class="varname">MAILDROP_OLD_REGEXP</code> to <span class="quote">“<span class="quote">1</span>”</span>.
+	      Setting this variable will use the legacy pattern matching engine for the
+	      rest of the <span class="command"><strong>maildrop</strong></span> recipe file.</p><p>
+	      The pattern matching engine will be removed completely in a future version
+	      of maildrop.
+	      This setting provides for a transitional period of converting old recipes.
+	      <code class="varname">MAILDROP_OLD_REGEXP</code> can be set to <span class="quote">“<span class="quote">1</span>”</span> in
+	      the global <code class="filename">maildroprc</code> file, then reset to <span class="quote">“<span class="quote">0</span>”</span>
+	      in each individual <span class="command"><strong>maildrop</strong></span> recipe file, after it gets
+	      converted to the new syntax.</p></dd><dt><span class="term"><code class="varname">MAILFILTER</code></span></dt><dd><p>This is the name of the original <code class="systemitem">filter file</code>
+	      that was given to <span class="command"><strong>maildrop</strong></span> on the command line. This is mostly
+	      useful to <code class="literal">-default</code> <code class="systemitem">filter file</code>s, it allows them to
+	      obtain the <a class="ulink" href="maildrop.html#moption" target="_top" shape="rect">value of the -M option</a>
+	      specified on the command line.
+	</p></dd><dt><span class="term"><code class="varname">PATH</code></span></dt><dd><p>Command execution path. <span class="command"><strong>maildrop</strong></span> resets PATH
+	      to the system default (usually
+	      <code class="literal">/bin:/usr/bin:/usr/local/bin</code>).
+
+	</p></dd><dt><span class="term"><code class="varname">SENDMAIL</code></span></dt><dd><p>The mail delivery agent.
+	      When <span class="command"><strong>maildrop</strong></span> is
+	      instructed to deliver the message to a mailbox whose name begins with the
+	      ! character, this is interpreted as a request to forward the message. The
+	      <code class="varname">SENDMAIL</code> command is executed to forward the message.
+
+	</p></dd><dt><span class="term"><code class="varname">SHELL</code></span></dt><dd><p>The login shell. The shell is used to execute all
+	      commands invoked by <span class="command"><strong>maildrop</strong></span>.
+
+	</p></dd><dt><span class="term"><code class="varname">VERBOSE</code></span></dt><dd><p>Current Debug level (default: <code class="literal">0</code>). Setting <code class="varname">VERBOSE</code> to
+	      progressive higher values, between 1 and 9, produces debugging output on
+	      standard error. <span class="command"><strong>maildrop</strong></span> ignores
+	      the <code class="varname">VERBOSE</code> variable in delivery
+	      mode (in order not to confuse the mail transport agent).
+
+	</p></dd><dt><span class="term"><code class="varname">UMASK</code></span></dt><dd><p>The file creation mode mask, in octal.  The
+	      default setting of <code class="literal">077</code> creates mailboxes that are readable and writable
+	      by the owner only.  Use <code class="literal">007</code> to create mailboxes that are
+	      readable/writable by both owner and the group.  Use <code class="literal">037</code>
+	      to create
+	      mailboxes that are readable by both owner and group, but writable by
+	      owner only.  Permissions on existing mailboxes are not changed, this
+	      setting affects only new mailboxes.  When delivering to maildirs this
+	      setting sets the permissions on new messages only.  Access permissions on
+	      messages in maildirs are also affected by the permissions on the maildir
+	      directories.
+	</p></dd></dl></div></div><div class="refsect2"><a id="idm46044389118688" shape="rect"> </a><h3>Other special variables</h3><p>
+	The following variables are automatically used by <span class="command"><strong>maildrop</strong></span> when the
+	<code class="systemitem">filter file</code> is being processed:
+      </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="varname">EXITCODE</code></span></dt><dd><p>Return code for <span class="command"><strong>maildrop</strong></span>. When
+	      <span class="command"><strong>maildrop</strong></span> successfully delivers a message, it terminates with this
+	      exit code, which defaults to 0. When the <span class="command"><strong>to</strong></span> or the
+	      <span class="command"><strong>cc</strong></span> command is used to deliver the message to an external
+	      process, via a pipe, <span class="command"><strong>maildrop</strong></span> will set this variable to the exit
+	      code of the external process. Since <span class="command"><strong>maildrop</strong></span> immediately
+	      terminates after completing the <span class="command"><strong>to</strong></span> command this means that
+	      <span class="command"><strong>maildrop</strong></span>'s exit code will be the exit code of the external
+	      process. If the <span class="command"><strong>to</strong></span> command does not deliver the message to a
+	      process you must set <code class="varname">EXITCODE</code> before the <span class="command"><strong>to</strong></span>
+	      command, since <span class="command"><strong>maildrop</strong></span> terminates immediately after finishing the
+	      delivery.
+
+	</p></dd><dt><span class="term"><code class="varname">FLAGS</code></span></dt><dd><p>
+	      The <code class="varname">FLAGS</code> variable is used only when delivering
+	      a message to a maildir, and may contain only the following
+	      letters: <span class="quote">“<span class="quote">D</span>”</span>, <span class="quote">“<span class="quote">F</span>”</span>,
+	      <span class="quote">“<span class="quote">R</span>”</span>, and <span class="quote">“<span class="quote">S</span>”</span>. They may appear in
+	      any order. When the message gets delivered to the maildir,
+	      the message will be marked with a draft, flag, replied, or seen,
+	      attribute, correspondingly.
+	    </p><p>
+	      <code class="varname">FLAGS</code> must be set before the message is
+	      delivered to a maildir.
+	      The contents of <code class="varname">FLAGS</code> are ignored, when
+	      delivering on
+	      an mbox folder.
+	    </p></dd><dt><span class="term"><code class="varname">KEYWORDS</code></span></dt><dd><p>
+	      The <code class="varname">KEYWORDS</code> variable is used only when delivering a
+	      message to a maildir, and implements the optional IMAP keyword extension
+	      as implemented in the
+	      <a class="ulink" href="http://www.courier-mta.org/" target="_top" shape="rect"><span class="application">Courier</span> IMAP server</a>.
+	      It may be optionally initialized to contain a comma-separate list of keywords.
+	      The <a class="link" href="#to" shape="rect"><span class="command"><strong>to</strong></span></a>, or the
+	      <a class="link" href="#cc" shape="rect"><span class="command"><strong>cc</strong></span></a> command, delivers the message
+	      to the maildir normally, but also associated the list of keywords in
+	      <code class="varname">KEYWORDS</code> with the newly delivered message.</p><p>
+	      <code class="varname">KEYWORDS</code> must be set before the message is delivered to
+	      a maildir.
+	      The contents of <code class="varname">KEYWORDS</code> are ignored, when delivering on
+	      an mbox folder.
+	</p></dd><dt><span class="term"><code class="varname">LINES</code></span></dt><dd><p>Number of lines in the current message. Note that
+	      this may be an approximation. It may or may not take into account the -A
+	      option. Use this as criteria for filtering,
+	      nothing more.
+
+	</p></dd><dt><span class="term"><code class="varname">MAILDIRQUOTA</code></span></dt><dd><p>Set this variable in order to manually
+	      enforce a maximum size on ANY maildir where the message is delivered.
+	      This is an optional feature that must be enabled by the system
+	      administrator, see <a class="ulink" href="maildirquota.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildirquota</span>(8)</span></a> for
+	      more information.
+
+	</p></dd><dt><span class="term"><code class="varname">RETURNCODE</code></span></dt><dd><p>This variable is set when <span class="command"><strong>maildrop</strong></span>
+	      runs the
+	      <a class="ulink" href="#system" target="_top" shape="rect">system</a> command,
+	      <a class="ulink" href="#xfilter" target="_top" shape="rect">xfilter</a> command, or a command that's
+	      specified within a pair of backtick characters ( command substitution ).
+	      The <code class="varname">RETURNCODE</code> variable will be set to the exit code of the
+	      command, after it completes.
+
+	</p></dd><dt><span class="term"><code class="varname">SIZE</code></span></dt><dd><p>Number of bytes in the message. This may or may not
+	      include the -A option. Use this as a criteria
+	      for filtering, nothing more.</p></dd></dl></div></div><div class="refsect2"><a id="idm46044389086400" shape="rect"> </a><h3>Unquoted text</h3><p>
+	All text strings in <code class="systemitem">filter file</code>s should be in single, or double quotes.
+	However, for convenience sake, quotes can be omitted under certain
+	circumstances.</p><p>
+	Text that includes ONLY letters, digits, and the following characters:
+	<code class="literal">_-.:/${}@</code> may appear without quotes. Note that this does not
+	allow spaces, or backslashes to be entered, however the text is still
+	variable-substituted, and the substituted text may contain other
+	characters.</p><p>
+	Also, note that patterns (see below) begin with the slash character.
+	Normally, anything that begins with the slash is interpreted as a pattern.
+	However, text immediately after <span class="quote">“<span class="quote">VARIABLE=</span>”</span> is interpreted as a
+	string even if it begins with a slash. This is why something like:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+MAILDIR=/var/mail
+	  </pre></div></blockquote></div><p>
+	works as expected. Using quotes, though, is highly recommended. You must use
+	quotes to set a variable to a lone slash, because an unquoted slash is
+	interpreted as a division sign.</p><p>
+	Long double or singly-quoted text can be broken across multiple lines by
+	ending the line with a lone backslash character, like this:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+TEXT="This is a long \
+   text string"
+	  </pre></div></blockquote></div><p>
+	The backslash, the newline, and all leading whitespace on the next line is
+	removed, resulting in "This is a long text string".</p></div><div class="refsect2"><a id="idm46044389077424" shape="rect"> </a><h3>Command substitution</h3><p>
+	Text enclosed in back-tick characters is interpreted as a shell command. The
+	shell command is executed as a child process by <span class="command"><strong>maildrop</strong></span>.
+	Its output is used in place of the command. For example:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+DIR=`ls`
+	  </pre></div></blockquote></div><p>
+	places the names of the files in the current directory into the DIR
+	variable.</p><p>
+	The output of the command will have all newline characters replaced by
+	spaces, and leading and trailing spaces will be stripped (multiple spaces are
+	not removed, though). Also, the contents of the message being delivered is
+	made available to the command on standard input.</p></div><div class="refsect2"><a id="idm46044389072880" shape="rect"> </a><h3>Patterns</h3><a id="patterns" shape="rect"> </a><p>
+	The pattern syntax in <span class="command"><strong>maildrop</strong></span> is similar to the
+	<span class="command"><strong>grep</strong></span> command's syntax, with some minor differences.
+	A pattern takes the following
+	form in the <code class="systemitem">filter file</code>:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+/<em class="replaceable"><code>pattern</code></em>/:<em class="replaceable"><code>options</code></em>
+	  </pre></div></blockquote></div><p>
+	<em class="replaceable"><code>pattern</code></em> specifies the text to look for in the
+	message, in the <code class="literal">UTF-8</code> codeset.
+	<em class="replaceable"><code>pattern</code></em> must not begin with a space,
+	otherwise the leading slash will then be
+	interpreted as a division sign. If you must search for text that starts
+	with a space, use something like <code class="literal">"/[ ] ... /"</code>.
+      </p><p>
+	The general syntax of <span class="command"><strong>maildrop</strong></span>'s patterns is
+	described in the <span class="citerefentry"><span class="refentrytitle">pcrepattern</span>(3)</span>
+	manual page, with certain exceptions
+	noted below.
+	<span class="command"><strong>maildrop</strong></span> uses the
+	<a class="ulink" href="http://www.pcre.org" target="_top" shape="rect">PCRE</a>
+	library to implement pattern matching.
+	Not all features in <acronym class="acronym">PCRE</acronym> are available in
+	<span class="command"><strong>maildrop</strong></span>, and
+	the <span class="quote">“<span class="quote">options</span>”</span> part, which follows the pattern
+	specification, changes the pattern matching further.
+	Consult the
+	<span class="citerefentry"><span class="refentrytitle">pcrepattern</span>(3)</span>
+	manual page for more information, but note the following
+	exceptions:
+      </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+	    Internal options settings are not supported (but see the
+	    <span class="quote">“<span class="quote">D</span>”</span> maildrop option, below).
+	    Do not include option settings in the
+	    <em class="replaceable"><code>pattern</code></em>,
+	    doing so will lead to undefined results.</p></li><li class="listitem"><p>
+	    Named subpatterns are not implemented.
+	    Numbered subpatterns are implemented, see
+	    <span class="quote">“<span class="quote"><a class="link" href="#patmatch" shape="rect">Pattern Match Results</a></span>”</span>,
+	    below.
+	  </p></li><li class="listitem"><p>
+	    The search pattern gets executed not against the raw message text,
+	    but the message transcoded into a canonical UTF-8-based format.
+	    This process involves transcoding any non-UTF-8 message content
+	    into UTF-8. Additionally, message headers get converted into a
+	    canonical format before the search pattern gets executed.
+	  </p><p>
+	    For structured headers with email addresses, the process involves
+	    removing extraneous punctuation, or adding missing ones (in
+	    situations where a missing punctuation character can be deduced).
+	    Additionally certain pre-RFC822 obsolete header formats get
+	    converted to canonical form.
+	  </p><p>
+	    This means that header search patterns that include punctuation
+	    character may appear not to work against obviously-matching
+	    message text. Use <span class="quote">“<span class="quote">reformime -u &lt;message.txt</span>”</span>,
+	    with <code class="filename">message.txt</code> containing the sample message,
+	    to see exactly the actual text that gets searched by patterns.
+	  </p></li></ul></div></div><div class="refsect2"><a id="idm46044389051264" shape="rect"> </a><h3>Pattern options</h3><a id="options" shape="rect"> </a><p>
+	Following <code class="literal">/<em class="replaceable"><code>pattern</code></em>/,</code>
+	there may be an optional colon, followed by one. or
+	more options. The following options may be specified in any order:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">h</code></span></dt><dd><p>
+	      Match this pattern in the message's header, and the
+	      header of any attachments in the message.
+	    </p></dd><dt><span class="term"><code class="literal">H</code></span></dt><dd><p>
+	      Match this pattern in the message's main header. Do not match
+	      this pattern in the headers of the message's attachments.
+	    </p></dd><dt><span class="term"><code class="literal">b</code></span></dt><dd><p>Match this pattern against the message body.</p></dd><dt><span class="term"><code class="literal">D</code></span></dt><dd><p>This is a case sensitive match. Normally the patterns match either
+	      uppercase or lowercase text. <code class="literal">/john/</code> will match "John",
+	      "john", or "JOHN". Specify the D option for a case-sensitive search:
+	      lowercase letters in the pattern must match lowercase letters in the
+	      message; ditto for uppercase.</p></dd></dl></div><p>
+	If neither 'h', 'H', or 'b' is specified, 'h' is the default,
+	matching the pattern in the message's header, and all attachments'
+	headers. Specifying the 'b' option causes the pattern to be matched
+	against the message body.
+	Specifying 'b' and 'h' causes the pattern to be matched
+	against the entire message.
+      </p><p>
+	Normally, each line in the message gets matched against the pattern
+	individually. When applying patterns to a header, multi-line headers (headers
+	split on several lines by beginning each continuation line with whitespace)
+	are silently combined into a single line, before the pattern is applied.</p></div><div class="refsect2"><a id="idm46044389038304" shape="rect"> </a><h3>MIME encoding</h3><p>
+	The pattern must be a valid text string in the <code class="literal">UTF-8</code>
+	codeset, and <span class="command"><strong>maildrop</strong></span> should handle messages
+	that use MIME encodings in other known character sets.
+	<a class="link" href="#options" shape="rect">Options</a> that specify a
+	message header search
+	result in <span class="command"><strong>maildrop</strong></span> searching the initial message
+	headers, and any headers of additional MIME sections, in a multipart
+	MIME message. Options that specify a message body search will search
+	through all "text" MIME content.
+      </p><p>
+	For a MIME search to succeed, the message must be a well-formed MIME
+	message (with a Mime-Version: 1.0 header).
+      </p></div><div class="refsect2"><a id="idm46044389033808" shape="rect"> </a><h3>Weighted scoring</h3><p>
+	Patterns are evaluated by <span class="command"><strong>maildrop</strong></span> as any other numerical
+	expression. If a pattern is found, <span class="command"><strong>maildrop</strong></span>'s filter
+	interprets the
+	results of the pattern match as number 1, or true, for filtering purposes. If
+	a pattern is not found the results of the pattern search is zero. Once a
+	pattern is found, the search stops. Second, and subsequent occurrences of the
+	same pattern are NOT searched for.</p><p>
+	<span class="command"><strong>maildrop</strong></span> can also do weighted scoring. In weighted scoring,
+	multiple occurrences of the same pattern are used to calculate a numerical
+	score.</p><p>
+	To use a weighted search, specify the pattern as follows:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+/<em class="replaceable"><code>pattern</code></em>/:<em class="replaceable"><code>options</code></em>,<em class="replaceable"><code>xxx</code></em>,<em class="replaceable"><code>yyy</code></em>
+	  </pre></div></blockquote></div><p>
+	where <em class="replaceable"><code>xxx</code></em> and <em class="replaceable"><code>yyy</code></em> are
+	two numbers. <em class="replaceable"><code>yyy</code></em> is optional -- it will
+	default to 1, if missing.</p><p>The first occurrence of the pattern is evaluated as xxx. The second
+	occurrence of the pattern is evaluated as xxx*yyy, the third as xxx*yyy*yyy,
+	etc... All occurrences of the pattern are added up to calculate the final
+	score.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	  <span class="command"><strong>maildrop</strong></span> does not
+	  recognize multiple occurrences of the same pattern in the same line.
+	  Multiple occurences of the same pattern in one line count as one
+	  occurence.</p></div></div><div class="refsect2"><a id="idm46044389023296" shape="rect"> </a><h3>Pattern Match Results</h3><a id="patmatch" shape="rect"> </a><p>
+	After a pattern is successfully matched, the actual text that is matched
+	is placed in the <code class="varname">MATCH</code> variable. For example:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+/^From:.*/
+	  </pre></div></blockquote></div><p>
+	matches a line of the form:
+      </p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+From: postmaster@localhost
+	  </pre></div></blockquote></div><p>
+	Here the variable <code class="varname">MATCH</code> will be set to "From:
+	postmaster@localhost", which can be used in subsequent statements.</p><p>
+	If the pattern contains subpatterns, the portions of the text that match
+	the first subpattern is placed in the <code class="varname">MATCH1</code> variable.
+	The second subpattern, if any, is placed in <code class="varname">MATCH2</code>, and
+	so on:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+/^From:\s+(.*)@(.*)/
+	  </pre></div></blockquote></div><p>
+	matched against the same line will set <code class="varname">MATCH</code> to
+	<span class="quote">“<span class="quote">From: postmaster@localhost</span>”</span>,
+	<code class="varname">MATCH1</code> to <span class="quote">“<span class="quote">postmaster</span>”</span>, and
+	<code class="varname">MATCH2</code> to <span class="quote">“<span class="quote">localhost</span>”</span>.
+	Of course, in real world the <span class="quote">“<span class="quote">From:</span>”</span> header is usually much
+	more complicated, and can't be handled that easily.
+	This is just an illustrative example.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	  Subpatterns are not processed in the <code class="literal">foreach</code>
+	  statement.</p></div></div><div class="refsect2"><a id="conversion" shape="rect"> </a><h3>Conversion of <span class="command"><strong>maildrop</strong></span> 1.x patterns to 2.0</h3><p>
+	Although the new <acronym class="acronym">PCRE</acronym>-based pattern matching code in
+	<span class="command"><strong>maildrop</strong></span> is completely different from the built-in
+	pattern matching code in <span class="command"><strong>maildrop</strong></span> 1.x, very few changes
+	will be required to convert recipes to the new syntax.
+	The only major differences are:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+	    The subexpression format has changed.
+	    Any pattern that uses subexpression needs to be converted.
+	    Additionally, references to <code class="varname">MATCH2</code> must be replaced
+	    with <code class="varname">MATCH1</code>, <code class="varname">MATCH3</code> to
+	    <code class="varname">MATCH2</code>, and so on.
+	    References to plain old <code class="varname">MATCH</code> will remain the
+	    same.</p></li><li class="listitem"><p>
+	    The <span class="quote">“<span class="quote">w</span>”</span> pattern option is no longer possible, with
+	    <acronym class="acronym">PCRE</acronym>.
+	    The very few recipes that use this option, if any actually exist,
+	    will have to be rewritten in some other fashion.</p></li></ul></div></div><div class="refsect2"><a id="idm46044389000992" shape="rect"> </a><h3>Expressions</h3><p>
+	Although <span class="command"><strong>maildrop</strong></span> evaluates expressions numerically,
+	results of
+	expressions are stored as text literals. When necessary, text literals are
+	converted to numbers, then the results of a mathematical operation is
+	converted back into a text literal.</p><div class="refsect3"><a id="idm46044388999344" shape="rect"> </a><h4>Operators</h4><p>
+	  The following operators carry their usual meaning, and are listed in order
+	  from lowest precedence, to the highest:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+
+||
+&amp;&amp;
+&lt;  &lt;=  &gt;  &gt;=  ==  !=  lt  le  gt  ge  eq  ne
+|
+&amp;
++  -
+*  /
+=~ /<em class="replaceable"><code>pattern</code></em>/
+/<em class="replaceable"><code>pattern</code></em>/  !  ~  <em class="replaceable"><code>function()</code></em>
+	    </pre></div></blockquote></div></div><div class="refsect3"><a id="idm46044388995344" shape="rect"> </a><h4>Variable assignment</h4><a id="assign" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+VARIABLE=<em class="replaceable"><code>expression</code></em>
+	    </pre></div></blockquote></div><p>
+	  Assigns the result of the expression to <em class="replaceable"><code>VARIABLE</code></em>
+	  (note no leading $ in front of variable).
+	</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	    If <em class="replaceable"><code>VARIABLE</code></em> is NOT surrounded by quotes, then it
+	    may contain only letters, numbers, underscores, dashes, and a selected few
+	    other characters. In order to initialize a variable whose name contains
+	    non-standard punctuation marks, surround the name of the variable with
+	    quotes.</p></div></div><div class="refsect3"><a id="idm46044388990080" shape="rect"> </a><h4>cc - deliver a copy of the message</h4><a id="cc" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+cc <em class="replaceable"><code>expression</code></em>
+	    </pre></div></blockquote></div><p>
+	  The <span class="command"><strong>cc</strong></span> statement is very similar to the
+	  <span class="command"><strong>to</strong></span> statement, except
+	  that after delivering the message <span class="command"><strong>maildrop</strong></span> continues
+	  to process the
+	  <code class="systemitem">filter file</code>,
+	  unlike the <span class="command"><strong>to</strong></span> statement which immediately
+	  terminates <span class="command"><strong>maildrop</strong></span> after the delivery is complete.
+	  Essentially, the
+	  message is carbon copied to the given mailbox, and may be delivered again to
+	  another mailbox by another <span class="command"><strong>cc</strong></span> or
+	  <span class="command"><strong>to</strong></span> statement.</p><p>
+	  <a class="ulink" href="#to" target="_top" shape="rect">See the <span class="command"><strong>to</strong></span> statement</a> for more
+	  details.
+	  When
+	  <span class="command"><strong>cc</strong></span> is used to deliver a message to a process
+	  <span class="command"><strong>maildrop</strong></span>
+	  will set the <code class="varname">EXITCODE</code> variable to the process's exit
+	  code.</p></div><div class="refsect3"><a id="idm46044388977904" shape="rect"> </a><h4>dotlock - create a manual dot-lock</h4><a id="dotlock" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+dotlock <em class="replaceable"><code>expression</code></em> {
+
+   ...
+
+}
+	    </pre></div></blockquote></div><p>
+	  <span class="command"><strong>maildrop</strong></span> automatically creates a lock when a message is
+	  delivered to a
+	  mailbox. Depending upon your system configuration,
+	  <span class="command"><strong>maildrop</strong></span> will use
+	  either dot-locks, or the flock() system call.</p><p>The <span class="command"><strong>dotlock</strong></span> statement creates an explicit dot-lock
+	  file. Use the <a class="ulink" href="#flock" target="_top" shape="rect"><span class="command"><strong>flock</strong></span> statement</a> to create an
+	  explicit flock()
+	  lock.</p><p>The <em class="replaceable"><code>expression</code></em> is a filename that should be
+	  used as a lock file.
+	  <span class="command"><strong>maildrop</strong></span> creates the indicated dot-lock, executes the
+	  filtering
+	  instructions contained within the { ... } block, and removes the lock. The
+	  expression <span class="emphasis"><em>must</em></span> be the name of the dot-lock file itself,
+	  <span class="emphasis"><em>NOT</em></span>
+	  the name of the mailbox file you want to lock.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	    With manual locking, it is possible to deadlock multiple
+	    <span class="command"><strong>maildrop</strong></span> processes (or any other processes that try to
+	    claim the same
+	    locks).</p><p>No deadlock detection is possible with dot-locks, and since
+	    <span class="command"><strong>maildrop</strong></span> automatically refreshes all of its dot-locks
+	    regularly, they
+	    will never go stale. You'll have <span class="command"><strong>maildrop</strong></span> processes
+	    hanging in limbo,
+	    until their watchdog timers go off, aborting the mail delivery.</p></div></div><div class="refsect3"><a id="idm46044388964880" shape="rect"> </a><h4>echo - output diagnostic information</h4><a id="echo" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+echo <em class="replaceable"><code>expression</code></em>
+	    </pre></div></blockquote></div><p>
+	  <span class="command"><strong>maildrop</strong></span> will print the given text. This is usually used
+	  when
+	  <span class="command"><strong>maildrop</strong></span> runs in embedded mode, but can be used for
+	  debugging
+	  purposes. Normally, a newline is printed after the text. If text is
+	  terminated with a \c, no newline will be printed.</p></div><div class="refsect3"><a id="idm46044388959936" shape="rect"> </a><h4>exception - trap fatal errors</h4><a id="exception" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+exception {
+
+   ...
+
+}
+	    </pre></div></blockquote></div><p>
+	  The <span class="command"><strong>exception</strong></span> statement traps errors that would normally
+	  cause
+	  <span class="command"><strong>maildrop</strong></span> to terminate. If a fatal error is encountered
+	  anywhere within the
+	  block of statements enclosed by the <span class="command"><strong>exception</strong></span> clause,
+	  execution will
+	  resume immediately following the <span class="command"><strong>exception</strong></span> clause.</p></div><div class="refsect3"><a id="idm46044388954112" shape="rect"> </a><h4>exit - terminate filtering unconditionally</h4><a id="exit" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+exit
+	    </pre></div></blockquote></div><p>
+	  The <span class="command"><strong>exit</strong></span> statement immediately terminates filtering.
+	  <span class="command"><strong>maildrop</strong></span>'s
+	  return code is set to the value of the <code class="varname">EXITCODE</code> variable.
+	  Normally, <span class="command"><strong>maildrop</strong></span> terminates immediately after <a class="ulink" href="#to" target="_top" shape="rect">successfully delivering the message</a> to a mailbox. The
+	  <span class="command"><strong>exit</strong></span> statement causes <span class="command"><strong>maildrop</strong></span> to
+	  terminate without delivering the message anywhere.</p><p>The <span class="command"><strong>exit</strong></span> statement is usually used when
+	  <span class="command"><strong>maildrop</strong></span> runs in <a class="ulink" href="maildrop.html#embedded" target="_top" shape="rect">embedded mode</a>, when message
+	  delivery instructions are not allowed.</p></div><div class="refsect3"><a id="idm46044388944528" shape="rect"> </a><h4>flock - create an manual flock() lock</h4><a id="flock" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+flock <em class="replaceable"><code>expression</code></em> {
+
+   ...
+
+}
+	    </pre></div></blockquote></div><p>
+	  <span class="command"><strong>maildrop</strong></span> automatically creates a lock when a message is delivered to a
+	  mailbox. Depending upon your system configuration, <span class="command"><strong>maildrop</strong></span> will use
+	  either dot-locks, or the flock() system call.</p><p>The <span class="command"><strong>flock</strong></span> statement creates a manual flock() lock.
+	  Use the <a class="ulink" href="#dotlock" target="_top" shape="rect"><span class="command"><strong>dotlock</strong></span> statement</a>
+	  to create a manual dot-lock
+	  file.</p><p>The <em class="replaceable"><code>expression</code></em> is the name of the
+	  file that should be locked.
+	  <span class="command"><strong>maildrop</strong></span> creates the lock on the indicated file, executes
+	  the
+	  filtering instructions contained within the { ... } block, and removes the
+	  lock.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	    With manual locking, it is possible to deadlock multiple
+	    <span class="command"><strong>maildrop</strong></span> processes (or any other
+	    processes that try to claim the same
+	    locks). The operating system will automatically break flock() deadlocks. When
+	    that happens, one of the <span class="command"><strong>maildrop</strong></span> processes will terminate
+	    immediately. Use the <span class="command"><strong>exception</strong></span> statement in order to trap
+	    this
+	    exception condition, and execute an alternative set of filtering
+	    instructions.</p></div></div><div class="refsect3"><a id="idm46044388932912" shape="rect"> </a><h4>foreach - iterate over text sections matched by a pattern</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+foreach /pattern/:options
+{
+   ...
+}
+
+foreach (expression) =~ /pattern/:options
+{
+   ...
+}
+	    </pre></div></blockquote></div><p>
+	  The <span class="command"><strong>foreach</strong></span> statement executes a block of statements for
+	  each
+	  occurrence of the given pattern in the given message, or expression. On every
+	  iteration <code class="varname">MATCH</code> variable will be set to the matched string.
+	  All the usual options may be applied to the pattern match,
+	  EXCEPT the following:
+	  </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">,xxx,yyy</span></dt><dd><p>
+		  Weighted scoring is meaningless, in this context.</p></dd><dt><span class="term">( ... )</span></dt><dd><p>
+		  Subpatterns are not processed.
+		  Only the <code class="varname">MATCH</code> variable will be set for each found
+		  pattern.</p></dd></dl></div><p>
+	</p></div><div class="refsect3"><a id="idm46044388925024" shape="rect"> </a><h4>if - conditional execution</h4><a id="if" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+if (<em class="replaceable"><code>expression</code></em>)
+{
+   ...
+}
+else
+{
+   ...
+}
+	    </pre></div></blockquote></div><p>
+	  Conditional execution. If <em class="replaceable"><code>expression</code></em>
+	  evaluates to a logical true (note -
+	  parenthesis are required) then the first set of statements is executed.
+	  The <span class="command"><strong>else</strong></span> keyword, and the subsequent statements, are
+	  optional. If present,
+	  and the expression evaluates to a logical false, the
+	  <span class="command"><strong>else</strong></span> part is executed.</p><p>
+	  <span class="command"><strong>maildrop</strong></span> evaluates all expression as text strings.
+	  In the context
+	  of a logical expression, an empty string, or the number 0 constitutes a
+	  logical false value, anything else is a logical true value.</p><p>If the <span class="command"><strong>if</strong></span> part, or the
+	  <span class="command"><strong>else</strong></span>
+	  part consists of only one
+	  statement, the braces may be omitted.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	    The grammar of this <span class="command"><strong>if</strong></span> statement is stricter than
+	    usual.
+	    If
+	    you get baffling syntax errors from <span class="command"><strong>maildrop</strong></span>, make sure that the
+	    braces, and the if statement, appear on separate lines. Specifically: the
+	    closing parenthesis, the closing braces, and the else statement, must be at
+	    the end of the line (comments are allowed), and there may not be any blank
+	    lines in between (not even ones containing comments only).</p></div><p>
+	  If the <span class="command"><strong>else</strong></span> part contains a single <span class="command"><strong>if</strong></span>,
+	  and nothing else,
+	  this may be combined into an <span class="command"><strong>elsif</strong></span>:
+	</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+if (<em class="replaceable"><code>expression</code></em>)
+{
+   ...
+}
+elsif (<em class="replaceable"><code>expression</code></em>)
+{
+   ...
+}
+	    </pre></div></blockquote></div><p>
+	  The above example is logically identical to:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+if (<em class="replaceable"><code>expression</code></em>)
+{
+   ...
+}
+else
+{
+   if (<em class="replaceable"><code>expression</code></em>)
+   {
+      ...
+   }
+}
+	    </pre></div></blockquote></div><p>
+	  Consecutive <span class="command"><strong>elsif</strong></span> sequences are allowed:
+	</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+if (<em class="replaceable"><code>expression</code></em>)
+{
+   ...
+}
+elsif (<em class="replaceable"><code>expression</code></em>)
+{
+   ...
+}
+elsif (<em class="replaceable"><code>expression</code></em>)
+{
+   ...
+}
+	    </pre></div></blockquote></div><p>
+	  Consecutive occurences of <span class="command"><strong>elsif</strong></span> commands eliminate a
+	  significant amount of indentation, and the resulting code is more readable.
+	</p></div><div class="refsect3"><a id="idm46044388902864" shape="rect"> </a><h4>import - access original environment variable</h4><a id="import" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+import <em class="replaceable"><code>variable</code></em>
+	    </pre></div></blockquote></div><p>When <span class="command"><strong>maildrop</strong></span> starts,
+	  it normally imports the contents of the
+	  environment variables, and assigns them to internal <span class="command"><strong>maildrop</strong></span>
+	  variables. For example, if there was an environment variable
+	  <code class="varname">FOO</code>, the internal <span class="command"><strong>maildrop</strong></span> variable
+	  <code class="varname">FOO</code> will
+	  have the contents of the environment variable.
+	  From then on, <code class="varname">FOO</code>
+	  will be no different than any other variable,
+	  and when <span class="command"><strong>maildrop</strong></span> runs
+	  an external command, the contents of <span class="command"><strong>maildrop</strong></span>'s
+	  variables will be
+	  exported as the environment for the command.</p><p>Certain variables, like <code class="varname">HOME</code> and
+	  <code class="varname">PATH</code>, are always reset to fixed defaults,
+	  for security reasons.
+	  Also, in delivery and embedded modes, the environment is not imported at all
+	  (with the exception of system locale environment variables),
+	  and <span class="command"><strong>maildrop</strong></span> starts with only the fixed default
+	  variables.</p><p>
+	  The <span class="command"><strong>import</strong></span> statement initializes the specified
+	  variable with the contents of the original environment variable
+	  when <span class="command"><strong>maildrop</strong></span> started.  For example:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+echo "PATH is $PATH"
+PATH="/bin"
+echo "PATH is $PATH"
+import PATH
+echo "PATH is $PATH"
+exit
+	    </pre></div></blockquote></div><p>This results in the following output:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+PATH is /bin:/usr/bin:/usr/local/bin
+PATH is /bin
+PATH is /home/root/bin:/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
+	    </pre></div></blockquote></div><p>
+	  This shows that when <span class="command"><strong>maildrop</strong></span> starts
+	  <code class="varname">PATH</code> is set to the fixed default of
+	  <code class="literal">/bin:/usr/bin:/usr/local/bin</code>.
+	  However, the original contents of
+	  the <code class="varname">PATH</code> environment variable we different, and the
+	  <span class="command"><strong>import</strong></span> statement shows what it was.</p></div><div class="refsect3"><a id="idm46044388884496" shape="rect"> </a><h4>include - execute filtering instructions from another file</h4><a id="include" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+include <em class="replaceable"><code>expression</code></em>
+	    </pre></div></blockquote></div><p>
+	  The include statement reads a file, and executes filtering instructions
+	  contained in that file. Note that the include statement is processed when the
+	  current <code class="systemitem">filter file</code> is being executed. When <span class="command"><strong>maildrop</strong></span> reads the initial
+	  <code class="systemitem">filter file</code>, any syntax errors in the filtering instructions are immediately
+	  reported, and <span class="command"><strong>maildrop</strong></span> will terminate with a return code of
+	  <span class="errorcode">EX_TEMPFAIL</span>. Any errors in files specified by
+	  <span class="command"><strong>include</strong></span>
+	  statements are NOT reported, because those files will not be read until the
+	  <span class="command"><strong>include</strong></span> statement is itself executed.</p><p>
+	  If the specified file does not exist, or if there are any syntax errors in
+	  the file, <span class="command"><strong>maildrop</strong></span> reports the error, and terminates with
+	  a return
+	  code of <span class="errorcode">EX_TEMPFAIL</span>.</p></div><div class="refsect3"><a id="idm46044388873936" shape="rect"> </a><h4>log, logfile - log message deliveries</h4><a id="log" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+logfile <em class="replaceable"><code>expression</code></em>
+
+log <em class="replaceable"><code>expression</code></em>
+	    </pre></div></blockquote></div><p>
+	  Logging in <span class="command"><strong>maildrop</strong></span> is normally turned off.
+	  The <span class="command"><strong>logfile</strong></span>
+	  statement specifies the file where
+	  <span class="command"><strong>maildrop</strong></span> will log how the message has been
+	  disposed of. The parameter is then name of the file. If the
+	  file exists <span class="command"><strong>maildrop</strong></span> appends to the file.</p><p>
+	  For each delivery (the <a class="ulink" href="#to" target="_top" shape="rect"><span class="command"><strong>to</strong></span></a>
+	  and <a class="ulink" href="#cc" target="_top" shape="rect"><span class="command"><strong>cc</strong></span></a>
+	  statements, and default deliveries)
+	  <span class="command"><strong>maildrop</strong></span> records the
+	  <code class="literal">From:</code> and the
+	  <code class="literal">Subject:</code> fields, together with
+	  the current time, in the log file.</p><p>
+	  The <span class="command"><strong>log</strong></span> statement adds additional logging text to the
+	  log file. The <span class="command"><strong>log</strong></span> statement works exactly like
+	  the <span class="command"><strong>echo</strong></span>
+	  statement, except that the text is written to the logfile, instead of
+	  standard output.</p></div><div class="refsect3"><a id="idm46044388860736" shape="rect"> </a><h4>system - execute a system command</h4><a id="system" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+system <em class="replaceable"><code>expression</code></em>
+	    </pre></div></blockquote></div><p>
+	  <em class="replaceable"><code>expression</code></em> specifies an external program
+	  that
+	  <span class="command"><strong>maildrop</strong></span> runs as a subprocess.
+	  The subprocess's standard input gets connected to
+	  <code class="filename">/dev/null</code>, and the subprocess inherits
+	  the standard output and error from
+	   <span class="command"><strong>maildrop</strong></span>.</p></div><div class="refsect3"><a id="idm46044388854864" shape="rect"> </a><h4>to - deliver message to a mailbox</h4><a id="to" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+to <em class="replaceable"><code>expression</code></em>
+	    </pre></div></blockquote></div><p>
+	  The <span class="command"><strong>to</strong></span> statement delivers the message to a mailbox.
+	  <em class="replaceable"><code>expression</code></em>
+	  must evaluate to a valid mailbox. A valid mailbox is either a mailbox file, a
+	  maildir, or an external program (which includes forwarding to another
+	  address).</p><p>
+	  The <span class="command"><strong>to</strong></span> statement is the final delivery statement.
+	  <span class="command"><strong>maildrop</strong></span>
+	  delivers message, then immediately terminates,
+	  with its return code set to
+	  the <code class="varname">EXITCODE</code> variable.
+	  If there was an error while
+	  delivering the message, <span class="command"><strong>maildrop</strong></span> terminates with the
+	  <span class="errorcode">EX_TEMPFAIL</span> exit code. A properly-written mail
+	  transport agent
+	  should re-queue the message, and re-attempt delivery at some later time.</p><p>
+	  An <em class="replaceable"><code>expression</code></em> that begins with the
+	  "<span class="token">|</span>" character
+	  specifies an external program to run to handle the actual
+	  delivery. The <code class="varname">SHELL</code> variable specifies the shell to
+	  execute the
+	  given command. The message is provided to the command on standard input.
+	  <span class="command"><strong>maildrop</strong></span>'s exit code will be the process's exit
+	  code.</p><p>
+	  An <em class="replaceable"><code>expression</code></em> that begins
+	  with an exclamation mark, "<span class="token">!</span>"
+	  specifies a whitespace-delimited
+	  list of E-mail addresses to forward the message
+	  to.
+	  The program
+	  specified by the <code class="varname">SENDMAIL</code> variable is run as an
+	  external program, with the list of E-mail addresses provided as parameters to
+	  the program.</p><p>
+	  Otherwise, <em class="replaceable"><code>expression</code></em> names the mailbox
+	  where <span class="command"><strong>maildrop</strong></span> delivers the message.
+	  If <em class="replaceable"><code>expression</code></em> is a directory,
+	  <span class="command"><strong>maildrop</strong></span> assumes
+	  that the directory is a maildir directory.
+	  Otherwise, <span class="command"><strong>maildrop</strong></span> will deliver
+	  the message to a file, formatted in traditional mailbox format.
+	  <span class="command"><strong>maildrop</strong></span> will use either dot-locking, or flock()-locking
+	  when
+	  delivering the message to the file.</p></div><div class="refsect3"><a id="idm46044388838496" shape="rect"> </a><h4>while - repeatedly execute a block of statements</h4><a id="while" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+while (<em class="replaceable"><code>expression</code></em>)
+{
+   ...
+}
+	    </pre></div></blockquote></div><p>
+	  The <em class="replaceable"><code>expression</code></em> is repeatedly evaluated.
+	  Each time it <a class="ulink" href="#if" target="_top" shape="rect">evaluates to a logical true</a>,
+	  the statements inside the braces
+	  are executed.
+	  When <em class="replaceable"><code>expression</code></em> evaluates to a logical false,
+	  the while loop is over. Take care to avoid infinite loops.</p></div><div class="refsect3"><a id="idm46044388833488" shape="rect"> </a><h4>xfilter - filter message through another program</h4><a id="xfilter" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+xfilter <em class="replaceable"><code>expression</code></em>
+	    </pre></div></blockquote></div><p>
+	  <em class="replaceable"><code>expression</code></em> specifies an external program that
+	  <span class="command"><strong>maildrop</strong></span> runs to filter the current message.
+	  The current
+	  message will be piped to the filter program as standard input. The output of
+	  the filter program replaces the current message being delivered. The external
+	  program must terminate with an exit code of 0. If the external program does
+	  not terminate with an exit code of 0, or if it does not read the message from
+	  the standard input, <span class="command"><strong>maildrop</strong></span> terminates with an exit code of
+	  <span class="errorcode">EX_TEMPFAIL</span>.</p></div><div class="refsect3"><a id="idm46044388827808" shape="rect"> </a><h4>|| - logical or</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+<em class="replaceable"><code>expression1</code></em> <span class="token">||</span> <em class="replaceable"><code>expression2</code></em>
+
+	    </pre></div></blockquote></div><p>
+	  If <em class="replaceable"><code>expression1</code></em> evaluates to a logical true,
+	  the result of the <span class="token">||</span> is
+	  <em class="replaceable"><code>expression1</code></em>, otherwise it's
+	  <em class="replaceable"><code>expression2</code></em>, which is evaluated.</p><p>
+	  <span class="command"><strong>maildrop</strong></span> uses the following concept of true/false:
+	  an empty text
+	  literal, or a text literal that consists of the single character "0" is a
+	  logical false value. Anything else is a logical true value.</p></div><div class="refsect3"><a id="idm46044388821568" shape="rect"> </a><h4>&amp;&amp; - logical and</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+<em class="replaceable"><code>expression1</code></em> <span class="token">&amp;&amp;</span> <em class="replaceable"><code>expression2</code></em>
+
+	    </pre></div></blockquote></div><p>
+	  If <em class="replaceable"><code>expression1</code></em> evaluates to a logical false,
+	  the result of the <span class="token">&amp;&amp;</span> is
+	  <em class="replaceable"><code>expression1</code></em>, otherwise it's
+	  <em class="replaceable"><code>expression2</code></em>, which is evaluated.</p><p>
+	  <span class="command"><strong>maildrop</strong></span> uses the following concept of true/false:
+	  an empty text
+	  literal, or a text literal that consists of the single character "0" is a
+	  logical false value. Anything else is a logical true value.</p></div><div class="refsect3"><a id="idm46044388815120" shape="rect"> </a><h4>&lt;, &lt;=, &gt;, &gt;=, ==, !=   - numerical comparison</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+<em class="replaceable"><code>expression1</code></em> <span class="token">&lt;</span> <em class="replaceable"><code>expression2</code></em>
+
+<em class="replaceable"><code>expression1</code></em> <span class="token">&lt;=</span> <em class="replaceable"><code>expression2</code></em>
+
+<em class="replaceable"><code>expression1</code></em> <span class="token">&gt;</span> <em class="replaceable"><code>expression2</code></em>
+
+<em class="replaceable"><code>expression1</code></em> <span class="token">&gt;=</span> <em class="replaceable"><code>expression2</code></em>
+
+<em class="replaceable"><code>expression1</code></em> <span class="token">==</span> <em class="replaceable"><code>expression2</code></em>
+
+<em class="replaceable"><code>expression1</code></em> <span class="token">!=</span> <em class="replaceable"><code>expression2</code></em>
+
+	    </pre></div></blockquote></div><p>
+	  These operators compare their left hand side expression against their right
+	  hand side. These operators compare the numerical values of each side, as
+	  floating point numbers. If the numbers compare as indicated, the result of
+	  the comparison is the text string "1", otherwise it is the text
+	  string 0.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Ccomparisons are not associative:
+	    "<code class="literal">a &lt; b &lt; c</code>" is an error.
+	    If it is absolutely necessary, use
+	    "<code class="literal">(a &lt; b) &lt; c</code>".</p></div></div><div class="refsect3"><a id="idm46044388803120" shape="rect"> </a><h4>lt, le, gt, ge, eq, ne - text comparison</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+<em class="replaceable"><code>expression1</code></em> <span class="token">lt</span> <em class="replaceable"><code>expression2</code></em>
+
+<em class="replaceable"><code>expression1</code></em> <span class="token">le</span> <em class="replaceable"><code>expression2</code></em>
+
+<em class="replaceable"><code>expression1</code></em> <span class="token">gt</span> <em class="replaceable"><code>expression2</code></em>
+
+<em class="replaceable"><code>expression1</code></em> <span class="token">ge</span> <em class="replaceable"><code>expression2</code></em>
+
+<em class="replaceable"><code>expression1</code></em> <span class="token">eq</span> <em class="replaceable"><code>expression2</code></em>
+
+<em class="replaceable"><code>expression1</code></em> <span class="token">ne</span> <em class="replaceable"><code>expression2</code></em>
+
+	    </pre></div></blockquote></div><p>
+	  These operators compare their left hand side expression against their right
+	  hand side. These operators compare each side as text strings (alphabetically,
+	  although the text may include anything). If the text strings compare as
+	  indicated, the result of the comparison is the text string "1", otherwise it
+	  is the text string 0.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	    Comparisons are not associative: "<code class="literal">a lt b lt c</code>"
+	    is an error. If it is
+	    absolutely necessary, use "<code class="literal">(a lt b) lt c</code>".
+	    (But why would you?).</p></div></div><div class="refsect3"><a id="idm46044388791568" shape="rect"> </a><h4>| - bitwise or</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+<em class="replaceable"><code>expression1</code></em> <span class="token">|</span> <em class="replaceable"><code>expression2</code></em>
+	    </pre></div></blockquote></div><p>
+	  This is the bitwise or operator. Its result is a 32 bit
+	  integer, which is a bitwise-or combination of the left hand side and the
+	  right hand side.</p></div><div class="refsect3"><a id="idm46044388787696" shape="rect"> </a><h4>&amp; - bitwise and</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+<em class="replaceable"><code>expression1</code></em> <span class="token">&amp;</span> <em class="replaceable"><code>expression2</code></em>
+	    </pre></div></blockquote></div><p>
+	  This is the bitwise and operator. Its result is a 32 bit
+	  integer, which is a bitwise-and combination of the left hand side and the
+	  right hand side.</p></div><div class="refsect3"><a id="idm46044388783824" shape="rect"> </a><h4>+, -, *, / - numerical operations</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+<em class="replaceable"><code>expression1</code></em> <span class="token">+</span> <em class="replaceable"><code>expression2</code></em>
+
+<em class="replaceable"><code>expression1</code></em> <span class="token">-</span> <em class="replaceable"><code>expression2</code></em>
+
+<em class="replaceable"><code>expression1</code></em> <span class="token">*</span> <em class="replaceable"><code>expression2</code></em>
+
+<em class="replaceable"><code>expression1</code></em> <span class="token">/</span> <em class="replaceable"><code>expression2</code></em>
+
+	    </pre></div></blockquote></div><p>
+	  These are numerical, floating point, operators.</p></div><div class="refsect3"><a id="idm46044388776672" shape="rect"> </a><h4>=~ /pattern/:options - pattern match against string</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+<em class="replaceable"><code>expression</code></em> <span class="token">=~</span> /<em class="replaceable"><code>pattern</code></em>/:<em class="replaceable"><code>option</code></em>
+	    </pre></div></blockquote></div><p>
+	  The left hand side of the <span class="token">=~</span> operator can be any expression.
+	  The right hand
+	  side is always a pattern specification. The result of the operator is the
+	  weighted match of the pattern against
+	  <em class="replaceable"><code>expression</code></em> (if the options do not
+	  specify weighted scoring, the result is simply 1 if the pattern was found,
+	  0 if not).</p><p>
+	  See "<a class="ulink" href="#patterns" target="_top" shape="rect">Patterns</a>" for more information.</p></div><div class="refsect3"><a id="idm46044388770496" shape="rect"> </a><h4>/pattern/:options - pattern match against message</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+/<em class="replaceable"><code>pattern</code></em>/:<em class="replaceable"><code>option</code></em>
+	    </pre></div></blockquote></div><p>
+	  The result of this operator is the weighted match of the pattern against the
+	  current message (if the options do not specify weighted scoring, the result
+	  is simply 1 if the pattern was found, 0 if not).</p><p>
+	  See "<a class="ulink" href="#patterns" target="_top" shape="rect">Patterns</a>" for more information.</p></div><div class="refsect3"><a id="idm46044388765952" shape="rect"> </a><h4>!, ~ - logical/bitwise not operator.</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+<span class="token">!</span> <em class="replaceable"><code>expression</code></em>
+
+<span class="token">~</span> <em class="replaceable"><code>expression</code></em>
+	    </pre></div></blockquote></div><p>
+	  The result of the <span class="token">!</span>
+	  operator is a logical opposite of its right hand side
+	  expression. If the right hand side expression evaluated to a logical true,
+	  the result is a logical false. If it evaluated to a logical false, the result
+	  is a logical true.</p><p>
+	  <span class="command"><strong>maildrop</strong></span> uses the following concept of true/false:
+	  an empty text
+	  literal, or a text literal that consists of the single character "0" is a
+	  logical false value. Anything else is a logical true value.</p><p>
+	  The result of the <span class="token">~</span>
+	  operator is a bitwise complement of its right hand
+	  side expression. The right hand side expression is evaluated as a 32 bit
+	  integer, and the result of this operator is a bitwise complement of the
+	  result.</p></div><div class="refsect3"><a id="idm46044388759248" shape="rect"> </a><h4>escape(string) - escape special characters in a string.</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+<code class="function">escape</code>(<em class="replaceable"><code>expression</code></em>)
+	    </pre></div></blockquote></div><p>
+	  The <code class="function">escape</code> function returns
+	  its sole argument with every occurrence of a
+	  special character prefixed by a backslash. A special character is any of the
+	  following characters:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+|!$()[]\+*?.&amp;;`'-~&lt;&gt;^{}"
+	    </pre></div></blockquote></div><p>
+	  This can used when <a class="ulink" href="#patmatch" target="_top" shape="rect">matching pattern sections</a>,
+	  and then taking one section and matching it again. For example:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+if ( /^From:\s*(.*)/ )
+{
+   MATCH1=escape($MATCH1)
+   if ( /^Subject:.*$MATCH1/ )
+   {
+      ...
+   }
+}
+	    </pre></div></blockquote></div><p>
+	  This example checks if the contents of the <code class="literal">From:</code>
+	  header can also be found in the <code class="literal">Subject:</code> header.
+	  If the <code class="function">escape</code> function were not used, then any
+	  special characters in the <code class="literal">From:</code> header that are also used
+	  in regular
+	  expressions, such as <span class="token">*</span>
+	  or <span class="token">+</span>, would introduce unpredictable behavior, most
+	  likely a syntax error.</p><p>
+	  The reason why this list of special characters also includes characters
+	  not used in <span class="command"><strong>maildrop</strong></span>'s regular expressions is to allow
+	  <span class="command"><strong>maildrop</strong></span>'s variables to be used on the command line of a
+	  shell command
+	  executed by the <span class="command"><strong>xfilter</strong></span> command, backtick characters, or
+	  <span class="command"><strong>to</strong></span> or <span class="command"><strong>cc</strong></span> commands.</p><p>
+	  Although using data from an external data source is dangerous, and it may
+	  result in inadvertent exploits, using the escape function should hopefully
+	  result in fewer surprises.</p></div><div class="refsect3"><a id="idm46044388742592" shape="rect"> </a><h4>gdbmopen, gdbmclose, gdbmfetch, gdbmstore - GDBM support in
+	  <span class="command"><strong>maildrop</strong></span></h4><p>
+	  These functions provide support for GDBM database files. See <a class="ulink" href="maildropgdbm.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildropgdbm</span>(5)</span></a>
+	  for more information.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	    The system administrator can disable GDBM support in
+	    <span class="command"><strong>maildrop</strong></span>, so these commands may not be available to
+	    you.</p></div></div><div class="refsect3"><a id="idm46044388738176" shape="rect"> </a><h4>getaddr(string) - extract RFC 2822 addresses from a header.</h4><a id="getaddr" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+if ( /^From:\s*(.*)/ )
+{
+   ADDR=getaddr($MATCH1)
+}
+	    </pre></div></blockquote></div><p>
+	  This function is usually applied to a header that contains
+	  <a class="ulink" href="http://www.rfc-editor.org/rfc/rfc2822.txt" target="_top" shape="rect">RFC 2822</a>
+	  addresses. It extracts the actual addresses from the
+	  header, without any comments or extraneous punctuation. Each address is
+	  followed by a newline character. For example,
+	  if <em class="replaceable"><code>string</code></em> contains:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+joe@domain.com (Joe Brown), "Alex Smith" &lt;alex@domain.com&gt;, tom@domain.com
+	    </pre></div></blockquote></div><p>
+	  The result of the <code class="function">getaddr</code> function is the
+	  following string:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+joe@domain.com<span class="token">&lt;NL&gt;</span>alex@domain.com<span class="token">&lt;NL&gt;</span>tom@domain.com<span class="token">&lt;NL&gt;</span>
+	    </pre></div></blockquote></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	    Because <code class="function">getaddr</code>() interprets
+	    <a class="ulink" href="http://www.rfc-editor.org/rfc/rfc822.txt" target="_top" shape="rect">RFC 2822</a>
+	    loosely, it is not
+	    necessary to
+	    strip off the "<code class="literal">To:</code>" or the "<code class="literal">Cc:</code>"
+	    header from the string, before feeding it to
+	    <code class="function">getaddr()</code>. For example, the following snippet of code
+	    takes all
+	    addresses in the message, and concatenates them into a single string,
+	    separated by spaces:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+ADDRLIST=""
+foreach /^(To|Cc): .*/
+{
+    foreach (getaddr $MATCH) =~ /.+/
+    {
+        ADDRLIST="$ADDRLIST $MATCH"
+    }
+}
+	      </pre></div></blockquote></div></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	    In certain rare situations,
+	    <a class="ulink" href="http://www.rfc-editor.org/rfc/rfc822.txt" target="_top" shape="rect">RFC 2822</a> allows
+	    spaces to be included in E-mail addresses, so this example is just
+	    educational.</p></div></div><div class="refsect3"><a id="idm46044388721376" shape="rect"> </a><h4>hasaddr(string) - Search for an address.</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+if ( hasaddr(<em class="replaceable"><code>string</code></em>) )
+{
+   ...
+}
+	    </pre></div></blockquote></div><p>
+	  "<em class="replaceable"><code>string</code></em>" is of the form
+	  <code class="literal">user@domain</code>. The hasaddr
+	  function returns 1 if this address is included in any <code class="literal">To:</code>,
+	  <code class="literal">Cc:</code>,<code class="literal"> Resent-To:</code>, or <code class="literal">Resent-Cc:</code>, header
+	  in the message, otherwise this function returns 0.</p><p>
+	  This is more than just a simple text search. Each header is parsed
+	  according to <code class="literal">RFC822</code>. Addresses found in the header are
+	  extracted, ignoring all comments and names. The remaining addresses are
+	  checked, and if "<em class="replaceable"><code>string</code></em>" is one of them,
+	  <code class="function">hasaddr</code> returns 1,
+	  otherwise it returns 0.</p><p>The comparison is case-insensitive. This actually violates
+	  <code class="literal">RFC822</code> (and several others) a little bit, because the user part
+	  of the address may be (but is not required to be) case sensitive.</p></div><div class="refsect3"><a id="idm46044388711296" shape="rect"> </a><h4>length (string) - length of a string</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+if (length(<em class="replaceable"><code>string</code></em>) &gt; 80)
+{
+   ...
+}
+	    </pre></div></blockquote></div><p>
+	  The <code class="function">length</code> function returns the number of characters in
+	  <em class="replaceable"><code>string</code></em>.</p></div><div class="refsect3"><a id="idm46044388707280" shape="rect"> </a><h4>lookup (expr, 'filename', 'options') - read file for patterns</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+if (lookup(<em class="replaceable"><code>expr</code></em>, <code class="filename">file</code>, "<em class="replaceable"><code>option</code></em>"))
+{
+   ...
+}
+	    </pre></div></blockquote></div><p>
+	  <em class="replaceable"><code>expr</code></em> is any expression.
+	  <code class="filename">filename</code> is a name of a file containing
+	  a list of patterns. Note that <code class="filename">filename</code> is relative to the
+	  current directory, which is the home directory of the user when
+	  <span class="command"><strong>maildrop</strong></span> runs in delivery mode, or embedded mode. <span class="command"><strong>maildrop</strong></span> then
+	  reads the file.
+	  Blank lines will be ignored, as well as any lines that begin
+	  with the # character (comments).</p><p>Leading whitespace (but not trailing whitespace, take care) is removed,
+	  and the remaining contents of each line are interpreted as a pattern which is
+	  matched against <em class="replaceable"><code>expr</code></em>.
+	  As soon as the match is found, <code class="function">lookup</code>
+	  returns "1". If no match is found after reading the entire file,
+	  <code class="function">lookup</code> returns "0". For example:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+if ( /^To:\s*(.*)/ &amp;&amp; lookup( $MATCH1, "badto.dat" ))
+{
+    exit
+}
+	    </pre></div></blockquote></div><p>
+	  The file badto.dat contains the following two lines:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+friend@public
+^[^@]*$
+	    </pre></div></blockquote></div><p>
+	  If a message has a <code class="literal">To:</code>
+	  header that contains the text "<code class="literal">friend@public</code>", or does
+	  not contain at least one <span class="token">@</span> character, then the message will
+	  be silently
+	  dropped on the floor ( <span class="command"><strong>maildrop</strong></span> will terminate without
+	  delivering the
+	  message anywhere).</p><p>
+	  <em class="replaceable"><code>options</code></em> are the pattern matching options
+	  to use. The only supported
+	  option is "D" (the rest are meaningless, in this case).</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	    Be careful with discarding messages like that. Pattern matching can
+	    be tricky, and a slight miscalculation can cause mail to be unintentionally
+	    discarded. It is much desirable to first deliver message to a separate folder
+	    or mailbox, and once the filter is verified to work correctly, change it so
+	    the messages are discarded completely.</p></div></div><div class="refsect3"><a id="idm46044388689792" shape="rect"> </a><h4>substr(string,start [,count]) - return substring</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+foo=substr($foo, 1, 10)
+	    </pre></div></blockquote></div><p>
+	  The <code class="function">substr</code> function
+	  extracts characters from <em class="replaceable"><code>string</code></em>
+	  beginning with character #<em class="replaceable"><code>start</code></em>.
+	  If <em class="replaceable"><code>count</code></em> is
+	  specified, at most <em class="replaceable"><code>count</code></em> characters
+	  starting at position <em class="replaceable"><code>start</code></em> are kept, any excess is
+	  trimmed.</p></div><div class="refsect3"><a id="idm46044388684704" shape="rect"> </a><h4>time - return current time</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+foo=time
+	    </pre></div></blockquote></div><p>
+	  The <code class="function">time</code> function returns the current time, in
+	  seconds, since
+	  January 1, 1970. This function is useful when using GDBM files. See <a class="ulink" href="maildropex.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildropex</span>(7)</span></a>
+	  for an example of using the <code class="function">time</code> function.</p></div><div class="refsect3"><a id="idm46044388679632" shape="rect"> </a><h4>tolower(string) - Convert string to lowercase.</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+foo=tolower(<em class="replaceable"><code>string</code></em>)
+	    </pre></div></blockquote></div><p>
+	  This function returns the <em class="replaceable"><code>string</code></em>
+	  with all uppercase characters
+	  replaced by lowercase characters.</p></div><div class="refsect3"><a id="idm46044388676240" shape="rect"> </a><h4>toupper(string) - Convert string to uppercase.</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+foo=toupper(<em class="replaceable"><code>string</code></em>)
+	    </pre></div></blockquote></div><p>
+	  This function returns the <em class="replaceable"><code>string</code></em>
+	  with all lowercase characters
+	  replaced by uppercase characters.</p></div></div><div class="refsect2"><a id="idm46044388672720" shape="rect"> </a><h3>Statements</h3><p>
+	The <code class="systemitem">filter file</code> is read by
+	<span class="command"><strong>maildrop</strong></span>
+	(<code class="filename">$HOME/.mailfilter</code> or another file), and it
+	contains filtering
+	statements, one per line. The filtering language used by
+	<span class="command"><strong>maildrop</strong></span> has
+	a loosely - defined grammatical structure.</p><p>Statements are listed one per line. Multiple statements may be listed on
+	the same line by separating them with semicolons. To continue a long
+	statement on the next line, terminate the line with a backslash
+	character.</p></div></div><div class="refsect1"><a id="idm46044388668192" shape="rect"> </a><h2>BUGS</h2><p>
+      If <code class="function">getaddr</code>() or <code class="function">hasaddr</code>()
+      functions are used on broken headers, the results
+      are unpredictable.</p><p><code class="function">hasaddr</code>() is completely case insensitive. This
+      actually violates a few
+      RFCs, because the userid portion of the address could be case-sensitive, but
+      it's not in too many cases, so there.</p></div><div class="refsect1"><a id="idm46044388664608" shape="rect"> </a><h2>SEE ALSO</h2><p>
+      <a class="ulink" href="lockmail.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">lockmail</span>(1)</span></a>,
+      <a class="ulink" href="maildrop.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildrop</span>(1)</span></a>,
+      <a class="ulink" href="maildropgdbm.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildropgdbm</span>(5)</span></a>,
+      <a class="ulink" href="maildirquota.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildirquota</span>(8)</span></a>,
+      <a class="ulink" href="reformail.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">reformail</span>(1)</span></a>,
+      <span class="citerefentry"><span class="refentrytitle">egrep</span>(1)</span>,
+      <span class="citerefentry"><span class="refentrytitle">sendmail</span>(8)</span>.
+    </p></div></div></body></html>

@@ -12,17 +12,31 @@ SUBDIRS=libs/numlib libs/bdbobj libs/gdbmobj libs/soxwrap \
 	libs/unicode libs/rfc822 libs/rfc2045 \
 	libs/md5 libs/sha1 libs/random128 libs/rfc1035 libs/liblock \
 	libs/maildir libs/makedat libs/libhmac libs/authlib \
-	libs/waitlib libs/tcpd libs/rootcerts libs/imap
+	libs/waitlib libs/tcpd libs/rootcerts libs/imap libs/maildrop
 
 DISTCLEANFILES=stamp-h1 config.h config.log packaging/systemd/courier-imap.sysvinit packaging/systemd/courier-imap.service \
-	packaging/suse/courier-imap.init pop3d.rc dbobj.h imapd-ssl.rc pop3d-ssl.rc imapd.rc dbobj.config
+	packaging/suse/courier-imap.init pop3d.rc dbobj.h imapd-ssl.rc pop3d-ssl.rc imapd.rc dbobj.config $(MAILDROPHTML)
 
 CLEANFILES=$(databin_SCRIPTS) $(man_MANS) $(sysconf_DATA) $(sbin_SCRIPTS)
 
 EXTRA_PROGRAMS=
 
 EXTRA_DIST=README README.cygwin\
-	COPYING.GPL NEWS.html $(TEMPLFILES) pgpkeys.txt
+	COPYING.GPL NEWS.html $(TEMPLFILES) pgpkeys.txt \
+	INSTALL.html maildroptips.txt manpage.css
+
+if HAVE_SGML
+manpage.css: libs/docbook/manpage.css
+	cp -f $(srcdir)/libs/docbook/manpage.css manpage.css
+endif
+
+MAILDROPHTML=lockmail.html maildiracl.html maildirkw.html \
+	maildirmake.html maildropex.html \
+	maildir.html \
+	maildropfilter.html maildropgdbm.html maildrop.html mailbot.html \
+	makemime.html reformail.html reformime.html
+
+html_DATA=$(MAILDROPHTML) manpage.css
 
 sysconf_DATA=quotawarnmsg.example
 libexec_SCRIPTS=imapd.rc imapd-ssl.rc pop3d.rc pop3d-ssl.rc
@@ -173,6 +187,32 @@ all-gmake-check:
 		echo "instead of make, as you were told by the INSTALL file (you did read the" ; \
 		echo "INSTALL file, did you?)" ; echo "" ; exit 1
 
+lockmail.html: libs/liblock/lockmail.html
+	cp -f $(srcdir)/libs/liblock/lockmail.html lockmail.html
+maildir.html: libs/maildir/maildir.html
+	cp -f $(srcdir)/libs/maildir/maildir.html maildir.html
+maildiracl.html: libs/maildir/maildiracl.html
+	cp -f $(srcdir)/libs/maildir/maildiracl.html maildiracl.html
+maildirkw.html: libs/maildir/maildirkw.html
+	cp -f $(srcdir)/libs/maildir/maildirkw.html maildirkw.html
+maildirmake.html: libs/maildir/maildirmake.html
+	cp -f $(srcdir)/libs/maildir/maildirmake.html maildirmake.html
+mailbot.html: libs/maildrop/mailbot.html
+	cp -f $(srcdir)/libs/maildrop/mailbot.html mailbot.html
+maildrop.html: libs/maildrop/maildrop.html
+	cp -f $(srcdir)/libs/maildrop/maildrop.html maildrop.html
+reformail.html: libs/maildrop/reformail.html
+	cp -f $(srcdir)/libs/maildrop/reformail.html reformail.html
+maildropex.html: libs/maildrop/maildropex.html
+	cp -f $(srcdir)/libs/maildrop/maildropex.html maildropex.html
+maildropfilter.html: libs/maildrop/maildropfilter.html
+	cp -f $(srcdir)/libs/maildrop/maildropfilter.html maildropfilter.html
+maildropgdbm.html: libs/maildrop/maildropgdbm.html
+	cp -f $(srcdir)/libs/maildrop/maildropgdbm.html maildropgdbm.html
+makemime.html: libs/rfc2045/makemime.html
+	cp -f $(srcdir)/libs/rfc2045/makemime.html makemime.html
+reformime.html: libs/rfc2045/reformime.html
+	cp -f $(srcdir)/libs/rfc2045/reformime.html reformime.html
 
 # Copyright 2000 Double Precision, Inc.  See COPYING for
 # distribution information.
@@ -226,7 +266,9 @@ id=$(dollar)Id
 
 WWW=$$HOME/www/www.courier-mta.org
 
-htmldoc: INSTALL.html libs/imap/README.html libs/maildir/README.maildirquota.html libs/maildir/README.sharedfolders.html libs/maildir/README.imapkeywords.html libs/imap/BUGS.html libs/imap/README.proxy.html libs/imap/README.html
+htmldoc: INSTALL.html libs/imap/README.html $(MAILDROPHTML) libs/maildrop/maildroptips.html \
+	libs/maildir/README.maildirquota.html libs/maildir/README.sharedfolders.html \
+	libs/maildir/README.imapkeywords.html libs/imap/BUGS.html libs/imap/README.proxy.html libs/imap/README.html
 	for f in $^; do xsltproc --nonet $(srcdir)/imap-format.xsl $$f | perl -ne 's~\$(id):.*\$$~\$(id):'"$$h"'\$$~; print' >$(WWW)/imap/`basename $$f`; done
 	rm -rf doc
 	mkdir doc
@@ -243,6 +285,7 @@ htmldoc: INSTALL.html libs/imap/README.html libs/maildir/README.maildirquota.htm
 		rm -f $$f.tmp*; done
 	mv -f doc/*.html $(WWW)/imap
 	cp -f courier-imap.png bg.png $(WWW)/imap
+	cp manpage.css html
 	rm -rf doc
 
 AUTOMAKE_OPTIONS=dist-bzip2

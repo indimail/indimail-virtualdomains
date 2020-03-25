@@ -1,0 +1,2766 @@
+'\" t
+.\"<!-- Copyright 1998 - 2014 Double Precision, Inc.  See COPYING for -->
+.\"<!-- distribution information. -->
+.\"     Title: maildropfilter
+.\"    Author: Sam Varshavchik
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 04/27/2018
+.\"    Manual: Double Precision, Inc.
+.\"    Source: Courier Mail Server
+.\"  Language: English
+.\"
+.TH "MAILDROPFILTER" "7" "04/27/2018" "Courier Mail Server" "Double Precision, Inc\&."
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+maildropfilter \- maildrop\*(Aqs filtering language
+.SH "SYNOPSIS"
+.sp
+@withetcdir@/maildroprc, $HOME/\&.mailfilter, $HOME/\&.mailfilters/*, and friends\&.\&.\&.
+.SH "DESCRIPTION"
+.PP
+This manual page describes the language used by
+\fBmaildrop\fR
+to filter E\-mail messages\&. The mail filtering instructions are read from a file\&. The language is loosely structured, it is based on pattern matching\&. The language has a distinct lexical and syntactical structure, very similar to Perl\*(Aqs, but it is important to note that it is not Perl, and is very different from Perl, in certain cases\&.
+.PP
+If the filtering instructions do not exist,
+\fBmaildrop\fR
+delivers the message to the default mailbox without doing any additional processing, making it indistinguishable from the usual mail delivery agent\&.
+.PP
+It is important to note that
+\fBmaildrop\fR
+reads and parses the
+filter file
+before doing anything\&. If there are any errors
+\fBmaildrop\fR
+prints an error message, and terminates with the exit code set to
+\fBEX_TEMPFAIL\fR\&. A compliant mail transport agent should re\-queue the message for a later delivery attempt\&. Hopefully, most simple syntax errors will not cause mail to be bounced back if the error is caught and fixed quickly\&.
+.SS "Environment"
+.PP
+
+\fBmaildrop\fR
+uses variables to access and manipulate messages\&. Variables are arbitrary text accessed by referring to the name of the variable, such as
+\fIHOME\fR, or
+\fIDEFAULT\fR\&. Text is placed into a variable by using an assignment statement, such as:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+FILE="IN\&.junk"
+	  
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This statement puts the text "IN\&.junk" (without the quotes) into a variable whose name is
+\fIFILE\fR\&. Later, the contents of a variable are accessed by using the $ symbol and the name for the variable\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+to $FILE
+	  
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This will deliver the current message to the mailbox file (or a maildir directory) named "IN\&.junk"\&.
+.PP
+\fBmaildrop\fR
+initially creates variables from the environment variables of the operating system, UNLESS
+\fBmaildrop\fR
+runs in delivery mode\&. Each operating system environment variable becomes a
+\fBmaildrop\fR
+variable\&. When running in delivery mode,
+\fBmaildrop\fR
+does not import the environment for security reasons, except for the environment variables that define the process locale (\fILANG\fR,
+\fILANGUAGE\fR, and
+\fILC_\fR\fI\fI*\fR\fR), which are still imported\&.
+.PP
+In all cases
+\fBmaildrop\fR
+resets the following variables to their default values:
+\fIHOME\fR,
+\fIDEFAULT\fR,
+\fISHELL\fR,
+\fIPATH\fR,
+\fILOCKEXT\fR,
+\fILOCKREFRESH\fR,
+\fILOCKSLEEP\fR,
+\fILOCKTIMEOUT\fR,
+\fIMAILDIRQUOTA\fR,
+\fISENDMAIL\fR
+and
+\fILOGNAME\fR\&.
+.PP
+There\*(Aqs one exception to this rule which applies to the version of
+\fBmaildrop\fR
+that comes with the
+\m[blue]\fBCourier mail server\fR\m[]\&\s-2\u[1]\d\s+2\&. The following does not apply to the standalone version of
+\fBmaildrop\fR: when running in delivery mode, if the
+\fB\-d\fR
+flag was not used, or if it specifies the same userid as the one that\*(Aqs running
+\fBmaildrop\fR: the following variables are automatically imported from the environment:
+\fIHOME\fR,
+\fISHELL\fR,
+\fILOGNAME\fR
+and
+\fIMAILDIRQUOTA\fR\&. These environment variables are initialized by the
+Courier
+mail server prior to running
+\fBmaildrop\fR\&. Additionally, the initial value for the
+\fIDEFAULT\fR
+maildrop variable is imported from the
+\fIMAILDROPDEFAULT\fR
+environment variable\&. This is because the
+Courier
+mail server overloads the DEFAULT environment variable to store the defaulted portion of the local mailbox address\&. See the
+\m[blue]\fB\fBdot-courier\fR(5)\fR\m[]\&\s-2\u[2]\d\s+2
+man page in the
+Courier
+mail server distribution\&. You can get the
+Courier
+mail server\*(Aqs
+\fIDEFAULT\fR
+value by using the
+\fBimport\fR
+command\&. Note, however, that this will clobber the old contents of
+\fIDEFAULT\fR, which is probably not what you want\&. The right way to do this would be something like this:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+SAVEDEFAULT=$DEFAULT
+import DEFAULT
+LOCALDEFAULT=$DEFAULT
+DEFAULT=$SAVEDEFAULT
+	  
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+All internal variables are exported back as environment variables when
+\fBmaildrop\fR
+runs an external command\&. Changes to internal variables, made by the
+filter file, are reflected in the exported environment\&.
+.SS "Lexical structure"
+.PP
+Most whitespace is generally ignored\&. The
+#
+character introduces a comment running to the end of the line, which is also ignored\&. Unlike other mail filters,
+\fBmaildrop\fR
+parses the
+filter file
+before taking any action with the message\&. If there are syntax errors in the file,
+\fBmaildrop\fR
+displays an error message, and returns
+\fBEX_TEMPFAIL\fR\&. That should cause the mail message to remain in the queue, and, hopefully allow the problem to be corrected, without bouncing any mail\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+In
+\fBmaildrop\fR, the end of line is a lexical token\&. In order to continue a long statement on the next line, terminate the line with a backslash character\&.
+.sp .5v
+.RE
+.SS "Literal text"
+.PP
+Literal text in the
+\fBmaildrop\fR
+filtering language is surrounded by either single or double quotes\&. In order to enter a single quote into a text literal surrounded by single quotes, or a double quote into a literal surrounded by double quotes, prefix it with a backslash character\&. Use two backslash characters characters to enter one backslash character in the text literal\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+A backslash followed by either a backslash, or a matching quote, is the only situation where the backslash character is actually removed, leaving only the following character in the actual text literal\&. If a backslash character is followed by any other character, the backslash is NOT removed\&.
+.sp .5v
+.RE
+.PP
+Multiple text literals in a row are automatically concatenated, even if they use different quotes\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+FOOBAR="Foo"\*(Aqbar\*(Aq
+	  
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This sets the variable
+\fIFOOBAR\fR
+to the text "Foobar"\&.
+.SS "Variable substitution"
+.PP
+
+Variable substitution is performed on text literals that\*(Aqs surrounded by double quotation marks\&. The "$" character, followed by a variable name, is replaced by that variable\*(Aqs contents\&.
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+MAILBOX="$HOME/Mailbox"
+	  
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This sets the variable
+\fIMAILBOX\fR
+to the contents of the variable
+\fIHOME\fR
+followed by
+"/Mailbox"\&. Variable names must begin with an uppercase letter, a lowercase letter, or an underscore\&. Following that, all letters, digits, and underscores are taken as a variable name, and its contents replace the
+$
+sign, and the variable name\&. It is possible to access variables whose name includes other characters, by using braces as follows:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+MAILBOX="${HOME\-WORD}/Mailbox"
+	  
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Inserts the contents of the
+\fIHOME\-WORD\fR
+variable\&. If the variable does not exist, the empty text literal is used to replace the variable name\&. It is not possible to access variables whose names include the
+}
+character\&.
+.PP
+If the
+$
+character is not followed by a left brace, letter, or an underscore, the
+$
+character remains unmolested in the text literal\&. A backslash followed by the
+$
+character results in a
+$
+character in the text literal, without doing any variable substitution\&.
+.PP
+Variable substitution is not done in text literals which are surrounded by single quotes (apostrophes)\&.
+.SS "Command line arguments"
+.PP
+\fBmaildrop\fR
+initializes special variables:
+\fI$1\fR,
+\fI$2\fR, and so on, with additional parameters specified on the
+\fBmaildrop\fR
+command line\&. A
+filter file
+may use those variables just like any other variables\&.
+.SS "Predefined variables"
+.PP
+The following variables are automatically defined by
+\fBmaildrop\fR\&. The default values for the following variables may be changed by the system administrator\&. For security reasons, the values of the following variables are always reset to their default values, and are never imported from the environment:
+.PP
+\fIDEFAULT\fR
+.RS 4
+The default mailbox to deliver the message to\&. If the
+filter file
+does not indicate a mailbox to deliver this message to, the message is delivered to this mailbox\&. The default mailbox is defined by the system administrator\&.
+.RE
+.PP
+\fIFROM\fR
+.RS 4
+Message envelope sender\&. This is usually the same address as what appears in the
+From:
+header, but may not be\&. This information may or may not be available to
+\fBmaildrop\fR
+on your system\&. The message envelope sender is usually specified with the
+\fB\-f\fR
+option to
+\fBmaildrop\fR\&. If the
+\fB\-f\fR
+option is not given,
+\fBmaildrop\fR
+looks for the
+Return\-Path:
+header in the message\&. As the last resort,
+FROM
+defaults to
+\(lqMAILER\-DAEMON\(rq\&. Note that
+\fIFROM\fR
+may be empty \- the message envelope sender is empty for bounce messages\&.
+.RE
+.PP
+\fIHOME\fR
+.RS 4
+Home directory of the user running
+\fBmaildrop\fR\&.
+.RE
+.PP
+\fIHOSTNAME\fR
+.RS 4
+Network name of the machine running maildrop\&. Obtained from
+\fBgethostname\fR(3)\&.
+.RE
+.PP
+\fILOCKEXT\fR
+.RS 4
+Extension for dot\-lock files (default:
+\&.lock)\&.
+.RE
+.PP
+\fILOCKREFRESH\fR
+.RS 4
+Refresh interval, in seconds, for dot\-locks (default:
+15)\&. When
+\fBmaildrop\fR
+dot\-locks a mailbox,
+\fBmaildrop\fR
+tries to refresh the lock periodically in order to keep other programs from removing a stale dot\-lock\&. This is only required if a dot\-lock exists for a prolonged period of time, which should be discouraged anyway\&.
+.RE
+.PP
+\fILOCKSLEEP\fR
+.RS 4
+Number of seconds to wait to try again to create a dot\-lock file, if one already exists (default: 5)\&.
+.RE
+.PP
+\fILOCKTIMEOUT\fR
+.RS 4
+Number of seconds to wait before removing a stale dot\-lock file (default:
+60)\&. If a dot\-lock file still exists after
+\fILOCKTIMEOUT\fR
+seconds,
+\fBmaildrop\fR
+assumes that the process holding the lock no longer exists, and the dot\-lock file can be safely removed\&. After removing the dot\-lock file,
+\fBmaildrop\fR
+waits
+\fILOCKSLEEP\fR
+seconds before trying to create its own dot\-lock file, in order to avoid a race condition with another process which is also trying to remove the same stale dot\-lock, at the same time\&.
+.RE
+.PP
+\fILOGNAME\fR
+.RS 4
+Name of the user to who the message is being delivered\&.
+.RE
+.PP
+\fIMAILDROP_OLD_REGEXP\fR
+.RS 4
+Revert to using the old legacy pattern matching engine\&. Versions of
+\fBmaildrop\fR
+prior to version 2\&.0 (included in the
+Courier
+mail server 0\&.51, and earlier), used a built\-in pattern matching engine, instead of using the
+PCRE
+library (see the
+\(lqPatterns\(rq
+section)\&.
+\fBmaildrop\fR
+1\&.x used a different syntax for patterns, which is no longer described in this manual page\&. The old pattern matching engine is still available, by setting
+\fIMAILDROP_OLD_REGEXP\fR
+to
+\(lq1\(rq\&. Setting this variable will use the legacy pattern matching engine for the rest of the
+\fBmaildrop\fR
+recipe file\&.
+.sp
+The pattern matching engine will be removed completely in a future version of maildrop\&. This setting provides for a transitional period of converting old recipes\&.
+\fIMAILDROP_OLD_REGEXP\fR
+can be set to
+\(lq1\(rq
+in the global
+maildroprc
+file, then reset to
+\(lq0\(rq
+in each individual
+\fBmaildrop\fR
+recipe file, after it gets converted to the new syntax\&.
+.RE
+.PP
+\fIMAILFILTER\fR
+.RS 4
+This is the name of the original
+filter file
+that was given to
+\fBmaildrop\fR
+on the command line\&. This is mostly useful to
+\-default
+filter files, it allows them to obtain the
+\m[blue]\fBvalue of the \-M option\fR\m[]\&\s-2\u[3]\d\s+2
+specified on the command line\&.
+.RE
+.PP
+\fIPATH\fR
+.RS 4
+Command execution path\&.
+\fBmaildrop\fR
+resets PATH to the system default (usually
+/bin:/usr/bin:/usr/local/bin)\&.
+.RE
+.PP
+\fISENDMAIL\fR
+.RS 4
+The mail delivery agent\&. When
+\fBmaildrop\fR
+is instructed to deliver the message to a mailbox whose name begins with the ! character, this is interpreted as a request to forward the message\&. The
+\fISENDMAIL\fR
+command is executed to forward the message\&.
+.RE
+.PP
+\fISHELL\fR
+.RS 4
+The login shell\&. The shell is used to execute all commands invoked by
+\fBmaildrop\fR\&.
+.RE
+.PP
+\fIVERBOSE\fR
+.RS 4
+Current Debug level (default:
+0)\&. Setting
+\fIVERBOSE\fR
+to progressive higher values, between 1 and 9, produces debugging output on standard error\&.
+\fBmaildrop\fR
+ignores the
+\fIVERBOSE\fR
+variable in delivery mode (in order not to confuse the mail transport agent)\&.
+.RE
+.PP
+\fIUMASK\fR
+.RS 4
+The file creation mode mask, in octal\&. The default setting of
+077
+creates mailboxes that are readable and writable by the owner only\&. Use
+007
+to create mailboxes that are readable/writable by both owner and the group\&. Use
+037
+to create mailboxes that are readable by both owner and group, but writable by owner only\&. Permissions on existing mailboxes are not changed, this setting affects only new mailboxes\&. When delivering to maildirs this setting sets the permissions on new messages only\&. Access permissions on messages in maildirs are also affected by the permissions on the maildir directories\&.
+.RE
+.SS "Other special variables"
+.PP
+The following variables are automatically used by
+\fBmaildrop\fR
+when the
+filter file
+is being processed:
+.PP
+\fIEXITCODE\fR
+.RS 4
+Return code for
+\fBmaildrop\fR\&. When
+\fBmaildrop\fR
+successfully delivers a message, it terminates with this exit code, which defaults to 0\&. When the
+\fBto\fR
+or the
+\fBcc\fR
+command is used to deliver the message to an external process, via a pipe,
+\fBmaildrop\fR
+will set this variable to the exit code of the external process\&. Since
+\fBmaildrop\fR
+immediately terminates after completing the
+\fBto\fR
+command this means that
+\fBmaildrop\fR\*(Aqs exit code will be the exit code of the external process\&. If the
+\fBto\fR
+command does not deliver the message to a process you must set
+\fIEXITCODE\fR
+before the
+\fBto\fR
+command, since
+\fBmaildrop\fR
+terminates immediately after finishing the delivery\&.
+.RE
+.PP
+\fIFLAGS\fR
+.RS 4
+The
+\fIFLAGS\fR
+variable is used only when delivering a message to a maildir, and may contain only the following letters:
+\(lqD\(rq,
+\(lqF\(rq,
+\(lqR\(rq, and
+\(lqS\(rq\&. They may appear in any order\&. When the message gets delivered to the maildir, the message will be marked with a draft, flag, replied, or seen, attribute, correspondingly\&.
+.sp
+\fIFLAGS\fR
+must be set before the message is delivered to a maildir\&. The contents of
+\fIFLAGS\fR
+are ignored, when delivering on an mbox folder\&.
+.RE
+.PP
+\fIKEYWORDS\fR
+.RS 4
+The
+\fIKEYWORDS\fR
+variable is used only when delivering a message to a maildir, and implements the optional IMAP keyword extension as implemented in the
+\m[blue]\fBCourier IMAP server\fR\m[]\&\s-2\u[1]\d\s+2\&. It may be optionally initialized to contain a comma\-separate list of keywords\&. The
+\fBto\fR, or the
+\fBcc\fR
+command, delivers the message to the maildir normally, but also associated the list of keywords in
+\fIKEYWORDS\fR
+with the newly delivered message\&.
+.sp
+\fIKEYWORDS\fR
+must be set before the message is delivered to a maildir\&. The contents of
+\fIKEYWORDS\fR
+are ignored, when delivering on an mbox folder\&.
+.RE
+.PP
+\fILINES\fR
+.RS 4
+Number of lines in the current message\&. Note that this may be an approximation\&. It may or may not take into account the \-A option\&. Use this as criteria for filtering, nothing more\&.
+.RE
+.PP
+\fIMAILDIRQUOTA\fR
+.RS 4
+Set this variable in order to manually enforce a maximum size on ANY maildir where the message is delivered\&. This is an optional feature that must be enabled by the system administrator, see
+\m[blue]\fB\fBmaildirquota\fR(8)\fR\m[]\&\s-2\u[4]\d\s+2
+for more information\&.
+.RE
+.PP
+\fIRETURNCODE\fR
+.RS 4
+This variable is set when
+\fBmaildrop\fR
+runs the
+\m[blue]\fBsystem\fR\m[]\&\s-2\u[5]\d\s+2
+command,
+\m[blue]\fBxfilter\fR\m[]\&\s-2\u[6]\d\s+2
+command, or a command that\*(Aqs specified within a pair of backtick characters ( command substitution )\&. The
+\fIRETURNCODE\fR
+variable will be set to the exit code of the command, after it completes\&.
+.RE
+.PP
+\fISIZE\fR
+.RS 4
+Number of bytes in the message\&. This may or may not include the \-A option\&. Use this as a criteria for filtering, nothing more\&.
+.RE
+.SS "Unquoted text"
+.PP
+All text strings in
+filter files should be in single, or double quotes\&. However, for convenience sake, quotes can be omitted under certain circumstances\&.
+.PP
+Text that includes ONLY letters, digits, and the following characters:
+_\-\&.:/${}@
+may appear without quotes\&. Note that this does not allow spaces, or backslashes to be entered, however the text is still variable\-substituted, and the substituted text may contain other characters\&.
+.PP
+Also, note that patterns (see below) begin with the slash character\&. Normally, anything that begins with the slash is interpreted as a pattern\&. However, text immediately after
+\(lqVARIABLE=\(rq
+is interpreted as a string even if it begins with a slash\&. This is why something like:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+MAILDIR=/var/mail
+	  
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+works as expected\&. Using quotes, though, is highly recommended\&. You must use quotes to set a variable to a lone slash, because an unquoted slash is interpreted as a division sign\&.
+.PP
+Long double or singly\-quoted text can be broken across multiple lines by ending the line with a lone backslash character, like this:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+TEXT="This is a long \e
+   text string"
+	  
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The backslash, the newline, and all leading whitespace on the next line is removed, resulting in "This is a long text string"\&.
+.SS "Command substitution"
+.PP
+Text enclosed in back\-tick characters is interpreted as a shell command\&. The shell command is executed as a child process by
+\fBmaildrop\fR\&. Its output is used in place of the command\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+DIR=`ls`
+	  
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+places the names of the files in the current directory into the DIR variable\&.
+.PP
+The output of the command will have all newline characters replaced by spaces, and leading and trailing spaces will be stripped (multiple spaces are not removed, though)\&. Also, the contents of the message being delivered is made available to the command on standard input\&.
+.SS "Patterns"
+.PP
+The pattern syntax in
+\fBmaildrop\fR
+is similar to the
+\fBgrep\fR
+command\*(Aqs syntax, with some minor differences\&. A pattern takes the following form in the
+filter file:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+/\fIpattern\fR/:\fIoptions\fR
+	  
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fIpattern\fR
+specifies the text to look for in the message, in the
+UTF\-8
+codeset\&.
+\fIpattern\fR
+must not begin with a space, otherwise the leading slash will then be interpreted as a division sign\&. If you must search for text that starts with a space, use something like
+"/[ ] \&.\&.\&. /"\&.
+.PP
+The general syntax of
+\fBmaildrop\fR\*(Aqs patterns is described in the
+\fBpcrepattern\fR(3)
+manual page, with certain exceptions noted below\&.
+\fBmaildrop\fR
+uses the
+\m[blue]\fBPCRE\fR\m[]\&\s-2\u[7]\d\s+2
+library to implement pattern matching\&. Not all features in
+PCRE
+are available in
+\fBmaildrop\fR, and the
+\(lqoptions\(rq
+part, which follows the pattern specification, changes the pattern matching further\&. Consult the
+\fBpcrepattern\fR(3)
+manual page for more information, but note the following exceptions:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Internal options settings are not supported (but see the
+\(lqD\(rq
+maildrop option, below)\&. Do not include option settings in the
+\fIpattern\fR, doing so will lead to undefined results\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Named subpatterns are not implemented\&. Numbered subpatterns are implemented, see
+\(lqPattern Match Results\(rq, below\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The search pattern gets executed not against the raw message text, but the message transcoded into a canonical UTF\-8\-based format\&. This process involves transcoding any non\-UTF\-8 message content into UTF\-8\&. Additionally, message headers get converted into a canonical format before the search pattern gets executed\&.
+.sp
+For structured headers with email addresses, the process involves removing extraneous punctuation, or adding missing ones (in situations where a missing punctuation character can be deduced)\&. Additionally certain pre\-RFC822 obsolete header formats get converted to canonical form\&.
+.sp
+This means that header search patterns that include punctuation character may appear not to work against obviously\-matching message text\&. Use
+\(lqreformime \-u <message\&.txt\(rq, with
+message\&.txt
+containing the sample message, to see exactly the actual text that gets searched by patterns\&.
+.RE
+.SS "Pattern options"
+.PP
+Following
+/\fIpattern\fR/,
+there may be an optional colon, followed by one\&. or more options\&. The following options may be specified in any order:
+.PP
+h
+.RS 4
+Match this pattern in the message\*(Aqs header, and the header of any attachments in the message\&.
+.RE
+.PP
+H
+.RS 4
+Match this pattern in the message\*(Aqs main header\&. Do not match this pattern in the headers of the message\*(Aqs attachments\&.
+.RE
+.PP
+b
+.RS 4
+Match this pattern against the message body\&.
+.RE
+.PP
+D
+.RS 4
+This is a case sensitive match\&. Normally the patterns match either uppercase or lowercase text\&.
+/john/
+will match "John", "john", or "JOHN"\&. Specify the D option for a case\-sensitive search: lowercase letters in the pattern must match lowercase letters in the message; ditto for uppercase\&.
+.RE
+.PP
+If neither \*(Aqh\*(Aq, \*(AqH\*(Aq, or \*(Aqb\*(Aq is specified, \*(Aqh\*(Aq is the default, matching the pattern in the message\*(Aqs header, and all attachments\*(Aq headers\&. Specifying the \*(Aqb\*(Aq option causes the pattern to be matched against the message body\&. Specifying \*(Aqb\*(Aq and \*(Aqh\*(Aq causes the pattern to be matched against the entire message\&.
+.PP
+Normally, each line in the message gets matched against the pattern individually\&. When applying patterns to a header, multi\-line headers (headers split on several lines by beginning each continuation line with whitespace) are silently combined into a single line, before the pattern is applied\&.
+.SS "MIME encoding"
+.PP
+The pattern must be a valid text string in the
+UTF\-8
+codeset, and
+\fBmaildrop\fR
+should handle messages that use MIME encodings in other known character sets\&.
+Options
+that specify a message header search result in
+\fBmaildrop\fR
+searching the initial message headers, and any headers of additional MIME sections, in a multipart MIME message\&. Options that specify a message body search will search through all "text" MIME content\&.
+.PP
+For a MIME search to succeed, the message must be a well\-formed MIME message (with a Mime\-Version: 1\&.0 header)\&.
+.SS "Weighted scoring"
+.PP
+Patterns are evaluated by
+\fBmaildrop\fR
+as any other numerical expression\&. If a pattern is found,
+\fBmaildrop\fR\*(Aqs filter interprets the results of the pattern match as number 1, or true, for filtering purposes\&. If a pattern is not found the results of the pattern search is zero\&. Once a pattern is found, the search stops\&. Second, and subsequent occurrences of the same pattern are NOT searched for\&.
+.PP
+\fBmaildrop\fR
+can also do weighted scoring\&. In weighted scoring, multiple occurrences of the same pattern are used to calculate a numerical score\&.
+.PP
+To use a weighted search, specify the pattern as follows:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+/\fIpattern\fR/:\fIoptions\fR,\fIxxx\fR,\fIyyy\fR
+	  
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+where
+\fIxxx\fR
+and
+\fIyyy\fR
+are two numbers\&.
+\fIyyy\fR
+is optional \-\- it will default to 1, if missing\&.
+.PP
+The first occurrence of the pattern is evaluated as xxx\&. The second occurrence of the pattern is evaluated as xxx*yyy, the third as xxx*yyy*yyy, etc\&.\&.\&. All occurrences of the pattern are added up to calculate the final score\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+\fBmaildrop\fR
+does not recognize multiple occurrences of the same pattern in the same line\&. Multiple occurences of the same pattern in one line count as one occurence\&.
+.sp .5v
+.RE
+.SS "Pattern Match Results"
+.PP
+After a pattern is successfully matched, the actual text that is matched is placed in the
+\fIMATCH\fR
+variable\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+/^From:\&.*/
+	  
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+matches a line of the form:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+From: postmaster@localhost
+	  
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Here the variable
+\fIMATCH\fR
+will be set to "From: postmaster@localhost", which can be used in subsequent statements\&.
+.PP
+If the pattern contains subpatterns, the portions of the text that match the first subpattern is placed in the
+\fIMATCH1\fR
+variable\&. The second subpattern, if any, is placed in
+\fIMATCH2\fR, and so on:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+/^From:\es+(\&.*)@(\&.*)/
+	  
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+matched against the same line will set
+\fIMATCH\fR
+to
+\(lqFrom: postmaster@localhost\(rq,
+\fIMATCH1\fR
+to
+\(lqpostmaster\(rq, and
+\fIMATCH2\fR
+to
+\(lqlocalhost\(rq\&. Of course, in real world the
+\(lqFrom:\(rq
+header is usually much more complicated, and can\*(Aqt be handled that easily\&. This is just an illustrative example\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Subpatterns are not processed in the
+foreach
+statement\&.
+.sp .5v
+.RE
+.SS "Conversion of maildrop 1\&.x patterns to 2\&.0"
+.PP
+Although the new
+PCRE\-based pattern matching code in
+\fBmaildrop\fR
+is completely different from the built\-in pattern matching code in
+\fBmaildrop\fR
+1\&.x, very few changes will be required to convert recipes to the new syntax\&. The only major differences are:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The subexpression format has changed\&. Any pattern that uses subexpression needs to be converted\&. Additionally, references to
+\fIMATCH2\fR
+must be replaced with
+\fIMATCH1\fR,
+\fIMATCH3\fR
+to
+\fIMATCH2\fR, and so on\&. References to plain old
+\fIMATCH\fR
+will remain the same\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The
+\(lqw\(rq
+pattern option is no longer possible, with
+PCRE\&. The very few recipes that use this option, if any actually exist, will have to be rewritten in some other fashion\&.
+.RE
+.SS "Expressions"
+.PP
+Although
+\fBmaildrop\fR
+evaluates expressions numerically, results of expressions are stored as text literals\&. When necessary, text literals are converted to numbers, then the results of a mathematical operation is converted back into a text literal\&.
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBOperators\fR
+.RS 4
+.PP
+The following operators carry their usual meaning, and are listed in order from lowest precedence, to the highest:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+
+||
+&&
+<  <=  >  >=  ==  !=  lt  le  gt  ge  eq  ne
+|
+&
++  \-
+*  /
+=~ /\fIpattern\fR/
+/\fIpattern\fR/  !  ~  \fIfunction()\fR
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBVariable assignment\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+VARIABLE=\fIexpression\fR
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Assigns the result of the expression to
+\fIVARIABLE\fR
+(note no leading $ in front of variable)\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+If
+\fIVARIABLE\fR
+is NOT surrounded by quotes, then it may contain only letters, numbers, underscores, dashes, and a selected few other characters\&. In order to initialize a variable whose name contains non\-standard punctuation marks, surround the name of the variable with quotes\&.
+.sp .5v
+.RE
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBcc - deliver a copy of the message\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+cc \fIexpression\fR
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fBcc\fR
+statement is very similar to the
+\fBto\fR
+statement, except that after delivering the message
+\fBmaildrop\fR
+continues to process the
+filter file, unlike the
+\fBto\fR
+statement which immediately terminates
+\fBmaildrop\fR
+after the delivery is complete\&. Essentially, the message is carbon copied to the given mailbox, and may be delivered again to another mailbox by another
+\fBcc\fR
+or
+\fBto\fR
+statement\&.
+.PP
+\m[blue]\fBSee the \fBto\fR statement\fR\m[]\&\s-2\u[8]\d\s+2
+for more details\&. When
+\fBcc\fR
+is used to deliver a message to a process
+\fBmaildrop\fR
+will set the
+\fIEXITCODE\fR
+variable to the process\*(Aqs exit code\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBdotlock - create a manual dot-lock\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+dotlock \fIexpression\fR {
+
+   \&.\&.\&.
+
+}
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fBmaildrop\fR
+automatically creates a lock when a message is delivered to a mailbox\&. Depending upon your system configuration,
+\fBmaildrop\fR
+will use either dot\-locks, or the flock() system call\&.
+.PP
+The
+\fBdotlock\fR
+statement creates an explicit dot\-lock file\&. Use the
+\m[blue]\fB\fBflock\fR statement\fR\m[]\&\s-2\u[9]\d\s+2
+to create an explicit flock() lock\&.
+.PP
+The
+\fIexpression\fR
+is a filename that should be used as a lock file\&.
+\fBmaildrop\fR
+creates the indicated dot\-lock, executes the filtering instructions contained within the { \&.\&.\&. } block, and removes the lock\&. The expression
+\fImust\fR
+be the name of the dot\-lock file itself,
+\fINOT\fR
+the name of the mailbox file you want to lock\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+With manual locking, it is possible to deadlock multiple
+\fBmaildrop\fR
+processes (or any other processes that try to claim the same locks)\&.
+.PP
+No deadlock detection is possible with dot\-locks, and since
+\fBmaildrop\fR
+automatically refreshes all of its dot\-locks regularly, they will never go stale\&. You\*(Aqll have
+\fBmaildrop\fR
+processes hanging in limbo, until their watchdog timers go off, aborting the mail delivery\&.
+.sp .5v
+.RE
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBecho - output diagnostic information\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+echo \fIexpression\fR
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fBmaildrop\fR
+will print the given text\&. This is usually used when
+\fBmaildrop\fR
+runs in embedded mode, but can be used for debugging purposes\&. Normally, a newline is printed after the text\&. If text is terminated with a \ec, no newline will be printed\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBexception - trap fatal errors\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+exception {
+
+   \&.\&.\&.
+
+}
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fBexception\fR
+statement traps errors that would normally cause
+\fBmaildrop\fR
+to terminate\&. If a fatal error is encountered anywhere within the block of statements enclosed by the
+\fBexception\fR
+clause, execution will resume immediately following the
+\fBexception\fR
+clause\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBexit - terminate filtering unconditionally\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+exit
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fBexit\fR
+statement immediately terminates filtering\&.
+\fBmaildrop\fR\*(Aqs return code is set to the value of the
+\fIEXITCODE\fR
+variable\&. Normally,
+\fBmaildrop\fR
+terminates immediately after
+\m[blue]\fBsuccessfully delivering the message\fR\m[]\&\s-2\u[8]\d\s+2
+to a mailbox\&. The
+\fBexit\fR
+statement causes
+\fBmaildrop\fR
+to terminate without delivering the message anywhere\&.
+.PP
+The
+\fBexit\fR
+statement is usually used when
+\fBmaildrop\fR
+runs in
+\m[blue]\fBembedded mode\fR\m[]\&\s-2\u[10]\d\s+2, when message delivery instructions are not allowed\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBflock - create an manual flock() lock\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+flock \fIexpression\fR {
+
+   \&.\&.\&.
+
+}
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fBmaildrop\fR
+automatically creates a lock when a message is delivered to a mailbox\&. Depending upon your system configuration,
+\fBmaildrop\fR
+will use either dot\-locks, or the flock() system call\&.
+.PP
+The
+\fBflock\fR
+statement creates a manual flock() lock\&. Use the
+\m[blue]\fB\fBdotlock\fR statement\fR\m[]\&\s-2\u[11]\d\s+2
+to create a manual dot\-lock file\&.
+.PP
+The
+\fIexpression\fR
+is the name of the file that should be locked\&.
+\fBmaildrop\fR
+creates the lock on the indicated file, executes the filtering instructions contained within the { \&.\&.\&. } block, and removes the lock\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+With manual locking, it is possible to deadlock multiple
+\fBmaildrop\fR
+processes (or any other processes that try to claim the same locks)\&. The operating system will automatically break flock() deadlocks\&. When that happens, one of the
+\fBmaildrop\fR
+processes will terminate immediately\&. Use the
+\fBexception\fR
+statement in order to trap this exception condition, and execute an alternative set of filtering instructions\&.
+.sp .5v
+.RE
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBforeach - iterate over text sections matched by a pattern\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+foreach /pattern/:options
+{
+   \&.\&.\&.
+}
+
+foreach (expression) =~ /pattern/:options
+{
+   \&.\&.\&.
+}
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fBforeach\fR
+statement executes a block of statements for each occurrence of the given pattern in the given message, or expression\&. On every iteration
+\fIMATCH\fR
+variable will be set to the matched string\&. All the usual options may be applied to the pattern match, EXCEPT the following:
+.PP
+,xxx,yyy
+.RS 4
+Weighted scoring is meaningless, in this context\&.
+.RE
+.PP
+( \&.\&.\&. )
+.RS 4
+Subpatterns are not processed\&. Only the
+\fIMATCH\fR
+variable will be set for each found pattern\&.
+.RE
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBif - conditional execution\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+if (\fIexpression\fR)
+{
+   \&.\&.\&.
+}
+else
+{
+   \&.\&.\&.
+}
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Conditional execution\&. If
+\fIexpression\fR
+evaluates to a logical true (note \- parenthesis are required) then the first set of statements is executed\&. The
+\fBelse\fR
+keyword, and the subsequent statements, are optional\&. If present, and the expression evaluates to a logical false, the
+\fBelse\fR
+part is executed\&.
+.PP
+\fBmaildrop\fR
+evaluates all expression as text strings\&. In the context of a logical expression, an empty string, or the number 0 constitutes a logical false value, anything else is a logical true value\&.
+.PP
+If the
+\fBif\fR
+part, or the
+\fBelse\fR
+part consists of only one statement, the braces may be omitted\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+The grammar of this
+\fBif\fR
+statement is stricter than usual\&. If you get baffling syntax errors from
+\fBmaildrop\fR, make sure that the braces, and the if statement, appear on separate lines\&. Specifically: the closing parenthesis, the closing braces, and the else statement, must be at the end of the line (comments are allowed), and there may not be any blank lines in between (not even ones containing comments only)\&.
+.sp .5v
+.RE
+.PP
+If the
+\fBelse\fR
+part contains a single
+\fBif\fR, and nothing else, this may be combined into an
+\fBelsif\fR:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+if (\fIexpression\fR)
+{
+   \&.\&.\&.
+}
+elsif (\fIexpression\fR)
+{
+   \&.\&.\&.
+}
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The above example is logically identical to:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+if (\fIexpression\fR)
+{
+   \&.\&.\&.
+}
+else
+{
+   if (\fIexpression\fR)
+   {
+      \&.\&.\&.
+   }
+}
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Consecutive
+\fBelsif\fR
+sequences are allowed:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+if (\fIexpression\fR)
+{
+   \&.\&.\&.
+}
+elsif (\fIexpression\fR)
+{
+   \&.\&.\&.
+}
+elsif (\fIexpression\fR)
+{
+   \&.\&.\&.
+}
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Consecutive occurences of
+\fBelsif\fR
+commands eliminate a significant amount of indentation, and the resulting code is more readable\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBimport - access original environment variable\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+import \fIvariable\fR
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+When
+\fBmaildrop\fR
+starts, it normally imports the contents of the environment variables, and assigns them to internal
+\fBmaildrop\fR
+variables\&. For example, if there was an environment variable
+\fIFOO\fR, the internal
+\fBmaildrop\fR
+variable
+\fIFOO\fR
+will have the contents of the environment variable\&. From then on,
+\fIFOO\fR
+will be no different than any other variable, and when
+\fBmaildrop\fR
+runs an external command, the contents of
+\fBmaildrop\fR\*(Aqs variables will be exported as the environment for the command\&.
+.PP
+Certain variables, like
+\fIHOME\fR
+and
+\fIPATH\fR, are always reset to fixed defaults, for security reasons\&. Also, in delivery and embedded modes, the environment is not imported at all (with the exception of system locale environment variables), and
+\fBmaildrop\fR
+starts with only the fixed default variables\&.
+.PP
+The
+\fBimport\fR
+statement initializes the specified variable with the contents of the original environment variable when
+\fBmaildrop\fR
+started\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+echo "PATH is $PATH"
+PATH="/bin"
+echo "PATH is $PATH"
+import PATH
+echo "PATH is $PATH"
+exit
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This results in the following output:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+PATH is /bin:/usr/bin:/usr/local/bin
+PATH is /bin
+PATH is /home/root/bin:/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This shows that when
+\fBmaildrop\fR
+starts
+\fIPATH\fR
+is set to the fixed default of
+/bin:/usr/bin:/usr/local/bin\&. However, the original contents of the
+\fIPATH\fR
+environment variable we different, and the
+\fBimport\fR
+statement shows what it was\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBinclude - execute filtering instructions from another file\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+include \fIexpression\fR
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The include statement reads a file, and executes filtering instructions contained in that file\&. Note that the include statement is processed when the current
+filter file
+is being executed\&. When
+\fBmaildrop\fR
+reads the initial
+filter file, any syntax errors in the filtering instructions are immediately reported, and
+\fBmaildrop\fR
+will terminate with a return code of
+\fBEX_TEMPFAIL\fR\&. Any errors in files specified by
+\fBinclude\fR
+statements are NOT reported, because those files will not be read until the
+\fBinclude\fR
+statement is itself executed\&.
+.PP
+If the specified file does not exist, or if there are any syntax errors in the file,
+\fBmaildrop\fR
+reports the error, and terminates with a return code of
+\fBEX_TEMPFAIL\fR\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBlog, logfile - log message deliveries\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+logfile \fIexpression\fR
+
+log \fIexpression\fR
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Logging in
+\fBmaildrop\fR
+is normally turned off\&. The
+\fBlogfile\fR
+statement specifies the file where
+\fBmaildrop\fR
+will log how the message has been disposed of\&. The parameter is then name of the file\&. If the file exists
+\fBmaildrop\fR
+appends to the file\&.
+.PP
+For each delivery (the
+\m[blue]\fB\fBto\fR\fR\m[]\&\s-2\u[8]\d\s+2
+and
+\m[blue]\fB\fBcc\fR\fR\m[]\&\s-2\u[12]\d\s+2
+statements, and default deliveries)
+\fBmaildrop\fR
+records the
+From:
+and the
+Subject:
+fields, together with the current time, in the log file\&.
+.PP
+The
+\fBlog\fR
+statement adds additional logging text to the log file\&. The
+\fBlog\fR
+statement works exactly like the
+\fBecho\fR
+statement, except that the text is written to the logfile, instead of standard output\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBsystem - execute a system command\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+system \fIexpression\fR
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fIexpression\fR
+specifies an external program that
+\fBmaildrop\fR
+runs as a subprocess\&. The subprocess\*(Aqs standard input gets connected to
+/dev/null, and the subprocess inherits the standard output and error from
+\fBmaildrop\fR\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBto - deliver message to a mailbox\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+to \fIexpression\fR
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fBto\fR
+statement delivers the message to a mailbox\&.
+\fIexpression\fR
+must evaluate to a valid mailbox\&. A valid mailbox is either a mailbox file, a maildir, or an external program (which includes forwarding to another address)\&.
+.PP
+The
+\fBto\fR
+statement is the final delivery statement\&.
+\fBmaildrop\fR
+delivers message, then immediately terminates, with its return code set to the
+\fIEXITCODE\fR
+variable\&. If there was an error while delivering the message,
+\fBmaildrop\fR
+terminates with the
+\fBEX_TEMPFAIL\fR
+exit code\&. A properly\-written mail transport agent should re\-queue the message, and re\-attempt delivery at some later time\&.
+.PP
+An
+\fIexpression\fR
+that begins with the "|" character specifies an external program to run to handle the actual delivery\&. The
+\fISHELL\fR
+variable specifies the shell to execute the given command\&. The message is provided to the command on standard input\&.
+\fBmaildrop\fR\*(Aqs exit code will be the process\*(Aqs exit code\&.
+.PP
+An
+\fIexpression\fR
+that begins with an exclamation mark, "!" specifies a whitespace\-delimited list of E\-mail addresses to forward the message to\&. The program specified by the
+\fISENDMAIL\fR
+variable is run as an external program, with the list of E\-mail addresses provided as parameters to the program\&.
+.PP
+Otherwise,
+\fIexpression\fR
+names the mailbox where
+\fBmaildrop\fR
+delivers the message\&. If
+\fIexpression\fR
+is a directory,
+\fBmaildrop\fR
+assumes that the directory is a maildir directory\&. Otherwise,
+\fBmaildrop\fR
+will deliver the message to a file, formatted in traditional mailbox format\&.
+\fBmaildrop\fR
+will use either dot\-locking, or flock()\-locking when delivering the message to the file\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBwhile - repeatedly execute a block of statements\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+while (\fIexpression\fR)
+{
+   \&.\&.\&.
+}
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fIexpression\fR
+is repeatedly evaluated\&. Each time it
+\m[blue]\fBevaluates to a logical true\fR\m[]\&\s-2\u[13]\d\s+2, the statements inside the braces are executed\&. When
+\fIexpression\fR
+evaluates to a logical false, the while loop is over\&. Take care to avoid infinite loops\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBxfilter - filter message through another program\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+xfilter \fIexpression\fR
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fIexpression\fR
+specifies an external program that
+\fBmaildrop\fR
+runs to filter the current message\&. The current message will be piped to the filter program as standard input\&. The output of the filter program replaces the current message being delivered\&. The external program must terminate with an exit code of 0\&. If the external program does not terminate with an exit code of 0, or if it does not read the message from the standard input,
+\fBmaildrop\fR
+terminates with an exit code of
+\fBEX_TEMPFAIL\fR\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fB|| - logical or\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\fIexpression1\fR || \fIexpression2\fR
+
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+If
+\fIexpression1\fR
+evaluates to a logical true, the result of the
+||
+is
+\fIexpression1\fR, otherwise it\*(Aqs
+\fIexpression2\fR, which is evaluated\&.
+.PP
+\fBmaildrop\fR
+uses the following concept of true/false: an empty text literal, or a text literal that consists of the single character "0" is a logical false value\&. Anything else is a logical true value\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fB&& - logical and\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\fIexpression1\fR && \fIexpression2\fR
+
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+If
+\fIexpression1\fR
+evaluates to a logical false, the result of the
+&&
+is
+\fIexpression1\fR, otherwise it\*(Aqs
+\fIexpression2\fR, which is evaluated\&.
+.PP
+\fBmaildrop\fR
+uses the following concept of true/false: an empty text literal, or a text literal that consists of the single character "0" is a logical false value\&. Anything else is a logical true value\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fB<, <=, >, >=, ==, != - numerical comparison\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\fIexpression1\fR < \fIexpression2\fR
+
+\fIexpression1\fR <= \fIexpression2\fR
+
+\fIexpression1\fR > \fIexpression2\fR
+
+\fIexpression1\fR >= \fIexpression2\fR
+
+\fIexpression1\fR == \fIexpression2\fR
+
+\fIexpression1\fR != \fIexpression2\fR
+
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+These operators compare their left hand side expression against their right hand side\&. These operators compare the numerical values of each side, as floating point numbers\&. If the numbers compare as indicated, the result of the comparison is the text string "1", otherwise it is the text string 0\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Ccomparisons are not associative: "a < b < c" is an error\&. If it is absolutely necessary, use "(a < b) < c"\&.
+.sp .5v
+.RE
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBlt, le, gt, ge, eq, ne - text comparison\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\fIexpression1\fR lt \fIexpression2\fR
+
+\fIexpression1\fR le \fIexpression2\fR
+
+\fIexpression1\fR gt \fIexpression2\fR
+
+\fIexpression1\fR ge \fIexpression2\fR
+
+\fIexpression1\fR eq \fIexpression2\fR
+
+\fIexpression1\fR ne \fIexpression2\fR
+
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+These operators compare their left hand side expression against their right hand side\&. These operators compare each side as text strings (alphabetically, although the text may include anything)\&. If the text strings compare as indicated, the result of the comparison is the text string "1", otherwise it is the text string 0\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Comparisons are not associative: "a lt b lt c" is an error\&. If it is absolutely necessary, use "(a lt b) lt c"\&. (But why would you?)\&.
+.sp .5v
+.RE
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fB| - bitwise or\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\fIexpression1\fR | \fIexpression2\fR
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This is the bitwise or operator\&. Its result is a 32 bit integer, which is a bitwise\-or combination of the left hand side and the right hand side\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fB& - bitwise and\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\fIexpression1\fR & \fIexpression2\fR
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This is the bitwise and operator\&. Its result is a 32 bit integer, which is a bitwise\-and combination of the left hand side and the right hand side\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fB+, -, *, / - numerical operations\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\fIexpression1\fR + \fIexpression2\fR
+
+\fIexpression1\fR \- \fIexpression2\fR
+
+\fIexpression1\fR * \fIexpression2\fR
+
+\fIexpression1\fR / \fIexpression2\fR
+
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+These are numerical, floating point, operators\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fB=~ /pattern/:options - pattern match against string\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\fIexpression\fR =~ /\fIpattern\fR/:\fIoption\fR
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The left hand side of the
+=~
+operator can be any expression\&. The right hand side is always a pattern specification\&. The result of the operator is the weighted match of the pattern against
+\fIexpression\fR
+(if the options do not specify weighted scoring, the result is simply 1 if the pattern was found, 0 if not)\&.
+.PP
+See "\m[blue]\fBPatterns\fR\m[]\&\s-2\u[14]\d\s+2" for more information\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fB/pattern/:options - pattern match against message\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+/\fIpattern\fR/:\fIoption\fR
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The result of this operator is the weighted match of the pattern against the current message (if the options do not specify weighted scoring, the result is simply 1 if the pattern was found, 0 if not)\&.
+.PP
+See "\m[blue]\fBPatterns\fR\m[]\&\s-2\u[14]\d\s+2" for more information\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fB!, ~ - logical/bitwise not operator.\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+! \fIexpression\fR
+
+~ \fIexpression\fR
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The result of the
+!
+operator is a logical opposite of its right hand side expression\&. If the right hand side expression evaluated to a logical true, the result is a logical false\&. If it evaluated to a logical false, the result is a logical true\&.
+.PP
+\fBmaildrop\fR
+uses the following concept of true/false: an empty text literal, or a text literal that consists of the single character "0" is a logical false value\&. Anything else is a logical true value\&.
+.PP
+The result of the
+~
+operator is a bitwise complement of its right hand side expression\&. The right hand side expression is evaluated as a 32 bit integer, and the result of this operator is a bitwise complement of the result\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBescape(string) - escape special characters in a string.\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+\fBescape\fR(\fIexpression\fR)
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fBescape\fR
+function returns its sole argument with every occurrence of a special character prefixed by a backslash\&. A special character is any of the following characters:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+|!$()[]\e+*?\&.&;`\*(Aq\-~<>^{}"
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This can used when
+\m[blue]\fBmatching pattern sections\fR\m[]\&\s-2\u[15]\d\s+2, and then taking one section and matching it again\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+if ( /^From:\es*(\&.*)/ )
+{
+   MATCH1=escape($MATCH1)
+   if ( /^Subject:\&.*$MATCH1/ )
+   {
+      \&.\&.\&.
+   }
+}
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This example checks if the contents of the
+From:
+header can also be found in the
+Subject:
+header\&. If the
+\fBescape\fR
+function were not used, then any special characters in the
+From:
+header that are also used in regular expressions, such as
+*
+or
++, would introduce unpredictable behavior, most likely a syntax error\&.
+.PP
+The reason why this list of special characters also includes characters not used in
+\fBmaildrop\fR\*(Aqs regular expressions is to allow
+\fBmaildrop\fR\*(Aqs variables to be used on the command line of a shell command executed by the
+\fBxfilter\fR
+command, backtick characters, or
+\fBto\fR
+or
+\fBcc\fR
+commands\&.
+.PP
+Although using data from an external data source is dangerous, and it may result in inadvertent exploits, using the escape function should hopefully result in fewer surprises\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBgdbmopen, gdbmclose, gdbmfetch, gdbmstore - GDBM support in maildrop\fR
+.RS 4
+.PP
+These functions provide support for GDBM database files\&. See
+\m[blue]\fB\fBmaildropgdbm\fR(5)\fR\m[]\&\s-2\u[16]\d\s+2
+for more information\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+The system administrator can disable GDBM support in
+\fBmaildrop\fR, so these commands may not be available to you\&.
+.sp .5v
+.RE
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBgetaddr(string) - extract RFC 2822 addresses from a header.\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+if ( /^From:\es*(\&.*)/ )
+{
+   ADDR=getaddr($MATCH1)
+}
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This function is usually applied to a header that contains
+\m[blue]\fBRFC 2822\fR\m[]\&\s-2\u[17]\d\s+2
+addresses\&. It extracts the actual addresses from the header, without any comments or extraneous punctuation\&. Each address is followed by a newline character\&. For example, if
+\fIstring\fR
+contains:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+joe@domain\&.com (Joe Brown), "Alex Smith" <alex@domain\&.com>, tom@domain\&.com
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The result of the
+\fBgetaddr\fR
+function is the following string:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+joe@domain\&.com<NL>alex@domain\&.com<NL>tom@domain\&.com<NL>
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Because
+\fBgetaddr\fR() interprets
+\m[blue]\fBRFC 2822\fR\m[]\&\s-2\u[18]\d\s+2
+loosely, it is not necessary to strip off the "To:" or the "Cc:" header from the string, before feeding it to
+\fBgetaddr()\fR\&. For example, the following snippet of code takes all addresses in the message, and concatenates them into a single string, separated by spaces:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+ADDRLIST=""
+foreach /^(To|Cc): \&.*/
+{
+    foreach (getaddr $MATCH) =~ /\&.+/
+    {
+        ADDRLIST="$ADDRLIST $MATCH"
+    }
+}
+	      
+.fi
+.if n \{\
+.RE
+.\}
+.sp .5v
+.RE
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+In certain rare situations,
+\m[blue]\fBRFC 2822\fR\m[]\&\s-2\u[18]\d\s+2
+allows spaces to be included in E\-mail addresses, so this example is just educational\&.
+.sp .5v
+.RE
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBhasaddr(string) - Search for an address.\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+if ( hasaddr(\fIstring\fR) )
+{
+   \&.\&.\&.
+}
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+"\fIstring\fR" is of the form
+user@domain\&. The hasaddr function returns 1 if this address is included in any
+To:,
+Cc:,Resent\-To:, or
+Resent\-Cc:, header in the message, otherwise this function returns 0\&.
+.PP
+This is more than just a simple text search\&. Each header is parsed according to
+RFC822\&. Addresses found in the header are extracted, ignoring all comments and names\&. The remaining addresses are checked, and if "\fIstring\fR" is one of them,
+\fBhasaddr\fR
+returns 1, otherwise it returns 0\&.
+.PP
+The comparison is case\-insensitive\&. This actually violates
+RFC822
+(and several others) a little bit, because the user part of the address may be (but is not required to be) case sensitive\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBlength (string) - length of a string\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+if (length(\fIstring\fR) > 80)
+{
+   \&.\&.\&.
+}
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fBlength\fR
+function returns the number of characters in
+\fIstring\fR\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBlookup (expr, 'filename', 'options') - read file for patterns\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+if (lookup(\fIexpr\fR, file, "\fIoption\fR"))
+{
+   \&.\&.\&.
+}
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fIexpr\fR
+is any expression\&.
+filename
+is a name of a file containing a list of patterns\&. Note that
+filename
+is relative to the current directory, which is the home directory of the user when
+\fBmaildrop\fR
+runs in delivery mode, or embedded mode\&.
+\fBmaildrop\fR
+then reads the file\&. Blank lines will be ignored, as well as any lines that begin with the # character (comments)\&.
+.PP
+Leading whitespace (but not trailing whitespace, take care) is removed, and the remaining contents of each line are interpreted as a pattern which is matched against
+\fIexpr\fR\&. As soon as the match is found,
+\fBlookup\fR
+returns "1"\&. If no match is found after reading the entire file,
+\fBlookup\fR
+returns "0"\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+if ( /^To:\es*(\&.*)/ && lookup( $MATCH1, "badto\&.dat" ))
+{
+    exit
+}
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The file badto\&.dat contains the following two lines:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+friend@public
+^[^@]*$
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+If a message has a
+To:
+header that contains the text "friend@public", or does not contain at least one
+@
+character, then the message will be silently dropped on the floor (
+\fBmaildrop\fR
+will terminate without delivering the message anywhere)\&.
+.PP
+\fIoptions\fR
+are the pattern matching options to use\&. The only supported option is "D" (the rest are meaningless, in this case)\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Be careful with discarding messages like that\&. Pattern matching can be tricky, and a slight miscalculation can cause mail to be unintentionally discarded\&. It is much desirable to first deliver message to a separate folder or mailbox, and once the filter is verified to work correctly, change it so the messages are discarded completely\&.
+.sp .5v
+.RE
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBsubstr(string,start [,count]) - return substring\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+foo=substr($foo, 1, 10)
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fBsubstr\fR
+function extracts characters from
+\fIstring\fR
+beginning with character #\fIstart\fR\&. If
+\fIcount\fR
+is specified, at most
+\fIcount\fR
+characters starting at position
+\fIstart\fR
+are kept, any excess is trimmed\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBtime - return current time\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+foo=time
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fBtime\fR
+function returns the current time, in seconds, since January 1, 1970\&. This function is useful when using GDBM files\&. See
+\m[blue]\fB\fBmaildropex\fR(7)\fR\m[]\&\s-2\u[19]\d\s+2
+for an example of using the
+\fBtime\fR
+function\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBtolower(string) - Convert string to lowercase.\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+foo=tolower(\fIstring\fR)
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This function returns the
+\fIstring\fR
+with all uppercase characters replaced by lowercase characters\&.
+.RE
+.sp
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBtoupper(string) - Convert string to uppercase.\fR
+.RS 4
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+foo=toupper(\fIstring\fR)
+	    
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This function returns the
+\fIstring\fR
+with all lowercase characters replaced by uppercase characters\&.
+.RE
+.SS "Statements"
+.PP
+The
+filter file
+is read by
+\fBmaildrop\fR
+($HOME/\&.mailfilter
+or another file), and it contains filtering statements, one per line\&. The filtering language used by
+\fBmaildrop\fR
+has a loosely \- defined grammatical structure\&.
+.PP
+Statements are listed one per line\&. Multiple statements may be listed on the same line by separating them with semicolons\&. To continue a long statement on the next line, terminate the line with a backslash character\&.
+.SH "BUGS"
+.PP
+If
+\fBgetaddr\fR() or
+\fBhasaddr\fR() functions are used on broken headers, the results are unpredictable\&.
+.PP
+\fBhasaddr\fR() is completely case insensitive\&. This actually violates a few RFCs, because the userid portion of the address could be case\-sensitive, but it\*(Aqs not in too many cases, so there\&.
+.SH "SEE ALSO"
+.PP
+\m[blue]\fB\fBlockmail\fR(1)\fR\m[]\&\s-2\u[20]\d\s+2,
+\m[blue]\fB\fBmaildrop\fR(1)\fR\m[]\&\s-2\u[21]\d\s+2,
+\m[blue]\fB\fBmaildropgdbm\fR(5)\fR\m[]\&\s-2\u[16]\d\s+2,
+\m[blue]\fB\fBmaildirquota\fR(8)\fR\m[]\&\s-2\u[4]\d\s+2,
+\m[blue]\fB\fBreformail\fR(1)\fR\m[]\&\s-2\u[22]\d\s+2,
+\fBegrep\fR(1),
+\fBsendmail\fR(8)\&.
+.SH "AUTHOR"
+.PP
+\fBSam Varshavchik\fR
+.RS 4
+Author
+.RE
+.SH "NOTES"
+.IP " 1." 4
+Courier mail server
+.RS 4
+\%http://www.courier-mta.org/
+.RE
+.IP " 2." 4
+\fBdot-courier\fR(5)
+.RS 4
+\%http://www.courier-mta.org/maildrop/dot-courier.html
+.RE
+.IP " 3." 4
+value of the -M option
+.RS 4
+\%http://www.courier-mta.org/maildrop/maildrop.html#moption
+.RE
+.IP " 4." 4
+\fBmaildirquota\fR(8)
+.RS 4
+\%http://www.courier-mta.org/maildrop/maildirquota.html
+.RE
+.IP " 5." 4
+system
+.RS 4
+\%http://www.courier-mta.org/maildrop/#system
+.RE
+.IP " 6." 4
+xfilter
+.RS 4
+\%http://www.courier-mta.org/maildrop/#xfilter
+.RE
+.IP " 7." 4
+PCRE
+.RS 4
+\%http://www.pcre.org
+.RE
+.IP " 8." 4
+See the \fBto\fR statement
+.RS 4
+\%http://www.courier-mta.org/maildrop/#to
+.RE
+.IP " 9." 4
+\fBflock\fR statement
+.RS 4
+\%http://www.courier-mta.org/maildrop/#flock
+.RE
+.IP "10." 4
+embedded mode
+.RS 4
+\%http://www.courier-mta.org/maildrop/maildrop.html#embedded
+.RE
+.IP "11." 4
+\fBdotlock\fR statement
+.RS 4
+\%http://www.courier-mta.org/maildrop/#dotlock
+.RE
+.IP "12." 4
+\fBcc\fR
+.RS 4
+\%http://www.courier-mta.org/maildrop/#cc
+.RE
+.IP "13." 4
+evaluates to a logical true
+.RS 4
+\%http://www.courier-mta.org/maildrop/#if
+.RE
+.IP "14." 4
+Patterns
+.RS 4
+\%http://www.courier-mta.org/maildrop/#patterns
+.RE
+.IP "15." 4
+matching pattern sections
+.RS 4
+\%http://www.courier-mta.org/maildrop/#patmatch
+.RE
+.IP "16." 4
+\fBmaildropgdbm\fR(5)
+.RS 4
+\%http://www.courier-mta.org/maildrop/maildropgdbm.html
+.RE
+.IP "17." 4
+RFC 2822
+.RS 4
+\%http://www.rfc-editor.org/rfc/rfc2822.txt
+.RE
+.IP "18." 4
+RFC 2822
+.RS 4
+\%http://www.rfc-editor.org/rfc/rfc822.txt
+.RE
+.IP "19." 4
+\fBmaildropex\fR(7)
+.RS 4
+\%http://www.courier-mta.org/maildrop/maildropex.html
+.RE
+.IP "20." 4
+\fBlockmail\fR(1)
+.RS 4
+\%http://www.courier-mta.org/maildrop/lockmail.html
+.RE
+.IP "21." 4
+\fBmaildrop\fR(1)
+.RS 4
+\%http://www.courier-mta.org/maildrop/maildrop.html
+.RE
+.IP "22." 4
+\fBreformail\fR(1)
+.RS 4
+\%http://www.courier-mta.org/maildrop/reformail.html
+.RE

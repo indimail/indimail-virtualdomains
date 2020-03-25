@@ -184,6 +184,7 @@ then
 	fi
 	dblibrary=libs/gdbmobj/libgdbmobj.la
 	USE_GDBM=1
+	DBSUBDIR=libs/gdbmobj
 else
 	if test "$needs_withdb" = 1
 	then
@@ -191,11 +192,14 @@ else
 	fi
 	dblibrary=libs/bdbobj/libbdbobj.la
 	USE_DB=1
+	DBSUBDIR=libs/bdbobj
 fi
 
 AC_SUBST(USE_GDBM)
 AC_SUBST(USE_DB)
 AC_SUBST(dblibrary)
+AC_SUBST(DBSUBDIR)
+AM_CONDITIONAL(HAVE_DBLIBRARY, test "$dblibrary" != "")
 
 AC_ARG_WITH(userdb, [], userdb="$withval", userdb=/etc/userdb
 	ac_configure_args="$ac_configure_args --with-userdb=$userdb")
@@ -207,6 +211,34 @@ AC_ARG_WITH(mailuser, [], , ac_configure_args="$ac_configure_args --with-mailuse
 AC_ARG_WITH(mailgroup, [], , ac_configure_args="$ac_configure_args --with-mailgroup=$authmailgroup")
 AC_SUBST(authmailuser)
 AC_SUBST(authmailgroup)
+
+AC_ARG_WITH(plentyofbeer,
+[  --enable-sendmail=prog       set sendmail location
+  --enable-trusted-users='...' specify users allowed to use the -d option
+  --enable-maildrop-uid=root   UID of maildrop
+  --enable-maildrop-gid=mail   GID of maildrop
+  --disable-authlib            Disable support for Courier Auth Library
+  --enable-use-flock=(1|0)     enable flock()/lockf() locking
+  --enable-use-dotlock=(1|0)   enable dotlock locking
+  --enable-lockext-def=.lock   set extension for dotlock files
+  --enable-locksleep-def=5     set sleep interval dotlock files (seconds)
+  --enable-locktimeout-def=60  set timeout for dotlock files (seconds)
+  --enable-lockrefresh-def=15  set timeout for dotlock files (seconds)
+  --enable-tempdir=.tmp        directory for temp files (in user's home dir)
+  --disable-tempdir            disable temp files in home directory (use
+                               the tmpfile function)
+  --enable-smallmsg=8192       size of buffer for small messages
+  --enable-global-timeout=300  global watchdog timer (seconds)
+  --enable-crlf-term=0         enable <CR><LF> line termination
+  --enable-restrict-trusted=1  restrict -d for trusted users only
+  --enable-keep-fromline=(1|0) preserve the original From_ line in messages
+  --enable-syslog=1            log fatal errors to syslog
+  --enable-authlib-tempreject=(1|0) whether authlib errors cause temprejects]
+  --enable-dovecotauth         Enable Dovecot authentication)
+
+dnl AC_ARG_WITH(etcdir, [  --with-etcdir=dir            Instead of /etc, use this. ], [ withetcdir=$withval], [ withetcdir="/etc" ])
+dnl AC_SUBST(withetcdir)
+dnl AC_DEFINE_UNQUOTED(ETCDIR,"$withetcdir")
 
 AC_CONFIG_SUBDIRS(libs/numlib)
 AC_CONFIG_SUBDIRS(libs/unicode)
@@ -228,6 +260,7 @@ AC_CONFIG_SUBDIRS(libs/tcpd)
 AC_CONFIG_SUBDIRS(libs/rootcerts)
 AC_CONFIG_SUBDIRS(libs/authlib)
 AC_CONFIG_SUBDIRS(libs/imap)
+AC_CONFIG_SUBDIRS(libs/maildrop)
 
 mkdir -p m4
 
@@ -264,6 +297,7 @@ AC_ARG_WITH(package, [], package="$withval",
 	])
 
 AM_CONDITIONAL(HAVE_HTML, test -f ${srcdir}/html/main.html)
+AM_CONDITIONAL(HAVE_SGML, test -d ${srcdir}/libs/docbook)
 
 AC_ARG_WITH(certsdir, [ --with-certsdir Directory where certs are created ],
 		      certsdir="$withval", certsdir=$datadir)

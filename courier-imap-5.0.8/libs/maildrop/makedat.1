@@ -1,0 +1,161 @@
+'\" t
+.\"<!-- Copyright 1998 - 2007 Double Precision, Inc.  See COPYING for -->
+.\"<!-- distribution information. -->
+.\"     Title: makedat
+.\"    Author: Sam Varshavchik
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 06/20/2015
+.\"    Manual: Double Precision, Inc.
+.\"    Source: Courier Mail Server
+.\"  Language: English
+.\"
+.TH "MAKEDAT" "1" "06/20/2015" "Courier Mail Server" "Double Precision, Inc\&."
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+makedat \- create GDBM/DB files for maildrop
+.SH "SYNOPSIS"
+.HP \w'\fBmakedat\fR\ 'u
+\fBmakedat\fR {\-src=\fItextfile\fR} {\-tmp=\fItmpfile\fR} {\-file=\fIgdbmfile\fR} [\-cidr]
+.SH "DESCRIPTION"
+.PP
+The gdbm family of functions in
+\fBmaildrop\fR
+provides access to GDBM/DB databases \- simple database files\&. The gdbm family of functions provide a way of quickly storing and looking up key/data pairs\&.
+.PP
+You can use any program to create GDBM/DB database files\&.
+\fBmakedat\fR
+is a quick utility to create GDBM or DB files from plain text files\&.
+.PP
+The system administrator selects whether
+\fBmaildrop\fR
+uses GDBM or DB database files and whether
+\fBmakedat\fR
+creates GDBM or DB database files as well\&.
+.PP
+The
+\fBmakedat\fR
+command may not be available to you\&. GDBM/DB support in
+\fBmaildrop\fR
+is optional, and the system administrator may choose not to install GDBM/DB support and the
+\fBmakedat\fR
+command\&.
+.PP
+To see whether GDBM or DB support is being used, run the command "\fBmaildrop \-v\fR"\&.
+.PP
+The
+\fItextfile\fR
+argument to
+\fBmakedat\fR
+is a plain text file containing key/value pairs\&. Each line in the text file contains a key value, followed by a tab and a data value\&. The data value may be omitted, which defaults to "1"\&. For example, the following three lines:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+example\&.com
+
+domain\&.com<tab>ok
+
+foo\&.domain\&.com<tab>bad
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Three key/value pairs are created: example\&.com, value "1"; domain\&.com, value "ok", and "foo\&.domain\&.com", value "bad"\&.
+.PP
+Empty lines in
+\fItextfile\fR, and lines starting with the # character, are ignored\&.
+.PP
+\fItextfile\fR
+can be "\-", in which case standard input is used\&.
+.PP
+\fIgdbmfile\fR
+is the GDBM/DB file to create\&. If this file exists, its existing contents are replaced\&.
+.PP
+\fItmpfile\fR
+is a name of a temporary file in the same directory as
+\fIgdbmfile\fR\&.
+\fItmpfile\fR
+is used by
+\fBmakedat\fR
+to create the GDBM file, then
+\fItmpfile\fR
+is renamed to
+\fIgdbmfile\fR\&.
+.PP
+This approach foregoes any need for locking in order to be able to dynamically update GDBM/DB files used by
+\fBmaildrop\fR\*(Aqs gdbm functions\&. However,
+\fBmakedat\fR
+does not use any locks on
+\fItmpfile\fR, so multiple instances of
+\fBmakedat\fR
+using the same
+\fItmpfile\fR
+are prohibited\&.
+.PP
+The
+\fB\-cidr\fR
+flag specifies that the key is an IP netblock in CIDR notation\&. This flag requires the
+Net::CIDR
+Perl module to be installed separately\&. Download Net::CIDR from
+\m[blue]\fBhttp://www\&.cpan\&.org\fR\m[]\&.
+.SH "BUGS"
+.PP
+There are historical reasons why database functions in maildrop are called gdbm functions\&. The initial implementation used GDBM functions exclusively\&. The ability to use the DB library instead of the GDBM library has been added later\&.
+.SH "EXAMPLE"
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+makedat blacklist /etc/mail/blacklist\&.tmp /etc/mail/blacklist\&.dat
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+Takes
+blacklist, and creates
+/etc/mail/blacklist\&.dat, using
+/etc/mail/blacklist\&.tmp
+as a temporary file\&.
+.SH "SEE ALSO"
+.PP
+\m[blue]\fB\fBmaildrop\fR(1)\fR\m[]\&\s-2\u[1]\d\s+2,
+\m[blue]\fB\fBmaildropgdbm\fR(5)\fR\m[]\&\s-2\u[2]\d\s+2\&.
+.SH "AUTHOR"
+.PP
+\fBSam Varshavchik\fR
+.RS 4
+Author
+.RE
+.SH "NOTES"
+.IP " 1." 4
+\fBmaildrop\fR(1)
+.RS 4
+\%http://www.courier-mta.org/maildrop/maildrop.html
+.RE
+.IP " 2." 4
+\fBmaildropgdbm\fR(5)
+.RS 4
+\%http://www.courier-mta.org/maildrop/maildropgdbm.html
+.RE

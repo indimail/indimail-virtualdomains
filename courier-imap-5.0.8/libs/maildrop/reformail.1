@@ -1,0 +1,259 @@
+'\" t
+.\"<!-- Copyright 1998 - 2007 Double Precision, Inc.  See COPYING for -->
+.\"<!-- distribution information. -->
+.\"     Title: reformail
+.\"    Author: Sam Varshavchik
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 06/20/2015
+.\"    Manual: Double Precision, Inc.
+.\"    Source: Courier Mail Server
+.\"  Language: English
+.\"
+.TH "REFORMAIL" "1" "06/20/2015" "Courier Mail Server" "Double Precision, Inc\&."
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+reformail \- E\-mail reformatting tool
+.SH "SYNOPSIS"
+.HP \w'\fBreformail\fR\ 'u
+\fBreformail\fR \-s command [option...]
+.HP \w'\fBreformail\fR\ 'u
+\fBreformail\fR \-D len \fIfilename\fR
+.HP \w'\fBreformail\fR\ 'u
+\fBreformail\fR \-x\ \fIheader:\fR...
+.HP \w'\fBreformail\fR\ 'u
+\fBreformail\fR \-X\ \fIheader:\fR...
+.HP \w'\fBreformail\fR\ 'u
+\fBreformail\fR [\fIoptions\fR...]
+.sp
+See below for additional options
+.SH "DESCRIPTION"
+.PP
+The
+\fBreformail\fR
+program reads a message on standard input, reformats it in some way, and writes the message to standard output:
+.SS "Splitting mailboxes into individual messages"
+.PP
+The
+\fB\-s\fR
+option splits the mbox\-formatted mailbox file on standard input into individual messages\&. An external program is executed for each message\&. The contents of each individual message will be provided to the external program on standard input\&.
+.PP
+If the
+\fBFILENO\fR
+environment variable is set to a number,
+\fBreformail\fR
+will consecutively increment
+\fBFILENO\fR
+each time the program is executed for each individual message\&.
+.PP
+If
+\fBFILENO\fR
+is not set, it\*(Aqs initial value will be "000"\&. If
+\fBFILENO\fR
+is set to a non\-numeric value,
+\fBFILENO\fR
+will remain unchanged\&.
+.SS "Detecting duplicate messages"
+.PP
+The
+\fB\-D\fR
+option implements a simple way to delete duplicate messages in incoming mail\&.
+\fIfilename\fR
+is a file that will be approximately \*(Aq\fIlen\fR\*(Aq bytes long\&. This file will be used by
+\fBreformail\fR
+to save message IDs seen in recent mail\&.
+\fBreformail\fR
+reads the message on standard input\&. If the message has a
+Message\-ID:
+header that\*(Aqs already in the cache file,
+\fBreformail\fR
+terminates with the exit code set to 0\&. Otherwise,
+\fBreformail\fR
+terminates with the exit code set to 1\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Unlike a similar feature in the
+\fBformail\fR
+command,
+\fBreformail\fR
+takes care of locking the file, so it\*(Aqs not necessary to implement your own locking mechanism for this option\&.
+.sp .5v
+.RE
+.SS "Extracting headers"
+.PP
+The
+\fB\-x\fR
+and
+\fB\-X\fR
+options extract the indicated headers from the message, and print them to standard output\&. Multiple
+\fB\-x\fR
+and
+\fB\-X\fR
+options can be specified at the same time, and may be intermixed\&.
+.PP
+The
+\fB\-x\fR
+option extracts and prints the contents of the header\&. The
+\fB\-X\fR
+option prints the name of the header as well\&.
+.PP
+In all other situations,
+\fBreformail\fR
+copies the message on its standard input to its standard output, reformatting the message as follows:
+.SH "OPTIONS"
+.PP
+\-a\*(Aqheader: value\*(Aq
+.RS 4
+Append a custom header to the message if this header does not already exist\&. If the header is either
+Message\-ID:
+or
+Resent\-Message\-ID:
+and the value is empty,
+\fBreformail\fR
+generates a (hopefully) unique message ID for you\&.
+.RE
+.PP
+\-A\*(Aqheader: value\*(Aq
+.RS 4
+Append a custom header to the message even if this header already exists\&. If the header is either
+Message\-ID:
+or
+Resent\-Message\-ID:
+and the value is empty,
+\fBreformail\fR
+generates a (hopefully) unique message ID for you\&.
+.RE
+.PP
+\-c
+.RS 4
+Concatenate multi\-line headers\&. Headers split on multiple lines are combined into a single line\&.
+.RE
+.PP
+\-d\fIn\fR
+.RS 4
+If n is
+1, each line will be terminated with CRLF\&. If n is
+0
+(default), each line will be terminated with LF\&.
+\fBreformail\fR
+reads a message with either line terminator, and will force the message to have the specified line termination\&.
+.RE
+.PP
+\-f0
+.RS 4
+Any initial blank lines are removed\&. If the first non\-blank line is a "From_" line, it gets converted to a "Return\-Path:" header, and any existing "Return\-Path:" header gets removed\&. If the message does not start with a "From_" line, the message remains unchanged\&.
+.RE
+.PP
+\-f1
+.RS 4
+Add the "From_" line to the message, if it\*(Aqs not there\&.
+\fBreformail\fR
+will attempt to generate the "From_" line from any
+Errors\-To:,
+Return\-Path:, or
+From:
+headers in the message\&. "root" will be used if
+\fBreformail\fR
+is unable to determine the return address\&.
+.RE
+.PP
+\-i\*(Aq\fIheader: value\fR\*(Aq
+.RS 4
+Appends a custom header to the message\&. If this header already exists it is renamed by prepending "Old\-" to the name of the header\&.
+.RE
+.PP
+\-I\*(Aq\fIheader: value\fR\*(Aq
+.RS 4
+Append a custom header to the message\&. If this header already exists in the message, the old header is completely removed\&. If the value is empty, any existing header is completely removed, and nothing gets appended\&.
+.RE
+.PP
+\-R oldheader: newheader:
+.RS 4
+Rename the indicated header\&.
+.RE
+.PP
+\-u\*(Aqheader:\*(Aq
+.RS 4
+If this header occurs multiple times in the message, remove all occurrences except the first one\&.
+.RE
+.PP
+\-U\*(Aqheader:\*(Aq
+.RS 4
+If this header occurs multiple times in the message, remove all occurrences except the last one\&.
+.RE
+.SH "AUTOREPLIES"
+.PP
+The autoreply options from earlier versions of
+\fBmailbot\fR
+have been moved into
+\m[blue]\fB\fBmailbot\fR(1)\fR\m[]\&\s-2\u[1]\d\s+2\&.
+.SH "BUGS"
+.PP
+For the
+\fB\-a\fR,
+\fB\-A\fR, and
+\fB\-I\fR
+options, a space after the header name and the colon is considered to be a non\-empty field\&.
+.PP
+Do not provide the same header to more than one family of header\-modifying options, such as
+\fB\-u\fR/\fB\-U\fR
+and
+\fB\-a\fR/\fB\-A\fR\&. Doing so yields unpredictable results\&. It\*(Aqs better to run
+\fBreformail\fR
+several times (use a pipe, perhaps)\&.
+.SH "SEE ALSO"
+.PP
+\m[blue]\fB\fBcourier\fR(8)\fR\m[]\&\s-2\u[2]\d\s+2,
+\fBsendmail\fR(8),
+\m[blue]\fB\fBmailbot\fR(1)\fR\m[]\&\s-2\u[1]\d\s+2,
+\m[blue]\fB\fBmaildrop\fR(1)\fR\m[]\&\s-2\u[3]\d\s+2\&.
+.SH "AUTHOR"
+.PP
+\fBSam Varshavchik\fR
+.RS 4
+Author
+.RE
+.SH "NOTES"
+.IP " 1." 4
+\fBmailbot\fR(1)
+.RS 4
+\%http://www.courier-mta.org/maildrop/mailbot.html
+.RE
+.IP " 2." 4
+\fBcourier\fR(8)
+.RS 4
+\%http://www.courier-mta.org/maildrop/courier.html
+.RE
+.IP " 3." 4
+\fBmaildrop\fR(1)
+.RS 4
+\%http://www.courier-mta.org/maildrop/maildrop.html
+.RE

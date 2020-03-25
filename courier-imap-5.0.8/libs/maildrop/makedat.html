@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>makedat</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets V1.78.1"/><link rel="home" href="#idm255219627840" title="makedat"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+
+Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
+information.
+
+--></head><body><div class="refentry"><a id="idm255219627840" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>makedat — create GDBM/DB files for maildrop</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">makedat</code>  {-src=<em class="replaceable"><code>textfile</code></em>} {-tmp=<em class="replaceable"><code>tmpfile</code></em>} {-file=<em class="replaceable"><code>gdbmfile</code></em>} [-cidr]</p></div></div><div class="refsect1"><a id="idm255220996240" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+The gdbm family of functions in <span class="command"><strong>maildrop</strong></span> provides access
+to GDBM/DB databases - simple database files. The gdbm family of functions
+provide a way of quickly storing and looking up key/data pairs.</p><p>
+You can use any program to create GDBM/DB database files.
+<span class="command"><strong>makedat</strong></span> is a quick utility to create GDBM or DB files from
+plain text files.</p><p>
+The system administrator selects whether <span class="command"><strong>maildrop</strong></span> uses
+GDBM or DB
+database files and whether <span class="command"><strong>makedat</strong></span> creates GDBM or DB
+database files as well.</p><p>
+The <span class="command"><strong>makedat</strong></span> command may not be available to you. GDBM/DB
+support in <span class="command"><strong>maildrop</strong></span> is optional, and the system
+administrator may choose not to
+install GDBM/DB support and the <span class="command"><strong>makedat</strong></span> command.</p><p>
+To see whether GDBM or DB support is being used, run the command
+"<span class="command"><strong>maildrop -v</strong></span>".</p><p>
+The <em class="replaceable"><code>textfile</code></em> argument to
+<span class="command"><strong>makedat</strong></span> is a plain text file containing
+key/value pairs. Each line in the text file contains a key value, followed by
+a tab and a data value. The data value may be omitted, which
+defaults to "1". For example, the following three lines:</p><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+example.com
+
+domain.com&lt;tab&gt;ok
+
+foo.domain.com&lt;tab&gt;bad
+</pre></div><p>
+Three key/value pairs are created: example.com, value "1"; domain.com,
+value "ok", and "foo.domain.com", value "bad".</p><p>
+Empty lines in <em class="replaceable"><code>textfile</code></em>, and lines starting with
+the # character, are ignored.</p><p>
+<em class="replaceable"><code>textfile</code></em> can be "-", in which case standard input
+is used.</p><p>
+<em class="replaceable"><code>gdbmfile</code></em> is the GDBM/DB file to create. If this
+file exists, its existing contents are replaced.</p><p>
+<em class="replaceable"><code>tmpfile</code></em> is a name of a temporary file in the same
+directory as <em class="replaceable"><code>gdbmfile</code></em>.
+<em class="replaceable"><code>tmpfile</code></em> is used by <span class="command"><strong>makedat</strong></span> to
+create the GDBM
+file, then <em class="replaceable"><code>tmpfile</code></em> is renamed to
+<em class="replaceable"><code>gdbmfile</code></em>.</p><p>
+This approach foregoes any need for locking in order to be able to
+dynamically update GDBM/DB files used by <span class="command"><strong>maildrop</strong></span>'s gdbm functions.
+However, <span class="command"><strong>makedat</strong></span> does not use any locks on <em class="replaceable"><code>tmpfile</code></em>, so multiple
+instances of <span class="command"><strong>makedat</strong></span> using the same <em class="replaceable"><code>tmpfile</code></em> are prohibited.</p><p>
+The <code class="option">-cidr</code> flag specifies that the key is an IP netblock in
+CIDR notation. This flag requires the <span class="application">Net::CIDR</span>
+Perl module to be installed separately. Download Net::CIDR from
+<a class="ulink" href="http://www.cpan.org" target="_top" shape="rect">http://www.cpan.org</a>.</p></div><div class="refsect1"><a id="idm255215694592" shape="rect"> </a><h2>BUGS</h2><p>
+There are historical reasons why database functions in maildrop are called
+gdbm functions. The initial implementation used GDBM functions exclusively.
+The ability to use the DB library instead of the GDBM library has been added
+later.</p></div><div class="refsect1"><a id="idm255215693152" shape="rect"> </a><h2>EXAMPLE</h2><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+makedat blacklist /etc/mail/blacklist.tmp /etc/mail/blacklist.dat
+</pre></div><p>
+Takes <code class="filename">blacklist</code>, and creates
+<code class="filename">/etc/mail/blacklist.dat</code>, using
+<code class="filename">/etc/mail/blacklist.tmp</code> as a temporary file.</p></div><div class="refsect1"><a id="idm255215688736" shape="rect"> </a><h2>SEE ALSO</h2><p>
+<a class="ulink" href="maildrop.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildrop</span>(1)</span></a>,
+<a class="ulink" href="maildropgdbm.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildropgdbm</span>(5)</span></a>.</p></div></div></body></html>
