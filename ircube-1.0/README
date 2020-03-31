@@ -180,6 +180,15 @@ Non SSL Version Install/Configuration (look below for SSL config)
         'verify_peer_name'  => false,
       ),
    );
+   //$config['imap_conn_options'] = null;
+
+   $config['smtp_conn_options'] = array(
+     'ssl'         => array(
+       'verify_peer'       => false,
+       'verify_peer_name'  => false,
+     ),
+   );
+   //$config['smtp_conn_options'] = null;
 
    This file should have read permission for apache group
    $ sudo chown root:apache /etc/roundcube/defaults.inc.php
