@@ -30,6 +30,7 @@ manpage.css: libs/docbook/manpage.css
 	cp -f $(srcdir)/libs/docbook/manpage.css manpage.css
 endif
 
+htmldir=$(docdir)/html
 MAILDROPHTML=lockmail.html maildiracl.html maildirkw.html \
 	maildirmake.html maildropex.html \
 	maildir.html \
