@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.19 2020-03-25 16:27:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.20 2020-03-31 20:58:19+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -194,7 +194,7 @@ BuildRequires: python python-devel
 %endif
 
 %if %nocourierimap == 0
-BuildRequires: libgcrypt-devel gdbm-devel libidn-devel
+BuildRequires: libgcrypt-devel gdbm-devel libidn-devel pcre-devel
 BuildRequires: perl
 %endif
 
