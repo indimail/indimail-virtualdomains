@@ -209,6 +209,12 @@ maildiracl.html: maildiracl.html.in
 maildiracl.1: maildiracl.1.in
 	./config.status --file=$@
 
+sharedindexinstall.1:sharedindexinstall.1.in
+	./config.status --file=$@
+
+sharedindexsplit.1:sharedindexsplit.1.in
+	./config.status --file=$@
+
 # autoresponse.c: autoresponsequota.h
 
 DISTCLEANFILES=$(BUILT_SOURCES)
