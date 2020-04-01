@@ -1,5 +1,8 @@
 /*
  * $Log: parse_email.c,v $
+ * Revision 1.2  2020-04-01 18:57:26+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.1  2019-04-14 18:35:13+05:30  Cprogrammer
  * Initial revision
  *
@@ -15,7 +18,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: parse_email.c,v 1.1 2019-04-14 18:35:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: parse_email.c,v 1.2 2020-04-01 18:57:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*

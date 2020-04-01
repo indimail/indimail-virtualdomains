@@ -1,5 +1,8 @@
 /*
  * $Log: vset_default_domain.c,v $
+ * Revision 1.2  2020-04-01 18:59:10+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.1  2019-04-14 21:50:39+05:30  Cprogrammer
  * Initial revision
  *
@@ -20,7 +23,7 @@
 #include "host_in_locals.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vset_default_domain.c,v 1.1 2019-04-14 21:50:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vset_default_domain.c,v 1.2 2020-04-01 18:59:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

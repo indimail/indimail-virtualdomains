@@ -1,5 +1,8 @@
 /*
  * $Log: iopen.c,v $
+ * Revision 1.9  2020-04-01 18:56:00+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.8  2019-06-30 10:14:25+05:30  Cprogrammer
  * seperate fields in error string by commas
  *
@@ -57,7 +60,7 @@
 #include "set_mysql_options.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iopen.c,v 1.8 2019-06-30 10:14:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iopen.c,v 1.9 2020-04-01 18:56:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

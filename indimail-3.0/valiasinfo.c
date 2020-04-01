@@ -1,5 +1,8 @@
 /*
  * $Log: valiasinfo.c,v $
+ * Revision 1.3  2020-04-01 18:58:29+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.2  2019-06-07 14:23:56+05:30  Cprogrammer
  * fixed directory length
  * added missing new line
@@ -39,7 +42,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valiasinfo.c,v 1.2 2019-06-07 14:23:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valiasinfo.c,v 1.3 2020-04-01 18:58:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

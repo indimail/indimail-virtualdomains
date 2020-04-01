@@ -1,5 +1,8 @@
 /*
  * $Log: host_in_locals.c,v $
+ * Revision 1.2  2020-04-01 18:55:05+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.1  2019-04-18 08:25:31+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: host_in_locals.c,v 1.1 2019-04-18 08:25:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: host_in_locals.c,v 1.2 2020-04-01 18:55:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IP_ALIAS_DOMAINS

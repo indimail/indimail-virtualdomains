@@ -1,5 +1,8 @@
 /*
  * $Log: count_rcpthosts.c,v $
+ * Revision 1.2  2020-04-01 18:53:40+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.1  2019-04-18 08:22:40+05:30  Cprogrammer
  * Initial revision
  *
@@ -25,7 +28,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: count_rcpthosts.c,v 1.1 2019-04-18 08:22:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: count_rcpthosts.c,v 1.2 2020-04-01 18:53:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

@@ -1,5 +1,8 @@
 /*
  * $Log: vacation.c,v $
+ * Revision 1.3  2020-04-01 18:58:21+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.2  2019-06-07 15:57:12+05:30  mbhangui
  * use _exit() instead of exit()
  *
@@ -45,7 +48,7 @@
 #include "runcmmd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vacation.c,v 1.2 2019-06-07 15:57:12+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vacation.c,v 1.3 2020-04-01 18:58:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "

@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 1.8  2020-04-01 18:54:35+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.7  2019-06-30 10:14:19+05:30  Cprogrammer
  * seperate fields in error string by commas
  *
@@ -43,7 +46,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 1.7 2019-06-30 10:14:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 1.8 2020-04-01 18:54:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

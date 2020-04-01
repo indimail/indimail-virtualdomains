@@ -1,5 +1,8 @@
 /*
  * $Log: MailQuotaWarn.c,v $
+ * Revision 1.4  2020-04-01 18:56:58+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.3  2019-07-26 09:32:13+05:30  Cprogrammer
  * speed up MailQuotaWarn. exit if non of QUOTAWARN env variables are defined
  *
@@ -39,7 +42,7 @@
 #include "runcmmd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: MailQuotaWarn.c,v 1.3 2019-07-26 09:32:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: MailQuotaWarn.c,v 1.4 2020-04-01 18:56:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

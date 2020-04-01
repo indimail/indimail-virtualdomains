@@ -1,5 +1,8 @@
 /*
  * $Log: monkey.c,v $
+ * Revision 1.3  2020-04-01 18:57:19+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.2  2019-04-22 23:14:13+05:30  Cprogrammer
  * replaced atoi() with scan_int()
  *
@@ -52,7 +55,7 @@
 #include "sockwrite.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: monkey.c,v 1.2 2019-04-22 23:14:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: monkey.c,v 1.3 2020-04-01 18:57:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int

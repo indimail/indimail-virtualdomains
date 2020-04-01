@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 1.6  2020-04-01 18:54:28+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.5  2019-06-18 09:57:41+05:30  Cprogrammer
  * added comments
  *
@@ -74,7 +77,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 1.5 2019-06-18 09:57:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 1.6 2020-04-01 18:54:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};

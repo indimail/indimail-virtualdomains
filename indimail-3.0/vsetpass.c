@@ -1,5 +1,9 @@
 /*
  * $Log: vsetpass.c,v $
+ * Revision 1.3  2020-04-01 18:59:14+05:30  Cprogrammer
+ * added encrypt flag argument to mkpasswd()
+ * moved authentication functions to libqmail
+ *
  * Revision 1.2  2019-07-10 12:58:10+05:30  Cprogrammer
  * print more error information in print_error
  *
@@ -41,7 +45,7 @@
 #include "getpeer.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vsetpass.c,v 1.2 2019-07-10 12:58:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetpass.c,v 1.3 2020-04-01 18:59:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE

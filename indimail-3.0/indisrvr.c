@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.4  2020-04-01 18:55:43+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.3  2019-06-07 16:00:18+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.3 2019-06-07 16:00:18+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.4 2020-04-01 18:55:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

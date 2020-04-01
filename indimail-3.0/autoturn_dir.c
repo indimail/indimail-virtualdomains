@@ -1,5 +1,8 @@
 /*
  * $Log: autoturn_dir.c,v $
+ * Revision 1.2  2020-04-01 18:53:10+05:30  Cprogrammer
+ * moved getEnvConfig to libqmail
+ *
  * Revision 1.1  2019-04-18 08:25:27+05:30  Cprogrammer
  * Initial revision
  *
@@ -27,7 +30,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: autoturn_dir.c,v 1.1 2019-04-18 08:25:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: autoturn_dir.c,v 1.2 2020-04-01 18:53:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

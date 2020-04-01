@@ -1,5 +1,8 @@
 /*
  * $Log: deldomain.c,v $
+ * Revision 1.3  2020-04-01 18:54:26+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.2  2019-07-02 09:48:07+05:30  Cprogrammer
  * return success while deleting if a domain is not found in assign file
  *
@@ -49,7 +52,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deldomain.c,v 1.2 2019-07-02 09:48:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deldomain.c,v 1.3 2020-04-01 18:54:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

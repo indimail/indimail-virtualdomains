@@ -1,5 +1,8 @@
 /*
  * $Log: get_local_ip.c,v $
+ * Revision 1.3  2020-04-01 18:54:49+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.2  2019-07-04 10:05:36+05:30  Cprogrammer
  * collapsed multiple if statements
  *
@@ -41,7 +44,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_local_ip.c,v 1.2 2019-07-04 10:05:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_local_ip.c,v 1.3 2020-04-01 18:54:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc hostbuf = { 0 };

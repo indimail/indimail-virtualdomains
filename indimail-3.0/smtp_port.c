@@ -1,5 +1,8 @@
 /*
  * $Log: smtp_port.c,v $
+ * Revision 1.4  2020-04-01 18:57:55+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.3  2019-06-17 23:26:17+05:30  Cprogrammer
  * set default port as PORT_SMTP
  *
@@ -34,7 +37,7 @@
 #include "create_table.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: smtp_port.c,v 1.3 2019-06-17 23:26:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: smtp_port.c,v 1.4 2020-04-01 18:57:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

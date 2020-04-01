@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 1.6  2020-04-01 18:58:38+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.5  2019-06-17 23:24:18+05:30  Cprogrammer
  * fixed SMTPROUTE, QMTPROUTE env variable
  *
@@ -81,7 +84,7 @@
 #include "get_message_size.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 1.5 2019-06-17 23:24:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 1.6 2020-04-01 18:58:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vdelivermail: fatal: "

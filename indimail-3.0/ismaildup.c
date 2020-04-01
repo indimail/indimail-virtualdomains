@@ -1,5 +1,8 @@
 /*
  * $Log: ismaildup.c,v $
+ * Revision 1.2  2020-04-01 18:56:39+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.1  2019-04-18 08:21:46+05:30  Cprogrammer
  * Initial revision
  *
@@ -41,7 +44,7 @@
 #include "MakeArgs.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ismaildup.c,v 1.1 2019-04-18 08:21:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ismaildup.c,v 1.2 2020-04-01 18:56:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_SSL 

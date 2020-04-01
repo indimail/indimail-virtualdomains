@@ -1,5 +1,8 @@
 /*
  * $Log: CreateDomainDirs.c,v $
+ * Revision 1.2  2020-04-01 18:53:59+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.1  2019-04-14 18:31:59+05:30  Cprogrammer
  * Initial revision
  *
@@ -29,7 +32,7 @@
 #include "r_mkdir.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: CreateDomainDirs.c,v 1.1 2019-04-14 18:31:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: CreateDomainDirs.c,v 1.2 2020-04-01 18:53:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

@@ -1,5 +1,8 @@
 /*
  * $Log: sql_adduser.c,v $
+ * Revision 1.2  2020-04-01 18:58:00+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.1  2019-04-20 08:34:31+05:30  Cprogrammer
  * Initial revision
  *
@@ -32,7 +35,7 @@
 #include "getpeer.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_adduser.c,v 1.1 2019-04-20 08:34:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_adduser.c,v 1.2 2020-04-01 18:58:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

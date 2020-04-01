@@ -1,5 +1,8 @@
 /*
  * $Log: iadduser.c,v $
+ * Revision 1.2  2020-04-01 18:55:09+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.1  2019-04-14 18:31:35+05:30  Cprogrammer
  * Initial revision
  *
@@ -50,7 +53,7 @@
 #define ALLOWCHARS              " .!#$%&'*+-/=?^_`{|}~\""
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iadduser.c,v 1.1 2019-04-14 18:31:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iadduser.c,v 1.2 2020-04-01 18:55:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

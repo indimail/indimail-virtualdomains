@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 1.5  2020-04-01 18:57:47+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.4  2019-07-04 10:08:13+05:30  Cprogrammer
  * collapsed multiple if statements
  *
@@ -28,7 +31,7 @@
 #include <getEnvConfig.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 1.4 2019-07-04 10:08:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 1.5 2020-04-01 18:57:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define max_mysql_option_err_num 21

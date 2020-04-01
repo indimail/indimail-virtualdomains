@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 1.2  2020-04-01 18:52:49+05:30  Cprogrammer
+ * moved pw_comp.h to libqmail
+ *
  * Revision 1.1  2019-04-17 02:31:12+05:30  Cprogrammer
  * Initial revision
  *
@@ -46,7 +49,7 @@
 #include "sql_getpw.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.1 2019-04-17 02:31:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.2 2020-04-01 18:52:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE

@@ -1,5 +1,8 @@
 /*
  * $Log: spam.c,v $
+ * Revision 1.2  2020-04-01 18:57:58+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.1  2019-04-18 08:37:53+05:30  Cprogrammer
  * Initial revision
  *
@@ -41,7 +44,7 @@
 #include "lowerit.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: spam.c,v 1.1 2019-04-18 08:37:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: spam.c,v 1.2 2020-04-01 18:57:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define BADMAIL 1

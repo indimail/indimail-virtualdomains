@@ -1,5 +1,8 @@
 /*
  * $Log: maildir_to_email.c,v $
+ * Revision 1.3  2020-04-01 18:56:55+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.2  2019-04-21 16:14:02+05:30  Cprogrammer
  * remove '/' from the end
  *
@@ -25,7 +28,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: maildir_to_email.c,v 1.2 2019-04-21 16:14:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: maildir_to_email.c,v 1.3 2020-04-01 18:56:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

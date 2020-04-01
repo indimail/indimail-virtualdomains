@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 1.3  2020-04-01 18:58:26+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.2  2019-06-07 15:55:38+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -59,7 +62,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 1.2 2019-06-07 15:55:38+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 1.3 2020-04-01 18:58:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "

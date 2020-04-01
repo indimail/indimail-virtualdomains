@@ -1,5 +1,8 @@
 /*
  * $Log: sql_init.c,v $
+ * Revision 1.2  2020-04-01 18:58:04+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.1  2019-04-18 08:36:25+05:30  Cprogrammer
  * Initial revision
  *
@@ -12,7 +15,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_init.c,v 1.1 2019-04-18 08:36:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_init.c,v 1.2 2020-04-01 18:58:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- NOTE: Not safe to be called on a socket by multiple processes simultaneously */

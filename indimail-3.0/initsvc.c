@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 1.2  2020-04-01 18:55:46+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.1  2019-04-18 08:36:05+05:30  Cprogrammer
  * Initial revision
  *
@@ -28,7 +31,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 1.1 2019-04-18 08:36:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 1.2 2020-04-01 18:55:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1

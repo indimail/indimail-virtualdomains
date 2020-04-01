@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 1.4  2020-04-01 18:58:43+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.3  2019-06-07 15:52:44+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 1.3 2019-06-07 15:52:44+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 1.4 2020-04-01 18:58:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -155,7 +158,7 @@ execMda(char **argptr, char **mda)
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 1.3 $", *mda;
+	char           *revision = "$Revision: 1.4 $", *mda;
 	static stralloc XFilter = {0};
 	pid_t           pid;
 	int             i, tmp_stat, wait_status;

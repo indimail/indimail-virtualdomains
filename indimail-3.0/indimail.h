@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 1.4  2020-04-01 18:55:24+05:30  Cprogrammer
+ * moved defintions to pw_comp.h
+ *
  * Revision 1.3  2019-06-03 06:50:32+05:30  Cprogrammer
  * replaced config.h with indimail_config.h
  *
@@ -14,7 +17,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 1.3 2019-06-03 06:50:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 1.4 2020-04-01 18:55:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H

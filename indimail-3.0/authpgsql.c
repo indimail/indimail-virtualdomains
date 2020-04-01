@@ -1,5 +1,8 @@
 /*
  * $Log: authpgsql.c,v $
+ * Revision 1.4  2020-04-01 18:53:05+05:30  Cprogrammer
+ * moved getEnvConfig to libqmail
+ *
  * Revision 1.3  2019-07-10 12:57:26+05:30  Cprogrammer
  * print more error information in print_error
  *
@@ -45,7 +48,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authpgsql.c,v 1.3 2019-07-10 12:57:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authpgsql.c,v 1.4 2020-04-01 18:53:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_PGSQL

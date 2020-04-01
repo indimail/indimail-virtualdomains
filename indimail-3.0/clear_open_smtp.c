@@ -1,5 +1,8 @@
 /*
  * $Log: clear_open_smtp.c,v $
+ * Revision 1.4  2020-04-01 18:53:17+05:30  Cprogrammer
+ * moved getEnvConfig to libqmail
+ *
  * Revision 1.3  2019-06-30 10:13:43+05:30  Cprogrammer
  * seperate fields in error string by commas
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: clear_open_smtp.c,v 1.3 2019-06-30 10:13:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: clear_open_smtp.c,v 1.4 2020-04-01 18:53:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY

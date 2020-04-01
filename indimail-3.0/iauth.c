@@ -1,5 +1,8 @@
 /*
  * $Log: iauth.c,v $
+ * Revision 1.4  2020-04-01 18:55:14+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.3  2019-04-22 23:11:22+05:30  Cprogrammer
  * replaced atol() with scan_ulong()
  *
@@ -89,7 +92,7 @@
 #include "common.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: iauth.c,v 1.3 2019-04-22 23:11:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iauth.c,v 1.4 2020-04-01 18:55:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      defaultTask(char *, char *, struct passwd *, char *, int);

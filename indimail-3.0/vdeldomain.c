@@ -1,5 +1,8 @@
 /*
  * $Log: vdeldomain.c,v $
+ * Revision 1.3  2020-04-01 18:58:35+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.2  2019-06-07 15:54:18+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -48,7 +51,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeldomain.c,v 1.2 2019-06-07 15:54:18+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeldomain.c,v 1.3 2020-04-01 18:58:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char    *usage =

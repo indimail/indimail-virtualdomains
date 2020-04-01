@@ -1,5 +1,8 @@
 /*
  * $Log: get_assign.c,v $
+ * Revision 1.3  2020-04-01 18:59:39+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.2  2019-04-10 10:09:16+05:30  Cprogrammer
  * replaced errout with strerr_warn1
  *
@@ -34,7 +37,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_assign.c,v 1.2 2019-04-10 10:09:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_assign.c,v 1.3 2020-04-01 18:59:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      cdb_seek(int, unsigned char *, unsigned int, int *);

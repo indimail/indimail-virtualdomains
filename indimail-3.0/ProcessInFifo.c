@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.5  2020-04-01 18:57:29+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.4  2019-05-28 17:41:50+05:30  Cprogrammer
  * added load_mysql.h for mysql interceptor function prototypes
  *
@@ -92,7 +95,7 @@
 #include "FifoCreate.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.4 2019-05-28 17:41:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.5 2020-04-01 18:57:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;

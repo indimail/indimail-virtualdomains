@@ -1,5 +1,8 @@
 /*
  * $Log: update_rules.c,v $
+ * Revision 1.2  2020-04-01 18:58:16+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.1  2019-04-18 08:33:49+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: update_rules.c,v 1.1 2019-04-18 08:33:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: update_rules.c,v 1.2 2020-04-01 18:58:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY

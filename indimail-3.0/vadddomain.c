@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.6  2020-04-01 18:58:24+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.5  2019-06-07 15:55:52+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -76,7 +79,7 @@
 #include "get_indimailuidgid.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.5 2019-06-07 15:55:52+05:30 mbhangui Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.6 2020-04-01 18:58:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "

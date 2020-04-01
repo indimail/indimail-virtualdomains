@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfo.c,v $
+ * Revision 1.4  2020-04-01 18:54:05+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.3  2019-06-07 15:59:13+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfo.c,v 1.3 2019-06-07 15:59:13+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: dbinfo.c,v 1.4 2020-04-01 18:54:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

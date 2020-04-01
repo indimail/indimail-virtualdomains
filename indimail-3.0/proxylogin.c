@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 1.4  2020-04-01 18:57:32+05:30  Cprogrammer
+ * added encrypt flag to mkpasswd()
+ *
  * Revision 1.3  2019-06-07 16:02:39+05:30  mbhangui
  * replaced getenv() with env_get()
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 1.3 2019-06-07 16:02:39+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 1.4 2020-04-01 18:57:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

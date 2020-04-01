@@ -1,5 +1,8 @@
 /*
  * $Log: sq_vacation.c,v $
+ * Revision 1.3  2020-04-01 18:58:08+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.2  2019-04-22 23:18:46+05:30  Cprogrammer
  * replaced exit with _exit
  *
@@ -80,7 +83,7 @@
 #define ERR_UNEXPECTED  126     /*- other unexpected error */
 
 #ifndef lint
-static char     sccsid[] = "$Id: sq_vacation.c,v 1.2 2019-04-22 23:18:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sq_vacation.c,v 1.3 2020-04-01 18:58:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define REMOTEFILE_OKCHARS \

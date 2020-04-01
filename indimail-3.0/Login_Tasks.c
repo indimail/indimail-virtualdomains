@@ -1,5 +1,8 @@
 /*
  * $Log: Login_Tasks.c,v $
+ * Revision 1.3  2020-04-01 18:56:52+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.2  2019-07-04 09:17:29+05:30  Cprogrammer
  * collapsed multiple if statements
  *
@@ -60,7 +63,7 @@
 #include "vset_lastdeliver.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: Login_Tasks.c,v 1.2 2019-07-04 09:17:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: Login_Tasks.c,v 1.3 2020-04-01 18:56:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int

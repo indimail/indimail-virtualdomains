@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 1.11  2020-04-01 18:54:17+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.10  2019-07-08 13:03:37+05:30  Cprogrammer
  * removed unused variables/functions
  *
@@ -60,7 +63,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 1.10 2019-07-08 13:03:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 1.11 2020-04-01 18:54:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static MYSQL   *is_duplicate_conn(MYSQL **, DBINFO **);

@@ -1,5 +1,8 @@
 /*
  * $Log: del_control.c,v $
+ * Revision 1.2  2020-04-01 18:54:20+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.1  2019-04-18 08:22:35+05:30  Cprogrammer
  * Initial revision
  *
@@ -24,7 +27,7 @@
 #include "compile_morercpthosts.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: del_control.c,v 1.1 2019-04-18 08:22:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: del_control.c,v 1.2 2020-04-01 18:54:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

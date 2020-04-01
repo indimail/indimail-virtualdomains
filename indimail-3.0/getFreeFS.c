@@ -1,5 +1,8 @@
 /*
  * $Log: getFreeFS.c,v $
+ * Revision 1.2  2020-04-01 18:59:42+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.1  2019-04-18 08:25:28+05:30  Cprogrammer
  * Initial revision
  *
@@ -30,7 +33,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: getFreeFS.c,v 1.1 2019-04-18 08:25:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: getFreeFS.c,v 1.2 2020-04-01 18:59:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

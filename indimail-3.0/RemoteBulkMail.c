@@ -1,5 +1,8 @@
 /*
  * $Log: RemoteBulkMail.c,v $
+ * Revision 1.5  2020-04-01 18:57:45+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.4  2019-06-30 10:14:30+05:30  Cprogrammer
  * seperate fields in error string by commas
  *
@@ -40,7 +43,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RemoteBulkMail.c,v 1.4 2019-06-30 10:14:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: RemoteBulkMail.c,v 1.5 2020-04-01 18:57:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

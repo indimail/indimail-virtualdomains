@@ -1,5 +1,8 @@
 /*
  * $Log: ipasswd.c,v $
+ * Revision 1.2  2020-04-01 18:56:04+05:30  Cprogrammer
+ * added encrypt flag to mkpasswd()
+ *
  * Revision 1.1  2019-04-14 18:29:26+05:30  Cprogrammer
  * Initial revision
  *
@@ -30,7 +33,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ipasswd.c,v 1.1 2019-04-14 18:29:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ipasswd.c,v 1.2 2020-04-01 18:56:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

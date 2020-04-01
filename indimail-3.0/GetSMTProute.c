@@ -1,5 +1,8 @@
 /*
  * $Log: GetSMTProute.c,v $
+ * Revision 1.2  2020-04-01 18:55:02+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.1  2019-04-18 08:36:02+05:30  Cprogrammer
  * Initial revision
  *
@@ -31,7 +34,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: GetSMTProute.c,v 1.1 2019-04-18 08:36:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: GetSMTProute.c,v 1.2 2020-04-01 18:55:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int

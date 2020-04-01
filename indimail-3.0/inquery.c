@@ -1,5 +1,8 @@
 /*
  * $Log: inquery.c,v $
+ * Revision 1.3  2020-04-01 18:55:52+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.2  2019-04-22 23:12:30+05:30  Cprogrammer
  * replaced realloc() with alloc()
  *
@@ -41,7 +44,7 @@
 #include "strToPw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 1.2 2019-04-22 23:12:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 1.3 2020-04-01 18:55:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- 

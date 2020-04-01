@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfoDel.c,v $
+ * Revision 1.2  2020-04-01 18:54:09+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.1  2019-04-12 20:42:09+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoDel.c,v 1.1 2019-04-12 20:42:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbinfoDel.c,v 1.2 2020-04-01 18:54:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

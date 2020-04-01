@@ -1,5 +1,8 @@
 /*
  * $Log: clearopensmtp.c,v $
+ * Revision 1.4  2020-04-01 18:53:20+05:30  Cprogrammer
+ * moved getEnvConfig to libqmail
+ *
  * Revision 1.3  2019-06-07 15:58:53+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: clearopensmtp.c,v 1.3 2019-06-07 15:58:53+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: clearopensmtp.c,v 1.4 2020-04-01 18:53:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY

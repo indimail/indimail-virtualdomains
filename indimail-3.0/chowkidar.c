@@ -1,5 +1,8 @@
 /*
  * $Log: chowkidar.c,v $
+ * Revision 1.3  2020-04-01 18:53:13+05:30  Cprogrammer
+ * moved getEnvConfig to libqmail
+ *
  * Revision 1.2  2019-06-07 15:58:31+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -37,7 +40,7 @@
 #define SPAMDB  3
 
 #ifndef	lint
-static char     sccsid[] = "$Id: chowkidar.c,v 1.2 2019-06-07 15:58:31+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: chowkidar.c,v 1.3 2020-04-01 18:53:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "chowkidar: fatal: "
@@ -75,7 +78,7 @@ die_nomem()
 int
 main(int argc, char **argv)
 {
-	char           *ptr, *revision = "$Revision: 1.2 $";
+	char           *ptr, *revision = "$Revision: 1.3 $";
 	int             spamNumber, spamFilter, c, silent, type, relative;
 	static stralloc ignfile = {0}, bad_from_rcpt_file = {0};
 	char           *filename = (char *) 0, *outfile = (char *) 0;

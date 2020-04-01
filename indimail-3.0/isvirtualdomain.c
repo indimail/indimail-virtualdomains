@@ -1,5 +1,8 @@
 /*
  * $Log: isvirtualdomain.c,v $
+ * Revision 1.3  2020-04-01 18:56:42+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.2  2019-12-03 22:13:19+05:30  Cprogrammer
  * return 0 for all domains if virtualdomains control file is absent
  *
@@ -28,7 +31,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: isvirtualdomain.c,v 1.2 2019-12-03 22:13:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: isvirtualdomain.c,v 1.3 2020-04-01 18:56:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

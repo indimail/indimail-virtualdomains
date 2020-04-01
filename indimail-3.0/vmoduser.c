@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.3  2020-04-01 18:58:53+05:30  Cprogrammer
+ * added encrypt flag argument to mkpasswd()
+ *
  * Revision 1.2  2019-06-07 15:44:54+05:30  Cprogrammer
  * use sgetopt library for getopt()
  *
@@ -54,7 +57,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.2 2019-06-07 15:44:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.3 2020-04-01 18:58:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "

@@ -1,5 +1,8 @@
 /*
  * $Log: add_domain_assign.c,v $
+ * Revision 1.2  2020-04-01 18:52:28+05:30  Cprogrammer
+ * moved getEnvConfig to libqmail
+ *
  * Revision 1.1  2019-04-14 18:34:09+05:30  Cprogrammer
  * Initial revision
  *
@@ -27,7 +30,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_domain_assign.c,v 1.1 2019-04-14 18:34:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: add_domain_assign.c,v 1.2 2020-04-01 18:52:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

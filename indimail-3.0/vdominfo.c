@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 1.3  2020-04-01 18:58:41+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.2  2019-06-07 15:53:04+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -50,7 +53,7 @@
 #include "vsmtp_select.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 1.2 2019-06-07 15:53:04+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 1.3 2020-04-01 18:58:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define VDOMTOKENS ":\n"

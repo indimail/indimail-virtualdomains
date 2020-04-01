@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 1.4  2020-04-01 18:58:19+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.3  2019-06-07 16:10:48+05:30  mbhangui
  * fix for missing mysql_get_option() in new versions of libmariadb
  *
@@ -71,7 +74,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 1.3 2019-06-07 16:10:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 1.4 2020-04-01 18:58:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);

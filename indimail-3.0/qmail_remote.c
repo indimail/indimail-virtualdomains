@@ -1,5 +1,8 @@
 /*
  * $Log: qmail_remote.c,v $
+ * Revision 1.3  2020-04-01 18:57:40+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
  * Revision 1.2  2019-04-22 23:18:40+05:30  Cprogrammer
  * replaced exit with _exit
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: qmail_remote.c,v 1.2 2019-04-22 23:18:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: qmail_remote.c,v 1.3 2020-04-01 18:57:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_SYS_TYPES_H
