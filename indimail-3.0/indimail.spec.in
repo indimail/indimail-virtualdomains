@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.20 2020-03-31 20:58:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.21 2020-04-01 14:00:37+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -622,7 +622,7 @@ if [ -x /usr/bin/chrpath ] ; then
 
   for i in adminclient chowkidar clearopensmtp \
   hostsync indisrvr inlookup inquerytest install_tables ipchange \
-  mgmtpass systpass updatefile updaterules vchkpass vdelivermail \
+  mgmtpass updatefile updaterules vchkpass vdelivermail \
   vdeloldusers vfilter vfstab vmoddomain vreorg vsetpass nssd vserverinfo check_getpw \
   vpurge vtable resetquota
   do
@@ -853,7 +853,6 @@ done
 %attr(4555,root,root)                   %{_prefix}/bin/vdominfo
 %attr(4555,root,root)                   %{_prefix}/bin/vadddomain
 %attr(4555,root,root)                   %{_prefix}/bin/vdeldomain
-%attr(4555,root,root)                   %{_prefix}/sbin/systpass
 
 # indimail binaries
 %attr(755,root,qmail)                   %{_prefix}/bin/vuserinfo
@@ -1275,7 +1274,6 @@ done
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vmoduser
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vcfilter
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vbulletin
-%verify (not user group mode) %attr(4755, root, root)      %{_prefix}/sbin/systpass
 %verify (not user group mode) %attr(4755, root, qmail)     %{libexedir}/sq_vacation
 %verify (not user group mode) %attr(4755, root, root)      %{libexedir}/imapmodules/authshadow
 %endif
@@ -1376,7 +1374,6 @@ done
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/del_user_assign.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/delusercntrl.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/deluser.h
-%attr(644,root,qmail)                   %{_prefix}/include/indimail/digest_md5.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/dir_control.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/Dirname.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/disable_mysql_escape.h
@@ -1390,7 +1387,6 @@ done
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/getactualpath.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/getAddressBook.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/get_assign.h
-%attr(644,root,qmail)                   %{_prefix}/include/indimail/getEnvConfig.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/getFreeFS.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/getindimail.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/get_indimailuidgid.h
@@ -1406,15 +1402,12 @@ done
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/GetSMTProute.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/smtp_port.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/getuidgid.h
-%attr(644,root,qmail)                   %{_prefix}/include/indimail/global.h
-%attr(644,root,qmail)                   %{_prefix}/include/indimail/hmac.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/hostcntrl_select.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/host_in_locals.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/iadddomain.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/iadduser.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/iclose.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/in_bsearch.h
-%attr(644,root,qmail)                   %{_prefix}/include/indimail/in_crypt.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/indimail_compat.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/indimail_config.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/indimail.h
@@ -1444,7 +1437,6 @@ done
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/makesalt.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/makeseekable.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/make_user_dir.h
-%attr(644,root,qmail)                   %{_prefix}/include/indimail/md5.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/mdaMySQLConnect.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/mgmtpassfuncs.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/mkpasswd3.h
@@ -1480,14 +1472,12 @@ done
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/remove_quotes.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/renameuser.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/replacestr.h
-%attr(644,root,qmail)                   %{_prefix}/include/indimail/ripemd.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/r_mkdir.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/runcmmd.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/SendWelcomeMail.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/set_mysql_options.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/setuserid.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/setuserquota.h
-%attr(644,root,qmail)                   %{_prefix}/include/indimail/sha1.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/skip_relay.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/skip_system_files.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/sockwrite.h
@@ -1519,7 +1509,6 @@ done
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/tcpopen.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/tls.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/trashpurge.h
-%attr(644,root,qmail)                   %{_prefix}/include/indimail/typesx.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/udpopen.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/update_file.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/update_local_hostid.h
@@ -1670,7 +1659,6 @@ fi
 %verify_permissions -e %{_prefix}/bin/vmoduser
 %verify_permissions -e %{_prefix}/bin/vcfilter
 %verify_permissions -e %{_prefix}/bin/vbulletin
-%verify_permissions -e %{_prefix}/sbin/systpass
 %verify_permissions -e %{libexecdir}/sq_vacation
 %verify_permissions -e %{libexecdir}/imapmodules/authshadow
 %endif
