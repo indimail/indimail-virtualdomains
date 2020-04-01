@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.21 2020-04-01 14:00:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.22 2020-04-01 20:44:30+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1434,12 +1434,10 @@ done
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/maildir_to_email.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/MailQuotaWarn.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/MakeArgs.h
-%attr(644,root,qmail)                   %{_prefix}/include/indimail/makesalt.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/makeseekable.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/make_user_dir.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/mdaMySQLConnect.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/mgmtpassfuncs.h
-%attr(644,root,qmail)                   %{_prefix}/include/indimail/mkpasswd3.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/monkey.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/MoveFile.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/munch_domain.h
@@ -1460,7 +1458,6 @@ done
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/ProcessInFifo.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/proxylogin.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/purge_files.h
-%attr(644,root,qmail)                   %{_prefix}/include/indimail/pw_comp.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/pwcomp.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/PwdInLookup.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/qmail_remote.h
