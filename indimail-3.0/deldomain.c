@@ -28,6 +28,7 @@
 #include <substdio.h>
 #include <open.h>
 #include <getln.h>
+#include <getEnvConfig.h>
 #endif
 #include "variables.h"
 #include "vlimits.h"
@@ -36,7 +37,6 @@
 #include "is_alias_domain.h"
 #include "sql_deldomain.h"
 #include "sql_delaliasdomain.h"
-#include "getEnvConfig.h"
 #include "get_real_domain.h"
 #include "dir_control.h"
 #include "del_control.h"

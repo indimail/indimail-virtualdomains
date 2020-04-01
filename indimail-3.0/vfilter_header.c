@@ -31,8 +31,8 @@ static char     sccsid[] = "$Id: vfilter_header.c,v 1.1 2019-04-18 08:33:58+05:3
 #include <open.h>
 #include <getln.h>
 #include <substdio.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "variables.h"
 
 static void

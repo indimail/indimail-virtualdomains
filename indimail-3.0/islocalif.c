@@ -59,8 +59,8 @@
 #include <getln.h>
 #include <byte.h>
 #include <str.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 
 #ifndef INET_ADDRSTRLEN
 #define INET_ADDRSTRLEN 16

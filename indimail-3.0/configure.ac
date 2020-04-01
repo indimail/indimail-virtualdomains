@@ -445,24 +445,6 @@ case $have_mysqloptionsv in
 	;;
 esac
 
-AC_ARG_ENABLE(HAVE_MD5_CRYPT,    [  --enable-md5-crypt            if your system crypt does not support md5],
-	[with_md5crypt=$enableval],
-	[with_md5crypt=no])
-test "$with_md5crypt" = "no" && AC_DEFINE(HAVE_MD5_CRYPT,1,Define if you want md5 crypt support compiled in)
-AM_CONDITIONAL(HAVE_MD5_CRYPT, test "$with_md5crypt" = yes)
-
-AC_ARG_ENABLE(HAVE_SHA256_CRYPT, [  --enable-sha256-crypt         if your system does not support sha256],
-	[with_sha256crypt=$enableval],
-	[with_sha256crypt=no])
-test "$with_sha256crypt" = "no" && AC_DEFINE(HAVE_SHA256_CRYPT,1,Define if you want sha256 crypt support compiled in)
-AM_CONDITIONAL(HAVE_SHA256_CRYPT, test "$with_sha256crypt" = yes)
-
-AC_ARG_ENABLE(HAVE_SHA512_CRYPT, [  --enable-sha512-crypt         if your system does not support sha512],
-	[with_sha512crypt=$enableval],
-	[with_sha512crypt=no])
-test "$with_sha512crypt" = "no" && AC_DEFINE(HAVE_SHA512_CRYPT,1,Define if you want sha512 crypt support compiled in)
-AM_CONDITIONAL(HAVE_SHA512_CRYPT, test "$with_sha512crypt" = yes)
-
 qmaildir=""
 for f in /var/indimail /var/qmail
 do
@@ -788,29 +770,6 @@ case $POPRELAY in
 	AC_DEFINE_UNQUOTED(OPEN_SMTP,"$open_smtp","")
 	;;
 *)
-	;;
-esac
-pwdhash=md5
-AC_ARG_ENABLE(pwdhash, [  --enable-passwd-hash=des|md5|sha256|sha512    Passwd Hash (des - DES, md5 - MD5, sha256 - SHA256, sha512 - SHA512)],
-	pwdhash=$enableval,
-	[
-	AC_DEFINE_UNQUOTED(DES_HASH,0,Enable DES Encryption)
-	AC_DEFINE_UNQUOTED(MD5_HASH,1,Enable DES Encryption)
-	AC_DEFINE_UNQUOTED(SHA256_HASH,2,Enable DES Encryption)
-	AC_DEFINE_UNQUOTED(SHA512_HASH,3,Enable DES Encryption)
-	])
-case $pwdhash in
-	des)
-	AC_DEFINE_UNQUOTED(PASSWORD_HASH,0,Enable DES Encryption)
-	;;
-	md5)
-	AC_DEFINE_UNQUOTED(PASSWORD_HASH,1,Enable MD5 Encryption)
-	;;
-	sha256)
-	AC_DEFINE_UNQUOTED(PASSWORD_HASH,2,Enable SHA256 Encryption)
-	;;
-	sha512)
-	AC_DEFINE_UNQUOTED(PASSWORD_HASH,3,Enable SHA512 Encryption)
 	;;
 esac
 
@@ -1478,20 +1437,6 @@ echo "     domain limits = ON  --enable-domain-limits=y default"
 echo "     domain limits = OFF --enable-domain-limits=n"
 	  ;;
 esac
-case $pwdhash in
-	des)
-echo "     Password Hash = DES --enable-password-hash=des"
-	;;
-	md5)
-echo "     Password Hash = MD5 --enable-password-hash=md5"
-	;;
-	sha256)
-echo "     Password Hash = SHA256 --enable-password-hash=sha256"
-	;;
-	sha512)
-echo "     Password Hash = SHA512 --enable-password-hash=sha512"
-	;;
-esac
 
 case $ipv6 in
 1*|y*|Y*)
@@ -1503,32 +1448,6 @@ AC_CHECK_LIB(nsl, gethostbyname,echo -lnsl >> socket.lib,,)
 ;;
 esac
 
-case $with_md5crypt in
-1*|y*|Y*)
-echo "         MD5 Crypt = ON  --enable-md5-crypt=y"
-;;
-*)
-echo "         MD5 Crypt = OFF --enable-md5-crypt=n default"
-;;
-esac
-
-case $with_sha256crypt in
-1*|y*|Y*)
-echo "      SHA256 Crypt = ON  --enable-sha256-crypt=y"
-;;
-*)
-echo "      SHA256 Crypt = OFF --enable-sha256-crypt=n default"
-;;
-esac
-
-case $with_sha512crypt in
-1*|y*|Y*)
-echo "      SHA512 Crypt = ON  --enable-sha512-crypt=y"
-;;
-*)
-echo "      SHA512 Crypt = OFF --enable-sha512-crypt=n default"
-;;
-esac
 case $ENABLE_ENTERPRISE in
 1*|y*|Y*)
 echo "      Enterprise   = ON  --enable-enterprise-support=y"

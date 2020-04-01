@@ -21,8 +21,8 @@
 #include <str.h>
 #include <strerr.h>
 #include <error.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: maildir_to_email.c,v 1.2 2019-04-21 16:14:02+05:30 Cprogrammer Exp mbhangui $";

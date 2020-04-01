@@ -64,13 +64,13 @@ static char     sccsid[] = "$Id: indisrvr.c,v 1.3 2019-06-07 16:00:18+05:30 mbha
 #include <scan.h>
 #include <fmt.h>
 #include <str.h>
+#include <pw_comp.h>
 #endif
 #include "tcpbind.h"
 #include "MakeArgs.h"
 #include "variables.h"
 #include "checkPerm.h"
 #include "mgmtpassfuncs.h"
-#include "pw_comp.h"
 #include "filewrt.h"
 #include "sockwrite.h"
 

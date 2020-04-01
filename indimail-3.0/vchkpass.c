@@ -28,9 +28,10 @@
 #include <str.h>
 #include <env.h>
 #include <error.h>
+#include <pw_comp.h>
+#include <getEnvConfig.h>
 #endif
 #include "parse_email.h"
-#include "getEnvConfig.h"
 #include "sqlOpen_user.h"
 #include "sql_getpw.h"
 #include "vlimits.h"
@@ -41,7 +42,6 @@
 #include "pipe_exec.h"
 #include "indimail.h"
 #include "variables.h"
-#include "pw_comp.h"
 #include "runcmmd.h"
 
 #ifndef lint

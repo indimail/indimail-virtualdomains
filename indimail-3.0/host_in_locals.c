@@ -27,8 +27,8 @@ static char     sccsid[] = "$Id: host_in_locals.c,v 1.1 2019-04-18 08:25:31+05:3
 #include <substdio.h>
 #include <getln.h>
 #include <open.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 
 static void
 die_nomem()

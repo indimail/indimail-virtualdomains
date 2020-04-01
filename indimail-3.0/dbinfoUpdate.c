@@ -25,8 +25,8 @@ static char     sccsid[] = "$Id: dbinfoUpdate.c,v 1.2 2019-04-20 08:10:52+05:30 
 #include <stralloc.h>
 #include <strerr.h>
 #include <fmt.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "open_master.h"
 #include "variables.h"
 #include "create_table.h"

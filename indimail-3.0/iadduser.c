@@ -28,15 +28,15 @@
 #include <getln.h>
 #include <error.h>
 #include <scan.h>
+#include <mkpasswd.h>
+#include <getEnvConfig.h>
 #endif
 #include "indimail.h"
-#include "getEnvConfig.h"
 #include "addusercntrl.h"
 #include "is_distributed_domain.h"
 #include "open_master.h"
 #include "is_user_present.h"
 #include "add_user_assign.h"
-#include "mkpasswd3.h"
 #include "get_assign.h"
 #include "get_local_hostid.h"
 #include "get_indimailuidgid.h"
@@ -213,7 +213,7 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 	if (!*dir)
 		dir = (char *) 0;
 	if (domain && *domain) {
-		mkpasswd3(password, &Crypted);
+		mkpasswd(password, &Crypted, encrypt_flag);
 		ptr = sql_adduser(username, domain, Crypted.s, gecos, dir, quota, apop, actFlag);
 		if (!ptr || !*ptr)
 			return (-1);

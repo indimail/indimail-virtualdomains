@@ -35,13 +35,13 @@
 #include <fmt.h>
 #include <error.h>
 #include <env.h>
+#include <getEnvConfig.h>
 #endif
 #include "indimail.h"
 #include "get_indimailuidgid.h"
 #include "variables.h"
 #include "r_mkdir.h"
 #include "inquery.h"
-#include "getEnvConfig.h"
 #include "common.h"
 #include "FifoCreate.h"
 #include "ProcessInFifo.h"

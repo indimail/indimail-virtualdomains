@@ -21,9 +21,9 @@ static char     sccsid[] = "$Id: vupdate_rules.c,v 1.1 2019-04-17 09:43:23+05:30
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <strerr.h>
+#include <getEnvConfig.h>
 #endif
 #include "iopen.h"
-#include "getEnvConfig.h"
 #include "variables.h"
 #include "create_table.h"
 

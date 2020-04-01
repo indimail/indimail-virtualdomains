@@ -26,9 +26,9 @@
 #include <getln.h>
 #include <strerr.h>
 #include <substdio.h>
+#include <getEnvConfig.h>
 #endif
 #include "indimail.h"
-#include "getEnvConfig.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: GetSMTProute.c,v 1.1 2019-04-18 08:36:02+05:30 Cprogrammer Exp mbhangui $";

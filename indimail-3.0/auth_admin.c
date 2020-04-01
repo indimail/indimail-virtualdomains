@@ -19,9 +19,9 @@
 #include <scan.h>
 #include <str.h>
 #include <error.h>
+#include <getEnvConfig.h>
 #endif
 #include "tcpopen.h"
-#include "getEnvConfig.h"
 #ifdef HAVE_SSL
 #include "tls.h"
 #endif

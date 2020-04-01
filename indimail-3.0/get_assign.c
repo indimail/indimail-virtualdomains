@@ -30,8 +30,8 @@
 #include <fmt.h>
 #include <scan.h>
 #include <env.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: get_assign.c,v 1.2 2019-04-10 10:09:16+05:30 Cprogrammer Exp mbhangui $";

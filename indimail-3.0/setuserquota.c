@@ -18,9 +18,9 @@
 #include <error.h>
 #include <strerr.h>
 #include <fmt.h>
+#include <getEnvConfig.h>
 #endif
 #include "lowerit.h"
-#include "getEnvConfig.h"
 #include "sql_getpw.h"
 #include "parse_quota.h"
 #include "recalc_quota.h"

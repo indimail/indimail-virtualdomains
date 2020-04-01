@@ -43,9 +43,9 @@ static char     sccsid[] = "$Id: LoadBMF.c,v 1.1 2019-04-15 13:05:29+05:30 Cprog
 #include <substdio.h>
 #include <getln.h>
 #include <open.h>
+#include <getEnvConfig.h>
 #endif
 #include "variables.h"
-#include "getEnvConfig.h"
 #include "open_master.h"
 #include "create_table.h"
 #include "common.h"

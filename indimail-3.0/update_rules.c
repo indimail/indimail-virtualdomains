@@ -34,8 +34,8 @@ static char     sccsid[] = "$Id: update_rules.c,v 1.1 2019-04-18 08:33:49+05:30 
 #include <open.h>
 #include <substdio.h>
 #include <getln.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "dblock.h"
 #include "get_indimailuidgid.h"
 #include "vupdate_rules.h"

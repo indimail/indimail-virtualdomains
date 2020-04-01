@@ -27,6 +27,7 @@
 #include <sgetopt.h>
 #include <env.h>
 #include <str.h>
+#include <mkpasswd.h>
 #endif
 #include "getpeer.h"
 #include "get_indimailuidgid.h"
@@ -49,7 +50,6 @@
 #include "deluser.h"
 #include "deldomain.h"
 #include "iclose.h"
-#include "mkpasswd3.h"
 #include "variables.h"
 #include "post_handle.h"
 
@@ -138,7 +138,7 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 			encrypt_flag = 1;
 			/*- flow through */
 		case 'P':
-			mkpasswd3(optarg, Passwd);
+			mkpasswd(optarg, Passwd, encrypt_flag);
 			break;
 		case 'D':
 			if (!stralloc_copys(DateFormat, optarg) ||

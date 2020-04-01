@@ -36,11 +36,11 @@
 #include <subfd.h>
 #include <substdio.h>
 #include <error.h>
+#include <getEnvConfig.h>
 #endif
 #ifdef HAVE_SSL
 #include "tls.h"
 #endif
-#include "getEnvConfig.h"
 #include "indimail.h"
 
 #ifndef lint

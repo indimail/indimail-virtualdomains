@@ -26,9 +26,9 @@
 #include <str.h>
 #include <strerr.h>
 #include <scan.h>
+#include <getEnvConfig.h>
 #endif
 #include "indimail.h"
-#include "getEnvConfig.h"
 #include "get_local_ip.h"
 #include "findhost.h"
 #include "create_table.h"

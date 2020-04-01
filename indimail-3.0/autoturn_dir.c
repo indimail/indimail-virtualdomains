@@ -23,8 +23,8 @@
 #include <getln.h>
 #include <substdio.h>
 #include <stralloc.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: autoturn_dir.c,v 1.1 2019-04-18 08:25:27+05:30 Cprogrammer Exp mbhangui $";

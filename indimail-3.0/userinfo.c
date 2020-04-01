@@ -42,6 +42,7 @@
 #include <substdio.h>
 #include <subfd.h>
 #include <strerr.h>
+#include <getEnvConfig.h>
 #endif
 #include "valiasinfo.h"
 #include "relay_select.h"
@@ -65,7 +66,6 @@
 #include "get_assign.h"
 #include "is_distributed_domain.h"
 #include "isvirtualdomain.h"
-#include "getEnvConfig.h"
 #include "variables.h"
 #include "userinfo.h"
 #include "common.h"

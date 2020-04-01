@@ -24,8 +24,8 @@
 #include <getln.h>
 #include <str.h>
 #include <stralloc.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: isvirtualdomain.c,v 1.2 2019-12-03 22:13:19+05:30 Cprogrammer Exp mbhangui $";

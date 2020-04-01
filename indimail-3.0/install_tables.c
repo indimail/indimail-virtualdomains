@@ -16,8 +16,8 @@
 #include <stralloc.h>
 #include <strerr.h>
 #include <env.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "create_table.h"
 #include "open_master.h"
 #include "common.h"

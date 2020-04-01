@@ -30,10 +30,10 @@ static char     sccsid[] = "$Id: dbinfo.c,v 1.3 2019-06-07 15:59:13+05:30 mbhang
 #include <fmt.h>
 #include <subfd.h>
 #include <scan.h>
+#include <getEnvConfig.h>
 #endif
 #include "LoadDbInfo.h"
 #include "iclose.h"
-#include "getEnvConfig.h"
 #include "variables.h"
 #include "common.h"
 #include "get_indimailuidgid.h"

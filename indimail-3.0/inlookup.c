@@ -39,8 +39,8 @@ static char     sccsid[] = "$Id: inlookup.c,v 1.2 2019-04-22 23:18:13+05:30 Cpro
 #include <sig.h>
 #include <env.h>
 #include <alloc.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "variables.h"
 #include "ProcessInFifo.h"
 #include "common.h"

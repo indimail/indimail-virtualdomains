@@ -25,8 +25,8 @@
 #include <scan.h>
 #include <substdio.h>
 #include <subfd.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "LoadBMF.h"
 #include "spam.h"
 #include "common.h"

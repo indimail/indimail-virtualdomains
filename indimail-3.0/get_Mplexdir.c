@@ -26,9 +26,9 @@
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <strerr.h>
+#include <getEnvConfig.h>
 #endif
 #include "r_mkdir.h"
-#include "getEnvConfig.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: get_Mplexdir.c,v 1.1 2019-04-18 08:18:02+05:30 Cprogrammer Exp mbhangui $";

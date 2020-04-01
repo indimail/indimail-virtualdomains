@@ -22,8 +22,8 @@
 #include <fmt.h>
 #include <strerr.h>
 #include <byte.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "fappend.h"
 #include "common.h"
 

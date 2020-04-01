@@ -32,6 +32,7 @@
 #include <substdio.h>
 #include <subfd.h>
 #include <qprintf.h>
+#include <getEnvConfig.h>
 #endif
 #include "get_assign.h"
 #include "common.h"
@@ -44,7 +45,6 @@
 #include "get_real_domain.h"
 #include "print_control.h"
 #include "common.h"
-#include "getEnvConfig.h"
 #include "get_local_hostid.h"
 #include "get_local_ip.h"
 #include "vsmtp_select.h"

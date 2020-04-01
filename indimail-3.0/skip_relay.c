@@ -27,8 +27,8 @@ static char     sccsid[] = "$Id: skip_relay.c,v 1.1 2019-04-18 08:36:22+05:30 Cp
 #include <getln.h>
 #include <substdio.h>
 #include <stralloc.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 
 static void
 die_nomem()

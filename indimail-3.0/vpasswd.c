@@ -22,13 +22,13 @@
 #include <strerr.h>
 #include <env.h>
 #include <str.h>
+#include <makesalt.h>
 #endif
 #include "parse_email.h"
 #include "get_real_domain.h"
 #include "vgetpasswd.h"
 #include "ipasswd.h"
 #include "iclose.h"
-#include "makesalt.h"
 #include "post_handle.h"
 #include "variables.h"
 #include "indimail.h"

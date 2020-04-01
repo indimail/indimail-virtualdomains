@@ -16,9 +16,9 @@
 #include <stralloc.h>
 #include <fmt.h>
 #include <strerr.h>
+#include <getEnvConfig.h>
 #endif
 #include "indimail.h"
-#include "getEnvConfig.h"
 #include "open_master.h"
 #include "create_table.h"
 #include "variables.h"

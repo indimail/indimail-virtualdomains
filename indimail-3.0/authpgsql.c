@@ -32,10 +32,10 @@
 #include <fmt.h>
 #include <scan.h>
 #include <str.h>
+#include <pw_comp.h>
+#include <getEnvConfig.h>
 #endif
 #include "replacestr.h"
-#include "getEnvConfig.h"
-#include "pw_comp.h"
 #include "inquery.h"
 #include "pipe_exec.h"
 #include "variables.h"

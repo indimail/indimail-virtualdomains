@@ -54,8 +54,8 @@
 #include <error.h>
 #include <fmt.h>
 #include <scan.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "dblock.h"
 #include "recalc_quota.h"
 #include "user_over_quota.h"

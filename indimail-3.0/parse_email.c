@@ -10,9 +10,9 @@
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <str.h>
+#include <getEnvConfig.h>
 #endif
 #include "indimail.h"
-#include "getEnvConfig.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: parse_email.c,v 1.1 2019-04-14 18:35:13+05:30 Cprogrammer Exp mbhangui $";

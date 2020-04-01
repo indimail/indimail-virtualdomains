@@ -31,11 +31,11 @@
 #include <scan.h>
 #include <timeoutread.h>
 #include <timeoutwrite.h>
+#include <getEnvConfig.h>
 #endif
 #include "FifoCreate.h"
 #include "common.h"
 #include "variables.h"
-#include "getEnvConfig.h"
 #include "r_mkdir.h"
 #include "get_indimailuidgid.h"
 #include "strToPw.h"

@@ -21,8 +21,8 @@
 #include <error.h>
 #include <getln.h>
 #include <strerr.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: get_local_hostid.c,v 1.2 2019-07-04 10:04:40+05:30 Cprogrammer Exp mbhangui $";

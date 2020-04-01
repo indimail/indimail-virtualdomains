@@ -37,8 +37,8 @@
 #include <str.h>
 #include <substdio.h>
 #include <error.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: get_local_ip.c,v 1.2 2019-07-04 10:05:36+05:30 Cprogrammer Exp mbhangui $";

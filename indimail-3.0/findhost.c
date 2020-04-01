@@ -72,9 +72,9 @@ die_nomem()
 #include <scan.h>
 #include <fmt.h>
 #include <env.h>
+#include <getEnvConfig.h>
 #endif
 #include "variables.h"
-#include "getEnvConfig.h"
 #include "set_mysql_options.h"
 #include "findhost.h"
 

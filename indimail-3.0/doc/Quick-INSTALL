@@ -50,7 +50,7 @@
     or
    # systemctl start indimail
     or
-   # /etc/init.d/indimail start
+   # /etc/init.d/svscan start
    # exit
 
    x--------------------------------------------------------------------------------------x

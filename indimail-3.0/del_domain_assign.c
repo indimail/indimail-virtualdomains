@@ -18,8 +18,8 @@
 #include <stralloc.h>
 #include <fmt.h>
 #include <strerr.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "remove_line.h"
 #include "update_newu.h"
 

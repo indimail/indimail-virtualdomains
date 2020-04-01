@@ -39,6 +39,7 @@
 #include <getln.h>
 #include <substdio.h>
 #include <sgetopt.h>
+#include <makesalt.h>
 #endif
 #include "iopen.h"
 #include "iclose.h"
@@ -49,7 +50,6 @@
 #include "SqlServer.h"
 #include "vlimits.h"
 #include "parse_email.h"
-#include "makesalt.h"
 #include "vgetpasswd.h"
 #include "check_group.h"
 #include "sql_getip.h"

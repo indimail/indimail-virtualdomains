@@ -8,7 +8,7 @@
 #include "config.h"
 #endif
 #include <mysql.h>
-#include "getEnvConfig.h"
+#include <getEnvConfig.h>
 #include "variables.h"
 
 #ifndef	lint

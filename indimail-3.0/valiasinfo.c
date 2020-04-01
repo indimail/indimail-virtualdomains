@@ -31,8 +31,8 @@
 #include <open.h>
 #include <getln.h>
 #include <substdio.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "get_assign.h"
 #include "sql_getpw.h"
 #include "valias_select.h"

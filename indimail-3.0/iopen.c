@@ -49,10 +49,10 @@
 #include <scan.h>
 #include <fmt.h>
 #include <str.h>
+#include <getEnvConfig.h>
 #endif
 #include "iclose.h"
 #include "islocalif.h"
-#include "getEnvConfig.h"
 #include "variables.h"
 #include "set_mysql_options.h"
 

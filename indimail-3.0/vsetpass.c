@@ -22,17 +22,17 @@
 #include <str.h>
 #include <env.h>
 #include <error.h>
+#include <pw_comp.h>
+#include <mkpasswd.h>
+#include <getEnvConfig.h>
 #endif
 #include "sqlOpen_user.h"
 #include "iopen.h"
 #include "pipe_exec.h"
 #include "variables.h"
-#include "getEnvConfig.h"
 #include "sql_getpw.h"
 #include "inquery.h"
 #include "iclose.h"
-#include "pw_comp.h"
-#include "mkpasswd3.h"
 #include "check_quota.h"
 #include "sql_passwd.h"
 #include "vset_lastauth.h"
@@ -221,7 +221,7 @@ main(int argc, char **argv)
 		print_error("exec");
 		_exit (111);
 	}
-	mkpasswd3(new_pass, &Crypted);
+	mkpasswd(new_pass, &Crypted, encrypt_flag);
 	if (env_get("DEBUG")) {
 		strerr_warn11("vsetpass: login [", login, "] old_pass [",
 				old_pass, "] new_pass [", new_pass, "] response [", response, "] pw_passwd [", Crypted.s, "]\n", 0);

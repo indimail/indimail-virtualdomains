@@ -47,10 +47,10 @@ static char     sccsid[] = "$Id: vfilter.c,v 1.3 2019-06-07 15:52:44+05:30 mbhan
 #include <qprintf.h>
 #include <error.h>
 #include <sgetopt.h>
+#include <getEnvConfig.h>
 #endif
 #include "common.h"
 #include "MakeArgs.h"
-#include "getEnvConfig.h"
 #include "get_real_domain.h"
 #include "get_message_size.h"
 #include "remove_quotes.h"
@@ -64,7 +64,7 @@ static char     sccsid[] = "$Id: vfilter.c,v 1.3 2019-06-07 15:52:44+05:30 mbhan
 #include "evaluate.h"
 #include "parse_email.h"
 #include "lowerit.h"
-#include "getEnvConfig.h"
+#include <getEnvConfig.h>
 #include "vfilter_header.h"
 #include "vfilter_select.h"
 #include "vfilter_display.h"

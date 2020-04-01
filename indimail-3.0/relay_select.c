@@ -25,10 +25,10 @@ static char     sccsid[] = "$Id: relay_select.c,v 1.1 2019-04-14 23:07:44+05:30 
 #include <str.h>
 #include <case.h>
 #include <scan.h>
+#include <getEnvConfig.h>
 #endif
 #include "iopen.h"
 #include "create_table.h"
-#include "getEnvConfig.h"
 #include "indimail.h"
 
 static void

@@ -23,9 +23,9 @@
 #include <stralloc.h>
 #include <strerr.h>
 #include <str.h>
+#include <getEnvConfig.h>
 #endif
 #include "indimail.h"
-#include "getEnvConfig.h"
 #include "r_mkdir.h"
 
 #ifndef	lint

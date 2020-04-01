@@ -21,8 +21,8 @@ static char     sccsid[] = "$Id: dbinfoDel.c,v 1.1 2019-04-12 20:42:09+05:30 Cpr
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <strerr.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "create_table.h"
 #include "open_master.h"
 #include "common.h"

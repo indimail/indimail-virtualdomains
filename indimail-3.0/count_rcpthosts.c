@@ -20,8 +20,8 @@
 #include <getln.h>
 #include <error.h>
 #include <strerr.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "variables.h"
 
 #ifndef	lint

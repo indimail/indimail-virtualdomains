@@ -36,9 +36,9 @@
 #include <str.h>
 #include <strerr.h>
 #include <env.h>
+#include <getEnvConfig.h>
 #endif
 #include "indimail.h"
-#include "getEnvConfig.h"
 #include "vmake_maildir.h"
 #include "get_indimailuidgid.h"
 #include "vget_lastauth.h"

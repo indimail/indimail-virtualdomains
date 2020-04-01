@@ -28,9 +28,9 @@
 #include <strerr.h>
 #include <substdio.h>
 #include <getln.h>
+#include <getEnvConfig.h>
 #endif
 #include "get_assign.h"
-#include "getEnvConfig.h"
 #include "is_distributed_domain.h"
 #include "sql_get_realdomain.h"
 #include "variables.h"

@@ -59,6 +59,7 @@
 #include <env.h>
 #include <timeoutread.h>
 #include <timeoutwrite.h>
+#include <getEnvConfig.h>
 #endif
 #include "in_bsearch.h"
 #include "common.h"
@@ -69,7 +70,6 @@
 #ifdef ENABLE_ENTERPRISE
 #include "count_table.h"
 #endif
-#include "getEnvConfig.h"
 #include "get_indimailuidgid.h"
 #include "r_mkdir.h"
 #include "get_local_ip.h"

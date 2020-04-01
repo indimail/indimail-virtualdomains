@@ -26,6 +26,7 @@
 #include <substdio.h>
 #include <subfd.h>
 #include <getln.h>
+#include <pw_comp.h>
 #endif
 #include "parse_email.h"
 #include "get_assign.h"
@@ -42,7 +43,6 @@
 #include "Login_Tasks.h"
 #include "parse_quota.h"
 #include "pipe_exec.h"
-#include "pw_comp.h"
 #include "sql_getpw.h"
 
 #ifndef lint

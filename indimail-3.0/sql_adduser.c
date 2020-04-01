@@ -20,10 +20,10 @@
 #include <strerr.h>
 #include <str.h>
 #include <fmt.h>
+#include <getEnvConfig.h>
 #endif
 #include "create_table.h"
 #include "iopen.h"
-#include "getEnvConfig.h"
 #include "get_assign.h"
 #include "vset_lastauth.h"
 #include "munch_domain.h"

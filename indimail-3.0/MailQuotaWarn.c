@@ -32,8 +32,8 @@
 #include <fmt.h>
 #include <str.h>
 #include <scan.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "parse_quota.h"
 #include "recalc_quota.h"
 #include "runcmmd.h"

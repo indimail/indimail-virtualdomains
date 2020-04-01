@@ -34,11 +34,11 @@
 #include <byte.h>
 #include <error.h>
 #include <subfd.h>
+#include <getEnvConfig.h>
 #endif
 #include "spam.h"
 #include "wildmat.h"
 #include "lowerit.h"
-#include "getEnvConfig.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: spam.c,v 1.1 2019-04-18 08:37:53+05:30 Cprogrammer Exp mbhangui $";

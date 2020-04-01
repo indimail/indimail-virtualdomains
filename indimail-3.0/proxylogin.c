@@ -37,15 +37,15 @@ static char     sccsid[] = "$Id: proxylogin.c,v 1.3 2019-06-07 16:02:39+05:30 mb
 #include <subfd.h>
 #include <getln.h>
 #include <open.h>
+#include <mkpasswd.h>
+#include <pw_comp.h>
+#include <getEnvConfig.h>
 #endif
-#include "mkpasswd3.h"
 #include "runcmmd.h"
-#include "getEnvConfig.h"
 #include "auth_admin.h"
 #include "adminCmmd.h"
 #include "inquery.h"
 #include "strmsg.h"
-#include "pw_comp.h"
 #include "remove_quotes.h"
 #include "variables.h"
 #include "islocalif.h"
@@ -88,7 +88,7 @@ autoAddUser(char *email, char *pass, char *service)
 			die_nomem();
 		encrypted.len--;
 	} else
-		mkpasswd3(pass, &encrypted);
+		mkpasswd(pass, &encrypted, encrypt_flag);
 	getEnvConfigStr(&ptr, "ADDUSERCMD", PREFIX"/bin/autoadduser");
 	if (!access(ptr, X_OK)) {
 		if (!stralloc_copys(&cmdbuf, ptr) ||

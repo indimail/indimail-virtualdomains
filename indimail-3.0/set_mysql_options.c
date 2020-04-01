@@ -25,7 +25,7 @@
 #include <env.h>
 #include <stralloc.h>
 #include <strerr.h>
-#include "getEnvConfig.h"
+#include <getEnvConfig.h>
 
 #ifndef	lint
 static char     sccsid[] = "$Id: set_mysql_options.c,v 1.4 2019-07-04 10:08:13+05:30 Cprogrammer Exp mbhangui $";

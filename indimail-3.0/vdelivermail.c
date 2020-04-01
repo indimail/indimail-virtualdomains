@@ -47,6 +47,7 @@
 #include <fmt.h>
 #include <byte.h>
 #include <open.h>
+#include <getEnvConfig.h>
 #endif
 #include "iclose.h"
 #include "lowerit.h"
@@ -70,7 +71,6 @@
 #include "sql_gethostid.h"
 #include "vset_lastauth.h"
 #include "vset_lastdeliver.h"
-#include "getEnvConfig.h"
 #include "valias_select.h"
 #include "wildmat.h"
 #include "indimail.h"

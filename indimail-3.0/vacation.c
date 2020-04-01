@@ -33,12 +33,12 @@
 #include <getln.h>
 #include <open.h>
 #include <error.h>
+#include <getEnvConfig.h>
 #endif
 #include "add_vacation.h"
 #include "parse_email.h"
 #include "get_real_domain.h"
 #include "sql_getpw.h"
-#include "getEnvConfig.h"
 #include "iclose.h"
 #include "case.h"
 #include "variables.h"

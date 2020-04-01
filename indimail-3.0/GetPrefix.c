@@ -17,8 +17,8 @@
 #include <stralloc.h>
 #include <strerr.h>
 #include <str.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "pathToFilesystem.h"
 
 #ifndef	lint

@@ -31,8 +31,8 @@ static char     sccsid[] = "$Id: qmail_remote.c,v 1.2 2019-04-22 23:18:40+05:30 
 #include <substdio.h>
 #include <subfd.h>
 #include <fmt.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "deliver_mail.h"
 #include "get_message_size.h"
 

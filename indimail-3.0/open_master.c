@@ -23,13 +23,13 @@ static char     sccsid[] = "$Id: open_master.c,v 1.1 2019-04-14 18:34:39+05:30 C
 #include <stralloc.h>
 #include <strerr.h>
 #include <env.h>
+#include <getEnvConfig.h>
 #endif
 #include "indimail.h"
 #include "open.h"
 #include "error.h"
 #include "substdio.h"
 #include "getln.h"
-#include "getEnvConfig.h"
 #include "findhost.h"
 
 struct substdio ssin;

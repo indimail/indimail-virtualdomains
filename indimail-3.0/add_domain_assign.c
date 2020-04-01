@@ -18,8 +18,8 @@
 #include <fmt.h>
 #include <strerr.h>
 #include <open.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "get_assign.h"
 #include "get_indimailuidgid.h"
 #include "update_newu.h"

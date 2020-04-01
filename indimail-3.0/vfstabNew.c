@@ -32,9 +32,9 @@
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <strerr.h>
+#include <getEnvConfig.h>
 #endif
 #include "variables.h"
-#include "getEnvConfig.h"
 #include "get_local_ip.h"
 #include "pathToFilesystem.h"
 #include "vfstab.h"

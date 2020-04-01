@@ -26,11 +26,11 @@ static char     sccsid[] = "$Id: open_smtp_relay.c,v 1.1 2019-04-18 16:05:55+05:
 #include <strerr.h>
 #include <fmt.h>
 #include <env.h>
+#include <getEnvConfig.h>
 #endif
 #include "iopen.h"
 #include "get_real_domain.h"
 #include "skip_relay.h"
-#include "getEnvConfig.h"
 #include "create_table.h"
 #include "variables.h"
 #include "indimail.h"

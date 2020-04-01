@@ -44,12 +44,12 @@
 #include <error.h>
 #include <substdio.h>
 #include <subfd.h>
+#include <getEnvConfig.h>
 #endif
 #include "indimail.h"
 #include "tcpopen.h"
 #include "isnum.h"
 #include "sockwrite.h"
-#include "getEnvConfig.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: monkey.c,v 1.2 2019-04-22 23:14:13+05:30 Cprogrammer Exp mbhangui $";

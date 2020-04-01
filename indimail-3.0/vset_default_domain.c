@@ -14,9 +14,9 @@
 #include <stralloc.h>
 #include <strerr.h>
 #include <env.h>
+#include <getEnvConfig.h>
 #endif
 #include "ip_map.h"
-#include "getEnvConfig.h"
 #include "host_in_locals.h"
 
 #ifndef	lint

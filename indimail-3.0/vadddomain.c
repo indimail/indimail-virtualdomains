@@ -47,13 +47,13 @@
 #include <fmt.h>
 #include <env.h>
 #include <str.h>
+#include <getEnvConfig.h>
 #endif
 #include "variables.h"
 #include "valias_insert.h"
 #include "isvalid_domain.h"
 #include "vgetpasswd.h"
 #include "check_group.h"
-#include "getEnvConfig.h"
 #include "get_assign.h"
 #include "r_mkdir.h"
 #include "iclose.h"

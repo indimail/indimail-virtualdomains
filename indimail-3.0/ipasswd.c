@@ -16,13 +16,13 @@
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <strerr.h>
+#include <mkpasswd.h>
 #endif
 #include "lowerit.h"
 #include "iopen.h"
 #include "iclose.h"
 #include "sqlOpen_user.h"
 #include "sql_getpw.h"
-#include "mkpasswd3.h"
 #include "check_quota.h"
 #include "vset_lastauth.h"
 #include "getpeer.h"
@@ -81,7 +81,7 @@ ipasswd(char *username, char *domain, char *password, int apop)
 		iclose();
 		return (i);
 	} else {
-		mkpasswd3(password, &Crypted);
+		mkpasswd(password, &Crypted, encrypt_flag);
 		if ((i = sql_passwd(username, domain, Crypted.s, apop)) == 1) {
 			if (!stralloc_copys(&Dir, pw->pw_dir) ||
 					!stralloc_catb(&Dir, "/Maildir", 8) ||

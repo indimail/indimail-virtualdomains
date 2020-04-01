@@ -35,10 +35,10 @@
 #include <byte.h>
 #include <fmt.h>
 #include <env.h>
+#include <getEnvConfig.h>
 #endif
 #include "dblock.h"
 #include "MakeArgs.h"
-#include "getEnvConfig.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: ismaildup.c,v 1.1 2019-04-18 08:21:46+05:30 Cprogrammer Exp mbhangui $";

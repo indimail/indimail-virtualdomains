@@ -64,11 +64,11 @@
 #include <strerr.h>
 #include <scan.h>
 #include <env.h>
+#include <getEnvConfig.h>
 #endif
 #include "create_table.h"
 #include "get_local_ip.h"
 #include "variables.h"
-#include "getEnvConfig.h"
 #include "open_master.h"
 #include "get_indimailuidgid.h"
 #include "is_alias_domain.h"

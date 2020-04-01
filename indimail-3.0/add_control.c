@@ -14,8 +14,8 @@
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <strerr.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "count_rcpthosts.h"
 #include "compile_morercpthosts.h"
 #include "update_file.h"

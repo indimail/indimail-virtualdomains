@@ -31,11 +31,11 @@
 #include <scan.h>
 #include <str.h>
 #include <fmt.h>
+#include <getEnvConfig.h>
 #endif
 #include "iopen.h"
 #include "set_mysql_options.h"
 #include "create_table.h"
-#include "getEnvConfig.h"
 #include "CopyEmailFile.h"
 #include "variables.h"
 

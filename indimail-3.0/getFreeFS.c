@@ -21,13 +21,13 @@
 #include <str.h>
 #include <open.h>
 #include <error.h>
+#include <getEnvConfig.h>
 #endif
 #include "get_local_hostid.h"
 #include "pathToFilesystem.h"
 #include "vfstab.h"
 #include "dblock.h"
 #include "indimail.h"
-#include "getEnvConfig.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: getFreeFS.c,v 1.1 2019-04-18 08:25:28+05:30 Cprogrammer Exp mbhangui $";

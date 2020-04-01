@@ -29,8 +29,8 @@ static char     sccsid[] = "$Id: clear_open_smtp.c,v 1.3 2019-06-30 10:13:43+05:
 #include <stralloc.h>
 #include <strerr.h>
 #include <fmt.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "variables.h"
 #include "iopen.h"
 #include "sql_init.h"

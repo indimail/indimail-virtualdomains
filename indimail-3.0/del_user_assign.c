@@ -14,10 +14,10 @@
 #include <stralloc.h>
 #include <strerr.h>
 #include <fmt.h>
+#include <getEnvConfig.h>
 #endif
 #include "get_indimailuidgid.h"
 #include "variables.h"
-#include "getEnvConfig.h"
 #include "remove_line.h"
 #include "update_newu.h"
 

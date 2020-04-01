@@ -51,8 +51,8 @@
 #include <fmt.h>
 #include <str.h>
 #include <strerr.h>
+#include <getEnvConfig.h>
 #include "LoadDbInfo.h"
-#include "getEnvConfig.h"
 #include "set_mysql_options.h"
 #include "islocalif.h"
 #include "variables.h"

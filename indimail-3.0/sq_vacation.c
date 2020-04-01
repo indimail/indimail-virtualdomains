@@ -35,6 +35,8 @@
 #include <getln.h>
 #include <subfd.h>
 #include <str.h>
+#include <pw_comp.h>
+#include <getEnvConfig.h>
 #endif
 #include "indimail.h"
 #include "variables.h"
@@ -42,10 +44,8 @@
 #include "iclose.h"
 #include "sqlOpen_user.h"
 #include "inquery.h"
-#include "pw_comp.h"
 #include "fappend.h"
 #include "get_assign.h"
-#include "getEnvConfig.h"
 #include "get_real_domain.h"
 #include "sql_getpw.h"
 

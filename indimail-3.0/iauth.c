@@ -69,8 +69,8 @@
 #include <byte.h>
 #include <fmt.h>
 #include <scan.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "sqlOpen_user.h"
 #include "iopen.h"
 #include "iclose.h"

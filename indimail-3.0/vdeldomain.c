@@ -32,8 +32,8 @@
 #include <str.h>
 #include <env.h>
 #include <error.h>
+#include <getEnvConfig.h>
 #endif
-#include "getEnvConfig.h"
 #include "get_indimailuidgid.h"
 #include "variables.h"
 #include "iclose.h"

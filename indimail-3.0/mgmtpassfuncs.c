@@ -28,17 +28,17 @@ static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.2 2019-04-22 23:14:00+05:30
 #include <scan.h>
 #include <alloc.h>
 #include <str.h>
+#include <mkpasswd.h>
+#include <makesalt.h>
+#include <in_crypt.h>
+#include <pw_comp.h>
 #endif
 #include "mgmtpassfuncs.h"
 #include "passwd_policy.h"
-#include "pw_comp.h"
 #include "findhost.h"
 #include "common.h"
-#include "makesalt.h"
-#include "in_crypt.h"
 #include "create_table.h"
 #include "open_master.h"
-#include "mkpasswd3.h"
 #include "variables.h"
 #include "indimail.h"
 
@@ -495,7 +495,7 @@ mgmtsetpass(char *username, char *pass, uid_t uid, gid_t gid, time_t lastaccess,
 			die_nomem();
 		crypted.len--;
 	} else
-		mkpasswd3(pass, &crypted);
+		mkpasswd(pass, &crypted, encrypt_flag);
 	cur_time = time(0);
 	tmptr = localtime(&cur_time);
 	if (!stralloc_copyb(&SqlBuf, "update low_priority mgmtaccess set pass=\"", 41) ||
