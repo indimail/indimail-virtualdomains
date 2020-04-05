@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.22 2020-04-01 20:44:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.23 2020-04-05 23:19:57+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -273,7 +273,7 @@ Requires: coreutils grep /bin/sh glibc openssl
 Requires: /usr/bin/hostname
 Requires: pam mrtg
 
-%if 0%{?suse_version}
+%if 0%{?sles_version}
 Requires: mysql-community-server
 %else
 Requires: mysql-server
