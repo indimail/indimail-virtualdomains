@@ -150,11 +150,23 @@ Non SSL Version Install/Configuration (look below for SSL config)
    $config['default_host'] = 'ssl://indimail.org';
    $config['default_port'] = 993;
    $config['imap_auth_type'] = 'LOGIN';
+   $config['imap_conn_options'] = array(
+     'ssl'         => array(
+        'verify_peer'       => false,
+        'verify_peer_name'  => false,
+      ),
+   );
    $config['smtp_server'] = 'localhost';
    $config['smtp_port'] = 587;
    $config['smtp_user'] = '%u';
    $config['smtp_pass'] = '%p';
-   $config['smtp_auth_type'] = 'LOGIN';
+   $config['smtp_auth_type'] = 'PLAIN';
+   $config['smtp_conn_options'] = array(
+     'ssl'         => array(
+       'verify_peer'       => false,
+       'verify_peer_name'  => false,
+     ),
+   );
    $config['force_https'] = true;
    $config['support_url'] = 'http://indimail.sourceforge.net';
    $config['product_name'] = 'IndiMail Webmail';
@@ -172,24 +184,7 @@ Non SSL Version Install/Configuration (look below for SSL config)
    $ sudo chown root:apache /etc/roundcube/config.inc.php
    $ sudo chmod 640 /etc/roundcube/config.inc.php
 
-4) Edit the lines in /etc/roundcube/defaults.inc.php i.e.
-
-   $config['imap_conn_options'] = array(
-     'ssl'         => array(
-        'verify_peer'       => false,
-        'verify_peer_name'  => false,
-      ),
-   );
-   //$config['imap_conn_options'] = null;
-
-   $config['smtp_conn_options'] = array(
-     'ssl'         => array(
-       'verify_peer'       => false,
-       'verify_peer_name'  => false,
-     ),
-   );
-   //$config['smtp_conn_options'] = null;
-
+4) Check permissions of /etc/roundcube/defaults.inc.php i.e.
    This file should have read permission for apache group
    $ sudo chown root:apache /etc/roundcube/defaults.inc.php
    $ sudo chmod 640 /etc/roundcube/defaults.inc.php
