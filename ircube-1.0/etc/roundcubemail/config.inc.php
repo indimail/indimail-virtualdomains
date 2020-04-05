@@ -9,7 +9,7 @@
  | from defaults.inc.php to this file to override the defaults.          |
  |                                                                       |
  | This file is part of the Roundcube Webmail client                     |
- | Copyright (C) 2005-2013, The Roundcube Dev Team                       |
+ | Copyright (C) The Roundcube Dev Team                                  |
  |                                                                       |
  | Licensed under the GNU General Public License version 3 or            |
  | any later version with exceptions for skins & plugins.                |
@@ -30,7 +30,8 @@ $config['db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
 // The IMAP host chosen to perform the log-in.
 // Leave blank to show a textbox at login, give a list of hosts
 // to display a pulldown menu or set one host as string.
-// To use SSL/TLS connection, enter hostname with prefix ssl:// or tls://
+// Enter hostname with prefix ssl:// to use Implicit TLS, or use
+// prefix tls:// to use STARTTLS.
 // Supported replacement variables:
 // %n - hostname ($_SERVER['SERVER_NAME'])
 // %t - hostname without the first part
@@ -47,9 +48,19 @@ $config['default_port'] = 993;
 // By default the most secure method (from supported) will be selected.
 $config['imap_auth_type'] = 'LOGIN';
 
+// IMAP socket context options
+// See http://php.net/manual/en/context.ssl.php
+// The example below enables server certificate validation
+$config['imap_conn_options'] = array(
+ 'ssl'         => array(
+    'verify_peer'       => false,
+    'verify_peer_name'  => false,
+ ),
+);
+
 // SMTP server host (for sending mails).
-// Enter hostname with prefix tls:// to use STARTTLS, or use
-// prefix ssl:// to use the deprecated SSL over SMTP (aka SMTPS)
+// Enter hostname with prefix ssl:// to use Implicit TLS, or use
+// prefix tls:// to use STARTTLS.
 // Supported replacement variables:
 // %h - user's IMAP hostname
 // %n - hostname ($_SERVER['SERVER_NAME'])
@@ -57,10 +68,9 @@ $config['imap_auth_type'] = 'LOGIN';
 // %d - domain (http hostname $_SERVER['HTTP_HOST'] without the first part)
 // %z - IMAP domain (IMAP hostname without the first part)
 // For example %n = mail.domain.tld, %t = domain.tld
-$config['smtp_server'] = 'localhost';
+$config['smtp_server'] = 'tls://localhost';
 
-// SMTP port (default is 25; use 587 for STARTTLS or 465 for the
-// deprecated SSL over SMTP (aka SMTPS))
+// SMTP port. Use 25 for cleartext, 465 for Implicit TLS, or 587 for STARTTLS (default)
 $config['smtp_port'] = 587;
 
 // SMTP username (if required) if you use %u as the username Roundcube
@@ -74,6 +84,15 @@ $config['smtp_pass'] = '%p';
 // SMTP AUTH type (DIGEST-MD5, CRAM-MD5, LOGIN, PLAIN or empty to use
 // best server supported one)
 $config['smtp_auth_type'] = 'PLAIN';
+
+// SMTP socket context options
+// See http://php.net/manual/en/context.ssl.php
+$config['smtp_conn_options'] = array(
+  'ssl'         => array(
+    'verify_peer'       => false,
+    'verify_peer_name'  => false,
+  ),
+);
 
 // Enforce connections over https
 // With this option enabled, all non-secure connections will be redirected.
