@@ -1,5 +1,8 @@
 /*
  * $Log: vcalias.c,v $
+ * Revision 1.4  2020-04-09 18:32:08+05:30  Cprogrammer
+ * close MySQL on exit and return on read error
+ *
  * Revision 1.3  2019-07-04 10:14:26+05:30  Cprogrammer
  * fixed incorrect initialization by replacing stralloc_cats() with stralloc_copys()
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcalias.c,v 1.3 2019-07-04 10:14:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcalias.c,v 1.4 2020-04-09 18:32:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #if defined(VALIAS)
@@ -120,6 +123,7 @@ main(int argc, char **argv)
 		AliasName= dp->d_name + 7;
 		if ((fd = open_read(dp->d_name)) == -1) {
 			strerr_warn3("vcalias: open: ", dp->d_name, ": ", &strerr_sys);
+			iclose();
 			return (-1);
 		}
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
@@ -127,6 +131,8 @@ main(int argc, char **argv)
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("vcalias: read: ", dp->d_name, ": ", &strerr_sys);
 				close(fd);
+				iclose();
+				return (-1);
 			}
 			if (!match && line.len == 0)
 				break;
@@ -142,8 +148,10 @@ main(int argc, char **argv)
 				if (!stralloc_copys(&tmp, dp->d_name + 7) ||
 						!stralloc_append(&tmp, "@") ||
 						!stralloc_cats(&tmp, Domain) ||
-						!stralloc_0(&tmp))
+						!stralloc_0(&tmp)) {
+					iclose();
 					die_nomem();
+				}
 				qprintf(subfdoutsmall, "Converting ", "%s");
 			} else
 				qprintf(subfdoutsmall, "           ", "%s");
@@ -169,6 +177,7 @@ main(int argc, char **argv)
 				if (in_mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
 					if (create_table(ON_LOCAL, "valias", VALIAS_TABLE_LAYOUT)) {
 						close(fd);
+						iclose();
 						return (1);
 					}
 					if (!mysql_query(&mysql[1], SqlBuf.s))
