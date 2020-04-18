@@ -223,7 +223,7 @@ the above information then starting from scratch.
     privileges, just clear the gid flags for that user with 
     'vmoduser -x <user@domain>'
 
- 9. To log into the interface you will first need to
+9.  To log into the interface you will first need to
     create a domain using the vadddomain program.
 
     sudo /var/indimail/bin/vadddomain "your new domain name" "pick a postmaster password"
@@ -241,6 +241,46 @@ the above information then starting from scratch.
     returnhttp and returntext (both must be used) = create a link to 
     returnhttp on all iwebadmin pages with returntext for its label.
 
+11. For using nginx, you can create /etc/nginx/default.d/iwebadmin.conf
+
+ a) Install nginx, fcgiwrap
+    # install fcgiwrap nginx
+
+ b) create iwebadmin.conf
+    location /iwebadmin/ {
+        root /var/www/;
+        # Fastcgi socket
+        fastcgi_pass unix:/run/fcgiwrap/fcgiwrap-nginx.sock;
+        # Fastcgi parameters, include the standard ones
+        include fastcgi_params;
+ 
+        # Adjust non standard parameters (SCRIPT_FILENAME)
+        fastcgi_split_path_info (^/cgi-bin/iwebadmin[^/]*)(.*)$;
+        fastcgi_param SCRIPT_FILENAME /var/www/cgi-bin/iwebadmin;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param HTTPS on;
+    }
+
+    location /cgi-bin/iwebadmin/ {
+        root /var/www/;
+        # Fastcgi socket
+        fastcgi_pass unix:/run/fcgiwrap/fcgiwrap-nginx.sock;
+        # Fastcgi parameters, include the standard ones
+        include fastcgi_params;
+
+        # Adjust non standard parameters (SCRIPT_FILENAME)
+        fastcgi_split_path_info (^/cgi-bin/iwebadmin[^/]*)(.*)$;
+        fastcgi_param SCRIPT_FILENAME /var/www/cgi-bin/iwebadmin;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param HTTPS on;
+    }
+
+ c) start nginx
+    # systemctl enable fcgiwrap@nginx.socket
+    # systemctl start  fcgiwrap@nginx.socket
+    # systemctl start nginx
+
+# apt-get install nginx fcgiwrap libbg1-dev ssl-cert
 
 11. Enjoy
 
