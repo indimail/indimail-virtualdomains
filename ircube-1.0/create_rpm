@@ -3,13 +3,14 @@ set -x
 rcsflag=0
 make clean
 make distclean
+/bin/rm -r autom4te.cache
 ver=1.0
 cd ..
 if [ -f $HOME/.rpmmacros ] ; then
-	topdir=`grep ^%_topdir $HOME/.rpmmacros|awk |awk '{print $2}'`
+	topdir=`grep ^%_topdir $HOME/.rpmmacros|awk '{print $2}'`
 else
 	topdir=$HOME/rpmbuild
 fi
 tar cf - ircube-$ver |gzip -c > $topdir/SOURCES/ircube-$ver.tar.gz
 cd ircube-$ver
-rpmbuild -bb ircube.spec
+rpmbuild -bb --clean ircube.spec
