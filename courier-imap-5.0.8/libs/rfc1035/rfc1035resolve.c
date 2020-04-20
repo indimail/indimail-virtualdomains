@@ -15,11 +15,6 @@
 #include	<string.h>
 #include	<idna.h>
 
-struct querybuf {
-	char qbuf[512];
-	unsigned qbuflen;
-	} ;
-
 static void putqbuf(const char *p, unsigned l, void *q)
 {
 struct querybuf *qp=(struct querybuf *)q;
@@ -88,6 +83,24 @@ struct rfc1035_reply
 }
 
 static struct rfc1035_reply
+*rfc1035_resolve_multiple_attempt(struct rfc1035_res *res,
+				  int opcode,
+				  struct querybuf *qbuf,
+				  int udpfd,
+				  int af,
+				  const RFC1035_ADDR *sin,
+				  unsigned current_timeout);
+
+static struct rfc1035_reply
+*rfc1035_resolve_multiple_attempt_tcp(struct rfc1035_res *res,
+				      int opcode,
+				      struct querybuf *qbuf,
+				      int af,
+				      const RFC1035_ADDR *sin,
+				      int isaxfr,
+				      unsigned current_timeout);
+
+static struct rfc1035_reply
 *rfc1035_resolve_multiple_idna(struct rfc1035_res *res,
 			       int opcode,
 			       const struct rfc1035_query *queries,
@@ -101,6 +114,10 @@ static struct rfc1035_reply
 	unsigned current_timeout, timeout_backoff;
 	unsigned nbackoff, backoff_num;
 	int	af;
+	unsigned i;
+	int	isaxfr=0;
+
+	struct	rfc1035_reply *rfcreply=0;
 	static const char fakereply[]={0, 0, 0, RFC1035_RCODE_SERVFAIL,
 				       0, 0,
 				       0, 0,
@@ -121,6 +138,16 @@ static struct rfc1035_reply
 		return (0);
 	}
 
+	for (i=0; i<nqueries; i++)
+		if (queries[i].qtype == RFC1035_TYPE_AXFR)
+		{
+			isaxfr=1;
+			break;
+		}
+
+	if (isaxfr && nqueries > 1)
+		return rfc1035_replyparse(fakereply, sizeof(fakereply));
+
 	/* Prepare the UDP socket */
 
 	if ((udpfd=rfc1035_open_udp(&af)) < 0)	return (0);
@@ -133,33 +160,71 @@ static struct rfc1035_reply
 	if (!nbackoff)	nbackoff=RFC1035_DEFAULT_MAXIMUM_BACKOFF;
 
 	timeout_backoff=current_timeout;
-    for (backoff_num=0; backoff_num < nbackoff; backoff_num++,
-					current_timeout *= timeout_backoff)
 
-
-	for ( attempt=0; attempt < nscount; ++attempt)
+	for (backoff_num=0; backoff_num < nbackoff; backoff_num++,
+		     current_timeout *= timeout_backoff)
 	{
+		for ( attempt=0; attempt < nscount; ++attempt)
+		{
+			const RFC1035_ADDR *sin=
+				&ns[(res->rfc1035_good_ns+attempt) % nscount];
+
+			rfcreply=isaxfr ?
+				rfc1035_resolve_multiple_attempt_tcp
+				(res,
+				 opcode,
+				 &qbuf,
+				 af,
+				 sin,
+				 1,
+				 current_timeout)
+				: rfc1035_resolve_multiple_attempt
+				(res,
+				 opcode,
+				 &qbuf,
+				 udpfd,
+				 af,
+				 sin,
+				 current_timeout);
+
+			if (rfcreply)
+			{
+				res->rfc1035_good_ns=
+					(res->rfc1035_good_ns + attempt) %
+					nscount;
+				break;
+			}
+		}
+
+		if (rfcreply)
+			break;
+	}
+
+	sox_close(udpfd);
+
+	if (!rfcreply)
+		rfcreply=rfc1035_replyparse(fakereply, sizeof(fakereply));
+
+	return (rfcreply);
+}
+
+static struct rfc1035_reply
+*rfc1035_resolve_multiple_attempt(struct rfc1035_res *res,
+				  int opcode,
+				  struct querybuf *qbuf,
+				  int udpfd,
+				  int af,
+				  const RFC1035_ADDR *sin,
+				  unsigned current_timeout)
+{
 	int	nbytes;
 	char	*reply;
 	struct	rfc1035_reply *rfcreply=0;
 
-	const RFC1035_ADDR *sin=&ns[(res->rfc1035_good_ns+attempt) % nscount];
 	int	sin_len=sizeof(*sin);
 
-	int	dotcp=0, isaxfr=0;
-	unsigned i;
+	int	dotcp=0;
 
-		for (i=0; i<nqueries; i++)
-			if (queries[i].qtype == RFC1035_TYPE_AXFR)
-			{
-				dotcp=1;
-				isaxfr=1;
-				break;
-			}
-
-		if (isaxfr && nqueries > 1)
-			return (rfc1035_replyparse(fakereply,
-				sizeof(fakereply)));
 
 		if (!dotcp)
 		{
@@ -171,15 +236,12 @@ static struct rfc1035_reply
 			if (rfc1035_mkaddress(af, &addrbuf,
 				sin, htons(53),
 				&addrptr, &addrptrlen))
-				continue;
+				return NULL;
 
 			if ((reply=rfc1035_query_udp(res, udpfd, addrptr,
-				addrptrlen, qbuf.qbuf, qbuf.qbuflen, &nbytes,
+				addrptrlen, qbuf->qbuf, qbuf->qbuflen, &nbytes,
 					current_timeout)) == 0)
-				continue;
-
-			res->rfc1035_good_ns= (res->rfc1035_good_ns + attempt) %
-					nscount;
+				return NULL;
 
 		/* Parse the reply */
 
@@ -187,8 +249,7 @@ static struct rfc1035_reply
 			if (!rfcreply)
 			{
 				free(reply);
-				if (errno == ENOMEM)	break;
-				continue;
+				return NULL;
 			/* Bad response from the server, try the next one. */
 			}
 			rfcreply->mallocedbuf=reply;
@@ -206,38 +267,79 @@ static struct rfc1035_reply
 
 		if (dotcp)
 		{
+			rfcreply=rfc1035_resolve_multiple_attempt_tcp
+				(res, opcode, qbuf, af, sin, 0,
+				 current_timeout);
+			if (!rfcreply)
+				return NULL;
+		}
+
+		memcpy(&rfcreply->server_addr, sin, sin_len);
+		return (rfcreply);
+}
+
+static struct rfc1035_reply
+*rfc1035_resolve_multiple_attempt_tcp(struct rfc1035_res *res,
+				      int opcode,
+				      struct querybuf *qbuf,
+				      int af,
+				      const RFC1035_ADDR *sin,
+				      int isaxfr,
+				      unsigned current_timeout)
+{
+	int nbytes;
+	char *reply;
+	struct rfc1035_reply *rfcreply;
+	unsigned i;
+
+	/*
+	** First record in axfr will be an SOA. Start searching for the
+	** trailing SOA starting with record 1. In case of multiple responses
+	** we'll start looking with element 0, again.
+	*/
+	unsigned check_soa=1;
+
 		int	tcpfd;
 		struct	rfc1035_reply *firstreply=0, *lastreply=0;
 
 			if ((tcpfd=rfc1035_open_tcp(res, sin)) < 0)
-				continue;	/*
+				return NULL;	/*
 						** Can't connect via TCP,
 						** try the next server.
 						*/
 
-			reply=rfc1035_query_tcp(res, tcpfd, qbuf.qbuf,
-				qbuf.qbuflen, &nbytes, current_timeout);
+			reply=rfc1035_query_tcp(res, tcpfd, qbuf->qbuf,
+				qbuf->qbuflen, &nbytes, current_timeout);
 
 			if (!reply)
 			{
 				sox_close(tcpfd);
-				continue;
+				return NULL;
 			}
-
-			res->rfc1035_good_ns= (res->rfc1035_good_ns
-					+ attempt) % nscount;
 
 			rfcreply=rfc1035_replyparse(reply, nbytes);
 			if (!rfcreply)
 			{
 				free(reply);
 				sox_close(tcpfd);
-				continue;
+				return NULL;
 			}
 			rfcreply->mallocedbuf=reply;
 			firstreply=lastreply=rfcreply;
 			while (isaxfr && rfcreply->rcode == 0)
 			{
+				for (i=check_soa; i<rfcreply->ancount; ++i)
+				{
+					if (rfcreply->anptr[i].rrtype ==
+					    RFC1035_TYPE_SOA)
+						break;
+				}
+
+				if (i < rfcreply->ancount)
+					break; /* Found trailing SOA */
+
+				check_soa=0;
+
 				if ((reply=rfc1035_recv_tcp(res,
 					tcpfd, &nbytes, current_timeout))==0)
 					break;
@@ -253,28 +355,10 @@ static struct rfc1035_reply
 				rfcreply->mallocedbuf=reply;
 				lastreply->next=rfcreply;
 				lastreply=rfcreply;
-
-				if ( rfcreply->ancount &&
-					rfcreply->anptr[0].rrtype ==
-						RFC1035_TYPE_SOA)
-					break;
 			}
 			sox_close(tcpfd);
-			if (!firstreply)
-				return (0);
-			rfcreply=firstreply;
-		}
-		memcpy(&rfcreply->server_addr, sin, sin_len);
-		sox_close(udpfd);
-		return (rfcreply);
-	}
 
-	/*
-	** Return a fake server failure reply, when we couldn't contact
-	** any name server.
-	*/
-	sox_close(udpfd);
-	return (rfc1035_replyparse(fakereply, sizeof(fakereply)));
+			return firstreply;
 }
 
 struct rfc1035_reply *rfc1035_resolve(
