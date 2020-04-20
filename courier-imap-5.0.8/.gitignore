@@ -392,6 +392,11 @@ libs/maildrop/README.html
 libs/maildrop/testsuite
 libs/maildrop/uidgid
 libs/maildrop/xconfig.h
+libs/maildrop/mailbot
+libs/maildrop/maildrop
+libs/maildrop/maildrop.1
+libs/maildrop/maildropfilter.7
+libs/maildrop/reformail
 libtool
 maildiracl
 maildiracl.1
