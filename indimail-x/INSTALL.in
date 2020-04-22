@@ -179,7 +179,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
 
     Prepare Source Directory Structure in the disk partition selected
     you have to extract minimum of 10 sources as per the directory
-    structure below. You may skip extraction of nssd-1.1, fetchmail-6.3.19,
+    structure below. You may skip extraction of nssd-1.2, fetchmail-6.3.19,
     depending on whether you require them. Most probably you have downloaded
     indimail-@version@.tar.gz only. You require to additionally download the
     following sources mentioned below. Except for ucspi-tcp, bogofilter,
@@ -197,8 +197,8 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . indimail-@version@  (20   Mb)
                                . indimail-mta-2.7    (18   Mb)
                                . ucspi-tcp-0.88      (4.0  Mb)
-                               . nssd-1.1            (2.0  Mb)
-                               . pam-multi-1.1       (3.0  Mb)
+                               . nssd-1.2            (2.0  Mb)
+                               . pam-multi-1.2       (3.0  Mb)
                                . logalert-0.3        (2.0  Mb)
                                . flash-0.9.4         (4.3  Mb)
                                . altermime-0.3.10    (1.5  Mb)
@@ -207,7 +207,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . fortune-1.1         (8.4  Mb)
                                . courier-imap-4.18.2 (23   Mb)
                                . bogofilter-1.2.4    (11.6 Mb)
-                               . fetchmail-6.4.0     (10.5 Mb)
+                               . fetchmail-6.4.1     (10.5 Mb)
                                . iwebadmin-2.0       (3.0  Mb)
                                ------------------------------
                                  Total               (200  Mb)
@@ -333,13 +333,13 @@ the installation.
     % wget http://downloads.sourceforge.net/indimail/libsrs2-1.0.18.tar.gz
     % wget http://downloads.sourceforge.net/courier/courier-imap-4.18.2.tar.bz2
     % wget http://downloads.sourceforge.net/indimail/flash-0.9.4.tar.gz
-    % wget http://downloads.sourceforge.net/indimail/fetchmail-6.4.0.tar.xz
+    % wget http://downloads.sourceforge.net/indimail/fetchmail-6.4.1.tar.xz
     % wget http://downloads.sourceforge.net/indimail/altermime-0.3.10.tar.gz
     % wget http://downloads.sourceforge.net/indimail/ripmime-1.4.0.10.tar.gz
     % wget http://downloads.sourceforge.net/indimail/mpack-1.6.tar.gz
     % wget http://downloads.sourceforge.net/indimail/fortune-1.1.tar.gz
-    % wget http://downloads.sourceforge.net/indimail/nssd-1.1.tar.gz
-    % wget http://downloads.sourceforge.net/indimail/pam-multi-1.1.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/nssd-1.2.tar.gz
+    % wget http://downloads.sourceforge.net/indimail/pam-multi-1.2.tar.gz
     % wget http://downloads.sourceforge.net/indimail/logalert-0.3.tar.gz
     % wget http://downloads.sourceforge.net/indimail/iwebadmin-2.0.tar.gz
 
@@ -638,20 +638,20 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 9  ## Optional STEP ##### Fetchmail ############
-    Install fetchmail MD5 cb3de7eff720b9af77ae9d1e381349eb
+    Install fetchmail MD5 c2b836a919cdd4ec53b06b70e0aa3e63
     current working directory /home/local/src
     Download the fetchmail package. The latest tested fetchmail package tested is
-    fetchmail-6.4.0.tar.bz2.
+    fetchmail-6.4.1.tar.bz2.
 
-    % wget http://downloads.sourceforge.net/indimail/obs/fetchmail-6.4.0.tar.bz2
-    % xz -d -c fetchmail-6.4.0.tar.bz2 | tar xf -
+    % wget http://downloads.sourceforge.net/indimail/obs/fetchmail-6.4.1.tar.bz2
+    % xz -d -c fetchmail-6.4.1.tar.bz2 | tar xf -
     ##################### Do not carry out the below patch instruction ###########
     do not carry out this patch instruction as the patch has been applied to
-    fetchmail-6.4.0.tar.bz2 downloaded from obs subdir
-    % gunzip -c fetchmail-6.4.0.patch.gz | patch -p0
+    fetchmail-6.4.1.tar.bz2 downloaded from obs subdir
+    % gunzip -c fetchmail-6.4.1.patch.gz | patch -p0
     NOTE: download the patch from https://sourceforge.net/projects/indimail/files/Patches-2.0
     ##############################################################################
-    % cd fetchmail-6.4.0
+    % cd fetchmail-6.4.1
     % autoreconf -fi
     % ./configure --prefix=@prefix@ --enable-indimail \
         --sysconfdir=@sysconfdir@ \
@@ -671,13 +671,13 @@ the installation.
     Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-strip
 
     ##### STEP 10 ## Optional STEP ## nssd ####################
-    Install nssd MD5 c64269a4e29f97430220546e8f6f989b
+    Install nssd MD5 cc6721db394c9634d9983bb69dce0d36
     current working directory /home/local/src
     Download the nssd package from http://www.indimail.org
 
-    % wget http://downloads.sourceforge.net/indimail/nssd-1.1.tar.gz
-    % gunzip -c nssd-1.1.tar.gz | tar xf -
-    % cd nssd-1.1
+    % wget http://downloads.sourceforge.net/indimail/nssd-1.2.tar.gz
+    % gunzip -c nssd-1.2.tar.gz | tar xf -
+    % cd nssd-1.2
     % ./configure --prefix=@prefix@ --sysconfdir=@sysconfdir@ \
         --mandir=@mandir@ --libexecdir=@libexecdir@ \
         --enable-mysqlprefix=@mysql_prefix@ \
@@ -733,7 +733,7 @@ the installation.
     ##### STEP 1  ## MySQL Configuration and Database Creation ##################
     a) Create MySQL configuration (@sysconfdir@/indimail.cnf)
     % sudo @prefix@/sbin/svctool --config=mysql --mysqlPrefix=@mysql_prefix@ \
-     --mysqlport=3306 --mysqlsocket=/tmp/mysql.sock
+     --mysqlport=3306 --mysqlsocket=/var/run/mysqld.sock
     You can have a section [indimail] in @sysconfdir@/indimail.cnf for parameters specific
     to indimail
 
@@ -967,7 +967,7 @@ the installation.
 
     % sudo @prefix@/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
         --mysqlhost=localhost --mysqluser=indimail --mysqlpass=ssh-1.5- \
-        --mysqlsocket=/tmp/mysql.sock --servicedir=@servicedir@
+        --mysqlsocket=/var/run/mysqld.sock --servicedir=@servicedir@
 
     ##### STEP 9  ## svscan log Service ##################
     The command below creates a multilog process for logging output of svscan
@@ -1171,8 +1171,8 @@ You can go on to add a virtual domain and users if you wish
     % sudo @prefix@/bin/svstat @servicedir@/mysql.3306
     @servicedir@/mysql.3306: up (pid 11936) 5 seconds
 
-    NOTE: replace localhost, indimail, ssh-1.5-, /tmp/mysql.sock as relevant to your MySQL
-    installation. You can use 3306 instead of /tmp/mysql.sock in case your MySQL
+    NOTE: replace localhost, indimail, ssh-1.5-, /var/run/mysqld.sock as relevant to your MySQL
+    installation. You can use 3306 instead of /var/run/mysqld.sock in case your MySQL
     database is on another host.
     you must use host:user:password:socket or host:user:password:port format
     for host.mysql (for IndiMail 1.6.9 and above). Also set your PATH to 
@@ -1186,7 +1186,7 @@ You can go on to add a virtual domain and users if you wish
 
     % cd @sysconfdir@/control
     % su
-    # echo "mysql_server_ip:indimail:ssh-1.5-:/tmp/mysql.sock" > host.cntrl
+    # echo "mysql_server_ip:indimail:ssh-1.5-:/var/run/mysqld.sock" > host.cntrl
        or
     # echo mysql_server_ip > host.cntrl
     # ln -s host.cntrl host.master
@@ -1199,8 +1199,8 @@ You can go on to add a virtual domain and users if you wish
     % sudo @prefix@/bin/svstat @servicedir@/mysql.3306
     @servicedir@/mysql.3306: up (pid 11936) 5 seconds
 
-    NOTE: replace localhost, indimail, ssh-1.5-, /tmp/mysql.sock as relevant to your MySQL
-    installation. You can use 3306 instead of /tmp/mysql.sock in case your MySQL
+    NOTE: replace localhost, indimail, ssh-1.5-, /var/run/mysqld.sock as relevant to your MySQL
+    installation. You can use 3306 instead of /var/run/mysqld.sock in case your MySQL
     database is on another host.
 
     you must use host:user:password:socket or host:user:password:port format
