@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.23 2020-04-05 23:19:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.24 2020-04-22 18:58:37+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -22,7 +22,11 @@
 %global _hardened_build    1
 %endif
 
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
+%global pythondir %{python3_sitelib}
+%else
 %global pythondir %(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
+%endif
 %global _prefix            @prefix@
 %global indimaildir        @indimaildir@
 %global domaindir          @domaindir@
@@ -187,7 +191,7 @@ BuildRequires: flex findutils
 BuildRequires: readline gzip autoconf automake libtool pkgconfig
 BuildRequires: xz
 BuildRequires: mysql-devel pam-devel libqmail-devel libqmail
-%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 BuildRequires: python3 python3-devel
 %else
 BuildRequires: python python-devel
@@ -201,11 +205,11 @@ BuildRequires: perl
 %if %{defined fedora_version}
 BuildRequires: redhat-lsb-core
 %endif
-%if %{defined centos_version} || %{defined rhel_version}
+%if %{defined centos_version} || %{defined rhel_version} || %{defined %centos_ver}
 BuildRequires: redhat-lsb
 %endif
 
-%if %{undefined centos_version} && %{undefined rhel_version}
+%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined %centos_vers}
 BuildRequires: chrpath
 %endif
 
@@ -239,7 +243,7 @@ PreReq: permissions
 %if 0%{?suse_version}
 BuildRequires: db-devel
 %else
-%if 0%{?fedora_version} > 17 || 0%{?centos_version} > 600 || 0%{?rhel_version} > 600
+%if 0%{?fedora_version} > 17 || 0%{?centos_version} > 600 || 0%{?rhel_version} > 600 || 0%{?centos_ver} > 7
 BuildRequires: libdb-devel
 %else
 BuildRequires: db4-devel
@@ -249,7 +253,7 @@ BuildRequires: db4-devel
 
 
 ################################# OBS ###############################
-%if 0%{?rhel_version} != 600 && 0%{?rhel_version} != 700 && 0%{?rhel_version} != 800
+%if 0%{?rhel_version} != 600 && 0%{?rhel_version} != 700 && 0%{?rhel_version} != 800 && 0%{?centos_ver} != 8
 BuildRequires: sharutils
 %endif
 
@@ -279,9 +283,14 @@ Requires: mysql-community-server
 Requires: mysql-server
 %endif
 
-%if %{defined centos_version} || %{defined rhel_version}
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
+Requires: python3-policycoreutils
+%else
+%if %{defined centos_version} || %{defined rhel_version} || %{defined %centos_ver}
 Requires: policycoreutils-python
 %endif
+%endif
+
 %if %nobogofilter == 0
 Requires: bogofilter-wordlist
 %endif
@@ -403,7 +412,7 @@ echo target_cpu    %_target_cpu
 echo target_os     %_target_os
 echo target_vendor %_target_vendor
 echo Project       %{_project}
-%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 echo pythondir     %{python3_sitelib}
 %else
 echo pythondir     %{pythondir}
@@ -1143,7 +1152,7 @@ done
 #lang(pt) /usr/share/indimail/locale/pt_BR/LC_MESSAGES/fetchmail.mo
 #lang(sk) /usr/share/indimail/locale/sk/LC_MESSAGES/fetchmail.mo
 #lang(tr) /usr/share/indimail/locale/tr/LC_MESSAGES/fetchmail.mo
-%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 %attr(644,root,root)                    %{python3_sitelib}/__pycache__/*.pyc
 %attr(755,root,root)                    %{python3_sitelib}/fetchmailconf.py
 %else
