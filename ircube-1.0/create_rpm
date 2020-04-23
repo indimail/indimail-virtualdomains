@@ -5,6 +5,7 @@ make clean
 make distclean
 /bin/rm -r autom4te.cache
 ver=1.0
+mv debain ../ircubeDebian
 cd ..
 if [ -f $HOME/.rpmmacros ] ; then
 	topdir=`grep ^%_topdir $HOME/.rpmmacros|awk '{print $2}'`
@@ -12,5 +13,6 @@ else
 	topdir=$HOME/rpmbuild
 fi
 tar cf - ircube-$ver |gzip -c > $topdir/SOURCES/ircube-$ver.tar.gz
+mv ircubeDebian ircube-$ver/debian
 cd ircube-$ver
 rpmbuild -bb --clean ircube.spec
