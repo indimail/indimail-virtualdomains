@@ -5,7 +5,7 @@ make clean
 make distclean
 /bin/rm -r autom4te.cache
 ver=1.0
-mv debain ../ircubeDebian
+mv debian ../ircubeDebian
 cd ..
 if [ -f $HOME/.rpmmacros ] ; then
 	topdir=`grep ^%_topdir $HOME/.rpmmacros|awk '{print $2}'`
