@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.24 2020-04-22 18:58:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.25 2020-04-27 22:02:41+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1863,7 +1863,7 @@ if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   /sbin/ldconfig
 fi
 
-echo "Doing post installation activities for the following"
+echo "Doing Post Install"
 echo ""
 echo " 1. Configure %{logdir} for multilog"
 echo " 2. Configure %{servicedir}"
