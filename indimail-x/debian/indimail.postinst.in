@@ -194,7 +194,7 @@ fi
 /sbin/ldconfig
 fi
 
-echo "Doing post installation activities for the following"
+echo "Doing Post Install"
 echo ""
 echo " 1. Configure ${logdir} for multilog"
 echo " 2. Configure ${servicedir}"
