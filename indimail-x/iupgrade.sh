@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: iupgrade.sh,v $
+# Revision 2.11  2020-04-27 21:59:40+05:30  Cprogrammer
+# added install routine
+#
 # Revision 2.10  2018-03-13 14:14:04+05:30  Cprogrammer
 # fixed syntax error
 #
@@ -31,16 +34,13 @@
 # generic upgrade script for indimail
 #
 #
-# $Id: iupgrade.sh,v 2.10 2018-03-13 14:14:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: iupgrade.sh,v 2.11 2020-04-27 21:59:40+05:30 Cprogrammer Exp mbhangui $
 
 do_upgrade()
 {
 	if [ -f /usr/libexec/indimail/ilocal_upgrade.sh ] ; then
 		echo "Running upgrade script for $1"
 		sh /usr/libexec/indimail/ilocal_upgrade.sh $1
-		#if [ $? -eq 0 ] ; then
-		#	/bin/rm -f /usr/libexec/indimail/ilocal_upgrade.sh
-		#fi
 	fi
 }
 
@@ -80,6 +80,7 @@ do_post()
 	case $1 in
 		install)
 		echo do_post install
+		do_upgrade install
 		;;
 		upgrade)
 		echo do_post upgrade
@@ -185,6 +186,19 @@ do_posttrans()
 	esac
 }
 
+# iupgrade.sh pretrans  noargs    %{version} $*
+#   do_upgrade pretrans
+# iupgrade.sh pre       upgrade   %{version} $*
+#   do_upgrade pre
+# iupgrade.sh post      upgrade   %{version} $*
+#   do_upgrade post
+# iupgrade.sh post      install   %{version} $*
+# iupgrade.sh preun     upgrade   %{version} "$argv1"
+# iupgrade.sh preun     uninstall %{version} "$argv1"
+# iupgrade.sh postun    upgrade   %{version} $*
+# iupgrade.sh postun    uninstall %{version} $*
+# iupgrade.sh posttrans noargs    %{version} $*
+#   do_upgrade posttrans
 version=$3
 case $1 in
 	pre)
