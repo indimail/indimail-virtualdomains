@@ -8,7 +8,7 @@ Homepage: http://indimail.sourceforge.net
 Package: indimail
 Architecture: any
 Pre-Depends: indimail-mta, virtual-mysql-server, bogofilter-wordlist, mrtg
-Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils, procps
+Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils, findutils, procps
 Provides: libindimail
 Replaces: libindimail
 Description: IndiMail is a messaging platform providing multi-cluster domain support.
@@ -22,7 +22,7 @@ Description: IndiMail is a messaging platform providing multi-cluster domain sup
  virtual domains.
 
 Package: indimail-devel
-Depends: ${misc:Depends}
+Depends: ${misc:Depends}, findutils, coreutils, binutils
 Section: devel
 Architecture: any
 Description: IndiMail - Development header files and libraries
