@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: ilocal_upgrade.sh,v $
+# Revision 2.27  2020-04-27 21:59:16+05:30  Cprogrammer
+# added install routine
+#
 # Revision 2.26  2019-10-01 14:08:25+05:30  Cprogrammer
 # use svctool to update libindimail, mysql_lib control files
 #
@@ -79,7 +82,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: ilocal_upgrade.sh,v 2.26 2019-10-01 14:08:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.27 2020-04-27 21:59:16+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -96,10 +99,32 @@ check_update_if_diff()
 	fi
 }
 
+do_install()
+{
+date
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.27 2020-04-27 21:59:16+05:30 Cprogrammer Exp mbhangui $"
+if [ -d /var/indimail/mysqldb/data/indimail ] ; then
+	if [ -f /service/mysql.3306/down ] ; then
+		systemctl disable mysqld.service > /dev/null 2>&1
+		if [ $? -eq 0 ] ; then
+			echo "enabling MySQL under supervise"
+			/bin/rm -f /service/mysql.3306/down
+		else
+			systemctl disable mariadb.service > /dev/null 2>&1
+			if [ $? -eq 0 ] ; then
+				echo "enabling MySQL under supervise"
+				/bin/rm -f /service/mysql.3306/down
+			fi
+		fi
+	fi
+fi
+/usr/sbin/svctool --fixsharedlibs
+}
+
 do_post_upgrade()
 {
 date
-echo "Running $1 - $Id: ilocal_upgrade.sh,v 2.26 2019-10-01 14:08:25+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.27 2020-04-27 21:59:16+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do
@@ -146,5 +171,8 @@ fi
 case $1 in
 	post|posttrans)
 	do_post_upgrade $1
+	;;
+	install)
+	do_install $1
 	;;
 esac
