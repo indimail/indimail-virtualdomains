@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: ilocal_upgrade.sh,v $
+# Revision 2.28  2020-04-28 10:57:21+05:30  Cprogrammer
+# disable mysqld service if indimail database gets created successfully
+#
 # Revision 2.27  2020-04-27 21:59:16+05:30  Cprogrammer
 # added install routine
 #
@@ -82,7 +85,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: ilocal_upgrade.sh,v 2.27 2020-04-27 21:59:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.28 2020-04-28 10:57:21+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -102,20 +105,17 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.27 2020-04-27 21:59:16+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.28 2020-04-28 10:57:21+05:30 Cprogrammer Exp mbhangui $"
 if [ -d /var/indimail/mysqldb/data/indimail ] ; then
-	if [ -f /service/mysql.3306/down ] ; then
-		systemctl disable mysqld.service > /dev/null 2>&1
-		if [ $? -eq 0 ] ; then
-			echo "enabling MySQL under supervise"
-			/bin/rm -f /service/mysql.3306/down
-		else
-			systemctl disable mariadb.service > /dev/null 2>&1
+	if [ ! -f /service/mysql.3306/down ] ; then
+		for i in mysqld mariadb mysql
+		do
+			echo "systemctl disable $i.service"
+			systemctl disable $i.service > /dev/null 2>&1
 			if [ $? -eq 0 ] ; then
-				echo "enabling MySQL under supervise"
-				/bin/rm -f /service/mysql.3306/down
+				break
 			fi
-		fi
+		done
 	fi
 fi
 /usr/sbin/svctool --fixsharedlibs
@@ -124,7 +124,7 @@ fi
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.27 2020-04-27 21:59:16+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.28 2020-04-28 10:57:21+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do
