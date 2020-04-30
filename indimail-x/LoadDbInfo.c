@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbInfo.c,v $
+ * Revision 1.8  2020-04-30 19:25:15+05:30  Cprogrammer
+ * changed scope of ssin, ssout variables to local
+ *
  * Revision 1.7  2020-04-01 18:56:49+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -80,7 +83,7 @@
 #include "check_group.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.7 2020-04-01 18:56:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.8 2020-04-30 19:25:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static DBINFO **loadMCDInfo(int *);
@@ -98,7 +101,6 @@ loadDbinfoTotal()
 static int      delete_dbinfo_rows(char *);
 
 static stralloc SqlBuf = {0}, mcdFile = {0}, line = { 0 }, filename = {0};
-struct substdio ssin, ssout;
 static char     inbuf[4096], outbuf[256];
 static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
@@ -122,6 +124,7 @@ writemcdinfo(DBINFO **rhostsptr, time_t mtime)
 	gid_t           gid, gidtmp;
 	struct utimbuf  ubuf;
 	DBINFO        **ptr;
+	struct substdio ssout;
 
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
@@ -505,6 +508,7 @@ loadMCDInfo(int *total)
 	int             t, count, items, distributed, fd, match;
 	DBINFO        **relayhosts, **rhostsptr;
 	static stralloc dummy1 = {0}, dummy2 = {0};
+	struct substdio ssin;
 
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	getEnvConfigStr(&mcdfile, "MCDFILE", MCDFILE);
@@ -727,6 +731,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 	int             t, count, field_count, found, use_ssl = 0, fd, mfd, match;
 	static stralloc host_path = {0}, mysqlhost_buf = {0};
 	DBINFO        **relayhosts, **rhostsptr, **tmpPtr;
+	struct substdio ssin;
 
 	relayhosts = *rhosts;
 	getEnvConfigStr(&assigndir, "ASSIGNDIR", ASSIGNDIR);
