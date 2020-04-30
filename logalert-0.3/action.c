@@ -1,5 +1,8 @@
 /*
  * $Log: action.c,v $
+ * Revision 1.3  2020-04-30 19:48:20+05:30  Cprogrammer
+ * fixed compilation error
+ *
  * Revision 1.2  2014-01-30 00:25:18+05:30  Cprogrammer
  * fixed compilation warnings
  *
@@ -22,7 +25,7 @@ substitute_args(char *cmd, char **args_list, int nmatch)
 {
 
 	int             i;
-	char            key[3];
+	char            key[14];
 	char           *new_cmd;
 	unsigned int    ncmd_size;
 	char           *cmd_copy;
@@ -36,7 +39,7 @@ substitute_args(char *cmd, char **args_list, int nmatch)
 		unsigned int    n;
 		char           *temp, *temp2;
 
-		memset(key, 0x0, 3);
+		memset(key, 0x0, 11);
 		sprintf(key, "$%d", i);
 
 		while (1) {

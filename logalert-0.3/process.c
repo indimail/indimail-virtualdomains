@@ -1,5 +1,8 @@
 /*
  * $Log: process.c,v $
+ * Revision 1.2  2020-04-30 19:49:14+05:30  Cprogrammer
+ * fixed compilation error
+ *
  * Revision 1.1  2013-05-15 00:33:54+05:30  Cprogrammer
  * Initial revision
  *
@@ -75,7 +78,7 @@ start_process(struct process_hdr *p)
 		}
 		pgargs[i++] = p->econf->watchfile;
 		pgargs[i] = NULL;
-		snprintf(path, PATH_MAX, "%s/%s", pwd, pgname);
+		snprintf(path, PATH_MAX + 2, "%s/%s", pwd, pgname);
 		printf("\nExecuting: %s", path);
 		for (j = 0; j < i; j++)
 			printf("%s ", pgargs[j]);
