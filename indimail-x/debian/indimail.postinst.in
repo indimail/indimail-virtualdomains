@@ -250,7 +250,7 @@ if [ -x ${mysqlPrefix}/libexec/mysqld -o -x ${mysqlPrefix}/sbin/mysqld ] ; then
   # MySQL Supervise creation
   ${prefix}/sbin/svctool --mysql=3306 --servicedir=${servicedir} --mysqlPrefix=${mysqlPrefix} \
     --databasedir=${indimaildir}/mysqldb --config=${sysconfdir}/indimail.cnf --default-domain=${default_domain}
-  if [ ! -f ${indimaildir}/mysqldb/data/indimail/indimail.frm ] ; then
+  if [ ! -f ${indimaildir}/mysqldb/data/indimail/indimail.frm -a ! -f ${indimaildir}/mysqldb/data/indimail/indimail.ibd ] ; then
     error=1
   fi
   if [ $error -gt 0 ] ; then
