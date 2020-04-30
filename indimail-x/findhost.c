@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 1.9  2020-04-30 19:26:37+05:30  Cprogrammer
+ * changed scope of ssin to local
+ *
  * Revision 1.8  2020-04-01 18:54:35+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -46,7 +49,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 1.8 2020-04-01 18:54:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 1.9 2020-04-30 19:26:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -81,7 +84,6 @@ die_nomem()
 #include "set_mysql_options.h"
 #include "findhost.h"
 
-struct substdio ssin;
 static char     inbuf[512];
 static char     strnum[FMT_ULONG];
 
@@ -104,6 +106,7 @@ iclose_cntrl()
 int
 open_central_db(char *dbhost)
 {
+	struct substdio ssin;
 	static stralloc host_path = {0}, SqlBuf = {0};
 	static char     atexit_registered = 0;
 	char           *ptr, *mysql_user = 0, *mysql_passwd = 0, *mysql_database = 0,
