@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.25 2020-04-27 22:02:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.26 2020-04-30 09:25:49+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1913,7 +1913,7 @@ if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld ] ; then
   # MySQL Supervise creation
   %{_prefix}/sbin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
     --databasedir=%{indimaildir}/mysqldb --config=%{sysconfdir}/indimail.cnf --default-domain=$default_domain
-  if [ ! -f %{indimaildir}/mysqldb/data/indimail/indimail.frm ] ; then
+  if [ ! -f %{indimaildir}/mysqldb/data/indimail/indimail.frm -a ! -f %{indimaildir}/mysqldb/data/indimail/indimail.ibd ] ; then
     error=1
   fi
   if [ $error -gt 0 ] ; then
