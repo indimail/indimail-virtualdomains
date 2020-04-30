@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.h,v $
+ * Revision 1.2  2020-04-30 19:50:29+05:30  Cprogrammer
+ * define prototypes as extern to fix compilation error
+ *
  * Revision 1.1  2019-06-13 21:21:52+05:30  Cprogrammer
  * Initial revision
  *
@@ -38,7 +41,7 @@ extern int      (*in_mysql_get_option) (MYSQL *, enum mysql_option, void *);
 extern int      (*in_mysql_query) (MYSQL *, const char *);
 extern res     *(*in_mysql_store_result) (MYSQL *);
 extern char   **(*in_mysql_fetch_row) (MYSQL_RES *);
-unsigned long  *(*in_mysql_fetch_lengths) (MYSQL_RES *);
+extern unsigned long  *(*in_mysql_fetch_lengths) (MYSQL_RES *);
 extern my_ulonglong (*in_mysql_num_rows) (MYSQL_RES *);
 extern unsigned int (*in_mysql_num_fields) (MYSQL_RES *res);
 extern my_ulonglong (*in_mysql_affected_rows) (MYSQL *);
@@ -54,10 +57,10 @@ extern i_char  *(*in_mysql_get_ssl_cipher) (MYSQL *);
 extern void     (*in_mysql_data_seek) (MYSQL_RES *, my_ulonglong);
 extern i_char  *(*in_mysql_get_server_info) (MYSQL *);
 extern i_char  *(*in_mysql_get_client_info) (void);
-void           *loadLibrary(void **, char *, int *, char **);
-void           *getlibObject(char *, void **, char *, char **);
-void            closeLibrary(void **);
-int             initMySQLlibrary(char **);
+extern void    *loadLibrary(void **, char *, int *, char **);
+extern void    *getlibObject(char *, void **, char *, char **);
+extern void     closeLibrary(void **);
+extern int      initMySQLlibrary(char **);
 #else /*- DLOPEN_LIBMYSQLCLIENT */
 extern MYSQL   *mysql_Init(MYSQL *);
 extern MYSQL   *in_mysql_init(MYSQL *);
@@ -73,7 +76,7 @@ extern int      in_mysql_get_option(MYSQL *, enum mysql_option, void *);
 extern int      in_mysql_query(MYSQL *, const char *);
 extern res     *in_mysql_store_result(MYSQL *);
 extern char   **in_mysql_fetch_row(MYSQL_RES *);
-unsigned long  *in_mysql_fetch_lengths(MYSQL_RES *);
+extern unsigned long  *in_mysql_fetch_lengths(MYSQL_RES *);
 extern my_ulonglong in_mysql_num_rows(MYSQL_RES *);
 extern unsigned int in_mysql_num_fields(MYSQL_RES *);
 extern my_ulonglong in_mysql_affected_rows(MYSQL *);
