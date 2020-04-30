@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 #
 # A GUI configurator for generating fetchmail configuration files.
 # by Eric S. Raymond, <esr@snark.thyrsus.com>,
