@@ -18,7 +18,7 @@ unsigned int    lineno = 1;
 char           *filename;
 struct entry_conf **conf_table;
 unsigned int    cur_pconf = 0;
-FILE           *yyin;
+static FILE    *yyin;
 
 
 static const struct entry_attribute entry_attributes[] = {

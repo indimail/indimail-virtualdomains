@@ -1,5 +1,8 @@
 /*
  * $Log: monitor.h,v $
+ * Revision 1.2  2020-04-30 19:48:58+05:30  Cprogrammer
+ * define variable as extern to prevent multiple definition
+ *
  * Revision 1.1  2013-05-15 00:14:29+05:30  Cprogrammer
  * Initial revision
  *
@@ -31,8 +34,7 @@
 #include "parsers.h"
 #include "utils.h"
 
-
-unsigned int    active;
+extern unsigned int active;
 
 void            match_sleep(unsigned int tsleep);
 ssize_t         read_data(int fd, struct entry_conf *cur_cfg);
