@@ -9,7 +9,7 @@ Vcs-Browser: http://indimail.git.sourceforge.net/git/gitweb.cgi?p=indimail/indim
 
 Package: ircube
 Architecture: any
-Pre-Depends: indimail (>= 2.0 ), iwebadmin, roundcubemail
+Pre-Depends: indimail (>= 2.0), indimail-mta (>= 2.0), iwebadmin, roundcubemail
 Depends: coreutils
 Recommends: indimail
 Description: a collection of plugins for RoundCube Mail
