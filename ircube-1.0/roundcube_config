@@ -1,0 +1,166 @@
+#!/bin/sh
+chown=$(which chown)
+chmod=$(which chmod)
+cp=$(which cp)
+mv=$(which mv)
+rm=$(which rm)
+cmp=$(which cmp)
+sed=$(which sed)
+php=$(which php)
+grep=$(which grep)
+head=$(which head)
+cut=$(which cut)
+PRIV_PASS=$($grep PRIV_PASS /usr/sbin/svctool|$head -1|$cut -d= -f2|$sed 's{"{{g')
+
+create_roundcube_conf()
+{
+echo "<?php"
+echo ""
+echo "\$config = array();"
+echo "\$config['db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';"
+echo "\$config['default_host'] = 'ssl://indimail.org';"
+echo "\$config['default_port'] = 993;"
+echo "\$config['imap_auth_type'] = 'LOGIN';"
+echo "\$config['imap_conn_options'] = array("
+echo " 'ssl'         => array("
+echo "    'verify_peer'       => false,"
+echo "    'verify_peer_name'  => false,"
+echo " ),"
+echo ");"
+echo "\$config['smtp_server'] = 'tls://localhost';"
+echo "\$config['smtp_port'] = 587;"
+echo "\$config['smtp_user'] = '%u';"
+echo "\$config['smtp_pass'] = '%p';"
+echo "\$config['smtp_auth_type'] = 'PLAIN';"
+echo "\$config['smtp_conn_options'] = array("
+echo "  'ssl'         => array("
+echo "    'verify_peer'       => false,"
+echo "    'verify_peer_name'  => false,"
+echo "  ),"
+echo ");"
+echo "\$config['force_https'] = true;"
+echo "\$config['support_url'] = 'https://sourceforge.net/p/indimail/support-requests';"
+echo "\$config['product_name'] = 'IndiMail Webmail';"
+echo "\$config['useragent'] = 'IndiMail Webmail/'.RCUBE_VERSION;"
+echo "\$config['des_key'] = 'rcmail-!24ByteDESkey*Str';"
+echo "\$config['plugins'] = array("
+echo "    'archive',"
+echo "    'sauserprefs',"
+echo "    'markasjunk2',"
+echo "    'iwebadmin',"
+echo ");"
+echo "\$config['skin'] = 'larry';"
+}
+
+change_config()
+{
+if [ $# -ne 2 ] ; then
+	echo "USAGE: change_config old_config_file new_config_file" 1>&2
+	return 1
+fi
+conf_file=$1
+temp_file=$2
+if [ -f $conf_file ] ; then
+	if ! $cmp -s $conf_file $temp_file ; then
+		echo "saving $temp_file as $conf_file.rpmnew"
+		$mv $temp_file "$conf_file".rpmnew
+	else
+		echo "$conf_file not changed" 1>&2
+		$rm -f $temp_file
+	fi
+else
+	echo "Creating $conf_file"
+	$mv $temp_file $conf_file
+fi
+}
+
+echo "adding roundcube user"
+(
+	echo "create database if not exists RoundCube_db;"
+	echo "create user if not exists roundcube identified by 'subscribed';"
+	echo "GRANT ALL PRIVILEGES on RoundCube_db.* to roundcube;"
+	echo "FLUSH PRIVILEGES;"
+) | /usr/bin/mysql -u mysql -p"$PRIV_PASS" mysql
+if [ -f /usr/share/roundcubemail/SQL/mysql.initial.sql ] ; then
+	echo "initializing roundcube db"
+	/usr/bin/mysql -u roundcube -psubscribed RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
+fi
+
+if [ -d /etc/roundcubemail ] ; then
+	echo "creating roundcubemail config"
+	create_roundcube_conf > /tmp/config.cnf.$$
+	conf_file="/etc/roundcubemail/config.inc.php"
+	if [ -f $conf_file ] ; then
+		$mv $conf_file $conf_file".BAK"
+		$cp $conf_file".BAK" $conf_file
+	fi
+	change_config $conf_file /tmp/config.cnf.$$
+	$chown root:apache $conf_file
+	$chmod 640 $conf_file
+	if [ -f /etc/roundcubemail/defaults.inc.php ] ; then
+		$chown root:apache /etc/roundcubemail/defaults.inc.php
+		$chmod 640 /etc/roundcubemail/defaults.inc.php
+	fi
+fi
+
+if [ -f /usr/share/roundcubemail/plugins/iwebadmin/config.inc.php ] ; then
+	echo "Configuring /usr/share/roundcubemail/plugins/iwebadmin/config.inc.php"
+	$mv /usr/share/roundcubemail/plugins/iwebadmin/config.inc.php \
+		/usr/share/roundcubemail/plugins/iwebadmin/config.inc.php.BAK
+	$cp /usr/share/roundcubemail/plugins/iwebadmin/config.inc.php.BAK \
+		/usr/share/roundcubemail/plugins/iwebadmin/config.inc.php
+	$sed -i \
+		-e "s}$rcmail_config\['iwebadmin_path'\].*}$rcmail_config\['iwebadmin_path'\] = 'https://indimail.org/cgi-bin/iwebadmin/';}g" \
+		/usr/share/roundcubemail/plugins/iwebadmin/config.inc.php
+fi
+		
+if [ -f /usr/share/roundcubemail/plugins/sauserprefs/config.inc.php ]; then
+	echo "Configuring /usr/share/roundcubemail/plugins/sauserprefs/config.inc.php"
+	$mv /usr/share/roundcubemail/plugins/sauserprefs/config.inc.php \
+		/usr/share/roundcubemail/plugins/sauserprefs/config.inc.php.BAK
+	$cp /usr/share/roundcubemail/plugins/sauserprefs/config.inc.php.BAK \
+		/usr/share/roundcubemail/plugins/sauserprefs/config.inc.php
+	$sed -i \
+		-e "s}$rcmail_config\['sauserprefs_db_dsnw'\].*}$rcmail_config\['sauserprefs_db_dsnw'\] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';}g" \
+		/usr/share/roundcubemail/plugins/sauserprefs/config.inc.php
+fi
+		
+if [ -f /etc/php.ini ] ; then
+	echo "Configuring /etc/php.ini"
+	$mv /etc/php.ini /etc/php.ini.BAK
+	$cp /etc/php.ini.BAK /etc/php.ini
+	$sed -i \
+		-e "s}pdo_mysql.default_socket=.*}pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock}g" \
+		-e "s};openssl.cafile=.*}openssl.cafile=/etc/indimail/certs/servercert.pem}g" \
+      	-e "s};openssl.capath=.*}openssl.capath=/etc/pki/tls/certs}g" \
+		/etc/php.ini
+	$php -r "print_r(openssl_get_cert_locations());"
+fi
+if [ -f /etc/httpd/conf.d/roundcubemail.conf ] ; then
+	echo "Configuring /etc/httpd/conf.d/roundcubemail.conf"
+	$mv /etc/httpd/conf.d/roundcubemail.conf \
+		/etc/httpd/conf.d/roundcubemail.conf.BAK
+	$cp /etc/httpd/conf.d/roundcubemail.conf.BAK \
+		/etc/httpd/conf.d/roundcubemail.conf
+	$sed -i \
+		-e "s}Alias /roundcubemail /usr/share/roundcubemail}Alias /indimail /usr/share/roundcubemail}g" \
+		-e "/Require local/ i \        Require ip 127.0.0.1" \
+		-e "/Require local/ i \        Require all granted" \
+		/etc/httpd/conf.d/roundcubemail.conf
+	$chown root:root /etc/httpd/conf.d/roundcubemail.conf
+	$chmod 644 /etc/httpd/conf.d/roundcubemail.conf
+fi
+if [ -f /etc/httpd/conf.d/ssl.conf ] ; then
+	echo "Configuring /etc/httpd/conf.d/ssl.conf"
+	$mv /etc/httpd/conf.d/ssl.conf \
+		/etc/httpd/conf.d/ssl.conf.BAK
+	$cp /etc/httpd/conf.d/ssl.conf.BAK \
+		/etc/httpd/conf.d/ssl.conf
+	$sed -i \
+		-e "s}^#ServerName www.example.com:443}ServerName indimail.org:443}g" \
+		-e "s}^SSLCertificateFile.*}SSLCertificateFile /etc/indimail/certs/servercert.pem}g" \
+		-e 's/^SSLCertificateKeyFile./#&/' \
+		/etc/httpd/conf.d/ssl.conf
+fi
+echo "Adding qmail as supplementary group to apache"
+/usr/bin/getent group apache > /dev/null && /usr/sbin/usermod -aG qmail apache
