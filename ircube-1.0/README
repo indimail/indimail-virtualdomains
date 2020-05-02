@@ -25,9 +25,9 @@ Non SSL Version Install/Configuration (look below for SSL config)
       MySQL> QUIT;
    b) /usr/bin/mysql -u roundcube -p RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
 
-3) Copy /etc/roundcube/config.inc.php.sample to /etc/roundcube/config.inc.php
-   $ sudo cp /etc/roundcube/config.inc.php.sample /etc/roundcubemail/config.inc.php
-   Edit the lines in /etc/roundcube/config.inc.php
+3) Copy /etc/roundcubemail/config.inc.php.sample to /etc/roundcubemail/config.inc.php
+   $ sudo cp /etc/roundcubemail/config.inc.php.sample /etc/roundcubemail/config.inc.php
+   Edit the lines in /etc/roundcubemail/config.inc.php
 
    $config['db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
    $config['smtp_server'] = 'localhost';
@@ -46,28 +46,22 @@ Non SSL Version Install/Configuration (look below for SSL config)
    IndiMail users having QA_ADMIN privileges. man vmoduser(1)
 
    This file should have read permission for apache group
-   $ sudo chown root:apache /etc/roundcube/config.inc.php
-   $ sudo chmod 640 /etc/roundcube/config.inc.php
+   $ sudo chown root:apache /etc/roundcubemail/config.inc.php
+   $ sudo chmod 640 /etc/roundcubemail/config.inc.php
    For markasjunk2 to work you need to set permission for
    apache to write /etc/indimail/spamignore
 
-4) Edit the lines in /etc/roundcube/defaults.inc.php
+4) Edit the lines in /etc/roundcubemail/defaults.inc.php
 
    $config['db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
    $config['imap_auth_type'] = 'LOGIN';
    $config['smtp_auth_type'] = 'LOGIN';
 
    This file should have read permission for apache group
-   $ sudo chown root:apache /etc/roundcube/defaults.inc.php
-   $ sudo chmod 640 /etc/roundcube/defaults.inc.php
+   $ sudo chown root:apache /etc/roundcubemail/defaults.inc.php
+   $ sudo chmod 640 /etc/roundcubemail/defaults.inc.php
 
-5) Change iwebadmin path in /usr/share/roundcubemail/iwebadmin/config.inc.php
-   $rcmail_config['iwebadmin_path'] = 'http://127.0.0.1/cgi-bin/iwebadmin';
-
-6) Change sauserprefs_db_dsnw in /usr/share/roundcubemail/sauserprefs/config.inc.php
-   $rcmail_config['sauserprefs_db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
-
-7) Restore indimail plugins for roundcube
+5) Restore indimail plugins for roundcube
 
    $ cd /tmp
    $ wget http://downloads.sourceforge.net/indimail/indimail-roundcube-1.0.tar.gz # This file
@@ -75,6 +69,14 @@ Non SSL Version Install/Configuration (look below for SSL config)
    $ sudo tar xvfz /tmp/indimail-roundcube-1.0.tar.gz usr/share/roundcubemail/plugins
    $ /usr/bin/mysql -u roundcube -p RoundCube_db <
        /usr/share/roundcubemail/plugins/sauserprefs/sauserprefs.sql
+
+6) Change iwebadmin path in /usr/share/roundcubemail/iwebadmin/config.inc.php
+   $rcmail_config['iwebadmin_path'] = 'http://127.0.0.1/cgi-bin/iwebadmin';
+
+7) Change sauserprefs_db_dsnw and sauserprefs_whitelist_cmd in
+   /usr/share/roundcubemail/sauserprefs/config.inc.php
+   $rcmail_config['sauserprefs_db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
+   $rcmail_config['sauserprefs_whitelist_cmd'] = '/usr/libexec/indimail/bogo-learn %m %u %i whitelist %t';
 
 8) change pdo_mysql.default_socket /etc/php.ini
    For some reason pdo_mysql uses wrong mysql socket on some systems. Uses
@@ -142,9 +144,9 @@ Non SSL Version Install/Configuration (look below for SSL config)
       MySQL> QUIT;
    b) /usr/bin/mysql -u roundcube -p RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
 
-3) Copy /etc/roundcube/config.inc.php.sample to /etc/roundcube.inc.php
-   $ sudo cp /etc/roundcube/config.inc.php.sample /etc/roundcubemail/config.inc.php
-   Edit the lines in /etc/roundcube/config.inc.php
+3) Copy /etc/roundcubemail/config.inc.php.sample to /etc/roundcube.inc.php
+   $ sudo cp /etc/roundcubemail/config.inc.php.sample /etc/roundcubemail/config.inc.php
+   Edit the lines in /etc/roundcubemail/config.inc.php
 
    $config['db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
    $config['default_host'] = 'ssl://indimail.org';
@@ -181,23 +183,15 @@ Non SSL Version Install/Configuration (look below for SSL config)
    IndiMail users having QA_ADMIN privileges. man vmoduser(1)
 
    This file should have read permission for apache group
-   $ sudo chown root:apache /etc/roundcube/config.inc.php
-   $ sudo chmod 640 /etc/roundcube/config.inc.php
+   $ sudo chown root:apache /etc/roundcubemail/config.inc.php
+   $ sudo chmod 640 /etc/roundcubemail/config.inc.php
 
-4) Check permissions of /etc/roundcube/defaults.inc.php i.e.
+4) Check permissions of /etc/roundcubemail/defaults.inc.php i.e.
    This file should have read permission for apache group
-   $ sudo chown root:apache /etc/roundcube/defaults.inc.php
-   $ sudo chmod 640 /etc/roundcube/defaults.inc.php
+   $ sudo chown root:apache /etc/roundcubemail/defaults.inc.php
+   $ sudo chmod 640 /etc/roundcubemail/defaults.inc.php
 
-5) Change iwebadmin path in /usr/share/roundcubemail/plugins/iwebadmin/config.inc.php
-
-   $rcmail_config['iwebadmin_path'] = 'https://127.0.0.1/cgi-bin/iwebadmin';
-
-6) Change sauserprefs_db_dsnw in /usr/share/roundcubemail/plugins/sauserprefs/config.inc.php
-
-   $rcmail_config['sauserprefs_db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
-
-7) Restore indimail plugins for roundcube
+5) Restore indimail plugins for roundcube
 
    $ cd /tmp
    $ wget http://downloads.sourceforge.net/indimail/indimail-roundcube-ssl-1.0.tar.gz # This file
@@ -205,6 +199,16 @@ Non SSL Version Install/Configuration (look below for SSL config)
    $ sudo tar xvfz /tmp/indimail-roundcube-ssl-1.0.tar.gz usr/share/roundcubemail/plugins
    $ /usr/bin/mysql -u roundcube -p RoundCube_db <
       /usr/share/roundcubemail/plugins/sauserprefs/sauserprefs.sql
+
+6) Change iwebadmin path in /usr/share/roundcubemail/plugins/iwebadmin/config.inc.php
+
+   $rcmail_config['iwebadmin_path'] = 'https://127.0.0.1/cgi-bin/iwebadmin';
+
+7) Change sauserprefs_db_dsnw and sauserprefs_whitelist_cmd in
+   /usr/share/roundcubemail/sauserprefs/config.inc.php
+
+   $rcmail_config['sauserprefs_db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
+   $rcmail_config['sauserprefs_whitelist_cmd'] = '/usr/libexec/indimail/bogo-learn %m %u %i whitelist %t';
 
 8) change pdo_mysql.default_socket /etc/php.ini
    For some reason pdo_mysql uses wrong mysql socket on some systems. Uses
