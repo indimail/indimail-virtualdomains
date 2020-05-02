@@ -1,6 +1,9 @@
 ircube (1.0-1) stable; urgency=low
 
   * First debian release of ircube for indimail
+  * Created autoconfigure scripts
+  * added roundcubemail config script roundcube_config
+  * updated README
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Thu, 13 Apr 2017 18:07:23 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 02 May 2020 12:13:43 +0530
 

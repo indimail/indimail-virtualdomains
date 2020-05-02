@@ -3,7 +3,7 @@ COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
 
 ircubelibexecdir=@libexecdir@
-ircubelibexec_SCRIPTS = bogo-learn
+ircubelibexec_SCRIPTS = bogo-learn roundcube_config
 
 install-data-hook: 
 	$(mkinstalldirs) $(DESTDIR)@plugindir@ || exit 1

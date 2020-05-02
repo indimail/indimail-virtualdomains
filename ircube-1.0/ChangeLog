@@ -1,6 +1,9 @@
-* Thu Apr 13 2017 mbhangui@gmail.com @version@-@release@
+* Sat May 02 2020 12:13:43 +0530 mbhangui@gmail.com 1.0-1.1%{?dist}
 Release 1.0 Start 13/04/2017
 16/03/2017
 1. Created autoconfigure scripts
 07/11/2018
 2. fixed typos in README
+02/05/2020
+3. added roundcubemail config script roundcube_config
+4. updated README

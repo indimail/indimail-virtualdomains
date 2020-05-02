@@ -50,10 +50,18 @@ License: GPLv3
 URL: http://sourceforge.net/indimail
 Source0: %{name}-%{version}.tar.gz
 
+##################################### OBS ####################################
+%if %build_on_obs == 1
+%if 0%{?suse_version}
+BuildRequires: -post-build-checks  
+#!BuildIgnore: post-build-checks  
+%endif
+%endif
+##############################################################################
+
 BuildRequires: coreutils
-Requires: roundcubemail
-Requires: iwebadmin
-Requires: indimail >= 2.0
+Requires: roundcubemail iwebadmin coreutils sed
+Requires: indimail >= 2.0 indimail-mta >= 2.0
 
 %description
 A collection of plugins for RoundCube Mail
@@ -87,9 +95,9 @@ make
 %install
 %make_install
 
-
 %files
 %attr(0755,root,root)      %{libexecdir}/bogo-learn
+%attr(0755,root,root)      %{libexecdir}/roundcube_config
 %dir %{pluginbase}
 %dir %attr(0755,root,root) %{pluginbase}/plugins
 %dir %attr(0755,root,root) %{pluginbase}/plugins/sauserprefs
@@ -209,8 +217,12 @@ make
 %doc %{_prefix}/share/indimail/doc/COPYING.ircube
 
 %changelog
-* Sat Apr 13 2017 mbhangui@gmail.com 1-0
-Release 1.1 Start 13/04/2017
+* Sat May 02 2020 12:13:43 +0530 mbhangui@gmail.com 1.0-1.1%{?dist}
+Release 1.0 Start 13/04/2017
 1. Created package for roundcube plugins
-2. Added INSTALL file
-3. Added testssl.php
+2. Created autoconfigure scripts
+3. Added INSTALL file
+4. Added testssl.php
+5. fixed typos in README
+6. added roundcubemail config script roundcube_config
+7. updated README
