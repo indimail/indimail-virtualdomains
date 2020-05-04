@@ -1,5 +1,8 @@
 /*
  * $Log: pathToFilesystem.c,v $
+ * Revision 1.2  2020-05-04 10:39:45+05:30  Cprogrammer
+ * use /proc/mounts, /proc/self/mounts for docker containers
+ *
  * Revision 1.1  2019-04-18 08:31:50+05:30  Cprogrammer
  * Initial revision
  *
@@ -25,12 +28,13 @@
 #include <stralloc.h>
 #include <str.h>
 #include <strerr.h>
+#include <error.h>
 #endif
 #include "Dirname.h"
 #include "getactualpath.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pathToFilesystem.c,v 1.1 2019-04-18 08:31:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pathToFilesystem.c,v 1.2 2020-05-04 10:39:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -92,7 +96,18 @@ pathToFilesystem(char *path)
 #else
 	fp = (FILE *) 0;
 #ifdef linux
-	if (!access("/etc/mtab", F_OK))
+	if (access("/etc/mtab", F_OK)) {
+		if (!access("/proc/self/mounts", F_OK))
+			fp = setmntent("/proc/self/mounts", "r");
+		else
+		if (!access("/proc/mounts", F_OK))
+			fp = setmntent("/proc/mounts", "r");
+		else {
+			errno = 2;
+			strerr_warn1("pathToFilesystem: /etc/mtab, /proc/mounts, /proc/self/mounts", &strerr_sys);
+			return ((char *) 0);
+		}
+	} else
 		fp = setmntent("/etc/mtab", "r");
 #elif defined(sun)
 	if (!access("/etc/mnttab", F_OK))
