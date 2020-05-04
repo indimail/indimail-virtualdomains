@@ -804,7 +804,7 @@ usr.bin.freshclam: usr.bin.freshclam.in
 indimail_config.h: config.h
 	egrep -v "#define PACKAGE|#define VERSION" config.h > indimail_config.h
 
-debian/Makefile: debian/Makefile.in
+debian/Makefile: debian/Makefile.in configure.ac
 	$(edit) $@.in > $@;
 
 INSTALL: INSTALL.in configure.ac
