@@ -60,7 +60,7 @@ BuildRequires: -post-build-checks
 ##############################################################################
 
 BuildRequires: coreutils
-Requires: roundcubemail iwebadmin coreutils sed
+Requires: iwebadmin coreutils sed
 Requires: indimail >= 2.0 indimail-mta >= 2.0
 
 %description
