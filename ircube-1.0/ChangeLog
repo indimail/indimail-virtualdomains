@@ -1,12 +1,13 @@
 * Mon May 04 2020 19:47:04 +0530 mbhangui@gmail.com 1.0-1.1%{?dist}
 Release 1.0 Start 13/04/2017
 16/03/2017
-1. Created autoconfigure scripts
+1.  Created autoconfigure scripts
 07/11/2018
-2. fixed typos in README
+2.  fixed typos in README
 02/05/2020
-3. added roundcubemail config script roundcube_config
-4. updated README
+3.  added roundcubemail config script roundcube_config
+4.  updated README
 04/05/2020
-4. removed IF NOT EXISTS from create user sql statement to support older
-   mysqld versions
+4.  removed IF NOT EXISTS from create user sql statement to support older
+    mysqld versions
+5.  updated roundcube_config for deskey, crontab entry
