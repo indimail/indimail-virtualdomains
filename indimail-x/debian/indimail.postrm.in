@@ -177,6 +177,13 @@ fi
 ${rm} -f ${sysconfdir}/imapd.pem ${sysconfdir}/pop3d.pem
 ${rm} -f ${sysconfdir}/imapd.cnf.* ${sysconfdir}/pop3d.cnf.*
 
+# update config for pam-multi link
+if [ -x /usr/sbin/update-alternatives ] ; then
+	/usr/sbin/update-alternatives --config mta
+elif [ -x /usr/bin/update-alternatives ] ; then
+	/usr/bin/update-alternatives --config mta
+fi
+
 echo "removing logs"
 ${rm} -f ${indimaildir}/mysqldb/logs/logisam.log
 ${rm} -f ${indimaildir}/mysqldb/logs/logquery

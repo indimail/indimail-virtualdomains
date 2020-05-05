@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.26 2020-04-30 09:25:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.27 2020-05-05 08:48:25+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -2124,6 +2124,11 @@ done
 
 # selinux
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
+if [ -x /usr/sbin/alternatives ] ; then
+	/usr/sbin/alternatives --add-slave mta %{_prefix}/bin/sendmail \
+		%{pam_confdir}/smtp mta-pam %{pam_confdir}/pam-multi
+fi
+
 
 if [ -f %{sysconfdir}/cronlist.i -a -d %{_sysconfdir}/cron.d ] ; then
   echo "adding cron entries"
@@ -2275,6 +2280,10 @@ do
     > %{servicedir}/qmail-smtpd.$port/variables/LOGFILTER
   fi
 done
+# remove pam module for smtp
+if [ -x /usr/sbin/alternatives ] ; then
+	/usr/sbin/alternatives --remove-slave mta %{_prefix}/bin/sendmail mta-pam
+fi
 %{__rm} -f %{sysconfdir}/indimail.mrtg.ok %{sysconfdir}/system.mrtg.ok
 echo "removing startup services"
 for i in fetchmail indisrvr.4000 inlookup.infifo mysql.3306 \
@@ -2320,7 +2329,6 @@ proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110 pwdlookup
 do
   %{__rm} -rf $log_dir/$i
 done
-
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   echo "recreating ld.so cache"
   /sbin/ldconfig

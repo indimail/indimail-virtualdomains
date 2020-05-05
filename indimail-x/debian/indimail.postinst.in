@@ -464,6 +464,12 @@ if [ -f ${libexecdir}/iupgrade.sh ] ; then
   echo "Running Custom Installation Script for post install"
   /bin/sh ${libexecdir}/iupgrade.sh post install @version@ $*
 fi
+# update config for pam-multi link
+if [ -x /usr/sbin/update-alternatives ] ; then
+	/usr/sbin/update-alternatives --config mta
+elif [ -x /usr/bin/update-alternatives ] ; then
+	/usr/bin/update-alternatives --config mta
+fi
 ) >> /tmp/indimail-setup.log 2>&1
 
 if [ -f /etc/init/svscan.conf -o -f /etc/event.d/svscan ] ; then
