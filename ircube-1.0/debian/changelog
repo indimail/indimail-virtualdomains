@@ -4,6 +4,7 @@ ircube (1.0-1) stable; urgency=low
   * Created autoconfigure scripts
   * added roundcubemail config script roundcube_config
   * updated README
+  * removed IF NOT EXISTS from create user sql statement to support older mysqld versions
 
- -- Manvendra Bhangui <manvendra@indimail.org>  Sat, 02 May 2020 12:13:43 +0530
+ -- Manvendra Bhangui <manvendra@indimail.org>  Mon, 04 May 2020 19:47:04 +0530
 

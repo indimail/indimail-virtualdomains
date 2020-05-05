@@ -217,7 +217,7 @@ make
 %doc %{_prefix}/share/indimail/doc/COPYING.ircube
 
 %changelog
-* Sat May 02 2020 12:13:43 +0530 mbhangui@gmail.com 1.0-1.1%{?dist}
+* Mon May 04 2020 19:47:04 +0530 mbhangui@gmail.com 1.0-1.1%{?dist}
 Release 1.0 Start 13/04/2017
 1. Created package for roundcube plugins
 2. Created autoconfigure scripts
@@ -226,3 +226,5 @@ Release 1.0 Start 13/04/2017
 5. fixed typos in README
 6. added roundcubemail config script roundcube_config
 7. updated README
+8. removed IF NOT EXISTS from create user sql statement to support older
+   mysqld versions
