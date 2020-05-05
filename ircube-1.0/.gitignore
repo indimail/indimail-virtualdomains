@@ -12,3 +12,5 @@ install-sh
 autom4te.cache
 config.log
 config.status
+ChangeLog
+debian/changelog
