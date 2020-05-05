@@ -40,11 +40,19 @@ echo "  ),"
 echo ");"
 echo "\$config['force_https'] = true;"
 echo "\$config['support_url'] = 'https://sourceforge.net/p/indimail/support-requests';"
-echo "\$config['product_name'] = 'IndiMail Webmail';"
+echo "\$config['product_name'] = 'IndiMail';"
 echo "\$config['useragent'] = 'IndiMail Webmail/'.RCUBE_VERSION;"
-echo "\$config['des_key'] = 'rcmail-!24ByteDESkey*Str';"
+deskey=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9-_#&!*%?' | fold -w 24 | head -n 1)
+echo "\$config['des_key'] = '$deskey';"
+echo "\$config['language'] = 'en_US';"
+echo "\$config['enable_spellcheck'] = false;"
+echo "\$config['mail_pagesize'] = 50;"
+echo "\$config['draft_autosave'] = 300;"
+echo "\$config['mime_param_folding'] = 0;"
+echo "\$config['mdn_requests'] = 2;"
 echo "\$config['plugins'] = array("
 echo "    'archive',"
+echo "    'zipdownload',"
 echo "    'sauserprefs',"
 echo "    'markasjunk2',"
 echo "    'iwebadmin',"
@@ -292,5 +300,13 @@ if [ -f /etc/debian_version ] ; then
 		a2ensite default-ssl.conf
 	fi
 fi
+echo "Adding crontab entry for root"
+tmp=$(mktemp -t crontab.tmp.XXXXXXXXXX)
+crontab -u root -l | $sed "/$(echo /usr/share/roundcubemail | $sed -e 's/\//\\\//g')\/bin\/cleandb\.sh/d" > "${tmp}"
+echo "18 11 * * * /usr/share/roundcubemail/bin/cleandb.sh > /dev/null" >> "${tmp}"
+crontab -u root "${tmp}"
+$rm -f "${tmp}"
+unset tmp
+$chmod +x /usr/share/roundcubemail/bin/cleandb.sh
 echo "Adding qmail as supplementary group to $httpd_group"
 /usr/bin/getent group $httpd_group > /dev/null && /usr/sbin/usermod -aG qmail $httpd_group
