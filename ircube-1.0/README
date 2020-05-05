@@ -30,6 +30,22 @@ Non SSL Version Install/Configuration (look below for SSL config)
    Edit the lines in /etc/roundcubemail/config.inc.php
 
    $config['db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
+   #
+   # To use SSL/TLS connection, enter the hostname with prefix "ssl://" or
+   # "tls://"
+   # And if you want a drop-down list like it's explained in the comments you
+   # need something like this:
+   #$config['default_host'] = array('mail.example.com', 'webmail.example.com', 'ssl://mail.example.com:993');
+   #
+   # In order to show nice labels instead of the host names in the drop-down
+   # box write it this way:
+   #
+   #$config['default_host'] = array(
+   #  'mail.example.com' => 'Default Server',
+   #  'webmail.example.com' => 'Webmail Server',
+   #  'ssl://mail.example.com:993' => 'Secure Webmail Server'
+   #);
+   #
    $config['smtp_server'] = 'localhost';
    $config['smtp_port'] = 587;
    $config['smtp_user'] = '%u';
@@ -149,6 +165,22 @@ Non SSL Version Install/Configuration (look below for SSL config)
    Edit the lines in /etc/roundcubemail/config.inc.php
 
    $config['db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
+   #
+   # To use SSL/TLS connection, enter the hostname with prefix "ssl://" or
+   # "tls://"
+   # And if you want a drop-down list like it's explained in the comments you
+   # need something like this:
+   #$config['default_host'] = array('mail.example.com', 'webmail.example.com', 'ssl://mail.example.com:993');
+   #
+   # In order to show nice labels instead of the host names in the drop-down
+   # box write it this way:
+   #
+   #$config['default_host'] = array(
+   #  'mail.example.com' => 'Default Server',
+   #  'webmail.example.com' => 'Webmail Server',
+   #  'ssl://mail.example.com:993' => 'Secure Webmail Server'
+   #);
+   #
    $config['default_host'] = 'ssl://indimail.org';
    $config['default_port'] = 993;
    $config['imap_auth_type'] = 'LOGIN';
