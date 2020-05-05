@@ -163,9 +163,9 @@ if [ ! -d /var/indimail/mysqldb/data/RoundCube_db ] ; then
 	if [ $? -eq 0 ] ; then
 		echo "adding roundcube user"
 		(
-			echo "create database if not exists RoundCube_db;"
-			echo "create user if not exists roundcube identified by 'subscribed';"
-			echo "GRANT ALL PRIVILEGES on RoundCube_db.* to roundcube;"
+			echo "CREATE DATABASE IF NOT EXISTS RoundCube_db;"
+			echo "CREATE USER roundcube IDENTIFIED BY 'subscribed';"
+			echo "GRANT ALL PRIVILEGES ON RoundCube_db.* TO roundcube;"
 			echo "FLUSH PRIVILEGES;"
 		) | /usr/bin/mysql -u mysql -p"$PRIV_PASS" mysql
 		if [ -f /usr/share/roundcubemail/SQL/mysql.initial.sql ] ; then
