@@ -38,7 +38,10 @@ echo "    'verify_peer'       => false,"
 echo "    'verify_peer_name'  => false,"
 echo "  ),"
 echo ");"
-echo "\$config['force_https'] = true;"
+echo "\$config['force_https'] = false;"
+echo "// THIS OPTION WILL ALLOW THE INSTALLER TO RUN AND CAN EXPOSE SENSITIVE CONFIG DATA."
+echo "// ONLY ENABLE IT IF YOU'RE REALLY SURE WHAT YOU'RE DOING!"
+echo "\$config['enable_installer'] = false;"
 echo "\$config['support_url'] = 'https://sourceforge.net/p/indimail/support-requests';"
 echo "\$config['product_name'] = 'IndiMail';"
 echo "\$config['useragent'] = 'IndiMail Webmail/'.RCUBE_VERSION;"
@@ -150,16 +153,33 @@ if [ ! -d /var/indimail/mysqldb/data/RoundCube_db ] ; then
 	ps -ef|grep mysqld|grep -v grep > /dev/null 2>&1
 	if [ $? -ne 0 ] ; then
 		if [ -x /service/mysql.3306/run ] ; then
-			echo "starting MySQL server"
+			echo "Starting MySQL server"
 			/service/mysql.3306/run >/dev/null 2>&1 &
 			count=0
 			while true
 			do
-				ps -ef|grep mysqld|grep -v grep > /dev/null 2>&1
-				if [ $? -eq 0 ] ; then
-					break
+				if [ -f /var/run/mysqld/mysqld.3306.pid ] ; then
+					pid=`cat /var/run/mysqld/mysqld.3306.pid`
+				elif [ -f /run/mysqld/mysqld.3306.pid ] ; then
+					pid=`cat /var/run/mysqld/mysqld.3306.pid`
+				else
+					pid=""
 				fi
-				sleep 2
+				if [ -n "$pid" ] ; then
+					echo "Checking MySQLD pid=$pid"
+					kill -0 $pid
+					if [ $? -eq 0 ] ; then
+						echo "$count: found a running MySQL server with pid=$pid" 1>&2
+						sleep 2
+						break
+					else
+						echo "$count: Did not find a running MySQL server with pid=$pid" 1>&2
+						sleep 5
+					fi
+				else
+					echo "$count: Did not find a running MySQL server" 1>&2
+					sleep 5
+				fi
 				if [ $count -gt 10 ] ; then
 					break
 				fi
@@ -167,8 +187,7 @@ if [ ! -d /var/indimail/mysqldb/data/RoundCube_db ] ; then
 			done
 		fi
 	fi
-	ps -ef|grep mysqld|grep -v grep > /dev/null 2>&1
-	if [ $? -eq 0 ] ; then
+	if [ -S /var/run/mysqld/mysqld.sock ] ; then
 		echo "adding roundcube user"
 		(
 			echo "CREATE DATABASE IF NOT EXISTS RoundCube_db;"
@@ -180,12 +199,12 @@ if [ ! -d /var/indimail/mysqldb/data/RoundCube_db ] ; then
 			echo "initializing roundcube db"
 			/usr/bin/mysql -u roundcube -psubscribed RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
 		fi
-		if [ -x /service/mysql.3306/shutdown ] ; then
-			/service/mysql.3306/shutdown
-			echo "shutdown MySQL server"
-		fi
 	else
-		echo "Couldn't find a running MySQL server"
+		echo "Couldn't find a running MySQL server: mysqld.sock missing"
+	fi
+	if [ -x /service/mysql.3306/shutdown ] ; then
+		/service/mysql.3306/shutdown
+		echo "shutdown MySQL server"
 	fi
 fi
 
@@ -281,10 +300,31 @@ if [ -f /etc/debian_version ] ; then
 		$cp /etc/apache2/sites-available/000-default.conf.BAK \
 			/etc/apache2/sites-available/000-default.conf
 		echo "configuring /etc/apache2/sites-available/000-default.conf"
+		# apache2 on debian by default uses mod_php. You have to do this
+		# in order for apache2 to use php-fpm
+		tmp=$(mktemp -t apache2.tmp.XXXXXXXXXX)
+		(
+		echo ""
+		echo "    <Directory /var/www/html>"
+		echo "        Options -Indexes +FollowSymLinks +MultiViews"
+		echo "        AllowOverride All"
+		echo "        Require all granted"
+		echo "    </Directory>"
+		echo ""
+		echo "    <FilesMatch \.php$>"
+		echo "        # 2.4.10+ can proxy to unix socket"
+		echo "        SetHandler \"proxy:unix:/var/run/php/php7.2-fpm.sock|fcgi://localhost/\""
+		echo "        # Else we can just use a tcp socket:"
+		echo "        #SetHandler \"proxy:fcgi://127.0.0.1:9000\""
+		echo "    </FilesMatch>"
+		) > $tmp
 		$sed -i \
+			-e "/DocumentRoot/ r $tmp"
 			-e "s}#ServerName www.example.com}ServerName mail.indimail.org}g" \
 			-e "s}ServerAdmin webmaster@localhost}ServerAdmin root@localhost}g" \
 		/etc/apache2/sites-available/000-default.conf
+		$rm -f $tmp
+		unset tmp
 	fi
 	if [ -f /etc/apache2/sites-available/default-ssl.conf ] ; then
 		$mv /etc/apache2/sites-available/default-ssl.conf \
@@ -300,13 +340,72 @@ if [ -f /etc/debian_version ] ; then
 		a2ensite default-ssl.conf
 	fi
 fi
+
+#
+# create supervised services for apache2 and php-fpm under /service
+# have them in down state so that they don't get started when
+# invoked as indimail/indimail-mta containers
+#
+php_fpm=`ls /usr/sbin/php-fpm*`
+if [ ! -d /service/php-fpm ] ; then
+	if [ -f /etc/php-fpm.d/www.conf ] ; then
+		www_conf=/etc/php-fpm.d/www.conf
+	else
+		www_conf=`ls /etc/php/*/fpm/pool.d/www.conf 2>/dev/null`
+	fi
+	if [ -n "$www_conf" -a -f $www_conf ] ; then
+		sockname=$(grep "listen =" $www_conf |cut -d= -f2)
+		sockdir=$(dirname $sockname)
+		echo "socket director for php-fpm is $sockdir"
+	else
+		echo "couldn't find socket dir for php-fpm"
+	fi
+	if [ -n "$www_conf" -a -f $www_conf ] ; then
+		echo "Creating supervised service for php-fpm"
+		mkdir -p /service/php-fpm/log
+		touch /service/php-fpm/down
+		(
+		echo "#!/bin/sh"
+		echo "# created by roundcube_config for indimail+roundcube docker container"
+		echo "# service started by docker-entrypoint"
+		echo "#"
+		echo "mkdir -p $sockdir"
+		echo "exec $php_fpm -O -F"
+		) > /service/php-fpm/run
+		chmod +x /service/php-fpm/run
+		(
+		echo "#!/bin/sh"
+		echo "exec /usr/bin/setuidgid qmaill \\"
+		echo "  /usr/sbin/multilog t /var/log/svc/php-fpm"
+		) > /service/php-fpm/log/run
+		chmod +x /service/php-fpm/log/run
+	fi
+fi
+if [ ! -d /service/httpd ] ; then
+	echo "Creating supervised service for apache2"
+	mkdir -p /service/httpd
+	touch /service/httpd/down
+	(
+	echo "#!/bin/sh"
+	echo "# created by roundcube_config for indimail+roundcube docker container"
+	echo "# service started by docker-entrypoint"
+	echo "#"
+	echo "exec /usr/sbin/httpd -DFOREGROUND"
+	) > /service/httpd/run
+	chmod +x /service/httpd/run
+fi
+if [ -d /var/www/html ] ; then
+	echo "<?php phpinfo(); ?>" > /var/www/html/info.php
+fi
 echo "Adding crontab entry for root"
-tmp=$(mktemp -t crontab.tmp.XXXXXXXXXX)
-crontab -u root -l | $sed "/$(echo /usr/share/roundcubemail | $sed -e 's/\//\\\//g')\/bin\/cleandb\.sh/d" > "${tmp}"
-echo "18 11 * * * /usr/share/roundcubemail/bin/cleandb.sh > /dev/null" >> "${tmp}"
-crontab -u root "${tmp}"
-$rm -f "${tmp}"
-unset tmp
-$chmod +x /usr/share/roundcubemail/bin/cleandb.sh
+if [ -x /usr/bin/crontab ] ; then
+	tmp=$(mktemp -t crontab.tmp.XXXXXXXXXX)
+	crontab -u root -l | $sed "/$(echo /usr/share/roundcubemail | $sed -e 's/\//\\\//g')\/bin\/cleandb\.sh/d" > "${tmp}"
+	echo "18 11 * * * /usr/share/roundcubemail/bin/cleandb.sh > /dev/null" >> "${tmp}"
+	crontab -u root "${tmp}"
+	$rm -f "${tmp}"
+	unset tmp
+	$chmod +x /usr/share/roundcubemail/bin/cleandb.sh
+fi
 echo "Adding qmail as supplementary group to $httpd_group"
 /usr/bin/getent group $httpd_group > /dev/null && /usr/sbin/usermod -aG qmail $httpd_group

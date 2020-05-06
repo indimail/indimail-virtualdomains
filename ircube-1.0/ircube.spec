@@ -229,3 +229,5 @@ Release 1.0 Start 13/04/2017
 8.  removed IF NOT EXISTS from create user sql statement to support older
     mysqld versions
 9.  updated roundcube_config for deskey, crontab entry
+10. Create supervised services for apache2, php-fpm
+11. Enable php-fpm for apache2 on debian systems
