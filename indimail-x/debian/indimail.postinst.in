@@ -473,14 +473,14 @@ fi
 ) >> /tmp/indimail-setup.log 2>&1
 
 if [ -f /etc/init/svscan.conf -o -f /etc/event.d/svscan ] ; then
-	echo "1. Issue /sbin/initctl emit qmailstart to start services"
+	echo "1. Execute /sbin/initctl emit qmailstart to start services"
 	count=1
 elif [ -f /etc/systemd/system/multi-user.target.wants/svscan.service ] ; then
-	echo "1. Issue /bin/systemctl start svscan to start services"
+	echo "1. Execute /bin/systemctl start svscan to start services"
 	count=1
 else
-	echo "1. Issue ${prefix}/sbin/initsvc -on"
-	echo "2. Issue /sbin/init q to start services"
+	echo "1. Execute ${prefix}/sbin/initsvc -on"
+	echo "2. Execute /sbin/init q to start services"
 	count=2
 fi
 echo "   You can also use the 'service' command to start indimail"

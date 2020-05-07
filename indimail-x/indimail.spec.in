@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.27 2020-05-05 08:48:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.28 2020-05-08 00:23:22+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -2142,14 +2142,14 @@ fi
 ) >> /tmp/indimail-setup.log 2>&1
 
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
-  echo "1. Issue /sbin/initctl emit qmailstart to start services"
+  echo "1. Execute /sbin/initctl emit qmailstart to start services"
   count=1
 elif [ -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service ] ; then
-  echo "1. Issue /bin/systemctl start svscan to start services"
+  echo "1. Execute /bin/systemctl start svscan to start services"
   count=1
 else
-  echo "1. Issue %{_prefix}/sbin/initsvc -on"
-  echo "2. Issue /sbin/init q to start services"
+  echo "1. Execute %{_prefix}/sbin/initsvc -on"
+  echo "2. Execute /sbin/init q to start services"
   count=2
 fi
 
