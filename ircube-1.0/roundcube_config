@@ -121,6 +121,56 @@ echo "    Deny from all"
 echo "</Directory>"
 }
 
+create_roundcube_centos_httpd_conf()
+{
+echo "#"
+echo "# Round Cube Webmail is a browser-based multilingual IMAP client"
+echo "#"
+echo ""
+echo "Alias /indimail /usr/share/roundcubemail"
+echo ""
+echo "# Define who can access the Webmail"
+echo "# You can enlarge permissions once configured"
+echo ""
+echo "<Directory /usr/share/roundcubemail>"
+echo "    Options -Indexes"
+echo "    AllowOverride All"
+echo "    Require all granted"
+echo "</Directory>"
+echo ""
+echo "# Define who can access the installer"
+echo "# keep this secured once configured"
+echo ""
+echo "<Directory /usr/share/roundcubemail/installer/>"
+echo "    Require all granted"
+echo "</Directory>"
+echo ""
+echo "<Directory /usr/share/roundcubemail/config>"
+echo "    Order Deny,Allow"
+echo "    Deny from All"
+echo "</Directory>"
+echo ""
+echo "<Directory /usr/share/roundcubemail/temp>"
+echo "    Order Deny,Allow"
+echo "    Deny from All"
+echo "</Directory>"
+echo ""
+echo "<Directory /usr/share/roundcubemail/logs>"
+echo "    Order Deny,Allow"
+echo "    Deny from All"
+echo "</Directory>"
+echo ""
+echo "# Those directories should not be viewed by Web clients."
+echo "<Directory /usr/share/roundcubemail/bin/>"
+echo "    Order Allow,Deny"
+echo "    Deny from all"
+echo "</Directory>"
+echo "<Directory /usr/share/roundcubemail/plugins/enigma/home/>"
+echo "    Order Allow,Deny"
+echo "    Deny from all"
+echo "</Directory>"
+}
+
 change_config()
 {
 if [ $# -ne 2 ] ; then
@@ -144,14 +194,15 @@ fi
 
 if [ -f /etc/debian_version ] ; then
 	httpd_group="www-data"
-	php_ini="/etc/php/7.2/apache2/php.ini"
+	php_ini="ls /etc/php/*/apache2/php.ini"
 else
 	httpd_group="apache"
 	php_ini="/etc/php.ini"
 fi
 if [ ! -d /var/indimail/mysqldb/data/RoundCube_db ] ; then
-	ps -ef|grep mysqld|grep -v grep > /dev/null 2>&1
-	if [ $? -ne 0 ] ; then
+	sleep 3
+	ps -ef|grep mysqld|egrep -v "systemctl|grep" > /dev/null 2>&1
+	if [ $? -ne 0 -a ! -S /var/run/mysqld/mysqld.sock ] ; then
 		if [ -x /service/mysql.3306/run ] ; then
 			echo "Starting MySQL server"
 			/service/mysql.3306/run >/dev/null 2>&1 &
@@ -247,7 +298,7 @@ if [ -f /usr/share/roundcubemail/plugins/sauserprefs/config.inc.php ]; then
 	/usr/share/roundcubemail/plugins/sauserprefs/config.inc.php
 fi
 		
-if [ -f $php_ini ] ; then
+if [ -n "$php_ini" -a -f $php_ini ] ; then
 	echo "configuring $php_ini"
 	$mv $php_ini "$php_ini".BAK
 	$cp "$php_ini".BAK $php_ini
@@ -288,7 +339,62 @@ if [ -f /etc/httpd/conf.d/ssl.conf ] ; then
 		-e 's/^SSLCertificateKeyFile./#&/' \
 	/etc/httpd/conf.d/ssl.conf
 fi
-if [ -f /etc/debian_version ] ; then
+if [ -f /etc/centos-release ] ; then
+	centos_release=$(cat /etc/centos-release|awk '{print $4}'|cut -d.  -f1)
+	case "$centos_release" in
+		7)
+		echo "configuring /etc/httpd/conf.d/roundcubemail.conf for CentOS 7"
+		if [ -f /etc/httpd/conf.d/roundcubemail.conf ] ; then
+			$mv /etc/httpd/conf.d/roundcubemail.conf \
+				/etc/httpd/conf.d/roundcubemail.conf.BAK
+		fi
+		create_roundcube_centos_httpd_conf > /etc/httpd/conf.d/roundcubemail.conf
+		if [ -f /etc/httpd/conf.modules.d/00-mpm.conf ] ; then
+			echo "configuring /etc/httpd/conf.modules.d/00-mpm.conf"
+			$mv /etc/httpd/conf.modules.d/00-mpm.conf \
+				/etc/httpd/conf.modules.d/00-mpm.conf.BAK
+			$cp /etc/httpd/conf.modules.d/00-mpm.conf.BAK \
+				/etc/httpd/conf.modules.d/00-mpm.conf
+			sed -i \
+				-e 's{LoadModule mpm_prefork_module.*{#&{g' \
+				-e 's{#LoadModule mpm_event_module{LoadModule mpm_event_module{g' \
+					/etc/httpd/conf.modules.d/00-mpm.conf
+		fi
+		if [ -f /etc/httpd/conf.d/php.conf ] ; then
+			echo "configuring /etc/httpd/conf.d/php.conf"
+			$mv /etc/httpd/conf.d/php.conf \
+				/etc/httpd/conf.d/php.conf.BAK
+			$cp /etc/httpd/conf.d/php.conf.BAK \
+				/etc/httpd/conf.d/php.conf
+			tmp=$(mktemp -t httpd.tmp.XXXXXXXXXX)
+			(
+			echo ""
+			echo "# Tell the PHP interpreter to handle files with a .php extension."
+			echo ""
+			echo "# Proxy declaration"
+			echo "<Proxy \"unix:/var/run/php-fpm/www.sock|fcgi://php-fpm\">"
+			echo "    # we must declare a parameter in here (doesn't matter which) or it'll not register the proxy ahead of time"
+			echo "    ProxySet disablereuse=off"
+			echo "</Proxy>"
+			echo ""
+			echo "# Redirect to the proxy"
+			echo "<FilesMatch \.php$>"
+			echo "    SetHandler proxy:fcgi://php-fpm"
+			echo "</FilesMatch>"
+			) > $tmp
+			$sed -i \
+				-e "/<\/Files>/ r $tmp" \
+				-e "s{^    <FilesMatch \\\.(php|phar)$>{#&{g" \
+				-e "s{^        SetHandler application/x-httpd-php{#&{g" \
+				-e "s{^    </FilesMatch>{#&{g" \
+				/etc/httpd/conf.d/php.conf
+			/bin/rm -f $tmp
+		fi
+		;;
+		*)
+		;;
+	esac
+elif [ -f /etc/debian_version ] ; then
 	if [ ! -f /etc/apache2/sites-available/roundcubemail.conf ] ; then
 		echo "configuring /etc/apache2/sites-available/roundcubemail.conf"
 		create_roundcube_httpd_conf > /etc/apache2/sites-available/roundcubemail.conf
@@ -356,7 +462,7 @@ if [ ! -d /service/php-fpm ] ; then
 	if [ -n "$www_conf" -a -f $www_conf ] ; then
 		sockname=$(grep "listen =" $www_conf |cut -d= -f2)
 		sockdir=$(dirname $sockname)
-		echo "socket director for php-fpm is $sockdir"
+		echo "socket directory for php-fpm is $sockdir"
 	else
 		echo "couldn't find socket dir for php-fpm"
 	fi
@@ -390,6 +496,10 @@ if [ ! -d /service/httpd ] ; then
 	echo "# created by roundcube_config for indimail+roundcube docker container"
 	echo "# service started by docker-entrypoint"
 	echo "#"
+	echo "if [ ! -d /usr/share/roundcubemail/config -a ! -L /usr/share/roundcubemail/config ] ; then"
+	echo "  echo \"ln -s /etc/roundcubemail /usr/share/roundcubemail/config\""
+	echo "  ln -s /etc/roundcubemail /usr/share/roundcubemail/config"
+	echo "fi"
 	echo "exec /usr/sbin/httpd -DFOREGROUND"
 	) > /service/httpd/run
 	chmod +x /service/httpd/run
@@ -397,11 +507,12 @@ fi
 if [ -d /var/www/html ] ; then
 	echo "<?php phpinfo(); ?>" > /var/www/html/info.php
 fi
-echo "Adding crontab entry for root"
 if [ -x /usr/bin/crontab ] ; then
 	tmp=$(mktemp -t crontab.tmp.XXXXXXXXXX)
+	echo "Getting existing crontab entry for root"
 	crontab -u root -l | $sed "/$(echo /usr/share/roundcubemail | $sed -e 's/\//\\\//g')\/bin\/cleandb\.sh/d" > "${tmp}"
 	echo "18 11 * * * /usr/share/roundcubemail/bin/cleandb.sh > /dev/null" >> "${tmp}"
+	echo "Adding crontab entry for root"
 	crontab -u root "${tmp}"
 	$rm -f "${tmp}"
 	unset tmp
