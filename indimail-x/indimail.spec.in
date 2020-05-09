@@ -1940,15 +1940,15 @@ fi
 
 # SMTP
 %ifarch x86_64
-%global fetchmail_mem 144857600
-%global imap_pop3_mem 524288000
-%global imapspop3_mem 524288000
-%global poppass_mem   104857600
+%global fetchmail_mem 52428800
+%global imap_pop3_mem 26214400
+%global imapspop3_mem 26214400
+%global poppass_mem   26214400
 %else
 %global fetchmail_mem 72428800
-%global imap_pop3_mem 52428800
-%global imapspop3_mem 52428800
-%global poppass_mem   52428800
+%global imap_pop3_mem 26214400
+%global imapspop3_mem 26214400
+%global poppass_mem   26214400
 %endif
 
 # Configure SPAMFILTER, LOGFILTER
@@ -2125,8 +2125,11 @@ done
 # selinux
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
 if [ -x /usr/sbin/alternatives ] ; then
-	/usr/sbin/alternatives --add-slave mta %{_prefix}/bin/sendmail \
-		%{pam_confdir}/smtp mta-pam %{pam_confdir}/pam-multi
+  openSUSE=$(grep /etc/os-release 2>/dev/null)
+  if [ -z "$openSUSE" -a ! -f /etc/SuSE-release ] ; then
+    /usr/sbin/alternatives --add-slave mta %{_prefix}/bin/sendmail \
+      %{pam_confdir}/smtp mta-pam %{pam_confdir}/pam-multi
+  fi
 fi
 
 
@@ -2282,7 +2285,10 @@ do
 done
 # remove pam module for smtp
 if [ -x /usr/sbin/alternatives ] ; then
-	/usr/sbin/alternatives --remove-slave mta %{_prefix}/bin/sendmail mta-pam
+  openSUSE=$(grep /etc/os-release 2>/dev/null)
+  if [ -z "$openSUSE" -a ! -f /etc/SuSE-release ] ; then
+    /usr/sbin/alternatives --remove-slave mta %{_prefix}/bin/sendmail mta-pam
+  fi
 fi
 %{__rm} -f %{sysconfdir}/indimail.mrtg.ok %{sysconfdir}/system.mrtg.ok
 echo "removing startup services"
