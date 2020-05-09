@@ -278,15 +278,15 @@ fi
 
 a_arch=`uname -m`
 if [ " $a_arch" = " x86_64" ] ; then
- fetchmail_mem=144857600
- imap_pop3_mem=524288000
- imapspop3_mem=524288000
- poppass_mem=104857600
+ fetchmail_mem=52428800
+ imap_pop3_mem=26214400
+ imapspop3_mem=26214400
+ poppass_mem=26214400
 else
- fetchmail_mem=72428800
- imap_pop3_mem=52428800
- imapspop3_mem=52428800
- poppass_mem=52428800
+ fetchmail_mem=52428800
+ imap_pop3_mem=26214400
+ imapspop3_mem=26214400
+ poppass_mem=26214400
 fi
 # SMTP
 for port in 465 25
