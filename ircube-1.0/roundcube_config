@@ -192,17 +192,11 @@ else
 fi
 }
 
-if [ -f /etc/debian_version ] ; then
-	httpd_group="www-data"
-	php_ini="ls /etc/php/*/apache2/php.ini"
-else
-	httpd_group="apache"
-	php_ini="/etc/php.ini"
-fi
+# same for all distros
+# RoundCube DB setup
 if [ ! -d /var/indimail/mysqldb/data/RoundCube_db ] ; then
-	sleep 3
 	ps -ef|grep mysqld|egrep -v "systemctl|grep" > /dev/null 2>&1
-	if [ $? -ne 0 -a ! -S /var/run/mysqld/mysqld.sock ] ; then
+	if [ $? -ne 0 -o ! -S /var/run/mysqld/mysqld.sock ] ; then
 		if [ -x /service/mysql.3306/run ] ; then
 			echo "Starting MySQL server"
 			/service/mysql.3306/run >/dev/null 2>&1 &
@@ -250,15 +244,17 @@ if [ ! -d /var/indimail/mysqldb/data/RoundCube_db ] ; then
 			echo "initializing roundcube db"
 			/usr/bin/mysql -u roundcube -psubscribed RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
 		fi
+		if [ -x /service/mysql.3306/shutdown ] ; then
+			/service/mysql.3306/shutdown
+			echo "shutdown MySQL server"
+		fi
 	else
 		echo "Couldn't find a running MySQL server: mysqld.sock missing"
 	fi
-	if [ -x /service/mysql.3306/shutdown ] ; then
-		/service/mysql.3306/shutdown
-		echo "shutdown MySQL server"
-	fi
 fi
 
+# same for all distros
+# RoundCube DB setup
 if [ -d /etc/roundcubemail -a ! -f /etc/roundcubemail/config.inc.php ] ; then
 	echo "creating /etc/roundcubemail/config.inc.php"
 	create_roundcube_php_config > /tmp/config.cnf.$$
@@ -276,6 +272,8 @@ if [ -d /etc/roundcubemail -a ! -f /etc/roundcubemail/config.inc.php ] ; then
 	fi
 fi
 
+# same for all distros
+# Plugins
 if [ -f /usr/share/roundcubemail/plugins/iwebadmin/config.inc.php ] ; then
 	echo "configuring /usr/share/roundcubemail/plugins/iwebadmin/config.inc.php"
 	$mv /usr/share/roundcubemail/plugins/iwebadmin/config.inc.php \
@@ -297,7 +295,17 @@ if [ -f /usr/share/roundcubemail/plugins/sauserprefs/config.inc.php ]; then
 		-e "s}$rcmail_config\['sauserprefs_db_dsnw'\].*}$rcmail_config\['sauserprefs_db_dsnw'\] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';}g" \
 	/usr/share/roundcubemail/plugins/sauserprefs/config.inc.php
 fi
-		
+
+if [ -f /etc/debian_version ] ; then
+	# debian / ubuntu
+	httpd_group="www-data"
+	php_ini="ls /etc/php/*/apache2/php.ini"
+else
+	# CentOS, Fedora
+	httpd_group="apache"
+	php_ini="/etc/php.ini"
+fi
+
 if [ -n "$php_ini" -a -f $php_ini ] ; then
 	echo "configuring $php_ini"
 	$mv $php_ini "$php_ini".BAK
@@ -313,31 +321,44 @@ if [ -n "$php_ini" -a -f $php_ini ] ; then
 	$php_ini
 	$php -r "print_r(openssl_get_cert_locations());"
 fi
+
 if [ -f /etc/httpd/conf.d/roundcubemail.conf ] ; then
-	echo "configuring /etc/httpd/conf.d/roundcubemail.conf"
-	$mv /etc/httpd/conf.d/roundcubemail.conf \
-		/etc/httpd/conf.d/roundcubemail.conf.BAK
-	$cp /etc/httpd/conf.d/roundcubemail.conf.BAK \
-		/etc/httpd/conf.d/roundcubemail.conf
+	rcube_conf=/etc/httpd/conf.d/roundcubemail.conf
+elif [ -f /etc/apache2/conf.d/roundcubemail.conf ] ; then
+	rcube_conf=/etc/apache2/conf.d/roundcubemail.conf
+else
+	rcube_conf=""
+fi
+if [ -n "$rcube_conf" -a -f "$rcube_conf" ] ; then
+	echo "configuring $rcube_conf"
+	$mv $rcube_conf \
+		$rcube_conf.BAK
+	$cp $rcube_conf.BAK \
+		$rcube_conf
 	$sed -i \
-		-e "s}Alias /roundcubemail /usr/share/roundcubemail}Alias /indimail /usr/share/roundcubemail}g" \
+		-e "s}Alias /roundcubemail }Alias /indimail }g" \
 		-e "/Require local/ i \        Require ip 127.0.0.1" \
 		-e "/Require local/ i \        Require all granted" \
-	/etc/httpd/conf.d/roundcubemail.conf
-	$chown root:root /etc/httpd/conf.d/roundcubemail.conf
-	$chmod 644 /etc/httpd/conf.d/roundcubemail.conf
+		$rcube_conf
+	$chown root:root $rcube_conf
+	$chmod 644 $rcube_conf
 fi
 if [ -f /etc/httpd/conf.d/ssl.conf ] ; then
+	ssl_cnf=/etc/httpd/conf.d/ssl.conf
+else
+	ssl_cnf=""
+fi
+if [ -f $ssl_cnf ] ; then
 	echo "configuring /etc/httpd/conf.d/ssl.conf"
-	$mv /etc/httpd/conf.d/ssl.conf \
-		/etc/httpd/conf.d/ssl.conf.BAK
-	$cp /etc/httpd/conf.d/ssl.conf.BAK \
-		/etc/httpd/conf.d/ssl.conf
+	$mv $ssl_cnf \
+		$ssl_cnf.BAK
+	$cp $ssl_cnf.BAK \
+		$ssl_cnf
 	$sed -i \
 		-e "s}^#ServerName www.example.com:443}ServerName indimail.org:443}g" \
 		-e "s}^SSLCertificateFile.*}SSLCertificateFile /etc/indimail/certs/servercert.pem}g" \
 		-e 's/^SSLCertificateKeyFile./#&/' \
-	/etc/httpd/conf.d/ssl.conf
+	$ssl_cnf
 fi
 if [ -f /etc/centos-release ] ; then
 	centos_release=$(cat /etc/centos-release|awk '{print $4}'|cut -d.  -f1)
@@ -459,14 +480,14 @@ if [ ! -d /service/php-fpm ] ; then
 	else
 		www_conf=`ls /etc/php/*/fpm/pool.d/www.conf 2>/dev/null`
 	fi
-	if [ -n "$www_conf" -a -f $www_conf ] ; then
+	if [ -n "$www_conf" -a -f "$www_conf" ] ; then
 		sockname=$(grep "listen =" $www_conf |cut -d= -f2)
 		sockdir=$(dirname $sockname)
 		echo "socket directory for php-fpm is $sockdir"
 	else
 		echo "couldn't find socket dir for php-fpm"
 	fi
-	if [ -n "$www_conf" -a -f $www_conf ] ; then
+	if [ -n "$www_conf" -a -f "$www_conf" ] ; then
 		echo "Creating supervised service for php-fpm"
 		mkdir -p /service/php-fpm/log
 		touch /service/php-fpm/down
