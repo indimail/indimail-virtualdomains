@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbInfo.c,v $
+ * Revision 1.9  2020-05-12 19:23:58+05:30  Cprogrammer
+ * BUG - uninitialized relayhosts variable
+ *
  * Revision 1.8  2020-04-30 19:25:15+05:30  Cprogrammer
  * changed scope of ssin, ssout variables to local
  *
@@ -83,7 +86,7 @@
 #include "check_group.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.8 2020-04-30 19:25:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.9 2020-05-12 19:23:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static DBINFO **loadMCDInfo(int *);
@@ -877,7 +880,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 			 * remember that total is one less than the actual number of records allocated
 			 * in loadMCDInfo(). So for one more record we have to allocate total + 1 + 1
 			 * The new allocated becomes total + 1 plus 1 for the last NULL dbinfo structure
-			 * The new total becoems total + 1
+			 * The old total was total + 1 and the new total becomes total + 2
 			 */
 			alloc_re((char *) &relayhosts, sizeof(DBINFO *) * (*total + 1), sizeof(DBINFO *) * (*total + 2));
 			rhostsptr = relayhosts + *total;
@@ -912,14 +915,18 @@ localDbInfo(int *total, DBINFO ***rhosts)
 		(*rhostsptr) = (DBINFO *) 0;
 		return (relayhosts);
 	}
-	if (*total) { /*- we found domains in the assign file */
+	if (*total) { /*- non-empty mcdinfo file */
+		/*- +ve count indicates that we found domains in the assign file */
 		alloc_re((char *) &relayhosts, sizeof(DBINFO *) * *total, sizeof(DBINFO *) * (*total + count + 1));
 		rhostsptr = relayhosts + *total;
 		for (tmpPtr = rhostsptr;tmpPtr < relayhosts + *total + count + 1;tmpPtr++)
 			*tmpPtr = (DBINFO *) 0;
 		_total = (*total) += count;
 	} else {
+		/*- empty relayhosts */
 		relayhosts = (DBINFO **) alloc(sizeof(DBINFO *) * (count + 1));
+		for (found = 0, rhostsptr = relayhosts; found < count + 1;found++, rhostsptr++)
+			(*rhostsptr) = (DBINFO *) 0;
 		rhostsptr = relayhosts;
 	}
 	if (!relayhosts)
