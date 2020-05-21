@@ -140,7 +140,9 @@ obs_deb_prep: obs_deb_prep.in Makefile
 	$(edit) $@.in > $@;
 
 changelog: changelog.in Makefile ../conf-release
-	$(edit) $@.in > $@;
+	(cat $@.in; echo ""; \
+	echo " -- Manvendra Bhangui <indimail-virtualdomains@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
+	| $(edit) > $@
 indimail.dsc: indimail.dsc.in Makefile ../conf-release
 	$(edit) $@.in > $@;
 indimail-Debian_9.0.dsc: indimail-Debian_9.0.dsc.in Makefile ../conf-release
