@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([IndiMail],3.1,[Manvendra Bhangui manvendra@indimail.org],indimail, [http://www.indimail.org])
+AC_INIT([IndiMail],3.2,[Manvendra Bhangui manvendra@indimail.org],indimail, [http://www.indimail.org])
 AC_CONFIG_HEADERS([config.h])
 AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-support@lists.sourceforge.net")
 PACKAGE=$PACKAGE_NAME
