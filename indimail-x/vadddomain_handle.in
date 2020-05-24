@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.18  2020-05-25 00:05:59+05:30  Cprogrammer
+# use root:qmail permission for spamignore, nodnscheck
+#
 # Revision 2.17  2018-01-27 10:11:44+05:30  Cprogrammer
 # updated comment
 #
@@ -54,7 +57,7 @@
 # post handle for vadddomain
 #
 #
-# $Id: vadddomain_handle.in,v 2.17 2018-01-27 10:11:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.18 2020-05-25 00:05:59+05:30 Cprogrammer Exp mbhangui $
 
 # send sighup to inlookup service to reload domains
 (
@@ -109,7 +112,7 @@ do
 	else
 		echo @"$1" > @controldir@/$i
 	fi
-	$chown indimail:indimail @controldir@/$i
+	$chown root:qmail @controldir@/$i
 	$chmod 644 @controldir@/$i
 done
 exit 0
