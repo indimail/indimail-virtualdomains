@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vdeldomain_handle.in,v $
+# Revision 2.5  2020-05-25 00:04:57+05:30  Cprogrammer
+# use root:qmail permission for spamignore, nodnscheck
+#
 # Revision 2.4  2019-03-05 17:06:19+05:30  Cprogrammer
 # supress message when there is no entries to be removed from spamignore, nodnscheck
 #
@@ -15,7 +18,7 @@
 #
 #
 #
-# $Id: vdeldomain_handle.in,v 2.4 2019-03-05 17:06:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: vdeldomain_handle.in,v 2.5 2020-05-25 00:04:57+05:30 Cprogrammer Exp mbhangui $
 
 # get securely chown, chmod path
 PATH=/usr/bin:/bin
@@ -34,7 +37,7 @@ do
 			if [ -s /tmp/$i.$$ ] ; then
 				echo "removing $1 from $i control file"
 				$mv /tmp/$i.$$ @controldir@/$i
-				$chown indimail:indimail @controldir@/$i
+				$chown root:qmail @controldir@/$i
 				$chmod 644 @controldir@/$i
 			else
 				/bin/rm -f /tmp/$i.$$
