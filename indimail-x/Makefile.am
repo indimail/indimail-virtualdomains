@@ -3,7 +3,7 @@ SUBDIRS=@subdir_list@
 
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
-release=$(shell grep Release: indimail.spec.in | cut -d: -f2|cut -c2-)
+release := $(shell cat conf-release 2>/dev/null|| echo "1.1")
 
 DEFS=@DEFS@ -Dlint -fno-strict-aliasing -I. -I/usr/include/qmail -Ieps-1.2 @auth_inc@
 
