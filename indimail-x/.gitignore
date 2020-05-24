@@ -226,3 +226,4 @@ debian/indimail.dsc
 .deps
 vpurge
 indimail_config.h
+conf-release
