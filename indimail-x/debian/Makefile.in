@@ -15,7 +15,7 @@ mysql_prefix=@mysql_prefix@
 mysql_incdir=@mysql_incdir@
 mysql_libdir=@mysql_libdir@
 defaultdomain=@defaultdomain@
-release := $(shell head -1 ../conf-release 2>/dev/null|| echo 1)
+release := $(shell head -1 ../conf-release 2>/dev/null|| echo 1.1)
 version=@version@
 prefix=@prefix@
 #
