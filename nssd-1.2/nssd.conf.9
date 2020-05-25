@@ -121,9 +121,9 @@ The example below shows a configuration file INDIMAIL/etc/nssd.conf
  database    indimail
  username    indimail
  password    xxxxxxxx
- socket      /tmp/mysql.sock
+ socket      /run/mysqld/mysqld.sock
  #port       3306
- pidfile     /tmp/nssd.pid
+ pidfile     /run/indimail/nssd.pid
  threads     5
  timeout     -1
  facility    daemon
