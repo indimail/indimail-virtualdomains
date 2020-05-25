@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.31 2020-05-24 12:03:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.32 2020-05-25 21:10:51+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -453,8 +453,17 @@ if [ -d ../nssd-%{nssd_version} ] ; then
     autoreconf -fiv
   fi
 
+  if [ -d /run ] ; then
+  	nssd_sock=/run/indimail/nssd.sock
+  elif [ -d /var/run ] ; then
+  	nssd_sock=/var/run/indimail/nssd.sock
+  else
+  	nssd_sock=/tmp/nssd.sock
+  fi
   %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
   --mandir=%{mandir} --libdir=%{_libdir} \
+  --enable-nssd-socket=$nssd_sock \
+  --enable-nssd-config-path=%{sysconfdir}/nssd.conf \
   --enable-mysqlprefix=%{mysqlPrefix} \
   `%{__cat} ../%{name}-%{version}/config/nssd.opts`
 fi
@@ -689,9 +698,10 @@ done
   $TOUCH %{buildroot}%{sysconfdir}/nssd.conf
 %endif
 (
+# host.mysql, host.cntrl, host.master, host.ldap
 for i in `%{__cat} %{buildroot}%{sysconfdir}/controlfiles.i`
 do
-  echo "%ghost %config(noreplace,missingok)   %{sysconfdir}/control/$i"
+  echo "%ghost %attr(0640,indimail,qmail) %config(noreplace,missingok) %{sysconfdir}/control/$i"
   $TOUCH %{buildroot}%{sysconfdir}/control/$i
 done
 ) > config_files.list
@@ -699,8 +709,10 @@ done
 %if %{undefined suse_version} && %{undefined sles_version}
   %{__mkdir_p} %{buildroot}%{logdir}
   for i in imapd.143 imapd-ssl.993 indisrvr.4000 \
-    inlookup.infifo logfifo mrtg mysql.3306 pop3d.110 pop3d-ssl.995 poppass.106 \
-    proxyIMAP.4143 proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110 pwdlookup
+    inlookup.infifo logfifo mrtg mysql.3306 \
+    pop3d.110 pop3d-ssl.995 poppass.106 \
+    proxyIMAP.4143 proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110 \
+    pwdlookup
   do
     %{__mkdir_p} %{buildroot}%{logdir}/$i
     $TOUCH %{buildroot}%{logdir}/$i/current
@@ -709,7 +721,7 @@ done
     %{__mkdir_p} %{buildroot}%{logdir}/fetchmail
     $TOUCH %{buildroot}%{logdir}/fetchmail/current
   fi
-  
+
   if [ %nobogofilter -eq 0 ] ; then
     $TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
   fi
@@ -726,34 +738,35 @@ done
 #
 # opensuse requres ghost files to be present
 %if %{undefined suse_version} && %{undefined sles_version}
-%ghost %dir                       %{logdir}
-%ghost %dir                       %{logdir}/*
-%ghost                            %{logdir}/*/*
+%ghost %dir %attr(0755,qmaill,nofiles) %{logdir}
+%ghost %dir %attr(0755,qmaill,nofiles) %{logdir}/*
+%ghost      %attr(-,qmaill,nofiles)    %{logdir}/*/*
 %endif
 
-%dir %attr(775,root,indimail)     %{domaindir}/domains
-%dir %attr(770,indimail,qmail)    %{indimaildir}/inquery
-%dir %attr(555,root,root)         %{libexecdir}/imapmodules
+%dir %attr(775,root,indimail)          %{domaindir}/domains
+%dir %attr(770,indimail,qmail)         %{indimaildir}/inquery
+%dir %attr(555,root,root)              %{libexecdir}/imapmodules
+%dir %attr(755,root,root)              %{_prefix}/lib/indimail/modules
 %if "%{mandir}" != "/usr/share/man"
-%dir %attr(755,root,root)         %{mandir}
-%dir %attr(755,root,root)         %{mandir}/man1
-%dir %attr(755,root,root)         %{mandir}/cat1
-%dir %attr(755,root,root)         %{mandir}/man5
-%dir %attr(755,root,root)         %{mandir}/cat5
-%dir %attr(755,root,root)         %{mandir}/man7
-%dir %attr(755,root,root)         %{mandir}/cat7
-%dir %attr(755,root,root)         %{mandir}/man8
-%dir %attr(755,root,root)         %{mandir}/cat8
+%dir %attr(755,root,root)              %{mandir}
+%dir %attr(755,root,root)              %{mandir}/man1
+%dir %attr(755,root,root)              %{mandir}/cat1
+%dir %attr(755,root,root)              %{mandir}/man5
+%dir %attr(755,root,root)              %{mandir}/cat5
+%dir %attr(755,root,root)              %{mandir}/man7
+%dir %attr(755,root,root)              %{mandir}/cat7
+%dir %attr(755,root,root)              %{mandir}/man8
+%dir %attr(755,root,root)              %{mandir}/cat8
 %endif
 %if "%{_prefix}" != "/usr"
-%dir %attr(555,root,root)         %{_libdir}
+%dir %attr(555,root,root)              %{_libdir}
 %endif
 
 %if %nofetchmail == 0
-%dir %attr(755,root,root)         %{shareddir}/locale
+%dir %attr(755,root,root)              %{shareddir}/locale
 %endif
 
-%dir %attr(755,root,root)         %{shareddir}/fortunes
+%dir %attr(755,root,root)              %{shareddir}/fortunes
 #
 # If the configuration file should not be replaced when the RPM is
 # upgraded, mark it as follows:
@@ -830,18 +843,18 @@ done
 %endif
 
 %if %nobogofilter == 0
-%attr(644,root,root)                              %{sysconfdir}/bogofilter.cf.example
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/bogofilter.cf.example
 %endif
 
 %if %nocourierimap == 0
-%attr(600,root,root)                              %{sysconfdir}/pop3d-ssl.dist
-%attr(600,root,root)                              %{sysconfdir}/imapd-ssl.dist
-%attr(600,root,root)                              %{sysconfdir}/pop3d.cnf
-%attr(600,root,root)                              %{sysconfdir}/imapd.cnf
-%attr(600,root,root)                              %{sysconfdir}/pop3d.dist
-%attr(600,root,root)                              %{sysconfdir}/imapd.dist
-%attr(600,root,root)                              %{sysconfdir}/authmodulelist
-%attr(644,root,root)                              %{sysconfdir}/quotawarnmsg.example
+%attr(600,root,root) %config(noreplace)           %{sysconfdir}/pop3d-ssl.dist
+%attr(600,root,root) %config(noreplace)           %{sysconfdir}/imapd-ssl.dist
+%attr(600,root,root) %config(noreplace)           %{sysconfdir}/pop3d.cnf
+%attr(600,root,root) %config(noreplace)           %{sysconfdir}/imapd.cnf
+%attr(600,root,root) %config(noreplace)           %{sysconfdir}/pop3d.dist
+%attr(600,root,root) %config(noreplace)           %{sysconfdir}/imapd.dist
+%attr(600,root,root) %config(noreplace)           %{sysconfdir}/authmodulelist
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/quotawarnmsg.example
 %endif
 
 #
@@ -971,12 +984,13 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/pop3login
 %attr(755,root,root)                    %{_prefix}/sbin/sharedindexinstall
 %attr(755,root,root)                    %{_prefix}/sbin/sharedindexsplit
-#
+# setuid binary
 %attr(4755,root,root)                   %{libexecdir}/imapmodules/authshadow
 %endif
 
 # bogofilter
 %if %nobogofilter == 0
+# setuid binary
 %attr(6551,root,indimail)               %{_prefix}/bin/bogofilter
 %attr(755,root,root)                    %{_prefix}/bin/bogolexer
 %attr(755,root,root)                    %{_prefix}/bin/bogotune
@@ -1311,7 +1325,7 @@ done
 
 %files devel
 %defattr(-, root, root, 0755)
-%dir %attr(555,root,root)              %{_prefix}/include/indimail
+%dir %attr(755,root,root)              %{_prefix}/include/indimail
 %if "%{_prefix}" != "/usr"
 %dir %attr(555,root,root)              %{_libdir}
 %dir %attr(555,root,qmail)             %{mandir}/man3
@@ -1609,8 +1623,6 @@ done
 %{_libdir}/libunicode.so.4.1.0
 %endif
 
-%{_pkg_config_path}/libindimail.pc
-
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
 
@@ -1706,11 +1718,12 @@ if [ -d %{_prefix} -a -d %{servicedir} ] ; then
     fi
   fi
 fi
+# initialize setup log file
 if [ -f %{libexecdir}/iupgrade.sh ] ; then
 (
   echo "Running Custom Installation Script for pretrans"
   /bin/sh %{libexecdir}/iupgrade.sh pretrans noargs %{version} $*
-) > /tmp/indimail-setup.log 2>&1
+) > /var/log/indimail-setup.log 2>&1
 fi
 
 ### SCRIPTLET ###############################################################################
@@ -1721,8 +1734,6 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
-# initialize setup log file
->> /tmp/indimail-setup.log
 if [ -z "$argv1" ] ; then
   argv1=0
 fi
@@ -1732,13 +1743,13 @@ if [ $argv1 -eq 2 ] ; then
   (
     echo "Running Custom Upgrade Script for pre upgrade"
     /bin/sh %{libexecdir}/iupgrade.sh pre upgrade %{version} $*
-  ) >> /tmp/indimail-setup.log 2>&1
+  ) >> /var/log/indimail-setup.log 2>&1
   fi
   exit 0
 fi
 (
 echo "Checking for mandatory user/group mysql.."
-case "%host" in
+case "%{_host}" in
   *-*-darwin*)
   /usr/bin/dscl . -list /Groups/mysql > /dev/null || (echo "group mysql does not exist. Aborting..." && false)
   if [ $? -ne 0 ] ; then
@@ -1791,7 +1802,7 @@ if [ $nscd_up -ge 1 ] ; then
     /bin/systemctl start nscd.service
   fi
 fi
-) >> /tmp/indimail-setup.log 2>&1
+) >> /var/log/indimail-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %post
@@ -1831,7 +1842,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   for i in mrtg mysql.3306 fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
     qmail-pop3d.110 qmail-pop3d-ssl.995 proxy-imapd.4143 proxy-imapd-ssl.9143 \
     proxy-pop3d.4110 proxy-pop3d-ssl.9110 indisrvr.4000 inlookup.infifo \
-    pwdlookup qmail-poppass.106 
+    pwdlookup qmail-poppass.106 qmail-logfifo
   do
     if [ -z "$svc_list" ] ; then
       svc_list="%{servicedir}/$i"
@@ -1850,16 +1861,8 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   if [ -n "$indlib" -a -f "$indlib" ] ; then
     echo $indlib > %{servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
   fi
-  ) >> /tmp/indimail-setup.log 2>&1
+  ) >> /var/log/indimail-setup.log 2>&1
   exit 0
-fi
-
-# Recreate ld.so links and cache
-if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
-  if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
-    echo %{_libdir} > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
-  fi
-  /sbin/ldconfig
 fi
 
 echo "Doing Post Install"
@@ -1881,11 +1884,39 @@ echo "14. Configure default cron entries"
 echo ""
 
 (
-echo "Creating %{logdir}"
-if [ ! -d %{logdir} ] ; then
-  %{__mkdir_p} %{logdir}
+# Recreate ld.so links and cache
+if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+  if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
+    echo %{_libdir} > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
+  fi
+  /sbin/ldconfig
 fi
-%{__chown} -R qmaill:nofiles %{logdir}
+
+for i in fetchmail imapd.143 imapd-ssl pop3d.110 pop3d-ssl logfifo \
+pwdlookup inlookup indisrvr mrtg mysql.3306 poppass proxyIMAP.4143 \
+proxyPOP.4110
+do
+  %{__mkdir_p} %{logdir}/$i
+  %{__chown} qmaill:nofiles %{logdir}/$i
+done
+
+if [ -d /run ] ; then
+  logfifo="/run/indimail/logfifo"
+  nssd_sock="/run/indimail/nssd.sock"
+  %{__mkdir_p} /run/indimail
+  %{__chown} indimail:indimail /run/indimail
+elif [ -d /var/run ] ; then
+  logfifo="/var/run/indimail/logfifo"
+  nssd_sock="/var/run/indimail/nssd.sock"
+  %{__mkdir_p} /var/run/indimail
+  %{__chown} indimail:indimail /var/run/indimail
+else
+  logfifo="/tmp/logfifo"
+  nssd_sock="/tmp/nssd.sock"
+fi
+
+# fifolog service
+%{_prefix}/sbin/svctool --fifologger=$logfifo --servicedir=%{servicedir}
 
 # mrtg service
 %{_prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=%{servicedir}
@@ -1958,9 +1989,11 @@ do
     echo 0 > %{servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
     echo 0 > %{servicedir}/qmail-smtpd.$port/variables/REJECTSPAM
     echo 1 > %{servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
-    echo /tmp/logfifo > %{servicedir}/qmail-smtpd.$port/variables/LOGFILTER
+    echo $logfifo > %{servicedir}/qmail-smtpd.$port/variables/LOGFILTER
     # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
-    options="`cat %{servicedir}/qmail-smtpd.$port/variables/.options` --spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\" --logfilter=\"/tmp/logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
+    options="`cat %{servicedir}/qmail-smtpd.$port/variables/.options`
+    --spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\"
+    --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
     echo $options > %{servicedir}/qmail-smtpd.$port/variables/.options
   fi
 done
@@ -1988,7 +2021,7 @@ if [ %nofetchmail -eq 0 ] ; then
   extra_opt=""
   if [ %nobogofilter -eq 0 ] ; then
     extra_opt="--spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\""
-    extra_opt="$extra_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
+    extra_opt="$extra_opt --logfilter=$logfifo --rejectspam=0 --spamexitcode=0"
   fi
   if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
     if [ -d %{_sysconfdir}/clamav ] ; then
@@ -2010,8 +2043,10 @@ if [ %nofetchmail -eq 0 ] ; then
   echo 0 > %{servicedir}/fetchmail/variables/SPAMEXITCODE
   echo 0 > %{servicedir}/fetchmail/variables/REJECTSPAM
   echo 1 > %{servicedir}/fetchmail/variables/MAKE_SEEKABLE
-  echo /tmp/logfifo > %{servicedir}/fetchmail/variables/LOGFILTER
-  options="`cat %{servicedir}/fetchmail/variables/.options` --spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\" --logfilter=\"/tmp/logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
+  echo $logfifo > %{servicedir}/fetchmail/variables/LOGFILTER
+  options="`cat %{servicedir}/fetchmail/variables/.options`
+  --spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\"
+  --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
   echo $options > %{servicedir}/fetchmail/variables/.options
   #
   # user has to create fetchmailrc before which fetchmail cannot be started
@@ -2062,7 +2097,7 @@ fi
 
 #nssd
 if [ %nonssd -eq 0 ] ; then
-  %{_prefix}/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
+  %{_prefix}/sbin/svctool --pwdlookup=$nssd_sock --threads=5 --timeout=-1 \
     --mysqlhost=localhost --mysqluser=indimail \
     --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket} --servicedir=%{servicedir}
 fi
@@ -2115,7 +2150,7 @@ svc_list=""
 for i in mrtg mysql.3306 fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
   qmail-pop3d.110 qmail-pop3d-ssl.995 proxy-imapd.4143 proxy-imapd-ssl.9143 \
   proxy-pop3d.4110 proxy-pop3d-ssl.9110 indisrvr.4000 inlookup.infifo \
-  pwdlookup qmail-poppass.106 
+  pwdlookup qmail-poppass.106 qmail-logfifo
 do
   svc_list="$svc_list %{servicedir}/$i"
 done
@@ -2141,7 +2176,7 @@ if [ -f %{libexecdir}/iupgrade.sh ] ; then
   echo "Running Custom Installation Script for post install"
   /bin/sh %{libexecdir}/iupgrade.sh post install %{version} $*
 fi
-) >> /tmp/indimail-setup.log 2>&1
+) >> /var/log/indimail-setup.log 2>&1
 
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
   echo "1. Execute /sbin/initctl emit qmailstart to start services"
@@ -2178,7 +2213,7 @@ echo "   %{_prefix}/sbin/svctool --config=cert --postmaster=postmaster@$default_
 fi
 
 echo
-echo "Check /tmp/indimail-setup.log for the detailed installation log!!!"
+echo "Check /var/log/indimail-setup.log for the detailed installation log!!!"
 
 ### SCRIPTLET ###############################################################################
 %preun
@@ -2195,10 +2230,12 @@ if [ -z "$argv1" ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
+  (
   if [ -f %{libexecdir}/iupgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for preun upgrade"
     /bin/sh %{libexecdir}/iupgrade.sh preun upgrade %{version} "$argv1"
   fi
+  ) >> /var/log/indimail-setup.log 2>&1
   exit 0
 fi
 if [ -f %{_prefix}/bin/svok ] ; then
@@ -2229,7 +2266,7 @@ if [ -f %{libexecdir}/iupgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for preun pre-uninstall"
   /bin/sh %{libexecdir}/iupgrade.sh preun uninstall %{version} "$argv1"
 fi
-) >> /tmp/indimail-setup.log 2>&1
+) >> /var/log/indimail-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %postun
@@ -2254,7 +2291,7 @@ if [ $argv1 -eq 1 ] ; then
     echo "Running Custom Un-Installation Script for postun upgrade"
     /bin/sh %{libexecdir}/iupgrade.sh postun upgrade %{version} $*
   fi
-  ) >> /tmp/indimail-setup.log
+  ) >> /var/log/indimail-setup.log 2>&1
   if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
     echo "recreating ld.so cache"
     /sbin/ldconfig
@@ -2292,8 +2329,9 @@ fi
 %{__rm} -f %{sysconfdir}/indimail.mrtg.ok %{sysconfdir}/system.mrtg.ok
 echo "removing startup services"
 for i in fetchmail indisrvr.4000 inlookup.infifo mysql.3306 \
-pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
-qmail-imapd.4143 qmail-pop3d.4110 qmail-poppass.106 mrtg 
+pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 \
+qmail-pop3d.110 qmail-pop3d-ssl.995 qmail-logfifo \
+qmail-imapd.4143 qmail-pop3d.4110 qmail-poppass.106 mrtg
 do
   if [ -d %{servicedir}/$i ] ; then
     %{__rm} -rf %{servicedir}/$i || true
@@ -2351,7 +2389,7 @@ if [ -f %{libexecdir}/iupgrade.sh ] ; then
   echo "Running Custom Un-Installation Script for postun uninstall"
   /bin/sh %{libexecdir}/iupgrade.sh postun uninstall %{version} $*
 fi
-) >> /tmp/indimail-setup.log 2>&1
+) >> /var/log/indimail-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %posttrans
@@ -2365,65 +2403,18 @@ if [ -f %{libexecdir}/iupgrade.sh ] ; then
 (
   echo "Running Custom Installation Script for posttrans"
   /bin/sh %{libexecdir}/iupgrade.sh posttrans noargs %{version} $*
-) >> /tmp/indimail-setup.log 2>&1
+) >> /var/log/indimail-setup.log 2>&1
 fi
 
-### SCRIPTLET ###############################################################################
-%pre -n libindimail
-
-### SCRIPTLET ###############################################################################
 %post -n libindimail
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   /sbin/ldconfig
 fi
 
-### SCRIPTLET ###############################################################################
 %postun -n libindimail
-argv1=$1
-if [ -z "$argv1" ] ; then
-  argv1=0
-fi
-# we are doing upgrade
-if [ $argv1 -eq 1 ] ; then
-  exit 0
-fi
-# Shared libraries (omit for architectures that don't support them)
-echo "removing shared libraries"
-%{__rm} -f %{_libdir}/libeps.so
-%{__rm} -f %{_libdir}/libeps.so.1
-%{__rm} -f %{_libdir}/libeps.so.1.0.0
-%{__rm} -f %{_libdir}/libflash.so
-%{__rm} -f %{_libdir}/libflash.so.1
-%{__rm} -f %{_libdir}/libflash.so.1.0.0
-%{__rm} -f %{_libdir}/libindimail.so
-%{__rm} -f %{_libdir}/libindimail.so.2
-%{__rm} -f %{_libdir}/libindimail.so.2.0.0
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   /sbin/ldconfig
 fi
-
-%postun devel
-argv1=$1
-if [ -z "$argv1" ] ; then
-  argv1=0
-fi
-# we are doing upgrade
-if [ $argv1 -eq 1 ] ; then
-  exit 0
-fi
-if [ %{_prefix} = "/var/indimail" -o %{_prefix} = "/var/qmail" ] ; then
-echo "removing man pages, include files"
-for i in %{_prefix}/include %{mandir}/man3
-do
-  %{__rm} -rf $i || true
-done
-/bin/rmdir --ignore-fail-on-non-empty %{mandir} 2>/dev/null
-fi
-echo "removing static libraries"
-%{__rm} -f %{_libdir}/libeps.a
-%{__rm} -f %{_libdir}/libflash.a
-%{__rm} -f %{_libdir}/libindimail.a
-
 
 # fix changelog for openSUSE buildservice
 %changelog
