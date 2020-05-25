@@ -275,8 +275,8 @@ AC_ARG_ENABLE(default-domain, [--enable-default-domain=name             Default 
 AC_DEFINE_UNQUOTED(DEFAULT_DOMAIN,"$defaultdomain",Default Domain)
 
 socket_path=""
-AC_ARG_ENABLE(socket_path,    [--enable-nssd-socket=/path/to/socket      socket for nssd daemon.],
-socket_path="$enableval",
+AC_ARG_ENABLE(nssd-socket,    [--enable-nssd-socket=unix domain socket path for nssd and client library],
+socket_path="$enableval", 
 [
 	if test "$socket_path" = ""
 	then
@@ -290,7 +290,7 @@ if test " $sysconfdir" = " \${prefix}/etc"; then
 else
 	config_path="$sysconfdir/nssd.conf"
 fi
-AC_ARG_ENABLE(config_path, [--enable-nssd-config-path=$sysconfdir/nssd.conf     configuration file for nssd daemon.],
+AC_ARG_ENABLE(nssd-config-path, [--enable-nssd-config-path=$sysconfdir/nssd.conf     configuration file for nssd daemon.],
 config_path="$enableval",
 [
 	if test "$config_path" = ""
