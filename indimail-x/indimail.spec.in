@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.32 2020-05-25 21:10:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.33 2020-05-25 23:06:56+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -418,7 +418,7 @@ echo pythondir     %{pythondir}
 %endif
 echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
 echo "------------------------------------------------------"
-) > indimail-rpm.info
+) > %{name}-rpm.info
 
 #### IndiMail ######################
 cd %{name}-%{version}
@@ -454,11 +454,11 @@ if [ -d ../nssd-%{nssd_version} ] ; then
   fi
 
   if [ -d /run ] ; then
-  	nssd_sock=/run/indimail/nssd.sock
+    nssd_sock=/run/indimail/nssd.sock
   elif [ -d /var/run ] ; then
-  	nssd_sock=/var/run/indimail/nssd.sock
+    nssd_sock=/var/run/indimail/nssd.sock
   else
-  	nssd_sock=/tmp/nssd.sock
+    nssd_sock=/tmp/nssd.sock
   fi
   %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
   --mandir=%{mandir} --libdir=%{_libdir} \
@@ -569,6 +569,7 @@ done
 
 %{__mkdir_p} %{buildroot}%{sysconfdir}
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
+/bin/rm -f %{name}-rpm.info
 #
 # remove fetchmail docs installed by IndiMail Makefile
 #
@@ -828,12 +829,12 @@ done
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/indimail.mrtg.cfg
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/headerlist
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/indimail.settings
-%attr(444,root,root) %config(noreplace)           %{sysconfdir}/indimail-rpm.info
+%attr(444,root,root) %config(noreplace)           %{sysconfdir}/%{name}-release
+%attr(444,root,root) %config(noreplace)           %{sysconfdir}/%{name}-rpm.info
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/perm_list.i
 
 %attr(644,root,qmail) %config(noreplace)          %{sysconfdir}/indimail.te
 %attr(644,root,qmail) %config(noreplace)          %{sysconfdir}/indimail.fc
-%attr(444,root,root)  %config(noreplace)          %{sysconfdir}/indimail-release
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -1897,19 +1898,16 @@ pwdlookup inlookup indisrvr mrtg mysql.3306 poppass proxyIMAP.4143 \
 proxyPOP.4110
 do
   %{__mkdir_p} %{logdir}/$i
-  %{__chown} qmaill:nofiles %{logdir}/$i
 done
 
 if [ -d /run ] ; then
   logfifo="/run/indimail/logfifo"
   nssd_sock="/run/indimail/nssd.sock"
   %{__mkdir_p} /run/indimail
-  %{__chown} indimail:indimail /run/indimail
 elif [ -d /var/run ] ; then
   logfifo="/var/run/indimail/logfifo"
   nssd_sock="/var/run/indimail/nssd.sock"
   %{__mkdir_p} /var/run/indimail
-  %{__chown} indimail:indimail /var/run/indimail
 else
   logfifo="/tmp/logfifo"
   nssd_sock="/tmp/nssd.sock"
