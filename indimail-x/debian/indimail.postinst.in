@@ -225,8 +225,23 @@ if [ ! -d ${logdir} ] ; then
 fi
 /bin/chown -R qmaill:nofiles ${logdir}
 
+if [ -d /run ] ; then
+  logfifo="/run/indimail/logfifo"
+  nssd_sock="/run/indimail/nssd.sock"
+  /bin/mkdir -p /run/indimail
+  /bin/chown indimail:indimail /run/indimail
+elif [ -d /var/run ] ; then
+  logfifo="/var/run/indimail/logfifo"
+  nssd_sock="/var/run/indimail/nssd.sock"
+  /bin/mkdir /var/run/indimail
+  /bin/chown indimail:indimail /var/run/indimail
+else
+  logfifo="/tmp/logfifo"
+  nssd_sock="/tmp/nssd.sock"
+fi
+
 # fifolog service
-${prefix}/sbin/svctool --fifologger=/tmp/logfifo --servicedir=${servicedir}
+${prefix}/sbin/svctool --fifologger=$logfifo --servicedir=${servicedir}
 
 # mrtg service
 ${prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=${servicedir}
@@ -299,9 +314,9 @@ do
 		echo 0 > ${servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
 		echo 0 > ${servicedir}/qmail-smtpd.$port/variables/REJECTSPAM
 		echo 1 > ${servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
-		echo /tmp/logfifo > ${servicedir}/qmail-smtpd.$port/variables/LOGFILTER
+		echo $logfifo > ${servicedir}/qmail-smtpd.$port/variables/LOGFILTER
 		# update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
-		options="`cat ${servicedir}/qmail-smtpd.$port/variables/.options` --spamfilter=\"${prefix}/bin/bogofilter -p -d ${sysconfdir}\" --logfilter=\"/tmp/logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
+		options="`cat ${servicedir}/qmail-smtpd.$port/variables/.options` --spamfilter=\"${prefix}/bin/bogofilter -p -d ${sysconfdir}\" --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
 		echo $options > ${servicedir}/qmail-smtpd.$port/variables/.options
 	fi
 done
@@ -328,7 +343,7 @@ if [ $nofetchmail -eq 0 ] ; then
 	extra_opt=""
 	if [ $nobogofilter -eq 0 ] ; then
 		extra_opt="--spamfilter=\"${prefix}/bin/bogofilter -p -d ${sysconfdir}\""
-		extra_opt="$extra_opt --logfilter=/tmp/logfifo --rejectspam=0 --spamexitcode=0"
+		extra_opt="$extra_opt --logfilter=$logfifo --rejectspam=0 --spamexitcode=0"
 	fi
 	if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
 		qhpsi="/usr/bin/clamdscan %s --config=%{sysconfdir}/scan.conf --fdpass --quiet --no-summary"
@@ -344,8 +359,8 @@ if [ $nofetchmail -eq 0 ] ; then
 	echo 0 > ${servicedir}/fetchmail/variables/SPAMEXITCODE
 	echo 0 > ${servicedir}/fetchmail/variables/REJECTSPAM
 	echo 1 > ${servicedir}/fetchmail/variables/MAKE_SEEKABLE
-	echo /tmp/logfifo > ${servicedir}/fetchmail/variables/LOGFILTER
-	options="`cat ${servicedir}/fetchmail/variables/.options` --spamfilter=\"${prefix}/bin/bogofilter -p -d ${sysconfdir}\" --logfilter=\"/tmp/logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
+	echo $logfifo > ${servicedir}/fetchmail/variables/LOGFILTER
+	options="`cat ${servicedir}/fetchmail/variables/.options` --spamfilter=\"${prefix}/bin/bogofilter -p -d ${sysconfdir}\" --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
 	echo $options > ${servicedir}/fetchmail/variables/.options
 	#
 	# user has to create fetchmailrc before which fetchmail cannot be started
@@ -393,7 +408,7 @@ ${prefix}/sbin/svctool --indisrvr=4000 --servicedir=$servicedir \
 ${prefix}/sbin/svctool --inlookup=infifo --servicedir=$servicedir \
 	--cntrldir=control --threads=5 --activeDays=60 --password-cache --use-btree --max-btree-count=10000
 if [ $nonssd -eq 0 ] ; then
-${prefix}/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
+${prefix}/sbin/svctool --pwdlookup=$nssd_sock --threads=5 --timeout=-1 \
 	--mysqlhost=localhost --mysqluser=indimail \
 	--mysqlpass=ssh-1.5- --mysqlsocket=${mysqlSocket} --servicedir=$servicedir
 fi
