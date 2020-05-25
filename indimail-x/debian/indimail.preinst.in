@@ -37,7 +37,7 @@ case "$1" in
 	(
 		echo "Running Custom Upgrade Script for pre $1"
 		/bin/sh ${libexecdir}/iupgrade.sh pre $1 @version@ $* || true
-	) >> /tmp/indimail-setup.log 2>&1
+	) >> /var/log/indimail-setup.log 2>&1
 	fi
 	if [ " $1" = " upgrade" ] ; then
 		exit 0
@@ -71,7 +71,7 @@ case "$1" in
 			systemctl stop nscd.service
 		fi
 	fi
-	) >> /tmp/indimail-setup.log 2>&1
+	) >> /var/log/indimail-setup.log 2>&1
 	;;
 
     abort-upgrade)
