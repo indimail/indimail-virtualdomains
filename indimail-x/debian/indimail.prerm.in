@@ -38,7 +38,7 @@ case "$1" in
 	(
 		echo "Running Custom Upgrade Script for prerm $1"
 		/bin/sh ${libexecdir}/iupgrade.sh prerm $1 @version@ $* || true
-	) >> /tmp/indimail-setup.log 2>&1
+	) >> /var/log/indimail-setup.log 2>&1
 	fi
 	(
 	if [ -f ${prefix}/sbin/initsvc -a -f /etc/init.d/svscan ] ; then
@@ -65,7 +65,7 @@ case "$1" in
 			sleep 5
 		fi
 	fi
-	) >> /tmp/indimail-setup.log 2>&1
+	) >> /var/log/indimail-setup.log 2>&1
     ;;
 
     failed-upgrade)
@@ -134,5 +134,5 @@ if [ -f ${libexecdir}/iupgrade.sh ] ; then
 echo "Running Custom Upgrade Script for prerm $1"
 /bin/sh ${libexecdir}/iupgrade.sh prerm uninstall @version@ $* || true
 fi
-) >> /tmp/indimail-setup.log 2>&1
+) >> /var/log/indimail-setup.log 2>&1
 exit 0
