@@ -49,7 +49,7 @@ case "$1" in
 	(
 		echo "Running Custom Upgrade Script for pre $1"
 		/bin/sh ${libexecdir}/iupgrade.sh postrm $1 @version@ $* || true
-	) >> /tmp/indimail-setup.log 2>&1
+	) >> /var/log/indimail-setup.log 2>&1
 	fi
     ;;
 
@@ -204,5 +204,5 @@ if [ ! "${prefix}" = "/usr" ] ; then
 	echo "recreating ld.so cache"
 	/sbin/ldconfig
 fi
-) >> /tmp/indimail-setup.log
+) >> /var/log/indimail-setup.log
 exit 0
