@@ -258,18 +258,22 @@ echo "Clearing stage directory"
 echo -n "Build RPM for indimail-"$version"-1."$release" (Y/N) - "
 read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
-	cp indimail-x/indimail.spec /tmp
-	sed -i -e "s|^Release: .*|Release: 1.$release%{?dist}|g" /tmp/indimail.spec
 	tmprel=`cat indimail-x/conf-release 2>/dev/null`
 	if [ ! " $tmprel" = " 1.$release" ] ; then
 		echo 1.$release > indimail-x/conf-release
-		cd indimail-x/debian
+		cd indimail-x
+		make indimail.spec
+		cp indimail.spec /tmp
+		cd debian
 		make
+		cd ../..
+	else
+		cp indimail-x/indimail.spec /tmp
 	fi
 	rpmbuild -ba --clean /tmp/indimail.spec
 	/bin/rm -f /tmp/indimail.spec
 	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
-	for i in indimail indimail-devel libindimail ucspi-tcp
+	for i in indimail indimail-devel libindimail
 	do
 		rpm --addsign $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
 	done
@@ -278,7 +282,7 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	read key
 	if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		(
-		for i in indimail indimail-devel libindimail ucspi-tcp
+		for i in indimail indimail-devel libindimail
 		do
 			echo $i
 			rpmlint $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
