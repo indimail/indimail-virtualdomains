@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: ilocal_upgrade.sh,v $
+# Revision 2.29  2020-05-25 23:05:25+05:30  Cprogrammer
+# upgrade pwdlookup, qmail-logifo services and nssd config file
+#
 # Revision 2.28  2020-04-28 10:57:21+05:30  Cprogrammer
 # disable mysqld service if indimail database gets created successfully
 #
@@ -85,7 +88,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: ilocal_upgrade.sh,v 2.28 2020-04-28 10:57:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.29 2020-05-25 23:05:25+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -105,7 +108,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.28 2020-04-28 10:57:21+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.29 2020-05-25 23:05:25+05:30 Cprogrammer Exp mbhangui $"
 if [ -d /var/indimail/mysqldb/data/indimail ] ; then
 	if [ ! -f /service/mysql.3306/down ] ; then
 		for i in mysqld mariadb mysql
@@ -124,7 +127,7 @@ fi
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.28 2020-04-28 10:57:21+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.29 2020-05-25 23:05:25+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do
@@ -147,6 +150,69 @@ do
 		check_update_if_diff $i/variables/FIFODIR /var/indimail/inquery
 	fi
 done
+
+# path for /tmp/nssd.sock, /tmp/logfifo have changed to /run/indimail
+if [ -d /run ] ; then
+	logfifo=/run/indimail/logfifo
+	nssd_sock=/run/indimail/nssd.sock
+	mkdir -p /run/indimail
+	chown indimail:indimail /run/indimail
+elif [ -d /var/run ] ; then
+	logfifo=/var/run/indimail/logfifo
+	nssd_sock=/var/run/indimail/nssd.sock
+	mkdir -p /var/run/indimail
+	chown indimail:indimail /var/run/indimail
+else
+	logfifo=/tmp/logfifo
+	nssd_sock=/tmp/nssd.sock
+fi
+if [ " $logfifo" != " /tmp/logfifo" ] ; then
+	/usr/sbin/svctool --fifologger=$logfifo --servicedir=/service
+	for i in fetchmail qmail-smtpd.25 qmail-logfifo qmail-smtpd.366 \
+		qmail-qmqpd.628 qmail-smtpd.465 qmail-qmtpd.209 qmail-smtpd.587
+	do
+		if [ -d /service/$i ] ; then
+			check_udpate_if_diff /service/$i/variables/LOGFILTER $logfifo
+			for j in /service/$i/run /service/$i/variables/.options
+			do
+				grep "/tmp/logfifo" $j > /dev/null
+				if [ $? -eq 0 ] ; then
+					sed -i -e "s}/tmp/logfifo}$logfifo}" $j
+				fi
+			done
+		fi
+	done
+fi
+update_nssd=0
+for j in /service/pwdlookup/run /service/pwdlookup/variables/.options
+do
+	grep "/tmp/nssd.sock" $j > /dev/null
+	if [ $? -eq 0 ] ; then
+		update_nssd=1
+		sed -i -e "s}/tmp/nssd.sock}$nssd_sock}" $j
+	fi
+done
+
+if [ $update_nssd -eq 1 ] ; then
+	/usr/sbin/svctool --servicedir=/service --norefreshsvc="1 /service/pwdlookup"
+	/usr/sbin/svctool --servicedir=/service --refreshsvc="/service/pwdlookup"
+	/usr/sbin/svctool --servicedir=/service --norefreshsvc="0 /service/pwdlookup"
+fi
+
+# update pid file to /run or /var/run
+if [ -f /etc/indimail/nssd.conf ] ; then
+	grep "/tmp/logfifo" /etc/indimail/nssd.conf > /dev/null
+	if [ $? -eq 0 ] ; then
+		if [ -d /run ] ; then
+			pidfile=/run/indimail/nssd.pid
+		elif [ -d /var/run ] ; then
+			pidfile=/var/run/indimail/nssd.pid
+		else
+			pidfile=/tmp/nssd.pid
+		fi
+		sed -i -e "s{^pidfile.*{pidfile     $pidfile{g" /etc/indimail/nssd.conf
+	fi
+fi
 
 # add for roundcube/php to access certs
 /usr/bin/getent group apache > /dev/null && /usr/sbin/usermod -aG qmail apache || true
