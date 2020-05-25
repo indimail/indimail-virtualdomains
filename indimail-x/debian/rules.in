@@ -96,7 +96,16 @@ build-stamp:
 	fi
 	if [ -d nssd-$(nssd_version) ] ; then \
 		cd nssd-$(nssd_version) ; \
+		if [ -d /run ] ; then \
+			nssd_sock=/run/indimail/nssd.sock ; \
+		elif [ -d /var/run ] ; then ; \
+			nssd_sock=/var/run/indimail/nssd.sock ; \
+		else ; \
+			nssd_sock=/tmp/nssd.sock ; \
+		fi ; \
 		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --libdir=$(libdir) \
+		--enable-nssd-socket=${nssd_sock} \
+		--enable-nssd-config-path=$(sysconfdir)/nssd.conf \
 		--mandir=$(mandir) --enable-mysqlprefix=/usr `cat ../indimail-$(version)/config/nssd.opts`; \
 		cd ..; \
 	fi
