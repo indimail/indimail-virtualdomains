@@ -7,9 +7,18 @@ if [ -d /usr/lib64 ] ; then
 else
   libdir=/usr/lib
 fi
+if [ -d /run ] ; then
+  nssd_sock=/run/indimail/nssd.sock
+elif [ -d /var/run ] ; then
+  nssd_sock=/var/run/indimail/nssd.sock
+else
+  nssd_sock=/tmp/nssd.sock
+fi
 ./configure --prefix=/usr \
   --sysconfdir=/etc/indimail \
   --mandir=/usr/share/man \
+  --enable-nssd-socket=$nssd_sock \
+  --enable-nssd-config-path=/etc/indimail/nssd.conf \
   --libexecdir=/usr/libexec/indimail \
   --enable-dlload-mysql=yes \
   --enable-mysqlprefix=/usr \
