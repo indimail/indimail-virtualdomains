@@ -38,18 +38,19 @@ password for the user. \fBpam-multi\fR will encrypt the plain text password give
 and compare it with the result fetched by one of the three configured method. If the encrypted
 password match, access will be granted. The comparision will utilize one of the four hashing
 schemes.
-.IP \( 2
+.IP "" 2
 ??  .. DES
-.IP
 .sp -1
+.IP
 $1$ .. MD5
-.IP
 .sp -1
+.IP
 $5$ .. SHA256
-.IP
 .sp -1
+.IP
 $6$ .. SHA512
 
+.TP 0
 The following three methods are supported in configuration file in /etc/pam.d
 
 .TP
@@ -79,7 +80,7 @@ the account expiry separated by a ',' comma sign.
 Library Mode. pam-multi will dynamically load the shared library. It is expected for the
 library to provide the function
 .RE
-.IP \( 2
+.IP "" 2
  char *iauth(char *email, char *service, 0|1, int *size, int *nitems, int debug)
 .RE
 
@@ -90,6 +91,8 @@ expected for the function to return the data. The third argument is either 0 or 
 or account management respectively. \fIsize\fR denotes the size of the result returned. \fInitems\fR
 denotes the number of items that will be returned. The function should return 0 for successful authentication.
 .RE
+
+The other options supported are
 
 .TP
 .I \fB\-i\fR \fIservice\fR Token identifier denotiing the name of service. The \fIservice\fR can also be
@@ -102,7 +105,7 @@ set by setting the environment variable AUTHSERVICE
 
 The following tokens if present in command string or the sql string (-m or -c options), will
 be replaced as follows
-.IP \( 2
+.IP "" 2
 %u - Username (the username will be escaped using
      mysql_real_escape_string() function).
 .sp -1
@@ -137,7 +140,7 @@ auth optional pam-multi.so args -s MODULEDIR/iauth.so
 .PP
 
 \fI/etc/pam\.d/imap\fR
-.IP \( 2
+.IP "" 2
 auth optional pam-multi.so args -m [select pw_passwd from indimail where pw_name='%u' and pw_domain='%d'] -u indimail -p ssh-1.5- -D indimail -H localhost -P 3306
 .IP
 .sp -1
@@ -186,7 +189,7 @@ describes how to interpret the return code from the module. Understanding the co
 essential to understanding PAM configuration files. There are a number of different control
 flags:
 
-.IP \( 2
+.IP "" 2
 .I binding
 
 If the module succeeds and no earlier module in the chain has failed, the chain is immediately
@@ -247,7 +250,7 @@ function are used to determine what happens next. With a few exceptions, which w
 below, the following table applies:
 
 Table PAM chain execution summary
-.IP \( 2
+.IP "" 2
               PAM_SUCCESS          PAM_IGNORE    other
 .IP
 .sp -1
