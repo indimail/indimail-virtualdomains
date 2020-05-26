@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.19  2020-05-26 11:21:29+05:30  Cprogrammer
+# make spamignore writeable for roundcube
+#
 # Revision 2.18  2020-05-25 00:05:59+05:30  Cprogrammer
 # use root:qmail permission for spamignore, nodnscheck
 #
@@ -57,7 +60,7 @@
 # post handle for vadddomain
 #
 #
-# $Id: vadddomain_handle.in,v 2.18 2020-05-25 00:05:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.19 2020-05-26 11:21:29+05:30 Cprogrammer Exp mbhangui $
 
 # send sighup to inlookup service to reload domains
 (
@@ -113,6 +116,11 @@ do
 		echo @"$1" > @controldir@/$i
 	fi
 	$chown root:qmail @controldir@/$i
-	$chmod 644 @controldir@/$i
+	if [ "$i" = "spamignore" ] ; then
+		# 664 for roundcube plugin to modify
+		$chmod 664 @controldir@/$i
+	else
+		$chmod 644 @controldir@/$i
+	fi
 done
 exit 0
