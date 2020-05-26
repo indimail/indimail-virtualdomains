@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: ilocal_upgrade.sh,v $
+# Revision 2.30  2020-05-26 11:22:18+05:30  Cprogrammer
+# fixed permission of spamignore
+#
 # Revision 2.29  2020-05-25 23:05:25+05:30  Cprogrammer
 # upgrade pwdlookup, qmail-logifo services and nssd config file
 #
@@ -88,7 +91,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: ilocal_upgrade.sh,v 2.29 2020-05-25 23:05:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.30 2020-05-26 11:22:18+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -108,7 +111,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.29 2020-05-25 23:05:25+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.30 2020-05-26 11:22:18+05:30 Cprogrammer Exp mbhangui $"
 if [ -d /var/indimail/mysqldb/data/indimail ] ; then
 	if [ ! -f /service/mysql.3306/down ] ; then
 		for i in mysqld mariadb mysql
@@ -127,7 +130,7 @@ fi
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.29 2020-05-25 23:05:25+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.30 2020-05-26 11:22:18+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do
@@ -217,7 +220,7 @@ fi
 # add for roundcube/php to access certs
 /usr/bin/getent group apache > /dev/null && /usr/sbin/usermod -aG qmail apache || true
 if [ -f /etc/indimail/control/spamignore ] ; then
-	$chgrp apache /etc/indimail/control/spamignore
+	$chgrp qmail /etc/indimail/control/spamignore
 	$chmod 664 /etc/indimail/control/spamignore
 fi
 
