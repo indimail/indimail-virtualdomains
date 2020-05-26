@@ -102,10 +102,10 @@ include_HEADERS = addaliasdomain.h add_control.h add_domain_assign.h addressToke
 				  vupdate_rules.h wildmat.h indimail_config.h
 includedir=@prefix@/include/indimail
 
-setuid_list = vdeldomain vadddomain vadduser vdeluser \
-			  vaddaliasdomain vrenamedomain vrenameuser vbulletin vdominfo \
-			  printdir vuserinfo ../sbin/vreorg vsetuserquota vmoduser \
-			  vmoveuser vcfilter ../libexec/sq_vacation
+setuid_list = bin/printdir bin/vaddaliasdomain bin/vadddomain bin/vadduser bin/vbulletin \
+	bin/vcfilter bin/vdeldomain bin/vdeluser bin/vmoduser bin/vmoveuser bin/vrenamedomain \
+	bin/vrenameuser bin/vsetuserquota bin/vdominfo bin/vuserinfo sbin/vreorg \
+	libexec/sq_vacation
 
 doc_list= ChangeLog.indimail COPYING.indimail FAQ.pdf HOWTO.bogofilter \
 	HOWTO.sharedmaildir INSTALL.indimail README \
@@ -922,11 +922,11 @@ install-data-hook:
 	done
 	if test `@idcommand@` = "0" ; then \
 		for f in $(setuid_list); do \
-			if [ -f $(DESTDIR)@prefix@/bin/$$f ] ; then \
-				echo "chown root $(DESTDIR)@prefix@/bin/$$f"; \
-				chown root $(DESTDIR)@prefix@/bin/$$f; \
-				echo "chmod 4555 $(DESTDIR)@prefix@/bin/$$f"; \
-				chmod 4555 $(DESTDIR)@prefix@/bin/$$f; \
+			if [ -f $(DESTDIR)@prefix@/$$f ] ; then \
+				echo "chown root $(DESTDIR)@prefix@/$$f"; \
+				chown root $(DESTDIR)@prefix@/$$f; \
+				echo "chmod 4555 $(DESTDIR)@prefix@/$$f"; \
+				chmod 4555 $(DESTDIR)@prefix@/$$f; \
 			fi;  \
 		done; \
 	fi
