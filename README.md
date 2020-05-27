@@ -7,11 +7,11 @@ for details on installing indimail-mta
 
 Look at indimail-3.x/doc/INSTALL for Source Installation instructions
 
-# Compile libqmail-0.1
+# Compile libqmail
 ```
 $ cd /usr/local/src
-$ git clone https://github.com/mbhangui/libqmail-0.1.git
-$ cd /usr/local/src/libqmail-0.1
+$ git clone https://github.com/mbhangui/libqmail.git
+$ cd /usr/local/src/libqmail
 $ ./default.configure
 $ make
 $ sudo make install-strip
@@ -40,9 +40,9 @@ $ make
 $ sudo make install-strip
 ```
 
-# Build ucspi-tcp-0.88 (with all patches applied)
+# Build ucspi-tcp (with all patches applied)
 ```
-$ cd /usr/local/src/indimail-mta/ucspi-tcp-0.88
+$ cd /usr/local/src/indimail-mta/ucspi-tcp
 $ make
 $ sudo make install-strip
 ```
@@ -63,18 +63,18 @@ $ make
 $ sudo make install-strip
 ```
 
-# Build indimail-mta-2.x
+# Build indimail-mta-x
 (here x is the release)
 ```
-$ cd /usr/local/src/indimail-mta/indimail-mta-2.x
+$ cd /usr/local/src/indimail-mta/indimail-mta-x
 $ make
 $ sudo make install-strip
 $ sudo sh ./svctool --config=users --nolog
 ```
 
-# Build indimail-3.x
+# Build indimail
 ```
-$ cd /usr/local/src/indimail-virtualdomains/indimail-3.0
+$ cd /usr/local/src/indimail-virtualdomains/indimail-x
 $ ./default.configure
 $ make
 $ sudo make install-strip
@@ -82,14 +82,14 @@ $ sudo make install-strip
 
 # Build courier-imap
 ```
-$ cd /usr/local/src/indimail-virtualdomains/courier-imap-5.0.7
+$ cd /usr/local/src/indimail-virtualdomains/courier-imap-x
 $ ./default.configure
 $ sudo make install-strip
 ```
 
 # Build nssd
 ```
-$ cd /usr/local/src/indimail-virtualdomains/nssd-1.1
+$ cd /usr/local/src/indimail-virtualdomains/nssd-1.2
 $ ./default.configure
 $ make
 $ sudo make install-strip
@@ -103,7 +103,7 @@ indimail-mta. It will also put a systemd unit file indimail.service in
 /lib/systemd/system
 
 ```
-$ cd /usr/local/src/indimail-mta/indimail-mta-2.7
+$ cd /usr/local/src/indimail-mta/indimail-mta-x
 $ sudo sh ./create_services --servicedir=/services --mysqlPrefix=/usr
 $ sudo service indimail start
 ```
@@ -147,7 +147,7 @@ Currently, the list of supported distributions for IndiMail is
           o SUSE Linux Enterprise 15 SP1
 
     * Red Hat
-          o Fedora 30
+          o Fedora 32
           o Fedora 31
           o Red Hat Enterprise Linux 6
           o Red Hat Enterprise Linux 7
@@ -155,14 +155,15 @@ Currently, the list of supported distributions for IndiMail is
           o CentOS 7
 
     * Debian
-          o Debian 7.0
-          o Debian 8.0
-          o Debian 9.0
+          o Debian  8.0
+          o Debian  9.0
+          o Debian 10.0
           o Ubuntu 16.04
           o Ubuntu 17.04
           o Ubuntu 18.04
           o Ubuntu 19.04
           o Ubuntu 19.10
+          o Ubuntu 20.04
 ```
 
 # Docker / Podman Repository
@@ -189,6 +190,8 @@ bionic   for ubuntu 18.04
 
 disco    for ubuntu 19.04
 
+focal    for ubuntu 20.04
+
 centos7  for centos7
 
 debian8  for debian8
@@ -197,6 +200,6 @@ debian9  for debian9
 
 debian10 for debian10
 
-fc31     for fc31
+fc32     for fc32
 
-fc30     for fc30
+fc31     for fc31
