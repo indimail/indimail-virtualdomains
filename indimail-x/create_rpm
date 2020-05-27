@@ -69,6 +69,14 @@ else
 	rpmbuild=$HOME/rpmbuild
 fi
 
+make
+if [ $? -ne 0 ] ; then
+	echo "make failed"
+	exit 0
+fi
+if [ -d ../stage ] ; then
+	/bin/rm -rf ../stage
+fi
 mkdir ../stage
 cd ..
 list=`get_tar_files`
