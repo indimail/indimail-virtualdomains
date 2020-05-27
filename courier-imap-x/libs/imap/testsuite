@@ -326,6 +326,7 @@ e003 noop
 edone logout
 EOF
 cat confmdtest/maildirsize
+/bin/rm -rf confmdtest/.Trash
 ../maildir/maildirmake -f Trash confmdtest || exit 1
 
 env IMAP_BROKENUIDV=1 MAILDIR=confmdtest ./imapd <<EOF | sed 's/UIDVALIDITY [0-9]*/UIDVALIDITY/;s/INTERNALDATE "[^"]*"/INTERNALDATE -DATE-/g'
@@ -420,6 +421,7 @@ Subject: message 2
 EOF
 
 ../maildir/maildirmake -f c confmdtest
+/bin/rm -r confmdtest2/.Trash
 ../maildir/maildirmake -f Trash confmdtest2
 
 env IMAP_BROKENUIDV=1 MAILDIR=confmdtest ./imapd <<EOF | sed 's/UIDVALIDITY [0-9]*/UIDVALIDITY/;s/INTERNALDATE "[^"]*"/INTERNALDATE -DATE-/g'
