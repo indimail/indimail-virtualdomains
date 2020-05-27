@@ -20,7 +20,6 @@ fortune_version=@fortune_version@
 noproxy=0
 nonssd=0
 nocourierimap=0
-nolibsrs2=0
 nofetchmail=0
 nobogofilter=0
 nopam_multi=0
