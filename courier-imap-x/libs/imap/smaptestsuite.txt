@@ -1852,7 +1852,7 @@
 001851 * FLAGS (Abra,Cadabra \Draft \Answered \Flagged \Deleted \Seen \Recent)
 001852 * OK [PERMANENTFLAGS (Abra,Cadabra \* \Draft \Answered \Flagged \Deleted \Seen)] Limited
 001853 a3 OK STORE completed.
-001854 * BYE Courier-IMAP server shutting down
+001854 * BYE IMAP4rev1 server shutting down
 001855 a3 OK LOGOUT completed
 001856 +OK SMAP1 LOGIN Ok.
 001857 * EXISTS 1
