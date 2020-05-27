@@ -15,11 +15,11 @@ mysql_prefix=@mysql_prefix@
 mysql_incdir=@mysql_incdir@
 mysql_libdir=@mysql_libdir@
 defaultdomain=@defaultdomain@
+version=$(shell head -1 ../conf-version 2>/dev/null)
 release := $(shell head -1 ../conf-release 2>/dev/null|| echo 1.1)
-version=@version@
 prefix=@prefix@
 #
-libsrs2_version=1.0.18
+courier_version=$(shell grep AC_INIT configure.ac|head -1|cut -d, -f2)
 courier_version=5.0.10
 bogofilter_version=1.2.4
 fetchmail_version=6.4.1
@@ -33,11 +33,6 @@ mpack_version=1.6
 logalert_version=0.3
 fortune_version=1.1
 
-#bits=$(shell if [ -d /usr/lib64 ] ; then echo 64; else echo 32; fi)
-#libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
-#acl_libdirstem=$(shell if [ $(bits) -eq 64 ] ; then echo lib64; else echo lib;fi)
-#pkgconfigdir=$(shell if [ $(bits) -eq 64 ] ; then echo /usr/lib64/pkgconfig; else echo /usr/lib/pkgconfig;fi)
-bits=32
 libdir=@prefix@/lib
 acl_libdirstem=lib
 pkgconfigdir=@prefix@/lib/pkgconfig
@@ -124,32 +119,32 @@ indimail.postrm: indimail.postrm.in Makefile
 indimail.postinst: indimail.postinst.in Makefile
 	$(edit) $@.in > $@;
 
-indimail-devel.postinst: indimail-devel.postinst.in
+indimail-devel.postinst: indimail-devel.postinst.in ../conf-version ../conf-release
 	$(edit) $@.in > $@;
-indimail-devel.postrm: indimail-devel.postrm.in
+indimail-devel.postrm: indimail-devel.postrm.in ../conf-version ../conf-release
 	$(edit) $@.in > $@;
-indimail-devel.install: indimail-devel.install.in
+indimail-devel.install: indimail-devel.install.in ../conf-version ../conf-release
 	$(edit) $@.in > $@;
-libindimail.install: libindimail.install.in
+libindimail.install: libindimail.install.in ../conf-version ../conf-release
 	$(edit) $@.in > $@;
 
 indimail.cron.d: indimail.cron.d.in
 	$(edit) $@.in > $@
 
-obs_deb_prep: obs_deb_prep.in Makefile
+obs_deb_prep: obs_deb_prep.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@;
 
-changelog: changelog.in Makefile ../conf-release
+changelog: changelog.in Makefile ../conf-version ../conf-release
 	(cat $@.in; echo ""; \
 	echo " -- Manvendra Bhangui <indimail-virtualdomains@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
 	| $(edit) > $@
-indimail.dsc: indimail.dsc.in Makefile ../conf-release
+indimail.dsc: indimail.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@;
-indimail-Debian_9.0.dsc: indimail-Debian_9.0.dsc.in Makefile ../conf-release
+indimail-Debian_9.0.dsc: indimail-Debian_9.0.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@;
-indimail-xUbuntu_18.04.dsc: indimail-xUbuntu_18.04.dsc.in Makefile ../conf-release
+indimail-xUbuntu_18.04.dsc: indimail-xUbuntu_18.04.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@;
-indimail-xUbuntu_18.10.dsc: indimail-xUbuntu_18.10.dsc.in Makefile ../conf-release
+indimail-xUbuntu_18.10.dsc: indimail-xUbuntu_18.10.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@;
 
 #sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp

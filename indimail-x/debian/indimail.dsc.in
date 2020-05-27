@@ -6,7 +6,7 @@ Binary: indimail
 Architecture: any
 Version: @version@-@release@
 Maintainer: Manvendra Bhangui <indimail-virtualdomains@indimail.org>
-Homepage: http://indimail.sourceforge.net
+Homepage: https://github.com/mbhangui/indimail-virtualdomains
 Debtransform-Files-Tar: debian.tar.gz
 Debtransform-Tar: dummy.tar.gz
 Standards-Version: 3.9.1

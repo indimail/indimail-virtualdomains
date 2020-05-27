@@ -6,8 +6,8 @@ Binary: indimail
 Architecture: any
 Version: @version@-@release@
 Maintainer: Manvendra Bhangui <indimail-virtualdomains@indimail.org>
-Homepage: http://indimail.sourceforge.net
-Debtransform-Files-Tar: debian.tar.gz
-Debtransform-Tar: dummy.tar.gz
+Homepage: https://github.com/mbhangui/indimail-virtualdomains
+Debtransform-Release: 1
+Debtransform-Files-Tar: indimail-@version@.tar.gz libsrs2-1.0.18.tar.gz courier-imap-5.0.10.tar.bz2 bogofilter-1.2.4.tar.gz fetchmail-6.4.1.tar.xz nssd-1.2.tar.gz pam-multi-1.2.tar.gz altermime-0.3.10.tar.gz ripmime-1.4.0.10.tar.gz flash-0.9.4.tar.gz mpack-1.6.tar.gz fortune-1.1.tar.gz
 Standards-Version: 3.9.1
-Build-Depends: cdbs, debhelper (>= 7.0.50~), gcc, g++, automake, python (>= 2.0), libqmail-dev, libqmail, libldap2-dev, libpcre3-dev, libgsl0-dev, libssl-dev, default-libmysqlclient-dev, libreadline5, libreadline-dev, libncurses5 (>= 5.7), libncurses5-dev (>= 5.7), bison (>= 1.2), flex (>= 2.5), libpam0g-dev, libidn11-dev, libdb-dev, mime-support, m4, gawk
+Build-Depends: cdbs, debhelper (>= 7.0.50~), gcc, g++, automake, libqmail-dev, libqmail, libldap2-dev, libpcre30dev, python (>= 2.0), libgsl0-dev, libssl-dev, default-libmysqlclient-dev, libreadline5, libreadline-dev, libncurses5 (>= 5.7), libncurses5-dev (>= 5.7), bison (>= 1.2), flex (>= 2.5), libpam0g-dev, libidn11-dev, libdb-dev, mime-support, m4, gawk
