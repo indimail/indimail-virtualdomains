@@ -48,14 +48,13 @@
 %else
 %global noperms            0
 %endif
-%global see_base           For a description of IndiMail visit http://www.indimail.org
+%global url                https://github.com/mbhangui/indimail-virtualdomains
 %global nonssd             0
 %global noproxy            0
 %global nocourierimap      0
 %global nofetchmail        0
 %global nobogofilter       0
 %global nodksignatures     0
-%global patch_applied      1
 
 %global _verbose           0
 %global qcount             5
@@ -119,28 +118,20 @@ Group: System Environment/Base
 %else
 Group: Productivity/Networking/Email/Servers
 %endif
-Source0:  http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
+Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 %if %nocourierimap == 0
-%if %build_on_obs == 0
-Source1:  http://downloads.sourceforge.net/courier/courier-imap-%{courier_version}.tar.bz2
-%else
-Source1:  http://downloads.sourceforge.net/%{name}/courier-imap-%{courier_version}.tar.bz2
+Source1: http://downloads.sourceforge.net/%{name}/courier-imap-%{courier_version}.tar.bz2
 %endif
-%endif
-Source2:  http://downloads.sourceforge.net/%{name}/flash-0.9.4.tar.gz
-Source3:  http://downloads.sourceforge.net/%{name}/altermime-0.3.10.tar.gz
-Source4:  http://downloads.sourceforge.net/%{name}/ripmime-1.4.0.10.tar.gz
-Source5:  http://downloads.sourceforge.net/%{name}/mpack-1.6.tar.gz
-Source6:  http://downloads.sourceforge.net/%{name}/fortune-%{fortune_version}.tar.gz
+Source2: http://downloads.sourceforge.net/%{name}/flash-0.9.4.tar.gz
+Source3: http://downloads.sourceforge.net/%{name}/altermime-0.3.10.tar.gz
+Source4: http://downloads.sourceforge.net/%{name}/ripmime-1.4.0.10.tar.gz
+Source5: http://downloads.sourceforge.net/%{name}/mpack-1.6.tar.gz
+Source6: http://downloads.sourceforge.net/%{name}/fortune-%{fortune_version}.tar.gz
 %if %nonssd == 0
-Source7:  http://downloads.sourceforge.net/%{name}/nssd-%{nssd_version}.tar.gz
+Source7: http://downloads.sourceforge.net/%{name}/nssd-%{nssd_version}.tar.gz
 %endif
 %if %nobogofilter == 0
-%if %build_on_obs == 0
-Source8: http://downloads.sourceforge.net/bogofilter/bogofilter-%{bogofilter_version}.tar.bz2
-%else
 Source8: http://downloads.sourceforge.net/%{name}/bogofilter-%{bogofilter_version}.tar.bz2
-%endif
 %endif
 %if %nofetchmail == 0
 Source9: http://downloads.sourceforge.net/%{name}/fetchmail-%{fetchmail_version}.tar.xz
@@ -149,32 +140,13 @@ Source10: http://downloads.sourceforge.net/%{name}/pam-multi-%{pam_multi_version
 Source11: http://downloads.sourceforge.net/%{name}/%{name}-rpmlintrc
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
-Source12: %{name}-permissions.easy
-Source13: %{name}-permissions.secure
-Source14: %{name}-permissions.paranoid
+Source12: http://downloads.sourceforge.net/%{name}/%{name}-permissions.easy
+Source13: http://downloads.sourceforge.net/%{name}/%{name}-permissions.secure
+Source14: http://downloads.sourceforge.net/%{name}/%{name}-permissions.paranoid
 %endif
 %endif
 
-# Comment out below for openSUSE buildservice
-%if %build_on_obs == 0
-
-%if %patch_applied == 0
-%if %nocourierimap == 0
-Patch1:  http://downloads.sourceforge.net/%{name}/Patches-2.0/courier-imap-%{courier_version}.patch.gz
-%endif
-
-%if %nobogofilter == 0
-Patch8: http://downloads.sourceforge.net/%{name}/Patches-2.0/bogofilter-%{bogofilter_version}.patch.gz
-%endif
-
-%if %nofetchmail == 0
-Patch9: http://downloads.sourceforge.net/%{name}/Patches-2.0/fetchmail-%{fetchmail_version}.patch.gz
-%endif
-%endif
-
-%endif
-
-URL: http://www.indimail.org
+URL: https://github.com/mbhangui/indimail-virtualdomains
 AutoReqProv: Yes
 # few binaries were moved to sbin and indimail >= 2.5 depends on that
 Requires: indimail-mta > 2.6
@@ -311,7 +283,7 @@ IndiMail provides ability for a single domain to have users across multiple
 hosts (even across different geographical locations) and tools to manage
 virtual domains.
 
-%{see_base}
+For more details visit %{url}
 
 %package devel
 Summary: IndiMail - Development header files and libraries
@@ -323,7 +295,7 @@ Conflicts: %{name}-devel < 2.0
 This package contains the development header files and libraries
 necessary to develop IndiMail client applications.
 
-%{see_base}
+For more details visit %{url}
 
 %package -n libindimail
 Summary: IndiMail - Shared libraries
@@ -334,7 +306,7 @@ Conflicts: libindimail < 2.0
 This package contains the shared libraries (*.so*) which certain
 languages and applications need to dynamically load and use IndiMail.
 
-%{see_base}
+For more details visit %{url}
 
 %prep
 for i in %{name}-%{version} altermime-0.3.10 ripmime-1.4.0.10 flash-0.9.4 \
@@ -383,23 +355,6 @@ do
 %endif
   )
 done
-
-# skip patch application on obs. Picked the patched source from indimail/obs subdir
-# autoreconf gives issues
-# Comment out below for openSUSE buildservice
-%if %build_on_obs == 0
-%if %patch_applied == 0
-%if %nocourierimap == 0
-%patch1  -p0
-%endif
-%if %nobogofilter == 0
-%patch8 -p0
-%endif
-%if %nofetchmail == 0
-%patch9 -p0
-%endif
-%endif
-%endif
 
 %build
 ID=$(id -u)
