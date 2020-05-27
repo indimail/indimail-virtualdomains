@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.33 2020-05-25 23:06:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.34 2020-05-27 12:43:42+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -472,8 +472,7 @@ if [ -d ../fetchmail-%{fetchmail_version} ] ; then
     autoreconf -fiv
   fi
   %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
-    --enable-binprefix=%{_prefix} --mandir=%{mandir} --datarootdir=%{shareddir} \
-    --libdir=%{_libdir} \
+    --mandir=%{mandir} --datarootdir=%{shareddir} \
     `%{__cat} ../%{name}-%{version}/config/fetchmail.opts`
 fi
 %endif
