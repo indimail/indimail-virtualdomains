@@ -221,7 +221,7 @@ fi
 (
 echo "Creating ${logdir}"
 if [ ! -d ${logdir} ] ; then
-  /bin/mkdir ${logdir}
+  /bin/mkdir -p ${logdir}
 fi
 /bin/chown -R qmaill:nofiles ${logdir}
 
