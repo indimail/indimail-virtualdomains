@@ -4,7 +4,7 @@ has been written by Ben Goodwin.
 Official website: http://fssos.sourceforge.net/
 
 This source has been hacked and adapted to indimail as nssd from the FSSOS site.
-The hacked source will also work with vpopmail by just changing the
+The hacked source will also work with indimail by just changing the
 configuration file nssd.conf
 
 nssd is experimental and without warranty.
@@ -13,8 +13,8 @@ The hacked source can be downloaded from
 http://downloads.sourceforge.net/indimail/nssd-1.0.tar.gz
 
 Modification has been made to have user and domain in the query
-e.g. mbhangui@gmail.com gets split into mbhangui as the user
-and gmail.com as the domain. This split allows authentication against
+e.g. mbhangui@indimail.org gets split into mbhangui as the user
+and indimail.org as the domain. This split allows authentication against
 IndiMail's MySQL database. By just changing the configuration, authentication
 should also work for vpopmail. The other change I have made is to make the
 Name Service Switch daemon supervise friendly.
@@ -53,7 +53,10 @@ INSTALLATION DETAILS
 ====================
     o If installing from source:
       o wget http://downloads.sourceforge.net/indimail/nssd-1.0.tar.gz
-      o ./configure --prefix=/var/indimail --default-domain=indimail.org --with-mysql=/usr/local/mysql
+      o ./configure --prefix=/usr --sysconfdir=/etc/indimail --mandir=/usr/share/man \
+          --libexecdir=/usr/libexec/indimail --enable-dlload-mysql=yes \
+          --enable-mysqlprefix=/usr --libdir=/usr/[lib|lib64] \
+          --enable-default-domain=`uname -n`
       o make
       o make install-strip
 
@@ -69,9 +72,9 @@ INSTALLATION DETAILS
 
     If your MySQL installation is based in a strange directory, use
     the --with-mysql=DIR option of ./configure to specify.  For example,
-    "./configure --with-mysql=/usr2"
+    "./configure --with-mysqlprefix=/usr/local"
 
-    o Edit /var/indimail/etc/nssd.conf (or /var/vpopmail/etc/nssd.conf)
+    o Edit /etc/indimail/nssd.conf (or /var/vpopmail/etc/nssd.conf)
       You will find nssd.conf in samples directory of the source
 
     o Edit (or create) /etc/nsswitch.conf such that it contains at least the
@@ -82,7 +85,7 @@ INSTALLATION DETAILS
       If you don't want groups from MySQL, simply don't include 'nssd' in 
       in the 'group' line.
 
-    o Start 'nssd' (e.g. "/var/indimail/sbin/nssd" or "/var/vpopmail/sbin/nssd")
+    o Start 'nssd' (e.g. "/usr/sbin/nssd" )
 
       For vpopmail, you need to have nssd run either by supervise or by your favourite method
       (rc, etc)
@@ -90,17 +93,29 @@ INSTALLATION DETAILS
       # ./svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=5000 \
           --mysqlhost=localhost --mysqluser=indimail --mysqlpass=xxxxxxxx \
           --mysqlsocket=/tmp/mysql.sock --servicedir=/service
+      # /usr/sbin/svctool --pwdlookup=/run/indimail/nssd.sock --threads=5 --timeout=-1 \
+          --mysqlhost=localhost --mysqluser=indimail \
+          --mysqlpass=ssh-1.5- --mysqlsocket=/var/run/mysqld/mysqld.sock \
+          --servicedir=/service
 
       The above command will create /service/pwlookup/run as below
       #!/bin/sh
-      # $Id: svctool.in,v 2.69 2008-09-04 16:41:45+05:30 Cprogrammer Exp mbhangui $
-      # generated on i686-pc-linux-gnu on Thu Sep  4 16:45:35 IST 2008
-      # ./svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=5000 \
-      # --mysqlhost=localhost --mysqluser=indimail --mysqlpass=ssh-1.5- \
-      # --mysqlsocket=/tmp/mysql.sock --servicedir=/service
+      # $Id: svctool.in,v 2.478 2020-05-24 23:55:49+05:30 Cprogrammer Exp mbhangui $
+      # generated on x86_64-pc-linux-gnu on Monday 25 May 2020 06:35:11 PM IST
+      # /usr/sbin/svctool --pwdlookup="/run/indimail/nssd.sock" --threads="5" --timeout="-1" --mysqlhost="localhost" --mysqluser="indimail" --mysqlpass="ssh-1.5-" --mysqlsocket="/var/run/mysqld/mysqld.sock" --servicedir="/service"
 
-      exec /var/indimail/bin/envdir /service/pwdlookup/variables \
-      /var/indimail/bin/setuidgid indimail /var/indimail/sbin/nssd -d notice 2>&1
+      if [ -d /run ] ; then
+        mkdir -p /run/indimail
+        chown indimail:indimail /run/indimail
+        chmod 775 /run/indimail
+      elif [ -d /var/run ] ; then
+        mkdir -p /var/run/indimail
+        chown indimail:indimail /var/run/indimail
+        chmod 775 /var/run/indimail
+      fi
+      exec 2>&1
+      exec /usr/bin/envdir /service/pwdlookup/variables \
+      /usr/bin/setuidgid indimail /usr/sbin/nssd -d notice
 
     o Test pwlookup using a virtual user configured in indimail/vpopmail
-      # /var/indimail/sbin/check_getpw user@domain 
+      # /usr/libexec/indimail/check_getpw user@domain 
