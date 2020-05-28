@@ -843,6 +843,10 @@ vdeluser_handle: vdeluser_handle.in post_handle
 vrenameuser_handle: vrenameuser_handle.in post_handle
 	$(edit) $@.in > post_handle/vrenameuser; ln -sf post_handle/vrenameuser $@
 
+conf-release:
+	if [ ! -f conf-release ] ; then \
+		echo 1.1 > conf-release; \
+	fi
 indimail.spec: indimail.spec.in catChangeLog doc/ChangeLog.indimail conf-version conf-release
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 indimail-rpmlintrc: indimail-rpmlintrc.in
