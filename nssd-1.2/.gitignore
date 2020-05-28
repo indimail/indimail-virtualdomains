@@ -25,3 +25,4 @@ missing
 *.lo
 *.la
 autom4te.cache
+ChangeLog
