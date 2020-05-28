@@ -32,7 +32,6 @@ bogofilter_version=@bogofilter_version@
 fetchmail_version=@fetchmail_version@
 nssd_version=@nssd_version@
 #
-pam_multi_version=@pam_multi_version@
 altermime_version=@altermime_version@
 ripmime_version=@ripmime_version@
 flash_version=@flash_version@
@@ -106,6 +105,7 @@ build-stamp:
 		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --libdir=$(libdir) \
 		--enable-nssd-socket=${nssd_sock} \
 		--enable-nssd-config-path=$(sysconfdir)/nssd.conf \
+		--enable-default-domain=indimail.org \
 		--mandir=$(mandir) --enable-mysqlprefix=/usr `cat ../indimail-$(version)/config/nssd.opts`; \
 		cd ..; \
 	fi
