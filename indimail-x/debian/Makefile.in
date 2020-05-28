@@ -19,8 +19,7 @@ version=$(shell head -1 ../conf-version 2>/dev/null)
 release := $(shell head -1 ../conf-release 2>/dev/null|| echo 1.1)
 prefix=@prefix@
 #
-courier_version=$(shell grep AC_INIT configure.ac|head -1|cut -d, -f2)
-courier_version=5.0.10
+courier_version=$(shell grep AC_INIT ../../courier-imap-x/configure.ac|head -1|cut -d, -f2)
 bogofilter_version=1.2.4
 fetchmail_version=6.4.1
 nssd_version=1.2
