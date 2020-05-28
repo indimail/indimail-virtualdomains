@@ -383,6 +383,11 @@ if [ %{reconfigure_mode} -eq 1 ] ; then
   autoreconf -fiv
 fi
 
+if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+else
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
+fi
 %configure --prefix=%{_prefix} --sysconfdir=%{sysconfdir} \
   --mandir=%{_prefix}/share/man --datarootdir=%{_prefix}/share/indimail \
   --with-pkgconfigdir=%{_pkg_config_path} --libdir=%{_libdir} --enable-domaindir=%{domaindir} \
@@ -393,6 +398,7 @@ fi
   --enable-basepath=@basepath@ --enable-logdir=%{logdir} \
   --enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{sysconfdir}/tcp/tcp.smtp \
   --enable-cookiedir=%{_prefix}/share/indimail/fortunes \
+  --enable-default-domain=${default_domain} \
   --enable-moduledir=%pam_module_dir `%{__cat} config/indimail.opts`
 
 #### nssd ######################
@@ -418,6 +424,7 @@ if [ -d ../nssd-%{nssd_version} ] ; then
   --enable-nssd-socket=$nssd_sock \
   --enable-nssd-config-path=%{sysconfdir}/nssd.conf \
   --enable-mysqlprefix=%{mysqlPrefix} \
+  --enable-default-domain=${default_domain} \
   `%{__cat} ../%{name}-%{version}/config/nssd.opts`
 fi
 %endif
@@ -593,8 +600,8 @@ if [ -x /usr/bin/chrpath ] ; then
   for i in adminclient chowkidar clearopensmtp \
   hostsync indisrvr inlookup inquerytest install_tables ipchange \
   mgmtpass updatefile updaterules vchkpass vdelivermail \
-  vdeloldusers vfilter vfstab vmoddomain vreorg vsetpass nssd vserverinfo check_getpw \
-  vpurge vtable resetquota
+  vdeloldusers vfilter vfstab vmoddomain vreorg vsetpass \
+  vserverinfo vpurge vtable resetquota
   do
     if [ -f %{buildroot}%{_prefix}/sbin/$i ] ; then
       /usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/$i
@@ -603,6 +610,17 @@ if [ -x /usr/bin/chrpath ] ; then
       /usr/bin/chrpath -d %{buildroot}%{libexecdir}/$i
     fi
   done
+%if %nonssd == 0
+  for i in nssd check_getpw
+  do
+    if [ -f %{buildroot}%{_prefix}/sbin/$i ] ; then
+      /usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/$i
+    fi
+    if [ -f %{buildroot}%{libexecdir}/$i ] ; then
+      /usr/bin/chrpath -d %{buildroot}%{libexecdir}/$i
+    fi
+  done
+%endif
 fi
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
