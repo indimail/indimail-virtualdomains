@@ -38,6 +38,7 @@ flash_version=@flash_version@
 mpack_version=@mpack_version@
 fortune_version=@fortune_version@
 tcpserver_plugin=1
+default_domain=indimail.org
 rm=/bin/rm
 cp=/bin/cp
 
@@ -69,6 +70,7 @@ build-stamp:
 		--enable-qmaildir=$(indimaildir) --enable-domaindir=$(domaindir) \
 		--enable-tcprules-prog=$(prefix)/bin/tcprules \
 		--enable-tcpserver-file=$(sysconfdir)/tcp/tcp.smtp \
+		--enable-default-domain=$(default_domain) \
 		--enable-mysqlprefix=/usr --enable-moduledir=/lib/security `cat config/indimail.opts`; \
 		cd ..; \
 	fi
@@ -76,7 +78,7 @@ build-stamp:
 		cd courier-imap-$(courier_version) ; \
 		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --libdir=$(libdir) \
 		--libexecdir=$(libexecdir) --datarootdir=$(shareddir) --mandir=$(mandir) \
-		--with-mailer=${prefix}/bin/sendmail \
+		--with-mailer=$(prefix)/bin/sendmail \
 		`cat ../indimail-$(version)/config/courier-imap.opts`; \
 		cd ..; \
 	fi
@@ -103,9 +105,9 @@ build-stamp:
 		fi; \
 		cd nssd-$(nssd_version) ; \
 		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --libdir=$(libdir) \
-		--enable-nssd-socket=${nssd_sock} \
+		--libexecdir=$(libexecdir) --enable-nssd-socket=$(nssd_sock) \
 		--enable-nssd-config-path=$(sysconfdir)/nssd.conf \
-		--enable-default-domain=indimail.org \
+		--enable-default-domain=$(default_domain) \
 		--mandir=$(mandir) --enable-mysqlprefix=/usr `cat ../indimail-$(version)/config/nssd.opts`; \
 		cd ..; \
 	fi
