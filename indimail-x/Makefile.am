@@ -112,14 +112,12 @@ doc_list= ChangeLog.indimail COPYING.indimail FAQ.pdf HOWTO.bogofilter \
 	INSTALL-MYSQL RELEASE-Notes INSTALL-RPM README-CLUSTER \
 	indimail_arch.png indimail_queue.png Quick-INSTALL \
 	AUTHORS.altermime AUTHORS.bogofilter AUTHORS.courier-imap AUTHORS.fortune \
-	AUTHORS.nssd AUTHORS.pam-multi \
 	AUTHORS.ripmime COPYING.bogofilter COPYING.courier-imap \
-	COPYING.flash COPYING.fortune COPYING.nssd COPYING.pam-multi \
+	COPYING.flash COPYING.fortune \
 	COPYRIGHT.flash COPYRIGHT.mpack LICENSE.altermime \
 	LICENSE.ripmime README.altermime \
 	README.courier-imap README.flash \
-	README.ldap README.nssd \
-	README.pam-multi README.ripmime \
+	README.ldap README.ripmime \
 	README.vlimits README-SSL-SERVER.fetchmail \
 	README-SSL.fetchmail README-NTLM.fetchmail README.fetchmail \
 	COPYING.fetchmail
