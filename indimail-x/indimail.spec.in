@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.37 2020-05-29 14:45:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.38 2020-05-29 15:20:36+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -419,7 +419,7 @@ if [ -d ../nssd-%{nssd_version} ] ; then
     nssd_sock=/tmp/nssd.sock
   fi
   %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
-  --mandir=%{mandir} --libdir=%{_libdir} \
+  --mandir=%{mandir} --libdir=%{_libdir} --enable-shareddir=%{shareddir} \
   --enable-nssd-socket=$nssd_sock \
   --enable-nssd-config-path=%{sysconfdir}/nssd.conf \
   --enable-mysqlprefix=%{mysqlPrefix} \
