@@ -1,0 +1,14 @@
+Source: indimail-auth
+Section: mail
+Priority: optional
+Maintainer: Manvendra Bhangui <indimail-auth@indimail.org>
+Standards-Version: 4.5.0
+Build-Depends: debhelper (>= 9), libpam0g-dev
+Homepage: https://github.com/mbhangui/indimail-virtualdomains
+
+Package: indimail-auth
+Architecture: any
+Pre-Depends: indimail-mta, virtual-mysql-server, libqmail
+Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, binutils, findutils, procps
+Description: indimail-auth provides nssd daemon to provide name service switch in
+ MySQL db and pam-multi to provide multiple ways to do PAM authentication

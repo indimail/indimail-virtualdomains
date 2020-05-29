@@ -1,0 +1,365 @@
+#
+#
+# $Id: indimail.spec.in,v 1.34 2020-05-27 12:43:42+05:30 Cprogrammer Exp mbhangui $
+%undefine _missing_build_ids_terminate_build
+%global _unpackaged_files_terminate_build 1
+
+%if %{defined _project}
+# define if building on openSUSE build service
+%global build_on_obs       1
+%global build_cflags       "-DOBS_BUILD %{build_cflags}"
+%else
+%define _project           local
+%global build_on_obs       0
+%global _hardened_build    1
+%endif
+
+%global _prefix            @prefix@
+%global sysconfdir         @sysconfdir@
+%global shareddir          @shareddir@
+%global libexecdir         @libexecdir@
+%global mandir             @mandir@
+%global nssd_version       @nssd_version@
+%global pam_multi_version  @pam_multi_version@
+%global url                https://github.com/mbhangui/indimail-virtualdomains
+%global logdir             @logdir@
+%global servicedir         @servicedir@
+%global pam_confdir        %{_sysconfdir}/pam.d
+%global pam_module_dir     /%{_lib}/security
+%global mysqlPrefix        /usr
+%global mysqlSocket        /var/run/mysqld/mysqld.sock
+%global defaultDomain      indimail.org
+
+%if %build_on_obs == 1
+%global packager Manvendra Bhangui <indimail-auth@indimail.org>
+%endif
+
+Summary: Name Service Sw
+Name: indimail-auth
+Version: 1.0
+Release: 1.1%{?dist}
+
+%if %build_on_obs == 1
+License: GPL-3.0+
+%else
+License: GPLv3
+%endif
+
+%if %{undefined suse_version} && %{undefined sles_version}
+Group: System Environment/Base
+%else
+Group: Productivity/Networking/Email/Servers
+%endif
+Source1: http://downloads.sourceforge.net/indimail/nssd-%{nssd_version}.tar.gz
+Source2: http://downloads.sourceforge.net/indimail/pam-multi-%{pam_multi_version}.tar.gz
+Source3: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
+
+URL: https://github.com/mbhangui/indimail-virtualdomains
+AutoReqProv: Yes
+# few binaries were moved to sbin and indimail >= 2.5 depends on that
+
+BuildRequires: gcc gcc-c++ make autoconf automake libtool
+BuildRequires: glibc glibc-devel procps
+BuildRequires: sed findutils gzip binutils coreutils grep
+BuildRequires: mysql-devel pam-devel libqmail-devel libqmail
+
+################################# OBS ###############################
+%if %build_on_obs == 1
+%if 0%{?suse_version}
+BuildRequires: -post-build-checks
+#!BuildIgnore: post-build-checks
+#!BuildIgnore: brp-check-suse
+%endif
+%endif
+################################# OBS ###############################
+
+Requires: procps /usr/bin/awk /usr/bin/which
+Requires: binutils sed findutils
+Requires: coreutils grep /bin/sh glibc
+Requires: /usr/bin/hostname
+Requires: pam indimail-mta
+
+%if %build_on_obs == 1
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+%endif
+#
+# IndiMail is choosy and runs on reliable OS only
+#
+Excludeos: windows
+
+%description
+indimail-auth provides nssd daemon to provide name service switch
+in MySQL db and pam-multi to provide multiple PAM authentication
+methods
+
+For more details visit %{url}
+
+%prep
+for i in pam-multi-%{pam_multi_version} nssd-%{nssd_version}
+do
+  (
+  if [ -d $i ] ; then
+    %{__rm} -rf $i
+  fi
+  if [ -f ../SOURCES/$i.tar.bz2 ] ; then
+    %{__bzip2} -d -c ../SOURCES/$i.tar.bz2 | tar xf -
+  elif [ -f ../SOURCES/$i.tar.xz ] ; then
+    xz -d -c ../SOURCES/$i.tar.xz |tar xf -
+  elif [ -f ../SOURCES/$i.tar.gz ] ; then
+    gunzip -c ../SOURCES/$i.tar.gz | tar xf -
+  else
+    echo "No Source Archive for $i"
+    exit 1
+  fi
+  )
+done
+
+%build
+ID=$(id -u)
+(
+echo "---------------- INFORMATION ------------------------"
+echo target         %_target
+echo target_alias   %_target_alias
+echo target_cpu     %_target_cpu
+echo target_os      %_target_os
+echo target_vendor  %_target_vendor
+echo PAM Module dir %{pam_module_dir}
+echo Project        %{_project}
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
+echo "------------------------------------------------------"
+) > %{name}-rpm.info
+(
+echo "NAME=%{name}"
+echo "Description=\"IndiMail Authentication Package\""
+echo "AUTH_version="%{version}""
+echo "ID=%{name}"
+echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
+echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui indimail-auth@indimail.org\""
+) > %{name}-release
+
+if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+else
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
+fi
+#### nssd ######################
+if [ -d nssd-%{nssd_version} ] ; then
+  cd nssd-%{nssd_version}
+  if [ -d /run ] ; then
+    nssd_sock=/run/indimail/nssd.sock
+  elif [ -d /var/run ] ; then
+    nssd_sock=/var/run/indimail/nssd.sock
+  else
+    nssd_sock=/tmp/nssd.sock
+  fi
+  %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
+  --mandir=%{mandir} --libdir=%{_libdir} --datarootdir=%{shareddir} \
+  --enable-nssd-socket=$nssd_sock \
+  --enable-nssd-config-path=%{sysconfdir}/nssd.conf \
+  --enable-mysqlprefix=%{mysqlPrefix} \
+  --enable-default-domain=$(default_domain) \
+  --enable-dlload-mysql=yes
+  cd ..
+fi
+
+#### pam-multi ######################
+if [ pam-multi-%{pam_multi_version} ] ; then
+  cd pam-multi-%{pam_multi_version}
+  %configure --prefix=%{_prefix} --enable-mysqlprefix=%{mysqlPrefix} \
+  --datarootdir=%{shareddir} \
+  --enable-moduledir=%pam_module_dir --enable-controldir=%{sysconfdir}/control \
+  --enable-dlload-mysql=yes --enable-default-domain=${default_domain}
+  cd ..
+fi
+
+%install
+ID=$(id -u)
+%{__mkdir_p} $RPM_BUILD_ROOT
+%{__mkdir_p} %{buildroot}%{shareddir}/doc
+for i in nssd-%{nssd_version} pam-multi-%{pam_multi_version}
+do
+  if [ -d $i ] ; then
+    cd $i
+    %{__make} -s DESTDIR=%{buildroot}
+    %{__make} -s DESTDIR=%{buildroot} install-strip
+    cd ..
+  fi
+done
+
+%{__mkdir_p} %{buildroot}%{sysconfdir}
+install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
+install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
+/bin/rm -f %{name}-rpm.info %{name}-release
+
+# nssd
+%{__rm} -f %{buildroot}%{_libdir}/libnss_nssd.la
+%{__rm} -f %{buildroot}%{_libdir}/libnss_nssd.so
+# pam-multi
+%{__rm} -f %{buildroot}%{pam_module_dir}/pam-multi.la
+%{__rm} -f %{buildroot}%{pam_module_dir}/pam-multi.a
+if [ -x /usr/bin/chrpath ] ; then
+  /usr/bin/chrpath -d %{buildroot}%{pam_module_dir}/pam-multi.so
+  /usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
+fi
+
+if [ -x /bin/touch ] ; then
+  touch=/bin/touch
+elif [ -x /usr/bin/touch ] ; then
+  touch=/usr/bin/touch
+else
+  touch=/bin/touch
+fi
+$touch %{buildroot}%{sysconfdir}/nssd.conf
+
+# Compress the man pages
+find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
+
+%files
+%defattr(-, root, root,-)
+#
+# Directories
+#
+
+%ghost %config(noreplace,missingok)               %{sysconfdir}/nssd.conf
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/%{name}-rpm.info
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/%{name}-release
+
+%attr(755,root,qmail)                   %{_prefix}/sbin/nssd
+%attr(755,root,qmail)                   %{libexecdir}/check_getpw
+
+# pam-multi
+%attr(755,root,root)                    %{_prefix}/sbin/pam-checkpwd
+%attr(644,root,root) %config(noreplace) %{pam_confdir}/pam-multi
+%attr(644,root,root) %config(noreplace) %{pam_confdir}/pop3
+%attr(644,root,root) %config(noreplace) %{pam_confdir}/imap
+
+%docdir %{shareddir}/doc
+%docdir %{mandir}
+%attr(644,root,root)                    %{mandir}/man[1,5,7,8]/*
+
+%if %build_on_obs == 0
+%license %attr(644,root,qmail)          %{shareddir}/doc/COPYING.nssd
+%license %attr(644,root,qmail)          %{shareddir}/doc/COPYING.pam-multi
+%else
+%attr(644,root,qmail)                   %{shareddir}/doc/COPYING.nssd
+%attr(644,root,qmail)                   %{shareddir}/doc/COPYING.pam-multi
+%endif
+
+%attr(644,root,qmail)                   %{shareddir}/doc/AUTHORS.nssd
+%attr(644,root,qmail)                   %{shareddir}/doc/AUTHORS.pam-multi
+%attr(644,root,qmail)                   %{shareddir}/doc/README.nssd
+%attr(644,root,qmail)                   %{shareddir}/doc/README.pam-multi
+
+# Shared libraries (omit for architectures that don't support them)
+
+# pam-multi
+%attr(755,root,root)                    /%{pam_module_dir}/pam-multi.so
+
+%attr(755,root,root)                    %{_libdir}/libnss_nssd.so.2.0.0
+                                        %{_libdir}/libnss_nssd.so.2
+
+%clean
+[ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
+
+%verifyscript
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+
+### SCRIPTLET ###############################################################################
+%post
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+
+if [ -z "$argv1" ] ; then
+  argv1=0
+  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="%{servicedir}/pwdlookup"
+fi
+
+echo "Doing Post Install"
+echo ""
+echo " 1. Configure %{logdir} for multilog"
+echo " 2. Configure %{servicedir}"
+echo " 3. Configure nssd service"
+echo " 4. Configure pam-multi as alternative for SMTP auth"
+echo ""
+
+# Recreate ld.so links and cache
+if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+  if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
+    echo %{_libdir} > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
+  fi
+  /sbin/ldconfig
+fi
+
+%{__mkdir_p} %{logdir}/pwdlookup
+if [ -d /run ] ; then
+  nssd_sock="/run/indimail/nssd.sock"
+  %{__mkdir_p} /run/indimail
+elif [ -d /var/run ] ; then
+  nssd_sock="/var/run/indimail/nssd.sock"
+  %{__mkdir_p} /var/run/indimail
+else
+  nssd_sock="/tmp/nssd.sock"
+fi
+
+#nssd
+%{_prefix}/sbin/svctool --pwdlookup=${nssd_sock} --threads=5 --timeout=-1 \
+  --mysqlhost=localhost --mysqluser=indimail \
+  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket} --servicedir=%{servicedir}
+
+if [ -x /usr/sbin/alternatives ] ; then
+  openSUSE=$(grep /etc/os-release 2>/dev/null)
+  if [ -z "$openSUSE" -a ! -f /etc/SuSE-release ] ; then
+    /usr/sbin/alternatives --add-slave mta %{_prefix}/bin/sendmail \
+      %{pam_confdir}/smtp mta-pam %{pam_confdir}/pam-multi
+  fi
+fi
+
+# turn off automatic refresh for services during first time installation
+%{_prefix}/sbin/svctool --servicedir=%{servicedir} --norefreshsvc="0 %{servicedir}/pwdlookup"
+
+### SCRIPTLET ###############################################################################
+%postun
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
+
+# remove pam module for smtp
+if [ -x /usr/sbin/alternatives ] ; then
+  openSUSE=$(grep /etc/os-release 2>/dev/null)
+  if [ -z "$openSUSE" -a ! -f /etc/SuSE-release ] ; then
+    /usr/sbin/alternatives --remove-slave mta %{_prefix}/bin/sendmail mta-pam
+  fi
+fi
+
+if [ -d %{servicedir}/pwdlookup ] ; then
+  %{__rm} -rf %{servicedir}/pwdlookup || true
+elif [ -L %{servicedir}/pwdlookup ] ; then
+  %{__rm} -f %{servicedir}/pwdlookup || true
+fi
+if [ -h %{logdir} ] ; then
+  log_dir=`/bin/ls -ld %{logdir} | /usr/bin/awk '{print $10}'`
+else
+  log_dir=%{logdir}
+fi
+%{__rm} -rf $log_dir/pwdlookup
+%{__rm} -f %{sysconfdir}/nssd.conf
+if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+  /sbin/ldconfig
+fi
+
+# fix changelog for openSUSE buildservice
+%changelog

@@ -5,9 +5,9 @@
 %dir %attr(0770,indimail,qmail)    @indimaildir@/inquery
 %dir %attr(0555,root,root)         @libexecdir@/imapmodules
 %dir %attr(0755,root,root)         @prefix@/lib/indimail/modules
-%dir %attr(0755,root,qmail)        @shareddir@/table_config
-%dir %attr(0755,root,root)         @shareddir@/locale
-%dir %attr(0755,root,root)         @shareddir@/fortunes
+%dir %attr(0755,root,qmail)        @prefix@/share/indimail/table_config
+%dir %attr(0755,root,root)         @prefix@/share/indimail/locale
+%dir %attr(0755,root,root)         @prefix@/share/indimail/fortunes
 #
 # Post handle
 #

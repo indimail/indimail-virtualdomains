@@ -143,17 +143,6 @@ case $dlload_mysql in
 esac
 ])
 
-shareddir=$prefix
-AC_ARG_ENABLE(shareddir, [  --enable-shareddir=dir       directory for shared files.],
-	shareddir="$enableval",
-	[
-	 	if test "$shareddir" != ""
-		then
-			AC_DEFINE_UNQUOTED(SHAREDDIR,"$shareddir", Directory for shared files.)
-		fi
-	])
-AC_DEFINE_UNQUOTED(SHAREDDIR, "$shareddir", Directory for shared files)
-
 AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directory.],[mysql_prefix=$enableval],[mysql_prefix=""])
 if test "$mysql_prefix" = ""
 then
@@ -319,7 +308,6 @@ AC_SUBST(mysql_incdir)
 AC_SUBST(mysql_libdir)
 AC_SUBST(auth_inc)
 AC_SUBST(auth_libs)
-AC_SUBST(shareddir)
 (
 echo "---------- $PACKAGE $VERSION $target ----------"
 echo "Host               = $host"
@@ -337,6 +325,7 @@ echo "     MySQL lib dir = $mysql_libdir --enable-mysqllibdir=$mysql_libdir"
 else
 echo "     MySQL lib dir = loaded using dlopen"
 fi
+echo "          data dir = $datarootdir --datarootdir=$datarootdir"
 echo "       socket Path = $socket_path --enable-nssd-socket-path=$socket_path"
 echo "       config Path = $config_path --enable-nssd-config-path=$config_path"
 ) | tee nssd.settings

@@ -30,6 +30,8 @@ nssd_DEPENDENCIES = config.h
 
 nssdlibexecdir=@libexecdir@
 nssdlibexec_PROGRAMS = check_getpw
+check_getpw_SOURCES=check_getpw.c
+check_getpw_LDADD=
 man_MANS=nssd.8 nssd.conf.5
 doc_list = COPYING AUTHORS README
 
@@ -60,7 +62,7 @@ libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
 
 install-data-local:  COPYING README AUTHORS
-	$(mkinstalldirs)  $(DESTDIR)@shareddir@/doc || exit 1
+	$(mkinstalldirs)  $(DESTDIR)@datarootdir@/doc || exit 1
 	for f in $(doc_list); do \
-		$(INSTALL_DATA) $$f $(DESTDIR)@shareddir@/doc/$$f.nssd || exit 1 ;\
+		$(INSTALL_DATA) $$f $(DESTDIR)@datarootdir@/doc/$$f.nssd || exit 1 ;\
 	done

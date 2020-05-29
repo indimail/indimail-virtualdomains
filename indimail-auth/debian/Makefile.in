@@ -1,0 +1,58 @@
+prefix=@prefix@
+sysconfdir=@sysconfdir@
+shareddir=@shareddir@
+libexecdir=@libexecdir@
+mandir=@mandir@
+logdir=@logdir@
+servicedir=@servicedir@
+version=@version@
+release=@release@
+nssd_version=@nssd_version@
+pam_multi_version=@pam_multi_version@
+edit = sed \
+	-e 's,@prefix\@,$(prefix),g' \
+	-e 's,@sysconfdir\@,$(sysconfdir),g' \
+	-e 's,@shareddir\@,$(shareddir),g' \
+	-e 's,@libexecdir\@,$(libexecdir),g' \
+	-e 's,@mandir\@,$(mandir),g' \
+	-e 's,@logdir\@,$(logdir),g' \
+	-e 's,@servicedir\@,$(servicedir),g' \
+	-e 's,@version\@,$(version),g' \
+	-e 's,@release\@,$(release),g' \
+	-e 's,@nssd_version\@,$(nssd_version),g' \
+	-e 's,@pam_multi_version\@,$(pam_multi_version),g' \
+	-e 's,@DATE\@,$(DATE),g'
+
+all: rules changelog postinst postrm \
+	indimail-auth.install indimail-auth.dsc indimail-auth-Debian_9.0.dsc \
+	debian.tar.gz dummy.tar.gz
+
+dummy.tar.gz: README
+	tar cf - README |gzip > $@
+postinst: postinst.in
+	$(edit) $@.in > $@
+postrm: postrm.in
+	$(edit) $@.in > $@
+obs_deb_prep: obs_deb_prep.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+rules: rules.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+indimail-auth.install: indimail-auth.install.in Makefile
+	$(edit) $@.in > $@
+changelog: changelog.in ../conf-version ../conf-release
+	(cat $@.in; echo ""; \
+	echo " -- Manvendra Bhangui <indimail-auth@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
+	| $(edit) > $@
+indimail-auth.dsc: indimail-auth.dsc.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+indimail-auth-Debian_9.0.dsc: indimail-auth.dsc.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+debian.tar.gz: copyright postinst postrm rules changelog compat \
+indimail-auth.install obs_deb_prep Makefile control
+	tar cf - copyright postinst postrm rules changelog \
+		compat indimail-auth.install obs_deb_prep Makefile control \
+		| gzip > $@
+
+clean:
+	/bin/rm -f rules prerm preinst postrm postinst \
+	*.dsc changelog indimail-auth.install obs_deb_prep debian.tar.gz
