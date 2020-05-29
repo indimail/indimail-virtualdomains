@@ -94,7 +94,7 @@ build-stamp:
 		cd ..; \
 	fi
 	if [ -d pam-multi-$(pam_multi_version) ] ; then \
-		cd ../pam-multi-$(pam_multi_version); \
+		cd pam-multi-$(pam_multi_version); \
 		./configure --prefix=$(prefix) --enable-mysqlprefix=/usr \
 		--enable-shareddir=$(shareddir) \
 		--enable-moduledir=/lib/security --enable-controldir=$(sysconfdir)/control \
