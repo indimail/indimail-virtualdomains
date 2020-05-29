@@ -414,7 +414,7 @@ the installation.
     % cd indimail-mta-2.7
 
     change first line in indimail-mta-2.7/conf-qmail to @indimaildir@
-    change first line in indimail-mta-2.7/conf-shared to @shareddir@
+    change first line in indimail-mta-2.7/conf-shared to @prefix@/share/indimail
     change first line in indimail-mta-2.7/conf-prefix to @prefix@
     change first line in indimail-mta-2.7/conf-libexec to @libexecdir@
     change first line in indimail-mta-2.7/conf-sysconfdir to @sysconfdir@
@@ -446,9 +446,8 @@ the installation.
         --libexecdir=@libexecdir@ \
         --sysconfdir=@sysconfdir@ \
         --with-pkgconfigdir=@pkgconfigdir@ \
-        --datarootdir=@shareddir@ \
+        --datarootdir=@prefix@/share/indimail \
         --mandir=@prefix@/share/man \
-        --enable-shareddir=@shareddir@ \
         --enable-servicedir=@servicedir@ \
         --enable-domaindir=@indimaildir@
         --enable-qmaildir=@indimaildir@ \
@@ -530,7 +529,7 @@ the installation.
     MySQL libraries.
 
     change first line in conf-home to @prefix@
-    change first line in conf-shared to @shareddir@
+    change first line in conf-shared to @prefix@/share/indimail
 
     % cd ucspi-tcp-0.88
     % make -s [DESTDIR=staging_directory]
@@ -562,7 +561,7 @@ the installation.
         --sysconfdir=@sysconfdir@ \
         --with-certsdir=@sysconfdir@/certs \
         --libexecdir=@libexecdir@ \
-        --datarootdir=@shareddir@ \
+        --datarootdir=@prefix@/share/indimail \
         --without-authchangepwdir \
         --without-authpam --without-authcustom \
         --without-authpwd --with-authshadow
@@ -656,7 +655,7 @@ the installation.
     % ./configure --prefix=@prefix@ --enable-indimail \
         --sysconfdir=@sysconfdir@ \
         --enable-binprefix=@prefix@ \
-        --datarootdir=@shareddir@ \
+        --datarootdir=@prefix@/share/indimail \
         --libexecdir=@libexecdir@ \
         --libdir=@libdir@ \ # /usr/lib or /usr/lib64 on a 32/debian/64bit system
         --mandir=@mandir@ \
@@ -1290,7 +1289,7 @@ You can go on to add a virtual domain and users if you wish
 9.  Man pages
     A lot of the underlying indimail details are not covered in this
     file. This is on purpose. If you want to find out the internal
-    workings of indimail and qmail look into all files in @shareddir@/doc
+    workings of indimail and qmail look into all files in @prefix@/share/indimail/doc
     and @mandir@/man?
 
     As a first step, do
@@ -1441,7 +1440,7 @@ startup item containing the IndiMail startup script and paramters list. Create a
 directory for IndiMail using the following command:
 
 Mac OS X 10.5.x or later
-% sudo cp @shareddir@/boot/indimail.plist /System/Library/LaunchDaemons
+% sudo cp @prefix@/share/indimail/boot/indimail.plist /System/Library/LaunchDaemons
 
 NOTE: You can also add @prefix@/sbin/svscanboot to /etc/rc.local
 
@@ -1449,7 +1448,7 @@ prior to Mac OS X 10.5.x (NOTE: I have not compiled/tested IndiMail on Mac OS X 
 % cd ..
 % sudo mkdir /Library/StartupItems/IndiMail
 % sudo cp @prefix@/bin/qmailctl /Library/StartupItems/IndiMail/IndiMail
-% sudo cp @shareddir@/boot/StartupParameters.plist /Library/StartupItems/IndiMail
+% sudo cp @prefix@share/indimail/boot/StartupParameters.plist /Library/StartupItems/IndiMail
 
 When you reboot your machine IndiMail will automatically start.
 

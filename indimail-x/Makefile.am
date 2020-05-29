@@ -732,7 +732,6 @@ edit = sed \
 	-e 's}@servicedir\@}$(servicedir)}g' \
 	-e 's}@controldir\@}$(controldir)}g' \
 	-e 's}@sysconfdir\@}$(sysconfdir)}g' \
-	-e 's}@shareddir\@}$(shareddir)}g' \
 	-e 's}@mandir\@}$(mandir)}g' \
 	-e 's}@libexecdir\@}$(libexecdir)}g' \
 	-e 's}@domaindir\@}$(domaindir)}g' \
@@ -918,9 +917,9 @@ install-data-hook:
 			echo "chmod 755 $(DESTDIR)@libexecdir@/$$f"; \
 		fi;\
 	done
-	$(mkinstalldirs) $(DESTDIR)@shareddir@/doc || exit 1
+	$(mkinstalldirs) $(DESTDIR)@datarootdir@/doc || exit 1
 	for f in $(doc_list); do \
-		$(INSTALL_DATA) doc/$$f $(DESTDIR)@shareddir@/doc/$$f || exit 1 ;\
+		$(INSTALL_DATA) doc/$$f $(DESTDIR)@datarootdir@/doc/$$f || exit 1 ;\
 	done
 	if test `@idcommand@` = "0" ; then \
 		for f in $(setuid_list); do \

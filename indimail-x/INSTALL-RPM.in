@@ -50,7 +50,7 @@ A) Package Installation/Upgrade
    3. Installs important directories in @indimaildir@, binaries in @prefix@/bin,
       @prefix@/sbin, @libexecdir@, shared libraries in @libdir@
    4. Install plugins, modules in /usr/lib/indimail
-   5. Installs shared files in @shareddir@
+   5. Installs shared files in @prefix@/share/indimail
    6. Sets up configuration files in /etc/indimail/control, etc
    7. Installs services under supervise in /service
        smtp, smtp - odmr, qmtp, qmqp, qmail-send, imap/pop3, indisrvr, inlookup, pwdlookup,

@@ -1,0 +1,7 @@
+etc/pam.d              /etc
+lib/security           /lib
+usr/sbin               @prefix@
+usr/libexec/indimail   @prefix@/libexec
+usr/share/man/man5     @mandir@
+usr/share/man/man8     @mandir@
+usr/lib/*.so.*         /usr/lib

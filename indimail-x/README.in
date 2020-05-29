@@ -133,7 +133,7 @@ You could also look at
 http://indimail.blogspot.com/2009/11/indimail-installation-steps.html
 
 Once you have installed IndiMail, you will find all man pages in @mandir@ and
-documents in @shareddir@/doc. You can do man indimail to get started
+documents in @prefix@/share/indimail/doc. You can do man indimail to get started
 with understanding IndiMail.
 
 DISCLAIMER

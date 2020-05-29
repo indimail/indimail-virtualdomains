@@ -1,0 +1,50 @@
+#!/bin/sh
+set -e
+#
+# Unpacker for OpenSUSE build service
+#
+version=@version@
+nssd_version=@nssd_version@
+pam_multi_version=@pam_multi_version@
+nonssd=0
+nopam_multi=0
+
+for i in nssd-"$nssd_version" pam-multi-"$pam_multi_version"
+do
+	/bin/rm -rf $i
+	if [ ${nonssd} -eq 1 -a $i =  nssd-"$nssd_version" ] ; then
+		continue
+	fi
+	if [ ${nopam_multi} -eq 1 -a $i =  pam-multi-"$pam_multi_version" ] ; then
+		continue
+	fi
+	if [ -f ../SOURCES/$i.tar.gz ] ; then
+		echo "extracting $i.tar.gz"
+		gunzip -c ../SOURCES/$i.tar.gz |tar xf -
+	elif [ -f ../SOURCES/$i.tar.xz ] ; then
+		echo "extracting $i.tar.xz"
+		xz -d -c ../SOURCES/$i.tar.xz|tar xf -
+	elif [ -f ../SOURCES/$i.tar.bz2 ] ; then
+		echo "extracting $i.tar.bz2"
+		bzip2 -d -c ../SOURCES/$i.tar.bz2|tar xf -
+	else
+		echo "no source archive for $i"
+		exit 1
+	fi
+	# apply from the obs directory
+	if [ -f ../SOURCES/$i.patch.gz ] ; then
+		echo "applying patch for $i"
+		gunzip -c ../SOURCES/$i.patch.gz | patch -p0 > /dev/null
+		continue
+	elif [ -f ../SOURCES/$i.patch ] ; then
+		echo "applying patch for $i"
+		patch -p0 < ../SOURCES/$i.patch > /dev/null
+		continue
+	fi
+done
+# Local Stuff
+if [ -f ../SOURCES/debian_extra.patch ] ; then
+	echo "applying debian_extra.patch"
+	patch -p0 < ../SOURCES/debian_extra.patch
+fi
+exit 0

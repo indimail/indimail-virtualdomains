@@ -17,7 +17,7 @@ fi
 ./configure --prefix=/usr \
   --sysconfdir=/etc/indimail \
   --mandir=/usr/share/man \
-  --enable-shareddir=/usr/share/indimail \
+  --datarootdir=/usr/share/indimail \
   --enable-nssd-socket=$nssd_sock \
   --enable-nssd-config-path=/etc/indimail/nssd.conf \
   --libexecdir=/usr/libexec/indimail \

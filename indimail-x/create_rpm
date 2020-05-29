@@ -7,11 +7,20 @@ fetchmail_version=$(grep fetchmail_version indimail.spec.in | head -1| awk '{pri
 fortune_version=$(grep fortune_version indimail.spec.in | head -1| awk '{print $3}')
 nssd_version=$(grep nssd_version indimail.spec.in | head -1| awk '{print $3}')
 flash_version=$(grep flash_version indimail.spec.in | head -1| awk '{print $3}')
+nonssd=1
+nopam_multi=1
 
 get_tar_files()
 {
 (
-for i in `grep "^Source" indimail-x/indimail.spec.in | grep -v Source0 | awk '{print $2}' | grep "\.tar"`
+PATT="Source0"
+if [ $nonssd -eq 1 ] ; then
+	PATT="$PATT|nssd"
+fi
+if [ $nopam_multi -eq 1 ] ; then
+	PATT="$PATT|pam-multi"
+fi
+for i in `grep "^Source" indimail-x/indimail.spec.in | egrep -v $PATT | awk '{print $2}' | grep "\.tar"`
 do
 	i=`basename $i`
 	echo $i

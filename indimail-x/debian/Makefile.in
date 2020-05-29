@@ -1,7 +1,6 @@
 indimaildir=@indimaildir@
 mandir=@mandir@
 libexecdir=@libexecdir@
-shareddir=@shareddir@
 qmaildir=@qmaildir@
 domaindir=@domaindir@
 sysconfdir=@sysconfdir@
@@ -71,7 +70,6 @@ edit = sed \
 	-e 's,@domaindir\@,$(domaindir),g' \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
-	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
 	-e 's,@mysqlbindir\@,$(mysqlbindir),g' \

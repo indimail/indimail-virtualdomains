@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 1.3  2020-05-29 19:07:18+05:30  Cprogrammer
+ * use PREFIX/share/indimail instead of SHAREDDIR
+ *
  * Revision 1.2  2020-04-01 18:55:46+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -31,7 +34,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 1.2 2020-04-01 18:55:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 1.3 2020-05-29 19:07:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
@@ -180,8 +183,8 @@ main(int argc, char **argv)
 				return (0);
 			out("svscan", "Installing svscan.service\n");
 			flush("svscan");
-			if (chdir(SHAREDDIR) || chdir("boot")) {
-				strerr_warn3("svscan: chdir: ", SHAREDDIR, "/boot: ", &strerr_sys);
+			if (chdir(PREFIX"/share/indimail") || chdir("boot")) {
+				strerr_warn3("svscan: chdir: ", PREFIX"/share/indimail", "/boot: ", &strerr_sys);
 				return (1);
 			} else
 			if (fappend("systemd", "/lib/systemd/system/svscan.service", "w", 0644, 0, getgid())) {
@@ -222,8 +225,8 @@ main(int argc, char **argv)
 				return (0);
 			out("svscan", "Installing indimail.plist\n");
 			flush("svscan");
-			if (chdir(SHAREDDIR) || chdir("boot")) {
-				strerr_warn3("svscan: chdir: ", SHAREDDIR, "/boot: ", &strerr_sys);
+			if (chdir(PREFIX"/share/indimail") || chdir("boot")) {
+				strerr_warn3("svscan: chdir: ", PREFIX"/share/indimail", "/boot: ", &strerr_sys);
 				return (1);
 			} else
 			if (fappend("indimail.plist", "/System/Library/LaunchDaemons/indimail.plist", "w", 0644, 0, getgid())) {
@@ -276,8 +279,8 @@ main(int argc, char **argv)
 				return (0);
 			out("svscan", "Installing upstart service\n");
 			flush("svscan");
-			if (chdir(SHAREDDIR) || chdir("boot")) {
-				strerr_warn3("svscan: chdir: ", SHAREDDIR, "/boot: ", &strerr_sys);
+			if (chdir(PREFIX"/share/indimail") || chdir("boot")) {
+				strerr_warn3("svscan: chdir: ", PREFIX"/share/indimail", "/boot: ", &strerr_sys);
 				return (1);
 			} else
 			if (fappend("upstart", jobfile, "w", 0644, 0, getgid())) {

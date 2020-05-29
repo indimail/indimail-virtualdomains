@@ -299,9 +299,6 @@ AC_ARG_WITH(package, [], package="$withval",
 AM_CONDITIONAL(HAVE_HTML, test -f ${srcdir}/html/main.html)
 AM_CONDITIONAL(HAVE_SGML, test -d ${srcdir}/libs/docbook)
 
-AC_ARG_WITH(certsdir, [ --with-certsdir Directory where certs are created ],
-		      certsdir="$withval", certsdir=$datadir)
-
 AC_CONFIG_FILES(Makefile dbobj.h dbobj.config imapd.rc imapd-ssl.rc
 		pop3d.rc pop3d-ssl.rc makeimapaccess
 		courier-imap.spec

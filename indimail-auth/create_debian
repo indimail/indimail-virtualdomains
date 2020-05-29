@@ -1,0 +1,21 @@
+#!/bin/sh
+pam_multi_version=$(cat ../pam-multi-x/conf-version)
+nssd_version=$(cat ../nssd-x/conf-version)
+
+if [ -d ../stage ] ; then
+	/bin/rm -rf ../stage
+fi
+mkdir -p ../stage
+cp -rp ../nssd-x ../stage/nssd-$nssd_version
+cp -rp ../pam-multi-x ../stage/pam-multi-$pam_multi_version
+make -s
+make -s -C debian
+cp -rp debian ../stage
+cd ../stage
+make -s -C nssd-$nssd_version clean
+make -s -C nssd-$nssd_version distclean
+make -s -C pam-multi-$pam_multi_version clean
+make -s -C pam-multi-$pam_multi_version distclean
+dpkg-buildpackage -tc -b
+cd ..
+/bin/rm -r stage

@@ -13,4 +13,5 @@ patches
 cscope.*
 *.BAK
 RCS
+stage
 ChangeLog.indimail
