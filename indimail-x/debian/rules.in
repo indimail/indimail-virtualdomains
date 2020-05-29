@@ -65,9 +65,10 @@ build-stamp:
 	if [ -d indimail-$(version) ] ; then \
 		cd indimail-$(version); \
 		./configure --prefix=$(prefix) --libdir=$(libdir) --datarootdir=$(shareddir) \
-		--with-pkgconfigdir=$(pkgconfigdir) --libexecdir=$(libexecdir) --enable-shareddir=$(shareddir) \
-  		--mandir=$(prefix)/share/man --datarootdir=$(prefix)/share/indimail \
-		--enable-modbase=$(prefix)/lib/indimail --mandir=$(mandir) --sysconfdir=$(sysconfdir) \
+		--with-pkgconfigdir=$(pkgconfigdir) --libexecdir=$(libexecdir) \
+		--enable-shareddir=$(shareddir) --mandir=$(prefix)/share/man \
+		--datarootdir=$(prefix)/share/indimail --enable-modbase=$(prefix)/lib/indimail \
+		--mandir=$(mandir) --sysconfdir=$(sysconfdir) \
 		--enable-qmaildir=$(indimaildir) --enable-domaindir=$(domaindir) \
 		--enable-tcprules-prog=$(prefix)/bin/tcprules \
 		--enable-tcpserver-file=$(sysconfdir)/tcp/tcp.smtp \
@@ -86,6 +87,7 @@ build-stamp:
 		cd nssd-$(nssd_version) ; \
 		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --libdir=$(libdir) \
 		--libexecdir=$(libexecdir) --enable-nssd-socket=$(nssd_sock) \
+		--enable-shareddir=$(shareddir) \
 		--enable-nssd-config-path=$(sysconfdir)/nssd.conf \
 		--enable-default-domain=$(default_domain) \
 		--mandir=$(mandir) --enable-mysqlprefix=/usr `cat ../indimail-$(version)/config/nssd.opts`; \
