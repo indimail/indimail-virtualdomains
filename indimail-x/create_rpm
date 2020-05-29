@@ -82,27 +82,38 @@ cd ..
 list=`get_tar_files`
 for i in $list
 do
-	echo $i | grep courier-imap > /dev/null
-	if [ $? -eq 0 ] ; then
+	case "$i" in
+		courier-imap-"$courier_version".tar.bz2)
 		if [ ! -d courier-imap-x ] ; then
 			echo "$i: No such file or directory" 1>&2
 			exit 1
 		fi
-		echo "Preparing courier-imap-"$courier_version""
+		echo "Versioning courier-imap-"$courier_version".tar.bz2"
 		/bin/cp -rp courier-imap-x stage/courier-imap-"$courier_version"
 		cd stage/courier-imap-"$courier_version"
+		echo "Cleaning courier-imap-$courier_version"
 		make -s clean > /dev/null
 		make -s distclean > /dev/null
 		/bin/rm -rf autom4te.cache .deps
-		cd ..
-		tar cf - courier-imap-"$courier_version" | \
-			bzip2 -c > $rpmbuild/SOURCES/courier-imap-"$courier_version".tar.bz2
-		SRC="$rpmbuild/SOURCES/courier-imap-"$courier_version".tar.bz2 $SRC"
-		cd ..
-		continue
-	fi
+		cd ../..
+		;;
+		nssd-"$nssd_version".tar.gz)
+		if [ ! -d nssd-x ] ; then
+			echo "$i: No such file or directory" 1>&2
+			exit 1
+		fi
+		echo "Versioning nssd-"$nssd_version".tar.gz"
+		/bin/cp -rp nssd-x stage/nssd-"$nssd_version"
+		cd stage/nssd-"$nssd_version"
+		echo "Cleaning nssd-$nssd_version"
+		make -s clean > /dev/null
+		make -s distclean > /dev/null
+		/bin/rm -rf autom4te.cache .deps
+		cd ../..
+		;;
+	esac
 	do_archive="gz"
-	echo $i | grep bogofilter > /dev/null
+	echo $i | egrep "bogofilter|courier" > /dev/null
 	if [ $? -eq 0 ] ; then
 		do_archive="bz2"
 	fi
@@ -111,12 +122,18 @@ do
 		do_archive="xz"
 	fi
 	dir=`get_dirname $i`
-	if [ ! -d $dir ] ; then
-		echo "$dir: No such file or directory" 1>&2
-		exit 1
-	fi
 	case "$dir" in
-		"bogofilter-$bogofilter_version"|"fetchmail-$fetchmail_version"|"nssd-$nssd_version")
+		nssd-$nssd_version|courier-imap-$courier_version)
+		;;
+		*)
+		if [ ! -d $dir ] ; then
+			echo "$dir: No such file or directory" 1>&2
+			exit 1
+		fi
+		;;
+	esac
+	case "$dir" in
+		"bogofilter-$bogofilter_version"|"fetchmail-$fetchmail_version")
 		echo "Preparing $dir"
 		/bin/cp -rp $dir stage
 		cd stage/$dir
@@ -124,9 +141,20 @@ do
 		make -s clean > /dev/null
 		make -s distclean > /dev/null
 		/bin/rm -rf autom4te.cache .deps
-		cd ..
+		cd ../..
+		;;
+		"nssd-$nssd_version"|"courier-imap-$courier_version")
+		;;
+		*)
+		/bin/cp -rp $dir stage
+		;;
+	esac
+	case "$dir" in
+		"bogofilter-$bogofilter_version"|"fetchmail-$fetchmail_version"|"nssd-$nssd_version"|"courier-imap-$courier_version")
 		case "$do_archive" in
 			gz)
+				cd stage
+				echo "Archiving $dir.tar.gz in `pwd`"
 				tar \
 				--exclude="$dir/.git" \
 				--exclude="$dir/debian"  \
@@ -134,8 +162,11 @@ do
 				-cf - $dir \
 				| gzip -c > $rpmbuild/SOURCES/$dir.tar.gz
 				SRC="$rpmbuild/SOURCES/$dir.tar.gz $SRC"
+				cd ..
 				;;
 			bz2)
+				cd stage
+				echo "Archiving $dir.tar.bz2 in `pwd`"
 				tar \
 				--exclude="$dir/.git" \
 				--exclude="$dir/debian"  \
@@ -143,8 +174,11 @@ do
 				-cf - $dir \
 				| bzip2 -c > $rpmbuild/SOURCES/$dir.tar.bz2
 				SRC="$rpmbuild/SOURCES/$dir.tar.bz2 $SRC"
+				cd ..
 				;;
 			xz)
+				cd stage
+				echo "Archiving $dir.tar.xz in `pwd`"
 				tar \
 				--exclude="$dir/.git" \
 				--exclude="$dir/debian"  \
@@ -152,18 +186,16 @@ do
 				-cf - $dir \
 				| xz -c > $rpmbuild/SOURCES/$dir.tar.xz
 				SRC="$rpmbuild/SOURCES/$dir.tar.xz $SRC"
+				cd ..
 				;;
 		esac
-		cd ..
-		;;
-		*)
-		/bin/cp -rp $dir stage
 		;;
 	esac
 done
 echo "Preparing indimail-"$version""
 /bin/cp -rp indimail-x stage/indimail-"$version"
 cd stage/indimail-"$version"
+echo "Cleaning indimail-"$version""
 make clean > /dev/null
 make distclean > /dev/null
 /bin/rm -rf autom4te.cache .deps
@@ -186,7 +218,7 @@ done
 # copy rest of source
 for i in $list
 do
-	echo $i | grep courier-imap > /dev/null
+	echo $i | egrep "nssd|courier-imap" > /dev/null
 	if [ $? -eq 0 ] ; then
 		continue
 	fi
@@ -209,9 +241,11 @@ do
 		;;
 		*)
 		echo "Preparing $dir"
+		echo "Cleaning $dir"
 		/bin/rm -rf $dir/autom4te.cache $dir/.deps
 		case "$do_archive" in
 			gz)
+				echo "Archiving $dir.tar.gz in `pwd`"
 				tar \
 				--exclude="$dir/.git" \
 				--exclude="$dir/debian"  \
@@ -221,6 +255,7 @@ do
 				SRC="$rpmbuild/SOURCES/$dir.tar.gz $SRC"
 				;;
 			bz2)
+				echo "Archiving $dir.tar.bz2 in `pwd`"
 				tar \
 				--exclude="$dir/.git" \
 				--exclude="$dir/debian"  \
@@ -230,6 +265,7 @@ do
 				SRC="$rpmbuild/SOURCES/$dir.tar.bz2 $SRC"
 				;;
 			xz)
+				echo "Archiving $dir.tar.xz in `pwd`"
 				tar \
 				--exclude="$dir/.git" \
 				--exclude="$dir/debian"  \
@@ -242,7 +278,6 @@ do
 		;;
 	esac
 done
-
 dist=`uname -r |cut -d . -f4`
 if [ $# -gt 0 ] ; then
 	release=$1
