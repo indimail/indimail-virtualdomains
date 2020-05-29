@@ -35,11 +35,16 @@ MOSTLYCLEANFILES=pam-multi.la pam-checkpwd pam-support.h.gch config.h.gch pam-mu
 EXTRA_DIST=COPYING NEWS README CREDITS ChangeLog INSTALL.pam-multi pam-multi.spec.in \
 		   install-sh missing mkinstalldirs pam-multi.spec
 DISTCLEANFILES=pam-multi.settings
+doc_list = COPYING AUTHORS README
 
 pam-multi.8: pam-multi.9
 	cat $^ | sed s}INDIMAIL}$(prefix)}g > $@
 
 install-data-local:  pam-multi.8 pam-checkpwd.8
+	$(mkinstalldirs)  $(DESTDIR)@shareddir@/doc || exit 1
+	for f in $(doc_list); do \
+		$(INSTALL_DATA) $$f $(DESTDIR)@shareddir@/doc/$$f.pam-multi || exit 1 ;\
+	done
 	$(mkinstalldirs)  $(DESTDIR)$(moduledir)
 	$(mkinstalldirs)  $(DESTDIR)$(libdir)
 	$(mkinstalldirs)  $(DESTDIR)$(pam_confdir)
