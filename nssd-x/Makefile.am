@@ -31,6 +31,7 @@ nssd_DEPENDENCIES = config.h
 nssdlibexecdir=@libexecdir@
 nssdlibexec_PROGRAMS = check_getpw
 man_MANS=nssd.8 nssd.conf.5
+doc_list = COPYING AUTHORS README
 
 noinst_HEADERS = nssd.h
 
@@ -58,13 +59,8 @@ LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
 
-#install -data-hook:
-#install-libnss_nssdLTLIBRARIES: $(libnss_nssd_LTLIBRARIES)
-#	@$(NORMAL_INSTALL)
-#	@if [ " $(ARCH_LIB)" = " " ] ; then \
-#		if [ -d /usr/lib64 ] ; then \
-#			$(LIBTOOL) --mode=install $(INSTALL) -c -s libnss_nssd.la $(DESTDIR)/usr/lib64/libnss_nssd.la; \
-#		else \
-#			$(LIBTOOL) --mode=install $(INSTALL) -c -s libnss_nssd.la $(DESTDIR)/usr/lib/libnss_nssd.la; \
-#		fi; \
-#	fi
+install-data-local:  COPYING README AUTHORS
+	$(mkinstalldirs)  $(DESTDIR)@shareddir@/doc || exit 1
+	for f in $(doc_list); do \
+		$(INSTALL_DATA) $$f $(DESTDIR)@shareddir@/doc/$$f.nssd || exit 1 ;\
+	done
