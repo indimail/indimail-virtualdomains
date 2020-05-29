@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.36 2020-05-29 10:54:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.37 2020-05-29 14:45:59+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -398,8 +398,7 @@ fi
   --enable-basepath=@basepath@ --enable-logdir=%{logdir} \
   --enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{sysconfdir}/tcp/tcp.smtp \
   --enable-cookiedir=%{_prefix}/share/indimail/fortunes \
-  --enable-default-domain=${default_domain} \
-  --enable-moduledir=%pam_module_dir `%{__cat} config/indimail.opts`
+  --enable-default-domain=${default_domain} `%{__cat} config/indimail.opts`
 
 #### nssd ######################
 %if %nonssd == 0
@@ -429,6 +428,21 @@ if [ -d ../nssd-%{nssd_version} ] ; then
 fi
 %endif
 
+#### pam-multi ######################
+if [ -d ../pam-multi-%{pam_multi_version} ] ; then
+  cd ../pam-multi-%{pam_multi_version}
+  if [ %{reconfigure_mode} -eq 1 ] ; then
+    echo "reconfiguring..."
+    %{__mkdir_p} m4
+    aclocal -I m4
+    autoreconf -fiv
+  fi
+  %configure --prefix=%{_prefix} --enable-mysqlprefix=%{mysqlPrefix} \
+  --enable-shareddir=%{shareddir} \
+  --enable-moduledir=%pam_module_dir --enable-controldir=%{sysconfdir}/control \
+  --enable-dlload-mysql=yes --enable-default-domain=${default_domain}
+fi
+
 #### courier-imap ######################
 %if %nocourierimap == 0
 if [ -d ../courier-imap-%{courier_version} ] ; then
@@ -442,7 +456,7 @@ if [ -d ../courier-imap-%{courier_version} ] ; then
   fi
   %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --bindir=%{_prefix}/bin \
   --mandir=%{mandir} --sysconfdir=%{sysconfdir} --libdir=%{_libdir} \
-  --datarootdir=%{shareddir} --with-certsdir=%{sysconfdir}/control \
+  --datarootdir=%{shareddir} --with-certsdir=%{sysconfdir}/certs \
   --with-mailer=%{_prefix}/bin/sendmail \
   `%{__cat} ../%{name}-%{version}/config/courier-imap.opts`
 fi
@@ -494,7 +508,8 @@ fi
 %install
 ID=$(id -u)
 %{__mkdir_p} $RPM_BUILD_ROOT%{_prefix}
-for i in %{name}-%{version} nssd-%{nssd_version} bogofilter-%{bogofilter_version} \
+for i in %{name}-%{version} nssd-%{nssd_version} \
+pam-multi-%{pam_multi_version} bogofilter-%{bogofilter_version} \
 fetchmail-%{fetchmail_version} courier-imap-%{courier_version}
 do
   if [ " $i" = " fetchmail-%{fetchmail_version}" -a %nofetchmail -ne 0 ] ; then
