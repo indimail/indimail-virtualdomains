@@ -89,7 +89,15 @@ $ sudo make install-strip
 
 # Build nssd
 ```
-$ cd /usr/local/src/indimail-virtualdomains/nssd-1.2
+$ cd /usr/local/src/indimail-virtualdomains/nssd-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
+```
+
+# Build pam-multi
+```
+$ cd /usr/local/src/indimail-virtualdomains/pam-multi-x
 $ ./default.configure
 $ make
 $ sudo make install-strip
@@ -105,18 +113,16 @@ indimail-mta. It will also put a systemd unit file indimail.service in
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
 $ sudo sh ./create_services --servicedir=/services --mysqlPrefix=/usr
-$ sudo service indimail start
 ```
 
+# Start Services
+```
+$ sudo systemctl start svscan
 or
-
-```
-$ /etc/init.d/indimail start
-```
-
+$ sudo service svscan start
 or
-
-```
+$ /etc/init.d/svscan start
+or
 $ /usr/bin/qmailctl start
 ```
 
@@ -143,6 +149,12 @@ Currently, the list of supported distributions for IndiMail is
           o openSUSE_Leap_15.1
           o openSUSE_Leap_15.2
 		  o openSUSE_Tumbleweed
+          o SUSE Linux Enterprise 12
+          o SUSE Linux Enterprise 12 SP1
+          o SUSE Linux Enterprise 12 SP2
+          o SUSE Linux Enterprise 12 SP3
+          o SUSE Linux Enterprise 12 SP4
+          o SUSE Linux Enterprise 12 SP5
           o SUSE Linux Enterprise 15
           o SUSE Linux Enterprise 15 SP1
 
