@@ -111,6 +111,20 @@ do
 		/bin/rm -rf autom4te.cache .deps
 		cd ../..
 		;;
+		pam-multi-"$pam_multi_version".tar.gz)
+		if [ ! -d pam-multi-x ] ; then
+			echo "$i: No such file or directory" 1>&2
+			exit 1
+		fi
+		echo "Versioning pam-multi-"$pam_multi_version".tar.gz"
+		/bin/cp -rp pam-multi-x stage/pam-multi-"$pam_multi_version"
+		cd stage/pam-multi-"$pam_multi_version"
+		echo "Cleaning pam-multi-$pam_multi_version"
+		make -s clean > /dev/null
+		make -s distclean > /dev/null
+		/bin/rm -rf autom4te.cache .deps
+		cd ../..
+		;;
 	esac
 	do_archive="gz"
 	echo $i | egrep "bogofilter|courier" > /dev/null
@@ -123,7 +137,7 @@ do
 	fi
 	dir=`get_dirname $i`
 	case "$dir" in
-		nssd-$nssd_version|courier-imap-$courier_version)
+		nssd-$nssd_version|courier-imap-$courier_version|pam-multi-$pam_multi_version)
 		;;
 		*)
 		if [ ! -d $dir ] ; then
@@ -143,14 +157,14 @@ do
 		/bin/rm -rf autom4te.cache .deps
 		cd ../..
 		;;
-		"nssd-$nssd_version"|"courier-imap-$courier_version")
+		"nssd-$nssd_version"|"courier-imap-$courier_version"|"pam-multi-$pam_multi_version")
 		;;
 		*)
 		/bin/cp -rp $dir stage
 		;;
 	esac
 	case "$dir" in
-		"bogofilter-$bogofilter_version"|"fetchmail-$fetchmail_version"|"nssd-$nssd_version"|"courier-imap-$courier_version")
+		"bogofilter-$bogofilter_version"|"fetchmail-$fetchmail_version"|"nssd-$nssd_version"|"courier-imap-$courier_version"|"pam-multi-$pam_multi_version")
 		case "$do_archive" in
 			gz)
 				cd stage
@@ -218,7 +232,7 @@ done
 # copy rest of source
 for i in $list
 do
-	echo $i | egrep "nssd|courier-imap" > /dev/null
+	echo $i | egrep "nssd|courier-imap|pam-multi" > /dev/null
 	if [ $? -eq 0 ] ; then
 		continue
 	fi
@@ -237,7 +251,7 @@ do
 		exit 1
 	fi
 	case "$dir" in
-		"bogofilter-$bogofilter_version"|"fetchmail-$fetchmail_version"|"nssd-$nssd_version")
+		"bogofilter-$bogofilter_version"|"fetchmail-$fetchmail_version"|"nssd-$nssd_version"|"pam-multi-$pam_multi_version")
 		;;
 		*)
 		echo "Preparing $dir"
