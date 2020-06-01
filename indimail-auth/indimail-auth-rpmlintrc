@@ -1,0 +1,7 @@
+addFilter(".* non-standard-uid")
+addFilter(".* non-standard-gid")
+addFilter(".* hardening-no-relro .*")
+addFilter(".* hardening-no-fortify-functions .*")
+setBadness('permissions-unauthorized-file', 0)
+setBadness('lto-bytecode', 0)
+setBadness('files-duplicated-waste', 0)

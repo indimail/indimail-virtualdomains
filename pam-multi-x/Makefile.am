@@ -41,9 +41,9 @@ pam-multi.8: pam-multi.9
 	cat $^ | sed s}INDIMAIL}$(prefix)}g > $@
 
 install-data-local:  pam-multi.8 pam-checkpwd.8
-	$(mkinstalldirs)  $(DESTDIR)@shareddir@/doc || exit 1
+	$(mkinstalldirs)  $(DESTDIR)@datarootdir@/doc || exit 1
 	for f in $(doc_list); do \
-		$(INSTALL_DATA) $$f $(DESTDIR)@shareddir@/doc/$$f.pam-multi || exit 1 ;\
+		$(INSTALL_DATA) $$f $(DESTDIR)@datarootdir@/doc/$$f.pam-multi || exit 1 ;\
 	done
 	$(mkinstalldirs)  $(DESTDIR)$(moduledir)
 	$(mkinstalldirs)  $(DESTDIR)$(libdir)

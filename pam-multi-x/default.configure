@@ -3,7 +3,7 @@ if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
 autoreconf -fiv
 fi
 ./configure --prefix=/usr \
-  --enable-shareddir=/usr/share/indimail \
+  --datarootdir=/usr/share/indimail \
   --enable-mysqlprefix=/usr \
   --enable-moduledir=/lib/security \
   --enable-controldir=/etc/indimail/control \

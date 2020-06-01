@@ -3,12 +3,12 @@ if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
   autoreconf -fiv
 fi
 if [ -d /usr/lib64 ] ; then
-	libdir=/usr/lib64
+  libdir=/usr/lib64
 elif [ -d /usr/lib ] ;then
-	libdir=/usr/lib
+  libdir=/usr/lib
 else
-	echo "could not find libdir " 1>&2
-	exit 1
+  echo "could not find libdir " 1>&2
+  exit 1
 fi
 prefix=/usr
 sysconfdir=/etc/indimail
@@ -20,7 +20,6 @@ sysconfdir=/etc/indimail
   --enable-servicedir=/service \
   --libdir=$libdir \
   --libexecdir=$prefix/libexec/indimail \
-  --enable-shareddir=$prefix/share/indimail \
   --enable-domaindir=/var/indimail \
   --sysconfdir=$sysconfdir \
   --enable-controldir=$sysconfdir/control \

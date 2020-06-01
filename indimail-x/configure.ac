@@ -514,17 +514,6 @@ AC_DEFINE_UNQUOTED(ASSIGNDIR, "$assigndir",  Directory for qmail users/assign)
 AC_DEFINE_UNQUOTED(LIBEXECDIR,"$libexecdir", Directory for architecture-dependent binaries)
 AC_DEFINE_UNQUOTED(SYSCONFDIR,"$sysconfdir", Directory for configuration files)
 
-shareddir=$prefix
-AC_ARG_ENABLE(shareddir, [  --enable-shareddir=dir       directory for shared files.],
-	shareddir="$enableval",
-	[
-	 	if test "$shareddir" != ""
-		then
-			AC_DEFINE_UNQUOTED(SHAREDDIR,"$shareddir", Directory for shared files.)
-		fi
-	])
-AC_DEFINE_UNQUOTED(SHAREDDIR, "$shareddir", Directory for shared files)
-
 domaindir=$prefix
 AC_ARG_ENABLE(domaindir, [  --enable-domaindir=dir       directory for virtual domains.],
 	domaindir="$enableval",
@@ -665,7 +654,6 @@ AC_SUBST(indimaildir)
 AC_SUBST(controldir)
 AC_SUBST(domaindir)
 AC_SUBST(assigndir)
-AC_SUBST(shareddir)
 AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir",IndiMail Home Directory)
 AC_DEFINE_UNQUOTED(PREFIX,"$prefix",Prefix)
 rm -f indimail.dir
@@ -1198,7 +1186,6 @@ echo "-------------------------------------------------------------"
 echo "   qmail directory = $qmaildir --enable-qmaildir=$qmaildir"
 echo " control directory = $controldir --enable-controldir=$controldir"
 echo " domains directory = $domaindir --enable-domaindir=$domaindir"
-echo "  shared directory = $shareddir --enable-shareddir=$shareddir"
 echo "        sysconfdir = $q_sysconfdir"
 echo "        servicedir = $servicedir"
 if test "$postfixdir" != ""

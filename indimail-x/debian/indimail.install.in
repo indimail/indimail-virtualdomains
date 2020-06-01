@@ -5,7 +5,7 @@ var/indimail/domains   @indimaildir@
 var/indimail/inquery   @indimaildir@
 usr/bin                @prefix@
 usr/sbin               @prefix@
-usr/share/indimail/*   @shareddir@
+usr/share/indimail/*   @prefix@/share/indimail
 usr/libexec/indimail/* @libexecdir@
 usr/share/man/man1     @mandir@
 usr/share/man/man3     @mandir@

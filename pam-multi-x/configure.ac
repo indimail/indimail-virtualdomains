@@ -136,17 +136,6 @@ AC_ARG_ENABLE(moduledir, [  --enable-moduledir=dir specify PAM module installati
   ])
 AC_DEFINE_UNQUOTED(PAM_MOD_DIR,"$moduledir",full path to PAM Module Directory)
 
-shareddir=$prefix
-AC_ARG_ENABLE(shareddir, [  --enable-shareddir=dir       directory for shared files.],
-	shareddir="$enableval",
-	[
-	 	if test "$shareddir" != ""
-		then
-			AC_DEFINE_UNQUOTED(SHAREDDIR,"$shareddir", Directory for shared files.)
-		fi
-	])
-AC_DEFINE_UNQUOTED(SHAREDDIR, "$shareddir", Directory for shared files)
-
 AC_DEFINE_UNQUOTED(USE_MYSQL,$USE_MYSQL,Use MySQL for primary authentication)
 pam_confdir=/etc/pam.d
 for f in /etc/pam.d /usr/etc/pam.d
@@ -328,7 +317,6 @@ AC_SUBST(auth_libs)
 AC_SUBST(moduledir)
 AC_SUBST(pam_confdir)
 AC_SUBST(HOST)
-AC_SUBST(shareddir)
 
 (
 echo "---------- $PACKAGE $VERSION $target ----------"

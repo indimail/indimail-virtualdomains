@@ -1,0 +1,14 @@
+Format: 1.0
+Source: indimail-auth
+Section: Misc
+Priority: extra
+Binary: indimail-auth
+Architecture: any
+Version: @version@-@release@
+Maintainer: Manvendra Bhangui <indimail-auth@indimail.org>
+Homepage: https://github.com/mbhangui/indimail-virtualdomains
+Debtransform-Release: 1
+Debtransform-Tar: dummy.tar.gz
+Debtransform-Files-Tar: debian.tar.gz
+Standards-Version: 3.9.1
+Build-Depends: cdbs, debhelper (>= 7.0.50~), gcc, g++, automake, libqmail-dev, libqmail, default-libmysqlclient-dev, m4, gawk

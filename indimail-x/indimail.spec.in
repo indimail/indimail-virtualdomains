@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.38 2020-05-29 15:20:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.41 2020-05-30 19:56:02+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -32,8 +32,8 @@
 %global domaindir          @domaindir@
 %global sysconfdir         @sysconfdir@
 %global libexecdir         @libexecdir@
+%global shareddir          @prefix@/share/indimail
 %global mandir             @mandir@
-%global shareddir          @shareddir@
 %global defaultDomain      @defaultdomain@
 %global courier_version    5.0.10
 %global bogofilter_version 1.2.4
@@ -48,7 +48,8 @@
 %global noperms            0
 %endif
 %global url                https://github.com/mbhangui/indimail-virtualdomains
-%global nonssd             0
+%global nonssd             1
+%global nopam_multi        1
 %global noproxy            0
 %global nocourierimap      0
 %global nofetchmail        0
@@ -129,7 +130,9 @@ Source8: http://downloads.sourceforge.net/%{name}/bogofilter-%{bogofilter_versio
 %if %nofetchmail == 0
 Source9: http://downloads.sourceforge.net/%{name}/fetchmail-%{fetchmail_version}.tar.xz
 %endif
+%if %nopam_multi == 0
 Source10: http://downloads.sourceforge.net/%{name}/pam-multi-%{pam_multi_version}.tar.gz
+%endif
 Source11: http://downloads.sourceforge.net/%{name}/%{name}-rpmlintrc
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -146,17 +149,24 @@ Requires: indimail-mta > 2.6
 Conflicts: %{name} < 2.0
 Obsoletes: %{name} < 2.0
 
-BuildRequires: openssl-devel rpm gcc gcc-c++ make bison binutils coreutils grep
-BuildRequires: glibc glibc-devel openssl procps readline-devel
-BuildRequires: sed ncurses-devel gettext-devel
-BuildRequires: flex findutils
-BuildRequires: readline gzip autoconf automake libtool pkgconfig
+BuildRequires: openssl-devel rpm gcc gcc-c++ make binutils coreutils grep
+BuildRequires: glibc glibc-devel openssl procps
+BuildRequires: gzip autoconf automake libtool pkgconfig
+#flash, osh
+BuildRequires: readline-devel readline ncurses-devel
+BuildRequires: sed findutils
+BuildRequires: mysql-devel libqmail-devel libqmail
+%if %nopam_multi == 0
+BuildRequires: pam-devel
+%endif
+%if %nofetchmail == 0
 BuildRequires: xz
-BuildRequires: mysql-devel pam-devel libqmail-devel libqmail
+BuildRequires: gettext-devel
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 BuildRequires: python3 python3-devel
 %else
 BuildRequires: python python-devel
+%endif
 %endif
 
 %if %nocourierimap == 0
@@ -206,6 +216,7 @@ PreReq: permissions
 %endif
 
 %if %nobogofilter == 0
+BuildRequires: flex bison
 %if 0%{?suse_version}
 BuildRequires: db-devel
 %else
@@ -240,8 +251,10 @@ Requires: /usr/sbin/useradd /usr/sbin/groupadd /usr/sbin/groupdel
 Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
 Requires: binutils sed findutils pkgconfig
 Requires: coreutils grep /bin/sh glibc openssl
-Requires: /usr/bin/hostname
-Requires: pam mrtg
+Requires: /usr/bin/hostname mrtg
+%if %nopam_multi == 0
+Requires: pam
+%endif
 
 %if 0%{?sles_version}
 Requires: mysql-community-server
@@ -306,9 +319,48 @@ languages and applications need to dynamically load and use IndiMail.
 For more details visit %{url}
 
 %prep
+%if %nonssd == 0
+for i in nssd-%{nssd_version}
+do
+  (
+  if [ -d $i ] ; then
+    %{__rm} -rf $i
+  fi
+  if [ -f ../SOURCES/$i.tar.bz2 ] ; then
+    %{__bzip2} -d -c ../SOURCES/$i.tar.bz2 | tar xf -
+  elif [ -f ../SOURCES/$i.tar.xz ] ; then
+    xz -d -c ../SOURCES/$i.tar.xz |tar xf -
+  elif [ -f ../SOURCES/$i.tar.gz ] ; then
+    gunzip -c ../SOURCES/$i.tar.gz | tar xf -
+  else
+    echo "No Source Archive for $i"
+    exit 1
+  fi
+  )
+done
+%endif
+%if %nopam_multi == 0
+for i in pam-multi-%{pam_multi_version}
+do
+  (
+  if [ -d $i ] ; then
+    %{__rm} -rf $i
+  fi
+  if [ -f ../SOURCES/$i.tar.bz2 ] ; then
+    %{__bzip2} -d -c ../SOURCES/$i.tar.bz2 | tar xf -
+  elif [ -f ../SOURCES/$i.tar.xz ] ; then
+    xz -d -c ../SOURCES/$i.tar.xz |tar xf -
+  elif [ -f ../SOURCES/$i.tar.gz ] ; then
+    gunzip -c ../SOURCES/$i.tar.gz | tar xf -
+  else
+    echo "No Source Archive for $i"
+    exit 1
+  fi
+  )
+done
+%endif
 for i in %{name}-%{version} altermime-0.3.10 ripmime-1.4.0.10 flash-0.9.4 \
-mpack-1.6 fortune-%{fortune_version} pam-multi-%{pam_multi_version} \
-nssd-%{nssd_version} bogofilter-%{bogofilter_version} \
+mpack-1.6 fortune-%{fortune_version} bogofilter-%{bogofilter_version} \
 fetchmail-%{fetchmail_version} courier-imap-%{courier_version}
 do
   (
@@ -362,7 +414,9 @@ echo target_alias   %_target_alias
 echo target_cpu     %_target_cpu
 echo target_os      %_target_os
 echo target_vendor  %_target_vendor
+%if %nopam_multi == 0
 echo PAM Module dir %{pam_module_dir}
+%endif
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 echo pythondir      %{python3_sitelib}
 %else
@@ -393,7 +447,6 @@ fi
   --with-pkgconfigdir=%{_pkg_config_path} --libdir=%{_libdir} --enable-domaindir=%{domaindir} \
   --enable-mysqlprefix=%{mysqlPrefix} \
   --libexecdir=%{libexecdir} --mandir=%{mandir} --enable-qmaildir=%{indimaildir} \
-  --enable-shareddir=%{shareddir} --datarootdir=%{shareddir} \
   --enable-modbase=%{_prefix}/lib/indimail \
   --enable-basepath=@basepath@ --enable-logdir=%{logdir} \
   --enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{sysconfdir}/tcp/tcp.smtp \
@@ -419,7 +472,7 @@ if [ -d ../nssd-%{nssd_version} ] ; then
     nssd_sock=/tmp/nssd.sock
   fi
   %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
-  --mandir=%{mandir} --libdir=%{_libdir} --enable-shareddir=%{shareddir} \
+  --mandir=%{mandir} --libdir=%{_libdir} --datarootdir=%{shareddir} \
   --enable-nssd-socket=$nssd_sock \
   --enable-nssd-config-path=%{sysconfdir}/nssd.conf \
   --enable-mysqlprefix=%{mysqlPrefix} \
@@ -429,6 +482,7 @@ fi
 %endif
 
 #### pam-multi ######################
+%if %nopam_multi == 0
 if [ -d ../pam-multi-%{pam_multi_version} ] ; then
   cd ../pam-multi-%{pam_multi_version}
   if [ %{reconfigure_mode} -eq 1 ] ; then
@@ -438,10 +492,11 @@ if [ -d ../pam-multi-%{pam_multi_version} ] ; then
     autoreconf -fiv
   fi
   %configure --prefix=%{_prefix} --enable-mysqlprefix=%{mysqlPrefix} \
-  --enable-shareddir=%{shareddir} \
+  --datarootdir=%{shareddir} \
   --enable-moduledir=%pam_module_dir --enable-controldir=%{sysconfdir}/control \
   --enable-dlload-mysql=yes --enable-default-domain=${default_domain}
 fi
+%endif
 
 #### courier-imap ######################
 %if %nocourierimap == 0
@@ -519,6 +574,12 @@ do
     continue
   fi
   if [ " $i" = " courier-imap-%{courier_version}" -a %nocourierimap -ne 0 ] ; then
+    continue
+  fi
+  if [ " $i" = " pam-multi-%{pam_multi_version}" -a %nopam_multi -ne 0 ] ; then
+    continue
+  fi
+  if [ " $i" = " nssd-%{nssd_version}" -a %nonssd -ne 0 ] ; then
     continue
   fi
   if [ -d $i ] ; then
@@ -646,6 +707,7 @@ if [ -f %{buildroot}%{mandir}/man7/authlib.7.gz ] ; then
     echo ".so man7/authlib.7" |gzip -c > %{buildroot}%{mandir}/man7/$i.gz
   done
 fi
+%if %nopam_multi == 0
 # pam-multi
 %{__rm} -f %{buildroot}%{pam_module_dir}/pam-multi.la
 %{__rm} -f %{buildroot}%{pam_module_dir}/pam-multi.a
@@ -653,6 +715,7 @@ if [ -x /usr/bin/chrpath ] ; then
   /usr/bin/chrpath -d %{buildroot}%{pam_module_dir}/pam-multi.so
   /usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
 fi
+%endif
 
 if [ -x /bin/touch ] ; then
   TOUCH=/bin/touch
@@ -697,23 +760,26 @@ done
   for i in imapd.143 imapd-ssl.993 indisrvr.4000 \
     inlookup.infifo logfifo mrtg mysql.3306 \
     pop3d.110 pop3d-ssl.995 poppass.106 \
-    proxyIMAP.4143 proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110 \
-    pwdlookup
+    proxyIMAP.4143 proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110
   do
     %{__mkdir_p} %{buildroot}%{logdir}/$i
     $TOUCH %{buildroot}%{logdir}/$i/current
   done
+
+  if [ %nonssd -eq 0 ] ; then
+    %{__mkdir_p} %{buildroot}%{logdir}/pwdlookup
+    $TOUCH %{buildroot}%{logdir}/pwdlookup/current
+  fi
+
   if [ %nofetchmail -eq 0 ] ; then
     %{__mkdir_p} %{buildroot}%{logdir}/fetchmail
     $TOUCH %{buildroot}%{logdir}/fetchmail/current
+    $TOUCH %{buildroot}%{sysconfdir}/fetchmailrc
+    #%%find_lang fetchmail
   fi
 
   if [ %nobogofilter -eq 0 ] ; then
     $TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
-  fi
-  if [ %nofetchmail -eq 0 ] ; then
-    $TOUCH %{buildroot}%{sysconfdir}/fetchmailrc
-    #%%find_lang fetchmail
   fi
 %endif
 
@@ -993,11 +1059,13 @@ done
 %attr(755,root,root)                    %{_prefix}/bin/fetchmail
 %endif
 
+%if %nopam_multi == 0
 # pam-multi
 %attr(755,root,root)                    %{_prefix}/sbin/pam-checkpwd
 %attr(644,root,root) %config(noreplace) %{pam_confdir}/pam-multi
 %attr(644,root,root) %config(noreplace) %{pam_confdir}/pop3
 %attr(644,root,root) %config(noreplace) %{pam_confdir}/imap
+%endif
 
 %if %nocourierimap == 0
 %attr(755,root,root)                    %{libexecdir}/pop3d-ssl.rc
@@ -1171,8 +1239,12 @@ done
 %license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.ripmime
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.flash
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.fortune
+%if %nonssd == 0
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.nssd
+%endif
+%if %nopam_multi == 0
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.pam-multi
+%endif
 %if %nobogofilter == 0
 %license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.bogofilter
 %endif
@@ -1188,8 +1260,12 @@ done
 %attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.ripmime
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING.flash
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING.fortune
+%if %nonssd == 0
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING.nssd
+%endif
+%if %nopam_multi == 0
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING.pam-multi
+%endif
 %if %nobogofilter == 0
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYING.bogofilter
 %endif
@@ -1205,8 +1281,12 @@ done
 %attr(444,root,qmail)                   %{shareddir}/doc/COPYRIGHT.mpack
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.altermime
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.fortune
+%if %nonssd == 0
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.nssd
+%endif
+%if %nopam_multi == 0
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.pam-multi
+%endif
 %attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.ripmime
 %attr(444,root,qmail)                   %{shareddir}/doc/README.altermime
 %attr(444,root,qmail)                   %{shareddir}/doc/ChangeLog.indimail
@@ -1221,8 +1301,12 @@ done
 %attr(444,root,qmail)                   %{shareddir}/doc/README.flash
 %attr(444,root,qmail)                   %{shareddir}/doc/README.ldap
 %attr(444,root,qmail)                   %{shareddir}/doc/README.mpack
+%if %nonssd == 0
 %attr(444,root,qmail)                   %{shareddir}/doc/README.nssd
+%endif
+%if %nopam_multi == 0
 %attr(444,root,qmail)                   %{shareddir}/doc/README.pam-multi
+%endif
 %attr(444,root,qmail)                   %{shareddir}/doc/README.ripmime
 %attr(444,root,qmail)                   %{shareddir}/doc/README.vlimits
 %attr(444,root,qmail)                   %{shareddir}/doc/RELEASE-Notes
@@ -1289,8 +1373,10 @@ done
 
 # Shared libraries (omit for architectures that don't support them)
 
+%if %nopam_multi == 0
 # pam-multi
 %attr(755,root,root)                    /%{pam_module_dir}/pam-multi.so
+%endif
 
 %{_libdir}/libeps.so.1
 %{_libdir}/libeps.so.1.0.0
@@ -1828,7 +1914,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   for i in mrtg mysql.3306 fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
     qmail-pop3d.110 qmail-pop3d-ssl.995 proxy-imapd.4143 proxy-imapd-ssl.9143 \
     proxy-pop3d.4110 proxy-pop3d-ssl.9110 indisrvr.4000 inlookup.infifo \
-    pwdlookup qmail-poppass.106 qmail-logfifo
+    qmail-poppass.106 qmail-logfifo
   do
     if [ -z "$svc_list" ] ; then
       svc_list="%{servicedir}/$i"
@@ -1836,6 +1922,13 @@ if [ $argv1 -eq 2 ] ; then # upgrade
       svc_list="$svc_list %{servicedir}/$i"
     fi
   done
+%if %nonssd == 0
+  if [ -z "$svc_list" ] ; then
+    svc_list="%{servicedir}/pwdlookup"
+  else
+    svc_list="$svc_list %{servicedir}/pwdlookup"
+  fi
+%endif
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
   indlib=`ls -d %{_libdir}/libindimail.so.*.*.* 2>/dev/null`
   for port in 25 465 587
@@ -1862,11 +1955,12 @@ echo " 6. Configure fetchmail service"
 echo " 7. Configure IMAP/POP3/poppass services"
 echo " 8. Configure indisrvr service"
 echo " 9. Configure nssd service"
-echo "10. Configure inlookup service"
-echo "11. Configure SPAM filter configuration"
-echo "12. Configure tcprules database for IMAP, POP3, popass"
-echo "13. Configure selinux configuration"
-echo "14. Configure default cron entries"
+echo "10. Configure pam-multi as alternative for SMTP auth"
+echo "11. Configure inlookup service"
+echo "12. Configure SPAM filter configuration"
+echo "13. Configure tcprules database for IMAP, POP3, popass"
+echo "14. Configure selinux configuration"
+echo "15. Configure default cron entries"
 echo ""
 
 (
@@ -1879,11 +1973,14 @@ if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
 fi
 
 for i in fetchmail imapd.143 imapd-ssl pop3d.110 pop3d-ssl logfifo \
-pwdlookup inlookup indisrvr mrtg mysql.3306 poppass proxyIMAP.4143 \
+inlookup indisrvr mrtg mysql.3306 poppass proxyIMAP.4143 \
 proxyPOP.4110
 do
   %{__mkdir_p} %{logdir}/$i
 done
+%if %nonssd == 0
+  %{__mkdir_p} %{logdir}/pwdlookup
+%endif
 
 if [ -d /run ] ; then
   logfifo="/run/indimail/logfifo"
@@ -2079,11 +2176,11 @@ fi
   --threads=5 --activeDays=60 --query-cache --password-cache --use-btree
 
 #nssd
-if [ %nonssd -eq 0 ] ; then
-  %{_prefix}/sbin/svctool --pwdlookup=$nssd_sock --threads=5 --timeout=-1 \
-    --mysqlhost=localhost --mysqluser=indimail \
-    --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket} --servicedir=%{servicedir}
-fi
+%if %nonssd == 0
+%{_prefix}/sbin/svctool --pwdlookup=$nssd_sock --threads=5 --timeout=-1 \
+  --mysqlhost=localhost --mysqluser=indimail \
+  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket} --servicedir=%{servicedir}
+%endif
 
 #poppass
 %{_prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
@@ -2133,14 +2230,19 @@ svc_list=""
 for i in mrtg mysql.3306 fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
   qmail-pop3d.110 qmail-pop3d-ssl.995 proxy-imapd.4143 proxy-imapd-ssl.9143 \
   proxy-pop3d.4110 proxy-pop3d-ssl.9110 indisrvr.4000 inlookup.infifo \
-  pwdlookup qmail-poppass.106 qmail-logfifo
+  qmail-poppass.106 qmail-logfifo
 do
   svc_list="$svc_list %{servicedir}/$i"
 done
+%if %nonssd == 0
+  svc_list="$svc_list %{servicedir}/pwdlookup"
+%endif
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --norefreshsvc="0 $svc_list"
 
 # selinux
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
+
+%if %nopam_multi == 0
 if [ -x /usr/sbin/alternatives ] ; then
   openSUSE=$(grep /etc/os-release 2>/dev/null)
   if [ -z "$openSUSE" -a ! -f /etc/SuSE-release ] ; then
@@ -2148,7 +2250,7 @@ if [ -x /usr/sbin/alternatives ] ; then
       %{pam_confdir}/smtp mta-pam %{pam_confdir}/pam-multi
   fi
 fi
-
+%endif
 
 if [ -f %{sysconfdir}/cronlist.i -a -d %{_sysconfdir}/cron.d ] ; then
   echo "adding cron entries"
@@ -2302,6 +2404,8 @@ do
     > %{servicedir}/qmail-smtpd.$port/variables/LOGFILTER
   fi
 done
+
+%if %nopam_multi == 0
 # remove pam module for smtp
 if [ -x /usr/sbin/alternatives ] ; then
   openSUSE=$(grep /etc/os-release 2>/dev/null)
@@ -2309,10 +2413,12 @@ if [ -x /usr/sbin/alternatives ] ; then
     /usr/sbin/alternatives --remove-slave mta %{_prefix}/bin/sendmail mta-pam
   fi
 fi
+%endif
+
 %{__rm} -f %{sysconfdir}/indimail.mrtg.ok %{sysconfdir}/system.mrtg.ok
 echo "removing startup services"
 for i in fetchmail indisrvr.4000 inlookup.infifo mysql.3306 \
-pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 \
+qmail-imapd.143 qmail-imapd-ssl.993 \
 qmail-pop3d.110 qmail-pop3d-ssl.995 qmail-logfifo \
 qmail-imapd.4143 qmail-pop3d.4110 qmail-poppass.106 mrtg
 do
@@ -2322,6 +2428,13 @@ do
     %{__rm} -f %{servicedir}/$i || true
   fi
 done
+%if %nonssd == 0
+  if [ -d %{servicedir}/pwdlookup ] ; then
+    %{__rm} -rf %{servicedir}/pwdlookup || true
+  elif [ -L %{servicedir}/pwdlookup ] ; then
+    %{__rm} -f %{servicedir}/pwdlookup || true
+  fi
+%endif
 if [ %noproxy -eq 0 ] ; then
 for i in proxy-imapd.4143 proxy-imapd-ssl.9143 proxy-pop3d.4110 proxy-pop3d-ssl.9110
 do
@@ -2351,10 +2464,13 @@ else
 fi
 for i in fetchmail imapd.143 imapd-ssl.993 indisrvr.4000 inlookup.infifo \
 mrtg mysql.3306 pop3d.110 pop3d-ssl.995 poppass.106 proxyIMAP.4143 \
-proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110 pwdlookup
+proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110
 do
   %{__rm} -rf $log_dir/$i
 done
+%if %nonssd == 0
+  %{__rm} -rf $log_dir/pwdlookup
+%endif
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   echo "recreating ld.so cache"
   /sbin/ldconfig
