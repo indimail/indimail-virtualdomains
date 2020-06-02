@@ -27,6 +27,8 @@ EXTRA_DIST=	autogen.sh gsl config.rpath \
 
 .PHONY:	check rpm svn-check
 
+doc_list=AUTHORS HOWTO COPYING
+
 #
 # RPM building - there are some cheats here
 #
@@ -121,6 +123,10 @@ rsynconly: .rsyncs
 install-data-hook:
 	chown root:indimail $(DESTDIR)$(bindir)/bogofilter || true
 	chmod 6511 $(DESTDIR)$(bindir)/bogofilter || true
+	$(mkinstalldirs) $(DESTDIR)$(datarootdir)/doc || exit 1
+	for f in $(doc_list); do \
+		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/doc/$$f.bogofilter || exit 1 ;\
+	done
 
 dist-hook:
 	cd $(distdir) && find doc gnugetopt gsl '(' -name .svn -o -name CVS ')' -type d -prune -exec rm -rf '{}' +

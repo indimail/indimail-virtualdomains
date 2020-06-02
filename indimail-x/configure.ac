@@ -121,51 +121,8 @@ else
 	ilibdir=$libdir
 fi
 RPATH_LIB="$acl_libdirstem"
-dnl configure only packages for whom the subdirectories which are present
-subdir_list=""
-for i in eps-1.2 ../flash-0.9.4 ../ripmime-1.4.0.10 ../altermime-0.3.10 \
-		../mpack-1.6 ../fortune-1.1 .
-do
-	if test -d $i
-	then
-		if test " $subdir_list" = " "
-		then
-			subdir_list="$i"
-		else
-			subdir_list="$subdir_list $i"
-		fi
-		if test -f $i/configure.in -o -f $i/configure.ac
-		then
-			case $i in
-				eps-1.2)
-				AC_CONFIG_SUBDIRS([eps-1.2])
-				;;
-				../flash-0.9.4)
-				AC_CONFIG_SUBDIRS([../flash-0.9.4])
-				;;
-				../ripmime-1.4.0.10)
-				AC_CONFIG_SUBDIRS([../ripmime-1.4.0.10])
-				;;
-				../altermime-0.3.10)
-				AC_CONFIG_SUBDIRS([../altermime-0.3.10])
-				;;
-				../mpack-1.6)
-				AC_CONFIG_SUBDIRS([../mpack-1.6])
-				;;
-				../fortune-1.1)
-				AC_CONFIG_SUBDIRS([../fortune-1.1])
-				;;
-			esac
-		fi
-	else
-		if test " $missing_list" = " "
-		then
-			missing_list="$i"
-		else
-			missing_list="$missing_list $i"
-		fi
-	fi
-done
+
+AC_CONFIG_SUBDIRS([eps-1.2])
 
 AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],noqmail=t,)
 if test " $noqmail" = " t"
@@ -1151,7 +1108,6 @@ AC_SUBST(STRIP_OPT)
 AC_SUBST(CFLAGS)
 AC_SUBST(defaultprefix)
 AC_SUBST(libdir)
-AC_SUBST(subdir_list)
 AC_SUBST(auth_inc)
 AC_SUBST(auth_libs)
 AC_SUBST(mysql_prefix)
@@ -1442,42 +1398,4 @@ echo "      Enterprise   = OFF --enable-enterprise-support=n default"
 esac
 
 echo "-------------------------------------------------------------"
-echo "Additonal Components = $subdir_list"
-if test "$missing_list" != ""
-then
-	#clear
-	echo
-	echo
-	echo "============ WARNING WARNING WARNING WARNING ==============="
-	echo "Missing   Components = $missing_list"
-	echo
-	echo "Download and extract the following additional component(s)"
-	echo
-	if ! test -d ../flash-0.9.4
-	then
-		echo "http://downloads.sourceforge.net/indimail/flash-0.9.4.tar.gz"
-	fi
-	if ! test -d ../altermime-0.3.10
-	then
-		echo "http://downloads.sourceforge.net/indimail/altermime-0.3.10.tar.gz"
-	fi
-	if ! test -d ../ripmime-1.4.0.10
-	then
-		echo "http://downloads.sourceforge.net/indimail/ripmime-1.4.0.10.tar.gz"
-	fi
-	if ! test -d ../mpack-1.6
-	then
-		echo "http://downloads.sourceforge.net/indimail/mpack-1.6.tar.gz"
-	fi
-	if ! test -d ../fortune-1.1
-	then
-		echo "http://downloads.sourceforge.net/indimail/fortune-1.1.tar.gz"
-	fi
-	echo
-	echo "in the directory `dirname $PWD`"
-	echo
-	sleep 2
-else
-	echo "CONGRATULATIONS!! All IndiMail components found"
-fi
 ) | tee indimail.settings

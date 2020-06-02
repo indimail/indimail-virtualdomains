@@ -19,9 +19,11 @@ DISTCLEANFILES=stamp-h1 config.h config.log packaging/systemd/courier-imap.sysvi
 
 CLEANFILES=$(databin_SCRIPTS) $(man_MANS) $(sysconf_DATA) $(sbin_SCRIPTS)
 
-EXTRA_PROGRAMS=
+doc_list= libs/maildir/README.sharedfolders.txt libs/maildir/README.maildirquota.txt \
+	libs/unicode/README.unicode libs/imap/README.imap libs/tcpd/README.couriertls \
+	libs/authlib/README.authlib README.courier-imap AUTHORS COPYING COPYING.GPL
 
-EXTRA_DIST=README README.cygwin\
+EXTRA_DIST=README.courier-imap README.cygwin\
 	COPYING.GPL NEWS.html $(TEMPLFILES) pgpkeys.txt \
 	INSTALL.html maildroptips.txt manpage.css
 
@@ -90,6 +92,11 @@ install-data-local: install-man
 		$(DESTDIR)/etc/pam.d/pop3 || exit 1
 	for f in $(man_MANS); do chmod a+r $(DESTDIR)$(mandir)/*/$$f; done
 	@echo "Do not forget to run make install-configure"
+	$(mkinstalldirs) $(DESTDIR)$(datarootdir)/doc/courier-imap || exit 1
+	for f in $(doc_list); do \
+		j=`basename $$f`; \
+		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/doc/courier-imap/$$j || exit 1 ;\
+	done
 
 uninstall-local:
 	rm -f $(DESTDIR)$(bindir)/couriertls
@@ -110,8 +117,8 @@ dist-hook: courier-imap.spec
 
 if HAVE_HTML
 
-README: html/main.html
-	$(HTML2TXT) $(srcdir)/html/index.html >README
+README.courier-imap: html/main.html
+	$(HTML2TXT) $(srcdir)/html/index.html >README.courier-imap
 endif
 
 distrelease:

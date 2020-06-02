@@ -242,11 +242,11 @@ docs:
 	perl -p -i -e 's/:/[\\:]/g if s@^man_MANS=.*@"man_MANS=" . join(" ", map { "\$$(srcdir)/$$_" } glob("man/*.[123456789]"))@e' Makefile.am
 
 if HAVE_DOCS
-all-am: INSTALL README
+all-am: INSTALL README.unicode
 
-README: html/index.html
+README.unicode: html/index.html
 	elinks -dump -no-numbering -no-references html/index.html >README.tmp
-	mv -f README.tmp README
+	mv -f README.tmp README.unicode
 
 INSTALL: html/INSTALL.html
 	elinks -dump -no-numbering -no-references html/INSTALL.html >INSTALL.tmp

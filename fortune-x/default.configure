@@ -1,0 +1,11 @@
+#!/bin/sh
+if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
+  autoreconf -fiv
+fi
+prefix=/usr
+./configure \
+  --prefix=$prefix \
+  --datarootdir=$prefix/share/indimail \
+  --mandir=$prefix/share/man \
+  --enable-cookiedir=$prefix/share/indimail/fortunes \
+  --enable-offensive=n

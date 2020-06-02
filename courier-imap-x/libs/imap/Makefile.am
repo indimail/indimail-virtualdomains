@@ -13,7 +13,7 @@ CLEANFILES=imapd.8 imapd.html mkimapdcert.html mkimapdcert.8 \
 	pop3d.html pop3d.8 mkpop3dcert.html mkpop3dcert.8
 
 EXTRA_DIST=testsuite testsuite.txt smaptestsuite smaptestsuite.txt \
-	BUGS BUGS.html README README.html imapd.authpam \
+	BUGS BUGS.html README.imap README.html imapd.authpam \
 	pop3d.authpam system-auth.authpam system-auth2.authpam\
 	makeimapaccess.8.in makeimapaccess.html.in \
 	imapd.html.in imapd.8.in \
@@ -106,8 +106,8 @@ pop3d_LDADD=libpop3d.la ../authlib/libauthmod.la ../authlib/libauth.la ../unicod
 
 HTML2TXT=links -dump -no-numbering
 
-README: README.html
-	$(HTML2TXT) README.html >README
+README.imap: README.html
+	$(HTML2TXT) README.html >README.imap
 
 BUGS: BUGS.html
 	$(HTML2TXT) BUGS.html >BUGS

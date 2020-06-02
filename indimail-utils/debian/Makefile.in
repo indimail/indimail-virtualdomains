@@ -1,0 +1,52 @@
+prefix=@prefix@
+shareddir=@shareddir@
+mandir=@mandir@
+version=@version@
+release=@release@
+altermime_version=@altermime_version@
+ripmime_version=@ripmime_version@
+flash_version=@flash_version@
+mpack_version=@mpack_version@
+fortune_version=@fortune_version@
+edit = sed \
+	-e 's,@prefix\@,$(prefix),g' \
+	-e 's,@shareddir\@,$(shareddir),g' \
+	-e 's,@mandir\@,$(mandir),g' \
+	-e 's,@version\@,$(version),g' \
+	-e 's,@release\@,$(release),g' \
+	-e 's,@altermime_version\@,$(altermime_version),g' \
+	-e 's,@ripmime_version\@,$(ripmime_version),g' \
+	-e 's,@fortune_version\@,$(fortune_version),g' \
+	-e 's,@flash_version\@,$(flash_version),g' \
+	-e 's,@mpack_version\@,$(mpack_version),g' \
+	-e 's,@DATE\@,$(DATE),g'
+
+all: rules changelog indimail-utils.install \
+	indimail-utils.dsc indimail-utils-Debian_9.0.dsc \
+	debian.tar.gz dummy.tar.gz
+
+dummy.tar.gz: README
+	tar cf - README |gzip > $@
+obs_deb_prep: obs_deb_prep.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+rules: rules.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+indimail-utils.install: indimail-utils.install.in Makefile
+	$(edit) $@.in > $@
+changelog: changelog.in ../conf-version ../conf-release
+	(cat $@.in; echo ""; \
+	echo " -- Manvendra Bhangui <indimail-utils@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
+	| $(edit) > $@
+indimail-utils.dsc: indimail-utils.dsc.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+indimail-utils-Debian_9.0.dsc: indimail-utils.dsc.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+debian.tar.gz: copyright rules changelog compat \
+indimail-utils.install obs_deb_prep Makefile control
+	tar cf - copyright rules changelog \
+		compat indimail-utils.install obs_deb_prep Makefile control \
+		| gzip > $@
+
+clean:
+	/bin/rm -f rules dummy.tar.gz *.dsc changelog \
+	indimail-utils.install obs_deb_prep debian.tar.gz

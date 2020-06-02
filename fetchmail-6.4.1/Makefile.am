@@ -149,6 +149,8 @@ DISTDOCS=	FAQ FEATURES NOTES OLDNEWS fetchmail-man.html \
 		fetchmail-SA-2005-02.txt \
 		fetchmail-SA-2005-03.txt
 
+doc_list=README README.NTLM README.SSL-SERVER README.SSL COPYING
+
 # extra directories to ship
 distdirs = rh-config contrib beos
 
@@ -257,3 +259,8 @@ AM_DISTCHECK_CONFIGURE_FLAGS=--with-ssl
 # Local Variables:
 # compile-command:"configure"
 # End:
+install-data-hook:
+	$(mkinstalldirs) $(DESTDIR)$(datarootdir)/doc || exit 1
+	for f in $(doc_list); do \
+		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/doc/$$f.fetchmail || exit 1 ;\
+	done
