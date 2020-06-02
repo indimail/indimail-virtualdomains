@@ -24,5 +24,4 @@
 --enable-random-balancing=y
 --enable-mysql-escape=y
 --enable-ipv6=y
---enable-offensive=n
 --enable-dlload-mysql=yes

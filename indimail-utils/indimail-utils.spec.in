@@ -1,0 +1,396 @@
+#
+#
+# $Id: indimail.spec.in,v 1.41 2020-05-30 19:56:02+05:30 Cprogrammer Exp mbhangui $
+%undefine _missing_build_ids_terminate_build
+%global _unpackaged_files_terminate_build 1
+
+%if %{defined _project}
+# define if building on openSUSE build service
+%global build_on_obs       1
+%global build_cflags       "-DOBS_BUILD %{build_cflags}"
+%else
+%define _project           local
+%global build_on_obs       0
+%global _hardened_build    1
+%endif
+
+%global _prefix            @prefix@
+%global sysconfdir         @sysconfdir@
+%global shareddir          @prefix@/share/indimail
+%global mandir             @mandir@
+%global imoduledir         %{_prefix}/lib/indimail/modules
+%global altermime_version  @altermime_version@
+%global ripmime_version    @ripmime_version@
+%global fortune_version    @fortune_version@
+%global mpack_version      @mpack_version@
+%global flash_version      @flash_version@
+%global url                https://github.com/mbhangui/indimail-virtualdomains
+
+%if %build_on_obs == 1
+%global packager Manvendra Bhangui <manvendra@indimail.org>
+%endif
+
+Summary: Mail Utility Package for indimail MTA
+Name: indimail-utils
+Version: @version@
+Release: @release@%{?dist}
+
+%if %build_on_obs == 1
+License: GPL-3.0+
+%else
+License: GPLv3
+%endif
+
+%if %{undefined suse_version} && %{undefined sles_version}
+Group: System Environment/Base
+%else
+Group: Productivity/Networking/Email/Servers
+%endif
+
+Source1: http://downloads.sourceforge.net/indimail/altermime-%{altermime_version}.tar.gz
+Source2: http://downloads.sourceforge.net/indimail/ripmime-%{ripmime_version}.tar.gz
+Source3: http://downloads.sourceforge.net/indimail/fortune-%{fortune_version}.tar.gz
+Source4: http://downloads.sourceforge.net/indimail/mpack-%{mpack_version}.tar.gz
+Source5: http://downloads.sourceforge.net/indimail/flash-%{flash_version}.tar.gz
+Source6: http://downloads.sourceforge.net/indimail/indimail-utils-rpmlintrc
+
+URL: https://github.com/mbhangui/indimail-virtualdomains
+AutoReqProv: Yes
+# few binaries were moved to sbin and indimail >= 2.5 depends on that
+
+BuildRequires: rpm gcc gcc-c++ make binutils coreutils grep
+BuildRequires: glibc glibc-devel
+BuildRequires: gzip autoconf automake libtool
+#flash, osh
+BuildRequires: readline-devel readline ncurses-devel
+BuildRequires: sed findutils
+
+################################# OBS ###############################
+%if %build_on_obs == 1
+%if 0%{?suse_version}
+BuildRequires: -post-build-checks
+#!BuildIgnore: post-build-checks
+#!BuildIgnore: brp-check-suse
+%endif
+%endif
+################################# OBS ###############################
+
+Requires: /usr/bin/awk /usr/bin/which
+Requires: binutils sed findutils
+Requires: coreutils grep /bin/sh glibc
+
+%if %build_on_obs == 1
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+%endif
+#
+# IndiMail is choosy and runs on reliable OS only
+#
+Excludeos: windows
+
+%description
+indimail-utils provides a package consisting of utilities like
+mpack, munpack, altermime, ripmime, fortune, flash.
+
+For more details visit %{url}
+
+%prep
+for i in altermime-%{altermime_version} ripmime-%{ripmime_version} \
+fortune-%{fortune_version} mpack-%{mpack_version} flash-%{flash_version}
+do
+  (
+  if [ -d $i ] ; then
+    %{__rm} -rf $i
+  fi
+  if [ -f ../SOURCES/$i.tar.bz2 ] ; then
+    %{__bzip2} -d -c ../SOURCES/$i.tar.bz2 | tar xf -
+  elif [ -f ../SOURCES/$i.tar.xz ] ; then
+    xz -d -c ../SOURCES/$i.tar.xz |tar xf -
+  elif [ -f ../SOURCES/$i.tar.gz ] ; then
+    gunzip -c ../SOURCES/$i.tar.gz | tar xf -
+  else
+    echo "No Source Archive for $i"
+    exit 1
+  fi
+  )
+done
+
+%build
+ID=$(id -u)
+(
+echo "---------------- INFORMATION ------------------------"
+echo target         %_target
+echo target_alias   %_target_alias
+echo target_cpu     %_target_cpu
+echo target_os      %_target_os
+echo target_vendor  %_target_vendor
+echo Project        %{_project}
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
+echo "------------------------------------------------------"
+) > %{name}-rpm.info
+(
+echo "NAME=%{name}"
+echo "Description=\"indimail utils package\""
+echo "indimail-util-version="%{version}""
+echo "ID=%{name}"
+echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
+echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui indimail-utils@indimail.org\""
+) > %{name}-release
+
+for i in altermime-%{altermime_version} ripmime-%{ripmime_version} \
+fortune-%{fortune_version} mpack-%{mpack_version} flash-%{flash_version}
+do
+  if [ -d $i ] ; then
+    cd $i
+    if [ " $i" = " flash-%{flash_version}" ] ; then
+      extra_opt="--sysconfdir=%{sysconfdir} --enable-modbase=%{_prefix}/lib/indimail"
+    elif [ " $i" = " fortune-%{fortune_version}" ] ; then
+      extra_opt="--enable-cookiedir=%{shareddir}/fortunes --enable-offensive=n"
+    fi
+    %configure --prefix=%{_prefix} --mandir=%{mandir} \
+      --datarootdir=%{shareddir} $extra_opt
+    cd ..
+  fi
+done
+
+%install
+ID=$(id -u)
+%{__mkdir_p} $RPM_BUILD_ROOT%{_prefix}
+for i in altermime-%{altermime_version} ripmime-%{ripmime_version} \
+fortune-%{fortune_version} mpack-%{mpack_version} flash-%{flash_version}
+do
+  if [ -d $i ] ; then
+    cd $i
+    %{__make} -s DESTDIR=%{buildroot}
+    %{__make} -s DESTDIR=%{buildroot} install-strip
+    cd ..
+  fi
+done
+
+
+%{__mkdir_p} %{buildroot}%{sysconfdir}
+install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
+install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
+%{__rm} -f %{name}-rpm.info %{name}-release
+#
+# remove fetchmail docs installed by IndiMail Makefile
+#
+%{__rm} -f %{buildroot}%{_libdir}/libflash.la
+%{__rm} -f %{buildroot}%{_libdir}/libflash.a
+%{__rm} -f %{buildroot}%{_libdir}/libflash.so
+
+if [ -x /usr/bin/chrpath ] ; then
+  if [ -f %{buildroot}%{_prefix}/bin/flash ] ; then
+    /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/flash
+  fi
+  for i in background alarms countdown
+  do
+    if [ -f %{buildroot}%{imoduledir}/$i ] ; then
+      /usr/bin/chrpath -d %{buildroot}%{imoduledir}/$i
+    fi
+  done
+fi
+# Compress the man pages
+find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
+
+if [ -x /bin/touch ] ; then
+  TOUCH=/bin/touch
+elif [ -x /usr/bin/touch ] ; then
+  TOUCH=/usr/bin/touch
+else
+  TOUCH=/bin/touch
+fi
+
+%files
+%defattr(-, root, root,-)
+#
+# Directories
+#
+# opensuse requres ghost files to be present
+%dir %attr(755,root,root)              %{_prefix}/lib/indimail/modules
+%if "%{mandir}" != "/usr/share/man"
+%dir %attr(755,root,root)              %{mandir}
+%dir %attr(755,root,root)              %{mandir}/man1
+%endif
+%if "%{_prefix}" != "/usr"
+%dir %attr(555,root,root)              %{_libdir}
+%endif
+
+%dir %attr(755,root,root)              %{shareddir}/fortunes
+
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/system.flashlogin
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/system.rc
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/system.menu
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/system.module
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/%{name}-release
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/%{name}-rpm.info
+
+# indimail binaries
+%attr(755,root,qmail)                   %{_prefix}/bin/altermime
+%attr(755,root,qmail)                   %{_prefix}/bin/randstr
+%attr(755,root,qmail)                   %{_prefix}/bin/ripmime
+
+%attr(755,root,qmail)                   %{_prefix}/bin/mpack
+%attr(755,root,qmail)                   %{_prefix}/bin/munpack
+%attr(755,root,qmail)                   %{_prefix}/bin/fortune
+%attr(755,root,qmail)                   %{_prefix}/sbin/rot
+%attr(755,root,qmail)                   %{_prefix}/sbin/strfile
+%attr(755,root,qmail)                   %{_prefix}/sbin/unstr
+%attr(755,root,qmail)                   %{_prefix}/bin/flash
+%attr(755,root,qmail)                   %{_prefix}/bin/ripole
+
+%attr(755,root,root)                    %{imoduledir}/background
+%attr(755,root,root)                    %{imoduledir}/alarms
+%attr(755,root,root)                    %{imoduledir}/countdown
+
+%attr(644,root,root)                    %{shareddir}/fortunes/definitions
+%attr(644,root,root)                    %{shareddir}/fortunes/linux.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/food
+%attr(644,root,root)                    %{shareddir}/fortunes/medicine
+%attr(644,root,root)                    %{shareddir}/fortunes/magic
+%attr(644,root,root)                    %{shareddir}/fortunes/ethnic
+%attr(644,root,root)                    %{shareddir}/fortunes/art.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/computers.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/songs-poems.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/kids
+%attr(644,root,root)                    %{shareddir}/fortunes/goedel
+%attr(644,root,root)                    %{shareddir}/fortunes/paradoxum
+%attr(644,root,root)                    %{shareddir}/fortunes/computers
+%attr(644,root,root)                    %{shareddir}/fortunes/goedel.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/news
+%attr(644,root,root)                    %{shareddir}/fortunes/pets
+%attr(644,root,root)                    %{shareddir}/fortunes/law.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/zippy
+%attr(644,root,root)                    %{shareddir}/fortunes/miscellaneous
+%attr(644,root,root)                    %{shareddir}/fortunes/ascii-art.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/perl
+%attr(644,root,root)                    %{shareddir}/fortunes/kids.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/love.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/work.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/humorists
+%attr(644,root,root)                    %{shareddir}/fortunes/definitions.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/drugs
+%attr(644,root,root)                    %{shareddir}/fortunes/education.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/politics.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/science.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/love
+%attr(644,root,root)                    %{shareddir}/fortunes/men-women
+%attr(644,root,root)                    %{shareddir}/fortunes/ascii-art
+%attr(644,root,root)                    %{shareddir}/fortunes/humorists.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/platitudes.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/debian
+%attr(644,root,root)                    %{shareddir}/fortunes/sports.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/riddles
+%attr(644,root,root)                    %{shareddir}/fortunes/law
+%attr(644,root,root)                    %{shareddir}/fortunes/knghtbrd.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/sports
+%attr(644,root,root)                    %{shareddir}/fortunes/perl.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/tao.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/linuxcookie
+%attr(644,root,root)                    %{shareddir}/fortunes/linuxcookie.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/riddles.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/medicine.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/fortunes
+%attr(644,root,root)                    %{shareddir}/fortunes/cookie
+%attr(644,root,root)                    %{shareddir}/fortunes/cookie.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/art
+%attr(644,root,root)                    %{shareddir}/fortunes/politics
+%attr(644,root,root)                    %{shareddir}/fortunes/songs-poems
+%attr(644,root,root)                    %{shareddir}/fortunes/startrek.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/men-women.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/kernelnewbies
+%attr(644,root,root)                    %{shareddir}/fortunes/fortunes.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/magic.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/science
+%attr(644,root,root)                    %{shareddir}/fortunes/platitudes
+%attr(644,root,root)                    %{shareddir}/fortunes/kernelnewbies.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/literature.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/translate-me
+%attr(644,root,root)                    %{shareddir}/fortunes/startrek
+%attr(644,root,root)                    %{shareddir}/fortunes/drugs.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/zippy.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/linux
+%attr(644,root,root)                    %{shareddir}/fortunes/work
+%attr(644,root,root)                    %{shareddir}/fortunes/literature
+%attr(644,root,root)                    %{shareddir}/fortunes/knghtbrd
+%attr(644,root,root)                    %{shareddir}/fortunes/news.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/paradoxum.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/bofh-excuses.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/translate-me.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/miscellaneous.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/rj.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/debian.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/tao
+%attr(644,root,root)                    %{shareddir}/fortunes/food.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/ethnic.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/people.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/people
+%attr(644,root,root)                    %{shareddir}/fortunes/wisdom.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/rj
+%attr(644,root,root)                    %{shareddir}/fortunes/wisdom
+%attr(644,root,root)                    %{shareddir}/fortunes/pets.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/bofh-excuses
+%attr(644,root,root)                    %{shareddir}/fortunes/education
+%attr(644,root,root)                    %{shareddir}/fortunes/age
+%attr(644,root,root)                    %{shareddir}/fortunes/age.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/chanakya
+%attr(644,root,root)                    %{shareddir}/fortunes/chanakya.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/joel-on-software
+%attr(644,root,root)                    %{shareddir}/fortunes/joel-on-software.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/osp
+%attr(644,root,root)                    %{shareddir}/fortunes/osp.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/paul-graham
+%attr(644,root,root)                    %{shareddir}/fortunes/paul-graham.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/thirukkural
+%attr(644,root,root)                    %{shareddir}/fortunes/thirukkural.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/vedas-1
+%attr(644,root,root)                    %{shareddir}/fortunes/vedas-1.dat
+%attr(644,root,root)                    %{shareddir}/fortunes/vedas-2
+%attr(644,root,root)                    %{shareddir}/fortunes/vedas-2.dat
+
+%docdir %{shareddir}/doc
+%docdir %{mandir}
+%attr(644,root,root)                    %{mandir}/man[1,5,7,8]/*
+
+%if %build_on_obs == 0
+%license %attr(644,root,qmail)          %{shareddir}/doc/LICENSE.altermime
+%license %attr(644,root,qmail)          %{shareddir}/doc/LICENSE.ripmime
+%license %attr(644,root,qmail)          %{shareddir}/doc/COPYING.flash
+%license %attr(644,root,qmail)          %{shareddir}/doc/COPYING.fortune
+%license %attr(644,root,qmail)          %{shareddir}/doc/COPYRIGHT.mpack
+%else
+%attr(644,root,qmail)                   %{shareddir}/doc/LICENSE.altermime
+%attr(644,root,qmail)                   %{shareddir}/doc/LICENSE.ripmime
+%attr(644,root,qmail)                   %{shareddir}/doc/COPYING.flash
+%attr(644,root,qmail)                   %{shareddir}/doc/COPYING.fortune
+%attr(644,root,qmail)                   %{shareddir}/doc/COPYRIGHT.mpack
+%endif
+
+%attr(644,root,qmail)                   %{shareddir}/doc/AUTHORS.altermime
+%attr(644,root,qmail)                   %{shareddir}/doc/AUTHORS.ripmime
+%attr(644,root,qmail)                   %{shareddir}/doc/AUTHORS.flash
+%attr(644,root,qmail)                   %{shareddir}/doc/AUTHORS.fortune
+%attr(644,root,qmail)                   %{shareddir}/doc/README.altermime
+%attr(644,root,qmail)                   %{shareddir}/doc/README.ripmime
+%attr(644,root,qmail)                   %{shareddir}/doc/README.fortune
+%attr(644,root,qmail)                   %{shareddir}/doc/README.flash
+%attr(644,root,qmail)                   %{shareddir}/doc/README.mpack
+
+# Shared libraries (omit for architectures that don't support them)
+
+%{_libdir}/libflash.so.1
+%{_libdir}/libflash.so.1.0.0
+
+
+%clean
+[ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
+
+### SCRIPTLET ###############################################################################
+%verifyscript
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+
+# fix changelog for openSUSE buildservice
+%changelog

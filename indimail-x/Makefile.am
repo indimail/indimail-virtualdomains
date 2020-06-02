@@ -1,5 +1,5 @@
 @SET_MAKE@
-SUBDIRS=@subdir_list@
+SUBDIRS=eps-1.2
 
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
@@ -107,20 +107,11 @@ setuid_list = bin/printdir bin/vaddaliasdomain bin/vadddomain bin/vadduser bin/v
 	bin/vrenameuser bin/vsetuserquota bin/vdominfo bin/vuserinfo sbin/vreorg \
 	libexec/sq_vacation
 
-doc_list= ChangeLog.indimail COPYING.indimail FAQ.pdf HOWTO.bogofilter \
-	HOWTO.sharedmaildir INSTALL.indimail README \
-	INSTALL-MYSQL RELEASE-Notes INSTALL-RPM README-CLUSTER \
-	indimail_arch.png indimail_queue.png Quick-INSTALL \
-	AUTHORS.altermime AUTHORS.bogofilter AUTHORS.courier-imap AUTHORS.fortune \
-	AUTHORS.ripmime COPYING.bogofilter COPYING.courier-imap \
-	COPYING.flash COPYING.fortune \
-	COPYRIGHT.flash COPYRIGHT.mpack LICENSE.altermime \
-	LICENSE.ripmime README.altermime \
-	README.courier-imap README.flash \
-	README.ldap README.ripmime \
-	README.vlimits README-SSL-SERVER.fetchmail \
-	README-SSL.fetchmail README-NTLM.fetchmail README.fetchmail \
-	COPYING.fetchmail
+doc_list= ChangeLog.indimail FAQ.pdf \
+	INSTALL.indimail README INSTALL-MYSQL RELEASE-Notes \
+	INSTALL-RPM README-CLUSTER Quick-INSTALL \
+	README.ldap indimail_arch.png indimail_queue.png \
+	README.vlimits COPYING.indimail
 
 COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.c add_ip_map.c \
 				add_user_assign.c addusercntrl.c add_vacation.c atrn_access.c autoturn_dir.c \

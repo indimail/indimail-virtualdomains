@@ -39,9 +39,7 @@
 %global bogofilter_version 1.2.4
 %global pam_multi_version  1.2
 %global fetchmail_version  6.4.1
-%global fortune_version    1.1
 %global nssd_version       1.3
-%global flash_version      0.9.4
 %if 0%{?suse_version}
 %global noperms            1
 %else
@@ -51,7 +49,7 @@
 %global nonssd             1
 %global nopam_multi        1
 %global noproxy            0
-%global nocourierimap      0
+%global nocourierimap      1
 %global nofetchmail        0
 %global nobogofilter       0
 %global nodksignatures     0
@@ -116,29 +114,24 @@ Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 %if %nocourierimap == 0
 Source1: http://downloads.sourceforge.net/%{name}/courier-imap-%{courier_version}.tar.bz2
 %endif
-Source2: http://downloads.sourceforge.net/%{name}/flash-0.9.4.tar.gz
-Source3: http://downloads.sourceforge.net/%{name}/altermime-0.3.10.tar.gz
-Source4: http://downloads.sourceforge.net/%{name}/ripmime-1.4.0.10.tar.gz
-Source5: http://downloads.sourceforge.net/%{name}/mpack-1.6.tar.gz
-Source6: http://downloads.sourceforge.net/%{name}/fortune-%{fortune_version}.tar.gz
 %if %nonssd == 0
-Source7: http://downloads.sourceforge.net/%{name}/nssd-%{nssd_version}.tar.gz
+Source2: http://downloads.sourceforge.net/%{name}/nssd-%{nssd_version}.tar.gz
 %endif
 %if %nobogofilter == 0
-Source8: http://downloads.sourceforge.net/%{name}/bogofilter-%{bogofilter_version}.tar.bz2
+Source3: http://downloads.sourceforge.net/%{name}/bogofilter-%{bogofilter_version}.tar.bz2
 %endif
 %if %nofetchmail == 0
-Source9: http://downloads.sourceforge.net/%{name}/fetchmail-%{fetchmail_version}.tar.xz
+Source4: http://downloads.sourceforge.net/%{name}/fetchmail-%{fetchmail_version}.tar.xz
 %endif
 %if %nopam_multi == 0
-Source10: http://downloads.sourceforge.net/%{name}/pam-multi-%{pam_multi_version}.tar.gz
+Source5: http://downloads.sourceforge.net/%{name}/pam-multi-%{pam_multi_version}.tar.gz
 %endif
-Source11: http://downloads.sourceforge.net/%{name}/%{name}-rpmlintrc
+Source6: http://downloads.sourceforge.net/%{name}/%{name}-rpmlintrc
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
-Source12: http://downloads.sourceforge.net/%{name}/%{name}-permissions.easy
-Source13: http://downloads.sourceforge.net/%{name}/%{name}-permissions.secure
-Source14: http://downloads.sourceforge.net/%{name}/%{name}-permissions.paranoid
+Source7: http://downloads.sourceforge.net/%{name}/%{name}-permissions.easy
+Source8: http://downloads.sourceforge.net/%{name}/%{name}-permissions.secure
+Source9: http://downloads.sourceforge.net/%{name}/%{name}-permissions.paranoid
 %endif
 %endif
 
@@ -152,8 +145,6 @@ Obsoletes: %{name} < 2.0
 BuildRequires: openssl-devel rpm gcc gcc-c++ make binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps
 BuildRequires: gzip autoconf automake libtool pkgconfig
-#flash, osh
-BuildRequires: readline-devel readline ncurses-devel
 BuildRequires: sed findutils
 BuildRequires: mysql-devel libqmail-devel libqmail
 %if %nopam_multi == 0
@@ -284,10 +275,6 @@ Excludeos: windows
 
 %description
 IndiMail is a messaging platform providing multi-cluster domain support.
-It provides IMAP/POP3 protocol using Courier Imap, SPAM filtering using
-bogofilter (A Bayesian Spam Filter), mail retreival using Fetchmail.
-Additionally it packages other useful utilities like mpack, unpack,
-altermime, ripmime, fortune, flash.
 
 IndiMail provides ability for a single domain to have users across multiple
 hosts (even across different geographical locations) and tools to manage
@@ -359,8 +346,7 @@ do
   )
 done
 %endif
-for i in %{name}-%{version} altermime-0.3.10 ripmime-1.4.0.10 flash-0.9.4 \
-mpack-1.6 fortune-%{fortune_version} bogofilter-%{bogofilter_version} \
+for i in %{name}-%{version} bogofilter-%{bogofilter_version} \
 fetchmail-%{fetchmail_version} courier-imap-%{courier_version}
 do
   (
@@ -447,10 +433,8 @@ fi
   --with-pkgconfigdir=%{_pkg_config_path} --libdir=%{_libdir} --enable-domaindir=%{domaindir} \
   --enable-mysqlprefix=%{mysqlPrefix} \
   --libexecdir=%{libexecdir} --mandir=%{mandir} --enable-qmaildir=%{indimaildir} \
-  --enable-modbase=%{_prefix}/lib/indimail \
   --enable-basepath=@basepath@ --enable-logdir=%{logdir} \
   --enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{sysconfdir}/tcp/tcp.smtp \
-  --enable-cookiedir=%{_prefix}/share/indimail/fortunes \
   --enable-default-domain=${default_domain} `%{__cat} config/indimail.opts`
 
 #### nssd ######################
@@ -530,7 +514,8 @@ if [ -d ../bogofilter-%{bogofilter_version} ] ; then
   (
   HOME='.';export HOME
   ./configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
-  --mandir=%{mandir} --libdir=%{_libdir} `%{__cat} ../%{name}-%{version}/config/bogofilter.opts`
+  --mandir=%{mandir} --libdir=%{_libdir} --datarootdir=%{shareddir} \
+  `%{__cat} ../%{name}-%{version}/config/bogofilter.opts`
   )
 fi
 %endif
@@ -546,7 +531,7 @@ if [ -d ../fetchmail-%{fetchmail_version} ] ; then
     autoreconf -fiv
   fi
   %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
-    --mandir=%{mandir} --datarootdir=%{shareddir} \
+    --datarootdir=%{shareddir} --mandir=%{mandir} \
     `%{__cat} ../%{name}-%{version}/config/fetchmail.opts`
 fi
 %endif
@@ -608,14 +593,7 @@ install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
 #
 # remove fetchmail docs installed by IndiMail Makefile
 #
-if [ %nofetchmail -eq 1 ] ; then
-  %{__rm} -f %{buildroot}%{shareddir}/doc/COPYING.fetchmail \
-    %{buildroot}%{shareddir}/doc/README-NTLM.fetchmail \
-    %{buildroot}%{shareddir}/doc/README-SSL-SERVER.fetchmail \
-    %{buildroot}%{shareddir}/doc/README-SSL.fetchmail \
-    %{buildroot}%{shareddir}/doc/README.fetchmail
-fi
-for i in eps cdb flash indimail
+for i in eps cdb indimail
 do
   %{__rm} -f %{buildroot}%{_libdir}/lib"$i".la
 done
@@ -647,14 +625,14 @@ fi
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
-install -m 644 %{S:14} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
-install -m 644 %{S:15} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
+install -m 644 %{S:7} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
+install -m 644 %{S:8} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
 %endif
 
 if [ -x /usr/bin/chrpath ] ; then
   /usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
-  for i in dbinfo flash hostcntrl printdir \
+  for i in dbinfo hostcntrl printdir \
     proxyimap proxypop3 sigtool vacation vaddaliasdomain vadddomain vadduser \
     valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser vdominfo \
     vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv sslerator \
@@ -669,9 +647,6 @@ if [ -x /usr/bin/chrpath ] ; then
   /usr/bin/chrpath -d %{buildroot}%{libexecdir}/sq_vacation
   /usr/bin/chrpath -d %{buildroot}%{libexecdir}/qmailmrtg7
   /usr/bin/chrpath -d %{buildroot}%{imoduledir}/iauth.so
-  /usr/bin/chrpath -d %{buildroot}%{imoduledir}/background
-  /usr/bin/chrpath -d %{buildroot}%{imoduledir}/alarms
-  /usr/bin/chrpath -d %{buildroot}%{imoduledir}/countdown
 
   for i in adminclient chowkidar clearopensmtp \
   hostsync indisrvr inlookup inquerytest install_tables ipchange \
@@ -802,13 +777,9 @@ done
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(755,root,root)              %{mandir}
 %dir %attr(755,root,root)              %{mandir}/man1
-%dir %attr(755,root,root)              %{mandir}/cat1
 %dir %attr(755,root,root)              %{mandir}/man5
-%dir %attr(755,root,root)              %{mandir}/cat5
 %dir %attr(755,root,root)              %{mandir}/man7
-%dir %attr(755,root,root)              %{mandir}/cat7
 %dir %attr(755,root,root)              %{mandir}/man8
-%dir %attr(755,root,root)              %{mandir}/cat8
 %endif
 %if "%{_prefix}" != "/usr"
 %dir %attr(555,root,root)              %{_libdir}
@@ -817,8 +788,6 @@ done
 %if %nofetchmail == 0
 %dir %attr(755,root,root)              %{shareddir}/locale
 %endif
-
-%dir %attr(755,root,root)              %{shareddir}/fortunes
 #
 # If the configuration file should not be replaced when the RPM is
 # upgraded, mark it as follows:
@@ -833,10 +802,6 @@ done
 # from the previous package revision. Whenever plain %%config is used,
 # add a brief comment to the specfile explaining why.
 
-%attr(444,root,root) %config(noreplace)           %{sysconfdir}/system.flashlogin
-%attr(444,root,root) %config(noreplace)           %{sysconfdir}/system.rc
-%attr(444,root,root) %config(noreplace)           %{sysconfdir}/system.menu
-%attr(444,root,root) %config(noreplace)           %{sysconfdir}/system.module
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/osh.table
 # Allow new control files to get added with new packages
 # unlikely for this file to have local changes
@@ -947,11 +912,8 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/crc
 %attr(755,root,qmail)                   %{_prefix}/bin/iecho
 
-%attr(755,root,qmail)                   %{_prefix}/bin/altermime
 %attr(755,root,qmail)                   %{_prefix}/bin/crcdiff
 %attr(755,root,qmail)                   %{_prefix}/bin/dbinfo
-%attr(755,root,qmail)                   %{_prefix}/bin/randstr
-%attr(755,root,qmail)                   %{_prefix}/bin/ripmime
 %attr(755,root,qmail)                   %{_prefix}/bin/sslerator
 
 %attr(755,root,qmail)                   %{_prefix}/sbin/resetquota
@@ -982,15 +944,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/vproxy
 %attr(755,root,qmail)                   %{_prefix}/sbin/osh
 %attr(755,root,qmail)                   %{_prefix}/bin/ismaildup
-
-%attr(755,root,qmail)                   %{_prefix}/bin/mpack
-%attr(755,root,qmail)                   %{_prefix}/bin/munpack
-%attr(755,root,qmail)                   %{_prefix}/bin/fortune
-%attr(755,root,qmail)                   %{_prefix}/sbin/rot
-%attr(755,root,qmail)                   %{_prefix}/sbin/strfile
-%attr(755,root,qmail)                   %{_prefix}/sbin/unstr
-%attr(755,root,qmail)                   %{_prefix}/bin/flash
-%attr(755,root,qmail)                   %{_prefix}/bin/ripole
 
 %if %nonssd == 0
 %attr(755,root,qmail)                   %{_prefix}/sbin/nssd
@@ -1080,116 +1033,7 @@ done
 %endif
 %attr(755,root,root)                    %{libexecdir}/imapmodules/authindi
 %attr(755,root,root)                    %{libexecdir}/imapmodules/authgeneric
-
-%attr(755,root,root)                    %{imoduledir}/background
-%attr(755,root,root)                    %{imoduledir}/alarms
-%attr(755,root,root)                    %{imoduledir}/countdown
 %attr(755,root,root)                    %{imoduledir}/iauth.so
-
-%attr(644,root,root)                    %{shareddir}/fortunes/definitions
-%attr(644,root,root)                    %{shareddir}/fortunes/linux.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/food
-%attr(644,root,root)                    %{shareddir}/fortunes/medicine
-%attr(644,root,root)                    %{shareddir}/fortunes/magic
-%attr(644,root,root)                    %{shareddir}/fortunes/ethnic
-%attr(644,root,root)                    %{shareddir}/fortunes/art.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/computers.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/songs-poems.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/kids
-%attr(644,root,root)                    %{shareddir}/fortunes/goedel
-%attr(644,root,root)                    %{shareddir}/fortunes/paradoxum
-%attr(644,root,root)                    %{shareddir}/fortunes/computers
-%attr(644,root,root)                    %{shareddir}/fortunes/goedel.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/news
-%attr(644,root,root)                    %{shareddir}/fortunes/pets
-%attr(644,root,root)                    %{shareddir}/fortunes/law.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/zippy
-%attr(644,root,root)                    %{shareddir}/fortunes/miscellaneous
-%attr(644,root,root)                    %{shareddir}/fortunes/ascii-art.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/perl
-%attr(644,root,root)                    %{shareddir}/fortunes/kids.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/love.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/work.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/humorists
-%attr(644,root,root)                    %{shareddir}/fortunes/definitions.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/drugs
-%attr(644,root,root)                    %{shareddir}/fortunes/education.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/politics.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/science.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/love
-%attr(644,root,root)                    %{shareddir}/fortunes/men-women
-%attr(644,root,root)                    %{shareddir}/fortunes/ascii-art
-%attr(644,root,root)                    %{shareddir}/fortunes/humorists.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/platitudes.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/debian
-%attr(644,root,root)                    %{shareddir}/fortunes/sports.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/riddles
-%attr(644,root,root)                    %{shareddir}/fortunes/law
-%attr(644,root,root)                    %{shareddir}/fortunes/knghtbrd.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/sports
-%attr(644,root,root)                    %{shareddir}/fortunes/perl.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/tao.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/linuxcookie
-%attr(644,root,root)                    %{shareddir}/fortunes/linuxcookie.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/riddles.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/medicine.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/fortunes
-%attr(644,root,root)                    %{shareddir}/fortunes/cookie
-%attr(644,root,root)                    %{shareddir}/fortunes/cookie.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/art
-%attr(644,root,root)                    %{shareddir}/fortunes/politics
-%attr(644,root,root)                    %{shareddir}/fortunes/songs-poems
-%attr(644,root,root)                    %{shareddir}/fortunes/startrek.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/men-women.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/kernelnewbies
-%attr(644,root,root)                    %{shareddir}/fortunes/fortunes.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/magic.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/science
-%attr(644,root,root)                    %{shareddir}/fortunes/platitudes
-%attr(644,root,root)                    %{shareddir}/fortunes/kernelnewbies.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/literature.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/translate-me
-%attr(644,root,root)                    %{shareddir}/fortunes/startrek
-%attr(644,root,root)                    %{shareddir}/fortunes/drugs.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/zippy.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/linux
-%attr(644,root,root)                    %{shareddir}/fortunes/work
-%attr(644,root,root)                    %{shareddir}/fortunes/literature
-%attr(644,root,root)                    %{shareddir}/fortunes/knghtbrd
-%attr(644,root,root)                    %{shareddir}/fortunes/news.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/paradoxum.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/bofh-excuses.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/translate-me.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/miscellaneous.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/rj.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/debian.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/tao
-%attr(644,root,root)                    %{shareddir}/fortunes/food.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/ethnic.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/people.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/people
-%attr(644,root,root)                    %{shareddir}/fortunes/wisdom.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/rj
-%attr(644,root,root)                    %{shareddir}/fortunes/wisdom
-%attr(644,root,root)                    %{shareddir}/fortunes/pets.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/bofh-excuses
-%attr(644,root,root)                    %{shareddir}/fortunes/education
-%attr(644,root,root)                    %{shareddir}/fortunes/age
-%attr(644,root,root)                    %{shareddir}/fortunes/age.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/chanakya
-%attr(644,root,root)                    %{shareddir}/fortunes/chanakya.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/joel-on-software
-%attr(644,root,root)                    %{shareddir}/fortunes/joel-on-software.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/osp
-%attr(644,root,root)                    %{shareddir}/fortunes/osp.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/paul-graham
-%attr(644,root,root)                    %{shareddir}/fortunes/paul-graham.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/thirukkural
-%attr(644,root,root)                    %{shareddir}/fortunes/thirukkural.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/vedas-1
-%attr(644,root,root)                    %{shareddir}/fortunes/vedas-1.dat
-%attr(644,root,root)                    %{shareddir}/fortunes/vedas-2
-%attr(644,root,root)                    %{shareddir}/fortunes/vedas-2.dat
 
 %if %nofetchmail == 0
 #%%attr(644,root,root)                    %%{shareddir}/locale/*/LC_MESSAGES/*.mo
@@ -1234,103 +1078,93 @@ done
 %attr(644,root,root)                    %{mandir}/man[1,5,7,8]/*
 
 %if %build_on_obs == 0
-%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.indimail
-%license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.altermime
-%license %attr(444,root,qmail)          %{shareddir}/doc/LICENSE.ripmime
-%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.flash
-%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.fortune
+%license %attr(644,root,root)           %{shareddir}/doc/COPYING.indimail
 %if %nonssd == 0
-%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.nssd
+%license %attr(644,root,root)           %{shareddir}/doc/COPYING.nssd
 %endif
 %if %nopam_multi == 0
-%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.pam-multi
+%license %attr(644,root,root)           %{shareddir}/doc/COPYING.pam-multi
 %endif
 %if %nobogofilter == 0
-%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.bogofilter
+%license %attr(644,root,root)           %{shareddir}/doc/COPYING.bogofilter
 %endif
 %if %nocourierimap == 0
-%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.courier-imap
+%license %attr(644,root,root)           %{shareddir}/doc/COPYING.courier-imap
+%license %attr(644,root,root)           %{shareddir}/doc/COPYING.GPL.courier-imap
 %endif
 %if %nofetchmail == 0
-%license %attr(444,root,qmail)          %{shareddir}/doc/COPYING.fetchmail
+%license %attr(644,root,root)           %{shareddir}/doc/COPYING.fetchmail
 %endif
 %else
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.indimail
-%attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.altermime
-%attr(444,root,qmail)                   %{shareddir}/doc/LICENSE.ripmime
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.flash
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.fortune
+%attr(644,root,root)                    %{shareddir}/doc/COPYING.indimail
 %if %nonssd == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.nssd
+%attr(644,root,root)                    %{shareddir}/doc/COPYING.nssd
 %endif
 %if %nopam_multi == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.pam-multi
+%attr(644,root,root)                    %{shareddir}/doc/COPYING.pam-multi
 %endif
 %if %nobogofilter == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.bogofilter
+%attr(644,root,root)                    %{shareddir}/doc/COPYING.bogofilter
 %endif
 %if %nocourierimap == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.courier-imap
+%attr(644,root,root)                    %{shareddir}/doc/COPYING.courier-imap
+%attr(644,root,root)                    %{shareddir}/doc/COPYING.GPL.courier-imap
 %endif
 %if %nofetchmail == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYING.fetchmail
+%attr(644,root,root)                    %{shareddir}/doc/COPYING.fetchmail
 %endif
 %endif
 
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYRIGHT.flash
-%attr(444,root,qmail)                   %{shareddir}/doc/COPYRIGHT.mpack
-%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.altermime
-%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.fortune
 %if %nonssd == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.nssd
+%attr(644,root,root)                    %{shareddir}/doc/AUTHORS.nssd
 %endif
 %if %nopam_multi == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.pam-multi
+%attr(644,root,root)                    %{shareddir}/doc/AUTHORS.pam-multi
 %endif
-%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.ripmime
-%attr(444,root,qmail)                   %{shareddir}/doc/README.altermime
-%attr(444,root,qmail)                   %{shareddir}/doc/ChangeLog.indimail
-%attr(444,root,qmail)                   %{shareddir}/doc/FAQ.pdf
-%attr(444,root,qmail)                   %{shareddir}/doc/HOWTO.sharedmaildir
-%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL-MYSQL
-%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL-RPM
-%attr(444,root,qmail)                   %{shareddir}/doc/INSTALL.indimail
-%attr(444,root,qmail)                   %{shareddir}/doc/Quick-INSTALL
-%attr(444,root,qmail)                   %{shareddir}/doc/README
-%attr(444,root,qmail)                   %{shareddir}/doc/README-CLUSTER
-%attr(444,root,qmail)                   %{shareddir}/doc/README.flash
-%attr(444,root,qmail)                   %{shareddir}/doc/README.ldap
-%attr(444,root,qmail)                   %{shareddir}/doc/README.mpack
+%attr(644,root,root)                    %{shareddir}/doc/ChangeLog.indimail
+%attr(644,root,root)                    %{shareddir}/doc/FAQ.pdf
+%attr(644,root,root)                    %{shareddir}/doc/INSTALL-MYSQL
+%attr(644,root,root)                    %{shareddir}/doc/INSTALL-RPM
+%attr(644,root,root)                    %{shareddir}/doc/INSTALL.indimail
+%attr(644,root,root)                    %{shareddir}/doc/Quick-INSTALL
+%attr(644,root,root)                    %{shareddir}/doc/README
+%attr(644,root,root)                    %{shareddir}/doc/README-CLUSTER
+%attr(644,root,root)                    %{shareddir}/doc/README.ldap
 %if %nonssd == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/README.nssd
+%attr(644,root,root)                    %{shareddir}/doc/README.nssd
 %endif
 %if %nopam_multi == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/README.pam-multi
+%attr(644,root,root)                    %{shareddir}/doc/README.pam-multi
 %endif
-%attr(444,root,qmail)                   %{shareddir}/doc/README.ripmime
-%attr(444,root,qmail)                   %{shareddir}/doc/README.vlimits
-%attr(444,root,qmail)                   %{shareddir}/doc/RELEASE-Notes
-%attr(444,root,qmail)                   %{shareddir}/doc/indimail_arch.png
-%attr(444,root,qmail)                   %{shareddir}/doc/indimail_queue.png
+%attr(644,root,root)                    %{shareddir}/doc/README.vlimits
+%attr(644,root,root)                    %{shareddir}/doc/RELEASE-Notes
+%attr(644,root,root)                    %{shareddir}/doc/indimail_arch.png
+%attr(644,root,root)                    %{shareddir}/doc/indimail_queue.png
 
 %if %nobogofilter == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.bogofilter
-%attr(444,root,qmail)                   %{shareddir}/doc/HOWTO.bogofilter
+%attr(644,root,root)                    %{shareddir}/doc/AUTHORS.bogofilter
+%attr(644,root,root)                    %{shareddir}/doc/HOWTO.bogofilter
 %endif
 
 %if %nocourierimap == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/AUTHORS.courier-imap
+%attr(644,root,root)                    %{shareddir}/doc/AUTHORS.courier-imap
 %endif
 
 %if %nofetchmail == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/README-SSL-SERVER.fetchmail
-%attr(444,root,qmail)                   %{shareddir}/doc/README-SSL.fetchmail
-%attr(444,root,qmail)                   %{shareddir}/doc/README-NTLM.fetchmail
-%attr(444,root,qmail)                   %{shareddir}/doc/README.fetchmail
+%attr(644,root,root)                    %{shareddir}/doc/README.SSL-SERVER.fetchmail
+%attr(644,root,root)                    %{shareddir}/doc/README.SSL.fetchmail
+%attr(644,root,root)                    %{shareddir}/doc/README.NTLM.fetchmail
+%attr(644,root,root)                    %{shareddir}/doc/README.fetchmail
 %endif
 
 %if %nocourierimap == 0
-%attr(444,root,qmail)                   %{shareddir}/doc/README.courier-imap
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.sharedfolders.txt
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.maildirquota.txt
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.couriertls
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.unicode
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.imap
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.authlib
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.courier-imap
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/lockmail.html
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/mailbot.html
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildir.html
@@ -1380,8 +1214,6 @@ done
 
 %{_libdir}/libeps.so.1
 %{_libdir}/libeps.so.1.0.0
-%{_libdir}/libflash.so.1
-%{_libdir}/libflash.so.1.0.0
 %{_libdir}/libindimail.so.3
 %{_libdir}/libindimail.so.3.0.0
 
@@ -1658,7 +1490,6 @@ done
 %endif
 
 %{_libdir}/libeps.a
-%{_libdir}/libflash.a
 %{_libdir}/libindimail.a
 
 %if %nocourierimap == 0
@@ -1666,7 +1497,6 @@ done
 %endif
 
 %{_libdir}/libeps.so
-%{_libdir}/libflash.so
 %{_libdir}/libindimail.so
 
 %if %nonssd == 0
@@ -1680,8 +1510,6 @@ done
 # Shared libraries (omit for architectures that don't support them)
 %{_libdir}/libeps.so.1
 %{_libdir}/libeps.so.1.0.0
-%{_libdir}/libflash.so.1
-%{_libdir}/libflash.so.1.0.0
 %{_libdir}/libindimail.so.3
 %{_libdir}/libindimail.so.3.0.0
 

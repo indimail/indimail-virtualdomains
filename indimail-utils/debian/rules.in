@@ -1,0 +1,154 @@
+#!/usr/bin/make -f
+
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# This is the debhelper compatibility version to use.
+# export DH_COMPAT=4
+CFLAGS=-g -DOBS_BUILD
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0 -fno-strict-aliasing -Wno-unused-result -Wno-unused-result
+else
+	CFLAGS += -O2 -fno-strict-aliasing -Wno-unused-result -Wno-unused-result
+endif
+
+prefix=/usr
+sysconfdir=/etc/indimail
+altermime_vers=@altermime_version@
+ripmime_vers=@ripmime_version@
+fortune_vers=@fortune_version@
+flash_version=@flash_version@
+mpack_version=@mpack_version@
+mandir=/usr/share/man
+libdir=/usr/lib
+rm=/bin/rm
+cp=/bin/cp
+
+DESTDIR=$(CURDIR)/debian/tmp
+
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+	#
+	# Extract source archives
+	#
+	if [ -f ../BUILD/debian/obs_deb_prep ] ; then sh ../BUILD/debian/obs_deb_prep; fi
+	#
+	# run configure script
+	#
+	if [ -d altermime-$(altermime_vers) ] ; then \
+		cd altermime-$(altermime_vers); \
+		./configure --prefix=${prefix} --mandir=${mandir} \
+			--datarootdir=${prefix}/share/indimail; \
+		cd ..; \
+	fi
+	if [ -d ripmime-$(ripmime_vers) ] ; then \
+		cd ripmime-$(ripmime_vers); \
+		./configure --prefix=${prefix} --mandir=${mandir} \
+			--datarootdir=${prefix}/share/indimail; \
+		cd ..; \
+	fi
+	if [ -d fortune-$(fortune_vers) ] ; then \
+		cd fortune-$(fortune_vers); \
+		./configure --prefix=${prefix} --mandir=${mandir} \
+			--enable-cookiedir=${prefix}/share/indimail/fortunes --enable-offensive=n \
+			--datarootdir=${prefix}/share/indimail; \
+		cd ..; \
+	fi
+	if [ -d flash-$(flash_version) ] ; then \
+		cd flash-$(flash_version); \
+		./configure --prefix=${prefix} --mandir=${mandir} --libdir=${libdir} \
+			--sysconfdir=${sysconfdir} --enable-modbase=${prefix}/lib/indimail \
+			--datarootdir=${prefix}/share/indimail; \
+		cd ..; \
+	fi
+	if [ -d mpack-$(mpack_version) ] ; then \
+		cd mpack-$(mpack_version); \
+		./configure --prefix=${prefix} --mandir=${mandir} \
+			--datarootdir=${prefix}/share/indimail; \
+		cd ..; \
+	fi
+	#
+	# run make
+	#
+	if [ -d altermime-$(altermime_vers) ] ; then $(MAKE) -s -C altermime-$(altermime_vers) DESTDIR=$(DESTDIR); fi
+	if [ -d ripmime-$(ripmime_vers) ]     ; then $(MAKE) -s -C ripmime-$(ripmime_vers) DESTDIR=$(DESTDIR); fi
+	if [ -d fortune-$(fortune_vers) ]     ; then $(MAKE) -s -C fortune-$(fortune_vers) DESTDIR=$(DESTDIR); fi
+	if [ -d mpack-$(mpack_version) ]      ; then $(MAKE) -s -C mpack-$(mpack_version) DESTDIR=$(DESTDIR); fi
+	if [ -d flash-$(flash_version) ]      ; then $(MAKE) -s -C flash-$(flash_version) DESTDIR=$(DESTDIR); fi
+	${rm} -rf $(DESTDIR)$(libdir)/*.la
+	( \
+	echo NAME=indimail-utils; \
+	echo Description=\"IndiMail Authentication Package\"; \
+	echo AUTH_version=$(version); \
+	echo ID=indimail-utils; \
+	echo HOME_URL="https://github.com/mbhangui/indimail-virtualdomains"; \
+	echo PACKAGE_BUGREPORT=\"Manvendra Bhangui indimail-utils@indimail.org\"; \
+	) > indimail-utils-release
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep || dh_clean -k
+	dh_installdirs
+	if [ -d altermime-$(altermime_vers) ] ; then $(MAKE) -s install -C altermime-$(altermime_vers) DESTDIR=$(DESTDIR); fi
+	if [ -d ripmime-$(ripmime_vers) ]     ; then $(MAKE) -s install -C ripmime-$(ripmime_vers) DESTDIR=$(DESTDIR); fi
+	if [ -d fortune-$(fortune_vers) ]     ; then $(MAKE) -s install -C fortune-$(fortune_vers) DESTDIR=$(DESTDIR); fi
+	if [ -d mpack-$(mpack_version) ]      ; then $(MAKE) -s install -C mpack-$(mpack_version) DESTDIR=$(DESTDIR); fi
+	if [ -d flash-$(flash_version) ]      ; then $(MAKE) -s install -C flash-$(flash_version) DESTDIR=$(DESTDIR); fi
+	mkdir -p $(DESTDIR)$(sysconfdir)
+	install -m 0644 indimail-utils-release "$(DESTDIR)$(sysconfdir)"/indimail-utils-release
+	/bin/rm -f indimail-utils-release
+
+clean:
+	if [ -d altermime-$(altermime_vers) ] ; then $(MAKE) -s clean -C altermime-$(altermime_vers) DESTDIR=$(DESTDIR) || true; fi
+	if [ -d ripmime-$(ripmime_vers) ]     ; then $(MAKE) -s clean -C ripmime-$(ripmime_vers) DESTDIR=$(DESTDIR) || true; fi
+	if [ -d fortune-$(fortune_vers) ]     ; then $(MAKE) -s clean -C fortune-$(fortune_vers) DESTDIR=$(DESTDIR) || true; fi
+	if [ -d mpack-$(mpack_version) ]      ; then $(MAKE) -s clean -C mpack-$(mpack_version) DESTDIR=$(DESTDIR) || true; fi
+	if [ -d flash-$(flash_version) ]      ; then $(MAKE) -s clean -C flash-$(flash_version) DESTDIR=$(DESTDIR) || true; fi
+	if [ -d altermime-$(altermime_vers) ] ; then $(MAKE) -s distclean -C altermime-$(altermime_vers) DESTDIR=$(DESTDIR) || true; fi
+	if [ -d ripmime-$(ripmime_vers) ]     ; then $(MAKE) -s distclean -C ripmime-$(ripmime_vers) DESTDIR=$(DESTDIR) || true; fi
+	if [ -d fortune-$(fortune_vers) ]     ; then $(MAKE) -s distclean -C fortune-$(fortune_vers) DESTDIR=$(DESTDIR) || true; fi
+	if [ -d mpack-$(mpack_version) ]      ; then $(MAKE) -s distclean -C mpack-$(mpack_version) DESTDIR=$(DESTDIR) || true; fi
+	if [ -d flash-$(flash_version) ]      ; then $(MAKE) -s distclean -C flash-$(flash_version) DESTDIR=$(DESTDIR) || true; fi
+	${rm} -f build-stamp configure-stamp
+	${rm} -rf $(DESTDIR)
+	dh_testdir
+	dh_testroot
+	dh_clean
+	dh_auto_clean
+
+binary-indep: build install
+	dh_testdir
+	dh_testroot
+	find $(DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
+	dh_install --sourcedir=$(DESTDIR) -pindimail-utils
+	dh_installchangelogs
+	dh_installcron
+	dh_installdocs
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_makeshlibs -V
+	dh_shlibdeps
+	dh_gencontrol
+	dh_installcron
+	dh_md5sums
+	dh_builddeb
+
+# Build architecture-dependent files here. 
+binary-arch: build install
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

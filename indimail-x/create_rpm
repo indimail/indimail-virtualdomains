@@ -4,9 +4,7 @@ courier_version=$(grep courier_version indimail.spec.in | head -1| awk '{print $
 bogofilter_version=$(grep bogofilter_version indimail.spec.in | head -1| awk '{print $3}')
 pam_multi_version=$(grep pam_multi_version indimail.spec.in | head -1| awk '{print $3}')
 fetchmail_version=$(grep fetchmail_version indimail.spec.in | head -1| awk '{print $3}')
-fortune_version=$(grep fortune_version indimail.spec.in | head -1| awk '{print $3}')
 nssd_version=$(grep nssd_version indimail.spec.in | head -1| awk '{print $3}')
-flash_version=$(grep flash_version indimail.spec.in | head -1| awk '{print $3}')
 nonssd=1
 nopam_multi=1
 
@@ -29,11 +27,9 @@ done
 	-e 's/%{name}/indimail/g' \
 	-e "s/%{version}/$version/g" \
 	-e "s/%{courier_version}/$courier_version/g" \
-	-e "s/%{flash_version}/$flash_version/g" \
 	-e "s/%{bogofilter_version}/$bogofilter_version/g" \
 	-e "s/%{fetchmail_version}/$fetchmail_version/g" \
 	-e "s/%{pam_multi_version}/$pam_multi_version/g" \
-	-e "s/%{fortune_version}/$fortune_version/g" \
 	-e "s/%{nssd_version}/$nssd_version/g"
 }
 
@@ -49,11 +45,9 @@ done
 	-e 's/%{name}/indimail/g' \
 	-e "s/%{version}/$version/g" \
 	-e "s/%{courier_version}/$courier_version/g" \
-	-e "s/%{flash_version}/$flash_version/g" \
 	-e "s/%{bogofilter_version}/$bogofilter_version/g" \
 	-e "s/%{fetchmail_version}/$fetchmail_version/g" \
 	-e "s/%{pam_multi_version}/$pam_multi_version/g" \
-	-e "s/%{fortune_version}/$fortune_version/g" \
 	-e "s/%{nssd_version}/$nssd_version/g"
 }
 

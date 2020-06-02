@@ -62,3 +62,6 @@ config.status
 doc/Makefile
 src/Makefile
 src/config.h
+aclocal.m4
+INSTALL
+ylwrap

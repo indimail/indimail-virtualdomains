@@ -1,0 +1,5 @@
+usr/bin                @prefix@
+usr/sbin               @prefix@
+usr/share/indimail     @prefix@/share
+usr/share/man/man1     @mandir@
+usr/lib/*.so.*         @prefix@/lib
