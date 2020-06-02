@@ -12,10 +12,11 @@ make -s
 make -s -C debian
 cp -rp debian ../stage
 cd ../stage
-make -s -C nssd-$nssd_version clean
-make -s -C nssd-$nssd_version distclean
-make -s -C pam-multi-$pam_multi_version clean
-make -s -C pam-multi-$pam_multi_version distclean
+for i in nssd-$nssd_version pam-multi-$pam_multi_version
+do
+	make -s -C $i clean
+	make -s -C $i distclean
+done
 dpkg-buildpackage -tc -b
 cd ..
 /bin/rm -r stage

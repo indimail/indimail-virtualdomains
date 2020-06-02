@@ -57,15 +57,15 @@ build-stamp:
 		--libexecdir=$(libexecdir) --enable-nssd-socket=$(nssd_sock) \
 		--datarootdir=$(prefix)/share/indimail \
 		--enable-nssd-config-path=$(sysconfdir)/nssd.conf \
-		--enable-default-domain=$(default_domain) \
-		--mandir=$(mandir) --enable-mysqlprefix=/usr `cat ../indimail-$(version)/config/nssd.opts`; \
+		--mandir=$(mandir) --enable-mysqlprefix=/usr \
+		--enable-dlload-mysql=yes --enable-default-domain=$(default_domain); \
 		cd ..; \
 	fi
 	if [ -d pam-multi-$(pam_multi_version) ] ; then \
 		cd pam-multi-$(pam_multi_version); \
-		./configure --prefix=$(prefix) --enable-mysqlprefix=/usr \
-		--datarootdir=$(prefix)/share/indimail \
+		./configure --prefix=$(prefix) --datarootdir=$(prefix)/share/indimail \
 		--enable-moduledir=/lib/security --enable-controldir=$(sysconfdir)/control \
+		--enable-mysqlprefix=/usr \
 		--enable-dlload-mysql=yes --enable-default-domain=$(default_domain); \
 		cd ..; \
 	fi
@@ -74,7 +74,6 @@ build-stamp:
 	#
 	if [ -d nssd-$(nssd_version) ]           ; then $(MAKE) -s -C nssd-$(nssd_version) DESTDIR=$(DESTDIR); fi
 	if [ -d pam-multi-$(pam_multi_version) ] ; then $(MAKE) -s -C pam-multi-$(pam_multi_version) DESTDIR=$(DESTDIR); fi
-	${rm} -rf $(DESTDIR)$(libdir)/*.la
 	( \
 	echo NAME=indimail-auth; \
 	echo Description=\"IndiMail Authentication Package\"; \
@@ -104,6 +103,9 @@ install: build
 	dh_installdirs
 	if [ -d nssd-$(nssd_version) ]           ; then $(MAKE) -s install -C nssd-$(nssd_version) DESTDIR=$(DESTDIR); fi
 	if [ -d pam-multi-$(pam_multi_version) ] ; then $(MAKE) -s install -C pam-multi-$(pam_multi_version) DESTDIR=$(DESTDIR); fi
+	#${rm} -rf $(DESTDIR)$(libdir)/*.la
+	${rm} -f $(DESTDIR)$(pam_module_dir)/pam-multi.la
+	${rm} -f $(DESTDIR)$(pam_module_dir)/pam-multi.a
 	mkdir -p $(DESTDIR)$(sysconfdir)
 	install -m 0644 indimail-auth-release "$(DESTDIR)$(sysconfdir)"/indimail-auth-release
 	/bin/rm -f indimail-auth-release
