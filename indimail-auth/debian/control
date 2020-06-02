@@ -3,7 +3,7 @@ Section: mail
 Priority: optional
 Maintainer: Manvendra Bhangui <indimail-auth@indimail.org>
 Standards-Version: 4.5.0
-Build-Depends: debhelper (>= 9), libpam0g-dev
+Build-Depends: debhelper (>= 9), libpam0g-dev, libqmail-dev
 Homepage: https://github.com/mbhangui/indimail-virtualdomains
 
 Package: indimail-auth

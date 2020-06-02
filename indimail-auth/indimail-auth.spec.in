@@ -157,17 +157,16 @@ if [ -d nssd-%{nssd_version} ] ; then
   --enable-nssd-socket=$nssd_sock \
   --enable-nssd-config-path=%{sysconfdir}/nssd.conf \
   --enable-mysqlprefix=%{mysqlPrefix} \
-  --enable-default-domain=$(default_domain) \
-  --enable-dlload-mysql=yes
+  --enable-dlload-mysql=yes --enable-default-domain=$(default_domain)
   cd ..
 fi
 
 #### pam-multi ######################
 if [ pam-multi-%{pam_multi_version} ] ; then
   cd pam-multi-%{pam_multi_version}
-  %configure --prefix=%{_prefix} --enable-mysqlprefix=%{mysqlPrefix} \
-  --datarootdir=%{shareddir} \
+  %configure --prefix=%{_prefix} --datarootdir=%{shareddir} \
   --enable-moduledir=%pam_module_dir --enable-controldir=%{sysconfdir}/control \
+  --enable-mysqlprefix=%{mysqlPrefix} \
   --enable-dlload-mysql=yes --enable-default-domain=${default_domain}
   cd ..
 fi
