@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.41 2020-05-30 19:56:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.42 2020-06-02 22:38:20+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -37,17 +37,13 @@
 %global defaultDomain      @defaultdomain@
 %global courier_version    5.0.10
 %global bogofilter_version 1.2.4
-%global pam_multi_version  1.2
 %global fetchmail_version  6.4.1
-%global nssd_version       1.3
 %if 0%{?suse_version}
 %global noperms            1
 %else
 %global noperms            0
 %endif
 %global url                https://github.com/mbhangui/indimail-virtualdomains
-%global nonssd             1
-%global nopam_multi        1
 %global noproxy            0
 %global nocourierimap      1
 %global nofetchmail        0
@@ -61,8 +57,6 @@
 %global logdir             @logdir@
 %global imoduledir         %{_prefix}/lib/indimail/modules
 %global servicedir         @servicedir@
-%global pam_confdir        %{_sysconfdir}/pam.d
-%global pam_module_dir     /%{_lib}/security
 %global _pkg_config_path   /usr/%{_lib}/pkgconfig
 %global mysqlSocket        /var/run/mysqld/mysqld.sock
 %global mysqlPrefix        @mysql_prefix@
@@ -114,17 +108,11 @@ Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 %if %nocourierimap == 0
 Source1: http://downloads.sourceforge.net/%{name}/courier-imap-%{courier_version}.tar.bz2
 %endif
-%if %nonssd == 0
-Source2: http://downloads.sourceforge.net/%{name}/nssd-%{nssd_version}.tar.gz
-%endif
 %if %nobogofilter == 0
 Source3: http://downloads.sourceforge.net/%{name}/bogofilter-%{bogofilter_version}.tar.bz2
 %endif
 %if %nofetchmail == 0
 Source4: http://downloads.sourceforge.net/%{name}/fetchmail-%{fetchmail_version}.tar.xz
-%endif
-%if %nopam_multi == 0
-Source5: http://downloads.sourceforge.net/%{name}/pam-multi-%{pam_multi_version}.tar.gz
 %endif
 Source6: http://downloads.sourceforge.net/%{name}/%{name}-rpmlintrc
 %if %noperms == 0
@@ -147,9 +135,6 @@ BuildRequires: glibc glibc-devel openssl procps
 BuildRequires: gzip autoconf automake libtool pkgconfig
 BuildRequires: sed findutils
 BuildRequires: mysql-devel libqmail-devel libqmail
-%if %nopam_multi == 0
-BuildRequires: pam-devel
-%endif
 %if %nofetchmail == 0
 BuildRequires: xz
 BuildRequires: gettext-devel
@@ -243,9 +228,6 @@ Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
 Requires: binutils sed findutils pkgconfig
 Requires: coreutils grep /bin/sh glibc openssl
 Requires: /usr/bin/hostname mrtg
-%if %nopam_multi == 0
-Requires: pam
-%endif
 
 %if 0%{?sles_version}
 Requires: mysql-community-server
@@ -306,46 +288,6 @@ languages and applications need to dynamically load and use IndiMail.
 For more details visit %{url}
 
 %prep
-%if %nonssd == 0
-for i in nssd-%{nssd_version}
-do
-  (
-  if [ -d $i ] ; then
-    %{__rm} -rf $i
-  fi
-  if [ -f ../SOURCES/$i.tar.bz2 ] ; then
-    %{__bzip2} -d -c ../SOURCES/$i.tar.bz2 | tar xf -
-  elif [ -f ../SOURCES/$i.tar.xz ] ; then
-    xz -d -c ../SOURCES/$i.tar.xz |tar xf -
-  elif [ -f ../SOURCES/$i.tar.gz ] ; then
-    gunzip -c ../SOURCES/$i.tar.gz | tar xf -
-  else
-    echo "No Source Archive for $i"
-    exit 1
-  fi
-  )
-done
-%endif
-%if %nopam_multi == 0
-for i in pam-multi-%{pam_multi_version}
-do
-  (
-  if [ -d $i ] ; then
-    %{__rm} -rf $i
-  fi
-  if [ -f ../SOURCES/$i.tar.bz2 ] ; then
-    %{__bzip2} -d -c ../SOURCES/$i.tar.bz2 | tar xf -
-  elif [ -f ../SOURCES/$i.tar.xz ] ; then
-    xz -d -c ../SOURCES/$i.tar.xz |tar xf -
-  elif [ -f ../SOURCES/$i.tar.gz ] ; then
-    gunzip -c ../SOURCES/$i.tar.gz | tar xf -
-  else
-    echo "No Source Archive for $i"
-    exit 1
-  fi
-  )
-done
-%endif
 for i in %{name}-%{version} bogofilter-%{bogofilter_version} \
 fetchmail-%{fetchmail_version} courier-imap-%{courier_version}
 do
@@ -400,9 +342,6 @@ echo target_alias   %_target_alias
 echo target_cpu     %_target_cpu
 echo target_os      %_target_os
 echo target_vendor  %_target_vendor
-%if %nopam_multi == 0
-echo PAM Module dir %{pam_module_dir}
-%endif
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 echo pythondir      %{python3_sitelib}
 %else
@@ -436,51 +375,6 @@ fi
   --enable-basepath=@basepath@ --enable-logdir=%{logdir} \
   --enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{sysconfdir}/tcp/tcp.smtp \
   --enable-default-domain=${default_domain} `%{__cat} config/indimail.opts`
-
-#### nssd ######################
-%if %nonssd == 0
-if [ -d ../nssd-%{nssd_version} ] ; then
-  cd ../nssd-%{nssd_version}
-  if [ %{reconfigure_mode} -eq 1 ] ; then
-    echo "reconfiguring..."
-    %{__mkdir_p} m4
-    aclocal -I m4
-    autoreconf -fiv
-  fi
-
-  if [ -d /run ] ; then
-    nssd_sock=/run/indimail/nssd.sock
-  elif [ -d /var/run ] ; then
-    nssd_sock=/var/run/indimail/nssd.sock
-  else
-    nssd_sock=/tmp/nssd.sock
-  fi
-  %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
-  --mandir=%{mandir} --libdir=%{_libdir} --datarootdir=%{shareddir} \
-  --enable-nssd-socket=$nssd_sock \
-  --enable-nssd-config-path=%{sysconfdir}/nssd.conf \
-  --enable-mysqlprefix=%{mysqlPrefix} \
-  --enable-default-domain=${default_domain} \
-  `%{__cat} ../%{name}-%{version}/config/nssd.opts`
-fi
-%endif
-
-#### pam-multi ######################
-%if %nopam_multi == 0
-if [ -d ../pam-multi-%{pam_multi_version} ] ; then
-  cd ../pam-multi-%{pam_multi_version}
-  if [ %{reconfigure_mode} -eq 1 ] ; then
-    echo "reconfiguring..."
-    %{__mkdir_p} m4
-    aclocal -I m4
-    autoreconf -fiv
-  fi
-  %configure --prefix=%{_prefix} --enable-mysqlprefix=%{mysqlPrefix} \
-  --datarootdir=%{shareddir} \
-  --enable-moduledir=%pam_module_dir --enable-controldir=%{sysconfdir}/control \
-  --enable-dlload-mysql=yes --enable-default-domain=${default_domain}
-fi
-%endif
 
 #### courier-imap ######################
 %if %nocourierimap == 0
@@ -548,8 +442,7 @@ fi
 %install
 ID=$(id -u)
 %{__mkdir_p} $RPM_BUILD_ROOT%{_prefix}
-for i in %{name}-%{version} nssd-%{nssd_version} \
-pam-multi-%{pam_multi_version} bogofilter-%{bogofilter_version} \
+for i in %{name}-%{version} bogofilter-%{bogofilter_version} \
 fetchmail-%{fetchmail_version} courier-imap-%{courier_version}
 do
   if [ " $i" = " fetchmail-%{fetchmail_version}" -a %nofetchmail -ne 0 ] ; then
@@ -559,12 +452,6 @@ do
     continue
   fi
   if [ " $i" = " courier-imap-%{courier_version}" -a %nocourierimap -ne 0 ] ; then
-    continue
-  fi
-  if [ " $i" = " pam-multi-%{pam_multi_version}" -a %nopam_multi -ne 0 ] ; then
-    continue
-  fi
-  if [ " $i" = " nssd-%{nssd_version}" -a %nonssd -ne 0 ] ; then
     continue
   fi
   if [ -d $i ] ; then
@@ -599,9 +486,6 @@ do
 done
 %{__rm} -f %{buildroot}%{imoduledir}/iauth.la
 
-if [ %nonssd -eq 0 ] ; then
-  %{__rm} -f %{buildroot}%{_libdir}/libnss_nssd.la
-fi
 if [ %nocourierimap -eq 0 ] ; then
   %{__rm} -f %{buildroot}/%{_libdir}/libunicode.la
   if [ -x /usr/bin/chrpath ] ; then
@@ -661,17 +545,6 @@ if [ -x /usr/bin/chrpath ] ; then
       /usr/bin/chrpath -d %{buildroot}%{libexecdir}/$i
     fi
   done
-%if %nonssd == 0
-  for i in nssd check_getpw
-  do
-    if [ -f %{buildroot}%{_prefix}/sbin/$i ] ; then
-      /usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/$i
-    fi
-    if [ -f %{buildroot}%{libexecdir}/$i ] ; then
-      /usr/bin/chrpath -d %{buildroot}%{libexecdir}/$i
-    fi
-  done
-%endif
 fi
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
@@ -682,15 +555,6 @@ if [ -f %{buildroot}%{mandir}/man7/authlib.7.gz ] ; then
     echo ".so man7/authlib.7" |gzip -c > %{buildroot}%{mandir}/man7/$i.gz
   done
 fi
-%if %nopam_multi == 0
-# pam-multi
-%{__rm} -f %{buildroot}%{pam_module_dir}/pam-multi.la
-%{__rm} -f %{buildroot}%{pam_module_dir}/pam-multi.a
-if [ -x /usr/bin/chrpath ] ; then
-  /usr/bin/chrpath -d %{buildroot}%{pam_module_dir}/pam-multi.so
-  /usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
-fi
-%endif
 
 if [ -x /bin/touch ] ; then
   TOUCH=/bin/touch
@@ -718,9 +582,6 @@ do
     $TOUCH %{buildroot}%{sysconfdir}/$i
   fi
 done
-%if %nonssd == 0
-  $TOUCH %{buildroot}%{sysconfdir}/nssd.conf
-%endif
 (
 # host.mysql, host.cntrl, host.master, host.ldap
 for i in `%{__cat} %{buildroot}%{sysconfdir}/controlfiles.i`
@@ -740,11 +601,6 @@ done
     %{__mkdir_p} %{buildroot}%{logdir}/$i
     $TOUCH %{buildroot}%{logdir}/$i/current
   done
-
-  if [ %nonssd -eq 0 ] ; then
-    %{__mkdir_p} %{buildroot}%{logdir}/pwdlookup
-    $TOUCH %{buildroot}%{logdir}/pwdlookup/current
-  fi
 
   if [ %nofetchmail -eq 0 ] ; then
     %{__mkdir_p} %{buildroot}%{logdir}/fetchmail
@@ -824,9 +680,6 @@ done
 %ghost %config(noreplace,missingok)               %{sysconfdir}/procmailrc
 
 %ghost %config(noreplace,missingok)               %{sysconfdir}/indimail.cnf
-%if %nonssd == 0
-%ghost %config(noreplace,missingok)               %{sysconfdir}/nssd.conf
-%endif
 %ghost %config(noreplace,missingok)               %{sysconfdir}/tcp/tcp.imap
 %ghost %config(noreplace,missingok)               %{sysconfdir}/tcp/tcp.pop3
 %ghost %config(noreplace,missingok)               %{sysconfdir}/tcp/tcp.poppass
@@ -945,11 +798,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/sbin/osh
 %attr(755,root,qmail)                   %{_prefix}/bin/ismaildup
 
-%if %nonssd == 0
-%attr(755,root,qmail)                   %{_prefix}/sbin/nssd
-%attr(755,root,qmail)                   %{libexecdir}/check_getpw
-%endif
-
 %attr(755,root,qmail)                   %{libexecdir}/controlsync
 %attr(755,root,qmail)                   %{libexecdir}/mailzipper
 %attr(755,root,qmail)                   %{libexecdir}/updatefile
@@ -1012,14 +860,6 @@ done
 %attr(755,root,root)                    %{_prefix}/bin/fetchmail
 %endif
 
-%if %nopam_multi == 0
-# pam-multi
-%attr(755,root,root)                    %{_prefix}/sbin/pam-checkpwd
-%attr(644,root,root) %config(noreplace) %{pam_confdir}/pam-multi
-%attr(644,root,root) %config(noreplace) %{pam_confdir}/pop3
-%attr(644,root,root) %config(noreplace) %{pam_confdir}/imap
-%endif
-
 %if %nocourierimap == 0
 %attr(755,root,root)                    %{libexecdir}/pop3d-ssl.rc
 %attr(755,root,root)                    %{libexecdir}/makedatprog
@@ -1079,12 +919,6 @@ done
 
 %if %build_on_obs == 0
 %license %attr(644,root,root)           %{shareddir}/doc/COPYING.indimail
-%if %nonssd == 0
-%license %attr(644,root,root)           %{shareddir}/doc/COPYING.nssd
-%endif
-%if %nopam_multi == 0
-%license %attr(644,root,root)           %{shareddir}/doc/COPYING.pam-multi
-%endif
 %if %nobogofilter == 0
 %license %attr(644,root,root)           %{shareddir}/doc/COPYING.bogofilter
 %endif
@@ -1097,12 +931,6 @@ done
 %endif
 %else
 %attr(644,root,root)                    %{shareddir}/doc/COPYING.indimail
-%if %nonssd == 0
-%attr(644,root,root)                    %{shareddir}/doc/COPYING.nssd
-%endif
-%if %nopam_multi == 0
-%attr(644,root,root)                    %{shareddir}/doc/COPYING.pam-multi
-%endif
 %if %nobogofilter == 0
 %attr(644,root,root)                    %{shareddir}/doc/COPYING.bogofilter
 %endif
@@ -1115,12 +943,6 @@ done
 %endif
 %endif
 
-%if %nonssd == 0
-%attr(644,root,root)                    %{shareddir}/doc/AUTHORS.nssd
-%endif
-%if %nopam_multi == 0
-%attr(644,root,root)                    %{shareddir}/doc/AUTHORS.pam-multi
-%endif
 %attr(644,root,root)                    %{shareddir}/doc/ChangeLog.indimail
 %attr(644,root,root)                    %{shareddir}/doc/FAQ.pdf
 %attr(644,root,root)                    %{shareddir}/doc/INSTALL-MYSQL
@@ -1130,12 +952,6 @@ done
 %attr(644,root,root)                    %{shareddir}/doc/README
 %attr(644,root,root)                    %{shareddir}/doc/README-CLUSTER
 %attr(644,root,root)                    %{shareddir}/doc/README.ldap
-%if %nonssd == 0
-%attr(644,root,root)                    %{shareddir}/doc/README.nssd
-%endif
-%if %nopam_multi == 0
-%attr(644,root,root)                    %{shareddir}/doc/README.pam-multi
-%endif
 %attr(644,root,root)                    %{shareddir}/doc/README.vlimits
 %attr(644,root,root)                    %{shareddir}/doc/RELEASE-Notes
 %attr(644,root,root)                    %{shareddir}/doc/indimail_arch.png
@@ -1207,20 +1023,10 @@ done
 
 # Shared libraries (omit for architectures that don't support them)
 
-%if %nopam_multi == 0
-# pam-multi
-%attr(755,root,root)                    /%{pam_module_dir}/pam-multi.so
-%endif
-
 %{_libdir}/libeps.so.1
 %{_libdir}/libeps.so.1.0.0
 %{_libdir}/libindimail.so.3
 %{_libdir}/libindimail.so.3.0.0
-
-%if %nonssd == 0
-                                        %{_libdir}/libnss_nssd.so.2
-%attr(755,root,root)                    %{_libdir}/libnss_nssd.so.2.0.0
-%endif
 
 %if %nocourierimap == 0
 %{_libdir}/libunicode.so.4
@@ -1499,10 +1305,6 @@ done
 %{_libdir}/libeps.so
 %{_libdir}/libindimail.so
 
-%if %nonssd == 0
-                                        %{_libdir}/libnss_nssd.so
-%endif
-
 %{_pkg_config_path}/libindimail.pc
 
 %files -n libindimail
@@ -1512,11 +1314,6 @@ done
 %{_libdir}/libeps.so.1.0.0
 %{_libdir}/libindimail.so.3
 %{_libdir}/libindimail.so.3.0.0
-
-%if %nonssd == 0
-                                        %{_libdir}/libnss_nssd.so.2
-%attr(755,root,root)                    %{_libdir}/libnss_nssd.so.2.0.0
-%endif
 
 %if %nocourierimap == 0
 %{_libdir}/libunicode.so.4
@@ -1750,13 +1547,6 @@ if [ $argv1 -eq 2 ] ; then # upgrade
       svc_list="$svc_list %{servicedir}/$i"
     fi
   done
-%if %nonssd == 0
-  if [ -z "$svc_list" ] ; then
-    svc_list="%{servicedir}/pwdlookup"
-  else
-    svc_list="$svc_list %{servicedir}/pwdlookup"
-  fi
-%endif
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
   indlib=`ls -d %{_libdir}/libindimail.so.*.*.* 2>/dev/null`
   for port in 25 465 587
@@ -1782,13 +1572,11 @@ echo " 5. Configure MySQL DB in %{indimaildir}/mysqldb/data"
 echo " 6. Configure fetchmail service"
 echo " 7. Configure IMAP/POP3/poppass services"
 echo " 8. Configure indisrvr service"
-echo " 9. Configure nssd service"
-echo "10. Configure pam-multi as alternative for SMTP auth"
-echo "11. Configure inlookup service"
-echo "12. Configure SPAM filter configuration"
-echo "13. Configure tcprules database for IMAP, POP3, popass"
-echo "14. Configure selinux configuration"
-echo "15. Configure default cron entries"
+echo " 9. Configure inlookup service"
+echo "10. Configure SPAM filter configuration"
+echo "11. Configure tcprules database for IMAP, POP3, popass"
+echo "12. Configure selinux configuration"
+echo "13. Configure default cron entries"
 echo ""
 
 (
@@ -1806,21 +1594,15 @@ proxyPOP.4110
 do
   %{__mkdir_p} %{logdir}/$i
 done
-%if %nonssd == 0
-  %{__mkdir_p} %{logdir}/pwdlookup
-%endif
 
 if [ -d /run ] ; then
   logfifo="/run/indimail/logfifo"
-  nssd_sock="/run/indimail/nssd.sock"
   %{__mkdir_p} /run/indimail
 elif [ -d /var/run ] ; then
   logfifo="/var/run/indimail/logfifo"
-  nssd_sock="/var/run/indimail/nssd.sock"
   %{__mkdir_p} /var/run/indimail
 else
   logfifo="/tmp/logfifo"
-  nssd_sock="/tmp/nssd.sock"
 fi
 
 # fifolog service
@@ -2003,13 +1785,6 @@ fi
 %{_prefix}/sbin/svctool --inlookup=infifo --servicedir=%{servicedir} --cntrldir=control \
   --threads=5 --activeDays=60 --query-cache --password-cache --use-btree
 
-#nssd
-%if %nonssd == 0
-%{_prefix}/sbin/svctool --pwdlookup=$nssd_sock --threads=5 --timeout=-1 \
-  --mysqlhost=localhost --mysqluser=indimail \
-  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket} --servicedir=%{servicedir}
-%endif
-
 #poppass
 %{_prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
   --memory=%{poppass_mem} \
@@ -2062,23 +1837,10 @@ for i in mrtg mysql.3306 fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
 do
   svc_list="$svc_list %{servicedir}/$i"
 done
-%if %nonssd == 0
-  svc_list="$svc_list %{servicedir}/pwdlookup"
-%endif
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --norefreshsvc="0 $svc_list"
 
 # selinux
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
-
-%if %nopam_multi == 0
-if [ -x /usr/sbin/alternatives ] ; then
-  openSUSE=$(grep /etc/os-release 2>/dev/null)
-  if [ -z "$openSUSE" -a ! -f /etc/SuSE-release ] ; then
-    /usr/sbin/alternatives --add-slave mta %{_prefix}/bin/sendmail \
-      %{pam_confdir}/smtp mta-pam %{pam_confdir}/pam-multi
-  fi
-fi
-%endif
 
 if [ -f %{sysconfdir}/cronlist.i -a -d %{_sysconfdir}/cron.d ] ; then
   echo "adding cron entries"
@@ -2233,16 +1995,6 @@ do
   fi
 done
 
-%if %nopam_multi == 0
-# remove pam module for smtp
-if [ -x /usr/sbin/alternatives ] ; then
-  openSUSE=$(grep /etc/os-release 2>/dev/null)
-  if [ -z "$openSUSE" -a ! -f /etc/SuSE-release ] ; then
-    /usr/sbin/alternatives --remove-slave mta %{_prefix}/bin/sendmail mta-pam
-  fi
-fi
-%endif
-
 %{__rm} -f %{sysconfdir}/indimail.mrtg.ok %{sysconfdir}/system.mrtg.ok
 echo "removing startup services"
 for i in fetchmail indisrvr.4000 inlookup.infifo mysql.3306 \
@@ -2256,13 +2008,6 @@ do
     %{__rm} -f %{servicedir}/$i || true
   fi
 done
-%if %nonssd == 0
-  if [ -d %{servicedir}/pwdlookup ] ; then
-    %{__rm} -rf %{servicedir}/pwdlookup || true
-  elif [ -L %{servicedir}/pwdlookup ] ; then
-    %{__rm} -f %{servicedir}/pwdlookup || true
-  fi
-%endif
 if [ %noproxy -eq 0 ] ; then
 for i in proxy-imapd.4143 proxy-imapd-ssl.9143 proxy-pop3d.4110 proxy-pop3d-ssl.9110
 do
@@ -2296,9 +2041,6 @@ proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110
 do
   %{__rm} -rf $log_dir/$i
 done
-%if %nonssd == 0
-  %{__rm} -rf $log_dir/pwdlookup
-%endif
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   echo "recreating ld.so cache"
   /sbin/ldconfig
