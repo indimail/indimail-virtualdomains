@@ -121,7 +121,7 @@ done
 ${rm} -f ${sysconfdir}/indimail.mrtg.ok ${sysconfdir}/system.mrtg.ok
 echo "removing startup services"
 for i in fetchmail indisrvr.4000 inlookup.infifo mysql.3306 \
-pwdlookup qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
+qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
 qmail-imapd.4143 qmail-pop3d.4110 qmail-poppass.106 mrtg qmail-logfifo
 do
 	if [ -d ${servicedir}/$i ] ; then
@@ -176,13 +176,6 @@ fi
 ${rm} -f ${sysconfdir}/imapd.pem ${sysconfdir}/pop3d.pem
 ${rm} -f ${sysconfdir}/imapd.cnf.* ${sysconfdir}/pop3d.cnf.*
 
-# update config for pam-multi link
-if [ -x /usr/sbin/update-alternatives ] ; then
-	/usr/sbin/update-alternatives --config mta
-elif [ -x /usr/bin/update-alternatives ] ; then
-	/usr/bin/update-alternatives --config mta
-fi
-
 echo "removing logs"
 ${rm} -f ${indimaildir}/mysqldb/logs/logisam.log
 ${rm} -f ${indimaildir}/mysqldb/logs/logquery
@@ -194,7 +187,7 @@ else
 fi
 for i in fetchmail imapd.143 imapd-ssl.993 indisrvr.4000 inlookup.infifo \
 mrtg mysql.3306 pop3d.110 pop3d-ssl.995 poppass.106 proxyIMAP.4143 \
-proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110 pwdlookup logfifo
+proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110 logfifo
 do
 	${rm} -rf $log_dir/$i
 done
