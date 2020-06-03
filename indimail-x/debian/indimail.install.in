@@ -1,6 +1,4 @@
-etc/pam.d              /etc
 etc/indimail           /etc
-lib/security           /lib
 var/indimail/domains   @indimaildir@
 var/indimail/inquery   @indimaildir@
 usr/bin                @prefix@
@@ -13,5 +11,4 @@ usr/share/man/man5     @mandir@
 usr/share/man/man8     @mandir@
 usr/lib/indimail       @prefix@/lib
 usr/lib/pkgconfig      @prefix@/lib
-usr/lib/python*        @prefix@/lib
 usr/lib/*.so.*         @prefix@/lib

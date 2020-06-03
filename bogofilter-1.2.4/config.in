@@ -300,6 +300,9 @@
 /* Define to the type of arg 5 for `select'. */
 #undef SELECT_TYPE_ARG5
 
+/* supervise service directory */
+#undef SERVICEDIR
+
 /* The size of `int', as computed by sizeof. */
 #undef SIZEOF_INT
 

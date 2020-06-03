@@ -250,7 +250,7 @@ VERP		{TOKEN}-{VERPID}-{TOKEN}={TOKEN}@{TOKEN}
 						}
 <INITIAL>^Message-ID:.*				{ /* save token for logging */
 						  unsigned long off = 11;
-						  while(isspace((unsigned char)yytext[off]) && off < yyleng)
+						  while(isspace((unsigned char)yytext[off]) && off < (unsigned long int) yyleng)
 						      off++;
 						  set_msg_id((unsigned char *)(yytext+off), yyleng-off);
 						  header();

@@ -1,9 +1,9 @@
 Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
 Name: procmail
-Maintainer: Manvendra Bhangui <mbhangui@gmail.com>
+Maintainer: Manvendra Bhangui <mbhangui@indimail.org>
 Source: http://indimail.sourceforge.net/
 
-Copyright: 2008-2011, Manvendra Bhangui <mbhangui@gmail.com>
+Copyright: 2008-2020, Manvendra Bhangui <procmail@indimail.org>
 License: GPL-3+
 
 License: GPL-3+

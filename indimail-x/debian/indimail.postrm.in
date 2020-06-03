@@ -30,11 +30,7 @@ rm=/bin/rm
 rmdir=/bin/rmdir
 mv=/bin/mv
 ####################################
-noproxy=0
-nocourierimap=0
-nofetchmail=0
 nobogofilter=0
-nonssd=0
 
 ID=`id -u`
 if [ $ID -ne 0 ] ; then
@@ -120,9 +116,8 @@ do
 done
 ${rm} -f ${sysconfdir}/indimail.mrtg.ok ${sysconfdir}/system.mrtg.ok
 echo "removing startup services"
-for i in fetchmail indisrvr.4000 inlookup.infifo mysql.3306 \
-qmail-imapd.143 qmail-imapd-ssl.993 qmail-pop3d.110 qmail-pop3d-ssl.995 \
-qmail-imapd.4143 qmail-pop3d.4110 qmail-poppass.106 mrtg qmail-logfifo
+for i in indisrvr.4000 inlookup.infifo mysql.3306 \
+qmail-poppass.106 mrtg qmail-logfifo
 do
 	if [ -d ${servicedir}/$i ] ; then
 		${rm} -rf ${servicedir}/$i || true
@@ -130,14 +125,6 @@ do
 		${rm} -f ${servicedir}/$i || true
 	fi
 done
-if [ $noproxy -eq 0 ] ; then
-	for i in proxy-imapd.4143 proxy-imapd-ssl.9143 proxy-pop3d.4110 proxy-pop3d-ssl.9110
-	do
-  		if [ -d ${servicedir}/$i ] ; then
-   			${rm} -rf ${servicedir}/$i || true
-  		fi
-	done
-fi
 count=`/bin/ls ${servicedir} 2>/dev/null| /usr/bin/wc -l`
 if [ $count -eq 0 ] ; then # ignore disabled services
 	${rm} -rf ${servicedir} || true
@@ -148,17 +135,12 @@ if [ -d /etc/cron.d ] ; then
 	${rm} -f /etc/cron.d/indimail.cron.d
 fi
 
-echo "removing configuration"
-for i in imap pop3 poppass
-do
-	${rm} -f ${sysconfdir}/tcp/tcp.$i.cdb ${sysconfdir}/tcp/tcp.$i
-done
+echo "removing TCP configuration"
+${rm} -f ${sysconfdir}/tcp/tcp.poppass.cdb ${sysconfdir}/tcp/tcp.poppass
 ${rm} -f ${sysconfdir}/control/controlfiles
-for i in indimail.cnf stat.override backup.conf headerlist \
-	imapd.cnf imapd.dist imapd-ssl.dist indimail.mrtg.cfg \
-	procmailrc indimail.settings osh.table perm_list.i pop3d.cnf \
-	pop3d.dist pop3d-ssl.dist qmailprog.list quotawarnmsg.example \
-	services.log system.flashlogin system.menu system.module system.rc
+for i in indimail.cnf indimail-stat.override backup.conf headerlist \
+	indimail.mrtg.cfg procmailrc indimail.settings osh.table perm_list.indimail \
+	qmailprog.list services.log
 do
 	${rm} -f ${sysconfdir}/$i
 done
@@ -166,15 +148,6 @@ done
 if [ $nobogofilter -eq 0 ] ; then
 	${rm} -f ${sysconfdir}/bogofilter.cf ${sysconfdir}/bogofilter.cf.example
 fi
-
-if [ $nonssd -eq 0 ] ; then
-	${rm} -f ${sysconfdir}/nssd.conf
-fi
-if [ $nofetchmail -eq 0 ] ; then
-	${rm} -f ${sysconfdir}/fetchmailrc
-fi
-${rm} -f ${sysconfdir}/imapd.pem ${sysconfdir}/pop3d.pem
-${rm} -f ${sysconfdir}/imapd.cnf.* ${sysconfdir}/pop3d.cnf.*
 
 echo "removing logs"
 ${rm} -f ${indimaildir}/mysqldb/logs/logisam.log
@@ -185,9 +158,8 @@ if [ -h ${logdir} ] ; then
 else
 	log_dir=${logdir}
 fi
-for i in fetchmail imapd.143 imapd-ssl.993 indisrvr.4000 inlookup.infifo \
-mrtg mysql.3306 pop3d.110 pop3d-ssl.995 poppass.106 proxyIMAP.4143 \
-proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110 logfifo
+for i in indisrvr.4000 inlookup.infifo \
+mrtg mysql.3306 poppass.106 logfifo
 do
 	${rm} -rf $log_dir/$i
 done

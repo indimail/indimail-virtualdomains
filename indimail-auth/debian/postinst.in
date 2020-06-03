@@ -38,7 +38,9 @@ case "$1" in
     configure)
 		if [ " $2" = " " ] ; then
 		echo "installing indimail-auth"
+		${rm} -f /tmp/indimail-auth.upgrade
 		else
+		touch /tmp/indimail-auth.upgrade
 		echo "upgrading to indimail-auth $2"
 		fi
     ;;
@@ -58,15 +60,11 @@ esac
 
 #DEBHELPER#
 
-#
-# We need to do this for debian. SIGH!!
-#
-
-if [ -d /service/pwdlookup ] ; then
-	${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="/service/pwdlookup"
-	# Recreate ld.so links and cache
-	/sbin/ldconfig
-	exit 0
+if [ -f /tmp/indimail-auth.upgrade ] ; then # upgrade
+  ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="${servicedir}/pwdlookup"
+  ${rm} -f /tmp/indimail-auth.upgrade
+  /sbin/ldconfig
+  exit 0
 fi
 
 echo "Doing Post Install"

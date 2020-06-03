@@ -1,9 +1,9 @@
 Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
 Name: indium
-Maintainer: Manvendra Bhangui <mbhangui@gmail.com>
-Source: http://indimail.sourceforge.net/
+Maintainer: Manvendra Bhangui <indium@indimail.org>
+Source: https://github.com/mbhangui/indimail-virtualdomains
 
-Copyright: 2008-2011, Manvendra Bhangui <mbhangui@gmail.com>
+Copyright: 2008-2020, Manvendra Bhangui <indium@indimail.org>
 License: GPL-3+
 
 License: GPL-3+

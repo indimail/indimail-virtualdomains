@@ -123,13 +123,14 @@ do
 	esac
 	cd ..
 done
-echo "Preparing indimail-utils-"$version""
 echo "Copying permissions files and rpmlintrc"
 for i in `get_non_tar_files indimail-utils/indimail-utils.spec`
 do
+	echo "/bin/cp -p indimail-utils/$i $rpmbuild/SOURCES"
 	/bin/cp -p indimail-utils/$i $rpmbuild/SOURCES
 	SRC="$rpmbuild/SOURCES/$i $SRC"
 done
+echo "Preparing indimail-utils-"$version""
 dist=`uname -r |cut -d . -f4`
 if [ $# -gt 0 ] ; then
 	release=$1

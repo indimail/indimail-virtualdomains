@@ -1,0 +1,27 @@
+#!/bin/sh
+set -e
+#
+# Unpacker for OpenSUSE build service
+#
+version=@version@
+courier_version=@courier_version@
+fetchmail_version=@fetchmail_version@
+
+for i in courier-imap-"$courier_version" fetchmail-"$fetchmail_version"
+do
+	/bin/rm -rf $i
+	if [ -f ../SOURCES/$i.tar.gz ] ; then
+		echo "extracting $i.tar.gz"
+		gunzip -c ../SOURCES/$i.tar.gz |tar xf -
+	elif [ -f ../SOURCES/$i.tar.xz ] ; then
+		echo "extracting $i.tar.xz"
+		xz -d -c ../SOURCES/$i.tar.xz|tar xf -
+	elif [ -f ../SOURCES/$i.tar.bz2 ] ; then
+		echo "extracting $i.tar.bz2"
+		bzip2 -d -c ../SOURCES/$i.tar.bz2|tar xf -
+	else
+		echo "no source archive for $i"
+		exit 1
+	fi
+done
+exit 0

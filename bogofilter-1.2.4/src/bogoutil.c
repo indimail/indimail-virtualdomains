@@ -715,6 +715,7 @@ int process_arg(int option, const char *name, const char *val, priority_t preced
 
     case 'r':
 	onlyprint = true;
+	/*- flow through */
     case 'R':
 	flag = M_ROBX;
 	count += 1;

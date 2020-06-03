@@ -26,9 +26,7 @@ version=@version@
 sysconfdir=@sysconfdir@
 libexecdir=@libexecdir@
 mandir=@mandir@
-courier_version=@courier_version@
 bogofilter_version=@bogofilter_version@
-fetchmail_version=@fetchmail_version@
 tcpserver_plugin=1
 default_domain=indimail.org
 rm=/bin/rm
@@ -66,15 +64,6 @@ build-stamp:
 		--enable-mysqlprefix=/usr `cat config/indimail.opts`; \
 		cd ..; \
 	fi
-	if [ -d courier-imap-$(courier_version) ] ; then \
-		cd courier-imap-$(courier_version) ; \
-		./configure --prefix=$(prefix) --libexecdir=$(libexecdir) --bindir=$(prefix)/bin \
-		--mandir=$(mandir) --sysconfdir=$(sysconfdir) --libdir=$(libdir) \
-		--datarootdir=$(prefix)/share/indimail --with-certsdir=$(sysconfdir)/certs \
-		--with-mailer=$(prefix)/bin/sendmail \
-		`cat ../indimail-$(version)/config/courier-imap.opts`; \
-		cd ..; \
-	fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then \
 		cd bogofilter-$(bogofilter_version) ; \
 		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --libexecdir=$(libexecdir) \
@@ -82,20 +71,11 @@ build-stamp:
 		`cat ../indimail-$(version)/config/bogofilter.opts`; \
 		cd ..; \
 	fi
-	if [ -d fetchmail-$(fetchmail_version) ] ; then \
-		cd fetchmail-$(fetchmail_version); \
-		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) \
-		--datarootdir=$(prefix)/share/indimail --libexecdir=$(libexecdir) \
-		--mandir=$(mandir) `cat ../indimail-$(version)/config/fetchmail.opts`; \
-		cd ..; \
-	fi
 	#
 	# run make
 	#
 	if [ -d indimail-$(version) ]              ; then $(MAKE) -s -C indimail-$(version) DESTDIR=$(DESTDIR); fi
-	if [ -d courier-imap-$(courier_version) ]  ; then $(MAKE) -s -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s -C bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR); fi
-	if [ -d fetchmail-$(fetchmail_version) ]   ; then $(MAKE) -s -C fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR); fi
 	${rm} -rf $(DESTDIR)$(libdir)/*.la
 	touch build-stamp
 
@@ -103,13 +83,9 @@ clean:
 	${rm} -f build-stamp configure-stamp
 	${rm} -rf $(DESTDIR)
 	if [ -d indimail-$(version) ]              ; then $(MAKE) -s clean -C indimail-$(version) || true; fi
-	if [ -d courier-imap-$(courier_version) ]  ; then $(MAKE) -s clean -C courier-imap-$(courier_version) || true; fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s clean -C bogofilter-$(bogofilter_version) || true; fi
-	if [ -d fetchmail-$(fetchmail_version) ]   ; then $(MAKE) -s clean -C fetchmail-$(fetchmail_version) || true; fi
 	if [ -d indimail-$(version) ]              ; then $(MAKE) -s distclean -C indimail-$(version) || true; fi
-	if [ -d courier-imap-$(courier_version) ]  ; then $(MAKE) -s distclean -C courier-imap-$(courier_version) || true; fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s distclean -C bogofilter-$(bogofilter_version) || true; fi
-	if [ -d fetchmail-$(fetchmail_version) ]   ; then $(MAKE) -s distclean -C fetchmail-$(fetchmail_version) || true; fi
 	dh_testdir
 	dh_testroot
 	dh_clean
@@ -121,9 +97,7 @@ install: build
 	dh_prep || dh_clean -k
 	dh_installdirs
 	if [ -d indimail-$(version) ]              ; then $(MAKE) -s install -C indimail-$(version) DESTDIR=$(DESTDIR); fi
-	if [ -d courier-imap-$(courier_version) ]  ; then $(MAKE) -s install -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s install -C bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR); fi
-	if [ -d fetchmail-$(fetchmail_version) ]   ; then $(MAKE) -s install -C fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR); fi
 	mkdir -p $(DESTDIR)$(domaindir)/domains
 	mkdir -p $(DESTDIR)$(indimaildir)/inquery
 

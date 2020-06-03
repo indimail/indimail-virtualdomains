@@ -6,7 +6,6 @@ src/bf_compact
 src/bf_copy
 src/bf_tar
 depcomp
-bogofilter.spec
 version.c
 mkinstalldirs
 bogogrep
@@ -65,3 +64,15 @@ src/config.h
 aclocal.m4
 INSTALL
 ylwrap
+conf-release
+build-stamp
+debian/bogofilter.dsc
+debian/bogofilter.install
+debian/changelog
+debian/changelog.in
+debian/debian.tar.gz
+debian/dummy.tar.gz
+debian/postinst
+debian/postrm
+debian/rules
+

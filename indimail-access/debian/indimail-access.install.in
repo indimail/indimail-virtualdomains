@@ -1,0 +1,9 @@
+usr/bin                @prefix@
+usr/sbin               @prefix@
+usr/libexec/indimail   @prefix@/libexec
+usr/share/indimail     @prefix@/share
+usr/share/man/man1     @mandir@
+usr/share/man/man7     @mandir@
+usr/share/man/man8     @mandir@
+usr/lib/python*        @prefix@/lib
+usr/lib/*.so.*         @prefix@/lib
