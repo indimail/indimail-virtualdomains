@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 1.3  2020-06-03 17:06:16+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.2  2020-04-01 18:52:49+05:30  Cprogrammer
  * moved pw_comp.h to libqmail
  *
@@ -49,7 +52,7 @@
 #include "sql_getpw.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.2 2020-04-01 18:52:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.3 2020-06-03 17:06:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -187,7 +190,7 @@ main(int argc, char **argv)
 		return (1);
 	}
 	if (!(authstr = alloc((authlen + 1) * sizeof(char)))) {
-		write(2, "AUTHFAILURE\n", 12);
+		if (write(2, "AUTHFAILURE\n", 12) == -1) ;
 		die_nomem();
 	}
 	/*-
@@ -224,7 +227,7 @@ main(int argc, char **argv)
 		}
 	}
 	if (!(buf = alloc((offset + 1) * sizeof(char)))) {
-		write(2, "AUTHFAILURE\n", 12);
+		if (write(2, "AUTHFAILURE\n", 12) == -1) ;
 		die_nomem();
 	}
 	byte_copy(buf, offset, authstr);

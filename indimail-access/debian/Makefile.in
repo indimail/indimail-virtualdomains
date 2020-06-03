@@ -1,0 +1,57 @@
+prefix=@prefix@
+indimaildir=@indimaildir@
+sysconfdir=@sysconfdir@
+libexecdir=@libexecdir@
+shareddir=@shareddir@
+libdir=@libdir@
+mandir=@mandir@
+logdir=@logdir@
+version=@version@
+release=@release@
+courier_version=@courier_version@
+fetchmail_version=@fetchmail_version@
+edit = sed \
+	-e 's,@prefix\@,$(prefix),g' \
+	-e 's,@indimaildir\@,$(indimaildir),g' \
+	-e 's,@sysconfdir\@,$(sysconfdir),g' \
+	-e 's,@libexecdir\@,$(libexecdir),g' \
+	-e 's,@libdir\@,$(libdir),g' \
+	-e 's,@shareddir\@,$(shareddir),g' \
+	-e 's,@mandir\@,$(mandir),g' \
+	-e 's,@logdir\@,$(logdir),g' \
+	-e 's,@version\@,$(version),g' \
+	-e 's,@release\@,$(release),g' \
+	-e 's,@courier_version\@,$(courier_version),g' \
+	-e 's,@fetchmail_version\@,$(fetchmail_version),g' \
+	-e 's,@DATE\@,$(DATE),g'
+
+all: rules changelog postrm postinst indimail-access.install \
+	indimail-access.dsc debian.tar.gz dummy.tar.gz
+
+dummy.tar.gz: README
+	tar cf - README |gzip > $@
+postrm: postrm.in Makefile
+	$(edit) $@.in > $@
+postinst: postinst.in Makefile
+	$(edit) $@.in > $@
+obs_deb_prep: obs_deb_prep.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+rules: rules.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+indimail-access.install: indimail-access.install.in Makefile
+	$(edit) $@.in > $@
+changelog: changelog.in ../conf-version ../conf-release
+	(cat $@.in; echo ""; \
+	echo " -- Manvendra Bhangui <indimail-access@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
+	| $(edit) > $@
+indimail-access.dsc: indimail-access.dsc.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@
+debian.tar.gz: copyright rules postrm postinst changelog compat \
+indimail-access.install obs_deb_prep Makefile control
+	tar cf - copyright rules postrm postinst changelog \
+		compat indimail-access.install obs_deb_prep Makefile control \
+		| gzip > $@
+
+clean:
+	/bin/rm -f rules dummy.tar.gz *.dsc postrm postinst changelog \
+	indimail-access.install obs_deb_prep debian.tar.gz

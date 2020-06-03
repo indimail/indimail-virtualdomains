@@ -1,7 +1,9 @@
 # $Id: Makefile.am 6787 2009-02-09 09:00:24Z m-a $ 
 
 # search path for m4 macros
+COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS = -I m4
+release := $(shell cat conf-release 2>/dev/null|| echo "1.1")
 SUBDIRS = trio src . doc
 SYSCONFDIR = @sysconfdir@
 
@@ -17,7 +19,6 @@ $(srcdir)/changelog.txt:
 # what to distribute
 EXTRA_DIST=	autogen.sh gsl config.rpath \
 		bogofilter.cf.example \
-		bogofilter.spec bogofilter.spec.in \
 		Doxyfile gpl-3.0.txt gnugetopt \
 		GETTING.STARTED \
 		NEWS.0 \
@@ -143,6 +144,7 @@ noinst_PROGRAMS+=bogogrep_static
 bogogrep_static_SOURCES=contrib/bogogrep.c
 bogogrep_static_LDFLAGS=$(STATICLDFLAGS)
 endif
+noinst_DATA = bogofilter.spec
 
 EXTRA_DIST+= \
 	contrib/README.contrib \
@@ -164,4 +166,26 @@ EXTRA_DIST+= \
 	contrib/stripsearch.pl \
 	contrib/trainbogo.sh \
 	contrib/vm-bogofilter.el
+
+edit = sed \
+	-e 's}@servicedir\@}$(servicedir)}g' \
+	-e 's}@sysconfdir\@}$(sysconfdir)}g' \
+	-e 's}@mandir\@}$(mandir)}g' \
+	-e 's}@libexecdir\@}$(libexecdir)}g' \
+	-e 's}@libdir\@}$(libdir)}g' \
+	-e 's}@logdir\@}$(logdir)}g' \
+	-e 's}@PACKAGE\@}$(PACKAGE)}g' \
+	-e 's}@PACKAGE_VERSION\@}$(PACKAGE_VERSION)}g' \
+	-e 's}@version\@}$(VERSION)}g' \
+	-e 's|@release\@|$(release)|g' \
+	-e 's}@VERSION\@}$(VERSION)}g' \
+	-e 's}@DESTDIR\@}$(DESTDIR)}g' \
+	-e 's}@HOST\@}$(host)}g' \
+	-e 's}@DATE\@}$(DATE)}g' \
+	-e 's}@prefix\@}$(prefix)}g'
+
+bogofilter.spec: bogofilter.spec.in catChangeLog ChangeLog conf-version conf-release
+	(cat $@.in;./catChangeLog) | $(edit) > $@
+debian/Makefile: debian/Makefile.in configure.ac
+	$(edit) $@.in > $@;
 # ---------------------------------------------------------------------

@@ -1,11 +1,10 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: indimail-auth
-Upstream-Contact: <preferred name and address to reach the upstream project>
-Source: <url://example.com>
+Upstream-Contact: Manvendra Bhangui <indimail-auth@indimail.org>
+Source: https://github.com/mbhangui/indimail-virtualdomains
 
 Files: *
-Copyright: <years> <put author's name and email here>
-           <years> <likewise for another author>
+Copyright: 2020 <Manvendra Bhangui indimail-auth@indimail.org>
 License: GPL-3.0+
 
 Files: debian/*

@@ -1,0 +1,14 @@
+Format: 1.0
+Source: bogofilter
+Section: Misc
+Priority: extra
+Binary: bogofilter
+Architecture: any
+Version: @version@-@release@
+Maintainer: Manvendra Bhangui <indimail-virtualdomains@indimail.org>
+Homepage: https://github.com/mbhangui/indimail-virtualdomains
+Debtransform-Release: 1
+Debtransform-Tar: dummy.tar.gz
+Debtransform-Files-Tar: debian.tar.gz
+Standards-Version: 3.9.1
+Build-Depends: cdbs, debhelper (>= 7.0.50~), gcc, g++, automake, libgsl0-dev, bison (>= 1.2), flex (>= 2.5), libdb-dev, m4

@@ -1,0 +1,16 @@
+indimail-access.spec
+perm_list.imap
+conf-release
+doc
+debian/Makefile
+debian/postinst
+debian/changelog
+debian/changelog.in
+debian/indimail-access-docs.docs
+debian/rules
+debian/indimail-access.dsc
+debian/indimail-access.install
+debian/postrm
+debian/debian.tar.gz
+debian/dummy.tar.gz
+debian/obs_deb_prep

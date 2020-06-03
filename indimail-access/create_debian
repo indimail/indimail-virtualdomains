@@ -1,0 +1,17 @@
+#!/bin/sh
+courier_version=$(cat ../courier-imap-x/conf-version)
+fetchmail_version=$(cat ../fetchmail-x/conf-version)
+
+if [ -d ../stage ] ; then
+	/bin/rm -rf ../stage
+fi
+mkdir -p ../stage
+cp -rp ../courier-imap-x ../stage/courier-imap-$courier_version
+cp -rp ../fetchmail-x   ../stage/fetchmail-$fetchmail_version
+make -s
+make -s -C debian
+cp -rp debian ../stage
+cd ../stage
+dpkg-buildpackage -tc -b
+cd ..
+/bin/rm -r stage

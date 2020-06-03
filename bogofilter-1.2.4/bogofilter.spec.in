@@ -1,64 +1,96 @@
-# $Id: bogofilter.spec.in 6431 2006-01-22 03:28:21Z relson $
-
-# This .spec file will not build the static package by default.
-# To do this, run either of the next rpm[build] commands:
 #
-# rpmbuild --define 'bogostatic 1' --sign -bb bogofilter.spec
 #
-# To build with SQLite3, use:
-#
-# rpmbuild --define 'with_sqlite 1' --sign -bb bogofilter.spec
+# $Id: indimail.spec.in,v 1.42 2020-06-02 22:38:20+05:30 Cprogrammer Exp mbhangui $
+%undefine _missing_build_ids_terminate_build
+%global _unpackaged_files_terminate_build 1
 
-# To build -debuginfo RPMs on systems with RPM 4.2 or newer and recent
-# elfutils, add
-#
-# --define 'debugrpm 1'
-#
-# or place   %debugrpm 1   into your ~/.rpmmacros file.
-
-%define	Name		@PACKAGE@
-%define	Version		@VERSION@
-%define	Release		1
-
-%{?bogostatic:  %define bogostatic 1}
-%{!?bogostatic: %define bogostatic 0}
-
-%{?with_db42:   %define with_db42 1}
-%{!?with_db42:  %define with_db42 0}
-
-%{?with_sqlite:  %define with_sqlite 1}
-%{!?with_sqlite: %define with_sqlite 0}
-
-%if %{with_db42}
-%define DBFlag 1
-%define DBName -db42
-%endif
-
-%if %{with_sqlite}
-%define DBFlag 1
-%define DBName -sqlite3
-%endif
-
-%{!?DBFlag: %define DBFlag 0}
-%{!?bf_nameext: %define bf_nameext %{nil}}
-
-Summary:	Fast anti-spam filtering by Bayesian statistical analysis
-%if ! %{DBFlag}
-Name:		%{Name}%{bf_nameext}
+%if %{defined _project}
+# define if building on openSUSE build service
+%global build_on_obs       1
+%global reconfigure_mode   0
+%global reconf_bogofilter  0
+%global build_cflags       "-DOBS_BUILD %{build_cflags}"
 %else
-Name:		%{Name}%{DBName}%{bf_nameext}
+%define _project           local
+%global build_on_obs       0
+%global reconfigure_mode   0
+%global reconf_bogofilter  0
+%global _hardened_build    1
 %endif
-Version:	%{Version}
-Release:	%{Release}
-License:	GPL
-Group:		Networking/Mail
-URL:		http://bogofilter.sourceforge.net
-Source0:	%{Name}-%{Version}.tar.gz
 
-%define _requires_exceptions perl
+%global _prefix            @prefix@
+%global servicedir         @servicedir@
+%global sysconfdir         @sysconfdir@
+%global libexecdir         %{_prefix}/libexec/indimail
+%global shareddir          %{_prefix}/share/indimail
+%global mandir             %{_prefix}/share/man
+%global url                https://github.com/mbhangui/indimail-virtualdomains
+%if 0%{?suse_version}
+%global noperms            1
+%else
+%global noperms            0
+%endif
 
-Buildroot:	%{_tmppath}/%{Name}-%{Version}-root
-Conflicts:	%{Name}%{DBName}-static
+%if %build_on_obs == 1
+%global packager Manvendra Bhangui <indimail-spamfilter@indimail.org>
+%endif
+
+Summary: Fast anti-spam filtering by Bayesian statistical analysis
+Name: bogofilter
+Version: @version@
+Release: @release@%{?dist}
+
+%if %build_on_obs == 1
+License: GPL-3.0+
+%else
+License: GPLv3
+%endif
+
+%if %{undefined suse_version} && %{undefined sles_version}
+Group: System Environment/Base
+%else
+Group: Productivity/Networking/Email/Servers
+%endif
+Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.bz2
+Source1: http://downloads.sourceforge.net/%{name}/%{name}-rpmlintrc
+
+URL: https://github.com/mbhangui/indimail-virtualdomains
+AutoReqProv: Yes
+
+BuildRequires: rpm gcc gcc-c++ make coreutils grep
+BuildRequires: glibc glibc-devel
+BuildRequires: gzip autoconf automake libtool
+BuildRequires: sed findutils
+
+BuildRequires: flex bison
+%if 0%{?suse_version}
+BuildRequires: db-devel
+%else
+%if 0%{?fedora_version} > 17 || 0%{?centos_version} > 600 || 0%{?rhel_version} > 600 || 0%{?centos_ver} > 7
+BuildRequires: libdb-devel
+%else
+BuildRequires: db4-devel
+%endif
+%endif
+
+################################# OBS ###############################
+%if %build_on_obs == 1
+%if 0%{?suse_version}
+BuildRequires: -post-build-checks
+#!BuildIgnore: post-build-checks
+#!BuildIgnore: brp-check-suse
+%endif
+%endif
+################################# OBS ###############################
+
+Requires: procps /usr/bin/awk /usr/bin/which
+Requires: sed findutils
+Requires: coreutils grep /bin/sh glibc
+Requires: bogofilter-wordlist indimail-mta
+
+%if %build_on_obs == 1
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+%endif
 
 %description
 Bogofilter is a Bayesian spam filter.  In its normal mode of
@@ -69,179 +101,283 @@ Bogofilter is designed with fast algorithms (including Berkeley DB system),
 coded directly in C, and tuned for speed, so it can be used for production
 by sites that process a lot of mail.
 
-%if %{with_sqlite}
-This version was built with SQLite3 support.
-%else
-This version was built with Berkeley DB support.
-%endif
-
-%package static
-Summary:	Statically linked
-Group:		Networking/Mail
-Conflicts:	%{Name}%{DBName}
-
-%description static
-Statically linked bogofilter, bogolexer, bogoutil, and bogotune.
-
-# use the debug_package macro if applicable:
-%{?debugrpm:%debug_package}
+This version substantially improves on Paul's proposal by doing smarter
+lexical analysis.  In particular, hostnames and IP addresses are retained
+as recognition features rather than broken up. Various kinds of MTA
+cruft such as dates and message-IDs are discarded so as not to bloat
+the word lists.
 
 %prep
-%setup -q -n %{Name}-%{Version}
-CFLAGS="$RPM_OPT_FLAGS" \
-./configure \
-  --prefix=%{_prefix} \
-  --mandir=%{_mandir} \
-  --sysconfdir=%{_sysconfdir} \
-%if %{?bogostatic}
-  --enable-static \
-%endif
-%if %{?with_db42}
-  --with-database=db \
-%endif
-%if %{?with_sqlite}
-  --with-database=sqlite3 \
-%endif
-  --with-included-gsl
+%setup -q
 
 %build
-make
-make DESTDIR="%{buildroot}" check
+ID=$(id -u)
+(
+echo "---------------- INFORMATION ------------------------"
+echo target         %_target
+echo target_alias   %_target_alias
+echo target_cpu     %_target_cpu
+echo target_os      %_target_os
+echo target_vendor  %_target_vendor
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
+echo pythondir      %{python3_sitelib}
+%else
+echo pythondir      %{pythondir}
+%endif
+echo Project        %{_project}
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os}
+echo "------------------------------------------------------"
+) > %{name}-rpm.info
+(
+echo "NAME=%{name}"
+echo "Description=\"IndiMail Spamfilter Package\""
+echo "SPAMFILTER_version="%{version}""
+echo "ID=%{name}"
+echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
+echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui indimail-spamfilter@indimail.org\""
+) > %{name}-release
 
-%clean
-[ -n "%{buildroot}" -a "%{buildroot}" != / ] && rm -rf %{buildroot}
+#### bogofilter ######################
+if [ %{reconf_bogofilter} -eq 1 ] ; then
+  echo "reconfiguring..."
+  %{__mkdir_p} m4
+  aclocal -I m4
+  autoreconf -fiv
+fi
+(
+HOME='.';export HOME
+./configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
+  --mandir=%{mandir} --datarootdir=%{shareddir} \
+  --enable-indimail
+)
 
 %install
-[ -n "%{buildroot}" -a "%{buildroot}" != / ] && rm -rf %{buildroot}
-make DESTDIR=%{buildroot} install
+ID=$(id -u)
+%{__make} -s DESTDIR=%{buildroot}
+%{__make} -s DESTDIR=%{buildroot} install-strip
 
-cp %{buildroot}%{_sysconfdir}/bogofilter.cf.example \
-   %{buildroot}%{_sysconfdir}/bogofilter.cf
-
-for n in xml html ; do
-  install -d .inst/$n
-  install -m644 doc/*.$n .inst/$n
-done
-
-for n in `find %{buildroot}%{_datadir}/%{name} -type d` ; do
-  chmod o-w $n
-done
-
-for d in contrib ; do
-  install -d %{buildroot}%{_datadir}/%{name}/$d
-  files=$(find "$d" -maxdepth 1 -type f -print)
-  for f in $files ; do
-    case $f in
-      *.c|*.o|*.obj|*/Makefile*) continue ;;
-      *.1)
-	cp -p $f %{buildroot}%{_mandir}/man1 ;;
-      *)
-	cp -p $f %{buildroot}%{_datadir}/%{name}/$d ;;
-    esac
+%{__mkdir_p} %{buildroot}%{sysconfdir}
+install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
+install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
+/bin/rm -f %{name}-rpm.info %{name}-release
+if [ -x /usr/bin/chrpath ] ; then
+  for i in bogofilter bogoutil bogotune
+  do
+    /bin/chmod 755 %{buildroot}%{_prefix}/bin/$i
+    /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
   done
-done
+fi
 
-mv bogogrep* contrib
+# Compress the man pages
+find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
-%if %{bogostatic}
-(
-cd %{buildroot}%{_datadir}/%{name}
-cp -p -r contrib contrib-static
-rm contrib/bogogrep_static
-rm contrib-static/bogogrep
-strip contrib-static/bogogrep_static
-)
+if [ -x /bin/touch ] ; then
+  TOUCH=/bin/touch
+elif [ -x /usr/bin/touch ] ; then
+  TOUCH=/usr/bin/touch
+else
+  TOUCH=/bin/touch
+fi
+%if %{undefined suse_version} && %{undefined sles_version}
+$TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
 %endif
-
-%post
-
-%post static
-for file in bogofilter bogolexer bogoutil bogotune ; do
-    if [ $1 -lt 2 ] ; then
-        ln -s %{_bindir}/${file}_static %{_bindir}/${file} 
-    fi
-done
-
-%postun static
-for file in bogofilter bogolexer bogoutil bogotune ; do
-    if [ $1 -eq 0 ] ; then
-        rm -f %{_bindir}/${file}
-        echo rm -f %{_bindir}/${file}
-    fi
-done
 
 %files
-%defattr(-,root,root)
+%defattr(-, root, root,-)
+#
+# Directories
+#
+%if "%{mandir}" != "/usr/share/man"
+%dir %attr(755,root,root)              %{mandir}
+%dir %attr(755,root,root)              %{mandir}/man1
+%endif
+%attr(444,root,root) %config(noreplace)           %{sysconfdir}/%{name}-release
+%attr(444,root,root) %config(noreplace)           %{sysconfdir}/%{name}-rpm.info
+%ghost %config(noreplace,missingok)               %{sysconfdir}/bogofilter.cf
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/bogofilter.cf.example
 
-%doc AUTHORS COPYING INSTALL
-%doc GETTING.STARTED
-%doc NEWS README* RELEASE.NOTES TODO
-%doc doc/bogofilter-tuning.HOWTO.html
-%doc doc/bogofilter-SA-2002-01
-%doc doc/integrating*
-%doc doc/programmer
-%doc doc/README.*db doc/rpm.notes.BerkeleyDB
-%doc .inst/html .inst/xml
+# bogofilter
+# setuid binary
+%attr(6551,root,indimail)               %{_prefix}/bin/bogofilter
+%attr(755,root,root)                    %{_prefix}/bin/bogolexer
+%attr(755,root,root)                    %{_prefix}/bin/bogotune
+%attr(755,root,root)                    %{_prefix}/bin/bogoutil
+%attr(755,root,root)                    %{_prefix}/bin/bogoupgrade
+%attr(755,root,root)                    %{_prefix}/sbin/bf_compact
+%attr(755,root,root)                    %{_prefix}/sbin/bf_copy
+%attr(755,root,root)                    %{_prefix}/sbin/bf_tar
 
-%{_sysconfdir}/bogofilter.cf.example
-%config(noreplace) %{_sysconfdir}/bogofilter.cf
+%docdir %{shareddir}/doc
+%docdir %{mandir}
+%attr(644,root,root)                    %{mandir}/man1/*
 
-%{_bindir}/bogofilter
-%{_bindir}/bogolexer
-%{_bindir}/bogotune
-%{_bindir}/bogoutil
-%{_bindir}/bogoupgrade
-%{_bindir}/bf_copy
-%{_bindir}/bf_compact
-%{_bindir}/bf_tar
+%if %build_on_obs == 0
+%license %attr(644,root,root)           %{shareddir}/doc/COPYING.bogofilter
+%else
+%attr(644,root,root)                    %{shareddir}/doc/COPYING.bogofilter
+%endif
+%attr(644,root,root)                    %{shareddir}/doc/AUTHORS.bogofilter
+%attr(644,root,root)                    %{shareddir}/doc/HOWTO.bogofilter
 
-%{_mandir}/man1/bogofilter.1*
-%{_mandir}/man1/bogolexer.1*
-%{_mandir}/man1/bogotune.1*
-%{_mandir}/man1/bogoutil.1*
-%{_mandir}/man1/bogoupgrade.1*
-%{_mandir}/man1/bf_compact.1*
-%{_mandir}/man1/bf_copy.1*
-%{_mandir}/man1/bf_tar.1*
-
-%{_datadir}/%{name}/contrib/*
-
-%if %{bogostatic}
-%files static
-%defattr(-,root,root)
-
-%doc AUTHORS COPYING INSTALL
-%doc GETTING.STARTED
-%doc NEWS README* RELEASE.NOTES TODO
-%doc doc/bogofilter-tuning.HOWTO.html
-%doc doc/bogofilter-SA-2002-01
-%doc doc/integrating*
-%doc doc/programmer
-%doc doc/README.*db doc/rpm.notes.BerkeleyDB
-%doc .inst/html .inst/xml
-
-%{_sysconfdir}/bogofilter.cf.example
-%config(noreplace) %{_sysconfdir}/bogofilter.cf
-
-%{_bindir}/bogofilter_static
-%{_bindir}/bogolexer_static
-%{_bindir}/bogotune_static
-%{_bindir}/bogoutil_static
-%{_bindir}/bogoupgrade
-%{_bindir}/bf_copy
-%{_bindir}/bf_compact
-%{_bindir}/bf_tar
-
-%{_mandir}/man1/bogofilter.1*
-%{_mandir}/man1/bogolexer.1*
-%{_mandir}/man1/bogotune.1*
-%{_mandir}/man1/bogoutil.1*
-%{_mandir}/man1/bogoupgrade.1*
-%{_mandir}/man1/bf_compact.1*
-%{_mandir}/man1/bf_copy.1*
-%{_mandir}/man1/bf_tar.1*
-
-%{_datadir}/%{name}/contrib-static/*
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%verify (not user group mode) %attr(6551, root, indimail)  %{_prefix}/bin/bogofilter
+%endif
 %endif
 
+### SCRIPTLET ###############################################################################
+%verifyscript
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%verify_permissions -e %{_prefix}/bin/bogofilter
+%endif
+%endif
+
+### SCRIPTLET ###############################################################################
+%post
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+if [ -x /bin/touch ] ; then
+  TOUCH=/bin/touch
+elif [ -x /usr/bin/touch ] ; then
+  TOUCH=/usr/bin/touch
+else
+  TOUCH=/bin/touch
+fi
+
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
+if [ -d /run ] ; then
+  logfifo="/run/indimail/logfifo"
+  %{__mkdir_p} /run/indimail
+elif [ -d /var/run ] ; then
+  logfifo="/var/run/indimail/logfifo"
+  %{__mkdir_p} /var/run/indimail
+else
+  logfifo="/tmp/logfifo"
+fi
+
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%if 0%{?set_permissions:1} > 0
+  if [ ! -f /tmp/no_permissions ] ; then
+      %set_permissions %{name}
+  fi
+%else
+  if [ ! -f /tmp/no_permissions ] ; then
+      %run_permissions
+  fi
+%endif
+%endif
+%endif
+
+# SMTP
+# Configure SPAMFILTER, LOGFILTER
+for port in 465 25
+do
+  if [ ! -d %{servicedir}/qmail-smtpd.$port ] ; then
+    continue
+  fi
+  # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
+  echo "%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" > %{servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
+  if [ ! -f %{servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE ] ; then
+  echo 0 > %{servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
+  fi
+  if [ ! -f %{servicedir}/qmail-smtpd.$port/variables/REJECTSPAM ] ; then
+  echo 0 > %{servicedir}/qmail-smtpd.$port/variables/REJECTSPAM
+  fi
+  if [ ! -f %{servicedir}/qmail-smtpd.$port/variables/MAKESEEKABLE ] ; then
+  echo 1 > %{servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
+  elif [ ! -s %{servicedir}/qmail-smtpd.$port/variables/MAKESEEKABLE ] ; then
+  echo 1 > %{servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
+  fi
+  if [ ! -f %{servicedir}/qmail-smtpd.$port/variables/LOGFILTER ] ; then
+  echo $logfifo > %{servicedir}/qmail-smtpd.$port/variables/LOGFILTER
+  fi
+  grep bogofilter %{servicedir}/qmail-smtpd.$port/variables/.options > /dev/null 2>&1
+  if [ $? -ne 0 ] ; then
+    options="`cat %{servicedir}/qmail-smtpd.$port/variables/.options`
+    --spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\"
+    --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
+    if [ -f %{servicedir}/qmail-smtpd.$port/variables/.options ] ; then
+      %{__mv} %{servicedir}/qmail-smtpd.$port/variables/.options \
+        %{servicedir}/qmail-smtpd.$port/variables/.options.nospamfilter
+    fi
+    echo $options > %{servicedir}/qmail-smtpd.$port/variables/.options
+  fi
+done
+if [ -d %{servicedir}/fetchmail ] ; then
+  # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
+  echo "%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" > %{servicedir}/fetchmail/variables/SPAMFILTER
+  if [ ! -f %{servicedir}/fetchmail/variables/SPAMEXITCODE ] ; then
+  echo 0 > %{servicedir}/fetchmail/variables/SPAMEXITCODE
+  fi
+  if [ ! -f %{servicedir}/fetchmail/variables/REJECTSPAM ] ; then
+  echo 0 > %{servicedir}/fetchmail/variables/REJECTSPAM
+  fi
+  if [ ! -f %{servicedir}/fetchmail/variables/MAKESEEKABLE ] ; then
+  echo 1 > %{servicedir}/fetchmail/variables/MAKE_SEEKABLE
+  elif [ ! -s %{servicedir}/fetchmail/variables/MAKESEEKABLE ] ; then
+  echo 1 > %{servicedir}/fetchmail/variables/MAKE_SEEKABLE
+  fi
+  if [ ! -f %{servicedir}/fetchmail/variables/LOGFILTER ] ; then
+  echo $logfifo > %{servicedir}/fetchmail/variables/LOGFILTER
+  fi
+  grep bogofilter %{servicedir}/fetchmail/variables/.options > /dev/null 2>&1
+  if [ $? -ne 0 ] ; then
+    options="`cat %{servicedir}/fetchmail/variables/.options`
+    --spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\"
+    --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
+    if [ -f %{servicedir}/fetchmail/variables/.options ] ; then
+      %{__mv} %{servicedir}/fetchmail/variables/.options \
+        %{servicedir}/fetchmail/variables/.options.nospamfilter
+    fi
+    echo $options > %{servicedir}/fetchmail/variables/.options
+  fi
+fi
+
+#
+# bogofilter configuration
+#
+if [ -d %{sysconfdir} ] ; then
+  if [ -x %{_prefix}/sbin/svctool ] ; then
+    %{_prefix}/sbin/svctool --config=bogofilter
+  fi
+fi
+
+### SCRIPTLET ###############################################################################
+%postun
+argv1=$1
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
+for dir in fetchmail qmail-smtpd.465 qmail-smtpd.25
+do
+  > %{servicedir}/$dir/variables/SPAMFILTER
+  > %{servicedir}/$dir/variables/SPAMEXITCODE
+  > %{servicedir}/$dir/variables/REJECTSPAM
+  > %{servicedir}/$dir/variables/LOGFILTER
+  if [ -f %{servicedir}/$dir/variables/.options.nospamfilter ] ; then
+    %{__mv} %{servicedir}/$dir/variables/.options.nospamfilter \
+      %{servicedir}/$dir/variables/.options
+  fi
+done
+
+# fix changelog for openSUSE buildservice
 %changelog

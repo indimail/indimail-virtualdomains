@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.42 2020-06-02 22:38:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.43 2020-06-03 20:25:42+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -8,16 +8,12 @@
 # define if building on openSUSE build service
 %global build_on_obs       1
 %global reconfigure_mode   0
-%global reconf_fetchmail   0
-%global reconf_courierimap 0
 %global reconf_bogofilter  0
 %global build_cflags       "-DOBS_BUILD %{build_cflags}"
 %else
 %define _project           local
 %global build_on_obs       0
 %global reconfigure_mode   0
-%global reconf_fetchmail   0
-%global reconf_courierimap 0
 %global reconf_bogofilter  0
 %global _hardened_build    1
 %endif
@@ -35,18 +31,13 @@
 %global shareddir          @prefix@/share/indimail
 %global mandir             @mandir@
 %global defaultDomain      @defaultdomain@
-%global courier_version    5.0.10
 %global bogofilter_version 1.2.4
-%global fetchmail_version  6.4.1
 %if 0%{?suse_version}
 %global noperms            1
 %else
 %global noperms            0
 %endif
 %global url                https://github.com/mbhangui/indimail-virtualdomains
-%global noproxy            0
-%global nocourierimap      1
-%global nofetchmail        0
 %global nobogofilter       0
 %global nodksignatures     0
 
@@ -105,22 +96,16 @@ Group: System Environment/Base
 Group: Productivity/Networking/Email/Servers
 %endif
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
-%if %nocourierimap == 0
-Source1: http://downloads.sourceforge.net/%{name}/courier-imap-%{courier_version}.tar.bz2
-%endif
-%if %nobogofilter == 0
-Source3: http://downloads.sourceforge.net/%{name}/bogofilter-%{bogofilter_version}.tar.bz2
-%endif
-%if %nofetchmail == 0
-Source4: http://downloads.sourceforge.net/%{name}/fetchmail-%{fetchmail_version}.tar.xz
-%endif
-Source6: http://downloads.sourceforge.net/%{name}/%{name}-rpmlintrc
+Source1: http://downloads.sourceforge.net/%{name}/%{name}-rpmlintrc
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
-Source7: http://downloads.sourceforge.net/%{name}/%{name}-permissions.easy
-Source8: http://downloads.sourceforge.net/%{name}/%{name}-permissions.secure
-Source9: http://downloads.sourceforge.net/%{name}/%{name}-permissions.paranoid
+Source2: http://downloads.sourceforge.net/%{name}/%{name}-permissions.easy
+Source3: http://downloads.sourceforge.net/%{name}/%{name}-permissions.secure
+Source4: http://downloads.sourceforge.net/%{name}/%{name}-permissions.paranoid
 %endif
+%endif
+%if %nobogofilter == 0
+Source5: http://downloads.sourceforge.net/%{name}/bogofilter-%{bogofilter_version}.tar.bz2
 %endif
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
@@ -135,25 +120,6 @@ BuildRequires: glibc glibc-devel openssl procps
 BuildRequires: gzip autoconf automake libtool pkgconfig
 BuildRequires: sed findutils
 BuildRequires: mysql-devel libqmail-devel libqmail
-%if %nofetchmail == 0
-BuildRequires: xz
-BuildRequires: gettext-devel
-%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
-BuildRequires: python3 python3-devel
-%else
-BuildRequires: python python-devel
-%endif
-%endif
-
-%if %nocourierimap == 0
-BuildRequires: libgcrypt-devel gdbm-devel libidn-devel pcre-devel gamin-devel
-BuildRequires: perl
-%if %{defined fedora_version}
-BuildRequires: perl-generators
-BuildRequires: glibc-all-langpacks
-%endif
-%endif
-
 %if %{defined fedora_version}
 BuildRequires: redhat-lsb-core
 %endif
@@ -246,6 +212,7 @@ Requires: policycoreutils-python
 %if %nobogofilter == 0
 Requires: bogofilter-wordlist
 %endif
+Requires: indimail-access
 
 %if %build_on_obs == 1
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
@@ -288,20 +255,13 @@ languages and applications need to dynamically load and use IndiMail.
 For more details visit %{url}
 
 %prep
-for i in %{name}-%{version} bogofilter-%{bogofilter_version} \
-fetchmail-%{fetchmail_version} courier-imap-%{courier_version}
+for i in %{name}-%{version} bogofilter-%{bogofilter_version}
 do
   (
   if [ -d $i ] ; then
     %{__rm} -rf $i
   fi
-  if [ " $i" = " fetchmail-%{fetchmail_version}" -a %nofetchmail -ne 0 ] ; then
-    continue
-  fi
   if [ " $i" = " bogofilter-%{bogofilter_version}" -a %nobogofilter -ne 0 ] ; then
-    continue
-  fi
-  if [ " $i" = " courier-imap-%{courier_version}" -a %nocourierimap -ne 0 ] ; then
     continue
   fi
   if [ -f ../SOURCES/$i.tar.bz2 ] ; then
@@ -376,25 +336,6 @@ fi
   --enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{sysconfdir}/tcp/tcp.smtp \
   --enable-default-domain=${default_domain} `%{__cat} config/indimail.opts`
 
-#### courier-imap ######################
-%if %nocourierimap == 0
-if [ -d ../courier-imap-%{courier_version} ] ; then
-  cd ../courier-imap-%{courier_version}
-  if [ %{reconf_courierimap} -eq 1 ] ; then
-    echo "reconfiguring..."
-    %{__mkdir_p} m4
-    aclocal -I m4
-    autoreconf -fiv
-    %{__cp} libs/unicode/depcomp .
-  fi
-  %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --bindir=%{_prefix}/bin \
-  --mandir=%{mandir} --sysconfdir=%{sysconfdir} --libdir=%{_libdir} \
-  --datarootdir=%{shareddir} --with-certsdir=%{sysconfdir}/certs \
-  --with-mailer=%{_prefix}/bin/sendmail \
-  `%{__cat} ../%{name}-%{version}/config/courier-imap.opts`
-fi
-%endif
-
 #### bogofilter ######################
 %if %nobogofilter == 0
 if [ -d ../bogofilter-%{bogofilter_version} ] ; then
@@ -414,21 +355,6 @@ if [ -d ../bogofilter-%{bogofilter_version} ] ; then
 fi
 %endif
 
-#### fetchmail ######################
-%if %nofetchmail == 0
-if [ -d ../fetchmail-%{fetchmail_version} ] ; then
-  cd ../fetchmail-%{fetchmail_version}
-  if [ %{reconf_fetchmail} -eq 1 ] ; then
-    echo "reconfiguring..."
-    %{__mkdir_p} m4
-    aclocal -I m4
-    autoreconf -fiv
-  fi
-  %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
-    --datarootdir=%{shareddir} --mandir=%{mandir} \
-    `%{__cat} ../%{name}-%{version}/config/fetchmail.opts`
-fi
-%endif
 if [ $ID -eq 0 ] ; then
   if [ $nscd_up -ge 1 ] ; then
     if [ -x %{_sysconfdir}/init.d/nscd ] ; then
@@ -442,27 +368,15 @@ fi
 %install
 ID=$(id -u)
 %{__mkdir_p} $RPM_BUILD_ROOT%{_prefix}
-for i in %{name}-%{version} bogofilter-%{bogofilter_version} \
-fetchmail-%{fetchmail_version} courier-imap-%{courier_version}
+for i in %{name}-%{version} bogofilter-%{bogofilter_version}
 do
-  if [ " $i" = " fetchmail-%{fetchmail_version}" -a %nofetchmail -ne 0 ] ; then
-    continue
-  fi
   if [ " $i" = " bogofilter-%{bogofilter_version}" -a %nobogofilter -ne 0 ] ; then
-    continue
-  fi
-  if [ " $i" = " courier-imap-%{courier_version}" -a %nocourierimap -ne 0 ] ; then
     continue
   fi
   if [ -d $i ] ; then
     cd $i
-    if [ %{_verbose} -eq 0 ] ; then
-      %{__make} -s DESTDIR=%{buildroot}
-      %{__make} -s DESTDIR=%{buildroot} install-strip
-    else
-      %{__make} DESTDIR=%{buildroot}
-      %{__make} DESTDIR=%{buildroot} install-strip
-    fi
+    %{__make} -s DESTDIR=%{buildroot}
+    %{__make} -s DESTDIR=%{buildroot} install-strip
 %if %noperms == 0
     if [ " $i" = " %{name}-%{version}" ] ; then
       %{__cp} %{name}-permissions.easy   ../../SOURCES/%{name}-permissions.easy
@@ -477,22 +391,12 @@ done
 %{__mkdir_p} %{buildroot}%{sysconfdir}
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
 /bin/rm -f %{name}-rpm.info
-#
-# remove fetchmail docs installed by IndiMail Makefile
-#
 for i in eps cdb indimail
 do
   %{__rm} -f %{buildroot}%{_libdir}/lib"$i".la
 done
 %{__rm} -f %{buildroot}%{imoduledir}/iauth.la
 
-if [ %nocourierimap -eq 0 ] ; then
-  %{__rm} -f %{buildroot}/%{_libdir}/libunicode.la
-  if [ -x /usr/bin/chrpath ] ; then
-     /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/imapd
-     /usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/imaplogin
-  fi
-fi
 if [ %nobogofilter -eq 0 ] ; then
   if [ -x /usr/bin/chrpath ] ; then
     for i in bogofilter bogoutil bogotune
@@ -509,18 +413,18 @@ fi
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
-install -m 644 %{S:7} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
-install -m 644 %{S:8} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
+install -m 644 %{S:2} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
+install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
 %endif
 
 if [ -x /usr/bin/chrpath ] ; then
   /usr/bin/chrpath -d %{buildroot}%{_libdir}/*.so
-  for i in dbinfo hostcntrl printdir \
-    proxyimap proxypop3 sigtool vacation vaddaliasdomain vadddomain vadduser \
-    valias vatrn vbulletin vcalias vcfilter vdeldomain vdeluser vdominfo \
-    vgroup vhostid vipmap vlimit vmoduser vmoveuser vpasswd vpriv sslerator \
-    vproxy vrenamedomain vrenameuser vsetuserquota vsmtp vuserinfo tcpserver ismaildup
+  for i in dbinfo hostcntrl printdir sigtool vacation vaddaliasdomain \
+  vadddomain vadduser valias vatrn vbulletin vcalias vcfilter \
+  vdeldomain vdelusevdominfo vgroup vhostid vipmap vlimit vmoduser \
+  vmoveuser vpasswd vpriv sslerator vproxy vrenamedomain vrenameuser \
+  vsetuserquota vsmtp vuserinfo tcpserver ismaildup
   do
     if [ -f %{buildroot}%{_prefix}/bin/$i ] ; then
       /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
@@ -568,15 +472,14 @@ fi
 %{__mkdir_p} %{buildroot}%{sysconfdir}/control
 %{__mkdir_p} %{buildroot}%{sysconfdir}/tcp
 # Create these files so that %%ghost does not complain
-for i in tcp.imap tcp.imap.cdb tcp.pop3 tcp.pop3.cdb \
-  tcp.poppass tcp.poppass.cdb
+for i in tcp.poppass tcp.poppass.cdb
 do
   if [ ! -f %{buildroot}%{sysconfdir}/tcp/$i ] ; then
     $TOUCH %{buildroot}%{sysconfdir}/tcp/$i
   fi
 done
 for i in indimail.cnf procmailrc indimail.pp indimail.mod \
-  users/cdb users/assign
+users/cdb users/assign
 do
   if [ ! -f %{buildroot}%{sysconfdir}/$i ] ; then
     $TOUCH %{buildroot}%{sysconfdir}/$i
@@ -593,21 +496,12 @@ done
 
 %if %{undefined suse_version} && %{undefined sles_version}
   %{__mkdir_p} %{buildroot}%{logdir}
-  for i in imapd.143 imapd-ssl.993 indisrvr.4000 \
-    inlookup.infifo logfifo mrtg mysql.3306 \
-    pop3d.110 pop3d-ssl.995 poppass.106 \
-    proxyIMAP.4143 proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110
+  for i in indisrvr.4000 inlookup.infifo logfifo \
+  mrtg mysql.3306 poppass.106 
   do
     %{__mkdir_p} %{buildroot}%{logdir}/$i
     $TOUCH %{buildroot}%{logdir}/$i/current
   done
-
-  if [ %nofetchmail -eq 0 ] ; then
-    %{__mkdir_p} %{buildroot}%{logdir}/fetchmail
-    $TOUCH %{buildroot}%{logdir}/fetchmail/current
-    $TOUCH %{buildroot}%{sysconfdir}/fetchmailrc
-    #%%find_lang fetchmail
-  fi
 
   if [ %nobogofilter -eq 0 ] ; then
     $TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
@@ -641,9 +535,6 @@ done
 %dir %attr(555,root,root)              %{_libdir}
 %endif
 
-%if %nofetchmail == 0
-%dir %attr(755,root,root)              %{shareddir}/locale
-%endif
 #
 # If the configuration file should not be replaced when the RPM is
 # upgraded, mark it as follows:
@@ -674,20 +565,12 @@ done
 %if %nobogofilter == 0
 %ghost %config(noreplace,missingok)               %{sysconfdir}/bogofilter.cf
 %endif
-%if %nofetchmail == 0
-%ghost %config(noreplace,missingok)               %{sysconfdir}/fetchmailrc
-%endif
 %ghost %config(noreplace,missingok)               %{sysconfdir}/procmailrc
-
 %ghost %config(noreplace,missingok)               %{sysconfdir}/indimail.cnf
-%ghost %config(noreplace,missingok)               %{sysconfdir}/tcp/tcp.imap
-%ghost %config(noreplace,missingok)               %{sysconfdir}/tcp/tcp.pop3
 %ghost %config(noreplace,missingok)               %{sysconfdir}/tcp/tcp.poppass
 #
 # These files will get removed during uninstallation
 #
-%ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp/tcp.imap.cdb
-%ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp/tcp.pop3.cdb
 %ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp/tcp.poppass.cdb
 #
 #
@@ -700,7 +583,7 @@ done
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/indimail.settings
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/%{name}-release
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/%{name}-rpm.info
-%attr(444,root,root) %config(noreplace)           %{sysconfdir}/perm_list.i
+%attr(444,root,root) %config(noreplace)           %{sysconfdir}/perm_list.indimail
 
 %attr(644,root,qmail) %config(noreplace)          %{sysconfdir}/indimail.te
 %attr(644,root,qmail) %config(noreplace)          %{sysconfdir}/indimail.fc
@@ -714,17 +597,6 @@ done
 
 %if %nobogofilter == 0
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/bogofilter.cf.example
-%endif
-
-%if %nocourierimap == 0
-%attr(600,root,root) %config(noreplace)           %{sysconfdir}/pop3d-ssl.dist
-%attr(600,root,root) %config(noreplace)           %{sysconfdir}/imapd-ssl.dist
-%attr(600,root,root) %config(noreplace)           %{sysconfdir}/pop3d.cnf
-%attr(600,root,root) %config(noreplace)           %{sysconfdir}/imapd.cnf
-%attr(600,root,root) %config(noreplace)           %{sysconfdir}/pop3d.dist
-%attr(600,root,root) %config(noreplace)           %{sysconfdir}/imapd.dist
-%attr(600,root,root) %config(noreplace)           %{sysconfdir}/authmodulelist
-%attr(644,root,root) %config(noreplace)           %{sysconfdir}/quotawarnmsg.example
 %endif
 
 #
@@ -821,26 +693,6 @@ done
 # setuid binary
 %attr(4755,root,qmail)                  %{libexecdir}/sq_vacation
 
-%if %nocourierimap == 0
-# courier imap
-%attr(755,root,root)                    %{_prefix}/bin/maildirmake
-%attr(755,root,root)                    %{_prefix}/bin/maildirkw
-%attr(755,root,root)                    %{_prefix}/bin/deliverquota
-%attr(755,root,root)                    %{_prefix}/bin/couriertls
-%attr(755,root,root)                    %{_prefix}/bin/maildiracl
-%attr(755,root,root)                    %{_prefix}/bin/imapd
-%attr(755,root,root)                    %{_prefix}/bin/pop3d
-%attr(755,root,root)                    %{_prefix}/bin/mailbot
-%attr(755,root,root)                    %{_prefix}/bin/maildrop
-%attr(755,root,root)                    %{_prefix}/bin/reformail
-%attr(755,root,root)                    %{_prefix}/sbin/imaplogin
-%attr(755,root,root)                    %{_prefix}/sbin/pop3login
-%attr(755,root,root)                    %{_prefix}/sbin/sharedindexinstall
-%attr(755,root,root)                    %{_prefix}/sbin/sharedindexsplit
-# setuid binary
-%attr(4755,root,root)                   %{libexecdir}/imapmodules/authshadow
-%endif
-
 # bogofilter
 %if %nobogofilter == 0
 # setuid binary
@@ -854,64 +706,9 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/bf_tar
 %endif
 
-# fetchmail
-%if %nofetchmail == 0
-%attr(755,root,root)                    %{_prefix}/bin/fetchmailconf
-%attr(755,root,root)                    %{_prefix}/bin/fetchmail
-%endif
-
-%if %nocourierimap == 0
-%attr(755,root,root)                    %{libexecdir}/pop3d-ssl.rc
-%attr(755,root,root)                    %{libexecdir}/makedatprog
-%attr(755,root,root)                    %{libexecdir}/imapd-ssl.rc
-%attr(755,root,root)                    %{libexecdir}/couriertcpd
-%attr(755,root,root)                    %{libexecdir}/imapd.rc
-%attr(755,root,root)                    %{libexecdir}/pop3d.rc
-%attr(755,root,root)                    %{libexecdir}/mkimapdcert
-%attr(755,root,root)                    %{libexecdir}/mkpop3dcert
-%attr(755,root,root)                    %{libexecdir}/mkdhparams
-%endif
 %attr(755,root,root)                    %{libexecdir}/imapmodules/authindi
 %attr(755,root,root)                    %{libexecdir}/imapmodules/authgeneric
 %attr(755,root,root)                    %{imoduledir}/iauth.so
-
-%if %nofetchmail == 0
-#%%attr(644,root,root)                    %%{shareddir}/locale/*/LC_MESSAGES/*.mo
-#%%files -f fetchmail.lang
-
-%lang(eo) /usr/share/indimail/locale/eo/LC_MESSAGES/fetchmail.mo
-%lang(sq) /usr/share/indimail/locale/sq/LC_MESSAGES/fetchmail.mo
-%lang(cs) /usr/share/indimail/locale/cs/LC_MESSAGES/fetchmail.mo
-%lang(ru) /usr/share/indimail/locale/ru/LC_MESSAGES/fetchmail.mo
-%lang(de) /usr/share/indimail/locale/de/LC_MESSAGES/fetchmail.mo
-%lang(vi) /usr/share/indimail/locale/vi/LC_MESSAGES/fetchmail.mo
-%lang(ca) /usr/share/indimail/locale/ca/LC_MESSAGES/fetchmail.mo
-%lang(pl) /usr/share/indimail/locale/pl/LC_MESSAGES/fetchmail.mo
-%lang(it) /usr/share/indimail/locale/it/LC_MESSAGES/fetchmail.mo
-%lang(id) /usr/share/indimail/locale/id/LC_MESSAGES/fetchmail.mo
-%lang(fr) /usr/share/indimail/locale/fr/LC_MESSAGES/fetchmail.mo
-%lang(nl) /usr/share/indimail/locale/nl/LC_MESSAGES/fetchmail.mo
-%lang(sv) /usr/share/indimail/locale/sv/LC_MESSAGES/fetchmail.mo
-%lang(es) /usr/share/indimail/locale/es/LC_MESSAGES/fetchmail.mo
-%lang(da) /usr/share/indimail/locale/da/LC_MESSAGES/fetchmail.mo
-%lang(en) /usr/share/indimail/locale/en_GB/LC_MESSAGES/fetchmail.mo
-%lang(zh) /usr/share/indimail/locale/zh_CN/LC_MESSAGES/fetchmail.mo
-%lang(ja) /usr/share/indimail/locale/ja/LC_MESSAGES/fetchmail.mo
-#lang(el) /usr/share/indimail/locale/el/LC_MESSAGES/fetchmail.mo
-#lang(fi) /usr/share/indimail/locale/fi/LC_MESSAGES/fetchmail.mo
-#lang(gl) /usr/share/indimail/locale/gl/LC_MESSAGES/fetchmail.mo
-#lang(pt) /usr/share/indimail/locale/pt_BR/LC_MESSAGES/fetchmail.mo
-#lang(sk) /usr/share/indimail/locale/sk/LC_MESSAGES/fetchmail.mo
-#lang(tr) /usr/share/indimail/locale/tr/LC_MESSAGES/fetchmail.mo
-%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
-%attr(644,root,root)                    %{python3_sitelib}/__pycache__/*.pyc
-%attr(755,root,root)                    %{python3_sitelib}/fetchmailconf.py
-%else
-%attr(644,root,root)                    %{pythondir}/fetchmailconf.pyo
-%attr(644,root,root)                    %{pythondir}/fetchmailconf.pyc
-%attr(755,root,root)                    %{pythondir}/fetchmailconf.py
-%endif
-%endif
 
 %docdir %{shareddir}/doc
 %docdir %{mandir}
@@ -922,24 +719,10 @@ done
 %if %nobogofilter == 0
 %license %attr(644,root,root)           %{shareddir}/doc/COPYING.bogofilter
 %endif
-%if %nocourierimap == 0
-%license %attr(644,root,root)           %{shareddir}/doc/COPYING.courier-imap
-%license %attr(644,root,root)           %{shareddir}/doc/COPYING.GPL.courier-imap
-%endif
-%if %nofetchmail == 0
-%license %attr(644,root,root)           %{shareddir}/doc/COPYING.fetchmail
-%endif
 %else
 %attr(644,root,root)                    %{shareddir}/doc/COPYING.indimail
 %if %nobogofilter == 0
 %attr(644,root,root)                    %{shareddir}/doc/COPYING.bogofilter
-%endif
-%if %nocourierimap == 0
-%attr(644,root,root)                    %{shareddir}/doc/COPYING.courier-imap
-%attr(644,root,root)                    %{shareddir}/doc/COPYING.GPL.courier-imap
-%endif
-%if %nofetchmail == 0
-%attr(644,root,root)                    %{shareddir}/doc/COPYING.fetchmail
 %endif
 %endif
 
@@ -962,41 +745,6 @@ done
 %attr(644,root,root)                    %{shareddir}/doc/HOWTO.bogofilter
 %endif
 
-%if %nocourierimap == 0
-%attr(644,root,root)                    %{shareddir}/doc/AUTHORS.courier-imap
-%endif
-
-%if %nofetchmail == 0
-%attr(644,root,root)                    %{shareddir}/doc/README.SSL-SERVER.fetchmail
-%attr(644,root,root)                    %{shareddir}/doc/README.SSL.fetchmail
-%attr(644,root,root)                    %{shareddir}/doc/README.NTLM.fetchmail
-%attr(644,root,root)                    %{shareddir}/doc/README.fetchmail
-%endif
-
-%if %nocourierimap == 0
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.sharedfolders.txt
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.maildirquota.txt
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.couriertls
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.unicode
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.imap
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.authlib
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.courier-imap
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/lockmail.html
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/mailbot.html
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildir.html
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildiracl.html
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildirkw.html
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildirmake.html
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildrop.html
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildropex.html
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildropfilter.html
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/maildropgdbm.html
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/makemime.html
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/manpage.css
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/reformail.html
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/reformime.html
-%endif
-
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vdeluser
@@ -1017,7 +765,6 @@ done
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vcfilter
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vbulletin
 %verify (not user group mode) %attr(4755, root, qmail)     %{libexedir}/sq_vacation
-%verify (not user group mode) %attr(4755, root, root)      %{libexedir}/imapmodules/authshadow
 %endif
 %endif
 
@@ -1027,11 +774,6 @@ done
 %{_libdir}/libeps.so.1.0.0
 %{_libdir}/libindimail.so.3
 %{_libdir}/libindimail.so.3.0.0
-
-%if %nocourierimap == 0
-%{_libdir}/libunicode.so.4
-%{_libdir}/libunicode.so.4.1.0
-%endif
 
 %files devel
 %defattr(-, root, root, 0755)
@@ -1287,20 +1029,8 @@ done
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/wildmat.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/load_mysql.h
 
-%if %nocourierimap == 0
-%attr(644,root,qmail)                   %{_prefix}/include/courier-unicode.h
-%attr(644,root,qmail)                   %{_prefix}/include/courier-unicode-categories-tab.h
-%attr(644,root,qmail)                   %{_prefix}/include/courier-unicode-script-tab.h
-%attr(644,root,qmail)                   %{_prefix}/share/aclocal/courier-unicode.m4
-%attr(644,root,qmail)                   %{_libdir}/libunicode.a
-%endif
-
 %{_libdir}/libeps.a
 %{_libdir}/libindimail.a
-
-%if %nocourierimap == 0
-%{_libdir}/libunicode.so
-%endif
 
 %{_libdir}/libeps.so
 %{_libdir}/libindimail.so
@@ -1314,11 +1044,6 @@ done
 %{_libdir}/libeps.so.1.0.0
 %{_libdir}/libindimail.so.3
 %{_libdir}/libindimail.so.3.0.0
-
-%if %nocourierimap == 0
-%{_libdir}/libunicode.so.4
-%{_libdir}/libunicode.so.4.1.0
-%endif
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
@@ -1536,10 +1261,8 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
   # refresh indimail services
   svc_list=""
-  for i in mrtg mysql.3306 fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
-    qmail-pop3d.110 qmail-pop3d-ssl.995 proxy-imapd.4143 proxy-imapd-ssl.9143 \
-    proxy-pop3d.4110 proxy-pop3d-ssl.9110 indisrvr.4000 inlookup.infifo \
-    qmail-poppass.106 qmail-logfifo
+  for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
+  qmail-poppass.106 qmail-logfifo
   do
     if [ -z "$svc_list" ] ; then
       svc_list="%{servicedir}/$i"
@@ -1569,14 +1292,11 @@ echo " 2. Configure %{servicedir}"
 echo " 3. Configure IndiMail configuration"
 echo " 4. Configure %{sysconfdir}/indimail.cnf for MySQL service"
 echo " 5. Configure MySQL DB in %{indimaildir}/mysqldb/data"
-echo " 6. Configure fetchmail service"
-echo " 7. Configure IMAP/POP3/poppass services"
-echo " 8. Configure indisrvr service"
-echo " 9. Configure inlookup service"
-echo "10. Configure SPAM filter configuration"
-echo "11. Configure tcprules database for IMAP, POP3, popass"
-echo "12. Configure selinux configuration"
-echo "13. Configure default cron entries"
+echo " 6. Configure indisrvr, inlookup, poppass service"
+echo " 7. Configure SPAM filter configuration"
+echo " 8. Configure tcprules database for popass"
+echo " 9. Configure selinux configuration"
+echo "10. Configure default cron entries"
 echo ""
 
 (
@@ -1588,9 +1308,7 @@ if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   /sbin/ldconfig
 fi
 
-for i in fetchmail imapd.143 imapd-ssl pop3d.110 pop3d-ssl logfifo \
-inlookup indisrvr mrtg mysql.3306 poppass proxyIMAP.4143 \
-proxyPOP.4110
+for i in logfifo inlookup indisrvr mrtg mysql.3306
 do
   %{__mkdir_p} %{logdir}/$i
 done
@@ -1616,7 +1334,7 @@ if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
 else
   default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
 fi
-echo "Creating default indimail tcp access control files"
+echo "Creating default indimail mysql config indimail.cnf"
 %{_prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
   --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
 
@@ -1660,14 +1378,8 @@ fi
 
 # SMTP
 %ifarch x86_64
-%global fetchmail_mem 52428800
-%global imap_pop3_mem 26214400
-%global imapspop3_mem 26214400
 %global poppass_mem   26214400
 %else
-%global fetchmail_mem 72428800
-%global imap_pop3_mem 26214400
-%global imapspop3_mem 26214400
 %global poppass_mem   26214400
 %endif
 
@@ -1675,104 +1387,35 @@ fi
 for port in 465 25
 do
   if [ %nobogofilter -eq 0 ] ; then
-    echo "%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" > %{servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
-    echo 0 > %{servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
-    echo 0 > %{servicedir}/qmail-smtpd.$port/variables/REJECTSPAM
-    echo 1 > %{servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
-    echo $logfifo > %{servicedir}/qmail-smtpd.$port/variables/LOGFILTER
     # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
-    options="`cat %{servicedir}/qmail-smtpd.$port/variables/.options`
-    --spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\"
-    --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
-    echo $options > %{servicedir}/qmail-smtpd.$port/variables/.options
+    echo "%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" > %{servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
+    if [ ! -f %{servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE ] ; then
+    echo 0 > %{servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
+    fi
+    if [ ! -f %{servicedir}/qmail-smtpd.$port/variables/REJECTSPAM ] ; then
+    echo 0 > %{servicedir}/qmail-smtpd.$port/variables/REJECTSPAM
+    fi
+    if [ ! -f %{servicedir}/qmail-smtpd.$port/variables/MAKESEEKABLE ] ; then
+    echo 1 > %{servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
+    elif [ ! -s %{servicedir}/qmail-smtpd.$port/variables/MAKESEEKABLE ] ; then
+    echo 1 > %{servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
+    fi
+    if [ ! -f %{servicedir}/qmail-smtpd.$port/variables/LOGFILTER ] ; then
+    echo $logfifo > %{servicedir}/qmail-smtpd.$port/variables/LOGFILTER
+    fi
+    grep bogofilter %{servicedir}/qmail-smtpd.$port/variables/.options > /dev/null 2>&1
+	if [ $? -ne 0 ] ; then
+      options="`cat %{servicedir}/qmail-smtpd.$port/variables/.options`
+      --spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\"
+      --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
+      if [ -f %{servicedir}/qmail-smtpd.$port/variables/.options ] ; then
+        %{__mv} %{servicedir}/qmail-smtpd.$port/variables/.options \
+          %{servicedir}/qmail-smtpd.$port/variables/.options.nospamfilter
+      fi
+      echo $options > %{servicedir}/qmail-smtpd.$port/variables/.options
+	fi
   fi
 done
-
-
-# fetchmail
-if [ %nofetchmail -eq 0 ] ; then
-  if [ %nodksignatures -eq 0 ] ; then
-    if [ -x %{_prefix}/bin/dknewkey ] ; then
-      ver_opt="both"
-      sign_opt="both"
-      key_bit=$KEYBIT # set KEYBIT in environment variable
-      if [ " $key_bit" = " " ] ; then
-        key_bit=1024
-      fi
-      %{_prefix}/bin/dknewkey %{sysconfdir}/control/domainkeys/default $key_bit
-    else
-      ver_opt="none"
-      sign_opt="none"
-    fi
-  else
-    ver_opt="none"
-    sign_opt="none"
-  fi
-  extra_opt=""
-  if [ %nobogofilter -eq 0 ] ; then
-    extra_opt="--spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\""
-    extra_opt="$extra_opt --logfilter=$logfifo --rejectspam=0 --spamexitcode=0"
-  fi
-  if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
-    if [ -d %{_sysconfdir}/clamav ] ; then
-      mysysconfdir=%{_sysconfdir}/clamav
-    elif [ -d %{_sysconfdir}/clamd.d ] ; then
-      mysysconfdir=%{_sysconfdir}/clamd.d
-    elif [ -d %{sysconfdir} ] ; then
-      mysysconfdir=%{sysconfdir}
-    else
-      mysysconfdir=%{_sysconfdir}
-    fi
-    qhpsi="/usr/bin/clamdscan %s --config=${mysysconfdir}/scan.conf --fdpass --quiet --no-summary"
-    extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
-  fi
-  eval %{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} \
-    --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-    --cntrldir=control --memory=%{fetchmail_mem} --fsync --syncdir \
-    --dkverify=$ver_opt $extra_opt
-  echo 0 > %{servicedir}/fetchmail/variables/SPAMEXITCODE
-  echo 0 > %{servicedir}/fetchmail/variables/REJECTSPAM
-  echo 1 > %{servicedir}/fetchmail/variables/MAKE_SEEKABLE
-  echo $logfifo > %{servicedir}/fetchmail/variables/LOGFILTER
-  options="`cat %{servicedir}/fetchmail/variables/.options`
-  --spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\"
-  --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
-  echo $options > %{servicedir}/fetchmail/variables/.options
-  #
-  # user has to create fetchmailrc before which fetchmail cannot be started
-  #
-  $TOUCH %{servicedir}/fetchmail/down
-fi
-
-if [ %nocourierimap -eq 0 ] ; then
-# IMAP/POP3
-%{_prefix}/sbin/svctool --imap=143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-  --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imap_pop3_mem} \
-  --starttls --infifo=infifo
-%{_prefix}/sbin/svctool --imap=993 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-  --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imapspop3_mem} \
-  --ssl --infifo=infifo
-%{_prefix}/sbin/svctool --pop3=110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-  --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imap_pop3_mem} \
-  --starttls --infifo=infifo
-%{_prefix}/sbin/svctool --pop3=995 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-  --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imapspop3_mem} \
-  --ssl --infifo=infifo
-fi
-if [ %noproxy -eq 0 ] ; then
-%{_prefix}/sbin/svctool --imap=4143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-  --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imap_pop3_mem} \
-  --proxy=143 --starttls --tlsprog=%{_prefix}/bin/sslerator --infifo=infifo
-%{_prefix}/sbin/svctool --imap=9143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-  --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imapspop3_mem} \
-  --proxy=143 --ssl --infifo=infifo
-%{_prefix}/sbin/svctool --pop3=4110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-  --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imap_pop3_mem} \
-  --proxy=110 --starttls --tlsprog=%{_prefix}/bin/sslerator --infifo=infifo
-%{_prefix}/sbin/svctool --pop3=9110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-  --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imapspop3_mem} \
-  --proxy=110 --ssl --infifo=infifo
-fi
 
 # IndiMail Daemons
 #indisrvr
@@ -1798,23 +1441,21 @@ if [ %nobogofilter -eq 0 ] ; then
   %{_prefix}/sbin/svctool --config=bogofilter
 fi
 
-# rebuild cdb
-for i in imap pop3 poppass
+echo "Creating default indimail tcp access control files"
+# rebuild cdb for poppass
+for j in `/bin/ls %{sysconfdir}/tcp/tcp*.poppass 2>/dev/null`
 do
-  for j in `/bin/ls %{sysconfdir}/tcp/tcp*.$i 2>/dev/null`
-  do
-    t1=`date +'%s' -r $j`
-    if [ -f $j.cdb ] ; then
-      t2=`date +'%s' -r $j.cdb`
-    else
-      t2=0
-    fi
-    if [ $t1 -gt $t2 ] ; then
-      echo "Creating CDB $j.cdb"
-      %{_prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
-        && %{__chown} indimail:indimail $j.cdb
-    fi
-  done
+  t1=`date +'%s' -r $j`
+  if [ -f $j.cdb ] ; then
+    t2=`date +'%s' -r $j.cdb`
+  else
+    t2=0
+  fi
+  if [ $t1 -gt $t2 ] ; then
+    echo "Creating CDB $j.cdb"
+    %{_prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
+      && %{__chown} indimail:indimail $j.cdb
+  fi
 done
 #update VIRTUAL_PKG_LIB for smtp service
 indlib=`ls -d %{_libdir}/libindimail.so.*.*.* 2>/dev/null`
@@ -1830,10 +1471,8 @@ fi
 
 # turn off automatic refresh for services during first time installation
 svc_list=""
-for i in mrtg mysql.3306 fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
-  qmail-pop3d.110 qmail-pop3d-ssl.995 proxy-imapd.4143 proxy-imapd-ssl.9143 \
-  proxy-pop3d.4110 proxy-pop3d-ssl.9110 indisrvr.4000 inlookup.infifo \
-  qmail-poppass.106 qmail-logfifo
+for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
+qmail-poppass.106 qmail-logfifo
 do
   svc_list="$svc_list %{servicedir}/$i"
 done
@@ -1878,11 +1517,7 @@ else
   default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
 fi
 count=`expr $count + 1`
-%if %nocourierimap == 0
-echo "$count. You need to create CERTS for STARTTLS / SSL enabled IMAP/POP3."
-%else
 echo "$count. You need to create CERTS for STARTTLS."
-%endif
 echo "   Run the following command to create Certificate for TLS/SSL"
 echo "   %{_prefix}/sbin/svctool --config=cert --postmaster=postmaster@$default_domain --common_name=$default_domain"
 fi
@@ -1991,16 +1626,19 @@ do
   if [ %nobogofilter -eq 0 -a $port -ne 587 ] ; then
     > %{servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
     > %{servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
+    > %{servicedir}/qmail-smtpd.$port/variables/REJECTSPAM
     > %{servicedir}/qmail-smtpd.$port/variables/LOGFILTER
+    if [ -f %{servicedir}/qmail-smtpd.$port/variables/.options.nospamfilter ] ; then
+      %{__mv} %{servicedir}/qmail-smtpd.$port/variables/.options.nospamfilter \
+        %{servicedir}/qmail-smtpd.$port/variables/.options
+    fi
   fi
 done
 
 %{__rm} -f %{sysconfdir}/indimail.mrtg.ok %{sysconfdir}/system.mrtg.ok
 echo "removing startup services"
-for i in fetchmail indisrvr.4000 inlookup.infifo mysql.3306 \
-qmail-imapd.143 qmail-imapd-ssl.993 \
-qmail-pop3d.110 qmail-pop3d-ssl.995 qmail-logfifo \
-qmail-imapd.4143 qmail-pop3d.4110 qmail-poppass.106 mrtg
+for i in indisrvr.4000 inlookup.infifo mysql.3306 \
+qmail-logfifo qmail-poppass.106 mrtg
 do
   if [ -d %{servicedir}/$i ] ; then
     %{__rm} -rf %{servicedir}/$i || true
@@ -2008,14 +1646,6 @@ do
     %{__rm} -f %{servicedir}/$i || true
   fi
 done
-if [ %noproxy -eq 0 ] ; then
-for i in proxy-imapd.4143 proxy-imapd-ssl.9143 proxy-pop3d.4110 proxy-pop3d-ssl.9110
-do
-  if [ -d %{servicedir}/$i ] ; then
-    %{__rm} -rf %{servicedir}/$i || true
-  fi
-done
-fi
 count=`/bin/ls %{servicedir} 2>/dev/null| /usr/bin/wc -l`
 if [ $count -eq 0 ] ; then # ignore disabled services
   %{__rm} -rf %{servicedir} || true
@@ -2035,9 +1665,8 @@ if [ -h %{logdir} ] ; then
 else
   log_dir=%{logdir}
 fi
-for i in fetchmail imapd.143 imapd-ssl.993 indisrvr.4000 inlookup.infifo \
-mrtg mysql.3306 pop3d.110 pop3d-ssl.995 poppass.106 proxyIMAP.4143 \
-proxyIMAP.9143 proxyPOP3.4110 proxyPOP3.9110
+for i in indisrvr.4000 inlookup.infifo \
+mrtg mysql.3306 poppass.106
 do
   %{__rm} -rf $log_dir/$i
 done

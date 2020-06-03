@@ -48,8 +48,6 @@ esac
 if [ "$1" = "remove" ]; then
 	echo "removing static libraries"
 	${rm} -f ${libdir}/libeps.a
-	${rm} -f ${libdir}/libcdb.a
-	${rm} -f ${libdir}/libflash.a
 	${rm} -f ${libdir}/libindimail.a
 fi
 exit 0

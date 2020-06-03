@@ -6,8 +6,6 @@
 %dir %attr(0555,root,root)         @libexecdir@/imapmodules
 %dir %attr(0755,root,root)         @prefix@/lib/indimail/modules
 %dir %attr(0755,root,qmail)        @prefix@/share/indimail/table_config
-%dir %attr(0755,root,root)         @prefix@/share/indimail/locale
-%dir %attr(0755,root,root)         @prefix@/share/indimail/fortunes
 #
 # Post handle
 #
@@ -38,17 +36,9 @@
 %attr(4555,root,root)                   @prefix@/bin/vadddomain
 %attr(4555,root,root)                   @prefix@/bin/vdeldomain
 %attr(4755,root,qmail)                  @libexecdir@/sq_vacation
-%attr(4755,root,root)                   @libexecdir@/imapmodules/authshadow
 %attr(6551,root,indimail)               @prefix@/bin/bogofilter
 #
 # Config files
 #
-%attr(0600,indimail,root)      @sysconfdir@/fetchmailrc
-%attr(0600,root,root)          @sysconfdir@/imapd.cnf
-%attr(0600,root,root)          @sysconfdir@/imapd.dist
-%attr(0600,root,root)          @sysconfdir@/imapd-ssl.dist
-%attr(0600,root,root)          @sysconfdir@/pop3d.cnf
-%attr(0600,root,root)          @sysconfdir@/pop3d.dist
-%attr(0600,root,root)          @sysconfdir@/pop3d-ssl.dist
 %attr(0644,indimail,indimail)  @sysconfdir@/wordlist.db
 %attr(0644,root,root)          /etc/apparmor.d/local/usr.sbin.mysqld

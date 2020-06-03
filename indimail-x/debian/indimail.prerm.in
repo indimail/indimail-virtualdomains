@@ -23,7 +23,6 @@ libexecdir=@libexecdir@
 mandir=@mandir@
 rm=/bin/rm
 mv=/bin/mv
-nocourierimap=0
 
 ID=`id -u`
 if [ $ID -ne 0 ] ; then
@@ -113,13 +112,6 @@ ${mv} ${prefix}/bin/newaliases_i ${prefix}/bin/newaliases || true
 fi
 if [ -f ${prefix}/bin/rmail_i ] ; then
 ${mv} ${prefix}/bin/rmail_i ${prefix}/bin/rmail || true
-fi
-if [ $nocourierimap -eq 0 ] ; then
-	for i in authshadow.7 authpwd.7 authpam.7 authcustom.7
-	do
-		${rm} -f ${mandir}/man7/$i.gz || true
-	done
-	${rmdir} --ignore-fail-on-non-empty ${mandir}/man7 2>/dev/null || true
 fi
 
 for i in lib sbin

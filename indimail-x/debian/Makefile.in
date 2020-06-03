@@ -4,7 +4,6 @@ libexecdir=@libexecdir@
 qmaildir=@qmaildir@
 domaindir=@domaindir@
 sysconfdir=@sysconfdir@
-mysqlbindir=@mysqlbindir@
 moduledir=@moduledir@
 auth_inc=@auth_inc@
 auth_libs=@auth_libs@
@@ -12,29 +11,17 @@ logdir=@logdir@
 basepath=@basepath@
 mysql_prefix=@mysql_prefix@
 mysql_incdir=@mysql_incdir@
-mysql_libdir=@mysql_libdir@
 defaultdomain=@defaultdomain@
 version=$(shell head -1 ../conf-version 2>/dev/null)
 release := $(shell head -1 ../conf-release 2>/dev/null|| echo 1.1)
 prefix=@prefix@
 #
-nssd_version=$(shell grep AC_INIT ../../nssd-x/configure.ac|head -1|cut -d, -f2)
-pam_multi_version=$(shell grep AC_INIT ../../pam-multi-x/configure.ac|head -1|cut -d, -f2)
-courier_version=$(shell grep AC_INIT ../../courier-imap-x/configure.ac|head -1|cut -d, -f2)
 bogofilter_version=1.2.4
-fetchmail_version=6.4.1
 #
-altermime_version=0.3.10
-ripmime_version=1.4.0.10
-flash_version=0.9.4
-mpack_version=1.6
-logalert_version=0.3
-fortune_version=1.1
 
 libdir=@prefix@/lib
 acl_libdirstem=lib
 pkgconfigdir=@prefix@/lib/pkgconfig
-
 
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
 obs_deb_prep gen_control indimail.install indimail.dsc indimail-Debian_9.0.dsc \
@@ -72,7 +59,6 @@ edit = sed \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
-	-e 's,@mysqlbindir\@,$(mysqlbindir),g' \
 	-e 's,@moduledir\@,$(moduledir),g' \
 	-e 's,@auth_inc\@,$(auth_inc),g' \
 	-e 's,@auth_libs\@,$(auth_libs),g' \
@@ -83,24 +69,13 @@ edit = sed \
 	-e 's,@basepath\@,$(basepath),g' \
 	-e 's,@mysql_prefix\@,$(mysql_prefix),g' \
 	-e 's,@mysql_incdir\@,$(mysql_incdir),g' \
-	-e 's,@mysql_libdir\@,$(mysql_libdir),g' \
 	-e 's,@defaultdomain\@,$(defaultdomain),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
 	-e 's,@HOST\@,$(host),g' \
 	-e 's,@DATE\@,$(DATE),g' \
-	-e 's,@courier_version\@,$(courier_version),g' \
 	-e 's,@bogofilter_version\@,$(bogofilter_version),g' \
-	-e 's,@fetchmail_version\@,$(fetchmail_version),g' \
-	-e 's,@nssd_version\@,$(nssd_version),g' \
-	-e 's,@pam_multi_version\@,$(pam_multi_version),g' \
-	-e 's,@altermime_version\@,$(altermime_version),g' \
-	-e 's,@ripmime_version\@,$(ripmime_version),g' \
-	-e 's,@flash_version\@,$(flash_version),g' \
-	-e 's,@mpack_version\@,$(mpack_version),g' \
-	-e 's,@logalert_version\@,$(logalert_version),g' \
-	-e 's,@fortune_version\@,$(fortune_version),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 rules: rules.in Makefile

@@ -1,0 +1,15 @@
+#!/bin/sh
+bogofilter_version=$(cat conf-version)
+
+if [ -d ../stage ] ; then
+	/bin/rm -rf ../stage
+fi
+mkdir -p ../stage
+cp -rp . ../stage/bogofilter-$bogofilter_version
+cd ../stage/bogofilter-$bogofilter_version
+make -s clean
+make -s distclean
+make -s -C debian
+dpkg-buildpackage -tc -b
+cd ..
+#/bin/rm -r stage

@@ -229,6 +229,7 @@ SRC="$rpmbuild/SOURCES/indimail-"$version".tar.gz $SRC"
 echo "Copying permissions files and rpmlintrc"
 for i in `get_non_tar_files ../indimail-x/indimail.spec.in`
 do
+	echo "/bin/cp -p indimail-"$version"/$i $rpmbuild/SOURCES"
 	/bin/cp -p indimail-"$version"/$i $rpmbuild/SOURCES
 	SRC="$rpmbuild/SOURCES/$i $SRC"
 done

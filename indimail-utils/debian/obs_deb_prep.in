@@ -10,7 +10,7 @@ fortune_version=@fortune_version@
 flash_version=@flash_version@
 mpack_version=@mpack_version@
 
-for i in altermime-"$altermime_version" ripmime-"$ripmime_version"
+for i in altermime-"$altermime_version" ripmime-"$ripmime_version" \
 mpack-"$mpack_version" fortune-"$fortune_version" flash-"$flash_version"
 do
 	/bin/rm -rf $i

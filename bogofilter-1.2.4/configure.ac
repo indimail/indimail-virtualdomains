@@ -288,6 +288,18 @@ AC_ARG_ENABLE(indimail,
 test "$with_INDIMAIL" = "yes" && AC_DEFINE(INDIMAIL,1,Define if you want INDIMAIL support compiled in)
 AM_CONDITIONAL(INDIMAIL, test "$with_INDIMAIL" = yes)
 
+servicedir="/service"
+AC_ARG_ENABLE(servicedir, [  --enable-servicedir=dir         directory where supervise services are installed.],
+	servicedir="$enableval",
+	[
+		if test "$servicedir" = ""
+		then
+			AC_MSG_ERROR([Unable to find your servicedir directory, specify --enable-servicedir.])
+		fi
+	])
+AC_DEFINE_UNQUOTED(SERVICEDIR,"$servicedir",supervise service directory)
+AC_SUBST(servicedir)
+
 dnl Allow the user to specify a header name to use to indicate whether a given
 dnl message is SPAM or not.
 AC_ARG_ENABLE(spam-header-name, 
@@ -878,7 +890,6 @@ AC_DEFINE(DIRSEP_S, "\\\\")
 fi
 
 AC_CONFIG_FILES([Makefile \
-		bogofilter.spec \
 		trio/Makefile \
 		doc/Makefile \
 		src/Makefile \

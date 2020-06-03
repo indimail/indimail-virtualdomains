@@ -149,10 +149,14 @@ do
 		;;
 	esac
 done
+echo "Copying permissions files and rpmlintrc"
+for i in `get_non_tar_files indimail-auth/indimail-auth.spec`
+do
+	echo "/bin/cp -p indimail-auth/$i $rpmbuild/SOURCES"
+	/bin/cp -p indimail-auth/$i $rpmbuild/SOURCES
+	SRC="$rpmbuild/SOURCES/$i $SRC"
+done
 echo "Preparing indimail-auth"
-echo "Copying rpmlintrc"
-/bin/cp -p indimail-auth/indimail-auth-rpmlintrc $rpmbuild/SOURCES
-SRC="$rpmbuild/SOURCES/indimail-auth-rpmlintrc $SRC"
 dist=`uname -r |cut -d . -f4`
 if [ $# -gt 0 ] ; then
 	release=$1

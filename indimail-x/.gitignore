@@ -108,7 +108,7 @@ myslave
 debian/Makefile
 osh
 overquota.sh
-perm_list.i
+perm_list.indimail
 postdel
 printdir
 proxyimap

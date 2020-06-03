@@ -1,0 +1,5 @@
+usr/bin/*          @prefix@/bin
+usr/sbin/*         @prefix@/sbin
+usr/share/man/man1 @mandir@
+usr/share/indimail @prefix@/share
+/etc/indimail/*    @sysconfdir@
