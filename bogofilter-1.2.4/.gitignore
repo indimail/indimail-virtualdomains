@@ -75,4 +75,4 @@ debian/dummy.tar.gz
 debian/postinst
 debian/postrm
 debian/rules
-
+bogofilter.spec
