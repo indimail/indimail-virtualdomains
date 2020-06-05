@@ -113,7 +113,7 @@ should be no problem installing IndiMail. If you are a newbie, the RPM/Deb provi
 to install the entire package with all features. In case you are a newbie, it will always be
 a pleasure to assist you (at no cost or any obligation) with the installation and please feel
 free to email me. In my experience, it has taken 2-3 email exchanges for newbies to get going.
-You need to read the INSTALL* files for installation. The file Quick-INSTALL is another attempt
+You need to read the INSTALL\* files for installation. The file Quick-INSTALL is another attempt
 to make it easy for a newbie to install IndiMail.
 
 To install IndiMail you can take the help of the following documents
@@ -135,12 +135,11 @@ You could also look at
 
 http://indimail.blogspot.com/2009/11/indimail-installation-steps.html
 
-Once you have installed IndiMail, you will find all man pages in @mandir@ and
-documents in @prefix@/share/indimail/doc. You can do man indimail to get started
+Once you have installed IndiMail, you will find all man pages in /usr/share/man and
+documents in /usr/share/indimail/doc. You can do man indimail to get started
 with understanding IndiMail.
 
 DISCLAIMER
-----------
 
 There is no warranty implied or otherwise with this package. I believe in OpenSource Philosophy
 and this is an attempt to give back to the OpenSource community. I do not desire any monetary
@@ -347,15 +346,6 @@ There are four Mailing Lists for IndiMail
 
 There is also a Project Tracker for IndiMail (Bugs, Feature Requests, Patches, Support Requests) at
 http://sourceforge.net/tracker/?group_id=230686
-
-You can also get titbits about IndiMail at
-
-Tips&Tricks - http://indimail.blogspot.com         (WEB)
-            - http://feeds.feedburner.com/indimail (RSS)
-twitter     - http://twitter.com/indimail
-facebook    - http://www.facebook.com/pages/indimail/88063516703?_fb_noscript=1
-              (You can become a facebook fan of IndiMail at the above link)
-sourceforge - https://sourceforge.net/apps/laconica/indimail/
 
 # Binary Builds
 You can get binary RPM / Debian packages at

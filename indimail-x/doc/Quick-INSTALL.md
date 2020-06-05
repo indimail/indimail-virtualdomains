@@ -1,3 +1,4 @@
+# Quick Install
    IndiMail supports two types of virtual domains
 
    1. Non-Clustered domain - A domain existing on a single server
@@ -46,9 +47,9 @@
    Start IndiMail
    # /usr/sbin/initsvc -on
     or
-   # service indimail start
+   # service svscan start
     or
-   # systemctl start indimail
+   # systemctl start svscan
     or
    # /etc/init.d/svscan start
    # exit
@@ -111,6 +112,12 @@
 
    Start IndiMail
    # /usr/sbin/initsvc -on
+    or
+   # service svscan start
+    or
+   # systemctl start svscan
+    or
+   # /etc/init.d/svscan start
    # exit
 
    x------------------------------------------------------------------------------------x
@@ -122,9 +129,6 @@
    | If you change the socket/port then you have to edit /etc/indimailcontrol/host.*    |
    | and /etc/indimail/indimail.cnf to change the socket path / port                    |
    |                                                                                    |
-   | Instead of the above initsvc command, you can also do (a more portable way)        |
-   |                                                                                    |
-   | % sudo service indimail start                                                      |
    x------------------------------------------------------------------------------------x
 
    Ensure MySQL is running
@@ -162,13 +166,14 @@
    To send mails, you can either use SMTP or use a sendmail (IndiMail's sendmail replacement
    /usr/bin/sendmail).
 
-   % ( echo 'First M. Last'; uname -a) | mail -s "IndiMail Installation" manvendra@indimail.org
+   % ( echo 'First M. Last'; uname -a) | \
+      mail -s "IndiMail Installation" indimail-virtualdomains@indimail.org
 
    Replace First M. Last with your name.
 
    --- * --- * ---- * --- * --- THE END --- * --- * --- * --- * ---
 
    x------------------------------------------------------------------------------------x
-   |NOTE: You can email me at manvendra@indimail.org, if you find this confusing or     |
-   |need any help/clarification.                                                        |
+   |NOTE: You can email me at indimail-virtualdomains@indimail.org, if you find this    |
+   |confusing or need any help/clarification.                                           |
    x------------------------------------------------------------------------------------x

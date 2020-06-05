@@ -1,5 +1,5 @@
-File INSTALL.indimail, Version @version@
-DATE: @DATE@
+File INSTALL.indimail, Version 3.2
+DATE: Fri Jun  5 20:01:11 IST 2020
 
 PLEASE DON'T HESITATE to join IndiMail group at https://groups.google.com/forum/#!forum/indimail
 
@@ -159,7 +159,7 @@ For more information, read Basic Installation instructions at the bottom. In all
 a) you are doing this on a fresh system or
 b) in case you are installing this on a live IndiMail System and do not wish
    to do make install or make install-strip immediately.
-c) IndiMail 2.x follows FHS. The base directory is installed in @indimaildir@ and does not contain binaries.
+c) IndiMail 2.x follows FHS. The base directory is installed in /var/indimail and does not contain binaries.
 
 Which user should I use to run the commands listed below ?
 
@@ -193,7 +193,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
                                . indimail-mta-x      (18   Mb)
 
     +-/home/local/src/indimail-virtualdomains/.+
-                               . indimail-@version@  (20   Mb)
+                               . indimail-3.2  (20   Mb)
                                . ucspi-tcp-x         (4.0  Mb)
                                . nssd-x              (2.0  Mb)
                                . pam-multi-x         (3.0  Mb)
@@ -225,15 +225,15 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
     # groupadd -g 557 qmail
     # groupadd -g 558 qscand
 
-    # useradd -M -g indimail -u 555 -d @indimaildir@ indimail
-    # useradd -M -g nofiles  -u 556 -d @indimaildir@/alias  -s /bin/false alias
-    # useradd -M -g nofiles  -u 557 -d @indimaildir@        -s /bin/false qmaild
-    # useradd -M -g nofiles  -u 558 -d @indimaildir@        -s /bin/false qmaill
-    # useradd -M -g nofiles  -u 559 -d @indimaildir@        -s /bin/false qmailp
-    # useradd -M -g qmail    -u 560 -d @indimaildir@        -s /bin/false qmailq
-    # useradd -M -g qmail    -u 561 -d @indimaildir@        -s /bin/false qmailr
-    # useradd -M -g qmail    -u 562 -d @indimaildir@        -s /bin/false qmails
-    # useradd -M -g qscand   -u 563 -d @indimaildir@/qscanq -G qmail,qscand -s /bin/false qscand
+    # useradd -M -g indimail -u 555 -d /var/indimail indimail
+    # useradd -M -g nofiles  -u 556 -d /var/indimail/alias  -s /bin/false alias
+    # useradd -M -g nofiles  -u 557 -d /var/indimail        -s /bin/false qmaild
+    # useradd -M -g nofiles  -u 558 -d /var/indimail        -s /bin/false qmaill
+    # useradd -M -g nofiles  -u 559 -d /var/indimail        -s /bin/false qmailp
+    # useradd -M -g qmail    -u 560 -d /var/indimail        -s /bin/false qmailq
+    # useradd -M -g qmail    -u 561 -d /var/indimail        -s /bin/false qmailr
+    # useradd -M -g qmail    -u 562 -d /var/indimail        -s /bin/false qmails
+    # useradd -M -g qscand   -u 563 -d /var/indimail/qscanq -G qmail,qscand -s /bin/false qscand
 
 #   on a debian system omit the -M option above
 
@@ -241,7 +241,7 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
 
     # dscl . -create /Groups/indimail PrimaryGroupID 555
     # dscl . -create /Users/indimail UniqueID 555
-    # dscl . -create /Users/indimail home @indimaildir@
+    # dscl . -create /Users/indimail home /var/indimail
     # dscl . -create /Users/indimail PrimaryGroupID 555
     # dscl . -create /Users/indimail UserShell /bin/bash
     # dscl . -create /Users/indimail RealName indimail
@@ -251,49 +251,49 @@ I usually prefer to run privileged commands like this (so that I don't get fond 
     # dscl . -create /Groups/qscand  PrimaryGroupID 558
 
     # dscl . -create /Users/alias    UniqueID 556
-    # dscl . -create /Users/alias    home @indimaildir@/alias
+    # dscl . -create /Users/alias    home /var/indimail/alias
     # dscl . -create /Users/alias    PrimaryGroupID 556
     # dscl . -create /Users/alias    UserShell /bin/bash
     # dscl . -create /Users/alias    RealName alias
 
     # dscl . -create /Users/qmaild   UniqueID 557
-    # dscl . -create /Users/qmaild   home @indimaildir@
+    # dscl . -create /Users/qmaild   home /var/indimail
     # dscl . -create /Users/qmaild   PrimaryGroupID 556
     # dscl . -create /Users/qmaild   UserShell /bin/bash
     # dscl . -create /Users/qmaild   RealName qmaild
 
     # dscl . -create /Users/qmaill   UniqueID 558
-    # dscl . -create /Users/qmaill   home @indimaildir@
+    # dscl . -create /Users/qmaill   home /var/indimail
     # dscl . -create /Users/qmaill   PrimaryGroupID 556
     # dscl . -create /Users/qmaill   UserShell /bin/bash
     # dscl . -create /Users/qmaill   RealName qmaill
 
     # dscl . -create /Users/qmailp   UniqueID 559
-    # dscl . -create /Users/qmailp   home @indimaildir@
+    # dscl . -create /Users/qmailp   home /var/indimail
     # dscl . -create /Users/qmailp   PrimaryGroupID 556
     # dscl . -create /Users/qmailp   UserShell /bin/bash
     # dscl . -create /Users/qmailp   RealName qmailp
 
     # dscl . -create /Users/qmailq   UniqueID 560
-    # dscl . -create /Users/qmailq   home @indimaildir@
+    # dscl . -create /Users/qmailq   home /var/indimail
     # dscl . -create /Users/qmailq   PrimaryGroupID 557
     # dscl . -create /Users/qmailq   UserShell /bin/bash
     # dscl . -create /Users/qmailq   RealName qmailq
 
     # dscl . -create /Users/qmailr   UniqueID 561
-    # dscl . -create /Users/qmailr   home @indimaildir@
+    # dscl . -create /Users/qmailr   home /var/indimail
     # dscl . -create /Users/qmailr   PrimaryGroupID 557
     # dscl . -create /Users/qmailr   UserShell /bin/bash
     # dscl . -create /Users/qmailr   RealName qmailr
 
     # dscl . -create /Users/qmails   UniqueID 562
-    # dscl . -create /Users/qmails   home @indimaildir@
+    # dscl . -create /Users/qmails   home /var/indimail
     # dscl . -create /Users/qmails   PrimaryGroupID 557
     # dscl . -create /Users/qmails   UserShell /bin/bash
     # dscl . -create /Users/qmails   RealName qmails
 
     # dscl . -create /Users/qscand UniqueID 563
-    # dscl . -create /Users/qscand home @indimaildir@/qscanq
+    # dscl . -create /Users/qscand home /var/indimail/qscanq
     # dscl . -create /Users/qscand PrimaryGroupID 558
     # dscl . -create /Users/qscand UserShell /bin/false
     # dscl . -create /Users/qscand RealName qscand
@@ -341,7 +341,7 @@ the installation.
     % You can download mysql-5.5.2-m2.tar.gz from dev.mysql.com
     % gunzip -c mysql-5.5.2-m2.tar.gz |tar xf -
     % cd mysql-5.5.2-m2
-    % ./configure --prefix=@mysql_prefix@ --enable-local-infile
+    % ./configure --prefix=/usr --enable-local-infile
     % make -s DESTDIR=staging_directory
     % sudo make install-strip DESTDIR=staging_directory
     cd ..
@@ -350,7 +350,7 @@ the installation.
     can also choose to install MariaDB. MariaDB is a drop-in replacement for MySQL
     New versions of MySQL use cmake.
 
-    % cmake . -DCMAKE_INSTALL_PREFIX=@mysql_prefix@ -DENABLED_LOCAL_INFILE=1
+    % cmake . -DCMAKE_INSTALL_PREFIX=/usr -DENABLED_LOCAL_INFILE=1
     % make -s DESTDIR=staging_directory
     % sudo make install-strip DESTDIR=staging_directory
     cd ..
@@ -391,11 +391,11 @@ the installation.
 
     % cd indimail-mta-x
 
-    change first line in indimail-mta-2.7/conf-qmail to @indimaildir@
-    change first line in indimail-mta-2.7/conf-shared to @prefix@/share/indimail
-    change first line in indimail-mta-2.7/conf-prefix to @prefix@
-    change first line in indimail-mta-2.7/conf-libexec to @libexecdir@
-    change first line in indimail-mta-2.7/conf-sysconfdir to @sysconfdir@
+    change first line in indimail-mta-2.7/conf-qmail to /var/indimail
+    change first line in indimail-mta-2.7/conf-shared to /usr/share/indimail
+    change first line in indimail-mta-2.7/conf-prefix to /usr
+    change first line in indimail-mta-2.7/conf-libexec to /usr/libexec/indimail
+    change first line in indimail-mta-2.7/conf-sysconfdir to /etc/indimail
 
     % make -s
 
@@ -414,8 +414,8 @@ the installation.
     ensure that mysql_config is in the path. This is needed by ucspi-tcp to detect
     MySQL libraries.
 
-    change first line in conf-home to @prefix@
-    change first line in conf-shared to @prefix@/share/indimail
+    change first line in conf-home to /usr
+    change first line in conf-shared to /usr/share/indimail
 
     % cd ucspi-tcp-x
     % make -s [DESTDIR=staging_directory]
@@ -431,8 +431,8 @@ the installation.
     current working directory /home/local/src
     Download the indimail package from http://www.indimail.org
 
-    % gunzip -c indimail-@version@.tar.gz | tar xf -
-    % cd indimail-@version@
+    % gunzip -c indimail-3.2.tar.gz | tar xf -
+    % cd indimail-3.2
     % ./default.configure
 
     NOTES: To get a complete list of configure options type: ./configure --help
@@ -456,7 +456,7 @@ the installation.
     'sudo make -s install-strip' also shuts down indimail (if running). You may want to start
     indimail at the end of the installation by running the command
 
-    % sudo @prefix@/bin/initsvc -on (see SECTION 5. Start your services below)
+    % sudo /usr/bin/initsvc -on (see SECTION 5. Start your services below)
 
     BUT DO NOT START THE SERVICES NOW (unless you are upgrading IndiMail)
 
@@ -510,12 +510,12 @@ the installation.
     % wget http://spamassassin.apache.org/old/publiccorpus/20050311_spam_2.tar.bz2
      
     % for i in *.bz2; do bzip2 -d -c $i | tar xf -; done
-    % @prefix@/bin/bogofilter -d @sysconfdir@ -B -s spam
-    % @prefix@/bin/bogofilter -d @sysconfdir@ -B -s spam_2
-    % @prefix@/bin/bogofilter -d @sysconfdir@ -B -n easy_ham
-    % @prefix@/bin/bogofilter -d @sysconfdir@ -B -n easy_ham_2
-    % @prefix@/bin/bogofilter -d @sysconfdir@ -B -n hard_ham
-    % sudo chown indimail:indimail @sysconfdir@/wordlist.db
+    % /usr/bin/bogofilter -d /etc/indimail -B -s spam
+    % /usr/bin/bogofilter -d /etc/indimail -B -s spam_2
+    % /usr/bin/bogofilter -d /etc/indimail -B -n easy_ham
+    % /usr/bin/bogofilter -d /etc/indimail -B -n easy_ham_2
+    % /usr/bin/bogofilter -d /etc/indimail -B -n hard_ham
+    % sudo chown indimail:indimail /etc/indimail/wordlist.db
     % cd ..
 
     NOTE: UPGRADE Information. You can always upgrade to the latest version of bogofilter
@@ -570,23 +570,23 @@ the installation.
     service installed under supervise which will start MySQL along with all other IndiMail services.
 
     The commands below will create configuration and service for running mysql. The command also
-    creates a default MySQL database for IndiMail in @indimaildir@/mysqldb/data and MySQl
-    logs to go in @indimaildir@/mysqldb/logs.
+    creates a default MySQL database for IndiMail in /var/indimail/mysqldb/data and MySQl
+    logs to go in /var/indimail/mysqldb/logs.
 
     ##### STEP 1  ## MySQL Configuration and Database Creation ##################
-    a) Create MySQL configuration (@sysconfdir@/indimail.cnf)
-    % sudo @prefix@/sbin/svctool --config=mysql --mysqlPrefix=@mysql_prefix@ \
+    a) Create MySQL configuration (/etc/indimail/indimail.cnf)
+    % sudo /usr/sbin/svctool --config=mysql --mysqlPrefix=/usr \
      --mysqlport=3306 --mysqlsocket=/var/run/mysqld.sock
-    You can have a section [indimail] in @sysconfdir@/indimail.cnf for parameters specific
+    You can have a section [indimail] in /etc/indimail/indimail.cnf for parameters specific
     to indimail
 
     b) Create a new MySQL database
-    % sudo @prefix@/sbin/svctool --config=mysqldb --mysqlPrefix=@mysql_prefix@ \
-        --databasedir=@indimaildir@/mysqldb --default-domain=indimail.org \
-        --base_path=@basepath@
+    % sudo /usr/sbin/svctool --config=mysqldb --mysqlPrefix=/usr \
+        --databasedir=/var/indimail/mysqldb --default-domain=indimail.org \
+        --base_path=/home/mail
 
     ##### STEP 2  ## MySQL Startup ############################
-    If you plan to use an existing MySQL server, read INSTALL-MYSQL in indimail-@version@/doc
+    If you plan to use an existing MySQL server, read INSTALL-MYSQL in indimail-3.2/doc
     directory and proceed to STEP 3 after that. The instructions below are for MySQL to be
     managed by supervise and hence will require you to disable MySQL startup in your OS
     startup/boot scripts.
@@ -599,9 +599,9 @@ the installation.
     services on startup. You must remove any invocation of mysqld_safe from these scripts.
 
     Create service in supervise to start mysqld
-    % sudo @prefix@/sbin/svctool --mysql=3306 --servicedir=@servicedir@ \
-        --mysqlPrefix=@mysql_prefix@ --databasedir=@indimaildir@/mysqldb \
-        --config=@sysconfdir@/indimail.cnf --default-domain=indimail.org
+    % sudo /usr/sbin/svctool --mysql=3306 --servicedir=/service \
+        --mysqlPrefix=/usr --databasedir=/var/indimail/mysqldb \
+        --config=/etc/indimail/indimail.cnf --default-domain=indimail.org
 
     If you had given --enable-dlload-mysql=yes while configuring IndiMail, you should
     Create /etc/indimail/control/mysql_lib. This should point to the the shared mysql
@@ -619,7 +619,7 @@ the installation.
     The command below creates all necessary configuration for running a domain 'indimail.org' on
     your host. You may want to replace indimail.org with your domain
 
-    % sudo @prefix@/sbin/svctool --config=qmail --postmaster=postmaster@indimail.org \
+    % sudo /usr/sbin/svctool --config=qmail --postmaster=postmaster@indimail.org \
         --default-domain=indimail.org
 
     ##### STEP 4  ## SMTP Service ##################
@@ -630,22 +630,22 @@ the installation.
 
     The commands below will create service for the MTA (both smtp and delivery process). The
     number of queues can be adjusted by you. The commands below create 5 queues.
-    % sudo @prefix@/sbin/svctool --smtp=25 --servicedir=@servicedir@ \
+    % sudo /usr/sbin/svctool --smtp=25 --servicedir=/service \
         --query-cache --password-cache \
-        --qbase=@indimaildir@/queue --qcount=5 --qstart=1 \
+        --qbase=/var/indimail/queue --qcount=5 --qstart=1 \
         --cntrldir=control --localip=0 --maxdaemons=150 --maxperip=25 --persistdb \
         --starttls --fsync --syncdir --memory=104857600 --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter --virus-filter \
         --qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary" \
-        --spamfilter="@prefix@/bin/bogofilter -p -d @sysconfdir@" \
+        --spamfilter="/usr/bin/bogofilter -p -d /etc/indimail" \
         --logfilter=/tmp/spamfifo --rejectspam=0 --spamexitcode=0 --localfilter --remotefilter \
         --remote-authsmtp=plain --dmasquerade \
-        --dkverify=both --dksign=both --private_key=@sysconfdir@/control/domainkeys/indimail \
+        --dkverify=both --dksign=both --private_key=/etc/indimail/control/domainkeys/indimail \
         --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net
 
     The command below will create the public and private key for domainkey, dkim signatures
 
-    % sudo @prefix@/bin/dknewkey @sysconfdir@/control/domainkeys/indimail 1024
+    % sudo /usr/bin/dknewkey /etc/indimail/control/domainkeys/indimail 1024
 
     If you want to have a message submission port (587) for users to submit outgoing mails
     you can create the Message Submission Port. Note the additional --skipsend option which
@@ -653,15 +653,15 @@ the installation.
     created above for port 25. The message submission port will enforce authenticated SMTP and
     hence you do not require rblsmtpd to frontend the SMTP service.
 
-    % sudo @prefix@/sbin/svctool --smtp=587 --servicedir=@servicedir@ \
-        --qbase=@indimaildir@/queue --qcount=5 --qstart=1 --authsmtp --antispoof \
+    % sudo /usr/sbin/svctool --smtp=587 --servicedir=/service \
+        --qbase=/var/indimail/queue --qcount=5 --qstart=1 --authsmtp --antispoof \
         --query-cache --password-cache \
         --cntrldir=control --localip=0 --maxdaemons=150 --maxperip=25 --persistdb \
         --starttls --fsync --syncdir --memory=104857600 --chkrecipient --chkrelay --masquerade \
         --min-free=52428800 --content-filter --virus-filter \
         --qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary" \
         --dmasquerade --skipsend \
-        --dkverify=both --dksign=both --private_key=@sysconfdir@/control/domainkeys/indimail
+        --dkverify=both --dksign=both --private_key=/etc/indimail/control/domainkeys/indimail
 
     NOTE: You can create a deliver process for port 587 too either by having a different --qbase
     or have a qstart > 5. The point to remember is you can have multiple delivery process as long
@@ -669,66 +669,66 @@ the installation.
 
     If you are going to use the local mail, sendmail, qmail-inject command, they need to figure
     out the queue location. This is done by having a directory called 'defaultqueue' in
-    @sysconfdir@/control. Run the following command to create this
+    /etc/indimail/control. Run the following command to create this
 
-    % sudo @prefix@/sbin/svctool --queueParam=defaultqueue \
-        --qbase=@indimaildir@/queue --qcount=5 --qstart=1 \
+    % sudo /usr/sbin/svctool --queueParam=defaultqueue \
+        --qbase=/var/indimail/queue --qcount=5 --qstart=1 \
         --min-free=52428800 --fsync --syncdir --virus-filter \
         --qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary" \
         --dkverify="both" --dksign=both \
-        --private_key=@sysconfdir@/control/domainkeys/indimail
+        --private_key=/etc/indimail/control/domainkeys/indimail
 
     You can implement QMTP service if you want a faster distribution of mails from your
     relay servers. Remember you will also need to create the file
-    @sysconfdir@/control/qmtproutes
+    /etc/indimail/control/qmtproutes
 
-    % sudo @prefix@/sbin/svctool --qmtp=209 --servicedir=@servicedir@ \
-        --qbase=@indimaildir@/queue --qcount=5 --qstart=1 --cntrldir=control --localip=0 \
+    % sudo /usr/sbin/svctool --qmtp=209 --servicedir=/service \
+        --qbase=/var/indimail/queue --qcount=5 --qstart=1 --cntrldir=control --localip=0 \
         --maxdaemons=75 --maxperip=25 --fsync --syncdir --memory=104857600 --min-free=52428800
 
     If you want a centralized mail queue, you can implement QMQP service. Like QMTP, QMQP
     is much faster than SMTP.
-    % sudo @prefix@/sbin/svctool --qmqp=628 --servicedir=@servicedir@ \
-        --qbase=@indimaildir@/queue --qcount=5 --qstart=1 --cntrldir=control --localip=0 \
+    % sudo /usr/sbin/svctool --qmqp=628 --servicedir=/service \
+        --qbase=/var/indimail/queue --qcount=5 --qstart=1 --cntrldir=control --localip=0 \
         --maxdaemons=75 --maxperip=25 --fsync --syncdir --memory=104857600 --min-free=52428800
 
     The above will create a QMQP service for a centralized queue. On servers which do not have
-    its own queue, you need to create @sysconfdir@/control/qmqpservers containing the IP address
+    its own queue, you need to create /etc/indimail/control/qmqpservers containing the IP address
     of the server which has the QMQP service running.
 
     You can implement Greylisting as described at
     http://www.gossamer-threads.com/lists/qmail/users/136740?page=last
     by executing the command
 
-    % sudo @prefix@/sbin/svctool --greylist=1999 --servicedir=@servicedir@ --min-resend-min=2 \
+    % sudo /usr/sbin/svctool --greylist=1999 --servicedir=/service --min-resend-min=2 \
         --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
         --hash-size=65536 --save-interval=5 --whitelist=greylist.white
 
     If you decide to use greylisting, have the following in tcp.smtp
 
-    :allow,GREYIP=":" in the file @sysconfdir@/tcp.smtp
+    :allow,GREYIP=":" in the file /etc/indimail/tcp.smtp
 
     You can enforce DANE by configuring qmail-dane TLSA verification daemon by executing
     the command
 
-    % sudo @prefix@/sbin/svctool --tlsa=1998 --servicedir=@servicedir@ \
+    % sudo /usr/sbin/svctool --tlsa=1998 --servicedir=/service \
         --timeout-days=30 --context-file=tlsa.context \
         --hash-size=65536 --save-interval=5 --whitelist=tlsa.white
 
     ##### STEP 5  ## IMAP/POP3 Service ##################
     The commands below will create listeners for IMAP and POP3 service.
 
-    % sudo @prefix@/sbin/svctool --imap=143 --servicedir=@servicedir@ --localip=0 \
+    % sudo /usr/sbin/svctool --imap=143 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=52428800 --starttls
-    % sudo @prefix@/sbin/svctool --imap=993 --servicedir=@servicedir@ --localip=0 \
+    % sudo /usr/sbin/svctool --imap=993 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=52428800 \
         --postmaster=postmaster@indimail.org --ssl
-    % sudo @prefix@/sbin/svctool --pop3=110 --servicedir=@servicedir@ --localip=0 \
+    % sudo /usr/sbin/svctool --pop3=110 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=52428800 --starttls
-    % sudo @prefix@/sbin/svctool --pop3=995 --servicedir=@servicedir@ --localip=0 \
+    % sudo /usr/sbin/svctool --pop3=995 --servicedir=/service --localip=0 \
         --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=52428800 \
         --postmaster=postmaster@indimail.org --ssl
@@ -737,37 +737,37 @@ the installation.
     will be required if you decide to split your users belonging to a single domain across
     multiple hosts.
 
-    % sudo @prefix@/sbin/svctool --imap=4143 --servicedir=@servicedir@ --localip=0 \
+    % sudo /usr/sbin/svctool --imap=4143 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 --starttls \
-        --tlsprog=@prefix@/bin/sslerator \
+        --tlsprog=/usr/bin/sslerator \
         --default-domain=indimail.org --memory=52428800 --proxy=143
-    % sudo @prefix@/sbin/svctool --imap=4990 --servicedir=@servicedir@ --localip=0 \
+    % sudo /usr/sbin/svctool --imap=4990 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=52428800 --proxy=143 \
         --postmaster=postmaster@indimail.org --ssl
-    % sudo @prefix@/sbin/svctool --pop3=4110 --servicedir=@servicedir@ --localip=0 \
+    % sudo /usr/sbin/svctool --pop3=4110 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 --starttls \
-        --tlsprog=@prefix@/bin/sslerator \
+        --tlsprog=/usr/bin/sslerator \
         --default-domain=indimail.org --memory=52428800 --proxy=110
-    % sudo @prefix@/sbin/svctool --pop3=4995 --servicedir=@servicedir@ --localip=0 \
+    % sudo /usr/sbin/svctool --pop3=4995 --servicedir=/service --localip=0 \
         --query-cache --maxdaemons=150 --maxperip=25 \
         --default-domain=indimail.org --memory=52428800 --proxy=110 \
         --postmaster=postmaster@indimail.org --ssl
 
     If you have used the --ssl option above, you can quickly generate a self-signed X.509 key for
     IMAP/POP3 over SSL by running the following command. This command should be run
-    after editing the files @sysconfdir@/imapd.cnf, @sysconfdir@/pop3d.cnf
+    after editing the files /etc/indimail/imapd.cnf, /etc/indimail/pop3d.cnf
 
     the command additionally creates a self-signed X.509 certificate for SMTP over SSL. i.e.
 
-    % sudo @prefix@/sbin/svctool --config=cert --postmaster=youremail@yourdomain
+    % sudo /usr/sbin/svctool --config=cert --postmaster=youremail@yourdomain
 
     ##### STEP 6  ## Query Pooling/Caching/Lookup Service ##################
     The command below creates InLookup service with 5 threads. This provides qmail-smtpd, IMAP
     and POP3 services to do high speed user lookups and password authentication.
 
-    % sudo @prefix@/sbin/svctool --inlookup=infifo --servicedir=@servicedir@ \
-        --cntrldir=@sysconfdir@/control --threads=5 \
+    % sudo /usr/sbin/svctool --inlookup=infifo --servicedir=/service \
+        --cntrldir=/etc/indimail/control --threads=5 \
         --activeDays=60 --password-cache --query-cache \
         --use-btree --max-btree-count=10000
 
@@ -799,56 +799,56 @@ the installation.
 
     The commands below will create services for virus scanning and spam filter.
 
-    % sudo @prefix@/sbin/svctool --qscanq --servicedir=@servicedir@ --clamdPrefix=/usr \
+    % sudo /usr/sbin/svctool --qscanq --servicedir=/service --clamdPrefix=/usr \
         --scanint=200
-    % sudo @prefix@/sbin/svctool --config=clamd
-    % sudo @prefix@/sbin/svctool --config=bogofilter
+    % sudo /usr/sbin/svctool --config=clamd
+    % sudo /usr/sbin/svctool --config=bogofilter
 
     ##### STEP 8  ## Password Lookup Service ##################
     The command below creates Password Lookup Service using Name Service Switch (NSS). It extends
     functions like getpwnam(), getspnam(), etc to look at indimail MySQL tables.
 
-    % sudo @prefix@/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
+    % sudo /usr/sbin/svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
         --mysqlhost=localhost --mysqluser=indimail --mysqlpass=ssh-1.5- \
-        --mysqlsocket=/var/run/mysqld.sock --servicedir=@servicedir@
+        --mysqlsocket=/var/run/mysqld.sock --servicedir=/service
 
     ##### STEP 9  ## svscan log Service ##################
     The command below creates a multilog process for logging output of svscan
 
-    % sudo @prefix@/sbin/svctool --svscanlog --servicedir=@servicedir@
+    % sudo /usr/sbin/svctool --svscanlog --servicedir=/service
 
    ###### STEP 10 ### Network Access for SMTP/IMAP/POP3 ####################
-   Check your @sysconfdir@/tcp.smtp file, @sysconfdir@/tcp.imap file,
-   @sysconfdir@/tcp.pop3 file 
+   Check your /etc/indimail/tcp.smtp file, /etc/indimail/tcp.imap file,
+   /etc/indimail/tcp.pop3 file 
 
     This file should list all the static IP's of your machines
     you want to allow to relay out to the internet.
     
     For example: If you have a whole C class named 192.9.200.X
-    either edit @sysconfdir@/tcp.smtp file, or use the following to appened:
+    either edit /etc/indimail/tcp.smtp file, or use the following to appened:
 
     % su
-    # echo "192.9.200.:allow,RELAYCLIENT=\"\"" >> @sysconfdir@/tcp.smtp
-    # echo ":allow,GREYIP=\":\""               >> @sysconfdir@/tcp.smtp
-    # echo "192.9.200.:allow"                  >> @sysconfdir@/tcp.qmtp
-    # echo "192.9.200.:allow"                  >> @sysconfdir@/tcp.qmqp
-    # echo "192.9.200.:allow,IMAPCLIENT=\"\""  >> @sysconfdir@/tcp.imap
-    # echo "192.9.200.:allow,POP3CLIENT=\"\""  >> @sysconfdir@/tcp.pop3
-    # echo "192.9.200.:allow"                  >> @sysconfdir@/tcp.poppass
+    # echo "192.9.200.:allow,RELAYCLIENT=\"\"" >> /etc/indimail/tcp.smtp
+    # echo ":allow,GREYIP=\":\""               >> /etc/indimail/tcp.smtp
+    # echo "192.9.200.:allow"                  >> /etc/indimail/tcp.qmtp
+    # echo "192.9.200.:allow"                  >> /etc/indimail/tcp.qmqp
+    # echo "192.9.200.:allow,IMAPCLIENT=\"\""  >> /etc/indimail/tcp.imap
+    # echo "192.9.200.:allow,POP3CLIENT=\"\""  >> /etc/indimail/tcp.pop3
+    # echo "192.9.200.:allow"                  >> /etc/indimail/tcp.poppass
     # exit
 
-    % sudo @prefix@/bin/tcprules @sysconfdir@/tcp.smtp.cdb \
-        @sysconfdir@/tcp.smtp.tmp < @sysconfdir@/tcp.smtp
-    % sudo @prefix@/bin/tcprules @sysconfdir@/tcp.qmtp.cdb \
-        @sysconfdir@/tcp.qmtp.tmp < @sysconfdir@/tcp.qmtp
-    % sudo @prefix@/bin/tcprules @sysconfdir@/tcp.qmqp.cdb \
-        @sysconfdir@/tcp.qmqp.tmp < @sysconfdir@/tcp.qmqp
-    % sudo @prefix@/bin/tcprules @sysconfdir@/tcp.imap.cdb \
-        @sysconfdir@/tcp.imap.tmp < @sysconfdir@/tcp.imap
-    % sudo @prefix@/bin/tcprules @sysconfdir@/tcp.pop3.cdb \
-        @sysconfdir@/tcp.pop3.tmp < @sysconfdir@/tcp.pop3
-    % sudo @prefix@/bin/tcprules @sysconfdir@/tcp.poppass.cdb \
-        @sysconfdir@/tcp.pop3.tmp < @sysconfdir@/tcp.poppass
+    % sudo /usr/bin/tcprules /etc/indimail/tcp.smtp.cdb \
+        /etc/indimail/tcp.smtp.tmp < /etc/indimail/tcp.smtp
+    % sudo /usr/bin/tcprules /etc/indimail/tcp.qmtp.cdb \
+        /etc/indimail/tcp.qmtp.tmp < /etc/indimail/tcp.qmtp
+    % sudo /usr/bin/tcprules /etc/indimail/tcp.qmqp.cdb \
+        /etc/indimail/tcp.qmqp.tmp < /etc/indimail/tcp.qmqp
+    % sudo /usr/bin/tcprules /etc/indimail/tcp.imap.cdb \
+        /etc/indimail/tcp.imap.tmp < /etc/indimail/tcp.imap
+    % sudo /usr/bin/tcprules /etc/indimail/tcp.pop3.cdb \
+        /etc/indimail/tcp.pop3.tmp < /etc/indimail/tcp.pop3
+    % sudo /usr/bin/tcprules /etc/indimail/tcp.poppass.cdb \
+        /etc/indimail/tcp.pop3.tmp < /etc/indimail/tcp.poppass
 
     you can add other ip's later, when ever you want.
 
@@ -857,7 +857,7 @@ the installation.
     -----------------
     The command below is required if you need to use ODMR (On Demand Mail Relay Protocol)
 
-    % sudo @prefix@/sbin/svctool --smtp=366 --odmr --servicedir=@servicedir@
+    % sudo /usr/sbin/svctool --smtp=366 --odmr --servicedir=/service
 
     The command below is required in case you need to fetch mails from another host which has
     intermittent connectivty. You require fetchmail if you need to pull emails from a host using
@@ -866,42 +866,42 @@ the installation.
     the down file when you have configured fetchmailrc file. You can use fetchmailconf
     to generate fetchmailrc file.
 
-    % sudo @prefix@/sbin/svctool --fetchmail --servicedir=@servicedir@ \
+    % sudo /usr/sbin/svctool --fetchmail --servicedir=/service \
         --query-cache --password-cache \
-        --qbase=@indimaildir@/queue --qcount=5 --qstart=1 \
+        --qbase=/var/indimail/queue --qcount=5 --qstart=1 \
         --cntrldir=control --default-domain=indimail.org \
         --qhpsi="/usr/bin/clamdscan %s --fdpass --quiet --no-summary" \
-        --spamfilter="@prefix@/bin/bogofilter -p -d @sysconfdir@" --spamexitcode=0 \
+        --spamfilter="/usr/bin/bogofilter -p -d /etc/indimail" --spamexitcode=0 \
         --memory=72428800 --fsync --syncdir \
         --dkverify=both
-    % sudo /bin/touch @servicedir@/fetchmail/down
+    % sudo /bin/touch /service/fetchmail/down
 
     The command below creates a service for indisrvr which allows you to execute from remote
     IndiMail admin commands
 
-    % sudo @prefix@/sbin/svctool --indisrvr=4000 --servicedir=@servicedir@ \
+    % sudo /usr/sbin/svctool --indisrvr=4000 --servicedir=/service \
         --localip=0 --maxdaemons=150 --maxperip=25 --avguserquota=2097152 \
-        --certfile=@sysconfdir@/control/servercert.pem --ssl \
-        --hardquota=52428800 --base_path=@basepath@
+        --certfile=/etc/indimail/control/servercert.pem --ssl \
+        --hardquota=52428800 --base_path=/home/mail
 
     The command below creates a service for indimail to support poppassd protocol which
     allows you to change passwords over the network.
 
-    % sudo @prefix@/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip-25 \
+    % sudo /usr/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip-25 \
         --memory=52428800 \
-        --certfile=@sysconfdir@/control/servercert.pem --ssl \
-        --setpassword=@prefix@/sbin/vsetpass --servicedir=@servicedir@
+        --certfile=/etc/indimail/control/servercert.pem --ssl \
+        --setpassword=/usr/sbin/vsetpass --servicedir=/service
 
 
 ########### SECTION 5  ### Start Services ###############################
 5. Start your services
-   IndiMail puts shared libs in @libdir@. In case this is not /usr/lib, or /usr/lib64,
+   IndiMail puts shared libs in /usr/lib64. In case this is not /usr/lib, or /usr/lib64,
    You need to put
-   @libdir@ in /etc/ld.so.conf.d/indimail.conf
+   /usr/lib64 in /etc/ld.so.conf.d/indimail.conf
 
    % su
-   # echo @libdir@ > /etc/ld.so.conf.d/indimail-`arch`.conf
-   # echo @mysql_libdir@ >> /etc/ld.so.conf.d/indimail-`arch`.conf
+   # echo /usr/lib64 > /etc/ld.so.conf.d/indimail-`arch`.conf
+   # echo  >> /etc/ld.so.conf.d/indimail-`arch`.conf
    # /sbin/ldconfig
    # exit
 
@@ -915,7 +915,7 @@ the installation.
    The above command will install svscan.service/svscanboot (in inittab,
    /usr/lib/systemd/system, /etc/init or /etc/event.d). It will also set
    IndiMail as an alternative MTA and replace /usr/sbin/sendmail or
-   /usr/lib/sendmail as link to @prefix@/bin/sendmail
+   /usr/lib/sendmail as link to /usr/bin/sendmail
 
    To make sure that sendmail is disabled on your system
 
@@ -927,18 +927,18 @@ the installation.
    Shutdown down sendmail
    % sudo /etc/init.d/sendmail stop
 
-   Make sure that sendmail is linked to @prefix@/bin/sendmail. If not, then do the
+   Make sure that sendmail is linked to /usr/bin/sendmail. If not, then do the
    following
 
-   % ln -s @prefix@/bin/sendmail /usr/sbin/sendmail
+   % ln -s /usr/bin/sendmail /usr/sbin/sendmail
 
    On some systems sendmail could be in /usr/lib instead of /usr/sbin
 
-   % ln -s @prefix@/bin/sendmail /usr/lib/sendmail
+   % ln -s /usr/bin/sendmail /usr/lib/sendmail
 
    FINALLY! To start all services
 
-   % sudo @prefix@/sbin/initsvc -on
+   % sudo /usr/sbin/initsvc -on
 
    Instead of the above initsvc command, you can also do (a more portable way)
 
@@ -948,37 +948,37 @@ the installation.
 ########### SECTION 6  ### Verfiy INSTALLATION ##########################
 6. Check your installation
 
-   % sudo @prefix@/sbin/svctool --check-install --servicedir=@servicedir@ \
-       --qbase=@indimaildir@/queue --qcount=5 --qstart=1
+   % sudo /usr/sbin/svctool --check-install --servicedir=/service \
+       --qbase=/var/indimail/queue --qcount=5 --qstart=1
 
    NOTE: All the above svctool commands, in all previous steps, are in the script
    create_services. You can run this script from IndiMail's source directory to
    create all services with reasonable defaults.
 
-   sudo sh ./create_services --qbase=@indimaildir@/queue --mbase=@basepath@ \
-     --mysqlPrefix=@mysql_prefix@
+   sudo sh ./create_services --qbase=/var/indimail/queue --mbase=/home/mail \
+     --mysqlPrefix=/usr
 
    On Mac OS X you may run
 
-   sudo sh ./create_services --qbase=@indimaildir@/queue --mbase=@basepath@ \
-     --mysqlPrefix=@mysql_prefix@ --no-nssd
+   sudo sh ./create_services --qbase=/var/indimail/queue --mbase=/home/mail \
+     --mysqlPrefix=/usr --no-nssd
 
 ########### SECTION 7  ### Crontab Entries ##############################
 7. Setup crontab for indimail
     Add lines to roots crontab (you may want to edit the file cronlist)
 
     % su -
-    # crontab -u root @sysconfdir@/cronlist
+    # crontab -u root /etc/indimail/cronlist
     # exit
     CAUTION: Do not use sudo from a non-privileged user else it will
     overwrite your root user's crontab file
 
     The following procedure configures MRTG for IndiMail
     % sudo mkdir /var/www/html/mailmrtg
-    % sudo cp @sysconfdir@/indimail.mrtg.cfg /var/www/html/mailmrtg
+    % sudo cp /etc/indimail/indimail.mrtg.cfg /var/www/html/mailmrtg
     % sudo indexmaker --title="IndiMail Statistics" --section=title \
         --output=/var/www/html/mailmrtg/index.html \
-        @sysconfdir@/indimail.mrtg.cfg
+        /etc/indimail/indimail.mrtg.cfg
 
 
 You can go on to add a virtual domain and users if you wish
@@ -1002,7 +1002,7 @@ You can go on to add a virtual domain and users if you wish
 
     First you need to have all local information stored in MySQL
 
-    % cd @sysconfdir@/control
+    % cd /etc/indimail/control
     % su
     # echo "localhost:indimail:ssh-1.5-:/var/run/mysqld/mysqld.sock:nossl" > host.mysql
       or
@@ -1010,16 +1010,16 @@ You can go on to add a virtual domain and users if you wish
 
     Ensure MySQL is running
 
-    % sudo @prefix@/bin/svc -u @servicedir@/mysql.3306
-    % sudo @prefix@/bin/svstat @servicedir@/mysql.3306
-    @servicedir@/mysql.3306: up (pid 11936) 5 seconds
+    % sudo /usr/bin/svc -u /service/mysql.3306
+    % sudo /usr/bin/svstat /service/mysql.3306
+    /service/mysql.3306: up (pid 11936) 5 seconds
 
     NOTE: replace localhost, indimail, ssh-1.5-, /var/run/mysqld.sock as relevant to your MySQL
     installation. You can use 3306 instead of /var/run/mysqld.sock in case your MySQL
     database is on another host.
     you must use host:user:password:socket or host:user:password:port format
     for host.mysql (for IndiMail 1.6.9 and above). Also set your PATH to 
-    have @prefix@/bin in the path.
+    have /usr/bin in the path.
 
     Creating a Clustered Domain
     ---------------------------
@@ -1027,7 +1027,7 @@ You can go on to add a virtual domain and users if you wish
     have a common MySQL server to store cluster information for all mailstores.
     After you have setup a MySQL server, you need do the following
 
-    % cd @sysconfdir@/control
+    % cd /etc/indimail/control
     % su
     # echo "mysql_server_ip:indimail:ssh-1.5-:/var/run/mysqld.sock" > host.cntrl
        or
@@ -1038,9 +1038,9 @@ You can go on to add a virtual domain and users if you wish
 
     Ensure MySQL is running
 
-    % sudo @prefix@/bin/svc -u @servicedir@/mysql.3306
-    % sudo @prefix@/bin/svstat @servicedir@/mysql.3306
-    @servicedir@/mysql.3306: up (pid 11936) 5 seconds
+    % sudo /usr/bin/svc -u /service/mysql.3306
+    % sudo /usr/bin/svstat /service/mysql.3306
+    /service/mysql.3306: up (pid 11936) 5 seconds
 
     NOTE: replace localhost, indimail, ssh-1.5-, /var/run/mysqld.sock as relevant to your MySQL
     installation. You can use 3306 instead of /var/run/mysqld.sock in case your MySQL
@@ -1048,7 +1048,7 @@ You can go on to add a virtual domain and users if you wish
 
     you must use host:user:password:socket or host:user:password:port format
     for host.cntrl (for IndiMail 1.6.9 and above). Also set your PATH to 
-    have @prefix@/bin in the path.
+    have /usr/bin in the path.
 
     mysql_server_ip ideally should point to a dedicated MySQL server.
     host.cntrl needs to be same for all mailstores. Also you can have host.master
@@ -1064,27 +1064,27 @@ You can go on to add a virtual domain and users if you wish
     For a non-clustered domain you would execute the following command
 
     % su indimail
-    % @prefix@/bin/vadddomain indimail.org
+    % /usr/bin/vadddomain indimail.org
         or
-    % @prefix@/bin/vadddomain indimail.org password-for-postmaster
+    % /usr/bin/vadddomain indimail.org password-for-postmaster
 
     For a clustered domain you would execute the following command
 
     % su indimail
-    % @prefix@/bin/vadddomain -D indimail -S localhost \
+    % /usr/bin/vadddomain -D indimail -S localhost \
         -U indimail -P ssh-1.5- -p 3306 -c indimail.org password-for-postmaster
         or
-    % @prefix@/bin/vadddomain -D indimail -S localhost \
+    % /usr/bin/vadddomain -D indimail -S localhost \
         -U indimail -P ssh-1.5- -p 3306 -c indimail.org password-for-postmaster
 
     vadddomain will modify the following qmail files 
     (default locations used)
-    @sysconfdir@/control/locals
-    @sysconfdir@/control/rcpthosts
-    @sysconfdir@/control/morercpthosts (if rcpthosts > than 50 lines)
-    @sysconfdir@/control/virtualdomains
-    @sysconfdir@/users/assign
-    @sysconfdir@/users/cdb
+    /etc/indimail/control/locals
+    /etc/indimail/control/rcpthosts
+    /etc/indimail/control/morercpthosts (if rcpthosts > than 50 lines)
+    /etc/indimail/control/virtualdomains
+    /etc/indimail/users/assign
+    /etc/indimail/users/cdb
 
     It will also create a domains directory 
         ~indimail/domains/indimail.org
@@ -1105,36 +1105,36 @@ You can go on to add a virtual domain and users if you wish
     You can use vadduser to add users.
 
     % su indimail
-    % @prefix@/bin/vadduser newuser@indimail.org
+    % /usr/bin/vadduser newuser@indimail.org
         or
-    % @prefix@/bin/vadduser newuser@indimail.org <password-for-newuser>
+    % /usr/bin/vadduser newuser@indimail.org <password-for-newuser>
 
     ##### STEP 4  #############################################
     Delete a user
 
     % su indimail
-    % @prefix@/bin/vdeluser newuser@indimail.org (for the indimail.org virtualdomain example)
+    % /usr/bin/vdeluser newuser@indimail.org (for the indimail.org virtualdomain example)
 
     ##### STEP 5  #############################################
     Delete a virtual domain
 
     % su indimail
-    % @prefix@/bin/vdeldomain indimail.org
+    % /usr/bin/vdeldomain indimail.org
 
     ##### STEP 6  #############################################
     Changing a users password
 
     % su indimail
-    % @prefix@/bin/vpasswd user@indimail.org
+    % /usr/bin/vpasswd user@indimail.org
             or
-    % @prefix@/bin/vpasswd user@indimail.org <password-for-user@indimail.org>
+    % /usr/bin/vpasswd user@indimail.org <password-for-user@indimail.org>
 
 ########### SECTION 9 ### RTFM #########################################
 9.  Man pages
     A lot of the underlying indimail details are not covered in this
     file. This is on purpose. If you want to find out the internal
-    workings of indimail and qmail look into all files in @prefix@/share/indimail/doc
-    and @mandir@/man?
+    workings of indimail and qmail look into all files in /usr/share/indimail/doc
+    and /usr/share/man/man?
 
     As a first step, do
 
@@ -1149,7 +1149,7 @@ You can go on to add a virtual domain and users if you wish
     mails, you need to create your actual domain (instead of example.com) using vadddomain
     and setup a mail exchanger record for your domain (MX record).
     To send mails, you can either use SMTP or use sendmail (which is actually
-    @prefix@/bin/sendmail).
+    /usr/bin/sendmail).
 
     you can do the following to send a test mail.
 
@@ -1284,15 +1284,15 @@ startup item containing the IndiMail startup script and paramters list. Create a
 directory for IndiMail using the following command:
 
 Mac OS X 10.5.x or later
-% sudo cp @prefix@/share/indimail/boot/indimail.plist /System/Library/LaunchDaemons
+% sudo cp /usr/share/indimail/boot/indimail.plist /System/Library/LaunchDaemons
 
-NOTE: You can also add @prefix@/sbin/svscanboot to /etc/rc.local
+NOTE: You can also add /usr/sbin/svscanboot to /etc/rc.local
 
 prior to Mac OS X 10.5.x (NOTE: I have not compiled/tested IndiMail on Mac OS X prior to 10.5.x)
 % cd ..
 % sudo mkdir /Library/StartupItems/IndiMail
-% sudo cp @prefix@/bin/qmailctl /Library/StartupItems/IndiMail/IndiMail
-% sudo cp @prefix@share/indimail/boot/StartupParameters.plist /Library/StartupItems/IndiMail
+% sudo cp /usr/bin/qmailctl /Library/StartupItems/IndiMail/IndiMail
+% sudo cp /usrshare/indimail/boot/StartupParameters.plist /Library/StartupItems/IndiMail
 
 When you reboot your machine IndiMail will automatically start.
 
@@ -1304,7 +1304,7 @@ The following four commands will walk you through the Maildir creation process:
 
 % cd /System/Library/User\ Template/English.lproj
 % su
-# @prefix@/bin/maildirmake Maildir
+# /usr/bin/maildirmake Maildir
 # echo ./Maildir/ > .qmail
 # /Developer/Tools/SetFile -a V Maildir
 
@@ -1375,74 +1375,74 @@ PS Output
 % ps waux
 user       pid %cpu %mem    vsz   rss tty      stat start   time command
 smmsp     2506  0.0  0.0   9180  1512 ?        Ss   14:21   0:00 sendmail: Queue runner@01:00:00 for /var/spool/clientmqueue
-root     31328  0.0  0.0   2944  1024 ?        Ss   15:24   0:00 /bin/sh @prefix@/sbin/svscanboot @servicedir@ @servicedir@1
-root     31330  0.0  0.0   1908   388 ?        S    15:24   0:00 @prefix@/sbin/svscan @servicedir@
+root     31328  0.0  0.0   2944  1024 ?        Ss   15:24   0:00 /bin/sh /usr/sbin/svscanboot /service /service1
+root     31330  0.0  0.0   1908   388 ?        S    15:24   0:00 /usr/sbin/svscan /service
 root     31331  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
-qmaill   31332  0.0  0.0   1756   316 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/svscan
-root     31333  0.0  0.0   1728   268 ?        S    15:24   0:00 @prefix@/sbin/readproctitle @servicedir@ errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
+qmaill   31332  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/svscan
+root     31333  0.0  0.0   1728   268 ?        S    15:24   0:00 /usr/sbin/readproctitle /service errors: ................................................................................................................................................................................................................................................................................................................................................................................................................
 root     31334  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise qmail-imapd-ssl.993
-indimail 31335  0.0  0.0   5928  1188 ?        S    15:24   0:00 @prefix@/bin/tcpserver -v -c @servicedir@/qmail-imapd-ssl.993/variables/MAXDAEMONS -C 25 -x @sysconfdir@/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 993 @prefix@/bin/couriertls -server -tcpd @prefix@/sbin/imaplogin @libexecdir@/imapmodules/authindi @libexecdir@/imapmodules/authpam @prefix@/bin/imapd Maildir
+indimail 31335  0.0  0.0   5928  1188 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/qmail-imapd-ssl.993/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 993 /usr/bin/couriertls -server -tcpd /usr/sbin/imaplogin /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authpam /usr/bin/imapd Maildir
 root     31337  0.0  0.0   1744   316 ?        S    15:24   0:00 supervise log
-qmaill   31338  0.0  0.0   1756   312 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/imapd-ssl.993
+qmaill   31338  0.0  0.0   1756   312 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/imapd-ssl.993
 root     31339  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise qmail-pop3d-ssl.995
-indimail 31341  0.0  0.0   5928  1184 ?        S    15:24   0:00 @prefix@/bin/tcpserver -v -c @servicedir@/qmail-pop3d-ssl.995/variables/MAXDAEMONS -C 25 -x @sysconfdir@/tcp.pop3.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 995 @prefix@/bin/couriertls -server -tcpd @prefix@/sbin/pop3login @libexecdir@/imapmodules/authindi @libexecdir@/imapmodules/authpam @prefix@/bin/pop3d Maildir
+indimail 31341  0.0  0.0   5928  1184 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/qmail-pop3d-ssl.995/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.pop3.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 995 /usr/bin/couriertls -server -tcpd /usr/sbin/pop3login /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authpam /usr/bin/pop3d Maildir
 root     31343  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
-qmaill   31345  0.0  0.0   1756   316 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/pop3d-ssl.995
+qmaill   31345  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/pop3d-ssl.995
 root     31347  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise pwdlookup
-indimail 31348  0.0  0.0  44344  1288 ?        Sl   15:24   0:00 @prefix@/sbin/nssd -d debug
+indimail 31348  0.0  0.0  44344  1288 ?        Sl   15:24   0:00 /usr/sbin/nssd -d debug
 root     31354  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise log
 root     31355  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise indisrvr.4000
 root     31356  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
-qmaill   31357  0.0  0.0   1756   320 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/pwdlookup
-indimail 31358  0.0  0.0   6360  1320 ?        S    15:24   0:00 @prefix@/sbin/indisrvr -i 0 -p 4000 -b 40
-qmaill   31360  0.0  0.0   1756   320 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/indisrvr.4000
+qmaill   31357  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/pwdlookup
+indimail 31358  0.0  0.0   6360  1320 ?        S    15:24   0:00 /usr/sbin/indisrvr -i 0 -p 4000 -b 40
+qmaill   31360  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/indisrvr.4000
 root     31361  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise qscanq
 root     31363  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
-qmaill   31364  0.0  0.0   1756   304 ?        S    15:24   0:00 @prefix@/bin/multilog t -* cleanq starting -* deleting: *: not sticky@logdir@/qscanq
+qmaill   31364  0.0  0.0   1756   304 ?        S    15:24   0:00 /usr/bin/multilog t -* cleanq starting -* deleting: *: not sticky/var/log/svc/qscanq
 root     31366  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise qmail-imapd.143
-indimail 31367  0.0  0.0   5928  1204 ?        S    15:24   0:00 @prefix@/bin/tcpserver -v -c @servicedir@/qmail-imapd.143/variables/MAXDAEMONS -C 25 -x @sysconfdir@/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 143 @prefix@/sbin/imaplogin @libexecdir@/imapmodules/authindi @libexecdir@/imapmodules/authpam @prefix@/bin/imapd Maildir
+indimail 31367  0.0  0.0   5928  1204 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/qmail-imapd.143/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 143 /usr/sbin/imaplogin /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authpam /usr/bin/imapd Maildir
 root     31368  0.0  0.0   1744   316 ?        S    15:24   0:00 supervise log
-qmaill   31369  0.0  0.0   1756   320 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/imapd.143
+qmaill   31369  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/imapd.143
 root     31370  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise qmail-pop3d.110
-indimail 31371  0.0  0.0   5928  1196 ?        S    15:24   0:00 @prefix@/bin/tcpserver -v -c @servicedir@/qmail-pop3d.110/variables/MAXDAEMONS -C 25 -x @sysconfdir@/tcp.pop3.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 110 @prefix@/sbin/pop3login @libexecdir@/imapmodules/authindi @libexecdir@/imapmodules/authpam @prefix@/bin/pop3d Maildir
+indimail 31371  0.0  0.0   5928  1196 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/qmail-pop3d.110/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.pop3.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 110 /usr/sbin/pop3login /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authpam /usr/bin/pop3d Maildir
 root     31372  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise log
-qmaill   31373  0.0  0.0   1756   316 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/pop3d.110
+qmaill   31373  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/pop3d.110
 root     31374  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise fetchmail
-indimail 31375  0.0  0.1   6392  2828 ?        S    15:24   0:03 @prefix@/bin/fetchmail --nodetach -f @sysconfdir@/fetchmailrc
+indimail 31375  0.0  0.1   6392  2828 ?        S    15:24   0:03 /usr/bin/fetchmail --nodetach -f /etc/indimail/fetchmailrc
 root     31376  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise log
-qmaill   31377  0.0  0.0   1756   316 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/fetchmail
+qmaill   31377  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/fetchmail
 root     31379  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise proxy-imapd-ssl.9143
-indimail 31380  0.0  0.0   5928  1196 ?        S    15:24   0:00 @prefix@/bin/tcpserver -v -c @servicedir@/proxy-imapd-ssl.9143/variables/MAXDAEMONS -C 25 -x @sysconfdir@/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 9143 @prefix@/bin/couriertls -server -tcpd @prefix@/bin/proxyimap @prefix@/bin/imapd Maildir
+indimail 31380  0.0  0.0   5928  1196 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/proxy-imapd-ssl.9143/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 9143 /usr/bin/couriertls -server -tcpd /usr/bin/proxyimap /usr/bin/imapd Maildir
 root     31383  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise log
-qmaill   31384  0.0  0.0   1756   328 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/proxyIMAP.9143
+qmaill   31384  0.0  0.0   1756   328 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/proxyIMAP.9143
 root     31387  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise proxy-imapd.4143
-indimail 31388  0.0  0.0   5928  1188 ?        S    15:24   0:00 @prefix@/bin/tcpserver -v -c @servicedir@/proxy-imapd.4143/variables/MAXDAEMONS -C 25 -x @sysconfdir@/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 4143 @prefix@/bin/proxyimap @prefix@/bin/imapd Maildir
+indimail 31388  0.0  0.0   5928  1188 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/proxy-imapd.4143/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 4143 /usr/bin/proxyimap /usr/bin/imapd Maildir
 root     31393  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise log
-qmaill   31395  0.0  0.0   1756   316 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/proxyIMAP.4143
+qmaill   31395  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/proxyIMAP.4143
 root     31396  0.0  0.0   1744   328 ?        S    15:24   0:00 supervise proxy-pop3d-ssl.9110
-indimail 31397  0.0  0.0   5928  1316 ?        S    15:24   0:00 @prefix@/bin/tcpserver -v -c @servicedir@/proxy-pop3d-ssl.9110/variables/MAXDAEMONS -C 25 -x @sysconfdir@/tcp.pop3.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 9110 @prefix@/bin/couriertls -server -tcpd @prefix@/bin/proxypop3 @prefix@/bin/pop3d Maildir
+indimail 31397  0.0  0.0   5928  1316 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/proxy-pop3d-ssl.9110/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.pop3.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 9110 /usr/bin/couriertls -server -tcpd /usr/bin/proxypop3 /usr/bin/pop3d Maildir
 root     31400  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise log
-qmaill   31401  0.0  0.0   1756   316 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/proxyPOP3.9110
+qmaill   31401  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/proxyPOP3.9110
 root     31404  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise freshclam
-qscand   31405  0.0  0.0   3500  1332 ?        S    15:24   0:00 @prefix@/bin/freshclam -v --stdout --datadir=@indimaildir@/clamd -f -d -c 2
+qscand   31405  0.0  0.0   3500  1332 ?        S    15:24   0:00 /usr/bin/freshclam -v --stdout --datadir=/var/indimail/clamd -f -d -c 2
 root     31406  0.0  0.0   1744   316 ?        S    15:24   0:00 supervise log
-qmaill   31407  0.0  0.0   1756   320 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/freshclam
+qmaill   31407  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/freshclam
 root     31408  0.0  0.0   1744   316 ?        S    15:24   0:00 supervise qmail-smtpd.366
-indimail 31409  0.0  0.0   5928  1188 ?        S    15:24   0:00 @prefix@/bin/tcpserver -v -H -R -l 0 -x @sysconfdir@/tcp.smtp.cdb -c @servicedir@/qmail-smtpd.366/variables/MAXDAEMONS -o -b 150 -u 555 -g 555 0 366 @prefix@/sbin/qmail-smtpd indimail.org @prefix@/sbin/vchkpass @prefix@/sbin/systpass /bin/false
+indimail 31409  0.0  0.0   5928  1188 ?        S    15:24   0:00 /usr/bin/tcpserver -v -H -R -l 0 -x /etc/indimail/tcp.smtp.cdb -c /service/qmail-smtpd.366/variables/MAXDAEMONS -o -b 150 -u 555 -g 555 0 366 /usr/sbin/qmail-smtpd indimail.org /usr/sbin/vchkpass /usr/sbin/systpass /bin/false
 root     31414  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise log
-qmaill   31415  0.0  0.0   1756   316 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/smtpd.366
+qmaill   31415  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/smtpd.366
 root     31418  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise proxy-pop3d.4110
-indimail 31420  0.0  0.0   5928  1192 ?        S    15:24   0:00 @prefix@/bin/tcpserver -v -c @servicedir@/proxy-pop3d.4110/variables/MAXDAEMONS -C 25 -x @sysconfdir@/tcp.pop3.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 4110 @prefix@/bin/proxypop3 @prefix@/bin/pop3d Maildir
+indimail 31420  0.0  0.0   5928  1192 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/proxy-pop3d.4110/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.pop3.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 4110 /usr/bin/proxypop3 /usr/bin/pop3d Maildir
 root     31424  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
-qmaill   31425  0.0  0.0   1756   320 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/proxyPOP3.4110
+qmaill   31425  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/proxyPOP3.4110
 root     31426  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise qmail-send.25
 root     31427  0.0  0.0   1748   308 ?        S    15:24   0:00 qmail-daemon ./Maildir/
 root     31428  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise log
 root     31429  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise qmail-smtpd.25
-indimail 31430  0.0  0.0   5928  1184 ?        S    15:24   0:00 @prefix@/bin/tcpserver -v -H -R -l 0 -x @sysconfdir@/tcp.smtp.cdb -c @servicedir@/qmail-smtpd.25/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 25 @prefix@/sbin/qmail-smtpd indimail.org @prefix@/sbin/vchkpass @prefix@/sbin/systpass /bin/false
-qmaill   31431  0.0  0.0   1756   316 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/deliver.25
+indimail 31430  0.0  0.0   5928  1184 ?        S    15:24   0:00 /usr/bin/tcpserver -v -H -R -l 0 -x /etc/indimail/tcp.smtp.cdb -c /service/qmail-smtpd.25/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 25 /usr/sbin/qmail-smtpd indimail.org /usr/sbin/vchkpass /usr/sbin/systpass /bin/false
+qmaill   31431  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/deliver.25
 root     31435  0.0  0.0   1744   328 ?        S    15:24   0:00 supervise log
-qmaill   31437  0.0  0.0   1756   324 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/smtpd.25
+qmaill   31437  0.0  0.0   1756   324 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/smtpd.25
 qmails   31438  0.0  0.0   1928   420 ?        S    15:24   0:00 qmail-send
 root     31439  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise clamd
 root     31440  0.0  0.0   6456  1392 ?        S    15:24   0:00 qmail-lspawn ./Maildir/
@@ -1452,19 +1452,19 @@ qmails   31443  0.0  0.0   1900   388 ?        S    15:24   0:00 qmail-todo
 qmails   31445  0.0  0.0   1928   416 ?        S    15:24   0:00 qmail-send
 root     31446  0.0  0.0   6456  1392 ?        S    15:24   0:00 qmail-lspawn ./Maildir/
 root     31447  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
-qscand   31449  0.0  3.1  67996 65068 ?        S    15:24   0:01 @prefix@/sbin/clamd
+qscand   31449  0.0  3.1  67996 65068 ?        S    15:24   0:01 /usr/sbin/clamd
 qmailq   31450  0.0  0.0   1872   368 ?        S    15:24   0:00 qmail-clean
 qmails   31453  0.0  0.0   1928   428 ?        S    15:24   0:00 qmail-send
 qmailr   31454  0.0  0.0   6468  1396 ?        S    15:24   0:00 qmail-rspawn
 root     31455  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise qmail-spamlog
-indimail 31456  0.0  0.0   1740   280 ?        S    15:24   0:00 @prefix@/bin/qmail-cat /tmp/spamfifo
-qmaill   31457  0.0  0.0   1756   320 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/clamd
+indimail 31456  0.0  0.0   1740   280 ?        S    15:24   0:00 /usr/bin/qmail-cat /tmp/spamfifo
+qmaill   31457  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/clamd
 root     31458  0.0  0.0   6456  1428 ?        S    15:24   0:00 qmail-lspawn ./Maildir/
 qmails   31461  0.0  0.0   1928   424 ?        S    15:24   0:00 qmail-send
 qmailq   31462  0.0  0.0   1872   368 ?        S    15:24   0:00 qmail-clean
 root     31463  0.0  0.0   6456  1432 ?        S    15:24   0:00 qmail-lspawn ./Maildir/
 root     31464  0.0  0.0   1744   316 ?        S    15:24   0:00 supervise log
-qmaill   31465  0.0  0.0   1756   316 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/spamlog
+qmaill   31465  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/spamlog
 qmails   31467  0.0  0.0   1928   428 ?        S    15:24   0:00 qmail-send
 qmailr   31468  0.0  0.0   6468  1528 ?        S    15:24   0:00 qmail-rspawn
 root     31469  0.0  0.0   6456  1564 ?        S    15:24   0:00 qmail-lspawn ./Maildir/
@@ -1477,8 +1477,8 @@ qmailq   31475  0.0  0.0   1872   368 ?        S    15:24   0:00 qmail-clean
 qmailq   31476  0.0  0.0   1872   368 ?        S    15:24   0:00 qmail-clean
 root     31477  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise mysql.3306
 root     31478  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
-mysql    31479  0.0  0.3  36652  6364 ?        Sl   15:24   0:00 @mysql_prefix@/libexec/mysqld --defaults-file=@sysconfdir@/indimail.cnf --port=3306 --basedir=@mysql_prefix@ --datadir=@indimaildir@/mysqldb/data --myisam-recover=backup,force --memlock --skip-external-locking --delay-key-write=all --skip-safemalloc --sql-mode=NO_BACKSLASH_ESCAPES --log=@indimaildir@/mysqldb/logs/logquery --log-output=FILE --log-isam=@indimaildir@/mysqldb/logs/logisam --log-slow-queries=@indimaildir@/mysqldb/logs/logslow --log-queries-not-using-indexes --log-warnings=2 --pid-file=/tmp/mysql.3306.pid
-qmaill   31480  0.0  0.0   1756   324 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/mysql.3306
+mysql    31479  0.0  0.3  36652  6364 ?        Sl   15:24   0:00 /usr/libexec/mysqld --defaults-file=/etc/indimail/indimail.cnf --port=3306 --basedir=/usr --datadir=/var/indimail/mysqldb/data --myisam-recover=backup,force --memlock --skip-external-locking --delay-key-write=all --skip-safemalloc --sql-mode=NO_BACKSLASH_ESCAPES --log=/var/indimail/mysqldb/logs/logquery --log-output=FILE --log-isam=/var/indimail/mysqldb/logs/logisam --log-slow-queries=/var/indimail/mysqldb/logs/logslow --log-queries-not-using-indexes --log-warnings=2 --pid-file=/tmp/mysql.3306.pid
+qmaill   31480  0.0  0.0   1756   324 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/mysql.3306
 qmails   31481  0.0  0.0   1900   404 ?        S    15:24   0:00 qmail-todo
 qmails   31482  0.0  0.0   1928   420 ?        S    15:24   0:00 qmail-send
 root     31483  0.0  0.0   6456  1528 ?        S    15:24   0:00 qmail-lspawn ./Maildir/
@@ -1486,26 +1486,26 @@ qmailq   31485  0.0  0.0   1872   368 ?        S    15:24   0:00 qmail-clean
 qmailq   31486  0.0  0.0   1872   368 ?        S    15:24   0:00 qmail-clean
 qmailq   31487  0.0  0.0   1872   372 ?        S    15:24   0:00 qmail-clean
 root     31488  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise inlookup.infifo
-indimail 31489  0.0  0.0   6356  1260 ?        S    15:24   0:00 @prefix@/sbin/inlookup -i 5
+indimail 31489  0.0  0.0   6356  1260 ?        S    15:24   0:00 /usr/sbin/inlookup -i 5
 qmailr   31490  0.0  0.0   6468  1396 ?        S    15:24   0:00 qmail-rspawn
 qmails   31491  0.0  0.0   1900   400 ?        S    15:24   0:00 qmail-todo
 root     31492  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
-qmaill   31493  0.0  0.0   1756   316 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/inlookup.infifo
+qmaill   31493  0.0  0.0   1756   316 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/inlookup.infifo
 qmailq   31494  0.0  0.0   1872   372 ?        S    15:24   0:00 qmail-clean
-indimail 31495  0.0  0.0   6572   860 ?        S    15:24   0:00 @prefix@/sbin/inlookup -i 5
-indimail 31496  0.0  0.0   6572   860 ?        S    15:24   0:00 @prefix@/sbin/inlookup -i 5
+indimail 31495  0.0  0.0   6572   860 ?        S    15:24   0:00 /usr/sbin/inlookup -i 5
+indimail 31496  0.0  0.0   6572   860 ?        S    15:24   0:00 /usr/sbin/inlookup -i 5
 qmailq   31497  0.0  0.0   1872   368 ?        S    15:24   0:00 qmail-clean
-indimail 31498  0.0  0.0   6572   860 ?        S    15:24   0:00 @prefix@/sbin/inlookup -i 5
-indimail 31499  0.0  0.0   6572   860 ?        S    15:24   0:00 @prefix@/sbin/inlookup -i 5
-indimail 31500  0.0  0.0   6572   860 ?        S    15:24   0:00 @prefix@/sbin/inlookup -i 5
+indimail 31498  0.0  0.0   6572   860 ?        S    15:24   0:00 /usr/sbin/inlookup -i 5
+indimail 31499  0.0  0.0   6572   860 ?        S    15:24   0:00 /usr/sbin/inlookup -i 5
+indimail 31500  0.0  0.0   6572   860 ?        S    15:24   0:00 /usr/sbin/inlookup -i 5
 qmails   31501  0.0  0.0   1900   392 ?        S    15:24   0:00 qmail-todo
 qmailq   31502  0.0  0.0   1872   368 ?        S    15:24   0:00 qmail-clean
 root      1056  0.0  0.0   1740   316 ?        S    15:24   0:00 supervise qmail-qmtpd.209
-indimail  1078  0.0  0.0   6640  1108 ?        S    15:24   0:00 @prefix@/bin/tcpserver -v -H -R -l 0 -x @sysconfdir@/tcp.qmtp.cdb -c @servicedir@/qmail-qmtpd.209/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 209 @prefix@/sbin/qmail-qmtpd
-qmaill    1089  0.0  0.0   1756   336 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/qmtpd.209
+indimail  1078  0.0  0.0   6640  1108 ?        S    15:24   0:00 /usr/bin/tcpserver -v -H -R -l 0 -x /etc/indimail/tcp.qmtp.cdb -c /service/qmail-qmtpd.209/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 209 /usr/sbin/qmail-qmtpd
+qmaill    1089  0.0  0.0   1756   336 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/qmtpd.209
 root      1058  0.0  0.0   1740   316 ?        S    15:24   0:00 supervise qmail-qmqpd.628
-indimail  1102  0.0  0.0   6640   836 ?        S    15:24   0:00 @prefix@/bin/tcpserver -v -H -R -l 0 -x @sysconfdir@/tcp.qmqp.cdb -c @servicedir@/qmail-qmqpd.628/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 628 @prefix@/sbin/qmail-qmqpd
-qmaill    1110  0.0  0.0   1756   288 ?        S    15:24   0:00 @prefix@/bin/multilog t @logdir@/qmqpd.628
+indimail  1102  0.0  0.0   6640   836 ?        S    15:24   0:00 /usr/bin/tcpserver -v -H -R -l 0 -x /etc/indimail/tcp.qmqp.cdb -c /service/qmail-qmqpd.628/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 628 /usr/sbin/qmail-qmqpd
+qmaill    1110  0.0  0.0   1756   288 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/qmqpd.628
 ---------- * -------------- * ------------ * -------------- * ------------ * -------------- * ------------
 Basic Installation
 ==================

@@ -30,8 +30,6 @@ rm=/bin/rm
 rmdir=/bin/rmdir
 mv=/bin/mv
 ####################################
-nobogofilter=0
-
 ID=`id -u`
 if [ $ID -ne 0 ] ; then
 	echo "You are not root" >&2
@@ -108,16 +106,6 @@ done
 for port in 465 25 587
 do
 	> ${servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
-  	if [ $nobogofilter -eq 0 -a $port -ne 587 ] ; then
-   		> ${servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
-   		> ${servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
-		> ${servicedir}/qmail-smtpd.$port/variables/REJECTSPAM
-   		> ${servicedir}/qmail-smtpd.$port/variables/LOGFILTER
-		if [ -f ${servicedir}/qmail-smtpd.$port/variables/.options.nospamfilter ] ; then
-			${mv} ${servicedir}/qmail-smtpd.$port/variables/.options.nospamfilter \
-				${servicedir}/qmail-smtpd.$port/variables/.options
-		fi
-  	fi
 done
 ${rm} -f ${sysconfdir}/indimail.mrtg.ok ${sysconfdir}/system.mrtg.ok
 echo "removing startup services"
@@ -149,10 +137,6 @@ for i in indimail.cnf indimail-stat.override backup.conf headerlist \
 do
 	${rm} -f ${sysconfdir}/$i
 done
-
-if [ $nobogofilter -eq 0 ] ; then
-	${rm} -f ${sysconfdir}/bogofilter.cf ${sysconfdir}/bogofilter.cf.example
-fi
 
 echo "removing logs"
 ${rm} -f ${indimaildir}/mysqldb/logs/logisam.log

@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: catChangeLog,v $
+# Revision 1.5  2020-06-05 23:36:37+05:30  Cprogrammer
+# changed ChangeLog filename
+#
 # Revision 1.4  2020-05-30 16:43:18+05:30  Cprogrammer
 # skip blank lines
 #
@@ -15,13 +18,13 @@
 # utility to append changelog to indimail.spec
 #
 #
-# $Id: catChangeLog,v 1.4 2020-05-30 16:43:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: catChangeLog,v 1.5 2020-06-05 23:36:37+05:30 Cprogrammer Exp mbhangui $
 #
 flag=0
 if [ $# -eq 1 ] ; then
 	file=$1
 else
-	file=doc/ChangeLog.indimail
+	file=doc/ChangeLog-indimail
 fi
 cat $file|while read line
 do

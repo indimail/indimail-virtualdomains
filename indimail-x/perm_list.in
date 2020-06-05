@@ -36,7 +36,6 @@
 %attr(4555,root,root)                   @prefix@/bin/vadddomain
 %attr(4555,root,root)                   @prefix@/bin/vdeldomain
 %attr(4755,root,qmail)                  @libexecdir@/sq_vacation
-%attr(6551,root,indimail)               @prefix@/bin/bogofilter
 #
 # Config files
 #

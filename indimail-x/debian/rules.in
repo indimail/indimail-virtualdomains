@@ -54,21 +54,21 @@ build-stamp:
 	if [ -d indimail-$(version) ] ; then \
 		cd indimail-$(version); \
 		./configure --prefix=$(prefix) --libdir=$(libdir) \
-		--with-pkgconfigdir=$(pkgconfigdir) --libexecdir=$(libexecdir) \
-		--mandir=$(prefix)/share/man --datarootdir=$(prefix)/share/indimail \
-		--mandir=$(mandir) --sysconfdir=$(sysconfdir) \
-		--enable-qmaildir=$(indimaildir) --enable-domaindir=$(domaindir) \
-		--enable-tcprules-prog=$(prefix)/bin/tcprules \
-		--enable-tcpserver-file=$(sysconfdir)/tcp/tcp.smtp \
-		--enable-default-domain=$(default_domain) \
-		--enable-mysqlprefix=/usr `cat config/indimail.opts`; \
+			--with-pkgconfigdir=$(pkgconfigdir) --libexecdir=$(libexecdir) \
+			--mandir=$(prefix)/share/man --datarootdir=$(prefix)/share/indimail \
+			--mandir=$(mandir) --sysconfdir=$(sysconfdir) \
+			--enable-qmaildir=$(indimaildir) --enable-domaindir=$(domaindir) \
+			--enable-tcprules-prog=$(prefix)/bin/tcprules \
+			--enable-tcpserver-file=$(sysconfdir)/tcp/tcp.smtp \
+			--enable-default-domain=$(default_domain) \
+			--enable-mysqlprefix=/usr `cat config/indimail.opts`; \
 		cd ..; \
 	fi
 	if [ -d bogofilter-$(bogofilter_version) ] ; then \
 		cd bogofilter-$(bogofilter_version) ; \
-		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --libexecdir=$(libexecdir) \
-		--datarootdir=$(prefix)/share/indimail --mandir=$(mandir) \
-		`cat ../indimail-$(version)/config/bogofilter.opts`; \
+		./configure --prefix=${prefix} --libexecdir=${libexecdir} \
+			--sysconfdir=${sysconfdir} --mandir=${mandir} \
+			--datarootdir=${shareddir} --enable-indimail
 		cd ..; \
 	fi
 	#

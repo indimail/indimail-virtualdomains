@@ -85,15 +85,16 @@ if [ " $1" = " upgrade" -o " $1" = " deconfigure" ] ; then
 	exit 0
 fi
 (
-if [ -s ${sysconfdir}/stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
+if [ -s ${sysconfdir}/indimail-stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
 	echo "reverting permissions"
-	/bin/cat ${sysconfdir}/stat.override | while read line
+	/bin/cat ${sysconfdir}/indimail-stat.override | while read line
 	do
 		if [ -f $line ] ; then
 			echo "reverting permission for $line"
 			/usr/sbin/dpkg-statoverride --remove $line || true
 		fi
 	done
+	${rm} -f ${sysconfdir}/indimail-stat.override
 fi
 if [ -f ${mandir}/man8/rmail_i.8.gz ] ; then
 ${mv} ${mandir}/man8/rmail_i.8.gz ${mandir}/man8/rmail.8.gz || true
