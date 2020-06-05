@@ -6,7 +6,7 @@ Build-Depends: cdbs, debhelper (>= 9), gcc, g++, automake, libgsl0-dev, bison (>
 Standards-Version: 4.5.0
 Homepage: https://github.com/mbhangui/indimail-virtualdomains
 
-Package: bogofilter
+Package: indimail-spamfilter
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Fast anti-spam filtering by Bayesian statistical analysis

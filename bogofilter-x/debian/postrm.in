@@ -55,9 +55,12 @@ case "$1" in
 	exit 0
     ;;
 esac
-
+${rm} -f /etc/indimail/bogofilter-stat.override
 for dir in fetchmail qmail-smtpd.465 qmail-smtpd.25
 do
+  if [ ! -d ${servicedir}/$dir ] ; then
+    continue
+  fi
   > ${servicedir}/$dir/variables/SPAMFILTER
   > ${servicedir}/$dir/variables/SPAMEXITCODE
   > ${servicedir}/$dir/variables/REJECTSPAM

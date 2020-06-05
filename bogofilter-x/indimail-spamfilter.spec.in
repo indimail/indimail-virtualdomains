@@ -36,8 +36,8 @@
 %endif
 
 Summary: Fast anti-spam filtering by Bayesian statistical analysis
-Name: bogofilter
-Version: @version@
+Name: indimail-spamfilter
+Version: @spamfilter_version@
 Release: @release@%{?dist}
 
 %if %build_on_obs == 1
@@ -191,10 +191,11 @@ $TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
 %dir %attr(755,root,root)              %{mandir}
 %dir %attr(755,root,root)              %{mandir}/man1
 %endif
-%attr(444,root,root) %config(noreplace)           %{sysconfdir}/%{name}-release
-%attr(444,root,root) %config(noreplace)           %{sysconfdir}/%{name}-rpm.info
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/%{name}-release
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/%{name}-rpm.info
 %ghost %config(noreplace,missingok)               %{sysconfdir}/bogofilter.cf
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/bogofilter.cf.example
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/perm_list.bogofilter
 
 # bogofilter
 # setuid binary

@@ -2,10 +2,10 @@ Format: 1.0
 Source: bogofilter
 Section: Misc
 Priority: extra
-Binary: bogofilter
+Binary: indimail-spamfilter
 Architecture: any
 Version: @version@-@release@
-Maintainer: Manvendra Bhangui <indimail-virtualdomains@indimail.org>
+Maintainer: Manvendra Bhangui <indimail-spamfilter@indimail.org>
 Homepage: https://github.com/mbhangui/indimail-virtualdomains
 Debtransform-Release: 1
 Debtransform-Tar: dummy.tar.gz

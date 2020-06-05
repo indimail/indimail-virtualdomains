@@ -4,11 +4,12 @@
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS = -I m4
 release := $(shell cat conf-release 2>/dev/null|| echo "1.1")
+spamfilter_version=$(shell cat conf-version)
 SUBDIRS = trio src . doc
 SYSCONFDIR = @sysconfdir@
 
 # what to build
-sysconf_DATA=	bogofilter.cf.example
+sysconf_DATA=	bogofilter.cf.example perm_list.bogofilter
 
 # ChangeLog, cvs2cl lives at http://www.red-bean.com/cvs2cl
 .PHONY:		$(srcdir)/changelog.txt
@@ -144,7 +145,7 @@ noinst_PROGRAMS+=bogogrep_static
 bogogrep_static_SOURCES=contrib/bogogrep.c
 bogogrep_static_LDFLAGS=$(STATICLDFLAGS)
 endif
-noinst_DATA = bogofilter.spec
+noinst_DATA = indimail-spamfilter.spec
 
 EXTRA_DIST+= \
 	contrib/README.contrib \
@@ -177,6 +178,7 @@ edit = sed \
 	-e 's}@PACKAGE\@}$(PACKAGE)}g' \
 	-e 's}@PACKAGE_VERSION\@}$(PACKAGE_VERSION)}g' \
 	-e 's}@version\@}$(VERSION)}g' \
+	-e 's}@spamfilter_version\@}$(spamfilter_version)}g' \
 	-e 's|@release\@|$(release)|g' \
 	-e 's}@VERSION\@}$(VERSION)}g' \
 	-e 's}@DESTDIR\@}$(DESTDIR)}g' \
@@ -184,8 +186,10 @@ edit = sed \
 	-e 's}@DATE\@}$(DATE)}g' \
 	-e 's}@prefix\@}$(prefix)}g'
 
-bogofilter.spec: bogofilter.spec.in catChangeLog ChangeLog conf-version conf-release
+indimail-spamfilter.spec: indimail-spamfilter.spec.in catChangeLog ChangeLog conf-version conf-release
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 debian/Makefile: debian/Makefile.in configure.ac
 	$(edit) $@.in > $@;
+perm_list.bogofilter: perm_list.in
+	$(edit) perm_list.in > $@;
 # ---------------------------------------------------------------------
