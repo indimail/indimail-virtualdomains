@@ -52,7 +52,7 @@ Group: System Environment/Base
 Group: Productivity/Networking/Email/Servers
 %endif
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.bz2
-Source1: http://downloads.sourceforge.net/%{name}/%{name}-rpmlintrc
+# http://downloads.sourceforge.net/%%{name}/%%{name}-rpmlintrc
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
 AutoReqProv: Yes
@@ -146,9 +146,9 @@ if [ %{reconf_bogofilter} -eq 1 ] ; then
 fi
 (
 HOME='.';export HOME
-./configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
-  --mandir=%{mandir} --datarootdir=%{shareddir} \
-  --enable-indimail
+%configure --prefix=%{_prefix} --libexecdir=%{libexecdir} \
+  --sysconfdir=%{sysconfdir} --mandir=%{mandir} \
+  --datarootdir=%{shareddir} --enable-indimail
 )
 
 %install
@@ -311,7 +311,7 @@ do
     --spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\"
     --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
     if [ -f %{servicedir}/qmail-smtpd.$port/variables/.options ] ; then
-      %{__mv} %{servicedir}/qmail-smtpd.$port/variables/.options \
+      %{__cp} %{servicedir}/qmail-smtpd.$port/variables/.options \
         %{servicedir}/qmail-smtpd.$port/variables/.options.nospamfilter
     fi
     echo $options > %{servicedir}/qmail-smtpd.$port/variables/.options
@@ -340,7 +340,7 @@ if [ -d %{servicedir}/fetchmail ] ; then
     --spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\"
     --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
     if [ -f %{servicedir}/fetchmail/variables/.options ] ; then
-      %{__mv} %{servicedir}/fetchmail/variables/.options \
+      %{__cp} %{servicedir}/fetchmail/variables/.options \
         %{servicedir}/fetchmail/variables/.options.nospamfilter
     fi
     echo $options > %{servicedir}/fetchmail/variables/.options
