@@ -67,8 +67,8 @@ cd ..
 list=`get_tar_files`
 for i in $list
 do
-	echo "Versioning $i"
 	dir=`echo $i | sed -e 's{-[0-9].*tar.bz2{{g' -e 's{-[0-9].*tar.xz{{g'`
+	echo "Versioning $dir"
 	if [ ! -d $dir-x ] ; then
 		echo "$dir-x: No such file or directory" 1>&2
 		exit 1
@@ -76,9 +76,11 @@ do
 	case "$dir" in
 		courier-imap)
 		package_version=$courier_version
+		do_archive="bz2"
 		;;
 		fetchmail)
 		package_version=$fetchmail_version
+		do_archive="xz"
 		;;
 	esac
 	/bin/cp -rp "$dir"-x stage/$dir-"$package_version"
@@ -88,17 +90,26 @@ do
 	make -s distclean > /dev/null
 	/bin/rm -rf autom4te.cache .deps
 	cd ..
-	do_archive="gz"
 	case "$do_archive" in
-		gz)
-		echo "Archiving $dir-$package_version.tar.gz in `pwd`"
+		xz)
+		echo "Archiving "$dir"-"$package_version".tar.xz in `pwd`"
 		tar \
-		--exclude="$dir/.git" \
-		--exclude="$dir/debian"  \
-		--exclude="$dir/RCS" \
+		--exclude=""$dir"-"$package_version"/.git" \
+		--exclude=""$dir"-"$package_version"/debian"  \
+		--exclude=""$dir"-"$package_version"/RCS" \
 		-cf - $dir-$package_version \
-		| gzip -c > $rpmbuild/SOURCES/"$dir"-"$package_version".tar.gz
-		SRC="$rpmbuild/SOURCES/"$dir"-"$package_version".tar.gz $SRC"
+		| xz -c > $rpmbuild/SOURCES/"$dir"-"$package_version".tar.xz
+		SRC="$rpmbuild/SOURCES/"$dir"-"$package_version".tar.xz $SRC"
+		;;
+		bz2)
+		echo "Archiving "$dir"-"$package_version".tar.bz2 in `pwd`"
+		tar \
+		--exclude=""$dir"-"$package_version"/.git" \
+		--exclude=""$dir"-"$package_version"/debian"  \
+		--exclude=""$dir"-"$package_version"/RCS" \
+		-cf - $dir-$package_version \
+		| bzip2 -c > $rpmbuild/SOURCES/"$dir"-"$package_version".tar.bz2
+		SRC="$rpmbuild/SOURCES/"$dir"-"$package_version".tar.bz2 $SRC"
 		;;
 	esac
 	cd ..
