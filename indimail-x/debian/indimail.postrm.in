@@ -111,7 +111,12 @@ do
   	if [ $nobogofilter -eq 0 -a $port -ne 587 ] ; then
    		> ${servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
    		> ${servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
+		> ${servicedir}/qmail-smtpd.$port/variables/REJECTSPAM
    		> ${servicedir}/qmail-smtpd.$port/variables/LOGFILTER
+		if [ -f ${servicedir}/qmail-smtpd.$port/variables/.options.nospamfilter ] ; then
+			${mv} ${servicedir}/qmail-smtpd.$port/variables/.options.nospamfilter \
+				${servicedir}/qmail-smtpd.$port/variables/.options
+		fi
   	fi
 done
 ${rm} -f ${sysconfdir}/indimail.mrtg.ok ${sysconfdir}/system.mrtg.ok
