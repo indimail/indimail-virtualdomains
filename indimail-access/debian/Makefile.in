@@ -25,11 +25,13 @@ edit = sed \
 	-e 's,@fetchmail_version\@,$(fetchmail_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
-all: rules changelog postrm postinst indimail-access.install \
+all: rules changelog prerm postrm postinst indimail-access.install \
 	indimail-access.dsc debian.tar.gz dummy.tar.gz
 
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
+prerm: prerm.in Makefile
+	$(edit) $@.in > $@
 postrm: postrm.in Makefile
 	$(edit) $@.in > $@
 postinst: postinst.in Makefile
@@ -46,12 +48,12 @@ changelog: changelog.in ../conf-version ../conf-release
 	| $(edit) > $@
 indimail-access.dsc: indimail-access.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-debian.tar.gz: copyright rules postrm postinst changelog compat \
+debian.tar.gz: copyright rules prerm postrm postinst changelog compat \
 indimail-access.install obs_deb_prep Makefile control
-	tar cf - copyright rules postrm postinst changelog \
+	tar cf - copyright rules prerm postrm postinst changelog \
 		compat indimail-access.install obs_deb_prep Makefile control \
 		| gzip > $@
 
 clean:
-	/bin/rm -f rules dummy.tar.gz *.dsc postrm postinst changelog \
+	/bin/rm -f rules dummy.tar.gz *.dsc prerm postrm postinst changelog \
 	indimail-access.install obs_deb_prep debian.tar.gz

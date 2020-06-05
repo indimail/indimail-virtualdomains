@@ -10,6 +10,7 @@ debian/indimail-access-docs.docs
 debian/rules
 debian/indimail-access.dsc
 debian/indimail-access.install
+debian/prerm
 debian/postrm
 debian/debian.tar.gz
 debian/dummy.tar.gz
