@@ -101,7 +101,7 @@ write_fifolog(rc_t status)
 	/*- write to qmail-smtpd fifo */
 	if ((ptr = getenv("SPAMFD")))
 		spamfd = atoi(ptr);
-	write(spamfd, msg_bogofilter, strlen(msg_bogofilter));
+	if (write(spamfd, msg_bogofilter, strlen(msg_bogofilter)) == -1) {;}
 	if (logflag)
 		return;
 	if ((logfifo = open(fifo_name, O_NDELAY | O_WRONLY)) == -1)
