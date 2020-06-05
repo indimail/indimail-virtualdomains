@@ -216,12 +216,7 @@ m4
 missing
 stamp-h1
 RELEASE-Notes.in
-doc/README
-doc/RELEASE-Notes
-doc/INSTALL.indimail
-doc/INSTALL-RPM
-doc/INSTALL-MYSQL
-doc/README-CLUSTER
+doc/ChangeLog-indimail
 debian/indimail.dsc
 .deps
 vpurge

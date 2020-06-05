@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.43 2020-06-03 20:25:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.44 2020-06-05 23:37:46+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -8,13 +8,11 @@
 # define if building on openSUSE build service
 %global build_on_obs       1
 %global reconfigure_mode   0
-%global reconf_bogofilter  0
 %global build_cflags       "-DOBS_BUILD %{build_cflags}"
 %else
 %define _project           local
 %global build_on_obs       0
 %global reconfigure_mode   0
-%global reconf_bogofilter  0
 %global _hardened_build    1
 %endif
 
@@ -31,17 +29,13 @@
 %global shareddir          @prefix@/share/indimail
 %global mandir             @mandir@
 %global defaultDomain      @defaultdomain@
-%global bogofilter_version 1.2.4
 %if 0%{?suse_version}
 %global noperms            1
 %else
 %global noperms            0
 %endif
 %global url                https://github.com/mbhangui/indimail-virtualdomains
-%global nobogofilter       0
-%global nodksignatures     0
 
-%global _verbose           0
 %global qcount             5
 %global qbase              %{indimaildir}/queue
 %global mbase              @basepath@
@@ -104,9 +98,6 @@ Source3: http://downloads.sourceforge.net/%{name}/%{name}-permissions.secure
 Source4: http://downloads.sourceforge.net/%{name}/%{name}-permissions.paranoid
 %endif
 %endif
-%if %nobogofilter == 0
-Source5: http://downloads.sourceforge.net/%{name}/bogofilter-%{bogofilter_version}.tar.bz2
-%endif
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
 AutoReqProv: Yes
@@ -157,20 +148,6 @@ PreReq: permissions
 %endif
 %endif
 
-%if %nobogofilter == 0
-BuildRequires: flex bison
-%if 0%{?suse_version}
-BuildRequires: db-devel
-%else
-%if 0%{?fedora_version} > 17 || 0%{?centos_version} > 600 || 0%{?rhel_version} > 600 || 0%{?centos_ver} > 7
-BuildRequires: libdb-devel
-%else
-BuildRequires: db4-devel
-%endif
-%endif
-%endif
-
-
 ################################# OBS ###############################
 %if 0%{?rhel_version} != 600 && 0%{?rhel_version} != 700 && 0%{?rhel_version} != 800 && 0%{?centos_ver} != 8
 BuildRequires: sharutils
@@ -207,10 +184,6 @@ Requires: python3-policycoreutils
 %if %{defined centos_version} || %{defined rhel_version} || %{defined %centos_ver}
 Requires: policycoreutils-python
 %endif
-%endif
-
-%if %nobogofilter == 0
-Requires: bogofilter-wordlist
 %endif
 Requires: indimail-access
 
@@ -255,43 +228,7 @@ languages and applications need to dynamically load and use IndiMail.
 For more details visit %{url}
 
 %prep
-for i in %{name}-%{version} bogofilter-%{bogofilter_version}
-do
-  (
-  if [ -d $i ] ; then
-    %{__rm} -rf $i
-  fi
-  if [ " $i" = " bogofilter-%{bogofilter_version}" -a %nobogofilter -ne 0 ] ; then
-    continue
-  fi
-  if [ -f ../SOURCES/$i.tar.bz2 ] ; then
-    %{__bzip2} -d -c ../SOURCES/$i.tar.bz2 | tar xf -
-  elif [ -f ../SOURCES/$i.tar.xz ] ; then
-    xz -d -c ../SOURCES/$i.tar.xz |tar xf -
-  elif [ -f ../SOURCES/$i.tar.gz ] ; then
-    gunzip -c ../SOURCES/$i.tar.gz | tar xf -
-  else
-    echo "No Source Archive for $i"
-    exit 1
-  fi
-%if %build_on_obs == 1
-  if [ -d $i ] ; then
-    #
-    # Apply IndiMail Patch
-    #
-    if [ " $i" = " %{name}-%{version}" ] ; then
-      if [ -f ../SOURCES/%{name}-%{version}.patch ] ; then
-        patch -p0 < ../SOURCES/%{name}-%{version}.patch
-        continue
-      elif [ -f ../SOURCES/%{name}-%{version}.patch.gz ] ; then
-        gunzip -c ../SOURCES/%{name}-%{version}.patch.gz | patch -p0
-        continue
-      fi
-    fi
-  fi
-%endif
-  )
-done
+%setup -q
 
 %build
 ID=$(id -u)
@@ -302,19 +239,12 @@ echo target_alias   %_target_alias
 echo target_cpu     %_target_cpu
 echo target_os      %_target_os
 echo target_vendor  %_target_vendor
-%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
-echo pythondir      %{python3_sitelib}
-%else
-echo pythondir      %{pythondir}
-%endif
 echo Project        %{_project}
 echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
 echo "------------------------------------------------------"
 ) > %{name}-rpm.info
 
 #### IndiMail ######################
-cd %{name}-%{version}
-
 if [ %{reconfigure_mode} -eq 1 ] ; then
   echo "reconfiguring..."
   %{__mkdir_p} m4
@@ -336,25 +266,6 @@ fi
   --enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{sysconfdir}/tcp/tcp.smtp \
   --enable-default-domain=${default_domain} `%{__cat} config/indimail.opts`
 
-#### bogofilter ######################
-%if %nobogofilter == 0
-if [ -d ../bogofilter-%{bogofilter_version} ] ; then
-  cd ../bogofilter-%{bogofilter_version}
-  if [ %{reconf_bogofilter} -eq 1 ] ; then
-    echo "reconfiguring..."
-    %{__mkdir_p} m4
-    aclocal -I m4
-    autoreconf -fiv
-  fi
-  (
-  HOME='.';export HOME
-  ./configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
-  --mandir=%{mandir} --libdir=%{_libdir} --datarootdir=%{shareddir} \
-  `%{__cat} ../%{name}-%{version}/config/bogofilter.opts`
-  )
-fi
-%endif
-
 if [ $ID -eq 0 ] ; then
   if [ $nscd_up -ge 1 ] ; then
     if [ -x %{_sysconfdir}/init.d/nscd ] ; then
@@ -367,27 +278,8 @@ fi
 
 %install
 ID=$(id -u)
-%{__mkdir_p} $RPM_BUILD_ROOT%{_prefix}
-for i in %{name}-%{version} bogofilter-%{bogofilter_version}
-do
-  if [ " $i" = " bogofilter-%{bogofilter_version}" -a %nobogofilter -ne 0 ] ; then
-    continue
-  fi
-  if [ -d $i ] ; then
-    cd $i
-    %{__make} -s DESTDIR=%{buildroot}
-    %{__make} -s DESTDIR=%{buildroot} install-strip
-%if %noperms == 0
-    if [ " $i" = " %{name}-%{version}" ] ; then
-      %{__cp} %{name}-permissions.easy   ../../SOURCES/%{name}-permissions.easy
-      %{__cp} %{name}-permissions.secure ../../SOURCES/%{name}-permissions.secure
-      %{__cp} %{name}-permissions.paranoid ../../SOURCES/%{name}-permissions.paranoid
-    fi
-%endif
-    cd ..
-  fi
-done
-
+%{__make} -s DESTDIR=%{buildroot}
+%{__make} -s DESTDIR=%{buildroot} install-strip
 %{__mkdir_p} %{buildroot}%{sysconfdir}
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
 /bin/rm -f %{name}-rpm.info
@@ -396,16 +288,6 @@ do
   %{__rm} -f %{buildroot}%{_libdir}/lib"$i".la
 done
 %{__rm} -f %{buildroot}%{imoduledir}/iauth.la
-
-if [ %nobogofilter -eq 0 ] ; then
-  if [ -x /usr/bin/chrpath ] ; then
-    for i in bogofilter bogoutil bogotune
-    do
-      /bin/chmod 755 %{buildroot}%{_prefix}/bin/$i
-      /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
-    done
-  fi
-fi
 
 %{__mkdir_p} %{buildroot}%{domaindir}/domains
 %{__mkdir_p} %{buildroot}%{_prefix}/include/indimail
@@ -502,10 +384,6 @@ done
     %{__mkdir_p} %{buildroot}%{logdir}/$i
     $TOUCH %{buildroot}%{logdir}/$i/current
   done
-
-  if [ %nobogofilter -eq 0 ] ; then
-    $TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
-  fi
 %endif
 
 %files -f config_files.list
@@ -562,9 +440,6 @@ done
 # %%ghost filename
 %ghost %attr(0644,root,root) %config(noreplace,missingok) %{sysconfdir}/users/assign
 %ghost %attr(0644,root,root) %config(noreplace,missingok) %{sysconfdir}/users/cdb
-%if %nobogofilter == 0
-%ghost %config(noreplace,missingok)               %{sysconfdir}/bogofilter.cf
-%endif
 %ghost %config(noreplace,missingok)               %{sysconfdir}/procmailrc
 %ghost %config(noreplace,missingok)               %{sysconfdir}/indimail.cnf
 %ghost %config(noreplace,missingok)               %{sysconfdir}/tcp/tcp.poppass
@@ -594,11 +469,6 @@ done
 %attr(644,root,root)                              %{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
 %endif
-
-%if %nobogofilter == 0
-%attr(644,root,root) %config(noreplace)           %{sysconfdir}/bogofilter.cf.example
-%endif
-
 #
 # setuid binaries
 #
@@ -693,19 +563,6 @@ done
 # setuid binary
 %attr(4755,root,qmail)                  %{libexecdir}/sq_vacation
 
-# bogofilter
-%if %nobogofilter == 0
-# setuid binary
-%attr(6551,root,indimail)               %{_prefix}/bin/bogofilter
-%attr(755,root,root)                    %{_prefix}/bin/bogolexer
-%attr(755,root,root)                    %{_prefix}/bin/bogotune
-%attr(755,root,root)                    %{_prefix}/bin/bogoutil
-%attr(755,root,root)                    %{_prefix}/bin/bogoupgrade
-%attr(755,root,root)                    %{_prefix}/sbin/bf_compact
-%attr(755,root,root)                    %{_prefix}/sbin/bf_copy
-%attr(755,root,root)                    %{_prefix}/sbin/bf_tar
-%endif
-
 %attr(755,root,root)                    %{libexecdir}/imapmodules/authindi
 %attr(755,root,root)                    %{libexecdir}/imapmodules/authgeneric
 %attr(755,root,root)                    %{imoduledir}/iauth.so
@@ -715,35 +572,24 @@ done
 %attr(644,root,root)                    %{mandir}/man[1,5,7,8]/*
 
 %if %build_on_obs == 0
-%license %attr(644,root,root)           %{shareddir}/doc/COPYING.indimail
-%if %nobogofilter == 0
-%license %attr(644,root,root)           %{shareddir}/doc/COPYING.bogofilter
-%endif
+%license %attr(644,root,root)           %{shareddir}/doc/COPYING-indimail
 %else
-%attr(644,root,root)                    %{shareddir}/doc/COPYING.indimail
-%if %nobogofilter == 0
-%attr(644,root,root)                    %{shareddir}/doc/COPYING.bogofilter
-%endif
+%attr(644,root,root)                    %{shareddir}/doc/COPYING-indimail
 %endif
 
-%attr(644,root,root)                    %{shareddir}/doc/ChangeLog.indimail
+%attr(644,root,root)                    %{shareddir}/doc/ChangeLog-indimail
 %attr(644,root,root)                    %{shareddir}/doc/FAQ.pdf
-%attr(644,root,root)                    %{shareddir}/doc/INSTALL-MYSQL
-%attr(644,root,root)                    %{shareddir}/doc/INSTALL-RPM
-%attr(644,root,root)                    %{shareddir}/doc/INSTALL.indimail
-%attr(644,root,root)                    %{shareddir}/doc/Quick-INSTALL
-%attr(644,root,root)                    %{shareddir}/doc/README
-%attr(644,root,root)                    %{shareddir}/doc/README-CLUSTER
+%attr(644,root,root)                    %{shareddir}/doc/INSTALL-MYSQL.md
+%attr(644,root,root)                    %{shareddir}/doc/INSTALL-RPM.md
+%attr(644,root,root)                    %{shareddir}/doc/INSTALL-indimail.md
+%attr(644,root,root)                    %{shareddir}/doc/Quick-INSTALL.md
+%attr(644,root,root)                    %{shareddir}/doc/README-indimail.md
+%attr(644,root,root)                    %{shareddir}/doc/README-CLUSTER.md
 %attr(644,root,root)                    %{shareddir}/doc/README.ldap
 %attr(644,root,root)                    %{shareddir}/doc/README.vlimits
-%attr(644,root,root)                    %{shareddir}/doc/RELEASE-Notes
+%attr(644,root,root)                    %{shareddir}/doc/RELEASE-Notes-indimail.md
 %attr(644,root,root)                    %{shareddir}/doc/indimail_arch.png
 %attr(644,root,root)                    %{shareddir}/doc/indimail_queue.png
-
-%if %nobogofilter == 0
-%attr(644,root,root)                    %{shareddir}/doc/AUTHORS.bogofilter
-%attr(644,root,root)                    %{shareddir}/doc/HOWTO.bogofilter
-%endif
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -755,9 +601,6 @@ done
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vmoveuser
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vdeldomain
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vadddomain
-%if %nobogofilter == 0
-%verify (not user group mode) %attr(6551, root, indimail)  %{_prefix}/bin/bogofilter
-%endif
 %verify (not user group mode) %attr(4551, root, root)      %{_prefix}/bin/vdominfo
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vrenameuser
 %verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/printdir
@@ -1089,9 +932,6 @@ fi
 %verify_permissions -e %{_prefix}/bin/vmoveuser
 %verify_permissions -e %{_prefix}/bin/vdeldomain
 %verify_permissions -e %{_prefix}/bin/vadddomain
-%if %nobogofilter == 0
-%verify_permissions -e %{_prefix}/bin/bogofilter
-%endif
 %verify_permissions -e %{_prefix}/bin/vdominfo
 %verify_permissions -e %{_prefix}/bin/vrenameuser
 %verify_permissions -e %{_prefix}/bin/printdir
@@ -1383,40 +1223,6 @@ fi
 %global poppass_mem   26214400
 %endif
 
-# Configure SPAMFILTER, LOGFILTER
-for port in 465 25
-do
-  if [ %nobogofilter -eq 0 ] ; then
-    # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
-    echo "%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" > %{servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
-    if [ ! -f %{servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE ] ; then
-    echo 0 > %{servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
-    fi
-    if [ ! -f %{servicedir}/qmail-smtpd.$port/variables/REJECTSPAM ] ; then
-    echo 0 > %{servicedir}/qmail-smtpd.$port/variables/REJECTSPAM
-    fi
-    if [ ! -f %{servicedir}/qmail-smtpd.$port/variables/MAKESEEKABLE ] ; then
-    echo 1 > %{servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
-    elif [ ! -s %{servicedir}/qmail-smtpd.$port/variables/MAKESEEKABLE ] ; then
-    echo 1 > %{servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
-    fi
-    if [ ! -f %{servicedir}/qmail-smtpd.$port/variables/LOGFILTER ] ; then
-    echo $logfifo > %{servicedir}/qmail-smtpd.$port/variables/LOGFILTER
-    fi
-    grep bogofilter %{servicedir}/qmail-smtpd.$port/variables/.options > /dev/null 2>&1
-	if [ $? -ne 0 ] ; then
-      options="`cat %{servicedir}/qmail-smtpd.$port/variables/.options`
-      --spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\"
-      --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
-      if [ -f %{servicedir}/qmail-smtpd.$port/variables/.options ] ; then
-        %{__mv} %{servicedir}/qmail-smtpd.$port/variables/.options \
-          %{servicedir}/qmail-smtpd.$port/variables/.options.nospamfilter
-      fi
-      echo $options > %{servicedir}/qmail-smtpd.$port/variables/.options
-	fi
-  fi
-done
-
 # IndiMail Daemons
 #indisrvr
 %{_prefix}/sbin/svctool --indisrvr=4000 --servicedir=%{servicedir} \
@@ -1433,13 +1239,6 @@ done
   --memory=%{poppass_mem} \
   --certfile=%{sysconfdir}/certs/servercert.pem --ssl \
   --setpassword=%{_prefix}/sbin/vsetpass --servicedir=%{servicedir}
-
-#
-# bogofilter configuration
-#
-if [ %nobogofilter -eq 0 ] ; then
-  %{_prefix}/sbin/svctool --config=bogofilter
-fi
 
 echo "Creating default indimail tcp access control files"
 # rebuild cdb for poppass
@@ -1623,16 +1422,6 @@ fi
 for port in 465 25 587
 do
   > %{servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
-  if [ %nobogofilter -eq 0 -a $port -ne 587 ] ; then
-    > %{servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
-    > %{servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
-    > %{servicedir}/qmail-smtpd.$port/variables/REJECTSPAM
-    > %{servicedir}/qmail-smtpd.$port/variables/LOGFILTER
-    if [ -f %{servicedir}/qmail-smtpd.$port/variables/.options.nospamfilter ] ; then
-      %{__mv} %{servicedir}/qmail-smtpd.$port/variables/.options.nospamfilter \
-        %{servicedir}/qmail-smtpd.$port/variables/.options
-    fi
-  fi
 done
 
 %{__rm} -f %{sysconfdir}/indimail.mrtg.ok %{sysconfdir}/system.mrtg.ok

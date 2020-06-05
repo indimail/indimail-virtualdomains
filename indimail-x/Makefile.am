@@ -107,11 +107,11 @@ setuid_list = bin/printdir bin/vaddaliasdomain bin/vadddomain bin/vadduser bin/v
 	bin/vrenameuser bin/vsetuserquota bin/vdominfo bin/vuserinfo sbin/vreorg \
 	libexec/sq_vacation
 
-doc_list= ChangeLog.indimail FAQ.pdf \
-	INSTALL.indimail README INSTALL-MYSQL RELEASE-Notes \
-	INSTALL-RPM README-CLUSTER Quick-INSTALL \
+doc_list= ChangeLog-indimail FAQ.pdf INSTALL-indimail.md \
+	README-indimail.md INSTALL-RPM.md Quick-INSTALL.md \
+	INSTALL-MYSQL.md README-CLUSTER.md RELEASE-Notes-indimail.md \
 	README.ldap indimail_arch.png indimail_queue.png \
-	README.vlimits COPYING.indimail
+	README.vlimits COPYING-indimail
 
 COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.c add_ip_map.c \
 				add_user_assign.c addusercntrl.c add_vacation.c atrn_access.c autoturn_dir.c \
@@ -204,12 +204,14 @@ indimailauthlib_SCRIPTS = authgeneric
 indimailbin_SCRIPTS = vcaliasrev
 
 noinst_SCRIPTS = indimail.spec indimail-rpmlintrc \
-	INSTALL INSTALL-RPM INSTALL-MYSQL README-CLUSTER RELEASE-Notes Quick-INSTALL \
-	README vadddomain_handle vadduser_handle vdeldomain_handle \
+	vadddomain_handle vadduser_handle vdeldomain_handle \
 	vaddaliasdomain_handle vrenamedomain_handle vpasswd_handle vmoduser_handle \
 	vdeluser_handle vrenameuser_handle
 
-noinst_DATA = indimail-permissions.easy indimail-permissions.paranoid indimail-permissions.secure
+noinst_DATA = indimail-permissions.easy indimail-permissions.paranoid \
+			  indimail-permissions.secure doc/INSTALL-indimail.md doc/INSTALL-RPM.md \
+			  doc/INSTALL-MYSQL.md doc/README-CLUSTER.md doc/RELEASE-Notes-indimail.md \
+			  doc/Quick-INSTALL.md doc/README-indimail.md
 
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain vmoduser vpasswd \
 				   vdeluser_handle vrenameuser_handle
@@ -223,7 +225,10 @@ vcfilter.1 indimail.7 indimail.mrtg.cfg overquota.sh \
 vadddomain_handle vadduser_handle vpasswd_handle vdeldomain_handle vaddaliasdomain_handle \
 vrenamedomain_handle login_tasks.3 authgeneric usr.sbin.mysqld usr.sbin.clamd \
 vmoduser_handle vmoduser.1 usr.bin.freshclam indimail.mod indimail.pp \
-indimail_config.h
+indimail_config.h \
+doc/INSTALL-indimail.md doc/Quick-INSTALL.md doc/INSTALL-RPM.md \
+doc/INSTALL-MYSQL.md doc/RELEASE-Notes-indimail.md doc/README-CLUSTER.md \
+doc/README-indimail.md
 
 #DISTCLEANFILES=.gitignore
 
@@ -795,20 +800,20 @@ indimail_config.h: config.h
 debian/Makefile: debian/Makefile.in configure.ac
 	$(edit) $@.in > $@;
 
-INSTALL: INSTALL.in configure.ac
-	$(edit) $@.in > doc/$@.indimail; rm -f $@;ln -sf doc/$@.indimail $@
-Quick-INSTALL: Quick-INSTALL.in configure.ac
-	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
-INSTALL-RPM: INSTALL-RPM.in configure.ac
-	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
-INSTALL-MYSQL: INSTALL-MYSQL.in configure.ac
-	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
-RELEASE-Notes: RELEASE-Notes.in configure.ac
-	(cat $@.in; ./catChangeLog) | $(edit) > doc/$@; rm -f $@;ln -sf doc/$@ $@
-README-CLUSTER: README-CLUSTER.in configure.ac
-	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
-README: README.in configure.ac
-	$(edit) $@.in > doc/$@; rm -f $@;ln -sf doc/$@ $@
+doc/INSTALL-indimail.md: INSTALL.in configure.ac
+	$(edit) INSTALL.in > $@
+doc/Quick-INSTALL.md: Quick-INSTALL.in configure.ac
+	$(edit) Quick-INSTALL.in > $@
+doc/INSTALL-RPM.md: INSTALL-RPM.in configure.ac
+	$(edit) INSTALL-RPM.in > $@
+doc/INSTALL-MYSQL.md: INSTALL-MYSQL.in configure.ac
+	$(edit) INSTALL-MYSQL.in > $@
+doc/RELEASE-Notes-indimail.md: RELEASE-Notes.in configure.ac
+	(cat RELEASE-Notes.in; ./catChangeLog) | $(edit) > $@
+doc/README-CLUSTER.md: README-CLUSTER.in configure.ac
+	$(edit) README-CLUSTER.in > $@
+doc/README-indimail.md: README.in configure.ac
+	$(edit) README.in > $@
 
 post_handle:
 	mkdir -p post_handle
@@ -835,7 +840,7 @@ conf-release:
 	if [ ! -f conf-release ] ; then \
 		echo 1.1 > conf-release; \
 	fi
-indimail.spec: indimail.spec.in catChangeLog doc/ChangeLog.indimail conf-version conf-release
+indimail.spec: indimail.spec.in catChangeLog doc/ChangeLog-indimail conf-version conf-release
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 indimail-rpmlintrc: indimail-rpmlintrc.in
 	$(edit) indimail-rpmlintrc.in > $@
