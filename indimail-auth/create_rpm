@@ -67,87 +67,36 @@ cd ..
 list=`get_tar_files`
 for i in $list
 do
-	case "$i" in
-		nssd-"$nssd_version".tar.gz)
-		if [ ! -d nssd-x ] ; then
-			echo "$i: No such file or directory" 1>&2
-			exit 1
-		fi
-		echo "Versioning nssd-"$nssd_version".tar.gz"
-		/bin/cp -rp nssd-x stage/nssd-"$nssd_version"
-		cd stage/nssd-"$nssd_version"
-		echo "Cleaning nssd-$nssd_version"
-		make -s clean > /dev/null
-		make -s distclean > /dev/null
-		/bin/rm -rf autom4te.cache .deps
-		cd ../..
-		;;
-		pam-multi-"$pam_multi_version".tar.gz)
-		if [ ! -d pam-multi-x ] ; then
-			echo "$i: No such file or directory" 1>&2
-			exit 1
-		fi
-		echo "Versioning pam-multi-"$pam_multi_version".tar.gz"
-		/bin/cp -rp pam-multi-x stage/pam-multi-"$pam_multi_version"
-		cd stage/pam-multi-"$pam_multi_version"
-		echo "Cleaning pam-multi-$pam_multi_version"
-		make -s clean > /dev/null
-		make -s distclean > /dev/null
-		/bin/rm -rf autom4te.cache .deps
-		cd ../..
-		;;
-	esac
-	do_archive="gz"
-	dir=`get_dirname $i`
+	dir=`echo $i | sed -e 's{-[0-9].*tar.gz{{g'`
+	echo "Versioning $dir"
+	if [ ! -d $dir-x ] ; then
+		echo "$dir-x: No such file or directory" 1>&2
+		exit 1
+	fi
 	case "$dir" in
-		"nssd-$nssd_version"|"pam-multi-$pam_multi_version")
+		nssd)
+		package_version=$nssd_version
 		;;
-		*)
-		/bin/cp -rp $dir stage
-		;;
-	esac
-	case "$dir" in
-		"nssd-$nssd_version"|"pam-multi-$pam_multi_version")
-		case "$do_archive" in
-			gz)
-				cd stage
-				echo "Archiving $dir.tar.gz in `pwd`"
-				tar \
-				--exclude="$dir/.git" \
-				--exclude="$dir/debian"  \
-				--exclude="$dir/RCS" \
-				-cf - $dir \
-				| gzip -c > $rpmbuild/SOURCES/$dir.tar.gz
-				SRC="$rpmbuild/SOURCES/$dir.tar.gz $SRC"
-				cd ..
-				;;
-			bz2)
-				cd stage
-				echo "Archiving $dir.tar.bz2 in `pwd`"
-				tar \
-				--exclude="$dir/.git" \
-				--exclude="$dir/debian"  \
-				--exclude="$dir/RCS" \
-				-cf - $dir \
-				| bzip2 -c > $rpmbuild/SOURCES/$dir.tar.bz2
-				SRC="$rpmbuild/SOURCES/$dir.tar.bz2 $SRC"
-				cd ..
-				;;
-			xz)
-				cd stage
-				echo "Archiving $dir.tar.xz in `pwd`"
-				tar \
-				--exclude="$dir/.git" \
-				--exclude="$dir/debian"  \
-				--exclude="$dir/RCS" \
-				-cf - $dir \
-				| xz -c > $rpmbuild/SOURCES/$dir.tar.xz
-				SRC="$rpmbuild/SOURCES/$dir.tar.xz $SRC"
-				cd ..
-				;;
-		esac
+		pam-multi)
+		package_version=$pam_multi_version
 		;;
 	esac
+	/bin/cp -rp "$dir"-x stage/$dir-"$package_version"
+	cd stage/$dir-"$package_version"
+	echo "Cleaning $dir-$package_version"
+	make -s clean > /dev/null
+	make -s distclean > /dev/null
+	/bin/rm -rf autom4te.cache .deps
+	cd ..
+	echo "Archiving "$dir"-"$package_version".tar.gz in `pwd`"
+	tar \
+		--exclude=""$dir"-"$package_version"/.git" \
+		--exclude=""$dir"-"$package_version"/debian"  \
+		--exclude=""$dir"-"$package_version"/RCS" \
+		-cf - "$dir"-"$package_version" \
+		| gzip -c > $rpmbuild/SOURCES/"$dir"-"$package_version".tar.gz
+	SRC="$rpmbuild/SOURCES/"$dir"-"$package_version".tar.gz $SRC"
+	cd ..
 done
 echo "Copying permissions files and rpmlintrc"
 for i in `get_non_tar_files indimail-auth/indimail-auth.spec`
