@@ -26,6 +26,7 @@ ripmime_vers=@ripmime_version@
 fortune_vers=@fortune_version@
 flash_version=@flash_version@
 mpack_version=@mpack_version@
+version=@version@
 mandir=/usr/share/man
 libdir=/usr/lib
 rm=/bin/rm
