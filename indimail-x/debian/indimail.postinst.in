@@ -286,14 +286,32 @@ fi
 # SMTP
 for port in 465 25
 do
-	if [ ${nobogofilter} -eq 0 ] ; then
-		echo "${prefix}/bin/bogofilter -p -d ${sysconfdir}" > ${servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
-		echo 0 > ${servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
-		echo 0 > ${servicedir}/qmail-smtpd.$port/variables/REJECTSPAM
-		echo 1 > ${servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
-		echo $logfifo > ${servicedir}/qmail-smtpd.$port/variables/LOGFILTER
-		# update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
+	if [ ${nobogofilter} -ne 0 ] ; then
+		continue
+	fi
+	# update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
+	echo "${prefix}/bin/bogofilter -p -d ${sysconfdir}" > ${servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
+	if [ ! -f ${servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE ] ; then
+	echo 0 > ${servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
+	fi
+	if [ ! -f ${servicedir}/qmail-smtpd.$port/variables/REJECTSPAM ] ; then
+	echo 0 > ${servicedir}/qmail-smtpd.$port/variables/REJECTSPAM
+	fi
+	if [ ! -f ${servicedir}/qmail-smtpd.$port/variables/MAKESEEKABLE ] ; then
+	echo 1 > ${servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
+	elif [ ! -s ${servicedir}/qmail-smtpd.$port/variables/MAKESEEKABLE ] ; then
+	echo 1 > ${servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
+	fi
+	if [ ! -f ${servicedir}/qmail-smtpd.$port/variables/LOGFILTER ] ; then
+	echo $logfifo > ${servicedir}/qmail-smtpd.$port/variables/LOGFILTER
+	fi
+	grep bogofilter ${servicedir}/qmail-smtpd.$port/variables/.options > /dev/null 2>&1
+	if [ $? -ne 0 ] ; then
 		options="`cat ${servicedir}/qmail-smtpd.$port/variables/.options` --spamfilter=\"${prefix}/bin/bogofilter -p -d ${sysconfdir}\" --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
+		if [ -f ${servicedir}/qmail-smtpd.$port/variables/.options ] ; then
+			${mv} ${servicedir}/qmail-smtpd.$port/variables/.options \
+				${servicedir}/qmail-smtpd.$port/variables/.options.nospamfilter
+		fi
 		echo $options > ${servicedir}/qmail-smtpd.$port/variables/.options
 	fi
 done
