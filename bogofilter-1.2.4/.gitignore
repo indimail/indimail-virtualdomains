@@ -76,3 +76,4 @@ debian/postinst
 debian/postrm
 debian/rules
 bogofilter.spec
+doc/ChangeLog
