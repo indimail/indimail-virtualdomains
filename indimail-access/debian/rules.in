@@ -27,6 +27,7 @@ mandir=@mandir@
 libdir=@libdir@
 courier_version=@courier_version@
 fetchmail_version=@fetchmail_version@
+version=@version@
 rm=/bin/rm
 cp=/bin/cp
 
