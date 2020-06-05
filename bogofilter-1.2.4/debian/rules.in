@@ -41,9 +41,9 @@ build-stamp:
 	# run configure script
 	#
 	HOME='.';export HOME
-	./configure --prefix=${prefix} --libexecdir=${libexecdir} --sysconfdir=${sysconfdir} \
-		--mandir=${mandir} --datarootdir=${shareddir} \
-		--enable-indimail
+	./configure --prefix=${prefix} --libexecdir=${libexecdir} \
+		--sysconfdir=${sysconfdir} --mandir=${mandir} \
+		--datarootdir=${shareddir} --enable-indimail
 	$(MAKE) -s DESTDIR=$(DESTDIR)
 	touch build-stamp
 
