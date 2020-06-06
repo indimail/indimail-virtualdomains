@@ -8,6 +8,7 @@ for details on installing indimail-mta
 Look at indimail-3.x/doc/INSTALL for Source Installation instructions
 
 # Compile libqmail
+(check version in libqmail/conf-version)
 ```
 $ cd /usr/local/src
 $ git clone https://github.com/mbhangui/libqmail.git
@@ -24,33 +25,37 @@ $ git clone https://github.com/mbhangui/indimail-virtualdomains.git
 $ git clone https://github.com/mbhangui/indimail-mta.git
 ```
 
-# Compile libdkim-1.4 (with dynamic libaries)
+# Compile libdkim-x (with dynamic libaries)
+(check version in indimail-mta/libdkim-x/conf-version)
 ```
-$ cd /usr/local/src/indimail-mta/libdkim-1.4
+$ cd /usr/local/src/indimail-mta/libdkim-x
 $ ./default.configure
 $ make
 $ sudo make -s install-strip
 ```
 
-# Compile libsrs2-1.0.18 (with dynamic libaries)
+# Compile libsrs2-x (with dynamic libaries)
+(check version in indimail-mta/libsrs2-x/conf-version)
 ```
-$ cd /usr/local/src/indimail-mta/libsrs2-1.0.18
-$ ./defaualt.configure
+$ cd /usr/local/src/indimail-mta/libsrs2-x
+$ ./default.configure
 $ make
 $ sudo make install-strip
 ```
 
 # Build ucspi-tcp (with all patches applied)
+(check version in indimail-mta/ucspi-tcp-x/conf-version)
 ```
-$ cd /usr/local/src/indimail-mta/ucspi-tcp
+$ cd /usr/local/src/indimail-mta/ucspi-tcp-x
 $ make
 $ sudo make install-strip
 ```
 
 # Build bogofilter
 ```
-$ cd /usr/local/src/indimail-virtualdomains/bogofilter-1.2.4
-$ ./defaualt.configure
+$ cd /usr/local/src/indimail-virtualdomains/bogofilter-x
+(check version in indimail-virtualdomains/bogofilter-x/conf-version)
+$ ./default.configure
 $ make
 $ sudo make install-strip
 ```
@@ -58,13 +63,13 @@ $ sudo make install-strip
 # Build bogofilter-wordlist
 ```
 $ cd /usr/local/src/indimail-virtualdomains/bogofilter-wordlist-1.0
-$ ./defaualt.configure
+$ ./default.configure
 $ make
 $ sudo make install-strip
 ```
 
 # Build indimail-mta-x
-(here x is the release)
+(check version in indimail-mta/indimail-mta-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
 $ make
@@ -73,6 +78,7 @@ $ sudo sh ./svctool --config=users --nolog
 ```
 
 # Build indimail
+(check version in indimail-virtualdomains/indimail-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-x
 $ ./default.configure
@@ -81,6 +87,7 @@ $ sudo make install-strip
 ```
 
 # Build courier-imap
+(check version in indimail-virtualdomains/courier-imap-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-virtualdomains/courier-imap-x
 $ ./default.configure
@@ -88,6 +95,7 @@ $ sudo make install-strip
 ```
 
 # Build nssd
+(check version in indimail-virtualdomains/nssd-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-virtualdomains/nssd-x
 $ ./default.configure
@@ -96,8 +104,37 @@ $ sudo make install-strip
 ```
 
 # Build pam-multi
+(check version in indimail-virtualdomains/pam-multi-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-virtualdomains/pam-multi-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
+```
+
+# Build optional packages
+```
+$ cd /usr/local/src/indimail-virtualdomains/altermime-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
+
+$ cd /usr/local/src/indimail-virtualdomains/ripmime-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
+
+$ cd /usr/local/src/indimail-virtualdomains/fortune-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
+
+$ cd /usr/local/src/indimail-virtualdomains/mpack-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
+
+$ cd /usr/local/src/indimail-virtualdomains/flash-x
 $ ./default.configure
 $ make
 $ sudo make install-strip
@@ -140,6 +177,12 @@ https://software.opensuse.org/download.html?project=home%3Aindimail&package=indi
 &
 
 https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail
+
+NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to install the additional software
+
+1. indimail-auth (nssd - providing name service switch and pam-multi to provide multiple pam auth methods)
+2. indimail-utils (Multiple utility that can work with indimail-mta - altermime, ripmime, mpack, fortune and flash - customizable menu based admin interface)
+3. indimail-spamfilter - SPAM filter capabillity using bogofilter - https://bogofilter.sourceforge.io
 
 ```
 Currently, the list of supported distributions for IndiMail is
