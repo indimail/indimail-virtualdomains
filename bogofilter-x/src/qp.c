@@ -1,5 +1,3 @@
-/* $Id: qp.c 6835 2009-05-28 12:44:44Z m-a $ */
-
 /*****************************************************************************
 
 NAME:
@@ -92,7 +90,7 @@ uint qp_decode(word_t *word, qp_mode mode)
 
 static void qp_init(void)
 {
-    uint i;
+    unsigned i;
     static bool first = true;
 
     if (!first)
@@ -103,13 +101,13 @@ static void qp_init(void)
 	qp_xlate2045[i] = qp_xlate2047[i] = (byte) i;
     }
 
-    qp_xlate2045['\t'] = '\t';	/* HTAB */
-    qp_xlate2045[' ']  = ' ';	/* SP */
-    qp_xlate2045['=']  = 0;	/* illegal */
+    qp_xlate2045[(unsigned char)'\t'] = '\t';	/* HTAB */
+    qp_xlate2045[(unsigned char)' ']  = ' ';	/* SP */
+    qp_xlate2045[(unsigned char)'=']  = 0;	/* illegal */
 
-    qp_xlate2047['_']  = ' ';	/* SP */
-    qp_xlate2047['=']  = 0;	/* illegal */
-    qp_xlate2047['?']  = 0;	/* illegal */
+    qp_xlate2047[(unsigned char)'_']  = ' ';	/* SP */
+    qp_xlate2047[(unsigned char)'=']  = 0;	/* illegal */
+    qp_xlate2047[(unsigned char)'?']  = 0;	/* illegal */
 
     return;
 }

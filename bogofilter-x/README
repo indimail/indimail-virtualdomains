@@ -1,7 +1,5 @@
 		Bogofilter -- fast Bayesian spam filtering
 
-# $Id: README 6987 2012-12-30 18:05:33Z m-a $
-
 Summary:
 
 0. Important
@@ -10,7 +8,7 @@ Summary:
 3. Installing Bogofilter
 4. How to contribute
 5. How to request features
-6. Building & Installing Bogofilter from Source Tarball or SVN
+6. Building & Installing Bogofilter from Source Tarball or Git
   a. Downloading
   b. Building & Installing
   c. Configuring
@@ -98,13 +96,15 @@ mailing list, bogofilter@bogofilter.org.  You can subscribe to it by
 sending a message to bogofilter-subscribe@bogofilter.org and
 responding to the confirmation message it sends to you.  More
 information is available on the bogofilter home page at
-http://bogofilter.sourceforge.net/
+http://www.bogofilter.org/ or http://bogofilter.sourceforge.net/
 
-Bugs can be reported via the bogfilter mailing list or through
+Bugs can be reported via the bogfilter mailing list or through the
+issue trackers:
+https://gitlab.com/bogofilter/bogofilter/issues
 http://sourceforge.net/tracker/?atid=499997&group_id=62265&func=browse
 
 If you have code to contribute, please post it on the bogofilter
-mailing list or mail it to David Relson (relson@users.sourceforge.net)
+mailing list or file it to one of the issue trackers (Gitlab preferred).
 
 
 5. How to request features
@@ -119,7 +119,7 @@ feature on your own, which would be great!  You can then send a patch
 to the list.
 
 
-6. Building & Installing Bogofilter from Source Tarball or SVN
+6. Building & Installing Bogofilter from Source Tarball or Git
 --------------------------------------------------------------
 
   a. Downloading
@@ -130,11 +130,13 @@ to the list.
 	http://sourceforge.net/projects/bogofilter/
 
   The latest stable version can be downloaded.  The development source
-  is in a Subversion repository on SourceForge.  To download the latest SVN
+  is in a Subversion repository on SourceForge.  To download the latest Git
   source, cd to the directory to which you wish to download and type
-  the following command:
+  EITHER ONE of the following commands:
 
-  svn checkout http://svn.code.sf.net/p/bogofilter/code/trunk bogofilter
+  git clone https://gitlab.com/bogofilter/bogofilter.git
+  OR
+  git clone git://git.code.sf.net/p/bogofilter/git bogofilter-git
 
   b. Building & Installing
   ------------------------
@@ -142,23 +144,24 @@ to the list.
   To compile and install the standard configuration from a tarball, use
   the following commands:
 
-  cd bogofilter-1.0.1	[change to project directory]
+  cd bogofilter-1.2.5	[change to project directory]
   ./configure		[add configure options as required]
   make all check
   make install		[as root]
 
-  To compile and install the standard configuration from SVN, use
+  To compile and install the standard configuration from Git, use
   the following commands:
 
   cd bogofilter		[change to project directory]
   ./autogen.sh		[add configure options as required]
   make install		[as root]
 
-  Be sure to read README.svn for additional preparations required.
+  Be sure to read README.git for additional preparations required.
 
   You will need a full set of development tools installed to be able
-  to run autogen.sh, including recent automake (1.8) and autoconf
-  (2.59). configure does not have these requirements.
+  to run autogen.sh, including recent automake and autoconf.
+
+  configure does not have these requirements.
 
   c. Configuring
   --------------
@@ -169,11 +172,12 @@ to the list.
   your use.
 
   Running "./configure --help" will list all the configuration
-  options.  The most notable ones are:
+  options.  The most notable ones are, with examples:
 
   --prefix=PREFIX         install architecture-independent files in PREFIX
 			  [default: /usr/local]
-  --with-database=ENGINE  Choose database engine {db|qdbm|sqlite3} 
+  --with-database=ENGINE  Choose database engine
+                          {db|qdbm|sqlite3|tokyocabinet|kyotocabinet|lmdb}
   			  [default: db]
   CPPFLAGS=-I/opt/csw/include
 			  Choose additional include file path /opt/csw/include
@@ -184,7 +188,7 @@ to the list.
 
   If you make modifications to bogofilter, you may need to have a
   recent DocBook XML tool chain, the xmlto program, PassiveTeX and
-  XMLTeX, recent versions of automake (1.8) and autoconf (2.59).
+  XMLTeX, recent versions of automake and autoconf.
 
   These requirements do not apply if you are building an unmodified
   tarball.

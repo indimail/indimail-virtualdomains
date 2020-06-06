@@ -1,4 +1,39 @@
-Developer warnings:
+1. HOWTO - HOW TO RUN A SINGLE TEST
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+a) cd to src/tests in your *BUILD* directory hierarchy.
+   This may be the same as the SOURCE, but it is recommended to keep source and
+   build separate.
+
+   To see documentation, be sure to install the automake.info
+   documentation and run: info '(automake)VPATH Builds'
+
+   Example: cd _build/src/tests # <- adjust the _build/ part!
+
+b) assuming sh-compatible shells such as bash, run this to grab
+   the proper source directory: (copy & paste):
+
+   srcdir="$(sed -n 's/^srcdir = //p' Makefile)" ; export srcdir
+
+   (if you use csh, zsh or other shells, you're on your own here)
+
+c) to run a single test, run it this way, assuming you want to run
+   the test t.lexer:
+
+   $srcdir/t.lexer
+
+   NOTE that t.frame contains the test setup and configuration framework.
+
+d) The framework will run, for example, t.lexer and create a directory where it
+   placed all relevant non-constant data, and print a message similar to the
+   following, to show you where to find it and remind you to clean up after
+   yourself:
+
+   "Results are in ./lexer.20190614.  Remove it after testing."
+
+
+2. Developer warnings (designing tests):
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Solaris 8 head(1) cuts the output at the first NUL character.
 

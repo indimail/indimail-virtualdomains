@@ -1,5 +1,3 @@
-/* $Id: xmem_error.c 4050 2004-02-03 00:59:57Z relson $ */
-
 #include <stdio.h>
 
 #include "xmalloc.h"

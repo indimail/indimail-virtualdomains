@@ -26,9 +26,9 @@ struct dbhsqlite_t {
     char *path;	   /**< directory to hold database */
     char *name;	   /**< database file name */
     sqlite3 *db;   /**< pointer to SQLite3 handle */
-    sqlite3_stmt *select; /**< prepared SELECT statement for DB retrieval */
-    sqlite3_stmt *insert; /**< prepared INSERT OR REPLACE for DB update */
-    sqlite3_stmt *delete; /**< prepared DELETE statement */
+    sqlite3_stmt *stmt_select; /**< prepared SELECT statement for DB retrieval */
+    sqlite3_stmt *stmt_insert; /**< prepared INSERT OR REPLACE for DB update */
+    sqlite3_stmt *stmt_delete; /**< prepared DELETE statement */
     bool created;  /**< gets set by db_open if it created the database new */
     bool swapped;  /**< if endian swapped on disk vs. current host */
 };
@@ -116,7 +116,7 @@ static dbh_t *dbh_init(bfpath *bfp)
 
     dsm = &dsm_sqlite;
 
-    handle = xmalloc(sizeof(dbh_t));
+    handle = (dbh_t *)xmalloc(sizeof(dbh_t));
     memset(handle, 0, sizeof(dbh_t));
 
     handle->name = xstrdup(bfp->filepath);
@@ -188,7 +188,8 @@ static int db_loop(sqlite3 *db,	/**< SQLite3 database handle */
     sqlite3_stmt *stmt;
     int rc;
     bool loop, found = false;
-    dbv_t key, val;
+    dbv_t key;
+    dbv_const_t val;
 
     /* sqlite3_exec doesn't allow us to retrieve BLOBs */
     rc = sqlite3_prepare_v2(db, cmd, strlen(cmd), &stmt, &tail);
@@ -212,8 +213,7 @@ static int db_loop(sqlite3 *db,	/**< SQLite3 database handle */
 		    memcpy(key.data, sqlite3_column_blob(stmt, 0), key.leng);
 
 		    val.leng = sqlite3_column_bytes(stmt, /* column */ 1);
-		    val.data = xmalloc(val.leng);
-		    memcpy(val.data, sqlite3_column_blob(stmt, 1), val.leng);
+		    val.data = sqlite3_column_blob(stmt, 1);
 
 		    /* skip ENDIAN32 token */
 		    if (key.leng != strlen(ENDIAN32)
@@ -222,7 +222,6 @@ static int db_loop(sqlite3 *db,	/**< SQLite3 database handle */
 		    else
 			rc = 0;
 
-		    xfree(val.data);
 		    xfree(key.data);
 		    if (rc) {
 			sqlite3_finalize(stmt);
@@ -345,7 +344,7 @@ void *db_open(void *dummyenv, bfpath *bfp, dbmode_t mode)
 
 		    /* set endianness marker */
 		    k.data = xstrdup(ENDIAN32);
-		    k.leng = strlen(k.data);
+		    k.leng = strlen((const char *)k.data);
 		    v.data = p;
 		    v.leng = sizeof(p);
 		    rc = db_set_dbvalue(dbh, &k, &v);
@@ -367,8 +366,8 @@ void *db_open(void *dummyenv, bfpath *bfp, dbmode_t mode)
      * dbh->insert is not here as it's needed earlier,
      * so it sets itself up lazily
      */
-    dbh->select = sqlprep(dbh, "SELECT value FROM bogofilter WHERE key=? LIMIT 1;", false);
-    if (dbh->select == NULL)
+    dbh->stmt_select = sqlprep(dbh, "SELECT value FROM bogofilter WHERE key=? LIMIT 1;", false);
+    if (dbh->stmt_select == NULL)
     {
 	fprintf(stderr,
 		"\nRemember to register some spam and ham messages before you\n"
@@ -376,7 +375,7 @@ void *db_open(void *dummyenv, bfpath *bfp, dbmode_t mode)
 	exit(EX_ERROR);
     }
 
-    dbh->delete = sqlprep(dbh, "DELETE FROM bogofilter WHERE(key = ?);", true);
+    dbh->stmt_delete = sqlprep(dbh, "DELETE FROM bogofilter WHERE(key = ?);", true);
 
     /* check if byteswapped */
     {
@@ -384,7 +383,7 @@ void *db_open(void *dummyenv, bfpath *bfp, dbmode_t mode)
 	int ee;
 
 	k.data = xstrdup(ENDIAN32);
-	k.leng = strlen(k.data);
+	k.leng = strlen((const char *)k.data);
 	v.data = b;
 	v.leng = sizeof(b);
 
@@ -428,10 +427,10 @@ barf2:
 
 void db_close(void *handle) {
     int rc;
-    dbh_t *dbh = handle;
-    if (dbh->delete) sqlite3_finalize(dbh->delete);
-    if (dbh->insert) sqlite3_finalize(dbh->insert);
-    if (dbh->select) sqlite3_finalize(dbh->select);
+    dbh_t *dbh = (dbh_t *)handle;
+    if (dbh->stmt_delete) sqlite3_finalize(dbh->stmt_delete);
+    if (dbh->stmt_insert) sqlite3_finalize(dbh->stmt_insert);
+    if (dbh->stmt_select) sqlite3_finalize(dbh->stmt_select);
     rc = sqlite3_close(dbh->db);
     if (rc) {
 	print_error(__FILE__, __LINE__, "Can't close database %s: %d",
@@ -450,17 +449,17 @@ const char *db_version_str(void) {
 }
 
 static int sql_txn_begin(void *vhandle) {
-    dbh_t *dbh = vhandle;
+    dbh_t *dbh = (dbh_t *)vhandle;
     return sqlexec(dbh->db,  BEGIN );
 }
 
 static int sql_txn_abort(void *vhandle) {
-    dbh_t *dbh = vhandle;
+    dbh_t *dbh = (dbh_t *)vhandle;
     return sqlexec(dbh->db, "ROLLBACK;");
 }
 
 static int sql_txn_commit(void *vhandle) {
-    dbh_t *dbh = vhandle;
+    dbh_t *dbh = (dbh_t *)vhandle;
     return sqlexec(dbh->db, "COMMIT;");
 }
 
@@ -512,34 +511,34 @@ static int sql_fastpath(
 }
 
 int db_delete(void *vhandle, const dbv_t *key) {
-    dbh_t *dbh = vhandle;
+    dbh_t *dbh = (dbh_t *)vhandle;
 
-    sqlite3_bind_blob(dbh->delete, 1, key->data, key->leng, SQLITE_STATIC);
-    return sql_fastpath(dbh, "db_delete", dbh->delete, NULL, 0);
+    sqlite3_bind_blob(dbh->stmt_delete, 1, key->data, key->leng, SQLITE_STATIC);
+    return sql_fastpath(dbh, "db_delete", dbh->stmt_delete, NULL, 0);
 }
 
 int db_set_dbvalue(void *vhandle, const dbv_t *key, const dbv_t *val) {
-    dbh_t *dbh = vhandle;
+    dbh_t *dbh = (dbh_t *)vhandle;
 
-    if (!dbh->insert)
-	dbh->insert = sqlprep(dbh, "INSERT OR REPLACE INTO bogofilter VALUES(?,?);", true);
+    if (!dbh->stmt_insert)
+	dbh->stmt_insert = sqlprep(dbh, "INSERT OR REPLACE INTO bogofilter VALUES(?,?);", true);
 
-    sqlite3_bind_blob(dbh->insert, 1, key->data, key->leng, SQLITE_STATIC);
-    sqlite3_bind_blob(dbh->insert, 2, val->data, val->leng, SQLITE_STATIC);
-    return sql_fastpath(dbh, "db_set_dbvalue", dbh->insert, NULL, 0);
+    sqlite3_bind_blob(dbh->stmt_insert, 1, key->data, key->leng, SQLITE_STATIC);
+    sqlite3_bind_blob(dbh->stmt_insert, 2, val->data, val->leng, SQLITE_STATIC);
+    return sql_fastpath(dbh, "db_set_dbvalue", dbh->stmt_insert, NULL, 0);
 }
 
 int db_get_dbvalue(void *vhandle, const dbv_t* token, /*@out@*/ dbv_t *val) {
-    dbh_t *dbh = vhandle;
+    dbh_t *dbh = (dbh_t *)vhandle;
 
-    sqlite3_bind_blob(dbh->select, 1, token->data, token->leng, SQLITE_STATIC);
-    return sql_fastpath(dbh, "db_get_dbvalue", dbh->select, val, DS_NOTFOUND);
+    sqlite3_bind_blob(dbh->stmt_select, 1, token->data, token->leng, SQLITE_STATIC);
+    return sql_fastpath(dbh, "db_get_dbvalue", dbh->stmt_select, val, DS_NOTFOUND);
 }
 
 ex_t db_foreach(void *vhandle, db_foreach_t hook, void *userdata) {
-    dbh_t *dbh = vhandle;
+    dbh_t *dbh = (dbh_t *)vhandle;
     const char *cmd = "SELECT key, value FROM bogofilter;";
-    return db_loop(dbh->db, cmd, hook, userdata);
+    return db_loop(dbh->db, cmd, hook, userdata) == 0 ? EX_OK : EX_ERROR;
 }
 
 const char *db_str_err(int e) {
@@ -547,17 +546,17 @@ const char *db_str_err(int e) {
 }
 
 bool db_created(void *vhandle) {
-    dbh_t *dbh = vhandle;
+    dbh_t *dbh = (dbh_t *)vhandle;
     return dbh->created;
 }
 
 bool db_is_swapped(void *vhandle) {
-    dbh_t *dbh = vhandle;
+    dbh_t *dbh = (dbh_t *)vhandle;
     return dbh->swapped;
 }
 
 static int pagesize_cb(void *ptr, int argc, char **argv, char **dummy) {
-    u_int32_t *uptr = ptr;
+    u_int32_t *uptr = (u_int32_t *)ptr;
 
     (void)dummy;
 
@@ -574,7 +573,7 @@ static u_int32_t sql_pagesize(bfpath *bfp)
     int rc;
     u_int32_t size;
 
-    dbh = db_open(NULL, bfp, DS_READ);
+    dbh = (dbh_t *)db_open(NULL, bfp, DS_READ);
     if (!dbh)
 	return 0xffffffff;
     rc = sqlite3_exec(dbh->db, "PRAGMA page_size;", pagesize_cb, &size, NULL);
@@ -592,7 +591,7 @@ static int cb_first;
 static int cb_verify(void *errflag, int columns,
 	char * * values, char * * names)
 {
-    int *e = errflag;
+    int *e = (int *)errflag;
 
     if (columns != 1) {
 	fprintf(stderr, "Strange: got row with more or less than one column.\n"
@@ -627,7 +626,7 @@ static ex_t sql_verify(bfpath *bfp)
 	fprintf(dbgout, "SQLite: sql_verify(%s)\n", bfp->filename);
 	fflush(dbgout);
     }
-    dbh = db_open(NULL, bfp, DS_READ);
+    dbh = (dbh_t *)db_open(NULL, bfp, DS_READ);
     if (!dbh)
 	return EX_ERROR;
     cb_first = 1;

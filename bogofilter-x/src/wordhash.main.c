@@ -1,5 +1,3 @@
-/* $Id: wordhash.main.c 6797 2009-02-14 21:13:00Z relson $ */
-
 #include "common.h"
 
 #include "wordhash.h"
@@ -13,15 +11,15 @@ wh_elt_t;
 /* function definitions */
 
 static void word_init(void *vw){
-     wh_elt_t *w = vw;
-     w->count = 0;   
+     wh_elt_t *w = (wh_elt_t *)vw;
+     w->count = 0;
 }
 
 static void
 dump_hash (wordhash_t * h)
 {
   hashnode_t *p;
-  for (p = wordhash_first (h); p != NULL; p = wordhash_next (h))
+  for (p = (hashnode_t *)wordhash_first (h); p != NULL; p = (hashnode_t *)wordhash_next (h))
     {
       word_t *key = p->key;
       (void)word_puts(key, 0, stdout);
@@ -39,7 +37,7 @@ main (void)
   while (scanf ("%99s", buf) != EOF)
     {
       word_t *t = word_news(buf);
-      w = wordhash_insert (h, t, sizeof (word_t), &word_init);
+      w = (wh_elt_t *)wordhash_insert(h, t, sizeof (word_t), &word_init);
       w->count++;
     }
 

@@ -1,5 +1,3 @@
-/* $Id: robx.c 6875 2010-02-14 20:57:34Z relson $ */
-
 /*****************************************************************************
 
 NAME:
@@ -11,9 +9,10 @@ AUTHOR:
    
 ******************************************************************************/
 
-#include <errno.h>
-
+#include "bftypes.h"
 #include "common.h"
+
+#include <errno.h>
 
 #include "datastore.h"
 #include "rand_sleep.h"
@@ -34,8 +33,8 @@ typedef struct robhook_data {
 } rhd_t;
 
 static void robx_accum(rhd_t *rh, 
-		       word_t *key,
-		       dsv_t *data)
+		       const word_t *key,
+		       const dsv_t *data)
 {
     uint32_t goodness = data->goodcount;
     uint32_t spamness = data->spamcount;
@@ -57,16 +56,16 @@ static void robx_accum(rhd_t *rh,
     }
 }
 
-static int robx_hook(word_t *key, dsv_t *data, 
+static ex_t robx_hook(word_t *key, dsv_t *data, 
 		     void *userdata)
 {
-    struct robhook_data *rh = userdata;
+    struct robhook_data *rh = (struct robhook_data *)userdata;
 
     /* ignore system meta-data */
     if (*key->u.text != '.')
 	robx_accum(rh, key, data);
 
-    return 0;
+    return EX_OK;
 }
 
 /** returns negative for failure.
@@ -74,7 +73,13 @@ static int robx_hook(word_t *key, dsv_t *data,
 double compute_robinson_x(void)
 {
     int ret;
-    double rx;
+    double rx = /* C89 does not support NAN, C99 does. */
+#ifdef NAN
+	    NAN
+#else
+	    -999
+#endif
+	    ;
     dsh_t *dsh;
     wordlist_t *wordlist;
 
@@ -105,9 +110,10 @@ double compute_robinson_x(void)
 	}
     } while (ret == DS_ABORT_RETRY);
 
-    rx = rh.sum/rh.count;
     if (rh.count == 0)
 	ret = -1;
+    else
+	rx = rh.sum/rh.count;
     if (verbose > 2)
 	printf("%s: %u, %u, scale: %f, sum: %f, cnt: %6d, .ROBX: %f\n",
 	       MSG_COUNT, rh.spam_cnt, rh.good_cnt,

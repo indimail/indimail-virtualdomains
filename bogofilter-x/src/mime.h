@@ -1,5 +1,3 @@
-/* $Id: mime.h 6278 2005-10-25 23:48:03Z relson $ */
-
 /** \file mime.h
  * prototypes and definitions for mime.c
  */

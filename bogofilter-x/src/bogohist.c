@@ -1,5 +1,3 @@
-/* $Id: bogohist.c 6766 2009-01-12 04:27:36Z relson $ */
-
 /*****************************************************************************
 
 NAME:
@@ -43,18 +41,17 @@ struct rhistogram_s {
 
 /* Function Definitions */
 
-static int ds_histogram_hook(/*@unused@*/ word_t *key, dsv_t *data,
+static ex_t ds_histogram_hook(/*@unused@*/ word_t *key, dsv_t *data,
 			     void *userdata)
-/* returns 0 if ok, 1 if not ok */
 {
-    rhistogram_t *hist = userdata;
+    rhistogram_t *hist = (rhistogram_t *)userdata;
 
     double fw = calc_prob(data->goodcount, data->spamcount, mgood, mbad);
     uint idx = min(fw * INTERVALS, INTERVALS-1);
 
     /* ignore meta-tokens */
     if (*key->u.text == (byte) '.')
-	return 0;
+	return EX_OK;
 
     hist->count[idx] += 1;
 
@@ -70,7 +67,7 @@ static int ds_histogram_hook(/*@unused@*/ word_t *key, dsv_t *data,
 	    spam_hapax += 1;
     }
 
-    return 0;
+    return EX_OK;
 }
 
 static int print_histogram(rhistogram_t *hist)

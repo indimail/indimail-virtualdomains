@@ -1,4 +1,3 @@
-/* $Id: bogofilter.h 2867 2003-08-23 18:03:56Z relson $ */
 /*  constants and declarations for bogofilter */
 
 #ifndef	BOGOFILTER_H

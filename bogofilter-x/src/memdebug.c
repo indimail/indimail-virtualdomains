@@ -1,5 +1,3 @@
-/* $Id: memdebug.c 5708 2005-03-24 04:04:01Z relson $ */
-
 /*
 * NAME:
 *    memdebug.c -- memory usage debugging layer for malloc(), free(), etc.
@@ -248,7 +246,7 @@ void
 void
 *md_realloc(void *ptr, size_t size)
 {
-    mh_t *mh = ((mh_t *) ptr)-1;
+    mh_t *mh = ((mh_t *) ptr)-1, *omh;
     mt_t *mt;
     size_t oldsize = mh->size;
 
@@ -265,7 +263,9 @@ void
 	mh_disp( "r", mh );
 
     size = size + sizeof(mh_t) + sizeof(md_tag);
+    omh = mh;
     mh = realloc(mh, size);
+    if (!mh) { const char *oom = "Out of memory in " __FILE__ ":" #__LINE__ "\n"; free(omh); if(write(STDERR_FILENO, oom, strlen(oom))) { /* ignore error */ } _exit(EXIT_FAILURE); }
 
     mh->size = size - sizeof(mh_t) - sizeof(md_tag);
     mh->indx = ++cnt_realloc;

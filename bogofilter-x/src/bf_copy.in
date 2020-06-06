@@ -5,8 +5,6 @@
 #    use to copy wordlist.db and related files
 #    from one directory to another
 
-# $Id: bf_copy.in 6750 2008-10-15 23:18:45Z clint $
-
 set -e # die on errors
 
 : ${BOGOUTIL:=@transformed_bogoutil@}

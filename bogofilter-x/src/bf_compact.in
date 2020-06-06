@@ -6,8 +6,6 @@
 #    replaces original directory with new one
 #    renames original directory with '.old' extension
 
-# $Id: bf_compact.in 6749 2008-10-15 23:08:06Z clint $
-
 set -e # die on errors
 
 : ${BOGOFILTER:=@transformed_bogofilter@}

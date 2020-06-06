@@ -26,6 +26,9 @@ int xfgetsl(char *buf, int max_size, FILE *in, bool no_nul_terminate)
     char *end = buf + max_size;				/* Physical end of buffer */
     char *fin = end - (no_nul_terminate ? 0 : 1);	/* Last available byte    */
 
+    if (cp == fin && no_nul_terminate)
+	return 0;
+
     if (cp >= fin) {
 	fprintf(stderr, "Invalid buffer size, exiting.\n");
 	abort();
@@ -73,7 +76,7 @@ int main(int argc, char **argv) {
 
     non_nul_terminate = atoi(argv[2]);
     size = atoi(argv[1]);
-    buf = xmalloc(size);
+    buf = (char *)xmalloc(size);
     for (;;) {
 	count = xfgetsl(buf, size, stdin, non_nul_terminate);
 	if (count == EOF) break;

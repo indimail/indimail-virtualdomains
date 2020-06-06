@@ -1,5 +1,3 @@
-/* $Id: bogomain.h 4830 2004-10-15 01:32:59Z relson $ */
-
 #ifndef BOGOMAIN_H
 #define BOGOMAIN_H
 

@@ -1,5 +1,3 @@
-/* $Id: base64.c 6906 2010-07-03 08:39:44Z m-a $ */
-
 /** \file base64.c
  * decode base64 encoded text
  * \author David Relson <relson@osagesoftware.com>
@@ -86,7 +84,7 @@ static void base64_init(void)
 	base64_xlate[c] = (byte) i;
     }
 
-    base64_xlate['='] = base64_invalid;
+    base64_xlate[(unsigned char)'='] = base64_invalid;
 
     return;
 }

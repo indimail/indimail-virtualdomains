@@ -1,5 +1,3 @@
-/* $Id: configfile.c 6876 2010-02-15 19:16:16Z m-a $ */
-
 /*****************************************************************************
 
 NAME:
@@ -31,6 +29,7 @@ AUTHOR:
 #include "lexer.h"
 #include "longoptions.h"
 #include "maint.h"
+#include "system.h"
 #include "wordlists.h"
 #include "xatox.h"
 #include "xmalloc.h"
@@ -62,7 +61,7 @@ char 	*config_file_name;
 
 /*  remove trailing comment from the line.
  */
-void remove_comment(const char *line)
+void remove_comment(char *line)
 {
     char *tmp = strchr(line, '#');
     if (tmp != NULL) {

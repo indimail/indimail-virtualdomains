@@ -2,7 +2,7 @@
 
 	2005-11-28
 
-	* Minor FAQ updates and correctons.
+	* Minor FAQ updates and corrections.
 	* Abort if ar(1) is not available during build.
 
 	2005-11-19
@@ -2874,8 +2874,6 @@
 0.1: Mon 19 Aug 2002 03:07:31
 
 	* Initial release.
-
-$Id: NEWS.0 6525 2006-07-04 03:20:12Z relson $
 
  vim:tw=79 com=bf\:* ts=8 sts=8 sw=8 ai:
 

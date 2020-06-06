@@ -1,0 +1,19 @@
+#! /bin/sh
+
+# This checks if bogofilter/bogolexer will properly MIME decode messages
+# that contain boundaries that end in "--".
+
+. ${srcdir:=.}/t.frame
+
+cat <<_EOF | $BOGOLEXER -p -C | grep TEST >/dev/null
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="--boundary--"
+
+----boundary--
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
+
+=54=45=53=54
+
+----boundary----
+_EOF

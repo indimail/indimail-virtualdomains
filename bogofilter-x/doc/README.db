@@ -1,8 +1,6 @@
 BERKELEY DB ENVIRONMENT CODE
 ============================
 
-$Id: README.db 6978 2012-12-03 22:04:13Z m-a $
-
 This document does not apply when you are installing a bogofilter
 version that has been configured to use the QDBM or SQLite3
 database libraries. Common entry points are these
@@ -51,32 +49,15 @@ These versions are supported (with all Sleepycat-posted patches applied
 - if using a pre-packaged Berkeley DB version, the packager should have
 applied the patches, check your vendor's update site regularly):
 
-  Sleepycat Software: Berkeley DB 3.1.17: (July     31, 2000)
-  Sleepycat Software: Berkeley DB 3.2.9:  (January  24, 2001)
-  Sleepycat Software: Berkeley DB 3.3.11: (July     12, 2001)
-  Sleepycat Software: Berkeley DB 4.0.14: (November 18, 2001)
-  Sleepycat Software: Berkeley DB 4.1.25: (December 19, 2002)
-  Sleepycat Software: Berkeley DB 4.2.52: (December  3, 2003)
-  Sleepycat Software: Berkeley DB 4.3.29: (September 6, 2005)
-  Sleepycat Software: Berkeley DB 4.4.20: (January  10, 2006)
-  Berkeley DB 4.5.20: (September 20, 2006)
-  Berkeley DB 4.6.19: (August 10, 2007)
-  Berkeley DB 4.7.25: (May 15, 2008)
-  Berkeley DB 4.8.24: (August 14, 2009)
-  Berkeley DB 4.8.26: (December 18, 2009)
-  Berkeley DB 5.0.21: (March 30, 2010)
-  Berkeley DB 5.1.19: (August 27, 2010)
-  Berkeley DB 5.2.42: (February 29, 2012)
   Berkeley DB 5.3.21: (May 11, 2012)
 
 Other versions of Berkeley DB between the first and last listed above
 may or may not work but usually they will.
 
-Berkeley DB versions 4.1 and newer are recommended over the previous
-versions, because the newer can detect data corruptions more reliably
-(through the use of checksums that detect partially written data base
-pages); Berkeley DB 4.2 and 4.3 appear a bit faster under load than 4.1
-and older versions, 4.4 and newer have not yet been evaluated for speed.
+Note that versions starting with Berkeley DB 6 changed their license
+to the GNU Affero General Public License, which "requires the operator of a
+network server to provide the source code of the modified version running there
+to the users of that server." (quoting the AGPLv3 preamble).
 
 2.2.1 Upgrading to transactional databases, also from older bogofilter versions
 
@@ -120,7 +101,7 @@ and usually ship with their write cache enabled. They write fast, but
 can lose or corrupt up to a few MB of data when the power fails.
 Note: This problem is not specific to bogofilter.
 
-It is possible to sacrifice a bit bit of the the write speed and get
+It is possible to sacrifice a bit of the the write speed and get
 reliability in turn, by switching off the disk's write cache (see
 appendix A for instructions).
 

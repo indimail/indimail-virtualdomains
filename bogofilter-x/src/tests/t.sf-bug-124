@@ -1,0 +1,14 @@
+#! /bin/sh
+
+. ${srcdir:=.}/t.frame
+
+# t.sf-bug-124
+
+gzip -c -d <"$srcdir/inputs/input-sf-bug-124-yyinput-tmin.gz" >"$TMPDIR/input"
+$BOGOLEXER -p -C -I "$TMPDIR/input" >/dev/null
+
+gzip -c -d <"$srcdir/inputs/input-sf-bug-124-buffshift-tmin.gz" >"$TMPDIR/input"
+$BOGOLEXER -p -C -I "$TMPDIR/input" >/dev/null
+
+gzip -c -d <"$srcdir/inputs/input-sf-bug-124-count-tmin.gz" >"$TMPDIR/input"
+$BOGOLEXER -p -C -I "$TMPDIR/input" >/dev/null

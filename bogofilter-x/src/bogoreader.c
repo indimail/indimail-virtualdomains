@@ -1,5 +1,3 @@
-/* $Id: bogoreader.c 6924 2010-07-06 21:44:36Z m-a $ */
-
 /*****************************************************************************
 
 NAME:
@@ -41,7 +39,7 @@ static void (*fini)(void);
 static int  argc;
 static const char * const *argv;
 static const char *filename;
-static char namebuff[PATH_LEN+1];
+static char namebuff[PATH_LEN + 1 + MEMBERSIZE(struct dirent, d_name)];
 static char dir_name[PATH_LEN+1];
 
 static FILE *yy_file;
@@ -185,7 +183,7 @@ static st_t ismaildir(const char *dir) {
 
     r = isdir(dir);
     if (r != IS_DIR) return r;
-    x = xmalloc((l = strlen(dir)) + maxlen /* append */ + 1 /* NUL */);
+    x = (char *)xmalloc((l = strlen(dir)) + maxlen /* append */ + 1 /* NUL */);
     memcpy(x, dir, l);
     for (y = maildir_subs; *y; y++) {
 	strlcpy(x + l, *y, maxlen + 1);
@@ -368,7 +366,7 @@ static bool dir_next_mail(void)
 		if (*maildir_sub == NULL)
 		    return false; /* IMPORTANT for termination */
 		siz = strlen(dir_name) + 4 + 1;
-		x = xmalloc(siz);
+		x = (char *)xmalloc(siz);
 		strlcpy(x, dir_name, siz);
 		strlcat(x, *(maildir_sub++), siz);
 	    }

@@ -1,11 +1,8 @@
-# $Id: Makefile.am 6975 2012-11-06 02:18:15Z m-a $
-
 check_PROGRAMS=dehex spam_header_name dumbhead deqp deb64 escnp abortme \
 	       u_fpe wantcore leakmem ctype
 
 AM_CPPFLAGS = -I$(srcdir)/..
-AM_LDFLAGS = -L..
-LDADD = -lbogofilter
+LDADD = ../libbogofilter.a
 
 BUILT_SOURCES = t.config t.query.config
 CLEANFILES= $(BUILT_SOURCES)
@@ -35,10 +32,12 @@ PARSING_TESTS = \
 	t.ignore_spam_header \
 	t.nullstatsprefix \
 	t.integrity t.integrity2 t.integrity3 \
-	t.passthrough-hb \
+	t.passthrough-hb t.passthrough-truncation \
 	t.escaped.html t.escaped.url \
 	t.base64 t.split t.parsing \
 	t.lexer t.lexer.mbx t.lexer.qpcr t.lexer.eoh \
+	  t.lexer.boundary-- t.fgetsl.abort \
+	t.sf-bug-121 t.sf-bug-122 t.sf-bug-124 \
 	t.spam.header.place \
 	t.block.on.subnets \
 	t.token.count \
@@ -67,7 +66,7 @@ TESTSCRIPTS = ${ENVIRON_TESTS} ${PARSING_TESTS} ${WORDLIST_TESTS} ${SCORING_TEST
 
 TESTS=$(BUILT_TESTS) $(TESTSCRIPTS)
 
-TESTS_ENVIRONMENT=RUN_FROM_MAKE=1 AWK=$(AWK) srcdir=$(srcdir) SHELL="$(SHELL)" $(SHELL) $(VERBOSE)
+LOG_COMPILER=env RUN_FROM_MAKE=1 AWK=$(AWK) srcdir=$(srcdir) SHELL="$(SHELL)" $(SHELL) $(VERBOSE)
 
 EXTRA_DIST=$(TESTSCRIPTS) t.frame t.save t.skel \
 	printcore t._abort unsort.pl \
@@ -97,6 +96,13 @@ EXTRA_DIST=$(TESTSCRIPTS) t.frame t.save t.skel \
 	inputs/msg.split.dr.0118.base64 \
 	inputs/msg.split.gs.0119.text \
 	inputs/spam.mbx \
+	inputs/t.passthrough-truncation-in.gz \
+	inputs/input-sf-bug-124-yyinput-tmin.gz \
+	inputs/input-sf-bug-124-count-tmin.gz \
+	inputs/input-sf-bug-124-buffshift-tmin.gz \
+	inputs/input-sf-bug-122-buffadd-tmin.gz \
+	inputs/input-sf-bug-122-buffadd-tmin2.gz \
+	inputs/gconv-tmin2.gz \
 	outputs/MH.out \
 	outputs/bogolex.out \
 	outputs/bulkmode.out \

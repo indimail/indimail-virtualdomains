@@ -1,5 +1,3 @@
-/* $Id: passthrough.h 6654 2007-02-26 00:25:29Z relson $ */
-
 /*****************************************************************************
 
 NAME:
@@ -12,8 +10,6 @@ NAME:
 
 /* in main.c */
 extern FILE *fpo;
-
-extern const char *spam_header_place;
 
 extern void passthrough_setup(void);
 extern void passthrough_cleanup(void);

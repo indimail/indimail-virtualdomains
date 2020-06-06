@@ -1,5 +1,3 @@
-/* $Id: charset.h 6112 2005-06-24 11:22:47Z relson $ */
-
 /*****************************************************************************
 
 NAME:
@@ -13,8 +11,8 @@ AUTHOR:
 #ifndef	CHARSET_H
 #define	CHARSET_H
 
-extern const char *charset_default;
-extern const char *charset_unicode;
+extern char *charset_default;
+extern char *charset_unicode;
 extern bool replace_nonascii_characters;
 
 extern byte charset_table[256];

@@ -1,5 +1,3 @@
-/* $Id: main.c 6246 2005-09-11 12:51:52Z relson $ */
-
 /*****************************************************************************
 
 NAME:
@@ -24,6 +22,8 @@ const char *progname = "bogofilter";
 int main(int argc, char **argv) /*@globals errno,stderr,stdout@*/
 {
     ex_t exitcode;
+
+    init_globals();
 
     signal_setup();		/* setup to catch signals */
     atexit(bf_exit);

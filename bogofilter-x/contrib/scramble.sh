@@ -1,7 +1,5 @@
 #! /bin/bash
 #
-# $Id: scramble.sh 6306 2005-11-01 00:30:59Z relson $ #
-#
 #  scramble -- split up files into entries assuming each entry
 #                starts with a given separator
 #              optionally, classify the entries

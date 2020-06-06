@@ -7,8 +7,6 @@
 # (C) 2004 by Matthias Andree
 # GNU GPL v2.
 
-# $Id: bf_tar.in 6750 2008-10-15 23:18:45Z clint $
-
 set -e
 
 : ${BOGOFILTER:=@transformed_bogofilter@}

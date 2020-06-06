@@ -13,8 +13,6 @@
  * COPYING.
  */
 
-/* $Id: find_home_tildeexpand.c 5753 2005-03-29 03:06:11Z relson $ */
-
 #include "common.h"
 
 #include <string.h>
@@ -56,7 +54,7 @@ char *tildeexpand(const char *name)
 	    "0123456789._-"); /* Portable Filename Character Set */
     if (l > 0) {
 	/* got a parameter to the tilde */
-	tmp = xmalloc(l + 1);
+	tmp = (char *)xmalloc(l + 1);
 	memcpy(tmp, &name[1], l);
 	/* we want exactly the first l characters but as C string,
 	 * so stuff the NUL byte */
@@ -75,7 +73,7 @@ char *tildeexpand(const char *name)
     }
 
     tl = strlen(name) + strlen(home) - l + 1;
-    tmp = xmalloc(tl);
+    tmp = (char *)xmalloc(tl);
     (void)strlcpy(tmp, home, tl);
 
     /* no need to insert a slash here, name[l] contains one */

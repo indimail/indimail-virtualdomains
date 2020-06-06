@@ -30,6 +30,12 @@
 /* Enable Berkeley DB datastore */
 #undef ENABLE_DB_DATASTORE
 
+/* Enable kyotocabinet datastore */
+#undef ENABLE_KYOTOCABINET_DATASTORE
+
+/* Enable LMDB datastore */
+#undef ENABLE_LMDB_DATASTORE
+
 /* Enable memory usage debugging */
 #undef ENABLE_MEMDEBUG
 
@@ -144,6 +150,9 @@
 
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #undef HAVE_NDIR_H
+
+/* Define to 1 if you have the <qdbm/depot.h> header file. */
+#undef HAVE_QDBM_DEPOT_H
 
 /* Define to 1 if the system has the type `rlim_t'. */
 #undef HAVE_RLIM_T
@@ -266,6 +275,9 @@
 
 /* Define if you want INDIMAIL support compiled in */
 #undef INDIMAIL
+
+/* path to LEX */
+#undef LEX
 
 /* Define to 1 if trio is to be included. */
 #undef NEEDTRIO

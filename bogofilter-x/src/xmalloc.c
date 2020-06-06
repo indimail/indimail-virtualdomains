@@ -1,5 +1,3 @@
-/* $Id: xmalloc.c 5649 2005-03-16 00:52:05Z relson $ */
-
 /*
 * NAME:
 *    xmalloc.c -- front-end to standard heap manipulation routines, with error checking.

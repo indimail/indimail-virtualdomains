@@ -1,5 +1,3 @@
-/* $Id: xmalloc.h 5649 2005-03-16 00:52:05Z relson $ */
-
 #ifndef XMALLOC_H
 #define XMALLOC_H
 

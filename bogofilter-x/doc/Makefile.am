@@ -1,5 +1,3 @@
-# $Id: Makefile.am 6984 2012-12-04 00:40:24Z m-a $ 
-
 # Tell BSD make(1) to not remake the .1in and .htmlin files.
 SUFFIXES= .1 .1in .htmlin .html
 
@@ -48,7 +46,6 @@ EXTRA_DIST = \
 	     programmer/README.osx \
 	     programmer/RISC-OS/src/Makefile \
 	     programmer/RISC-OS/gsl/Makefile \
-	     rpm.notes.BerkeleyDB \
 	     README.db README.sqlite \
 	     README.validation
 

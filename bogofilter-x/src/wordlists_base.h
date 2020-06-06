@@ -1,5 +1,3 @@
-/* $Id: wordlists_base.h 6058 2005-06-17 03:35:11Z relson $ */
-
 /*  constants and declarations for wordlists_base.c */
 
 #ifndef	WORDLISTS_CORE_H

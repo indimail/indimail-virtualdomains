@@ -1,5 +1,3 @@
-/* $Id: buff.h 6894 2010-03-23 17:32:46Z m-a $ */
-
 /** \file buff.h
  * declarations and type definitions for buff.c
  *

@@ -1,5 +1,3 @@
-/* $Id: format.c 6820 2009-02-22 20:13:08Z relson $ */
-
 /*****************************************************************************
 
 NAME:
@@ -46,8 +44,8 @@ static uint msgcount = 0;
 
 /* initialized static variables */
 
-const char *spam_subject_tag = NULL;			/* used in passthrough mode */
-const char *unsure_subject_tag = NULL;			/* used in passthrough mode */
+char *spam_subject_tag = NULL;			/* used in passthrough mode */
+char *unsure_subject_tag = NULL;			/* used in passthrough mode */
 
 /*
 **	formatting characters:
@@ -76,11 +74,6 @@ const char *unsure_subject_tag = NULL;			/* used in passthrough mode */
 **
 **	    v - version, ex. "version=%v"
 */
-
-const char *header_format = "%h: %c, tests=bogofilter, spamicity=%p, version=%v";
-const char *terse_format = "%1.1c %f";
-const char *log_header_format = "%h: %c, spamicity=%p, version=%v";
-const char *log_update_format = "register-%r, %w words, %m messages";
 
 #define RC_COUNT 3
 #ifdef DEAD_CODE
@@ -121,10 +114,12 @@ void set_terse_mode_format(int mode)
     switch (mode) {
     case 1:
 	spamicity_tags = spamicity_tags_shu;
-	terse_format = "%1.1c %-8.6g";
+	xfree(terse_format);
+	terse_format = xstrdup("%1.1c %-8.6g");
 	break;
     case 2:
-	terse_format = "%0.16f";
+	xfree(terse_format);
+	terse_format = xstrdup("%0.16f");
 	break;
     default:
 	fprintf(stderr, "Invalid '-T' usage\n");

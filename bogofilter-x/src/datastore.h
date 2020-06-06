@@ -1,5 +1,3 @@
-/* $Id: datastore.h 6895 2010-03-23 17:48:52Z m-a $ */
-
 /*****************************************************************************
 
 NAME:
@@ -23,6 +21,9 @@ Matthias Andree <matthias.andree@gmx.de> 2003
 #include "common.h"
 
 #include <stdlib.h>
+
+#include "bftypes.h"
+#include <sys/types.h>
 
 #ifdef	ENABLE_DB_DATASTORE	/* if Berkeley DB */
 #include <db.h>
@@ -74,12 +75,18 @@ typedef struct {
 /** Database value type, used to communicate between datastore layer and
  * database layer.
  */
-typedef struct {
+typedef struct dbv_s {
     /** address of buffer    */
     void     *data;
     /** number of data bytes */
     u_int32_t leng;
 } dbv_t;
+typedef struct dbv_const_s {
+    /** address of buffer    */
+    const void *data;
+    /** number of data bytes */
+    u_int32_t leng;
+} dbv_const_t;
 
 #ifndef	ENABLE_DB_DATASTORE	/* if not Berkeley DB */
 typedef	void DB;
@@ -148,7 +155,7 @@ typedef struct {
 extern dsm_t *dsm;
 
 /** Type of the callback function that ds_foreach calls. */
-typedef int ds_foreach_t(
+typedef ex_t ds_foreach_t(
 	/** current token that ds_foreach is looking at */
 	word_t *token,
 	/** data store value */

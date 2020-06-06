@@ -1,5 +1,3 @@
-/* $Id: collect.c 6766 2009-01-12 04:27:36Z relson $ */
-
 /* collect.c -- tokenize input and cap word frequencies, return a wordhash */
 
 #include "common.h"
@@ -16,13 +14,13 @@
 
 void wordprop_init(void *vwordprop)
 {
-    wordprop_t *wp = vwordprop;
+    wordprop_t *wp = (wordprop_t *)vwordprop;
     memset(wp, 0, sizeof(*wp));
 }
 
 void wordcnts_init(void *vwordcnts)
 {
-    wordcnts_t *wc = vwordcnts;
+    wordcnts_t *wc = (wordcnts_t *)vwordcnts;
     memset(wc, 0, sizeof(*wc));
 }
 
@@ -60,7 +58,7 @@ void collect_words(wordhash_t *wh)
 	    token.u.text[token.leng] = '\0';	/* ensure nul termination */
 	}
 
-	wp = wordhash_insert(wh, &token, sizeof(wordprop_t), &wordprop_init);
+	wp = (wordprop_t *)wordhash_insert(wh, &token, sizeof(wordprop_t), &wordprop_init);
 	if (wh->type != WH_CNTS)
 	    wp->freq = 1;
 
@@ -97,10 +95,12 @@ void collect_words(wordhash_t *wh)
 	if (cls == BOGO_LEX_LINE)
 	{
 	    char *s = (char *)token.u.text;
+	    assert(s != 0);
 	    s += token.leng + 2;
 	    wp->cnts.bad = atoi(s);
-	    s = strchr(s+1, ' ') + 1;
-	    wp->cnts.good = atoi(s);
+	    s = strchr(s+1, ' ');
+	    assert(s != 0);
+	    wp->cnts.good = atoi(s + 1);
 	    wp->cnts.msgs_good = msgs_good;
 	    wp->cnts.msgs_bad = msgs_bad;
 	}

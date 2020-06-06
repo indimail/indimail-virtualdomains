@@ -1,5 +1,3 @@
-/* $Id: memdebug.h 5672 2005-03-21 01:34:30Z relson $ */
-
 /*
 * NAME:
 *    memdebug.h -- header file for memdebug.c

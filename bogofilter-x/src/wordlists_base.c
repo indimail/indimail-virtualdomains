@@ -1,5 +1,3 @@
-/* $Id: wordlists_base.c 5873 2005-05-06 01:34:01Z relson $ */
-
 #include "common.h"
 
 #include "find_home.h"
@@ -133,6 +131,8 @@ void free_wordlists()
     {
 	list = free_wordlistnode(list);
     }
+
+    word_lists = NULL;
 
     bogohome_cleanup();
 }

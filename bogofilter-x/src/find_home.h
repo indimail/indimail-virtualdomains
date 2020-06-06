@@ -1,5 +1,3 @@
-/* $Id: find_home.h 5752 2005-03-29 03:04:39Z relson $ */
-
 /* find_home.h -- library function to figure out the home dir of current user */
 
 #ifndef FIND_HOME_H

@@ -1,7 +1,5 @@
 #!/usr/bin/perl -w
 
-# $Id: mime.get.rfc822.pl 6288 2005-10-26 08:56:08Z m-a $ #
-
 =head1 NAME
 
 mime.get.rfc822 - splits out message/rfc822 parts from a MIME message

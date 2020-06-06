@@ -1,4 +1,3 @@
-/*	$Id: strlcat.c 3436 2003-10-29 14:31:52Z m-a $	*/
 /*	from NetBSD: strlcat.c,v 1.5.8.2 2002/04/26 13:17:23 he Exp 	*/
 /*	from OpenBSD: strlcat.c,v 1.2 1999/06/17 16:28:58 millert Exp 	*/
 

@@ -1,5 +1,3 @@
-$Id: README.validation 3771 2003-12-17 14:43:19Z relson $
-
 The bogofilter package will validate its SGML/XML documents prior to building
 either derived versions or the distribution tarball.
 

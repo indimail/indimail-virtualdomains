@@ -13,8 +13,6 @@
  * COPYING.
  */
 
-/* $Id: find_home.c 6487 2006-05-29 14:46:55Z relson $ */
-
 #include "system.h"
 
 #include <pwd.h>

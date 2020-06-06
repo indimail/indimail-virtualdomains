@@ -1,5 +1,3 @@
-/* $Id: wordlists.h 6875 2010-02-14 20:57:34Z relson $ */
-
 /*  constants and declarations for wordlists */
 
 #ifndef	WORDLISTS_H

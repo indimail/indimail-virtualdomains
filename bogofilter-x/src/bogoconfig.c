@@ -1,5 +1,3 @@
-/* $Id: bogoconfig.c 6993 2013-06-28 21:54:23Z m-a $ */
-
 /*****************************************************************************
 
 NAME:
@@ -83,7 +81,7 @@ static int inv_terse_mode = 0;
 
 static void display_tag_array(const char *label, FIELD *array);
 
-static void process_arglist(int argc, char **argv, priority_t precedence, int pass);
+static void process_arglist(int argc, char **argv, priority_t precedence, enum arg_pass_e pass);
 static bool get_parsed_value(char **arg, double *parm);
 static void comma_parse(char opt, const char *arg, double *parm1, double *parm2, double *parm3);
 static bool token_count_conflict(void);
@@ -161,11 +159,15 @@ static bool get_bool(const char *name, const char *arg)
 
 static bool get_double(const char *name, const char *arg, double *d)
 {
-    remove_comment(arg);
-    if (!xatof(d, arg))
+    char *s = xstrdup(arg);
+    remove_comment(s);
+    if (!xatof(d, s)) {
+	xfree(s);
 	return false;
+    }
     if (DEBUG_CONFIG(2))
 	fprintf(dbgout, "%s -> %f\n", name, *d);
+    xfree(s);
     return true;
 }
 
@@ -250,10 +252,10 @@ static run_t check_run_type(run_t add_type, run_t conflict)
 	(void)fprintf(stderr, "Error:  Invalid combination of options.\n");
 	exit(EX_ERROR);
     }
-    return (run_type | add_type);
+    return (run_t)(run_type | add_type);
 }
 
-static int validate_args(void)
+static ex_t validate_args(void)
 {
 /*  flags '-s', '-n', '-S', and '-N' are mutually exclusive with
     flags '-p', '-u', '-e', and '-R'. */
@@ -395,7 +397,8 @@ static void print_version(void)
     (void)fprintf(stdout,
 		  "%s version %s\n"
 		  "    Database: %s\n"
-		  "Copyright (C) 2002-2010 David Relson, Matthias Andree\n"
+		  "Copyright (C) 2002-2013 David Relson\n"
+		  "Copyright (C) 2002-2019 Matthias Andree\n"
 		  "Copyright (C) 2002-2004 Greg Louis\n"
 		  "Copyright (C) 2002-2003 Eric S. Raymond, Adrian Otto, Gyepi Sam\n\n"
 		  "%s comes with ABSOLUTELY NO WARRANTY.  "
@@ -418,7 +421,7 @@ static void print_version(void)
  ** there are leftover command line arguments.
  */
 
-static void process_arglist(int argc, char **argv, priority_t precedence, int pass)
+static void process_arglist(int argc, char **argv, priority_t precedence, enum arg_pass_e pass)
 {
     ex_t exitcode;
 
@@ -558,11 +561,11 @@ int process_arg(int option, const char *name, const char *val, priority_t preced
 	break;
 
     case 'n':
-	run_type = check_run_type(REG_GOOD, REG_SPAM | UNREG_GOOD);
+	run_type = check_run_type(REG_GOOD, (run_t)(REG_SPAM | UNREG_GOOD));
 	break;
 
     case 'N':
-	run_type = check_run_type(UNREG_GOOD, REG_GOOD | UNREG_SPAM);
+	run_type = check_run_type(UNREG_GOOD, (run_t)(REG_GOOD | UNREG_SPAM));
 	break;
 
     case 'O':
@@ -588,15 +591,15 @@ int process_arg(int option, const char *name, const char *val, priority_t preced
 	break;
 
     case 's':
-	run_type = check_run_type(REG_SPAM, REG_GOOD | UNREG_SPAM);
+	run_type = check_run_type(REG_SPAM, (run_t)(REG_GOOD | UNREG_SPAM));
 	break;
 
     case 'S':
-	run_type = check_run_type(UNREG_SPAM, REG_SPAM | UNREG_GOOD);
+	run_type = check_run_type(UNREG_SPAM, (run_t)(REG_SPAM | UNREG_GOOD));
 	break;
 
     case 'u':
-	run_type |= RUN_UPDATE;
+	run_type = (run_t)(run_type | RUN_UPDATE);
 	break;
 	
     case 'U':
@@ -716,10 +719,10 @@ int process_arg(int option, const char *name, const char *val, priority_t preced
 	exit(EX_OK);
 
     case O_BLOCK_ON_SUBNETS:		block_on_subnets = get_bool(name, val);			break;
-    case O_CHARSET_DEFAULT:		charset_default = get_string(name, val);		break;
-    case O_HEADER_FORMAT:		header_format = get_string(name, val);			break;
-    case O_LOG_HEADER_FORMAT:		log_header_format = get_string(name, val);		break;
-    case O_LOG_UPDATE_FORMAT:		log_update_format = get_string(name, val);		break;
+    case O_CHARSET_DEFAULT:		xfree(charset_default); charset_default = get_string(name, val);		break;
+    case O_HEADER_FORMAT:		xfree(header_format); header_format = get_string(name, val);			break;
+    case O_LOG_HEADER_FORMAT:		xfree(log_header_format); log_header_format = get_string(name, val);		break;
+    case O_LOG_UPDATE_FORMAT:		xfree(log_update_format); log_update_format = get_string(name, val);		break;
     case O_MAX_TOKEN_LEN:		max_token_len=atoi(val);				break;
     case O_MIN_TOKEN_LEN:		min_token_len=atoi(val);				break;
     case O_MAX_MULTI_TOKEN_LEN:		max_multi_token_len=atoi(val);				break;
@@ -727,18 +730,18 @@ int process_arg(int option, const char *name, const char *val, priority_t preced
     case O_REPLACE_NONASCII_CHARACTERS:	replace_nonascii_characters = get_bool(name, val);	break;
     case O_SPAMICITY_FORMATS:		set_spamicity_formats(val);				break;
     case O_SPAMICITY_TAGS:		set_spamicity_tags(val);				break;
-    case O_SPAM_HEADER_NAME:		spam_header_name = get_string(name, val);		break;
-    case O_SPAM_HEADER_PLACE:		spam_header_place = get_string(name, val);		break;
-    case O_SPAM_SUBJECT_TAG:		spam_subject_tag = get_string(name, val);		break;
+    case O_SPAM_HEADER_NAME:		xfree(spam_header_name); spam_header_name = get_string(name, val);		break;
+    case O_SPAM_HEADER_PLACE:		xfree(spam_header_place); spam_header_place = get_string(name, val);		break;
+    case O_SPAM_SUBJECT_TAG:		xfree(spam_subject_tag); spam_subject_tag = get_string(name, val);		break;
     case O_STATS_IN_HEADER:		stats_in_header = get_bool(name, val);			break;
     case O_TERSE:			terse = get_bool(name, val);				break;
-    case O_TERSE_FORMAT:		terse_format = get_string(name, val);			break;
+    case O_TERSE_FORMAT:		xfree(terse_format); terse_format = get_string(name, val);			break;
     case O_THRESH_UPDATE:		get_double(name, val, &thresh_update);			break;
     case O_TIMESTAMP:			timestamp_tokens = get_bool(name, val);			break;
     case O_TOKEN_COUNT_FIX:             token_count_fix = atoi(val);                            break;
     case O_TOKEN_COUNT_MIN:             token_count_min = atoi(val);                            break;
     case O_TOKEN_COUNT_MAX:             token_count_max = atoi(val);                            break;
-    case O_UNSURE_SUBJECT_TAG:		unsure_subject_tag = get_string(name, val);		break;
+    case O_UNSURE_SUBJECT_TAG:		xfree(unsure_subject_tag); unsure_subject_tag = get_string(name, val);		break;
     case O_UNICODE:			encoding = get_bool(name, val) ? E_UNICODE : E_RAW;	break;
     case O_WORDLIST:			configure_wordlist(val);				break;
 

@@ -1,5 +1,3 @@
-/* $Id: lexer_v3.l 6988 2013-01-20 14:02:48Z m-a $ */
-
 %{
 /*
  * NAME
@@ -96,7 +94,7 @@ static int lineno;
 #define	FLEX_VERSION_BF FLEX_VER(YY_FLEX_MAJOR_VERSION, YY_FLEX_MINOR_VERSION, YY_FLEX_SUBMINOR_VERSION)
 #endif
 
-#if	FLEX_VERSION_BF != 2531
+#if	FLEX_VERSION_BF < 2531
 int yylineno;
 #endif
 
@@ -250,7 +248,7 @@ VERP		{TOKEN}-{VERPID}-{TOKEN}={TOKEN}@{TOKEN}
 						}
 <INITIAL>^Message-ID:.*				{ /* save token for logging */
 						  unsigned long off = 11;
-						  while(isspace((unsigned char)yytext[off]) && off < (unsigned long int) yyleng)
+						  while(isspace((unsigned char)yytext[off]) && off < INT_MAX && off < (unsigned long)yyleng)
 						      off++;
 						  set_msg_id((unsigned char *)(yytext+off), yyleng-off);
 						  header();
@@ -310,7 +308,7 @@ VERP		{TOKEN}-{VERPID}-{TOKEN}={TOKEN}@{TOKEN}
   /* This has to match just as much or more than the below rules, so as to be the 
      controlling rule. */
 <HTML>{TOKEN}({HTMLTOKEN}*{BREAKHTML}+{HTMLTOKEN}*.?|{HTMLTOKEN}+{WHITESPACE})		{ 
-    			char *chr = memchr(yytext, '<', yyleng);	/* find start of html tag */
+    			char *chr = (char *)memchr(yytext, '<', yyleng);	/* find start of html tag */
 			size_t len = chr - yytext;
 			yyless(len);
 			return TOKEN;
@@ -366,9 +364,9 @@ static void skip_to(char chr)
 
 static void html_reorder(void)
 {
-    char *chr = memchr(yytext, '<', yyleng);	/* find start of html tag */
+    char *chr = (char *)memchr(yytext, '<', yyleng);	/* find start of html tag */
     size_t len = chr - yytext;
-    char *yycopy = xmalloc(yyleng + 1); 	/* +1 for NUL byte below */
+    char *yycopy = (char *)xmalloc(yyleng + 1); 	/* +1 for NUL byte below */
 
     memcpy(yycopy, yytext+len, yyleng-len);	/* copy tag to start of buffer */
     memcpy(yycopy+yyleng-len, yytext, len);	/* copy leading text to end of buffer */
@@ -399,7 +397,7 @@ static void html_char(void)
     char *yycopy = NULL;
 
     if (len != 0) {
-	yycopy = xmalloc(yyleng + 1);	/* +1 for NUL byte below */
+	yycopy = (char *)xmalloc(yyleng + 1);	/* +1 for NUL byte below */
 	memcpy(yycopy, yytext, yyleng);	/* copy tag to start of buffer */
 	yycopy[yyleng] = '\0';		/* for debugging */
     }

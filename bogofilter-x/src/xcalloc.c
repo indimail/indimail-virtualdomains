@@ -1,5 +1,3 @@
-/* $Id: xcalloc.c 5649 2005-03-16 00:52:05Z relson $ */
-
 /*
 * NAME:
 *    xcalloc.c -- front-end to standard heap manipulation routines, with error checking.

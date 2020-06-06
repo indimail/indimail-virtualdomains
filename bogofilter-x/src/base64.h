@@ -1,5 +1,3 @@
-/* $Id: base64.h 5267 2005-01-04 15:46:33Z m-a $ */
-
 /** \file base64.h
  * prototypes and definitions for base64.c
  */

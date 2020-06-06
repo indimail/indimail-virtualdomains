@@ -1,5 +1,3 @@
-/* $Id: wordhash.c 6890 2010-03-17 23:52:48Z m-a $ */
-
 /*
 NAME:
    wordhash.c -- Implements a hash data structure.
@@ -78,7 +76,7 @@ static void wh_trap(void) {}
 wordhash_t *
 wordhash_init (wh_t type, uint count)
 {
-    wordhash_t *wh = xcalloc (1, sizeof (wordhash_t));
+    wordhash_t *wh = (wordhash_t *)xcalloc (1, sizeof (wordhash_t));
 
     wh->type = type;
     wh->count = 0;
@@ -87,7 +85,7 @@ wordhash_init (wh_t type, uint count)
     switch (type)
     {
     case WH_NORMAL:
-	wh->bin = xcalloc (NHASH, sizeof (hashnode_t **));
+	wh->bin = (hashnode_t **)xcalloc (NHASH, sizeof (hashnode_t **));
 	break;
     case WH_CNTS:	/* used for bogotune with msg_count files */
 	wh->cnts = (wordcnts_t *) xcalloc(wh->size, sizeof(wordcnts_t));
@@ -195,11 +193,11 @@ nmalloc (wordhash_t *wh) /*@modifies wh->nodes@*/
 
     if (wn == NULL || wn->avail == 0)
     {
-	wn = xmalloc (sizeof (wh_alloc_node));
+	wn = (wh_alloc_node *)xmalloc (sizeof (wh_alloc_node));
 	wn->next = wh->nodes;
 	wh->nodes = wn;
 
-	wn->buf = xmalloc (N_CHUNK * sizeof (hashnode_t));
+	wn->buf = (hashnode_t *)xmalloc (N_CHUNK * sizeof (hashnode_t));
 	wn->avail = N_CHUNK;
 	wn->used = 0;
     }
@@ -225,11 +223,11 @@ smalloc (wordhash_t *wh, size_t n) /*@modifies wh->strings@*/
    
     if (s == NULL || s->avail < n)
     {
-	s = xmalloc (sizeof (wh_alloc_str));
+	s = (wh_alloc_str *)xmalloc (sizeof (wh_alloc_str));
 	s->next = wh->strings;
 	wh->strings = s;
 
-	s->buf = xmalloc (S_CHUNK + n);
+	s->buf = (char *)xmalloc (S_CHUNK + n);
 	s->avail = S_CHUNK + n;
 	s->used = 0;
     }
@@ -272,13 +270,13 @@ void wordhash_add(wordhash_t *dest, wordhash_t *src, void (*initializer)(void *)
 	display_node(src->iter_head, "  ");
     }
 
-    for (s = wordhash_first(src); s != NULL; s = wordhash_next(src)) {
+    for (s = (hashnode_t *)wordhash_first(src); s != NULL; s = (hashnode_t *)wordhash_next(src)) {
 	wordprop_t *p = (wordprop_t *)s->data;
 	word_t *key = s->key;
 	wordprop_t *d;
 	if (key == NULL)
 	    continue;
-	d = wordhash_insert(dest, key, sizeof(wordprop_t), initializer);
+	d = (wordprop_t *)wordhash_insert(dest, key, sizeof(wordprop_t), initializer);
 	d->freq += p->freq;
 	d->cnts.good += p->cnts.good;
 	d->cnts.bad  += p->cnts.bad;
@@ -288,18 +286,6 @@ void wordhash_add(wordhash_t *dest, wordhash_t *src, void (*initializer)(void *)
 	display_node(dest->iter_head, "\n");
 
     dest->size = count;
-}
-
-void
-wordhash_foreach (wordhash_t *wh, wh_foreach_t *hook, void *userdata)
-{
-    hashnode_t *hn;
-
-    for (hn = wordhash_first(wh); hn != NULL; hn = wordhash_next(wh)) {
-	(*hook)(hn->key, hn->data, userdata);
-    }
-
-    return;
 }
 
 void *
@@ -469,7 +455,7 @@ wordhash_set_counts(wordhash_t *wh, int good, int bad)
 {
     hashnode_t *hn;
 
-    for (hn = wordhash_first(wh); hn != NULL; hn = wordhash_next(wh)) {
+    for (hn = (hashnode_t *)wordhash_first(wh); hn != NULL; hn = (hashnode_t *)wordhash_next(wh)) {
 	wordcnts_t *c = wordhash_get_counts(wh, hn);
 	c->good += good;
 	c->bad  += bad;
@@ -509,7 +495,7 @@ convert_propslist_to_countlist(wordhash_t *whi)
 
     who = wordhash_init(WH_CNTS, whi->size);
 
-    for (node = wordhash_first(whi); node != NULL; node = wordhash_next(whi)) {
+    for (node = (hashnode_t *)wordhash_first(whi); node != NULL; node = (hashnode_t *)wordhash_next(whi)) {
 	wordcnts_t *ci = wordhash_get_counts(whi, node);
 	wordcnts_t *co = &who->cnts[who->count++];
 
@@ -538,14 +524,14 @@ convert_wordhash_to_propslist(wordhash_t *whi, wordhash_t *db)
 
 	who->count = 0;
 
-	for (node = wordhash_first(whi); node != NULL; node = wordhash_next(whi)) {
+	for (node = (hashnode_t *)wordhash_first(whi); node != NULL; node = (hashnode_t *)wordhash_next(whi)) {
 	    wordprop_t *wp;
 	    if (!msg_count_file && node->key != NULL) {
 		who->freeable = false;
-		wp = wordhash_insert(db, node->key, sizeof(wordprop_t), NULL);
+		wp = (wordprop_t *)wordhash_insert(db, node->key, sizeof(wordprop_t), NULL);
 	    }
 	    else {
-		wp = xcalloc(1, sizeof(wordprop_t));
+		wp = (wordprop_t *)xcalloc(1, sizeof(wordprop_t));
 		memcpy(wp, node->data, sizeof(wordprop_t));
 		if (!who->freeable)
 		    wh_trap();

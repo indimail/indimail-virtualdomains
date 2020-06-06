@@ -1,5 +1,3 @@
-/* $Id: tunelist.c 6714 2008-04-20 15:27:06Z relson $ */
-
 /*****************************************************************************
 
 NAME:
@@ -17,14 +15,14 @@ NAME:
 
 flhead_t *filelist_new(const char *name)
 {
-    flhead_t *list = xcalloc(1, sizeof(flhead_t));
+    flhead_t *list = (flhead_t *)xcalloc(1, sizeof(flhead_t));
     list->name = xstrdup(name);
     return list;
 }
 
 void filelist_add(flhead_t *list, const char *name)
 {
-    flitem_t *item = xcalloc(1, sizeof(flitem_t));
+    flitem_t *item = (flitem_t *)xcalloc(1, sizeof(flitem_t));
     item->name = xstrdup(name);
     if (list->head == NULL)
 	list->head = item;
@@ -56,14 +54,14 @@ void filelist_free(flhead_t *list)
 
 mlhead_t *msglist_new(const char *label)
 {
-    mlhead_t *v = xcalloc(1, sizeof(mlhead_t));
+    mlhead_t *v = (mlhead_t *)xcalloc(1, sizeof(mlhead_t));
     v->name = xstrdup(label);
     return v;
 }
 
 void msglist_add(mlhead_t *list, wordhash_t *wh)
 {
-    mlitem_t *item = xcalloc(1, sizeof(mlitem_t));
+    mlitem_t *item = (mlitem_t *)xcalloc(1, sizeof(mlitem_t));
     if (list->head == NULL)
 	list->head = item;
     if (list->tail != NULL)
@@ -117,7 +115,7 @@ void msglist_free(mlhead_t *list)
 
 tunelist_t *tunelist_new(const char *label)
 {
-    tunelist_t *list = xcalloc( 1, sizeof(tunelist_t));
+    tunelist_t *list = (tunelist_t *)xcalloc( 1, sizeof(tunelist_t));
 
     list->name = label;
     list->msgs   = msglist_new("msgs");
