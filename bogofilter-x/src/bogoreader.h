@@ -1,5 +1,3 @@
-/* $Id: bogoreader.h 6714 2008-04-20 15:27:06Z relson $ */
-
 /** \file bogoreader.h
  * prototypes and definitions for bogoreader.c
  *

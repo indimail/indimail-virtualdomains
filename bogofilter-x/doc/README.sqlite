@@ -1,8 +1,6 @@
 SQLITE3 DATABASE DRIVER FOR BOGOFILTER
 ======================================
 
-$Id: README.sqlite 6901 2010-04-01 16:05:05Z m-a $
-
 This document only applies if you want to use bogofilter with SQLite3
 databases.
 

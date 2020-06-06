@@ -14,8 +14,6 @@
  * COPYING.
  */
 
-/* $Id: find_home_user.c 6541 2006-07-08 14:56:40Z m-a $ */
-
 #include "system.h"
 
 #include <stdlib.h>

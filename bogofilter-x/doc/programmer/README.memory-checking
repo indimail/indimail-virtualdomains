@@ -1,5 +1,3 @@
-$Id: README.memory-checking 5251 2005-01-03 02:14:45Z m-a $
-
 Bogofilter's test suite has support for several memory access/leak
 checking tools, namely Valgrind ("valgrind"), Electric Fence ("efence"),
 GNU libc ("glibc", default), and the Boehm-Demers-Weiser Conservative

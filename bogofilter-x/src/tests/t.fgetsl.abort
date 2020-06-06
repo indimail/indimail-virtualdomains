@@ -1,0 +1,17 @@
+#! /bin/sh
+
+# This checks for SF.net bug #120.
+
+. ${srcdir:=.}/t.frame
+
+cat <<_EOF >"$TMPDIR/testcase"
+Content-Type:application/
+Content-Type:multipart/boundary================0000000000000000000==
+--===============0000000000000000000==
+C$(perl -e 'print "0" x 17717;')
+--===============0000000000000000000==--
+_EOF
+
+len=$(wc -c <"$TMPDIR/testcase")
+dd if=/dev/null of="$TMPDIR/testcase" obs=$(($len - 1)) seek=1
+$BOGOLEXER -p -C <"$TMPDIR/testcase" >/dev/null

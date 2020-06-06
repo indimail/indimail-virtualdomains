@@ -1,5 +1,3 @@
-/* $Id: datastore_qdbm.c 6649 2007-02-14 20:30:15Z m-a $ */
-
 /*****************************************************************************
 
 NAME:
@@ -52,7 +50,7 @@ static dbh_t *dbh_init(bfpath *bfp)
 {
     dbh_t *handle;
 
-    handle = xmalloc(sizeof(dbh_t));
+    handle = (dbh_t *)xmalloc(sizeof(dbh_t));
     memset(handle, 0, sizeof(dbh_t));	/* valgrind */
 
     handle->name = xstrdup(bfp->filepath);
@@ -87,7 +85,7 @@ bool db_is_swapped(void *vhandle)
 /* Returns created flag */
 bool db_created(void *vhandle)
 {
-    dbh_t *handle = vhandle;
+    dbh_t *handle = (dbh_t *)vhandle;
     return handle->created;
 }
 
@@ -143,11 +141,11 @@ void *db_open(void * dummy, bfpath *bfp, dbmode_t open_mode)
 int db_delete(void *vhandle, const dbv_t *token)
 {
     int ret;
-    dbh_t *handle = vhandle;
+    dbh_t *handle = (dbh_t *)vhandle;
     VILLA *dbp;
 
     dbp = handle->dbp;
-    ret = vlout(dbp, token->data, token->leng);
+    ret = vlout(dbp, (char *)token->data, token->leng);
 
     if (ret == 0) {
 	print_error(__FILE__, __LINE__, "(qdbm) vlout('%.*s'), err: %d, %s",
@@ -167,10 +165,10 @@ int db_get_dbvalue(void *vhandle, const dbv_t *token, /*@out@*/ dbv_t *val)
     char *data;
     int dsiz;
 
-    dbh_t *handle = vhandle;
+    dbh_t *handle = (dbh_t *)vhandle;
     VILLA *dbp = handle->dbp;
 
-    data = vlget(dbp, token->data, token->leng, &dsiz);
+    data = vlget(dbp, (const char *)token->data, token->leng, &dsiz);
 
     if (data == NULL)
 	return DS_NOTFOUND;
@@ -212,10 +210,10 @@ static inline void db_optimize(VILLA *dbp, char *name)
 int db_set_dbvalue(void *vhandle, const dbv_t *token, const dbv_t *val)
 {
     int ret;
-    dbh_t *handle = vhandle;
+    dbh_t *handle = (dbh_t *)vhandle;
     VILLA *dbp = handle->dbp;
 
-    ret = vlput(dbp, token->data, token->leng, val->data, val->leng, VL_DOVER);
+    ret = vlput(dbp, (const char *)token->data, token->leng, (const char *)val->data, val->leng, VL_DOVER);
 
     if (ret == 0) {
 	print_error(__FILE__, __LINE__,
@@ -236,7 +234,7 @@ int db_set_dbvalue(void *vhandle, const dbv_t *token, const dbv_t *val)
 */
 void db_close(void *vhandle)
 {
-    dbh_t *handle = vhandle;
+    dbh_t *handle = (dbh_t *)vhandle;
     VILLA *dbp;
 
     if (handle == NULL) return;
@@ -264,7 +262,7 @@ void db_close(void *vhandle)
 */
 void db_flush(void *vhandle)
 {
-    dbh_t *handle = vhandle;
+    dbh_t *handle = (dbh_t *)vhandle;
     VILLA * dbp = handle->dbp;
 
     if (!vlsync(dbp))
@@ -277,10 +275,11 @@ ex_t db_foreach(void *vhandle, db_foreach_t hook, void *userdata)
 {
     int ret = 0;
 
-    dbh_t *handle = vhandle;
+    dbh_t *handle = (dbh_t *)vhandle;
     VILLA *dbp = handle->dbp;
 
-    dbv_t dbv_key, dbv_data;
+    dbv_t dbv_key;
+    dbv_const_t dbv_data;
     int ksiz, dsiz;
     char *key, *data;
 

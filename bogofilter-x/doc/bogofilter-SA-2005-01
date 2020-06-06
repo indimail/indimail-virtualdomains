@@ -1,3 +1,6 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
 bogofilter-SA-2005-01
 
 Topic:		heap buffer overrun in bogofilter/bogolexer 0.93.5 - 0.96.2
@@ -86,13 +89,45 @@ A. Copyright, License and Warranty
 (C) Copyright 2005 - 2006 by Matthias Andree, <matthias.andree@gmx.de>.
 Some rights reserved.
 
-This work is licensed under the Creative Commons
-Attribution-NonCommercial-NoDerivs German License. To view a copy of
-this license, visit http://creativecommons.org/licenses/by-nc-nd/2.0/de/
-or send a letter to Creative Commons; 559 Nathan Abbott Way;
-Stanford, California 94305; USA.
+This work is dual-licensed under the
+Creative Commons Attribution-NoDerivs 3.0 Germany License (CC BY-ND 3.0),
+and the GNU General Public License, v3, or later.
+
+To view a copy of the Creative Commons Attribution-NoDerivs 3.0
+Germany license, visit
+http://creativecommons.org/licenses/by-nd/3.0/de/deed.en or send a
+letter to:
+
+Creative Commons
+444 Castro Street
+Suite 900
+MOUNTAIN VIEW, CALIFORNIA 94041
+USA
+
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program, in the file ../gpl-3.0.txt.
+If not, see <http://www.gnu.org/licenses/>.
+
 
 THIS WORK IS PROVIDED FREE OF CHARGE AND WITHOUT ANY WARRANTIES.
 Use the information herein at your own risk.
 
 END of bogofilter-SA-2005-01
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEARECAAYFAlHYI0gACgkQvmGDOQUufZXVRgCgmd/F4AAHMsARVYw6che2+XmR
+y6MAoMSR1LcUbwtnUxISkBvlgNe3eKtd
+=fDhh
+-----END PGP SIGNATURE-----

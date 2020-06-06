@@ -1,5 +1,3 @@
-/* $Id: globals.h 6940 2010-12-21 01:20:22Z relson $ */
-
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
@@ -8,6 +6,9 @@
 
 #include "system.h" /* has bool */
 #include "common.h" /* has PATH_LEN */
+
+#include <sys/types.h>
+#include "bftypes.h"
 
 #ifdef __LCLINT__
 typedef int  bool;
@@ -126,5 +127,10 @@ typedef volatile int sig_atomic_t;
 
 extern	sig_atomic_t	fDie;	/* true if a terminating signal (such as
 				   SIGINT or SIGTERM) has been received */
+
+void init_globals(void);    /**< initialize all global variables */
+
+extern char *spam_header_name;
+extern char *spam_header_place;
 
 #endif

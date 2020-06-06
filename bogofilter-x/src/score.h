@@ -1,4 +1,3 @@
-/* $Id: score.h 6777 2009-02-01 03:49:48Z relson $ */
 /*  constants and declarations for robinson-fisher method */
 
 #ifndef	FISHER_H

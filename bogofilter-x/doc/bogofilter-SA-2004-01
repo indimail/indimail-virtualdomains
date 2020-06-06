@@ -1,3 +1,6 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
 bogofilter-SA-2004-01 rfc2047crash
 
 Topic:		vulnerability in bogofilter/bogolexer
@@ -94,4 +97,49 @@ fix. Besides, bogofilter is under development and support is limited to
 the latest available "current" plus the latest available "stable"
 versions.
 
+A. License
+
+(C) Copyright 2004 by Matthias Andree. Some rights reserved.
+
+This work is dual-licensed under the
+Creative Commons Attribution-NoDerivs 3.0 Germany License (CC BY-ND 3.0),
+and the GNU General Public License, v3, or later.
+
+To view a copy of the Creative Commons Attribution-NoDerivs 3.0
+Germany license, visit
+http://creativecommons.org/licenses/by-nd/3.0/de/deed.en or send a
+letter to:
+
+Creative Commons
+444 Castro Street
+Suite 900
+MOUNTAIN VIEW, CALIFORNIA 94041
+USA
+
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program, in the file ../gpl-3.0.txt.
+If not, see <http://www.gnu.org/licenses/>.
+
+
+THIS WORK IS PROVIDED FREE OF CHARGE AND WITHOUT ANY WARRANTIES.
+Use the information herein at your own risk.
+
 END of bogofilter-SA-2004-01 rfc2047crash
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEARECAAYFAlHYI0gACgkQvmGDOQUufZXwkACg/BWfRDMAS3U4eEa9fzVcJw8L
+VHQAoLNOOg0cOL1jix72jU+lfvIv0mxl
+=0Kl8
+-----END PGP SIGNATURE-----

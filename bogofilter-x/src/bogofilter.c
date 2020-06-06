@@ -1,5 +1,3 @@
-/* $Id: bogofilter.c 6789 2009-02-12 01:12:53Z relson $ */
-
 /*****************************************************************************
 
 NAME:
@@ -154,7 +152,6 @@ rc_t bogofilter(int argc, char **argv)
     bogoreader_init(argc, (const char * const *) argv);
 
     while ((*reader_more)()) {
-	double spamicity;
 	wordhash_t *w = wordhash_new();
 
 	rstats_init();
@@ -177,6 +174,7 @@ rc_t bogofilter(int argc, char **argv)
 	    wordhash_add(words, w, &wordprop_init);
 
 	if (classify_msg || write_msg) {
+	    double spamicity;
 	    lookup_words(w);			/* This reads the database */
 	    spamicity = msg_compute_spamicity(w);
 	    status = msg_status();

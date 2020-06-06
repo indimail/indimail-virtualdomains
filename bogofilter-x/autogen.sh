@@ -1,8 +1,6 @@
 #!/bin/sh
 #
 # Run this to generate all the initial makefiles, etc.
-#
-# $Id: autogen.sh 3443 2003-10-29 15:12:06Z m-a $
 
 DIE=0
 
@@ -46,8 +44,8 @@ echo "Running 'autoreconf -fis'"
 autoreconf -fis
 echo ""
 
-echo "Running './configure --quiet $*'"
-./configure --quiet $*
+echo "Running './configure --quiet $@'"
+./configure --quiet "$@"
 echo ""
 
 echo "Running 'make -s check'"

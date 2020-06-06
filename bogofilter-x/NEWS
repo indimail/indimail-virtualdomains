@@ -14,6 +14,106 @@
 	!!!!!!!! READ THE RELEASE.NOTES !!!!!!!!
 
 -------------------------------------------------------------------------------
+	
+1.2.5	2019-10-11
+	* Release bogofilter 1.2.5.
+
+1.2.5.RC1
+	2019-09-08
+	* Release candidate #1 for bogofilter 1.2.5.
+	* Add a file "OBITUARY" to inform the bogofilter community
+	  that and how David M. Relson has passed away in 2013.
+	* Matthias Andree has been maintainer since.
+
+	2019-08-04
+	* Const-ness fix initiated for KyotoCabinet driver (fixing a const
+	  qualifier warning there) also improves performance in some
+	  "full-database" operations for LMDB and SQLite3, through reduced
+	  memory allocation and copy operations.
+
+	2019-06-21
+	* Plugged more memory leaks (one-shot leaks in bogoutil/bogotune).
+	* RPMs or scripts for static library builds have been removed.
+	  Bogofilter no longer supports systems that are too far out of date.
+	  This removes .spec files from the package (for now, it is still
+	  built during ./configure), disables "make rpm", and drops the
+	  install-staticdblibs.sh script, and removes "--enable-static"
+	  support from ./configure.
+
+	2019-05-19
+	* Bogofilter's source code repository has been converted to Git,
+	  and is hosted on GitLab and mirrored onto SourceForge.net.
+	  In contrast to Subversion (SVN), the prior system, Git is
+	  a distributed open-source version control system and has
+	  gained a lot of ground over the past years, and is solid and
+	  scales well.
+
+	2018-07-19
+	* Support for using LMDB (Lightning Memory-Mapped Database Manager)
+	  as the database back-end. Suggested, courteously implemented and
+	  contributed by Steffen Nurpmeso, steffen .at. sdaoden.eu.
+
+	2018-07-17
+	* The Berkeley DB backend driver forgoes DB_NOSYNC in transactional
+	  mode, so as to synchronize changes from the logs back into the .db
+	  files to keep them up to date and make environments more robust
+	  against a loss of log.* files, for instance, when moving databases.
+
+	2017-09-18
+	* The contrib/spamitarium.pl, originally written by Thomas 'Tom'
+	  Anderson, was enhanced by Jonathan Kamens and grew a few features.
+	  Run perldoc contrib/spamitarium.pl, or spamitarium.pl -h, to read
+	  its manual.
+
+	2016-01-26
+	* Apply patch from Denny Lin, with one fix, to add support for the
+	  KyotoCabinet embedded database library.  To enable, install
+	  KyotoCabinet including the development files, and run
+	  configure --with-database=kyotocabinet when building bogofilter.
+	  Thanks!
+
+	* Apply patch from Denny Lin to plug a few memory leaks in bogofilter's
+	  TokyoCabinet implementation, contributed through the bogofilter-dev
+	  mailing list.  Thanks!
+
+	2015-10-10
+	* Fix build with C89 compilers.
+	* Fix several memory leaks.
+	* Fix an out-of-bounds memory read in maint.c's discard_token().
+	  Found with clang 3.6's address sanitizer.
+
+	2015-02-28
+	* Fix the lexer to not try to delete parts from HTML tokens if it is
+	  reading garbage (for instance, binary files misdeclared as HTML).
+	  This was exposed on Fedora 20 and 21 but not Ubuntu 14.04 (x86_64),
+	  and is possibly related to its newer flex 2.5.37 that may have
+	  changed the way it uses yyinput() a bit.  Reported by Matt Garretson.
+
+	2015-02-25
+	* Fix the lexer to handle MIME multipart messages properly when the
+	  boundary ended in "--".  The parser would previously never find the
+	  MIME parts because it mistook all boundaries ending in two dashes to
+	  be the final boundary of the multipart, rather than checking if the
+	  two dashes were extra.  Add a test case, t.lexer.boundary--.
+	  Reported by Matt Garretson to the bogofilter mailing list today.
+
+	2014-07-10
+	* Take patch from Julius Plenz to fix a bug in the charset converter
+	  that causes truncation of messages in pass-through mode in rare
+	  circumstances, for instance, if binary data is misdeclared as
+	  text/html.  Also add his test case, t.passthrough-truncation.
+
+	2013-11-30
+	* Updated autoconf/automake stuff so that tests work properly with
+	  automake versions that default to running parallel-tests.
+
+	2013-07-06
+	* Relicensed all security announcements under a dual-license, at the
+	  user's option, to ease distribution without repackaging:
+
+	  - Creative Commons Attribution-NoDerivs 3.0 Germany License
+	    (CC BY-ND 3.0)
+	  - GNU General Public License v3 or newer (GPL v3+).
 
 1.2.4	2013-07-01 (released)
 
@@ -46,7 +146,8 @@
 	  svn checkout http://svn.code.sf.net/p/bogofilter/code/trunk bogofilter
 
 	  And developers would use, replacing joe by their sf.net login:
-	  svn checkout --username=joe svn+ssh://m-a@svn.code.sf.net/p/bogofilter/code/trunk bogofilter
+	  svn checkout --username=joe \
+	    svn+ssh://svn.code.sf.net/p/bogofilter/code/trunk bogofilter
 
 	2012-12-03
 	* Add bogofilter-SA-2012-01 (CVE-2012-5468).
@@ -673,8 +774,6 @@
 1.0.0	2005-11-30 (released)
 
 	Release history prior to 1.0.0 is in file NEWS.0
-
-$Id: NEWS 6993 2013-06-28 21:54:23Z m-a $
 
  vim:tw=79 com=bf\:* ts=8 sts=8 sw=8 ai:
 

@@ -1,5 +1,3 @@
-/* $Id: datastore_qdbm_cmpkey.c 4915 2004-11-01 10:17:15Z m-a $ */
-
 #include "datastore_qdbm.h"
 
 int cmpkey(const char *aptrin, int asiz, const char *bptrin, int bsiz)

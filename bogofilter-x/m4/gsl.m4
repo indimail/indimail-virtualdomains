@@ -91,6 +91,8 @@ int main (void)
 
   n = sscanf(tmp_version, "%d.%d.%d", &major, &minor, &micro) ;
 
+  free(tmp_version);
+
   if (n != 2 && n != 3) {
      printf("%s, bad version string\n", "$min_gsl_version");
      exit(1);

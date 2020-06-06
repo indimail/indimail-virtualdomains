@@ -1,5 +1,3 @@
-/* $Id: globals.c 6925 2010-07-06 21:49:00Z m-a $ */
-
 /*****************************************************************************
 
 NAME:
@@ -13,6 +11,7 @@ AUTHOR:
 #include "system.h"
 #include "globals.h"
 #include "score.h"
+#include "xstrdup.h"
 
 /* exports */
 
@@ -57,8 +56,11 @@ const char	*update_dir;
 /*@observer@*/
 const char	*stats_prefix;
 
-const char *spam_header_name = SPAM_HEADER_NAME;
-const char *spam_header_place = "";
+char *spam_header_name;
+char *spam_header_place;
+
+char *charset_default;
+char *charset_unicode;
 
 /* for lexer_v3.l */
 bool	header_line_markup = true;	/* -H */
@@ -89,3 +91,38 @@ bool	unsure_stats = false;		/* true if print stats for unsures */
 run_t run_type = RUN_UNKNOWN;
 
 uint	wordlist_version;
+
+char *header_format;
+char *terse_format;
+char *log_header_format;
+char *log_update_format;
+
+static int globals_initialized;
+
+#define zxfree(a) do { xfree((a)); (a) = 0; } while(0)
+
+static void free_globals(void) {
+    if (globals_initialized) {
+	zxfree(spam_header_place);
+	zxfree(spam_header_name);
+	zxfree(charset_default);
+	zxfree(charset_unicode);
+	globals_initialized = -1;
+    }
+}
+
+void init_globals(void) {
+    if (globals_initialized == 1) return;
+    spam_header_name = xstrdup(SPAM_HEADER_NAME);
+    spam_header_place = xstrdup("");
+    charset_default = xstrdup(DEFAULT_CHARSET);
+    charset_unicode = xstrdup("UTF-8");
+    header_format = xstrdup("%h: %c, tests=bogofilter, spamicity=%p, version=%v");
+    terse_format = xstrdup("%1.1c %f");
+    log_header_format = xstrdup("%h: %c, spamicity=%p, version=%v");
+    log_update_format = xstrdup("register-%r, %w words, %m messages");
+
+    if (!globals_initialized)
+	atexit(free_globals);
+    globals_initialized = 1;
+}

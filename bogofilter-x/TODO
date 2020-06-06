@@ -1,5 +1,3 @@
-# $Id: TODO 6883 2010-03-14 14:34:33Z m-a $
-
 			bogofilter TODO list
 
 **** Solaris: /opt/csw - fix system iconv vs. csw iconv. This fails if for

@@ -1,5 +1,3 @@
-/* $Id: configfile.h 5656 2005-03-16 03:55:14Z m-a $ */
-
 /*****************************************************************************
 
 NAME:
@@ -27,7 +25,7 @@ typedef enum arg_pass_e {
 
 extern char *config_file_name;
 
-extern void remove_comment(const char *line);
+extern void remove_comment(char *line);
 extern bool process_config_files(bool warn_on_error, struct option *lopts);
 extern bool process_config_option(const char *arg, bool warn_on_error, priority_t precedence, struct option *lopts);
 extern bool read_config_file(const char *fname, bool tilde_expand, bool warn_on_error, priority_t precedence, struct option *lopts);

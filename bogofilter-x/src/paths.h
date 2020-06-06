@@ -1,5 +1,3 @@
-/* $Id: paths.h 6207 2005-08-14 13:10:06Z relson $ */
-
 /**
  * \file
  * paths.h -- prototypes and definitions for paths.c.

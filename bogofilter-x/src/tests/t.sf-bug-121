@@ -1,0 +1,8 @@
+#! /bin/sh
+
+. ${srcdir:=.}/t.frame
+
+# t.sf-buf-121
+
+gzip -c -d <"$srcdir/inputs/gconv-tmin2.gz" >"$TMPDIR/input"
+$BOGOLEXER -p -C -I "$TMPDIR/input" >/dev/null

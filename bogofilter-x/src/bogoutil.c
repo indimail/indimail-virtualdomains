@@ -1,5 +1,3 @@
-/* $Id: bogoutil.c 6993 2013-06-28 21:54:23Z m-a $ */
-
 /*****************************************************************************
 
 NAME:
@@ -69,9 +67,8 @@ static void ds_open_failure(bfpath *bfp, void *dbe)
     exit(EX_ERROR);
 }
 
-static int ds_dump_hook(word_t *key, dsv_t *data,
+static ex_t ds_dump_hook(word_t *key, dsv_t *data,
 			/*@unused@*/ void *userdata)
-/* returns 0 if ok, 1 if not ok */
 {
     (void)userdata;
 
@@ -81,7 +78,7 @@ static int ds_dump_hook(word_t *key, dsv_t *data,
     token_count += 1;
 
     if (maintain && discard_token(key, data))
-	return 0;
+	return EX_OK;
 
     if (replace_nonascii_characters)
 	do_replace_nonascii_characters(key->u.text, key->leng);
@@ -95,7 +92,7 @@ static int ds_dump_hook(word_t *key, dsv_t *data,
     fprintf(fpo, "\n");
 
     fflush(stdout); /* solicit ferror flag if output is shorter than buffer */
-    return ferror(stdout) ? 1 : 0;
+    return ferror(stdout) ? EX_ERROR : EX_OK;
 }
 
 static ex_t dump_wordlist(bfpath *bfp)
@@ -153,7 +150,7 @@ static bool is_count(const char *in)
     return false;
 }
 
-static ex_t load_wordlist(bfpath *bfp)
+static int load_wordlist(bfpath *bfp)
 {
     void *dsh;
     byte buf[BUFSIZE];
@@ -167,7 +164,7 @@ static ex_t load_wordlist(bfpath *bfp)
 
     void *dbe = ds_init(bfp);
 
-    dsh = ds_open(dbe, bfp, DS_WRITE | DS_LOAD);
+    dsh = ds_open(dbe, bfp, (dbmode_t)(DS_WRITE | DS_LOAD));
     if (dsh == NULL)
 	/* print error, cleanup, and exit */
 	ds_open_failure(bfp, dbe);
@@ -323,6 +320,7 @@ static ex_t display_words(bfpath *bfp, int argc, char **argv, bool show_probabil
     void *dbe;
 
     int rv = 0;
+    ex_t ec = EX_OK;
 
     dsv_t msgcnts;
 
@@ -393,7 +391,7 @@ static ex_t display_words(bfpath *bfp, int argc, char **argv, bool show_probabil
 		break;
 	    default:
 		fprintf(stderr, "Cannot read from database.\n");
-		rv = EX_ERROR;
+		ec = EX_ERROR;
 		goto finish;
 	}
 
@@ -404,14 +402,14 @@ static ex_t display_words(bfpath *bfp, int argc, char **argv, bool show_probabil
 finish:
     if (DST_OK != rv ? ds_txn_abort(dsh) : ds_txn_commit(dsh)) {
 	fprintf(stderr, "Cannot %s transaction.\n", rv ? "abort" : "commit");
-	rv = EX_ERROR;
+	ec = EX_ERROR;
     }
     ds_close(dsh);
     ds_cleanup(dbe);
 
     buff_free(buff);
 
-    return rv;
+    return ec;
 }
 
 static ex_t get_robx(bfpath *bfp)
@@ -460,7 +458,8 @@ static void print_version(void)
     (void)fprintf(stdout,
 		  "%s version %s\n"
 		  "    Database: %s\n"
-		  "Copyright (C) 2002-2010 David Relson, Matthias Andree\n"
+		  "Copyright (C) 2002-2010 David Relson\n"
+		  "Copyright (C) 2003-2019 Matthias Andree\n"
 		  "Copyright (C) 2002-2003 Gyepi Sam.\n\n"
 		  "%s comes with ABSOLUTELY NO WARRANTY.  "
 		  "This is free software, and\nyou are welcome to "
@@ -715,7 +714,7 @@ int process_arg(int option, const char *name, const char *val, priority_t preced
 
     case 'r':
 	onlyprint = true;
-	/*- flow through */
+	/* fallthrough */
     case 'R':
 	flag = M_ROBX;
 	count += 1;
@@ -900,6 +899,8 @@ int main(int argc, char *argv[])
 
     fBogoutil = true;
 
+    init_globals();
+
     signal_setup();			/* setup to catch signals */
     atexit(bf_exit);
 
@@ -938,15 +939,15 @@ int main(int argc, char *argv[])
 
     switch (flag) {
 	case M_RECOVER:
-	    ds_init(bfp);
+	    dsm_init(bfp);
 	    rc = ds_recover(bfp, false);
 	    break;
 	case M_CRECOVER:
-	    ds_init(bfp);
+	    dsm_init(bfp);
 	    rc = ds_recover(bfp, true);
 	    break;
 	case M_CHECKPOINT:
-	    ds_init(bfp);
+	    dsm_init(bfp);
 	    rc = ds_checkpoint(bfp);
 	    break;
 	case M_LIST_LOGFILES:
@@ -954,7 +955,7 @@ int main(int argc, char *argv[])
 	    rc = ds_list_logfiles(bfp, argc - optind, argv + optind);
 	    break;
 	case M_PURGELOGS:
-	    ds_init(bfp);
+	    dsm_init(bfp);
 	    rc = ds_purgelogs(bfp);
 	    break;
 	case M_REMOVEENV:
@@ -1000,7 +1001,7 @@ int main(int argc, char *argv[])
 	    rc = dump_wordlist(bfp);
 	    break;
 	case M_LOAD:
-	    rc = load_wordlist(bfp);
+	    rc = load_wordlist(bfp) ? EX_ERROR : EX_OK;
 	    break;
 	case M_MAINTAIN:
 	    maintain = true;

@@ -1,5 +1,3 @@
-/* $Id: datastore_db_trad.c 6650 2007-02-14 21:19:32Z m-a $ */
-
 /*****************************************************************************
 
 NAME:
@@ -127,7 +125,7 @@ void bft_log_flush(DB_ENV *dbe)
 
 dbe_t *bft_init(bfpath *bfp)
 {
-    dbe_t *env = xcalloc(1, sizeof(dbe_t));
+    dbe_t *env = (dbe_t *)xcalloc(1, sizeof(dbe_t));
 
     env->magic = MAGIC_DBE;	    /* poor man's type checking */
     env->directory = xstrdup(bfp->dirname);

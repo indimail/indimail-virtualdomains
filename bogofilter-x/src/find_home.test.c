@@ -13,8 +13,6 @@
  * COPYING.
  */
 
-/* $Id: find_home.test.c 6484 2006-05-29 14:28:00Z relson $ */
-
 #include "common.h"
 
 #include <ctype.h>

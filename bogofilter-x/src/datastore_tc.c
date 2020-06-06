@@ -1,5 +1,3 @@
-/* $Id: datastore_tc.c 6892 2010-03-23 17:21:37Z m-a $ */
-
 /*****************************************************************************
 
 NAME:
@@ -16,10 +14,8 @@ Pierre Habouzit <madcoder@debian.org>    2007
 #include "common.h"
 
 #include <tcutil.h>
-#include <tchdb.h>
 #include <tcbdb.h>
 #include <stdlib.h>
-#include <time.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -33,9 +29,7 @@ Pierre Habouzit <madcoder@debian.org>    2007
 #define UNUSED(x) ((void)&x)
 
 typedef struct {
-    char *path;
     char *name;
-    bool locked;
     bool created;
     TCBDB *dbp;
 } dbh_t;
@@ -43,7 +37,7 @@ typedef struct {
 /* transaction stuff */
 
 static int tc_txn_begin(void *vhandle) {
-    dbh_t *dbh = vhandle;
+    dbh_t *dbh = (dbh_t *)vhandle;
     if (!dbh->dbp->wmode || tcbdbtranbegin(dbh->dbp))
         return DST_OK;
     print_error(__FILE__, __LINE__, "tc_txn_begin(%p), err: %d, %s", dbh->dbp,
@@ -52,7 +46,7 @@ static int tc_txn_begin(void *vhandle) {
 }
 
 static int tc_txn_abort(void *vhandle) {
-    dbh_t *dbh = vhandle;
+    dbh_t *dbh = (dbh_t *)vhandle;
     if (!dbh->dbp->wmode || tcbdbtranabort(dbh->dbp))
         return DST_OK;
     print_error(__FILE__, __LINE__, "tc_txn_abort(%p), err: %d, %s", dbh->dbp,
@@ -61,7 +55,7 @@ static int tc_txn_abort(void *vhandle) {
 }
 
 static int tc_txn_commit(void *vhandle) {
-    dbh_t *dbh = vhandle;
+    dbh_t *dbh = (dbh_t *)vhandle;
     if (!dbh->dbp->wmode || tcbdbtrancommit(dbh->dbp))
         return DST_OK;
     print_error(__FILE__, __LINE__, "tc_txn_commit(%p), err: %d, %s",
@@ -117,13 +111,12 @@ static dbh_t *dbh_init(bfpath *bfp)
 {
     dbh_t *handle;
 
-    handle = xmalloc(sizeof(dbh_t));
+    handle = (dbh_t *)xmalloc(sizeof(dbh_t));
     memset(handle, 0, sizeof(dbh_t));	/* valgrind */
 
     handle->name = xstrdup(bfp->filepath);
-
-    handle->locked = false;
     handle->created = false;
+    handle->dbp = tcbdbnew();
 
     return handle;
 }
@@ -133,7 +126,7 @@ static void dbh_free(/*@only@*/ dbh_t *handle)
 {
     if (handle != NULL) {
       xfree(handle->name);
-      xfree(handle->path);
+      tcbdbdel(handle->dbp);
       xfree(handle);
     }
     return;
@@ -152,7 +145,7 @@ bool db_is_swapped(void *vhandle)
 /* Returns created flag */
 bool db_created(void *vhandle)
 {
-    dbh_t *handle = vhandle;
+    dbh_t *handle = (dbh_t *)vhandle;
     return handle->created;
 }
 
@@ -180,7 +173,7 @@ void *db_open(void * dummy, bfpath *bfp, dbmode_t open_mode)
 
     if (handle == NULL) return NULL;
 
-    dbp = handle->dbp = tcbdbnew();
+    dbp = handle->dbp;
     res = tcbdbopen(dbp, handle->name, open_flags);
     if (!res && (open_mode & DS_WRITE)) {
         res = tcbdbopen(dbp, handle->name, open_flags | BDBOCREAT);
@@ -208,7 +201,7 @@ void *db_open(void * dummy, bfpath *bfp, dbmode_t open_mode)
 int db_delete(void *vhandle, const dbv_t *token)
 {
     int ret;
-    dbh_t *handle = vhandle;
+    dbh_t *handle = (dbh_t *)vhandle;
     TCBDB *dbp;
 
     dbp = handle->dbp;
@@ -232,10 +225,10 @@ int db_get_dbvalue(void *vhandle, const dbv_t *token, /*@out@*/ dbv_t *val)
     char *data;
     int dsiz;
 
-    dbh_t *handle = vhandle;
+    dbh_t *handle = (dbh_t *)vhandle;
     TCBDB *dbp = handle->dbp;
 
-    data = tcbdbget(dbp, token->data, token->leng, &dsiz);
+    data = (char *)tcbdbget(dbp, token->data, token->leng, &dsiz);
 
     if (data == NULL)
 	return DS_NOTFOUND;
@@ -277,7 +270,7 @@ static inline void db_optimize(TCBDB *dbp, char *name)
 int db_set_dbvalue(void *vhandle, const dbv_t *token, const dbv_t *val)
 {
     int ret;
-    dbh_t *handle = vhandle;
+    dbh_t *handle = (dbh_t *)vhandle;
     TCBDB *dbp = handle->dbp;
 
     ret = tcbdbput(dbp, token->data, token->leng, val->data, val->leng);
@@ -301,7 +294,7 @@ int db_set_dbvalue(void *vhandle, const dbv_t *token, const dbv_t *val)
 */
 void db_close(void *vhandle)
 {
-    dbh_t *handle = vhandle;
+    dbh_t *handle = (dbh_t *)vhandle;
     TCBDB *dbp;
 
     if (handle == NULL) return;
@@ -318,9 +311,6 @@ void db_close(void *vhandle)
 		    handle->name, 
 		    tcbdbecode(dbp), tcbdberrmsg(tcbdbecode(dbp)));
 
-    tcbdbdel(dbp);
-    handle->dbp = NULL;
-
     dbh_free(handle);
 }
 
@@ -330,7 +320,7 @@ void db_close(void *vhandle)
 */
 void db_flush(void *vhandle)
 {
-    dbh_t *handle = vhandle;
+    dbh_t *handle = (dbh_t *)vhandle;
     TCBDB * dbp = handle->dbp;
 
     if (!tcbdbsync(dbp))
@@ -343,46 +333,46 @@ ex_t db_foreach(void *vhandle, db_foreach_t hook, void *userdata)
 {
     int ret = 0;
 
-    dbh_t *handle = vhandle;
+    dbh_t *handle = (dbh_t *)vhandle;
     TCBDB *dbp = handle->dbp;
     BDBCUR *cursor;
 
-    dbv_t dbv_key, dbv_data;
+    dbv_t dbv_key;
+    dbv_const_t dbv_data;
     int ksiz, dsiz;
     char *key, *data;
 
     cursor = tcbdbcurnew(dbp);
-    ret = tcbdbcurfirst(cursor);
-    if (ret) {
-	while ((key = tcbdbcurkey(cursor, &ksiz))) {
-	    data = tcbdbcurval(cursor, &dsiz);
-	    if (data) {
-		/* switch to "dbv_t *" variables */
-		dbv_key.leng = ksiz;
-		dbv_key.data = xmalloc(dbv_key.leng+1);
-		memcpy(dbv_key.data, key, ksiz);
-		((char *)dbv_key.data)[dbv_key.leng] = '\0';
-
-		dbv_data.data = data;
-		dbv_data.leng = dsiz;		/* read count */
-
-		/* call user function */
-		ret = hook(&dbv_key, &dbv_data, userdata);
-
-		xfree(dbv_key.data);
-
-		if (ret != 0)
-		    break;
-		free(data); /* not xfree() as allocated by dpget() */
-	    }
-	    free(key); /* not xfree() as allocated by dpiternext() */
-
-	    tcbdbcurnext(cursor);
-	}
-    } else {
+    if (!tcbdbcurfirst(cursor)) {
 	print_error(__FILE__, __LINE__, "(tc) tcbdbcurfirst err: %d, %s",
 		    tcbdbecode(dbp), tcbdberrmsg(tcbdbecode(dbp)));
 	exit(EX_ERROR);
+    }
+
+    while ((key = (char *)tcbdbcurkey(cursor, &ksiz))) {
+	data = (char *)tcbdbcurval(cursor, &dsiz);
+	if (data) {
+	    /* switch to "dbv_t *" variables */
+	    dbv_key.data = xstrdup(key);
+	    dbv_key.leng = ksiz;
+
+	    dbv_data.data = data;
+	    dbv_data.leng = dsiz;		/* read count */
+
+	    /* call user function */
+	    ret = hook(&dbv_key, &dbv_data, userdata);
+
+	    xfree(dbv_key.data);
+	    free(data); /* not xfree() as allocated by dpget() */
+
+	    if (ret != 0) {
+		free(key);
+		break;
+	    }
+	}
+	free(key); /* not xfree() as allocated by dpiternext() */
+
+	tcbdbcurnext(cursor);
     }
 
     tcbdbcurdel(cursor);

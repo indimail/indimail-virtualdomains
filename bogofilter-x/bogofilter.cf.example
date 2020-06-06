@@ -1,7 +1,5 @@
 ########### Sample BOGOFILTER Configuration File ###########################
 
-# $Id: bogofilter.cf.example 6811 2009-02-21 20:32:50Z relson $
-
 # Default settings (as defined in the bogofilter source code) 
 # have a single hash mark at the beginning of the line.
 

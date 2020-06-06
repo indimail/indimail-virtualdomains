@@ -1,5 +1,3 @@
-/* $Id: memstr.c 6774 2009-02-01 02:29:27Z relson $ */
-
 /** \file memstr.c
  * find a C string in memory
  * \author Matthias Andree
@@ -14,7 +12,7 @@
  */
 void *memstr(void *hay, size_t n, const char *needle)
 {
-    unsigned char *haystack = hay;
+    unsigned char *haystack = (unsigned char *)hay;
     size_t l = strlen(needle);
 
     while (n >= l) {

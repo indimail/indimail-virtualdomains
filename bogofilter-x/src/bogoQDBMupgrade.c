@@ -1,5 +1,3 @@
-/* $Id: bogoQDBMupgrade.c 6484 2006-05-29 14:28:00Z relson $ */
-
 /*
   bogoQDBMupgrade.c -- convert QDBM data base from Hash to B+Tree format
   Copyright (C) 2004  Stefan Bellon
@@ -29,6 +27,7 @@
 #include <cabin.h>
 #include <villa.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "datastore_qdbm.h"
 
@@ -71,7 +70,7 @@ int main(int argc, char *argv[])
     if (argc >= 3) {
 	new_name = strdup(argv[2]);
     } else {
-	new_name = malloc(strlen(argv[1]) + strlen(tackon) + 1);
+	new_name = (char *)malloc(strlen(argv[1]) + strlen(tackon) + 1);
 	if (new_name) {
 	    strcpy(new_name, argv[1]);
 	    strcat(new_name, tackon);

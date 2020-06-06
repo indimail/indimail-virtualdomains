@@ -1,5 +1,3 @@
-/* $Id: wordlists.c 6917 2010-07-05 15:59:15Z m-a $ */
-
 #include "common.h"
 
 #include <string.h>
@@ -55,7 +53,7 @@ static void *list_searchinsert(bfpath *bfp)
     }
 
     l = strlen(bfp->dirname) + 1;
-    n = xmalloc(sizeof(struct envnode) + l);
+    n = (struct envnode *)xmalloc(sizeof(struct envnode) + l);
 
     n->dbe = ds_init(bfp);
 
@@ -87,7 +85,7 @@ void begin_wordlist(wordlist_t *list)
 	}
 	switch (ds_get_wordlist_encoding(list->dsh, &val)) {
 	    case 0:		/* found */
-		list->encoding = val.spamcount;
+		list->encoding = (e_enc)val.spamcount;	/* FIXME: is the cast correct? */
 		break;
 	    case 1:		/* not found */
 		break;
@@ -117,7 +115,7 @@ static bool open_wordlist(wordlist_t *list, dbmode_t mode)
     if (dbe == NULL)
 	exit(EX_ERROR);
 
-    list->dsh = ds_open(dbe, bfp, mode); /* FIXME -- euh, what is here to fix? */
+    list->dsh = (dsh_t *)ds_open(dbe, bfp, mode); /* FIXME -- euh, what is here to fix? */
 
     if (list->dsh == NULL) {
 	int err = errno;
@@ -265,9 +263,6 @@ bool close_wordlists(bool commit /** if unset, abort */)
 	xfree(i);
     }
 
-    if (commit)
-	word_lists = NULL;
-
     return err;
 }
 
@@ -310,8 +305,10 @@ static char *spanword(char *p)
 {
     const char *delim = ", \t";
     p += strcspn(p, delim);		/* skip to end of word */
-    *p++ = '\0';
-    p += strspn(p, " \t");		/* skip trailing whitespace */
+    if (*p) {
+	    *p++ = '\0';
+	    p += strspn(p, " \t");		/* skip trailing whitespace */
+    }
     return p;
 }
 
@@ -331,6 +328,7 @@ bool configure_wordlist(const char *val)
     int  precedence;
 
     char *tmp = xstrdup(val);
+    char *ftmp = tmp;
 
     ch= tmp[0];		/* save wordlist type (good/spam) */
     tmp = spanword(tmp);
@@ -345,6 +343,7 @@ bool configure_wordlist(const char *val)
 	break;
     default:
 	fprintf( stderr, "Unknown wordlist type - '%c'\n", ch);
+	xfree(ftmp);
 	return (false);
     }
 
@@ -358,7 +357,7 @@ bool configure_wordlist(const char *val)
     (void)spanword(tmp);
 
     init_wordlist(listname, filename, precedence, type);
-
+    xfree(ftmp);
     return true;
 }
 

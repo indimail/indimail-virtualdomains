@@ -1,5 +1,3 @@
-/* $Id: rstats.c 6816 2009-02-21 21:11:01Z relson $ */
-
 /*****************************************************************************
 
 NAME:
@@ -68,7 +66,7 @@ static void rstats_print_rtable(rstats_t *rstats_head);
 void rstats_init(void)
 {
     if (stats_head == NULL) {
-	stats_head = xcalloc(1, sizeof(header_t));
+	stats_head = (header_t *)xcalloc(1, sizeof(header_t));
 	stats_tail = (rstats_t *)xcalloc(1, sizeof(rstats_t));
 	stats_head->list = stats_tail;
     }

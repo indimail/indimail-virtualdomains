@@ -1,8 +1,10 @@
-# $Id: Makefile.am 6787 2009-02-09 09:00:24Z m-a $ 
+# automake options
+AUTOMAKE_OPTIONS = 
 
-# search path for m4 macros
 COFLAGS=-z+05:30
+# search path for m4 macros
 ACLOCAL_AMFLAGS = -I m4
+
 release := $(shell cat conf-release 2>/dev/null|| echo "1.1")
 spamfilter_version=$(shell cat conf-version)
 SUBDIRS = trio src . doc
@@ -10,6 +12,7 @@ SYSCONFDIR = @sysconfdir@
 
 # what to build
 sysconf_DATA=	bogofilter.cf.example perm_list.bogofilter
+MOSTLYCLEANFILES=perm_list.bogofilter
 
 # ChangeLog, cvs2cl lives at http://www.red-bean.com/cvs2cl
 .PHONY:		$(srcdir)/changelog.txt
@@ -20,32 +23,28 @@ $(srcdir)/changelog.txt:
 # what to distribute
 EXTRA_DIST=	autogen.sh gsl config.rpath \
 		bogofilter.cf.example \
+		bogofilter.spec.in \
+		bogofilter.spec \
 		Doxyfile gpl-3.0.txt gnugetopt \
 		GETTING.STARTED \
 		NEWS.0 \
-		README.svn \
-		RELEASE.NOTES \
-		install-staticdblibs.sh
+		OBITUARY \
+		README.git \
+		RELEASE.NOTES
 
-.PHONY:	check rpm svn-check
+.PHONY:	check rpm git-check
 
 doc_list=AUTHORS HOWTO COPYING
 
 #
 # RPM building - there are some cheats here
 #
+# NOTE this is unsupported and left to packagers.
+# The information below is historic.
+#
 # BF_ZAP_LIBDB is a magic variable we check from configure.ac,
 # which zaps LIBDB and allows us to override the library choice
 # through LIBS=...
-#
-# Passing -ldb-4.2 (for the second -tb line) will fail on systems that
-# don't have libdb-4.2.* in the default library path that "ld" uses.
-# Install your system's db42 and db42-devel packages and retry.
-# Using -ldb-4.2 is indispensable as systems with db 4.3 or 4.4 would
-# otherwise pick the newer one as their default, but we must match
-# the library between shared and static RPM so that users can switch
-# forth and back without difficulties such as dumping and reloading
-# the database.
 #
 # CPPFLAGS=-D__NO_CTYPE tells glibc to use the older glibc 2.2.X
 # ctype implementation (functions). Else glibc would use a newer
@@ -72,46 +71,35 @@ doc_list=AUTHORS HOWTO COPYING
 #
 # 3. run "setsid make rpm </dev/null >/dev/null"
 #
-DBPFX=/opt/db-4.2-lean
-SQPFX=/opt/sqlite-3-lean
-DBLIB=$(DBPFX)/lib/libdb.a
-SQLIB=$(SQPFX)/lib/libsqlite3.a
-DEF_DB42=--define 'with_db42 1'
-DEF_SQLITE=--define 'with_sqlite 1'
-DEF_STATIC=--define 'bf_nameext -static'
-SIGN=--sign
-#
-rpm:	dist
+rpm:
+	@echo
+	@echo "=================================="
+	@echo "'make rpm' is no longer supported."
+	@echo "=================================="
+	@echo
+	@exit 1
 	@echo
 	@echo "Note: if 'make rpm' fails, check the top-level Makefile.am for documentation."
 	@echo
 	@echo "Note: see Makefile.am comments for information on how to use the GnuPG agent."
 	@echo
-	@sleep 5
-	$(RPMBUILD) $(SIGN) -ts $(distdir).tar.gz
-	if test ! -f $(DBLIB) || test ! -f $(SQLIB) || objdump -t $(SQLIB) | grep -q __ctype_b_loc ; then \
-	  echo >&2 "Please run the install-staticdblibs.sh script first." ; exit 1 ; fi
-	BF_ZAP_LIBDB=zap CPPFLAGS="-D__NO_CTYPE -I$(DBPFX)/include" LIBS=$(DBLIB) \
-		     $(RPMBUILD) $(DEF_STATIC) $(DEF_DB42)   $(SIGN) -tb $(distdir).tar.gz
-	BF_ZAP_LIBDB=zap CPPFLAGS="-D__NO_CTYPE -I$(SQPFX)/include" LIBS="$(SQLIB) -ldl" \
-		     $(RPMBUILD) $(DEF_STATIC) $(DEF_SQLITE) $(SIGN) -tb $(distdir).tar.gz
-	@echo
 	@echo "Now building the shared database library RPMs - this may fail"
-	@echo "if system-wide library installs of BerkeleyDB 4.2 or SQLite 3"
-	@echo "are missing from your system. The static RPMs that have just"
-	@echo "been built are ready to go however."
+	@echo "if system-wide library installs of BerkeleyDB 5.3 or SQLite 3"
+	@echo "are missing from your system."
 	@echo
 	@sleep 5
-	-                CPPFLAGS="-D__NO_CTYPE -I$(DBPFX)" LIBS="-ldb-4.2 -pthread" \
+	-                CPPFLAGS="-D__NO_CTYPE -I$(DBPFX)" LIBS="-ldb-5.3 -pthread" \
 			$(RPMBUILD)              $(DEF_DB42)   $(SIGN) -tb $(distdir).tar.gz
 	-                CPPFLAGS="-D__NO_CTYPE -I$(SQPFX)"               \
 			$(RPMBUILD)              $(DEF_SQLITE) $(SIGN) -tb $(distdir).tar.gz
 
-svn-check:
+git-check:
+	if test -d $(PACKAGE)-$(VERSION)-export ; then chmod -R u+rwX $(PACKAGE)-$(VERSION)-export ; fi
 	rm -rf $(PACKAGE)-$(VERSION)-export
-	svn export -rBASE $(srcdir) $(PACKAGE)-$(VERSION)-export
-	cd $(PACKAGE)-$(VERSION)-export && autoreconf -i -f -s -v \
-	&& ./configure && make distcheck
+	mkdir $(PACKAGE)-$(VERSION)-export
+	( cd $(top_srcdir) && git archive --format=tar HEAD ) | tar -C $(PACKAGE)-$(VERSION)-export -xf -
+	cd $(PACKAGE)-$(VERSION)-export && chmod -R u+rwX . && autoreconf -i -f -s -v \
+	&& mkdir _build && cd _build && ../configure && $(MAKE) distcheck
 
 # this target expects a .rsyncs file with lines of this format:
 # host:directory/
@@ -131,7 +119,7 @@ install-data-hook:
 	done
 
 dist-hook:
-	cd $(distdir) && find doc gnugetopt gsl '(' -name .svn -o -name CVS ')' -type d -prune -exec rm -rf '{}' +
+	cd $(distdir) && find doc gnugetopt gsl '(' -name .svn -o -name .git -o -name CVS ')' -type d -prune -exec rm -rf '{}' +
 	cd $(distdir) && find doc gnugetopt gsl -name '.#*' -type f -exec rm '{}' ';'
 	rm -f $(distdir)/doc/.cvsignore $(distdir)/ChangeLog
 
@@ -140,11 +128,6 @@ dist-hook:
 #
 noinst_PROGRAMS=bogogrep
 bogogrep_SOURCES=contrib/bogogrep.c
-if ENABLE_STATIC
-noinst_PROGRAMS+=bogogrep_static
-bogogrep_static_SOURCES=contrib/bogogrep.c
-bogogrep_static_LDFLAGS=$(STATICLDFLAGS)
-endif
 noinst_DATA = indimail-spamfilter.spec
 
 EXTRA_DIST+= \
@@ -186,7 +169,7 @@ edit = sed \
 	-e 's}@DATE\@}$(DATE)}g' \
 	-e 's}@prefix\@}$(prefix)}g'
 
-indimail-spamfilter.spec: indimail-spamfilter.spec.in catChangeLog ChangeLog conf-version conf-release
+indimail-spamfilter.spec: indimail-spamfilter.spec.in catChangeLog doc/ChangeLog conf-version conf-release
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 debian/Makefile: debian/Makefile.in configure.ac
 	$(edit) $@.in > $@;

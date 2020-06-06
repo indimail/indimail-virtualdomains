@@ -1,5 +1,3 @@
-/* $Id: transaction.c 3441 2003-10-29 15:10:38Z m-a $ */
-
 /*****************************************************************************
 
 NAME:
@@ -43,7 +41,7 @@ struct ta_type {
 /* open a transaction and return pointer to transaction anchor */
 ta_t *ta_init(void)
 {
-    ta_t *ta = xmalloc(sizeof(*ta));
+    ta_t *ta = (ta_t *)xmalloc(sizeof(*ta));
     ta->head = NULL;
     ta->last = NULL;
     return ta;
@@ -97,7 +95,7 @@ int ta_rollback(ta_t *ta)
 
 /* add operation to scheduler queue (internal function) */
 static void ta_add(ta_t *ta, ta_kind_t ta_kind, void *vhandle,
-                   const word_t *word, dsv_t *dsvval)
+                   const word_t *word, const dsv_t *dsvval)
 {
     void *ta_vhandle = vhandle;
     word_t *ta_word = NULL;
@@ -108,11 +106,11 @@ static void ta_add(ta_t *ta, ta_kind_t ta_kind, void *vhandle,
         ta_word = word_dup(word);
     
     if (dsvval) {
-        ta_dsvval = xmalloc(sizeof(*ta_dsvval));
+        ta_dsvval = (dsv_t *)xmalloc(sizeof(*ta_dsvval));
 	memcpy(ta_dsvval, dsvval, sizeof(*ta_dsvval));
     }
     
-    item = xmalloc(sizeof(*item));
+    item = (ta_iter_t *)xmalloc(sizeof(*item));
     item->kind = ta_kind;
     item->vhandle = ta_vhandle;
     item->word = ta_word;
@@ -139,7 +137,7 @@ int ta_delete(ta_t *ta, void *vhandle, const word_t *word)
 }
 
 /* add write operation to scheduler queue */
-int ta_write(ta_t *ta, void *vhandle, const word_t *word, dsv_t *val)
+int ta_write(ta_t *ta, void *vhandle, const word_t *word, const dsv_t *val)
 {
     if (ta == NULL)
         return TA_ERR;

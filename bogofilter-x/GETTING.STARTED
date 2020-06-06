@@ -30,26 +30,20 @@ Summary:
     Releases are made available on SourceForge.net.
 
     If you're a newbie, installing from a binary package is quickest
-    and easiest.  If you're running an rpm based distro like Mandrake
-    or Suse, install bogofilter from an rpm.  Similarly if you're
-    running Debian, install from a deb package.
+    and easiest.  If you're running an rpm based distro like Fedora
+    or OpenSUSE, install bogofilter from an rpm.  Similarly if you're
+    running Debian, Mint, or Ubuntu, install from a deb package.
 
-    Source formats include tarballs (in .tar.gz and .tar.bz2 forms)
-    and rpms (bogofilter-VER.src.rpm).  Once downloaded and untarred,
-    build and install with the usual commands, i.e.  "configure",
-    "make", and "make install".  To ensure that the newly built
-    bogofilter is running properly on your hardware and operating
-    system, use "make check" to run a series of tests.  
+    Once downloaded and untarred, build and install with the usual 
+    commands, i.e.  "configure", "make", and "make install".  To ensure 
+    that the newly built bogofilter is running properly on your hardware 
+    and operating system, use "make check" to run a series of tests.  
 
     For source rpms, use "rpm -bb bogofilter.spec" and "rpm -ivh
     bogofilter" (or comparable commands).
 
     Binary formats include builds for dynamically linked (shared)
-    libaries, e.g. bogofilter-VER.i586.rpm, and a statically linked
-    executable, e.g. bogofilter-static-VER.i586.rpm.
-
-    It is also available as a .deb pack (use "apt-get bogofilter" to
-    install) and via yum (use "yum install bogofilter").
+    libaries, e.g. bogofilter-VER.x64_64.rpm.
 
     See the INSTALL file for more info.
 

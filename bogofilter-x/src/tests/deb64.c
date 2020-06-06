@@ -1,5 +1,3 @@
-/* $Id: deb64.c 6766 2009-01-12 04:27:36Z relson $ */
-
 #include "common.h"
 
 #include <stdlib.h>

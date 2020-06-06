@@ -20,7 +20,7 @@ char *mxcat(const char *first, ...) {
     va_end(ap);
 
     s++;
-    r = xmalloc(s);
+    r = (char *)xmalloc(s);
     va_start(ap, first);
     strlcpy(r, first, s);
     while ((t = va_arg(ap, char *))) {

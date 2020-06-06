@@ -1,5 +1,3 @@
-/* $Id: maint.c 6862 2009-08-05 08:43:04Z m-a $ */
-
 /*****************************************************************************
 
 NAME:
@@ -78,28 +76,30 @@ static bool keep_size(size_t size)
     return ok;
 }
 
-static void merge_tokens(const word_t *old_token, const word_t *new_token, dsv_t *in_val, ta_t *transaction, void *vhandle)
+static void merge_tokens(const word_t *old_token, const word_t *new_token, const dsv_t *in_val, ta_t *transaction, void *vhandle)
 {
     int	  ret;
-    dsv_t old_tmp;
+    dsv_t tmp;
 
     /* delete original token */
     ta_delete(transaction, vhandle, old_token);
 
     /* retrieve and update nonascii token*/
-    ret = ta_read(transaction, vhandle, new_token, &old_tmp);
+    ret = ta_read(transaction, vhandle, new_token, &tmp);
 
     if (ret == EX_OK) {
-	in_val->spamcount += old_tmp.spamcount;
-	in_val->goodcount += old_tmp.goodcount;
-	in_val->date       = max(old_tmp.date, in_val->date);	/* date in form YYYYMMDD */
-    }
-    set_date(in_val->date);	/* set timestamp */
-    ta_write(transaction, vhandle, new_token, in_val);
+	tmp.spamcount += in_val->spamcount;
+	tmp.goodcount += in_val->goodcount;
+	tmp.date       = max(tmp.date, in_val->date);	/* date in form YYYYMMDD */
+    } else {
+	memcpy(&tmp, in_val, sizeof(dsv_t));
+    };
+    set_date(tmp.date);	/* set timestamp */
+    ta_write(transaction, vhandle, new_token, &tmp);
     set_date(0);
 }
 
-static void replace_token(const word_t *old_token, const word_t *new_token, dsv_t *in_val, ta_t *transaction, void *vhandle)
+static void replace_token(const word_t *old_token, const word_t *new_token, const dsv_t *in_val, ta_t *transaction, void *vhandle)
 {
     /* delete original token */
     ta_delete(transaction, vhandle, old_token);	
@@ -113,16 +113,16 @@ static void replace_token(const word_t *old_token, const word_t *new_token, dsv_
 /* Keep token if at least one user given constraint should be kept */
 /* Discard if all user given constraints are satisfied */
 
-bool discard_token(word_t *token, dsv_t *in_val)
+bool discard_token(word_t *token, const dsv_t *in_val)
 {
     bool discard;
 
     if (token->u.text[0] == '.') {	/* keep .ENCODING, .MSG_COUNT, and .ROBX */
-	if (strcmp((const char *)token->u.text, MSG_COUNT) == 0)
+	if (0 == word_cmps(token, MSG_COUNT))
 	    return false;
-	if (strcmp((const char *)token->u.text, ROBX_W) == 0)
+	if (0 == word_cmps(token, ROBX_W))
 	    return false;
-	if (strcmp((const char *)token->u.text, WORDLIST_ENCODING) == 0)
+	if (0 == word_cmps(token, WORDLIST_ENCODING))
 	    return false;
     }
 
@@ -142,7 +142,7 @@ bool discard_token(word_t *token, dsv_t *in_val)
     return discard;
 }
 
-bool do_replace_nonascii_characters(register byte *str, register size_t len)
+bool do_replace_nonascii_characters(byte *str, size_t len)
 {
     bool change = false;
     assert(str != NULL);
@@ -161,7 +161,7 @@ struct userdata_t {
     ta_t *transaction;
 };
 
-static int maintain_hook(word_t *w_key, dsv_t *in_val,
+static ex_t maintain_hook(word_t *w_key, dsv_t *in_val,
 	void *userdata)
 {
     size_t len;
@@ -178,7 +178,7 @@ static int maintain_hook(word_t *w_key, dsv_t *in_val,
 	return EX_OK;
 
     if (discard_token(&token, in_val)) {
-	int ret = ta_delete(transaction, vhandle, &token);
+	ex_t ret = ta_delete(transaction, vhandle, &token) ? EX_ERROR : EX_OK;
 	if (DEBUG_DATABASE(0))
 	    fprintf(dbgout, "deleting '%.*s'\n", (int)min(INT_MAX, token.leng), (char *)token.u.text);
 	return ret;
@@ -291,7 +291,7 @@ static ex_t maintain_wordlist(void *database)
 	int rc = ds_get_wordlist_encoding(database, &val);
 	new_encoding = encoding;
 	if (rc == 0)
-	    old_encoding = val.spamcount;	/* found */
+	    old_encoding = (e_enc)val.spamcount;	/* found | FIXME: is the cast correct? */
 	else
 	    old_encoding = E_RAW;		/* not found */
 	if (old_encoding != new_encoding) {
@@ -305,7 +305,7 @@ static ex_t maintain_wordlist(void *database)
 	ret = EX_ERROR;
 
     if (upgrade_wordlist_version) {
-	done = check_wordlist_version(database);
+	done = check_wordlist_version((dsh_t *)database);
 	if (!done)
 	    fprintf(dbgout, "Upgrading wordlist.\n");
 	else
@@ -353,7 +353,7 @@ ex_t maintain_wordlist_file(bfpath *bfp)
 
     dbe = ds_init(bfp);
 
-    dsh = ds_open(dbe, bfp, DS_WRITE);
+    dsh = (dsh_t *)ds_open(dbe, bfp, DS_WRITE);
 
     if (dsh == NULL)
 	return EX_ERROR;

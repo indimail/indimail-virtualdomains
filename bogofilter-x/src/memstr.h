@@ -1,5 +1,3 @@
-/* $Id: memstr.h 6774 2009-02-01 02:29:27Z relson $ */
-
 /** \file memstr.h declarations for memstr.c
  * \author Matthias Andree
  * \date 2004

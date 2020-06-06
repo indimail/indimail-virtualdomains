@@ -1,5 +1,3 @@
-/* $Id: lexer.c 6988 2013-01-20 14:02:48Z m-a $ */
-
 /**
  * \file lexer.c
  * bogofilter's lexical analyzer (control routines)
@@ -11,6 +9,7 @@
 
 #include <ctype.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "base64.h"
 #include "bogoconfig.h"
@@ -141,6 +140,7 @@ static int yy_get_new_line(buff_t *buff)
 	   && count != EOF
 /* don't skip if inside message/rfc822 */
 	   && msg_state->parent == NULL
+	   && buff->t.leng >= hdrlen
 	   && memcmp(buff->t.u.text,spam_header_name,hdrlen) == 0) {
 	count = skip_folded_line(buff);
     }
@@ -152,12 +152,14 @@ static int get_decoded_line(buff_t *buff)
 {
     int count;
     buff_t *linebuff;
+    /* since msg_state might change during calls */
+    bool mime_dont_decode = msg_state->mime_dont_decode;
 
 #ifdef	DISABLE_UNICODE
     linebuff = buff;
 #else
     if (encoding == E_RAW ||
-	msg_state->mime_dont_decode ) {
+	mime_dont_decode ) {
 	linebuff = buff;
     }
     else {
@@ -180,6 +182,8 @@ static int get_decoded_line(buff_t *buff)
     }
 #endif
 
+    /* note that this call might invoke got_mimeboundary() thus
+     * changing the global msg_state variable */
     count = yy_get_new_line(linebuff);
 
     if (count == EOF) {
@@ -200,7 +204,7 @@ static int get_decoded_line(buff_t *buff)
 	textblock_add(linebuff->t.u.text+linebuff->read, (size_t) count);
 
     if ( !msg_header && 
-	 !msg_state->mime_dont_decode &&
+	 !mime_dont_decode &&
 	 msg_state->mime_type != MIME_TYPE_UNKNOWN)
     {
 	word_t temp;
@@ -221,15 +225,23 @@ static int get_decoded_line(buff_t *buff)
 
 #ifndef	DISABLE_UNICODE
     if (encoding == E_UNICODE &&
-	!msg_state->mime_dont_decode)
+	!mime_dont_decode &&
+        count > 0)
     {
 	iconvert(linebuff, buff);
-	/*
-	 * iconvert, treating multi-byte sequences, can shrink or enlarge
-	 * the output compared to its input.  Correct count.
-	 */
-	if (count > 0)
+
+	/* If we return count = 0 here, the caller will think we have
+	 * no more bytes left to read, even though before the iconvert
+	 * call we had a positive number of bytes. This *will* lead to
+	 * a message truncation which we try to avoid by simply
+	 * returning another in-band error code. */
+	if (buff->t.leng == 0) {
+	    count = -2;
+        } else {
+	    /* iconvert, treating multi-byte sequences, can shrink or enlarge
+	     * the output compared to its input.  Correct count. */
 	    count = buff->t.leng;
+	}
     }
 #endif
 
@@ -245,6 +257,7 @@ static int get_decoded_line(buff_t *buff)
 	byte *buf = buff->t.u.text;
 	if (memcmp(buf + count - 2, CRLF, 2) == 0) {
 	    count --;
+	    --buff->t.leng;
 	    *(buf + count - 1) = (byte) '\n';
 	}
     }
@@ -273,24 +286,6 @@ static int skip_folded_line(buff_t *buff)
     }
 }
 
-int buff_fill(buff_t *buff, size_t used, size_t need)
-{
-    int cnt = 0;
-    size_t leng = buff->t.leng;
-    size_t size = buff->size;
-
-    /* check bytes needed vs. bytes in buff */
-    while (size - leng > 2 && need > leng - used) {
-	/* too few, read more */
-	int add = get_decoded_line(buff);
-	if (add == EOF) return EOF;
-	if (add == 0) break ;
-	cnt += add;
-	leng += add;
-    }
-    return cnt;
-}
-
 void yyinit(void)
 {
     yylineno = 0;
@@ -316,11 +311,11 @@ int yyinput(byte *buf, size_t used, size_t size)
      */
 
     while ((cnt = get_decoded_line(&buff)) != 0) {
-
-	count += cnt;
+        if (cnt > 0)
+            count = buff.t.leng;
 
 	/* Note: some malformed messages can cause xfgetsl() to report
-	** "Invalid buffer size, exiting."  ** and then abort.  This
+	** "Invalid buffer size, exiting."  and then abort.  This
 	** can happen when the parser is in html mode and there's a
 	** leading '<' but no closing '>'.
 	**
@@ -334,9 +329,12 @@ int yyinput(byte *buf, size_t used, size_t size)
 
 	if (count >= MAX_TOKEN_LEN * 2 && 
 	    long_token(buff.t.u.text, (uint) count)) {
-	    uint start = buff.t.leng - count;
-	    uint length = count - max_token_len;
-	    buff_shift(&buff, start, length);
+	    /* Make sure not to shift bytes outside the buffer */
+	    if (buff.t.leng >= (uint) count) {
+		    uint start = buff.t.leng - count;
+		    uint length = count - max_token_len;
+		    buff_shift(&buff, start, length);
+	    }
 	    count = buff.t.leng;
 	}
 	else
@@ -346,6 +344,7 @@ int yyinput(byte *buf, size_t used, size_t size)
     if (msg_state &&
 	msg_state->mime_dont_decode &&
 	(msg_state->mime_disposition != MIME_DISPOSITION_UNKNOWN)) {
+        assert(size <= INT_MAX && count <= (int)size);
 	return (count == EOF ? 0 : count);   /* not decode at all */
     }
 
@@ -367,6 +366,7 @@ int yyinput(byte *buf, size_t used, size_t size)
     if (DEBUG_LEXER(2))
 	fprintf(dbgout, "*** yyinput(\"%-.*s\", %lu, %lu) = %d\n", count, buf, (unsigned long)used, (unsigned long)size, count);
 
+    assert(size <= INT_MAX && count <= (int)size);
     return (count == EOF ? 0 : count);
 }
 
@@ -376,11 +376,11 @@ static char *charset_as_string(const byte *txt, const size_t len)
     static unsigned short charset_leng = 0;
 
     if (charset_text == NULL)
-	charset_text = xmalloc(len+D);
+	charset_text = (char *)xmalloc(len+D);
     else {
 	if (charset_leng < len) {
 	    charset_leng = len;
-	    charset_text = xrealloc(charset_text, charset_leng+D);
+	    charset_text = (char *)xrealloc(charset_text, charset_leng+D);
 	}
     }
 
@@ -410,7 +410,7 @@ word_t *text_decode(word_t *w)
 #ifndef	DISABLE_UNICODE
     if (encoding == E_UNICODE) {
 	if (buf == NULL)
-	    buf = buff_new(xmalloc(max+D), 0, max);
+	    buf = buff_new((byte *)xmalloc(max+D), 0, max);
 	r = &buf->t;				/* Use buf to return unicode result */
 
 	buf->t.leng = 0;

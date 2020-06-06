@@ -1,4 +1,3 @@
-/*	$Id: strlcpy.c 3436 2003-10-29 14:31:52Z m-a $	*/
 /*	from NetBSD: strlcpy.c,v 1.5.8.2 2002/04/26 13:17:42 he Exp 	*/
 /*	from OpenBSD: strlcpy.c,v 1.4 1999/05/01 18:56:41 millert Exp 	*/
 

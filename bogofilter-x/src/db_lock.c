@@ -193,6 +193,7 @@ static int create_lockfile(const char *fn, int modes) {
 	}
 	unlink(tmp);
     }
+    if (tmp) free(tmp);
     return lockfd;
 }
 
@@ -291,7 +292,7 @@ static void check_lock(int unused) {
 
     if (0 != check_zombies()) {
 	const char *text = "bogofilter or related application has crashed or directory damaged, aborting.\n";
-	if (write(STDERR_FILENO, text, strlen(text)) == -1) {;}
+	if (write(STDERR_FILENO, text, strlen(text))) { /* NO-OP, to quench compiler warning */ }
 	_exit(EX_ERROR);	/* use _exit, not exit, to avoid running the atexit handler that might deadlock */
     }
     alarm(chk_intval);

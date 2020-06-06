@@ -1,5 +1,3 @@
-/* $Id: word.h 6895 2010-03-23 17:48:52Z m-a $ */
-
 /** \file word.h
  * constants and declarations for word.c
  *
@@ -9,6 +7,7 @@
 #ifndef	WORD_H
 #define	WORD_H
 
+#include <sys/types.h>
 #include "bftypes.h"
 #include "xmalloc.h"
 
@@ -17,7 +16,7 @@
  * \attention to lessen malloc/free calls, this struct and the data
  * are allocated in one chunk. */
 typedef struct {
-    uint leng;		/** length of string in \a text */
+    unsigned int leng;		/** length of string in \a text */
     union {
 	byte *text;	/** pointer to the string */
 	const char *ctext;
@@ -26,7 +25,7 @@ typedef struct {
 
 /** create a new word_t from the \a leng bytes at address \a text */
 extern word_t  *word_new(const byte *text, /**< may be NULL, to create a blank word_t */
-	uint leng /**< length of input string */);
+	unsigned int leng /**< length of input string */);
 
 /** create a new word_t from the NUL-terminated \a cstring */
 extern word_t  *word_news(const char *cstring);
@@ -46,7 +45,7 @@ extern word_t  *word_concat(const word_t *w1, const word_t *w2);
 /** output \a word onto the stream \a fp, formatted to \a width
  * characters. */
 extern void 	word_puts(const word_t *word, /**< word structure to print */
-	uint width, /**< if 0, use actual width, if > 0 then either
+	unsigned int width, /**< if 0, use actual width, if > 0 then either
 		     *   truncate the string or fill it with blanks to print
 		     *   exactly \a width characters */
 	FILE *fp /**< stdio stream to print word to */);

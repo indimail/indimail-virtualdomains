@@ -1,5 +1,3 @@
-/* $Id: score.c 6890 2010-03-17 23:52:48Z m-a $ */
-
 /*****************************************************************************
 
 NAME:
@@ -113,7 +111,7 @@ static int lookup(const word_t *token, wordcnts_t *cnts)
     wordlist_t* list;
 
     if (fBogotune) {
-	wordprop_t *wp = wordhash_search_memory(token);
+	wordprop_t *wp = (wordprop_t *)wordhash_search_memory(token);
 	if (wp) {
 	    cnts->good = wp->cnts.good;
 	    cnts->bad  = wp->cnts.bad;
@@ -195,7 +193,7 @@ void lookup_words(wordhash_t *wh)
 	return;
 
 retry:
-    for (node = wordhash_first(wh); node != NULL; node = wordhash_next(wh))
+    for (node = (hashnode_t *)wordhash_first(wh); node != NULL; node = (hashnode_t *)wordhash_next(wh))
     {
 	word_t *token     = node->key;
 	wordprop_t *props = (wordprop_t *) node->data;
@@ -264,7 +262,7 @@ static size_t compute_count_and_scores(wordhash_t *wh)
     if (fBogotune)
 	return count;
 
-    for (node = wordhash_first(wh); node != NULL; node = wordhash_next(wh))
+    for (node = (hashnode_t *)wordhash_first(wh); node != NULL; node = (hashnode_t *)wordhash_next(wh))
     {
 	wordcnts_t *cnts;
 	wordprop_t *props;
@@ -294,7 +292,7 @@ static size_t compute_count_and_spamicity(wordhash_t *wh,
 
     hashnode_t *node;
 
-    for (node = wordhash_first(wh); node != NULL; node = wordhash_next(wh))
+    for (node = (hashnode_t *)wordhash_first(wh); node != NULL; node = (hashnode_t *)wordhash_next(wh))
     {
 	bool useflag;
 	double prob;
@@ -384,7 +382,7 @@ static double find_scoring_boundary(wordhash_t *wh)
 
     count = max(token_count_fix, max(token_count_min, token_count_max));
 
-    for (node = wordhash_first(wh); node != NULL; node = wordhash_next(wh)) {
+    for (node = (hashnode_t *)wordhash_first(wh); node != NULL; node = (hashnode_t *)wordhash_next(wh)) {
 	wordcnts_t *cnts;
 	wordprop_t *props = NULL;
 	double prob;
@@ -427,8 +425,8 @@ static int compare_hashnode_t(const void *const pv1, const void *const pv2)
     double d2;
 
     if (!fBogotune) {
-	const hashnode_t *hn1 = (const hashnode_t *const)pv1;
-	const hashnode_t *hn2 = (const hashnode_t *const)pv2;
+	const hashnode_t *hn1 = (const hashnode_t *)pv1;
+	const hashnode_t *hn2 = (const hashnode_t *)pv2;
 	d1 = fabs(((wordprop_t *) hn1->data)->prob - EVEN_ODDS);
 	d2 = fabs(((wordprop_t *) hn2->data)->prob - EVEN_ODDS);
     } else {

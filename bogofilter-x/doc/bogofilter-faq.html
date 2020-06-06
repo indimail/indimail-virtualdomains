@@ -50,7 +50,8 @@
     <a href="http://bogofilter.sourceforge.net/faq_fr.shtml">French</a> or
     <a href="http://bogofilter.sourceforge.net/faq_it.shtml">Italian</a> or
     <a href="http://bogofilter.sourceforge.net/faq_bg.shtml">Bulgarian</a><br>
-    Maintainer: David Relson &lt;relson@osagesoftware.com&gt;</p>
+    Current maintainer since 2013: Matthias Andree &lt;m-a@users.sf.net&gt;<br>
+    Previous maintainer of ten years: David Relson &lt;relson@osagesoftware.com&gt;</p>
 
     <p>This document is intended to answer frequently asked
     questions about bogofilter.</p>
@@ -200,7 +201,9 @@
     authors have started to contribute to the project.</p>
 
     <p>The <a href="http://bogofilter.sourceforge.net/NEWS">NEWS file</a>
-    describes bogofilter's version history.</p>
+    describes bogofilter's version history starting with version 1.0.0.
+    Older news (before release 1.0.0) are in the <a
+	href="http://bogofilter.sourceforge.net/NEWS.0">NEWS.0 file.</a></p>
 
     <hr>
 
@@ -287,8 +290,7 @@
         <td>bogofilter-announce@bogofilter.org</td>
         <td><a href="http://www.bogofilter.org/mailman/listinfo/bogofilter-announce">[subscribe]</a>
         [archives: <a
-        href="http://www.bogofilter.org/pipermail/bogofilter-announce/">mailman</a>, <a
-        href="http://news.gmane.org/gmane.mail.bogofilter.announce">gmane</a>]
+        href="http://www.bogofilter.org/pipermail/bogofilter-announce/">mailman</a>]
         </td>
         <td>An announcement-only list where new versions are
         announced.</td>
@@ -298,8 +300,7 @@
         <td>bogofilter@bogofilter.org</td>
         <td><a href="http://www.bogofilter.org/mailman/listinfo/bogofilter">[subscribe]</a>
         [archives: <a
-        href="http://www.bogofilter.org/pipermail/bogofilter/">mailman</a>, <a
-        href="http://news.gmane.org/gmane.mail.bogofilter.general">gmane</a>]
+        href="http://www.bogofilter.org/pipermail/bogofilter/">mailman</a>]
         </td>
         <td>A discussion list where any conversation about
         bogofilter may take place.</td>
@@ -309,8 +310,7 @@
         <td>bogofilter-dev@bogofilter.org</td>
         <td><a href="http://www.bogofilter.org/mailman/listinfo/bogofilter-dev">[subscribe]</a>
         [archives: <a
-        href="http://www.bogofilter.org/pipermail/bogofilter-dev/">mailman</a>, <a
-        href="http://news.gmane.org/gmane.mail.bogofilter.devel">gmane</a>]
+        href="http://www.bogofilter.org/pipermail/bogofilter-dev/">mailman</a>]
         </td>
         <td>A list for sharing patches, development, and technical
         discussions.</td>
@@ -319,7 +319,7 @@
       <tr>
         <td>bogofilter-cvs@lists.sourceforge.net</td>
         <td><a href="https://lists.sourceforge.net/lists/listinfo/bogofilter-cvs">[subscribe]</a>
-        <a href="http://sourceforge.net/mailarchive/forum.php?forum=bogofilter-cvs">[archive]</a></td>
+        <a href="http://sourceforge.net/p/bogofilter/mailman/bogofilter-cvs/">[archive]</a></td>
         <td>Mailing list for announcing code changes to the SVN
         archive. (The CVS name is a leftover from before the migration 
         for our users' convenience.)</td>
@@ -1359,36 +1359,28 @@
     <h3>On FreeBSD</h3>
 
     <p>The FreeBSD ports collection carries the latest stable versions of
-    bogofilter. This approach uses the highly recommended
-    portupgrade and portsnap software packages. To install portupgrade,
-    type (you need to do this only once), as root:</p>
-    <pre>    # pkg_add -r portupgrade</pre>
+    bogofilter to be compiled from source. The bogofilter ports are also auto-built and provided as binary packages for you to install.</p>
 
-    <p>On newer FreeBSD releases, portsnap is in the base system. If
-    typing <kbd>portsnap help</kbd> does not print portsnap's help, you
-    need to install portsnap from ports. To achieve that, type (you need
-    to do this only once), as root:</p>
-    <pre>    # pkg_add -r portsnap</pre>
+    <p>The <a href="https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/pkgng-intro.html">binary
+    packages approach</a> uses default installed software. To install
+    bogofilter from binary package, type, as the privileged user:</p>
+    <pre>    pkg install -y bogofilter</pre>
+
+    <p>The ports from-source approach uses the highly recommended
+    portmaster and portsnap software packages. To install portmaster,
+    type (you need to do this only once), as root:</p>
+    <pre>    pkg install -y portmaster</pre>
 
     <p>To install or upgrade bogofilter, just
     <a
-        href="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/portsnap.html">upgrade
+        href="https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/ports-using.html">upgrade
         your portstree using portsnap</a>,
     then type, as root:</p>
-    <pre>    # portupgrade -N bogofilter</pre>
+    <pre>    portmaster mail/bogofilter</pre>
 
     <p><em>Note: This assumes you are root.</em> If not, read through
     the remainder of this FreeBSD section and then see how you can
     <a href="#build">build</a> if you haven't got root privileges.</p>
-
-    <p>Depending on your system you may have to set some environment
-    variables for the <code>./configure</code> command. Example:</p>
-
-    <pre>    $ env CPPFLAGS=-I/usr/local/include/db3 LIBS=-ldb3 LDFLAGS=-L/usr/local/lib ./configure</pre>
-
-    <p>The actual paths you use here depend on your system and
-    the database versions you have installed. Check and replace
-    accordingly.</p>
 
     <h3>On NetBSD and other systems that use "pkgsrc"</h3>
 
@@ -1641,10 +1633,5 @@
     <p> For more information, see the <a
     href="http://mh-e.sourceforge.net/">MH-E home page</a>
 
-    <hr>
-
-    <!--
-    $Id: bogofilter-faq.html 6970 2012-04-22 15:26:25Z relson $
-    -->
   </body>
 </html>

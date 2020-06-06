@@ -1,5 +1,4 @@
 # vim:tw=0
-# $Id: Makefile.am 6993 2013-06-28 21:54:23Z m-a $
 
 SUBDIRS = . tests
 SYSCONFDIR = @sysconfdir@
@@ -32,9 +31,6 @@ BUILT_SOURCES=	version.c directories.c
 bin_PROGRAMS = bogofilter bogoutil bogolexer bogotune
 bin_SCRIPTS = bogoupgrade
 dist_sbin_SCRIPTS = bf_copy bf_compact bf_tar
-if ENABLE_STATIC
-bin_PROGRAMS += bogofilter_static bogoutil_static bogolexer_static bogotune_static
-endif
 
 check_PROGRAMS = debugtest configtest wordhash find_home.test \
 		 fgetsl.test
@@ -190,6 +186,16 @@ datastore_SOURCE = datastore_tc.c \
 		   datastore_opthelp_dummies.c \
 		   datastore_dummies.c
 else
+if ENABLE_KYOTOCABINET_DATASTORE
+datastore_SOURCE = datastore_kc.c \
+		   datastore_opthelp_dummies.c \
+		   datastore_dummies.c
+else
+if ENABLE_LMDB_DATASTORE
+datastore_SOURCE = datastore_lmdb.c \
+		   datastore_opthelp_dummies.c \
+		   datastore_dummies.c
+else
 if ENABLE_TRANSACTIONS
 datastore_SOURCE = datastore_db.c datastore_db_trans.c
 else
@@ -198,6 +204,8 @@ datastore_SOURCE = datastore_db.c datastore_db_trad.c \
 		   datastore_opthelp_dummies.c
 else
 datastore_SOURCE = datastore_db.c datastore_db_trad.c datastore_db_trans.c
+endif
+endif
 endif
 endif
 endif
@@ -222,28 +230,13 @@ CLEANFILES=version.c directories.c bogoupgrade
 
 bogofilter_SOURCES = bogofilter.c bogofilter.h main.c \
 		     common.h
-bogofilter_static_SOURCES = $(bogofilter_SOURCES)
-bogofilter_static_LDFLAGS = $(STATICLDFLAGS)
-bogofilter_static_LDADD = $(LDADD) $(STATIC_DB) $(GSL_LIBS)
-
-bogolexer_static_SOURCES = bogolexer.c
-bogolexer_static_LDFLAGS = $(STATICLDFLAGS)
 
 bogoutil_SOURCES = bogoutil.c bogohist.c bogohist.h
-bogoutil_static_SOURCES = bogoutil.c bogohist.c bogohist.h
-bogoutil_static_LDFLAGS = $(STATICLDFLAGS)
-bogoutil_static_LDADD = $(LDADD) $(STATIC_DB)
 
 bogotune_SOURCES = bogotune.c bogotune.h \
 		   tunelist.c tunelist.h \
 		   common.h
 bogotune_LDADD = $(LDADD) $(LIBDB) $(GSL_LIBS)
-
-bogotune_static_SOURCES = bogotune.c bogotune.h \
-		   tunelist.c tunelist.h \
-		   common.h
-bogotune_static_LDFLAGS = $(STATICLDFLAGS)
-bogotune_static_LDADD= $(LDADD) $(STATIC_DB) $(GSL_LIBS)
 
 debugtest_SOURCES = debug.main.c
 
@@ -258,7 +251,9 @@ fgetsl_test_CFLAGS= -DMAIN
 EXTRA_DIST = bogoupgrade.in \
 	     version.sh \
 	     strlcat.3 strlcpy.3 \
-	     patch.lexer.254.txt patch.lexer.253x.txt
+	     patch.lexer.254.txt \
+	     patch.lexer.253x.txt \
+	     patch.lexer.253n.txt
 #
 version.c: version.sh ../configure.ac Makefile.am	\
 	$(version_sources)				\
@@ -269,9 +264,10 @@ version.c: version.sh ../configure.ac Makefile.am	\
 	$(SHELL) $(srcdir)/version.sh $(top_srcdir) >"$@.new" && mv -f "$@.new" "$@" \
 	    || { rm -f "$@" ; false ; }
 #
-directories.c: ../config.status
+directories.c: ../config.status Makefile
 	rm -f $@
-	echo "const char *const system_config_file = \"$(SYSCONFDIR)/bogofilter.cf\";" >"$@" \
+	echo "#include \"globals.h\"" >"$@" && \
+	echo "const char *const system_config_file = \"$(SYSCONFDIR)/bogofilter.cf\";" >>"$@" \
 	    || { rm -f "$@" ; false ; }
 #
 $(datastore_OBJECT): Makefile $(datastore_SOURCE)
@@ -300,6 +296,9 @@ if PATCH_FLEX_254
 endif
 if PATCH_FLEX_253X
 	patch $@ < $(srcdir)/patch.lexer.253x.txt
+endif
+if PATCH_FLEX_253N
+	patch $@ < $(srcdir)/patch.lexer.253n.txt
 endif
 	rm -f lex.yy.c
 

@@ -10,7 +10,9 @@
 
 set -e
 
-exec < /dev/null
+if [ -z "$BF_INTERACTIVE" ] ; then
+	exec < /dev/null
+fi
 
 : ${srcdir=.}
 : ${relpath=..}
@@ -33,6 +35,8 @@ export BOGOLEXER
 export BOGOTUNE
 export BOGOUTIL
 export BF_COMPACT
+unset BF_DEBUG_DB
+unset BF_DEBUG_DB_OPEN
 
 # Cater for GNU coreutils "compatibility"
 _POSIX2_VERSION=199209
@@ -48,8 +52,10 @@ case $DB_NAME in
 	esac ;;
     *QDBM*)	     DB_TXN=false ;;
     *Tokyo*)	     DB_TXN=true  ;;
+    *Kyoto*)	     DB_TXN=true  ;;
     *SQLite*)	     DB_TXN=true  ;;
     *TrivialDB*)     DB_TXN=false ;;
+    *LMDB*)	     DB_TXN=true  ;;
     *)		    echo >&2 "Unknown data base type in bogofilter -V: $DB_NAME"
 		    exit 1 ;;
 esac

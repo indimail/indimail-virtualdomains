@@ -13,10 +13,10 @@
 int main(void) {
     char *x;
 
-    x = malloc(42);
+    x = (char *)malloc(42);
     printf("got %p\n", x);
     /* deliberately leak memory here */
-    x = malloc(42);
+    x = (char *)malloc(42);
     printf("got %p\n", x);
     free(x);
     return 0;

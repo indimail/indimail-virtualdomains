@@ -1,5 +1,3 @@
-/* $Id: xatox.h 1807 2003-03-04 04:10:38Z m-a $ */
-
 /** \file xatox.h
  * Header file for xato* string-to-number conversion
  * functions with simplified error checking.

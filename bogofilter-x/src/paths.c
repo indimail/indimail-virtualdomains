@@ -1,5 +1,3 @@
-/* $Id: paths.c 6207 2005-08-14 13:10:06Z relson $ */
-
 /**
  * \file
  * paths.c -- routines for working with file paths.
@@ -154,7 +152,7 @@ static bfpath *bfpath_split(bfpath *bfp, const char *home)
 
 bfpath *bfpath_create(const char *path)
 {
-    bfpath *bfp = xcalloc(1, sizeof(bfpath));
+    bfpath *bfp = (bfpath *)xcalloc(1, sizeof(bfpath));
     bfp->filepath = xstrdup(path);
 
     return bfp;
@@ -165,19 +163,17 @@ static void check_for_file(bfpath *bfp)
     int rc;
     struct stat sb;
 
-    bfp->isdir = bfp->isfile = false;
+    bfp->isdir = bfp->isfile = bfp->exists = false;
 
     rc = stat(bfp->filepath, &sb);
     if (rc == 0) {
 	bfp->exists = true;
 	xfree(bfp->dirname);
-	xfree(bfp->filename);
+	xfree(bfp->filename); bfp->filename = NULL;
 	if (S_ISDIR(sb.st_mode)) {
 	    bfp->isdir = true;
 	    bfp->dirname  = xstrdup(bfp->filepath);
-	    bfp->filename = NULL;
-	}
-	if (!S_ISDIR(sb.st_mode)) {
+	} else {
 	    bfp->isfile = true;
 	    bfp->dirname  = get_directory_from_path(bfp->filepath);
 	    bfp->filename = get_file_from_path(bfp->filepath);
@@ -261,7 +257,7 @@ char *build_progtype(const char *name, const char *db_type)
 	type = xstrdup(name);
     else {
 	size_t len = strlen(name) + strlen(db_type) + 2;
-	type = xmalloc(len);
+	type = (char *)xmalloc(len);
 	snprintf(type, len, "%s-%s", name, db_type);
     }
     return type;
@@ -278,7 +274,7 @@ char *create_path_from_env(const char *var,
 
     env_size = strlen(env);
     path_size = env_size + (subdir ? strlen(subdir) : 0) + 2;
-    buff = xmalloc(path_size);
+    buff = (char *)xmalloc(path_size);
 
     strlcpy(buff, env, path_size);
     if (subdir != NULL) {
@@ -328,12 +324,13 @@ bool check_directory(const char* path) /*@globals errno,stderr@*/
  */
 char *get_file_from_path(const char *path)
 {
-    char *file = strrchr(path, DIRSEP_C);
+    const char *file = strrchr(path, DIRSEP_C);
+    char *retval;
     if (file == NULL)
-	file = xstrdup(path);
+	retval = xstrdup(path);
     else
-	file = xstrdup(file + 1);
-    return file;
+	retval = xstrdup(file + 1);
+    return retval;
 }
 
 /** returns malloc()ed copy of the directory name of \a path.

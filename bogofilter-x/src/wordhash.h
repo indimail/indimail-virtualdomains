@@ -1,5 +1,3 @@
-/* $Id: wordhash.h 6799 2009-02-14 22:10:54Z relson $ */
-
 #ifndef WORDHASH_H
 #define WORDHASH_H
 
@@ -74,8 +72,6 @@ void *wordhash_search (const wordhash_t *wh, const word_t *t, uint hash);
 /* returns next entry or NULL if at end */
 /*@null@*/ /*@exposed@*/ void *wordhash_next(wordhash_t *);
 
-typedef void wh_foreach_t(word_t *token, void *data, void *userdata);
-void wordhash_foreach(wordhash_t *wh, wh_foreach_t *hook, void *userdata);
 wordhash_t *convert_propslist_to_countlist(wordhash_t *wh);
 wordhash_t *convert_wordhash_to_propslist(wordhash_t *wh, wordhash_t *db);
 

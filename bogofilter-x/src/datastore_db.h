@@ -1,5 +1,3 @@
-/* $Id: datastore_db.h 6895 2010-03-23 17:48:52Z m-a $ */
-
 /*****************************************************************************
 
 NAME:
@@ -70,7 +68,7 @@ int db_set_dbvalue(void *handle, const dbv_t *token, const dbv_t *val);
 /** Callback hook used by db_foreach, passes the original \p userdata
  * down as well as \a token and \a data. If the function returns a
  * nonzero value, the traversal is aborted. */
-typedef ex_t (*db_foreach_t)(dbv_t *token, dbv_t *data, void *userdata);
+typedef ex_t (*db_foreach_t)(dbv_t *token, dbv_const_t *data, void *userdata);
 /** Iterate over all elements in data base and call \p hook for each item.
  * \p userdata is passed through to the hook function unaltered. */
 ex_t db_foreach(void *handle, db_foreach_t hook, void *userdata);
