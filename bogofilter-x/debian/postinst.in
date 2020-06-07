@@ -87,9 +87,9 @@ fi
 case "$1" in
     configure)
 		if [ " $2" = " " ] ; then
-		echo "installing bogofilter @version@"
+		echo "installing indimail-spamfilter @version@"
 		else
-		echo "upgrading to bogofilter $2"
+		echo "upgrading to indimail-spamfilter $2"
 		fi
     ;;
 
@@ -152,7 +152,11 @@ do
     continue
   fi
   # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
+  if [ ! -f ${servicedir}/qmail-smtpd.$port/variables/SPAMFILTER ] ; then
   echo "${prefix}/bin/bogofilter -p -d ${sysconfdir}" > ${servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
+  elif [ ! -s ${servicedir}/qmail-smtpd.$port/variables/SPAMFILTER ] ; then
+  echo "${prefix}/bin/bogofilter -p -d ${sysconfdir}" > ${servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
+  fi
   if [ ! -f ${servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE ] ; then
   echo 0 > ${servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
   fi
@@ -181,7 +185,11 @@ do
 done
 if [ -d ${servicedir}/fetchmail ] ; then
   # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
+  if [ ! -f {servicedir}/fetchmail/variables/SPAMFILTER ] ; then
   echo "${prefix}/bin/bogofilter -p -d {sysconfdir}" > %{servicedir}/fetchmail/variables/SPAMFILTER
+  elif [ ! -s {servicedir}/fetchmail/variables/SPAMFILTER ] ; then
+  echo "${prefix}/bin/bogofilter -p -d {sysconfdir}" > %{servicedir}/fetchmail/variables/SPAMFILTER
+  fi
   if [ ! -f {servicedir}/fetchmail/variables/SPAMEXITCODE ] ; then
   echo 0 > {servicedir}/fetchmail/variables/SPAMEXITCODE
   fi

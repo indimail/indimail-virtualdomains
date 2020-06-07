@@ -39,6 +39,11 @@ tar \
 	--exclude="indimail-spamfilter-$version/RCS" \
 	-cf - indimail-spamfilter-"$version" \
 	| bzip2 -c > $rpmbuild/SOURCES/indimail-spamfilter-"$version".tar.bz2
+for i in rpmlintrc permissions.easy permissions.secure permissions.paranoid
+do
+	echo "cp -p indimail-spamfilter-$version/indimail-spamfilter-$i $rpmbuild/SOURCES"
+	cp -p indimail-spamfilter-$version/indimail-spamfilter-$i $rpmbuild/SOURCES
+done
 dist=`uname -r |cut -d . -f4`
 if [ $# -gt 0 ] ; then
 	release=$1
@@ -101,4 +106,9 @@ read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	echo "/bin/rm -f $rpmbuild/SOURCES/indimail-spamfilter-$version.tar.bz2"
 	/bin/rm -f $rpmbuild/SOURCES/indimail-spamfilter-$version.tar.bz2
+	for i in rpmlintrc permissions.easy permissions.secure permissions.paranoid
+	do
+		echo "/bin/rm -f $rpmbuild/SOURCES/indimail-spamfilter-$i"
+		/bin/rm -f $rpmbuild/SOURCES/indimail-spamfilter-$i
+	done
 fi

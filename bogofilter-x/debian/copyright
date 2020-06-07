@@ -1,5 +1,5 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: bogofilter
+Upstream-Name: indimail-spamfilter
 Upstream-Contact: Manvendra Bhangui <indimail-spamfilter@indimail.org>
 Source: https://github.com/mbhangui/indimail-virtualdomains
 

@@ -66,7 +66,7 @@ INSTALL
 ylwrap
 conf-release
 build-stamp
-debian/bogofilter.dsc
+debian/indimail-spamfilter.dsc
 debian/indimail-spamfilter.install
 debian/changelog
 debian/changelog.in
@@ -80,3 +80,7 @@ indimail-spamfilter.spec
 doc/ChangeLog
 configure.lineno
 perm_list.bogofilter
+indimail-spamfilter-permissions.easy
+indimail-spamfilter-permissions.paranoid
+indimail-spamfilter-permissions.secure
+indimail-spamfilter-rpmlintrc

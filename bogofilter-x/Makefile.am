@@ -128,7 +128,9 @@ dist-hook:
 #
 noinst_PROGRAMS=bogogrep
 bogogrep_SOURCES=contrib/bogogrep.c
-noinst_DATA = indimail-spamfilter.spec
+noinst_DATA = indimail-spamfilter.spec indimail-spamfilter-rpmlintrc \
+			  indimail-spamfilter-permissions.easy indimail-spamfilter-permissions.secure \
+			  indimail-spamfilter-permissions.paranoid
 
 EXTRA_DIST+= \
 	contrib/README.contrib \
@@ -175,4 +177,12 @@ debian/Makefile: debian/Makefile.in configure.ac
 	$(edit) $@.in > $@;
 perm_list.bogofilter: perm_list.in
 	$(edit) perm_list.in > $@;
+indimail-spamfilter-rpmlintrc: indimail-spamfilter-rpmlintrc.in
+	$(edit) indimail-spamfilter-rpmlintrc.in > $@
+indimail-spamfilter-permissions.easy: indimail-spamfilter-permissions.easy.in
+	$(edit) $@.in > $@
+indimail-spamfilter-permissions.secure: indimail-spamfilter-permissions.secure.in
+	$(edit) $@.in > $@
+indimail-spamfilter-permissions.paranoid: indimail-spamfilter-permissions.paranoid.in
+	$(edit) $@.in > $@
 # ---------------------------------------------------------------------
