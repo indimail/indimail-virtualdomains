@@ -1,4 +1,4 @@
-Source: bogofilter
+Source: indimail-spamfilter
 Section: mail
 Priority: optional
 Maintainer: Manvendra Bhangui <indimail-spamfilter@indimail.org>

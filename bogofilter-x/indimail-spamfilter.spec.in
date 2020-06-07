@@ -10,6 +10,7 @@
 %global reconfigure_mode   0
 %global reconf_bogofilter  0
 %global build_cflags       "-DOBS_BUILD %{build_cflags}"
+%global debug_package %{nil}
 %else
 %define _project           local
 %global build_on_obs       0
@@ -51,8 +52,16 @@ Group: System Environment/Base
 %else
 Group: Productivity/Networking/Email/Servers
 %endif
-Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.bz2
-# http://downloads.sourceforge.net/%%{name}/%%{name}-rpmlintrc
+Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.bz2
+Source1: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+Source2: http://downloads.sourceforge.net/indimail/%{name}-permissions.easy
+Source3: http://downloads.sourceforge.net/indimail/%{name}-permissions.secure
+Source4: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
+%endif
+%endif
+# http://downloads.sourceforge.net/indimail/%%{name}-rpmlintrc
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
 AutoReqProv: Yes
@@ -70,6 +79,12 @@ BuildRequires: db-devel
 BuildRequires: libdb-devel
 %else
 BuildRequires: db4-devel
+%endif
+%endif
+
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+PreReq: permissions
 %endif
 %endif
 
@@ -157,6 +172,13 @@ ID=$(id -u)
 %{__make} -s DESTDIR=%{buildroot} install-strip
 
 %{__mkdir_p} %{buildroot}%{sysconfdir}
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
+install -m 644 %{S:2} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
+install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
+%endif
+%endif
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
 install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
 /bin/rm -f %{name}-rpm.info %{name}-release
@@ -197,6 +219,12 @@ $TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/bogofilter.cf.example
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/perm_list.bogofilter
 
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%attr(644,root,root)                              %{_sysconfdir}/permissions.d/%{name}-permissions
+%attr(644,root,root)                              %{_sysconfdir}/permissions.d/%{name}-permissions.secure
+%endif
+%endif
 # bogofilter
 # setuid binary
 %attr(6551,root,indimail)               %{_prefix}/bin/bogofilter
@@ -259,6 +287,11 @@ fi
 if [ -z "$argv1" ] ; then
   argv1=0
 fi
+if [ $argv1 -eq 2 ] ; then # upgrade
+  # we are doing upgrade
+  exit 0
+fi
+
 if [ -d /run ] ; then
   logfifo="/run/indimail/logfifo"
   %{__mkdir_p} /run/indimail
@@ -291,7 +324,11 @@ do
     continue
   fi
   # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
+  if [ ! -f %{servicedir}/qmail-smtpd.$port/variables/SPAMFILTER ] ; then
   echo "%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" > %{servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
+  elif [ ! -s %{servicedir}/qmail-smtpd.$port/variables/SPAMFILTER ] ; then
+  echo "%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" > %{servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
+  fi
   if [ ! -f %{servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE ] ; then
   echo 0 > %{servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
   fi
@@ -320,7 +357,11 @@ do
 done
 if [ -d %{servicedir}/fetchmail ] ; then
   # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
+  if [ ! -f %{servicedir}/fetchmail/variables/SPAMFILTER ] ; then
   echo "%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" > %{servicedir}/fetchmail/variables/SPAMFILTER
+  elif [ ! -s %{servicedir}/fetchmail/variables/SPAMFILTER ] ; then
+  echo "%{_prefix}/bin/bogofilter -p -d %{sysconfdir}" > %{servicedir}/fetchmail/variables/SPAMFILTER
+  fi
   if [ ! -f %{servicedir}/fetchmail/variables/SPAMEXITCODE ] ; then
   echo 0 > %{servicedir}/fetchmail/variables/SPAMEXITCODE
   fi

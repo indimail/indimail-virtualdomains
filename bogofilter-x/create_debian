@@ -1,15 +1,11 @@
 #!/bin/sh
 bogofilter_version=$(cat conf-version)
 
-if [ -d ../stage ] ; then
-	/bin/rm -rf ../stage
-fi
-mkdir -p ../stage
-cp -rp . ../stage/bogofilter-$bogofilter_version
-cd ../stage/bogofilter-$bogofilter_version
-make -s clean
-make -s distclean
+/bin/rm -rf $HOME/stage
+mkdir -p    $HOME/stage
+cp -rp . $HOME/stage/indimail-spamfilter-$bogofilter_version
+cd $HOME/stage/indimail-spamfilter-$bogofilter_version
+make -s debian/Makefile
 make -s -C debian
 dpkg-buildpackage -tc -b
-cd ..
-#/bin/rm -r stage
+ls -lt $HOME/stage

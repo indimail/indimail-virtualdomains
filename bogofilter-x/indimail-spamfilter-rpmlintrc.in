@@ -1,0 +1,6 @@
+addFilter(".* non-standard-gid")
+addFilter("W: permissions-file-setuid-bit")
+addFilter("W: permissions-directory-setuid-bit .* is packaged with setuid/setgid bits .*")
+setBadness('permissions-unauthorized-file', 0)
+setBadness('permissions-file-setuid-bit', 0)
+setBadness('non-position-independent-executable', 0)
