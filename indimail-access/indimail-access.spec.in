@@ -12,6 +12,7 @@
 %global reconf_courierimap 0
 %global reconf_bogofilter  0
 %global build_cflags       "-DOBS_BUILD %{build_cflags}"
+%global debug_package      %{nil}
 %else
 %define _project           local
 %global build_on_obs       0
@@ -45,8 +46,11 @@
 %global nodksignatures     0
 %global qcount             5
 %global qbase              %{indimaildir}/queue
-
-%global _verbose           0
+%if 0%{?suse_version}
+%global noperms            1
+%else
+%global noperms            0
+%endif
 
 %if %build_on_obs == 1
 %global packager Manvendra Bhangui <manvendra@indimail.org>
@@ -74,6 +78,14 @@ Source2: http://downloads.sourceforge.net/indimail/perm_list.imap
 %endif
 %if %nofetchmail == 0
 Source3: http://downloads.sourceforge.net/indimail/fetchmail-%{fetchmail_version}.tar.xz
+%endif
+Source4: http://downloads.sourceforge.net/indimail/%{name}-%{version}-rpmlintrc
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+Source5: http://downloads.sourceforge.net/indimail/%{name}-permissions.easy
+Source6: http://downloads.sourceforge.net/indimail/%{name}-permissions.secure
+Source7: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
+%endif
 %endif
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
@@ -112,6 +124,11 @@ BuildRequires: redhat-lsb-core
 BuildRequires: redhat-lsb
 %endif
 
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+PreReq: permissions
+%endif
+%endif
 ################################# OBS ###############################
 %if %build_on_obs == 1
 %if 0%{?suse_version}
@@ -264,6 +281,13 @@ install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
 install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
 /bin/rm -f %{name}-rpm.info %{name}-release
 /bin/rm -f %{name}-rpm.info
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
+install -m 644 %{S:5} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
+install -m 644 %{S:6} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
+%endif
+%endif
 
 if [ %nocourierimap -eq 0 ] ; then
   %{__rm} -f  %{buildroot}%{_libdir}/libunicode.la
@@ -371,6 +395,12 @@ done
 %endif
 
 %if %nocourierimap == 0
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%attr(644,root,root)                    %{_sysconfdir}/permissions.d/%{name}-permissions
+%attr(644,root,root)                    %{_sysconfdir}/permissions.d/%{name}-permissions.secure
+%endif
+%endif
 # courier imap
 %attr(755,root,root)                    %{_prefix}/bin/maildirmake
 %attr(755,root,root)                    %{_prefix}/bin/maildirkw
@@ -492,6 +522,11 @@ done
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/manpage.css
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/reformail.html
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/reformime.html
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%verify (not user group mode) %attr(4755, root, root)      %{libexecdir}/imapmodules/authshadow
+%endif
+%endif
 %endif
 
 %if %nocourierimap == 0
@@ -510,6 +545,11 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%verify_permissions -e %{libexecdir}/imapmodules/authshadow
+%endif
+%endif
 
 ### SCRIPTLET ###############################################################################
 %post
@@ -541,7 +581,6 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     echo "Running Custom Upgrade Script for post upgrade"
     /bin/sh %{libexecdir}/iupgrade.sh post upgrade %{version} $*
   fi
-  # selinux
 
   # refresh indimail services
   svc_list=""
@@ -560,6 +599,20 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   ) >> /var/log/indimail-access-setup.log 2>&1
   exit 0
 fi
+
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%if 0%{?set_permissions:1} > 0
+  if [ ! -f /tmp/no_permissions ] ; then
+      %set_permissions %{name}
+  fi
+%else
+  if [ ! -f /tmp/no_permissions ] ; then
+      %run_permissions
+  fi
+%endif
+%endif
+%endif
 
 echo "Doing Post Install"
 echo ""
