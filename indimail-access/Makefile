@@ -31,10 +31,20 @@ edit = sed \
 	-e 's,@fetchmail_version\@,$(fetchmail_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
-all: indimail-access.spec perm_list.imap debian/Makefile
+all: indimail-access.spec indimail-access-rpmlintrc \
+	indimail-access-permissions.easy indimail-access-permissions.secure \
+	indimail-access-permissions.paranoid perm_list.imap debian/Makefile
 
 indimail-access.spec: indimail-access.spec.in catChangeLog Makefile conf-version conf-release
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
+indimail-access-rpmlintrc: indimail-access-rpmlintrc.in Makefile
+	$(edit) $@ > $@
+indimail-access-permissions.easy: indimail-access-permissions.easy.in Makefile
+	$(edit) $@ > $@
+indimail-access-permissions.secure: indimail-access-permissions.secure.in Makefile
+	$(edit) $@ > $@
+indimail-access-permissions.paranoid: indimail-access-permissions.paranoid.in Makefile
+	$(edit) $@ > $@
 perm_list.imap: perm_list.in
 	$(edit) perm_list.in > $@
 debian/Makefile: debian/Makefile.in

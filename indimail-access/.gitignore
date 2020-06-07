@@ -15,3 +15,7 @@ debian/postrm
 debian/debian.tar.gz
 debian/dummy.tar.gz
 debian/obs_deb_prep
+indimail-access-permissions.easy
+indimail-access-permissions.paranoid
+indimail-access-permissions.secure
+indimail-access-rpmlintrc

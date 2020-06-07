@@ -2,16 +2,13 @@
 courier_version=$(cat ../courier-imap-x/conf-version)
 fetchmail_version=$(cat ../fetchmail-x/conf-version)
 
-if [ -d ../stage ] ; then
-	/bin/rm -rf ../stage
-fi
-mkdir -p ../stage
-cp -rp ../courier-imap-x ../stage/courier-imap-$courier_version
-cp -rp ../fetchmail-x   ../stage/fetchmail-$fetchmail_version
-make -s
+rm -rf   $HOME/stage/indimail-access
+mkdir -p $HOME/stage/indimail-access
+cp -rp ../courier-imap-x $HOME/stage/indimail-access/courier-imap-$courier_version
+cp -rp ../fetchmail-x    $HOME/stage/indimail-access/fetchmail-$fetchmail_version
+make -s debian/Makefile
 make -s -C debian
-cp -rp debian ../stage
-cd ../stage
+cp -rp debian $HOME/stage/indimail-access
+cd $HOME/stage/indimail-access
 dpkg-buildpackage -tc -b
-cd ..
-/bin/rm -r stage
+ls -lt $HOME/stage
