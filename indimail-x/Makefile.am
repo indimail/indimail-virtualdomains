@@ -203,15 +203,14 @@ indimailauthlib_SCRIPTS = authgeneric
 
 indimailbin_SCRIPTS = vcaliasrev
 
-noinst_SCRIPTS = indimail.spec indimail-rpmlintrc \
-	vadddomain_handle vadduser_handle vdeldomain_handle \
+noinst_SCRIPTS = vadddomain_handle vadduser_handle vdeldomain_handle \
 	vaddaliasdomain_handle vrenamedomain_handle vpasswd_handle vmoduser_handle \
 	vdeluser_handle vrenameuser_handle
 
 noinst_DATA = indimail-permissions.easy indimail-permissions.paranoid \
 			  indimail-permissions.secure doc/INSTALL-indimail.md doc/INSTALL-RPM.md \
 			  doc/INSTALL-MYSQL.md doc/README-CLUSTER.md doc/RELEASE-Notes-indimail.md \
-			  doc/Quick-INSTALL.md doc/README-indimail.md
+			  doc/Quick-INSTALL.md doc/README-indimail.md indimail.spec indimail-rpmlintrc
 
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain vmoduser vpasswd \
 				   vdeluser_handle vrenameuser_handle
