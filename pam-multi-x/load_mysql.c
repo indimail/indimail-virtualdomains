@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.10  2020-06-08 23:43:18+05:30  Cprogrammer
+ * quench compiler warning
+ *
  * Revision 1.9  2019-07-03 19:37:17+05:30  Cprogrammer
  * added getversion_load_mysql_c()
  *
@@ -38,7 +41,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.9 2019-07-03 19:37:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.10 2020-06-08 23:43:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
@@ -571,5 +574,5 @@ const char     *in_mysql_get_client_info(void)
 void
 getversion_load_mysql_c()
 {
-	write(1, sccsid, 0);
+	if (write(1, sccsid, 0) == -1) ;
 }

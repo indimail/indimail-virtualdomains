@@ -1,5 +1,8 @@
 /*
  * $Log: pam-support.c,v $
+ * Revision 1.4  2020-06-08 23:43:54+05:30  Cprogrammer
+ * quench compiler warning
+ *
  * Revision 1.3  2010-05-05 15:21:34+05:30  Cprogrammer
  * added setting of credentials
  *
@@ -85,8 +88,8 @@ conversation(int num_msg, const struct pam_message **msg, struct pam_response **
 		case PAM_TEXT_INFO:
 		case PAM_ERROR_MSG:
 			style = msg[i]->msg_style == PAM_TEXT_INFO ?  "PAM_TEXT_INFO" : "PAM_ERROR_MSG";
-			write(2, msg[i]->msg, strlen(msg[i]->msg));
-			write(2, "\n", 1);
+			if (write(2, msg[i]->msg, strlen(msg[i]->msg)) == -1) ;
+			if (write(2, "\n", 1) == -1) ;
 			repl[i].resp_retcode = PAM_SUCCESS;
 			repl[i].resp = NULL;
 			break;
