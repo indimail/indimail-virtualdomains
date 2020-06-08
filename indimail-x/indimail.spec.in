@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.45 2020-06-07 18:01:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.46 2020-06-08 23:52:45+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -252,11 +252,15 @@ if [ %{reconfigure_mode} -eq 1 ] ; then
   autoreconf -fiv
 fi
 
-if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
-else
-  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
-fi
+%if %build_on_obs == 0
+  if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+  else
+    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
+  fi
+%else
+  default_domain=%{defaultDomain}
+%endif
 %configure --prefix=%{_prefix} --sysconfdir=%{sysconfdir} \
   --mandir=%{_prefix}/share/man --datarootdir=%{_prefix}/share/indimail \
   --with-pkgconfigdir=%{_pkg_config_path} --libdir=%{_libdir} --enable-domaindir=%{domaindir} \
@@ -1169,11 +1173,15 @@ fi
 # mrtg service
 %{_prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=%{servicedir}
 
-if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
-else
-  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
-fi
+%if %build_on_obs == 1
+  default_domain=%{defaultDomain}
+%else
+  if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+  else
+    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
+  fi
+%endif
 echo "Creating default indimail mysql config indimail.cnf"
 %{_prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
   --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
@@ -1310,11 +1318,6 @@ echo "$count. You can optionally run the following command to verify installatio
 echo "   sudo rpm -V indimail"
 
 if [ ! -f %{sysconfdir}/certs/servercert.pem ] ; then
-if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
-else
-  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
-fi
 count=`expr $count + 1`
 echo "$count. You need to create CERTS for STARTTLS."
 echo "   Run the following command to create Certificate for TLS/SSL"
