@@ -14,9 +14,9 @@
 # export DH_COMPAT=4
 CFLAGS=-g -DOBS_BUILD
 ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
-	CFLAGS += -O0
+	CFLAGS += -O0 -fno-strict-aliasing -Wno-unused-result -Wno-unused-result
 else
-	CFLAGS += -O2
+	CFLAGS += -O2 -fno-strict-aliasing -Wno-unused-result -Wno-unused-result
 endif
 
 prefix=@prefix@
@@ -25,9 +25,7 @@ mysql_prefix=@mysql_prefix@
 version=@version@
 #
 DESTDIR=$(CURDIR)/debian/iwebadmin.tmp
-#bits=$(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS)
-bits=32
-libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
+libdir=$(prefix)/lib
 
 build: build-stamp
 build-stamp:
