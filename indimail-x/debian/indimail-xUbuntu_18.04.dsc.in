@@ -11,4 +11,4 @@ Debtransform-Release: 1
 Debtransform-Tar: dummy.tar.gz
 Debtransform-Files-Tar: debian.tar.gz
 Standards-Version: 3.9.1
-Build-Depends: cdbs, debhelper (>= 7.0.50~), gcc, g++, automake, libqmail-dev, libqmail, libldap2-dev, libgsl0-dev, libssl-dev, libmysqlclient-dev, libreadline5, libreadline-dev, libncurses5 (>= 5.7), libncurses5-dev (>= 5.7), bison (>= 1.2), flex (>= 2.5), libdb-dev, libcom-err2, mime-support, m4, gawk
+Build-Depends: cdbs, debhelper (>= 7.0.50~), gcc, g++, automake, libqmail-dev, libqmail, libssl-dev, libmysqlclient-dev, libncurses5 (>= 5.7), libncurses5-dev (>= 5.7), libcom-err2, mime-support, m4, gawk
