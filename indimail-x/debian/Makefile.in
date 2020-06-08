@@ -4,30 +4,24 @@ libexecdir=@libexecdir@
 qmaildir=@qmaildir@
 domaindir=@domaindir@
 sysconfdir=@sysconfdir@
-moduledir=@moduledir@
-auth_inc=@auth_inc@
-auth_libs=@auth_libs@
 logdir=@logdir@
 basepath=@basepath@
 mysql_prefix=@mysql_prefix@
-mysql_incdir=@mysql_incdir@
 defaultdomain=@defaultdomain@
 version=$(shell head -1 ../conf-version 2>/dev/null)
 release := $(shell head -1 ../conf-release 2>/dev/null|| echo 1.1)
 prefix=@prefix@
-#
-bogofilter_version=1.2.4
+arch=$(shell uname -m)
+libd=$(arch)-linux-gnu
 #
 
 libdir=@prefix@/lib
-acl_libdirstem=lib
 pkgconfigdir=@prefix@/lib/pkgconfig
 
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
-gen_control indimail.install indimail.dsc indimail-Debian_9.0.dsc \
-indimail-devel.install libindimail.install indimail-devel.postinst \
-indimail-devel.postrm indimail-xUbuntu_18.04.dsc indimail-xUbuntu_18.10.dsc \
-debian.tar.gz dummy.tar.gz
+indimail.dsc indimail-Debian_10.dsc indimail-Debian_9.0.dsc \
+indimail-devel.postinst indimail-devel.postrm indimail-xUbuntu_18.04.dsc \
+indimail-xUbuntu_18.10.dsc debian.tar.gz dummy.tar.gz
 
 install: all
 install-strip: install
@@ -35,20 +29,14 @@ distclean: clean
 
 clean:
 	/bin/rm -f rules indimail.prerm indimail.preinst indimail.postrm \
-	indimail.postinst indimail-devel.install \
-	libindimail.install indimail.install \
-	indimail-devel.postinst indimail-devel.postrm \
+	indimail.postinst indimail-devel.postinst indimail-devel.postrm \
 	debian.tar.gz dummy.tar.gz *.dsc
 
 noinst_SCRIPTS = indimail.prerm indimail.preinst indimail.postrm \
-				 indimail.postinst rules gen_control \
-				 indimail-devel.install indimail.install \
-				 libindimail.install \
+				 indimail.postinst rules \
 				 indimail-devel.postinst indimail-devel.postrm
 MOSTLYCLEANFILES= indimail.prerm indimail.preinst indimail.postrm \
-				  indimail.postinst rules gen_control \
-				  indimail-devel.install indimail.install \
-				  libindimail.install \
+				  indimail.postinst rules \
 				  indimail-devel.postinst indimail-devel.postrm \
 				  changelog debian.tar.gz dummy.tar.gz
 
@@ -59,29 +47,22 @@ edit = sed \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@qmaildir\@,$(qmaildir),g' \
-	-e 's,@moduledir\@,$(moduledir),g' \
-	-e 's,@auth_inc\@,$(auth_inc),g' \
-	-e 's,@auth_libs\@,$(auth_libs),g' \
 	-e 's,@pkgconfigdir\@,$(pkgconfigdir),g' \
-	-e 's,@acl_libdirstem\@,$(acl_libdirstem),g' \
 	-e 's,@libdir\@,$(libdir),g' \
 	-e 's,@logdir\@,$(logdir),g' \
 	-e 's,@basepath\@,$(basepath),g' \
 	-e 's,@mysql_prefix\@,$(mysql_prefix),g' \
-	-e 's,@mysql_incdir\@,$(mysql_incdir),g' \
 	-e 's,@defaultdomain\@,$(defaultdomain),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
 	-e 's,@HOST\@,$(host),g' \
 	-e 's,@DATE\@,$(DATE),g' \
-	-e 's,@bogofilter_version\@,$(bogofilter_version),g' \
+	-e 's,@libd\@,$(libd),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 rules: rules.in Makefile
 	$(edit) $@.in > $@; chmod +x $@;
-indimail.install: indimail.install.in
-	$(edit) $@.in > $@
 indimail.prerm: indimail.prerm.in Makefile
 	$(edit) $@.in > $@;
 indimail.preinst: indimail.preinst.in Makefile
@@ -90,11 +71,13 @@ indimail.postrm: indimail.postrm.in Makefile
 	$(edit) $@.in > $@;
 indimail.postinst: indimail.postinst.in Makefile
 	$(edit) $@.in > $@;
-
 indimail-devel.postinst: indimail-devel.postinst.in ../conf-version ../conf-release
 	$(edit) $@.in > $@;
 indimail-devel.postrm: indimail-devel.postrm.in ../conf-version ../conf-release
 	$(edit) $@.in > $@;
+
+indimail.install: indimail.install.in
+	$(edit) $@.in > $@
 indimail-devel.install: indimail-devel.install.in ../conf-version ../conf-release
 	$(edit) $@.in > $@;
 libindimail.install: libindimail.install.in ../conf-version ../conf-release
@@ -109,6 +92,8 @@ changelog: changelog.in Makefile ../conf-version ../conf-release
 	| $(edit) > $@
 indimail.dsc: indimail.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@;
+indimail-Debian_10.dsc: indimail-Debian_10.dsc.in Makefile ../conf-version ../conf-release
+	$(edit) $@.in > $@;
 indimail-Debian_9.0.dsc: indimail-Debian_9.0.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@;
 indimail-xUbuntu_18.04.dsc: indimail-xUbuntu_18.04.dsc.in Makefile ../conf-version ../conf-release
@@ -121,15 +106,9 @@ indimail-xUbuntu_18.10.dsc: indimail-xUbuntu_18.10.dsc.in Makefile ../conf-versi
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
 debian.tar.gz: copyright indimail.preinst indimail.postinst indimail.prerm \
-indimail.postrm rules changelog compat indimail-devel.install \
-indimail-devel.postinst \
-libindimail.install indimail.install \
-indimail-devel.postrm \
-gen_control Makefile control indimail.cron.d control
+indimail.postrm rules changelog compat indimail-devel.postinst \
+indimail-devel.postrm Makefile control indimail.cron.d control docs
 	tar cf - copyright indimail.preinst indimail.postinst indimail.prerm \
-		indimail.postrm rules changelog compat \
-		indimail-devel.install indimail.install \
-		libindimail.install control \
-		indimail-devel.postinst gen_control \
-		indimail-devel.postrm \
-		indimail.cron.d |gzip > $@
+		indimail.postrm rules changelog compat control \
+		indimail-devel.postinst indimail-devel.postrm \
+		indimail.cron.d docs |gzip > $@

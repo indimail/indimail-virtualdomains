@@ -26,8 +26,9 @@ version=@version@
 sysconfdir=@sysconfdir@
 libexecdir=@libexecdir@
 mandir=@mandir@
-bogofilter_version=@bogofilter_version@
-tcpserver_plugin=1
+arch=$(shell uname -m)
+# check https://wiki.debian.org/Multiarch/Implementation#Dynamic_debian.2F.2A_files
+libd=$(shell if [ -d $(prefix)/lib/$(arch)-linux-gnu ] ; then echo lib/$(arch)-linux-gnu; else echo lib;fi)
 default_domain=indimail.org
 rm=/bin/rm
 cp=/bin/cp
@@ -44,48 +45,29 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 	#
-	# Extract source archives
-	#
-	if [ -f ../BUILD/debian/obs_deb_prep ] ; then sh ../BUILD/debian/obs_deb_prep; fi
-	if [ -f ../BUILD/debian/gen_control ] ; then chmod +x ../BUILD/debian/gen_control; fi
-	#
 	# run configure script
 	#
-	if [ -d indimail-$(version) ] ; then \
-		cd indimail-$(version); \
-		./configure --prefix=$(prefix) --libdir=$(libdir) \
-			--with-pkgconfigdir=$(pkgconfigdir) --libexecdir=$(libexecdir) \
-			--mandir=$(prefix)/share/man --datarootdir=$(prefix)/share/indimail \
-			--mandir=$(mandir) --sysconfdir=$(sysconfdir) \
-			--enable-qmaildir=$(indimaildir) --enable-domaindir=$(domaindir) \
-			--enable-tcprules-prog=$(prefix)/bin/tcprules \
-			--enable-tcpserver-file=$(sysconfdir)/tcp/tcp.smtp \
-			--enable-default-domain=$(default_domain) \
-			--enable-mysqlprefix=/usr `cat config/indimail.opts`; \
-		cd ..; \
-	fi
-	if [ -d bogofilter-$(bogofilter_version) ] ; then \
-		cd bogofilter-$(bogofilter_version) ; \
-		./configure --prefix=${prefix} --libexecdir=${libexecdir} \
-			--sysconfdir=${sysconfdir} --mandir=${mandir} \
-			--datarootdir=${shareddir} --enable-indimail
-		cd ..; \
-	fi
+	./configure --prefix=$(prefix) --libdir=$(prefix)/$(libd) \
+		--with-pkgconfigdir=$(pkgconfigdir) --libexecdir=$(libexecdir) \
+		--mandir=$(prefix)/share/man --datarootdir=$(prefix)/share/indimail \
+		--mandir=$(mandir) --sysconfdir=$(sysconfdir) \
+		--enable-qmaildir=$(indimaildir) --enable-domaindir=$(domaindir) \
+		--enable-tcprules-prog=$(prefix)/bin/tcprules \
+		--enable-tcpserver-file=$(sysconfdir)/tcp/tcp.smtp \
+		--enable-default-domain=$(default_domain) \
+		--enable-mysqlprefix=/usr `cat config/indimail.opts`
 	#
 	# run make
 	#
-	if [ -d indimail-$(version) ]              ; then $(MAKE) -s -C indimail-$(version) DESTDIR=$(DESTDIR); fi
-	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s -C bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR); fi
-	${rm} -rf $(DESTDIR)$(libdir)/*.la
+	$(MAKE) -s
+	${rm} -f $(DESTDIR)$(prefix)/$(libd)/*.la
 	touch build-stamp
 
 clean:
 	${rm} -f build-stamp configure-stamp
 	${rm} -rf $(DESTDIR)
-	if [ -d indimail-$(version) ]              ; then $(MAKE) -s clean -C indimail-$(version) || true; fi
-	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s clean -C bogofilter-$(bogofilter_version) || true; fi
-	if [ -d indimail-$(version) ]              ; then $(MAKE) -s distclean -C indimail-$(version) || true; fi
-	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s distclean -C bogofilter-$(bogofilter_version) || true; fi
+	$(MAKE) -s clean
+	$(MAKE) -s distclean
 	dh_testdir
 	dh_testroot
 	dh_clean
@@ -96,8 +78,7 @@ install: build
 	dh_testroot
 	dh_prep || dh_clean -k
 	dh_installdirs
-	if [ -d indimail-$(version) ]              ; then $(MAKE) -s install -C indimail-$(version) DESTDIR=$(DESTDIR); fi
-	if [ -d bogofilter-$(bogofilter_version) ] ; then $(MAKE) -s install -C bogofilter-$(bogofilter_version) DESTDIR=$(DESTDIR); fi
+	$(MAKE) -s DESTDIR=$(DESTDIR) install
 	mkdir -p $(DESTDIR)$(domaindir)/domains
 	mkdir -p $(DESTDIR)$(indimaildir)/inquery
 
@@ -123,6 +104,13 @@ binary-indep: build install
 	dh_installcron
 	dh_md5sums
 	dh_builddeb
+
+debian/indimail.install: debian/indimail.install.in
+	sed -e 's,@libd\@,$(libd),g' $@.in > $@
+debian/indimail-devel.install: debian/indimail-devel.install.in
+	sed -e 's,@libd\@,$(libd),g' $@.in > $@
+debian/libindimail.install: debian/libindimail.install.in
+	sed -e 's,@libd\@,$(libd),g' $@.in > $@
 
 # Build architecture-dependent files here. 
 binary-arch: build install

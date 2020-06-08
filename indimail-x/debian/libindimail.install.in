@@ -1,2 +1,2 @@
-usr/lib/*.so.* @prefix@/lib
-usr/lib/pkgconfig/libindimail.pc /usr/lib/pkgconfig
+usr/@libd@/*.so.* @prefix@/@libd@
+usr/lib/pkgconfig/libindimail.pc @prefix@/lib/pkgconfig
