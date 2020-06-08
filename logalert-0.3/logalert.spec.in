@@ -35,7 +35,7 @@ License: GPLv3
 URL: http://www.indimail.org
 Group: Productivity/Networking/Email/Utilities
 Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
-#Source1: http://downloads.sourceforge.net/indimail/%{name}-%{version}-rpmlintrc
+Source1: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 
 %if %{defined suse_version} || %{defined sles_version}
 BuildRequires: bison
@@ -51,6 +51,7 @@ BuildRequires: libtirpc libtirpc-devel
 %if 0%{?suse_version} >= 1550
 BuildRequires: libtirpc3 libtirpc-devel
 %endif
+BuildRequires: pcre-devel
 
 %if %build_on_obs == 1
 %define packager Manvendra Bhangui <manvendra@indimail.org>
