@@ -6,7 +6,7 @@ AM_INIT_AUTOMAKE
 LT_INIT
 AM_CONFIG_HEADER(config.h)
 AC_CANONICAL_HOST
-AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-support@lists.sourceforge.net")
+AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-auth@indimail.org")
 
 AC_SUBST(PACKAGE_VERSION)
 AC_SUBST(PACKAGE_NAME)
@@ -90,7 +90,7 @@ esac
 
 AC_CHECK_HEADERS([pam/pam_appl.h security/pam_appl.h pam_appl.h pam/pam_modules.h security/pam_modules.h pam_modules.h])
 
-defaultprefix="/var/indimail"
+defaultprefix="/usr"
 LIBVER=0
 AC_SUBST(LIBVER)
 AC_SUBST(STRIP_OPT)
