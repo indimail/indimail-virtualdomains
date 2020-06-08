@@ -216,9 +216,14 @@ m4
 missing
 stamp-h1
 RELEASE-Notes.in
-doc/ChangeLog-indimail
 debian/indimail.dsc
 .deps
 vpurge
 indimail_config.h
 conf-release
+doc/ChangeLog-indimail
+doc/INSTALL-RPM.md
+doc/INSTALL-indimail.md
+doc/README-CLUSTER.md
+doc/README-indimail.md
+doc/RELEASE-Notes-indimail.md

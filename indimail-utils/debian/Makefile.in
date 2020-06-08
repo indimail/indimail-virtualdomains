@@ -22,8 +22,7 @@ edit = sed \
 	-e 's,@DATE\@,$(DATE),g'
 
 all: rules changelog indimail-utils.install \
-	indimail-utils.dsc indimail-utils-Debian_9.0.dsc \
-	debian.tar.gz dummy.tar.gz
+	indimail-utils.dsc debian.tar.gz dummy.tar.gz
 
 dummy.tar.gz: README
 	tar cf - README |gzip > $@
@@ -38,8 +37,6 @@ changelog: changelog.in ../conf-version ../conf-release
 	echo " -- Manvendra Bhangui <indimail-utils@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
 	| $(edit) > $@
 indimail-utils.dsc: indimail-utils.dsc.in Makefile ../conf-version ../conf-release
-	$(edit) $@.in > $@
-indimail-utils-Debian_9.0.dsc: indimail-utils.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
 debian.tar.gz: copyright rules changelog compat \
 indimail-utils.install obs_deb_prep Makefile control

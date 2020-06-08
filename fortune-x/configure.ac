@@ -11,7 +11,7 @@ dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_RANLIB
 
-defaultprefix="/var/indimail"
+defaultprefix="/usr"
 AC_SUBST(defaultprefix)
 
 if test x$prefix = xNONE

@@ -5,4 +5,4 @@ usr/libexec/indimail   @prefix@/libexec
 usr/share/indimail     @prefix@/share
 usr/share/man/man5     @mandir@
 usr/share/man/man8     @mandir@
-usr/lib/*.so.*         /usr/lib
+usr/@libd@/*.so.*      @prefix@/@libd@

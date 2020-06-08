@@ -8,6 +8,7 @@ Homepage: https://github.com/mbhangui/indimail-virtualdomains
 
 Package: indimail-spamfilter
 Architecture: any
+Conflicts: indimail (< 3.2)
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Fast anti-spam filtering by Bayesian statistical analysis
  This package implements a fast Bayesian spam filter along the lines suggested

@@ -28,6 +28,9 @@ nssd_version=@nssd_version@
 pam_multi_version=@pam_multi_version@
 pam_module_dir=/lib/security
 default_domain=indimail.org
+arch=$(shell uname -m)
+# check https://wiki.debian.org/Multiarch/Implementation#Dynamic_debian.2F.2A_files
+libd=$(shell if [ -d $(prefix)/lib/$(arch)-linux-gnu ] ; then echo lib/$(arch)-linux-gnu; else echo lib;fi)
 libdir=/usr/lib
 rm=/bin/rm
 cp=/bin/cp
@@ -54,8 +57,8 @@ build-stamp:
 			nssd_sock=/tmp/nssd.sock; \
 		fi; \
 		cd nssd-$(nssd_version) ; \
-		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --libdir=$(libdir) \
-		--libexecdir=$(libexecdir) --enable-nssd-socket=$(nssd_sock) \
+		./configure --prefix=$(prefix) --sysconfdir=$(sysconfdir) --libdir=$(prefix)/$(libd) \
+		--libexecdir=$(libexecdir) --enable-nssd-socket=$$nssd_sock \
 		--datarootdir=$(prefix)/share/indimail \
 		--enable-nssd-config-path=$(sysconfdir)/nssd.conf \
 		--mandir=$(mandir) --enable-mysqlprefix=/usr \
@@ -104,7 +107,8 @@ install: build
 	dh_installdirs
 	if [ -d nssd-$(nssd_version) ]           ; then $(MAKE) -s install -C nssd-$(nssd_version) DESTDIR=$(DESTDIR); fi
 	if [ -d pam-multi-$(pam_multi_version) ] ; then $(MAKE) -s install -C pam-multi-$(pam_multi_version) DESTDIR=$(DESTDIR); fi
-	#${rm} -rf $(DESTDIR)$(libdir)/*.la
+	${rm} -f $(DESTDIR)${prefix}/$(libd)/libnss_nssd.la
+	${rm} -f $(DESTDIR)${prefix}/$(libd)/libnss_nssd.so
 	${rm} -f $(DESTDIR)$(pam_module_dir)/pam-multi.la
 	${rm} -f $(DESTDIR)$(pam_module_dir)/pam-multi.a
 	mkdir -p $(DESTDIR)$(sysconfdir)
@@ -115,6 +119,7 @@ binary-indep: build install
 	dh_testdir
 	dh_testroot
 	find $(DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
+	sed -i -e 's,@libd\@,$(libd),g' debian/indimail-auth.install
 	dh_install --sourcedir=$(DESTDIR) -pindimail-auth
 	dh_installchangelogs
 	dh_installcron
