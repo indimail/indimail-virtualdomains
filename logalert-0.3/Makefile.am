@@ -15,10 +15,10 @@ sbin_PROGRAMS=logsrv rpclog
 
 man_MANS = logalert.8 logsrv.8 rpclog.8 incrmesg.1 logclient.1 showbytes.1
 
-MOSTLYCLEANFILES=logalert.spec logalert-@VERSION@-rpmlintrc \
+MOSTLYCLEANFILES=logalert.spec logalert-rpmlintrc \
 				lex.c parser.h parser.c logalert_perm_list debian/Makefile
 
-noinst_SCRIPTS = logalert.spec logalert-@VERSION@-rpmlintrc
+noinst_SCRIPTS = logalert.spec logalert-rpmlintrc
 
 DISTCLEANFILES = *~
 
@@ -60,7 +60,7 @@ lex.c: lex.l parser.h
 	 $(LEX) $(LFLAGS) -o$@ $^
 
 parser.h: parser.c
-logalert-@VERSION@-rpmlintrc: logalert-rpmlintrc.in
+logalert-rpmlintrc: logalert-rpmlintrc.in
 	$(edit) logalert-rpmlintrc.in > $@
 logalert.spec: logalert.spec.in
 	($(edit) $@.in;cat ChangeLog) > $@
