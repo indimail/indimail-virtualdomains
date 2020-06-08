@@ -7,7 +7,7 @@ VERSION=$PACKAGE_VERSION
 LT_INIT([disable-static])
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
-AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-support@lists.sourceforge.net")
+AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-auth@indimail.org")
 
 dnl Checks for programs.
 AC_DISABLE_STATIC
@@ -75,7 +75,7 @@ freebsd*)
 	;;
 esac
 
-defaultprefix="/var/indimail"
+defaultprefix="/usr"
 
 if test x$prefix = xNONE
 then
