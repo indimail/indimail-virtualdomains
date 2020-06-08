@@ -12,7 +12,7 @@ do
 	echo $i
 done
 ) | sort -u | sed \
-	-e 's/%{name}/indimail/g' \
+	-e 's/%{name}/indimail-access/g' \
 	-e "s/%{version}/$version/g" \
 	-e "s/%{courier_version}/$courier_version/g" \
 	-e "s/%{fetchmail_version}/$fetchmail_version/g"
@@ -27,7 +27,7 @@ do
 	echo $i
 done
 ) | sort -u | sed \
-	-e 's/%{name}/indimail/g' \
+	-e 's/%{name}/indimail-access/g' \
 	-e "s/%{version}/$version/g" \
 	-e "s/%{courier_version}/$courier_version/g" \
 	-e "s/%{fetchmail_version}/$fetchmail_version/g"

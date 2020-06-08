@@ -24,6 +24,9 @@ sysconfdir=@sysconfdir@
 libexecdir=@libexecdir@
 shareddir=@shareddir@
 mandir=@mandir@
+arch=$(shell uname -m)
+# check https://wiki.debian.org/Multiarch/Implementation#Dynamic_debian.2F.2A_files
+libd=$(shell if [ -d $(prefix)/lib/$(arch)-linux-gnu ] ; then echo lib/$(arch)-linux-gnu; else echo lib;fi)
 libdir=@libdir@
 courier_version=@courier_version@
 fetchmail_version=@fetchmail_version@
@@ -47,7 +50,7 @@ build-stamp:
 	if [ -d courier-imap-$(courier_version) ] ; then \
 		cd courier-imap-$(courier_version); \
 		./configure --prefix=${prefix} --libexecdir=${libexecdir} --bindir=${prefix}/bin \
-			--mandir=${mandir} --sysconfdir=${sysconfdir} --libdir=${libdir} \
+			--mandir=${mandir} --sysconfdir=${sysconfdir} --libdir=${prefix}/${libd} \
 			--datarootdir=${shareddir} --with-certsdir=${sysconfdir}/certs \
 			--with-mailer=${prefix}/bin/sendmail --disable-root-check \
 			--without-authpam --without-authcustom --without-authchangepwdir \
@@ -66,7 +69,12 @@ build-stamp:
 	#
 	if [ -d courier-imap-$(courier_version) ] ; then $(MAKE) -s -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
 	if [ -d fetchmail-$(fetchmail_version) ]  ; then $(MAKE) -s -C fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR); fi
-	${rm} -rf $(DESTDIR)$(libdir)/*.la
+	${rm} -f  $(DESTDIR)$(prefix)/$(libd)/*.la
+	${rm} -f  $(DESTDIR)${prefix}/$(libd)/libunicode.a
+	${rm} -f  $(DESTDIR)${prefix}/$(libd)/libunicode.so
+	${rm} -rf $(DESTDIR)${prefix}/share/aclocal
+	${rm} -rf $(DESTDIR)${prefix}/include
+	${rm} -rf $(DESTDIR)${mandir}/man3
 	( \
 	echo NAME=indimail-access; \
 	echo Description=\"IndiMail Authentication Package\"; \
@@ -104,6 +112,7 @@ binary-indep: build install
 	dh_testdir
 	dh_testroot
 	find $(DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
+	sed -i -e 's,@libd\@,$(libd),g' debian/indimail-access.install
 	dh_install --sourcedir=$(DESTDIR) -pindimail-access
 	dh_installchangelogs
 	dh_installcron

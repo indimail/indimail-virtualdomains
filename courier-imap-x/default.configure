@@ -1,18 +1,37 @@
 #!/bin/sh
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
-autoreconf -fiv
+	autoreconf -fiv
 fi
-./configure --prefix=/usr --disable-root-check --bindir=/usr/bin \
-        --with-redhat \
-        --with-mailer=/usr/bin/sendmail \
-        --mandir=/usr/share/man \
-        --sysconfdir=/etc/indimail \
-        --with-certsdir=/etc/indimail/certs \
-        --libexecdir=/usr/libexec/indimail \
-        --datarootdir=/usr/share/indimail \
-        --without-authchangepwdir \
-        --without-authpam --without-authcustom \
-        --without-authpwd --with-authshadow
+arch=$(uname -m)
+if [ -f /etc/debian_version ] ; then
+	if [ -d /usr/lib/$arch-linux-gnu ] ; then
+		libdir=/usr/lib/$arch-linux-gnu
+	else
+		libdir=/usr/lib
+	fi
+else
+	if [ -d /usr/lib64 ] ; then
+		libdir=/usr/lib64
+	elif [ -d /usr/lib ] ;then
+		libdir=/usr/lib
+	else
+		echo "could not find libdir " 1>&2
+		exit 1
+	fi
+fi
+./configure --prefix=/usr --disable-root-check \
+	--bindir=/usr/bin \
+	--libdir=$libdir \
+	--with-redhat \
+	--with-mailer=/usr/bin/sendmail \
+	--mandir=/usr/share/man \
+	--sysconfdir=/etc/indimail \
+	--with-certsdir=/etc/indimail/certs \
+	--libexecdir=/usr/libexec/indimail \
+	--datarootdir=/usr/share/indimail \
+	--without-authchangepwdir \
+	--without-authpam --without-authcustom \
+	--without-authpwd --with-authshadow
 if [ ! -f depcomp ] ; then
 	cp libs/unicode/depcomp .
 fi

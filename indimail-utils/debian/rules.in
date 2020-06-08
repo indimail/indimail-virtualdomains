@@ -28,6 +28,9 @@ flash_version=@flash_version@
 mpack_version=@mpack_version@
 version=@version@
 mandir=/usr/share/man
+arch=$(shell uname -m)
+# check https://wiki.debian.org/Multiarch/Implementation#Dynamic_debian.2F.2A_files
+libd=$(shell if [ -d $(prefix)/lib/$(arch)-linux-gnu ] ; then echo lib/$(arch)-linux-gnu; else echo lib;fi)
 libdir=/usr/lib
 rm=/bin/rm
 cp=/bin/cp
@@ -66,7 +69,7 @@ build-stamp:
 	fi
 	if [ -d flash-$(flash_version) ] ; then \
 		cd flash-$(flash_version); \
-		./configure --prefix=${prefix} --mandir=${mandir} --libdir=${libdir} \
+		./configure --prefix=${prefix} --mandir=${mandir} --libdir=${prefix}/${libd} \
 			--sysconfdir=${sysconfdir} --enable-modbase=${prefix}/lib/indimail \
 			--datarootdir=${prefix}/share/indimail; \
 		cd ..; \
@@ -85,7 +88,7 @@ build-stamp:
 	if [ -d fortune-$(fortune_vers) ]     ; then $(MAKE) -s -C fortune-$(fortune_vers) DESTDIR=$(DESTDIR); fi
 	if [ -d mpack-$(mpack_version) ]      ; then $(MAKE) -s -C mpack-$(mpack_version) DESTDIR=$(DESTDIR); fi
 	if [ -d flash-$(flash_version) ]      ; then $(MAKE) -s -C flash-$(flash_version) DESTDIR=$(DESTDIR); fi
-	${rm} -rf $(DESTDIR)$(libdir)/*.la
+	${rm} -rf $(DESTDIR)$(prefix)/$(libd)/*.la
 	( \
 	echo NAME=indimail-utils; \
 	echo Description=\"IndiMail Authentication Package\"; \
@@ -132,6 +135,7 @@ binary-indep: build install
 	dh_testdir
 	dh_testroot
 	find $(DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
+	sed -i -e 's,@libd\@,$(libd),g' debian/indimail-utils.install
 	dh_install --sourcedir=$(DESTDIR) -pindimail-utils
 	dh_installchangelogs
 	dh_installcron

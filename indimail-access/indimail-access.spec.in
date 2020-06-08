@@ -10,7 +10,6 @@
 %global reconfigure_mode   0
 %global reconf_fetchmail   0
 %global reconf_courierimap 0
-%global reconf_bogofilter  0
 %global build_cflags       "-DOBS_BUILD %{build_cflags}"
 %global debug_package      %{nil}
 %else
@@ -19,7 +18,6 @@
 %global reconfigure_mode   0
 %global reconf_fetchmail   0
 %global reconf_courierimap 0
-%global reconf_bogofilter  0
 %global _hardened_build    1
 %endif
 
@@ -79,7 +77,7 @@ Source2: http://downloads.sourceforge.net/indimail/perm_list.imap
 %if %nofetchmail == 0
 Source3: http://downloads.sourceforge.net/indimail/fetchmail-%{fetchmail_version}.tar.xz
 %endif
-Source4: http://downloads.sourceforge.net/indimail/%{name}-%{version}-rpmlintrc
+Source4: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 Source5: http://downloads.sourceforge.net/indimail/%{name}-permissions.easy
@@ -90,16 +88,14 @@ Source7: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
 AutoReqProv: Yes
-# few binaries were moved to sbin and indimail >= 2.5 depends on that
 Requires: indimail-mta > 2.6
-Requires: indimail > 3.1
 
 BuildRequires: openssl-devel rpm gcc gcc-c++ make binutils coreutils grep
 BuildRequires: glibc glibc-devel openssl procps
 BuildRequires: gzip autoconf automake libtool pkgconfig
 BuildRequires: sed findutils
 %if %nofetchmail == 0
-BuildRequires: xz
+BuildRequires: xz bison flex
 BuildRequires: gettext-devel
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 BuildRequires: python3 python3-devel
@@ -109,18 +105,21 @@ BuildRequires: python python-devel
 %endif
 
 %if %nocourierimap == 0
-BuildRequires: libgcrypt-devel gdbm-devel libidn-devel pcre-devel gamin-devel
+BuildRequires: libgcrypt-devel gdbm-devel libidn-devel pcre-devel pam-devel
 BuildRequires: perl
 %if %{defined fedora_version}
 BuildRequires: perl-generators
 BuildRequires: glibc-all-langpacks
+%endif
+%if 0%{?rhel_version} == 600 || %{defined centos_version} || %{defined centos_ver} || %{defined fedora_version} || %{defined sles_version} || %{defined suse_version}
+BuildRequires: gamin-devel
 %endif
 %endif
 
 %if %{defined fedora_version}
 BuildRequires: redhat-lsb-core
 %endif
-%if %{defined centos_version} || %{defined rhel_version} || %{defined %centos_ver}
+%if %{defined centos_version} || %{defined rhel_version} || %{defined centos_ver}
 BuildRequires: redhat-lsb
 %endif
 
@@ -143,6 +142,7 @@ Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
 Requires: binutils sed findutils pkgconfig
 Requires: coreutils grep /bin/sh glibc openssl
 Requires: /usr/bin/hostname
+Conflicts: %{name} < 3.2
 
 %if %build_on_obs == 1
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
@@ -481,8 +481,8 @@ done
 %endif
 %else
 %if %nocourierimap == 0
-%attr(644,root,root)                    %{shareddir}/doc/COPYING.courier-imap
-%attr(644,root,root)                    %{shareddir}/doc/COPYING.GPL.courier-imap
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/COPYING
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/COPYING.GPL
 %endif
 %if %nofetchmail == 0
 %attr(644,root,root)                    %{shareddir}/doc/COPYING.fetchmail
@@ -638,11 +638,15 @@ do
   %{__mkdir_p} %{logdir}/$i
 done
 
+%if %build_on_obs == 1
+  default_domain=defaultDomain
+%else
 if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
   default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
 else
   default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
 fi
+%endif
 
 %ifarch x86_64
 %global fetchmail_mem 52428800

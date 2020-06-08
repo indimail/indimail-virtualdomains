@@ -224,10 +224,9 @@ vcfilter.1 indimail.7 indimail.mrtg.cfg overquota.sh \
 vadddomain_handle vadduser_handle vpasswd_handle vdeldomain_handle vaddaliasdomain_handle \
 vrenamedomain_handle login_tasks.3 authgeneric usr.sbin.mysqld usr.sbin.clamd \
 vmoduser_handle vmoduser.1 usr.bin.freshclam indimail.mod indimail.pp \
-indimail_config.h \
 doc/INSTALL-indimail.md doc/Quick-INSTALL.md doc/INSTALL-RPM.md \
 doc/INSTALL-MYSQL.md doc/RELEASE-Notes-indimail.md doc/README-CLUSTER.md \
-doc/README-indimail.md
+doc/README-indimail.md indimail_config.h
 
 #DISTCLEANFILES=.gitignore
 

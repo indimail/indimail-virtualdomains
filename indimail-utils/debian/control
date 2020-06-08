@@ -3,11 +3,12 @@ Section: mail
 Priority: optional
 Maintainer: Manvendra Bhangui <indimail-utils@indimail.org>
 Standards-Version: 4.5.0
-Build-Depends: debhelper (>= 9), libpam0g-dev, libreadline5, libreadline-dev, libncurses5 (>= 5.7), libncurses5-dev (>= 5.7)
+Build-Depends: debhelper (>= 9), libncurses5 (>= 5.7), libncurses5-dev (>= 5.7)
 Homepage: https://github.com/mbhangui/indimail-virtualdomains
 
 Package: indimail-utils
 Architecture: any
+Conflicts: indimail (< 3.2)
 Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, binutils, findutils
 Description: indimail-utils provides a package consisting of utilities like
  mpack, munpack, altermime, ripmime, fortune, flash for indimail MTA

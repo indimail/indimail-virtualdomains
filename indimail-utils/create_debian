@@ -1,29 +1,25 @@
 #!/bin/sh
+if [ ! -f /etc/debian_version ] ; then
+	echo "Not a debian or ubuntu distribution" 1>&2
+	exit 1
+fi
 altermime_version=$(cat ../altermime-x/conf-version)
 ripmime_version=$(cat ../ripmime-x/conf-version)
 fortune_version=$(cat ../fortune-x/conf-version)
 mpack_version=$(cat ../mpack-x/conf-version)
 flash_version=$(cat ../flash-x/conf-version)
 
-if [ -d ../stage ] ; then
-	/bin/rm -rf ../stage
-fi
-mkdir -p ../stage
-cp -rp ../altermime-x ../stage/altermime-$altermime_version
-cp -rp ../ripmime-x   ../stage/ripmime-$ripmime_version
-cp -rp ../fortune-x   ../stage/fortune-$fortune_version
-cp -rp ../flash-x     ../stage/flash-$flash_version
-cp -rp ../mpack-x     ../stage/mpack-$mpack_version
-make -s
+make -s debian/Makefile
 make -s -C debian
-cp -rp debian ../stage
-cd ../stage
-for i in alterime-$altermime_version ripmime-$ripmime_version \
-	fortune-$fortune_version flash-$flash_version mpack-$mpack_version
-do
-	make -s -C $i clean || true
-	make -s -C $i distclean || true
-done
+/bin/rm -rf           $HOME/stage/indimail-utils
+mkdir -p              $HOME/stage/indimail-utils
+cp -rp ../altermime-x $HOME/stage/indimail-utils/altermime-$altermime_version
+cp -rp ../ripmime-x   $HOME/stage/indimail-utils/ripmime-$ripmime_version
+cp -rp ../fortune-x   $HOME/stage/indimail-utils/fortune-$fortune_version
+cp -rp ../flash-x     $HOME/stage/indimail-utils/flash-$flash_version
+cp -rp ../mpack-x     $HOME/stage/indimail-utils/mpack-$mpack_version
+cp -rp debian         $HOME/stage/indimail-utils
+cd                    $HOME/stage/indimail-utils
 dpkg-buildpackage -tc -b
-cd ..
-/bin/rm -r stage
+/bin/rm -rf           $HOME/stage/indimail-utils
+ls -lt $HOME/stage

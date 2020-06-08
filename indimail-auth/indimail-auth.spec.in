@@ -8,6 +8,7 @@
 # define if building on openSUSE build service
 %global build_on_obs       1
 %global build_cflags       "-DOBS_BUILD %{build_cflags}"
+%global debug_package     %{nil}
 %else
 %define _project           local
 %global build_on_obs       0
@@ -78,6 +79,7 @@ Requires: binutils sed findutils
 Requires: coreutils grep /bin/sh glibc
 Requires: /usr/bin/hostname
 Requires: pam indimail-mta
+Conflicts: %{name} < 3.2
 
 %if %build_on_obs == 1
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
@@ -137,11 +139,15 @@ echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
 echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui indimail-auth@indimail.org\""
 ) > %{name}-release
 
-if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
-else
-  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
-fi
+%if %build_on_obs == 0
+  if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+  else
+    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
+  fi
+%else
+  default_domain=%{defaultDomain}
+%endif
 #### nssd ######################
 if [ -d nssd-%{nssd_version} ] ; then
   cd nssd-%{nssd_version}
@@ -157,7 +163,7 @@ if [ -d nssd-%{nssd_version} ] ; then
   --enable-nssd-socket=$nssd_sock \
   --enable-nssd-config-path=%{sysconfdir}/nssd.conf \
   --enable-mysqlprefix=%{mysqlPrefix} \
-  --enable-dlload-mysql=yes --enable-default-domain=$(default_domain)
+  --enable-dlload-mysql=yes --enable-default-domain=$default_domain
   cd ..
 fi
 
@@ -167,7 +173,7 @@ if [ pam-multi-%{pam_multi_version} ] ; then
   %configure --prefix=%{_prefix} --datarootdir=%{shareddir} \
   --enable-moduledir=%pam_module_dir --enable-controldir=%{sysconfdir}/control \
   --enable-mysqlprefix=%{mysqlPrefix} \
-  --enable-dlload-mysql=yes --enable-default-domain=${default_domain}
+  --enable-dlload-mysql=yes --enable-default-domain=$default_domain
   cd ..
 fi
 

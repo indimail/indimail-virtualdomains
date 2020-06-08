@@ -9,6 +9,7 @@ Homepage: https://github.com/mbhangui/indimail-virtualdomains
 Package: indimail-access
 Architecture: any
 Pre-Depends: indimail, indimail-mta
+Conflicts: indimail (< 3.2)
 Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils, findutils, procps
 Description: indimail-access package provides imap, pop3 and fetchmail retrieval for IndiMail
  IMAP/POP3 protocol is provided by Courier Imap.
