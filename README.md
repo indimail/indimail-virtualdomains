@@ -1,14 +1,23 @@
-# indimail
+# README
+
+## indimail Introduction
+
 Messaging Platform based on qmail for MTA Virtual Domains, Courier-IMAP for IMAP/POP3
 
-Look at indimail-3.x/doc/README for details. indimail needs indimail-mta to be installed. Look at
-https://github.com/mbhangui/indimail-mta
-for details on installing indimail-mta
+* Look at [README-indimail] (README-indimail.md) for details on IndiMail, indimail-mta. indimail needs indimail-mta to be installed. Look [here] (https://github.com/mbhangui/indimail-mta) for details on installing indimail-mta
+* Look at [README-CLUSTER] (README-CLUSTER.md) for details on setting up an IndiMail Cluster
+* Look at [INSTALL.md] (INSTALL-indimail.md) for Source Installation instructions
+* Look at [INSTALL-MINI] (INSTALL-MINI.md) for instructions on setting up an MINI Indimail Installation which uses QMQP protocol.
+* Look at [INSTALL-MYSQL] (INSTALL-MYSQL.md) for instructions on configuring a MySQL/MariaDB server for IndiMail.
+* Look at [INSTALL-RPM] (INSTALL-RPM.md) for instructions on setting up IndiMail using RPM or Debian packages
+* Look at [Quick-INSTALL] (Quick-INSTALL.md) for instructions on installation and setup of an IndiMail server.
 
-Look at indimail-3.x/doc/INSTALL for Source Installation instructions
+# Installation
 
-# Compile libqmail
+## Compile libqmail
+
 (check version in libqmail/conf-version)
+
 ```
 $ cd /usr/local/src
 $ git clone https://github.com/mbhangui/libqmail.git
@@ -18,14 +27,16 @@ $ make
 $ sudo make install-strip
 ```
 
-# Download indimail, indimail-mta and components
+## Download indimail, indimail-mta and components
+
 ```
 $ cd /usr/local/src
 $ git clone https://github.com/mbhangui/indimail-virtualdomains.git
 $ git clone https://github.com/mbhangui/indimail-mta.git
 ```
 
-# Compile libdkim-x (with dynamic libaries)
+## Compile libdkim-x (with dynamic libaries)
+
 (check version in indimail-mta/libdkim-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-mta/libdkim-x
@@ -34,7 +45,8 @@ $ make
 $ sudo make -s install-strip
 ```
 
-# Compile libsrs2-x (with dynamic libaries)
+## Compile libsrs2-x (with dynamic libaries)
+
 (check version in indimail-mta/libsrs2-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-mta/libsrs2-x
@@ -43,7 +55,8 @@ $ make
 $ sudo make install-strip
 ```
 
-# Build ucspi-tcp (with all patches applied)
+## Build ucspi-tcp (with all patches applied)
+
 (check version in indimail-mta/ucspi-tcp-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-mta/ucspi-tcp-x
@@ -51,7 +64,8 @@ $ make
 $ sudo make install-strip
 ```
 
-# Build bogofilter
+## Build bogofilter
+
 ```
 $ cd /usr/local/src/indimail-virtualdomains/bogofilter-x
 (check version in indimail-virtualdomains/bogofilter-x/conf-version)
@@ -60,7 +74,8 @@ $ make
 $ sudo make install-strip
 ```
 
-# Build bogofilter-wordlist
+## Build bogofilter-wordlist
+
 ```
 $ cd /usr/local/src/indimail-virtualdomains/bogofilter-wordlist-1.0
 $ ./default.configure
@@ -68,7 +83,8 @@ $ make
 $ sudo make install-strip
 ```
 
-# Build indimail-mta-x
+## Build indimail-mta-x
+
 (check version in indimail-mta/indimail-mta-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
@@ -77,7 +93,8 @@ $ sudo make install-strip
 $ sudo sh ./svctool --config=users --nolog
 ```
 
-# Build indimail
+## Build indimail
+
 (check version in indimail-virtualdomains/indimail-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-x
@@ -86,7 +103,8 @@ $ make
 $ sudo make install-strip
 ```
 
-# Build courier-imap
+## Build courier-imap
+
 (check version in indimail-virtualdomains/courier-imap-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-virtualdomains/courier-imap-x
@@ -94,7 +112,8 @@ $ ./default.configure
 $ sudo make install-strip
 ```
 
-# Build nssd
+## Build nssd
+
 (check version in indimail-virtualdomains/nssd-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-virtualdomains/nssd-x
@@ -103,7 +122,8 @@ $ make
 $ sudo make install-strip
 ```
 
-# Build pam-multi
+## Build pam-multi
+
 (check version in indimail-virtualdomains/pam-multi-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-virtualdomains/pam-multi-x
@@ -112,7 +132,8 @@ $ make
 $ sudo make install-strip
 ```
 
-# Build optional packages
+## Build optional packages
+
 ```
 $ cd /usr/local/src/indimail-virtualdomains/altermime-x
 $ ./default.configure
@@ -138,9 +159,14 @@ $ cd /usr/local/src/indimail-virtualdomains/flash-x
 $ ./default.configure
 $ make
 $ sudo make install-strip
+
+$ cd /usr/local/src/indimail-virtualdomains/iwebadmin-2.0
+$ ./default.configure
+$ make
+$ sudo make install-strip
 ```
 
-# Setup & Configuration
+## Setup & Configuration
 
 Setup (this uses svctool a general purpose utility to configure indimail-mta
 services. The create_services is a shell script which uses svctool to setup
@@ -152,7 +178,8 @@ $ cd /usr/local/src/indimail-mta/indimail-mta-x
 $ sudo sh ./create_services --servicedir=/services --mysqlPrefix=/usr
 ```
 
-# Start Services
+## Start Services
+
 ```
 $ sudo systemctl start svscan
 or
@@ -164,25 +191,21 @@ $ /usr/bin/qmailctl start
 ```
 
 # Binary Builds
+
 You can get binary RPM / Debian packages at
 
-Stable Releases       - http://download.opensuse.org/repositories/home:/indimail/
+[Stable Releases] (http://download.opensuse.org/repositories/home:/indimail/)
 
-Experimental Releases - http://download.opensuse.org/repositories/home:/mbhangui/
+[Experimental Releases] (http://download.opensuse.org/repositories/home:/mbhangui/)
 
-If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories are at
-
-https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail
-
-&
-
-https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail
+If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories are [Stable] (https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail) and [experimental] (https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail-mta)
 
 NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to install the additional software
 
 1. indimail-auth (nssd - providing name service switch and pam-multi to provide multiple pam auth methods)
 2. indimail-utils (Multiple utility that can work with indimail-mta - altermime, ripmime, mpack, fortune and flash - customizable menu based admin interface)
 3. indimail-spamfilter - SPAM filter capabillity using bogofilter - https://bogofilter.sourceforge.io
+4. indimail-saccess - IMAP/POP3 & fetchmail for mail retreival
 
 ```
 Currently, the list of supported distributions for IndiMail is
@@ -229,32 +252,46 @@ https://hub.docker.com/r/cprogrammer/indimail
 for Docker
 ```
 docker pull cprogrammer/indimail:tag
+docker run image_id indimail
 ```
 or
 
 for Podman
 ```
 podman pull cprogrammer/indimail:tag
+podman run image_id indimail
 ```
 
-where tag is one of
+where image_id is the IMAGE ID of the docker / podman container obtained by running the **docker images** or the **podman images** command and tag is one of
 
-xenial   for ubuntu 16.04
+tag|OS Distribution
+----|----------------------
+xenial|Ubuntu 16.04
+bionic|Ubuntu 18.04
+disco|Ubuntu 19.04
+focal|Ubuntu 20.04
+centos7|CentOS 7
+debian8|Debian 8
+debian9|Debian 9
+debian10|Debian10
+fc31|Fedora Core 31
+fc32|Fedora Core 32
+Tumbleweed|openSUSE Tumbleweed
+Leap15.2|openSUSE Leap 15.2
 
-bionic   for ubuntu 18.04
+# SUPPORT INFORMATION #
 
-disco    for ubuntu 19.04
+## IRC
+IndiMail has an IRC channel ##indimail and ##indimail-mta
 
-focal    for ubuntu 20.04
+## Mailing list
 
-centos7  for centos7
+There are four Mailing Lists for IndiMail
 
-debian8  for debian8
+1. indimail-support  - You can subscribe for Support [here] (https://lists.sourceforge.net/lists/listinfo/indimail-support). You can mail [indimail-support] (mailto:indimail-support@lists.sourceforge.net) for support Old discussions can be seen [here] (https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-support)
+2. indimail-devel - You can subscribe [here] (https://lists.sourceforge.net/lists/listinfo/indimail-devel). You can mail [indimail-devel] (mailto:indimail-devel@lists.sourceforge.net) for development activities. Old discussions can be seen [here]
+(https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-devel)
+3. indimail-announce - This is only meant for announcement of New Releases or patches. You can subscribe []here] (http://groups.google.com/group/indimail)
+4. Archive at [Google Groups] (http://groups.google.com/group/indimail). This groups acts as a remote archive for indimail-support and indimail-devel.
 
-debian9  for debian9
-
-debian10 for debian10
-
-fc32     for fc32
-
-fc31     for fc31
+There is also a [Project Tracker] (http://sourceforge.net/tracker/?group_id=230686) for IndiMail (Bugs, Feature Requests, Patches, Support Requests)

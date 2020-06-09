@@ -63,7 +63,7 @@ Quick-INSTALL.md|A minimal documentation on Installation/Configuration)
 
 If you have enough experience on your belt you can dive into this [document](https://github.com/mbhangui/indimail-virtualdomains/blob/v3.2/README.md).
 
-Once you have installed IndiMail, you will find all man pages in @mandir@ and documents in @prefix@/share/indimail/doc. You can do man indimail to get started with understanding IndiMail.
+Once you have installed IndiMail, you will find all man pages in /usr/share/man and documents in /usr/share/indimail/doc. You can do man indimail to get started with understanding IndiMail.
 
 #DISCLAIMER
 
@@ -172,5 +172,106 @@ Some of the features available in this package
 The complete list of features can be seen here
 https://sourceforge.net/p/indimail/wiki/IndiMail/
 
+# IRC
+IndiMail has an IRC channel ##indimail and ##indimail-mta
+
+# Mailing list
+
+There are four Mailing Lists for IndiMail
+
+1. indimail-support  - You can subscribe for Support [here] (https://lists.sourceforge.net/lists/listinfo/indimail-support). You can mail [indimail-support] (mailto:indimail-support@lists.sourceforge.net) for support Old discussions can be seen [here] (https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-support)
+2. indimail-devel - You can subscribe [here] (https://lists.sourceforge.net/lists/listinfo/indimail-devel). You can mail [indimail-devel] (mailto:indimail-devel@lists.sourceforge.net) for development activities. Old discussions can be seen [here]
+(https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-devel)
+3. indimail-announce - This is only meant for announcement of New Releases or patches. You can subscribe []here] (http://groups.google.com/group/indimail)
+4. Archive at [Google Groups] (http://groups.google.com/group/indimail). This groups acts as a remote archive for indimail-support and indimail-devel.
+
+There is also a [Project Tracker] (http://sourceforge.net/tracker/?group_id=230686) for IndiMail (Bugs, Feature Requests, Patches, Support Requests)
+
+# Binary Builds
+
+You can get binary RPM / Debian packages at
+
+[Stable Releases] (http://download.opensuse.org/repositories/home:/indimail/)
+
+[Experimental Releases] (http://download.opensuse.org/repositories/home:/mbhangui/)
+
+If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories are [Stable] (https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail) and [experimental] (https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail)
+
+```
+Currently, the list of supported distributions for IndiMail is
+
+    * SUSE
+          o openSUSE_Leap_15.0
+          o openSUSE_Leap_15.1
+          o openSUSE_Leap_15.2
+		  o openSUSE_Tumbleweed
+          o SUSE Linux Enterprise 12
+          o SUSE Linux Enterprise 12 SP1
+          o SUSE Linux Enterprise 12 SP2
+          o SUSE Linux Enterprise 12 SP3
+          o SUSE Linux Enterprise 12 SP4
+          o SUSE Linux Enterprise 12 SP5
+          o SUSE Linux Enterprise 15
+          o SUSE Linux Enterprise 15 SP1
+
+    * Red Hat
+          o Fedora 32
+          o Fedora 31
+          o Red Hat Enterprise Linux 6
+          o Red Hat Enterprise Linux 7
+          o CentOS 6
+          o CentOS 7
+
+    * Debian
+          o Debian  8.0
+          o Debian  9.0
+          o Debian 10.0
+          o Ubuntu 16.04
+          o Ubuntu 17.04
+          o Ubuntu 18.04
+          o Ubuntu 19.04
+          o Ubuntu 19.10
+          o Ubuntu 20.04
+```
+
+# Docker / Podman Repository
+The docker repository for indimail is at
+
+https://hub.docker.com/r/cprogrammer/indimail
+
+for Docker
+
+```
+docker pull cprogrammer/indimail:tag
+docker run image_id indimail
+```
+or
+
+for Podman
+
+```
+podman pull cprogrammer/indimail:tag
+podman run image_id indimail
+```
+
+where image_id is the IMAGE ID of the docker / podman container obtained by running the **docker images** or the **podman images** command and tag is one of
+
+tag|OS Distribution
+----|----------------------
+xenial|Ubuntu 16.04
+bionic|Ubuntu 18.04
+disco|Ubuntu 19.04
+focal|Ubuntu 20.04
+centos7|CentOS 7
+debian8|Debian 8
+debian9|Debian 9
+debian10|Debian10
+fc31|Fedora Core 31
+fc32|Fedora Core 32
+Tumbleweed|openSUSE Tumbleweed
+Leap15.2|openSUSE Leap 15.2
+
+# GIT Repository
+IndiMail has a git repository at [here] (https://github.com/mbhangui/indimail-virtualdomains)
 
 -- Manvendra Bhangui <manvendra@indimail.org>
