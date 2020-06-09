@@ -583,15 +583,9 @@ done
 
 %attr(644,root,root)                    %{shareddir}/doc/ChangeLog-indimail
 %attr(644,root,root)                    %{shareddir}/doc/FAQ.pdf
-%attr(644,root,root)                    %{shareddir}/doc/INSTALL-MYSQL.md
-%attr(644,root,root)                    %{shareddir}/doc/INSTALL-RPM.md
-%attr(644,root,root)                    %{shareddir}/doc/INSTALL-indimail.md
-%attr(644,root,root)                    %{shareddir}/doc/Quick-INSTALL.md
 %attr(644,root,root)                    %{shareddir}/doc/README-indimail.md
-%attr(644,root,root)                    %{shareddir}/doc/README-CLUSTER.md
 %attr(644,root,root)                    %{shareddir}/doc/README.ldap
 %attr(644,root,root)                    %{shareddir}/doc/README.vlimits
-%attr(644,root,root)                    %{shareddir}/doc/RELEASE-Notes-indimail.md
 %attr(644,root,root)                    %{shareddir}/doc/indimail_arch.png
 %attr(644,root,root)                    %{shareddir}/doc/indimail_queue.png
 
