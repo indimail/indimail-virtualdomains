@@ -240,17 +240,21 @@ The docker repository for indimail is at
 https://hub.docker.com/r/cprogrammer/indimail
 
 for Docker
+
 ```
 docker pull cprogrammer/indimail:tag
+docker run image_id indimail
 ```
 or
 
 for Podman
+
 ```
 podman pull cprogrammer/indimail:tag
+podman run image_id indimail
 ```
 
-where tag is one of
+where image_id is the IMAGE ID of the docker / podman container obtained by running the **docker images** or the **podman images** command and tag is one of
 
 tag|OS Distribution
 ----|----------------------
@@ -262,8 +266,10 @@ centos7|CentOS 7
 debian8|Debian 8
 debian9|Debian 9
 debian10|Debian10
-fc32|Fedora Core 32
 fc31|Fedora Core 31
+fc32|Fedora Core 32
+Tumbleweed|openSUSE Tumbleweed
+Leap15.2|openSUSE Leap 15.2
 
 # GIT Repository
 IndiMail has a git repository at [here] (https://github.com/mbhangui/indimail-virtualdomains)
