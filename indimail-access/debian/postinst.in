@@ -142,6 +142,7 @@ if [ -f /tmp/indimail-access.upgrade ] ; then # upgrade
 	proxy-imapd.4143 proxy-imapd-ssl.9143 \
     proxy-pop3d.4110 proxy-pop3d-ssl.9110 
   do
+    svc -d ${servicedir}/$i || true
     if [ -z "$svc_list" ] ; then
       svc_list="${servicedir}/$i"
     else
