@@ -79,7 +79,7 @@ BuildRequires: -post-build-checks
 Requires: /usr/bin/awk /usr/bin/which
 Requires: binutils sed findutils
 Requires: coreutils grep /bin/sh glibc
-Conflicts: %{name} < 3.2
+Conflicts: indimail < 3.2
 
 %if %build_on_obs == 1
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)

@@ -1093,10 +1093,10 @@ if [ $argv1 -eq 2 ] ; then # upgrade
 # we are doing upgrade
   (
   echo "doing post upgrade activities"
+  if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+    /sbin/ldconfig
+  fi
   if [ -f %{libexecdir}/iupgrade.sh ] ; then
-    if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
-      /sbin/ldconfig
-    fi
     echo "Running Custom Upgrade Script for post upgrade"
     /bin/sh %{libexecdir}/iupgrade.sh post upgrade %{version} $*
   fi
@@ -1399,15 +1399,15 @@ fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   (
+  if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+    echo "recreating ld.so cache"
+    /sbin/ldconfig
+  fi
   if [ -f %{libexecdir}/iupgrade.sh ] ; then
     echo "Running Custom Un-Installation Script for postun upgrade"
     /bin/sh %{libexecdir}/iupgrade.sh postun upgrade %{version} $*
   fi
   ) >> /var/log/indimail-setup.log 2>&1
-  if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
-    echo "recreating ld.so cache"
-    /sbin/ldconfig
-  fi
   exit 0
 fi
 
