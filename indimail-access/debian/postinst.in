@@ -198,12 +198,12 @@ fi
 a_arch=`uname -m`
 if [ " $a_arch" = " x86_64" ] ; then
  fetchmail_mem=52428800
- imap_pop3_mem=26214400
- imapspop3_mem=26214400
+ imap_pop3_mem=52428800
+ imapspop3_mem=52428800
 else
  fetchmail_mem=52428800
- imap_pop3_mem=26214400
- imapspop3_mem=26214400
+ imap_pop3_mem=52428800
+ imapspop3_mem=52428800
 fi
 
 if [ $nofetchmail -eq 0 ] ; then
