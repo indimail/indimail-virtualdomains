@@ -574,12 +574,8 @@ if [ $argv1 -eq 2 ] ; then # upgrade
 # we are doing upgrade
   (
   echo "doing post upgrade activities"
-  if [ -f %{libexecdir}/iupgrade.sh ] ; then
-    if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
-      /sbin/ldconfig
-    fi
-    echo "Running Custom Upgrade Script for post upgrade"
-    /bin/sh %{libexecdir}/iupgrade.sh post upgrade %{version} $*
+  if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+    /sbin/ldconfig
   fi
 
   # refresh indimail services
@@ -589,6 +585,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     proxy-imapd.4143 proxy-imapd-ssl.9143 \
     proxy-pop3d.4110 proxy-pop3d-ssl.9110 
   do
+    svc -d %{servicedir}/$i
     if [ -z "$svc_list" ] ; then
       svc_list="%{servicedir}/$i"
     else
