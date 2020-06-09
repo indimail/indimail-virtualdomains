@@ -650,12 +650,12 @@ fi
 
 %ifarch x86_64
 %global fetchmail_mem 52428800
-%global imap_pop3_mem 26214400
-%global imapspop3_mem 26214400
+%global imap_pop3_mem 52428800
+%global imapspop3_mem 52428800
 %else
-%global fetchmail_mem 72428800
-%global imap_pop3_mem 26214400
-%global imapspop3_mem 26214400
+%global fetchmail_mem 52428800
+%global imap_pop3_mem 52428800
+%global imapspop3_mem 52428800
 %endif
 
 # fetchmail
