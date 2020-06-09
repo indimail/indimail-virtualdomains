@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: ilocal_upgrade.sh,v $
+# Revision 2.31  2020-06-09 11:32:46+05:30  Cprogrammer
+# fixed typo
+#
 # Revision 2.30  2020-05-26 11:22:18+05:30  Cprogrammer
 # fixed permission of spamignore
 #
@@ -91,7 +94,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: ilocal_upgrade.sh,v 2.30 2020-05-26 11:22:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.31 2020-06-09 11:32:46+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -111,7 +114,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.30 2020-05-26 11:22:18+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.31 2020-06-09 11:32:46+05:30 Cprogrammer Exp mbhangui $"
 if [ -d /var/indimail/mysqldb/data/indimail ] ; then
 	if [ ! -f /service/mysql.3306/down ] ; then
 		for i in mysqld mariadb mysql
@@ -130,7 +133,7 @@ fi
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.30 2020-05-26 11:22:18+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.31 2020-06-09 11:32:46+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do
@@ -175,7 +178,7 @@ if [ " $logfifo" != " /tmp/logfifo" ] ; then
 		qmail-qmqpd.628 qmail-smtpd.465 qmail-qmtpd.209 qmail-smtpd.587
 	do
 		if [ -d /service/$i ] ; then
-			check_udpate_if_diff /service/$i/variables/LOGFILTER $logfifo
+			check_update_if_diff /service/$i/variables/LOGFILTER $logfifo
 			for j in /service/$i/run /service/$i/variables/.options
 			do
 				grep "/tmp/logfifo" $j > /dev/null
