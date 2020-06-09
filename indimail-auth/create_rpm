@@ -111,7 +111,7 @@ if [ $# -gt 0 ] ; then
 	release=$1
 else
 	if [ -f /usr/sbin/nssd ] ; then
-		ndist=$(rpm -qf /usr/sbin/nssd|cut -d- -f4|cut -d. -f4)
+		ndist=$(rpm -qf /usr/sbin/nssd|cut -d- -f4|cut -d. -f3)
 		if [ " $dist" = " $ndist" ] ; then
 			nversion=$(rpm -qf /usr/sbin/nssd|cut -d- -f3)
 			if [ "$nversion" = "$version" ] ; then
@@ -121,6 +121,7 @@ else
 				release=1
 			fi
 		else
+				echo 2
 			release=1
 		fi
 	else
@@ -136,7 +137,7 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	if [ -z "$temprel" -o ! " $tmprel" = " 1.$release" ] ; then
 		echo 1.$release > indimail-auth/conf-release
 		cd indimail-auth
-		make indimail-auth.spec
+		make -s indimail-auth.spec
 		cp indimail-auth.spec /tmp
 		cd debian
 		make
