@@ -25,6 +25,13 @@ doc/bogoupgrade.1
 doc/bogoupgrade.html
 doc/bogoutil.1
 doc/bogoutil.html
+doc/bf_tar.1in
+doc/bogofilter.1in
+doc/bogolexer.1in
+doc/bogotune.1in
+doc/bogotune.htmlin
+doc/bogoupgrade.1in
+doc/bogoutil.1in
 src/bogofilter
 src/bogolexer
 src/bogotune
