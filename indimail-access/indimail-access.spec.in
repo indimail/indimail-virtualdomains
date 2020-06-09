@@ -142,7 +142,7 @@ Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
 Requires: binutils sed findutils pkgconfig
 Requires: coreutils grep /bin/sh glibc openssl
 Requires: /usr/bin/hostname
-Conflicts: %{name} < 3.2
+Conflicts: indimail < 3.2
 
 %if %build_on_obs == 1
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
