@@ -37,8 +37,8 @@
 
 Summary: Name Service Sw
 Name: indimail-auth
-Version: 1.0
-Release: 1.1%{?dist}
+Version: @version@
+Release: @release@%{?dist}
 
 %if %build_on_obs == 1
 License: GPL-3.0+
