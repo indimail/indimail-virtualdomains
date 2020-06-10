@@ -66,8 +66,8 @@ build-stamp:
 clean:
 	${rm} -f build-stamp configure-stamp
 	${rm} -rf $(DESTDIR)
-	$(MAKE) -s clean
-	$(MAKE) -s distclean
+	$(MAKE) -s clean || true
+	$(MAKE) -s distclean || true
 	dh_testdir
 	dh_testroot
 	dh_clean
