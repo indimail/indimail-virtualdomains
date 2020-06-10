@@ -4,17 +4,18 @@
 
 Messaging Platform based on qmail for MTA Virtual Domains, Courier-IMAP for IMAP/POP3
 
-* Look at [README-indimail](README-indimail.md) for details on IndiMail, indimail-mta. indimail needs indimail-mta to be installed. Look [here](https://github.com/mbhangui/indimail-mta) for details on installing indimail-mta
-* Look at [README-CLUSTER](README-CLUSTER.md) for details on setting up an IndiMail Cluster
-* Look at [INSTALL.md](INSTALL-indimail.md) for Source Installation instructions
-* Look at [INSTALL-MINI](INSTALL-MINI.md) for instructions on setting up an MINI Indimail Installation which uses QMQP protocol.
-* Look at [INSTALL-MYSQL](INSTALL-MYSQL.md) for instructions on configuring a MySQL/MariaDB server for IndiMail.
-* Look at [INSTALL-RPM](INSTALL-RPM.md) for instructions on setting up IndiMail using RPM or Debian packages
-* Look at [Quick-INSTALL](Quick-INSTALL.md) for instructions on installation and setup of an IndiMail server.
+* Look at [README-indimail](.github/README-indimail.md) for details on IndiMail, indimail-mta. indimail needs indimail-mta to be installed. Read [README](https://github.com/mbhangui/indimail-mta/blob/master/README.md) for details on installing indimail-mta
+* Look at [README-CLUSTER](.github/README-CLUSTER.md) for details on setting up an IndiMail Cluster
+* Look at [INSTALL](.github/INSTALL-indimail.md) for Source Installation instructions
+* Look at [INSTALL-MINI](.github/INSTALL-MINI.md) for instructions on setting up an MINI Indimail Installation which uses QMQP protocol.
+* Look at [INSTALL-MYSQL](.github/INSTALL-MYSQL.md) for instructions on configuring a MySQL/MariaDB server for IndiMail.
+* Look at [INSTALL-RPM](.github/INSTALL-RPM.md) for instructions on setting up IndiMail using RPM or Debian packages
+* Look at [Quick-INSTALL](.github/Quick-INSTALL.md) for instructions on installation and setup of an IndiMail server.
+* Look at [Tutorial](.github/indimail.md) for a detailed tutorial on doing various tasks with an IndiMail server
 
 # Installation
 
-The steps below give instructions on building from source. If you need to deploy IndiMail on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the same package can be deployed on multiple hosts. To generate RPM packages for all components refer to [CREATE-Packages.md](CREATE-Packages.md)
+The steps below give instructions on building from source. If you need to deploy IndiMail on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the same package can be deployed on multiple hosts. To generate RPM packages for all components refer to [CREATE-Packages](.github/CREATE-Packages.md)
 
 ## Compile libqmail
 
@@ -196,21 +197,20 @@ $ /usr/bin/qmailctl start
 
 You can get binary RPM / Debian packages at
 
-[Stable Releases](http://download.opensuse.org/repositories/home:/indimail/)
-
-[Experimental Releases](http://download.opensuse.org/repositories/home:/mbhangui/)
+* [Stable Releases](http://download.opensuse.org/repositories/home:/indimail/)
+* [Experimental Releases](http://download.opensuse.org/repositories/home:/mbhangui/)
 
 If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories, depending on whether you want to install a stable or an experimental release, are
 
 * [Stable](https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail)
-* [Experimental](https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail-mta)
+* [Experimental](https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail)
 
 NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to install the additional software
 
-1. indimail-auth (nssd - providing name service switch and pam-multi to provide multiple pam auth methods)
-2. indimail-utils (Multiple utility that can work with indimail-mta - altermime, ripmime, mpack, fortune and flash - customizable menu based admin interface)
-3. indimail-spamfilter - SPAM filter capabillity using bogofilter - https://bogofilter.sourceforge.io
-4. indimail-saccess - IMAP/POP3 & fetchmail for mail retreival
+1. [indimail-access](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-access) - IMAP/POP3 & fetchmail for mail retreival
+2. [indimail-auth](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-auth) (nssd - providing Name Service Switch and pam-multi providing multiple PAM modules for flexible, configurable authentication methods)
+3. [indimail-spamfilter](https://github.com/mbhangui/indimail-virtualdomains/tree/master/bogofilter-x) - SPAM filter capabillity using bogofilter - https://bogofilter.sourceforge.io
+4. [indimail-utils](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils) (Multiple utilities that can work with indimail-mta - altermime, ripmime, mpack, fortune and flash - customizable menu based admin interface)
 
 ```
 Currently, the list of supported distributions for IndiMail is
@@ -250,39 +250,11 @@ Currently, the list of supported distributions for IndiMail is
 ```
 
 # Docker / Podman Repository
-The docker repository for indimail is at
 
-https://hub.docker.com/r/cprogrammer/indimail
+The [docker repository](https://hub.docker.com/r/cprogrammer/indimail) can be used to pull docker/podman images
+for indimail.
 
-for Docker
-```
-docker pull cprogrammer/indimail:tag
-docker run image_id indimail
-```
-or
-
-for Podman
-```
-podman pull cprogrammer/indimail:tag
-podman run image_id indimail
-```
-
-where image_id is the IMAGE ID of the docker / podman container obtained by running the **docker images** or the **podman images** command and tag is one of
-
-tag|OS Distribution
-----|----------------------
-xenial|Ubuntu 16.04
-bionic|Ubuntu 18.04
-disco|Ubuntu 19.04
-focal|Ubuntu 20.04
-centos7|CentOS 7
-debian8|Debian 8
-debian9|Debian 9
-debian10|Debian10
-fc31|Fedora Core 31
-fc32|Fedora Core 32
-Tumbleweed|openSUSE Tumbleweed
-Leap15.2|openSUSE Leap 15.2
+For latest details refer to [README](https://github.com/mbhangui/docker/blob/master/README.md)
 
 # SUPPORT INFORMATION #
 
