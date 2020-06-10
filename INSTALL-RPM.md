@@ -1,20 +1,16 @@
 # Installing from RPM or DEB
 
-File INSTALL-RPM, Version 3.2
-DATE: Tue Jun  9 01:05:52 IST 2020
-
 This section covers installing IndiMail from rpm/deb. This is the easy way to install IndiMail.
 If you are looking for something more simpler, then you need the Install IndiMail for
 dummies - instructions for which are in the file [Quick-INSTALL](Quick-INSTALL.md).
 
-There is also an Installation for Experts, involving source compilation. For that read [INSTALL](INSTALL-indimail.md). I would recommend you to go through the file INSTALL so that you undertand IndiMail
-better. [INSTALL](INSTALL-indimail.md) gives instructions for installing from source and could be challenging for those who are not accustomed with compilation, make, GNU autotools process.
+There is also an Installation for Experts, involving source compilation. For that read [INSTALL](INSTALL-indimail.md). I would recommend you to go through the file INSTALL so that you undertand IndiMail better. [INSTALL](INSTALL-indimail.md) gives instructions for installing from source and could be challenging for those who are not accustomed with compilation, make, GNU autotools process.
 
-Please refer to SECTION 10 SUPPORT INFORMATION in [INSTALL](INSTALL-indimail.md)
+Please refer to Support Information in [README](README-indimail.md) for getting support for IndiMail.
 
-Refer to 'Binary builds' section in [README](README-indimail.md) for indimail repository information for binary builds.
+Refer to 'Binary Builds' section in [README](README-indimail.md) for indimail repository information for binary builds.
 
-If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories are [Stable] (https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail) and [Experimental] (https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail)
+Refer to 'Docker / Podman Repository' section in [README](README-indimail.md) for information on running a docker/podman image of IndiMail.
 
 ## What happens during installation?
 

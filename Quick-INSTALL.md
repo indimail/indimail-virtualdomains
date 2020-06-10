@@ -17,8 +17,8 @@ or
 
 If you want to use DNF / YUM / apt-get, the corresponding install instructions are (depending whether you want a stable or an experimental release)
 
-* [Stable] (https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail)
-* [Experimental] (https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail)
+* [Stable](https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail)
+* [Experimental](https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail)
 
 Create a basic configuration file required by IndiMail
 
@@ -95,8 +95,8 @@ or
 
 If you want to use DNF / YUM / apt-get, the corresponding install instructions are (depending whether you want a stable or an experimental release)
 
-* [Stable] (https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail)
-* [Experimental] (https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail)
+* [Stable](https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail)
+* [Experimental](https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail)
 
 Create basic configuration files required by IndiMail
 

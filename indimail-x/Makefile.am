@@ -107,7 +107,7 @@ setuid_list = bin/printdir bin/vaddaliasdomain bin/vadddomain bin/vadduser bin/v
 	bin/vrenameuser bin/vsetuserquota bin/vdominfo bin/vuserinfo sbin/vreorg \
 	libexec/sq_vacation
 
-doc_list= ChangeLog-indimail FAQ.pdf README-indimail README.ldap  \
+doc_list= ChangeLog-indimail FAQ.pdf README-indimail.md README.ldap  \
 	README.vlimits COPYING-indimail
 
 COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.c add_ip_map.c \

@@ -4,15 +4,17 @@
 
 Messaging Platform based on qmail for MTA Virtual Domains, Courier-IMAP for IMAP/POP3
 
-* Look at [README-indimail] (README-indimail.md) for details on IndiMail, indimail-mta. indimail needs indimail-mta to be installed. Look [here] (https://github.com/mbhangui/indimail-mta) for details on installing indimail-mta
-* Look at [README-CLUSTER] (README-CLUSTER.md) for details on setting up an IndiMail Cluster
-* Look at [INSTALL.md] (INSTALL-indimail.md) for Source Installation instructions
-* Look at [INSTALL-MINI] (INSTALL-MINI.md) for instructions on setting up an MINI Indimail Installation which uses QMQP protocol.
-* Look at [INSTALL-MYSQL] (INSTALL-MYSQL.md) for instructions on configuring a MySQL/MariaDB server for IndiMail.
-* Look at [INSTALL-RPM] (INSTALL-RPM.md) for instructions on setting up IndiMail using RPM or Debian packages
-* Look at [Quick-INSTALL] (Quick-INSTALL.md) for instructions on installation and setup of an IndiMail server.
+* Look at [README-indimail](README-indimail.md) for details on IndiMail, indimail-mta. indimail needs indimail-mta to be installed. Look [here](https://github.com/mbhangui/indimail-mta) for details on installing indimail-mta
+* Look at [README-CLUSTER](README-CLUSTER.md) for details on setting up an IndiMail Cluster
+* Look at [INSTALL.md](INSTALL-indimail.md) for Source Installation instructions
+* Look at [INSTALL-MINI](INSTALL-MINI.md) for instructions on setting up an MINI Indimail Installation which uses QMQP protocol.
+* Look at [INSTALL-MYSQL](INSTALL-MYSQL.md) for instructions on configuring a MySQL/MariaDB server for IndiMail.
+* Look at [INSTALL-RPM](INSTALL-RPM.md) for instructions on setting up IndiMail using RPM or Debian packages
+* Look at [Quick-INSTALL](Quick-INSTALL.md) for instructions on installation and setup of an IndiMail server.
 
 # Installation
+
+The steps below give instructions on building from source. If you need to deploy IndiMail on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the same package can be deployed on multiple hosts. To generate RPM packages for all components refer to [CREATE-Packages.md](CREATE-Packages.md)
 
 ## Compile libqmail
 
@@ -194,11 +196,14 @@ $ /usr/bin/qmailctl start
 
 You can get binary RPM / Debian packages at
 
-[Stable Releases] (http://download.opensuse.org/repositories/home:/indimail/)
+[Stable Releases](http://download.opensuse.org/repositories/home:/indimail/)
 
-[Experimental Releases] (http://download.opensuse.org/repositories/home:/mbhangui/)
+[Experimental Releases](http://download.opensuse.org/repositories/home:/mbhangui/)
 
-If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories are [Stable] (https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail) and [experimental] (https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail-mta)
+If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories, depending on whether you want to install a stable or an experimental release, are
+
+* [Stable](https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail)
+* [Experimental](https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail-mta)
 
 NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to install the additional software
 
@@ -288,10 +293,10 @@ IndiMail has an IRC channel ##indimail and ##indimail-mta
 
 There are four Mailing Lists for IndiMail
 
-1. indimail-support  - You can subscribe for Support [here] (https://lists.sourceforge.net/lists/listinfo/indimail-support). You can mail [indimail-support] (mailto:indimail-support@lists.sourceforge.net) for support Old discussions can be seen [here] (https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-support)
-2. indimail-devel - You can subscribe [here] (https://lists.sourceforge.net/lists/listinfo/indimail-devel). You can mail [indimail-devel] (mailto:indimail-devel@lists.sourceforge.net) for development activities. Old discussions can be seen [here]
+1. indimail-support  - You can subscribe for Support [here](https://lists.sourceforge.net/lists/listinfo/indimail-support). You can mail [indimail-support](mailto:indimail-support@lists.sourceforge.net) for support Old discussions can be seen [here](https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-support)
+2. indimail-devel - You can subscribe [here](https://lists.sourceforge.net/lists/listinfo/indimail-devel). You can mail [indimail-devel](mailto:indimail-devel@lists.sourceforge.net) for development activities. Old discussions can be seen [here]
 (https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-devel)
-3. indimail-announce - This is only meant for announcement of New Releases or patches. You can subscribe []here] (http://groups.google.com/group/indimail)
-4. Archive at [Google Groups] (http://groups.google.com/group/indimail). This groups acts as a remote archive for indimail-support and indimail-devel.
+3. indimail-announce - This is only meant for announcement of New Releases or patches. You can subscribe [here](http://groups.google.com/group/indimail)
+4. Archive at [Google Groups](http://groups.google.com/group/indimail). This groups acts as a remote archive for indimail-support and indimail-devel.
 
-There is also a [Project Tracker] (http://sourceforge.net/tracker/?group_id=230686) for IndiMail (Bugs, Feature Requests, Patches, Support Requests)
+There is also a [Project Tracker](http://sourceforge.net/tracker/?group_id=230686) for IndiMail (Bugs, Feature Requests, Patches, Support Requests)
