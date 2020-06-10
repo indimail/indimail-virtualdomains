@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.48 2020-06-10 14:29:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.49 2020-06-10 21:41:41+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -9,6 +9,7 @@
 %global build_on_obs       1
 %global reconfigure_mode   0
 %global build_cflags       "-DOBS_BUILD %{build_cflags}"
+%global debug_package      %{nil}
 %else
 %define _project           local
 %global build_on_obs       0
@@ -107,7 +108,7 @@ Conflicts: %{name} < 2.0
 Obsoletes: %{name} < 2.0
 
 BuildRequires: openssl-devel rpm gcc gcc-c++ make binutils coreutils grep
-BuildRequires: glibc glibc-devel openssl procps
+BuildRequires: glibc glibc-devel openssl procps ncurses-devel
 BuildRequires: gzip autoconf automake libtool pkgconfig
 BuildRequires: sed findutils
 BuildRequires: mysql-devel libqmail-devel libqmail
