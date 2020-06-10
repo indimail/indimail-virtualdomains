@@ -2,8 +2,8 @@
 
 [IndiMail](https://github.com/mbhangui/indimail-virtualdomains "IndiMail") is a messaging Platform comprising of multiple software packages including
 
-* [qmail] (http://cr.yp.to/qmail.html "qmail")
-* [serialmail] (https://cr.yp.to/serialmail.html "serialmail")
+* [qmail](http://cr.yp.to/qmail.html "qmail")
+* [serialmail](https://cr.yp.to/serialmail.html "serialmail")
 * [qmailanalog](http://cr.yp.to/qmailanalog.html "qmailanalog")
 * [dotforward](https://cr.yp.to/dot-forward.html "dot-foward")
 * [fastforward](https://cr.yp.to/fastforward.html "fastforward")
@@ -14,13 +14,13 @@
 * [logalert](https://github.com/mbhangui/indimail-virtualdomains/tree/master/logalert-0.3 "logalert")
 * [courier IMAP/POP3](https://www.courier-mta.org/imap/ "courier-imap")
 * [fetchmail](https://www.fetchmail.info "fetchmail")
-* [bogofilter - A Bayesian Spam Filter] (https://bogofilter.sourceforge.io/ "bogofilter")
-* [Clam AntiVirus - GPL anti-virus toolkit for UNIX] (https://www.clamav.net/ "clamd")
+* [bogofilter - A Bayesian Spam Filter](https://bogofilter.sourceforge.io/ "bogofilter")
+* [Clam AntiVirus - GPL anti-virus toolkit for UNIX](https://www.clamav.net/ "clamd")
 * Utilities (mpack, unpack, altermime, ripmime, fortune, flash).
 
-**IndiMail** consists of two main packages - [indimail-mta] (https://github.com/mbhangui/indimail-mta "indimail-mta") and [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains "indimail-virtualdomains").
+**IndiMail** consists of two main packages - [indimail-mta](https://github.com/mbhangui/indimail-mta "indimail-mta") and [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains "indimail-virtualdomains").
 
-* 	**indimail-mta** is a re-engineered version of [qmail] (http://cr.yp.to/qmail.html "qmail").  **indimail-mta** provides you a MTA with all the features and functionality of **[qmail] (http://cr.yp.to/qmail.html "qmail")** plus many additional features.
+* 	**indimail-mta** is a re-engineered version of [qmail](http://cr.yp.to/qmail.html "qmail").  **indimail-mta** provides you a MTA with all the features and functionality of **[qmail](http://cr.yp.to/qmail.html "qmail")** plus many additional features.
 * 	**indimail-virtualdomains** provides you tools to create and manage multiple virtual domains with its own set of users, who can send and receive mails.
 
 This document will refer to **IndiMail** as a combined package of indimail-virtualdomains, indimail-mta & other packages namely indimail-access, indimail-auth, indimail-utils, indimail-spamfilter.
@@ -41,7 +41,7 @@ To migrate from an existing proprietary mail server like MS Exchange requires 5 
 4. Modify your user's mail configuration to use SMTP, IMAP Proxy, POP3 Proxy ports on the IndiMail server (**proxypop3**, **proxyimap**)
 5. Change the MX to point to the indimail-mta server.
 
-IndiMail is highly configurable. No hard-coded directories of qmail like /var/qmail/control or /var/qmail/queue. All directories are configurable at run time. IndiMail has multiple queues and the queue destination directories are also configurable. You can have one IndiMail installation cater to multiple instances having different properties / configuration.  To set up a new IndiMail instance requires you to just set few environment variables. Unlike qmail/netqmail, IndiMail doesn't force you to recompile each time you require a new instance.  Multiple queues eliminates what is known as ['the silly qmail syndrome'](https://qmail.jms1.net/silly-qmail.shtml "silly-qmail-syndrome") and gives IndiMail the capability to perform better than a stock qmail installation. IndiMail's multiple queue architecture gives allows it to achieve tremendous inject rates using commodity hardware as can be read [here] (http://groups.google.co.in/group/indimail/browse_thread/thread/f9e0b6214d88ca6d#). Here is a pictorial representation of the IndiMail queue ![Pictorial] (indimail_queue.png).
+IndiMail is highly configurable. No hard-coded directories of qmail like /var/qmail/control or /var/qmail/queue. All directories are configurable at run time. IndiMail has multiple queues and the queue destination directories are also configurable. You can have one IndiMail installation cater to multiple instances having different properties / configuration.  To set up a new IndiMail instance requires you to just set few environment variables. Unlike qmail/netqmail, IndiMail doesn't force you to recompile each time you require a new instance.  Multiple queues eliminates what is known as ['the silly qmail syndrome'](https://qmail.jms1.net/silly-qmail.shtml "silly-qmail-syndrome") and gives IndiMail the capability to perform better than a stock qmail installation. IndiMail's multiple queue architecture gives allows it to achieve tremendous inject rates using commodity hardware as can be read [here](http://groups.google.co.in/group/indimail/browse_thread/thread/f9e0b6214d88ca6d#). Here is a pictorial representation of the IndiMail queue ![Pictorial](indimail_queue.png).
 
 IndiMail is a pure messaging solution. It does not provide calendars, todo lists, address books, meeting requests and a web mail front-end. However, you can use [Roundcube Mail](https://roundcube.net/) or any web mail front-end that works with IMAP or POP3 protocol with IndiMail. If you decide to install [Roundcube Mail](https://roundcube.net/), you can install the **ircube** package from the IndiMail's DNF/YUM/Debian [Repository](https://build.opensuse.org/package/show/home:indimail/ircube "ircube") to have a fully functional web mail front-end. The ircube package provides plugins for Rouncube Mail to manage your passwords, vacation and SPAM filters.
 
@@ -50,7 +50,7 @@ IndiMail administrators can use a web administration tool called **iwebadmin**. 
 IndiMail comes with a power tcl/tk administration client called [**indium**](https://github.com/mbhangui/indimail-virtualdomains/tree/v3.2/indium-1.1 "indium"). It can be installed from source from [here](https://github.com/mbhangui/indimail-virtualdomains/tree/v3.2/indium-1.1) or from the [DNF/YUM/Debian Repository](https://build.opensuse.org/package/show/home:indimail/indium) on the openSUSE Build Service.
 
 
-To install IndiMail you can take the help of the following documents in the [indimail-x/doc subdirectory] (https://github.com/mbhangui/indimail-virtualdomains/tree/v3.2/indimail-x/doc) of [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains) github repository.
+To install IndiMail you can take the help of the following documents in the [indimail-x/doc subdirectory](https://github.com/mbhangui/indimail-virtualdomains/tree/v3.2/indimail-x/doc) of [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains) github repository.
 
 File | Description
 ----- | --------------------
@@ -125,7 +125,7 @@ Some of the features available in this package
 38. Can work with external virus scanners (QHPSI, or Len Budney's qscanq)
 39. qmail-queue custom error patch by Flavio Curti <fcu-software at no-way.org>
 40. Domainkey-Signature, DKIM-Signature with ADSP/SSP
-41. Greylisting Capability -  [Look Here] (http://www.gossamer-threads.com/lists/qmail/users/136740?page=last)
+41. Greylisting Capability -  [Look Here](http://www.gossamer-threads.com/lists/qmail/users/136740?page=last)
 42. nssd - Name Service Switch daemon which extends systems password database to lookup IndiMail's database for authentication
 43. pam-multi - Generic PAM which allows external program using PAM to authenticate against IndiMail's database. Using pam-multi and nssd, you can use any IMAP server like dovecot, etc with IndiMail.
 44. Post execution Handle - Allows extending indimail's functionality by writing simple scripts
@@ -158,7 +158,10 @@ Some of the features available in this package
 71. Ability to discard emails if filter exits 2
 72. goodrcpt, goodrcptpatterns
 73. udplogger service for logging messages through UDP
-74. docker/podman images for [indimail](https://hub.docker.com/repository/docker/cprogrammer/indimail), [indimail-mta](https://hub.docker.com/repository/docker/cprogrammer/indimail-mta) and [indimail-web](https://hub.docker.com/repository/docker/cprogrammer/indimail-web)
+74. docker/podman images for
+    * [indimail](https://hub.docker.com/repository/docker/cprogrammer/indimail)
+	* [indimail-mta](https://hub.docker.com/repository/docker/cprogrammer/indimail-mta)
+	* [indimail-web](https://hub.docker.com/repository/docker/cprogrammer/indimail-web)
 75. tcpserver plugin feature - dynamically load shared objects given on command line. Load shared objects defined by env variables PLUGIN0, PLUGIN1, ...
     tcpserver plugin allows you to load qmail-smtpd, rblsmtpd once in memory
 76. FHS compliance
@@ -169,33 +172,36 @@ Some of the features available in this package
 81. tcpserver - enable mysql support by loading mysql library configured in /etc/indimail/control/mysql_lib
 82. indimail-mta - enable virtual domain support by loading indimail shared library configured in /etc/indimail/control/libindimail
 
-The complete list of features can be seen here
-https://sourceforge.net/p/indimail/wiki/IndiMail/
+The complete list of features can be seen [HERE](https://sourceforge.net/p/indimail/wiki/IndiMail/)
 
-# IRC
+# Support Information
+
+## IRC
 IndiMail has an IRC channel ##indimail and ##indimail-mta
 
-# Mailing list
+## Mailing list
 
 There are four Mailing Lists for IndiMail
 
-1. indimail-support  - You can subscribe for Support [here] (https://lists.sourceforge.net/lists/listinfo/indimail-support). You can mail [indimail-support] (mailto:indimail-support@lists.sourceforge.net) for support Old discussions can be seen [here] (https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-support)
-2. indimail-devel - You can subscribe [here] (https://lists.sourceforge.net/lists/listinfo/indimail-devel). You can mail [indimail-devel] (mailto:indimail-devel@lists.sourceforge.net) for development activities. Old discussions can be seen [here]
+1. indimail-support  - You can subscribe for Support [here](https://lists.sourceforge.net/lists/listinfo/indimail-support). You can mail [indimail-support](mailto:indimail-support@lists.sourceforge.net) for support Old discussions can be seen [here](https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-support)
+2. indimail-devel - You can subscribe [here](https://lists.sourceforge.net/lists/listinfo/indimail-devel). You can mail [indimail-devel](mailto:indimail-devel@lists.sourceforge.net) for development activities. Old discussions can be seen [here]
 (https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-devel)
-3. indimail-announce - This is only meant for announcement of New Releases or patches. You can subscribe []here] (http://groups.google.com/group/indimail)
-4. Archive at [Google Groups] (http://groups.google.com/group/indimail). This groups acts as a remote archive for indimail-support and indimail-devel.
+3. indimail-announce - This is only meant for announcement of New Releases or patches. You can subscribe [here](http://groups.google.com/group/indimail)
+4. Archive at [Google Groups](http://groups.google.com/group/indimail). This groups acts as a remote archive for indimail-support and indimail-devel.
 
-There is also a [Project Tracker] (http://sourceforge.net/tracker/?group_id=230686) for IndiMail (Bugs, Feature Requests, Patches, Support Requests)
+There is also a [Project Tracker](http://sourceforge.net/tracker/?group_id=230686) for IndiMail (Bugs, Feature Requests, Patches, Support Requests)
 
 # Binary Builds
 
 You can get binary RPM / Debian packages at
 
-[Stable Releases] (http://download.opensuse.org/repositories/home:/indimail/)
+* [Stable](http://download.opensuse.org/repositories/home:/indimail/)
+* [Experimental](http://download.opensuse.org/repositories/home:/mbhangui/)
 
-[Experimental Releases] (http://download.opensuse.org/repositories/home:/mbhangui/)
+If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories, depending on whether you want to install a stable or an experimental release, are
 
-If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories are [Stable] (https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail) and [experimental] (https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail)
+* [Stable](https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail)
+* [Experimental](https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail-mta)
 
 ```
 Currently, the list of supported distributions for IndiMail is
@@ -235,6 +241,7 @@ Currently, the list of supported distributions for IndiMail is
 ```
 
 # Docker / Podman Repository
+
 The docker repository for indimail is at
 
 https://hub.docker.com/r/cprogrammer/indimail
@@ -272,6 +279,6 @@ Tumbleweed|openSUSE Tumbleweed
 Leap15.2|openSUSE Leap 15.2
 
 # GIT Repository
-IndiMail has a git repository at [here] (https://github.com/mbhangui/indimail-virtualdomains)
+IndiMail has a git repository at [here](https://github.com/mbhangui/indimail-virtualdomains)
 
 -- Manvendra Bhangui <manvendra@indimail.org>

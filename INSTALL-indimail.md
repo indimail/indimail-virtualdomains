@@ -1,9 +1,6 @@
-File INSTALL.indimail, Version 3.2
-DATE: Tue Jun  9 01:05:52 IST 2020
-
 # INSTALLATION DOCUMENT #
 
-PLEASE DON'T HESITATE to join IndiMail group at https://groups.google.com/forum/#!forum/indimail
+PLEASE DON'T HESITATE to join [IndiMail Group](https://groups.google.com/forum/#!forum/indimail)
 
 ## Installation Instructions ##
 
@@ -15,24 +12,22 @@ unlimited permission to copy, distribute and modify it.
 
 This section covers installing IndiMail. If you're an experienced system administrator, you can install IndiMail following the directions below. If you are in a hurry, you can directly jump to the Section 'Installation Steps' below. However, I would recommend you to go through the Checklist below to understand what is involved in setting up a full featured mail server.
 
-You will also find this file [INSTALL-indimail.md](https://github.com/mbhangui/indimail-virtualdomains/blob/v3.2/indimail-x/doc/INSTALL-indimail.md)
+There is also a 'Installation for Dummies'. For that read [INSTALL-RPM.md](INSTALL-RPM.md)
 
-There is also a 'Installation for Dummies'. For that read [INSTALL-RPM.md](https://github.com/mbhangui/indimail-virtualdomains/blob/v3.2/indimail-x/doc/INSTALL-RPM.md)
-
-This document is complicated as it involves installing from multiple sources. However, there is a crash course on IndiMail installation if you want to skip the above two documents and directly install from the RPM/Deb. Read the file [Quick-INSTALL.md](https://github.com/mbhangui/indimail-virtualdomains/blob/v3.2/indimail-x/doc/Quick-INSTALL.md)
+This document is complicated as it involves installing from multiple sources. However, there is a crash course on IndiMail installation if you want to skip the above two documents and directly install from the RPM/Deb. Read the file [Quick-INSTALL.md](Quick-INSTALL.md)
 
 Using Quick-INSTALL it is possible to setup a fully functional mail server in flat 30 minutes and in less than 10 commands;
 
 Installation of IndiMail using source involves going through ten sections. Don't say that I didn't warn you. You may jump to Section 1 below if you are in a hurry and have some Unix experience under your belt. If you have ideas on how to simplify this documentation further, do write to me. In case you get stuck, do write to me at "Manvendra Bhangui" <manvendra@indimail.org>
 
-You can look at the online [document] (https://github.com/mbhangui/indimail-virtualdomains/blob/master/README.md)
+You can look also take a look at the document [README.md](README.md).
 
 ## Checklist ##
 
 You need to have answers to the following ready before starting the installation.
 
-   1.  Whether you want a full featured *mailstore* or just a relay server installation
-   2.  Default Domain name for your Mail Server (*mailstore*)
+   1.  Whether you want a full featured **mailstore** or just a relay server installation
+   2.  Default Domain name for your Mail Server (**mailstore**)
 *      postmaster email account
 *      abuse account
    3.  What Filesystem to use (XFS, EXT4 for Maildirs, ext2 for queue)? (mailstore)
@@ -508,7 +503,7 @@ Download spam ham corpus from http://spamassassin.apache.org/publiccorpus/
 % wget http://spamassassin.apache.org/old/publiccorpus/20030228_spam.tar.bz2
 % wget http://spamassassin.apache.org/old/publiccorpus/20050311_spam_2.tar.bz2
      
-% for i in *.bz2; do bzip2 -d -c $i | tar xf -; done
+% for i in \*.bz2; do bzip2 -d -c $i | tar xf -; done
 % /usr/bin/bogofilter -d /etc/indimail -B -s spam
 % /usr/bin/bogofilter -d /etc/indimail -B -s spam_2
 % /usr/bin/bogofilter -d /etc/indimail -B -n easy_ham
@@ -1202,107 +1197,6 @@ Replace First M. Last with your name.
 If you have questions about indimail, join the indimail mailing list; You can also use the
 tracker to track all your requests.
 
-# SECTION 10 SUPPORT INFORMATION ##
-
-## IRC
-IndiMail has an IRC channel ##indimail and ##indimail-mta
-
-## Mailing list
-
-There are four Mailing Lists for IndiMail
-
-1. indimail-support  - You can subscribe for Support [here] (https://lists.sourceforge.net/lists/listinfo/indimail-support). You can mail [indimail-support] (mailto:indimail-support@lists.sourceforge.net) for support Old discussions can be seen [here] (https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-support)
-2. indimail-devel - You can subscribe [here] (https://lists.sourceforge.net/lists/listinfo/indimail-devel). You can mail [indimail-devel] (mailto:indimail-devel@lists.sourceforge.net) for development activities. Old discussions can be seen [here]
-(https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-devel)
-3. indimail-announce - This is only meant for announcement of New Releases or patches. You can subscribe []here] (http://groups.google.com/group/indimail)
-4. Archive at [Google Groups] (http://groups.google.com/group/indimail). This groups acts as a remote archive for indimail-support and indimail-devel.
-
-There is also a [Project Tracker] (http://sourceforge.net/tracker/?group_id=230686) for IndiMail (Bugs, Feature Requests, Patches, Support Requests)
-
-## Binary Builds
-
-You can get binary RPM / Debian packages at
-
-[Stable Releases] (http://download.opensuse.org/repositories/home:/indimail/)
-
-[Experimental Releases] (http://download.opensuse.org/repositories/home:/mbhangui/)
-
-If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories are [Stable] (https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail) and [Experimental] (https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail)
-
-```
-Currently, the list of supported distributions for IndiMail is
-
-    * SUSE
-          o openSUSE_Leap_15.0
-          o openSUSE_Leap_15.1
-          o openSUSE_Leap_15.2
-		  o openSUSE_Tumbleweed
-          o SUSE Linux Enterprise 12
-          o SUSE Linux Enterprise 12 SP1
-          o SUSE Linux Enterprise 12 SP2
-          o SUSE Linux Enterprise 12 SP3
-          o SUSE Linux Enterprise 12 SP4
-          o SUSE Linux Enterprise 12 SP5
-          o SUSE Linux Enterprise 15
-          o SUSE Linux Enterprise 15 SP1
-
-    * Red Hat
-          o Fedora 32
-          o Fedora 31
-          o Red Hat Enterprise Linux 6
-          o Red Hat Enterprise Linux 7
-          o CentOS 6
-          o CentOS 7
-
-    * Debian
-          o Debian  8.0
-          o Debian  9.0
-          o Debian 10.0
-          o Ubuntu 16.04
-          o Ubuntu 17.04
-          o Ubuntu 18.04
-          o Ubuntu 19.04
-          o Ubuntu 19.10
-          o Ubuntu 20.04
-```
-
-## Docker / Podman Repository
-The docker repository for indimail is at
-
-https://hub.docker.com/r/cprogrammer/indimail
-
-for Docker
-
-```
-docker pull cprogrammer/indimail:tag
-docker run image_id indimail
-```
-or
-
-for Podman
-
-```
-podman pull cprogrammer/indimail:tag
-podman run image_id indimail
-```
-
-where image_id is the IMAGE ID of the docker / podman container obtained by running the **docker images** or the **podman images** command and tag is one of
-
-tag|OS Distribution
-----|----------------------
-xenial|Ubuntu 16.04
-bionic|Ubuntu 18.04
-disco|Ubuntu 19.04
-focal|Ubuntu 20.04
-centos7|CentOS 7
-debian8|Debian 8
-debian9|Debian 9
-debian10|Debian10
-fc31|Fedora Core 31
-fc32|Fedora Core 32
-Tumbleweed|openSUSE Tumbleweed
-Leap15.2|openSUSE Leap 15.2
-
 -------
 **CentOS/Fedora/openSUSE/RedHat NOTES**
 
@@ -1535,7 +1429,7 @@ indimail 31358  0.0  0.0   6360  1320 ?        S    15:24   0:00 /usr/sbin/indis
 qmaill   31360  0.0  0.0   1756   320 ?        S    15:24   0:00 /usr/bin/multilog t /var/log/svc/indisrvr.4000
 root     31361  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise qscanq
 root     31363  0.0  0.0   1744   320 ?        S    15:24   0:00 supervise log
-qmaill   31364  0.0  0.0   1756   304 ?        S    15:24   0:00 /usr/bin/multilog t -* cleanq starting -* deleting: *: not sticky/var/log/svc/qscanq
+qmaill   31364  0.0  0.0   1756   304 ?        S    15:24   0:00 /usr/bin/multilog t -\* cleanq starting -\* deleting: \*: not sticky/var/log/svc/qscanq
 root     31366  0.0  0.0   1744   324 ?        S    15:24   0:00 supervise qmail-imapd.143
 indimail 31367  0.0  0.0   5928  1204 ?        S    15:24   0:00 /usr/bin/tcpserver -v -c /service/qmail-imapd.143/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 143 /usr/sbin/imaplogin /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authpam /usr/bin/imapd Maildir
 root     31368  0.0  0.0   1744   316 ?        S    15:24   0:00 supervise log

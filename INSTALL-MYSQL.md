@@ -1,6 +1,6 @@
 # MySQL Installation Notes
 
-Do not read this without reading [INSTALL.md] (INSTALL-indimail.md) This is an important file. Most users in my experience have got stuck with MySQL installation and configuration. Following are the three most common issues that users have experienced installing IndiMail If you have done a RPM/DEB/yum/dnf/dpkg/apt-get installation, all these steps are automatically taken care by the post-installation scripts. However, in some cases, even the post-install scripts fail due to frequent incompatible changes made by folks at Oracle & Mariadb.
+Do not read this without reading [INSTALL.md](INSTALL-indimail.md) This is an important file. Most users in my experience have got stuck with MySQL installation and configuration. Following are the three most common issues that users have experienced installing IndiMail If you have done a RPM/DEB/yum/dnf/dpkg/apt-get installation, all these steps are automatically taken care by the post-installation scripts. However, in some cases, even the post-install scripts fail due to frequent incompatible changes made by folks at Oracle & Mariadb.
 
 1. MySQL version : As far as possible use mysql 5.7.x or greater. If you use an unsupported version of MySQL, you might face the following problems
    MySQL fails to startup under supervise. This happens when svctool fails to create a default MySQL database for IndiMail
@@ -121,12 +121,12 @@ mysql> CREATE USER indimail identified by 'ssh-1.5-';
 mysql> CREATE USER mysql    identified by '4-57343';
 mysql> CREATE USER admin    identified by 'benhur20';
 mysql> CREATE USER repl     identified by 'slaveserver';
-mysql> GRANT ALL on *.* to 'mysql';
-mysql> GRANT USAGE ON *.* TO 'mysql' WITH GRANT OPTION; # for mysqld >= 8
+mysql> GRANT ALL on \*.\* to 'mysql';
+mysql> GRANT USAGE ON \*.\* TO 'mysql' WITH GRANT OPTION; # for mysqld >= 8
 mysql> GRANT SELECT,CREATE,ALTER,INDEX,INSERT,UPDATE,DELETE,CREATE TEMPORARY TABLES, \
-       LOCK TABLES ON indimail.* to 'indimail';
-mysql> GRANT RELOAD,SHUTDOWN,PROCESS on *.* to admin;
-mysql> GRANT REPLICATION SLAVE on *.* to repl;
+       LOCK TABLES ON indimail.\* to 'indimail';
+mysql> GRANT RELOAD,SHUTDOWN,PROCESS on \*.\* to admin;
+mysql> GRANT REPLICATION SLAVE on \*.\* to repl;
 ```
 
 Create a link to existing MySQL config file
