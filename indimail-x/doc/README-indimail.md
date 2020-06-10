@@ -201,7 +201,7 @@ You can get binary RPM / Debian packages at
 If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories, depending on whether you want to install a stable or an experimental release, are
 
 * [Stable](https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail)
-* [Experimental](https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail-mta)
+* [Experimental](https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail)
 
 ```
 Currently, the list of supported distributions for IndiMail is
@@ -242,41 +242,10 @@ Currently, the list of supported distributions for IndiMail is
 
 # Docker / Podman Repository
 
-The docker repository for indimail is at
+The [docker repository](https://hub.docker.com/r/cprogrammer/indimail) can be used to pull docker/podman images
+for indimail.
 
-https://hub.docker.com/r/cprogrammer/indimail
-
-for Docker
-
-```
-docker pull cprogrammer/indimail:tag
-docker run image_id indimail
-```
-or
-
-for Podman
-
-```
-podman pull cprogrammer/indimail:tag
-podman run image_id indimail
-```
-
-where image_id is the IMAGE ID of the docker / podman container obtained by running the **docker images** or the **podman images** command and tag is one of
-
-tag|OS Distribution
-----|----------------------
-xenial|Ubuntu 16.04
-bionic|Ubuntu 18.04
-disco|Ubuntu 19.04
-focal|Ubuntu 20.04
-centos7|CentOS 7
-debian8|Debian 8
-debian9|Debian 9
-debian10|Debian10
-fc31|Fedora Core 31
-fc32|Fedora Core 32
-Tumbleweed|openSUSE Tumbleweed
-Leap15.2|openSUSE Leap 15.2
+For latest details refer to [README](https://github.com/mbhangui/docker/blob/master/README.md)
 
 # GIT Repository
 IndiMail has a git repository at [here](https://github.com/mbhangui/indimail-virtualdomains)
