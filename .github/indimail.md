@@ -1,13 +1,5 @@
 # Installing Indimail using DNF/YUM/APT Repository
 
-**TERMINOLOGY used for commands**
-
-TERMINOLOGY|Description
------------|-----------
-$ command|command `command` was executed by a non-privileged user
-# command|command `command` was executed by the `root` user
-$ sudo command|command `command` requires root privilege to run. sudo was used to gain root privileges
-
 You can get binary RPM / Debian packages at
 
 * [Stable](http://download.opensuse.org/repositories/home:/indimail/)
@@ -54,6 +46,12 @@ Currently, the list of supported distributions for IndiMail is
           o Ubuntu 19.10
           o Ubuntu 20.04
 ```
+
+# TERMINOLOGY used for commands
+
+* $ command - `command` was executed by a non-privileged user
+* # command - `command` was executed by the `root` user
+* $ sudo command `command` requires root privilege to run. sudo was used to gain root privileges
 
 # Docker / Podman Repository
 
