@@ -119,6 +119,7 @@ if HAVE_HTML
 
 README.courier-imap: html/main.html
 	$(HTML2TXT) $(srcdir)/html/index.html >README.courier-imap
+	cp README.courier-imap README
 endif
 
 distrelease:
