@@ -6,6 +6,7 @@ env.c
 etrn.c
 fetchmail.c
 fm_getaddrinfo.c
+fm_realpath.c
 getpass.c
 gssapi.c
 idle.c

@@ -10,7 +10,7 @@
 .\" Load www macros to process .URL requests, this requires groff:
 .mso www.tmac
 .\"
-.TH fetchmail 1 "fetchmail 6.4.1" "fetchmail" "fetchmail reference manual"
+.TH fetchmail 1 2020-03-30 "fetchmail 6.4.6" "fetchmail reference manual"
 
 .SH NAME
 fetchmail \- fetch mail from a POP, IMAP, ETRN, or ODMR-capable server
@@ -61,8 +61,8 @@ env LC_ALL=C fetchmail \-vvv  \-\-nodetach \-\-nosyslog
 .IP
 (This command line actually runs fetchmail with verbose English output.)
 .PP
-Also see 
-.URL "http://fetchmail.sourceforge.net/fetchmail-FAQ.html#G3" "item #G3 in fetchmail's FAQ"
+Also see
+.URL "https://fetchmail.sourceforge.io/fetchmail-FAQ.html#G3" "item #G3 in fetchmail's FAQ"
 .PP
 You can omit the LC_ALL=C part above if you want output in the local
 language (if supported). However if you are posting to mailing lists,
@@ -405,7 +405,7 @@ POP3, ETRN, or ODMR.
 .B \-\-tracepolls
 (Keyword: tracepolls)
 .br
-Tell fetchmail to poll trace information in the form 'polling 
+Tell fetchmail to poll trace information in the form 'polling
 account %s' and 'folder %s' to the Received line it generates,
 where the %s parts are replaced by the user's remote name, the poll
 label, and the folder (mailbox) where available (the Received header
@@ -498,7 +498,7 @@ and pretend that '\fBauto\fP' had been used instead.
 (default). Since v6.4.0. Require TLS. Auto-negotiate TLSv1 or newer, disable SSLv3 downgrade.
 (fetchmail 6.3.26 and older have auto-negotiated all protocols that
 their OpenSSL library supported, including the broken SSLv3).
-.IP "\&'\fBSSL23\fP'
+.IP \&'\fBSSL23\fP'
 see '\fBauto\fP'.
 .IP \&'\fBSSL3\fP'
 Require SSLv3 exactly. SSLv3 is broken, not supported on all systems, avoid it
@@ -520,6 +520,10 @@ Since v6.4.0. Require TLS. Auto-negotiate TLSv1.1 or newer.
 Since v6.4.0. Require TLS v1.2 exactly.
 .IP '\fBTLS1.2+\fP'
 Since v6.4.0. Require TLS. Auto-negotiate TLSv1.2 or newer.
+.IP \&'\fBTLS1.3\fP'
+Since v6.4.0. Require TLS v1.3 exactly.
+.IP '\fBTLS1.3+\fP'
+Since v6.4.0. Require TLS. Auto-negotiate TLSv1.3 or newer.
 .IP "Unrecognized parameters"
 are treated the same as '\fBauto\fP'.
 .RE
@@ -543,9 +547,6 @@ indirectly), fetchmail will disconnect, regardless of the
 Note that CRL (certificate revocation lists) are only supported in
 OpenSSL 0.9.7 and newer! Your system clock should also be reasonably
 accurate when using this option.
-.IP
-Note that this optional behavior may become default behavior in future
-fetchmail versions.
 .TP
 .B \-\-nosslcertck
 (Keyword: no sslcertck, only in v6.4.X)
@@ -732,18 +733,18 @@ addresses will be inserted into the MDA command wherever you place a
 an %F.
 
 \fBDo NOT enclose the %F or %T string in single quotes!\fP
-For both %T and %F, fetchmail encloses the addresses in single quotes 
-('), after removing any single quotes they may contain, before the MDA 
+For both %T and %F, fetchmail encloses the addresses in single quotes
+('), after removing any single quotes they may contain, before the MDA
 command is passed to the shell.
 
-\fBDo NOT use an MDA invocation that dispatches on the contents of 
-To/Cc/Bcc,\fP like "sendmail \-i \-t" or "qmail-inject", it will create 
-mail loops and bring the just wrath of many postmasters down upon your 
+\fBDo NOT use an MDA invocation that dispatches on the contents of
+To/Cc/Bcc,\fP like "sendmail \-i \-t" or "qmail-inject", it will create
+mail loops and bring the just wrath of many postmasters down upon your
 head.  This is one of the most frequent configuration errors!
 
-Also, do \fInot\fP try to combine multidrop mode with an MDA such 
-as maildrop that can only accept one address, unless your upstream 
-stores one copy of the message per recipient and transports the envelope 
+Also, do \fInot\fP try to combine multidrop mode with an MDA such
+as maildrop that can only accept one address, unless your upstream
+stores one copy of the message per recipient and transports the envelope
 recipient in a header; you will lose mail.
 
 The well-known
@@ -994,7 +995,7 @@ TLS with client authentication and specify \fBgssapi\fP or
 GSSAPI or K4.  Choosing KPOP protocol automatically selects Kerberos
 authentication.  This option does not work with ETRN.  GSSAPI service names are
 in line with RFC-2743 and IANA registrations, see
-.URL http://www.iana.org/assignments/gssapi-service-names/ "Generic Security Service Application Program Interface (GSSAPI)/Kerberos/Simple Authentication and Security Layer (SASL) Service Names" . 
+.URL https://www.iana.org/assignments/gssapi-service-names/ "Generic Security Service Application Program Interface (GSSAPI)/Kerberos/Simple Authentication and Security Layer (SASL) Service Names" .
 .SS Miscellaneous Options
 .TP
 .B \-f <pathname> | \-\-fetchmailrc <pathname>
@@ -1264,7 +1265,8 @@ capability response. Specify a user option value that looks like
 username and the part to the right as the NTLM domain.
 
 .SS Secure Socket Layers (SSL) and Transport Layer Security (TLS)
-.PP All retrieval protocols can use SSL or TLS wrapping for the
+.PP
+All retrieval protocols can use SSL or TLS wrapping for the
 transport. Additionally, POP3 and IMAP retrival can also negotiate
 SSL/TLS by means of STARTTLS (or STLS).
 .PP
@@ -1327,7 +1329,7 @@ can protect you from a passive eavesdropper, it doesn't help against an
 active attacker. It's clearly an improvement over sending the
 passwords in clear, but you should be aware that a man-in-the-middle
 attack is trivially possible (in particular with tools such as
-.URL "http://monkey.org/~dugsong/dsniff/" "dsniff" ,
+.URL "https://monkey.org/~dugsong/dsniff/" "dsniff" ,
 ).  Use of strict certificate checking with a certification authority
 recognized by server and client, or perhaps of an SSH tunnel (see below
 for some examples) is preferable if you care seriously about the
@@ -1349,8 +1351,8 @@ polling interval.
 There are several ways to make fetchmail work in daemon mode. On the
 command line, \fB\-\-daemon\ <interval>\fP or \fB\-d\ <interval>\fP
 option runs \fBfetchmail\fP in daemon mode.  You must specify a numeric
-argument which is a polling interval (time to wait after completing a 
-whole poll cycle with the last server and before starting the next poll 
+argument which is a polling interval (time to wait after completing a
+whole poll cycle with the last server and before starting the next poll
 cycle with the first server) in seconds.
 .PP
 Example: simply invoking
@@ -1358,8 +1360,8 @@ Example: simply invoking
 fetchmail \-d 900
 .PP
 will, therefore, poll all the hosts described in your \fI~/.fetchmailrc\fP
-file (except those explicitly excluded with the 'skip' verb) a bit less 
-often than once every 15 minutes (exactly: 15 minutes + time that the 
+file (except those explicitly excluded with the 'skip' verb) a bit less
+often than once every 15 minutes (exactly: 15 minutes + time that the
 poll takes).
 .PP
 It is also possible to set a polling interval
@@ -1502,7 +1504,7 @@ The
 .B \-\-showdots
 option (keyword: set showdots) forces fetchmail to show progress dots
 even if the output goes to a file or fetchmail is not in verbose mode.
-Fetchmail shows the dots by default when run in \-\-verbose mode 
+Fetchmail shows the dots by default when run in \-\-verbose mode
 \fIand\fP output goes to console. This option is ignored in \-\-silent mode.
 .PP
 By specifying the
@@ -1716,7 +1718,6 @@ You can use the noise keywords 'and', 'with',
 it resemble English.  They're ignored, but but can make entries much
 easier to read at a glance.  The punctuation characters ':', ';' and
 \&',' are also ignored.
-.PP
 .SS Poll vs. Skip
 The 'poll' verb tells fetchmail to query this host when it is run with
 no arguments.  The 'skip' verb tells
@@ -1724,7 +1725,6 @@ no arguments.  The 'skip' verb tells
 not to poll this host unless it is explicitly named on the command
 line.  (The 'skip' verb allows you to experiment with test entries
 safely, or easily disable entries for hosts that are temporarily down.)
-.PP
 .SS Keyword/Option Summary
 Here are the legal options.  Keyword suffixes enclosed in
 square brackets are optional.  Those corresponding to short command-line
@@ -1774,6 +1774,9 @@ set logfile  	\-L	\&	T{
 Name of a file to append error and status messages to.  Only effective
 in daemon mode and if fetchmail detaches.  If effective, overrides \fBset
 syslog\fP.
+T}
+set pidfile  	\-p	\&	T{
+Name of the PID file.
 T}
 set idfile  	\-i	\&	T{
 Name of the file to store UID lists in.
@@ -1891,7 +1894,7 @@ _
 user[name]	\-u	\&	T{
 This is the user description and must come first after server
 description and after possible server options, and before user options.
-.br
+
 It sets the remote user name if by itself or followed by 'there', or the
 local user name if followed by 'here'.
 T}
@@ -2266,14 +2269,12 @@ of your fetchmail's time, because it will never drop the connection
 and allow other polls to occur unless the server times out the IDLE.
 It also doesn't work with multiple folders; only the first folder will
 ever be polled.
-
 .PP
 The 'properties' option is an extension mechanism.  It takes a string
 argument, which is ignored by fetchmail itself.  The string argument may be
 used to store configuration information for scripts which require it.
 In particular, the output of '\-\-configdump' option will make properties
 associated with a user entry readily available to a Python script.
-.PP
 .SS Miscellaneous Run Control Options
 The words 'here' and 'there' have useful English-like
 significance.  Normally 'user eric is esr' would mean that
@@ -2335,7 +2336,7 @@ in random locations even if you use the software the same way.
 
 For solving hardware-induced segfaults, find the faulty component and repair or
 replace it.
-.URL http://www.bitwizard.nl/sig11/ "The Sig11 FAQ"
+.URL https://www.bitwizard.nl/sig11/ "The Sig11 FAQ"
 may help you with details.
 
 For solving software-induced segfaults, the developers may need a "stack
@@ -2872,11 +2873,11 @@ multiple names per userid gracefully).
 .IP \fBFETCHMAIL_DISABLE_CBC_IV_COUNTERMEASURE\fP
 (since v6.3.22):
 If this environment variable is set and not empty, fetchmail will disable
-a countermeasure against an SSL CBC IV attack (by setting 
+a countermeasure against an SSL CBC IV attack (by setting
 SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS).  This is a security risk, but may be
 necessary for connecting to certain non-standards-conforming servers.
 See fetchmail's NEWS file and fetchmail-SA-2012-01.txt for details.
-Earlier fetchmail versions (v6.3.21 and older) used to disable this 
+Earlier fetchmail versions (v6.3.21 and older) used to disable this
 countermeasure, but v6.3.22 no longer does that as a safety precaution.
 
 .IP \fBFETCHMAIL_POP3_FORCE_RETR\fP
@@ -2898,10 +2899,10 @@ and the user has no administrator privileges to remedy the problem.
 (documented since 6.4.1):
 This variable is nomally set to the user's home directory. If it is set
 to a different directory than what is the password database, HOME takes
-prececence.
+precedence.
 
 .IP \fBHOME_ETC\fP
-(documented corrected to match behaviour code since 6.4.1):
+(documentation corrected to match behaviour code since 6.4.1):
 If the HOME_ETC variable is set, it will override fetchmail's idea of $HOME,
 i. e. fetchmail will read .fetchmailrc, .fetchids, .fetchmail.pid and .netrc
 from $HOME_ETC instead of $HOME (or if HOME is also unset,
@@ -3017,7 +3018,7 @@ Send comments, bug reports, gripes, and the like to the
 
 .PP
 An
-.URL "http://fetchmail.sourceforge.net/fetchmail-FAQ.html" "HTML FAQ"
+.URL "https://fetchmail.sourceforge.io/fetchmail-FAQ.html" "HTML FAQ"
 is available at the fetchmail home page, it should also accompany your
 installation.
 
@@ -3045,7 +3046,7 @@ Beinert, and H\['e]ctor Garc\['i]a.
 .BR README ,
 .BR README.SSL ,
 .BR README.SSL-SERVER ,
-.URL "http://www.fetchmail.info/fetchmail-FAQ.html" "The Fetchmail FAQ" ,
+.URL "https://www.fetchmail.info/fetchmail-FAQ.html" "The Fetchmail FAQ" ,
 .BR mutt (1),
 .BR elm (1),
 .BR mail (1),
@@ -3053,16 +3054,12 @@ Beinert, and H\['e]ctor Garc\['i]a.
 .BR popd (8),
 .BR imapd (8),
 .BR netrc (5).
-
 .PP
-.URL "http://www.fetchmail.info/" "The fetchmail home page."
-
+.URL "https://www.fetchmail.info/" "The fetchmail home page."
 .PP
-.URL "http://fetchmail.sourceforge.net/" "The fetchmail home page (alternative URI)."
-
+.URL "https://fetchmail.sourceforge.io/" "The fetchmail home page (alternative URI)."
 .PP
-.URL "http://www.courier-mta.org/maildrop/" "The maildrop home page."
-
+.URL "https://www.courier-mta.org/maildrop/" "The maildrop home page."
 .SH APPLICABLE STANDARDS
 .PP
 Note that this list is just a collection of references and not a
@@ -3110,7 +3107,7 @@ RFC 2033.
 .TP 5
 GSSAPI:
 RFC 1508, RFC 1734,
-.URL http://www.iana.org/assignments/gssapi-service-names/ "Generic Security Service Application Program Interface (GSSAPI)/Kerberos/Simple Authentication and Security Layer (SASL) Service Names" . 
+.URL https://www.iana.org/assignments/gssapi-service-names/ "Generic Security Service Application Program Interface (GSSAPI)/Kerberos/Simple Authentication and Security Layer (SASL) Service Names" .
 .TP 5
 TLS:
 RFC 2595.

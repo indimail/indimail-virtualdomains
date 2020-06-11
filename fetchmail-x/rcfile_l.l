@@ -25,6 +25,11 @@ int prc_lineno = 1;
 
 #define YY_NO_INPUT
 
+/* #define this to emit STRING pointers and contents to stderr while lexing.
+ * Useful with ASan/LSan (address/leak sanitizer) and its
+ * LSAN_OPTIONS=report_objects=1 to identify where the leaked strings go. */
+#undef STRING_DEBUG
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -44,6 +49,9 @@ int yywrap(void) { return 1; }
 			escapes(in, in);
 			yylval.sval = in;
 			SETSTATE(0);
+#ifdef STRING_DEBUG
+			fprintf(stderr, "STRING1: %p %s\n", in, in);
+#endif
 			return STRING;
 		}
 
@@ -52,6 +60,9 @@ int yywrap(void) { return 1; }
 			escapes(in, in);
 			yylval.sval = in;
 			SETSTATE(0);
+#ifdef STRING_DEBUG
+			fprintf(stderr, "STRING2: %p %s\n", in, in);
+#endif
 			return STRING;
 		}
 
@@ -213,6 +224,9 @@ options		{/* EMPTY */}
 			char *in = xstrdup(yytext);
 			escapes(in, in);
 			yylval.sval = in;
+#ifdef STRING_DEBUG
+			fprintf(stderr, "STRING3: %p %s\n", in, in);
+#endif
 			return STRING;
 		}
 

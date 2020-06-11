@@ -2070,7 +2070,7 @@ SSL?</a></h2>
 
 <p>You'll need to have the <a
 href="https://www.openssl.org/">OpenSSL</a> libraries installed, and they
-should at least be version 1.0.2.
+should at least be version 1.1.1.
 Configure with --with-ssl (default since fetchmail v6.4.0). If you have the OpenSSL libraries
 installed in commonly-used default locations, this will
 suffice. If you have them installed in a non-default location,
@@ -2181,16 +2181,6 @@ his certificates properly.</p>
 <p>In order to prevent fetchmail 6.4.0 and newer versions from trying
 STLS or STARTTLS negotiation, add this option:</p>
 <pre>sslproto ''</pre>
-
-<p>In order to prevent older fetchmail versions from trying TLS (STLS, STARTTLS)
-negotiation where the above does not work, try this option:</p>
-
-<pre>sslproto ssl23</pre>
-
-<p>This restricts fetchmail's SSL/TLS protocol choice from the default
-"SSLv2, SSLv3, TLSv1" to the two SSL variants, disabling TLSv1. Note
-however that this causes the connection to be unencrypted unless an
-encrypting &quot;plugin&quot; is used or SSL is requested explicitly.</p>
 
 <hr/>
 <h1>Runtime fatal errors</h1>
@@ -2459,14 +2449,14 @@ applications linked against older OpenSSL versions.</p>
 <p>Note: OpenSSL's <code>c_rehash</code> script is broken in several versions,
 which can cause malfunction if several OpenSSL tools versions are installed in
 parallel in separate directories. In such cases, you may need a workaround to
-get things going. Assuming your OpenSSL 1.0.2 is installed in
-<code>/opt/openssl1.0.2</code> and your certificates are in
+get things going. Assuming your OpenSSL 1.1.1 is installed in
+<code>/opt/openssl1.1.1</code> and your certificates are in
 <code>/home/hans/certs</code>, you'd do this (the corresponding fetchmail
 option is <kbd>--sslcertpath /home/hans/certs</kbd> on the commandline and
 <kbd>sslcertpath /home/hans/cert</kbd> in the rcfile):</p>
 
 <pre>
-env PATH=/opt/openssl1.0.2/bin /opt/openssl1.0.2/bin/c_rehash /home/hans/certs
+env PATH=/opt/openssl1.1.1/bin /opt/openssl1.1.1/bin/c_rehash /home/hans/certs
 </pre>
 
 <h2><a id="R15" name="R15">R15. Help, I'm getting Authorization failure!</a></h2>

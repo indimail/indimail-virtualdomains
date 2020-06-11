@@ -1690,7 +1690,7 @@ K4. What do I have to do to use the IMAP-GSS protocol?
 K5. How can I use fetchmail with SSL?
 
    You'll need to have the OpenSSL libraries installed, and they should at
-   least be version 1.0.2. Configure with --with-ssl (default since
+   least be version 1.1.1. Configure with --with-ssl (default since
    fetchmail v6.4.0). If you have the OpenSSL libraries installed in
    commonly-used default locations, this will suffice. If you have them
    installed in a non-default location, you'll need to specify the OpenSSL
@@ -1790,15 +1790,6 @@ does fetchmail use SSL even though not configured?
    In order to prevent fetchmail 6.4.0 and newer versions from trying STLS
    or STARTTLS negotiation, add this option:
 sslproto ''
-
-   In order to prevent older fetchmail versions from trying TLS (STLS,
-   STARTTLS) negotiation where the above does not work, try this option:
-sslproto ssl23
-
-   This restricts fetchmail's SSL/TLS protocol choice from the default
-   "SSLv2, SSLv3, TLSv1" to the two SSL variants, disabling TLSv1. Note
-   however that this causes the connection to be unencrypted unless an
-   encrypting "plugin" is used or SSL is requested explicitly.
      __________________________________________________________________
 
                               Runtime fatal errors
@@ -2032,12 +2023,12 @@ R14. Since upgrading fetchmail/OpenSSL, I can no longer connect!
    Note: OpenSSL's c_rehash script is broken in several versions, which
    can cause malfunction if several OpenSSL tools versions are installed
    in parallel in separate directories. In such cases, you may need a
-   workaround to get things going. Assuming your OpenSSL 1.0.2 is
-   installed in /opt/openssl1.0.2 and your certificates are in
+   workaround to get things going. Assuming your OpenSSL 1.1.1 is
+   installed in /opt/openssl1.1.1 and your certificates are in
    /home/hans/certs, you'd do this (the corresponding fetchmail option is
    --sslcertpath /home/hans/certs on the commandline and sslcertpath
    /home/hans/cert in the rcfile):
-env PATH=/opt/openssl1.0.2/bin /opt/openssl1.0.2/bin/c_rehash /home/hans/certs
+env PATH=/opt/openssl1.1.1/bin /opt/openssl1.1.1/bin/c_rehash /home/hans/certs
 
 R15. Help, I'm getting Authorization failure!
 

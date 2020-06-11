@@ -608,7 +608,7 @@ char *nxtaddr(const char *);
 
 /* uid.c: UID support */
 extern int dofastuidl;
-void initialize_saved_lists(struct query *hostlist, const char *idfile);
+int  initialize_saved_lists(struct query *hostlist, const char *idfile);
 void expunge_uids(struct query *ctl);
 void uid_swap_lists(struct query *ctl);
 void uid_discard_new_list(struct query *ctl);
@@ -727,7 +727,7 @@ void itimerthread(void*);
 #endif /* _EMX_ */
 
 #ifdef HAVE_STRERROR
-#  if !defined(strerror) && !defined(HAVE_DECL_STRERROR)	/* On some systems, strerror is a macro */
+#  if !defined(strerror) && !HAVE_DECL_STRERROR	/* On some systems, strerror is a macro */
 char *strerror (int);
 #  endif
 #endif /* HAVE_STRERROR */
@@ -795,4 +795,8 @@ int ntlm_helper(int sock, struct query *ctl, const char *protocol);
 	&& (run.showdots || !is_a_file(1)))
 
 #endif
+
+/* fm_realpath.c */
+char *fm_realpath(const char *restrict file_name);
+
 /* fetchmail.h ends here */

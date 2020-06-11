@@ -339,8 +339,7 @@ int SMTP_ehlo(int sock, char smtp_mode, const char *host, char *name, char *pass
 	  if (!strncasecmp(hp->name, smtp_response+4, strlen(hp->name))) {
 	      *opt |= hp->value;
 	      if (strncmp(hp->name, "AUTH ", 5) == 0)
-            strncpy(auth_response, smtp_response, sizeof(auth_response));
-	      auth_response[sizeof(auth_response)-1] = '\0';
+	        strlcpy(auth_response, smtp_response, sizeof(auth_response));
 	  }
       if ((smtp_response[0] == '1' || smtp_response[0] == '2' || smtp_response[0] == '3') && smtp_response[3] == ' ') {
 	  if (*opt & ESMTP_AUTH)

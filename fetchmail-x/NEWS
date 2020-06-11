@@ -60,16 +60,168 @@ removed from a 6.5.0 or newer release.)
 * SSLv3 support may be removed from a future fetchmail release. It has been
   obsolete for many years and found insecure. Use TLS.
 * Fetchmailconf is deprecated and will be removed from a future release.
+* Fetchmail does not guarantee compatibility with EOL OpenSSL versions. Support
+  for end-of-life OpenSSL versions may be removed even from patchlevel releases.
+
+--------------------------------------------------------------------------------
+fetchmail-6.4.6 (released 2020-05-29, 27596 LoC):
+
+## TRANSLATION UPDATE, with thanks to the translator:
+* eo:    Felipe Castro [Esperanto]
 
 --------------------------------------------------------------------------------
 
-fetchmail-6.4.1 (released 2019-09-28, 27473 LoC):
+fetchmail-6.4.5 (released 2020-05-07, 27596 LoC):
+
+## REGRESSION FIX:
+* fetchmail 6.4.0 and 6.4.1 changed the resolution of the home directory
+  in a way that requires SUSv4 semantics of realpath(), which leads to
+  'Cannot find absolute path for... directory' error messages followed by aborts
+  on systems where realpath() follows strict SUSv2 semantics and returns
+  EINVAL if the 2nd argument is NULL.
+
+  On such systems, for instance, Solaris 10, fetchmail requires PATH_MAX to be
+  defined, and will then work again.  Regression reported by David Hough.
+
+  On systems that neither provide auto-allocation semantics for realpath(),
+  nor PATH_MAX, fetchmail will print this error and abort. Such systems
+  are unsupported, see README.
+
+## CHANGES:
+* Add a test program fm_realpath, and a t.realpath script, neither to be
+  installed. These will test resolution of the current working directory.
+
+## TRANSLATION UPDATES in reverse alphabetical order of language codes,
+## with my thanks to the translators:
+* zh_CN: Boyuan Yang [Chinese (simplified)]
+* sv:    Göran Uddeborg [Swedish]
+* sq:    Besnik Bleta [Albanian]
+* pl:    Jakub Bogusz [Polish]
+* ja:    Takeshi Hamasaki [Japanese]
+* fr:    Frédéric Marchal [French]
+* cs:    Petr Pisar [Czech]
+
+# KNOWN BUGS AND WORKAROUNDS
+  (This section floats upwards through the NEWS file so it stays with the
+  current release information)
+* Fetchmail does not handle messages without Message-ID header well
+  (See sourceforge.net bug #780933)
+* Fetchmail currently uses 31-bit signed integers in several places
+  where unsigned and/or wider types should have been used, for instance,
+  for mailbox sizes, and misreports sizes of 2 GibiB and beyond. 
+  Fixing this requires C89 compatibility to be relinquished.
+* BSMTP is mostly untested and errors can cause corrupt output.
+* Fetchmail does not track pending deletes across crashes.
+* The command line interface is sometimes a bit stubborn, for instance,
+  fetchmail -s doesn't work with a daemon running.
+* Linux systems may return duplicates of an IP address in some circumstances if
+  no or no global IPv6 addresses are configured.
+  (No workaround. Ubuntu Bug#582585, Novell Bug#606980.)
+* Kerberos 5 may be broken, particularly on Heimdal, and provide bogus error
+  messages. This will not be fixed, because the maintainer has no Kerberos 5
+  server to test against. Use GSSAPI.
+
+--------------------------------------------------------------------------------
+
+fetchmail-6.4.4 (released 2020-04-26, 27530 LoC):
+
+## UPDATED TRANSLATIONS - WITH THANKS TO THE TRANSLATOR:
+* ja:    Takeshi Hamasaki [Japanese]
+
+--------------------------------------------------------------------------------
+
+fetchmail-6.4.3 (released 2020-04-05, 27530 LoC):
+
+## BUGFIXES:
+* Plug memory leaks when parts of the configuration (defaults, rcfile, command 
+  line) override one another.
+* fetchmail terminated the placeholder command string too late and included
+  garbage from the heap at the end of the string. Workaround: don't use place-
+  holders %h or %p in the --plugin string. Bug added in 6.4.0 when merging
+  Gitlab merge request !5 in order to fix an input buffer overrun.
+  Faulty commit 418cda65f752e367fa663fd13884a45fcbc39ddd.
+  Reported by Stefan Thurner, Gitlab issue #16.
+* Fetchmail now checks for errors when trying to read the .idfile,
+  Gitlab issue #3.
+* Fetchmail's error messages that reports that the defaults entry isn't the 
+  first was made more precise. It could be misleading if there was a poll or
+  skip statement before the defaults.
+
+## CHANGES:
+* Fetchmail documentation was updated to require OpenSSL 1.1.1.
+  OpenSSL 1.0.2 reached End Of Life status at the end of the year 2019.
+  Fetchmail will tolerate, but warn about, 1.0.2 for now on the assumption that 
+  distributors backport security fixes as the need arises.
+  Fetchmail will also warn if another SSL library that is API-compatible
+  with OpenSSL lacks TLS v1.3 support.
+* If the trust anchor is missing, fetchmail refers the user to README.SSL.
+
+## INTERNAL CHANGES:
+* The AC_DECLS(getenv) check was removed, its only user was broken and not 
+  accounting for that AC_DECLS always defines HAVE_DECL_... to 0 or 1, so
+  fetchmail never declared a missing getenv() symbol (it was testing with 
+  #ifdef).  Remove the backup declaration. getenv is mandated by SUSv2 anyways.
+
+## UPDATED TRANSLATIONS - WITH THANKS TO THE TRANSLATORS:
+* sq:    Besnik Bleta [Albanian]
+* zh_CN: Boyuan Yang [Chinese (simplified)]
+* pl:    Jakub Bogusz [Polish]
+* cs:    Petr Pisar [Czech]
+* fr:    Frédéric Marchal [French]
+* sv:    Göran Uddeborg [Swedish]
+* eo:    Felipe Castro [Esperanto]
+
+--------------------------------------------------------------------------------
+
+fetchmail-6.4.2 (released 2020-02-14, 27473 LoC):
+
+## BREAKING CHANGES:
+* fetchmailconf now supports Python 3 and currently requires the "future" 
+  package, see https://pypi.org/project/future/.
+* fetchmailconf: The minimum supported version is now Python 2.7.13, but it is 
+  recommended to use at least 2.7.16 (due to its massive SSL updates).
+  Older Python versions may check SSL certificates not strictly enough,
+  which may cause fetchmail to complain later, if the certificate verify fails.
+* fetchmailconf now autoprobes SSL-wrapped connections (ports 993 and 995 for 
+  IMAP and POP3) as well and by preference.
+* fetchmailconf now defaults newly created users to "ssl" if either of the
+  existing users sets ssl, or if the server has freshly been probed and
+  found supporting ssl.
+  There is a caveat: adding a user to an existing server without probing it
+  again may skip adding ssl. (This does not prevent STARTTLS.)
+
+## BUG FIXES:
+* Fix three bugs in fetchmail.man (one unterminated string to .IP macro, one
+  line that ran into a .PP macro, .TH date format), and remove one .br request 
+  from inside the table, which is unsupported by FreeBSD 12's mandoc(1) 
+  formatter.  FreeBSD Bug#241032, reported by Helge Oldach.
+* Further man page fixes and additions by Chris Mayo and Gregor Zattler.
+* When evaluating the need for STARTTLS in non-default configurations (SSL 
+  certificate validation turned off), fetchmail would only consider --sslproto 
+  tls1 as requiring STARTTLS, now all non-empty protocol versions do.
+* fetchmailconf now properly writes "no sslcertck" if sslcertck is disabled.
+* fetchmailconf now catches and reports OS errors (including DNS errors) when 
+  autoprobing.  Reported as Gitlab issue #12 by Sergey Alirzaev.
+* fetchmailconf received a host of other bugfixes, see the Git commit log.
+
+## CHANGES:
+* Make t.smoke more robust and use temporary directory as FETCHMAILHOME, to make
+  sure that the home directory resolves for the user running the test suite
+  even if the environment isn't perfect. Reported by Konstantin Belousov,
+  analysed by Corey Halpin, FreeBSD Bug#240914.
+
+## UPDATED TRANSLATION - THANKS TO:
+* zh_CN: Boyuan Yang [Chinese (simplified)]
+
+--------------------------------------------------------------------------------
+
+fetchmail 6.4.1 (released 2019-09-28, 27473 LoC):
 
 ## REGRESSION FIXES:
 * The bug fix Debian Bug#941129 was incomplete and caused
   + a regression in the default file locations, so that fetchmail was no longer
-    able to find it configuration files in some situations.
-    Reported by Cy Schubert.
+    able to find its configuration files in some situations.
+    Reported by Cy Schubert, Christian Ebert.
   + a regression under _FORTIFY_SOURCE where PATH_MAX > minimal _POSIX_PATH_MAX.
 
 --------------------------------------------------------------------------------
@@ -210,29 +362,6 @@ fetchmail 6.4.0 (released 2019-09-27, 27429 LoC):
 * JP: Takeshi Hamasaki <hmatrjp@users.sourceforge.jp> [Japanese]
 * PL: Jakub Bogusz <qboosh@pld-linux.org> [Polish]
 * SV: Göran Uddeborg <goeran@uddeborg.se> [Swedish]
-
-# KNOWN BUGS AND WORKAROUNDS
-  (This section floats upwards through the NEWS file so it stays with the
-  current release information)
-* Fetchmail does not handle messages without Message-ID header well
-  (See sourceforge.net bug #780933)
-* Fetchmail currently uses 31-bit signed integers in several places
-  where unsigned and/or wider types should have been used, for instance,
-  for mailbox sizes, and misreports sizes of 2 GibiB and beyond. 
-  Fixing this requires C89 compatibility to be relinquished.
-* BSMTP is mostly untested and errors can cause corrupt output.
-* Sun Workshop 6 (SPARC) is known to miscompile the configuration file lexer in
-  64-bit mode.  Either compile 32-bit code or use GCC to compile 64-bit
-  fetchmail.
-* Fetchmail does not track pending deletes across crashes.
-* The command line interface is sometimes a bit stubborn, for instance,
-  fetchmail -s doesn't work with a daemon running.
-* Linux systems may return duplicates of an IP address in some circumstances if
-  no or no global IPv6 addresses are configured.
-  (No workaround. Ubuntu Bug#582585, Novell Bug#606980.)
-* Kerberos 5 may be broken, particularly on Heimdal, and provide bogus error
-  messages. This will not be fixed, because the maintainer has no Kerberos 5
-  server to test against. Use GSSAPI.
 
 --------------------------------------------------------------------------------
 

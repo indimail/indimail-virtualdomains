@@ -146,8 +146,8 @@ static void printcopyright(FILE *fp) {
 		   "Copyright (C) 2004 Matthias Andree, Eric S. Raymond,\n"
 		   "                   Robert M. Funk, Graham Wilson\n"
 		   "Copyright (C) 2005 - 2012 Sunil Shetye\n"
-		   "Copyright (C) 2005 - 2019 Matthias Andree\n"
-		   ));
+		   "Copyright (C) 2005 - %d Matthias Andree\n"
+		   ), 2020);
 	fprintf(fp, GT_("Fetchmail comes with ABSOLUTELY NO WARRANTY. This is free software, and you\n"
 		   "are welcome to redistribute it under certain conditions. For details,\n"
 		   "please see the file COPYING in the source or documentation directory.\n"));
@@ -268,11 +268,18 @@ int main(int argc, char **argv)
 #ifndef ODMR_ENABLE
 	"-ODMR"
 #endif /* ODMR_ENABLE */
-#ifdef SSL_ENABLE
-	"+SSL"
-	"-SSLv2"
+#ifndef SSL_ENABLE
+	"-SSL"
+#else
+	"+SSL-SSLv2"
 #if (HAVE_DECL_SSLV3_CLIENT_METHOD + 0 == 0) || defined(OPENSSL_NO_SSL3)
 	"-SSLv3"
+#endif
+#if HAVE_DECL_TLS1_2_VERSION + 0 == 0
+	"-TLS1.2"
+#endif
+#if HAVE_DECL_TLS1_3_VERSION + 0 == 0
+	"-TLS1.3"
 #endif
 #endif
 #ifdef OPIE_ENABLE
@@ -299,6 +306,16 @@ int main(int argc, char **argv)
 	".\n";
 	printf(GT_("This is fetchmail release %s"), VERSION);
 	fputs(features, stdout);
+#ifdef SSL_ENABLE
+#if !HAVE_DECL_TLS1_3_VERSION || defined(OPENSSL_NO_TLS1_3)
+	printf(GT_("WARNING: Your SSL/TLS library does not support TLS v1.3.\n"));
+#endif
+#ifdef LIBRESSL_VERSION_NUMBER
+	printf(GT_("WARNING: Compiled against LibreSSL, which is not a supported configuration.\n"));
+#endif
+#else
+	printf(GT_("WARNING: Compiled without SSL/TLS.\n"));
+#endif
 	puts("");
 	printcopyright(stdout);
 	puts("");
@@ -376,10 +393,13 @@ int main(int argc, char **argv)
     {
 	int st;
 
-	if (!versioninfo && (st = prc_filecheck(run.idfile, !versioninfo)) != 0)
+	if (!versioninfo && (st = prc_filecheck(run.idfile, !versioninfo)) != 0) {
 	    exit(st);
-	else
-	    initialize_saved_lists(querylist, run.idfile);
+	} else {
+	    if ((st = initialize_saved_lists(querylist, run.idfile))) {
+		exit(st);
+	    }
+	}
     }
 #endif /* POP3_ENABLE */
 
@@ -968,46 +988,49 @@ static void optmerge(struct query *h2, struct query *h1, int force)
     list_merge(&h2->domainlist, &h1->domainlist, force);
     list_merge(&h2->antispam, &h1->antispam, force);
 
-#define FLAG_MERGE(fld) do { if (force ? !!h1->fld : !h2->fld) h2->fld = h1->fld; } while (0)
-    FLAG_MERGE(server.via);
+#define   FLAG_MERGE(fld) do { if (force ? !!h1->fld : !h2->fld) h2->fld = h1->fld; } while (0)
+#define STRING_MERGE(fld) do { if (force ? !!h1->fld : !h2->fld) { if (h2->fld) free((void *)h2->fld), h2->fld = 0; if (h1->fld) h2->fld = xstrdup(h1->fld); } } while (0)
+    STRING_MERGE(server.via);
     FLAG_MERGE(server.protocol);
-    FLAG_MERGE(server.service);
+    STRING_MERGE(server.service);
     FLAG_MERGE(server.interval);
     FLAG_MERGE(server.authenticate);
     FLAG_MERGE(server.timeout);
-    FLAG_MERGE(server.envelope);
+    STRING_MERGE(server.envelope);
     FLAG_MERGE(server.envskip);
-    FLAG_MERGE(server.qvirtual);
+    STRING_MERGE(server.qvirtual);
 #ifdef INDIMAIL
-    FLAG_MERGE(server.authmeth);
+    STRING_MERGE(server.authmeth);
 #endif
     FLAG_MERGE(server.skip);
     FLAG_MERGE(server.dns);
     FLAG_MERGE(server.checkalias);
     FLAG_MERGE(server.uidl);
-    FLAG_MERGE(server.principal);
+    STRING_MERGE(server.principal);
+    STRING_MERGE(server.esmtp_name);
+    STRING_MERGE(server.esmtp_password);
 
 #ifdef CAN_MONITOR
-    FLAG_MERGE(server.interface);
-    FLAG_MERGE(server.interface_pair);
-    FLAG_MERGE(server.monitor);
+    STRING_MERGE(server.interface);
+    FLAG_MERGE(server.interface_pair); /* XXX FIXME: leaky? */
+    STRING_MERGE(server.monitor);
 #endif
 
-    FLAG_MERGE(server.plugin);
-    FLAG_MERGE(server.plugout);
+    STRING_MERGE(server.plugin);
+    STRING_MERGE(server.plugout);
     FLAG_MERGE(server.tracepolls);
     FLAG_MERGE(server.badheader);
 
     FLAG_MERGE(wildcard);
-    FLAG_MERGE(remotename);
-    FLAG_MERGE(password);
-    FLAG_MERGE(mda);
-    FLAG_MERGE(bsmtp);
+    STRING_MERGE(remotename);
+    STRING_MERGE(password);
+    STRING_MERGE(mda);
+    STRING_MERGE(bsmtp);
     FLAG_MERGE(listener);
-    FLAG_MERGE(smtpaddress);
-    FLAG_MERGE(smtpname);
-    FLAG_MERGE(preconnect);
-    FLAG_MERGE(postconnect);
+    STRING_MERGE(smtpaddress);
+    STRING_MERGE(smtpname);
+    STRING_MERGE(preconnect);
+    STRING_MERGE(postconnect);
 
     FLAG_MERGE(keep);
     FLAG_MERGE(flush);
@@ -1029,14 +1052,14 @@ static void optmerge(struct query *h2, struct query *h1, int force)
     FLAG_MERGE(batchlimit);
 #ifdef	SSL_ENABLE
     FLAG_MERGE(use_ssl);
-    FLAG_MERGE(sslkey);
-    FLAG_MERGE(sslcert);
-    FLAG_MERGE(sslproto);
+    STRING_MERGE(sslkey);
+    STRING_MERGE(sslcert);
+    STRING_MERGE(sslproto);
     FLAG_MERGE(sslcertck);
-    FLAG_MERGE(sslcertfile);
-    FLAG_MERGE(sslcertpath);
-    FLAG_MERGE(sslcommonname);
-    FLAG_MERGE(sslfingerprint);
+    STRING_MERGE(sslcertfile);
+    STRING_MERGE(sslcertpath);
+    STRING_MERGE(sslcommonname);
+    STRING_MERGE(sslfingerprint);
 #endif
     FLAG_MERGE(expunge);
 
@@ -1169,7 +1192,7 @@ static int load_params(int argc, char **argv, int optind)
     /* don't allow a defaults record after the first */
     for (ctl = querylist; ctl; ctl = ctl->next) {
 	if (ctl != querylist && strcmp(ctl->server.pollname, "defaults") == 0) {
-	    fprintf(stderr, GT_("fetchmail: Error: multiple \"defaults\" records in config file.\n"));
+	    fprintf(stderr, GT_("fetchmail: Error: multiple \"defaults\" records in config file, or \"defaults\" is not the first record.\n"));
 	    exit(PS_SYNTAX);
 	}
     }
@@ -1178,12 +1201,18 @@ static int load_params(int argc, char **argv, int optind)
     fetchmailhost = "localhost";
 
     /* here's where we override globals */
-    if (cmd_run.logfile)
+    if (cmd_run.logfile) {
+    	xfree(run.logfile);
 	run.logfile = cmd_run.logfile;
-    if (cmd_run.idfile)
+    }
+    if (cmd_run.idfile) {
+    	xfree(run.idfile);
 	run.idfile = cmd_run.idfile;
-    if (cmd_run.pidfile)
+    }
+    if (cmd_run.pidfile) {
+    	xfree(run.pidfile);
 	run.pidfile = cmd_run.pidfile;
+    }
     /* do this before the keep/fetchall test below, otherwise -d0 may fail */
     if (cmd_run.poll_interval >= 0)
 	run.poll_interval = cmd_run.poll_interval;
@@ -1193,8 +1222,10 @@ static int load_params(int argc, char **argv, int optind)
 	run.showdots = (cmd_run.showdots == FLAG_TRUE);
     if (cmd_run.use_syslog)
 	run.use_syslog = (cmd_run.use_syslog == FLAG_TRUE);
-    if (cmd_run.postmaster)
+    if (cmd_run.postmaster) {
+    	free((void *)run.postmaster);
 	run.postmaster = cmd_run.postmaster;
+    }
     if (cmd_run.bouncemail)
 	run.bouncemail = (cmd_run.bouncemail == FLAG_TRUE);
     if (cmd_run.softbounce)

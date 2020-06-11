@@ -1,0 +1,6 @@
+#! /bin/sh
+
+# This is a rudimentary tests to check if realpath() works.
+
+set -eu
+./fm_realpath "." "$(pwd)"

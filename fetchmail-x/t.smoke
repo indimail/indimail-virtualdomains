@@ -3,9 +3,20 @@
 # This is a rudimentary tests to see if fetchmail can parse a trivial
 # configuration and dump it in human-readable and machine-readable form.
 
-set -e
-trap 'rm -f t.rc.$$' 0
-cp "${srcdir}/t.rc" t.rc.$$
-chmod 0400 t.rc.$$
-./fetchmail -V -f t.rc.$$ >/dev/null
-./fetchmail --configdump -f t.rc.$$ >/dev/null
+set -eu
+: "${TMPDIR:=/tmp}"
+{
+	dir=`(umask 077 && mktemp -d "$TMPDIR/t.smoke.XXXXXX")` 2>/dev/null \
+		&& test -d "$dir"
+} || {
+	dir=$TMPDIR/t.smoke.$$-$RANDOM
+		(umask 077 && mkdir "$dir")
+}
+trap 'r=$? ; rm -fr t.rc.$$ $dir ; exit $r' 0
+cp "${srcdir}/t.rc" $dir/t.rc.$$
+chmod 0400 $dir/t.rc.$$
+HOME=$dir
+FETCHMAILHOME=$dir
+export HOME FETCHMAILHOME
+./fetchmail -V -f $dir/t.rc.$$ >/dev/null
+./fetchmail --configdump -f $dir/t.rc.$$ >/dev/null

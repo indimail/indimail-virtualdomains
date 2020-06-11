@@ -120,12 +120,14 @@ static int dump_saved_uid(struct uid_db_record *rec, void *unused)
     return 0;
 }
 
-/** Read saved IDs from \a idfile and attach to each host in \a hostlist. */
-void initialize_saved_lists(struct query *hostlist, const char *idfile)
+/** Read saved IDs from \a idfile and attach to each host in \a hostlist.
+ * Returns 0 for success, or a non-zero error code. */
+int initialize_saved_lists(struct query *hostlist, const char *idfile)
 {
     struct stat statbuf;
     FILE	*tmpfp;
     struct query *ctl;
+    int  err;
 
     /* make sure lists are initially empty */
     for (ctl = hostlist; ctl; ctl = ctl->next) {
@@ -149,7 +151,7 @@ void initialize_saved_lists(struct query *hostlist, const char *idfile)
 	if (errno == ENOTDIR)
 	{
 	    report(stderr, "lstat: %s: %s\n", idfile, strerror(errno));
-	    exit(PS_IOERR);
+	    return PS_IOERR;
 	}
     }
 
@@ -250,7 +252,16 @@ void initialize_saved_lists(struct query *hostlist, const char *idfile)
 		}
 	    }
 	}
-	fclose(tmpfp);	/* not checking should be safe, mode was "r" */
+	err  = ferror(tmpfp);
+	err |= fclose(tmpfp);	/* not checking should be safe, mode was "r" */
+				/* bit-wise or, we only care about non-zero */
+    } else {
+	err = (errno != ENOENT);
+    }
+    if (err) {
+	report(stderr, GT_("Open or read error while reading idfile %s: %s\n"),
+		idfile, strerror(errno));
+	return PS_IOERR;
     }
 
     if (outlevel >= O_DEBUG)
@@ -280,6 +291,7 @@ void initialize_saved_lists(struct query *hostlist, const char *idfile)
 	}
 	report_complete(stdout, "\n");
     }
+    return PS_SUCCESS;
 }
 
 /** Assert that all UIDs marked deleted in query \a ctl have actually been

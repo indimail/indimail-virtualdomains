@@ -37,8 +37,6 @@ struct query cmd_opts;		/* where to put command-line info */
 /* parser sets these */
 struct query *querylist;	/* head of server list (globally visible) */
 
-int yydebug;			/* in case we didn't generate with -- debug */
-
 static struct query current;	/* current server record */
 static int prc_errflag;
 static struct hostdata *leadentry;

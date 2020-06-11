@@ -8,7 +8,8 @@ Greetings, dear packager!
 
 The bullet points below mention a few useful hints for package(r)s:
 
-- Fetchmail requires a somewhat recent OpenSSL v1.0.2.
+- Fetchmail requires OpenSSL v1.1.1. Fetchmail 6.4 tolerates 1.0.2 for now
+  but assumes the distributor backports security fixes for it.
 
 - Fetchmail now uses automake and supports all common automake targets and 
   overrides such as "make install-strip" or "DESTDIR=..." for staging areas.

@@ -14,7 +14,7 @@
 <!-- .mso www.tmac -->
 <!-- ignored unsupported tag .mso -->
 <!-- .\" -->
-<!-- .TH fetchmail 1 "fetchmail 6.4.1" "fetchmail" "fetchmail reference manual" -->
+<!-- .TH fetchmail 1 2020-03-30 "fetchmail 6.4.6" "fetchmail reference manual" -->
 <CENTER>
 <H1><HR><I>Manual Reference Pages &nbsp;-&nbsp;</I><NOBR>fetchmail (1)</NOBR><HR></H1>
 </CENTER>
@@ -180,7 +180,7 @@ env LC_ALL=C fetchmail -vvv  --nodetach --nosyslog
 </TD></TR>
 <!-- PP ends table -->
 <TR></TR></TABLE>Also see
-<!-- .URL "http://fetchmail.sourceforge.net/fetchmail-FAQ.html#G3" "item #G3 in fetchmail's FAQ" -->
+<!-- .URL "https://fetchmail.sourceforge.io/fetchmail-FAQ.html#G3" "item #G3 in fetchmail's FAQ" -->
 <!-- ignored unsupported tag .URL -->
 <!-- .PP -->
 <P>
@@ -875,7 +875,7 @@ and pretend that &#146;<B>auto</B>&#146; had been used instead.
 (default). Since v6.4.0. Require TLS. Auto-negotiate TLSv1 or newer, disable SSLv3 downgrade.
 (fetchmail 6.3.26 and older have auto-negotiated all protocols that
 their OpenSSL library supported, including the broken SSLv3).
-<!-- .IP "\&'\fBSSL23\fP' -->
+<!-- .IP \&'\fBSSL23\fP' -->
 </TD></TR>
 <TR valign=top><TD width=6%>
 &#146;<B>SSL23</B>&#146;
@@ -933,6 +933,18 @@ Since v6.4.0. Require TLS v1.2 exactly.
 &#146;<B>TLS1.2+</B>&#146;
 </TD><TD>
 Since v6.4.0. Require TLS. Auto-negotiate TLSv1.2 or newer.
+<!-- .IP \&'\fBTLS1.3\fP' -->
+</TD></TR>
+<TR valign=top><TD width=6%>
+&#146;<B>TLS1.3</B>&#146;
+</TD><TD>
+Since v6.4.0. Require TLS v1.3 exactly.
+<!-- .IP '\fBTLS1.3+\fP' -->
+</TD></TR>
+<TR valign=top><TD width=6%>
+&#146;<B>TLS1.3+</B>&#146;
+</TD><TD>
+Since v6.4.0. Require TLS. Auto-negotiate TLSv1.3 or newer.
 <!-- .IP "Unrecognized parameters" -->
 </TD></TR>
 <TR valign=top><TD width=6%>
@@ -973,13 +985,6 @@ indirectly), fetchmail will disconnect, regardless of the
 Note that CRL (certificate revocation lists) are only supported in
 OpenSSL 0.9.7 and newer! Your system clock should also be reasonably
 accurate when using this option.
-<!-- .IP -->
-</TD></TR>
-<TR valign=top><TD width=6%>
-
-</TD><TD>
-Note that this optional behavior may become default behavior in future
-fetchmail versions.
 <!-- .TP -->
 </TD></TR>
 <TR valign=top><TD colspan=2>
@@ -1600,7 +1605,7 @@ TLS with client authentication and specify <B>gssapi</B> or
 GSSAPI or K4.  Choosing KPOP protocol automatically selects Kerberos
 authentication.  This option does not work with ETRN.  GSSAPI service names are
 in line with RFC-2743 and IANA registrations, see
-<!-- .URL http://www.iana.org/assignments/gssapi-service-names/ "Generic Security Service Application Program Interface (GSSAPI)/Kerberos/Simple Authentication and Security Layer (SASL) Service Names" .  -->
+<!-- .URL https://www.iana.org/assignments/gssapi-service-names/ "Generic Security Service Application Program Interface (GSSAPI)/Kerberos/Simple Authentication and Security Layer (SASL) Service Names" . -->
 <!-- ignored unsupported tag .URL -->
 <!-- .SS Miscellaneous Options -->
 </TD></TR>
@@ -2005,8 +2010,9 @@ username and the part to the right as the NTLM domain.
     <H4>&nbsp; &nbsp; Secure Socket Layers (SSL) and Transport Layer Security (TLS)</H4>
 </A>
 <BLOCKQUOTE>
-<!-- .PP All retrieval protocols can use SSL or TLS wrapping for the -->
+<!-- .PP -->
 <P>
+All retrieval protocols can use SSL or TLS wrapping for the
 transport. Additionally, POP3 and IMAP retrival can also negotiate
 SSL/TLS by means of STARTTLS (or STLS).
 <!-- .PP -->
@@ -2075,7 +2081,7 @@ can protect you from a passive eavesdropper, it doesn&#146;t help against an
 active attacker. It&#146;s clearly an improvement over sending the
 passwords in clear, but you should be aware that a man-in-the-middle
 attack is trivially possible (in particular with tools such as
-<!-- .URL "http://monkey.org/~dugsong/dsniff/" "dsniff" , -->
+<!-- .URL "https://monkey.org/~dugsong/dsniff/" "dsniff" , -->
 <!-- ignored unsupported tag .URL -->
 ).  Use of strict certificate checking with a certification authority
 recognized by server and client, or perhaps of an SSH tunnel (see below
@@ -2620,8 +2626,6 @@ You can use the noise keywords &#146;and&#146;, &#146;with&#146;,
 it resemble English.  They&#146;re ignored, but but can make entries much
 easier to read at a glance.  The punctuation characters &#146;:&#146;, &#146;;&#146; and
 &#146;,&#146; are also ignored.
-<!-- .PP -->
-<P>
 <!-- .SS Poll vs. Skip -->
 </BLOCKQUOTE>
 <A name=33>
@@ -2635,8 +2639,6 @@ no arguments.  The &#146;skip&#146; verb tells
 not to poll this host unless it is explicitly named on the command
 line.  (The &#146;skip&#146; verb allows you to experiment with test entries
 safely, or easily disable entries for hosts that are temporarily down.)
-<!-- .PP -->
-<P>
 <!-- .SS Keyword/Option Summary -->
 </BLOCKQUOTE>
 <A name=34>
@@ -2694,6 +2696,9 @@ occurred (default).
 <TD>set logfile</TD><TD>-L</TD><TD></TD><TD>Name of a file to append error and status messages to.  Only effective
 in daemon mode and if fetchmail detaches.  If effective, overrides <B>set
 syslog</B>.
+</TD></TR>
+<TR valign=top>
+<TD>set pidfile</TD><TD>-p</TD><TD></TD><TD>Name of the PID file.
 </TD></TR>
 <TR valign=top>
 <TD>set idfile</TD><TD>-i</TD><TD></TD><TD>Name of the file to store UID lists in.
@@ -2815,7 +2820,7 @@ Here are the legal user descriptions and options:
 <TR valign=top>
 <TD>user[name]</TD><TD>-u</TD><TD></TD><TD>This is the user description and must come first after server
 description and after possible server options, and before user options.
-<BR>
+
 It sets the remote user name if by itself or followed by &#146;there&#146;, or the
 local user name if followed by &#146;here&#146;.
 </TD></TR>
@@ -3229,7 +3234,6 @@ of your fetchmail&#146;s time, because it will never drop the connection
 and allow other polls to occur unless the server times out the IDLE.
 It also doesn&#146;t work with multiple folders; only the first folder will
 ever be polled.
-<P>
 <!-- .PP -->
 <P>
 The &#146;properties&#146; option is an extension mechanism.  It takes a string
@@ -3237,8 +3241,6 @@ argument, which is ignored by fetchmail itself.  The string argument may be
 used to store configuration information for scripts which require it.
 In particular, the output of &#146;--configdump&#146; option will make properties
 associated with a user entry readily available to a Python script.
-<!-- .PP -->
-<P>
 <!-- .SS Miscellaneous Run Control Options -->
 </BLOCKQUOTE>
 <A name=37>
@@ -3327,7 +3329,7 @@ in random locations even if you use the software the same way.
 <P>
 For solving hardware-induced segfaults, find the faulty component and repair or
 replace it.
-<!-- .URL http://www.bitwizard.nl/sig11/ "The Sig11 FAQ" -->
+<!-- .URL https://www.bitwizard.nl/sig11/ "The Sig11 FAQ" -->
 <!-- ignored unsupported tag .URL -->
 may help you with details.
 <P>
@@ -4230,14 +4232,14 @@ and the user has no administrator privileges to remedy the problem.
 (documented since 6.4.1):
 This variable is nomally set to the user&#146;s home directory. If it is set
 to a different directory than what is the password database, HOME takes
-prececence.
+precedence.
 <P>
 <!-- .IP \fBHOME_ETC\fP -->
 </TD></TR>
 <TR valign=top><TD width=5%>
 <B>HOME_ETC</B>
 </TD><TD>
-(documented corrected to match behaviour code since 6.4.1):
+(documentation corrected to match behaviour code since 6.4.1):
 If the HOME_ETC variable is set, it will override fetchmail&#146;s idea of $HOME,
 i. e. fetchmail will read .fetchmailrc, .fetchids, .fetchmail.pid and .netrc
 from $HOME_ETC instead of $HOME (or if HOME is also unset,
@@ -4395,7 +4397,7 @@ Send comments, bug reports, gripes, and the like to the
 <!-- .PP -->
 <P>
 An
-<!-- .URL "http://fetchmail.sourceforge.net/fetchmail-FAQ.html" "HTML FAQ" -->
+<!-- .URL "https://fetchmail.sourceforge.io/fetchmail-FAQ.html" "HTML FAQ" -->
 <!-- ignored unsupported tag .URL -->
 is available at the fetchmail home page, it should also accompany your
 installation.
@@ -4444,7 +4446,7 @@ Beinert, and H[&#146;e]ctor Garc[&#146;i]a.
 <!-- .BR README , -->
 <B>README</B>, <!-- .BR README.SSL , -->
 <B>README.SSL</B>, <!-- .BR README.SSL-SERVER , -->
-<B>README.SSL-SERVER</B>, <!-- .URL "http://www.fetchmail.info/fetchmail-FAQ.html" "The Fetchmail FAQ" , -->
+<B>README.SSL-SERVER</B>, <!-- .URL "https://www.fetchmail.info/fetchmail-FAQ.html" "The Fetchmail FAQ" , -->
 <!-- ignored unsupported tag .URL -->
 <!-- .BR mutt (1), -->
 <B>mutt</B>(1),
@@ -4460,22 +4462,18 @@ Beinert, and H[&#146;e]ctor Garc[&#146;i]a.
 <B>imapd</B>(8),
 <!-- .BR netrc (5). -->
 <B>netrc</B>(5).
-<P>
 <!-- .PP -->
 <P>
-<!-- .URL "http://www.fetchmail.info/" "The fetchmail home page." -->
+<!-- .URL "https://www.fetchmail.info/" "The fetchmail home page." -->
 <!-- ignored unsupported tag .URL -->
-<P>
 <!-- .PP -->
 <P>
-<!-- .URL "http://fetchmail.sourceforge.net/" "The fetchmail home page (alternative URI)." -->
+<!-- .URL "https://fetchmail.sourceforge.io/" "The fetchmail home page (alternative URI)." -->
 <!-- ignored unsupported tag .URL -->
-<P>
 <!-- .PP -->
 <P>
-<!-- .URL "http://www.courier-mta.org/maildrop/" "The maildrop home page." -->
+<!-- .URL "https://www.courier-mta.org/maildrop/" "The maildrop home page." -->
 <!-- ignored unsupported tag .URL -->
-<P>
 <!-- .SH APPLICABLE STANDARDS -->
 </BLOCKQUOTE>
 <A name=56>
@@ -4572,7 +4570,7 @@ RFC 2033.
 GSSAPI:
 </TD></TR><TR valign=top><TD width=5%>&nbsp;</TD><TD>
 RFC 1508, RFC 1734,
-<!-- .URL http://www.iana.org/assignments/gssapi-service-names/ "Generic Security Service Application Program Interface (GSSAPI)/Kerberos/Simple Authentication and Security Layer (SASL) Service Names" .  -->
+<!-- .URL https://www.iana.org/assignments/gssapi-service-names/ "Generic Security Service Application Program Interface (GSSAPI)/Kerberos/Simple Authentication and Security Layer (SASL) Service Names" . -->
 <!-- ignored unsupported tag .URL -->
 <!-- .TP 5 -->
 </TD></TR>
@@ -4583,5 +4581,5 @@ RFC 2595.
 </TD></TR>
 <TR></TR></TABLE></BLOCKQUOTE>
 <P><HR>
-<TABLE width=100%><TR> <TD width=33%><I>fetchmail</I></TD> <TD width=33% align=center>fetchmail (1)</TD> <TD align=right width=33%><I>fetchmail 6.4.1</I></TD> </TR></TABLE><FONT SIZE=-1>Generated by <A HREF="http://www.squarebox.co.uk/users/rolf/download/manServer.shtml">manServer 1.07+ma1</A> from ../fetchmail.man using man macros with tbl support.</FONT>
+<TABLE width=100%><TR> <TD width=33%><I>fetchmail 6.4.6</I></TD> <TD width=33% align=center>fetchmail (1)</TD> <TD align=right width=33%><I>2020-03-30</I></TD> </TR></TABLE><FONT SIZE=-1>Generated by <A HREF="http://www.squarebox.co.uk/users/rolf/download/manServer.shtml">manServer 1.07+ma1</A> from ../fetchmail.man using man macros with tbl support.</FONT>
 </BODY></HTML>

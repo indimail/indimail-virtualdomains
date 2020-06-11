@@ -1,11 +1,11 @@
 # Makefile for fetchmail
 
 SUBDIRS=		. po
-AUTOMAKE_OPTIONS=	1.11 foreign no-dist-gzip dist-xz subdir-objects
+AUTOMAKE_OPTIONS=	1.12 foreign no-dist-gzip dist-xz subdir-objects dist-lzip
 
 AM_CPPFLAGS=		-I$(srcdir)/libesmtp
 ACLOCAL_AMFLAGS=	-I m4 -I m4-local
-AM_YFLAGS=		-d
+AM_YFLAGS=		-t -d
 # listing socket.$(OBJEXT) here is a hack to compile socket.c pretty
 # early in order to fail it early on outdated OpenSSL libraries,
 # without building a few dozen other files first.
@@ -47,7 +47,7 @@ DEPENDENCIES=		libfm.a $(LIBOBJS)
 
 check_PROGRAMS=
 
-TESTS=			t.smoke t.validate-xhtml10 t.validate-xhtml t.x509_name_match
+TESTS=			t.smoke t.validate-xhtml10 t.validate-xhtml t.x509_name_match t.realpath
 LOG_COMPILER=		env LC_ALL=C TZ=UTC $(SHELL)
 
 if NEED_TRIO
@@ -72,7 +72,8 @@ fetchmail_SOURCES=	fetchmail.h getopt.h \
 		unmime.c conf.c checkalias.c uid_db.h uid_db.c\
 		lock.h lock.c \
 		rcfile_l.l rcfile_y.y \
-		ucs/norm_charmap.c ucs/norm_charmap.h
+		ucs/norm_charmap.c ucs/norm_charmap.h \
+		fm_realpath.c
 if POP2_ENABLE
 fetchmail_SOURCES += pop2.c
 endif
@@ -102,7 +103,9 @@ fetchmail_SOURCES += libesmtp/getaddrinfo.h libesmtp/getaddrinfo.c
 endif
 
 check_PROGRAMS +=	rfc822 unmime netrc rfc2047e mxget rfc822valid \
-			x509_name_match
+			x509_name_match fm_realpath
+
+fm_realpath_CFLAGS=	-DTEST
 
 rfc2047e_CFLAGS=	-DTEST
 

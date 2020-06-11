@@ -3,13 +3,13 @@ dnl Autoconfigure input file for fetchmail
 # Fetchmail automatic configuration support
 #
 # Eric S. Raymond <esr@thyrsus.com>
-# 2004 - 2019 Matthias Andree <matthias.andree@gmx.de>
+# 2004 - 2020 Matthias Andree <matthias.andree@gmx.de>
 #
 dnl Process this file with autoconf to produce a configure script.
 dnl
 
 dnl XXX - if bumping version here, check fetchmail.man, too!
-AC_INIT([fetchmail],[6.4.1],[fetchmail-users@lists.sourceforge.net])
+AC_INIT([fetchmail],[6.4.6],[fetchmail-users@lists.sourceforge.net])
 AC_CONFIG_SRCDIR([fetchmail.h])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_LIBOBJ_DIR([.])
@@ -28,7 +28,7 @@ dnl python is optional
 # to disable python detection and continue without building/installing
 # fetchmail.conf -- be sure to check README.packaging, too!
 #
-AM_PATH_PYTHON(2.3,,AC_MSG_WARN([Disabling fetchmailconf: python 2.3 or greater not found]))
+AM_PATH_PYTHON(2.7,,AC_MSG_WARN([Disabling fetchmailconf: python 2.7 or greater not found]))
 AM_CONDITIONAL([HAVE_PYTHON], [test "$PYTHON" != :])
 
 AC_USE_SYSTEM_EXTENSIONS
@@ -98,6 +98,9 @@ AC_CHECK_DECLS([h_errno],,,[
 
 AC_C_CONST			dnl getopt needs this.
 AC_C_INLINE			dnl uid_db.? need this.
+AC_C_RESTRICT			dnl fm_realpath needs this.
+AC_C_VOLATILE			dnl check for ANSI volatile
+
 
 AM_PROG_LEX
 AC_PROG_MAKE_SET
@@ -180,7 +183,8 @@ AC_CHECK_FUNCS(tcsetattr stty setsid geteuid seteuid dnl
   atexit inet_aton strftime setrlimit socketpair dnl
   sigaction strdup setlocale)
 
-AC_CHECK_DECLS([strerror,getenv])
+AC_CHECK_DECLS([strerror])
+AC_CHECK_DECLS([PATH_MAX],,,[#include <limits.h>])
 dnl INET6 is used by KAME/getnameinfo
 AC_CACHE_CHECK(for AF_INET6/PF_INET6,ac_cv_inet6,
 AC_COMPILE_IFELSE([
@@ -234,9 +238,6 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[char *p;
     void *xmalloc();
     p = (char *) xmalloc(1);
    ]])],[AC_DEFINE(HAVE_VOIDPOINTER,1,[Define if your C compiler allows void * as a function result]) AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
-
-dnl Check for ANSI volatile
-AC_C_VOLATILE
 
 dnl Check out the wait reality.  We have to assume sys/wait.h is present.
 AC_CHECK_FUNCS(waitpid wait3)
@@ -771,7 +772,7 @@ then
   then
     ###	ssl.h found under openssl.  Use openssl configuration preferentially,
     AC_MSG_NOTICE(Enabling OpenSSL support in $with_ssl.)
-    test "$with_ssl" != "/usr" && CFLAGS="$CFLAGS -I$with_ssl/include"
+    test "$with_ssl" != "/usr" && CFLAGS="$CFLAGS -I$with_ssl/include" LDFLAGS="$LDFLAGS -L$with_ssl/lib"
     ### In Red Hat 9, this file includes a reference to <krb5.h>, so we
     ### force the Kerberos directory onto the include path so it will build.
     CFLAGS="$CFLAGS -I/usr/kerberos/include"
@@ -807,6 +808,9 @@ else
 fi
 
 case "$LIBS" in *-lssl*)
+	AC_CHECK_DECLS([TLS1_3_VERSION],,
+		       AC_MSG_WARN([Your OpenSSL version is too old and does not support TLS v1.3. Upgrade.]),
+		       [#include <openssl/ssl.h>])
 	AC_CHECK_DECLS([TLS1_2_VERSION],,
 		       AC_MSG_ERROR([Your OpenSSL version is too old and does not support TLS v1.2. Upgrade.]),
 		       [#include <openssl/ssl.h>])
