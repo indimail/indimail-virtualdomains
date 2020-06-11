@@ -91,3 +91,12 @@ indimail-spamfilter-permissions.easy
 indimail-spamfilter-permissions.paranoid
 indimail-spamfilter-permissions.secure
 indimail-spamfilter-rpmlintrc
+doc/bf_compact.1in
+doc/bf_copy.1in
+doc/bf_tar.1in
+doc/bogofilter.1in
+doc/bogolexer.1in
+doc/bogotune.1in
+doc/bogoupgrade.1in
+doc/bogoutil.1in
+doc/bogotune.htmlin
