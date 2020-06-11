@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.49 2020-06-10 21:41:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.50 2020-06-11 17:13:55+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -585,8 +585,8 @@ done
 %attr(644,root,root)                    %{shareddir}/doc/ChangeLog-indimail
 %attr(644,root,root)                    %{shareddir}/doc/FAQ.pdf
 %attr(644,root,root)                    %{shareddir}/doc/README-indimail.md
-%attr(644,root,root)                    %{shareddir}/doc/README.ldap
-%attr(644,root,root)                    %{shareddir}/doc/README.vlimits
+%attr(644,root,root)                    %{shareddir}/doc/README-ldap.md
+%attr(644,root,root)                    %{shareddir}/doc/README-vlimits.md
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
