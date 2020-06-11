@@ -1,5 +1,13 @@
 # Installing Indimail using DNF/YUM/APT Repository
 
+**TERMINOLOGY used for commands**
+
+TERMINOLOGY|Description
+-----------|-----------
+$ command|command `command` was executed by a non-privileged user
+# command|command `command` was executed by the `root` user
+$ sudo command| command `command` requires root privilege to run. sudo was used to gain root privileges
+
 You can get binary RPM / Debian packages at
 
 * [Stable](http://download.opensuse.org/repositories/home:/indimail/)
@@ -58,31 +66,28 @@ For latest details refer to [README](https://github.com/mbhangui/docker/blob/mas
 
 IndiMail now has docker images. You can read about installing Docker here. Once you have installed docker-engine, you need to start it. Typically it would be
 
-```
-$ sudo service docker start
-```
+`$ sudo service docker start`
 
 To avoid having to use sudo when you use the docker command, create a Unix group called docker and add users to it. When the docker daemon starts, it makes the ownership of the Unix socket read/writable by the docker group.
 NOTE: Warning: The docker group is equivalent to the root user; For details on how this impacts security in your system, see [Docker Daemon attack surface](https://docs.docker.com/engine/security/security/#docker-daemon-attack-surface)
 
 ```
 $ sudo groupadd docker 
-$ sudo usermod -aG docker your_username
+$ sudo usermod -aG docker your\_username
 ```
 Log out and login again to ensure your user is running with the correct permissions. You can run the unix id command to confirm that you have the docker group privileges. e.g.
 
 ```
 $ id -a
-uid=1000(mbhangui) gid=1000(mbhangui) groups=1000(mbhangui),10(wheel),545(docker) context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
+uid=1000(mbhangui) gid=1000(mbhangui) groups=1000(mbhangui),10(wheel),545(docker) context=unconfined\_u:unconfined\_r:unconfined\_t:s0-s0:c0.c1023
 ```
 
-Now we need to pull the docker image for IndiMail. use the ___docker pull___ command. The values for tag can be fedora-23, centos7, debian8, ubuntu-15.10, ubuntu-14.03. If your favourite OS is missing, let me know. You can find the list of all images here.
+Now we need to pull the docker image for IndiMail. use the **docker pull** command. The values for tag can be fedora-23, centos7, debian8, ubuntu-15.10, ubuntu-14.03. If your favourite OS is missing, let me know. You can find the list of all images here.
 
-```
-$ docker pull cprogrammer/indimail:tag
-```
+`$ docker pull cprogrammer/indimail:tag`
+
 (for indimail-mta image, execute docker pull cprogrammer/indimail-mta:tag
-You can now list the docker image by executing the ___docker images___ command.
+You can now list the docker image by executing the **docker images** command.
 
 ```
 $ docker images
@@ -90,13 +95,13 @@ REPOSITORY                 TAG                 IMAGE ID            CREATED      
 cprogrammer/indimail       fedora-23           a02e6014a67b        53 minutes ago      1.774 GB
 ```
 
-Now let us run a container with this image using the image id a02e6014a67b listed above by running the ___docker run___ command. The **\-\-privileged** flag gives all capabilities to the container, and it also lifts all the limitations enforced by the device cgroup controller. In other words, the container can then do almost everything that the host can do. This flag exists to allow special use-cases, like running Docker within Docker. In our case, I want the systemctl command to work and the container run like a normal host.
+Now let us run a container with this image using the image id a02e6014a67b listed above by running the **docker run** command. The **--privileged** flag gives all capabilities to the container, and it also lifts all the limitations enforced by the device cgroup controller. In other words, the container can then do almost everything that the host can do. This flag exists to allow special use-cases, like running Docker within Docker. In our case, I want the systemctl command to work and the container run like a normal host.
 
 
-I have now figured out the you don't require the \-\-privileged flag. This flag gives the container access to the host's systemd. A better way is to add SYS\_ADMIN capability
+I have now figured out the you don't require the --privileged flag. This flag gives the container access to the host's systemd. A better way is to add SYS\_ADMIN capability
 
 ```
-$ docker run \-ti \-\-cap-add=SYS_ADMIN -e "container-docker" -v /sys/fs/cgroup:/sys/fs/cgroup:ro a02e6014a67b /sbin/init
+$ docker run -ti --cap-add=SYS\_ADMIN -e "container-docker" -v /sys/fs/cgroup:/sys/fs/cgroup:ro a02e6014a67b /sbin/init
 ```
 
 The above will start a fully functional Fedora 23 OS with IndiMail, MySQL, sshd, httpd services up and running. We can list the running container by running the docker ps command
@@ -110,7 +115,7 @@ fd09c7ca75be        a02e6014a67b        "/sbin/init"        38 seconds ago      
 We now have a running container and can attach to it and use it like any functional host. Run the docker exec command. The **-ti** option attaches a pseudo terminal and makes the session interactive.
 
 ```
-$ docker exec -ti fd09c7ca75be /bin/bash \-\-login
+$ docker exec -ti fd09c7ca75be /bin/bash --login
 #
 # /var/indimail/bin/svstat /service/\*
 # /service/fetchmail: down 32 seconds
@@ -142,9 +147,8 @@ $ docker exec -ti fd09c7ca75be /bin/bash \-\-login
 
 You now have a fully functional mail server with a pre-configured virtual domain indimail.org and a pre-configured virtual user testuser01@indimail.org. You can use IMAP/POP3/SMTP to your heart's content. If not satisfied, try out the ssl enabled services IMAPS/POP3S/SMTPS or STARTTLS command. If still not satisfied, read the man pages in /var/indimail/man/\*. You can stop the container by executing the docker stop command.
 
-```
-$ docker stop fd09c7ca75be
-```
+`$ docker stop fd09c7ca75be`
+
 You can make your changes to the container and commit changes by using the docker commit command. Learning how to use docker is not difficult. Just follow the Docker Documentation. If you are lazy like me, just read the Getting Started guide.
 I am also a newbie as far as docker is concerned. Do let me know your experience with network settings and other advanced docker topics, that you may be familiar with. Do send few bottles of beer my way if you can.
 
@@ -184,15 +188,15 @@ The diagram below shows how qmail-multi(8) works ![qmail-multi](qmail_multi.png)
 
 You just need to configure the following environment variables to have the qmail-queue(8) frontends using qmail-multi(8)
 
-1. QUEUE\_BASE – Base directory where all queues will be placed
-2. QUEUE\_COUNT – number of queues
-3. QUEUE\_START – numeric prefix of the first queue
+1. QUEUE_BASE – Base directory where all queues will be placed
+2. QUEUE_COUNT – number of queues
+3. QUEUE_START – numeric prefix of the first queue
 
 e.g. If you want IndiMail to use 10 queues, this is what you will do
 
 ```
-$ % su
-for i in qmail-smtpd.25 qmail-smtpd.465 qmail-smtpd.587 qmail-send.25 \
+$ sudo /bin/bash
+# for i in qmail-smtpd.25 qmail-smtpd.465 qmail-smtpd.587 qmail-send.25 \
   qmail-qmqpd.628 qmail-qmtpd.209
 do
   echo 10 > /service/$i/variables/QUEUE_COUNT
@@ -204,13 +208,13 @@ done
 You also need to make sure that you have ten queues in /var/indimail/queue.
 
 ```
-% su
+$ sudo /bin/bash
 # for i 1 2 3 4 5 6 7 8 9 10
 do
   /usr/bin/queue-fix /var/indimail/queue/queue”$i” > /dev/null
 done
 # exit
-% ls -ld var/indimail/queue/queue*
+$ ls -ld var/indimail/queue/queue*
 drwxr-x---. 12 qmailq qmail 4096 Mar 30  2017 /var/indimail/queue/queue1
 drwxr-x---. 12 qmailq qmail 4096 Dec  7 10:45 /var/indimail/queue/queue10
 drwxr-x---. 12 qmailq qmail 4096 Mar 30  2017 /var/indimail/queue/queue2
@@ -226,8 +230,8 @@ drwxr-x---. 12 qmailq qmail 4096 Dec  7 10:45 /var/indimail/queue/queue9
 Now all you need is restart of all services to use the new QUEUE\_BASE, QUEUE\_COUNT, QUEUE\_START environment variables
 
 ```
-% sudo svc -d /service/qmail-smtpd* /service/qmail-send.25 /service/qmail-qm?pd.*
-% sudo svc -u /service/qmail-smtpd* /service/qmail-send.25 /service/qmail-qm?pd.*
+$ sudo svc -d /service/qmail-smtpd* /service/qmail-send.25 /service/qmail-qm?pd.*
+$ sudo svc -u /service/qmail-smtpd* /service/qmail-send.25 /service/qmail-qm?pd.*
 ```
 
 # Using systemd to start IndiMail
@@ -260,9 +264,7 @@ From Fedora 15 onwards, upstart has been replaced by a service called systemd. D
 
 To enable indimail service on boot, run the following systemctl command
 
-```
-# systemctl enable svscan.service
-```
+`# systemctl enable svscan.service`
 
 Now to start IndiMail you can use the usual service command
 
@@ -459,9 +461,10 @@ You can now also query the status of the running IndiMail service by using the s
 
 Jun 10 07:15:06 argos.indimail.org systemd[1]: Started IndiMail Messaging Platform.
 ```
+
 # Eliminating Duplicate Emails during local delivery
 
-Often you will find program like MS outlook, notorious for sending duplicate emails, flooding your inbox. IndiMail allows you to quickly deal with this proprietary nonsense by turning on duplicate eliminator in **vdelivermail**(8) - the default MDA. To turn on the duplicate eliminator in vdelivermail, you need to set **ELIMINATE\_DUPS** and **MAKE\_SEEKABLE** environment variables.
+Often you will find program like MS outlook, notorious for sending duplicate emails, flooding your inbox. IndiMail allows you to quickly deal with this proprietary nonsense by turning on duplicate eliminator in **vdelivermail**(8) - the default MDA. To turn on the duplicate eliminator in vdelivermail, you need to set **ELIMINATE_DUPS** and **MAKE_SEEKABLE** environment variables.
 
 ```
 $ sudo /bin/bash
@@ -473,16 +476,14 @@ $ sudo /bin/bash
 
 If you do not use vdelivermail and want to use your own delivery agent? Fear not by using ismaildup(1). ismaildup expects the email on standard input and is easily scriptable like the example below in a .qmail file.
 
-```
-|ismaildup /usr/bin/maildirdeliver /home/manny/Maildir/
-```
+`|ismaildup /usr/bin/maildirdeliver /home/manny/Maildir/`
 
 will deliver mails to /home/manny/Maildir while discarding duplicates.
 
-If you are not happy with the 900 seconds (15 minutes) time interval for checking duplicates, you can change it by setting the DUPLICATE\_INTERVAL environment variable. The following will not allow a single duplicate to be entertained within 24 hours
+If you are not happy with the 900 seconds (15 minutes) time interval for checking duplicates, you can change it by setting the DUPLICATE_INTERVAL environment variable. The following will not allow a single duplicate to be entertained within 24 hours
 
 ```
-% sudo /bin/bash
+$ sudo /bin/bash
 # echo 86400 > /service/qmail-send.25/variables/DUPLICATE_INTERVAL
 # svc -d /service/qmail-send.25
 # svc -u /service/qmail-send.25
@@ -500,15 +501,11 @@ This allows IndiMail to interface with many programs written by others. IndiMail
 
 1. inside .qmail
 
-   ```
-   | preline procmail`
-   ```
+   `| preline procmail`
 
 2. edit .qmail-default
 
-   ```
-   | preline -f procmail -p -m /etc/indimail/procmailrc
-   ```
+   `| preline -f procmail -p -m /etc/indimail/procmailrc`
 
 3. have an alias
    You can use valias(1) to create an alias to call procmail. The following alias calls procmail to deliver the mail using /etc/indimail/procmailrc as a procmail recipe
@@ -533,9 +530,7 @@ unset RPLINE
 
 You can replace maildirdeliver in the last line with vdelivermail(8)
 
-```
-| /usr/sbin/vdelivermail '' bounce-no-mailbox
-```
+`| /usr/sbin/vdelivermail '' bounce-no-mailbox`
 
 # Writing Filters for IndiMail
 IndiMail provides multiple methods by which you can intercept an email in transit and modify the email headers or the email body. A filter is a simple program that expects the raw email on standard input and outputs the message text back on standard output. The program /bin/cat can be used as a filter which simply copies the standard input to standard output without modifying anything. Some methods can be used before the mail gets queued and some methods can be used before the execution of local / remote delivery.
@@ -551,7 +546,7 @@ Let us say that we have written a script /usr/local/bin/myfilter. The myfilter p
 The below configuration causes all inbound SMTP email to be fed through the filter /usr/local/bin/myfilter. You can use the programs 822header(1), 822body(1) inside myfilter to get and manipulate the headers and body (See 1.5.1).
 
 ```
-% su root
+$ sudo /bin/bash
 # echo /usr/local/bin/myfilter > /service/qmail-smtpd.25/variables/FILTERARGS
 # svc -d /service/qmail-smtpd.25
 # svc -u /service/qmail-smtpd.25
@@ -564,7 +559,7 @@ NOTE: If the program myfilter returns 100, the message will be bounced. If it re
 You can use qmail-qfilter(1). qmail-qfilter allows you to run multiple filters passed as command line arguments to qmail-qfilter. Since QMAILQUEUE doesn't allow you to specify multiple arguments, you can write a shell script which calls qmail-qfilter and have the shell script defined as QMAILQUEUE environment variable.
 
 ```
-% su root
+$ sudo /bin/bash
 # echo /usr/bin/qmail-qfilter /usr/local/bin/myfilter > /usr/local/bin/qfilter
 # chmod +x /usr/local/bin/qfilter
 # echo /usr/local/bin/qfilter > /service/qmail-smtpd.25/variables/QMAILQUEUE
@@ -576,10 +571,11 @@ You can use qmail-qfilter(1). qmail-qfilter allows you to run multiple filters 
 NOTE: you can define QQF\_MAILQUEUE to /usr/bin/qmail-nullqueue to discard the mail (blackhole).
 
 ### 1.1.3 Using QMAILQUEUE with your own program
+
 When you want to use your own program as QMAILQUEUE, then your program is responsible for queuing the email. It is trivial to queue the email by calling qmail-multi(8). You script can read the stdin for the raw message (headers + body) and pipe the output (maybe after modifications) to qmail-multi(8). If you are doing DK/DKIM signing, you can execute qmail-dk(8) instead of qmail-multi(8). You can have qmail-dk(8) call qmail-dkim(8) and qmail-dkim(8) calls qmail-multi(8). Assuming you want to do DK/DKIM signing, and myfilter calls qmail-dk(8), you can do the following
 
 ```
-% su root
+$ sudo /bin/bash
 # echo /usr/local/bin/myfilter > /service/qmail-smtpd.25/variables/QMAILQUEUE
 # echo /usr/bin/qmail-dkim > /service/qmail-smtpd.25/variables/DKQUEUE
 # echo /usr/bin/qmail-multi > /service/qmail-smtpd.25/variables/DKIMQUEUE
@@ -591,12 +587,12 @@ NOTE: You can set the environment variable NULLQUEUE before calling qmail-multi 
 
 ## 1.2 Filtering during local / remote delivery
 
-###1.2.1 Using FILTERARGS environment variable
+### 1.2.1 Using FILTERARGS environment variable
 
 The below configuration causes all local / remote deliveries to be fed through the filter /usr/local/bin/myfilter. You can use the programs 822header(1), 822body(1) inside myfilter to get and manipulate the headers and body.
 
 ```
-% su root
+$ sudo /bin/bash
 # echo /usr/local/bin/myfilter > /service/qmail-send.25/variables/FILTERARGS
 # svc -d /service/qmail-send.25
 # svc -u /service/qmail-send.25
@@ -633,6 +629,7 @@ The raw email (header + body) is available on stdin. You can use 822header(8), 8
 ```
 exec qmail-local  "$@"     #(for local deliveries)
 exec qmail-remote "$@"     #(for remote deliveries)
+```
 
 NOTE: You can exit with value 0 instead of calling qmail-local / qmail-remote to discard the mail completely (blackhole)
 
@@ -641,9 +638,7 @@ NOTE: You can exit with value 0 instead of calling qmail-local / qmail-remote to
 Both .qmail files and valias mechanism allows you to execute your own programs for local deliveries. See the man pages for dot-qmail(5) and valias(1) for more details. After manipulating the original raw email on stdin, you can pipe the out to the program maildirdeliver(1) for the final delivery.
 Assuming you write the program myscript to call maildirdeliver program, you can use the valias command to add the following alias
 
-```
-% valias -i "|/usr/local/bin/myfilter" testuser01@example.com
-```
+`$ valias -i "|/usr/local/bin/myfilter" testuser01@example.com`
 
 Now any mail sent to testuser01@example.com will be given to the program /usr/local/bin/myfilter as standard input.
 NOTE: you can exit with value 0 instead of calling the maildirdeliver program to discard the mail completely (blackhole).
@@ -653,7 +648,7 @@ NOTE: you can exit with value 0 instead of calling the maildirdeliver program to
 IndiMail's vfilter(8) mechanism allows you to create rule based filter based on any keyword in the message headers or message body. You can create a vfilter by calling the vcfilter(1) program.
 
 ```
-% vcfilter -i -t myfilter -h 2 -c 0 -k "failure notice" -f /NoDeliver -b "2|/usr/local/bin/myfilter" testuser01@example.com
+$ vcfilter -i -t myfilter -h 2 -c 0 -k "failure notice" -f /NoDeliver -b "2|/usr/local/bin/myfilter" testuser01@example.com
 ```
 
 NOTE: you can exit with value 0 instead of putting anything on standard output to discard the mail completely (blackhole).
@@ -944,7 +939,7 @@ exit 111
 
 # IndiMail Delivery mechanism explained
 
-Any email that needs to be delivered needs to be put into a queue before it can be taken up for delivery. Email can be submitted to the queue using qmail-queue command or qmail\_open() function. The following programs use the qmail\_open() API -
+Any email that needs to be delivered needs to be put into a queue before it can be taken up for delivery. Email can be submitted to the queue using qmail-queue command or qmail_open() function. The following programs use the qmail_open() API -
 condredirect, dot-forward, fastforward, filterto, forward, maildirserial, new-inject, ofmipd, qmail-inject, qmail-local, qmail-qmqpd, qmail-qmtpd, qmail-queue, qmail-send, qreceipt, replier, rrforward, qmail-smtpd.
 Of these, qmail-smtpd and qmail-qmtpd accept an email for a domain only if the domain is listed in rcpthosts. Once an email is accepted into the queue, qmail-send(8) decides if the mail is to be delivered locally or to a remote address. If the email address corresponds to a domain listed in locals or virtualdomains control file, steps are taken to have the email delivered locally.
 
@@ -955,9 +950,7 @@ See INSTALL.mbox, INSTALL.maildir, and INSTALL.vsm for more information.
 To select your default mailbox type, just enter the defaultdelivery value from the table into /var/indimail/control/defaultdelivery.
 e.g., to select the standard qmail Maildir delivery, do:
 
-``
-echo ./Maildir/ >/etc/indimail/control/defaultdelivery
-``
+`echo ./Maildir/ >/etc/indimail/control/defaultdelivery`
 
 ## Addresses
 Once you have decided the delivery mode above, one needs to have some mechanism to assign a local address for the delivery. qmail (which is what IndiMail uses) offers the following mechanism
@@ -966,20 +959,17 @@ Any email addressed to user@domain listed in the file /etc/indimail/control/lo
 virtualdomains
 The control file /etc/indimail/control/virtualdomains allows you to have multiple domains configured on a single server. Entries in virtualdomains are of the form:
 
-```
-user@domain:prepend
-```
+`user@domain:prepend`
 
 qmail converts user@domain to prepend-user@domain and treats the result as if domain was local. The user@ part is optional. If it's omitted, the entry matches all @domain addresses.
 When you run the command
 
-```
-vadddomain example.com some_password
-```
+`$ sudo vadddomain example.com some_password`
 
 It will add the following entry in virtualdomains control file
 
 ```
+$ cat /etc/indimail/control/virtualdomains
 example.com:example.com
 ```
 
@@ -1011,18 +1001,24 @@ It means the same as
 for every string ext.
 When you add a virtualdomain using vadddomain, you will have the following entry
 
-`+example.com-:example.com:555:555:/var/indimail/domains/example.com:-::`
+```
++example.com-:example.com:555:555:/var/indimail/domains/example.com:-::
+```
 
 As stated earlier,  any email addressed to user@example.com will be delivered to local user example.com-user@example.com because of virtualdomains control file. The above address can be looked as
 
-`=user@example.com:example.com:555:555:/var/indimail/domains/example.com:-:user:`
+```
+=user@example.com:example.com:555:555:/var/indimail/domains/example.com:-:user:
+```
 
 So you can see that emails are controlled by .qmail-user in the directory /var/indimail/domains/example.com. if .qmail-user does not exist, then .qmail-default will be used
 Adding the entry
 
-`+example.com-customer_care-:example.com:555:555:/var/indimail/domains/example.com/cc:-::`
+```
++example.com-customer_care-:example.com:555:555:/var/indimail/domains/example.com/cc:-::
+```
 
-will cause emails to customer\_care-delhi@example.com, customer\_care-mumba@example.com, etc to be handled by /var/indimail/domains/cc/.qmail-default (if .qmail-customer\_care-delhi does does not exist).
+will cause emails to `customer_care-delhi@example.com`, `customer_care-mumba@example.com`, etc to be handled by /var/indimail/domains/cc/.qmail-default (if `.qmail-customer_care-delhi` does does not exist).
 
 ## Extension Addresses
 
@@ -1051,12 +1047,12 @@ The script below also allows you to define multiple outgoing IP addresses for a
 Let us name the below script balance\_outgoing
 
 ```
-% su
+$ sudo /bin/bash
 # svc -d /service/qmail-send.25
 # echo "/usr/bin/balance_outgoing" > /service/qmail-send.25/variables/QMAILREMOTE
 # svc -u /service/qmail-send.25
 # exit
-%
+$
 
 ```
 
@@ -1113,12 +1109,18 @@ IndiMail allows a mechanism by which you can use your own script/program to hand
 
 ## 1. Using environment variable BOUNCEPROCESSOR
 
-When you define the environment variable BOUNCEPROCESSOR as a valid path to a program or script, the program gets called whenever a delivery fails permanently. The program runs with the uid qmails and is passed the following five arguments
-bounce\_file bounce\_report bounce\_sender original\_recipient bounce\_recipient
+When you define the environment variable BOUNCEPROCESSOR as a valid path to a program or script, the program gets called whenever a delivery fails permanently. The program runs with the uid *qmails* and is passed the following five arguments
+
+* bounce_file
+* bounce_report
+* bounce_sender
+* original_recipient
+* bounce_recipient
+
 To set BOUNCEPROCESSOR, you would do the following
 
 ```
-% su
+$ sudo /bin/bash
 # echo "bounce_processor_path" > /service/qmail-send.25/variables/BOUNCEPROCESSOR
 # svc -d /service/qmail-send.25
 # svc -u /service/qmail-send.25
@@ -1136,7 +1138,9 @@ where pat is a regular expression which matches a bounce recipient.  envar1, e
 
 e.g.
 
-`support@indimail.org:CONTROLDIR=control2,QMAILQUEUE=/usr/bin/qmail-nullqueue`
+```
+support@indimail.org:CONTROLDIR=control2,QMAILQUEUE=/usr/bin/qmail-nullqueue
+```
 
 causes all bounces generated for the sender support@indimail.org to be discarded.
 
@@ -1146,7 +1150,7 @@ qmail-send uses qmail-queue to queue bounces and aliases/forwards. This can be c
 e.g
 
 ```
-% su
+$ sudo /bin/bash
 # echo /usr/bin/qmail-nullqueue > /service/qmail-send.25/variables/BOUNCEQUEUE
 # svc -d /service/qmail-send.25
 # svc -u /service/qmail-send.25
@@ -1159,16 +1163,15 @@ disables bounces system-wide. Though disabling bounces may not be the right thin
 IndiMail uses a modified version of qmail as the MTA. For local deliveries, qmail-lspawn reads a series of local delivery commands from descriptor 0, invokes qmail-local to perform the deliveries. qmail-local reads a mail message and delivers to to a user by the procedure described in dot-qmail(5). IndiMail uses vdelivermail as the local delivery agent.
 A virtual domain is created by the command vadddomain(1).
 
-```
-% su
-# vadddomain example.com some_password
-```
+`$ sudo vadddomain example.com some_password`
 
 The above command creates a virtual domain with delivery instructions in /var/indimail/domains/example.com/.qmail-default file. A line in this file is of the form
 
-`/usr/sbin/vdelivermail '' delivery_instruction_for_non_existing_user`
+```
+/usr/sbin/vdelivermail '' delivery_instruction_for_non_existing_user
+```
 
-The `delivery_instruction_for_non_existing_user` can have one of the following 5 forms
+The `delivery\_instruction\_for\_non\_existing\_user` can have one of the following 5 forms
 
  1. delete 
  2. bounce-no-mailbox 
@@ -1193,11 +1196,15 @@ IndiMail provides a utility called altermime(1) to add your own disclaimers on e
 
 The filterargs control file allows you to insert any filter before remote or local delivery. You can use altermime to insert a disclaimer as below
 
-`*:/usr/bin/altermime --input=- --disclaimer=/etc/indimail/control/disclaimer`
+```
+*:/usr/bin/altermime --input=- --disclaimer=/etc/indimail/control/disclaimer
+```
 
 If you want disclaimer to be used only for your outgoing mails then, you could do the following
 
-`*:remote:/usr/bin/altermime --input=- --disclaimer=/etc/indimail/control/disclaimer`
+```
+*:remote:/usr/bin/altermime --input=- --disclaimer=/etc/indimail/control/disclaimer
+```
 
 In both the above examples the file /etc/indimail/control/disclaimer contains the text of your disclaimer
 
@@ -1206,7 +1213,7 @@ In both the above examples the file /etc/indimail/control/disclaimer contains th
 Just like filterargs control file, the environment variable FILTERARGS allows you to set any custom filter before your mail gets deposited into the queue by qmail-queue(8).
 
 ```
-% su
+$ sudo /bin/bash
 # echo /usr/bin/altermime --input=- --disclaimer=/etc/indimail/control/disclaimer \
   > /service/qmail-smtpd.587/variables/FILTERARGS
 # svc -d /service/qmail-smtpd.587
@@ -1224,7 +1231,7 @@ IndiMail provides multiple options for those who want their emails archived auto
 If EXTRAQUEUE environment variable is set to any environment variable, qmail-queue will deposit an extra copy of the email which it receives for putting it in the queue. Normally you would set EXTRAQUEUE variable in any of the clients which use qmail-queue. e.g. qmail-smtpd, qmail-inject, sendmail, etc. If you have setup IndiMail as per the official instructions, you can set EXTRAQUEUE for incoming and outgoing mails as given below
 
 ```
-% su
+$ sudo /bin/bash
 # echo "archive@example.com" > /service/qmail-smtpd.25/variables/EXTRAQUEUE
 # svc -d /service/qmail-smtpd.25 /service/qmail-smtpd.587
 # svc -u /service/qmail-smtpd.25 /service/qmail-smtpd.587
@@ -1238,22 +1245,22 @@ This control file allows you to set up rule based archiving. For any specific se
 
 `type:regexp:dest_address`
 
-* Here type is 'T' to set a rule on recipients. You can set the type as 'F' to set a rule on the sender.
-* regexp is any email address which matches the sender or recipient (depending on whether type is 'T' or 'F').
-* dest\_address should expand to a valid email address. You can have a valid email address. You can also have the '%' sign followed by the letters u, d or e in the address to have the following substitutions made
+* Here *type* is 'T' to set a rule on recipients. You can set the type as 'F' to set a rule on the sender.
+* *regexp* is any email address which matches the sender or recipient (depending on whether type is 'T' or 'F').
+* *dest_address* should expand to a valid email address. You can have a valid email address. You can also have the '%' sign followed by the letters u, d or e in the address to have the following substitutions made
 
 ```
-%u - gets replaced by the user component of email address (without the '@' sign)
-%d - gets replaced by the domain component of email address
-%e - gets replaced by the email address
+$u - gets replaced by the user component of email address (without the '@' sign)
+$d - gets replaced by the domain component of email address
+$e - gets replaced by the email address
 ```
 
 The email address in the above substitution will be the recipient (if type is 'T') and the sender (if type is 'F').
-another example and a cool tip :)
+Here is another example and a cool tip.
 
 `T:*:%u@arch%d`
 
-Will make a hot standby of your incoming mails for yourdomain on another server hosting ___archyourdomain___.
+Will make a hot standby of your incoming mails for *yourdomain* on another server hosting arch*yourdomain*.
 
 For some organizations, email archiving is a must due to compliance with regulatory standards like SOX, HIPAA, Basel II Accord (effective 2006), Canadian Privacy Act, Data Protection Act 1988, EU Data Protection Directive 95/46/FC, Federal Information Security Management Act (FISMA), Federal Rules of Civil Procedure (FRCP), Financial Services Act 198, regulated by FSA, Freedom of Information Act (FOIA), Freedom of Information Act (in force January 2005), The Gramm-Leach-Bliley Act (GLBA), MiFID (Markets in Financial Instruments Directives), PIPEDA (Personal Information Protection and Electronic Documents Act), SEC Rule 17a-4/ NASD 3010 (Securities Exchange Act 1934).
 
@@ -1274,7 +1281,7 @@ IndiMail allows you to configure most of its functionality through set of enviro
 Some of these environment variables can be set during the startup of various services. IndiMail has all its services configured as directories in the /service directory. As an example, if you want to force authenticated SMTP on all your users, setting the environment variable REQUIREAUTH allows you to do so.
 
 ```
-% su
+$ sudo /bin/bash
 # echo 1 > /service/qmail-smtpd.587/variables/REQUIREAUTH
 # svc -d /service/qmail-smtpd.587
 # svc -u /service/qmail-smtpd.587
@@ -1282,9 +1289,9 @@ Some of these environment variables can be set during the startup of various ser
 
 sets the qmail-smtpd running on port 587 to force authentication.
 
-Setting environment variables in your startup script, in your .profile or your shell forces you to permanently set the environment variable to a specific value. Using **envrules**, IndiMail allows you to set these environment variables specific to different ___senders___ or ___recipients___. envrules allows IndiMail platform to be tuned differently for different users. No other messaging platform, to the best of my knowledge, is capable of doing that. Another way of saying is that envrules allows your IndiMail platform to dynamically change its behavior for each and every user.
+Setting environment variables in your startup script, in your .profile or your shell forces you to permanently set the environment variable to a specific value. Using **envrules**, IndiMail allows you to set these environment variables specific to different *senders* or *recipients* envrules allows IndiMail platform to be tuned differently for different users. No other messaging platform, to the best of my knowledge, is capable of doing that. Another way of saying is that envrules allows your IndiMail platform to dynamically change its behavior for each and every user.
 
-For the SMTP service, you can set different environment variables for different ___senders___. All that is required is to define the following in the control file /etc/indimail/control/from.envrules. The format of this file is of the form
+For the SMTP service, you can set different environment variables for different *senders*. All that is required is to define the following in the control file /etc/indimail/control/from.envrules. The format of this file is of the form
 
 `pattern:envar1=val,envar2=val,...]`
 
@@ -1326,9 +1333,7 @@ CONTROLDIR, SMTPROUTE, SIGNKEY, OUTGOINGIP, DOMAINBINDINGS, AUTH_SMTP, MIN_PENAL
 
 The following list of environment variables which can be modified using envrules are specfic to qmail-local. 
 
-```
-USE_SYNCDIR, USE_FSYNC, and LOCALDOMAINS
-```
+`USE_SYNCDIR, USE_FSYNC, and LOCALDOMAINS`
 
 Do man qmail-smtpd(8), spawn-filter(8) to know the full list of environment variables that can be controlled using envrules.
 
@@ -1343,7 +1348,7 @@ QMQP provides a centralized mail queue within a cluster of hosts. QMQP clients d
 For a minimal QMQP client installation, you need to have the following
 
 * forward, qmail-inject, rmail, sendmail, predate, datemail, mailsubj, qmail-showctl, qmaildirmake, maildir2mbox, maildirwatch in /usr/bin;
-* shared libs libsrs2-1.0*  from /usr/lib64
+* shared libs libsrs2-1.0\*  from /usr/lib64
 * a symbolic link to qmail-qmqpc from /usr/sbin/qmail-queue; 
 * symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail; 
 * a list of IP addresses of QMQP servers, one per line, in /etc/indimail/control/qmqpservers;
@@ -1358,7 +1363,7 @@ Note that users can still use all the qmail-inject environment variables to cont
 
 If you want to setup a SMTP service, it might be easier to install the entire indimail-mta package and remove the services qmail-send.25. You can use svctool to remove the service e.g.
 
-`% sudo /usr/sbin/svctool --rmsvc qmail-send.25`
+`$ sudo /usr/sbin/svctool --rmsvc qmail-send.25`
 
 In case the mails generated by the client is to be relayed to the outside world, you should set the SMTP service and have /usr/sbin/sendmail, /usr/lib/sendmail linked to /usr/bin/sendmail. This is to ensure that tasks like virus scanning, dk, dkim signing happen at the client end. You can also choose not to have these tasks done at the client end, but rather have it carried out by the QMQP service.
 
@@ -1369,14 +1374,15 @@ IndiMail runs a QMQP service which handles incoming QMQP connections on port 628
 If you have installed IndiMail using the RPM, QMQP service is installed by default. However, you need to enable it.
 
 ```
-% sudo /bin/rm /service/qmail-qmqpd.628/down
-% sudo /usr/bin/svc -u /service/qmail-qmqpd.628
+$ sudo /bin/bash
+# /bin/rm /service/qmail-qmqpd.628/down
+# /usr/bin/svc -u /service/qmail-qmqpd.628
 ```
 
 If you have installed IndiMail using the source, you may create the QMQP service using the following command
 
 ```
-% sudo /usr/sbin/svctool --qmqp=628 --servicedir=/service \
+$ sudo /usr/sbin/svctool --qmqp=628 --servicedir=/service \
   --qbase=/var/indimail/queue --qcount=5 --qstart=1 \
   --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
   --fsync --syncdir --memory=104857600 --min-free=52428800
@@ -1386,7 +1392,7 @@ The above command will create a supervised service which runs qmail-qmqpd under 
 
 A QMQP server shouldn't even have to glance at incoming messages; its only job is to queue them for qmail-send(8). Hence you should allow access to QMQP service only from your authorized clients. You can edit the file /etc/indimail/tcp.qmqp to grant specific access to clients. If you make changes to tcp.qmqp, don't forget to run the qmailctl command
 
-`% sudo /usr/bin/qmailctl cdb`
+`$ sudo /usr/bin/qmailctl cdb`
 
 Note: Some of the tasks like virus/spam filtering, dk, dkim signing, etc can be done either by the client (if `QMAILQUEUE=/usr/sbin/qmail-multi`), or can be performed by QMQP service if **QMAILQUEUE** is defined as qmail-multi in the service's variable directory.
 
@@ -1401,7 +1407,7 @@ Many of my friends run web servers which need to send out emails. If you already
 ### How do I set up a QMQP service?
 
 You need to have at least one host on your network offering QMQP service to your clients. IndiMail includes a QMQP server, qmail-qmqpd. Here's how to set up QMQP service to authorized client hosts on your IndiMail messaging server.
-first create /etc/indimail/tcp.qmqp in tcprules format to allow queueing from the authorized hosts. make sure to deny connections from unauthorized hosts. for example, if queueing is allowed from 1.2.3.*:
+first create /etc/indimail/tcp.qmqp in tcprules format to allow queueing from the authorized hosts. make sure to deny connections from unauthorized hosts. for example, if queueing is allowed from 1.2.3.\*:
 
 ```
 1.2.3.:allow
@@ -1411,21 +1417,21 @@ first create /etc/indimail/tcp.qmqp in tcprules format to allow queueing from th
 Then create /etc/indimail//tcp/tcp.qmqp.cdb:
 
 ```
-% sudo /usr/bin/tcprules /etc/indimail/tcp/tcp.qmqp.cdb \
+$ sudo /usr/bin/tcprules /etc/indimail/tcp/tcp.qmqp.cdb \
     /etc/indimail/tcp/qmqp.tmp < /etc/indimail/tcp/tcp.qmqp
 ```
 
 You can change /var/indimail/etc/tcp.qmqp and run tcprules again at any time. Finally qmail-qmqpd to be run under supervise:
+NOTE: 628 is the TCP port for QMQP.
 
 ```
-% sudo /usr/sbin/svctool --qmqp=628 --servicedir=/service \
+$ sudo /usr/sbin/svctool --qmqp=628 --servicedir=/service \
   --qbase=/var/indimail/queue --qcount=5 --qstart=1 \
   --cntrldir=control --localip=0 \
   --maxdaemons=75 --maxperip=25 --fsync --syncdir \
   --memory=104857600 --min-free=52428800
 ```
 
-628 is the TCP port for QMQP.
 
 ### How do I install indimail-mini?
 
@@ -1440,7 +1446,7 @@ A indimail-mini installation is just like a indimail installation, except that i
 Here's what you do need:
 
 * forward, qmail-inject, sendmail, rmail predate, datemail, mailsubj, qmail-showctl, maildirmake, maildir2mbox, and maildirwatch in your path
-* shared libs libsrs2-1.0* from /usr/lib64 (/usr/lib on 32 bit systems)
+* shared libs libsrs2-1.0\* from /usr/lib64 (/usr/lib on 32 bit systems)
 * a symbolic link to /usr/sbin/qmail-qmqpc from /usr/sbin/qmail-queue; 
 * symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail; 
 * a list of IP addresses of QMQP servers, one per line, in /etc/indimail/control/qmqpservers;
@@ -1450,7 +1456,7 @@ Here's what you do need:
 
 You can install all the above by manually copying the binaries and man pages from a host having standard IndiMail installation or you can install and setup just by using the indimail-mini RPM
 
-`% sudo rpm -ivh indimail-mini`
+`$ sudo rpm -ivh indimail-mini`
 
 Apart from the binaries, you need to do the following
 
@@ -1469,7 +1475,7 @@ Note that users can still use all the qmail-inject environment variables to cont
 Sometimes two or more Fedora package exist that serve the same purpose. The alternatives system provides a mechanism for selecting an active default application from several valid alternatives. You can use the alternatives system to configure as an alternative MTA for your system. Using alternatives, you don't have to create the links to /usr/bin/sendmail manually as instructed above.
 
 ```
-% sudo /usr/sbin/alternatives --install \
+$ sudo /usr/sbin/alternatives --install \
     /usr/sbin/sendmail mta /usr/bin/sendmail 120 \
     --slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
     /usr/share/man/man8/qmail-inject.8.gz \
@@ -1488,21 +1494,21 @@ IndiMail (release 1.6.9 onwards) provides you a hook, to execute any program aft
 
 A hook can be defined by creating a script or an executable in /usr/libexec/indimail with the name of the program being executed. e.g. if you create a script named vadduser in the directory /usr/libexec/indimail, the script will get executed whenever the program vadduser is used to add a user to indimail. The execution happens only if the program completes successfully. Depending on what you need to do, you can customize the scripts in a jiffy.
 
-The hook script name can be overridden by setting the `**POST_HANDLE**` environment variable. See the man pages of vadddomain, vaddaliasdomain, vdeldomain, vadduser, vmoduser, vmoveuser, vdeluser, vrenamedomain, vrenameuser, vpasswd for more details.
+The hook script name can be overridden by setting the **POST_HANDLE** environment variable. See the man pages of **vadddomain**(1), **vaddaliasdomain**(1), **vdeldomain**(1), **vadduser**(1), **vmoduser**(1), **vmoveuser**(1), **vdeluser**(1), **vrenamedomain**(1), **vrenameuser**(1), **vpasswd**(1) for more details.
 
 Let me know if you create an interesting script.
 
 Example of using a handle can be demonstrated when adding a user, vuserinfo is also run automatically
 
 ```
-% cat /usr/libexec/indimail/vadduser
+$ cat /usr/libexec/indimail/vadduser
 exec /usr/bin/vuserinfo $1
 ```
 
 because of the above, this is what happens when you add a user
 
 ```
-% sudo /var/indimail/bin/vadduser test05@example.com
+$ sudo /var/indimail/bin/vadduser test05@example.com
 New IndiMail password for test05@example.com:
 Retype new IndiMail password:
 name : test05@example.com
@@ -1533,7 +1539,7 @@ Delivery Time : No Mails Delivered yet / Per Day Limit not configured
 I personally use post execution handle for adding some mandatory users every time I add a new domain. So this is what my vadddomain handle looks like
 
 ```
-% cat /usr/libexec/indimail/vadddomain
+$ cat /usr/libexec/indimail/vadddomain
 /usr/bin/vdominfo $1
 /usr/bin/valias -i '&register-spam' register-spam@$1
 /usr/bin/valias -i '&register-ham' register-ham@$1
@@ -1566,14 +1572,14 @@ NOTE: you should use 1 & 2 only if if the host having the sender's IP is under y
 
 ## Using tcp.smtp
 
-Your startup script for the qmail smtp server must use the tcpserver \-x file option, similar to this startup line.
+Your startup script for the qmail smtp server must use the tcpserver -x file option, similar to this startup line.
 
 ```
 env - PATH="/usr/bin" tcpserver -H -R -x /etc/indimail/tcp.smtp.cdb \
   -c 20 -u 555 -g 555 0 smtp /var/indimail/bin/qmail-smtpd 2>&1
 ```
 
-IndiMail uses \-x option to tcpserver and hence you need not bother about the above line. You however need to edit /etc/indimail/tcp.smtp and put in lines for all static IP's that you will always want to relay access to.
+IndiMail uses -x option to tcpserver and hence you need not bother about the above line. You however need to edit /etc/indimail/tcp.smtp and put in lines for all static IP's that you will always want to relay access to.
 
 ```
 127.0.0.:allow,RELAYCLIENT=””
@@ -1584,7 +1590,7 @@ The above lines will cause **RELAYCLIENT** environment variable to be set for lo
 
 If you add any IP to tcp.smtp, you have to rebuild a cdb database tcp.smtp.cdb. You can run the following command
 
-`% sudo /usr/bin/qmailctl cdb`
+`$ sudo /usr/bin/qmailctl cdb`
 
 NOTE: Remember that you are exposed to unrestricted relaying from any of the IP addresses listed in tcp.smtp
 
@@ -1605,13 +1611,13 @@ Run the command /usr/bin/clearopensmtp in the cron every 30 Minutes
 By default every time, if anyone uses IndiMail's POP3 or IMAP service and authenticates, the following happens:
 
 1. On successful authentication, IMAP/POP3 daemon inserts entry into relay table, inserting email, IP address and timestamp
-2. If **CHECKRELAY** environment variable is enabled, SMTP checks the relay table for a entry within minutes specified by the **RELAY\_CLEAR\_MINUTES** environment variable. If the entry is there, **RELAYCLIENT** environment variable is set, which allows relaying. At this point, the SMTP server will allow that IP to relay for 60 Mins (default) 
+2. If **CHECKRELAY** environment variable is enabled, SMTP checks the relay table for a entry within minutes specified by the RELAY\_CLEAR\_MINUTES environment variable. If the entry is there, **RELAYCLIENT** environment variable is set, which allows relaying. At this point, the SMTP server will allow that IP to relay for 60 Mins (default) 
 
-clearopensmtp will clear all IP which have not authenticated in the past **RELAY\_CLEAR\_MINUTES**. clearopensmtp should be enabled in cron to run every 30 minutes.
+clearopensmtp will clear all IP which have not authenticated in the past RELAY\_CLEAR\_MINUTES. clearopensmtp should be enabled in cron to run every 30 minutes.
 
 # Set up Authenticated SMTP
 
-IndiMail also provides you authenticated SMTP providing **AUTH PLAIN**, **AUTH LOGIN**, **AUTH CRAM-MD5**, **CRAM-SHA1**, **CRAM-SHA256**, **CRAM-SHA512**, **CRAM-RIPEMD**, **DIGEST\_MD5** methods. Whenever a user successfully authenticates through SMTP, the **RELAYCLIENT** environment variable gets set. qmail-smtpd uses the **RELAYCLIENT** environment variable to allow relaying.
+IndiMail also provides you authenticated SMTP providing **AUTH PLAIN**, **AUTH LOGIN**, **AUTH CRAM-MD5**, **CRAM-SHA1**, **CRAM-SHA256**, **CRAM-SHA512**, **CRAM-RIPEMD**, **DIGEST_MD5** methods. Whenever a user successfully authenticates through SMTP, the **RELAYCLIENT** environment variable gets set. qmail-smtpd uses the **RELAYCLIENT** environment variable to allow relaying.
 
 Most of the email clients like thunderbird, evolution, outlook, outlook express have options to use authenticated SMTP.
 For a tutorial on authenticated SMTP, you can refer to this [tutorial](http://indimail.blogspot.com/2010/03/authenticated-smtp-tutorial.html)
@@ -1651,19 +1657,19 @@ IndiMail has a feature called **CHECKRECIPIENT** which allows indimail to check 
 
 You can selectively turn on **CHECKRECIPIENT** for selective domains by including those domains (prefixing the domain with '@' sign) in the control file /etc/indimail/control/chkrcptdomains.
 
-If the environment variable **MAX\_RCPT\_ERRCOUNT** is set qmail-smtpd will reject an email if in a SMTP session, the number of such recipients who do not exist, exceed MAX\_RCPT\_ERRCOUNT.
+If the environment variable MAX\_RCPT\_ERRCOUNT is set qmail-smtpd will reject an email if in a SMTP session, the number of such recipients who do not exist, exceed MAX\_RCPT\_ERRCOUNT.
 
 **CHECKRECIPIENT** also causes the RCPT TO command to be delayed by 5 seconds for every non-existent recipient, to make harvesting of email addresses difficult.
 
 If you do not have large number of users
 
 ```
-% su
+$ sudo /bin/bash
 # echo 1 > /service/qmail-smtpd.25/variables/CHECKRECIPIENT
 # svc -d /service/qmail-smtpd.25
 # svc -u /service/qmail-smtpd.25
 # exit
-%
+$
 ```
 
 # IndiMail Control Files Formats
@@ -1672,19 +1678,28 @@ A little known feature of IndiMail allows some of your control files to be in pl
 
 The mechanism is quite simple. For example, if you have the control file badmailfrom, qmail-smtpd will use badmailfrom. If you have the file badmailfrom.cdb, qmail-smtpd will first do cdb lookup in badmailfrom.cdb. To create badmailfrom.cdb, you need to run the command.
 
-`% sudo /usr/bin/qmail-cdb badmailfrom`
+`$ sudo /usr/bin/qmail-cdb badmailfrom`
 
 You can also have your entries in a MySQL table. Let say you have a MySQL server on the server localhost, a database named 'indimail' with user 'indimail' having password 'ssh-1.5-'. To enable the control file in MySQL you need to create the control file with a .sql extension. The following enables the badmailfrom in MySQL
 
-`# echo "localhost:indimail:ssh-1.5-:indimail:badmailfrom" > badmailfrom.sql`
+```
+# echo "localhost:indimail:ssh-1.5-:indimail:badmailfrom" > badmailfrom.sql
+```
 
 Once you have created a file badmailfrom.sql, qmail-smtpd will connect to the MySQL server on localhost and look for entry in the column 'email' in the table badmailfrom. If this table does not exist, qmail-smtpd will create an empty table using the following SQL create statement
 
-`create table badmailfrom (email char(64) NOT NULL, timestamp timestamp NOT NULL, primary key (email), index timestamp (timestamp))`
+```
+create table badmailfrom (email char(64) NOT NULL, \
+  timestamp timestamp NOT NULL, primary key (email), \
+  index timestamp (timestamp))
+```
 
 You can use the MySQL client to insert entries. e.g.
 
-`MySQL> insert into badmailfrom (email) values ('testuser@example.com');`
+```
+MySQL> insert into badmailfrom (email) \
+MYSQL> values ('testuser@example.com');
+```
 
 If you have all the 3 versions of control files existing, IndiMail will first do a cdb lookup, followed by MySQL lookup and finally look into the plain text control file.
 
@@ -1700,7 +1715,7 @@ Rather than making individual connections to MySQL for extracting information fr
 * It also maintains the query result in a double link list.
 * It uses binary tree algorithm to search the cache before actually sending the query to the database.
 * IndiMail clients send requests for MySQL(1) queries to inlookup through the function inquery() using a fifo.
-* The inquery() API uses the InLookup service only if the environment variable QUERY\_CACHE is set. If this environment variable is not set, the inquery() function makes a direct connecton to MySQL. 
+* The inquery() API uses the InLookup service only if the environment variable QUERY_CACHE is set. If this environment variable is not set, the inquery() function makes a direct connecton to MySQL. 
 * Clients which are currently using inquery are qmail-smtpd(1), proxyimap(8), proxypop3(8), vchkpass(8) and authindi(8). 
 * inlookup(8) service is one of the reasons why IndiMail is able to serve million+ users using commodity hardware. 
 
@@ -1712,12 +1727,12 @@ The program inquerytest simulates all the queries which inlookup supports and ca
 
 IndiMail comes with a program vlimit(1), which allows you to set global limits for your domain. Before using vlimit, you need to enable domain limits for a domain using vmoddomain(1).
 
-`% vmoddomain -l 1 example.com`
+`$ vmoddomain -l 1 example.com`
 
 Once you have done the above, you can start using vlimit for the domain example.com
 
 ```
-% vlimit -s example.com
+$ vlimit -s example.com
 Domain Expiry Date : Never Expires
 Password Expiry Date : Never Expires
 Max Domain Quota : -1
@@ -1742,11 +1757,11 @@ domain quota : ALLOW_CREATE ALLOW_MODIFY ALLOW_DELETE
 default quota : ALLOW_CREATE ALLOW_MODIFY
 ```
 
-Using vlimit you can set various limits or defaults for a domain. One of my favourite use of vlimit is setting default quota for users created in a domain. The default quota compiled in IndiMail is 5Mb which is not good enough for today's users. So if you want to have a default quota of 50 Mb for your users when you add them using the vadduser(1) command -
+Using vlimit you can set various limits or defaults for a domain. One of my favourite use of vlimit is setting default quota for users created in a domain. The default quota compiled in IndiMail is 5Mb which is not good enough for today's users. So if you want to have a default quota of 50 Mb for your users when you add them using the **vadduser**(1) command -
 
 ```
-% vlimit -q 52428800 example.com
-% vlimit -s example.com
+$ vlimit -q 52428800 example.com
+$ vlimit -s example.com
 Domain Expiry Date : Never Expires
 Password Expiry Date : Never Expires
 Max Domain Quota : -1
@@ -1774,8 +1789,8 @@ default quota : ALLOW_CREATE ALLOW_MODIFY
 You can also implement domain level restrictions. To disable POP3 for all users in example.com
 
 ```
-% vlimit -g p example.com
-% vlimit -s example.com
+$ vlimit -g p example.com
+$ vlimit -s example.com
 Domain Expiry Date : Never Expires
 Password Expiry Date : Never Expires
 Max Domain Quota : -1
@@ -1807,7 +1822,7 @@ default quota : ALLOW_CREATE ALLOW_MODIFY
 IndiMail has many methods to help deal with spam. For detecting spam, IndiMail uses bogofilter a fast bayesian spam filter. IndiMail's qmail-smtpd which provides SMTP protocol is neatly integrated with bogofilter. When bogofilter detects spam, qmail-smtpd prints the X-Bogosity header as part of SMTP transaction log
 
 ```
-% grep "X-Bogosity, Yes" /var/log/svc/smtpd.25/current
+$ grep "X-Bogosity, Yes" /var/log/svc/smtpd.25/current
 @400000004bc8183f01fcbc54 qmail-smtpd: pid 16158 from ::ffff:88.191.35.203 HELO X-Bogosity: Yes, spamicity=0.999616, cutoff=9.90e-01, ham_cutoff=0.00e+00, queueID=6cs66604wfk,
 ```
 
@@ -1835,15 +1850,19 @@ For turning on the BADIP functionality, you need to set the BADIPCHECK or the BA
  
 Clients whose IP match an entry in badip will be greeted as below
 
-`421 indimail.org sorry, your IP (::ffff:88.191.35.203) is temporarily denied (#4.7.1)`
+```
+421 indimail.org sorry, your IP (::ffff:88.191.35.203) is temporarily denied (#4.7.1)
+```
 
 Also the client will not be able to carry out any SMTP transactions like ehlo, MAIL FROM, RCPT TO, etc. A large ISP can run the following command every day once in cron
 
-`grep "X-Bogosity, Yes" /var/log/svc/qmail.smtpd.25/current > /etc/indimail/control/badip`
+```
+grep "X-Bogosity, Yes" /var/log/svc/qmail.smtpd.25/current > /etc/indimail/control/badip
+```
 
 If your badip files becomes very large, you can also take advantage of IndiMail's ability to use cdb (or you could use MySQL too)
 
-`% sudo /usr/bin/qmail-cdb badip`
+`$ sudo /usr/bin/qmail-cdb badip`
 
 # Virus Scanning using QHPSI
 
@@ -1867,7 +1886,7 @@ The above lines indicates that indimail-mta has received a new message, and its 
 
 To perform virus scanning, it would be trivial to do virus scanning on the mess file above in qmail-queue itself. That is exactly what IndiMail does by using a feature called Qmail High Performance Virus Scanner (**QHPSI**). **QHPSI** was conceptualized by Erwin Hoffman. You can read here for more details.
 
-IndiMail takes **QHPSI** forward by adding the ability to add plugins. The **QHPSI** extension for qmail-queue allows to call an arbitary virus scanner directly, scanning the incoming data-stream on STDIN. Alternatively, it allows plugins to be loaded from the /usr/lib/indimail/plugins directory. This directory can be changed by defining PLUGINDIR environment variable. **QHPSI** can be advised to pass multiple arguments to the virus scanner for customization. To run external scanner or load scanner plugins, qmail-queue calls qhpsi, a program setuid to qscand. By default, qhpsi looks for the symbol virusscan to invoke the scanner. The symbol can be changed by setting the environment variable QUEUE\_PLUGIN to the desired symbol.
+IndiMail takes **QHPSI** forward by adding the ability to add plugins. The **QHPSI** extension for qmail-queue allows to call an arbitary virus scanner directly, scanning the incoming data-stream on STDIN. Alternatively, it allows plugins to be loaded from the /usr/lib/indimail/plugins directory. This directory can be changed by defining PLUGINDIR environment variable. **QHPSI** can be advised to pass multiple arguments to the virus scanner for customization. To run external scanner or load scanner plugins, qmail-queue calls qhpsi, a program setuid to qscand. By default, qhpsi looks for the symbol virusscan to invoke the scanner. The symbol can be changed by setting the environment variable QUEUE_PLUGIN to the desired symbol.
 
 Today’s virus scanner -- in particluar Clam AV -- work in resource efficient client/server mode (clamd/clamdscan) and include the feature to detect virii/worms in the base64 encoded data stream. Thus, there is no necessity to call additional programs (like reformime or ripmime) except for the virus scanner itself.
 
@@ -1883,7 +1902,10 @@ Define QHPSI in tcp.smtp and rebuild tcp.smtp.cdb using tcprules.
 
 Define QHPSI in SMTP service's variable directory
 
-`# echo /usr/bin/clamdscan %s --quiet --no-summary > /service/qmail-smtpd.25/variables/QHPSI`
+```
+$ sudo /bin/bash
+# echo "/usr/bin/clamdscan %s --quiet --no-summary" > /service/qmail-smtpd.25/variables/QHPSI
+```
 
 If you have installed IndiMail using RPM available here or here, QHPSI is enabled by default by defining it in the qmail-smtpd.25 variables directory. If you have clamd, clamav already installed on your server, the rpm installation also installs two services under supervise.
 
@@ -1893,12 +1915,12 @@ If you have installed IndiMail using RPM available here or here, QHPSI is enable
 You may need to disable clamd, freshclam startup by your system boot process and enable the startup under indimail. Do have the clamd, freshclam service started up by indimail, remove the down file. i.e.
 
 ```
-# rm /service/freshclam/down /service/clamd/down
-# /usr/bin/svc -u /service/clamd /service/freshclam
+$ sudo /bin/rm /service/freshclam/down /service/clamd/down
+$ sudo /usr/bin/svc -u /service/clamd /service/freshclam
 ```
 
 ```
-% tail -f /var/log/indimail/freshclam/current
+$ tail -f /var/log/indimail/freshclam/current
 @400000004b9da034170f6394 cdiff_apply: Parsed 17 lines and executed 17 commands
 @400000004b9da03417103e54 Retrieving http://database.clamav.net/daily-10574.cdiff
 @400000004b9da0342261b83c Trying to download http://database.clamav.net/daily-10574.cdiff (IP: 130.59.10.36)
@@ -1911,7 +1933,7 @@ Downloading daily-10574.cdiff [100%]g daily-10574.cdiff [ 13%]
 ```
 
 ```
-% cat /var/log/indimail/clamd/current
+$ cat /var/log/indimail/clamd/current
 @400000004b9da0260d6c1a94 Limits: Global size limit set to 104857600 bytes.
 @400000004b9da0260d6c264c Limits: File size limit set to 26214400 bytes.
 @400000004b9da0260d6c3204 Limits: Recursion level limit set to 16.
@@ -1943,6 +1965,7 @@ in case the email is clean and the following header if a virus is found
 The default configuration of IndiMail will allow these emails to be delivered to the inbox. This is because some sites have have legislations like SOX, etc to enforce archiving of all emails that come into the system. In case you want to reject the email at SMTP you can do the following
 
 ```
+$ sudo /bin/bash
 # echo 1 > /service/qmail.smtpd/variables/REJECTVIRUS
 # svc -d /service/qmail-smtpd.25
 # svc -u /service/qmail-smtpd.25
@@ -1950,8 +1973,9 @@ The default configuration of IndiMail will allow these emails to be delivered to
 
 One can also create a vfilter to deliver such email to the quarantine folder
 
-`/usr/bin/vcfilter -i -t virusFilter -c 0 -k "virus found" -f Quarantine -b 0 -h 28 prefilt@$1`
-
+```
+/usr/bin/vcfilter -i -t virusFilter -c 0 -k "virus found" -f Quarantine -b 0 -h 28 prefilt@$1
+```
 
 If you implement different method, than explained above, let me know.
 
@@ -1961,7 +1985,7 @@ One of the feature that IndiMail adds to qmail-smtpd is accesslist between sende
 
 `type:sender:recipient`
 
-where type is either the word 'from' or 'rcpt'. sender and recipient can be the actual sender, recipient, a wildcard or a regular expression (uses regex(3))
+where *type* is either the word 'from' or 'rcpt'. *sender* and *recipient* can be the actual *sender*, *recipient*, a wildcard or a regular expression (uses regex(3))
 
 The accesslist happens during SMTP session and mails which get restricted get rejected with permanent 5xx code.
 
@@ -1973,39 +1997,39 @@ rcpt:md@indimail.org:country_distribution_list@indimail.org
 from:recruiter@gmail.com:hr_manager@indimail.org
 ```
 
-* The above accesslist implies that only the users with email ceo@indimail.org and md@indimail.org can send a mail to the email country\_distribution\_list@indimail.org
-* The 3rd line implies that all outside mails from the sender recruiter@gmail.com will be rejected at SMTP unless the recipient is hr\_manager@indimail.org
+* The above accesslist implies that only the users with email ceo@indimail.org and md@indimail.org can send a mail to the email country_distribution_list@indimail.org
+* The 3rd line implies that all outside mails from the sender recruiter@gmail.com will be rejected at SMTP unless the recipient is hr_manager@indimail.org
 
 IndiMail also provides a program called uacl to test this accesslist. uacl is useful especially when you use wildcards or regular expressions.
 
 An extreme example where you want to restrict the communication between two domains only
 
 ```
-% cat /etc/indimail/control/accesslist
+$ cat /etc/indimail/control/accesslist
 rcpt:*example.com:*@example1.com
 from:*@example1.com:*@example.com
 
 
-% uacl test@example.com test@example1.com
+$ uacl test@example.com test@example1.com
 rule no 1: rcpt:*example.com:*@example1.com
 matched recipient [test@example1.com] with [*@example1.com]
 matched sender [test@example.com] with [*example.com] --&gt; access allowed
-%
-% uacl test@indimail.org test@example1.com
+$
+$ uacl test@indimail.org test@example1.com
 rule no 1: rcpt:*example.com:*@example1.com
 matched recipient [test@example1.com] with [*@example1.com]
 sender not matched [test@indimail.org] --&gt; access denied
-%
-% uacl test@example1.com test@example.com
+$
+$ uacl test@example1.com test@example.com
 rule no 2: from:*@example1.com:*@example.com
 matched sender [test@example1.com] with [*@example1.com]
 matched recipient [test@example.com] with [*@example.com] --&gt; access allowed
-%
-% uacl test@example1.com mbhangui@gmail.com
+$
+$ uacl test@example1.com manvendra@indimail.org
 rule no 2: from:*@example1.com:*@example.com
 matched sender [test@example1.com] with [*@example1.com]
-recipient not matched [mbhangui@gmail.com] --&gt; access denied
-%
+recipient not matched [manvendra@indimail.org] --&gt; access denied
+$
 ```
 
 # Using spamassasin with IndiMail
@@ -2030,12 +2054,12 @@ SPAMFILTER="path_to_spamc_program -E-d host -p port -u user"
 SPAMEXITCODE=1
 ```
 
-(see the documentation on spamc for description of arguments to spamc program). You an also use -U socket\_path, to use unix domain socket instead of -d host, which uses tcp/ip
+(see the documentation on spamc for description of arguments to spamc program). You an also use -U socket_path, to use unix domain socket instead of -d host, which uses tcp/ip
 
 Since IndiMail uses envdir program to set environment variable, a simple way would be to set SPAMFILTER, SPAMEXITCODE is to do the following
 
 ```
-% su
+$ sudo /bin/bash
 # echo "spamcPath -E -d host -p port -u user" > /service/qmail-smtpd.25/variables/SPAMFILTER
 # echo 1 > /service/qmail-smtpd.25/variables/SPAMEXITCODE
 ```
@@ -2081,7 +2105,7 @@ exit 1
 Let us call the above script as bogospamc and let us place it in /usr/bin
 
 ```
-% su
+$ sudo /bin/bash
 # echo /usr/bin/bogospamc > /service/qmail-smtpd.25/variables/SPAMFILTER
 # echo 0 > /service/qmail-smtpd.25/variables/SPAMEXITCODE
 ```
@@ -2095,8 +2119,7 @@ IndiMail 1.6 onwards implements greylisting using qmail-greyd daemon. You additi
 ## 1. Enabling qmail-greyd greylisting server
 
 ```
-% su
-# svctool --greylist=1999 --servicedir=/service --min-resend-min=2 \
+$ sudo svctool --greylist=1999 --servicedir=/service --min-resend-min=2 \
    --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
    --save-interval=5 --whitelist=greylist.whitelist
 ```
@@ -2126,13 +2149,16 @@ If you've setup qmail-greyd on a non-default address (perhaps you're running qma
 Finally, don't forget to update the cdb file corresponding to the source file you've just edited. If you have a LWQ setup that's
 
 ```
-% su
+$ sudo /bin/bash
 # /usr/bin/qmailctl cdb
 ```
       
 Alternatively (and particularly if you're not using the -x option to tcpserver) you can enable greylisting for all SMTP connections by setting GREYIP in the environment in which qmail-smtpd is started - for example your variables directory for qmail-smtpd can contain a file with the name GREYIP
 
-`# echo GREYIP=\"127.0.0.1@1999\" > /service/qmail-smtpd.25/variables/GREYIP`
+```
+$ sudo /bin/bash
+# echo GREYIP=\"127.0.0.1@1999\" > /service/qmail-smtpd.25/variables/GREYIP
+```
       
 NOTE: The above instructions are for IndiMail/indimail-mta 2.x and above. For 1.x releases, use /var/indimail/etc for the location of tcp.smtp and tcp.smtp.cdb
 
@@ -2150,8 +2176,9 @@ You may want to look at an excellent [setup instructions](http://notes.sagredo.e
 ## Create your DKIM signature
 
 ```
-% mkdir -p /etcindimail/control/domainkeys
-% cd /etc/indimail/control/domainkeys
+$ sudo /bin/bash
+# mkdir -p /etcindimail/control/domainkeys
+# cd /etc/indimail/control/domainkeys
 # openssl genrsa -out rsa.private 1024
 # openssl rsa -in rsa.private -out rsa.public -pubout -outform PEM
 # mv rsa.private default
@@ -2169,7 +2196,7 @@ $ grep -v ^- rsa.public | perl -e 'while(<>){chop;$l.=$_;}print "t=y; p=$l;\n";'
 
 choose the selector (some\_name) and publish this into DNS TXT record for:
 
-selector.\_domainkey.indimail.org (e.g. selector can be named 'default')
+`selector._domainkey.indimail.org` (e.g. selector can be named 'default')
 
 Wait until it's on all DNS servers and that's it.
 
@@ -2178,7 +2205,7 @@ Wait until it's on all DNS servers and that's it.
 qmail-dkim uses openssl libraries and there is some amount of memory allocation that happens. You may want to increase your softlimit (if any) in your qmail-smtpd run script.
 
 ```
-% su
+$ sudo /bin/bash
 # cd /service/qmail-smtpd.25/variables
 # echo "/usr/bin/qmail-dkim" > QMAILQUEUE
 # echo "/etc/indimail/control/domainkeys/default" > DKIMSIGN
@@ -2192,7 +2219,7 @@ You can setup qmail-stmpd for verification by setting
 DKIMIVERIFY environment variable instead of DKIMSIGN environment variable.
 
 ```
-% su
+$ sudo /bin/bash
 # cd /service/qmail-smtpd.25/variables
 # echo "/usr/bin/qmail-dkim" > QMAILQUEUE
 # echo "/etc/indimail/control/domainkeys/default" > DKIMVERIFY
@@ -2209,7 +2236,7 @@ The Sender Signing Practice is published with a DNS TXT record as follows:
 
 The dkim tag denotes the outbound signing Practice. unknown means that the indimail.org domain may sign some emails. You can have the values "discardable" or "all" as other values for dkim tag. discardable means that any unsigned email from indimail.org is recommended for rejection. all means that indimail.org signs all emails with dkim.
 
-You may decide to consider ADSP as optional until the specifications are formalised. To set ADSP you need to set the environment variable SIGN\_PRACTICE=adsp. i.e
+You may decide to consider ADSP as optional until the specifications are formalised. To set ADSP you need to set the environment variable SIGNPRACTICE=adsp. i.e
 
 `# echo adsp > /service/smtpd.25/variables/SIGN_PRACTICE`
 
@@ -2217,6 +2244,7 @@ You may not want to do DKIM signing/verificaton by SMTP. In that case, you have 
 Setting qmail-remote to sign with DKIM signatures On your host which sends out outgoing mails, it only make sense to do DKIM signing and not verification.
 
 ```
+$ sudo /bin/bash
 # cd /service/qmail-send.25/variables
 # echo "/usr/bin/spawn-filter" > QMAILREMOTE
 # echo "/usr/bin/dk-filter" > FILTERARGS
@@ -2231,6 +2259,7 @@ Setting qmail-remote to sign with DKIM signatures On your host which sends out o
 On your host which serves as your incoming gateway for your local domains, it only makes sense to do DKIM verification with qmail-local
 
 ```
+$ sudo /bin/bash
 # cd /service/qmail-send.25/variables
 # echo "/usr/bin/spawn-filter" > QMAILLOCAL
 # echo "/usr/bin/dk-filter" > FILTERARGS
@@ -2249,7 +2278,7 @@ You can also use the following for testing.
 * dktest@temporary.com, is Yahoo!'s testing server. When you send a message to this address, it will send you back a message telling you whether or not the domainkeys signature was valid. 
 * sa-test@sendmail.net is a free service from the sendmail people. It's very similar to the Yahoo! address, but it also shows you the results of an SPF check as well. 
 
-All the above was quite easy. If you don't think so, you can always use the magic options --dkverify (for verification) or --dksign --private\_key=domain\_key\_private\_key\_file to svctool (svctool --help for all options) to create supervice run script for qmail-smtpd, qmail-send.
+All the above was quite easy. If you don't think so, you can always use the magic options --dkverify (for verification) or `--dksign --private_key=domain_key_private_key_file` to svctool (svctool --help for all options) to create supervice run script for qmail-smtpd, qmail-send.
 
 References
 
@@ -2265,15 +2294,15 @@ Lately my users have been pestering me if something can be done about it. I have
 
 For the admin user it provides
 
-1. user addition 
-2. user deletion
-3. password change 
-4. adding autoresponders 
-5. deleting autoresponders 
-6. modifying autoresponders
-7. adding forwarding addresses 
-8. deleting forwarding addresses 
-9. modifying forwarding addreses
+1.  user addition 
+2.  user deletion
+3.  password change 
+4.  adding autoresponders 
+5.  deleting autoresponders 
+6.  modifying autoresponders
+7.  adding forwarding addresses 
+8.  deleting forwarding addresses 
+9.  modifying forwarding addreses
 10. quota modification 
 
 For users other than the postmaster account it provides
@@ -2306,16 +2335,16 @@ The screen shots are below
 
 You can now configure MRTG Graphs to show statistics for IndiMail . You need to have mrtg installed on your system. If you do not have mrtg, you can execute yum/dnf
 
-`% sudo yum install mrtg`
+`$ sudo yum install mrtg`
 
 You need to execute the following steps (assuming your web server document root is /var/www/html)
 
-`% sudo /usr/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=/service`
+`$ sudo /usr/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=/service`
 
 After carrying out the above step,  check the status of mrtg service
 
 ```
-% sudo svstat /service/mrtg
+$ sudo svstat /service/mrtg
 /service/mrtg/: up (pid 2443) 35254 seconds
 ```
 
@@ -2330,7 +2359,7 @@ Non SSL Version Install/Configuration
     1. Install RoundCube. On older systems, use the yum command
        `$ sudo dnf -y install roundcubemail php-mysqlnd`
 
-    2. Connect to MySQL using a privileged user. IndiMail installation creates a privileged mysql user 'mysql'. It does not have the user 'root'. Look at the variable PRIV\_PASS in /usr/sbin/svctool to know the password.
+    2. Connect to MySQL using a privileged user. IndiMail installation creates a privileged mysql user 'mysql'. It does not have the user 'root'. Look at the variable PRIV_PASS in /usr/sbin/svctool to know the password.
 
        ```
        $ /usr/bin/mysql -u mysql -p mysql
@@ -2395,7 +2424,7 @@ Non SSL Version Install/Configuration
     5. Change iwebadmin path in /usr/share/roundcubemail/iwebadmin/config.inc.php
        `$rcmail_config['iwebadmin_path'] = 'http://127.0.0.1/cgi-bin/iwebadmin';`
 
-    6. Change sauserprefs_db_dsnw in /usr/share/roundcubemail/sauserprefs/config.inc.php
+    6. Change sauserprefs\_db\_dsnw in /usr/share/roundcubemail/sauserprefs/config.inc.php
        `$rcmail_config['sauserprefs_db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';`
 
     7. Restore indimail plugins for roundcube
@@ -2411,50 +2440,50 @@ Non SSL Version Install/Configuration
        $ /usr/bin/mysql -u mysql -p RoundCube_db < /usr/share/roundcubemail/sauserprefs/sauserprefs.sql
        ```
 
-    8. change pdo_mysql.default_socket /etc/php.ini
+    8. change pdo\_mysql.default\_socket /etc/php.ini
        For some reason pdo_mysql uses wrong mysql socket on some systems. Uses /var/lib/mysql/mysql.sock instead of /var/run/mysqld/mysqld.sock. You need to edit the file /etc/php.ini and define pdo_mysql.default_socket
 
-        `pdo_mysql.default_socket= /var/run/mysqld/mysqld.sock`
+       `pdo_mysql.default_socket= /var/run/mysqld/mysqld.sock`
 
-        You can verify if the path has been correctly entered by executing the below command. The command should return without any error
+       You can verify if the path has been correctly entered by executing the below command. The command should return without any error
 
-        `$ php -r "new PDO('mysql:host=localhost;dbname=RoundCube_db', 'roundcube', 'subscribed');"`
+       `$ php -r "new PDO('mysql:host=localhost;dbname=RoundCube_db', 'roundcube', 'subscribed');"`
 
     9. HTTPD config
-        i. Edit file /etc/httpd/conf.d/roundcubemail.conf and edit the following lines
-        ```
-        #
-        # Round Cube Webmail is a browser-based multilingual IMAP client
-        #Alias /indimail /usr/share/roundcubemail
-        # Define who can access the Webmail
-        # You can enlarge permissions once configured
-        <Directory /usr/share/roundcubemail/>
-            <IfModule mod_authz_core.c> 
-                # Apache 2.4
-                Require ip 127.0.0.1
-                Require all granted
-                Require local
-            </IfModule>
-            <IfModule !mod_authz_core.c>
-                # Apache 2.2
-                Order Deny,Allow
-                Deny from all
-                Allow from 127.0.0.1
-                Allow from ::1
-            </IfModule>
-        </Directory>
-        ```
+       i. Edit file /etc/httpd/conf.d/roundcubemail.conf and edit the following lines
+       ```
+       #
+       # Round Cube Webmail is a browser-based multilingual IMAP client
+       #Alias /indimail /usr/share/roundcubemail
+       # Define who can access the Webmail
+       # You can enlarge permissions once configured
+       <Directory /usr/share/roundcubemail/>
+           <IfModule mod_authz_core.c> 
+               # Apache 2.4
+               Require ip 127.0.0.1
+               Require all granted
+               Require local
+           </IfModule>
+           <IfModule !mod_authz_core.c>
+               # Apache 2.2
+               Order Deny,Allow
+               Deny from all
+               Allow from 127.0.0.1
+               Allow from ::1
+           </IfModule>
+       </Directory>
+       ```
 
-        This file should be owned by root
+       This file should be owned by root
 
-        ```
-        $ sudo chown root:root /etc/httpd/conf.d/roundcubemail.conf
-        $ sudo chmod 644 /etc/httpd/conf.d/roundcubemail.conf
-        ```
+       ```
+       $ sudo chown root:root /etc/httpd/conf.d/roundcubemail.conf
+       $ sudo chmod 644 /etc/httpd/conf.d/roundcubemail.conf
+       ```
 
-        ii. Restart httpd
+       ii. Restart httpd
 
-        `$ sudo service httpd restart`
+       `$ sudo service httpd restart`
 
     10. Login to webmail at http://localhost/indimail
         SSL / TLS Version
@@ -2587,7 +2616,9 @@ Non SSL Version Install/Configuration
 
           ii. This is assuming you have already generated indimail cert after indimail installation. If not execute the following command. We will assume that your host is indimail.org
 
-           `$ sudo /usr/sbin/svctool --postmaster=postmaster@indimail.org –config=cert" --common_name=indimail.org`
+           ```
+		   $ sudo /usr/sbin/svctool --postmaster=postmaster@indimail.org –config=cert" --common_name=indimail.org
+           ```
 
            Edit the file /etc/httpd/conf.d/ssl.conf i.e.
 
@@ -2683,7 +2714,7 @@ The role of the users discussed in point 3. above are
 
 ## Storing Passwords
 
-It is advisable not to store the MySQL passwords in scripts. You can use mysql\_config\_editor to store encrypted credentials in .mylogin.cnf file. This file is read by MySQL clients during startup, hence avoiding the need of passing passwords on the command line. Remember passing passwords on the command line is insecure. With the --password option, mysql\_config\_editor will prompt you for the password to store
+It is advisable not to store the MySQL passwords in scripts. You can use mysql_config_editor to store encrypted credentials in .mylogin.cnf file. This file is read by MySQL clients during startup, hence avoiding the need of passing passwords on the command line. Remember passing passwords on the command line is insecure. With the --password option, mysql_config_editor will prompt you for the password to store
 
 ```
 $ mysql_config_editor set --login-path=admin --socket=/var/run/mysqld/mysqld.sock --user=mysql --password
@@ -2724,7 +2755,7 @@ Now for carrying out routine queries for the MySQL indimail database you can pas
 svctool automates the process of MySQL db creation as required for IndiMail. You just need to run the following command
 
 ```
-$ /usr/sbin/svctool --config=mysqldb --mysqlPrefix=/usr \
+$ sudo /usr/sbin/svctool --config=mysqldb --mysqlPrefix=/usr \
      --databasedir=/var/indimail/mysqldb --default-domain=`uname -n` \
      --base_path=/home/mail
 ```
@@ -2735,7 +2766,7 @@ The above command will create and initialize a MySQL database for first time use
 
 In the examples shown here, the server is going to run under the user ID of the mysql login account. This assumes that such an account exists. Either create the account if it does not exist, or substitute the name of a different existing login account that you plan to use for running the server.  
 
-Create a directory whose location can be provided to the secure\_file\_priv system variable, which limits import/export operations to that specific directory: 
+Create a directory whose location can be provided to the secure_file_priv system variable, which limits import/export operations to that specific directory: 
 
 ```
 $ mkdir -p /var/indimail/mysqldb/data
@@ -2807,11 +2838,11 @@ If you want the server to be able to deploy with automatic support for secure co
 
 `$ sudo bin/mysql_ssl_rsa_setup -uid=mysql --datadir=/var/ndimail/mysqldb/data`
 
-For more information, see mysql\_ssl\_rsa\_setup — Create SSL/RSA Files. 
+For more information, see mysql_ssl_rsa_setup — Create SSL/RSA Files. 
 Now using the password obtained from var/log/mysqld.log, we will connect to MySQL and create users
 
-1. If the plugin directory (the directory named by the plugin\_dir system variable) is writable by the server, it may be possible for a user to write executable code to a file in the directory using SELECT ... INTO DUMPFILE. This can be prevented by making the plugin directory read only to the server or by setting the secure\_file\_priv system variable at server startup to a directory where SELECT writes can be performed safely. (For example, set it to the mysql-files directory created earlier.) 
-2. To specify options that the MySQL server should use at startup, put them in a /etc/my.cnf or /etc/mysql/my.cnf file. You can use such a file to set, for example, the secure\_file\_priv system variable. See Server Configuration Defaults. If you do not do this, the server starts with its default settings. You should set the datadir variable to /var/indimail/mysqldb/data  in my.cnf.
+1. If the plugin directory (the directory named by the plugin_dir system variable) is writable by the server, it may be possible for a user to write executable code to a file in the directory using SELECT ... INTO DUMPFILE. This can be prevented by making the plugin directory read only to the server or by setting the secure_file_priv system variable at server startup to a directory where SELECT writes can be performed safely. (For example, set it to the mysql-files directory created earlier.) 
+2. To specify options that the MySQL server should use at startup, put them in a /etc/my.cnf or /etc/mysql/my.cnf file. You can use such a file to set, for example, the secure_file_priv system variable. See Server Configuration Defaults. If you do not do this, the server starts with its default settings. You should set the datadir variable to /var/indimail/mysqldb/data  in my.cnf.
 3. If you want MySQL to start automatically when you boot your machine, see Section 9.5, “Starting and Stopping MySQL Automatically”. 
 
 Data directory initialization creates time zone tables in the mysql database but does not populate them. To do so, use the instructions in MySQL Server Time Zone Support. 
@@ -2827,7 +2858,7 @@ You can start mysqld my issuing the command
 
 `$ sudo service mysqld start`
 
-NOTE: On some system you might have to replace mysqld with mysql while issuing the above command. After you do this, you will see mysqld\_safe in the process list.
+NOTE: On some system you might have to replace mysqld with mysql while issuing the above command. After you do this, you will see mysqld_safe in the process list.
 If you have installed MariaDB there is no confusion to startup MySQL. The command will be
 
 `$ sudo service mariadb start`
@@ -2916,7 +2947,7 @@ mysql> DELETE from user  where host=’localhost’ and user=’root’;
 mysql> FLUSH PRIVILEGES;
 ```
 
-NOTE: for MariaDB, you will have to execute few additional MySQL statements. The statements below also achieves what the script /bin/mysql\_secure\_installation does for MariaDB installations.
+NOTE: for MariaDB, you will have to execute few additional MySQL statements. The statements below also achieves what the script /bin/mysql_secure_installation does for MariaDB installations.
 
 ```
 $ mysql -u root -p
@@ -3126,15 +3157,23 @@ collation-server = utf8mb4_unicode_ci
 
 MySQL community Client
 You first need to copy ca.pem and ca-key.pem to the directory /var/indimail/mysqldb/data. Then run the following commands
+
+```
 $ sudo /usr/sbin/svctool --config=ssl_rsa –capath=/var/indimail/mysqldb/data
   --certdir=/var/indimail/mysqldb/data
+```
 
 MariaDB Client
 You first need to copy ca.pem and ca-key.pem to the directory /var/indimail/mysqldb/ssl. Then run the following commands
+
+```
 $ sudo /usr/sbin/svctool --config=ssl_rsa –capath=/var/indimail/mysqldb/ssl
   --certdir=/var/indimail/mysqldb/ssl
+```
 
 You also need to specify the client certificates in my.cnf like this
+
+```
 [client]
 port      = 3306
 socket    = /var/run/mysqld/mysqld.sock
@@ -3145,5 +3184,4 @@ ssl-cert=/var/indimail/mysqldb/ssl/client-cert.pem
 ssl-key=/var/indimail/mysqldb/ssl/client-key.pem
 # This option is disabled by default
 #ssl-verify-server-cert
-
 ```
