@@ -20,7 +20,7 @@ If you want to use DNF / YUM / apt-get, the corresponding install instructions a
 * [Stable](https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail)
 * [Experimental](https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail)
 
-Create a basic configuration file required by IndiMail
+**Create a basic configuration file required by IndiMail**
 
 ```
 % cd /etc/indimail/control
@@ -28,7 +28,7 @@ Create a basic configuration file required by IndiMail
 # echo "localhost:indimail:ssh-1.5-:/var/run/mysqld/mysqld.sock" > host.mysql
 ```
 
-Start IndiMail
+**Start IndiMail**
 
 ```
 # /usr/sbin/initsvc -on
@@ -41,15 +41,7 @@ or
 # exit
 ```
 
-```
- NOTE: replace localhost, indimail, ssh-1.5-, /var/run/mysqld/mysqld.sock as per your
- MySQL installation. You can use 3306 instead of /var/run/mysqld/mysqld.sock in case
- your MySQL database is on another host.
- you must use host:user:password:socket or host:user:password:port format
- for host.mysql (for IndiMail 1.6.9 and above).
- If you change the socket/port then you have to edit /etc/indimailcontrol/host.\*
- and /etc/indimail/indimail.cnf to change the socket path / port
-```
+NOTE: replace localhost, indimail, ssh-1.5-, /var/run/mysqld/mysqld.sock as per your MySQL installation. You can use 3306 instead of /var/run/mysqld/mysqld.sock in case your MySQL database is on another host. You must use `host:user:password:socket` or `host:user:password:port` format for host.mysql (for IndiMail 1.6.9 and above).  If you change the socket/port then you have to edit /etc/indimailcontrol/host.\* and /etc/indimail/indimail.cnf to change the socket path / port
  
 Instead of the above initsvc command, you can also do (a more portable way)
 
@@ -57,7 +49,7 @@ Instead of the above initsvc command, you can also do (a more portable way)
 % sudo service indimail start
 ```
 
-Ensure MySQL is running
+**Ensure MySQL is running**
 
 The RPM installation creates MySQL service in down state. The MySQL service will not come up unless you use the command svc -u. Also to ensure that the service comes up automatically after system reboot, remove the file 'down'. Also check the MySQl configuration file /etc/indimail/indimail.cnf for the port and socket parameter.
 
@@ -75,7 +67,7 @@ socket = /var/run/mysqld/mysqld.sock
 /service/mysql.3306: up (pid 11936) 5 seconds
 ```
 
-Create a virtual domain and do various operations
+**Create a virtual domain and do various operations**
 
 ```
 % sudo /usr/bin/vadddomain example.com pass
@@ -98,7 +90,7 @@ If you want to use DNF / YUM / apt-get, the corresponding install instructions a
 * [Stable](https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail)
 * [Experimental](https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail)
 
-Create basic configuration files required by IndiMail
+**Create basic configuration files required by IndiMail**
 
 ```
 % cd /etc/indimail/control
@@ -108,7 +100,7 @@ Create basic configuration files required by IndiMail
 # echo 192.168.1.100 > hostip (replace 192.168.1.100 with your mailserver IP)
 ```
 
-Start IndiMail
+**Start IndiMail**
 
 ```
 # /usr/sbin/initsvc -on
@@ -121,17 +113,9 @@ or
 # exit
 ```
 
-```
-NOTE: replace localhost, indimail, ssh-1.5-, /var/run/mysqld/mysqld.sock as relevant to your
-MySQL installation. You can use 3306 instead of /var/run/mysqld/mysqld.sock in case your MySQL
-database is on another host.
-you must use host:user:password:socket or host:user:password:port format
-for host.cntrl (for IndiMail 1.6.9 and above).
-If you change the socket/port then you have to edit /etc/indimailcontrol/host.\*
-and /etc/indimail/indimail.cnf to change the socket path / port
-```
+NOTE: replace localhost, indimail, ssh-1.5-, /var/run/mysqld/mysqld.sock as relevant to your MySQL installation. You can use 3306 instead of /var/run/mysqld/mysqld.sock in case your MySQL database is on another host.  You must use `host:user:password:socket` or `host:user:password:port` format for host.cntrl (for IndiMail 1.6.9 and above).  If you change the socket/port then you have to edit /etc/indimailcontrol/host.\* and /etc/indimail/indimail.cnf to change the socket path / port
 
-Ensure MySQL is running
+**Ensure MySQL is running**
 
 The RPM installation creates MySQL service in down state. The service will not come up unless you use the command svc -u. Also to ensure that the service comes up automatically after system reboot, remove the file 'down'
 
@@ -143,7 +127,7 @@ The RPM installation creates MySQL service in down state. The service will not c
 /service/mysql.3306: up (pid 11936) 7 seconds
 ```
 
-Create a virtual domain and do various operations
+**Create a virtual domain and do various operations**
 
 ```
 % sudo /usr/bin/vadddomain -D indimail -S localhost \
@@ -155,14 +139,14 @@ Create a virtual domain and do various operations
 % sudo /usr/bin/vmoduser -q 50000000 testuser1@example.com
 ```
 
-Query the cluster definition
+**Query the cluster definition**
 
 ```
 % /usr/bin/dbinfo -s
 ```
 
 
-Send / Receive Mails
+**Send / Receive Mails**
 
 At this stage, your setup is ready to send mails to the outside world. To receive mails, you need to create your actual domain (instead of example.com) using vadddomain and setup a mail exchanger record for your domain (MX record). To send mails, you can either use SMTP or use a sendmail (IndiMail's sendmail replacement /usr/bin/sendmail).
 

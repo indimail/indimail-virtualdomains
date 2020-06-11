@@ -62,10 +62,10 @@ $ ./create_debian # for deb
 
 Installing and configuration is much simplied when you use the Binary Packages Build. The pre, post instlation scripts do all the hard work for you.
 
-** For RPM based distributions **
+**For RPM based distributions**
 
 `sudo rpm -ivh rpm_file`
 
-** For Debian based distributions **
+**For Debian based distributions**
 
 `sudo dpkg -i debian_file`

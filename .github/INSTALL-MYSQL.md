@@ -18,6 +18,7 @@ Do not read this without reading [INSTALL.md](INSTALL-indimail.md) This is an im
 3. If the user root in mysql does not have a password. This will prevent anyone on the system to connect to MySQL using a password.
 
 ## STEP 1  MySQL Startup ##
+
 Create Supervise Directory for starting MySQL. If you already have a running MySQL
 server and want to continue to have MySQL started through the system boot scripts,
 proceed to STEP 2 below
@@ -73,8 +74,9 @@ a) For creation of a brand new MySQL database, create MySQL Options file /etc/in
 
 ```
 sql_mode="NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES"
-
 ```
+
+Create mysql service under supervise
 
 ```
 # /usr/sbin/svctool --config=mysql --mysqlPrefix=/usr \
@@ -144,19 +146,23 @@ mysql> ALTER USER 'indimail'@'%' IDENTIFIED WITH mysql_native_password BY 'ssh-1
 
 The information for IndiMail to connect to IndiMail is maintained in the file
 
+```
 /etc/indimail/control/host.mysql    # for non-clustered setup
 
 and
 
 /etc/indimail/control/host.cntrl    # for clustered setup
 /etc/indimail/control/host.master   # for clustered setup
+```
 
 The format for this file is
 
+```
 mysql_host:mysql_user:mysql_pass:mysql_socket[:use_ssl]
 
 or
 
 mysql_host:mysql_user:mysql_pass:mysql_port[:use_ssl]
+```
 
-where use_ssl is the keyword "ssl" or "nossl", or it can be omitted entirely.
+where use\_ssl is the keyword "ssl" or "nossl", or it can be omitted entirely.

@@ -1,12 +1,12 @@
-Creating a shared Address Book for your IndiMail server
+# Creating a shared Address Book for your IndiMail server
 
-Install openldap
-----------------
+## Install openldap
 
+```
 % sudo yum install openldap openldap-servers openldap-clients
+```
 
-Configure openldap
-------------------
+## Configure openldap
 
 You need to start slapd to implement openldap. slapd uses configurion
 file /etc/openldap/slapd.conf
@@ -16,6 +16,7 @@ shared address book on a secure network, however there are no access controls ye
 security is covered later on. The encrypted root password (rootpw) should be substituted where
 necessary. You can use slappasswd to generate the password
 
+```
 % slappasswd -s secret
 {SSHA}gDPX3cS87+B31mAF5zHCGtEJBYSuqrN/
 
@@ -96,22 +97,25 @@ index objectClass                       eq,pres
 #index uidNumber,gidNumber,loginShell    eq,pres
 #index uid,memberUid                     eq,pres,sub
 #index nisMapName,nisMapEntry            eq,pres,sub
+```
 
 Make user that /etc/openldap/slapd.conf is owned by ldap and has write permissions for
 ldap user.
 
 As of now I prefer openldap using slapd.conf and not slapd.d for configuration.
 
+```
 % sudo /bin/rm -r /etc/openldap/slapd.d
+```
 
-slapd Startup
--------------
+## slapd Startup
 
 My favourite method happens to be using djb's supervise and hence is one of the
 core compoment of the IndiMail package
 
 Create the run files in /tmp temporarily
 
+```
 % cat /tmp/run1
 #!/bin/sh
 exec /usr/sbin/slapd -u ldap -f /etc/openldap/slapd.conf -d 0 2>&1
@@ -120,23 +124,27 @@ exec /usr/sbin/slapd -u ldap -f /etc/openldap/slapd.conf -d 0 2>&1
 #!/bin/sh
 exec /var/indimail/bin/setuidgid qmaill \
 /var/indimail/bin/multilog t /var/log/indimail/slapd.389
+```
 
 create /service/.slapd.389 so that svscan does not discover this new service yet
 
+```
 % sudo mkdir -p /service/.slapd.389/log
 % sudo mv /tmp/run2 /service/.slapd.389/log/run
 % sudo mv /tmp/run1 /service/.slapd.389/run
 % sudo chmod +x /service/.slapd.389/run /service/.slapd.389/log/run
+```
 
 rename .slapd.389 to slapd.389 and wait for svscan to discover and start slapd
 
+```
 % sudo mv /service/.slapd.389 /service/slapd.389
 
 % /var/indimail/bin/svstat /service/slapd.389
 /service/slapd.389/: up (pid 4069) 4 seconds
+```
 
-Access Control
---------------
+## Access Control
 
 The standard access controls for the server defines that everyone can read the directory
 entries, but only the manager (administrator) can write to the directories. To add the LDIF
@@ -149,6 +157,7 @@ access, however people are allowed to bind to the server to authenticate. All au
 users are allowed to change their own details, and all of the entries in the
 "ou=addressbook,o=indimail.org" directory; anonymous access it disallowed.
 
+```
 #disallow bind_anon
 access to dn.subtree="ou=addressbook,o=indimail.org"
        by anonymous auth
@@ -158,15 +167,16 @@ access to *
        by anonymous auth
        by self read
        by users read
+```
 
 An access control list may be prone to user syntax errors and will not be accepted by the LDAP
 server, so the configuration should be tested before it is loaded.
 
-% /etc/init.d/slapd configtest
+`% /etc/init.d/slapd configtest`
 
 If the configuration passes integrity testing, the server can be restarted.
 
-% /var/indimail/bin/svc -u /service/slapd.389
+`% /var/indimail/bin/svc -u /service/slapd.389`
 
 The new security access controls now prevent unauthorised access to the directory service, so
 simple user objects must be prepared that will allow people to authenticate with the server.
@@ -180,14 +190,18 @@ saved to store in a text file. This does not mean they are completely safe, it j
 can not be easily read. An attacker can still subject the password value to a brute force
 attack, but it would take them an awfully long time. Physical security is still important.
 
+```
 % slappasswd -s manny
 {SSHA}HEarGJkMA9WqFyg9YfNzQHQTYsIcqEtm
+```
 
 The default algorithm for the hashed password is SSHA, this can be changed at the command line
 to other formats; the default type (SSHA) is recommended.
 
+```
 % slappasswd -h {MD5} -s manny
 {MD5}j+eKwOqr8vR0sN46lo4WXg==
+```
 
 AddressBook Entries
 -------------------
@@ -201,6 +215,7 @@ Now that the LDAP server has been configured and is running, we can conduct a si
 of the naming context to see our directory information before we start to import our entries.
 The "namingContexts" should be similar to the example below.
 
+```
 % ldapsearch -x -b '' -s base '(objectclass=*)' namingContexts
 # extended LDIF
 #
@@ -218,6 +233,7 @@ result: 0 Success
 
 # numResponses: 2
 # numEntries: 1
+```
 
 The following LDIF file will create the hierarchical directory service structure that we will
 be using for indimail's address book. The first entry is that of the base directory and the
@@ -227,6 +243,7 @@ and the address book entries.
 
 The bolded entries should be changed to suit your configuration requirements.
 
+```
 % cat addressbook.ldif
 # Domain entry
 dn: o=indimail.org
@@ -258,11 +275,13 @@ adding new entry "o=indimail.org"
 adding new entry "cn=Manager,o=indimail.org"
 adding new entry "ou=users,o=indimail.org"
 adding new entry "ou=addressbook,o=indimail.org"
+```
 
 The following LDAP search is requesting a listing of all entries starting from the
 base "o=indimail.org". This should return all of the entries that where added in the
 previous step.
 
+```
 % ldapsearch -x -b 'o=indimail.org' '(objectclass=*)'
 
 # indimail.com
@@ -289,6 +308,7 @@ dn: ou=addressbook,o=indimail.org
 ou: addressbook
 objectClass: top
 objectClass: organizationalUnit
+```
 
 Now that we have defined and imported our directory scheme, we can create user entries
 to populate the addressbook. The following is a simple example LDIF entry for a contact.
@@ -296,6 +316,7 @@ to populate the addressbook. The following is a simple example LDIF entry for a 
 The first line (dn:) designates where about in the directory the entry will belong when its
 imported, this should be changed to suit your needs.
 
+```
 % cat newcontact.ldif
 dn:uid=mbhangui,ou=addressbook,o=indimail.org
 uid: mbhangui
@@ -316,18 +337,24 @@ mail: m.bhangui@gmail.com
 objectClass: top
 objectClass: inetOrgPerson
 userPassword: {MD5}j+eKwOqr8vR0sN46lo4WXg==
+```
 
 The contents of the LDIF file can be added into the directory service using the "ldapadd"
 command below.
 
+```
 % ldapadd -x -D 'cn=Manager,o=indimail.org' -W -f newcontact.ldif
 Enter LDAP Password:
 adding new entry "uid=mbhangui,ou=addressbook,o=indimail.org"
+```
 
 You can now use ldapsearch with authentication to test
+
+```
 % ldapsearch -x -b 'o=indimail.org' \
     -D "uid=mbhangui,ou=AddressBook,o=indimail.org" '(objectclass=*)' \
     -s sub -w manny
+```
 
 If you do not require an address book and just require a basic user object to use for
 authenticaton, a basic user object can be created and imported into the LDAP server.
@@ -337,6 +364,7 @@ all that we need to create a basic authentication mechanism.
 It should also be noted that this object is stored in the "users" organisational unit, which
 is located outside of the address book directory.
 
+```
 % cat useraccount.ldif 
 dn:uid=mbhangui,ou=users,o=indimail.org
 uid: mbhangui
@@ -345,35 +373,43 @@ userPassword: {MD5}j+eKwOqr8vR0sN46lo4WXg==
 objectClass: top
 objectClass: account
 objectClass: simpleSecurityObject
+```
 
+```
 % ldapadd -x -D 'cn=Manager,o=indimail.org' -W -f useraccount.ldif
 Enter LDAP Password:
 adding new entry "uid=mbhangui,ou=users,o=indimail.org"
+```
 
 For mbhangui to authenticate to the server, one needs to pass
 "uid=mbhangui,ou=users,o=indimail.org" as username along with the the plain text value of
 password, the hashed value is only for storage purposes. 
 
+```
 % ldapsearch -x -b 'ou=addressbook,o=indimail.org' \
       -D "uid=mbhangui,ou=users,o=indimail.org" '(objectclass=*)' -s sub -w manny
+```
 
 NOTE: You can use ldap-checkpwd(8) if you want IndiMail to authenticate against ldap
 
-Backing up LDAP Database
-------------------------
+## Backing up LDAP Database
 
+```
 % sudo /var/indimail/bin/svc -d /service/slapd.389
 % slapcat -vl /etc/openldap/backup_slapd.ldif
 % sudo /var/indimail/bin/svc -u /service/slapd.389
+```
 
 To Import
+
+```
 % sudo /var/indimail/bin/svc -d /service/slapd.389
 % slapadd -vl /etc/openldap/backup_slapd.ldif
 % chown ldap.ldap /var/lib/ldap/*
 % sudo /var/indimail/bin/svc -u /service/slapd.389
+```
 
-Email Client Settings
----------------------
+## Email Client Settings
 
 The last steps in setting up the shared address book is to configure the users email clients
 to access the LDAP server.
@@ -385,19 +421,23 @@ value so the server knows which object to authenticate.
 Remember, not all clients can write to the address book, so use the phpLDAPadmin application
 to add and manage the entries as needed.
 
-LDAP Server      : your_host_IP:389
-Search Base      : ou=addressbook,o=indimail.org
-Login Method     : use distinguished name (if listed)
-Username         : uid=user,ou=addressbook,o=indimail.org
-Password         : As entered in newcontact.ldif file (plain text version)
-Secure Connection: Never (unless encryption has been configured)
+Table|Description
+-----|-----------
+LDAP Server|your_host_IP:389
+Search Base|ou=addressbook,o=indimail.org
+Login Method|use distinguished name (if listed)
+Username|uid=user,ou=addressbook,o=indimail.org
+Password|As entered in newcontact.ldif file (plain text version)
+Secure Connection|Never (unless encryption has been configured)
 
 In the above replace 'user' with the actual user created in ldap by using ldapadd
 
 checkpassword authentication
 
+```
 declare -x LDAP_BASE="ou=users,o=indimail.org"
 declare -x LDAP_FILTER="(&(uid=%u)(o=%h))"
 % printf "mbhangui@indimail.org\0manny\0\0" | ldap-checkpwd /bin/ls -ld /tmp 3<&0
 % echo $?
 0
+```
