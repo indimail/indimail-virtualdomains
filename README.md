@@ -13,7 +13,7 @@ Messaging Platform based on qmail for MTA Virtual Domains, Courier-IMAP for IMAP
 * Look at [Quick-INSTALL](.github/Quick-INSTALL.md) for instructions on installation and setup of an IndiMail server.
 * Look at [Tutorial](.github/indimail.md) for a detailed tutorial on doing various tasks with an IndiMail server
 
-# Installation
+# Source Installation
 
 The steps below give instructions on building from source. If you need to deploy IndiMail on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the same package can be deployed on multiple hosts. To generate RPM packages for all components refer to [CREATE-Packages](.github/CREATE-Packages.md)
 
@@ -173,7 +173,7 @@ $ sudo make install-strip
 
 Setup (this uses svctool a general purpose utility to configure indimail-mta
 services. The create_services is a shell script which uses svctool to setup
-indimail-mta. It will also put a systemd unit file indimail.service in
+indimail-mta/indimail. It will also put a systemd unit file svscan.service in
 /lib/systemd/system
 
 ```
@@ -193,7 +193,7 @@ or
 $ /usr/bin/qmailctl start
 ```
 
-# Binary Builds
+# Binary Builds on openSUSE Build Service
 
 You can get binary RPM / Debian packages at
 

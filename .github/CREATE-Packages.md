@@ -1,4 +1,4 @@
-# Build Binary Packages
+# Binary Packages Build
 
 ## Clone git repository
 
@@ -57,3 +57,15 @@ $ ./create_rpm    # for RPM
 or
 $ ./create_debian # for deb
 ```
+
+## Install Packages
+
+Installing and configuration is much simplied when you use the Binary Packages Build. The pre, post instlation scripts do all the hard work for you.
+
+** For RPM based distributions **
+
+`sudo rpm -ivh rpm_file`
+
+** For Debian based distributions **
+
+`sudo dpkg -i debian_file`
