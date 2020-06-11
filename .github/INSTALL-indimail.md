@@ -982,13 +982,9 @@ NOTE: All the above svctool commands, in all previous steps, are in the script
 create_services. You can run this script from IndiMail's source directory to
 create all services with reasonable defaults.
 
-sudo sh ./create_services --qbase=/var/indimail/queue --mbase=/home/mail \
-  --mysqlPrefix=/usr
-
-On Mac OS X you may run
-
-sudo sh ./create_services --qbase=/var/indimail/queue --mbase=/home/mail \
-  --mysqlPrefix=/usr --no-nssd
+$ cd /usr/local/src/indimail-mta-x
+$ sudo sh ./create_services --servicedir=/services --qbase=/var/indimail/queue
+$ sudo service indimail start
 ```
 
 ## SECTION 7  Crontab Entries ##
