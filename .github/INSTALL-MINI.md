@@ -18,8 +18,8 @@ IndiMail includes a QMQP server, qmail-qmqpd. You also need to have tcpserver in
 first create /etc/indimail/etc/qmqp.tcp in tcprules format to allow queueing from the authorized hosts. make sure to deny connections from unauthorized hosts. for example, if queueing is allowed from 1.2.3.\*:
 
 ```
-     1.2.3.:allow
-     :deny
+1.2.3.:allow
+:deny
 ```
 
 Then create /etc/indimail/etc/qmqp.cdb:
