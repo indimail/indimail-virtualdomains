@@ -35,7 +35,8 @@ all: indimail-access.spec indimail-access-rpmlintrc \
 	indimail-access-permissions.easy indimail-access-permissions.secure \
 	indimail-access-permissions.paranoid perm_list.imap debian/Makefile
 
-indimail-access.spec: indimail-access.spec.in catChangeLog Makefile conf-version conf-release
+indimail-access.spec: indimail-access.spec.in catChangeLog Makefile conf-version conf-release doc/ChangeLog \
+../fetchmail-x/conf-version ../courier-imap-x/conf-version
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
 indimail-access-rpmlintrc: indimail-access-rpmlintrc.in Makefile
 	$(edit) $@.in > $@
@@ -47,5 +48,5 @@ indimail-access-permissions.paranoid: indimail-access-permissions.paranoid.in Ma
 	$(edit) $@.in > $@
 perm_list.imap: perm_list.in
 	$(edit) perm_list.in > $@
-debian/Makefile: debian/Makefile.in
+debian/Makefile: debian/Makefile.in ../fetchmail-x/conf-version ../courier-imap-x/conf-version
 	$(edit) $@.in > $@
