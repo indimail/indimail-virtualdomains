@@ -533,6 +533,7 @@ You can replace maildirdeliver in the last line with vdelivermail(8)
 `| /usr/sbin/vdelivermail '' bounce-no-mailbox`
 
 # Writing Filters for IndiMail
+
 IndiMail provides multiple methods by which you can intercept an email in transit and modify the email headers or the email body. A filter is a simple program that expects the raw email on standard input and outputs the message text back on standard output. The program /bin/cat can be used as a filter which simply copies the standard input to standard output without modifying anything. Some methods can be used before the mail gets queued and some methods can be used before the execution of local / remote delivery.
 
 It is not necessary for a filter to modify the email. You can have a filter just to extract the headers or body and use that information for some purpose. IndiMail also provides the following programs - 822addr(1), 822headerfilter(1), 822bodyfilter(1), 822field(1), 822fields(1), 822header(1), 822body(1), 822headerok(1), 822received(1), 822date(1), 822fields(1) to help in processing emails.
@@ -1816,6 +1817,37 @@ domain quota : ALLOW_CREATE ALLOW_MODIFY ALLOW_DELETE
 default quota : ALLOW_CREATE ALLOW_MODIFY
 ```
 
+# SPAM and Virus Filtering
+
+IndiMail has multiple methods to insert your script anywhere before the queue, after the queue, before local delivery, before remote deliver or call a script to do local or remote delivery. Refer to the chapter **Writing Filters for IndiMail** for more details.
+
+# SPAM Control using bogofilter
+
+If you have installed indimail-spamfilter package, you will have [bogofilter](https://bogofilter.sourceforge.io/) providing a bayesian spam filter.
+
+On of the easiest method to enable bogofilter is to set few environment variable for indimail's qmail-multi(8) the frontend for qmail-queue(8) program. e.g. to enable spam filter on the incoming SMTP on port 25:
+
+bogofilter requires training to work. You can refer to Section 3, Step 8 in the document [INSTALL](INSTALL-indimail.md). You can also have a pre-trained database installed by installing the **bogofilter-wordlist** package.
+
+```
+$ sudo /bin/bash
+# echo "/usr/bin/bogofilter -p -d /etc/indimail" > /service/qmail-smtpd.25/variables/SPAMFILTER
+# echo "0" > /service/qmail-smtpd.25/variables/SPAMEXITCODE
+# echo "0" > /service/qmail-smtpd.25/variables/REJECTSPAM
+# echo "1" > /service/qmail-smtpd.25/variables/MAKESEEKABLE
+```
+
+Now qmail-multi(8) will pass every mail will pass through bogofilter before it passes to qmail-queue(8). You can refer to Chapter **IndiMail Queue Mechanism**, look at the picture to understand how it works. bogofilter(1) will add X-Bogosity in each and every mail. A spam mail will have the value `Yes` along with a probabality number (e.g. 0.999616 below). You can configure bogofilter in /etc/indimail/bogofilter.cf. The SMTP logs will also have lines having this X-Bogosity field. A detailed mechanism is depicted pictorially in the chapter **Virus Scanning using QHPSI**
+
+```
+X-Bogosity: Yes, spamicity=0.999616, cutoff=9.90e-01, ham_cutoff=0.00e+00, queueID=6cs66604wfk,
+```
+
+The method describe above is a global SPAM filter. It will happen for all users, unless you use something like **envrules** to unset **SPAMFILTER** environment variable. You can use **envrules** to set **SPAMFILTER** for few specific email addresses. You can refer to the chapter on **Envrules** for more details.
+
+There is another way you can do spam filtering - during local delivery (you could do for remote delivery, but what would be the point?). IndiMail allows you to call an external program during local/remote delivery by settting **QMAILLOCAL** / **QMAILREMOTE** environment variable. You could use any method to call bogofilter (either directly in *filterargs* control file, or your own script). You can see a Pictorial representation of how this happens. ![LocalFilter](indimail_spamfilter_local.png)
+
+You can also use vcfilter(1) to set up a filter that will place your spam emails in a designated folder for SPAM. Refer to the chapter **Writing Filters for IndiMail** for more details.
 
 # SPAM Control using badip control file
 
@@ -1889,6 +1921,8 @@ To perform virus scanning, it would be trivial to do virus scanning on the mess 
 IndiMail takes **QHPSI** forward by adding the ability to add plugins. The **QHPSI** extension for qmail-queue allows to call an arbitary virus scanner directly, scanning the incoming data-stream on STDIN. Alternatively, it allows plugins to be loaded from the /usr/lib/indimail/plugins directory. This directory can be changed by defining PLUGINDIR environment variable. **QHPSI** can be advised to pass multiple arguments to the virus scanner for customization. To run external scanner or load scanner plugins, qmail-queue calls qhpsi, a program setuid to qscand. By default, qhpsi looks for the symbol virusscan to invoke the scanner. The symbol can be changed by setting the environment variable QUEUE_PLUGIN to the desired symbol.
 
 Today’s virus scanner -- in particluar Clam AV -- work in resource efficient client/server mode (clamd/clamdscan) and include the feature to detect virii/worms in the base64 encoded data stream. Thus, there is no necessity to call additional programs (like reformime or ripmime) except for the virus scanner itself.
+
+You can see how the scanning works ![Pictorially](indimail_spamfilter_global.png)
 
 To enable virus scanning in IndiMail during the SMTP data phase, you can implement either of the two methods below
 
