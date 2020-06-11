@@ -11,7 +11,7 @@ You must decide if you want Non-clustered setup or a clustered setup. If you hav
 
 ## Creating a non-clustered Domain
 
-Either refer to 'Binary builds' section in [README](README-indimail.md) for indimail repository information for binary builds.
+Either refer to 'Binary builds on openSUSE Build Service' section in [README](README-indimail.md) for indimail repository information for binary builds.
 
 or
 
@@ -89,7 +89,7 @@ Create a virtual domain and do various operations
 
 ## Creating a Clustered Domain
 
-Either refer to 'Binary builds' section in [README](README-indimail.md) for indimail repository information for binary builds.
+Either refer to 'Binary builds on openSUSE Build Service' section in [README](README-indimail.md) for indimail repository information for binary builds.
 
 or
 

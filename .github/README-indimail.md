@@ -191,7 +191,7 @@ There are four Mailing Lists for IndiMail
 
 There is also a [Project Tracker](http://sourceforge.net/tracker/?group_id=230686) for IndiMail (Bugs, Feature Requests, Patches, Support Requests)
 
-# Binary Builds
+# Binary Builds on openSUSE Build Service
 
 You can get binary RPM / Debian packages at
 

@@ -8,7 +8,7 @@ There is also an Installation for Experts, involving source compilation. For tha
 
 Please refer to Support Information in [README](README-indimail.md) for getting support for IndiMail.
 
-Refer to 'Binary Builds' section in [README](README-indimail.md) for indimail repository information for binary builds.
+Refer to 'Binary Builds on openSUSE Build Service' section in [README](README-indimail.md) for indimail repository information for binary builds.
 
 Refer to 'Docker / Podman Repository' section in [README](README-indimail.md) for information on running a docker/podman image of IndiMail.
 
