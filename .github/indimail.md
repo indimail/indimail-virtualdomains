@@ -6,7 +6,7 @@ TERMINOLOGY|Description
 -----------|-----------
 $ command|command `command` was executed by a non-privileged user
 # command|command `command` was executed by the `root` user
-$ sudo command| command `command` requires root privilege to run. sudo was used to gain root privileges
+$ sudo command|command `command` requires root privilege to run. sudo was used to gain root privileges
 
 You can get binary RPM / Debian packages at
 
