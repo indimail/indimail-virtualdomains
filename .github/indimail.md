@@ -49,9 +49,11 @@ Currently, the list of supported distributions for IndiMail is
 
 # TERMINOLOGY used for commands
 
-* $ command - `command` was executed by a non-privileged user
-* # command - `command` was executed by the `root` user
-* $ sudo command `command` requires root privilege to run. sudo was used to gain root privileges
+```
+$ command      - command was executed by a non-privileged user
+# command      - command was executed by the `root` user
+$ sudo command - command requires root privilege to run. sudo was used to gain root privileges
+```
 
 # Docker / Podman Repository
 
