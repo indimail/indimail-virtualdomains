@@ -61,7 +61,6 @@ Source3: http://downloads.sourceforge.net/indimail/%{name}-permissions.secure
 Source4: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
 %endif
 %endif
-# http://downloads.sourceforge.net/indimail/%%{name}-rpmlintrc
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
 AutoReqProv: Yes
