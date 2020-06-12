@@ -461,9 +461,12 @@ done
 %attr(644,root,root)                    %{python3_sitelib}/__pycache__/*.pyc
 %attr(755,root,root)                    %{python3_sitelib}/fetchmailconf.py
 %else
+%if 0%{?centos_version} > 600 || 0%{?rhel_version} > 600 || %{defined fedora_version} || %{defined sles_version}
+# fetchmailconf is not installed in fetchmail > 6.4.6 if python version < 2.7
 %attr(644,root,root)                    %{pythondir}/fetchmailconf.pyo
 %attr(644,root,root)                    %{pythondir}/fetchmailconf.pyc
 %attr(755,root,root)                    %{pythondir}/fetchmailconf.py
+%endif
 %endif
 %endif
 
@@ -629,8 +632,8 @@ if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   /sbin/ldconfig
 fi
 
-for i in fetchmail imapd.143 imapd-ssl pop3d.110 pop3d-ssl \
-proxyIMAP.4143 proxyPOP.4110
+for i in fetchmail imapd.143 imapd-ssl.993 pop3d.110 pop3d-ssl.995 \
+proxyIMAP.4143 proxyPOP3.4110
 do
   %{__mkdir_p} %{logdir}/$i
 done
