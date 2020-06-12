@@ -45,12 +45,12 @@ IndiMail is highly configurable. No hard-coded directories of qmail like /var/qm
 
 IndiMail is a pure messaging solution. It does not provide calendars, todo lists, address books, meeting requests and a web mail front-end. However, you can use [Roundcube Mail](https://roundcube.net/) or any web mail front-end that works with IMAP or POP3 protocol with IndiMail. If you decide to install [Roundcube Mail](https://roundcube.net/), you can install the **ircube** package from the IndiMail's DNF/YUM/Debian [Repository](https://build.opensuse.org/package/show/home:indimail/ircube "ircube") to have a fully functional web mail front-end. The ircube package provides plugins for Rouncube Mail to manage your passwords, vacation and SPAM filters.
 
-IndiMail administrators can use a web administration tool called **iwebadmin**. It can be installed from source from [here](https://github.com/mbhangui/indimail-virtualdomains/tree/v3.2/iwebadmin-x) or from the [DNF/YUM/Debian Repository](https://build.opensuse.org/package/show/home:indimail/iwebadmin "iwebadmin") on the openSUSE build Service.
+IndiMail administrators can use a web administration tool called **iwebadmin**. It can be installed from source from [here](https://github.com/mbhangui/indimail-virtualdomains/tree/master/iwebadmin-x) or from the [DNF/YUM/Debian Repository](https://build.opensuse.org/package/show/home:indimail/iwebadmin "iwebadmin") on the openSUSE build Service.
 
-IndiMail comes with a power tcl/tk administration client called [**indium**](https://github.com/mbhangui/indimail-virtualdomains/tree/v3.2/indium-1.1 "indium"). It can be installed from source from [here](https://github.com/mbhangui/indimail-virtualdomains/tree/v3.2/indium-1.1) or from the [DNF/YUM/Debian Repository](https://build.opensuse.org/package/show/home:indimail/indium) on the openSUSE Build Service.
+IndiMail comes with a power tcl/tk administration client called [**indium**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indium-1.1 "indium"). It can be installed from source from [here](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indium-1.1) or from the [DNF/YUM/Debian Repository](https://build.opensuse.org/package/show/home:indimail/indium) on the openSUSE Build Service.
 
 
-To install IndiMail you can take the help of the following documents in the [indimail-x/doc subdirectory](https://github.com/mbhangui/indimail-virtualdomains/tree/v3.2/indimail-x/doc) of [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains) github repository.
+To install IndiMail you can take the help of the following documents in the [indimail-x/doc subdirectory](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-x/doc) of [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains) github repository.
 
 File | Description
 ----- | --------------------
@@ -61,7 +61,7 @@ INSTALL-MYSQL.md|MySQL specific Installation Instructions
 README-CLUSTER.md|Steps on configuring a clustered setup
 Quick-INSTALL.md|A minimal documentation on Installation/Configuration)
 
-If you have enough experience on your belt you can dive into this [document](https://github.com/mbhangui/indimail-virtualdomains/blob/v3.2/README.md).
+If you have enough experience on your belt you can dive into this [document](https://github.com/mbhangui/indimail-virtualdomains/blob/master/README.md).
 
 Once you have installed IndiMail, you will find all man pages in /usr/share/man and documents in /usr/share/indimail/doc. You can do man indimail to get started with understanding IndiMail.
 
@@ -71,7 +71,7 @@ There is no warranty implied or otherwise with this package. I believe in OpenSo
 
 # LICENSING
 
-IndiMail uses GPLv3 License. See file [LICENSE](https://github.com/mbhangui/indimail-virtualdomains/blob/v3.2/LICENSE). Additional licenses (if any) may be found in subfolder of each component that IndiMail uses.
+IndiMail uses GPLv3 License. See file [LICENSE](https://github.com/mbhangui/indimail-virtualdomains/blob/master/LICENSE). Additional licenses (if any) may be found in subfolder of each component that IndiMail uses.
 
 # BRIEF FEATURE LIST
 
