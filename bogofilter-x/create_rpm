@@ -49,11 +49,11 @@ if [ $# -gt 0 ] ; then
 	release=$1
 else
 	if [ -f /usr/bin/bogofilter ] ; then
-		bdist=$(rpm -qf /usr/bin/bogofilter|cut -d- -f3|cut -d. -f3)
+		bdist=$(rpm -qf /usr/bin/bogofilter|cut -d- -f4|cut -d. -f3)
 		if [ " $dist" = " $bdist" ] ; then
-			bversion=$(rpm -qf /usr/bin/bogofilter|cut -d- -f2)
+			bversion=$(rpm -qf /usr/bin/bogofilter|cut -d- -f3)
 			if [ "$bversion" = "$version" ] ; then
-				release=$(rpm -qf /usr/bin/bogofilter | cut -d- -f3 | cut -d. -f2)
+				release=$(rpm -qf /usr/bin/bogofilter | cut -d- -f4 | cut -d. -f2)
 				release=$(expr $release + 1)
 			else
 				release=1
@@ -67,7 +67,7 @@ else
 fi
 cd ..
 echo "Clearing stage directory"
-#/bin/rm -rf stage
+/bin/rm -rf stage
 echo -n "Build RPM for indimail-spamfilter-"$version"-1."$release" (Y/N) - "
 read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
