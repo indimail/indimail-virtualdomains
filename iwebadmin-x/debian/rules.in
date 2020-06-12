@@ -21,7 +21,6 @@ endif
 
 prefix=@prefix@
 sysconfdir=@sysconfdir@
-mysql_prefix=@mysql_prefix@
 version=@version@
 #
 DESTDIR=$(CURDIR)/debian/iwebadmin.tmp
@@ -36,14 +35,13 @@ build-stamp:
 	#
 	# run configure script
 	#
-	./configure --prefix=${prefix} \
-		--sysconfdir=${sysconfdir} \
-		--libdir=$(libdir) \
+	./configure --prefix=$(prefix) \
+		--sysconfdir=$(sysconfdir) \
 		--disable-ipauth \
 		--disable-trivial-password \
-		--enable-ezmlmdir=${prefix}/bin \
-  		--enable-ezmlmidx \
-		--enable-mysqlprefix=${mysql_prefix} \
+		--enable-ezmlmdir=$(prefix)/bin \
+		--enable-ezmlmidx \
+		--enable-domain-autofill \
 		--enable-modify-quota \
 		--enable-htmldir=@htmldir@ \
 		--enable-cgibindir=@cgibindir@ \

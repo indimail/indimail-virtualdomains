@@ -35,3 +35,10 @@ config.status
 libtool
 stamp-h1
 *.o
+conf-release
+iwebadmin-permissions.easy
+iwebadmin-permissions.paranoid
+iwebadmin-permissions.secure
+perm_list.iwebadmin
+debian/changelog.in
+doc/ChangeLog

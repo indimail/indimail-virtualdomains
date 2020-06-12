@@ -19,8 +19,8 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include "indimail.h"
-#include "indimail_compat.h"
+#include <indimail.h>
+#include <indimail_compat.h>
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
 #endif

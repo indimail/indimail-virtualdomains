@@ -2,16 +2,19 @@
 ACLOCAL_AMFLAGS=-I m4
 DEFS=@DEFS@ -fno-strict-aliasing -I. @auth_incs@
 
-EXTRA_DIST=BUGS FAQ TRANSLATORS html lang images contrib
-
 htmllibdir=@htmllibdir@
 htmldir=@htmldir@
 imagedir=@imagedir@
 
+version=$(shell cat conf-version)
+release := $(shell cat conf-release 2>/dev/null|| echo "1.1")
+
+EXTRA_DIST=BUGS FAQ TRANSLATORS html lang images contrib
+
 #
 # Install iwebadmin setuid to @indimailuser@
 #
-INSTALL_PROGRAM = ${INSTALL}          -c
+INSTALL_PROGRAM = ${INSTALL} -c
 INSTALL_STRIP_PROGRAM=${INSTALL_PROGRAM} -s
 
 bindir=@cgibindir@
@@ -19,7 +22,7 @@ bin_PROGRAMS=@CGIBINTARGETS@
 EXTRA_PROGRAMS=iwebadmin
 
 SYSCONFDIR = @sysconfdir@
-sysconf_DATA = iwebadmin_perm_list
+sysconf_DATA = perm_list.iwebadmin
 
 iwebadmin_DEPENDENCIES=$(COMMONDEPENDENCIES)
 
@@ -33,9 +36,11 @@ iwebadmin_SOURCES=$(COMMONSOURCES)
 iwebadmin_LDADD=@auth_libs@
 iwebadmin_CFLAGS = @auth_incs@ $(AM_CFLAGS)
 
-noinst_SCRIPTS = iwebadmin.spec iwebadmin-@VERSION@-rpmlintrc
+noinst_DATA = iwebadmin.spec iwebadmin-rpmlintrc \
+			  iwebadmin-permissions.easy iwebadmin-permissions.secure \
+			  iwebadmin-permissions.paranoid
 
-MOSTLYCLEANFILES = iwebadmin_perm_list obs.mk
+MOSTLYCLEANFILES = perm_list.iwebadmin
 
 edit = sed \
 	-e 's,@mysql_prefix\@,$(mysql_prefix),g' \
@@ -46,7 +51,8 @@ edit = sed \
 	-e 's,@sys_libdir\@,$(sys_libdir),g' \
 	-e 's,@cgibindir\@,$(cgibindir),g' \
 	-e 's,@imagedir\@,$(imagedir),g' \
-	-e 's,@version\@,$(VERSION),g' \
+	-e 's,@version\@,$(version),g' \
+	-e 's,@release\@,$(release),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 iwebadmin.o: config.h iwebadmin.h 
@@ -66,12 +72,18 @@ limits.o: config.h iwebadmin.h iwebadminx.h
 dotqmail.o: config.h iwebadmin.h iwebadminx.h 
 
 iwebadmin.spec: iwebadmin.spec.in
-	($(edit) $@.in;cat doc/ChangeLog) > $@
-iwebadmin-@VERSION@-rpmlintrc: iwebadmin-rpmlintrc.in
+	(cat $@.in;./catChangeLog) | $(edit) > $@
+iwebadmin-rpmlintrc: iwebadmin-rpmlintrc.in
 	$(edit) iwebadmin-rpmlintrc.in > $@
-obs.mk: debian/obs.mk.in
-	$(edit) debian/$@.in > debian/$@;/bin/rm -f $@;ln -s debian/$@ $@
-iwebadmin_perm_list: iwebadmin_perm_list.in
+debian/Makefile: debian/Makefile.in conf-version conf-release
+	$(edit) $@.in > $@
+perm_list.iwebadmin: perm_list.iwebadmin.in
+	$(edit) $@.in > $@
+iwebadmin-permissions.easy: iwebadmin-permissions.easy.in
+	$(edit) $@.in > $@
+iwebadmin-permissions.secure: iwebadmin-permissions.secure.in
+	$(edit) $@.in > $@
+iwebadmin-permissions.paranoid: iwebadmin-permissions.paranoid.in
 	$(edit) $@.in > $@
 
 # Maintainer stuff
@@ -105,7 +117,7 @@ install-data-local:
 install-data-hook:
 	$(mkinstalldirs)         $(DESTDIR)@sysconfdir@
 	$(mkinstalldirs)         $(DESTDIR)@docdir@
-	$(INSTALL_DATA) iwebadmin_perm_list $(DESTDIR)@sysconfdir@/iwebadmin_perm_list  || exit 1
+	$(INSTALL_DATA) perm_list.iwebadmin $(DESTDIR)@sysconfdir@/perm_list.iwebadmin  || exit 1
 	$(INSTALL_DATA) README $(DESTDIR)@docdir@/README || exit 1
 	$(INSTALL_DATA) README.hooks $(DESTDIR)@docdir@/README.hooks || exit 1
 	$(INSTALL_DATA) COPYING $(DESTDIR)@docdir@/COPYING || exit 1

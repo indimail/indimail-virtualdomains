@@ -1,20 +1,23 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.33 2019-06-08 23:22:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.34 2020-06-12 12:05:10+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
 %if %{defined _project}
 # define if building on openSUSE build service
 %define build_on_obs       1
-%global reconfigure_mode   0
 %global build_cflags       "-DOBS_BUILD %{build_cflags}"
 %global debug_package %{nil}
 %else
 %define _project           local
 %define build_on_obs       0
-%global reconfigure_mode   1
 %global _hardened_build    1
+%endif
+%if 0%{?suse_version}
+%global noperms            1
+%else
+%global noperms            0
 %endif
 
 %define _prefix            @prefix@
@@ -24,7 +27,7 @@
 Summary: Web Administration GUI for IndiMail User Administration
 Name: iwebadmin
 Version: @version@
-Release: 1.1%{?dist}
+Release: @release@%{?dist}
 
 %if %build_on_obs == 1
 License: GPL-3.0+
@@ -32,8 +35,15 @@ License: GPL-3.0+
 License: GPLv3
 %endif
 Group: System Environment/Base
-Source0:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
-Source2: %{name}-%{version}-rpmlintrc
+Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
+Source1: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+Source2: http://downloads.sourceforge.net/indimail/%{name}-permissions.easy
+Source3: http://downloads.sourceforge.net/indimail/%{name}-permissions.secure
+Source4: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
+%endif
+%endif
 
 URL: http://www.indimail.org
 AutoReqProv: No
@@ -43,21 +53,21 @@ BuildRequires: sed gettext-devel
 BuildRequires: findutils libqmail-devel libqmail
 BuildRequires: gzip autoconf automake libtool indimail-devel libindimail
 BuildRequires: mysql-devel
-%if %{undefined rhel_version}
-BuildRequires: sharutils
-%else
-%if 0%{?rhel_version} != 600 && 0%{?rhel_version} != 700
-BuildRequires: sharutils
-%endif
-%endif
-
 %if %{undefined centos_version} && %{undefined rhel_version}
 BuildRequires: chrpath
 %endif
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+PreReq: permissions
+%endif
+%endif
+
+################################# OBS ###############################
 %if 0%{?suse_version}
 BuildRequires: -post-build-checks  
 #!BuildIgnore: post-build-checks  
 %endif
+################################# OBS ###############################
 
 Requires: coreutils grep /bin/sh glibc /usr/sbin/useradd /usr/sbin/groupadd
 Requires: procps /usr/bin/awk indimail > 1.6
@@ -66,7 +76,7 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 Excludeos: windows 
 
 %description
-iwebadmin provides a Web frontend for administering IndiMail Users
+iwebadmin provides a Web front-end for administering IndiMail Users
 
 %{see_base}
 
@@ -74,7 +84,31 @@ iwebadmin provides a Web frontend for administering IndiMail Users
 %setup -q
 
 %build
-autoreconf -fiv
+(
+echo "---------------- INFORMATION ------------------------"
+echo target         %_target
+echo target_alias   %_target_alias
+echo target_cpu     %_target_cpu
+echo target_os      %_target_os
+echo target_vendor  %_target_vendor
+echo Project        %{_project}
+echo HTML Dir       @htmldir@
+echo CGI Bin Dir    @cgibindir@
+echo Image Dir      @imagedir@
+echo HTML libdir    @htmllibdir@
+echo Build          %{name}-%{version}-%{release} Build %{_build} OS %{_os}
+echo "------------------------------------------------------"
+) > %{name}-rpm.info
+
+(
+echo "NAME=%{name}"
+echo "Description=\"IndiMail iwebadmin Package\""
+echo "IWEBADMIN_version="%{version}""
+echo "ID=%{name}"
+echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
+echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui iwebadmin@indimail.org\""
+) > %{name}-release
+
 %configure --prefix=%{_prefix} \
   --sysconfdir=%{sysconfdir} \
   --libdir=%{_libdir} \
@@ -94,6 +128,17 @@ autoreconf -fiv
 %{__make} -s DESTDIR=%{buildroot}
 %{__make} -s DESTDIR=%{buildroot} install-strip
 
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
+install -m 644 %{S:2} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
+install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
+%endif
+%endif
+%{__mkdir_p} %{buildroot}%{sysconfdir}
+install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
+install -m 0644 %{name}-release  %{buildroot}%{sysconfdir}/%{name}-release
+
 if [ -x /usr/bin/chrpath ] ; then
   /usr/bin/chrpath -d %{buildroot}@cgibindir@/iwebadmin
 fi
@@ -103,12 +148,24 @@ fi
 %if "%{_prefix}" != "/usr"
 %dir %attr(555,root,qmail)               %{_prefix}
 %endif
+
+%attr(644,root,root) %config(noreplace)  %{sysconfdir}/%{name}-release
+%attr(644,root,root) %config(noreplace)  %{sysconfdir}/%{name}-rpm.info
+%attr(444,root,root) %config(noreplace)  %{sysconfdir}/perm_list.iwebadmin
+
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%attr(644,root,root)                     %{_sysconfdir}/permissions.d/%{name}-permissions
+%attr(644,root,root)                     %{_sysconfdir}/permissions.d/%{name}-permissions.secure
+%endif
+%endif
+
 %dir %attr(755,root,qmail)               @htmllibdir@
 %dir %attr(755,root,qmail)               @htmllibdir@/html
 %dir %attr(755,root,qmail)               @htmllibdir@/lang
 
 # binary
-%attr(6555,root,indimail)                @cgibindir@/iwebadmin
+%attr(6511,root,indimail)                @cgibindir@/iwebadmin
 
 #html
 %attr(444,root,root)                     @htmllibdir@/html/add_autorespond.html
@@ -169,7 +226,6 @@ fi
 %attr(444,root,root)                     @htmllibdir@/lang/tr
 %attr(444,root,root)                     @htmllibdir@/lang/zh-cn
 
-%attr(444,root,root) %config(noreplace)  @sysconfdir@/iwebadmin_perm_list
 #images
 %attr(444,root,root)                     @imagedir@/delete.png
 %attr(444,root,root)                     @imagedir@/disabled.png

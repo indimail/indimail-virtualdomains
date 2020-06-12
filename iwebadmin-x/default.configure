@@ -14,4 +14,3 @@ fi
 	--enable-cgibindir=/var/www/cgi-bin \
 	--enable-imagedir=/var/www/html/images/iwebadmin \
 	--enable-htmllibdir=/usr/share/iwebadmin
-

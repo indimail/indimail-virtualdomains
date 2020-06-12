@@ -1,0 +1,111 @@
+#!/bin/sh
+curdir=`pwd`
+version=$(cat conf-version)
+
+if test -f $HOME/.rpmmacros
+then
+	topdir=`grep ^%_topdir $HOME/.rpmmacros | awk '{print $2}'`
+	if test -n "$topdir"
+	then
+		rpmbuild=$topdir
+	else
+		rpmbuild=$HOME/rpmbuild
+	fi
+else
+	rpmbuild=$HOME/rpmbuild
+fi
+
+if [ -d ../stage ] ; then
+	/bin/rm -rf ../stage
+fi
+mkdir ../stage
+cd ..
+echo "Versioning iwebadmin-$version"
+cp -rp iwebadmin-x stage/iwebadmin-$version
+cd stage/iwebadmin-$version
+echo "Cleaning iwebadmin-$version"
+make -s clean > /dev/null
+make -s distclean > /dev/null
+/bin/rm -rf autom4te.cache .deps
+cd ..
+echo "Archiving iwebadmin-$version.tar.gz in `pwd`"
+tar \
+	--exclude="iwebadmin-$version/.git" \
+	--exclude="iwebadmin-$version/debian"  \
+	--exclude="iwebadmin-$version/RCS" \
+	-cf - iwebadmin-"$version" \
+	| gzip -c > $rpmbuild/SOURCES/iwebadmin-"$version".tar.gz
+for i in rpmlintrc permissions.easy permissions.secure permissions.paranoid
+do
+	echo "cp iwebadmin-$version/iwebadmin-$i $rpmbuild/SOURCES"
+	cp iwebadmin-$version/iwebadmin-$i $rpmbuild/SOURCES
+done
+dist=`uname -r |cut -d . -f4`
+if [ $# -gt 0 ] ; then
+	release=$1
+else
+	if [ -f /var/www/cgi-bin/iwebadmin ] ; then
+		bdist=$(rpm -qf /var/www/cgi-bin/iwebadmin|cut -d- -f3|cut -d. -f3)
+		if [ " $dist" = " $bdist" ] ; then
+			bversion=$(rpm -qf /var/www/cgi-bin/iwebadmin|cut -d- -f2)
+			if [ "$bversion" = "$version" ] ; then
+				release=$(rpm -qf /var/www/cgi-bin/iwebadmin|cut -d- -f3|cut -d. -f2)
+				release=$(expr $release + 1)
+			else
+				release=1
+			fi
+		else
+			release=1
+		fi
+	else
+		release=1
+	fi
+fi
+cd ..
+echo "Clearing stage directory"
+/bin/rm -rf stage
+echo -n "Build RPM for iwebadmin-"$version"-1."$release" (Y/N) - "
+read key
+if [ " $key" = " Y" -o " $key" = " y" ] ; then
+	tmprel=`cat iwebadmin-x/conf-release 2>/dev/null`
+	if [ ! " $tmprel" = " 1.$release" ] ; then
+		echo 1.$release > iwebadmin-x/conf-release
+		cd iwebadmin-x
+		make iwebadmin.spec
+		cp iwebadmin.spec /tmp
+		cd debian
+		make
+		cd ../..
+	else
+		make -s -C iwebadmin-x iwebadmin.spec
+		cp iwebadmin-x/iwebadmin.spec /tmp
+	fi
+	rpmbuild -ba --clean /tmp/iwebadmin.spec
+	/bin/rm -f /tmp/iwebadmin.spec
+	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
+	rpm --addsign $rpmbuild/RPMS/$build_arch/iwebadmin-"$version"-"1.$release".$dist.$build_arch.rpm
+	rpm --addsign $rpmbuild/SRPMS/iwebadmin-"$version"-"1.$release".$dist.src.rpm
+	echo -n "RPM lint for iwebadmin-"$version"-1."$release" (Y/N) - "
+	read key
+	if [ " $key" = " Y" -o " $key" = " y" ] ; then
+		(
+		echo iwebadmin
+		rpmlint $rpmbuild/RPMS/$build_arch/iwebadmin-"$version"-"1.$release".$dist.$build_arch.rpm
+		echo ------------------------
+		echo iwebadmin-"$version"-"1.$release".$dist.src.rpm
+		rpmlint $rpmbuild/SRPMS/iwebadmin-"$version"-"1.$release".$dist.src.rpm
+		echo ------------------------
+		) 2>&1 | less
+	fi
+fi
+echo -n "Remove Source (Y/N) - "
+read key
+if [ " $key" = " Y" -o " $key" = " y" ] ; then
+	echo "/bin/rm -f $rpmbuild/SOURCES/iwebadmin-$version.tar.bz2"
+	/bin/rm -f $rpmbuild/SOURCES/iwebadmin-$version.tar.bz2
+	for i in rpmlintrc permissions.easy permissions.secure permissions.paranoid
+	do
+		echo "/bin/rm -f $rpmbuild/SOURCES/iwebadmin-$i"
+		/bin/rm -f $rpmbuild/SOURCES/iwebadmin-$i
+	done
+fi
