@@ -271,6 +271,7 @@ then
 	AC_CHECK_FUNC(mysql_optionsv, have_mysqloptionsv=1)
 	LIBS=$saveLIBS
 else
+  AC_EGREP_HEADER(st_mysql_res, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_LIBMARIADB, 1, "have st_mysql_res typedef"),)
 	AC_DEFINE_UNQUOTED(DLOPEN_LIBMYSQLCLIENT, "1", "if libmysqlclient is loaded using dlopen")
 fi
 
