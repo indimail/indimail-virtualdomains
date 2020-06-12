@@ -244,6 +244,7 @@ then
 	LIBS=$saveLIBS
 else
 	AC_DEFINE_UNQUOTED(DLOPEN_LIBMYSQLCLIENT, "1", "if libmysqlclient is loaded using dlopen")
+	AC_EGREP_HEADER(st_mysql_res, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_LIBMARIADB, 1, "have st_mysql_res typedef"),)
 fi
 
 auth_inc="-I/usr/include/qmail -I$mysql_incdir -I$mysql_incdir/mysql"
