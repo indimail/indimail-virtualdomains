@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.h,v $
+ * Revision 1.3  2020-06-12 21:45:54+05:30  Cprogrammer
+ * use HAVE_LIBMARIADB to define MYSQL_RES typedef
+ *
  * Revision 1.2  2020-04-30 19:50:29+05:30  Cprogrammer
  * define prototypes as extern to fix compilation error
  *
@@ -20,7 +23,7 @@ typedef const char i_char;
 #ifndef HAVE_BOOL
 typedef char bool;
 #endif
-#ifdef LIBMARIADB
+#if defined(LIBMARIADB) || defined(HAVE_LIBMARIADB)
 typedef struct st_mysql_res res;
 #else
 typedef struct MYSQL_RES res;
