@@ -1,5 +1,8 @@
 /*
  * $Log: vacation.c,v $
+ * Revision 1.4  2020-06-12 21:37:59+05:30  Cprogrammer
+ * added stdlib.h for mkstemp() prototype
+ *
  * Revision 1.3  2020-04-01 18:58:21+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -21,6 +24,9 @@
 #endif
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
 #endif
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
@@ -48,7 +54,7 @@
 #include "runcmmd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vacation.c,v 1.3 2020-04-01 18:58:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vacation.c,v 1.4 2020-06-12 21:37:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
