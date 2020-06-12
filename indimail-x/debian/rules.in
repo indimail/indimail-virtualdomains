@@ -35,9 +35,9 @@ cp=/bin/cp
 
 DESTDIR=$(CURDIR)/debian/tmp
 
-define genControl
-$(shell if [ -d ../BUILD ] ; then ../BUILD/debian/gen_control; else debian/gen_control;fi)
-endef
+#define genControl
+#$(shell if [ -d ../BUILD ] ; then ../BUILD/debian/gen_control; else debian/gen_control;fi)
+#endef
 libdir=@prefix@/lib
 pkgconfigdir=@prefix@/lib/pkgconfig
 
@@ -86,6 +86,9 @@ binary-indep: build install
 	dh_testdir
 	dh_testroot
 	find $(DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
+	sed -i -e 's,@libd\@,$(libd),g' debian/indimail.install
+	sed -i -e 's,@libd\@,$(libd),g' debian/indimail-devel.install
+	sed -i -e 's,@libd\@,$(libd),g' debian/libindimail.install
 	dh_install --sourcedir=$(DESTDIR) -pindimail
 	dh_install --sourcedir=$(DESTDIR) -pindimail-devel
 	dh_install --sourcedir=$(DESTDIR) -plibindimail
@@ -104,13 +107,6 @@ binary-indep: build install
 	dh_installcron
 	dh_md5sums
 	dh_builddeb
-
-debian/indimail.install: debian/indimail.install.in
-	sed -e 's,@libd\@,$(libd),g' $@.in > $@
-debian/indimail-devel.install: debian/indimail-devel.install.in
-	sed -e 's,@libd\@,$(libd),g' $@.in > $@
-debian/libindimail.install: debian/libindimail.install.in
-	sed -e 's,@libd\@,$(libd),g' $@.in > $@
 
 # Build architecture-dependent files here. 
 binary-arch: build install

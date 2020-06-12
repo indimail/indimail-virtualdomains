@@ -12,7 +12,6 @@ version=$(shell head -1 ../conf-version 2>/dev/null)
 release := $(shell head -1 ../conf-release 2>/dev/null|| echo 1.1)
 prefix=@prefix@
 arch=$(shell uname -m)
-libd=$(arch)-linux-gnu
 #
 
 libdir=@prefix@/lib
@@ -30,7 +29,7 @@ distclean: clean
 clean:
 	/bin/rm -f rules indimail.prerm indimail.preinst indimail.postrm \
 	indimail.postinst indimail-devel.postinst indimail-devel.postrm \
-	debian.tar.gz dummy.tar.gz *.dsc
+	debian.tar.gz dummy.tar.gz *.dsc *.install
 
 noinst_SCRIPTS = indimail.prerm indimail.preinst indimail.postrm \
 				 indimail.postinst rules \
@@ -58,7 +57,6 @@ edit = sed \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
 	-e 's,@HOST\@,$(host),g' \
 	-e 's,@DATE\@,$(DATE),g' \
-	-e 's,@libd\@,$(libd),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 rules: rules.in Makefile
@@ -107,8 +105,10 @@ dummy.tar.gz: README
 	tar cf - README |gzip > $@
 debian.tar.gz: copyright indimail.preinst indimail.postinst indimail.prerm \
 indimail.postrm rules changelog compat indimail-devel.postinst \
-indimail-devel.postrm Makefile control indimail.cron.d control docs
+indimail-devel.postrm Makefile control indimail.cron.d control \
+indimail.install indimail-devel.install libindimail.install docs
 	tar cf - copyright indimail.preinst indimail.postinst indimail.prerm \
 		indimail.postrm rules changelog compat control \
 		indimail-devel.postinst indimail-devel.postrm \
-		indimail.cron.d docs |gzip > $@
+		indimail.cron.d  docs indimail.install \
+		indimail-devel.install libindimail.install |gzip > $@
