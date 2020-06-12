@@ -284,7 +284,14 @@ fi
 
 if [ -z "$argv1" ] ; then
   argv1=0
+fi
+if [ $argv1 -eq 2 ] ; then # upgrade
+  if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+    /sbin/ldconfig
+  fi
+  svc -d %{servicedir}/pwdlookup
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="%{servicedir}/pwdlookup"
+  exit 0
 fi
 
 echo "Doing Post Install"

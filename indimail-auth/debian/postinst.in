@@ -61,8 +61,9 @@ esac
 #DEBHELPER#
 
 if [ -f /tmp/indimail-auth.upgrade ] ; then # upgrade
-  ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="${servicedir}/pwdlookup"
   ${rm} -f /tmp/indimail-auth.upgrade
+  svc -d ${servicedir}/pwdlookup || true
+  ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="${servicedir}/pwdlookup"
   /sbin/ldconfig
   exit 0
 fi
