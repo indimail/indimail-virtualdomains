@@ -82,7 +82,7 @@ Requires: coreutils grep /bin/sh glibc
 Conflicts: indimail < 3.2
 
 %if %build_on_obs == 1
-BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 %endif
 #
 # IndiMail is choosy and runs on reliable OS only

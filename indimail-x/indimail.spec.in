@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.50 2020-06-11 17:13:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.51 2020-06-13 00:31:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -189,7 +189,7 @@ Requires: policycoreutils-python
 Requires: indimail-access
 
 %if %build_on_obs == 1
-BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 %endif
 #
 # IndiMail is choosy and runs on reliable OS only

@@ -41,7 +41,7 @@ BuildRequires: -post-build-checks
 #!BuildIgnore: post-build-checks  
 %endif
 Requires: pam
-BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXXX)
+BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 %description
 A PAM-module for authentication against custom databases. It helps to to
