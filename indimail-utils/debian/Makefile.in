@@ -40,9 +40,8 @@ indimail-utils.dsc: indimail-utils.dsc.in Makefile ../conf-version ../conf-relea
 	$(edit) $@.in > $@
 debian.tar.gz: copyright rules changelog compat \
 indimail-utils.install obs_deb_prep Makefile control
-	tar cf - copyright rules changelog \
-		compat indimail-utils.install obs_deb_prep Makefile control \
-		| gzip > $@
+	tar cf - copyright rules changelog compat indimail-utils.install \
+		obs_deb_prep control | gzip > $@
 
 clean:
 	/bin/rm -f rules dummy.tar.gz *.dsc changelog \

@@ -6,8 +6,8 @@ shareddir=@shareddir@
 libdir=@libdir@
 mandir=@mandir@
 logdir=@logdir@
-version=@version@
-release=@release@
+version=$(shell cat ../conf-version)
+release=$(shell cat ../conf-version)
 courier_version=@courier_version@
 fetchmail_version=@fetchmail_version@
 edit = sed \
@@ -51,7 +51,7 @@ indimail-access.dsc: indimail-access.dsc.in Makefile ../conf-version ../conf-rel
 debian.tar.gz: copyright rules prerm postrm postinst changelog compat \
 indimail-access.install obs_deb_prep Makefile control
 	tar cf - copyright rules prerm postrm postinst changelog \
-		compat indimail-access.install obs_deb_prep Makefile control \
+		compat indimail-access.install obs_deb_prep control \
 		| gzip > $@
 
 clean:

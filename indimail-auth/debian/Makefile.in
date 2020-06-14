@@ -52,7 +52,7 @@ indimail-auth-Debian_9.0.dsc: indimail-auth-Debian_9.0.dsc.in Makefile ../conf-v
 debian.tar.gz: copyright postinst postrm rules changelog compat \
 indimail-auth.install obs_deb_prep Makefile control
 	tar cf - copyright postinst postrm rules changelog \
-		compat indimail-auth.install obs_deb_prep Makefile control \
+		compat indimail-auth.install obs_deb_prep control \
 		| gzip > $@
 
 clean:
