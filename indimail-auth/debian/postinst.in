@@ -101,15 +101,10 @@ ${prefix}/sbin/svctool --pwdlookup=$nssd_sock --threads=5 --timeout=-1 \
   --mysqlhost=localhost --mysqluser=indimail \
   --mysqlpass=ssh-1.5- --mysqlsocket=${mysqlSocket} --servicedir=${servicedir}
 
-# update config for pam-multi link
-if [ -f /usr/bin/qmail-inject ] ; then
-	if [ -x /usr/sbin/update-alternatives ] ; then
-		/usr/sbin/update-alternatives --config mta
-	elif [ -x /usr/bin/update-alternatives ] ; then
-		/usr/bin/update-alternatives --config mta
-	fi
-fi
-
 # turn off automatic refresh for services during first time installation
 ${prefix}/sbin/svctool --servicedir=${servicedir} --norefreshsvc="0 /service/pwdlookup"
+
+# update config for pam-multi link
+${prefix}/sbin/svctool --config=add=alt
+
 exit 0

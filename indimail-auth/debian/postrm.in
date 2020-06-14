@@ -70,13 +70,7 @@ esac
 # Debian silliness
 #
 # update config for pam-multi link
-if [ -f /usr/bin/qmail-inject ] ; then
-	if [ -x /usr/sbin/update-alternatives ] ; then
-		/usr/sbin/update-alternatives --config mta
-	elif [ -x /usr/bin/update-alternatives ] ; then
-		/usr/bin/update-alternatives --config mta
-	fi
-fi
+${prefix}/sbin/svctool --config=remove-alt
 ${rm} -rf ${servicedir}/pwdlookup || true
 ${rm} -f ${sysconfdir}/nssd.conf || true
 if [ -h ${logdir} ] ; then

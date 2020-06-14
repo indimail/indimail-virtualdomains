@@ -326,16 +326,11 @@ fi
   --mysqlhost=localhost --mysqluser=indimail \
   --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket} --servicedir=%{servicedir}
 
-if [ -x /usr/sbin/alternatives ] ; then
-  openSUSE=$(grep /etc/os-release 2>/dev/null)
-  if [ -z "$openSUSE" -a ! -f /etc/SuSE-release ] ; then
-    /usr/sbin/alternatives --add-slave mta %{_prefix}/bin/sendmail \
-      %{pam_confdir}/smtp mta-pam %{pam_confdir}/pam-multi
-  fi
-fi
-
 # turn off automatic refresh for services during first time installation
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --norefreshsvc="0 %{servicedir}/pwdlookup"
+
+#pam-multi
+%{_prefix}/sbin/svctool --config=add-alt
 
 ### SCRIPTLET ###############################################################################
 %postun
@@ -350,12 +345,7 @@ if [ -z "$argv1" ] ; then
 fi
 
 # remove pam module for smtp
-if [ -x /usr/sbin/alternatives ] ; then
-  openSUSE=$(grep /etc/os-release 2>/dev/null)
-  if [ -z "$openSUSE" -a ! -f /etc/SuSE-release ] ; then
-    /usr/sbin/alternatives --remove-slave mta %{_prefix}/bin/sendmail mta-pam
-  fi
-fi
+%{_prefix}/sbin/svctool --config=remove-alt
 
 if [ -d %{servicedir}/pwdlookup ] ; then
   %{__rm} -rf %{servicedir}/pwdlookup || true
