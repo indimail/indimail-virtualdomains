@@ -2,7 +2,7 @@
 
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
-release=1
+release := $(shell cat conf-release 2>/dev/null||echo "1.1")
 
 SYSCONFDIR = @sysconfdir@
 sysconf_DATA = wordlist.db
@@ -22,7 +22,7 @@ edit = sed \
 	-e 's,@release\@,$(release),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
-bogofilter-wordlist.spec: bogofilter-wordlist.spec.in catChangeLog
+bogofilter-wordlist.spec: bogofilter-wordlist.spec.in catChangeLog conf-version conf-release
 	($(edit) $@.in;./catChangeLog) | $(edit) > $@
 
 create_rpm: create_rpm.in

@@ -16,7 +16,7 @@
 
 Name: bogofilter-wordlist
 Version: @version@
-Release: 1.1%{?dist}
+Release: @release@%{?dist}
 Summary: SPAM wordlist database for bogofilter
 
 Group: System Environment/Base
