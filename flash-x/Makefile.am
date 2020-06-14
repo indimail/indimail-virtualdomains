@@ -26,7 +26,7 @@ flash_SOURCES = main.c
 flash_LDADD = @auth_libs@ @LIB_CURSES@ @LIB_DLOPEN@
 flash_DEPENDENCIES = libflash.la
 
-doc_list=README COPYING AUTHORS
+doc_list=README-flash.md COPYING-flash AUTHORS-flash
 
 MOSTLYCLEANFILES=$(modules_list) system.menu system.rc
 all-local: system.menu system.rc modules
@@ -90,7 +90,7 @@ install-data-local: modules
 	$(INSTALL_DATA) flash.1 $(DESTDIR)@mandir@/man1
 	$(mkinstalldirs) $(DESTDIR)$(datarootdir)/doc || exit 1
 	for f in $(doc_list); do \
-		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/doc/$$f.flash || exit 1 ;\
+		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/doc/$$f || exit 1 ;\
 	done
 
 LIBTOOL_DEPS = @LIBTOOL_DEPS@

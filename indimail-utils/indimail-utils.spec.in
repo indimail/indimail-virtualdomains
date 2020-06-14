@@ -162,8 +162,8 @@ fortune-%{fortune_version} mpack-%{mpack_version} flash-%{flash_version}
 do
   if [ -d $i ] ; then
     cd $i
-    %{__make} -s DESTDIR=%{buildroot}
-    %{__make} -s DESTDIR=%{buildroot} install-strip
+    %{make_build} -s DESTDIR=%{buildroot}
+    %{make_build} -s DESTDIR=%{buildroot} install-strip
     cd ..
   fi
 done
@@ -227,18 +227,18 @@ fi
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/%{name}-rpm.info
 
 # indimail binaries
-%attr(755,root,qmail)                   %{_prefix}/bin/altermime
-%attr(755,root,qmail)                   %{_prefix}/bin/randstr
-%attr(755,root,qmail)                   %{_prefix}/bin/ripmime
+%attr(755,root,root)                    %{_prefix}/bin/altermime
+%attr(755,root,root)                    %{_prefix}/bin/randstr
+%attr(755,root,root)                    %{_prefix}/bin/ripmime
 
-%attr(755,root,qmail)                   %{_prefix}/bin/mpack
-%attr(755,root,qmail)                   %{_prefix}/bin/munpack
-%attr(755,root,qmail)                   %{_prefix}/bin/fortune
-%attr(755,root,qmail)                   %{_prefix}/sbin/rot
-%attr(755,root,qmail)                   %{_prefix}/sbin/strfile
-%attr(755,root,qmail)                   %{_prefix}/sbin/unstr
-%attr(755,root,qmail)                   %{_prefix}/bin/flash
-%attr(755,root,qmail)                   %{_prefix}/bin/ripole
+%attr(755,root,root)                    %{_prefix}/bin/mpack
+%attr(755,root,root)                    %{_prefix}/bin/munpack
+%attr(755,root,root)                    %{_prefix}/bin/fortune
+%attr(755,root,root)                    %{_prefix}/sbin/rot
+%attr(755,root,root)                    %{_prefix}/sbin/strfile
+%attr(755,root,root)                    %{_prefix}/sbin/unstr
+%attr(755,root,root)                    %{_prefix}/bin/flash
+%attr(755,root,root)                    %{_prefix}/bin/ripole
 
 %attr(755,root,root)                    %{imoduledir}/background
 %attr(755,root,root)                    %{imoduledir}/alarms
@@ -354,28 +354,28 @@ fi
 %attr(644,root,root)                    %{mandir}/man[1,5,7,8]/*
 
 %if %build_on_obs == 0
-%license %attr(644,root,qmail)          %{shareddir}/doc/LICENSE.altermime
-%license %attr(644,root,qmail)          %{shareddir}/doc/LICENSE.ripmime
-%license %attr(644,root,qmail)          %{shareddir}/doc/COPYING.flash
-%license %attr(644,root,qmail)          %{shareddir}/doc/COPYING.fortune
-%license %attr(644,root,qmail)          %{shareddir}/doc/COPYRIGHT.mpack
+%license %attr(644,root,root)           %{shareddir}/doc/LICENSE-altermime
+%license %attr(644,root,root)           %{shareddir}/doc/LICENSE-ripmime
+%license %attr(644,root,root)           %{shareddir}/doc/COPYING-flash
+%license %attr(644,root,root)           %{shareddir}/doc/COPYING-fortune
+%license %attr(644,root,root)           %{shareddir}/doc/COPYRIGHT-mpack
 %else
-%attr(644,root,qmail)                   %{shareddir}/doc/LICENSE.altermime
-%attr(644,root,qmail)                   %{shareddir}/doc/LICENSE.ripmime
-%attr(644,root,qmail)                   %{shareddir}/doc/COPYING.flash
-%attr(644,root,qmail)                   %{shareddir}/doc/COPYING.fortune
-%attr(644,root,qmail)                   %{shareddir}/doc/COPYRIGHT.mpack
+%attr(644,root,root)                    %{shareddir}/doc/LICENSE-altermime
+%attr(644,root,root)                    %{shareddir}/doc/LICENSE-ripmime
+%attr(644,root,root)                    %{shareddir}/doc/COPYING-flash
+%attr(644,root,root)                    %{shareddir}/doc/COPYING-fortune
+%attr(644,root,root)                    %{shareddir}/doc/COPYRIGHT-mpack
 %endif
 
-%attr(644,root,qmail)                   %{shareddir}/doc/AUTHORS.altermime
-%attr(644,root,qmail)                   %{shareddir}/doc/AUTHORS.ripmime
-%attr(644,root,qmail)                   %{shareddir}/doc/AUTHORS.flash
-%attr(644,root,qmail)                   %{shareddir}/doc/AUTHORS.fortune
-%attr(644,root,qmail)                   %{shareddir}/doc/README.altermime
-%attr(644,root,qmail)                   %{shareddir}/doc/README.ripmime
-%attr(644,root,qmail)                   %{shareddir}/doc/README.fortune
-%attr(644,root,qmail)                   %{shareddir}/doc/README.flash
-%attr(644,root,qmail)                   %{shareddir}/doc/README.mpack
+%attr(644,root,root)                    %{shareddir}/doc/AUTHORS-altermime
+%attr(644,root,root)                    %{shareddir}/doc/AUTHORS-ripmime
+%attr(644,root,root)                    %{shareddir}/doc/AUTHORS-flash
+%attr(644,root,root)                    %{shareddir}/doc/AUTHORS-fortune
+%attr(644,root,root)                    %{shareddir}/doc/README-altermime.md
+%attr(644,root,root)                    %{shareddir}/doc/README-ripmime.md
+%attr(644,root,root)                    %{shareddir}/doc/README-fortune.md
+%attr(644,root,root)                    %{shareddir}/doc/README-flash.md
+%attr(644,root,root)                    %{shareddir}/doc/README-mpack.md
 
 # Shared libraries (omit for architectures that don't support them)
 

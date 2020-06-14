@@ -7,7 +7,7 @@ INSTALL_SCRIPT = ${INSTALL}
 install_sh_SCRIPT = $(install_sh) -c
 INSTALL_STRIP_PROGRAM = $(install_sh) -c $(STRIP_OPT)
 
-doc_list= README COPYRIGHT
+doc_list= README-mpack.md COPYRIGHT-mpack
 
 bin_PROGRAMS=mpack munpack
 mpack_SOURCES=unixpk.c encode.c codes.c magic.c unixos.c xmalloc.c \
@@ -31,5 +31,5 @@ munpack.1: unixunpk.man
 install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(datarootdir)/doc || exit 1
 	for f in $(doc_list); do \
-		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/doc/$$f.mpack || exit 1 ;\
+		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/doc/$$f || exit 1 ;\
 	done

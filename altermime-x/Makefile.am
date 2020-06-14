@@ -9,13 +9,13 @@ altermime_SOURCES = qpe.c strstack.c mime_alter.c ffget.c pldstr.c filename-filt
 					altermime.c
 altermime_bindir=@prefix@/bin
 
-doc_list=AUTHORS README LICENSE
+doc_list=AUTHORS-altermime README-altermime.md LICENSE-altermime
 
 boundary-stack.o: logger.h pldstr.h boundary-stack.h
 
 install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(datarootdir)/doc || exit 1
 	for f in $(doc_list); do \
-		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/doc/$$f.altermime || exit 1 ;\
+		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/doc/$$f || exit 1 ;\
 	done
 AUTOMAKE_OPTIONS = foreign no-dependencies

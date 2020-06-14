@@ -13,7 +13,7 @@ ripmime.o: buildcodes.h
 
 ripmime_bindir=@prefix@/bin
 
-doc_list=AUTHORS README LICENSE
+doc_list=AUTHORS-ripmime README-ripmime.md LICENSE-ripmime
 
 buildcodes.h: 
 	./generate-buildcodes.sh
@@ -33,6 +33,6 @@ clean:
 install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)@datarootdir@/doc || exit 1
 	for f in $(doc_list); do \
-		$(INSTALL_DATA) $$f $(DESTDIR)@datarootdir@/doc/$$f.ripmime || exit 1 ;\
+		$(INSTALL_DATA) $$f $(DESTDIR)@datarootdir@/doc/$$f || exit 1 ;\
 	done
 AUTOMAKE_OPTIONS = foreign no-dependencies

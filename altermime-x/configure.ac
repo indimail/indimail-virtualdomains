@@ -3,7 +3,7 @@ AC_INIT([altermime],0.3.10,[Manvendra Bhangui manvendra@indimail.org],indimail, 
 AM_CONFIG_HEADER(config.h)
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
 AC_CANONICAL_HOST
 
 dnl Checks for programs.

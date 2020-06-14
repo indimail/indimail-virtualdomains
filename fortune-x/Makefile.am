@@ -30,7 +30,7 @@ fortunesbin_PROGRAMS = strfile unstr rot
 fortunedata_DATA=cookies ocookies
 man1_MANS=fortune.man randstr.man strfile.man unstr.man rot.man
 
-doc_list=AUTHORS README COPYING
+doc_list=AUTHORS-fortune README-fortune.md COPYING-fortune
 
 MOSTLYCLEANFILES=stamp-cookies stamp-ocookies datfiles/*.dat
 
@@ -55,6 +55,6 @@ stamp-ocookies: datfiles/off/unrotated
 install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(datarootdir)/doc || exit 1
 	for f in $(doc_list); do \
-		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/doc/$$f.fortune || exit 1 ;\
+		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/doc/$$f || exit 1 ;\
 	done
 AUTOMAKE_OPTIONS = foreign no-dependencies

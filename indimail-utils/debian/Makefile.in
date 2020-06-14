@@ -1,8 +1,8 @@
 prefix=@prefix@
 shareddir=@shareddir@
 mandir=@mandir@
-version=@version@
-release=@release@
+version=$(shell cat ../conf-version)
+release=$(shell cat ../conf-release)
 altermime_version=@altermime_version@
 ripmime_version=@ripmime_version@
 flash_version=@flash_version@

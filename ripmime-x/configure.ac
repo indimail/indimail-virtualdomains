@@ -5,7 +5,7 @@ AC_PREREQ([2.69])
 AC_INIT([ripmime],1.4.0.10,[Manvendra Bhangui manvendra@indimail.org],indimail, [http://www.indimail.org])
 AC_CONFIG_SRCDIR([pldstr.h])
 AC_CONFIG_HEADERS([config.h])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
 
 # Checks for programs.
 AC_PROG_CC
