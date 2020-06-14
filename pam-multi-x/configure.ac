@@ -2,7 +2,7 @@ AC_PREREQ([2.52])
 AC_INIT([pam-multi],1.2,[Manvendra Bhangui indimail-auth@indimail.org],pam-multi,[https://github.com/mbhangui/indimail-virtualdomains])
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
 LT_INIT
 AM_CONFIG_HEADER(config.h)
 AC_CANONICAL_HOST

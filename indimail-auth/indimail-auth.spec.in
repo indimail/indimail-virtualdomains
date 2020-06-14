@@ -229,8 +229,8 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/%{name}-rpm.info
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/%{name}-release
 
-%attr(755,root,qmail)                   %{_prefix}/sbin/nssd
-%attr(755,root,qmail)                   %{libexecdir}/check_getpw
+%attr(755,root,root)                    %{_prefix}/sbin/nssd
+%attr(755,root,root)                    %{libexecdir}/check_getpw
 
 # pam-multi
 %attr(755,root,root)                    %{_prefix}/sbin/pam-checkpwd
@@ -243,17 +243,17 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(644,root,root)                    %{mandir}/man[1,5,7,8]/*
 
 %if %build_on_obs == 0
-%license %attr(644,root,qmail)          %{shareddir}/doc/COPYING.nssd
-%license %attr(644,root,qmail)          %{shareddir}/doc/COPYING.pam-multi
+%license %attr(644,root,root)           %{shareddir}/doc/COPYING-nssd
+%license %attr(644,root,root)           %{shareddir}/doc/COPYING-pam-multi
 %else
-%attr(644,root,qmail)                   %{shareddir}/doc/COPYING.nssd
-%attr(644,root,qmail)                   %{shareddir}/doc/COPYING.pam-multi
+%attr(644,root,root)                    %{shareddir}/doc/COPYING-nssd
+%attr(644,root,root)                    %{shareddir}/doc/COPYING-pam-multi
 %endif
 
-%attr(644,root,qmail)                   %{shareddir}/doc/AUTHORS.nssd
-%attr(644,root,qmail)                   %{shareddir}/doc/AUTHORS.pam-multi
-%attr(644,root,qmail)                   %{shareddir}/doc/README.nssd
-%attr(644,root,qmail)                   %{shareddir}/doc/README.pam-multi
+%attr(644,root,root)                    %{shareddir}/doc/AUTHORS-nssd
+%attr(644,root,root)                    %{shareddir}/doc/AUTHORS-pam-multi
+%attr(644,root,root)                    %{shareddir}/doc/README-nssd.md
+%attr(644,root,root)                    %{shareddir}/doc/README-pam-multi.md
 
 # Shared libraries (omit for architectures that don't support them)
 
