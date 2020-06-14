@@ -123,6 +123,13 @@ BuildRequires: redhat-lsb-core
 BuildRequires: redhat-lsb
 %endif
 
+Requires: user(qmaill)
+Requires: group(nofiles)
+%if %build_on_obs == 0
+Requires(pre): shadow-utils
+Requires(postun): shadow-utils
+%endif
+
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 PreReq: permissions
@@ -636,6 +643,7 @@ for i in fetchmail imapd.143 imapd-ssl.993 pop3d.110 pop3d-ssl.995 \
 proxyIMAP.4143 proxyPOP3.4110
 do
   %{__mkdir_p} %{logdir}/$i
+  %{__chown} -R qmaill:nofiles %{logdir}/$i
 done
 
 %if %build_on_obs == 1

@@ -177,10 +177,12 @@ else
 fi
 (
 echo "Creating ${logdir}"
-if [ ! -d ${logdir} ] ; then
-  /bin/mkdir -p ${logdir}
-fi
-/bin/chown -R qmaill:nofiles ${logdir}
+for i in fetchmail imapd.143 imapd-ssl.993 pop3d.110 pop3d-ssl.995 \
+proxyIMAP.4143 proxyPOP3.4110
+do
+  /bin/mkdir -p ${logdir}/$i
+  /bin/chown -R qmaill:nofiles ${logdir}/$i
+done
 
 if [ -d /run ] ; then
   logfifo="/run/indimail/logfifo"
