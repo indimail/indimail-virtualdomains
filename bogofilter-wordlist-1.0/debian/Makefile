@@ -20,8 +20,10 @@ rules: rules.in Makefile
 	$(edit) $@.in > $@; chmod +x $@;
 bogofilter-wordlist.dsc: bogofilter-wordlist.dsc.in Makefile
 	$(edit) $@.in > $@
-changelog:changelog.in
-	$(edit) $@.in > $@
+changelog: changelog.in
+	(cat $@.in; echo ""; \
+	echo " -- Manvendra Bhangui <indimail-spamfilter@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
+	| $(edit) > $@
 
 dummy.tar.gz: README
 	tar cf - README |gzip > $@

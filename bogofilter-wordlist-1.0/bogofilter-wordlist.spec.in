@@ -29,14 +29,13 @@ URL: http://www.indimail.org
 Source0:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 
 %if %build_on_obs == 1
-BuildRequires: libidn-devel
 %if 0%{?suse_version}
 BuildRequires: -post-build-checks
 #!BuildIgnore: post-build-checks
 #!BuildIgnore: brp-check-suse
 %endif
 %endif
-Requires:indimail >= 2.0
+Requires: indimail-spamfilter 
 
 %description
 bogofilter-wordlist provides a SPAM database for bogofilter in Berkeley DB format

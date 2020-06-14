@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([bogofilter-wordlist], [1.0], [Manvendra Bhangui manvendra@indimail.org])
+AC_INIT([bogofilter-wordlist], [1.0], [Manvendra Bhangui indimail-spamfilter@indimail.org])
 AM_INIT_AUTOMAKE
 AC_CONFIG_MACRO_DIR([m4])
 
