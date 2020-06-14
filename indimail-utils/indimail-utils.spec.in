@@ -162,8 +162,8 @@ fortune-%{fortune_version} mpack-%{mpack_version} flash-%{flash_version}
 do
   if [ -d $i ] ; then
     cd $i
-    %{make_build} -s DESTDIR=%{buildroot}
-    %{make_build} -s DESTDIR=%{buildroot} install-strip
+    %{__make} -s DESTDIR=%{buildroot}
+    %{__make} -s DESTDIR=%{buildroot} install-strip
     cd ..
   fi
 done
