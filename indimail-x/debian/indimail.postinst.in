@@ -249,7 +249,15 @@ else
   default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${defaultDomain})
 fi
 
+a_arch=`uname -m`
 if [ $noproxy -eq 0 ] ; then
+if [ " $a_arch" = " x86_64" ] ; then
+  imap_pop3_mem=52428800
+  imapspop3_mem=52428800
+else
+  imap_pop3_mem=52428800
+  imapspop3_mem=52428800
+fi
 ${prefix}/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 \
 	--maxdaemons=40 --maxperip=25 --infifo=infifo \
 	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=143 \
@@ -314,23 +322,20 @@ if [ -x /etc/init.d/apparmor ] ; then
  fi
 fi
 
-a_arch=`uname -m`
-if [ " $a_arch" = " x86_64" ] ; then
- poppass_mem=26214400
-else
- poppass_mem=26214400
-fi
-
 # IndiMail Daemons
 ${prefix}/sbin/svctool --indisrvr=4000 --servicedir=$servicedir \
 	--localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
-		--certfile=${sysconfdir}/certs/servercert.pem --ssl \
+	--certfile=${sysconfdir}/certs/servercert.pem --ssl \
 	--hardquota=52428800 --base_path=${mbase}
 ${prefix}/sbin/svctool --inlookup=infifo --servicedir=$servicedir \
 	--cntrldir=control --threads=5 --activeDays=60 --password-cache --use-btree --max-btree-count=10000
+if [ " $a_arch" = " x86_64" ] ; then
+  poppass_mem=52428800
+else
+  poppass_mem=52428800
+fi
 ${prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
-	--memory=$poppass_mem \
-		--certfile=${sysconfdir}/certs/servercert.pem --ssl \
+	--memory=$poppass_mem --certfile=${sysconfdir}/certs/servercert.pem --ssl \
 	--setpassword=${prefix}/sbin/vsetpass --servicedir=$servicedir
 
 echo "Creating default indimail tcp access control files"
