@@ -159,11 +159,11 @@ BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 Excludeos: windows
 
 %description
-indimail-access package provides imap, pop3 and fetchmail
+indimail-access package provides IMAP, POP3 and fetchmail
 retrieval for IndiMail
 
 IMAP/POP3 protocol is provided by Courier Imap.
-Mail retreival is provided by Fetchmail.
+Mail retrieval is provided by fetchmail.
 
 IndiMail provides ability for a single domain to have users
 across multiple hosts (even across different geographical
