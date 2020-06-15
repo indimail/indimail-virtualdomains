@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.51 2020-06-13 00:31:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.52 2020-06-15 10:11:21+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -36,6 +36,7 @@
 %global noperms            0
 %endif
 %global url                https://github.com/mbhangui/indimail-virtualdomains
+%global noproxy            0
 
 %global qcount             5
 %global qbase              %{indimaildir}/queue
@@ -365,6 +366,7 @@ do
     $TOUCH %{buildroot}%{sysconfdir}/tcp/$i
   fi
 done
+
 for i in indimail.cnf procmailrc indimail.pp indimail.mod \
 users/cdb users/assign
 do
@@ -389,6 +391,15 @@ done
     %{__mkdir_p} %{buildroot}%{logdir}/$i
     $TOUCH %{buildroot}%{logdir}/$i/current
   done
+
+%if %{noproxy} == 0
+  for i in proxyIMAP.4143 proxyIMAP.9143 \
+    proxyPOP3.4110 proxyPOP3.9110
+  do
+    %{__mkdir_p} %{buildroot}%{logdir}/$i
+    $TOUCH %{buildroot}%{logdir}/$i/current
+  done
+%endif
 %endif
 
 %files -f config_files.list
@@ -1083,7 +1094,6 @@ if [ -z "$argv1" ] ; then
   argv1=0
 fi
 if [ $argv1 -eq 2 ] ; then # upgrade
-# we are doing upgrade
   (
   echo "doing post upgrade activities"
   if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
@@ -1093,20 +1103,36 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     echo "Running Custom Upgrade Script for post upgrade"
     /bin/sh %{libexecdir}/iupgrade.sh post upgrade %{version} $*
   fi
-  # selinux
 
+  #selinux
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
+
   # refresh indimail services
   svc_list=""
   for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
   qmail-poppass.106 qmail-logfifo
   do
+    svc -d ${servicedir}/$i || true
     if [ -z "$svc_list" ] ; then
       svc_list="%{servicedir}/$i"
     else
       svc_list="$svc_list %{servicedir}/$i"
     fi
   done
+
+  if [ %noproxy -eq 0 ] ; then
+    for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
+      proxy-pop3d.4110 proxy-pop3d-ssl.9110
+    do
+      svc -d ${servicedir}/$i || true
+      if [ -z "$svc_list" ] ; then
+        svc_list="%{servicedir}/$i"
+      else
+        svc_list="$svc_list %{servicedir}/$i"
+      fi
+    done
+  fi
+
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
   indlib=`ls -d %{_libdir}/libindimail.so.*.*.* 2>/dev/null`
   for port in 25 465 587
@@ -1145,10 +1171,44 @@ if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   /sbin/ldconfig
 fi
 
+%if %build_on_obs == 1
+  default_domain=%{defaultDomain}
+%else
+  if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+  else
+    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
+  fi
+%endif
+
+if [ %noproxy -eq 0 ] ; then
+%{_prefix}/sbin/svctool --imap=4143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+  --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imap_pop3_mem} \
+  --proxy=143 --starttls --tlsprog=%{_prefix}/bin/sslerator --infifo=infifo
+%{_prefix}/sbin/svctool --imap=9143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+  --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imapspop3_mem} \
+  --proxy=143 --ssl --infifo=infifo
+%{_prefix}/sbin/svctool --pop3=4110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+  --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imap_pop3_mem} \
+  --proxy=110 --starttls --tlsprog=%{_prefix}/bin/sslerator --infifo=infifo
+%{_prefix}/sbin/svctool --pop3=9110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
+  --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imapspop3_mem} \
+  --proxy=110 --ssl --infifo=infifo
+fi
+
 for i in logfifo inlookup indisrvr mrtg mysql.3306
 do
   %{__mkdir_p} %{logdir}/$i
+  %{__chown} -R qmaill:nofiles %{logdir}/$i
 done
+
+if [ %noproxy -eq 0 ] ; then
+  for i in proxyIMAP.4143 proxyPOP3.4110
+  do
+    %{__mkdir_p} %{logdir}/$i
+    %{__chown} -R qmaill:nofiles %{logdir}/$i
+  done
+fi
 
 if [ -d /run ] ; then
   logfifo="/run/indimail/logfifo"
@@ -1166,15 +1226,6 @@ fi
 # mrtg service
 %{_prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=%{servicedir}
 
-%if %build_on_obs == 1
-  default_domain=%{defaultDomain}
-%else
-  if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
-  else
-    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
-  fi
-%endif
 echo "Creating default indimail mysql config indimail.cnf"
 %{_prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
   --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
@@ -1425,12 +1476,39 @@ echo "removing startup services"
 for i in indisrvr.4000 inlookup.infifo mysql.3306 \
 qmail-logfifo qmail-poppass.106 mrtg
 do
+  if [ -d %{servicedir}/$i -o -L %{servicedir}/$i ] ; then
+    touch %{servicedir}/$i/down
+  fi
+  if [ -d %{servicedir}/log/$i -o -L %{servicedir}/log/$i ] ; then
+    touch %{servicedir}/$i/log/down
+  fi
+  svc -dx %{servicedir}/$i %{servicedir}/$i/log
   if [ -d %{servicedir}/$i ] ; then
     %{__rm} -rf %{servicedir}/$i || true
   elif [ -L %{servicedir}/$i ] ; then
     %{__rm} -f %{servicedir}/$i || true
   fi
 done
+
+if [ %noproxy -eq 0 ] ; then
+  for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
+    proxy-pop3d.4110 proxy-pop3d-ssl.9110
+  do
+    if [ -d %{servicedir}/$i -o -L %{servicedir}/$i ] ; then
+      touch %{servicedir}/$i/down
+    fi
+    if [ -d %{servicedir}/log/$i -o -L %{servicedir}/log/$i ] ; then
+      touch %{servicedir}/$i/log/down
+    fi
+    svc -dx %{servicedir}/$i %{servicedir}/$i/log
+    if [ -d %{servicedir}/$i ] ; then
+      %{__rm} -rf %{servicedir}/$i || true
+    elif [ -L %{servicedir}/$i ] ; then
+      %{__rm} -rf %{servicedir}/$i || true
+    fi
+  done
+fi
+
 count=`/bin/ls %{servicedir} 2>/dev/null| /usr/bin/wc -l`
 if [ $count -eq 0 ] ; then # ignore disabled services
   %{__rm} -rf %{servicedir} || true
@@ -1450,11 +1528,21 @@ if [ -h %{logdir} ] ; then
 else
   log_dir=%{logdir}
 fi
+
 for i in indisrvr.4000 inlookup.infifo \
 mrtg mysql.3306 poppass.106
 do
   %{__rm} -rf $log_dir/$i
 done
+
+if [ %noproxy -eq 0 ] ; then
+  for i in proxyIMAP.4143 proxyIMAP.9143 \
+    proxyPOP3.4110 proxyPOP3.9110
+  do
+    %{__rm} -rf $log_dir/$i
+  done
+fi
+
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   echo "recreating ld.so cache"
   /sbin/ldconfig

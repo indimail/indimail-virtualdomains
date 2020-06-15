@@ -28,7 +28,6 @@ rm=/bin/rm
 rmdir=/bin/rmdir
 mv=/bin/mv
 ####################################
-noproxy=0
 nocourierimap=0
 nofetchmail=0
 
@@ -88,18 +87,6 @@ if [ $nocourierimap -eq 0 ] ; then
 			${rm} -f ${servicedir}/$i || true
 		fi
 	done
-	if [ $noproxy -eq 0 ] ; then
-		for i in proxy-imapd.4143 proxy-imapd-ssl.9143 proxy-pop3d.4110 proxy-pop3d-ssl.9110
-		do
-  			if [ -d ${servicedir}/$i ] ; then
-   				${rm} -rf ${servicedir}/$i || true
-  			fi
-		done
-	fi
-	count=`/bin/ls ${servicedir} 2>/dev/null| /usr/bin/wc -l`
-	if [ $count -eq 0 ] ; then # ignore disabled services
-		${rm} -rf ${servicedir} || true
-	fi
 
 	echo "removing TCP configuration"
 	for i in imap pop3
@@ -127,24 +114,30 @@ if [ $nofetchmail -eq 0 ] ; then
 	${rm} -f ${sysconfdir}/fetchmailrc
 fi
 
+count=`/bin/ls ${servicedir} 2>/dev/null| /usr/bin/wc -l`
+if [ $count -eq 0 ] ; then # ignore disabled services
+	${rm} -rf ${servicedir} || true
+fi
+
 echo "removing logs"
 if [ -h ${logdir} ] ; then
 	log_dir=`/bin/ls -ld ${logdir} | /usr/bin/awk '{print $10}'`
 else
 	log_dir=${logdir}
 fi
+
 if [ $nocourierimap -eq 0 ] ; then
 	for i in fetchmail imapd.143 imapd-ssl.993
-	pop3d.110 pop3d-ssl.995 \
-	proxyIMAP.4143 proxyIMAP.9143 \
-	proxyPOP3.4110 proxyPOP3.9110
+	pop3d.110 pop3d-ssl.995
 	do
 		${rm} -rf $log_dir/$i
 	done
 fi
+
 if [ $nofetchmail -eq 0 ] ; then
 	${rm} -rf $log_dir/fetchmail
 fi
+
 if [ ! "${prefix}" = "/usr" ] ; then
 	echo "recreating ld.so cache"
 	/sbin/ldconfig

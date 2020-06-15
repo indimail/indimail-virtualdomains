@@ -31,7 +31,6 @@ cp=/bin/cp
 rm=/bin/rm
 mv=/bin/mv
 ####################################
-noproxy=0
 nocourierimap=0
 nofetchmail=0
 nodksignature=0
@@ -138,9 +137,7 @@ fi
 if [ -f /tmp/indimail-access.upgrade ] ; then # upgrade
   svc_list=""
   for i in qmail-imapd.143 qmail-imapd-ssl.993 \
-    qmail-pop3d.110 qmail-pop3d-ssl.995 \
-	proxy-imapd.4143 proxy-imapd-ssl.9143 \
-    proxy-pop3d.4110 proxy-pop3d-ssl.9110 
+    qmail-pop3d.110 qmail-pop3d-ssl.995
   do
     svc -d ${servicedir}/$i || true
     if [ -z "$svc_list" ] ; then
@@ -177,8 +174,7 @@ else
 fi
 (
 echo "Creating ${logdir}"
-for i in fetchmail imapd.143 imapd-ssl.993 pop3d.110 pop3d-ssl.995 \
-proxyIMAP.4143 proxyPOP3.4110
+for i in fetchmail imapd.143 imapd-ssl.993 pop3d.110 pop3d-ssl.995
 do
   /bin/mkdir -p ${logdir}/$i
   /bin/chown -R qmaill:nofiles ${logdir}/$i
@@ -271,22 +267,6 @@ ${prefix}/sbin/svctool --pop3=995 --servicedir=$servicedir --localip=0 \
 	--maxdaemons=40 --maxperip=25 --infifo=infifo \
 	--default-domain=${default_domain} --memory=$imapspop3_mem --ssl
 fi
-if [ $noproxy -eq 0 ] ; then
-${prefix}/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 \
-	--maxdaemons=40 --maxperip=25 --infifo=infifo \
-	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=143 \
-	--starttls
-${prefix}/sbin/svctool --imap=9143 --servicedir=$servicedir --localip=0 \
-	--maxdaemons=40 --maxperip=25 --infifo=infifo \
-	--default-domain=${default_domain} --memory=$imapspop3_mem --proxy=143 --ssl
-${prefix}/sbin/svctool --pop3=4110 --servicedir=$servicedir --localip=0 \
-	--maxdaemons=40 --maxperip=25 --infifo=infifo \
-	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=110 \
-	--starttls
-${prefix}/sbin/svctool --pop3=9110 --servicedir=$servicedir --localip=0 \
-	--maxdaemons=40 --maxperip=25 --infifo=infifo \
-	--default-domain=${default_domain} --memory=$imapspop3_mem --proxy=110 --ssl
-fi
 
 # rebuild cdb
 for i in imap pop3 poppass
@@ -320,9 +300,7 @@ fi
 # turn off automatic refresh for services during first time installation
 svc_list=""
 for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
-  qmail-pop3d.110 qmail-pop3d-ssl.995 \
-  proxy-imapd.4143 proxy-imapd-ssl.9143 \
-  proxy-pop3d.4110 proxy-pop3d-ssl.9110
+  qmail-pop3d.110 qmail-pop3d-ssl.995
 do
   svc_list="$svc_list ${servicedir}/$i"
 done

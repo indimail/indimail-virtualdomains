@@ -32,6 +32,7 @@ cp=/bin/cp
 rm=/bin/rm
 mv=/bin/mv
 ####################################
+noproxy=0
 tcpserver_plugin=1
 mysqlSocket=/var/run/mysqld/mysqld.sock
 
@@ -138,21 +139,37 @@ if [ -f /tmp/indimail.upgrade ] ; then # upgrade
     echo "Running Custom Upgrade Script for post upgrade"
     /bin/sh ${libexecdir}/iupgrade.sh post upgrade @version@ $* || true
   fi
+
   if [ -f /etc/init.d/svscan ] ; then
     cmp -s ${prefix}/bin/qmailctl /etc/init.d/svscan >/dev/null 2>&1 || \
     ${cp} ${prefix}/bin/qmailctl /etc/init.d/svscan || true
   fi
+
   svc_list=""
   for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
   qmail-poppass.106 qmail-logfifo
   do
+    svc -d ${servicedir}/$i || true
     if [ -z "$svc_list" ] ; then
       svc_list="${servicedir}/$i"
     else
       svc_list="$svc_list ${servicedir}/$i"
     fi
   done
+  if [ $noproxy -eq 0 ] ; then
+  for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
+    proxy-pop3d.4110 proxy-pop3d-ssl.9110 
+  do
+    svc -d ${servicedir}/$i || true
+    if [ -z "$svc_list" ] ; then
+      svc_list="${servicedir}/$i"
+    else
+      svc_list="$svc_list ${servicedir}/$i"
+    fi
+  done
+  fi
   ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
+
   #update VIRTUAL_PKG_LIB for smtp service
   indlib=`ls -d /usr/lib*/libindimail.so.*.*.* 2>/dev/null`
   for port in 25 465 587
@@ -205,10 +222,13 @@ else
 fi
 (
 echo "Creating ${logdir}"
-if [ ! -d ${logdir} ] ; then
-  /bin/mkdir -p ${logdir}
+if [ $noproxy -eq 0 ] ; then
+for i in proxyIMAP.4143 proxyPOP3.4110
+do
+  /bin/mkdir -p ${logdir}/$i
+  /bin/chown -R qmaill:nofiles ${logdir}/$i
+done
 fi
-/bin/chown -R qmaill:nofiles ${logdir}
 
 if [ -d /run ] ; then
   logfifo="/run/indimail/logfifo"
@@ -222,18 +242,36 @@ else
   logfifo="/tmp/logfifo"
 fi
 
-# fifolog service
-${prefix}/sbin/svctool --fifologger=$logfifo --servicedir=${servicedir}
-
-# mrtg service
-${prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=${servicedir}
-
 if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
   default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
 else
   defaultDomain=@defaultdomain@
   default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${defaultDomain})
 fi
+
+if [ $noproxy -eq 0 ] ; then
+${prefix}/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 \
+	--maxdaemons=40 --maxperip=25 --infifo=infifo \
+	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=143 \
+	--starttls
+${prefix}/sbin/svctool --imap=9143 --servicedir=$servicedir --localip=0 \
+	--maxdaemons=40 --maxperip=25 --infifo=infifo \
+	--default-domain=${default_domain} --memory=$imapspop3_mem --proxy=143 --ssl
+${prefix}/sbin/svctool --pop3=4110 --servicedir=$servicedir --localip=0 \
+	--maxdaemons=40 --maxperip=25 --infifo=infifo \
+	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=110 \
+	--starttls
+${prefix}/sbin/svctool --pop3=9110 --servicedir=$servicedir --localip=0 \
+	--maxdaemons=40 --maxperip=25 --infifo=infifo \
+	--default-domain=${default_domain} --memory=$imapspop3_mem --proxy=110 --ssl
+fi
+
+# fifolog service
+${prefix}/sbin/svctool --fifologger=$logfifo --servicedir=${servicedir}
+
+# mrtg service
+${prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=${servicedir}
+
 echo "Creating default indimail mysql config indimail.cnf"
 ${prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail \
   --mysqlpass=ssh-1.5- --mysqlsocket=${mysqlSocket}
@@ -331,6 +369,15 @@ qmail-poppass.106 qmail-logfifo
 do
   svc_list="$svc_list ${servicedir}/$i"
 done
+
+if [ $noproxy -eq 0 ] ; then
+for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
+  proxy-pop3d.4110 proxy-pop3d-ssl.9110
+do
+  svc_list="$svc_list ${servicedir}/$i"
+done
+fi
+
 ${prefix}/sbin/svctool --servicedir=${servicedir} --norefreshsvc="0 $svc_list"
 
 #
