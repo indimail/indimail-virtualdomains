@@ -106,6 +106,6 @@ ${prefix}/sbin/svctool --pwdlookup=$nssd_sock --threads=5 --timeout=-1 \
 ${prefix}/sbin/svctool --servicedir=${servicedir} --norefreshsvc="0 /service/pwdlookup"
 
 # update config for pam-multi link
-${prefix}/sbin/svctool --config=add=alt
+${prefix}/sbin/svctool --config=add-alt
 
 exit 0
