@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.52 2020-06-15 10:11:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.53 2020-06-15 14:52:12+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1182,6 +1182,13 @@ fi
 %endif
 
 if [ %noproxy -eq 0 ] ; then
+%ifarch x86_64
+%global imap_pop3_mem 52428800
+%global imapspop3_mem 52428800
+%else
+%global imap_pop3_mem 52428800
+%global imapspop3_mem 52428800
+%endif
 %{_prefix}/sbin/svctool --imap=4143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imap_pop3_mem} \
   --proxy=143 --starttls --tlsprog=%{_prefix}/bin/sslerator --infifo=infifo
@@ -1268,13 +1275,6 @@ fi
 %endif
 %endif
 
-# SMTP
-%ifarch x86_64
-%global poppass_mem   26214400
-%else
-%global poppass_mem   26214400
-%endif
-
 # IndiMail Daemons
 #indisrvr
 %{_prefix}/sbin/svctool --indisrvr=4000 --servicedir=%{servicedir} \
@@ -1287,6 +1287,11 @@ fi
   --threads=5 --activeDays=60 --query-cache --password-cache --use-btree
 
 #poppass
+%ifarch x86_64
+%global poppass_mem   52428800
+%else
+%global poppass_mem   52428800
+%endif
 %{_prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
   --memory=%{poppass_mem} \
   --certfile=%{sysconfdir}/certs/servercert.pem --ssl \
