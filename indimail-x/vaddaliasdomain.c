@@ -1,5 +1,8 @@
 /*
  * $Log: vaddaliasdomain.c,v $
+ * Revision 1.3  2020-06-16 17:56:01+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
  * Revision 1.2  2019-06-07 15:56:08+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -22,17 +25,17 @@
 #include <env.h>
 #include <str.h>
 #include <sgetopt.h>
+#include <setuserid.h>
 #endif
 #include "get_indimailuidgid.h"
 #include "check_group.h"
 #include "iclose.h"
 #include "addaliasdomain.h"
-#include "setuserid.h"
 #include "post_handle.h"
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vaddaliasdomain.c,v 1.2 2019-06-07 15:56:08+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vaddaliasdomain.c,v 1.3 2020-06-16 17:56:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vaddaliasdomain: fatal: "

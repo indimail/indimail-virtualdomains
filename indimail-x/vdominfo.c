@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 1.4  2020-06-16 17:56:39+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
  * Revision 1.3  2020-04-01 18:58:41+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -36,10 +39,10 @@
 #include <subfd.h>
 #include <qprintf.h>
 #include <getEnvConfig.h>
+#include <setuserid.h>
 #endif
 #include "get_assign.h"
 #include "common.h"
-#include "setuserid.h"
 #include "check_group.h"
 #include "iclose.h"
 #include "variables.h"
@@ -53,7 +56,7 @@
 #include "vsmtp_select.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 1.3 2020-04-01 18:58:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 1.4 2020-06-16 17:56:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define VDOMTOKENS ":\n"

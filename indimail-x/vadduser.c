@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 1.4  2020-06-16 17:56:08+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
  * Revision 1.3  2020-04-01 18:58:26+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -43,6 +46,7 @@
 #include <substdio.h>
 #include <sgetopt.h>
 #include <makesalt.h>
+#include <setuserid.h>
 #endif
 #include "iopen.h"
 #include "iclose.h"
@@ -58,11 +62,10 @@
 #include "sql_getip.h"
 #include "variables.h"
 #include "post_handle.h"
-#include "setuserid.h"
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 1.3 2020-04-01 18:58:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 1.4 2020-06-16 17:56:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "

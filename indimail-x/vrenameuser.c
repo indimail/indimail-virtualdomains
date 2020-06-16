@@ -1,5 +1,8 @@
 /*
  * $Log: vrenameuser.c,v $
+ * Revision 1.3  2020-06-16 17:56:51+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
  * Revision 1.2  2019-06-07 15:42:29+05:30  Cprogrammer
  * use sgetopt library for getopt()
  *
@@ -23,6 +26,7 @@
 #include <strerr.h>
 #include <fmt.h>
 #include <sgetopt.h>
+#include <setuserid.h>
 #endif
 #include "parse_email.h"
 #include "get_assign.h"
@@ -32,10 +36,9 @@
 #include "iclose.h"
 #include "renameuser.h"
 #include "post_handle.h"
-#include "setuserid.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenameuser.c,v 1.2 2019-06-07 15:42:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vrenameuser.c,v 1.3 2020-06-16 17:56:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vrenameuser: fatal: "

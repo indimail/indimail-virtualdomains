@@ -1,5 +1,8 @@
 /*
  * $Log: vdeluser.c,v $
+ * Revision 1.3  2020-06-16 17:56:32+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
  * Revision 1.2  2019-06-07 15:53:23+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -26,6 +29,7 @@
 #include <env.h>
 #include <str.h>
 #include <fmt.h>
+#include <setuserid.h>
 #endif
 #include "parse_email.h"
 #include "get_assign.h"
@@ -33,11 +37,10 @@
 #include "iclose.h"
 #include "deluser.h"
 #include "post_handle.h"
-#include "setuserid.h"
 #include "check_group.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeluser.c,v 1.2 2019-06-07 15:53:23+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeluser.c,v 1.3 2020-06-16 17:56:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vdeluser: warning: "

@@ -1,5 +1,8 @@
 /*
  * $Log: vcfilter.c,v $
+ * Revision 1.4  2020-06-16 17:56:23+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
  * Revision 1.3  2019-06-07 15:54:31+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 1.3 2019-06-07 15:54:31+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 1.4 2020-06-16 17:56:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -36,6 +39,7 @@ static char     sccsid[] = "$Id: vcfilter.c,v 1.3 2019-06-07 15:54:31+05:30 mbha
 #include <open.h>
 #include <qprintf.h>
 #include <subfd.h>
+#include <setuserid.h>
 #endif
 #include "common.h"
 #include "parse_email.h"
@@ -44,7 +48,6 @@ static char     sccsid[] = "$Id: vcfilter.c,v 1.3 2019-06-07 15:54:31+05:30 mbha
 #include "sqlOpen_user.h"
 #include "sql_getpw.h"
 #include "iclose.h"
-#include "setuserid.h"
 #include "vfilter_display.h"
 #include "vfilter_header.h"
 #include "vfilter_select.h"

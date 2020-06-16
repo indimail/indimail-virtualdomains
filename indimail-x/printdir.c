@@ -1,5 +1,8 @@
 /*
  * $Log: printdir.c,v $
+ * Revision 1.2  2020-06-16 17:55:46+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
  * Revision 1.1  2019-04-14 21:03:42+05:30  Cprogrammer
  * Initial revision
  *
@@ -20,15 +23,15 @@
 #include <substdio.h>
 #include <getln.h>
 #include <scan.h>
+#include <setuserid.h>
 #endif
 #include "get_indimailuidgid.h"
 #include "get_assign.h"
 #include "variables.h"
-#include "setuserid.h"
 #include "print_control.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: printdir.c,v 1.1 2019-04-14 21:03:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: printdir.c,v 1.2 2020-06-16 17:55:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

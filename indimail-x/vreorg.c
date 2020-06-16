@@ -1,5 +1,8 @@
 /*
  * $Log: vreorg.c,v $
+ * Revision 1.4  2020-06-16 17:56:58+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
  * Revision 1.3  2019-06-07 15:41:57+05:30  Cprogrammer
  * use sgetopt library for getopt()
  *
@@ -29,9 +32,9 @@
 #include <fmt.h>
 #include <scan.h>
 #include <str.h>
+#include <setuserid.h>
 #endif
 #include "get_assign.h"
-#include "setuserid.h"
 #include "common.h"
 #include "sql_getpw.h"
 #include "valias_select.h"
@@ -47,7 +50,7 @@
 #include "next_big_dir.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vreorg.c,v 1.3 2019-06-07 15:41:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vreorg.c,v 1.4 2020-06-16 17:56:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vreorg: fatal: "

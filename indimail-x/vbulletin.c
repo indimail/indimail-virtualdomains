@@ -1,5 +1,8 @@
 /*
  * $Log: vbulletin.c,v $
+ * Revision 1.3  2020-06-16 17:56:15+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
  * Revision 1.2  2019-06-07 15:54:44+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -43,24 +46,23 @@
 #include <str.h>
 #include <fmt.h>
 #include <env.h>
+#include <setuserid.h>
 #endif
 #include "iopen.h"
 #include "iclose.h"
 #include "get_assign.h"
 #include "check_group.h"
-#include "setuserid.h"
 #include "bulletin.h"
 #include "get_real_domain.h"
 #include "fappend.h"
 #include "variables.h"
 #include "indimail.h"
-#include "setuserid.h"
 #include "CopyEmailFile.h"
 #include "sql_getall.h"
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vbulletin.c,v 1.2 2019-06-07 15:54:44+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vbulletin.c,v 1.3 2020-06-16 17:56:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL            "vbulletin: fatal: "

@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.55 2020-06-16 11:36:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.56 2020-06-16 17:55:03+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -798,7 +798,6 @@ done
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/runcmmd.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/SendWelcomeMail.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/set_mysql_options.h
-%attr(644,root,qmail)                   %{_prefix}/include/indimail/setuserid.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/setuserquota.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/skip_relay.h
 %attr(644,root,qmail)                   %{_prefix}/include/indimail/skip_system_files.h
