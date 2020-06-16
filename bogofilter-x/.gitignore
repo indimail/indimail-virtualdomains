@@ -74,6 +74,7 @@ ylwrap
 conf-release
 build-stamp
 debian/indimail-spamfilter.dsc
+debian/indimail-spamfilter-Debian_8.0.dsc
 debian/indimail-spamfilter.install
 debian/changelog
 debian/changelog.in

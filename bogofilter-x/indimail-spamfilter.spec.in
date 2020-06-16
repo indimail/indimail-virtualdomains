@@ -68,7 +68,7 @@ AutoReqProv: Yes
 BuildRequires: rpm gcc gcc-c++ make coreutils grep
 BuildRequires: glibc glibc-devel
 BuildRequires: gzip autoconf automake libtool
-BuildRequires: sed findutils
+BuildRequires: sed findutils gsl-devel
 
 BuildRequires: flex bison
 %if 0%{?suse_version}

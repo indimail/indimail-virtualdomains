@@ -117,15 +117,11 @@ for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
 proxy-pop3d.4110 proxy-pop3d-ssl.9110
 do
 	if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
-		touch ${servicedir}/$i/down || true
+		touch ${servicedir}/$i/down
+		svc -dx ${servicedir}/$i || true
 	fi
 	if [ -d ${servicedir}/log/$i -o -L ${servicedir}/log/$i ] ; then
 		touch ${servicedir}/log/down || true
-	fi
-	if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
-		svc -dx ${servicedir}/$i || true
-	fi
-	if [ -d ${servicedir}/$i/log  -o -L ${servicedir}/$i/log ] ; then
 		svc -dx ${servicedir}/log || true
 	fi
 	if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
@@ -138,15 +134,11 @@ for i in indisrvr.4000 inlookup.infifo mysql.3306 \
 qmail-poppass.106 mrtg qmail-logfifo
 do
 	if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
-		touch ${servicedir}/$i/down || true
-	fi
-	if [ -d ${servicedir}/log/$i -o -L ${servicedir}/log/$i ] ; then
-		touch ${servicedir}/log/down || true
-	fi
-	if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
+		touch ${servicedir}/$i/down
 		svc -dx ${servicedir}/$i || true
 	fi
-	if [ -d ${servicedir}/$i/log  -o -L ${servicedir}/$i/log] ; then
+	if [ -d ${servicedir}/log/$i -o -L ${servicedir}/log/$i ] ; then
+		touch ${servicedir}/log/down
 		svc -dx ${servicedir}/log || true
 	fi
 	if [ -d ${servicedir}/$i -o -L ${servicedir}/$i/log ] ; then

@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.53 2020-06-15 14:52:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.55 2020-06-16 11:36:19+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1112,7 +1112,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
   qmail-poppass.106 qmail-logfifo
   do
-    svc -d ${servicedir}/$i || true
+    svc -d ${servicedir}/$i
     if [ -z "$svc_list" ] ; then
       svc_list="%{servicedir}/$i"
     else
@@ -1124,7 +1124,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
       proxy-pop3d.4110 proxy-pop3d-ssl.9110
     do
-      svc -d ${servicedir}/$i || true
+      svc -d ${servicedir}/$i
       if [ -z "$svc_list" ] ; then
         svc_list="%{servicedir}/$i"
       else
@@ -1483,15 +1483,14 @@ qmail-logfifo qmail-poppass.106 mrtg
 do
   if [ -d %{servicedir}/$i -o -L %{servicedir}/$i ] ; then
     touch %{servicedir}/$i/down
+    svc -dx %{servicedir}/$i
   fi
   if [ -d %{servicedir}/log/$i -o -L %{servicedir}/log/$i ] ; then
     touch %{servicedir}/$i/log/down
+    svc -dx %{servicedir}/$i/log
   fi
-  svc -dx %{servicedir}/$i %{servicedir}/$i/log
-  if [ -d %{servicedir}/$i ] ; then
-    %{__rm} -rf %{servicedir}/$i || true
-  elif [ -L %{servicedir}/$i ] ; then
-    %{__rm} -f %{servicedir}/$i || true
+  if [ -d %{servicedir}/$i -o -L %{servicedir}/$i ] ; then
+    %{__rm} -rf %{servicedir}/$i
   fi
 done
 
@@ -1501,22 +1500,21 @@ if [ %noproxy -eq 0 ] ; then
   do
     if [ -d %{servicedir}/$i -o -L %{servicedir}/$i ] ; then
       touch %{servicedir}/$i/down
+      svc -dx %{servicedir}/$i
     fi
     if [ -d %{servicedir}/log/$i -o -L %{servicedir}/log/$i ] ; then
       touch %{servicedir}/$i/log/down
+      svc -dx %{servicedir}/$i/log
     fi
-    svc -dx %{servicedir}/$i %{servicedir}/$i/log
-    if [ -d %{servicedir}/$i ] ; then
-      %{__rm} -rf %{servicedir}/$i || true
-    elif [ -L %{servicedir}/$i ] ; then
-      %{__rm} -rf %{servicedir}/$i || true
+    if [ -d %{servicedir}/$i -o -L %{servicedir}/$i ] ; then
+      %{__rm} -rf %{servicedir}/$i
     fi
   done
 fi
 
 count=`/bin/ls %{servicedir} 2>/dev/null| /usr/bin/wc -l`
 if [ $count -eq 0 ] ; then # ignore disabled services
-  %{__rm} -rf %{servicedir} || true
+  %{__rm} -rf %{servicedir}
 fi
 
 if [ -d %{_sysconfdir}/cron.d ] ; then

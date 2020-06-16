@@ -795,10 +795,16 @@ for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
 qmail-pop3d.110 qmail-pop3d-ssl.995 \
 qmail-imapd.4143 qmail-pop3d.4110
 do
-  if [ -d %{servicedir}/$i ] ; then
+  if [ -d %{servicedir}/$i -o -L %{servicedir}/$i ] ; then
+    touch %{servicedir}/$i/down
+    svc -dx %{servicedir}/$i
+  fi
+  if [ -d %{servicedir}/$i/log -o -L %{servicedir}/$i/log ] ; then
+    touch %{servicedir}/$i/log/down
+    svc -dx %{servicedir}/$i/log
+  fi
+  if [ -d %{servicedir}/$i -o -L %{servicedir}/$i ] ; then
     %{__rm} -rf %{servicedir}/$i || true
-  elif [ -L %{servicedir}/$i ] ; then
-    %{__rm} -f %{servicedir}/$i || true
   fi
 done
 

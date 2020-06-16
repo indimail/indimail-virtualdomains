@@ -355,10 +355,16 @@ fi
 # remove pam module for smtp
 %{_prefix}/sbin/svctool --config=remove-alt
 
-if [ -d %{servicedir}/pwdlookup ] ; then
-  %{__rm} -rf %{servicedir}/pwdlookup || true
-elif [ -L %{servicedir}/pwdlookup ] ; then
-  %{__rm} -f %{servicedir}/pwdlookup || true
+if [ -d %{servicedir}/pwdlookup -o -L %{servicedir}/pwdlookup ] ; then
+  touch %{servicedir}/pwdlookup/down
+  svc -dx %{servicedir}/pwdlookup
+fi
+if [ -d %{servicedir}/pwdlookup/log -o -L %{servicedir}/pwdlookup/log ] ; then
+  touch %{servicedir}/pwdlookup/log/down
+  svc -dx %{servicedir}/pwdlookup/log
+fi
+if [ -d %{servicedir}/pwdlookup -o -L %{servicedir}/pwdlookup ] ; then
+  %{__rm} -rf %{servicedir}/pwdlookup
 fi
 if [ -h %{logdir} ] ; then
   log_dir=`/bin/ls -ld %{logdir} | /usr/bin/awk '{print $10}'`

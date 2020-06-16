@@ -71,7 +71,17 @@ esac
 #
 # update config for pam-multi link
 ${prefix}/sbin/svctool --config=remove-alt
-${rm} -rf ${servicedir}/pwdlookup || true
+if [ -d ${servicedir}/pwdlookup -o -L ${servicedir}/pwdlookup ] ; then
+	touch ${servicedir}/pwdlookup/down
+	svc -dx ${servicedir}/pwdlookup || true
+fi
+if [ -d ${servicedir}/pwdlookup/log -o -L ${servicedir}/pwdlookup/log ] ; then
+	touch ${servicedir}/pwdlookup/log
+	svc -dx ${servicedir}/pwdlookup/log || true
+fi
+if [ -d ${servicedir}/pwdlookup -o -L ${servicedir}/pwdlookup ] ; then
+	${rm} -rf ${servicedir}/pwdlookup || true
+fi
 ${rm} -f ${sysconfdir}/nssd.conf || true
 if [ -h ${logdir} ] ; then
 	log_dir=`/bin/ls -ld ${logdir} | /usr/bin/awk '{print $10}'`

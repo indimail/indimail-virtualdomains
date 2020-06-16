@@ -81,9 +81,15 @@ if [ $nocourierimap -eq 0 ] ; then
 		qmail-pop3d.110 qmail-pop3d-ssl.995 \
 		qmail-imapd.4143 qmail-pop3d.4110
 	do
-		if [ -d ${servicedir}/$i ] ; then
-			${rm} -rf ${servicedir}/$i || true
-		elif [ -L ${servicedir}/$i ] ; then
+		if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
+			touch ${servicedir}/$i/down
+			svc -dx ${servicedir}/$i || true
+		fi
+		if [ -d ${servicedir}/$i/log -o -L ${servicedir}/$i/log ] ; then
+			touch ${servicedir}/$i/log/down
+			svc -dx ${servicedir}/$i/log || true
+		fi
+		if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
 			${rm} -f ${servicedir}/$i || true
 		fi
 	done
@@ -106,10 +112,16 @@ fi
 
 if [ $nofetchmail -eq 0 ] ; then
 	echo "removing startup services"
-	if [ -d ${servicedir}/fetchmail ] ; then
-		${rm} -rf ${servicedir}/fetchmail || true
-	elif [ -L ${servicedir}/fetchmail ] ; then
-		${rm} -f ${servicedir}/fetchmail || true
+	if [ -d ${servicedir}/fetchmail -o -L ${servicedir}/fetchmail ] ; then
+		touch ${servicedir}/fetchmail/down
+		svc -dx ${servicedir}/fetchmail || true
+	fi
+	if [ -d ${servicedir}/fetchmail/log -o -L ${servicedir}/fetchmail/log ] ; then
+		touch ${servicedir}/fetchmail/log/down
+		svc -dx ${servicedir}/fetchmail/log || true
+	fi
+	if [ -d ${servicedir}/fetchmail -o -L ${servicedir}/fetchmail ] ; then
+		${rm} -rf ${servicedir}/fetchmail
 	fi
 	${rm} -f ${sysconfdir}/fetchmailrc
 fi

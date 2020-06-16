@@ -185,26 +185,26 @@ do
 done
 if [ -d ${servicedir}/fetchmail ] ; then
   # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
-  if [ ! -f {servicedir}/fetchmail/variables/SPAMFILTER ] ; then
-  echo "${prefix}/bin/bogofilter -p -d {sysconfdir}" > %{servicedir}/fetchmail/variables/SPAMFILTER
+  if [ ! -f $servicedir}/fetchmail/variables/SPAMFILTER ] ; then
+  echo "${prefix}/bin/bogofilter -p -d {sysconfdir}" > ${servicedir}/fetchmail/variables/SPAMFILTER
   elif [ ! -s {servicedir}/fetchmail/variables/SPAMFILTER ] ; then
-  echo "${prefix}/bin/bogofilter -p -d {sysconfdir}" > %{servicedir}/fetchmail/variables/SPAMFILTER
+  echo "${prefix}/bin/bogofilter -p -d {sysconfdir}" > ${servicedir}/fetchmail/variables/SPAMFILTER
   fi
-  if [ ! -f {servicedir}/fetchmail/variables/SPAMEXITCODE ] ; then
-  echo 0 > {servicedir}/fetchmail/variables/SPAMEXITCODE
+  if [ ! -f ${servicedir}/fetchmail/variables/SPAMEXITCODE ] ; then
+  echo 0 > ${servicedir}/fetchmail/variables/SPAMEXITCODE
   fi
-  if [ ! -f {servicedir}/fetchmail/variables/REJECTSPAM ] ; then
-  echo 0 > {servicedir}/fetchmail/variables/REJECTSPAM
+  if [ ! -f ${servicedir}/fetchmail/variables/REJECTSPAM ] ; then
+  echo 0 > ${servicedir}/fetchmail/variables/REJECTSPAM
   fi
-  if [ ! -f {servicedir}/fetchmail/variables/MAKESEEKABLE ] ; then
-  echo 1 > {servicedir}/fetchmail/variables/MAKE_SEEKABLE
+  if [ ! -f ${servicedir}/fetchmail/variables/MAKESEEKABLE ] ; then
+  echo 1 > ${servicedir}/fetchmail/variables/MAKE_SEEKABLE
   elif [ ! -s {servicedir}/fetchmail/variables/MAKESEEKABLE ] ; then
-  echo 1 > {servicedir}/fetchmail/variables/MAKE_SEEKABLE
+  echo 1 > ${servicedir}/fetchmail/variables/MAKE_SEEKABLE
   fi
-  if [ ! -f {servicedir}/fetchmail/variables/LOGFILTER ] ; then
-  echo $logfifo > {servicedir}/fetchmail/variables/LOGFILTER
+  if [ ! -f ${servicedir}/fetchmail/variables/LOGFILTER ] ; then
+  echo $logfifo > ${servicedir}/fetchmail/variables/LOGFILTER
   fi
-  grep bogofilter {servicedir}/fetchmail/variables/.options > /dev/null 2>&1
+  grep bogofilter ${servicedir}/fetchmail/variables/.options > /dev/null 2>&1
   if [ $? -ne 0 ] ; then
     options="`cat {servicedir}/fetchmail/variables/.options`
     --spamfilter=\"{prefix}/bin/bogofilter -p -d ${sysconfdir}\"
