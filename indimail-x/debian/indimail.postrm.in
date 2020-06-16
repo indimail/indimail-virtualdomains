@@ -122,16 +122,14 @@ do
 	if [ -d ${servicedir}/log/$i -o -L ${servicedir}/log/$i ] ; then
 		touch ${servicedir}/log/down || true
 	fi
-	if [ -d ${servicedir}/$i ] ; then
+	if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
 		svc -dx ${servicedir}/$i || true
 	fi
-	if [ -d ${servicedir}/$i/log ] ; then
+	if [ -d ${servicedir}/$i/log  -o -L ${servicedir}/$i/log ] ; then
 		svc -dx ${servicedir}/log || true
 	fi
-	if [ -d ${servicedir}/$i ] ; then
+	if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
 		${rm} -rf ${servicedir}/$i || true
-	elif [ -L ${servicedir}/$i ] ; then
-		${rm} -f ${servicedir}/$i || true
  	fi
 done
 fi
@@ -145,16 +143,14 @@ do
 	if [ -d ${servicedir}/log/$i -o -L ${servicedir}/log/$i ] ; then
 		touch ${servicedir}/log/down || true
 	fi
-	if [ -d ${servicedir}/$i ] ; then
+	if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
 		svc -dx ${servicedir}/$i || true
 	fi
-	if [ -d ${servicedir}/$i/log ] ; then
+	if [ -d ${servicedir}/$i/log  -o -L ${servicedir}/$i/log] ; then
 		svc -dx ${servicedir}/log || true
 	fi
-	if [ -d ${servicedir}/$i ] ; then
+	if [ -d ${servicedir}/$i -o -L ${servicedir}/$i/log ] ; then
 		${rm} -rf ${servicedir}/$i || true
-	elif [ -L ${servicedir}/$i ] ; then
-		${rm} -f ${servicedir}/$i || true
 	fi
 done
 
