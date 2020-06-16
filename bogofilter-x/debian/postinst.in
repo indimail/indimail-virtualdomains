@@ -153,29 +153,29 @@ do
   fi
   # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
   if [ ! -f ${servicedir}/qmail-smtpd.$port/variables/SPAMFILTER ] ; then
-  echo "${prefix}/bin/bogofilter -p -d ${sysconfdir}" > ${servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
+    echo "${prefix}/bin/bogofilter -p -d ${sysconfdir}" > ${servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
   elif [ ! -s ${servicedir}/qmail-smtpd.$port/variables/SPAMFILTER ] ; then
-  echo "${prefix}/bin/bogofilter -p -d ${sysconfdir}" > ${servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
+    echo "${prefix}/bin/bogofilter -p -d ${sysconfdir}" > ${servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
   fi
   if [ ! -f ${servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE ] ; then
-  echo 0 > ${servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
+    echo 0 > ${servicedir}/qmail-smtpd.$port/variables/SPAMEXITCODE
   fi
   if [ ! -f ${servicedir}/qmail-smtpd.$port/variables/REJECTSPAM ] ; then
-  echo 0 > ${servicedir}/qmail-smtpd.$port/variables/REJECTSPAM
+    echo 0 > ${servicedir}/qmail-smtpd.$port/variables/REJECTSPAM
   fi
   if [ ! -f ${servicedir}/qmail-smtpd.$port/variables/MAKESEEKABLE ] ; then
-  echo 1 > ${servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
+    echo 1 > ${servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
   elif [ ! -s ${servicedir}/qmail-smtpd.$port/variables/MAKESEEKABLE ] ; then
-  echo 1 > ${servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
+    echo 1 > ${servicedir}/qmail-smtpd.$port/variables/MAKE_SEEKABLE
   fi
   if [ ! -f ${servicedir}/qmail-smtpd.$port/variables/LOGFILTER ] ; then
-  echo $logfifo > ${servicedir}/qmail-smtpd.$port/variables/LOGFILTER
+    echo $logfifo > ${servicedir}/qmail-smtpd.$port/variables/LOGFILTER
   fi
-  grep bogofilter ${servicedir}/qmail-smtpd.$port/variables/.options > /dev/null 2>&1
-  if [ $? -ne 0 ] ; then
-    options="`cat ${servicedir}/qmail-smtpd.$port/variables/.options`
-    --spamfilter=\"${prefix}/bin/bogofilter -p -d ${sysconfdir}\"
-    --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
+  bogo=$(grep bogofilter ${servicedir}/qmail-smtpd.$port/variables/.options > /dev/null 2>&1 || true)
+  if [ -z "$bogo" ] ; then
+    options="`cat ${servicedir}/qmail-smtpd.$port/variables/.options`"
+    options="$options --spamfilter=\"${prefix}/bin/bogofilter -p -d ${sysconfdir}\""
+    options="$options --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
     if [ -f ${servicedir}/qmail-smtpd.$port/variables/.options ] ; then
       ${mv} ${servicedir}/qmail-smtpd.$port/variables/.options \
         ${servicedir}/qmail-smtpd.$port/variables/.options.nospamfilter
@@ -186,29 +186,29 @@ done
 if [ -d ${servicedir}/fetchmail ] ; then
   # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
   if [ ! -f $servicedir}/fetchmail/variables/SPAMFILTER ] ; then
-  echo "${prefix}/bin/bogofilter -p -d {sysconfdir}" > ${servicedir}/fetchmail/variables/SPAMFILTER
-  elif [ ! -s {servicedir}/fetchmail/variables/SPAMFILTER ] ; then
-  echo "${prefix}/bin/bogofilter -p -d {sysconfdir}" > ${servicedir}/fetchmail/variables/SPAMFILTER
+    echo "${prefix}/bin/bogofilter -p -d ${sysconfdir}" > ${servicedir}/fetchmail/variables/SPAMFILTER
+  elif [ ! -s ${servicedir}/fetchmail/variables/SPAMFILTER ] ; then
+    echo "${prefix}/bin/bogofilter -p -d ${sysconfdir}" > ${servicedir}/fetchmail/variables/SPAMFILTER
   fi
   if [ ! -f ${servicedir}/fetchmail/variables/SPAMEXITCODE ] ; then
-  echo 0 > ${servicedir}/fetchmail/variables/SPAMEXITCODE
+    echo 0 > ${servicedir}/fetchmail/variables/SPAMEXITCODE
   fi
   if [ ! -f ${servicedir}/fetchmail/variables/REJECTSPAM ] ; then
-  echo 0 > ${servicedir}/fetchmail/variables/REJECTSPAM
+    echo 0 > ${servicedir}/fetchmail/variables/REJECTSPAM
   fi
   if [ ! -f ${servicedir}/fetchmail/variables/MAKESEEKABLE ] ; then
-  echo 1 > ${servicedir}/fetchmail/variables/MAKE_SEEKABLE
-  elif [ ! -s {servicedir}/fetchmail/variables/MAKESEEKABLE ] ; then
-  echo 1 > ${servicedir}/fetchmail/variables/MAKE_SEEKABLE
+    echo 1 > ${servicedir}/fetchmail/variables/MAKE_SEEKABLE
+  elif [ ! -s ${servicedir}/fetchmail/variables/MAKESEEKABLE ] ; then
+    echo 1 > ${servicedir}/fetchmail/variables/MAKE_SEEKABLE
   fi
   if [ ! -f ${servicedir}/fetchmail/variables/LOGFILTER ] ; then
-  echo $logfifo > ${servicedir}/fetchmail/variables/LOGFILTER
+    echo $logfifo > ${servicedir}/fetchmail/variables/LOGFILTER
   fi
-  grep bogofilter ${servicedir}/fetchmail/variables/.options > /dev/null 2>&1
-  if [ $? -ne 0 ] ; then
-    options="`cat {servicedir}/fetchmail/variables/.options`
-    --spamfilter=\"{prefix}/bin/bogofilter -p -d ${sysconfdir}\"
-    --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
+  bogo=$(grep bogofilter ${servicedir}/fetchmail/variables/.options > /dev/null 2>&1 || true)
+  if [ -z "$bogo" ] ; then
+    options="`cat ${servicedir}/fetchmail/variables/.options`"
+    options="$options --spamfilter=\"${prefix}/bin/bogofilter -p -d ${sysconfdir}\""
+    options="$options --logfilter=\"$logfifo\" --rejectspam=\"0\" --spamexitcode=\"0\""
     if [ -f ${servicedir}/fetchmail/variables/.options ] ; then
       ${mv} ${servicedir}/fetchmail/variables/.options \
         ${servicedir}/fetchmail/variables/.options.nospamfilter
