@@ -120,9 +120,9 @@ do
 		touch ${servicedir}/$i/down
 		svc -dx ${servicedir}/$i || true
 	fi
-	if [ -d ${servicedir}/log/$i -o -L ${servicedir}/log/$i ] ; then
-		touch ${servicedir}/log/down || true
-		svc -dx ${servicedir}/log || true
+	if [ -d ${servicedir}/$i/log -o -L ${servicedir}/$i/log ] ; then
+		touch ${servicedir}/$i/log/down || true
+		svc -dx ${servicedir}/$i/log || true
 	fi
 	if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
 		${rm} -rf ${servicedir}/$i || true
@@ -138,8 +138,8 @@ do
 		svc -dx ${servicedir}/$i || true
 	fi
 	if [ -d ${servicedir}/log/$i -o -L ${servicedir}/log/$i ] ; then
-		touch ${servicedir}/log/down
-		svc -dx ${servicedir}/log || true
+		touch ${servicedir}/$i/log/down
+		svc -dx ${servicedir}/$i/log || true
 	fi
 	if [ -d ${servicedir}/$i -o -L ${servicedir}/$i/log ] ; then
 		${rm} -rf ${servicedir}/$i || true
