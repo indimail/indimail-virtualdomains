@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT([bogofilter-wordlist], [1.0], [Manvendra Bhangui indimail-spamfilter@indimail.org])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for programs.
