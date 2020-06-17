@@ -2,7 +2,7 @@
 
 ## indimail Introduction
 
-Messaging Platform based on qmail for MTA Virtual Domains, Courier-IMAP for IMAP/POP3
+Messaging Platform based on indimail-mta for MTA (modified qmail), IndiMail-VirtualDomains for Virtual Domains, Courier-IMAP for IMAP/POP3
 
 * Look at [README-indimail](.github/README-indimail.md) for details on IndiMail, indimail-mta. indimail needs indimail-mta to be installed. Read [README](https://github.com/mbhangui/indimail-mta/blob/master/README.md) for details on installing indimail-mta
 * Look at [README-CLUSTER](.github/README-CLUSTER.md) for details on setting up an IndiMail Cluster
