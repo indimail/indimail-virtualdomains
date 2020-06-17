@@ -1,8 +1,6 @@
 # Training from SpamAssassin Corpus
 
-Welcome to the SpamAssassin public mail corpus.  This is a selection of mail
-messages, suitable for use in testing spam filtering systems.  Pertinent
-points:
+Welcome to the SpamAssassin public mail corpus.  This is a selection of mail messages, suitable for use in testing spam filtering systems.  Pertinent points:
 
 * All headers are reproduced in full.  Some address obfuscation has taken place, and hostnames in some cases have been replaced with "spamassassin.taint.org" (which has a valid MX record).  In most cases though, the headers appear as they were received.
 * All of these messages were posted to public fora, were sent to me in the knowledge that they may be made public, were sent by me, or originated as newsletters from public news web sites.
@@ -25,6 +23,19 @@ The corpora are prefixed with the date they were assembled.  The messages are na
 
 This corpus lives [here](http://spamassassin.apache.org/publiccorpus/).  Mail jm - public - corpus AT jmason dot org if you have questions.
 
-Note: if you write a paper or similar using this corpus, and it's available for download, we'd love to hear about it!  Mail users AT spamassassin dot apache dot org.  cheers!
+NOTE: the training folder is missing in the git repository to avoid cluttering it with 1000s of spam messages. You need to recreate the folder from this [site](https://spamassassin.apache.org/old/publiccorpus), extract the files.
 
-UPDATE: Jan 31 2006 jm: I've received a mail saying 'I'm seeing 41 messages [from the ham corpus](www.countermoon.com) hit on SURBL. Looks like the domain changed may have changed hands at some point.' So again, live lookups will probably now produce different results from what would have been seen at time of first email receipt; be warned.
+You can run the script download.sh to download the corpus. After extraction your training folder should look like this
+
+`
+$ sh ./download.sh
+$ ls -l training
+total 460
+drwx--x--x. 2 mbhangui mbhangui 172032 Jun 29  2014 easy_ham
+drwx--x--x. 2 mbhangui mbhangui  94208 Jun 29  2014 easy_ham_2
+drwx--x--x. 2 mbhangui mbhangui  20480 Jun 29  2014 hard_ham
+drwxr-xr-x. 2 mbhangui mbhangui  36864 Jun 29  2014 spam
+drwxr-xr-x. 2 mbhangui mbhangui  98304 Mar  3  2009 spam_2
+drwxr-xr-x. 2 mbhangui mbhangui  32768 Mar 16  2017 spam_3
+`
+The `easy_ham2` and `spam_3` folder above should be a collection of your own ham and spam emails
