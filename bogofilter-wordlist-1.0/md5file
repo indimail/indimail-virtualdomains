@@ -1,0 +1,14 @@
+#!/bin/sh
+# if you copy emails to any of the sub folders in the training folder,
+# use this script to rename the email files
+count=1
+for i in `ls -tr`
+do
+	pre=`printf "%05d" $count`
+	file=$pre."`md5sum $i|awk '{print $1}'`"
+	if [ " $i" != " $file" ] ; then
+		echo "mv $i $file"
+		mv $i $file
+	fi
+	count=`expr $count + 1`
+done
