@@ -9,7 +9,7 @@ Homepage: https://github.com/mbhangui/indimail-virtualdomains
 Package: indimail
 Architecture: any
 Pre-Depends: indimail-mta, indimail-access, virtual-mysql-server, mrtg
-Recommends: indimail-auth, indimail-utils, indimail-spamfilter
+Recommends: indimail-auth
 Conflicts: indimail (< 2.0)
 Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils, findutils, procps
 Provides: libindimail
