@@ -100,7 +100,7 @@ BuildRequires: -post-build-checks
 Requires: procps /usr/bin/awk /usr/bin/which
 Requires: sed findutils
 Requires: coreutils grep /bin/sh glibc
-Requires: bogofilter-wordlist indimail-mta
+Requires: indimail-mta
 Conflicts: indimail < 3.2
 
 %if %build_on_obs == 1
