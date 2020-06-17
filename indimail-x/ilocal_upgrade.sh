@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: ilocal_upgrade.sh,v $
+# Revision 2.32  2020-06-17 11:14:54+05:30  Cprogrammer
+# removed posttrans to avoid duplicate run of ilocal_upgrade.sh
+#
 # Revision 2.31  2020-06-09 11:32:46+05:30  Cprogrammer
 # fixed typo
 #
@@ -94,7 +97,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: ilocal_upgrade.sh,v 2.31 2020-06-09 11:32:46+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.32 2020-06-17 11:14:54+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -114,7 +117,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.31 2020-06-09 11:32:46+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.32 2020-06-17 11:14:54+05:30 Cprogrammer Exp mbhangui $"
 if [ -d /var/indimail/mysqldb/data/indimail ] ; then
 	if [ ! -f /service/mysql.3306/down ] ; then
 		for i in mysqld mariadb mysql
@@ -133,7 +136,7 @@ fi
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.31 2020-06-09 11:32:46+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.32 2020-06-17 11:14:54+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do
@@ -241,7 +244,7 @@ fi
 } 
 
 case $1 in
-	post|posttrans)
+	post)
 	do_post_upgrade $1
 	;;
 	install)
