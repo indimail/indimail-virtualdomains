@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: iupgrade.sh,v $
+# Revision 2.13  2020-06-17 11:15:54+05:30  Cprogrammer
+# fixed ilocal_upgrade.sh not getting called
+#
 # Revision 2.12  2020-06-09 11:33:12+05:30  Cprogrammer
 # added timestamp and seperators in messages
 #
@@ -37,13 +40,13 @@
 # generic upgrade script for indimail
 #
 #
-# $Id: iupgrade.sh,v 2.12 2020-06-09 11:33:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: iupgrade.sh,v 2.13 2020-06-17 11:15:54+05:30 Cprogrammer Exp mbhangui $
 
 do_upgrade()
 {
 	if [ -f /usr/libexec/indimail/ilocal_upgrade.sh ] ; then
 		echo "-- $tm - Running upgrade script for $1 ----------"
-		#sh /usr/libexec/indimail/ilocal_upgrade.sh $1
+		sh /usr/libexec/indimail/ilocal_upgrade.sh $1
 	fi
 }
 
@@ -87,7 +90,7 @@ do_post()
 		install)
 		echo "-- $tm - do_post install ------------------------"
 		echo "-- $tm RPM/DEB Version  $PKG_VER"
-		do_upgrade postinstall
+		do_upgrade install
 		echo "-------------------------------------------------"
 		;;
 		upgrade)
