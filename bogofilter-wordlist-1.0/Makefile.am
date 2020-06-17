@@ -8,9 +8,8 @@ SYSCONFDIR = @sysconfdir@
 sysconf_DATA = wordlist.db
 
 noinst_SCRIPTS = bogofilter-wordlist.spec
-MOSTLYCLEANFILES= create_rpm
 
-all-local: create_rpm bogofilter-wordlist.spec
+all-local: bogofilter-wordlist.spec
 install-data-local: wordlist.db
 
 install-data-hook: 
@@ -25,8 +24,6 @@ edit = sed \
 bogofilter-wordlist.spec: bogofilter-wordlist.spec.in catChangeLog conf-version conf-release
 	($(edit) $@.in;./catChangeLog) | $(edit) > $@
 
-create_rpm: create_rpm.in
-	$(edit) $@.in > $@
 wordlist.db: training/easy_ham training/easy_ham_2 training/hard_ham \
 training/spam training/spam_2
 	./download.sh && ./training.sh
