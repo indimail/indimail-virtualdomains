@@ -20,7 +20,7 @@ pkgconfigdir=@prefix@/lib/pkgconfig
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
 indimail.dsc indimail-Debian_10.dsc indimail-Debian_9.0.dsc \
 indimail-devel.postinst indimail-devel.postrm indimail-xUbuntu_18.04.dsc \
-indimail-xUbuntu_18.10.dsc debian.tar.gz dummy.tar.gz
+debian.tar.gz dummy.tar.gz
 
 install: all
 install-strip: install
