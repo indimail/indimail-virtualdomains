@@ -27,7 +27,7 @@ NOTE: the training folder is missing in the git repository to avoid cluttering i
 
 You can run the script download.sh to download the corpus. After extraction your training folder should look like this
 
-`
+```
 $ sh ./download.sh
 $ ls -l training
 total 460
@@ -37,5 +37,6 @@ drwx--x--x. 2 mbhangui mbhangui  20480 Jun 29  2014 hard_ham
 drwxr-xr-x. 2 mbhangui mbhangui  36864 Jun 29  2014 spam
 drwxr-xr-x. 2 mbhangui mbhangui  98304 Mar  3  2009 spam_2
 drwxr-xr-x. 2 mbhangui mbhangui  32768 Mar 16  2017 spam_3
-`
+```
+
 The `easy_ham2` and `spam_3` folder above should be a collection of your own ham and spam emails
