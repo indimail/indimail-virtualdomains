@@ -14,3 +14,5 @@ cscope.*
 *.BAK
 RCS
 stage
+.github/indimail-virtualdomains.wiki
+.github/indimail-mta.wiki
