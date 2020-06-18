@@ -11,7 +11,6 @@ Messaging Platform based on indimail-mta for MTA (modified qmail), IndiMail-Virt
 * Look at [INSTALL-MYSQL](.github/INSTALL-MYSQL.md) for instructions on configuring a MySQL/MariaDB server for IndiMail.
 * Look at [INSTALL-RPM](.github/INSTALL-RPM.md) for instructions on setting up IndiMail using RPM or Debian packages
 * Look at [Quick-INSTALL](.github/Quick-INSTALL.md) for instructions on installation and setup of an IndiMail server.
-* Look at [Tutorial](.github/indimail.md) for a detailed tutorial on doing various tasks with an IndiMail server
 
 # Source Installation
 
