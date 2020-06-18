@@ -48,7 +48,7 @@ When you install indimail-virtualdomains, a shared library from the package is d
 
 indimail-virtualdomains provides programs to manage multiple virtual domains on a single host. It allows extending any of the domains across multiple servers. With indimail-mta installed, two compoments - **qmail-rspawn**, **qmail-remote** can act as an SMTP router/interceptor. Both the components use a **MySQL** database to know the location of each and every user. Similarly, the Mail Delivery Agent (MDA) **vdelivermail** uses the same MySQL database, allowing it to re-route any email to any server where the user's mailbox is present. Additionally, indimail-virtualdomains provide **proxyimap** and **proxypop3** - proxies for IMAP and POP3 protocols, to retrieve the user's mailbox from any server. To deliver or retrieve any email, the user doesn't have to connect to any specific serer. This is a very powerful feature which allows IndiMail to provide native horizontal scalability. It knows the location of each and every user and can distribute or retrieve mails for any user residing on any server located anywhere on the network. If one uses IndiMail, one can simply add one more server and cater to more users without changing any configuration, software or hardware of existing servers.
 
-This does not force a filesystem architecture like NFS to be used for provisioning large number of users (typically in an ISP/MSP environment). In the architecture below, you can keep on increasing the number of servers (incoming relay, outgoing relay or mailstores) to cater to large number of users. This allows you to scale indimail easily to serve millions of users using commodity hardware. You can read the feature list to get an idea of the changes and new features that have been added over the original packages. You can see a pictorial representation of the architecture ![Image](indimail_arch.png "IndiMail Architecture")
+This does not force a filesystem architecture like NFS to be used for provisioning large number of users (typically in an ISP/MSP environment). In the architecture below, you can keep on increasing the number of servers (incoming relay, outgoing relay or mailstores) to cater to large number of users. This allows you to scale indimail easily to serve millions of users using commodity hardware. You can read the feature list to get an idea of the changes and new features that have been added over the original packages. You can see a pictorial representation of the ![architecture](indimail_arch.png "IndiMail Architecture")
 
 IndiMail allows servers to be distributed anywhere geographically. This is useful especially if you have users at different parts of the globe. e.g. Your Brazil users can have their server located in Brazil, Bombay users in Bombay, Delhi users in Delhi. And yet when your Brazil users comes to Delhi for a visit, he or she can access all emails sitting in Delhi by accessing the Delhi server. IndiMail provides this distributed feature using proxies for SMTP, IMAP and POP3 protocols. The proxy servers run using [ucspi-tcp](https://cr.yp.to/ucspi-tcp.html "ucspi-tcp") and are by default configured under supervise. You can use any IMAP/POP3 server behind the proxy. You can extend the domain across multiple servers without using any kind of NAS storage.
 
@@ -315,7 +315,7 @@ Some of the features available in this package
 
 1.  svctool - A simple tool with command-line options which helps you to configure any configuration item in indimail (creation of supervise scripts, qmail configuration, installation of all default MySQL tables, creation of default aliases, users, etc)
 2.  configurable control files directory (using CONTROLDIR environment variable) (allows one to have multiple running copies of qmail using a single binary installation)
-3.  configurable queue directory (using QUEUEDIR environment variable) (allows one to have multiple queues on a host with a single qmail installation). 
+3.  configurable queue directory (using QUEUEDIR environment variable) (allows one to have multiple queues on a host with a single qmail installation).
     * qmail-multi (queue load balancer) uses qmail-queue to deposit mails across multiple queues. Each queue has its own qmail-send process. You can spread the individual queues across multiple filesystems on different controllers  to maximize on IO throughput.
     * The number of queues is configurable by three environment variables **QUEUE_BASE**, **QUEUE_COUNT** and **QUEUE_START**. A queue in indimail is defined as a collection of multiple queues.
     * Each queue in the collection can have one or more SMTP listener but a single delivery (qmail-send) processes. It is possible to have the entire queue collection without a delivery process (e.g. SMTP on port 366 ODMR). The QUEUE_COUNT can be defined based on how powerful your host is (IO bandwidth, etc). The configurable queue is possible with a single installation of indimail-mta and does not require you to have multiple indimail-mta installations (unlike qmail) to achieve this.
@@ -767,7 +767,7 @@ This allows IndiMail to interface with many programs written by others. IndiMail
 
 3. have an alias
    You can use valias(1) to create an alias to call procmail. The following alias calls procmail to deliver the mail using /etc/indimail/procmailrc as a procmail recipe
-    
+
    ```
    valias -i "|/usr/bin/preline -f /usr/bin/procmail -p -m /etc/indimail/procmailrc" testuser@example.com
    ```
@@ -874,7 +874,7 @@ exit 0
 
 ### 1.2.2 Using control file filterargs
 
-The control file filterargs gives you control to run filters individually for local or remote deliveries. It also allows you to run your filter for both local and remote deliveries. See spawn-filter(8) for full description on this control file. 
+The control file filterargs gives you control to run filters individually for local or remote deliveries. It also allows you to run your filter for both local and remote deliveries. See spawn-filter(8) for full description on this control file.
 e.g. The following entry in /var/indimail/control/filterargs causes all mails to yahoo.com be fed through the filter dk-filter(8) for DK/DKIM signing.
 yahoo.com:remote:/usr/bin/dk-filter
 NOTE: If the program myfilter returns 100, the message will be bounced. If it returns 2, the message will be discarded (blackholed).
@@ -1004,7 +1004,7 @@ exit 111
 # argv3          - qqeh   (qmail queue extra header)
 # argv4          - size
 # argv5 .. argvn - recipients
-# 
+#
 #
 host=$1
 sender=$2
@@ -1432,11 +1432,11 @@ The above command creates a virtual domain with delivery instructions in /var/in
 
 The `delivery\_instruction\_for\_non\_existing\_user` can have one of the following 5 forms
 
- 1. delete 
- 2. bounce-no-mailbox 
- 3. Maildir 
- 4. emailAddress 
- 5. IPaddress 
+ 1. delete
+ 2. bounce-no-mailbox
+ 3. Maildir
+ 4. emailAddress
+ 5. IPaddress
 
 * Using **delete** as the delivery instruction causes IndiMail to discard all mails addressed to non-existing users. The original sender does not get notified of the delivery. On a real messaging system serving real users, you will not want to do this.
 * The instruction **bounce-no-mailbox** causes a bounce to be generated to the sender in case an email is addressed to a non-existing user. This is the most common usage in .qmail-default which most IndiMail installations will have
@@ -1529,9 +1529,9 @@ Apart from archiving, you would also want to set disclaimers. IndiMail allows yo
 ```
 Reference
     • Email Compliance - A simple 5 step guide
-    • E-Mail archiving - Wikipedia 
-    • Compliance Requirements for email archiving 
-    • Email Legislation - Summary of UK, US, EU legislations 
+    • E-Mail archiving - Wikipedia
+    • Compliance Requirements for email archiving
+    • Email Legislation - Summary of UK, US, EU legislations
 ```
 
 # Envrules
@@ -1590,7 +1590,7 @@ The following list of environment variables which can be modified using envrules
 CONTROLDIR, SMTPROUTE, SIGNKEY, OUTGOINGIP, DOMAINBINDINGS, AUTH_SMTP, MIN_PENALTY, and MAX_TOLERANCE
 ```
 
-The following list of environment variables which can be modified using envrules are specfic to qmail-local. 
+The following list of environment variables which can be modified using envrules are specfic to qmail-local.
 
 `USE_SYNCDIR, USE_FSYNC, and LOCALDOMAINS`
 
@@ -1608,15 +1608,15 @@ For a minimal QMQP client installation, you need to have the following
 
 * forward, qmail-inject, rmail, sendmail, predate, datemail, mailsubj, qmail-showctl, qmaildirmake, maildir2mbox, maildirwatch in /usr/bin;
 * shared libs libsrs2-1.0\* from /usr/lib64
-* a symbolic link to qmail-qmqpc from /usr/sbin/qmail-queue; 
-* symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail; 
+* a symbolic link to qmail-qmqpc from /usr/sbin/qmail-queue;
+* symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail;
 * a list of IP addresses of QMQP servers, one per line, in /etc/indimail/control/qmqpservers;
-* a copy of /etc/indimail/control/me, /etc/indimail/control/defaultdomain, and /etc/indimail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and 
-* this host's name in /etc/indimail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision. 
+* a copy of /etc/indimail/control/me, /etc/indimail/control/defaultdomain, and /etc/indimail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
+* this host's name in /etc/indimail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision.
 
-Everything can be shared across hosts except for /etc/indimail/control/idhost. 
+Everything can be shared across hosts except for /etc/indimail/control/idhost.
 
-Remember that users won't be able to send mail if all the QMQP servers are down. Most sites have two or three independent QMQP servers. 
+Remember that users won't be able to send mail if all the QMQP servers are down. Most sites have two or three independent QMQP servers.
 
 Note that users can still use all the qmail-inject environment variables to control the appearance of their outgoing messages. This will include environment variables in $HOME/.defaultqueue directory.
 
@@ -1706,11 +1706,11 @@ Here's what you do need:
 
 * forward, qmail-inject, sendmail, rmail predate, datemail, mailsubj, qmail-showctl, maildirmake, maildir2mbox, and maildirwatch in your path
 * shared libs libsrs2-1.0\* from /usr/lib64 (/usr/lib on 32 bit systems)
-* a symbolic link to /usr/sbin/qmail-qmqpc from /usr/sbin/qmail-queue; 
-* symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail; 
+* a symbolic link to /usr/sbin/qmail-qmqpc from /usr/sbin/qmail-queue;
+* symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail;
 * a list of IP addresses of QMQP servers, one per line, in /etc/indimail/control/qmqpservers;
-* a copy of /etc/indimail/control/me, /etc/indimail/control/defaultdomain, and /etc/indimail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and 
-* this host's name in /etc/indimail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision. 
+* a copy of /etc/indimail/control/me, /etc/indimail/control/defaultdomain, and /etc/indimail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
+* this host's name in /etc/indimail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision.
 * All manual pages.
 
 You can install all the above by manually copying the binaries and man pages from a host having standard IndiMail installation or you can install and setup just by using the indimail-mini RPM
@@ -1820,14 +1820,14 @@ The default configuration of IndiMail configures the SMTP as a closed system. He
 
 There are many methods. Choose any of the below after studying them. I prefer 3 or 4 for security reasons.
 
-1. Have Sender's IP addresses in tcp.smtp file 
-2. Use control file relayclients for IP addresses of clients allowed to relay mail through this host. 
-3. Configure IndiMail to use MySQL relay table (good security). This is implemented as POP3/IMAP before SMTP 
-4. Use authenticated SMTP (good security) 
-5. For allowing relay to specific domains use control file relaydomains 
-6. For allowing specific users (native addresses) use control file relaymailfrom 
+1. Have Sender's IP addresses in tcp.smtp file
+2. Use control file relayclients for IP addresses of clients allowed to relay mail through this host.
+3. Configure IndiMail to use MySQL relay table (good security). This is implemented as POP3/IMAP before SMTP
+4. Use authenticated SMTP (good security)
+5. For allowing relay to specific domains use control file relaydomains
+6. For allowing specific users (native addresses) use control file relaymailfrom
 
-NOTE: you should use 1 & 2 only if if the host having the sender's IP is under your control and you have good security policies for the host (however ‘what is a good security’ can be very subjective) 
+NOTE: you should use 1 & 2 only if if the host having the sender's IP is under your control and you have good security policies for the host (however ‘what is a good security’ can be very subjective)
 
 ## Using tcp.smtp
 
@@ -1870,7 +1870,7 @@ Run the command /usr/bin/clearopensmtp in the cron every 30 Minutes
 By default every time, if anyone uses IndiMail's POP3 or IMAP service and authenticates, the following happens:
 
 1. On successful authentication, IMAP/POP3 daemon inserts entry into relay table, inserting email, IP address and timestamp
-2. If **CHECKRELAY** environment variable is enabled, SMTP checks the relay table for a entry within minutes specified by the RELAY\_CLEAR\_MINUTES environment variable. If the entry is there, **RELAYCLIENT** environment variable is set, which allows relaying. At this point, the SMTP server will allow that IP to relay for 60 Mins (default) 
+2. If **CHECKRELAY** environment variable is enabled, SMTP checks the relay table for a entry within minutes specified by the RELAY\_CLEAR\_MINUTES environment variable. If the entry is there, **RELAYCLIENT** environment variable is set, which allows relaying. At this point, the SMTP server will allow that IP to relay for 60 Mins (default)
 
 clearopensmtp will clear all IP which have not authenticated in the past RELAY\_CLEAR\_MINUTES. clearopensmtp should be enabled in cron to run every 30 minutes.
 
@@ -1910,9 +1910,9 @@ IndiMail has a feature called **CHECKRECIPIENT** which allows indimail to check 
 
 **CHECKRECIPIENT** can be also be used to reject mails for inactive users, overquota users and users who do not have the privilege to receive mails. **CHECKRECIPIENT** can be enabled by setting the environment variable **CHECKRECIPIENT** to one of the following values
 
-1. Reject the user if not present in IndiMail's MySQL database 
-2. Reject the user if not present in IndiMail's MySQL database and recipients.cdb 
-3. Reject user if not present in recipients.cdb 
+1. Reject the user if not present in IndiMail's MySQL database
+2. Reject the user if not present in IndiMail's MySQL database and recipients.cdb
+3. Reject user if not present in recipients.cdb
 
 You can selectively turn on **CHECKRECIPIENT** for selective domains by including those domains (prefixing the domain with '@' sign) in the control file /etc/indimail/control/chkrcptdomains.
 
@@ -1974,9 +1974,9 @@ Rather than making individual connections to MySQL for extracting information fr
 * It also maintains the query result in a double link list.
 * It uses binary tree algorithm to search the cache before actually sending the query to the database.
 * IndiMail clients send requests for MySQL(1) queries to inlookup through the function inquery() using a fifo.
-* The inquery() API uses the InLookup service only if the environment variable QUERY_CACHE is set. If this environment variable is not set, the inquery() function makes a direct connecton to MySQL. 
-* Clients which are currently using inquery are qmail-smtpd(1), proxyimap(8), proxypop3(8), vchkpass(8) and authindi(8). 
-* inlookup(8) service is one of the reasons why IndiMail is able to serve million+ users using commodity hardware. 
+* The inquery() API uses the InLookup service only if the environment variable QUERY_CACHE is set. If this environment variable is not set, the inquery() function makes a direct connecton to MySQL.
+* Clients which are currently using inquery are qmail-smtpd(1), proxyimap(8), proxypop3(8), vchkpass(8) and authindi(8).
+* inlookup(8) service is one of the reasons why IndiMail is able to serve million+ users using commodity hardware.
 
 The program inquerytest simulates all the queries which inlookup supports and can be used as a test/diagnostic tool for submitting queries to inlookup. e.g
 
@@ -2042,7 +2042,7 @@ mailinglist : ALLOW_CREATE ALLOW_MODIFY ALLOW_DELETE
 mailinglist users : ALLOW_CREATE ALLOW_MODIFY ALLOW_DELETE
 mailinglist moderators: ALLOW_CREATE ALLOW_MODIFY ALLOW_DELETE
 domain quota : ALLOW_CREATE ALLOW_MODIFY ALLOW_DELETE
-default quota : ALLOW_CREATE ALLOW_MODIFY 
+default quota : ALLOW_CREATE ALLOW_MODIFY
 ```
 
 You can also implement domain level restrictions. To disable POP3 for all users in example.com
@@ -2137,7 +2137,7 @@ For turning on the BADIP functionality, you need to set the BADIPCHECK or the BA
 # svc -d /service/qmail-smtpd.25
 # svc -u /service/qmail-smtpd.25
 ```
- 
+
 Clients whose IP match an entry in badip will be greeted as below
 
 ```
@@ -2201,8 +2201,8 @@ $ sudo /bin/bash
 
 If you have installed IndiMail using RPM available here or here, QHPSI is enabled by default by defining it in the qmail-smtpd.25 variables directory. If you have clamd, clamav already installed on your server, the rpm installation also installs two services under supervise.
 
-* freshclam - service to update the clamd virus databases 
-* clamd - service to run the clamd scanner 
+* freshclam - service to update the clamd virus databases
+* clamd - service to run the clamd scanner
 
 You may need to disable clamd, freshclam startup by your system boot process and enable the startup under indimail. Do have the clamd, freshclam service started up by indimail, remove the down file. i.e.
 
@@ -2437,7 +2437,7 @@ could become,
 :allow,GREYIP="127.0.0.1@1999"
 ```
 
-If you've setup qmail-greyd on a non-default address (perhaps you're running qmail-greyd on a separate machine), you'll also need to specify the address it's listening on - adjust the above to include GREYIP="192.168.5.5@1999", for example. 
+If you've setup qmail-greyd on a non-default address (perhaps you're running qmail-greyd on a separate machine), you'll also need to specify the address it's listening on - adjust the above to include GREYIP="192.168.5.5@1999", for example.
 Finally, don't forget to update the cdb file corresponding to the source file you've just edited. If you have a LWQ setup that's
 
 ```
@@ -2567,14 +2567,14 @@ Once you have installed your private key file and added your public key to your 
 If you experience problems, consult the qmail-dkim man page or post a comment below and I’ll try to help.
 You can also use the following for testing.
 
-* dktest@temporary.com, is Yahoo!'s testing server. When you send a message to this address, it will send you back a message telling you whether or not the domainkeys signature was valid. 
-* sa-test@sendmail.net is a free service from the sendmail people. It's very similar to the Yahoo! address, but it also shows you the results of an SPF check as well. 
+* dktest@temporary.com, is Yahoo!'s testing server. When you send a message to this address, it will send you back a message telling you whether or not the domainkeys signature was valid.
+* sa-test@sendmail.net is a free service from the sendmail people. It's very similar to the Yahoo! address, but it also shows you the results of an SPF check as well.
 
 All the above was quite easy. If you don't think so, you can always use the magic options --dkverify (for verification) or `--dksign --private_key=domain_key_private_key_file` to svctool (svctool --help for all options) to create supervice run script for qmail-smtpd, qmail-send.
 
 References
 
-1. http://www.brandonturner.net/blog/2009/03/dkim-and-domainkeys-for-qmail/ 
+1. http://www.brandonturner.net/blog/2009/03/dkim-and-domainkeys-for-qmail/
 2. http://qmail.jms1.net/patches/domainkeys.shtml
 3. http://notes.sagredo.eu/node/82
 
@@ -2586,22 +2586,22 @@ Lately my users have been pestering me if something can be done about it. I have
 
 For the admin user it provides
 
-1.  user addition 
+1.  user addition
 2.  user deletion
-3.  password change 
-4.  adding autoresponders 
-5.  deleting autoresponders 
+3.  password change
+4.  adding autoresponders
+5.  deleting autoresponders
 6.  modifying autoresponders
-7.  adding forwarding addresses 
-8.  deleting forwarding addresses 
+7.  adding forwarding addresses
+8.  deleting forwarding addresses
 9.  modifying forwarding addreses
-10. quota modification 
+10. quota modification
 
 For users other than the postmaster account it provides
 
-1. Password change 
-2. add/modify/delete forwarding addresses 
-3. add/modify/delete autoresponder 
+1. Password change
+2. add/modify/delete forwarding addresses
+3. add/modify/delete autoresponder
 
 
 The RPM / Yum / APT Repo file can be installed using instructions at
@@ -2641,7 +2641,7 @@ Point your browser to /var/www/html/mailmrtg and you should see the graphs.
 # RoundCube Installation for IndiMail
 
 These instructions will work on CentOS, RHEL, Fedora. For Debian/Ubuntu and other distros, please use your knowledge to make changes accordingly. In this guide, replace indimail.org with your own hostname.
-Non SSL Version Install/Configuration 
+Non SSL Version Install/Configuration
 (look below for SSL config)
 
 1. Install RoundCube. On older systems, use the yum command
@@ -2701,7 +2701,7 @@ Non SSL Version Install/Configuration
    $config['db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';$config['imap_auth_type'] = 'LOGIN';
    $config['smtp_auth_type'] = 'LOGIN';
    ```
-   
+
    This file should have read permission for apache group
 
    ```
@@ -2748,7 +2748,7 @@ Non SSL Version Install/Configuration
    # Define who can access the Webmail
    # You can enlarge permissions once configured
    <Directory /usr/share/roundcubemail/>
-       <IfModule mod_authz_core.c> 
+       <IfModule mod_authz_core.c>
            # Apache 2.4
            Require ip 127.0.0.1
            Require all granted
@@ -3037,7 +3037,7 @@ owners.
 
 Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 
-mysql> 
+mysql>
 ```
 
 You can create a similar login path for indimail user
@@ -3064,9 +3064,9 @@ The above command will create and initialize a MySQL database for first time use
 
 **Manual Initialization**
 
-In the examples shown here, the server is going to run under the user ID of the mysql login account. This assumes that such an account exists. Either create the account if it does not exist, or substitute the name of a different existing login account that you plan to use for running the server.  
+In the examples shown here, the server is going to run under the user ID of the mysql login account. This assumes that such an account exists. Either create the account if it does not exist, or substitute the name of a different existing login account that you plan to use for running the server.
 
-Create a directory whose location can be provided to the secure\_file\_priv system variable, which limits import/export operations to that specific directory: 
+Create a directory whose location can be provided to the secure\_file\_priv system variable, which limits import/export operations to that specific directory:
 
 ```
 $ mkdir -p /var/indimail/mysqldb/data
@@ -3075,9 +3075,9 @@ $ chown -R mysql:mysql /var/indimail/mysqldb/data
 $ chmod 750 /var/indimail/mysqldb/data
 ```
 
-Initialize the data directory, including the mysql database containing the initial MySQL grant tables that determine how users are permitted to connect to the server. 
+Initialize the data directory, including the mysql database containing the initial MySQL grant tables that determine how users are permitted to connect to the server.
 
-Typically, data directory initialization need be done only after you first installed MySQL. If you are upgrading an existing installation, you should run mysql\_upgrade instead (see mysql\_upgrade — Check and Upgrade MySQL Tables). However, the command that initializes the data directory does not overwrite any existing privilege tables, so it should be safe to run in any circumstances. Use the server to initialize the data directory; for example: 
+Typically, data directory initialization need be done only after you first installed MySQL. If you are upgrading an existing installation, you should run mysql\_upgrade instead (see mysql\_upgrade — Check and Upgrade MySQL Tables). However, the command that initializes the data directory does not overwrite any existing privilege tables, so it should be safe to run in any circumstances. Use the server to initialize the data directory; for example:
 
 **For MySQL from Oracle**
 
@@ -3124,7 +3124,7 @@ drwxr-x---. 2 mysql mysql    12288 Mar 24  2017 sys
 You now need to check the log /var/indimail/mysqldb/logs/mysqld.log. The last line in this log will give you the password for the root user. This user will have all privileges and we will use this to create the user indimail and grant it privileges to access the indimail database. Note down this password.
 
 ```
-$ cat /var/indimail/mysqldb/logs/mysqld.log 
+$ cat /var/indimail/mysqldb/logs/mysqld.log
 2018-02-07T03:34:41.509241Z 0 [Warning] Changed limits: max_open_files: 1024 (requested 5000)
 2018-02-07T03:34:41.509393Z 0 [Warning] Changed limits: table_open_cache: 431 (requested 2000)
 2018-02-07T03:34:43.457211Z 0 [Warning] InnoDB: New log files created, LSN=45790
@@ -3138,18 +3138,18 @@ If you want the server to be able to deploy with automatic support for secure co
 
 `$ sudo bin/mysql_ssl_rsa_setup -uid=mysql --datadir=/var/ndimail/mysqldb/data`
 
-For more information, see mysql\_ssl\_rsa\_setup — Create SSL/RSA Files. 
+For more information, see mysql\_ssl\_rsa\_setup — Create SSL/RSA Files.
 Now using the password obtained from var/log/mysqld.log, we will connect to MySQL and create users
 
-1. If the plugin directory (the directory named by the plugin\_dir system variable) is writable by the server, it may be possible for a user to write executable code to a file in the directory using SELECT ... INTO DUMPFILE. This can be prevented by making the plugin directory read only to the server or by setting the secure\_file\_priv system variable at server startup to a directory where SELECT writes can be performed safely. (For example, set it to the mysql-files directory created earlier.) 
+1. If the plugin directory (the directory named by the plugin\_dir system variable) is writable by the server, it may be possible for a user to write executable code to a file in the directory using SELECT ... INTO DUMPFILE. This can be prevented by making the plugin directory read only to the server or by setting the secure\_file\_priv system variable at server startup to a directory where SELECT writes can be performed safely. (For example, set it to the mysql-files directory created earlier.)
 2. To specify options that the MySQL server should use at startup, put them in a /etc/my.cnf or /etc/mysql/my.cnf file. You can use such a file to set, for example, the secure\_file\_priv system variable. See Server Configuration Defaults. If you do not do this, the server starts with its default settings. You should set the datadir variable to /var/indimail/mysqldb/data in my.cnf.
-3. If you want MySQL to start automatically when you boot your machine, see Section 9.5, “Starting and Stopping MySQL Automatically”. 
+3. If you want MySQL to start automatically when you boot your machine, see Section 9.5, “Starting and Stopping MySQL Automatically”.
 
-Data directory initialization creates time zone tables in the mysql database but does not populate them. To do so, use the instructions in MySQL Server Time Zone Support. 
+Data directory initialization creates time zone tables in the mysql database but does not populate them. To do so, use the instructions in MySQL Server Time Zone Support.
 
 ## 2. MySQL Startup
 
-If you have done a binary installation of MySQL (yum/dnf/apt-get or RPM/DEB installation), the post install scripts should have installed MySQL to be started during boot. The preferred method for IndiMail is using supervise, though not mandatory. 
+If you have done a binary installation of MySQL (yum/dnf/apt-get or RPM/DEB installation), the post install scripts should have installed MySQL to be started during boot. The preferred method for IndiMail is using supervise, though not mandatory.
 
 **System Default**
 
@@ -3207,9 +3207,9 @@ First step is to connect using the password noted in Section 1 and change the pa
 
 ```
 $ mysqladmin -u root -p password
-Enter password: 
-New password: 
-Confirm new password: 
+Enter password:
+New password:
+Confirm new password:
 ```
 Warning: Since password will be sent to server in plain text, use ssl connection to ensure password safety.
 
@@ -3218,7 +3218,7 @@ Now you can connect to MySQL using the new password set for user root above.
 
 ```
 $ mysql -u root -p
-Enter password: 
+Enter password:
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 10
 Server version: 5.7.20-log MySQL Community Server (GPL)
@@ -3251,7 +3251,7 @@ NOTE: for MariaDB, you will have to execute few additional MySQL statements. The
 
 ```
 $ mysql -u root -p
-Enter password: 
+Enter password:
 Welcome to the MariaDB monitor.  Commands end with ; or \g.
 Your MariaDB connection id is 6
 Server version: 5.5.59-MariaDB MariaDB Server
@@ -3348,7 +3348,7 @@ mysql_host:mysql_user:mysql_pass:mysql_port
 You will use the first syntax when you have MySQL and IndiMail installed on the same host. You will use the second form when you have MySQL installed on a host different from the host on which you have installed IndiMail. The user mysql_user needs to have certain privileges, which we will discuss under the section MySQL Privileges.
 
 ```
-$ sudo /bin/sh -c “localhost:indimail:ssh-1.5-:/var/run/mysqld/mysqld.sock > 
+$ sudo /bin/sh -c “localhost:indimail:ssh-1.5-:/var/run/mysqld/mysqld.sock >
     /etc/indimail/control/host.mysql
 ```
 
@@ -3496,7 +3496,7 @@ To avoid having to use sudo when you use the docker command, create a Unix group
 NOTE: Warning: The docker group is equivalent to the root user; For details on how this impacts security in your system, see [Docker Daemon attack surface](https://docs.docker.com/engine/security/security/#docker-daemon-attack-surface)
 
 ```
-$ sudo groupadd docker 
+$ sudo groupadd docker
 $ sudo usermod -aG docker your\_username
 ```
 Log out and login again to ensure your user is running with the correct permissions. You can run the unix id command to confirm that you have the docker group privileges. e.g.
@@ -3533,7 +3533,7 @@ The above will start a fully functional Fedora 23 OS with IndiMail, MySQL, sshd,
 ```
 $ docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
-fd09c7ca75be        a02e6014a67b        "/sbin/init"        38 seconds ago      Up 37 seconds                           desperate_jones 
+fd09c7ca75be        a02e6014a67b        "/sbin/init"        38 seconds ago      Up 37 seconds                           desperate_jones
 ```
 
 We now have a running container and can attach to it and use it like any functional host. Run the docker exec command. The **-ti** option attaches a pseudo terminal and makes the session interactive.
@@ -3578,11 +3578,11 @@ I am also a newbie as far as docker is concerned. Do let me know your experience
 
 NOTE: There are few defaults for the indimail docker container image
 
-* root password is passxxx@xxx 
-* mysql user, password for indimail is indimail, ssh-1.5- 
-* mysql privileged user, password is mysql, 4-57343- 
-* password for postmaster@indimail.org virtual imap/pop3 account is passxxx 
-* password for testuser01@indimail.org virtual imap/pop3 account is passxxx 
+* root password is passxxx@xxx
+* mysql user, password for indimail is indimail, ssh-1.5-
+* mysql privileged user, password is mysql, 4-57343-
+* password for postmaster@indimail.org virtual imap/pop3 account is passxxx
+* password for testuser01@indimail.org virtual imap/pop3 account is passxxx
 
 
 # Installation & Repositories
