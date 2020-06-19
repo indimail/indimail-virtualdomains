@@ -2,12 +2,12 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.59])
-AC_INIT([indium],1.1,[Manvendra Bhangui manvendra@indimail.org],indium, [http://www.indimail.org])
+AC_INIT([indium],1.1,[Manvendra Bhangui indium@indimail.org],indium, [https://github.com/mbhangui/indimail-virtualdomains])
 AC_CANONICAL_TARGET
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 AC_CONFIG_HEADERS([config.h])
-AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-support@lists.sourceforge.net")
+AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indium@indimail.org")
 AM_INIT_AUTOMAKE
 
 AC_LIB_PREPARE_MULTILIB
@@ -71,6 +71,7 @@ AC_SUBST(defaultprefix)
 # Checks for programs.
 AC_PROG_AWK
 AC_PROG_CC
+AC_PROG_CC_C99
 AC_PROG_LN_S
 AC_PROG_LIBTOOL
 

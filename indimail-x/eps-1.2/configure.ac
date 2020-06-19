@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.59])
-AC_INIT([eps],1.2,[Manvendra Bhangui manvendra@indimail.org],indimail, [http://www.indimail.org])
+AC_INIT([eps],1.2,[Manvendra Bhangui indimail-virtualdomains@indimail.org],indimail, [https://github.com/mbhangui/indimail-virtualdomains])
 AC_CANONICAL_HOST
 LT_INIT
 PACKAGE=$PACKAGE_NAME
@@ -12,6 +12,7 @@ dnl Checks for programs.
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_LIBTOOL
 AC_PROG_CC
+AC_PROG_CC_C99
 
 case "$host" in
 *-*-sunos4.1.1*)

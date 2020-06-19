@@ -4,13 +4,14 @@ dnl Copyright 1998 - 2018 Double Precision, Inc.  See COPYING for
 dnl distribution information.
 
 AC_PREREQ(2.59)
-AC_INIT(courier-imap, 5.0.10, [courier-imap@lists.sourceforge.net])
+AC_INIT(courier-imap, 5.0.11, [courier-imap@lists.sourceforge.net])
 AC_CONFIG_SRCDIR(libs/imap/imapd.c)
 AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE
 >confdefs.h # Kill PACKAGE_ macros
 
 AC_PROG_CC
+AC_PROG_CC_C99
 AC_PROG_AWK
 AC_PROG_INSTALL
 AC_PROG_LN_S

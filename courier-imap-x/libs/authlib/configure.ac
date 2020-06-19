@@ -15,6 +15,7 @@ AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-support@lists.sourceforge.net")
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_CC_C99
 AC_PROG_LIBTOOL
 AC_CONFIG_MACRO_DIR([../../m4])
 LPATH="$PATH:/usr/local/bin"

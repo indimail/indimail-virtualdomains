@@ -1,15 +1,16 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([iwebadmin],2.0,[Manvendra Bhangui manvendra@indimail.org],iwebadmin, [http://www.indimail.org])
+AC_INIT([iwebadmin],2.0,[Manvendra Bhangui iwebadmin@indimail.org],iwebadmin, [https://github.com/mbhangui/indimail-virtualdomains])
 AC_CANONICAL_TARGET
 LT_INIT
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
-AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-support@lists.sourceforge.net")
+AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "iwebadmin@indimail.org")
 
 dnl Checks for programs.
 AC_PROG_LIBTOOL
 AC_PROG_CC
+AC_PROG_CC_C99
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S

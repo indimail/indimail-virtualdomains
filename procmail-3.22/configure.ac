@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.59])
-AC_INIT([procmail], [3.22], [manvendra@indimail.org])
+AC_INIT([procmail],3.22,[Manvendra Bhangui indimail-virtualdomains@indimail.org],procmail,[https://github.com/mbhangui/indimail-virtualdomains])
 LT_INIT
 AC_CONFIG_SRCDIR([patchlevel.h])
 AC_CONFIG_HEADERS([config.h])
@@ -11,6 +11,7 @@ AC_DEFINE_UNQUOTED(PM_VERSION, $PACKAGE_VERSION, "Procmail Version")
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_CC_C99
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL

@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([logalert],0.3,[Manvendra Bhangui manvendra@indimail.org],indimail, [http://www.indimail.org])
+AC_INIT([logalert],0.3,[Manvendra Bhangui indimail-virtualdomains@indimail.org],logalert, [https://github.com/mbhangui/indimail-virtualdomains])
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 LT_INIT
@@ -11,6 +11,7 @@ AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC
+AC_PROG_CC_C99
 AC_PROG_LIBTOOL
 AC_LIB_PREPARE_MULTILIB
 

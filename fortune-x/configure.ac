@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.59])
-AC_INIT([fortune],1.1,[Manvendra Bhangui manvendra@indimail.org],indimail, [http://www.indimail.org])
+AC_INIT([fortune],1.1,[Manvendra Bhangui indimail-utils@indimail.org],fortune, [https://github.com/mbhangui/indimail-virtualdomains])
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 AM_INIT_AUTOMAKE([foreign])
@@ -9,6 +9,7 @@ AC_CANONICAL_HOST
 
 dnl Checks for programs.
 AC_PROG_CC
+AC_PROG_CC_C99
 AC_PROG_RANLIB
 
 defaultprefix="/usr"

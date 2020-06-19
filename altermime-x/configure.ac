@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([altermime],0.3.10,[Manvendra Bhangui manvendra@indimail.org],indimail, [http://www.indimail.org])
+AC_INIT([altermime],0.3.10,[Manvendra Bhangui indimail-utils@indimail.org],altermime, [https://github.com/mbhangui/indimail-virtualdomains])
 AM_CONFIG_HEADER(config.h)
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
@@ -8,6 +8,7 @@ AC_CANONICAL_HOST
 
 dnl Checks for programs.
 AC_PROG_CC
+AC_PROG_CC_C99
 AC_ISC_POSIX
 
 defaultprefix="/usr"

@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([ircube],1.0,[Manvendra Bhangui manvendra@indimail.org],ircube, [http://www.indimail.org])
+AC_INIT([ircube],1.0,[Manvendra Bhangui indimail-virtualdomains@indimail.org],ircube, [https://github.com/mbhangui/indimail-virtualdomains])
 AM_INIT_AUTOMAKE
 
 # Checks for programs.

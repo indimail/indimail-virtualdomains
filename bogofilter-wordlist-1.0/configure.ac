@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([bogofilter-wordlist], [1.0], [Manvendra Bhangui indimail-spamfilter@indimail.org])
+AC_INIT([bogofilter-wordlist], [1.0], [Manvendra Bhangui indimail-spamfilter@indimail.org],bogofilter-wordlist,[https://github.com/mbhangui/indimail-virtualdomains])
 AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_MACRO_DIR([m4])
 
