@@ -4,12 +4,12 @@
 .\"     Title: maildrop
 .\"    Author: Sam Varshavchik
 .\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 02/16/2018
+.\"      Date: 09/24/2019
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "MAILDROP" "1" "02/16/2018" "Courier Mail Server" "Double Precision, Inc\&."
+.TH "MAILDROP" "1" "09/24/2019" "Courier Mail Server" "Double Precision, Inc\&."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -85,7 +85,7 @@ maildir
 is a directory\-based mail format used by the
 \m[blue]\fBCourier\fR\m[]\&\s-2\u[1]\d\s+2
 and
-\m[blue]\fBQmail\fR\m[]\&\s-2\u[2]\d\s+2
+Qmail
 mail servers\&. Many other mail servers also know how to read maildirs\&. When delivering to mailbox files,
 \fBmaildrop\fR
 will lock the mailbox for the duration of the delivery\&.
@@ -281,9 +281,9 @@ If
 is not specified, the first argument following all the options is a name of the file containing filtering instructions\&. The remaining arguments, if any, are assigned to the variables
 \fI$1\fR,
 \fI$2\fR, and so on (see
-\m[blue]\fB"Environment"\fR\m[]\&\s-2\u[3]\d\s+2
+\m[blue]\fB"Environment"\fR\m[]\&\s-2\u[2]\d\s+2
 and
-\m[blue]\fB"Variable substitution"\fR\m[]\&\s-2\u[4]\d\s+2)\&.
+\m[blue]\fB"Variable substitution"\fR\m[]\&\s-2\u[3]\d\s+2)\&.
 .RE
 .PP
 \-f \fIaddress\fR
@@ -511,7 +511,7 @@ The embedded mode is used when
 \fBmaildrop\fR\*(Aqs filtering abilities are desired, but no actual mail delivery is needed\&. In embedded mode
 \fBmaildrop\fR
 is executed by another application, and
-\m[blue]\fBis passed the \(hym or the \(hyM option\&.\fR\m[]\&\s-2\u[5]\d\s+2
+\m[blue]\fBis passed the \(hym or the \(hyM option\&.\fR\m[]\&\s-2\u[4]\d\s+2
 \fBmaildrop\fR
 reads the message, then runs the filtering rules specified in
 filename\&.
@@ -524,61 +524,61 @@ may contain any filtering instructions EXCEPT the following:
 Text strings delimited by back\-tick characters (run shell command) are not allowed\&.
 .RE
 .PP
-\m[blue]\fBcc\fR\m[]\&\s-2\u[6]\d\s+2
+\m[blue]\fBcc\fR\m[]\&\s-2\u[5]\d\s+2
 .RS 4
 The
 \fBcc\fR
 command is not allowed in embedded mode\&.
 .RE
 .PP
-\m[blue]\fBdotlock\fR\m[]\&\s-2\u[7]\d\s+2
+\m[blue]\fBdotlock\fR\m[]\&\s-2\u[6]\d\s+2
 .RS 4
 The
 \fBdotlock\fR
 command is not allowed in embedded mode\&.
 .RE
 .PP
-\m[blue]\fBflock\fR\m[]\&\s-2\u[8]\d\s+2
+\m[blue]\fBflock\fR\m[]\&\s-2\u[7]\d\s+2
 .RS 4
 The
 \fBflock\fR
 command is not allowed in embedded mode\&.
 .RE
 .PP
-\m[blue]\fBgdbmopen\fR\m[]\&\s-2\u[9]\d\s+2
+\m[blue]\fBgdbmopen\fR\m[]\&\s-2\u[8]\d\s+2
 .RS 4
 In embedded mode, GDBM databases may be opened only for reading\&.
 .RE
 .PP
-\m[blue]\fBlog\fR\m[]\&\s-2\u[10]\d\s+2
+\m[blue]\fBlog\fR\m[]\&\s-2\u[9]\d\s+2
 .RS 4
 The
 \fBlog\fR
 command is not allowed in embedded mode\&.
 .RE
 .PP
-\m[blue]\fBlogfile\fR\m[]\&\s-2\u[10]\d\s+2
+\m[blue]\fBlogfile\fR\m[]\&\s-2\u[9]\d\s+2
 .RS 4
 The
 \fBlogfile\fR
 command is not allowed in embedded mode\&.
 .RE
 .PP
-\m[blue]\fBsystem\fR\m[]\&\s-2\u[11]\d\s+2
+\m[blue]\fBsystem\fR\m[]\&\s-2\u[10]\d\s+2
 .RS 4
 The
 \fBsystem\fR
 command is not allowed in embedded mode\&.
 .RE
 .PP
-\m[blue]\fBto\fR\m[]\&\s-2\u[12]\d\s+2
+\m[blue]\fBto\fR\m[]\&\s-2\u[11]\d\s+2
 .RS 4
 The
 \fBto\fR
 command is not allowed in embedded mode\&.
 .RE
 .PP
-\m[blue]\fBxfilter\fR\m[]\&\s-2\u[13]\d\s+2
+\m[blue]\fBxfilter\fR\m[]\&\s-2\u[12]\d\s+2
 .RS 4
 The
 \fBxfilter\fR
@@ -594,7 +594,7 @@ will deliver the message to the user\*(Aqs default mailbox\&. This is also disab
 The
 filename
 may communicate with the parent application by using the
-\m[blue]\fBecho\fR\m[]\&\s-2\u[14]\d\s+2
+\m[blue]\fBecho\fR\m[]\&\s-2\u[13]\d\s+2
 statement and the
 \fIEXITCODE\fR
 environment variable\&.
@@ -603,7 +603,7 @@ environment variable\&.
 If
 \fBmaildrop\fR
 encounters an
-\m[blue]\fBinclude\fR\m[]\&\s-2\u[15]\d\s+2
+\m[blue]\fBinclude\fR\m[]\&\s-2\u[14]\d\s+2
 statement where the filename starts with
 @withetcdir@/maildroprcs/, the normal restrictions for the embedded mode are suspended while executing the filter file in the
 @withetcdir@/maildroprcs
@@ -614,9 +614,9 @@ finishes executing the file from
 @withetcdir@/maildroprcs\&.
 .PP
 This allows the system administrator to have a controlled environment for running external commands (via the backticks, the
-\m[blue]\fBsystem\fR\m[]\&\s-2\u[11]\d\s+2
+\m[blue]\fBsystem\fR\m[]\&\s-2\u[10]\d\s+2
 or the
-\m[blue]\fBxfilter\fR\m[]\&\s-2\u[13]\d\s+2
+\m[blue]\fBxfilter\fR\m[]\&\s-2\u[12]\d\s+2
 commands)\&.
 .PP
 The name of the file may not contain any periods (so that a creative individual can\*(Aqt write
@@ -679,19 +679,18 @@ Directory containing files used in special embedded mode\&.
 .RE
 .SH "SEE ALSO"
 .PP
-\m[blue]\fB\fBlockmail\fR(1)\fR\m[]\&\s-2\u[16]\d\s+2,
-\m[blue]\fB\fBmaildropfilter\fR(7)\fR\m[]\&\s-2\u[17]\d\s+2,
-\m[blue]\fB\fBmakedat\fR(1)\fR\m[]\&\s-2\u[18]\d\s+2,
-\m[blue]\fB\fBmaildropgdbm\fR(7)\fR\m[]\&\s-2\u[9]\d\s+2,
-\m[blue]\fB\fBmaildropex\fR(7)\fR\m[]\&\s-2\u[19]\d\s+2,
-\m[blue]\fB\fBreformail\fR(1)\fR\m[]\&\s-2\u[20]\d\s+2,
-\m[blue]\fB\fBmakemime\fR(1)\fR\m[]\&\s-2\u[21]\d\s+2,
-\m[blue]\fB\fBreformime\fR(1)\fR\m[]\&\s-2\u[22]\d\s+2,
+\m[blue]\fB\fBlockmail\fR(1)\fR\m[]\&\s-2\u[15]\d\s+2,
+\m[blue]\fB\fBmaildropfilter\fR(7)\fR\m[]\&\s-2\u[16]\d\s+2,
+\m[blue]\fB\fBmakedat\fR(1)\fR\m[]\&\s-2\u[17]\d\s+2,
+\m[blue]\fB\fBmaildropgdbm\fR(7)\fR\m[]\&\s-2\u[8]\d\s+2,
+\m[blue]\fB\fBmaildropex\fR(7)\fR\m[]\&\s-2\u[18]\d\s+2,
+\m[blue]\fB\fBreformail\fR(1)\fR\m[]\&\s-2\u[19]\d\s+2,
+\m[blue]\fB\fBmakemime\fR(1)\fR\m[]\&\s-2\u[20]\d\s+2,
+\m[blue]\fB\fBreformime\fR(1)\fR\m[]\&\s-2\u[21]\d\s+2,
 \fBegrep\fR(1),
 \fBgrep\fR(1), ,
-\m[blue]\fB\fBcourier\fR(8)\fR\m[]\&\s-2\u[23]\d\s+2,
-\fBsendmail\fR(8),
-\m[blue]\fBhttp://www\&.qmail\&.org\fR\m[]\&.
+\m[blue]\fB\fBcourier\fR(8)\fR\m[]\&\s-2\u[22]\d\s+2,
+\fBsendmail\fR(8)\&.
 .SH "AUTHOR"
 .PP
 \fBSam Varshavchik\fR
@@ -705,111 +704,106 @@ Courier
 \%http://www.courier-mta.org
 .RE
 .IP " 2." 4
-Qmail
-.RS 4
-\%http://www.qmail.org
-.RE
-.IP " 3." 4
 "Environment"
 .RS 4
 \%http://www.courier-mta.org/maildrop/maildropfilter.html#environment
 .RE
-.IP " 4." 4
+.IP " 3." 4
 "Variable substitution"
 .RS 4
 \%http://www.courier-mta.org/maildrop/maildropfilter.html#varsubst
 .RE
-.IP " 5." 4
+.IP " 4." 4
 is passed the \(hym or the \(hyM option.
 .RS 4
 \%http://www.courier-mta.org/maildrop/#options
 .RE
-.IP " 6." 4
+.IP " 5." 4
 cc
 .RS 4
 \%http://www.courier-mta.org/maildrop/maildropfilter.html#cc
 .RE
-.IP " 7." 4
+.IP " 6." 4
 dotlock
 .RS 4
 \%http://www.courier-mta.org/maildrop/maildropfilter.html#dotlock
 .RE
-.IP " 8." 4
+.IP " 7." 4
 flock
 .RS 4
 \%http://www.courier-mta.org/maildrop/maildropfilter.html#flock
 .RE
-.IP " 9." 4
+.IP " 8." 4
 gdbmopen
 .RS 4
 \%http://www.courier-mta.org/maildrop/maildropgdbm.html
 .RE
-.IP "10." 4
+.IP " 9." 4
 log
 .RS 4
 \%http://www.courier-mta.org/maildrop/maildropfilter.html#log
 .RE
-.IP "11." 4
+.IP "10." 4
 system
 .RS 4
 \%http://www.courier-mta.org/maildrop/maildropfilter.html#system
 .RE
-.IP "12." 4
+.IP "11." 4
 to
 .RS 4
 \%http://www.courier-mta.org/maildrop/maildropfilter.html#to
 .RE
-.IP "13." 4
+.IP "12." 4
 xfilter
 .RS 4
 \%http://www.courier-mta.org/maildrop/maildropfilter.html#xfilter
 .RE
-.IP "14." 4
+.IP "13." 4
 echo
 .RS 4
 \%http://www.courier-mta.org/maildrop/maildropfilter.html#echo
 .RE
-.IP "15." 4
+.IP "14." 4
 include
 .RS 4
 \%http://www.courier-mta.org/maildrop/maildropfilter.html#include
 .RE
-.IP "16." 4
+.IP "15." 4
 \fBlockmail\fR(1)
 .RS 4
 \%http://www.courier-mta.org/maildrop/lockmail.html
 .RE
-.IP "17." 4
+.IP "16." 4
 \fBmaildropfilter\fR(7)
 .RS 4
 \%http://www.courier-mta.org/maildrop/maildropfilter.html
 .RE
-.IP "18." 4
+.IP "17." 4
 \fBmakedat\fR(1)
 .RS 4
 \%http://www.courier-mta.org/maildrop/makedat.html
 .RE
-.IP "19." 4
+.IP "18." 4
 \fBmaildropex\fR(7)
 .RS 4
 \%http://www.courier-mta.org/maildrop/maildropex.html
 .RE
-.IP "20." 4
+.IP "19." 4
 \fBreformail\fR(1)
 .RS 4
 \%http://www.courier-mta.org/maildrop/reformail.html
 .RE
-.IP "21." 4
+.IP "20." 4
 \fBmakemime\fR(1)
 .RS 4
 \%http://www.courier-mta.org/maildrop/makemime.html
 .RE
-.IP "22." 4
+.IP "21." 4
 \fBreformime\fR(1)
 .RS 4
 \%http://www.courier-mta.org/maildrop/reformime.html
 .RE
-.IP "23." 4
+.IP "22." 4
 \fBcourier\fR(8)
 .RS 4
 \%http://www.courier-mta.org/maildrop/courier.html

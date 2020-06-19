@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>maildrop</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets Vsnapshot"/><link rel="home" href="#idm139907572086400" title="maildrop"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>maildrop</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets Vsnapshot"/><link rel="home" href="#maildrop" title="maildrop"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
 
 Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
 information.
 
---></head><body><div class="refentry"><a id="idm139907572086400" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>maildrop — mail delivery filter/agent</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">maildrop</code>  [option...] [-d <em class="replaceable"><code>user</code></em>] [<em class="replaceable"><code>arg</code></em>...]</p></div><div class="cmdsynopsis"><p><code class="command">maildrop</code>  [option...] [<em class="replaceable"><code>filename</code></em>] [<em class="replaceable"><code>arg</code></em>...]</p></div></div><div class="refsect1"><a id="idm139907576176096" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+--></head><body><div class="refentry"><a id="maildrop" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>maildrop — mail delivery filter/agent</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">maildrop</code>  [option...] [-d <em class="replaceable"><code>user</code></em>] [<em class="replaceable"><code>arg</code></em>...]</p></div><div class="cmdsynopsis"><p><code class="command">maildrop</code>  [option...] [<em class="replaceable"><code>filename</code></em>] [<em class="replaceable"><code>arg</code></em>...]</p></div></div><div class="refsect1"><a id="description" shape="rect"> </a><h2>DESCRIPTION</h2><p>
 <span class="command"><strong>maildrop</strong></span> is a replacement local mail delivery agent that
 includes a mail filtering language.
 The system administrator can either
@@ -49,7 +49,7 @@ also knows how to deliver to maildirs. A <code class="literal">maildir</code> is
 directory-based mail format used by the
 <a class="ulink" href="http://www.courier-mta.org" target="_top" shape="rect"><span class="application">Courier</span></a>
 and
-<span class="application"><a class="ulink" href="http://www.qmail.org" target="_top" shape="rect">Qmail</a></span>
+<span class="application">Qmail</span>
 mail servers.
 Many other mail servers also know how to read maildirs.
 When delivering to mailbox files, <span class="command"><strong>maildrop</strong></span> will lock the
@@ -86,7 +86,7 @@ into the process of receiving mail from a remote mail relay, thus rejecting
 unwanted mail before it is even accepted for local mail delivery.
 Embedded mode is used when either the -m, or the -M, option is specified,
 and is described below.
-See below for a more extensive description of the embedded mode.</p></dd></dl></div></div><div class="refsect1"><a id="idm139907576320416" shape="rect"> </a><h2>SECURITY</h2><p>
+See below for a more extensive description of the embedded mode.</p></dd></dl></div></div><div class="refsect1"><a id="security" shape="rect"> </a><h2>SECURITY</h2><p>
 It is safe to install <span class="command"><strong>maildrop</strong></span> as a root setuid program.
 <a class="ulink" href="http://www.courier-mta.org" target="_top" shape="rect">The <span class="application">Courier</span> mail server</a>
 installs <span class="command"><strong>maildrop</strong></span> as a root setuid program by default,
@@ -127,7 +127,7 @@ immediately terminates with the exit code set to
 <span class="errorcode">EX_TEMPFAIL</span> if
 <code class="filename">$HOME/.mailfilters</code>
 is not owned by the user, or if it has any
-group or world permissions.</p></div><div class="refsect1"><a id="idm139907576299744" shape="rect"> </a><h2>TEMPORARY FILES</h2><p>
+group or world permissions.</p></div><div class="refsect1"><a id="temporaryfiles" shape="rect"> </a><h2>TEMPORARY FILES</h2><p>
 <span class="command"><strong>maildrop</strong></span> is heavily optimized and tries to use as
 little resources as possible. <span class="command"><strong>maildrop</strong></span> reads small
 messages into
@@ -137,7 +137,7 @@ from the file.
 If the standard input is not a file, <span class="command"><strong>maildrop</strong></span> writes the
 message to a
 temporary file, then accesses the message from the temporary file. The
-temporary file is automatically removed when the message is delivered.</p></div><div class="refsect1"><a id="idm139907570960864" shape="rect"> </a><h2>OPTIONS</h2><a id="options" shape="rect"> </a><div class="variablelist"><dl class="variablelist"><dt><span class="term">-a</span></dt><dd><p>
+temporary file is automatically removed when the message is delivered.</p></div><div class="refsect1"><a id="options" shape="rect"> </a><h2>OPTIONS</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term">-a</span></dt><dd><p>
 Makes the <span class="application">Courier</span>
 Authentication Library usage mandatory, i.e. maildrop
 will throw a temporary error code if the call to the authlib mechanism
@@ -292,7 +292,7 @@ below
 	    Dovecot authentication support. <em class="replaceable"><code>socket</code></em>
 	    specifies the location of Dovecot master authentication socket,
 	    for example <code class="filename">/var/run/dovecot/auth-master</code>.
-	  </p></dd></dl></div></div><div class="refsect1"><a id="idm139907570877360" shape="rect"> </a><h2>DELIVERY MODE</h2><p>
+	  </p></dd></dl></div></div><div class="refsect1"><a id="deliverymode" shape="rect"> </a><h2>DELIVERY MODE</h2><p>
 If a <code class="filename">filename</code> is not specified on the command line, or
 if the <code class="option">-d</code>
 option is used, <span class="command"><strong>maildrop</strong></span> will run in delivery mode.
@@ -314,13 +314,13 @@ before reading
 <code class="filename">$HOME/.mailfilter</code>. This allows the system administrator
 to provide global filtering instructions for all users.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
 <code class="filename">@withetcdir@/maildroprc</code> is read only in
-delivery mode.</p></div></div><div class="refsect1"><a id="idm139907570865056" shape="rect"> </a><h2>VIRTUAL ACCOUNTS</h2><p>
+delivery mode.</p></div></div><div class="refsect1"><a id="virtualaccounts" shape="rect"> </a><h2>VIRTUAL ACCOUNTS</h2><p>
 The <code class="option">-d</code> option can also specify a name of a virtual account
 or mailbox. See the
 <span class="citerefentry"><span class="refentrytitle">makeuserdb</span>(1)</span>
 manual page in the <span class="application">Courier</span>
 Authentication library's documentation
-for more information.</p></div><div class="refsect1"><a id="idm139907570861952" shape="rect"> </a><h2>EMBEDDED MODE</h2><a id="embedded" shape="rect"> </a><p>
+for more information.</p></div><div class="refsect1"><a id="embeddedmode" shape="rect"> </a><h2>EMBEDDED MODE</h2><a id="embedded" shape="rect"> </a><p>
 The embedded mode is used when <span class="command"><strong>maildrop</strong></span>'s filtering
 abilities are
 desired, but no actual mail delivery is needed. In embedded mode
@@ -350,7 +350,7 @@ a message,
 The <code class="filename">filename</code> may communicate with the parent application
 by
 using the <a class="ulink" href="maildropfilter.html#echo" target="_top" shape="rect">echo</a> statement and the
-<code class="varname">EXITCODE</code> environment variable.</p><div class="refsect2"><a id="idm139907570827200" shape="rect"> </a><h3><code class="filename">@withetcdir@/maildroprcs</code></h3><p>If <span class="command"><strong>maildrop</strong></span> encounters an
+<code class="varname">EXITCODE</code> environment variable.</p><div class="refsect2"><a id="maildroprcs" shape="rect"> </a><h3><code class="filename">@withetcdir@/maildroprcs</code></h3><p>If <span class="command"><strong>maildrop</strong></span> encounters an
 <a class="ulink" href="maildropfilter.html#include" target="_top" shape="rect">include</a>
 statement where the filename
 starts with <code class="filename">@withetcdir@/maildroprcs/</code>,
@@ -381,12 +381,12 @@ initial values: <code class="varname">DEFAULT</code>, <code class="varname">HOME
 Please note that the previous
 values of these variables (if they were changed) will NOT be restored once
 <span class="command"><strong>maildrop</strong></span> finishes executing the commands from
-<code class="filename">@withetcdir@/maildroprcs</code>.</p></div></div><div class="refsect1"><a id="idm139907570811296" shape="rect"> </a><h2>WATCHDOG TIMER</h2><p>
+<code class="filename">@withetcdir@/maildroprcs</code>.</p></div></div><div class="refsect1"><a id="watchdog" shape="rect"> </a><h2>WATCHDOG TIMER</h2><p>
 <span class="command"><strong>maildrop</strong></span> has a watchdog timer that attempts to abort runaway
 filtering. If filtering is not complete within a predefined time interval
 (defined by the system administrator, usually five minutes),
 <span class="command"><strong>maildrop</strong></span>
-terminates.</p></div><div class="refsect1"><a id="idm139907570808896" shape="rect"> </a><h2>FILES</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="filename">/etc/passwd</code></span></dt><dd><p>
+terminates.</p></div><div class="refsect1"><a id="files" shape="rect"> </a><h2>FILES</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="filename">/etc/passwd</code></span></dt><dd><p>
 Sets user's home directory, and related
 variables. If NIS/YP is install, that will be used as well.</p></dd><dt><span class="term"><code class="filename">@withetcdir@/maildroprc</code></span></dt><dd><p>
 Global filtering instructions for delivery mode.</p></dd><dt><span class="term"><code class="filename">/var/mail</code></span></dt><dd><p>
@@ -394,7 +394,7 @@ System mailbox (actual directory defined by the system administrator).</p></dd><
 Program to forward mail (exact program defined by the system
 administrator).</p></dd><dt><span class="term"><code class="filename">$HOME/.mailfilter</code></span></dt><dd><p>
 Filtering instructions in delivery mode.</p></dd><dt><span class="term"><code class="filename">$HOME/.mailfilters</code></span></dt><dd><p>
-Directory containing files used in special embedded mode.</p></dd></dl></div></div><div class="refsect1"><a id="idm139907570796048" shape="rect"> </a><h2>SEE ALSO</h2><p>
+Directory containing files used in special embedded mode.</p></dd></dl></div></div><div class="refsect1"><a id="seealso" shape="rect"> </a><h2>SEE ALSO</h2><p>
 <a class="ulink" href="lockmail.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">lockmail</span>(1)</span></a>,
 <a class="ulink" href="maildropfilter.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildropfilter</span>(7)</span></a>,
 <a class="ulink" href="makedat.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">makedat</span>(1)</span></a>,
@@ -407,5 +407,4 @@ Directory containing files used in special embedded mode.</p></dd></dl></div></d
 <span class="citerefentry"><span class="refentrytitle">grep</span>(1)</span>,
 ,
 <a class="ulink" href="courier.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">courier</span>(8)</span></a>,
-<span class="citerefentry"><span class="refentrytitle">sendmail</span>(8)</span>,
-<a class="ulink" href="http://www.qmail.org" target="_top" shape="rect">http://www.qmail.org</a>.</p></div></div></body></html>
+<span class="citerefentry"><span class="refentrytitle">sendmail</span>(8)</span>.</p></div></div></body></html>
