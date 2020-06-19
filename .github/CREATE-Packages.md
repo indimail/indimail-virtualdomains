@@ -22,7 +22,7 @@ $ ./create_debian # for deb
 
 ## Build indimail-auth package
 
-Optional. Required if you require additional authentication methods using Name Service Switch and PAM
+Optional component. Required only if you require a Name Service Switch & extra PAM modules for authentication
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-auth
