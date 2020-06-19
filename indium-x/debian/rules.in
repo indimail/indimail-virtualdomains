@@ -26,10 +26,10 @@ shareddir=@shareddir@
 sysconfdir=@sysconfdir@
 mandir=@mandir@
 mysql_prefix=@mysql_prefix@
+libdir=@prefix@/@libd@
+rm=/bin/rm
 #
 #bits=$(shell dpkg-architecture -qDEB_BUILD_ARCH_BITS)
-bits=32
-libdir=$(shell if [ $(bits) -eq 64 ] ; then echo $(prefix)/lib64; else echo $(prefix)/lib;fi)
 DESTDIR=$(CURDIR)/debian/indium.tmp
 
 build: build-stamp
@@ -43,12 +43,14 @@ build-stamp:
 	#
 	./configure --prefix=${prefix} \
 	--libexecdir=${libexecdir} --sysconfdir=${sysconfdir} \
-	--enable-shareddir=${shareddir} \
+	--libdir=${libdir} --enable-shareddir=${shareddir} \
 	--mandir=${mandir} --enable-mysqlprefix=${mysql_prefix}
 	#
 	# run make
 	#
 	$(MAKE) -s DESTDIR=$(DESTDIR)
+	${rm} -rf $(DESTDIR)$(libdir)/*.la
+	${rm} -rf $(DESTDIR)$(libdir)/*.so
 	touch build-stamp
 
 clean:

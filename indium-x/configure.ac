@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.59])
-AC_INIT([indium],1.1,[Manvendra Bhangui indium@indimail.org],indium, [https://github.com/mbhangui/indimail-virtualdomains])
+AC_INIT([indium],1.2,[Manvendra Bhangui indium@indimail.org],indium, [https://github.com/mbhangui/indimail-virtualdomains])
 AC_CANONICAL_TARGET
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION

@@ -1,6 +1,8 @@
 @SET_MAKE@
 
 #noinst_LIBRARIES = libfbsql.a libtai64.a
+version=$(shell cat conf-version)
+release := $(shell cat conf-release 2>/dev/null|| echo "1.1")
 
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
@@ -38,10 +40,10 @@ guilibexec_PROGRAMS = pwhelper
 
 guibin_SCRIPTS = indium litesrc supernotepad secpanel FMbrowse tkdiff
 
-noinst_SCRIPTS = indium.spec indium-@VERSION@-rpmlintrc
+noinst_SCRIPTS = indium.spec indium-rpmlintrc
 
 MOSTLYCLEANFILES = indium litesrc common.tcl fileman.tcl supernotepad secpanel FMbrowse \
-				   indium.spec indium-@VERSION@-rpmlintrc tkdiff
+				   tkdiff
 
 pwhelper_SOURCES = pwhelper.c
 pwhelper_DEPENDENCIES = pipe_exec.lo
@@ -61,7 +63,8 @@ edit = sed \
 	-e 's,@imagedir\@,$(shareddir)/indium/images,g' \
 	-e 's,@shareetcdir\@,$(sysconfdir),g' \
 	-e 's,@defaultdomain\@,$(defaultdomain),g' \
-	-e 's,@version\@,$(VERSION),g' \
+	-e 's,@version\@,$(version),g' \
+	-e 's,@release\@,$(release),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 pwhelper.lo: config.h
@@ -82,16 +85,16 @@ FMbrowse: FMbrowse.tcl
 	$(edit) $@.tcl > $@
 tkdiff: tkdiff.tcl
 	$(edit) $@.tcl > $@
-indium.spec: indium.spec.in
-	($(edit) $@.in;cat doc/ChangeLog) > $@
+indium.spec: indium.spec.in conf-version conf-release
+	(cat $@.in;./catChangeLog) | $(edit) > $@
 pwhelper.o: pwhelper.c
 	$(COMPILE) $(DEFS) -c pwhelper.c
 pwhelper$(EXEEXT): $(pwhelper_DEPENDENCIES) $(pwhelper_OBJECTS)
 	$(LINK) $@.o pipe_exec.lo $(pwhelper_LDADD)
-indium-@VERSION@-rpmlintrc: indium-rpmlintrc.in
+indium-rpmlintrc: indium-rpmlintrc.in
 	$(edit) indium-rpmlintrc.in > $@
-obs.mk: debian/obs.mk.in
-	$(edit) debian/$@.in > debian/$@;/bin/rm -f $@;ln -s debian/$@ $@
+debian/Makefile: debian/Makefile.in
+	$(edit) $@.in > $@
 
 install-data-hook:
 	for f in `ls images`; do \
