@@ -16,7 +16,7 @@ Messaging Platform based on [indimail-mta](https://github.com/mbhangui/indimail-
 
 The steps below give instructions on building from source. If you need to deploy IndiMail on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the same package can be deployed on multiple hosts. To generate RPM packages for all components refer to [Binary Packages](.github/CREATE-Packages.md)
 
-You can also use docker / podman images to deploy indimail-mta. Look at the chapter `# Docker / Podman Repository` below on how to do that. The big advantage of using a docker / podman image is you can change your configuration with the `docker commit ..` or `podman commit` to save your entire build and deploy the exact configuration on multiple hosts.
+You can also use docker / podman images to deploy indimail. Look at the chapter `# Docker / Podman Repository` below on how to do that. The big advantage of using a docker / podman image is you can change your configuration with the `docker commit ..` or `podman commit` to save your entire build and deploy the exact configuration on multiple hosts.
 
 Doing a source build can be daunting for many. You can always use the pre-built binaries from the DNF / YUM / APT repositories given in the chapter `# Binary Builds on openSUSE Build Service` towards the end of this document.
 
@@ -25,7 +25,7 @@ Doing a source build requires you to have all the development packages installed
 db-devel, libdb-devel, db4-devel on different systems, just to get Berkeley db installed. There is an easy way out to find out what your distribution needs.
 
 * For RPM based distribtions, locate your .spec file (e.g. indimail.spec in indimail-virtualdomains/indimail-x directory, libqmail/libqmail.spec). Open the RPM spec file and look for `BuildRequires`. This will tell you what you require for your distribution. If there is a specific version of development package required, you will find `%if %else` statements. Use dnf / yum / zypper to install your development package.
-* For debian based distribution, locate your debian subdirectory (e.g. indimail-virtualdomains/indimail-x/debian, libqmail/debian). In this directory you will find files with `.dsc` extension. Look at the line having `Build-Depends`. Use `apt-get install package` to install the package. If your debian distribution has few libraries different than the default, you will find a `.dsc` filename with a name corresponding to your distribution. (e.g. indimail-mta-x-Debain_10.dsc)
+* For debian based distribution, locate your debian subdirectory (e.g. indimail-virtualdomains/indimail-x/debian, libqmail/debian). In this directory you will find files with `.dsc` extension. Look at the line having `Build-Depends`. Use `apt-get install package` to install the package. If your debian distribution has few libraries different than the default, you will find a `.dsc` filename with a name corresponding to your distribution. (e.g. indimail-Debain_10.dsc)
 
 ## Compile libqmail
 
@@ -239,7 +239,7 @@ $ sudo make install-strip
 
 ## Setup & Configuration
 
-You are here because you decided to do a complete source installation. If you use source installation method, you need to setup various configuration and services. You can configure indimail-mta using /usr/sbin/svctool. `svctool` is a general purpose utility to configure indimail-mta services.
+You are here because you decided to do a complete source installation. If you use source installation method, you need to setup various configuration and services. You can configure indimail/indimail-mta using /usr/sbin/svctool. `svctool` is a general purpose utility to configure indimail/indimail-mta services.
 
 You can also run the script `create_services` which invokes svctool to setup few default services to start a fully configured system. `create_services` will also put a systemd unit file `svscan.service` in `/lib/systemd/system`.
 
@@ -261,7 +261,8 @@ $ /usr/bin/qmailctl start
 ```
 
 # Binary Packages Build
-If you need to have indimail-mta on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command. To generate RPM packages locally for all components refer to [Binary Packages](.github/CREATE-Packages.md)
+
+If you need to have indimail on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command. To generate RPM packages locally for all components refer to [Binary Packages](.github/CREATE-Packages.md)
 You can also download pre-built binary packages from [openSUSE Build Service](https://build.opensuse.org/), described in the chapter '# Binary Builds on openSUSE Build Service`.
 
 # Binary Builds on openSUSE Build Service
@@ -281,7 +282,7 @@ NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to i
 1. [indimail-access](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-access) - IMAP/POP3 & fetchmail for mail retreival
 2. [indimail-auth](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-auth) (nssd - providing Name Service Switch and pam-multi providing multiple PAM modules for flexible, configurable authentication methods)
 3. [indimail-spamfilter](https://github.com/mbhangui/indimail-virtualdomains/tree/master/bogofilter-x) - SPAM filter capabillity using bogofilter - https://bogofilter.sourceforge.io
-4. [indimail-utils](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils) (Multiple utilities that can work with indimail-mta - [altermime](http://pldaniels.com/altermime/), [ripMIME](https://pldaniels.com/ripmime/), [mpack](https://github.com/mbhangui/indimail-virtualdomains/tree/master/mpack-x), [fortune](https://en.wikipedia.org/wiki/Fortune_(Unix)) and [flash](https://github.com/mbhangui/indimail-virtualdomains/tree/master/flash-x) - customizable menu based admin interface)
+4. [indimail-utils](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils) (Multiple utilities that can work with indimail - [altermime](http://pldaniels.com/altermime/), [ripMIME](https://pldaniels.com/ripmime/), [mpack](https://github.com/mbhangui/indimail-virtualdomains/tree/master/mpack-x), [fortune](https://en.wikipedia.org/wiki/Fortune_(Unix)) and [flash](https://github.com/mbhangui/indimail-virtualdomains/tree/master/flash-x) - customizable menu based admin interface)
 
 ```
 Currently, the list of supported distributions for IndiMail is
@@ -330,7 +331,7 @@ For latest details refer to [README](https://github.com/mbhangui/docker/blob/mas
 # SUPPORT INFORMATION #
 
 ## IRC
-IndiMail has an IRC channel ##indimail and ##indimail-mta
+IndiMail has an IRC channel ##indimail and ##indimail
 
 ## Mailing list
 
