@@ -87,9 +87,15 @@ $ sudo make install-strip
 
 ## Build indimail-mta-x
 
+You can refer to the detailed installation for indimail-mta [here](https://github.com/mbhangui/indimail-mta/blob/master/README.md)
+
+But in short you can install indimail-mta by follow the steps below
+
 (check version in indimail-mta/indimail-mta-x/conf-version)
+
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
+$ ./default.configure
 $ make
 $ sudo make install-strip
 $ sudo sh ./svctool --config=users --nolog
@@ -170,10 +176,9 @@ $ sudo make install-strip
 
 ## Setup & Configuration
 
-Setup (this uses svctool a general purpose utility to configure indimail-mta
-services. The create_services is a shell script which uses svctool to setup
-indimail-mta/indimail. It will also put a systemd unit file svscan.service in
-/lib/systemd/system
+You are here because you decided to do a complete source installation. If you use source installation method, you need to setup various configuration and services. You can configure indimail-mta using /usr/sbin/svctool. `svctool` is a general purpose utility to configure indimail-mta services.
+
+You can also run the script `create_services` which invokes svctool to setup few default services to start a fully configured system. `create_services` will also put a systemd unit file `svscan.service` in `/lib/systemd/system`.
 
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
@@ -191,6 +196,93 @@ $ /etc/init.d/svscan start
 or
 $ /usr/bin/qmailctl start
 ```
+
+# Binary Packages Build
+
+If you need to have indimail on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command.
+You can also download pre-built binary packages from [openSUSE Build Service](https://build.opensuse.org/), described in the chapter '# Binary Builds on openSUSE Build Service`.
+
+The steps for doing a binary build are
+
+## Clone git repository
+
+```
+$ cd /usr/local/src
+$ git clone https://github.com/mbhangui/libqmail.git
+$ git clone https://github.com/mbhangui/indimail-mta.git
+$ git clone https://github.com/mbhangui/indimail.git
+$ git clone https://github.com/mbhangui/indimail-access.git
+$ git clone https://github.com/mbhangui/indimail-auth.git
+$ git clone https://github.com/mbhangui/indimail-utils.git
+$ git clone https://github.com/mbhangui/indimail-spamfilter.git
+```
+
+## Build libqmail, libqmail-dev package
+
+```
+$ cd /usr/local/src/libqmail
+$ ./create_rpm    # for RPM
+or
+$ ./create_debian # for deb
+```
+
+## Build indimail-mta package
+
+```
+$ cd /usr/local/src/indimail-mta/indimail-mta-x
+$ ./create_rpm    # for RPM
+or
+$ ./create_debian # for deb
+```
+
+## Build indimail-access package
+
+```
+$ cd /usr/local/src/indimail-mta/indimail-access
+$ ./create_rpm    # for RPM
+or
+$ ./create_debian # for deb
+```
+
+## Build indimail-auth package
+
+```
+$ cd /usr/local/src/indimail-mta/indimail-auth
+$ ./create_rpm    # for RPM
+or
+$ ./create_debian # for deb
+```
+
+## Build indimail-utils package
+
+```
+$ cd /usr/local/src/indimail-mta/indimail-utils
+$ ./create_rpm    # for RPM
+or
+$ ./create_debian # for deb
+```
+
+## Build indimail-spamfilter package
+
+```
+$ cd /usr/local/src/indimail-mta/bogofilter-x
+$ ./create_rpm    # for RPM
+or
+$ ./create_debian # for deb
+```
+
+## Install Packages
+
+Installing and configuration is much simplied when you use the Binary Packages Build. The pre, post instlation scripts do all the hard work for you. For each of the packages built above you can follow the steps below, depending on your linux distribution. The location of the RPM file will be ~/rpmbuild/RPMS/x86_64 for rpm based distributions and ~/stage for debian/ubuntu distributions.
+
+** For RPM based distributions **
+
+`sudo rpm -ivh rpm_file`
+
+** For Debian based distributions **
+
+`sudo dpkg -i debian_file`
+
 
 # Binary Builds on openSUSE Build Service
 
@@ -218,7 +310,7 @@ Currently, the list of supported distributions for IndiMail is
           o openSUSE_Leap_15.0
           o openSUSE_Leap_15.1
           o openSUSE_Leap_15.2
-		  o openSUSE_Tumbleweed
+          o openSUSE_Tumbleweed
           o SUSE Linux Enterprise 12
           o SUSE Linux Enterprise 12 SP1
           o SUSE Linux Enterprise 12 SP2
