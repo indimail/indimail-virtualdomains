@@ -1,16 +1,16 @@
 * Wed May 06 2020 11:03:34 +0530 mbhangui@gmail.com 1.0-1.1%{?dist}
 Release 1.0 Start 13/04/2017
-16/03/2017
+- 16/03/2017
 1.  Created autoconfigure scripts
 07/11/2018
 2.  fixed typos in README
-02/05/2020
+- 02/05/2020
 3.  added roundcubemail config script roundcube_config
 4.  updated README
-04/05/2020
+- 04/05/2020
 4.  removed IF NOT EXISTS from create user sql statement to support older
     mysqld versions
 5.  updated roundcube_config for deskey, crontab entry
-06/05/2020
+- 06/05/2020
 6.  Create supervised services for apache2, php-fpm
 7.  Enable php-fpm for apache2 on debian systems

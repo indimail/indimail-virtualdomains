@@ -30,3 +30,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * postinst - use /usr/lib/*-linux-gnu for indimail shared library for setting VIRTUAL_PKG_LIB
   * indimail.spec - shutdown service before removing service directory
   * indimail.spec, indimail.postinst - fixed ilocal_upgrade.sh script not getting called
+  * Add AC_PROG_CC_C99 to configure
