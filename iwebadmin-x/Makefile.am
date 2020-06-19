@@ -6,8 +6,8 @@ htmllibdir=@htmllibdir@
 htmldir=@htmldir@
 imagedir=@imagedir@
 
-version=$(shell cat conf-version)
-release := $(shell cat conf-release 2>/dev/null|| echo "1.1")
+version=@VERSION@
+release=@release@ 
 
 EXTRA_DIST=BUGS FAQ TRANSLATORS html lang images contrib
 

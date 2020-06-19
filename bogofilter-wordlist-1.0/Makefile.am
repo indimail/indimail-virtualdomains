@@ -2,7 +2,8 @@
 
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
-release := $(shell cat conf-release 2>/dev/null||echo "1.1")
+version=@VERSION@
+release=@release@
 
 SYSCONFDIR = @sysconfdir@
 sysconf_DATA = wordlist.db
@@ -17,7 +18,7 @@ install-data-hook:
 
 edit = sed \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
-	-e 's,@version\@,$(VERSION),g' \
+	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
 	-e 's,@prefix\@,$(prefix),g'
 

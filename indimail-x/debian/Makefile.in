@@ -8,8 +8,8 @@ logdir=@logdir@
 basepath=@basepath@
 mysql_prefix=@mysql_prefix@
 defaultdomain=@defaultdomain@
-version=$(shell head -1 ../conf-version 2>/dev/null)
-release := $(shell head -1 ../conf-release 2>/dev/null|| echo 1.1)
+version=@version@
+release=@release@
 prefix=@prefix@
 arch=$(shell uname -m)
 #

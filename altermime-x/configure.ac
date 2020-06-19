@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([altermime],0.3.10,[Manvendra Bhangui indimail-utils@indimail.org],altermime, [https://github.com/mbhangui/indimail-virtualdomains])
+AC_INIT([altermime],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-utils@indimail.org],altermime, [https://github.com/mbhangui/indimail-virtualdomains])
 AM_CONFIG_HEADER(config.h)
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION

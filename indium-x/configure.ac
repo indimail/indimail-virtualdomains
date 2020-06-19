@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.59])
-AC_INIT([indium],1.2,[Manvendra Bhangui indium@indimail.org],indium, [https://github.com/mbhangui/indimail-virtualdomains])
+AC_INIT([indium],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indium@indimail.org],indium, [https://github.com/mbhangui/indimail-virtualdomains])
 AC_CANONICAL_TARGET
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
@@ -93,6 +93,13 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([memset putenv strcasecmp strchr strerror strncasecmp strrchr])
 AC_CHECK_LIB(ssl, EVP_MD_CTX_init, [AC_SUBST([LIB_SSL], ["-lssl"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl)
+if test -f conf-release
+then
+	release=$(cat conf-release)
+else
+	release="1.1"
+fi
+AC_SUBST(release)
 
 if test -f /usr/lib/tclConfig.sh
 then

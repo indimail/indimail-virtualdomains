@@ -5,8 +5,8 @@ COFLAGS=-z+05:30
 # search path for m4 macros
 ACLOCAL_AMFLAGS = -I m4
 
-release := $(shell cat conf-release 2>/dev/null|| echo "1.1")
-spamfilter_version=$(shell cat conf-version)
+release=@release@
+spamfilter_version=@spamfilter_version@
 SUBDIRS = trio src . doc
 SYSCONFDIR = @sysconfdir@
 

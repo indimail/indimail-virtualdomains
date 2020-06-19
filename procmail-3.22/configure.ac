@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.59])
-AC_INIT([procmail],3.22,[Manvendra Bhangui indimail-virtualdomains@indimail.org],procmail,[https://github.com/mbhangui/indimail-virtualdomains])
+AC_INIT([procmail],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-virtualdomains@indimail.org],procmail,[https://github.com/mbhangui/indimail-virtualdomains])
 LT_INIT
 AC_CONFIG_SRCDIR([patchlevel.h])
 AC_CONFIG_HEADERS([config.h])

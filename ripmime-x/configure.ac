@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([ripmime],1.4.0.10,[Manvendra Bhangui indimail-utils@indimail.org],ripmime, [https://github.com/mbhangui/indimail-virtualdomains])
+AC_INIT([ripmime],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-utils@indimail.org],ripmime, [https://github.com/mbhangui/indimail-virtualdomains])
 AC_CONFIG_SRCDIR([pldstr.h])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([foreign])

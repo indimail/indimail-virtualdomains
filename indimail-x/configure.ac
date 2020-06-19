@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([IndiMail],3.2,[Manvendra Bhangui indimail-virtualdomains@indimail.org],indimail, [https://github.com/mbhangui/indimail-virtualdomains])
+AC_INIT([IndiMail],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-virtualdomains@indimail.org],indimail, [https://github.com/mbhangui/indimail-virtualdomains])
 AC_CONFIG_HEADERS([config.h])
 AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-support@lists.sourceforge.net")
 PACKAGE=$PACKAGE_NAME
@@ -606,6 +606,14 @@ then
 else
 	indimaildir=`cat indimail.dir`
 fi
+
+if test -f conf-release
+then
+	release=$(cat conf-release)
+else
+	release="1.1"
+fi
+AC_SUBST(release)
 
 DATE=`date`
 AC_SUBST(DATE)

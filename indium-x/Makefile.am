@@ -1,8 +1,8 @@
 @SET_MAKE@
 
 #noinst_LIBRARIES = libfbsql.a libtai64.a
-version=$(shell cat conf-version)
-release := $(shell cat conf-release 2>/dev/null|| echo "1.1")
+version = @VERSION@
+release = @release@
 
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4

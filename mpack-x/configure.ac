@@ -1,5 +1,5 @@
 AC_PREREQ([2.52])
-AC_INIT([mpack],1.6,[Manvendra Bhangui indimail-utils@indimail.org],mpack, [https://github.com/mbhangui/indimail-virtualdomains])
+AC_INIT([mpack],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-utils@indimail.org],mpack, [https://github.com/mbhangui/indimail-virtualdomains])
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 AM_INIT_AUTOMAKE([foreign])

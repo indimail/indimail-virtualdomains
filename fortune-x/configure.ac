@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.59])
-AC_INIT([fortune],1.1,[Manvendra Bhangui indimail-utils@indimail.org],fortune, [https://github.com/mbhangui/indimail-virtualdomains])
+AC_INIT([fortune],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-utils@indimail.org],fortune, [https://github.com/mbhangui/indimail-virtualdomains])
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 AM_INIT_AUTOMAKE([foreign])

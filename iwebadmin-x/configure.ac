@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([iwebadmin],2.0,[Manvendra Bhangui iwebadmin@indimail.org],iwebadmin, [https://github.com/mbhangui/indimail-virtualdomains])
+AC_INIT([iwebadmin],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui iwebadmin@indimail.org],iwebadmin, [https://github.com/mbhangui/indimail-virtualdomains])
 AC_CANONICAL_TARGET
 LT_INIT
 AM_INIT_AUTOMAKE
@@ -121,6 +121,13 @@ DISTRIB_VERSION=$(sh ./lsb_release -sr)
 fi
 AC_SUBST(DISTRIB_ID)
 AC_SUBST(DISTRIB_VERSION)
+if test -f conf-release
+then
+	release=$(cat conf-release)
+else
+	release="1.1"
+fi
+AC_SUBST(release)
 #libdir=$prefix/$acl_libdirstem
 auth_incs="-I$prefix/include/indimail -I$prefix/include/qmail"
 case "$host" in

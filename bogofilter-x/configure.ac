@@ -17,14 +17,15 @@ dnl set to "yes"    the "Trio" [v]snprintf library (which is
 dnl                 part of the bogofilter source).
 dnl ********************************************************
 dnl
-AC_INIT([bogofilter],[1.2.5])
+AC_INIT([bogofilter],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-spamfilter@indimail.org],indimail, [https://github.com/mbhangui/indimail-virtualdomains])
 dnl
 AC_PREREQ([2.68])
 AC_CONFIG_MACRO_DIR([m4])
 AC_USE_SYSTEM_EXTENSIONS
 AC_CONFIG_SRCDIR([src/bogofilter.c])
 AC_CANONICAL_HOST
-AM_INIT_AUTOMAKE([1.11 foreign tar-ustar parallel-tests no-dist-gzip dist-xz no-installinfo -Wall subdir-objects])
+dnl AM_INIT_AUTOMAKE([1.11 foreign tar-ustar parallel-tests no-dist-gzip dist-xz no-installinfo -Wall subdir-objects])
+AM_INIT_AUTOMAKE([foreign parallel-tests no-installinfo subdir-objects])
 AC_CONFIG_HEADERS([src/config.h:config.in])
 
 AC_PROG_AWK
@@ -882,6 +883,21 @@ case "${host}" in
     *)
        ;;
 esac
+
+if test -f conf-version
+then
+	spamfilter_version=$(cat conf-version)
+else
+	spamfilter_version="1.1"
+fi
+AC_SUBST(spamfilter_version)
+if test -f conf-release
+then
+	release=$(cat conf-release)
+else
+	release="1.1"
+fi
+AC_SUBST(release)
 
 bogofilter_transform=`echo "${program_transform_name}" | sed -e 's,\\\\\\\\,\\\\,g;s,\\\$\\\$,\$,g'`
 transformed_bogofilter=`echo bogofilter | sed -e "$bogofilter_transform"`

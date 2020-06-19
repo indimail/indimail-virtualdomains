@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.59])
-AC_INIT([nssd], 1.3,[Manvendra Bhangui indimail-auth@indimail.org],nssd, [https://github.com/mbhangui/indimail-virtualdomains])
+AC_INIT([nssd], m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-auth@indimail.org],nssd, [https://github.com/mbhangui/indimail-virtualdomains])
 AC_CANONICAL_TARGET
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION

@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.59])
-AC_INIT([eps],1.2,[Manvendra Bhangui indimail-virtualdomains@indimail.org],indimail, [https://github.com/mbhangui/indimail-virtualdomains])
+AC_INIT([eps],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-virtualdomains@indimail.org],indimail, [https://github.com/mbhangui/indimail-virtualdomains])
 AC_CANONICAL_HOST
 LT_INIT
 PACKAGE=$PACKAGE_NAME

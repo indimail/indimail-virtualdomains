@@ -3,7 +3,7 @@ SUBDIRS=eps-1.2
 
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
-release := $(shell cat conf-release 2>/dev/null|| echo "1.1")
+release=@release@
 
 DEFS=@DEFS@ -Dlint -fno-strict-aliasing -I. -I/usr/include/qmail -Ieps-1.2 @auth_inc@
 
@@ -21,7 +21,7 @@ indimailauthlibdir=@libexecdir@/imapmodules
 libindimail_LTLIBRARIES = libindimail.la
 libindimail_la_SOURCES = $(COMMONSOURCES)
 libindimail_la_LIBADD = @LIB_MYSQL@ $(LIB_QMAIL) -lm
-libindimail_la_LDFLAGS = -version-info @LIBVER@
+libindimail_la_LDFLAGS = -version-info @LIBVER@ -release @VERSION@
 libindimaildir=@libdir@
 
 iauth_LTLIBRARIES = iauth.la
@@ -205,7 +205,8 @@ noinst_SCRIPTS = vadddomain_handle vadduser_handle vdeldomain_handle \
 	vdeluser_handle vrenameuser_handle
 
 noinst_DATA = indimail-permissions.easy indimail-permissions.paranoid \
-			  indimail-permissions.secure indimail.spec indimail-rpmlintrc
+			  indimail-permissions.secure indimail.spec indimail-rpmlintrc \
+			  debian/Makefile
 
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain vmoduser vpasswd \
 				   vdeluser_handle vrenameuser_handle
