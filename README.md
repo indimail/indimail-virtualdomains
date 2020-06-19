@@ -14,7 +14,7 @@ Messaging Platform based on [indimail-mta](https://github.com/mbhangui/indimail-
 
 # Source Installation
 
-The steps below give instructions on building from source. If you need to deploy IndiMail on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the same package can be deployed on multiple hosts. To generate RPM packages for all components refer to [Build Binary Packages](.github/CREATE-Packages.md)
+The steps below give instructions on building from source. If you need to deploy IndiMail on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the same package can be deployed on multiple hosts. To generate RPM packages for all components refer to [Binary Packages](.github/CREATE-Packages.md)
 
 You can also use docker / podman images to deploy indimail-mta. Look at the chapter `# Docker / Podman Repository` below on how to do that. The big advantage of using a docker / podman image is you can change your configuration with the `docker commit ..` or `podman commit` to save your entire build and deploy the exact configuration on multiple hosts.
 
@@ -261,95 +261,8 @@ $ /usr/bin/qmailctl start
 ```
 
 # Binary Packages Build
-
-If you need to have indimail on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command. To generate RPM packages locally for all components refer to [Build Binary Packages](.github/CREATE-Packages.md)
+If you need to have indimail-mta on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command. To generate RPM packages locally for all components refer to [Binary Packages](.github/CREATE-Packages.md)
 You can also download pre-built binary packages from [openSUSE Build Service](https://build.opensuse.org/), described in the chapter '# Binary Builds on openSUSE Build Service`.
-
-The steps for doing a binary build are
-
-## Clone git repository
-
-```
-$ cd /usr/local/src
-$ git clone https://github.com/mbhangui/libqmail.git
-$ git clone https://github.com/mbhangui/indimail-mta.git
-$ git clone https://github.com/mbhangui/indimail-virtualdomains.git
-```
-
-## Build libqmail, libqmail-dev package
-
-```
-$ cd /usr/local/src/libqmail
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
-```
-
-## Build indimail-mta package
-
-```
-$ cd /usr/local/src/indimail-mta/indimail-mta-x
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
-```
-
-## Build indimail-auth package
-
-Optional. Required only if you want extra authentication methods using NSS or PAM.
-
-```
-$ cd /usr/local/src/indimail-mta/indimail-auth
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
-```
-
-## Build indimail-access package
-
-Optional. You require this if you want IMAP/POP3 or fetchmail to retrieve your mails
-
-```
-$ cd /usr/local/src/indimail-mta/indimail-access
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
-```
-
-## Build indimail-utils package
-
-Optional. Required only if you want utilities like altermime, ripmime, flash menu, mpack and fortune
-
-```
-$ cd /usr/local/src/indimail-mta/indimail-utils
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
-```
-
-## Build indimail-spamfilter package
-
-Optional. Required only if you want to use bogofilter to filter SPAM mails
-
-```
-$ cd /usr/local/src/indimail-mta/bogofilter-x
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
-```
-
-## Install Packages
-
-Installing and configuration is much simplied when you use the Binary Packages Build. The pre, post instlation scripts do all the hard work for you. For each of the packages built above you can follow the steps below, depending on your linux distribution. The location of the RPM file will be ~/rpmbuild/RPMS/x86_64 for rpm based distributions and ~/stage for debian/ubuntu distributions.
-
-** For RPM based distributions **
-
-`$ sudo rpm -ivh rpm_file`
-
-** For Debian based distributions **
-
-`$ sudo dpkg -i debian_file`
-
 
 # Binary Builds on openSUSE Build Service
 
