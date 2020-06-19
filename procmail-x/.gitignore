@@ -22,7 +22,7 @@ man/procmailex.5
 man/procmailrc.5
 man/procmailsc.5
 procmail
-procmail-*-rpmlintrc
+procmail-rpmlintrc
 procmail.1
 procmail_perm_list
 procmailex.5
@@ -53,3 +53,4 @@ obs.mk
 INSTALL
 *.o
 autom4te.cache
+conf-release

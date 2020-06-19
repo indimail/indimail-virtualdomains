@@ -1,0 +1,12 @@
+Format: 1.0
+Source: procmail
+Binary: procmail
+Architecture: any
+Version: @version@-@release@
+Maintainer: Manvendra Bhangui <indimail-virtualdomains@indimail.org>
+Homepage: https://github.com/mbhangui/indimail-virtualdomains
+Debtransform-Release: 1
+Debtransform-Files-Tar: debian.tar.gz
+Debtransform-Tar: procmail-@version@.tar.gz
+Standards-Version: 3.9.1
+Build-Depends: cdbs, debhelper (>= 7.0.50~), gcc, g++, m4, autotools-dev

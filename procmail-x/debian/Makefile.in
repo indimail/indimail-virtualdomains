@@ -1,18 +1,20 @@
 prefix=@prefix@
 version=@version@
+release=@release@
 #
 
 all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
 	procmail.dsc
 
 clean:
-	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz _service
+	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz changelog
 
 edit = sed \
 	-e 's,@version\@,$(version),g' \
+	-e 's,@release\@,$(release),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
-rules: rules.in Makefile
+rules: rules.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@; chmod +x $@;
 postinst: postinst.in Makefile
 	$(edit) $@.in > $@;
@@ -20,10 +22,10 @@ postrm: postrm.in Makefile
 	$(edit) $@.in > $@;
 procmail.dsc: procmail.dsc.in Makefile
 	$(edit) $@.in > $@
-_service: _service.in Makefile
-	$(edit) $@.in > $@
-changelog: changelog.in Makefile
-	$(edit) $@.in > $@
+changelog: changelog.in Makefile ../conf-version ../conf-release
+	(cat $@.in; echo ""; \
+	echo " -- Manvendra Bhangui <indimail-virtualdomains@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
+	| $(edit) > $@
 
 dummy.tar.gz: README
 	tar cf - README |gzip > $@

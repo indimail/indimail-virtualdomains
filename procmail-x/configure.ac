@@ -138,5 +138,13 @@ AC_CHECK_FUNCS([alarm endgrent endpwent gethostbyname gethostname getspnam memch
 AC_CHECK_LIB(m, pow)
 AC_CHECK_LIB(crypt, crypt)
 
+if test -f conf-release
+then
+	release=$(cat conf-release)
+else
+	release="1.1"
+fi
+AC_SUBST(release)
+
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

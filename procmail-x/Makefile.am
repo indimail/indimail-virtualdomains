@@ -4,15 +4,16 @@ AM_CFLAGS = -g -O4 -fPIC -Wno-parentheses
 RM	= /bin/rm -f
 DEVNULL = /dev/null
 DIST_COMMON=ChangeLog COPYING AUTHORS
+release=@release@
 #AM_CFLAGS=-O2 -pedantic -Wreturn-type -Wunused -Wformat -Wtraditional -Wpointer-arith \
 #	   -Wconversion -Waggregate-return \
 #	   #-Wimplicit -Wshadow -Wid-clash-6 #-Wuninitialized
 #
-MOSTLYCLEANFILES=man/*.1 man/*.5 man/man.sed.* man/man.sed procmail-@VERSION@-rpmlintrc \
-				 procmail_perm_list formail.1 lockfile.1 procmail.1 \
-				 procmailex.5 procmailrc.5 procmailsc.5 procmail.spec debian/Makefile
+BUILT_SOURCES = procmail.spec procmail-rpmlintrc
 
-noinst_SCRIPTS = procmail.spec procmail-@VERSION@-rpmlintrc debian/Makefile
+MOSTLYCLEANFILES=man/*.1 man/*.5 man/man.sed.* man/man.sed \
+				 procmail_perm_list formail.1 lockfile.1 procmail.1 \
+				 procmailex.5 procmailrc.5 procmailsc.5 debian/Makefile
 
 bin_PROGRAMS=procmail lockfile formail
 bin_SCRIPTS=mailstat
@@ -80,6 +81,7 @@ man/man.sed: manconf.c config.h includes.h procmail.h
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
 	-e 's,@version\@,$(VERSION),g' \
+	-e 's,@release\@,$(release),g' \
 	-e 's,@VERSION\@,$(VERSION),g' \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
 	-e 's,@HOST\@,$(host),g' \
@@ -88,12 +90,12 @@ edit = sed \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
-procmail-@VERSION@-rpmlintrc: procmail-rpmlintrc.in
+procmail-rpmlintrc: procmail-rpmlintrc.in conf-version conf-release
 	$(edit) procmail-rpmlintrc.in > $@
-procmail.spec: procmail.spec.in
-	($(edit) $@.in;cat ChangeLog) > $@
-debian/Makefile: debian/obs.mk.in
-	$(edit) debian/obs.mk.in > debian/Makefile
+procmail.spec: procmail.spec.in conf-version conf-release ChangeLog
+	(cat $@.in;./catChangeLog) | $(edit) > $@
+debian/Makefile: debian/Makefile.in conf-version conf-release
+	$(edit) $@.in > $@
 procmail_perm_list: procmail_perm_list.in
 	$(edit) $@.in > $@
 

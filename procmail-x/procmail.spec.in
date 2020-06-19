@@ -38,8 +38,8 @@
 
 Summary: The Mail processing/filtering program
 Name: procmail
-Version: @VERSION@
-Release: 1
+Version: @version@
+Release: 1.1%{?dist}
 %if %build_on_obs == 1
 License: GPL-3.0+
 %else
@@ -47,7 +47,7 @@ License: GPLv3
 %endif
 Group: Productivity/Networking/Email/Utilities
 Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
-Source1: http://downloads.sourceforge.net/indimail/%{name}-%{version}-rpmlintrc
+Source1: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 %if %build_on_obs == 1
 BuildRequires: -post-build-checks  
 %endif
@@ -65,7 +65,7 @@ supports a rich command set that allows you to pre-sort, archive, or re-mail
 incoming mail automatically.  SmartList also needs procmail to operate.
 
 %prep
-%setup
+%setup -q
 
 %build
 %configure --prefix=%{_prefix} --enable-sendmail-prog=%{_prefix}/bin/sendmail \
@@ -78,17 +78,17 @@ incoming mail automatically.  SmartList also needs procmail to operate.
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 %files
-%attr(4511,root,root)              %{_prefix}/bin/procmail
-%attr(555,root,root)               %{_prefix}/bin/lockfile
-%attr(555,root,root)               %{_prefix}/bin/formail
-%attr(555,root,root)               %{_prefix}/bin/mailstat
-%attr(444,root,root)               %{sysconfdir}/procmail_perm_list
 %defattr(-,root,root)
-%attr(644,root,root)               %{mandir}/man[1,5]/*
-%doc [A-Z]* examples
-%attr(644,root,root)               %{_prefix}/share/doc/procmail/AUTHORS
-%attr(644,root,root)               %{_prefix}/share/doc/procmail/COPYING
-%attr(644,root,root)               %{_prefix}/share/doc/procmail/INSTALL.procmail
 
+%attr(4511,root,root)                             %{_prefix}/bin/procmail
+%attr(755,root,root)                              %{_prefix}/bin/lockfile
+%attr(755,root,root)                              %{_prefix}/bin/formail
+%attr(755,root,root)                              %{_prefix}/bin/mailstat
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/procmail_perm_list
+%attr(644,root,root)                              %{mandir}/man[1,5]/*
+#%%doc [A-Z]* examples
+%attr(644,root,root)                              %{_prefix}/share/doc/procmail/AUTHORS
+%attr(644,root,root)                              %{_prefix}/share/doc/procmail/COPYING
+%attr(644,root,root)                              %{_prefix}/share/doc/procmail/INSTALL.procmail
 
 %changelog
