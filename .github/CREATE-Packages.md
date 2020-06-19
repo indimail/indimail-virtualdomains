@@ -11,6 +11,8 @@ $ git clone https://github.com/mbhangui/indimail-mta.git
 
 ## Build indimail-mta package
 
+Essential component required for providng MTA functions
+
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
 $ ./create_rpm    # for RPM
@@ -19,6 +21,9 @@ $ ./create_debian # for deb
 ```
 
 ## Build indimail-auth package
+
+Optional. Required if you require additional authentication methods using Name Service Switch and PAM
+
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-auth
 $ ./create_rpm    # for RPM
@@ -27,6 +32,9 @@ $ ./create_debian # for deb
 ```
 
 ## Build indimail-access package
+
+Optional. You require this if you want IMAP/POP3 or fetchmail to retrieve your mails
+
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-access
 $ ./create_rpm    # for RPM
@@ -35,6 +43,9 @@ $ ./create_debian # for deb
 ```
 
 ## Build indimail-utils package
+
+Optional. Required only if you want utilities like altermime, ripmime, flash menu, mpack and fortune
+
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-utils
 $ ./create_rpm    # for RPM
@@ -43,6 +54,9 @@ $ ./create_debian # for deb
 ```
 
 ## Build indimail-spamfilter package
+
+Optional. Required only if you want to use bogofilter to filter SPAM mails
+
 ```
 $ cd /usr/local/src/indimail-virtualdomains/bogofilter-x
 $ ./create_rpm    # for RPM
@@ -53,6 +67,17 @@ $ ./create_debian # for deb
 ## Build indimail-virtualdomains package
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-x
+$ ./create_rpm    # for RPM
+or
+$ ./create_debian # for deb
+```
+
+## Build iwebadmin package
+
+Required for a web administration front-end for administering your indimail-users and ezmlm mailing lists. You can do tasks like adding, deleting, modifying users, change user password, update quota, set vacation messages, etc.
+
+```
+$ cd /usr/local/src/indimail-virtualdomains/iwebadmin-x
 $ ./create_rpm    # for RPM
 or
 $ ./create_debian # for deb

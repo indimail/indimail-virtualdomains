@@ -16,6 +16,17 @@ Messaging Platform based on [indimail-mta](https://github.com/mbhangui/indimail-
 
 The steps below give instructions on building from source. If you need to deploy IndiMail on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the same package can be deployed on multiple hosts. To generate RPM packages for all components refer to [CREATE-Packages](.github/CREATE-Packages.md)
 
+You can also use docker / podman images to deploy indimail-mta. Look at the chapter `# Docker / Podman Repository` below on how to do that. The big advantage of using a docker / podman image is you can change your configuration with the `docker commit ..` or `podman commit` to save your entire build and deploy the exact configuration on multiple hosts.
+
+Doing a source build can be daunting for many. You can always use the pre-built binaries from the DNF / YUM / APT repositories given in the chapter `# Binary Builds on openSUSE Build Service` towards the end of this document.
+
+Doing a source build requires you to have all the development packages installed. Linux distributions are known to be crazy. You will have different package names for different distirbutions. e.g.
+
+db-devel, libdb-devel, db4-devel on different systems, just to get Berkeley db installed. There is an easy way out to find out what your distribution needs.
+
+* For RPM based distribtions, locate your .spec file (e.g. indimail.spec in indimail-virtualdomains/indimail-x directory, libqmail/libqmail.spec). Open the RPM spec file and look for `BuildRequires`. This will tell you what you require for your distribution. If there is a specific version of development package required, you will find `%if %else` statements. Use dnf / yum / zypper to install your development package.
+* For debian based distribution, locate your debian subdirectory (e.g. indimail-virtualdomains/indimail-x/debian, libqmail/debian). In this directory you will find files with `.dsc` extension. Look at the line having `Build-Depends`. Use `apt-get install package` to install the package. If your debian distribution has few libraries different than the default, you will find a `.dsc` filename with a name corresponding to your distribution. (e.g. indimail-mta-x-Debain_10.dsc)
+
 ## Compile libqmail
 
 (check version in libqmail/conf-version)
@@ -103,6 +114,8 @@ $ sudo sh ./svctool --config=users --nolog
 
 ## Build indimail
 
+Rquired for Virtual Domains function.
+
 (check version in indimail-virtualdomains/indimail-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-x
@@ -113,6 +126,8 @@ $ sudo make install-strip
 
 ## Build courier-imap
 
+Required for IMAP, POP3 to retrieve your mails
+
 (check version in indimail-virtualdomains/courier-imap-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-virtualdomains/courier-imap-x
@@ -120,7 +135,20 @@ $ ./default.configure
 $ sudo make install-strip
 ```
 
+### Build fetchmail
+
+Optional. Required only if you want fetchmail to retrieve your mails
+
+```
+cd /usr/local/src/indimail-virtualdomans/fetchmail-x
+./default.configure
+make
+sudo make install-strip
+```
+
 ## Build nssd
+
+Optional component. Required only if you require a Name Service Switch to authenticate from a MySQL db (e.g. for authenticated SMTP)
 
 (check version in indimail-virtualdomains/nssd-x/conf-version)
 ```
@@ -132,6 +160,8 @@ $ sudo make install-strip
 
 ## Build pam-multi
 
+Optional. Required only if you require PAM authentication for authenticated SMTP or extra PAM other than /etc/shadow authentication for IMAP / POP3
+
 (check version in indimail-virtualdomains/pam-multi-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-virtualdomains/pam-multi-x
@@ -140,35 +170,67 @@ $ make
 $ sudo make install-strip
 ```
 
-## Build optional packages
+### Build altermime
+
+Optional. Required only if you want altermime to add content to your emails before delivery. e.g. adding disclaimers
 
 ```
-$ cd /usr/local/src/indimail-virtualdomains/altermime-x
-$ ./default.configure
-$ make
-$ sudo make install-strip
+cd /usr/local/src/indimail-virtualdomans/altermime-x
+./default.configure
+make
+sudo make install-strip
+```
 
-$ cd /usr/local/src/indimail-virtualdomains/ripmime-x
-$ ./default.configure
-$ make
-$ sudo make install-strip
+### Build ripmime
 
-$ cd /usr/local/src/indimail-virtualdomains/fortune-x
-$ ./default.configure
-$ make
-$ sudo make install-strip
+Optional. Required only if you want extract attachments from your emails
 
-$ cd /usr/local/src/indimail-virtualdomains/mpack-x
-$ ./default.configure
-$ make
-$ sudo make install-strip
+```
+cd /usr/local/src/indimail-virtualdomans/ripmime-x
+./default.configure
+make
+sudo make install-strip
+```
 
-$ cd /usr/local/src/indimail-virtualdomains/flash-x
-$ ./default.configure
-$ make
-$ sudo make install-strip
+### Build mpack
 
-$ cd /usr/local/src/indimail-virtualdomains/iwebadmin-2.0
+Optional. Required only if you want to pack a zip file and attach it to your email.
+
+```
+cd /usr/local/src/indimail-virtualdomans/mpack-x
+./default.configure
+make
+sudo make install-strip
+```
+
+### Build flash
+
+Optional. Required only if you want a configurable ncurses based menu system to configure a system for administering emails using a dumb terminal
+
+```
+cd /usr/local/src/indimail-virtualdomans/flash-x
+./default.configure
+make
+sudo make install-strip
+```
+
+### Build fortune
+
+Optional. Required only if you want fortune cookies to be sent out in your outgoing emails.
+
+```
+cd /usr/local/src/indimail-virtualdomans/fortune-x
+./default.configure
+make
+sudo make install-strip
+```
+
+## Build iwebadmin
+
+Required for a web administration front-end for administering your indimail-users and ezmlm mailing lists. You can do tasks like adding, deleting, modifying users, change user password, update quota, set vacation messages, etc.
+
+```
+$ cd /usr/local/src/indimail-virtualdomains/iwebadmin-x
 $ ./default.configure
 $ make
 $ sudo make install-strip
@@ -210,11 +272,7 @@ The steps for doing a binary build are
 $ cd /usr/local/src
 $ git clone https://github.com/mbhangui/libqmail.git
 $ git clone https://github.com/mbhangui/indimail-mta.git
-$ git clone https://github.com/mbhangui/indimail.git
-$ git clone https://github.com/mbhangui/indimail-access.git
-$ git clone https://github.com/mbhangui/indimail-auth.git
-$ git clone https://github.com/mbhangui/indimail-utils.git
-$ git clone https://github.com/mbhangui/indimail-spamfilter.git
+$ git clone https://github.com/mbhangui/indimail-virtualdomains.git
 ```
 
 ## Build libqmail, libqmail-dev package
@@ -235,16 +293,9 @@ or
 $ ./create_debian # for deb
 ```
 
-## Build indimail-access package
-
-```
-$ cd /usr/local/src/indimail-mta/indimail-access
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
-```
-
 ## Build indimail-auth package
+
+Optional. Required only if you want extra authentication methods using NSS or PAM.
 
 ```
 $ cd /usr/local/src/indimail-mta/indimail-auth
@@ -253,7 +304,20 @@ or
 $ ./create_debian # for deb
 ```
 
+## Build indimail-access package
+
+Optional. You require this if you want IMAP/POP3 or fetchmail to retrieve your mails
+
+```
+$ cd /usr/local/src/indimail-mta/indimail-access
+$ ./create_rpm    # for RPM
+or
+$ ./create_debian # for deb
+```
+
 ## Build indimail-utils package
+
+Optional. Required only if you want utilities like altermime, ripmime, flash menu, mpack and fortune
 
 ```
 $ cd /usr/local/src/indimail-mta/indimail-utils
@@ -263,6 +327,8 @@ $ ./create_debian # for deb
 ```
 
 ## Build indimail-spamfilter package
+
+Optional. Required only if you want to use bogofilter to filter SPAM mails
 
 ```
 $ cd /usr/local/src/indimail-mta/bogofilter-x
