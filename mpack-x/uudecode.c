@@ -1,5 +1,8 @@
 /*-
  * $Log: uudecode.c,v $
+ * Revision 1.4  2020-06-19 21:37:07+05:30  Cprogrammer
+ * fixed possible overflow
+ *
  * Revision 1.3  2008-06-13 19:25:12+05:30  Cprogrammer
  * include config.h to prevent warning for strchr
  *
@@ -106,7 +109,7 @@ handleUuencode(struct part *inpart, char *subject, int extractText)
 	char           *fname = 0, *tmpfname;
 	int             part, nparts;
 	int             tmppart, tmpnparts;
-	char            buf[1024], buf2[1024];
+	char            buf[1024], buf2[2048];
 	char            fnamebuf[80];
 	char           *boundary_end, *p;
 	int             wantdescfile = 0;
