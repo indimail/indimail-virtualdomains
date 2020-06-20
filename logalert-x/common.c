@@ -818,6 +818,55 @@ timeoutwrite(t, fd, buf, len)
 	errno = ETIMEDOUT;
 	return -1;
 }
+#else
+#include <errno.h>
+#include <unistd.h>
+#define MAXNOBUFRETRY           60 /*- Defines maximum number of ENOBUF retries -*/
+#define SELECTTIMEOUT           30 /*- secs after which select will timeout -*/
+
+int
+sockread(fd, buffer, len)
+	int             fd;
+	char           *buffer;
+	int             len;
+{
+	char           *ptr;
+	int             rembytes, rbytes, retrycount;
+
+	for (retrycount = 0, rembytes = len, ptr = buffer; rembytes;)
+	{
+		errno = 0;
+		if ((rbytes = read(fd, ptr, rembytes)) == -1)
+		{
+#ifdef ERESTART
+			if (errno == EINTR || errno == ERESTART)
+#else
+			if (errno == EINTR)
+#endif
+				continue;
+			if (errno == ENOBUFS && retrycount++ < MAXNOBUFRETRY)
+			{
+				usleep(1000);
+				continue;
+			}
+#if defined(HPUX_SOURCE)
+			if (errno == EREMOTERELEASE)
+			{
+				rbytes = 0;
+				break;
+			}
+#endif
+			return (-1);
+		} else
+		if (!rbytes)	/* EOF */
+			break;;
+		rembytes -= rbytes;
+		if (!rembytes)
+			break;
+		ptr += rbytes;
+	}
+	return (len - rembytes);
+}
 #endif
 
 void

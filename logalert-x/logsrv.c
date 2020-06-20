@@ -802,9 +802,9 @@ server(int silent)
 			}
 			if (*ptr)
 			{
-				bytes += slen(ptr + 1);
+				bytes += strlen(ptr + 1);
 			} else {
-				bytes += slen(buffer);
+				bytes += strlen(buffer);
 				filewrt(2, "error-%s", ptr+1);
 			}
 			if (write_bytes(fd, &bytes) == -1) {

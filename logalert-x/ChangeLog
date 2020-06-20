@@ -1,10 +1,11 @@
-* Mon Dec 09 2019 mbhangui@gmail.com
-2019-12-09      <mbhangui@gmail.com>
-    * parser.y fixed return value of handle_conf_file()
+* Thu Feb 25 2010 01:30:05 +0530 mbhangui@gmail.com 0.3-1.1%{?dist}
+Release 0.3 Start 25/02/2010
+- 25-02-2010
+01. parser.c, main.c, parser.y added -i option
+- 29-12-2019
+02. parser.y fixed return value of handle_conf_file()
 
-2010-02-25      <mbhangui@gmail.com>
-    * parser.c, main.c, parser.y added -i option
-
+*
 2005-10-04      <gabriel@icaro.com.br>
 	* action.c: now it is possible to grab a string using parenthesis '('
 	in pcre regex style and substitute them in the command defined by user

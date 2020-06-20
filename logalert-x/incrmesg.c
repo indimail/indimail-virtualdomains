@@ -121,7 +121,7 @@ incrmesg(fname)
 		else
 			ptr = *fptr;
 		(void) snprintf(seekfile, MAXBUF, "%s/%s.seek", seekdir, ptr);
-		(void) scopy(msgptr->fname, *fptr, MAXBUF);
+		(void) strncpy(msgptr->fname, *fptr, MAXBUF);
 		if ((msgptr->fd = open(msgptr->fname, O_RDONLY)) == -1)
 		{
 			perror(msgptr->fname);

@@ -1,6 +1,4 @@
-======================================
- LOGALERT
-======================================
+# LOGALERT
 
 Lastchange: 2005 08 30
 
@@ -9,8 +7,7 @@ THANKS for downloading and (so far :-) reading this! I hope you enjoy and
 would like to receive your feedback.
 
 
-DESCRIPTION
------------
+## DESCRIPTION
 
 logalert is a logfile monitoring tool which executes a specific action whenever it matches a
 string (pattern) occurrence. 
@@ -24,19 +21,16 @@ normaly configure a logrotation process to rotate file as they grown or based on
 periods [daily, weekly, ...] truncating or temporily removing them - logalert keeps track of
 them even so.
 
-LICENSE
--------
+## LICENSE
 
 Please refer to LICENSE for license details.
 
 
-INSTALATION
------------
+## INSTALATION
 
 Please refer to INSTALL for instalation details.
 
-DOCUMENTATION
--------------
+## DOCUMENTATION
 
 You can always find the latest documentation at:
 
@@ -44,38 +38,35 @@ http://logalert.sourceforge.net
 
 Or you can look at doc/ directory where you'll find this releases documents.
 
-EXTRAS
-------
+## EXTRAS
 
 Look at contrib/ directory, you'll find some extra-goodies. For example, there you'll
 find a perl script 'sendmail' if you plan to configure some auto-mailing actions.
 
 
-EXAMPLES
---------
+## EXAMPLES
 
-I-)
+1.Imagine you have a VPN in your firewall server and would like to restart it everytime it goes down. The process related to the VPN reports it's information via syslog to
 
-Imagine you have a VPN in your firewall server and would like to restart it everytime it goes
-down. The process related to the VPN reports it's information via syslog to
-
-/var/log/vpn
+`/var/log/vpn`
 
 ... and everytime a problem occurs, it dumps the message: 
 
+```
     'Error: problem found, quiting...' 
+```
 
 You already have a script in /etc/init.d/startprocess that [re]starts that guy, so you could:
 
+```
 ./logalert --match='[Ee]rror: problem found, quiting...' --exec='/etc/init.d/startprocess \
    restart' /var/log/process.log
+```
 
-II-) 
+2. Ok, you have dozens of files you whish to monitor ?
+   Just create a configuration file like this:
 
-Ok, you have dozens of files you whish to monitor ?
-
-Just create a configuration file like this:
-
+```
 logalert.conf
 ---------------
 filename /var/log/messages
@@ -97,13 +88,8 @@ filename /var/log/mail
 }
 
 [...]
----------------
+```
 
 And start logalert in parent mode:
 
-./logalert -c /etc/logalert.conf
-
-
-
-======================================
-END
+`./logalert -c /etc/logalert.conf`

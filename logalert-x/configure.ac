@@ -7,7 +7,7 @@ PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 LT_INIT
 AC_CANONICAL_HOST
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC
@@ -131,7 +131,7 @@ case "$host" in
 
 esac
 
-test "$prefix" = "NONE" && prefix=/var/indimail
+test "$prefix" = "NONE" && prefix=/usr
 test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'
 test "$program_prefix" = "NONE" && program_prefix=
 test "$program_suffix" = "NONE" && program_suffix=
@@ -160,6 +160,14 @@ fi
 AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir",indimaildir's home directory)
 #'
 
+if test -f conf-release
+then
+	release=$(cat conf-release)
+else
+	release="1.1"
+fi
+AC_SUBST(release)
+
 if test -d /lib64 -a "$acl_libdirstem" = "lib"
 then
 	acl_libdirstem=lib64
@@ -177,7 +185,12 @@ else
 	ilibdir=$libdir
 fi
 RPATH_LIB="$acl_libdirstem"
-AC_CHECK_LIB(indimail, filewrt, [AC_SUBST([LIB_INDIMAIL], ["-lindimail"]) AC_DEFINE([HAVE_INDIMAIL], [1],[indimail Library])],,-lindimail -lcdb)
+AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],noqmail=t,)
+if test " $noqmail" = " t"
+then
+  AC_MSG_ERROR(Could not find qmail library.)
+fi
+AC_CHECK_LIB(indimail, filewrt, [AC_SUBST([LIB_INDIMAIL], ["-lindimail"]) AC_DEFINE([HAVE_INDIMAIL], [1],[indimail Library])],,-lindimail)
 
 AC_SUBST(indimaildir)
 AC_CONFIG_FILES([Makefile])

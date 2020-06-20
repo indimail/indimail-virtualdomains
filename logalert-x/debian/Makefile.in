@@ -2,6 +2,7 @@ prefix=@prefix@
 mandir=@mandir@
 sysconfdir=@sysconfdir@
 version=@version@
+release=@release@
 #
 
 all: rules postinst postrm debian.tar.gz logalert.dsc dummy.tar.gz
@@ -21,9 +22,11 @@ postinst: postinst.in Makefile
 	$(edit) $@.in > $@;
 postrm: postrm.in Makefile
 	$(edit) $@.in > $@;
-changelog: changelog.in Makefile
-	$(edit) $@.in > $@
-logalert.dsc: Makefile logalert.dsc.in
+changelog: changelog.in Makefile ../conf-version ../conf-release
+	(cat $@.in; echo ""; \
+	echo " -- Manvendra Bhangui <indimail-virtualdomains@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
+	| $(edit) > $@
+logalert.dsc: Makefile logalert.dsc.in ../conf-version ../conf-release
 	$(edit) $@.in > $@
 
 dummy.tar.gz: README

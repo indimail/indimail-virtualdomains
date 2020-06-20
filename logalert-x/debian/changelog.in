@@ -1,5 +1,4 @@
-logalert (@version@-1) stable; urgency=low
+logalert (@version@-@release@) stable; urgency=low
 
+  * parser.c, main.c, parser.y added -i option
   * parser.y fixed return value of handle_conf_file()
-
- -- Manvendra Bhangui <manvendra@indimail.org>  Mon, 00 May 2019 16:55:10 +0530
