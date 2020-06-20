@@ -1,5 +1,11 @@
 #!/bin/sh
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
-autoreconf -fiv
+  autoreconf -fiv
 fi
-./configure --prefix=/usr --libexecdir=/usr/libexec/indimail --enable-plugindir=/usr/share/roundcubemail
+if [ ! -f conf-release ] ; then
+	echo 1.1 > conf-release
+fi
+prefix=/usr
+sysconfdir=/etc/indimail
+./configure --prefix=$prefix --libexecdir=$prefix/libexec/indimail \
+	--enable-plugindir=$prefix/share/roundcubemail

@@ -19,9 +19,14 @@ else
 		exit 1
 	fi
 fi
-./configure --prefix=/usr \
-  --libexecdir=/usr/libexec/indimail --libdir=$libdir \
-  --sysconfdir=/etc/indimail \
-  --mandir=/usr/share/man \
-  --enable-shareddir=/usr/share/indimail \
-  --enable-mysqlprefix=/usr
+if [ ! -f conf-release ] ; then
+	echo 1.1 > conf-release
+fi
+prefix=/usr
+sysconfdir=/etc/indimail
+./configure --prefix=$prefix \
+  --libexecdir=$prefix/libexec/indimail --libdir=$libdir \
+  --sysconfdir=$sysconfdir \
+  --mandir=$prefix/share/man \
+  --enable-shareddir=$prefix/share/indimail \
+  --enable-mysqlprefix=$prefix

@@ -26,14 +26,19 @@ elif [ -d /var/run ] ; then
 else
   nssd_sock=/tmp/nssd.sock
 fi
-./configure --prefix=/usr \
-  --sysconfdir=/etc/indimail \
-  --mandir=/usr/share/man \
-  --datarootdir=/usr/share/indimail \
+if [ ! -f conf-release ] ; then
+	echo 1.1 > conf-release
+fi
+prefix=/usr
+sysconfdir=/etc/indimail
+./configure --prefix=$prefix \
+  --sysconfdir=$sysconfdir \
+  --mandir=$prefix/share/man \
+  --datarootdir=$prefix/share/indimail \
   --enable-nssd-socket=$nssd_sock \
-  --enable-nssd-config-path=/etc/indimail/nssd.conf \
-  --libexecdir=/usr/libexec/indimail \
+  --enable-nssd-config-path=$sysconfdir/nssd.conf \
+  --libexecdir=$prefix/libexec/indimail \
   --enable-dlload-mysql=yes \
-  --enable-mysqlprefix=/usr \
+  --enable-mysqlprefix=$prefix \
   --libdir=$libdir \
   --enable-default-domain=`uname -n`

@@ -19,6 +19,9 @@ else
 		exit 1
 	fi
 fi
+if [ ! -f conf-release ] ; then
+	echo 1.1 > conf-release
+fi
 prefix=/usr
 sysconfdir=/etc/indimail
 ./configure \

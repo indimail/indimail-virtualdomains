@@ -1,11 +1,16 @@
 #!/bin/sh
 prefix=/usr
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
-autoreconf -fiv
+  autoreconf -fiv
 fi
+if [ ! -f conf-release ] ; then
+	echo 1.1 > conf-release
+fi
+prefix=/usr
+sysconfdir=/etc/indimail
 ./configure --prefix=$prefix \
---enable-indimail \
---sysconfdir=/etc/indimail \
---datarootdir=$prefix/share/indimail \
---libexecdir=/usr/libexec/indimail \
---mandir=/usr/share/man
+  --enable-indimail \
+  --sysconfdir=$sysconfdir \
+  --datarootdir=$prefix/share/indimail \
+  --libexecdir=$prefix/libexec/indimail \
+  --mandir=$prefix/share/man

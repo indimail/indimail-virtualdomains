@@ -2,15 +2,20 @@
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
 	autoreconf -fiv
 fi
-./configure --prefix=/usr \
-	--sysconfdir=/etc/indimail \
+if [ ! -f conf-release ] ; then
+	echo 1.1 > conf-release
+fi
+prefix=/usr
+sysconfdir=/etc/indimail
+./configure --prefix=$prefix \
+	--sysconfdir=$sysconfdir \
 	--disable-ipauth \
 	--disable-trivial-password \
-	--enable-ezmlmdir=/usr/bin \
+	--enable-ezmlmdir=$prefix/bin \
 	--enable-ezmlmidx \
 	--enable-domain-autofill \
 	--enable-modify-quota \
 	--enable-htmldir=/var/www/html \
 	--enable-cgibindir=/var/www/cgi-bin \
 	--enable-imagedir=/var/www/html/images/iwebadmin \
-	--enable-htmllibdir=/usr/share/iwebadmin
+	--enable-htmllibdir=$prefix/share/iwebadmin

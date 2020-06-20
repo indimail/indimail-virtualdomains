@@ -19,16 +19,21 @@ else
 		exit 1
 	fi
 fi
-./configure --prefix=/usr --disable-root-check \
-	--bindir=/usr/bin \
+if [ ! -f conf-release ] ; then
+	echo "1.1" > conf-release
+fi
+prefix=/usr
+sysconfdir=/etc/indimail
+./configure --prefix=$prefix --disable-root-check \
+	--bindir=$prefix/bin \
 	--libdir=$libdir \
 	--with-redhat \
-	--with-mailer=/usr/bin/sendmail \
-	--mandir=/usr/share/man \
-	--sysconfdir=/etc/indimail \
-	--with-certsdir=/etc/indimail/certs \
-	--libexecdir=/usr/libexec/indimail \
-	--datarootdir=/usr/share/indimail \
+	--with-mailer=$prefix/bin/sendmail \
+	--mandir=$prefix/share/man \
+	--sysconfdir=$sysconfdir \
+	--with-certsdir=$sysconfdir/certs \
+	--libexecdir=$prefix/libexec/indimail \
+	--datarootdir=$prefix/share/indimail \
 	--without-authchangepwdir \
 	--without-authpam --without-authcustom \
 	--without-authpwd --with-authshadow
