@@ -35,8 +35,11 @@ tar \
 	--exclude="procmail-$version/RCS" \
 	-cf - procmail-"$version" \
 	| gzip -c > $rpmbuild/SOURCES/procmail-"$version".tar.gz
-echo "cp procmail-$version/procmail-rpmlintrc $rpmbuild/SOURCES"
-cp procmail-$version/procmail-rpmlintrc $rpmbuild/SOURCES
+for i in rpmlintrc permissions.easy permissions.secure permissions.paranoid
+do
+	echo "cp procmail-$version/procmail-$i $rpmbuild/SOURCES"
+	cp procmail-$version/procmail-$i $rpmbuild/SOURCES
+done
 dist=`uname -r |cut -d . -f4`
 if [ $# -gt 0 ] ; then
 	release=$1
@@ -101,6 +104,9 @@ read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	echo "/bin/rm -f $rpmbuild/SOURCES/procmail-$version.tar.bz2"
 	/bin/rm -f $rpmbuild/SOURCES/procmail-$version.tar.bz2
-	echo "/bin/rm -f $rpmbuild/SOURCES/procmail-rpmlintrc"
-	/bin/rm -f $rpmbuild/SOURCES/procmail-rpmlintrc
+	for i in rpmlintrc permissions.easy permissions.secure permissions.paranoid
+	do
+		echo "/bin/rm -f $rpmbuild/SOURCES/procmail-$i"
+		/bin/rm -f $rpmbuild/SOURCES/procmail-$i
+	done
 fi

@@ -54,3 +54,6 @@ INSTALL
 *.o
 autom4te.cache
 conf-release
+procmail-permissions.easy
+procmail-permissions.secure
+procmail-permissions.paranoid

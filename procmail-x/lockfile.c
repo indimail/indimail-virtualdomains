@@ -14,10 +14,9 @@
  *	#include "../README"						*
  ************************************************************************/
 #ifdef RCS
-static /*const */ char rcsid[] =
-	"$Id: lockfile.c,v 1.49 2001/08/04 07:12:16 guenther Exp $";
-#endif
+static /*const */ char rcsid[] = "$Id: lockfile.c,v 1.49 2001/08/04 07:12:16 guenther Exp $";
 static /*const */ char rcsdate[] = "$Date: 2001/08/04 07:12:16 $";
+#endif
 #include "includes.h"
 #include "sublib.h"
 #include "exopen.h"
@@ -65,7 +64,7 @@ void
 elog(a)
 	const char     *const a;
 {
-	write(STDERR, a, strlen(a));
+	if (write(STDERR, a, strlen(a))) ;
 }
 
 void
@@ -86,7 +85,6 @@ main(argc, argv)
 	const char     *const *p;
 	char           *cp;
 	uid_t           uid;
-	gid_t           gid;
 	int             sleepsec, retries, invert, force, suspend, retval = EXIT_SUCCESS, virgin = 1;
 	static const char usage[] = "Usage: lockfile -v | -nnn | -r nnn | -l nnn \
 | -s nnn | -! | -ml | -mu | file ...\n";
@@ -98,7 +96,6 @@ main(argc, argv)
 	thepid = getpid();
 	force = 0;
 	uid = getuid();
-	gid = getgid();
 	signal(SIGPIPE, SIG_IGN);
 	if (setgroups(0, NULL) || setuid(uid) || geteuid() != uid)	/* resist setuid operation */
 sp:{
@@ -222,7 +219,7 @@ xusg:						retval = EX_USAGE;
 		} else if (sleepsec < 0)	/* second pass, release everything we acquired */
 			unlink(cp);
 		else {
-			time_t          t;
+			time_t          t = 0;
 			int             permanent;
 			gid_t           gid = getgid();
 			if (setgid(gid) || getegid() != gid)	/* just to be on the safe side */

@@ -121,10 +121,10 @@ P((void))
 		if (setRgid(gid) &&		/* due to these !@#$%^&*() POSIX semantics, setgid() */
 			setgid(gid))		/* sets the saved gid as well; we can't use that! */
 			checkroot('g', (unsigned long) gid);	/* did setgid fail as root? */
-		setruid(uid);
+		if (setruid(uid));
 		if (setuid(uid))		/* "This cannot happen" */
 			checkroot('u', (unsigned long) uid);	/* Whoops... */
-		setegid(gid);
+		if (setegid(gid));
 		privileged = 0;
 #if !DEFverbose
 		verbose = 0;			/* to avoid peeking in rcfiles using SIGUSR1 */

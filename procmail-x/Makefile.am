@@ -1,19 +1,16 @@
 ACLOCAL_AMFLAGS = -I m4
 COFLAGS=-z+05:30
-AM_CFLAGS = -g -O4 -fPIC -Wno-parentheses 
+AM_CFLAGS = -g -O4 -fPIC -Wno-parentheses
 RM	= /bin/rm -f
 DEVNULL = /dev/null
 DIST_COMMON=ChangeLog COPYING AUTHORS
 release=@release@
-#AM_CFLAGS=-O2 -pedantic -Wreturn-type -Wunused -Wformat -Wtraditional -Wpointer-arith \
-#	   -Wconversion -Waggregate-return \
-#	   #-Wimplicit -Wshadow -Wid-clash-6 #-Wuninitialized
-#
-BUILT_SOURCES = procmail.spec procmail-rpmlintrc
+BUILT_SOURCES = procmail.spec procmail-rpmlintrc \
+	procmail-permissions.easy procmail-permissions.secure procmail-permissions.paranoid
 
 MOSTLYCLEANFILES=man/*.1 man/*.5 man/man.sed.* man/man.sed \
-				 procmail_perm_list formail.1 lockfile.1 procmail.1 \
-				 procmailex.5 procmailrc.5 procmailsc.5 debian/Makefile
+	procmail_perm_list formail.1 lockfile.1 procmail.1 \
+	procmailex.5 procmailrc.5 procmailsc.5 debian/Makefile
 
 bin_PROGRAMS=procmail lockfile formail
 bin_SCRIPTS=mailstat
@@ -90,6 +87,12 @@ edit = sed \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
+procmail-permissions.easy: procmail-permissions.easy.in
+	$(edit) procmail-permissions.easy.in > $@
+procmail-permissions.secure: procmail-permissions.secure.in
+	$(edit) procmail-permissions.secure.in > $@
+procmail-permissions.paranoid: procmail-permissions.paranoid.in
+	$(edit) procmail-permissions.paranoid.in > $@
 procmail-rpmlintrc: procmail-rpmlintrc.in conf-version conf-release
 	$(edit) procmail-rpmlintrc.in > $@
 procmail.spec: procmail.spec.in conf-version conf-release ChangeLog

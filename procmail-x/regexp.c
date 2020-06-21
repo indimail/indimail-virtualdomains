@@ -652,7 +652,7 @@ bregexec(code, text, str, len, ign_case)
 	while (--len);				/* still text to search */
 	goto wrapup;
 	; {
-		const char     *start, *bom;
+		const char     *start = 0, *bom = 0;
 		do {
 			i = *++str;			/* get the next real-text character */
 			if (i - 'A' <= 'Z' - 'A')

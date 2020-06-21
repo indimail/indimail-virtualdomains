@@ -446,8 +446,7 @@ concon(ch)
 }
 
 void
-readmail(rhead, tobesent)
-	const long      tobesent;
+readmail(int rhead, const long tobesent)
 {
 	char           *chp, *pastend;
 	static size_t   contlengthoffset;

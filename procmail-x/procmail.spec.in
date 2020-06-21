@@ -35,6 +35,11 @@
 %global disttag rhfc
 %global fedora_version %(cat /etc/fedora-release | awk '{print $3}')
 %endif
+%if 0%{?suse_version}
+%global noperms            1
+%else
+%global noperms            0
+%endif
 
 Summary: The Mail processing/filtering program
 Name: procmail
@@ -48,6 +53,20 @@ License: GPLv3
 Group: Productivity/Networking/Email/Utilities
 Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 Source1: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+Source2: http://downloads.sourceforge.net/indimail/%{name}-permissions.easy
+Source3: http://downloads.sourceforge.net/indimail/%{name}-permissions.secure
+Source4: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
+%endif
+%endif
+
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+PreReq: permissions
+%endif
+%endif
+
 %if %build_on_obs == 1
 BuildRequires: -post-build-checks  
 %endif
@@ -75,6 +94,13 @@ incoming mail automatically.  SmartList also needs procmail to operate.
 [ "$RPM_BUILD_ROOT" != "/" ] && %{__rm} -fr $RPM_BUILD_ROOT
 %{__make} -s DESTDIR=%{buildroot}
 %{__make} -s DESTDIR=%{buildroot} install-strip
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
+install -m 644 %{S:2} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
+install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
+%endif
+%endif
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 %files
@@ -85,10 +111,57 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(755,root,root)                              %{_prefix}/bin/formail
 %attr(755,root,root)                              %{_prefix}/bin/mailstat
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/procmail_perm_list
+
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%attr(644,root,root)                              %{_sysconfdir}/permissions.d/%{name}-permissions
+%attr(644,root,root)                              %{_sysconfdir}/permissions.d/%{name}-permissions.secure
+%endif
+%endif
+
 %attr(644,root,root)                              %{mandir}/man[1,5]/*
 #%%doc [A-Z]* examples
 %attr(644,root,root)                              %{_prefix}/share/doc/procmail/AUTHORS
 %attr(644,root,root)                              %{_prefix}/share/doc/procmail/COPYING
 %attr(644,root,root)                              %{_prefix}/share/doc/procmail/INSTALL.procmail
+
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%verify (not user group mode) %attr(4511, root, root)      %{_prefix}/bin/procmail
+%endif
+%endif
+
+### SCRIPTLET ###############################################################################
+%verifyscript
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%verify_permissions -e %{_prefix}/bin/procmail
+%endif
+%endif
+
+%post
+ID=$(id -u)
+if [ $ID -ne 0 ] ; then
+  echo "You are not root" 1>&2
+  exit 1
+fi
+%if %noperms == 0
+%if 0%{?suse_version} >= 1120
+%if 0%{?set_permissions:1} > 0
+  if [ ! -f /tmp/no_permissions ] ; then
+      %set_permissions %{name}
+  fi
+%else
+  if [ ! -f /tmp/no_permissions ] ; then
+      %run_permissions
+  fi
+%endif
+%endif
+%endif
 
 %changelog

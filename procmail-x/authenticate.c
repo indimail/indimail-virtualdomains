@@ -21,6 +21,9 @@ static /*const */ char rcsid[] =
 #include "robust.h"
 #include "shell.h"
 #include "misc.h"
+#ifdef SHADOW_PASSWD
+#include <shadow.h>
+#endif
 #else
 #include "config.h"
 #include <sys/types.h>

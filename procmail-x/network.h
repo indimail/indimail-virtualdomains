@@ -3,9 +3,9 @@
  */
 
 #include <sys/socket.h>			/* socket() sendto() AF_INET
-								 * /* SOCK_DGRAM */
+								 * SOCK_DGRAM */
 #include <netdb.h>				/* gethostbyname() getservbyname()
-								 * /* getprotobyname() */
+								 * getprotobyname() */
 #include <netinet/in.h>			/* htons() struct sockaddr_in */
 
 #ifndef BIFF_serviceport

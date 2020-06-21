@@ -16,4 +16,5 @@ void nlog       P((const char *const a));
 void logqnl     P((const char *const a));
 void closemine  P((void));
 void opensink   P((void));
+int  GetLine    P((void));
 char           *skipwords P((char *start));

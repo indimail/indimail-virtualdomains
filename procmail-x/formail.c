@@ -9,10 +9,9 @@
  *	#include "../README"						*
  ************************************************************************/
 #ifdef RCS
-static /*const */ char rcsid[] =
-	"$Id: formail.c,v 1.102 2001/08/04 07:07:43 guenther Exp $";
-#endif
+static /*const */ char rcsid[] = "$Id: formail.c,v 1.102 2001/08/04 07:07:43 guenther Exp $";
 static /*const */ char rcsdate[] = "$Date: 2001/08/04 07:07:43 $";
+#endif
 #include "includes.h"
 #include <ctype.h>				/* iscntrl() */
 #include "formail.h"
@@ -370,7 +369,7 @@ elimdups(namep, idcache, maxlen, split)
 	const int       split;
 {
 	int             dupid = 0;
-	char           *key, *oldnewl;
+	char           *key, *oldnewl = 0;
 	key = (char *) namep;		/* not to worry, no change will be noticed */
 	if (!areply) {
 		key = 0;
@@ -418,7 +417,7 @@ elimdups(namep, idcache, maxlen, split)
 		putc('\0', idcache);	/* mark new end of buffer */
 	  dupfound:
 		fseek(idcache, (long) 0, SEEK_SET);	/* rewind, for any next run */
-		if (!areply)
+		if (!areply && oldnewl)
 			*oldnewl = '\n';	/* restore the newline */
 	}
 	if (!split)					/* not splitting?  terminate early */
@@ -435,8 +434,8 @@ main(lastm, argv)
 	const char     *const argv[];
 {
 	int             i, split = 0, force = 0, bogus = 1, every = 0, headreply = 0, digest = 0, nowait = 0, keepb = 0, minfields =
-		(char *) progid - (char *) progid, conctenate = 0, babyl = 0, babylstart, berkeley = 0, forgetclen;
-	long            maxlen, ctlength;
+		(char *) progid - (char *) progid, conctenate = 0, babyl = 0, babylstart = 0, berkeley = 0, forgetclen;
+	long            maxlen = 0, ctlength = 0;
 	FILE           *idcache = 0;
 	pid_t           thepid;
 	size_t          j, lnl, escaplen;
@@ -949,7 +948,11 @@ invfield:
 			  accuhdr:{
 					for (i = minfields; --i && readhead() && digheadr(););	/* found enough */
 					if (!i)		/* then split it! */
-				  splitit:{
+#ifdef MAILBOX_SEPARATOR
+splitit:			{
+#else
+					{
+#endif
 						if (!lnl)	/* did the previous mail end with an empty line? */
 							lputcs('\n');	/* but now it does :-) */
 						logfolder();

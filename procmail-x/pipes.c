@@ -322,7 +322,9 @@ pipin(line, source, len, asgnlastf)
 			}
 		}
 		pidchild = 0;
+#if 0
 builtin:
+#endif
 		if (!sh)
 			concatenate(line);
 		if (asgnlastf)
@@ -330,124 +332,127 @@ builtin:
 		return len;
 	}
 
-	static char    *read_read(p, left, data) char *p;
-	long            left;
-	void           *data;
+static char    *read_read(p, left, data)
+char           *p;
+long            left;
+void           *data;
+{
+	long            got;
+	do
 	{
-		long            got;
-		do
-			if (0 >= (got = rread(STDIN, p, left)))	/* read mail */
-				return p;
-		while (p += got, left -= got);	/* change listed buffer size */
-		return 0;
-	}
+		if (0 >= (got = rread(STDIN, p, left)))	/* read mail */
+			return p;
+	} while (p += got, left -= got);	/* change listed buffer size */
+	return 0;
+}
 
-	static int      read_cleanup(mb, filledp, origfilled, data) memblk *mb;
-	long           *filledp, origfilled;
-	void           *data;
-	{
-		long            oldfilled = *(long *) data;
-		if (pidchild > 0) {
-			if (PRDB >= 0) {
-				getstdin(PRDB);	/* filter ready, get backpipe */
-				if (1 == rread(STDIN, buf, 1)) {	/* backup pipe closed? */
-					resizeblock(mb, oldfilled, 0);
-					mb->p[origfilled] = *buf;
-					*filledp = origfilled + 1;
-					PRDB = -1;
-					pwait = 2;	/* break loop, definitely reap */
-					return 1;	/* filter goofed, rescue data */
-				}
+static int      read_cleanup(mb, filledp, origfilled, data)
+memblk         *mb;
+long           *filledp, origfilled;
+void           *data;
+{
+	long            oldfilled = *(long *) data;
+	if (pidchild > 0) {
+		if (PRDB >= 0) {
+			getstdin(PRDB);	/* filter ready, get backpipe */
+			if (1 == rread(STDIN, buf, 1)) {	/* backup pipe closed? */
+				resizeblock(mb, oldfilled, 0);
+				mb->p[origfilled] = *buf;
+				*filledp = origfilled + 1;
+				PRDB = -1;
+				pwait = 2;	/* break loop, definitely reap */
+				return 1;	/* filter goofed, rescue data */
 			}
-			if (pwait)
-				pipw = waitfor(pidchild);	/* reap your child in any case */
 		}
-		pidchild = 0;			/* child must be gone by now */
-		return 0;
+		if (pwait)
+			pipw = waitfor(pidchild);	/* reap your child in any case */
 	}
+	pidchild = 0;			/* child must be gone by now */
+	return 0;
+}
 
-	char           *readdyn(mb, filled, oldfilled) memblk *const mb;
-	long           *const filled, oldfilled;
-	{
-		return read2blk(mb, filled, &read_read, &read_cleanup, &oldfilled);
-	}
+char           *readdyn(mb, filled, oldfilled) memblk *const mb;
+long           *const filled, oldfilled;
+{
+	return read2blk(mb, filled, &read_read, &read_cleanup, &oldfilled);
+}
 
-	char           *fromprog(name, dest, max) char *name;
-	char           *const dest;
-	size_t          max;
-	{
-		int             pinfd[2], poutfd[2];
-		int             i;
-		char           *p;
-		concon('\n');
-		rpipe(pinfd);
-		inittmout(name);
-		if (!(pidchild = sfork())) {	/* create a sending procmail */
-			Stdout = name;
-			childsetup();
-			rclose(PRDI);
-			rpipe(poutfd);
-			rclose(STDOUT);
-			if (!(pidfilt = sfork()))	/* spawn program/filter */
-				rclose(PWRO), rdup(PWRI), rclose(PWRI), getstdin(PRDO), callnewprog(name);
-			rclose(PWRI);
-			rclose(PRDO);
-			if (forkerr(pidfilt, name))
-				rclose(PWRO), stermchild();
-			dump(PWRO, ft_PIPE, themail.p, filled);
-			waitfor(pidfilt);
-			exit(lexitcode);
-		}
+char           *fromprog(name, dest, max) char *name;
+char           *const dest;
+size_t          max;
+{
+	int             pinfd[2], poutfd[2];
+	int             i;
+	char           *p;
+	concon('\n');
+	rpipe(pinfd);
+	inittmout(name);
+	if (!(pidchild = sfork())) {	/* create a sending procmail */
+		Stdout = name;
+		childsetup();
+		rclose(PRDI);
+		rpipe(poutfd);
+		rclose(STDOUT);
+		if (!(pidfilt = sfork()))	/* spawn program/filter */
+			rclose(PWRO), rdup(PWRI), rclose(PWRI), getstdin(PRDO), callnewprog(name);
 		rclose(PWRI);
-		p = dest;
-		if (!forkerr(pidchild, name)) {
-			name = tstrdup(name);
-			while (0 < (i = rread(PRDI, p, (int) max)) && (p += i, max -= i));	/* read its lips */
-			if (0 < rread(PRDI, p, 1)) {
-				nlog("Excessive output quenched from");
-				logqnl(name);
-				setoverflow();
-			} else
-				while (--p >= dest && *p == '\n');	/* trailing newlines should be discarded */
-			rclose(PRDI);
-			free(name);
-			p++;
-			waitfor(pidchild);
+		rclose(PRDO);
+		if (forkerr(pidfilt, name))
+			rclose(PWRO), stermchild();
+		dump(PWRO, ft_PIPE, themail.p, filled);
+		waitfor(pidfilt);
+		exit(lexitcode);
+	}
+	rclose(PWRI);
+	p = dest;
+	if (!forkerr(pidchild, name)) {
+		name = tstrdup(name);
+		while (0 < (i = rread(PRDI, p, (int) max)) && (p += i, max -= i));	/* read its lips */
+		if (0 < rread(PRDI, p, 1)) {
+			nlog("Excessive output quenched from");
+			logqnl(name);
+			setoverflow();
 		} else
-			rclose(PRDI);
-		resettmout();
-		pidchild = 0;
-		*p = '\0';
-		return p;
-	}
+			while (--p >= dest && *p == '\n');	/* trailing newlines should be discarded */
+		rclose(PRDI);
+		free(name);
+		p++;
+		waitfor(pidchild);
+	} else
+		rclose(PRDI);
+	resettmout();
+	pidchild = 0;
+	*p = '\0';
+	return p;
+}
 
-	void            exectrap(tp) const char *const tp;
-	{
-		int             forceret;
-		forceret = setexitcode(*tp);	/* whether TRAP is set matters */
-		if (*tp) {
-			int             poutfd[2];
-			rawnonl = 0;		/* force a trailing newline */
-			metaparse(tp);
-			concon('\n');		/* expand $TRAP */
-			rpipe(poutfd);
-			inittmout(buf);
-			if (!(pidchild = sfork())) {	/* connect stdout to stderr before exec */
-				rclose(PWRO);
-				getstdin(PRDO);
-				rclose(STDOUT);
-				rdup(STDERR);
-				callnewprog(buf);	/* trap your heart out */
-			}
-			rclose(PRDO);		/* neat & clean */
-			if (!forkerr(pidchild, buf)) {
-				int             newret;
-				dump(PWRO, ft_PIPE, themail.p, filled);	/* try and shove down the mail */
-				if ((newret = waitfor(pidchild)) != EXIT_SUCCESS && forceret == -2)
-					retval = newret;	/* supersede the return value */
-				pidchild = 0;
-			} else
-				rclose(PWRO);
-			resettmout();
+void            exectrap(tp) const char *const tp;
+{
+	int             forceret;
+	forceret = setexitcode(*tp);	/* whether TRAP is set matters */
+	if (*tp) {
+		int             poutfd[2];
+		rawnonl = 0;		/* force a trailing newline */
+		metaparse(tp);
+		concon('\n');		/* expand $TRAP */
+		rpipe(poutfd);
+		inittmout(buf);
+		if (!(pidchild = sfork())) {	/* connect stdout to stderr before exec */
+			rclose(PWRO);
+			getstdin(PRDO);
+			rclose(STDOUT);
+			rdup(STDERR);
+			callnewprog(buf);	/* trap your heart out */
 		}
+		rclose(PRDO);		/* neat & clean */
+		if (!forkerr(pidchild, buf)) {
+			int             newret;
+			dump(PWRO, ft_PIPE, themail.p, filled);	/* try and shove down the mail */
+			if ((newret = waitfor(pidchild)) != EXIT_SUCCESS && forceret == -2)
+				retval = newret;	/* supersede the return value */
+			pidchild = 0;
+		} else
+			rclose(PWRO);
+		resettmout();
 	}
+}

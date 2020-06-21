@@ -72,7 +72,7 @@ savepass(spass, uid)
 		goto ret;
 	if ((tpass = auth_finduid(uid, 0))) {	/* save by copying */
 		auth_copyid(spass, tpass);
-	  ret:return spass;
+ret:	return spass;
 	}
 	return (auth_identity *) 0;
 }
@@ -193,13 +193,13 @@ main(argc, argv)
 		}
 		if (Deliverymode == 1 && !(chp = chp2))
 			nlog(misrecpt), Deliverymode = 0;
-	  last_option:
+last_option:
 		switch (Deliverymode) {
 		case 0:
 			idhint = getenv(lgname);
 			if (mailfilter && crestarg) {
 				crestarg = 0;	/* -m will supersede -a */
-			  conflopt:nlog(conflicting);
+conflopt:		nlog(conflicting);
 				elog("options\n");
 				elog(pmusage);
 			}
@@ -213,7 +213,9 @@ main(argc, argv)
 #endif
 		case 1:
 			if (presenviron || mailfilter)
+#ifdef LMTP
 confldopt:
+#endif
 			{
 				presenviron = mailfilter = 0;	/* -d disables -p and -m */
 				goto conflopt;
@@ -242,7 +244,7 @@ confldopt:
 			fclose(stdout);
 			rclose(STDOUT);		/* just to make sure */
 			if (0 > opena(devnull))
-			  nodevnull:
+nodevnull:
 			{
 				writeerr(devnull);
 				syslog(LOG_EMERG, slogstr, errwwriting, devnull);
@@ -343,7 +345,9 @@ confldopt:
 					syslog(LOG_ERR, slogstr, unkuser, chp2);
 					return EX_NOUSER;	/* we don't handle strangers */
 				}
+#ifdef LMTP
 dorcpt:
+#endif
 				if (enoughprivs(passinvk, euid, egid, auth_whatuid(pass), auth_whatgid(pass)))
 					goto Setuser;
 				nlog(insufprivs);
@@ -401,7 +405,7 @@ dorcpt:
 								S_ISDIR(stbuf.st_mode) ||	/* no directories! */
 								!savepass(spassinvk, stbuf.st_uid)	/* user exists? */
 								)
-						  nospecial:{
+nospecial:					{
 								static const char densppr[] = "Denying special privileges for";
 								nlog(densppr);
 								logqnl(rcfile);
@@ -446,7 +450,7 @@ Setuser:
 		sgid = egid;
 		chp = (char *) tgetenv(orgmail);
 		if (mailfilter || !screenmailbox(chp, egid, Deliverymode))
-		  nix_sysmbox:
+nix_sysmbox:
 		{
 			sputenv(orgmail);	/* nix delivering to system mailbox */
 			if (privileged)		/* don't need this any longer */
@@ -516,7 +520,7 @@ Setuser:
 			if (mainloop() != rcs_EOF)
 				goto mailed;
 	}
-  nomore_rc:
+nomore_rc:
 	if (ifstack.vals)
 		free(ifstack.vals);
 	; {
@@ -525,7 +529,10 @@ Setuser:
 		succeed = 0;
 		if (*(chp = (char *) fdefault)) {	/* DEFAULT set? */
 			int             len;
-			setuid(uid);		/* make sure we have enough space */
+			if (setuid(uid)) {
+				perror("setuid");
+				return (1);
+			}
 			if (linebuf < (len = strlen(chp) + strlen(lockext) + UNIQnamelen))
 				allocbuffers(linebuf = len, 1);	/* to perform the lock & delivery */
 			if (writefolder(chp, (char *) 0, themail.p, filled, 0, 1))	/* default */
@@ -537,7 +544,7 @@ Setuser:
 				succeed = 1;	/* try the last resort */
 		}
 		if (succeed)			/* should we panic now? */
-		  mailed:retval = EXIT_SUCCESS;
+mailed:		retval = EXIT_SUCCESS;
 									/* we're home free, mail delivered */
 	}
 	unlock(&loclock);
@@ -589,7 +596,7 @@ tryopen(delay_setid, rctype, dowarning)
 		setids();				/* need the privileges or it's accessible, then setid now */
 	if (0 > bopen(buf)) {		/* try opening the rcfile */
 		if (dowarning)
-		  rerr:readerr(buf);
+rerr:		readerr(buf);
 		return 0;
 	}
 	if (!delay_setid && privileged) {	/* if we're not supposed to delay */
@@ -605,7 +612,7 @@ tryopen(delay_setid, rctype, dowarning)
 #endif
 	{
 		static const char susprcf[] = "Suspicious rcfile";
-	  suspicious_rc:
+suspicious_rc:
 		closerc();
 		nlog(susprcf);
 		logqnl(buf);
@@ -676,11 +683,10 @@ P((void))
 		goto commint;
 		do {
 			skipline();
-		  commint:do
+commint:	do {
 				skipspace();	/* skip whitespace */
-			while (testB('\n'));
-		}
-		while (testB('#'));		/* no comment :-) */
+			} while (testB('\n'));
+		} while (testB('#'));		/* no comment :-) */
 		if (testB(':')) {		/* check for a recipe */
 			int             locknext, succeed;
 			char           *startchar;
@@ -749,7 +755,7 @@ P((void))
 			skipspace();
 			if (i)
 				zombiecollect(), concon('\n');
-		  progrm:if (testB('!')) {
+progrm:		if (testB('!')) {
 								/* forward the mail */
 				if (!i)
 					skiprc |= 1;
@@ -784,7 +790,7 @@ P((void))
 						*(char *) (Tmnate++) = '\0';	/* fake it */
 						goto tostdout;
 					}
-				  forward:if (locknext) {
+forward:			if (locknext) {
 						if (!tolock) {	/* an explicit lockfile specified already */
 							*buf2 = '\0';	/* find the implicit lockfile ('>>name') */
 							for (chp = buf; (i = *chp++);)
@@ -806,7 +812,7 @@ P((void))
 									break;
 								}
 							if (!*buf2)
-						  nolock:{
+nolock:						{
 								nlog("Couldn't determine implicit lockfile from");
 								logqnl(buf);
 							}
@@ -929,26 +935,26 @@ P((void))
 				if (!i)			/* no match? */
 					skiprc |= 1;	/* temporarily disable subprograms */
 				if (readparse(chp, getb, 0, skiprc))
-			  fail:{
+fail:			{
 					succeed = 0;
 					goto setlsucc;
 				}
 				if (i) {
 					if (ofiltflag)	/* protect who use bogus filter-flags */
 						startchar = themail.p, tobesent = filled;	/* whole message */
-				  tostdout:rawnonl = flags[RAW_NONL];
+tostdout:			rawnonl = flags[RAW_NONL];
 					if (locknext)	/* write to a file or directory */
 						lcllock(tolock, buf);
 					inittmout(buf);	/* to break messed-up kernel locks */
 					if (writefolder(buf, strchr(buf, '\0') + 1, startchar, tobesent, ignwerr, 0) && (succeed = 1, !flags[CONTINUE]))
-				  frmailed:{
+frmailed:			{
 						if (ifstack.vals)
 							free(ifstack.vals);
 						return rcs_DELIVERED;
 					}
-				  logsetlsucc:if (succeed && flags[CONTINUE] && lgabstract == 2)
+logsetlsucc:		if (succeed && flags[CONTINUE] && lgabstract == 2)
 						logabstract(tgetenv(lastfolder));
-				  setlsucc:rawnonl = 0;
+setlsucc:			rawnonl = 0;
 					lastsucc = succeed;
 					lasttell = -1;	/* for comsat */
 					resettmout();	/* clear any pending timer */

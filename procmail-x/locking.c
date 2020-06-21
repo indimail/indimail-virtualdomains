@@ -1,14 +1,12 @@
 /************************************************************************
- *	Whatever is needed for (un)locking files in various ways	*
- *									*
- *	Copyright (c) 1990-1997, S.R. van den Berg, The Netherlands	*
- *	Copyright (c) 1998-2001, Philip Guenther, The United States	*
- *						of America		*
- *	#include "../README"						*
+ * Whatever is needed for (un)locking files in various ways             *
+ * Copyright (c) 1990-1997, S.R. van den Berg, The Netherlands          *
+ * Copyright (c) 1998-2001, Philip Guenther, The United States          *
+ *                                                  of America          *
+ * #include "../README"                                                  *
  ************************************************************************/
 #ifdef RCS
-static /*const */ char rcsid[] =
-	"$Id: locking.c,v 1.63 2001/08/04 07:12:17 guenther Exp $";
+static /*const */ char rcsid[] = "$Id: locking.c,v 1.63 2001/08/04 07:12:17 guenther Exp $";
 #endif
 #include "procmail.h"
 #include "robust.h"
@@ -106,20 +104,20 @@ lockit(name, lockp)
 		}
 #endif
 		default:
-		  faillock:nlog("Lock failure on");
+faillock:	nlog("Lock failure on");
 			logqnl(name);
 			goto term;
 		}
 		permanent = nfsTRY;
-	  ds:ssleep((unsigned) locksleep);
-	  ce:if (nextexit)
-	  term:{
-			free(name);			/* drop the preallocated buffer */
+ds:		ssleep((unsigned) locksleep);
+ce:		if (nextexit)
+term:	{
+			free(name);		/* drop the preallocated buffer */
 			break;
 		}
 	}
-	if (!privileged)			/* we already set our ids */
-		setegid(gid);			/* we put back our regular permissions */
+	if (!privileged)		/* we already set our ids */
+		if (setegid(gid));	/* we put back our regular permissions */
 	lcking &= ~lck_DELAYSIG;
 	if (nextexit)
 		elog(whilstwfor), elog("lockfile"), logqnl(name), Terminate();
@@ -157,12 +155,12 @@ unlock(lockp)
 	onguard();
 	if (*lockp) {
 		if (!strcmp(*lockp, defdeflock))	/* is it the system mailbox lockfile? */
-			setegid(sgid);		/* try and get some extra permissions */
+			if (setegid(sgid));		/* try and get some extra permissions */
 		yell("Unlocking", *lockp);
 		if (unlink(*lockp))
 			nlog("Couldn't unlock"), logqnl(*lockp);
 		if (!privileged)		/* we already set our ids */
-			setegid(gid);		/* we put back our regular permissions */
+			if (setegid(gid));		/* we put back our regular permissions */
 		if (!nextexit)			/* if not inside a signal handler */
 			free(*lockp);
 		*lockp = 0;
@@ -170,9 +168,9 @@ unlock(lockp)
 	offguard();
 }
 
-					/*
-					 * an NFS secure exclusive file open 
-					 */
+/*
+ * an NFS secure exclusive file open 
+ */
 int
 xcreat(name, mode, tim, chownit)
 	const char     *const name;
@@ -322,4 +320,4 @@ P((void))
 	oldfdlock = -1;
 	return i;
 }
-#endif							/* fdlock */
+#endif /* fdlock */
