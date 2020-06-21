@@ -3454,6 +3454,7 @@ collation-server = utf8mb4_unicode_ci
 #If set to 0 (default), usually for security reasons, attempts to perform a
 #LOAD DATA LOCAL will fail with an error message.
 # local-infile = 1
+```
 
 MySQL community Client
 You first need to copy ca.pem and ca-key.pem to the directory /var/indimail/mysqldb/data. Then run the following commands
