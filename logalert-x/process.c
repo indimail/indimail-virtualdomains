@@ -1,5 +1,8 @@
 /*
  * $Log: process.c,v $
+ * Revision 1.3  2020-06-21 12:49:17+05:30  Cprogrammer
+ * fixed possible buffer overflow
+ *
  * Revision 1.2  2020-04-30 19:49:14+05:30  Cprogrammer
  * fixed compilation error
  *
@@ -25,15 +28,14 @@ start_process(struct process_hdr *p)
 		exit(1);
 	}
 	if (ppid == 0) {			// child
-	//char *path = NULL;
 		char           *pgname = progname;
-		char            path[PATH_MAX];
-		char            pwd[PATH_MAX];
+		char            path[PATH_MAX + 2];
+		char            pwd[PATH_MAX - 1];
 		char           *pgargs[20];
 		uint            i, j;
 
 		i = 0;
-		if (!getcwd(pwd, PATH_MAX)) {
+		if (!getcwd(pwd, PATH_MAX - 1)) {
 			perror("getcwd");
 			fatal("getcwd failed");
 		}
@@ -85,8 +87,8 @@ start_process(struct process_hdr *p)
 		if (execv(path, pgargs) < 0) {
 		//this means we did not execute from same directory, so
 		//try using BINDIR instead.
-			memset(path, 0, PATH_MAX);
-			snprintf(path, PATH_MAX, "%s/%s", BINDIR, pgname);
+			memset(path, 0, sizeof(path));
+			snprintf(path, PATH_MAX - 1, "%s/%s", BINDIR, pgname);
 			execv(path, pgargs);
 		}
 		exit(0);

@@ -1,5 +1,8 @@
 /*
  * $Log: common.c,v $
+ * Revision 1.7  2020-06-21 12:47:36+05:30  Cprogrammer
+ * added sockread() function
+ *
  * Revision 1.6  2017-03-13 14:16:00+05:30  Cprogrammer
  * fixed compilation warnings
  *
@@ -24,7 +27,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: common.c,v 1.6 2017-03-13 14:16:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: common.c,v 1.7 2020-06-21 12:47:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifndef HAVE_INDIMAIL

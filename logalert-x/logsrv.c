@@ -1,5 +1,8 @@
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.14  2020-06-21 12:49:10+05:30  Cprogrammer
+ * quench rpmlint
+ *
  * Revision 1.13  2018-08-21 19:38:58+05:30  Cprogrammer
  * fix for rpc.h on openSUSE tumbleweed
  *
@@ -114,7 +117,7 @@ program RPCLOG
 #define STATUSDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.13 2018-08-21 19:38:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.14 2020-06-21 12:49:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef __STDC__
@@ -476,7 +479,7 @@ main(int argc, char **argv)
 		statusdir = STATUSDIR;
 	if (!foreground) {
 		if ((pidfp = fopen(PIDFILE, "r"))) {
-			(void) fscanf(pidfp, "%d", &logsrvpid);
+			if (fscanf(pidfp, "%d", &logsrvpid) != 1) ;
 			(void) fclose(pidfp);
 			if (logsrvpid && !kill(logsrvpid, 0)) {
 				(void) filewrt(2, "%s is already running\n", progname);
@@ -728,7 +731,7 @@ server(int silent)
 
 	if ((retval = sockread(0, hostname, MAXHOSTNAMELEN)) == -1) {
 		(void) filewrt(2, "read: %s\n", strerror(errno));
-		write(3, "1", 1);
+		if (write(3, "1", 1) == -1) ;
 		return (1);
 	} else
 	if (!retval)
@@ -736,10 +739,10 @@ server(int silent)
 	hostname[retval] = 0;
 	if (!(socketfp = fdopen(0, "r"))) {
 		(void) filewrt(2, "fdopen: %s\n", strerror(errno));
-		write(3, "1", 1);
+		if (write(3, "1", 1) == -1) ;
 		return (1);
 	}
-	write(3, "1", 1);
+	if (write(3, "1", 1) == -1) ;
 	(void) sprintf(statusfile, "%s/%s.status", statusdir, hostname);
 	if (!access(statusfile, R_OK)) {
 		if ((fd = open(statusfile, O_RDWR, 0644)) == -1) {
@@ -776,8 +779,7 @@ server(int silent)
 	(void) signal(SIGTERM, SigTerm);
 	for (;; sleep(5)) {
 		for (;;) {
-			(void) fgets(buffer, MAXBUF - 1, socketfp);
-			if (feof(socketfp)) {
+			if (!fgets(buffer, MAXBUF - 1, socketfp) || feof(socketfp)) {
 				(void) filewrt(2, "client terminated on %s\n", hostname);
 				shutdown(0, 0);
 				return (1);

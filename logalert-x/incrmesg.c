@@ -1,5 +1,8 @@
 /*
  * $Log: incrmesg.c,v $
+ * Revision 1.6  2020-06-21 12:47:48+05:30  Cprogrammer
+ * quench rpmlint
+ *
  * Revision 1.5  2013-05-15 00:19:32+05:30  Cprogrammer
  * fixed warnings
  *
@@ -47,7 +50,7 @@
 #define SEEKDIR "/var/tmp/incrmesg"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: incrmesg.c,v 1.5 2013-05-15 00:19:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: incrmesg.c,v 1.6 2020-06-21 12:47:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct msgtable
@@ -190,9 +193,7 @@ IOplex()
 #endif
 		for (dflag = 0, startsrno = msgptr->machcnt;;)
 		{
-			(void) fgets(Buffer, MAXBUF - 2, msgptr->fp);
-			seekval[0] = ftell(msgptr->fp);
-			if (feof(msgptr->fp))
+			if (!fgets(Buffer, MAXBUF - 2, msgptr->fp) || feof(msgptr->fp))
 			{
 				/*
 				 * If message file has been moved than update
@@ -218,6 +219,7 @@ IOplex()
 			}
 			else
 			{
+				seekval[0] = ftell(msgptr->fp);
 				if (!dflag++)
 				{
 					printf("=======================================================\n");
@@ -236,7 +238,7 @@ IOplex()
 				}
 				seekval[1] = msgptr->machcnt;
 				(void) lseek(msgptr->seekfd, 0, SEEK_SET);
-				(void) write(msgptr->seekfd, seekval, sizeof(seekval));
+				if (write(msgptr->seekfd, seekval, sizeof(seekval)) == -1) ;
 			}
 		} /* end of for(dflag = 0;;) */
 	} /* end of for(msgptr = msghd;;) */
@@ -270,7 +272,7 @@ checkfiles(fname, msgfp, seekval, seekfd)
 			rewind(msgfp);
 			(void) lseek(seekfd, 0l, SEEK_SET);
 			seekval[0] = 0l;
-			(void) write(seekfd, seekval, sizeof(seekval));
+			if (write(seekfd, seekval, sizeof(seekval)) == -1) ;
 			return (1);
 		} else
 			break;
@@ -294,7 +296,7 @@ checkfiles(fname, msgfp, seekval, seekfd)
 		rewind(msgfp);
 		(void) lseek(seekfd, 0l, SEEK_SET);
 		seekval[0] = 0l;
-		(void) write(seekfd, &seekval, sizeof(seekval));
+		if (write(seekfd, &seekval, sizeof(seekval)) == -1);
 		return (1);
 	}
 }

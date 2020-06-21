@@ -9,13 +9,13 @@ install_sh_PROGRAM = $(install_sh)    -c
 INSTALL_SCRIPT = ${INSTALL}           -c
 install_sh_SCRIPT = $(install_sh)     -c
 
-LIBS = @LEXLIB@ @LIBPCRE_LIBS@
-
 bin_PROGRAMS=logclient incrmesg logalert showbytes
 sbin_PROGRAMS=logsrv rpclog
 
 man_MANS = logalert.8 logsrv.8 rpclog.8 incrmesg.1 logclient.1 showbytes.1
-doc_DOCS = COPYING README.md
+mandir = @prefix@/share/man
+
+doc_DATA = LICENSE README.md
 
 MOSTLYCLEANFILES=lex.c parser.h parser.c logalert_perm_list debian/Makefile
 
@@ -42,7 +42,7 @@ edit = sed \
 	-e 's,@prefix\@,$(prefix),g'
 
 logalert_SOURCES = lex.c utils.c log.c parser.y process.c monitor.c action.c sig.c user.c main.c 
-logalert_LDADD = $(LIBS)
+logalert_LDADD = @LEXLIB@ @LIBPCRE_LIBS@
 
 logclient_SOURCES=logclient.c common.c tls.c
 logclient_LDADD = $(LIB_INDIMAIL) $(LIB_SSL) $(LIB_QMAIL)

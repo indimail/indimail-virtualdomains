@@ -1,5 +1,8 @@
 /*
  * $Log: logclient.c,v $
+ * Revision 1.8  2020-06-21 12:49:01+05:30  Cprogrammer
+ * quench rpmlint
+ *
  * Revision 1.7  2013-05-15 00:38:47+05:30  Cprogrammer
  * added SSL encryption
  *
@@ -56,7 +59,7 @@
 #define SEEKDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logclient.c,v 1.7 2013-05-15 00:38:47+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logclient.c,v 1.8 2020-06-21 12:49:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -359,9 +362,7 @@ IOplex(lhost, sockfd)
 				for (;;)
 				{
 					errno = 0;
-					(void) fgets(Buffer, MAXBUF - 2, msgptr->fp);
-					seekval[0] = ftell(msgptr->fp);
-					if (feof(msgptr->fp))
+					if (!fgets(Buffer, MAXBUF - 2, msgptr->fp) || feof(msgptr->fp))
 					{
 						/*
 						 * If message file has been moved than update
@@ -378,11 +379,12 @@ IOplex(lhost, sockfd)
 							break;
 					} else
 					{
+						seekval[0] = ftell(msgptr->fp);
 						if (sslwrt(sockfd, log_timeout, "%s %ld %s", lhost, (msgptr->machcnt)++, Buffer) == -1)
 							return (-1);
 						seekval[1] = msgptr->machcnt;
-						(void) lseek(msgptr->seekfd, 0, SEEK_SET);
-						(void) write(msgptr->seekfd, seekval, sizeof(seekval));
+						if (lseek(msgptr->seekfd, 0, SEEK_SET)) ;
+						if (write(msgptr->seekfd, seekval, sizeof(seekval)) == -1) ;
 					}
 				} /* end of for(;;) */
 			}	/* End of FD_ISSET(masterfd) */
@@ -416,9 +418,9 @@ checkfiles(fname, msgfp, seekval, seekfd)
 			if (fd != msgfd)
 				(void) close(fd);
 			rewind(msgfp);
-			(void) lseek(seekfd, 0l, SEEK_SET);
+			if (lseek(seekfd, 0l, SEEK_SET)) ;
 			seekval[0] = 0l;
-			(void) write(seekfd, seekval, sizeof(seekval));
+			if (write(seekfd, seekval, sizeof(seekval)) == -1) ;
 			return (1);
 		} else
 			break;
@@ -442,7 +444,7 @@ checkfiles(fname, msgfp, seekval, seekfd)
 		rewind(msgfp);
 		(void) lseek(seekfd, 0l, SEEK_SET);
 		seekval[0] = 0l;
-		(void) write(seekfd, &seekval, sizeof(seekval));
+		if (write(seekfd, &seekval, sizeof(seekval)) == -1) ;
 		return (1);
 	}
 }

@@ -35,8 +35,8 @@ build-stamp:
 	#
 	# run configure script
 	#
-	./configure --prefix=${prefix} --mandir=${mandir} \
-		--sysconfdir=${sysconfdir} LEXLIB=""
+	./configure --prefix=${prefix} --sysconfdir=${sysconfdir} \
+		--mandir=${prefix}/share/man --datarootdir=${prefix}/share/indimail
 	#
 	# run make
 	#

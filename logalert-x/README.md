@@ -25,7 +25,6 @@ them even so.
 
 Please refer to LICENSE for license details.
 
-
 ## INSTALATION
 
 Please refer to INSTALL for instalation details.

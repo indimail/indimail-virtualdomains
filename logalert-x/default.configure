@@ -7,4 +7,6 @@ if [ ! -f conf-release ] ; then
 fi
 prefix=/usr
 sysconfdir=/etc/indimail
-./configure --prefix=$prefix --sysconfdir=$sysconfdir
+./configure --prefix=$prefix \
+	--sysconfdir=$sysconfdir \
+	--datarootdir=$prefix/share/indimail

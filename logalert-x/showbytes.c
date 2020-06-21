@@ -1,5 +1,8 @@
 /*
  * $Log: showbytes.c,v $
+ * Revision 1.3  2020-06-21 12:49:33+05:30  Cprogrammer
+ * quench rpmlint
+ *
  * Revision 1.2  2013-05-15 00:16:21+05:30  Cprogrammer
  * fixed warnings
  *
@@ -15,7 +18,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: showbytes.c,v 1.2 2013-05-15 00:16:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: showbytes.c,v 1.3 2020-06-21 12:49:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -25,7 +28,7 @@ main(int argc, char **argv)
 	int fd;
 
 	if (argc != 2) {
-		write(2, "usage: showbytes statusfile\n", 28);
+		if (write(2, "usage: showbytes statusfile\n", 28) == -1) ;
 		_exit (1);
 	}
 	if ((fd = open(argv[1], O_RDONLY)) == -1) {

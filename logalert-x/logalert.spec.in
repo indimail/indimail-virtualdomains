@@ -20,12 +20,9 @@
 
 Summary: Watch files for specific patterns
 Name: logalert
-Version: @VERSION@
-%if %build_on_obs == 1
-Release: 1.<B_CNT>
-%else
-Release: 1.1%{?dist}
-%endif
+Version: @version@
+Release: @release@%{?dist}
+#Release: 1.<B_CNT>
 
 %if %build_on_obs == 1
 License: GPL-3.0+
@@ -37,21 +34,22 @@ Group: Productivity/Networking/Email/Utilities
 Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 Source1: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 
-%if %{defined suse_version} || %{defined sles_version}
-BuildRequires: bison
-%endif
-BuildRequires: flex  
+
 %if %build_on_obs == 1
 BuildRequires: -post-build-checks  
 %endif
-BuildRequires: coreutils
+
+%if %{defined suse_version} || %{defined sles_version}
+BuildRequires: bison
+%endif
 %if 0%{?fedora_version} > 27 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700
 BuildRequires: libtirpc libtirpc-devel
 %endif
 %if 0%{?suse_version} >= 1550
 BuildRequires: libtirpc3 libtirpc-devel
 %endif
-BuildRequires: pcre-devel
+BuildRequires: pcre-devel libqmail-devel libqmail libindimail
+BuildRequires: flex coreutils
 
 %if %build_on_obs == 1
 %define packager Manvendra Bhangui <manvendra@indimail.org>
@@ -76,7 +74,10 @@ removal normally used by sysadmins.
 %setup -q
 
 %build
-%configure --prefix=%{_prefix}  --sysconfdir=%{sysconfdir} --mandir=%{mandir}
+%configure --prefix=%{_prefix}  \
+  --sysconfdir=%{sysconfdir} \
+  --mandir=%{mandir} \
+  --datarootdir=%{_prefix}/share/indimail
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && %{__rm} -fr $RPM_BUILD_ROOT
@@ -85,6 +86,8 @@ removal normally used by sysadmins.
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 %files
+%defattr(-,root,root)
+
 %attr(0755,root,root)                          %{_prefix}/bin/logalert
 %attr(0755,root,root)                          %{_prefix}/bin/logclient
 %attr(0755,root,root)                          %{_prefix}/bin/incrmesg
@@ -92,7 +95,10 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0755,root,root)                          %{_prefix}/sbin/rpclog
 %attr(0755,root,root)                          %{_prefix}/sbin/logsrv
 %attr(644,root,root)      %config(noreplace)   %{sysconfdir}/logalert_perm_list
-%defattr(-,root,root)
+
+%doc %attr(644,root,root)                      %{_prefix}/share/indimail/doc/logalert/LICENSE
+%doc %attr(644,root,root)                      %{_prefix}/share/indimail/doc/logalert/README.md
+
 %doc %attr(644,root,root)                      %{_mandir}/man1/incrmesg.1.gz
 %doc %attr(644,root,root)                      %{_mandir}/man1/logclient.1.gz
 %doc %attr(644,root,root)                      %{_mandir}/man1/showbytes.1.gz
