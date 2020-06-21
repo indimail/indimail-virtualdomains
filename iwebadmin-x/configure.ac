@@ -121,13 +121,6 @@ DISTRIB_VERSION=$(sh ./lsb_release -sr)
 fi
 AC_SUBST(DISTRIB_ID)
 AC_SUBST(DISTRIB_VERSION)
-if test -f conf-release
-then
-	release=$(cat conf-release)
-else
-	release="1.1"
-fi
-AC_SUBST(release)
 #libdir=$prefix/$acl_libdirstem
 auth_incs="-I$prefix/include/indimail -I$prefix/include/qmail"
 case "$host" in

@@ -2,7 +2,6 @@
 
 #noinst_LIBRARIES = libfbsql.a libtai64.a
 version = @VERSION@
-release = @release@
 
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
@@ -40,7 +39,7 @@ guilibexec_PROGRAMS = pwhelper
 
 guibin_SCRIPTS = indium litesrc supernotepad secpanel FMbrowse tkdiff
 
-noinst_SCRIPTS = indium.spec indium-rpmlintrc
+noinst_DATA = indium.spec indium-rpmlintrc
 
 MOSTLYCLEANFILES = indium litesrc common.tcl fileman.tcl supernotepad secpanel FMbrowse \
 				   tkdiff
@@ -63,7 +62,7 @@ edit = sed \
 	-e 's,@imagedir\@,$(shareddir)/indium/images,g' \
 	-e 's,@shareetcdir\@,$(sysconfdir),g' \
 	-e 's,@defaultdomain\@,$(defaultdomain),g' \
-	-e 's,@version\@,$(version),g' \
+	-e 's|@version\@|"`cat conf-release`"|g' \
 	-e 's,@release\@,$(release),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
@@ -93,7 +92,7 @@ pwhelper$(EXEEXT): $(pwhelper_DEPENDENCIES) $(pwhelper_OBJECTS)
 	$(LINK) $@.o pipe_exec.lo $(pwhelper_LDADD)
 indium-rpmlintrc: indium-rpmlintrc.in
 	$(edit) indium-rpmlintrc.in > $@
-debian/Makefile: debian/Makefile.in
+debian/Makefile: debian/Makefile.in conf-version conf-release
 	$(edit) $@.in > $@
 
 install-data-hook:

@@ -160,14 +160,6 @@ fi
 AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir",indimaildir's home directory)
 #'
 
-if test -f conf-release
-then
-	release=$(cat conf-release)
-else
-	release="1.1"
-fi
-AC_SUBST(release)
-
 if test -d /lib64 -a "$acl_libdirstem" = "lib"
 then
 	acl_libdirstem=lib64

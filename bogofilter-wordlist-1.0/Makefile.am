@@ -8,7 +8,7 @@ release=@release@
 SYSCONFDIR = @sysconfdir@
 sysconf_DATA = wordlist.db
 
-noinst_SCRIPTS = bogofilter-wordlist.spec
+noinst_DATA = bogofilter-wordlist.spec
 
 all-local: bogofilter-wordlist.spec
 install-data-local: wordlist.db
@@ -19,7 +19,7 @@ install-data-hook:
 edit = sed \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@version\@,$(version),g' \
-	-e 's,@release\@,$(release),g' \
+	-e "s|@release\@|"`cat conf-release`"|g" \
 	-e 's,@prefix\@,$(prefix),g'
 
 bogofilter-wordlist.spec: bogofilter-wordlist.spec.in catChangeLog conf-version conf-release

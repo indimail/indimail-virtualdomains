@@ -7,7 +7,6 @@ htmldir=@htmldir@
 imagedir=@imagedir@
 
 version=@VERSION@
-release=@release@ 
 
 EXTRA_DIST=BUGS FAQ TRANSLATORS html lang images contrib
 
@@ -52,7 +51,7 @@ edit = sed \
 	-e 's,@cgibindir\@,$(cgibindir),g' \
 	-e 's,@imagedir\@,$(imagedir),g' \
 	-e 's,@version\@,$(version),g' \
-	-e 's,@release\@,$(release),g' \
+	-e "s|@release\@|"`cat conf-release`"|g" \
 	-e 's,@prefix\@,$(prefix),g'
 
 iwebadmin.o: config.h iwebadmin.h 

@@ -3,7 +3,6 @@ SUBDIRS=eps-1.2
 
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
-release=@release@
 
 DEFS=@DEFS@ -Dlint -fno-strict-aliasing -I. -I/usr/include/qmail -Ieps-1.2 @auth_inc@
 
@@ -205,24 +204,22 @@ noinst_SCRIPTS = vadddomain_handle vadduser_handle vdeldomain_handle \
 	vdeluser_handle vrenameuser_handle
 
 noinst_DATA = indimail-permissions.easy indimail-permissions.paranoid \
-			  indimail-permissions.secure indimail.spec indimail-rpmlintrc \
-			  debian/Makefile
+	indimail-permissions.secure indimail.spec indimail-rpmlintrc
 
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain vmoduser vpasswd \
-				   vdeluser_handle vrenameuser_handle
+	vdeluser_handle vrenameuser_handle
 
 MOSTLYCLEANFILES=vcaliasrev myslave controlsync bogofilter-qfe \
-cronlist.i crypt vdeluser_handle vrenameuser_handle \
-cscope.* *.dSYM socket.lib mailzipper \
-perm_list.indimail dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
-vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
-vcfilter.1 indimail.7 indimail.mrtg.cfg overquota.sh \
-vadddomain_handle vadduser_handle vpasswd_handle vdeldomain_handle vaddaliasdomain_handle \
-vrenamedomain_handle login_tasks.3 authgeneric usr.sbin.mysqld usr.sbin.clamd \
-vmoduser_handle vmoduser.1 usr.bin.freshclam indimail.mod indimail.pp \
-indimail_config.h
-
-#DISTCLEANFILES=.gitignore
+	cronlist.i crypt vdeluser_handle vrenameuser_handle \
+	cscope.* *.dSYM socket.lib mailzipper \
+	perm_list.indimail dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
+	vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
+	vcfilter.1 indimail.7 indimail.mrtg.cfg overquota.sh \
+	vadddomain_handle vadduser_handle vpasswd_handle vdeldomain_handle vaddaliasdomain_handle \
+	vrenamedomain_handle login_tasks.3 authgeneric usr.sbin.mysqld usr.sbin.clamd \
+	vmoduser_handle vmoduser.1 usr.bin.freshclam indimail.mod indimail.pp \
+	indimail_config.h indimail-permissions.easy indimail-permissions.paranoid \
+	indimail-permissions.secure debian/Makefile
 
 vadddomain_SOURCES = vadddomain.c
 vadddomain_LDADD = @auth_libs@ isvalid_domain.lo
@@ -736,7 +733,7 @@ edit = sed \
 	-e 's}@PACKAGE\@}$(PACKAGE)}g' \
 	-e 's}@PACKAGE_VERSION\@}$(PACKAGE_VERSION)}g' \
 	-e 's}@version\@}$(VERSION)}g' \
-	-e 's|@release\@|$(release)|g' \
+	-e "s|@release\@|"`cat conf-release`"|g" \
 	-e 's}@pkgconfigdir\@}$(pkgconfigdir)}g' \
 	-e 's}@VERSION\@}$(VERSION)}g' \
 	-e 's}@DESTDIR\@}$(DESTDIR)}g' \

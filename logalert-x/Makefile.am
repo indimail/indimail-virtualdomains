@@ -1,7 +1,6 @@
 @SET_MAKE@
 ACLOCAL_AMFLAGS = -I m4
 version=@VERSION@
-release=@release@
 COFLAGS=-z+05:30
 DEFS = @DEFS@ -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-unused-function -Wno-return-type
 INSTALL_PROGRAM = ${INSTALL}          -c
@@ -16,11 +15,9 @@ man_MANS = logalert.8 logsrv.8 rpclog.8 incrmesg.1 logclient.1 showbytes.1
 mandir = @prefix@/share/man
 
 doc_DATA = LICENSE README.md
-
-MOSTLYCLEANFILES=lex.c parser.h parser.c logalert_perm_list debian/Makefile
-
 noinst_SCRIPTS = logalert.spec logalert-rpmlintrc
 
+MOSTLYCLEANFILES=lex.c parser.h parser.c logalert_perm_list debian/Makefile
 DISTCLEANFILES = *~
 
 SYSCONFDIR = @sysconfdir@
@@ -32,7 +29,7 @@ AM_YFLAGS  = -d
 edit = sed \
 	-e 's,@indimaildir\@,$(prefix),g' \
 	-e 's,@version\@,$(version),g' \
-	-e 's,@release\@,$(release),g' \
+	-e "s,@release\@,"`cat conf-release`",g" \
 	-e 's,@VERSION\@,$(VERSION),g' \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
 	-e 's,@mandir\@,$(mandir),g' \
@@ -70,7 +67,7 @@ logsrv.8: logsrv.man
 	$(edit) logsrv.man > $@
 logclient.1: logclient.man
 	$(edit) logclient.man > $@
-debian/Makefile: debian/Makefile.in
+debian/Makefile: debian/Makefile.in conf-version conf-release
 	$(edit) $@.in > $@
 logalert_perm_list: logalert_perm_list.in
 	$(edit) $@.in > $@

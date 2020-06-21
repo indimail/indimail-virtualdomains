@@ -38,7 +38,7 @@ BuildRequires: -post-build-checks
 Requires: indimail-spamfilter 
 
 %description
-bogofilter-wordlist provides a SPAM database for bogofilter in Berkeley DB format
+bogofilter-wordlist provides SPAM database for bogofilter in Berkeley DB format
 
 %prep
 %setup -q

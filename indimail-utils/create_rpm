@@ -64,6 +64,12 @@ then
 else
 	rpmbuild=$HOME/rpmbuild
 fi
+copy_src=0
+echo -n "Copy Source Files - "
+read key
+if [ " $key" = " y" -o " $key" = " Y" ] ; then
+	copy_src=1
+fi
 
 make -s indimail-utils.spec
 if [ $? -ne 0 ] ; then
@@ -73,63 +79,72 @@ fi
 if [ -d ../stage ] ; then
 	/bin/rm -rf ../stage
 fi
-mkdir ../stage
-cd ..
-list=`get_tar_files`
-for i in $list
-do
-	echo "Versioning $i"
-	dir=`echo $i|cut -d- -f1`
-	if [ ! -d $dir-x ] ; then
-		echo "$dir-x: No such file or directory" 1>&2
-		exit 1
+if [ $copy_src -eq 1 ] ; then
+	if [ -d ../stage ] ; then
+		/bin/rm -rf ../stage
 	fi
-	case "$dir" in
-		altermime)
-		package_version=$altermime_version
-		;;
-		ripmime)
-		package_version=$ripmime_version
-		;;
-		flash)
-		package_version=$flash_version
-		;;
-		fortune)
-		package_version=$fortune_version
-		;;
-		mpack)
-		package_version=$mpack_version
-		;;
-	esac
-	/bin/cp -rp "$dir"-x stage/$dir-"$package_version"
-	cd stage/$dir-"$package_version"
-	echo "Cleaning $dir-$package_version"
-	make -s clean > /dev/null
-	make -s distclean > /dev/null
-	/bin/rm -rf autom4te.cache .deps
+	mkdir ../stage
 	cd ..
-	do_archive="gz"
-	case "$do_archive" in
-		gz)
-		echo "Archiving $dir-$package_version.tar.gz in `pwd`"
-		tar \
-		--exclude="$dir/.git" \
-		--exclude="$dir/debian"  \
-		--exclude="$dir/RCS" \
-		-cf - $dir-$package_version \
-		| gzip -c > $rpmbuild/SOURCES/"$dir"-"$package_version".tar.gz
-		SRC="$rpmbuild/SOURCES/"$dir"-"$package_version".tar.gz $SRC"
-		;;
-	esac
+	list=`get_tar_files`
+	for i in $list
+	do
+		echo "Versioning $i"
+		dir=`echo $i|cut -d- -f1`
+		if [ ! -d $dir-x ] ; then
+			echo "$dir-x: No such file or directory" 1>&2
+			exit 1
+		fi
+		case "$dir" in
+			altermime)
+			package_version=$altermime_version
+			;;
+			ripmime)
+			package_version=$ripmime_version
+			;;
+			flash)
+			package_version=$flash_version
+			;;
+			fortune)
+			package_version=$fortune_version
+			;;
+			mpack)
+			package_version=$mpack_version
+			;;
+		esac
+		/bin/cp -rp "$dir"-x stage/$dir-"$package_version"
+		cd stage/$dir-"$package_version"
+		echo "Cleaning $dir-$package_version"
+		make -s clean > /dev/null
+		make -s distclean > /dev/null
+		/bin/rm -rf autom4te.cache .deps
+		cd ..
+		do_archive="gz"
+		case "$do_archive" in
+			gz)
+			echo "Archiving $dir-$package_version.tar.gz in `pwd`"
+			tar \
+			--exclude="$dir/.git" \
+			--exclude="$dir/debian"  \
+			--exclude="$dir/RCS" \
+			-cf - $dir-$package_version \
+			| gzip -c > $rpmbuild/SOURCES/"$dir"-"$package_version".tar.gz
+			SRC="$rpmbuild/SOURCES/"$dir"-"$package_version".tar.gz $SRC"
+			;;
+		esac
+		cd ..
+	done
+	echo "Copying permissions files and rpmlintrc"
+	for i in `get_non_tar_files indimail-utils/indimail-utils.spec`
+	do
+		echo "/bin/cp -p stage/indimail-utils/$i $rpmbuild/SOURCES"
+		/bin/cp -p stage/indimail-utils/$i $rpmbuild/SOURCES
+		SRC="$rpmbuild/SOURCES/$i $SRC"
+	done
+	echo "Clearing stage directory"
+	/bin/rm -rf stage
+else
 	cd ..
-done
-echo "Copying permissions files and rpmlintrc"
-for i in `get_non_tar_files indimail-utils/indimail-utils.spec`
-do
-	echo "/bin/cp -p indimail-utils/$i $rpmbuild/SOURCES"
-	/bin/cp -p indimail-utils/$i $rpmbuild/SOURCES
-	SRC="$rpmbuild/SOURCES/$i $SRC"
-done
+fi
 echo "Preparing indimail-utils-"$version""
 dist=`uname -r |cut -d . -f4`
 if [ $# -gt 0 ] ; then
@@ -152,8 +167,6 @@ else
 		release=1
 	fi
 fi
-echo "Clearing stage directory"
-/bin/rm -rf stage
 echo -n "Build RPM for indimail-utils-"$version"-1."$release" (Y/N) - "
 read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then

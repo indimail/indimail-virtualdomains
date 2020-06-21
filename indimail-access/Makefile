@@ -48,5 +48,5 @@ indimail-access-permissions.paranoid: indimail-access-permissions.paranoid.in Ma
 	$(edit) $@.in > $@
 perm_list.imap: perm_list.in
 	$(edit) perm_list.in > $@
-debian/Makefile: debian/Makefile.in ../fetchmail-x/conf-version ../courier-imap-x/conf-version
+debian/Makefile: debian/Makefile.in ../fetchmail-x/conf-version ../courier-imap-x/conf-version conf-release
 	$(edit) $@.in > $@

@@ -15,12 +15,5 @@ AC_CONFIG_MACRO_DIR([m4])
 # Checks for typedefs, structures, and compiler characteristics.
 
 # Checks for library functions.
-if test -f conf-release
-then
-	release=$(cat conf-release)
-else
-	release="1.1"
-fi
-AC_SUBST(release)
 
 AC_OUTPUT(Makefile)

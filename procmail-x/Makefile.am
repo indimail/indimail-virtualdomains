@@ -4,9 +4,9 @@ AM_CFLAGS = -g -O4 -fPIC -Wno-parentheses
 RM	= /bin/rm -f
 DEVNULL = /dev/null
 DIST_COMMON=ChangeLog COPYING AUTHORS
-release=@release@
 BUILT_SOURCES = procmail.spec procmail-rpmlintrc \
-	procmail-permissions.easy procmail-permissions.secure procmail-permissions.paranoid
+	procmail-permissions.easy procmail-permissions.secure \
+	procmail-permissions.paranoid
 
 MOSTLYCLEANFILES=man/*.1 man/*.5 man/man.sed.* man/man.sed \
 	procmail_perm_list formail.1 lockfile.1 procmail.1 \
@@ -78,7 +78,7 @@ man/man.sed: manconf.c config.h includes.h procmail.h
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
 	-e 's,@version\@,$(VERSION),g' \
-	-e 's,@release\@,$(release),g' \
+	-e "s|@release\@|"`cat conf-release`"|g" \
 	-e 's,@VERSION\@,$(VERSION),g' \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
 	-e 's,@HOST\@,$(host),g' \

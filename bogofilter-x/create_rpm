@@ -19,31 +19,50 @@ else
 	rpmbuild=$HOME/rpmbuild
 fi
 
-if [ -d ../stage ] ; then
-	/bin/rm -rf ../stage
+copy_src=0
+echo -n "Copy Source Files - "
+read key
+if [ " $key" = " y" -o " $key" = " Y" ] ; then
+	copy_src=1
 fi
-mkdir ../stage
-cd ..
-echo "Versioning indimail-spamfilter-$version"
-cp -rp bogofilter-x stage/indimail-spamfilter-$version
-cd stage/indimail-spamfilter-$version
-echo "Cleaning indimail-spamfilter-$version"
-make -s clean > /dev/null
-make -s distclean > /dev/null
-/bin/rm -rf autom4te.cache .deps
-cd ..
-echo "Archiving indimail-spamfilter-$version.tar.bz2 in `pwd`"
-tar \
-	--exclude="indimail-spamfilter-$version/.git" \
-	--exclude="indimail-spamfilter-$version/debian"  \
-	--exclude="indimail-spamfilter-$version/RCS" \
-	-cf - indimail-spamfilter-"$version" \
-	| bzip2 -c > $rpmbuild/SOURCES/indimail-spamfilter-"$version".tar.bz2
-for i in rpmlintrc permissions.easy permissions.secure permissions.paranoid
-do
-	echo "cp -p indimail-spamfilter-$version/indimail-spamfilter-$i $rpmbuild/SOURCES"
-	cp -p indimail-spamfilter-$version/indimail-spamfilter-$i $rpmbuild/SOURCES
-done
+make -s indimail-spamfilter.spec
+if [ $? -ne 0 ] ; then
+	echo "make failed" 1>&2
+	exit 1
+fi
+
+if [ $copy_src -eq 1 ] ; then
+	if [ -d ../stage ] ; then
+		/bin/rm -rf ../stage
+	fi
+	mkdir ../stage
+	cd ..
+	echo "Versioning indimail-spamfilter-$version"
+	cp -rp bogofilter-x stage/indimail-spamfilter-$version
+	cd stage/indimail-spamfilter-$version
+	echo "Cleaning indimail-spamfilter-$version"
+	make -s clean > /dev/null
+	make -s distclean > /dev/null
+	/bin/rm -rf autom4te.cache .deps
+	cd ..
+	echo "Archiving indimail-spamfilter-$version.tar.bz2 in `pwd`"
+	tar \
+		--exclude="indimail-spamfilter-$version/.git" \
+		--exclude="indimail-spamfilter-$version/debian"  \
+		--exclude="indimail-spamfilter-$version/RCS" \
+		-cf - indimail-spamfilter-"$version" \
+		| bzip2 -c > $rpmbuild/SOURCES/indimail-spamfilter-"$version".tar.bz2
+	for i in rpmlintrc permissions.easy permissions.secure permissions.paranoid
+	do
+		echo "cp -p indimail-spamfilter-$version/indimail-spamfilter-$i $rpmbuild/SOURCES"
+		cp -p indimail-spamfilter-$version/indimail-spamfilter-$i $rpmbuild/SOURCES
+	done
+	cd ..
+	echo "Clearing stage directory"
+	/bin/rm -rf stage
+else
+	cd ..
+fi
 dist=`uname -r |cut -d . -f4`
 if [ $# -gt 0 ] ; then
 	release=$1
@@ -65,9 +84,6 @@ else
 		release=1
 	fi
 fi
-cd ..
-echo "Clearing stage directory"
-/bin/rm -rf stage
 echo -n "Build RPM for indimail-spamfilter-"$version"-1."$release" (Y/N) - "
 read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
@@ -84,7 +100,7 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		cp bogofilter-x/indimail-spamfilter.spec /tmp
 	fi
 	rpmbuild -ba --clean /tmp/indimail-spamfilter.spec
-	/bin/rm -f /tmp/indimail-spamfilter.spec
+	#/bin/rm -f /tmp/indimail-spamfilter.spec
 	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
 	rpm --addsign $rpmbuild/RPMS/$build_arch/indimail-spamfilter-"$version"-"1.$release".$dist.$build_arch.rpm
 	rpm --addsign $rpmbuild/SRPMS/indimail-spamfilter-"$version"-"1.$release".$dist.src.rpm
@@ -101,14 +117,17 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		) 2>&1 | less
 	fi
 fi
-echo -n "Remove Source (Y/N) - "
-read key
-if [ " $key" = " Y" -o " $key" = " y" ] ; then
-	echo "/bin/rm -f $rpmbuild/SOURCES/indimail-spamfilter-$version.tar.bz2"
-	/bin/rm -f $rpmbuild/SOURCES/indimail-spamfilter-$version.tar.bz2
-	for i in rpmlintrc permissions.easy permissions.secure permissions.paranoid
-	do
-		echo "/bin/rm -f $rpmbuild/SOURCES/indimail-spamfilter-$i"
-		/bin/rm -f $rpmbuild/SOURCES/indimail-spamfilter-$i
-	done
+
+if [ $copy_src -eq 1 ] ; then
+	echo -n "Remove Source (Y/N) - "
+	read key
+	if [ " $key" = " Y" -o " $key" = " y" ] ; then
+		echo "/bin/rm -f $rpmbuild/SOURCES/indimail-spamfilter-$version.tar.bz2"
+		/bin/rm -f $rpmbuild/SOURCES/indimail-spamfilter-$version.tar.bz2
+		for i in rpmlintrc permissions.easy permissions.secure permissions.paranoid
+		do
+			echo "/bin/rm -f $rpmbuild/SOURCES/indimail-spamfilter-$i"
+			/bin/rm -f $rpmbuild/SOURCES/indimail-spamfilter-$i
+		done
+	fi
 fi

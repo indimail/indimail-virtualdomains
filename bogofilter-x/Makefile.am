@@ -5,14 +5,13 @@ COFLAGS=-z+05:30
 # search path for m4 macros
 ACLOCAL_AMFLAGS = -I m4
 
-release=@release@
 spamfilter_version=@spamfilter_version@
 SUBDIRS = trio src . doc
 SYSCONFDIR = @sysconfdir@
 
 # what to build
-sysconf_DATA=	bogofilter.cf.example perm_list.bogofilter
-MOSTLYCLEANFILES=perm_list.bogofilter
+sysconf_DATA = bogofilter.cf.example perm_list.bogofilter
+MOSTLYCLEANFILES = perm_list.bogofilter debian/Makefile
 
 # ChangeLog, cvs2cl lives at http://www.red-bean.com/cvs2cl
 .PHONY:		$(srcdir)/changelog.txt
@@ -164,7 +163,7 @@ edit = sed \
 	-e 's}@PACKAGE_VERSION\@}$(PACKAGE_VERSION)}g' \
 	-e 's}@version\@}$(VERSION)}g' \
 	-e 's}@spamfilter_version\@}$(spamfilter_version)}g' \
-	-e 's|@release\@|$(release)|g' \
+	-e "s|@release\@|"`cat conf-release`"|g" \
 	-e 's}@VERSION\@}$(VERSION)}g' \
 	-e 's}@DESTDIR\@}$(DESTDIR)}g' \
 	-e 's}@HOST\@}$(host)}g' \
@@ -173,7 +172,7 @@ edit = sed \
 
 indimail-spamfilter.spec: indimail-spamfilter.spec.in catChangeLog doc/ChangeLog conf-version conf-release
 	(cat $@.in;./catChangeLog) | $(edit) > $@
-debian/Makefile: debian/Makefile.in configure.ac
+debian/Makefile: debian/Makefile.in configure.ac conf-version conf-release
 	$(edit) $@.in > $@;
 perm_list.bogofilter: perm_list.in
 	$(edit) perm_list.in > $@;

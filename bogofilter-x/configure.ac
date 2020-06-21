@@ -891,13 +891,6 @@ else
 	spamfilter_version="1.1"
 fi
 AC_SUBST(spamfilter_version)
-if test -f conf-release
-then
-	release=$(cat conf-release)
-else
-	release="1.1"
-fi
-AC_SUBST(release)
 
 bogofilter_transform=`echo "${program_transform_name}" | sed -e 's,\\\\\\\\,\\\\,g;s,\\\$\\\$,\$,g'`
 transformed_bogofilter=`echo bogofilter | sed -e "$bogofilter_transform"`

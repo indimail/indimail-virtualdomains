@@ -14,32 +14,51 @@ then
 else
 	rpmbuild=$HOME/rpmbuild
 fi
-
-if [ -d ../stage ] ; then
-	/bin/rm -rf ../stage
+copy_src=0
+echo -n "Copy Source Files - "
+read key
+if [ " $key" = " y" -o " $key" = " Y" ] ; then
+	copy_src=1
 fi
-mkdir ../stage
-cd ..
-echo "Versioning iwebadmin-$version"
-cp -rp iwebadmin-x stage/iwebadmin-$version
-cd stage/iwebadmin-$version
-echo "Cleaning iwebadmin-$version"
-make -s clean > /dev/null
-make -s distclean > /dev/null
-/bin/rm -rf autom4te.cache .deps
-cd ..
-echo "Archiving iwebadmin-$version.tar.gz in `pwd`"
-tar \
-	--exclude="iwebadmin-$version/.git" \
-	--exclude="iwebadmin-$version/debian"  \
-	--exclude="iwebadmin-$version/RCS" \
-	-cf - iwebadmin-"$version" \
-	| gzip -c > $rpmbuild/SOURCES/iwebadmin-"$version".tar.gz
-for i in rpmlintrc permissions.easy permissions.secure permissions.paranoid
-do
-	echo "cp iwebadmin-$version/iwebadmin-$i $rpmbuild/SOURCES"
-	cp iwebadmin-$version/iwebadmin-$i $rpmbuild/SOURCES
-done
+
+make -s iwebadmin.spec
+if [ $? -ne 0 ] ; then
+	echo "make failed" 1>&2
+	exit 0
+fi
+
+if [ $copy_src -eq 1 ] ; then
+	if [ -d ../stage ] ; then
+		/bin/rm -rf ../stage
+	fi
+	mkdir ../stage
+	cd ..
+	echo "Versioning iwebadmin-$version"
+	cp -rp iwebadmin-x stage/iwebadmin-$version
+	cd stage/iwebadmin-$version
+	echo "Cleaning iwebadmin-$version"
+	make -s clean > /dev/null
+	make -s distclean > /dev/null
+	/bin/rm -rf autom4te.cache .deps
+	cd ..
+	echo "Archiving iwebadmin-$version.tar.gz in `pwd`"
+	tar \
+		--exclude="iwebadmin-$version/.git" \
+		--exclude="iwebadmin-$version/debian"  \
+		--exclude="iwebadmin-$version/RCS" \
+		-cf - iwebadmin-"$version" \
+		| gzip -c > $rpmbuild/SOURCES/iwebadmin-"$version".tar.gz
+	for i in rpmlintrc permissions.easy permissions.secure permissions.paranoid
+	do
+		echo "cp iwebadmin-$version/iwebadmin-$i $rpmbuild/SOURCES"
+		cp iwebadmin-$version/iwebadmin-$i $rpmbuild/SOURCES
+	done
+	cd ..
+	echo "Clearing stage directory"
+	/bin/rm -rf stage
+else
+	cd ..
+fi
 dist=`uname -r |cut -d . -f4`
 if [ $# -gt 0 ] ; then
 	release=$1
@@ -61,9 +80,6 @@ else
 		release=1
 	fi
 fi
-cd ..
-echo "Clearing stage directory"
-/bin/rm -rf stage
 echo -n "Build RPM for iwebadmin-"$version"-1."$release" (Y/N) - "
 read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
@@ -98,14 +114,16 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		) 2>&1 | less
 	fi
 fi
-echo -n "Remove Source (Y/N) - "
-read key
-if [ " $key" = " Y" -o " $key" = " y" ] ; then
-	echo "/bin/rm -f $rpmbuild/SOURCES/iwebadmin-$version.tar.bz2"
-	/bin/rm -f $rpmbuild/SOURCES/iwebadmin-$version.tar.bz2
-	for i in rpmlintrc permissions.easy permissions.secure permissions.paranoid
-	do
-		echo "/bin/rm -f $rpmbuild/SOURCES/iwebadmin-$i"
-		/bin/rm -f $rpmbuild/SOURCES/iwebadmin-$i
-	done
+if [ $copy_src -eq 1 ] ; then
+	echo -n "Remove Source (Y/N) - "
+	read key
+	if [ " $key" = " Y" -o " $key" = " y" ] ; then
+		echo "/bin/rm -f $rpmbuild/SOURCES/iwebadmin-$version.tar.bz2"
+		/bin/rm -f $rpmbuild/SOURCES/iwebadmin-$version.tar.bz2
+		for i in rpmlintrc permissions.easy permissions.secure permissions.paranoid
+		do
+			echo "/bin/rm -f $rpmbuild/SOURCES/iwebadmin-$i"
+			/bin/rm -f $rpmbuild/SOURCES/iwebadmin-$i
+		done
+	fi
 fi

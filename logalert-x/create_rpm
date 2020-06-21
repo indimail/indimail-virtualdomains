@@ -14,29 +14,47 @@ then
 else
 	rpmbuild=$HOME/rpmbuild
 fi
-
-if [ -d ../stage ] ; then
-	/bin/rm -rf ../stage
+copy_src=0
+echo -n "Copy Source Files - "
+read key
+if [ " $key" = " y" -o " $key" = " Y" ] ; then
+	copy_src=1
 fi
-mkdir ../stage
-cd ..
-echo "Versioning logalert-$version"
-cp -rp logalert-x stage/logalert-$version
-cd stage/logalert-$version
-echo "Cleaning logalert-$version"
-make -s clean > /dev/null
-make -s distclean > /dev/null
-/bin/rm -rf autom4te.cache .deps
-cd ..
-echo "Archiving logalert-$version.tar.gz in `pwd`"
-tar \
-	--exclude="logalert-$version/.git" \
-	--exclude="logalert-$version/debian"  \
-	--exclude="logalert-$version/RCS" \
-	-cf - logalert-"$version" \
-	| gzip -c > $rpmbuild/SOURCES/logalert-"$version".tar.gz
-echo "cp logalert-$version/logalert-rpmlintrc $rpmbuild/SOURCES"
-cp logalert-$version/logalert-rpmlintrc $rpmbuild/SOURCES
+
+make -s logalert.spec
+if [ $? -ne 0 ] ; then
+	echo "make failed" 1>&2
+	exit 0
+fi
+if [ $copy_src -eq 1 ] ; then
+	if [ -d ../stage ] ; then
+		/bin/rm -rf ../stage
+	fi
+	mkdir ../stage
+	cd ..
+	echo "Versioning logalert-$version"
+	cp -rp logalert-x stage/logalert-$version
+	cd stage/logalert-$version
+	echo "Cleaning logalert-$version"
+	make -s clean > /dev/null
+	make -s distclean > /dev/null
+	/bin/rm -rf autom4te.cache .deps
+	cd ..
+	echo "Archiving logalert-$version.tar.gz in `pwd`"
+	tar \
+		--exclude="logalert-$version/.git" \
+		--exclude="logalert-$version/debian"  \
+		--exclude="logalert-$version/RCS" \
+		-cf - logalert-"$version" \
+		| gzip -c > $rpmbuild/SOURCES/logalert-"$version".tar.gz
+	echo "cp logalert-$version/logalert-rpmlintrc $rpmbuild/SOURCES"
+	cp logalert-$version/logalert-rpmlintrc $rpmbuild/SOURCES
+	cd ..
+	echo "Clearing stage directory"
+	/bin/rm -rf stage
+else
+	cd ..
+fi
 dist=`uname -r |cut -d . -f4`
 if [ $# -gt 0 ] ; then
 	release=$1
@@ -58,9 +76,6 @@ else
 		release=1
 	fi
 fi
-cd ..
-echo "Clearing stage directory"
-/bin/rm -rf stage
 echo -n "Build RPM for logalert-"$version"-1."$release" (Y/N) - "
 read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
@@ -96,11 +111,13 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		) 2>&1 | less
 	fi
 fi
-echo -n "Remove Source (Y/N) - "
-read key
-if [ " $key" = " Y" -o " $key" = " y" ] ; then
-	echo "/bin/rm -f $rpmbuild/SOURCES/logalert-$version.tar.bz2"
-	/bin/rm -f $rpmbuild/SOURCES/logalert-$version.tar.bz2
-	echo "/bin/rm -f $rpmbuild/SOURCES/logalert-rpmlintrc"
-	/bin/rm -f $rpmbuild/SOURCES/logalert-rpmlintrc
+if [ $copy_src -eq 1 ] ; then
+	echo -n "Remove Source (Y/N) - "
+	read key
+	if [ " $key" = " Y" -o " $key" = " y" ] ; then
+		echo "/bin/rm -f $rpmbuild/SOURCES/logalert-$version.tar.bz2"
+		/bin/rm -f $rpmbuild/SOURCES/logalert-$version.tar.bz2
+		echo "/bin/rm -f $rpmbuild/SOURCES/logalert-rpmlintrc"
+		/bin/rm -f $rpmbuild/SOURCES/logalert-rpmlintrc
+	fi
 fi

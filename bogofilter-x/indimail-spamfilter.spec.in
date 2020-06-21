@@ -38,7 +38,7 @@
 
 Summary: Fast anti-spam filtering by Bayesian statistical analysis
 Name: indimail-spamfilter
-Version: @spamfilter_version@
+Version: @version@
 Release: @release@%{?dist}
 
 %if %build_on_obs == 1

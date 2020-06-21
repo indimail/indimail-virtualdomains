@@ -137,14 +137,5 @@ AC_FUNC_STRTOD
 AC_CHECK_FUNCS([alarm endgrent endpwent gethostbyname gethostname getspnam memchr strerror memmove mkdir munmap pow socket strchr strcspn strncasecmp strpbrk strstr strtol uname setruid setrgid setreuid setregid strlcat strpbrk memset bzero bcopy strtol getspnam strcspn strncasecmp uname fstat strtod fdlock initgroups pow ftruncate fsync waitpid])
 AC_CHECK_LIB(m, pow)
 AC_CHECK_LIB(crypt, crypt)
-
-if test -f conf-release
-then
-	release=$(cat conf-release)
-else
-	release="1.1"
-fi
-AC_SUBST(release)
-
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

@@ -607,14 +607,6 @@ else
 	indimaildir=`cat indimail.dir`
 fi
 
-if test -f conf-release
-then
-	release=$(cat conf-release)
-else
-	release="1.1"
-fi
-AC_SUBST(release)
-
 DATE=`date`
 AC_SUBST(DATE)
 AC_SUBST(indimaildir)

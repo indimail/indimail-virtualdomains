@@ -54,73 +54,87 @@ else
 	rpmbuild=$HOME/rpmbuild
 fi
 
+copy_src=0
+echo -n "Copy Source Files - "
+read key
+if [ " $key" = " y" -o " $key" = " Y" ] ; then
+	copy_src=1
+fi
+
 make -s indimail-access.spec
 if [ $? -ne 0 ] ; then
 	echo "make failed" 1>&2
 	exit 0
 fi
-if [ -d ../stage ] ; then
-	/bin/rm -rf ../stage
-fi
-mkdir ../stage
-cd ..
-list=`get_tar_files`
-for i in $list
-do
-	dir=`echo $i | sed -e 's{-[0-9].*tar.bz2{{g' -e 's{-[0-9].*tar.xz{{g'`
-	echo "Versioning $dir"
-	if [ ! -d $dir-x ] ; then
-		echo "$dir-x: No such file or directory" 1>&2
-		exit 1
+
+if [ $copy_src -eq 1 ] ; then
+	if [ -d ../stage ] ; then
+		/bin/rm -rf ../stage
 	fi
-	case "$dir" in
-		courier-imap)
-		package_version=$courier_version
-		do_archive="bz2"
-		;;
-		fetchmail)
-		package_version=$fetchmail_version
-		do_archive="xz"
-		;;
-	esac
-	/bin/cp -rp "$dir"-x stage/$dir-"$package_version"
-	cd stage/$dir-"$package_version"
-	echo "Cleaning $dir-$package_version"
-	make -s clean > /dev/null
-	make -s distclean > /dev/null
-	/bin/rm -rf autom4te.cache .deps
+	mkdir ../stage
 	cd ..
-	case "$do_archive" in
-		xz)
-		echo "Archiving "$dir"-"$package_version".tar.xz in `pwd`"
-		tar \
-		--exclude=""$dir"-"$package_version"/.git" \
-		--exclude=""$dir"-"$package_version"/debian"  \
-		--exclude=""$dir"-"$package_version"/RCS" \
-		-cf - $dir-$package_version \
-		| xz -c > $rpmbuild/SOURCES/"$dir"-"$package_version".tar.xz
-		SRC="$rpmbuild/SOURCES/"$dir"-"$package_version".tar.xz $SRC"
-		;;
-		bz2)
-		echo "Archiving "$dir"-"$package_version".tar.bz2 in `pwd`"
-		tar \
-		--exclude=""$dir"-"$package_version"/.git" \
-		--exclude=""$dir"-"$package_version"/debian"  \
-		--exclude=""$dir"-"$package_version"/RCS" \
-		-cf - $dir-$package_version \
-		| bzip2 -c > $rpmbuild/SOURCES/"$dir"-"$package_version".tar.bz2
-		SRC="$rpmbuild/SOURCES/"$dir"-"$package_version".tar.bz2 $SRC"
-		;;
-	esac
+	list=`get_tar_files`
+	for i in $list
+	do
+		dir=`echo $i | sed -e 's{-[0-9].*tar.bz2{{g' -e 's{-[0-9].*tar.xz{{g'`
+		echo "Versioning $dir"
+		if [ ! -d $dir-x ] ; then
+			echo "$dir-x: No such file or directory" 1>&2
+			exit 1
+		fi
+		case "$dir" in
+			courier-imap)
+			package_version=$courier_version
+			do_archive="bz2"
+			;;
+			fetchmail)
+			package_version=$fetchmail_version
+			do_archive="xz"
+			;;
+		esac
+		/bin/cp -rp "$dir"-x stage/$dir-"$package_version"
+		cd stage/$dir-"$package_version"
+		echo "Cleaning $dir-$package_version"
+		make -s clean > /dev/null
+		make -s distclean > /dev/null
+		/bin/rm -rf autom4te.cache .deps
+		cd ..
+		case "$do_archive" in
+			xz)
+			echo "Archiving "$dir"-"$package_version".tar.xz in `pwd`"
+			tar \
+			--exclude=""$dir"-"$package_version"/.git" \
+			--exclude=""$dir"-"$package_version"/debian"  \
+			--exclude=""$dir"-"$package_version"/RCS" \
+			-cf - $dir-$package_version \
+			| xz -c > $rpmbuild/SOURCES/"$dir"-"$package_version".tar.xz
+			SRC="$rpmbuild/SOURCES/"$dir"-"$package_version".tar.xz $SRC"
+			;;
+			bz2)
+			echo "Archiving "$dir"-"$package_version".tar.bz2 in `pwd`"
+			tar \
+			--exclude=""$dir"-"$package_version"/.git" \
+			--exclude=""$dir"-"$package_version"/debian"  \
+			--exclude=""$dir"-"$package_version"/RCS" \
+			-cf - $dir-$package_version \
+			| bzip2 -c > $rpmbuild/SOURCES/"$dir"-"$package_version".tar.bz2
+			SRC="$rpmbuild/SOURCES/"$dir"-"$package_version".tar.bz2 $SRC"
+			;;
+		esac
+		cd ..
+	done
+	echo "Copying permissions files and rpmlintrc"
+	for i in `get_non_tar_files indimail-access/indimail-access.spec`
+	do
+		echo "/bin/cp -p stage/indimail-access/$i $rpmbuild/SOURCES"
+		/bin/cp -p stage/indimail-access/$i $rpmbuild/SOURCES
+		SRC="$rpmbuild/SOURCES/$i $SRC"
+	done
+	echo "Clearing stage directory"
+	/bin/rm -rf stage
+else
 	cd ..
-done
-echo "Copying permissions files and rpmlintrc"
-for i in `get_non_tar_files indimail-access/indimail-access.spec`
-do
-	echo "/bin/cp -p indimail-access/$i $rpmbuild/SOURCES"
-	/bin/cp -p indimail-access/$i $rpmbuild/SOURCES
-	SRC="$rpmbuild/SOURCES/$i $SRC"
-done
+fi
 echo "Preparing indimail-access-"$version""
 dist=`uname -r |cut -d . -f4`
 if [ $# -gt 0 ] ; then
@@ -143,8 +157,6 @@ else
 		release=1
 	fi
 fi
-echo "Clearing stage directory"
-/bin/rm -rf stage
 echo -n "Build RPM for indimail-access-"$version"-1."$release" (Y/N) - "
 read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
@@ -178,12 +190,14 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		) 2>&1 | less
 	fi
 fi
-echo -n "Remove Source (Y/N) - "
-read key
-if [ " $key" = " Y" -o " $key" = " y" ] ; then
-	for i in $SRC
-	do
-		echo "/bin/rm -f $i"
-		/bin/rm -f $i
-	done
+if [ $copy_src -eq 1 ] ; then
+	echo -n "Remove Source (Y/N) - "
+	read key
+	if [ " $key" = " Y" -o " $key" = " y" ] ; then
+		for i in $SRC
+		do
+			echo "/bin/rm -f $i"
+			/bin/rm -f $i
+		done
+	fi
 fi

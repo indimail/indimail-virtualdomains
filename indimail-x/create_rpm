@@ -35,41 +35,56 @@ else
 	rpmbuild=$HOME/rpmbuild
 fi
 
+copy_src=0
+echo -n "Copy Source Files - "
+read key
+if [ " $key" = " y" -o " $key" = " Y" ] ; then
+	copy_src=1
+fi
+
 make -s indimail.spec
 if [ $? -ne 0 ] ; then
 	echo "make failed" 1>&2
 	exit 0
 fi
-if [ -d ../stage ] ; then
-	/bin/rm -rf ../stage
-fi
-mkdir ../stage
-cd ..
-echo "Preparing indimail-"$version""
-/bin/cp -rp indimail-x stage/indimail-"$version"
-cd stage/indimail-"$version"
-echo "Cleaning indimail-"$version""
-make clean > /dev/null
-make distclean > /dev/null
-/bin/rm -rf autom4te.cache .deps
-/bin/rm -rf eps-1.2/autom4te.cache eps-1.2/.deps
-cd ..
-echo "Archiving indimail-"$version" in `pwd`"
-tar \
-	--exclude="indimail-$version/.git" \
-	--exclude="indimail-$version/debian"  \
-	--exclude="indimail-$version/RCS" \
-	-cf - indimail-"$version" \
-	| gzip -c > $rpmbuild/SOURCES/indimail-"$version".tar.gz
-SRC="$rpmbuild/SOURCES/indimail-"$version".tar.gz $SRC"
 
-echo "Copying permissions files and rpmlintrc"
-for i in `get_non_tar_files ../indimail-x/indimail.spec.in`
-do
-	echo "/bin/cp -p indimail-"$version"/$i $rpmbuild/SOURCES"
-	/bin/cp -p indimail-"$version"/$i $rpmbuild/SOURCES
-	SRC="$rpmbuild/SOURCES/$i $SRC"
-done
+if [ $copy_src -eq 1 ] ; then
+	if [ -d ../stage ] ; then
+		/bin/rm -rf ../stage
+	fi
+	mkdir ../stage
+	cd ..
+	echo "Preparing indimail-"$version""
+	/bin/cp -rp indimail-x stage/indimail-"$version"
+	cd stage/indimail-"$version"
+	echo "Cleaning indimail-"$version""
+	make clean > /dev/null
+	make distclean > /dev/null
+	/bin/rm -rf autom4te.cache .deps
+	/bin/rm -rf eps-1.2/autom4te.cache eps-1.2/.deps
+	cd ..
+	echo "Archiving indimail-"$version" in `pwd`"
+	tar \
+		--exclude="indimail-$version/.git" \
+		--exclude="indimail-$version/debian"  \
+		--exclude="indimail-$version/RCS" \
+		-cf - indimail-"$version" \
+		| gzip -c > $rpmbuild/SOURCES/indimail-"$version".tar.gz
+	SRC="$rpmbuild/SOURCES/indimail-"$version".tar.gz $SRC"
+
+	echo "Copying permissions files and rpmlintrc"
+	for i in `get_non_tar_files ../indimail-x/indimail.spec.in`
+	do
+		echo "/bin/cp -p indimail-"$version"/$i $rpmbuild/SOURCES"
+		/bin/cp -p indimail-"$version"/$i $rpmbuild/SOURCES
+		SRC="$rpmbuild/SOURCES/$i $SRC"
+	done
+	cd ..
+	echo "Clearing stage directory"
+	/bin/rm -rf stage
+else
+	cd ..
+fi
 dist=`uname -r |cut -d . -f4`
 if [ $# -gt 0 ] ; then
 	release=$1
@@ -91,9 +106,6 @@ else
 		release=1
 	fi
 fi
-cd ..
-echo "Clearing stage directory"
-/bin/rm -rf stage
 echo -n "Build RPM for indimail-"$version"-1."$release" (Y/N) - "
 read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
@@ -133,12 +145,14 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		) 2>&1 | less
 	fi
 fi
-echo -n "Remove Source (Y/N) - "
-read key
-if [ " $key" = " Y" -o " $key" = " y" ] ; then
-	for i in $SRC
-	do
-		echo "/bin/rm -f $i"
-		/bin/rm -f $i
-	done
+if [ $copy_src -eq 1 ] ; then
+	echo -n "Remove Source (Y/N) - "
+	read key
+	if [ " $key" = " Y" -o " $key" = " y" ] ; then
+		for i in $SRC
+		do
+			echo "/bin/rm -f $i"
+			/bin/rm -f $i
+		done
+	fi
 fi
