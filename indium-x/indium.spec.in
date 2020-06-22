@@ -1,6 +1,6 @@
 #
 #
-# $Id: indium.spec.in,v 1.21 2018-12-23 15:51:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.22 2020-06-22 09:15:48+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
