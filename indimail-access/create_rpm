@@ -126,8 +126,8 @@ if [ $copy_src -eq 1 ] ; then
 	echo "Copying permissions files and rpmlintrc"
 	for i in `get_non_tar_files indimail-access/indimail-access.spec`
 	do
-		echo "/bin/cp -p stage/indimail-access/$i $rpmbuild/SOURCES"
-		/bin/cp -p stage/indimail-access/$i $rpmbuild/SOURCES
+		echo "/bin/cp -p indimail-access/$i $rpmbuild/SOURCES"
+		/bin/cp -p indimail-access/$i $rpmbuild/SOURCES
 		SRC="$rpmbuild/SOURCES/$i $SRC"
 	done
 	echo "Clearing stage directory"
