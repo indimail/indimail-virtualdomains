@@ -20,7 +20,8 @@ indimailauthlibdir=@libexecdir@/imapmodules
 libindimail_LTLIBRARIES = libindimail.la
 libindimail_la_SOURCES = $(COMMONSOURCES)
 libindimail_la_LIBADD = @LIB_MYSQL@ $(LIB_QMAIL) -lm
-libindimail_la_LDFLAGS = -version-info @LIBVER@ -release @VERSION@
+libindimail_la_LDFLAGS = -version-info @LIBVER@
+#libindimail_la_LDFLAGS = -version-info @LIBVER@ -release @VERSION@
 libindimaildir=@libdir@
 
 iauth_LTLIBRARIES = iauth.la
@@ -218,8 +219,7 @@ MOSTLYCLEANFILES=vcaliasrev myslave controlsync bogofilter-qfe \
 	vadddomain_handle vadduser_handle vpasswd_handle vdeldomain_handle vaddaliasdomain_handle \
 	vrenamedomain_handle login_tasks.3 authgeneric usr.sbin.mysqld usr.sbin.clamd \
 	vmoduser_handle vmoduser.1 usr.bin.freshclam indimail.mod indimail.pp \
-	indimail_config.h indimail-permissions.easy indimail-permissions.paranoid \
-	indimail-permissions.secure debian/Makefile
+	indimail_config.h debian/Makefile
 
 vadddomain_SOURCES = vadddomain.c
 vadddomain_LDADD = @auth_libs@ isvalid_domain.lo
