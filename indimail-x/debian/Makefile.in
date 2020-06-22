@@ -95,8 +95,6 @@ indimail-Debian_9.0.dsc: indimail-Debian_9.0.dsc.in Makefile ../conf-version ../
 	$(edit) $@.in > $@;
 indimail-xUbuntu_18.04.dsc: indimail-xUbuntu_18.04.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@;
-indimail-xUbuntu_18.10.dsc: indimail-xUbuntu_18.10.dsc.in Makefile ../conf-version ../conf-release
-	$(edit) $@.in > $@;
 
 #sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
 
