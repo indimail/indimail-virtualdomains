@@ -9,7 +9,6 @@ basepath=@basepath@
 mysql_prefix=@mysql_prefix@
 defaultdomain=@defaultdomain@
 version=@version@
-release=@release@
 prefix=@prefix@
 arch=$(shell uname -m)
 #
@@ -53,7 +52,7 @@ edit = sed \
 	-e 's,@mysql_prefix\@,$(mysql_prefix),g' \
 	-e 's,@defaultdomain\@,$(defaultdomain),g' \
 	-e 's,@version\@,$(version),g' \
-	-e 's,@release\@,$(release),g' \
+	-e "s|@release\@|"`cat ../conf-release`"|g" \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
 	-e 's,@HOST\@,$(host),g' \
 	-e 's,@DATE\@,$(DATE),g' \
