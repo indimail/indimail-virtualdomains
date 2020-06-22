@@ -398,7 +398,7 @@ do
 done
 fi
 ${prefix}/sbin/svctool --servicedir=${servicedir} --norefreshsvc="0 $svc_list"
-${prefix}/sbin/svctool --fixedsharedlibs
+${prefix}/sbin/svctool --fixsharedlibs
 
 if [ -f ${libexecdir}/iupgrade.sh ] ; then
   echo "Running Custom Installation Script for post install"

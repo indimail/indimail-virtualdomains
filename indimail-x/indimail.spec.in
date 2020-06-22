@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.57 2020-06-22 14:22:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.58 2020-06-22 21:17:19+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1577,7 +1577,7 @@ if [ -f %{libexecdir}/iupgrade.sh ] ; then
   /bin/sh %{libexecdir}/iupgrade.sh posttrans noargs %{version} $*
 ) >> /var/log/indimail-setup.log 2>&1
 fi
-%{_prefix}/sbin/svctool --fixedsharedlibs
+%{_prefix}/sbin/svctool --fixsharedlibs
 
 %post -n libindimail
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
