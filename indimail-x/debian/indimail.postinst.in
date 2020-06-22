@@ -257,8 +257,8 @@ fi
 a_arch=`uname -m`
 if [ $noproxy -eq 0 ] ; then
 if [ " $a_arch" = " x86_64" ] ; then
-  imap_pop3_mem=52428800
-  imapspop3_mem=52428800
+  imap_pop3_mem=104857600
+  imapspop3_mem=104857600
 else
   imap_pop3_mem=52428800
   imapspop3_mem=52428800
@@ -339,7 +339,7 @@ ${prefix}/sbin/svctool --inlookup=infifo --servicedir=$servicedir \
 
 echo "Configuring poppass"
 if [ " $a_arch" = " x86_64" ] ; then
-  poppass_mem=52428800
+  poppass_mem=104857600
 else
   poppass_mem=52428800
 fi
@@ -398,6 +398,7 @@ do
 done
 fi
 ${prefix}/sbin/svctool --servicedir=${servicedir} --norefreshsvc="0 $svc_list"
+${prefix}/sbin/svctool --fixedsharedlibs
 
 if [ -f ${libexecdir}/iupgrade.sh ] ; then
   echo "Running Custom Installation Script for post install"

@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.56 2020-06-16 17:55:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.57 2020-06-22 14:22:18+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1181,8 +1181,8 @@ fi
 
 if [ %noproxy -eq 0 ] ; then
 %ifarch x86_64
-%global imap_pop3_mem 52428800
-%global imapspop3_mem 52428800
+%global imap_pop3_mem 104857600
+%global imapspop3_mem 104857600
 %else
 %global imap_pop3_mem 52428800
 %global imapspop3_mem 52428800
@@ -1286,7 +1286,7 @@ fi
 
 #poppass
 %ifarch x86_64
-%global poppass_mem   52428800
+%global poppass_mem   104857600
 %else
 %global poppass_mem   52428800
 %endif
@@ -1577,6 +1577,7 @@ if [ -f %{libexecdir}/iupgrade.sh ] ; then
   /bin/sh %{libexecdir}/iupgrade.sh posttrans noargs %{version} $*
 ) >> /var/log/indimail-setup.log 2>&1
 fi
+%{_prefix}/sbin/svctool --fixedsharedlibs
 
 %post -n libindimail
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then

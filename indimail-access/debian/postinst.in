@@ -196,9 +196,9 @@ else
 fi
 a_arch=`uname -m`
 if [ " $a_arch" = " x86_64" ] ; then
- fetchmail_mem=52428800
- imap_pop3_mem=52428800
- imapspop3_mem=52428800
+ fetchmail_mem=104857600
+ imap_pop3_mem=104857600
+ imapspop3_mem=104857600
 else
  fetchmail_mem=52428800
  imap_pop3_mem=52428800
