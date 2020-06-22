@@ -1,0 +1,14 @@
+*
+Release @version@-@release@ Start 03/06/2020
+01. New package indimail-access
+- 11/06/2020
+02. Upgraded fetchmail to 6.4.6
+- 12/06/2020
+03. fixed log directory created in /var/log/svc
+- 15/06/2020
+04. moved IMAP/POP3 proxy config from indimail-access to indimail-virtualdomains
+- 19/06/2020
+05. upgraded courier-imap to 5.0.11
+06. Add AC_PROG_CC_C99 to configure.ac
+- 22/06/2020
+07. increased soft mem for IMAP/POP3/poppass to 100Mb

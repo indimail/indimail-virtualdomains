@@ -1,0 +1,9 @@
+indimail-access (@version@-@release@) unstable; urgency=medium
+
+  * New package indimail-access
+  * Upgraded fetchmail to 6.4.6
+  * moved IMAP/POP3 proxy config from indimail-access to indimail-virtualdomains
+  * removed Pre-Depends indimail which created a circular dependency
+  * upgraded courier-imap to 5.0.11
+  * Add AC_PROG_CC_C99 to configure.ac
+  * increased soft mem for IMAP/POP3/poppass to 100Mb
