@@ -53,3 +53,7 @@ Release 3.2 Start 21/05/2020
 30. indimail.spec, indimail.postinst - fixed ilocal_upgrade.sh script not getting called
 - 19/06/2020
 31. Add AC_PROG_CC_C99 to configure
+- 22/06/2020
+32. increased soft mem for IMAP/POP3/poppass to 100Mb
+33. call svctool --fixsharedlibs during post install to fix mysql_lib control
+    file

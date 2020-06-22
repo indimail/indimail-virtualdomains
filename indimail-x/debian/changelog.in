@@ -31,3 +31,5 @@ indimail (@version@-@release@) unstable; urgency=low
   * indimail.spec - shutdown service before removing service directory
   * indimail.spec, indimail.postinst - fixed ilocal_upgrade.sh script not getting called
   * Add AC_PROG_CC_C99 to configure
+  * increased soft mem for IMAP/POP3/poppass to 100Mb
+  * call svctool --fixsharedlibs during post install to fix mysql_lib control file
