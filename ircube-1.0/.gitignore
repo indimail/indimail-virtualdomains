@@ -13,5 +13,7 @@ autom4te.cache
 config.log
 config.status
 ChangeLog
-debian/changelog
 README.urls
+conf-release
+debian/ircube.dsc
+debian/changelog

@@ -14,3 +14,5 @@ Release 1.0 Start 13/04/2017
 - 06/05/2020
 6.  Create supervised services for apache2, php-fpm
 7.  Enable php-fpm for apache2 on debian systems
+- 23/06/2020
+8.  fixed imap host variable

@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.69])
 AC_INIT([ircube],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-virtualdomains@indimail.org],ircube, [https://github.com/mbhangui/indimail-virtualdomains])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
 
 # Checks for programs.
 

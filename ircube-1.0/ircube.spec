@@ -213,11 +213,11 @@ make
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/markasjunk2.js
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/CHANGELOG
 
-%doc %{_prefix}/share/indimail/doc/README.ircube
+%doc %{_prefix}/share/indimail/doc/README-ircube.md
 %doc %{_prefix}/share/indimail/doc/COPYING.ircube
 
 %changelog
-* Mon May 04 2020 19:47:04 +0530 mbhangui@gmail.com 1.0-1.1%{?dist}
+* Tue Jun 23 2020 19:23:49 +0530 mbhangui@gmail.com 1.0-1.1%{?dist}
 Release 1.0 Start 13/04/2017
 1.  Created package for roundcube plugins
 2.  Created autoconfigure scripts
@@ -231,3 +231,4 @@ Release 1.0 Start 13/04/2017
 9.  updated roundcube_config for deskey, crontab entry
 10. Create supervised services for apache2, php-fpm
 11. Enable php-fpm for apache2 on debian systems
+12. fixed imap host variable

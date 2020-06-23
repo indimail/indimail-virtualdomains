@@ -1,4 +1,4 @@
-ircube (1.0-1) stable; urgency=low
+ircube (@version@-@release@) stable; urgency=low
 
   * First debian release of ircube for indimail
   * Created autoconfigure scripts
@@ -9,6 +9,4 @@ ircube (1.0-1) stable; urgency=low
   * updated roundcube_config for deskey, crontab entry
   * Create supervised services for apache2, php-fpm
   * Enable php-fpm for apache2 on debian systems
-
- -- Manvendra Bhangui <manvendra@indimail.org>  Wed, 06 May 2020 11:03:34 +0530
-
+  * fixed imap host variable
