@@ -1,0 +1,16 @@
+#!/bin/sh
+if [ ! -f /etc/debian_version ] ; then
+	echo "Not a debian or ubuntu distribution" 1>&2
+	exit 1
+fi
+version=$(cat conf-version)
+
+make -s debian/Makefile
+make -s -C debian
+/bin/rm -rf $HOME/stage/bogofilter-wordlist-$version
+mkdir -p    $HOME/stage/bogofilter-wordlist-$version
+cp -rp .    $HOME/stage/bogofilter-wordlist-$version
+cd          $HOME/stage/bogofilter-wordlist-$version
+dpkg-buildpackage -tc -b
+/bin/rm -rf $HOME/stage/bogofilter-wordlist-$version
+ls -lt $HOME/stage
