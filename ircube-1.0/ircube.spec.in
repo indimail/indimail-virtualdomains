@@ -143,7 +143,6 @@ make
 %attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/skins/classic/tabstyles.css
 %attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/config.inc.php.dist
 %attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/sauserprefs.sql
-%attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/.gitignore
 %attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/CHANGELOG
 %dir %attr(0755,root,root) %{pluginbase}/plugins/sauserprefs/lib
 %dir %attr(0755,root,root) %{pluginbase}/plugins/sauserprefs/lib/Roundcube
@@ -209,7 +208,6 @@ make
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/skins/classic/images/mail_toolbar.png
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/skins/classic/markasjunk2.css
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/config.inc.php.dist
-%attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/.gitignore
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/markasjunk2.js
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/CHANGELOG
 
