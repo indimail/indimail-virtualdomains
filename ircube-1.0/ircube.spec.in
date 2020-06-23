@@ -33,8 +33,8 @@
 %global libexecdir         %{_prefix}/libexec/indimail
 
 Name: ircube
-Version: 1.0
-Release: 1.1%{?dist}
+Version: @version@
+Release: @release@%{?dist}
 Summary: A collection of plugins for RoubdCube Mail
 
 %if %{undefined suse_version} && %{undefined sles_version}
@@ -217,18 +217,3 @@ make
 %doc %{_prefix}/share/indimail/doc/COPYING.ircube
 
 %changelog
-* Tue Jun 23 2020 19:23:49 +0530 mbhangui@gmail.com 1.0-1.1%{?dist}
-Release 1.0 Start 13/04/2017
-1.  Created package for roundcube plugins
-2.  Created autoconfigure scripts
-3.  Added INSTALL file
-4.  Added testssl.php
-5.  fixed typos in README
-6.  added roundcubemail config script roundcube_config
-7.  updated README
-8.  removed IF NOT EXISTS from create user sql statement to support older
-    mysqld versions
-9.  updated roundcube_config for deskey, crontab entry
-10. Create supervised services for apache2, php-fpm
-11. Enable php-fpm for apache2 on debian systems
-12. fixed imap host variable

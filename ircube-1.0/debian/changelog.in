@@ -10,3 +10,4 @@ ircube (@version@-@release@) stable; urgency=low
   * Create supervised services for apache2, php-fpm
   * Enable php-fpm for apache2 on debian systems
   * fixed imap host variable
+  * roundcube_config - updated for CentOS8
