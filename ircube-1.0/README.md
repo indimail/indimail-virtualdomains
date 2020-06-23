@@ -12,14 +12,21 @@ These instructions will work on CentOS, RHEL, Fedora. For Debian/Ubuntu and othe
 
 2. Connect to MySQL using a privileged user. IndiMail installation creates a privileged mysql user 'mysql'. It does not have the user 'root'. Look at the variable `PRIV_PASS` in `/usr/sbin/svctool` to know the password.
 
+   a) Create RoundCube Database and roundcube user
+
    ```
-   a) $ /usr/bin/mysql -u mysql -p mysql
-      MySQL> create database RoundCube_db;
-      MySQL> create user roundcube identified by 'subscribed';
-      MySQL> GRANT ALL PRIVILEGES on RoundCube_db.* to roundcube;
-      MySQL> FLUSH PRIVILEGES;
-      MySQL> QUIT;
-   b) /usr/bin/mysql -u roundcube -p RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
+   $ /usr/bin/mysql -u mysql -p mysql
+   MySQL> create database RoundCube_db;
+   MySQL> create user roundcube identified by 'subscribed';
+   MySQL> GRANT ALL PRIVILEGES on RoundCube_db.* to roundcube;
+   MySQL> FLUSH PRIVILEGES;
+   MySQL> QUIT;
+   ```
+
+   b) Initialize RoundCube Database
+
+   ```
+   $ /usr/bin/mysql -u roundcube -p RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
    ```
 
 3. Copy /etc/roundcubemail/config.inc.php.sample to /etc/roundcubemail/config.inc.php
@@ -178,14 +185,21 @@ These instructions will work on CentOS, RHEL, Fedora. For Debian/Ubuntu and othe
 
 2. Connect to MySQL using a privileged user
 
+   a) Create RoundCube Database and roundcube user
+
    ```
-   a) $ /usr/bin/mysql -u mysql -p mysql
-      MySQL> create database RoundCube_db;
-      MySQL> create user roundcube identified by 'subscribed';
-      MySQL> GRANT ALL PRIVILEGES on RoundCube_db.* to roundcube;
-      MySQL> FLUSH PRIVILEGES;
-      MySQL> QUIT;
-   b) /usr/bin/mysql -u roundcube -p RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
+   $ /usr/bin/mysql -u mysql -p mysql
+   MySQL> create database RoundCube_db;
+   MySQL> create user roundcube identified by 'subscribed';
+   MySQL> GRANT ALL PRIVILEGES on RoundCube_db.* to roundcube;
+   MySQL> FLUSH PRIVILEGES;
+   MySQL> QUIT;
+   ```
+
+   b) Initialize RoundCube Database
+
+   ```
+   /usr/bin/mysql -u roundcube -p RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
    ```
 
 3. Copy /etc/roundcubemail/config.inc.php.sample to /etc/roundcube.inc.php
@@ -281,8 +295,7 @@ These instructions will work on CentOS, RHEL, Fedora. For Debian/Ubuntu and othe
    $rcmail_config['iwebadmin_path'] = 'https://127.0.0.1/cgi-bin/iwebadmin';
    ```
 
-7. Change `sauserprefs_db_dsnw` and `sauserprefs_whitelist_cmd` in
-   `/usr/share/roundcubemail/sauserprefs/config.inc.php`
+7. Change `sauserprefs_db_dsnw` and `sauserprefs_whitelist_cmd` in `/usr/share/roundcubemail/sauserprefs/config.inc.php`
 
    ```
    $rcmail_config['sauserprefs_db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
@@ -354,8 +367,7 @@ These instructions will work on CentOS, RHEL, Fedora. For Debian/Ubuntu and othe
       SSLCertificateFile /etc/indimail/certs/servercert.pem
       ```
 
-      Now apache server needs access to servercert.pem. Add `apache` user to the `qmail` group. You can chose either of the below two options.
-      Options 2 is less secure, as it gives httpd access to qmail files
+      Now apache server needs access to servercert.pem. Add `apache` user to the `qmail` group. You can chose either of the below two options. Options 2 is less secure, as it gives httpd access to qmail files
 
       **Option 1**
 
