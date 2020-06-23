@@ -11,3 +11,4 @@ ircube (@version@-@release@) stable; urgency=low
   * Enable php-fpm for apache2 on debian systems
   * fixed imap host variable
   * roundcube_config - updated for CentOS8
+  * fix for opensuse ssl.conf and wwwrun group

@@ -22,3 +22,4 @@ Release 1.0 Start 13/03/2017
 12. fixed imap host variable
 13. roundcube_config - updated for CentOS8
 14. generate ircube.spec from ircube.spec.in
+15. fix for opensuse ssl.conf and wwwrun group
