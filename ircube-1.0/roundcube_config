@@ -363,8 +363,8 @@ fi
 if [ -f /etc/centos-release ] ; then
 	centos_release=$(cat /etc/centos-release|awk '{print $4}'|cut -d.  -f1)
 	case "$centos_release" in
-		7)
-		echo "configuring /etc/httpd/conf.d/roundcubemail.conf for CentOS 7"
+		7|8)
+		echo "configuring /etc/httpd/conf.d/roundcubemail.conf for CentOS $centos_release"
 		if [ -f /etc/httpd/conf.d/roundcubemail.conf ] ; then
 			$mv /etc/httpd/conf.d/roundcubemail.conf \
 				/etc/httpd/conf.d/roundcubemail.conf.BAK
