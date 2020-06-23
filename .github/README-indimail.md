@@ -139,7 +139,6 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 * [courier IMAP/POP3](https://www.courier-mta.org/imap/ "courier-imap")
 * [fetchmail](https://www.fetchmail.info "fetchmail")
-* [logalert](https://github.com/mbhangui/indimail-virtualdomains/tree/master/logalert-0.3 "logalert")
 
 [**indimail-auth**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-auth)
 
@@ -149,6 +148,7 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 [**indimail-utils**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils)
 
 * Utilities ([altermime](http://pldaniels.com/altermime/), [ripMIME](https://pldaniels.com/ripmime/), [mpack](https://github.com/mbhangui/indimail-virtualdomains/tree/master/mpack-x), [fortune](https://en.wikipedia.org/wiki/Fortune_\(Unix\)) and [flash](https://github.com/mbhangui/indimail-virtualdomains/tree/master/flash-x))
+* [logalert](https://github.com/mbhangui/indimail-virtualdomains/tree/master/logalert-0.3 "logalert")
 
 [**indimail-spamfilter**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/bogofilter-x "bogofilter")
 
