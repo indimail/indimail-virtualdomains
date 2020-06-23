@@ -7,3 +7,4 @@ indimail-access (@version@-@release@) unstable; urgency=medium
   * upgraded courier-imap to 5.0.11
   * Add AC_PROG_CC_C99 to configure.ac
   * increased soft mem for IMAP/POP3/poppass to 100Mb
+  * Removed creation of dkim key as that is part of indimail-mta package

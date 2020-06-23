@@ -12,3 +12,5 @@ Release @version@-@release@ Start 03/06/2020
 06. Add AC_PROG_CC_C99 to configure.ac
 - 22/06/2020
 07. increased soft mem for IMAP/POP3/poppass to 100Mb
+- 23/06/2020
+09. Removed creation of dkim key as that is part of indimail-mta package
