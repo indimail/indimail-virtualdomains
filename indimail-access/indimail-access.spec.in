@@ -7,7 +7,6 @@
 %if %{defined _project}
 # define if building on openSUSE build service
 %global build_on_obs       1
-%global reconfigure_mode   0
 %global reconf_fetchmail   0
 %global reconf_courierimap 0
 %global build_cflags       "-DOBS_BUILD %{build_cflags}"
@@ -15,7 +14,6 @@
 %else
 %define _project           local
 %global build_on_obs       0
-%global reconfigure_mode   0
 %global reconf_fetchmail   0
 %global reconf_courierimap 0
 %global _hardened_build    1
@@ -672,21 +670,13 @@ if [ %nofetchmail -eq 0 ] ; then
     logfifo="/tmp/logfifo"
   fi
   if [ %nodksignatures -eq 0 ] ; then
-    if [ -x %{_prefix}/bin/dknewkey ] ; then
+    if [ -f %{sysconfdir}/control/default ] ; then
       ver_opt="both"
-      sign_opt="both"
-      key_bit=$KEYBIT # set KEYBIT in environment variable
-      if [ " $key_bit" = " " ] ; then
-        key_bit=1024
-      fi
-      %{_prefix}/bin/dknewkey %{sysconfdir}/control/domainkeys/default $key_bit
     else
       ver_opt="none"
-      sign_opt="none"
     fi
   else
     ver_opt="none"
-    sign_opt="none"
   fi
   extra_opt=""
   if [ -x %{_prefix}/bin/bogofilter ] ; then

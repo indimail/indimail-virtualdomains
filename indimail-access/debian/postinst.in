@@ -208,21 +208,13 @@ fi
 if [ $nofetchmail -eq 0 ] ; then
 	# fetchmail
 	if [ $nodksignature -eq 0 ] ; then
-		if [ -x ${prefix}/bin/dknewkey ] ; then
+		if [ -f ${sysconfdir}/control/domainkeys/default ] ; then
 			ver_opt="both"
-			sign_opt="both"
-			key_bit=$KEYBIT # set KEYBIT in environment variable
-			if [ " $key_bit" = " " ] ; then
-				key_bit=1024
-			fi
-			${prefix}/bin/dknewkey ${sysconfdir}/control/domainkeys/default $key_bit
 		else
 			ver_opt="none"
-			sign_opt="none"
 		fi
 	else
 		ver_opt="none"
-		sign_opt="none"
 	fi
 	extra_opt=""
 	if [ -x ${prefix}/bin/bogofilter ] ; then
