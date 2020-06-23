@@ -253,6 +253,26 @@ if [ ! -d /var/indimail/mysqldb/data/RoundCube_db ] ; then
 	fi
 fi
 
+grep openSUSE /etc/os-release > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+	is_suse=1
+else
+	is_suse=0
+fi
+if [ -f /etc/debian_version ] ; then
+	# debian / ubuntu
+	httpd_group="www-data"
+	php_ini="ls /etc/php/*/apache2/php.ini"
+elif [ $is_suse -eq 1 ] ; then
+	httpd_group="wwwrun"
+	php_ini="/etc/php7/apache2/php.ini"
+else
+	# CentOS, Fedora
+	httpd_group="apache"
+	php_ini="/etc/php.ini"
+fi
+
+
 # same for all distros
 # RoundCube DB setup
 if [ -d /etc/roundcubemail -a ! -f /etc/roundcubemail/config.inc.php ] ; then
@@ -296,16 +316,6 @@ if [ -f /usr/share/roundcubemail/plugins/sauserprefs/config.inc.php ]; then
 	/usr/share/roundcubemail/plugins/sauserprefs/config.inc.php
 fi
 
-if [ -f /etc/debian_version ] ; then
-	# debian / ubuntu
-	httpd_group="www-data"
-	php_ini="ls /etc/php/*/apache2/php.ini"
-else
-	# CentOS, Fedora
-	httpd_group="apache"
-	php_ini="/etc/php.ini"
-fi
-
 if [ -n "$php_ini" -a -f $php_ini ] ; then
 	echo "configuring $php_ini"
 	$mv $php_ini "$php_ini".BAK
@@ -345,10 +355,6 @@ if [ -n "$rcube_conf" -a -f "$rcube_conf" ] ; then
 fi
 if [ -f /etc/httpd/conf.d/ssl.conf ] ; then
 	ssl_cnf=/etc/httpd/conf.d/ssl.conf
-else
-	ssl_cnf=""
-fi
-if [ -f $ssl_cnf ] ; then
 	echo "configuring /etc/httpd/conf.d/ssl.conf"
 	$mv $ssl_cnf \
 		$ssl_cnf.BAK
@@ -540,4 +546,5 @@ if [ -x /usr/bin/crontab ] ; then
 	$chmod +x /usr/share/roundcubemail/bin/cleandb.sh
 fi
 echo "Adding qmail as supplementary group to $httpd_group"
-/usr/bin/getent group $httpd_group > /dev/null && /usr/sbin/usermod -aG qmail $httpd_group
+/usr/bin/getent group $httpd_group && /usr/sbin/usermod -aG qmail $httpd_group
+exit 0
