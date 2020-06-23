@@ -1,3 +1,121 @@
+Table of Contents
+=================
+
+   * [INTRODUCTION](#introduction)
+   * [LICENSING](#licensing)
+   * [Features](#features)
+      * [Speed](#speed)
+      * [Setup](#setup)
+      * [Security](#security)
+      * [Message construction](#message-construction)
+      * [SMTP service](#smtp-service)
+      * [Queue management](#queue-management)
+      * [Bounces](#bounces)
+      * [Routing by domain](#routing-by-domain)
+      * [Remote SMTP delivery](#remote-smtp-delivery)
+      * [Local delivery](#local-delivery)
+      * [Other](#other)
+      * [Brief on changes](#brief-on-changes-made-to-qmail-and-other-software)
+   * [TERMINOLOGY](#terminology-used-for-commands)
+   * [IndiMail Queue Mechanism](#indimail-queue-mechanism)
+   * [Using systemd to start IndiMail](#using-systemd-to-start-indimail)
+   * [Eliminating Duplicate Emails during local delivery](#eliminating-duplicate-emails-during-local-delivery)
+   * [Using procmail with IndiMail](#using-procmail-with-indimail)
+   * [Writing Filters for IndiMail](#writing-filters-for-indimail)
+      * [1.1 Filtering during SMTP (before mail gets queued)](#11-filtering-during-smtp-before-mail-gets-queued)
+         * [1.1.1 Using FILTERARGS environment variable](#111-using-filterargs-environment-variable)
+         * [1.1.2 Using QMAILQUEUE with qmail-qfilter](#112-using-qmailqueue-with-qmail-qfilter)
+         * [1.1.3 Using QMAILQUEUE with your own program](#113-using-qmailqueue-with-your-own-program)
+      * [1.2 Filtering during local / remote delivery](#12-filtering-during-local--remote-delivery)
+         * [1.2.1 Using FILTERARGS environment variable](#121-using-filterargs-environment-variable)
+         * [1.2.2 Using control file filterargs](#122-using-control-file-filterargs)
+         * [1.2.3 Using QMAILLOCAL or QMAILREMOTE environment variables](#123-using-qmaillocal-or-qmailremote-environment-variables)
+      * [1.3 Using dot-qmail(5) or valias(1)](#13-using-dot-qmail5-or-valias1)
+      * [1.4 Using IndiMail rule based filter - vfilter](#14-using-indimail-rule-based-filter---vfilter)
+      * [1.5 Examples Filters](#15-examples-filters)
+         * [1.5.1 FILTERARGS script](#151-filterargs-script)
+         * [1.5.2 QMAILQUEUE script](#152-qmailqueue-script)
+         * [1.5.3 QMAILREMOTE script](#153-qmailremote-script)
+         * [1.5.4 QMAILLOCAL script](#154-qmaillocal-script)
+   * [IndiMail Delivery mechanism explained](#indimail-delivery-mechanism-explained)
+      * [Delivery Mode](#delivery-mode)
+      * [Addresses](#addresses)
+      * [qmail-users](#qmail-users)
+      * [Extension Addresses](#extension-addresses)
+   * [Distributing your outgoing mails from Multiple IP addresses](#distributing-your-outgoing-mails-from-multiple-ip-addresses)
+   * [Processing Bounces](#processing-bounces)
+      * [1. Using environment variable BOUNCEPROCESSOR](#1-using-environment-variable-bounceprocessor)
+      * [2. Using environment variable BOUNCERULES or control files bounce.envrules.](#2-using-environment-variable-bouncerules-or-control-files-bounceenvrules)
+      * [3. Using BOUNCEQUEUE environment variable to queue bounces](#3-using-bouncequeue-environment-variable-to-queue-bounces)
+   * [Delivery Instructions for a virtual domain](#delivery-instructions-for-a-virtual-domain)
+   * [Setting Disclaimers in your emails](#setting-disclaimers-in-your-emails)
+      * [Option 1 - using /etc/indimail/control/filterargs](#option-1---using-etcindimailcontrolfilterargs)
+      * [Option 2 - Set the FILTERARGS environment variable](#option-2---set-the-filterargs-environment-variable)
+   * [Email Archiving](#email-archiving)
+      * [1. using environment variable EXTRAQUEUE](#1-using-environment-variable-extraqueue)
+      * [2. using control file mailarchive](#2-using-control-file-mailarchive)
+   * [Envrules](#envrules)
+   * [Setting up QMQP services](#setting-up-qmqp-services)
+      * [Client Setup](#client-setup)
+      * [QMQP Service](#qmqp-service)
+   * [Mini IndiMail Installation](#mini-indimail-installation)
+         * [How do I set up a QMQP service?](#how-do-i-set-up-a-qmqp-service)
+         * [How do I install indimail-mini?](#how-do-i-install-indimail-mini)
+   * [Fedora - Using /usr/sbin/alternatives](#fedora---using-usrsbinalternatives)
+   * [Post Handle Scripts](#post-handle-scripts)
+   * [Relay Mechanism in IndiMail](#relay-mechanism-in-indimail)
+      * [Using tcp.smtp](#using-tcpsmtp)
+      * [Using control file relayclients](#using-control-file-relayclients)
+      * [Using MySQL relay table](#using-mysql-relay-table)
+   * [Set up Authenticated SMTP](#set-up-authenticated-smtp)
+      * [Using control file relaydomains](#using-control-file-relaydomains)
+      * [Using control file relaymailfrom](#using-control-file-relaymailfrom)
+   * [CHECKRECIPIENT - Check Recipients during SMTP](#checkrecipient---check-recipients-during-smtp)
+   * [IndiMail Control Files Formats](#indimail-control-files-formats)
+   * [Inlookup database connection pooling service](#inlookup-database-connection-pooling-service)
+   * [Setting limits for your domain](#setting-limits-for-your-domain)
+   * [SPAM and Virus Filtering](#spam-and-virus-filtering)
+   * [SPAM Control using bogofilter](#spam-control-using-bogofilter)
+   * [SPAM Control using badip control file](#spam-control-using-badip-control-file)
+   * [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi)
+      * [1. Using tcprules](#1-using-tcprules)
+      * [2. Using envdir for SMTP service under supervise(8)](#2-using-envdir-for-smtp-service-under-supervise8)
+   * [SMTP Access List](#smtp-access-list)
+   * [Using spamassasin with IndiMail](#using-spamassasin-with-indimail)
+   * [Greylisting in IndiMail](#greylisting-in-indimail)
+      * [1. Enabling qmail-greyd greylisting server](#1-enabling-qmail-greyd-greylisting-server)
+      * [2. Enabling greylisting in SMTP](#2-enabling-greylisting-in-smtp)
+   * [Configuring DKIM](#configuring-dkim)
+      * [Create your DKIM signature](#create-your-dkim-signature)
+      * [Create your DNS records](#create-your-dns-records)
+      * [Set SMTP to sign with DKIM signatures](#set-smtp-to-sign-with-dkim-signatures)
+      * [Set SMTP to verify DKIM signatures](#set-smtp-to-verify-dkim-signatures)
+      * [DKIM Author Domain Signing Practices](#dkim-author-domain-signing-practices)
+      * [Setting qmail-local to verify DKIM signatures](#setting-qmail-local-to-verify-dkim-signatures)
+      * [Testing outbound signatures](#testing-outbound-signatures)
+   * [iwebadmin – Web Administration of IndiMail](#iwebadmin--web-administration-of-indimail)
+   * [Publishing statistics for IndiMail Server](#publishing-statistics-for-indimail-server)
+   * [RoundCube Installation for IndiMail](#roundcube-installation-for-indimail)
+   * [Setting up MySQL](#setting-up-mysql)
+      * [Storing Passwords](#storing-passwords)
+      * [1. Database Initialization](#1-database-initialization)
+      * [2. MySQL Startup](#2-mysql-startup)
+      * [3. Creating MySQL Users](#3-creating-mysql-users)
+      * [4. Creating MySQL Configuration](#4-creating-mysql-configuration)
+      * [5. MySQL Control File](#5-mysql-control-file)
+      * [6. Configuring MySQL/MariaDB to use SSL/TLS](#6-configuring-mysqlmariadb-to-use-ssltls)
+   * [Using Docker Engine to Run IndiMail / IndiMail-MTA](#using-docker-engine-to-run-indimail--indimail-mta)
+   * [Installation &amp; Repositories](#installation--repositories)
+      * [Installing Indimail using DNF/YUM/APT Repository](#installing-indimail-using-dnfyumapt-repository)
+      * [Docker / Podman Repository](#docker--podman-repository)
+      * [GIT Repository](#git-repository)
+   * [Support Information](#support-information)
+      * [IRC](#irc)
+      * [Mailing list](#mailing-list)
+   * [See also](#see-also)
+
+Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
+
 # INTRODUCTION
 
 [IndiMail](https://github.com/mbhangui/indimail-virtualdomains "IndiMail") is a messaging Platform comprising of multiple software packages including
@@ -1387,7 +1505,7 @@ $ sudo /bin/bash
 
 There are few email marketing companies who are using BOUNCEPROCESSOR to insert the status of all bounces in MySQL table for their email marketing campaigns.
 
-## 2 Using environment variable BOUNCERULES or control files bounce.envrules.
+## 2. Using environment variable BOUNCERULES or control files bounce.envrules.
 
 Using envrules, you can set specific environment variables only for bounced recipients. The format of this file is of the form
 
@@ -2077,7 +2195,7 @@ default quota : ALLOW_CREATE ALLOW_MODIFY
 
 # SPAM and Virus Filtering
 
-IndiMail has multiple methods to insert your script anywhere before the queue, after the queue, before local delivery, before remote deliver or call a script to do local or remote delivery. Refer to the chapter **Writing Filters for IndiMail** for more details.
+IndiMail has multiple methods to insert your script anywhere before the queue, after the queue, before local delivery, before remote deliver or call a script to do local or remote delivery. Refer to the chapter [Writing Filters for IndiMail](#writing-filters-for-indimail) for more details.
 
 # SPAM Control using bogofilter
 
@@ -2095,17 +2213,17 @@ $ sudo /bin/bash
 # echo "1" > /service/qmail-smtpd.25/variables/MAKESEEKABLE
 ```
 
-Now qmail-multi(8) will pass every mail will pass through bogofilter before it passes to qmail-queue(8). You can refer to Chapter **IndiMail Queue Mechanism**, look at the picture to understand how it works. bogofilter(1) will add X-Bogosity in each and every mail. A spam mail will have the value `Yes` along with a probabality number (e.g. 0.999616 below). You can configure bogofilter in /etc/indimail/bogofilter.cf. The SMTP logs will also have lines having this X-Bogosity field. A detailed mechanism is depicted pictorially in the chapter **Virus Scanning using QHPSI**
+Now qmail-multi(8) will pass every mail will pass through bogofilter before it passes to qmail-queue(8). You can refer to chapter [IndiMail Queue Mechanism](#indimail-queue-mechanism) and look at the picture to understand how it works. bogofilter(1) will add X-Bogosity in each and every mail. A spam mail will have the value `Yes` along with a probabality number (e.g. 0.999616 below). You can configure bogofilter in /etc/indimail/bogofilter.cf. The SMTP logs will also have lines having this X-Bogosity field. A detailed mechanism is depicted pictorially in the chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi).
 
 ```
 X-Bogosity: Yes, spamicity=0.999616, cutoff=9.90e-01, ham_cutoff=0.00e+00, queueID=6cs66604wfk,
 ```
 
-The method describe above is a global SPAM filter. It will happen for all users, unless you use something like **envrules** to unset **SPAMFILTER** environment variable. You can use **envrules** to set **SPAMFILTER** for few specific email addresses. You can refer to the chapter on **Envrules** for more details.
+The method describe above is a global SPAM filter. It will happen for all users, unless you use something like **envrules** to unset **SPAMFILTER** environment variable. You can use **envrules** to set **SPAMFILTER** for few specific email addresses. You can refer to the chapter [Envrules](#envrules) for more details.
 
 There is another way you can do spam filtering - during local delivery (you could do for remote delivery, but what would be the point?). IndiMail allows you to call an external program during local/remote delivery by settting **QMAILLOCAL** / **QMAILREMOTE** environment variable. You could use any method to call bogofilter (either directly in *filterargs* control file, or your own script). You can see a Pictorial representation of how this happens. ![LocalFilter](indimail_spamfilter_local.png)
 
-You can also use vcfilter(1) to set up a filter that will place your spam emails in a designated folder for SPAM. Refer to the chapter **Writing Filters for IndiMail** for more details.
+You can also use vcfilter(1) to set up a filter that will place your spam emails in a designated folder for SPAM. Refer to the chapter [Writing Filters for IndiMail](#writing-filters-for-indiMail) for more details.
 
 # SPAM Control using badip control file
 
@@ -3383,7 +3501,7 @@ skipped table badrcptto on master
 skipped table spamdb on master
 ```
 
-# 6. Configuring MySQL/MariaDB to use SSL/TLS
+## 6. Configuring MySQL/MariaDB to use SSL/TLS
 
 MySQL/MariaDB can encrypt the connections between itself and its clients. To do that you need to create certificates. There are differences betweeen how you configure MySQL server and MariaDB server for SSL/TLS
 
