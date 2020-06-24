@@ -57,3 +57,5 @@ Release 3.2 Start 21/05/2020
 32. increased soft mem for IMAP/POP3/poppass to 100Mb
 33. call svctool --fixsharedlibs during post install to fix mysql_lib control
     file
+- 24/06/2020
+34. qlocal_upgrade.sh - fixed getent, usermod usage in setting supplementary groups
