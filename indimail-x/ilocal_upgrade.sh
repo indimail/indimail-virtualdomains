@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: ilocal_upgrade.sh,v $
+# Revision 2.33  2020-06-24 22:23:19+05:30  Cprogrammer
+# fixed setting supplementary groups
+#
 # Revision 2.32  2020-06-17 11:14:54+05:30  Cprogrammer
 # removed posttrans to avoid duplicate run of ilocal_upgrade.sh
 #
@@ -97,7 +100,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: ilocal_upgrade.sh,v 2.32 2020-06-17 11:14:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.33 2020-06-24 22:23:19+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -117,7 +120,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.32 2020-06-17 11:14:54+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.33 2020-06-24 22:23:19+05:30 Cprogrammer Exp mbhangui $"
 if [ -d /var/indimail/mysqldb/data/indimail ] ; then
 	if [ ! -f /service/mysql.3306/down ] ; then
 		for i in mysqld mariadb mysql
@@ -136,7 +139,7 @@ fi
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.32 2020-06-17 11:14:54+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.33 2020-06-24 22:23:19+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do
@@ -224,7 +227,7 @@ if [ -f /etc/indimail/nssd.conf ] ; then
 fi
 
 # add for roundcube/php to access certs
-/usr/bin/getent group apache > /dev/null && /usr/sbin/usermod -aG qmail apache || true
+/usr/bin/getent passwd apache > /dev/null && /usr/sbin/usermod -aG qmail apache || true
 if [ -f /etc/indimail/control/spamignore ] ; then
 	$chgrp qmail /etc/indimail/control/spamignore
 	$chmod 664 /etc/indimail/control/spamignore
