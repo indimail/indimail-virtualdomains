@@ -20,7 +20,7 @@ The steps below give instructions to build from source. If you need to deploy in
 
 You can also use docker / podman images to deploy indimail. Look at the chapter [Docker / Podman Repository](#docker-/-podman-repository) below on how to do that. The big advantage of using a docker / podman image is you can save your configuration with the `docker commit ..` or `podman commit` to checkpoint your entire build and deploy the exact configuration on multiple hosts.
 
-Doing a source build can be daunting for many. There are total of 18 sub-packages to be built out of which 6 (libdkim, libsrs2, ucspi-tcp, courier-imap, indimail-mta, indimail) are required, 6 (bogofilter, bogofilter-wordlist, fetchmail, nssd, pam-multi, iwebadmin) are recommended and remaining 6 are optional. You can always use the pre-built binaries from the DNF / YUM / APT repositories given in the chapter [Binary Builds on OBS](#binary-builds-on-opensuse-build-service) towards the end of this document.
+Doing a source build can be daunting for many. There are total of 18 sub-packages to be built, out of which 6 (libdkim, libsrs2, ucspi-tcp, courier-imap, indimail-mta, indimail) are required, 6 (bogofilter, bogofilter-wordlist, fetchmail, nssd, pam-multi, iwebadmin) are recommended and remaining 6 are optional. You can always use the pre-built binaries from the DNF / YUM / APT repositories given in the chapter [Binary Builds on OBS](#binary-builds-on-opensuse-build-service) towards the end of this document.
 
 Doing a source build requires you to have all the development packages installed. Linux distributions are known to be crazy. You will have different package names for different distirbutions. e.g.
 
