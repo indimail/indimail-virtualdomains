@@ -171,6 +171,63 @@ echo "    Deny from all"
 echo "</Directory>"
 }
 
+create_roundcube_suse_httpd_conf()
+{
+echo "#"
+echo "# Round Cube Webmail is a browser-based multilingual IMAP client"
+echo "#"
+echo ""
+echo "Alias /indimail \"/srv/www/roundcubemail/public_html\""
+echo ""
+echo "# Define who can access the Webmail"
+echo "# You can enlarge permissions once configured"
+echo ""
+echo "<Directory \"/srv/www/roundcubemail/public_html\">"
+echo "    <IfModule mod_authz_core.c>"
+echo "        # Apache 2.4"
+echo "        Options Indexes FollowSymLinks"
+echo "        Require ip 127.0.0.1"
+echo "        Require all granted"
+echo "        Require local"
+echo "    </IfModule>"
+echo "    <IfModule !mod_authz_core.c>"
+echo "        # Apache 2.2"
+echo "        Options Indexes FollowSymLinks"
+echo "        Order Deny,Allow"
+echo "        Deny from all"
+echo "        Allow from 127.0.0.1"
+echo "        Allow from ::1"
+echo "    </IfModule>"
+echo "</Directory>"
+echo ""
+echo "# Define who can access the installer"
+echo "# keep this secured once configured"
+echo ""
+echo "<Directory /srv/www/roundcubemail/installer/>"
+echo "    <IfModule mod_authz_core.c>"
+echo "        # Apache 2.4"
+echo "        Require ip 127.0.0.1"
+echo "        Require all granted"
+echo "        Require local"
+echo "    </IfModule>"
+echo "    <IfModule !mod_authz_core.c>"
+echo "        # Apache 2.2"
+echo "        Order Deny,Allow"
+echo "        Deny from all"
+echo "        Allow from 127.0.0.1"
+echo "        Allow from ::1"
+echo "    </IfModule>"
+echo "</Directory>"
+echo ""
+echo "# Those directories should not be viewed by Web clients."
+echo "<Directory /srv/www/roundcubemail/bin/>"
+echo "    Require all denied"
+echo "</Directory>"
+echo "<Directory /srv/www/roundcubemail/plugins/enigma/home/>"
+echo "    Require all denied"
+echo "</Directory>"
+}
+
 change_config()
 {
 if [ $# -ne 2 ] ; then
@@ -192,8 +249,20 @@ else
 fi
 }
 
-# same for all distros
+grep openSUSE /etc/os-release > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+	is_suse=1
+else
+	is_suse=0
+fi
+
 # RoundCube DB setup
+if [ $is_suse -eq 1 ] ; then
+	httpd_base=/srv
+else
+	httpd_base=/usr
+fi
+echo "Creating MySQL DB for roundcube"
 if [ ! -d /var/indimail/mysqldb/data/RoundCube_db ] ; then
 	ps -ef|grep mysqld|egrep -v "systemctl|grep" > /dev/null 2>&1
 	if [ $? -ne 0 -o ! -S /var/run/mysqld/mysqld.sock ] ; then
@@ -240,9 +309,9 @@ if [ ! -d /var/indimail/mysqldb/data/RoundCube_db ] ; then
 			echo "GRANT ALL PRIVILEGES ON RoundCube_db.* TO roundcube;"
 			echo "FLUSH PRIVILEGES;"
 		) | /usr/bin/mysql -u mysql -p"$PRIV_PASS" mysql
-		if [ -f /usr/share/roundcubemail/SQL/mysql.initial.sql ] ; then
+		if [ -f $httpd_base/share/roundcubemail/SQL/mysql.initial.sql ] ; then
 			echo "initializing roundcube db"
-			/usr/bin/mysql -u roundcube -psubscribed RoundCube_db < /usr/share/roundcubemail/SQL/mysql.initial.sql
+			/usr/bin/mysql -u roundcube -psubscribed RoundCube_db < $httpd_base/share/roundcubemail/SQL/mysql.initial.sql
 		fi
 		if [ -x /service/mysql.3306/shutdown ] ; then
 			/service/mysql.3306/shutdown
@@ -253,12 +322,6 @@ if [ ! -d /var/indimail/mysqldb/data/RoundCube_db ] ; then
 	fi
 fi
 
-grep openSUSE /etc/os-release > /dev/null 2>&1
-if [ $? -eq 0 ] ; then
-	is_suse=1
-else
-	is_suse=0
-fi
 if [ -f /etc/debian_version ] ; then
 	# debian / ubuntu
 	httpd_group="www-data"
@@ -271,7 +334,6 @@ else
 	httpd_group="apache"
 	php_ini="/etc/php.ini"
 fi
-
 
 # same for all distros
 # RoundCube DB setup
@@ -333,38 +395,55 @@ if [ -n "$php_ini" -a -f $php_ini ] ; then
 fi
 
 if [ -f /etc/httpd/conf.d/roundcubemail.conf ] ; then
-	rcube_conf=/etc/httpd/conf.d/roundcubemail.conf
+	rcube_httpd_conf=/etc/httpd/conf.d/roundcubemail.conf
 elif [ -f /etc/apache2/conf.d/roundcubemail.conf ] ; then
-	rcube_conf=/etc/apache2/conf.d/roundcubemail.conf
+	rcube_httpd_conf=/etc/apache2/conf.d/roundcubemail.conf
 else
-	rcube_conf=""
+	rcube_httpd_conf=""
 fi
-if [ -n "$rcube_conf" -a -f "$rcube_conf" ] ; then
-	echo "configuring $rcube_conf"
-	$mv $rcube_conf \
-		$rcube_conf.BAK
-	$cp $rcube_conf.BAK \
-		$rcube_conf
+if [ -n "$rcube_httpd_conf" -a $is_suse -eq 1 ] ; then
+	if [ -f "$rcube_httpd_conf" ] ; then
+		$mv $rcube_httpd_conf $rcube_httpd_conf.orig
+	fi
+	echo "Creating $rcube_httpd_conf for openSUSE"
+	create_roundcube_suse_httpd_conf > $rcube_httpd_conf
+fi
+if [ -n "$rcube_httpd_conf" -a -f "$rcube_httpd_conf" ] ; then
+	echo "configuring $rcube_httpd_conf"
+	$mv $rcube_httpd_conf $rcube_httpd_conf.BAK
+	$cp $rcube_httpd_conf.BAK $rcube_httpd_conf
 	$sed -i \
 		-e "s}Alias /roundcubemail }Alias /indimail }g" \
 		-e "/Require local/ i \        Require ip 127.0.0.1" \
 		-e "/Require local/ i \        Require all granted" \
-		$rcube_conf
-	$chown root:root $rcube_conf
-	$chmod 644 $rcube_conf
+		$rcube_httpd_conf
+	$chown root:root $rcube_httpd_conf
+	$chmod 644 $rcube_httpd_conf
 fi
+
 if [ -f /etc/httpd/conf.d/ssl.conf ] ; then
 	ssl_cnf=/etc/httpd/conf.d/ssl.conf
-	echo "configuring /etc/httpd/conf.d/ssl.conf"
-	$mv $ssl_cnf \
-		$ssl_cnf.BAK
-	$cp $ssl_cnf.BAK \
+elif [ -f /etc/apache2/ssl-global.conf ] ; then
+	ssl_cnf=/etc/apache2/ssl-global.conf
+else
+	ssl_cnf=""
+fi
+
+if [ -n "$ssl_cnf" -f $ssl_cnf ] ; then
+	echo "configuring $ssl_cnf"
+	$mv $ssl_cnf $ssl_cnf.BAK
+	$cp $ssl_cnf.BAK $ssl_cnf
+	if [ $is_suse -eq 1 ] ; then
+		$sed -i \
+			-e "s{.*#SSLCertificateFile /etc/apache2/ssl.crt/server.crt{SSLCertificateFile /etc/indimail/certs/servercert.pem{g" \
 		$ssl_cnf
-	$sed -i \
-		-e "s}^#ServerName www.example.com:443}ServerName indimail.org:443}g" \
-		-e "s}^SSLCertificateFile.*}SSLCertificateFile /etc/indimail/certs/servercert.pem}g" \
-		-e 's/^SSLCertificateKeyFile./#&/' \
-	$ssl_cnf
+	else
+		$sed -i \
+			-e "s}^#ServerName www.example.com:443}ServerName indimail.org:443}g" \
+			-e "s}^SSLCertificateFile.*}SSLCertificateFile /etc/indimail/certs/servercert.pem}g" \
+			-e 's/^SSLCertificateKeyFile./#&/' \
+		$ssl_cnf
+	fi
 fi
 if [ -f /etc/centos-release ] ; then
 	centos_release=$(cat /etc/centos-release|awk '{print $4}'|cut -d.  -f1)
@@ -479,13 +558,43 @@ fi
 # have them in down state so that they don't get started when
 # invoked as indimail/indimail-mta containers
 #
+if [ -f /etc/php-fpm.d/www.conf ] ; then
+	www_conf=/etc/php-fpm.d/www.conf
+elif [ -f /etc/php7/fpm/php-fpm.d/www.conf ] ; then
+	www_conf=/etc/php7/fpm/php-fpm.d/www.conf
+else
+	www_conf=`ls /etc/php/*/fpm/pool.d/www.conf 2>/dev/null`
+fi
+if [ $is_suse -eq 1 ] ; then
+	if [ -f /etc/php7/fpm/php-fpm.conf.default ] ; then
+		$cp /etc/php7/fpm/php-fpm.conf.default /etc/php7/fpm/php-fpm.conf
+	fi
+	echo "fixing /etc/php7/fpm/php-fpm.conf"
+	$sed -i -e "s{^;pid =.*{pid = /run/php-fpm.pid{g" \
+		/etc/php7/fpm/php-fpm.conf
+	if [ -f $www_conf.default ] ; then
+		$cp $www_conf.default $www_conf
+	fi
+	echo "fixing $www_conf"
+	$sed -i \
+		-e 's}^user = nobody}user = wwwrun}' \
+		-e 's}^group = nobody}group = wwwrun}' \
+		-e 's}listen = 127.0.0.1:9000}listen = /run/php-fpm/www.sock}' \
+		-e 's};listen.owner = nobody}listen.owner = wwwrun}g' \
+		-e 's};listen.group = nobody}listen.group = wwwrun}g' \
+		-e 's};listen.mode = 0660}listen.mode = 0660}g' \
+		-e 's}^listen.acl_users.};&}' $www_conf
+
+	if [ -f /etc/apache2/loadmodule.conf ] ; then
+		grep php7_mode /etc/apache2/loadmodule.conf > /dev/null
+		if [ $? -ne 0 ] ; then
+			echo "fixing /etc/apache2/loadmodule.conf"
+			echo "LoadModule php7_module                    /usr/lib64/apache2/mod_php7.so" > /etc/apache2/loadmodule.conf
+		fi
+	fi
+fi
 php_fpm=`ls /usr/sbin/php-fpm*`
 if [ ! -d /service/php-fpm ] ; then
-	if [ -f /etc/php-fpm.d/www.conf ] ; then
-		www_conf=/etc/php-fpm.d/www.conf
-	else
-		www_conf=`ls /etc/php/*/fpm/pool.d/www.conf 2>/dev/null`
-	fi
 	if [ -n "$www_conf" -a -f "$www_conf" ] ; then
 		sockname=$(grep "listen =" $www_conf |cut -d= -f2)
 		sockdir=$(dirname $sockname)
@@ -514,6 +623,7 @@ if [ ! -d /service/php-fpm ] ; then
 		chmod +x /service/php-fpm/log/run
 	fi
 fi
+
 if [ ! -d /service/httpd ] ; then
 	echo "Creating supervised service for apache2"
 	mkdir -p /service/httpd
@@ -531,20 +641,27 @@ if [ ! -d /service/httpd ] ; then
 	) > /service/httpd/run
 	chmod +x /service/httpd/run
 fi
+
 if [ -d /var/www/html ] ; then
 	echo "<?php phpinfo(); ?>" > /var/www/html/info.php
+elif [ -d /srv/www/htdocs ] ; then
+	echo "<?php phpinfo(); ?>" > /srv/www/htdocs/info.php
 fi
+
 if [ -x /usr/bin/crontab ] ; then
 	tmp=$(mktemp -t crontab.tmp.XXXXXXXXXX)
 	echo "Getting existing crontab entry for root"
-	crontab -u root -l | $sed "/$(echo /usr/share/roundcubemail | $sed -e 's/\//\\\//g')\/bin\/cleandb\.sh/d" > "${tmp}"
-	echo "18 11 * * * /usr/share/roundcubemail/bin/cleandb.sh > /dev/null" >> "${tmp}"
+	crontab -u root -l 2>/dev/null | \
+		$sed "/$(echo $httpd_base/share/roundcubemail | \
+		$sed -e 's/\//\\\//g')\/bin\/cleandb\.sh/d" > "${tmp}"
+	echo "18 11 * * * $httpd_base/share/roundcubemail/bin/cleandb.sh > /dev/null" >> "${tmp}"
 	echo "Adding crontab entry for root"
 	crontab -u root "${tmp}"
 	$rm -f "${tmp}"
 	unset tmp
-	$chmod +x /usr/share/roundcubemail/bin/cleandb.sh
+	$chmod +x $httpd_base/share/roundcubemail/bin/cleandb.sh
 fi
+
 echo "Adding qmail as supplementary group to $httpd_group"
 /usr/bin/getent group $httpd_group && /usr/sbin/usermod -aG qmail $httpd_group
 exit 0
