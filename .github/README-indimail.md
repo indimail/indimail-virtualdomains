@@ -118,7 +118,12 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 # INTRODUCTION
 
-[IndiMail](https://github.com/mbhangui/indimail-virtualdomains "IndiMail") is a messaging Platform comprising of multiple software packages including
+IndiMail is a messaging Platform comprising of multiple software packages including
+
+[**indimail-virtualdomains**](https://github.com/mbhangui/indimail-virtualdomains)
+
+* [virtualdomains](https://github.com/mbhangui/indimail-virtualdomains "IndiMail")
+* [Email Parsing System](http://www.inter7.com/software/)
 
 [**indimail-mta**](https://github.com/mbhangui/indimail-mta)
 
@@ -130,6 +135,8 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 * [fastforward](https://cr.yp.to/fastforward.html "fastforward")
 * [mess822](https://cr.yp.to/mess822.html "mess822")
 * [daemontools](https://cr.yp.to/daemontools.html "daemontools")
+* [dkim](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail)
+* [SRS2](https://en.wikipedia.org/wiki/Sender_Rewriting_Scheme)
 
 [**ezmlm-idx**](https://github.com/mbhangui/ezmlm-idx)
 
