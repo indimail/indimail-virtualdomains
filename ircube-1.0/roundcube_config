@@ -324,13 +324,16 @@ fi
 
 if [ -f /etc/debian_version ] ; then
 	# debian / ubuntu
+	httpd_user="www-data"
 	httpd_group="www-data"
 	php_ini="ls /etc/php/*/apache2/php.ini"
 elif [ $is_suse -eq 1 ] ; then
+	httpd_user="wwwrun"
 	httpd_group="wwwrun"
 	php_ini="/etc/php7/apache2/php.ini"
 else
 	# CentOS, Fedora
+	httpd_user="apache"
 	httpd_group="apache"
 	php_ini="/etc/php.ini"
 fi
@@ -478,7 +481,7 @@ if [ -f /etc/centos-release ] ; then
 			echo "# Tell the PHP interpreter to handle files with a .php extension."
 			echo ""
 			echo "# Proxy declaration"
-			echo "<Proxy \"unix:/var/run/php-fpm/www.sock|fcgi://php-fpm\">"
+			echo "<Proxy \"unix:/run/php-fpm/www.sock|fcgi://php-fpm\">"
 			echo "    # we must declare a parameter in here (doesn't matter which) or it'll not register the proxy ahead of time"
 			echo "    ProxySet disablereuse=off"
 			echo "</Proxy>"
@@ -525,7 +528,7 @@ elif [ -f /etc/debian_version ] ; then
 		echo ""
 		echo "    <FilesMatch \.php$>"
 		echo "        # 2.4.10+ can proxy to unix socket"
-		echo "        SetHandler \"proxy:unix:/var/run/php/php7.2-fpm.sock|fcgi://localhost/\""
+		echo "        SetHandler \"proxy:unix:/run/php/php7.2-fpm.sock|fcgi://localhost/\""
 		echo "        # Else we can just use a tcp socket:"
 		echo "        #SetHandler \"proxy:fcgi://127.0.0.1:9000\""
 		echo "    </FilesMatch>"
@@ -559,11 +562,11 @@ fi
 # invoked as indimail/indimail-mta containers
 #
 if [ -f /etc/php-fpm.d/www.conf ] ; then
-	www_conf=/etc/php-fpm.d/www.conf
+	php_fpm_www_conf=/etc/php-fpm.d/www.conf
 elif [ -f /etc/php7/fpm/php-fpm.d/www.conf ] ; then
-	www_conf=/etc/php7/fpm/php-fpm.d/www.conf
-else
-	www_conf=`ls /etc/php/*/fpm/pool.d/www.conf 2>/dev/null`
+	php_fpm_www_conf=/etc/php7/fpm/php-fpm.d/www.conf
+else #debian /etc/php/7.3/fpm/pool.d/www.conf
+	php_fpm_www_conf=`ls /etc/php/*/fpm/pool.d/www.conf 2>/dev/null`
 fi
 if [ $is_suse -eq 1 ] ; then
 	if [ -f /etc/php7/fpm/php-fpm.conf.default ] ; then
@@ -572,18 +575,9 @@ if [ $is_suse -eq 1 ] ; then
 	echo "fixing /etc/php7/fpm/php-fpm.conf"
 	$sed -i -e "s{^;pid =.*{pid = /run/php-fpm.pid{g" \
 		/etc/php7/fpm/php-fpm.conf
-	if [ -f $www_conf.default ] ; then
-		$cp $www_conf.default $www_conf
+	if [ -f $php_fpm_www_conf.default ] ; then
+		$cp $php_fpm_www_conf.default $php_fpm_www_conf
 	fi
-	echo "fixing $www_conf"
-	$sed -i \
-		-e 's}^user = nobody}user = wwwrun}' \
-		-e 's}^group = nobody}group = wwwrun}' \
-		-e 's}listen = 127.0.0.1:9000}listen = /run/php-fpm/www.sock}' \
-		-e 's};listen.owner = nobody}listen.owner = wwwrun}g' \
-		-e 's};listen.group = nobody}listen.group = wwwrun}g' \
-		-e 's};listen.mode = 0660}listen.mode = 0660}g' \
-		-e 's}^listen.acl_users.};&}' $www_conf
 
 	if [ -f /etc/apache2/loadmodule.conf ] ; then
 		grep php7_mode /etc/apache2/loadmodule.conf > /dev/null
@@ -593,16 +587,28 @@ if [ $is_suse -eq 1 ] ; then
 		fi
 	fi
 fi
+if [ -f $php_fpm_www_conf ] ; then
+	echo "fixing $php_fpm_www_conf"
+	$sed -i \
+		-e "s}^user = nobody}user = $httpd_user}" \
+		-e "s}^group = nobody}group = $httpd_group}" \
+		-e 's}listen = 127.0.0.1:9000}listen = /run/php-fpm/www.sock}' \
+		-e "s};listen.owner = nobody}listen.owner = $httpd_user}g" \
+		-e "s};listen.group = nobody}listen.group = $httpd_group}g" \
+		-e 's};listen.mode = 0660}listen.mode = 0660}g' \
+		-e 's}^listen.acl_users.};&}' \
+	$php_fpm_www_conf
+fi
 php_fpm=`ls /usr/sbin/php-fpm*`
 if [ ! -d /service/php-fpm ] ; then
-	if [ -n "$www_conf" -a -f "$www_conf" ] ; then
-		sockname=$(grep "listen =" $www_conf |cut -d= -f2)
+	if [ -n "$php_fpm_www_conf" -a -f "$php_fpm_www_conf" ] ; then
+		sockname=$(grep "listen =" $php_fpm_www_conf |cut -d= -f2)
 		sockdir=$(dirname $sockname)
 		echo "socket directory for php-fpm is $sockdir"
 	else
 		echo "couldn't find socket dir for php-fpm"
 	fi
-	if [ -n "$www_conf" -a -f "$www_conf" ] ; then
+	if [ -n "$php_fpm_www_conf" -a -f "$php_fpm_www_conf" ] ; then
 		echo "Creating supervised service for php-fpm"
 		mkdir -p /service/php-fpm/log
 		touch /service/php-fpm/down
