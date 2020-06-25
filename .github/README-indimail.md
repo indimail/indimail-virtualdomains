@@ -120,12 +120,12 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 IndiMail is a messaging Platform comprising of multiple software packages including
 
-[**indimail-virtualdomains**](https://github.com/mbhangui/indimail-virtualdomains)
+[**indimail-virtualdomains**](https://github.com/mbhangui/indimail-virtualdomains "indimail-virtualdomains")
 
-* [virtualdomains](https://github.com/mbhangui/indimail-virtualdomains "IndiMail")
-* [Email Parsing System](http://www.inter7.com/software/)
+* [virtualdomains](https://github.com/mbhangui/indimail-virtualdomains "indimail-virtualdomains")
+* [Email Parsing System](http://www.inter7.com/software/ "eps")
 
-[**indimail-mta**](https://github.com/mbhangui/indimail-mta)
+[**indimail-mta**](https://github.com/mbhangui/indimail-mta "indimail-mta")
 
 * [qmail](http://cr.yp.to/qmail.html "qmail")
 * [ucspi-tcp](https://cr.yp.to/ucspi-tcp.html "ucspi-tcp")
@@ -135,10 +135,10 @@ IndiMail is a messaging Platform comprising of multiple software packages includ
 * [fastforward](https://cr.yp.to/fastforward.html "fastforward")
 * [mess822](https://cr.yp.to/mess822.html "mess822")
 * [daemontools](https://cr.yp.to/daemontools.html "daemontools")
-* [dkim](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail)
-* [SRS2](https://en.wikipedia.org/wiki/Sender_Rewriting_Scheme)
+* [dkim](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail "DKIM")
+* [SRS2](https://en.wikipedia.org/wiki/Sender_Rewriting_Scheme "SRS2")
 
-[**ezmlm-idx**](https://github.com/mbhangui/ezmlm-idx)
+[**ezmlm-idx**](https://github.com/mbhangui/ezmlm-idx "ezmlm-idx")
 
 * [ezmlm-idx mailing list manager](https://untroubled.org/ezmlm/ "ezmlm-idx")
 
@@ -147,14 +147,14 @@ IndiMail is a messaging Platform comprising of multiple software packages includ
 * [courier IMAP/POP3](https://www.courier-mta.org/imap/ "courier-imap")
 * [fetchmail](https://www.fetchmail.info "fetchmail")
 
-[**indimail-auth**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-auth)
+[**indimail-auth**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-auth "indimail-auth")
 
-* [nssd - providing Name Service Switch](https://github.com/mbhangui/indimail-virtualdomains/tree/master/nssd-x)
-* [pam-multi - PAM modules for flexible, configurable authentication methods](https://github.com/mbhangui/indimail-virtualdomains/tree/master/pam-multi-x)
+* [nssd - providing Name Service Switch](https://github.com/mbhangui/indimail-virtualdomains/tree/master/nssd-xi "nssd")
+* [pam-multi - PAM modules for flexible, configurable authentication methods](https://github.com/mbhangui/indimail-virtualdomains/tree/master/pam-multi-x "pam-multi")
 
-[**indimail-utils**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils)
+[**indimail-utils**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils "indimail-utils")
 
-* Utilities ([altermime](http://pldaniels.com/altermime/), [ripMIME](https://pldaniels.com/ripmime/), [mpack](https://github.com/mbhangui/indimail-virtualdomains/tree/master/mpack-x), [fortune](https://en.wikipedia.org/wiki/Fortune_\(Unix\)) and [flash](https://github.com/mbhangui/indimail-virtualdomains/tree/master/flash-x))
+* Utilities ([altermime](http://pldaniels.com/altermime/ "altermime"), [ripMIME](https://pldaniels.com/ripmime/ "ripmime"), [mpack](https://github.com/mbhangui/indimail-virtualdomains/tree/master/mpack-x "mpack"), [fortune](https://en.wikipedia.org/wiki/Fortune_\(Unix\ "fortune")) and [flash](https://github.com/mbhangui/indimail-virtualdomains/tree/master/flash-x "flash"))
 * [logalert](https://github.com/mbhangui/indimail-virtualdomains/tree/master/logalert-0.3 "logalert")
 
 [**indimail-spamfilter**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/bogofilter-x "bogofilter")
@@ -189,13 +189,13 @@ To migrate from an existing proprietary mail server like MS Exchange requires 5 
 
 IndiMail is highly configurable. No hard-coded directories of qmail like /var/qmail/control or /var/qmail/queue. All directories are configurable at run time. IndiMail has multiple queues and the queue destination directories are also configurable. You can have one IndiMail installation cater to multiple instances having different properties / configuration.  To set up a new IndiMail instance requires you to just set few environment variables. Unlike qmail/netqmail, IndiMail doesn't force you to recompile each time you require a new instance.  Multiple queues eliminates what is known as ['the silly qmail syndrome'](https://qmail.jms1.net/silly-qmail.shtml "silly-qmail-syndrome") and gives IndiMail the capability to perform better than a stock qmail installation. IndiMail's multiple queue architecture gives allows it to achieve tremendous inject rates using commodity hardware as can be read [here](http://groups.google.co.in/group/indimail/browse_thread/thread/f9e0b6214d88ca6d#). Here is a pictorial representation of the IndiMail queue ![Pictorial](indimail_queue.png).
 
-IndiMail is a pure messaging solution. It does not provide calendars, todo lists, address books, meeting requests and a web mail front-end. However, you can use [Roundcube Mail](https://roundcube.net/) or any web mail front-end that works with IMAP or POP3 protocol with IndiMail. If you decide to install [Roundcube Mail](https://roundcube.net/), you can install the **ircube** package from the IndiMail's DNF/YUM/Debian [Repository](https://build.opensuse.org/package/show/home:indimail/ircube "ircube") to have a fully functional web mail front-end. The ircube package provides plugins for Rouncube Mail to manage your passwords, vacation and SPAM filters.
+IndiMail is a pure messaging solution. It does not provide calendars, todo lists, address books, meeting requests and a web mail front-end. However, you can use [RoundCubemail](https://roundcube.net/ "RoundCubemail") or any web mail front-end that works with IMAP or POP3 protocol with IndiMail. If you decide to install [RoundCubemail](https://roundcube.net/ "RoundCubemail"), you can install the **ircube** package from the IndiMail's DNF/YUM/Debian [Repository](https://build.opensuse.org/package/show/home:indimail/ircube "ircube") to have a fully functional web mail front-end. The ircube package provides plugins for Rouncube Mail to manage your passwords, vacation and SPAM filters.
 
-IndiMail administrators can use a web administration tool called **iwebadmin**. It can be installed from source from [here](https://github.com/mbhangui/indimail-virtualdomains/tree/master/iwebadmin-x) or from the [DNF/YUM/Debian Repository](https://build.opensuse.org/package/show/home:indimail/iwebadmin "iwebadmin") on the openSUSE build Service.
+IndiMail administrators can use a web administration tool called **iwebadmin**. It can be installed from source from [here](https://github.com/mbhangui/indimail-virtualdomains/tree/master/iwebadmin-x "iwebadmin") or from the [DNF/YUM/Debian Repository](https://build.opensuse.org/package/show/home:indimail/iwebadmin "iwebadmin Repository") on the openSUSE build Service.
 
-IndiMail comes with a power tcl/tk administration client called [**indium**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indium-1.1 "indium"). It can be installed from source from [here](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indium-1.1) or from the [DNF/YUM/Debian Repository](https://build.opensuse.org/package/show/home:indimail/indium) on the openSUSE Build Service.
+IndiMail comes with a power tcl/tk administration client called [**indium**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indium-1.1 "indium"). It can be installed from source from [here](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indium-1.1 "indium") or from the [DNF/YUM/Debian Repository](https://build.opensuse.org/package/show/home:indimail/indium "indium repository") on the openSUSE Build Service.
 
-To install IndiMail you can take the help of the following documents in the [indimail-x/doc subdirectory](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-x/doc) of [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains) github repository. You can also jump to the section `# Installing Indimail using DNF/YUM/APT Repository` towards the bottom of this document.
+To install IndiMail you can take the help of the following documents in the [indimail-x/doc subdirectory](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-x/doc "Documents Subdirectory") of [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains "indimail-virtualdomains") github repository. You can also jump to the section `# Installing Indimail using DNF/YUM/APT Repository` towards the bottom of this document.
 
 File | Description
 ----- | --------------------
@@ -206,7 +206,7 @@ INSTALL-MYSQL.md|MySQL specific Installation Instructions
 README-CLUSTER.md|Steps on configuring a clustered setup
 Quick-INSTALL.md|A minimal documentation on Installation/Configuration)
 
-If you have enough experience on your belt you can dive into this [document](https://github.com/mbhangui/indimail-virtualdomains/blob/master/README.md).
+If you have enough experience on your belt you can dive into this [document](https://github.com/mbhangui/indimail-virtualdomains/blob/master/README.md "README").
 
 Once you have installed IndiMail, you will find all man pages in /usr/share/man and documents in /usr/share/indimail/doc. You can do man indimail to get started with understanding IndiMail.
 
@@ -216,13 +216,13 @@ There is no warranty implied or otherwise with this package. I believe in OpenSo
 
 # LICENSING
 
-IndiMail uses GPLv3 License. See file [LICENSE](https://github.com/mbhangui/indimail-virtualdomains/blob/master/LICENSE). Additional licenses (if any) may be found in subfolder of each component that IndiMail uses.
+IndiMail uses GPLv3 License. See file [LICENSE](https://github.com/mbhangui/indimail-virtualdomains/blob/master/LICENSE "GPLv3"). Additional licenses (if any) may be found in subfolder of each component that IndiMail uses.
 
 # Features
 
 ## Speed
 
-IndiMail uses a modified [qmail](http://cr.yp.to/qmail.html) as the MTA. qmail's modular, lightweight design and sensible queue management provides IndiMail the speed to make it one of the fastest available message transfer agent.
+IndiMail uses a modified [qmail](http://cr.yp.to/qmail.html "qmail") as the MTA. qmail's modular, lightweight design and sensible queue management provides IndiMail the speed to make it one of the fastest available message transfer agent.
 IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''qmail-multi'' uses multiple queues with each queue running its own qmail-send process. This allows IndiMail to process mails faster than what can be provided by qmail.
 
 ## Setup
@@ -231,7 +231,7 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * Linux, SunOS, Solaris, and more
  * automatic per-host configuration - gnu autoconf
  * High degree of automation of configuration through ''svctool''
- * RPM/Debian packages for multiple Linux Distros. Binary packages follows Dave Sill's [LWQ](http://www.lifewithqmail.org/).
+ * RPM/Debian packages for multiple Linux Distros. Binary packages follows Dave Sill's [LWQ](http://www.lifewithqmail.org/ "LWQ").
 
 ## Security
 
@@ -294,11 +294,11 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * Message Submission Agent – MSA (RFC 2476)
  * Domain IP address pair access control via control file hostaccess
  * Per User accesslist via control file accesslist
- * [SPF](http://www.openspf.org/) – Sender Permitted From
- * [SRS](http://www.libsrs2.org/) - Sender Rewriting Scheme
- * [Bounce Address Tag Validation (BATV)](http://www.linux-magazine.com/Online/News/IndiMail-1.6-Includes-Greylisting-and-BATV?category=13404)
+ * [SPF](http://www.openspf.org/ "openspf") – Sender Permitted From
+ * [SRS](http://www.libsrs2.org/ "libsrs2") - Sender Rewriting Scheme
+ * [Bounce Address Tag Validation (BATV)](http://www.linux-magazine.com/Online/News/IndiMail-1.6-Includes-Greylisting-and-BATV?category=13404 "batv")
  * Per User control of environment variable by envrules(rules file set by environment variable FROMRULES)
- * [Greylisting](http://www.gossamer-threads.com/lists/qmail/users/136761) capability using qmail-greyd or greydaemon
+ * [Greylisting](http://www.gossamer-threads.com/lists/qmail/users/136761 "greylisting") capability using qmail-greyd or greydaemon
  * SMTP Plugins - External plugins using shared objects in /var/indimail/plugins to enhance functionality of MAIL, RCPT & DATA session.
  * Notify recipients when message size exceeds databyte limits (by setting environment variable DATABYTES_NOTIFY)
  * Enforce STARTTLS before AUTH
@@ -322,24 +322,24 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * Ability to extend QHPSI interface through plugins. The keyword plugin:shared_lib defined in the environment variable QHPSI denotes 'shared_lib' to be loaded.
  * Virus scanner qscanq. Ability to detect virus via a third party scanner defined by SCANCMD environment variable (clamscan, clamdscan, etc)
  * Blocking of prohibited filename extensions via qscanq program
- * [Domainkeys](https://en.wikipedia.org/wiki/DomainKeys) (qmail-dk) RFC 4870
- * [DomainKeys Identified Mail](http://marc.info/?l=qmail&m=123817543532399&w=2) with ADSP/SSP (qmail-dkim) RFC 4871
+ * [Domainkeys](https://en.wikipedia.org/wiki/DomainKeys "Yahoo Domainkeys") (qmail-dk) RFC 4870
+ * [DomainKeys Identified Mail](http://marc.info/?l=qmail&m=123817543532399&w=2 "DKIM") with ADSP/SSP (qmail-dkim) RFC 4871
  * Set all header values listed in envheader control file as environment variables.
  * Log all headers listed in control file logheaders to stderr.
  * Remove all headers listed in control file removeheaders from email.
  * Ability to do line processing instead of block processing.
  * qmail-nullqueue – blackhole the mail silently.
- * rule based mail archival using control file mailarchive ([Sarbanes–Oxley_Act](https://en.wikipedia.org/wiki/Sarbanes%E2%80%93Oxley_Act), [Health_Insurance_Portability_and_Accountability_Act](https://en.wikipedia.org/wiki/Health_Insurance_Portability_and_Accountability_Act) compliance)
+ * rule based mail archival using control file mailarchive ([Sarbanes–Oxley_Act](https://en.wikipedia.org/wiki/Sarbanes%E2%80%93Oxley_Act "Sarbanes Oxley Act"), [Health_Insurance_Portability_and_Accountability_Act](https://en.wikipedia.org/wiki/Health_Insurance_Portability_and_Accountability_Act "HIPAA Compliance") compliance)
  * Added additional recipients for a message using extraqueue or mailarchive control file.
  * X-Originating-IP header to record the original IP from which the mail originates
 
 ## Bounces
 
- * [QSBMF](https://cr.yp.to/proto/qsbmf.txt) bounce messages---both machine-readable and human-readable
- * [HCMSSC](https://cr.yp.to/proto/hcmssc.txt) support---language-independent RFC 1893 error codes
+ * [QSBMF](https://cr.yp.to/proto/qsbmf.txt "QSBMF") bounce messages---both machine-readable and human-readable
+ * [HCMSSC](https://cr.yp.to/proto/hcmssc.txt "HCMSSC") support---language-independent RFC 1893 error codes
  * double bounces sent to postmaster
  * Ability to discard double bounces
- * Ability to preserve [MIME](https://en.wikipedia.org/wiki/MIME) format when bouncing.
+ * Ability to preserve [MIME](https://en.wikipedia.org/wiki/MIME "MIME") format when bouncing.
  * Control of bounce process via envrules (rules file controlled by environment variable BOUNCERULES or control files bounce.envrules)
  * limit size of bounce using control file bouncemaxbytes
  * Ability to process bounces using external bounce processor (environment variable BOUNCEPROCESSOR)
@@ -378,7 +378,7 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * IP address binding on domain, sender address, recipient address and random selection from a pool of IP addresses
  * Return Receipt Responder - rrt
  * IPV6 support
- * DANE verification ([RFC 7672](http://tools.ietf.org/html/rfc7672))
+ * DANE verification ([RFC 7672](http://tools.ietf.org/html/rfc7672 "RFC 7672"))
 
 ## Local delivery
 
@@ -399,7 +399,7 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
 
 ## Other
 
- * Unix Client Server Program Interface [ucspi]([http://cr.yp.to/proto/ucspi.txt) through programs ''tcpserver'' and ''tcpclient''
+ * Unix Client Server Program Interface [ucspi]([http://cr.yp.to/proto/ucspi.txt "ucspi-tcp") through programs ''tcpserver'' and ''tcpclient''
  * Change concurrency of ''tcpserver'' without restart.
  * ability to load plugins in tcpserver - dynamically load shared objects given on command line. Load shared objects defined by env variables
 
@@ -414,8 +414,8 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * Ability to restrict connection per IP (MAXPERIP)
  * run shutdown script if present on svc -d
  * ability to log ''svscan'' output using ''multilog''
- * nssd daemon providing [Name Service Switch](https://en.wikipedia.org/wiki/Name_Service_Switch) which allows extending of the system passwd database to IndiMail's database.
- * pam-multi - Generic [PAM](https://en.wikipedia.org/wiki/Pluggable_authentication_module) module allows any external programs to authenticate against IndiMails database.
+ * nssd daemon providing [Name Service Switch](https://en.wikipedia.org/wiki/Name_Service_Switch "NSS") which allows extending of the system passwd database to IndiMail's database.
+ * pam-multi - Generic [PAM](https://en.wikipedia.org/wiki/Pluggable_authentication_module "PAM") module allows any external programs to authenticate against IndiMails database.
  * multiple checkpassword modules sys-checkpwd, ldap-checkpwd, pam-checkpwd, vchkpass, systpass
  * ''inlookup'' – High Performance User Lookup Daemon.
  * ''indisrvr'' – Indimail Administration Daemon.
@@ -486,7 +486,7 @@ Some of the features available in this package
 38. Can work with external virus scanners (QHPSI, or Len Budney's qscanq)
 39. qmail-queue custom error patch by Flavio Curti <fcu-software at no-way.org>
 40. Domainkey-Signature, DKIM-Signature with ADSP/SSP
-41. Greylisting Capability -  [Look Here](http://www.gossamer-threads.com/lists/qmail/users/136740?page=last)
+41. Greylisting Capability -  [Look Here](http://www.gossamer-threads.com/lists/qmail/users/136740?page=last "Greylisting")
 42. nssd - Name Service Switch daemon which extends systems password database to lookup IndiMail's database for authentication
 43. pam-multi - Generic PAM which allows external program using PAM to authenticate against IndiMail's database. Using pam-multi and nssd, you can use any IMAP server like dovecot, etc with IndiMail.
 44. Post execution Handle - Allows extending indimail's functionality by writing simple scripts
@@ -520,17 +520,17 @@ Some of the features available in this package
 72. goodrcpt, goodrcptpatterns
 73. udplogger service for logging messages through UDP
 74. docker/podman images for
-    * [indimail](https://hub.docker.com/repository/docker/cprogrammer/indimail)
-    * [indimail-mta](https://hub.docker.com/repository/docker/cprogrammer/indimail-mta)
-    * [indimail-web](https://hub.docker.com/repository/docker/cprogrammer/indimail-web)
-75. FHS compliance
+    * [indimail](https://hub.docker.com/repository/docker/cprogrammer/indimail "IndiMail")
+    * [indimail-mta](https://hub.docker.com/repository/docker/cprogrammer/indimail-mta "indimail-mta")
+    * [indimail-web](https://hub.docker.com/repository/docker/cprogrammer/indimail-web "RoundCubemail")
+75. [FHS](https://refspecs.linuxfoundation.org/FHS_3.0/fhs-3.0.pdf) compliance.
 76. Ed Neville - allow multiple Delivered-To in qmail-local using control file maxdeliveredto
 77. Ed Neville - configure TLS method in control/tlsclientmethod (qmail-smtpd), control/tlsservermethod (qmail-remote)
 78. roundcube support for password, autoresponder through roundcube plugin iwebadmin
-79. ezmlm-idx mailing list manager from https://untroubled.org/ezmlm/
+79. ezmlm-idx mailing list manager from [https://untroubled.org/ezmlm/](https://untroubled.org/ezmlm/ "ezmlm-idx")
 80. tcpserver plugin feature - dynamically load shared objects given on command line. Load shared objects defined by env variables PLUGIN0, PLUGIN1, ...
     tcpserver plugin allows you to load qmail-smtpd, rblsmtpd once in memory
-81. tcpserver - enable mysql support by loading mysql library configured in /etc/indimail/control/mysql_lib
+81. tcpserver - enable mysql support by loading mysql library configured in /etc/indimail/control/mysql\_lib
 82. indimail-mta - enable virtual domain support by loading indimail shared library configured in /etc/indimail/control/libindimail
 
 # TERMINOLOGY used for commands
@@ -619,7 +619,7 @@ $ sudo svc -u /service/qmail-smtpd* /service/qmail-send.25 /service/qmail-qm?pd.
 
 IndiMail compoments get started by indimail-mta service. It does not have it's own startup service, but rather places all its services under indimail-mta's svscan directory /service.
 
-[systemd](http://en.wikipedia.org/wiki/Systemd) is a system and service manager for Linux, compatible with SysV and LSB init scripts. systemd provides aggressive parallelization capabilities, uses socket and D-Bus activation for starting services, offers on-demand starting of daemons, keeps track of processes using Linux cgroups, supports snapshots and restoring of the system state, maintains mount and automount points and implements an elaborate transactional dependency-based service control logic. It can work as a drop-in replacement for sysvinit.
+[systemd](http://en.wikipedia.org/wiki/Systemd "systemd") is a system and service manager for Linux, compatible with SysV and LSB init scripts. systemd provides aggressive parallelization capabilities, uses socket and D-Bus activation for starting services, offers on-demand starting of daemons, keeps track of processes using Linux cgroups, supports snapshots and restoring of the system state, maintains mount and automount points and implements an elaborate transactional dependency-based service control logic. It can work as a drop-in replacement for sysvinit.
 The first step is to write the service configuration file for IndiMail in /lib/systemd/system/svscan.service
 
 ```
@@ -2004,7 +2004,7 @@ clearopensmtp will clear all IP which have not authenticated in the past RELAY\_
 IndiMail also provides you authenticated SMTP providing **AUTH PLAIN**, **AUTH LOGIN**, **AUTH CRAM-MD5**, **CRAM-SHA1**, **CRAM-SHA256**, **CRAM-SHA512**, **CRAM-RIPEMD**, **DIGEST_MD5** methods. Whenever a user successfully authenticates through SMTP, the **RELAYCLIENT** environment variable gets set. qmail-smtpd uses the **RELAYCLIENT** environment variable to allow relaying.
 
 Most of the email clients like thunderbird, evolution, outlook, outlook express have options to use authenticated SMTP.
-For a tutorial on authenticated SMTP, you can refer to this [tutorial](http://indimail.blogspot.com/2010/03/authenticated-smtp-tutorial.html)
+For a tutorial on authenticated SMTP, you can refer to this [tutorial](http://indimail.blogspot.com/2010/03/authenticated-smtp-tutorial.html "Authenticated SMTP tutorial")
 
 ## Using control file relaydomains
 
@@ -2206,7 +2206,7 @@ IndiMail has multiple methods to insert your script anywhere before the queue, a
 
 # SPAM Control using bogofilter
 
-If you have installed indimail-spamfilter package, you will have [bogofilter](https://bogofilter.sourceforge.io/) providing a bayesian spam filter.
+If you have installed indimail-spamfilter package, you will have [bogofilter](https://bogofilter.sourceforge.io/ "bogofilter") providing a bayesian spam filter.
 
 On of the easiest method to enable bogofilter is to set few environment variable for indimail's qmail-multi(8) the frontend for qmail-queue(8) program. e.g. to enable spam filter on the incoming SMTP on port 25:
 
@@ -2588,7 +2588,7 @@ DKIM uses public-key cryptography to allow the sender to electronically sign leg
 
 IndiMail from version 1.5 onwards, comes with a drop-in replacement for qmail-queue for DKIM signature signing and verification (see qmail-dkim(8) for more details). You need the following steps to enable DKIM. IndiMail from version 1.5.1 onwards comes with a filter dk-filter, which can be enabled before mail is handed over to qmail-local or qmail-remote (see spawn-filter(8) for more details).
 
-You may want to look at an excellent [setup instructions](http://notes.sagredo.eu/node/92) by Roberto Puzzanghera for configuring dkim for qmail
+You may want to look at an excellent [setup instructions](http://notes.sagredo.eu/node/92 "Roberto's Notes") by Roberto Puzzanghera for configuring dkim for qmail
 
 ## Create your DKIM signature
 
@@ -2853,7 +2853,7 @@ Non SSL Version Install/Configuration
    ```
 
 8. change pdo\_mysql.default\_socket /etc/php.ini
-   For some reason pdo_mysql uses wrong mysql socket on some systems. Uses /var/lib/mysql/mysql.sock instead of /var/run/mysqld/mysqld.sock. You need to edit the file /etc/php.ini and define pdo_mysql.default_socket
+   For some reason `pdo_mysql` uses wrong mysql socket on some systems. Uses `/var/lib/mysql/mysql.sock` instead of `/var/run/mysqld/mysqld.sock`. You need to edit the file `/etc/php.ini` and define `pdo_mysql.default_socket`
 
    `pdo_mysql.default_socket= /var/run/mysqld/mysqld.sock`
 
@@ -2906,7 +2906,7 @@ Non SSL Version Install/Configuration
     1. Install RoundCube. On older systems, use the yum command
        `$ sudo dnf -y install roundcubemail php-mysqlnd`
 
-    2. Connect to MySQL using a privileged user. IndiMail installation creates a privileged mysql user 'mysql'. It does not have the user 'root'. Look at the variable PRIV_PASS in /usr/sbin/svctool to know the password.
+    2. Connect to MySQL using a privileged user. IndiMail installation creates a privileged mysql user 'mysql'. It does not have the user 'root'. Look at the variable PRIV\_PASS in /usr/sbin/svctool to know the password.
 
        ```
        $ /usr/bin/mysql -u mysql -p mysql
@@ -2977,7 +2977,7 @@ Non SSL Version Install/Configuration
     5. Change iwebadmin path in /usr/share/roundcubemail/iwebadmin/config.inc.php
        `$rcmail_config['iwebadmin_path'] = 'https://127.0.0.1/cgi-bin/iwebadmin';`
 
-    6. Change sauserprefs_db_dsnw in /usr/share/roundcubemail/sauserprefs/config.inc.php
+    6. Change `sauserprefs_db_dsnw` in /usr/share/roundcubemail/sauserprefs/config.inc.php
 
        ```
        $rcmail_config['sauserprefs_db_dsnw'] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';
@@ -3518,7 +3518,7 @@ MySQL/MariaDB can encrypt the connections between itself and its clients. To do 
 
 You will now find the following files in /var/indimail/mysqldb/data.
 
-ca.pem, ca-key.pem, client-cert.pem, client-key.pem, server-cert.pem, server-key.pem, public_key.pem, private_key.pem. If you are going to have multiple clients who need to connect to this server, you need to copy ca.pem and ca-key.pem to /var/indimail/mysqldb/data directory on the client host.
+ca.pem, ca-key.pem, client-cert.pem, client-key.pem, server-cert.pem, server-key.pem, public\_key.pem, private\_key.pem. If you are going to have multiple clients who need to connect to this server, you need to copy ca.pem and ca-key.pem to /var/indimail/mysqldb/data directory on the client host.
 
 Setting up the mysql community server for encrypting communication is simple. If you want to enforce the connection you need to have the following lines in my.cnf under the [mysqld] section
 
@@ -3538,7 +3538,7 @@ $ sudo /usr/sbin/svctool --config=ssl_rsa –capath=/var/indimail/mysqldb/ssl
 ```
 
 You will now find the following files in /var/indimail/mysqldb/ssl.
-ca.pem, ca-key.pem, client-cert.pem, client-key.pem, server-cert.pem, server-key.pem, public_key.pem, private_key.pem. If you are going to have multiple clients who need to connect to this server, you need to copy ca.pem and ca-key.pem to /var/indimail/mysqldb/ssl directory on the client host.
+ca.pem, ca-key.pem, client-cert.pem, client-key.pem, server-cert.pem, server-key.pem, public\_key.pem, private\_key.pem. If you are going to have multiple clients who need to connect to this server, you need to copy ca.pem and ca-key.pem to /var/indimail/mysqldb/ssl directory on the client host.
 
 Unlike mysql-community server, for MariaDB server, you need to mention the certificates in my.cnf like this
 
@@ -3614,7 +3614,7 @@ ssl-key=/var/indimail/mysqldb/ssl/client-key.pem
 
 # Using Docker Engine to Run IndiMail / IndiMail-MTA
 
-IndiMail now has docker images. You can read about installing Docker [here](https://docs.docker.com/engine/install/). Once you have installed docker-engine, you need to start it. Typically it would be
+IndiMail now has docker images. You can read about installing Docker [here](https://docs.docker.com/engine/install/ "Docker Installatoin"). Once you have installed docker-engine, you need to start it. Typically it would be
 
 `$ sudo service docker start`
 
@@ -3717,13 +3717,13 @@ NOTE: There are few defaults for the indimail docker container image
 
 You can get binary RPM / Debian packages at
 
-* [Stable](http://download.opensuse.org/repositories/home:/indimail/)
-* [Experimental](http://download.opensuse.org/repositories/home:/mbhangui/)
+* [Stable](http://download.opensuse.org/repositories/home:/indimail/ "Stable Build Repository")
+* [Experimental](http://download.opensuse.org/repositories/home:/mbhangui/ "Experimental Build Repository")
 
 If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories, depending on whether you want to install a stable or an experimental release, are
 
-* [Stable](https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail)
-* [Experimental](https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail)
+* [Stable](https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail "Stable Build Repository")
+* [Experimental](https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail "Experimental Build Repository")
 
 ```
 Currently, the list of supported distributions for IndiMail is
@@ -3764,13 +3764,13 @@ Currently, the list of supported distributions for IndiMail is
 
 ## Docker / Podman Repository
 
-The [docker repository](https://hub.docker.com/r/cprogrammer/indimail) can be used to pull docker/podman images for indimail.
+The [docker repository](https://hub.docker.com/r/cprogrammer/indimail "Docker Repository") can be used to pull docker/podman images for indimail.
 
-For latest details refer to [README](https://github.com/mbhangui/docker/blob/master/README.md)
+For latest details refer to [README](https://github.com/mbhangui/docker/blob/master/README.md "README")
 
 ## GIT Repository
 
-IndiMail has a git repository at [here](https://github.com/mbhangui/indimail-virtualdomains)
+IndiMail has a git repository at [here](https://github.com/mbhangui/indimail-virtualdomains "IndiMail")
 
 # Support Information
 
@@ -3782,17 +3782,17 @@ IndiMail has an IRC channel ##indimail and ##indimail-mta
 
 There are four Mailing Lists for IndiMail
 
-1. indimail-support  - You can subscribe for Support [here](https://lists.sourceforge.net/lists/listinfo/indimail-support). You can mail [indimail-support](mailto:indimail-support@lists.sourceforge.net) for support Old discussions can be seen [here](https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-support)
-2. indimail-devel - You can subscribe [here](https://lists.sourceforge.net/lists/listinfo/indimail-devel). You can mail [indimail-devel](mailto:indimail-devel@lists.sourceforge.net) for development activities. Old discussions can be seen [here]
+1. indimail-support  - You can subscribe for Support [here](https://lists.sourceforge.net/lists/listinfo/indimail-support "Support"). You can mail [indimail-support](mailto:indimail-support@lists.sourceforge.net) for support Old discussions can be seen [here](https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-support)
+2. indimail-devel - You can subscribe [here](https://lists.sourceforge.net/lists/listinfo/indimail-devel "Devel Support"). You can mail [indimail-devel](mailto:indimail-devel@lists.sourceforge.net) for development activities. Old discussions can be seen [here]
 (https://sourceforge.net/mailarchive/forum.php?forum_name=indimail-devel)
-3. indimail-announce - This is only meant for announcement of New Releases or patches. You can subscribe [here](http://groups.google.com/group/indimail)
-4. Archive at [Google Groups](http://groups.google.com/group/indimail). This groups acts as a remote archive for indimail-support and indimail-devel.
+3. indimail-announce - This is only meant for announcement of New Releases or patches. You can subscribe [here](http://groups.google.com/group/indimail "Announce")
+4. Archive at [Google Groups](http://groups.google.com/group/indimail "Archive"). This groups acts as a remote archive for indimail-support and indimail-devel.
 
-There is also a [Project Tracker](http://sourceforge.net/tracker/?group_id=230686) for IndiMail (Bugs, Feature Requests, Patches, Support Requests)
+There is also a [Project Tracker](http://sourceforge.net/tracker/?group_id=230686 "Project Trackerr") for IndiMail (Bugs, Feature Requests, Patches, Support Requests)
 
 
 # See also
 
-* [Official qmail website, maintained by Daniel J. Bernstein](http://cr.yp.to/qmail.html)
-* [Unofficial qmail website, maintained by Russ Nelson](http://www.qmail.org)
-* [Life with qmail](http://www.lifewithqmail.org/lwq.html)
+* [Official qmail website, maintained by Daniel J. Bernstein](http://cr.yp.to/qmail.html "qmail")
+* [Unofficial qmail website, maintained by Russ Nelson](http://www.qmail.org "qmail.org")
+* [Life with qmail](http://www.lifewithqmail.org/lwq.html "LWQ")
