@@ -110,7 +110,7 @@ Table of Contents
       * [Docker / Podman Repository](#docker--podman-repository)
       * [GIT Repository](#git-repository)
    * [Support Information](#support-information)
-      * [IRC](#irc)
+      * [IRC](#irc--matrix)
       * [Mailing list](#mailing-list)
    * [See also](#see-also)
 
@@ -3774,9 +3774,10 @@ IndiMail has a git repository at [here](https://github.com/mbhangui/indimail-vir
 
 # Support Information
 
-## IRC
+## IRC / Matrix
 
-IndiMail has an IRC channel ##indimail and ##indimail-mta
+* Join me https://matrix.to/#/#indimail:matrix.org
+* IndiMail has an IRC channel #indimail-mta
 
 ## Mailing list
 
