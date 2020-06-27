@@ -1,3 +1,5 @@
+![IndiMail](indimail_logo.png "IndiMail")
+
 Table of Contents
 =================
 
