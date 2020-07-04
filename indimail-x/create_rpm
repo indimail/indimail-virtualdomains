@@ -58,8 +58,8 @@ if [ $copy_src -eq 1 ] ; then
 	/bin/cp -rp indimail-x stage/indimail-"$version"
 	cd stage/indimail-"$version"
 	echo "Cleaning indimail-"$version""
-	make clean > /dev/null
-	make distclean > /dev/null
+	make -s clean > /dev/null
+	make -s distclean > /dev/null
 	/bin/rm -rf autom4te.cache .deps
 	/bin/rm -rf eps-1.2/autom4te.cache eps-1.2/.deps
 	cd ..
