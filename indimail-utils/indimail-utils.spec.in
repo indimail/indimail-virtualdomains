@@ -162,12 +162,11 @@ fortune-%{fortune_version} mpack-%{mpack_version} flash-%{flash_version}
 do
   if [ -d $i ] ; then
     cd $i
-    %{__make} -s DESTDIR=%{buildroot}
-    %{__make} -s DESTDIR=%{buildroot} install-strip
+    %{__make} -s %{?_smp_mflags}
+    %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
     cd ..
   fi
 done
-
 
 %{__mkdir_p} %{buildroot}%{sysconfdir}
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
