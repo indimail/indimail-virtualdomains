@@ -168,8 +168,8 @@ HOME='.';export HOME
 
 %install
 ID=$(id -u)
-%{__make} -s DESTDIR=%{buildroot}
-%{__make} -s DESTDIR=%{buildroot} install-strip
+%{__make} -s %{?_smp_mflags}
+%{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
 
 %{__mkdir_p} %{buildroot}%{sysconfdir}
 %if %noperms == 0
