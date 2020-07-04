@@ -61,6 +61,11 @@ install-exec-local:
 		echo $$f; \
 		$(INSTALL_PROGRAM) $(INSTALL_STRIP_FLAG) libs/authlib/$$f \
 			$(DESTDIR)$(libexecdir)/imapmodules/$$f ; done
+	for f in `cat libs/authlib/modulelist ; echo $$authmodulelist ` ; do \
+		echo $$f; \
+		test "$$f" = "authpam" || test "$$f" = "authshadow" || continue ; \
+		chmod 4555 $(DESTDIR)$(libexecdir)/imapmodules/$$f || exit 1; \
+	done
 	$(mkinstalldirs) $(DESTDIR)$(databindir)
 	$(mkinstalldirs) $(DESTDIR)$(bindir)
 	test ! -x libs/tcpd/couriertls || $(INSTALL_PROGRAM) $(INSTALL_STRIP_FLAG) \
@@ -77,11 +82,6 @@ install-exec-hook:
 
 install-data-local: install-man
 	$(INSTALL_DATA) libs/authlib/modulelist $(DESTDIR)$(sysconfdir)/authmodulelist
-	for f in `cat libs/authlib/modulelist ; echo $$authmodulelist ` ; do \
-		echo $$f; \
-		test "$$f" = "authpam" || test "$$f" = "authshadow" || continue ; \
-		chmod 4555 $(DESTDIR)/$(libexecdir)/imapmodules/$$f || exit 1; \
-	done
 	test -d $(DESTDIR)/etc/pam.d || exit 0 ; \
 	test -w $(DESTDIR)/etc/pam.d || exit 0 ; \
 	test -f $(DESTDIR)/etc/pam.d/imap || \
