@@ -69,7 +69,7 @@ if [ $copy_src -eq 1 ] ; then
 		/bin/rm -rf ../stage
 	fi
 	mkdir ../stage
-	cd ..
+	cd .. # /usr/local/src/indimail-virtualdomains
 	list=`get_tar_files`
 	for i in $list
 	do
@@ -88,12 +88,12 @@ if [ $copy_src -eq 1 ] ; then
 			;;
 		esac
 		/bin/cp -rp "$dir"-x stage/$dir-"$package_version"
-		cd stage/$dir-"$package_version"
+		cd stage/$dir-"$package_version" # stage/package
 		echo "Cleaning $dir-$package_version"
 		make -s clean > /dev/null
 		make -s distclean > /dev/null
 		/bin/rm -rf autom4te.cache .deps
-		cd ..
+		cd .. # stage
 		echo "Archiving "$dir"-"$package_version".tar.gz in `pwd`"
 		tar \
 			--exclude=""$dir"-"$package_version"/.git" \
@@ -102,7 +102,7 @@ if [ $copy_src -eq 1 ] ; then
 			-cf - "$dir"-"$package_version" \
 			| gzip -c > $rpmbuild/SOURCES/"$dir"-"$package_version".tar.gz
 		SRC="$rpmbuild/SOURCES/"$dir"-"$package_version".tar.gz $SRC"
-		cd ..
+		cd .. # /usr/local/src/indimail-virtualdomains
 	done
 	echo "Copying permissions files and rpmlintrc"
 	for i in `get_non_tar_files indimail-auth/indimail-auth.spec`
@@ -111,11 +111,10 @@ if [ $copy_src -eq 1 ] ; then
 		/bin/cp -p stage/indimail-auth/$i $rpmbuild/SOURCES
 		SRC="$rpmbuild/SOURCES/$i $SRC"
 	done
-	cd ..
 	echo "Clearing stage directory"
 	/bin/rm -rf stage
 else
-	cd ..
+	cd .. # /usr/local/src/indimail-virtualdomains
 fi
 
 echo "Preparing indimail-auth"
@@ -156,7 +155,8 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	else
 		cp indimail-auth/indimail-auth.spec /tmp
 	fi
-	rpmbuild -ba --clean /tmp/indimail-auth.spec
+	echo "rpmbuild -ba --clean --quiet /tmp/indimail-auth.spec"
+	rpmbuild -ba --clean --quiet /tmp/indimail-auth.spec
 	/bin/rm -f /tmp/indimail-auth.spec
 	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
 	rpm --addsign $rpmbuild/RPMS/$build_arch/indimail-auth-"$version"-"1.$release".$dist.$build_arch.rpm
