@@ -99,7 +99,8 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	else
 		cp bogofilter-x/indimail-spamfilter.spec /tmp
 	fi
-	rpmbuild -ba --clean /tmp/indimail-spamfilter.spec
+	echo "rpmbuild -ba --clean --quiet /tmp/indimail-spamfilter.spec"
+	rpmbuild -ba --clean --quiet /tmp/indimail-spamfilter.spec
 	#/bin/rm -f /tmp/indimail-spamfilter.spec
 	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
 	rpm --addsign $rpmbuild/RPMS/$build_arch/indimail-spamfilter-"$version"-"1.$release".$dist.$build_arch.rpm
