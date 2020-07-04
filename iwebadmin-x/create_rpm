@@ -96,7 +96,8 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		make -s -C iwebadmin-x iwebadmin.spec
 		cp iwebadmin-x/iwebadmin.spec /tmp
 	fi
-	rpmbuild -ba --clean /tmp/iwebadmin.spec
+	echo "rpmbuild -ba --clean --quiet /tmp/iwebadmin.spec"
+	rpmbuild -ba --clean --quiet /tmp/iwebadmin.spec
 	/bin/rm -f /tmp/iwebadmin.spec
 	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
 	rpm --addsign $rpmbuild/RPMS/$build_arch/iwebadmin-"$version"-"1.$release".$dist.$build_arch.rpm
