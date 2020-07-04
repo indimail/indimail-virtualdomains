@@ -97,7 +97,8 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		make -s -C procmail-x procmail.spec
 		cp procmail-x/procmail.spec /tmp
 	fi
-	rpmbuild -ba --clean /tmp/procmail.spec
+	echo "rpmbuild -ba --clean --quiet /tmp/procmail.spec"
+	rpmbuild -ba --clean --quiet /tmp/procmail.spec
 	/bin/rm -f /tmp/procmail.spec
 	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
 	rpm --addsign $rpmbuild/RPMS/$build_arch/procmail-"$version"-"1.$release".$dist.$build_arch.rpm
