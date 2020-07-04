@@ -118,19 +118,14 @@ if [ $copy_src -eq 1 ] ; then
 		make -s distclean > /dev/null
 		/bin/rm -rf autom4te.cache .deps
 		cd ..
-		do_archive="gz"
-		case "$do_archive" in
-			gz)
-			echo "Archiving $dir-$package_version.tar.gz in `pwd`"
-			tar \
-			--exclude="$dir/.git" \
-			--exclude="$dir/debian"  \
-			--exclude="$dir/RCS" \
+		echo "Archiving $dir-$package_version.tar.gz in `pwd`"
+		tar \
+			--exclude="$dir"-"$package_version"/.git \
+			--exclude="$dir"-"$package_version"/debian  \
+			--exclude="$dir"-"$package_version"/RCS \
 			-cf - $dir-$package_version \
 			| gzip -c > $rpmbuild/SOURCES/"$dir"-"$package_version".tar.gz
-			SRC="$rpmbuild/SOURCES/"$dir"-"$package_version".tar.gz $SRC"
-			;;
-		esac
+		SRC="$rpmbuild/SOURCES/"$dir"-"$package_version".tar.gz $SRC"
 		cd ..
 	done
 	echo "Copying permissions files and rpmlintrc"
