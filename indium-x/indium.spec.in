@@ -1,6 +1,6 @@
 #
 #
-# $Id: indium.spec.in,v 1.22 2020-06-22 09:15:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.23 2020-07-05 00:59:02+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -39,7 +39,7 @@
 Summary: TCL/TK based Administration GUI for IndiMail
 Name: indium
 Version: @version@
-Release: 1.1%{?dist}
+Release: @release@%{?dist}
 
 %if %build_on_obs == 1
 License: GPL-3.0+
@@ -152,11 +152,11 @@ do
 if [ -d $i ] ; then
   cd $i
   if [ %{_verbose} -eq 0 ] ; then
-    %{__make} -s DESTDIR=%{buildroot}
-    %{__make} -s DESTDIR=%{buildroot} install-strip
+    %{__make} -s %{?_smp_mflags}
+    %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
   else
-    %{__make} DESTDIR=%{buildroot}
-    %{__make} DESTDIR=%{buildroot} install-strip
+    %{__make} %{?_smp_mflags}
+    %{__make} %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
   fi
   cd ..
 fi
