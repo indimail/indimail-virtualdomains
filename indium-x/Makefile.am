@@ -62,8 +62,8 @@ edit = sed \
 	-e 's,@imagedir\@,$(shareddir)/indium/images,g' \
 	-e 's,@shareetcdir\@,$(sysconfdir),g' \
 	-e 's,@defaultdomain\@,$(defaultdomain),g' \
-	-e 's|@version\@|"`cat conf-release`"|g' \
-	-e 's,@release\@,$(release),g' \
+	-e 's,@version\@,$(version),g' \
+	-e "s|@release\@|"`cat conf-release`"|g" \
 	-e 's,@prefix\@,$(prefix),g'
 
 pwhelper.lo: config.h
