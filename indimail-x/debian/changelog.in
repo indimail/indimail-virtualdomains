@@ -34,3 +34,5 @@ indimail (@version@-@release@) unstable; urgency=low
   * increased soft mem for IMAP/POP3/poppass to 100Mb
   * call svctool --fixsharedlibs during post install to fix mysql_lib control file
   * qlocal_upgrade.sh - fixed getent, usermod usage in setting supplementary groups
+  * LoadDbInfo.c, LoadBMF.c, MoveFile.c, vacation.c: replace utime() with utimes()
+  * use %{?_smp_mflags for parallel builds

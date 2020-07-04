@@ -59,3 +59,6 @@ Release 3.2 Start 21/05/2020
     file
 - 24/06/2020
 34. qlocal_upgrade.sh - fixed getent, usermod usage in setting supplementary groups
+- 05/07/2020
+35. LoadDbInfo.c, LoadBMF.c, MoveFile.c, vacation.c: replace utime() with utimes()
+36. use %{?_smp_mflags for parallel builds
