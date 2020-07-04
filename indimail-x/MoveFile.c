@@ -1,5 +1,8 @@
 /*
  * $Log: MoveFile.c,v $
+ * Revision 1.2  2020-07-04 22:54:01+05:30  Cprogrammer
+ * replaced utime() with utimes()
+ *
  * Revision 1.1  2019-04-18 08:36:10+05:30  Cprogrammer
  * Initial revision
  *
@@ -14,8 +17,8 @@
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
-#ifdef HAVE_UTIME_H
-#include <utime.h>
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
 #endif
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -30,7 +33,7 @@
 #include "fappend.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: MoveFile.c,v 1.1 2019-04-18 08:36:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: MoveFile.c,v 1.2 2020-07-04 22:54:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -45,7 +48,7 @@ MoveFile(char *src_dir, char *dest_dir)
 {
 	DIR            *entry;
 	struct dirent  *dp;
-	struct utimbuf  ubuf1, ubuf2;
+	struct timeval  ubuf1[2] = {0}, ubuf2[2] = {0};
 	struct stat     statbuf;
 	static stralloc tmpbuf = {0}, nsrc_dir = {0}, ndest_dir = {0};
 	int             status;
@@ -58,8 +61,8 @@ MoveFile(char *src_dir, char *dest_dir)
 		strerr_warn3("MoveFile: opendir: ", src_dir, ": ", &strerr_sys);
 		return (-1);
 	} 
-	ubuf1.actime = statbuf.st_atime;
-	ubuf1.modtime = statbuf.st_mtime;
+	ubuf1[0].tv_sec = statbuf.st_atime;
+	ubuf1[1].tv_sec = statbuf.st_mtime;
 	if (access(dest_dir, F_OK) && r_mkdir((char *) dest_dir, statbuf.st_mode, 
 		statbuf.st_uid, statbuf.st_gid)) {
 		strerr_warn3("MoveFile: r_mkdir: ", dest_dir, ": ", &strerr_sys);
@@ -94,8 +97,8 @@ MoveFile(char *src_dir, char *dest_dir)
 			strerr_warn3("MoveFile: stat: ", nsrc_dir.s, ": ", &strerr_sys);
 			continue;
 		}
-		ubuf2.actime = statbuf.st_atime;
-		ubuf2.modtime = statbuf.st_mtime;
+		ubuf2[0].tv_sec = statbuf.st_atime;
+		ubuf2[1].tv_sec = statbuf.st_mtime;
 		if (S_ISDIR(statbuf.st_mode))
 			status = MoveFile(nsrc_dir.s, ndest_dir.s);
 		else
@@ -132,10 +135,10 @@ MoveFile(char *src_dir, char *dest_dir)
 					strerr_warn3("MoveFile: unlink: ", nsrc_dir.s, ": ", &strerr_sys);
 			}
 		}
-		if (!S_ISLNK(statbuf.st_mode) && utime(ndest_dir.s, &ubuf2))
+		if (!S_ISLNK(statbuf.st_mode) && utimes(ndest_dir.s, ubuf2))
 			strerr_warn3("MoveFile: utime: ", ndest_dir.s, ": ", &strerr_sys);
 	}
-	if (utime(dest_dir, &ubuf1))
+	if (utimes(dest_dir, ubuf1))
 		strerr_warn3("MoveFile: utime: ", dest_dir, ": ", &strerr_sys);
 	if ((status = rmdir(src_dir) == -1))
 		strerr_warn3("MoveFile: rmdir: ", src_dir, ": ", &strerr_sys);

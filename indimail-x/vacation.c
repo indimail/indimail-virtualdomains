@@ -1,5 +1,8 @@
 /*
  * $Log: vacation.c,v $
+ * Revision 1.5  2020-07-04 22:54:50+05:30  Cprogrammer
+ * replaced utime() with utimes()
+ *
  * Revision 1.4  2020-06-12 21:37:59+05:30  Cprogrammer
  * added stdlib.h for mkstemp() prototype
  *
@@ -19,8 +22,8 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_UTIME_H
-#include <utime.h>
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
 #endif
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -54,7 +57,7 @@
 #include "runcmmd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vacation.c,v 1.4 2020-06-12 21:37:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vacation.c,v 1.5 2020-07-04 22:54:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -124,7 +127,6 @@ int
 vacation_check(stralloc *email, stralloc *homedir)
 {
 	struct stat     statbuf;
-	struct utimbuf  ubuf;
 	time_t          curtime;
 	int             fd;
 
@@ -154,8 +156,7 @@ vacation_check(stralloc *email, stralloc *homedir)
 		return (0);
 	}
 	if ((curtime - statbuf.st_mtime) > 86400) {
-		ubuf.actime = ubuf.modtime = time(0);
-		if (utime(tmpbuf.s, &ubuf))
+		if (utimes(tmpbuf.s, 0))
 			strerr_die3sys(111, "vacation: utime: ", tmpbuf.s, ": ");
 	} else
 		return (1);

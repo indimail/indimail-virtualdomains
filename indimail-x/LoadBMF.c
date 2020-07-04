@@ -1,5 +1,8 @@
 /*
  * $Log: LoadBMF.c,v $
+ * Revision 1.3  2020-07-04 22:53:05+05:30  Cprogrammer
+ * replaced utime() with utimes()
+ *
  * Revision 1.2  2020-04-01 18:56:45+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadBMF.c,v 1.2 2020-04-01 18:56:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadBMF.c,v 1.3 2020-07-04 22:53:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -22,8 +25,8 @@ static char     sccsid[] = "$Id: LoadBMF.c,v 1.2 2020-04-01 18:56:45+05:30 Cprog
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_UTIME_H
-#include <utime.h>
+#ifdef HAVE_TIME_H
+#include <sys/time.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -156,7 +159,7 @@ UpdateSpamTable(char *bmf)
 	 * If err is 0, possibility is file has been  updated without any content
 	 * being changed.
 	 */
-	if (err && utime(badmailfrom.s, 0))
+	if (err && utimes(badmailfrom.s, 0))
 		strerr_warn3("LoadBMF: utime: ", badmailfrom.s, ": ", &strerr_sys);
 	if (verbose) {
 		strnum[fmt_ulong(strnum, (unsigned long) err)] = 0;
@@ -181,7 +184,7 @@ LoadBMF(int *total, char *bmf)
 	MYSQL_ROW       row;
 	time_t          mtime = 0l, mcd_time = 0l, file_time = 0l;
 	char           *sysconfdir, *controldir;
-	struct utimbuf  ubuf;
+	struct timeval  ubuf[2] = {0};
 	char            outbuf[512];
 	struct substdio ssout;
 
@@ -342,8 +345,8 @@ LoadBMF(int *total, char *bmf)
 				strerr_warn1("LoadBMF: Invalid TIMESTAMP: Internal BUG", 0);
 				return ((char **) 0);
 			}
-			ubuf.actime = ubuf.modtime = (err ? time(0) : file_time);
-			if (ubuf.actime && utime(badmailfrom.s, &ubuf))
+			ubuf[0].tv_sec = ubuf[1].tv_sec = (err ? time(0) : file_time);
+			if (ubuf[0].tv_sec && utimes(badmailfrom.s, ubuf))
 				strerr_warn3("LoadBMF: utime: ", badmailfrom.s, ": ", &strerr_sys);
 			return (LoadBMF_internal(total, bmf));
 		}
@@ -385,9 +388,9 @@ LoadBMF(int *total, char *bmf)
 			return ((char **) 0);
 		}
 		close(fd);
-		ubuf.actime = time(0);
-		ubuf.modtime = mcd_time;
-		if (utime(badmailfrom.s, &ubuf))
+		ubuf[0].tv_sec = time(0);
+		ubuf[1].tv_sec = mcd_time;
+		if (utimes(badmailfrom.s, ubuf))
 			strerr_warn3("LoadBMF: utime: ", badmailfrom.s, ": ", &strerr_sys);
 	} else
 	if (verbose) {

@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbInfo.c,v $
+ * Revision 1.10  2020-07-04 22:53:56+05:30  Cprogrammer
+ * replaced utime() with utimes()
+ *
  * Revision 1.9  2020-05-12 19:23:58+05:30  Cprogrammer
  * BUG - uninitialized relayhosts variable
  *
@@ -52,8 +55,8 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_UTIME_H
-#include <utime.h>
+#ifdef HAVE_TIME_H
+#include <sys/time.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -86,7 +89,7 @@
 #include "check_group.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.9 2020-05-12 19:23:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.10 2020-07-04 22:53:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static DBINFO **loadMCDInfo(int *);
@@ -125,7 +128,7 @@ writemcdinfo(DBINFO **rhostsptr, time_t mtime)
 	int             fd, idx;
 	uid_t           uid, uidtmp;
 	gid_t           gid, gidtmp;
-	struct utimbuf  ubuf;
+	struct timeval  ubuf[2] = {0};
 	DBINFO        **ptr;
 	struct substdio ssout;
 
@@ -202,9 +205,9 @@ writemcdinfo(DBINFO **rhostsptr, time_t mtime)
 			strerr_die3sys(111, "LoadDbInfo: write error: ", mcdFile.s, ": ");
 	}
 	close(fd);
-	ubuf.actime = time(0);
-	ubuf.modtime = mtime;
-	if (utime(mcdFile.s, &ubuf))
+	ubuf[0].tv_sec = time(0);
+	ubuf[1].tv_sec = mtime;
+	if (utimes(mcdFile.s, ubuf))
 		strerr_die3sys(111, "writemcdinfo: utime: ", mcdFile.s, ": ");
 	return (0);
 }
