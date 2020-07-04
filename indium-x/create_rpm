@@ -94,7 +94,8 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		make -s -C indium-x indium.spec
 		cp indium-x/indium.spec /tmp
 	fi
-	rpmbuild -ba --clean /tmp/indium.spec
+	echo "rpmbuild -ba --clean --quiet /tmp/indium.spec"
+	rpmbuild -ba --clean --quiet /tmp/indium.spec
 	/bin/rm -f /tmp/indium.spec
 	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
 	rpm --addsign $rpmbuild/RPMS/$build_arch/indium-"$version"-"1.$release".$dist.$build_arch.rpm
