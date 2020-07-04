@@ -182,7 +182,8 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	else
 		cp indimail-utils/indimail-utils.spec /tmp
 	fi
-	rpmbuild -ba --clean /tmp/indimail-utils.spec
+	echo "rpmbuild -ba --clean --quiet /tmp/indimail-utils.spec"
+	rpmbuild -ba --clean --quiet /tmp/indimail-utils.spec
 	/bin/rm -f /tmp/indimail.spec
 	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
 	rpm --addsign $rpmbuild/RPMS/$build_arch/indimail-utils-"$version"-"1.$release".$dist.$build_arch.rpm
