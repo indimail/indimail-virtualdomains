@@ -121,7 +121,8 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	else
 		cp indimail-x/indimail.spec /tmp
 	fi
-	rpmbuild -ba --clean /tmp/indimail.spec
+	echo "rpmbuild -ba --clean --quiet /tmp/indimail.spec"
+	rpmbuild -ba --clean --quiet /tmp/indimail.spec
 	/bin/rm -f /tmp/indimail.spec
 	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
 	for i in indimail indimail-devel libindimail
