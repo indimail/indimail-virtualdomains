@@ -2,6 +2,34 @@
 curdir=`pwd`
 version=$(cat conf-version)
 
+if [ -f /etc/debian_version ] ; then
+	echo "you can't do rpmbuild on an insane system" 1>&2
+	exit 1
+fi
+
+verbose=0
+while test $# -gt 0; do
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
+	;;
+    *) optarg=
+	;;
+    esac
+
+    case "$1" in
+    --verbose)
+	verbose=1
+    ;;
+    *)
+    echo "invalid option [$1]"
+    read key
+    usage 1
+    ;;
+    esac
+
+    shift
+done
+
 if test -f $HOME/.rpmmacros
 then
 	topdir=`grep ^%_topdir $HOME/.rpmmacros | awk '{print $2}'`
@@ -93,22 +121,32 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		make -s -C logalert-x logalert.spec
 		cp logalert-x/logalert.spec /tmp
 	fi
-	rpmbuild -ba --clean /tmp/logalert.spec
-	/bin/rm -f /tmp/logalert.spec
-	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
-	rpm --addsign $rpmbuild/RPMS/$build_arch/logalert-"$version"-"1.$release".$dist.$build_arch.rpm
-	rpm --addsign $rpmbuild/SRPMS/logalert-"$version"-"1.$release".$dist.src.rpm
-	echo -n "RPM lint for logalert-"$version"-1."$release" (Y/N) - "
-	read key
-	if [ " $key" = " Y" -o " $key" = " y" ] ; then
-		(
-		echo logalert
-		rpmlint $rpmbuild/RPMS/$build_arch/logalert-"$version"-"1.$release".$dist.$build_arch.rpm
-		echo ------------------------
-		echo logalert-"$version"-"1.$release".$dist.src.rpm
-		rpmlint $rpmbuild/SRPMS/logalert-"$version"-"1.$release".$dist.src.rpm
-		echo ------------------------
-		) 2>&1 | less
+	if [ $verbose -eq 0 ] ; then
+		echo "rpmbuild -ba --clean --quiet /tmp/logalert.spec"
+		rpmbuild -ba --clean --quiet /tmp/logalert.spec
+	else
+		echo "rpmbuild -ba --clean /tmp/logalert.spec"
+		rpmbuild -ba --clean /tmp/logalert.spec
+	fi
+	if [ $? -eq 0 ] ; then
+		/bin/rm -f /tmp/logalert.spec
+		build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
+		rpm --addsign $rpmbuild/RPMS/$build_arch/logalert-"$version"-"1.$release".$dist.$build_arch.rpm
+		rpm --addsign $rpmbuild/SRPMS/logalert-"$version"-"1.$release".$dist.src.rpm
+		echo -n "RPM lint for logalert-"$version"-1."$release" (Y/N) - "
+		read key
+		if [ " $key" = " Y" -o " $key" = " y" ] ; then
+			(
+			echo logalert
+			rpmlint $rpmbuild/RPMS/$build_arch/logalert-"$version"-"1.$release".$dist.$build_arch.rpm
+			echo ------------------------
+			echo logalert-"$version"-"1.$release".$dist.src.rpm
+			rpmlint $rpmbuild/SRPMS/logalert-"$version"-"1.$release".$dist.src.rpm
+			echo ------------------------
+			) 2>&1 | less
+		fi
+	else
+		/bin/rm -f /tmp/logalert.spec
 	fi
 fi
 if [ $copy_src -eq 1 ] ; then
