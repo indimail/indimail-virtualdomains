@@ -22,6 +22,34 @@ get_dirname()
 		-e 's}.tar.xz}}g'
 }
 
+if [ -f /etc/debian_version ] ; then
+	echo "you can't do rpmbuild on an insane system" 1>&2
+	exit 1
+fi
+
+verbose=0
+while test $# -gt 0; do
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
+	;;
+    *) optarg=
+	;;
+    esac
+
+    case "$1" in
+    --verbose)
+	verbose=1
+    ;;
+    *)
+    echo "invalid option [$1]"
+    read key
+    usage 1
+    ;;
+    esac
+
+    shift
+done
+
 if test -f $HOME/.rpmmacros
 then
 	topdir=`grep ^%_topdir $HOME/.rpmmacros | awk '{print $2}'`
@@ -121,29 +149,38 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	else
 		cp indimail-x/indimail.spec /tmp
 	fi
-	echo "rpmbuild -ba --clean --quiet /tmp/indimail.spec"
-	rpmbuild -ba --clean --quiet /tmp/indimail.spec
-	/bin/rm -f /tmp/indimail.spec
-	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
-	for i in indimail indimail-devel libindimail
-	do
-		rpm --addsign $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
-	done
-	rpm --addsign $rpmbuild/SRPMS/indimail-"$version"-"1.$release".$dist.src.rpm
-	echo -n "RPM lint for indimail-"$version"-1."$release" (Y/N) - "
-	read key
-	if [ " $key" = " Y" -o " $key" = " y" ] ; then
-		(
+	if [ $verbose -eq 0 ] ; then
+		echo "rpmbuild -ba --clean --quiet /tmp/indimail.spec"
+		rpmbuild -ba --clean --quiet /tmp/indimail.spec
+	else
+		echo "rpmbuild -ba --clean /tmp/indimail.spec"
+		rpmbuild -ba --clean /tmp/indimail.spec
+	fi
+	if [ $? -eq 0 ] ; then
+		/bin/rm -f /tmp/indimail.spec
+		build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
 		for i in indimail indimail-devel libindimail
 		do
-			echo $i
-			rpmlint $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
-			echo ------------------------
+			rpm --addsign $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
 		done
-		echo indimail-"$version"-"1.$release".$dist.src.rpm
-		rpmlint $rpmbuild/SRPMS/indimail-"$version"-"1.$release".$dist.src.rpm
-		echo ------------------------
-		) 2>&1 | less
+		rpm --addsign $rpmbuild/SRPMS/indimail-"$version"-"1.$release".$dist.src.rpm
+		echo -n "RPM lint for indimail-"$version"-1."$release" (Y/N) - "
+		read key
+		if [ " $key" = " Y" -o " $key" = " y" ] ; then
+			(
+			for i in indimail indimail-devel libindimail
+			do
+				echo $i
+				rpmlint $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
+				echo ------------------------
+			done
+			echo indimail-"$version"-"1.$release".$dist.src.rpm
+			rpmlint $rpmbuild/SRPMS/indimail-"$version"-"1.$release".$dist.src.rpm
+			echo ------------------------
+			) 2>&1 | less
+		fi
+	else
+		/bin/rm -f /tmp/indimail.spec
 	fi
 fi
 if [ $copy_src -eq 1 ] ; then
