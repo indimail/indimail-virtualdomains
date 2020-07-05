@@ -1,8 +1,8 @@
 prefix=@prefix@
 mandir=@mandir@
 sysconfdir=@sysconfdir@
-version=@version@
-release=@release@
+version=$(shell cat ../conf-version)
+release=$(shell cat ../conf-release)
 #
 
 all: rules postinst postrm debian.tar.gz logalert.dsc dummy.tar.gz
@@ -12,6 +12,7 @@ clean:
 
 edit = sed \
 	-e 's,@version\@,$(version),g' \
+	-e 's,@release\@,$(release),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@prefix\@,$(prefix),g'

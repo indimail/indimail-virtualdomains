@@ -8,12 +8,16 @@ fetchmail_version=$(cat ../fetchmail-x/conf-version)
 
 make -s debian/Makefile
 make -s -C debian
+echo "Cleaning Stage"
 rm -rf                   $HOME/stage/indimail-access
+echo "Copying Stage"
 mkdir -p                 $HOME/stage/indimail-access
 cp -rp ../courier-imap-x $HOME/stage/indimail-access/courier-imap-$courier_version
 cp -rp ../fetchmail-x    $HOME/stage/indimail-access/fetchmail-$fetchmail_version
 cp -rp debian            $HOME/stage/indimail-access
 cd                       $HOME/stage/indimail-access
 dpkg-buildpackage -tc -b -d
-rm -rf                   $HOME/stage/indimail-access
-ls -lt $HOME/stage
+if [ $? -eq 0 ] ; then
+	rm -rf                   $HOME/stage/indimail-access
+	ls -lt $HOME/stage
+fi

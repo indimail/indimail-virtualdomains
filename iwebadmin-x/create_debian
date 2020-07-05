@@ -7,10 +7,14 @@ iwebadmin_version=$(cat conf-version)
 
 make -s debian/Makefile
 make -s -C debian
+echo "Cleaning Stage"
 /bin/rm -rf $HOME/stage/iwebadmin-$iwebadmin_version
+echo "Copying Stage"
 mkdir -p    $HOME/stage/iwebadmin-$iwebadmin_version
 cp -rp .    $HOME/stage/iwebadmin-$iwebadmin_version
 cd          $HOME/stage/iwebadmin-$iwebadmin_version
 dpkg-buildpackage -tc -b
-/bin/rm -rf $HOME/stage/iwebadmin-$iwebadmin_version
-ls -lt $HOME/stage
+if [ $? -eq 0 ] ; then
+	/bin/rm -rf $HOME/stage/iwebadmin-$iwebadmin_version
+	ls -lt $HOME/stage
+fi

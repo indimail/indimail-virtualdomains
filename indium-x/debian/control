@@ -3,9 +3,8 @@ Section: misc
 Priority: extra
 Maintainer: Manvendra Bhangui <mbhangui@gmail.com>
 Standards-Version: 3.9.1
+Build-Depends: cdbs, debhelper (>= 10), gcc, g++, m4, autotools-dev, tcl-dev
 Homepage: http://indimail.sourceforge.net
-Vcs-Git:git://indimail.git.sourceforge.net/gitroot/indimail/indimail
-Vcs-Browser: http://indimail.git.sourceforge.net/git/gitweb.cgi?p=indimail/indimail;a=summary
 
 Package: indium
 Architecture: any

@@ -7,10 +7,14 @@ procmail_version=$(cat conf-version)
 
 make -s debian/Makefile
 make -s -C debian
+echo "Cleaning Stage"
 /bin/rm -rf $HOME/stage/procmail-$procmail_version
+echo "Copying Stage"
 mkdir -p    $HOME/stage/procmail-$procmail_version
 cp -rp .    $HOME/stage/procmail-$procmail_version
 cd          $HOME/stage/procmail-$procmail_version
 dpkg-buildpackage -tc -b
-/bin/rm -rf $HOME/stage/procmail-$procmail_version
-ls -lt $HOME/stage
+if [ $? -eq 0 ] ; then
+	/bin/rm -rf $HOME/stage/procmail-$procmail_version
+	ls -lt $HOME/stage
+fi

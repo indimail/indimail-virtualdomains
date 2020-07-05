@@ -11,4 +11,4 @@ Debtransform-Release: 1
 Debtransform-Files-Tar: debian.tar.gz
 Debtransform-Tar: iwebadmin-@version@.tar.gz
 Standards-Version: 3.9.1
-Build-Depends: cdbs, debhelper (>= 7), gcc, g++, m4, autotools-dev, libqmail-dev, libqmail, libmysqlclient-dev, libssl-dev, indimail-devel, libindimail
+Build-Depends: cdbs, debhelper (>= 10), gcc, g++, m4, autotools-dev, libqmail-dev, libqmail, libmysqlclient-dev, libssl-dev, indimail-devel, libindimail

@@ -7,10 +7,14 @@ indium_version=$(cat conf-version)
 
 make -s debian/Makefile
 make -s -C debian
+echo "Cleaning Stage"
 /bin/rm -rf $HOME/stage/indium-$indium_version
+echo "Copying Stage"
 mkdir -p    $HOME/stage/indium-$indium_version
 cp -rp .    $HOME/stage/indium-$indium_version
 cd          $HOME/stage/indium-$indium_version
 dpkg-buildpackage -tc -b
-/bin/rm -rf $HOME/stage/indium-$indium_version
-ls -lt $HOME/stage
+if [ $? -eq 0 ] ; then
+	/bin/rm -rf $HOME/stage/indium-$indium_version
+	ls -lt $HOME/stage
+fi

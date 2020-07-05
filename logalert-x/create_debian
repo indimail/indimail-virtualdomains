@@ -7,10 +7,14 @@ logalert_version=$(cat conf-version)
 
 make -s debian/Makefile
 make -s -C debian
+echo "Cleaning Stage"
 /bin/rm -rf $HOME/stage/logalert-$logalert_version
+echo "Copying Stage"
 mkdir -p    $HOME/stage/logalert-$logalert_version
 cp -rp .    $HOME/stage/logalert-$logalert_version
 cd          $HOME/stage/logalert-$logalert_version
 dpkg-buildpackage -tc -b
+if [ $? -eq 0 ] ; then
 /bin/rm -rf $HOME/stage/logalert-$logalert_version
 ls -lt $HOME/stage
+fi
