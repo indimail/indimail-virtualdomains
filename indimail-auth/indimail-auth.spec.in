@@ -61,7 +61,7 @@ AutoReqProv: Yes
 
 BuildRequires: gcc gcc-c++ make autoconf automake libtool
 BuildRequires: glibc glibc-devel procps
-BuildRequires: sed findutils gzip binutils coreutils grep
+BuildRequires: sed findutils gzip coreutils grep
 BuildRequires: mysql-devel pam-devel libqmail-devel libqmail
 
 ################################# OBS ###############################
@@ -75,7 +75,7 @@ BuildRequires: -post-build-checks
 ################################# OBS ###############################
 
 Requires: procps /usr/bin/awk /usr/bin/which
-Requires: binutils sed findutils
+Requires: sed findutils
 Requires: coreutils grep /bin/sh glibc
 Requires: /usr/bin/hostname
 Requires: pam indimail-mta
