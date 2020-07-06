@@ -3625,7 +3625,7 @@ NOTE: Warning: The docker group is equivalent to the root user; For details on h
 
 ```
 $ sudo groupadd docker
-$ sudo usermod -aG docker your\_username
+$ sudo usermod -aG docker your_username
 ```
 Log out and login again to ensure your user is running with the correct permissions. You can run the unix id command to confirm that you have the docker group privileges. e.g.
 
@@ -3704,14 +3704,8 @@ You now have a fully functional mail server with a pre-configured virtual domain
 You can make your changes to the container and commit changes by using the docker commit command. Learning how to use docker is not difficult. Just follow the Docker Documentation. If you are lazy like me, just read the Getting Started guide.
 I am also a newbie as far as docker is concerned. Do let me know your experience with network settings and other advanced docker topics, that you may be familiar with. Do send few bottles of beer my way if you can.
 
-NOTE: There are few defaults for the indimail docker container image
-
-* root password is passxxx@xxx
-* mysql user, password for indimail is indimail, ssh-1.5-
-* mysql privileged user, password is mysql, 4-57343-
-* password for postmaster@indimail.org virtual imap/pop3 account is passxxx
-* password for testuser01@indimail.org virtual imap/pop3 account is passxxx
-
+NOTE:
+Currently IndiMail supports both docker and podman. Both commands are interchangeble. There is much that has happened since this chapter was written in Apr 2016. You should be actually reading [this](https://github.com/mbhangui/docker/blob/master/README.md "Docker README ").
 
 # Installation & Repositories
 
@@ -3768,7 +3762,7 @@ Currently, the list of supported distributions for IndiMail is
 
 The [docker repository](https://hub.docker.com/r/cprogrammer/indimail "Docker Repository") can be used to pull docker/podman images for indimail.
 
-For latest details refer to [README](https://github.com/mbhangui/docker/blob/master/README.md "README")
+For latest details refer to [README](https://github.com/mbhangui/docker/blob/master/README.md "Docker README ")
 
 ## GIT Repository
 
