@@ -1,5 +1,8 @@
 /*
  * $Log: replacestr.c,v $
+ * Revision 1.2  2020-07-09 08:15:48+05:30  Cprogrammer
+ * BUGFIX: fixed bug with multiple pattern replacement
+ *
  * Revision 1.1  2019-04-14 18:30:01+05:30  Cprogrammer
  * Initial revision
  *
@@ -14,7 +17,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: replacestr.c,v 1.1 2019-04-14 18:30:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: replacestr.c,v 1.2 2020-07-09 08:15:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -31,8 +34,17 @@ replacestr(char *str, char *ch, char *rch, stralloc *buf)
 	chlen = str_len(ch);
 	rchlen = str_len(rch);
 	for (ptr = str, prev = cnt = 0; *ptr;) {
-		if (!(s = str_str(ptr, ch)))
-			return (0);
+		if (!(s = str_str(ptr, ch))) {
+			if (cnt) {
+				/*- copy remaining data */
+				if (!stralloc_cats(buf, ptr))
+					return (-1);
+				if (!stralloc_0(buf))
+					return (-1);
+				buf->len--;
+			}
+			return (cnt);
+		}
 		i = s - str;
 		if (!stralloc_catb(buf, ptr, i - prev))
 			return (-1);
