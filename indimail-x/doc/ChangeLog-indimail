@@ -62,3 +62,5 @@ Release 3.2 Start 21/05/2020
 - 05/07/2020
 35. LoadDbInfo.c, LoadBMF.c, MoveFile.c, vacation.c: replace utime() with utimes()
 36. use %{?_smp_mflags for parallel builds
+- 09/07/2020
+37. replacestr: BUGFIX: fixed bug with multiple pattern replacement

@@ -36,3 +36,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * qlocal_upgrade.sh - fixed getent, usermod usage in setting supplementary groups
   * LoadDbInfo.c, LoadBMF.c, MoveFile.c, vacation.c: replace utime() with utimes()
   * use %{?_smp_mflags for parallel builds
+  * replacestr: BUGFIX: fixed bug with multiple pattern replacement
