@@ -2,7 +2,7 @@ Source: indimail-spamfilter
 Section: mail
 Priority: optional
 Maintainer: Manvendra Bhangui <indimail-spamfilter@indimail.org>
-Build-Depends: cdbs, debhelper (>= 10), gcc, g++, automake, bison (>= 1.2), flex (>= 2.5), libdb-dev, m4
+Build-Depends: cdbs, debhelper (>= 9), gcc, g++, automake, bison (>= 1.2), flex (>= 2.5), libdb-dev, m4
 Standards-Version: 4.5.0
 Homepage: https://github.com/mbhangui/indimail-virtualdomains
 

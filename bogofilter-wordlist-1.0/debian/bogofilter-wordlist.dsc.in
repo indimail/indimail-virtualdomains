@@ -9,4 +9,4 @@ Debtransform-Release: 1
 Debtransform-Files-Tar: debian.tar.gz
 Debtransform-Tar: bogofilter-wordlist-@version@.tar.gz
 Standards-Version: 3.9.1
-Build-Depends: cdbs, debhelper (>= 7), m4, autotools-dev
+Build-Depends: cdbs, debhelper (>= 9), m4, autotools-dev
