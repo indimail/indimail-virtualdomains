@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 1.4  2020-08-08 10:51:43+05:30  Cprogrammer
+ * added missing return on connect() failure
+ *
  * Revision 1.3  2020-03-10 20:06:36+05:30  Cprogrammer
  * incorrect usage of htons()
  *
@@ -13,7 +16,6 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdlib.h>
 #include <netdb.h>
 #include <unistd.h>
 #include <netinet/in.h>
@@ -25,7 +27,9 @@
 #include <sys/un.h>
 #include <ctype.h>
 #include "fmt.h"
+#include "env.h"
 #include "scan.h"
+#include "str.h"
 #include "byte.h"
 #include "subfd.h"
 #include "strerr.h"
@@ -49,24 +53,6 @@ isnum(str)
 		if (!isdigit((int) *ptr))
 			return (0);
 	return (1);
-}
-
-static char    *
-Dirname(char *path)
-{
-	static char     tmpbuf[MAX_BUFF];
-	char           *ptr;
-
-	if (!path || !*path)
-		return ((char *) 0);
-	byte_copy(tmpbuf, MAX_BUFF, path);
-	if ((ptr = strrchr(tmpbuf, '/')) != (char *) 0) {
-		if (ptr == tmpbuf)
-			return ("/");
-		*ptr = 0;
-		return (tmpbuf);
-	} 
-	return ((char *) 0);
 }
 
 static int
@@ -105,14 +91,13 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
  *           if > 0, it is the port# of server (host-byte-order)
  */
 {
-	int             resvport, fd = -1, optval, retval;
+	int             resvport, fd = -1, optval, retval, i;
 	char           *ptr, *hostptr;
 	struct servent *sp;
 #ifdef ENABLE_IPV6
 	struct addrinfo hints = {0}, *res = 0, *res0 = 0;
 	char            serv[FMT_ULONG];
 #else
-	int             i;
 	struct hostent *hp;
 #ifdef HAVE_IN_ADDR_T
 	in_addr_t       inaddr;
@@ -123,14 +108,14 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 #endif
 	struct sockaddr_un unixaddr;	/*- server's local unix socket address */
 	struct linger   linger;
-	char           *dir;
 	char            localhost[MAXHOSTNAMELEN];
 
-	if (host && *host && ((strchr(host, '/') || ((dir = Dirname(host)) && !access(dir, F_OK))))) {
+	i = str_chr(host, '/');
+	if (host && *host && host[i] && !access(host, F_OK)) {
 		if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
         	return -1;
     	unixaddr.sun_family = AF_UNIX;
-    	byte_copy(unixaddr.sun_path, sizeof(unixaddr.sun_path), host);
+    	str_copyb(unixaddr.sun_path, host, sizeof(unixaddr.sun_path));
     	if (connect(fd, (struct sockaddr *) &unixaddr, sizeof(struct sockaddr_un)) == -1) {
 			close (fd);
         	return -1;
@@ -143,11 +128,11 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	if (gethostname(localhost, MAXHOSTNAMELEN))
 #endif
 		return (-1);
-	if (!strcmp(host, localhost) || !strcmp(host, "localhost"))
+	if (!str_diff(host, localhost) || !str_diffn(host, "localhost", 10))
 		hostptr = "localhost";
 	else
 		hostptr = host;
-	if ((ptr = (char *) getenv("SLEEPTIME")) != (char *) 0) {
+	if ((ptr = (char *) env_get("SLEEPTIME")) != (char *) 0) {
 		if (isnum(ptr))
 			scan_uint(ptr, &sleeptime);
 		else {
@@ -163,7 +148,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 			serv[fmt_ulong(serv, port)] = 0;
 		else {
 			if (isnum(service))
-				byte_copy(serv, FMT_ULONG, service);
+				str_copyb(serv, service, FMT_ULONG);
 			else {
 				if ((sp = getservbyname(service, "tcp")) == NULL) {
 					errno = EINVAL;
@@ -179,7 +164,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	} else
 		serv[fmt_ulong(serv, port)] = 0;
 	if ((retval = getaddrinfo(hostptr, serv, &hints, &res0)))
-		strerr_die7x(111, "tcpopen", "getadrinfo: ", hostptr, ": ", serv, ":", (char *) gai_strerror(retval));
+		strerr_die7x(111, "tcpopen: ", "getaddrinfo: ", hostptr, ": ", serv, ":", (char *) gai_strerror(retval));
 	for (fd = -1, res = res0; res && fd == -1; res = res->ai_next) {
 		for (;;) {
 			if (port >= 0) {
@@ -193,7 +178,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 				}
 			}
 			for (errno = 0;;) {
-				if ((retval = connect(fd, res->ai_addr, res->ai_addrlen)) != -1)
+				if (!(retval = connect(fd, res->ai_addr, res->ai_addrlen)))
 					break;
 				else {
 #ifdef ERESTART
@@ -204,18 +189,18 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 						continue;
 					if (errno == ECONNREFUSED) {
 						if (sleeptime <= MAXSLEEP) {
+							(void) close(fd);
 							if (sleeptime)
 								(void) sleep(sleeptime);
 							else
 								(void) sleep(5);
 							sleeptime += sleeptime;
-							(void) close(fd);
 							errno = ECONNREFUSED;
 							break;
 						} else {
 							(void) close(fd);
-							errno = ECONNREFUSED;
 							freeaddrinfo(res0);
+							errno = ECONNREFUSED;
 							return (-1);
 						}
 					}	/*- if (errno == ECONNREFUSED) */
@@ -283,7 +268,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 				return (-1);
 		}
 #if !defined(linux) && !defined(CYGWIN) && !defined(WindowsNT)
-		if (!strcmp(hostptr, "localhost")) {
+		if (!str_diffn(hostptr, "localhost", 10)) {
 			optval = 1;
 			if (setsockopt(fd, SOL_SOCKET, SO_USELOOPBACK, (char *) &optval, sizeof(optval)) == -1) {
 				(void) close(fd);
@@ -293,7 +278,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 #endif
 		/*- Connect to the server. */
 		for (errno = 0;;) {
-			if ((retval = connect(fd, (struct sockaddr *) &tcp_srv_addr, sizeof(tcp_srv_addr))) != -1)
+			if (!(retval = connect(fd, (struct sockaddr *) &tcp_srv_addr, sizeof(tcp_srv_addr))))
 				break;
 			else {
 #ifdef ERESTART
@@ -328,6 +313,8 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	 		break;
 	} /*- for (;;) */
 #endif /*- #if defined(LIBC_HAS_IP6) && defined(IPV6) */
+	if (!fd)
+		return (-1);
 	linger.l_onoff = 1;
 	linger.l_linger = 1;
 	if (setsockopt(fd, SOL_SOCKET, SO_LINGER, (char *) &linger, sizeof(linger)) == -1) {
