@@ -17,7 +17,7 @@ Table of Contents
       * [Remote SMTP delivery](#remote-smtp-delivery)
       * [Local delivery](#local-delivery)
       * [Other](#other)
-      * [Brief on changes](#brief-on-changes-made-to-qmail-and-other-software)
+      * [Brief Feature List](#brief-feature-list)
    * [TERMINOLOGY](#terminology-used-for-commands)
    * [IndiMail Queue Mechanism](#indimail-queue-mechanism)
    * [Using systemd to start IndiMail](#using-systemd-to-start-indimail)
@@ -436,7 +436,7 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * indium - Menu based administration tool written in tcl/tk
  * osh - Operator Shell (with configurable restricted command set) for Administrator
 
-## Brief on changes made to qmail and other software
+## Brief Feature List
 
 Some of the features available in this package
 
