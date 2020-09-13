@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.60 2020-07-05 09:25:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.61 2020-09-13 20:42:08+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -56,6 +56,8 @@ Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
 Name: indimail
 Version: @version@
 Provides: libindimail = %{version}
+Provides: indimail-libs = %{version}
+Provides: indimail-libs%{?_isa} = %{version}
 Release: @release@%{?dist}
 
 ## user/group management
@@ -209,7 +211,7 @@ For more details visit %{url}
 %package devel
 Summary: IndiMail - Development header files and libraries
 Group: Development/Libraries/Other
-Requires: libindimail
+Requires: libindimail >= %{version}
 Conflicts: %{name}-devel < 2.0
 
 %description devel
@@ -222,6 +224,8 @@ For more details visit %{url}
 Summary: IndiMail - Shared libraries
 Group: Development/Libraries/Other
 Conflicts: libindimail < 2.0
+Provides: indimail-libs = %{version}
+Provides: indimail-libs%{?_isa} = %{version}
 
 %description -n libindimail
 This package contains the shared libraries (*.so*) which certain
@@ -593,7 +597,7 @@ done
 %attr(644,root,root)                    %{shareddir}/doc/COPYING-indimail
 %endif
 
-%attr(644,root,root)                    %{shareddir}/doc/ChangeLog-indimail
+%attr(644,root,root)                    %{shareddir}/doc/ChangeLog
 %attr(644,root,root)                    %{shareddir}/doc/FAQ.pdf
 %attr(644,root,root)                    %{shareddir}/doc/README-indimail.md
 %attr(644,root,root)                    %{shareddir}/doc/README-ldap.md
