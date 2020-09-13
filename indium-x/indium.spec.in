@@ -1,6 +1,6 @@
 #
 #
-# $Id: indium.spec.in,v 1.24 2020-07-05 09:27:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.25 2020-09-13 23:24:55+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -51,12 +51,12 @@ Source1:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 Source2: %{name}-rpmlintrc
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
-AutoReqProv: No
+AutoReq: Yes
 BuildRequires: tcl-devel rpm gcc gcc-c++ make coreutils grep
 BuildRequires: tk-devel glibc glibc-devel procps tcl tk cpio
 BuildRequires: sed gettext-devel
 BuildRequires: findutils openssl-devel openssl
-BuildRequires: gzip autoconf indimail-devel libindimail mysql-devel
+BuildRequires: gzip autoconf indimail-devel mysql-devel
 %if %{undefined rhel_version}
 BuildRequires: sharutils
 %else
