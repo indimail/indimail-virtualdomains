@@ -107,7 +107,7 @@ setuid_list = bin/printdir bin/vaddaliasdomain bin/vadddomain bin/vadduser bin/v
 	bin/vrenameuser bin/vsetuserquota bin/vdominfo bin/vuserinfo sbin/vreorg \
 	libexec/sq_vacation
 
-doc_list= ChangeLog-indimail FAQ.pdf README-indimail.md README-ldap.md  \
+doc_list= ChangeLog FAQ.pdf README-indimail.md README-ldap.md  \
 	README-vlimits.md COPYING-indimail
 
 COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.c add_ip_map.c \
@@ -813,7 +813,7 @@ conf-release:
 	if [ ! -f conf-release ] ; then \
 		echo 1.1 > conf-release; \
 	fi
-indimail.spec: indimail.spec.in catChangeLog doc/ChangeLog-indimail conf-version conf-release
+indimail.spec: indimail.spec.in catChangeLog doc/ChangeLog conf-version conf-release
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 indimail-rpmlintrc: indimail-rpmlintrc.in
 	$(edit) indimail-rpmlintrc.in > $@
