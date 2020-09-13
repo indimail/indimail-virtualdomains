@@ -24,8 +24,8 @@ Description: IndiMail is a messaging platform providing multi-cluster domain sup
  hosts (even across different geographical locations) and tools to manage
  virtual domains.
 
-Package: indimail-devel
-Depends: ${misc:Depends}, findutils, coreutils, binutils
+Package: indimail-dev
+Depends: libindimail (= ${binary:Version}), ${misc:Depends}
 Section: devel
 Architecture: any
 Description: IndiMail - Development header files and libraries
