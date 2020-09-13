@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.35 2020-07-05 09:26:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.36 2020-09-13 23:23:23+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -46,12 +46,12 @@ Source4: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
 %endif
 
 URL: http://www.indimail.org
-AutoReqProv: No
+AutoReq: Yes
 BuildRequires: rpm gcc make coreutils grep
 BuildRequires: glibc glibc-devel procps cpio
 BuildRequires: sed gettext-devel
 BuildRequires: findutils libqmail-devel libqmail
-BuildRequires: gzip autoconf automake libtool indimail-devel libindimail
+BuildRequires: gzip autoconf automake libtool indimail-devel
 BuildRequires: mysql-devel
 %if %{undefined centos_version} && %{undefined rhel_version}
 BuildRequires: chrpath
