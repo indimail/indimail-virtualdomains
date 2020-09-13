@@ -35,7 +35,7 @@ debian/*.ex
 debian/files
 debian/indimail.cron.d
 debian/indimail.debhelper.log
-debian/indimail-devel.install
+debian/indimail-dev.install
 debian/indimail-doc.docs
 debian/indimail-doc.install
 debian/indimail-*.dsc
