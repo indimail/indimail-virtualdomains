@@ -1,39 +1,6 @@
 indimail (@version@-@release@) unstable; urgency=low
 
-  * Added create_rpm script for RPM builds
-  * changed logfifo path for fifologger to /run/indimail
-  * changed nssd.sock path to /run/indimail
-  * changed nssd.pid path to /run/indimail
-  * nssd-1.2/configure.ac - fixed --enable-nssd-socket, --enable-nssd-config-path options
-  * courier-imap- libcouriertls.c - use PROFILE=SYSTEM as default for ssl_cipher_list
-  * ilocal_upgrade - ilocal_upgrade: upgrade pwdlookup, qmail-logifo services and nssd config file
-  * preinst, postinst, prerm, postrm - use /var/log for setup logs
-  * vadddomain_handle, vdeldomain_handle - use root:qmail owner for spamignore, nodnscheck control files
-  * ilocal_upgrade: fix spamignore permissions
-  * indimail.spec: updated fetchmail configure options
-  * indimail-x/config/nssd.opts - removed --enable-default-domain
-  * indimail.spec - added missing --enable-default-domain parameter to configure for nssd, pam-multi
-  * initsvc.c - use PREFIX/share/indimail instead of SHAREDDIR
-  * nssd, pam-multi, indimail - use datarootdir instead of shareddir in configure scripts
-  * pam-multi, nssd made into separate packages indimail-auth
-  * altermime, ripmime, flash, mpack, fortune, nssd, pam-multi made into separate packages - indimail-utils
-  * moved out courier-imap, fetchmail into separate package - indimail-access
-  * moved out bogofilter into a separate package - indimail-spamfilter
-  * Created create_debian, refactored create_rpm scripts
-  * Tested indimail-auth, indimail-access, indimail-utils, indimail-spamfilter, indimail for obs builds
-  * vacation.c: added stdlib.h for mkstemp() prototype
-  * configure.ac: define HAVE_LIBMARIADB using egrep st_mysql_res in mysql.h to pull in MYSQL_RES typedef
-  * moved imap/proxy config from indimail-access to indimail-virtualdomains
-  * added soft_mem variables for imap/proxy services
-  * increased soft_mem variable to 50mb for poppass service
-  * postinst - fix svc -dx error when service directory is missing
-  * postinst - use /usr/lib/*-linux-gnu for indimail shared library for setting VIRTUAL_PKG_LIB
-  * indimail.spec - shutdown service before removing service directory
-  * indimail.spec, indimail.postinst - fixed ilocal_upgrade.sh script not getting called
-  * Add AC_PROG_CC_C99 to configure
-  * increased soft mem for IMAP/POP3/poppass to 100Mb
-  * call svctool --fixsharedlibs during post install to fix mysql_lib control file
-  * qlocal_upgrade.sh - fixed getent, usermod usage in setting supplementary groups
-  * LoadDbInfo.c, LoadBMF.c, MoveFile.c, vacation.c: replace utime() with utimes()
-  * use %{?_smp_mflags for parallel builds
-  * replacestr: BUGFIX: fixed bug with multiple pattern replacement
+  * create_rpm: added --release option
+  * indimail.spec: added explicit dependency of indimail-devel on libindimail version
+  * renamed ChangeLog.indimail to ChangeLog
+  * Shortened README-indimail after moving document to online wiki
