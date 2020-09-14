@@ -1,5 +1,5 @@
 NAME=@PACKAGE@
-Description="@PACKAGE_NAME@ Messaging Platform"
+Description="@PACKAGE_NAME@ Virtual Domains"
 MTA_version="@PACKAGE_VERSION@"
 ID=@PACKAGE@
 HOME_URL="@PACKAGE_URL@"
