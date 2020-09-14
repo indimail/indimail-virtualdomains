@@ -5,3 +5,6 @@ Release 3.3 Start 06/09/2020
 02. indimail.spec: added explicit dependency of indimail-devel on libindimail version
 03. renamed ChangeLog.indimail to ChangeLog
 04. Shortened README-indimail after moving document to online wiki
+-14/09/2020
+05. Removed Provides: indimail-libs, libindimail from indimail package. Now
+    available only in libindimail package

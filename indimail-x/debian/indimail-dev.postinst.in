@@ -13,9 +13,9 @@ fi
 case "$1" in
     configure)
 		if [ " $2" = " " ] ; then
-		echo "installing indimail-devel @version@"
+		echo "installing indimail-dev @version@"
 		else
-		echo "upgrading to indimail-devel $2"
+		echo "upgrading to indimail-dev $2"
 		fi
     ;;
 
@@ -47,7 +47,7 @@ if [ -d /etc/ld.so.conf.d ] ; then
 		else
 			echo ${prefix}/lib
 		fi
-	) > /etc/ld.so.conf.d/indimail-devel-`uname -m`.conf
+	) > /etc/ld.so.conf.d/indimail-`uname -m`.conf
 fi
 /sbin/ldconfig
 fi

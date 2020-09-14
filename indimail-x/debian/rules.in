@@ -78,10 +78,10 @@ binary-indep: build install
 	dh_testroot
 	find $(DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
 	sed -i -e 's,@libd\@,$(libd),g' debian/indimail.install
-	sed -i -e 's,@libd\@,$(libd),g' debian/indimail-devel.install
+	sed -i -e 's,@libd\@,$(libd),g' debian/indimail-dev.install
 	sed -i -e 's,@libd\@,$(libd),g' debian/libindimail.install
 	dh_install --sourcedir=$(DESTDIR) -pindimail
-	dh_install --sourcedir=$(DESTDIR) -pindimail-devel
+	dh_install --sourcedir=$(DESTDIR) -pindimail-dev
 	dh_install --sourcedir=$(DESTDIR) -plibindimail
 	dh_installchangelogs
 	dh_installcron
