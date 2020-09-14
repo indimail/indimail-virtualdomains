@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.61 2020-09-13 20:42:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.62 2020-09-14 10:33:53+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -55,9 +55,6 @@
 Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
 Name: indimail
 Version: @version@
-Provides: libindimail = %{version}
-Provides: indimail-libs = %{version}
-Provides: indimail-libs%{?_isa} = %{version}
 Release: @release@%{?dist}
 
 ## user/group management
@@ -104,7 +101,7 @@ Source4: http://downloads.sourceforge.net/%{name}/%{name}-permissions.paranoid
 %endif
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
-AutoReqProv: Yes
+AutoReq: Yes
 # few binaries were moved to sbin and indimail >= 2.5 depends on that
 Requires: indimail-mta > 2.6
 Conflicts: %{name} < 2.0
@@ -189,7 +186,7 @@ Requires: python3-policycoreutils
 Requires: policycoreutils-python
 %endif
 %endif
-Requires: indimail-access
+Requires: indimail-access indimail-libs
 
 %if %build_on_obs == 1
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
@@ -624,11 +621,6 @@ done
 %endif
 
 # Shared libraries (omit for architectures that don't support them)
-
-%{_libdir}/libeps.so.1
-%{_libdir}/libeps.so.1.0.0
-%{_libdir}/libindimail.so.3
-%{_libdir}/libindimail.so.3.0.0
 
 %files devel
 %defattr(-, root, root, 0755)
