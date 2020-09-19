@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.6  2020-09-17 14:48:15+05:30  Cprogrammer
+ * FreeBSD fix for missing tdestroy
+ *
  * Revision 1.5  2020-04-01 18:57:29+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -95,7 +98,7 @@
 #include "FifoCreate.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.5 2020-04-01 18:57:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.6 2020-09-17 14:48:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -105,6 +108,9 @@ time_t          start_time;
 int             host_query_count;
 #endif
 static void    *in_root = 0;
+#ifdef FREEBSD
+static void    *element = 0;
+#endif
 char            strnum[FMT_ULONG];
 
 /*-
@@ -125,6 +131,19 @@ typedef struct
 	int             in_userStatus;
 } INENTRY;
 */
+
+#ifdef FREEBSD
+/*
+ *  This comparison routine can be used with tdelete()
+ *  when explicitly deleting a root node, as no comparison
+ *  is necessary.
+ */
+static int
+delete_root(const void *node1, const void *node2)
+{
+    return 0;
+}
+#endif
 
 static void
 die_nomem()
@@ -363,7 +382,15 @@ sig_hup()
 	get_real_domain_cache(0);
 	get_assign_cache(0);
 #endif
+#ifdef FREEBSD
+	while (in_root != NULL) {
+		element = *(INENTRY **) in_root;
+		tdelete(element, &in_root, delete_root);
+		in_free_func(element);
+	}
+#else
 	tdestroy(in_root, in_free_func);
+#endif
 	in_root = 0;
 	btree_count = 0;
 	if (pwdCache) {
@@ -600,7 +627,15 @@ sig_hand(sig, code, scp, addr)
 			get_assign_cache(0);
 			get_real_domain_cache(0);
 #endif
+#ifdef FREEBSD
+			while (in_root != NULL) {
+				element = *(INENTRY **) in_root;
+				tdelete(element, &in_root, delete_root);
+				in_free_func(element);
+			}
+#else
 			tdestroy(in_root, in_free_func);
+#endif
 			in_root = 0;
 			btree_count = 0;
 		break;
@@ -715,7 +750,15 @@ cache_active_pwd(time_t tval)
 		return (0);
 	scan_uint((ptr = env_get("MAX_BTREE_COUNT")) && *ptr ? ptr : "-1", (unsigned int *) &max_btree_count);
 	if (in_root) {
+#ifdef FREEBSD
+		while (in_root != NULL) {
+			element = *(INENTRY **) in_root;
+			tdelete(element, &in_root, delete_root);
+			in_free_func(element);
+		}
+#else
 		tdestroy(in_root, in_free_func);
+#endif
 		in_root = 0;
 		btree_count = 0;
 	}
