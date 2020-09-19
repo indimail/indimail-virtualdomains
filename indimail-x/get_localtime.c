@@ -1,5 +1,8 @@
 /*
  * $Log: get_localtime.c,v $
+ * Revision 1.2  2020-09-17 14:47:36+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.1  2019-04-20 09:18:09+05:30  Cprogrammer
  * Initial revision
  *
@@ -20,7 +23,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_localtime.c,v 1.1 2019-04-20 09:18:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_localtime.c,v 1.2 2020-09-17 14:47:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -36,21 +39,20 @@ get_localtime()
 	time_t          tmval;
 	struct tm      *tmptr;
 	static stralloc tmpbuf = {0};
-	int             mins;
 #ifdef USE_TIMEZONE
-	int             hours, len;
+	int             mins, hours, len;
 #endif
 
 	tmval = time(0);
 	tmptr = localtime(&tmval);
-	mins = (timezone % 3600) / 60;
-	if (mins < 0)
-		mins = -mins;
 	if (!stralloc_copys(&tmpbuf, asctime(tmptr)))
 		die_nomem();
 	if (tmpbuf.s[tmpbuf.len - 1] == '\n')
 		tmpbuf.len--; /*- remove newline */
 #ifdef USE_TIMEZONE
+	mins = (timezone % 3600) / 60;
+	if (mins < 0)
+		mins = -mins;
 	hours = timezone / 3600;
 	if (!stralloc_cats(&tmpbuf, tzname[0]) ||
 			!stralloc_append(&tmpbuf, " ") ||

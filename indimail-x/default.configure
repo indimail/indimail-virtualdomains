@@ -22,6 +22,11 @@ fi
 if [ ! -f conf-release ] ; then
 	echo 1.1 > conf-release
 fi
+if [ ! -d /usr/include/mysql -a /usr/local/include/mysql ] ; then
+	mysqlPrefix=/usr/local
+elif [ -d $prefix/include/mysql ] ; then
+	mysqlPrefix=$prefix
+fi
 prefix=/usr
 sysconfdir=/etc/indimail
 ./configure \
@@ -38,7 +43,7 @@ sysconfdir=/etc/indimail
   --enable-assigndir=$sysconfdir/users \
   --enable-tcpserver-file=$sysconfdir/tcp/tcp.smtp \
   --with-pkgconfigdir=$prefix/lib64/pkgconfig \
-  --enable-mysqlprefix=$prefix \
+  --enable-mysqlprefix=$mysqlPrefix \
   --enable-logdir=/var/log/svc \
   --enable-basepath=/home/mail \
   --enable-tcprules-prog=$prefix/bin/tcprules \

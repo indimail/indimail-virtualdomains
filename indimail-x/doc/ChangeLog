@@ -8,3 +8,7 @@ Release 3.3 Start 06/09/2020
 -14/09/2020
 05. Removed Provides: indimail-libs, libindimail from indimail package. Now
     available only in libindimail package
+-17/09/2020
+07. FreeBSD fixes fo vfstabNew.c, vadddomain.c, ProcessInFifo.c,
+    pathToFilesystem.c, get_localtime.c, Makefile.am, configure.ac,
+    default.configure

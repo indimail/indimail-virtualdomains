@@ -1,5 +1,8 @@
 /*
  * $Log: vfstabNew.c,v $
+ * Revision 1.4  2020-09-17 14:48:28+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.3  2020-04-01 18:58:50+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -26,7 +29,7 @@
 #if defined(sun)
 #include <sys/types.h>
 #include <sys/statvfs.h>
-#elif defined(DARWIN)
+#elif defined(DARWIN) || defined(FREEBSD)
 #include <sys/param.h>
 #include <sys/mount.h>
 #else
@@ -43,7 +46,7 @@
 #include "vfstab.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfstabNew.c,v 1.3 2020-04-01 18:58:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfstabNew.c,v 1.4 2020-09-17 14:48:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int

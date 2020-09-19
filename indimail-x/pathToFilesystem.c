@@ -1,5 +1,8 @@
 /*
  * $Log: pathToFilesystem.c,v $
+ * Revision 1.3  2020-09-17 14:48:08+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.2  2020-05-04 10:39:45+05:30  Cprogrammer
  * use /proc/mounts, /proc/self/mounts for docker containers
  *
@@ -19,7 +22,7 @@
 #elif defined(sun)
 #include <sys/types.h>
 #include <sys/mnttab.h>
-#elif defined(DARWIN)
+#elif defined(DARWIN) || defined(FREEBSD)
 #include <sys/param.h>
 #include <sys/ucred.h>
 #include <sys/mount.h>
@@ -34,7 +37,7 @@
 #include "getactualpath.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pathToFilesystem.c,v 1.2 2020-05-04 10:39:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pathToFilesystem.c,v 1.3 2020-09-17 14:48:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -58,7 +61,7 @@ pathToFilesystem(char *path)
 	FILE           *fp;
 	struct mnttab   _MntTab;
 	struct mnttab  *mntptr = &_MntTab;
-#elif defined(DARWIN)
+#elif defined(DARWIN) || defined(FREEBSD)
 	int             num;
 	struct statfs  *mntinf;
 #endif
@@ -80,12 +83,12 @@ pathToFilesystem(char *path)
 	/*- Resolve links and Find the actual path */
 	if (!(ptr = getactualpath(ptr)))
 		return ((char *) 0);
-#ifdef DARWIN
+#if defined(DARWIN) || defined(FREEBSD)
 	if (!(num = getmntinfo(&mntinf, MNT_WAIT)))
 		return ((char *) 0);
-	for (*tmpbuf = 0, pathlen = 0;num--;) {
+	for (tmpbuf.len = 0, pathlen = 0;num--;) {
 		if (str_str(ptr, mntinf->f_mntonname)) {
-			if ((len = strlen(mntinf->f_mntonname)) > pathlen) {
+			if ((len = str_len(mntinf->f_mntonname)) > pathlen) {
 				if (!stralloc_copys(&tmpbuf, mntinf->f_mntonname))
 					die_nomem();
 				pathlen = len;
@@ -93,7 +96,7 @@ pathToFilesystem(char *path)
 		}
 		mntinf++;
 	}
-#else
+#else /*- DARWIN || FREEBSD */
 	fp = (FILE *) 0;
 #ifdef linux
 	if (access("/etc/mtab", F_OK)) {

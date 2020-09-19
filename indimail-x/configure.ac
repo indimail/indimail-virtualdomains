@@ -28,7 +28,7 @@ AC_ISC_POSIX
 AC_HEADER_STDC
 AC_CHECK_HEADERS([ctype.h fcntl.h stdlib.h string.h sys/wait.h sys/types.h sys/socket.h unistd.h time.h sys/time.h])
 saveCPPFLAGS="$CPPFLAGS"
-CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/include/qmail"
+CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/local/include/mysql -I/usr/include/qmail"
 AC_CHECK_HEADERS([mysql.h pwd.h grp.h stdarg.h varargs.h errno.h signal.h netdb.h netinet/in.h arpa/inet.h])
 AC_CHECK_TYPE([bool],AC_DEFINE(HAVE_BOOL, 1, have bool typedef),,[#include <mysql.h>])
 CPPFLAGS=$saveCPPFLAGS
@@ -92,6 +92,14 @@ case "$host" in
 	CPPFLAGS="$CPPFLAGS -DDARWIN"
 	CFLAGS="$CFLAGS -O4 -Wall -pie"
 	MODFLAGS="-g -O4 -bundle -pie -Wall -undefined dynamic_lookup"
+	STRIP_OPT=-s
+	;;
+*-*-freebsd*)
+	INSTALL="/usr/bin/install -c"
+	idcommand="/usr/bin/id -u"
+	CPPFLAGS="$CPPFLAGS -DFREEBSD"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	MODFLAGS="-g -O4 -fPIC -shared -Wall"
 	STRIP_OPT=-s
 	;;
 *)

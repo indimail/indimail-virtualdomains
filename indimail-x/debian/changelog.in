@@ -5,3 +5,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * renamed ChangeLog.indimail to ChangeLog
   * Shortened README-indimail after moving document to online wiki
   * Removed Provides: indimail-libs, libindimail from indimail package. Now available only in libindimail package
+  * FreeBSD fixes fo vfstabNew.c, vadddomain.c, ProcessInFifo.c, pathToFilesystem.c, get_localtime.c, Makefile.am, configure.ac, default.configure

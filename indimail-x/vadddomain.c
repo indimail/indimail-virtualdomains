@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.7  2020-09-17 14:48:23+05:30  Cprogrammer
+ * FreeBSD fix
+ *
  * Revision 1.6  2020-04-01 18:58:24+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -26,6 +29,9 @@
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -79,7 +85,7 @@
 #include "get_indimailuidgid.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.6 2020-04-01 18:58:24+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.7 2020-09-17 14:48:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
