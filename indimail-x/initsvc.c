@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 1.4  2020-09-21 07:52:47+05:30  Cprogrammer
+ * FreeBSD port
+ *
  * Revision 1.3  2020-05-29 19:07:18+05:30  Cprogrammer
  * use PREFIX/share/indimail instead of SHAREDDIR
  *
@@ -13,7 +16,6 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -34,7 +36,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 1.3 2020-05-29 19:07:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 1.4 2020-09-21 07:52:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
@@ -202,11 +204,13 @@ main(int argc, char **argv)
 				return (systemd_control("disable"));
 				break;
 			case SV_STAT:
-				printf("svscan.service is %s\n", systemd_control("status") ? "disabled" : "enabled");
-				fflush(stdout);
+				out("svscan", "svscan.service is ");
+				out("svscan", systemd_control("status") ? "disabled" : "enabled");
+				out("svscan", "\n");
+				flush("svscan");
 				execl("/bin/sh", "sh", "-c",
 					"/bin/ls -l /lib/systemd/system/svscan.service", (char *) 0);
-				perror("/bin/systemctl status svscan.service");
+				strerr_warn1("svscan: execl /bin/sh: ", &strerr_sys);
 				break;
 			case SV_PRINT:
 				execl("/bin/sh", "sh", "-c",
@@ -216,6 +220,50 @@ main(int argc, char **argv)
 				break;
 		}
 	}
+#ifdef FREEBSD
+	else
+	if (!access("/usr/local/etc/rc.d", F_OK)) {
+		if (access("/usr/local/etc/rc.d/svscan", F_OK)) {
+			if (flag == SV_OFF)
+				return (0);
+			out("svscan", "Installing /usr/local/etc/rc.d/svscan\n");
+			flush("svscan");
+			if (chdir(PREFIX"/share/indimail") || chdir("boot")) {
+				strerr_warn3("svscan: chdir: ", PREFIX"/share/indimail", "/boot: ", &strerr_sys);
+				return (1);
+			} else
+			if (fappend("svscan", "/usr/local/etc/rc.d/svscan", "w", 0644, 0, getgid())) {
+				strerr_warn1("svscan: fappend systemd /usr/local/etc/rc.d/svscan: ", &strerr_sys);
+				return (1);
+			}
+		}
+		switch(flag)
+		{
+			case SV_ON:
+				execl("/usr/sbin/service", "service", "svscan", "enable", (char *) 0);
+				strerr_die1sys(111, "execl: /usr/sbin/service: ");
+				break;
+			case SV_OFF:
+				execl("/usr/sbin/service", "service", "svscan", "disable", (char *) 0);
+				strerr_die1sys(111, "execl: /usr/sbin/service: ");
+				break;
+			case SV_STAT:
+				out("svscan", "svscan.service in /etc/rc.conf is ");
+				flush("svscan");
+				execl("/bin/sh", "sh", "-c",
+				"/usr/bin/grep svscan_enable /etc/rc.conf;/bin/ls -l /usr/local/etc/rc.d/svscan",
+				(char *) 0);
+				strerr_warn1("svscan: execl /bin/sh: ", &strerr_sys);
+			case SV_PRINT:
+				execl("/bin/sh", "sh", "-c",
+				"/bin/cat /usr/local/etc/rc.d/svscan;/bin/ls -l /usr/local/etc/rc.d/svscan",
+				(char *) 0);
+				strerr_die1sys(111, "execl: /bin/cat: ");
+				break;
+		}
+		return (1);
+	}
+#endif
 #ifdef DARWIN
 	else
 	if (!access("/bin/launchctl", X_OK)) {
