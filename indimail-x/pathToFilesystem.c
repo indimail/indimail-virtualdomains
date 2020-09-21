@@ -1,7 +1,7 @@
 /*
  * $Log: pathToFilesystem.c,v $
- * Revision 1.3  2020-09-17 14:48:08+05:30  Cprogrammer
- * FreeBSD fix
+ * Revision 1.4  2020-09-21 07:55:34+05:30  Cprogrammer
+ * fixed unterminated stralloc variable
  *
  * Revision 1.2  2020-05-04 10:39:45+05:30  Cprogrammer
  * use /proc/mounts, /proc/self/mounts for docker containers
@@ -37,7 +37,7 @@
 #include "getactualpath.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pathToFilesystem.c,v 1.3 2020-09-17 14:48:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pathToFilesystem.c,v 1.4 2020-09-21 07:55:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -89,7 +89,7 @@ pathToFilesystem(char *path)
 	for (tmpbuf.len = 0, pathlen = 0;num--;) {
 		if (str_str(ptr, mntinf->f_mntonname)) {
 			if ((len = str_len(mntinf->f_mntonname)) > pathlen) {
-				if (!stralloc_copys(&tmpbuf, mntinf->f_mntonname))
+				if (!stralloc_copys(&tmpbuf, mntinf->f_mntonname) || !stralloc_0(&tmpbuf))
 					die_nomem();
 				pathlen = len;
 			}
