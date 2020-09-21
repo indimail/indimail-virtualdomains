@@ -33,7 +33,7 @@ int
 main(int argc, char **argv)
 {
 	struct passwd *pw;
-#ifdef HAVE_SHADOW
+#ifdef HAVE_SHADOW_H
 	struct spwd   *spw;
 #endif
 	int i;
@@ -48,7 +48,7 @@ main(int argc, char **argv)
 			return(1);
 		}
 		printf("%s:", pw->pw_name);
-#ifdef HAVE_SHADOW
+#ifdef HAVE_SHADOW_H
 		if (!(spw = getspnam(argv[i]))) {
 			fprintf(stderr, "getspnam: %s: %s\n", argv[i], errno ? strerror(errno) : "not found in shadow");
 			printf("%s:", pw->pw_passwd);
