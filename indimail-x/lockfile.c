@@ -1,5 +1,8 @@
 /*
  * $Log: lockfile.c,v $
+ * Revision 1.3  2020-09-21 07:54:30+05:30  Cprogrammer
+ * fixed incorrect initialization of struct flock
+ *
  * Revision 1.2  2019-07-26 09:37:25+05:30  Cprogrammer
  * use variable USE_FLOCK when using fcntl LOCKF
  *
@@ -13,7 +16,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: lockfile.c,v 1.2 2019-07-26 09:37:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: lockfile.c,v 1.3 2020-09-21 07:54:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef FILE_LOCKING
@@ -26,6 +29,7 @@ static char     sccsid[] = "$Id: lockfile.c,v 1.2 2019-07-26 09:37:25+05:30 Cpro
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>
 #endif
+
 #ifdef USE_SEMAPHORES
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -172,12 +176,12 @@ lockcreate(char *filename, char proj)
 	int             fd, tmperrno, i;
 	pid_t           pid, mypid;
 	time_t          file_age, start_time, secs;
-#ifdef DARWIN
-	struct flock    fl = {0, 0, 0, F_WRLCK, SEEK_SET};
-#else
-	struct flock    fl = {F_WRLCK, SEEK_SET, 0, 0, 0};
-#endif
+	struct flock    fl = {0};
 
+	fl.l_start = 0;
+	fl.l_len = 0;
+	fl.l_type = F_WRLCK;
+	fl.l_whence = SEEK_SET;
 	start_time = time(0);
 	strnum1[i = fmt_uint(strnum1, proj)] = 0;
 	if (!stralloc_copys(&tmplock, filename) ||
@@ -345,12 +349,12 @@ int
 lockcreate(char *filename, char proj)
 {
 	int             fd, i;
-#ifdef DARWIN
-	struct flock    fl = {0, 0, 0, F_WRLCK, SEEK_SET};
-#else
-	struct flock    fl = {F_WRLCK, SEEK_SET, 0, 0, 0};
-#endif
+	struct flock    fl = {0};
 
+	fl.l_start = 0;
+	fl.l_len = 0;
+	fl.l_type = F_WRLCK;
+	fl.l_whence = SEEK_SET;
 	strnum[i = fmt_uint(strnum, proj)] = 0;
 	if (!stralloc_copys(&tmplock, filename) ||
 			!stralloc_catb(&tmplock, ".pre.", 5) ||
@@ -383,14 +387,14 @@ get_write_lock(int fd)
 int
 ReleaseLock(int fd)
 {
-#ifdef DARWIN
-	struct flock    fl = {0, 0, 0, F_UNLCK, SEEK_SET};
-#else
-	struct flock    fl = {F_UNLCK, SEEK_SET, 0, 0, 0};
-#endif
+	struct flock    fl = {0};
 
 	if (fd == -1)
 		return (-1);
+	fl.l_start = 0;
+	fl.l_len = 0;
+	fl.l_type = F_UNLCK;
+	fl.l_whence = SEEK_SET;
 	fl.l_pid = getpid();
 	if (fcntl(fd, F_SETLK, &fl) == -1);
 	return (close(fd));

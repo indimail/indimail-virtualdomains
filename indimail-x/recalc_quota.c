@@ -1,5 +1,8 @@
 /*
  * $Log: recalc_quota.c,v $
+ * Revision 1.6  2020-09-21 07:55:11+05:30  Cprogrammer
+ * fixed incorrect initialization of struct flock
+ *
  * Revision 1.5  2019-07-29 14:02:12+05:30  Cprogrammer
  * added scan.h for scan_ulong()
  *
@@ -54,7 +57,7 @@
 #include "get_assign.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: recalc_quota.c,v 1.5 2019-07-29 14:02:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: recalc_quota.c,v 1.6 2020-09-21 07:55:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -71,11 +74,7 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 #endif
 {
 	static mdir_t   mail_size, mail_count;
-#ifdef DARWIN
-	struct flock    fl = {0, 0, 0, F_WRLCK, SEEK_SET};
-#else
-	struct flock    fl = {F_WRLCK, SEEK_SET, 0, 0, 0};
-#endif
+	struct flock    fl = {0};
 	int             fd, i, j;
 	char            strnum1[FMT_ULONG], outbuf[512];
 	struct substdio ssout;
@@ -91,6 +90,10 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 	int             fast_quota_calc;
 	unsigned long   max_age = 43200, max_size = 8192;
 
+	fl.l_start = 0;
+	fl.l_len = 0;
+	fl.l_type = F_WRLCK;
+	fl.l_whence = SEEK_SET;
 	if (!stralloc_copys(&maildir, Maildir) || !stralloc_0(&maildir))
 		die_nomem();
 	maildir.len--;

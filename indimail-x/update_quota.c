@@ -1,5 +1,8 @@
 /*
  * $Log: update_quota.c,v $
+ * Revision 1.4  2020-09-21 07:55:21+05:30  Cprogrammer
+ * fixed incorrect initialization of struct flock
+ *
  * Revision 1.3  2019-07-26 22:19:43+05:30  Cprogrammer
  * refactored code
  *
@@ -38,7 +41,7 @@
 #include "maildir_to_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: update_quota.c,v 1.3 2019-07-26 22:19:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: update_quota.c,v 1.4 2020-09-21 07:55:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -55,11 +58,7 @@ update_quota(char *Maildir, mdir_t new_size)
 	char           *ptr;
 	uid_t           uid;
 	gid_t           gid;
-#ifdef DARWIN
-	struct flock    fl = {0, 0, 0, F_WRLCK, SEEK_SET};
-#else
-	struct flock    fl = {F_WRLCK, SEEK_SET, 0, 0, 0};
-#endif
+	struct flock    fl = {0};
 	char            strnum[FMT_ULONG], outbuf[512];
 	struct substdio ssout;
 	int             fd, i;
@@ -95,6 +94,10 @@ update_quota(char *Maildir, mdir_t new_size)
 		strerr_warn3("update_quota: ", mdirsizefn.s, ": ", &strerr_sys);
 		return (-1);
 	}
+	fl.l_start = 0;
+	fl.l_len = 0;
+	fl.l_type = F_WRLCK;
+	fl.l_whence = SEEK_SET;
 	for (;;) {
 		if (fcntl(fd, F_SETLKW, &fl) == -1) {
 			if (errno == EINTR)
