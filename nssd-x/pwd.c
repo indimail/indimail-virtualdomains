@@ -1,24 +1,25 @@
 /*
  * Copyright (C) 2004 Ben Goodwin
- * * This file is part of the nsvs package
- * *
- * * The nsvs package is free software; you can redistribute it and/or
- * * modify it under the terms of the GNU General Public License as published
- * * by the Free Software Foundation; either version 2 of the License, or
- * * (at your option) any later version.
- * *
- * * The nsvs package is distributed in the hope that it will be useful,
- * * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * * GNU General Public License for more details.
- * * You should have received a copy of the GNU General Public License
- * * along with the nsvs package; if not, write to the Free Software
- * * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * This file is part of the nsvs package
+ *
+ * The nsvs package is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * The nsvs package is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with the nsvs package; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 /*
- * $Id: pwd.c,v 1.1 2011-06-18 11:38:46+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: pwd.c,v 1.2 2020-09-21 18:54:21+05:30 Cprogrammer Exp mbhangui $ 
  */
+
 #include "common.h"
 #include <pwd.h>
 #include <string.h>
@@ -58,9 +59,9 @@ _load_passwd(struct response_data *data, struct passwd *result, char *buffer, si
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_getpwnam_r(nss_backend_t * be, void *args)
+_nss_nsvs_getpwnam_r(nss_backend_t * be, void *args)
 #else
-_nss_nssd_getpwnam_r(const char *key, struct passwd * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nsvs_getpwnam_r(const char *key, struct passwd * result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	response_header_t response_header;
@@ -91,9 +92,9 @@ _nss_nssd_getpwnam_r(const char *key, struct passwd * result, char *buf_out, siz
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_getpwuid_r(nss_backend_t * be, void *args)
+_nss_nsvs_getpwuid_r(nss_backend_t * be, void *args)
 #else
-_nss_nssd_getpwuid_r(uid_t uid, struct passwd * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nsvs_getpwuid_r(uid_t uid, struct passwd * result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	response_header_t response_header;
@@ -126,9 +127,9 @@ _nss_nssd_getpwuid_r(uid_t uid, struct passwd * result, char *buf_out, size_t bu
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_endpwent(nss_backend_t * be, void *args)
+_nss_nsvs_endpwent(nss_backend_t * be, void *args)
 #else
-_nss_nssd_endpwent(void)
+_nss_nsvs_endpwent(void)
 #endif
 {
 	XFREE(pwent.data);
@@ -138,9 +139,9 @@ _nss_nssd_endpwent(void)
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_setpwent(nss_backend_t * be, void *args)
+_nss_nsvs_setpwent(nss_backend_t * be, void *args)
 #else
-_nss_nssd_setpwent(void)
+_nss_nsvs_setpwent(void)
 #endif
 {
 	int             status;
@@ -159,9 +160,9 @@ _nss_nssd_setpwent(void)
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_getpwent_r(nss_backend_t * be, void *args)
+_nss_nsvs_getpwent_r(nss_backend_t * be, void *args)
 #else
-_nss_nssd_getpwent_r(struct passwd * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nsvs_getpwent_r(struct passwd * result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	int             status;
@@ -187,16 +188,16 @@ _nss_nssd_getpwent_r(struct passwd * result, char *buf_out, size_t buflen, int *
 
 #if defined (sun)
 static nss_backend_op_t passwd_ops[] = {
-	_nss_nssd_default_destr,	/* NSS_DBOP_DESTRUCTOR */
-	_nss_nssd_endpwent,			/* NSS_DBOP_ENDENT */
-	_nss_nssd_setpwent,			/* NSS_DBOP_SETENT */
-	_nss_nssd_getpwent_r,		/* NSS_DBOP_GETENT */
-	_nss_nssd_getpwnam_r,		/* NSS_DBOP_PASSWD_BYNAME */
-	_nss_nssd_getpwuid_r,		/* NSS_DBOP_PASSWD_BYUID */
+	_nss_nsvs_default_destr,	/* NSS_DBOP_DESTRUCTOR */
+	_nss_nsvs_endpwent,			/* NSS_DBOP_ENDENT */
+	_nss_nsvs_setpwent,			/* NSS_DBOP_SETENT */
+	_nss_nsvs_getpwent_r,		/* NSS_DBOP_GETENT */
+	_nss_nsvs_getpwnam_r,		/* NSS_DBOP_PASSWD_BYNAME */
+	_nss_nsvs_getpwuid_r,		/* NSS_DBOP_PASSWD_BYUID */
 };
 
 nss_backend_t  *
-_nss_nssd_passwd_constr(const char *db_name, const char *src_name, const char *cfg_args)
+_nss_nsvs_passwd_constr(const char *db_name, const char *src_name, const char *cfg_args)
 {
 	nss_backend_t  *be;
 	be = (nss_backend_t *) malloc(sizeof (*be));
