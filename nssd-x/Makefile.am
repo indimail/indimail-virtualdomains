@@ -62,6 +62,9 @@ libtool: $(LIBTOOL_DEPS)
 
 install-data-local:  COPYING-nssd README-nssd.md AUTHORS-nssd
 	$(mkinstalldirs)  $(DESTDIR)@datarootdir@/doc || exit 1
+	if [ " @OS@" = " freebsd" ] ; then \
+		ln -sf @libdir@/libnss_nssd.so.@LIBVER@ /usr/lib/nss_nssd.so.@LIBVER@; \
+	fi
 	for f in $(doc_list); do \
 		$(INSTALL_DATA) $$f $(DESTDIR)@datarootdir@/doc/$$f || exit 1 ;\
 	done
