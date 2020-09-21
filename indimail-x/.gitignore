@@ -22,7 +22,7 @@ crc
 crcdiff
 create_services
 cronlist.i
-crypt
+incrypt
 dbinfo
 dbinfo.8
 */*.debhelper
