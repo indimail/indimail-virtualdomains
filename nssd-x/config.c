@@ -17,10 +17,10 @@
  */
 
 /*
- * $Id: config.c,v 1.2 2018-11-06 11:26:36+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: config.c,v 1.3 2020-09-21 18:49:42+05:30 Cprogrammer Exp mbhangui $ 
  */
 #ifndef	lint
-static const char rcsid[] = "$Id: config.c,v 1.2 2018-11-06 11:26:36+05:30 Cprogrammer Exp mbhangui $";
+static const char rcsid[] = "$Id: config.c,v 1.3 2020-09-21 18:49:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "common.h"
@@ -175,7 +175,7 @@ load_config(const char *file)
 		for (c = config_fields; c->name; c++) {
 			if (!strcmp(key, c->name)) {
 				if (c->type == CV_STRING)
-					strncpy(c->ptr, val, 1024);
+					strncpy(c->ptr, val, sizeof(val));
 				else if (c->type == CV_INTEGER)
 					*((int *) c->ptr) = atoi(val);
 			}
