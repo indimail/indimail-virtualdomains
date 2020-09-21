@@ -512,7 +512,7 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/vhostid
 %attr(755,root,qmail)                   %{_prefix}/bin/vatrn
 %attr(755,root,qmail)                   %{_prefix}/bin/vlimit
-%attr(755,root,qmail)                   %{_prefix}/bin/crypt
+%attr(755,root,qmail)                   %{_prefix}/bin/incrypt
 %attr(755,root,qmail)                   %{_prefix}/bin/vpriv
 %attr(755,root,qmail)                   %{_prefix}/bin/vipmap
 %attr(755,root,qmail)                   %{_prefix}/bin/vsmtp
@@ -1227,7 +1227,7 @@ fi
 # mrtg service
 %{_prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=%{servicedir}
 
-echo "Creating default indimail mysql config indimail.cnf"
+echo "Creating default mysql.host, tcprules, mysql configs, indimail.cnf, bogofilter-qfe"
 %{_prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
   --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
 
