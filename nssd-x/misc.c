@@ -17,7 +17,7 @@
  */
 
 /*
- * $Id: misc.c,v 1.1 2011-06-18 11:38:32+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: misc.c,v 1.2 2020-09-21 18:50:48+05:30 Cprogrammer Exp mbhangui $ 
  */
 #include "common.h"
 #include <stdarg.h>
@@ -44,7 +44,7 @@ nsvs_log(int prio, const char *fmt, ...)
 
 #if defined (sun)
 NSS_STATUS
-_nss_nssd_default_destr(nss_backend_t * be, void *args)
+_nss_nsvs_default_destr(nss_backend_t *be, void *args)
 {
 	if (be) {
 		free(be);
@@ -70,29 +70,29 @@ NSS_METHOD_PROTOTYPE(__nss_compat_getgrent_r);
 NSS_METHOD_PROTOTYPE(__nss_compat_setgrent);
 NSS_METHOD_PROTOTYPE(__nss_compat_endgrent);
 
-NSS_STATUS      _nss_nssd_getpwnam_r(const char *, struct passwd *, char *, size_t, int *);
-NSS_STATUS      _nss_nssd_getpwuid_r(uid_t, struct passwd *, char *, size_t, int *);
-NSS_STATUS      _nss_nssd_getpwent_r(struct passwd *, char *, size_t, int *);
-NSS_STATUS      _nss_nssd_setpwent(void);
-NSS_STATUS      _nss_nssd_endpwent(void);
+NSS_STATUS      _nss_nsvs_getpwnam_r(const char *, struct passwd *, char *, size_t, int *);
+NSS_STATUS      _nss_nsvs_getpwuid_r(uid_t, struct passwd *, char *, size_t, int *);
+NSS_STATUS      _nss_nsvs_getpwent_r(struct passwd *, char *, size_t, int *);
+NSS_STATUS      _nss_nsvs_setpwent(void);
+NSS_STATUS      _nss_nsvs_endpwent(void);
 
-NSS_STATUS      _nss_nssd_getgrnam_r(const char *, struct group *, char *, size_t, int *);
-NSS_STATUS      _nss_nssd_getgrgid_r(gid_t, struct group *, char *, size_t, int *);
-NSS_STATUS      _nss_nssd_getgrent_r(struct group *, char *, size_t, int *);
-NSS_STATUS      _nss_nssd_setgrent(void);
-NSS_STATUS      _nss_nssd_endgrent(void);
+NSS_STATUS      _nss_nsvs_getgrnam_r(const char *, struct group *, char *, size_t, int *);
+NSS_STATUS      _nss_nsvs_getgrgid_r(gid_t, struct group *, char *, size_t, int *);
+NSS_STATUS      _nss_nsvs_getgrent_r(struct group *, char *, size_t, int *);
+NSS_STATUS      _nss_nsvs_setgrent(void);
+NSS_STATUS      _nss_nsvs_endgrent(void);
 
 static ns_mtab  methods[] = {
-	{NSDB_PASSWD, "getpwnam_r", __nss_compat_getpwnam_r, _nss_nssd_getpwnam_r},
-	{NSDB_PASSWD, "getpwuid_r", __nss_compat_getpwuid_r, _nss_nssd_getpwuid_r},
-	{NSDB_PASSWD, "getpwent_r", __nss_compat_getpwent_r, _nss_nssd_getpwent_r},
-	{NSDB_PASSWD, "setpwent", __nss_compat_setpwent, _nss_nssd_setpwent},
-	{NSDB_PASSWD, "endpwent", __nss_compat_endpwent, _nss_nssd_endpwent},
-	{NSDB_GROUP, "getgrnam_r", __nss_compat_getgrnam_r, _nss_nssd_getgrnam_r},
-	{NSDB_GROUP, "getgrgid_r", __nss_compat_getgrgid_r, _nss_nssd_getgrgid_r},
-	{NSDB_GROUP, "getgrent_r", __nss_compat_getgrent_r, _nss_nssd_getgrent_r},
-	{NSDB_GROUP, "setgrent", __nss_compat_setgrent, _nss_nssd_setgrent},
-	{NSDB_GROUP, "endgrent", __nss_compat_endgrent, _nss_nssd_endgrent},
+	{NSDB_PASSWD, "getpwnam_r", __nss_compat_getpwnam_r, _nss_nsvs_getpwnam_r},
+	{NSDB_PASSWD, "getpwuid_r", __nss_compat_getpwuid_r, _nss_nsvs_getpwuid_r},
+	{NSDB_PASSWD, "getpwent_r", __nss_compat_getpwent_r, _nss_nsvs_getpwent_r},
+	{NSDB_PASSWD, "setpwent", __nss_compat_setpwent, _nss_nsvs_setpwent},
+	{NSDB_PASSWD, "endpwent", __nss_compat_endpwent, _nss_nsvs_endpwent},
+	{NSDB_GROUP, "getgrnam_r", __nss_compat_getgrnam_r, _nss_nsvs_getgrnam_r},
+	{NSDB_GROUP, "getgrgid_r", __nss_compat_getgrgid_r, _nss_nsvs_getgrgid_r},
+	{NSDB_GROUP, "getgrent_r", __nss_compat_getgrent_r, _nss_nsvs_getgrent_r},
+	{NSDB_GROUP, "setgrent", __nss_compat_setgrent, _nss_nsvs_setgrent},
+	{NSDB_GROUP, "endgrent", __nss_compat_endgrent, _nss_nsvs_endgrent},
 };
 
 ns_mtab        *
