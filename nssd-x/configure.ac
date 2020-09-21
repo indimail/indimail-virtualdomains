@@ -40,7 +40,6 @@ case "$host" in
 	CPPFLAGS="$CPPFLAGS -DSOLARIS"
 	CFLAGS="$CFLAGS -s -O4 -Wall -fPIC"
 	STRIP_OPT=-s
-    LIBVER=1
 	OS=solaris
 	;;
 *-*-linux*)
@@ -48,7 +47,6 @@ case "$host" in
 	CPPFLAGS="$CPPFLAGS -DLINUX"
 	CFLAGS="$CFLAGS -Wno-enum-compare -s -O4 -Wall -fPIC"
 	#STRIP_OPT=-s
-    LIBVER=2
 	OS=linux
 	;;
 *-*-darwin*)
@@ -63,7 +61,6 @@ case "$host" in
     CPPFLAGS="$CPPFLAGS -DFREEBSD"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	STRIP_OPT=-s
-    LIBVER=1
 	OS=freebsd
     ;;
 *)
@@ -74,6 +71,7 @@ case "$host" in
 esac
 
 defaultprefix="/usr"
+LIBVER=2
 
 if test x$prefix = xNONE
 then
