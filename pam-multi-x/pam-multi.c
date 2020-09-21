@@ -1,5 +1,8 @@
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.15  2020-09-22 00:17:52+05:30  Cprogrammer
+ * FreeBSD port
+ *
  * Revision 1.14  2019-07-03 19:35:49+05:30  Cprogrammer
  * load libmysqlclient/libmariadb dynamically using load_mysql.c
  *
@@ -170,7 +173,7 @@ PAM_EXTERN int  pam_sm_close_session(pam_handle_t * pamh, int flags, int argc, c
 char           *md5_crypt(const char *, const char *);
 char           *sha256_crypt(const char *, const char *);
 char           *sha512_crypt(const char *, const char *);
-#ifndef DARWIN
+#ifdef HAVE_SHADOW_H
 static int      update_shadow(pam_handle_t *, const char *, const char *);
 #endif
 #ifdef WHY_IS_THIS_NEEDED
@@ -178,7 +181,7 @@ static int      update_passwd(pam_handle_t *, const char *, const char *);
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.14 2019-07-03 19:35:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.15 2020-09-22 00:17:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -572,7 +575,7 @@ converse(pam_handle_t *pamh, int flags, const char *prompt, const char **passwor
 		return (pam_err == PAM_PERM_DENIED ? PAM_AUTH_ERR : pam_err);
 	}
 	msg.msg_style = PAM_PROMPT_ECHO_OFF;
-	msg.msg = prompt;
+	msg.msg = (char *) prompt;
 	msgp = &msg;
 	*password = NULL;
 	for (retry = 0; retry < MAX_RETRIES; ++retry) {
@@ -1059,12 +1062,12 @@ pam_sm_close_session(pam_handle_t * pamh, int flags, int argc, const char *argv[
 PAM_EXTERN int
 pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 {
-#ifndef DARWIN
-	struct spwd    *pwd;
-	struct passwd  *old_pwd;
+	struct passwd  *pwd;
 	const char     *old_pass, *new_pass;
 	char           *hashedpwd, salt[SALTSIZE + 1];
 	int             retries;
+#ifdef HAVE_SHADOW_H
+	struct spwd    *spw;
 #endif
 	const char     *user;
 	int             pam_err;
@@ -1072,17 +1075,18 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 	if ((pam_err = pam_get_user(pamh, &user, NULL)) != PAM_SUCCESS)
 		return (pam_err);
 #ifndef DARWIN
-	if (!(old_pwd = getpwnam(user))) {
+	if (!(pwd = getpwnam(user))) {
 		_pam_log(LOG_WARNING, "User [%s] either has a corrupted passwd entry or \
 				is not in the selected database", user);
 		return (PAM_AUTHTOK_RECOVERY_ERR);
 	}
-	if (!(pwd = getspnam(user)))
-	{
+#ifdef HAVE_SHADOW_H
+	if (!(spw = getspnam(user))) {
 		_pam_log(LOG_WARNING, "User [%s] either has a corrupted passwd entry or \
 				is not in the selected database", user);
 		return PAM_USER_UNKNOWN;
 	}
+#endif
 	/*
 	 * When looking through the LinuxPAM code, I came across this : 
 	 * 
@@ -1107,8 +1111,12 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 		}
 		if (!old_pass && (pam_err = converse(pamh, flags, PLEASE_ENTER_OLD_PASSWORD, &old_pass)) != PAM_SUCCESS)
 			return (pam_err == PAM_CONV_ERR ? pam_err : PAM_AUTH_ERR);
-		hashedpwd = crypt(old_pass, pwd->sp_pwdp);
-		if (strcmp(hashedpwd, old_pwd->pw_passwd))
+#ifdef HAVE_SHADOW_H
+		hashedpwd = crypt(old_pass, spw->sp_pwdp);
+#else
+		hashedpwd = crypt(old_pass, pwd->pw_passwd);
+#endif
+		if (strcmp(hashedpwd, pwd->pw_passwd))
 			return (PAM_PERM_DENIED);
 	} else
 	if (flags & PAM_UPDATE_AUTHTOK) {
@@ -1140,6 +1148,7 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 		 * verify it's not weak. 
 		 */
 		makesalt(salt);
+#ifdef HAVE_SHADOW_H
 		/*- Update shadow/passwd entries for Linux */
 		if ((pam_err = update_shadow(pamh, user, (const char *) sha512_crypt(new_pass, salt))) != PAM_SUCCESS)
 		{
@@ -1150,6 +1159,7 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 		}
 		if (pam_err != PAM_SUCCESS)
 			return (pam_err);
+#endif
 #ifdef WHY_IS_THIS_NEEDED
 		if ((pam_err = update_passwd(pamh, user, "x")) != PAM_SUCCESS)
 			return (pam_err);
@@ -1166,7 +1176,7 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 	return (PAM_SERVICE_ERR);
 }
 
-#ifndef DARWIN
+#ifdef HAVE_SHADOW_H
 #define NEW_SHADOW "/etc/.shadow"
 /*
  * Update shadow with new user password
@@ -1177,7 +1187,6 @@ update_shadow(pam_handle_t * pamh, const char *user, const char *newhashedpwd)
 	FILE           *oldshadow, *newshadow;
 	struct spwd    *pwd, *cur_pwd;
 	struct stat     filestat;
-
 
 	if ((pwd = getspnam(user)) == NULL)
 		return PAM_USER_UNKNOWN;

@@ -30,3 +30,7 @@ ltmain.sh
 m4
 stamp-h1
 ChangeLog
+conf-release
+pop3
+imap
+pam-multi

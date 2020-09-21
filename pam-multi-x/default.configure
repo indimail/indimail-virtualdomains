@@ -5,12 +5,42 @@ fi
 if [ ! -f conf-release ] ; then
 	echo 1.1 > conf-release
 fi
-prefix=/usr
-sysconfdir=/etc/indimail
+SYSTEM=$(uname -s)
+case "$SYSTEM" in
+	FreeBSD)
+	prefix=/usr/local
+	mandir=/usr/local/man
+	sysconfdir=/usr/local/etc/indimail
+	moduledir=/usr/lib
+	;;
+	Linux)
+	prefix=/usr
+	mandir=$prefix/share/man
+	sysconfdir=/etc/indimail
+	if [ -d /lib/security ] ; then
+		moduledir=/lib/security
+	elif [ -d /lib64/security ] ; then
+		moduledir=/lib64/security
+	fi
+	;;
+	*)
+	prefix=/usr
+	mandir=/usr/man
+	libdir=/usr/lib
+	sysconfdir=/etc/indimail
+	;;
+esac
+if [ -d $prefix/include/mysql ] ; then
+	mysqlPrefix=$prefix
+elif [ /usr/local/include/mysql ] ; then
+	mysqlPrefix=/usr/local
+fi
+
 ./configure --prefix=$prefix \
   --datarootdir=$prefix/share/indimail \
-  --enable-mysqlprefix=$prefix \
-  --enable-moduledir=/lib/security \
+  --mandir=$mandir \
+  --enable-mysqlprefix=$mysqlPrefix \
+  --enable-moduledir=$moduledir \
   --enable-controldir=$sysconfdir/control \
   --enable-dlload-mysql=yes \
   --enable-default-domain=`uname -n`

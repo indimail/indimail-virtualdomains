@@ -1,5 +1,8 @@
 /*
  * $Log: sha512_crypt.c,v $
+ * Revision 1.4  2020-09-22 00:18:04+05:30  Cprogrammer
+ * FreeBSD port
+ *
  * Revision 1.3  2009-10-17 16:54:15+05:30  Cprogrammer
  * fix for darwin
  *
@@ -15,8 +18,12 @@
  */
 
 #ifndef HAVE_SHA512_CRYPT
-#ifndef DARWIN
+#ifdef HAVE_ENDIAN_H
 #include <endian.h>
+#else
+#ifdef HAVE_SYS_ENDIAN_H
+#include <sys/endian.h>
+#endif
 #endif
 #define	__USE_GNU
 #define _GNU_SOURCE
@@ -31,6 +38,9 @@
 #include <sys/param.h>
 #include <sys/types.h>
 
+#ifdef __FreeBSD__
+void           *mempcpy(void *, const void *, size_t);
+#endif
 
 /*
  * Structure to save state of computation between the single steps.  
@@ -566,7 +576,7 @@ sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen)
 	 * Now we can construct the result string.  It consists of three
 	 * parts.  
 	 */
-	cp = (char *) __stpncpy(buffer, sha512_salt_prefix, MAX(0, buflen));
+	cp = (char *) stpncpy(buffer, sha512_salt_prefix, MAX(0, buflen));
 	buflen -= sizeof(sha512_salt_prefix) - 1;
 
 	if (rounds_custom)
@@ -577,7 +587,7 @@ sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen)
 		buflen -= n;
 	}
 
-	cp = (char *) __stpncpy(cp, salt, MIN((size_t) MAX(0, buflen), salt_len));
+	cp = (char *) stpncpy(cp, salt, MIN((size_t) MAX(0, buflen), salt_len));
 	buflen -= MIN((size_t) MAX(0, buflen), salt_len);
 
 	if (buflen > 0)

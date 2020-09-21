@@ -1,5 +1,8 @@
 /*
  * $Log: sha256_crypt.c,v $
+ * Revision 1.3  2020-09-22 00:17:58+05:30  Cprogrammer
+ * FreeBSD port
+ *
  * Revision 1.2  2009-10-17 16:53:52+05:30  Cprogrammer
  * fix for DARWIN
  *
@@ -10,8 +13,12 @@
  * Released into the Public Domain by Ulrich Drepper <drepper@redhat.com>.
  */
 #ifndef HAVE_SHA256_CRYPT
-#ifndef DARWIN
+#ifdef HAVE_ENDIAN_H
 #include <endian.h>
+#else
+#ifdef HAVE_SYS_ENDIAN_H
+#include <sys/endian.h>
+#endif
 #endif
 #define	__USE_GNU
 #define _GNU_SOURCE
@@ -26,6 +33,9 @@
 #include <sys/param.h>
 #include <sys/types.h>
 
+#ifdef __FreeBSD__
+void           *mempcpy(void *, const void *, size_t);
+#endif
 
 /*- Structure to save state of computation between the single steps.  */
 struct sha256_ctx

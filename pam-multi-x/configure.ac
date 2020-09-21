@@ -29,9 +29,10 @@ AC_PROG_MAKE_SET
 AC_ISC_POSIX
 AC_HEADER_STDC
 saveCPPFLAGS="$CPPFLAGS"
-CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/include/qmail"
+CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/local/include/mysql -I/usr/include/qmail -I/usr/local/include/qmail"
 AC_CHECK_HEADERS([arpa/inet.h netinet/in.h netdb.h string.h strings.h sys/socket.h sys/types.h sys/stat.h])
 AC_CHECK_HEADERS([sys/param.h fcntl.h syslog.h unistd.h stdarg.h errno.h crypt.h shadow.h dlfcn.h mysql.h])
+AC_CHECK_HEADERS([endian.h sys/endian.h])
 AC_CHECK_TYPE([bool],AC_DEFINE(HAVE_BOOL, 1, have bool typedef),,[#include <mysql.h>])
 CPPFLAGS=$saveCPPFLAGS
 
@@ -136,9 +137,8 @@ AC_ARG_ENABLE(moduledir, [  --enable-moduledir=dir specify PAM module installati
   ])
 AC_DEFINE_UNQUOTED(PAM_MOD_DIR,"$moduledir",full path to PAM Module Directory)
 
-AC_DEFINE_UNQUOTED(USE_MYSQL,$USE_MYSQL,Use MySQL for primary authentication)
-pam_confdir=/etc/pam.d
-for f in /etc/pam.d /usr/etc/pam.d
+pam_confdir=$prefix/etc/pam.d
+for f in $prefix/etc/pam.d /etc/pam.d /usr/etc/pam.d
 do
   if test -d $f
   then
@@ -146,6 +146,16 @@ do
     break
   fi
 done
+AC_ARG_ENABLE(pamconfdir, [  --enable-pamconfdir=dir specify PAM config path],
+  pam_confdir="$enableval",
+  [
+	  if test "$pam_confdir" = ""
+	  then
+		  AC_MSG_ERROR([Unable to find your pam configuration dir, specify --enable-pamconfdir.])
+	  fi
+  ])
+
+AC_DEFINE_UNQUOTED(USE_MYSQL,$USE_MYSQL,Use MySQL for primary authentication)
 
 controldir="$sysconfdir/control"
 AC_ARG_ENABLE(controldir, [  --enable-controldir=dir       directory for control files.],
@@ -288,35 +298,14 @@ AC_EGREP_HEADER(MYSQL_OPT_SSL_ENFORCE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYS
 AC_EGREP_HEADER(MYSQL_OPT_TLS_VERSION, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_TLS_VERSION, 1, "tls version"))
 AC_EGREP_HEADER(MYSQL_OPT_SSL_MODE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_MODE, 1, "ssl mmode"))
 
-auth_inc="-I$mysql_incdir -I$mysql_incdir/mysql"
-case "$host" in
-	*-*-darwin*)
-	if test "$dlload_mysql" = "no"
-  then
-	  auth_libs="-L. -L$mysql_libdir -lmysqlclient $LIB_QMAIL"
-  else
-	  auth_libs=""
-  fi
-	;;
-	*)
-	if test "$dlload_mysql" = "no"
-	then
-	  auth_libs="-L. -Xlinker -R -Xlinker $mysql_libdir -L$mysql_libdir -lmysqlclient $LIB_QMAIL"
-	else
-		auth_libs=""
-	fi
-	;;
-esac
-
 AC_CHECK_LIB(m,floor)
 AC_CHECK_LIB(z,compress)
 
 HOST=$host
 AC_SUBST(MODFLAGS)
-AC_SUBST(auth_inc)
-AC_SUBST(auth_libs)
 AC_SUBST(moduledir)
 AC_SUBST(pam_confdir)
+AC_SUBST(mysql_incdir)
 AC_SUBST(HOST)
 
 (
@@ -340,8 +329,8 @@ echo "     MySQL lib dir = loaded using dlopen"
 fi
 echo "         libraries = $libs $LIBS"
 echo "  module directory = $moduledir"
-echo "          auth inc = $auth_inc"
-echo "          auth lib = $auth_libs $LIB_PAM $LIB_CRYPT $LIB_DL"
+echo "    pam config dir = $pam_confdir"
+echo "              Libs = $LIB_QMAIL $LIB_MYSQL $LIB_PAM $LIB_CRYPT $LIB_DL"
 ) | tee pam-multi.settings
 AC_OUTPUT(Makefile)
 AC_OUTPUT([pam-multi.spec])
