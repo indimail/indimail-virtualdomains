@@ -73,7 +73,6 @@ case "$host" in
 	STRIP_OPT=-s
 	;;
 *-*-linux*)
-	AC_LIB_PREPARE_MULTILIB
 	INSTALL="/usr/bin/install -c"
 	if test x"$FAKED_MODE" = x
 	then
@@ -116,20 +115,6 @@ then
 	prefix="$defaultprefix"
 	ac_configure_args="$ac_configure_args --prefix=$prefix"
 fi
-tlib='${exec_prefix}/lib'
-if test x$libdir = x$tlib
-then
-	dnl Does not work on RHEL 5, CentOS 5 64 bit systems
-	if test -d /lib64 -a "$acl_libdirstem" = "lib"
-	then
-		acl_libdirstem=lib64
-		libdir=$prefix/$acl_libdirstem
-	fi
-	ilibdir=$prefix/$acl_libdirstem
-else
-	ilibdir=$libdir
-fi
-RPATH_LIB="$acl_libdirstem"
 
 AC_CONFIG_SUBDIRS([eps-1.2])
 
@@ -138,7 +123,7 @@ if test " $noqmail" = " t"
 then
   AC_MSG_ERROR(Could not find qmail library.)
 fi
-AC_CHECK_LIB(socket, socket,echo -lsocket > socket.lib,,)
+AC_CHECK_LIB(socket, socket, [AC_SUBST([LIB_SOCKET], ["-lsocket"]) AC_DEFINE([HAVE_SOCKET], [1],[socket Library])],,-lsocket)
 AC_CHECK_LIB(ssl, SSL_CTX_new, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
 AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
 AC_CHECK_LIB(ncurses, tgetstr, [AC_SUBST([LIB_TERMCAP], ["-lncurses"]) AC_DEFINE([HAVE_TERMCAP_IN_NCURSES], [1],[ncurses Library])],notermcap=t,)
@@ -308,26 +293,6 @@ AC_EGREP_HEADER(MYSQL_OPT_SSL_ENFORCE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYS
 AC_EGREP_HEADER(MYSQL_OPT_TLS_VERSION, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_TLS_VERSION, 1, "tls version"))
 AC_EGREP_HEADER(MYSQL_OPT_SSL_MODE, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_MYSQL_OPT_SSL_MODE, 1, "ssl mmode"))
 AC_EGREP_HEADER(st_mysql_res, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_LIBMARIADB, 1, "have st_mysql_res typedef"),)
-
-auth_inc="$CFLAGS -I$indimaildir/include -I$mysql_incdir -I$mysql_incdir/mysql"
-case "$host" in
-	*-*-darwin*)
-	if test "$dlload_mysql" = "no"
-	then
-		auth_libs="-L. -L$prefix/lib -lindimail $LIB_MYSQL $LIB_QMAIL $LIB_SSL $LIB_CRYPT"
-	else
-		auth_libs="-L. -L$prefix/lib -lindimail $LIB_QMAIL $LIB_SSL $LIB_CRYPT"
-	fi
-	;;
-	*)
-	if test "$dlload_mysql" = "no"
-	then
-		auth_libs="-L. -L$ilibdir -lindimail $LIB_MYSQL $LIB_QMAIL $LIB_SSL $LIB_CRYPT"
-	else
-		auth_libs="-L. -L$ilibdir -lindimail $LIB_QMAIL $LIB_SSL $LIB_CRYPT"
-	fi
-	;;
-esac
 
 AC_ARG_ENABLE(passwd,   [  --enable-passwd=y|n           Turn on (y, default) or off (n) /etc/passwd (or shadow) authentication],
 	ENABLE_PASSWD=$enableval,
@@ -1118,8 +1083,6 @@ AC_SUBST(STRIP_OPT)
 AC_SUBST(CFLAGS)
 AC_SUBST(defaultprefix)
 AC_SUBST(libdir)
-AC_SUBST(auth_inc)
-AC_SUBST(auth_libs)
 AC_SUBST(mysql_prefix)
 AC_SUBST(mysql_incdir)
 AC_SUBST(mysql_libdir)
@@ -1149,6 +1112,7 @@ echo "LDFLAGS              = $LDFLAGS"
 echo "MODFLAGS             = $MODFLAGS"
 echo "            Current settings"
 echo "-------------------------------------------------------------"
+echo "            Prefix = $prefix"
 echo "   qmail directory = $qmaildir --enable-qmaildir=$qmaildir"
 echo " control directory = $controldir --enable-controldir=$controldir"
 echo " domains directory = $domaindir --enable-domaindir=$domaindir"
@@ -1179,9 +1143,7 @@ echo "     MySQL lib dir = $mysql_libdir --enable-mysqllibdir=$mysql_libdir"
 else
 echo "     MySQL lib dir = loaded using dlopen"
 fi
-echo "          auth inc = $auth_inc"
-echo "          auth lib = $auth_libs"
-echo "    acl_libdirstem = $acl_libdirstem"
+echo "            libdir = $libdir"
 case $mysql_escape in
 	1*|y*|Y*)
 	echo "      mysql escape = enabled"

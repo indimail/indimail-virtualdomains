@@ -27,9 +27,6 @@ AC_C_CONST
 AC_TYPE_UID_T
 AC_TYPE_SIZE_T
 
-AC_LIB_PREPARE_MULTILIB
-RPATH_LIB="$acl_libdirstem"
-
 case "$host" in
 *-*-sunos4.1.1*)
 	INSTALL="./install-sh -c"
@@ -61,7 +58,7 @@ case "$host" in
 	STRIP_OPT=-s
 	OS=darwin
 	;;
-freebsd*)
+*-*-freebsd*)
 	INSTALL="/usr/bin/install -c"
     CPPFLAGS="$CPPFLAGS -DFREEBSD"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
@@ -126,23 +123,10 @@ AC_ARG_ENABLE(controldir, [  --enable-controldir=dir       directory for control
 AC_DEFINE_UNQUOTED(CONTROLDIR, "$controldir", Directory for control files)
 
 saveCPPFLAGS="$CPPFLAGS"
-CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/include/qmail"
+CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/local/include/mysql -I${prefix}/include/qmail"
 AC_CHECK_HEADERS([mysql.h])
 AC_CHECK_TYPE([bool],AC_DEFINE(HAVE_BOOL, 1, have bool typedef),,[#include <mysql.h>])
 CPPFLAGS=$saveCPPFLAGS
-
-AC_ARG_ENABLE(dlload-mysql,   [  --enable-dlload-mysql=yes|no Turn off (n, default) or on (y) use dlopen to load libmysqlclient],
-dlload_mysql="$enableval", 
-[
-case $dlload_mysql in
-	1*|y*|Y*)
-	dlload_mysql="yes"
-	;;
-	*)
-	dlload_mysql="no"
-	;;
-esac
-])
 
 AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directory.],[mysql_prefix=$enableval],[mysql_prefix=""])
 if test "$mysql_prefix" = ""
@@ -235,6 +219,19 @@ else
 	fi
 fi
 
+AC_ARG_ENABLE(dlload-mysql,   [  --enable-dlload-mysql=yes|no Turn off (n, default) or on (y) use dlopen to load libmysqlclient],
+dlload_mysql="$enableval", 
+[
+case $dlload_mysql in
+	1*|y*|Y*)
+	dlload_mysql="yes"
+	;;
+	*)
+	dlload_mysql="no"
+	;;
+esac
+])
+
 if test "$dlload_mysql" = "no"
 then
 	saveLIBS="$LIBS"
@@ -247,26 +244,6 @@ else
 	AC_DEFINE_UNQUOTED(DLOPEN_LIBMYSQLCLIENT, "1", "if libmysqlclient is loaded using dlopen")
 	AC_EGREP_HEADER(st_mysql_res, $mysql_incdir/mysql.h, AC_DEFINE(HAVE_LIBMARIADB, 1, "have st_mysql_res typedef"),)
 fi
-
-auth_inc="-I/usr/include/qmail -I$mysql_incdir -I$mysql_incdir/mysql"
-case "$host" in
-	*-*-darwin*)
-	if test "$dlload_mysql" = "no"
-	then
-		auth_libs="-L. $LIB_MYSQL $LIB_QMAIL"
-	else
-		auth_libs="-L. $LIB_QMAIL"
-	fi
-	;;
-	*)
-	if test "$dlload_mysql" = "no"
-	then
-		auth_libs="-L. $LIB_MYSQL $LIB_QMAIL"
-	else
-		auth_libs="-L. $LIB_QMAIL"
-	fi
-	;;
-esac
 #---------------------------------------------------------------------
 
 AC_ARG_ENABLE(debug,          [--enable-debug                           Enable debug (see DEBUGGING)], [AC_DEFINE([DEBUG], 1, [Enable debug])])
@@ -308,8 +285,6 @@ AC_SUBST(OS)
 AC_SUBST(defaultdomain)
 AC_SUBST(mysql_incdir)
 AC_SUBST(mysql_libdir)
-AC_SUBST(auth_inc)
-AC_SUBST(auth_libs)
 (
 echo "---------- $PACKAGE $VERSION $target ----------"
 echo "Host               = $host"
@@ -319,6 +294,7 @@ echo "CFLAGS             = $CFLAGS"
 echo "LDFLAGS            = $LDFLAGS"
 echo "            Current settings"
 echo "---------------------------------------"
+echo "                OS = $OS"
 echo "    default domain = $defaultdomain --enable-default-domain=$defaultdomain"
 echo "       include dir = $mysql_incdir --enable-mysqlincdir=$mysql_incdir"
 if test "$dlload_mysql" = "no"

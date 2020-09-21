@@ -8,6 +8,5 @@ pam_moduledir=@moduledir@
 Name: @PACKAGE@
 Description: @PACKAGE_NAME@ - Development header files and libraries
 Version: @VERSION@
-Cflags: @CFLAGS@ @auth_inc@
-Libs: @auth_libs@
-
+Cflags: @CFLAGS@ -I@prefix@/include/qmail -I@prefix@/include/indimail -I@mysql_incdir@
+Libs: -L@libdir@ -lindimail @LIB_CRYPT@ @LIB_MYSQL@ @LIB_QMAIL@ @LIB_SSL@

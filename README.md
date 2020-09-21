@@ -64,6 +64,9 @@ libgamin-dev, python, libidn11-dev
 Debian 9, Debian 10 - default-libmysqlclient-dev
 Remaining - libmysqlclient-dev,
 Ubuntu 16.04 - libcom-err2, libmysqlclient-dev
+
+FreeBSD
+mysql-server, mysql-client libidn
 ```
 
 ## Compile libqmail
