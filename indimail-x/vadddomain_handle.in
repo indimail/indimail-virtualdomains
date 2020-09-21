@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.20  2020-09-21 07:57:01+05:30  Cprogrammer
+# added /usr/sbin for FreeBSD for chown command
+#
 # Revision 2.19  2020-05-26 11:21:29+05:30  Cprogrammer
 # make spamignore writeable for roundcube
 #
@@ -60,7 +63,7 @@
 # post handle for vadddomain
 #
 #
-# $Id: vadddomain_handle.in,v 2.19 2020-05-26 11:21:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.20 2020-09-21 07:57:01+05:30 Cprogrammer Exp mbhangui $
 
 # send sighup to inlookup service to reload domains
 (
@@ -97,7 +100,7 @@ echo "creating rules for spam, virus detected emails"
 /bin/ls -al @domaindir@/domains/$1
 
 # get securely chown, chmod path
-PATH=/usr/bin:/bin
+PATH=/usr/bin:/usr/sbin:/bin
 chown=$(which chown)
 chmod=$(which chmod)
 sort=$(which sort)
