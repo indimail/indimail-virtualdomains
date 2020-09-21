@@ -69,5 +69,5 @@ NSS_STATUS _get_response_data (int32_t type, const char *key,
                                struct response_data **data, int timeout);
 void nsvs_log (int prio, const char *fmt, ...);
 #if defined (sun)
-NSS_STATUS _nss_nssd_default_destr (nss_backend_t *be, void *args);
+NSS_STATUS _nss_nsvs_default_destr (nss_backend_t *be, void *args);
 #endif
