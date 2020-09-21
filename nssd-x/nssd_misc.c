@@ -17,7 +17,7 @@
  */
 
 /*
- * $Id: nssd_misc.c,v 1.1 2011-06-18 11:38:41+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: nssd_misc.c,v 1.2 2020-09-21 18:52:22+05:30 Cprogrammer Exp mbhangui $ 
  */
 #include "common.h"
 #include <string.h>
@@ -30,15 +30,17 @@ typedef struct _code {
 } CODE;
 
 CODE            prioritynames[] = {
-	{"emerg", LOG_EMERG},
 	{"alert", LOG_ALERT},
 	{"crit", LOG_CRIT},
-	{"err", LOG_ERR},
-	{"warning", LOG_WARNING},
-	{"notice", LOG_NOTICE},
-	{"info", LOG_INFO},
 	{"debug", LOG_DEBUG},
-	{NULL, -1}
+	{"emerg", LOG_EMERG},
+	{"err", LOG_ERR},
+	{"error", LOG_ERR},
+	{"info", LOG_INFO},
+	{"notice", LOG_NOTICE},
+	{"warn", LOG_WARNING},
+	{"warning", LOG_WARNING},
+	{NULL, -1 }
 };
 
 CODE            facilitynames[] = {
@@ -107,6 +109,7 @@ nssd_log(int prio, const char *fmt, ...)
 	vsnprintf(msg, sizeof (msg), fmt, ap);
 	if (debug_level) {
 		fprintf(stderr, "%s\n", msg);
+		fflush(stderr);
 	} else
 		syslog(prio, "%d: %s", getpid(), msg);
 	va_end(ap);
