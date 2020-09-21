@@ -1,24 +1,25 @@
-/*
+/*-
  * Copyright (C) 2004 Ben Goodwin
- * * This file is part of the nsvs package
- * *
- * * The nsvs package is free software; you can redistribute it and/or
- * * modify it under the terms of the GNU General Public License as published
- * * by the Free Software Foundation; either version 2 of the License, or
- * * (at your option) any later version.
- * *
- * * The nsvs package is distributed in the hope that it will be useful,
- * * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * * GNU General Public License for more details.
- * * You should have received a copy of the GNU General Public License
- * * along with the nsvs package; if not, write to the Free Software
- * * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * This file is part of the nsvs package
+ *
+ * The nsvs package is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * The nsvs package is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with the nsvs package; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 /*
- * $Id: spwd.c,v 1.1 2011-06-18 11:38:54+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: spwd.c,v 1.2 2020-09-21 18:55:25+05:30 Cprogrammer Exp mbhangui $ 
  */
+
 #include "common.h"
 #ifdef HAVE_SHADOW_H
 #include <shadow.h>
@@ -51,9 +52,9 @@ _load_shadow(struct response_data *data, struct spwd *result, char *buffer, size
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_getspnam_r(nss_backend_t * be, void *args)
+_nss_nsvs_getspnam_r(nss_backend_t * be, void *args)
 #else
-_nss_nssd_getspnam_r(const char *key, struct spwd * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nsvs_getspnam_r(const char *key, struct spwd * result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	response_header_t response_header;
@@ -84,9 +85,9 @@ _nss_nssd_getspnam_r(const char *key, struct spwd * result, char *buf_out, size_
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_endspent(nss_backend_t * be, void *args)
+_nss_nsvs_endspent(nss_backend_t * be, void *args)
 #else
-_nss_nssd_endspent(void)
+_nss_nsvs_endspent(void)
 #endif
 {
 	XFREE(spent.data);
@@ -96,9 +97,9 @@ _nss_nssd_endspent(void)
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_setspent(nss_backend_t * be, void *args)
+_nss_nsvs_setspent(nss_backend_t * be, void *args)
 #else
-_nss_nssd_setspent(void)
+_nss_nsvs_setspent(void)
 #endif
 {
 	int             status;
@@ -117,9 +118,9 @@ _nss_nssd_setspent(void)
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_getspent_r(nss_backend_t * be, void *args)
+_nss_nsvs_getspent_r(nss_backend_t * be, void *args)
 #else
-_nss_nssd_getspent_r(struct spwd * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nsvs_getspent_r(struct spwd * result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	int             status;
@@ -145,15 +146,15 @@ _nss_nssd_getspent_r(struct spwd * result, char *buf_out, size_t buflen, int *er
 
 #if defined (sun)
 static nss_backend_op_t shadow_ops[] = {
-	_nss_nssd_default_destr,	/* NSS_DBOP_DESTRUCTOR */
-	_nss_nssd_endspent,			/* NSS_DBOP_ENDENT */
-	_nss_nssd_setspent,			/* NSS_DBOP_SETENT */
-	_nss_nssd_getspent_r,		/* NSS_DBOP_GETENT */
-	_nss_nssd_getspnam_r		/* NSS_DBOP_SHADOW_BYNAME */
+	_nss_nsvs_default_destr,	/* NSS_DBOP_DESTRUCTOR */
+	_nss_nsvs_endspent,			/* NSS_DBOP_ENDENT */
+	_nss_nsvs_setspent,			/* NSS_DBOP_SETENT */
+	_nss_nsvs_getspent_r,		/* NSS_DBOP_GETENT */
+	_nss_nsvs_getspnam_r		/* NSS_DBOP_SHADOW_BYNAME */
 };
 
 nss_backend_t  *
-_nss_nssd_shadow_constr(const char *db_name, const char *src_name, const char *cfg_args)
+_nss_nsvs_shadow_constr(const char *db_name, const char *src_name, const char *cfg_args)
 {
 	nss_backend_t  *be;
 	be = (nss_backend_t *) malloc(sizeof (*be));
