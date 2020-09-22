@@ -66,12 +66,11 @@ Remaining - libmysqlclient-dev,
 Ubuntu 16.04 - libcom-err2, libmysqlclient-dev
 
 FreeBSD
+Install the following using pkg
 mysql-server, mysql-client libidn
 ```
 
 ## Compile libqmail
-
-(check version in libqmail/conf-version)
 
 ```
 $ cd /usr/local/src
@@ -80,7 +79,9 @@ $ cd /usr/local/src/libqmail
 $ ./default.configure
 $ make
 $ sudo make install-strip
+
 ```
+(check version in libqmail/conf-version)
 
 ## Download indimail, indimail-mta and components
 
@@ -92,7 +93,6 @@ $ git clone https://github.com/mbhangui/indimail-mta.git
 
 ## Compile libdkim-x (with dynamic libaries)
 
-(check version in indimail-mta/libdkim-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-mta/libdkim-x
 $ ./default.configure
@@ -100,9 +100,10 @@ $ make
 $ sudo make -s install-strip
 ```
 
+(check version in indimail-mta/libdkim-x/conf-version)
+
 ## Compile libsrs2-x (with dynamic libaries)
 
-(check version in indimail-mta/libsrs2-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-mta/libsrs2-x
 $ ./default.configure
@@ -110,18 +111,19 @@ $ make
 $ sudo make install-strip
 ```
 
+(check version in indimail-mta/libsrs2-x/conf-version)
+
 ## Build ucspi-tcp
 
-(check version in indimail-mta/ucspi-tcp-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-mta/ucspi-tcp-x
 $ make
 $ sudo make install-strip
 ```
 
-## Build bogofilter
+(check version in indimail-mta/ucspi-tcp-x/conf-version)
 
-(check version in indimail-virtualdomains/bogofilter-x/conf-version)
+## Build bogofilter
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/bogofilter-x
@@ -129,6 +131,8 @@ $ ./default.configure
 $ make
 $ sudo make install-strip
 ```
+
+(check version in indimail-virtualdomains/bogofilter-x/conf-version)
 
 ## Build bogofilter-wordlist
 
@@ -155,11 +159,12 @@ $ sudo make install-strip
 $ sudo sh ./svctool --config=users --nolog
 ```
 
+(check version in indimail-mta/indimail-mta-x/conf-version)
+
 ## Build indimail
 
 Rquired for Virtual Domains function.
 
-(check version in indimail-virtualdomains/indimail-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-x
 $ ./default.configure
@@ -167,16 +172,19 @@ $ make
 $ sudo make install-strip
 ```
 
+(check version in indimail-virtualdomains/indimail-x/conf-version)
+
 ## Build courier-imap
 
 Required for IMAP, POP3 to retrieve your mails
 
-(check version in indimail-virtualdomains/courier-imap-x/conf-version)
 ```
 $ cd /usr/local/src/indimail-virtualdomains/courier-imap-x
 $ ./default.configure
 $ sudo make install-strip
 ```
+
+(check version in indimail-virtualdomains/courier-imap-x/conf-version)
 
 ### Build fetchmail
 
@@ -189,11 +197,12 @@ $ make
 $ sudo make install-strip
 ```
 
+(check version in indimail-virtualdomains/fetchmail-x/conf-version)
+
 ## Build nssd
 
-Optional component. Required only if you require a Name Service Switch to authenticate from a MySQL db (e.g. for authenticated SMTP)
+Optional component. Required only if you require the Standard C library routines to use Name Service Switch to authenticate from a MySQL db (e.g. for authenticated SMTP, IMAP, POP3, etc). Your passwd(5) database gets extended to indimail's MySQL database. You will also need to edit /etc/nsswitch.conf and have a line like this `passwd: files nssd`. Check the man page for nssd(8) and nsswitch.conf(5)
 
-(check version in indimail-virtualdomains/nssd-x/conf-version)
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/nssd-x
@@ -202,11 +211,11 @@ $ make
 $ sudo make install-strip
 ```
 
+(check version in indimail-virtualdomains/nssd-x/conf-version)
+
 ## Build pam-multi
 
 Optional. Required only if you require PAM authentication for authenticated SMTP or extra PAM other than /etc/shadow authentication for IMAP / POP3
-
-(check version in indimail-virtualdomains/pam-multi-x/conf-version)
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/pam-multi-x
@@ -214,6 +223,8 @@ $ ./default.configure
 $ make
 $ sudo make install-strip
 ```
+
+(check version in indimail-virtualdomains/pam-multi-x/conf-version)
 
 ### Build altermime
 
@@ -226,6 +237,8 @@ $ make
 $ sudo make install-strip
 ```
 
+(check version in indimail-virtualdomains/altermime-x/conf-version)
+
 ### Build ripmime
 
 Optional. Required only if you want extract attachments from your emails
@@ -236,6 +249,8 @@ $ ./default.configure
 $ make
 $ sudo make install-strip
 ```
+
+(check version in indimail-virtualdomains/ripmime-x/conf-version)
 
 ### Build mpack
 
@@ -248,6 +263,8 @@ $ make
 $ sudo make install-strip
 ```
 
+(check version in indimail-virtualdomains/mpack-x/conf-version)
+
 ### Build flash
 
 Optional. Required only if you want a configurable ncurses based menu system to configure a system for administering emails using a dumb terminal
@@ -258,6 +275,8 @@ $ ./default.configure
 $ make
 $ sudo make install-strip
 ```
+
+(check version in indimail-virtualdomains/flash-x/conf-version)
 
 ### Build fortune
 
@@ -270,6 +289,8 @@ $ make
 $ sudo make install-strip
 ```
 
+(check version in indimail-virtualdomains/fortune-x/conf-version)
+
 ## Build iwebadmin
 
 Required for a web administration front-end for administering your indimail-users and ezmlm mailing lists. You can do tasks like adding, deleting, modifying users, change user password, update quota, set vacation messages, etc.
@@ -281,15 +302,17 @@ $ make
 $ sudo make install-strip
 ```
 
+(check version in indimail-virtualdomains/iwebadmin-x/conf-version)
+
 ## Setup & Configuration
 
-You are here because you decided to do a complete source installation. If you use source installation method, you need to setup various configuration and services. You can configure indimail/indimail-mta using /usr/sbin/svctool. `svctool` is a general purpose utility to configure indimail/indimail-mta services.
+You are here because you decided to do a complete source installation. If you use source installation method, you need to setup various configuration and services. You can configure indimail/indimail-mta using /usr/sbin/svctool. `svctool` is a general purpose utility to configure indimail/indimail-mta services and configuration.
 
 You can also run the script `create_services` which invokes svctool to setup few default services to start a fully configured system. `create_services` will also put a systemd unit file `svscan.service` in `/lib/systemd/system`.
 
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
-$ sudo sh ./create_services --servicedir=/services --mysqlPrefix=/usr
+$ sudo sh ./create_services
 ```
 
 NOTE: I myself use RPMs for deploying indimail-mta on my own servers and do not use `create_services`. It is possible that it may not include few steps added recently in the pre/post install scripts written for the RPM/Debian builds.
@@ -297,13 +320,13 @@ NOTE: I myself use RPMs for deploying indimail-mta on my own servers and do not 
 ## Start Services
 
 ```
-$ sudo systemctl start svscan
+$ sudo systemctl start svscan # Linux
 or
-$ sudo service svscan start
+$ sudo service svscan start # Universal
 or
-$ /etc/init.d/svscan start
+$ /etc/init.d/svscan start # Linux
 or
-$ /usr/bin/qmailctl start
+$ qmailctl start # Universal
 ```
 
 # Binary Packages Build
@@ -311,6 +334,8 @@ $ /usr/bin/qmailctl start
 If you need to have indimail on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command. To generate RPM packages locally for all components refer to [Binary Packages](.github/CREATE-Packages.md).
 
 You can also download pre-built binary packages from [openSUSE Build Service](https://build.opensuse.org/), described in the chapter [Binary Builds on OBS](#binary-builds-on-opensuse-build-service).
+
+NOTE: binary package for FreeBSD and OSX is in my TODO list.
 
 # Binary Builds on openSUSE Build Service
 
