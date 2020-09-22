@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 1.5  2020-09-22 07:57:58+05:30  Cprogrammer
+ * enable and start services on FreeBSD
+ *
  * Revision 1.4  2020-09-21 07:52:47+05:30  Cprogrammer
  * FreeBSD port
  *
@@ -36,7 +39,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 1.4 2020-09-21 07:52:47+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 1.5 2020-09-22 07:57:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
@@ -236,15 +239,17 @@ main(int argc, char **argv)
 				strerr_warn1("svscan: fappend systemd /usr/local/etc/rc.d/svscan: ", &strerr_sys);
 				return (1);
 			}
+			system("service svscan enable");
 		}
 		switch(flag)
 		{
 			case SV_ON:
-				execl("/usr/sbin/service", "service", "svscan", "enable", (char *) 0);
+				execl("/usr/sbin/service", "service", "svscan", "start", (char *) 0);
 				strerr_die1sys(111, "execl: /usr/sbin/service: ");
 				break;
 			case SV_OFF:
-				execl("/usr/sbin/service", "service", "svscan", "disable", (char *) 0);
+				system("service svscan disable");
+				execl("/usr/sbin/service", "service", "svscan", "stop", (char *) 0);
 				strerr_die1sys(111, "execl: /usr/sbin/service: ");
 				break;
 			case SV_STAT:
