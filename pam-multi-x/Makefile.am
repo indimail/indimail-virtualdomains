@@ -67,7 +67,7 @@ pam-multi: pam-multi.in
 	$(edit) pam-multi.in > $@
 
 pam-multi.8: pam-multi.9
-	cat pam-multi.9 | sed s}INDIMAIL}$(prefix)}g > $@
+	$(edit) pam-multi.9 > $@
 
 install-data-local:  pam-multi.8 pam-checkpwd.8 pam-multi pop3 imap
 	$(mkinstalldirs)  $(DESTDIR)@datarootdir@/doc || exit 1
