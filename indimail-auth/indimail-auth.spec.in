@@ -25,8 +25,8 @@
 %global url                https://github.com/mbhangui/indimail-virtualdomains
 %global logdir             @logdir@
 %global servicedir         @servicedir@
-%global pam_confdir        %{_sysconfdir}/pam.d
-%global pam_module_dir     /%{_lib}/security
+%global pam_confdir        @pam_confdir@
+%global pam_moduledir      /%{_lib}/security
 %global mysqlPrefix        /usr
 %global mysqlSocket        /var/run/mysqld/mysqld.sock
 %global defaultDomain      indimail.org
@@ -132,7 +132,7 @@ echo target_alias   %_target_alias
 echo target_cpu     %_target_cpu
 echo target_os      %_target_os
 echo target_vendor  %_target_vendor
-echo PAM Module dir %{pam_module_dir}
+echo PAM Module dir %{pam_moduledir}
 echo Project        %{_project}
 echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
 echo "------------------------------------------------------"
@@ -178,7 +178,9 @@ fi
 if [ pam-multi-%{pam_multi_version} ] ; then
   cd pam-multi-%{pam_multi_version}
   %configure --prefix=%{_prefix} --datarootdir=%{shareddir} \
-  --enable-moduledir=%pam_module_dir --enable-controldir=%{sysconfdir}/control \
+  --enable-moduledir=%{pam_moduledir} \
+  --enable-controldir=%{sysconfdir}/control \
+  --enable-pamconfdir=%{pam_confdir} \
   --enable-mysqlprefix=%{mysqlPrefix} \
   --enable-dlload-mysql=yes --enable-default-domain=$default_domain
   cd ..
@@ -207,10 +209,10 @@ install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
 %{__rm} -f %{buildroot}%{_libdir}/libnss_nssd.la
 %{__rm} -f %{buildroot}%{_libdir}/libnss_nssd.so
 # pam-multi
-%{__rm} -f %{buildroot}%{pam_module_dir}/pam-multi.la
-%{__rm} -f %{buildroot}%{pam_module_dir}/pam-multi.a
+%{__rm} -f %{buildroot}%{pam_moduledir}/pam-multi.la
+%{__rm} -f %{buildroot}%{pam_moduledir}/pam-multi.a
 if [ -x /usr/bin/chrpath ] ; then
-  /usr/bin/chrpath -d %{buildroot}%{pam_module_dir}/pam-multi.so
+  /usr/bin/chrpath -d %{buildroot}%{pam_moduledir}/pam-multi.so
   /usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
 fi
 
@@ -265,7 +267,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 # Shared libraries (omit for architectures that don't support them)
 
 # pam-multi
-%attr(755,root,root)                    /%{pam_module_dir}/pam-multi.so
+%attr(755,root,root)                    /%{pam_moduledir}/pam-multi.so
 
 %attr(755,root,root)                    %{_libdir}/libnss_nssd.so.2.0.0
                                         %{_libdir}/libnss_nssd.so.2
