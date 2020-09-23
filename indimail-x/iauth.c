@@ -1,5 +1,8 @@
 /*
  * $Log: iauth.c,v $
+ * Revision 1.5  2020-09-23 10:56:17+05:30  Cprogrammer
+ * avoid potential SIGSEGV if nitiems is 0
+ *
  * Revision 1.4  2020-04-01 18:55:14+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -92,7 +95,7 @@
 #include "common.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: iauth.c,v 1.4 2020-04-01 18:55:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iauth.c,v 1.5 2020-09-23 10:56:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      defaultTask(char *, char *, struct passwd *, char *, int);
@@ -215,8 +218,10 @@ i_acctmgmt(char *email, char *service, int *size, int *nitems, int debug)
 	struct vlimits  limits;
 #endif
 
-	*nitems = NO_OF_ITEMS;
-	*size = 0;
+	if (nitems)
+		*nitems = NO_OF_ITEMS;
+	if (size)
+		*size = 0;
 	parse_email(email, &User, &Domain);
 	if (debug)
 		strerr_warn1("iauth.so: i_acctmgmt: opening MySQL connection", 0);
@@ -352,8 +357,15 @@ i_acctmgmt(char *email, char *service, int *size, int *nitems, int debug)
 			return ((char *) 0);
 		}
 	}
-	*size = sizeof(long) * NO_OF_ITEMS;
-	return ((char *) &exp_times[0]);
+	if (nitems) {
+		if (size)
+			*size = sizeof(long) * NO_OF_ITEMS;
+		return ((char *) &exp_times[0]);
+	} else {
+		if (size)
+			*size = 0;
+		return ((char *) 0);
+	}
 }
 #else
 char           *
