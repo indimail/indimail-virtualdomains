@@ -85,8 +85,13 @@ NOTE: Any line starting with `#` is a comment
 
 ## TESTING
 
+You can use pam-checkpwd to test pam-multi. You can also use pamtester Written by Moriyoshi Koizumi <moriyoshi@users.sourceforge.net>. 
+
 ```
 printf "user01@example.com\0pass\0\0" | pam-checkpwd -s pam-multi -e -- /usr/bin/id 3<&0
+pamtester imap user01@example.com authenticate
+pamtester pop3 user01@example.com authenticate
+pamtester pam-multi user01@example.com authenticate
 ```
 
 pam-multi is experimental at this stage. It is covered under GNU GPL V3 license and no warranty is implied. Suggestions to improve it are welcome.
