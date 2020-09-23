@@ -3,7 +3,6 @@ pam-multi-1.2
 doc/ChangeLog
 debian/changelog.in
 debian/changelog
-Makefile
 conf-release
 indimail-auth.spec
 debian/Makefile
