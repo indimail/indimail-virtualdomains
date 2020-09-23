@@ -54,7 +54,8 @@ esac
 	--datarootdir=$prefix/share/indimail \
 	--without-authchangepwdir \
 	--without-authpam --without-authcustom \
-	--without-authpwd --with-authshadow
+	--without-authpwd --with-authshadow \
+	--without-authpwd --with-authpam
 if [ ! -f depcomp ] ; then
 	cp libs/unicode/depcomp .
 fi

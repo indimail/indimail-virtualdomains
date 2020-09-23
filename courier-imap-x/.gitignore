@@ -162,6 +162,7 @@ libs/authlib/authchangepwdir.h
 libs/authlib/authenumerate
 libs/authlib/authlib.7
 libs/authlib/authshadow
+libs/authlib/authpam
 libs/authlib/authstaticlist.c
 libs/authlib/authtest
 libs/authlib/autom4te.cache/

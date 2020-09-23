@@ -238,7 +238,7 @@ if [ -d courier-imap-%{courier_version} ] ; then
     --datarootdir=%{shareddir} --with-certsdir=%{sysconfdir}/certs \
     --with-mailer=%{_prefix}/bin/sendmail --disable-root-check --with-redhat \
     --without-authpam --without-authcustom --without-authchangepwdir \
-    --without-authpwd --without-userdb --with-authshadow
+    --without-authpwd --without-userdb --with-authshadow --with-authpam
   cd ..
 fi
 %endif
@@ -420,6 +420,7 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/sharedindexsplit
 # setuid binary
 %attr(4755,root,root)                   %{libexecdir}/imapmodules/authshadow
+%attr(4755,root,root)                   %{libexecdir}/imapmodules/authpam
 %endif
 
 # fetchmail
@@ -530,6 +531,7 @@ done
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %verify (not user group mode) %attr(4755, root, root)      %{libexecdir}/imapmodules/authshadow
+%verify (not user group mode) %attr(4755, root, root)      %{libexecdir}/imapmodules/authpam
 %endif
 %endif
 %endif
@@ -553,6 +555,7 @@ fi
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %verify_permissions -e %{libexecdir}/imapmodules/authshadow
+%verify_permissions -e %{libexecdir}/imapmodules/authpam
 %endif
 %endif
 
