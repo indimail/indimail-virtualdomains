@@ -5,6 +5,8 @@ libexecdir=@libexecdir@
 mandir=@mandir@
 logdir=@logdir@
 servicedir=@servicedir@
+pam_moduledir=/lib/security
+pam_confdir=/etc/pam.d
 version=$(shell cat ../conf-version)
 release=$(shell cat ../conf-release)
 nssd_version=@nssd_version@
@@ -16,6 +18,8 @@ edit = sed \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@logdir\@,$(logdir),g' \
+	-e 's,@pam_confdir\@,$(pam_confdir),g' \
+	-e 's,@pam_moduledir\@,$(pam_moduledir),g' \
 	-e 's,@servicedir\@,$(servicedir),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
