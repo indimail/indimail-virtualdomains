@@ -138,7 +138,7 @@ AC_ARG_ENABLE(moduledir, [  --enable-moduledir=dir specify PAM module installati
 AC_DEFINE_UNQUOTED(PAM_MOD_DIR,"$moduledir",full path to PAM Module Directory)
 
 pam_confdir=$prefix/etc/pam.d
-for f in $prefix/etc/pam.d /etc/pam.d /usr/etc/pam.d
+for f in /etc/pam.d $prefix/etc/pam.d /usr/etc/pam.d
 do
   if test -d $f
   then
