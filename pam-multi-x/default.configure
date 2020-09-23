@@ -11,6 +11,7 @@ case "$SYSTEM" in
 	prefix=/usr/local
 	mandir=/usr/local/man
 	sysconfdir=/usr/local/etc/indimail
+	pam_confdir=/usr/local/etc/pam.d
 	moduledir=/usr/lib
 	;;
 	Linux)
@@ -22,12 +23,14 @@ case "$SYSTEM" in
 	elif [ -d /lib64/security ] ; then
 		moduledir=/lib64/security
 	fi
+	pam_confdir=/etc/pam.d
 	;;
 	*)
 	prefix=/usr
 	mandir=/usr/man
 	libdir=/usr/lib
 	sysconfdir=/etc/indimail
+	pam_confdir=/etc/pam.d
 	;;
 esac
 if [ -d $prefix/include/mysql ] ; then
@@ -42,5 +45,6 @@ fi
   --enable-mysqlprefix=$mysqlPrefix \
   --enable-moduledir=$moduledir \
   --enable-controldir=$sysconfdir/control \
+  --enable-pam-confdir=$pam_confdir \
   --enable-dlload-mysql=yes \
   --enable-default-domain=`uname -n`
