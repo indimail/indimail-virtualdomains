@@ -37,23 +37,24 @@ uses PAM service name specified by
 .B PAM_SERVICE
 environment variable, or by the -\fBs\fR " or " --\fBservice\fR command-line option.
 .B pam-checkpwd
-can use an identifier specified by the -\fBi\fR " or " --\fBidentifier\fR command-line option.
-You can use -i imap to use imap as an identifier when authenticating for an IMAP service. Similarly
-you can use -i pop3 to use pop3 as an identifier when authenticationg for a POP3 service.
+can use an identifier specified by the -\fBi\fR " or " --\fBidentifier\fR
+command-line option. You can use -i imap to use imap as an identifier when
+authenticating for an IMAP service. Similarly you can use -i pop3 to use
+pop3 as an identifier when authenticationg for a POP3 service.
 
 .PP
-After successful authentication, if -\fBe\fR or --\fBnoenv\fR or option is not specified,
-\fBpam-checkpwd\fR sets up supplementary groups of authenticated user,
-its gid, its uid, and its working directory (those values are taken from the system
-user database).
+After successful authentication, if -\fBe\fR or --\fBnoenv\fR or option is
+not specified, \fBpam-checkpwd\fR sets up supplementary groups of the
+authenticated user, its gid, its uid, and its working directory (those
+values are taken from the system user database - passwd(5)).
 
 .PP
 Normally,
 .B pam-checkpwd
 switches to user home directory.   If
--\fBH\fR or --\fBno\fR-\fBchdir\fR-\fBhome\fR option is specified, this step is skipped.
-This option is useful when you have automounted home directories, but mail is delivered to a
-central location.
+-\fBH\fR or --\fBno\fR-\fBchdir\fR-\fBhome\fR option is specified, this
+step is skipped. This option is useful when you have automounted home
+directories, but mail is delivered to a central location.
 
 .PP
 If authentication fails,
@@ -64,8 +65,8 @@ with
 .I args
 as its arguments.
 
-If the environment variable POSTAUTH is defined as set as a path to an executable/script, the program
-gets called with the authenticated username as the argument
+If the environment variable POSTAUTH is set as a path to an executable/script,
+the program gets called with the authenticated username as the argument
 
 .PP
 \fB--\fR is used as usual to separate the \fBpam-checkpwd\fR own options from
@@ -96,20 +97,22 @@ overriden by -\fBs\fR option, see above.
 
 .TP
 .B POSTAUTH
-If this is set to a path to an executable or script, \fBpam-checkpwd\fR will execute this program
-with the authenticated username as an argument exit with the return status of the program.
+If this is set to a path to an executable or script, \fBpam-checkpwd\fR
+will execute this program with the authenticated username as an argument
+exit with the return status of the program.
 
 
 .SH "DEBUGGING"
 .PP
 You can turn on debugging using the --\fBdebug\fR option. \fBpam-checkpwd\fR
-starts to log all of its actions and the results of those actions to to stderr.
+starts to log all of its actions and the results of those actions to to
+stderr.
 
 There is a way to manually trace how the \fBpam-checkpwd\fR
 authenticates: use the shell redirection option. In this case
 \fBpam-checkpwd\fR reads \fIcheckpassword\fR protocol data from stdin,
-and logs actions to stderr. You can trace the authentication for the given user
-and password with the following command-line
+and logs actions to stderr. You can trace the authentication for the given
+user and password with the following command-line
 
 .PP
 # printf "%s\\0%s\\0%s\\0" username password timestamp \\
@@ -132,8 +135,8 @@ http://cr.yp.to/checkpwd.html
 
 .SH "AUTHOR"
 .PP
-This version of pam-checkpwd was written by Manvendra Bhangui <mbhangui@gmail\&.com> by 
-hacking checkpassword-pam by Alexey Mahotkin <alexm@hsys\&.msk\&.ru>
+This version of pam-checkpwd was adapted from checkpassword-pam by Alexey
+Mahotkin <alexm@hsys\&.msk\&.ru>
 .PP
 .I checkpassword
 interface was designed by Daniel J. Bernstein.
