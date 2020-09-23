@@ -38,7 +38,7 @@ pkgconfig_DATA = libindimail.pc
 
 BUILT_SOURCES = indimail_config.h
 man_MANS=adminclient.8 chowkidar.8 clearopensmtp.8 crc.1 crcdiff.1 \
-		 incrypt.1 dbinfo.8 hostcntrl.8 hostsync.8 iecho.1 indimail.7 \
+		 incrypt.1 dbinfo.8 hostcntrl.8 hostsync.8 indimail.7 \
 		 IndiMail.7 indisrvr.8 initsvc.1 inlookup.8 InLookup.8 inquerytest.8 \
 		 install_tables.8 ipchange.8 ismaildup.1 login_tasks.3 \
 		 mgmtpass.8 osh.8 postdel.8 printdir.1 proxyimap.8 proxypop3.8 \
@@ -174,7 +174,7 @@ indimailbin_PROGRAMS = vadddomain vdeldomain vadduser vdeluser vuserinfo \
 					   vmoduser printdir ismaildup valias vcalias hostcntrl \
 					   vhostid vpasswd vcfilter vsmtp vsetuserquota \
 					   vacation vatrn vmoveuser vrenameuser vipmap vlimit \
-					   vpriv crc crcdiff iecho incrypt vgroup proxyimap proxypop3 \
+					   vpriv crc crcdiff incrypt vgroup proxyimap proxypop3 \
 					   sslerator vproxy vbulletin
 
 indimailsbin_PROGRAMS = inlookup vdelivermail clearopensmtp updaterules \
@@ -419,9 +419,6 @@ crc_DEPENDENCIES = libindimail.la
 
 crcdiff_SOURCES=crcdiff.c
 crcdiff_LDADD=
-
-iecho_SOURCES=iecho.c
-iecho_LDADD=
 
 incrypt_SOURCES = incrypt.c
 incrypt_LDADD = libindimail.la @LIB_CRYPT@
@@ -846,11 +843,6 @@ crc.$(OBJEXT): crc.c
 	$(COMPILE) $(DEFS) -DMAIN -c crc.c
 crc$(EXEEXT): $(crc_DEPENDENCIES) $(crc_OBJECTS)
 	$(LINK) $@.$(OBJEXT) $(crc_LDADD)
-
-iecho.$(OBJEXT): iecho.c
-	$(COMPILE) $(DEFS) -c iecho.c
-iecho$(EXEEXT): $(iecho_DEPENDENCIES) $(iecho_OBJECTS)
-	$(LINK) $@.$(OBJEXT) $(iecho_LDADD)
 
 install-data-local: initsvc libindimail.la indimail-rpmlintrc \
 indimail.spec iauth.la indimail.te indimail.fc usr.sbin.mysqld usr.sbin.clamd usr.bin.freshclam
