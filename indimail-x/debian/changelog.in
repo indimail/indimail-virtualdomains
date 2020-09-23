@@ -6,5 +6,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * Shortened README-indimail after moving document to online wiki
   * Removed Provides: indimail-libs, libindimail from indimail package. Now available only in libindimail package
   * FreeBSD fixes fo vfstabNew.c, vadddomain.c, ProcessInFifo.c, pathToFilesystem.c, get_localtime.c, Makefile.am, configure.ac, default.configure
-  * courier-imap: fixed compler warning on FreeBSD for rfc6533.c
   * initsvc: enable and start services for FreeBSD
