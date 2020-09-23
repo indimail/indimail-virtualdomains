@@ -1,8 +1,15 @@
 #
+# $Log: imap.in,v $
+# Revision 1.1  2020-09-23 17:21:03+05:30  Cprogrammer
+# Initial revision
+#
+#
 # auth     required  pam-multi.so args -m [select pw_passwd from indimail where pw_name='%u' and pw_domain='%d'] -u indimail -p ssh-1.5- -D indimail -H localhost -P 3306 -d
-# auth     required  pam-multi.so args -s @prefix@/lib/indimail/modules/iauth.so -d
-# account  required  pam-multi.so args -d
-# account  required  pam-multi.so args -s @prefix@/lib/indimail/modules/iauth.so -d
+# auth     required  pam-multi.so args -s @prefix@/lib/indimail/modules/iauth.so
+# account  required  pam-multi.so args -i imap -s @prefix@/lib/indimail/modules/iauth.so
+# add -d argument to debug pam-multi lines
+#
+# $Id: imap.in,v 1.1 2020-09-23 17:21:03+05:30 Cprogrammer Exp mbhangui $
 #
 auth     required  pam-multi.so args -s @prefix@/lib/indimail/modules/iauth.so
 account  required  pam-multi.so args -i imap -s @prefix@/lib/indimail/modules/iauth.so
