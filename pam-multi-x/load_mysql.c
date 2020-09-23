@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.11  2020-09-23 11:00:40+05:30  Cprogrammer
+ * fold braces for code readability
+ *
  * Revision 1.10  2020-06-08 23:43:18+05:30  Cprogrammer
  * quench compiler warning
  *
@@ -41,7 +44,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.10 2020-06-08 23:43:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.11 2020-09-23 11:00:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
@@ -101,8 +104,7 @@ static void
 striptrailingwhitespace(sa)
 	stralloc       *sa;
 {
-	while (sa->len > 0)
-	{
+	while (sa->len > 0) {
 		switch (sa->s[sa->len - 1])
 		{
 		case '\n':
@@ -266,8 +268,7 @@ getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 	i = dlsym(*handle, plugin_symb);
 	if (!i && (!stralloc_copyb(&errbuf, "getlibObject: ", 14) ||
 			!stralloc_cats(&errbuf, plugin_symb) ||
-			!stralloc_catb(&errbuf, ": ", 2)))
-	{
+			!stralloc_catb(&errbuf, ": ", 2))) {
 		if (errstr)
 			*errstr = memerr;
 	}

@@ -1,5 +1,8 @@
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.16  2020-09-23 11:01:37+05:30  Cprogrammer
+ * fold braces for readability
+ *
  * Revision 1.15  2020-09-22 00:17:52+05:30  Cprogrammer
  * FreeBSD port
  *
@@ -181,7 +184,7 @@ static int      update_passwd(pam_handle_t *, const char *, const char *);
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.15 2020-09-22 00:17:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.16 2020-09-23 11:01:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -490,8 +493,7 @@ loadLIB(char *shared_lib, const char *user, const char *service, char **qresult,
 	}
 	if (debug)
 		_pam_log(LOG_INFO, "loadLIB nitems=%d, size=%d", nitems ? *nitems : 0, size);
-	if (!size)
-	{
+	if (!size) {
 		dlclose(handle);
 		return (PAM_AUTH_ERR);
 	}
@@ -630,8 +632,7 @@ makesalt(char salt[SALTSIZE])
 	 * numbers that change to thwart construction of a
 	 * dictionary. This is exposed to the public.
 	 */
-	if (!seeded)
-	{
+	if (!seeded) {
 		seeded = 1;
 		srand(time(0)^(getpid()<<15));
 	}
@@ -731,8 +732,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 		_pam_log(LOG_EMERG, "Invalid PAM configuration. Mode Should be MYSQL, Command or Lib");
 		return (PAM_SERVICE_ERR);
 	}
-	if ((pam_err = pam_get_user(pamh, (const char **) &user, NULL)) != PAM_SUCCESS)
-	{
+	if ((pam_err = pam_get_user(pamh, (const char **) &user, NULL)) != PAM_SUCCESS) {
 		_pam_log(LOG_ERR, "pam_get_user (reason: %s)", pam_strerror(pamh, pam_err));
 		return (pam_err);
 	}
@@ -858,7 +858,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 	int             c, status, mode, pam_err, errflag, debug = 0,
 					nitems = 0, mysql_port = 3306;
 	char           *mysql_query_str, *mysql_user, *mysql_pass, *mysql_host, *mysql_database,
-				   *command_str, *result, *ptr;
+				   *command_str, *result = 0, *ptr;
 	long            exp_times[2];
 	long           *expiry_ptr;
 	time_t          curtime;
@@ -951,12 +951,10 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 	switch (mode) 
 	{
 	case COMMAND_MODE:
-		if (!(status = run_command(command_str, 1, user, &result, &nitems, debug)))
-		{
-			for (ptr = result;*ptr;ptr++)
-			{
-				if (*ptr == ',' && *(ptr + 1))
-				{
+		if (!(status = run_command(command_str, 1, user, &result, &nitems, debug))) {
+			fprintf(stderr, "result=[%s]\n", result);
+			for (ptr = result;*ptr;ptr++) {
+				if (*ptr == ',' && *(ptr + 1)) {
 					exp_times[1] = atol(ptr + 1);
 					*ptr = 0;
 					break;
@@ -986,8 +984,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 		return (PAM_SERVICE_ERR);
 	}
 	expiry_ptr = (long *) result;
-	for (c = 0;c < nitems;c++)
-	{
+	for (c = 0;c < nitems;c++) {
 		switch (c)
 		{
 		case 0:
@@ -1002,10 +999,8 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 		}
 		if (debug)
 			_pam_log(LOG_INFO, "expiry[%d]=%ld", c, *expiry_ptr);
-		if (*expiry_ptr > 0)
-		{
-			if (curtime > *expiry_ptr)
-			{
+		if (*expiry_ptr > 0) {
+			if (curtime > *expiry_ptr) {
 				_pam_log(LOG_WARNING, "%s has expired!", ptr);
 				return (PAM_ACCT_EXPIRED);
 			} else
@@ -1150,8 +1145,7 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 		makesalt(salt);
 #ifdef HAVE_SHADOW_H
 		/*- Update shadow/passwd entries for Linux */
-		if ((pam_err = update_shadow(pamh, user, (const char *) sha512_crypt(new_pass, salt))) != PAM_SUCCESS)
-		{
+		if ((pam_err = update_shadow(pamh, user, (const char *) sha512_crypt(new_pass, salt))) != PAM_SUCCESS) {
 #ifdef DEBUG
 			_pam_log(LOG_INFO, "failed sha512_crypt\n");
 #endif

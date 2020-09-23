@@ -1,5 +1,8 @@
 /*
  * $Log: pam-support.c,v $
+ * Revision 1.5  2020-09-23 11:01:45+05:30  Cprogrammer
+ * fold braces for readability
+ *
  * Revision 1.4  2020-06-08 23:43:54+05:30  Cprogrammer
  * quench compiler warning
  *
@@ -69,8 +72,7 @@ conversation(int num_msg, const struct pam_message **msg, struct pam_response **
 			style = "PAM_PROMPT_ECHO_ON";
 			repl[i].resp_retcode = PAM_SUCCESS;
 			repl[i].resp = strdup(pam_username);
-			if (!repl[i].resp)
-			{
+			if (!repl[i].resp) {
 				perror("strdup");
 				return PAM_CONV_ERR;
 			}
@@ -79,8 +81,7 @@ conversation(int num_msg, const struct pam_message **msg, struct pam_response **
 			style = "PAM_PROMPT_ECHO_OFF";
 			repl[i].resp_retcode = PAM_SUCCESS;
 			repl[i].resp = strdup(pam_password);
-			if (!repl[i].resp)
-			{
+			if (!repl[i].resp) {
 				perror("strdup");
 				return PAM_CONV_ERR;
 			}
@@ -117,8 +118,7 @@ auth_pam(const char *service_name, const char *username, const char *password, i
 	pam_username = username;
 	pam_password = password;
 	/*- initialize the PAM library */
-	if (debug)
-	{
+	if (debug) {
 		fprintf(stderr, "Initializing PAM library using service name '%s'\n", service_name);
 		_debug = debug;
 	}
