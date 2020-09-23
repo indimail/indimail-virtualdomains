@@ -16,7 +16,8 @@ mandir=@mandir@
 version=@version@
 nssd_version=@nssd_version@
 pam_multi_version=@pam_multi_version@
-pam_module_dir=/lib/security
+pam_moduledir=@pam_moduledir@
+pam_confdir=@pam_confdir@
 default_domain=indimail.org
 arch=$(shell uname -m)
 # check https://wiki.debian.org/Multiarch/Implementation#Dynamic_debian.2F.2A_files
@@ -60,7 +61,9 @@ build-stamp:
 		cd pam-multi-$(pam_multi_version); \
 		./configure $(shell dpkg-buildflags --export=cmdline) \
 			--prefix=$(prefix) --datarootdir=$(prefix)/share/indimail \
-			--enable-moduledir=/lib/security --enable-controldir=$(sysconfdir)/control \
+			--enable-moduledir=${pam_moduledir} \
+			--enable-pamconfdir=${pam_confdir} \
+			--enable-controldir=$(sysconfdir)/control \
 			--enable-mysqlprefix=/usr \
 			--enable-dlload-mysql=yes --enable-default-domain=$(default_domain); \
 		cd ..; \
@@ -101,8 +104,8 @@ install: build
 	if [ -d pam-multi-$(pam_multi_version) ] ; then $(MAKE) -s install -C pam-multi-$(pam_multi_version) DESTDIR=$(DESTDIR); fi
 	${rm} -f $(DESTDIR)${prefix}/$(libd)/libnss_nssd.la
 	${rm} -f $(DESTDIR)${prefix}/$(libd)/libnss_nssd.so
-	${rm} -f $(DESTDIR)$(pam_module_dir)/pam-multi.la
-	${rm} -f $(DESTDIR)$(pam_module_dir)/pam-multi.a
+	${rm} -f $(DESTDIR)$(pam_moduledir)/pam-multi.la
+	${rm} -f $(DESTDIR)$(pam_moduledir)/pam-multi.a
 	mkdir -p $(DESTDIR)$(sysconfdir)
 	install -m 0644 indimail-auth-release "$(DESTDIR)$(sysconfdir)"/indimail-auth-release
 	/bin/rm -f indimail-auth-release
