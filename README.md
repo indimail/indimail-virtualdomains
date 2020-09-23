@@ -115,8 +115,27 @@ $ sudo make install-strip
 
 ## Build ucspi-tcp
 
+To configure the build for ucspi-tcp, you need to configure conf-prefix, conf-sysconfdir and conf-shared. Defaults are given in the table below. You can also use the script default.configure to set the below values.
+
+**Linux**
+
+config file|value
+-----------|------
+conf-prefix|/usr
+conf-sysconfdir|/etc/indimail
+conf-shared|/usr/share/indimail
+
+**FreeBSD**
+
+config file|value
+-----------|------
+conf-prefix|/usr/local
+conf-sysconfdir|/usr/local/etc/indimail
+conf-shared|/usr/local/share/indimail
+
 ```
 $ cd /usr/local/src/indimail-mta/ucspi-tcp-x
+$ ./default.configure
 $ make
 $ sudo make install-strip
 ```
@@ -145,11 +164,31 @@ $ sudo make install-strip
 
 ## Build indimail-mta-x
 
+To configure the build for indimail-mta, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared and conf-libexec. Defaults are given in the table below. You can also use the script default.configure to set the below values.
+
+**Linux**
+
+config file|value
+-----------|------
+conf-prefix|/usr
+conf-qmail|/var/indimail
+conf-sysconfdir|/etc/indimail
+conf-shared|/usr/share/indimail
+conf-libexec|/usr/libexec/indimail
+
+**FreeBSD**
+
+config file|value
+-----------|------
+conf-prefix|/usr/local
+conf-qmail|/var/indimail
+conf-sysconfdir|/usr/local/etc/indimail
+conf-shared|/usr/local/share/indimail
+conf-libexec|/usr/local/libexec/indimail
+
 You can refer to the detailed installation for indimail-mta [here](https://github.com/mbhangui/indimail-mta/blob/master/README.md)
 
 But in short you can install indimail-mta by follow the steps below
-
-(check version in indimail-mta/indimail-mta-x/conf-version)
 
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
