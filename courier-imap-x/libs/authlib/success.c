@@ -31,10 +31,7 @@ char	*p;
 	{
 		if (gid)
 			libmail_changegroup(*gid);
-		if ((p = strchr(username, '@')))
-			libmail_changeusername("indimail", gid);
-		else
-			libmail_changeusername(username, gid);
+		libmail_changeusername(username, gid);
 	}
 	else
 	{
