@@ -69,7 +69,7 @@ the --with-mysql=DIR option of ./configure to specify.  For example,
 
 `./configure --with-mysqlprefix=/usr/local`
 
-* Edit /etc/indimail/nssd.conf (or /var/vpopmail/etc/nssd.conf) You will find nssd.conf in samples directory of the source
+* Edit /etc/indimail/nssd.conf. You will find nssd.conf in samples directory of the source
 
 * Edit (or create) /etc/nsswitch.conf such that it contains at least the following:
 
@@ -82,7 +82,6 @@ the --with-mysql=DIR option of ./configure to specify.  For example,
 
 * Start 'nssd' (e.g. "/usr/sbin/nssd" )
 
-  For vpopmail, you need to have nssd run either by supervise or by your favourite method (rc, etc)
   For IndiMail, to install a supervise service, run the svctool command
 
   ```
@@ -117,6 +116,120 @@ the --with-mysql=DIR option of ./configure to specify.  For example,
 
 * Test pwlookup using a virtual user configured in indimail/vpopmail
   `# /usr/libexec/indimail/check_getpw user@domain`
+
+## Example usage of nssd - Configure Dovecot to work with IndiMail
+
+IndiMail stores it's virtual user information in MySQL. However, IndiMail can work with virtually any IMAP/POP3 server which has a mechanism to authenticate using PAM and can use the system's passwd database for user's home directory. This is because IndiMail provides a PAM module and **nssd** NSS service . The beauty of providing both PAM and NSS is that you do not have to modify a single line of code anywhere. In this respect, IndiMail is probably the most flexible messaging server available at the moment.
+
+Dovecot is an open source IMAP and POP3 server for Linux/UNIX-like systems, written with security primarily in mind. Dovecot is an excellent choice for both small and large installations. It's fast, simple to set up, requires no special administration and it uses very little memory. Though I do not use dovecot, I have heard excellent reviews from users about dovecot. It took me less than 20 minutes to download dovecot today and have it working with IndiMail with all existing mails intact and accessible. So at the moment, my IndiMail installation is working with both courier-imap and dovecot simultaneously (with different IMAP/POP3 ports assigned to courier-imap and dovecot).
+
+Like most of imap/pop3 servers, dovecot is configurable and can use multiple methods to authenticate and as well get other information about the user such as home directory, user id, etc.
+
+IndiMail provides pam-multi(8) as a flexible Password Authentication Module. For providing the userdb information using the standard passwd mechanism, IndiMail provides the pwdlookup service. The pwdlookup service uses nssd(8) daemon which provides Name Service Switch. NSS provides a mechanism by which standard functions, which look into /etc/passwd, /etc/shadow, can be extended to look into external sources. nssd provides IndiMail's database as an alternate UNIX configuration database for /etc/passwd, /etc/shadow and /etc/group. The additional source for passwd database can be enabled by adding 'nssd' in /etc/nsswitch.conf as an alternate source for passwd database.
+
+```
+$ egrep "passwd|shadow" /etc/nsswitch.conf
+#     passwd: sss files
+#     passwd: files
+#     passwd: sss files # from profile
+passwd:     sss files systemd nssd
+# passwd:    db files
+# shadow:    db files
+shadow:     files sss nssd
+```
+
+pam-multi along with pwdlookup services makes it easy to have dovecot work with IndiMail without modifying a single line of code of dovecot. You just need to configure 3 additonal config files - /etc/indimail/nssd.conf, /etc/pam.d/pam-multi and /etc/dovecot.conf. Here is what is required
+
+**File /etc/nssd.conf**
+
+```
+getpwnam    SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell \
+            FROM indimail \
+            WHERE pw_name='%1$s' and pw_domain='%2$s' \
+            LIMIT 1
+getspnam    SELECT pw_name,pw_passwd,'1','0','99999','0','0','-1','0' \
+            FROM indimail \
+            WHERE pw_name='%1$s'and pw_domain='%2$s' \
+            LIMIT 1
+getpwent    SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell \
+            FROM indimail LIMIT 100
+getspent    SELECT pw_name,pw_passwd,'1','0','99999','0','0','-1','0' \
+            FROM indimail
+
+host        localhost
+database    indimail
+username    indimail
+password    ssh-1.5-
+socket      /var/run/mysqld/mysqld.sock
+pidfile     /run/indimail/nssd.pid
+threads     5
+timeout     -1
+facility    daemon
+priority    err
+```
+
+**File /etc/pam.d/pam-multi**
+```
+auth     required  pam-multi.so args -s /usr/lib/indimail/modules/iauth.so
+account  required  pam-multi.so args -s /usr/lib/indimail/modules/iauth.so
+#pam_selinux.so close should be the first session rule
+session  required  pam_selinux.so close
+#pam_selinux.so  open should only be followed by sessions to be executed in the user context
+session  required  pam_selinux.so open env_params
+session  optional  pam_keyinit.so force revoke
+```
+
+The above is for fedora. You may have to change the configuration for your OS. Consult your OS pam documentation
+
+If you have installed IndiMail using RPM, you will be having pwdlookup service configured and running. Ensure that pwdlookup service is running
+
+```
+$ sudo /usr/bin/svstat /service/pwdlookup
+/service/pwdlookup/: up (pid 8397) 1091 seconds
+```
+
+To improve passwd lookup performance, you may want to have nscd(8) daemon started.
+
+```
+$ /etc/init.d/nscd start
+Starting nscd: [ OK ]
+```
+
+Finally, the following configuration will be needed for dovecot
+**File /etc/dovecot.conf**
+
+```
+# User to use for the login process. Create a completely new user for this,
+# and don't use it anywhere else. The user must also belong to a group where
+# only it has access, it's used to control access for authentication process.
+# Note that this user is NOT used to access mails.
+login_user = qmaill
+
+#
+mail_location = maildir:~/Maildir
+
+# System user and group used to access mails. If you use multiple, userdb
+# can override these by returning uid or gid fields. You can use either numbers
+# or names.
+mail_uid = 555
+mail_gid = 555
+
+passdb pam {
+# PAM authentication. Preferred nowadays by most systems.
+# Note that PAM can only be used to verify if user's password is correct,
+# so it can't be used as userdb. If you don't want to use a separate user
+# database (passwd usually), you can use static userdb.
+# REMEMBER: You'll need /etc/pam.d/dovecot file created for PAM
+# authentication to actually work.
+# [session=yes] [setcred=yes] [failure_show_msg=yes] [max_requests=]
+# [cache_key=] []
+args = session=yes pam-multi
+}
+```
+
+Restart/start dovecot and your user's should be able to access their Maildirs using dovecot using POP3, IMAP, POP3S or IMAPS
+
+Note: IndiMail's pam-multi is installed in /lib/security, lib64/security or /usr/lib/pam depending on your OS.
 
 ## NOTE
 
