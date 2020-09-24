@@ -1,5 +1,8 @@
 /*
  * $Log: check_getpw.c,v $
+ * Revision 1.5  2020-09-24 10:49:01+05:30  Cprogrammer
+ * removed root id check
+ *
  * Revision 1.4  2020-09-21 18:48:24+05:30  Cprogrammer
  * FreeBSD port
  *
@@ -26,7 +29,7 @@
 #endif
 
 #ifndef	lint
-static char     rcsid[] = "$Id: check_getpw.c,v 1.4 2020-09-21 18:48:24+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: check_getpw.c,v 1.5 2020-09-24 10:49:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -38,10 +41,6 @@ main(int argc, char **argv)
 #endif
 	int i;
 
-	if (!getuid()) {
-		fprintf(stderr, "you must not be root!!\n");
-		return (1);
-	}
 	for (i = 1;i < argc;i++) {
 		if (!(pw = getpwnam(argv[i]))) {
 			fprintf(stderr, "%s: No such user\n", argv[i]);
