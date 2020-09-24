@@ -19,7 +19,7 @@
 /*- A SIGNIFICANT PORTION OF THIS CODE IS BASED ON GNU NSCD */
 
 /*
- * $Id: nssd.c,v 1.4 2019-06-13 21:23:19+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: nssd.c,v 1.5 2020-09-24 11:11:37+05:30 Cprogrammer Exp mbhangui $ 
  */
 #include "common.h"
 #include <errno.h>
@@ -52,7 +52,7 @@ do {                                                                         \
 
 int             debug_level = 0;
 static int      sock;
-static const char *conffile = _PATH_NSVSD_CONF;
+static const char *conffile = _PATH_NSSD_CONF;
 typedef char ns_bool;
 
 /*- Each thread gets their own MySQL connection and result set */
@@ -475,7 +475,7 @@ setup_socket(void)
 	struct sockaddr_un sock_addr;
 	char            buf[256];
 
-	getEnvConfigStr(&socket_file, "NSSD_SOCKET", _PATH_NSVSD_SOCKET);
+	getEnvConfigStr(&socket_file, "NSSD_SOCKET", _PATH_NSSD_SOCKET);
 	nssd_log(LOG_DEBUG, "%s: Initializing socket ...", __FUNCTION__);
 	if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
 		strerror_r(errno, buf, sizeof(buf));

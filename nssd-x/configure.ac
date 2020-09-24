@@ -260,7 +260,7 @@ socket_path="$enableval",
 		socket_path="/tmp/nssd.sock"
 	fi
 ])
-AC_DEFINE_UNQUOTED(_PATH_NSVSD_SOCKET,"$socket_path",full path of the NSVS Socket File)
+AC_DEFINE_UNQUOTED(_PATH_NSSD_SOCKET,"$socket_path",full path of the nssd Socket File)
 
 if test " $sysconfdir" = " \${prefix}/etc"; then
 	config_path="$prefix/etc/nssd.conf"
@@ -275,7 +275,7 @@ config_path="$enableval",
 		config_path="$prefix/etc/nssd.conf"
 	fi
 ])
-AC_DEFINE_UNQUOTED(_PATH_NSVSD_CONF, "$config_path", full path of the NSVS configuration File)
+AC_DEFINE_UNQUOTED(_PATH_NSSD_CONF, "$config_path", full path of the nssd configuration File)
 
 AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST(LIBVER)

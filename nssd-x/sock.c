@@ -17,7 +17,7 @@
  */
 
 /*
- * $Id: sock.c,v 1.1 2011-06-18 11:38:50+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: sock.c,v 1.2 2020-09-24 11:11:45+05:30 Cprogrammer Exp mbhangui $ 
  */
 #include "common.h"
 #include <sys/socket.h>
@@ -44,7 +44,7 @@ _open_socket(int *sock)
 	char           *socket_file;
 	struct sockaddr_un sock_addr;
 
-	getEnvConfigStr(&socket_file, "NSSD_SOCKET", _PATH_NSVSD_SOCKET);
+	getEnvConfigStr(&socket_file, "NSSD_SOCKET", _PATH_NSSD_SOCKET);
 	if ((*sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
 		strerror_r(errno, buf, sizeof(buf));
 		nsvs_log(LOG_ALERT, "%s: sock: %s", __FUNCTION__, buf);
