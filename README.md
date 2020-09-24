@@ -136,8 +136,8 @@ conf-shared|/usr/local/share/indimail
 ```
 $ cd /usr/local/src/indimail-mta/ucspi-tcp-x
 $ ./default.configure
-$ make
-$ sudo make install-strip
+$ ./qmake
+$ sudo ./qmake install-strip
 ```
 
 (check version in indimail-mta/ucspi-tcp-x/conf-version)
@@ -193,8 +193,8 @@ But in short you can install indimail-mta by follow the steps below
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
 $ ./default.configure
-$ make
-$ sudo make install-strip
+$ ./qmake
+$ sudo ./qmake install-strip
 $ sudo sh ./svctool --config=users --nolog
 ```
 
