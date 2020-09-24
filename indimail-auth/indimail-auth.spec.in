@@ -353,6 +353,13 @@ fi
 if [ -z "$argv1" ] ; then
   argv1=0
 fi
+if [ $argv1 -eq 1 ] ; then
+  if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
+    echo "recreating ld.so cache"
+    /sbin/ldconfig
+  fi
+  exit 0
+fi
 
 # remove pam module for smtp
 %{_prefix}/sbin/svctool --config=remove-alt
