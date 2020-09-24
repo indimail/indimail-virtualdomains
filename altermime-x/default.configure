@@ -5,8 +5,22 @@ fi
 if [ ! -f conf-release ] ; then
 	echo "1.1" > conf-release
 fi
-prefix=/usr
+SYSTEM=$(uname -s)
+case "$SYSTEM" in
+	FreeBSD)
+	prefix=/usr/local
+	mandir=/usr/local/man
+	;;
+	Linux)
+	prefix=/usr
+	mandir=$prefix/share/man
+	;;
+	*)
+	prefix=/usr
+	mandir=/usr/man
+	;;
+esac
 ./configure \
   --prefix=$prefix \
   --datarootdir=$prefix/share/indimail \
-  --mandir=$prefix/share/man
+  --mandir=$mandir

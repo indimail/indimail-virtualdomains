@@ -5,8 +5,25 @@ fi
 if [ ! -f conf-release ] ; then
 	echo 1.1 > conf-release
 fi
-prefix=/usr
+SYSTEM=$(uname -s)
+case "$SYSTEM" in
+	FreeBSD)
+	prefix=/usr/local
+	mandir=/usr/local/man
+	sysconfdir=/usr/local/etc/indimail
+	;;
+	Linux)
+	prefix=/usr
+	mandir=$prefix/share/man
+	sysconfdir=/etc/indimail
+	;;
+	*)
+	prefix=/usr
+	mandir=/usr/man
+	sysconfdir=/usr/etc/indimail
+	;;
+esac
 ./configure \
   --prefix=$prefix \
   --datarootdir=$prefix/share/indimail \
-  --mandir=$prefix/share/man
+  --mandir=$mandir
