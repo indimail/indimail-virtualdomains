@@ -17,7 +17,7 @@
  */
 
 /*
- * $Id: grp.c,v 1.1 2011-06-18 11:38:29+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: grp.c,v 1.2 2020-09-24 10:14:17+05:30 Cprogrammer Exp mbhangui $ 
  */
 #include "common.h"
 #include <grp.h>
@@ -145,9 +145,9 @@ _load_gidsbymem(struct response_data *data, response_header_t response_header, g
 
 NSS_STATUS
 #if defined (sun)
-_nss_nsvs_getgrnam_r(nss_backend_t * be, void *args)
+_nss_nssd_getgrnam_r(nss_backend_t * be, void *args)
 #else
-_nss_nsvs_getgrnam_r(const char *key, struct group * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nssd_getgrnam_r(const char *key, struct group * result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	response_header_t response_header;
@@ -199,9 +199,9 @@ _nss_nsvs_getgrnam_r(const char *key, struct group * result, char *buf_out, size
 
 NSS_STATUS
 #if defined (sun)
-_nss_nsvs_getgrgid_r(nss_backend_t * be, void *args)
+_nss_nssd_getgrgid_r(nss_backend_t * be, void *args)
 #else
-_nss_nsvs_getgrgid_r(gid_t gid, struct group * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nssd_getgrgid_r(gid_t gid, struct group * result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	response_header_t response_header;
@@ -254,9 +254,9 @@ _nss_nsvs_getgrgid_r(gid_t gid, struct group * result, char *buf_out, size_t buf
 
 NSS_STATUS
 #if defined (sun)
-_nss_nsvs_endgrent(nss_backend_t * be, void *args)
+_nss_nssd_endgrent(nss_backend_t * be, void *args)
 #else
-_nss_nsvs_endgrent(void)
+_nss_nssd_endgrent(void)
 #endif
 {
 	XFREE(grent.data);
@@ -266,9 +266,9 @@ _nss_nsvs_endgrent(void)
 
 NSS_STATUS
 #if defined (sun)
-_nss_nsvs_setgrent(nss_backend_t * be, void *args)
+_nss_nssd_setgrent(nss_backend_t * be, void *args)
 #else
-_nss_nsvs_setgrent(void)
+_nss_nssd_setgrent(void)
 #endif
 {
 	int             status;
@@ -287,9 +287,9 @@ _nss_nsvs_setgrent(void)
 
 NSS_STATUS
 #if defined (sun)
-_nss_nsvs_getgrent_r(nss_backend_t * be, void *args)
+_nss_nssd_getgrent_r(nss_backend_t * be, void *args)
 #else
-_nss_nsvs_getgrent_r(struct group * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nssd_getgrent_r(struct group * result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	int             status;
@@ -345,9 +345,9 @@ _nss_nsvs_getgrent_r(struct group * result, char *buf_out, size_t buflen, int *e
 
 NSS_STATUS
 #if defined (sun)
-_nss_nsvs_getgrmem(nss_backend_t * be, void *args)
+_nss_nssd_getgrmem(nss_backend_t * be, void *args)
 #else
-_nss_nsvs_initgroups_dyn(const char *key, gid_t group, long int *start, long int *size, gid_t ** groupsp, long int limit,
+_nss_nssd_initgroups_dyn(const char *key, gid_t group, long int *start, long int *size, gid_t ** groupsp, long int limit,
 						 int *errnop)
 #endif
 {
@@ -389,17 +389,17 @@ _nss_nsvs_initgroups_dyn(const char *key, gid_t group, long int *start, long int
 
 #if defined (sun)
 static nss_backend_op_t group_ops[] = {
-	_nss_nsvs_default_destr,	/* NSS_DBOP_DESTRUCTOR */
-	_nss_nsvs_endgrent,			/* NSS_DBOP_ENDENT */
-	_nss_nsvs_setgrent,			/* NSS_DBOP_SETENT */
-	_nss_nsvs_getgrent_r,		/* NSS_DBOP_GETENT */
-	_nss_nsvs_getgrnam_r,		/* NSS_DBOP_GROUP_BYNAME */
-	_nss_nsvs_getgrgid_r,		/* NSS_DBOP_GROUP_BYGID */
-	_nss_nsvs_getgrmem			/* NSS_DBOP_GROUP_BYMEMBER */
+	_nss_nssd_default_destr,	/* NSS_DBOP_DESTRUCTOR */
+	_nss_nssd_endgrent,			/* NSS_DBOP_ENDENT */
+	_nss_nssd_setgrent,			/* NSS_DBOP_SETENT */
+	_nss_nssd_getgrent_r,		/* NSS_DBOP_GETENT */
+	_nss_nssd_getgrnam_r,		/* NSS_DBOP_GROUP_BYNAME */
+	_nss_nssd_getgrgid_r,		/* NSS_DBOP_GROUP_BYGID */
+	_nss_nssd_getgrmem			/* NSS_DBOP_GROUP_BYMEMBER */
 };
 
 nss_backend_t  *
-_nss_nsvs_group_constr(const char *db_name, const char *src_name, const char *cfg_args)
+_nss_nssd_group_constr(const char *db_name, const char *src_name, const char *cfg_args)
 {
 	nss_backend_t  *be;
 	be = (nss_backend_t *) malloc(sizeof (*be));

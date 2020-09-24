@@ -17,7 +17,7 @@
  */
 
 /*
- * $Id: pwd.c,v 1.2 2020-09-21 18:54:21+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: pwd.c,v 1.3 2020-09-24 10:14:38+05:30 Cprogrammer Exp mbhangui $ 
  */
 
 #include "common.h"
@@ -59,9 +59,9 @@ _load_passwd(struct response_data *data, struct passwd *result, char *buffer, si
 
 NSS_STATUS
 #if defined (sun)
-_nss_nsvs_getpwnam_r(nss_backend_t * be, void *args)
+_nss_nssd_getpwnam_r(nss_backend_t * be, void *args)
 #else
-_nss_nsvs_getpwnam_r(const char *key, struct passwd * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nssd_getpwnam_r(const char *key, struct passwd * result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	response_header_t response_header;
@@ -92,9 +92,9 @@ _nss_nsvs_getpwnam_r(const char *key, struct passwd * result, char *buf_out, siz
 
 NSS_STATUS
 #if defined (sun)
-_nss_nsvs_getpwuid_r(nss_backend_t * be, void *args)
+_nss_nssd_getpwuid_r(nss_backend_t * be, void *args)
 #else
-_nss_nsvs_getpwuid_r(uid_t uid, struct passwd * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nssd_getpwuid_r(uid_t uid, struct passwd * result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	response_header_t response_header;
@@ -127,9 +127,9 @@ _nss_nsvs_getpwuid_r(uid_t uid, struct passwd * result, char *buf_out, size_t bu
 
 NSS_STATUS
 #if defined (sun)
-_nss_nsvs_endpwent(nss_backend_t * be, void *args)
+_nss_nssd_endpwent(nss_backend_t * be, void *args)
 #else
-_nss_nsvs_endpwent(void)
+_nss_nssd_endpwent(void)
 #endif
 {
 	XFREE(pwent.data);
@@ -139,9 +139,9 @@ _nss_nsvs_endpwent(void)
 
 NSS_STATUS
 #if defined (sun)
-_nss_nsvs_setpwent(nss_backend_t * be, void *args)
+_nss_nssd_setpwent(nss_backend_t * be, void *args)
 #else
-_nss_nsvs_setpwent(void)
+_nss_nssd_setpwent(void)
 #endif
 {
 	int             status;
@@ -160,9 +160,9 @@ _nss_nsvs_setpwent(void)
 
 NSS_STATUS
 #if defined (sun)
-_nss_nsvs_getpwent_r(nss_backend_t * be, void *args)
+_nss_nssd_getpwent_r(nss_backend_t * be, void *args)
 #else
-_nss_nsvs_getpwent_r(struct passwd * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nssd_getpwent_r(struct passwd * result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	int             status;
@@ -188,16 +188,16 @@ _nss_nsvs_getpwent_r(struct passwd * result, char *buf_out, size_t buflen, int *
 
 #if defined (sun)
 static nss_backend_op_t passwd_ops[] = {
-	_nss_nsvs_default_destr,	/* NSS_DBOP_DESTRUCTOR */
-	_nss_nsvs_endpwent,			/* NSS_DBOP_ENDENT */
-	_nss_nsvs_setpwent,			/* NSS_DBOP_SETENT */
-	_nss_nsvs_getpwent_r,		/* NSS_DBOP_GETENT */
-	_nss_nsvs_getpwnam_r,		/* NSS_DBOP_PASSWD_BYNAME */
-	_nss_nsvs_getpwuid_r,		/* NSS_DBOP_PASSWD_BYUID */
+	_nss_nssd_default_destr,	/* NSS_DBOP_DESTRUCTOR */
+	_nss_nssd_endpwent,			/* NSS_DBOP_ENDENT */
+	_nss_nssd_setpwent,			/* NSS_DBOP_SETENT */
+	_nss_nssd_getpwent_r,		/* NSS_DBOP_GETENT */
+	_nss_nssd_getpwnam_r,		/* NSS_DBOP_PASSWD_BYNAME */
+	_nss_nssd_getpwuid_r,		/* NSS_DBOP_PASSWD_BYUID */
 };
 
 nss_backend_t  *
-_nss_nsvs_passwd_constr(const char *db_name, const char *src_name, const char *cfg_args)
+_nss_nssd_passwd_constr(const char *db_name, const char *src_name, const char *cfg_args)
 {
 	nss_backend_t  *be;
 	be = (nss_backend_t *) malloc(sizeof (*be));
