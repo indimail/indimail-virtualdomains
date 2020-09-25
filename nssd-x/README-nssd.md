@@ -1,25 +1,24 @@
-FSSOS stands for Flexible Single Sign-On Solution and
-has been written by Ben Goodwin.
+NSSD is a fork of FSSOS. FSSOS stands for Flexible Single Sign-On Solution written by Ben Goodwin.
 
 [Official website](http://fssos.sourceforge.net/)
 
-This source has been hacked and adapted to indimail as nssd from the FSSOS site. The hacked source will also work with vpopmail by just changing the configuration file nssd.conf
+This source has been hacked to extract the username, domain component from an email address to allow email addresses as usernames. NSSD will also work with vpopmail, by just changing the configuration file - nssd.conf
 
-nssd is experimental and without warranty.
+NSSD is experimental and without warranty.
 
-The hacked source can be downloaded from [here](https://github.com/mbhangui/indimail-virtualdomains/tree/master/nssd-x)
+NSSD can be downloaded from [here](https://github.com/mbhangui/indimail-virtualdomains/tree/master/nssd-x)
 
-nssd has been modified to have user and domain in the query e.g.
+NSSD has been modified to have user and domain in the query e.g.
 
-mbhangui@indimail.org gets split into mbhangui as the user and indimail.org as the domain.
+manvendra@indimail.org gets split into manvendra as the user and indimail.org as the domain.
 
-This split allows authentication against IndiMail's MySQL database. By just changing the configuration, authentication should also work for vpopmail. The other change made to nssd, is to make the Name Service Switch daemon supervise friendly.
+This split allows authentication against IndiMail's MySQL database. By just changing the configuration, authentication should also work for vpopmail. The other change made to NSSD, is to make it run in the foreground and make it supervise(8) friendly.
 
 You may also want to look at the wonderful original code written by Ben.
 
-You may find this of use if you want to run a IMAP/POP3 server which does not yet have support for IndiMail or vpopmail
+You may find NSSD of use if you want to run a IMAP/POP3 server which does not yet have support for IndiMail or vpopmail
 
-nssd allows many IMAP/POP3 servers, which use getpwnam(), getspnam(), PAM, etc to authenticate against IndiMail's database without making a single change to the IMAP/POP3 server code.  This gives a Yet Another Way to have courier-imap, dovecot, etc to authenticate against your own custom MySQL database.
+NSSD allows many IMAP/POP3 servers, which use getpwnam(), getspnam(), PAM, etc to authenticate against IndiMail's database without making a single change to the IMAP/POP3 server code.  This gives a Yet Another Way to have courier-imap, dovecot, etc to authenticate against your own custom MySQL database.
 
 ## NSSD - Name Service Switch Daemon
 
@@ -58,7 +57,7 @@ $ make
 $ sudo make install-strip
 ```
 
-On some systems, libtool insists on adding "-lc" to the link stage (due to the way gcc was built for that system), which breaks nssd threading in daemon mode.  If you see a "-lc" before a "-pthread" or "-lpthread", then you're in trouble.  You'll notice the broken behavior in the form of fewer-than-expected threads running (3) and the inability to kill the parent process off without a "-9" signal. To fix this, do the following:
+On some systems, libtool insists on adding "-lc" to the link stage (due to the way gcc was built for that system), which breaks NSSD threading in daemon mode.  If you see a "-lc" before a "-pthread" or "-lpthread", then you're in trouble.  You'll notice the broken behavior in the form of fewer-than-expected threads running (3) and the inability to kill the parent process off without a "-9" signal. To fix this, do the following:
 
 `PTRHEAD_LIBS="-lpthread -lc" ./configure`
 
