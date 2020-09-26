@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.63 2020-09-21 18:58:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.64 2020-09-26 16:20:00+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1227,9 +1227,9 @@ fi
 # mrtg service
 %{_prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=%{servicedir}
 
-echo "Creating default mysql.host, tcprules, mysql configs, indimail.cnf, bogofilter-qfe"
+echo "Creating default mysql.host, tcprules, bogofilter-qfe, default domain dir"
 %{_prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
-  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
+  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket} --default-domain=$default_domain
 
 # MySQL
 if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld ] ; then
