@@ -347,14 +347,20 @@ $ sudo make install-strip
 
 You are here because you decided to do a complete source installation. If you use source installation method, you need to setup various configuration and services. You can configure indimail/indimail-mta using /usr/sbin/svctool. `svctool` is a general purpose utility to configure indimail/indimail-mta services and configuration.
 
-You can also run the script `create_services` which invokes svctool to setup few default services to start a fully configured system. `create_services` will also put a systemd unit file `svscan.service` in `/lib/systemd/system`.
+You can also run the script `create_services` which invokes svctool to setup few default services to start a fully configured system. `create_services` will also put a systemd(1) unit file `svscan.service` in `/lib/systemd/system`. For FreeBSD systems, it will configure indimail to be started by rc(8) by creating a rc script in /usr/local/rc.d/svscan.
 
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
-$ sudo sh ./create_services
+$ sudo ./create_services
 ```
 
 NOTE: I myself use RPMs for deploying indimail-mta on my own servers and do not use `create_services`. It is possible that it may not include few steps added recently in the pre/post install scripts written for the RPM/Debian builds.
+
+1. The default password for indimail MySQL user/password will be indimail/ssh-1.5-.
+2. The default password for admin MySQL user will be mysql/4-57343-.
+3. create\_service will create indimail UNIX user with password benhur20. Change the password or disable login
+4. You can also set MYSQL\_PASS, PRIV\_PASS, ADMIN\_PASS environent variables to set your own passwords before running create\_services.
+5. If you change the MySQL password for indimail after running create\_services, edit /etc/indimail/control/host.mysql. On FreeBSD this file will be /usr/local/etc/indimail/host.mysql
 
 ## Start Services
 
