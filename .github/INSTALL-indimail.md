@@ -642,13 +642,14 @@ ls: cannot access '/usr/lib*/libmysqlclient.so.*.*.*': No such file or directory
 
 % sudo sh -c "echo /usr/lib64/mysql/libmysqlclient.so.21.0.16 > /etc/indimail/control/mysql_lib"
 
-Please note that on FreeBSD the libraries will be under /usr/local/lib and the mysql_lib control file will be in /usr/local/etc/indimail
+Please note that on FreeBSD the libraries will be under /usr/local/lib and
+the mysql_lib control file will be in /usr/local/etc/indimail
 ```
 
 ```
 ##### STEP 3  ## Default Control Files ##################
-The command below creates all necessary configuration for running a domain 'indimail.org' on
-your host. You may want to replace indimail.org with your domain
+The command below creates all necessary configuration for running a domain 'indimail.org'
+on your host. You may want to replace indimail.org with your domain
 
 % sudo svctool --config=qmail --postmaster=postmaster@indimail.org \
     --default-domain=indimail.org
@@ -696,11 +697,18 @@ hence you do not require rblsmtpd to frontend the SMTP service.
     --dmasquerade --skipsend \
     --dkverify=both --dksign=both --private_key=/etc/indimail/control/domainkeys/indimail
 
-NOTE: You can create a deliver process for port 587 too either by having a different --qbase or have a qstart > 5. The point to remember is you can have multiple delivery process as long as you do not share a queue between delivery processes.
+NOTE: You can create a deliver process for port 587 too either by having a
+different --qbase or have a qstart > 5. The point to remember is you can
+have multiple delivery process as long as you do not share a queue between
+delivery processes.
 
-NOTE: On FreeBSD the path will be /usr/local/etc/indimail/control/domainkeys/indimail instead of /etc/indimail/control/domainkeys/indimail.
+NOTE: On FreeBSD the path will be /usr/local/etc/indimail/control/domainkeys/indimail
+instead of /etc/indimail/control/domainkeys/indimail.
 
-If you are going to use the local mail, sendmail, qmail-inject command, they need to figure out the queue location. This is done by having a directory called 'defaultqueue' in /etc/indimail/control. Run the following command to create this
+If you are going to use the local mail, sendmail, qmail-inject command, they
+need to figure out the queue location. This is done by having a directory
+called 'defaultqueue' in /etc/indimail/control. Run the following command to
+create this
 
 % sudo svctool --queueParam=defaultqueue \
     --qbase=/var/indimail/queue --qcount=5 --qstart=1 \
@@ -723,9 +731,13 @@ is much faster than SMTP.
     --qbase=/var/indimail/queue --qcount=5 --qstart=1 --cntrldir=control --localip=0 \
     --maxdaemons=75 --maxperip=25 --fsync --syncdir --memory=104857600 --min-free=52428800
 
-The above will create a QMQP service for a centralized queue. On servers which do not have its own queue, you need to create /etc/indimail/control/qmqpservers containing the IP address of the server which has the QMQP service running. On FreeBSD it will be /usr/local/etc/indimail/control/qmqpservers.
+The above will create a QMQP service for a centralized queue. On servers which do not have
+its own queue, you need to create /etc/indimail/control/qmqpservers containing the IP address
+of the server which has the QMQP service running. On FreeBSD it will be
+/usr/local/etc/indimail/control/qmqpservers.
 
-You can implement Greylisting as described at http://www.gossamer-threads.com/lists/qmail/users/136740?page=last by executing the command
+You can implement Greylisting as described at
+http://www.gossamer-threads.com/lists/qmail/users/136740?page=last by executing the command
 
 % sudo svctool --greylist=1999 --servicedir=/service --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
@@ -762,7 +774,9 @@ The commands below will create listeners for IMAP and POP3 service.
     --postmaster=postmaster@indimail.org --ssl
 ```
 
-The below four command will create proxies (ssl and non-ssl) for IMAP and POP3. These will be required if you decide to split your users belonging to a single domain across multiple hosts.
+The below four command will create proxies (ssl and non-ssl) for IMAP and
+POP3. These will be required if you decide to split your users belonging
+to a single domain across multiple hosts.
 
 ```
 % sudo svctool --imap=4143 --servicedir=/service --localip=0 \
@@ -783,9 +797,14 @@ The below four command will create proxies (ssl and non-ssl) for IMAP and POP3. 
     --postmaster=postmaster@indimail.org --ssl
 ```
 
-If you have used the --ssl option above, you can quickly generate a self-signed X.509 key for IMAP/POP3 over SSL by running the following command. This command should be run after editing the files /etc/indimail/imapd.cnf, /etc/indimail/pop3d.cnf
+If you have used the --ssl option above, you can quickly generate a
+self-signed X.509 key for IMAP/POP3 over SSL by running the following
+command. This command should be run after editing the files
+/etc/indimail/imapd.cnf, /etc/indimail/pop3d.cnf
+(/usr/local/etc/indimail/imapd.conf, /usr/local/etc/indimail/pop3d.cnf on
+ FreeBSD)
 
-the command additionally creates a self-signed X.509 certificate for SMTP over SSL. i.e.
+the command additionally creates a self-signed X.509 certificate for SMTP over SSL. i.e
 
 ```
 % sudo svctool --config=cert --postmaster=youremail@yourdomain
@@ -793,7 +812,9 @@ the command additionally creates a self-signed X.509 certificate for SMTP over S
 
 ```
 ##### STEP 6  ## Query Pooling/Caching/Lookup Service ##################
-The command below creates InLookup service with 5 threads. This provides qmail-smtpd, IMAP and POP3 services to do high speed user lookups and password authentication. (on FreeBSD replace /etc/indimail/control with /usr/local/etc/indimail/control)
+The command below creates InLookup service with 5 threads. This provides qmail-smtpd,
+IMAP and POP3 services to do high speed user lookups and password authentication.
+(on FreeBSD replace /etc/indimail/control with /usr/local/etc/indimail/control)
 
 % sudo svctool --inlookup=infifo --servicedir=/service \
     --cntrldir=/etc/indimail/control --threads=5 \
@@ -838,7 +859,8 @@ The commands below will create services for virus scanning and spam filter.
 
 ```
 ##### STEP 8  ## Password Lookup Service ##################
-The command below creates Password Lookup Service using Name Service Switch (NSS). It extends functions like getpwnam(), getspnam(), etc to look at indimail MySQL tables.
+The command below creates Password Lookup Service using Name Service Switch (NSS).
+It extends functions like getpwnam(), getspnam(), etc to look at indimail MySQL tables.
 
 % sudo svctool --pwdlookup=/tmp/nssd.sock --threads=5 --timeout=-1 \
     --mysqlhost=localhost --mysqluser=indimail --mysqlpass=ssh-1.5- \
@@ -859,7 +881,8 @@ Check your /etc/indimail/tcp.smtp file, /etc/indimail/tcp.imap file, /etc/indima
 
 This file should list all the static IP's of your machines you want to allow to relay out to the internet.
     
-For example: If you have a whole C class named 192.9.200.X either edit /etc/indimail/tcp.smtp file, or use the following to appened:
+For example: If you have a whole C class named 192.9.200.X either edit
+/etc/indimail/tcp.smtp file, or use the following to appened:
 
 % su
 # echo "192.9.200.:allow,RELAYCLIENT=\"\"" >> /etc/indimail/tcp.smtp
@@ -895,7 +918,13 @@ The command below is required if you need to use ODMR (On Demand Mail Relay Prot
 
 % sudo svctool --smtp=366 --odmr --servicedir=/service
 
-The command below is required in case you need to fetch mails from another host which has intermittent connectivty. You require fetchmail if you need to pull emails from a host using IMAP, POP3 or ODMR protocol. After creating fetchmail service, create a file 'down' in the service directory to prevent fetchmail from getting started automatically. Remove the down file when you have configured fetchmailrc file. You can use fetchmailconf to generate fetchmailrc file.
+The command below is required in case you need to fetch mails from another
+host which has intermittent connectivty. You require fetchmail if you need
+to pull emails from a host using IMAP, POP3 or ODMR protocol. After creating
+fetchmail service, create a file 'down' in the service directory to prevent
+fetchmail from getting started automatically. Remove the down file when you
+have configured fetchmailrc file. You can use fetchmailconf to generate
+fetchmailrc file.
 
 % sudo svctool --fetchmail --servicedir=/service \
     --query-cache --password-cache \
@@ -907,7 +936,8 @@ The command below is required in case you need to fetch mails from another host 
     --dkverify=both
 % sudo /bin/touch /service/fetchmail/down
 
-The command below creates a service for indisrvr which allows you to execute from remote IndiMail admin commands
+The command below creates a service for indisrvr which allows you to execute
+from remote IndiMail admin commands
 
 % sudo svctool --indisrvr=4000 --servicedir=/service \
     --localip=0 --maxdaemons=150 --maxperip=25 --avguserquota=2097152 \
@@ -922,14 +952,18 @@ allows you to change passwords over the network.
     --certfile=/etc/indimail/control/servercert.pem --ssl \
     --setpassword=/usr/sbin/vsetpass --servicedir=/service
 
-on FreeBSD change /usr/sbin/vsetpass to /usr/local/sbin/vsetpass and change /etc/indimail to /usr/local/etc/indimail
+on FreeBSD change /usr/sbin/vsetpass to /usr/local/sbin/vsetpass and
+change /etc/indimail to /usr/local/etc/indimail
 ```
 
 
 ## SECTION 5  Start Services ##
 
 5. Start your services
-IndiMail puts shared libs in /usr/lib64. In case if this is not /usr/lib, /usr/lib64 or /usr/lib/x86_64-linux-gnu (debian), /usr/lib/i386-linux-gnu (debian), You need to put the libdir in /etc/ld.so.conf.d/indimail.conf and run ldconfig
+IndiMail puts shared libs in /usr/lib64. In case if this is not /usr/lib,
+/usr/lib64 or /usr/lib/x86_64-linux-gnu (debian),
+/usr/lib/i386-linux-gnu (debian), You need to put the libdir in
+/etc/ld.so.conf.d/indimail.conf and run ldconfig
 
 ```
 # su
@@ -944,13 +978,16 @@ Run the following command to install indimail in startup scripts.
 % sudo svctool --config=add-boot
 ```
 
-The command below will install indimail as an alternative MTA in case your system has /usr/sbin/alternatives or mailwrapper. Additionally sendmail will be disabled. On FreeBSD, /etc/mail/mailer.conf will be configured.
+The command below will install indimail as an alternative MTA in case your system has
+/usr/sbin/alternatives or mailwrapper. Additionally sendmail will be disabled. On FreeBSD,
+/etc/mail/mailer.conf will be configured.
 
 ```
 % sudo svctool --config=add-alt
 ```
 
-The above command will set IndiMail as an alternative MTA and replace /usr/sbin/sendmail or /usr/lib/sendmail as link to /usr/bin/sendmail (/usr/local/bin/sendmail on FreeBSD)
+The above command will set IndiMail as an alternative MTA and replace /usr/sbin/sendmail
+or /usr/lib/sendmail as link to /usr/bin/sendmail (/usr/local/bin/sendmail on FreeBSD)
 
 To make sure that sendmail is disabled on your system
 
@@ -1004,7 +1041,9 @@ FINALLY! To start all services
 % sudo svctool --check-install --servicedir=/service \
     --qbase=/var/indimail/queue --qcount=5 --qstart=1
 
-NOTE: All the above svctool commands, in all previous steps, are in the script create_services. You can run this script from IndiMail's source directory to create all services with reasonable defaults.
+NOTE: All the above svctool commands, in all previous steps, are in the
+script create_services. You can run this script from IndiMail's source
+directory to create all services with reasonable defaults.
 
 $ cd /usr/local/src/indimail-mta-x
 $ sudo ./create_services --servicedir=/services --qbase=/var/indimail/queue
@@ -1040,7 +1079,9 @@ IndiMail supports two types of virtual domains
 2. Clustered domain - A domain extended across multiple servers, with each
    server having its own set of users.
    
-You must decide if you want Non-clustered setup or a clustered setup. If you have millions of users, then you must chose clustered setup. Even if you chose to install a non-clustered setup, you can always migrate to a clustered setup later.
+You must decide if you want Non-clustered setup or a clustered setup. If you have
+millions of users, then you must chose clustered setup. Even if you chose to install
+a non-clustered setup, you can always migrate to a clustered setup later.
 
 ```
 ##### STEP 1  #############################################
@@ -1090,11 +1131,19 @@ Ensure MySQL is running
 % sudo /usr/bin/svstat /service/mysql.3306
 /service/mysql.3306: up (pid 11936) 5 seconds
 
-NOTE: replace localhost, indimail, ssh-1.5-, /var/run/mysqld.sock as relevant to your MySQL installation. You can use 3306 instead of /var/run/mysqld.sock in case your MySQL database is on another host.
+NOTE: replace localhost, indimail, ssh-1.5-, /var/run/mysqld.sock as relevant
+to your MySQL installation. You can use 3306 instead of /var/run/mysqld.sock
+in case your MySQL database is on another host.
 
-you must use host:user:password:socket or host:user:password:port format for host.cntrl (for IndiMail 1.6.9 and above). Also set your PATH to have /usr/bin in the path.
+you must use host:user:password:socket or host:user:password:port format for
+host.cntrl (for IndiMail 1.6.9 and above). Also set your PATH to have
+/usr/bin in the path.
 
-mysql_server_ip ideally should point to a dedicated MySQL server.  host.cntrl needs to be same for all mailstores. Also you can have host.master pointing to another MySQL server. host.master, host.cntrl implements MySQL Master / Slave architecture. However, you need to configure master slave replication in MySQL.
+mysql_server_ip ideally should point to a dedicated MySQL server.
+host.cntrl needs to be same for all mailstores. Also you can have
+host.master pointing to another MySQL server. host.master, host.cntrl
+implements MySQL Master / Slave architecture. However, you need to
+configure master slave replication in MySQL.
 ```
 
 ```
@@ -1182,7 +1231,9 @@ Changing a users password
 ## SECTION 9 RTFM ##
 
 **Man pages**
-A lot of the underlying indimail details are not covered in this file. This is on purpose. If you want to find out the internal workings of indimail and qmail look into all files in /usr/share/indimail/doc and /usr/share/man/man?
+A lot of the underlying indimail details are not covered in this file. This
+is on purpose. If you want to find out the internal workings of indimail and
+qmail look into all files in /usr/share/indimail/doc and /usr/share/man/man?
 
 As a first step, do
 
@@ -1193,7 +1244,10 @@ As a first step, do
 **Send / Receive Mails**
 
 ```
-At this stage, your setup is ready to send mails to the outside world. To receive mails, you need to create your actual domain (instead of example.com) using vadddomain and setup a mail exchanger record for your domain (MX record).  To send mails, you can either use SMTP or use sendmail (which is actually /usr/bin/sendmail).
+At this stage, your setup is ready to send mails to the outside world. To receive
+mails, you need to create your actual domain (instead of example.com) using
+vadddomain and setup a mail exchanger record for your domain (MX record).
+To send mails, you can either use SMTP or use sendmail (which is actually /usr/bin/sendmail).
 
 you can do the following to send a test mail.
 
@@ -1208,11 +1262,15 @@ tracker to track all your requests.
 -------
 **CentOS/Fedora/openSUSE/RedHat NOTES**
 
-Install the following for making a build (source build or rpm build) openssl-devel gcc gcc-c++ bison readline-devel ncurses-devel gettext-devel python-devel flex autoconf libidn-devel sharutils openldap-devel chrpath pam-devel mysql-devel automake libtool groff libdb4-devel expect
+Install the following for making a build (source build or rpm build) openssl-devel
+gcc gcc-c++ bison readline-devel ncurses-devel gettext-devel python-devel flex autoconf
+libidn-devel sharutils openldap-devel chrpath pam-devel mysql-devel automake libtool groff
+libdb4-devel expect
          
 **Ubuntu NOTES**
 
-You may need to install the following additional packages before you can start the compilation of most of the packages
+You may need to install the following additional packages before you can start the
+compilation of most of the packages
 
 ```
 % sudo apt-get install libssl-dev
@@ -1301,7 +1359,10 @@ install the following packages
 
 Post Install
 
-In order to get IndiMail to start automatically when OS X boots, you will need to create a new startup item containing the IndiMail startup script and paramters list. Create a new startup directory for IndiMail using the following command:
+In order to get IndiMail to start automatically when OS X boots, you will
+need to create a new startup item containing the IndiMail startup script
+and paramters list. Create a new startup directory for IndiMail using the
+following command:
 
 Mac OS X 10.5.x or later
 
@@ -1322,7 +1383,9 @@ prior to Mac OS X 10.5.x (NOTE: I have not compiled/tested IndiMail on Mac OS X 
 
 When you reboot your machine IndiMail will automatically start.
 
-In order to have a Maildir created automatically when a new user is added to the system you will need to modify the new user template. The new user template can be found in the /System/Library/User Template/English.lproj directory.
+In order to have a Maildir created automatically when a new user is added to the system
+you will need to modify the new user template. The new user template can be found in the
+/System/Library/User Template/English.lproj directory.
 
 The following four commands will walk you through the Maildir creation process:
 
@@ -1334,12 +1397,19 @@ The following four commands will walk you through the Maildir creation process:
 # /Developer/Tools/SetFile -a V Maildir
 ```
 
-The last command, SetFile -a V Maildir, will set a special bit in the Maildir meta-file such that the directory is hidden in the Finder (only works on HFS filesystems). This handy command can be used for any file/directory that you might want to hide. Originally found on the O'Reilly site macdevcenter.com -- tip \#5 from the article Top Ten Mac OS X Tips for Unix Geeks.
+The last command, SetFile -a V Maildir, will set a special bit in the Maildir meta-file such
+that the directory is hidden in the Finder (only works on HFS filesystems). This handy command
+can be used for any file/directory that you might want to hide. Originally found on the O'Reilly
+site macdevcenter.com -- tip \#5 from the article Top Ten Mac OS X Tips for Unix Geeks.
 
-Remember to create a Maildir for each existing user account. You will have to use the SetFile command on each Maildir individually (if you want to hide them in the Finder). After you create a Maildir for an existing user, remember to make the user the owner of the of the directory using chown.
+Remember to create a Maildir for each existing user account. You will have to use the SetFile
+command on each Maildir individually (if you want to hide them in the Finder). After you create
+a Maildir for an existing user, remember to make the user the owner of the of the directory using
+chown.
 
 ----
-If you see the new users in the login-window, you might want to use one of the following commands (depending on which one works for you) to hide them:
+If you see the new users in the login-window, you might want to use one of the following commands
+(depending on which one works for you) to hide them:
 
 ```
 % sudo defaults write /Library/Preferences/com.apple.loginwindow HiddenUsersList \
