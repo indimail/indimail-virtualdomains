@@ -354,13 +354,14 @@ $ cd /usr/local/src/indimail-mta/indimail-mta-x
 $ sudo ./create_services
 ```
 
-NOTE: I myself use RPMs for deploying indimail-mta on my own servers and do not use `create_services`. It is possible that it may not include few steps added recently in the pre/post install scripts written for the RPM/Debian builds.
+The script create_services does the following.
 
-1. The default password for indimail MySQL user/password will be indimail/ssh-1.5-.
-2. The default password for admin MySQL user will be mysql/4-57343-.
-3. create\_service will create indimail UNIX user with password benhur20. Change the password or disable login
-4. You can also set MYSQL\_PASS, PRIV\_PASS, ADMIN\_PASS environent variables to set your own passwords before running create\_services.
-5. If you change the MySQL password for indimail after running create\_services, edit /etc/indimail/control/host.mysql. On FreeBSD this file will be /usr/local/etc/indimail/host.mysql
+1. Creates MySQL user 'indimail' with password 'ssh-1.5-'. This user has access to indimail database.
+2. Creates MySQL user 'mysql' with '4-57343-'. This user has all MySQL privileges.
+3. Creates MySQL user 'admin' with 'benhur20'. This user has shutdown privilege in MySQL.
+4. Creates user 'admin' in indimail internal database for adminclient(8). This is used by indisrvr(8) for access to various IndiMail(7) programs. The password of this user is 'benhur20'
+5. You can also set MYSQL\_PASS, PRIV\_PASS, ADMIN\_PASS environent variables to set your own passwords before running create\_services.
+6. If you change the MySQL password for indimail after running create\_services, edit /etc/indimail/control/host.mysql. On FreeBSD this file will be /usr/local/etc/indimail/host.mysql
 
 ## Start Services
 
