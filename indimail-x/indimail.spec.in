@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.64 2020-09-26 16:20:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.65 2020-09-26 16:46:36+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -522,7 +522,6 @@ done
 %attr(755,root,qmail)                   %{_prefix}/bin/proxyimap
 %attr(755,root,qmail)                   %{_prefix}/bin/proxypop3
 %attr(755,root,qmail)                   %{_prefix}/bin/crc
-%attr(755,root,qmail)                   %{_prefix}/bin/iecho
 
 %attr(755,root,qmail)                   %{_prefix}/bin/crcdiff
 %attr(755,root,qmail)                   %{_prefix}/bin/dbinfo
