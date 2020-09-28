@@ -12,6 +12,7 @@ case "$SYSTEM" in
 	mandir=/usr/local/man
 	libdir=/usr/local/lib
 	sysconfdir=/usr/local/etc/indimail
+	extra="--with-authpwd --with-authpam"
 	;;
 	Linux)
 	prefix=/usr
@@ -34,12 +35,14 @@ case "$SYSTEM" in
 		fi
 	fi
 	sysconfdir=/etc/indimail
+	extra="--with-authpwd --with-authshadow"
 	;;
 	*)
 	prefix=/usr
 	mandir=/usr/man
 	libdir=/usr/lib
 	sysconfdir=/etc/indimail
+	extra="--with-authpwd --with-authpam"
 	;;
 esac
 ./configure --prefix=$prefix --disable-root-check \
@@ -53,9 +56,8 @@ esac
 	--libexecdir=$prefix/libexec/indimail \
 	--datarootdir=$prefix/share/indimail \
 	--without-authchangepwdir \
-	--without-authpam --without-authcustom \
-	--without-authpwd --with-authshadow \
-	--without-authpwd --with-authpam
+	--without-authcustom --without-authgeneric \
+	$extra
 if [ ! -f depcomp ] ; then
 	cp libs/unicode/depcomp .
 fi

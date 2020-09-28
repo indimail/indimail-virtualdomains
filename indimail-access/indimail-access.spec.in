@@ -237,8 +237,8 @@ if [ -d courier-imap-%{courier_version} ] ; then
     --mandir=%{mandir} --sysconfdir=%{sysconfdir} --libdir=%{_libdir} \
     --datarootdir=%{shareddir} --with-certsdir=%{sysconfdir}/certs \
     --with-mailer=%{_prefix}/bin/sendmail --disable-root-check --with-redhat \
-    --without-authpam --without-authcustom --without-authchangepwdir \
-    --without-authpwd --without-userdb --with-authshadow --with-authpam
+    --without-userdb --without-authcustom --without-authchangepwdir \
+	--without-authgeneric --with-authshadow --with-authpam --with-authpwd
   cd ..
 fi
 %endif
@@ -418,6 +418,7 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/pop3login
 %attr(755,root,root)                    %{_prefix}/sbin/sharedindexinstall
 %attr(755,root,root)                    %{_prefix}/sbin/sharedindexsplit
+%attr(755,root,root)                    %{libexecdir}/imapmodules/authpwd
 # setuid binary
 %attr(4755,root,root)                   %{libexecdir}/imapmodules/authshadow
 %attr(4755,root,root)                   %{libexecdir}/imapmodules/authpam

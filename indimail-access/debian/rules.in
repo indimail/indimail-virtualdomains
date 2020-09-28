@@ -44,8 +44,8 @@ build-stamp:
 			--mandir=${mandir} --sysconfdir=${sysconfdir} --libdir=${prefix}/${libd} \
 			--datarootdir=${shareddir} --with-certsdir=${sysconfdir}/certs \
 			--with-mailer=${prefix}/bin/sendmail --disable-root-check \
-			--without-authpam --without-authcustom --without-authchangepwdir \
-			--without-authpwd --without-userdb --with-authshadow; \
+			--without-userdb --without-authcustom --without-authchangepwdir \
+			--without-authgeneric --with-authshadow --with-authpwd; \
 		cd ..; \
 	fi
 	if [ -d fetchmail-$(fetchmail_version) ] ; then \
