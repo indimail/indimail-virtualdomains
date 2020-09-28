@@ -1,5 +1,8 @@
 /*
  * $Log: pam-checkpwd.c,v $
+ * Revision 1.10  2020-09-28 12:46:38+05:30  Cprogrammer
+ * put authmodule name in error logs
+ *
  * Revision 1.9  2018-09-12 21:14:32+05:30  Cprogrammer
  * call initialize post successful auth
  *
@@ -54,7 +57,7 @@
 #define isEscape(ch) ((ch) == '"' || (ch) == '\'')
 
 #ifndef lint
-static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.9 2018-09-12 21:14:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.10 2020-09-28 12:46:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             authlen = 512;
@@ -96,44 +99,44 @@ initialize(char *username, int opt_dont_chdir_home, int debug)
 	/*- switch to proper uid/gid/groups */
 	if (!(pw = getpwnam(username))) {
 		if (debug)
-			fprintf(stderr, "Error getting information about %s from /etc/passwd: %s\n", username, strerror(errno));
+			fprintf(stderr, "pam-checkpwd: Error getting information about %s from /etc/passwd: %s\n", username, strerror(errno));
 		exit(111);
 	}
 	/*- set supplementary groups */
 	if (initgroups(username, pw->pw_gid) == -1) {
-		fprintf(stderr, "Error setting supplementary groups for user %s: %s\n", username, strerror(errno));
+		fprintf(stderr, "pam-checkpwd: Error setting supplementary groups for user %s: %s\n", username, strerror(errno));
 		exit(111);
 	}
 	/*- set gid */
 	if (setgid(pw->pw_gid) == -1) {
-		fprintf(stderr, "setgid(%d) error: %s\n", pw->pw_gid, strerror(errno));
+		fprintf(stderr, "pam-checkpwd: setgid(%d) error: %s\n", pw->pw_gid, strerror(errno));
 		exit(111);
 	}
 	/*- set uid */
 	if (setuid(pw->pw_uid) == -1) {
-		fprintf(stderr, "setuid(%d) error: %s\n", pw->pw_uid, strerror(errno));
+		fprintf(stderr, "pam-checkpwd: setuid(%d) error: %s\n", pw->pw_uid, strerror(errno));
 		exit(111);
 	}
 	/*- switch to user home directory */
 	if (!opt_dont_chdir_home) {
 		if (chdir(pw->pw_dir) == -1) {
-			fprintf(stderr, "Error changing directory %s: %s\n", pw->pw_dir, strerror(errno));
+			fprintf(stderr, "pam-checkpwd: Error changing directory %s: %s\n", pw->pw_dir, strerror(errno));
 			exit(111);
 		}
 	}
 	/*- set $USER */
 	if (setenv("USER", username, 1) == -1) {
-		fprintf(stderr, "Error setting $USER to %s: %s\n", username, strerror(errno));
+		fprintf(stderr, "pam-checkpwd: Error setting $USER to %s: %s\n", username, strerror(errno));
 		exit(111);
 	}
 	/*- set $HOME */
 	if (setenv("HOME", pw->pw_dir, 1) == -1) {
-		fprintf(stderr, "Error setting $HOME to %s: %s\n", pw->pw_dir, strerror(errno));
+		fprintf(stderr, "pam-checkpwd: Error setting $HOME to %s: %s\n", pw->pw_dir, strerror(errno));
 		exit(111);
 	}
 	/*- set $SHELL */
 	if (setenv("SHELL", pw->pw_shell, 1) == -1) {
-		fprintf(stderr, "Error setting $SHELL to %s: %s\n", pw->pw_shell, strerror(errno));
+		fprintf(stderr, "pam-checkpwd: Error setting $SHELL to %s: %s\n", pw->pw_shell, strerror(errno));
 		exit(111);
 	}
 	return (0);
@@ -223,12 +226,14 @@ int pipe_exec(char **argv, char *tmpbuf, int len)
 {
 	int             pipe_fd[2];
 
+	if (getenv("DEBUG"))
+		fprintf(stderr, "pam-checkpwd: executing authmodule [%s]\n", argv[0]);
 	if (pipe(pipe_fd) == -1) {
-		fprintf(stderr, "pipe_exec: pipe: %s\n", strerror(errno));
+		fprintf(stderr, "pam-checkpwd: pipe_exec: pipe: %s\n", strerror(errno));
 		return(-1);
 	}
 	if (dup2(pipe_fd[0], 3) == -1 || dup2(pipe_fd[1], 4) == -1) {
-		fprintf(stderr, "pipe_exec: dup2: %s\n", strerror(errno));
+		fprintf(stderr, "pam-checkpwd: pipe_exec: dup2: %s\n", strerror(errno));
 		return(-1);
 	}
 	if (pipe_fd[0] != 3 && pipe_fd[0] != 4)
@@ -236,12 +241,12 @@ int pipe_exec(char **argv, char *tmpbuf, int len)
 	if (pipe_fd[1] != 3 && pipe_fd[1] != 4)
 		close(pipe_fd[1]);
 	if (write(4, tmpbuf, len) != len) {
-		fprintf(stderr, "pipe_exec: %s: %s\n", argv[0], strerror(errno));
+		fprintf(stderr, "pam-checkpwd: pipe_exec: %s: %s\n", argv[0], strerror(errno));
 		return(-1);
 	}
 	close(4);
 	execvp(argv[0], argv);
-	fprintf(stderr, "pipe_exec: %s: %s\n", argv[0], strerror(errno));
+	fprintf(stderr, "pam-checkpwd: pipe_exec: %s: %s\n", argv[0], strerror(errno));
 	return(-1);
 }
 
@@ -338,7 +343,7 @@ main(int argc, char **argv)
 			break;
 		case 'i':
 			if (setenv("AUTHSERVICE", optarg, 1) == -1) {
-				fprintf(stderr, "Error setting $AUTHSERVICE to %s: %s\n",
+				fprintf(stderr, "pam-checkpwd: Error setting $AUTHSERVICE to %s: %s\n",
 					optarg, strerror(errno));
 				exit(111);
 			}
@@ -347,23 +352,23 @@ main(int argc, char **argv)
 			fprintf(stderr, "%s: %s\n", PACKAGE, VERSION);
 			exit(2);
 		case '?':
-			fprintf(stderr, "Invalid command line, see --help\n");
+			fprintf(stderr, "pam-checkpwd: Invalid command line, see --help\n");
 			exit(2);
 		}
 	}
 	s_optind = optind;
 	if (optind >= argc) {
-		fprintf(stderr, "Expected argument after options\n");
+		fprintf(stderr, "pam-checkpwd: Expected argument after options\n");
 		exit(2);
 	}
 	if (!service_name && !(service_name = getenv("PAM_SERVICE"))) {
-		fprintf(stderr, "PAM service name not specified\n");
+		fprintf(stderr, "pam-checkpwd: PAM service name not specified\n");
 		exit(2);
 	}
 	if (!(tmpbuf = calloc(1, (authlen + 1) * sizeof(char)))) {
 		printf("454-%s (#4.3.0)\r\n", strerror(errno));
 		fflush(stdout);
-		fprintf(stderr, "malloc-%d: %s\n", authlen + 1, strerror(errno));
+		fprintf(stderr, "pam-checkpwd: malloc-%d: %s\n", authlen + 1, strerror(errno));
 		_exit(111);
 	}
 	for (offset = 0;;) {
@@ -378,7 +383,7 @@ main(int argc, char **argv)
 		if (count == -1) {
 			printf("454-%s (#4.3.0)\r\n", strerror(errno));
 			fflush(stdout);
-			fprintf(stderr, "read: %s\n", strerror(errno));
+			fprintf(stderr, "pam-checkpwd: read: %s\n", strerror(errno));
 			_exit(111);
 		}
 		else
@@ -389,13 +394,13 @@ main(int argc, char **argv)
 			_exit(2);
 	}
 	if (debug)
-		fprintf(stderr, "read %d bytes\n", offset);
+		fprintf(stderr, "pam-checkpwd: read %d bytes\n", offset);
 	count = 0;
 	login = tmpbuf + count; /*- username */
 	for(;tmpbuf[count] && count < offset;count++);
 	if (count == offset || (count + 1) == offset) {
 		if (debug)
-			fprintf(stderr, "no username\n");
+			fprintf(stderr, "pam-checkpwd: no username\n");
 		_exit(2);
 	}
 	count++;
@@ -403,7 +408,7 @@ main(int argc, char **argv)
 	for(;tmpbuf[count] && count < offset;count++);
 	if (count == offset || (count + 1) == offset) {
 		if (debug)
-			fprintf(stderr, "no challenge\n");
+			fprintf(stderr, "pam-checkpwd: no challenge\n");
 		_exit(2);
 	}
 	response = tmpbuf + count + 1; /*- response */
