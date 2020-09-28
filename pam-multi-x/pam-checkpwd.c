@@ -1,5 +1,8 @@
 /*
  * $Log: pam-checkpwd.c,v $
+ * Revision 1.11  2020-09-28 13:33:09+05:30  Cprogrammer
+ * added pid in debug statements
+ *
  * Revision 1.10  2020-09-28 12:46:38+05:30  Cprogrammer
  * put authmodule name in error logs
  *
@@ -57,7 +60,7 @@
 #define isEscape(ch) ((ch) == '"' || (ch) == '\'')
 
 #ifndef lint
-static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.10 2020-09-28 12:46:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.11 2020-09-28 13:33:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             authlen = 512;
@@ -227,7 +230,7 @@ int pipe_exec(char **argv, char *tmpbuf, int len)
 	int             pipe_fd[2];
 
 	if (getenv("DEBUG"))
-		fprintf(stderr, "pam-checkpwd: executing authmodule [%s]\n", argv[0]);
+		fprintf(stderr, "pam-checkpwd: pid [%d] executing authmodule [%s]\n", getpid(), argv[0]);
 	if (pipe(pipe_fd) == -1) {
 		fprintf(stderr, "pam-checkpwd: pipe_exec: pipe: %s\n", strerror(errno));
 		return(-1);
@@ -413,8 +416,8 @@ main(int argc, char **argv)
 	}
 	response = tmpbuf + count + 1; /*- response */
 	if (debug)
-		fprintf(stderr, "%s: login [%s] challenge [%s] response [%s]\n", 
-			argv[0], login, challenge, response);
+		fprintf(stderr, "%s: pid [%d] login [%s] challenge [%s] response [%s]\n", 
+			argv[0], getpid(), login, challenge, response);
 	/*- authenticate using PAM */
 	if ((status = auth_pam(service_name, login, challenge, debug))) {
 		pipe_exec(argv + s_optind, tmpbuf, offset);
