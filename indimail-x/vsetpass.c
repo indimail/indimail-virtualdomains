@@ -1,5 +1,8 @@
 /*
  * $Log: vsetpass.c,v $
+ * Revision 1.5  2020-09-28 13:28:36+05:30  Cprogrammer
+ * added pid in debug statements
+ *
  * Revision 1.4  2020-09-28 12:50:12+05:30  Cprogrammer
  * removed extra newline
  *
@@ -48,7 +51,7 @@
 #include "getpeer.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vsetpass.c,v 1.4 2020-09-28 12:50:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetpass.c,v 1.5 2020-09-28 13:28:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -82,7 +85,7 @@ int
 main(int argc, char **argv)
 {
 	char           *authstr, *login, *new_pass, *old_pass, *response, *crypt_pass, *ptr;
-	char            strnum[FMT_ULONG];
+	char            strnum[FMT_ULONG], module_pid[FMT_ULONG];
 	static stralloc Dir = {0}, Crypted = {0}, user = {0}, domain = {0};
 	int             count, offset, i;
 	mdir_t          quota;
@@ -216,8 +219,9 @@ main(int argc, char **argv)
 		_exit (1);
 	}
 	crypt_pass = pw->pw_passwd;
+	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	if (env_get("DEBUG_LOGIN"))
-		strerr_warn11("vsetpass: login [", login, "] old_pass [",
+		strerr_warn13("vsetpass: pid [", module_pid, "] login [", login, "] old_pass [",
 				old_pass, "] new_pass [", new_pass, "] response [", response, "] pw_passwd [", crypt_pass, "]", 0);
 	if (pw_comp((unsigned char *) login, (unsigned char *) crypt_pass,
 		(unsigned char *) (*response ? old_pass : 0),

@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 1.5  2020-09-28 13:28:00+05:30  Cprogrammer
+ * added pid in debug statements
+ *
  * Revision 1.4  2020-09-28 12:48:11+05:30  Cprogrammer
  * print authmodule name in error logs/debug statements
  *
@@ -55,7 +58,7 @@
 #include "sql_getpw.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.4 2020-09-28 12:48:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.5 2020-09-28 13:28:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -68,8 +71,8 @@ static char     sccsid[] = "$Id: authindi.c,v 1.4 2020-09-28 12:48:11+05:30 Cpro
 static int      exec_local(char **, char *, char *, struct passwd *, char *);
 
 static stralloc tmpbuf = {0};
-int             authlen = AUTH_SIZE;
-char            strnum[FMT_ULONG];
+static int      authlen = AUTH_SIZE;
+static char     strnum[FMT_ULONG], module_pid[FMT_ULONG];
 
 static void
 die_nomem()
@@ -508,19 +511,20 @@ main(int argc, char **argv)
 		}
 	}
 	crypt_pass = pw->pw_passwd;
+	strnum[fmt_uint(strnum, (unsigned int) auth_method)] = 0;
+	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	if ((ptr = env_get("DEBUG_LOGIN")) && *ptr > '0') {
-		strnum[fmt_uint(strnum, (unsigned int) auth_method)] = 0;
-		if (response) {
-			strerr_warn14(prog_name, ": service[", service, "] authmeth [",
+		if (response)
+			strerr_warn16(prog_name, ": pid [", module_pid, "] service[", service, "] authmeth [",
 				strnum, "] login [", login, "] challenge [",
 				challenge, "] response [", response, "] pw_passwd [", crypt_pass, "]", 0);
-		} else  {
-			strerr_warn11("service[", service, "] authmeth [", strnum, "] login [",
+		else 
+			strerr_warn14(prog_name, ": pid [", module_pid, "] service[", service, "] authmeth [", strnum, "] login [",
 				login, "] auth [", auth_data, "] pw_passwd [", crypt_pass, "]", 0);
-		}
 	} else
 	if (env_get("DEBUG"))
-		strerr_warn8(prog_name, ": service[", service, "] authmeth [", strnum, "] login [", login, "]", 0);
+		strerr_warn10(prog_name, ": pid [", module_pid, "] service[", service,
+				"] authmeth [", strnum, "] login [", login, "]", 0);
 	if (pw_comp((unsigned char *) login, (unsigned char *) crypt_pass,
 		(unsigned char *) (auth_method > 2 ? challenge : 0),
 		(unsigned char *) (auth_method > 2 ? response : auth_data), auth_method))

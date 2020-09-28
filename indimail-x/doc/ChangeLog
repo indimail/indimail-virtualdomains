@@ -14,3 +14,9 @@ Release 3.3 Start 06/09/2020
     default.configure
 -19/09/2020
 09. initsvc: enable and start services for FreeBSD
+-28/09/2020
+10. vsetpass.c, vchkpass.c, authpgsql.c, authindi.c print authmodule name in
+    error logs/debug statements
+11. pipe_exec.c: display authmodule being executed in debug statements
+12. vsetpass.c, vchkpass.c, authpgsql.c, authindi.c, pipe_exec.c added pid
+    error logs/debug statements

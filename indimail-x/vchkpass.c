@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.5  2020-09-28 13:28:28+05:30  Cprogrammer
+ * added pid in debug statements
+ *
  * Revision 1.4  2020-09-28 12:49:53+05:30  Cprogrammer
  * print authmodule name in error logs/debug statements
  *
@@ -51,7 +54,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.4 2020-09-28 12:49:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.5 2020-09-28 13:28:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -85,7 +88,7 @@ int
 main(int argc, char **argv)
 {
 	char           *authstr, *login, *ologin, *response, *challenge, *crypt_pass, *ptr, *cptr;
-	char            strnum[FMT_ULONG];
+	char            strnum[FMT_ULONG], module_pid[FMT_ULONG];
 	static stralloc user = {0}, fquser = {0}, domain = {0}, buf = {0};
 	int             i, count, offset, norelay = 0, status, auth_method;
 	struct passwd  *pw;
@@ -251,12 +254,13 @@ main(int argc, char **argv)
 		norelay = 1;
 	crypt_pass = pw->pw_passwd;
 	strnum[fmt_uint(strnum, (unsigned int) auth_method)] = 0;
+	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	if (env_get("DEBUG_LOGIN"))
-		strerr_warn12("vchkpass", ": login [", login, "] challenge [", challenge,
+		strerr_warn14("vchkpass", "pid [", module_pid, ": login [", login, "] challenge [", challenge,
 			"] response [", response, "] pw_passwd [", crypt_pass, "] method [", strnum, "]", 0);
 	else
 	if (env_get("DEBUG"))
-		strerr_warn6("vchkpass", ": login [", login, "] method [", strnum, "]", 0);
+		strerr_warn8("vchkpass", "pid [", module_pid, ": login [", login, "] method [", strnum, "]", 0);
 	if (pw_comp((unsigned char *) ologin, (unsigned char *) crypt_pass,
 		(unsigned char *) (*response ? challenge : 0),
 		(unsigned char *) (*response ? response : challenge), auth_method)) {

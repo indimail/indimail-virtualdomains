@@ -1,5 +1,8 @@
 /*
  * $Log: authpgsql.c,v $
+ * Revision 1.6  2020-09-28 13:28:08+05:30  Cprogrammer
+ * added pid in debug statements
+ *
  * Revision 1.5  2020-09-28 12:48:55+05:30  Cprogrammer
  * print authmodule name in error logs/debug statements
  *
@@ -51,7 +54,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authpgsql.c,v 1.5 2020-09-28 12:48:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authpgsql.c,v 1.6 2020-09-28 13:28:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_PGSQL
@@ -64,8 +67,8 @@ static char     sccsid[] = "$Id: authpgsql.c,v 1.5 2020-09-28 12:48:55+05:30 Cpr
 #define AUTH_SIZE 512
 #endif
 
-int             authlen = AUTH_SIZE;
-char            strnum[FMT_ULONG];
+static int      authlen = AUTH_SIZE;
+static char     strnum[FMT_ULONG], module_pid[FMT_ULONG];
 static stralloc tmp = {0};
 PGconn         *pgc; /* pointer to pgsql connection */
 
@@ -296,12 +299,13 @@ main(int argc, char **argv)
 		norelay = 1;
 	crypt_pass = pw->pw_passwd;
 	strnum[fmt_uint(strnum, (unsigned int) auth_method)] = 0;
+	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	if (env_get("DEBUG_LOGIN"))
-		strerr_warn12("authpgsql", ": login [", login, "] challenge [", challenge,
+		strerr_warn13("authpgsql: pid [", module_pid, "] login [", login, "] challenge [", challenge,
 			"] response [", response, "] pw_passwd [", crypt_pass, "] method [", strnum, "]", 0);
 	else
 	if (env_get("DEBUG"))
-		strerr_warn6("authpgsql", ": login [", login, "] method [", strnum, "]", 0);
+		strerr_warn7("authpgsql: pid [", module_pid, "] login [", login, "] method [", strnum, "]", 0);
 	if (pw_comp((unsigned char *) ologin, (unsigned char *) crypt_pass, (unsigned char *) (*response ? challenge : 0),
 		 (unsigned char *) (*response ? response : challenge), auth_method)) {
 		pipe_exec(argv, authstr, offset);

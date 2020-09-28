@@ -7,3 +7,6 @@ indimail (@version@-@release@) unstable; urgency=low
   * Removed Provides: indimail-libs, libindimail from indimail package. Now available only in libindimail package
   * FreeBSD fixes fo vfstabNew.c, vadddomain.c, ProcessInFifo.c, pathToFilesystem.c, get_localtime.c, Makefile.am, configure.ac, default.configure
   * initsvc: enable and start services for FreeBSD
+  * vsetpass.c, vchkpass.c, authpgsql.c, authindi.c print authmodule name in error logs/debug statements
+  * pipe_exec.c: display authmodule being executed in debug statements
+  * vsetpass.c, vchkpass.c, authpgsql.c, authindi.c, pipe_exec.c added pid error logs/debug statements
