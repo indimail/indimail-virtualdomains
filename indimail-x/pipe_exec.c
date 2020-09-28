@@ -1,5 +1,8 @@
 /*
  * $Log: pipe_exec.c,v $
+ * Revision 1.2  2020-09-28 12:49:06+05:30  Cprogrammer
+ * display authmodule being executed in debug statements
+ *
  * Revision 1.1  2019-04-18 08:16:08+05:30  Cprogrammer
  * Initial revision
  *
@@ -15,10 +18,11 @@
 #endif
 #ifdef HAVE_QMAIL
 #include <strerr.h>
+#include <env.h>
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: pipe_exec.c,v 1.1 2019-04-18 08:16:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pipe_exec.c,v 1.2 2020-09-28 12:49:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -27,6 +31,8 @@ pipe_exec(char **argv, char *tmpbuf, int len)
 	int             pipe_fd[2];
 	void            (*pstat) ();
 
+	if (env_get("DEBUG"))
+		strerr_warn4(argv[0], ": executing authmodule [", argv[1], "]", 0);
 	if ((pstat = signal(SIGPIPE, SIG_IGN)) == SIG_ERR) {
 		strerr_warn1("pipe_exec: signal: ", &strerr_sys);
 		return (-1);
