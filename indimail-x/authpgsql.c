@@ -1,5 +1,8 @@
 /*
  * $Log: authpgsql.c,v $
+ * Revision 1.5  2020-09-28 12:48:55+05:30  Cprogrammer
+ * print authmodule name in error logs/debug statements
+ *
  * Revision 1.4  2020-04-01 18:53:05+05:30  Cprogrammer
  * moved getEnvConfig to libqmail
  *
@@ -48,7 +51,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authpgsql.c,v 1.4 2020-04-01 18:53:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authpgsql.c,v 1.5 2020-09-28 12:48:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_PGSQL
@@ -292,11 +295,13 @@ main(int argc, char **argv)
 	if (pw->pw_gid & NO_RELAY)
 		norelay = 1;
 	crypt_pass = pw->pw_passwd;
-	if (env_get("DEBUG")) {
-		strnum[fmt_uint(strnum, (unsigned int) auth_method)] = 0;
+	strnum[fmt_uint(strnum, (unsigned int) auth_method)] = 0;
+	if (env_get("DEBUG_LOGIN"))
 		strerr_warn12("authpgsql", ": login [", login, "] challenge [", challenge,
-			"] response [", response, "] pw_passwd [", crypt_pass, "] method [", strnum, "]\n", 0);
-	}
+			"] response [", response, "] pw_passwd [", crypt_pass, "] method [", strnum, "]", 0);
+	else
+	if (env_get("DEBUG"))
+		strerr_warn6("authpgsql", ": login [", login, "] method [", strnum, "]", 0);
 	if (pw_comp((unsigned char *) ologin, (unsigned char *) crypt_pass, (unsigned char *) (*response ? challenge : 0),
 		 (unsigned char *) (*response ? response : challenge), auth_method)) {
 		pipe_exec(argv, authstr, offset);

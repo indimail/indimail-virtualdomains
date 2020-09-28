@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 1.4  2020-09-28 12:48:11+05:30  Cprogrammer
+ * print authmodule name in error logs/debug statements
+ *
  * Revision 1.3  2020-06-03 17:06:16+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -52,7 +55,7 @@
 #include "sql_getpw.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.3 2020-06-03 17:06:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.4 2020-09-28 12:48:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -508,14 +511,16 @@ main(int argc, char **argv)
 	if ((ptr = env_get("DEBUG_LOGIN")) && *ptr > '0') {
 		strnum[fmt_uint(strnum, (unsigned int) auth_method)] = 0;
 		if (response) {
-			strerr_warn13("service[", service, "] authmeth [",
+			strerr_warn14(prog_name, ": service[", service, "] authmeth [",
 				strnum, "] login [", login, "] challenge [",
 				challenge, "] response [", response, "] pw_passwd [", crypt_pass, "]", 0);
 		} else  {
 			strerr_warn11("service[", service, "] authmeth [", strnum, "] login [",
 				login, "] auth [", auth_data, "] pw_passwd [", crypt_pass, "]", 0);
 		}
-	}
+	} else
+	if (env_get("DEBUG"))
+		strerr_warn8(prog_name, ": service[", service, "] authmeth [", strnum, "] login [", login, "]", 0);
 	if (pw_comp((unsigned char *) login, (unsigned char *) crypt_pass,
 		(unsigned char *) (auth_method > 2 ? challenge : 0),
 		(unsigned char *) (auth_method > 2 ? response : auth_data), auth_method))

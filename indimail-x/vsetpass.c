@@ -1,5 +1,8 @@
 /*
  * $Log: vsetpass.c,v $
+ * Revision 1.4  2020-09-28 12:50:12+05:30  Cprogrammer
+ * removed extra newline
+ *
  * Revision 1.3  2020-04-01 18:59:14+05:30  Cprogrammer
  * added encrypt flag argument to mkpasswd()
  * moved authentication functions to libqmail
@@ -45,7 +48,7 @@
 #include "getpeer.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vsetpass.c,v 1.3 2020-04-01 18:59:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetpass.c,v 1.4 2020-09-28 12:50:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -213,10 +216,9 @@ main(int argc, char **argv)
 		_exit (1);
 	}
 	crypt_pass = pw->pw_passwd;
-	if (env_get("DEBUG")) {
+	if (env_get("DEBUG_LOGIN"))
 		strerr_warn11("vsetpass: login [", login, "] old_pass [",
-				old_pass, "] new_pass [", new_pass, "] response [", response, "] pw_passwd [", crypt_pass, "]\n", 0);
-	}
+				old_pass, "] new_pass [", new_pass, "] response [", response, "] pw_passwd [", crypt_pass, "]", 0);
 	if (pw_comp((unsigned char *) login, (unsigned char *) crypt_pass,
 		(unsigned char *) (*response ? old_pass : 0),
 		(unsigned char *) (*response ? response : old_pass), 0))
@@ -226,10 +228,9 @@ main(int argc, char **argv)
 		_exit (111);
 	}
 	mkpasswd(new_pass, &Crypted, encrypt_flag);
-	if (env_get("DEBUG")) {
+	if (env_get("DEBUG_LOGIN")) 
 		strerr_warn11("vsetpass: login [", login, "] old_pass [",
-				old_pass, "] new_pass [", new_pass, "] response [", response, "] pw_passwd [", Crypted.s, "]\n", 0);
-	}
+				old_pass, "] new_pass [", new_pass, "] response [", response, "] pw_passwd [", Crypted.s, "]", 0);
 	if ((i = sql_passwd(user.s, domain.s, Crypted.s, 0)) == 1) {
 		if (!stralloc_copys(&Dir, pw->pw_dir) ||
 				!stralloc_catb(&Dir, "/Maildir", 8) ||

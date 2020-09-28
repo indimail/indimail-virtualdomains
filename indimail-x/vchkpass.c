@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.4  2020-09-28 12:49:53+05:30  Cprogrammer
+ * print authmodule name in error logs/debug statements
+ *
  * Revision 1.3  2020-04-01 18:58:32+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -48,7 +51,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.3 2020-04-01 18:58:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.4 2020-09-28 12:49:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -247,11 +250,13 @@ main(int argc, char **argv)
 	if (pw->pw_gid & NO_RELAY)
 		norelay = 1;
 	crypt_pass = pw->pw_passwd;
-	if (env_get("DEBUG")) {
-		strnum[fmt_uint(strnum, (unsigned int) auth_method)] = 0;
+	strnum[fmt_uint(strnum, (unsigned int) auth_method)] = 0;
+	if (env_get("DEBUG_LOGIN"))
 		strerr_warn12("vchkpass", ": login [", login, "] challenge [", challenge,
 			"] response [", response, "] pw_passwd [", crypt_pass, "] method [", strnum, "]", 0);
-	}
+	else
+	if (env_get("DEBUG"))
+		strerr_warn6("vchkpass", ": login [", login, "] method [", strnum, "]", 0);
 	if (pw_comp((unsigned char *) ologin, (unsigned char *) crypt_pass,
 		(unsigned char *) (*response ? challenge : 0),
 		(unsigned char *) (*response ? response : challenge), auth_method)) {
