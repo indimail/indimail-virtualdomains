@@ -23,7 +23,7 @@ pamsbin_PROGRAMS = pam-checkpwd$(EXEEXT)
 
 man_MANS=pam-multi.8
 
-all-local: pam-multi.spec imap pop3 pam-multi
+all-local: pam-multi.spec imap pop3 pam-multi authcheckpassword
 
 pam-checkpwd$(EXEEXT): pam-checkpwd.o pam-support.o 
 	$(LINK) $@.o pam-support.o @LIB_PAM@
@@ -60,11 +60,13 @@ edit = sed \
 	-e 's}@prefix\@}$(prefix)}g'
 
 imap: imap.in
-	$(edit) imap.in > $@
+	$(edit) $@.in > $@
 pop3: pop3.in
-	$(edit) pop3.in > $@
+	$(edit) $@.in > $@
 pam-multi: pam-multi.in
-	$(edit) pam-multi.in > $@
+	$(edit) $@.in > $@
+authcheckpassword: authcheckpassword.in
+	$(edit) $@.in > $@
 
 pam-multi.8: pam-multi.9
 	$(edit) pam-multi.9 > $@

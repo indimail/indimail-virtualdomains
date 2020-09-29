@@ -34,3 +34,4 @@ conf-release
 pop3
 imap
 pam-multi
+authcheckpassword
