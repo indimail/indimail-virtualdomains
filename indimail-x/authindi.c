@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 1.6  2020-09-29 11:13:18+05:30  Cprogrammer
+ * fixed module name to 'authindi'
+ *
  * Revision 1.5  2020-09-28 13:28:00+05:30  Cprogrammer
  * added pid in debug statements
  *
@@ -58,7 +61,7 @@
 #include "sql_getpw.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.5 2020-09-28 13:28:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.6 2020-09-29 11:13:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -77,7 +80,7 @@ static char     strnum[FMT_ULONG], module_pid[FMT_ULONG];
 static void
 die_nomem()
 {
-	strerr_warn1("authindimail: out of memory", 0);
+	strerr_warn1("authindi: out of memory", 0);
 	_exit(111);
 }
 
@@ -201,14 +204,14 @@ main(int argc, char **argv)
 	}
 	/*-
 	 * Courier-IMAP authmodules Protocol (authindi /var/indimail/bin/imapd Maildir < /tmp/input 3<&0)
-	 * imap\n
+	 * imap\n                ---> imap service (imap/pop3/pam-multi)
 	 * login\n
 	 * postmaster@test.com\n ---> username or challenge
 	 * pass\n                ---> plain text / response
 	 * newpass\n             ---> auth_data
-	 * argv[0]=/usr/libexecl/indimail/imapmodules/try
-	 * argv[1]=/usr/libexecl/indimail/imapmodules/authpam
-	 * argv[2]=/var/indimail/bin/imapd
+	 * argv[0]=/usr/libexec/indimail/imapmodules/authindi
+	 * argv[1]=/usr/libexec/indimail/imapmodules/authpam
+	 * argv[2]=/usr/bin/imapd
 	 * argv[3]=Maildir
 	 */
 	for (offset = 0;;) {
@@ -221,7 +224,7 @@ main(int argc, char **argv)
 		} while (count == -1 && errno == EINTR);
 #endif
 		if (count == -1) {
-			strerr_warn1("authindimail: read: ", &strerr_sys);
+			strerr_warn1("authindi: read: ", &strerr_sys);
 			return (1);
 		} else
 		if (!count)
@@ -288,7 +291,7 @@ main(int argc, char **argv)
 	authstr[count++] = 0;
 	if (auth_method > 2) {
 		if (!(ptr = b64_decode((unsigned char *) login, cram_md5_len, &out_len))) {
-			strerr_warn1("authindimail: b64_decode failure", 0);
+			strerr_warn1("authindi: b64_decode failure", 0);
 			pipe_exec(argv, buf, offset);
 			return (1);
 		}
@@ -303,7 +306,7 @@ main(int argc, char **argv)
 		if (!(ptr = b64_decode((unsigned char *) auth_data, cram_md5_len, &out_len))) {
 			if (challenge)
 				alloc_free (challenge);
-			strerr_warn1("authindimail: b64_decode failure", 0);
+			strerr_warn1("authindi: b64_decode failure", 0);
 			pipe_exec(argv, buf, offset);
 			return (1);
 		}
@@ -381,7 +384,7 @@ main(int argc, char **argv)
 		if (mailstore[i])
 			mailstore[i] = 0;
 		else {
-			strerr_warn4("authindimail: invalid mailstore [", mailstore, "] for ", Email.s, 0);
+			strerr_warn4("authindi: invalid mailstore [", mailstore, "] for ", Email.s, 0);
 			if (auth_method > 2) {
 				if (challenge)
 					alloc_free (challenge);
@@ -392,7 +395,7 @@ main(int argc, char **argv)
 		}
 		for(; *mailstore && *mailstore != ':'; mailstore++);
 		if  (*mailstore != ':') {
-			strerr_warn4("authindimail: invalid mailstore [", mailstore, "] for ", Email.s, 0);
+			strerr_warn4("authindi: invalid mailstore [", mailstore, "] for ", Email.s, 0);
 			if (auth_method > 2) {
 				if (challenge)
 					alloc_free (challenge);
@@ -628,16 +631,16 @@ exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *
 		return (1);
 	}
 	if (!env_put2("AUTHENTICATED", userid))
-		strerr_die3sys(111, "authindimail: env_put2: AUTHENTICATED=", userid, ": ");
+		strerr_die3sys(111, "authindi: env_put2: AUTHENTICATED=", userid, ": ");
 	if (!stralloc_copy(&tmpbuf, &TheUser) ||
 			!stralloc_append(&tmpbuf, "@") ||
 			!stralloc_cats(&tmpbuf, TheDomain) ||
 			!stralloc_0(&tmpbuf))
 		die_nomem();
 	if (!env_put2("AUTHADDR", tmpbuf.s))
-		strerr_die3sys(111, "authindimail: env_put2: AUTHADDR=", tmpbuf.s, ": ");
+		strerr_die3sys(111, "authindi: env_put2: AUTHADDR=", tmpbuf.s, ": ");
 	if (!env_put2("AUTHFULLNAME", pw->pw_gecos))
-		strerr_die3sys(111, "authindimail: env_put2: AUTHFULLNAME=", pw->pw_gecos, ": ");
+		strerr_die3sys(111, "authindi: env_put2: AUTHFULLNAME=", pw->pw_gecos, ": ");
 #ifdef USE_MAILDIRQUOTA	
 	if ((size_limit = parse_quota(pw->pw_shell, &count_limit)) == -1) {
 		strerr_warn3("parse_quota: ", pw->pw_shell, ": ", &strerr_sys);
@@ -657,11 +660,11 @@ exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *
 		die_nomem();
 #endif
 	if (!env_put2("MAILDIRQUOTA", tmpbuf.s))
-		strerr_die3sys(111, "authindimail: env_put2: MAILDIRQUOTA=", tmpbuf.s, ": ");
+		strerr_die3sys(111, "authindi: env_put2: MAILDIRQUOTA=", tmpbuf.s, ": ");
 	if (!env_put2("HOME", pw->pw_dir))
-		strerr_die3sys(111, "authindimail: env_put2: HOME=", pw->pw_dir, ": ");
+		strerr_die3sys(111, "authindi: env_put2: HOME=", pw->pw_dir, ": ");
 	if (!env_put2("AUTHSERVICE", service))
-		strerr_die3sys(111, "authindimail: env_put2: AUTHENTICATED=", service, ": ");
+		strerr_die3sys(111, "authindi: env_put2: AUTHENTICATED=", service, ": ");
 	switch ((status = Login_Tasks(pw, userid, service)))
 	{
 		case 2:
@@ -674,12 +677,12 @@ exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *
 			if ((ptr = env_get("EXIT_ONERROR"))) {
 				if ((ptr = env_get("MSG_ONERROR")) && !access(ptr, F_OK)) {
 					if ((fd = open_read(ptr)) == -1)
-						strerr_warn3("authindimail: open: ", ptr, ": ", &strerr_sys);
+						strerr_warn3("authindi: open: ", ptr, ": ", &strerr_sys);
 					else {
 						substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 						for (;;) {
 							if (getln(&ssin, &line, &match, '\n') == -1) {
-								strerr_warn3("authindimail: read: ", ptr, ": ", &strerr_sys);
+								strerr_warn3("authindi: read: ", ptr, ": ", &strerr_sys);
 								close(fd);
 								break;
 							}
@@ -710,7 +713,7 @@ exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *
 	}
 	close_connection();
 	if (chdir(Maildir.s)) {
-		strerr_warn3("authindimail: chdir: ", Maildir.s, ": ", &strerr_sys);
+		strerr_warn3("authindi: chdir: ", Maildir.s, ": ", &strerr_sys);
 		return (1);
 	}
 	if (!stralloc_copy(&tmpbuf, &Maildir) ||
@@ -718,8 +721,8 @@ exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *
 			!stralloc_0(&tmpbuf))
 		die_nomem();
 	if (!env_put2("MAILDIR", tmpbuf.s))
-		strerr_die3sys(111, "authindimail: env_put2: AUTHSERVICE=", service, ": ");
+		strerr_die3sys(111, "authindi: env_put2: AUTHSERVICE=", service, ": ");
 	execv(argv[0], argv);
-	strerr_warn3("authindimail: exec: ", argv[1], ": ", &strerr_sys);
+	strerr_warn3("authindi: exec: ", argv[1], ": ", &strerr_sys);
 	return (1);
 }
