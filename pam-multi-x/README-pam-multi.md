@@ -1,6 +1,8 @@
 # Introduction
 
-[pam-multi](https://github.com/mbhangui/indimail-virtualdomains/tree/master/pam-multi-x) helps you to extend authentication of an existing pam-module (e.g. courier-imap, dovecout, cyrus, etc) to transparently authenticate against [IndiMail's](https://github.com/mbhangui/indimail-virtualdomains) own MySQL database. The primary goal of pam-multi was to allow authentication of IMAP/POP3 servers like courier-imap, dovecot against IndiMail MySQL database. In short, pam-multi provides a pam service, which is configurable to look at any datasource. IndiMail uses pam-multi to make possible usage of any IMAP/POP3 server with IndiMail's database, without modifying a single line of code in the IMAP/POP3 server.  see the man page pam-multi
+[pam-multi](https://github.com/mbhangui/indimail-virtualdomains/tree/master/pam-multi-x) helps you to extend authentication of an existing pam-module (e.g. courier-imap, dovecout, cyrus, etc) to transparently authenticate against [IndiMail's](https://github.com/mbhangui/indimail-virtualdomains) own MySQL database. The primary goal of pam-multi was to allow SMTP/IMAP/POP# servers to authenticate against IndiMail's MySQL database. In short, pam-multi provides a pam service, which is configurable to look at any datasource. IndiMail uses pam-multi to make possible usage of any SMTP server with IndiMail's database, without modifying a single line of code of the SMTP/IMAP/POP3 server. See the man page pam-multi(8). pam-multi package also contains pam-checkpwd(8) which provides a [checkpassword interface](http://cr.yp.to/checkpwd/interface.html). pam-checkpwd can use pam-multi or any PAM config/module authentication. See the examples below how it can be used to provided authenticated SMTP, IMAP/POP3 login. pam-checkpwd can be used for courier-imap, dovecot authentication too. pam-multi does chdir to the user's home directory and sets the uid, gid before returning.
+
+pam-multi doesn't depend on the user being in /etc/passwd. But your application may need fields like uid, gid, home directory from /et/passwd. If your datasource happens to be in MySQL, you can use nssd(8) to transparently extend your MySQL db into /etc/passwd. If you use nssd, all calls like getpwnam(3), getpwent(3), getspnam(3), getspent(3), etc will read data from your MySQL database with some simple configuration of /etc/indimail/nssd.conf. See the man page of nssd(8) for details. Both pam-multi and nssd are part of the indimail-auth package. In most cases, using nssd is enough make your application authenticate against IndiMail's MySQL db.
 
 pam-multi supports four methods for password hashing schemes.
 
@@ -50,38 +52,87 @@ will be replaced as follows
 
 A checkpassword compatible program **pam-checkpwd** has been provided in the package. pam-checkpwd can use pam-multi as well as any existing pam service on your system. See man pam-checkpwd(8) for more details.
 
-## Examples
+## Examples PAM Configuration
 
 ### System PAM Configuration
 
 If you want an existing application on your system which uses PAM to use pam-multi, you will neeed to modify the configuration file which your application uses to have any one of the three options below.
 
 ```
-1. auth optional pam-multi.so args -m [select pw\_passwd from indimail where pw\_name=’%u’ and pw\_domain=’%d’] -u indimail -p ssh-1.5- -d indimail -H localhost -P 3306
-2. auth optional pam-multi.so args -c [grep "^%u:" /etc/passwd | awk -F: ’{print $2}’]
-3. auth optional pam-multi.so args -s /var/indimail/modules/iauth.so
+1. auth sufficient pam-multi.so args -m [select pw\_passwd from indimail where pw\_name=’%u’ and pw\_domain=’%d’] -u indimail -p ssh-1.5- -d indimail -H localhost -P 3306
+2. auth sufficient pam-multi.so args -c [grep "^%u:" /etc/passwd | awk -F: ’{print $2}’]
+3. auth sufficient pam-multi.so args -s /usr/lib/indimail/modules/iauth.so
 ```
 NOTE: Read the **pam**(8) man page to cconfigure your PAM
 
-### Config /etc/pam.d/pam-multi
+#### Config /etc/pam.d/pam-multi
 
 ```
 #
-# auth     required  pam-multi.so args -m [select pw_passwd from indimail where pw_name='%u' and pw_domain='%d'] -u indimail -p ssh-1.5- -D indimail -H localhost -P 3306 -d
-# auth     required  pam-multi.so args -s /var/indimail/modules/iauth.so -d
-# account  required  pam-multi.so args -d
-# account  required  pam-multi.so args -s /var/indimail/modules/iauth.so -d
+# auth     sufficient  pam-multi.so argv0 -m [select pw_passwd from indimail where pw_name='%u' and pw_domain='%d'] -u indimail -p ssh-1.5- -D indimail -H localhost -P 3306 -d
+# auth     sufficient  pam-multi.so argv0 -s /usr/lib/indimail/modules/iauth.so -d
+# account  sufficient  pam-multi.so argv0 -s /usr/lib/indimail/modules/iauth.so -d
 #
-auth     required  pam-multi.so args -s /var/indimail/modules/iauth.so
-account  required  pam-multi.so args -s /var/indimail/modules/iauth.so
-#pam_selinux.so close should be the first session rule
-session  required  pam_selinux.so close
-#pam_selinux.so  open should only be followed by sessions to be executed in the user context
-session  required  pam_selinux.so open env_params
-session  optional  pam_keyinit.so force revoke
+auth     sufficient  pam-multi.so pam-multi -s /usr/lib/indimail/modules/iauth.so
+account  sufficient  pam-multi.so pam-multi -s /usr/lib/indimail/modules/iauth.so
+```
+
+#### Config /etc/pam.d/imap
+```
+#
+# $Log: imap.in,v $
+#
+# $Id: imap.in,v 1.2 2020-09-29 10:59:22+05:30 Cprogrammer Exp mbhangui $
+#
+# auth     required  pam-multi.so argv0 -m [select pw_passwd from indimail where pw_name='%u' and pw_domain='%d'] -u indimail -p ssh-1.5- -D indimail -H localhost -P 3306 -d
+# auth     required  pam-multi.so argv0 -s /usr/lib/indimail/modules/iauth.so
+# account  required  pam-multi.so argv0 -i imap -s /usr/lib/indimail/modules/iauth.so
+# add -d argument to debug pam-multi lines
+#
+auth     required  pam-multi.so pam-multi -s /usr/lib/indimail/modules/iauth.so
+account  required  pam-multi.so pam-multi -i imap -s /usr/lib/indimail/modules/iauth.so
+```
+
+#### Config /etc/pam.d/pop3
+```
+#
+# $Log: pop3.in,v $
+#
+# $Id: pop3.in,v 1.2 2020-09-29 10:59:22+05:30 Cprogrammer Exp mbhangui $
+#
+# auth     required  pam-multi.so argv0 -m [select pw_passwd from indimail where pw_name='%u' and pw_domain='%d'] -u indimail -p ssh-1.5- -D indimail -H localhost -P 3306 -d
+# auth     required  pam-multi.so argv0 -s /usr/lib/indimail/modules/iauth.so
+# account  required  pam-multi.so argv0 -i pop3 -s /usr/lib/indimail/modules/iauth.so
+# add -d argument to debug pam-multi lines
+#
+auth     required  pam-multi.so pam-multi -s /usr/lib/indimail/modules/iauth.so
+account  required  pam-multi.so pam-multi -i pop3 -s /usr/lib/indimail/modules/iauth.so
 ```
 
 NOTE: Any line starting with `#` is a comment
+
+## Examples AUTHMODULE configuration
+
+### courier-imap
+
+```
+# cat > /usr/libexec/indimail/imapmodules/authcheckpassword <<EOF
+#!/bin/sh
+exec 3<&0
+sed -e '1,2d' | tr '\n' '\0' | pam-checkpwd -s pop3 -- $@ 3<&0
+EOF
+# chmod +x /usr/libexec/indimail/imapmodules/authcheckpassword
+```
+
+### indimail-mta
+
+The following will use pam-checkpwd sys-checkpwd as the first, pam-checkpwd as the second authmodule, and vchkpass as the last module.
+
+```
+# cat > /service/qmail-smtpd.25/variables/AUTHMODULES <<EOF
+/usr/sbin/sys-checkpwd pam-checkwd -s pam-multi -e -- /usr/sbin/vchkpass
+EOF
+```
 
 ## TESTING
 
