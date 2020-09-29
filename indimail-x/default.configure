@@ -5,11 +5,6 @@ fi
 if [ ! -f conf-release ] ; then
 	echo 1.1 > conf-release
 fi
-if [ -d $prefix/include/mysql ] ; then
-	mysqlPrefix=$prefix
-elif [ /usr/local/include/mysql ] ; then
-	mysqlPrefix=/usr/local
-fi
 SYSTEM=$(uname -s)
 arch=$(uname -m)
 case "$SYSTEM" in
@@ -46,6 +41,11 @@ else
 		echo "could not find libdir " 1>&2
 		exit 1
 	fi
+fi
+if [ -d $prefix/include/mysql ] ; then
+	mysqlPrefix=$prefix
+elif [ /usr/local/include/mysql ] ; then
+	mysqlPrefix=/usr/local
 fi
 ./configure \
   --prefix=$prefix \
