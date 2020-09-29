@@ -20,3 +20,6 @@ Release 3.3 Start 06/09/2020
 11. pipe_exec.c: display authmodule being executed in debug statements
 12. vsetpass.c, vchkpass.c, authpgsql.c, authindi.c, pipe_exec.c added pid
     error logs/debug statements
+-29/09/2020
+13. authindi: execute next module when already authenticated by previous
+    module

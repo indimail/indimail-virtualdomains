@@ -10,3 +10,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * vsetpass.c, vchkpass.c, authpgsql.c, authindi.c print authmodule name in error logs/debug statements
   * pipe_exec.c: display authmodule being executed in debug statements
   * vsetpass.c, vchkpass.c, authpgsql.c, authindi.c, pipe_exec.c added pid error logs/debug statements
+  * authindi: execute next module when already authenticated by previous module
