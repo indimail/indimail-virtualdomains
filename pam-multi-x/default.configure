@@ -45,6 +45,6 @@ fi
   --enable-mysqlprefix=$mysqlPrefix \
   --enable-moduledir=$moduledir \
   --enable-controldir=$sysconfdir/control \
-  --enable-pam-confdir=$pam_confdir \
+  --enable-pamconfdir=$pam_confdir \
   --enable-dlload-mysql=yes \
   --enable-default-domain=`uname -n`
