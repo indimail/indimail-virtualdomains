@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 1.7  2020-09-29 20:51:27+05:30  Cprogrammer
+ * execute next module when already authenticated by previous module
+ *
  * Revision 1.6  2020-09-29 11:13:18+05:30  Cprogrammer
  * fixed module name to 'authindi'
  *
@@ -61,7 +64,7 @@
 #include "sql_getpw.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.6 2020-09-29 11:13:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.7 2020-09-29 20:51:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -189,6 +192,12 @@ main(int argc, char **argv)
 	struct vlimits  limits;
 #endif
 
+	if (argc < 2)
+		exit (2);
+	if ((ptr = env_get("AUTHENTICATED"))) {
+		execv(argv[1], argv + 1);
+		strerr_warn3("execv: ", argv[1], ": ", &strerr_sys);
+	}
 	i = str_rchr(argv[0], '/');
 	if (argv[0][i])
 		prog_name = argv[0] + i + 1;
