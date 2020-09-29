@@ -1,5 +1,9 @@
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.17  2020-09-29 11:07:05+05:30  Cprogrammer
+ * replaced LOG_EMERG with LOG_INFO
+ * changed/added debug statements
+ *
  * Revision 1.16  2020-09-23 11:01:37+05:30  Cprogrammer
  * fold braces for readability
  *
@@ -92,6 +96,7 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <getopt.h>
 #ifdef HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
@@ -184,7 +189,7 @@ static int      update_passwd(pam_handle_t *, const char *, const char *);
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.16 2020-09-23 11:01:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.17 2020-09-29 11:07:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -650,7 +655,6 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
 	int             mode, pam_err, errflag, c, debug = 0, status, crypt_method = DES_HASH,
 					mysql_port = 3306;
-	char            opt_str[56];
 	const char     *user, *password, *rhost;
 	char           *mysql_query_str, *mysql_user, *mysql_pass, *mysql_host, *mysql_database,
 				   *command_str, *result;
@@ -658,11 +662,6 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	char           *shared_lib, *service;
 #endif
 
-#ifdef HAVE_DLFCN_H
-	snprintf(opt_str, sizeof (opt_str), "dm:u:p:D:H:P:c:s:i:");
-#else
-	snprintf(opt_str, sizeof (opt_str), "dm:u:p:D:H:P:c:");
-#endif
 	mysql_user = mysql_pass = mysql_database = mysql_host = command_str = (char *) 0;
 	mysql_query_str = (char *) 0;
 #ifdef HAVE_DLFCN_H
@@ -676,8 +675,14 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	 * %D - Domain
 	 * %S - Secret
 	 */
+	if (argc < 3)
+		_pam_log(LOG_ERR, "Invalid PAM configuration (less than 3 arguments). Check config file");
 	optind = opterr = errflag = 0;
-	while (!errflag && (c = getopt(argc, (char **) argv, opt_str)) != -1) {
+#ifdef HAVE_DLFCN_H
+	while ((c = getopt(argc, (char **) argv, "dm:u:p:D:H:P:c:s:i:")) != -1) {
+#else
+	while ((c = getopt(argc, (char **) argv, "dm:u:p:D:H:P:c:")) != -1) {
+#endif
 		switch (c)
 		{
 		case 'd':	/* debug */
@@ -719,17 +724,22 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 			errflag = 1;
 			break;
 		}
-		if (debug)
-			_pam_log(LOG_INFO, "optind=%d, c=[%c] [%s]", optind, c, opt_str);
 	}
+	if (debug)
+		for (c = 0; c < argc; c++)
+			_pam_log(LOG_INFO, "arg[%d]=[%s]", c, argv[c]);
 	if (!service)
 		service = getenv("AUTHSERVICE");
 	if (errflag > 0) {
-		_pam_log(LOG_EMERG, "Invalid PAM configuration. Check config file");
+		_pam_log(LOG_ERR, "Invalid PAM configuration. Check config file");
 		return (PAM_SERVICE_ERR);
 	}
 	if (mode < 0) {
-		_pam_log(LOG_EMERG, "Invalid PAM configuration. Mode Should be MYSQL, Command or Lib");
+#ifdef HAVE_DLFCN_H
+		_pam_log(LOG_ERR, "Invalid PAM configuration (without -m, -c, -s). Mode must be mysql, command or lib");
+#else
+		_pam_log(LOG_ERR, "Invalid PAM configuration (without -m, -c). Mode must be mysql or command");
+#endif
 		return (PAM_SERVICE_ERR);
 	}
 	if ((pam_err = pam_get_user(pamh, (const char **) &user, NULL)) != PAM_SUCCESS) {
@@ -952,7 +962,8 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 	{
 	case COMMAND_MODE:
 		if (!(status = run_command(command_str, 1, user, &result, &nitems, debug))) {
-			fprintf(stderr, "result=[%s]\n", result);
+			if (debug)
+				_pam_log(LOG_INFO, "sm_acct_mgmt result[%s]", result ? result : "null");
 			for (ptr = result;*ptr;ptr++) {
 				if (*ptr == ',' && *(ptr + 1)) {
 					exp_times[1] = atol(ptr + 1);
