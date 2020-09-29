@@ -1,15 +1,18 @@
 #
 # $Log: pam-multi.in,v $
+# Revision 1.2  2020-09-29 10:59:57+05:30  Cprogrammer
+# pam-multi.so uses getopt. argv0 must be supplied
+#
 # Revision 1.1  2020-09-28 22:08:30+05:30  Cprogrammer
 # Initial revision
 #
 #
-# $Id: pam-multi.in,v 1.1 2020-09-28 22:08:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: pam-multi.in,v 1.2 2020-09-29 10:59:57+05:30 Cprogrammer Exp mbhangui $
 #
-# auth     required  pam-multi.so args -m [select pw_passwd from indimail where pw_name='%u' and pw_domain='%d'] -u indimail -p ssh-1.5- -D indimail -H localhost -P 3306 -d
-# auth     required  pam-multi.so args -s @prefix@/lib/indimail/modules/iauth.so
-# account  required  pam-multi.so args -s @prefix@/lib/indimail/modules/iauth.so
+# auth     required  pam-multi.so argv0 -m [select pw_passwd from indimail where pw_name='%u' and pw_domain='%d'] -u indimail -p ssh-1.5- -D indimail -H localhost -P 3306 -d
+# auth     required  pam-multi.so argv0 -s @prefix@/lib/indimail/modules/iauth.so
+# account  required  pam-multi.so argv0 -s @prefix@/lib/indimail/modules/iauth.so
 # add -d argument to debug pam-multi lines
 #
-auth     required  pam-multi.so -s @prefix@/lib/indimail/modules/iauth.so
-account  required  pam-multi.so -s @prefix@/lib/indimail/modules/iauth.so
+auth     required  pam-multi.so pam-multi -s @prefix@/lib/indimail/modules/iauth.so
+account  required  pam-multi.so pam-multi -s @prefix@/lib/indimail/modules/iauth.so
