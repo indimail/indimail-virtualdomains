@@ -2,7 +2,7 @@
 
 [pam-multi](https://github.com/mbhangui/indimail-virtualdomains/tree/master/pam-multi-x) helps you to extend authentication of an existing pam-module (e.g. courier-imap, dovecout, cyrus, etc) to transparently authenticate against [IndiMail's](https://github.com/mbhangui/indimail-virtualdomains) own MySQL database. The primary goal of pam-multi was to allow SMTP/IMAP/POP# servers to authenticate against IndiMail's MySQL database. In short, pam-multi provides a pam service, which is configurable to look at any datasource. IndiMail uses pam-multi to make possible usage of any SMTP server with IndiMail's database, without modifying a single line of code of the SMTP/IMAP/POP3 server. See the man page pam-multi(8). pam-multi package also contains pam-checkpwd(8) which provides a [checkpassword interface](http://cr.yp.to/checkpwd/interface.html). pam-checkpwd can use pam-multi or any PAM config/module authentication. See the examples below how it can be used to provided authenticated SMTP, IMAP/POP3 login. pam-checkpwd can be used for courier-imap, dovecot authentication too. pam-multi does chdir to the user's home directory and sets the uid, gid before returning.
 
-pam-multi doesn't depend on the user being in /etc/passwd. But your application may need fields like uid, gid, home directory from /et/passwd. If your datasource happens to be in MySQL, you can use nssd(8) to transparently extend your MySQL db into /etc/passwd. If you use nssd, all calls like getpwnam(3), getpwent(3), getspnam(3), getspent(3), etc will read data from your MySQL database with some simple configuration of /etc/indimail/nssd.conf. See the man page of nssd(8) for details. Both pam-multi and nssd are part of the indimail-auth package. In most cases, using nssd is enough make your application authenticate against IndiMail's MySQL db.
+pam-multi doesn't depend on the user being in /etc/passwd. But your application may need fields like uid, gid, home directory from /et/passwd. If your datasource happens to be in MySQL, you can use nssd(8) to transparently extend your MySQL db into /etc/passwd. If you use nssd, all calls like getpwnam(3), getpwent(3), getspnam(3), getspent(3), etc will read data from your MySQL database with some simple configuration of /etc/indimail/nssd.conf. See the man page of nssd(8) for details. Both pam-multi and nssd are part of the indimail-auth package. In most cases, using nssd is enough make your application authenticate against IndiMail's MySQL db, and you many not need pam-multi.
 
 pam-multi supports four methods for password hashing schemes.
 
@@ -113,23 +113,35 @@ NOTE: Any line starting with `#` is a comment
 
 ## Examples AUTHMODULE configuration
 
-### courier-imap
+### IndiMail courier-imap
+
+This is a crazy example of using checkpassword compatible auth module with courier-imap (because courier-imap has its own auth modules).
 
 ```
 # cat > /usr/libexec/indimail/imapmodules/authcheckpassword <<EOF
 #!/bin/sh
-exec 3<&0
-sed -e '1,2d' | tr '\n' '\0' | pam-checkpwd -s pop3 -- $@ 3<&0
+if [ -n "$POSTAUTH" ] ; then
+  exec env "AUTHENTICATED=$1" "MAILDIR=$HOME/Maildir" "AUTHADDR=$1" \
+    /usr/local/bin/imapd Maildir
+fi
+POSTAUTH=/usr/local/libexec/indimail/imapmodules/authcheckpassword
+AUTHSERVICE=$(basename $AUTHUSER | cut -c1-4)
+export POSTAUTH
+out=`mktemp -t authpXXXXXXXXXX`
+sed -e '1,2d' 0<&3 | tr '\n' '\0' > $out
+exec 3<$out
+/bin/rm -f $out
+exec /usr/local/sbin/pam-checkpwd -s pam-multi -i $AUTHSERVICE -- $*
 EOF
 # chmod +x /usr/libexec/indimail/imapmodules/authcheckpassword
 ```
 
-### indimail-mta
+### indimail-mta Authenticated SMTP
 
 The following will use pam-checkpwd sys-checkpwd as the first, pam-checkpwd as the second authmodule, and vchkpass as the last module.
 
 ```
-# cat > /service/qmail-smtpd.25/variables/AUTHMODULES <<EOF
+# cat > /service/qmail-smtpd.587/variables/AUTHMODULES <<EOF
 /usr/sbin/sys-checkpwd pam-checkwd -s pam-multi -e -- /usr/sbin/vchkpass
 EOF
 ```

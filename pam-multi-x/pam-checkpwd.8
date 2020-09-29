@@ -82,8 +82,8 @@ Before invoking \fIprog\fR, \fBpam-checkpwd\fR sets environment variables
 to appropriate values.  If --\fBnoenv\fR option is specified, this step is
 skipped and the variables are left alone. This is needed when you have
 virtual users which are not listed in your \fI/etc/passwd\fR,
-and you need to only do authentication. Setting up process
-environment is handled by some other application like \fBsetuidgid\fR.
+and you need to only do authentication. Setting up process uid, gid can
+be handled by some other application like \fBsetuidgid(8)\fR.
 
 .SH "ENVIRONMENT VARIABLES"
 
@@ -123,7 +123,7 @@ user and password with the following command-line
 .PP
 It will trace the PAM authentication process for the user
 \fIusername\fR with password \fIpassword\fR, and run the \fBid\fR
-program, which will report the user and groups \fBpam-checkpwd\fR
+program on failure, which will report the user and groups \fBpam-checkpwd\fR
 switched to.
 
 .SH "SEE ALSO"
