@@ -1,5 +1,8 @@
 /*
  * $Log: ismaildup.c,v $
+ * Revision 1.3  2020-10-01 18:25:44+05:30  Cprogrammer
+ * fixed compiler warning
+ *
  * Revision 1.2  2020-04-01 18:56:39+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -18,6 +21,9 @@
 #endif
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
+#endif
+#ifdef HAVE_TIME_H
+#include <time.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -44,7 +50,7 @@
 #include "MakeArgs.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ismaildup.c,v 1.2 2020-04-01 18:56:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ismaildup.c,v 1.3 2020-10-01 18:25:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_SSL 
