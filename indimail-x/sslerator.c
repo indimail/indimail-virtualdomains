@@ -1,5 +1,8 @@
 /*
  * $Log: sslerator.c,v $
+ * Revision 1.3  2020-10-01 18:30:32+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.2  2019-06-07 16:07:19+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: sslerator.c,v 1.2 2019-06-07 16:07:19+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: sslerator.c,v 1.3 2020-10-01 18:30:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_SSL
@@ -57,7 +60,8 @@ ssl_write(SSL *ssl, char *buf, int len)
 				continue;
 			return -1;	/*- note that some data may have been written */
 		}
-		if (w == 0);	/*- luser's fault */
+		if (w == 0)
+			;	/*- luser's fault */
 		buf += w;
 		len -= w;
 	}
