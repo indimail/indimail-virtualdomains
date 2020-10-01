@@ -25,7 +25,7 @@ case "$host" in
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	;;
 *-*-darwin*)
-	CFLAGS="$CFLAGS -O4 -Wall -pie"
+	CFLAGS="$CFLAGS -O3 -Wall -pie"
 	;;
 *)
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
