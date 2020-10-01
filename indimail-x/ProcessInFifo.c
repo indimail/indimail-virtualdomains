@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.7  2020-10-01 18:27:59+05:30  Cprogrammer
+ * Darwin Port
+ *
  * Revision 1.6  2020-09-17 14:48:15+05:30  Cprogrammer
  * FreeBSD fix for missing tdestroy
  *
@@ -98,7 +101,7 @@
 #include "FifoCreate.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.6 2020-09-17 14:48:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.7 2020-10-01 18:27:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -108,10 +111,11 @@ time_t          start_time;
 int             host_query_count;
 #endif
 static void    *in_root = 0;
-#ifdef FREEBSD
+#if defined(FREEBSD) || defined(DARWIN)
 static void    *element = 0;
 #endif
 char            strnum[FMT_ULONG];
+static int      pwdCache; /*- for sighup to figure out if caching was selected on startup */
 
 /*-
 typedef struct
@@ -132,7 +136,7 @@ typedef struct
 } INENTRY;
 */
 
-#ifdef FREEBSD
+#if defined(FREEBSD) || defined(DARWIN)
 /*
  *  This comparison routine can be used with tdelete()
  *  when explicitly deleting a root node, as no comparison
@@ -260,9 +264,277 @@ in_free_func(void *in_data)
 	return;
 }
 
+static void
+getTimeoutValues(int *readTimeout, int *writeTimeout, char *sysconfdir, char *controldir)
+{
+	static stralloc tmpbuf = {0}, line = {0};
+	char            inbuf[512];
+	int             fd, match;
+	substdio        ssin;
+
+	if (*controldir == '/') {
+		if (!stralloc_copys(&tmpbuf, controldir) ||
+				!stralloc_catb(&tmpbuf, "/timeoutread", 12) ||
+				!stralloc_0(&tmpbuf))
+			die_nomem();
+	} else {
+		if (!stralloc_copys(&tmpbuf, sysconfdir) ||
+				!stralloc_append(&tmpbuf, "/") ||
+				!stralloc_cats(&tmpbuf, controldir) ||
+				!stralloc_catb(&tmpbuf, "/timeoutread", 12) ||
+				!stralloc_0(&tmpbuf))
+			die_nomem();
+	}
+	if ((fd = open_read(tmpbuf.s)) == -1)
+		*readTimeout = 4;
+	else {
+		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		if (getln(&ssin, &line, &match, '\n') == -1)
+			*readTimeout = 4;
+		else {
+			if (match) {
+				line.len--;
+				line.s[line.len] = 0; /*- remove newline */
+			}
+			scan_uint(line.s, (unsigned int *) readTimeout);
+		}
+		close(fd);
+	}
+	if (*controldir == '/') {
+		if (!stralloc_copys(&tmpbuf, controldir) ||
+				!stralloc_catb(&tmpbuf, "/timeoutwrite", 13) ||
+				!stralloc_0(&tmpbuf))
+			die_nomem();
+	} else {
+		if (!stralloc_copys(&tmpbuf, sysconfdir) ||
+				!stralloc_append(&tmpbuf, "/") ||
+				!stralloc_cats(&tmpbuf, controldir) ||
+				!stralloc_catb(&tmpbuf, "/timeoutwrite", 13) ||
+				!stralloc_0(&tmpbuf))
+			die_nomem();
+	}
+	if ((fd = open_read(tmpbuf.s)) == -1)
+		*writeTimeout = 4;
+	else {
+		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		if (getln(&ssin, &line, &match, '\n') == -1)
+			*writeTimeout = 4;
+		else {
+			if (match) {
+				line.len--;
+				line.s[line.len] = 0; /*- null terminate */
+			}
+			scan_uint(line.s, (unsigned int *) writeTimeout);
+		}
+		close(fd);
+	}
+	return;
+}
+
+int
+in_compare_func(const void *l, const void *r)
+{
+	return str_diff(*(char **) l, *(char **) r);
+}
+
+int
+cache_active_pwd(time_t tval)
+{
+	MYSQL_RES      *res;
+	MYSQL_ROW       row;
+	static stralloc SqlBuf = {0}, email = {0};
+	int             use_btree, max_btree_count, err;
+	static time_t   act_secs;
+	char           *ptr;
+	INENTRY        *in, *re, *retval;
+
+	if (tval)
+		act_secs = tval;
+	pwdCache = 1;
+	ptr = env_get("USE_BTREE");
+	use_btree = ((ptr && *ptr == '1') ? 1 : 0);
+	if (!use_btree)
+		return (0);
+	scan_uint((ptr = env_get("MAX_BTREE_COUNT")) && *ptr ? ptr : "-1", (unsigned int *) &max_btree_count);
+	if (in_root) {
+#if defined(FREEBSD) || defined(DARWIN)
+		while (in_root != NULL) {
+			element = *(INENTRY **) in_root;
+			tdelete(element, &in_root, delete_root);
+			in_free_func(element);
+		}
+#else
+		tdestroy(in_root, in_free_func);
+#endif
+		in_root = 0;
+		btree_count = 0;
+	}
+	if (!stralloc_copyb(&SqlBuf, "SELECT pw_name, pw_domain, pw_passwd, pw_uid, pw_gid, ", 54) ||
+			!stralloc_catb(&SqlBuf, "pw_gecos, pw_dir, pw_shell FROM indimail ", 41) ||
+			!stralloc_catb(&SqlBuf, "JOIN lastauth ON pw_name = user AND pw_domain = domain WHERE ", 61) ||
+			!stralloc_catb(&SqlBuf, "UNIX_timestamp(lastauth.timestamp) >= UNIX_timestamp() - ", 57) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_ulong(strnum, act_secs)) ||
+			!stralloc_catb(&SqlBuf, " AND service in (\"imap\", \"pop3\", \"wtbm\") ", 41) ||
+			!stralloc_catb(&SqlBuf, "GROUP BY pw_name, pw_domain ORDER BY lastauth.timestamp desc", 60) ||
+			!stralloc_0(&SqlBuf))
+		die_nomem();
+
+	if ((err = iopen((char *) 0)) != 0)
+		return (-1);
+	if (mysql_query(&mysql[1], SqlBuf.s)) {
+		if (in_mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
+			create_table(ON_LOCAL, "lastauth", LASTAUTH_TABLE_LAYOUT);
+			iclose();
+			return (0);
+		}
+		strerr_warn4("ProcesInFifo: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
+		return (-1);
+	}
+	if (!(res = in_mysql_store_result(&mysql[1]))) {
+		strerr_warn2("ProcesInFifo: in_mysql_store_result: ", (char *) in_mysql_error(&mysql[1]), 0);
+		return (-1);
+	}
+	for(; (row = in_mysql_fetch_row(res));) {
+		if (!stralloc_copys(&email, row[0]) ||
+				!stralloc_append(&email, "@") ||
+				!stralloc_cats(&email, row[1]) ||
+				!stralloc_0(&email))
+			die_nomem();
+		if (!(in = mk_in_entry(email.s))) {
+			in_mysql_free_result(res);
+			return (-1);
+		}
+		if (!(retval = tsearch (in, &in_root, in_compare_func))) {
+			in_free_func(in);
+			in_mysql_free_result(res);
+			return (-1);
+		} else {
+			re = *(INENTRY **) retval;
+			if (re != in) { /*- existing data, shouldn't happen */
+				in_free_func(in);
+				in_mysql_free_result(res);
+				return (1);
+			} else {/*- New entry in was added.  */
+				in->in_pw.pw_name = in_strdup(row[0]);
+				in->domain = in_strdup(row[1]);
+				in->in_pw.pw_passwd = in_strdup(row[2]);
+				in->in_pw.pw_gecos = in_strdup(row[5]);
+				in->in_pw.pw_dir = in_strdup(row[6]);
+				in->in_pw.pw_shell = in_strdup(row[7]);
+				scan_uint(row[3], &in->in_pw.pw_uid);
+				scan_uint(row[4], &in->in_pw.pw_gid);
+				in->pwStat = 1;
+				btree_count++;
+				if (max_btree_count > 0 && btree_count >= max_btree_count)
+					break;
+			}
+		}
+	}
+	in_mysql_free_result(res);
+	iclose();
+	return (0);
+}
+
+static char    *
+query_type(int status)
+{
+	static char     tmpbuf[FMT_ULONG + 12];
+	char           *s;
+
+	switch(status)
+	{
+		case USER_QUERY:
+			return ("'User Query'");
+		case RELAY_QUERY:
+			return ("'Relay Query'");
+		case PWD_QUERY:
+			return ("'Password Query'");
+#ifdef CLUSTERED_SITE
+		case HOST_QUERY:
+			return ("'Host Query'");
+#endif
+		case ALIAS_QUERY:
+			return ("'Alias Query'");
+#ifdef ENABLE_DOMAIN_LIMITS
+		case LIMIT_QUERY:
+			return ("'Domain Limits Query'");
+#endif
+		case DOMAIN_QUERY:
+			return ("'Domain Query'");
+		default:
+			break;
+	}
+	s = tmpbuf;
+	s += fmt_strn(s, "'Unknown ", 9);
+	s += fmt_uint(s, status);
+	s += fmt_strn(s, "'\n", 2);
+	*s++ = 0;
+	return (tmpbuf);
+}
+
+#ifdef ENABLE_ENTERPRISE
+int
+do_startup(int instNum)
+{
+	void           *handle;
+	char            tmp[FMT_ULONG];
+	char           *plugindir, *plugin_symb, *start_plugin, *error;
+	static stralloc plugin = {0};
+	int             (*func) (void);
+	int             i, status;
+
+	if (!(plugindir = env_get("PLUGINDIR")))
+		plugindir = "plugins";
+	i = strchr(plugindir, '/');
+	if (plugindir[i]) {
+		strerrr_warn1("alert: plugindir cannot have an absolute path", 0);
+		return (-1);
+	}
+	if (!(plugin_symb = env_get("START_PLUGIN_SYMB")))
+		plugin_symb = "startup";
+	if (!(start_plugin = env_get("START_PLUGIN")))
+		start_plugin = "indimail-license.so";
+	if (!stralloc_copyb(&plugin, "/usr/lib/indimail/", 18) ||
+			!stralloc_cats(&plugin, plugindir) ||
+			!stralloc_append(&plugin, "/") ||
+			!stralloc_cats(&plugin, start_plugin) ||
+			!stralloc_0(&plugin))
+		die_nomem();
+	strnum[fmt_uint(strnum, instNum)] = 0;
+	if (access(plugin.s, F_OK)) {
+		strerr_warn5("InLookup[", strnum, "] plugin ", plugin.s, ": ", &strerr_sys);
+		return (2);
+	}
+	if (!(handle = dlopen(plugin, RTLD_LAZY|RTLD_GLOBAL))) {
+		strerr_warn6("InLookup[", strnum, "] dlopen failed for ", plugin.s, ": ", dlerror(), 0);
+		return (-1);
+	}
+	dlerror(); /*- man page told me to do this */
+	func = dlsym(handle, plugin_symb);
+	if ((error = dlerror())) {
+		strerr_warn6("InLookup[", strnum, "] dlsym ", plugin_symb, " failed: ", error, 0);
+		_exit(111);
+	}
+	out("ProcessInFifo", "InLookup[");
+	out("ProcessInFifo", strnum);
+	out("ProcessInFifo", "] Checking Plugin ");
+	out("ProcessInFifo", start_plugin);
+	out("ProcessInFifo", "\n");
+	flush("ProcessInFifo");
+	if ((status = (*func) ()))
+		tmp[fmt_int(tmp, status)] = 0;
+		strerr_warn6("InLookup[", strnum, "] function ", plugin_symb, " failed with status ", tmp, 0);
+	if (dlclose(handle)) {
+		strerr_warn6("InLookup[", strnum, "] dlclose for ", plugin.s, " failed: ", error, 0);
+		return (-1);
+	}
+	return (status);
+}
+#endif
+
 #ifdef DARWIN
 static void
-sig_usr1()
+isig_usr1()
 {
 	char           *fifo_name;
 	long            total_count;
@@ -325,13 +597,13 @@ sig_usr1()
 	out("ProcessInFifo", "\n");
 	flush("ProcessInFifo");
 	twalk(in_root, walk_entry);
-	signal(SIGUSR1, (void(*)()) sig_usr1);
+	signal(SIGUSR1, (void(*)()) isig_usr1);
 	errno = error_intr;
 	return;
 }
 
 static void
-sig_usr2()
+isig_usr2()
 {
 	char           *fifo_name;
 
@@ -349,13 +621,13 @@ sig_usr2()
 	out("ProcessInFifo", _debug ? "0\n" : "1\n");
 	flush("ProcessInFifo");
 	_debug = (_debug ? 0 : 1);
-	signal(SIGUSR2, (void(*)()) sig_usr2);
+	signal(SIGUSR2, (void(*)()) isig_usr2);
 	errno = error_intr;
 	return;
 }
 
 static void
-sig_hup()
+isig_hup()
 {
 	char           *fifo_name;
 
@@ -382,7 +654,7 @@ sig_hup()
 	get_real_domain_cache(0);
 	get_assign_cache(0);
 #endif
-#ifdef FREEBSD
+#if defined(FREEBSD) || defined(DARWIN)
 	while (in_root != NULL) {
 		element = *(INENTRY **) in_root;
 		tdelete(element, &in_root, delete_root);
@@ -401,13 +673,13 @@ sig_hup()
 		out("ProcessInFifo", " records\n");
 	}
 	flush("ProcessInFifo");
-	signal(SIGHUP, (void(*)()) sig_hup);
+	signal(SIGHUP, (void(*)()) isig_hup);
 	errno = error_intr;
 	return;
 }
 
 static void
-sig_int()
+isig_int()
 {
 	char           *fifo_name;
 
@@ -423,13 +695,13 @@ sig_int()
 	out("ProcessInFifo", " closing db\n");
 	flush("ProcessInFifo");
 	close_db();
-	signal(SIGINT, (void(*)()) sig_int);
+	signal(SIGINT, (void(*)()) isig_int);
 	errno = error_intr;
 	return;
 }
 
 static void
-sig_term()
+isig_term()
 {
 	char           *fifo_name;
 	long            total_count;
@@ -627,7 +899,7 @@ sig_hand(sig, code, scp, addr)
 			get_assign_cache(0);
 			get_real_domain_cache(0);
 #endif
-#ifdef FREEBSD
+#if defined(FREEBSD) || defined(DARWIN)
 			while (in_root != NULL) {
 				element = *(INENTRY **) in_root;
 				tdelete(element, &in_root, delete_root);
@@ -655,276 +927,6 @@ sig_hand(sig, code, scp, addr)
 }
 #endif /*- #ifdef DARWIN */
 
-static void
-getTimeoutValues(int *readTimeout, int *writeTimeout, char *sysconfdir, char *controldir)
-{
-	static stralloc tmpbuf = {0}, line = {0};
-	char            inbuf[512];
-	int             fd, match;
-	substdio        ssin;
-
-	if (*controldir == '/') {
-		if (!stralloc_copys(&tmpbuf, controldir) ||
-				!stralloc_catb(&tmpbuf, "/timeoutread", 12) ||
-				!stralloc_0(&tmpbuf))
-			die_nomem();
-	} else {
-		if (!stralloc_copys(&tmpbuf, sysconfdir) ||
-				!stralloc_append(&tmpbuf, "/") ||
-				!stralloc_cats(&tmpbuf, controldir) ||
-				!stralloc_catb(&tmpbuf, "/timeoutread", 12) ||
-				!stralloc_0(&tmpbuf))
-			die_nomem();
-	}
-	if ((fd = open_read(tmpbuf.s)) == -1)
-		*readTimeout = 4;
-	else {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-		if (getln(&ssin, &line, &match, '\n') == -1)
-			*readTimeout = 4;
-		else {
-			if (match) {
-				line.len--;
-				line.s[line.len] = 0; /*- remove newline */
-			}
-			scan_uint(line.s, (unsigned int *) readTimeout);
-		}
-		close(fd);
-	}
-	if (*controldir == '/') {
-		if (!stralloc_copys(&tmpbuf, controldir) ||
-				!stralloc_catb(&tmpbuf, "/timeoutwrite", 13) ||
-				!stralloc_0(&tmpbuf))
-			die_nomem();
-	} else {
-		if (!stralloc_copys(&tmpbuf, sysconfdir) ||
-				!stralloc_append(&tmpbuf, "/") ||
-				!stralloc_cats(&tmpbuf, controldir) ||
-				!stralloc_catb(&tmpbuf, "/timeoutwrite", 13) ||
-				!stralloc_0(&tmpbuf))
-			die_nomem();
-	}
-	if ((fd = open_read(tmpbuf.s)) == -1)
-		*writeTimeout = 4;
-	else {
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-		if (getln(&ssin, &line, &match, '\n') == -1)
-			*writeTimeout = 4;
-		else {
-			if (match) {
-				line.len--;
-				line.s[line.len] = 0; /*- null terminate */
-			}
-			scan_uint(line.s, (unsigned int *) writeTimeout);
-		}
-		close(fd);
-	}
-	return;
-}
-
-int
-in_compare_func(const void *l, const void *r)
-{
-	return str_diff(*(char **) l, *(char **) r);
-}
-
-static int      pwdCache; /*- for sighup to figure out if caching was selected on startup */
-
-int
-cache_active_pwd(time_t tval)
-{
-	MYSQL_RES      *res;
-	MYSQL_ROW       row;
-	static stralloc SqlBuf = {0}, email = {0};
-	int             use_btree, max_btree_count, err;
-	static time_t   act_secs;
-	char           *ptr;
-	INENTRY        *in, *re, *retval;
-
-	if (tval)
-		act_secs = tval;
-	pwdCache = 1;
-	ptr = env_get("USE_BTREE");
-	use_btree = ((ptr && *ptr == '1') ? 1 : 0);
-	if (!use_btree)
-		return (0);
-	scan_uint((ptr = env_get("MAX_BTREE_COUNT")) && *ptr ? ptr : "-1", (unsigned int *) &max_btree_count);
-	if (in_root) {
-#ifdef FREEBSD
-		while (in_root != NULL) {
-			element = *(INENTRY **) in_root;
-			tdelete(element, &in_root, delete_root);
-			in_free_func(element);
-		}
-#else
-		tdestroy(in_root, in_free_func);
-#endif
-		in_root = 0;
-		btree_count = 0;
-	}
-	if (!stralloc_copyb(&SqlBuf, "SELECT pw_name, pw_domain, pw_passwd, pw_uid, pw_gid, ", 54) ||
-			!stralloc_catb(&SqlBuf, "pw_gecos, pw_dir, pw_shell FROM indimail ", 41) ||
-			!stralloc_catb(&SqlBuf, "JOIN lastauth ON pw_name = user AND pw_domain = domain WHERE ", 61) ||
-			!stralloc_catb(&SqlBuf, "UNIX_timestamp(lastauth.timestamp) >= UNIX_timestamp() - ", 57) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_ulong(strnum, act_secs)) ||
-			!stralloc_catb(&SqlBuf, " AND service in (\"imap\", \"pop3\", \"wtbm\") ", 41) ||
-			!stralloc_catb(&SqlBuf, "GROUP BY pw_name, pw_domain ORDER BY lastauth.timestamp desc", 60) ||
-			!stralloc_0(&SqlBuf))
-		die_nomem();
-
-	if ((err = iopen((char *) 0)) != 0)
-		return (-1);
-	if (mysql_query(&mysql[1], SqlBuf.s)) {
-		if (in_mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
-			create_table(ON_LOCAL, "lastauth", LASTAUTH_TABLE_LAYOUT);
-			iclose();
-			return (0);
-		}
-		strerr_warn4("ProcesInFifo: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
-		return (-1);
-	}
-	if (!(res = in_mysql_store_result(&mysql[1]))) {
-		strerr_warn2("ProcesInFifo: in_mysql_store_result: ", (char *) in_mysql_error(&mysql[1]), 0);
-		return (-1);
-	}
-	for(; (row = in_mysql_fetch_row(res));) {
-		if (!stralloc_copys(&email, row[0]) ||
-				!stralloc_append(&email, "@") ||
-				!stralloc_cats(&email, row[1]) ||
-				!stralloc_0(&email))
-			die_nomem();
-		if (!(in = mk_in_entry(email.s))) {
-			in_mysql_free_result(res);
-			return (-1);
-		}
-		if (!(retval = tsearch (in, &in_root, in_compare_func))) {
-			in_free_func(in);
-			in_mysql_free_result(res);
-			return (-1);
-		} else {
-			re = *(INENTRY **) retval;
-			if (re != in) { /*- existing data, shouldn't happen */
-				in_free_func(in);
-				in_mysql_free_result(res);
-				return (1);
-			} else {/*- New entry in was added.  */
-				in->in_pw.pw_name = in_strdup(row[0]);
-				in->domain = in_strdup(row[1]);
-				in->in_pw.pw_passwd = in_strdup(row[2]);
-				in->in_pw.pw_gecos = in_strdup(row[5]);
-				in->in_pw.pw_dir = in_strdup(row[6]);
-				in->in_pw.pw_shell = in_strdup(row[7]);
-				scan_uint(row[3], &in->in_pw.pw_uid);
-				scan_uint(row[4], &in->in_pw.pw_gid);
-				in->pwStat = 1;
-				btree_count++;
-				if (max_btree_count > 0 && btree_count >= max_btree_count)
-					break;
-			}
-		}
-	}
-	in_mysql_free_result(res);
-	iclose();
-	return (0);
-}
-
-static char    *
-query_type(int status)
-{
-	static char     tmpbuf[FMT_ULONG + 12];
-	char           *s;
-
-	switch(status)
-	{
-		case USER_QUERY:
-			return ("'User Query'");
-		case RELAY_QUERY:
-			return ("'Relay Query'");
-		case PWD_QUERY:
-			return ("'Password Query'");
-#ifdef CLUSTERED_SITE
-		case HOST_QUERY:
-			return ("'Host Query'");
-#endif
-		case ALIAS_QUERY:
-			return ("'Alias Query'");
-#ifdef ENABLE_DOMAIN_LIMITS
-		case LIMIT_QUERY:
-			return ("'Domain Limits Query'");
-#endif
-		case DOMAIN_QUERY:
-			return ("'Domain Query'");
-		default:
-			break;
-	}
-	s = tmpbuf;
-	s += fmt_strn(s, "'Unknown ", 9);
-	s += fmt_uint(s, status);
-	s += fmt_strn(s, "'\n", 2);
-	*s++ = 0;
-	return (tmpbuf);
-}
-
-#ifdef ENABLE_ENTERPRISE
-int
-do_startup(int instNum)
-{
-	void           *handle;
-	char            tmp[FMT_ULONG];
-	char           *plugindir, *plugin_symb, *start_plugin, *error;
-	static stralloc plugin = {0};
-	int             (*func) (void);
-	int             i, status;
-
-	if (!(plugindir = env_get("PLUGINDIR")))
-		plugindir = "plugins";
-	i = strchr(plugindir, '/');
-	if (plugindir[i]) {
-		strerrr_warn1("alert: plugindir cannot have an absolute path", 0);
-		return (-1);
-	}
-	if (!(plugin_symb = env_get("START_PLUGIN_SYMB")))
-		plugin_symb = "startup";
-	if (!(start_plugin = env_get("START_PLUGIN")))
-		start_plugin = "indimail-license.so";
-	if (!stralloc_copyb(&plugin, "/usr/lib/indimail/", 18) ||
-			!stralloc_cats(&plugin, plugindir) ||
-			!stralloc_append(&plugin, "/") ||
-			!stralloc_cats(&plugin, start_plugin) ||
-			!stralloc_0(&plugin))
-		die_nomem();
-	strnum[fmt_uint(strnum, instNum)] = 0;
-	if (access(plugin.s, F_OK)) {
-		strerr_warn5("InLookup[", strnum, "] plugin ", plugin.s, ": ", &strerr_sys);
-		return (2);
-	}
-	if (!(handle = dlopen(plugin, RTLD_LAZY|RTLD_GLOBAL))) {
-		strerr_warn6("InLookup[", strnum, "] dlopen failed for ", plugin.s, ": ", dlerror(), 0);
-		return (-1);
-	}
-	dlerror(); /*- man page told me to do this */
-	func = dlsym(handle, plugin_symb);
-	if ((error = dlerror())) {
-		strerr_warn6("InLookup[", strnum, "] dlsym ", plugin_symb, " failed: ", error, 0);
-		_exit(111);
-	}
-	out("ProcessInFifo", "InLookup[");
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", "] Checking Plugin ");
-	out("ProcessInFifo", start_plugin);
-	out("ProcessInFifo", "\n");
-	flush("ProcessInFifo");
-	if ((status = (*func) ()))
-		tmp[fmt_int(tmp, status)] = 0;
-		strerr_warn6("InLookup[", strnum, "] function ", plugin_symb, " failed with status ", tmp, 0);
-	if (dlclose(handle)) {
-		strerr_warn6("InLookup[", strnum, "] dlclose for ", plugin.s, " failed: ", error, 0);
-		return (-1);
-	}
-	return (status);
-}
-#endif
-
 int
 ProcessInFifo(int instNum)
 {
@@ -951,11 +953,11 @@ ProcessInFifo(int instNum)
 	_debug = (env_get("DEBUG") ? 1 : 0);
 	start_time = time(0);
 #ifdef DARWIN
-	signal(SIGTERM, (void(*)()) sig_term);
-	signal(SIGUSR1, (void(*)()) sig_usr1);
-	signal(SIGUSR2, (void(*)()) sig_usr2);
-	signal(SIGHUP, (void(*)()) sig_hup);
-	signal(SIGINT, (void(*)()) sig_int);
+	signal(SIGTERM, (void(*)()) isig_term);
+	signal(SIGUSR1, (void(*)()) isig_usr1);
+	signal(SIGUSR2, (void(*)()) isig_usr2);
+	signal(SIGHUP, (void(*)()) isig_hup);
+	signal(SIGINT, (void(*)()) isig_int);
 #else
 	signal(SIGTERM, (void(*)()) sig_hand);
 	signal(SIGUSR1, (void(*)()) sig_hand);
