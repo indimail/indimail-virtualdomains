@@ -4,7 +4,6 @@
 AC_PREREQ([2.69])
 AC_INIT([IndiMail],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-virtualdomains@indimail.org],indimail, [https://github.com/mbhangui/indimail-virtualdomains])
 AC_CONFIG_HEADERS([config.h])
-AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-support@lists.sourceforge.net")
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 AM_INIT_AUTOMAKE
@@ -20,36 +19,6 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_MAKE_SET
 PKG_PROG_PKG_CONFIG
 PKG_INSTALLDIR
-
-# Checks for libraries.
-
-# Checks for header files.
-AC_ISC_POSIX
-AC_HEADER_STDC
-AC_CHECK_HEADERS([ctype.h fcntl.h stdlib.h string.h sys/wait.h sys/types.h sys/socket.h unistd.h time.h sys/time.h])
-saveCPPFLAGS="$CPPFLAGS"
-CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/local/include/mysql -I/usr/include/qmail"
-AC_CHECK_HEADERS([mysql.h pwd.h grp.h stdarg.h varargs.h errno.h signal.h netdb.h netinet/in.h arpa/inet.h])
-AC_CHECK_TYPE([bool],AC_DEFINE(HAVE_BOOL, 1, have bool typedef),,[#include <mysql.h>])
-CPPFLAGS=$saveCPPFLAGS
-AC_CHECK_HEADERS([dirent.h limits.h sys/ioctl.h net/if.h linux/sockios.h sys/sockio.h])
-AC_CHECK_HEADERS([openssl/evp.h sys/syscall.h sys/select.h sys/un.h])
-AC_CHECK_HEADERS([crypt.h inttypes.h])
-AC_CHECK_HEADERS([fnmatch.h udb.h elf.h magic.h a.out.h malloc.h sys/utsname.h sys/ipc.h])
-
-AC_EGREP_HEADER(in_addr_t, netinet/in.h, AC_DEFINE(HAVE_IN_ADDR_T, 1, "have in_addr_t data type"),)
-
-# Checks for typedefs, structures, and compiler characteristics.
-AC_TYPE_UID_T
-AC_C_CONST
-AC_TYPE_SIZE_T
-AC_STRUCT_TM
-AC_TYPE_GETGROUPS
-
-# Checks for library functions.
-AC_FUNC_CHOWN
-AC_CHECK_FUNCS([strchr strerror strrchr])
-AC_CHECK_FUNCS(fdatasync sigaction sigprocmask fnmatch gethostname fchown getmntent getmntinfo setenv unsetenv)
 
 if test "$GCC" = yes ; then
 	CXXFLAGS="$CXXFLAGS -Wall"
@@ -88,17 +57,19 @@ case "$host" in
 *-*-darwin*)
 	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
-	CPPFLAGS="$CPPFLAGS -DDARWIN"
-	CFLAGS="$CFLAGS -O4 -Wall -pie"
-	MODFLAGS="-g -O4 -bundle -pie -Wall -undefined dynamic_lookup"
+	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I/opt/local/include/qmail"
+	CFLAGS="$CFLAGS -O3 -Wall"
+	LDFLAGS="$LDFLAGS -L/opt/local/lib"
+	MODFLAGS="-g -O3 -bundle -Wall -undefined dynamic_lookup"
 	STRIP_OPT=-s
 	;;
 *-*-freebsd*)
 	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
-	CPPFLAGS="$CPPFLAGS -DFREEBSD"
+	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/include/qmail"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	MODFLAGS="-g -O4 -fPIC -shared -Wall"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib"
 	STRIP_OPT=-s
 	;;
 *)
@@ -109,6 +80,36 @@ case "$host" in
 	STRIP_OPT=-s
 	;;
 esac
+
+# Checks for libraries.
+
+# Checks for header files.
+AC_ISC_POSIX
+AC_HEADER_STDC
+AC_CHECK_HEADERS([ctype.h fcntl.h stdlib.h string.h sys/wait.h sys/types.h sys/socket.h unistd.h time.h sys/time.h])
+saveCPPFLAGS="$CPPFLAGS"
+CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/local/include/mysql -I/usr/local/mysql/include"
+AC_CHECK_HEADERS([mysql.h pwd.h grp.h stdarg.h varargs.h errno.h signal.h netdb.h netinet/in.h arpa/inet.h])
+AC_CHECK_TYPE([bool],AC_DEFINE(HAVE_BOOL, 1, have bool typedef),,[#include <mysql.h>])
+CPPFLAGS=$saveCPPFLAGS
+AC_CHECK_HEADERS([dirent.h limits.h sys/ioctl.h net/if.h linux/sockios.h sys/sockio.h])
+AC_CHECK_HEADERS([openssl/evp.h sys/syscall.h sys/select.h sys/un.h])
+AC_CHECK_HEADERS([crypt.h inttypes.h])
+AC_CHECK_HEADERS([fnmatch.h udb.h elf.h magic.h a.out.h malloc.h sys/utsname.h sys/ipc.h])
+
+AC_EGREP_HEADER(in_addr_t, netinet/in.h, AC_DEFINE(HAVE_IN_ADDR_T, 1, "have in_addr_t data type"),)
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_TYPE_UID_T
+AC_C_CONST
+AC_TYPE_SIZE_T
+AC_STRUCT_TM
+AC_TYPE_GETGROUPS
+
+# Checks for library functions.
+AC_FUNC_CHOWN
+AC_CHECK_FUNCS([strchr strerror strrchr])
+AC_CHECK_FUNCS(fdatasync sigaction sigprocmask fnmatch gethostname fchown getmntent getmntinfo setenv unsetenv)
 defaultprefix="/usr"
 if test x$prefix = xNONE
 then
@@ -222,10 +223,10 @@ fi
 mysqlbindir=""
 for f in /usr/local/mysql/bin/mysql /usr/bin/mysql
 do
-if test -f $f
-then
-	mysqlbindir="`dirname $f`"
-	break
+	if test -f $f
+	then
+		mysqlbindir="`dirname $f`"
+		break
 	fi
 done
 AC_ARG_ENABLE(mysqlbindir, [  --enable-mysqlbindir=""       directory where mysql binary are.],
@@ -238,7 +239,7 @@ mysqlbindir="$enableval",
 ])
 mysql_prefix=`dirname $mysqlbindir`
 else
-	for f in $mysql_prefix/include/mysql.h $mysql_prefix/include/mysql/mysql.h
+	for f in $mysql_prefix/include/mysql.h $mysql_prefix/include/mysql/mysql.h $mysql_prefix/mysql/include/mysql.h
 	do
 		if test -f $f
 		then
@@ -261,11 +262,22 @@ else
 		elif test -d $mysql_prefix/lib
 		then
 			mysql_libdir=$mysql_prefix/lib
+		elif test -d $mysql_prefix/mysql/lib
+		then
+			mysql_libdir=$mysql_prefix/mysql/lib
 		else
 			mysql_libdir=$mysql_prefix/lib/mysql
 		fi
-		mysqlbindir=$mysql_prefix/bin
 	fi
+	mysqlbindir=""
+	for f in /usr/local/mysql/bin/mysql /usr/bin/mysql
+	do
+		if test -f $f
+		then
+			mysqlbindir="`dirname $f`"
+			break
+		fi
+	done
 fi
 AC_DEFINE_UNQUOTED(MYSQLBINDIR,"$mysqlbindir",full path to MySQL binaries)
 if test "$dlload_mysql" = "no"
