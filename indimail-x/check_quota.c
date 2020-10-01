@@ -1,5 +1,8 @@
 /*
  * $Log: check_quota.c,v $
+ * Revision 1.4  2020-10-01 18:22:00+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.3  2019-04-22 23:09:35+05:30  Cprogrammer
  * replaced atol() with scan_ulong()
  *
@@ -34,7 +37,7 @@
 #include "count_dir.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: check_quota.c,v 1.3 2019-04-22 23:09:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: check_quota.c,v 1.4 2020-10-01 18:22:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -131,11 +134,11 @@ mdir_t check_quota(char *Maildir)
 		}
 		i = str_chr(line.s, ' ');
 		if (line.s[i]) {
-			scan_ulong(line.s + i + 1, &count);
+			scan_ulong(line.s + i + 1, (unsigned long *) &count);
 			if (total)
 				*total += count;
 			line.s[i] = 0;
-			scan_ulong(line.s, &size);
+			scan_ulong(line.s, (unsigned long *) &size);
 			mail_size += size;
 		}
 	}
