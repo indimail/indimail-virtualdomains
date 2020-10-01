@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 1.8  2020-10-01 18:19:57+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.7  2020-09-29 20:51:27+05:30  Cprogrammer
  * execute next module when already authenticated by previous module
  *
@@ -64,7 +67,7 @@
 #include "sql_getpw.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.7 2020-09-29 20:51:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.8 2020-10-01 18:19:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -208,7 +211,8 @@ main(int argc, char **argv)
 		return (1);
 	}
 	if (!(authstr = alloc((authlen + 1) * sizeof(char)))) {
-		if (write(2, "AUTHFAILURE\n", 12) == -1) ;
+		if (write(2, "AUTHFAILURE\n", 12) == -1)
+			;
 		die_nomem();
 	}
 	/*-
@@ -245,7 +249,8 @@ main(int argc, char **argv)
 		}
 	}
 	if (!(buf = alloc((offset + 1) * sizeof(char)))) {
-		if (write(2, "AUTHFAILURE\n", 12) == -1) ;
+		if (write(2, "AUTHFAILURE\n", 12) == -1)
+			;
 		die_nomem();
 	}
 	byte_copy(buf, offset, authstr);
@@ -480,7 +485,8 @@ main(int argc, char **argv)
 	if (str_diff("webmail", service) == 0) {
 		if (pw->pw_gid & NO_WEBMAIL) {
 			strerr_warn2(prog_name, ": webmail disabled for this account", 0);
-			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
+			if (write(2, "AUTHFAILURE\n", 12) == -1)
+				;
 			close_connection();
 			if (auth_method > 2) {
 				if (challenge)
@@ -495,7 +501,8 @@ main(int argc, char **argv)
 	if (str_diff("pop3", service) == 0) {
 		if (pw->pw_gid & NO_POP) {
 			strerr_warn2(prog_name, ": pop3 disabled for this account", 0);
-			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
+			if (write(2, "AUTHFAILURE\n", 12) == -1)
+				;
 			close_connection();
 			if (auth_method > 2) {
 				if (challenge)
@@ -510,7 +517,8 @@ main(int argc, char **argv)
 	if (str_diff("imap", service) == 0) {
 		if (pw->pw_gid & NO_IMAP) {
 			strerr_warn2(prog_name, ": imap disabled for this account", 0);
-			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
+			if (write(2, "AUTHFAILURE\n", 12) == -1)
+				;
 			close_connection();
 			if (auth_method > 2) {
 				if (challenge)
@@ -543,7 +551,8 @@ main(int argc, char **argv)
 	{
 		if (argc == 3) {
 			strerr_warn2(prog_name, ": no more modules will be tried", 0);
-			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
+			if (write(2, "AUTHFAILURE\n", 12) == -1)
+				;
 			close_connection();
 			execv(!str_diff("pop3", service) ? *pop3args : *imapargs, argv);
 			strerr_warn4(prog_name, ": execv ", !str_diff("pop3", service) ? *pop3args : *imapargs, ": ", &strerr_sys);
@@ -592,7 +601,8 @@ main(int argc, char **argv)
 		curtime = time(0);
 		if (lmt->domain_expiry > -1 && curtime > lmt->domain_expiry) {
 			strerr_warn2(prog_name, ": Sorry, your domain has expired", 0);
-			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
+			if (write(2, "AUTHFAILURE\n", 12) == -1)
+				;
 			close_connection();
 			if (auth_method > 2)
 				alloc_free (login);
@@ -602,7 +612,8 @@ main(int argc, char **argv)
 		} else
 		if (lmt->passwd_expiry > -1 && curtime > lmt->passwd_expiry) {
 			strerr_warn2(prog_name, ": Sorry, your password has expired", 0);
-			if (write(2, "AUTHFAILURE\n", 12) == -1) ;
+			if (write(2, "AUTHFAILURE\n", 12) == -1)
+				;
 			close_connection();
 			if (auth_method > 2)
 				alloc_free (login);
