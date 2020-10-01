@@ -1,5 +1,8 @@
 /*
  * $Log: inlookup.c,v $
+ * Revision 1.4  2020-10-01 18:24:22+05:30  Cprogrammer
+ * Darwin Port
+ *
  * Revision 1.3  2020-04-01 18:55:49+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -16,7 +19,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inlookup.c,v 1.3 2020-04-01 18:55:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inlookup.c,v 1.4 2020-10-01 18:24:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -126,7 +129,7 @@ fork_child(char *infifo, int instNum)
 
 #ifdef DARWIN
 static void
-sig_usr1()
+isig_usr1()
 {
 	int             idx;
 
@@ -135,13 +138,13 @@ sig_usr1()
 			continue;
 		kill(pid_table[idx].pid, SIGUSR1);
 	}
-	signal(SIGUSR1, sig_usr1);
+	signal(SIGUSR1, isig_usr1);
 	errno = error_intr;
 	return;
 }
 
 static void
-sig_usr2()
+isig_usr2()
 {
 	int             idx;
 
@@ -150,13 +153,13 @@ sig_usr2()
 			continue;
 		kill(pid_table[idx].pid, SIGUSR2);
 	}
-	signal(SIGUSR2, sig_usr2);
+	signal(SIGUSR2, isig_usr2);
 	errno = error_intr;
 	return;
 }
 
 static void
-sig_hup()
+isig_hup()
 {
 	int             idx;
 
@@ -165,13 +168,13 @@ sig_hup()
 			continue;
 		kill(pid_table[idx].pid, SIGHUP);
 	}
-	signal(SIGHUP, sig_hup);
+	signal(SIGHUP, isig_hup);
 	errno = error_intr;
 	return;
 }
 
 static void
-sig_int()
+isig_int()
 {
 	int             idx;
 
@@ -180,13 +183,13 @@ sig_int()
 			continue;
 		kill(pid_table[idx].pid, SIGINT);
 	}
-	signal(SIGINT, sig_int);
+	signal(SIGINT, isig_int);
 	errno = error_intr;
 	return;
 }
 
 static void
-sig_term()
+isig_term()
 {
 	int             idx;
 
@@ -270,11 +273,11 @@ main(int argc, char **argv)
 			}
 		}
 #ifdef DARWIN
-		signal(SIGTERM, sig_term);
-		signal(SIGUSR1, sig_usr1);
-		signal(SIGUSR2, sig_usr2);
-		signal(SIGHUP, sig_hup);
-		signal(SIGINT, sig_int);
+		signal(SIGTERM, isig_term);
+		signal(SIGUSR1, isig_usr1);
+		signal(SIGUSR2, isig_usr2);
+		signal(SIGHUP, isig_hup);
+		signal(SIGINT, isig_int);
 #else
 		sig_catch(SIGTERM, sig_hand);
 		sig_catch(SIGUSR1, sig_hand);
