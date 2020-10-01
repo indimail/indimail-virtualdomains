@@ -1,5 +1,8 @@
 /*
  * $Log: vdeloldusers.c,v $
+ * Revision 1.3  2020-10-01 18:31:05+05:30  Cprogrammer
+ * initialize activecount variable
+ *
  * Revision 1.2  2019-06-07 15:53:48+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeloldusers.c,v 1.2 2019-06-07 15:53:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeloldusers.c,v 1.3 2020-10-01 18:31:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING
@@ -233,7 +236,7 @@ main(argc, argv)
 	char           *argv[];
 {
 	register char **ptr, **tmp, **lastauthptr, **indimailptr;
-	unsigned long   totalcount, activecount, count, purged;
+	unsigned long   totalcount, activecount = 0, count, purged;
 	char           *Domain;
 	struct stat     statbuf;
 	static stralloc CurDir = {0};
