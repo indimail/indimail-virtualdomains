@@ -1,5 +1,8 @@
 /*
  * $Log: bulletin.c,v $
+ * Revision 1.3  2020-10-01 18:20:40+05:30  Cprogrammer
+ * initialize len variable
+ *
  * Revision 1.2  2019-06-07 15:58:03+05:30  mbhangui
  * added include file stdlib.h
  *
@@ -56,7 +59,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: bulletin.c,v 1.2 2019-06-07 15:58:03+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: bulletin.c,v 1.3 2020-10-01 18:20:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -254,7 +257,7 @@ store_email(char *host, char *domain, char *email)
 	static struct mdahosts **mdaptr;
 	static int      mdacount;
 	char           *s;
-	int             len, emailcount;
+	int             len = 0, emailcount;
 
 	if (!stralloc_copys(&tmpbuf, host) ||
 			!stralloc_append(&tmpbuf, "@") ||
@@ -312,7 +315,7 @@ bulletin(char *emailFile, char *subscriber_list)
 	MYSQL         **mysqlptr;
 	uid_t           uid;
 	gid_t           gid;
-	int             err, fd, fdtmp, match, count, ret;
+	int             err, fd, fdtmp, match, count = 0, ret;
 	char            inbuf[8192], outbuf[512];
 	struct substdio ssin, ssout;
 
