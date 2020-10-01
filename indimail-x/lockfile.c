@@ -1,5 +1,8 @@
 /*
  * $Log: lockfile.c,v $
+ * Revision 1.4  2020-10-01 18:26:16+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.3  2020-09-21 07:54:30+05:30  Cprogrammer
  * fixed incorrect initialization of struct flock
  *
@@ -16,7 +19,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: lockfile.c,v 1.3 2020-09-21 07:54:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: lockfile.c,v 1.4 2020-10-01 18:26:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef FILE_LOCKING
@@ -396,7 +399,8 @@ ReleaseLock(int fd)
 	fl.l_type = F_UNLCK;
 	fl.l_whence = SEEK_SET;
 	fl.l_pid = getpid();
-	if (fcntl(fd, F_SETLK, &fl) == -1);
+	if (fcntl(fd, F_SETLK, &fl) == -1)
+		;
 	return (close(fd));
 }
 
