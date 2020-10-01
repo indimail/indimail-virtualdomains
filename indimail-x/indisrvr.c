@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.5  2020-10-01 18:23:48+05:30  Cprogrammer
+ * fixed compiler warning
+ *
  * Revision 1.4  2020-04-01 18:55:43+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.4 2020-04-01 18:55:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.5 2020-10-01 18:23:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -141,7 +144,8 @@ ssl_write(SSL *ssl, char *buf, int len)
 				continue;
 			return -1;	/*- note that some data may have been written */
 		}
-		if (w == 0);	/*- luser's fault */
+		if (w == 0)
+			;	/*- luser's fault */
 		buf += w;
 		len -= w;
 	}
