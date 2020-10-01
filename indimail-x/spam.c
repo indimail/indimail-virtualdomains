@@ -1,5 +1,8 @@
 /*
  * $Log: spam.c,v $
+ * Revision 1.3  2020-10-01 18:29:19+05:30  Cprogrammer
+ * initialize pos variable
+ *
  * Revision 1.2  2020-04-01 18:57:58+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -44,7 +47,7 @@
 #include "lowerit.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: spam.c,v 1.2 2020-04-01 18:57:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: spam.c,v 1.3 2020-10-01 18:29:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define BADMAIL 1
@@ -367,7 +370,7 @@ readLogFile(char *fn, int type, int count)
 	static stralloc keyfile = {0}, line = {0};
 	char            strnum[FMT_ULONG], buf[1024];
 	int             status, fd, keyfd, match;
-	unsigned long   pos, seekPos;
+	unsigned long   pos = 0, seekPos;
 	char            inbuf[4096], outbuf[512];
 	struct substdio ssin, ssout;
 
