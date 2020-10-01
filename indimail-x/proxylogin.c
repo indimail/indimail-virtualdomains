@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 1.5  2020-10-01 18:28:17+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.4  2020-04-01 18:57:32+05:30  Cprogrammer
  * added encrypt flag to mkpasswd()
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 1.4 2020-04-01 18:57:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 1.5 2020-10-01 18:28:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -475,7 +478,8 @@ AuthModuser(int argc, char **argv, unsigned timeout, unsigned errsleep)
 	if (!env_put("AUTHENTICATED="))
 		die_nomem();
 	if (argc < 2) {
-		if (write(2, "AUTHFAILURE\n", 12) == -1) ;
+		if (write(2, "AUTHFAILURE\n", 12) == -1)
+			;
 		_exit(1);
 	}
 	p = env_get("AUTHARGC");
