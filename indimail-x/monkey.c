@@ -1,5 +1,8 @@
 /*
  * $Log: monkey.c,v $
+ * Revision 1.4  2020-10-01 18:26:49+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.3  2020-04-01 18:57:19+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -55,7 +58,7 @@
 #include "sockwrite.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: monkey.c,v 1.3 2020-04-01 18:57:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: monkey.c,v 1.4 2020-10-01 18:26:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -259,7 +262,8 @@ monkey(char *host, char *servicename, char *startbuf, int skip_nl)
 						gotNl++;
 						if (gotNl == skip_nl) {
 							if ((retval - (cptr - sockbuf + 1)) > 0)
-								if (write(1, cptr + 1, retval - (cptr - sockbuf + 1)) == -1) ;
+								if (write(1, cptr + 1, retval - (cptr - sockbuf + 1)) == -1)
+									;
 						}
 						if (cptr < sockbuf + retval)
 							ptr = cptr + 1;
