@@ -6,7 +6,6 @@ if [ ! -f conf-release ] ; then
 	echo 1.1 > conf-release
 fi
 SYSTEM=$(uname -s)
-arch=$(uname -m)
 case "$SYSTEM" in
 	FreeBSD)
 	prefix=/usr/local
@@ -17,6 +16,31 @@ case "$SYSTEM" in
 	prefix=/usr
 	sysconfdir=/etc/indimail
 	mandir=$prefix/share/man
+	arch=$(uname -m)
+	if [ -f /etc/debian_version ] ; then
+		if [ -d /usr/lib/$arch-linux-gnu ] ; then
+			libdir=/usr/lib/$arch-linux-gnu
+		else
+			libdir=/usr/lib
+		fi
+	elif [ " $SYSTEM" = " FreeBSD" ] ; then
+		libdir=/usr/local/lib
+	else
+		if [ -d /usr/lib64 ] ; then
+			libdir=/usr/lib64
+		elif [ -d /usr/lib ] ;then
+			libdir=/usr/lib
+		else
+			echo "could not find libdir " 1>&2
+			exit 1
+		fi
+	fi
+	;;
+	Darwin)
+	prefix=/usr/local
+	sysconfdir=/usr/local/etc/indimail
+	mandir=/usr/local/man
+	libdir=/opt/local/lib
 	;;
 	*)
 	prefix=/usr
@@ -24,24 +48,6 @@ case "$SYSTEM" in
 	mandir=/usr/man
 	;;
 esac
-if [ -f /etc/debian_version ] ; then
-	if [ -d /usr/lib/$arch-linux-gnu ] ; then
-		libdir=/usr/lib/$arch-linux-gnu
-	else
-		libdir=/usr/lib
-	fi
-elif [ " $SYSTEM" = " FreeBSD" ] ; then
-	libdir=/usr/local/lib
-else
-	if [ -d /usr/lib64 ] ; then
-		libdir=/usr/lib64
-	elif [ -d /usr/lib ] ;then
-		libdir=/usr/lib
-	else
-		echo "could not find libdir " 1>&2
-		exit 1
-	fi
-fi
 if [ -d $prefix/include/mysql ] ; then
 	mysqlPrefix=$prefix
 elif [ /usr/local/include/mysql ] ; then
