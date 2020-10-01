@@ -1,5 +1,8 @@
 /*
  * $Log: osh.c,v $
+ * Revision 1.2  2020-10-01 18:27:28+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.1  2019-04-14 18:33:12+05:30  Cprogrammer
  * Initial revision
  *
@@ -27,7 +30,7 @@
  */
 
 #ifndef lint
-static char    *rcsid = "@(#) $Id: osh.c,v 1.1 2019-04-14 18:33:12+05:30 Cprogrammer Exp mbhangui $";
+static char    *rcsid = "@(#) $Id: osh.c,v 1.2 2020-10-01 18:27:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -998,7 +1001,8 @@ get_table(name, group)
 						Table[i].path = NULL;
 					i++;
 				}		/*- of if not an acl entry */
-				if (!fgets(dummy, 255, table)) ;
+				if (!fgets(dummy, 255, table))
+					;
 			}	/*- Of while reading the table */
 		}	/*- Of if a match */
 	}	/*- Of while */
