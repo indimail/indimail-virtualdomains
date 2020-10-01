@@ -1,5 +1,8 @@
 /*
  * $Log: crc.c,v $
+ * Revision 1.3  2020-10-01 18:23:01+05:30  Cprogrammer
+ * Darwin Port
+ *
  * Revision 1.2  2019-04-22 23:10:00+05:30  Cprogrammer
  * replaced atoi() with scan_long()
  *
@@ -74,7 +77,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crc.c,v 1.2 2019-04-22 23:10:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crc.c,v 1.3 2020-10-01 18:23:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define MAXBUF 4096
@@ -450,7 +453,12 @@ printcrc(const char *file, unsigned long *lcount, int statflag, int displayhex)
 		return (crc);
 	}
 	/*- open the file and do a silent crc on it */
+#if defined(LINUX) || defined(FREEBSD)
+	/*- prevent hooking the open system call */
     if ((fd = syscall(SYS_open, file, O_RDONLY)) == -1)
+#else
+    if ((fd = open(file, O_RDONLY)) == -1)
+#endif
 		return (-1);
 	for (crc = initial_crc;;) {
 		if ((nr = read(fd, (char *) buf, MAXBUF)) == -1) {
