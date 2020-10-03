@@ -1,5 +1,8 @@
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.18  2020-10-03 12:29:44+05:30  Cprogrammer
+ * Darwin Port
+ *
  * Revision 1.17  2020-09-29 11:07:05+05:30  Cprogrammer
  * replaced LOG_EMERG with LOG_INFO
  * changed/added debug statements
@@ -189,7 +192,7 @@ static int      update_passwd(pam_handle_t *, const char *, const char *);
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.17 2020-09-29 11:07:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.18 2020-10-03 12:29:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -1080,7 +1083,6 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 
 	if ((pam_err = pam_get_user(pamh, &user, NULL)) != PAM_SUCCESS)
 		return (pam_err);
-#ifndef DARWIN
 	if (!(pwd = getpwnam(user))) {
 		_pam_log(LOG_WARNING, "User [%s] either has a corrupted passwd entry or \
 				is not in the selected database", user);
@@ -1174,7 +1176,6 @@ pam_sm_chauthtok(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 		_pam_log(LOG_ERR, "Unrecognized flags.");
 		return (pam_err);
 	}
-#endif
 	/*
 	 * This code is yet to be completed
 	 */
