@@ -26,6 +26,25 @@ defaultprefix="/usr/lib/courier-imap"
 AC_SUBST(defaultprefix)
 
 CXXFLAGS="-std=c++0x $CXXFLAGS"
+case "$host" in
+*-*-sunos4.1.1*)
+	CPPFLAGS="$CPPFLAGS -DSUNOS4"
+	;;
+*-*-solaris*)
+	CPPFLAGS="$CPPFLAGS -DSOLARIS"
+	;;
+*-*-linux*)
+	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -Wall"
+	;;
+*-*-darwin*)
+	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include"
+	CXXFLAGS="$CXXFLAGS -DDARWIN -I/opt/local/include"
+	LDFLAGS="$LDFLAGS -L/opt/local/lib"
+	;;
+*-*-freebsd*)
+	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include"
+	;;
+esac
 
 AC_ARG_ENABLE(root-check, [  --disable-root-check    Allow build as root (make check will fail)],
 	rootcheck="$enableval",
