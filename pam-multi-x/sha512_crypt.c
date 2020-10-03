@@ -1,5 +1,8 @@
 /*
  * $Log: sha512_crypt.c,v $
+ * Revision 1.5  2020-10-03 12:30:12+05:30  Cprogrammer
+ * Darwin Port
+ *
  * Revision 1.4  2020-09-22 00:18:04+05:30  Cprogrammer
  * FreeBSD port
  *
@@ -38,7 +41,7 @@
 #include <sys/param.h>
 #include <sys/types.h>
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(DARWIN)
 void           *mempcpy(void *, const void *, size_t);
 #endif
 

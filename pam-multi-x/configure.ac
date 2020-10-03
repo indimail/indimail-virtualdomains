@@ -6,7 +6,6 @@ AM_INIT_AUTOMAKE([foreign])
 LT_INIT
 AM_CONFIG_HEADER(config.h)
 AC_CANONICAL_HOST
-AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-auth@indimail.org")
 
 AC_SUBST(PACKAGE_VERSION)
 AC_SUBST(PACKAGE_NAME)
@@ -29,7 +28,7 @@ AC_PROG_MAKE_SET
 AC_ISC_POSIX
 AC_HEADER_STDC
 saveCPPFLAGS="$CPPFLAGS"
-CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/local/include/mysql -I/usr/include/qmail -I/usr/local/include/qmail"
+CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/local/include/mysql -I/usr/local/mysql/include -I/usr/include/qmail -I/usr/local/include/qmail"
 AC_CHECK_HEADERS([arpa/inet.h netinet/in.h netdb.h string.h strings.h sys/socket.h sys/types.h sys/stat.h])
 AC_CHECK_HEADERS([sys/param.h fcntl.h syslog.h unistd.h stdarg.h errno.h crypt.h shadow.h dlfcn.h mysql.h])
 AC_CHECK_HEADERS([endian.h sys/endian.h])
@@ -50,39 +49,31 @@ fi
 case "$host" in
 *-*-sunos4.1.1*)
 	INSTALL="./install-sh -c"
-	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSUNOS4"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	MODFLAGS="-O4 -fPIC -shared -Wall"
 	STRIP_OPT=-s
 	;;
 *-*-solaris*)
-	INSTALL="./install-sh -c"
-	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSOLARIS"
 	CFLAGS="$CFLAGS -g -O4 -Wall -fPIC"
 	MODFLAGS="-g -O4 -fPIC -shared -Wall"
 	STRIP_OPT=-s
 	;;
 *-*-linux*)
-	INSTALL="/usr/bin/install -c"
-	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DLINUX"
 	CFLAGS="$CFLAGS -g -O4 -Wall -fPIC"
 	MODFLAGS="-g -module -O4 -fPIC -shared -Wall"
 	STRIP_OPT=-s
 	;;
 *-*-darwin*)
-	INSTALL="/usr/bin/install -c"
-	idcommand="/usr/bin/id -u"
-	CPPFLAGS="$CPPFLAGS -DDARWIN"
-	CFLAGS="$CFLAGS -g -O4 -Wall -pie"
-	MODFLAGS="-g -O4 -bundle -pie -Wall -undefined dynamic_lookup"
+	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I/opt/local/include/qmail"
+	CFLAGS="$CFLAGS -g -O3 -Wall"
+	LDFLAGS="$LDFLAGS -L/opt/local/lib"
+	MODFLAGS="-g -O3 -bundle -Wall -undefined dynamic_lookup"
 	STRIP_OPT=-S
 	;;
 *)
-	INSTALL="/usr/bin/install -c"
-	idcommand="/usr/bin/id -u"
 	CFLAGS="$CFLAGS -g -O4 -Wall -fPIC"
 	MODFLAGS="-g -O4 -fPIC -shared -Wall"
 	STRIP_OPT=-s
