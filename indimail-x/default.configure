@@ -39,7 +39,7 @@ case "$SYSTEM" in
 	Darwin)
 	prefix=/usr/local
 	sysconfdir=/usr/local/etc/indimail
-	mandir=/usr/local/man
+	mandir=/usr/local/share/man
 	libdir=/opt/local/lib
 	;;
 	*)
@@ -50,8 +50,10 @@ case "$SYSTEM" in
 esac
 if [ -d $prefix/include/mysql ] ; then
 	mysqlPrefix=$prefix
-elif [ /usr/local/include/mysql ] ; then
+elif [ -d /usr/local/include/mysql ] ; then
 	mysqlPrefix=/usr/local
+elif [ -d /usr/local/mysql/include ] ; then
+	mysqlPrefix=/usr/local/mysql
 fi
 ./configure \
   --prefix=$prefix \

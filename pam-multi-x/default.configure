@@ -14,6 +14,13 @@ case "$SYSTEM" in
 	pam_confdir=/usr/local/etc/pam.d
 	moduledir=/usr/lib
 	;;
+	Darwin)
+	prefix=/usr/local
+	mandir=/usr/local/share/man
+	sysconfdir=/usr/local/etc/indimail
+	pam_confdir=/etc/pam.d
+	moduledir=/usr/lib/pam
+	;;
 	Linux)
 	prefix=/usr
 	mandir=$prefix/share/man
@@ -35,8 +42,10 @@ case "$SYSTEM" in
 esac
 if [ -d $prefix/include/mysql ] ; then
 	mysqlPrefix=$prefix
-elif [ /usr/local/include/mysql ] ; then
+elif [ -d /usr/local/include/mysql ] ; then
 	mysqlPrefix=/usr/local
+elif [ -d /usr/local/mysql/include ] ; then
+	mysqlPrefix=/usr/local/mysql
 fi
 
 ./configure --prefix=$prefix \

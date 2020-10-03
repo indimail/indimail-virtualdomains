@@ -44,8 +44,10 @@ case "$SYSTEM" in
 esac
 if [ -d $prefix/include/mysql ] ; then
 	mysqlPrefix=$prefix
-elif [ /usr/local/include/mysql ] ; then
+elif [ -d /usr/local/include/mysql ] ; then
 	mysqlPrefix=/usr/local
+elif [ -d /usr/local/mysql/include ] ; then
+	mysqlPrefix=/usr/local/mysql
 fi
 if [ -d /run ] ; then
   nssd_sock=/run/indimail/nssd.sock
