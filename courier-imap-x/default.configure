@@ -14,6 +14,17 @@ case "$SYSTEM" in
 	sysconfdir=/usr/local/etc/indimail
 	extra="--with-authpwd --with-authpam"
 	;;
+	Darwin)
+	prefix=/usr/local
+	mandir=/usr/local/share/man
+	libdir=/opt/local/lib
+	sysconfdir=/usr/local/etc/indimail
+	export RANLIB="ranlib -c"
+	export CPPFLAGS="-I/opt/local/include"
+	export CXXFLAGS="-I/opt/local/include"
+	export LDFLAGS="-L/opt/local/lib"
+	extra="--with-waitfunc=wait3 --with-authpwd --with-authpam"
+	;;
 	Linux)
 	prefix=/usr
 	mandir=$prefix/share/man
@@ -35,7 +46,7 @@ case "$SYSTEM" in
 		fi
 	fi
 	sysconfdir=/etc/indimail
-	extra="--with-authpwd --with-authshadow"
+	extra="--without-authpwd --with-authshadow"
 	;;
 	*)
 	prefix=/usr
@@ -56,7 +67,8 @@ esac
 	--libexecdir=$prefix/libexec/indimail \
 	--datarootdir=$prefix/share/indimail \
 	--without-authchangepwdir \
-	--without-authcustom --without-authgeneric \
+	--without-authpam --without-authcustom \
+	--without-authgeneric \
 	$extra
 if [ ! -f depcomp ] ; then
 	cp libs/unicode/depcomp .
