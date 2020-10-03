@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.66 2020-09-26 17:02:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.67 2020-10-03 12:33:25+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1231,7 +1231,7 @@ echo "Creating default mysql.host, tcprules, bogofilter-qfe, default domain dir"
   --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket} --default-domain=$default_domain
 
 # MySQL
-if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld ] ; then
+if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld -o -x %{mysqlPrefix}/bin/mysqld ] ; then
   error=`ps -e|grep mysqld|grep -v grep|wc -l` # another mysqld instance running ?
   echo "Creating Database/Service for MySQL"
   # MySQL Config Creation
