@@ -1,5 +1,8 @@
 /*
  * $Log: pam-support.c,v $
+ * Revision 1.6  2020-10-03 12:29:53+05:30  Cprogrammer
+ * fixed compilation warning
+ *
  * Revision 1.5  2020-09-23 11:01:45+05:30  Cprogrammer
  * fold braces for readability
  *
@@ -89,8 +92,10 @@ conversation(int num_msg, const struct pam_message **msg, struct pam_response **
 		case PAM_TEXT_INFO:
 		case PAM_ERROR_MSG:
 			style = msg[i]->msg_style == PAM_TEXT_INFO ?  "PAM_TEXT_INFO" : "PAM_ERROR_MSG";
-			if (write(2, msg[i]->msg, strlen(msg[i]->msg)) == -1) ;
-			if (write(2, "\n", 1) == -1) ;
+			if (write(2, msg[i]->msg, strlen(msg[i]->msg)) == -1)
+				;
+			if (write(2, "\n", 1) == -1)
+				;
 			repl[i].resp_retcode = PAM_SUCCESS;
 			repl[i].resp = NULL;
 			break;
