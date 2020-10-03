@@ -4,10 +4,6 @@
 
 @SET_MAKE@
 
-TEMPLFILES=packaging/suse/courier-imap.init.in \
-	packaging/suse/imap.pam \
-	packaging/suse/pop3.pam
-
 SUBDIRS=libs/numlib libs/bdbobj libs/gdbmobj libs/soxwrap \
 	libs/unicode libs/rfc822 libs/rfc2045 \
 	libs/md5 libs/sha1 libs/random128 libs/rfc1035 libs/liblock \
@@ -24,7 +20,7 @@ doc_list= libs/maildir/README.sharedfolders.txt libs/maildir/README.maildirquota
 	libs/authlib/README.authlib README.courier-imap AUTHORS COPYING COPYING.GPL
 
 EXTRA_DIST=README.courier-imap README.cygwin\
-	COPYING.GPL NEWS.html $(TEMPLFILES) pgpkeys.txt \
+	COPYING.GPL NEWS.html pgpkeys.txt \
 	INSTALL.html maildroptips.txt manpage.css
 
 if HAVE_SGML
@@ -82,14 +78,6 @@ install-exec-hook:
 
 install-data-local: install-man
 	$(INSTALL_DATA) libs/authlib/modulelist $(DESTDIR)$(sysconfdir)/authmodulelist
-	test -d $(DESTDIR)/etc/pam.d || exit 0 ; \
-	test -w $(DESTDIR)/etc/pam.d || exit 0 ; \
-	test -f $(DESTDIR)/etc/pam.d/imap || \
-		$(INSTALL_DATA) $(srcdir)/libs/imap/imapd.pam \
-		$(DESTDIR)/etc/pam.d/imap || exit 1 ;\
-	test -f $(DESTDIR)/etc/pam.d/pop3 || \
-		$(INSTALL_DATA) $(srcdir)/libs/imap/pop3d.pam \
-		$(DESTDIR)/etc/pam.d/pop3 || exit 1
 	for f in $(man_MANS); do chmod a+r $(DESTDIR)$(mandir)/*/$$f; done
 	@echo "Do not forget to run make install-configure"
 	$(mkinstalldirs) $(DESTDIR)$(datarootdir)/doc/courier-imap || exit 1
