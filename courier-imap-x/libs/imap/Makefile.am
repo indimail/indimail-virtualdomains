@@ -6,15 +6,14 @@ ACLOCAL_AMFLAGS=-I ../../m4
 
 #CONFIG_STATUS_DEPENDENCIES = ../tcpd/couriertls.config
 
-DISTCLEANFILES=imapd.pam pop3d.pam imapd.cnf pop3d.cnf
+DISTCLEANFILES=imapd.cnf pop3d.cnf
 CLEANFILES=imapd.8 imapd.html mkimapdcert.html mkimapdcert.8 \
 	makeimapaccess.html makeimapaccess.8 \
 	mkdhparams.html mkdhparams.8 \
 	pop3d.html pop3d.8 mkpop3dcert.html mkpop3dcert.8
 
 EXTRA_DIST=testsuite testsuite.txt smaptestsuite smaptestsuite.txt \
-	BUGS BUGS.html README.imap README.html imapd.authpam \
-	pop3d.authpam system-auth.authpam system-auth2.authpam\
+	BUGS BUGS.html README.imap README.html \
 	makeimapaccess.8.in makeimapaccess.html.in \
 	imapd.html.in imapd.8.in \
 	mkdhparams.html.in mkdhparams.8.in \

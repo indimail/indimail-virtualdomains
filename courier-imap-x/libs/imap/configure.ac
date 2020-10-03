@@ -281,26 +281,6 @@ AC_SUBST(certsdir)
 mydatadir="$datadir"
 AC_SUBST(mydatadir)   # Avoid useless autoconf warning
 
-#
-# Check for PAM configuration flavor
-
-rm -f imapd.pam pop3d.pam
-
-cp -f $srcdir/imapd.authpam imapd.pam
-cp -f $srcdir/pop3d.authpam pop3d.pam
-
-if test -f /etc/pam.d/system-auth
-then
-	if ls /lib*/security/pam_stack.so 2>/dev/null >/dev/null
-	then
-		cp -f $srcdir/system-auth.authpam imapd.pam
-		cp -f $srcdir/system-auth.authpam pop3d.pam
-	else
-		cp -f $srcdir/system-auth2.authpam imapd.pam
-		cp -f $srcdir/system-auth2.authpam pop3d.pam
-	fi
-fi
-
 AM_CONDITIONAL(HAVE_SGML, test -d ${srcdir}/../docbook)
 
 # This gets built by the make rule, and is not in the git repo
