@@ -79,6 +79,7 @@ You can get mysql-community-server for all distributions [here](https://dev.mysq
 You can get MariaDB [here](https://mariadb.org/download/)
 
 If you need MariaDB for Mac OSX, you can try MacPorts or Brew.
+```
 
 ## Compile libqmail
 
