@@ -18,8 +18,8 @@ case "$SYSTEM" in
 	prefix=/usr/local
 	mandir=/usr/local/share/man
 	sysconfdir=/usr/local/etc/indimail
-	pam_confdir=/etc/pam.d
-	moduledir=/usr/lib/pam
+	pam_confdir=/usr/local/etc/pam.d
+	moduledir=/usr/local/lib/pam
 	;;
 	Linux)
 	prefix=/usr
