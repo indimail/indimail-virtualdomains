@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 1.7  2020-10-04 09:28:57+05:30  Cprogrammer
+ * changed Label for launchd unit file to org.indimail.svscan
+ *
  * Revision 1.6  2020-10-03 12:33:37+05:30  Cprogrammer
  * changed location of indimail.plist to /Library/LaunchDaemons from /Systems/Library/LaunchDaemons
  *
@@ -42,7 +45,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 1.6 2020-10-03 12:33:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 1.7 2020-10-04 09:28:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
@@ -275,40 +278,40 @@ main(int argc, char **argv)
 #ifdef DARWIN
 	else
 	if (!access("/bin/launchctl", X_OK)) {
-		/* Install indimail.plist */
-		if (access("/Library/LaunchDaemons/indimail.plist", F_OK)) {
+		/* Install svscan.plist */
+		if (access("/Library/LaunchDaemons/svscan.plist", F_OK)) {
 			if (flag == SV_OFF)
 				return (0);
-			out("svscan", "Installing indimail.plist\n");
+			out("svscan", "Installing svscan.plist\n");
 			flush("svscan");
 			if (chdir(PREFIX"/share/indimail") || chdir("boot")) {
 				strerr_warn3("svscan: chdir: ", PREFIX"/share/indimail", "/boot: ", &strerr_sys);
 				return (1);
 			} else
-			if (fappend("indimail.plist", "/Library/LaunchDaemons/indimail.plist", "w", 0644, 0, getgid())) {
-				strerr_warn1("svscan: fappend indimail.plist Library/LaunchDaemons/indimail.plist: ", &strerr_sys);
+			if (fappend("svscan.plist", "/Library/LaunchDaemons/org.indimail.svscan.plist", "w", 0644, 0, getgid())) {
+				strerr_warn1("svscan: fappend svscan.plist Library/LaunchDaemons/org.indimail.svscan.plist: ", &strerr_sys);
 				return (1);
 			}
 		} 
 		switch(flag)
 		{
 			case SV_ON:
-				execl("/bin/launchctl", "launchctl", "load", "/Library/LaunchDaemons/indimail.plist", (char *) 0);
+				execl("/bin/launchctl", "launchctl", "load", "/Library/LaunchDaemons/org.indimail.svscan.plist", (char *) 0);
 				strerr_die1sys(111, "execl: /bin/launchctl: ");
 				break;
 			case SV_OFF:
-				execl("/bin/launchctl", "launchctl", "unload", "/Library/LaunchDaemons/indimail.plist", (char *) 0);
+				execl("/bin/launchctl", "launchctl", "unload", "/Library/LaunchDaemons/org.indimail.svscan.plist", (char *) 0);
 				strerr_die1sys(111, "execl: /bin/launchctl: ");
 				break;
 			case SV_STAT:
 				execl("/bin/sh", "sh", "-c",
-				"/bin/launchctl list indimail || /bin/cat /Library/LaunchDaemons/indimail.plist;\
-				/bin/ls -l /Library/LaunchDaemons/indimail.plist", (char *) 0);
+				"/bin/launchctl list org.indimail.svscan || /bin/cat /Library/LaunchDaemons/org.indimail.svscan.plist;\
+				/bin/ls -l /Library/LaunchDaemons/org.indimail.svscan.plist", (char *) 0);
 				strerr_die1sys(111, "execl: /bin/launchctl: ");
 				break;
 			case SV_PRINT:
 				execl("/bin/sh", "sh", "-c",
-				"/bin/cat /Library/LaunchDaemons/indimail.plist;/bin/ls -l /Library/LaunchDaemons/indimail.plist",
+				"/bin/cat /Library/LaunchDaemons/org.indimail.svscan.plist;/bin/ls -l /Library/LaunchDaemons/org.indimail.svscan.plist",
 				(char *) 0);
 				strerr_die1sys(111, "execl: /bin/cat: ");
 				break;
