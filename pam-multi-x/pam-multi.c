@@ -1,5 +1,8 @@
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.19  2020-10-04 09:21:32+05:30  Cprogrammer
+ * set optreset=1 for Darwin
+ *
  * Revision 1.18  2020-10-03 12:29:44+05:30  Cprogrammer
  * Darwin Port
  *
@@ -192,7 +195,7 @@ static int      update_passwd(pam_handle_t *, const char *, const char *);
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.18 2020-10-03 12:29:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.19 2020-10-04 09:21:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -680,7 +683,11 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	 */
 	if (argc < 3)
 		_pam_log(LOG_ERR, "Invalid PAM configuration (less than 3 arguments). Check config file");
-	optind = opterr = errflag = 0;
+	optind = 1;
+#ifdef DARWIN
+	optreset = 1;
+#endif
+	opterr = errflag = 0;
 #ifdef HAVE_DLFCN_H
 	while ((c = getopt(argc, (char **) argv, "dm:u:p:D:H:P:c:s:i:")) != -1) {
 #else
@@ -727,6 +734,8 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 			errflag = 1;
 			break;
 		}
+		if (debug)
+			_pam_log(LOG_INFO, "optind=%d, c=[%c]", optind, c);
 	}
 	if (debug)
 		for (c = 0; c < argc; c++)
@@ -866,7 +875,6 @@ pam_sm_setcred(pam_handle_t * pamh, int flags, int argc, const char *argv[])
 PAM_EXTERN int
 pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 {
-	char            opt_str[56];
 	const char     *user, *rhost;
 	int             c, status, mode, pam_err, errflag, debug = 0,
 					nitems = 0, mysql_port = 3306;
@@ -889,11 +897,6 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 		return (PAM_USER_UNKNOWN);
 	if (strcmp(user, _global_user))
 		return (PAM_AUTH_ERR);
-#ifdef HAVE_DLFCN_H
-	snprintf(opt_str, sizeof (opt_str), "dm:u:p:D:H:P:c:s:i:");
-#else
-	snprintf(opt_str, sizeof (opt_str), "dm:u:p:D:H:P:c:");
-#endif
 	mysql_user = mysql_pass = mysql_database = mysql_host = command_str = (char *) 0;
 #ifdef HAVE_DLFCN_H
 	shared_lib = service = 0;
@@ -906,8 +909,16 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 	 * %D - Domain
 	 * %S - Secret
 	 */
-	optind = opterr = errflag = 0;
-	while (!errflag && (c = getopt(argc, (char **) argv, opt_str)) != -1) {
+	opterr = errflag = 0;
+	optind = 1;
+#ifdef DARWIN
+	optreset = 1;
+#endif
+#ifdef HAVE_DLFCN_H
+	while (!errflag && (c = getopt(argc, (char **) argv, "dm:u:p:D:H:P:c:s:i:")) != -1) {
+#else
+	while (!errflag && (c = getopt(argc, (char **) argv, "dm:u:p:D:H:P:c:")) != -1) {
+#endif
 		switch (c)
 		{
 		case 'd':	/* debug */
@@ -949,6 +960,8 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc, const char *argv[])
 			errflag = 1;
 			break;
 		}
+		if (debug)
+			_pam_log(LOG_INFO, "optind=%d, c=[%c]", optind, c);
 	}
 	if (!service)
 		service = getenv("AUTHSERVICE");
