@@ -73,6 +73,8 @@ NOTE: Read the **pam**(8) man page to cconfigure your PAM
 # auth     sufficient  pam-multi.so argv0 -s /usr/lib/indimail/modules/iauth.so -d
 # account  sufficient  pam-multi.so argv0 -s /usr/lib/indimail/modules/iauth.so -d
 #
+#%PAM-1.0
+auth     include     system-auth
 auth     sufficient  pam-multi.so pam-multi -s /usr/lib/indimail/modules/iauth.so
 account  sufficient  pam-multi.so pam-multi -s /usr/lib/indimail/modules/iauth.so
 ```
@@ -89,8 +91,10 @@ account  sufficient  pam-multi.so pam-multi -s /usr/lib/indimail/modules/iauth.s
 # account  required  pam-multi.so argv0 -i imap -s /usr/lib/indimail/modules/iauth.so
 # add -d argument to debug pam-multi lines
 #
-auth     required  pam-multi.so pam-multi -s /usr/lib/indimail/modules/iauth.so
-account  required  pam-multi.so pam-multi -i imap -s /usr/lib/indimail/modules/iauth.so
+#%PAM-1.0
+auth     include     system-auth
+auth     sufficient  pam-multi.so pam-multi -s /usr/lib/indimail/modules/iauth.so
+account  sufficient  pam-multi.so pam-multi -i imap -s /usr/lib/indimail/modules/iauth.so
 ```
 
 #### Config /etc/pam.d/pop3
@@ -105,8 +109,10 @@ account  required  pam-multi.so pam-multi -i imap -s /usr/lib/indimail/modules/i
 # account  required  pam-multi.so argv0 -i pop3 -s /usr/lib/indimail/modules/iauth.so
 # add -d argument to debug pam-multi lines
 #
-auth     required  pam-multi.so pam-multi -s /usr/lib/indimail/modules/iauth.so
-account  required  pam-multi.so pam-multi -i pop3 -s /usr/lib/indimail/modules/iauth.so
+#%PAM-1.0
+auth     include     system-auth
+auth     sufficient  pam-multi.so pam-multi -s /usr/lib/indimail/modules/iauth.so
+account  sufficient  pam-multi.so pam-multi -i pop3 -s /usr/lib/indimail/modules/iauth.so
 ```
 
 NOTE: Any line starting with `#` is a comment
