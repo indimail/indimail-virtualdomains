@@ -855,9 +855,9 @@ indimail.spec iauth.la indimail.te indimail.fc usr.sbin.mysqld usr.sbin.clamd us
 		./initsvc -off || exit 0; \
 	fi;
 
-# This is the last step in indimail installation. Post this installation will start in qmail
-# Hence we still cannot start svscan.
+# This is the last step in indimail installation.
 install-data-hook:
+	$(mkinstalldirs) $(DESTDIR)@domaindir@ || exit 1
 	$(mkinstalldirs) $(DESTDIR)@prefix@/lib/indimail/modules || exit 1
 	$(INSTALL_DATA) $(DESTDIR)@libdir@/iauth.so  $(DESTDIR)@prefix@/lib/indimail/modules || exit 1
 	/bin/rm -f $(DESTDIR)@libdir@/iauth.* || exit 1
@@ -883,15 +883,17 @@ install-data-hook:
 			fi;  \
 		done; \
 	fi
-	if test " $(DISTRIB_ID)" = " Ubuntu" -o " $(DISTRIB_ID)" = " Debian" ; then \
-		$(mkinstalldirs) $(DESTDIR)@sysconfdir@/apparmor.d/local || exit 1; \
-		$(INSTALL_DATA) usr.sbin.mysqld $(DESTDIR)@sysconfdir@/apparmor.d/local/usr.sbin.mysqld  || exit 1; \
-		$(INSTALL_DATA) usr.sbin.clamd $(DESTDIR)@sysconfdir@/apparmor.d/local/usr.sbin.clamd  || exit 1; \
-		$(INSTALL_DATA) usr.bin.freshclam $(DESTDIR)@sysconfdir@/apparmor.d/local/usr.bin.freshclam  || exit 1; \
-	fi
-	if test " $(DISTRIB_ID)" != " Ubuntu" -a " $(DISTRIB_ID)" != " Debian" ; then \
-		$(INSTALL_DATA) indimail.te $(DESTDIR)@sysconfdir@/indimail.te  || exit 1; \
-		$(INSTALL_DATA) indimail.fc $(DESTDIR)@sysconfdir@/indimail.fc  || exit 1; \
+	if test -n "$(DISTRIB_ID)" ; then \
+		if test " $(DISTRIB_ID)" = " Ubuntu" -o " $(DISTRIB_ID)" = " Debian" ; then \
+			$(mkinstalldirs) $(DESTDIR)@sysconfdir@/apparmor.d/local || exit 1; \
+			$(INSTALL_DATA) usr.sbin.mysqld $(DESTDIR)@sysconfdir@/apparmor.d/local/usr.sbin.mysqld  || exit 1; \
+			$(INSTALL_DATA) usr.sbin.clamd $(DESTDIR)@sysconfdir@/apparmor.d/local/usr.sbin.clamd  || exit 1; \
+			$(INSTALL_DATA) usr.bin.freshclam $(DESTDIR)@sysconfdir@/apparmor.d/local/usr.bin.freshclam  || exit 1; \
+		fi; \
+		if test " $(DISTRIB_ID)" != " Ubuntu" -a " $(DISTRIB_ID)" != " Debian" ; then \
+			$(INSTALL_DATA) indimail.te $(DESTDIR)@sysconfdir@/indimail.te  || exit 1; \
+			$(INSTALL_DATA) indimail.fc $(DESTDIR)@sysconfdir@/indimail.fc  || exit 1; \
+		fi; \
 	fi
 
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
