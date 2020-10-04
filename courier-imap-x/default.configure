@@ -23,7 +23,7 @@ case "$SYSTEM" in
 	export CPPFLAGS="-I/opt/local/include"
 	export CXXFLAGS="-I/opt/local/include"
 	export LDFLAGS="-L/opt/local/lib"
-	extra="--with-waitfunc=wait3 --with-authpwd --with-authpam"
+	extra="--with-waitfunc=wait3 --with-authpam"
 	;;
 	Linux)
 	prefix=/usr
@@ -46,14 +46,14 @@ case "$SYSTEM" in
 		fi
 	fi
 	sysconfdir=/etc/indimail
-	extra="--without-authpwd --with-authshadow"
+	extra="--with-authpam --with-authshadow"
 	;;
 	*)
 	prefix=/usr
 	mandir=/usr/man
 	libdir=/usr/lib
 	sysconfdir=/etc/indimail
-	extra="--with-authpwd --with-authpam"
+	extra="--with-authpam"
 	;;
 esac
 ./configure --prefix=$prefix --disable-root-check \
@@ -67,7 +67,7 @@ esac
 	--libexecdir=$prefix/libexec/indimail \
 	--datarootdir=$prefix/share/indimail \
 	--without-authchangepwdir \
-	--without-authpam --without-authcustom \
+	--without-authcustom \
 	--without-authgeneric \
 	$extra
 if [ ! -f depcomp ] ; then
