@@ -1367,18 +1367,24 @@ following command:
 Mac OS X 10.5.x or later
 
 ```
-% sudo cp /usr/share/indimail/boot/indimail.plist /System/Library/LaunchDaemons
+% sudo cp /usr/share/indimail/boot/svscan.plist /Library/LaunchDaemons/org.indimail.svscan
+```
+
+Mac OS X 19.6.x or later
+
+```
+% sudo cp /usr/share/indimail/boot/svscan.plist /System/Library/LaunchDaemons
 ```
 
 NOTE: You can also add /usr/sbin/svscanboot to /etc/rc.local
 
-prior to Mac OS X 10.5.x (NOTE: I have not compiled/tested IndiMail on Mac OS X prior to 10.5.x)
+prior to Mac OS X 10.5.x (NOTE: I have not compiled/tested IndiMail on Mac OS X after 10.5.x)
 
 ```
 % cd ..
 % sudo mkdir /Library/StartupItems/IndiMail
 % sudo cp /usr/bin/qmailctl /Library/StartupItems/IndiMail/IndiMail
-% sudo cp /usrshare/indimail/boot/StartupParameters.plist /Library/StartupItems/IndiMail
+% sudo cp /usr/share/indimail/boot/StartupParameters.plist /Library/StartupItems/IndiMail
 ```
 
 When you reboot your machine IndiMail will automatically start.
