@@ -20,18 +20,18 @@ The steps below give instructions to build from source. If you need to deploy in
 
 You can also use docker / podman images to deploy indimail. Look at the chapter [Docker / Podman Repository](#docker-/-podman-repository) below on how to do that. The big advantage of using a docker / podman image is you can save your configuration with the `docker commit ..` or `podman commit` to checkpoint your entire build and deploy the exact configuration on multiple hosts.
 
-Doing a source build can be daunting for many. There are total of 18 sub-packages to be built, out of which 6 (libdkim, libsrs2, ucspi-tcp, courier-imap, indimail-mta, indimail) are required, 6 (bogofilter, bogofilter-wordlist, fetchmail, nssd, pam-multi, iwebadmin) are recommended and remaining 6 are optional. You can always use the pre-built binaries from the DNF / YUM / APT repositories given in the chapter [Binary Builds on OBS](#binary-builds-on-opensuse-build-service) towards the end of this document.
+Doing a source build can be daunting for many. There are total of 18 sub-packages to be built, out of which 6 (libdkim, libsrs2, ucspi-tcp, courier-imap, indimail-mta, indimail) are required, 6 (bogofilter, bogofilter-wordlist, fetchmail, nssd, pam-multi, iwebadmin) are recommended and remaining 6 are optional. On Linux, you can always use the pre-built binaries from the DNF / YUM / APT repositories given in the chapter [Binary Builds on OBS](#binary-builds-on-opensuse-build-service) towards the end of this document.
 
 Doing a source build requires you to have all the development packages installed. Linux distributions are known to be crazy. You will have different package names for different distirbutions. e.g.
 
 db-devel, libdb-devel, db4-devel on different systems, just to get Berkeley db installed. There is an easy way out to find out what your distribution needs.
 
 * For RPM based distribtions, locate your .spec file (e.g. indimail.spec in indimail-virtualdomains/indimail-x directory, libqmail/libqmail.spec). Open the RPM spec file and look for `BuildRequires`. This will tell you what you require for your distribution. If there is a specific version of development package required, you will find `%if %else` statements. Use dnf / yum / zypper to install your development package.
-* For debian based distribution, locate your debian subdirectory (e.g. indimail-virtualdomains/indimail-x/debian, libqmail/debian). In this directory you will find files with `.dsc` extension. Look at the line having `Build-Depends`. Use `apt-get install package` to install the package. If your debian distribution has few libraries different than the default, you will find a `.dsc` filename with a name corresponding to your distribution. (e.g. indimail-Debain_10.dsc)
+* For debian based distribution, locate your debian subdirectory (e.g. indimail-virtualdomains/indimail-x/debian, libqmail/debian). In this directory you will find files with `.dsc` extension. Look at the line having `Build-Depends`. Use `apt-get install package` to install the package. If your debian distribution has few libraries different than the default, you will find a `.dsc` filename with a name corresponding to your distribution. (e.g. indimail-Debain\_10.dsc)
 
 **Note**
 
-This is a rough list of packages required. If you want the exact packages, look BuildRequires in the spec file or Build-Depends in the debian/control or debian/\*.dsc files
+This is a rough list of packages required. If you want the exact packages, look BuildRequires in the \*.spec file or Build-Depends in the debian/control or debian/\*.dsc files
 
 **RPM Based Distributions**
 Install the following packages using dnf/yum
@@ -67,19 +67,17 @@ Ubuntu 16.04 - libcom-err2, libmysqlclient-dev
 ```
 
 FreeBSD / Darwin OSX
-
-```
 FreeBSD - Install the following using pkg
 
+```
 # pkg install mysql80-server mysql80-client libidn
-You also need MariaDB (Linux only) or MySQL community server (All Unix distributions)
+```
 
-You can get mysql-community-server for all distributions [here](https://dev.mysql.com/downloads/mysql/)
-
-You can get MariaDB [here](https://mariadb.org/download/)
+- You also need either MariaDB (Linux only) or MySQL community server (All Unix distributions)
+- You can get mysql-community-server for all distributions [here](https://dev.mysql.com/downloads/mysql/)
+- You can get MariaDB [here](https://mariadb.org/download/)
 
 If you need MariaDB for Mac OSX, you can try MacPorts or Brew.
-```
 
 ## Compile libqmail
 
@@ -90,7 +88,6 @@ $ cd /usr/local/src/libqmail
 $ ./default.configure
 $ make
 $ sudo make install-strip
-
 ```
 (check version in libqmail/conf-version)
 
