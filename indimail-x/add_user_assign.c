@@ -1,5 +1,8 @@
 /*
  * $Log: add_user_assign.c,v $
+ * Revision 1.3  2020-10-04 09:25:41+05:30  Cprogrammer
+ * BUG: wrong variable passed to do_assign2()
+ *
  * Revision 1.2  2020-04-01 18:52:38+05:30  Cprogrammer
  * moved getEnvConfig to libqmail
  *
@@ -27,7 +30,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_user_assign.c,v 1.2 2020-04-01 18:52:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: add_user_assign.c,v 1.3 2020-10-04 09:25:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -132,7 +135,7 @@ add_user_assign(char *user, char *dir)
 	if (indimailuid == -1 || indimailgid == -1)
 		get_indimailuidgid(&indimailuid, &indimailgid);
 	do_assign1(&tmpstr1, user, dir);
-	do_assign2(&tmpstr1, user, dir);
+	do_assign2(&tmpstr2, user, dir);
 	if (update_file(filename.s, tmpstr1.s, INDIMAIL_QMAIL_MODE) || update_file(filename.s, tmpstr2.s, INDIMAIL_QMAIL_MODE))
 		return (-1);
 	update_newu();
