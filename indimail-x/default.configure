@@ -11,11 +11,13 @@ case "$SYSTEM" in
 	prefix=/usr/local
 	sysconfdir=/usr/local/etc/indimail
 	mandir=/usr/local/man
+	base_path=/home/mail
 	;;
 	Linux)
 	prefix=/usr
 	sysconfdir=/etc/indimail
 	mandir=$prefix/share/man
+	base_path=/home/mail
 	arch=$(uname -m)
 	if [ -f /etc/debian_version ] ; then
 		if [ -d /usr/lib/$arch-linux-gnu ] ; then
@@ -41,11 +43,13 @@ case "$SYSTEM" in
 	sysconfdir=/usr/local/etc/indimail
 	mandir=/usr/local/share/man
 	libdir=/opt/local/lib
+	base_path=/Users/mail
 	;;
 	*)
 	prefix=/usr
 	sysconfdir=/etc/indimail
 	mandir=/usr/man
+	base_path=/mail
 	;;
 esac
 if [ -d $prefix/include/mysql ] ; then
@@ -71,7 +75,7 @@ fi
   --with-pkgconfigdir=$prefix/lib64/pkgconfig \
   --enable-mysqlprefix=$mysqlPrefix \
   --enable-logdir=/var/log/svc \
-  --enable-basepath=/home/mail \
+  --enable-basepath=$base_path \
   --enable-tcprules-prog=$prefix/bin/tcprules \
   --enable-default-domain=`uname -n` \
   `cat config/indimail.opts`
