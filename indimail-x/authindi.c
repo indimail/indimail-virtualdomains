@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 1.9  2020-10-04 09:27:08+05:30  Cprogrammer
+ * use AUTHADDR to determine if we are already authenticated
+ *
  * Revision 1.8  2020-10-01 18:19:57+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -67,7 +70,7 @@
 #include "sql_getpw.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.8 2020-10-01 18:19:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.9 2020-10-04 09:27:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -197,9 +200,10 @@ main(int argc, char **argv)
 
 	if (argc < 2)
 		exit (2);
-	if ((ptr = env_get("AUTHENTICATED"))) {
-		execv(argv[1], argv + 1);
-		strerr_warn3("execv: ", argv[1], ": ", &strerr_sys);
+	ptr = env_get("AUTHADDR");
+	if (ptr && *ptr) {
+		execv(*(argv + argc - 2), argv + argc - 2);
+		strerr_warn3("execv: ", *(argv + argc - 2), ": ", &strerr_sys);
 	}
 	i = str_rchr(argv[0], '/');
 	if (argv[0][i])
@@ -684,7 +688,7 @@ exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *
 	if (!env_put2("HOME", pw->pw_dir))
 		strerr_die3sys(111, "authindi: env_put2: HOME=", pw->pw_dir, ": ");
 	if (!env_put2("AUTHSERVICE", service))
-		strerr_die3sys(111, "authindi: env_put2: AUTHENTICATED=", service, ": ");
+		strerr_die3sys(111, "authindi: env_put2: AUTHSERVICE=", service, ": ");
 	switch ((status = Login_Tasks(pw, userid, service)))
 	{
 		case 2:
