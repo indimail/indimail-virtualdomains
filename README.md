@@ -64,15 +64,19 @@ libgamin-dev, python, libidn11-dev
 Debian 9, Debian 10 - default-libmysqlclient-dev
 Remaining - libmysqlclient-dev,
 Ubuntu 16.04 - libcom-err2, libmysqlclient-dev
-
-FreeBSD
-Install the following using pkg
-# pkg install mysql80-server mysql80-client libidn
 ```
+
+FreeBSD / Darwin OSX
+
+```
+FreeBSD - Install the following using pkg
+
+# pkg install mysql80-server mysql80-client libidn
 You also need MariaDB (Linux only) or MySQL community server (All Unix distributions)
 
-[mysql-community-server](https://dev.mysql.com/downloads/mysql/) for all distributions
-[Mariadb](https://mariadb.org/download/)
+You can get mysql-community-server for all distributions [here](https://dev.mysql.com/downloads/mysql/)
+
+You can get MariaDB [here](https://mariadb.org/download/)
 
 If you need MariaDB for Mac OSX, you can try MacPorts or Brew.
 
