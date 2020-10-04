@@ -1,25 +1,37 @@
 * 
 Release 3.3 Start 06/09/2020
--13/09/2020
+- 13/09/2020
 01. create_rpm: added --release option
 02. indimail.spec: added explicit dependency of indimail-devel on libindimail version
 03. renamed ChangeLog.indimail to ChangeLog
 04. Shortened README-indimail after moving document to online wiki
--14/09/2020
+- 14/09/2020
 05. Removed Provides: indimail-libs, libindimail from indimail package. Now
     available only in libindimail package
--17/09/2020
+- 17/09/2020
 07. FreeBSD fixes fo vfstabNew.c, vadddomain.c, ProcessInFifo.c,
     pathToFilesystem.c, get_localtime.c, Makefile.am, configure.ac,
     default.configure
--19/09/2020
+- 19/09/2020
 09. initsvc: enable and start services for FreeBSD
--28/09/2020
+- 28/09/2020
 10. vsetpass.c, vchkpass.c, authpgsql.c, authindi.c print authmodule name in
     error logs/debug statements
 11. pipe_exec.c: display authmodule being executed in debug statements
 12. vsetpass.c, vchkpass.c, authpgsql.c, authindi.c, pipe_exec.c added pid
     error logs/debug statements
--29/09/2020
+- 29/09/2020
 13. authindi: execute next module when already authenticated by previous
     module
+- 01/10/2020
+14. authindi.c, check_quota.c, indisrvr.c, ismaildup.c, lockfile.c, monkey.c,
+    osh.c, proxylogin.c, sslerator.c fixed compiler warnings
+15. bulletin.c: initialize len variable
+16. crc.c, configure.ac, inlookup.c, ProcessInFifo.c - Darwin Port
+17. spam.c: initialize pos variable
+18. vdeloldusers.c: initialize activecount variable
+- 04/10/2020
+19. add_user_assign.c: BUG: wrong variable passed to do_assign2()
+20. authindi.c: use AUTHADDR to determine if we are already authenticated
+21. initsvc.c: changed Label for launchd unit file to org.indimail.svscan
+22. Makefile.am: bypass linux specific code on Darwin

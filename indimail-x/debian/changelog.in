@@ -11,3 +11,12 @@ indimail (@version@-@release@) unstable; urgency=low
   * pipe_exec.c: display authmodule being executed in debug statements
   * vsetpass.c, vchkpass.c, authpgsql.c, authindi.c, pipe_exec.c added pid error logs/debug statements
   * authindi: execute next module when already authenticated by previous module
+  * authindi.c, check_quota.c, indisrvr.c, ismaildup.c, lockfile.c, monkey.c, osh.c, proxylogin.c, sslerator.c fixed compiler warnings
+  * bulletin.c: initialize len variable
+  * crc.c, configure.ac, inlookup.c, ProcessInFifo.c - Darwin Port
+  * spam.c: initialize pos variable
+  * vdeloldusers.c: initialize activecount variable
+  * add_user_assign.c: BUG: wrong variable passed to do_assign2()
+  * authindi.c: use AUTHADDR to determine if we are already authenticated
+  * initsvc.c: changed Label for launchd unit file to org.indimail.svscan
+  * Makefile.am: bypass linux specific code on Darwin
