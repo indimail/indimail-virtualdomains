@@ -438,7 +438,7 @@ controldir="$sysconfdir/control"
 AC_ARG_ENABLE(controldir, [  --enable-controldir=dir       directory for control files.],
 	controdir="$enableval",
 	[
-	 	if test "$domaindir" != ""
+	 	if test "$controldir" != ""
 		then
 			AC_DEFINE_UNQUOTED(CONTROLDIR,"$controldir", Directory for control files)
 		fi
