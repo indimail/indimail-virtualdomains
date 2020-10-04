@@ -1,5 +1,8 @@
 /*
  * $Log: iauth.c,v $
+ * Revision 1.6  2020-10-04 08:34:13+05:30  Cprogrammer
+ * allow size paramter to be null
+ *
  * Revision 1.5  2020-09-23 10:56:17+05:30  Cprogrammer
  * avoid potential SIGSEGV if nitiems is 0
  *
@@ -95,7 +98,7 @@
 #include "common.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: iauth.c,v 1.5 2020-09-23 10:56:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iauth.c,v 1.6 2020-10-04 08:34:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      defaultTask(char *, char *, struct passwd *, char *, int);
@@ -124,7 +127,8 @@ i_auth(char *email, char *service, int *size, int debug)
 	struct passwd  *pw;
 
 	_global_pw = (struct passwd *) 0;
-	*size = 0;
+	if (size)
+		*size = 0;
 	if (parse_email(email, &User, &Domain)) {
 		strerr_warn1("iauth.so: out of memory", 0);
 		return ((char *) 0);
@@ -188,13 +192,15 @@ i_auth(char *email, char *service, int *size, int debug)
 	}
 	crypt_pass = pw->pw_passwd;
 	if (env_get("DEBUG_LOGIN"))
-		strerr_warn7("i_auth: service[", service, "] email [", email, "] pw_passwd [", crypt_pass, "]", 0);
+		strerr_warn7("i_auth: service[", service ? service : "null", "] email [", email, "] pw_passwd [", crypt_pass, "]", 0);
 	close_connection();
 	_global_pw = pw;
-	*size = str_len(crypt_pass) + 1;
-	if (debug) {
-		strnum[fmt_ulong(strnum, *size)] = 0;
-		strerr_warn2("iauth.so: returning data of size ", strnum, 0);
+	if (size) {
+		*size = str_len(crypt_pass) + 1;
+		if (debug) {
+			strnum[fmt_ulong(strnum, *size)] = 0;
+			strerr_warn2("iauth.so: returning data of size ", strnum, 0);
+		}
 	}
 	return (crypt_pass);
 }
