@@ -49,6 +49,11 @@ distclean-local:
 
 quotawarnmsg.example: libs/maildir/quotawarnmsg
 	cp -f $(srcdir)/libs/maildir/quotawarnmsg quotawarnmsg.example
+uninstall-hook:
+	for f in `cat libs/authlib/modulelist ; echo $$authmodulelist ` ; do \
+		/bin/rm -f $(DESTDIR)$(libexecdir)/imapmodules/$$f; \
+	done
+	/bin/rmdir $(DESTDIR)$(libexecdir)/imapmodules
 
 install-exec-local:
 	$(mkinstalldirs) $(DESTDIR)$(libexecdir)/imapmodules
