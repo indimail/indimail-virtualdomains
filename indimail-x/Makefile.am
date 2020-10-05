@@ -20,7 +20,7 @@ iauthdir=@libdir@
 libindimail_LTLIBRARIES = libindimail.la
 libindimail_la_SOURCES = $(COMMONSOURCES)
 libindimail_la_LIBADD = @LIB_MYSQL@ @LIB_QMAIL@ @LIB_SSL@ -lm
-libindimail_la_LDFLAGS = -version-info @LIBVER@
+libindimail_la_LDFLAGS = -version-info @LIBVER@ $(LDFLAGS)
 libindimail_la_CFLAGS = -fPIC
 libindimaildir=@libdir@
 
