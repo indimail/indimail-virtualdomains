@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.12  2020-10-05 18:42:36+05:30  Cprogrammer
+ * fixed compilation warning on Darwin
+ *
  * Revision 1.11  2020-09-23 11:00:40+05:30  Cprogrammer
  * fold braces for code readability
  *
@@ -44,7 +47,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.11 2020-09-23 11:00:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.12 2020-10-05 18:42:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
@@ -575,5 +578,6 @@ const char     *in_mysql_get_client_info(void)
 void
 getversion_load_mysql_c()
 {
-	if (write(1, sccsid, 0) == -1) ;
+	if (write(1, sccsid, 0) == -1)
+		;
 }
