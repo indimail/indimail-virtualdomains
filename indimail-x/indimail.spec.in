@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.67 2020-10-03 12:33:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.68 2020-10-05 15:04:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -593,7 +593,7 @@ done
 %attr(644,root,root)                    %{shareddir}/doc/COPYING-indimail
 %endif
 
-%attr(644,root,root)                    %{shareddir}/doc/ChangeLog
+%attr(644,root,root)                    %{shareddir}/doc/ChangeLog-indimail
 %attr(644,root,root)                    %{shareddir}/doc/FAQ.pdf
 %attr(644,root,root)                    %{shareddir}/doc/README-indimail.md
 %attr(644,root,root)                    %{shareddir}/doc/README-ldap.md
