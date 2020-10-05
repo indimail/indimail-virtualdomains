@@ -35,3 +35,6 @@ Release 3.3 Start 06/09/2020
 20. authindi.c: use AUTHADDR to determine if we are already authenticated
 21. initsvc.c: changed Label for launchd unit file to org.indimail.svscan
 22. Makefile.am: bypass linux specific code on Darwin
+- 05/10/2020
+23. uninstall iauth.so, docs and post handle scripts
+24. Makefile.am: Set LDPATH for libqmail path (Darwin)

@@ -20,3 +20,5 @@ indimail (@version@-@release@) unstable; urgency=low
   * authindi.c: use AUTHADDR to determine if we are already authenticated
   * initsvc.c: changed Label for launchd unit file to org.indimail.svscan
   * Makefile.am: bypass linux specific code on Darwin
+  * uninstall iauth.so, docs and post handle scripts
+  * Makefile.am: Set LDPATH for libqmail path (Darwin)
