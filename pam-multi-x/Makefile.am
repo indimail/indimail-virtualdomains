@@ -60,11 +60,15 @@ edit = sed \
 	-e 's}@prefix\@}$(prefix)}g'
 
 imap: imap.in
-	$(edit) $@.in > $@
+	([ -f imap.$(SYSTEM) ] && \
+	$(edit) imap.in imap.$(SYSTEM) || $(edit) imap.in) > imap
 pop3: pop3.in
-	$(edit) $@.in > $@
+	([ -f pop3.$(SYSTEM) ] && \
+	$(edit) pop3.in pop3.$(SYSTEM) || $(edit) pop3.in) > pop3
 pam-multi: pam-multi.in
-	$(edit) $@.in > $@
+	([ -f pam-multi.$(SYSTEM) ] && \
+	$(edit) pam-multi.in pam-multi.$(SYSTEM) || $(edit) pam-multi.in) > pam-multi
+
 authcheckpassword: authcheckpassword.in
 	$(edit) $@.in > $@
 
@@ -85,3 +89,8 @@ install-data-local:  pam-multi.8 pam-checkpwd.8 pam-multi pop3 imap
 	$(INSTALL_DATA) -c imap $(DESTDIR)$(pam_confdir)
 	$(INSTALL_DATA) -c pam-multi.8 $(DESTDIR)@mandir@/man8
 	$(INSTALL_DATA) -c pam-checkpwd.8 $(DESTDIR)@mandir@/man8
+
+uninstall-hook:
+	/bin/rm -f $(DESTDIR)$(pam_confdir)/imap
+	/bin/rm -f $(DESTDIR)$(pam_confdir)/pop3
+	/bin/rm -f $(DESTDIR)$(pam_confdir)/pam-multi

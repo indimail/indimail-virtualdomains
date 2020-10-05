@@ -52,31 +52,36 @@ case "$host" in
 	CPPFLAGS="$CPPFLAGS -DSUNOS4"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	MODFLAGS="-O4 -fPIC -shared -Wall"
-	STRIP_OPT=-s
+	SYSTEM=SunOS
 	;;
 *-*-solaris*)
 	CPPFLAGS="$CPPFLAGS -DSOLARIS"
 	CFLAGS="$CFLAGS -g -O4 -Wall -fPIC"
 	MODFLAGS="-g -O4 -fPIC -shared -Wall"
-	STRIP_OPT=-s
+	SYSTEM=Solaris
 	;;
 *-*-linux*)
 	CPPFLAGS="$CPPFLAGS -DLINUX"
 	CFLAGS="$CFLAGS -g -O4 -Wall -fPIC"
 	MODFLAGS="-g -module -O4 -fPIC -shared -Wall"
-	STRIP_OPT=-s
+	SYSTEM=Linux
+	;;
+*-*-freebsd*)
+	CPPFLAGS="$CPPFLAGS -DFREEBSD"
+	CFLAGS="$CFLAGS -g -O4 -Wall -fPIC"
+	MODFLAGS="-g -module -O4 -fPIC -shared -Wall"
+	SYSTEM=FreeBSD
 	;;
 *-*-darwin*)
 	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I/opt/local/include/qmail"
 	CFLAGS="$CFLAGS -g -O3 -Wall"
 	LDFLAGS="$LDFLAGS -L/opt/local/lib"
 	MODFLAGS="-g -O3 -bundle -Wall -undefined dynamic_lookup"
-	STRIP_OPT=-S
+	SYSTEM=Darwin
 	;;
 *)
 	CFLAGS="$CFLAGS -g -O4 -Wall -fPIC"
 	MODFLAGS="-g -O4 -fPIC -shared -Wall"
-	STRIP_OPT=-s
 	;;
 esac
 
@@ -84,8 +89,8 @@ AC_CHECK_HEADERS([pam/pam_appl.h security/pam_appl.h pam_appl.h pam/pam_modules.
 
 defaultprefix="/usr"
 LIBVER=0
+AC_SUBST(SYSTEM)
 AC_SUBST(LIBVER)
-AC_SUBST(STRIP_OPT)
 AC_SUBST(defaultprefix)
 
 if test x$prefix = xNONE
