@@ -202,7 +202,7 @@ noinst_DATA = indimail-permissions.easy indimail-permissions.paranoid \
 	indimail-permissions.secure indimail.spec indimail-rpmlintrc
 
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain vmoduser vpasswd \
-	vdeluser_handle vrenameuser_handle
+	vdeluser vrenameuser
 
 MOSTLYCLEANFILES=vcaliasrev myslave controlsync bogofilter-qfe \
 	cronlist.i incrypt vdeluser_handle vrenameuser_handle \
@@ -871,7 +871,11 @@ install-data-hook:
 	done
 	$(mkinstalldirs) $(DESTDIR)@datarootdir@/doc || exit 1
 	for f in $(doc_list); do \
-		$(INSTALL_DATA) doc/$$f $(DESTDIR)@datarootdir@/doc/$$f || exit 1 ;\
+		if [ "$$f" = "ChangeLog" ] ; then \
+			$(INSTALL_DATA) doc/$$f $(DESTDIR)@datarootdir@/doc/$$f-indimail || exit 1 ;\
+		else \
+			$(INSTALL_DATA) doc/$$f $(DESTDIR)@datarootdir@/doc/$$f || exit 1 ;\
+		fi; \
 	done
 	if test `@idcommand@` = "0" ; then \
 		for f in $(setuid_list); do \
@@ -895,6 +899,21 @@ install-data-hook:
 			$(INSTALL_DATA) indimail.fc $(DESTDIR)@sysconfdir@/indimail.fc  || exit 1; \
 		fi; \
 	fi
+
+uninstall-hook:
+	/bin/rm -f $(DESTDIR)@prefix@/lib/indimail/modules/iauth.so
+	/bin/rmdir $(DESTDIR)@prefix@/lib/indimail/modules || true
+	for f in $(post_handle_list); do \
+		if [ -f $(DESTDIR)@libexecdir@/$$f ] ; then \
+			/bin/rm -f $(DESTDIR)@libexecdir@/$$f; \
+   		fi;\
+	done
+	/bin/rmdir $(DESTDIR)@prefix@/lib/indimail/modules || true
+	for f in $(doc_list); do \
+		/bin/rm -f $(DESTDIR)@datarootdir@/doc/$$f || exit 1 ;\
+	done
+	/bin/rmdir $(DESTDIR)@datarootdir@/doc || true
+
 
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
