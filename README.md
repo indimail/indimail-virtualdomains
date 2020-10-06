@@ -409,6 +409,149 @@ or
 $ qmailctl start # Universal
 ```
 
+After starting svscan as given above, your system will be ready to send and receive mails, provided you have set your system hostname, domain name IP addresses and setup mail exchanger in DNS. You can look at this [guide](https://www.godaddy.com/garage/configuring-dns-for-email-a-quick-beginners-guide/) to do that.
+
+## Check Status of Services
+
+The svstat command can be used to query the status of various services. You can query for all services like below. You can query the status of a single service like running a command like this.
+
+```
+% sudo svstat /service/qmail-smtpd.25
+```
+The argument to svstat should be a directory in /service. Each directory in /service refers to an indimail-mta/indimail service. e.g. `/service/qmail-smtpd.25` refers to the SMTP service serving port 25.
+
+```
+$ sudo svstat /service/*
+/service/dnscache: up (pid 120532) 4394 seconds
+/service/fetchmail: down 4394 seconds
+/service/greylist.1999: up (pid 120502) 4394 seconds
+/service/indisrvr.4000: up (pid 120494) 4394 seconds
+/service/inlookup.infifo: up (pid 120465) 4394 seconds
+/service/mrtg: up (pid 120495) 4394 seconds
+/service/mysql.3306: up (pid 120471) 4394 seconds
+/service/proxy-imapd.4143: down 4394 seconds
+/service/proxy-imapd-ssl.9143: down 4394 seconds
+/service/proxy-pop3d.4110: down 4394 seconds
+/service/proxy-pop3d-ssl.9110: down 4394 seconds
+/service/pwdlookup: up (pid 120515) 4394 seconds
+/service/qmail-daned.1998: up (pid 120413) 4394 seconds
+/service/qmail-imapd.143: up (pid 120405) 4394 seconds
+/service/qmail-imapd-ssl.993: up (pid 120475) 4394 seconds
+/service/qmail-logfifo: up (pid 120499) 4394 seconds
+/service/qmail-pop3d.110: up (pid 120407) 4394 seconds
+/service/qmail-pop3d-ssl.995: up (pid 120497) 4394 seconds
+/service/qmail-poppass.106: up (pid 120474) 4394 seconds
+/service/qmail-qmqpd.628: down 4394 seconds
+/service/qmail-qmtpd.209: up (pid 120487) 4394 seconds
+/service/qmail-send.25: up (pid 120469) 4394 seconds
+/service/qmail-smtpd.25: up (pid 120416) 4394 seconds
+/service/qmail-smtpd.366: up (pid 120516) 4394 seconds
+/service/qmail-smtpd.465: up (pid 120492) 4394 seconds
+/service/qmail-smtpd.587: up (pid 120473) 4394 seconds
+/service/qscanq: up (pid 120500) 4394 seconds
+/service/udplogger.3000: up (pid 120463) 4394 seconds
+```
+
+## Create Virtual Domains
+
+##### STEP 1  #############################################
+Add a virtual domain
+
+For this example, we will add a domain "indimail.org"
+
+For a non-clustered domain you would execute the following command
+
+```
+% sudo /usr/bin/vadddomain indimail.org
+    or
+% sudo /usr/bin/vadddomain indimail.org password-for-postmaster
+
+For a clustered domain you would execute the following command
+
+% sudo /usr/bin/vadddomain -D indimail -S localhost \
+    -U indimail -P ssh-1.5- -p 3306 -c indimail.org password-for-postmaster
+    or
+% sudo /usr/bin/vadddomain -D indimail -S localhost \
+    -U indimail -P ssh-1.5- -p 3306 -c indimail.org password-for-postmaster
+```
+
+vadddomain will modify the following qmail files (default locations used)
+/etc/indimail/control/locals
+/etc/indimail/control/rcpthosts
+/etc/indimail/control/morercpthosts (if rcpthosts > than 50 lines)
+/etc/indimail/control/virtualdomains
+/etc/indimail/users/assign
+/etc/indimail/users/cdb
+
+NOTE: FreeBSD/Darwin has /usr/local/etc/indimail instead of /etc/indimail
+
+It will also create a domains directory 
+    ~indimail/domains/indimail.org
+    ~indimail/domains/indimail.org/postmaster/Maildir ...
+
+If you do not specify a password on the command line, it will prompt for a password for the postmaster.
+
+Then it will send a kill -HUP signal to qmail-send telling it to re-read the control files.
+
+Note: setting up DNS MX records for the virtual domain is not covered in this INSTALL file. You can look at this [guide](https://www.godaddy.com/garage/configuring-dns-for-email-a-quick-beginners-guide/) to do that.
+
+##### STEP 2  #############################################
+Add a new user.
+
+You can use vadduser to add users.
+
+```
+% sudo /usr/bin/vadduser newuser@indimail.org
+    or
+% sudo /usr/bin/vadduser newuser@indimail.org <password-for-newuser>
+```
+
+##### STEP 3  #############################################
+Delete a user
+
+```
+% sudo /usr/bin/vdeluser newuser@indimail.org (for the indimail.org virtualdomain example)
+```
+
+##### STEP 4  #############################################
+Delete a virtual domain
+
+```
+% sudo /usr/bin/vdeldomain indimail.org
+```
+
+##### STEP 5  #############################################
+Changing a users password
+
+```
+% sudo /usr/bin/vpasswd user@indimail.org
+        or
+% sudo /usr/bin/vpasswd user@indimail.org <password-for-user@indimail.org>
+```
+
+##### STEP 6  #############################################
+**Man pages**
+
+A lot of the underlying indimail details are not covered in this file. This is on purpose. If you want to find out the internal workings of indimail and qmail look into all files in /usr/share/indimail/doc and /usr/share/man/man?
+
+As a first step, do
+
+```
+% man indimail
+```
+
+**Send / Receive Mails**
+
+At this stage, your setup is ready to send mails to the outside world. To receive mails, you need to create your actual domain (instead of example.com) using vadddomain and setup a mail exchanger record for your domain (MX record).  To send mails, you can either use SMTP or use sendmail (which is actually /usr/bin/sendmail). You can do the following to send a test mail. The mail command is part of the BSD mail/mailx package
+
+```
+% ( echo 'First M. Last'; uname -a) | mail -s "IndiMail Installation" manvendra@indimail.org
+```
+
+You can also play around with the system at this point. Try POP3 (110), POP3s (995), IMAP (143), IMAPs (993), SMTP (25), SMTPS (465), Submission (587). You can use telnet or nc command to connect to these ports. You could also configure your mail client to connect to this ports and set it up for regular mail usage.
+
+Replace First M. Last with your name.
+
 # Binary Packages Build
 
 If you need to have indimail on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command. To generate RPM packages locally for all components refer to [Binary Packages](.github/CREATE-Packages.md).
