@@ -43,6 +43,7 @@ case "$host" in
 	;;
 *-*-freebsd*)
 	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib"
 	;;
 esac
 
