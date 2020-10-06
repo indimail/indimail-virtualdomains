@@ -1,33 +1,24 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
-
+AC_INIT([ripmime],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-utils@indimail.org],ripmime,[https://github.com/mbhangui/indimail-virtualdomains])
 AC_PREREQ([2.69])
-AC_INIT([ripmime],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-utils@indimail.org],ripmime, [https://github.com/mbhangui/indimail-virtualdomains])
-AC_CONFIG_SRCDIR([pldstr.h])
+AC_CONFIG_SRCDIR([uuencode.c])
 AC_CONFIG_HEADERS([config.h])
-AM_INIT_AUTOMAKE([foreign])
+AM_INIT_AUTOMAKE
+AC_CANONICAL_HOST
 
 # Checks for programs.
 AC_PROG_CC
-AC_PROG_CC_C99
 AC_PROG_MAKE_SET
-
-# Checks for libraries.
-# FIXME: Replace `main' with a function in `-lc':
-AC_CHECK_LIB([c], [main])
-# FIXME: Replace `main' with a function in `-lsocket':
-AC_CHECK_LIB([socket], [main])
-
-# Checks for header files.
-AC_CHECK_HEADERS([fcntl.h netinet/in.h stddef.h stdlib.h string.h syslog.h unistd.h])
-
-# Checks for typedefs, structures, and compiler characteristics.
-AC_CHECK_HEADER_STDBOOL
-AC_TYPE_SIZE_T
-
-# Checks for library functions.
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
-AC_CHECK_FUNCS([alarm memmove memset mkdir strcasecmp strchr strdup strerror strncasecmp strpbrk strrchr strstr])
-
-AC_OUTPUT(Makefile)
+AC_PROG_CC_C99
+CFLAGS="$CFLAGS -Wall -O3 -fPIC"
+echo "host=[$host]"
+case "$host" in
+	*-*-darwin*)
+	LIBICONV="-liconv"
+	LDFLAGS="$LDFLAGS -L/opt/local/lib"
+	;;
+esac
+AC_SUBST([LIBICONV])
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT

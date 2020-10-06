@@ -1,6 +1,4 @@
 @SET_MAKE@
-COFLAGS=-z+05:30
-AM_CFLAGS = -s -O4 -Wall -fPIC
 bin_PROGRAMS = ripmime ripole
 man_MANS = ripmime.1 ripole.1
 ripmime_SOURCES = strstack.c mime.c ffget.c MIME_headers.c tnef.c \
@@ -19,7 +17,7 @@ buildcodes.h:
 	./generate-buildcodes.sh
 
 ripmime$(EXEEXT): $(ripmime_DEPENDENCIES) $(ripmime_OBJECTS) ripmime.$(OBJEXT)
-	$(LINK) $@.$(OBJEXT) $(ripmime_OBJECTS)
+	$(LINK) $@.$(OBJEXT) $(ripmime_OBJECTS) $(LIBICONV)
 
 ripole$(EXEEXT): $(ripole_DEPENDENCIES) $(ripole_OBJECTS) ripole.$(OBJEXT)
 	$(LINK) $@.$(OBJEXT) $(ripole_OBJECTS)

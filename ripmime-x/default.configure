@@ -10,22 +10,20 @@ case "$SYSTEM" in
 	FreeBSD)
 	prefix=/usr/local
 	mandir=/usr/local/man
-	sysconfdir=/usr/local/etc/indimail
 	;;
 	Darwin)
 	prefix=/usr/local
 	mandir=/usr/local/share/man
-	sysconfdir=/usr/local/etc/indimail
+	export CPPFLAGS="-I/opt/local/include"
+	export LDFLAGS="-L/opt/local/lib"
 	;;
 	Linux)
 	prefix=/usr
 	mandir=$prefix/share/man
-	sysconfdir=/etc/indimail
 	;;
 	*)
 	prefix=/usr
 	mandir=/usr/man
-	sysconfdir=/usr/etc/indimail
 	;;
 esac
 ./configure \
