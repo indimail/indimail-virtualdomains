@@ -454,6 +454,8 @@ $ sudo svstat /service/*
 
 ## Create Virtual Domains
 
+The commands below will look familiar to you if you have used [vpopmail](https://www.inter7.com/vpopmail-virtualized-email/). IndiMail-virtualdomains has many commands with the same name but is a totally new package with all code written in djb style. Also the feature list is extensive compated to vpopmail. But unlike vpopmail, indimail-virtualdomains supports MySQL database only. The idea for doing indimail-virtualdomains comes from looking at how vpopmail works. You can extend what many of indimail-virtualdomains programs by creating a script with the same name in /usr/libexec/indimail. These scripts will be passed the same arguments that you pass the original programs. The man pages for the commands will have more details.
+
 ##### STEP 1  #############################################
 Add a virtual domain
 
@@ -486,8 +488,9 @@ vadddomain will modify the following qmail files (default locations used)
 NOTE: FreeBSD/Darwin has /usr/local/etc/indimail instead of /etc/indimail
 
 It will also create a domains directory 
-    ~indimail/domains/indimail.org
-    ~indimail/domains/indimail.org/postmaster/Maildir ...
+ ~indimail/domains/indimail.org
+and user's home directory and Maildir
+ ~indimail/domains/indimail.org/postmaster/Maildir
 
 If you do not specify a password on the command line, it will prompt for a password for the postmaster.
 
