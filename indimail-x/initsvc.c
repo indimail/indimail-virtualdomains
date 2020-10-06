@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 1.8  2020-10-06 14:53:02+05:30  Cprogrammer
+ * fix for FreeBSD
+ *
  * Revision 1.7  2020-10-04 09:28:57+05:30  Cprogrammer
  * changed Label for launchd unit file to org.indimail.svscan
  *
@@ -34,6 +37,9 @@
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #ifdef HAVE_QMAIL
 #include <str.h>
 #include <fmt.h>
@@ -45,7 +51,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 1.7 2020-10-04 09:28:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 1.8 2020-10-06 14:53:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
@@ -223,7 +229,8 @@ main(int argc, char **argv)
 				break;
 			case SV_PRINT:
 				execl("/bin/sh", "sh", "-c",
-				"/bin/cat /lib/systemd/system/svscan.service;/bin/ls -l /lib/systemd/system/svscan.service",
+				"/bin/cat /lib/systemd/system/svscan.service;"
+				"/bin/ls -l /lib/systemd/system/svscan.service",
 				(char *) 0);
 				strerr_die1sys(111, "execl: cat: ");
 				break;
@@ -245,31 +252,34 @@ main(int argc, char **argv)
 				strerr_warn1("svscan: fappend systemd /usr/local/etc/rc.d/svscan: ", &strerr_sys);
 				return (1);
 			}
-			system("service svscan enable");
+			system("/usr/sbin/service svscan enable");
 		}
 		switch(flag)
 		{
 			case SV_ON:
-				execl("/usr/sbin/service", "service", "svscan", "start", (char *) 0);
-				strerr_die1sys(111, "execl: /usr/sbin/service: ");
+				execl("/bin/sh", "sh", "-c",
+					"/usr/sbin/service svscan enable; /usr/sbin/service svscan start",
+					(char *) 0);
+				strerr_die1sys(111, "execl: /bin/sh: ");
 				break;
 			case SV_OFF:
-				system("service svscan disable");
-				execl("/usr/sbin/service", "service", "svscan", "stop", (char *) 0);
-				strerr_die1sys(111, "execl: /usr/sbin/service: ");
+				execl("/bin/sh", "sh", "-c",
+					"service svscan stop; service svscan disable; service svscan delete",
+					(char *) 0);
+				strerr_die1sys(111, "execl: /bin/sh: ");
 				break;
 			case SV_STAT:
 				out("svscan", "svscan.service in /etc/rc.conf is ");
 				flush("svscan");
 				execl("/bin/sh", "sh", "-c",
-				"/usr/bin/grep svscan_enable /etc/rc.conf;/bin/ls -l /usr/local/etc/rc.d/svscan",
-				(char *) 0);
-				strerr_warn1("svscan: execl /bin/sh: ", &strerr_sys);
+					"/usr/bin/grep svscan_enable /etc/rc.conf;/bin/ls -l /usr/local/etc/rc.d/svscan",
+					(char *) 0);
+				strerr_die1sys(111, "execl: /bin/sh: ");
 			case SV_PRINT:
 				execl("/bin/sh", "sh", "-c",
-				"/bin/cat /usr/local/etc/rc.d/svscan;/bin/ls -l /usr/local/etc/rc.d/svscan",
-				(char *) 0);
-				strerr_die1sys(111, "execl: /bin/cat: ");
+					"/bin/cat /usr/local/etc/rc.d/svscan;/bin/ls -l /usr/local/etc/rc.d/svscan",
+					(char *) 0);
+				strerr_die1sys(111, "execl: /bin/sh: ");
 				break;
 		}
 		return (1);
@@ -311,7 +321,8 @@ main(int argc, char **argv)
 				break;
 			case SV_PRINT:
 				execl("/bin/sh", "sh", "-c",
-				"/bin/cat /Library/LaunchDaemons/org.indimail.svscan.plist;/bin/ls -l /Library/LaunchDaemons/org.indimail.svscan.plist",
+				"/bin/cat /Library/LaunchDaemons/org.indimail.svscan.plist;"
+				"/bin/ls -l /Library/LaunchDaemons/org.indimail.svscan.plist",
 				(char *) 0);
 				strerr_die1sys(111, "execl: /bin/cat: ");
 				break;
