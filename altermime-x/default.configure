@@ -11,6 +11,10 @@ case "$SYSTEM" in
 	prefix=/usr/local
 	mandir=/usr/local/man
 	;;
+	FreeBSD)
+	prefix=/usr/local
+	mandir=/usr/local/share/man
+	;;
 	Linux)
 	prefix=/usr
 	mandir=$prefix/share/man
