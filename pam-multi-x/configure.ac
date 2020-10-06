@@ -67,8 +67,9 @@ case "$host" in
 	SYSTEM=Linux
 	;;
 *-*-freebsd*)
-	CPPFLAGS="$CPPFLAGS -DFREEBSD"
+	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/include/qmail"
 	CFLAGS="$CFLAGS -g -O4 -Wall -fPIC"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib"
 	MODFLAGS="-g -module -O4 -fPIC -shared -Wall"
 	SYSTEM=FreeBSD
 	;;
