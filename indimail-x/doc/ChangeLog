@@ -38,3 +38,5 @@ Release 3.3 Start 06/09/2020
 - 05/10/2020
 23. uninstall iauth.so, docs and post handle scripts
 24. Makefile.am: Set LDPATH for libqmail path (Darwin)
+25. initsvc: Fix for FreeBSD
+26. set CPPFLAGS, CFLAGS, LDFLAGS for nssd, pam-multi

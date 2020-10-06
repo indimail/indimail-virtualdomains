@@ -22,3 +22,5 @@ indimail (@version@-@release@) unstable; urgency=low
   * Makefile.am: bypass linux specific code on Darwin
   * uninstall iauth.so, docs and post handle scripts
   * Makefile.am: Set LDPATH for libqmail path (Darwin)
+  * initsvc: Fix for FreeBSD
+  * set CPPFLAGS, CFLAGS, LDFLAGS for nssd, pam-multi
