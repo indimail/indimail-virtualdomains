@@ -11,7 +11,7 @@ case "$SYSTEM" in
 	prefix=/usr/local
 	mandir=/usr/local/man
 	;;
-	FreeBSD)
+	Darwin)
 	prefix=/usr/local
 	mandir=/usr/local/share/man
 	;;

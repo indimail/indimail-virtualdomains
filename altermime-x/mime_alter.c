@@ -1485,7 +1485,7 @@ Errors:
 ------------------------------------------------------------------------*/
 int AM_add_disclaimer_insert_html( 	struct AM_disclaimer_details *dd, FFGET_FILE *f, FILE *newf )
 {
-	char boundary[ AM_1K_BUFFER_SIZE +1];
+	char boundary[ AM_1K_BUFFER_SIZE +2];
 	int boundary_length = 0;
 	char line[ AM_1K_BUFFER_SIZE +1];
 	char lline[ AM_1K_BUFFER_SIZE +1];
@@ -3344,7 +3344,7 @@ Errors:
 int AM_alter_header( char *filename, char *header, char *change, int change_mode )
 {
 
-	char line[ AM_1K_BUFFER_SIZE +1];
+	char line[ AM_1K_BUFFER_SIZE];
 	char tpn[ AM_1K_BUFFER_SIZE +1];
 	int main_headers_complete = 0;
 	int header_written = 0;

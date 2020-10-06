@@ -10,7 +10,7 @@ dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CC_C99
 AC_ISC_POSIX
-
+CFLAGS="$CFLAGS -Wall -O3"
 defaultprefix="/usr"
 AC_SUBST(defaultprefix)
 
@@ -34,11 +34,6 @@ int main()
     AC_MSG_RESULT(no)
     AC_MSG_ERROR(Could not compile and run even a trivial ANSI C program - check CC.),
     AC_MSG_ERROR(Could not compile and run even a trivial ANSI C program - check CC.))
-
-dnl AC_CHECK_HEADERS(crypt.h)
-dnl Checks for libraries.
-dnl AC_CHECK_LIB(dl, main)
-dnl AC_CHECK_FUNCS(setenv unsetenv)
 
 dnl Checks for header files.
 AC_HEADER_STDC
