@@ -67,8 +67,8 @@ case "$host" in
 	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/include/qmail"
-	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
-	MODFLAGS="-g -O4 -fPIC -shared -Wall"
+	CFLAGS="$CFLAGS -O3 -Wall -fPIC"
+	MODFLAGS="-g -O3 -fPIC -shared -Wall"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
 	STRIP_OPT=-s
 	;;
