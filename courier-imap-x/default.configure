@@ -12,6 +12,9 @@ case "$SYSTEM" in
 	mandir=/usr/local/man
 	libdir=/usr/local/lib
 	sysconfdir=/usr/local/etc/indimail
+	export CPPFLAGS="-I/usr/local/include"
+	export CXXFLAGS="-I/usr/local/include"
+	export LDFLAGS="-L/usr/local/lib"
 	extra="--with-authpwd --with-authpam"
 	;;
 	Darwin)
