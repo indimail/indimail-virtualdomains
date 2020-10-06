@@ -51,15 +51,17 @@ case "$host" in
 	;;
 *-*-darwin*)
 	INSTALL="/usr/bin/install -c"
-	CPPFLAGS="$CPPFLAGS -DDARWIN"
+	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I/opt/local/include/qmail"
 	CFLAGS="$CFLAGS -O4 -Wall -pie"
+	LDFLAGS="$LDFLAGS -L/opt/local/lib"
 	STRIP_OPT=-s
 	OS=darwin
 	;;
 *-*-freebsd*)
 	INSTALL="/usr/bin/install -c"
-    CPPFLAGS="$CPPFLAGS -DFREEBSD"
-	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+   	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/include/qmail"
+	CFLAGS="$CFLAGS -O3 -Wall -fPIC -Wno-non-literal-null-conversion"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib"
 	STRIP_OPT=-s
 	OS=freebsd
     ;;
