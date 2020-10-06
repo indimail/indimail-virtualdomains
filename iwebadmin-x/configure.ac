@@ -5,7 +5,6 @@ AC_CANONICAL_TARGET
 LT_INIT
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
-AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "iwebadmin@indimail.org")
 
 dnl Checks for programs.
 AC_PROG_LIBTOOL
@@ -21,8 +20,57 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AC_ISC_POSIX
 
+CPPFLAGS="${CPPFLAGS} -Dlint"
+
+case "$host" in
+*-*-sunos4.1.1*)
+	INSTALL="./install-sh -c"
+	idcommand="/usr/xpg4/bin/id -u"
+	CPPFLAGS="$CPPFLAGS -DSUNOS4"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	;;
+*-*-solaris*)
+	INSTALL="./install-sh -c"
+	idcommand="/usr/xpg4/bin/id -u"
+	CPPFLAGS="$CPPFLAGS -DSOLARIS"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	STRIP_OPT=-s
+	;;
+*-*-linux*)
+	INSTALL="/usr/bin/install -c"
+	idcommand="/usr/bin/id -u"
+	CPPFLAGS="$CPPFLAGS -DLINUX -I/usr/include/qmail -I/usr/include/indimail -I/usr/include/mysql"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC -fno-strict-aliasing"
+	STRIP_OPT=-s
+	;;
+*-*-darwin*)
+	INSTALL="/usr/bin/install -c"
+	idcommand="/usr/bin/id -u"
+	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I/opt/local/include/qmail -I/opt/local/include/indimail"
+	CPPFLAGS="$CPPFLAGS -I/opt/local/include/mysql"
+	CFLAGS="$CFLAGS -O3 -Wall"
+	LDFLAGS="$LDFLAGS -L/opt/local/lib"
+	STRIP_OPT=-s
+	;;
+*-*-freebsd*)
+	INSTALL="/usr/bin/install -c"
+	idcommand="/usr/bin/id -u"
+	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/include/qmail -I/usr/local/include/indimail"
+	CPPFLAGS="$CPPFLAGS -I/usr/local/include/mysql"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib"
+	CFLAGS="$CFLAGS -O3 -Wall"
+	STRIP_OPT=-s
+	;;
+*)
+	INSTALL="/usr/bin/install -c"
+	idcommand="/usr/bin/id -u"
+	CPPFLAGS="$CPPFLAGS -DLINUX -I/usr/include/qmail -I/usr/include/indimail -I/usr/include/mysql"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	STRIP_OPT=-s
+	;;
+esac
+
 AC_HEADER_STDC
-CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/include/indimail -I/usr/include/qmail"
 AC_CHECK_HEADERS([mysql.h errno.h signal.h unistd.h])
 AC_CHECK_HEADERS([pwd.h ctype.h time.h stdlib.h sys/wait.h])
 dnl Checks for libraries.
@@ -34,6 +82,11 @@ if test " $noqmail" = " t"
 then
   AC_MSG_ERROR(Could not find qmail library.)
 fi
+AC_CHECK_LIB(indimail, iopen, [AC_SUBST([LIB_INDIMAIL], ["-lindimail"]) AC_DEFINE([HAVE_INDIMAIL], [1],[indimail Library])],noindimail=t,)
+if test " $noindimail" = " t"
+then
+  AC_MSG_ERROR(Could not find indimail library.)
+fi
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -42,48 +95,6 @@ AC_TYPE_UID_T
 # Checks for library functions.
 AC_FUNC_CLOSEDIR_VOID
 AC_CHECK_FUNCS([dup2 memset mkdir strcasecmp strchr strdup strncasecmp strrchr strstr setreuid setregid])
-
-if test "$GCC" = yes ; then
-  CFLAGS="$CFLAGS -Wall"
-fi
-
-case "$host" in
-*-*-sunos4.1.1*)
-	INSTALL="./install-sh -c"
-	idcommand="/usr/xpg4/bin/id -u"
-	CPPFLAGS="$CPPFLAGS -DSUNOS4"
-	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
-	STRIP_OPT=-s
-	;;
-*-*-solaris*)
-	INSTALL="./install-sh -c"
-	idcommand="/usr/xpg4/bin/id -u"
-	CPPFLAGS="$CPPFLAGS -DSOLARIS"
-	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
-	STRIP_OPT=-s
-	;;
-*-*-linux*)
-	AC_LIB_PREPARE_MULTILIB
-	INSTALL="/usr/bin/install -c"
-	idcommand="/usr/bin/id -u"
-	CPPFLAGS="$CPPFLAGS -DLINUX"
-	CFLAGS="$CFLAGS -O4 -Wall -fPIC -fno-strict-aliasing"
-	STRIP_OPT=-s
-	;;
-*-*-darwin*)
-	INSTALL="/usr/bin/install -c"
-	idcommand="/usr/bin/id -u"
-	CPPFLAGS="$CPPFLAGS -DDARWIN"
-	CFLAGS="$CFLAGS -O4 -Wall -pie"
-	STRIP_OPT=-s
-	;;
-*)
-	INSTALL="/usr/bin/install -c"
-	idcommand="/usr/bin/id -u"
-	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
-	STRIP_OPT=-s
-	;;
-esac
 
 CGIBINTARGETS=iwebadmin
 AC_SUBST(CGIBINTARGETS)
@@ -96,20 +107,6 @@ then
 	prefix="$defaultprefix"
 	ac_configure_args="$ac_configure_args --prefix=$prefix"
 fi
-tlib='${exec_prefix}/lib'
-if test x$libdir = x$tlib
-then
-	dnl Does not work on RHEL 5, CentOS 5 64 bit systems
-	if test -d /lib64 -a "$acl_libdirstem" = "lib"
-	then
-		acl_libdirstem=lib64
-		libdir=$prefix/$acl_libdirstem
-	fi
-	ilibdir=$prefix/$acl_libdirstem
-else
-	ilibdir=$libdir
-fi
-RPATH_LIB="$acl_libdirstem"
 
 if test -f /usr/bin/lsb_release
 then
@@ -121,20 +118,8 @@ DISTRIB_VERSION=$(sh ./lsb_release -sr)
 fi
 AC_SUBST(DISTRIB_ID)
 AC_SUBST(DISTRIB_VERSION)
-#libdir=$prefix/$acl_libdirstem
-auth_incs="-I$prefix/include/indimail -I$prefix/include/qmail"
-case "$host" in
-	*-*-darwin*)
-	auth_libs="-L. -L$libdir -lindimail $LIB_CRYPT $LIB_QMAIL $LIB_SSL"
-	;;
-	*)
-	auth_libs="-L. -L$libdir -Xlinker -R -Xlinker $libdir -lindimail $LIB_CRYPT $LIB_QMAIL $LIB_SSL"
-	;;
-esac
-sys_libdir=${acl_libdirstem}
 AC_SUBST(auth_incs)
 AC_SUBST(auth_libs)
-AC_SUBST(sys_libdir)
 
 htmldir=""
 for f in /home/httpd/html /usr/local/apache/htdocs /usr/local/www/data /var/www/html
@@ -220,7 +205,7 @@ AC_DEFINE_UNQUOTED(HTMLLIBDIR, "$htmllibdir","")
 
 
 ezmlmdir=""
-for f in /var/indimail/bin/ezmlm /usr/bin /usr/sbin /usr/local/bin
+for f in /usr/bin /usr/local/bin
 do
     if test -f $f/ezmlm-make
     then
@@ -452,13 +437,10 @@ echo "         image dir = "$imagedir""
 echo "         image URL = "$imageurl""
 echo "      template dir = "$htmllibdir""
 echo "         ezmlm dir = "$ezmlmdir""
-echo "    system lib dir = "$sys_libdir""
 echo "         ezmlm idx = "$ezmlmidx""
 echo "   ezmlm for MySQL = "$ezmlm_mysql""
 echo "              help = "$enable_help""
 echo "            libdir = "$libdir""
-echo "          auth_inc = "$auth_incs""
-echo "          auth_lib = "$auth_libs""
 echo "      modify quota = "$MODIFY_QUOTA""
 echo "   domain autofill = "$DOMAIN_AUTOFILL""
 echo "          No Cache = "$NO_CACHE""

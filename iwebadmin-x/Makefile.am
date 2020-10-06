@@ -1,6 +1,5 @@
 @SET_MAKE@
 ACLOCAL_AMFLAGS=-I m4
-DEFS=@DEFS@ -fno-strict-aliasing -I. @auth_incs@
 
 htmllibdir=@htmllibdir@
 htmldir=@htmldir@
@@ -28,12 +27,12 @@ iwebadmin_DEPENDENCIES=$(COMMONDEPENDENCIES)
 COMMONSOURCES=iwebadmin.c alias.c autorespond.c forward.c mailinglist.c \
 	      user.c util.c printh.c auth.c template.c \
 	      command.c show.c cgi.c limits.c dotqmail.c \
-		  common.c \
-	      iwebadmin.h iwebadminx.h
+		  common.c iwebadmin.h iwebadminx.h
 
 iwebadmin_SOURCES=$(COMMONSOURCES) 
-iwebadmin_LDADD=@auth_libs@
-iwebadmin_CFLAGS = @auth_incs@ $(AM_CFLAGS)
+iwebadmin_LDADD=-lindimail $(LIB_QMAIL) $(LIB_CRYPT) $(LIB_SSL)
+iwebadmin_LDFLAGS = $(AM_LDFLAGS)
+iwebadmin_CFLAGS = $(AM_CFLAGS)
 
 noinst_DATA = iwebadmin.spec iwebadmin-rpmlintrc \
 			  iwebadmin-permissions.easy iwebadmin-permissions.secure \
