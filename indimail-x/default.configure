@@ -11,6 +11,7 @@ case "$SYSTEM" in
 	prefix=/usr/local
 	sysconfdir=/usr/local/etc/indimail
 	mandir=/usr/local/man
+	libdir=/usr/local/lib
 	base_path=/home/mail
 	;;
 	Linux)
