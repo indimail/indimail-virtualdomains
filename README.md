@@ -402,9 +402,11 @@ NOTE: The Darwin Mac OSX system is broken for sending emails because you can't r
 ```
 $ sudo systemctl start svscan # Linux
 or
-$ sudo service svscan start # Universal
+$ sudo service svscan start # Linux/FreeBSD
 or
 $ /etc/init.d/svscan start # Linux
+or
+$ sudo launchctl start org.indimail.svscan # Mac OSX
 or
 $ qmailctl start # Universal
 ```

@@ -1187,7 +1187,7 @@ If you do not specify a password on the command line, it will prompt for a passw
 
 Then it will send a kill -HUP signal to qmail-send telling it to re-read the control files.
 
-Note: setting up DNS MX records for the virtual domain is not covered in this INSTALL file.
+Note: setting up DNS MX records for the virtual domain is not covered in this INSTALL file. You can look at this [guide](https://www.godaddy.com/garage/configuring-dns-for-email-a-quick-beginners-guide/) to do that.
 ```
 
 ```
