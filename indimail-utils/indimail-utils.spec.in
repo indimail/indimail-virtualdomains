@@ -138,11 +138,13 @@ echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
 echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui indimail-utils@indimail.org\""
 ) > %{name}-release
 
+extra_opt=""
 for i in altermime-%{altermime_version} ripmime-%{ripmime_version} \
 fortune-%{fortune_version} mpack-%{mpack_version} flash-%{flash_version}
 do
   if [ -d $i ] ; then
     cd $i
+    extra_opt=""
     if [ " $i" = " flash-%{flash_version}" ] ; then
       extra_opt="--sysconfdir=%{sysconfdir} --enable-modbase=%{_prefix}/lib/indimail"
     elif [ " $i" = " fortune-%{fortune_version}" ] ; then
