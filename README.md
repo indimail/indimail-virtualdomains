@@ -172,6 +172,7 @@ $ sudo make install-strip
 ```
 
 NOTE: for Darwin
+
 ```
 # port install db48
 ```
@@ -230,6 +231,7 @@ $ sudo sh ./svctool --config=users --nolog
 (check version in indimail-mta/indimail-mta-x/conf-version)
 
 Note: for Darwin
+
 ```
 # port install openldap mrtg
 ```
@@ -258,6 +260,7 @@ $ sudo make install-strip
 ```
 
 NOTE: for Darwin
+
 ```
 # port install libidn2 pcre db48
 ```
@@ -280,7 +283,6 @@ $ sudo make install-strip
 ## Build nssd
 
 Optional component. Required only if you require the Standard C library routines to use Name Service Switch to authenticate from a MySQL db (e.g. for authenticated SMTP, IMAP, POP3, etc). Your passwd(5) database gets extended to indimail's MySQL database. You will also need to edit /etc/nsswitch.conf and have a line like this `passwd: files nssd`. Check the man page for nssd(8) and nsswitch.conf(5)
-
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/nssd-x
@@ -395,7 +397,7 @@ $ cd /usr/local/src/indimail-mta/indimail-mta-x
 $ sudo ./create_services
 ```
 
-The script create_services does the following.
+The script create\_services does the following.
 
 1. Creates MySQL user 'indimail' with password 'ssh-1.5-'. This user has access to indimail database.
 2. Creates MySQL user 'mysql' with '4-57343-'. This user has all MySQL privileges.
@@ -429,6 +431,7 @@ The svstat command can be used to query the status of various services. You can 
 ```
 % sudo svstat /service/qmail-smtpd.25
 ```
+
 The argument to svstat should be a directory in /service. Each directory in /service refers to an indimail-mta/indimail service. e.g. `/service/qmail-smtpd.25` refers to the SMTP service serving port 25.
 
 ```
