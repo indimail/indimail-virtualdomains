@@ -7,21 +7,38 @@ if [ ! -f conf-release ] ; then
 	echo 1.1 > conf-release
 fi
 SYSTEM=$(uname -s)
+sysconfdir=/etc/indimail
 case "$SYSTEM" in
 	FreeBSD)
 	prefix=/usr/local
 	mandir=/usr/local/man
-	sysconfdir=/usr/local/etc/indimail
+	CPPFLAGS="-I/usr/local/include"
+	LDFLAGS="-L/usr/local/lib"
+	for i in db4 db5
+	do
+		if [ -d /usr/local/lib/$i ] ; then
+			LDFLAGS="$LDFLAGS -L/usr/local/lib/$i"
+		fi
+		if [ -d /usr/local/include/$i ] ; then
+			CPPFLAGS="$CPPFLAGS -I/usr/local/include/$i"
+		fi
+	done
+	export CPPFLAGS LDFLAGS
 	;;
 	Linux)
 	prefix=/usr
 	mandir=$prefix/share/man
-	sysconfdir=/etc/indimail
+	;;
+	Darwin)
+	prefix=/opt/local
+	mandir=/opt/local/share/man
+	extra="--with-libdb-prefix=/opt/local/lib/db48/"
+	export CPPFLAGS="-I/opt/local/include -I/opt/local/include/db48"
+	export LDFLAGS="-L/opt/local/lib -L/opt/local/lib/db48"
 	;;
 	*)
 	prefix=/usr
 	mandir=/usr/man
-	sysconfdir=/usr/etc/indimail
 	;;
 esac
 ./configure --prefix=$prefix \
@@ -29,4 +46,4 @@ esac
   --sysconfdir=$sysconfdir \
   --datarootdir=$prefix/share/indimail \
   --libexecdir=$prefix/libexec/indimail \
-  --mandir=$mandir
+  --mandir=$mandir $extra
