@@ -12,6 +12,8 @@ AC_PROG_CC
 AC_PROG_CC_C99
 AC_PROG_RANLIB
 
+CFLAGS="$CFLAGS -g -O3 -Wall -fPIC"
+
 defaultprefix="/usr"
 AC_SUBST(defaultprefix)
 

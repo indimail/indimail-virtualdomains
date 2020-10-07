@@ -26,7 +26,7 @@ case "$host" in
 	;;
 *-*-darwin*)
 	CPPFLAGS="$CPPFLAGS -DDARWIN"
-	CFLAGS="$CFLAGS -O4 -Wall -pie"
+	CFLAGS="$CFLAGS -O3 -Wall"
 	STRIP_OPT=-s
 	;;
 *)

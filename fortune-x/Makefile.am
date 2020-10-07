@@ -14,8 +14,6 @@ OCOOKIES=drugsO misandry privates sex astrology ethnicO \
 	religion vulgarity definitionsO limerick politicsO riddlesO \
 	atheism fortunesO linuxO
 
-CFLAGS = -g -O4 -Wall -fPIC
-
 COMMONSOURCES= fortune.c randstr.c rot.c strfile.c unstr.c
 
 fortune_SOURCES = fortune.c

@@ -28,8 +28,8 @@ AC_ISC_POSIX
 
 case "$host" in
 *-*-darwin*)
-	CFLAGS="$CFLAGS -g -I. -I.. -O4 -Wall -pie"
-	MODFLAGS="-O4 -bundle -pie -Wall -undefined dynamic_lookup"
+	CFLAGS="$CFLAGS -g -I. -I.. -O3 -Wall"
+	MODFLAGS="-O3 -bundle -Wall -undefined dynamic_lookup"
 	STRIP_OPT=-s
 	;;
 *)
@@ -124,6 +124,5 @@ AC_DEFINE(PATH_TO_HELP,"system.help","")
 AC_DEFINE(DEFAULT_MENU,"system.menu","")
 
 auth_libs="-L. -L$libdir -lflash"
-echo "system lib dir = $acl_libdirstem $acl_libdirstem2 RPATH=$libdir"
 AC_SUBST(auth_libs)
 AC_OUTPUT(Makefile)
