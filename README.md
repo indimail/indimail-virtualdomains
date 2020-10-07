@@ -162,6 +162,8 @@ $ sudo make install or sudo ./qmake install
 
 ## Build bogofilter
 
+Optional. Required only if you want to use bogofilter for spam filtering
+
 ```
 $ cd /usr/local/src/indimail-virtualdomains/bogofilter-x
 $ ./default.configure
@@ -169,9 +171,16 @@ $ make
 $ sudo make install-strip
 ```
 
+NOTE: for Darwin
+```
+# port install db48
+```
+
 (check version in indimail-virtualdomains/bogofilter-x/conf-version)
 
 ## Build bogofilter-wordlist
+
+Optional. Required only if you want to use bogofilter for spam filtering
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/bogofilter-wordlist-1.0
