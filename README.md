@@ -67,10 +67,13 @@ Ubuntu 16.04 - libcom-err2, libmysqlclient-dev
 ```
 
 FreeBSD / Darwin OSX
+
+You require a MySQL server provided either by Oracle or by MariaDB. You also require the MySQL client libraries (either libmysqlcliebt or libmariadb). The steps below will help you do that.
+
 FreeBSD - Install the following using pkg
 
 ```
-# pkg install mysql80-server mysql80-client libidn
+# pkg install mysql80-server mysql80-client
 ```
 
 - You also need either MariaDB (Linux only) or MySQL community server (All Unix distributions)
@@ -141,7 +144,7 @@ conf-prefix|/usr
 conf-sysconfdir|/etc/indimail
 conf-shared|/usr/share/indimail
 
-**FreeBSD**
+**FreeBSD** / **Darwin**
 
 config file|value
 -----------|------
@@ -204,7 +207,7 @@ conf-sysconfdir|/etc/indimail
 conf-shared|/usr/share/indimail
 conf-libexec|/usr/libexec/indimail
 
-**FreeBSD**
+**FreeBSD** / **Darwin**
 
 config file|value
 -----------|------
@@ -259,10 +262,16 @@ $ ./default.configure
 $ sudo make install-strip
 ```
 
+NOTE: for FreeBSD
+
+```
+# pkg install libidn
+```
+
 NOTE: for Darwin
 
 ```
-# port install libidn2 pcre db48
+$ sudo port install libidn2 pcre db48
 ```
 
 (check version in indimail-virtualdomains/courier-imap-x/conf-version)
@@ -404,7 +413,7 @@ The script create\_services does the following.
 3. Creates MySQL user 'admin' with 'benhur20'. This user has shutdown privilege in MySQL.
 4. Creates user 'admin' in indimail internal database for adminclient(8). This is used by indisrvr(8) for access to various IndiMail(7) programs. The password of this user is 'benhur20'
 5. You can also set MYSQL\_PASS, PRIV\_PASS, ADMIN\_PASS environent variables to set your own passwords before running create\_services.
-6. If you change the MySQL password for indimail after running create\_services, edit /etc/indimail/control/host.mysql. On FreeBSD this file will be /usr/local/etc/indimail/host.mysql
+6. If you change the MySQL password for indimail after running create\_services, edit /etc/indimail/control/host.mysql. On FreeBSD/Darwin this file will be /usr/local/etc/indimail/host.mysql
 
 NOTE: The Darwin Mac OSX system is broken for sending emails because you can't remove /usr/sbin/sendmail. [System Integrity Protection (SIP)](https://en.wikipedia.org/wiki/System_Integrity_Protection) ensures that you cannot modify anything in /bin, /sbin, /usr, /System, etc. You could disable it by using csrutil in recover mode but that is not adviseable. See [this](https://www.howtogeek.com/230424/how-to-disable-system-integrity-protection-on-a-mac-and-why-you-shouldnt/). indimail-mta requires services in /service to configure all startup items. On Mac OS X, it uses `/etc/synthetic.conf' to create a virtual symlink of /service to /usr/local/etc/indimail/service. This file is created/modified by 'svctool --add-boot' command. For program that need to send mails, you will need to call /usr/local/bin/sendmail (indimal-mta's sendmail replacement). The OS and all utilites like cron, mailx, etc will continue to use /usr/sbin/sendmail. There is nothing you can do about it, other than fooling around with SIP.
 
