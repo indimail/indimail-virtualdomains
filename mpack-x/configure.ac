@@ -24,6 +24,11 @@ case "$host" in
 	CFLAGS="$CFLAGS -s -O4 -Wall -fPIC"
 	STRIP_OPT=-s
 	;;
+*-*-freebsd*)
+	CPPFLAGS="$CPPFLAGS -DFREEBSD"
+	CFLAGS="$CFLAGS -O3 -Wall"
+	STRIP_OPT=-s
+	;;
 *-*-darwin*)
 	CPPFLAGS="$CPPFLAGS -DDARWIN"
 	CFLAGS="$CFLAGS -O3 -Wall"

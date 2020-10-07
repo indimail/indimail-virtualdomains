@@ -23,7 +23,8 @@ flashbin_PROGRAMS = flash
 modules_list = alarms background countdown
 
 flash_SOURCES = main.c
-flash_LDADD = @auth_libs@ @LIB_CURSES@ @LIB_DLOPEN@
+flash_LDFLAGS = $(LDFLAGS)
+flash_LDADD = libflash.la @LIB_CURSES@ @LIB_DLOPEN@
 flash_DEPENDENCIES = libflash.la
 
 doc_list=README-flash.md COPYING-flash AUTHORS-flash

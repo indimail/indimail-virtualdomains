@@ -13,7 +13,6 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC
 AC_PROG_CC_C99
 AC_PROG_LIBTOOL
-AC_LIB_PREPARE_MULTILIB
 
 LIBVER=1:0:0
 defaultprefix="/usr"
@@ -27,13 +26,18 @@ fi
 AC_ISC_POSIX
 
 case "$host" in
+*-*-freebsd*)
+	CFLAGS="$CFLAGS -I. -I.. -O3 -Wall -fPIC"
+	MODFLAGS="-shared -nostartfiles -s -O3 -fPIC -Wall"
+	STRIP_OPT=-s
+	;;
 *-*-darwin*)
 	CFLAGS="$CFLAGS -g -I. -I.. -O3 -Wall"
 	MODFLAGS="-O3 -bundle -Wall -undefined dynamic_lookup"
 	STRIP_OPT=-s
 	;;
 *)
-	CFLAGS="$CFLAGS -s -I. -I.. -O4 -Wall -fPIC"
+	CFLAGS="$CFLAGS -I. -I.. -O4 -Wall -fPIC"
 	MODFLAGS="-shared -nostartfiles -s -O4 -fPIC -Wall"
 	STRIP_OPT=-s
 	;;
@@ -123,6 +127,4 @@ AC_DEFINE(PATH_TO_GPL,"COPYING","")
 AC_DEFINE(PATH_TO_HELP,"system.help","")
 AC_DEFINE(DEFAULT_MENU,"system.menu","")
 
-auth_libs="-L. -L$libdir -lflash"
-AC_SUBST(auth_libs)
 AC_OUTPUT(Makefile)
