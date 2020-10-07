@@ -14,4 +14,10 @@ Release @version@-@release@ Start 03/06/2020
 07. increased soft mem for IMAP/POP3/poppass to 100Mb
 - 23/06/2020
 09. Removed creation of dkim key as that is part of indimail-mta package
+- 23/09/2020
 10. courier-imap: fixed compler warning on FreeBSD for rfc6533.c
+- 05/10/2020
+11. courier-imap: Fixes for Darwin. Use configure args --with-waitfunc=wait3
+    for Darwin
+12. courier-imap: Set LDFLAGS=/opt/local/lib when calling configure to avoid
+    wrong libiconv getting picked
