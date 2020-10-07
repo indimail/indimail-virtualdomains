@@ -417,6 +417,24 @@ The script create\_services does the following.
 
 NOTE: The Darwin Mac OSX system is broken for sending emails because you can't remove /usr/sbin/sendmail. [System Integrity Protection (SIP)](https://en.wikipedia.org/wiki/System_Integrity_Protection) ensures that you cannot modify anything in /bin, /sbin, /usr, /System, etc. You could disable it by using csrutil in recover mode but that is not adviseable. See [this](https://www.howtogeek.com/230424/how-to-disable-system-integrity-protection-on-a-mac-and-why-you-shouldnt/). indimail-mta requires services in /service to configure all startup items. On Mac OS X, it uses `/etc/synthetic.conf' to create a virtual symlink of /service to /usr/local/etc/indimail/service. This file is created/modified by 'svctool --add-boot' command. For program that need to send mails, you will need to call /usr/local/bin/sendmail (indimal-mta's sendmail replacement). The OS and all utilites like cron, mailx, etc will continue to use /usr/sbin/sendmail. There is nothing you can do about it, other than fooling around with SIP.
 
+## Enable svscan to be started at boot
+
+```
+$ sudo /usr/sbin/svctool --config=add-boot
+```
+
+You can enable indimail-mta as an alternative mta (if your system supports the `alternatives` commaand)
+
+```
+$ sudo  /usr/bin/svctool --config=add-alt
+```
+
+You can remove automatic startup at boot by running the command
+
+```
+$ sudo /usr/sbin/svctool --config=rm-boot
+```
+
 ## Start Services
 
 ```
@@ -444,7 +462,7 @@ The svstat command can be used to query the status of various services. You can 
 The argument to svstat should be a directory in /service. Each directory in /service refers to an indimail-mta/indimail service. e.g. `/service/qmail-smtpd.25` refers to the SMTP service serving port 25.
 
 ```
-$ sudo svstat /service/*
+$ sudo svstat /service/\*
 /service/dnscache: up (pid 120532) 4394 seconds
 /service/fetchmail: down 4394 seconds
 /service/greylist.1999: up (pid 120502) 4394 seconds
