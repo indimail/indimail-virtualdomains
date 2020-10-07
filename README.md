@@ -397,9 +397,9 @@ $ sudo make install-strip
 
 ## Setup & Configuration
 
-You are here because you decided to do a complete source installation. If you use source installation method, you need to setup various configuration and services. You can configure indimail/indimail-mta using /usr/sbin/svctool. `svctool` is a general purpose utility to configure indimail/indimail-mta services and configuration.
+You are here because you decided to do a complete source installation. If you use source installation method, you need to setup various configuration and services. You can configure indimail/indimail-mta using /usr/sbin/svctool. `svctool` is a general purpose utility to configure indimail/indimail-mta services and configuration. At this point you should stop MySQL/MariaDB service if it is up.
 
-You can also run the script `create_services` which invokes svctool to setup few default services to start a fully configured system. `create_services` will also put a systemd(1) unit file `svscan.service` in `/lib/systemd/system`. For FreeBSD systems, it will configure indimail to be started by rc(8) by creating a rc script in /usr/local/rc.d/svscan.
+You can also run the script `create_services` which invokes svctool to setup few default services to start a fully configured system. If you pass --add-boot argument to `create_services`, create\_services will also put a systemd(1) unit file `svscan.service` in `/lib/systemd/system`. For FreeBSD systems, it will configure indimail to be started by rc(8) by creating a rc script in /usr/local/rc.d/svscan. For Darwin (Mac OSX), it will put a LaunchDaemon unit file in /Library/LauncDaemons. You can enable automatic later (detailed in the next section).
 
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
