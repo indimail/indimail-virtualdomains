@@ -1,6 +1,5 @@
 ACLOCAL_AMFLAGS = -I m4
 COFLAGS=-z+05:30
-AM_CFLAGS = -g -O4 -fPIC -Wno-parentheses
 RM	= /bin/rm -f
 DEVNULL = /dev/null
 DIST_COMMON=ChangeLog COPYING AUTHORS

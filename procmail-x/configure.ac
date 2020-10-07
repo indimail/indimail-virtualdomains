@@ -41,11 +41,17 @@ case "$host" in
 	CPPFLAGS="$CPPFLAGS -DLINUX"
 	CFLAGS="$CFLAGS -O4 -fPIC -fno-strict-aliasing"
 	;;
+*-*-freebsd*)
+	INSTALL="/usr/bin/install -c"
+	idcommand="/usr/bin/id -u"
+	CPPFLAGS="$CPPFLAGS -DFREEBSD"
+	CFLAGS="$CFLAGS -O3"
+	;;
 *-*-darwin*)
 	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DDARWIN"
-	CFLAGS="$CFLAGS -O4 -pie"
+	CFLAGS="$CFLAGS -O3"
 	;;
 *)
 	INSTALL="/usr/bin/install -c"
