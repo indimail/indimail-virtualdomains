@@ -11,13 +11,15 @@ case "$SYSTEM" in
 	prefix=/usr/local
 	sysconfdir=/usr/local/etc/indimail
 	mandir=/usr/local/man
-	libdir=/usr/local/lib
+	servicedir=/usr/local/libexec/indimail/service
 	base_path=/home/mail
+	libdir=/usr/local/lib
 	;;
 	Linux)
 	prefix=/usr
 	sysconfdir=/etc/indimail
 	mandir=$prefix/share/man
+	servicedir=/service
 	base_path=/home/mail
 	arch=$(uname -m)
 	if [ -f /etc/debian_version ] ; then
@@ -43,13 +45,15 @@ case "$SYSTEM" in
 	prefix=/usr/local
 	sysconfdir=/usr/local/etc/indimail
 	mandir=/usr/local/share/man
-	libdir=/opt/local/lib
+	servicedir=/usr/local/libexec/indimail/service
 	base_path=/Users/mail
+	libdir=/opt/local/lib
 	;;
 	*)
 	prefix=/usr
 	sysconfdir=/etc/indimail
 	mandir=/usr/man
+	servicedir=/service
 	base_path=/mail
 	;;
 esac
@@ -65,7 +69,7 @@ fi
   --datarootdir=$prefix/share/indimail \
   --mandir=$mandir \
   --enable-qmaildir=/var/indimail \
-  --enable-servicedir=/service \
+  --enable-servicedir=$servicedir \
   --libdir=$libdir \
   --libexecdir=$prefix/libexec/indimail \
   --enable-domaindir=/var/indimail \
