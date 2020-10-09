@@ -6,6 +6,7 @@ shareddir=@shareddir@
 libdir=@libdir@
 mandir=@mandir@
 logdir=@logdir@
+servicedir=@servicedir@
 version=$(shell cat ../conf-version)
 release=$(shell cat ../conf-release)
 courier_version=@courier_version@
@@ -16,6 +17,7 @@ edit = sed \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@libdir\@,$(libdir),g' \
+	-e 's,@servicedir\@,$(servicedir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@logdir\@,$(logdir),g' \
