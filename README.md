@@ -195,7 +195,7 @@ $ sudo make install-strip
 
 ## Build indimail-mta-x
 
-To configure the build for indimail-mta, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared and conf-libexec. Defaults are given in the table below. You can also use the script default.configure to set the below values.
+To configure the build for indimail-mta, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared, conf-libexec and conf-servicedir. Defaults are given in the table below. You can also use the script default.configure to set the below values.
 
 **Linux**
 
@@ -206,6 +206,7 @@ conf-qmail|/var/indimail
 conf-sysconfdir|/etc/indimail
 conf-shared|/usr/share/indimail
 conf-libexec|/usr/libexec/indimail
+conf-servicedir|/service
 
 **FreeBSD** / **Darwin**
 
@@ -216,6 +217,7 @@ conf-qmail|/var/indimail
 conf-sysconfdir|/usr/local/etc/indimail
 conf-shared|/usr/local/share/indimail
 conf-libexec|/usr/local/libexec/indimail
+conf-servicedir|/usr/local/libexec/indimail/service
 
 You can refer to the detailed installation for indimail-mta [here](https://github.com/mbhangui/indimail-mta/blob/master/README.md)
 
