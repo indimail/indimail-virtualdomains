@@ -56,6 +56,19 @@ For systems using upstart
 # /sbin/initctl stop mysqld
 ```
 
+On FreeBSD
+
+```
+# service mysql stop
+# service mysql disable
+```
+
+On Darwin Mac OSX
+
+```
+# launchctl unload /Library/LaunchDaemons/com.oracle.oss.mysql.mysqld.plist
+```
+
 Some operating systems also use '/etc/rc.local' or '/etc/init.d/boot.local' to start additional services on startup. You must remove any invocation of mysqld_safe from these scripts.
 
 Create service in supervise to start mysqld

@@ -461,6 +461,8 @@ The svstat command can be used to query the status of various services. You can 
 
 The argument to svstat should be a directory in /service. Each directory in /service refers to an indimail-mta/indimail service. e.g. `/service/qmail-smtpd.25` refers to the SMTP service serving port 25.
 
+If you don't have /service create a link to /usr/libexec/indimail/service (/usr/local/libexec/indimail/service on FreeBSD and Darwin). I'm working on creating this link automatically during setup.
+
 ```
 $ sudo svstat /service/\*
 /service/dnscache: up (pid 120532) 4394 seconds
