@@ -44,7 +44,7 @@ case "$1" in
 	fi
 	if [ -f ${prefix}/bin/svok ] ; then
 		set +e
-		${prefix}/bin/svok /service/.svscan/log 2>/dev/null
+		${prefix}/bin/svok @servicedir@/.svscan/log 2>/dev/null
 		if [ $? -eq 0 ] ; then
 			echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
 			if test -f /lib/systemd/system/svscan.service && test -x /bin/systemctl
