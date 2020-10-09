@@ -12,6 +12,7 @@ case "$SYSTEM" in
 	prefix=/usr/local
 	mandir=/usr/local/man
 	sysconfdir=/usr/local/etc/indimail
+	servicedir=/usr/local/libexec/indimail/service
 	CPPFLAGS="-I/usr/local/include"
 	LDFLAGS="-L/usr/local/lib"
 	for i in db4 db5
@@ -30,11 +31,13 @@ case "$SYSTEM" in
 	prefix=/usr
 	mandir=$prefix/share/man
 	sysconfdir=/etc/indimail
+	servicedir=/service
 	;;
 	Darwin)
 	prefix=/opt/local
 	mandir=/opt/local/share/man
 	sysconfdir=/usr/local/etc/indimail
+	servicedir=/usr/local/libexec/indimail/service
 	extra="--with-libdb-prefix=/opt/local/lib/db48/"
 	export CPPFLAGS="-I/opt/local/include -I/opt/local/include/db48"
 	export LDFLAGS="-L/opt/local/lib -L/opt/local/lib/db48"
@@ -43,6 +46,7 @@ case "$SYSTEM" in
 	prefix=/usr/local
 	mandir=/usr/local/share/man
 	sysconfdir=/usr/local/etc/indimail
+	servicedir=/service
 	;;
 esac
 ./configure --prefix=$prefix \
@@ -50,4 +54,5 @@ esac
   --sysconfdir=$sysconfdir \
   --datarootdir=$prefix/share/indimail \
   --libexecdir=$prefix/libexec/indimail \
+  --servicedir=$servicedir \
   --mandir=$mandir $extra
