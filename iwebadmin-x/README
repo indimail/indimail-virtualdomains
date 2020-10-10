@@ -1,10 +1,11 @@
-What is it?
-~~~~~~~~~~~
-iwebadmin is a cgi program for administering Qmail with vchkpw.
-This version of QmailAdmin has been hacked to work with IndiMail
+# What is it?
+
+iwebadmin is a cgi program for administering indimail.
+This version of iwebadmin is a hack of QmailAdmin https://www.inter7.com/qmailadmin-project
 
 Requirements:
 ~~~~~~~~~~~~~
+
 - A UNIX computer (Linux/Solaris/BSD) and C compiler (gcc)
 
 - A web server (Apache, Zeus)
@@ -21,17 +22,15 @@ Requirements:
     http://cr.yp.to/ezmlm.html
     http://www.ezmlm.org/
 
-Updates?
-~~~~~~~~
- Latest version is available at:
+# Updates?
 
- http://sourceforge.net/projects/indimail/
+Latest version is available at:
 
- Please refer your suggestions/bug reports to indimail-support@lists.sourceforge.net
+https://github.com/mbhangui/indimail-virtualdomains/tree/master/iwebadmin-x
 
+Please refer your suggestions/bug reports to iwebadmin@indimail.org
 
-Install guide 
-~~~~~~~~~~~~~
+# Install guide 
 
 iwebadmin 1.3 and later requires indimail 1.7 or later.
 
@@ -69,11 +68,12 @@ the above information then starting from scratch.
         --enable-cgibindir=/var/www/cgi-bin \
         --enable-imagedir=/var/www/html/images/iwebadmin \
         --enable-htmllibdir=/usr/share/iwebadmin
+    or you can run ./default.configure instead of the above configure command
     # make
     # make install-strip
 
-   If it works, you are done!
-   If it doesn't.. read below.
+    If it works, you are done!
+    If it doesn't.. read below.
 
 1.  Before we can make and install there are a few things to consider..
     a. do you have a indimail user and indimail group?
@@ -137,33 +137,33 @@ the above information then starting from scratch.
 
     ./configure  --enable-cgibindir=/my/wierd/cgi-bin/dir ....
 
-4.   make
+4.  make
 
-5.   make install or 
-     make install-strip (for a smaller binary)
+5.  make install or 
+    make install-strip (for a smaller binary)
 
-     To run it, type into your webrowser:
-     http://yourdomain/cgi-bin/iwebadmin
+    To run it, type into your webrowser:
+    http://yourdomain/cgi-bin/iwebadmin
 
-     Now.. some fine tuning..
+    Now.. some fine tuning..
 
 6.  If you want to set per domain limits on the number of:
 
-        a) pop accounts  
-        b) aliases
-        c) forwards
-        d) mailing lists 
-        e) autoresponders
+    a) pop accounts  
+    b) aliases
+    c) forwards
+    d) mailing lists 
+    e) autoresponders
 
     Then create a .iwebadmin-limits file in the virtual domain directory
     for the domain you wish to limit. The syntax of the .iwebadmin-limits
     file is as follows:
 
-        maxpopaccounts          X
-        maxaliases              X
-        maxforwards             X
-        maxmailinglists         X
-        maxautoresponders       X
+    maxpopaccounts          X
+    maxaliases              X
+    maxforwards             X
+    maxmailinglists         X
+    maxautoresponders       X
 
     Where X is the maximum number you wish. Be sure the indimail user
     has read permissions to this file. The default is unlimited.
@@ -178,22 +178,22 @@ the above information then starting from scratch.
     
     You may disable these services:
 
-       a) POP Access
-       b) IMAP Access
-       c) Roaming Users (External Relaying)
-       d) Webmail Access
-       e) Dialup Access
-       f) Password Changing
+    a) POP Access
+    b) IMAP Access
+    c) Roaming Users (External Relaying)
+    d) Webmail Access
+    e) Dialup Access
+    f) Password Changing
 
     The syntax of the .iwebadmin-limits file for disabling the above 
     services, respectively, is:
 
-       disable_pop
-       disable_imap
-       disable_external_relay
-       disable_webmail
-       disable_dialup
-       disable_password_changing
+    disable_pop
+    disable_imap
+    disable_external_relay
+    disable_webmail
+    disable_dialup
+    disable_password_changing
 
     These services are enabled by default, unless manually changed
     via vmoduser.
@@ -201,7 +201,7 @@ the above information then starting from scratch.
     Lastly, you can set default quotas on a per domain basis.  Just include this
     line in your .iwebadmin-limits file:
 
-       default_quota <quota>
+    default_quota <quota>
 
     The format of <quota> is the same used for other command line tools like 
     vadduser, vsetuserquota, and vmoduser.  NOTE: the same restrictions apply as
@@ -243,10 +243,14 @@ the above information then starting from scratch.
 
 11. For using nginx, you can create /etc/nginx/default.d/iwebadmin.conf
 
- a) Install nginx, fcgiwrap
-    # install fcgiwrap nginx
+    a) Install nginx, fcgiwrap
 
- b) create iwebadmin.conf
+    # dnf/yum install fcgiwrap nginx
+    or
+    # apt-get install nginx fcgiwrap libbg1-dev ssl-cert
+
+    b) create iwebadmin.conf
+
     location /iwebadmin/ {
         root /var/www/;
         # Fastcgi socket
@@ -279,8 +283,6 @@ the above information then starting from scratch.
     # systemctl enable fcgiwrap@nginx.socket
     # systemctl start  fcgiwrap@nginx.socket
     # systemctl start nginx
-
-# apt-get install nginx fcgiwrap libbg1-dev ssl-cert
 
 11. Enjoy
 
