@@ -466,7 +466,7 @@ The argument to svstat should be a directory in /service. Each directory in /ser
 If you don't have /service create a link to /usr/libexec/indimail/service (/usr/local/libexec/indimail/service on FreeBSD and Darwin). I'm working on creating this link automatically during setup.
 
 ```
-$ sudo svstat /service/*
+$ sudo svstat /service/\*
 /service/dnscache: up (pid 120532) 4394 seconds
 /service/fetchmail: down 4394 seconds
 /service/greylist.1999: up (pid 120502) 4394 seconds
@@ -499,7 +499,7 @@ $ sudo svstat /service/*
 
 ## Create Virtual Domains
 
-The commands below will look familiar to you if you have used [vpopmail](https://www.inter7.com/vpopmail-virtualized-email/). IndiMail-virtualdomains has many commands with the same name but is a totally new package with all code written in djb style. Also the feature list is extensive compated to vpopmail. But unlike vpopmail, indimail-virtualdomains supports MySQL database only. The idea for doing indimail-virtualdomains comes from looking at how vpopmail works. You can extend what many of indimail-virtualdomains programs by creating a script with the same name in /usr/libexec/indimail. These scripts will be passed the same arguments that you pass the original programs. The man pages for the commands will have more details.
+The commands below will look familiar to you if you have used [vpopmail](https://www.inter7.com/vpopmail-virtualized-email/). IndiMail-virtualdomains has many commands with the same name but is a totally new package with all code written in djb style. Also the feature list is extensive compated to vpopmail. But unlike vpopmail, indimail-virtualdomains supports MySQL database only. The idea for doing indimail-virtualdomains comes from looking at how vpopmail works (See #History). You can extend what many of indimail-virtualdomains programs by creating a script with the same name in /usr/libexec/indimail. These scripts will be passed the same arguments that you pass the original programs. The man pages for the commands will have more details.
 
 ##### STEP 1  #############################################
 Add a virtual domain
@@ -688,3 +688,7 @@ There are four Mailing Lists for IndiMail
 4. Archive at [Google Groups](http://groups.google.com/group/indimail). This groups acts as a remote archive for indimail-support and indimail-devel.
 
 There is also a [Project Tracker](http://sourceforge.net/tracker/?group_id=230686) for IndiMail (Bugs, Feature Requests, Patches, Support Requests)
+
+# History
+
+indimail-virtualdomain started with a modified vpopmail base that could handle a distributed setup - Same domain on multiple servers. Having this kind of setup made the control file smtproutes unviable. email would arrive at a relay server for user@domain. But the domain '@domain' was preset on multiple hosts, with each host having it's own set of users. This required special routing and modification of qmail (especially qmail-remote) to route the traffic to the correct host. vdelivermail to had to be written to deliver email for a local domain to a remote host, in case the user wasn't present on the current host. New MySQL tables were created to store the host information for a user. This table would be used by qmail-local, qmail-remote, vdelivermail to route the mail to the write host. All this complicated stuff had to be done because the ISP who employed had no money to buy costly servers to cater to users who were multiplying at an exponential rate. These were free email users. So the solution we decided was to buy multiple intel servers running Linux and make the qmail/vpopmail solution horizontally scalable. This was the origin of indimail-1.x which borrowed code from vpopmail, modified it for a domain on multiple hosts. indimail-2.x was a complete rewrite using djb style, using [libqmail](https://github.com/mbhangui/libqmail) as the standard library for all basic operations. All functions were discarded because they used the standard C library. The problem with indimail-2.x was linking with MySQL libraries, which caused significant issues building binary packages on [openSUSE build service](https://build.opensuse.org/). Binaries got built with MySQL/MariaDB libraries pulled by OBS, but when installed on a target machine, the user would have a completely different MySQL/MariaDB setup. Hence a decision was taken to load the library at runtime using dlopen/dlsym. This was the start of indimail-3.x. The source was moved from sourceforge.net to github and the project renamed as indimail-virtualdomains from the original name IndiMail. The modified source code of qmail was moved to github as indimail-mta.
