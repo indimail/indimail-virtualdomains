@@ -844,8 +844,7 @@ crc.$(OBJEXT): crc.c
 crc$(EXEEXT): $(crc_DEPENDENCIES) $(crc_OBJECTS)
 	$(LINK) $@.$(OBJEXT) $(crc_LDADD)
 
-install-data-local: initsvc libindimail.la indimail-rpmlintrc \
-indimail.spec iauth.la indimail.te indimail.fc usr.sbin.mysqld usr.sbin.clamd usr.bin.freshclam
+install-data-local: initsvc
 	if [ " $(DESTDIR)" = " " ] ; then \
 		if test `@idcommand@` != "0" ; then \
 			echo "you are not root"; \
@@ -856,7 +855,7 @@ indimail.spec iauth.la indimail.te indimail.fc usr.sbin.mysqld usr.sbin.clamd us
 	fi;
 
 # This is the last step in indimail installation.
-install-data-hook:
+install-data-hook: iauth.la indimail.te indimail.fc usr.sbin.mysqld usr.sbin.clamd usr.bin.freshclam
 	$(mkinstalldirs) $(DESTDIR)@domaindir@ || exit 1
 	$(mkinstalldirs) $(DESTDIR)@prefix@/lib/indimail/modules || exit 1
 	$(INSTALL_DATA) $(DESTDIR)@libdir@/iauth.so  $(DESTDIR)@prefix@/lib/indimail/modules || exit 1
@@ -898,6 +897,9 @@ install-data-hook:
 			$(INSTALL_DATA) indimail.te $(DESTDIR)@sysconfdir@/indimail.te  || exit 1; \
 			$(INSTALL_DATA) indimail.fc $(DESTDIR)@sysconfdir@/indimail.fc  || exit 1; \
 		fi; \
+	else \
+		$(INSTALL_DATA) indimail.te $(DESTDIR)@sysconfdir@/indimail.te  || exit 1; \
+		$(INSTALL_DATA) indimail.fc $(DESTDIR)@sysconfdir@/indimail.fc  || exit 1; \
 	fi
 
 uninstall-hook:
