@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.8  2020-10-11 23:13:41+05:30  Cprogrammer
+ * replace deprecated sys_siglist with strsignal
+ *
  * Revision 1.7  2020-10-01 18:27:59+05:30  Cprogrammer
  * Darwin Port
  *
@@ -49,6 +52,9 @@
 #include <mysql.h>
 #include "load_mysql.h"
 #include <mysqld_error.h>
+#if defined( HAVE_STRSIGNAL) && defined(HAVE_STRING_H)
+#include <string.h>
+#endif
 #ifdef ENABLE_ENTERPRISE
 #include <dlfcn.h>
 #endif
@@ -101,7 +107,7 @@
 #include "FifoCreate.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.7 2020-10-01 18:27:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.8 2020-10-11 23:13:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -795,7 +801,11 @@ sig_hand(sig, code, scp, addr)
 		out("ProcessInFifo", " INFIFO ");
 		out("ProcessInFifo", fifo_name);
 		out("ProcessInFifo", ", Got ");
+#ifdef HAVE_STRSIGNAL
+		out("ProcessInFifo", (char *) strsignal(sig));
+#else
 		out("ProcessInFifo", (char *) sys_siglist[sig]);
+#endif
 		out("ProcessInFifo", "\n");
 		flush("ProcessInFifo");
 	}
