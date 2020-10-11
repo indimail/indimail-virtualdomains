@@ -108,8 +108,7 @@ AC_TYPE_GETGROUPS
 
 # Checks for library functions.
 AC_FUNC_CHOWN
-AC_CHECK_FUNCS([strchr strerror strrchr])
-AC_CHECK_FUNCS(fdatasync sigaction sigprocmask fnmatch gethostname fchown getmntent getmntinfo setenv unsetenv)
+AC_CHECK_FUNCS(strsignal fdatasync sigaction sigprocmask fnmatch gethostname fchown getmntent getmntinfo setenv unsetenv)
 defaultprefix="/usr"
 if test x$prefix = xNONE
 then
