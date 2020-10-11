@@ -39,4 +39,8 @@ Release 3.3 Start 06/09/2020
 23. uninstall iauth.so, docs and post handle scripts
 24. Makefile.am: Set LDPATH for libqmail path (Darwin)
 25. initsvc: Fix for FreeBSD
-26. set CPPFLAGS, CFLAGS, LDFLAGS for nssd, pam-multi
+- 11/10/2020
+26. fix for empty DISTRIB_ID on openSUSE, Suse causes indimail.[te][fc] to be
+    missed out in the build.
+27. ProcessInFifo.c: replace deprecated sys_siglist with strsignal
+28. configure.ac: added check for strsignal function

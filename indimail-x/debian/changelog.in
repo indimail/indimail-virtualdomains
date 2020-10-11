@@ -23,4 +23,6 @@ indimail (@version@-@release@) unstable; urgency=low
   * uninstall iauth.so, docs and post handle scripts
   * Makefile.am: Set LDPATH for libqmail path (Darwin)
   * initsvc: Fix for FreeBSD
-  * set CPPFLAGS, CFLAGS, LDFLAGS for nssd, pam-multi
+  * fix for empty DISTRIB_ID on openSUSE, Suse causes indimail.[te][fc] to be missed out in the build.
+  * ProcessInFifo.c: replace deprecated sys_siglist with strsignal
+  * configure.ac: added check for strsignal function
