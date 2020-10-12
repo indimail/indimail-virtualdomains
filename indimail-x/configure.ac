@@ -50,7 +50,8 @@ case "$host" in
 		idcommand="/usr/bin/id -u mail"
 	fi
 	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -Wall"
-	CFLAGS="$CFLAGS -O4 -fPIC -Wall -fno-strict-aliasing"
+	CFLAGS="$CFLAGS -O4 -fPIC -fpie -Wall -fno-strict-aliasing"
+	LDFLAGS="$LDFLAGS -pie"
 	MODFLAGS="-O4 -fPIC -shared -Wall"
 	STRIP_OPT=-s
 	;;
