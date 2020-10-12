@@ -44,3 +44,6 @@ Release 3.3 Start 06/09/2020
     missed out in the build.
 27. ProcessInFifo.c: replace deprecated sys_siglist with strsignal
 28. configure.ac: added check for strsignal function
+- 12/10/2020
+29. recalc_quota.c: maildirquota problem: strnum2 variable wasn't getting set
+30. configure.ac: set LDFLAGS -pie on Linux (primarily for openSUSE builds)

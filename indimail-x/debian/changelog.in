@@ -26,3 +26,5 @@ indimail (@version@-@release@) unstable; urgency=low
   * fix for empty DISTRIB_ID on openSUSE, Suse causes indimail.[te][fc] to be missed out in the build.
   * ProcessInFifo.c: replace deprecated sys_siglist with strsignal
   * configure.ac: added check for strsignal function
+  * recalc_quota.c: maildirquota problem: strnum2 variable wasn't getting set
+  * configure.ac: set LDFLAGS -pie on Linux (primarily for openSUSE builds)
