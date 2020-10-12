@@ -28,3 +28,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * configure.ac: added check for strsignal function
   * recalc_quota.c: maildirquota problem: strnum2 variable wasn't getting set
   * configure.ac: set LDFLAGS -pie on Linux (primarily for openSUSE builds)
+  * indimail.spec: fixed DISTRIB_ID and DISTRIB_VERSION for openSUSE, SLES builds
