@@ -69,7 +69,7 @@ cgi.o: config.h iwebadmin.h iwebadminx.h
 limits.o: config.h iwebadmin.h iwebadminx.h 
 dotqmail.o: config.h iwebadmin.h iwebadminx.h 
 
-iwebadmin.spec: iwebadmin.spec.in conf-version conf-release
+iwebadmin.spec: iwebadmin.spec.in conf-version conf-release doc/ChangeLog
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 iwebadmin-rpmlintrc: iwebadmin-rpmlintrc.in
 	$(edit) iwebadmin-rpmlintrc.in > $@
