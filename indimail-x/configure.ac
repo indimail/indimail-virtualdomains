@@ -14,6 +14,7 @@ AC_PROG_LN_S
 AC_PROG_AWK
 AC_PROG_CC
 AC_PROG_CC_C99
+AC_CANONICAL_HOST
 AC_PROG_INSTALL
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_MAKE_SET
@@ -1110,9 +1111,6 @@ AC_OUTPUT(Makefile)
 (
 echo "---------- $PACKAGE $VERSION $target ----------"
 echo "Date                 = $DATE"
-echo "Target CPU           = $target_cpu"
-echo "Target Vendor        = $target_vendor"
-echo "Target OS            = $target_os"
 echo "Host                 = $host"
 echo "DISTRIB_ID           = $DISTRIB_ID"
 echo "DISTRIB_VERSION      = $DISTRIB_VERSION"

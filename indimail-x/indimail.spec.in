@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.68 2020-10-05 15:04:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.69 2020-10-12 22:18:12+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -119,18 +119,20 @@ BuildRequires: redhat-lsb-core
 BuildRequires: redhat-lsb
 %endif
 
+# suse_version gets defined for sles too
+%if %{defined suse_version}
+BuildRequires: lsb-release
+%if %{undefined sles_version}
+BuildRequires: openSUSE-release
+%endif
+%if !0%{?is_opensuse}
+BuildRequires: sles-release
+%else
+BuildRequires: openSUSE-release
+%endif
+%endif
 %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined centos_vers}
 BuildRequires: chrpath
-%endif
-
-%if %{undefined rhel_version}
-BuildRequires: sharutils
-%endif
-
-%if %{defined suse_version}
-%if 0%{?suse_version} > 1110 || 0%{?suse_version} == 1310 || 0%{?suse_version} == 1230 || 0%{?suse_version} == 1220 || 0%{?suse_version} == 1210 || 0%{?suse_version} == 1140
-BuildRequires: lsb-release
-%endif
 %endif
 
 %if 0%{?suse_version} == 1220 || 0%{?suse_version} == 1210 || 0%{?suse_version} == 1140 || 0%{?suse_version} == 1100 || 0%{?suse_version} == 1030 || 0%{?suse_version} == 1020
@@ -150,10 +152,6 @@ PreReq: permissions
 %endif
 
 ################################# OBS ###############################
-%if 0%{?rhel_version} != 600 && 0%{?rhel_version} != 700 && 0%{?rhel_version} != 800 && 0%{?centos_ver} != 8
-BuildRequires: sharutils
-%endif
-
 %if %build_on_obs == 1
 %if 0%{?suse_version}
 BuildRequires: -post-build-checks
