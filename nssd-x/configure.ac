@@ -59,7 +59,7 @@ case "$host" in
 	;;
 *-*-freebsd*)
 	INSTALL="/usr/bin/install -c"
-   	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/include/qmail"
+	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/include/qmail"
 	CFLAGS="$CFLAGS -O3 -Wall -fPIC -Wno-non-literal-null-conversion"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
 	STRIP_OPT=-s
