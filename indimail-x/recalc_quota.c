@@ -1,5 +1,8 @@
 /*
  * $Log: recalc_quota.c,v $
+ * Revision 1.7  2020-10-12 12:41:07+05:30  Cprogrammer
+ * maildirquota problem: strnum2 variable wasn't getting set
+ *
  * Revision 1.6  2020-09-21 07:55:11+05:30  Cprogrammer
  * fixed incorrect initialization of struct flock
  *
@@ -57,7 +60,7 @@
 #include "get_assign.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: recalc_quota.c,v 1.6 2020-09-21 07:55:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: recalc_quota.c,v 1.7 2020-10-12 12:41:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -182,7 +185,7 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 #ifdef USE_MAILDIRQUOTA
 	if (count_limit) {
 		strnum1[i = fmt_ulonglong(strnum1, size_limit)] = 0;
-		strnum2[j = fmt_ulonglong(strnum1, count_limit)] = 0;
+		strnum2[j = fmt_ulonglong(strnum2, count_limit)] = 0;
 		if (substdio_put(&ssout, strnum1, i) ||
 				substdio_put(&ssout, "S,", 2) ||
 				substdio_put(&ssout, strnum2, j) || substdio_put(&ssout, "C\n", 2)) {
@@ -204,7 +207,7 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 	}
 	if (mail_size || mail_count) {
 		strnum1[i = fmt_ulonglong(strnum1, mail_size)] = 0;
-		strnum2[j = fmt_ulonglong(strnum1, mail_count)] = 0;
+		strnum2[j = fmt_ulonglong(strnum2, mail_count)] = 0;
 		if (substdio_put(&ssout, strnum1, i) || substdio_put(&ssout, " ", 1) ||
 				substdio_put(&ssout, strnum2, j) || substdio_put(&ssout, "\n", 1)) {
 			strerr_warn3("recalc_quota: write error: ", mdirsizefn.s, ": ", &strerr_sys);
