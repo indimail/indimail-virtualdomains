@@ -29,3 +29,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * recalc_quota.c: maildirquota problem: strnum2 variable wasn't getting set
   * configure.ac: set LDFLAGS -pie on Linux (primarily for openSUSE builds)
   * indimail.spec: fixed DISTRIB_ID and DISTRIB_VERSION for openSUSE, SLES builds
+  * no_of_days.c: fixed no of days variabel getting clobbered due to use of stralloc_copyb() instead of stralloc_catb()

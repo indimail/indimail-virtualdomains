@@ -49,3 +49,5 @@ Release 3.3 Start 06/09/2020
 30. configure.ac: set LDFLAGS -pie on Linux (primarily for openSUSE builds)
 31. indimail.spec: fixed DISTRIB_ID and DISTRIB_VERSION for openSUSE, SLES
     builds
+32. no_of_days.c: fixed no of days variabel getting clobbered due to use of
+    stralloc_copyb() instead of stralloc_catb()
