@@ -1,5 +1,8 @@
 /*-
  * $Log: no_of_days.c,v $
+ * Revision 1.2  2020-10-12 22:57:33+05:30  Cprogrammer
+ * fixed no of days variabel getting clobbered due to use of stralloc_copyb() instead of stralloc_catb()
+ *
  * Revision 1.1  2019-04-20 08:16:13+05:30  Cprogrammer
  * Initial revision
  *
@@ -20,7 +23,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: no_of_days.c,v 1.1 2019-04-20 08:16:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: no_of_days.c,v 1.2 2020-10-12 22:57:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -46,17 +49,17 @@ no_of_days(time_t seconds)
 		die_nomem();
 	if (hours < 10 && !stralloc_append(&tmpbuf, "0"))
 		die_nomem();
-	if (!stralloc_copyb(&tmpbuf, strnum, fmt_uint(strnum, hours)) ||
+	if (!stralloc_catb(&tmpbuf, strnum, fmt_uint(strnum, hours)) ||
 			!stralloc_catb(&tmpbuf, " Hrs ", 5))
 		die_nomem();
 	if (mins < 10 && !stralloc_append(&tmpbuf, "0"))
 		die_nomem();
-	if (!stralloc_copyb(&tmpbuf, strnum, fmt_uint(strnum, mins)) ||
+	if (!stralloc_catb(&tmpbuf, strnum, fmt_uint(strnum, mins)) ||
 			!stralloc_catb(&tmpbuf, " Mins ", 6))
 		die_nomem();
 	if (secs < 10 && !stralloc_append(&tmpbuf, "0"))
 		die_nomem();
-	if (!stralloc_copyb(&tmpbuf, strnum, fmt_uint(strnum, secs)) ||
+	if (!stralloc_catb(&tmpbuf, strnum, fmt_uint(strnum, secs)) ||
 			!stralloc_catb(&tmpbuf, " Secs", 5) ||
 			!stralloc_0(&tmpbuf))
 		die_nomem();
