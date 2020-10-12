@@ -108,19 +108,6 @@ then
 	ac_configure_args="$ac_configure_args --prefix=$prefix"
 fi
 
-if test -f /usr/bin/lsb_release
-then
-DISTRIB_ID=$(lsb_release -si)
-DISTRIB_VERSION=$(lsb_release -sr)
-else
-DISTRIB_ID=$(sh ./lsb_release -si)
-DISTRIB_VERSION=$(sh ./lsb_release -sr)
-fi
-AC_SUBST(DISTRIB_ID)
-AC_SUBST(DISTRIB_VERSION)
-AC_SUBST(auth_incs)
-AC_SUBST(auth_libs)
-
 htmldir=""
 for f in /home/httpd/html /usr/local/apache/htdocs /usr/local/www/data /var/www/html
 do
