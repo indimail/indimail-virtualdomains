@@ -95,7 +95,7 @@ then
 	fi
 fi
 AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
-AC_CHECK_FUNCS(setenv unsetenv)
+AC_CHECK_FUNCS(setenv unsetenv strsignal)
 
 dnl Checks for header files.
 AC_HEADER_STDC

@@ -1,5 +1,8 @@
 /*
  * $Log: exec.c,v $
+ * Revision 1.5  2020-10-12 18:14:27+05:30  Cprogrammer
+ * replace sys_siglist with strsignal
+ *
  * Revision 1.4  2008-07-17 21:37:14+05:30  Cprogrammer
  * moved progname to variables.h
  *
@@ -525,13 +528,15 @@ job_status(struct job_q *j)
 		return ("Running");
 		break;
 	case S_STOP:
+	case S_KILL:
+#ifdef HAVE_STRSIGNAL
+		return ((char *) strsignal(j->signal));
+#else
 		return ((char *) sys_siglist[j->signal]);
+#endif
 		break;
 	case S_EXIT:
 		return ("Exited");
-		break;
-	case S_KILL:
-		return ((char *) sys_siglist[j->signal]);
 		break;
 	}
 	return NULL;
