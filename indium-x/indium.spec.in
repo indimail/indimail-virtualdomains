@@ -1,6 +1,6 @@
 #
 #
-# $Id: indium.spec.in,v 1.25 2020-09-13 23:24:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.26 2020-10-12 22:20:01+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 %global debug_package %{nil}
@@ -57,13 +57,7 @@ BuildRequires: tk-devel glibc glibc-devel procps tcl tk cpio
 BuildRequires: sed gettext-devel
 BuildRequires: findutils openssl-devel openssl
 BuildRequires: gzip autoconf indimail-devel mysql-devel
-%if %{undefined rhel_version}
-BuildRequires: sharutils
-%else
-%if 0%{?rhel_version} != 600 && 0%{?rhel_version} != 700
-BuildRequires: sharutils
-%endif
-%endif
+
 %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
 BuildRequires: chrpath
 %endif
