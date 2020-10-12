@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: catChangeLog,v $
+# Revision 1.7  2020-10-12 17:05:49+05:30  Cprogrammer
+# fixed date lines in ChangeLog
+#
 # Revision 1.6  2020-09-13 20:44:29+05:30  Cprogrammer
 # renamed ChangeLog-indimail to ChangeLog
 #
@@ -21,7 +24,7 @@
 # utility to append changelog to indimail.spec
 #
 #
-# $Id: catChangeLog,v 1.6 2020-09-13 20:44:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: catChangeLog,v 1.7 2020-10-12 17:05:49+05:30 Cprogrammer Exp mbhangui $
 #
 flag=0
 if [ $# -eq 1 ] ; then
@@ -48,7 +51,7 @@ do
 		flag=2
 		continue
 	fi
-	echo "$line" |grep "^[0-9]" > /dev/null
+	echo "$line" |egrep "^- [0-9]|^[0-9]" > /dev/null
 	if [ $? -eq 0 ] ; then
 		echo "$line"
 	elif [ -n "$line" ] ; then
