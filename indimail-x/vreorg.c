@@ -1,5 +1,8 @@
 /*
  * $Log: vreorg.c,v $
+ * Revision 1.5  2020-10-14 00:20:59+05:30  Cprogrammer
+ * fixed infinite loop
+ *
  * Revision 1.4  2020-06-16 17:56:58+05:30  Cprogrammer
  * moved setuserid function to libqmail
  *
@@ -50,7 +53,7 @@
 #include "next_big_dir.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vreorg.c,v 1.4 2020-06-16 17:56:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vreorg.c,v 1.5 2020-10-14 00:20:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vreorg: fatal: "
@@ -158,12 +161,12 @@ main(int argc, char **argv)
 			close(fd);
 			return (-1);
 		}
-		if (line.len == 0 || !match)
-			strerr_warn3("vadduser", listfile, "incomplete line", 0);
-		if (match) {
-			line.len--;
-			line.s[line.len] = 0;
-		}
+		if (line.len == 0)
+			break;
+		if (!match)
+			strerr_warn3("vadduser: ", listfile, ": incomplete line", 0);
+		line.len--;
+		line.s[line.len] = 0;
 		/*- get old pw struct */
 		if (!(pw = sql_getpw(line.s, domain))) {
 			strerr_warn5("vreorg: ", line.s, "@", domain, ": sql_getpw failed", 0);

@@ -1,5 +1,8 @@
 /*
  * $Log: GetSMTProute.c,v $
+ * Revision 1.3  2020-10-14 00:17:52+05:30  Cprogrammer
+ * BUG: Fixed infinite loop
+ *
  * Revision 1.2  2020-04-01 18:55:02+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -34,7 +37,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: GetSMTProute.c,v 1.2 2020-04-01 18:55:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: GetSMTProute.c,v 1.3 2020-10-14 00:17:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -63,13 +66,13 @@ get_smtp_qmtp_port(char *file, char *domain, int default_port)
 			close(fd);
 			return (-1);
 		}
-		if (line.len == 0)
-			strerr_warn3("GetSMTProute", file, "incomplete line", 0);
+		if (!match && line.len == 0)
+			break;
 		else
-		if (match) {
-			line.len--;
-			line.s[line.len] = 0; /*- remove newline */
-		}
+		if (!match)
+			strerr_warn3("GetSMTProute: ", file, ": incomplete line", 0);
+		line.len--;
+		line.s[line.len] = 0; /*- remove newline */
 		i = str_chr(line.s, '#');
 		line.s[i] = 0;
 		for (ptr = line.s; *ptr && isspace((int) *ptr); ptr++);
