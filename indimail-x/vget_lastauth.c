@@ -1,5 +1,8 @@
 /*
  * $Log: vget_lastauth.c,v $
+ * Revision 1.3  2020-10-13 22:49:15+05:30  Cprogrammer
+ * null terminate ipaddr
+ *
  * Revision 1.2  2019-04-22 23:19:22+05:30  Cprogrammer
  * replaced atol() with scan_ulong()
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vget_lastauth.c,v 1.2 2019-04-22 23:19:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vget_lastauth.c,v 1.3 2020-10-13 22:49:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING
@@ -44,13 +47,13 @@ die_nomem()
 time_t
 vget_lastauth(struct passwd *pw, char *domain, int type, char *ipaddr)
 {
-	int             err;
+	int             err, n;
 	time_t          tmval1, tmval2;
 	static stralloc SqlBuf = {0};
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;
 
-	if(ipaddr)
+	if (ipaddr)
 		*ipaddr = 0;
 	if ((err = iopen((char *) 0)) != 0)
 		return (-1);
@@ -138,7 +141,7 @@ vget_lastauth(struct passwd *pw, char *domain, int type, char *ipaddr)
 		break;
 	}
 	if (mysql_query(&mysql[1], SqlBuf.s)) {
-		if(in_mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
+		if (in_mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE)
 			create_table(ON_LOCAL, "lastauth", LASTAUTH_TABLE_LAYOUT);
 		else
 			strerr_warn4("vget_lastauth: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
@@ -148,10 +151,12 @@ vget_lastauth(struct passwd *pw, char *domain, int type, char *ipaddr)
 	tmval1 = 0;
 	while ((row = in_mysql_fetch_row(res))) {
 		scan_ulong(row[0], (unsigned long *) &tmval2);
-		if(tmval2 > tmval1) {
+		if (tmval2 > tmval1) {
 			tmval1 = tmval2;
-			if(ipaddr)
-				str_copyb(ipaddr, row[1], 18);
+			if (ipaddr) {
+				n = str_copyb(ipaddr, row[1], 16); /*- this can be max 15 bytes length in LASTAUTH definition */
+				ipaddr[n] = 0;
+			}
 		}
 	}
 	in_mysql_free_result(res);
