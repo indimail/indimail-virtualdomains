@@ -10,13 +10,16 @@
 %global reconf_fetchmail   0
 %global reconf_courierimap 0
 %global build_cflags       "-DOBS_BUILD %{build_cflags}"
-%global debug_package      %{nil}
 %else
 %define _project           local
 %global build_on_obs       0
 %global reconf_fetchmail   0
 %global reconf_courierimap 0
 %global _hardened_build    1
+%endif
+
+%if %{defined nodebug}
+%global debug_package %{nil}
 %endif
 
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
@@ -274,7 +277,11 @@ do
   if [ -d $i ] ; then
     cd $i
     %{__make} -s %{?_smp_mflags}
+%if %{defined nodebug}
     %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
+%else
+    %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install
+%endif
     cd ..
   fi
 done
