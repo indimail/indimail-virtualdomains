@@ -2,7 +2,6 @@
 #
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
-%global debug_package %{nil}
 
 %define _prefix            @prefix@
 %define mandir             @mandir@
@@ -16,6 +15,10 @@
 %define build_on_obs       0
 %define fast_mode          1
 %global _hardened_build    1
+%endif
+
+%if %{defined nodebug}
+%global debug_package %{nil}
 %endif
 
 Summary: Watch files for specific patterns
@@ -82,7 +85,11 @@ removal normally used by sysadmins.
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && %{__rm} -fr $RPM_BUILD_ROOT
 %{__make} -s DESTDIR=%{buildroot}
+%if %{defined nodebug}
 %{__make} -s DESTDIR=%{buildroot} install-strip
+%else
+%{__make} -s DESTDIR=%{buildroot} install
+%endif
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 %files
