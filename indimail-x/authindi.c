@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 1.10  2020-10-13 18:30:57+05:30  Cprogrammer
+ * use _exit(2) as no buffers need to be flushed
+ *
  * Revision 1.9  2020-10-04 09:27:08+05:30  Cprogrammer
  * use AUTHADDR to determine if we are already authenticated
  *
@@ -70,7 +73,7 @@
 #include "sql_getpw.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.9 2020-10-04 09:27:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.10 2020-10-13 18:30:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -199,7 +202,7 @@ main(int argc, char **argv)
 #endif
 
 	if (argc < 2)
-		exit (2);
+		_exit (2);
 	ptr = env_get("AUTHADDR");
 	if (ptr && *ptr) {
 		execv(*(argv + argc - 2), argv + argc - 2);
