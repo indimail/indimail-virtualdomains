@@ -57,3 +57,4 @@ Release 3.3 Start 06/09/2020
 35. userinfo.c, vlimit.c: initialize struct tm for strptime() value too big
     error
 36. added debuginfo package
+37. vget_lastauth.c: null terminate ipaddr

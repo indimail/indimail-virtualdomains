@@ -33,3 +33,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * authindi.c: use _exit(2) as no buffers need to be flushed
   * get_assign.c, islocalif.c: added missing alloc_free
   * userinfo.c, vlimit.c: initialize struct tm for strptime() value too big error
+  * vget_lastauth.c: null terminate ipaddr
