@@ -1,5 +1,8 @@
 /*
  * $Log: vlimit.c,v $
+ * Revision 1.5  2020-10-13 18:35:44+05:30  Cprogrammer
+ * initialize struct tm for strptime() value too big error
+ *
  * Revision 1.4  2019-06-07 15:46:15+05:30  Cprogrammer
  * use sgetopt library for getopt()
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vlimit.c,v 1.4 2019-06-07 15:46:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vlimit.c,v 1.5 2020-10-13 18:35:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -116,7 +119,7 @@ get_options(int argc, char **argv, char **Domain, char **DomainQuota, char **Def
 	extern char    *optarg;
 	extern int      optind;
 	char            flag[4];
-	struct tm       tm;
+	struct tm       tm = {0};
 
 	*Domain = *DomainQuota = *DefaultUserQuota = *DomainMaxMsgCount =
 		*DefaultUserMaxMsgCount = *MaxPopAccounts = *MaxAliases =

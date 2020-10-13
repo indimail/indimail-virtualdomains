@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 1.5  2020-10-13 18:35:14+05:30  Cprogrammer
+ * initialize struct tm for strptime() value too big error
+ *
  * Revision 1.4  2020-04-01 18:58:19+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -74,7 +77,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 1.4 2020-04-01 18:58:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 1.5 2020-10-13 18:35:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -112,7 +115,7 @@ userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid
 	mdir_t          delivery_count, delivery_size;
 	char            ipaddr[7][18];
 	time_t          add_time, auth_time, pwdchg_time, inact_time, act_time, pop3_time, imap_time, delivery_time;
-	struct tm       tm;
+	struct tm       tm = {0};
 #endif
 
 	real_domain = (char *) 0;
