@@ -110,8 +110,12 @@ rsynconly: .rsyncs
 	@( cat $(srcdir)/.rsyncs | sed -e 's}^}rsync -av -e ssh --delete $(PACKAGE)-$(VERSION)/ }; s/\($$\)/ \&/;' ; echo "wait" ) | $(SHELL) -x
 
 install-data-hook:
-	chown root:indimail $(DESTDIR)$(bindir)/bogofilter || true
-	chmod 6511 $(DESTDIR)$(bindir)/bogofilter || true
+	if test `id -u` = "0" ; then \
+		echo chown root:indimail $(DESTDIR)$(bindir)/bogofilter; \
+		chown root:indimail $(DESTDIR)$(bindir)/bogofilter || true; \
+		echo chmod 6511 $(DESTDIR)$(bindir)/bogofilter; \
+		chmod 6511 $(DESTDIR)$(bindir)/bogofilter || true; \
+	fi
 	$(mkinstalldirs) $(DESTDIR)$(datarootdir)/doc || exit 1
 	for f in $(doc_list); do \
 		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/doc/$$f.bogofilter || exit 1 ;\
