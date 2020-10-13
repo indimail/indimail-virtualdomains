@@ -1,21 +1,22 @@
 #
 #
-# $Id: indium.spec.in,v 1.26 2020-10-12 22:20:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.27 2020-10-13 21:59:10+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
-%global debug_package %{nil}
 
 %if %{defined _project}
 # define if building on openSUSE build service
 %global build_on_obs       1
 %global reconfigure_mode   0
-%global _verbose           1
 %else
 %define _project           local
 %define build_on_obs       0
 %global reconfigure_mode   0
-%global _verbose           0
 %global _hardened_build    1
+%endif
+
+%if %{defined nodebug}
+%global debug_package %{nil}
 %endif
 
 %define _prefix            @prefix@
@@ -145,13 +146,12 @@ for i in %{name}-%{version}
 do
 if [ -d $i ] ; then
   cd $i
-  if [ %{_verbose} -eq 0 ] ; then
-    %{__make} -s %{?_smp_mflags}
-    %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
-  else
-    %{__make} %{?_smp_mflags}
-    %{__make} %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
-  fi
+  %{__make} -s %{?_smp_mflags}
+%if %{defined nodebug}
+  %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
+%else
+  %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install
+%endif
   cd ..
 fi
 done
