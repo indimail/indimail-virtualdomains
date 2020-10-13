@@ -3,7 +3,6 @@
 #
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
-%global debug_package %{nil}
 %if 0%{?opensuse_bs}
 # define to 1 if building on openSUSE build service
 %define build_on_obs       1
@@ -12,6 +11,10 @@
 %endif
 %define _prefix      @indimaildir@
 %define security_dir @moduledir@
+
+%if %{defined nodebug}
+%global debug_package %{nil}
+%endif
 
 Summary: A PAM-module for generic authentication
 Name: @PACKAGE_NAME@
@@ -66,7 +69,11 @@ ID=$(id -u)
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf "$RPM_BUILD_ROOT"
-%{__make} install DESTDIR="$RPM_BUILD_ROOT"
+%if %{defined nodebug}
+%{__make} DESTDIR="$RPM_BUILD_ROOT" install-strip
+%else
+%{__make} DESTDIR="$RPM_BUILD_ROOT" install
+%endif
 /bin/rm -f "$RPM_BUILD_ROOT"%{security_dir}/*.la
 /bin/rm -f "$RPM_BUILD_ROOT"%{security_dir}/*a
 if [ -x /usr/bin/chrpath ] ; then
