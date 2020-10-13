@@ -1,6 +1,9 @@
 * Sat Jun 20 2020 01:30:05 +0530 mbhangui@gmail.com 3.23-1.1%{?dist}
 Release 3.23 Start 20/06/2020
-01. Added setgroups() before setuid() call
+- 20/06/2020
+01. added setgroups() before setuid() call
+- 13/10/2020
+02. added debuginfo package
 
 * Mon Sep 10 2001 Philip Guenther <guenther@sendmail.com>
 Release 3.2.2

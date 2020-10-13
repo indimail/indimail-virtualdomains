@@ -4,6 +4,8 @@ Release 0.3 Start 25/02/2010
 01. parser.c, main.c, parser.y added -i option
 - 29-12-2019
 02. parser.y fixed return value of handle_conf_file()
+- 13-10-2020
+03. added debuginfo package
 
 *
 2005-10-04      <gabriel@icaro.com.br>

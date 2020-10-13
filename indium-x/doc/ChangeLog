@@ -1,6 +1,8 @@
 * Fri Jun 19 2020 13:00:14 +0530 mbhangui@gmail.com @release@-@version@%{?dist}
 Release 1.2 Start 19/06/2020
 - 19/06/2020
-1.  Add AC_PROG_CC_C99 to configure
-2.  RPM/debian Build Fixes
-3.  added create_rpm, create_debian scripts
+01. Add AC_PROG_CC_C99 to configure
+02. RPM/debian Build Fixes
+03. added create_rpm, create_debian scripts
+- 13/10/2020
+04. added debuginfo package

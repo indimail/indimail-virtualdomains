@@ -21,3 +21,5 @@ Release @version@-@release@ Start 03/06/2020
     for Darwin
 12. courier-imap: Set LDFLAGS=/opt/local/lib when calling configure to avoid
     wrong libiconv getting picked
+- 13/10/2020
+13. added debuginfo package

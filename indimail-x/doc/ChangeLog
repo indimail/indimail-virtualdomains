@@ -51,3 +51,9 @@ Release 3.3 Start 06/09/2020
     builds
 32. no_of_days.c: fixed no of days variabel getting clobbered due to use of
     stralloc_copyb() instead of stralloc_catb()
+- 13/10/2020
+33. authindi.c: use _exit(2) as no buffers need to be flushed
+34. get_assign.c, islocalif.c: added missing alloc_free
+35. userinfo.c, vlimit.c: initialize struct tm for strptime() value too big
+    error
+36. added debuginfo package

@@ -30,3 +30,6 @@ indimail (@version@-@release@) unstable; urgency=low
   * configure.ac: set LDFLAGS -pie on Linux (primarily for openSUSE builds)
   * indimail.spec: fixed DISTRIB_ID and DISTRIB_VERSION for openSUSE, SLES builds
   * no_of_days.c: fixed no of days variabel getting clobbered due to use of stralloc_copyb() instead of stralloc_catb()
+  * authindi.c: use _exit(2) as no buffers need to be flushed
+  * get_assign.c, islocalif.c: added missing alloc_free
+  * userinfo.c, vlimit.c: initialize struct tm for strptime() value too big error
