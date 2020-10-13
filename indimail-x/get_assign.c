@@ -1,5 +1,8 @@
 /*
  * $Log: get_assign.c,v $
+ * Revision 1.4  2020-10-13 18:32:27+05:30  Cprogrammer
+ * added missing alloc_free
+ *
  * Revision 1.3  2020-04-01 18:59:39+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -37,7 +40,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_assign.c,v 1.3 2020-04-01 18:59:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_assign.c,v 1.4 2020-10-13 18:32:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      cdb_seek(int, unsigned char *, unsigned int, int *);
@@ -123,6 +126,11 @@ get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 			dir->len = 0;
 		return ((char *) 0);
 	}
+	s = tmpstr;
+	s += fmt_strn(s, "!", 1);
+	s += fmt_strn(s, domain, in_domain_size);
+	s += fmt_strn(s, "-", 1);
+	*s++ = 0;
 	if ((fd = open(cdbfilename.s, O_RDONLY)) == -1) {
 		if (uid)
 			*uid = -1;
@@ -130,13 +138,9 @@ get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 			*gid = -1;
 		if (dir)
 			dir->len = 0;
+		alloc_free(tmpstr);
 		return ((char *) 0);
 	}
-	s = tmpstr;
-	s += fmt_strn(s, "!", 1);
-	s += fmt_strn(s, domain, in_domain_size);
-	s += fmt_strn(s, "-", 1);
-	*s++ = 0;
 	if ((i = cdb_seek(fd, (unsigned char *) tmpstr, in_domain_size + 2, &dlen)) == 1) {
 		if (!(tmpbuf = (char *) alloc(dlen + 1))) {
 			close(fd);
@@ -149,6 +153,7 @@ get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 				dir->len = 0;
 			return ((char *) 0);
 		}
+		alloc_free(tmpstr);
 		i = read(fd, tmpbuf, dlen);
 		tmpbuf[dlen] = 0;
 		for (ptr = tmpbuf; *ptr; ptr++);
@@ -165,7 +170,6 @@ get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 		ptr++;
 		if (alloc_re((char *) &in_dir, in_dir_size, (i = (str_len(ptr) + 1))) == -1) {
 			close(fd);
-			alloc_free(tmpstr);
 			alloc_free(tmpbuf);
 			if (uid)
 				*uid = -1;
@@ -184,7 +188,6 @@ get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 		s = in_dir;
 		s += fmt_strn(s, ptr, in_dir_size - 1);
 		*s++ = 0;
-		alloc_free(tmpstr);
 		alloc_free(tmpbuf);
 		close(fd);
 		return (in_dir);

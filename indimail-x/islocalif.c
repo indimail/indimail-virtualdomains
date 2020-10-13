@@ -1,5 +1,8 @@
 /*
  * $Log: islocalif.c,v $
+ * Revision 1.4  2020-10-13 18:33:46+05:30  Cprogrammer
+ * added missing alloc_free
+ *
  * Revision 1.3  2020-04-01 18:56:37+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -70,7 +73,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: islocalif.c,v 1.3 2020-04-01 18:56:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: islocalif.c,v 1.4 2020-10-13 18:33:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -200,6 +203,7 @@ islocalif(char *hostptr)
 		}
 		if (len > 200000) {
 			close(s);
+			alloc_free(buf);
 #ifdef ENABLE_IPV6
 			freeaddrinfo(res0);
 #endif
