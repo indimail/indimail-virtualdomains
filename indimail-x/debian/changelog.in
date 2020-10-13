@@ -34,3 +34,5 @@ indimail (@version@-@release@) unstable; urgency=low
   * get_assign.c, islocalif.c: added missing alloc_free
   * userinfo.c, vlimit.c: initialize struct tm for strptime() value too big error
   * vget_lastauth.c: null terminate ipaddr
+  * GetSMTProute.c, vreorg.c: fixed infinite loop
+  * skip_relay.c: new logic for terminating a line
