@@ -1,5 +1,8 @@
 /*
  * $Log: skip_relay.c,v $
+ * Revision 1.3  2020-10-14 00:19:48+05:30  Cprogrammer
+ * new logic for terminating a line
+ *
  * Revision 1.2  2020-04-01 18:57:52+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: skip_relay.c,v 1.2 2020-04-01 18:57:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: skip_relay.c,v 1.3 2020-10-14 00:19:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY
@@ -64,11 +67,16 @@ skip_relay(char *ipaddr)
 			close(fd);
 			return (-1);
 		}
-		if (!stralloc_0(&line))
-			die_nomem();
-		line.len--;
 		if (line.len == 0)
 			break;
+		if (match) {
+			line.len--;
+			line.s[line.len] = 0;
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
+		}
 		match = str_chr(line.s, '#');
 		if (line.s[match])
 			line.s[match] = 0;
