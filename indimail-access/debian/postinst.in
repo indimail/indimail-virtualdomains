@@ -251,6 +251,19 @@ ${prefix}/sbin/svctool --pop3=110 --servicedir=$servicedir --localip=0 \
 ${prefix}/sbin/svctool --pop3=995 --servicedir=$servicedir --localip=0 \
 	--maxdaemons=40 --maxperip=25 --infifo=infifo \
 	--default-domain=${default_domain} --memory=$imapspop3_mem --ssl
+
+# add courier-imap auth module authindi
+echo "adding authindi as IMAP/POP3 auth module"
+for i in `ls -d ${servicedir}/qmail-pop3d* ${servicedir}/qmail-imapd*`
+do
+  if [ -s $i/variables/IMAPMODULES ] ; then
+    grep authindi $i/variables/IMAPMODULES > /dev/null
+    if [ $? -ne 0 ] ; then
+      AUTHM="`cat $i/variables/IMAPMODULES` authindi"
+      echo $AUTHM > $i/variables/IMAPMODULES
+    fi
+  fi
+done
 fi
 
 # rebuild cdb
