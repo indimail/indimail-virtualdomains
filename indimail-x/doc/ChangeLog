@@ -60,3 +60,7 @@ Release 3.3 Start 06/09/2020
 37. vget_lastauth.c: null terminate ipaddr
 38: GetSMTProute.c, vreorg.c: fixed infinite loop
 39. skip_relay.c: new logic for terminating a line
+- 16/10/2020
+40. postinstallation: update smtp authmodule with vchkpass                      
+41. postinstallation: update imap/pop3, proxy imap/pop3 authmodule with authindi
+

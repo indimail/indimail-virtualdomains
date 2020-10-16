@@ -23,3 +23,5 @@ Release @version@-@release@ Start 03/06/2020
     wrong libiconv getting picked
 - 13/10/2020
 13. added debuginfo package
+- 16/10/2020
+14. postinstallation: update imap/pop3, proxy imap/pop3 authmodule with authindi

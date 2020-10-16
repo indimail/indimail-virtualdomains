@@ -36,3 +36,5 @@ indimail (@version@-@release@) unstable; urgency=low
   * vget_lastauth.c: null terminate ipaddr
   * GetSMTProute.c, vreorg.c: fixed infinite loop
   * skip_relay.c: new logic for terminating a line
+  * postinstallation: update smtp authmodule with vchkpass                      
+  * postinstallation: update imap/pop3, proxy imap/pop3 authmodule with authindi
