@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.70 2020-10-13 21:12:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.71 2020-10-16 21:19:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1199,7 +1199,46 @@ if [ %noproxy -eq 0 ] ; then
 %{_prefix}/sbin/svctool --pop3=9110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imapspop3_mem} \
   --proxy=110 --ssl --infifo=infifo
+
+# add courier-imap auth module authindi
+echo "adding authindi as Proxy IMAP/POP3 auth module"
+for i in `ls -d %{servicedir}/proxy-pop3d* %{servicedir}/proxy-imapd*`
+do
+  if [ -s $i/variables/IMAPMODULES ] ; then
+    grep authindi $i/variables/IMAPMODULES > /dev/null
+    if [ $? -ne 0 ] ; then
+      AUTHM="`cat $i/variables/IMAPMODULES` authindi"
+      echo $AUTHM > $i/variables/IMAPMODULES
+    fi
+  fi
+done
 fi
+
+# add courier-imap auth module authindi
+echo "adding authindi as IMAP/POP3 auth module"
+for i in `ls -d %{servicedir}/qmail-pop3d* %{servicedir}/qmail-imapd*`
+do
+  if [ -s $i/variables/IMAPMODULES ] ; then
+    grep authindi $i/variables/IMAPMODULES > /dev/null
+    if [ $? -ne 0 ] ; then
+      AUTHM="`cat $i/variables/IMAPMODULES` authindi"
+      echo $AUTHM > $i/variables/IMAPMODULES
+    fi
+  fi
+done
+
+# add checkpassword auth module vchkpass
+echo "adding vchkpass as SMTP auth module"
+for i in 465 587
+do
+  if [ -s %{servicedir}/qmail-smtpd.$i/variables/AUTHMODULES ] ; then
+    grep vchkpass %{servicedir}/qmail-smtpd.$i/variables/AUTHMODULES > /dev/null
+    if [ $? -ne 0 ] ; then
+      AUTHM="`cat %{servicedir}/qmail-smtpd.$i/variables/AUTHMODULES` /usr/sbin/vchkpass"
+      echo $AUTHM > %{servicedir}/qmail-smtpd.$i/variables/AUTHMODULES
+    fi
+  fi
+done
 
 for i in logfifo inlookup indisrvr mrtg mysql.3306
 do
