@@ -1,5 +1,8 @@
 /*
  * $Log: inquery.c,v $
+ * Revision 1.4  2020-10-18 07:49:06+05:30  Cprogrammer
+ * use alloc() instead of alloc_re()
+ *
  * Revision 1.3  2020-04-01 18:55:52+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -44,7 +47,7 @@
 #include "strToPw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 1.3 2020-04-01 18:55:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 1.4 2020-10-18 07:49:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- 
@@ -56,7 +59,7 @@ inquery(char query_type, char *email, char *ip)
 {
 	int             rfd, wfd, len, bytes, idx, readTimeout, writeTimeout,
 					pipe_size, tmperrno, relative, fd;
-	static int      intBuf, old_size;
+	static int      intBuf, old_size = 0;
 	char           *sysconfdir, *controldir, *infifo_dir, *infifo, *ptr;
 	char            strnum[FMT_ULONG];
 	static char    *pwbuf;
@@ -307,14 +310,17 @@ inquery(char query_type, char *email, char *ip)
 						errno = 0;
 						return ((void *) 0);
 					}
-					if (!alloc_re((char *) &pwbuf, old_size, intBuf + 1)) {
+					if (intBuf + 1 > old_size && old_size)
+						alloc_free(pwbuf);
+					if (intBuf + 1 > old_size && !(pwbuf = alloc(intBuf + 1))) {
 						tmperrno = errno;
 						close(rfd);
 						unlink(myfifo.s);
 						errno = tmperrno;
 						return ((void *) 0);
 					}
-					old_size = intBuf + 1;
+					if (intBuf + 1 > old_size)
+						old_size = intBuf + 1;
 					if ((idx = timeoutread(readTimeout, rfd, pwbuf, intBuf)) == -1 || !idx) {
 						tmperrno = errno;
 						close(rfd);
@@ -344,14 +350,17 @@ inquery(char query_type, char *email, char *ip)
 						errno = 0;
 						return ((void *) 0);
 					}
-					if (!alloc_re((char *) &pwbuf, old_size, intBuf + 1)) {
+					if (intBuf + 1 > old_size && old_size)
+						alloc_free(pwbuf);
+					if (intBuf + 1 > old_size && !(pwbuf = alloc(intBuf + 1))) {
 						tmperrno = errno;
 						close(rfd);
 						unlink(myfifo.s);
 						errno = tmperrno;
 						return ((void *) 0);
 					}
-					old_size = intBuf + 1;
+					if (intBuf + 1 > old_size)
+						old_size = intBuf + 1;
 					if ((idx = timeoutread(readTimeout, rfd, pwbuf, intBuf)) == -1 || !idx) {
 						tmperrno = errno;
 						close(rfd);

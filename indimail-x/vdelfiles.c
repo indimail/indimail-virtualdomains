@@ -1,5 +1,8 @@
 /*
  * $Log: vdelfiles.c,v $
+ * Revision 1.2  2020-10-18 07:54:49+05:30  Cprogrammer
+ * use alloc() instead of alloc_re()
+ *
  * Revision 1.1  2019-04-18 08:14:58+05:30  Cprogrammer
  * Initial revision
  *
@@ -28,7 +31,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelfiles.c,v 1.1 2019-04-18 08:14:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelfiles.c,v 1.2 2020-10-18 07:54:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -90,12 +93,15 @@ vdelfiles(char *dir, char *user, char *domain)
 			continue;
 		file_len = str_len(dp->d_name);
 		strnum[i = fmt_uint(strnum, dir_len + file_len + 2)] = 0;
-		if (!alloc_re((char *) &file_name, old_size, dir_len + file_len + 2)) {
-			strerr_warn3("vdelfiles: alloc_re: ", strnum, " bytes", &strerr_sys);
+		if (dir_len + file_len + 2 > old_size && old_size)
+			alloc_free(file_name);
+		if (dir_len + file_len + 2 > old_size && !(file_name = alloc(dir_len + file_len + 2))) {
+			strerr_warn3("vdelfiles: alloc: ", strnum, " bytes", &strerr_sys);
 			closedir(entry);
 			return (-1);
 		}
-		old_size = dir_len + file_len + 2;
+		if (dir_len + file_len + 2 > old_size)
+			old_size = dir_len + file_len + 2;
 		s = file_name;
 		s += fmt_strn(s, dir, dir_len);
 		s += fmt_strn(s, "/", 1);

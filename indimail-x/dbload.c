@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 1.12  2020-10-18 07:35:53+05:30  Cprogrammer
+ * use alloc() instead of alloc_re()
+ *
  * Revision 1.11  2020-04-01 18:54:17+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -63,7 +66,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 1.11 2020-04-01 18:54:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 1.12 2020-10-18 07:35:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static MYSQL   *is_duplicate_conn(MYSQL **, DBINFO **);
@@ -130,11 +133,14 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 
 		if ((my_error = (char *) in_mysql_error(*mysqlptr))) {
 			my_error_len = str_len(my_error) + 1;
-			if (!alloc_re((char *) &((*ptr)->last_error), (*ptr)->last_error ? (str_len((*ptr)->last_error) + 1) : 0,
-						my_error_len * sizeof(char))) {
+			if (my_error_len > (*ptr)->last_error_len && (*ptr)->last_error_len)
+				alloc_free((*ptr)->last_error);
+			if (my_error_len > (*ptr)->last_error_len && !((*ptr)->last_error = alloc(my_error_len))) {
 				strnum1[fmt_uint(strnum1, my_error_len)] = 0;
-				strerr_die3sys(111, "connect_db: alloc_re", strnum1, " Bytes: ");
+				strerr_die3sys(111, "connect_db: alloc: ", strnum1, " Bytes: ");
 			}
+			if (my_error_len > (*ptr)->last_error_len)
+				(*ptr)->last_error_len = my_error_len;
 			str_copyb((*ptr)->last_error, my_error, my_error_len);
 		}
 		if (verbose) {
@@ -159,6 +165,7 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 	if ((*ptr)->last_error) {
 		alloc_free((*ptr)->last_error);
 		(*ptr)->last_error = 0;
+		(*ptr)->last_error_len = 0;
 	}
 	return (0);
 }
@@ -254,6 +261,7 @@ OpenDatabases()
 				}
 				(*ptr)->failed_attempts = 0;
 				(*ptr)->last_error = 0;
+				(*ptr)->last_error_len = 0;
 				if (connect_db(ptr, mysqlptr)) {
 					strnum1[fmt_uint(strnum1, count)] = 0;
 					strnum2[fmt_uint(strnum2, (*ptr)->port)] = 0;

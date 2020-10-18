@@ -1,5 +1,8 @@
 /*
  * $Log: islocalif.c,v $
+ * Revision 1.5  2020-10-18 07:51:29+05:30  Cprogrammer
+ * use alloc() instead of alloc_re()
+ *
  * Revision 1.4  2020-10-13 18:33:46+05:30  Cprogrammer
  * added missing alloc_free
  *
@@ -73,7 +76,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: islocalif.c,v 1.4 2020-10-13 18:33:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: islocalif.c,v 1.5 2020-10-18 07:51:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -190,7 +193,9 @@ islocalif(char *hostptr)
 	}
 	len = 8192;
 	for (t = 0, buf = (char *) 0;;) {
-		if (!alloc_re((char *) &buf, t, len * sizeof(char)))
+		if (len > t && t)
+			alloc_free(buf);
+		if (len > t && !(buf = alloc(len)))
 			die_nomem();
 		ifc.ifc_buf = buf;
 		ifc.ifc_len = len;
@@ -209,7 +214,9 @@ islocalif(char *hostptr)
 #endif
 			return (-1);
 		}
-		t = len;
+		if (len > t)
+			t = len;
+		alloc_free(buf);
 		len *= 2;
 	}
 	ifr = ifc.ifc_req;

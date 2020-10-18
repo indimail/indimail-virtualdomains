@@ -1,5 +1,8 @@
 /*
  * $Log: count_dir.c,v $
+ * Revision 1.2  2020-10-18 07:34:38+05:30  Cprogrammer
+ * use alloc() instead of alloc_re()
+ *
  * Revision 1.1  2019-04-18 08:22:42+05:30  Cprogrammer
  * Initial revision
  *
@@ -27,7 +30,7 @@
 #include "skip_system_files.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: count_dir.c,v 1.1 2019-04-18 08:22:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: count_dir.c,v 1.2 2020-10-18 07:34:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 mdir_t count_dir(char *dir_name, mdir_t *mailcount)
@@ -65,13 +68,16 @@ mdir_t count_dir(char *dir_name, mdir_t *mailcount)
 			continue;
 		filename_len = str_len(dp->d_name);
 		newlen = sizeof(char) * (filename_len + dirname_len + 2);
-		if (!alloc_re((char *) &tmpstr, oldlen, newlen)) {
+		if (newlen > oldlen && oldlen)
+			alloc_free(tmpstr);
+		if (newlen > oldlen && !(tmpstr = alloc(newlen))) {
 			strnum[i = fmt_uint(strnum, newlen)] = 0;
-			strerr_warn3("count_dir: alloc_re: ", strnum, " bytes: ", &strerr_sys);
+			strerr_warn3("count_dir: alloc: ", strnum, " bytes: ", &strerr_sys);
 			closedir(entry);
 			return (-1);
 		}
-		oldlen = newlen;
+		if (newlen > oldlen)
+			oldlen = newlen;
 		ptr = tmpstr;
 		ptr += fmt_strn(ptr, dir_name, dirname_len);
 		ptr += fmt_strn(ptr, "/", 1);

@@ -1,5 +1,8 @@
 /*
  * $Log: get_assign.c,v $
+ * Revision 1.5  2020-10-18 07:47:19+05:30  Cprogrammer
+ * use alloc() instead of alloc_re()
+ *
  * Revision 1.4  2020-10-13 18:32:27+05:30  Cprogrammer
  * added missing alloc_free
  *
@@ -40,7 +43,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_assign.c,v 1.4 2020-10-13 18:32:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_assign.c,v 1.5 2020-10-18 07:47:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      cdb_seek(int, unsigned char *, unsigned int, int *);
@@ -95,8 +98,12 @@ get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 	}
 	if (!_cacheSwitch) {
 		in_uid = in_gid = -1;
+		if (in_domain)
+			alloc_free(in_domain);
+		if (in_dir)
+			alloc_free(in_dir);
 		in_domain = in_dir = (char *) 0;
-		in_domain_size = in_dir_size = 0;
+		o_alloc = in_domain_size = in_dir_size = 0;
 		_cacheSwitch = 1;
 	}
 #endif
@@ -105,18 +112,29 @@ get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 		!stralloc_catb(&cdbfilename, "/cdb", 4) ||
 		!stralloc_0(&cdbfilename))
 		die_nomem();
-	if (alloc_re((char *) &in_domain, o_alloc, (i = (str_len(domain) + 1))) == -1) {
+	i = str_len(domain) + 1;
+	if (i > o_alloc && o_alloc)
+		alloc_free(in_domain);
+	if (i > o_alloc && !(in_domain = alloc(i))) {
 		if (uid)
 			*uid = -1;
 		if (gid)
 			*gid = -1;
 		if (dir)
 			dir->len = 0;
+		in_uid = in_gid = -1;
+		if (in_domain)
+			alloc_free(in_domain);
+		if (in_dir)
+			alloc_free(in_dir);
+		in_domain = in_dir = (char *) 0;
+		o_alloc = in_domain_size = in_dir_size = 0;
 		return ((char *) 0);
 	}
-	o_alloc = i;
+	if (i > o_alloc)
+		o_alloc = i;
 	in_domain_size = i - 1;
-	str_copyb(in_domain, domain, in_domain_size + 1);
+	str_copyb(in_domain, domain, i); /*- copy with null */
 	if (!(tmpstr = alloc(in_domain_size + 3))) {
 		if (uid)
 			*uid = -1;
@@ -124,6 +142,13 @@ get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 			*gid = -1;
 		if (dir)
 			dir->len = 0;
+		in_uid = in_gid = -1;
+		if (in_domain)
+			alloc_free(in_domain);
+		if (in_dir)
+			alloc_free(in_dir);
+		in_domain = in_dir = (char *) 0;
+		o_alloc = in_domain_size = in_dir_size = 0;
 		return ((char *) 0);
 	}
 	s = tmpstr;
@@ -139,6 +164,13 @@ get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 		if (dir)
 			dir->len = 0;
 		alloc_free(tmpstr);
+		in_uid = in_gid = -1;
+		if (in_domain)
+			alloc_free(in_domain);
+		if (in_dir)
+			alloc_free(in_dir);
+		in_domain = in_dir = (char *) 0;
+		o_alloc = in_domain_size = in_dir_size = 0;
 		return ((char *) 0);
 	}
 	if ((i = cdb_seek(fd, (unsigned char *) tmpstr, in_domain_size + 2, &dlen)) == 1) {
@@ -151,6 +183,13 @@ get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 				*gid = -1;
 			if (dir)
 				dir->len = 0;
+			in_uid = in_gid = -1;
+			if (in_domain)
+				alloc_free(in_domain);
+			if (in_dir)
+				alloc_free(in_dir);
+			in_domain = in_dir = (char *) 0;
+			o_alloc = in_domain_size = in_dir_size = 0;
 			return ((char *) 0);
 		}
 		alloc_free(tmpstr);
@@ -168,7 +207,10 @@ get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 			*gid = in_gid;
 		for (; *ptr; ptr++);
 		ptr++;
-		if (alloc_re((char *) &in_dir, in_dir_size, (i = (str_len(ptr) + 1))) == -1) {
+		i = str_len(ptr) + 1;
+		if (i > in_dir_size && in_dir_size)
+			alloc_free(in_dir);
+		if (i > in_dir_size && !(in_dir = alloc(i))) {
 			close(fd);
 			alloc_free(tmpbuf);
 			if (uid)
@@ -177,16 +219,24 @@ get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 				*gid = -1;
 			if (dir)
 				dir->len = 0;
+			in_uid = in_gid = -1;
+			if (in_domain)
+				alloc_free(in_domain);
+			if (in_dir)
+				alloc_free(in_dir);
+			in_domain = in_dir = (char *) 0;
+			o_alloc = in_domain_size = in_dir_size = 0;
 			return ((char *) 0);
 		}
-		in_dir_size = i;
+		if (i > in_dir_size)
+			in_dir_size = i;
 		if (dir) {
-			if (!stralloc_copyb(dir, ptr, in_dir_size - 1) || !stralloc_0(dir))
+			if (!stralloc_copyb(dir, ptr, i - 1) || !stralloc_0(dir))
 				die_nomem();
 			dir->len--;
 		}
 		s = in_dir;
-		s += fmt_strn(s, ptr, in_dir_size - 1);
+		s += fmt_strn(s, ptr, i - 1);
 		*s++ = 0;
 		alloc_free(tmpbuf);
 		close(fd);
