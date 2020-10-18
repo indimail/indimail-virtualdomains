@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.h,v $
+ * Revision 1.8  2020-10-18 07:53:30+05:30  Cprogrammer
+ * renamed closeLibrary() to incloseLibrary()
+ *
  * Revision 1.7  2020-06-12 21:42:39+05:30  Cprogrammer
  * use HAVE_LIBMARIADB to define MYSQL_RES typedef
  *
@@ -75,7 +78,7 @@ extern i_char  *(*in_mysql_get_server_info) (MYSQL *);
 extern i_char  *(*in_mysql_get_client_info) (void);
 extern void    *loadLibrary(void **, char *, int *, char **);
 extern void    *getlibObject(char *, void **, char *, char **);
-extern void     closeLibrary(void **);
+extern void     incloseLibrary();
 extern int      initMySQLlibrary(char **);
 #else /*- DLOPEN_LIBMYSQLCLIENT */
 extern MYSQL   *mysql_Init(MYSQL *);

@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.10  2020-10-18 07:52:43+05:30  Cprogrammer
+ * renamed closeLibrary() to incloseLibrary()
+ *
  * Revision 1.9  2019-07-04 10:07:07+05:30  Cprogrammer
  * collapsed multiple if statements
  *
@@ -38,7 +41,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.9 2019-07-04 10:07:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.10 2020-10-18 07:52:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
@@ -238,16 +241,6 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 	return (*handle);
 }
 
-void
-closeLibrary(void **handle)
-{
-	if (*handle) {
-		dlclose(*handle);
-		*handle = (void *) 0;
-	}
-	return;
-}
-
 static void *
 getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 {
@@ -281,10 +274,11 @@ getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 	return (i);
 }
 
+static void    *phandle = (void *) 0;
+
 int
 initMySQLlibrary(char **errstr)
 {
-	static void    *phandle = (void *) 0;
 	char           *ptr;
 	int             i = -1;
 
@@ -392,6 +386,16 @@ mysql_Init(MYSQL *mysql)
 	if (initMySQLlibrary(&x))
 		strerr_die2x(111, "mysql_init: couldn't load libmysqlclient: ", x);
 	return (in_mysql_init(mysql));
+}
+
+void
+incloseLibrary()
+{
+	if (phandle) {
+		dlclose(phandle);
+		phandle = (void *) 0;
+	}
+	return;
 }
 #else /*- DLOPEN_LIBMYSQLCLIENT */
 #ifdef LIBMARIADB
