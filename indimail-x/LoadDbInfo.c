@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbInfo.c,v $
+ * Revision 1.11  2020-10-18 07:51:37+05:30  Cprogrammer
+ * initialize last_error_len field of dbinfo
+ *
  * Revision 1.10  2020-07-04 22:53:56+05:30  Cprogrammer
  * replaced utime() with utimes()
  *
@@ -89,7 +92,7 @@
 #include "check_group.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.10 2020-07-04 22:53:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.11 2020-10-18 07:51:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static DBINFO **loadMCDInfo(int *);
@@ -459,6 +462,7 @@ LoadDbInfo_TXT(int *total)
 			str_copyb((*ptr)->password, row[8], DBINFO_BUFF);
 			(*ptr)->fd = -1;
 			(*ptr)->last_error = 0;
+			(*ptr)->last_error_len = 0;
 			(*ptr)->failed_attempts = 0;
 			(*ptr)->isLocal = 0;
 		}
@@ -663,6 +667,7 @@ loadMCDInfo(int *total)
 			(*rhostsptr)->fd = -1;
 			(*rhostsptr)->port = -1;
 			(*rhostsptr)->last_error = 0;
+			(*rhostsptr)->last_error_len = 0;
 			(*rhostsptr)->failed_attempts = 0;
 			str_copyb((*rhostsptr)->server, dummy2.s, dummy2.len);
 		} else
@@ -900,6 +905,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 		(*rhostsptr)->isLocal = 1; /*- this indicates that this record was created automatically */
 		(*rhostsptr)->fd = -1;
 		(*rhostsptr)->last_error = 0;
+		(*rhostsptr)->last_error_len = 0;
 		(*rhostsptr)->failed_attempts = 0;
 		if (!(localhost = get_local_ip(AF_INET))) /*- entry in control/localiphost */
 			localhost = "localhost";
@@ -981,6 +987,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 		(*rhostsptr)->isLocal = 1; /*- indicate that we were created automatically */
 		(*rhostsptr)->fd = -1;
 		(*rhostsptr)->last_error = 0;
+		(*rhostsptr)->last_error_len = 0;
 		(*rhostsptr)->failed_attempts = 0;
 		if (!(localhost = get_local_ip(AF_INET))) /*- entry in control/localiphost */
 			localhost = "localhost";
