@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 1.5  2020-10-18 07:47:25+05:30  Cprogrammer
+ * added last_error_len field to dbinfo to keep track of allocated_length of last_error field
+ *
  * Revision 1.4  2020-04-01 18:55:24+05:30  Cprogrammer
  * moved defintions to pw_comp.h
  *
@@ -17,7 +20,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 1.4 2020-04-01 18:55:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 1.5 2020-10-18 07:47:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -120,6 +123,7 @@ struct dbinfo
 	int             failed_attempts;
 	char            isLocal;
 	char           *last_error;
+	int             last_error_len;
 };
 typedef struct dbinfo DBINFO;
 extern MYSQL    mysql[2];
