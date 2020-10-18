@@ -1,5 +1,8 @@
 /*
  * $Log: sq_vacation.c,v $
+ * Revision 1.4  2020-10-18 10:39:26+05:30  Cprogrammer
+ * drop supplementary privilges before setuid()
+ *
  * Revision 1.3  2020-04-01 18:58:08+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -19,6 +22,9 @@
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_GRP_H
+#include <grp.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -83,7 +89,7 @@
 #define ERR_UNEXPECTED  126     /*- other unexpected error */
 
 #ifndef lint
-static char     sccsid[] = "$Id: sq_vacation.c,v 1.3 2020-04-01 18:58:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sq_vacation.c,v 1.4 2020-10-18 10:39:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define REMOTEFILE_OKCHARS \
@@ -389,6 +395,9 @@ main(int argc, char **argv)
 		if (argc != SRC + 1)
 			die(ERR_USAGE, "Incorrect usage for delete");
 		status = do_delete(argv[SRC], pw);
+		if (setgroups(0, NULL) == -1)
+			die_sys(ERR_PRIVILEGE, "setgroups: revoke privileges");
+		else
 		if (setgid(gid))
 			die_sys(ERR_PRIVILEGE, "setgid %d", gid);
 		else
