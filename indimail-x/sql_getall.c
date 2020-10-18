@@ -1,5 +1,8 @@
 /*
  * $Log: sql_getall.c,v $
+ * Revision 1.3  2020-10-18 07:53:54+05:30  Cprogrammer
+ * use alloc_re() only for expansion of memory
+ *
  * Revision 1.2  2019-05-02 14:38:04+05:30  Cprogrammer
  * reset onum after alloc_free()
  *
@@ -30,7 +33,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_getall.c,v 1.2 2019-05-02 14:38:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_getall.c,v 1.3 2020-10-18 07:53:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      storeSql(int *, int, MYSQL_RES *);
@@ -150,11 +153,12 @@ storeSql(int *more, int num, MYSQL_RES *res)
 		onum = 0;
 		return (0);
 	}
-	if (onum < num + 1 && !alloc_re((char *) &SqlPtr, sizeof(struct passwd *) * onum, sizeof(struct passwd *) * (num + 1))) {
+	if (num + 1 > onum && !alloc_re((char *) &SqlPtr, sizeof(struct passwd *) * onum, sizeof(struct passwd *) * (num + 1))) {
 		strerr_warn1("sql_getall: alloc_re: ", &strerr_sys);
 		return (1);
 	}
-	onum = num + 1;
+	if (num + 1 > onum)
+		onum = num + 1;
 	for(;(row = in_mysql_fetch_row(res));(*more)++) {
 		if (!(SqlPtr[*more] = (struct passwd *) alloc(sizeof(struct passwd)))) {
 			strerr_warn1("sql_getall: alloc: ", &strerr_sys);
