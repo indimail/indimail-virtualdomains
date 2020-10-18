@@ -14,7 +14,7 @@ iauth_LTLIBRARIES = iauth.la
 iauth_la_SOURCES = iauth.c
 iauth_la_LIBADD = libindimail.la
 iauth_la_DEPENDENCIES = libindimail.la
-iauth_la_LDFLAGS = -L.libs -module -avoid-version -shared -no-undefined -rdynamic -nostartfiles
+iauth_la_LDFLAGS = -L.libs -module -avoid-version -shared -rdynamic -no-undefined -nostartfiles $(LDFLAGS)
 iauthdir=@libdir@
 
 libindimail_LTLIBRARIES = libindimail.la
@@ -38,67 +38,67 @@ pkgconfig_DATA = libindimail.pc
 
 BUILT_SOURCES = indimail_config.h
 man_MANS=adminclient.8 chowkidar.8 clearopensmtp.8 crc.1 crcdiff.1 \
-		 incrypt.1 dbinfo.8 hostcntrl.8 hostsync.8 indimail.7 \
-		 IndiMail.7 indisrvr.8 initsvc.1 inlookup.8 InLookup.8 inquerytest.8 \
-		 install_tables.8 ipchange.8 ismaildup.1 login_tasks.3 \
-		 mgmtpass.8 osh.8 postdel.8 printdir.1 proxyimap.8 proxypop3.8 \
-		 resetquota.8 sslerator.1 updaterules.8 vacation.8 \
-		 vaddaliasdomain.1 vadddomain.1 vadduser.1 valias.1 vatrn.1 \
-		 vbulletin.1 vcalias.8 vcaliasrev.8 vcfilter.1 vchkpass.8 vdeldomain.1 \
-		 vdelivermail.8 vdeloldusers.8 vdeluser.1 vdominfo.1 vfilter.8 \
-		 vfstab.8 vgroup.1 vhostid.8 vipmap.1 vlimit.1 vmoddomain.1 vmoduser.1 \
-		 vmoveuser.1 vpasswd.1 vpriv.8 vproxy.8 vrenamedomain.1 vrenameuser.1 \
-		 vreorg.8 vserverinfo.1 vsetpass.8 vsetuserquota.1 vsmtp.8 vtable.1 \
-		 vuserinfo.1
+	incrypt.1 dbinfo.8 hostcntrl.8 hostsync.8 indimail.7 \
+	IndiMail.7 indisrvr.8 initsvc.1 inlookup.8 InLookup.8 inquerytest.8 \
+	install_tables.8 ipchange.8 ismaildup.1 login_tasks.3 \
+	mgmtpass.8 osh.8 postdel.8 printdir.1 proxyimap.8 proxypop3.8 \
+	resetquota.8 sslerator.1 updaterules.8 vacation.8 \
+	vaddaliasdomain.1 vadddomain.1 vadduser.1 valias.1 vatrn.1 \
+	vbulletin.1 vcalias.8 vcaliasrev.8 vcfilter.1 vchkpass.8 vdeldomain.1 \
+	vdelivermail.8 vdeloldusers.8 vdeluser.1 vdominfo.1 vfilter.8 \
+	vfstab.8 vgroup.1 vhostid.8 vipmap.1 vlimit.1 vmoddomain.1 vmoduser.1 \
+	vmoveuser.1 vpasswd.1 vpriv.8 vproxy.8 vrenamedomain.1 vrenameuser.1 \
+	vreorg.8 vserverinfo.1 vsetpass.8 vsetuserquota.1 vsmtp.8 vtable.1 \
+	vuserinfo.1
 
 include_HEADERS = addaliasdomain.h add_control.h add_domain_assign.h addressToken.h \
-				  add_user_assign.h addusercntrl.h add_vacation.h adminCmmd.h \
-				  AliasInLookup.h atrn_map.h auth_admin.h autoturn_dir.h \
-				  backfill.h bulk_mail.h bulletin.h check_group.h Check_Login.h checkPerm.h \
-				  check_quota.h clear_open_smtp.h close_big_dir.h cntrl_clearaddflag.h \
-				  cntrl_cleardelflag.h common.h compile_morercpthosts.h CopyEmailFile.h \
-				  copyPwdStruct.h count_dir.h count_rcpthosts.h count_table.h crc.h \
-				  CreateDomainDirs.h create_table.h dbinfoAdd.h dbinfoDel.h dbinfoSelect.h \
-				  dbinfoUpdate.h dbload.h dblock.h del_control.h del_domain_assign.h \
-				  deldomain.h deliver_mail.h delunreadmails.h del_user_assign.h \
-				  delusercntrl.h deluser.h dir_control.h Dirname.h \
-				  disable_mysql_escape.h evaluate.h fappend.h FifoCreate.h filewrt.h \
-				  findhost.h findmdahost.h fstabChangeCounters.h getactualpath.h \
-				  getAddressBook.h get_assign.h getFreeFS.h getindimail.h \
-				  get_indimailuidgid.h getlastauth.h get_local_hostid.h get_local_ip.h \
-				  get_localtime.h get_message_size.h get_Mplexdir.h getpeer.h GetPrefix.h \
-				  get_real_domain.h GetSMTProute.h getuidgid.h \
-				  hostcntrl_select.h host_in_locals.h iadddomain.h iadduser.h iclose.h \
-				  in_bsearch.h indimail_compat.h indimail.h inquery.h iopen.h ipasswd.h \
-				  ip_map.h is_alias_domain.h is_already_running.h is_distributed_domain.h \
-				  islocalif.h ismaildup.h isnum.h is_user_present.h isvalid_domain.h \
-				  isvirtualdomain.h layout.h LoadBMF.h LoadDbInfo.h lockfile.h Login_Tasks.h \
-				  load_mysql.h lowerit.h maildir_to_domain.h maildir_to_email.h MailQuotaWarn.h \
-				  MakeArgs.h makeseekable.h make_user_dir.h mdaMySQLConnect.h \
-				  mgmtpassfuncs.h monkey.h MoveFile.h munch_domain.h mysql_stack.h \
-				  next_big_dir.h no_of_days.h open_big_dir.h open_master.h open_smtp_relay.h \
-				  parseAddress.h parse_email.h parse_quota.h passwd_policy.h pathToFilesystem.h \
-				  pipe_exec.h post_handle.h print_control.h ProcessInFifo.h proxylogin.h \
-				  purge_files.h pwcomp.h PwdInLookup.h qmail_remote.h recalc_quota.h \
-				  RelayInLookup.h relay_select.h RemoteBulkMail.h remove_line.h remove_quotes.h \
-				  renameuser.h replacestr.h r_mkdir.h runcmmd.h SendWelcomeMail.h \
-				  set_mysql_options.h setuserquota.h skip_relay.h \
-				  skip_system_files.h sockwrite.h smtp_port.h spam.h sql_active.h sql_adddomain.h \
-				  sql_adduser.h sql_delaliasdomain.h sql_deldomain.h sql_deluser.h sql_getall.h \
-				  sql_getflags.h sql_gethostid.h sql_getip.h sql_getpw.h sql_get_realdomain.h \
-				  sql_init.h sql_insertaliasdomain.h sqlOpen_user.h sql_passwd.h sql_renamedomain.h \
-				  SqlServer.h sql_setpw.h sql_setquota.h sql_updateflag.h storeHeader.h \
-				  strToPw.h tcpbind.h tcpopen.h tls.h trashpurge.h udpopen.h update_file.h \
-				  update_local_hostid.h update_newu.h update_quota.h update_rules.h \
-				  updusercntrl.h userinfo.h UserInLookup.h user_over_quota.h valiasCount.h \
-				  valias_delete_domain.h valias_delete.h valiasinfo.h valias_insert.h \
-				  valias_select.h valias_update.h variables.h vdelfiles.h vfilter_delete.h \
-				  vfilter_display.h vfilter_filterNo.h vfilter_header.h vfilter_insert.h \
-				  vfilter_select.h vfilter_update.h vfstab.h vget_lastauth.h vgetpasswd.h \
-				  vhostid_delete.h vhostid_insert.h vhostid_select.h vhostid_update.h VlimitInLookup.h \
-				  vlimits.h vmake_maildir.h vpriv.h vquota_select.h vset_lastauth.h vset_lastdeliver.h \
-				  vsmtp_delete_domain.h vsmtp_delete.h vsmtp_insert.h vsmtp_select.h vsmtp_update.h \
-				  vupdate_rules.h wildmat.h indimail_config.h
+	add_user_assign.h addusercntrl.h add_vacation.h adminCmmd.h \
+	AliasInLookup.h atrn_map.h auth_admin.h autoturn_dir.h \
+	backfill.h bulk_mail.h bulletin.h check_group.h Check_Login.h checkPerm.h \
+	check_quota.h clear_open_smtp.h close_big_dir.h cntrl_clearaddflag.h \
+	cntrl_cleardelflag.h common.h compile_morercpthosts.h CopyEmailFile.h \
+	copyPwdStruct.h count_dir.h count_rcpthosts.h count_table.h crc.h \
+	CreateDomainDirs.h create_table.h dbinfoAdd.h dbinfoDel.h dbinfoSelect.h \
+	dbinfoUpdate.h dbload.h dblock.h del_control.h del_domain_assign.h \
+	deldomain.h deliver_mail.h delunreadmails.h del_user_assign.h \
+	delusercntrl.h deluser.h dir_control.h Dirname.h \
+	disable_mysql_escape.h evaluate.h fappend.h FifoCreate.h filewrt.h \
+	findhost.h findmdahost.h fstabChangeCounters.h getactualpath.h \
+	getAddressBook.h get_assign.h getFreeFS.h getindimail.h \
+	get_indimailuidgid.h getlastauth.h get_local_hostid.h get_local_ip.h \
+	get_localtime.h get_message_size.h get_Mplexdir.h getpeer.h GetPrefix.h \
+	get_real_domain.h GetSMTProute.h getuidgid.h \
+	hostcntrl_select.h host_in_locals.h iadddomain.h iadduser.h iclose.h \
+	in_bsearch.h indimail_compat.h indimail.h inquery.h iopen.h ipasswd.h \
+	ip_map.h is_alias_domain.h is_already_running.h is_distributed_domain.h \
+	islocalif.h ismaildup.h isnum.h is_user_present.h isvalid_domain.h \
+	isvirtualdomain.h layout.h LoadBMF.h LoadDbInfo.h lockfile.h Login_Tasks.h \
+	load_mysql.h lowerit.h maildir_to_domain.h maildir_to_email.h MailQuotaWarn.h \
+	MakeArgs.h makeseekable.h make_user_dir.h mdaMySQLConnect.h \
+	mgmtpassfuncs.h monkey.h MoveFile.h munch_domain.h mysql_stack.h \
+	next_big_dir.h no_of_days.h open_big_dir.h open_master.h open_smtp_relay.h \
+	parseAddress.h parse_email.h parse_quota.h passwd_policy.h pathToFilesystem.h \
+	pipe_exec.h post_handle.h print_control.h ProcessInFifo.h proxylogin.h \
+	purge_files.h pwcomp.h PwdInLookup.h qmail_remote.h recalc_quota.h \
+	RelayInLookup.h relay_select.h RemoteBulkMail.h remove_line.h remove_quotes.h \
+	renameuser.h replacestr.h r_mkdir.h runcmmd.h SendWelcomeMail.h \
+	set_mysql_options.h setuserquota.h skip_relay.h \
+	skip_system_files.h sockwrite.h smtp_port.h spam.h sql_active.h sql_adddomain.h \
+	sql_adduser.h sql_delaliasdomain.h sql_deldomain.h sql_deluser.h sql_getall.h \
+	sql_getflags.h sql_gethostid.h sql_getip.h sql_getpw.h sql_get_realdomain.h \
+	sql_init.h sql_insertaliasdomain.h sqlOpen_user.h sql_passwd.h sql_renamedomain.h \
+	SqlServer.h sql_setpw.h sql_setquota.h sql_updateflag.h storeHeader.h \
+	strToPw.h tcpbind.h tcpopen.h tls.h trashpurge.h udpopen.h update_file.h \
+	update_local_hostid.h update_newu.h update_quota.h update_rules.h \
+	updusercntrl.h userinfo.h UserInLookup.h user_over_quota.h valiasCount.h \
+	valias_delete_domain.h valias_delete.h valiasinfo.h valias_insert.h \
+	valias_select.h valias_update.h variables.h vdelfiles.h vfilter_delete.h \
+	vfilter_display.h vfilter_filterNo.h vfilter_header.h vfilter_insert.h \
+	vfilter_select.h vfilter_update.h vfstab.h vget_lastauth.h vgetpasswd.h \
+	vhostid_delete.h vhostid_insert.h vhostid_select.h vhostid_update.h VlimitInLookup.h \
+	vlimits.h vmake_maildir.h vpriv.h vquota_select.h vset_lastauth.h vset_lastdeliver.h \
+	vsmtp_delete_domain.h vsmtp_delete.h vsmtp_insert.h vsmtp_select.h vsmtp_update.h \
+	vupdate_rules.h wildmat.h indimail_config.h
 includedir=@prefix@/include/indimail
 
 setuid_list = bin/printdir bin/vaddaliasdomain bin/vadddomain bin/vadduser bin/vbulletin \
@@ -110,54 +110,54 @@ doc_list= ChangeLog FAQ.pdf README-indimail.md README-ldap.md  \
 	README-vlimits.md COPYING-indimail
 
 COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.c add_ip_map.c \
-				add_user_assign.c addusercntrl.c add_vacation.c atrn_access.c autoturn_dir.c \
-				backfill.c bulk_mail.c check_group.c Check_Login.c check_quota.c close_big_dir.c \
-				cntrl_clearaddflag.c cntrl_cleardelflag.c common.c compile_morercpthosts.c \
-				CopyEmailFile.c copyPwdStruct.c count_dir.c count_rcpthosts.c count_table.c \
-				CreateDomainDirs.c create_table.c dbinfoAdd.c dbinfoDel.c dbinfoSelect.c \
-				dbinfoUpdate.c dbload.c dec_dir_control.c del_atrn_map.c del_control.c \
-				del_domain_assign.c deldomain.c del_ip_map.c del_user_assign.c compat.c \
-				deluser.c delusercntrl.c Dirname.c evaluate.c fappend.c \
-				FifoCreate.c filewrt.c findhost.c findmdahost.c fstabChangeCounters.c \
-				getactualpath.c get_assign.c getDbLock.c \
-				get_indimailuidgid.c get_local_hostid.c get_local_ip.c get_localtime.c \
-				get_message_size.c get_Mplexdir.c getpeer.c GetPrefix.c get_real_domain.c \
-				GetSMTProute.c hostcntrl_select.c \
-				host_in_locals.c iadddomain.c iadduser.c iclose.c inc_dir.c \
-				inc_dir_control.c init_dir_control.c inquery.c iopen.c \
-				ipasswd.c is_alias_domain.c is_already_running.c is_distributed_domain.c \
-				islocalif.c ismaildup.c isnum.c is_user_present.c isvirtualdomain.c \
-				layout.c limits.c LoadDbInfo.c lockfile.c Login_Tasks.c lowerit.c \
-				maildir_to_domain.c maildir_to_email.c MailQuotaWarn.c MakeArgs.c \
-				makeseekable.c make_user_dir.c \
-				mdaMySQLConnect.c mgmtpassfuncs.c MoveFile.c munch_domain.c \
-				mysql_query.c mysql_stack.c next_big_dir.c no_of_days.c open_big_dir.c \
-				open_master.c open_smtp_relay.c parse_email.c parse_quota.c passwd_policy.c \
-				pathToFilesystem.c pipe_exec.c post_handle.c print_control.c \
-				pwcomp.c recalc_quota.c relay_select.c RemoteBulkMail.c remove_line.c \
-				remove_quotes.c renameuser.c replacestr.c r_mkdir.c runcmmd.c \
-				SendWelcomeMail.c set_mysql_options.c setuserquota.c \
-				show_atrn_map.c show_ip_map.c skip_relay.c \
-				skip_system_files.c smtp_port.c sql_active.c sql_adddomain.c sql_adduser.c \
-				sql_delaliasdomain.c sql_deldomain.c sql_deluser.c sql_getall.c \
-				sql_getflags.c sql_gethostid.c sql_getip.c sql_getpw.c \
-				sql_get_realdomain.c sql_init.c sql_insertaliasdomain.c sqlOpen_user.c \
-				sql_passwd.c sql_renamedomain.c SqlServer.c sql_setpw.c sql_setquota.c \
-				sql_updateflag.c strToPw.c tcpbind.c tcpopen.c update_file.c \
-				update_local_hostid.c update_newu.c update_quota.c update_rules.c \
-				upd_atrn_map.c upd_ip_map.c updusercntrl.c userinfo.c user_over_quota.c \
-				valiasCount.c valias_delete.c valias_delete_domain.c valiasinfo.c \
-				valias_insert.c valias_select.c valias_update.c variables.c \
-				vcreate_dir_control.c vdel_dir_control.c vdelfiles.c vfilter_delete.c \
-				vfilter_display.c vfilter_filterNo.c vfilter_header.c vfilter_insert.c \
-				vfilter_select.c vfilter_update.c vget_ip_map.c vget_lastauth.c vgetpasswd.c \
-				vhostid_delete.c vhostid_insert.c vhostid_select.c vhostid_update.c \
-				vmake_maildir.c vpriv_delete.c vpriv_insert.c \
-				vpriv_select.c vpriv_update.c vquota_select.c vread_dir_control.c \
-				vset_default_domain.c vset_lastauth.c vset_lastdeliver.c vsmtp_delete.c \
-				vsmtp_delete_domain.c vsmtp_insert.c vsmtp_select.c vsmtp_update.c \
-				vupdate_rules.c vwrite_dir_control.c wildmat.c \
-				load_mysql.c
+	add_user_assign.c addusercntrl.c add_vacation.c atrn_access.c autoturn_dir.c \
+	backfill.c bulk_mail.c check_group.c Check_Login.c check_quota.c close_big_dir.c \
+	cntrl_clearaddflag.c cntrl_cleardelflag.c common.c compile_morercpthosts.c \
+	CopyEmailFile.c copyPwdStruct.c count_dir.c count_rcpthosts.c count_table.c \
+	CreateDomainDirs.c create_table.c dbinfoAdd.c dbinfoDel.c dbinfoSelect.c \
+	dbinfoUpdate.c dbload.c dec_dir_control.c del_atrn_map.c del_control.c \
+	del_domain_assign.c deldomain.c del_ip_map.c del_user_assign.c compat.c \
+	deluser.c delusercntrl.c Dirname.c evaluate.c fappend.c \
+	FifoCreate.c filewrt.c findhost.c findmdahost.c fstabChangeCounters.c \
+	getactualpath.c get_assign.c getDbLock.c \
+	get_indimailuidgid.c get_local_hostid.c get_local_ip.c get_localtime.c \
+	get_message_size.c get_Mplexdir.c getpeer.c GetPrefix.c get_real_domain.c \
+	GetSMTProute.c hostcntrl_select.c \
+	host_in_locals.c iadddomain.c iadduser.c iclose.c inc_dir.c \
+	inc_dir_control.c init_dir_control.c inquery.c iopen.c \
+	ipasswd.c is_alias_domain.c is_already_running.c is_distributed_domain.c \
+	islocalif.c ismaildup.c isnum.c is_user_present.c isvirtualdomain.c \
+	layout.c limits.c LoadDbInfo.c lockfile.c Login_Tasks.c lowerit.c \
+	maildir_to_domain.c maildir_to_email.c MailQuotaWarn.c MakeArgs.c \
+	makeseekable.c make_user_dir.c \
+	mdaMySQLConnect.c mgmtpassfuncs.c MoveFile.c munch_domain.c \
+	mysql_query.c mysql_stack.c next_big_dir.c no_of_days.c open_big_dir.c \
+	open_master.c open_smtp_relay.c parse_email.c parse_quota.c passwd_policy.c \
+	pathToFilesystem.c pipe_exec.c post_handle.c print_control.c \
+	pwcomp.c recalc_quota.c relay_select.c RemoteBulkMail.c remove_line.c \
+	remove_quotes.c renameuser.c replacestr.c r_mkdir.c runcmmd.c \
+	SendWelcomeMail.c set_mysql_options.c setuserquota.c \
+	show_atrn_map.c show_ip_map.c skip_relay.c \
+	skip_system_files.c smtp_port.c sql_active.c sql_adddomain.c sql_adduser.c \
+	sql_delaliasdomain.c sql_deldomain.c sql_deluser.c sql_getall.c \
+	sql_getflags.c sql_gethostid.c sql_getip.c sql_getpw.c \
+	sql_get_realdomain.c sql_init.c sql_insertaliasdomain.c sqlOpen_user.c \
+	sql_passwd.c sql_renamedomain.c SqlServer.c sql_setpw.c sql_setquota.c \
+	sql_updateflag.c strToPw.c tcpbind.c tcpopen.c update_file.c \
+	update_local_hostid.c update_newu.c update_quota.c update_rules.c \
+	upd_atrn_map.c upd_ip_map.c updusercntrl.c userinfo.c user_over_quota.c \
+	valiasCount.c valias_delete.c valias_delete_domain.c valiasinfo.c \
+	valias_insert.c valias_select.c valias_update.c variables.c \
+	vcreate_dir_control.c vdel_dir_control.c vdelfiles.c vfilter_delete.c \
+	vfilter_display.c vfilter_filterNo.c vfilter_header.c vfilter_insert.c \
+	vfilter_select.c vfilter_update.c vget_ip_map.c vget_lastauth.c vgetpasswd.c \
+	vhostid_delete.c vhostid_insert.c vhostid_select.c vhostid_update.c \
+	vmake_maildir.c vpriv_delete.c vpriv_insert.c \
+	vpriv_select.c vpriv_update.c vquota_select.c vread_dir_control.c \
+	vset_default_domain.c vset_lastauth.c vset_lastdeliver.c vsmtp_delete.c \
+	vsmtp_delete_domain.c vsmtp_insert.c vsmtp_select.c vsmtp_update.c \
+	vupdate_rules.c vwrite_dir_control.c wildmat.c \
+	load_mysql.c
 
 libindimail.la: $(libindimail_la_OBJECTS) $(libindimail_la_DEPENDENCIES)
 	$(LIBTOOL) --mode=link --tag=CC gcc $(libindimail_la_LDFLAGS) \
@@ -166,27 +166,27 @@ libindimail.la: $(libindimail_la_OBJECTS) $(libindimail_la_DEPENDENCIES)
 
 iauth.la: $(iauth_la_OBJECTS) $(iauth_la_DEPENDENCIES)
 	$(LIBTOOL) --mode=link $(COMPILE) $(MODFLAGS) \
-		-o $@ iauth.lo $(iauth_la_LDFLAGS) \
-		$(iauth_la_LIBADD) -rpath @libdir@
+	-o $@ iauth.lo $(iauth_la_LDFLAGS) \
+	$(iauth_la_LIBADD) -rpath @libdir@
 
 indimailbin_PROGRAMS = vadddomain vdeldomain vadduser vdeluser vuserinfo \
-					   vaddaliasdomain vrenamedomain dbinfo vdominfo \
-					   vmoduser printdir ismaildup valias vcalias hostcntrl \
-					   vhostid vpasswd vcfilter vsmtp vsetuserquota \
-					   vacation vatrn vmoveuser vrenameuser vipmap vlimit \
-					   vpriv crc crcdiff incrypt vgroup proxyimap proxypop3 \
-					   sslerator vproxy vbulletin
+	vaddaliasdomain vrenamedomain dbinfo vdominfo \
+	vmoduser printdir ismaildup valias vcalias hostcntrl \
+	vhostid vpasswd vcfilter vsmtp vsetuserquota \
+	vacation vatrn vmoveuser vrenameuser vipmap vlimit \
+	vpriv crc crcdiff incrypt vgroup proxyimap proxypop3 \
+	sslerator vproxy vbulletin
 
 indimailsbin_PROGRAMS = inlookup vdelivermail clearopensmtp updaterules \
-						vfilter vmoddomain inquerytest vreorg vtable \
-						install_tables hostsync vserverinfo initsvc \
-						mgmtpass vchkpass vsetpass resetquota \
-						ipchange adminclient indisrvr vdeloldusers vfstab \
-						osh chowkidar vpurge
+	vfilter vmoddomain inquerytest vreorg vtable \
+	install_tables hostsync vserverinfo initsvc \
+	mgmtpass vchkpass vsetpass resetquota \
+	ipchange adminclient indisrvr vdeloldusers vfstab \
+	osh chowkidar vpurge
 
 indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7 updatefile
 indimaillibexec_SCRIPTS = mailzipper overquota.sh controlsync cputime \
-						  myslave bogofilter-qfe iupgrade.sh ilocal_upgrade.sh
+	myslave bogofilter-qfe iupgrade.sh ilocal_upgrade.sh
 
 indimailauthlib_PROGRAMS = authindi
 
@@ -301,10 +301,10 @@ vdelivermail_DEPENDENCIES = deliver_mail.lo qmail_remote.lo udpopen.lo libindima
 
 vfilter_SOURCES=vfilter.c
 vfilter_LDADD= storeHeader.lo parseAddress.lo deliver_mail.lo \
-			   addressToken.lo getAddressBook.lo udpopen.lo \
-			   eps-1.2/libeps.la libindimail.la
+	addressToken.lo getAddressBook.lo udpopen.lo \
+	eps-1.2/libeps.la libindimail.la
 vfilter_DEPENDENCIES=storeHeader.lo parseAddress.lo deliver_mail.lo \
-					 addressToken.lo getAddressBook.lo udpopen.lo libindimail.la
+	addressToken.lo getAddressBook.lo udpopen.lo libindimail.la
 
 vcfilter_SOURCES=vcfilter.c
 vcfilter_LDADD= libindimail.la
@@ -438,15 +438,15 @@ sslerator_DEPENDENCIES = sockwrite.lo libindimail.la
 
 proxyimap_SOURCES = proxyimap.c
 proxyimap_LDADD = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
-				  monkey.lo sockwrite.lo libindimail.la
+	monkey.lo sockwrite.lo libindimail.la
 proxyimap_DEPENDENCIES = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
-						 monkey.lo sockwrite.lo libindimail.la
+	monkey.lo sockwrite.lo libindimail.la
 
 proxypop3_SOURCES = proxypop3.c
 proxypop3_LDADD = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
-				  monkey.lo sockwrite.lo libindimail.la
+	monkey.lo sockwrite.lo libindimail.la
 proxypop3_DEPENDENCIES = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
-						 monkey.lo sockwrite.lo libindimail.la
+	monkey.lo sockwrite.lo libindimail.la
 
 vproxy_SOURCES = vproxy.c
 vproxy_LDADD = monkey.lo sockwrite.lo libindimail.la
@@ -466,16 +466,16 @@ indisrvr_DEPENDENCIES = sockwrite.lo checkPerm.lo libindimail.la
 
 vdeloldusers_SOURCES = vdeloldusers.c
 vdeloldusers_LDADD = delunreadmails.lo getlastauth.lo \
-					 trashpurge.lo getindimail.lo libindimail.la
+	trashpurge.lo getindimail.lo libindimail.la
 vdeloldusers_DEPENDENCIES = delunreadmails.lo getlastauth.lo \
-							trashpurge.lo getindimail.lo libindimail.la
+	trashpurge.lo getindimail.lo libindimail.la
 
 vfstab_SOURCES = vfstab.c
 vfstab_LDADD = vfstab_select.lo vfstab_insert.lo vfstab_update.lo \
-			   vfstab_delete.lo vfstabNew.lo vfstab_status.lo getFreeFS.lo libindimail.la
+	vfstab_delete.lo vfstabNew.lo vfstab_status.lo getFreeFS.lo libindimail.la
 vfstab_DEPENDENCIES = vfstab_select.lo vfstab_insert.lo vfstab_update.lo \
-					  vfstab_delete.lo vfstabNew.lo vfstab_status.lo getFreeFS.lo \
-					  libindimail.la
+	vfstab_delete.lo vfstabNew.lo vfstab_status.lo getFreeFS.lo \
+	libindimail.la
 
 vpurge_SOURCES = vpurge.c
 vpurge_LDADD = purge_files.lo libindimail.la
@@ -908,7 +908,7 @@ uninstall-hook:
 	for f in $(post_handle_list); do \
 		if [ -f $(DESTDIR)@libexecdir@/$$f ] ; then \
 			/bin/rm -f $(DESTDIR)@libexecdir@/$$f; \
-   		fi;\
+		fi;\
 	done
 	/bin/rmdir $(DESTDIR)@prefix@/lib/indimail/modules || true
 	for f in $(doc_list); do \
