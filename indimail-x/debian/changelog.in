@@ -38,3 +38,9 @@ indimail (@version@-@release@) unstable; urgency=low
   * skip_relay.c: new logic for terminating a line
   * postinstallation: update smtp authmodule with vchkpass                      
   * postinstallation: update imap/pop3, proxy imap/pop3 authmodule with authindi
+  * indimail.h: added last_error_len field to dbinfo to keep track of allocated_length of last_error field
+  * count_dir.c, dbload.c. get_assigh.c, inquery.c, islocalif.c, vdelfiles.c use alloc() instead of alloc_re()
+  * LoadDbInfo.c: initialize last_error_len field of dbinfo
+  * load_mysql.c: renamed closeLibrary() to incloseLibrary()
+  * sql_getall.c: use allo_re() only for expansion
+  * sq_vacation.c: drop supplementary privilges before setuid()

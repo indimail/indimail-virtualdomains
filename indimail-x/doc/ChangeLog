@@ -63,4 +63,12 @@ Release 3.3 Start 06/09/2020
 - 16/10/2020
 40. postinstallation: update smtp authmodule with vchkpass                      
 41. postinstallation: update imap/pop3, proxy imap/pop3 authmodule with authindi
-
+- 18/10/2020
+42. indimail.h: added last_error_len field to dbinfo to keep track of allocated_length
+    of last_error field
+43. count_dir.c, dbload.c. get_assigh.c, inquery.c, islocalif.c, vdelfiles.c
+    use alloc() instead of alloc_re()
+44. LoadDbInfo.c: initialize last_error_len field of dbinfo
+45. load_mysql.c: renamed closeLibrary() to incloseLibrary()
+44. sql_getall.c: use allo_re() only for expansion
+45. sq_vacation.c: drop supplementary privilges before setuid()
