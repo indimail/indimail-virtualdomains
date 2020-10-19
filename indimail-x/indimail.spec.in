@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.72 2020-10-18 11:07:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.73 2020-10-19 12:46:38+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -406,6 +406,9 @@ done
     $TOUCH %{buildroot}%{logdir}/$i/current
   done
 %endif
+%endif
+%if %{undefined nodebug}
+  /bin/chmod 755 %{buildroot}%{imoduledir}/iauth.so
 %endif
 
 %files -f config_files.list
