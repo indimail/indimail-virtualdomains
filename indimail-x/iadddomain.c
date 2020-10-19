@@ -1,5 +1,8 @@
 /*
  * $Log: iadddomain.c,v $
+ * Revision 1.2  2020-10-19 12:46:12+05:30  Cprogrammer
+ * use /var/indomain/domains for domain/bulk_mail
+ *
  * Revision 1.1  2019-04-14 18:31:49+05:30  Cprogrammer
  * Initial revision
  *
@@ -48,7 +51,7 @@
 #include "vdelfiles.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iadddomain.c,v 1.1 2019-04-14 18:31:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iadddomain.c,v 1.2 2020-10-19 12:46:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -140,12 +143,8 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 				return (-1);
 			}
 		}
-		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = CONTROLDIR;
-		if (!stralloc_copys(&tmpbuf, controldir) ||
-				!stralloc_append(&tmpbuf, "/") ||
-				!stralloc_cats(&tmpbuf, domain) ||
-				!stralloc_append(&tmpbuf, "/") ||
+		if (!stralloc_copys(&tmpbuf, dir) || !stralloc_catb(&tmpbuf, "/domains/", 9) ||
+				!stralloc_cats(&tmpbuf, domain) || !stralloc_append(&tmpbuf, "/") ||
 				!stralloc_cats(&tmpbuf, (ptr = env_get("BULK_MAILDIR")) ? ptr : BULK_MAILDIR) ||
 				!stralloc_0(&tmpbuf))
 			die_nomem();

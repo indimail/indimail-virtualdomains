@@ -1,5 +1,8 @@
 /*
  * $Log: bulk_mail.c,v $
+ * Revision 1.2  2020-10-19 12:45:28+05:30  Cprogrammer
+ * use /var/indomain/domains for domain/bulk_mail
+ *
  * Revision 1.1  2019-04-18 08:38:49+05:30  Cprogrammer
  * Initial revision
  *
@@ -26,7 +29,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: bulk_mail.c,v 1.1 2019-04-18 08:38:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: bulk_mail.c,v 1.2 2020-10-19 12:45:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -47,7 +50,7 @@ bulk_mail(const char *email, const char *domain, const char *homedir)
 	time_t          last_mtime;
 	int             status;
 
-	if (!stralloc_copys(&bulkdir, CONTROLDIR) ||
+	if (!stralloc_copys(&bulkdir, INDIMAILDIR) ||
 			!stralloc_append(&bulkdir, "/") ||
 			!stralloc_cats(&bulkdir, (char *) domain) ||
 			!stralloc_append(&bulkdir, "/") ||

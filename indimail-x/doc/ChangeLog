@@ -72,3 +72,7 @@ Release 3.3 Start 06/09/2020
 45. load_mysql.c: renamed closeLibrary() to incloseLibrary()
 44. sql_getall.c: use allo_re() only for expansion
 45. sq_vacation.c: drop supplementary privilges before setuid()
+19/10/2020
+46. vbulletin.c, SendWelcomeMail.c, RemoteBulkMail.c, iadddomain.c,
+    bulletin.c, bulk_mail.c use /var/indomain/domains for domain/bulk_mail
+47. indimail.spec: fixed rplint error with unstripped binary or object

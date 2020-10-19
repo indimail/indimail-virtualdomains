@@ -1,5 +1,8 @@
 /*
  * $Log: RemoteBulkMail.c,v $
+ * Revision 1.6  2020-10-19 12:46:54+05:30  Cprogrammer
+ * use /var/indomain/domains for domain/bulk_mail
+ *
  * Revision 1.5  2020-04-01 18:57:45+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -43,7 +46,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RemoteBulkMail.c,v 1.5 2020-04-01 18:57:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: RemoteBulkMail.c,v 1.6 2020-10-19 12:46:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -177,7 +180,7 @@ RemoteBulkMail(const char *email, const char *domain, const char *homedir)
 		in_mysql_free_result(res);
 		return (0);
 	}
-	if (!stralloc_copys(&bulkdir, CONTROLDIR) ||
+	if (!stralloc_copys(&bulkdir, INDIMAILDIR) ||
 			!stralloc_append(&bulkdir, "/") ||
 			!stralloc_cats(&bulkdir, (char *) domain) ||
 			!stralloc_append(&bulkdir, "/") ||

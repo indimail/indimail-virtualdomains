@@ -1,5 +1,8 @@
 /*
  * $Log: SendWelcomeMail.c,v $
+ * Revision 1.2  2020-10-19 12:46:58+05:30  Cprogrammer
+ * use /var/indomain/domains for domain/bulk_mail
+ *
  * Revision 1.1  2019-04-18 08:37:49+05:30  Cprogrammer
  * Initial revision
  *
@@ -22,7 +25,7 @@
 #include "CopyEmailFile.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: SendWelcomeMail.c,v 1.1 2019-04-18 08:37:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: SendWelcomeMail.c,v 1.2 2020-10-19 12:46:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -39,7 +42,7 @@ SendWelcomeMail(char *homedir, char *username, char *domain, int inactFlag, char
 	char           *ptr;
 	struct stat     statbuf;
 
-	if (!stralloc_copys(&bulkdir, CONTROLDIR) ||
+	if (!stralloc_copys(&bulkdir, INDIMAILDIR) ||
 			!stralloc_append(&bulkdir, "/") ||
 			!stralloc_cats(&bulkdir, domain) ||
 			!stralloc_append(&bulkdir, "/") ||

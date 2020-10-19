@@ -1,5 +1,8 @@
 /*
  * $Log: bulletin.c,v $
+ * Revision 1.4  2020-10-19 12:46:06+05:30  Cprogrammer
+ * use /var/indomain/domains for domain/bulk_mail
+ *
  * Revision 1.3  2020-10-01 18:20:40+05:30  Cprogrammer
  * initialize len variable
  *
@@ -59,7 +62,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: bulletin.c,v 1.3 2020-10-01 18:20:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: bulletin.c,v 1.4 2020-10-19 12:46:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -88,7 +91,7 @@ insert_bulletin(char *domain, char *emailFile, char *list_file)
 		strerr_warn2(emailFile, " contains '/'. Filename cannot have any path", 0);
 		return (-1);
 	}
-	if (!stralloc_copys(&EmailFile, CONTROLDIR) ||
+	if (!stralloc_copys(&EmailFile, INDIMAILDIR) ||
 			!stralloc_append(&EmailFile, "/") ||
 			!stralloc_cats(&EmailFile, domain) ||
 			!stralloc_append(&EmailFile, "/") ||

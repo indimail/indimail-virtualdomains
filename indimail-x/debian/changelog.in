@@ -44,3 +44,5 @@ indimail (@version@-@release@) unstable; urgency=low
   * load_mysql.c: renamed closeLibrary() to incloseLibrary()
   * sql_getall.c: use allo_re() only for expansion
   * sq_vacation.c: drop supplementary privilges before setuid()
+  * vbulletin.c, SendWelcomeMail.c, RemoteBulkMail.c, iadddomain.c, bulletin.c, bulk_mail.c use /var/indomain/domains for domain/bulk_mail
+  * indimail.spec: fixed rplint error with unstripped binary or object

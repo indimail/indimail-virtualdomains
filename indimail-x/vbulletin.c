@@ -1,5 +1,8 @@
 /*
  * $Log: vbulletin.c,v $
+ * Revision 1.4  2020-10-19 12:47:03+05:30  Cprogrammer
+ * use /var/indomain/domains for domain/bulk_mail
+ *
  * Revision 1.3  2020-06-16 17:56:15+05:30  Cprogrammer
  * moved setuserid function to libqmail
  *
@@ -62,7 +65,7 @@
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vbulletin.c,v 1.3 2020-06-16 17:56:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vbulletin.c,v 1.4 2020-10-19 12:47:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL            "vbulletin: fatal: "
@@ -409,7 +412,7 @@ spost(char *EmailOrDomain, int method, char *emailFile, int bulk)
 		strerr_warn2(Domain.s, ": No such domain", 0);
 		return (1);
 	}
-	if (!stralloc_copys(&bulkdir, CONTROLDIR) ||
+	if (!stralloc_copys(&bulkdir, INDIMAILDIR) ||
 			!stralloc_append(&bulkdir, "/") ||
 			!stralloc_cats(&bulkdir, domain) ||
 			!stralloc_append(&bulkdir, "/") ||
