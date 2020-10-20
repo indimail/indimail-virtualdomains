@@ -12,3 +12,4 @@ indimail-access (@version@-@release@) unstable; urgency=medium
   * courier-imap: Fixes for Darwin. Use configure args --with-waitfunc=wait3 for Darwin
   * courier-imap: Set LDFLAGS=/opt/local/lib when calling configure to avoid wrong libiconv getting picked
   * postinstallation: update imap/pop3, proxy imap/pop3 authmodule with authindi
+  * maildirquota.c: break out of infinite loop when maildirfolder creation fails
