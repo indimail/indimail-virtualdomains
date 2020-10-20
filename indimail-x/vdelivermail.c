@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 1.7  2020-10-20 13:59:43+05:30  Cprogrammer
+ * skip creation of maildirfolder file for user's Maildir (INBOX)
+ *
  * Revision 1.6  2020-04-01 18:58:38+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -84,7 +87,7 @@
 #include "get_message_size.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 1.6 2020-04-01 18:58:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 1.7 2020-10-20 13:59:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vdelivermail: fatal: "
@@ -142,7 +145,7 @@ get_arguments(int argc, char **argv, char **user, char **domain, char **user_ext
 				*user = "postmaster";
 		}
 		if (!(tmpstr = env_get("HOST")))
-			*domain = ((tmpstr = (char *) env_get("DEFAULT_DOMAIN")) ? tmpstr : DEFAULT_DOMAIN);
+			*domain = ((tmpstr = env_get("DEFAULT_DOMAIN")) ? tmpstr : DEFAULT_DOMAIN);
 		else
 			*domain = tmpstr;
 		if (remove_quotes(user)) {
@@ -207,12 +210,12 @@ prepare_maildir(char *dir, uid_t uid, gid_t gid)
 		"new",
 		"tmp",
 	};
-	maildirfolder = (char *) env_get("MAILDIRFOLDER");
-	if (!stralloc_copys(&TheDir, dir))
+	if (!stralloc_copys(&TheDir, dir)) /*- e.g. /mail/A2E/domain/account@example.com/Maildir */
 		die_nomem();
-	if (maildirfolder) {
-		if (TheDir.s[TheDir.len - 1] != '/' && !stralloc_append(&TheDir, "/"))
-			die_nomem();
+	if (TheDir.s[TheDir.len - 1] != '/' && !stralloc_append(&TheDir, "/"))
+		die_nomem();
+	/*- vfilter sets MAILDIRFOLDER to the Maildir where mail needs to be delivered */
+	if ((maildirfolder = env_get("MAILDIRFOLDER"))) {
 		if (!stralloc_cats(&TheDir, maildirfolder) ||
 				!stralloc_append(&TheDir, "/"))
 			die_nomem();
@@ -229,14 +232,23 @@ prepare_maildir(char *dir, uid_t uid, gid_t gid)
 				vdl_exit(111);
 			}
 			TheDir.len -= 3; /*- remove cur, new or tmp */
-			if (!stralloc_catb(&TheDir, "/maildirfolder", 14) || !stralloc_0(&TheDir))
-				die_nomem();
-			TheDir.len -= 15; /*- dir/maildirfolder + 1 null character */
-			if ((fd = open(TheDir.s, O_CREAT | O_TRUNC, 0644)) == -1) {
-				strerr_warn3("vdelivermail: open: O_CREAT|O_TRUNC: ", TheDir.s, ": ", &strerr_sys);
-				vdl_exit(111);
+			/*- 
+			 * figure out the parent Maildir
+			 * dir=Maildir means parent Maildir or INBOX
+			 * The parent Maildir shouldn't have maildirfolder file
+			 * else courier-imap will go in an infinite loop trying to
+			 * create this file
+			 */
+			if (str_diffn(TheDir.s + TheDir.len - 9, "/Maildir/", 9)) {
+				if (!stralloc_catb(&TheDir, "/maildirfolder", 14) || !stralloc_0(&TheDir))
+					die_nomem();
+				TheDir.len -= 15; /*- dir/maildirfolder + 1 null character */
+				if ((fd = open(TheDir.s, O_CREAT | O_TRUNC, 0644)) == -1) {
+					strerr_warn3("vdelivermail: open: O_CREAT|O_TRUNC: ", TheDir.s, ": ", &strerr_sys);
+					vdl_exit(111);
+				}
+				close(fd);
 			}
-			close(fd);
 		}
 		TheDir.len = olen;
 	}
@@ -480,7 +492,7 @@ processMail(struct passwd *pw, char *user, char *domain, mdir_t MsgSize)
 						!stralloc_catb(&TheDir, "/Maildir", 8))
 					die_nomem();
 				/*- Call overquota command with 5 arguments */
-				if ((maildirfolder = (char *) env_get("MAILDIRFOLDER"))) {
+				if ((maildirfolder = env_get("MAILDIRFOLDER"))) {
 					if (!stralloc_append(&TheDir, "/") ||
 							!stralloc_cats(&TheDir, maildirfolder))
 						die_nomem();
@@ -533,7 +545,7 @@ processMail(struct passwd *pw, char *user, char *domain, mdir_t MsgSize)
 	 * If either exists, then carry out delivery instructions
 	 * and skip Maildir delivery
 	 */
-	ptr = (char *) env_get("EXT");
+	ptr = env_get("EXT");
 	if (ptr && *ptr && doAlias(pw->pw_dir, user, domain, MsgSize) == 1)
 		vdl_exit(0);
 	if (!str_diffn(pw->pw_gecos, "MailGroup ", 10)) {
@@ -851,7 +863,7 @@ main(int argc, char **argv)
 		strerr_warn1("vdelivermail: discarding 0 size message", 0);
 		_exit(0);
 	}
-	if (!(addr = (char *) env_get("SENDER"))) {
+	if (!(addr = env_get("SENDER"))) {
 		strerr_warn1("vdelivermail: No SENDER environment variable", 0);
 		_exit(100);
 	}
@@ -860,7 +872,7 @@ main(int argc, char **argv)
 		_exit(0);
 	}
 	/*- get the user from indimail database */
-	if (!(pw = ((ptr = (char *) env_get("PWSTRUCT"))) ? strToPw(ptr, str_len(ptr) + 1) : sql_getpw(TheUser, TheDomain))) {
+	if (!(pw = ((ptr = env_get("PWSTRUCT"))) ? strToPw(ptr, str_len(ptr) + 1) : sql_getpw(TheUser, TheDomain))) {
 		if (!userNotFound) {
 			strerr_warn1("vdelivermail: temporary authentication error", 0);
 			vdl_exit(111);
