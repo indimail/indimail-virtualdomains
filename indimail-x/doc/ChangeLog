@@ -76,3 +76,5 @@ Release 3.3 Start 06/09/2020
 46. vbulletin.c, SendWelcomeMail.c, RemoteBulkMail.c, iadddomain.c,
     bulletin.c, bulk_mail.c use /var/indomain/domains for domain/bulk_mail
 47. indimail.spec: fixed rplint error with unstripped binary or object
+20/10/2020
+48. vdelivermail.c: skip creation of maildirfolder file for user's Maildir (INBOX)

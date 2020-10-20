@@ -46,3 +46,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * sq_vacation.c: drop supplementary privilges before setuid()
   * vbulletin.c, SendWelcomeMail.c, RemoteBulkMail.c, iadddomain.c, bulletin.c, bulk_mail.c use /var/indomain/domains for domain/bulk_mail
   * indimail.spec: fixed rplint error with unstripped binary or object
+  * vdelivermail.c: skip creation of maildirfolder file for user's Maildir (INBOX)
