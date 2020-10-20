@@ -18,6 +18,7 @@
 %global _hardened_build    1
 %endif
 
+%global nodebug            1
 %if %{defined nodebug}
 %global debug_package %{nil}
 %endif
@@ -353,6 +354,10 @@ done
     $TOUCH %{buildroot}%{sysconfdir}/fetchmailrc
     #%%find_lang fetchmail
   fi
+%endif
+%if %{undefined nodebug}
+/bin/chmod -R 0755 %{buildroot}%{_prefix}/bin %{buildroot}%{_prefix}/sbin \
+  %{buildroot}%{libexecdir}
 %endif
 
 %files
