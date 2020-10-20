@@ -99,7 +99,7 @@ printBounce(char *bounce)
 
 	if (str_diffn(bounce, BOUNCE_ALL, str_len(BOUNCE_ALL) + 1)) {
 		out("vfilter", "Hi. This is the IndiMail MDA for ");
-		out("vfilter", (ptr = (char *) env_get("HOST")) ? ptr : DEFAULT_DOMAIN);
+		out("vfilter", (ptr = env_get("HOST")) ? ptr : DEFAULT_DOMAIN);
 		out("vfilter", "\n");
 		out("vfilter", "I'm afraid I cannot accept your message as a configured filter has decided\n");
 		out("vfilter", "to reject this mail\n");
@@ -111,7 +111,7 @@ printBounce(char *bounce)
 		else
 			user = ptr;
 		if (!(ptr = env_get("HOST")))
-			domain = (ptr = (char *) env_get("DEFAULT_DOMAIN")) ? ptr : DEFAULT_DOMAIN;
+			domain = (ptr = env_get("DEFAULT_DOMAIN")) ? ptr : DEFAULT_DOMAIN;
 		else
 			domain = ptr;
 		out("vfilter", "No Account ");
@@ -421,7 +421,7 @@ get_options(int argc, char **argv, char **bounce, stralloc *emailid, stralloc *u
 					!stralloc_0(&pwstruct))
 				die_nomem();
 			if (!env_put2("PWSTRUCT", pwstruct.s)) {
-				strerr_warn3("vfilter: env_put2: MAILDIRFOLDER=", pwstruct.s, ": ", &strerr_sys);
+				strerr_warn3("vfilter: env_put2: PWSTRUCT=", pwstruct.s, ": ", &strerr_sys);
 				if (interactive)
 					return (1);
 				_exit(111);
@@ -454,7 +454,7 @@ get_options(int argc, char **argv, char **bounce, stralloc *emailid, stralloc *u
 			!stralloc_0(&pwstruct))
 		die_nomem();
 	if (!env_put2("PWSTRUCT", pwstruct.s)) {
-		strerr_warn3("vfilter: env_put2: MAILDIRFOLDER=", pwstruct.s, ": ", &strerr_sys);
+		strerr_warn3("vfilter: env_put2: PWSTRUCT=", pwstruct.s, ": ", &strerr_sys);
 		if (interactive)
 			return (1);
 		_exit(111);
