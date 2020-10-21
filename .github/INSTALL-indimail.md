@@ -285,7 +285,7 @@ If you don't want to see the above added  users in the login-window, you might w
 
 RedHat and other linux systems place useradd and groupadd in the /usr/sbin directory.
 
-for freebsd the following would work
+for FreeBSD the following would work
 ```
 % su
 # pw groupadd -g 555 -n indimail
@@ -409,7 +409,7 @@ change first line in indimail-mta-x/conf-prefix to /usr
 change first line in indimail-mta-x/conf-libexec to /usr/libexec/indimail
 change first line in indimail-mta-x/conf-sysconfdir to /etc/indimail
 
-On FreeBSD
+On FreeBSD / Darwin
 change first line in indimail-mta-x/conf-qmail to /var/indimail
 change first line in indimail-mta-x/conf-shared to /usr/local/share/indimail
 change first line in indimail-mta-x/conf-prefix to /usr/local
@@ -429,7 +429,33 @@ continue the make below
 ```
 
 ```
-##### STEP 6  ##### Install ucsp-tcp ######################
+##### STEP 6  ##### Install daemontools ######################
+current working directory /home/local/src/indimail-mta
+
+On Linux
+change first line in indimail-mta-x/conf-prefix to /usr
+change first line in indimail-mta-x/conf-qmail to /var/indimail
+change first line in indimail-mta-x/conf-shared to /usr/share/indimail
+change first line in indimail-mta-x/conf-libexec to /usr/libexec/indimail
+change first line in indimail-mta-x/conf-sysconfdir to /etc/indimail
+change first line in indimail-mta-x/conf-servicedir to /service
+
+On FreeBSD / Darwin
+change first line in indimail-mta-x/conf-prefix to /usr/local
+change first line in indimail-mta-x/conf-qmail to /var/indimail
+change first line in indimail-mta-x/conf-shared to /usr/local/share/indimail
+change first line in indimail-mta-x/conf-libexec to /usr/local/libexec/indimail
+change first line in indimail-mta-x/conf-sysconfdir to /usr/local/etc/indimail
+change first line in indimail-mta-x/conf-servicedir to /usr/local/etc/sv
+
+% cd daemontools-x
+% make -s [DESTDIR=staging_directory]
+% sudo make -s install [DESTDIR=staging_directory]
+% cd ..
+```
+
+```
+##### STEP 7  ##### Install ucsp-tcp ######################
 current working directory /home/local/src/indimail-mta
 
 ensure that mysql_config is in the path. This is needed by ucspi-tcp to detect
@@ -450,7 +476,7 @@ change first line in conf-shared to /usr/local/share/indimail
 ```
 
 ```
-##### STEP 5  ##### Install indimail ######################
+##### STEP 8  ##### Install indimail ######################
 current working directory /home/local/src/indimail-virtualdomains
 
 % cd indimail-x
@@ -484,7 +510,7 @@ BUT DO NOT START THE SERVICES NOW (unless you are upgrading IndiMail)
 ```
 
 ```
-##### STEP 7  ##### Install courier IMAP/POP3 #############
+##### STEP 9  ##### Install courier IMAP/POP3 #############
 current working directory /home/local/src/indimail-virtualdomains
 
 % cd courier-imap-x
@@ -500,7 +526,7 @@ happens transparently by using pam-multi(8) in conjunction with nssd(8)
 ```
 
 ```
-##### STEP 8  ##### Install indimail-spamfilter ###########
+##### STEP 10  ##### Install indimail-spamfilter ###########
 current working directory /home/local/src/indimail-virtualdomains
 
 % cd bogofilter-x
@@ -551,7 +577,7 @@ Then do ./configure <same_parameters_as_earlier_install> ; make ; make install-s
 ```
 
 ```
-##### STEP 9  ## Optional STEP ##### Install fetchmail ####
+##### STEP 11  ## Optional STEP ##### Install fetchmail ####
 current working directory /home/local/src/indimail-virtualdomains
 
 % cd fetchmail-x
@@ -562,7 +588,7 @@ current working directory /home/local/src/indimail-virtualdomains
 ```
 
 ```
-##### STEP 10 ## Optional STEP ## Install nssd ############
+##### STEP 12 ## Optional STEP ## Install nssd ############
 current working directory /home/local/src/indimail-virtualdomains
 
 % cd nssd-x
@@ -573,7 +599,7 @@ current working directory /home/local/src/indimail-virtualdomains
 ```
 
 ```
-##### STEP 11 ## Optional STEP ## Install iwebadmin #######
+##### STEP 13 ## Optional STEP ## Install iwebadmin #######
 current working directory /home/local/src/indimail-virtualdomains
 
 % cd iwebadmin-x
