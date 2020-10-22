@@ -35,6 +35,8 @@ case "$host" in
 	;;
 *-*-linux*)
 	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -Wall"
+	CFLAGS="$CFLAGS -fPIC -fpie"
+	LDFLAGS="$LDFLAGS -pie"
 	;;
 *-*-darwin*)
 	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include"
