@@ -41,11 +41,12 @@ case "$host" in
 *-*-linux*)
 	CPPFLAGS="$CPPFLAGS -DLINUX"
 	CFLAGS="$CFLAGS -Wno-enum-compare -s -O4 -Wall -fPIC"
+	LDFLAGS="$LDFLAGS -pie"
 	OS=linux
 	;;
 *-*-darwin*)
 	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I/opt/local/include/qmail"
-	CFLAGS="$CFLAGS -O4 -Wall -pie"
+	CFLAGS="$CFLAGS -O4 -Wall"
 	LDFLAGS="$LDFLAGS -L/opt/local/lib"
 	OS=darwin
 	;;
