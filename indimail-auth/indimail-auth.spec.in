@@ -33,6 +33,14 @@
 %global mysqlPrefix        /usr
 %global mysqlSocket        /var/run/mysqld/mysqld.sock
 %global defaultDomain      indimail.org
+# Packages which do not use autosetup or setup macro
+# in the prep section have a problem in enabling debuginfo.
+# This isn't documented clearly anywhere. A workaround is
+# to define buildsubdir
+%if %{undefined nodebug}
+%global buildsubdir        ""
+%endif
+
 
 %if %build_on_obs == 1
 %global packager Manvendra Bhangui <indimail-auth@indimail.org>
@@ -107,18 +115,20 @@ methods
 For more details visit %{url}
 
 %prep
-for i in pam-multi-%{pam_multi_version} nssd-%{nssd_version}
+%{__mkdir_p} %{_builddir}/%{name}-%{version}
+cd %{name}-%{version}
+for i in nssd-%{nssd_version} pam-multi-%{pam_multi_version}
 do
   (
   if [ -d $i ] ; then
     %{__rm} -rf $i
   fi
-  if [ -f ../SOURCES/$i.tar.bz2 ] ; then
-    %{__bzip2} -d -c ../SOURCES/$i.tar.bz2 | tar xf -
-  elif [ -f ../SOURCES/$i.tar.xz ] ; then
-    xz -d -c ../SOURCES/$i.tar.xz |tar xf -
-  elif [ -f ../SOURCES/$i.tar.gz ] ; then
-    gunzip -c ../SOURCES/$i.tar.gz | tar xf -
+  if [ -f ../../SOURCES/$i.tar.bz2 ] ; then
+    %{__bzip2} -d -c ../../SOURCES/$i.tar.bz2 | tar xf -
+  elif [ -f ../../SOURCES/$i.tar.xz ] ; then
+    xz -d -c ../../SOURCES/$i.tar.xz |tar xf -
+  elif [ -f ../../SOURCES/$i.tar.gz ] ; then
+    gunzip -c ../../SOURCES/$i.tar.gz | tar xf -
   else
     echo "No Source Archive for $i"
     exit 1
@@ -127,7 +137,7 @@ do
 done
 
 %build
-ID=$(id -u)
+cd %{name}-%{version}
 (
 echo "---------------- INFORMATION ------------------------"
 echo target         %_target
@@ -190,7 +200,7 @@ if [ pam-multi-%{pam_multi_version} ] ; then
 fi
 
 %install
-ID=$(id -u)
+cd %{name}-%{version}
 %{__mkdir_p} $RPM_BUILD_ROOT
 %{__mkdir_p} %{buildroot}%{shareddir}/doc
 for i in nssd-%{nssd_version} pam-multi-%{pam_multi_version}
@@ -218,10 +228,6 @@ install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
 # pam-multi
 %{__rm} -f %{buildroot}%{pam_moduledir}/pam-multi.la
 %{__rm} -f %{buildroot}%{pam_moduledir}/pam-multi.a
-if [ -x /usr/bin/chrpath ] ; then
-  /usr/bin/chrpath -d %{buildroot}%{pam_moduledir}/pam-multi.so
-  /usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
-fi
 
 if [ -x /bin/touch ] ; then
   touch=/bin/touch
@@ -234,6 +240,11 @@ $touch %{buildroot}%{sysconfdir}/nssd.conf
 
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
+%if %{undefined nodebug}
+chmod -R 755 %{buildroot}%{_prefix}/sbin
+chmod -R 755 %{buildroot}%{_libdir}
+chmod -R 755 %{buildroot}/%{pam_moduledir}
+%endif
 
 %files
 %defattr(-, root, root,-)
@@ -241,9 +252,9 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 # Directories
 #
 
-%ghost %config(noreplace,missingok)               %{sysconfdir}/nssd.conf
-%attr(644,root,root) %config(noreplace)           %{sysconfdir}/%{name}-rpm.info
-%attr(644,root,root) %config(noreplace)           %{sysconfdir}/%{name}-release
+%ghost %config(noreplace,missingok)     %{sysconfdir}/nssd.conf
+%attr(644,root,root) %config(noreplace) %{sysconfdir}/%{name}-rpm.info
+%attr(644,root,root) %config(noreplace) %{sysconfdir}/%{name}-release
 
 %attr(755,root,root)                    %{_prefix}/sbin/nssd
 %attr(755,root,root)                    %{libexecdir}/check_getpw
@@ -281,6 +292,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
+%{__rm} -fr %{_builddir}/%{name}-%{version}
 
 %verifyscript
 ID=$(id -u)
