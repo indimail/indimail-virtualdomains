@@ -61,8 +61,9 @@ case "$host" in
 	;;
 *-*-linux*)
 	CPPFLAGS="$CPPFLAGS -DLINUX"
-	CFLAGS="$CFLAGS -g -O4 -Wall -fPIC"
+	CFLAGS="$CFLAGS -g -O4 -Wall -fPIC -fpie"
 	MODFLAGS="-g -module -O4 -fPIC -shared -Wall"
+	LDFLAGS="$LDFLAGS -pie"
 	SYSTEM=Linux
 	;;
 *-*-freebsd*)
