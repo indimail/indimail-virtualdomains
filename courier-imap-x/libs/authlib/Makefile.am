@@ -160,7 +160,7 @@ install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(man7dir) ; \
 	for f in $(man_MANS) "" ; do \
 		test "$$f" = "" && continue ; \
-		$(INSTALL_DATA) $$f $(DESTDIR)$(man7dir) ; done ; \
+		$(INSTALL) -C -m 644 $$f $(DESTDIR)$(man7dir) ; done ; \
 	cd $(DESTDIR)$(man7dir) || exit 1 ; \
 		for f in $(man_LINKS) "" ; do \
 			test "$$f" = "" && continue ; \
