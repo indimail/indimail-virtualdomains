@@ -18,7 +18,7 @@
 %global _hardened_build    1
 %endif
 
-%global nodebug            1
+%global xxxxxxxx           1
 %if %{defined nodebug}
 %global debug_package %{nil}
 %endif
@@ -49,6 +49,13 @@
 %global noperms            1
 %else
 %global noperms            0
+%endif
+# Packages which do not use autosetup or setup macro
+# in the prep section have a problem in enabling debuginfo.
+# This isn't documented clearly anywhere. A workaround is
+# to define buildsubdir
+%if %{undefined nodebug}
+%global buildsubdir        ""
 %endif
 
 %if %build_on_obs == 1
@@ -174,6 +181,8 @@ locations) and tools to manage virtual domains.
 For more details visit %{url}
 
 %prep
+%{__mkdir_p} %{_builddir}/%{name}-%{version}
+cd %{name}-%{version}
 for i in fetchmail-%{fetchmail_version} courier-imap-%{courier_version}
 do
   (
@@ -186,12 +195,12 @@ do
   if [ " $i" = " courier-imap-%{courier_version}" -a %nocourierimap -ne 0 ] ; then
     continue
   fi
-  if [ -f ../SOURCES/$i.tar.bz2 ] ; then
-    %{__bzip2} -d -c ../SOURCES/$i.tar.bz2 | tar xf -
-  elif [ -f ../SOURCES/$i.tar.xz ] ; then
-    xz -d -c ../SOURCES/$i.tar.xz |tar xf -
-  elif [ -f ../SOURCES/$i.tar.gz ] ; then
-    gunzip -c ../SOURCES/$i.tar.gz | tar xf -
+  if [ -f ../../SOURCES/$i.tar.bz2 ] ; then
+    %{__bzip2} -d -c ../../SOURCES/$i.tar.bz2 | tar xf -
+  elif [ -f ../../SOURCES/$i.tar.xz ] ; then
+    xz -d -c ../../SOURCES/$i.tar.xz |tar xf -
+  elif [ -f ../../SOURCES/$i.tar.gz ] ; then
+    gunzip -c ../../SOURCES/$i.tar.gz | tar xf -
   else
     echo "No Source Archive for $i"
     exit 1
@@ -200,7 +209,7 @@ do
 done
 
 %build
-ID=$(id -u)
+cd %{name}-%{version}
 (
 echo "---------------- INFORMATION ------------------------"
 echo target         %_target
@@ -265,8 +274,7 @@ fi
 %endif
 
 %install
-ID=$(id -u)
-%{__mkdir_p} $RPM_BUILD_ROOT%{_prefix}
+cd %{name}-%{version}
 for i in fetchmail-%{fetchmail_version} courier-imap-%{courier_version}
 do
   if [ " $i" = " fetchmail-%{fetchmail_version}" -a %nofetchmail -ne 0 ] ; then
@@ -308,10 +316,6 @@ if [ %nocourierimap -eq 0 ] ; then
   %{__rm} -f  %{buildroot}%{_prefix}/share/aclocal/courier-unicode.m4
   %{__rm} -rf %{buildroot}%{_prefix}/include
   %{__rm} -rf %{buildroot}%{mandir}/man3
-  if [ -x /usr/bin/chrpath ] ; then
-     /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/imapd
-     /usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/imaplogin
-  fi
 fi
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
@@ -356,8 +360,8 @@ done
   fi
 %endif
 %if %{undefined nodebug}
-/bin/chmod -R 0755 %{buildroot}%{_prefix}/bin %{buildroot}%{_prefix}/sbin \
-  %{buildroot}%{libexecdir}
+  /bin/chmod -R 0755 %{buildroot}%{_prefix}/bin %{buildroot}%{_prefix}/sbin \
+    %{buildroot}%{libexecdir}
 %endif
 
 %files
