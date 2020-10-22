@@ -29,46 +29,34 @@ AC_TYPE_SIZE_T
 
 case "$host" in
 *-*-sunos4.1.1*)
-	INSTALL="./install-sh -c"
 	CPPFLAGS="$CPPFLAGS -DSUNOS4"
 	CFLAGS="$CFLAGS -s -O4 -Wall -fPIC"
-	STRIP_OPT=-s
 	OS=sunos
 	;;
 *-*-solaris*)
-	INSTALL="./install-sh -c"
 	CPPFLAGS="$CPPFLAGS -DSOLARIS"
 	CFLAGS="$CFLAGS -s -O4 -Wall -fPIC"
-	STRIP_OPT=-s
 	OS=solaris
 	;;
 *-*-linux*)
-	INSTALL="/usr/bin/install -c"
 	CPPFLAGS="$CPPFLAGS -DLINUX"
 	CFLAGS="$CFLAGS -Wno-enum-compare -s -O4 -Wall -fPIC"
-	#STRIP_OPT=-s
 	OS=linux
 	;;
 *-*-darwin*)
-	INSTALL="/usr/bin/install -c"
 	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I/opt/local/include/qmail"
 	CFLAGS="$CFLAGS -O4 -Wall -pie"
 	LDFLAGS="$LDFLAGS -L/opt/local/lib"
-	STRIP_OPT=-s
 	OS=darwin
 	;;
 *-*-freebsd*)
-	INSTALL="/usr/bin/install -c"
 	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/include/qmail"
 	CFLAGS="$CFLAGS -O3 -Wall -fPIC -Wno-non-literal-null-conversion"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
-	STRIP_OPT=-s
 	OS=freebsd
     ;;
 *)
-	INSTALL="/usr/bin/install -c"
 	CFLAGS="$CFLAGS -s -O4 -Wall -fPIC"
-	STRIP_OPT=-s
 	;;
 esac
 

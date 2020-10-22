@@ -12,12 +12,6 @@ libflash_la_LIBADD = @LIB_CURSES@ @LIB_DLOPEN@
 libflash_la_LDFLAGS = -version-info @LIBVER@
 libflashdir=@libdir@
 
-INSTALL_PROGRAM = ${INSTALL} -c
-install_sh_PROGRAM = $(install_sh) -c
-INSTALL_SCRIPT = ${INSTALL}
-install_sh_SCRIPT = $(install_sh) -c
-INSTALL_STRIP_PROGRAM = $(install_sh) -c $(STRIP_OPT)
-
 flashbindir=@prefix@/bin
 flashbin_PROGRAMS = flash 
 modules_list = alarms background countdown

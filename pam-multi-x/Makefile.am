@@ -2,11 +2,6 @@
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
 
-INSTALL_PROGRAM = ${INSTALL} -c
-install_sh_PROGRAM = $(install_sh) -c
-INSTALL_SCRIPT = ${INSTALL}
-install_sh_SCRIPT = $(install_sh) -c
-
 DEFS=@DEFS@ -fno-strict-aliasing -I@prefix@/include/qmail
 
 pamsbindir=@prefix@/sbin

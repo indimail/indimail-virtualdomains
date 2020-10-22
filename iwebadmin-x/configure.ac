@@ -24,49 +24,38 @@ CPPFLAGS="${CPPFLAGS} -Dlint"
 
 case "$host" in
 *-*-sunos4.1.1*)
-	INSTALL="./install-sh -c"
 	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSUNOS4"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	;;
 *-*-solaris*)
-	INSTALL="./install-sh -c"
 	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSOLARIS"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
-	STRIP_OPT=-s
 	;;
 *-*-linux*)
-	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DLINUX -I/usr/include/qmail -I/usr/include/indimail -I/usr/include/mysql"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC -fno-strict-aliasing"
-	STRIP_OPT=-s
 	;;
 *-*-darwin*)
-	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I/opt/local/include/qmail -I/opt/local/include/indimail"
 	CPPFLAGS="$CPPFLAGS -I/opt/local/include/mysql"
 	CFLAGS="$CFLAGS -O3 -Wall"
 	LDFLAGS="$LDFLAGS -L/opt/local/lib"
-	STRIP_OPT=-s
 	;;
 *-*-freebsd*)
-	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/include/qmail -I/usr/local/include/indimail"
 	CPPFLAGS="$CPPFLAGS -I/usr/local/include/mysql"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
 	CFLAGS="$CFLAGS -O3 -Wall"
-	STRIP_OPT=-s
 	;;
 *)
-	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DLINUX -I/usr/include/qmail -I/usr/include/indimail -I/usr/include/mysql"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
-	STRIP_OPT=-s
 	;;
 esac
 

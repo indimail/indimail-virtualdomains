@@ -13,6 +13,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC
 AC_PROG_CC_C99
 AC_PROG_LIBTOOL
+AC_PROG_INSTALL
 
 LIBVER=1:0:0
 defaultprefix="/usr"
@@ -29,17 +30,14 @@ case "$host" in
 *-*-freebsd*)
 	CFLAGS="$CFLAGS -I. -I.. -O3 -Wall -fPIC"
 	MODFLAGS="-shared -nostartfiles -s -O3 -fPIC -Wall"
-	STRIP_OPT=-s
 	;;
 *-*-darwin*)
 	CFLAGS="$CFLAGS -g -I. -I.. -O3 -Wall"
 	MODFLAGS="-O3 -bundle -Wall -undefined dynamic_lookup"
-	STRIP_OPT=-s
 	;;
 *)
 	CFLAGS="$CFLAGS -I. -I.. -O4 -Wall -fPIC"
 	MODFLAGS="-shared -nostartfiles -s -O4 -fPIC -Wall"
-	STRIP_OPT=-s
 	;;
 esac
 modbase=$prefix/lib/indimail
@@ -57,7 +55,6 @@ AC_DEFINE_UNQUOTED(SYSCONFDIR, "$sysconfdir", Directory for menu)
 AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST(defaultprefix)
 AC_SUBST(LIBVER)
-AC_SUBST(STRIP_OPT)
 AC_SUBST(MODFLAGS)
 if test -d /lib64 -a "$acl_libdirstem" = "lib"
 then

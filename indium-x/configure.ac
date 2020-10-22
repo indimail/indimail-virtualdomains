@@ -26,45 +26,34 @@ fi
 
 case "$host" in
 *-*-sunos4.1.1*)
-	INSTALL="./install-sh -c"
 	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSUNOS4"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
-	STRIP_OPT=-s
 	;;
 *-*-solaris*)
-	INSTALL="./install-sh -c"
 	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSOLARIS"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
-	STRIP_OPT=-s
 	;;
 *-*-linux*)
-	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DLINUX"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
-	STRIP_OPT=-s
 	;;
 *-*-darwin*)
-	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DDARWIN"
 	CFLAGS="$CFLAGS -O4 -Wall -pie"
-	STRIP_OPT=-s
 	;;
 *)
-	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
-	STRIP_OPT=-s
 	;;
 esac
 
 defaultprefix="/usr"
 LIBVER=0:0:0
 AC_SUBST(LIBVER)
-AC_SUBST(STRIP_OPT)
 AC_SUBST(RPATH_LIB)
 AC_SUBST(defaultprefix)
 
@@ -74,6 +63,7 @@ AC_PROG_CC
 AC_PROG_CC_C99
 AC_PROG_LN_S
 AC_PROG_LIBTOOL
+AC_PROG_INSTALL
 
 # Checks for libraries.
 # FIXME: Replace `main' with a function in `-ltcl':

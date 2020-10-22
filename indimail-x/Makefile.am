@@ -4,12 +4,6 @@ ACLOCAL_AMFLAGS=-I m4
 
 DEFS=@DEFS@ -Dlint -fno-strict-aliasing -I. -I@prefix@/include/qmail -Ieps-1.2 -I@mysql_incdir@
 
-INSTALL_PROGRAM = ${INSTALL}          -c
-install_sh_PROGRAM = $(install_sh)    -c
-INSTALL_SCRIPT = ${INSTALL}           -c
-install_sh_SCRIPT = $(install_sh)     -c
-INSTALL_STRIP_PROGRAM = $(install_sh) -c $(STRIP_OPT)
-
 iauth_LTLIBRARIES = iauth.la
 iauth_la_SOURCES = iauth.c
 iauth_la_LIBADD = libindimail.la

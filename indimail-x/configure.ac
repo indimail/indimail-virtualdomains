@@ -27,23 +27,18 @@ fi
 
 case "$host" in
 *-*-sunos4.1.1*)
-	INSTALL="./install-sh -c"
 	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSUNOS4"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	MODFLAGS="-O4 -fPIC -shared -Wall"
-	STRIP_OPT=-s
 	;;
 *-*-solaris*)
-	INSTALL="./install-sh -c"
 	idcommand="/usr/xpg4/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DSOLARIS"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	MODFLAGS="-O4 -fPIC -shared -Wall"
-	STRIP_OPT=-s
 	;;
 *-*-linux*)
-	INSTALL="/usr/bin/install -c"
 	if test x"$FAKED_MODE" = x
 	then
 		idcommand="/usr/bin/id -u"
@@ -54,32 +49,25 @@ case "$host" in
 	CFLAGS="$CFLAGS -O4 -fPIC -fpie -Wall -fno-strict-aliasing"
 	LDFLAGS="$LDFLAGS -pie"
 	MODFLAGS="-O4 -fPIC -shared -Wall"
-	STRIP_OPT=-s
 	;;
 *-*-darwin*)
-	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I/opt/local/include/qmail"
 	CFLAGS="$CFLAGS -O3 -Wall"
 	LDFLAGS="$LDFLAGS -L/opt/local/lib"
 	MODFLAGS="-g -O3 -bundle -Wall -undefined dynamic_lookup"
-	STRIP_OPT=-s
 	;;
 *-*-freebsd*)
-	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/include/qmail"
 	CFLAGS="$CFLAGS -O3 -Wall -fPIC"
 	MODFLAGS="-g -O3 -fPIC -shared -Wall"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
-	STRIP_OPT=-s
 	;;
 *)
-	INSTALL="/usr/bin/install -c"
 	idcommand="/usr/bin/id -u"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	MODFLAGS="-O4 -fPIC -shared -Wall"
-	STRIP_OPT=-s
 	;;
 esac
 
@@ -1092,7 +1080,6 @@ AC_DEFINE_UNQUOTED(MODVER, "$MODVER", iauth module version)
 AC_SUBST(DISTRIB_ID)
 AC_SUBST(DISTRIB_VERSION)
 AC_SUBST([LIBTOOL_DEPS])
-AC_SUBST(STRIP_OPT)
 AC_SUBST(CFLAGS)
 AC_SUBST(defaultprefix)
 AC_SUBST(libdir)

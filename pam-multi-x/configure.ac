@@ -48,7 +48,6 @@ fi
 
 case "$host" in
 *-*-sunos4.1.1*)
-	INSTALL="./install-sh -c"
 	CPPFLAGS="$CPPFLAGS -DSUNOS4"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	MODFLAGS="-O4 -fPIC -shared -Wall"

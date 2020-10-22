@@ -4,12 +4,6 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
 
-INSTALL_PROGRAM = ${INSTALL} -c
-install_sh_PROGRAM = $(install_sh) -c
-INSTALL_SCRIPT = ${INSTALL}
-install_sh_SCRIPT = $(install_sh) -c
-INSTALL_STRIP_PROGRAM = $(install_sh) -c $(STRIP_OPT)
-
 DEFS=@DEFS@ -Wall -Dlint -I. -I@prefix@/include/qmail -I@mysql_incdir@
 COMMONSOURCES= pwd.c spwd.c grp.c sock.c misc.c util.c load_mysql.c
 

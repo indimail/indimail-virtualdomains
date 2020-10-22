@@ -9,12 +9,6 @@ version=@VERSION@
 
 EXTRA_DIST=BUGS FAQ TRANSLATORS html lang images contrib
 
-#
-# Install iwebadmin setuid to @indimailuser@
-#
-INSTALL_PROGRAM = ${INSTALL} -c
-INSTALL_STRIP_PROGRAM=${INSTALL_PROGRAM} -s
-
 bindir=@cgibindir@
 bin_PROGRAMS=@CGIBINTARGETS@
 EXTRA_PROGRAMS=iwebadmin

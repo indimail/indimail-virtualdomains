@@ -1,12 +1,6 @@
 @SET_MAKE@
 COFLAGS=-z+05:30
 
-INSTALL_PROGRAM = ${INSTALL} -c
-install_sh_PROGRAM = $(install_sh) -c
-INSTALL_SCRIPT = ${INSTALL}
-install_sh_SCRIPT = $(install_sh) -c
-INSTALL_STRIP_PROGRAM = $(install_sh) -c $(STRIP_OPT)
-
 doc_list= README-mpack.md COPYRIGHT-mpack
 
 bin_PROGRAMS=mpack munpack
