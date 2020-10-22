@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.73 2020-10-19 12:46:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.74 2020-10-22 18:12:36+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1109,12 +1109,12 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   #selinux
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
 
-  # refresh indimail services
+  # stop indimail services before upgrade
   svc_list=""
   for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
   qmail-poppass.106 qmail-logfifo
   do
-    svc -d ${servicedir}/$i
+    svc -d %{servicedir}/$i
     if [ -z "$svc_list" ] ; then
       svc_list="%{servicedir}/$i"
     else
@@ -1126,7 +1126,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
       proxy-pop3d.4110 proxy-pop3d-ssl.9110
     do
-      svc -d ${servicedir}/$i
+      svc -d %{servicedir}/$i
       if [ -z "$svc_list" ] ; then
         svc_list="%{servicedir}/$i"
       else
@@ -1135,6 +1135,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     done
   fi
 
+  # refresh indimail services
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
   indlib=`ls -d %{_libdir}/libindimail.so.*.*.* 2>/dev/null`
   for port in 25 465 587
