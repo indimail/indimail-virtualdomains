@@ -41,7 +41,6 @@
 %global buildsubdir        ""
 %endif
 
-
 %if %build_on_obs == 1
 %global packager Manvendra Bhangui <indimail-auth@indimail.org>
 %endif
@@ -238,6 +237,11 @@ else
 fi
 $touch %{buildroot}%{sysconfdir}/nssd.conf
 
+%if %{undefined suse_version} && %{undefined sles_version}
+%{__mkdir_p} %{buildroot}%{logdir}/pwdlookup
+touch %{buildroot}%{logdir}/pwdlookup/current
+%endif
+
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %if %{undefined nodebug}
@@ -251,6 +255,11 @@ chmod -R 755 %{buildroot}/%{pam_moduledir}
 #
 # Directories
 #
+%if %{undefined suse_version} && %{undefined sles_version}
+%ghost %dir %attr(0755,qmaill,nofiles)   %{logdir}
+%ghost %dir %attr(0755,qmaill,nofiles)   %{logdir}/pwdlookup
+%ghost      %attr(-,qmaill,nofiles)      %{logdir}/pwdlookup/*
+%endif
 
 %ghost %config(noreplace,missingok)     %{sysconfdir}/nssd.conf
 %attr(644,root,root) %config(noreplace) %{sysconfdir}/%{name}-rpm.info
