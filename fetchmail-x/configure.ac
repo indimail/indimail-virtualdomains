@@ -132,6 +132,10 @@ rhapsody*)
     AC_MSG_NOTICE(found Rhapsody - Removing -s load flag)
     LDFLAGS=`echo $LDFLAGS | sed "s/-s //"`
     ;;
+linux*)
+	CFLAGS="$CFLAGS -fPIC -fpie"
+	LDFLAGS="$LDFLAGS -pie"
+	;;
 esac
 
 AC_CACHE_SAVE
