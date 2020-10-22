@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.36 2020-09-13 23:23:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.37 2020-10-22 10:14:07+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -56,9 +56,6 @@ BuildRequires: sed gettext-devel
 BuildRequires: findutils libqmail-devel libqmail
 BuildRequires: gzip autoconf automake libtool indimail-devel
 BuildRequires: mysql-devel
-%if %{undefined centos_version} && %{undefined rhel_version}
-BuildRequires: chrpath
-%endif
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 PreReq: permissions
@@ -146,9 +143,9 @@ install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissio
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
 install -m 0644 %{name}-release  %{buildroot}%{sysconfdir}/%{name}-release
 
-if [ -x /usr/bin/chrpath ] ; then
-  /usr/bin/chrpath -d %{buildroot}@cgibindir@/iwebadmin
-fi
+%if %{undefined nodebug}
+  /bin/chmod -R 755 %{buildroot}@cgibindir@
+%endif
 
 %files
 %defattr(-,root,root,-)
