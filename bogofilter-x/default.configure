@@ -54,5 +54,5 @@ esac
   --sysconfdir=$sysconfdir \
   --datarootdir=$prefix/share/indimail \
   --libexecdir=$prefix/libexec/indimail \
-  --servicedir=$servicedir \
+  --enable-servicedir=$servicedir \
   --mandir=$mandir $extra
