@@ -71,7 +71,7 @@ AutoReqProv: Yes
 BuildRequires: rpm gcc gcc-c++ make coreutils grep
 BuildRequires: glibc glibc-devel
 BuildRequires: gzip autoconf automake libtool
-BuildRequires: sed findutils gsl-devel
+BuildRequires: sed findutils gsl-devel chrpath
 
 BuildRequires: flex bison
 %if 0%{?suse_version}
@@ -107,7 +107,7 @@ Requires: indimail-mta
 Conflicts: indimail < 3.2
 
 %if %build_on_obs == 1
-BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+BuildRoot: %{_tmppath}/%{name}-%{version}-build
 %endif
 
 %description
@@ -189,13 +189,15 @@ install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissio
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
 install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
 /bin/rm -f %{name}-rpm.info %{name}-release
-if [ -x /usr/bin/chrpath ] ; then
+%if %{undefined nodebug}
   for i in bogofilter bogoutil bogotune
   do
+    if [ -x /usr/bin/chrpath ] ; then
+      /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
+    fi
     /bin/chmod 755 %{buildroot}%{_prefix}/bin/$i
-    /usr/bin/chrpath -d %{buildroot}%{_prefix}/bin/$i
   done
-fi
+%endif
 
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
@@ -259,6 +261,15 @@ $TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
 %if 0%{?suse_version} >= 1120
 %verify (not user group mode) %attr(6551, root, indimail)  %{_prefix}/bin/bogofilter
 %endif
+%endif
+
+%clean
+[ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
+%{__rm} -fr %{_builddir}/%{name}-%{version}
+%if %{undefined nodebug}
+%{__rm} -f %{_builddir}/debugfiles.list %{_builddir}/debuglinks.list \
+  %{_builddir}/debugsourcefiles.list %{_builddir}/debugsources.list \
+  %{_builddir}/elfbins.list
 %endif
 
 ### SCRIPTLET ###############################################################################

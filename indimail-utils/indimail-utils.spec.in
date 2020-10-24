@@ -29,6 +29,13 @@
 %global mpack_version      @mpack_version@
 %global flash_version      @flash_version@
 %global url                https://github.com/mbhangui/indimail-virtualdomains
+# Packages which do not use autosetup or setup macro
+# in the prep section have a problem in enabling debuginfo.
+# This isn't documented clearly anywhere. A workaround is
+# to define buildsubdir
+%if %{undefined nodebug}
+%global buildsubdir        ""
+%endif
 
 %if %build_on_obs == 1
 %global packager Manvendra Bhangui <manvendra@indimail.org>
@@ -85,7 +92,7 @@ Requires: coreutils grep /bin/sh glibc
 Conflicts: indimail < 3.2
 
 %if %build_on_obs == 1
-BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+BuildRoot: %{_tmppath}/%{name}-%{version}-build
 %endif
 #
 # IndiMail is choosy and runs on reliable OS only
@@ -99,6 +106,8 @@ mpack, munpack, altermime, ripmime, fortune, flash.
 For more details visit %{url}
 
 %prep
+%{__mkdir_p} %{_builddir}/%{name}-%{version}
+cd %{name}-%{version}
 for i in altermime-%{altermime_version} ripmime-%{ripmime_version} \
 fortune-%{fortune_version} mpack-%{mpack_version} flash-%{flash_version}
 do
@@ -106,12 +115,12 @@ do
   if [ -d $i ] ; then
     %{__rm} -rf $i
   fi
-  if [ -f ../SOURCES/$i.tar.bz2 ] ; then
-    %{__bzip2} -d -c ../SOURCES/$i.tar.bz2 | tar xf -
-  elif [ -f ../SOURCES/$i.tar.xz ] ; then
-    xz -d -c ../SOURCES/$i.tar.xz |tar xf -
-  elif [ -f ../SOURCES/$i.tar.gz ] ; then
-    gunzip -c ../SOURCES/$i.tar.gz | tar xf -
+  if [ -f ../../SOURCES/$i.tar.bz2 ] ; then
+    %{__bzip2} -d -c ../../SOURCES/$i.tar.bz2 | tar xf -
+  elif [ -f ../../SOURCES/$i.tar.xz ] ; then
+    xz -d -c ../../SOURCES/$i.tar.xz |tar xf -
+  elif [ -f ../../SOURCES/$i.tar.gz ] ; then
+    gunzip -c ../../SOURCES/$i.tar.gz | tar xf -
   else
     echo "No Source Archive for $i"
     exit 1
@@ -120,7 +129,7 @@ do
 done
 
 %build
-ID=$(id -u)
+cd %{name}-%{version}
 (
 echo "---------------- INFORMATION ------------------------"
 echo target         %_target
@@ -160,7 +169,7 @@ do
 done
 
 %install
-ID=$(id -u)
+cd %{name}-%{version}
 %{__mkdir_p} $RPM_BUILD_ROOT%{_prefix}
 for i in altermime-%{altermime_version} ripmime-%{ripmime_version} \
 fortune-%{fortune_version} mpack-%{mpack_version} flash-%{flash_version}
@@ -393,6 +402,12 @@ fi
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
+%{__rm} -fr %{_builddir}/%{name}-%{version}
+%if %{undefined nodebug}
+%{__rm} -f %{_builddir}/debugfiles.list %{_builddir}/debuglinks.list \
+  %{_builddir}/debugsourcefiles.list %{_builddir}/debugsources.list \
+  %{_builddir}/elfbins.list
+%endif
 
 ### SCRIPTLET ###############################################################################
 %verifyscript

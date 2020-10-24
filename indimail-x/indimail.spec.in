@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.74 2020-10-22 18:12:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.75 2020-10-24 15:01:53+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -900,6 +900,12 @@ done
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
+%{__rm} -fr %{_builddir}/%{name}-%{version}
+%if %{undefined nodebug}
+%{__rm} -f %{_builddir}/debugfiles.list %{_builddir}/debuglinks.list \
+  %{_builddir}/debugsourcefiles.list %{_builddir}/debugsources.list \
+  %{_builddir}/elfbins.list
+%endif
 
 #            install   erase   upgrade  reinstall
 # pretrans      0        -         0

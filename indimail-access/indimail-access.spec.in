@@ -160,7 +160,7 @@ Requires: /usr/bin/hostname
 Conflicts: indimail < 3.2
 
 %if %build_on_obs == 1
-BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+BuildRoot: %{_tmppath}/%{name}-%{version}-build
 %endif
 #
 # IndiMail is choosy and runs on reliable OS only
@@ -560,7 +560,12 @@ done
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
-
+%{__rm} -fr %{_builddir}/%{name}-%{version}
+%if %{undefined nodebug}
+%{__rm} -f %{_builddir}/debugfiles.list %{_builddir}/debuglinks.list \
+  %{_builddir}/debugsourcefiles.list %{_builddir}/debugsources.list \
+  %{_builddir}/elfbins.list
+%endif
 
 ### SCRIPTLET ###############################################################################
 %verifyscript
