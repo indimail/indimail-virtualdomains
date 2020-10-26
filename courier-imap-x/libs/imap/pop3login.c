@@ -23,7 +23,9 @@
 #include	"tcpd/spipe.h"
 #include	"authlib/debug.h"
 
+#ifndef lint
 static const char rcsid[] = "$Id: pop3login.c,v 1.11 2004/09/12 23:25:56 mrsam Exp $";
+#endif
 
 extern void     pop3dcapa();
 extern int      have_starttls();
@@ -73,7 +75,7 @@ starttls()
 		p = fork();
 		if (p == -1)
 		{
-			perror("fork");
+			perror("pop3login: fork");
 			exit(1);
 		}
 		if (p)
@@ -89,8 +91,13 @@ starttls()
 		 */
 
 		close(1);
-		dup(2);
+		if (dup(2) == -1) {
+			perror("pop3login: dup");
+			exit (1);
+		}
 		execl(getenv("COURIERTLS"), "couriertls", buf1, "-tcpd", "-server", (char *) 0);
+		perror("pop3login: exec: couriertls");
+		exit (1);
 	}
 	printed(printf("+OK Begin SSL/TLS negotiation now.\r\n"));
 	fflush(stdout);
@@ -99,11 +106,12 @@ starttls()
 	close(1);
 	if (dup(pipefd[0]) != 0 || dup(pipefd[0]) != 1)
 	{
-		perror("dup");
+		perror("pop3login: dup");
 		exit(1);
 	}
 	close(pipefd[0]);
-	write(1, "", 1);			/*- child - exec OK now */
+	if (write(1, "", 1) == -1)
+		;			/*- child - exec OK now */
 	while (wait(&waitstat) != p)
 		;
 	putenv("POP3_STARTTLS=NO");
@@ -131,7 +139,7 @@ authresp(const char *s)
 	p = strdup(buf);
 	if (!p)
 	{
-		perror("malloc");
+		perror("pop3login: malloc");
 		return (0);
 	}
 	return (p);
@@ -234,7 +242,7 @@ main(int argc, char **argv)
 					{
 						printed(printf("-ERR Server out of memory, aborting connection.\r\n"));
 						fflush(stdout);
-						perror("malloc");
+						perror("pop3login: malloc");
 						exit(1);
 					}
 					strcpy(user, p);

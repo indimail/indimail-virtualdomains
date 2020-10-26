@@ -28,7 +28,9 @@
 #include	<Pam/pam_appl.h>
 #endif
 
+#ifndef lint
 static const char rcsid[] = "$Id: authpam.c,v 1.17 2004/04/18 15:54:38 mrsam Exp $";
+#endif
 
 static const char *pam_username, *pam_password, *pam_service;
 
@@ -67,8 +69,8 @@ pam_conv(int num_msg, const struct pam_message **msg, struct pam_response **resp
 			break;
 		case PAM_TEXT_INFO:
 		case PAM_ERROR_MSG:
-			write(2, msg[i]->msg, strlen(msg[i]->msg));
-			write(2, "\n", 1);
+			if (write(2, msg[i]->msg, strlen(msg[i]->msg)) == -1 || write(2, "\n", 1) == -1)
+				;
 			repl[i].resp_retcode = PAM_SUCCESS;
 			repl[i].resp = NULL;
 			break;
@@ -229,8 +231,8 @@ callback_pam(struct authinfo *a, void *argptr)
 		{
 			close(pipefd[0]);
 			retval = dopam(&pamh);
-			if (retval == PAM_SUCCESS)
-				write(pipefd[1], "", 1);
+			if (retval == PAM_SUCCESS && write(pipefd[1], "", 1) == -1)
+				;
 			close(pipefd[1]);
 			_exit(0);
 		}
@@ -293,7 +295,8 @@ callback_pam(struct authinfo *a, void *argptr)
 		return (-1);
 	}
 	/*- Tell child process to run in authenticated state */
-	write(pipefd[1], "", 1);
+	if (write(pipefd[1], "", 1) == -1)
+		;
 	close(pipefd[1]);
 	/*- Wait for child process to finish */
 	while (wait(&waitstat) != p)

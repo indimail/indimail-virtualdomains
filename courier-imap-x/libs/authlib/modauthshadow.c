@@ -7,4 +7,7 @@
 #define	MODULE	auth_shadow
 #define	MODNAME	"authshadow"
 #include	"mod.h"
+
+#ifndef lint
 static const char rcsid[]="$Id: modauthshadow.c,v 1.3 2004/04/18 15:54:39 mrsam Exp $";
+#endif

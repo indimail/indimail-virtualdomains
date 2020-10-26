@@ -18,7 +18,9 @@
 #include	<unistd.h>
 #endif
 
+#ifndef lint
 static const char rcsid[]="$Id: pop3dcapa.c,v 1.5 2008/06/29 20:18:36 mrsam Exp $";
+#endif
 
 extern const char *externalauth();
 
@@ -57,7 +59,7 @@ const char *pop3_externalauth()
 
 void pop3dcapa()
 {
-	const char *p, *q;
+	const char *p;
 	const char *external=pop3_externalauth();
 
 	printf("+OK Here's what I can do:\r\n");

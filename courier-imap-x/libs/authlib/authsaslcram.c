@@ -32,7 +32,8 @@ char	*chrsp;
 
 	if (initresponse && *initresponse)
 	{
-		write(2, "authsasl_cram: invalid request.\n", 32);
+		if (write(2, "authsasl_cram: invalid request.\n", 32) == -1)
+			;
 		return (AUTHSASL_ERROR);
 	}
 

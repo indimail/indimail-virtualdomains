@@ -67,7 +67,9 @@
 #include    "unicode/courier-unicode.h"
 #include	"authlib/auth.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: mailboxlist.c,v 1.21 2009/06/27 16:32:38 mrsam Exp $";
+#endif
 
 static const char hierchs[]={HIERCH, 0};
 

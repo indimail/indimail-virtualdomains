@@ -13,7 +13,9 @@
 extern "C" {
 #endif
 
+#ifndef lint
 static const char authdebug_h_rcsid[]="$Id: debug.h,v 1.3 2004/05/09 02:52:23 mrsam Exp $";
+#endif
 
 #define DEBUG_LOGIN_ENV "DEBUG_LOGIN"
 #define DEBUG_MESSAGE_SIZE (1<<10)
@@ -27,8 +29,7 @@ int auth_debug_authinfo(const char *pfx, const struct authinfo *auth,
 	const char *clearpasswd, const char *passwd);
 
 extern int auth_debug_login_level;
-
-#define dprintf auth_debug_login_level && auth_debug_printf
+#define dprintf auth_debug_printf
 
 #ifdef	__cplusplus
 }

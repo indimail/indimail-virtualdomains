@@ -19,7 +19,9 @@
 #include	"random128/random128.h"
 #include	"rfc2045/rfc2045.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: authenticate_auth.c,v 1.9 2003/05/27 15:55:09 mrsam Exp $";
+#endif
 
 extern int main_argc;
 extern char **main_argv;

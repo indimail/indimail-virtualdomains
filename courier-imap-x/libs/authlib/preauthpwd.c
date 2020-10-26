@@ -18,7 +18,9 @@
 #include	"auth.h"
 #include	"debug.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: preauthpwd.c,v 1.7 2004/05/09 02:52:23 mrsam Exp $";
+#endif
 
 int auth_pwd_pre(const char *userid, const char *service,
 	int (*callback)(struct authinfo *, void *),

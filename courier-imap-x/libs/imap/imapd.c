@@ -94,7 +94,10 @@
 #define KEYWORD_IMAPVERBOTTEN " (){%*\"\\]"
 #define KEYWORD_SMAPVERBOTTEN ","
 
+#ifndef lint
 static const char rcsid[]="$Id: imapd.c,v 1.163 2011/01/10 01:47:58 mrsam Exp $";
+#endif
+
 extern time_t rfc822_parsedt(const char *);
 extern void fetchflags(unsigned long);
 extern unsigned long header_count, body_count;

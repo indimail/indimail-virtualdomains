@@ -21,8 +21,9 @@
 #include	"authmod.h"
 #include	"authstaticlist.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: authshadow.c,v 1.13 2004/01/11 02:47:32 mrsam Exp $";
-
+#endif
 
 extern int auth_shadow_pre(const char *userid, const char *service,
         int (*callback)(struct authinfo *, void *),

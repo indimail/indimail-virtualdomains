@@ -181,8 +181,8 @@ then
 	CXXFLAGS="-Wall $CXXFLAGS"
 fi
 
-CFLAGS="-I.. -I$srcdir/.. $CFLAGS"
-CXXFLAGS="-I.. -I$srcdir/.. $CXXFLAGS"
+CFLAGS="-Dlint -I.. -I$srcdir/.. $CFLAGS"
+CXXFLAGS="-Dlint -I.. -I$srcdir/.. $CXXFLAGS"
 
 AC_ARG_ENABLE(workarounds-for-imap-client-bugs, [  --enable-workarounds-for-imap-client-bugs
               - compile fixes for various bugs in several IMAP clients ],

@@ -44,7 +44,7 @@ then
 	CFLAGS="$CFLAGS -Wall"
 fi
 
-CFLAGS="$CFLAGS -I.. -I${srcdir}/.."
+CFLAGS="$CFLAGS -Dlint -I.. -I${srcdir}/.."
 
 dnl Other checks
 AC_CHECK_FUNCS(setsid setlogin)

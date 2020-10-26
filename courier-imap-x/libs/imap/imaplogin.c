@@ -28,7 +28,9 @@
 #include	"tcpd/spipe.h"
 #include	"authlib/debug.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: imaplogin.c,v 1.24 2004/09/12 23:25:56 mrsam Exp $";
+#endif
 
 FILE *debugfile=0;
 extern void mainloop();
@@ -91,7 +93,7 @@ int	waitstat;
 		p=fork();
 		if (p == -1)
 		{
-			perror("fork");
+			perror("imaplogin: fork");
 			exit(1);
 		}
 		if (p)	exit(0);
@@ -105,9 +107,13 @@ int	waitstat;
 		** and dup stderr on fd 1 */
 
 		close(1);
-		dup(2);
-		execl( getenv("COURIERTLS"), "couriertls",
-			buf1, "-tcpd", "-server", (char *)0);
+		if (dup(2) == -1) {
+			perror("imaplogin: dup");
+			exit(1);
+		}
+		execl(getenv("COURIERTLS"), "couriertls", buf1, "-tcpd", "-server", (char *)0);
+		perror("imaplogin: exec: couriertls");
+		exit(1);
 	}
 
 	cmdsuccess(tag, "Begin SSL/TLS negotiation now.\r\n");
@@ -117,11 +123,12 @@ int	waitstat;
 	close(1);
 	if (dup(pipefd[0]) != 0 || dup(pipefd[0]) != 1)
 	{
-		perror("dup");
+		perror("imaplogin: dup");
 		exit(1);
 	}
 	close(pipefd[0]);
-	write(1, "", 1);	/* child - exec OK now */
+	if (write(1, "", 1) == -1)
+		;	/* child - exec OK now */
 	while (wait(&waitstat) != p)
 		;
 
@@ -130,7 +137,7 @@ int	waitstat;
 	if (fcntl(0, F_SETFL, O_NONBLOCK) ||
 	    fcntl(1, F_SETFL, O_NONBLOCK))
 	{
-		perror("fcntl");
+		perror("imaplogin: fcntl");
 		exit(1);
 	}
 	return (0);
@@ -307,7 +314,7 @@ const char	*ip, *port;
 	if (fcntl(0, F_SETFL, O_NONBLOCK) ||
 	    fcntl(1, F_SETFL, O_NONBLOCK))
 	{
-		perror("fcntl");
+		perror("imaplogin: fcntl");
 		exit(1);
 	}
 

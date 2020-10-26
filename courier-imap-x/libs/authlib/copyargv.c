@@ -14,7 +14,9 @@
 #endif
 #include	"auth.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: copyargv.c,v 1.3 1999/12/20 03:10:53 mrsam Exp $";
+#endif
 
 char **authcopyargv(int c, char **oldv, char **prog)
 {

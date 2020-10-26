@@ -59,7 +59,9 @@
 #include	"imapwrite.h"
 #include	"imapd.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: imapscanclient.c,v 1.47 2009/06/27 16:32:38 mrsam Exp $";
+#endif
 
 /*
 ** RFC 2060: "A good value to use for the unique identifier validity value is a

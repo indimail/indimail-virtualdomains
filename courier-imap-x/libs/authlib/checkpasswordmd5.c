@@ -13,7 +13,9 @@
 #include	"md5/md5.h"
 #include	"auth.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: checkpasswordmd5.c,v 1.6 2002/12/12 04:23:58 mrsam Exp $";
+#endif
 
 int authcheckpasswordmd5(const char *password, const char *encrypted_password)
 {

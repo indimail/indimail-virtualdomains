@@ -13,7 +13,9 @@
 #include	<unistd.h>
 #endif
 
+#ifndef lint
 static const char rcsid[]="$Id: authmodfail.c,v 1.4 1999/12/20 03:10:53 mrsam Exp $";
+#endif
 
 void	authmod_fail_completely()
 {
@@ -24,7 +26,8 @@ char	buf[20];
 
 	if (!p || sscanf(p, "%d", &argc) <= 0 || argc <= 0)
 	{
-		write(2, "AUTHFAILURE\n", 12);
+		if (write(2, "AUTHFAILURE\n", 12) == -1)
+			;
 		authexit(1);
 	}
 

@@ -14,7 +14,9 @@
 #include	<unistd.h>
 #endif
 
+#ifndef lint
 static const char rcsid[]="$Id: success.c,v 1.11 2003/02/27 04:48:52 mrsam Exp $";
+#endif
 
 void authsuccess(const char *homedir,
 	const char *username,
@@ -37,7 +39,8 @@ char	*p;
 	{
 		if (!uid || !gid)
 		{
-			write(2, "AUTHFAILURE\n", 12);
+			if (write(2, "AUTHFAILURE\n", 12) == -1)
+				;
 			authexit(1);
 		}
 		libmail_changeuidgid(*uid, *gid);

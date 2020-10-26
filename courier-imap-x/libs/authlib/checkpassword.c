@@ -16,7 +16,9 @@
 #include	"auth.h"
 #include	"debug.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: checkpassword.c,v 1.10 2004/04/18 15:54:39 mrsam Exp $";
+#endif
 
 #if HAVE_CRYPT
 #if NEED_CRYPT_PROTOTYPE
@@ -64,9 +66,9 @@ int rc;
 	rc=do_authcheckpassword(password, encrypted_password);
 	if (rc == 0)
 		dprintf("password matches successfully");
-	else if (auth_debug_login_level >= 2)
-		dprintf("supplied password '%s' does not match encrypted password '%s'",
-			password, encrypted_password);
+	else
+	if (auth_debug_login_level >= 2)
+		dprintf("supplied password '%s' does not match encrypted password '%s'", password, encrypted_password);
 	else
 		dprintf("supplied password does not match encrypted password");
 	return rc;

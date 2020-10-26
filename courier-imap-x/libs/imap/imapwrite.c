@@ -27,7 +27,9 @@
 
 #include	"imapwrite.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: imapwrite.c,v 1.8 2008/07/20 16:58:32 mrsam Exp $";
+#endif
 
 static char outbuf[BUFSIZ];	/* Ye olde output buffer */
 static size_t outbuf_cnt=0;	/* How much stuff's in ye olde output buffer */

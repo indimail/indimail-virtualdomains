@@ -17,7 +17,9 @@
 #include	"authsasl.h"
 #include	"debug.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: authtest.c,v 1.11 2004/04/20 01:34:44 mrsam Exp $";
+#endif
 
 static void usage()
 {

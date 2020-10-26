@@ -16,7 +16,9 @@
 #include	<time.h>
 #include	"authwait.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: authmoduser2.c,v 1.7 2000/05/02 04:31:49 mrsam Exp $";
+#endif
 
 int authmoduser(int argc, char **argv, unsigned timeout, unsigned errsleep)
 {
@@ -47,16 +49,16 @@ int	waitstat;
 	}
 	else if (!p || *p != '/')
 	{
-		write(2, argv[0], strlen(argv[0]));
-		write(2, ": AUTHUSER is not initialized to a complete path\n",
-			49);
+		if (write(2, argv[0], strlen(argv[0])) == -1 || write(2, ": AUTHUSER is not initialized to a complete path\n", 49) == -1)
+			;
 		authexit(1);
 	}
 
 	putenv("AUTHENTICATED=");
 	if (argc < 2)
 	{
-		write(2, "AUTHFAILURE\n", 12);
+		if (write(2, "AUTHFAILURE\n", 12) == -1)
+			;
 		authexit(1);
 	}
 

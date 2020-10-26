@@ -16,7 +16,9 @@
 #endif
 #include	"numlib/numlib.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: authenumerate.c,v 1.1 2004/01/11 02:47:32 mrsam Exp $";
+#endif
 
 static void enum_cb(const char *name,
 		    uid_t uid,

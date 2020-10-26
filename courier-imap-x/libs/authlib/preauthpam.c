@@ -18,7 +18,9 @@
 #include	<shadow.h>
 #endif
 
+#ifndef lint
 static const char rcsid[]="$Id: preauthpam.c,v 1.10 2004/05/09 02:52:23 mrsam Exp $";
+#endif
 
 int auth_pam_pre(const char *userid, const char *service,
         int (*callback)(struct authinfo *, void *),

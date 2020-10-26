@@ -11,7 +11,9 @@
 #include	<stdlib.h>
 #include	<signal.h>
 
+#ifndef lint
 static const char rcsid[]="$Id: authmodclient.c,v 1.2 1999/12/06 13:12:28 mrsam Exp $";
+#endif
 
 const char *authmodclient()
 {

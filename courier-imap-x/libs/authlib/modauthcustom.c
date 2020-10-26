@@ -7,4 +7,7 @@
 #define	MODULE	auth_custom
 #define	MODNAME	"authcustom"
 #include	"mod.h"
+
+#ifndef lint
 static const char rcsid[]="$Id: modauthcustom.c,v 1.2 2004/04/18 15:54:39 mrsam Exp $";
+#endif

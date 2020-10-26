@@ -11,12 +11,15 @@
 #include	<string.h>
 #include	<stdlib.h>
 #include	<fcntl.h>
+#include	<errno.h>
 #if	HAVE_UNISTD_H
 #include	<unistd.h>
 #endif
 #include	<signal.h>
 
+#ifndef lint
 static const char rcsid[]="$Id: authmoduser.c,v 1.6 2001/11/29 02:57:15 mrsam Exp $";
+#endif
 
 void authmod(int argc, char **argv,
 	const char *service,
@@ -57,7 +60,10 @@ int	l;
 
 		if (!prog)	authexit(1);
 		close(3);
-		dup(pipe3fd[0]);
+		if (dup(pipe3fd[0]) == -1) {
+			fprintf(stderr, "%s: dup: %s\n", prog, strerror(errno));
+			authexit(1);
+		}
 		close(pipe3fd[0]);
 		close(pipe3fd[1]);
 		execv(prog, argvec);

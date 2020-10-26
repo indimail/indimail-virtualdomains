@@ -17,7 +17,9 @@
 #include	"auth.h"
 #include	<sys/time.h>
 
+#ifndef lint
 static const char rcsid[]="$Id: cryptpassword.c,v 1.4 2002/12/12 04:23:58 mrsam Exp $";
+#endif
 
 #if HAVE_CRYPT
 #if NEED_CRYPT_PROTOTYPE

@@ -19,7 +19,9 @@
 #include	"authstaticlist.h"
 #include	"debug.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: authstaticlistsearch.c,v 1.7 2004/05/09 03:32:01 mrsam Exp $";
+#endif
 
 int auth_changepass=AUTHCHANGEPASS;
 

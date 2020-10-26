@@ -20,7 +20,9 @@
 #include	"authcustom.h"
 #include	"debug.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: preauthcustom.c,v 1.4 2004/04/18 15:54:39 mrsam Exp $";
+#endif
 
 int auth_custom_pre(const char *userid, const char *service,
         int (*callback)(struct authinfo *, void *),

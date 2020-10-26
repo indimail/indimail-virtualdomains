@@ -17,8 +17,9 @@
 
 #include	"auth.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: authoption.c,v 1.1 2004/01/19 19:37:37 mrsam Exp $";
-
+#endif
 
 char *authgetoptionenv(const char *keyword)
 {

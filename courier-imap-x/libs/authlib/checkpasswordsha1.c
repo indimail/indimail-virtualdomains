@@ -13,7 +13,9 @@
 #include	"sha1/sha1.h"
 #include	"auth.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: checkpasswordsha1.c,v 1.1 2001/04/19 01:22:17 mrsam Exp $";
+#endif
 
 int authcheckpasswordsha1(const char *password, const char *encrypted_password)
 {

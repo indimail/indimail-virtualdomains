@@ -23,7 +23,9 @@
 #include	"imapwrite.h"
 #include	"numlib/numlib.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: mainloop.c,v 1.10 2006/07/07 23:17:18 mrsam Exp $";
+#endif
 
 extern int do_imap_command(const char *, int *);
 

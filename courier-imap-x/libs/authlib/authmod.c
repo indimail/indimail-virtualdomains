@@ -15,7 +15,9 @@
 #include	<unistd.h>
 #endif
 
+#ifndef lint
 static const char rcsid[]="$Id: authmod.c,v 1.5 2001/11/29 02:57:15 mrsam Exp $";
+#endif
 
 static char	authrec[BUFSIZ];
 static char	buf[BUFSIZ];
@@ -50,7 +52,8 @@ int	n;
 
 	if (n == 0)
 	{
-		write(2, "AUTHFAILURE\n", 12);
+		if (write(2, "AUTHFAILURE\n", 12) == -1)
+			;
 		authexit(1);
 	}
 

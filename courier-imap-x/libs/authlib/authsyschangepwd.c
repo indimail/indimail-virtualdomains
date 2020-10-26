@@ -23,7 +23,9 @@
 #include	"authchangepwdir.h"
 #include	"numlib/numlib.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: authsyschangepwd.c,v 1.8 2004/04/18 15:54:39 mrsam Exp $";
+#endif
 
 static int dochangepwd(struct passwd *, const char *, const char *);
 
@@ -102,14 +104,20 @@ static int dochangepwd(struct passwd *pwd,
 		char *envp[4];
 
 		close(0);
-		dup(pipefd[0]);
+		if (dup(pipefd[0]) == -1) {
+			fprintf(stderr, "dochangepwd: %s: dup: %s\n", argv[0], strerror(errno));
+			exit(1);
+		}
 		close(pipefd[0]);
 		close(pipefd[1]);
 
 		close(1);
 		open("/dev/null", O_WRONLY);
 		close(2);
-		dup(1);
+		if (dup(1) == -1) {
+			fprintf(stderr, "dochangepwd: %s: dup: %s\n", argv[0], strerror(errno));
+			exit(1);
+		}
 
 		if (pwd->pw_uid != getuid())
 		{
@@ -136,7 +144,7 @@ static int dochangepwd(struct passwd *pwd,
 		envp[3]=0;
 
 		execve(argv[0], argv, envp);
-		perror("exec");
+		fprintf(stderr, "dochangepwd: %s: exec: %s\n", argv[0], strerror(errno));
 		exit(1);
 	}
 

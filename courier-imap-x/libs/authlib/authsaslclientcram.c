@@ -46,12 +46,9 @@ int	i;
 		return (AUTHSASL_ERROR);
 	}
 
-	hmac_hashkey( hashinfo, password, strlen(password),
-                        keybuf, keybuf+hashinfo->hh_L );
-
-	hmac_hashtext( hashinfo, base64buf, i,
-                keybuf, keybuf+hashinfo->hh_L,
-                keybuf+hashinfo->hh_L*2);
+	hmac_hashkey( hashinfo, password, strlen(password), (unsigned char *) keybuf, (unsigned char *) keybuf+hashinfo->hh_L);
+	hmac_hashtext( hashinfo, base64buf, i, (unsigned char *) keybuf,
+		(unsigned char *) keybuf+hashinfo->hh_L, (unsigned char *) keybuf+hashinfo->hh_L*2);
 
 	free(base64buf);
 	base64buf=malloc(strlen(userid)+2+hashinfo->hh_L*2);

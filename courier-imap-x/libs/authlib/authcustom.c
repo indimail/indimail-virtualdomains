@@ -17,8 +17,9 @@
 #include	"authcustom.h"
 #include	"authstaticlist.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: authcustom.c,v 1.4 2002/08/19 15:30:45 mrsam Exp $";
-
+#endif
 
 struct callback_info {
 	char *userret;

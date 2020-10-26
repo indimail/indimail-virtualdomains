@@ -18,11 +18,12 @@
 #include	<shadow.h>
 #endif
 
-
 #include	"auth.h"
 #include	"debug.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: preauthshadow.c,v 1.7 2004/05/09 02:52:23 mrsam Exp $";
+#endif
 
 int auth_shadow_pre(const char *userid, const char *service,
 	int (*callback)(struct authinfo *, void *),

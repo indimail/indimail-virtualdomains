@@ -11,7 +11,9 @@
 #include	"authmod.h"
 #include	"debug.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: authmoduser3.c,v 1.4 2002/10/01 03:00:12 mrsam Exp $";
+#endif
 
 void authmod_login(int argc, char **argv, const char *service,
 	const char *userid,

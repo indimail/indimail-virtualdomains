@@ -29,7 +29,9 @@
 #define	BUFSIZ	8192
 #endif
 
+#ifndef lint
 static const char rcsid[]="$Id: imaptoken.c,v 1.20 2005/10/01 03:23:44 mrsam Exp $";
+#endif
 
 static struct imaptoken curtoken;
 static char readbuf[BUFSIZ];

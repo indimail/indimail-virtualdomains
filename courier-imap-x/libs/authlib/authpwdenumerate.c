@@ -19,8 +19,9 @@
 #include	"authmod.h"
 #include	"authstaticlist.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: authpwdenumerate.c,v 1.1 2004/01/11 02:47:32 mrsam Exp $";
-
+#endif
 
 void auth_pwd_enumerate( void(*cb_func)(const char *name,
 					uid_t uid,

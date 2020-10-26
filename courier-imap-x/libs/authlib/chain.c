@@ -9,6 +9,7 @@
 #include	<stdio.h>
 #include	<stdlib.h>
 #include	<string.h>
+#include	<errno.h>
 #if	HAVE_UNISTD_H
 #include	<unistd.h>
 #endif
@@ -18,7 +19,9 @@
 
 #include	"auth.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: chain.c,v 1.4 2000/05/14 17:39:10 mrsam Exp $";
+#endif
 
 void authchain(int argc, char **argv, const char *buf)
 {
@@ -46,7 +49,10 @@ char	*prog;
 
 	if (p)
 	{
-		dup(pipes[0]);
+		if (dup(pipes[0])) {
+			fprintf(stderr, "%s: dup: %s\n", prog, strerror(errno));
+			authexit(1);
+		}
 		close(pipes[0]);
 		close(pipes[1]);
 		execv(prog, vec);

@@ -17,8 +17,8 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_LIBTOOL_DLOPEN
-AC_CONFIG_MACRO_DIR([m4])
 AM_PROG_LIBTOOL
+AC_CONFIG_MACRO_DIR([m4])
 
 AC_PATH_PROGS(SETENV, env)
 
@@ -112,22 +112,6 @@ then
 	esac
 fi
 
-AC_ARG_ENABLE(unicode,
-	[],
-	[
-	unicode="$enableval"
-
-	if test "$unicode" != "yes"
-	then
-		AC_MSG_ERROR(This option is no longer supported)
-	fi
-	],
-	[
-	ac_configure_args="$ac_configure_args --enable-unicode"
-	unicode="yes"
-	]
-)
-
 if test x$prefix = xNONE
 then
 	prefix="$defaultprefix"
@@ -138,8 +122,6 @@ if test x$exec_prefix = xNONE
 then
 	exec_prefix="$prefix"
 fi
-
-eval "datadir=$datadir"
 
 AC_ARG_WITH(certsdir, [ --with-certsdir Directory where certs are created ],
 certsdir="$withval", certsdir="$datadir")
@@ -258,10 +240,6 @@ AC_ARG_WITH(plentyofbeer,
   --enable-syslog=1            log fatal errors to syslog
   --enable-authlib-tempreject=(1|0) whether authlib errors cause temprejects]
   --enable-dovecotauth         Enable Dovecot authentication)
-
-dnl AC_ARG_WITH(etcdir, [  --with-etcdir=dir            Instead of /etc, use this. ], [ withetcdir=$withval], [ withetcdir="/etc" ])
-dnl AC_SUBST(withetcdir)
-dnl AC_DEFINE_UNQUOTED(ETCDIR,"$withetcdir")
 
 AC_CONFIG_SUBDIRS(libs/numlib)
 AC_CONFIG_SUBDIRS(libs/unicode)

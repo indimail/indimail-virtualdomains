@@ -11,7 +11,9 @@
 #include "auth.h"
 #include "debug.h"
 
+#ifndef lint
 static const char rcsid[]="$Id: debug.c,v 1.5 2004/05/09 02:52:23 mrsam Exp $";
+#endif
 
 /* for internal use */
 
@@ -53,7 +55,8 @@ int auth_debug_printf( const char *fmt, ... ) {
 	va_list ap;
 	int rc;
 
-	if (auth_debug_login_level == 0) return 0;
+	if (auth_debug_login_level == 0)
+		return 0;
 	va_start( ap, fmt );
 	rc = auth_debug( "DEBUG: %s\n", fmt, ap );
 	va_end( ap );
