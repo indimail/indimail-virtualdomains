@@ -40,8 +40,6 @@
 %global courier_version    @courier_version@
 %global fetchmail_version  @fetchmail_version@
 %global url                https://github.com/mbhangui/indimail-virtualdomains
-%global nocourierimap      0
-%global nofetchmail        0
 %global nodksignatures     0
 %global qcount             5
 %global qbase              %{indimaildir}/queue
@@ -78,13 +76,9 @@ Group: Applications/Mail
 %else
 Group: Productivity/Networking/Email/Servers
 %endif
-%if %nocourierimap == 0
 Source1: http://downloads.sourceforge.net/indimail/courier-imap-%{courier_version}.tar.bz2
 Source2: http://downloads.sourceforge.net/indimail/perm_list.imap
-%endif
-%if %nofetchmail == 0
 Source3: http://downloads.sourceforge.net/indimail/fetchmail-%{fetchmail_version}.tar.xz
-%endif
 Source4: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -102,7 +96,6 @@ BuildRequires: openssl-devel rpm gcc gcc-c++ make coreutils grep
 BuildRequires: glibc glibc-devel openssl procps
 BuildRequires: gzip autoconf automake libtool pkgconfig
 BuildRequires: sed findutils
-%if %nofetchmail == 0
 BuildRequires: xz bison flex
 BuildRequires: gettext-devel
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
@@ -110,9 +103,7 @@ BuildRequires: python3 python3-devel
 %else
 BuildRequires: python python-devel
 %endif
-%endif
 
-%if %nocourierimap == 0
 BuildRequires: libgcrypt-devel gdbm-devel libidn-devel pcre-devel pam-devel
 BuildRequires: perl
 %if %{defined fedora_version}
@@ -121,7 +112,6 @@ BuildRequires: glibc-all-langpacks
 %endif
 %if 0%{?rhel_version} == 600 || %{defined centos_version} || %{defined centos_ver} || %{defined fedora_version} || %{defined sles_version} || %{defined suse_version}
 BuildRequires: gamin-devel
-%endif
 %endif
 
 %if %{defined fedora_version}
@@ -189,12 +179,6 @@ do
   if [ -d $i ] ; then
     %{__rm} -rf $i
   fi
-  if [ " $i" = " fetchmail-%{fetchmail_version}" -a %nofetchmail -ne 0 ] ; then
-    continue
-  fi
-  if [ " $i" = " courier-imap-%{courier_version}" -a %nocourierimap -ne 0 ] ; then
-    continue
-  fi
   if [ -f ../../SOURCES/$i.tar.bz2 ] ; then
     %{__bzip2} -d -c ../../SOURCES/$i.tar.bz2 | tar xf -
   elif [ -f ../../SOURCES/$i.tar.xz ] ; then
@@ -236,7 +220,6 @@ echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui indimail-access@indimail.org\""
 ) > %{name}-release
 
 #### courier-imap ######################
-%if %nocourierimap == 0
 if [ -d courier-imap-%{courier_version} ] ; then
   cd courier-imap-%{courier_version}
   if [ %{reconf_courierimap} -eq 1 ] ; then
@@ -254,10 +237,8 @@ if [ -d courier-imap-%{courier_version} ] ; then
     --without-authgeneric --with-authshadow --with-authpam --with-authpwd
   cd ..
 fi
-%endif
 
 #### fetchmail ######################
-%if %nofetchmail == 0
 if [ -d fetchmail-%{fetchmail_version} ] ; then
   cd fetchmail-%{fetchmail_version}
   if [ %{reconf_fetchmail} -eq 1 ] ; then
@@ -271,18 +252,11 @@ if [ -d fetchmail-%{fetchmail_version} ] ; then
     --enable-indimail --with-ssl
   cd ..
 fi
-%endif
 
 %install
 cd %{name}-%{version}
 for i in fetchmail-%{fetchmail_version} courier-imap-%{courier_version}
 do
-  if [ " $i" = " fetchmail-%{fetchmail_version}" -a %nofetchmail -ne 0 ] ; then
-    continue
-  fi
-  if [ " $i" = " courier-imap-%{courier_version}" -a %nocourierimap -ne 0 ] ; then
-    continue
-  fi
   if [ -d $i ] ; then
     cd $i
     %{__make} -s %{?_smp_mflags}
@@ -309,14 +283,12 @@ install -m 644 %{S:6} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissio
 %endif
 %endif
 
-if [ %nocourierimap -eq 0 ] ; then
-  %{__rm} -f  %{buildroot}%{_libdir}/libunicode.la
-  %{__rm} -f  %{buildroot}%{_libdir}/libunicode.a
-  %{__rm} -f  %{buildroot}%{_libdir}/libunicode.so
-  %{__rm} -f  %{buildroot}%{_prefix}/share/aclocal/courier-unicode.m4
-  %{__rm} -rf %{buildroot}%{_prefix}/include
-  %{__rm} -rf %{buildroot}%{mandir}/man3
-fi
+%{__rm} -f  %{buildroot}%{_libdir}/libunicode.la
+%{__rm} -f  %{buildroot}%{_libdir}/libunicode.a
+%{__rm} -f  %{buildroot}%{_libdir}/libunicode.so
+%{__rm} -f  %{buildroot}%{_prefix}/share/aclocal/courier-unicode.m4
+%{__rm} -rf %{buildroot}%{_prefix}/include
+%{__rm} -rf %{buildroot}%{mandir}/man3
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 if [ -f %{buildroot}%{mandir}/man7/authlib.7.gz ] ; then
@@ -352,12 +324,10 @@ done
     $TOUCH %{buildroot}%{logdir}/$i/current
   done
 
-  if [ %nofetchmail -eq 0 ] ; then
-    %{__mkdir_p} %{buildroot}%{logdir}/fetchmail
-    $TOUCH %{buildroot}%{logdir}/fetchmail/current
-    $TOUCH %{buildroot}%{sysconfdir}/fetchmailrc
-    #%%find_lang fetchmail
-  fi
+  %{__mkdir_p} %{buildroot}%{logdir}/fetchmail
+  $TOUCH %{buildroot}%{logdir}/fetchmail/current
+  $TOUCH %{buildroot}%{sysconfdir}/fetchmailrc
+  #%%find_lang fetchmail
 %endif
 %if %{undefined nodebug}
   /bin/chmod -R 0755 %{buildroot}%{_prefix}/bin %{buildroot}%{_prefix}/sbin \
@@ -377,20 +347,16 @@ done
 %endif
 
 %if "%{mandir}" != "/usr/share/man"
-%dir %attr(755,root,root)              %{mandir}
-%dir %attr(755,root,root)              %{mandir}/man1
-%dir %attr(755,root,root)              %{mandir}/man7
-%dir %attr(755,root,root)              %{mandir}/man8
+%dir %attr(755,root,root)                         %{mandir}
+%dir %attr(755,root,root)                         %{mandir}/man1
+%dir %attr(755,root,root)                         %{mandir}/man7
+%dir %attr(755,root,root)                         %{mandir}/man8
 %endif
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/%{name}-release
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/%{name}-rpm.info
 
-%if %nofetchmail == 0
-%dir %attr(755,root,root)              %{shareddir}/locale
-%endif
-%if %nofetchmail == 0
+%dir %attr(755,root,root)                         %{shareddir}/locale
 %ghost %config(noreplace,missingok)               %{sysconfdir}/fetchmailrc
-%endif
 %ghost %config(noreplace,missingok)               %{sysconfdir}/tcp/tcp.imap
 %ghost %config(noreplace,missingok)               %{sysconfdir}/tcp/tcp.pop3
 #
@@ -400,7 +366,6 @@ done
 %ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp/tcp.pop3.cdb
 #
 
-%if %nocourierimap == 0
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/perm_list.imap
 %attr(600,root,root) %config(noreplace)           %{sysconfdir}/pop3d-ssl.dist
 %attr(600,root,root) %config(noreplace)           %{sysconfdir}/imapd-ssl.dist
@@ -410,9 +375,7 @@ done
 %attr(600,root,root) %config(noreplace)           %{sysconfdir}/imapd.dist
 %attr(600,root,root) %config(noreplace)           %{sysconfdir}/authmodulelist
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/quotawarnmsg.example
-%endif
 
-%if %nocourierimap == 0
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %attr(644,root,root)                    %{_sysconfdir}/permissions.d/%{name}-permissions
@@ -438,15 +401,11 @@ done
 # setuid binary
 %attr(4755,root,root)                   %{libexecdir}/imapmodules/authshadow
 %attr(4755,root,root)                   %{libexecdir}/imapmodules/authpam
-%endif
 
 # fetchmail
-%if %nofetchmail == 0
 %attr(755,root,root)                    %{_prefix}/bin/fetchmailconf
 %attr(755,root,root)                    %{_prefix}/bin/fetchmail
-%endif
 
-%if %nocourierimap == 0
 %attr(755,root,root)                    %{libexecdir}/pop3d-ssl.rc
 %attr(755,root,root)                    %{libexecdir}/makedatprog
 %attr(755,root,root)                    %{libexecdir}/imapd-ssl.rc
@@ -456,9 +415,7 @@ done
 %attr(755,root,root)                    %{libexecdir}/mkimapdcert
 %attr(755,root,root)                    %{libexecdir}/mkpop3dcert
 %attr(755,root,root)                    %{libexecdir}/mkdhparams
-%endif
 
-%if %nofetchmail == 0
 %lang(eo) /usr/share/indimail/locale/eo/LC_MESSAGES/fetchmail.mo
 %lang(sq) /usr/share/indimail/locale/sq/LC_MESSAGES/fetchmail.mo
 %lang(cs) /usr/share/indimail/locale/cs/LC_MESSAGES/fetchmail.mo
@@ -488,42 +445,61 @@ done
 %attr(755,root,root)                    %{pythondir}/fetchmailconf.py
 %endif
 %endif
-%endif
 
 %docdir %{shareddir}/doc
 %docdir %{mandir}
-%attr(644,root,root)                    %{mandir}/man[1,7,8]/*
+
+%attr(0644,root,root) %{mandir}/man1/fetchmailconf.1.gz
+%attr(0644,root,root) %{mandir}/man1/fetchmail.1.gz
+%attr(0644,root,root) %{mandir}/man1/reformail.1.gz
+%attr(0644,root,root) %{mandir}/man1/makedat.1.gz
+%attr(0644,root,root) %{mandir}/man1/maildrop.1.gz
+%attr(0644,root,root) %{mandir}/man1/mailbot.1.gz
+%attr(0644,root,root) %{mandir}/man1/couriertls.1.gz
+%attr(0644,root,root) %{mandir}/man1/couriertcpd.1.gz
+%attr(0644,root,root) %{mandir}/man1/maildirkw.1.gz
+%attr(0644,root,root) %{mandir}/man1/sharedindexsplit.1.gz
+%attr(0644,root,root) %{mandir}/man1/sharedindexinstall.1.gz
+%attr(0644,root,root) %{mandir}/man1/maildiracl.1.gz
+%attr(0644,root,root) %{mandir}/man1/maildirmake.1.gz
+%attr(0644,root,root) %{mandir}/man7/maildropgdbm.7.gz
+%attr(0644,root,root) %{mandir}/man7/maildropfilter.7.gz
+%attr(0644,root,root) %{mandir}/man7/maildropex.7.gz
+%attr(0644,root,root) %{mandir}/man7/authlib.7.gz
+%attr(0644,root,root) %{mandir}/man7/authshadow.7.gz
+%attr(0644,root,root) %{mandir}/man7/authpwd.7.gz
+%attr(0644,root,root) %{mandir}/man7/authpam.7.gz
+%attr(0644,root,root) %{mandir}/man7/authcustom.7.gz
+                      %{mandir}/man7/authman.7.gz
+%attr(0644,root,root) %{mandir}/man7/maildirquota.7.gz
+%attr(0644,root,root) %{mandir}/man7/courier-unicode.7.gz
+%attr(0644,root,root) %{mandir}/man8/makeimapaccess.8.gz
+%attr(0644,root,root) %{mandir}/man8/pop3login.8.gz
+%attr(0644,root,root) %{mandir}/man8/imaplogin.8.gz
+%attr(0644,root,root) %{mandir}/man8/pop3d.8.gz
+%attr(0644,root,root) %{mandir}/man8/imapd.8.gz
+%attr(0644,root,root) %{mandir}/man8/mkpop3dcert.8.gz
+%attr(0644,root,root) %{mandir}/man8/mkimapdcert.8.gz
+%attr(0644,root,root) %{mandir}/man8/mkdhparams.8.gz
+%attr(0644,root,root) %{mandir}/man8/deliverquota.8.gz
 
 %if %build_on_obs == 0
-%if %nocourierimap == 0
 %license %attr(644,root,root)           %{shareddir}/doc/courier-imap/COPYING
 %license %attr(644,root,root)           %{shareddir}/doc/courier-imap/COPYING.GPL
-%endif
-%if %nofetchmail == 0
 %license %attr(644,root,root)           %{shareddir}/doc/COPYING.fetchmail
-%endif
 %else
-%if %nocourierimap == 0
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/COPYING
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/COPYING.GPL
-%endif
-%if %nofetchmail == 0
 %attr(644,root,root)                    %{shareddir}/doc/COPYING.fetchmail
 %endif
-%endif
 
-%if %nocourierimap == 0
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/AUTHORS
-%endif
 
-%if %nofetchmail == 0
 %attr(644,root,root)                    %{shareddir}/doc/README.SSL-SERVER.fetchmail
 %attr(644,root,root)                    %{shareddir}/doc/README.SSL.fetchmail
 %attr(644,root,root)                    %{shareddir}/doc/README.NTLM.fetchmail
 %attr(644,root,root)                    %{shareddir}/doc/README.fetchmail
-%endif
 
-%if %nocourierimap == 0
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.sharedfolders.txt
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.maildirquota.txt
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.couriertls
@@ -551,12 +527,9 @@ done
 %verify (not user group mode) %attr(4755, root, root)      %{libexecdir}/imapmodules/authpam
 %endif
 %endif
-%endif
 
-%if %nocourierimap == 0
 %{_libdir}/libunicode.so.4
 %{_libdir}/libunicode.so.4.1.0
-%endif
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
@@ -684,54 +657,51 @@ fi
 %endif
 
 # fetchmail
-if [ %nofetchmail -eq 0 ] ; then
-  if [ -d /run ] ; then
-    logfifo="/run/indimail/logfifo"
-    %{__mkdir_p} /run/indimail
-  elif [ -d /var/run ] ; then
-    logfifo="/var/run/indimail/logfifo"
-    %{__mkdir_p} /var/run/indimail
-  else
-    logfifo="/tmp/logfifo"
-  fi
-  if [ %nodksignatures -eq 0 ] ; then
-    if [ -f %{sysconfdir}/control/default ] ; then
-      ver_opt="both"
-    else
-      ver_opt="none"
-    fi
+if [ -d /run ] ; then
+  logfifo="/run/indimail/logfifo"
+  %{__mkdir_p} /run/indimail
+elif [ -d /var/run ] ; then
+  logfifo="/var/run/indimail/logfifo"
+  %{__mkdir_p} /var/run/indimail
+else
+  logfifo="/tmp/logfifo"
+fi
+if [ %nodksignatures -eq 0 ] ; then
+  if [ -f %{sysconfdir}/control/default ] ; then
+    ver_opt="both"
   else
     ver_opt="none"
   fi
-  extra_opt=""
-  if [ -x %{_prefix}/bin/bogofilter ] ; then
-    extra_opt="--spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\""
-    extra_opt="$extra_opt --logfilter=$logfifo --rejectspam=0 --spamexitcode=0"
-  fi
-  if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
-    if [ -d %{_sysconfdir}/clamav ] ; then
-      mysysconfdir=%{_sysconfdir}/clamav
-    elif [ -d %{_sysconfdir}/clamd.d ] ; then
-      mysysconfdir=%{_sysconfdir}/clamd.d
-    elif [ -d %{sysconfdir} ] ; then
-      mysysconfdir=%{sysconfdir}
-    else
-      mysysconfdir=%{_sysconfdir}
-    fi
-    qhpsi="/usr/bin/clamdscan %s --config=${mysysconfdir}/scan.conf --fdpass --quiet --no-summary"
-    extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
-  fi
-  eval %{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} \
-    --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-    --cntrldir=control --memory=%{fetchmail_mem} --fsync --syncdir \
-    --dkverify=$ver_opt $extra_opt
-  #
-  # user has to create fetchmailrc before which fetchmail cannot be started
-  #
-  $TOUCH %{servicedir}/fetchmail/down
+else
+  ver_opt="none"
 fi
+extra_opt=""
+if [ -x %{_prefix}/bin/bogofilter ] ; then
+  extra_opt="--spamfilter=\"%{_prefix}/bin/bogofilter -p -d %{sysconfdir}\""
+  extra_opt="$extra_opt --logfilter=$logfifo --rejectspam=0 --spamexitcode=0"
+fi
+if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+  if [ -d %{_sysconfdir}/clamav ] ; then
+    mysysconfdir=%{_sysconfdir}/clamav
+  elif [ -d %{_sysconfdir}/clamd.d ] ; then
+    mysysconfdir=%{_sysconfdir}/clamd.d
+  elif [ -d %{sysconfdir} ] ; then
+    mysysconfdir=%{sysconfdir}
+  else
+    mysysconfdir=%{_sysconfdir}
+  fi
+  qhpsi="/usr/bin/clamdscan %s --config=${mysysconfdir}/scan.conf --fdpass --quiet --no-summary"
+  extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
+fi
+eval %{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} \
+  --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
+  --cntrldir=control --memory=%{fetchmail_mem} --fsync --syncdir \
+  --dkverify=$ver_opt $extra_opt
+#
+# user has to create fetchmailrc before which fetchmail cannot be started
+#
+$TOUCH %{servicedir}/fetchmail/down
 
-if [ %nocourierimap -eq 0 ] ; then
 # IMAP/POP3
 %{_prefix}/sbin/svctool --imap=143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imap_pop3_mem} \
@@ -758,7 +728,6 @@ do
     fi
   fi
 done
-fi
 
 # rebuild cdb
 for i in imap pop3
