@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.9 2019-07-15 12:46:00+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.10 2020-10-28 21:27:27+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1796,10 +1796,12 @@ default_options()
 void
 show_current_list_values()
 {
-	int             ok, checked, len, plen;
+	int             fd, ok, checked, len, plen, match;
 	static stralloc listname = {0}, line = {0};
 	char            strnum[FMT_ULONG];
 	char           *ptr, *cptr;
+	char            inbuf[1024];
+	struct substdio ssin;
 
 	/*-
 	 * Note that we do not support the following list options:
@@ -1889,7 +1891,7 @@ show_current_list_values()
 	out(html_text[313]);
 	out(" ");
 
-	printh("<INPUT TYPE=TEXT NAME=\"replyaddr\" VALUE=\"%H\" SIZE=30></TD></TR>\n", replyto_addr.s);
+	printh("<INPUT TYPE=TEXT NAME=\"replyaddr\" VALUE=\"%H\" SIZE=30></TD></TR>\n", replyto_addr.len ? replyto_addr.s : "");
 	out("</TABLE><BR>\n");
 	build_option_str("CHECKBOX", "opt4", "t", html_text[270]);
 	out("<BR>\n");
@@ -1987,8 +1989,28 @@ show_current_list_values()
 			!stralloc_catb(&TmpBuf, "/sql", 4) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
-	if (!access(TmpBuf.s, F_OK))
+	if ((fd = open_read(TmpBuf.s)) > 0) {
+		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 		checked = 1;
+		if (getln(&ssin, &line, &match, '\n') == -1) {
+			strerr_warn3("show_current_list_values: read: ", TmpBuf.s, ": ", &strerr_sys);
+			out(html_text[144]);
+			out(" ");
+			out(TmpBuf.s);
+			out(" 1<BR>\n");
+			flush();
+			return;
+		}
+		if (match) {
+			line.len--;
+			line.s[line.len] = 0;
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
+		}
+		close(fd);
+	}
 #ifdef ENABLE_MYSQL
 	out("<P><B><U>");
 	out(html_text[99]);
@@ -2006,11 +2028,16 @@ show_current_list_values()
 #endif
 
 	/*- get hostname */
-	ptr = line.s;
-	for (cptr = ptr; *cptr && *cptr != ':';cptr++);
-	if (*cptr == ':') {
-		ok = 1;
-		*cptr = 0;
+	if (line.len) {
+		ptr = line.s;
+		for (cptr = ptr; *cptr && *cptr != ':';cptr++);
+		if (*cptr == ':') {
+			ok = 1;
+			*cptr = 0;
+		} else {
+			ok = 0;
+			ptr = "localhost";
+		}
 	} else {
 		ok = 0;
 		ptr = "localhost";
@@ -2025,12 +2052,16 @@ show_current_list_values()
 #else
 	printh("<INPUT TYPE=HIDDEN NAME=sql1 VALUE=\"%H\">\n", ptr);
 #endif
-	if (ok)
+	if (ok) {
 		ptr = cptr + 1;
-	for (cptr = ptr; *cptr && *cptr != ':';cptr++);
-	if (*cptr == ':') {
-		ok = 1;
-		*cptr = 0;
+		for (cptr = ptr; *cptr && *cptr != ':';cptr++);
+		if (*cptr == ':') {
+			ok = 1;
+			*cptr = 0;
+		} else {
+			ok = 0;
+			ptr = "3306";
+		}
 	} else {
 		ok = 0;
 		ptr = "3306";
@@ -2047,12 +2078,16 @@ show_current_list_values()
 	printh("<INPUT TYPE=HIDDEN NAME=sql2 VALUE=\"%H\">\n", ptr);
 #endif
 
-	if (ok)
+	if (ok) {
 		ptr = cptr + 1; /*- user */
-	for (cptr = ptr; *cptr && *cptr != ':';cptr++);
-	if (*cptr == ':') {
-		ok = 1;
-		*cptr = 0;
+		for (cptr = ptr; *cptr && *cptr != ':';cptr++);
+		if (*cptr == ':') {
+			ok = 1;
+			*cptr = 0;
+		} else {
+			ok = 0;
+			ptr = "";
+		}
 	} else {
 		ok = 0;
 		ptr = "";
@@ -2068,12 +2103,16 @@ show_current_list_values()
 	printh("<INPUT TYPE=HIDDEN NAME=sql3 VALUE=\"%H\">\n", ptr);
 #endif
 
-	if (ok)
+	if (ok) {
 		ptr = cptr + 1; /*- password */
-	for (cptr = ptr; *cptr && *cptr != ':';cptr++);
-	if (*cptr == ':') {
-		ok = 1;
-		*cptr = 0;
+		for (cptr = ptr; *cptr && *cptr != ':';cptr++);
+		if (*cptr == ':') {
+			ok = 1;
+			*cptr = 0;
+		} else {
+			ok = 0;
+			ptr = "";
+		}
 	} else {
 		ok = 0;
 		ptr = "";
@@ -2089,12 +2128,16 @@ show_current_list_values()
 	printh("<INPUT TYPE=HIDDEN NAME=sql4 VALUE=\"%H\">\n", ptr);
 #endif
 
-	if (ok)
+	if (ok) {
 		ptr = cptr + 1; /*- database */
-	for (cptr = ptr; *cptr && *cptr != ':';cptr++);
-	if (*cptr == ':') {
-		ok = 1;
-		*cptr = 0;
+		for (cptr = ptr; *cptr && *cptr != ':';cptr++);
+		if (*cptr == ':') {
+			ok = 1;
+			*cptr = 0;
+		} else {
+			ok = 0;
+			ptr = "";
+		}
 	} else {
 		ok = 0;
 		ptr = "";
@@ -2110,12 +2153,16 @@ show_current_list_values()
 	printh("<INPUT TYPE=HIDDEN NAME=sql5 VALUE=\"%H\">\n", ptr);
 #endif
 
-	if (ok)
+	if (ok) {
 		ptr = cptr + 1; /*- table name */
-	for (cptr = ptr; *cptr && *cptr != ':';cptr++);
-	if (*cptr == ':') {
-		ok = 1;
-		*cptr = 0;
+		for (cptr = ptr; *cptr && *cptr != ':';cptr++);
+		if (*cptr == ':') {
+			ok = 1;
+			*cptr = 0;
+		} else {
+			ok = 0;
+			ptr = "ezmlm";
+		}
 	} else {
 		ok = 0;
 		ptr = "ezmlm";
