@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.c,v 1.13 2020-06-22 09:14:31+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.14 2020-10-29 22:17:54+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -72,7 +72,8 @@ stralloc        Username = {0}, Domain = {0}, Password = {0}, Gecos = {0},
 				LineData = {0}, Action = {0}, Message = {0}, SearchUser = {0},
 				TmpBuf = {0}, RealDir = {0}, line = {0}, StatusMessage = {0};
 int             CGIValues[256];
-int             num_of_mailinglist;
+int             ezmlm_idx = 0;
+int             ezmlm_make = 0;
 time_t          mytime;
 char           *TmpCGI = NULL;
 int             Compressed;
@@ -200,10 +201,11 @@ main(argc, argv)
 		ip_addr = x_forward;
 	if (!ip_addr)
 		ip_addr = "127.0.0.1";
-	if ((pi = env_get("PATH_INFO"))) {
-		if (!stralloc_copys(&tmp, pi + 5) || !stralloc_0(&tmp))
-			die_nomem();
-	}
+	ezmlm_make = !access(EZMLMDIR"/ezmlm-make", F_OK);
+	if (ezmlm_make)
+		ezmlm_idx = !access(EZMLMDIR"/ezmlm-idx", F_OK);
+	if ((pi = env_get("PATH_INFO")) && (!stralloc_copys(&tmp, pi + 5) || !stralloc_0(&tmp)))
+		die_nomem();
 	if (!(rm = env_get("REQUEST_METHOD")))
 		rm = "";
 	if (rm && !str_diffn(rm, "POST", 4))
