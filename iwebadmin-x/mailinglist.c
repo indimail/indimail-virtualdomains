@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.10 2020-10-28 21:27:27+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.11 2020-10-29 22:21:03+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -59,9 +59,10 @@
 int             rename(const char *, const char *);
 
 static stralloc dotqmail_name = {0}, replyto_addr = {0};
-int             replyto;
-int             dotnum;
-int             checkopt[256]; /* used to display mailing list options */
+static int      replyto;
+static int      dotnum;
+extern int      ezmlm_idx, ezmlm_make;
+static int      checkopt[256]; /* used to display mailing list options */
 
 #define REPLYTO_SENDER 1
 #define REPLYTO_LIST 2
@@ -131,11 +132,11 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
 	out("<th align=center><font size=2>");
 	out(html_text[72]);
 	out("</font></th>");
-#ifdef EZMLMIDX
-	out("<th align=center><font size=2>");
-	out(html_text[71]);
-	out("</font></th>");
-#endif
+	if (ezmlm_idx) {
+		out("<th align=center><font size=2>");
+		out(html_text[71]);
+		out("</font></th>");
+	}
 	out("<th align=center><font size=2>");
 	out(html_text[81]);
 	out("</font></th>");
@@ -148,67 +149,70 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
 	out("<th align=center><font size=2>");
 	out(html_text[85]);
 	out("</font></th>");
-#ifdef EZMLMIDX
-	out("<th align=center><font size=2>");
-	out(html_text[86]);
-	out("</font></th>");
-	out("<th align=center><font size=2>");
-	out(html_text[87]);
-	out("</font></th>");
-	out("<th align=center><font size=2>");
-	out(html_text[88]);
-	out("</font></th>");
-	out("<th align=center><font size=2>");
-	out(html_text[237]);
-	out("</font></th>");
-	out("<th align=center><font size=2>");
-	out(html_text[238]);
-	out("</font></th>");
-	out("<th align=center><font size=2>");
-	out(html_text[239]);
-	out("</font></th>");
-#endif
+	if (ezmlm_idx) {
+		out("<th align=center><font size=2>");
+		out(html_text[86]);
+		out("</font></th>");
+		out("<th align=center><font size=2>");
+		out(html_text[87]);
+		out("</font></th>");
+		out("<th align=center><font size=2>");
+		out(html_text[88]);
+		out("</font></th>");
+		out("<th align=center><font size=2>");
+		out(html_text[237]);
+		out("</font></th>");
+		out("<th align=center><font size=2>");
+		out(html_text[238]);
+		out("</font></th>");
+		out("<th align=center><font size=2>");
+		out(html_text[239]);
+		out("</font></th>");
+	}
 	out("</tr>\n");
 	sort_init();
 	/*- Now, display each list */
 	while ((mydirent = readdir(mydir))) {
 		if (!str_diffn(".qmail-", mydirent->d_name, 7)) {
 			if ((fd = open_read(mydirent->d_name)) == -1) {
-#ifdef EZMLMIDX
-				out("<tr><td colspan=12>");
-				out(html_text[144]);
-				out(" ");
-				out(mydirent->d_name);
-				out("</td></tr>\n");
-#else
-				out("<tr><td colspan=5>");
-				out(html_text[144]);
-				out(" ");
-				out(mydirent->d_name);
-				out("</td></tr>\n");
-#endif
+				if (ezmlm_idx) {
+					out("<tr><td colspan=12>");
+					out(html_text[144]);
+					out(" ");
+					out(mydirent->d_name);
+					out("</td></tr>\n");
+				} else {
+					out("<tr><td colspan=5>");
+					out(html_text[144]);
+					out(" ");
+					out(mydirent->d_name);
+					out("</td></tr>\n");
+				}
 				continue;
 			}
 			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &line, &match, '\n') == -1) {
-#ifdef EZMLMIDX
-				out("<tr><td colspan=12>");
-				out(html_text[144]);
-				out(" ");
-				out(mydirent->d_name);
-				out("</td></tr>\n");
-#else
-				out("<tr><td colspan=5>");
-				out(html_text[144]);
-				out(" ");
-				out(mydirent->d_name);
-				out("</td></tr>\n");
-#endif
+				if (ezmlm_idx) {
+					out("<tr><td colspan=12>");
+					out(html_text[144]);
+					out(" ");
+					out(mydirent->d_name);
+					out("</td></tr>\n");
+				} else {
+					out("<tr><td colspan=5>");
+					out(html_text[144]);
+					out(" ");
+					out(mydirent->d_name);
+					out("</td></tr>\n");
+				}
 				continue;
 			}
 			close(fd);
-			if (str_str(line.s, "ezmlm-reject"))
-				sort_add_entry(&mydirent->d_name[7], 0);
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
+			if (line.len && str_str(line.s, "ezmlm-reject"))
+				sort_add_entry(mydirent->d_name + 7, 0);
 		}
 	}
 	closedir(mydir);
@@ -225,31 +229,30 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
 		out("<tr>");
 		qmail_button(addr, "delmailinglist", user, dom, mytime, "trash.png");
 
-#ifdef EZMLMIDX
-		qmail_button(addr, "modmailinglist", user, dom, mytime, "modify.png");
-#endif
+		if (ezmlm_idx)
+			qmail_button(addr, "modmailinglist", user, dom, mytime, "modify.png");
 		printh("<td align=left>%H</td>\n", addr);
 
 		qmail_button(addr, "addlistuser", user, dom, mytime, "delete.png");
 		qmail_button(addr, "dellistuser", user, dom, mytime, "delete.png");
 		qmail_button(addr, "showlistusers", user, dom, mytime, "delete.png");
 
-#ifdef EZMLMIDX
-		qmail_button(addr, "addlistmod", user, dom, mytime, "delete.png");
-		qmail_button(addr, "dellistmod", user, dom, mytime, "delete.png");
-		qmail_button(addr, "showlistmod", user, dom, mytime, "delete.png");
+		if (ezmlm_idx) {
+			qmail_button(addr, "addlistmod", user, dom, mytime, "delete.png");
+			qmail_button(addr, "dellistmod", user, dom, mytime, "delete.png");
+			qmail_button(addr, "showlistmod", user, dom, mytime, "delete.png");
 
-		/*- Is it a digest list?  */
-		if ((fd = open_read(testfn.s)) == -1) {
-			/*- not a digest list */
-			out("<TD COLSPAN=3> </TD>");
-		} else {
-			qmail_button(addr, "addlistdig", user, dom, mytime, "delete.png");
-			qmail_button(addr, "dellistdig", user, dom, mytime, "delete.png");
-			qmail_button(addr, "showlistdig", user, dom, mytime, "delete.png");
-			close(fd);
+			/*- Is it a digest list?  */
+			if ((fd = open_read(testfn.s)) == -1) {
+				/*- not a digest list */
+				out("<TD COLSPAN=3> </TD>");
+			} else {
+				qmail_button(addr, "addlistdig", user, dom, mytime, "delete.png");
+				qmail_button(addr, "dellistdig", user, dom, mytime, "delete.png");
+				qmail_button(addr, "showlistdig", user, dom, mytime, "delete.png");
+				close(fd);
+			}
 		}
-#endif
 		out("</tr>\n");
 	}
 	flush();
@@ -277,7 +280,7 @@ show_mailing_list_line2(char *user, char *dom, time_t mytime, char *dir)
 		iclose();
 		exit(0);
 	}
-	if (*EZMLMDIR == 'n' || MaxMailingLists == 0)
+	if (!ezmlm_make || MaxMailingLists == 0)
 		return;
 	if (!(mydir = opendir("."))) {
 		out(html_text[143]);
@@ -298,24 +301,27 @@ show_mailing_list_line2(char *user, char *dom, time_t mytime, char *dir)
 			}
 			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &line, &match, '\n') == -1) {
-#ifdef EZMLMIDX
-				out("<tr><td colspan=12>");
-				out(html_text[144]);
-				out(" ");
-				out(mydirent->d_name);
-				out("</td></tr>\n");
-#else
-				out("<tr><td colspan=5>");
-				out(html_text[144]);
-				out(" ");
-				out(mydirent->d_name);
-				out("</td></tr>\n");
-#endif
+				if (ezmlm_idx) {
+					out("<tr><td colspan=12>");
+					out(html_text[144]);
+					out(" ");
+					out(mydirent->d_name);
+					out("</td></tr>\n");
+				} else {
+					out("<tr><td colspan=5>");
+					out(html_text[144]);
+					out(" ");
+					out(mydirent->d_name);
+					out("</td></tr>\n");
+				}
 				continue;
 			}
 			close(fd);
-			if (str_str(line.s, "ezmlm-reject")) {
-				sort_add_entry(&mydirent->d_name[7], 0);
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
+			if (line.len && str_str(line.s, "ezmlm-reject")) {
+				sort_add_entry(mydirent->d_name + 7, 0);
 				listcount++;
 			}
 		}
@@ -377,11 +383,10 @@ addmailinglist()
 	}
 	/*- set up default options for new list */
 	default_options();
-#ifdef EZMLMIDX
-	send_template("add_mailinglist-idx.html");
-#else
-	send_template("add_mailinglist-no-idx.html");
-#endif
+	if (ezmlm_idx)
+		send_template("add_mailinglist-idx.html");
+	else
+		send_template("add_mailinglist-no-idx.html");
 
 }
 
@@ -447,16 +452,15 @@ delmailinglistnow()
 		die_nomem();
 	if (!stralloc_0(&tmp2))
 		die_nomem();
+	tmp2.len--;
 	while ((mydirent = readdir(mydir)) != NULL) {
-		/*- delete the main .qmail-"list" file */
-		if (!str_diff(tmp1.s, mydirent->d_name)) {
-			if (unlink(mydirent->d_name)) {
-				ack("185", tmp1.s);
-			}
-		} else /*- delete secondary .qmail-"list"-* files */
-		if (!str_diffn(tmp2.s, mydirent->d_name, tmp2.len)) {
-			if (unlink(mydirent->d_name) != 0)
-				ack("185", tmp1.s);
+		/*- 
+		 * delete the main .qmail-"list" file 
+		 * delete secondary .qmail-"list"-* files
+		 */
+		if (!str_diff(tmp1.s, mydirent->d_name) || !str_diffn(tmp2.s, mydirent->d_name, tmp2.len)) {
+			if (unlink(mydirent->d_name))
+				ack("185", mydirent->d_name);
 		}
 	}
 	closedir(mydir);
@@ -486,7 +490,7 @@ delmailinglistnow()
 
 /*-
  * sets the Reply-To header in header* files based on form fields
- * designed to be called by ezmlm_make() (after calling ezmlm-make)
+ * designed to be called by ezmlmMake() (after calling ezmlm-make)
  * Replaces the "Reply-To" line in <filename> with <newtext>.
  */
 void
@@ -509,70 +513,59 @@ ezmlm_setreplyto(char *filename, char *newtext)
 			!stralloc_catb(&tempfn, ".tmp", 4) ||
 			!stralloc_0(&tempfn))
 		die_nomem();
-	if ((hfd = open_read(realfn.s)) == -1) {
+	if ((tmp_fd = open_trunc(tempfn.s)) == -1)
 		return;
-	}
-	if ((tmp_fd = open_trunc(tempfn.s)) == -1) {
-		close(hfd);
-		return;
-	}
-	substdio_fdbuf(&ssin, read, hfd, inbuf, sizeof(inbuf));
 	substdio_fdbuf(&ssout, write, tmp_fd, outbuf, sizeof(outbuf));
-	for (;;) {
-		if (getln(&ssin, &line, &match, '\n') == -1) {
-			strerr_warn3("ezmlm_setreplyto: read: ", realfn.s, ": ", &strerr_sys);
-			close(tmp_fd);
-			close(hfd);
-			unlink(tempfn.s);
-			return;
-		}
-		if (line.len == 0)
-			break;
-		if (match) {
-			line.len--;
-			line.s[line.len] = 0;
-		} else {
-			if (!stralloc_0(&line))
-				die_nomem();
-			line.len--;
-		}
-		if (case_diffb(line.s, 8, "Reply-To")) {
-			if (substdio_put(&ssout, line.s, line.len)) {
+	if ((hfd = open_read(realfn.s)) != -1) {
+		substdio_fdbuf(&ssin, read, hfd, inbuf, sizeof(inbuf));
+		for (;;) {
+			if (getln(&ssin, &line, &match, '\n') == -1) {
+				strerr_warn3("ezmlm_setreplyto: read: ", realfn.s, ": ", &strerr_sys);
 				close(tmp_fd);
 				close(hfd);
 				unlink(tempfn.s);
 				return;
 			}
+			if (line.len == 0)
+				break;
+			if (!match) {
+				if (!stralloc_append(&line, "\n"))
+					die_nomem();
+				line.len--;
+			}
+			/*- copy contents to new file, except for Reply-To header */
+			if (case_diffb(line.s, 8, "Reply-To")) {
+				if (substdio_put(&ssout, line.s, line.len)) {
+					close(tmp_fd);
+					close(hfd);
+					unlink(tempfn.s);
+					return;
+				}
+			}
 		}
-	}
-
-	if (substdio_puts(&ssout, newtext)) {
-		close(tmp_fd);
 		close(hfd);
+	}
+	if (substdio_puts(&ssout, newtext) || substdio_put(&ssout, "\n", 1) || substdio_flush(&ssout)) {
+		close(tmp_fd);
 		unlink(tempfn.s);
 		return;
 	}
-	close(hfd);
 	close(tmp_fd);
 	unlink(realfn.s);
-	rename(tempfn.s, realfn.s);
+	if (rename(tempfn.s, realfn.s) == -1)
+		unlink(tempfn.s);
 }
 
 void
-ezmlm_make(int newlist)
+ezmlmMake(int newlist)
 {
-	int             pid, len, plen, fd;
+	int             pid, len, plen, fd, argc, loop, i;
 	struct substdio ssout;
-	int             i;
-#ifdef EZMLMIDX
 	static stralloc list_owner = {0}, owneremail = {0};
-	char           *t;
-#endif
 	static stralloc loop_ch = {0}, tmp1 = {0}, tmp2 = {0}, tmp3 = {0};
 	char            options[128], outbuf[1024];
-	char           *s;
+	char           *t, *s;
 	char           *arguments[MAX_BUFF];
-	int             argc, loop;
 	/*-
 	 * Initialize listopt to be a string of the characters A-Z, with each one
 	 * set to the correct case (e.g., A or a) to match the expected behavior
@@ -628,56 +621,56 @@ ezmlm_make(int newlist)
 	listopt[4] = newlist ? ' ' : 'e';
 	argc = 0;
 	arguments[argc++] = "ezmlm-make";
-#ifdef EZMLMIDX
-	/*- check the list owner entry */
-	GetValue(TmpCGI, &list_owner, "listowner="); /*- Get the listowner -*/
-	if (list_owner.len > 0) {
-		if (!stralloc_copyb(&owneremail, "-5", 2) ||
-				!stralloc_cat(&owneremail, &list_owner) ||
-				!stralloc_0(&owneremail))
-			die_nomem();
-		arguments[argc++] = owneremail.s;
+	if (ezmlm_idx) {
+		/*- check the list owner entry */
+		GetValue(TmpCGI, &list_owner, "listowner="); /*- Get the listowner -*/
+		if (list_owner.len > 0) {
+			if (!stralloc_copyb(&owneremail, "-5", 2) ||
+					!stralloc_cat(&owneremail, &list_owner) ||
+					!stralloc_0(&owneremail))
+				die_nomem();
+			arguments[argc++] = owneremail.s;
+		}
 	}
-#endif
 
 	/*- build the option string */
 	s = options;
 	arguments[argc++] = s;
 	*s++ = '-';
-#ifndef EZMLMIDX
-	/*- non idx list, only allows options A and P */
-	*s++ = listopt[0];		/* a or A */
-	*s++ = listopt['p' - 'a'];	/* p or P */
-	*s++ = 0;				/* add NULL terminator */
-#else
-	/*- ignore options v-z, but test a-u */
-	for (i = 0; i <= ('u' - 'a'); i++) {
-		if (listopt[i] != ' ')
-			*s++ = listopt[i];
-	}
-	*s++ = 0;				/* add NULL terminator */
-	/*- check for sql support */
-	GetValue(TmpCGI, &tmp1, "sqlsupport=");
-	if (tmp1.len > 0) {
-		arguments[argc++] = s;
-		s += fmt_strn(s, tmp1.s, tmp1.len);
-		*s++ = 0;
-		arguments[argc++] = s;
-		for (loop = 1; loop <= NUM_SQL_OPTIONS; loop++) {
-			t = tmp1.s;
-			t += fmt_strn(t, "sql", 3);
-			t += fmt_int(t, loop);
-			*t++ = '=';
-			*t++ = 0;
-			GetValue(TmpCGI, &loop_ch, tmp1.s);
-			s += fmt_strn(s, loop_ch.s, loop_ch.len);
-			s += fmt_strn(s, ":", 1);
+	if (ezmlm_idx) {
+		/*- ignore options v-z, but test a-u */
+		for (i = 0; i <= ('u' - 'a'); i++) {
+			if (listopt[i] != ' ')
+				*s++ = listopt[i];
 		}
-		/*- remove trailing ':' */
-		s--;
-		*s++ = 0;
+		*s++ = 0; /* add NULL terminator */
+		/*- check for sql support */
+		GetValue(TmpCGI, &tmp1, "sqlsupport=");
+		if (tmp1.len > 0) {
+			arguments[argc++] = s;
+			s += fmt_strn(s, tmp1.s, tmp1.len);
+			*s++ = 0;
+			arguments[argc++] = s;
+			for (loop = 1; loop <= NUM_SQL_OPTIONS; loop++) {
+				t = tmp1.s;
+				t += fmt_strn(t, "sql", 3);
+				t += fmt_int(t, loop);
+				*t++ = '=';
+				*t++ = 0;
+				GetValue(TmpCGI, &loop_ch, tmp1.s);
+				s += fmt_strn(s, loop_ch.s, loop_ch.len);
+				s += fmt_strn(s, ":", 1);
+			}
+			/*- remove trailing ':' */
+			s--;
+			*s++ = 0;
+		}
+	} else {
+		/*- non idx list, only allows options A and P */
+		*s++ = listopt[0];	/* a or A */
+		*s++ = listopt['p' - 'a'];	/* p or P */
+		*s++ = 0;	/* add NULL terminator */
 	}
-#endif
 	/*- make dotqmail name */
 	if (!stralloc_copy(&dotqmail_name, &ActionUser) || !stralloc_0(&dotqmail_name))
 		die_nomem();
@@ -711,7 +704,12 @@ ezmlm_make(int newlist)
 		exit(127);
 	} else
 		wait(&pid);
-	/*- Check for prefix setting */
+	/*- 
+	 * Check for prefix setting 
+	 * the value here gets displayed by
+	 * calling get_mailinglist_prefix()
+	 * in template.c
+	 */
 	GetValue(TmpCGI, &tmp1, "prefix=");
 
 	/*- strip leading '[' and trailing ']' from tmp */
@@ -729,9 +727,8 @@ ezmlm_make(int newlist)
 			!stralloc_0(&tmp2))
 		die_nomem();
 	if (str_len(s) > 0) {
-		if ((fd = open_trunc(tmp2.s)) == -1) {
+		if ((fd = open_trunc(tmp2.s)) == -1)
 			return;
-		}
 		substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
 		if (substdio_put(&ssout, "[", 1) ||
 				substdio_puts(&ssout, s) ||
@@ -756,11 +753,11 @@ ezmlm_make(int newlist)
 			GetValue(TmpCGI, &replyto_addr, "replyaddr=");
 			if (!stralloc_copyb(&tmp1, "Reply-To: ", 10) ||
 					!stralloc_cat(&tmp1, &replyto_addr) ||
-					!stralloc_0(&replyto_addr))
+					!stralloc_0(&tmp1))
 				die_nomem();
 		} else {/* REPLYTO_LIST */
-			if (!stralloc_copyb(&tmp1, "Reply-To: <#l#>@<#h#>\n", 22) ||
-					!stralloc_0(&replyto_addr))
+			if (!stralloc_copyb(&tmp1, "Reply-To: <#l#>@<#h#>", 21) ||
+					!stralloc_0(&tmp1))
 				die_nomem();
 		}
 		ezmlm_setreplyto("headeradd", tmp1.s);
@@ -788,16 +785,16 @@ ezmlm_make(int newlist)
 
 	}
 	close(fd);
-#ifdef EZMLMIDX
-	/*- if this is a new list, add owner as subscriber */
-	if (newlist && list_owner.len) {
-		ezmlm_sub(GROUP_SUBSCRIBER, list_owner.s);
-		if (listopt['M' - 'A'] == 'm') {	/* moderation on */
-			/*- add owner as moderator/remote admin as well */
-			ezmlm_sub(GROUP_MODERATOR, list_owner.s);
+	if (ezmlm_idx) {
+		/*- if this is a new list, add owner as subscriber */
+		if (newlist && list_owner.len) {
+			ezmlm_sub(GROUP_SUBSCRIBER, list_owner.s);
+			if (listopt['M' - 'A'] == 'm') {	/* moderation on */
+				/*- add owner as moderator/remote admin as well */
+				ezmlm_sub(GROUP_MODERATOR, list_owner.s);
+			}
 		}
 	}
-#endif
 }
 
 void
@@ -835,7 +832,7 @@ addmailinglistnow()
 		iclose();
 		exit(0);
 	}
-	ezmlm_make(1);
+	ezmlmMake(1);
 	len = str_len(html_text[187]) + ActionUser.len + Domain.len + 28;
 	for (plen = 0;;) {
 		if (!stralloc_ready(&StatusMessage, len))
@@ -1050,7 +1047,6 @@ ezmlm_sub(int mod, char *email)
 	pid = fork();
 	if (pid == 0) {
 		if (!stralloc_copys(&subpath, EZMLMDIR) ||
-				!stralloc_append(&subpath, "/") ||
 				!stralloc_catb(&subpath, "/ezmlm-sub", 10) ||
 				!stralloc_0(&subpath))
 			die_nomem();
@@ -1294,6 +1290,9 @@ count_mailinglists()
 				flush();
 				return;
 			}
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
 			if (line.len && str_str(line.s, "ezmlm-reject"))
 				++CurMailingLists;
 			close(fd);
@@ -1405,11 +1404,10 @@ modmailinglist()
 	}
 	/*- read in options for the current list */
 	set_options();
-#ifdef EZMLMIDX
-	send_template("mod_mailinglist-idx.html");
-#else
-	send_template("show_mailinglists.html");
-#endif
+	if (ezmlm_idx)
+		send_template("mod_mailinglist-idx.html");
+	else
+		send_template("show_mailinglists.html");
 
 }
 
@@ -1418,7 +1416,7 @@ modmailinglistnow()
 {
 	int             len, plen;
 
-	ezmlm_make(0);
+	ezmlmMake(0);
 	len = str_len(html_text[226]) + ActionUser.len + Domain.len + 28;
 	for (plen = 0;;) {
 		if (!stralloc_ready(&StatusMessage, len))
@@ -2226,7 +2224,11 @@ get_mailinglist_prefix(stralloc *prefix)
 			*p++ = *b++;
 		*p++ = 0;
 		prefix->len = len;
-	} else 
+	} else {
+		if (!stralloc_ready(prefix, 1))
+			die_nomem();
+		*prefix->s = 0;
 		return 1;
+	}
 	return 0;
 }
