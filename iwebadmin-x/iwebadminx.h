@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadminx.h,v 1.2 2019-06-03 06:47:21+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadminx.h,v 1.3 2020-10-29 22:19:25+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,6 @@ extern int      Compressed, actout;
 extern char    *html_text[MAX_LANG_STR + 1];
 
 extern struct vlimits Limits;
-extern int      num_of_mailinglist;
 extern int      AdminType;
 extern int      MaxPopAccounts;
 extern int      MaxAliases;
