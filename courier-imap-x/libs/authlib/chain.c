@@ -49,8 +49,8 @@ char	*prog;
 
 	if (p)
 	{
-		if (dup(pipes[0])) {
-			fprintf(stderr, "%s: dup: %s\n", prog, strerror(errno));
+		if (dup(pipes[0]) == -1) {
+			fprintf(stderr, "authchain: %s: dup: %s\n", prog, strerror(errno));
 			authexit(1);
 		}
 		close(pipes[0]);
