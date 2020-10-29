@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.12 2019-07-15 12:54:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.13 2020-10-29 22:21:59+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -535,7 +535,7 @@ send_template_now(char *filename)
 					out("</a> ");
 					out(VERSION);
 					out("<BR>");
-					out("<a href=\"http://localhost://mailmrtg/\">IndiMail MRTG Graphs</a><BR>");
+					out("<a href=\"http://localhost://mailmrtg/\">MRTG Graphs</a><BR>");
 					break;
 				case 'v': /* display the main menu */
 					printh("<font size=\"2\" color=\"#000000\"><b>%H</b></font><br><br>", Domain.s);
