@@ -61,7 +61,7 @@ int	l;
 		if (!prog)	authexit(1);
 		close(3);
 		if (dup(pipe3fd[0]) == -1) {
-			fprintf(stderr, "%s: dup: %s\n", prog, strerror(errno));
+			fprintf(stderr, "authmod: %s: dup: %s\n", prog, strerror(errno));
 			authexit(1);
 		}
 		close(pipe3fd[0]);
