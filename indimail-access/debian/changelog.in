@@ -13,3 +13,4 @@ indimail-access (@version@-@release@) unstable; urgency=medium
   * courier-imap: Set LDFLAGS=/opt/local/lib when calling configure to avoid wrong libiconv getting picked
   * postinstallation: update imap/pop3, proxy imap/pop3 authmodule with authindi
   * maildirquota.c: break out of infinite loop when maildirfolder creation fails
+  * maildrop: alarmsleep.C: replaced deprecated function sigpause() with sigsuspend()

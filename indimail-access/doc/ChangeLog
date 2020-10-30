@@ -28,3 +28,6 @@ Release @version@-@release@ Start 03/06/2020
 - 20/10/2020
 15. maildirquota.c: break out of infinite loop when maildirfolder creation
     fails
+- 28/10/2020
+16. maildrop: alarmsleep.C: replaced deprecated function sigpause() with
+    sigsuspend()
