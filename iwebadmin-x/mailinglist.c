@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.12 2020-10-30 12:44:08+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.13 2020-10-30 13:43:18+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1204,13 +1204,12 @@ dellistgroupnow(int mod)
 				!stralloc_0(&tmp2))
 			die_nomem();
 		if (mod == GROUP_MODERATOR)
-			execl(tmp1.s, "ezmlm-unsub", tmp2.s, "mod", Newu, (char *) 0);
+			execl(tmp1.s, "ezmlm-unsub", tmp2.s, "mod", Newu.s, (char *) 0);
 		else
 		if (mod == GROUP_DIGEST)
-			execl(tmp1.s, "ezmlm-unsub", tmp2.s, "digest", Newu, (char *) 0);
+			execl(tmp1.s, "ezmlm-unsub", tmp2.s, "digest", Newu.s, (char *) 0);
 		else
-			execl(tmp1.s, "ezmlm-unsub", tmp2.s, Newu, (char *) 0);
-		execl(tmp1.s, "ezmlm-unsub", tmp2.s, Newu, (char *) 0);
+			execl(tmp1.s, "ezmlm-unsub", tmp2.s, Newu.s, (char *) 0);
 		exit(127);
 	} else
 		wait(&pid);
