@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.c,v 1.14 2020-10-29 22:17:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.15 2020-10-30 22:29:04+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -194,6 +194,7 @@ main(argc, argv)
 	char            strnum[FMT_ULONG], outbuf[2048];
 	struct substdio ssout;
 
+	mytime = time(0);
 	while (!access("/tmp/gdb.wait", F_OK))
 			sleep(1);
 	init_globals();
@@ -400,18 +401,15 @@ main(argc, argv)
 				die_nomem();
 			tmp.len--;
 			del_id_files(&tmp);
-			mytime = time(NULL);
 			if (!stralloc_append(&tmp, "/") ||
 					!stralloc_catb(&tmp, strnum, fmt_ulong(strnum, (unsigned long) mytime)) ||
 					!stralloc_catb(&tmp, ".qw", 3) ||
 					!stralloc_0(&tmp))
 				die_nomem();
 			if ((fd = open_trunc(tmp.s)) == -1) {
-				out(html_text[144]);
-				out(" ");
-				out(tmp.s);
-				out("<br>\n");
-				flush();
+				/*- printh("<a href=\"%s\">%s", cgiurl("logout"), html_text[218]); -*/
+				strerr_warn3("iwebadmin: open: ", tmp.s, ": ", &strerr_sys);
+				show_login();
 				iclose();
 				exit(0);
 			}
@@ -426,20 +424,16 @@ main(argc, argv)
 					substdio_put(&ssout, "&returnhttp=", 12) ||
 					substdio_put(&ssout, returnhttp.s, returnhttp.len) ||
 					substdio_put(&ssout, "\n", 1) || substdio_flush(&ssout)) {
-				out(html_text[144]);
-				out(" ");
-				out(tmp.s);
-				out("<br>\n");
-				flush();
+				/*- printh("<a href=\"%s\">%s", cgiurl("logout"), html_text[218]); -*/
+				strerr_warn3("iwebadmin: write: ", tmp.s, ": ", &strerr_sys);
+				show_login();
 				iclose();
 				exit(0);
 			} else
 			if (close(fd)) {
-				out(html_text[144]);
-				out(" ");
-				out(tmp.s);
-				out("<br>\n");
-				flush();
+				/*- printh("<a href=\"%s\">%s", cgiurl("logout"), html_text[218]); -*/
+				strerr_warn3("iwebadmin: write: ", tmp.s, ": ", &strerr_sys);
+				show_login();
 				iclose();
 				exit(0);
 			}
