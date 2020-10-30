@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.13 2020-10-29 22:21:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.14 2020-10-30 22:24:44+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -920,21 +920,11 @@ get_session_val(char *session_var)
 			die_nomem();
 		if ((fd = open_read(TmpBuf.s)) == -1) {
 			strerr_warn3("get_session_val: open: ", TmpBuf.s, ": ", &strerr_sys);
-			out(html_text[144]);
-			out(" ");
-			out(TmpBuf.s);
-			out(" 1<BR>\n");
-			flush();
 			return (retval);
 		}
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("get_session_val: read: ", TmpBuf.s, ": ", &strerr_sys);
-			out(html_text[144]);
-			out(" ");
-			out(TmpBuf.s);
-			out(" 1<BR>\n");
-			flush();
 			close(fd);
 			return (retval);
 		}
