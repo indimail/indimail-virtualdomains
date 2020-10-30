@@ -11,16 +11,13 @@ Requirements:
 - A web server (Apache, Zeus)
     http://www.apache.org/
 
-- qmail 1.03 
-    http://cr.yp.to/qmail.html 
-    http://www.qmail.org/
+- indimail-virtualdomains
+  https://github.com/mbhangui/indimail-virtualdomains
 
-- indimail (a virtual domain addon for qmail) 
-    http://www.indimail.org/
-
-- ezmlm installed in /usr/local/bin/ezmlm 
+- ezmlm / ezmlm-idx installed in /usr/bin
     http://cr.yp.to/ezmlm.html
     http://www.ezmlm.org/
+    https://github.com/mbhangui/ezmlm-idx
 
 # Updates?
 
@@ -33,6 +30,7 @@ Please refer your suggestions/bug reports to iwebadmin@indimail.org
 # Install guide 
 
 iwebadmin 1.3 and later requires indimail 1.7 or later.
+iwebadmin 1.4 and later requires indimail 2.x or later.
 
 If you are installing on x86_64 platform (64-bit Intel/AMD processor),
 or if configure exits with an "Invalid configuration" error,
@@ -59,15 +57,13 @@ the above information then starting from scratch.
 
 0.  fast install guide.. 
     type as root: 
-    # ./configure --prefix=/usr \
-        --sysconfdir=/etc/indimail \
-        --enable-ezmlmdir=/var/indimail \
-        --disable-ipauth --disable-trivial-password --enable-modify-quota \
-        --enable-mysqlprefix=/usr \
-        --enable-htmldir=/var/www/html \
+    # ./configure --prefix=/usr --sysconfdir=/etc/indimail \
+        --disable-ipauth --disable-trivial-password
+        --enable-ezmlmdir=/usr/bin --enable-domain-autofill \
+        --enable-modify-quota --enable-htmldir=/var/www/html
         --enable-cgibindir=/var/www/cgi-bin \
         --enable-imagedir=/var/www/html/images/iwebadmin \
-        --enable-htmllibdir=/usr/share/iwebadmin
+		--enable-htmllibdir=/usr/share/iwebadmin
     or you can run ./default.configure instead of the above configure command
     # make
     # make install-strip
@@ -78,8 +74,8 @@ the above information then starting from scratch.
 1.  Before we can make and install there are a few things to consider..
     a. do you have a indimail user and indimail group?
     b. where is your cgi bin directory?
-    c. where is your ezmlm directory? default /var/indimail/bin/ezmlm
-    d. where is your autorespond directory? /var/indimail/bin
+    c. where is your ezmlm directory? default /usr/bin/ezmlm
+    d. where is your autorespond directory? /usr/bin
 
     If you are missing any one of the above, stop reading this now and
     go install the missing software. 
@@ -96,11 +92,8 @@ the above information then starting from scratch.
     on a volume that isn't mounted with the 'nosuid' option in /etc/fstab.
 
     *Use this if your don't want the HTML templates to be 
-     in /var/indimail/share/iwebadmin
+     in /usr/share/iwebadmin
        --enable-htmllibdir={dir}  iwebadmin HTML library directory.
-
-    *Use this if your qmail directory is not in /var/qmail  
-       --enable-qmaildir={dir}   directory where qmail is installed.
 
     *Use this if your URL PATH for cgi-bin is elsewhere   
        --enable-cgipath={/cgi-bin/iwebadmin}   URL path for cgi.
@@ -110,11 +103,8 @@ the above information then starting from scratch.
 
     *use this to set the indimail group if it is not indimail.
        --enable-indimailgroup={indimail}   group indimail was installed as.
-
-    *Use this if your autorespond is not in /user/local/bin   
-       --enable-autoresponder-bin={path}  Path to autoresponder binary.
    
-    *Use this if ezmlm is not in /var/indimail/bin/ezmlm
+    *Use this if ezmlm is not in /usr/bin/ezmlm
        --enable-ezmlmdir={dir}  Directory that holds the ezmlm package.
 
     *If you have different domains accessing the same iwebadmin, you 
@@ -210,7 +200,7 @@ the above information then starting from scratch.
 
 7.  If you want to modify the "look" of qmail admin:
 
-    Edit the html template files in /var/indimail/share/iwebadmin/
+    Edit the html template files in /usr/share/iwebadmin/
     or if you changed the location with the --enable-htmllibdir={dir}
     then edit the files in that directory. The HTML elements for some
     not-very-often used features are included in comments in the
@@ -226,7 +216,7 @@ the above information then starting from scratch.
 9.  To log into the interface you will first need to
     create a domain using the vadddomain program.
 
-    sudo /var/indimail/bin/vadddomain "your new domain name" "pick a postmaster password"
+    sudo /usr/bin/vadddomain "your new domain name" "pick a postmaster password"
 
     Then you can log into iwebadmin with "your new domain name" and
     the password you set with the vadddomain command.
