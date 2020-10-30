@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.39 2020-10-30 20:53:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.41 2020-10-30 22:45:49+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -156,7 +156,6 @@ install -m 0644 %{name}-release  %{buildroot}%{sysconfdir}/%{name}-release
 
 %attr(644,root,root) %config(noreplace)  %{sysconfdir}/%{name}-release
 %attr(644,root,root) %config(noreplace)  %{sysconfdir}/%{name}-rpm.info
-%attr(444,root,root) %config(noreplace)  %{sysconfdir}/perm_list.iwebadmin
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -170,7 +169,7 @@ install -m 0644 %{name}-release  %{buildroot}%{sysconfdir}/%{name}-release
 %dir %attr(755,root,qmail)               @htmllibdir@/lang
 
 # binary
-%attr(6511,root,indimail)                @cgibindir@/iwebadmin
+%attr(6555,root,indimail)                @cgibindir@/iwebadmin
 
 #html
 %attr(444,root,root)                     @htmllibdir@/html/add_autorespond.html
