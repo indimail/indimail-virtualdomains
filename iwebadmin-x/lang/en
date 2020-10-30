@@ -20,7 +20,7 @@
 019 Unable to get domain details from assign file
 020 You don't have permission to change password
 039 Respond to administrative requests and allow archive retrieval.
-053 Enable MySQL support
+053 Enable MySQL support for ezmlm-idx
 054 Host
 055 Port
 056 User
@@ -66,7 +66,7 @@
 096 Delete alias
 097 Confirm delete
 098 Delete Mail Autoresponder
-099 MySQL Settings
+099 ezmlm-idx MySQL Settings
 100 Delete forward
 101 Delete mailing list
 102 Delete user
