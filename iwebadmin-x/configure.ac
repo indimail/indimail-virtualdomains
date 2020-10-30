@@ -98,7 +98,7 @@ then
 fi
 
 htmldir=""
-for f in /home/httpd/html /usr/local/apache/htdocs /usr/local/www/data /var/www/html
+for f in /var/www/html /home/httpd/html /usr/local/apache/htdocs /usr/local/www/data
 do
     if test -d $f
     then
@@ -118,7 +118,7 @@ AC_SUBST(htmldir)
 
 cgibindir=""
 
-for f in /home/httpd /usr/local/apache /usr/local/www /var/lib/httpd /var/www /usr/local/www $htmldir
+for f in var/www /home/httpd /usr/local/apache /usr/local/www /var/lib/httpd /usr/local/www $htmldir
 do
     if test -d $f/cgi-bin
     then
@@ -149,7 +149,7 @@ AC_SUBST(imageurl)
 AC_DEFINE_UNQUOTED(IMAGEURL, "$imageurl","")
 
 imagedir=""
-for f in /home/httpd/html /usr/local/apache/htdocs /usr/local/www/data /var/www/html $htmldir
+for f in /var/www/html /home/httpd/html /usr/local/apache/htdocs /usr/local/www/data $htmldir
 do
     if test -d $f
     then
@@ -166,7 +166,7 @@ AC_ARG_ENABLE(imagedir, [  --enable-imagedir=DIR     Where to put the image file
     ] )
 AC_SUBST(imagedir)
 
-htmllibdir="$prefix/share/indimail/iwebadmin"
+htmllibdir="$prefix/share/iwebadmin"
 
 AC_ARG_ENABLE(htmllibdir, [  --enable-htmllibdir=DIR   iwebadmin HTML library directory.],
     htmllibdir="$enableval",
@@ -198,6 +198,17 @@ AC_ARG_ENABLE(ezmlmdir, [  --enable-ezmlmdir=PATH    Path to ezmlm binaries or =
         fi
     ] )
 AC_DEFINE_UNQUOTED(EZMLMDIR,"$ezmlmdir","")
+
+ezmlm_mysql=yes
+AC_ARG_ENABLE(ezmlm-mysql, [  --disable-ezmlm-mysql         Disable MySQL options for mailing lists.],
+    ezmlm_mysql="$enableval",)
+case $ezmlm_mysql in
+	1*|y*|Y*)
+	AC_DEFINE_UNQUOTED(ENABLE_MYSQL,1,"")
+	;;
+	*)
+	;;
+esac
 
 cgipath="/cgi-bin/iwebadmin"
 
@@ -234,17 +245,6 @@ AC_ARG_ENABLE(indimailgroup, [  --enable-indimailgroup=GROUP      Group indimail
     ] )
 AC_DEFINE_UNQUOTED(INDIMAILGROUP,"$indimailgroup","")
 AC_SUBST(indimailgroup)
-
-ezmlm_mysql=yes
-AC_ARG_ENABLE(ezmlm-mysql, [  --disable-ezmlm-mysql         Disable MySQL options for mailing lists.],
-    ezmlm_mysql="$enableval",)
-case $ezmlm_mysql in
-	1*|y*|Y*)
-	AC_DEFINE_UNQUOTED(ENABLE_MYSQL,1,"")
-	;;
-	*)
-	;;
-esac
 
 maxusersperpage=15
 AC_ARG_ENABLE(maxusersperpage, [  --enable-maxusersperpage=#    Number of users to display on a page [15].],
@@ -378,26 +378,6 @@ case $HELP in
         enable_help="no"
         echo "checking whether to show help pages... no"
         ;;
-esac
-
-EZMLMIDX=no
-AC_ARG_ENABLE(ezmlmidx, [  --enable-ezmlmidx Enable ezmlmidx.], EZMLMIDX="$enableval",)
-if test -f $ezmlmdir/ezmlm-moderate
-then
-	EZMLMIDX=yes
-fi
-
-case $EZMLMIDX in
-	1*|y*|Y*)
-	EZMLMIDX=1
-	AC_DEFINE_UNQUOTED(EZMLMIDX,$EZMLMIDX,"")
-	echo "checking for ezmlm-idx... yes"
-	ezmlmidx="yes"
-	;;
-	*)
-	echo "checking for ezmlm-idx... no"
-	ezmlmidx="no"
-	;;
 esac
 
 AC_OUTPUT(Makefile)

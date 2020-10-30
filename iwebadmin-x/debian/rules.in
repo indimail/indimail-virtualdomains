@@ -31,7 +31,6 @@ build-stamp:
 		--disable-ipauth \
 		--disable-trivial-password \
 		--enable-ezmlmdir=$(prefix)/bin \
-		--enable-ezmlmidx \
 		--enable-domain-autofill \
 		--enable-modify-quota \
 		--enable-htmldir=@htmldir@ \
