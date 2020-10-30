@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.c,v 1.15 2020-10-30 22:29:04+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.16 2020-10-30 23:48:48+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -188,7 +188,7 @@ main(argc, argv)
 	const char     *x_forward = env_get("HTTP_X_FORWARDED_FOR");
 	static stralloc tmp = {0}, returnhttp = {0}, returntext = {0};
 	char           *pi, *rm;
-	int             i, fd;
+	int             i, fd, len;
 	struct passwd  *pw;
 	extern int      encrypt_flag;
 	char            strnum[FMT_ULONG], outbuf[2048];
@@ -228,10 +228,6 @@ main(argc, argv)
 		}
 		/*- get the real uid and gid and change to that user */
 		if (!get_assign(Domain.s, &RealDir, &Uid, &Gid)) {
-			out("<h2>coudldn't get domain details for ");
-			out(Domain.s);
-			out(" from assign file</h2>\n");
-			flush();
 			copy_status_mesg(html_text[19]);
 			show_login();
 			iclose();
@@ -268,81 +264,83 @@ main(argc, argv)
 			errflush();
 		} else
 		if (Username.len && Password.len) {
+			i = str_chr(Username.s, '@');
+			if (Username.s[i]) {
+				len = Username.len;
+				Username.s[i] = 0;
+				Username.len = i;
+				if (!stralloc_copyb(&Domain, Username.s + i + 1, len - Username.len) || !stralloc_0(&Domain))
+					die_nomem();
+				Domain.len--;
+			} else {
+				copy_status_mesg(html_text[198]);
+				show_login();
+				iclose();
+				exit(0);
+			}
 			/*- attempt to authenticate user */
 			if (!get_assign(Domain.s, &RealDir, &Uid, &Gid)) {
-				out("<h2>coudldn't get domain details for ");
-				out(Domain.s);
-				out(" from assign file</h2>\n");
-				flush();
 				copy_status_mesg(html_text[19]);
 				show_login();
 				iclose();
 				exit(0);
 			}
 			iwebadmin_suid(Gid, Uid);
-			if (!Domain.len) {
+			if (chdir(RealDir.s) < 0) {
+				out("<h2>");
+				out(html_text[171]);
+				out(" ");
+				out(RealDir.s);
+				out("</h2>\n");
+				flush();
+			}
+			load_limits();
+			if (!access(".trivial_passwords", F_OK))
+				encrypt_flag = 1;
+			if (!(pw = sql_getpw(Username.s, Domain.s))) {
 				copy_status_mesg(html_text[198]);
 				errout("iwebadmin: ");
 				errout(Username.s);
-				out(": No domain given\n");
+				out(": No such user\n");
 				errflush();
-			} else {
-				if (chdir(RealDir.s) < 0) {
-					out("<h2>");
-					out(html_text[171]);
-					out(" ");
-					out(RealDir.s);
-					out("</h2>\n");
-					flush();
-				}
-				load_limits();
-				if (!access(".trivial_passwords", F_OK))
-					encrypt_flag = 1;
-				if (!(pw = sql_getpw(Username.s, Domain.s))) {
-					copy_status_mesg(html_text[198]);
-					errout("iwebadmin: ");
-					errout(Username.s);
-					out(": No such user\n");
-					errflush();
-				} else
-				if (pw->pw_gid & NO_PASSWD_CHNG) {
-					copy_status_mesg(html_text[20]);
-					errout("iwebadmin: ");
-					errout(Username.s);
-					out(": password change denied\n");
-					errflush();
-				} else
-				if (auth_user(pw, Password.s)) {
-					copy_status_mesg(html_text[198]);
-					errout("iwebadmin: ");
-					errout(Username.s);
-					out(": incorrect password\n");
-					errflush();
-				} else
-				if (str_diffn(Password1.s, Password2.s, Password1.len > Password2.len ? Password1.len : Password2.len) != 0)
-					copy_status_mesg(html_text[200]);
-				else
-				if (!Password1.len)
-					copy_status_mesg(html_text[234]);
-				else
-				if ((i = ipasswd(Username.s, Domain.s, Password1.s, USE_POP)) != 1)
-					copy_status_mesg(html_text[140]);
+			} else
+			if (pw->pw_gid & NO_PASSWD_CHNG) {
+				copy_status_mesg(html_text[20]);
+				errout("iwebadmin: ");
+				errout(Username.s);
+				out(": password change denied\n");
+				errflush();
+			} else
+			if (auth_user(pw, Password.s)) {
+				copy_status_mesg(html_text[198]);
+				errout("iwebadmin: ");
+				errout(Username.s);
+				out(": incorrect password\n");
+				errflush();
+			} else
+			if (str_diffn(Password1.s, Password2.s, Password1.len > Password2.len ? Password1.len : Password2.len) != 0)
+				copy_status_mesg(html_text[200]);
+			else
+			if (!Password1.len)
+				copy_status_mesg(html_text[234]);
+			else
+			if ((i = ipasswd(Username.s, Domain.s, Password1.s, USE_POP)) != 1)
+				copy_status_mesg(html_text[140]);
 #ifndef TRIVIAL_PASSWORD_ENABLED
-				else
-				if (str_str(Username.s, Password1.s) != NULL)
-					copy_status_mesg(html_text[320]);
+			else
+			if (str_str(Username.s, Password1.s) != NULL)
+				copy_status_mesg(html_text[320]);
 #endif
-				else {
-					/* success */
-					copy_status_mesg(html_text[139]);
-					Password.len = 0;
-					send_template("change_password_success.html");
-					errout("iwebadmin: ");
-					errout(Username.s);
-					out(": password changed\n");
-					errflush();
-					return 0;
-				}
+			else {
+				/* success */
+				copy_status_mesg(html_text[139]);
+				Password.len = 0;
+				send_template("change_password_success.html");
+				errout("iwebadmin: ");
+				errout(Username.s);
+				out(": password changed\n");
+				errflush();
+				return 0;
 			}
 		}
 		send_template("change_password.html");
