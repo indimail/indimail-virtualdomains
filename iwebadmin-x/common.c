@@ -1,5 +1,8 @@
 /*
  * $Log: common.c,v $
+ * Revision 1.2  2020-10-30 12:43:40+05:30  Cprogrammer
+ * add newline to separate functions
+ *
  * Revision 1.1  2019-06-08 18:15:55+05:30  Cprogrammer
  * Initial revision
  *
@@ -32,6 +35,7 @@ set_status_mesg_size(int len)
 	if (!stralloc_ready(&StatusMessage, len))
 		strerr_die1sys(111, "iwebadmin: out of memory: ");
 }
+
 void
 copy_status_mesg(char *str)
 {
