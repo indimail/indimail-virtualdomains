@@ -58,10 +58,10 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root" >&2
 	exit 1
 fi
-if [ -f ${sysconfdir}/perm_list.iwebadmin ] ; then
+if [ -f ${sysconfdir}/iwebadmin.perms ] ; then
 	echo "Fixing Permissions (debian stupidity)"
 (
-/bin/grep -v "^#" ${sysconfdir}/perm_list.iwebadmin | while read line
+/bin/grep -v "^#" ${sysconfdir}/iwebadmin.perms | while read line
 do
 	fixperms $line
 done

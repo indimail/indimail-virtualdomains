@@ -13,9 +13,6 @@ bindir=@cgibindir@
 bin_PROGRAMS=@CGIBINTARGETS@
 EXTRA_PROGRAMS=iwebadmin
 
-SYSCONFDIR = @sysconfdir@
-sysconf_DATA = perm_list.iwebadmin
-
 iwebadmin_DEPENDENCIES=$(COMMONDEPENDENCIES)
 
 COMMONSOURCES=iwebadmin.c alias.c autorespond.c forward.c mailinglist.c \
@@ -30,9 +27,9 @@ iwebadmin_CFLAGS = $(AM_CFLAGS)
 
 noinst_DATA = iwebadmin.spec iwebadmin-rpmlintrc \
 			  iwebadmin-permissions.easy iwebadmin-permissions.secure \
-			  iwebadmin-permissions.paranoid
+			  iwebadmin-permissions.paranoid iwebadmin.perms
 
-MOSTLYCLEANFILES = perm_list.iwebadmin
+MOSTLYCLEANFILES = iwebadmin.perms
 
 edit = sed \
 	-e 's,@mysql_prefix\@,$(mysql_prefix),g' \
@@ -69,8 +66,8 @@ iwebadmin-rpmlintrc: iwebadmin-rpmlintrc.in
 	$(edit) iwebadmin-rpmlintrc.in > $@
 debian/Makefile: debian/Makefile.in conf-version conf-release
 	$(edit) $@.in > $@
-perm_list.iwebadmin: perm_list.iwebadmin.in
-	$(edit) $@.in > $@
+iwebadmin.perms: perm_list.in
+	$(edit) perm_list.in > $@
 iwebadmin-permissions.easy: iwebadmin-permissions.easy.in
 	$(edit) $@.in > $@
 iwebadmin-permissions.secure: iwebadmin-permissions.secure.in
@@ -107,9 +104,7 @@ install-data-local:
 		chmod 4555 $(DESTDIR)$(bindir)/iwebadmin; \
 	fi
 install-data-hook:
-	$(mkinstalldirs)         $(DESTDIR)@sysconfdir@
 	$(mkinstalldirs)         $(DESTDIR)@docdir@
-	$(INSTALL_DATA) perm_list.iwebadmin $(DESTDIR)@sysconfdir@/perm_list.iwebadmin  || exit 1
 	$(INSTALL_DATA) README $(DESTDIR)@docdir@/README || exit 1
 	$(INSTALL_DATA) README.hooks $(DESTDIR)@docdir@/README.hooks || exit 1
 	$(INSTALL_DATA) COPYING $(DESTDIR)@docdir@/COPYING || exit 1

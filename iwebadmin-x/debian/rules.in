@@ -48,6 +48,10 @@ clean:
 	rm -f build-stamp configure-stamp
 	/bin/rm -rf $(DESTDIR)
 	$(MAKE) -s clean; $(MAKE) -s distclean || true
+	if [ -f iwebadmin.perms ] ; then \
+		mkdir -p $(DESTDIR)$(qsysconfdir); \
+		install -m 0644 iwebadmin.perms "$(DESTDIR)$(qsysconfdir)"/iwebadmin.perms; \
+	fi
 	dh_testdir
 	dh_testroot
 	dh_clean
