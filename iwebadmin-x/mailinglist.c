@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.11 2020-10-29 22:21:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.12 2020-10-30 12:44:08+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -531,8 +531,10 @@ ezmlm_setreplyto(char *filename, char *newtext)
 			if (!match) {
 				if (!stralloc_append(&line, "\n"))
 					die_nomem();
-				line.len--;
 			}
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
 			/*- copy contents to new file, except for Reply-To header */
 			if (case_diffb(line.s, 8, "Reply-To")) {
 				if (substdio_put(&ssout, line.s, line.len)) {
@@ -907,6 +909,13 @@ show_list_group_now(int mod)
 			}
 			if (line.len == 0)
 				break;
+			if (!match) {
+				if (!stralloc_append(&line, "\n"))
+					die_nomem();
+			}
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
 			sort_add_entry(line.s, '\n');
 			subuser_count++;
 		}
@@ -917,20 +926,17 @@ show_list_group_now(int mod)
 				!stralloc_ready(&tmp3, 5))
 			die_nomem();
 		if (mod == 1) {
-			str_copyb(tmp1.s, "228", 4);
-			str_copyb(tmp2.s, "220", 4);
-			/*- strcpy(tmp3, "087"); */
+			str_copyb(tmp1.s, "228", 4); /*- Total Moderators: */
+			str_copyb(tmp2.s, "220", 4); /*- Moderator Address */
 		} else
 		if (mod == 2) {
-			str_copyb(tmp1.s, "244", 4);
-			str_copyb(tmp2.s, "246", 4);
-			/*- strcpy(tmp3, "245"); */
+			str_copyb(tmp1.s, "244", 4); /*- Total Digest Subscribers: */
+			str_copyb(tmp2.s, "246", 4); /*- Digest Subscriber Address */
 		} else {
-			str_copyb(tmp1.s, "230", 4);
-			str_copyb(tmp2.s, "222", 4);
-			/*- strcpy(tmp2, "084"); */
+			str_copyb(tmp1.s, "230", 4); /*- Total subscribers */
+			str_copyb(tmp2.s, "222", 4); /*- Subscriber address */
 		}
-		str_copyb(tmp3.s, "072", 4);
+		str_copyb(tmp3.s, "072", 4); /*- delete */
 		out("<TABLE border=0 width=\"100%\">\n");
 		out(" <TR>\n");
 		out("  <TH align=left COLSPAN=4><B>");
@@ -956,7 +962,7 @@ show_list_group_now(int mod)
 		out(get_html_text(tmp2.s));
 		out("</font></b></TH>\n");
 		out(" </TR>\n");
-		if (stralloc_ready(&tmp1, 16))
+		if (!stralloc_ready(&tmp1, 16))
 			die_nomem();
 		if (mod == 1)
 			str_copy(tmp1.s, "dellistmodnow");
