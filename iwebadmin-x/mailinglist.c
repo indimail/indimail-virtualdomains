@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.13 2020-10-30 13:43:18+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.14 2020-10-30 22:30:27+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -175,36 +175,26 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
 	while ((mydirent = readdir(mydir))) {
 		if (!str_diffn(".qmail-", mydirent->d_name, 7)) {
 			if ((fd = open_read(mydirent->d_name)) == -1) {
-				if (ezmlm_idx) {
+				if (ezmlm_idx)
 					out("<tr><td colspan=12>");
-					out(html_text[144]);
-					out(" ");
-					out(mydirent->d_name);
-					out("</td></tr>\n");
-				} else {
+				else
 					out("<tr><td colspan=5>");
-					out(html_text[144]);
-					out(" ");
-					out(mydirent->d_name);
-					out("</td></tr>\n");
-				}
+				out(html_text[144]);
+				out(" ");
+				out(mydirent->d_name);
+				out("</td></tr>\n");
 				continue;
 			}
 			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &line, &match, '\n') == -1) {
-				if (ezmlm_idx) {
+				if (ezmlm_idx)
 					out("<tr><td colspan=12>");
-					out(html_text[144]);
-					out(" ");
-					out(mydirent->d_name);
-					out("</td></tr>\n");
-				} else {
+				else
 					out("<tr><td colspan=5>");
-					out(html_text[144]);
-					out(" ");
-					out(mydirent->d_name);
-					out("</td></tr>\n");
-				}
+				out(html_text[144]);
+				out(" ");
+				out(mydirent->d_name);
+				out("</td></tr>\n");
 				continue;
 			}
 			close(fd);
@@ -301,19 +291,14 @@ show_mailing_list_line2(char *user, char *dom, time_t mytime, char *dir)
 			}
 			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ssin, &line, &match, '\n') == -1) {
-				if (ezmlm_idx) {
+				if (ezmlm_idx)
 					out("<tr><td colspan=12>");
-					out(html_text[144]);
-					out(" ");
-					out(mydirent->d_name);
-					out("</td></tr>\n");
-				} else {
+				else
 					out("<tr><td colspan=5>");
-					out(html_text[144]);
-					out(" ");
-					out(mydirent->d_name);
-					out("</td></tr>\n");
-				}
+				out(html_text[144]);
+				out(" ");
+				out(mydirent->d_name);
+				out("</td></tr>\n");
 				continue;
 			}
 			close(fd);
@@ -558,15 +543,52 @@ ezmlm_setreplyto(char *filename, char *newtext)
 		unlink(tempfn.s);
 }
 
+#ifdef ENABLE_MYSQL
+void
+write_mysql(char *mysql_host, char *mysql_socket, char *mysql_user, char *mysql_passwd, char *mysql_database, char *mysql_table)
+{
+	char            outbuf[1024];
+	int             fd;
+	struct substdio ssout;
+
+	if (!stralloc_copy(&TmpBuf, &ActionUser) ||
+			!stralloc_catb(&TmpBuf, "/sql", 4) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	if (!mysql_host || !mysql_socket || !mysql_user || !mysql_passwd || !mysql_database || !mysql_table) {
+		unlink(TmpBuf.s);
+		return;
+	}
+	if ((fd = open_trunc(TmpBuf.s)) == -1)
+		return;
+	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	if (substdio_puts(&ssout, mysql_host) || substdio_put(&ssout, ":", 1) ||
+			substdio_puts(&ssout, mysql_socket) || substdio_put(&ssout, ":", 1) ||
+			substdio_puts(&ssout, mysql_user) || substdio_put(&ssout, ":", 1) ||
+			substdio_puts(&ssout, mysql_passwd) || substdio_put(&ssout, ":", 1) ||
+			substdio_puts(&ssout, mysql_database) || substdio_put(&ssout, ":", 1) ||
+			substdio_puts(&ssout, mysql_table) || substdio_put(&ssout, "\n", 1) ||
+			substdio_flush(&ssout)) {
+		close(fd);
+		unlink(TmpBuf.s);
+		return;
+	}
+	close(fd);
+	return;
+}
+#endif
+
 void
 ezmlmMake(int newlist)
 {
-	int             pid, len, plen, fd, argc, loop, i;
+	int             pid, len, plen, fd, argc, loop, i, sql_support = 0;
 	struct substdio ssout;
 	static stralloc list_owner = {0}, owneremail = {0};
 	static stralloc loop_ch = {0}, tmp1 = {0}, tmp2 = {0}, tmp3 = {0};
 	char            options[128], outbuf[1024];
 	char           *t, *s;
+	char           *mysql_host = 0, *mysql_user = 0, *mysql_passwd = 0,
+				   *mysql_socket = 0, *mysql_database = 0, *mysql_table = 0;
 	char           *arguments[MAX_BUFF];
 	/*-
 	 * Initialize listopt to be a string of the characters A-Z, with each one
@@ -613,7 +635,8 @@ ezmlmMake(int newlist)
 		for (s = loop_ch.s; *s; s++) {
 			if ((*s >= 'A') && (*s <= 'Z'))
 				listopt[*s - 'A'] = *s;
-			else if ((*s >= 'a') && (*s <= 'z'))
+			else
+			if ((*s >= 'a') && (*s <= 'z'))
 				listopt[*s - 'a'] = *s;
 		}
 	}
@@ -649,20 +672,23 @@ ezmlmMake(int newlist)
 		/*- check for sql support */
 		GetValue(TmpCGI, &tmp1, "sqlsupport=");
 		if (tmp1.len > 0) {
+			sql_support = 1;
 			arguments[argc++] = s;
 			s += fmt_strn(s, tmp1.s, tmp1.len);
 			*s++ = 0;
 			arguments[argc++] = s;
-			for (loop = 1; loop <= NUM_SQL_OPTIONS; loop++) {
+			for (tmp2.len = 0, loop = 1; loop <= NUM_SQL_OPTIONS; loop++) {
 				t = tmp1.s;
 				t += fmt_strn(t, "sql", 3);
 				t += fmt_int(t, loop);
 				*t++ = '=';
 				*t++ = 0;
 				GetValue(TmpCGI, &loop_ch, tmp1.s);
+				if (!stralloc_cat(&tmp2, &loop_ch) || !stralloc_0(&tmp2))
+					die_nomem();
 				s += fmt_strn(s, loop_ch.s, loop_ch.len);
 				s += fmt_strn(s, ":", 1);
-			}
+			} /*- for (tmp2.len = 0, loop = 1; loop <= NUM_SQL_OPTIONS; loop++) { */
 			/*- remove trailing ':' */
 			s--;
 			*s++ = 0;
@@ -673,6 +699,40 @@ ezmlmMake(int newlist)
 		*s++ = listopt['p' - 'a'];	/* p or P */
 		*s++ = 0;	/* add NULL terminator */
 	}
+	if (sql_support) {
+		for (len = 0, loop = 1; loop <= NUM_SQL_OPTIONS; loop++) {
+			switch (loop)
+			{
+			case 1:
+				mysql_host = tmp2.s + len;
+				len += (str_len(mysql_host) + 1);
+				break;
+			case 2:
+				mysql_socket = tmp2.s + len;
+				len += (str_len(mysql_socket) + 1);
+				break;
+			case 3:
+				mysql_user = tmp2.s + len;
+				len += (str_len(mysql_user) + 1);
+				break;
+			case 4:
+				mysql_passwd = tmp2.s + len;
+				len += (str_len(mysql_passwd) + 1);
+				break;
+			case 5:
+				mysql_database = tmp2.s + len;
+				len += (str_len(mysql_database) + 1);
+				break;
+			case 6:
+				mysql_table = tmp2.s + len;
+				len += (str_len(mysql_table) + 1);
+				break;
+			}
+		}
+	}
+#ifdef ENABLE_MYSQL
+	write_mysql(mysql_host, mysql_socket, mysql_user, mysql_passwd, mysql_database, mysql_table);
+#endif
 	/*- make dotqmail name */
 	if (!stralloc_copy(&dotqmail_name, &ActionUser) || !stralloc_0(&dotqmail_name))
 		die_nomem();
@@ -773,7 +833,7 @@ ezmlmMake(int newlist)
 			!stralloc_0(&tmp1))
 		die_nomem();
 	if ((fd = open_trunc(tmp1.s)) == -1) {
-		strerr_warn3("open_trunc: ", tmp1.s,  ": ", &strerr_sys);
+		strerr_warn3("ezmlm_make: open_trunc: ", tmp1.s,  ": ", &strerr_sys);
 		return;
 	}
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
@@ -1336,7 +1396,7 @@ modmailinglist()
 			!stralloc_catb(&TmpBuf, "-owner", 6) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
-	if ((fd = open_read(TmpBuf.s)) > 01) {
+	if ((fd = open_read(TmpBuf.s)) != -1) {
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("modmailinglist: read: ", TmpBuf.s, ": ", &strerr_sys);
@@ -1371,7 +1431,7 @@ modmailinglist()
 			!stralloc_0(&TmpBuf))
 		die_nomem();
 	/*- get the Reply-To setting for the list */
-	if ((fd = open_read(TmpBuf.s)) > 0) {
+	if ((fd = open_read(TmpBuf.s)) != -1) {
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 		for (;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
@@ -1661,7 +1721,7 @@ set_options()
 			!stralloc_catb(&TmpBuf, "-default", 8) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
-	if ((fd = open_read(TmpBuf.s)) > 0) {
+	if ((fd = open_read(TmpBuf.s)) != -1) {
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 		for (;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
@@ -1709,7 +1769,7 @@ set_options()
 			!stralloc_cat(&TmpBuf, &dotqmail_name) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
-	if ((fd = open_read(TmpBuf.s)) > 0) {
+	if ((fd = open_read(TmpBuf.s)) != -1) {
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 		for (;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
@@ -1799,10 +1859,12 @@ default_options()
 void
 show_current_list_values()
 {
-	int             fd, ok, checked, len, plen, match;
-	static stralloc listname = {0}, line = {0};
+	int             i, fd, ok, checked, len, plen, match, loop;
+	static stralloc listname = {0}, line1 = {0}, line2 = {0};
 	char            strnum[FMT_ULONG];
 	char           *ptr, *cptr;
+	char           *mysql_host = 0, *mysql_user = 0, *mysql_passwd = 0,
+				   *mysql_socket = 0;
 	char            inbuf[1024];
 	struct substdio ssin;
 
@@ -1985,17 +2047,19 @@ show_current_list_values()
 	build_option_str("CHECKBOX", "opt16", "i", html_text[291]);
 	out("</P>\n");
 
-	/*- begin MySQL options */
-	/*- See if sql is turned on */
+	/*- Begin MySQL options
+	 * See if sql is turned on
+	 * host:username:password:socket_or_port:ssl_or_nossl
+	 */
 	checked = 0;
 	if (!stralloc_copy(&TmpBuf, &ActionUser) ||
 			!stralloc_catb(&TmpBuf, "/sql", 4) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
-	if ((fd = open_read(TmpBuf.s)) > 0) {
+	if ((fd = open_read(TmpBuf.s)) != -1) {
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 		checked = 1;
-		if (getln(&ssin, &line, &match, '\n') == -1) {
+		if (getln(&ssin, &line1, &match, '\n') == -1) {
 			strerr_warn3("show_current_list_values: read: ", TmpBuf.s, ": ", &strerr_sys);
 			out(html_text[144]);
 			out(" ");
@@ -2005,56 +2069,125 @@ show_current_list_values()
 			return;
 		}
 		if (match) {
-			line.len--;
-			line.s[line.len] = 0;
+			line1.len--;
+			line1.s[line1.len] = 0;
 		} else {
-			if (!stralloc_0(&line))
+			if (!stralloc_0(&line1))
 				die_nomem();
-			line.len--;
+			line1.len--;
 		}
 		close(fd);
 	}
 #ifdef ENABLE_MYSQL
 	out("<P><B><U>");
-	out(html_text[99]);
+	out(html_text[99]); /*- MySQL Settings */
 	out("</U></B><BR>\n");
 	out("<input type=checkbox name=\"sqlsupport\" value=\"-6\"");
 	if (checked)
 		out(" CHECKED");
 	out("> ");
-	out(html_text[53]);
+	out(html_text[53]); /*- Enable MySQL support */
 	/*- parse dir/sql file for SQL settings */
 	out("    <table cellpadding=0 cellspacing=2 border=0>\n");
 #else
 	if (checked)
 		out("<INPUT TYPE=HIDDEN NAME=sqlsupport VALUE=\"-6\">\n");
 #endif
+	if (!stralloc_copys(&TmpBuf, SYSCONFDIR) ||
+			!stralloc_catb(&TmpBuf, "/control/host.mysql", 23) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	if ((fd = open_read(TmpBuf.s)) != -1) {
+		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		if (getln(&ssin, &line2, &match, '\n') == -1) {
+			strerr_warn3("show_current_list_values: read: ", TmpBuf.s, ": ", &strerr_sys);
+			out(html_text[144]);
+			out(" ");
+			out(TmpBuf.s);
+			out(" 1<BR>\n");
+			flush();
+			return;
+		}
+		if (match) {
+			line2.len--;
+			line2.s[line2.len] = 0;
+		} else {
+			if (!stralloc_0(&line2))
+				die_nomem();
+			line2.len--;
+		}
+		close(fd);
+	}
+	/*- host:user:password:socket_or_port:ssl_or_nossl */
+	for (plen = 0, ok = loop = 1; ok && loop < NUM_SQL_OPTIONS - 1; loop++) {
+		switch (loop)
+		{
+		case 1:
+			mysql_host = line2.s + plen;
+			i = str_chr(mysql_host, ':');
+			if (mysql_host[i])
+				mysql_host[i] = 0;
+			else
+				ok = 0;
+			plen += (str_len(mysql_host) + 1);
+			break;
+		case 2:
+			mysql_user = line2.s + plen;
+			i = str_chr(mysql_user, ':');
+			if (mysql_user[i])
+				mysql_user[i] = 0;
+			else
+				ok = 0;
+			plen += (str_len(mysql_user) + 1);
+			break;
+		case 3:
+			mysql_passwd = line2.s + plen;
+			i = str_chr(mysql_passwd, ':');
+			if (mysql_passwd[i])
+				mysql_passwd[i] = 0;
+			else
+				ok = 0;
+			plen += (str_len(mysql_passwd) + 1);
+			break;
+		case 4:
+			mysql_socket = line2.s + plen;
+			i = str_chr(mysql_socket, ':');
+			if (mysql_socket[i])
+				mysql_socket[i] = 0;
+			else
+				ok = 0;
+			plen += (str_len(mysql_socket) + 1);
+			break;
+		}
+	}
 
 	/*- get hostname */
-	if (line.len) {
-		ptr = line.s;
+	if (line1.len) {
+		ptr = line1.s;
 		for (cptr = ptr; *cptr && *cptr != ':';cptr++);
 		if (*cptr == ':') {
 			ok = 1;
 			*cptr = 0;
 		} else {
 			ok = 0;
-			ptr = "localhost";
+			ptr = mysql_host ? mysql_host : "localhost";
 		}
 	} else {
 		ok = 0;
-		ptr = "localhost";
+		ptr = mysql_host ? mysql_host : "localhost";
 	}
 #ifdef ENABLE_MYSQL
 	out("      <tr>\n");
 	out("        <td ALIGN=RIGHT>");
-	out(html_text[54]);
+	out(html_text[54]); /*- Host */
 	out(":\n");
 	out("          </td><td>\n");
 	printh("          <input type=text name=sql1 value=\"%H\"></td>\n", ptr);
 #else
 	printh("<INPUT TYPE=HIDDEN NAME=sql1 VALUE=\"%H\">\n", ptr);
 #endif
+
+	/*- get port */
 	if (ok) {
 		ptr = cptr + 1;
 		for (cptr = ptr; *cptr && *cptr != ':';cptr++);
@@ -2063,16 +2196,15 @@ show_current_list_values()
 			*cptr = 0;
 		} else {
 			ok = 0;
-			ptr = "3306";
+			ptr = mysql_socket ? mysql_socket : "/var/run/mysqld/mysqld.sock";
 		}
 	} else {
 		ok = 0;
-		ptr = "3306";
+		ptr = mysql_socket ? mysql_socket : "/var/run/mysqld/mysqld.sock";
 	}
-	/*- get port */
 #ifdef ENABLE_MYSQL
 	out("        <td ALIGN=RIGHT>");
-	out(html_text[55]);
+	out(html_text[55]); /*- Port */
 	out(":\n");
 	out("          </td><td>\n");
 	printh("          <input type=text size=7 name=sql2 value=\"%H\"></td>\n", ptr);
@@ -2081,6 +2213,7 @@ show_current_list_values()
 	printh("<INPUT TYPE=HIDDEN NAME=sql2 VALUE=\"%H\">\n", ptr);
 #endif
 
+	/*- get user */
 	if (ok) {
 		ptr = cptr + 1; /*- user */
 		for (cptr = ptr; *cptr && *cptr != ':';cptr++);
@@ -2089,16 +2222,16 @@ show_current_list_values()
 			*cptr = 0;
 		} else {
 			ok = 0;
-			ptr = "";
+			ptr = mysql_user ? mysql_user : "";
 		}
 	} else {
 		ok = 0;
-		ptr = "";
+		ptr = mysql_user ? mysql_user : "";
 	}
 #ifdef ENABLE_MYSQL
 	out("      <tr>\n");
 	out("        <td ALIGN=RIGHT>");
-	out(html_text[56]);
+	out(html_text[56]); /*- user */
 	out(":\n");
 	out("          </td><td>\n");
 	printh("          <input type=text name=sql3 value=\"%H\"></td>\n", ptr);
@@ -2106,6 +2239,7 @@ show_current_list_values()
 	printh("<INPUT TYPE=HIDDEN NAME=sql3 VALUE=\"%H\">\n", ptr);
 #endif
 
+	/*- get password */
 	if (ok) {
 		ptr = cptr + 1; /*- password */
 		for (cptr = ptr; *cptr && *cptr != ':';cptr++);
@@ -2114,15 +2248,15 @@ show_current_list_values()
 			*cptr = 0;
 		} else {
 			ok = 0;
-			ptr = "";
+			ptr = mysql_passwd ? mysql_passwd : "";
 		}
 	} else {
 		ok = 0;
-		ptr = "";
+		ptr = mysql_passwd ? mysql_passwd : "";
 	}
 #ifdef ENABLE_MYSQL
 	out("        <td ALIGN=RIGHT>");
-	out(html_text[57]);
+	out(html_text[57]); /*- password */
 	out(":\n");
 	out("          </td><td>\n");
 	printh("          <input type=text name=sql4 value=\"%H\"></td>\n", ptr);
@@ -2131,6 +2265,7 @@ show_current_list_values()
 	printh("<INPUT TYPE=HIDDEN NAME=sql4 VALUE=\"%H\">\n", ptr);
 #endif
 
+	/*- get database */
 	if (ok) {
 		ptr = cptr + 1; /*- database */
 		for (cptr = ptr; *cptr && *cptr != ':';cptr++);
@@ -2139,16 +2274,16 @@ show_current_list_values()
 			*cptr = 0;
 		} else {
 			ok = 0;
-			ptr = "";
+			ptr = "indimail";
 		}
 	} else {
 		ok = 0;
-		ptr = "";
+		ptr = "indimail";
 	}
 #ifdef ENABLE_MYSQL
 	out("      <tr>\n");
 	out("        <td ALIGN=RIGHT>");
-	out(html_text[58]);
+	out(html_text[58]); /*- database */
 	out(":\n");
 	out("          </td><td>\n");
 	printh("          <input type=text name=sql5 value=\"%H\"></td>\n", ptr);
@@ -2156,6 +2291,7 @@ show_current_list_values()
 	printh("<INPUT TYPE=HIDDEN NAME=sql5 VALUE=\"%H\">\n", ptr);
 #endif
 
+	/*- get tablename */
 	if (ok) {
 		ptr = cptr + 1; /*- table name */
 		for (cptr = ptr; *cptr && *cptr != ':';cptr++);
@@ -2172,7 +2308,7 @@ show_current_list_values()
 	}
 #ifdef ENABLE_MYSQL
 	out("        <td ALIGN=RIGHT>");
-	out(html_text[59]);
+	out(html_text[59]); /*- table */
 	out(":\n");
 	out("          </td><td>\n");
 	printh("          <input type=text name=\"sql6\" value=\"%H\"></td>\n", ptr);
@@ -2199,10 +2335,10 @@ get_mailinglist_prefix(stralloc *prefix)
 			!stralloc_catb(&TmpBuf, "/prefix", 7) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
-	if ((fd = open_read(TmpBuf.s)) > 0) {
+	if ((fd = open_read(TmpBuf.s)) != -1) {
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1) {
-			strerr_warn3("show_current_list_values: read: ", TmpBuf.s, ": ", &strerr_sys);
+			strerr_warn3("get_mailinglist_prefix: read: ", TmpBuf.s, ": ", &strerr_sys);
 			out(html_text[144]);
 			out(" ");
 			out(TmpBuf.s);
