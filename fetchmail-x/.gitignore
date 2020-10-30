@@ -34,3 +34,4 @@ ChangeLog.fetchmail
 compile
 py-compile
 ylwrap
+conf-release
