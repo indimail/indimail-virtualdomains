@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.14 2020-10-30 22:30:27+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.15 2020-10-31 00:39:56+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -555,7 +555,12 @@ write_mysql(char *mysql_host, char *mysql_socket, char *mysql_user, char *mysql_
 			!stralloc_catb(&TmpBuf, "/sql", 4) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
+	TmpBuf.len--;
 	if (!mysql_host || !mysql_socket || !mysql_user || !mysql_passwd || !mysql_database || !mysql_table) {
+		unlink(TmpBuf.s);
+		TmpBuf.len -= 3;
+		if (!stralloc_catb(&TmpBuf, "subdb", 5) || !stralloc_0(&TmpBuf))
+			die_nomem();
 		unlink(TmpBuf.s);
 		return;
 	}
