@@ -14,7 +14,7 @@ config.sub
 depcomp
 install-sh
 obs.mk
-iwebadmin_perm_list
+iwebadmin.perms
 compile
 debian/obs.mk
 debian/*.gz
@@ -39,6 +39,5 @@ conf-release
 iwebadmin-permissions.easy
 iwebadmin-permissions.paranoid
 iwebadmin-permissions.secure
-perm_list.iwebadmin
 debian/changelog.in
 doc/ChangeLog
