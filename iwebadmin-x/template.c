@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.15 2020-10-31 13:45:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.16 2020-10-31 17:22:37+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -532,7 +532,7 @@ send_template_now(char *filename)
 					show_users(Username.s, Domain.s, mytime);
 					break;
 				case 'V': /* show version number */
-					out("<a href=\"http://sourceforge.net/projects/indimail/\">");
+					out("<a href=\"https://github.com/mbhangui/indimail-virtualdomains/tree/master/iwebadmin-x\">");
 					out(PACKAGE);
 					out("</a> ");
 					out(VERSION);
