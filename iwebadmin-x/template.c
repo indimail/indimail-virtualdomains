@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.14 2020-10-30 22:24:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.15 2020-10-31 13:45:01+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -65,6 +65,8 @@ void            transmit_block(substdio *ss);
 void            ignore_to_end_tag(substdio *ss);
 void            get_calling_host();
 char           *get_session_val(char *session_var);
+
+extern int      ezmlm_make;
 
 /*
  * send an html template to the browser 
@@ -183,10 +185,10 @@ send_template_now(char *filename)
 					out(Lang);
 					break;
 				case 'A': /* send the action user parameter */
-					printh("%H", ActionUser.s);
+					printh("%H", ActionUser.len ? ActionUser.s : "");
 					break;
 				case 'a': /* send the Alias parameter */
-					printh("%H", Alias.s);
+					printh("%H", Alias.len ? Alias.s : "");
 					break;
 				case 'B': /* show number of pop accounts */
 					load_limits();
@@ -474,7 +476,7 @@ send_template_now(char *filename)
 					break;
 				case 'Q': /* show quota usage */
 					vpw = sql_getpw(ActionUser.s, Domain.s);
-					if (str_diffn(vpw->pw_shell, "NOQUOTA", 8)) {
+					if (vpw && str_diffn(vpw->pw_shell, "NOQUOTA", 8)) {
 						mdir_t          diskquota = 0;
 						mdir_t          maxmsg = 0;
 
@@ -490,7 +492,7 @@ send_template_now(char *filename)
 					break;
 				case 'q': /* display user's quota (mod user page) */
 					vpw = sql_getpw(ActionUser.s, Domain.s);
-					if (str_diffn(vpw->pw_shell, "NOQUOTA", 8)) {
+					if (vpw && str_diffn(vpw->pw_shell, "NOQUOTA", 8)) {
 						quota_to_megabytes(qconvert, vpw->pw_shell);
 						out(qconvert);
 					} else {
@@ -524,7 +526,7 @@ send_template_now(char *filename)
 					transmit_block(&ssin);
 					break;
 				case 'U': /* send the username parameter */
-					printh("%H", Username.s);
+					printh("%H", Username.len ? Username.s : "");
 					break;
 				case 'u': /* show the users */
 					show_users(Username.s, Domain.s, mytime);
@@ -538,7 +540,7 @@ send_template_now(char *filename)
 					out("<a href=\"http://localhost://mailmrtg/\">MRTG Graphs</a><BR>");
 					break;
 				case 'v': /* display the main menu */
-					printh("<font size=\"2\" color=\"#000000\"><b>%H</b></font><br><br>", Domain.s);
+					printh("<font size=\"2\" color=\"#000000\"><b>%H</b></font><br><br>", Domain.len ? Domain.s : "");
 					out("<font size=\"2\" color=\"#ff0000\"><b>");
 					out(html_text[1]);
 					out("</b></font><br>");
@@ -561,7 +563,7 @@ send_template_now(char *filename)
 							out(html_text[77]);
 							out("</b></a></font><br>");
 						}
-						if (*EZMLMDIR != 'n' && MaxMailingLists != 0) {
+						if (ezmlm_make == 1 && MaxMailingLists != 0) {
 							printh("<a href=\"%s\">", cgiurl("showmailinglists"));
 							out("<font size=\"2\" color=\"#000000\"><b>");
 							out(html_text[80]);
@@ -579,7 +581,7 @@ send_template_now(char *filename)
 						vpw = sql_getpw(Username.s, Domain.s);
 						printh("<a href=\"%s&moduser=%C\">", cgiurl("moduser"), Username.s);
 						printh("<font size=\"2\" color=\"#000000\"><b>%s %H</b></font></a><br><br>", html_text[111], Username.s);
-						if (str_diffn(vpw->pw_shell, "NOQUOTA", 8)) {
+						if (vpw && str_diffn(vpw->pw_shell, "NOQUOTA", 8)) {
 							quota_to_megabytes(qconvert, vpw->pw_shell);
 						} else {
 							str_copy(qconvert, html_text[229]);
@@ -624,7 +626,7 @@ send_template_now(char *filename)
 							out(html_text[128]);
 							out("</b></a></font><br>");
 						}
-						if (*EZMLMDIR != 'n' && MaxMailingLists != 0) {
+						if (ezmlm_make == 1 && MaxMailingLists != 0) {
 							printh("<a href=\"%s\">", cgiurl("addmailinglist"));
 							out("<font size=\"2\" color=\"#000000\"><b>");
 							out(html_text[129]);
@@ -633,7 +635,7 @@ send_template_now(char *filename)
 					}
 					break;
 				case 'W': /* Password */
-					printh("%H", Password.s);
+					printh("%H", Password.len ? Password.s : "");
 					break;
 				case 'X': /* dictionary entry, followed by three more chars for the entry # */
 					for (i = 0; i < 3; ++i)
