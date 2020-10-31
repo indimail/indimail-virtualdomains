@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.15 2020-10-31 00:39:56+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.16 2020-10-31 13:44:41+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -85,6 +85,8 @@ show_mailing_lists()
 		exit(0);
 	}
 
+	if (!ezmlm_make || MaxMailingLists == 0)
+		return;
 	/*- see if there's anything to display */
 	count_mailinglists();
 	if (CurMailingLists == 0) {
@@ -92,10 +94,6 @@ show_mailing_lists()
 		show_menu();
 		iclose();
 		exit(0);
-	}
-
-	if (MaxMailingLists == 0) {
-		return;
 	}
 	send_template("show_mailinglist.html");
 }
@@ -105,7 +103,7 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
 {
 	DIR            *mydir;
 	struct dirent  *mydirent;
-	int             fd, i, match;
+	int             fd, i, match, ok;
 	char           *addr;
 	char            inbuf[1024];
 	static stralloc testfn = {0}, line = {0};
@@ -118,7 +116,7 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
 		iclose();
 		exit(0);
 	}
-	if (MaxMailingLists == 0)
+	if (!ezmlm_make || MaxMailingLists == 0)
 		return;
 	if (!(mydir = opendir("."))) {
 		out("<tr><td>");
@@ -208,11 +206,20 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
 	closedir(mydir);
 	sort_dosort();
 	for (i = 0; (addr = (char *) sort_get_entry(i)); ++i) {
-		if (!stralloc_copyb(&testfn, ".qmail-", 7) ||
-				!stralloc_cats(&testfn, addr) ||
-				!stralloc_catb(&testfn, "-digest-owner", 13) ||
+		if (!stralloc_copys(&testfn, addr) ||
+				!stralloc_catb(&testfn, "/digested", 9) ||
 				!stralloc_0(&testfn))
 			die_nomem();
+		if (!access(testfn.s, F_OK))
+			ok = 1;
+		else {
+			ok = 0;
+			if (!stralloc_copyb(&testfn, ".qmail-", 7) ||
+					!stralloc_cats(&testfn, addr) ||
+					!stralloc_catb(&testfn, "-digest-owner", 13) ||
+					!stralloc_0(&testfn))
+				die_nomem();
+		}
 		/*- convert ':' in addr to '.' */
 		str_replace(addr, ':', '.');
 
@@ -232,15 +239,37 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
 			qmail_button(addr, "dellistmod", user, dom, mytime, "delete.png");
 			qmail_button(addr, "showlistmod", user, dom, mytime, "delete.png");
 
+			if (!ok && (fd = open_read(testfn.s)) != -1) {
+				substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+				if (getln(&ssin, &line, &match, '\n') == -1)
+					ok = 0;
+				else
+				if (line.len) {
+					if (match) {
+						line.len--;
+						line.s[line.len] = 0;
+					} else {
+						if (!stralloc_0(&line))
+							die_nomem();
+						line.len--;
+					}
+					i = str_rchr(line.s, '/');
+					if (line.s[i] && !str_diffn(line.s + i, "/Mailbox", 8))
+						ok = 0;
+					else
+						ok = 1;
+				} else
+					ok = 0;
+				close(fd);
+			} 
 			/*- Is it a digest list?  */
-			if ((fd = open_read(testfn.s)) == -1) {
-				/*- not a digest list */
-				out("<TD COLSPAN=3> </TD>");
-			} else {
+			if (ok) {
 				qmail_button(addr, "addlistdig", user, dom, mytime, "delete.png");
 				qmail_button(addr, "dellistdig", user, dom, mytime, "delete.png");
 				qmail_button(addr, "showlistdig", user, dom, mytime, "delete.png");
-				close(fd);
+			} else {
+				/*- not a digest list */
+				out("<TD COLSPAN=3> </TD>");
 			}
 		}
 		out("</tr>\n");
@@ -353,6 +382,8 @@ addmailinglist()
 		exit(0);
 	}
 
+	if (!ezmlm_make || MaxMailingLists == 0)
+		return;
 	count_mailinglists();
 	load_limits();
 	if (MaxMailingLists != -1 && CurMailingLists >= MaxMailingLists) {
@@ -838,7 +869,7 @@ ezmlmMake(int newlist)
 			!stralloc_0(&tmp1))
 		die_nomem();
 	if ((fd = open_trunc(tmp1.s)) == -1) {
-		strerr_warn3("ezmlm_make: open_trunc: ", tmp1.s,  ": ", &strerr_sys);
+		strerr_warn3("ezmlmMake: open_trunc: ", tmp1.s,  ": ", &strerr_sys);
 		return;
 	}
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
@@ -870,6 +901,8 @@ addmailinglistnow()
 	char            strnum[FMT_ULONG];
 	int             len, plen;
 
+	if (!ezmlm_make || MaxMailingLists == 0)
+		return;
 	count_mailinglists();
 	load_limits();
 	if (MaxMailingLists != -1 && CurMailingLists >= MaxMailingLists) {
@@ -1070,7 +1103,7 @@ show_list_group(char *template)
 		iclose();
 		exit(0);
 	}
-	if (MaxMailingLists == 0)
+	if (!ezmlm_make || MaxMailingLists == 0)
 		return;
 	send_template(template);
 }
