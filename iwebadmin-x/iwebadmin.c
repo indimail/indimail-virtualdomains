@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.c,v 1.16 2020-10-30 23:48:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.17 2020-10-31 13:43:38+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -72,8 +72,7 @@ stralloc        Username = {0}, Domain = {0}, Password = {0}, Gecos = {0},
 				LineData = {0}, Action = {0}, Message = {0}, SearchUser = {0},
 				TmpBuf = {0}, RealDir = {0}, line = {0}, StatusMessage = {0};
 int             CGIValues[256];
-int             ezmlm_idx = 0;
-int             ezmlm_make = 0;
+int             ezmlm_idx = -1, ezmlm_make = -1, debug = 0;
 time_t          mytime;
 char           *TmpCGI = NULL;
 int             Compressed;
@@ -179,6 +178,46 @@ del_id_files(stralloc *dirname)
 	return;
 }
 
+void
+conf_iwebadmin()
+{
+	int             fd, match;
+	char            inbuf[1024];
+	struct substdio ssin;
+
+	if (!stralloc_copys(&TmpBuf, SYSCONFDIR) ||
+			!stralloc_catb(&TmpBuf, "/conf-iwebadmin", 23) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	if ((fd = open_read(TmpBuf.s)) != -1) {
+		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		for (;;) {
+			if (getln(&ssin, &line, &match, '\n') == -1)
+				return;
+			if (line.len == 0)
+				break;
+			if (match) {
+				line.len--;
+				line.s[line.len] = 0;
+			} else {
+				if (!stralloc_0(&line))
+					die_nomem();
+				line.len--;
+			}
+			if (!str_diffn(line.s, "no-ezmlm", 9))
+				ezmlm_make = 0;
+			else
+			if (!str_diffn(line.s, "no-ezmlm-idx", 13))
+				ezmlm_idx = 0;
+			else
+			if (!str_diffn(line.s, "debug", 5))
+				debug = 1;
+		}
+		close(fd);
+	}
+	return;
+}
+
 int
 main(argc, argv)
 	int             argc;
@@ -195,26 +234,28 @@ main(argc, argv)
 	struct substdio ssout;
 
 	mytime = time(0);
-	while (!access("/tmp/gdb.wait", F_OK))
+	conf_iwebadmin();
+	if (debug)
+		while (!access("/tmp/gdb.wait", F_OK))
 			sleep(1);
 	init_globals();
 	if (x_forward)
 		ip_addr = x_forward;
 	if (!ip_addr)
 		ip_addr = "127.0.0.1";
-	ezmlm_make = !access(EZMLMDIR"/ezmlm-make", F_OK);
-	if (ezmlm_make)
-		ezmlm_idx = !access(EZMLMDIR"/ezmlm-idx", F_OK);
+	if (ezmlm_make == -1)
+		ezmlm_make = !access(EZMLMDIR"/ezmlm-make", X_OK);
+	if (ezmlm_make && ezmlm_idx == -1)
+		ezmlm_idx = !access(EZMLMDIR"/ezmlm-idx", X_OK);
 	if ((pi = env_get("PATH_INFO")) && (!stralloc_copys(&tmp, pi + 5) || !stralloc_0(&tmp)))
 		die_nomem();
 	if (!(rm = env_get("REQUEST_METHOD")))
 		rm = "";
 	if (rm && !str_diffn(rm, "POST", 4))
 		get_cgi(); /*- sets TmpCGI */
-	else {
-		if (!(TmpCGI = env_get("QUERY_STRING")))
-			TmpCGI = "";
-	}
+	else 
+	if (!(TmpCGI = env_get("QUERY_STRING")))
+		TmpCGI = "";
 	if (pi && !str_diffn(pi, "/com/", 5)) {
 		GetValue(TmpCGI, &Username, "user=");
 		GetValue(TmpCGI, &Domain, "dom=");
