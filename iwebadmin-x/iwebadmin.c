@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.c,v 1.18 2020-11-01 12:16:58+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.19 2020-11-01 17:50:35+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -238,6 +238,14 @@ main(argc, argv)
 	if (debug)
 		while (!access("/tmp/gdb.wait", F_OK))
 			sleep(1);
+	if (debug) {
+		strnum[fmt_int(strnum, argc)] = 0;
+		strerr_warn2("argc = ", strnum, 0);
+		for (i = 0;i < argc;i++) {
+			strnum[fmt_int(strnum, i)] = 0;
+			strerr_warn4("argv[", strnum, "] = ", argv[i], 0);
+		}
+	}
 	init_globals();
 	if (x_forward)
 		ip_addr = x_forward;
@@ -256,6 +264,11 @@ main(argc, argv)
 	else 
 	if (!(TmpCGI = env_get("QUERY_STRING")))
 		TmpCGI = "";
+	if (debug) {
+		strerr_warn2("PATH_INFO=", pi, 0);
+		strerr_warn2("REQUEST_METHOD=", rm, 0);
+		strerr_warn2("QUERY_STRING=", TmpCGI, 0);
+	}
 	if (pi && !str_diffn(pi, "/com/", 5)) {
 		GetValue(TmpCGI, &Username, "user=");
 		GetValue(TmpCGI, &Domain, "dom=");
