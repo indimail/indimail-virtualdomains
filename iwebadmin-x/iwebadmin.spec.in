@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.41 2020-10-30 22:45:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.42 2020-11-01 12:17:11+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -237,8 +237,6 @@ install -m 0644 %{name}-release  %{buildroot}%{sysconfdir}/%{name}-release
 %attr(444,root,root)                     @imagedir@/lowermiddle.png
 %attr(444,root,root)                     @imagedir@/lowerright.png
 %attr(444,root,root)                     @imagedir@/main.png
-%attr(444,root,root)                     @imagedir@/main1.png
-%attr(444,root,root)                     @imagedir@/main2.png
 %attr(444,root,root)                     @imagedir@/middleleft1.png
 %attr(444,root,root)                     @imagedir@/middleleft2.png
 %attr(444,root,root)                     @imagedir@/middlelogin.png

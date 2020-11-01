@@ -12,8 +12,6 @@
 %attr(0644,root,root) @imagedir@/middleleft1.png
 %attr(0644,root,root) @imagedir@/main.png
 %attr(0644,root,root) @imagedir@/disabled.png
-%attr(0644,root,root) @imagedir@/main2.png
-%attr(0644,root,root) @imagedir@/main1.png
 %attr(0644,root,root) @imagedir@/middleleft2.png
 %attr(0644,root,root) @imagedir@/middlelogin.png
 %attr(0644,root,root) @imagedir@/lowerleft.png
