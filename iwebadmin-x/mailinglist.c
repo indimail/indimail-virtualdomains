@@ -103,7 +103,7 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
 {
 	DIR            *mydir;
 	struct dirent  *mydirent;
-	int             fd, i, match, ok;
+	int             fd, i, j, match, ok;
 	char           *addr;
 	char            inbuf[1024];
 	static stralloc testfn = {0}, line = {0};
@@ -253,8 +253,8 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
 							die_nomem();
 						line.len--;
 					}
-					i = str_rchr(line.s, '/');
-					if (line.s[i] && !str_diffn(line.s + i, "/Mailbox", 8))
+					j = str_rchr(line.s, '/');
+					if (line.s[j] && !str_diffn(line.s + i, "/Mailbox", 8))
 						ok = 0;
 					else
 						ok = 1;
