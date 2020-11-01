@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.c,v 1.17 2020-10-31 13:43:38+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.18 2020-11-01 12:16:58+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -446,7 +446,6 @@ main(argc, argv)
 					!stralloc_0(&tmp))
 				die_nomem();
 			if ((fd = open_trunc(tmp.s)) == -1) {
-				/*- printh("<a href=\"%s\">%s", cgiurl("logout"), html_text[218]); -*/
 				strerr_warn3("iwebadmin: open: ", tmp.s, ": ", &strerr_sys);
 				show_login();
 				iclose();
@@ -463,14 +462,12 @@ main(argc, argv)
 					substdio_put(&ssout, "&returnhttp=", 12) ||
 					substdio_put(&ssout, returnhttp.s, returnhttp.len) ||
 					substdio_put(&ssout, "\n", 1) || substdio_flush(&ssout)) {
-				/*- printh("<a href=\"%s\">%s", cgiurl("logout"), html_text[218]); -*/
 				strerr_warn3("iwebadmin: write: ", tmp.s, ": ", &strerr_sys);
 				show_login();
 				iclose();
 				exit(0);
 			} else
 			if (close(fd)) {
-				/*- printh("<a href=\"%s\">%s", cgiurl("logout"), html_text[218]); -*/
 				strerr_warn3("iwebadmin: write: ", tmp.s, ": ", &strerr_sys);
 				show_login();
 				iclose();
