@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.16 2019-07-15 21:14:40+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.17 2020-11-01 12:18:13+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -160,13 +160,13 @@ show_user_lines(char *user, char *dom, time_t mytime, char *dir)
 		totalpages = 1;
 	else
 		totalpages = (k / MAXUSERSPERPAGE) + 1;
-	/*- End determine number of pages */
-	scan_int(Pagenumber, &i);
+	scan_int(*Pagenumber ? Pagenumber : "1", &i);
+	startnumber = MAXUSERSPERPAGE * (i - 1);
 	if (i == 0)
 		str_copy(Pagenumber, "1");
-	if (str_str(line.s, " bounce-no-mailbox\n")) {
+	if (str_str(line.s, " bounce-no-mailbox\n"))
 		bounced = 1;
-	} else
+	else
 	if (str_str(line.s, "@")) {
 		bounced = 0;
 		i = str_rchr(line.s, ' ');
@@ -184,18 +184,16 @@ show_user_lines(char *user, char *dom, time_t mytime, char *dir)
 			die_nomem();
 		dest.len--;
 	}
-	scan_int(Pagenumber, &i);
-	startnumber = MAXUSERSPERPAGE * (i - 1);
 
 	/*
 	 * check to see if there are any users to list, 
 	 * otherwise repeat previous page
-	 *  
 	 */
 	pw = sql_getall(dom, 1, 1);
-	if (AdminType == DOMAIN_ADMIN || (AdminType == USER_ADMIN && !str_diffn(pw->pw_name, Username.s, Username.len))) {
-		for (k = 0; k < startnumber; ++k)
+	if (AdminType == DOMAIN_ADMIN || (AdminType == USER_ADMIN && !str_diffn(pw->pw_name, Username.s, Username.len + 1))) {
+		for (k = 0; k < startnumber; ++k) {
 			pw = sql_getall(dom, 0, 0);
+		}
 	}
 	if (pw == NULL) {
 		out("<tr><td colspan=\"");
@@ -207,13 +205,13 @@ show_user_lines(char *user, char *dom, time_t mytime, char *dir)
 		out(html_text[131]);
 		out("</td></tr>\n");
 		moreusers = 0;
+		flush();
 	} else {
-		while ((pw) &&
+		while (pw &&
 				((k < MAXUSERSPERPAGE + startnumber) ||
-				 (AdminType != DOMAIN_ADMIN || AdminType != DOMAIN_ADMIN ||
-				  (AdminType == USER_ADMIN && !str_diffn(pw->pw_name, Username.s, Username.len)))))
+				 (AdminType != DOMAIN_ADMIN || (AdminType == USER_ADMIN && !str_diffn(pw->pw_name, Username.s, Username.len + 1)))))
 		{
-			if (AdminType == DOMAIN_ADMIN || (AdminType == USER_ADMIN && !str_diffn(pw->pw_name, Username.s, Username.len))) {
+			if (AdminType == DOMAIN_ADMIN || (AdminType == USER_ADMIN && !str_diffn(pw->pw_name, Username.s, Username.len + 1))) {
 				mdir_t          diskquota = 0;
 				mdir_t          maxmsg = 0;
 
@@ -303,10 +301,11 @@ show_user_lines(char *user, char *dom, time_t mytime, char *dir)
 				}
 				out("</td>");
 				out("</tr>\n");
+				flush();
 			}
 			pw = sql_getall(dom, 0, 0);
 			++k;
-		}
+		} /*- while */
 	}
 
 	if (AdminType == DOMAIN_ADMIN) {
