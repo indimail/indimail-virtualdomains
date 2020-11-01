@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.7 2019-07-15 12:43:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: command.c,v 1.8 2020-11-01 12:16:21+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -56,6 +56,7 @@ void
 process_commands(char *cmmd)
 {
 	static stralloc tmp = {0};
+	struct passwd  *pw;
 
 	if (!str_diff(cmmd, "showmenu")) {
 		show_menu();
@@ -299,13 +300,14 @@ process_commands(char *cmmd)
 		delautorespondnow();
 	} else
 	if (!str_diff(cmmd, "logout")) {
-		if (!stralloc_copy(&TmpBuf, &RealDir) ||
-				!stralloc_append(&TmpBuf, "/") ||
-				!stralloc_cat(&TmpBuf, &Username) ||
-				!stralloc_catb(&TmpBuf, "/Maildir", 8) ||
-				!stralloc_0(&TmpBuf))
-			die_nomem();
-		del_id_files(&TmpBuf);
+		if ((pw = sql_getpw(Username.s, Domain.s))) {
+			if(!stralloc_copys(&TmpBuf, pw->pw_dir) ||
+					!stralloc_catb(&TmpBuf, "/Maildir", 8) ||
+					!stralloc_0(&TmpBuf))
+				die_nomem();
+			TmpBuf.len--;
+			del_id_files(&TmpBuf);
+		}
 		show_login();
 	} else
 	if (!str_diff(cmmd, "showcounts"))
