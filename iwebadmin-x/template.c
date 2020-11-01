@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.16 2020-10-31 17:22:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.17 2020-11-01 12:17:41+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -33,6 +33,9 @@
 #ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif
+#ifdef HAVE_ERRNO_H
+#include <errno.h>
+#endif
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <str.h>
@@ -44,6 +47,7 @@
 #include <open.h>
 #include <fmt.h>
 #include <strerr.h>
+#include <error.h>
 #endif
 #include "alias.h"
 #include "autorespond.h"
@@ -60,7 +64,7 @@
 #include "common.h"
 
 static char     dchar[4];
-void            check_mailbox_flags(char newchar);
+int             check_mailbox_flags(char newchar);
 void            transmit_block(substdio *ss);
 void            ignore_to_end_tag(substdio *ss);
 void            get_calling_host();
@@ -102,13 +106,14 @@ putch(int ch, substdio *ss)
 int
 send_template_now(char *filename)
 {
-	int             i, fd, match, inchar;
+	int             i, fd1, fd2, match, inchar;
 	char           *ptr, *alias_line, *qnote = " MB";
 	struct stat     mystat;
-	char            qconvert[FMT_ULONG], inbuf[1024], strnum1[FMT_ULONG], strnum2[FMT_ULONG];
+	char            qconvert[FMT_ULONG], inbuf1[1024], inbuf2[1024],
+					strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	struct passwd  *vpw;
 	static stralloc value1 = {0}, value2 = {0};
-	struct substdio ssin;
+	struct substdio ssin1, ssin2;
 
 	if (str_str(filename, "/") || str_str(filename, "..")) {
 		out("warning: invalid file name ");
@@ -139,7 +144,7 @@ send_template_now(char *filename)
 		return (-1);
 	}
 	/* open the template */
-	if ((fd = open_read(TmpBuf.s)) == -1) {
+	if ((fd1 = open_read(TmpBuf.s)) == -1) {
 		strerr_warn3("send_template: open: ", TmpBuf.s, ": ", &strerr_sys);
 		out(html_text[144]);
 		out(" ");
@@ -148,46 +153,55 @@ send_template_now(char *filename)
 		flush();
 		return 0;
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin1, read, fd1, inbuf1, sizeof(inbuf1));
 	/* parse the template looking for "##" pattern */
 	for (;;) {
-		if ((inchar = getch(&ssin)) == -1) {
+		if ((inchar = getch(&ssin1)) == -1) {
 			strerr_warn3("send_template: read: ", TmpBuf.s, ": ", &strerr_sys);
 			out(html_text[144]);
 			out(" ");
 			out(TmpBuf.s);
 			out("<br>\n");
 			flush();
+			close(fd1);
 			return 0;
 		} else
 		if (!inchar)
 			break;
 		/* if not '#' then send it */
-		if (inchar != '#') {
+		if (inchar != '#')
 			putch(inchar, subfdoutsmall);
-		} else { /* found a '#' */
+		else { /* found a '#' */
 			/* look for a second '#' */
-			inchar = getch(&ssin);
-			if (!inchar)
+			if (!(inchar = getch(&ssin1)))
 				break;
 			else /* found a tag */
 			if (inchar == '#') {
-				inchar = getch(&ssin);
-				if (!inchar)
+				if (!(inchar = getch(&ssin1)))
 					break;
 				/* switch on the tag */
 				switch (inchar)
 				{
 				case '&': /* send stock (user, dom, time) cgi parameters */
+					if (!Username.len || !Domain.len) {
+						if (!Username.len)
+							strerr_warn1("Username is null", 0);
+						if (!Domain.len)
+						strerr_warn1("Domain is null", 0);
+					}
 					printh("user=%C&dom=%C&time=%d&", Username.s, Domain.s, mytime);
 					break;
 				case '~':
 					out(Lang);
 					break;
 				case 'A': /* send the action user parameter */
+					if (!ActionUser.len)
+						strerr_warn1("User is null", 0);
 					printh("%H", ActionUser.len ? ActionUser.s : "");
 					break;
 				case 'a': /* send the Alias parameter */
+					if (!Alias.len)
+						strerr_warn1("Alias is null", 0);
 					printh("%H", Alias.len ? Alias.s : "");
 					break;
 				case 'B': /* show number of pop accounts */
@@ -215,32 +229,47 @@ send_template_now(char *filename)
 					show_mailing_list_line2(Username.s, Domain.s, mytime, RealDir.s);
 					break;
 				case 'D': /* send the domain parameter */
-					if (Domain.len)
-						printh("%H", Domain.s);
+					if (!Domain.len)
+						strerr_warn1("Domain is null", 0);
+					printh("%H", Domain.len ? Domain.s : "");
 					break;
 				case 'd': /* show the lines inside a forward table */
-					show_dotqmail_lines(Username.s, Domain.s, mytime);
+					if (!Domain.len)
+						strerr_warn1("Domain is null", 0);
+					show_dotqmail_lines(Username.s, Domain.len ? Domain.s : "", mytime);
 					break;
 				case 'E': /* this will be used to parse mod_mailinglist-idx.html */
 					show_current_list_values();
 					break;
 				case 'e': /* show the lines inside a mailing list table */
-					show_mailing_list_line(Username.s, Domain.s, mytime, RealDir.s);
+					if (!Username.len || !Domain.len || !RealDir.len) {
+						if (!Username.len)
+							strerr_warn1("Username is null", 0);
+						if (!Domain.len)
+							strerr_warn1("Domain is null", 0);
+						if (!RealDir.len)
+							strerr_warn1("RealDir is null", 0);
+					}
+					show_mailing_list_line(Username.len ? Username.s : "", Domain.len ? Domain.s : "",
+							mytime, RealDir.len ? RealDir.s : "");
 					break;
 				case 'F': /* display a file (used for mod_autorespond ONLY) */
 					/* should verify here that alias_line contains "/autorespond " */
-					{
-					char            inbuf[1024];
-					int             fd;
-					struct substdio ssin;
-
-					if ((alias_line = valias_select(ActionUser.s, Domain.s))) {
+					if (!ActionUser.len || !Domain.len) {
+						if (!ActionUser.len)
+							strerr_warn1("Username is null", 0);
+						if (!Domain.len)
+							strerr_warn1("Domain is null", 0);
+					}
+					if ((alias_line = valias_select(ActionUser.len ? ActionUser.s : "", Domain.len ? Domain.s : ""))) {
 						i = str_rchr(alias_line, '/');
 						if (alias_line[i])
 							for (ptr = alias_line + i - 1; ptr != alias_line && *ptr != '/'; ptr--);
-						if (*ptr == '/')
-							printh("value=\"%H@%H\"></td>\n", ptr + 1, Domain.s);
-						else
+						if (*ptr == '/') {
+							if (!Domain.len)
+								strerr_warn1("Domain is null", 0);
+							printh("value=\"%H@%H\"></td>\n", ptr + 1, Domain.len ? Domain.s : "");
+						} else
 							printh("value=\"%H\"></td>\n", *alias_line == '&' ? alias_line + 1 : alias_line);
 					}
 					if (!stralloc_copyb(&TmpBuf, "vacation/", 9) ||
@@ -248,22 +277,22 @@ send_template_now(char *filename)
 							!stralloc_catb(&TmpBuf, "/.vacation.msg", 14) ||
 							!stralloc_0(&TmpBuf))
 						die_nomem();
-					if ((fd = open_read(TmpBuf.s)) == -1) {
+					if ((fd2 = open_read(TmpBuf.s)) == -1) {
 						strnum1[fmt_uint(strnum1, getuid())] = 0;
 						strnum2[fmt_uint(strnum2, getgid())] = 0;
 						strerr_warn7("send_template_now: ", TmpBuf.s, ": uid=", strnum1, ", gid=", strnum2, ": ", &strerr_sys);
 						ack("150", TmpBuf.s);
 					}
-					substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+					substdio_fdbuf(&ssin2, read, fd2, inbuf2, sizeof(inbuf2));
 					/*- read Reference: and Subjec: line */
 					for (i = 0; i < 2; i++) {
-						if (getln(&ssin, &line, &match, '\n') == -1) {
+						if (getln(&ssin2, &line, &match, '\n') == -1) {
 							strerr_warn3("send_template_now: ", TmpBuf.s, ": ", &strerr_sys);
 							out(html_text[144]);
 							out(" ");
 							out(TmpBuf.s);
 							out(" 1<BR>\n");
-							close(fd);
+							close(fd2);
 							flush();
 							return (1);
 						}
@@ -293,14 +322,14 @@ send_template_now(char *filename)
 
 					/*- Skip custom headers */
 					while(1) {
-						if (getln(&ssin, &line, &match, '\n') == -1) {
+						if (getln(&ssin2, &line, &match, '\n') == -1) {
 							strerr_warn3("send_template_now: ", TmpBuf.s, ": ", &strerr_sys);
 							out(html_text[144]);
 							out(" ");
 							out(TmpBuf.s);
 							out(" 1<BR>\n");
 							flush();
-							close(fd);
+							close(fd2);
 							return (1);
 						}
 						if (!line.len || line.s[0] == '\r' || line.s[0] == '\n')
@@ -308,24 +337,23 @@ send_template_now(char *filename)
 					}
 					out(line.s);
 					for (;;) {
-						if (getln(&ssin, &line, &match, '\n') == -1) {
+						if (getln(&ssin2, &line, &match, '\n') == -1) {
 							strerr_warn3("send_template_now: ", TmpBuf.s, ": ", &strerr_sys);
 							out(html_text[144]);
 							out(" ");
 							out(TmpBuf.s);
 							out(" 1<BR>\n");
 							flush();
-							close(fd);
+							close(fd2);
 							return (1);
 						}
 						if (!line.len)
 							break;
 						substdio_put(subfdoutsmall, line.s, line.len);
 					}
-					close(fd);
+					close(fd2);
 					out("</textarea>");
 					flush();
-					}
 					break;
 				case 'f': /* show the forwards */
 					if (AdminType == DOMAIN_ADMIN)
@@ -349,10 +377,15 @@ send_template_now(char *filename)
 					show_dotqmail_file(ActionUser.s);
 					break;
 				case 'i': /* check for user forward and forward/store vacation */
-					parse_users_dotqmail(getch(&ssin));
+					parse_users_dotqmail(getch(&ssin1));
 					break;
 				case 'J': /* show mailbox flag status */
-					check_mailbox_flags(getch(&ssin));
+					if (check_mailbox_flags(getch(&ssin1))) {
+						close(fd1);
+						strerr_warn1("unable to get mailbox flags", 0);
+						out("<p>unable to get mailbox flags<br></p>");
+						flush();
+					}
 					break;
 				case 'j': /* show number of mailing lists */
 					load_limits();
@@ -413,7 +446,7 @@ send_template_now(char *filename)
 					if (TmpCGI && GetValue(TmpCGI, &value1, "user=") == 0)
 						printh("%H", value1.s);
 					else
-						out("postmaster");
+						printh("%H", "postmaster");
 					break;
 				case 'M': /* show the mailing list subscribers */
 					if (AdminType == DOMAIN_ADMIN)
@@ -424,14 +457,14 @@ send_template_now(char *filename)
 						show_mailing_lists();
 					break;
 				case 'N': /* parse include files */
-					i = getch(&ssin);
+					i = getch(&ssin1);
 					if (i == '/')
 						out(html_text[144]);
 					else
 					if (i > 0) {
 						TmpBuf.len = 0;
 						for (;;) {
-							if (!(i = getch(&ssin)))
+							if (!(i = getch(&ssin1)))
 								break;
 							if (i != '#' && !stralloc_append(&TmpBuf, (char *) &i))
 								die_nomem();
@@ -453,14 +486,19 @@ send_template_now(char *filename)
 					printh("%H", value1.s);
 					break;
 				case 'O': /* build a pulldown menu of all POP/IMAP users */
-					{
-						struct passwd  *pw;
-
-						pw = sql_getall(Domain.s, 1, 1);
-						while (pw) {
-							printh("<option value=\"%H\">%H</option>\n", pw->pw_name, pw->pw_name);
-							pw = sql_getall(Domain.s, 0, 0);
-						}
+					if (!Domain.len)
+						strerr_warn1("Domain is null ", 0);
+					if (!(vpw = sql_getall(Domain.s, 1, 1))) {
+						strerr_warn3("no records for domain [", Domain.s, "]", 0);
+						out("<p>no records for domain [");
+						out(Domain.s);
+						out("]<br></p>");
+						flush();
+						return -1;
+					}
+					while (vpw) {
+						printh("<option value=\"%H\">%H</option>\n", vpw->pw_name, vpw->pw_name);
+						vpw = sql_getall(Domain.s, 0, 0);
 					}
 					break;
 				case 'o': /* show the mailing list moderators */
@@ -472,11 +510,36 @@ send_template_now(char *filename)
 					printh("%H", TmpBuf.s);
 					break;
 				case 'p': /* show POP/IMAP users */
-					show_user_lines(Username.s, Domain.s, mytime, RealDir.s);
+					if (!Username.len || !Domain.len || !RealDir.len) {
+						if (!Username.len)
+							strerr_warn1("Username is null", 0);
+						if (!Domain.len)
+							strerr_warn1("Domain is null", 0);
+						if (!RealDir.len)
+							strerr_warn1("RealDir is null", 0);
+					}
+					show_user_lines(Username.len ? Username.s : "", Domain.len ? Domain.s : "",
+							mytime, RealDir.len ? RealDir.s : "");
 					break;
 				case 'Q': /* show quota usage */
-					vpw = sql_getpw(ActionUser.s, Domain.s);
-					if (vpw && str_diffn(vpw->pw_shell, "NOQUOTA", 8)) {
+					if (!ActionUser.len || !Domain.len) {
+						if (!ActionUser.len)
+							strerr_warn1("User null", 0);
+						if (!Domain.len)
+							strerr_warn1("Domain is null", 0);
+						return -1;
+					}
+					if (!(vpw = sql_getpw(ActionUser.s, Domain.s))) {
+						strerr_warn4("no records for user", ActionUser.s, "@", Domain.s, 0);
+						out("<p>no records for user ");
+						out(ActionUser.s);
+						out("@");
+						out(Domain.s);
+						out("<br></p>");
+						flush();
+						return -1;
+					}
+					if (str_diffn(vpw->pw_shell, "NOQUOTA", 8)) {
 						mdir_t          diskquota = 0;
 						mdir_t          maxmsg = 0;
 
@@ -491,8 +554,24 @@ send_template_now(char *filename)
 					}
 					break;
 				case 'q': /* display user's quota (mod user page) */
-					vpw = sql_getpw(ActionUser.s, Domain.s);
-					if (vpw && str_diffn(vpw->pw_shell, "NOQUOTA", 8)) {
+					if (!ActionUser.len || !Domain.len) {
+						if (!ActionUser.len)
+							strerr_warn1("User null", 0);
+						if (!Domain.len)
+							strerr_warn1("Domain is null", 0);
+						return -1;
+					}
+					if (!(vpw = sql_getpw(ActionUser.s, Domain.s))) {
+						strerr_warn4("no records for user", ActionUser.s, "@", Domain.s, 0);
+						out("<p>no records for user ");
+						out(ActionUser.s);
+						out("@");
+						out(Domain.s);
+						out("<br></p>");
+						flush();
+						return -1;
+					}
+					if (str_diffn(vpw->pw_shell, "NOQUOTA", 8)) {
 						quota_to_megabytes(qconvert, vpw->pw_shell);
 						out(qconvert);
 					} else {
@@ -523,7 +602,7 @@ send_template_now(char *filename)
 					out(strnum1);
 					break;
 				case 't': /* transmit block?  */
-					transmit_block(&ssin);
+					transmit_block(&ssin1);
 					break;
 				case 'U': /* send the username parameter */
 					printh("%H", Username.len ? Username.s : "");
@@ -578,12 +657,27 @@ send_template_now(char *filename)
 						mdir_t          diskquota = 0;
 						mdir_t          maxmsg = 0;
 
-						vpw = sql_getpw(Username.s, Domain.s);
+						if (!Username.len || !Domain.len) {
+							if (!Username.len)
+								strerr_warn1("User null", 0);
+							if (!Domain.len)
+								strerr_warn1("Domain is null", 0);
+							return -1;
+						}
+						if (!(vpw = sql_getpw(Username.s, Domain.s))) {
+							strerr_warn4("no records for user", Username.s, "@", Domain.s, 0);
+							out("<p>no records for user ");
+							out(Username.s);
+							out("@");
+							out(Domain.s);
+							out("<br></p>");
+							flush();
+						}
 						printh("<a href=\"%s&moduser=%C\">", cgiurl("moduser"), Username.s);
 						printh("<font size=\"2\" color=\"#000000\"><b>%s %H</b></font></a><br><br>", html_text[111], Username.s);
-						if (vpw && str_diffn(vpw->pw_shell, "NOQUOTA", 8)) {
+						if (str_diffn(vpw->pw_shell, "NOQUOTA", 8))
 							quota_to_megabytes(qconvert, vpw->pw_shell);
-						} else {
+						else {
 							str_copy(qconvert, html_text[229]);
 							qnote = "";
 						}
@@ -639,7 +733,7 @@ send_template_now(char *filename)
 					break;
 				case 'X': /* dictionary entry, followed by three more chars for the entry # */
 					for (i = 0; i < 3; ++i)
-						dchar[i] = getch(&ssin);
+						dchar[i] = getch(&ssin1);
 					dchar[i] = 0;
 					scan_int(dchar, &i);
 					if ((i >= 0) && (i <= MAX_LANG_STR))
@@ -693,9 +787,9 @@ send_template_now(char *filename)
 				putch(inchar, subfdoutsmall);
 			}
 		}
-	}
-	close(fd);
-	substdio_flush(subfdoutsmall);
+	} /*- for (;;) { */
+	close(fd1);
+	flush();
 	iclose();
 	return 0;
 }
@@ -706,52 +800,67 @@ send_template_now(char *filename)
 /*
  * James Raftery <james@now.ie> 12 Dec. 2002 / 15 Apr. 2003 
  */
-void
+int
 check_mailbox_flags(char newchar)
 {
-	static struct passwd *vpw = NULL;
+	struct passwd *vpw = NULL;
 
-	if (!vpw)
-		vpw = sql_getpw(ActionUser.s, Domain.s);
+	if (!(vpw = sql_getpw(ActionUser.s, Domain.s)))
+		return -1;
 	switch (newchar)
 	{
 	case '1': /* "checked" if V_USER0 is set */
-		if (vpw->pw_gid & V_USER0)
+		if (vpw->pw_gid & V_USER0) {
 			out("checked");
+			flush();
+		}
 		break;
 	case '2': /* "checked" if V_USER0 is unset */
-		if (!(vpw->pw_gid & V_USER0))
+		if (!(vpw->pw_gid & V_USER0)) {
 			out("checked");
+			flush();
+		}
 		break;
 	case '3': /* "checked" if V_USER1 is set */
-		if (vpw->pw_gid & V_USER1)
+		if (vpw->pw_gid & V_USER1) {
 			out("checked");
+			flush();
+		}
 		break;
 	case '4': /* "checked" if V_USER1 is unset */
-		if (!(vpw->pw_gid & V_USER1))
+		if (!(vpw->pw_gid & V_USER1)) {
 			out("checked");
+			flush();
+		}
 		break;
 	case '5': /* "checked" if V_USER2 is set */
-		if (vpw->pw_gid & V_USER2)
+		if (vpw->pw_gid & V_USER2) {
 			out("checked");
+			flush();
+		}
 		break;
 	case '6': /* "checked" if V_USER2 is unset */
-		if (!(vpw->pw_gid & V_USER2))
+		if (!(vpw->pw_gid & V_USER2)) {
 			out("checked");
+			flush();
+		}
 		break;
 	case '7': /* "checked" if V_USER3 is set */
-		if (vpw->pw_gid & V_USER3)
+		if (vpw->pw_gid & V_USER3) {
 			out("checked");
+			flush();
+		}
 		break;
 	case '8': /* "checked" if V_USER3 is unset */
-		if (!(vpw->pw_gid & V_USER3))
+		if (!(vpw->pw_gid & V_USER3)) {
 			out("checked");
+			flush();
+		}
 		break;
 	default:
 		break;
 	}
-	flush();
-	return;
+	return 0;
 }
 
 /*
@@ -921,7 +1030,8 @@ get_session_val(char *session_var)
 				!stralloc_0(&TmpBuf))
 			die_nomem();
 		if ((fd = open_read(TmpBuf.s)) == -1) {
-			strerr_warn3("get_session_val: open: ", TmpBuf.s, ": ", &strerr_sys);
+			if (errno != error_noent)
+				strerr_warn3("get_session_val: open: ", TmpBuf.s, ": ", &strerr_sys);
 			return (retval);
 		}
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
