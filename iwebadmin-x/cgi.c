@@ -1,5 +1,5 @@
 /*
- * $Id: cgi.c,v 1.3 2019-06-03 06:46:12+05:30 Cprogrammer Exp mbhangui $
+ * $Id: cgi.c,v 1.4 2020-11-01 23:15:39+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,9 @@
 #endif
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
 #endif
 #ifdef HAVE_QMAIL
 #include <env.h>

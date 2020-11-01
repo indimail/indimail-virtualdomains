@@ -1,5 +1,5 @@
 /*
- * $Id: auth.c,v 1.4 2019-06-03 06:46:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: auth.c,v 1.5 2020-11-01 23:15:11+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,6 +26,9 @@
 #endif
 #ifdef HAVE_PWD_H
 #include <pwd.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
 #endif
 #ifdef HAVE_QMAIL
 #include <stralloc.h>

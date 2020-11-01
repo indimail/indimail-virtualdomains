@@ -1,5 +1,5 @@
 /*
- * $Id: forward.c,v 1.5 2019-07-15 12:44:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: forward.c,v 1.6 2020-11-01 23:15:43+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,6 +18,9 @@
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
 #endif
 #include <indimail.h>
 #include <indimail_compat.h>
