@@ -1,5 +1,5 @@
 /*
- * $Id: util.c,v 1.7 2019-07-15 12:58:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: util.c,v 1.8 2020-11-02 15:08:10+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
-#include <stdio.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -34,9 +33,13 @@
 #include <str.h>
 #include <fmt.h>
 #include <scan.h>
+#include <error.h>
 #endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#ifdef HAVE_ERRNO_H
+#include <errno.h>
 #endif
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -249,14 +252,15 @@ check_indimail_alias(char *addr, stralloc *dest)
 			!stralloc_cats(&TmpBuf, addr) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
-	fprintf(stderr, "%d %s [%s]\n", __LINE__, __FILE__, TmpBuf.s);
-	if ((fd = open_read(TmpBuf.s)) == -1)
-		return (-1);
-	fprintf(stderr, "%d %s\n", __LINE__, __FILE__);
+	if ((fd = open_read(TmpBuf.s)) == -1) {
+		if (errno != error_noent)
+			return -1;
+		strerr_warn3("check_indimail_alias: ", TmpBuf.s, ": ", &strerr_sys);
+		return -1;
+	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	for(;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
-			strerr_warn1("check_indimail_alias: read: ", &strerr_sys);
 			close(fd);
 			return (-1);
 		}
@@ -276,10 +280,8 @@ check_indimail_alias(char *addr, stralloc *dest)
 				die_nomem();
 			dest->len--;
 		}
-		fprintf(stderr, "%d %s\n", __LINE__, __FILE__);
 		return (0);
 	}
-	fprintf(stderr, "%d %s\n", __LINE__, __FILE__);
 	return (1);
 }
 
