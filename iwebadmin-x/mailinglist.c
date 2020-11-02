@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.18 2020-11-02 15:03:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.19 2020-11-02 20:21:39+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -55,6 +55,7 @@
 #include "template.h"
 #include "util.h"
 #include "common.h"
+#include "user.h"
 
 int             rename(const char *, const char *);
 
@@ -70,6 +71,15 @@ static int      checkopt[256]; /* used to display mailing list options */
 #define GROUP_SUBSCRIBER 0
 #define GROUP_MODERATOR 1
 #define GROUP_DIGEST 2
+
+#define HOOKS 1
+#ifdef HOOKS
+#define HOOK_ADDMAILLIST "addmaillist"
+#define HOOK_DELMAILLIST "delmaillist"
+#define HOOK_MODMAILLIST "modmaillist"
+#define HOOK_LISTADDUSER "addlistuser"
+#define HOOK_LISTDELUSER "dellistuser"
+#endif
 
 void            set_options();
 void            default_options();
@@ -486,6 +496,9 @@ delmailinglistnow()
 			!stralloc_0(&tmp1))
 		die_nomem();
 	vdelfiles(tmp1.s, ActionUser.s, Domain.s);
+#ifdef HOOKS
+	call_hooks(HOOK_DELMAILLIST, ActionUser.s, Domain.s, "", "");
+#endif
 	count_mailinglists();
 	len = str_len(html_text[186]) + ActionUser.len + 28;
 	for(plen = 0;;) {
@@ -893,6 +906,10 @@ ezmlmMake(int newlist)
 			}
 		}
 	}
+#ifdef HOOKS
+	call_hooks(HOOK_ADDMAILLIST, ActionUser.s, Domain.s,
+			list_owner.len ? list_owner.s : "", replyto_addr.len ? replyto_addr.s : "");
+#endif
 }
 
 void
@@ -1161,7 +1178,8 @@ ezmlm_sub(int mod, char *email)
 			die_nomem();
 		if (mod == GROUP_MODERATOR)
 			execl(subpath.s, "ezmlm-sub", listpath.s, "mod", email, (char *) NULL);
-		else if (mod == GROUP_DIGEST)
+		else
+		if (mod == GROUP_DIGEST)
 			execl(subpath.s, "ezmlm-sub", listpath.s, "digest", email, (char *) NULL);
 		else
 			execl(subpath.s, "ezmlm-sub", listpath.s, email, (char *) NULL);
@@ -1200,7 +1218,8 @@ addlistgroupnow(int mod)
 		}
 		if (mod == GROUP_MODERATOR)
 			addlistmod();
-		else if (mod == GROUP_DIGEST)
+		else
+		if (mod == GROUP_DIGEST)
 			addlistdig();
 		else
 			addlistuser();
@@ -1222,7 +1241,8 @@ addlistgroupnow(int mod)
 			len = plen + 28;
 		}
 		send_template("add_listmod.html");
-	} else if (mod == GROUP_DIGEST) {
+	} else
+	if (mod == GROUP_DIGEST) {
 		len = str_len(html_text[240]) + Newu.len + ActionUser.len + Domain.len + 28;
 		for (plen = 0;;) {
 			if (!stralloc_ready(&StatusMessage, len))
