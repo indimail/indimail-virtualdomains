@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.17 2020-11-01 12:18:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.18 2020-11-02 20:20:35+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -73,11 +73,6 @@
 #define HOOK_ADDUSER     "adduser"
 #define HOOK_DELUSER     "deluser"
 #define HOOK_MODUSER     "moduser"
-#define HOOK_ADDMAILLIST "addmaillist"
-#define HOOK_DELMAILLIST "delmaillist"
-#define HOOK_MODMAILLIST "modmaillist"
-#define HOOK_LISTADDUSER "addlistuser"
-#define HOOK_LISTDELUSER "dellistuser"
 #endif
 
 extern int create_flag;
@@ -604,15 +599,15 @@ call_hooks(char *hook_type, char *p1, char *p2, char *p3, char *p4)
 			!stralloc_catb(&hooks_path, "/.iwebadmin-hooks", 17) ||
 			!stralloc_0(&hooks_path))
 		die_nomem();
-	if ((fd = open_read(hooks_path.s)) == -1) {
+	if (access(hooks_path.s, F_OK)) {
 		/*- then try /etc/indimail */
 		if (!stralloc_copys(&hooks_path, SYSCONFDIR) ||
-				!stralloc_catb(&hooks_path, "/.iwebadmin-hooks", 17) ||
+				!stralloc_catb(&hooks_path, "/iwebadmin-hooks", 16) ||
 				!stralloc_0(&hooks_path))
 			die_nomem();
-		if ((fd = open_read(hooks_path.s)) == -1)
-			return (0);
 	}
+	if ((fd = open_read(hooks_path.s)) == -1)
+		return (0);
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
