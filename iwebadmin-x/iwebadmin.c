@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.c,v 1.19 2020-11-01 17:50:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.20 2020-11-02 14:53:15+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -72,7 +72,7 @@ stralloc        Username = {0}, Domain = {0}, Password = {0}, Gecos = {0},
 				LineData = {0}, Action = {0}, Message = {0}, SearchUser = {0},
 				TmpBuf = {0}, RealDir = {0}, line = {0}, StatusMessage = {0};
 int             CGIValues[256];
-int             ezmlm_idx = -1, ezmlm_make = -1, debug = 0;
+int             ezmlm_idx = -1, ezmlm_make = -1, debug = 0, enable_fortune = 1;
 time_t          mytime;
 char           *TmpCGI = NULL;
 int             Compressed;
@@ -204,6 +204,9 @@ conf_iwebadmin()
 					die_nomem();
 				line.len--;
 			}
+			if (!str_diffn(line.s, "no-fortune", 10))
+				enable_fortune = 0;
+			else
 			if (!str_diffn(line.s, "no-ezmlm", 9))
 				ezmlm_make = 0;
 			else
@@ -686,9 +689,9 @@ init_globals()
 	SearchUser.len--;
 }
 
-	/*
-	 * This feature sponsored by PinkRoccade Public Sector, Sept 2004 
-	 */
+/*
+ * This feature sponsored by PinkRoccade Public Sector, Sept 2004 
+ */
 void
 quickAction(char *username, int action)
 {
@@ -703,9 +706,7 @@ quickAction(char *username, int action)
 	 * that's how it was originally done.  The code in command.c that
 	 * calls quickAction() passes ActionUser as the username parameter
 	 * in hopes that someday we'll remove the globals and pass parameters.
-	 */
-
-	/*
+	 *
 	 * first check for alias/forward, autorepsonder (or even mailing list) 
 	 */
 	if ((aliasline = valias_select(username, Domain.s))) {
@@ -729,13 +730,15 @@ quickAction(char *username, int action)
 			/* mailing list (cdb-backend only) */
 			if (action == ACTION_MODIFY)
 				modmailinglist();
-			else if (action == ACTION_DELETE)
+			else
+			if (action == ACTION_DELETE)
 				delmailinglist();
 		} else {
 			/*- it's just a forward/alias of some sort */
 			if (action == ACTION_MODIFY)
 				moddotqmail();
-			else if (action == ACTION_DELETE)
+			else
+			if (action == ACTION_DELETE)
 				deldotqmail();
 		}
 	} else
