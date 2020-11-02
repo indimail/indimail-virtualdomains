@@ -23,6 +23,7 @@
 %attr(0644,root,root) @imagedir@/modify.png
 %attr(0644,root,root) @imagedir@/upperright.png
 %attr(0644,root,root) @imagedir@/delete.png
+%attr(0644,root,root) @imagedir@/iwebadmin-icon.png
 %attr(6555,root,indimail) @cgibindir@/iwebadmin
 %attr(0644,root,root) @htmllibdir@/lang/ja
 %attr(0644,root,root) @htmllibdir@/lang/fi
