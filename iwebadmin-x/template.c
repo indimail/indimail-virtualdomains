@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.17 2020-11-01 12:17:41+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.18 2020-11-02 15:03:59+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -70,7 +70,7 @@ void            ignore_to_end_tag(substdio *ss);
 void            get_calling_host();
 char           *get_session_val(char *session_var);
 
-extern int      ezmlm_make;
+extern int      ezmlm_make, enable_fortune;
 
 /*
  * send an html template to the browser 
@@ -78,9 +78,57 @@ extern int      ezmlm_make;
 int
 send_template(char *actualfile)
 {
+	int             pipe_fd[2], pid, match;
+	char            inbuf[1024];
+	static stralloc line = {0};
+	struct substdio ssin;
+
 	send_template_now("header.html");
 	send_template_now(actualfile);
-	send_template_now("footer.html");
+	if (!enable_fortune || access("/usr/bin/fortune", X_OK)) {
+		send_template_now("footer.html");
+		return 0;
+	}
+	if (pipe(pipe_fd))
+		return (-1);
+	switch ((pid = fork()))
+	{
+		case -1:
+			return -1;
+		case 0:
+			close(pipe_fd[0]);
+			dup2(pipe_fd[1], 1);
+			execl("/usr/bin/fortune", "fortune", "-s", (char *) 0);
+			exit(127);
+		default:
+			break;
+	}
+	close(pipe_fd[1]);
+	substdio_fdbuf(&ssin, read, pipe_fd[0], inbuf, sizeof(inbuf));
+	out("<footer align=\"center\">\n");
+	for (;;) {
+		if (getln(&ssin, &line, &match, '\n') == -1) {
+			strerr_warn1("send_template: read: ", &strerr_sys);
+			close(pipe_fd[0]);
+			return -1;
+		}
+		if (line.len == 0)
+			break;
+		if (match) {
+			line.len--;
+			line.s[line.len] = 0;
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
+		}
+		out("<p>");
+		out(line.s);
+		out("</p>\n");
+	}
+	close(pipe_fd[0]);
+	out("</footer>\n");
+	flush();
 	return 0;
 }
 
@@ -132,14 +180,14 @@ send_template_now(char *filename)
 	if (lstat(TmpBuf.s, &mystat) == -1) {
 		out("Warning: cannot lstat '");
 		out(TmpBuf.s);
-		out("', check permissions.<BR>\n");
+		out("', check permissions.<br>");
 		flush();
 		return (-1);
 	}
 	if (S_ISLNK(mystat.st_mode)) {
 		out("Warning: '");
 		out(TmpBuf.s);
-		out("' is a symbolic link.<BR>\n");
+		out("' is a symbolic link.<br>");
 		flush();
 		return (-1);
 	}
