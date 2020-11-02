@@ -27,7 +27,7 @@ iwebadmin_CFLAGS = $(AM_CFLAGS)
 
 noinst_DATA = iwebadmin.spec iwebadmin-rpmlintrc \
 			  iwebadmin-permissions.easy iwebadmin-permissions.secure \
-			  iwebadmin-permissions.paranoid iwebadmin.perms
+			  iwebadmin-permissions.paranoid iwebadmin.perms conf-iwebadmin
 
 MOSTLYCLEANFILES = iwebadmin.perms
 
@@ -81,21 +81,23 @@ dist-hook:
 
 # use the [^C]* pattern to skip the CVS directory
 install-data-local:
-	$(mkinstalldirs)         $(DESTDIR)@htmllibdir@
-	rm -rf                   $(DESTDIR)@htmllibdir@/html
-	$(mkinstalldirs)         $(DESTDIR)@htmllibdir@/html 
-	cp $(srcdir)/html/*.html $(DESTDIR)@htmllibdir@/html
-	cp $(srcdir)/html/colortable $(DESTDIR)@htmllibdir@/html
-	chmod 755                $(DESTDIR)@htmllibdir@/html
-	chmod 644                $(DESTDIR)@htmllibdir@/html/*
-	rm -rf                   $(DESTDIR)@htmllibdir@/lang
-	$(mkinstalldirs)         $(DESTDIR)@htmllibdir@/lang 
-	cp $(srcdir)/lang/??     $(DESTDIR)@htmllibdir@/lang
-	cp $(srcdir)/lang/??-??  $(DESTDIR)@htmllibdir@/lang
-	chmod 755                $(DESTDIR)@htmllibdir@/lang
-	chmod 644                $(DESTDIR)@htmllibdir@/lang/*
-	$(mkinstalldirs)         $(DESTDIR)@imagedir@
-	cp $(srcdir)/images/*.png $(DESTDIR)@imagedir@
+	$(mkinstalldirs)               $(DESTDIR)$(sysconfdir)
+	$(INSTALL_DATA) conf-iwebadmin $(DESTDIR)$(sysconfdir)
+	$(mkinstalldirs)               $(DESTDIR)@htmllibdir@
+	rm -rf                         $(DESTDIR)@htmllibdir@/html
+	$(mkinstalldirs)               $(DESTDIR)@htmllibdir@/html 
+	cp $(srcdir)/html/*.html       $(DESTDIR)@htmllibdir@/html
+	cp $(srcdir)/html/colortable   $(DESTDIR)@htmllibdir@/html
+	chmod 755                      $(DESTDIR)@htmllibdir@/html
+	chmod 644                      $(DESTDIR)@htmllibdir@/html/*
+	rm -rf                         $(DESTDIR)@htmllibdir@/lang
+	$(mkinstalldirs)               $(DESTDIR)@htmllibdir@/lang 
+	cp $(srcdir)/lang/??           $(DESTDIR)@htmllibdir@/lang
+	cp $(srcdir)/lang/??-??        $(DESTDIR)@htmllibdir@/lang
+	chmod 755                      $(DESTDIR)@htmllibdir@/lang
+	chmod 644                      $(DESTDIR)@htmllibdir@/lang/*
+	$(mkinstalldirs)               $(DESTDIR)@imagedir@
+	cp $(srcdir)/images/*.png      $(DESTDIR)@imagedir@
 
 	if test `@idcommand@` = "0" ; then \
 		echo "chown root $(DESTDIR)$(bindir)/iwebadmin"; \
@@ -104,8 +106,8 @@ install-data-local:
 		chmod 4555 $(DESTDIR)$(bindir)/iwebadmin; \
 	fi
 install-data-hook:
-	$(mkinstalldirs)         $(DESTDIR)@docdir@
-	$(INSTALL_DATA) README $(DESTDIR)@docdir@/README || exit 1
+	$(mkinstalldirs)             $(DESTDIR)@docdir@
+	$(INSTALL_DATA) README       $(DESTDIR)@docdir@/README || exit 1
 	$(INSTALL_DATA) README.hooks $(DESTDIR)@docdir@/README.hooks || exit 1
-	$(INSTALL_DATA) COPYING $(DESTDIR)@docdir@/COPYING || exit 1
-	$(INSTALL_DATA) AUTHORS $(DESTDIR)@docdir@/AUTHORS || exit 1
+	$(INSTALL_DATA) COPYING      $(DESTDIR)@docdir@/COPYING || exit 1
+	$(INSTALL_DATA) AUTHORS      $(DESTDIR)@docdir@/AUTHORS || exit 1
