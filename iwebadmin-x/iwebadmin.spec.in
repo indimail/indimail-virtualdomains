@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.42 2020-11-01 12:17:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.43 2020-11-02 14:53:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -156,6 +156,7 @@ install -m 0644 %{name}-release  %{buildroot}%{sysconfdir}/%{name}-release
 
 %attr(644,root,root) %config(noreplace)  %{sysconfdir}/%{name}-release
 %attr(644,root,root) %config(noreplace)  %{sysconfdir}/%{name}-rpm.info
+%attr(644,root,root) %config(noreplace)  %{sysconfdir}/conf-%{name}
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -250,6 +251,7 @@ install -m 0644 %{name}-release  %{buildroot}%{sysconfdir}/%{name}-release
 %attr(444,root,root)                     @imagedir@/uppermiddle1.png
 %attr(444,root,root)                     @imagedir@/uppermiddle2.png
 %attr(444,root,root)                     @imagedir@/upperright.png
+%attr(444,root,root)                     @imagedir@/iwebadmin-icon.png
 %attr(644,root,root)                     @docdir@/README
 %attr(644,root,root)                     @docdir@/AUTHORS
 %attr(644,root,root)                     @docdir@/COPYING
