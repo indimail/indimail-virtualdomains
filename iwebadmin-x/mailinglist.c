@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.17 2020-11-01 23:15:50+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.18 2020-11-02 15:03:17+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1017,6 +1017,7 @@ show_list_group_now(int mod)
 			sort_add_entry(line.s, '\n');
 			subuser_count++;
 		}
+		close(handles[0]);
 		sort_dosort();
 		/*- Display subscriber/moderator/digest list, along with delete button */
 		if (!stralloc_ready(&tmp1, 5) ||
@@ -1087,7 +1088,6 @@ show_list_group_now(int mod)
 		sort_cleanup();
 		out("</TABLE>");
 		flush();
-		close(handles[0]);
 		wait(&pid);
 		copy_status_mesg(html_text[190]);
 	}
