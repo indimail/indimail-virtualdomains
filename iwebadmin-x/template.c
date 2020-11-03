@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.18 2020-11-02 15:03:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.20 2020-11-03 09:24:59+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -235,9 +235,9 @@ send_template_now(char *filename)
 						if (!Username.len)
 							strerr_warn1("Username is null", 0);
 						if (!Domain.len)
-						strerr_warn1("Domain is null", 0);
-					}
-					printh("user=%C&dom=%C&time=%d&", Username.s, Domain.s, mytime);
+							strerr_warn1("Domain is null", 0);
+					} else
+						printh("user=%C&dom=%C&time=%d&", Username.s, Domain.s, mytime);
 					break;
 				case '~':
 					out(Lang);
@@ -279,12 +279,17 @@ send_template_now(char *filename)
 				case 'D': /* send the domain parameter */
 					if (!Domain.len)
 						strerr_warn1("Domain is null", 0);
-					printh("%H", Domain.len ? Domain.s : "");
+					else
+						printh("%H", Domain.s);
 					break;
 				case 'd': /* show the lines inside a forward table */
-					if (!Domain.len)
-						strerr_warn1("Domain is null", 0);
-					show_dotqmail_lines(Username.s, Domain.len ? Domain.s : "", mytime);
+					if (!Username.len || !Domain.len) {
+						if (!Username.len)
+							strerr_warn1("Username is null", 0);
+						if (!Domain.len)
+							strerr_warn1("Domain is null", 0);
+					} else
+						show_dotqmail_lines(Username.s, Domain.s, mytime);
 					break;
 				case 'E': /* this will be used to parse mod_mailinglist-idx.html */
 					show_current_list_values();
@@ -297,9 +302,8 @@ send_template_now(char *filename)
 							strerr_warn1("Domain is null", 0);
 						if (!RealDir.len)
 							strerr_warn1("RealDir is null", 0);
-					}
-					show_mailing_list_line(Username.len ? Username.s : "", Domain.len ? Domain.s : "",
-							mytime, RealDir.len ? RealDir.s : "");
+					} else
+						show_mailing_list_line(Username.s, Domain.s, mytime, RealDir.s);
 					break;
 				case 'F': /* display a file (used for mod_autorespond ONLY) */
 					/* should verify here that alias_line contains "/autorespond " */
@@ -308,15 +312,18 @@ send_template_now(char *filename)
 							strerr_warn1("Username is null", 0);
 						if (!Domain.len)
 							strerr_warn1("Domain is null", 0);
+						break;
 					}
-					if ((alias_line = valias_select(ActionUser.len ? ActionUser.s : "", Domain.len ? Domain.s : ""))) {
+					if ((alias_line = valias_select(ActionUser.s, Domain.s))) {
 						i = str_rchr(alias_line, '/');
 						if (alias_line[i])
 							for (ptr = alias_line + i - 1; ptr != alias_line && *ptr != '/'; ptr--);
 						if (*ptr == '/') {
-							if (!Domain.len)
+							if (!Domain.len) {
 								strerr_warn1("Domain is null", 0);
-							printh("value=\"%H@%H\"></td>\n", ptr + 1, Domain.len ? Domain.s : "");
+								printh("value=\"%H\"></td>\n", ptr + 1);
+							} else
+								printh("value=\"%H@%H\"></td>\n", ptr + 1, Domain.len ? Domain.s : "");
 						} else
 							printh("value=\"%H\"></td>\n", *alias_line == '&' ? alias_line + 1 : alias_line);
 					}
@@ -536,17 +543,19 @@ send_template_now(char *filename)
 				case 'O': /* build a pulldown menu of all POP/IMAP users */
 					if (!Domain.len)
 						strerr_warn1("Domain is null ", 0);
-					if (!(vpw = sql_getall(Domain.s, 1, 1))) {
-						strerr_warn3("no records for domain [", Domain.s, "]", 0);
-						out("<p>no records for domain [");
-						out(Domain.s);
-						out("]<br></p>");
-						flush();
-						return -1;
-					}
-					while (vpw) {
-						printh("<option value=\"%H\">%H</option>\n", vpw->pw_name, vpw->pw_name);
-						vpw = sql_getall(Domain.s, 0, 0);
+					else {
+						if (!(vpw = sql_getall(Domain.s, 1, 1))) {
+							strerr_warn3("no records for domain [", Domain.s, "]", 0);
+							out("<p>no records for domain [");
+							out(Domain.s);
+							out("]<br></p>");
+							flush();
+							return -1;
+						}
+						while (vpw) {
+							printh("<option value=\"%H\">%H</option>\n", vpw->pw_name, vpw->pw_name);
+							vpw = sql_getall(Domain.s, 0, 0);
+						}
 					}
 					break;
 				case 'o': /* show the mailing list moderators */
@@ -565,9 +574,8 @@ send_template_now(char *filename)
 							strerr_warn1("Domain is null", 0);
 						if (!RealDir.len)
 							strerr_warn1("RealDir is null", 0);
-					}
-					show_user_lines(Username.len ? Username.s : "", Domain.len ? Domain.s : "",
-							mytime, RealDir.len ? RealDir.s : "");
+					} else
+						show_user_lines(Username.s, Domain.s, mytime, RealDir.s);
 					break;
 				case 'Q': /* show quota usage */
 					if (!ActionUser.len || !Domain.len) {
@@ -575,7 +583,7 @@ send_template_now(char *filename)
 							strerr_warn1("User null", 0);
 						if (!Domain.len)
 							strerr_warn1("Domain is null", 0);
-						return -1;
+						break;
 					}
 					if (!(vpw = sql_getpw(ActionUser.s, Domain.s))) {
 						strerr_warn4("no records for user", ActionUser.s, "@", Domain.s, 0);
@@ -607,7 +615,7 @@ send_template_now(char *filename)
 							strerr_warn1("User null", 0);
 						if (!Domain.len)
 							strerr_warn1("Domain is null", 0);
-						return -1;
+						break;
 					}
 					if (!(vpw = sql_getpw(ActionUser.s, Domain.s))) {
 						strerr_warn4("no records for user", ActionUser.s, "@", Domain.s, 0);
@@ -710,7 +718,7 @@ send_template_now(char *filename)
 								strerr_warn1("User null", 0);
 							if (!Domain.len)
 								strerr_warn1("Domain is null", 0);
-							return -1;
+							break;
 						}
 						if (!(vpw = sql_getpw(Username.s, Domain.s))) {
 							strerr_warn4("no records for user", Username.s, "@", Domain.s, 0);
@@ -815,13 +823,11 @@ send_template_now(char *filename)
 					if (Domain.len)
 						printh("%H", Domain.s);
 					else
-					if (TmpCGI && GetValue(TmpCGI, &value1, "dom=") == 0) {
+					if (TmpCGI && GetValue(TmpCGI, &value1, "dom=") == 0)
 						printh("%H", value1.s);
 #ifdef DOMAIN_AUTOFILL
-					} else {
 						get_calling_host();
 #endif
-					}
 					break;
 				default:
 					break;
@@ -1006,8 +1012,9 @@ get_calling_host()
 			!stralloc_catb(&TmpBuf, "/control/virtualdomains", 23) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
-	if ((srvnam = env_get("HTTP_HOST")))
-		lowerit(srvnam);
+	if (!(srvnam = env_get("HTTP_HOST")))
+		return;
+	lowerit(srvnam);
 	if ((fd = open_read(TmpBuf.s)) == -1) {
 		strerr_warn3("get_calling_host: open: ", TmpBuf.s, ": ", &strerr_sys);
 		out(html_text[144]);
@@ -1018,7 +1025,7 @@ get_calling_host()
 		return;
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-	/*- read Reference: and Subjec: line */
+	/*- read Reference: and Subject: line */
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("get_calling_host: read: ", TmpBuf.s, ": ", &strerr_sys);
@@ -1056,7 +1063,6 @@ get_calling_host()
 
 /*
  * returns the value of session_var, first checking the .qw file for saved 
- *
  * value, or the TmpCGI if it's not yet been saved                         
  */
 char           *
