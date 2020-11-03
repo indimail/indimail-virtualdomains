@@ -1,5 +1,9 @@
 /*
- * $Id: iwebadmin.c,v 1.20 2020-11-02 14:53:15+05:30 Cprogrammer Exp mbhangui $
+ * $Log: iwebadmin.c,v $
+ * Revision 1.21  2020-11-03 09:28:09+05:30  Cprogrammer
+ * refactored code
+ *
+ *
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -15,6 +19,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ *
+ * $Id: iwebadmin.c,v 1.21 2020-11-03 09:28:09+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -243,10 +249,10 @@ main(argc, argv)
 			sleep(1);
 	if (debug) {
 		strnum[fmt_int(strnum, argc)] = 0;
-		strerr_warn2("argc = ", strnum, 0);
+		strerr_warn2("iwebdmin: argc = ", strnum, 0);
 		for (i = 0;i < argc;i++) {
 			strnum[fmt_int(strnum, i)] = 0;
-			strerr_warn4("argv[", strnum, "] = ", argv[i], 0);
+			strerr_warn4("iwebdmin: argv[", strnum, "] = ", argv[i], 0);
 		}
 	}
 	init_globals();
@@ -268,9 +274,9 @@ main(argc, argv)
 	if (!(TmpCGI = env_get("QUERY_STRING")))
 		TmpCGI = "";
 	if (debug) {
-		strerr_warn2("PATH_INFO=", pi, 0);
-		strerr_warn2("REQUEST_METHOD=", rm, 0);
-		strerr_warn2("QUERY_STRING=", TmpCGI, 0);
+		strerr_warn2("iwebdmin: PATH_INFO=", pi, 0);
+		strerr_warn2("iwebdmin: REQUEST_METHOD=", rm, 0);
+		strerr_warn2("iwebdmin: QUERY_STRING=", TmpCGI, 0);
 	}
 	if (pi && !str_diffn(pi, "/com/", 5)) {
 		GetValue(TmpCGI, &Username, "user=");
@@ -279,25 +285,24 @@ main(argc, argv)
 		scan_ulong(Time.s, (unsigned long *) &mytime);
 		if (!(pw = sql_getpw(Username.s, Domain.s))) {
 			copy_status_mesg(html_text[198]);
-			show_login();
 			iclose();
+			show_login();
 			exit(0);
 		}
 		/*- get the real uid and gid and change to that user */
 		if (!get_assign(Domain.s, &RealDir, &Uid, &Gid)) {
 			copy_status_mesg(html_text[19]);
-			show_login();
 			iclose();
+			show_login();
 			exit(0);
 		}
 		iwebadmin_suid(Gid, Uid);
 		if (chdir(RealDir.s) < 0) {
-			out("<h2>");
-			out(html_text[171]);
-			out(" ");
-			out(RealDir.s);
-			out("</h2>\n");
-			flush();
+			copy_status_mesg(html_text[171]);
+			strerr_warn3("iwebdmin: chdir: ", RealDir.s, ": ", &strerr_sys);
+			iclose();
+			show_login();
+			exit(0);
 		}
 		load_limits();
 		set_admin_type();
@@ -306,8 +311,8 @@ main(argc, argv)
 		else
 			auth_system(ip_addr, pw);
 		process_commands(tmp.s);
-	} else
-	if (pi && str_diffn(pi, "/passwd/", 7) == 0) {
+	} else /*- password change */
+	if (pi && !str_diffn(pi, "/passwd/", 7)) {
 		GetValue(TmpCGI, &Username, "address=");
 		GetValue(TmpCGI, &Password, "oldpass=");
 		GetValue(TmpCGI, &Password1, "newpass1=");
@@ -315,10 +320,7 @@ main(argc, argv)
 		if (Username.len && !Password.len && (Password1.len || Password2.len)) {
 			/*- username entered, but no password */
 			copy_status_mesg(html_text[198]);
-			errout("iwebadmin: ");
-			errout(Username.s);
-			errout(": No password\n");
-			errflush();
+			strerr_warn5("iwebadmin: ", Username.s, "@", Domain.s, ": No password", 0);
 		} else
 		if (Username.len && Password.len) {
 			i = str_chr(Username.s, '@');
@@ -331,49 +333,40 @@ main(argc, argv)
 				Domain.len--;
 			} else {
 				copy_status_mesg(html_text[198]);
-				show_login();
-				iclose();
-				exit(0);
+				send_template("change_password.html");
+				return 0;
 			}
 			/*- attempt to authenticate user */
 			if (!get_assign(Domain.s, &RealDir, &Uid, &Gid)) {
 				copy_status_mesg(html_text[19]);
-				show_login();
-				iclose();
-				exit(0);
+				strerr_warn3("iwebdmin: get_assign failed for ", Domain.s, ": ", 0);
+				send_template("change_password.html");
+				return 0;
 			}
 			iwebadmin_suid(Gid, Uid);
 			if (chdir(RealDir.s) < 0) {
-				out("<h2>");
-				out(html_text[171]);
-				out(" ");
-				out(RealDir.s);
-				out("</h2>\n");
-				flush();
+				copy_status_mesg(html_text[171]);
+				strerr_warn3("iwebdmin: chdir: ", RealDir.s, ": ", &strerr_sys);
+				send_template("change_password.html");
+				return 0;
 			}
 			load_limits();
 			if (!access(".trivial_passwords", F_OK))
 				encrypt_flag = 1;
 			if (!(pw = sql_getpw(Username.s, Domain.s))) {
 				copy_status_mesg(html_text[198]);
-				errout("iwebadmin: ");
-				errout(Username.s);
-				out(": No such user\n");
-				errflush();
+				if (debug)
+					strerr_warn5("iwebadmin: ", Username.s, "@", Domain.s, ": No such user", 0);
 			} else
 			if (pw->pw_gid & NO_PASSWD_CHNG) {
 				copy_status_mesg(html_text[20]);
-				errout("iwebadmin: ");
-				errout(Username.s);
-				out(": password change denied\n");
-				errflush();
+				if (debug)
+					strerr_warn5("iwebadmin: ", Username.s, "@", Domain.s, ": password change denied", 0);
 			} else
 			if (auth_user(pw, Password.s)) {
 				copy_status_mesg(html_text[198]);
-				errout("iwebadmin: ");
-				errout(Username.s);
-				out(": incorrect password\n");
-				errflush();
+				if (debug)
+					strerr_warn5("iwebadmin: ", Username.s, "@", Domain.s, ": incorrect password", 0);
 			} else
 			if (str_diffn(Password1.s, Password2.s, Password1.len > Password2.len ? Password1.len : Password2.len) != 0)
 				copy_status_mesg(html_text[200]);
@@ -388,22 +381,18 @@ main(argc, argv)
 			if (str_str(Username.s, Password1.s) != NULL)
 				copy_status_mesg(html_text[320]);
 #endif
-			else {
-				/* success */
+			else { /* success */
 				copy_status_mesg(html_text[139]);
+				strerr_warn5("iwebadmin: ", Username.s, "@", Domain.s, ": password changed", 0);
 				Password.len = 0;
 				send_template("change_password_success.html");
-				errout("iwebadmin: ");
-				errout(Username.s);
-				out(": password changed\n");
-				errflush();
 				return 0;
 			}
 		}
 		send_template("change_password.html");
 		return 0;
 	} else
-	if (rm && *rm) {
+	if (rm && *rm) { /*- authenticate */
 		GetValue(TmpCGI, &Username, "username=");
 		GetValue(TmpCGI, &Domain, "domain=");
 		GetValue(TmpCGI, &Password, "password=");
@@ -419,95 +408,92 @@ main(argc, argv)
 		get_assign(Domain.s, &RealDir, &Uid, &Gid);
 		iwebadmin_suid(Gid, Uid);
 		/*- Authenticate a user and domain admin */
-		if (Domain.len && Username.len) {
-			if (chdir(RealDir.s)) {
-				copy_status_mesg(html_text[171]);
-				errout("iwebadmin: ");
-				errout(RealDir.s);
-				errout(": unable to change dir\n");
-				errflush();
-				iclose();
-				exit(0);
-			}
-			load_limits();
-			if (!(pw = sql_getpw(Username.s, Domain.s))) {
-				copy_status_mesg(html_text[198]);
-				errout("iwebadmin: ");
-				errout(Username.s);
-				errout(": No such user\n");
-				errflush();
-				show_login();
-				iclose();
-				exit(0);
-			}
-			if (auth_user(pw, Password.s)) {
-				copy_status_mesg(html_text[198]);
-				errout("iwebadmin: ");
-				errout(Username.s);
-				out(": incorrect password\n");
-				errflush();
-				show_login();
-				iclose();
-				exit(0);
-			}
-			if (!stralloc_copys(&tmp, pw->pw_dir) ||
-					!stralloc_catb(&tmp, "/Maildir", 8) ||
-					!stralloc_0(&tmp))
-				die_nomem();
-			tmp.len--;
-			del_id_files(&tmp);
-			if (!stralloc_append(&tmp, "/") ||
-					!stralloc_catb(&tmp, strnum, fmt_ulong(strnum, (unsigned long) mytime)) ||
-					!stralloc_catb(&tmp, ".qw", 3) ||
-					!stralloc_0(&tmp))
-				die_nomem();
-			if ((fd = open_trunc(tmp.s)) == -1) {
-				strerr_warn3("iwebadmin: open: ", tmp.s, ": ", &strerr_sys);
-				show_login();
-				iclose();
-				exit(0);
-			}
-			substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
-			/*- set session vars */
-			GetValue(TmpCGI, &returntext, "returntext=");
-			GetValue(TmpCGI, &returnhttp, "returnhttp=");
-			if (substdio_put(&ssout, "ip_addr=", 8) ||
-					substdio_puts(&ssout, (char *) ip_addr) ||
-					substdio_put(&ssout, "&returntext=", 12) ||
-					substdio_put(&ssout, returntext.s, returntext.len) ||
-					substdio_put(&ssout, "&returnhttp=", 12) ||
-					substdio_put(&ssout, returnhttp.s, returnhttp.len) ||
-					substdio_put(&ssout, "\n", 1) || substdio_flush(&ssout)) {
-				strerr_warn3("iwebadmin: write: ", tmp.s, ": ", &strerr_sys);
-				show_login();
-				iclose();
-				exit(0);
-			} else
-			if (close(fd)) {
-				strerr_warn3("iwebadmin: write: ", tmp.s, ": ", &strerr_sys);
-				show_login();
-				iclose();
-				exit(0);
-			}
-			set_admin_type();
-			/*-
-			 * show the main menu for domain admins, modify user page
-			 * for regular users 
-			 */
-			if (AdminType == DOMAIN_ADMIN)
-				show_menu();
-			else {
-				if (!stralloc_copy(&ActionUser, &Username) || !stralloc_0(&ActionUser))
-					die_nomem();
-				ActionUser.len--;
-				moduser();
-			}
+		if (!Domain.len || !Username.len) {
 			iclose();
+			show_login();
 			exit(0);
 		}
+		if (chdir(RealDir.s)) {
+			copy_status_mesg(html_text[171]);
+			strerr_warn3("iwebadmin: chdir: ", RealDir.s, ": ", &strerr_sys);
+			iclose();
+			show_login();
+			exit(0);
+		}
+		load_limits();
+		if (!(pw = sql_getpw(Username.s, Domain.s))) {
+			copy_status_mesg(html_text[198]);
+			if (debug)
+				strerr_warn5("iwebadmin: ", Username.s, "@", Domain.s, ": No such user", 0);
+			iclose();
+			show_login();
+			exit(0);
+		}
+		if (auth_user(pw, Password.s)) {
+			copy_status_mesg(html_text[198]);
+			if (debug)
+				strerr_warn5("iwebadmin: ", Username.s, "@", Domain.s, ": incorrect password", 0);
+			iclose();
+			show_login();
+			exit(0);
+		}
+		if (!stralloc_copys(&tmp, pw->pw_dir) ||
+				!stralloc_catb(&tmp, "/Maildir", 8) ||
+				!stralloc_0(&tmp))
+			die_nomem();
+		tmp.len--;
+		del_id_files(&tmp);
+		if (!stralloc_append(&tmp, "/") ||
+				!stralloc_catb(&tmp, strnum, fmt_ulong(strnum, (unsigned long) mytime)) ||
+				!stralloc_catb(&tmp, ".qw", 3) ||
+				!stralloc_0(&tmp))
+			die_nomem();
+		if ((fd = open_trunc(tmp.s)) == -1) {
+			strerr_warn3("iwebadmin: open: ", tmp.s, ": ", &strerr_sys);
+			iclose();
+			show_login();
+			exit(0);
+		}
+		substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+		/*- set session vars */
+		GetValue(TmpCGI, &returntext, "returntext=");
+		GetValue(TmpCGI, &returnhttp, "returnhttp=");
+		if (substdio_put(&ssout, "ip_addr=", 8) ||
+				substdio_puts(&ssout, (char *) ip_addr) ||
+				substdio_put(&ssout, "&returntext=", 12) ||
+				substdio_put(&ssout, returntext.s, returntext.len) ||
+				substdio_put(&ssout, "&returnhttp=", 12) ||
+				substdio_put(&ssout, returnhttp.s, returnhttp.len) ||
+				substdio_put(&ssout, "\n", 1) || substdio_flush(&ssout)) {
+			strerr_warn3("iwebadmin: write: ", tmp.s, ": ", &strerr_sys);
+			iclose();
+			show_login();
+			exit(0);
+		} else
+		if (close(fd)) {
+			strerr_warn3("iwebadmin: write: ", tmp.s, ": ", &strerr_sys);
+			iclose();
+			show_login();
+			exit(0);
+		}
+		set_admin_type();
+		/*-
+		 * show the main menu for domain admins, modify user page
+		 * for regular users 
+		 */
+		if (AdminType == DOMAIN_ADMIN)
+			show_menu();
+		else {
+			if (!stralloc_copy(&ActionUser, &Username) || !stralloc_0(&ActionUser))
+				die_nomem();
+			ActionUser.len--;
+			moduser();
+		}
+		iclose();
+		exit(0);
 	}
-	show_login();
 	iclose();
+	show_login();
 	return 0;
 }
 
