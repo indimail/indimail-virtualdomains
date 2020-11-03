@@ -1,0 +1,55 @@
+* Mon Jul 15 2019 13:00:14 +0530 mbhangui@gmail.com 2.0-1.1%{?dist}
+Release 2.0 Start 27/04/2019
+01. Replaced all functions with djb functions
+02. Link with indimail-3.0
+- 15/07/2019
+03. removed unused arguments to show_menu(), show_users(), show_mailing_lists()
+04. renamed deluser() to ideluser() to avoid clash with indimail deluser()
+    function
+05. BUG - iwebadmin.c initialize SearchUser variable
+06. BUG - user.c - Fixed allocation of StatusMessage
+07. printh.c - fixes to snprintf() size parameter to have space for last null
+    byte
+- 12/06/2020
+08. moved iwebadmin to unversioned directory iwebadmin-x
+09. created create_rpm, create_debian scripts
+- 12/10/2020
+10. removed lsb_release
+- 13/10/2020
+11. added debuginfo package
+- 28/10/2020
+12. fixed mailinglist option screen. segfault due to missing code after
+    porting to libqmail
+- 29/10/2020
+13. iwebadmin.c: check at runtime ezmlm-make, ezmlm-idx and set ezmlm_make,
+    ezmlm_idx variables to show the correct screens
+14. mailinglist.c: fixed listing of .qmail files for mailinglist
+- 30/10/2020
+15. maillinglist.c: fixed show subscriber list
+16. maillinglist.c: fixed delete subscriber list
+17. iwebadmin.c, template.c: fixed "Log Out" getting clobbered by session
+    timeout
+18. mailinglist.c: save sql file for ezmlm-idx when "Enable MySQL support for
+    ezmlm-idx" is selected
+19. iwebadmin.spec: set read permissions for iwebadmin to fix mod_mime_magic
+    error in httpd logs
+20. iwebadmin.c: fixed password change
+21. mailinglist.c: delete subdb when MySQL support for ezmlm-idx is turned off
+- 31/10/2020
+22. iwebadmin.c: added /etc/indimail/conf-iwebadmin to set variables
+23. template.c: Fixed SIGSEGV
+24. mailinglist.c: Fixed digest options
+25. updated image assets
+01/11/2020
+26. mailinglist.c: use another variable to avoid changing loop counter
+27. iwebadmin: added debug statements
+02/11/2020
+28. templte.c: display fortune cookies in footer if fortune program is
+    installed
+29. user.c: use /etc/indimail/iwebadmin-hooks instead of
+   /etc/indiamil/.iwebadmin-hooks
+30. mailinglist.c: added hooks addmaillist, delmaillist
+03/11/2020
+31. template.c: fixed SIGSEGV
+32. user.c: fixed iwebadmin-hooks
+33. Makefile.am: added iwebadmin-hooks config file
