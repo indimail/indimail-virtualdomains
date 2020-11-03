@@ -113,3 +113,5 @@ install-data-hook:
 	$(INSTALL_DATA) README.hooks $(DESTDIR)@docdir@/README.hooks || exit 1
 	$(INSTALL_DATA) COPYING      $(DESTDIR)@docdir@/COPYING || exit 1
 	$(INSTALL_DATA) AUTHORS      $(DESTDIR)@docdir@/AUTHORS || exit 1
+
+AUTOMAKE_OPTIONS = foreign no-dependencies
