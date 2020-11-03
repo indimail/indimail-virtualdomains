@@ -108,10 +108,10 @@ install-data-local:
 		chmod 4555 $(DESTDIR)$(bindir)/iwebadmin; \
 	fi
 install-data-hook:
-	$(mkinstalldirs)             $(DESTDIR)@docdir@
-	$(INSTALL_DATA) README       $(DESTDIR)@docdir@/README || exit 1
-	$(INSTALL_DATA) README.hooks $(DESTDIR)@docdir@/README.hooks || exit 1
-	$(INSTALL_DATA) COPYING      $(DESTDIR)@docdir@/COPYING || exit 1
-	$(INSTALL_DATA) AUTHORS      $(DESTDIR)@docdir@/AUTHORS || exit 1
+	$(mkinstalldirs)                $(DESTDIR)@docdir@
+	$(INSTALL_DATA) README.md       $(DESTDIR)@docdir@/README.md || exit 1
+	$(INSTALL_DATA) README-hooks.md $(DESTDIR)@docdir@/README-hooks.md || exit 1
+	$(INSTALL_DATA) COPYING         $(DESTDIR)@docdir@/COPYING || exit 1
+	$(INSTALL_DATA) AUTHORS         $(DESTDIR)@docdir@/AUTHORS || exit 1
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
