@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.18 2020-11-02 20:20:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.19 2020-11-03 10:19:17+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -617,6 +617,8 @@ call_hooks(char *hook_type, char *p1, char *p2, char *p3, char *p4)
 			flush();
 			return (0);
 		}
+		if (!line.len)
+			break;
 		if (match) {
 			line.len--;
 			line.s[line.len] = 0;
@@ -632,7 +634,7 @@ call_hooks(char *hook_type, char *p1, char *p2, char *p3, char *p4)
 		if (!*ptr)
 			continue;
 		match = str_chr(ptr, ' ');
-		if (ptr[match] && !str_diffn(ptr, hook_type, match + 1)) {
+		if (ptr[match] && !str_diffn(ptr, hook_type, match)) {
 			ptr += match;
 			for (;*ptr && isspace(*ptr); ptr++);
 			cmd = ptr;
@@ -1346,8 +1348,7 @@ parse_users_dotqmail(char newchar)
 				!stralloc_catb(&fn1, "/.qmail", 7) ||
 				!stralloc_0(&fn1))
 			die_nomem();
-		fd1 = open_read(fn1.s);
-		if (fd1 == -1) {
+		if ((fd1 = open_read(fn1.s)) == -1) {
 			/*- no .qmail file, standard delivery */
 			dotqmail_flags = DOTQMAIL_STANDARD;
 		} else {
@@ -1361,8 +1362,18 @@ parse_users_dotqmail(char newchar)
 					out(" 1<BR>\n");
 					flush();
 					iclose();
+					if (fd1 != -1) {
+						close(fd1);
+						fd1 = -1;
+					}
+					if (fd2 != -1) {
+						close(fd2);
+						fd2 = -1;
+					}
 					exit(0);
 				}
+				if (line.len == 0)
+					break;
 				if (match) {
 					line.len--;
 					line.s[line.len] = 0;
@@ -1410,24 +1421,16 @@ parse_users_dotqmail(char newchar)
 				default: /* email address delivery */
 					dotqmail_flags |= DOTQMAIL_FORWARD;
 				}
-			}
-			/*
-			 * if other flags were set, in addition to blackhole, clear blackhole flag 
-			 */
+			} /*- for (;;) */
+			/*- if other flags were set, in addition to blackhole, clear blackhole flag */
 			if (dotqmail_flags & (DOTQMAIL_FORWARD | DOTQMAIL_SAVECOPY))
 				dotqmail_flags &= ~DOTQMAIL_BLACKHOLE;
-			/*
-			 * if no flags were set (.qmail file without delivery), it's a blackhole 
-			 */
+			/*- if no flags were set (.qmail file without delivery), it's a blackhole */
 			if (dotqmail_flags == 0)
 				dotqmail_flags = DOTQMAIL_BLACKHOLE;
-			/*
-			 * clear OTHERPGM flag, as it tells us nothing at this point 
-			 */
+			/*- clear OTHERPGM flag, as it tells us nothing at this point */
 			dotqmail_flags &= ~DOTQMAIL_OTHERPGM;
-			/*
-			 * if forward and save-a-copy are set, it will actually set the spam flag 
-			 */
+			/*- if forward and save-a-copy are set, it will actually set the spam flag */
 			if ((dotqmail_flags & DOTQMAIL_FORWARD))
 				dotqmail_flags |= DOTQMAIL_SAVECOPY;
 			/*- if forward is not set, clear save-a-copy */
@@ -1469,6 +1472,14 @@ parse_users_dotqmail(char newchar)
 						out(" 1<BR>\n");
 						flush();
 						iclose();
+						if (fd1 != -1) {
+							close(fd1);
+							fd1 = -1;
+						}
+						if (fd2 != -1) {
+							close(fd2);
+							fd2 = -1;
+						}
 						exit(0);
 					}
 					if (match) {
@@ -1513,6 +1524,14 @@ parse_users_dotqmail(char newchar)
 						out(" 1<BR>\n");
 						flush();
 						iclose();
+						if (fd1 != -1) {
+							close(fd1);
+							fd1 = -1;
+						}
+						if (fd2 != -1) {
+							close(fd2);
+							fd2 = -1;
+						}
 						exit(0);
 					}
 					if (line.s[0] == '\n')
@@ -1557,6 +1576,14 @@ parse_users_dotqmail(char newchar)
 						out(" 1<BR>\n");
 						flush();
 						iclose();
+						if (fd1 != -1) {
+							close(fd1);
+							fd1 = -1;
+						}
+						if (fd2 != -1) {
+							close(fd2);
+							fd2 = -1;
+						}
 						exit(0);
 					}
 					if (!inheader)
