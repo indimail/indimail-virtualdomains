@@ -1,5 +1,7 @@
 # iwebadmin-hooks
 
+iwebadmin run run user defined hooks using a feature known as iwebadmin-hooks. It just needs you to write simple script/program in any language. These script/programs will be called with certain arguments with environment variables set by your httpd server.
+
 Note: Only the add/del/moduser and add/del/mailinglist hooks have been implemented.  Parameters to add/del/modmaillist will be different than those used for add/del/mod user.
 
 Create a file named `.iwebadmin-hooks` according to the following syntax. iwebadmin will first look in the directory for the current domain, and then look for `iwebadmin-hooks` in /etc/indimail.
