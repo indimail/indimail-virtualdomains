@@ -39,5 +39,3 @@ conf-release
 iwebadmin-permissions.easy
 iwebadmin-permissions.paranoid
 iwebadmin-permissions.secure
-debian/changelog.in
-doc/ChangeLog

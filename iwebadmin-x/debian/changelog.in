@@ -1,0 +1,35 @@
+iwebadmin (@version@-@release@) unstable; urgency=low
+
+  * fixed vsetuserquota
+  * Replaced all functions with djb functions
+  * Link with indimail-3.0
+  * removed unused arguments to show_menu(), show_users(), show_mailing_lists()
+  * renamed deluser() to ideluser() to avoid clash with indimail deluser() function
+  * BUG - iwebadmin.c initialize SearchUser variable
+  * BUG - user.c - Fixed allocation of StatusMessage
+  * printh.c - fixes to snprintf() size parameter to have space for last null byte
+  * moved iwebadmin to unversioned directory iwebadmin-x
+  * created create_rpm, create_debian scripts
+  * removed lsb_release
+  * fixed mailinglist option screen. segfault due to missing code after porting to libqmail
+  * iwebadmin.c: check at runtime ezmlm-make, ezmlm-idx and set ezmlm_make, ezmlm_idx variables to show the correct screens
+  * mailinglist.c: fixed listing of .qmail files for mailinglist
+  * maillinglist.c: fixed show subscriber list
+  * maillinglist.c: fixed delete subscriber list
+  * iwebadmin.c, template.c: fixed "Log Out" getting clobbered by session timeout
+  * mailinglist.c: save sql file for ezmlm-idx when "Enable MySQL support for ezmlm-idx" is selected
+  * iwebadmin.perms: set read permissions for iwebadmin to fix mod_mime_magic error in httpd logs
+  * iwebadmin.c: fixed password change
+  * mailinglist.c: delete subdb when MySQL support for ezmlm-idx is turned off
+  * iwebadmin.c: added /etc/indimail/conf-iwebadmin to set variables
+  * template.c: Fixed SIGSEGV
+  * mailinglist.c: Fixed digest options
+  * updated image assets
+  * mailinglist.c: use another variable to avoid changing loop counter
+  * iwebadmin: added debug statements
+  * templte.c: display fortune cookies in footer if fortune program is installed
+  * user.c: use /etc/indimail/iwebadmin-hooks instead of /etc/indiamil/.iwebadmin-hooks
+  * mailinglist.c: added hooks addmaillist, delmaillist
+  * template.c: fixed SIGSEGV
+  * user.c: fixed iwebadmin-hooks
+  * Makefile.am: added iwebadmin-hooks config file
