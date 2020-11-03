@@ -1,0 +1,5 @@
+#adduser     /usr/libexec/iwebadmin/adduser
+#deluser     /usr/libexec/iwebadmin/deluser
+#moduser     /usr/libexec/iwebadmin/moduser
+#addmaillist /usr/libexec/iwebadmin/addmaillist
+#delmaillist /usr/libexec/iwebadmin/delmaillist

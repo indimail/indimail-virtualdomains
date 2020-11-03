@@ -1,5 +1,8 @@
 /*
  * $Log: iwebadmin.c,v $
+ * Revision 1.22  2020-11-03 10:24:55+05:30  Cprogrammer
+ * renamed conf-iwebadmin to iwebadmin-conf
+ *
  * Revision 1.21  2020-11-03 09:28:09+05:30  Cprogrammer
  * refactored code
  *
@@ -20,7 +23,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: iwebadmin.c,v 1.21 2020-11-03 09:28:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.22 2020-11-03 10:24:55+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -192,7 +195,7 @@ conf_iwebadmin()
 	struct substdio ssin;
 
 	if (!stralloc_copys(&TmpBuf, SYSCONFDIR) ||
-			!stralloc_catb(&TmpBuf, "/conf-iwebadmin", 23) ||
+			!stralloc_catb(&TmpBuf, "/iwebadmin-conf", 23) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
 	if ((fd = open_read(TmpBuf.s)) != -1) {

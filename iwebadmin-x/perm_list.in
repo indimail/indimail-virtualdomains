@@ -81,3 +81,5 @@
 %attr(0644,root,root) @htmllibdir@/html/del_listuser.html
 %attr(0644,root,root) @htmllibdir@/html/show_login.html
 %attr(0644,root,root) @htmllibdir@/html/show_users.html
+%attr(0644,root,root) @sysconfdir@/iwebadmin-hooks
+%attr(0644,root,root) @sysconfdir@/iwebadmin-conf
