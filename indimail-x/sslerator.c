@@ -1,5 +1,8 @@
 /*
  * $Log: sslerator.c,v $
+ * Revision 1.4  2020-11-11 17:04:17+05:30  Cprogrammer
+ * added option to specify socket fd
+ *
  * Revision 1.3  2020-10-01 18:30:32+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: sslerator.c,v 1.3 2020-10-01 18:30:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sslerator.c,v 1.4 2020-11-11 17:04:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_SSL
@@ -39,6 +42,7 @@ static char     sccsid[] = "$Id: sslerator.c,v 1.3 2020-10-01 18:30:32+05:30 Cpr
 #include <fmt.h>
 #include <env.h>
 #include <strmsg.h>
+#include <scan.h>
 #endif
 #include "sockwrite.h"
 #include "variables.h"
@@ -219,13 +223,14 @@ SigChild(void)
 }
 
 static int
-get_options(int argc, char **argv, int *err_to_net, char ***pgargs)
+get_options(int argc, char **argv, int *err_to_net, int *fd, char ***pgargs)
 {
 	int             c;
 
 	certfile = 0;
 	*err_to_net = 0;
-	while ((c = getopt(argc, argv, "vn:")) != opteof) {
+	*fd = 0;
+	while ((c = getopt(argc, argv, "vn:f:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
@@ -234,11 +239,14 @@ get_options(int argc, char **argv, int *err_to_net, char ***pgargs)
 		case 'e':
 			*err_to_net = 1;
 			break;
+		case 'f':
+			scan_int(optarg, fd);
+			break;
 		case 'n':
 			certfile = optarg;
 			break;
 		default:
-			strerr_warn1("usage: sslerator [-t][-n certfile][-v] prog [args]", 0);
+			strerr_warn1("usage: sslerator [-t][-n certfile][-f fd][-v] prog [args]", 0);
 			return (1);
 		}
 	}
@@ -251,7 +259,7 @@ get_options(int argc, char **argv, int *err_to_net, char ***pgargs)
 	if (optind < argc)
 		*pgargs = argv + optind;
 	else {
-		strerr_warn1("usage: sslerator [-t][-n certfile][-v] prog [args]", 0);
+		strerr_warn1("usage: sslerator [-t][-n certfile][-f fd][-v] prog [args]", 0);
 		return (1);
 	}
 	return (0);
@@ -266,9 +274,9 @@ main(argc, argv)
 	SSL            *ssl;
 	char          **pgargs, *ptr;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
-	int             status, r, ret, n, err_to_net, pid, pi1[2], pi2[2], pi3[2];
+	int             status, r, ret, n, sock, err_to_net, pid, pi1[2], pi2[2], pi3[2];
 
-	if (get_options(argc, argv, &err_to_net, &pgargs))
+	if (get_options(argc, argv, &err_to_net, &sock, &pgargs))
 		return (1);
 	if (usessl == 0) {
 		execv(pgargs[0], pgargs);
@@ -302,7 +310,7 @@ main(argc, argv)
 			/*
 			 * signals are allready set in the parent
 			 */
-			putenv("SSLERATOR=1");
+			env_put("SSLERATOR=1");
 			execv(pgargs[0], pgargs);
 			strerr_warn3("sslerator: execv: ", pgargs[0], ": ", &strerr_sys);
 			close(0);
@@ -342,16 +350,15 @@ main(argc, argv)
 		return (1);
 	}
 #endif
-	if (!(sbio = BIO_new_socket(0, BIO_NOCLOSE))) {
+	if (!(sbio = BIO_new_socket(sock, BIO_NOCLOSE))) {
 		strnum1[fmt_ulong(strnum1, getpid())] = 0;
 		strerr_warn2(strnum1, ": unable to set up BIO socket", 0);
 		SSL_free(ssl);
 		_exit(1);
 	}
 	SSL_set_bio(ssl, sbio, sbio); /*- cannot fail */
-	if ((ptr = env_get("BANNER"))) {
+	if ((ptr = env_get("BANNER")))
 		strmsg_out2(ptr, "\n");
-	}
 	n = translate(ssl, err_to_net, pi1[1], pi2[0], pi3[0], 3600);
 	SSL_shutdown(ssl);
 	SSL_free(ssl);
