@@ -436,6 +436,8 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * flash - ncurses customizable menu based Admin Tool
  * indium - Menu based administration tool written in tcl/tk
  * osh - Operator Shell (with configurable restricted command set) for Administrator
+ * docker/podman support in daemontools
+ * support /run, /var/run filesystem in daemontools
 
 ## Brief Feature List
 
