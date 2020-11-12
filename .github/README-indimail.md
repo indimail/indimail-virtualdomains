@@ -2763,7 +2763,7 @@ After carrying out the above step,  check the status of mrtg service
 
 ```
 $ sudo svstat /service/mrtg
-/service/mrtg/: up (pid 2443) 35254 seconds
+/service/mrtg/: up 35254 seconds pid 2443
 ```
 
 Point your browser to /var/www/html/mailmrtg and you should see the graphs.
@@ -3673,31 +3673,33 @@ We now have a running container and can attach to it and use it like any functio
 $ docker exec -ti fd09c7ca75be /bin/bash --login
 #
 # /var/indimail/bin/svstat /service/\*
-# /service/fetchmail: down 32 seconds
-# /service/greylist.1999: up (pid 203) 32 seconds
-# /service/indisrvr.4000: up (pid 178) 32 seconds
-# /service/inlookup.infifo: up (pid 192) 32 seconds
-# /service/mysql.3306: up (pid 181) 32 seconds
-# /service/proxy-imapd.4143: up (pid 191) 32 seconds
-# /service/proxy-imapd-ssl.9143: up (pid 188) 32 seconds
-# /service/proxy-pop3d.4110: up (pid 197) 32 seconds
-# /service/proxy-pop3d-ssl.9110: up (pid 179) 32 seconds
-# /service/pwdlookup: up (pid 195) 32 seconds
-# /service/qmail-imapd.143: up (pid 222) 32 seconds
-# /service/qmail-imapd-ssl.993: up (pid 200) 32 seconds
-# /service/qmail-pop3d.110: up (pid 212) 32 seconds
-# /service/qmail-pop3d-ssl.995: up (pid 184) 32 seconds
-# /service/qmail-poppass.106: up (pid 216) 32 seconds
-# /service/qmail-qmqpd.628: down 32 seconds
-# /service/qmail-qmtpd.209: up (pid 153) 32 seconds
-# /service/qmail-send.25: up (pid 182) 32 seconds
-# /service/qmail-smtpd.25: up (pid 187) 32 seconds
-# /service/qmail-smtpd.366: up (pid 208) 32 seconds
-# /service/qmail-smtpd.465: up (pid 194) 32 seconds
-# /service/qmail-smtpd.587: up (pid 196) 32 seconds
-# /service/qmail-spamlog: up (pid 221) 32 seconds
-# /service/qscanq: up (pid 213) 32 seconds
-# /service/udplogger.3000: up (pid 211) 32 seconds
+/service/fetchmail: down 10036 seconds spid 45058 
+/service/greylist.1999: up 10036 seconds pid 45102 
+/service/indisrvr.4000: up 10036 seconds pid 45090 
+/service/inlookup.infifo: up 10006 seconds pid 46146 
+/service/mrtg: up 10036 seconds pid 45125 
+/service/mysql.3306: up 10036 seconds pid 45148 
+/service/proxy-imapd.4143: up 10036 seconds pid 45128 
+/service/proxy-imapd-ssl.9143: up 10036 seconds pid 45141 
+/service/proxy-pop3d.4110: up 10036 seconds pid 45147 
+/service/proxy-pop3d-ssl.9110: up 10036 seconds pid 45120 
+/service/pwdlookup: up 10006 seconds pid 46148 
+/service/qmail-daned.1998: up 10036 seconds pid 45067 
+/service/qmail-imapd.143: up 10036 seconds pid 45064 
+/service/qmail-imapd-ssl.993: up 10036 seconds pid 45072 
+/service/qmail-logfifo: up 10036 seconds pid 45091 
+/service/qmail-pop3d.110: up 10036 seconds pid 45104 
+/service/qmail-pop3d-ssl.995: up 10036 seconds pid 45114 
+/service/qmail-poppass.106: up 10036 seconds pid 45081 
+/service/qmail-qmqpd.628: down 10036 seconds spid 45007 
+/service/qmail-qmtpd.209: up 10036 seconds pid 45107 
+/service/qmail-send.25: up 10036 seconds pid 45131 
+/service/qmail-smtpd.25: up 10036 seconds pid 45066 
+/service/qmail-smtpd.366: up 10036 seconds pid 45065 
+/service/qmail-smtpd.465: up 10036 seconds pid 45124 
+/service/qmail-smtpd.587: up 10036 seconds pid 45136 
+/service/qscanq: up 10036 seconds pid 45096 
+/service/udplogger.3000: up 10036 seconds pid 45150 
 ```
 
 You now have a fully functional mail server with a pre-configured virtual domain indimail.org and a pre-configured virtual user testuser01@indimail.org. You can use IMAP/POP3/SMTP to your heart's content. If not satisfied, try out the ssl enabled services IMAPS/POP3S/SMTPS or STARTTLS command. If still not satisfied, read the man pages in /var/indimail/man/\*. You can stop the container by executing the docker stop command.
