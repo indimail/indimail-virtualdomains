@@ -226,12 +226,12 @@ IndiMail uses GPLv3 License. See file [LICENSE](https://github.com/mbhangui/indi
 ## Speed
 
 IndiMail uses a modified [qmail](http://cr.yp.to/qmail.html "qmail") as the MTA. qmail's modular, lightweight design and sensible queue management provides IndiMail the speed to make it one of the fastest available message transfer agent.
-IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''qmail-multi'' uses multiple queues with each queue running its own qmail-send process. This allows IndiMail to process mails faster than what can be provided by qmail.
+IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''qmail-multi'' uses multiple queues with each queue running its own qmail-send/qmail-todo, qmail-lspawn, qmail-rspawn processes. This allows IndiMail to process mails faster than what can be provided by qmail. A process named qmail-daemon monitors these processes and restarts them if they go down, which hasn't yet been observed to go down.
 
 ## Setup
 
  * automatic adaptation to your UNIX variant
- * Linux, SunOS, Solaris, and more
+ * Linux, FreeBSD, OSX, SunOS, Solaris, and more
  * automatic per-host configuration - gnu autoconf
  * High degree of automation of configuration through ''svctool''
  * RPM/Debian packages for multiple Linux Distros. Binary packages follows Dave Sill's [LWQ](http://www.lifewithqmail.org/ "LWQ").
@@ -430,7 +430,7 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * ability to distribute QMQP traffic across multiple servers
  * ''sslerator'' - TLS/SSL protocol wrapper for non-tls aware applications
  * ''svctool'' – Configuration tool for IndiMail.
- * ''iwebadmin'' - Web Frontend for IndiMail user administration.
+ * ''iwebadmin'' - CGI Web Frontend for IndiMail user administration.
  * mrtg graphs for detailed statistics
  * ability to specify commands in control files.
  * flash - ncurses customizable menu based Admin Tool
