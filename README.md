@@ -504,34 +504,104 @@ If you don't have /service create a link to /usr/libexec/indimail/service (/usr/
 
 ```
 $ sudo svstat /service/\*
-/service/dnscache: up (pid 120532) 4394 seconds
-/service/fetchmail: down 4394 seconds
-/service/greylist.1999: up (pid 120502) 4394 seconds
-/service/indisrvr.4000: up (pid 120494) 4394 seconds
-/service/inlookup.infifo: up (pid 120465) 4394 seconds
-/service/mrtg: up (pid 120495) 4394 seconds
-/service/mysql.3306: up (pid 120471) 4394 seconds
-/service/proxy-imapd.4143: down 4394 seconds
-/service/proxy-imapd-ssl.9143: down 4394 seconds
-/service/proxy-pop3d.4110: down 4394 seconds
-/service/proxy-pop3d-ssl.9110: down 4394 seconds
-/service/pwdlookup: up (pid 120515) 4394 seconds
-/service/qmail-daned.1998: up (pid 120413) 4394 seconds
-/service/qmail-imapd.143: up (pid 120405) 4394 seconds
-/service/qmail-imapd-ssl.993: up (pid 120475) 4394 seconds
-/service/qmail-logfifo: up (pid 120499) 4394 seconds
-/service/qmail-pop3d.110: up (pid 120407) 4394 seconds
-/service/qmail-pop3d-ssl.995: up (pid 120497) 4394 seconds
-/service/qmail-poppass.106: up (pid 120474) 4394 seconds
-/service/qmail-qmqpd.628: down 4394 seconds
-/service/qmail-qmtpd.209: up (pid 120487) 4394 seconds
-/service/qmail-send.25: up (pid 120469) 4394 seconds
-/service/qmail-smtpd.25: up (pid 120416) 4394 seconds
-/service/qmail-smtpd.366: up (pid 120516) 4394 seconds
-/service/qmail-smtpd.465: up (pid 120492) 4394 seconds
-/service/qmail-smtpd.587: up (pid 120473) 4394 seconds
-/service/qscanq: up (pid 120500) 4394 seconds
-/service/udplogger.3000: up (pid 120463) 4394 seconds
+/service/fetchmail: down 9226 seconds spid 45058 
+/service/greylist.1999: up 9226 seconds pid 45102 
+/service/indisrvr.4000: up 9226 seconds pid 45090 
+/service/inlookup.infifo: up 9196 seconds pid 46146 
+/service/mrtg: up 9226 seconds pid 45125 
+/service/mysql.3306: up 9226 seconds pid 45148 
+/service/proxy-imapd.4143: up 9226 seconds pid 45128 
+/service/proxy-imapd-ssl.9143: up 9226 seconds pid 45141 
+/service/proxy-pop3d.4110: up 9226 seconds pid 45147 
+/service/proxy-pop3d-ssl.9110: up 9226 seconds pid 45120 
+/service/pwdlookup: up 9196 seconds pid 46148 
+/service/qmail-daned.1998: up 9226 seconds pid 45067 
+/service/qmail-imapd.143: up 9226 seconds pid 45064 
+/service/qmail-imapd-ssl.993: up 9226 seconds pid 45072 
+/service/qmail-logfifo: up 9226 seconds pid 45091 
+/service/qmail-pop3d.110: up 9226 seconds pid 45104 
+/service/qmail-pop3d-ssl.995: up 9226 seconds pid 45114 
+/service/qmail-poppass.106: up 9226 seconds pid 45081 
+/service/qmail-qmqpd.628: down 9226 seconds spid 45007 
+/service/qmail-qmtpd.209: up 9226 seconds pid 45107 
+/service/qmail-send.25: up 9226 seconds pid 45131 
+/service/qmail-smtpd.25: up 9226 seconds pid 45066 
+/service/qmail-smtpd.366: up 9226 seconds pid 45065 
+/service/qmail-smtpd.465: up 9226 seconds pid 45124 
+/service/qmail-smtpd.587: up 9226 seconds pid 45136 
+/service/qscanq: up 9226 seconds pid 45096 
+/service/udplogger.3000: up 9226 seconds pid 45150 
+```
+
+or you could use svps command
+
+```
+$ sudo svps -a
+------------ svscan ---------------
+/usr/sbin/svscan /service          up      9227 secs  pid   44997
+
+------------ main -----------------
+/service/fetchmail                 down    9226 secs spid   45058
+/service/qmail-qmqpd.628           down    9226 secs spid   45007
+/service/inlookup.infifo           up      9196 secs  pid   46146
+/service/pwdlookup                 up      9196 secs  pid   46148
+/service/dnscache                  up      9226 secs  pid   45119
+/service/freshclam                 up      9226 secs  pid   45069
+/service/greylist.1999             up      9226 secs  pid   45102
+/service/indisrvr.4000             up      9226 secs  pid   45090
+/service/mrtg                      up      9226 secs  pid   45125
+/service/mysql.3306                up      9226 secs  pid   45148
+/service/proxy-imapd.4143          up      9226 secs  pid   45128
+/service/proxy-imapd-ssl.9143      up      9226 secs  pid   45141
+/service/proxy-pop3d.4110          up      9226 secs  pid   45147
+/service/proxy-pop3d-ssl.9110      up      9226 secs  pid   45120
+/service/qmail-daned.1998          up      9226 secs  pid   45067
+/service/qmail-imapd.143           up      9226 secs  pid   45064
+/service/qmail-imapd-ssl.993       up      9226 secs  pid   45072
+/service/qmail-logfifo             up      9226 secs  pid   45091
+/service/qmail-pop3d.110           up      9226 secs  pid   45104
+/service/qmail-pop3d-ssl.995       up      9226 secs  pid   45114
+/service/qmail-poppass.106         up      9226 secs  pid   45081
+/service/qmail-qmtpd.209           up      9226 secs  pid   45107
+/service/qmail-send.25             up      9226 secs  pid   45131
+/service/qmail-smtpd.25            up      9226 secs  pid   45066
+/service/qmail-smtpd.366           up      9226 secs  pid   45065
+/service/qmail-smtpd.465           up      9226 secs  pid   45124
+/service/qmail-smtpd.587           up      9226 secs  pid   45136
+/service/qscanq                    up      9226 secs  pid   45096
+/service/udplogger.3000            up      9226 secs  pid   45150
+
+------------ logs -----------------
+/service/.svscan/log               up      9226 secs  pid   45024
+/service/clamd/log                 up      9226 secs  pid   45123
+/service/fetchmail/log             up      9226 secs  pid   45137
+/service/freshclam/log             up      9226 secs  pid   45074
+/service/greylist.1999/log         up      9226 secs  pid   45097
+/service/indisrvr.4000/log         up      9226 secs  pid   45063
+/service/inlookup.infifo/log       up      9226 secs  pid   45118
+/service/mrtg/log                  up      9226 secs  pid   45099
+/service/mysql.3306/log            up      9226 secs  pid   45142
+/service/proxy-imapd.4143/log      up      9226 secs  pid   45101
+/service/proxy-imapd-ssl.9143/log  up      9226 secs  pid   45126
+/service/proxy-pop3d.4110/log      up      9226 secs  pid   45143
+/service/proxy-pop3d-ssl.9110/log  up      9226 secs  pid   45117
+/service/pwdlookup/log             up      9226 secs  pid   45132
+/service/qmail-daned.1998/log      up      9226 secs  pid   45044
+/service/qmail-imapd.143/log       up      9226 secs  pid   45075
+/service/qmail-imapd-ssl.993/log   up      9226 secs  pid   45070
+/service/qmail-logfifo/log         up      9226 secs  pid   45135
+/service/qmail-pop3d.110/log       up      9226 secs  pid   45103
+/service/qmail-pop3d-ssl.995/log   up      9226 secs  pid   45105
+/service/qmail-poppass.106/log     up      9226 secs  pid   45046
+/service/qmail-qmqpd.628/log       up      9226 secs  pid   45113
+/service/qmail-qmtpd.209/log       up      9226 secs  pid   45106
+/service/qmail-send.25/log         up      9226 secs  pid   45129
+/service/qmail-smtpd.25/log        up      9226 secs  pid   45073
+/service/qmail-smtpd.366/log       up      9226 secs  pid   45068
+/service/qmail-smtpd.465/log       up      9226 secs  pid   45140
+/service/qmail-smtpd.587/log       up      9226 secs  pid   45121
+/service/qscanq/log                up      9226 secs  pid   45139
+/service/udplogger.3000/log        up      9226 secs  pid   45149
 ```
 
 ## Create Virtual Domains
