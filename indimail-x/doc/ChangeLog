@@ -78,3 +78,6 @@ Release 3.3 Start 06/09/2020
 47. indimail.spec: fixed rplint error with unstripped binary or object
 20/10/2020
 48. vdelivermail.c: skip creation of maildirfolder file for user's Maildir (INBOX)
+14/11/2020
+49. indimail.spec: turn off lto
+50. indimail.spec: turn on openSUSE permissions
