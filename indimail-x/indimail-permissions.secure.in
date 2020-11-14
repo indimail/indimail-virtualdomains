@@ -53,5 +53,18 @@
 # in your system.
 
 #
-@libexecdir@/sq_vacation            root:qmail     4555
-@prefix@/sbin/systpass              root:root      4555
+@prefix@/bin/vdeluser               root:root 4555
+@prefix@/bin/vadduser               root:root 4555
+@prefix@/bin/vaddaliasdomain        root:root 4555
+@prefix@/bin/vrenamedomain          root:root 4555
+@prefix@/bin/vsetuserquota          root:root 4555
+@prefix@/bin/vmoveuser              root:root 4555
+@prefix@/bin/vdeldomain             root:root 4555
+@prefix@/bin/vadddomain             root:root 4555
+@prefix@/bin/vdominfo               root:root 4555
+@prefix@/bin/vrenameuser            root:root 4555
+@prefix@/bin/printdir               root:root 4555
+@prefix@/bin/vmoduser               root:root 4555
+@prefix@/bin/vcfilter               root:root 4555
+@prefix@/bin/vbulletin              root:root 4555
+@libexecdir@/sq_vacation            root:root 4555

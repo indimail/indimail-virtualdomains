@@ -20,6 +20,7 @@ libeps_LTLIBRARIES = libeps.la
 libeps_la_SOURCES=$(COMMONSOURCES) 
 libeps_la_LIBADD =
 libeps_la_LDFLAGS = -version-info @LIBVER@
+libeps_la_CFLAGS = -fPIC
 libepsdir=@libdir@
 
 eps_line.lo: $(INC)

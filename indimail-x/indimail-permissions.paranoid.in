@@ -27,5 +27,4 @@
 # you do not need or by restricting access to them using packet filters
 # or tcp wrappers (see hosts_access(5)) to gain a higher level of security
 # in your system.
-@libexecdir@/sq_vacation            root:qmail     4555
-@prefix@/sbin/systpass              root:root      4555
+@libexecdir@/sq_vacation            root:root 4555

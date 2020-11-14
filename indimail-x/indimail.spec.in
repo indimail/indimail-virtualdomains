@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.75 2020-10-24 15:01:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.76 2020-11-14 17:10:59+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -8,7 +8,6 @@
 # define if building on openSUSE build service
 %global build_on_obs       1
 %global reconfigure_mode   0
-%global build_cflags       "-DOBS_BUILD %{build_cflags}"
 %else
 %define _project           local
 %global build_on_obs       0
@@ -33,11 +32,6 @@
 %global shareddir          @prefix@/share/indimail
 %global mandir             @mandir@
 %global defaultDomain      @defaultdomain@
-%if 0%{?suse_version}
-%global noperms            1
-%else
-%global noperms            0
-%endif
 %global url                https://github.com/mbhangui/indimail-virtualdomains
 %global noproxy            0
 
@@ -95,12 +89,10 @@ Group: Productivity/Networking/Email/Servers
 %endif
 Source0: http://downloads.sourceforge.net/%{name}/%{name}-%{version}.tar.gz
 Source1: http://downloads.sourceforge.net/%{name}/%{name}-rpmlintrc
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 Source2: http://downloads.sourceforge.net/%{name}/%{name}-permissions.easy
 Source3: http://downloads.sourceforge.net/%{name}/%{name}-permissions.secure
 Source4: http://downloads.sourceforge.net/%{name}/%{name}-permissions.paranoid
-%endif
 %endif
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
@@ -148,10 +140,8 @@ BuildRequires: openldap2-devel
 BuildRequires: openldap-devel
 %endif
 
-%if %noperms == 0
-%if 0%{?suse_version} >= 1120
+%if 0%{?suse_version}
 PreReq: permissions
-%endif
 %endif
 
 ################################# OBS ###############################
@@ -286,7 +276,21 @@ fi
 
 %install
 ID=$(id -u)
-%{__make} -s %{?_smp_mflags}
+%if 0%{?suse_version} >= 1120
+%if 0%{?build_cflags:1}
+  CFLAGS="%{build_cflags} -fPIC -fno-lto"
+%else
+  CFLAGS="%{optflags} -fPIC -fno-lto"
+%endif
+%if 0%{?build_ldflags:1}
+  LDFLAGS="%{build_ldflags} -fno-lto -pie $LDFLAGS"
+%else
+  LDFLAGS="-fno-lto -pie $LDFLAGS"
+%endif
+  %{__make} SYSTEM=LINUX %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+%else
+  %{__make} -s %{?_smp_mflags}
+%endif
 %if %{defined nodebug}
 %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
 %else
@@ -304,12 +308,10 @@ done
 %{__mkdir_p} %{buildroot}%{domaindir}/domains
 %{__mkdir_p} %{buildroot}%{_prefix}/include/indimail
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
 install -m 644 %{S:2} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
 install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
-%endif
 %endif
 
 if [ -x /usr/bin/chrpath ] ; then
@@ -488,15 +490,30 @@ done
 %attr(644,root,root)  %config(noreplace)          %{sysconfdir}/indimail.te
 %attr(644,root,root)  %config(noreplace)          %{sysconfdir}/indimail.fc
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
-%attr(644,root,root)                              %{_sysconfdir}/permissions.d/%{name}-permissions
-%attr(644,root,root)                              %{_sysconfdir}/permissions.d/%{name}-permissions.secure
-%endif
+%attr(644,root,root)  %config(noreplace)          %{_sysconfdir}/permissions.d/%{name}-permissions
+%attr(644,root,root)  %config(noreplace)          %{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
 #
 # setuid binaries
 #
+%if 0%{?suse_version} >= 1120
+%verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vrenameuser
+%verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vmoveuser
+%verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vrenamedomain
+%verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vmoduser
+%verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vcfilter
+%verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vsetuserquota
+%verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vaddaliasdomain
+%verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vadduser
+%verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/printdir
+%verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vdeluser
+%verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vbulletin
+%verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vdominfo
+%verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vadddomain
+%verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vdeldomain
+%verify (not user group mode caps) %attr(4555,root,root) %{libexecdir}/sq_vacation
+%else
 %attr(4555,root,root)                   %{_prefix}/bin/vrenameuser
 %attr(4555,root,root)                   %{_prefix}/bin/vmoveuser
 %attr(4555,root,root)                   %{_prefix}/bin/vrenamedomain
@@ -511,6 +528,8 @@ done
 %attr(4555,root,root)                   %{_prefix}/bin/vdominfo
 %attr(4555,root,root)                   %{_prefix}/bin/vadddomain
 %attr(4555,root,root)                   %{_prefix}/bin/vdeldomain
+%attr(4555,root,root)                   %{libexecdir}/sq_vacation
+%endif
 
 # indimail binaries
 %attr(755,root,root)                    %{_prefix}/bin/vuserinfo
@@ -584,8 +603,6 @@ done
 %attr(755,root,root)                    %{libexecdir}/vrenameuser
 %attr(755,root,root)                    %{libexecdir}/overquota.sh
 %attr(755,root,root)                    %{libexecdir}/qmailmrtg7
-# setuid binary
-%attr(4755,root,root)                   %{libexecdir}/sq_vacation
 
 %attr(755,root,root)                    %{libexecdir}/imapmodules/authindi
 %attr(755,root,root)                    %{libexecdir}/imapmodules/authgeneric
@@ -607,25 +624,6 @@ done
 %attr(644,root,root)                    %{shareddir}/doc/README-ldap.md
 %attr(644,root,root)                    %{shareddir}/doc/README-vlimits.md
 
-%if %noperms == 0
-%if 0%{?suse_version} >= 1120
-%verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vdeluser
-%verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vadduser
-%verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vaddaliasdomain
-%verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vrenamedomain
-%verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vsetuserquota
-%verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vmoveuser
-%verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vdeldomain
-%verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vadddomain
-%verify (not user group mode) %attr(4551, root, root)      %{_prefix}/bin/vdominfo
-%verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vrenameuser
-%verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/printdir
-%verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vmoduser
-%verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vcfilter
-%verify (not user group mode) %attr(4755, root, root)      %{_prefix}/bin/vbulletin
-%verify (not user group mode) %attr(4755, root, qmail)     %{libexedir}/sq_vacation
-%endif
-%endif
 
 # Shared libraries (omit for architectures that don't support them)
 
@@ -938,25 +936,23 @@ fi
 %{_prefix}/sbin/svctool --check-install --servicedir=%{servicedir} \
   --qbase=%{qbase} --qcount=%{qcount} --qstart=1
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
-%verify_permissions -e %{_prefix}/bin/vdeluser
-%verify_permissions -e %{_prefix}/bin/vadduser
-%verify_permissions -e %{_prefix}/bin/vaddaliasdomain
-%verify_permissions -e %{_prefix}/bin/vrenamedomain
-%verify_permissions -e %{_prefix}/bin/vsetuserquota
-%verify_permissions -e %{_prefix}/bin/vmoveuser
-%verify_permissions -e %{_prefix}/bin/vdeldomain
-%verify_permissions -e %{_prefix}/bin/vadddomain
-%verify_permissions -e %{_prefix}/bin/vdominfo
-%verify_permissions -e %{_prefix}/bin/vrenameuser
-%verify_permissions -e %{_prefix}/bin/printdir
-%verify_permissions -e %{_prefix}/bin/vmoduser
-%verify_permissions -e %{_prefix}/bin/vcfilter
-%verify_permissions -e %{_prefix}/bin/vbulletin
-%verify_permissions -e %{libexecdir}/sq_vacation
-%verify_permissions -e %{libexecdir}/imapmodules/authshadow
-%endif
+  %verify_permissions -e %{_prefix}/bin/vdeluser
+  %verify_permissions -e %{_prefix}/bin/vadduser
+  %verify_permissions -e %{_prefix}/bin/vaddaliasdomain
+  %verify_permissions -e %{_prefix}/bin/vrenamedomain
+  %verify_permissions -e %{_prefix}/bin/vsetuserquota
+  %verify_permissions -e %{_prefix}/bin/vmoveuser
+  %verify_permissions -e %{_prefix}/bin/vdeldomain
+  %verify_permissions -e %{_prefix}/bin/vadddomain
+  %verify_permissions -e %{_prefix}/bin/vdominfo
+  %verify_permissions -e %{_prefix}/bin/vrenameuser
+  %verify_permissions -e %{_prefix}/bin/printdir
+  %verify_permissions -e %{_prefix}/bin/vmoduser
+  %verify_permissions -e %{_prefix}/bin/vcfilter
+  %verify_permissions -e %{_prefix}/bin/vbulletin
+  %verify_permissions -e %{libexecdir}/sq_vacation
+  %verify_permissions -e %{libexecdir}/imapmodules/authshadow
 %endif
 
 ### SCRIPTLET ###############################################################################
@@ -1308,17 +1304,25 @@ else
   echo "WARNING!!! Did not find mysqld in %{mysqlPrefix}/{libexec,sbin}. Skipping MySQL configuration" 1>&2
 fi
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %if 0%{?set_permissions:1} > 0
-  if [ ! -f /tmp/no_permissions ] ; then
-      %set_permissions %{name}
-  fi
+  %set_permissions %{_prefix}/bin/printdir
+  %set_permissions %{_prefix}/bin/vaddaliasdomain
+  %set_permissions %{_prefix}/bin/vadddomain
+  %set_permissions %{_prefix}/bin/vadduser
+  %set_permissions %{_prefix}/bin/vbulletin
+  %set_permissions %{_prefix}/bin/vcfilter
+  %set_permissions %{_prefix}/bin/vdeldomain
+  %set_permissions %{_prefix}/bin/vdeluser
+  %set_permissions %{_prefix}/bin/vdominfo
+  %set_permissions %{_prefix}/bin/vmoduser
+  %set_permissions %{_prefix}/bin/vmoveuser
+  %set_permissions %{_prefix}/bin/vrenamedomain
+  %set_permissions %{_prefix}/bin/vrenameuser
+  %set_permissions %{_prefix}/bin/vsetuserquota
+  %set_permissions %{libexecdir}/sq_vacation
 %else
-  if [ ! -f /tmp/no_permissions ] ; then
-      %run_permissions
-  fi
-%endif
+  %run_permissions
 %endif
 %endif
 
