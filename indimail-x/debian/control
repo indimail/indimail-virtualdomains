@@ -11,7 +11,7 @@ Architecture: any
 Pre-Depends: indimail-mta, indimail-access, virtual-mysql-server, mrtg
 Recommends: indimail-auth
 Conflicts: indimail (< 2.0)
-Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils, findutils, procps
+Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, findutils, procps
 Provides: libindimail
 Replaces: libindimail
 Description: IndiMail is a messaging platform providing multi-cluster domain support.

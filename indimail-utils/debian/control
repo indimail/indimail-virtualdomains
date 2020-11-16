@@ -9,6 +9,6 @@ Homepage: https://github.com/mbhangui/indimail-virtualdomains
 Package: indimail-utils
 Architecture: any
 Conflicts: indimail (< 3.2)
-Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, binutils, findutils
+Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, findutils
 Description: indimail-utils provides a package consisting of utilities like
  mpack, munpack, altermime, ripmime, fortune, flash for indimail MTA

@@ -10,7 +10,7 @@ Package: indimail-access
 Architecture: any
 Pre-Depends: indimail-mta (>2.6)
 Conflicts: indimail (< 3.2)
-Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, binutils, findutils, procps
+Depends: ${shlibs:Depends}, ${misc:Depends}, net-tools, coreutils, findutils, procps
 Description: indimail-access package provides imap, pop3 and fetchmail retrieval for IndiMail
  IMAP/POP3 protocol is provided by Courier Imap.
  Mail retreival is provided by Fetchmail.

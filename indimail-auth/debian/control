@@ -10,6 +10,6 @@ Package: indimail-auth
 Architecture: any
 Pre-Depends: indimail-mta, virtual-mysql-server, libqmail
 Conflicts: indimail (< 3.2)
-Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, binutils, findutils, procps
+Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, findutils, procps
 Description: indimail-auth provides nssd daemon to provide name service switch in
  MySQL db and pam-multi to provide multiple ways to do PAM authentication
