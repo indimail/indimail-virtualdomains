@@ -13,9 +13,9 @@ fi
 case "$1" in
     configure)
 		if [ " $2" = " " ] ; then
-		echo "installing indimail-dev @version@"
+			echo "installing indimail-dev @version@"
 		else
-		echo "upgrading to indimail-dev $2"
+			echo "upgrading to indimail-dev $2"
 		fi
     ;;
 

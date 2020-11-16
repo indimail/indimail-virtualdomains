@@ -90,13 +90,14 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root" >&2
 	exit 1
 fi
-
+upgrade=0
 case "$1" in
     configure)
 		if [ " $2" = " " ] ; then
-		echo "installing indimail @version@"
+			echo "installing indimail @version@"
 		else
-		echo "upgrading to indimail $2"
+			echo "upgrading to indimail $2"
+			upgrade=1
 		fi
     ;;
 
@@ -131,9 +132,7 @@ done
 ) > ${sysconfdir}/indimail-stat.override
 fi
 
-# indimail.upgrade/indimail.install are created
-# by the preinst script
-if [ -f /tmp/indimail.upgrade ] ; then # upgrade
+if [ $upgrade -eq 1 ] ; then # upgrade
   (
   if [ -f ${libexecdir}/iupgrade.sh ] ; then
     echo "Running Custom Upgrade Script for post upgrade"
@@ -185,10 +184,8 @@ if [ -f /tmp/indimail.upgrade ] ; then # upgrade
     fi
   fi
   ) >> /var/log/indimail-setup.log
-  ${rm} -f /tmp/indimail.upgrade
   exit 0
 fi
-${rm} -f /tmp/indimail.install /tmp/indimail.upgrade
 # Recreate ld.so links and cache
 if [ ! "${prefix}" = "/usr" ] ; then
 echo "recreating ld.so cache"

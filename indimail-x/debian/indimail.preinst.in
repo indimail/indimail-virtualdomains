@@ -31,8 +31,6 @@ case "$1" in
     install|upgrade)
 	# create this for the postinst script to figure out if we are
 	# installing or upgrading
-	${rm} -f /tmp/indimail.install /tmp/indimail.upgrade
-	touch /tmp/indimail.$1
 	if [ -f ${libexecdir}/iupgrade.sh ] ; then
 	(
 		echo "Running Custom Upgrade Script for pre $1"

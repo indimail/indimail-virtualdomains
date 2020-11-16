@@ -34,14 +34,14 @@ if [ $ID -ne 0 ] ; then
 	exit 1
 fi
 
+upgrade=0
 case "$1" in
     configure)
 		if [ " $2" = " " ] ; then
-		echo "installing indimail-auth"
-		${rm} -f /tmp/indimail-auth.upgrade
+			echo "installing indimail-auth"
 		else
-		touch /tmp/indimail-auth.upgrade
-		echo "upgrading to indimail-auth $2"
+			echo "upgrading to indimail-auth $2"
+			upgrade=1
 		fi
     ;;
 
@@ -60,8 +60,7 @@ esac
 
 #DEBHELPER#
 
-if [ -f /tmp/indimail-auth.upgrade ] ; then # upgrade
-  ${rm} -f /tmp/indimail-auth.upgrade
+if [ $upgrade -eq 1 ] ; then # upgrade
   svc -d ${servicedir}/pwdlookup || true
   ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="${servicedir}/pwdlookup"
   /sbin/ldconfig

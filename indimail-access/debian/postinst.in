@@ -91,13 +91,14 @@ if [ $ID -ne 0 ] ; then
 	exit 1
 fi
 
+upgrade=0
 case "$1" in
     configure)
 		if [ " $2" = " " ] ; then
-		echo "installing indimail-auth @version@"
+			echo "installing indimail-auth @version@"
 		else
-		echo "upgrading to indimail-auth $2"
-		touch /tmp/indimail-access.upgrade
+			echo "upgrading to indimail-auth $2"
+			upgrade=1
 		fi
     ;;
 
@@ -134,7 +135,7 @@ fi
 
 # indimail-access.upgrade/indimail-access.install are created
 # by the preinst script
-if [ -f /tmp/indimail-access.upgrade ] ; then # upgrade
+if [ $upgrade -eq 1 ] ; then # upgrade
   svc_list=""
   for i in qmail-imapd.143 qmail-imapd-ssl.993 \
     qmail-pop3d.110 qmail-pop3d-ssl.995
@@ -147,10 +148,8 @@ if [ -f /tmp/indimail-access.upgrade ] ; then # upgrade
     fi
   done
   ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
-  ${rm} -f /tmp/indimail-access.upgrade
   exit 0
 fi
-${rm} -f /tmp/indimail-access.install /tmp/indimail-access.upgrade
 # Recreate ld.so links and cache
 if [ ! "${prefix}" = "/usr" ] ; then
   /sbin/ldconfig
