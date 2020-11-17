@@ -61,8 +61,10 @@ esac
 #DEBHELPER#
 
 if [ $upgrade -eq 1 ] ; then # upgrade
-  svc -d ${servicedir}/pwdlookup || true
   ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="${servicedir}/pwdlookup"
+  if [ ! -f ${servicedir}/pwdlookup/down ] ; then
+    svc -u ${servicedir}/pwdlookup || true
+  fi
   /sbin/ldconfig
   exit 0
 fi

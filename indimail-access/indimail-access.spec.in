@@ -299,19 +299,12 @@ if [ -f %{buildroot}%{mandir}/man7/authlib.7.gz ] ; then
   done
 fi
 
-if [ -x /bin/touch ] ; then
-  TOUCH=/bin/touch
-elif [ -x /usr/bin/touch ] ; then
-  TOUCH=/usr/bin/touch
-else
-  TOUCH=/bin/touch
-fi
 # Create these files so that %%ghost does not complain
 %{__mkdir_p} %{buildroot}%{sysconfdir}/tcp
 for i in tcp.imap tcp.imap.cdb tcp.pop3 tcp.pop3.cdb
 do
   if [ ! -f %{buildroot}%{sysconfdir}/tcp/$i ] ; then
-    $TOUCH %{buildroot}%{sysconfdir}/tcp/$i
+    touch %{buildroot}%{sysconfdir}/tcp/$i
   fi
 done
 
@@ -321,12 +314,12 @@ done
     pop3d.110 pop3d-ssl.995
   do
     %{__mkdir_p} %{buildroot}%{logdir}/$i
-    $TOUCH %{buildroot}%{logdir}/$i/current
+    touch %{buildroot}%{logdir}/$i/current
   done
 
   %{__mkdir_p} %{buildroot}%{logdir}/fetchmail
-  $TOUCH %{buildroot}%{logdir}/fetchmail/current
-  $TOUCH %{buildroot}%{sysconfdir}/fetchmailrc
+  touch %{buildroot}%{logdir}/fetchmail/current
+  touch %{buildroot}%{sysconfdir}/fetchmailrc
   #%%find_lang fetchmail
 %endif
 %if %{undefined nodebug}
@@ -555,19 +548,20 @@ fi
 %endif
 
 ### SCRIPTLET ###############################################################################
+%pretrans
+for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
+  qmail-pop3d.110 qmail-pop3d-ssl.995 fetchmail
+do
+  svc -d %{servicedir}/$i
+done
+
+### SCRIPTLET ###############################################################################
 %post
 argv1=$1
 ID=$(id -u)
 if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
-fi
-if [ -x /bin/touch ] ; then
-  TOUCH=/bin/touch
-elif [ -x /usr/bin/touch ] ; then
-  TOUCH=/usr/bin/touch
-else
-  TOUCH=/bin/touch
 fi
 
 if [ -z "$argv1" ] ; then
@@ -586,14 +580,21 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
     qmail-pop3d.110 qmail-pop3d-ssl.995
   do
-    svc -d %{servicedir}/$i
     if [ -z "$svc_list" ] ; then
       svc_list="%{servicedir}/$i"
     else
       svc_list="$svc_list %{servicedir}/$i"
     fi
   done
+  # restart services
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
+  for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
+    qmail-pop3d.110 qmail-pop3d-ssl.995 fetchmail
+  do
+    if [ ! -f %{servicedir}/down ] ; then
+      svc -u %{servicedir}/$i
+    fi
+  done
   ) >> /var/log/indimail-access-setup.log 2>&1
   exit 0
 fi
@@ -700,7 +701,7 @@ eval %{_prefix}/sbin/svctool --fetchmail --servicedir=%{servicedir} \
 #
 # user has to create fetchmailrc before which fetchmail cannot be started
 #
-$TOUCH %{servicedir}/fetchmail/down
+touch %{servicedir}/fetchmail/down
 
 # IMAP/POP3
 %{_prefix}/sbin/svctool --imap=143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \

@@ -14,3 +14,4 @@ indimail-access (@version@-@release@) unstable; urgency=medium
   * postinstallation: update imap/pop3, proxy imap/pop3 authmodule with authindi
   * maildirquota.c: break out of infinite loop when maildirfolder creation fails
   * maildrop: alarmsleep.C: replaced deprecated function sigpause() with sigsuspend()
+  * stop start imap, pop3, fetchmail services on upgrade

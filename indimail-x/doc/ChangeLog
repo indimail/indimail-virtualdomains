@@ -83,3 +83,4 @@ Release 3.3 Start 06/09/2020
 50. indimail.spec: turn on openSUSE permissions
 17/11/2020
 51. removed sslerator
+52. indimail.spec: stop/start svscan on upgrade

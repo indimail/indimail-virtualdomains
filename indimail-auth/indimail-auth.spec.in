@@ -316,6 +316,10 @@ if [ $ID -ne 0 ] ; then
 fi
 
 ### SCRIPTLET ###############################################################################
+%pretrans
+svc -d %{servicedir}/pwdlookup
+
+### SCRIPTLET ###############################################################################
 %post
 argv1=$1
 ID=$(id -u)
@@ -331,8 +335,10 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
     /sbin/ldconfig
   fi
-  svc -d %{servicedir}/pwdlookup
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="%{servicedir}/pwdlookup"
+  if [ ! -f %{servicedir}/pwdlookup/down ] ; then
+    svc -u %{servicedir}/pwdlookup
+  fi
   exit 0
 fi
 

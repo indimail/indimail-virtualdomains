@@ -31,3 +31,5 @@ Release @version@-@release@ Start 03/06/2020
 - 28/10/2020
 16. maildrop: alarmsleep.C: replaced deprecated function sigpause() with
     sigsuspend()
+- 17/10/2020
+17. stop start imap, pop3, fetchmail services on upgrade
