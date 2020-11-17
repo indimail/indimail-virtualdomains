@@ -49,3 +49,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * vdelivermail.c: skip creation of maildirfolder file for user's Maildir (INBOX)
   * indimail.spec: turn off lto
   * indimail.spec: turn on openSUSE permissions
+  * removed sslerator

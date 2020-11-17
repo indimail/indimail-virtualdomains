@@ -81,3 +81,5 @@ Release 3.3 Start 06/09/2020
 14/11/2020
 49. indimail.spec: turn off lto
 50. indimail.spec: turn on openSUSE permissions
+17/11/2020
+51. removed sslerator
