@@ -13,6 +13,8 @@ For a clusterd domain you require the additional control files
 * host.cntrl
 * mcdinfo
 
+The **mcdinfo** control file is a special file. If you update it on one server, it automatically gets updated on all servers that are part of the IndiMail cluster. This allows a server and it's users to be immediately know to all servers.
+
 Refer to this diagram for the architecture ![diagram](indimail_arch.png "IndiMail Architecture")
 
 There are five types of servers
@@ -20,7 +22,7 @@ There are five types of servers
 Server Type|Description
 -----------|-----------
 clusterinfo|This is the host which has a MySQL database for storing the location of each user. Location information is hostid and ip address. If this host is going to serve as a pure MySQL database server only, you need not install IndiMail on this server.
-Mailstore |A mailstore is a host which has disk space to host user's mailboxes. Each mailstore can have its own set of users. You can call each host a 'node'. IndiMail allows you to extend a domain across multiple mailstores. Each mailstore needs its own MySQL database to store information for its own set of users. You may install a MySQL database on each of the mailstore. You need to install IndiMail on each mailstore.
+Mailstore |A mailstore is a host which has disk space to host user's mailboxes. Each mailstore can have its own set of users. You can call each host a 'node'. IndiMail allows you to extend a domain across multiple mailstores. Each mailstore needs its own MySQL database to store information for its own set of users. You may install a MySQL database on each of the mailstore. You need to install IndiMail on each mailstore. You can also have a non-indimail mailstore like Lotus Notes, M$ Exchange, etc. In such a case, you will have to add the users manually to the clusterinfo database using **hostcntrl(8)** utility.
 Relay Server|A relay server acts as an SMTP gateway between the user and the mailstore or between the user and the internet. A relay server can also carry out tasks like virus/spam filtering, maintain your security policy, access lists. You need to install IndiMail on each relay server.
 IMAP/POP3 Gateway|These servers run IndiMail's IMAP/POP3 Proxies You need to install IndiMail on each IMAP/POP3 proxy server.
 Webmail|This servers run a webmail software (like squirellmail, roundcube, etc). In case your webmail software connects to localhost on the IMAP/POP3 port, you will need to install IndiMail for providing IMAP/POP3 proxy on localhost.
