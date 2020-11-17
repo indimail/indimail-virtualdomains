@@ -77,7 +77,6 @@ debian/indimail-spamfilter.dsc
 debian/indimail-spamfilter-Debian_8.0.dsc
 debian/indimail-spamfilter.install
 debian/changelog
-debian/changelog.in
 debian/debian.tar.gz
 debian/dummy.tar.gz
 debian/postinst
@@ -85,7 +84,6 @@ debian/prerm
 debian/postrm
 debian/rules
 indimail-spamfilter.spec
-doc/ChangeLog
 configure.lineno
 perm_list.bogofilter
 indimail-spamfilter-permissions.easy
