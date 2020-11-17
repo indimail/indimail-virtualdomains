@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.76 2020-11-14 17:10:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.77 2020-11-17 16:47:53+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -319,7 +319,7 @@ if [ -x /usr/bin/chrpath ] ; then
   for i in dbinfo hostcntrl printdir sigtool vacation vaddaliasdomain \
   vadddomain vadduser valias vatrn vbulletin vcalias vcfilter \
   vdeldomain vdelusevdominfo vgroup vhostid vipmap vlimit vmoduser \
-  vmoveuser vpasswd vpriv sslerator vproxy vrenamedomain vrenameuser \
+  vmoveuser vpasswd vpriv vproxy vrenamedomain vrenameuser \
   vsetuserquota vsmtp vuserinfo tcpserver ismaildup
   do
     if [ -f %{buildroot}%{_prefix}/bin/$i ] ; then
@@ -552,7 +552,6 @@ done
 
 %attr(755,root,root)                    %{_prefix}/bin/crcdiff
 %attr(755,root,root)                    %{_prefix}/bin/dbinfo
-%attr(755,root,root)                    %{_prefix}/bin/sslerator
 
 %attr(755,root,root)                    %{_prefix}/sbin/resetquota
 %attr(755,root,root)                    %{_prefix}/sbin/vserverinfo

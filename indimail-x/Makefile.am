@@ -36,7 +36,7 @@ man_MANS=adminclient.8 chowkidar.8 clearopensmtp.8 crc.1 crcdiff.1 \
 	IndiMail.7 indisrvr.8 initsvc.1 inlookup.8 InLookup.8 inquerytest.8 \
 	install_tables.8 ipchange.8 ismaildup.1 login_tasks.3 \
 	mgmtpass.8 osh.8 postdel.8 printdir.1 proxyimap.8 proxypop3.8 \
-	resetquota.8 sslerator.1 updaterules.8 vacation.8 \
+	resetquota.8 updaterules.8 vacation.8 \
 	vaddaliasdomain.1 vadddomain.1 vadduser.1 valias.1 vatrn.1 \
 	vbulletin.1 vcalias.8 vcaliasrev.8 vcfilter.1 vchkpass.8 vdeldomain.1 \
 	vdelivermail.8 vdeloldusers.8 vdeluser.1 vdominfo.1 vfilter.8 \
@@ -169,7 +169,7 @@ indimailbin_PROGRAMS = vadddomain vdeldomain vadduser vdeluser vuserinfo \
 	vhostid vpasswd vcfilter vsmtp vsetuserquota \
 	vacation vatrn vmoveuser vrenameuser vipmap vlimit \
 	vpriv crc crcdiff incrypt vgroup proxyimap proxypop3 \
-	sslerator vproxy vbulletin
+	vproxy vbulletin
 
 indimailsbin_PROGRAMS = inlookup vdelivermail clearopensmtp updaterules \
 	vfilter vmoddomain inquerytest vreorg vtable \
@@ -425,10 +425,6 @@ ipchange_DEPENDENCIES = libindimail.la
 resetquota_SOURCES = resetquota.c
 resetquota_LDADD = libindimail.la
 resetquota_DEPENDENCIES = libindimail.la
-
-sslerator_SOURCES = sslerator.c
-sslerator_LDADD = sockwrite.lo libindimail.la @LIB_SOCKET@
-sslerator_DEPENDENCIES = sockwrite.lo libindimail.la
 
 proxyimap_SOURCES = proxyimap.c
 proxyimap_LDADD = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
