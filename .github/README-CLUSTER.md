@@ -5,13 +5,13 @@ DATE: Tue Jun  9 01:05:52 IST 2020
 
 IndiMail supports a cluster of servers for a domain. A cluster is a set of servers having the same domain. In other words, a clustered domain is a domain which has been extended across more than one server.
 
-You can either have a normal non-clustered domain or a clustered domain. To achieve high performance needed for high volume servers, IndiMail uses MySQL to store some of the information in MySQL tables. All indimail program depend on one or more control file to figure out how to extract this information stored in MySQL tables. The control file **host.mysql** is required regardless of whether the domain is clustered or not.
+You can either have a normal non-clustered domain or a clustered domain. To achieve high performance needed for high volume servers, IndiMail uses MySQL to store some of the information in MySQL tables. All indimail programs depend on one or more control file to figure out how to extract this information stored in MySQL tables. The control file **host.mysql** is required regardless of whether the domain is clustered or not.
 
 For a clusterd domain you require the additional control files
 
 * host.master
 * host.cntrl
-* mcdinfo.
+* mcdinfo
 
 Refer to this diagram for the architecture ![diagram](indimail_arch.png "IndiMail Architecture")
 
@@ -19,13 +19,17 @@ There are five types of servers
 
 Server Type|Description
 -----------|-----------
-clusterinfo|This is the host which has a MySQL database for storing the location of each user. Location information is hostid and ip address.  If this host is going to serve as a pure MySQL database server only, you need not install IndiMail on this server.
-Mailstore |A mailstore is a host which has disk space to host user's mailboxes. Each mailstore can have its own set of users. You can call each host a 'node'.  IndiMail allows you to extend a domain across multiple mailstores. Each mailstore needs its own MySQL database to store information for its own set of users. You may install a MySQL database on each of the mailstore. You need to install IndiMail on each mailstore.
+clusterinfo|This is the host which has a MySQL database for storing the location of each user. Location information is hostid and ip address. If this host is going to serve as a pure MySQL database server only, you need not install IndiMail on this server.
+Mailstore |A mailstore is a host which has disk space to host user's mailboxes. Each mailstore can have its own set of users. You can call each host a 'node'. IndiMail allows you to extend a domain across multiple mailstores. Each mailstore needs its own MySQL database to store information for its own set of users. You may install a MySQL database on each of the mailstore. You need to install IndiMail on each mailstore.
 Relay Server|A relay server acts as an SMTP gateway between the user and the mailstore or between the user and the internet. A relay server can also carry out tasks like virus/spam filtering, maintain your security policy, access lists. You need to install IndiMail on each relay server.
 IMAP/POP3 Gateway|These servers run IndiMail's IMAP/POP3 Proxies You need to install IndiMail on each IMAP/POP3 proxy server.
-Webmail|This servers run a webmail software (like squirellmail, roundcube, etc). In case your webmail software connects to localhost on the IMAP/POP3 port, you will need to install IndiMail for having the IMAP/POP3 proxy.
+Webmail|This servers run a webmail software (like squirellmail, roundcube, etc). In case your webmail software connects to localhost on the IMAP/POP3 port, you will need to install IndiMail for providing IMAP/POP3 proxy on localhost.
 
-The control files used to figure out the MySQL server storing IndiMail configuration & information depends on whether you are running a clustered or a non-clustered domain.  Read below to know more about this.
+A server can be a Mailstore + Relay Server + Webmail. But you do need one **clusterinfo** server to store information for all **Mailstores**.
+
+IndiMail has been deployed, tested by an ISP to provide service to 6 milllion users using 8 mailstores, 4 servers serving as incoming relay servers, 4 servers serving as webmail (custom PHP code), 3 servers as outoing relay servers and one server with just MySQL installed, serving as the clusterinfo server.
+
+The control files used to figure out the MySQL server storing IndiMail configuration & information depends on whether you are running a clustered or a non-clustered domain. Read below to know more about this.
 
 **Non-Clustered Domain**
 
