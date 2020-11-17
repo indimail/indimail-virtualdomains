@@ -2,6 +2,7 @@ indimail-access.spec
 perm_list.imap
 conf-release
 debian/Makefile
+debian/preinst
 debian/postinst
 debian/changelog
 debian/indimail-access-docs.docs

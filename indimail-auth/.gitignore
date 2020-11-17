@@ -7,6 +7,7 @@ conf-release
 indimail-auth.spec
 debian/Makefile
 debian/rules
+debian/preinst
 debian/postinst
 debian/postrm
 debian/indimail-auth.install
