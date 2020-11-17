@@ -44,7 +44,28 @@ then
 	CFLAGS="$CFLAGS -Wall"
 fi
 
-CFLAGS="$CFLAGS -Dlint -I.. -I${srcdir}/.."
+case "$host" in
+*-*-sunos4.1.1*)
+	CPPFLAGS="$CPPFLAGS -DSUNOS4"
+	;;
+*-*-solaris*)
+	CPPFLAGS="$CPPFLAGS -DSOLARIS"
+	;;
+*-*-linux*)
+	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -fPIC -Wall"
+	CFLAGS="$CFLAGS -Dlint -fPIC -I.. -I${srcdir}/.."
+	LDFLAGS="$LDFLAGS -pie"
+	;;
+*-*-darwin*)
+	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include"
+	CXXFLAGS="$CXXFLAGS -DDARWIN -I/opt/local/include"
+	LDFLAGS="$LDFLAGS -L/opt/local/lib"
+	;;
+*-*-freebsd*)
+	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib"
+	;;
+esac
 
 dnl Other checks
 AC_CHECK_FUNCS(setsid setlogin)
