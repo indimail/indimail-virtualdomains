@@ -43,11 +43,6 @@
 %global nodksignatures     0
 %global qcount             5
 %global qbase              %{indimaildir}/queue
-%if 0%{?suse_version}
-%global noperms            1
-%else
-%global noperms            0
-%endif
 # Packages which do not use autosetup or setup macro
 # in the prep section have a problem in enabling debuginfo.
 # This isn't documented clearly anywhere. A workaround is
@@ -80,12 +75,10 @@ Source1: http://downloads.sourceforge.net/indimail/courier-imap-%{courier_versio
 Source2: http://downloads.sourceforge.net/indimail/perm_list.imap
 Source3: http://downloads.sourceforge.net/indimail/fetchmail-%{fetchmail_version}.tar.xz
 Source4: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 Source5: http://downloads.sourceforge.net/indimail/%{name}-permissions.easy
 Source6: http://downloads.sourceforge.net/indimail/%{name}-permissions.secure
 Source7: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
-%endif
 %endif
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
@@ -128,10 +121,8 @@ Requires(pre): shadow-utils
 Requires(postun): shadow-utils
 %endif
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 PreReq: permissions
-%endif
 %endif
 ################################# OBS ###############################
 %if %build_on_obs == 1
@@ -275,12 +266,10 @@ install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
 install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
 /bin/rm -f %{name}-rpm.info %{name}-release
 /bin/rm -f %{name}-rpm.info
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
 install -m 644 %{S:5} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
 install -m 644 %{S:6} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
-%endif
 %endif
 
 %{__rm} -f  %{buildroot}%{_libdir}/libunicode.la
@@ -369,11 +358,9 @@ done
 %attr(600,root,root) %config(noreplace)           %{sysconfdir}/authmodulelist
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/quotawarnmsg.example
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
-%attr(644,root,root)                    %{_sysconfdir}/permissions.d/%{name}-permissions
-%attr(644,root,root)                    %{_sysconfdir}/permissions.d/%{name}-permissions.secure
-%endif
+%attr(644,root,root) %config(noreplace) %{_sysconfdir}/permissions.d/%{name}-permissions
+%attr(644,root,root) %config(noreplace) %{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
 # courier imap
 %attr(755,root,root)                    %{_prefix}/bin/maildirmake
@@ -391,9 +378,15 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/sharedindexinstall
 %attr(755,root,root)                    %{_prefix}/sbin/sharedindexsplit
 %attr(755,root,root)                    %{libexecdir}/imapmodules/authpwd
+
 # setuid binary
+%if 0%{?suse_version} >= 1120
+%verify (not user group mode caps) %attr(4755, root, root) %{libexecdir}/imapmodules/authshadow
+%verify (not user group mode caps) %attr(4755, root, root) %{libexecdir}/imapmodules/authpam
+%else
 %attr(4755,root,root)                   %{libexecdir}/imapmodules/authshadow
 %attr(4755,root,root)                   %{libexecdir}/imapmodules/authpam
+%endif
 
 # fetchmail
 %attr(755,root,root)                    %{_prefix}/bin/fetchmailconf
@@ -514,12 +507,6 @@ done
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/manpage.css
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/reformail.html
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/reformime.html
-%if %noperms == 0
-%if 0%{?suse_version} >= 1120
-%verify (not user group mode) %attr(4755, root, root)      %{libexecdir}/imapmodules/authshadow
-%verify (not user group mode) %attr(4755, root, root)      %{libexecdir}/imapmodules/authpam
-%endif
-%endif
 
 %{_libdir}/libunicode.so.4
 %{_libdir}/libunicode.so.4.1.0
@@ -540,11 +527,9 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
-%verify_permissions -e %{libexecdir}/imapmodules/authshadow
-%verify_permissions -e %{libexecdir}/imapmodules/authpam
-%endif
+%verify_permissions -e %{libexecdir}/imapmodules/authshadow
+%verify_permissions -e %{libexecdir}/imapmodules/authpam
 %endif
 
 ### SCRIPTLET ###############################################################################
@@ -599,17 +584,12 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   exit 0
 fi
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %if 0%{?set_permissions:1} > 0
-  if [ ! -f /tmp/no_permissions ] ; then
-      %set_permissions %{name}
-  fi
+  %set_permissions %{libexecdir}/imapmodules/authshadow
+  %set_permissions %{libexecdir}/imapmodules/authpam
 %else
-  if [ ! -f /tmp/no_permissions ] ; then
-      %run_permissions
-  fi
-%endif
+  %run_permissions
 %endif
 %endif
 

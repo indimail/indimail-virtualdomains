@@ -27,4 +27,5 @@
 # you do not need or by restricting access to them using packet filters
 # or tcp wrappers (see hosts_access(5)) to gain a higher level of security
 # in your system.
-@libexecdir@/imapmodules/authshadow root:root      4555
+@libexecdir@/imapmodules/authshadow root:root      4755
+@libexecdir@/imapmodules/authpam    root:root      4755

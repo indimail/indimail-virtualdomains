@@ -13,4 +13,5 @@
 # file.
 # 
 #
-@libexecdir@/imapmodules/authshadow root:root      4555
+@libexecdir@/imapmodules/authshadow root:root      4755
+@libexecdir@/imapmodules/authpam    root:root      4755
