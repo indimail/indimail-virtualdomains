@@ -36,7 +36,7 @@ The control files used to figure out the MySQL server storing IndiMail configura
 A mailstore requires a MySQL database to store its local user infomation. For a non-clustered domain IndiMail needs to connect to a single MySQL database. You can create the control file host.mysql which has the IP address or hostname for the MySQL database. If this file is missing, IndiMail program will use 'localhost' my default.
 
 ```
-# echo localhost > /var/indimail/control/host.mysql
+# echo localhost > /etc/indimail/control/host.mysql
 
 localhost : MySQL host to which all programs will connect)
 ```
@@ -146,11 +146,11 @@ commands
     -p 3306 -d indimail.org -m 192.168.2.116
 ```
 
-You can use the command /var/indimail/bin/dbinfo -s to show this information.
+You can use the command dbinfo -s to show this information.
 
 The cluster information is maintained in the MySQL table dbinfo. You can modify the table dbinfo directly or use the '-i' option to the dbinfo commmand. The immediate next call to 'dbinfo -s' will create the file mcdinfo. In a cluster you need to update mcdinfo on any of the hosts. The entries to mcdinfo on all hosts part of the cluster automatically get updated.
 
-Every host has to be assigned a unique identifier called hostid Each hostid is associated with the IP address of the mail store host. You can use the command vhostid to add, insert, delete or update this information. The hostid for a mailstore can be stored in the conrol file /var/indimail/control/hostid.  In case this control file is not there, IndiMail will use the gethostid(2) system call to get the hostid. The mapping of hostid of a mailstore to its IP address is maintained in the table host_table.
+Every host has to be assigned a unique identifier called hostid Each hostid is associated with the IP address of the mail store host. You can use the command vhostid to add, insert, delete or update this information. The hostid for a mailstore can be stored in the conrol file /etc/indimail/control/hostid.  In case this control file is not there, IndiMail will use the gethostid(2) system call to get the hostid. The mapping of hostid of a mailstore to its IP address is maintained in the table host_table.
 
 When you add a user to a host in the cluster, the user gets added to a MySQL table hostcntrl. This table maintains the username, domain and the hostid on which the user's mailbox lies.
 
@@ -159,7 +159,7 @@ The SMTP, IMAP/POP3 processes all look into the tables hostcntrl and host_table 
 **Adding a New Mailstore to a Cluster**
 
 1. use vadddomain on the new node to add domain
-2. Create the files host.cntrl, host.master in /var/indimail/control
+2. Create the files host.cntrl, host.master in /etc/indimail/control
 3. Use dbinfo -i to add entry for the new node
 4. assign a hostid to the mailstore (e.g. 1000)
    ```
@@ -169,7 +169,7 @@ The SMTP, IMAP/POP3 processes all look into the tables hostcntrl and host_table 
 
 **Adding a New Relay Server/Proxy IMAP/Proxy POP3 Server to a cluster**
 
-1. Create the files host.cntrl, host.master in /var/indimail/control
+1. Create the files host.cntrl, host.master in /etc/indimail/control
 2. run dbinfo -s
 3. On host which will have SMTP/qmail-send, have the environment variable
    ROUTES=dynamic for qmail-send. i.e
