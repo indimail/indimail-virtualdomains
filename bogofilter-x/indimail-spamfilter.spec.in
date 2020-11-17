@@ -29,11 +29,6 @@
 %global shareddir          %{_prefix}/share/indimail
 %global mandir             %{_prefix}/share/man
 %global url                https://github.com/mbhangui/indimail-virtualdomains
-%if 0%{?suse_version}
-%global noperms            1
-%else
-%global noperms            0
-%endif
 
 %if %build_on_obs == 1
 %global packager Manvendra Bhangui <indimail-spamfilter@indimail.org>
@@ -57,12 +52,10 @@ Group: Productivity/Networking/Email/Servers
 %endif
 Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.bz2
 Source1: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 Source2: http://downloads.sourceforge.net/indimail/%{name}-permissions.easy
 Source3: http://downloads.sourceforge.net/indimail/%{name}-permissions.secure
 Source4: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
-%endif
 %endif
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
@@ -84,10 +77,8 @@ BuildRequires: db4-devel
 %endif
 %endif
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 PreReq: permissions
-%endif
 %endif
 
 ################################# OBS ###############################
@@ -179,12 +170,10 @@ ID=$(id -u)
 %endif
 
 %{__mkdir_p} %{buildroot}%{sysconfdir}
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
 install -m 644 %{S:2} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
 install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
-%endif
 %endif
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
 install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
@@ -228,15 +217,17 @@ $TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/bogofilter.cf.example
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/perm_list.bogofilter
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
-%attr(644,root,root)                              %{_sysconfdir}/permissions.d/%{name}-permissions
-%attr(644,root,root)                              %{_sysconfdir}/permissions.d/%{name}-permissions.secure
-%endif
+%attr(644,root,root) %config(noreplace)           %{_sysconfdir}/permissions.d/%{name}-permissions
+%attr(644,root,root) %config(noreplace)           %{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
 # bogofilter
 # setuid binary
+%if 0%{?suse_version} >= 1120
+%verify (not user group mode caps) %attr(6551, root, indimail)  %{_prefix}/bin/bogofilter
+%else
 %attr(6551,root,indimail)               %{_prefix}/bin/bogofilter
+%endif
 %attr(755,root,root)                    %{_prefix}/bin/bogolexer
 %attr(755,root,root)                    %{_prefix}/bin/bogotune
 %attr(755,root,root)                    %{_prefix}/bin/bogoutil
@@ -257,12 +248,6 @@ $TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
 %attr(644,root,root)                    %{shareddir}/doc/AUTHORS.bogofilter
 %attr(644,root,root)                    %{shareddir}/doc/HOWTO.bogofilter
 
-%if %noperms == 0
-%if 0%{?suse_version} >= 1120
-%verify (not user group mode) %attr(6551, root, indimail)  %{_prefix}/bin/bogofilter
-%endif
-%endif
-
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
 %{__rm} -fr %{_builddir}/%{name}-%{version}
@@ -280,10 +265,8 @@ if [ $ID -ne 0 ] ; then
   exit 1
 fi
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
-%verify_permissions -e %{_prefix}/bin/bogofilter
-%endif
+%verify_permissions -e %{_prefix}/bin/bogofilter
 %endif
 
 ### SCRIPTLET ###############################################################################
@@ -320,17 +303,11 @@ else
   logfifo="/tmp/logfifo"
 fi
 
-%if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %if 0%{?set_permissions:1} > 0
-  if [ ! -f /tmp/no_permissions ] ; then
-      %set_permissions %{name}
-  fi
+  %set_permissions %{_prefix}/bin/bogofilter
 %else
-  if [ ! -f /tmp/no_permissions ] ; then
-      %run_permissions
-  fi
-%endif
+  %run_permissions
 %endif
 %endif
 
