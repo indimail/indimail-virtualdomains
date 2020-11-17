@@ -1,0 +1,12 @@
+* 
+Release 1.0 Start 06/06/2020
+- 06/06/2020
+01. New package indimail-spamfilter
+- 07/06/2020
+02. upgraded bogofilter version to 1.2.5
+- 19/06/2020
+03. Add AC_PROG_CC_C99 to configure
+- 13/10/2020
+04. added debuginfo packages
+- 17/10/2020
+05. enabled suse permissions
