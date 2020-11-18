@@ -133,58 +133,69 @@ done
 fi
 
 if [ $upgrade -eq 1 ] ; then # upgrade
-  (
-  if [ -f ${libexecdir}/iupgrade.sh ] ; then
-    echo "Running Custom Upgrade Script for post upgrade"
-    /bin/sh ${libexecdir}/iupgrade.sh post upgrade @version@ $* || true
-  fi
+	(
+	if [ -f ${libexecdir}/iupgrade.sh ] ; then
+		echo "Running Custom Upgrade Script for post upgrade"
+		/bin/sh ${libexecdir}/iupgrade.sh post upgrade @version@ $* || true
+	fi
 
-  # stop indimail services before upgrade
-  echo "shutting down indimail services"
-  svc_list=""
-  for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
-  qmail-poppass.106 qmail-logfifo
-  do
-    svc -d ${servicedir}/$i || true
-    if [ -z "$svc_list" ] ; then
-      svc_list="${servicedir}/$i"
-    else
-      svc_list="$svc_list ${servicedir}/$i"
-    fi
-  done
-  if [ $noproxy -eq 0 ] ; then
-  for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
-    proxy-pop3d.4110 proxy-pop3d-ssl.9110 
-  do
-    svc -d ${servicedir}/$i || true
-    if [ -z "$svc_list" ] ; then
-      svc_list="${servicedir}/$i"
-    else
-      svc_list="$svc_list ${servicedir}/$i"
-    fi
-  done
-  fi
+	# refresh indimail services
+	${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
 
-  # refresh indimail services
-  ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
+	# restore svscan service if we find .svscan.down
+	if [ -f ${servicedir}/.svscan.down ] ; then
+		set +e
+		rm -f ${servicedir}/.svscan.down
+		echo "Starting svscan"
+		if test -f /etc/init/svscan.conf
+		then
+			/sbin/initctl emit qmailstart > /dev/null 2>&1
+		elif test -f /etc/event.d/svscan
+		then
+			/sbin/initctl emit qmailstart > /dev/null 2>&1
+		elif test -f /etc/systemd/system/multi-user.target.wants/svscan.service
+		then
+			/bin/systemctl start svscan > /dev/null 2>&1
+		elif test -x ${prefix}/sbin/initsvc
+		then
+			if [ -x /etc/init.d/svscan ] ; then
+				${prefix}/sbin/initsvc -status || /etc/init.d/svscan start || true
+			else
+				${prefix}/sbin/initsvc -status || true
+			fi
+			${prefix}/sbin/initsvc -on || true
+		else
+			if [ -x /etc/init.d/svscan ] ; then
+				/etc/init.d/svscan start
+			fi
+			/bin/grep "^#SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+			if [ $? -eq 0 ] ; then
+				sed -i 's{^#SV:{SV:{' /etc//inittab
+				if [ $? -eq 0 ] ; then
+					/sbin/init q
+				fi
+			fi
+		fi
+		set -e
+	fi
 
-  #update VIRTUAL_PKG_LIB for smtp service
-  indlib=`ls -d /usr/lib/*-linux-gnu/libindimail.so.*.*.* /usr/lib*/libindimail.so.*.*.* 2>/dev/null || true`
-  for port in 25 465 587
-  do
-    if [ -n "$indlib" -a -f "$indlib" ] ; then
-      if [ -f ${servicedir}/qmail-smtpd.$port/variables ] ; then
-        echo $indlib > ${servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
-      fi
-    fi
-  done
-  if [ -n "$indlib" -a -f "$indlib" ] ; then
-    if [ -f ${servicedir}/qmail-send.25/variables ] ; then
-      echo $indlib > ${servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
-    fi
-  fi
-  ) >> /var/log/indimail-setup.log
-  exit 0
+	#update VIRTUAL_PKG_LIB for smtp service
+	indlib=`ls -d /usr/lib/*-linux-gnu/libindimail.so.*.*.* /usr/lib*/libindimail.so.*.*.* 2>/dev/null || true`
+	for port in 25 465 587
+	do
+		if [ -n "$indlib" -a -f "$indlib" ] ; then
+			if [ -f ${servicedir}/qmail-smtpd.$port/variables ] ; then
+				echo $indlib > ${servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
+			fi
+		fi
+	done
+	if [ -n "$indlib" -a -f "$indlib" ] ; then
+		if [ -f ${servicedir}/qmail-send.25/variables ] ; then
+			echo $indlib > ${servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
+		fi
+	fi
+	) >> /var/log/indimail-setup.log
+	exit 0
 fi
 # Recreate ld.so links and cache
 if [ ! "${prefix}" = "/usr" ] ; then

@@ -7,6 +7,7 @@ set -e
 prefix=@prefix@
 indimaildir=@indimaildir@
 libexecdir=@libexecdir@
+sysconfdir=@sysconfdir@
 rm=/bin/rm
 
 # summary of how this script can be called:
@@ -28,17 +29,12 @@ echo "Checking for mandatory user/group mysql.."
 /usr/bin/getent passwd mysql > /dev/null || (echo "user  mysql does not exist. Aborting..." && false)
 
 case "$1" in
-    install|upgrade)
-	# create this for the postinst script to figure out if we are
-	# installing or upgrading
+    install)
 	if [ -f ${libexecdir}/iupgrade.sh ] ; then
-	(
+		(
 		echo "Running Custom Upgrade Script for pre $1"
 		/bin/sh ${libexecdir}/iupgrade.sh pre $1 @version@ $* || true
-	) >> /var/log/indimail-setup.log 2>&1
-	fi
-	if [ " $1" = " upgrade" ] ; then
-		exit 0
+		) >> /var/log/indimail-setup.log 2>&1
 	fi
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
@@ -71,7 +67,43 @@ case "$1" in
 	fi
 	) >> /var/log/indimail-setup.log 2>&1
 	;;
-
+    upgrade)
+	if [ -d ${prefix} -a -d ${servicedir} ] ; then
+		if [ -f ${prefix}/sbin/initsvc ] ; then
+			${prefix}/sbin/initsvc -status || true
+		fi
+	
+		if [ -f ${prefix}/bin/svok ] ; then
+			set +e
+			# shutdown svscan before upgrade
+			# create .svscan.down so that we
+			# can restore state after upgrade in postinst
+			${prefix}/bin/svok ${servicedir}/.svscan/log 2>/dev/null
+			if [ $? -eq 0 ] ; then
+				touch ${servicedir}/.svscan.down
+				if test -f ${sysconfdir}/init/svscan.conf
+				then
+					echo "Giving IndiMail exactly 5 seconds to exit nicely"
+					/sbin/initctl emit qmailstop > /dev/null 2>&1
+				elif test -f ${sysconfdir}/event.d/svscan
+				then
+					echo "Giving IndiMail exactly 5 seconds to exit nicely"
+					/sbin/initctl emit qmailstop > /dev/null 2>&1
+				elif test -f ${sysconfdir}/systemd/system/multi-user.target.wants/svscan.service
+				then
+					echo "Giving IndiMail exactly 5 seconds to exit nicely"
+					/bin/systemctl stop svscan > /dev/null 2>&1
+				elif test -x ${prefix}/sbin/initsvc
+				then
+					echo "Giving IndiMail exactly 5 seconds to exit nicely"
+					${prefix}/sbin/initsvc -off
+				fi
+				sleep 5
+			fi
+			set -e
+		fi
+	fi
+	;;
     abort-upgrade)
     ;;
 
