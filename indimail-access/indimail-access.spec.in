@@ -491,7 +491,6 @@ done
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.couriertls
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.unicode
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.imap
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.authlib
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.courier-imap
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/lockmail.html
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/mailbot.html
