@@ -349,7 +349,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   fi
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="%{servicedir}/pwdlookup"
   %{_prefix}/bin/svok %{servicedir}/pwdlookup
-  if [ $? -eq 0 -f %{rundir}/pwdlookup/.down ] ; then
+  if [ $? -eq 0 -a -f %{rundir}/pwdlookup/.down ] ; then
     %{__rm} -f %{rundir}/pwdlookup/.down
     %{_prefix}/bin/svc -u %{servicedir}/pwdlookup
   fi
