@@ -147,14 +147,25 @@ if [ $upgrade -eq 1 ] ; then # upgrade
     fi
   done
   ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
+  set +e
+  if [ -d /run ] ; then
+    rundir=/run
+  elif [ -d /var/run ] ; then
+    rundir=/var/run
+  else
+    rundir=${servicedir}
+  fi
   for i in qmail-imapd.143 qmail-imapd-ssl.993 \
     qmail-pop3d.110 qmail-pop3d-ssl.995 \
-	fetchmail
+    fetchmail
   do
-    if [ ! -f ${servicedir}/down ] ; then
-      svc -u ${servicedir}/$i || true
+    ${prefix}/bin/svok ${servicedir}/$i >/dev/null 2>&1
+    if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
+	  rm -f ${rundir}/$i/.down
+      ${prefix}/bin/svc -u ${servicedir}/$i >/dev/null 2>&1
     fi
   done
+  set -e
   exit 0
 fi
 # Recreate ld.so links and cache

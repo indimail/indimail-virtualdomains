@@ -15,17 +15,25 @@ servicedir=@servicedir@
 # the debian-policy package
 
 case "$1" in
-    install|upgrade)
-	# create this for the postinst script to figure out if we are
-	# installing or upgrading
-	if [ " $1" = " upgrade" ] ; then
-  		svc -d ${servicedir}/pwdlookup || true
-		exit 0
+    upgrade)
+	if [ -d /run ] ; then
+		rundir=/run
+	elif [ -d /var/run ] ; then
+		rundir=/var/run
+	else
+		rundir=${servicedir}
 	fi
-	#
-	# Create a users and groups. Do not report any problems if they already
-	# exists.
-	#
+	if [ -f ${prefix}/bin/svstat ] ; then
+		set +e
+		${prefix}/bin/svstat ${servicedir}/pwdlookup >/dev/null 2>&1
+		if [ $? -eq 0 ] ; then
+			mkdir -p ${rundir}/pwdlookup
+			touch ${rundir}/pwdlookup/.down
+			${prefix}/bin/svc -d ${servicedir}/pwdlookup || true
+		fi
+		set -e
+	fi
+	exit 0
 	;;
 
     abort-upgrade)

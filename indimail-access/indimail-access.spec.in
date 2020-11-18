@@ -534,10 +534,22 @@ fi
 
 ### SCRIPTLET ###############################################################################
 %pretrans
+if [ -d /run ] ; then
+  rundir=/run/svscan
+elif [ -d /var/run ] ; then
+  rundir=/var/run/svscan
+else
+  rundir=%{servicedir}
+fi
 for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
   qmail-pop3d.110 qmail-pop3d-ssl.995 fetchmail
 do
-  svc -d %{servicedir}/$i
+  %{_prefix}/bin/svstat %{servicedir}/$i >/dev/null 2>&1
+  if [ $? -eq 0 ] ; then
+    %{__mkdir_p} %{rundir}/$i
+    touch %{rundir}/$i/.down
+    %{_prefix}/bin/svc -d %{servicedir}/$i
+  fi
 done
 
 ### SCRIPTLET ###############################################################################
@@ -571,13 +583,22 @@ if [ $argv1 -eq 2 ] ; then # upgrade
       svc_list="$svc_list %{servicedir}/$i"
     fi
   done
+  if [ -d /run ] ; then
+    rundir=/run/svscan
+  elif [ -d /var/run ] ; then
+    rundir=/var/run/svscan
+  else
+    rundir=%{servicedir}
+  fi
   # restart services
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
   for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
     qmail-pop3d.110 qmail-pop3d-ssl.995 fetchmail
   do
-    if [ ! -f %{servicedir}/down ] ; then
-      svc -u %{servicedir}/$i
+    %{_prefix}/bin/svok %{servicedir}/$i
+    if [ $? -eq 0 -a -f %{rundir}/$i/.down ] ; then
+      %{__rm} -f %{rundir}/$i/.down
+      %{_prefix}/bin/svc -u %{servicedir}/$i
     fi
   done
   ) >> /var/log/indimail-access-setup.log 2>&1

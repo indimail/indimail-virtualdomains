@@ -62,10 +62,21 @@ esac
 
 if [ $upgrade -eq 1 ] ; then # upgrade
   ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="${servicedir}/pwdlookup"
-  if [ ! -f ${servicedir}/pwdlookup/down ] ; then
-    svc -u ${servicedir}/pwdlookup || true
+  set +e
+  if [ -d /run ] ; then
+    rundir=/run
+  elif [ -d /var/run ] ; then
+    rundir=/var/run
+  else
+    rundir=${servicedir}
+  fi
+  ${prefix}/bin/svok ${servicedir}/pwdlookup >/dev/null 2>&1
+  if [ $? -eq 0 -a -f ${rundir}/pwdlookup/.down ] ; then
+    rm -f ${rundir}/pwdlookup/.down
+    ${prefix}/bin/svc -u ${servicedir}/pwdlookup || true
   fi
   /sbin/ldconfig
+  set -e
   exit 0
 fi
 
