@@ -17,7 +17,7 @@ CLEANFILES=$(databin_SCRIPTS) $(man_MANS) $(sysconf_DATA) $(sbin_SCRIPTS)
 
 doc_list= libs/maildir/README.sharedfolders.txt libs/maildir/README.maildirquota.txt \
 	libs/unicode/README.unicode libs/imap/README.imap libs/tcpd/README.couriertls \
-	libs/authlib/README.authlib README.courier-imap AUTHORS COPYING COPYING.GPL
+	README.courier-imap AUTHORS COPYING COPYING.GPL
 
 EXTRA_DIST=README.courier-imap README.cygwin\
 	COPYING.GPL NEWS.html pgpkeys.txt \
@@ -112,7 +112,6 @@ if HAVE_HTML
 
 README.courier-imap: html/main.html
 	$(HTML2TXT) $(srcdir)/html/index.html >README.courier-imap
-	cp README.courier-imap README
 endif
 
 distrelease:
