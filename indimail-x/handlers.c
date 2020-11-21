@@ -1,5 +1,8 @@
 /*
  * $Log: handlers.c,v $
+ * Revision 1.2  2020-11-21 15:59:39+05:30  Cprogrammer
+ * use execv() in i_mount() instead of execute()
+ *
  * Revision 1.1  2019-04-14 18:33:17+05:30  Cprogrammer
  * Initial revision
  *
@@ -28,7 +31,7 @@
  */
 
 #ifndef	lint
-static char    *rcsid = "@(#) $Id: handlers.c,v 1.1 2019-04-14 18:33:17+05:30 Cprogrammer Exp mbhangui $";
+static char    *rcsid = "@(#) $Id: handlers.c,v 1.2 2020-11-21 15:59:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -796,7 +799,7 @@ execute(argc, argv)
 int
 execute(argc, argv)
 	int             argc;
-	char           *argv[];
+	char           **argv;
 {
 	char          **av2;
 	int             fd;
@@ -838,16 +841,15 @@ execute(argc, argv)
 #else
 		temp = (struct exec *) buf;
 #endif /*- HAVE_ELF_H */
-		if (N_BADMAG((*temp)))
-			if (*buf != '#')
-			{
-				/*- Has shell header */
-				*av2 = "/bin/sh";	/*- bourne shell default?  */
-				for (i = 0; i < argc + 1; i++)
-					*(av2 + 1 + i) = argv[i];
-				execv(*av2, av2);
-				fatal("exec");
-			}
+		if (N_BADMAG((*temp)) && *buf != '#') {
+			/*- Has shell header */
+			av2[0] = "/bin/sh";	/*- bourne shell default?  */
+			for (i = 0; i < argc; i++)
+				av2[i + 1] = argv[i];
+			av2[i + 1] = (char *) 0;
+			execv(*av2, av2);
+			fatal("exec");
+		}
 		execv(argv[0], argv);
 		fatal("exec");
 	}
@@ -935,7 +937,7 @@ i_mount(argc, argv)
 		nargv[3] = argv[1];
 		nargv[4] = argv[2];
 		nargv[5] = 0;
-		execute(5, nargv);		/*- There are 5 arguments */
+		execv(*nargv, nargv); /*- There are 5 arguments */
 	}
 	return(0);
 }
