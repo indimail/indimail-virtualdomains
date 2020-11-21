@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.78 2020-11-17 18:03:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.79 2020-11-21 16:00:23+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -955,39 +955,39 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
-if [ -d %{_prefix} -a -d %{servicedir} ] ; then
-  if [ -f %{_prefix}/sbin/initsvc ] ; then
-    %{_prefix}/sbin/initsvc -status
-  fi
 
-  if [ -f %{_prefix}/bin/svok ] ; then
-    # shutdown svscan before upgrade
-    # create .svscan.down so that we
-    # can restore state after upgrade in postinst
-    %{_prefix}/bin/svok %{servicedir}/.svscan/log 2>/dev/null
-    if [ $? -eq 0 ] ; then
-      touch %{servicedir}/.svscan.down
-      if test -f %{_sysconfdir}/init/svscan.conf
-      then
-        echo "Giving IndiMail exactly 5 seconds to exit nicely"
-        /sbin/initctl emit qmailstop > /dev/null 2>&1
-      elif test -f %{_sysconfdir}/event.d/svscan
-      then
-        echo "Giving IndiMail exactly 5 seconds to exit nicely"
-        /sbin/initctl emit qmailstop > /dev/null 2>&1
-      elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service
-      then
-        echo "Giving IndiMail exactly 5 seconds to exit nicely"
-        /bin/systemctl stop svscan > /dev/null 2>&1
-      elif test -x %{_prefix}/sbin/initsvc
-      then
-        echo "Giving IndiMail exactly 5 seconds to exit nicely"
-        %{_prefix}/sbin/initsvc -off
-      fi
-      sleep 5
-    fi
-  fi
+# stop indimail services before upgrade
+if [ -d /run ] ; then
+  rundir=/run/svscan
+elif [ -d /var/run ] ; then
+  rundir=/var/run/svscan
+else
+  rundir=%{servicedir}
 fi
+for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
+qmail-poppass.106 qmail-logfifo
+do
+  %{_prefix}/bin/svstat %{servicedir}/$i >/dev/null 2>&1
+  if [ $? -eq 0 ] ; then
+    %{__mkdir_p} %{rundir}/$i
+    touch %{rundir}/$i/.down
+    %{_prefix}/bin/svc -d %{servicedir}/$i
+  fi
+done
+
+if [ %noproxy -eq 0 ] ; then
+  for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
+    proxy-pop3d.4110 proxy-pop3d-ssl.9110
+  do
+    %{_prefix}/bin/svstat %{servicedir}/$i >/dev/null 2>&1
+    if [ $? -eq 0 ] ; then
+      %{__mkdir_p} %{rundir}/$i
+      touch %{rundir}/$i/.down
+      %{_prefix}/bin/svc -d %{servicedir}/$i
+    fi
+  done
+fi
+
 # initialize setup log file
 if [ -f %{libexecdir}/iupgrade.sh ] ; then
 (
@@ -1096,39 +1096,34 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     echo "Running Custom Upgrade Script for post upgrade"
     /bin/sh %{libexecdir}/iupgrade.sh post upgrade %{version} $*
   fi
-  # restore svscan service if we find .svscan.down
-  if [ -f %{servicedir}/.svscan.down ] ; then
-    %{__rm} -f %{servicedir}/.svscan.down
-    echo "Starting svscan"
-    if test -f %{_sysconfdir}/init/svscan.conf
-    then
-      /sbin/initctl emit qmailstart > /dev/null 2>&1
-    elif test -f %{_sysconfdir}/event.d/svscan
-    then
-      /sbin/initctl emit qmailstart > /dev/null 2>&1
-    elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service
-    then
-      /bin/systemctl start svscan > /dev/null 2>&1
-    elif test -x %{_prefix}/sbin/initsvc
-    then
-      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
-        %{_prefix}/sbin/initsvc -status || %{_sysconfdir}/init.d/svscan start || true
-      else
-        %{_prefix}/sbin/initsvc -status || true
-      fi
-      %{_prefix}/sbin/initsvc -on || true
-    else
-      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
-        %{_sysconfdir}/init.d/svscan start
-      fi
-      /bin/grep "^#SV:" %{_sysconfdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
-      if [ $? -eq 0 ] ; then
-        %{__sed} -i 's{^#SV:{SV:{' %{_sysconfdir}/inittab
-        if [ $? -eq 0 ] ; then
-          /sbin/init q
-        fi
-      fi
+
+  # start indimail services after upgrade
+  if [ -d /run ] ; then
+    rundir=/run/svscan
+  elif [ -d /var/run ] ; then
+    rundir=/var/run/svscan
+  else
+    rundir=%{servicedir}
+  fi
+  for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
+  qmail-poppass.106 qmail-logfifo
+  do
+    %{_prefix}/bin/svok %{servicedir}/$i >/dev/null 2>&1
+    if [ $? -eq 0 -a -f %{rundir}/$i/.down ] ; then
+      %{__rm} -f %{rundir}/$i/.down
+      %{_prefix}/bin/svc -u %{servicedir}/$i
     fi
+  done
+  if [ %noproxy -eq 0 ] ; then
+    for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
+      proxy-pop3d.4110 proxy-pop3d-ssl.9110
+    do
+      %{_prefix}/bin/svok %{servicedir}/$i >/dev/null 2>&1
+      if [ $? -eq 0 -a -f %{rundir}/$i/.down ] ; then
+        %{__rm} -f %{rundir}/$i/.down
+        %{_prefix}/bin/svc -u %{servicedir}/$i
+      fi
+    done
   fi
 
   #selinux

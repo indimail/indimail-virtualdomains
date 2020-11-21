@@ -8,7 +8,7 @@ prefix=@prefix@
 indimaildir=@indimaildir@
 libexecdir=@libexecdir@
 sysconfdir=@sysconfdir@
-rm=/bin/rm
+servicedir=@servicedir@
 
 # summary of how this script can be called:
 #        * <new-preinst> `install'
@@ -67,50 +67,34 @@ case "$1" in
 	fi
 	) >> /var/log/indimail-setup.log 2>&1
 	;;
-    upgrade)
-	if [ -d ${prefix} -a -d ${servicedir} ] ; then
-		if [ -f ${prefix}/sbin/initsvc ] ; then
-			${prefix}/sbin/initsvc -status || true
-		fi
-	
-		if [ -f ${prefix}/bin/svok ] ; then
-			set +e
-			# shutdown svscan before upgrade
-			# create .svscan.down so that we
-			# can restore state after upgrade in postinst
-			${prefix}/bin/svok ${servicedir}/.svscan/log 2>/dev/null
-			if [ $? -eq 0 ] ; then
-				touch ${servicedir}/.svscan.down
-				if test -f ${sysconfdir}/init/svscan.conf
-				then
-					echo "Giving IndiMail exactly 5 seconds to exit nicely"
-					/sbin/initctl emit qmailstop > /dev/null 2>&1
-				elif test -f ${sysconfdir}/event.d/svscan
-				then
-					echo "Giving IndiMail exactly 5 seconds to exit nicely"
-					/sbin/initctl emit qmailstop > /dev/null 2>&1
-				elif test -f ${sysconfdir}/systemd/system/multi-user.target.wants/svscan.service
-				then
-					echo "Giving IndiMail exactly 5 seconds to exit nicely"
-					/bin/systemctl stop svscan > /dev/null 2>&1
-				elif test -x ${prefix}/sbin/initsvc
-				then
-					echo "Giving IndiMail exactly 5 seconds to exit nicely"
-					${prefix}/sbin/initsvc -off
-				fi
-				sleep 5
-			fi
-			set -e
-		fi
+	upgrade)
+	# stop indimail services before upgrade
+	if [ -d /run ] ; then
+		rundir=/run/svscan
+	elif [ -d /var/run ] ; then
+		rundir=/var/run/svscan
+	else
+		rundir=${servicedir}
 	fi
+	for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
+		qmail-poppass.106 qmail-logfifo proxy-imapd.4143 \
+		proxy-imapd-ssl.9143 \ proxy-pop3d.4110 proxy-pop3d-ssl.9110
+	do
+		${prefix}/bin/svstat ${servicedir}/$i >/dev/null 2>&1
+		if [ $? -eq 0 ] ; then
+			mkdir -p ${rundir}/$i
+			touch ${rundir}/$i/.down
+			${prefix}/bin/svc -d ${servicedir}/$i
+		fi
+	done
 	;;
-    abort-upgrade)
-    ;;
+	abort-upgrade)
+	;;
 
-    *)
-        echo "preinst called with unknown argument \`$1'" >&2
-        exit 1
-    ;;
+	*)
+	echo "preinst called with unknown argument \`$1'" >&2
+	exit 1
+	;;
 esac
 
 # dh_installdeb will replace this with shell code automatically
