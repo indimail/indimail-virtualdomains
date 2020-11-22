@@ -84,3 +84,7 @@ Release 3.3 Start 06/09/2020
 17/11/2020
 51. removed sslerator
 52. indimail.spec: stop/start svscan on upgrade
+21/11/2020
+53. packaging: shutdown specific indimaail services instead of entire svscan
+    service
+54. handlers.c: use execv() instead of execute() in i_mount() function
