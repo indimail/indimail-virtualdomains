@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.79 2020-11-21 16:00:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.80 2020-11-25 19:52:23+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -105,7 +105,7 @@ Obsoletes: %{name} < 2.0
 BuildRequires: openssl-devel rpm gcc gcc-c++ make coreutils grep
 BuildRequires: glibc glibc-devel openssl procps ncurses-devel
 BuildRequires: gzip autoconf automake libtool pkgconfig
-BuildRequires: sed findutils
+BuildRequires: sed findutils binutils
 BuildRequires: mysql-devel libqmail-devel libqmail
 %if %{defined fedora_version}
 BuildRequires: redhat-lsb-core

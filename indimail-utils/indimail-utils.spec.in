@@ -70,7 +70,7 @@ AutoReqProv: Yes
 # few binaries were moved to sbin and indimail >= 2.5 depends on that
 
 BuildRequires: rpm gcc gcc-c++ make coreutils grep
-BuildRequires: glibc glibc-devel
+BuildRequires: glibc glibc-devel binutils
 BuildRequires: gzip autoconf automake libtool
 #flash, osh
 BuildRequires: readline-devel readline ncurses-devel

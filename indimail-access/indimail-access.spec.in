@@ -86,7 +86,7 @@ AutoReqProv: Yes
 Requires: indimail-mta > 2.6
 
 BuildRequires: openssl-devel rpm gcc gcc-c++ make coreutils grep
-BuildRequires: glibc glibc-devel openssl procps
+BuildRequires: glibc glibc-devel openssl procps binutils
 BuildRequires: gzip autoconf automake libtool pkgconfig
 BuildRequires: sed findutils
 BuildRequires: xz bison flex

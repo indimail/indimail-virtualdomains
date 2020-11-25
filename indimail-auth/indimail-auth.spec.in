@@ -70,7 +70,7 @@ AutoReqProv: Yes
 # few binaries were moved to sbin and indimail >= 2.5 depends on that
 
 BuildRequires: gcc gcc-c++ make autoconf automake libtool
-BuildRequires: glibc glibc-devel procps
+BuildRequires: glibc glibc-devel procps binutils
 BuildRequires: sed findutils gzip coreutils grep
 BuildRequires: mysql-devel pam-devel libqmail-devel libqmail
 

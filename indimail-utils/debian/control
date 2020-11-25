@@ -3,7 +3,7 @@ Section: mail
 Priority: optional
 Maintainer: Manvendra Bhangui <indimail-utils@indimail.org>
 Standards-Version: 4.5.0
-Build-Depends: debhelper (>= 9), libncurses5 (>= 5.7), libncurses5-dev (>= 5.7)
+Build-Depends: debhelper (>= 9), binutils, coreutils, libncurses5 (>= 5.7), libncurses5-dev (>= 5.7)
 Homepage: https://github.com/mbhangui/indimail-virtualdomains
 
 Package: indimail-utils
