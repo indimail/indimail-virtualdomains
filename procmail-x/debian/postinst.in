@@ -59,7 +59,7 @@ if [ $ID -ne 0 ] ; then
 	exit 1
 fi
 if [ -f ${prefix}/etc/procmail_perm_list ] ; then
-	echo "Fixing Permissions (debian stupidity)"
+	echo "Fixing Permissions"
 (
 /bin/grep -v "^#" ${prefix}/etc/procmail_perm_list | while read line
 do

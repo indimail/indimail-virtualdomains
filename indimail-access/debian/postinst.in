@@ -121,7 +121,7 @@ esac
 # We need to do this for debian. SIGH!!
 #
 if [ -f ${sysconfdir}/perm_list.imap ] ; then
-	echo "Fixing Permissions (debian stupidity)"
+	echo "Fixing Permissions"
 (
 /bin/grep -v "^#" ${sysconfdir}/perm_list.imap | while read line
 do

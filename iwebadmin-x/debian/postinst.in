@@ -59,7 +59,7 @@ if [ $ID -ne 0 ] ; then
 	exit 1
 fi
 if [ -f ${sysconfdir}/iwebadmin.perms ] ; then
-	echo "Fixing Permissions (debian stupidity)"
+	echo "Fixing Permissions"
 (
 /bin/grep -v "^#" ${sysconfdir}/iwebadmin.perms | while read line
 do
