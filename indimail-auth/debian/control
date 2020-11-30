@@ -8,7 +8,7 @@ Homepage: https://github.com/mbhangui/indimail-virtualdomains
 
 Package: indimail-auth
 Architecture: any
-Pre-Depends: indimail-mta, virtual-mysql-server, libqmail
+Pre-Depends: indimail-mta
 Conflicts: indimail (< 3.2)
 Depends: ${shlibs:Depends}, ${misc:Depends}, coreutils, findutils, procps
 Description: indimail-auth provides nssd daemon to provide name service switch in
