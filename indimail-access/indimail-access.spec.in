@@ -718,17 +718,19 @@ touch %{servicedir}/fetchmail/down
   --ssl --infifo=infifo
 
 # add courier-imap auth module authindi
-echo "adding authindi as IMAP/POP3 auth module"
-for i in `ls -d %{servicedir}/qmail-pop3d* %{servicedir}/qmail-imapd*`
-do
-  if [ -s $i/variables/IMAPMODULES ] ; then
-    grep authindi $i/variables/IMAPMODULES > /dev/null
-    if [ $? -ne 0 ] ; then
-      AUTHM="`cat $i/variables/IMAPMODULES` authindi"
-      echo $AUTHM > $i/variables/IMAPMODULES
+if [ -f %{libexecdir}/imapmodules/authindi ] ; then
+  echo "adding authindi as IMAP/POP3 auth module"
+  for i in `ls -d %{servicedir}/qmail-pop3d* %{servicedir}/qmail-imapd*`
+  do
+    if [ -s $i/variables/IMAPMODULES ] ; then
+      grep authindi $i/variables/IMAPMODULES > /dev/null
+      if [ $? -ne 0 ] ; then
+        AUTHM="`cat $i/variables/IMAPMODULES` authindi"
+        echo $AUTHM > $i/variables/IMAPMODULES
+      fi
     fi
-  fi
-done
+  done
+fi
 
 # rebuild cdb
 for i in imap pop3
