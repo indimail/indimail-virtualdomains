@@ -7,3 +7,4 @@ usr/share/man/man7     @mandir@
 usr/share/man/man8     @mandir@
 usr/lib/python*        @prefix@/lib
 usr/@libd@/*.so.*      @prefix@/@libd@
+etc/indimail           /etc

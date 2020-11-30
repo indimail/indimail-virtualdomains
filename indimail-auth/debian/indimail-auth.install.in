@@ -1,4 +1,5 @@
 etc/pam.d              /etc
+etc/indimail           /etc
 lib/security           /lib
 usr/sbin               @prefix@
 usr/libexec/indimail   @prefix@/libexec

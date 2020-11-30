@@ -3,3 +3,4 @@ usr/sbin               @prefix@
 usr/share/indimail     @prefix@/share
 usr/share/man/man1     @mandir@
 usr/@libd@/*.so.*      @prefix@/@libd@
+etc/indimail           /etc
