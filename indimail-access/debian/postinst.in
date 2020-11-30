@@ -94,22 +94,19 @@ fi
 upgrade=0
 case "$1" in
     configure)
-		if [ " $2" = " " ] ; then
-			echo "installing indimail-auth @version@"
-		else
-			echo "upgrading to indimail-auth $2"
-			upgrade=1
-		fi
-    ;;
+	if [ -n "$2" ] ; then
+		upgrade=1
+	fi
+	;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
 	exit 0
-    ;;
+ 	;;
 
-    *)
-        echo "postinst called with unknown argument \`$1'" >&2
-        exit 1
-    ;;
+	*)
+	echo "postinst called with unknown argument \`$1'" >&2
+	exit 1
+	;;
 esac
 
 # dh_installdeb will replace this with shell code automatically
@@ -122,15 +119,15 @@ esac
 #
 if [ -f ${sysconfdir}/perm_list.imap ] ; then
 	echo "Fixing Permissions"
-(
-/bin/grep -v "^#" ${sysconfdir}/perm_list.imap | while read line
-do
-	if [ " $line" = " " ] ; then
-		continue
-	fi
-	fixperms $line
-done
-) > ${sysconfdir}/indimail-access-stat.override
+	(
+	/bin/grep -v "^#" ${sysconfdir}/perm_list.imap | while read line
+	do
+		if [ " $line" = " " ] ; then
+			continue
+		fi
+		fixperms $line
+	done
+	) > ${sysconfdir}/indimail-access-stat.override
 fi
 
 # indimail-access.upgrade/indimail-access.install are created
