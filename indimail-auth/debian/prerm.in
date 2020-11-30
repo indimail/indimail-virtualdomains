@@ -17,9 +17,7 @@ set -e
 # the debian-policy package
 
 prefix=@prefix@
-sysconfdir=@sysconfdir@
 servicedir=@servicedir@
-rm=/bin/rm
 
 ID=`id -u`
 if [ $ID -ne 0 ] ; then
@@ -36,19 +34,16 @@ case "$1" in
 	else
 		rundir=${servicedir}
 	fi
-	set +e
-	for i in qmail-imapd.143 qmail-imapd-ssl.993 \
-		qmail-pop3d.110 qmail-pop3d-ssl.995 \
-		fetchmail
-	do
-		${prefix}/bin/svstat ${servicedir}/$i >/dev/null 2>&1
+	if [ -f ${prefix}/bin/svstat ] ; then
+		set +e
+		${prefix}/bin/svstat ${servicedir}/pwdlookup || true
 		if [ $? -eq 0 ] ; then
-			mkdir -p ${rundir}/$i
-			touch ${rundir}/$i/.down
-			${prefix}/bin/svc -d ${servicedir}/$i >/dev/null 2>&1 || true
+			mkdir -p ${rundir}/pwdlookup
+			touch ${rundir}/pwdlookup/.down
+			${prefix}/bin/svc -d ${servicedir}/pwdlookup || true
 		fi
-	done
-	set -e
+		set -e
+	fi
     ;;
 
     failed-upgrade)
@@ -69,16 +64,3 @@ esac
 if [ " $1" = " upgrade" -o " $1" = " deconfigure" ] ; then
 	exit 0
 fi
-if [ -s ${sysconfdir}/indimail-access-stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
-	echo "reverting permissions"
-	/bin/cat ${sysconfdir}/indimail-access-stat.override | while read line
-	do
-		if [ -f $line ] ; then
-			echo "reverting permission for $line"
-			/usr/sbin/dpkg-statoverride --remove $line || true
-		fi
-	done
-	${rm} -f ${sysconfdir}/indimail-access-stat.override
-fi
-
-exit 0

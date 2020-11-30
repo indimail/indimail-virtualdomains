@@ -9,6 +9,7 @@ debian/Makefile
 debian/rules
 debian/preinst
 debian/postinst
+debian/prerm
 debian/postrm
 debian/indimail-auth.install
 debian/obs_deb_prep

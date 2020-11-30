@@ -20,6 +20,7 @@ prefix=@prefix@
 indimaildir=@indimaildir@
 sysconfdir=@sysconfdir@
 libexecdir=@libexecdir@
+servicedir=@servicedir@
 mandir=@mandir@
 rm=/bin/rm
 mv=/bin/mv
@@ -32,38 +33,32 @@ fi
 
 case "$1" in
     remove|upgrade|deconfigure)
-	if [ -f ${libexecdir}/iupgrade.sh ] ; then
 	(
+	if [ -f ${libexecdir}/iupgrade.sh ] ; then
 		echo "Running Custom Upgrade Script for prerm $1"
 		/bin/sh ${libexecdir}/iupgrade.sh prerm $1 @version@ $* || true
-	) >> /var/log/indimail-setup.log 2>&1
 	fi
-	(
 	# stop indimail services before upgrade
-	echo "shutting down indimail/indimail-log services"
-	svc_list=""
+	if [ -d /run ] ; then
+		rundir=/run/svscan
+	elif [ -d /var/run ] ; then
+		rundir=/var/run/svscan
+	else
+		rundir=${servicedir}
+	fi
+	set +e
 	for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
-		qmail-poppass.106 qmail-logfifo
+		qmail-poppass.106 qmail-logfifo proxy-imapd.4143 \
+		proxy-imapd-ssl.9143 \ proxy-pop3d.4110 proxy-pop3d-ssl.9110
 	do
-		svc -d ${servicedir}/$i ${servicedir}/$i/log || true
-		if [ -z "$svc_list" ] ; then
-			svc_list="${servicedir}/$i"
-		else
-			svc_list="$svc_list ${servicedir}/$i"
+		${prefix}/bin/svstat ${servicedir}/$i
+		if [ $? -eq 0 ] ; then
+			mkdir -p ${rundir}/$i
+			touch ${rundir}/$i/.down
+			${prefix}/bin/svc -d ${servicedir}/$i
 		fi
 	done
-	if [ $noproxy -eq 0 ] ; then
-		for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
-			proxy-pop3d.4110 proxy-pop3d-ssl.9110 
-		do
-			svc -d ${servicedir}/$i ${servicedir}/$i/log || true
-			if [ -z "$svc_list" ] ; then
-				svc_list="${servicedir}/$i"
-			else
-				svc_list="$svc_list ${servicedir}/$i"
-			fi
-		done
-	fi
+	set -e
 	) >> /var/log/indimail-setup.log 2>&1
     ;;
 
