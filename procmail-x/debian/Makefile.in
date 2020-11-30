@@ -1,6 +1,7 @@
 prefix=@prefix@
 version=@version@
 release=@release@
+sysconfdir=@sysconfdir@
 #
 
 all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
@@ -12,6 +13,7 @@ clean:
 edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
+	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 rules: rules.in Makefile ../conf-version ../conf-release

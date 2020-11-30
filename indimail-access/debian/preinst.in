@@ -38,6 +38,8 @@ case "$1" in
 	done
 	set -e
 	;;
+    install)
+	;;
 
     abort-upgrade)
     ;;

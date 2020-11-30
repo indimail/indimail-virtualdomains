@@ -1,7 +1,6 @@
 #!/bin/sh
 set -e
-prefix=@prefix@
-sysconfdir=/etc
+sysconfdir=@sysconfdir@
 rm=/bin/rm
 rmdir=/bin/rmdir
 
@@ -38,12 +37,12 @@ case "$1" in
 esac
 if [ " $1" = " remove" ] ; then
 	echo "reverting permissions"
-	if [ -s ${prefix}/etc/procmail_stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
-		/bin/cat ${prefix}/etc/procmail_stat.override | while read line
+	if [ -s ${sysconfdir}/procmail-stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
+		/bin/cat ${sysconfdir}/procmail-stat.override | while read line
 		do
 			/usr/sbin/dpkg-statoverride --remove $line
 		done
-		${rm} -f ${prefix}/etc/procmail_stat.override 2>/dev/null || true
-		${rmdir} --ignore-fail-on-non-empty ${prefix}/etc 2>/dev/null || true
+		${rm} -f ${sysconfdir}/procmail-stat.override 2>/dev/null || true
+		${rmdir} --ignore-fail-on-non-empty ${sysconfdir} 2>/dev/null || true
 	fi
 fi

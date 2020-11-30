@@ -244,43 +244,46 @@ fi
 
 a_arch=`uname -m`
 if [ $noproxy -eq 0 ] ; then
-if [ " $a_arch" = " x86_64" ] ; then
-  imap_pop3_mem=104857600
-  imapspop3_mem=104857600
-else
-  imap_pop3_mem=52428800
-  imapspop3_mem=52428800
-fi
-${prefix}/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 \
-	--maxdaemons=40 --maxperip=25 --infifo=infifo \
-	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=143 \
-	--starttls
-${prefix}/sbin/svctool --imap=9143 --servicedir=$servicedir --localip=0 \
-	--maxdaemons=40 --maxperip=25 --infifo=infifo \
-	--default-domain=${default_domain} --memory=$imapspop3_mem --proxy=143 --ssl
-${prefix}/sbin/svctool --pop3=4110 --servicedir=$servicedir --localip=0 \
-	--maxdaemons=40 --maxperip=25 --infifo=infifo \
-	--default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=110 \
-	--starttls
-${prefix}/sbin/svctool --pop3=9110 --servicedir=$servicedir --localip=0 \
-	--maxdaemons=40 --maxperip=25 --infifo=infifo \
-	--default-domain=${default_domain} --memory=$imapspop3_mem --proxy=110 --ssl
-
-# add courier-imap auth module authindi
-echo "adding authindi as Proxy IMAP/POP3 auth module"
-for i in `ls -d ${servicedir}/proxy-pop3d* ${servicedir}/proxy-imapd*`
-do
-  if [ -s $i/variables/IMAPMODULES ] ; then
-    grep authindi $i/variables/IMAPMODULES > /dev/null
-    if [ $? -ne 0 ] ; then
-      AUTHM="`cat $i/variables/IMAPMODULES` authindi"
-      echo $AUTHM > $i/variables/IMAPMODULES
-    fi
+  if [ " $a_arch" = " x86_64" ] ; then
+    imap_pop3_mem=104857600
+    imapspop3_mem=104857600
+  else
+    imap_pop3_mem=52428800
+    imapspop3_mem=52428800
   fi
-done
+  ${prefix}/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 \
+	  --maxdaemons=40 --maxperip=25 --infifo=infifo \
+	  --default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=143 \
+	  --starttls
+  ${prefix}/sbin/svctool --imap=9143 --servicedir=$servicedir --localip=0 \
+	  --maxdaemons=40 --maxperip=25 --infifo=infifo \
+	  --default-domain=${default_domain} --memory=$imapspop3_mem --proxy=143 --ssl
+  ${prefix}/sbin/svctool --pop3=4110 --servicedir=$servicedir --localip=0 \
+	  --maxdaemons=40 --maxperip=25 --infifo=infifo \
+	  --default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=110 \
+	  --starttls
+  ${prefix}/sbin/svctool --pop3=9110 --servicedir=$servicedir --localip=0 \
+	  --maxdaemons=40 --maxperip=25 --infifo=infifo \
+	  --default-domain=${default_domain} --memory=$imapspop3_mem --proxy=110 --ssl
+
+  # add courier-imap auth module authindi
+  set +e
+  echo "adding authindi as Proxy IMAP/POP3 auth module"
+  for i in `ls -d ${servicedir}/proxy-pop3d* ${servicedir}/proxy-imapd*`
+  do
+    if [ -s $i/variables/IMAPMODULES ] ; then
+      grep authindi $i/variables/IMAPMODULES > /dev/null
+      if [ $? -ne 0 ] ; then
+        AUTHM="`cat $i/variables/IMAPMODULES` authindi"
+        echo $AUTHM > $i/variables/IMAPMODULES
+      fi
+    fi
+  done
+  set -e
 fi
 
 # add checkpassword auth module vchkpass
+set +e
 echo "adding vchkpass as SMTP auth module"
 for i in 465 587
 do
@@ -292,8 +295,10 @@ do
     fi
   fi
 done
+set -e
 
 # add courier-imap auth module authindi
+set +e
 echo "adding authindi as IMAP/POP3 auth module"
 for i in `ls -d ${servicedir}/qmail-pop3d* ${servicedir}/qmail-imapd*`
 do
@@ -305,6 +310,7 @@ do
     fi
   fi
 done
+set -e
 
 # fifolog service
 ${prefix}/sbin/svctool --fifologger=$logfifo --servicedir=${servicedir}

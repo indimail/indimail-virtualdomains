@@ -36,6 +36,8 @@ case "$1" in
 	fi
 	exit 0
 	;;
+	install)
+	;;
 
     abort-upgrade)
     ;;
