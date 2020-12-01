@@ -10,7 +10,7 @@ EXTRA_DIST=confwait.c
 
 libwaitlib_la_SOURCES=waitlib.c waitlib.h waitlib2.c
 
-testwait_SOURCES=testwait.c testwait2.c
+testwait_SOURCES=testwait.c
 testwait_DEPENDENCIES=libwaitlib.la
 testwait_LDADD=libwaitlib.la
 

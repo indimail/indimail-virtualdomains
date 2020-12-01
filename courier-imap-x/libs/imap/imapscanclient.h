@@ -21,7 +21,6 @@ struct imapscanmessageinfo {
 	char changedflags;	/* Set by imapscan_open */
 	char copiedflag;	/* This message was copied to another folder */
 	char storeflag;  /* Used by imap_addRemoveKeywords() */
-	char err8bitflag;       /* Invalid 8 bit header error was reported */
 	/* When reading keywords, hash messages by filename */
 	struct imapscanmessageinfo *firstBucket, *nextBucket;
 	} ;

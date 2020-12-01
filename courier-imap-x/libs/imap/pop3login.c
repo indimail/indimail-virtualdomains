@@ -110,8 +110,9 @@ starttls()
 		exit(1);
 	}
 	close(pipefd[0]);
+	fflush(stdin);
 	if (write(1, "", 1) == -1)
-		;			/*- child - exec OK now */
+		; /*- child - exec OK now */
 	while (wait(&waitstat) != p)
 		;
 	putenv("POP3_STARTTLS=NO");
