@@ -64,7 +64,7 @@ build-stamp:
 	${rm} -f  $(DESTDIR)$(prefix)/$(libd)/*.la
 	${rm} -f  $(DESTDIR)${prefix}/$(libd)/libunicode.a
 	${rm} -f  $(DESTDIR)${prefix}/$(libd)/libunicode.so
-	${rm} -rf $(DESTDIR)${prefix}/share/aclocal
+	${rm} -rf $(DESTDIR)${shareddir}/aclocal
 	${rm} -rf $(DESTDIR)${prefix}/include
 	${rm} -rf $(DESTDIR)${mandir}/man3
 	( \
@@ -89,10 +89,10 @@ install: build
 	/bin/rm -f indimail-access-release
 
 clean:
-	if [ -d courier-imap-$(courier_version) ] ; then $(MAKE) -s clean -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
-	if [ -d fetchmail-$(fetchmail_version) ]  ; then $(MAKE) -s clean -C fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR); fi
-	if [ -d courier-imap-$(courier_version) ] ; then $(MAKE) -s distclean -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
-	if [ -d fetchmail-$(fetchmail_version) ]  ; then $(MAKE) -s distclean -C fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR); fi
+	if [ -d courier-imap-$(courier_version) ] ; then $(MAKE) -s clean -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR) || true; fi
+	if [ -d fetchmail-$(fetchmail_version) ]  ; then $(MAKE) -s clean -C fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR) || true; fi
+	if [ -d courier-imap-$(courier_version) ] ; then $(MAKE) -s distclean -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR) || true; fi
+	if [ -d fetchmail-$(fetchmail_version) ]  ; then $(MAKE) -s distclean -C fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR) || true; fi
 	${rm} -f build-stamp configure-stamp
 	${rm} -rf $(DESTDIR)
 	dh_testdir
