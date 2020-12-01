@@ -53,17 +53,17 @@ Install the following packages using apt
 
 ```
 Universal
-cdbs, debhelper, gcc, g++, automake, autoconf, libtool
-libqmail-dev, libqmail, libldap2-dev, libssl-dev,
-mime-support, m4, gawk, openssl, procps, sed, bison
-findutils, diffutils, readline, libreadline-dev, xz, gzip,
-binutils, coreutils, grep, flex, libncurses5-dev, libncurses5,
-libpam0g-dev, libpcre3-dev, libgdbm-dev, libdb-dev, libgcrypt20-dev,
-libgamin-dev, python, libidn11-dev
+cdbs debhelper gcc g++ automake autoconf libtool
+libqmail-dev libqmail libldap2-dev libssl-dev
+mime-support m4 gawk openssl procps sed bison
+findutils diffutils readline libreadline-dev xz gzip
+binutils coreutils grep flex libncurses5-dev libncurses5
+libpam0g-dev libpcre3-dev libgdbm-dev libdb-dev libgcrypt20-dev
+libgamin-dev python libidn11-dev
 
 Debian 9, Debian 10 - default-libmysqlclient-dev
-Remaining - libmysqlclient-dev,
-Ubuntu 16.04 - libcom-err2, libmysqlclient-dev
+Remaining - libmysqlclient-dev
+Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 ```
 
 FreeBSD / Darwin OSX
