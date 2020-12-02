@@ -3637,7 +3637,7 @@ $ id -a
 uid=1000(mbhangui) gid=1000(mbhangui) groups=1000(mbhangui),10(wheel),545(docker) context=unconfined\_u:unconfined\_r:unconfined\_t:s0-s0:c0.c1023
 ```
 
-Now we need to pull the docker image for IndiMail. use the **docker pull** command. The values for tag can be fedora-23, centos7, centos8, debian8, ubuntu-15.10, ubuntu-14.03. If your favourite OS is missing, let me know. You can find the list of all images here.
+Now we need to pull the docker image for IndiMail. use the **docker pull** command. The values for tag can be fedora-23, centos7, centos8, debian9, debian10, xenial, bionic, focal, fc32, Leap15.2, Tumbleweed, etc. If your favourite OS is missing, let me know. You can find the list of all images here.
 
 `$ docker pull cprogrammer/indimail:tag`
 
@@ -3754,7 +3754,6 @@ Currently, the list of supported distributions for IndiMail is
           o CentOS 8
 
     * Debian
-          o Debian  8.0
           o Debian  9.0
           o Debian 10.0
           o Ubuntu 16.04
