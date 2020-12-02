@@ -762,7 +762,6 @@ Currently, the list of supported distributions for IndiMail is
           o CentOS 8
 
     * Debian
-          o Debian  8.0
           o Debian  9.0
           o Debian 10.0
           o Ubuntu 16.04
