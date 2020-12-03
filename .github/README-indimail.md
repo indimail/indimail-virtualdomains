@@ -305,6 +305,7 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * SMTP Plugins - External plugins using shared objects in /var/indimail/plugins to enhance functionality of MAIL, RCPT & DATA session.
  * Notify recipients when message size exceeds databyte limits (by setting environment variable DATABYTES_NOTIFY)
  * Enforce STARTTLS before AUTH
+ * RFC 6530-32 Email Address Internationalization
 
 ## Queue management
 
@@ -382,6 +383,7 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * Return Receipt Responder - rrt
  * IPV6 support
  * DANE verification ([RFC 7672](http://tools.ietf.org/html/rfc7672 "RFC 7672"))
+ * RFC 6530-32 Email Address Internationalization using libidn2
 
 ## Local delivery
 
