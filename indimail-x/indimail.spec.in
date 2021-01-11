@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.80 2020-11-25 19:52:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.81 2021-01-11 23:44:07+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -107,10 +107,10 @@ BuildRequires: glibc glibc-devel openssl procps ncurses-devel
 BuildRequires: gzip autoconf automake libtool pkgconfig
 BuildRequires: sed findutils binutils
 BuildRequires: mysql-devel libqmail-devel libqmail
-%if %{defined fedora_version}
+%if %{defined fedora_version} || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 BuildRequires: redhat-lsb-core
 %endif
-%if %{defined centos_version} || %{defined rhel_version} || %{defined centos_ver}
+%if 0%{?centos_version} <= 700 || %{defined rhel_version}
 BuildRequires: redhat-lsb
 %endif
 
