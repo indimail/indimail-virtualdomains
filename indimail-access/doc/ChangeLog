@@ -33,3 +33,5 @@ Release @version@-@release@ Start 03/06/2020
     sigsuspend()
 - 17/10/2020
 17. stop start imap, pop3, fetchmail services on upgrade
+- 11/01/2021
+18. indimail-access.spec: removed redhat-lsb-core from BuildRequires
