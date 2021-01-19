@@ -53,3 +53,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * indimail.spec: stop/start svscan on upgrade
   * packaging: shutdown specific indimaail services instead of entire svscan service
   * handlers.c: use execv() instead of execute() in i_mount() function
+  * authindi.c: added uid, gid in debug log
