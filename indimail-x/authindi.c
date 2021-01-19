@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 1.11  2021-01-19 22:45:13+05:30  Cprogrammer
+ * added uid, gid in debug
+ *
  * Revision 1.10  2020-10-13 18:30:57+05:30  Cprogrammer
  * use _exit(2) as no buffers need to be flushed
  *
@@ -73,7 +76,7 @@
 #include "sql_getpw.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.10 2020-10-13 18:30:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.11 2021-01-19 22:45:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -87,7 +90,7 @@ static int      exec_local(char **, char *, char *, struct passwd *, char *);
 
 static stralloc tmpbuf = {0};
 static int      authlen = AUTH_SIZE;
-static char     strnum[FMT_ULONG], module_pid[FMT_ULONG];
+static char     strnum[FMT_ULONG], module_pid[FMT_ULONG], euidstr[FMT_ULONG];
 
 static void
 die_nomem()
@@ -191,7 +194,7 @@ main(int argc, char **argv)
 	char           *(pop3args[]) = { PREFIX"/sbin/pop3login", LIBEXECDIR"/imapmodules/authindi",
 					PREFIX"/bin/pop3d", "Maildir", 0 };
 	static stralloc user = {0}, domain = {0}, Email = {0};
-	int             i, count, offset, auth_method;
+	int             i, count, offset, auth_method, debug;
 	size_t          cram_md5_len, out_len;
 	uid_t           uid;
 	gid_t           gid;
@@ -203,6 +206,7 @@ main(int argc, char **argv)
 
 	if (argc < 2)
 		_exit (2);
+	debug = env_get("DEBUG") ? 1 : 0;
 	ptr = env_get("AUTHADDR");
 	if (ptr && *ptr) {
 		execv(*(argv + argc - 2), argv + argc - 2);
@@ -216,6 +220,11 @@ main(int argc, char **argv)
 	if (argc < 3) {
 		strerr_warn2(prog_name, ": no more modules will be tried", 0);
 		return (1);
+	}
+	if (debug) {
+		strnum[fmt_uint(strnum, (unsigned int) getuid())] = 0;
+		euidstr[fmt_uint(euidstr, (unsigned int) geteuid())] = 0;
+		strerr_warn8(prog_name, " uid [", strnum, "] euid [", euidstr, "] next_module [", argv[1], "]", 0);
 	}
 	if (!(authstr = alloc((authlen + 1) * sizeof(char)))) {
 		if (write(2, "AUTHFAILURE\n", 12) == -1)
@@ -549,7 +558,7 @@ main(int argc, char **argv)
 			strerr_warn14(prog_name, ": pid [", module_pid, "] service[", service, "] authmeth [", strnum, "] login [",
 				login, "] auth [", auth_data, "] pw_passwd [", crypt_pass, "]", 0);
 	} else
-	if (env_get("DEBUG"))
+	if (debug)
 		strerr_warn10(prog_name, ": pid [", module_pid, "] service[", service,
 				"] authmeth [", strnum, "] login [", login, "]", 0);
 	if (pw_comp((unsigned char *) login, (unsigned char *) crypt_pass,
