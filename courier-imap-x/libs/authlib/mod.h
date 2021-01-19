@@ -5,6 +5,7 @@
 
 #include	<stdio.h>
 #include	<stdlib.h>
+#include	<unistd.h>
 #include	<errno.h>
 #include	"auth.h"
 #include	"authmod.h"
@@ -27,23 +28,29 @@ int main(int argc, char **argv)
 const char *service, *type;
 char *authdata;
 char	*user;
+uid_t uid, euid;
 
 	auth_debug_login_init();
 	authmod_init(argc, argv, &service, &type, &authdata);
 	dprintf(MODNAME ": starting client module");
 	user=MODULE(service, type, authdata, 1, 0, 0);
-	if (!user || !*user)
-	{
-		if (user || errno != EPERM)
-		{
-			dprintf(MODNAME ": TEMPFAIL - no more modules will be tried");
+	uid = getuid();
+	euid = geteuid();
+	if (!user || !*user) {
+		if (user || ((!euid || !uid) && errno != EPERM)) {
+			dprintf(MODNAME ": TEMPFAIL - no more modules will be tried uid[%d] euid[%d]", uid, euid);
 			authmod_fail_completely();
 		}
-
-		dprintf(MODNAME ": REJECT");
+		if ((!euid || !uid) && setuid(uid)) {
+			euid = geteuid();
+			dprintf(MODNAME ": setuid: TEMPFAIL - no more modules will be tried uid[%d] euid[%d]", uid, euid);
+			authmod_fail_completely();
+		}
+		euid = geteuid();
+		dprintf(MODNAME ": REJECT uid[%d], euid[%d]", uid, euid);
 		authmod_fail(argc, argv);
 	}
-	dprintf(MODNAME ": ACCEPT, username %s", user);
+	dprintf(MODNAME ": ACCEPT, username %s uid[%d], euid[%d]", user, uid, euid);
 	authmod_success(argc, argv, user);
 	return (0);
 }
