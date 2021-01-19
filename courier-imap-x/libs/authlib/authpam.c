@@ -94,47 +94,45 @@ dopam(pam_handle_t ** pamh)
 	int             retval;
 
 	dprintf("pam_service=%s, pam_username=%s", pam_service ? pam_service : "<null>", pam_username ? pam_username : "<null>");
-
 	retval = pam_start(pam_service, pam_username, &conv, pamh);
-	if (retval != PAM_SUCCESS)
+	if (retval != PAM_SUCCESS) {
+		errno = EPERM;
 		dprintf("pam_start failed, result %d [Hint: bad PAM configuration?][%s]", retval, pam_strerror(*pamh, retval));
-
-#if 0
+	}
+#if 1
 	if (retval == PAM_SUCCESS)
 	{
-		retval = pam_set_item(*pamh, PAM_AUTHTOK, pam_password);
-		if (retval != PAM_SUCCESS)
+		char *remoteip;
+		remoteip = getenv("TCPREMOTEIP");
+		retval = pam_set_item(*pamh, PAM_RHOST, remoteip);
+		if (retval != PAM_SUCCESS) {
+			errno = EPERM;
 			dprintf("pam_set_item failed, result %d", retval);
+		}
 	}
 #endif
 
 	if (retval == PAM_SUCCESS)
 	{
-		retval = pam_authenticate(*pamh, 0);
-		if (retval != PAM_SUCCESS)
+		retval = pam_authenticate(*pamh, PAM_DISALLOW_NULL_AUTHTOK);
+		if (retval != PAM_SUCCESS) {
+			errno = EPERM;
 			dprintf("pam_authenticate: %s", pam_strerror(*pamh, retval));
+		}
 	}
-#if 0
 
-#if	HAVE_PAM_SETCRED
-	if (retval == PAM_SUCCESS)
-	{
-		retval = pam_setcred(*pamh, PAM_ESTABLISH_CRED);
-		if (retval != PAM_SUCCESS)
-			dprintf("pam_setcred failed, result %d", retval);
-	}
-#endif
-
+#if 1
 	if (retval == PAM_SUCCESS)
 	{
 		retval = pam_acct_mgmt(*pamh, 0);
-		if (retval != PAM_SUCCESS)
+		if (retval != PAM_SUCCESS) {
+			errno = EPERM;
 			dprintf("pam_acct_mgmt failed, result %d", retval);
+		}
 	}
 #endif
 	if (retval == PAM_SUCCESS)
 		dprintf("dopam successful");
-
 	return (retval);
 }
 
@@ -171,8 +169,10 @@ callback_pam(struct authinfo *a, void *argptr)
 
 		if (retval == PAM_SUCCESS)
 		{
-			if (pam_end(pamh, retval) != PAM_SUCCESS)
+			if (pam_end(pamh, retval) != PAM_SUCCESS) {
+				errno = EPERM;
 				dprintf("pam_end: %s", pam_strerror(pamh, retval));
+			}
 			if (ci->callback_func == 0)
 				authsuccess(a->homedir, s, 0, &a->sysgroupid, a->address, a->fullname);
 
@@ -181,8 +181,10 @@ callback_pam(struct authinfo *a, void *argptr)
 			return (0);
 		}
 		free(s);
-		if (pam_end(pamh, retval) != PAM_SUCCESS)
+		if (pam_end(pamh, retval) != PAM_SUCCESS) {
+			errno = EPERM;
 			dprintf("pam_end: %s", pam_strerror(pamh, retval));
+		}
 		return (-1);
 	}
 
@@ -278,6 +280,14 @@ callback_pam(struct authinfo *a, void *argptr)
 	close(pipefd[0]);
 
 	retval = dopam(&pamh);
+#if	HAVE_PAM_SETCRED
+	if (retval == PAM_SUCCESS)
+	{
+		retval = pam_setcred(pamh, PAM_ESTABLISH_CRED);
+		if (retval != PAM_SUCCESS)
+			dprintf("pam_setcred failed, result %d", retval);
+	}
+#endif
 	if (retval == PAM_SUCCESS)
 	{
 		if ((retval = pam_open_session(pamh, 0)) != PAM_SUCCESS)
@@ -304,6 +314,13 @@ callback_pam(struct authinfo *a, void *argptr)
 	retval = pam_close_session(pamh, 0);
 	if (retval != PAM_SUCCESS)
 		dprintf("pam_close_session: %s", pam_strerror(pamh, retval));
+#if	HAVE_PAM_SETCRED
+	if (retval == PAM_SUCCESS) {
+		retval = pam_setcred(pamh, PAM_DELETE_CRED);
+		if (retval != PAM_SUCCESS)
+			dprintf("pam_setcred failed, result %d", retval);
+	}
+#endif
 	if (pam_end(pamh, retval) != PAM_SUCCESS)
 		dprintf("pam_end: %s", pam_strerror(pamh, retval));
 	if (WIFEXITED(waitstat))
