@@ -14,5 +14,5 @@
 # account  required  pam-multi.so argv0 -i imap -s @prefix@/lib/indimail/modules/iauth.so
 # add -d argument to debug pam-multi lines
 #
-auth     required  pam-multi.so pam-multi -s @prefix@/lib/indimail/modules/iauth.so
+auth     required  pam-multi.so pam-multi -i imap -s @prefix@/lib/indimail/modules/iauth.so
 account  required  pam-multi.so pam-multi -i imap -s @prefix@/lib/indimail/modules/iauth.so
