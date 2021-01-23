@@ -48,7 +48,7 @@ BuildRequires: bison
 %if 0%{?fedora_version} > 27 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700
 BuildRequires: libtirpc libtirpc-devel
 %endif
-%if 0%{?suse_version} >= 1550
+%if 0%{?suse_version} >= 1550 || 0%{?sle_version} >= 150300
 BuildRequires: libtirpc3 libtirpc-devel
 %endif
 BuildRequires: pcre-devel libqmail-devel libqmail libindimail
