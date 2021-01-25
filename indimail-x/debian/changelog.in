@@ -54,3 +54,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * packaging: shutdown specific indimaail services instead of entire svscan service
   * handlers.c: use execv() instead of execute() in i_mount() function
   * authindi.c: added uid, gid in debug log
+  * sql_init.c, UserInLookup.c, sqlOpen_user.c, findmdahost.c, bulletin.c, clear_open_smtp.c: renamed sql_init() to in_sql_init() to avoid clash with dovecot sql authentication driver

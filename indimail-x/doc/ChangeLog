@@ -92,3 +92,7 @@ Release 3.3 Start 06/09/2020
 55. indimail.spec: use redhat-lsb-core for centos8
 19/01/2021
 56. authindi.c: added uid, gid in debug log
+26/01/2021
+57. sql_init.c, UserInLookup.c, sqlOpen_user.c, findmdahost.c, bulletin.c,
+	clear_open_smtp.c: renamed sql_init() to in_sql_init() to avoid clash with
+	dovecot sql authentication driver

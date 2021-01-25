@@ -15,3 +15,5 @@ indimail-access (@version@-@release@) unstable; urgency=medium
   * maildirquota.c: break out of infinite loop when maildirfolder creation fails
   * maildrop: alarmsleep.C: replaced deprecated function sigpause() with sigsuspend()
   * stop start imap, pop3, fetchmail services on upgrade
+  * authpam.c: set EPERM on pam failures
+  * mod.h: reset uid, euid

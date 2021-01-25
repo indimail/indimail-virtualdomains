@@ -35,3 +35,6 @@ Release @version@-@release@ Start 03/06/2020
 17. stop start imap, pop3, fetchmail services on upgrade
 - 11/01/2021
 18. indimail-access.spec: removed redhat-lsb-core from BuildRequires
+- 19/01/2021
+19. authpam.c: set EPERM on pam failures
+20. mod.h: reset uid, euid
