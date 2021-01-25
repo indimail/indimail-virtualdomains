@@ -1,5 +1,8 @@
 /*
  * $Log: findmdahost.c,v $
+ * Revision 1.3  2021-01-26 00:28:43+05:30  Cprogrammer
+ * renamed sql_init() to in_sql_init() to avoid clash with dovecot sql authentication driver
+ *
  * Revision 1.2  2019-05-28 17:39:14+05:30  Cprogrammer
  * added load_mysql.h for mysql interceptor function prototypes
  *
@@ -31,7 +34,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findmdahost.c,v 1.2 2019-05-28 17:39:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findmdahost.c,v 1.3 2021-01-26 00:28:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -131,7 +134,7 @@ findmdahost(char *email, int *total)
 			} else
 				(*rhostsptr)->fd = (*mysqlptr)->net.fd;
 		}
-		sql_init(1, *mysqlptr);
+		in_sql_init(1, *mysqlptr);
 		if (!(pw = sql_getpw(user.s, real_domain))) {
 			is_open = 0; /* prevent closing of connection by iclose */
 			return ((char *) 0);

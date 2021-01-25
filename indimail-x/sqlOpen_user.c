@@ -1,5 +1,8 @@
 /*
  * $Log: sqlOpen_user.c,v $
+ * Revision 1.3  2021-01-26 00:29:08+05:30  Cprogrammer
+ * renamed sql_init() to in_sql_init() to avoid clash with dovecot sql authentication driver
+ *
  * Revision 1.2  2019-05-28 17:42:19+05:30  Cprogrammer
  * added load_mysql.h for mysql interceptor function prototypes
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sqlOpen_user.c,v 1.2 2019-05-28 17:42:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sqlOpen_user.c,v 1.3 2021-01-26 00:29:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -49,7 +52,6 @@ sqlOpen_user(char *email, int connect_all)
 	DBINFO        **rhostsptr;
 	MYSQL         **mysqlptr;
 
-	parse_email(email, &user, &domain);
 	if (!(ptr = findmdahost(email, &total))) /*- returns domain:host:port */
 		return (-1);
 	for (; *ptr && *ptr != ':'; ptr++);
@@ -86,6 +88,7 @@ sqlOpen_user(char *email, int connect_all)
 				*mysqlptr = (MYSQL *) 0;
 		}
 	}
+	parse_email(email, &user, &domain);
 	if (!(real_domain = get_real_domain(domain.s)))
 		real_domain = domain.s;
 	for (count = 1, rhostsptr = RelayHosts, mysqlptr = MdaMysql;*rhostsptr;mysqlptr++, rhostsptr++, count++) {
@@ -127,7 +130,7 @@ sqlOpen_user(char *email, int connect_all)
 			} else
 				(*rhostsptr)->fd = (*mysqlptr)->net.fd;
 		}
-		sql_init(1, *mysqlptr);
+		in_sql_init(1, *mysqlptr);
 		return (0);
 	} else
 		userNotFound = 1;

@@ -1,5 +1,8 @@
 /*
  * $Log: UserInLookup.c,v $
+ * Revision 1.3  2021-01-26 00:29:14+05:30  Cprogrammer
+ * renamed sql_init() to in_sql_init() to avoid clash with dovecot sql authentication driver
+ *
  * Revision 1.2  2019-05-28 17:42:25+05:30  Cprogrammer
  * added load_mysql.h for mysql interceptor function prototypes
  *
@@ -36,7 +39,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: UserInLookup.c,v 1.2 2019-05-28 17:42:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: UserInLookup.c,v 1.3 2021-01-26 00:29:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -125,7 +128,7 @@ UserInLookup(char *email)
 							(*rhostsptr)->fd = (*mysqlptr)->net.fd;
 					}
 #ifdef VALIAS
-					sql_init(1, *mysqlptr);
+					in_sql_init(1, *mysqlptr);
 					if ((valias_count = valiasCount(user.s, real_domain)) == -1) {
 						is_open = 0;
 						userNotFound = 0;

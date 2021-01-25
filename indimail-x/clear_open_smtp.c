@@ -1,5 +1,8 @@
 /*
  * $Log: clear_open_smtp.c,v $
+ * Revision 1.5  2021-01-26 00:28:35+05:30  Cprogrammer
+ * renamed sql_init() to in_sql_init() to avoid clash with dovecot sql authentication driver
+ *
  * Revision 1.4  2020-04-01 18:53:17+05:30  Cprogrammer
  * moved getEnvConfig to libqmail
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: clear_open_smtp.c,v 1.4 2020-04-01 18:53:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: clear_open_smtp.c,v 1.5 2021-01-26 00:28:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY
@@ -119,7 +122,7 @@ clear_open_smtp(time_t clear_seconds, int connect_all)
 			die_nomem();
 		if (mysql_query((*mysqlptr), SqlBuf.s)) {
 			if (in_mysql_errno((*mysqlptr)) == ER_NO_SUCH_TABLE) {
-				sql_init(1, *mysqlptr);
+				in_sql_init(1, *mysqlptr);
 				create_table(ON_LOCAL, relay_table, RELAY_TABLE_LAYOUT);
 				in_mysql_close(*mysqlptr);
 				is_open = 0;

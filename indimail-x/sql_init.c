@@ -1,5 +1,8 @@
 /*
  * $Log: sql_init.c,v $
+ * Revision 1.3  2021-01-26 00:28:56+05:30  Cprogrammer
+ * renamed sql_init() to in_sql_init() to avoid clash with dovecot sql authentication driver
+ *
  * Revision 1.2  2020-04-01 18:58:04+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -15,12 +18,12 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_init.c,v 1.2 2020-04-01 18:58:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_init.c,v 1.3 2021-01-26 00:28:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*- NOTE: Not safe to be called on a socket by multiple processes simultaneously */
 void
-sql_init(int which, MYSQL *mysqlStruct)
+in_sql_init(int which, MYSQL *mysqlStruct)
 {
 	mysql[which]=*mysqlStruct;
 	/* adjust connection pointers */
@@ -28,7 +31,7 @@ sql_init(int which, MYSQL *mysqlStruct)
 	mysql[which].net.last_errno=0;
 	mysql[which].info=0;
 	mysql[which].affected_rows= ~(my_ulonglong) 0;
-	switch(which)
+	switch (which)
 	{
 #ifdef CLUSTERED_SITE
 		case 0:

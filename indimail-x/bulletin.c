@@ -1,5 +1,8 @@
 /*
  * $Log: bulletin.c,v $
+ * Revision 1.5  2021-01-26 00:27:45+05:30  Cprogrammer
+ * renamed sql_init() to in_sql_init() to avoid clash with dovecot sql authentication driver
+ *
  * Revision 1.4  2020-10-19 12:46:06+05:30  Cprogrammer
  * use /var/indomain/domains for domain/bulk_mail
  *
@@ -62,7 +65,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: bulletin.c,v 1.4 2020-10-19 12:46:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: bulletin.c,v 1.5 2021-01-26 00:27:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -416,7 +419,7 @@ bulletin(char *emailFile, char *subscriber_list)
 			unlink(SplitFile.s);
 			continue;
 		}
-		sql_init(1, *mysqlptr);
+		in_sql_init(1, *mysqlptr);
 		if ((ret = insert_bulletin(domain, emailFile, SplitFile.s)) == -1)
 			err++;
 		else
