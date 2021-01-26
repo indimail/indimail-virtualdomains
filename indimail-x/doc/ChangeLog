@@ -96,3 +96,6 @@ Release 3.3 Start 06/09/2020
 57. sql_init.c, UserInLookup.c, sqlOpen_user.c, findmdahost.c, bulletin.c,
 	clear_open_smtp.c: renamed sql_init() to in_sql_init() to avoid clash with
 	dovecot sql authentication driver
+58. vchkpass: support dovecot checkpassword implementation
+59. vchkpass: set HOME, userdb_uid, userdb_gid, EXTRA env variables for
+    dovecot
