@@ -2977,12 +2977,12 @@ FIXME: The script should rename also folder names that aren't valid mUTF-7. Dove
 
 ### Dovecot configuration
 
-Courier by default uses "INBOX." as the IMAP namespace for private mailboxes. If you want a transparent migration, you'll need to configure Dovecot to use a namespace with "INBOX." prefix as well.
+Courier by default uses "INBOX." as the IMAP namespace for private mailboxes. If you want a transparent migration, you'll need to configure Dovecot to use a namespace with "INBOX." prefix as well. In /etc/dovecot/conf.d/10-mail.conf
 
 ```
-mail_location = maildir:~/INBOX
+mail_location = maildir:~/Maildir
 
-namespace {
+namespace inbox {
   prefix = INBOX.
   separator = .
   inbox = yes
