@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.6  2021-01-26 13:45:03+05:30  Cprogrammer
+ * modified to support dovecot checkpassword authentication
+ *
  * Revision 1.5  2020-09-28 13:28:28+05:30  Cprogrammer
  * added pid in debug statements
  *
@@ -54,7 +57,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.5 2020-09-28 13:28:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.6 2021-01-26 13:45:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -90,7 +93,7 @@ main(int argc, char **argv)
 	char           *authstr, *login, *ologin, *response, *challenge, *crypt_pass, *ptr, *cptr;
 	char            strnum[FMT_ULONG], module_pid[FMT_ULONG];
 	static stralloc user = {0}, fquser = {0}, domain = {0}, buf = {0};
-	int             i, count, offset, norelay = 0, status, auth_method;
+	int             i, count, offset, norelay = 0, status, auth_method, use_dovecot;
 	struct passwd  *pw;
 #ifdef ENABLE_DOMAIN_LIMITS
 	time_t          curtime;
@@ -177,6 +180,9 @@ main(int argc, char **argv)
 			}
 		}
 	}
+	if (!env_unset("HOME"))
+		die_nomem();
+	use_dovecot = env_get("DOVECOT_VERSION") ? 1 : 0;
 	parse_email(login, &user, &domain);
 #ifdef QUERY_CACHE
 	if (!env_get("QUERY_CACHE")) {
@@ -187,7 +193,7 @@ main(int argc, char **argv)
 #endif
 		{
 			if (userNotFound)
-				pipe_exec(argv, authstr, offset);
+				use_dovecot ? _exit (1) : pipe_exec(argv, authstr, offset);
 			else
 #ifdef CLUSTERED_SITE
 				strerr_warn1("sqlOpen_user: failed to connect to db: ", &strerr_sys);
@@ -215,7 +221,7 @@ main(int argc, char **argv)
 #endif
 	{
 		if (userNotFound)
-			pipe_exec(argv, authstr, offset);
+			use_dovecot ? _exit (1) : pipe_exec(argv, authstr, offset);
 		else
 #ifdef CLUSTERED_SITE
 			strerr_warn1("sqlOpen_user: failed to connect to db: ", &strerr_sys);
@@ -234,7 +240,7 @@ main(int argc, char **argv)
 #endif
 	if (!pw) {
 		if (userNotFound)
-			pipe_exec(argv, authstr, offset);
+			use_dovecot ? _exit (1) : pipe_exec(argv, authstr, offset);
 		else
 			strerr_warn3("vchkpass: ", ptr, ": ", &strerr_sys);
 		print_error(ptr);
@@ -264,7 +270,7 @@ main(int argc, char **argv)
 	if (pw_comp((unsigned char *) ologin, (unsigned char *) crypt_pass,
 		(unsigned char *) (*response ? challenge : 0),
 		(unsigned char *) (*response ? response : challenge), auth_method)) {
-		pipe_exec(argv, authstr, offset);
+		use_dovecot ? _exit (1) : pipe_exec(argv, authstr, offset);
 		print_error("exec");
 		_exit (111);
 	}
@@ -316,6 +322,13 @@ main(int argc, char **argv)
 				!stralloc_0(&buf))
 			die_nomem();
 		status = runcmmd(buf.s, 0);
+	}
+	if (env_get("DOVECOT_VERSION")) {
+		if (!env_put2("HOME", pw->pw_dir))
+			die_nomem();
+		execv(argv[1], argv + 1);
+		print_error("exec");
+		_exit (111);
 	}
 	_exit(norelay ? 3 : status);
 	/*- Not reached */
