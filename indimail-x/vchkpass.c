@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.7  2021-01-26 14:17:22+05:30  Cprogrammer
+ * set HOME, userdb_uid, userdb_gid, EXTRA env variables for dovecot
+ *
  * Revision 1.6  2021-01-26 13:45:03+05:30  Cprogrammer
  * modified to support dovecot checkpassword authentication
  *
@@ -57,7 +60,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.6 2021-01-26 13:45:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.7 2021-01-26 14:17:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -183,6 +186,11 @@ main(int argc, char **argv)
 	if (!env_unset("HOME"))
 		die_nomem();
 	use_dovecot = env_get("DOVECOT_VERSION") ? 1 : 0;
+	if (use_dovecot) {
+		if (!env_unset("userdb_uid") || !env_unset("userdb_gid") ||
+				!env_unset("EXTRA"))
+			die_nomem();
+	}
 	parse_email(login, &user, &domain);
 #ifdef QUERY_CACHE
 	if (!env_get("QUERY_CACHE")) {
@@ -315,6 +323,8 @@ main(int argc, char **argv)
 	}
 #endif
 	status = 0;
+	if (!env_put2("HOME", pw->pw_dir))
+		die_nomem();
 	if ((ptr = (char *) env_get("POSTAUTH")) && !access(ptr, X_OK)) {
 		if (!stralloc_copys(&buf, ptr) ||
 				!stralloc_append(&buf, " ") ||
@@ -323,8 +333,19 @@ main(int argc, char **argv)
 			die_nomem();
 		status = runcmmd(buf.s, 0);
 	}
-	if (env_get("DOVECOT_VERSION")) {
-		if (!env_put2("HOME", pw->pw_dir))
+	if (env_get("DOVECOT_VERSION")) { /*- support dovecot checkpassword */
+		if (!env_put2("userdb_uid", "indimail") ||
+				!env_put2("userdb_gid", "indimail"))
+			die_nomem();
+		if ((ptr = env_get("EXTRA"))) {
+			if (!stralloc_copyb(&buf, "userdb_uid userdb_gid ", 22) ||
+					!stralloc_cats(&buf, ptr) || !stralloc_0(&buf))
+				die_nomem();
+		} else
+		if (!stralloc_copyb(&buf, "userdb_uid userdb_gid", 21) ||
+				!stralloc_0(&buf))
+			die_nomem();
+		if (!env_put2("EXTRA", buf.s))
 			die_nomem();
 		execv(argv[1], argv + 1);
 		print_error("exec");
