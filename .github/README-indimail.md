@@ -87,6 +87,17 @@ Table of Contents
    * [Greylisting in IndiMail](#greylisting-in-indimail)
       * [1. Enabling qmail-greyd greylisting server](#1-enabling-qmail-greyd-greylisting-server)
       * [2. Enabling greylisting in SMTP](#2-enabling-greylisting-in-smtp)
+   * [Configuring dovecot as the IMAP/POP3 server](#configuring-dovecot-as-the-imappop3-server)
+      * [Installation](#installation)
+         * [For RPM based systems](#for-rpm-based-systems)
+         * [For Debian based systems](#for-debian-based-systems)
+      * [Configuring Authentication Methods](#configuring-authentication-methods)
+         * [Basic Configuration](#basic-configuration)
+         * [1 Use dovecot's SQL driver](#1-use-dovecots-sql-driver)
+         * [2 Using checkpassword](#2-using-checkpassword)
+         * [3 Using pam-multi](#3-using-pam-multi)
+         * [4 Using indimail's Name Service Switch](#4-using-indimails-name-service-switch)
+   * [Start dovecot](#start-dovecot)
    * [Configuring DKIM](#configuring-dkim)
       * [Create your DKIM signature](#create-your-dkim-signature)
       * [Create your DNS records](#create-your-dns-records)
@@ -112,10 +123,10 @@ Table of Contents
       * [Docker / Podman Repository](#docker--podman-repository)
       * [GIT Repository](#git-repository)
    * [Support Information](#support-information)
-      * [IRC](#irc--matrix)
+      * [IRC / Matrix](#irc--matrix)
       * [Mailing list](#mailing-list)
-   * [See also](#see-also)
    * [History](#history)
+   * [See also](#see-also)
 
 Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
@@ -2585,6 +2596,326 @@ $ sudo /bin/bash
 ```
 
 NOTE: The above instructions are for IndiMail/indimail-mta 2.x and above. For 1.x releases, use /var/indimail/etc for the location of tcp.smtp and tcp.smtp.cdb
+
+# Configuring dovecot as the IMAP/POP3 server
+
+IndiMail stores it's virtual user information in MySQL. However, IndiMail can work with virtually any IMAP/POP3 server which has a mechanism to authenticate using PAM and can use the system's passwd database for user's home directory. This is because IndiMail provides a PAM module and a NSS service, both independent of each other. The beauty of providing both PAM and NSS is that you do not have to modify a single line of code anywhere. In this respect, IndiMail is probably the most flexible messaging server available at the moment.
+
+[Dovecot](https://www.dovecot.org/) is an open source IMAP and POP3 server for Linux/UNIX-like systems, written with security primarily in mind. Dovecot is an excellent choice for both small and large installations. It's fast, simple to set up, requires no special administration and it uses very little memory. Though I do not use dovecot, I have heard excellent reviews from users about dovecot. It took me less than 20 minutes to download dovecot today and have it working with IndiMail with all existing mails intact and accessible. So at the moment, my IndiMail installation is working with both courier-imap and dovecot simultaneously (with different IMAP/POP3 ports assigned to courier-imap and dovecot). dovecot isn't as modular and pluggable as courier-imap and extremely supervise friendly. With dovecot however, you will need to install and configure it outside supervise.
+
+## Installation
+
+To install dovecot you just need to use dnf/yum/apt to install
+
+### For RPM based systems
+
+If you are doing to use dovecot, you need to disable courier-imap
+
+```
+$ sudo /bin/bash
+# for i in /service/proxy-imapd.4143 /service/proxy-imapd-ssl.9143
+   /service/qmail-imapd.143 /service/qmail-imapd-ssl.993
+   /service/proxy-pop3d.4110 /service/proxy-pop3d-ssl.9110
+   /service/qmail-pop3d.110 /service/qmail-pop3d-ssl.995
+ do
+   touch $i/down
+   svc -dx $i $i/log
+ done
+```
+
+```
+# dnf -h install dovecot dovecot-mysql
+# systemctl enable dovecot
+```
+
+NOTE: replace dnf with yum for distros like RHEL, CentOS, etc. For openSUSE, SUSE replace dnf with zypper
+
+### For Debian based systems
+
+```
+# apt-get -y update
+# apt-get -y install dovecot dovecot-mysql
+# systemctl enable dovecot
+```
+
+Like most other IMAP/POP3 servers, dovecot is configurable and can use multiple methods to authenticate and as well get other information about the user such as home directory, user id, etc.
+
+## Configuring Authentication Methods
+
+### Basic Configuration
+
+Dovecot uses /etc/dovecot/dovecot.conf as the main configuration file.
+
+```
+protocols = imap pop3
+```
+
+You need to have auth-system.conf.ext for authenticating users in your system's password database.
+
+file /etc/dovecot/conf.d/10-auth.conf
+
+```
+auth_mechanisms = plain login
+!include auth-system.conf.ext
+```
+
+Indimail uses $HOME/Maildir for all virtual accounts
+
+file /etc/dovecot/conf.d/10-mail.conf
+
+```
+mail_location = maildir:~/Maildir
+```
+
+It is important that the dovecot auth process runs as the user indimail so that it can read indimail control files and configuration.
+
+file /etc/dovecot/conf.d/10-master.conf
+
+```
+service auth {
+  # auth_socket_path points to this userdb socket by default. It's typically
+  # used by dovecot-lda, doveadm, possibly imap process, etc. Users that have
+  # full permissions to this socket are able to get a list of all usernames and
+  # get the results of everyone's userdb lookups.
+  #
+  # The default 0666 mode allows anyone to connect to the socket, but the
+  # userdb lookups will succeed only if the userdb returns an "uid" field that
+  # matches the caller process's UID. Also if caller's uid or gid matches the
+  # socket's uid or gid the lookup succeeds. Anything else causes a failure.
+  #
+  # To give the caller full permissions to lookup all users, set the mode to
+  # something else than 0666 and Dovecot lets the kernel enforce the
+  # permissions (e.g. 0777 allows everyone full permissions).
+  unix_listener auth-userdb {
+    #mode = 0666
+    #user = 
+    #group = 
+  }
+
+  # Auth process is run as this user.
+  #user = $default_internal_user
+  user = indimail
+  group = qmail
+}
+
+service auth-worker {
+  unix_listener auth-worker {
+    mode = 0660
+    group = qmail
+  }
+  # Auth worker process is run as root by default, so that it can access
+  # /etc/shadow. If this isn't necessary, the user should be changed to
+  # $default_internal_user.
+  #user = root
+  group=qmail
+}
+```
+
+You also need to configure the ssl certs. The default certificate used by indimail is /etc/indimail/certs/servercert.pem.
+
+File /etc/dovecot/conf.d/10-ssl.conf
+
+```
+ssl = required
+ssl_cert = </etc/indimail/certs/servercert.pem
+ssl_key = </etc/indimail/certs/servercert.pem
+ssl_cipher_list = PROFILE=SYSTEM
+```
+
+There are four methods you can configure dovecot to work with indimail
+
+### 1 Use dovecot's SQL driver
+
+file /etc/dovecot/conf.d/10-auth.conf
+
+```
+!include auth-sql.conf.ext
+```
+
+file /etc/dovecot/connf.d/auth-sql.conf.ext
+```
+passdb {
+  driver = sql
+  # Path for SQL configuration file, see example-config/dovecot-sql.conf.ext
+  args = /etc/dovecot/dovecot-sql.conf
+}
+
+userdb {
+  driver = prefetch
+}
+
+userdb {
+  driver = sql
+  args = /etc/dovecot/dovecot-sql.conf
+}
+```
+
+```
+file /etc/dovecot/dovecot-sql.conf
+driver = mysql
+default_pass_scheme = MD5
+connect = host=/run/mysqld/mysqld.sock user=indimail password=ssh-1.5- dbname=indimail
+
+#
+user_query = SELECT pw_name,555 as uid, 555 as gid, pw_dir as home FROM indimail WHERE pw_name = '%n' AND pw_domain = '%d'
+
+# The below passes all users and doesn't care for indimail vlimits (pw_gid column or vlimits table)
+password_query = SELECT pw_passwd as password FROM indimail WHERE pw_name = '%n' AND pw_domain = '%d'
+
+#
+# A little bit more complicated query to support indimail pw_gid flags and vlimits for domain
+# explanation:
+# We're using bitwise operations on pw_gid.
+# as defined in indimail.h:
+# #define NO_POP                  0x02 - no pop3
+# #define NO_WEBMAIL              0x04 - no imap
+# #define NO_IMAP                 0x08 - no webmail
+#
+# !(pw_gid & 2) means - if 2nd bit of pw_gid is not set
+# !(pw_gid & 4) means - if 4th bit of pw_gid is not set
+# !(pw_gid & 8) means - if 8th bit of pw_gid is not set
+# (pw_gid & 100) means - if 8 bits of pw_gid is set (ignore vlimits)
+#
+# additionally because we're using LEFT JOIN we have to take care of NULLs for rows
+# that don't return any records from the right table hence the use of COALESCE() function
+# !(pw_gid & 4) (disable webmail flag) is used in conjuntion with '%r'!="127.0.0.1"
+# which means that it will only apply to connections originating from hosts other than localhost
+#
+# So the below query supports pw_gid and vlimits settings for user account and domains but no domain limit overrides
+#
+#password_query = select pw_passwd as password FROM indimail LEFT JOIN vlimits ON indimail.pw_domain=vlimits.domain WHERE pw_name='%n' and pw_domain='%d' and ( !(pw_gid & 8) and ('%r'!='127.0.0.1' or !(pw_gid & 4)) and ( '%r'!='127.0.0.1' or COALESCE(disable_webmail,0)!=1) and COALESCE(disable_imap,0)!=1);
+
+#
+# The below adds support for vlimits override on user account (vmoduser -o)
+#
+# logically this means: show password for user=%n at domain=%d when imap on the account
+# is not disabled and connection is not comming from localhost when webmail access on
+# the account is not disabled and if imap for the domain is not disabled and (connection
+# is not comming from localhost when webmail access for the domain is not disabled) when
+# vlimits are not overriden on the account
+#
+#password_query = select pw_passwd as password FROM indimail LEFT JOIN vlimits ON indimail.pw_domain=vlimits.domain WHERE pw_name='%n' and pw_domain='%d' and !(pw_gid & 8) and ('%r'!='127.0.0.1' or !(pw_gid & 4)) and ( ('%r'!='127.0.0.1' or COALESCE(disable_webmail,0)!=1) and COALESCE(disable_imap,0)!=1 or (pw_gid & 8192) );
+```
+
+### 2 Using checkpassword
+
+The checkpassword interface used by dovecot uses dovecot specific extensions. If you have a standard checkpassword extension like indimail's `vchkpass`, you will need to write a wrapper like below
+
+```
+#!/bin/sh
+CHECKPASSWORD_REPLY_BINARY="$1"
+[ "$AUTHORIZED" != 1 ] || export AUTHORIZED=2
+/usr/sbin/vchkpass /bin/false
+if [ $? -eq 0 ] ; then
+  export userdb_uid=indimail
+  export userdb_gid=indimail
+  export EXTRA="userdb_uid userdb_gid $EXTRA"
+  exec $CHECKPASSWORD_REPLY_BINARY
+else
+  exec /bin/false
+fi
+```
+
+file /etc/dovecot/conf.d/10-auth.conf
+
+```
+!include auth-checkpassword.conf.ext
+```
+
+file /etc/dovecot/conf.d/auth-checkpassword.conf.ext
+
+```
+passdb {
+  driver = checkpassword
+  args = /usr/bin/checkpassword.sh
+}
+
+userdb {
+  driver = prefetch
+}
+```
+
+### 3 Using pam-multi
+
+Create the file /etc/dovecot/conf.d/auth-indimail-conf.ext
+
+```
+# Authentication for system users. Included from 10-auth.conf.
+#
+
+# PAM authentication. Preferred nowadays by most systems.
+# PAM is typically used with either userdb passwd or userdb static.
+# REMEMBER: You'll need /etc/pam.d/dovecot file created for PAM
+# authentication to actually work. <doc/wiki/PasswordDatabase.PAM.txt>
+passdb {
+  driver = pam
+  # [session=yes] [setcred=yes] [failure_show_msg=yes] [max_requests=<n>]
+  # [cache_key=<key>] [<service name>]
+  args = pam-multi
+}
+
+##
+## User databases
+##
+
+# System users (NSS, /etc/passwd, or similar). In many systems nowadays this
+# uses Name Service Switch, which is configured in /etc/nsswitch.conf.
+userdb {
+  driver = passwd
+}
+```
+
+file /etc/dovecot/conf.d/10-auth.conf
+
+```
+!include auth-indimail.conf.ext
+```
+
+### 4 Using indimail's Name Service Switch
+
+file /etc/dovecot/conf.d/10-auth.conf
+
+```
+!include auth-system.conf.ext
+```
+
+In file /etc/nsswitch.conf
+
+```
+passwd: files nssd
+shadow: files nssd
+```
+
+In file /etc/indimail/nssd.conf
+
+```
+getpwnam    SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell \
+            FROM indimail \
+            WHERE pw_name='%1$s' and pw_domain='%2$s' \
+            LIMIT 1
+getspnam    SELECT pw_name,pw_passwd,'1','0','99999','0','0','-1','0' \
+            FROM indimail \
+            WHERE pw_name='%1$s'and pw_domain='%2$s' \
+            LIMIT 1
+getpwent    SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell \
+            FROM indimail LIMIT 100
+getspent    SELECT pw_name,pw_passwd,'1','0','99999','0','0','-1','0' \
+            FROM indimail
+
+host        localhost
+database    indimail
+username    indimail
+password    ssh-1.5-
+socket      /var/run/mysqld/mysqld.sock
+pidfile     /run/indimail/nssd.pid
+threads     5
+timeout     -1
+facility    daemon
+priority    err
+```
+# Start dovecot
+
+You can start dovecot with a single command `sudo service dovecot start`
 
 # Configuring DKIM
 
