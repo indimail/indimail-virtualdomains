@@ -18,7 +18,7 @@ Table of Contents
       * [Local delivery](#local-delivery)
       * [Other](#other)
       * [Brief Feature List](#brief-feature-list)
-   * [TERMINOLOGY](#terminology-used-for-commands)
+   * [TERMINOLOGY used for commands](#terminology-used-for-commands)
    * [IndiMail Queue Mechanism](#indimail-queue-mechanism)
    * [Using systemd to start IndiMail](#using-systemd-to-start-indimail)
    * [Eliminating Duplicate Emails during local delivery](#eliminating-duplicate-emails-during-local-delivery)
@@ -97,7 +97,13 @@ Table of Contents
          * [2 Using checkpassword](#2-using-checkpassword)
          * [3 Using pam-multi](#3-using-pam-multi)
          * [4 Using indimail's Name Service Switch](#4-using-indimails-name-service-switch)
-   * [Start dovecot](#start-dovecot)
+      * [Start dovecot](#start-dovecot)
+      * [Migration from courier-imap to dovecot](#migration-from-courier-imap-to-dovecot)
+         * [IMAP migration](#imap-migration)
+         * [POP3 migration](#pop3-migration)
+         * [Courier IMAP/POP3](#courier-imappop3)
+         * [Dovecot configuration](#dovecot-configuration)
+         * [Manual conversion](#manual-conversion)
    * [Configuring DKIM](#configuring-dkim)
       * [Create your DKIM signature](#create-your-dkim-signature)
       * [Create your DNS records](#create-your-dns-records)
@@ -2898,9 +2904,97 @@ timeout     -1
 facility    daemon
 priority    err
 ```
-# Start dovecot
+## Start dovecot
 
 You can start dovecot with a single command `sudo service dovecot start`
+
+## Migration from courier-imap to dovecot
+
+If you are already running courier-imap and want to migrate to dovecot, you need to convert your existing data or make dovecot read existing data.
+
+### IMAP migration
+
+When migrating mails from another IMAP server, you should make sure that these are preserved:
+
+1. Message flags
+   * Lost flags can be really annoying, you most likely want to avoid it.
+
+2. Message UIDs and UIDVALIDITY value
+   * If UIDs are lost, at the minimum clients' message cache gets cleaned and messages are re-downloaded as new.
+   * Some IMAP clients store metadata by assigning it to specific UID, if UIDs are changed these will be lost.
+
+3. Mailbox subscription list
+   * Users would be able to manually subscribe them again if you don't want to mess with it.
+
+### POP3 migration
+
+When migrating mails from another POP3 server, you should try to preserve the old UIDLs. If POP3 client is configured to keep mails in the server and the messages' UIDLs change, all the messages are downloaded again as new messages.
+
+Don't trust the migration scripts or anything you see in this wiki. Verify manually that the UIDLs are correct before exposing real clients to Dovecot. You can do this by logging in using your old POP3 server, issuing UIDL command and saving the output. Then log in using Dovecot and save its UIDL output as well. Use e.g. diff command to verify that the lists are identical. Note that:
+
+  * If a client already saw changed UIDLs and decided to start re-downloading mails, it's unlikely there is anything you can do to stop it. Even going back to your old server is unlikely to help at that point.
+  * Some (many?) POP3 clients also require that the message ordering is preserved.
+  * Some clients re-download all mails if you change the hostname in the client configuration. Be aware of this when testing.
+
+Some servers (UW, Cyrus) implementing both IMAP and POP3 protocols use the IMAP UID and UIDVALIDITY values for generating the POP3 UIDL values. To preserve the POP3 UIDL from such servers you'll need to preserve the IMAP UIDs and set pop3\_uidl\_format properly.
+
+If the server doesn't use IMAP UIDs for the POP3 UIDL, you'll need to figure out another way to do it. One way is to put the UIDL value into X-UIDL: header in the mails and set pop3\_reuse\_xuidl=yes. Some POP3 servers (QPopper) write the X-UIDL: header themselves, making the migration easy.
+
+Some POP3 servers using Maildir uses the maildir base filename as the UIDL. You can use pop3\_uidl\_format = %f to do this.
+
+### Courier IMAP/POP3
+
+[courier-dovecot-migrate.pl](https://dovecot.org/tools/courier-dovecot-migrate.pl) does a perfect migration from Courier IMAP and POP3, preserving IMAP UIDs and POP3 UIDLs. It reads Courier's courierimapuiddb and courierpop3dsizelist files and produces dovecot-uidlist file from it.
+
+Before doing the actual conversion you can run the script and see if it complains about any errors and such, for example:
+
+```
+# ./courier-dovecot-migrate.pl --to-dovecot --recursive /home
+Finding maildirs under /home
+/home/user/Maildir/dovecot-uidlist already exists, not overwritten
+/home/user/Maildir2: No imap/pop3 uidlist files
+Total: 69 mailboxes / 6 users
+       0 errors
+No actual conversion done, use --convert parameter
+```
+
+The actual conversion can be done for all users at once by running the script with --convert --recursive parameters. Make sure the conversion worked by checking that dovecot-uidlist files were created to all maildirs (including to subfolders).
+
+The --recursive option goes through only one level down in directory hierarchies. This means that if you have some kind of a directory hashing scheme (or even domain/username/), it won't convert all of the files.
+
+You can also convert each user as they log in for the first time, using [PostLoginScripting](https://wiki.dovecot.org/PostLoginScripting) with a script something like:
+
+```
+#!/bin/sh
+# WARNING: Be sure to use mail_drop_priv_before_exec=yes,
+# otherwise the files are created as root!
+
+courier-dovecot-migrate.pl --quiet --to-dovecot --convert Maildir
+# This is for imap, create a similar script for pop3 too
+exec /usr/local/libexec/dovecot/imap
+```
+FIXME: The script should rename also folder names that aren't valid mUTF-7. Dovecot can't otherwise access such folders.
+
+### Dovecot configuration
+
+Courier by default uses "INBOX." as the IMAP namespace for private mailboxes. If you want a transparent migration, you'll need to configure Dovecot to use a namespace with "INBOX." prefix as well.
+
+```
+mail_location = maildir:~/INBOX
+
+namespace {
+  prefix = INBOX.
+  separator = .
+  inbox = yes
+}
+```
+
+### Manual conversion
+
+* Courier's courierimapsubscribed file is compatible with Dovecot's subscriptions file, but you need to remove the "INBOX." prefixes from the mailboxes. This is true even if you set namespace prefix to "INBOX." as described above.
+* Courier's courierimapuiddb file is compatible with Dovecot's dovecot-uidlist file, just rename it.
+* Courier's message flags are compatible with Dovecot (as they are specified by the Maildir specification)
+* Courier's message keywords implementation isn't Dovecot compatible. There doesn't exist a simple way to convert the keywords manually.
 
 # Configuring DKIM
 
