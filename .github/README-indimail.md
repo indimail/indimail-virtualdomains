@@ -2799,22 +2799,7 @@ password_query = SELECT pw_passwd as password FROM indimail WHERE pw_name = '%n'
 
 ### 2 Using checkpassword
 
-The checkpassword interface used by dovecot uses dovecot specific extensions. If you have a standard checkpassword extension like indimail's `vchkpass`, you will need to write a wrapper like below
-
-```
-#!/bin/sh
-CHECKPASSWORD_REPLY_BINARY="$1"
-[ "$AUTHORIZED" != 1 ] || export AUTHORIZED=2
-/usr/sbin/vchkpass /bin/false
-if [ $? -eq 0 ] ; then
-  export userdb_uid=indimail
-  export userdb_gid=indimail
-  export EXTRA="userdb_uid userdb_gid $EXTRA"
-  exec $CHECKPASSWORD_REPLY_BINARY
-else
-  exec /bin/false
-fi
-```
+The checkpassword interface used by dovecot uses dovecot specific extensions. IndiMail provides `vchkpass`, a checkpassword implementation compatible with dovecot.
 
 file /etc/dovecot/conf.d/10-auth.conf
 
@@ -2827,7 +2812,7 @@ file /etc/dovecot/conf.d/auth-checkpassword.conf.ext
 ```
 passdb {
   driver = checkpassword
-  args = /usr/bin/checkpassword.sh
+  args = /usr/sbin/vchkpass
 }
 
 userdb {
