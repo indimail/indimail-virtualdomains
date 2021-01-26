@@ -139,7 +139,7 @@ shadow:     files sss nssd
 
 pam-multi along with pwdlookup services makes it easy to have dovecot work with IndiMail without modifying a single line of code of dovecot. You just need to configure 3 additonal config files - /etc/indimail/nssd.conf, /etc/pam.d/pam-multi and /etc/dovecot.conf. Here is what is required
 
-**File /etc/nssd.conf**
+**File /etc/indimail/nssd.conf**
 
 ```
 getpwnam    SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell \
