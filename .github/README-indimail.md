@@ -2654,6 +2654,7 @@ Dovecot uses /etc/dovecot/dovecot.conf as the main configuration file.
 
 ```
 protocols = imap pop3
+import_environment = QUERY_CACHE=1 DOMAIN_LIMITS=1 FIFODIR=/var/indimail/inquery INFIFO=infifo
 ```
 
 You need to have auth-system.conf.ext for authenticating users in your system's password database.
