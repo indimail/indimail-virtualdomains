@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.8  2021-01-27 13:23:25+05:30  Cprogrammer
+ * use use_dovecot variable instead of env_get() twice
+ *
  * Revision 1.7  2021-01-26 14:17:22+05:30  Cprogrammer
  * set HOME, userdb_uid, userdb_gid, EXTRA env variables for dovecot
  *
@@ -60,7 +63,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.7 2021-01-26 14:17:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.8 2021-01-27 13:23:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -333,7 +336,7 @@ main(int argc, char **argv)
 			die_nomem();
 		status = runcmmd(buf.s, 0);
 	}
-	if (env_get("DOVECOT_VERSION")) { /*- support dovecot checkpassword */
+	if (use_dovecot) { /*- support dovecot checkpassword */
 		if (!env_put2("userdb_uid", "indimail") ||
 				!env_put2("userdb_gid", "indimail"))
 			die_nomem();
