@@ -36,6 +36,7 @@ extern int authcheckpasswordsha1(const char *, const char *);
 
 static int do_authcheckpassword(const char *password, const char *encrypted_password)
 {
+	char *ptr;
 #if	HAVE_MD5LIB
 	if (strncmp(encrypted_password, "$1$", 3) == 0
 		|| strncasecmp(encrypted_password, "{MD5}", 5) == 0
@@ -49,14 +50,14 @@ static int do_authcheckpassword(const char *password, const char *encrypted_pass
 		return (authcheckpasswordsha1(password, encrypted_password));
 #endif
 
-	return (
 #if	HAVE_CRYPT
-		strcmp(encrypted_password,
-			crypt(password, encrypted_password))
+	if (!(ptr = crypt(password, encrypted_password)))
+		return 1;
+	else
+		return (strcmp(encrypted_password, ptr));
 #else
-		strcmp(encrypted_password, password)
+	return (strcmp(encrypted_password, password));
 #endif
-				);
 }
 
 int authcheckpassword(const char *password, const char *encrypted_password)
