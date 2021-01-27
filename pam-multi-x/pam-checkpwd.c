@@ -1,5 +1,8 @@
 /*
  * $Log: pam-checkpwd.c,v $
+ * Revision 1.13  2021-01-27 16:51:36+05:30  Cprogrammer
+ * set HOME for dovecot
+ *
  * Revision 1.12  2021-01-27 13:28:02+05:30  Cprogrammer
  * dovecot support added
  *
@@ -63,7 +66,7 @@
 #define isEscape(ch) ((ch) == '"' || (ch) == '\'')
 
 #ifndef lint
-static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.12 2021-01-27 13:28:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.13 2021-01-27 16:51:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             authlen = 512;
@@ -106,44 +109,44 @@ initialize(char *username, int opt_dont_chdir_home, int debug)
 	if (!(pw = getpwnam(username))) {
 		if (debug)
 			fprintf(stderr, "pam-checkpwd: Error getting information about %s from /etc/passwd: %s\n", username, strerror(errno));
-		exit(111);
+		_exit(111);
 	}
 	/*- set supplementary groups */
 	if (initgroups(username, pw->pw_gid) == -1) {
 		fprintf(stderr, "pam-checkpwd: Error setting supplementary groups for user %s: %s\n", username, strerror(errno));
-		exit(111);
+		_exit(111);
 	}
 	/*- set gid */
 	if (setgid(pw->pw_gid) == -1) {
 		fprintf(stderr, "pam-checkpwd: setgid(%d) error: %s\n", pw->pw_gid, strerror(errno));
-		exit(111);
+		_exit(111);
 	}
 	/*- set uid */
 	if (setuid(pw->pw_uid) == -1) {
 		fprintf(stderr, "pam-checkpwd: setuid(%d) error: %s\n", pw->pw_uid, strerror(errno));
-		exit(111);
+		_exit(111);
 	}
 	/*- switch to user home directory */
 	if (!opt_dont_chdir_home) {
 		if (chdir(pw->pw_dir) == -1) {
 			fprintf(stderr, "pam-checkpwd: Error changing directory %s: %s\n", pw->pw_dir, strerror(errno));
-			exit(111);
+			_exit(111);
 		}
 	}
 	/*- set $USER */
 	if (setenv("USER", username, 1) == -1) {
 		fprintf(stderr, "pam-checkpwd: Error setting $USER to %s: %s\n", username, strerror(errno));
-		exit(111);
+		_exit(111);
 	}
 	/*- set $HOME */
 	if (setenv("HOME", pw->pw_dir, 1) == -1) {
 		fprintf(stderr, "pam-checkpwd: Error setting $HOME to %s: %s\n", pw->pw_dir, strerror(errno));
-		exit(111);
+		_exit(111);
 	}
 	/*- set $SHELL */
 	if (setenv("SHELL", pw->pw_shell, 1) == -1) {
 		fprintf(stderr, "pam-checkpwd: Error setting $SHELL to %s: %s\n", pw->pw_shell, strerror(errno));
-		exit(111);
+		_exit(111);
 	}
 	return (0);
 }
@@ -267,16 +270,16 @@ runcmmd(char *cmmd, int useP, int debug)
 	switch ((pid = fork()))
 	{
 	case -1:
-		exit(1);
+		_exit(1);
 	case 0:
 		if (!(argv = MakeArgs(cmmd)))
-			exit(1);
+			_exit(1);
 		if (useP)
 			execvp(*argv, argv);
 		else
 			execv(*argv, argv);
 		perror(*argv);
-		exit(1);
+		_exit(1);
 	default:
 		break;
 	}
@@ -324,6 +327,7 @@ main(int argc, char **argv)
 					debug = 0, c, count, offset, status, option_index = 0,
 					use_dovecot = 0, s_optind;
 	char           *service_name = 0;
+	struct passwd  *pw;
 
 	if (argc < 2)
 		_exit(2);
@@ -343,8 +347,8 @@ main(int argc, char **argv)
 			opt_dont_set_env = 1;
 			break;
 		case 'h':
-			puts(usage);
-			exit(0);
+			fprintf(stderr, "%s", usage);
+			_exit(0);
 		case 's':
 			service_name = optarg;
 			break;
@@ -352,25 +356,25 @@ main(int argc, char **argv)
 			if (setenv("AUTHSERVICE", optarg, 1) == -1) {
 				fprintf(stderr, "pam-checkpwd: Error setting $AUTHSERVICE to %s: %s\n",
 					optarg, strerror(errno));
-				exit(111);
+				_exit(111);
 			}
 			break;
 		case 'V':
 			fprintf(stderr, "%s: %s\n", PACKAGE, VERSION);
-			exit(2);
+			_exit(2);
 		case '?':
 			fprintf(stderr, "pam-checkpwd: Invalid command line, see --help\n");
-			exit(2);
+			_exit(2);
 		}
 	}
 	s_optind = optind;
 	if (optind >= argc) {
 		fprintf(stderr, "pam-checkpwd: Expected argument after options\n");
-		exit(2);
+		_exit(2);
 	}
 	if (!service_name && !(service_name = getenv("PAM_SERVICE"))) {
 		fprintf(stderr, "pam-checkpwd: PAM service name not specified\n");
-		exit(2);
+		_exit(2);
 	}
 	if (!(tmpbuf = calloc(1, (authlen + 1) * sizeof(char)))) {
 		printf("454-%s (#4.3.0)\r\n", strerror(errno));
@@ -456,6 +460,21 @@ main(int argc, char **argv)
 			printf("454-%s (#4.3.0)\r\n", strerror(errno));
 			fflush(stdout);
 			_exit (111);
+		}
+		/*- dovecot requires HOME */
+		if (opt_dont_set_env) {
+			if (!(pw = getpwnam(login))) {
+				if (debug)
+					fprintf(stderr, "pam-checkpwd: /etc/passwd: %s: %s\n", login, strerror(errno));
+				printf("454-%s (#4.3.0)\r\n", strerror(errno));
+				fflush(stdout);
+				_exit(111);
+			}
+			if (setenv("HOME", pw->pw_dir, 1) == -1) {
+				printf("454-%s (#4.3.0)\r\n", strerror(errno));
+				fflush(stdout);
+				_exit(111);
+			}
 		}
 		if ((ptr = getenv("EXTRA")))
 			snprintf(buf, MAX_BUFF, "userdb_uid userdb_gid %s", ptr);
