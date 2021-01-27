@@ -51,7 +51,7 @@ values are taken from the system user database - passwd(5)).
 .PP
 Normally,
 .B pam-checkpwd
-switches to user home directory.   If
+switches to user home directory. If
 -\fBH\fR or --\fBno\fR-\fBchdir\fR-\fBhome\fR option is specified, this
 step is skipped. This option is useful when you have automounted home
 directories, but mail is delivered to a central location.
@@ -59,7 +59,8 @@ directories, but mail is delivered to a central location.
 .PP
 If authentication fails,
 .B pam-checkpwd
-executes and passes input on file descriptor 3 to checkpassword compatabile program
+executes and passes input on file descriptor 3 to checkpassword compatabile
+program
 .I prog
 with
 .I args
@@ -74,16 +75,37 @@ the program gets called with the authenticated username as the argument
 
 .PP
 \fBpam-checkpwd\fR logs authentication failures (or all actions, if
---\fBdebug\fR option is used) to stderr.
+-\fBd\fR or --\fBdebug\fR option is used) to stderr.
 
 .PP
 Before invoking \fIprog\fR, \fBpam-checkpwd\fR sets environment variables
 .BR USER ", " HOME ", and " SHELL
-to appropriate values.  If --\fBnoenv\fR option is specified, this step is
-skipped and the variables are left alone. This is needed when you have
-virtual users which are not listed in your \fI/etc/passwd\fR,
+to appropriate values. If i\fBe\fR or --\fBnoenv\fR option is specified,
+this step is skipped and the variables are left alone. This is needed when
+you have virtual users which are not listed in your \fI/etc/passwd\fR,
 and you need to only do authentication. Setting up process uid, gid can
 be handled by some other application like \fBsetuidgid(8)\fR.
+
+.SH OPTIONS
+.TP
+.BR -d | --debug
+set debug option to log all actions instead of just authentication failures
+
+.TP
+.B -s | --service \fIservice\fR
+set PAM service as \fIservice\fR
+
+.TP
+.B -i | --identifier \fIident\fR
+Set an identifier to be used when authenticating
+
+.TP
+.B -H  | --no-chdir-home
+Skip chdir to home directory
+
+.TP
+.B -e | --noenv
+Skip setting \fBUSER\fR, \fBHOME\fR and \fBSHELL\fR environment variables
 
 .SH "ENVIRONMENT VARIABLES"
 
@@ -92,7 +114,7 @@ be handled by some other application like \fBsetuidgid(8)\fR.
 .B pam-checkpwd
 uses contents of
 .B PAM_SERVICE
-environment variable to specify the PAM service name.  This could be
+environment variable to specify the PAM service name. This could be
 overriden by -\fBs\fR option, see above.
 
 .TP
@@ -117,7 +139,7 @@ user and password with the following command-line
 .PP
 # printf "%s\\0%s\\0%s\\0" username password timestamp \\
 .br
-  | pam-checkpwd -s SERVICE -d -- /usr/bin/id 3<&0
+ | pam-checkpwd -s SERVICE -d -- /usr/bin/id 3<&0
 
 (here timestamp could be the output of date '+%s' command)
 .PP
