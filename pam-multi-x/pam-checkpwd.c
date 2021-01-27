@@ -1,5 +1,8 @@
 /*
  * $Log: pam-checkpwd.c,v $
+ * Revision 1.14  2021-01-27 18:47:28+05:30  Cprogrammer
+ * renamed use_dovecot to native_checkpassword
+ *
  * Revision 1.13  2021-01-27 16:51:36+05:30  Cprogrammer
  * set HOME for dovecot
  *
@@ -66,7 +69,7 @@
 #define isEscape(ch) ((ch) == '"' || (ch) == '\'')
 
 #ifndef lint
-static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.13 2021-01-27 16:51:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.14 2021-01-27 18:47:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             authlen = 512;
@@ -325,7 +328,7 @@ main(int argc, char **argv)
 	char            buf[MAX_BUFF];
 	int             opt_dont_set_env = 0, opt_dont_chdir_home = 0,
 					debug = 0, c, count, offset, status, option_index = 0,
-					use_dovecot = 0, s_optind;
+					native_checkpassword = 0, s_optind;
 	char           *service_name = 0;
 	struct passwd  *pw;
 
@@ -433,8 +436,8 @@ main(int argc, char **argv)
 			_exit (111);
 		}
 	}
-	use_dovecot = getenv("DOVECOT_VERSION") ? 1 : 0;
-	if (use_dovecot) {
+	native_checkpassword = (getenv("NATIVE_CHECKPASSWORD") || getenv("DOVECOT_VERSION")) ? 1 : 0;
+	if (native_checkpassword) {
 		if (unsetenv("userdb_uid") || unsetenv("userdb_gid") ||
 				unsetenv("EXTRA")) {
 			printf("454-%s (#4.3.0)\r\n", strerror(errno));
@@ -444,7 +447,7 @@ main(int argc, char **argv)
 	}
 	/*- authenticate using PAM */
 	if ((status = auth_pam(service_name, login, challenge, debug))) {
-		use_dovecot ? _exit (1) : pipe_exec(argv + s_optind, tmpbuf, offset);
+		native_checkpassword ? _exit (1) : pipe_exec(argv + s_optind, tmpbuf, offset);
 		printf("454-%s (#4.3.0)\r\n", strerror(errno));
 		fflush(stdout);
 		_exit (111);
@@ -455,7 +458,7 @@ main(int argc, char **argv)
 		snprintf(buf, MAX_BUFF, "%s %s", ptr, login);
 		status = runcmmd(buf, 1, debug);
 	}
-	if (use_dovecot) { /*- support dovecot checkpassword */
+	if (native_checkpassword) { /*- support dovecot checkpassword */
 		if (setenv("userdb_uid", "indimail", 1) || setenv("userdb_gid", "indimail", 1)) {
 			printf("454-%s (#4.3.0)\r\n", strerror(errno));
 			fflush(stdout);

@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.9  2021-01-27 18:46:10+05:30  Cprogrammer
+ * renamed use_dovecot to native_checkpassword
+ *
  * Revision 1.8  2021-01-27 13:23:25+05:30  Cprogrammer
  * use use_dovecot variable instead of env_get() twice
  *
@@ -63,7 +66,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.8 2021-01-27 13:23:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.9 2021-01-27 18:46:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -99,7 +102,7 @@ main(int argc, char **argv)
 	char           *authstr, *login, *ologin, *response, *challenge, *crypt_pass, *ptr, *cptr;
 	char            strnum[FMT_ULONG], module_pid[FMT_ULONG];
 	static stralloc user = {0}, fquser = {0}, domain = {0}, buf = {0};
-	int             i, count, offset, norelay = 0, status, auth_method, use_dovecot;
+	int             i, count, offset, norelay = 0, status, auth_method, native_checkpassword;
 	struct passwd  *pw;
 #ifdef ENABLE_DOMAIN_LIMITS
 	time_t          curtime;
@@ -188,8 +191,8 @@ main(int argc, char **argv)
 	}
 	if (!env_unset("HOME"))
 		die_nomem();
-	use_dovecot = env_get("DOVECOT_VERSION") ? 1 : 0;
-	if (use_dovecot) {
+	native_checkpassword = (env_get("NATIVE_CHECKPASSWORD") || env_get("DOVECOT_VERSION")) ? 1 : 0;
+	if (native_checkpassword) {
 		if (!env_unset("userdb_uid") || !env_unset("userdb_gid") ||
 				!env_unset("EXTRA"))
 			die_nomem();
@@ -204,7 +207,7 @@ main(int argc, char **argv)
 #endif
 		{
 			if (userNotFound)
-				use_dovecot ? _exit (1) : pipe_exec(argv, authstr, offset);
+				native_checkpassword ? _exit (1) : pipe_exec(argv, authstr, offset);
 			else
 #ifdef CLUSTERED_SITE
 				strerr_warn1("sqlOpen_user: failed to connect to db: ", &strerr_sys);
@@ -232,7 +235,7 @@ main(int argc, char **argv)
 #endif
 	{
 		if (userNotFound)
-			use_dovecot ? _exit (1) : pipe_exec(argv, authstr, offset);
+			native_checkpassword ? _exit (1) : pipe_exec(argv, authstr, offset);
 		else
 #ifdef CLUSTERED_SITE
 			strerr_warn1("sqlOpen_user: failed to connect to db: ", &strerr_sys);
@@ -251,7 +254,7 @@ main(int argc, char **argv)
 #endif
 	if (!pw) {
 		if (userNotFound)
-			use_dovecot ? _exit (1) : pipe_exec(argv, authstr, offset);
+			native_checkpassword ? _exit (1) : pipe_exec(argv, authstr, offset);
 		else
 			strerr_warn3("vchkpass: ", ptr, ": ", &strerr_sys);
 		print_error(ptr);
@@ -281,7 +284,7 @@ main(int argc, char **argv)
 	if (pw_comp((unsigned char *) ologin, (unsigned char *) crypt_pass,
 		(unsigned char *) (*response ? challenge : 0),
 		(unsigned char *) (*response ? response : challenge), auth_method)) {
-		use_dovecot ? _exit (1) : pipe_exec(argv, authstr, offset);
+		native_checkpassword ? _exit (1) : pipe_exec(argv, authstr, offset);
 		print_error("exec");
 		_exit (111);
 	}
@@ -336,7 +339,7 @@ main(int argc, char **argv)
 			die_nomem();
 		status = runcmmd(buf.s, 0);
 	}
-	if (use_dovecot) { /*- support dovecot checkpassword */
+	if (native_checkpassword) { /*- support dovecot checkpassword */
 		if (!env_put2("userdb_uid", "indimail") ||
 				!env_put2("userdb_gid", "indimail"))
 			die_nomem();

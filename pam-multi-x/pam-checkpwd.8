@@ -107,6 +107,16 @@ Skip chdir to home directory
 .B -e | --noenv
 Skip setting \fBUSER\fR, \fBHOME\fR and \fBSHELL\fR environment variables
 
+.SH RETURN VALUES
+If the password is acceptable, pam-checkpwd exits 0. If pam-checkpwd is misused, it may
+instead exit 2. If there is a temporary problem checking the password, pam-checkpwd exits 111.
+
+If the password is unacceptable, pam-checkpwd runs \fIprog\fR. \fIprog\fR consists of one or more
+arguments.
+
+If the environment variable \fBNATIVE_CHECKPASSWORD\fR is set, pam-checkpwd will run \fIprog\fR
+on successful authentication and exit 1 if password is unacceptable.
+
 .SH "ENVIRONMENT VARIABLES"
 
 .TP

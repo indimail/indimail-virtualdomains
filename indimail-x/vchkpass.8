@@ -3,7 +3,7 @@
 vchkpass \- checkpassword program for IndiMail authentication
 
 .SH SYNOPSYS
-\fBvchkpass\fR \fBalternate_checkpassword_program(s)\fR \fB/bin/false\fR
+\fBvchkpass\fR \fBprog\fR \fIargs\fR
 
 .SH DESCRIPTION
 \fBvchkpass\fR supports authentication for ESMTP AUTH option in \fBqmail-smtpd(8)\fR,
@@ -11,15 +11,15 @@ allowing the LOGIN, PLAIN, and CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 AUTH
 \fBvchkpass\fR looks up userid in IndiMail's Virtual Database
 .PP
 As reflected in the \fBqmail-smtpd(8)\fR man page, \fBqmail-smtpd(8)\fR must be invoked with
-three arguments: hostname, path of the vchkpass program, and subprogram. If these
+three arguments: hostname, path of the checkpassword programs. If these
 arguments are missing, \fBqmail-smtpd(8)\fR will not advertise availability of AUTH.
 .PP
 \fBvchkpass\fR reads descriptor 3 through end of file and then closes
 descriptor 3. There must be at most 512 bytes of data before end of file. If it invokes an
-\fBalternate_checkpassword_program\fR, it opens a pipe duping the read descriptor as 3 for
-the \fBalternate_checkpassword_program\fR. The write end of the pipe is duped to descriptor 4
+\fIprog\fR, it opens a pipe duping the read descriptor as 3 for
+the \fBprog\fR. The write end of the pipe is duped to descriptor 4
 and the data which was earlier read on descriptor 3 is written back on descriptor 4.
-The alternate program is invoked when vchkpass doesn't support authentication for the
+The \fIprog\fR program is invoked when vchkpass doesn't support authentication for the
 supplied login name.
 .PP
 For LOGIN, PLAIN AUTH types, the information supplied on descriptor 3 is a login name
@@ -41,10 +41,10 @@ is misused, it may instead exit 2. If there is a temporary problem checking the 
 hostname is simply used to form the CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 challenge.
 \fBqmail-smtpd\fR invokes \fBvchkpass\fR, feeding it the username and password, in the case
 of LOGIN or PLAIN, or the username, challenge, and response, in the case of CRAM-MD5,
-CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5.  If the user checks out, \fBvchkpass\fR
-exits with a status of 0. Otherwise, subprogram should
-exit with a non-zero status, or call an alternate checkpassword program. The last
-subprogram can usually be /usr/bin/false (or /bin/false, depending on your flavor of OS).
+CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5. If the password checks out, \fBvchkpass\fR
+exits with a status of 0. If password is unacceptable, \fBvchkpass\fR runs \fIprog\fR
+You can have a chain of \fIprog\fR on the command line with the last \fIprog\fR being
+\fB/bin/false\fR.
 
 .PP
 \fBvchkpass\fR does not authenticate if user is inactive. A user is active if one logs in using
@@ -57,6 +57,7 @@ expiry and password expiry set by \fBvmoduser(1)\fR program.
 On successful authentication, \fBvchkpass\fR can execute a script defined by environment
 variable \fBPOSTAUTH\fR. In that case, the return value of \fBvchkpass\fR will be the
 return value of \fBPOSTAUTH\fR program/script.
+
 .PP
 MUAs and AUTH types tested with this software are:
 
@@ -81,7 +82,14 @@ Path to an alternate checkpassword utility which supports additional authenticat
 advertised by qmail-smtpd.
 
 .SH RETURN VALUE
-0 if authenticated, 1 on authentication failure or system problems.
+If the password is acceptable, \fBvchkpass\fR exits 0. If \fBvchkpass\fR is misused, it may
+instead exit 2. If there is a temporary problem checking the password, \fBvchkpass\fR exits 111.
+
+If the password is unacceptable, \fBvchkpass\fR runs \fIprog\fR. \fIprog\fR consists of one or more
+arguments.
+
+If the environment variable \fBNATIVE_CHECKPASSWORD\fR is set, \fBvchkpass\fR will run \fIprog\fR
+on successful authentication and exit 1 if password is unacceptable.
 
 .SH "SEE ALSO"
 qmail-smtpd(8),
