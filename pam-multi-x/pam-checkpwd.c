@@ -1,5 +1,8 @@
 /*
  * $Log: pam-checkpwd.c,v $
+ * Revision 1.12  2021-01-27 13:28:02+05:30  Cprogrammer
+ * dovecot support added
+ *
  * Revision 1.11  2020-09-28 13:33:09+05:30  Cprogrammer
  * added pid in debug statements
  *
@@ -60,7 +63,7 @@
 #define isEscape(ch) ((ch) == '"' || (ch) == '\'')
 
 #ifndef lint
-static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.11 2020-09-28 13:33:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-checkpwd.c,v 1.12 2021-01-27 13:28:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             authlen = 512;
@@ -318,7 +321,8 @@ main(int argc, char **argv)
 	char           *ptr, *tmpbuf, *login, *response, *challenge;
 	char            buf[MAX_BUFF];
 	int             opt_dont_set_env = 0, opt_dont_chdir_home = 0,
-					debug = 0, c, count, offset, status, option_index = 0, s_optind;
+					debug = 0, c, count, offset, status, option_index = 0,
+					use_dovecot = 0, s_optind;
 	char           *service_name = 0;
 
 	if (argc < 2)
@@ -418,9 +422,25 @@ main(int argc, char **argv)
 	if (debug)
 		fprintf(stderr, "%s: pid [%d] login [%s] challenge [%s] response [%s]\n", 
 			argv[0], getpid(), login, challenge, response);
+	if (!opt_dont_set_env) {
+		if (unsetenv("HOME") || unsetenv("SHELL") || unsetenv("USER")) {
+			printf("454-%s (#4.3.0)\r\n", strerror(errno));
+			fflush(stdout);
+			_exit (111);
+		}
+	}
+	use_dovecot = getenv("DOVECOT_VERSION") ? 1 : 0;
+	if (use_dovecot) {
+		if (unsetenv("userdb_uid") || unsetenv("userdb_gid") ||
+				unsetenv("EXTRA")) {
+			printf("454-%s (#4.3.0)\r\n", strerror(errno));
+			fflush(stdout);
+			_exit (111);
+		}
+	}
 	/*- authenticate using PAM */
 	if ((status = auth_pam(service_name, login, challenge, debug))) {
-		pipe_exec(argv + s_optind, tmpbuf, offset);
+		use_dovecot ? _exit (1) : pipe_exec(argv + s_optind, tmpbuf, offset);
 		printf("454-%s (#4.3.0)\r\n", strerror(errno));
 		fflush(stdout);
 		_exit (111);
@@ -430,6 +450,26 @@ main(int argc, char **argv)
 	if ((ptr = (char *) getenv("POSTAUTH")) && !access(ptr, X_OK)) {
 		snprintf(buf, MAX_BUFF, "%s %s", ptr, login);
 		status = runcmmd(buf, 1, debug);
+	}
+	if (use_dovecot) { /*- support dovecot checkpassword */
+		if (setenv("userdb_uid", "indimail", 1) || setenv("userdb_gid", "indimail", 1)) {
+			printf("454-%s (#4.3.0)\r\n", strerror(errno));
+			fflush(stdout);
+			_exit (111);
+		}
+		if ((ptr = getenv("EXTRA")))
+			snprintf(buf, MAX_BUFF, "userdb_uid userdb_gid %s", ptr);
+		else
+			snprintf(buf, MAX_BUFF, "userdb_uid userdb_gid");
+		if (setenv("EXTRA", buf, 1)) {
+			printf("454-%s (#4.3.0)\r\n", strerror(errno));
+			fflush(stdout);
+			_exit (111);
+		}
+		execv(argv[1], argv + 1);
+		printf("454-%s (#4.3.0)\r\n", strerror(errno));
+		fflush(stdout);
+		_exit (111);
 	}
 	_exit(status);
 	/*- Not reached */
