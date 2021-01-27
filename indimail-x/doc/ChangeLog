@@ -99,3 +99,5 @@ Release 3.3 Start 06/09/2020
 58. vchkpass: support dovecot checkpassword implementation
 59. vchkpass: set HOME, userdb_uid, userdb_gid, EXTRA env variables for
     dovecot
+60. pam-checkpwd.c: env variable NATIVE_CHECKPASSWORD to comply exactly with
+    checkpassword protocol

@@ -58,3 +58,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * vchkpass: support dovecot checkpassword implementation
   * vchkpass: set HOME, userdb_uid, userdb_gid, EXTRA env variables for
     dovecot
+  * pam-checkpwd.c: env variable NATIVE_CHECKPASSWORD to comply exactly with checkpassword protocol
