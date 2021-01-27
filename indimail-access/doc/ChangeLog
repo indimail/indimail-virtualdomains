@@ -38,3 +38,6 @@ Release @version@-@release@ Start 03/06/2020
 - 19/01/2021
 19. authpam.c: set EPERM on pam failures
 20. mod.h: reset uid, euid
+- 27/01/2021
+21. checkpassword.c: check return value of crypt() to fix SIGSEGV in
+    authshadow

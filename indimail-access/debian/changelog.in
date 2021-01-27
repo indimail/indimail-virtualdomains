@@ -17,3 +17,4 @@ indimail-access (@version@-@release@) unstable; urgency=medium
   * stop start imap, pop3, fetchmail services on upgrade
   * authpam.c: set EPERM on pam failures
   * mod.h: reset uid, euid
+  * checkpassword.c: check return value of crypt() to fix SIGSEGV in authshadow
