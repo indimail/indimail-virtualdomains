@@ -1,5 +1,8 @@
 /*
  * $Log: fstabChangeCounters.c,v $
+ * Revision 1.2  2021-02-02 22:08:46+05:30  Cprogrammer
+ * fix SEGSEGV. Wrong variable used
+ *
  * Revision 1.1  2019-04-15 10:06:23+05:30  Cprogrammer
  * Initial revision
  *
@@ -31,7 +34,7 @@
 #include "create_table.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: fstabChangeCounters.c,v 1.1 2019-04-15 10:06:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: fstabChangeCounters.c,v 1.2 2021-02-02 22:08:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -87,7 +90,7 @@ fstabChangeCounter(char *filesystem, char *mdahost, long user_count, long size_c
 				!stralloc_catb(&SqlBuf, " where filesystem=\"", 19) ||
 				!stralloc_cats(&SqlBuf, ptr) ||
 				!stralloc_catb(&SqlBuf, "\" and host=\"", 12) ||
-				!stralloc_cats(&SqlBuf, mdahost) ||
+				!stralloc_cats(&SqlBuf, mhost) ||
 				!stralloc_append(&SqlBuf, "\"") ||
 				!stralloc_0(&SqlBuf))
 			die_nomem();
@@ -98,7 +101,7 @@ fstabChangeCounter(char *filesystem, char *mdahost, long user_count, long size_c
 				!stralloc_catb(&SqlBuf, " where filesystem=\"", 19) ||
 				!stralloc_cats(&SqlBuf, ptr) ||
 				!stralloc_catb(&SqlBuf, "\" and host=\"", 12) ||
-				!stralloc_cats(&SqlBuf, mdahost) ||
+				!stralloc_cats(&SqlBuf, mhost) ||
 				!stralloc_append(&SqlBuf, "\"") ||
 				!stralloc_0(&SqlBuf))
 			die_nomem();
@@ -109,7 +112,7 @@ fstabChangeCounter(char *filesystem, char *mdahost, long user_count, long size_c
 				!stralloc_catb(&SqlBuf, " where filesystem=\"", 19) ||
 				!stralloc_cats(&SqlBuf, ptr) ||
 				!stralloc_catb(&SqlBuf, "\" and host=\"", 12) ||
-				!stralloc_cats(&SqlBuf, mdahost) ||
+				!stralloc_cats(&SqlBuf, mhost) ||
 				!stralloc_append(&SqlBuf, "\"") ||
 				!stralloc_0(&SqlBuf))
 			die_nomem();
