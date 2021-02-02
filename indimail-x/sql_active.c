@@ -1,5 +1,8 @@
 /*
  * $Log: sql_active.c,v $
+ * Revision 1.3  2021-02-02 22:16:48+05:30  Cprogrammer
+ * use create_table() to create table
+ *
  * Revision 1.2  2019-04-22 23:15:10+05:30  Cprogrammer
  * replaced atol() with scan_ulong()
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_active.c,v 1.2 2019-04-22 23:15:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_active.c,v 1.3 2021-02-02 22:16:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING
@@ -35,6 +38,7 @@ static char     sccsid[] = "$Id: sql_active.c,v 1.2 2019-04-22 23:15:10+05:30 Cp
 #include "vset_lastauth.h"
 #include "check_quota.h"
 #include "fstabChangeCounters.h"
+#include "create_table.h"
 
 static void
 die_nomem()
@@ -47,7 +51,7 @@ int
 sql_active(struct passwd *pw, char *domain, int type)
 {
 	char           *table1 = NULL, *table2 = NULL;
-	int             row_count;
+	int             row_count, i;
 	mdir_t          quota;
 	static stralloc SqlBuf = {0}, Dir = {0};
 
@@ -61,18 +65,8 @@ sql_active(struct passwd *pw, char *domain, int type)
 		table2 = default_table;
 	} else
 	if(type == FROM_ACTIVE_TO_INACTIVE) {
-		table2  = inactive_table;
 		table1 = default_table;
-		if (!stralloc_copyb(&SqlBuf, "CREATE TABLE IF NOT EXISTS ", 27) ||
-				!stralloc_cats(&SqlBuf, inactive_table) ||
-				!stralloc_catb(&SqlBuf, " ( ", 3) ||
-				!stralloc_cats(&SqlBuf, SMALL_TABLE_LAYOUT) ||
-				!stralloc_0(&SqlBuf))
-			die_nomem();
-		if (mysql_query(&mysql[1], SqlBuf.s)) {
-			strerr_warn4("sql_active: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
-			return (1);
-		}
+		table2  = inactive_table;
 	}
 	if (!stralloc_copyb(&SqlBuf, "insert low_priority into ", 25) ||
 			!stralloc_cats(&SqlBuf, table2) ||
@@ -85,9 +79,16 @@ sql_active(struct passwd *pw, char *domain, int type)
 			!stralloc_append(&SqlBuf, "\"") ||
 			!stralloc_0(&SqlBuf))
 		die_nomem();
-	if (mysql_query(&mysql[1], SqlBuf.s)) { /*- move records */
-		strerr_warn4("sql_active: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
-		return (1);
+	for (i = 0;i < 2; i++) {
+		if (mysql_query(&mysql[1], SqlBuf.s)) { /*- insert record in table2 */
+			if (in_mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
+				if (create_table(ON_LOCAL, table2, site_size == LARGE_SITE ? LARGE_TABLE_LAYOUT : SMALL_TABLE_LAYOUT))
+					return (1);
+				continue;
+			}
+			strerr_warn4("sql_active: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
+			return (1);
+		}
 	}
 	row_count = in_mysql_affected_rows(&mysql[1]);
 	if(row_count == -1 || !row_count)
@@ -101,7 +102,7 @@ sql_active(struct passwd *pw, char *domain, int type)
 			!stralloc_append(&SqlBuf, "\"") ||
 			!stralloc_0(&SqlBuf))
 		die_nomem();
-	if (mysql_query(&mysql[1], SqlBuf.s)) { /*- move record */
+	if (mysql_query(&mysql[1], SqlBuf.s)) { /*- remove record from table1 */
 		strerr_warn4("sql_active: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
 		return (1);
 	}
