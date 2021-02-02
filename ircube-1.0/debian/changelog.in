@@ -12,3 +12,5 @@ ircube (@version@-@release@) stable; urgency=low
   * fixed imap host variable
   * roundcube_config - updated for CentOS8
   * fix for opensuse ssl.conf and wwwrun group
+  * roundcube_config: Fix value of PRIV_PASS
+  * roundcube_config: fixed path of cleandb.sh

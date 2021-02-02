@@ -72,27 +72,27 @@ Release 3.3 Start 06/09/2020
 45. load_mysql.c: renamed closeLibrary() to incloseLibrary()
 44. sql_getall.c: use allo_re() only for expansion
 45. sq_vacation.c: drop supplementary privilges before setuid()
-19/10/2020
+- 19/10/2020
 46. vbulletin.c, SendWelcomeMail.c, RemoteBulkMail.c, iadddomain.c,
     bulletin.c, bulk_mail.c use /var/indomain/domains for domain/bulk_mail
 47. indimail.spec: fixed rplint error with unstripped binary or object
-20/10/2020
+- 20/10/2020
 48. vdelivermail.c: skip creation of maildirfolder file for user's Maildir (INBOX)
-14/11/2020
+- 14/11/2020
 49. indimail.spec: turn off lto
 50. indimail.spec: turn on openSUSE permissions
-17/11/2020
+- 17/11/2020
 51. removed sslerator
 52. indimail.spec: stop/start svscan on upgrade
-21/11/2020
+- 21/11/2020
 53. packaging: shutdown specific indimaail services instead of entire svscan
     service
 54. handlers.c: use execv() instead of execute() in i_mount() function
-11/01/2021
+- 11/01/2021
 55. indimail.spec: use redhat-lsb-core for centos8
-19/01/2021
+- 19/01/2021
 56. authindi.c: added uid, gid in debug log
-26/01/2021
+- 26/01/2021
 57. sql_init.c, UserInLookup.c, sqlOpen_user.c, findmdahost.c, bulletin.c,
 	clear_open_smtp.c: renamed sql_init() to in_sql_init() to avoid clash with
 	dovecot sql authentication driver
@@ -101,3 +101,6 @@ Release 3.3 Start 06/09/2020
     dovecot
 60. pam-checkpwd.c: env variable NATIVE_CHECKPASSWORD to comply exactly with
     checkpassword protocol
+- 02/02/2021
+61. fstabChangeCounter.c: fix SIGSEGV, wrong variable used
+62. sql_active.c: use create_table() to create MySQL table

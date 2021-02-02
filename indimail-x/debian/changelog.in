@@ -59,3 +59,5 @@ indimail (@version@-@release@) unstable; urgency=low
   * vchkpass: set HOME, userdb_uid, userdb_gid, EXTRA env variables for
     dovecot
   * pam-checkpwd.c: env variable NATIVE_CHECKPASSWORD to comply exactly with checkpassword protocol
+  * fstabChangeCounter.c: fix SIGSEGV, wrong variable used
+  * sql_active.c: use create_table() to create MySQL table
