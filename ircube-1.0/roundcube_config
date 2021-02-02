@@ -10,7 +10,7 @@ php=$(which php)
 grep=$(which grep)
 head=$(which head)
 cut=$(which cut)
-PRIV_PASS=$($grep PRIV_PASS /usr/sbin/svctool|$head -1|$cut -d= -f2|$sed 's{"{{g')
+PRIV_PASS=$($grep "PRIV_PASS=" /usr/sbin/svctool|$head -1|$cut -d= -f2|$sed 's{"{{g')
 
 create_roundcube_php_config()
 {
@@ -691,6 +691,6 @@ if [ -x /usr/bin/crontab ] ; then
 	crontab -u root "${tmp}"
 	$rm -f "${tmp}"
 	unset tmp
-	$chmod +x $rcube_base/share/roundcubemail/bin/cleandb.sh
+	$chmod +x $rcube_base/bin/cleandb.sh
 fi
 exit 0
