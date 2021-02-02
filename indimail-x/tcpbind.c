@@ -1,5 +1,8 @@
 /*
  * $Log: tcpbind.c,v $
+ * Revision 1.4  2021-02-02 23:32:47+05:30  Cprogrammer
+ * fixed bind on unix domain sockets
+ *
  * Revision 1.3  2019-05-02 14:38:36+05:30  Cprogrammer
  * removed unused variable
  *
@@ -12,7 +15,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpbind.c,v 1.3 2019-05-02 14:38:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpbind.c,v 1.4 2021-02-02 23:32:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -66,6 +69,9 @@ tcpbind(char *hostname, char *servicename, int backlog)
 	int             idx, socket_type;
 	struct linger cflinger;
 
+	/*- Set up address structure for the listen socket. */
+	cflinger.l_onoff = 1;
+	cflinger.l_linger = 60;
 #ifdef HAVE_SYS_UN_H
 	if ((dir = Dirname(hostname)) && !access(dir, F_OK))
 		socket_type = AF_UNIX;
@@ -74,8 +80,6 @@ tcpbind(char *hostname, char *servicename, int backlog)
 		socket_type = AF_INET;
 	if (socket_type == AF_UNIX) {
 		byte_zero((char *) &localunaddr, sizeof(struct sockaddr_un));
-    	localunaddr.sun_family = AF_UNIX;
-    	byte_copy(localunaddr.sun_path, sizeof(localunaddr.sun_path), hostname);
 		if (!access(hostname, F_OK) && unlink(hostname)) {
 			errno = EEXIST;
 			return(-1);
@@ -91,14 +95,18 @@ tcpbind(char *hostname, char *servicename, int backlog)
 			close(listenfd);
 			return (-1);
 		}
-		if (bind(listenfd, (struct sockaddr *) &localunaddr, idx) == -1) {
+    	localunaddr.sun_family = AF_UNIX;
+    	byte_copy(localunaddr.sun_path, sizeof(localunaddr.sun_path), hostname);
+		if (bind(listenfd, (struct sockaddr *) &localunaddr, sizeof(localunaddr)) == -1) {
 			close(listenfd);
 			return (-1);
 		}
-	}
-	/*- Set up address structure for the listen socket. */
-	cflinger.l_onoff = 1;
-	cflinger.l_linger = 60;
+		if (listen(listenfd, backlog) == -1) {
+			close(listenfd);
+			return (-1);
+		}
+		return (listenfd);
+	} 
 #ifdef ENABLE_IPV6
 	byte_zero((char *) &hints, sizeof(struct addrinfo));
 	hints.ai_family = AF_UNSPEC;
@@ -170,7 +178,7 @@ tcpbind(char *hostname, char *servicename, int backlog)
 		return (-1);
 	}
 	if (bind(listenfd, (struct sockaddr *) &localinaddr, sizeof(localinaddr)) == -1) {
-		close(listenfd);
+			close(listenfd);
 		return (-1);
 	}
 #endif
