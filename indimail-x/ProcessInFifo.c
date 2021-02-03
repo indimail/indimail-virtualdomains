@@ -1060,21 +1060,19 @@ ProcessInFifo(int instNum)
 				die_nomem();
 		}
 	}
-	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
-	getTimeoutValues(&readTimeout, &writeTimeout, sysconfdir, controldir);
 	/*- Open the Fifos */
 	if (FifoCreate(InFifo.s) == -1) {
 		strerr_warn3("InLookup: FifoCreate: ", InFifo.s, ": ", &strerr_sys);
 		return (-1);
 	} else
-	if ((rfd = open(InFifo.s, O_RDWR, 0)) == -1) {
-		strerr_warn3("InLookup: open_write: ", InFifo.s, ": ", &strerr_sys);
+	if ((rfd = open_readwrite(InFifo.s)) == -1) {
+		strerr_warn3("InLookup: open_readwrite: ", InFifo.s, ": ", &strerr_sys);
 		return (-1);
 	} else 
 	if ((pipe_size = fpathconf(rfd, _PC_PIPE_BUF)) == -1) {
 		strerr_warn3("InLookup: fpathconf _PC_PIPE_BUF: ", InFifo.s, ": ", &strerr_sys);
 		return (-1);
-	} else
+	}
 	if (!(QueryBuf = (char *) alloc(pipe_size * sizeof(char))))
 		die_nomem();
 	user_query_count = relay_query_count = pwd_query_count = limit_query_count = alias_query_count = dom_query_count = 0;
@@ -1097,6 +1095,8 @@ ProcessInFifo(int instNum)
 	match = str_rchr(fifoName, '/');
 	if (fifoName[match])
 		fifoName = InFifo.s + match + 1;
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+	getTimeoutValues(&readTimeout, &writeTimeout, sysconfdir, controldir);
 	for (bytes = 0;getppid() != 1;) {
 		if ((idx = read(rfd, (char *) &bytes, sizeof(int))) == -1) {
 			strnum[fmt_uint(strnum, errno)] = 0;
@@ -1117,8 +1117,8 @@ ProcessInFifo(int instNum)
 		} else
 		if (!idx) {
 			close(rfd);
-			if ((rfd = open_write(InFifo.s)) == -1) {
-				strerr_warn3("InLookup: open_write: ", InFifo.s, ": ", &strerr_sys);
+			if ((rfd = open_readwrite(InFifo.s)) == -1) {
+				strerr_warn3("InLookup: open_readwrite: ", InFifo.s, ": ", &strerr_sys);
 				signal(SIGPIPE, pstat);
 				return (-1);
 			} else
@@ -1137,8 +1137,8 @@ ProcessInFifo(int instNum)
 		} else
 		if (!idx) {
 			close(rfd);
-			if ((rfd = open_write(InFifo.s)) == -1) {
-				strerr_warn3("InLookup: open_write: ", InFifo.s, ": ", &strerr_sys);
+			if ((rfd = open_readwrite(InFifo.s)) == -1) {
+				strerr_warn3("InLookup: open_readwrite: ", InFifo.s, ": ", &strerr_sys);
 				signal(SIGPIPE, pstat);
 				return (-1);
 			} else

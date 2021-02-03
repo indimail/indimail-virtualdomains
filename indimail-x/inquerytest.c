@@ -304,35 +304,8 @@ main(int argc, char **argv)
 			pid = -1;
 			close(fd);
 		}
-	} else {
-		getEnvConfigStr(&infifo, "INFIFO", INFIFO);
-		if (*infifo == '/' || *infifo == '.') {
-			if (!stralloc_copys(&InFifo, infifo) || !stralloc_0(&InFifo))
-				die_nomem();
-			InFifo.len--;
-		} else {
-			getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
-			getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
-			if (*controldir == '/') {
-				if (!stralloc_copys(&InFifo, infifo_dir) ||
-						!stralloc_append(&InFifo, "/") ||
-						!stralloc_cats(&InFifo, infifo) ||
-						!stralloc_0(&InFifo))
-					die_nomem();
-			} else {
-				if (!stralloc_copys(&InFifo, INDIMAILDIR) ||
-						!stralloc_cats(&InFifo, infifo_dir) ||
-						!stralloc_append(&InFifo, "/") ||
-						!stralloc_cats(&InFifo, infifo) ||
-						!stralloc_0(&InFifo))
-					die_nomem();
-			}
-			InFifo.len--;
-		}
+	} else
 		pid = -1;
-	}
-	getEnvConfigStr(&default_table, "MYSQL_TABLE", MYSQL_DEFAULT_TABLE);
-	getEnvConfigStr(&inactive_table, "MYSQL_INACTIVE_TABLE", MYSQL_INACTIVE_TABLE);
 	if (!(dbptr = inquery(query_type, email, ipaddr))) {
 		if (userNotFound)
 			strerr_warn2(email, ": No such user", 0);
@@ -420,6 +393,8 @@ main(int argc, char **argv)
 		out("inquerytest", pw->pw_shell);
 		out("inquerytest", "\n");
 		out("inquerytest", "Table    : ");
+		getEnvConfigStr(&default_table, "MYSQL_TABLE", MYSQL_DEFAULT_TABLE);
+		getEnvConfigStr(&inactive_table, "MYSQL_INACTIVE_TABLE", MYSQL_INACTIVE_TABLE);
 		out("inquerytest", is_inactive ? inactive_table : default_table);
 		out("inquerytest", "\n");
 		flush("inquerytest");
