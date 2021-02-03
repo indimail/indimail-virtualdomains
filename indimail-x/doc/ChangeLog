@@ -104,3 +104,4 @@ Release 3.3 Start 06/09/2020
 - 02/02/2021
 61. fstabChangeCounter.c: fix SIGSEGV, wrong variable used
 62. sql_active.c: use create_table() to create MySQL table
+63. tcpbind.c: fix bind on unix domain sockets

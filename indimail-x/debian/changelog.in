@@ -61,3 +61,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * pam-checkpwd.c: env variable NATIVE_CHECKPASSWORD to comply exactly with checkpassword protocol
   * fstabChangeCounter.c: fix SIGSEGV, wrong variable used
   * sql_active.c: use create_table() to create MySQL table
+  * tcpbind.c: fix bind on unix domain sockets
