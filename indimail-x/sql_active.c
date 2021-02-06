@@ -1,5 +1,8 @@
 /*
  * $Log: sql_active.c,v $
+ * Revision 1.4  2021-02-06 22:41:51+05:30  Cprogrammer
+ * fixed loop
+ *
  * Revision 1.3  2021-02-02 22:16:48+05:30  Cprogrammer
  * use create_table() to create table
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_active.c,v 1.3 2021-02-02 22:16:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_active.c,v 1.4 2021-02-06 22:41:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING
@@ -88,7 +91,8 @@ sql_active(struct passwd *pw, char *domain, int type)
 			}
 			strerr_warn4("sql_active: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
 			return (1);
-		}
+		} else
+			break;
 	}
 	row_count = in_mysql_affected_rows(&mysql[1]);
 	if(row_count == -1 || !row_count)

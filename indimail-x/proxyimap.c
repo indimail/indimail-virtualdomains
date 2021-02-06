@@ -247,7 +247,7 @@ static void bye()
 	_exit(0);
 }
 #else
-#include <sterrr.h>
+#include <strerr.h>
 int
 main()
 {

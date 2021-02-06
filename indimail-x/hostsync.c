@@ -149,7 +149,7 @@ main(int argc, char **argv)
 	return (0);
 }
 #else
-#include <sterrr.h>
+#include <strerr.h>
 int
 main()
 {

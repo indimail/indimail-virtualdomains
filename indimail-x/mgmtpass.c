@@ -125,11 +125,11 @@ main(int argc, char **argv)
 	return (setpassword(user));
 }
 #else
-#include <sterrr.h>
+#include <strerr.h>
 int
 main()
 {
-	sterr_warn1("IndiMail not configured with --enable-user-cluster=y", 0);
+	strerr_warn1("IndiMail not configured with --enable-user-cluster=y", 0);
 	return (1);
 }
 #endif

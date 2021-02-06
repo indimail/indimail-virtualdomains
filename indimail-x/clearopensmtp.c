@@ -145,7 +145,7 @@ main(int argc, char **argv)
 	return (errflag);
 }
 #else
-#include <sterrr.h>
+#include <strerr.h>
 int
 main()
 {

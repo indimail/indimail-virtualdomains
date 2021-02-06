@@ -215,7 +215,7 @@ main(argc, argv)
 	return(0);
 }
 #else
-#include <sterrr.h>
+#include <strerr.h>
 int
 main()
 {

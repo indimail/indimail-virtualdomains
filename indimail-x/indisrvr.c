@@ -806,7 +806,7 @@ SigHup(void)
 }
 #endif
 #else
-#include <sterrr.h>
+#include <strerr.h>
 int
 main()
 {

@@ -318,7 +318,7 @@ editdbinfo(char *filename)
 	return ((LoadDbInfo_TXT(&total) ? 0 : 1));
 }
 #else
-#include <sterrr.h>
+#include <strerr.h>
 int
 main()
 {
