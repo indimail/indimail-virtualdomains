@@ -62,3 +62,5 @@ indimail (@version@-@release@) unstable; urgency=low
   * fstabChangeCounter.c: fix SIGSEGV, wrong variable used
   * sql_active.c: use create_table() to create MySQL table
   * tcpbind.c: fix bind on unix domain sockets
+  * New program tcplookup - TCP/IP frontend to inlookup
+  * inquery.c, inlookup.c, ProcessInFifo.c - handle TCP/IP request under tcpclient/tcpserver

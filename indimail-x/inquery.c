@@ -1,5 +1,8 @@
 /*
  * $Log: inquery.c,v $
+ * Revision 1.5  2021-02-07 19:55:54+05:30  Cprogrammer
+ * make request over TCP/IP (tcpclient) using fd 6 and 7.
+ *
  * Revision 1.4  2020-10-18 07:49:06+05:30  Cprogrammer
  * use alloc() instead of alloc_re()
  *
@@ -42,39 +45,54 @@
 #include "FifoCreate.h"
 #include "common.h"
 #include "variables.h"
-#include "r_mkdir.h"
-#include "get_indimailuidgid.h"
 #include "strToPw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 1.4 2020-10-18 07:49:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 1.5 2021-02-07 19:55:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
+
+static void
+cleanup(int rfd, int wfd, void (*sig_pipe_save)(), char *fifo)
+{
+	int             tmperrno;
+
+	tmperrno = errno;
+	if (rfd != -1)
+		close(rfd);
+	if (wfd != -1)
+		close(wfd);
+	if (sig_pipe_save)
+		signal(SIGPIPE, sig_pipe_save);
+	if (fifo)
+		unlink(fifo);
+	errno = tmperrno;
+	return;
+}
 
 /*- 
  *  Format of Query Buffer
- *  |len of string - int|QueryType - 1|NULL - 1|EmailId - len1|NULL - 1|Fifo - len2|NULL - 1|Ip - len3|NULL - 1|
+ *  (len of string: int|QueryType: 1|NULL: 1|EmailId: len1|NULL: 1|Fifo: len2|NULL: 1|IP: len3|NULL: 1)
  */
 void           *
 inquery(char query_type, char *email, char *ip)
 {
 	int             rfd, wfd, len, bytes, idx, readTimeout, writeTimeout,
-					pipe_size, tmperrno, relative, fd;
+					pipe_size, fd;
 	static int      intBuf, old_size = 0;
-	char           *sysconfdir, *controldir, *infifo_dir, *infifo, *ptr;
+	char           *sysconfdir, *controldir, *infifo_dir, *infifo, *ptr, *tcpclient;
 	char            strnum[FMT_ULONG];
 	static char    *pwbuf;
-	void            (*sig_pipe_save) ();
+	void            (*sig_pipe_save) () = NULL;
 	static stralloc querybuf = { 0 };
 	static stralloc myfifo = { 0 };
 	static stralloc InFifo = { 0 };
 	static stralloc tmp = { 0 };
 
 	userNotFound = 0;
-	switch(query_type)
+	switch (query_type)
 	{
 		case RELAY_QUERY:
-			if (!ip || !*ip)
-			{
+			if (!ip || !*ip) {
 				errno = EINVAL;
 				return ((void *) 0);
 			}
@@ -103,120 +121,95 @@ inquery(char query_type, char *email, char *ip)
 	/*- email */
 	if (!stralloc_cats(&querybuf, email) || !stralloc_0(&querybuf))
 		return ((void *) 0);
-	if (!stralloc_copyb(&myfifo, "/tmp/", 5))
-		return ((void *) 0);
-	strnum[fmt_ulong(strnum, getpid())] = 0;
-	if (!stralloc_cats(&myfifo, strnum))
-		return ((void *) 0);
-	strnum[fmt_ulong(strnum, time(0))] = 0;
-	if (!stralloc_cats(&myfifo, strnum) || !stralloc_0(&myfifo))
+	if ((tcpclient = env_get("TCPCLIENT")))
+		tcpclient = env_get("TCPREMOTEIP");
+	if (!tcpclient) {
+		if (!stralloc_copyb(&myfifo, "/tmp/", 5))
+			return ((void *) 0);
+		strnum[fmt_ulong(strnum, getpid())] = 0;
+		if (!stralloc_cats(&myfifo, strnum))
+			return ((void *) 0);
+		strnum[fmt_ulong(strnum, time(0))] = 0;
+		if (!stralloc_cats(&myfifo, strnum) || !stralloc_0(&myfifo))
+			return ((void *) 0);
+	} else
+	if (!stralloc_copyb(&myfifo, "socket", 6) || !stralloc_0(&myfifo))
 		return ((void *) 0);
 	if (!stralloc_cat(&querybuf, &myfifo)) /*- fifo */
 		return ((void *) 0);
-	if (ip && *ip) {
-		if (!stralloc_cats(&querybuf, ip)) /*- ip */
-			return ((void *) 0);
-	}
+	if (ip && *ip && !stralloc_cats(&querybuf, ip)) /*- ip */
+		return ((void *) 0);
 	if (!stralloc_0(&querybuf))
 		return ((void *) 0);
 	ptr = querybuf.s;
 	*((int *) ptr) = querybuf.len - sizeof(int);
 	bytes = querybuf.len;
 
-	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
-	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
-	getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
-	relative = *infifo_dir == '/' ? 0 : 1;
-	if (!(infifo = env_get("INFIFO")))
-		infifo = INFIFO;
-	/*- Open the Fifos */
-	if (*infifo == '/' || *infifo == '.') {
-		if (!stralloc_copys(&InFifo, infifo) || !stralloc_0(&InFifo))
-			return ((void *) 0);
-	} else {
-		if (relative) {
-			if (!stralloc_copys(&InFifo, INDIMAILDIR) ||
-					!stralloc_cats(&InFifo, infifo_dir) ||
-					!stralloc_catb(&InFifo, "/", 1) ||
-					!stralloc_cats(&InFifo, infifo))
+	if (!tcpclient) {
+		if (!(infifo = env_get("INFIFO")))
+			infifo = INFIFO;
+		/*- Open the Fifos */
+		if (*infifo == '/' || *infifo == '.') {
+			if (!stralloc_copys(&InFifo, infifo) || !stralloc_0(&InFifo))
 				return ((void *) 0);
 		} else {
-			if (indimailuid == -1 || indimailgid == -1)
-				get_indimailuidgid(&indimailuid, &indimailgid);
-			r_mkdir(infifo_dir, 0775, indimailuid, indimailgid);
-			if (!stralloc_copys(&InFifo, infifo_dir) ||
-					!stralloc_catb(&InFifo, "/", 1) ||
-					!stralloc_cats(&InFifo, infifo))
-				return ((void *) 0);
-		}
-		for (idx = 1, len = InFifo.len;;idx++) {
+			getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
+			if (*infifo_dir == '/') {
+				if (!stralloc_copys(&InFifo, infifo_dir) ||
+						!stralloc_catb(&InFifo, "/", 1) ||
+						!stralloc_cats(&InFifo, infifo))
+					return ((void *) 0);
+			} else {
+				if (!stralloc_copys(&InFifo, INDIMAILDIR) ||
+						!stralloc_cats(&InFifo, infifo_dir) ||
+						!stralloc_catb(&InFifo, "/", 1) ||
+						!stralloc_cats(&InFifo, infifo))
+					return ((void *) 0);
+			}
+			for (idx = 1, len = InFifo.len;;idx++) {
+				InFifo.len = len;
+				strnum[fmt_ulong(strnum, (unsigned long) idx)] = 0;
+				if (!stralloc_catb(&InFifo, ".", 1) ||
+						!stralloc_cats(&InFifo, strnum) ||
+						!stralloc_0(&InFifo))
+					return ((void *) 0);
+				if (access(InFifo.s, F_OK))
+					break;
+			}
+#ifdef RANDOM_BALANCING
+			srand(getpid() + time(0));
+#endif
 			InFifo.len = len;
-			strnum[fmt_ulong(strnum, (unsigned long) idx)] = 0;
-			if (!stralloc_catb(&InFifo, ".", 1) ||
-					!stralloc_cats(&InFifo, strnum) ||
-					!stralloc_0(&InFifo))
-				return ((void *) 0);
-			if (access(InFifo.s, F_OK))
-				break;
-		}
 #ifdef RANDOM_BALANCING
-		srand(getpid() + time(0));
-#endif
-		InFifo.len = len;
-#ifdef RANDOM_BALANCING
-		strnum[fmt_ulong(strnum, 1 + (int) ((float) (idx - 1) * rand()/(RAND_MAX + 1.0)))] = 0;
+			strnum[fmt_ulong(strnum, 1 + (int) ((float) (idx - 1) * rand()/(RAND_MAX + 1.0)))] = 0;
 #else
-		strnum[fmt_ulong(strnum, 1 + (time(0) % (idx - 1)))] = 0;
+			strnum[fmt_ulong(strnum, 1 + (time(0) % (idx - 1)))] = 0;
 #endif
-	}
-	if (!stralloc_catb(&InFifo, ".", 1) ||
-			!stralloc_cats(&InFifo, strnum) ||
-			!stralloc_0(&InFifo))
-		return ((void *) 0);
-	if(verbose) {
+			if (!stralloc_catb(&InFifo, ".", 1) ||
+					!stralloc_cats(&InFifo, strnum) || !stralloc_0(&InFifo))
+				return ((void *) 0);
+		}
+	} /*- if (!tcpclient) { */
+	if (verbose) {
 		out("inquery", "Using INFIFO=");
-		out("inquery", InFifo.s);
+		out("inquery", tcpclient ? tcpclient : InFifo.s);
 		out("inquery", "\n");
 		flush("inquery");
 	}
-	if ((wfd = open(InFifo.s, O_WRONLY | O_NDELAY, 0)) == -1)
-		return ((void *) 0);
-	else 
-	if (bytes > (pipe_size = fpathconf(wfd, _PC_PIPE_BUF))) {
-		errno = EMSGSIZE;
-		return ((void *) 0);
-	} else
-	if (FifoCreate(myfifo.s) == -1) {
-		tmperrno = errno;
-		close(wfd);
-		errno = tmperrno;
-		return ((void *) 0);
-	} else
-	if ((rfd = open(myfifo.s, O_RDONLY | O_NDELAY, 0)) == -1) {
-		tmperrno = errno;
-		close(wfd);
-		unlink(myfifo.s);
-		errno = tmperrno;
-		return ((void *) 0);
-	} else
-	if ((sig_pipe_save = signal(SIGPIPE, SIG_IGN)) == SIG_ERR) {
-		tmperrno = errno;
-		close(rfd);
-		close(wfd);
-		unlink(myfifo.s);
-		errno = tmperrno;
-		return ((void *) 0);
-	}
-	if (relative) {
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+	if (*controldir == '/') {
+		if (!stralloc_copys(&tmp, controldir) ||
+				!stralloc_catb(&tmp, "/timeoutwrite", 13)) {
+			return ((void *) 0);
+		}
+	} else {
 		if (!stralloc_copys(&tmp, sysconfdir) ||
 				!stralloc_catb(&tmp, "/", 1) ||
 				!stralloc_cats(&tmp, controldir) ||
-				!stralloc_catb(&tmp, "/timeoutwrite", 13))
+				!stralloc_catb(&tmp, "/timeoutwrite", 13)) {
 			return ((void *) 0);
-	} else {
-		if (!stralloc_copys(&tmp, controldir) ||
-				!stralloc_catb(&tmp, "/timeoutwrite", 13))
-			return ((void *) 0);
+		}
 	}
 	if (!stralloc_0(&tmp))
 		return ((void *) 0);
@@ -228,18 +221,41 @@ inquery(char query_type, char *email, char *ip)
 		close(fd);
 		scan_ulong(strnum, (unsigned long *) &writeTimeout);
 	}
+	if (tcpclient) {
+		rfd = 6;
+		wfd = 7;
+		pipe_size = 8192;
+	} else {
+		if ((wfd = open(InFifo.s, O_WRONLY | O_NDELAY, 0)) == -1)
+			return ((void *) 0);
+		else 
+		if (bytes > (pipe_size = fpathconf(wfd, _PC_PIPE_BUF))) {
+			errno = EMSGSIZE;
+			return ((void *) 0);
+		} else
+		if (FifoCreate(myfifo.s) == -1) {
+			cleanup(-1, wfd, 0, 0);
+			return ((void *) 0);
+		} else
+		if ((rfd = open(myfifo.s, O_RDONLY | O_NDELAY, 0)) == -1) {
+			cleanup(-1, wfd, 0, myfifo.s);
+			return ((void *) 0);
+		} else
+		if ((sig_pipe_save = signal(SIGPIPE, SIG_IGN)) == SIG_ERR) {
+			cleanup(rfd, wfd, 0, myfifo.s);
+			return ((void *) 0);
+		}
+	}
 	ptr = querybuf.s;
 	if (timeoutwrite(writeTimeout, wfd, ptr, bytes) != bytes) {
-		tmperrno = errno;
-		signal(SIGPIPE, sig_pipe_save);
-		close(wfd);
-		close(rfd);
-		unlink(myfifo.s);
-		errno = tmperrno;
+		if (!tcpclient)
+			cleanup(rfd, wfd, sig_pipe_save, myfifo.s);
 		return ((void *) 0);
 	}
-	signal(SIGPIPE, sig_pipe_save);
-	close(wfd);
+	if (!tcpclient) {
+		signal(SIGPIPE, sig_pipe_save);
+		close(wfd);
+	}
 	switch(query_type)
 	{
 		case USER_QUERY:
@@ -253,19 +269,28 @@ inquery(char query_type, char *email, char *ip)
 		case LIMIT_QUERY:
 #endif
 		case DOMAIN_QUERY:
-			if (relative) {
+			if (*controldir == '/') {
+				if (!stralloc_copys(&tmp, controldir) ||
+						!stralloc_catb(&tmp, "/timeoutread", 12)) {
+					if (!tcpclient)
+						cleanup(rfd, -1, 0, myfifo.s);
+					return ((void *) 0);
+				}
+			} else {
 				if (!stralloc_copys(&tmp, sysconfdir) ||
 						!stralloc_catb(&tmp, "/", 1) ||
 						!stralloc_cats(&tmp, controldir) ||
-						!stralloc_catb(&tmp, "/timeoutread", 12))
+						!stralloc_catb(&tmp, "/timeoutread", 12)) {
+					if (!tcpclient)
+						cleanup(rfd, -1, 0, myfifo.s);
 					return ((void *) 0);
-			} else {
-				if (!stralloc_copys(&tmp, controldir) ||
-						!stralloc_catb(&tmp, "/timeoutread", 12))
-					return ((void *) 0);
+				}
 			}
-			if (!stralloc_0(&tmp))
+			if (!stralloc_0(&tmp)) {
+				if (!tcpclient)
+					cleanup(rfd, -1, 0, myfifo.s);
 				return ((void *) 0);
+			}
 			if ((fd = open(tmp.s, O_RDONLY)) == -1)
 				readTimeout = 4;
 			else {
@@ -275,21 +300,19 @@ inquery(char query_type, char *email, char *ip)
 				scan_ulong(strnum, (unsigned long *) &readTimeout);
 			}
 			if ((idx = timeoutread(readTimeout, rfd, (char *) &intBuf, sizeof(int))) == -1 || !idx) {
-				tmperrno = errno;
-				close(rfd);
-				unlink(myfifo.s);
-				errno = tmperrno;
+				if (!tcpclient)
+					cleanup(rfd, -1, 0, myfifo.s);
 				return ((void *) 0);
 			} else
-			if (intBuf == -1) {
-				close(rfd);
-				unlink(myfifo.s);
+			if (intBuf == -1) { /*- system error on remote inlookup service */
+				if (!tcpclient)
+					cleanup(rfd, -1, 0, myfifo.s);
 				errno = 0;
 				return ((void *) 0);
 			} else
 			if (intBuf > pipe_size) {
-				close(rfd);
-				unlink(myfifo.s);
+				if (!tcpclient)
+					cleanup(rfd, -1, 0, myfifo.s);
 				errno = EMSGSIZE;
 				return ((void *) 0);
 			}
@@ -297,39 +320,41 @@ inquery(char query_type, char *email, char *ip)
 			{
 				case USER_QUERY:
 				case RELAY_QUERY:
-					close(rfd);
-					unlink(myfifo.s);
+					if (!tcpclient) {
+						close(rfd);
+						unlink(myfifo.s);
+					}
 					return (&intBuf);
 				case PWD_QUERY:
 #ifdef ENABLE_DOMAIN_LIMITS
 				case LIMIT_QUERY:
 #endif
-					if (!intBuf) {
-						close(rfd);
-						unlink(myfifo.s);
+					if (!intBuf) { /*- error on remote inlookup */
+						if (!tcpclient) {
+							close(rfd);
+							unlink(myfifo.s);
+						}
 						errno = 0;
 						return ((void *) 0);
 					}
 					if (intBuf + 1 > old_size && old_size)
 						alloc_free(pwbuf);
 					if (intBuf + 1 > old_size && !(pwbuf = alloc(intBuf + 1))) {
-						tmperrno = errno;
-						close(rfd);
-						unlink(myfifo.s);
-						errno = tmperrno;
+						if (!tcpclient)
+							cleanup(rfd, -1, 0, myfifo.s);
 						return ((void *) 0);
 					}
 					if (intBuf + 1 > old_size)
 						old_size = intBuf + 1;
 					if ((idx = timeoutread(readTimeout, rfd, pwbuf, intBuf)) == -1 || !idx) {
-						tmperrno = errno;
-						close(rfd);
-						unlink(myfifo.s);
-						errno = tmperrno;
+						if (!tcpclient)
+							cleanup(rfd, -1, 0, myfifo.s);
 						return ((void *) 0);
 					}
-					close(rfd);
-					unlink(myfifo.s);
+					if (!tcpclient) {
+						close(rfd);
+						unlink(myfifo.s);
+					}
 #ifdef ENABLE_DOMAIN_LIMITS
 					if (query_type == PWD_QUERY)
 						return (strToPw(pwbuf, intBuf));
@@ -344,8 +369,10 @@ inquery(char query_type, char *email, char *ip)
 #endif
 				case DOMAIN_QUERY:
 					if (!intBuf) {
-						close(rfd);
-						unlink(myfifo.s);
+						if (!tcpclient) {
+							close(rfd);
+							unlink(myfifo.s);
+						}
 						userNotFound = 1;
 						errno = 0;
 						return ((void *) 0);
@@ -353,23 +380,21 @@ inquery(char query_type, char *email, char *ip)
 					if (intBuf + 1 > old_size && old_size)
 						alloc_free(pwbuf);
 					if (intBuf + 1 > old_size && !(pwbuf = alloc(intBuf + 1))) {
-						tmperrno = errno;
-						close(rfd);
-						unlink(myfifo.s);
-						errno = tmperrno;
+						if (!tcpclient)
+							cleanup(rfd, -1, 0, myfifo.s);
 						return ((void *) 0);
 					}
 					if (intBuf + 1 > old_size)
 						old_size = intBuf + 1;
 					if ((idx = timeoutread(readTimeout, rfd, pwbuf, intBuf)) == -1 || !idx) {
-						tmperrno = errno;
-						close(rfd);
-						unlink(myfifo.s);
-						errno = tmperrno;
+						if (!tcpclient)
+							cleanup(rfd, -1, 0, myfifo.s);
 						return ((void *) 0);
 					}
-					close(rfd);
-					unlink(myfifo.s);
+					if (!tcpclient) {
+						close(rfd);
+						unlink(myfifo.s);
+					}
 					return (pwbuf);
 					break;
 				default:
@@ -378,7 +403,9 @@ inquery(char query_type, char *email, char *ip)
 		default:
 			break;
 	} /*- switch(query_type) */
-	close(rfd);
-	unlink(myfifo.s);
+	if (!tcpclient) {
+		close(rfd);
+		unlink(myfifo.s);
+	}
 	return ((void *) 0);
 }

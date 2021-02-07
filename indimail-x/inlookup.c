@@ -1,5 +1,8 @@
 /*
  * $Log: inlookup.c,v $
+ * Revision 1.5  2021-02-07 20:26:13+05:30  Cprogrammer
+ * make inlookup runable under tcpserver
+ *
  * Revision 1.4  2020-10-01 18:24:22+05:30  Cprogrammer
  * Darwin Port
  *
@@ -19,7 +22,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inlookup.c,v 1.4 2020-10-01 18:24:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inlookup.c,v 1.5 2021-02-07 20:26:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -50,6 +53,7 @@ static char     sccsid[] = "$Id: inlookup.c,v 1.4 2020-10-01 18:24:22+05:30 Cpro
 #include "variables.h"
 #include "ProcessInFifo.h"
 #include "common.h"
+#include "iclose.h"
 
 #define FATAL   "inlookup: fatal: "
 
@@ -259,6 +263,11 @@ main(int argc, char **argv)
 			strerr_warn3("USAGE: ", ptr, " [-f infifo] [-i instance] [-c activeSecs] [-v]", 0);
 			return (1);
 		}
+	}
+	if ((ptr = env_get("TCPREMOTEIP"))) {
+		idx = ProcessInFifo(0);
+		iclose();
+		return (idx);
 	}
 	scan_uint(instance, (unsigned int *) &inst_count);
 	if (inst_count > 1) {

@@ -105,3 +105,7 @@ Release 3.3 Start 06/09/2020
 61. fstabChangeCounter.c: fix SIGSEGV, wrong variable used
 62. sql_active.c: use create_table() to create MySQL table
 63. tcpbind.c: fix bind on unix domain sockets
+- 07/02/2021
+64. New program tcplookup - TCP/IP frontend to inlookup
+65. inquery.c, inlookup.c, ProcessInFifo.c - handle TCP/IP request under
+    tcpclient/tcpserver

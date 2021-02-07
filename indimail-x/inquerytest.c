@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 1.4  2021-02-07 20:30:25+05:30  Cprogrammer
+ * minor code optimization
+ *
  * Revision 1.3  2020-04-01 18:55:55+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -51,7 +54,7 @@
 #include "vlimits.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 1.3 2020-04-01 18:55:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 1.4 2021-02-07 20:30:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "inquerytest: fatal: "
@@ -304,8 +307,33 @@ main(int argc, char **argv)
 			pid = -1;
 			close(fd);
 		}
-	} else
+	} else {
+		getEnvConfigStr(&infifo, "INFIFO", INFIFO);
+		if (*infifo == '/' || *infifo == '.') {
+			if (!stralloc_copys(&InFifo, infifo) || !stralloc_0(&InFifo))
+				die_nomem();
+			InFifo.len--;
+		} else {
+			getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+			getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
+			if (*controldir == '/') {
+				if (!stralloc_copys(&InFifo, infifo_dir) ||
+						!stralloc_append(&InFifo, "/") ||
+						!stralloc_cats(&InFifo, infifo) ||
+						!stralloc_0(&InFifo))
+					die_nomem();
+			} else {
+				if (!stralloc_copys(&InFifo, INDIMAILDIR) ||
+						!stralloc_cats(&InFifo, infifo_dir) ||
+						!stralloc_append(&InFifo, "/") ||
+						!stralloc_cats(&InFifo, infifo) ||
+						!stralloc_0(&InFifo))
+					die_nomem();
+			}
+			InFifo.len--;
+		}
 		pid = -1;
+	}
 	if (!(dbptr = inquery(query_type, email, ipaddr))) {
 		if (userNotFound)
 			strerr_warn2(email, ": No such user", 0);

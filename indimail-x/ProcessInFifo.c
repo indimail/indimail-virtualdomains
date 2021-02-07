@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.9  2021-02-07 19:54:52+05:30  Cprogrammer
+ * respond to TCP/IP request when run under tcpserver
+ *
  * Revision 1.8  2020-10-11 23:13:41+05:30  Cprogrammer
  * replace deprecated sys_siglist with strsignal
  *
@@ -55,9 +58,6 @@
 #if defined( HAVE_STRSIGNAL) && defined(HAVE_STRING_H)
 #include <string.h>
 #endif
-#ifdef ENABLE_ENTERPRISE
-#include <dlfcn.h>
-#endif
 #ifdef HAVE_QMAIL
 #include <substdio.h>
 #include <getln.h>
@@ -82,9 +82,6 @@
 #include "iclose.h"
 #include "create_table.h"
 #include "variables.h"
-#ifdef ENABLE_ENTERPRISE
-#include "count_table.h"
-#endif
 #include "get_indimailuidgid.h"
 #include "r_mkdir.h"
 #include "get_local_ip.h"
@@ -107,7 +104,7 @@
 #include "FifoCreate.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.8 2020-10-11 23:13:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.9 2021-02-07 19:54:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -122,6 +119,8 @@ static void    *element = 0;
 #endif
 char            strnum[FMT_ULONG];
 static int      pwdCache; /*- for sighup to figure out if caching was selected on startup */
+char           *tcpserver;
+void            (*logfunc) ();
 
 /*-
 typedef struct
@@ -168,6 +167,8 @@ getFifo_name()
 	static stralloc inFifo = {0};
 	char           *infifo_dir, *infifo;
 
+	if ((tcpserver = env_get("TCPREMOTEIP")))
+		return ((char *) NULL);
 	getEnvConfigStr(&infifo, "INFIFO", INFIFO);
 	if (*infifo == '/' || *infifo == '.') {
 		if (!stralloc_copys(&inFifo, infifo) || !stralloc_0(&inFifo))
@@ -175,6 +176,9 @@ getFifo_name()
 	} else {
 		getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
 		if (*infifo_dir == '/') {
+			if (indimailuid == -1 || indimailgid == -1)
+				get_indimailuidgid(&indimailuid, &indimailgid);
+			r_mkdir(infifo_dir, 0775, indimailuid, indimailgid);
 			if (!stralloc_copys(&inFifo, infifo_dir) ||
 					!stralloc_append(&inFifo, "/") ||
 					!stralloc_cats(&inFifo, infifo) ||
@@ -198,16 +202,16 @@ walk_entry(const void *in_data, VISIT x, int level)
 	INENTRY        *m = *(INENTRY **) in_data;
 
 	strnum[fmt_uint(strnum, level)] = 0;
-	out("ProcessInFifo", "<");
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", ">Walk on node ");
-	out("ProcessInFifo", x == preorder ? "preorder" : x == postorder ? "postorder" : x == endorder ? "endorder" : x == leaf ? "leaf" : "unknown");
-	out("ProcessInFifo", " ");
-	out("ProcessInFifo", m->in_key);
-	out("ProcessInFifo", " ");
-	out("ProcessInFifo", m->in_pw.pw_passwd);
-	out("ProcessInFifo", "\n");
-	flush("ProcessInFifo");
+	logfunc("ProcessInFifo", "<");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", ">Walk on node ");
+	logfunc("ProcessInFifo", x == preorder ? "preorder" : x == postorder ? "postorder" : x == endorder ? "endorder" : x == leaf ? "leaf" : "unknown");
+	logfunc("ProcessInFifo", " ");
+	logfunc("ProcessInFifo", m->in_key);
+	logfunc("ProcessInFifo", " ");
+	logfunc("ProcessInFifo", m->in_pw.pw_passwd);
+	logfunc("ProcessInFifo", "\n");
+	(tcpserver ? errflush : flush) ("ProcessInFifo");
 	return;
 }
 
@@ -478,130 +482,67 @@ query_type(int status)
 	return (tmpbuf);
 }
 
-#ifdef ENABLE_ENTERPRISE
-int
-do_startup(int instNum)
-{
-	void           *handle;
-	char            tmp[FMT_ULONG];
-	char           *plugindir, *plugin_symb, *start_plugin, *error;
-	static stralloc plugin = {0};
-	int             (*func) (void);
-	int             i, status;
-
-	if (!(plugindir = env_get("PLUGINDIR")))
-		plugindir = "plugins";
-	i = strchr(plugindir, '/');
-	if (plugindir[i]) {
-		strerrr_warn1("alert: plugindir cannot have an absolute path", 0);
-		return (-1);
-	}
-	if (!(plugin_symb = env_get("START_PLUGIN_SYMB")))
-		plugin_symb = "startup";
-	if (!(start_plugin = env_get("START_PLUGIN")))
-		start_plugin = "indimail-license.so";
-	if (!stralloc_copyb(&plugin, "/usr/lib/indimail/", 18) ||
-			!stralloc_cats(&plugin, plugindir) ||
-			!stralloc_append(&plugin, "/") ||
-			!stralloc_cats(&plugin, start_plugin) ||
-			!stralloc_0(&plugin))
-		die_nomem();
-	strnum[fmt_uint(strnum, instNum)] = 0;
-	if (access(plugin.s, F_OK)) {
-		strerr_warn5("InLookup[", strnum, "] plugin ", plugin.s, ": ", &strerr_sys);
-		return (2);
-	}
-	if (!(handle = dlopen(plugin, RTLD_LAZY|RTLD_GLOBAL))) {
-		strerr_warn6("InLookup[", strnum, "] dlopen failed for ", plugin.s, ": ", dlerror(), 0);
-		return (-1);
-	}
-	dlerror(); /*- man page told me to do this */
-	func = dlsym(handle, plugin_symb);
-	if ((error = dlerror())) {
-		strerr_warn6("InLookup[", strnum, "] dlsym ", plugin_symb, " failed: ", error, 0);
-		_exit(111);
-	}
-	out("ProcessInFifo", "InLookup[");
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", "] Checking Plugin ");
-	out("ProcessInFifo", start_plugin);
-	out("ProcessInFifo", "\n");
-	flush("ProcessInFifo");
-	if ((status = (*func) ()))
-		tmp[fmt_int(tmp, status)] = 0;
-		strerr_warn6("InLookup[", strnum, "] function ", plugin_symb, " failed with status ", tmp, 0);
-	if (dlclose(handle)) {
-		strerr_warn6("InLookup[", strnum, "] dlclose for ", plugin.s, " failed: ", error, 0);
-		return (-1);
-	}
-	return (status);
-}
-#endif
 
 #ifdef DARWIN
 static void
 isig_usr1()
 {
-	char           *fifo_name;
+	char           *fifo_path;
 	long            total_count;
 	time_t          cur_time;
 
 	cur_time = time(0);
-	fifo_name = getFifo_name();
+	fifo_path = getFifo_name();
 	strnum[fmt_ulong(strnum, getpid())] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", " INFIFO ");
-	out("ProcessInFifo", fifo_name);
-	out("ProcessInFifo", ", Got SIGUSR1\n");
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", " INFIFO ");
-	out("ProcessInFifo", fifo_name);
-	out("ProcessInFifo", " Dumping Stats\n");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", " INFIFO ");
+	logfunc("ProcessInFifo", fifo_path ? fifo_path : "socket");
+	logfunc("ProcessInFifo", ", Got SIGUSR Dumping Stats\n");
 
-	out("ProcessInFifo", "User Query ");
+	logfunc("ProcessInFifo", "User Query ");
 	strnum[fmt_uint(strnum, user_query_count)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", ", Relay Query ");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", ", Relay Query ");
 	strnum[fmt_uint(strnum, relay_query_count)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", ", Password Query ");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", ", Password Query ");
 	strnum[fmt_uint(strnum, pwd_query_count)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", ":");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", ":");
 	strnum[fmt_uint(strnum, limit_query_count)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", ", Alias Query ");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", ", Alias Query ");
 	strnum[fmt_uint(strnum, alias_query_count)] = 0;
-	out("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", strnum);
 	total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + dom_query_count;
 #ifdef CLUSTERED_SITE
-	out("ProcessInFifo", ", Host Query ");
+	logfunc("ProcessInFifo", ", Host Query ");
 	strnum[fmt_uint(strnum, host_query_count)] = 0;
-	out("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", strnum);
 	total_count += host_query_count;
 #endif
-	out("ProcessInFifo", ", Domain Query ");
+	logfunc("ProcessInFifo", ", Domain Query ");
 	strnum[fmt_uint(strnum, dom_query_count)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", " Cached Nodes ");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", " Cached Nodes ");
 	strnum[fmt_uint(strnum, btree_count)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", "\n");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", "\n");
 
-	out("ProcessInFifo", "Start Time: ");
-	out("ProcessInFifo", ctime(&start_time));
-	out("ProcessInFifo", "End   Time: ");
-	out("ProcessInFifo", ctime(&cur_time));
-	out("ProcessInFifo", "Queries ");
+	logfunc("ProcessInFifo", "Start Time: ");
+	logfunc("ProcessInFifo", ctime(&start_time));
+	logfunc("ProcessInFifo", "End   Time: ");
+	logfunc("ProcessInFifo", ctime(&cur_time));
+	logfunc("ProcessInFifo", "Queries ");
 	strnum[fmt_ulong(strnum, total_count)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", ", Total Time ");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", ", Total Time ");
 	strnum[fmt_ulong(strnum, cur_time - start_time)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", " secs, Query/Sec = ");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", " secs, Query/Sec = ");
 	strnum[fmt_double(strnum, (float) ((float) total_count/(cur_time - start_time)), 2)] = 0;
-	out("ProcessInFifo", "\n");
-	flush("ProcessInFifo");
+	logfunc("ProcessInFifo", "\n");
+	(tcpserver ? errflush : flush) ("ProcessInFifo");
 	twalk(in_root, walk_entry);
 	signal(SIGUSR1, (void(*)()) isig_usr1);
 	errno = error_intr;
@@ -611,21 +552,16 @@ isig_usr1()
 static void
 isig_usr2()
 {
-	char           *fifo_name;
+	char           *fifo_path;
 
-	fifo_name = getFifo_name();
+	fifo_path = getFifo_name();
 	strnum[fmt_ulong(strnum, getpid())] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", " INFIFO ");
-	out("ProcessInFifo", fifo_name);
-	out("ProcessInFifo", ", Got SIGUSR2\n");
-
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", " INFIFO ");
-	out("ProcessInFifo", fifo_name);
-	out("ProcessInFifo", " Resetting DEBUG flag to ");
-	out("ProcessInFifo", _debug ? "0\n" : "1\n");
-	flush("ProcessInFifo");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", " INFIFO ");
+	logfunc("ProcessInFifo", fifo_path ? fifo_path : "socket");
+	logfunc("ProcessInFifo", ", Got SIGUSR2 Resetting DEBUG flag to ");
+	logfunc("ProcessInFifo", _debug ? "0\n" : "1\n");
+	(tcpserver ? errflush : flush) ("ProcessInFifo");
 	_debug = (_debug ? 0 : 1);
 	signal(SIGUSR2, (void(*)()) isig_usr2);
 	errno = error_intr;
@@ -635,20 +571,16 @@ isig_usr2()
 static void
 isig_hup()
 {
-	char           *fifo_name;
+	char           *fifo_path;
 
 	signal(SIGHUP, (void(*)()) SIG_IGN);
-	fifo_name = getFifo_name();
+	fifo_path = getFifo_name();
 	strnum[fmt_ulong(strnum, getpid())] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", " INFIFO ");
-	out("ProcessInFifo", fifo_name);
-	out("ProcessInFifo", ", Got SIGHUP\n");
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", " INFIFO ");
-	out("ProcessInFifo", fifo_name);
-	out("ProcessInFifo", " Reconfiguring\n");
-	flush("ProcessInFifo");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", " INFIFO ");
+	logfunc("ProcessInFifo", fifo_path ? fifo_path : "socket");
+	logfunc("ProcessInFifo", ", Got SIGHUP Reconfiguring\n");
+	(tcpserver ? errflush : flush) ("ProcessInFifo");
 #ifdef QUERY_CACHE
 	findhost_cache(0);
 	is_user_present_cache(0);
@@ -674,11 +606,11 @@ isig_hup()
 	if (pwdCache) {
 		cache_active_pwd(0);
 		strnum[fmt_uint(strnum, btree_count)] = 0;
-		out("ProcessInFifo", "cached ");
-		out("ProcessInFifo", strnum);
-		out("ProcessInFifo", " records\n");
+		logfunc("ProcessInFifo", "cached ");
+		logfunc("ProcessInFifo", strnum);
+		logfunc("ProcessInFifo", " records\n");
 	}
-	flush("ProcessInFifo");
+	(tcpserver ? errflush : flush) ("ProcessInFifo");
 	signal(SIGHUP, (void(*)()) isig_hup);
 	errno = error_intr;
 	return;
@@ -687,19 +619,15 @@ isig_hup()
 static void
 isig_int()
 {
-	char           *fifo_name;
+	char           *fifo_path;
 
-	fifo_name = getFifo_name();
+	fifo_path = getFifo_name();
 	strnum[fmt_ulong(strnum, getpid())] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", " INFIFO ");
-	out("ProcessInFifo", fifo_name);
-	out("ProcessInFifo", ", Got SIGINT\n");
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", " INFIFO ");
-	out("ProcessInFifo", fifo_name);
-	out("ProcessInFifo", " closing db\n");
-	flush("ProcessInFifo");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", " INFIFO ");
+	logfunc("ProcessInFifo", fifo_path ? fifo_path : "socket");
+	logfunc("ProcessInFifo", ", Got SIGINT closing db\n");
+	(tcpserver ? errflush : flush) ("ProcessInFifo");
 	close_db();
 	signal(SIGINT, (void(*)()) isig_int);
 	errno = error_intr;
@@ -709,67 +637,68 @@ isig_int()
 static void
 isig_term()
 {
-	char           *fifo_name;
+	char           *fifo_path;
 	long            total_count;
 	time_t          cur_time;
 
 	sig_block(SIGTERM);
 	cur_time = time(0);
-	fifo_name = getFifo_name();
+	fifo_path = getFifo_name();
 	strnum[fmt_ulong(strnum, getpid())] = 0;
 	if (verbose || _debug) {
-		out("ProcessInFifo", strnum);
-		out("ProcessInFifo", " INFIFO ");
-		out("ProcessInFifo", fifo_name);
-		out("ProcessInFifo", " ARGH!! Committing suicide on SIGTERM\n");
-		flush("ProcessInFifo");
+		logfunc("ProcessInFifo", strnum);
+		logfunc("ProcessInFifo", " INFIFO ");
+		logfunc("ProcessInFifo", fifo_path ? fifo_path : "socket");
+		logfunc("ProcessInFifo", " ARGH!! Committing suicide on SIGTERM\n");
+		(tcpserver ? errflush : flush) ("ProcessInFifo");
 	}
-	out("ProcessInFifo", "User Query ");
+	logfunc("ProcessInFifo", "User Query ");
 	strnum[fmt_uint(strnum, user_query_count)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", ", Relay Query ");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", ", Relay Query ");
 	strnum[fmt_uint(strnum, relay_query_count)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", ", Password Query ");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", ", Password Query ");
 	strnum[fmt_uint(strnum, pwd_query_count)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", ":");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", ":");
 	strnum[fmt_uint(strnum, limit_query_count)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", ", Alias Query ");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", ", Alias Query ");
 	strnum[fmt_uint(strnum, alias_query_count)] = 0;
-	out("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", strnum);
 	total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + dom_query_count;
 #ifdef CLUSTERED_SITE
-	out("ProcessInFifo", ", Host Query ");
+	logfunc("ProcessInFifo", ", Host Query ");
 	strnum[fmt_uint(strnum, host_query_count)] = 0;
-	out("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", strnum);
 	total_count += host_query_count;
 #endif
-	out("ProcessInFifo", ", Domain Query ");
+	logfunc("ProcessInFifo", ", Domain Query ");
 	strnum[fmt_uint(strnum, dom_query_count)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", " Cached Nodes ");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", " Cached Nodes ");
 	strnum[fmt_uint(strnum, btree_count)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", "\n");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", "\n");
 
-	out("ProcessInFifo", "Start Time: ");
-	out("ProcessInFifo", ctime(&start_time));
-	out("ProcessInFifo", "End   Time: ");
-	out("ProcessInFifo", ctime(&cur_time));
-	out("ProcessInFifo", "Queries ");
+	logfunc("ProcessInFifo", "Start Time: ");
+	logfunc("ProcessInFifo", ctime(&start_time));
+	logfunc("ProcessInFifo", "End   Time: ");
+	logfunc("ProcessInFifo", ctime(&cur_time));
+	logfunc("ProcessInFifo", "Queries ");
 	strnum[fmt_ulong(strnum, total_count)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", ", Total Time ");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", ", Total Time ");
 	strnum[fmt_ulong(strnum, cur_time - start_time)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", " secs, Query/Sec = ");
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", " secs, Query/Sec = ");
 	strnum[fmt_double(strnum, (float) ((float) total_count/(cur_time - start_time)), 2)] = 0;
-	out("ProcessInFifo", "\n");
-	flush("ProcessInFifo");
+	logfunc("ProcessInFifo", "\n");
+	(tcpserver ? errflush : flush) ("ProcessInFifo");
 	close_db();
-	unlink(fifo_name);
+	if (fifo_path)
+		unlink(fifo_path);
 	_exit(0);
 }
 #else
@@ -779,124 +708,117 @@ sig_hand(sig, code, scp, addr)
 	struct sigcontext *scp;
 	char           *addr;
 {
-	char           *fifo_name;
+	char           *fifo_path;
 	long            total_count;
 	time_t          cur_time;
 
-	fifo_name = getFifo_name();
+	fifo_path = getFifo_name();
 	if (sig == SIGTERM) {
 		sig_block(sig);
 		if (verbose || _debug) {
 			strnum[fmt_ulong(strnum, getpid())] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", " INFIFO ");
-			out("ProcessInFifo", fifo_name);
-			out("ProcessInFifo", " ARGH!! Committing suicide on SIGTERM\n");
-			flush("ProcessInFifo");
+			logfunc("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", " INFIFO ");
+			logfunc("ProcessInFifo", fifo_path ? fifo_path : "socket");
+			logfunc("ProcessInFifo", " ARGH!! Committing suicide on SIGTERM\n");
+			(tcpserver ? errflush : flush) ("ProcessInFifo");
 		}
 	}
 	if (sig != SIGTERM || verbose || _debug) {
 		strnum[fmt_ulong(strnum, getpid())] = 0;
-		out("ProcessInFifo", strnum);
-		out("ProcessInFifo", " INFIFO ");
-		out("ProcessInFifo", fifo_name);
-		out("ProcessInFifo", ", Got ");
+		logfunc("ProcessInFifo", strnum);
+		logfunc("ProcessInFifo", " INFIFO ");
+		logfunc("ProcessInFifo", fifo_path ? fifo_path : "socket");
+		logfunc("ProcessInFifo", ", Got ");
 #ifdef HAVE_STRSIGNAL
-		out("ProcessInFifo", (char *) strsignal(sig));
+		logfunc("ProcessInFifo", (char *) strsignal(sig));
 #else
-		out("ProcessInFifo", (char *) sys_siglist[sig]);
+		logfunc("ProcessInFifo", (char *) sys_siglist[sig]);
 #endif
-		out("ProcessInFifo", "\n");
-		flush("ProcessInFifo");
+		logfunc("ProcessInFifo", "\n");
+		(tcpserver ? errflush : flush) ("ProcessInFifo");
 	}
 	switch (sig)
 	{
 		case SIGUSR1:
 			strnum[fmt_ulong(strnum, getpid())] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", " INFIFO ");
-			out("ProcessInFifo", fifo_name);
-			out("ProcessInFifo", ", Got SIGUSR1\n");
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", " INFIFO ");
-			out("ProcessInFifo", fifo_name);
-			out("ProcessInFifo", " Dumping Stats\n");
+			logfunc("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", " INFIFO ");
+			logfunc("ProcessInFifo", fifo_path ? fifo_path : "socket");
+			logfunc("ProcessInFifo", ", Got SIGUSR1 Dumping stats\n");
 			/*- flow through */
 		case SIGTERM:
 			cur_time = time(0);
-			out("ProcessInFifo", "User Query ");
+			logfunc("ProcessInFifo", "User Query ");
 			strnum[fmt_uint(strnum, user_query_count)] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", ", Relay Query ");
+			logfunc("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", ", Relay Query ");
 			strnum[fmt_uint(strnum, relay_query_count)] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", ", Password Query ");
+			logfunc("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", ", Password Query ");
 			strnum[fmt_uint(strnum, pwd_query_count)] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", ":");
+			logfunc("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", ":");
 			strnum[fmt_uint(strnum, limit_query_count)] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", ", Alias Query ");
+			logfunc("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", ", Alias Query ");
 			strnum[fmt_uint(strnum, alias_query_count)] = 0;
-			out("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", strnum);
 			total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + dom_query_count;
 #ifdef CLUSTERED_SITE
-			out("ProcessInFifo", ", Host Query ");
+			logfunc("ProcessInFifo", ", Host Query ");
 			strnum[fmt_uint(strnum, host_query_count)] = 0;
-			out("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", strnum);
 			total_count += host_query_count;
 #endif
-			out("ProcessInFifo", ", Domain Query ");
+			logfunc("ProcessInFifo", ", Domain Query ");
 			strnum[fmt_uint(strnum, dom_query_count)] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", " Cached Nodes ");
+			logfunc("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", " Cached Nodes ");
 			strnum[fmt_uint(strnum, btree_count)] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", "\n");
-			out("ProcessInFifo", "Start Time: ");
-			out("ProcessInFifo", ctime(&start_time));
-			out("ProcessInFifo", "End   Time: ");
-			out("ProcessInFifo", ctime(&cur_time));
-			out("ProcessInFifo", "Queries ");
+			logfunc("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", "\n");
+			logfunc("ProcessInFifo", "Start Time: ");
+			logfunc("ProcessInFifo", ctime(&start_time));
+			logfunc("ProcessInFifo", "End   Time: ");
+			logfunc("ProcessInFifo", ctime(&cur_time));
+			logfunc("ProcessInFifo", "Queries ");
 			strnum[fmt_ulong(strnum, total_count)] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", ", Total Time ");
+			logfunc("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", ", Total Time ");
 			strnum[fmt_ulong(strnum, cur_time - start_time)] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", " secs, Query/Sec = ");
+			logfunc("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", " secs, Query/Sec = ");
 			strnum[fmt_double(strnum, (float) ((float) total_count/(cur_time - start_time)), 2)] = 0;
-			out("ProcessInFifo", "\n");
-			flush("ProcessInFifo");
+			logfunc("ProcessInFifo", "\n");
+			(tcpserver ? errflush : flush) ("ProcessInFifo");
 			if (sig == SIGUSR1)
 				twalk(in_root, walk_entry);
 			if (sig == SIGTERM) {
-				flush("ProcessInFifo");
+				(tcpserver ? errflush : flush) ("ProcessInFifo");
 				close_db();
-				unlink(fifo_name);
+				if (fifo_path)
+					unlink(fifo_path);
 				_exit(0);
 			}
 			break;
 		case SIGUSR2:
 			strnum[fmt_ulong(strnum, getpid())] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", " INFIFO ");
-			out("ProcessInFifo", fifo_name);
-			out("ProcessInFifo", " Resetting DEBUG flag to ");
-			out("ProcessInFifo", _debug ? "0\n" : "1\n");
-			flush("ProcessInFifo");
+			logfunc("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", " INFIFO ");
+			logfunc("ProcessInFifo", fifo_path ? fifo_path : "socket");
+			logfunc("ProcessInFifo", " Resetting DEBUG flag to ");
+			logfunc("ProcessInFifo", _debug ? "0\n" : "1\n");
+			(tcpserver ? errflush : flush) ("ProcessInFifo");
 			_debug = (_debug ? 0 : 1);
 			break;
 		case SIGHUP:
 			strnum[fmt_ulong(strnum, getpid())] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", " INFIFO ");
-			out("ProcessInFifo", fifo_name);
-			out("ProcessInFifo", ", Got SIGHUP\n");
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", " INFIFO ");
-			out("ProcessInFifo", fifo_name);
-			out("ProcessInFifo", " Reconfiguring\n");
-			flush("ProcessInFifo");
+			logfunc("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", " INFIFO ");
+			logfunc("ProcessInFifo", fifo_path ? fifo_path : "socket");
+			logfunc("ProcessInFifo", ", Got SIGHUP Reconfiguring\n");
+			(tcpserver ? errflush : flush) ("ProcessInFifo");
 			close_db();
 #ifdef QUERY_CACHE
 			findhost_cache(0);
@@ -923,11 +845,11 @@ sig_hand(sig, code, scp, addr)
 		break;
 		case SIGINT:
 			strnum[fmt_ulong(strnum, getpid())] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", " INFIFO ");
-			out("ProcessInFifo", fifo_name);
-			out("ProcessInFifo", " closing db\n");
-			flush("ProcessInFifo");
+			logfunc("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", " INFIFO ");
+			logfunc("ProcessInFifo", fifo_path ? fifo_path : "socket");
+			logfunc("ProcessInFifo", " closing db\n");
+			(tcpserver ? errflush : flush) ("ProcessInFifo");
 			close_db();
 		break;
 	} /*- switch (sig) */
@@ -940,141 +862,80 @@ sig_hand(sig, code, scp, addr)
 int
 ProcessInFifo(int instNum)
 {
-	int             i, rfd, wfd, bytes, status, idx, pipe_size, readTimeout, writeTimeout, relative, use_btree,
-					max_btree_count, fd, match;
+	int             i, rfd, wfd, bytes, status, idx, pipe_size, readTimeout,
+					writeTimeout, use_btree, max_btree_count, fd, match;
 	INENTRY        *in, *re, *retval;
 	struct passwd  *pw;
-	static stralloc InFifo = {0}, pwbuf = {0}, host_path = {0}, line = {0};
+	static stralloc pwbuf = {0}, host_path = {0}, line = {0};
 	char            tmp[FMT_ULONG], inbuf[512];
-	char           *ptr, *fifoName, *sysconfdir, *infifo_dir, *controldir, *QueryBuf, *email, *myFifo,
-				   *remoteip, *infifo, *local_ip, *cntrl_host, *real_domain;
-	void            (*pstat) ();
+	char           *ptr, *fifoName, *fifo_path, *myFifo, *sysconfdir, *controldir,
+				   *QueryBuf, *email, *remoteip, *local_ip, *cntrl_host,
+				   *real_domain;
+	void            (*pstat) () = NULL;
 	void           *(*search_func) (const void *key, void *const *rootp, int (*compar)(const void *, const void *));
 	time_t          prev_time = 0l;
 	substdio        ssin;
 #ifdef ENABLE_DOMAIN_LIMITS
 	struct vlimits  limits;
 #endif
-#ifdef ENABLE_ENTERPRISE
-	mdir_t          count;
-	long            ucount;
-#endif
 
 	_debug = (env_get("DEBUG") ? 1 : 0);
 	start_time = time(0);
+	tcpserver = env_get("TCPREMOTEIP");
+	if (!tcpserver) {
 #ifdef DARWIN
-	signal(SIGTERM, (void(*)()) isig_term);
-	signal(SIGUSR1, (void(*)()) isig_usr1);
-	signal(SIGUSR2, (void(*)()) isig_usr2);
-	signal(SIGHUP, (void(*)()) isig_hup);
-	signal(SIGINT, (void(*)()) isig_int);
+		signal(SIGTERM, (void(*)()) isig_term);
+		signal(SIGUSR1, (void(*)()) isig_usr1);
+		signal(SIGUSR2, (void(*)()) isig_usr2);
+		signal(SIGHUP, (void(*)()) isig_hup);
+		signal(SIGINT, (void(*)()) isig_int);
 #else
-	signal(SIGTERM, (void(*)()) sig_hand);
-	signal(SIGUSR1, (void(*)()) sig_hand);
-	signal(SIGUSR2, (void(*)()) sig_hand);
-	signal(SIGHUP, (void(*)()) sig_hand);
-	signal(SIGINT, (void(*)()) sig_hand);
+		signal(SIGTERM, (void(*)()) sig_hand);
+		signal(SIGUSR1, (void(*)()) sig_hand);
+		signal(SIGUSR2, (void(*)()) sig_hand);
+		signal(SIGHUP, (void(*)()) sig_hand);
+		signal(SIGINT, (void(*)()) sig_hand);
 #endif
-#ifdef ENABLE_ENTERPRISE
-	for (;;) {
-		if ((count = count_table("indimail", 0)) == -1) {
-			flush_stack();
-			out("ProcessInFifo", "InLookup[");
-			strnum[fmt_uint(strnum, instNum)] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", "] PPID ");
-			strnum[fmt_ulong(strnum, getppid())] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", " PID ");
-			strnum[fmt_ulong(strnum, getpid())] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", " unable to get count\n");
-			flush("ProcessInFifo");
-			sleep(5);
-			continue;
-		}
-		iclose();
-		getEnvConfigLong(&ucount, "MAXUSERS", 10000);
-		if (count > ucount && (idx = do_startup(instNum))) {
-			out("ProcessInFifo", "enterprise version requires plugin\n");
-			flush("ProcessInFifo");
-			if (idx)
-				out("ProcessInFifo", "invalid plugin\n");
-			flush("ProcessInFifo");
-			sleep(5);
+	}
+	logfunc = tcpserver ? errout : out;
+	logfunc("ProcessInFifo", "InLookup[");
+	if (!tcpserver) {
+		strnum[fmt_uint(strnum, instNum)] = 0;
+		logfunc("ProcessInFifo", strnum);
+	} else {
+		logfunc("ProcessInFifo", tcpserver);
+	}
+	logfunc("ProcessInFifo", "] PPID ");
+	strnum[fmt_uint(strnum, getppid())] = 0;
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", " PID ");
+	strnum[fmt_uint(strnum, getpid())] = 0;
+	logfunc("ProcessInFifo", strnum);
+	logfunc("ProcessInFifo", "\n");
+	(tcpserver ? errflush : flush) ("ProcessInFifo");
+	fifo_path = getFifo_name();
+	if (!tcpserver) {
+		/*- Open the Fifos */
+		if (FifoCreate(fifo_path) == -1) {
+			strerr_warn3("InLookup: FifoCreate: ", fifo_path, ": ", &strerr_sys);
+			return (-1);
+		} else
+		if ((rfd = open_readwrite(fifo_path)) == -1) {
+			strerr_warn3("InLookup: open_readwrite: ", fifo_path, ": ", &strerr_sys);
+			return (-1);
+		} else 
+		if ((pipe_size = fpathconf(rfd, _PC_PIPE_BUF)) == -1) {
+			strerr_warn3("InLookup: fpathconf _PC_PIPE_BUF: ", fifo_path, ": ", &strerr_sys);
 			return (-1);
 		}
-		out("ProcessInFifo", "InLookup[");
-		strnum[fmt_uint(strnum, instNum)] = 0;
-		out("ProcessInFifo", strnum);
-		out("ProcessInFifo", "] PPID ");
-		strnum[fmt_uint(strnum, getppid())] = 0;
-		out("ProcessInFifo", strnum);
-		out("ProcessInFifo", " PID ");
-		strnum[fmt_uint(strnum, getpid())] = 0;
-		out("ProcessInFifo", strnum);
-		out("ProcessInFifo", " with ");
-		strnum[fmt_uint(strnum, count)] = 0;
-		out("ProcessInFifo", strnum);
-		out("ProcessInFifo", " users\n");
-		flush("ProcessInFifo");
-		break;
-	}
-#else
-	out("ProcessInFifo", "InLookup[");
-	strnum[fmt_uint(strnum, instNum)] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", "] PPID ");
-	strnum[fmt_uint(strnum, getppid())] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", " PID ");
-	strnum[fmt_uint(strnum, getpid())] = 0;
-	out("ProcessInFifo", strnum);
-	out("ProcessInFifo", "\n");
-	flush("ProcessInFifo");
-#endif
-	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
-	getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
-	relative = *infifo_dir == '/' ? 0 : 1;
-	getEnvConfigStr(&infifo, "INFIFO", INFIFO);
-	if (*infifo == '/' || *infifo == '.') {
-		if (!stralloc_copys(&InFifo, infifo) ||
-				!stralloc_0(&InFifo))
+		if (!(QueryBuf = (char *) alloc(pipe_size * sizeof(char))))
 			die_nomem();
 	} else {
-		if (relative) {
-			if (!stralloc_copys(&InFifo, INDIMAILDIR) ||
-					!stralloc_cats(&InFifo, infifo_dir) ||
-					!stralloc_append(&InFifo, "/") ||
-					!stralloc_cats(&InFifo, infifo) ||
-					!stralloc_0(&InFifo))
-				die_nomem();
-		} else {
-			if (indimailuid == -1 || indimailgid == -1)
-				get_indimailuidgid(&indimailuid, &indimailgid);
-			r_mkdir(infifo_dir, 0775, indimailuid, indimailgid);
-			if (!stralloc_copys(&InFifo, infifo_dir) ||
-					!stralloc_append(&InFifo, "/") ||
-					!stralloc_cats(&InFifo, infifo) ||
-					!stralloc_0(&InFifo))
-				die_nomem();
-		}
+		pipe_size = 1024;
+		if (!(QueryBuf = (char *) alloc(pipe_size * sizeof(char))))
+			die_nomem();
+		rfd = 0;
 	}
-	/*- Open the Fifos */
-	if (FifoCreate(InFifo.s) == -1) {
-		strerr_warn3("InLookup: FifoCreate: ", InFifo.s, ": ", &strerr_sys);
-		return (-1);
-	} else
-	if ((rfd = open_readwrite(InFifo.s)) == -1) {
-		strerr_warn3("InLookup: open_readwrite: ", InFifo.s, ": ", &strerr_sys);
-		return (-1);
-	} else 
-	if ((pipe_size = fpathconf(rfd, _PC_PIPE_BUF)) == -1) {
-		strerr_warn3("InLookup: fpathconf _PC_PIPE_BUF: ", InFifo.s, ": ", &strerr_sys);
-		return (-1);
-	}
-	if (!(QueryBuf = (char *) alloc(pipe_size * sizeof(char))))
-		die_nomem();
 	user_query_count = relay_query_count = pwd_query_count = limit_query_count = alias_query_count = dom_query_count = 0;
 #ifdef CLUSTERED_SITE
 	host_query_count = 0;
@@ -1083,27 +944,33 @@ ProcessInFifo(int instNum)
 		local_ip = "127.0.0.1";
 		strerr_warn1("ProcessInFifo: get_local_ip failed. using localhost", 0);
 	}
-	if ((pstat = signal(SIGPIPE, SIG_IGN)) == SIG_ERR) {
-		strerr_warn1("InLookup: signal: ", &strerr_sys);
-		return (-1);
+	if (!tcpserver) {
+		if ((pstat = signal(SIGPIPE, SIG_IGN)) == SIG_ERR) {
+			strerr_warn1("InLookup: signal: ", &strerr_sys);
+			return (-1);
+		}
+		ptr = env_get("USE_BTREE");
+		use_btree = ((ptr && *ptr == '1') ? 1 : 0);
+		scan_uint((ptr = env_get("MAX_BTREE_COUNT")) && *ptr ? ptr : "-1", (unsigned int *) &max_btree_count);
+		search_func = (void *) tsearch; /*- this adds a record if not found */
+		fifoName = fifo_path;
+		match = str_rchr(fifo_path, '/');
+		if (fifo_path[match])
+			fifoName = fifo_path + match + 1;
+	} else {
+		use_btree = 0;
+		fifoName = fifo_path = tcpserver;
 	}
-	ptr = env_get("USE_BTREE");
-	use_btree = ((ptr && *ptr == '1') ? 1 : 0);
-	scan_uint((ptr = env_get("MAX_BTREE_COUNT")) && *ptr ? ptr : "-1", (unsigned int *) &max_btree_count);
-	search_func = (void *) tsearch; /*- this adds a record if not found */
-	fifoName = InFifo.s;
-	match = str_rchr(fifoName, '/');
-	if (fifoName[match])
-		fifoName = InFifo.s + match + 1;
 	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	getTimeoutValues(&readTimeout, &writeTimeout, sysconfdir, controldir);
 	for (bytes = 0;getppid() != 1;) {
 		if ((idx = read(rfd, (char *) &bytes, sizeof(int))) == -1) {
 			strnum[fmt_uint(strnum, errno)] = 0;
-			out("ProcessInFifo", "errno = ");
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", "\n");
-			flush("ProcessInFifo");
+			logfunc("ProcessInFifo", "errno = ");
+			logfunc("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", "\n");
+			(tcpserver ? errflush : flush) ("ProcessInFifo");
 #ifdef ERESTART
 			if (errno != error_intr && errno != error_restart)
 #else
@@ -1117,45 +984,55 @@ ProcessInFifo(int instNum)
 		} else
 		if (!idx) {
 			close(rfd);
-			if ((rfd = open_readwrite(InFifo.s)) == -1) {
-				strerr_warn3("InLookup: open_readwrite: ", InFifo.s, ": ", &strerr_sys);
-				signal(SIGPIPE, pstat);
-				return (-1);
+			if (!tcpserver) {
+				if ((rfd = open_readwrite(fifo_path)) == -1) {
+					strerr_warn3("InLookup: open_readwrite: ", fifo_path, ": ", &strerr_sys);
+					signal(SIGPIPE, pstat);
+					return (-1);
+				} else
+					continue;
 			} else
-				continue;
+				return (0);
 		} else
 		if (bytes > pipe_size) {
 			errno = EMSGSIZE;
 			strnum[fmt_uint(strnum, bytes)] = 0;
 			tmp[fmt_uint(tmp, pipe_size)] = 0;
 			strerr_warn5("InLookup: bytes ", strnum, ", pipe_size ", tmp, ": ", &strerr_sys);
+			if (tcpserver)
+				return (1);
 			continue;
 		} else
 		if ((idx = timeoutread(readTimeout, rfd, QueryBuf, bytes)) == -1) {
 			strerr_warn1("InLookup: read-int: ", &strerr_sys);
+			if (tcpserver)
+				return (1);
 			continue;
 		} else
 		if (!idx) {
-			close(rfd);
-			if ((rfd = open_readwrite(InFifo.s)) == -1) {
-				strerr_warn3("InLookup: open_readwrite: ", InFifo.s, ": ", &strerr_sys);
-				signal(SIGPIPE, pstat);
-				return (-1);
+			if (!tcpserver) {
+				close(rfd);
+				if ((rfd = open_readwrite(fifo_path)) == -1) {
+					strerr_warn3("InLookup: open_readwrite: ", fifo_path, ": ", &strerr_sys);
+					signal(SIGPIPE, pstat);
+					return (-1);
+				} else
+					continue;
 			} else
-				continue;
+				return (-1); /*- partial read */
 		}
 		if (verbose || _debug)
 			prev_time = time(0);
 #ifdef CLUSTERED_SITE
-		if (relative) {
-			if (!stralloc_copys(&host_path, sysconfdir) ||
-					!stralloc_append(&host_path, "/") ||
-					!stralloc_cats(&host_path, controldir) ||
+		if (*controldir == '/') {
+			if (!stralloc_copys(&host_path, controldir) ||
 					!stralloc_catb(&host_path, "/host.cntrl", 11) ||
 					!stralloc_0(&host_path))
 				die_nomem();
 		} else {
-			if (!stralloc_copys(&host_path, controldir) ||
+			if (!stralloc_copys(&host_path, sysconfdir) ||
+					!stralloc_append(&host_path, "/") ||
+					!stralloc_cats(&host_path, controldir) ||
 					!stralloc_catb(&host_path, "/host.cntrl", 11) ||
 					!stralloc_0(&host_path))
 				die_nomem();
@@ -1184,7 +1061,8 @@ ProcessInFifo(int instNum)
 		if (line.len) {
 			if (!isopen_cntrl && open_central_db(cntrl_host)) {
 				strerr_warn1("InLookup: Unable to open central db", 0);
-				signal(SIGPIPE, pstat);
+				if (!tcpserver)
+					signal(SIGPIPE, pstat);
 				return (-1);
 			}
 			if (in_mysql_ping(&mysql[0])) {
@@ -1193,7 +1071,8 @@ ProcessInFifo(int instNum)
 				isopen_cntrl = 0;
 				if (open_central_db(cntrl_host)) {
 					strerr_warn1("InLookup: Unable to open central db", 0);
-					signal(SIGPIPE, pstat);
+					if (!tcpserver)
+						signal(SIGPIPE, pstat);
 					return (-1);
 				}
 			}
@@ -1237,30 +1116,33 @@ ProcessInFifo(int instNum)
 		ptr++;
 		remoteip = ptr;
 		if (verbose || _debug) {
-			out("ProcessInFifo", fifoName);
-			out("ProcessInFifo", "->");
-			out("ProcessInFifo", myFifo);
-			out("ProcessInFifo", ", Bytes ");
+			logfunc("ProcessInFifo", fifoName);
+			logfunc("ProcessInFifo", "->");
+			logfunc("ProcessInFifo", myFifo);
+			logfunc("ProcessInFifo", ", Bytes ");
 			strnum[fmt_int(strnum, bytes)] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", ", Query [");
-			out("ProcessInFifo", query_type(*QueryBuf));
-			out("ProcessInFifo", "], User ");
-			out("ProcessInFifo", email);
-			out("ProcessInFifo", ", RemoteIp ");
-			out("ProcessInFifo", *QueryBuf == 2 ? remoteip : "N/A");
-			out("ProcessInFifo", "\n");
-			flush("ProcessInFifo");
+			logfunc("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", ", Query [");
+			logfunc("ProcessInFifo", query_type(*QueryBuf));
+			logfunc("ProcessInFifo", "], User ");
+			logfunc("ProcessInFifo", email);
+			logfunc("ProcessInFifo", ", RemoteIp ");
+			logfunc("ProcessInFifo", *QueryBuf == 2 ? remoteip : "N/A");
+			logfunc("ProcessInFifo", "\n");
+			(tcpserver ? errflush : flush) ("ProcessInFifo");
 		}
-		if ((wfd = open_write(myFifo)) == -1) {
-			strerr_warn5(errno == error_acces ?  "InLookup: open-write: " : "InLookup: open-probably-timeout: ",
-					myFifo, ": QueryType ", query_type(*QueryBuf), ": ", &strerr_sys);
-			if (errno != ENOENT && unlink(myFifo))
+		if (!tcpserver) {
+			if ((wfd = open_write(myFifo)) == -1) {
+				strerr_warn5(errno == error_acces ?  "InLookup: open-write: " : "InLookup: open-probably-timeout: ",
+						myFifo, ": QueryType ", query_type(*QueryBuf), ": ", &strerr_sys);
+				if (errno != ENOENT && unlink(myFifo))
+					strerr_warn3("InLookup: unlink: ", myFifo, ": ", &strerr_sys);
+				continue;
+			} else
+			if (unlink(myFifo)) /*- make this invisible */
 				strerr_warn3("InLookup: unlink: ", myFifo, ": ", &strerr_sys);
-			continue;
 		} else
-		if (unlink(myFifo)) /*- make this invisible */
-			strerr_warn3("InLookup: unlink: ", myFifo, ": ", &strerr_sys);
+			wfd = 1;
 		switch(*QueryBuf)
 		{
 			case USER_QUERY:
@@ -1279,11 +1161,11 @@ ProcessInFifo(int instNum)
 							re->in_userStatus = status;
 						} else
 						if (verbose || _debug) {
-							out("ProcessInFifo", fifoName);
-							out("ProcessInFifo", "->");
-							out("ProcessInFifo", myFifo);
-							out("ProcessInFifo", ", cache hit\n");
-							flush("ProcessInFifo");
+							logfunc("ProcessInFifo", fifoName);
+							logfunc("ProcessInFifo", "->");
+							logfunc("ProcessInFifo", myFifo);
+							logfunc("ProcessInFifo", ", cache hit\n");
+							(tcpserver ? errflush : flush) ("ProcessInFifo");
 						}
 						in_free_func(in); /*- Prevents data leak: in was already present.  */
 					} else {/*- New entry in was added.  */
@@ -1294,15 +1176,23 @@ ProcessInFifo(int instNum)
 							search_func = tfind;
 					}
 				}
-				if (timeoutwrite(writeTimeout, wfd, (char *) &status, sizeof(int)) == -1)
+				if (timeoutwrite(writeTimeout, wfd, (char *) &status, sizeof(int)) == -1) {
 					strerr_warn1("InLookup: write-UserInLookup: ", &strerr_sys);
-				close(wfd);
+					if (tcpserver)
+						return (-1);
+				}
+				if (!tcpserver)
+					close(wfd);
 				break;
 			case RELAY_QUERY:
 				status = RelayInLookup(email, remoteip);
-				if (timeoutwrite(writeTimeout, wfd, (char *) &status, sizeof(int)) == -1)
+				if (timeoutwrite(writeTimeout, wfd, (char *) &status, sizeof(int)) == -1) {
 					strerr_warn1("InLookup: write-RelayInLookup: ", &strerr_sys);
-				close(wfd);
+					if (tcpserver)
+						return (-1);
+				}
+				if (!tcpserver)
+					close(wfd);
 				break;
 #ifdef CLUSTERED_SITE
 			case HOST_QUERY:
@@ -1321,11 +1211,11 @@ ProcessInFifo(int instNum)
 								re->mdahost = in_strdup(ptr);
 						} else
 						if (verbose || _debug) {
-							out("ProcessInFifo", fifoName);
-							out("ProcessInFifo", "->");
-							out("ProcessInFifo", myFifo);
-							out("ProcessInFifo", ", cache hit\n");
-							flush("ProcessInFifo");
+							logfunc("ProcessInFifo", fifoName);
+							logfunc("ProcessInFifo", "->");
+							logfunc("ProcessInFifo", myFifo);
+							logfunc("ProcessInFifo", ", cache hit\n");
+							(tcpserver ? errflush : flush) ("ProcessInFifo");
 						}
 						in_free_func(in); /*- Prevents data leak: in was already present.  */
 					} else {/*- New entry in was added.  */
@@ -1342,12 +1232,18 @@ ProcessInFifo(int instNum)
 					bytes = (userNotFound ? 0 : -1);
 				if (bytes > pipe_size)
 					bytes = -1;
-				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
+				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1) {
 					strerr_warn1("InLookup: write-findmdahost: ", &strerr_sys);
-				else
-				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, ptr, bytes) == -1)
+					if (tcpserver)
+						return (-1);
+				} else
+				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, ptr, bytes) == -1) {
 					strerr_warn1("InLookup: write-findmdahost: ", &strerr_sys);
-				close(wfd);
+					if (tcpserver)
+						return (-1);
+				}
+				if (!tcpserver)
+					close(wfd);
 				break;
 #endif
 			case ALIAS_QUERY:
@@ -1366,11 +1262,11 @@ ProcessInFifo(int instNum)
 								re->aliases = in_strdup(ptr);
 						} else
 						if (verbose || _debug) {
-							out("ProcessInFifo", fifoName);
-							out("ProcessInFifo", "->");
-							out("ProcessInFifo", myFifo);
-							out("ProcessInFifo", ", cache hit\n");
-							flush("ProcessInFifo");
+							logfunc("ProcessInFifo", fifoName);
+							logfunc("ProcessInFifo", "->");
+							logfunc("ProcessInFifo", myFifo);
+							logfunc("ProcessInFifo", ", cache hit\n");
+							(tcpserver ? errflush : flush) ("ProcessInFifo");
 						}
 						in_free_func(in); /*- Prevents data leak: in was already present.  */
 					} else {/*- New entry in was added.  */
@@ -1388,12 +1284,18 @@ ProcessInFifo(int instNum)
 					bytes = 1; /*- write Null Byte */
 					ptr = "\0";
 				}
-				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
+				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1) {
 					strerr_warn1("InLookup: write-AliasInLookup: ", &strerr_sys);
-				else
-				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, ptr, bytes) == -1)
+					if (tcpserver)
+						return (-1);
+				} else
+				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, ptr, bytes) == -1) {
 					strerr_warn1("InLookup: write-AliasInLookup: ", &strerr_sys);
-				close(wfd);
+					if (tcpserver)
+						return (-1);
+				}
+				if (!tcpserver)
+					close(wfd);
 				break;
 			case PWD_QUERY:
 				i = str_rchr(email, '@');
@@ -1427,11 +1329,11 @@ ProcessInFifo(int instNum)
 							pw = &re->in_pw;
 							real_domain = re->domain;
 							if (verbose || _debug) {
-								out("ProcessInFifo", fifoName);
-								out("ProcessInFifo", "->");
-								out("ProcessInFifo", myFifo);
-								out("ProcessInFifo", ", cache hit\n");
-								flush("ProcessInFifo");
+								logfunc("ProcessInFifo", fifoName);
+								logfunc("ProcessInFifo", "->");
+								logfunc("ProcessInFifo", myFifo);
+								logfunc("ProcessInFifo", ", cache hit\n");
+								(tcpserver ? errflush : flush) ("ProcessInFifo");
 							}
 						}
 						in_free_func(in); /*- Prevents data leak: in was already present.  */
@@ -1485,12 +1387,18 @@ ProcessInFifo(int instNum)
 					bytes = pwbuf.len;
 				} else
 					bytes = 0;
-				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
+				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1) {
 					strerr_warn1("InLookup: write-PwdInLookup: ", &strerr_sys);
-				else
-				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, pwbuf.s, bytes) == -1)
+					if (tcpserver)
+						return (-1);
+				} else
+				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, pwbuf.s, bytes) == -1) {
 					strerr_warn1("InLookup: write-PwdInLookup: ", &strerr_sys);
-				close(wfd);
+					if (tcpserver)
+						return (-1);
+				}
+				if (!tcpserver)
+					close(wfd);
 				break;
 #ifdef ENABLE_DOMAIN_LIMITS
 			case LIMIT_QUERY:
@@ -1504,12 +1412,18 @@ ProcessInFifo(int instNum)
 					if (bytes > pipe_size)
 						bytes = -1;
 				}
-				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
+				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1) {
 					strerr_warn1("InLookup: write-VlimitInLookup: ", &strerr_sys);
-				else
-				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, (char *) &limits, bytes) == -1)
+					if (tcpserver)
+						return (-1);
+				} else
+				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, (char *) &limits, bytes) == -1) {
 					strerr_warn1("InLookup: write-VlimitInLookup: ", &strerr_sys);
-				close(wfd);
+					if (tcpserver)
+						return (-1);
+				}
+				if (!tcpserver)
+					close(wfd);
 				break;
 #endif
 			case DOMAIN_QUERY:
@@ -1518,24 +1432,32 @@ ProcessInFifo(int instNum)
 				bytes = str_len(real_domain) + 1;
 				if (bytes > pipe_size)
 					bytes = -1;
-				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1)
+				if (timeoutwrite(writeTimeout, wfd, (char *) &bytes, sizeof(int)) == -1) {
 					strerr_warn1("InLookup: write-get_real_domain: ", &strerr_sys);
-				else
-				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, real_domain, bytes) == -1)
+					if (tcpserver)
+						return (-1);
+				} else
+				if (bytes > 0 && timeoutwrite(writeTimeout, wfd, real_domain, bytes) == -1) {
 					strerr_warn1("InLookup: write-get_real_domain: ", &strerr_sys);
-				close(wfd);
+					if (tcpserver)
+						return (-1);
+				}
+				if (!tcpserver)
+					close(wfd);
 				break;
 		} /*- switch(*QueryBuf) */
 		if (verbose || _debug) {
 			strnum[fmt_ulong(strnum, time(0) - prev_time)] = 0;
-			out("ProcessInFifo", strnum);
-			out("ProcessInFifo", " ");
-			out("ProcessInFifo", query_type(*QueryBuf));
-			out("ProcessInFifo", " -> ");
-			out("ProcessInFifo", myFifo);
-			out("ProcessInFifo", "\n");
-			flush("ProcessInFifo");
+			logfunc("ProcessInFifo", strnum);
+			logfunc("ProcessInFifo", " ");
+			logfunc("ProcessInFifo", query_type(*QueryBuf));
+			logfunc("ProcessInFifo", " -> ");
+			logfunc("ProcessInFifo", myFifo);
+			logfunc("ProcessInFifo", "\n");
+			(tcpserver ? errflush : flush) ("ProcessInFifo");
 		}
+		if (tcpserver)
+			return (0);
 	} /*- for (QueryBuf = (char *) 0;;) */
 	signal(SIGPIPE, pstat);
 	return (1);

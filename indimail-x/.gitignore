@@ -88,6 +88,7 @@ indisub.c
 indiversion
 initsvc
 inlookup
+tcplookup
 inlookup.8
 inquerytest
 install_tables
@@ -221,3 +222,5 @@ indimail_config.h
 conf-release
 ChangeLog
 NEWS
+mytcplookup.c
+tcplookup.8

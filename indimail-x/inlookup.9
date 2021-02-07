@@ -7,10 +7,11 @@ inlookup \- Connection Pooling server for Name Lookups
 
 .SH DESCRIPTION
 .PP
-\fBinlookup\fR(8) is a connection pooling server to serve requests for inquery() function. It is
-implemented over two FIFOs. One fixed FIFO for reading the query and reading the path of a
-randomly generated FIFO. The other FIFO is the randomly generated FIFO used for writing result
-of the query back.
+\fBinlookup\fR(8) is a query caching, connection pooling server to serve
+requests for inquery() function. It is implemented over two FIFOs. One
+fixed FIFO for reading the query and reading the path of a randomly
+generated FIFO. The other FIFO is the randomly generated FIFO used for
+writing back to the client, the result of the query.
 .PP
 \fBinlookup\fR(8) creates a read FIFO determined by the environment variable INFIFO. If INFIFO is
 not defined, the default FIFO used is INDIMAILDIR/inquery/infifo. \fBinlookup\fR(8) then goes
@@ -28,6 +29,11 @@ The information of all databases that \fBinlookup\fR needs to connect to can mai
 file \fBmcdinfo\fR. Without this file, \fBinlookup\fR will use the
 \fIhost.mysql\fR control file.
 
+\fBinlookup\fR can be run under tcpserver(1) to respond to inquery(3) request on a TCP/IP port.
+When run under tcpserver \fBinlookup\fR uses TCP/IP sockets instead of FIFOs. Also when
+run under tcpserver(1), the requests will not be cached. You can instead run
+\fBtcplookup(8)\fR instead under tcpserver(1) to utilize caching.
+
 You can use
 .B dbinfo(1)
 program to edit
@@ -40,8 +46,8 @@ needs to connect to, the following lines need to be maintained
  server   localhost
  mdahost  192.9.0.1
  port     3306
- database vpopmail
- user     vpopmail
+ database indimail
+ user     indimail
  pass     passwd
 
 
@@ -122,4 +128,5 @@ This causes \fBinlookup\fR(8) to terminate.
 Returns on SIGTERM with exit status = 1.
 
 .SH "SEE ALSO"
-inquerytest(8), proxyimap(8), proxypop3(8), vchkpass(8), authindi(8), tsearch(3)
+inquerytest(8), tcplookup(8), proxyimap(8), proxypop3(8), vchkpass(8), authindi(8),
+tsearch(3), inquery(3)

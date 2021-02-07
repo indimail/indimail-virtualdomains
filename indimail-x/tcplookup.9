@@ -1,0 +1,29 @@
+.TH tcplookup 8
+.SH NAME
+tcplookup \- TCP/IP frontend for inlookup
+
+.SH SYNOPSYS
+\fBtcplookup\fR [\fB\-v\fR]
+
+.SH DESCRIPTION
+.PP
+\fBtcplookup\fR(8) provides TCP/IP frontend for inlookup(8) - IndiMail's query
+caching and lookup daemon. It can be used if you want qmail-smtpd(8) to access
+indimail's database over network instead of local named pipes (FIFOs). This will
+be required if you want to have indimail-mta, and indimail installed on different
+hosts.
+.PP
+Please be aware that \fBtcplookup\fR doesn't provide any security based access
+to query. Hence it should be implemented with tcpserver acceess control using
+tcprules cdb database.
+
+\fBtcplookup\fR is available as @prefix@/sbin/tcplookup and a tcpserver module
+@prefix@/lib/indimail/modules/tcplookup.so.
+
+.SH OPTIONS
+.TP
+\fB\-v\fR
+Sets verbose option.
+
+.SH RETURN VALUE
+Returns 111 on system error, 100 on wrong usage and 0 on success.
