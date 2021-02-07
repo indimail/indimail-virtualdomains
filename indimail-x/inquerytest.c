@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 1.4  2021-02-07 20:30:25+05:30  Cprogrammer
+ * minor code optimization
+ *
  * Revision 1.3  2020-04-01 18:55:55+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -51,7 +54,7 @@
 #include "vlimits.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 1.3 2020-04-01 18:55:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 1.4 2021-02-07 20:30:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "inquerytest: fatal: "
@@ -331,8 +334,6 @@ main(int argc, char **argv)
 		}
 		pid = -1;
 	}
-	getEnvConfigStr(&default_table, "MYSQL_TABLE", MYSQL_DEFAULT_TABLE);
-	getEnvConfigStr(&inactive_table, "MYSQL_INACTIVE_TABLE", MYSQL_INACTIVE_TABLE);
 	if (!(dbptr = inquery(query_type, email, ipaddr))) {
 		if (userNotFound)
 			strerr_warn2(email, ": No such user", 0);
@@ -420,6 +421,8 @@ main(int argc, char **argv)
 		out("inquerytest", pw->pw_shell);
 		out("inquerytest", "\n");
 		out("inquerytest", "Table    : ");
+		getEnvConfigStr(&default_table, "MYSQL_TABLE", MYSQL_DEFAULT_TABLE);
+		getEnvConfigStr(&inactive_table, "MYSQL_INACTIVE_TABLE", MYSQL_INACTIVE_TABLE);
 		out("inquerytest", is_inactive ? inactive_table : default_table);
 		out("inquerytest", "\n");
 		flush("inquerytest");

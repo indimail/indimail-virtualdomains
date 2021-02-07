@@ -11,6 +11,14 @@ iauth_la_DEPENDENCIES = libindimail.la
 iauth_la_LDFLAGS = -L.libs -module -avoid-version -shared -rdynamic -no-undefined -nostartfiles $(LDFLAGS)
 iauthdir=@libdir@
 
+tcplookup_LTLIBRARIES = tcplookup.la
+tcplookup_la_SOURCES = mytcplookup.c
+tcplookup_la_LIBADD = libindimail.la
+tcplookup_la_DEPENDENCIES = libindimail.la mytcplookup.lo
+tcplookup_la_CFLAGS = -fPIC
+tcplookup_la_LDFLAGS = -L.libs -module -avoid-version -shared -rdynamic -no-undefined -nostartfiles $(LDFLAGS)
+tcplookupdir=@libdir@
+
 libindimail_LTLIBRARIES = libindimail.la
 libindimail_la_SOURCES = $(COMMONSOURCES)
 libindimail_la_LIBADD = @LIB_MYSQL@ @LIB_QMAIL@ @LIB_SSL@ -lm
@@ -36,7 +44,7 @@ man_MANS=adminclient.8 chowkidar.8 clearopensmtp.8 crc.1 crcdiff.1 \
 	IndiMail.7 indisrvr.8 initsvc.1 inlookup.8 InLookup.8 inquerytest.8 \
 	install_tables.8 ipchange.8 ismaildup.1 login_tasks.3 \
 	mgmtpass.8 osh.8 postdel.8 printdir.1 proxyimap.8 proxypop3.8 \
-	resetquota.8 updaterules.8 vacation.8 \
+	resetquota.8 updaterules.8 vacation.8 tcplookup.8 \
 	vaddaliasdomain.1 vadddomain.1 vadduser.1 valias.1 vatrn.1 \
 	vbulletin.1 vcalias.8 vcaliasrev.8 vcfilter.1 vchkpass.8 vdeldomain.1 \
 	vdelivermail.8 vdeloldusers.8 vdeluser.1 vdominfo.1 vfilter.8 \
@@ -163,6 +171,11 @@ iauth.la: $(iauth_la_OBJECTS) $(iauth_la_DEPENDENCIES)
 	-o $@ iauth.lo $(iauth_la_LDFLAGS) \
 	$(iauth_la_LIBADD) -rpath @libdir@
 
+tcplookup.la: $(tcplookup_la_OBJECTS) $(tcplookup_la_DEPENDENCIES)
+	$(LIBTOOL) --mode=link $(COMPILE) $(MODFLAGS) \
+	-o $@ mytcplookup.lo $(tcplookup_la_LDFLAGS) \
+	$(tcplookup_la_LIBADD) -rpath @libdir@
+
 indimailbin_PROGRAMS = vadddomain vdeldomain vadduser vdeluser vuserinfo \
 	vaddaliasdomain vrenamedomain dbinfo vdominfo \
 	vmoduser printdir ismaildup valias vcalias hostcntrl \
@@ -171,8 +184,8 @@ indimailbin_PROGRAMS = vadddomain vdeldomain vadduser vdeluser vuserinfo \
 	vpriv crc crcdiff incrypt vgroup proxyimap proxypop3 \
 	vproxy vbulletin
 
-indimailsbin_PROGRAMS = inlookup vdelivermail clearopensmtp updaterules \
-	vfilter vmoddomain inquerytest vreorg vtable \
+indimailsbin_PROGRAMS = inlookup tcplookup vdelivermail clearopensmtp \
+	updaterules vfilter vmoddomain inquerytest vreorg vtable \
 	install_tables hostsync vserverinfo initsvc \
 	mgmtpass vchkpass vsetpass resetquota \
 	ipchange adminclient indisrvr vdeloldusers vfstab \
@@ -200,7 +213,7 @@ post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain 
 
 MOSTLYCLEANFILES=vcaliasrev myslave controlsync bogofilter-qfe \
 	cronlist.i incrypt vdeluser_handle vrenameuser_handle \
-	cscope.* *.dSYM mailzipper \
+	cscope.* *.dSYM mailzipper mytcplookup.c tcplookup.8 \
 	perm_list.indimail dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
 	vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
 	vcfilter.1 indimail.7 indimail.mrtg.cfg overquota.sh \
@@ -281,9 +294,14 @@ vsmtp_DEPENDENCIES = libindimail.la
 
 inlookup_SOURCES = inlookup.c
 inlookup_LDADD = ProcessInFifo.lo AliasInLookup.lo PwdInLookup.lo \
-	RelayInLookup.lo UserInLookup.lo VlimitInLookup.lo libindimail.la -ldl
+	RelayInLookup.lo UserInLookup.lo VlimitInLookup.lo libindimail.la
 inlookup_DEPENDENCIES = ProcessInFifo.lo AliasInLookup.lo PwdInLookup.lo RelayInLookup.lo \
 	UserInLookup.lo VlimitInLookup.lo libindimail.la
+
+tcplookup_SOURCES = tcplookup.c
+tcplookup_LDADD = libindimail.la
+tcplookup_CFLAGS = -DMAIN
+tcplookup_DEPENDENCIES = libindimail.la
 
 printdir_SOURCES = printdir.c
 printdir_LDADD = libindimail.la
@@ -801,6 +819,8 @@ dbinfo.8: dbinfo.9
 	cat dbinfo.9 | sed s}INDIMAIL}$(indimaildir)}g > $@
 inlookup.8: inlookup.9
 	$(editman) inlookup.9 > $@
+tcplookup.8: tcplookup.9
+	$(editman) tcplookup.9 > $@
 vcfilter.1: vcfilter.9
 	cat vcfilter.9 | sed s}SYSCONFDIR}$(sysconfdir)}g > $@
 vadddomain.1: vadddomain.9
@@ -829,6 +849,9 @@ vdelivermail.8: vdelivermail.9
 indimail.7: indimail.9
 	$(editman) indimail.9 > $@
 
+mytcplookup.c: tcplookup.c
+	cp tcplookup.c mytcplookup.c
+
 crc.$(OBJEXT): crc.c
 	$(COMPILE) $(DEFS) -DMAIN -c crc.c
 crc$(EXEEXT): $(crc_DEPENDENCIES) $(crc_OBJECTS)
@@ -850,6 +873,8 @@ install-data-hook: iauth.la indimail.te indimail.fc usr.sbin.mysqld usr.sbin.cla
 	$(mkinstalldirs) $(DESTDIR)@prefix@/lib/indimail/modules || exit 1
 	$(INSTALL_DATA) $(DESTDIR)@libdir@/iauth.so  $(DESTDIR)@prefix@/lib/indimail/modules || exit 1
 	/bin/rm -f $(DESTDIR)@libdir@/iauth.* || exit 1
+	$(INSTALL_DATA) $(DESTDIR)@libdir@/tcplookup.so  $(DESTDIR)@prefix@/lib/indimail/modules || exit 1
+	/bin/rm -f $(DESTDIR)@libdir@/tcplookup.* || exit 1
 	$(mkinstalldirs) $(DESTDIR)@libexecdir@ || exit 1
 	$(INSTALL_DATA) post_handle/* $(DESTDIR)@libexecdir@ || exit 1
 	for f in $(post_handle_list); do \

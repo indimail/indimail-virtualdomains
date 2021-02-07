@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.82 2021-01-12 00:02:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.83 2021-02-07 20:37:21+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -337,8 +337,9 @@ if [ -x /usr/bin/chrpath ] ; then
   /usr/bin/chrpath -d %{buildroot}%{libexecdir}/sq_vacation
   /usr/bin/chrpath -d %{buildroot}%{libexecdir}/qmailmrtg7
   /usr/bin/chrpath -d %{buildroot}%{imoduledir}/iauth.so
+  /usr/bin/chrpath -d %{buildroot}%{imoduledir}/tcplookup.so
 
-  for i in adminclient chowkidar clearopensmtp \
+  for i in adminclient chowkidar clearopensmtp tcplookup \
   hostsync indisrvr inlookup inquerytest install_tables ipchange \
   mgmtpass updatefile updaterules vchkpass vdelivermail \
   vdeloldusers vfilter vfstab vmoddomain vreorg vsetpass \
@@ -410,6 +411,7 @@ done
 %endif
 %if %{undefined nodebug}
   /bin/chmod 755 %{buildroot}%{imoduledir}/iauth.so
+  /bin/chmod 755 %{buildroot}%{imoduledir}/tcplookup.so
 %endif
 
 %files -f config_files.list
@@ -561,6 +563,7 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/indisrvr
 %attr(755,root,root)                    %{_prefix}/sbin/initsvc
 %attr(755,root,root)                    %{_prefix}/sbin/inlookup
+%attr(755,root,root)                    %{_prefix}/sbin/tcplookup
 %attr(755,root,root)                    %{_prefix}/sbin/inquerytest
 %attr(755,root,root)                    %{_prefix}/sbin/install_tables
 %attr(755,root,root)                    %{_prefix}/sbin/vtable
@@ -605,6 +608,7 @@ done
 %attr(755,root,root)                    %{libexecdir}/imapmodules/authindi
 %attr(755,root,root)                    %{libexecdir}/imapmodules/authgeneric
 %attr(755,root,root)                    %{imoduledir}/iauth.so
+%attr(755,root,root)                    %{imoduledir}/tcplookup.so
 
 %docdir %{shareddir}/doc
 %docdir %{mandir}
