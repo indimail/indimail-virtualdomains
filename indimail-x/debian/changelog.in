@@ -64,3 +64,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * tcpbind.c: fix bind on unix domain sockets
   * New program tcplookup - TCP/IP frontend to inlookup
   * inquery.c, inlookup.c, ProcessInFifo.c - handle TCP/IP request under tcpclient/tcpserver
+  * tcplookup.c: include <stdlib.h> for srad()

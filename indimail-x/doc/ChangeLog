@@ -109,3 +109,5 @@ Release 3.3 Start 06/09/2020
 64. New program tcplookup - TCP/IP frontend to inlookup
 65. inquery.c, inlookup.c, ProcessInFifo.c - handle TCP/IP request under
     tcpclient/tcpserver
+- 24/02/2021
+66. tcplookup.c: include <stdlib.h> for srad()
