@@ -1,5 +1,8 @@
 /*
  * $Log: tcplookup.c,v $
+ * Revision 1.2  2021-02-14 21:40:13+05:30  Cprogrammer
+ * include <stdlib.h> for srand()
+ *
  * Revision 1.1  2021-02-07 20:40:35+05:30  Cprogrammer
  * Initial revision
  *
@@ -18,6 +21,9 @@
 #endif
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
 #endif
 #ifdef HAVE_QMAIL
 #include <timeoutread.h>
@@ -40,7 +46,7 @@
 #include "variables.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: tcplookup.c,v 1.1 2021-02-07 20:40:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcplookup.c,v 1.2 2021-02-14 21:40:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            strnum[FMT_ULONG];
