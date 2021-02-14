@@ -2734,9 +2734,9 @@ import_environment = QUERY_CACHE=1 DOMAIN_LIMITS=1 FIFODIR=/var/indimail/inquery
 
 NOTE: If you decide to use any of indimail's checkpassword authentication modules and if you need to enable QUERY\_CACHE above, make sure to comment out `#PrivateTmp=true` in the file `/usr/lib/systemd/system/dovecot.service. If you don't disable PrivateTmp and you are using any of the indimail's checkpassword modules for authentication, the modules will not be able to communicate with inlookup query daemon. This is because the /tmp that inlookup uses will be different from the /tmp directory that dovecot auth process will use. checkpassword modules create a fifo in the /tmp directory and exchange the name with inlookup through another fifo. If you do disable PrivateTmp, then do not forget to issue the command
 
-``
+```
 # systemctl daemon-reload
-``
+```
 
 You need to have auth-system.conf.ext for authenticating users in your system's password database.
 
