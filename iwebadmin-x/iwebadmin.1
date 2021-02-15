@@ -1,0 +1,39 @@
+.TH iwebadmin 1
+.SH NAME
+iwebadmin \- CGI program for indimail administration frontend
+
+.SH SYNOPSYS
+\fiwebadmin\fR [\fIoptions\fR]
+
+.SH DESCRIPTION
+\fBiwebadmin\fR provides a web interface for managing an IndiMail system
+with virtual domains. It provides admin for adding/deleting users, Aliases,
+Forwards, ezmlm Mailing lists and Autoresponders. It also features automatic
+International language support via the language settings on their browser.
+
+iwebadmin is configured to run under a web server. See README on instructions
+to set this up. It uses configuration file /etc/indimail/iwebadmin-conf to
+set various options
+
+.TP
+.I no-fortune
+
+Unset disply of fortune cookies on the main page
+
+.TP
+.I no-ezmlm
+Disable ezmlm mailing list feature
+
+.TP
+.I no-ezmlm-idx
+Disable ezmlm-idx mailing list feature
+
+.TP
+.I debug
+Sets iwebadmin in debug mode
+
+.SH FILES
+/usr/share/doc/iwebadmin/AUTHORS
+/usr/share/doc/iwebadmin/COPYING
+/usr/share/doc/iwebadmin/README-hooks.md
+/usr/share/doc/iwebadmin/README.md
