@@ -13,6 +13,8 @@ bindir=@cgibindir@
 bin_PROGRAMS=@CGIBINTARGETS@
 EXTRA_PROGRAMS=iwebadmin
 
+man_MANS=iwebadmin.1
+
 iwebadmin_DEPENDENCIES=$(COMMONDEPENDENCIES)
 
 COMMONSOURCES=iwebadmin.c alias.c autorespond.c forward.c mailinglist.c \
@@ -41,6 +43,7 @@ edit = sed \
 	-e 's,@sys_libdir\@,$(sys_libdir),g' \
 	-e 's,@cgibindir\@,$(cgibindir),g' \
 	-e 's,@imagedir\@,$(imagedir),g' \
+	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@version\@,$(version),g' \
 	-e "s|@release\@|"`cat conf-release`"|g" \
 	-e 's,@prefix\@,$(prefix),g'

@@ -24,6 +24,7 @@
 %endif
 
 %define _prefix            @prefix@
+%global mandir             @mandir@
 %define sysconfdir         @sysconfdir@
 %define see_base           For a description of IndiMail visit http://www.indimail.org
 
@@ -147,6 +148,7 @@ install -m 0644 %{name}-release  %{buildroot}%{sysconfdir}/%{name}-release
 %if %{undefined nodebug}
   /bin/chmod -R 755 %{buildroot}@cgibindir@
 %endif
+find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 %files
 %defattr(-,root,root,-)
@@ -166,6 +168,7 @@ install -m 0644 %{name}-release  %{buildroot}%{sysconfdir}/%{name}-release
 %endif
 %endif
 
+%attr(644,root,root)                     %{mandir}/man1/*
 %dir %attr(755,root,qmail)               @htmllibdir@
 %dir %attr(755,root,qmail)               @htmllibdir@/html
 %dir %attr(755,root,qmail)               @htmllibdir@/lang

@@ -53,3 +53,5 @@ Release 2.0 Start 27/04/2019
 31. template.c: fixed SIGSEGV
 32. user.c: fixed iwebadmin-hooks
 33. Makefile.am: added iwebadmin-hooks config file
+15/02/2021
+34. added iwebadmin man page

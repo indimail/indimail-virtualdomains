@@ -33,3 +33,4 @@ iwebadmin (@version@-@release@) unstable; urgency=low
   * template.c: fixed SIGSEGV
   * user.c: fixed iwebadmin-hooks
   * Makefile.am: added iwebadmin-hooks config file
+  * added iwebadmin man page
