@@ -1,5 +1,8 @@
 /*
  * $Log: sql_setpw.c,v $
+ * Revision 1.2  2021-02-23 21:41:18+05:30  Cprogrammer
+ * replaced CREATE TABLE statements with create_table() function
+ *
  * Revision 1.1  2019-04-20 08:43:22+05:30  Cprogrammer
  * Initial revision
  *
@@ -29,9 +32,10 @@
 #include "munch_domain.h"
 #include "indimail.h"
 #include "variables.h"
+#include "create_table.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_setpw.c,v 1.1 2019-04-20 08:43:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_setpw.c,v 1.2 2021-02-23 21:41:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -139,17 +143,8 @@ sql_setpw(struct passwd *inpw, char *domain)
 			die_nomem();
 		if (mysql_query(&mysql[1], SqlBuf.s)) {
 			if (in_mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
-				if (!stralloc_copyb(&SqlBuf, "CREATE TABLE IF NOT EXISTS ", 27) ||
-						!stralloc_cats(&SqlBuf, inactive_table) ||
-						!stralloc_catb(&SqlBuf, " ( ", 3) ||
-						!stralloc_cats(&SqlBuf, SMALL_TABLE_LAYOUT) ||
-						!stralloc_catb(&SqlBuf, " )", 2) ||
-						!stralloc_0(&SqlBuf))
-					die_nomem();
-				if (mysql_query(&mysql[1], SqlBuf.s)) {
-					strerr_warn4("sql_setpw: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
-					return (-1);
-				}
+				if (create_table(ON_LOCAL, inactive_table, SMALL_TABLE_LAYOUT))
+					return -1;
 				err = 0;
 			} else {
 				strerr_warn4("sql_setpw: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);

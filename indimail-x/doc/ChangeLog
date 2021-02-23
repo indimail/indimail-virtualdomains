@@ -1,5 +1,8 @@
 *
 Release 3.4 Start 14/02/2021
+- 23/02/2021
+01. sql_adddomain.c,, sql_setpw.c : replaced CREATE TABLE statements with
+    create_table() function
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020

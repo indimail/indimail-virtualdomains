@@ -1,5 +1,8 @@
 /*
  * $Log: sql_adddomain.c,v $
+ * Revision 1.2  2021-02-23 21:40:48+05:30  Cprogrammer
+ * replaced CREATE TABLE statements with create_table() function
+ *
  * Revision 1.1  2019-04-20 08:34:29+05:30  Cprogrammer
  * Initial revision
  *
@@ -17,61 +20,22 @@
 #include "iopen.h"
 #include "variables.h"
 #include "munch_domain.h"
+#include "create_table.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_adddomain.c,v 1.1 2019-04-20 08:34:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_adddomain.c,v 1.2 2021-02-23 21:40:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
-
-static void
-die_nomem()
-{
-	strerr_warn1("sql_adddomain: out of memory", 0);
-	_exit(111);
-}
 
 int
 sql_adddomain(char *domain)
 {
-	char           *tmpstr;
-	static stralloc SqlBuf = {0};
 	int             err;
 
 	if ((err = iopen((char *) 0)))
 		return (err);
-	if (site_size == LARGE_SITE) {
-		if (!domain || !*domain)
-			tmpstr = MYSQL_LARGE_USERS_TABLE;
-		else
-			tmpstr = munch_domain(domain);
-		if (!stralloc_copyb(&SqlBuf, "CREATE TABLE ", 13) ||
-				!stralloc_cats(&SqlBuf, tmpstr) ||
-				!stralloc_catb(&SqlBuf, " ( ", 3) ||
-				!stralloc_cats(&SqlBuf, LARGE_TABLE_LAYOUT) ||
-				!stralloc_catb(&SqlBuf, " )", 2) || !stralloc_0(&SqlBuf))
-			die_nomem();
-	} else {
-		if (!stralloc_copyb(&SqlBuf, "CREATE TABLE IF NOT EXISTS ", 27) ||
-				!stralloc_cats(&SqlBuf, default_table) ||
-				!stralloc_catb(&SqlBuf, " ( ", 3) ||
-				!stralloc_cats(&SqlBuf, SMALL_TABLE_LAYOUT) ||
-				!stralloc_catb(&SqlBuf, " )", 2) || !stralloc_0(&SqlBuf))
-			die_nomem();
-	}
-	if (mysql_query(&mysql[1], SqlBuf.s)) {
-		strerr_warn4("sql_adddomain: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
-		return (1);
-	}
-	if (site_size == SMALL_SITE) {
-		if (!stralloc_copyb(&SqlBuf, "CREATE TABLE IF NOT EXISTS ", 27) ||
-				!stralloc_cats(&SqlBuf, inactive_table) ||
-				!stralloc_catb(&SqlBuf, " ( ", 3) ||
-				!stralloc_cats(&SqlBuf, SMALL_TABLE_LAYOUT) ||
-				!stralloc_catb(&SqlBuf, " )", 2) || !stralloc_0(&SqlBuf))
-			die_nomem();
-		if (mysql_query(&mysql[1], SqlBuf.s)) {
-			strerr_warn4("sql_adddomain: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
-			return (1);
-		}
-	}
+	if (create_table(ON_LOCAL, site_size == SMALL_SITE ? default_table : (domain && *domain ? munch_domain(domain) : MYSQL_LARGE_USERS_TABLE), site_size == SMALL_SITE ? SMALL_TABLE_LAYOUT : LARGE_TABLE_LAYOUT))
+		return 1;
+	if (site_size == SMALL_SITE && create_table(ON_LOCAL, inactive_table, SMALL_TABLE_LAYOUT))
+		return 1;
 	return (0);
 }
