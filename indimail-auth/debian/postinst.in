@@ -117,7 +117,7 @@ ${prefix}/sbin/svctool --pwdlookup=$nssd_sock --threads=5 --timeout=-1 \
 # turn off automatic refresh for services during first time installation
 ${prefix}/sbin/svctool --servicedir=${servicedir} --norefreshsvc="0 /service/pwdlookup"
 # save variables
-${prefix}/sbin/svctool --servicedir=${servicedir} \
+${prefix}/sbin/svctool --servicedir=${servicedir} --service-name=pwdlookup \
   --export-variables=${servicedir}/pwdlookup/variables/.variables --force
 
 # update config for pam-multi link
