@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: catChangeLog,v $
+# Revision 1.8  2021-02-28 21:58:46+05:30  Cprogrammer
+# fixed catChangeLog
+#
 # Revision 1.7  2020-10-12 17:05:49+05:30  Cprogrammer
 # fixed date lines in ChangeLog
 #
@@ -24,7 +27,7 @@
 # utility to append changelog to indimail.spec
 #
 #
-# $Id: catChangeLog,v 1.7 2020-10-12 17:05:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: catChangeLog,v 1.8 2021-02-28 21:58:46+05:30 Cprogrammer Exp mbhangui $
 #
 flag=0
 if [ $# -eq 1 ] ; then
