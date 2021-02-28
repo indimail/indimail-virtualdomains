@@ -751,7 +751,7 @@ for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
 do
   svc_list="$svc_list %{servicedir}/$i"
   # save variables
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir}
+  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --service-name=$i \
     --export-variables=%{servicedir}/$i/variables/.variables  --force
 done
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --norefreshsvc="0 $svc_list"
