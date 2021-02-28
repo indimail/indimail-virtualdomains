@@ -18,3 +18,4 @@ indimail-access (@version@-@release@) unstable; urgency=medium
   * authpam.c: set EPERM on pam failures
   * mod.h: reset uid, euid
   * checkpassword.c: check return value of crypt() to fix SIGSEGV in authshadow
+  * post install: save variables

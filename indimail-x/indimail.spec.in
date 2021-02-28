@@ -1384,7 +1384,20 @@ for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
 qmail-poppass.106 qmail-logfifo
 do
   svc_list="$svc_list %{servicedir}/$i"
+  # save variables
+  %{_prefix}/sbin/svctool --servicedir=%{servicedir}
+    --export-variables=%{servicedir}/$i/variables/.variables  --force
 done
+if [ $noproxy -eq 0 ] ; then
+for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
+  proxy-pop3d.4110 proxy-pop3d-ssl.9110
+do
+  svc_list="$svc_list %{servicedir}/$i"
+  %{_prefix}/sbin/svctool --servicedir=%{servicedir}
+    --export-variables=%{servicedir}/$i/variables/.variables  --force
+done
+fi
+
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --norefreshsvc="0 $svc_list"
 
 # selinux

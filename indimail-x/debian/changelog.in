@@ -1,3 +1,4 @@
 indimail (@version@-@release@) unstable; urgency=low
 
   * sql_adddomain.c,, sql_setpw.c : replaced CREATE TABLE statements with create_table() function
+  * post install: save variables

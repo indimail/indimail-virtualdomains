@@ -41,3 +41,5 @@ Release @version@-@release@ Start 03/06/2020
 - 27/01/2021
 21. checkpassword.c: check return value of crypt() to fix SIGSEGV in
     authshadow
+- 28/01/2021
+22. post install: save variables

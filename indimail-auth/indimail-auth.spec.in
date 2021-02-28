@@ -391,6 +391,9 @@ fi
 
 # turn off automatic refresh for services during first time installation
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --norefreshsvc="0 %{servicedir}/pwdlookup"
+# save variables
+%{_prefix}/sbin/svctool --servicedir=%{servicedir} \
+  --export-variables=%{servicedir}/pwdlookup/variables/.variables --force
 
 #pam-multi
 %{_prefix}/sbin/svctool --config=add-alt
