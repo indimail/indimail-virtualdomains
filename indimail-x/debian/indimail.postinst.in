@@ -422,7 +422,7 @@ qmail-poppass.106 qmail-logfifo
 do
   svc_list="$svc_list ${servicedir}/$i"
   # save variables
-  ${prefix}/sbin/svctool --servicedir=${servicedir}
+  ${prefix}/sbin/svctool --servicedir=${servicedir} --service-name=$i \
     --export-variables=${servicedir}/$i/variables/.variables  --force
 done
 
@@ -431,7 +431,7 @@ for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
   proxy-pop3d.4110 proxy-pop3d-ssl.9110
 do
   svc_list="$svc_list ${servicedir}/$i"
-  ${prefix}/sbin/svctool --servicedir=${servicedir}
+  ${prefix}/sbin/svctool --servicedir=${servicedir} --service-name=$i \
     --export-variables=${servicedir}/$i/variables/.variables  --force
 done
 fi

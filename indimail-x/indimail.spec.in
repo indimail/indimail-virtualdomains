@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.83 2021-02-07 20:37:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.84 2021-02-28 21:59:40+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1385,7 +1385,7 @@ qmail-poppass.106 qmail-logfifo
 do
   svc_list="$svc_list %{servicedir}/$i"
   # save variables
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir}
+  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --service-name=$i \
     --export-variables=%{servicedir}/$i/variables/.variables  --force
 done
 if [ $noproxy -eq 0 ] ; then
@@ -1393,7 +1393,7 @@ for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
   proxy-pop3d.4110 proxy-pop3d-ssl.9110
 do
   svc_list="$svc_list %{servicedir}/$i"
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir}
+  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --service-name=$i \
     --export-variables=%{servicedir}/$i/variables/.variables  --force
 done
 fi
