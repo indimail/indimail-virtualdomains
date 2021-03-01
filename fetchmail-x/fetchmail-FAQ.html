@@ -210,6 +210,7 @@ fetchmail seems to have been vanished.</a><br/>
 
 <h2 id="C_M">Multidrop-mode problems</h2>
 
+<a href="#M0">M0. What about multidrop, anyways?</a><br />
 <a href="#M1">M1. I've declared local names, but all my multidrop
 mail is going to root anyway.</a><br/>
 <a href="#M2">M2. I can't seem to get fetchmail to route to a local
@@ -343,6 +344,15 @@ distribution. Because it freezes at distribution release time, it
 may not be completely current.</p>
 
 <p>The fetchmail sources are also available in the Git repositories at <a href="https://gitlab.com/fetchmail/fetchmail">https://gitlab.com/fetchmail/fetchmail</a> and <a href="https://sourceforge.net/p/fetchmail/git/">https://sourceforge.net/p/fetchmail/git/</a>.</p>
+
+<p>Note the Git branches:</p>
+<ul>
+	<li>legacy_63 (discontinued, unsupported old branch for 6.3.x releases)</li>
+	<li>legacy_64 (stable 6.4.x releases),</li>
+	<li>legacy_6x (near-future 6.5.x development),</li>
+	<li>next (mid-term future 7.x.x development)</li>
+</ul>
+<p>As of 2020-06-21, there no longer is a <em>master</em> branch. next was renamed to old-next, and <em>master</em> was renamed to <strong>next</strong>.</p>
 
 <h2><a id="G3" name="G3">G3. Something does not work/I think I've found a bug. Will you fix it?</a></h2>
 
@@ -2631,6 +2641,15 @@ fetch options.</p>
 
 <hr/>
 <h1>Multidrop-mode problems</h1>
+<h2><a id="M0" name="M0">M0. What about multidrop, anyways?</a></h2>
+
+<p>Multidrop is a way to receive mail for several receivers in one
+mailbox. It is sort of abusing the system (using address extensions
+would be more useful, where available) and has quite some
+requirements to work properly. I wrote a separate article to document
+this, it is avavailable <a href="multidrop.html"> in English </a>
+and <a href="multidrop.de.html"> in German.</a></p>
+
 <h2><a id="M1" name="M1">M1. I've declared local names, but all my
 multidrop mail is going to root anyway.</a></h2>
 

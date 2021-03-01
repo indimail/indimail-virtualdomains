@@ -79,6 +79,7 @@ static int odmr_getrange(int sock, struct query *ctl, const char *id,
 
     /* make sure we don't enter the fetch loop */
     *bytes = *countp = *newp = -1;
+
 #ifdef INDIMAIL
 	if ((ok = SMTP_auth(sock, SMTP_MODE, ctl->remotename, ctl->password, !(ptr = getenv("AUTHMETHOD")) ? ctl->server.authmeth : ptr)))
 		return (1);

@@ -2,7 +2,7 @@
  * socket.c -- socket library functions
  *
  * Copyright 1998 - 2004 by Eric S. Raymond.
- * Copyright 2004 - 2019 by Matthias Andree.
+ * Copyright 2004 - 2020 by Matthias Andree.
  * Contributions by Alexander Bluhm, Earl Chew, John Beck.
 
  * For license terms, see the file COPYING in this directory.
@@ -10,6 +10,7 @@
 
 #include "config.h"
 #include "fetchmail.h"
+#include "tls-aux.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -903,8 +904,8 @@ static const char *SSLCertGetCN(const char *mycert,
 	return ret;
 }
 
-#if defined(LIBRESSL_VERSION_NUMBER) || OPENSSL_VERSION_NUMBER < 0x1010000fL
-/* OSSL_proto_version_logic for OpenSSL 1.0.x and LibreSSL */
+#if !defined(OSSL110_API)
+/* ===== implementation for OpenSSL 1.0.X and LibreSSL ===== */
 static int OSSL10X_proto_version_logic(int sock, const char **myproto, int *avoid_ssl_versions)
 {
 	if (!*myproto) {
@@ -972,10 +973,8 @@ static int OSSL10X_proto_version_logic(int sock, const char **myproto, int *avoi
 	return 0;
 }
 #define OSSL_proto_version_logic(a,b,c) OSSL10X_proto_version_logic((a),(b),(c))
-#undef OSSL110_API
 #else
-/* implementation for OpenSSL 1.1.0 */
-#define OSSL110_API 1
+/* ===== implementation for OpenSSL 1.1.0 ===== */
 static int OSSL110_proto_version_logic(int sock, const char **myproto,
         int *avoid_ssl_versions)
 {
@@ -1073,10 +1072,8 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 	SSL_load_error_strings();
 	SSL_library_init();
 	OpenSSL_add_all_algorithms(); /* see Debian Bug#576430 and manpage */
-	ver = SSLeay();
-#else
-	ver = OpenSSL_version_num();
 #endif
+	ver = OpenSSL_version_num(); /* version switch through tls-aux.h */
 
 	if (ver < OPENSSL_VERSION_NUMBER) {
 	    report(stderr, GT_("Loaded OpenSSL library %#lx older than headers %#lx, refusing to work.\n"), (long)ver, (long)(OPENSSL_VERSION_NUMBER));

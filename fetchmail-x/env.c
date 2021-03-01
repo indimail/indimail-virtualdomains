@@ -220,8 +220,7 @@ char *host_fqdn(int required)
 	if (e) {
 	    /* exit with error message */
 	    fprintf(stderr,
-		    GT_("getaddrinfo failed for %s\n"), tmpbuf);
-	    fprintf(stderr, "%s", gai_strerror(e));
+		    GT_("getaddrinfo failed for \"%s\": %s\n"), tmpbuf, gai_strerror(e));
 	    fprintf(stderr, GT_("Cannot find my own host in hosts database to qualify it!\n"));
 	    if (required)
 		exit(PS_DNS);

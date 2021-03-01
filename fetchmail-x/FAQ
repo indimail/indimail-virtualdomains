@@ -165,6 +165,7 @@ Disappearing mail
 
 Multidrop-mode problems
 
+   M0. What about multidrop, anyways?
    M1. I've declared local names, but all my multidrop mail is going to
    root anyway.
    M2. I can't seem to get fetchmail to route to a local domain properly.
@@ -269,6 +270,15 @@ G2. Where do I find the latest FAQ and fetchmail sources?
    The fetchmail sources are also available in the Git repositories at
    https://gitlab.com/fetchmail/fetchmail and
    https://sourceforge.net/p/fetchmail/git/.
+
+   Note the Git branches:
+     * legacy_63 (discontinued, unsupported old branch for 6.3.x releases)
+     * legacy_64 (stable 6.4.x releases),
+     * legacy_6x (near-future 6.5.x development),
+     * next (mid-term future 7.x.x development)
+
+   As of 2020-06-21, there no longer is a master branch. next was renamed
+   to old-next, and master was renamed to next.
 
 G3. Something does not work/I think I've found a bug. Will you fix it?
 
@@ -2170,6 +2180,14 @@ been vanished.
      __________________________________________________________________
 
                             Multidrop-mode problems
+
+M0. What about multidrop, anyways?
+
+   Multidrop is a way to receive mail for several receivers in one
+   mailbox. It is sort of abusing the system (using address extensions
+   would be more useful, where available) and has quite some requirements
+   to work properly. I wrote a separate article to document this, it is
+   avavailable in English and in German.
 
 M1. I've declared local names, but all my multidrop mail is going to root
 anyway.

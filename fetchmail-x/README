@@ -1,52 +1,77 @@
-fetchmail-6.4.5 (released 2020-05-07, 27596 LoC):
+fetchmail README
+================
 
-## REGRESSION FIX:
-* fetchmail 6.4.0 and 6.4.1 changed the resolution of the home directory
-  in a way that requires SUSv4 semantics of realpath(), which leads to
-  'Cannot find absolute path for... directory' error messages followed by aborts
-  on systems where realpath() follows strict SUSv2 semantics and returns
-  EINVAL if the 2nd argument is NULL.
+Introduction
+------------
 
-  On such systems, for instance, Solaris 10, fetchmail requires PATH_MAX to be
-  defined, and will then work again.  Regression reported by David Hough.
+Fetchmail is a free, full-featured, robust, well-documented remote mail 
+retrieval and forwarding utility intended to be used over on-demand TCP/IP 
+links (such as SLIP or PPP connections).  It retrieves mail from remote mail 
+servers and forwards it to your local (client) machine's delivery system, so it 
+can then be be read by normal mail user agents such as mutt(1), elm(1) or 
+Mail(1).
 
-  On systems that neither provide auto-allocation semantics for realpath(),
-  nor PATH_MAX, fetchmail will print this error and abort. Such systems
-  are unsupported, see README.
+Fetchmail supports all standard mail-retrieval protocols in use on the 
+Internet: POP3 (including some variants such as RPOP, APOP, KPOP), IMAP4rev1 
+(also IMAP4, IMAP2bis), POP2, IMAP4, ETRN, and ODMR. On the output side, 
+fetchmail supports ESMTP/SMTP, LMTP, and invocation of a local delivery agent.
 
-## CHANGES:
-* Add a test program fm_realpath, and a t.realpath script, neither to be
-  installed. These will test resolution of the current working directory.
+Fetchmail also fully supports authentication via GSSAPI, Kerberos 4 and 5, 
+RFC1938 one-time passwords, Compuserve's POP3 with RPA, Microsoft's NTLM, Demon 
+Internet's SDPS, or CRAM-MD5 authentication a la RFC2195.
 
-## TRANSLATION UPDATES in reverse alphabetical order of language codes,
-## with my thanks to the translators:
-* zh_CN: Boyuan Yang [Chinese (simplified)]
-* sv:    Göran Uddeborg [Swedish]
-* sq:    Besnik Bleta [Albanian]
-* pl:    Jakub Bogusz [Polish]
-* ja:    Takeshi Hamasaki [Japanese]
-* fr:    Frédéric Marchal [French]
-* cs:    Petr Pisar [Czech]
+Fetchmail supports end-to-end encryption with OpenSSL, do read README.SSL for 
+details on fetchmail's configuration and README.SSL-SERVER for server-side 
+requirements.  NOTE! To be compatible with earlier releases, fetchmail 6.4
+default behaviour is more relaxed than dictated by recommendations - while it
+does away with SSLv2, only negotiates SSLv3 if forced to, it will by default
+still negotiate TLS v1.0.
 
-# KNOWN BUGS AND WORKAROUNDS
-  (This section floats upwards through the NEWS file so it stays with the
-  current release information)
-* Fetchmail does not handle messages without Message-ID header well
-  (See sourceforge.net bug #780933)
-* Fetchmail currently uses 31-bit signed integers in several places
-  where unsigned and/or wider types should have been used, for instance,
-  for mailbox sizes, and misreports sizes of 2 GibiB and beyond. 
-  Fixing this requires C89 compatibility to be relinquished.
-* BSMTP is mostly untested and errors can cause corrupt output.
-* Fetchmail does not track pending deletes across crashes.
-* The command line interface is sometimes a bit stubborn, for instance,
-  fetchmail -s doesn't work with a daemon running.
-* Linux systems may return duplicates of an IP address in some circumstances if
-  no or no global IPv6 addresses are configured.
-  (No workaround. Ubuntu Bug#582585, Novell Bug#606980.)
-* Kerberos 5 may be broken, particularly on Heimdal, and provide bogus error
-  messages. This will not be fixed, because the maintainer has no Kerberos 5
-  server to test against. Use GSSAPI.
+Portability
+-----------
 
---------------------------------------------------------------------------------
+The fetchmail code was developed under Linux, but has also been extensively 
+tested under the BSD variants, AIX, HP-UX versions 9 and 10, SunOS, Solaris, 
+NEXTSTEP, OSF 3.2, IRIX, and Rhapsody once upon a time.
 
+The current maintainer does not have access to these systems, and assumes that
+the system is at least Single-Unix-Specification V2 compatible, yet fetchmail
+should be compilable by a C89 compiler. It currently ships with a copy of the
+trio library for systems that lack snprintf(). A further requirement is that
+either realpath() permits its 2nd argument to be NULL for auto-allocation,
+or that otherwise PATH_MAX be defined.
+
+Fetchmail should be able to be compiled with C89, C99, C11, C++98, C++03,
+C++11, C++14 compilers, but not C++17 because the "register" keyword is
+used in some parts of the code.
+
+Future fetchmail releases will require modern language features such as
+"long long" and others, so this release is the last to support C89.
+
+Further reading
+---------------
+
+The INSTALL file describes how to configure and install fetchmail.
+
+See the distribution files FEATURES for a full list of features, NEWS for 
+detailed information on recent changes, NOTES for design notes, and TODO for 
+a list of things that still need doing.  If you want to hack on this code, 
+a list of known bugs and to-do items can be found in the file todo.html.
+
+Status, source code
+-------------------
+
+The fetchmail code appears to be stable and free of bugs affecting normal 
+operation (that is, retrieving from POP3 or IMAP in single-drop mode and 
+forwarding via SMTP to a local mail transfer agent).
+
+You can get the code from the fetchmail home page:
+
+	https://www.fetchmail.info/
+	https://fetchmail.sourceforge.io/
+
+The code is being maintained in a Git repository, see README.git for details.
+
+Enjoy!
+
+							-- esr, ma

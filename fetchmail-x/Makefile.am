@@ -35,7 +35,7 @@ libfm_a_SOURCES=	xmalloc.c base64.c rfc822.c report.c rfc2047e.c \
 			smbencrypt.h smbdes.c smbencrypt.c smbmd4.c smbutil.c \
 			smbtypes.h fm_getaddrinfo.c starttls.c rfc822valid.c \
 			xmalloc.h sdump.h sdump.c x509_name_match.c \
-			fm_strl.h md5c.c
+			fm_strl.h md5c.c tls-aux.c tls-aux.h
 
 if NTLM_ENABLE
 libfm_a_SOURCES += ntlmsubr.c
@@ -47,7 +47,7 @@ DEPENDENCIES=		libfm.a $(LIBOBJS)
 
 check_PROGRAMS=
 
-TESTS=			t.smoke t.validate-xhtml10 t.validate-xhtml t.x509_name_match t.realpath
+TESTS=			t.smoke t.validate-xhtml10 t.validate-xhtml t.x509_name_match t.realpath t.tls-aux
 LOG_COMPILER=		env LC_ALL=C TZ=UTC $(SHELL)
 
 if NEED_TRIO
@@ -102,8 +102,10 @@ if NEED_GETADDRINFO
 fetchmail_SOURCES += libesmtp/getaddrinfo.h libesmtp/getaddrinfo.c
 endif
 
+tls_aux_SOURCES = 	tls-aux.c
+
 check_PROGRAMS +=	rfc822 unmime netrc rfc2047e mxget rfc822valid \
-			x509_name_match fm_realpath
+			x509_name_match fm_realpath tls-aux
 
 fm_realpath_CFLAGS=	-DTEST
 
@@ -112,6 +114,8 @@ rfc2047e_CFLAGS=	-DTEST
 rfc822valid_CFLAGS=	-DTEST
 
 rfc822_CFLAGS=		-DMAIN
+
+tls_aux_CFLAGS=		-DTEST
 
 x509_name_match_CFLAGS=	-DTEST
 
@@ -195,6 +199,7 @@ EXTRA_DIST=	$(DISTDOCS) $(distdirs) \
 		$(TESTS) t.rc t.regression \
 		dist-tools/html2txt \
 		dist-tools/manServer.pl \
+		dist-tools/git-commit-po-updates.sh \
 		Doxyfile
 
 fetchmailconf:
@@ -226,9 +231,12 @@ fetchmail-man.html: fetchmail.man $(srcdir)/dist-tools/manServer.pl
 	env - "PATH=$$PATH" perl -T $(srcdir)/dist-tools/manServer.pl $(srcdir)/fetchmail.man >$@ \
 	|| { rm -f $@ ; exit 1 ; }
 
-dist-hook:
+dist-hook: fetch-translations
 	cd $(distdir) && find $(distdirs) po -name .git -type d -prune -exec rm -rf '{}' ';'
 	cd $(distdir) && find $(distdirs) po -name '*~' -exec rm -f '{}' ';'
+	if ! $(top_srcdir)/dist-tools/git-commit-po-updates.sh -n ; then \
+		printf '\n*** There are new translations. Please add them to the distribution. ***\n\n' ; exit 1 ; \
+	fi
 
 # this target expects a .rsyncs file with lines of this format:
 # host:directory/
@@ -237,9 +245,11 @@ dist-hook:
 rsync:  distdir $(srcdir)/.rsyncs
 	@( cat $(srcdir)/.rsyncs | sed -e 's}^}rsync -aH --delete-after $(PACKAGE)-$(VERSION)/ }; s/\($$\)/ \&/;' ; echo "wait" ) | $(SHELL) -x
 
-.PHONY: import-translations git-check
-import-translations:
+.PHONY: import-translations fetch-translations git-check
+fetch-translations:
 	rsync -Lrtvz translationproject.org::tp/latest/fetchmail/  $(top_srcdir)/po
+
+import-translations: fetch-translations
 	cd $(top_builddir)/po && $(MAKE) update-po
 	@printf '\n=== You can use dist-tools/git-commit-po-updates.sh to check these updates in. ===\n\n'
 

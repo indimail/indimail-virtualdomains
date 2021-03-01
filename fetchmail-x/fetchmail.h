@@ -799,4 +799,8 @@ int ntlm_helper(int sock, struct query *ctl, const char *protocol);
 /* fm_realpath.c */
 char *fm_realpath(const char *restrict file_name);
 
+/* tls-aux.c */
+const char *get_default_cert_path(void);
+const char *get_default_cert_file(void);
+
 /* fetchmail.h ends here */

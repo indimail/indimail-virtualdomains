@@ -10,7 +10,7 @@
 .\" Load www macros to process .URL requests, this requires groff:
 .mso www.tmac
 .\"
-.TH fetchmail 1 2020-03-30 "fetchmail 6.4.6" "fetchmail reference manual"
+.TH fetchmail 1 2021-01-30 "fetchmail 6.4.16" "fetchmail reference manual"
 
 .SH NAME
 fetchmail \- fetch mail from a POP, IMAP, ETRN, or ODMR-capable server
@@ -136,6 +136,25 @@ configuration, including the multidrop features.  In either case,
 the 'Autoprobe' button will tell you the most capable protocol a given
 mailserver supports, and warn you of potential problems with that
 server.
+
+.SH PREFACE ON THIS MANUAL
+Fetchmail's run-time strings have been translated (localized) to some
+languages, but the manual is only available in English.  In some
+situations, for comparing output to manual, it may be helpful to
+switch fetchmail to English output by overriding the locale variables,
+for instance:
+
+.IP
+.nf
+env LC_ALL=C fetchmail # add other options before the hash
+.fi
+
+.IP
+.nf
+env LANG=en fetchmail # other options before the hash
+.fi
+.PP
+or similar. Details vary by operating system.
 
 .SH GENERAL OPERATION
 The behavior of \fBfetchmail\fP is controlled by command-line options and a
@@ -551,7 +570,7 @@ accurate when using this option.
 .B \-\-nosslcertck
 (Keyword: no sslcertck, only in v6.4.X)
 .br
-The opposite of \-\-sslcertck, this is a disouraged option. It permits
+The opposite of \-\-sslcertck, this is a discouraged option. It permits
 fetchmail to continue connecting even if the server certificate failed
 the verification checks.  Should only be used together with
 \-\-sslfingerprint.
@@ -1019,8 +1038,11 @@ idfiles when running out of disk space.
 .B \--pidfile <pathname>
 (Keyword: pidfile; since fetchmail v6.3.4)
 .br
-Override the default location of the PID file. Default: see
-"ENVIRONMENT" below.
+Override the default location of the PID file that is used as a lock file.
+Default: see "ENVIRONMENT" below. Note that many places in the code and
+documentation, the term "lock file" is used.  This file contains the process ID
+of the running fetchmail on the first line and potentially the daemon interval
+on a second line.
 .TP
 .B \-n | \-\-norewrite
 (Keyword: no rewrite)
@@ -1929,7 +1951,7 @@ sslcertpath	\&	\&	T{
 Specify c_rehash-ed directory with trusted CA certificates.
 T}
 sslfingerprint	<HASH> \&	\&	T{
-Specify the expected server certificat finger print. Fetchmail will
+Specify the expected server certificate finger print from an MD5 hash. Fetchmail will
 disconnect and log an error if it does not match.
 T}
 sslkey  	\&	\&	T{
@@ -2577,11 +2599,24 @@ poll mailhost.net with proto imap:
 Use the multiple-local-recipients feature with caution -- it can bite.
 All multidrop features are ineffective in ETRN and ODMR modes.
 
-Also, note that in multidrop mode duplicate mails are suppressed.  A
-piece of mail is considered duplicate if it has the same message-ID as
+Also, note that in multidrop mode duplicate mails may be suppressed.
+A piece of mail is considered duplicate if it does not have a discernable
+envelope recipient address, has the same header as
 the message immediately preceding and more than one addressee.  Such
 runs of messages may be generated when copies of a message addressed
-to multiple users are delivered to a multidrop box.
+to multiple users are delivered to a multidrop box. (To be precise,
+fetchmail 6.2.5 through 6.4.X use an MD5 hash of the raw message header,
+and only fetchmail 6.4.16+ document this properly.
+Fetchmail 5.0.8 (1999-09-14) through 6.2.4 used only the Message-ID header.
+5.0.7 and older did not suppress duplicates.)
+
+Note that this duplication killer code checking the entire header is
+very restrictive and may not suppress many duplicates in practice - for
+instance, if some X-Original-To or Delivered-To header differs.  This is
+intentional and correct in such situations: wherever envelope information is
+available, it should be used for reliable delivery of mailing list and blind
+carbon copy (Bcc) messages. See the subsection Duplicate suppression below
+for suggestions.
 
 .SS Header vs. Envelope addresses
 The fundamental problem is that by having your mailserver toss several
@@ -2727,6 +2762,13 @@ this may change in a future version)
 you can declare 'no dns' to suppress DNS lookups entirely and
 \fIonly\fP match against the aka list.
 
+.SS Duplicate suppression on multidrop
+If fetchmail's duplicate suppression code does not kick in for your
+multidrop mail account, other options is using sieve, or for instance
+Courier's maildrop package (and in particular, its reformail program
+with the -D option) as the delivery agent (either from fetchmail,
+or from your local mail server that fetchmail injects into).
+
 .SH SOCKS
 Support for socks4/5 is a \fBcompile time\fP configuration option. Once
 compiled in, fetchmail will always use the socks libraries and
@@ -2837,7 +2879,8 @@ default location of file recording last message UIDs seen per host.
 (location can be overridden with environment variables)
 .TP 5
 ~/.fetchmail.pid, $HOME/.fetchmail.pid, $HOME_ETC/.fetchmail.pid, $FETCHMAILHOME/fetchmail.pid
-default location of lock file to help prevent concurrent runs (non-root mode).
+default location of lock file (sometimes called pidfile or PID file, see option
+pidfile) to help prevent concurrent runs (non-root mode).
 (location can be overridden with environment variables)
 .TP 5
 ~/.netrc, $HOME/.netrc, $HOME_ETC/.netrc
@@ -2846,12 +2889,16 @@ passwords as a last resort before prompting for one interactively.
 (location can be overridden with environment variables)
 .TP 5
 /var/run/fetchmail.pid
-lock file to help prevent concurrent runs (root mode, Linux systems).
+lock file (pidfile) to help prevent concurrent runs (root mode, Linux systems).
 .TP 5
 /etc/fetchmail.pid
-lock file to help prevent concurrent runs (root mode, systems without /var/run).
+lock file (pidfile) to help prevent concurrent runs (root mode, systems without /var/run).
 
 .SH ENVIRONMENT
+Fetchmail's behavior can be altered by providing it with environment variables. Some may
+alter the operation of libraries that fetchmail links against, for instance, OpenSSL.
+Note that in daemon mode, you will need to quit the background daemon process
+and start a new fetchmail daemon for environment changes to take effect.
 .IP \fBFETCHMAILHOME\fP
 If this environment variable is set to a valid and
 existing directory name, fetchmail will read $FETCHMAILHOME/fetchmailrc
@@ -2898,7 +2945,7 @@ and the user has no administrator privileges to remedy the problem.
 .IP \fBHOME\fP
 (documented since 6.4.1):
 This variable is nomally set to the user's home directory. If it is set
-to a different directory than what is the password database, HOME takes
+to a different directory than what is in the password database, HOME takes
 precedence.
 
 .IP \fBHOME_ETC\fP
@@ -2915,6 +2962,25 @@ and HOME_ETC will be ignored.
 (only if SOCKS support is compiled in) this variable is used by the
 socks library to find out which configuration file it should read. Set
 this to /dev/null to bypass the SOCKS proxy.
+
+.IP \fBSSL_CERT_DIR\fP
+(with truly OpenSSL 1.1.1 compatible library): overrides OpenSSL's idea
+of the default trust directory or path (which contains individual certificate
+files and hashed symlinks), see the SSL_CTX_set_default_verify_paths(3)
+manual page for details, it may be in the openssl development package.
+If using another library's OpenSSL compatibility interface, this may not work.
+Since this variable only specifies a default value, the option \-\-sslcertpath
+takes precedence if given.
+
+.IP \fBSSL_CERT_FILE\fP
+(with truly OpenSSL 1.1.1 compatible library): overrides OpenSSL's idea
+of the default trust certificate bundle file (which contains a concatenation
+of base64-encoded certificates in PEM format), see the
+SSL_CTX_set_default_verify_paths(3) manual page
+for details, it may be in the openssl development package.
+If using another library's OpenSSL compatibility interface, this may not work.
+Since this variable only specifies a default value, the option \-\-sslcertfile
+takes precedence if given.
 
 .SH SIGNALS
 If a \fBfetchmail\fP daemon is running as root, SIGUSR1 wakes it up from its

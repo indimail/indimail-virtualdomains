@@ -4,7 +4,10 @@
  * Concept due to Harry Hochheiser.  Implementation by ESR.  Cleanup and
  * strict RFC821 compliance by Cameron MacPherson.
  *
- * Copyright 1997 Eric S. Raymond, 2009 Matthias Andree
+ * Copyright 1997 Eric S. Raymond, 2009 - 2019 Matthias Andree
+ * Contribution 2004 by Phil Endecott (by way of Rob Funk)
+ * Contributions 2005, 2011 by Sunil Shetye
+ * Contributions 2012, 2021 by Earl Chew
  * For license terms, see the file COPYING in this directory.
  */
 
@@ -167,11 +170,14 @@ SMTP_auth(int sock, char smtp_mode, char *username, char *password, char *buf)
 		snprintf(tmp, sizeof(tmp), "^%s^%s", username, password);
 
 		len = strlen(tmp);
-		for (c = len - 1; c >= 0; c--)
-		{
-			if (tmp[c] == '^')
-				tmp[c] = '\0';
-		}
+
+		/* Take care not to overflow the buffer */
+		c = 0;
+		tmp[c] = '\0';
+		c += 1 + strlen(username);
+		if (c < len)
+			tmp[c] = '\0';
+
 		to64frombits(b64buf, tmp, len, sizeof b64buf);
 		SockPrintf(sock, "AUTH PLAIN %s\r\n", b64buf);
 #ifdef INDIMAIL

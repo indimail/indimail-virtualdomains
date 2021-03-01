@@ -64,6 +64,169 @@ removed from a 6.5.0 or newer release.)
   for end-of-life OpenSSL versions may be removed even from patchlevel releases.
 
 --------------------------------------------------------------------------------
+fetchmail-6.4.16 (released 2021-02-08, 27707 LoC):
+
+# BUG FIXES
+* fetchmail's --configdump, and fetchmailconf, lacked support for the
+  sslcertfile option. --configdump support added by Earl Chew,
+  Gitlab issue #25, merge request !28.
+* fetchmail's manual page was never updated to reflect 6.2.5's change about the
+  duplicate-killer code for multidrop mode, which read
+  "* Dup-killer code now keys on an MD5 hash of the raw headers."
+  ...instead of just the Message-ID. [commit 9dd8400, 2003-10-10 by esr]
+  The manual page was now updated accordingly and documents
+  historic behaviour:
+  start to 5.0.7 no duplicate suppression;
+  5.0.8 to 6.2.4 duplicate suppression only by Message-ID;
+  6.2.5 to 6.4.X duplicate suppression by entire raw header.
+  Manpage bug found by Julian Bane debugging "duplicate message" behaviour.
+* ./configure no longer runs AC_LIB_LINKFLAGS (how to link) checks
+  when called --without-ssl
+
+# FEATURES
+* fetchmail --version [fetchmail -V] now queries and prints the SSL/TLS
+  library's "SSL default trusted certificate" file or directory (mind the word
+  "default"), where the OpenSSL-compatible TLS implementation will look for
+  trusted root, meaning certification authority (CA), certificates.
+  NOTE 1: watch the output carefully if the line prints the defaults
+  or the configured path (without "default").
+  NOTE 2: SSL_CERT_DIR and SSL_CERT_FILE are documented environment variables
+  for OpenSSL 1.1.1 to override the *default* locations (those compiled into
+  OpenSSL or possibly in its configuration file).
+  This was added when Gene Heskett was debugging his setup and the
+  information "where does OpenSSL look" was missing.
+* fetchmail --version now prints version of the OpenSSL library that
+  it was compiled against, and that it is using at runtime, and also
+  the OPENSSL_DIR and OPENSSL_ENGINES_DIR (if available).
+
+# TRANSLATION UPDATES
+  These fine people have contributed updated translations for fetchmail,
+  in no particular order:
+* sq:    Besnik Bleta [Albanian]
+* eo:    Keith Bowes [Esperanto]
+* cs:    Petr Pisar [Czech]
+* pl:    Jakub Bogusz [Polish]
+* sv:    Göran Uddeborg [Swedish]
+* fr:    Frédéric Marchal [French]
+
+# KNOWN BUGS AND WORKAROUNDS
+  (This section floats upwards through the NEWS file so it stays with the
+  current release information)
+* Fetchmail does not handle messages without Message-ID header well
+  (See sourceforge.net bug #780933)
+* Fetchmail currently uses 31-bit signed integers in several places
+  where unsigned and/or wider types should have been used, for instance,
+  for mailbox sizes, and misreports sizes of 2 GibiB and beyond.
+  Fixing this requires C89 compatibility to be relinquished.
+* BSMTP is mostly untested and errors can cause corrupt output.
+* Fetchmail does not track pending deletes across crashes.
+* The command line interface is sometimes a bit stubborn, for instance,
+  fetchmail -s doesn't work with a daemon running.
+* Linux systems may return duplicates of an IP address in some circumstances if
+  no or no global IPv6 addresses are configured.
+  (No workaround. Ubuntu Bug#582585, Novell Bug#606980.)
+* Kerberos 5 may be broken, particularly on Heimdal, and provide bogus error
+  messages. This will not be fixed, because the maintainer has no Kerberos 5
+  server to test against. Use GSSAPI.
+
+---------------------------------------------------------------------------------
+fetchmail-6.4.15 (released 2021-01-03, 27614 LoC):
+
+# BUG FIXES
+* Fix a typo in the manual page reported by David McKelvie.
+* Fix cross-compilation with openssl, by Fabrice Fontaine. Merge request !23.
+* Fix truncation of SMTP PLAIN AUTH with ^ in credentials, by Earl Chew.
+  Gitlab issue #23, merge request !25.
+
+-------------------------------------------------------------------------------
+fetchmail-6.4.14 (released 2020-11-26, 27608 LoC):
+
+# TRANSLATION UPDATES were made by these fine people:
+* sr:    Мирослав Николић (Miroslav Nikolić) [Serbian]
+
+---------------------------------------------------------------------------------
+fetchmail-6.4.13 (released 2020-10-25, 27608 LoC):
+
+# BUG FIXES:
+* Errors about lock file (= pidfile) creation could be lost in daemon 
+  configurations (-d option, or set daemon) when using syslog. Now they are also 
+  logged to syslog.  Found verifying a pidfile creation issue on 6.4.12 that was 
+  previously reported by Alex Hall of Automatic Distributors.
+* If the lock file cannot be removed (no write permission on directory), try
+  to truncate it, and if that fails, report error.
+* If the pidfile was non-default, fetchmail -q or --quit would malfunction and
+  claim no other fetchmail were running, because it did not read the 
+  configuration files or merge the command line options, thus it would look for 
+  the PID in the wrong file.
+
+# CHANGES:
+* Lockfile (= pidfile) creation errors are now logged with filename and reason.
+
+# TRANSLATION UPDATES were made by these fine people:
+* cs:    Petr Pisar [Czech]
+* ja:    Takeshi Hamasaki [Japanese]
+* sq:    Besnik Bleta [Albanian]
+* zh_CN: Boyuan Yang [Chinese (simplified)]
+* sv:    Göran Uddeborg [Swedish]
+* pl:    Jakub Bogusz [Polish]
+* fr:    Frédéric Marchal [French]
+* eo:    Keith Bowes [Esperanto]
+* de:    [German - by current maintainer]
+
+---------------------------------------------------------------------------------
+fetchmail-6.4.12 (released 2020-09-04, 27596 LoC):
+
+# BUG FIXES:
+* The README file is now the one from Git again. The makerelease.pl script
+  used to roll and upload the tarball sometimes clobbered the README file and
+  replaced its contents by a part of the NEWS file.
+
+---------------------------------------------------------------------------------
+fetchmail-6.4.11 (released 2020-08-28, 27596 LoC):
+
+# REGRESSION FIX:
+* configure: fetchmail 6.4.9 and 6.4.10 would miss checking for TLS v1.2 and
+  TLS v1.3 support if AC_LIB_LINKFLAGS came up with something such as
+  /path/to/libssl.so, rather than -lssl. (For instance on FreeBSD)
+
+---------------------------------------------------------------------------------
+fetchmail-6.4.10 (released 2020-08-27, 27596 LoC):
+
+# REGRESSION FIX:
+* configure: fetchmail 6.4.9's configure was unable to pick up OpenSSL
+  if it wasn't announced by pkg-config, for instance, on FreeBSD.
+
+---------------------------------------------------------------------------------
+fetchmail-6.4.9: (not announced by e-mail, withdrawn)
+
+## DOCUMENTATION UPDATE:
+* manpage: mention that the SSL/TLS certificate fingerprint uses an MD5 hash.
+
+## CHANGES:
+* configure: try to use AC_LIB_LINKFLAGS to obtain proper link flags for 
+  libcrypto and libssl if pkg-config failed.
+  This is an attempt to fix borderline issues when users building on systems 
+  with obsolete OpenSSL try to use a local newer OpenSSL from a separate 
+  directory.
+
+## NEW TRANSLATION, with thanks to the translator:
+* ro:    Florentina Mușat [Romanian]
+
+---------------------------------------------------------------------------------
+fetchmail-6.4.8 (released 2020-06-14, 27596 LoC):
+
+## NEW TRANSLATION, with thanks to the translator:
+* sr:    Мирослав Николић (Miroslav Nikolić) [Serbian]
+- Sorry, this was missed earlier because my translation scripts did not properly
+  report new translations.
+
+---------------------------------------------------------------------------------
+fetchmail-6.4.7 (released 2020-06-14, 27596 LoC):
+
+## TRANSLATION UPDATE, with thanks to the translator:
+* sv:    Göran Uddeborg [Swedish]
+
+-------------------------------------------------------------------------------
 fetchmail-6.4.6 (released 2020-05-29, 27596 LoC):
 
 ## TRANSLATION UPDATE, with thanks to the translator:
@@ -101,26 +264,6 @@ fetchmail-6.4.5 (released 2020-05-07, 27596 LoC):
 * fr:    Frédéric Marchal [French]
 * cs:    Petr Pisar [Czech]
 
-# KNOWN BUGS AND WORKAROUNDS
-  (This section floats upwards through the NEWS file so it stays with the
-  current release information)
-* Fetchmail does not handle messages without Message-ID header well
-  (See sourceforge.net bug #780933)
-* Fetchmail currently uses 31-bit signed integers in several places
-  where unsigned and/or wider types should have been used, for instance,
-  for mailbox sizes, and misreports sizes of 2 GibiB and beyond. 
-  Fixing this requires C89 compatibility to be relinquished.
-* BSMTP is mostly untested and errors can cause corrupt output.
-* Fetchmail does not track pending deletes across crashes.
-* The command line interface is sometimes a bit stubborn, for instance,
-  fetchmail -s doesn't work with a daemon running.
-* Linux systems may return duplicates of an IP address in some circumstances if
-  no or no global IPv6 addresses are configured.
-  (No workaround. Ubuntu Bug#582585, Novell Bug#606980.)
-* Kerberos 5 may be broken, particularly on Heimdal, and provide bogus error
-  messages. This will not be fixed, because the maintainer has no Kerberos 5
-  server to test against. Use GSSAPI.
-
 --------------------------------------------------------------------------------
 
 fetchmail-6.4.4 (released 2020-04-26, 27530 LoC):
@@ -135,6 +278,7 @@ fetchmail-6.4.3 (released 2020-04-05, 27530 LoC):
 ## BUGFIXES:
 * Plug memory leaks when parts of the configuration (defaults, rcfile, command 
   line) override one another.
+* Merge esmtpname and esmtppassword defaults properly.
 * fetchmail terminated the placeholder command string too late and included
   garbage from the heap at the end of the string. Workaround: don't use place-
   holders %h or %p in the --plugin string. Bug added in 6.4.0 when merging
@@ -315,7 +459,7 @@ fetchmail 6.4.0 (released 2019-09-27, 27429 LoC):
   they have less than 500 translated messages out of 714: el fi gl pt_BR sk tr
   -> Greek, Finnish, Galician, Brazilian Portuguese, Slovak, Turkish.
 * Fetchmail now refuses delivery if the MDA option contains single-quoted
-  expansions.
+  expansions. Fixes Debian Bug#347909.
 
 ## FIXES
 * Fix a typo in the FAQ. Submitted by David Lawyer, Debian Bug#706776.

@@ -56,6 +56,8 @@
 
 #ifdef SSL_ENABLE
 #include <openssl/ssl.h>	/* for OPENSSL_NO_SSL2 and ..._SSL3 checks */
+#include <openssl/opensslv.h>	/* for version queries */
+#include "tls-aux.h"		/* compatibility and helper functions */
 #endif
 
 /* prototypes for internal functions */
@@ -147,7 +149,7 @@ static void printcopyright(FILE *fp) {
 		   "                   Robert M. Funk, Graham Wilson\n"
 		   "Copyright (C) 2005 - 2012 Sunil Shetye\n"
 		   "Copyright (C) 2005 - %d Matthias Andree\n"
-		   ), 2020);
+		   ), 2021);
 	fprintf(fp, GT_("Fetchmail comes with ABSOLUTELY NO WARRANTY. This is free software, and you\n"
 		   "are welcome to redistribute it under certain conditions. For details,\n"
 		   "please see the file COPYING in the source or documentation directory.\n"));
@@ -307,6 +309,13 @@ int main(int argc, char **argv)
 	printf(GT_("This is fetchmail release %s"), VERSION);
 	fputs(features, stdout);
 #ifdef SSL_ENABLE
+	printf(GT_("Compiled with SSL library %#lx \"%s\"\n"
+		   "Run-time uses SSL library %#lx \"%s\"\n"),
+			OPENSSL_VERSION_NUMBER, OPENSSL_VERSION_TEXT,
+			OpenSSL_version_num(), OpenSSL_version(OPENSSL_VERSION));
+	printf(GT_("OpenSSL: %s\nEngines: %s\n"),
+			OpenSSL_version(OPENSSL_DIR),
+			OpenSSL_version(OPENSSL_ENGINES_DIR));
 #if !HAVE_DECL_TLS1_3_VERSION || defined(OPENSSL_NO_TLS1_3)
 	printf(GT_("WARNING: Your SSL/TLS library does not support TLS v1.3.\n"));
 #endif
@@ -332,9 +341,10 @@ int main(int argc, char **argv)
 	if (system("uname -a")) { /* NOOP to quench GCC complaint */ }
     }
 
-    /* avoid parsing the config file if all we're doing is killing a daemon */
-    if (!quitonly)
-	implicitmode = load_params(argc, argv, optind);
+    /* We used to avoid parsing the config file if all we're doing is killing 
+     * a daemon, under if (!quitonly) but since the pidfile can be configured 
+     * in the rcfile, this is no longer viable. */
+    implicitmode = load_params(argc, argv, optind);
 
     if (run.logfile) {
 	/* nodetach -> turn off logfile option */
@@ -1777,8 +1787,10 @@ static void dump_params (struct runctl *runp,
 	} else {
 	    printf(GT_("  SSL server certificate checking disabled.\n"));
 	}
+	printf(GT_("  SSL default trusted certificate file: %s\n"), get_default_cert_file());
 	if (ctl->sslcertfile != NULL)
 		printf(GT_("  SSL trusted certificate file: %s\n"), ctl->sslcertfile);
+	printf(GT_("  SSL default trusted certificate directory: %s\n"), get_default_cert_path());
 	if (ctl->sslcertpath != NULL)
 		printf(GT_("  SSL trusted certificate directory: %s\n"), ctl->sslcertpath);
 	if (ctl->sslcommonname != NULL)

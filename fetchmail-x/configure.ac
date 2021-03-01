@@ -28,6 +28,8 @@ dnl python is optional
 # to disable python detection and continue without building/installing
 # fetchmail.conf -- be sure to check README.packaging, too!
 #
+# recent Python 3.x versions are supported.
+#
 AM_PATH_PYTHON(2.7,,AC_MSG_WARN([Disabling fetchmailconf: python 2.7 or greater not found]))
 AM_CONDITIONAL([HAVE_PYTHON], [test "$PYTHON" != :])
 
@@ -788,7 +790,9 @@ then
   PKG_CHECK_MODULES([SSL],[libssl libcrypto],[LIBS="$LIBS $SSL_LIBS"],[
     AS_MESSAGE([SSL-check: pkg-config check failed, using traditional probe])
     LDFLAGS="$LDFLAGS -L$with_ssl/lib"
-    LIBS="$LIBS -lssl -lcrypto"
+    AC_LIB_LINKFLAGS([crypto])
+    AC_LIB_LINKFLAGS([ssl], [crypto])
+    LIBS="$LIBS $LIBSSL $LIBCRYPTO"
     dnl check if -ldl is needed
     AC_MSG_CHECKING([for additional library dependencies of SSL])
     found=0
@@ -812,7 +816,16 @@ else
   AC_MSG_WARN(Consider re-running configure --with-ssl.)
 fi
 
-case "$LIBS" in *-lssl*)
+if test "$cross_compiling" != yes -a "$with_ssl" != "no"
+then
+  AC_LIB_LINKFLAGS([crypto])
+  AC_LIB_LINKFLAGS([ssl], [crypto])
+
+  LIBS="$LIBS $LIBSSL $LIBCRYPTO"
+fi
+AC_MSG_NOTICE([LIBS:] "$LIBS")
+
+case "$LIBS" in *-lssl*|*libssl*)
 	AC_CHECK_DECLS([TLS1_3_VERSION],,
 		       AC_MSG_WARN([Your OpenSSL version is too old and does not support TLS v1.3. Upgrade.]),
 		       [#include <openssl/ssl.h>])
