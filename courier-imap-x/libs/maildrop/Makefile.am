@@ -43,9 +43,9 @@ maildrop_SOURCES=deliver.C deliverdotlock.C deliverdotlock.h \
 	rematchstr.C rematchstr.h search.C search.h token.C \
 	token.h varlist.C varlist.h dovecotauth.c dovecotauth.h
 
-maildrop_DEPENDENCIES = libmdcommon.la ../maildir/maildir.libdeps
+maildrop_DEPENDENCIES = libmdcommon.la
 
-maildrop_LDADD = libmdcommon.la `cat ../maildir/maildir.libdeps`\
+maildrop_LDADD = libmdcommon.la \
 	@AUTHLDADD@ -lpcre
 maildrop_LDFLAGS=
 

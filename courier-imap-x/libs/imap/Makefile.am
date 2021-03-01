@@ -76,10 +76,10 @@ imapd_SOURCES=fetch.c fetchinfo.c fetchinfo.h imapd.c imapd.h \
 
 imapd_DEPENDENCIES=libimapd.la \
 	../authlib/libauthmod.la ../authlib/libauth.la \
-	../maildir/maildir.libdeps @dblibrary@
+	@dblibrary@
 
 imapd_LDADD=libimapd.la ../authlib/libauthmod.la ../authlib/libauth.la \
-	`cat ../maildir/maildir.libdeps` @dblibrary@ @DEBUGLIB@
+	@dblibrary@ @DEBUGLIB@
 
 pop3login_SOURCES=pop3login.c pop3dcapa.c
 pop3login_DEPENDENCIES=libpop3d.la \
