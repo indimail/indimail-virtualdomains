@@ -101,6 +101,7 @@ starttls()
 	}
 	printed(printf("+OK Begin SSL/TLS negotiation now.\r\n"));
 	fflush(stdout);
+	fflush(stdin);
 	close(pipefd[1]);
 	close(0);
 	close(1);

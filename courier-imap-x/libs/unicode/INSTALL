@@ -3,16 +3,10 @@
    Link: Courier Unicode Library (previous)
    Link: Manual pages (next)
 
-                             Installation and usage
-   Prev                                                                  Next
-
-   --------------------------------------------------------------------------
-
-
 Installation and usage
 
    Download the current version of the library from
-   http://www.courier-mta.org/download.html#unicode. After unpacking the
+   https://www.courier-mta.org/download.html#unicode. After unpacking the
    tarball, run the configure script, which takes the usual options, followed
    by make, then make install.
 
@@ -24,7 +18,7 @@ Installation and usage
    must be used to build code that uses this library that was used to build
    the library itself.
 
-   The Courier Unicode library installs an autoconf macro to prove for C++11
+   The Courier Unicode library installs an autoconf macro to probe for C++11
    support. In your configure.ac
 
            AX_COURIER_UNICODE_VERSION

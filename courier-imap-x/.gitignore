@@ -258,6 +258,7 @@ libs/maildir/maildirkw
 libs/maildir/maildirkwtest
 libs/maildir/maildirmake.html
 libs/maildir/maildirsharedrc.h
+libs/maildir/maildirwatch
 libs/maildir/quotawarnmsg.h
 libs/maildir/testmaildirfilter
 libs/maildir/testmaildirsearch

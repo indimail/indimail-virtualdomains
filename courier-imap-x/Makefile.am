@@ -79,7 +79,7 @@ install-exec-hook:
 	mkdir -p $(DESTDIR)$(sysconfdir)/shared.tmp
 	chmod 755 $(DESTDIR)$(sysconfdir)/shared.tmp
 	mkdir -p $(DESTDIR)$(sysconfdir)/imapaccess
-	chmod 755 $(DESTDIR)$(sysconfdir)/shared.tmp
+	chmod 755 $(DESTDIR)$(sysconfdir)/imapaccess
 
 install-data-local: install-man
 	$(INSTALL_DATA) libs/authlib/modulelist $(DESTDIR)$(sysconfdir)/authmodulelist

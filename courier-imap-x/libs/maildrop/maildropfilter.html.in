@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>maildropfilter</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets Vsnapshot"/><link rel="home" href="#idm46044390010000" title="maildropfilter"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>maildropfilter</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets Vsnapshot"/><link rel="home" href="#maildropfilter" title="maildropfilter"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
 
 Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
 information.
 
---></head><body><div class="refentry"><a id="idm46044390010000" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>maildropfilter — maildrop's filtering language</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="informalexample"><p>
+--></head><body><div class="refentry"><a id="maildropfilter" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>maildropfilter — maildrop's filtering language</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="informalexample"><p>
 	<code class="filename">@withetcdir@/maildroprc</code>,
 	<code class="filename">$HOME/.mailfilter</code>,
 	<code class="filename">$HOME/.mailfilters/*</code>, and friends...
-      </p></div></div><div class="refsect1"><a id="idm46044394451088" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+      </p></div></div><div class="refsect1"><a id="maildropfilter_description" shape="rect"> </a><h2>DESCRIPTION</h2><p>
       This manual page describes the language used by <span class="command"><strong>maildrop</strong></span>
       to filter E-mail messages.
       The mail filtering instructions are read from a file.
@@ -28,7 +28,7 @@ information.
       should
       re-queue the message for a later delivery attempt. Hopefully, most simple
       syntax errors will not cause mail to be bounced back if the error is caught
-      and fixed quickly.</p><div class="refsect2"><a id="idm46044394503184" shape="rect"> </a><h3>Environment</h3><p>
+      and fixed quickly.</p><div class="refsect2"><a id="maildropfilter_environment" shape="rect"> </a><h3>Environment</h3><p>
 	<a id="environment" shape="rect"> </a>
 
 	<span class="command"><strong>maildrop</strong></span> uses variables to access and manipulate messages.
@@ -101,7 +101,7 @@ LOCALDEFAULT=$DEFAULT
 DEFAULT=$SAVEDEFAULT
 	  </pre></div></blockquote></div><p>All internal variables are exported back as environment variables when
 	<span class="command"><strong>maildrop</strong></span> runs an external command. Changes to internal variables, made
-	by the <code class="systemitem">filter file</code>, are reflected in the exported environment.</p></div><div class="refsect2"><a id="idm46044394616512" shape="rect"> </a><h3>Lexical structure</h3><p>
+	by the <code class="systemitem">filter file</code>, are reflected in the exported environment.</p></div><div class="refsect2"><a id="maildropfilter_lexical_structure" shape="rect"> </a><h3>Lexical structure</h3><p>
 	Most whitespace is generally ignored. The <span class="token">#</span>
 	character introduces a comment
 	running to the end of the line, which is also ignored. Unlike other mail
@@ -115,7 +115,7 @@ DEFAULT=$SAVEDEFAULT
 	corrected, without bouncing any mail.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
 	  In <span class="command"><strong>maildrop</strong></span>, the end of line is a lexical token. In order to
 	  continue a long statement on the next line, terminate the line with a
-	  backslash character.</p></div></div><div class="refsect2"><a id="idm46044394609984" shape="rect"> </a><h3>Literal text</h3><p>
+	  backslash character.</p></div></div><div class="refsect2"><a id="maildropfilter_literal_text" shape="rect"> </a><h3>Literal text</h3><p>
 	Literal text in the <span class="command"><strong>maildrop</strong></span> filtering language is
 	surrounded by
 	either single or double quotes. In order to enter a single quote into a text
@@ -131,7 +131,7 @@ DEFAULT=$SAVEDEFAULT
 FOOBAR="Foo"'bar'
 	  </pre></div></blockquote></div><p>
 	This sets the variable <code class="varname">FOOBAR</code> to the text "Foobar".
-      </p></div><div class="refsect2"><a id="idm46044394590768" shape="rect"> </a><h3>Variable substitution</h3><p>
+      </p></div><div class="refsect2"><a id="maildropfilter_variable_substitution" shape="rect"> </a><h3>Variable substitution</h3><p>
 	<a id="varsubst" shape="rect"> </a>
 
 	Variable substitution is performed on text literals that's surrounded by
@@ -161,12 +161,12 @@ MAILBOX="${HOME-WORD}/Mailbox"
 	backslash followed by the <span class="token">$</span> character results in a <span class="token">$</span> character in the text
 	literal, without doing any variable substitution.</p><p>
 	Variable substitution is not done in text literals which are surrounded by
-	single quotes (apostrophes).</p></div><div class="refsect2"><a id="idm46044394578784" shape="rect"> </a><h3>Command line arguments</h3><p>
+	single quotes (apostrophes).</p></div><div class="refsect2"><a id="maildropfilter_command_line_arguments" shape="rect"> </a><h3>Command line arguments</h3><p>
 	<span class="command"><strong>maildrop</strong></span> initializes special variables:
 	<code class="varname">$1</code>, <code class="varname">$2</code>, and so on, with
 	additional parameters specified on the <span class="command"><strong>maildrop</strong></span>
 	command line. A <code class="systemitem">filter file</code>
-	may use those variables just like any other variables.</p></div><div class="refsect2"><a id="idm46044394574208" shape="rect"> </a><h3>Predefined variables</h3><a id="predefined" shape="rect"> </a><p>
+	may use those variables just like any other variables.</p></div><div class="refsect2"><a id="maildropfilter_predefined_variables" shape="rect"> </a><h3>Predefined variables</h3><a id="predefined" shape="rect"> </a><p>
 	The following variables are automatically defined by
 	<span class="command"><strong>maildrop</strong></span>. The
 	default values for the following variables may be changed by the system
@@ -273,7 +273,7 @@ MAILBOX="${HOME-WORD}/Mailbox"
 	      setting sets the permissions on new messages only.  Access permissions on
 	      messages in maildirs are also affected by the permissions on the maildir
 	      directories.
-	</p></dd></dl></div></div><div class="refsect2"><a id="idm46044389118688" shape="rect"> </a><h3>Other special variables</h3><p>
+	</p></dd></dl></div></div><div class="refsect2"><a id="maildropfilter_other_special_variables" shape="rect"> </a><h3>Other special variables</h3><p>
 	The following variables are automatically used by <span class="command"><strong>maildrop</strong></span> when the
 	<code class="systemitem">filter file</code> is being processed:
       </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="varname">EXITCODE</code></span></dt><dd><p>Return code for <span class="command"><strong>maildrop</strong></span>. When
@@ -338,7 +338,7 @@ MAILBOX="${HOME-WORD}/Mailbox"
 
 	</p></dd><dt><span class="term"><code class="varname">SIZE</code></span></dt><dd><p>Number of bytes in the message. This may or may not
 	      include the -A option. Use this as a criteria
-	      for filtering, nothing more.</p></dd></dl></div></div><div class="refsect2"><a id="idm46044389086400" shape="rect"> </a><h3>Unquoted text</h3><p>
+	      for filtering, nothing more.</p></dd></dl></div></div><div class="refsect2"><a id="maildropfilter_unquoted_text" shape="rect"> </a><h3>Unquoted text</h3><p>
 	All text strings in <code class="systemitem">filter file</code>s should be in single, or double quotes.
 	However, for convenience sake, quotes can be omitted under certain
 	circumstances.</p><p>
@@ -362,7 +362,7 @@ TEXT="This is a long \
    text string"
 	  </pre></div></blockquote></div><p>
 	The backslash, the newline, and all leading whitespace on the next line is
-	removed, resulting in "This is a long text string".</p></div><div class="refsect2"><a id="idm46044389077424" shape="rect"> </a><h3>Command substitution</h3><p>
+	removed, resulting in "This is a long text string".</p></div><div class="refsect2"><a id="maildropfilter_command_substitution" shape="rect"> </a><h3>Command substitution</h3><p>
 	Text enclosed in back-tick characters is interpreted as a shell command. The
 	shell command is executed as a child process by <span class="command"><strong>maildrop</strong></span>.
 	Its output is used in place of the command. For example:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
@@ -373,7 +373,7 @@ DIR=`ls`
 	The output of the command will have all newline characters replaced by
 	spaces, and leading and trailing spaces will be stripped (multiple spaces are
 	not removed, though). Also, the contents of the message being delivered is
-	made available to the command on standard input.</p></div><div class="refsect2"><a id="idm46044389072880" shape="rect"> </a><h3>Patterns</h3><a id="patterns" shape="rect"> </a><p>
+	made available to the command on standard input.</p></div><div class="refsect2"><a id="maildropfilter_patterns" shape="rect"> </a><h3>Patterns</h3><a id="patterns" shape="rect"> </a><p>
 	The pattern syntax in <span class="command"><strong>maildrop</strong></span> is similar to the
 	<span class="command"><strong>grep</strong></span> command's syntax, with some minor differences.
 	A pattern takes the following
@@ -430,7 +430,7 @@ DIR=`ls`
 	    message text. Use <span class="quote">“<span class="quote">reformime -u &lt;message.txt</span>”</span>,
 	    with <code class="filename">message.txt</code> containing the sample message,
 	    to see exactly the actual text that gets searched by patterns.
-	  </p></li></ul></div></div><div class="refsect2"><a id="idm46044389051264" shape="rect"> </a><h3>Pattern options</h3><a id="options" shape="rect"> </a><p>
+	  </p></li></ul></div></div><div class="refsect2"><a id="maildropfilter_pattern_options" shape="rect"> </a><h3>Pattern options</h3><a id="options" shape="rect"> </a><p>
 	Following <code class="literal">/<em class="replaceable"><code>pattern</code></em>/,</code>
 	there may be an optional colon, followed by one. or
 	more options. The following options may be specified in any order:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">h</code></span></dt><dd><p>
@@ -454,7 +454,7 @@ DIR=`ls`
 	Normally, each line in the message gets matched against the pattern
 	individually. When applying patterns to a header, multi-line headers (headers
 	split on several lines by beginning each continuation line with whitespace)
-	are silently combined into a single line, before the pattern is applied.</p></div><div class="refsect2"><a id="idm46044389038304" shape="rect"> </a><h3>MIME encoding</h3><p>
+	are silently combined into a single line, before the pattern is applied.</p></div><div class="refsect2"><a id="maildropfilter_mime_encoding" shape="rect"> </a><h3>MIME encoding</h3><p>
 	The pattern must be a valid text string in the <code class="literal">UTF-8</code>
 	codeset, and <span class="command"><strong>maildrop</strong></span> should handle messages
 	that use MIME encodings in other known character sets.
@@ -467,7 +467,7 @@ DIR=`ls`
       </p><p>
 	For a MIME search to succeed, the message must be a well-formed MIME
 	message (with a Mime-Version: 1.0 header).
-      </p></div><div class="refsect2"><a id="idm46044389033808" shape="rect"> </a><h3>Weighted scoring</h3><p>
+      </p></div><div class="refsect2"><a id="maildropfilter_weighted_scoring" shape="rect"> </a><h3>Weighted scoring</h3><p>
 	Patterns are evaluated by <span class="command"><strong>maildrop</strong></span> as any other numerical
 	expression. If a pattern is found, <span class="command"><strong>maildrop</strong></span>'s filter
 	interprets the
@@ -490,7 +490,7 @@ DIR=`ls`
 	  <span class="command"><strong>maildrop</strong></span> does not
 	  recognize multiple occurrences of the same pattern in the same line.
 	  Multiple occurences of the same pattern in one line count as one
-	  occurence.</p></div></div><div class="refsect2"><a id="idm46044389023296" shape="rect"> </a><h3>Pattern Match Results</h3><a id="patmatch" shape="rect"> </a><p>
+	  occurence.</p></div></div><div class="refsect2"><a id="maildropfilter_pattern_match_results" shape="rect"> </a><h3>Pattern Match Results</h3><a id="patmatch" shape="rect"> </a><p>
 	After a pattern is successfully matched, the actual text that is matched
 	is placed in the <code class="varname">MATCH</code> variable. For example:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 /^From:.*/
@@ -531,12 +531,12 @@ From: postmaster@localhost
 	    The <span class="quote">“<span class="quote">w</span>”</span> pattern option is no longer possible, with
 	    <acronym class="acronym">PCRE</acronym>.
 	    The very few recipes that use this option, if any actually exist,
-	    will have to be rewritten in some other fashion.</p></li></ul></div></div><div class="refsect2"><a id="idm46044389000992" shape="rect"> </a><h3>Expressions</h3><p>
+	    will have to be rewritten in some other fashion.</p></li></ul></div></div><div class="refsect2"><a id="maildropfilter_expressions" shape="rect"> </a><h3>Expressions</h3><p>
 	Although <span class="command"><strong>maildrop</strong></span> evaluates expressions numerically,
 	results of
 	expressions are stored as text literals. When necessary, text literals are
 	converted to numbers, then the results of a mathematical operation is
-	converted back into a text literal.</p><div class="refsect3"><a id="idm46044388999344" shape="rect"> </a><h4>Operators</h4><p>
+	converted back into a text literal.</p><div class="refsect3"><a id="maildropfilter_operators" shape="rect"> </a><h4>Operators</h4><p>
 	  The following operators carry their usual meaning, and are listed in order
 	  from lowest precedence, to the highest:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 
@@ -549,7 +549,7 @@ From: postmaster@localhost
 *  /
 =~ /<em class="replaceable"><code>pattern</code></em>/
 /<em class="replaceable"><code>pattern</code></em>/  !  ~  <em class="replaceable"><code>function()</code></em>
-	    </pre></div></blockquote></div></div><div class="refsect3"><a id="idm46044388995344" shape="rect"> </a><h4>Variable assignment</h4><a id="assign" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	    </pre></div></blockquote></div></div><div class="refsect3"><a id="maildropfilter_variable_assignment" shape="rect"> </a><h4>Variable assignment</h4><a id="assign" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 VARIABLE=<em class="replaceable"><code>expression</code></em>
 	    </pre></div></blockquote></div><p>
 	  Assigns the result of the expression to <em class="replaceable"><code>VARIABLE</code></em>
@@ -559,7 +559,7 @@ VARIABLE=<em class="replaceable"><code>expression</code></em>
 	    may contain only letters, numbers, underscores, dashes, and a selected few
 	    other characters. In order to initialize a variable whose name contains
 	    non-standard punctuation marks, surround the name of the variable with
-	    quotes.</p></div></div><div class="refsect3"><a id="idm46044388990080" shape="rect"> </a><h4>cc - deliver a copy of the message</h4><a id="cc" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	    quotes.</p></div></div><div class="refsect3"><a id="maildropfilter_cc___deliver_a_copy_of_the_message" shape="rect"> </a><h4>cc - deliver a copy of the message</h4><a id="cc" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 cc <em class="replaceable"><code>expression</code></em>
 	    </pre></div></blockquote></div><p>
 	  The <span class="command"><strong>cc</strong></span> statement is very similar to the
@@ -579,7 +579,7 @@ cc <em class="replaceable"><code>expression</code></em>
 	  <span class="command"><strong>cc</strong></span> is used to deliver a message to a process
 	  <span class="command"><strong>maildrop</strong></span>
 	  will set the <code class="varname">EXITCODE</code> variable to the process's exit
-	  code.</p></div><div class="refsect3"><a id="idm46044388977904" shape="rect"> </a><h4>dotlock - create a manual dot-lock</h4><a id="dotlock" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  code.</p></div><div class="refsect3"><a id="maildropfilter_dotlock___create_a_manual_dot_lock" shape="rect"> </a><h4>dotlock - create a manual dot-lock</h4><a id="dotlock" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 dotlock <em class="replaceable"><code>expression</code></em> {
 
    ...
@@ -609,7 +609,7 @@ dotlock <em class="replaceable"><code>expression</code></em> {
 	    regularly, they
 	    will never go stale. You'll have <span class="command"><strong>maildrop</strong></span> processes
 	    hanging in limbo,
-	    until their watchdog timers go off, aborting the mail delivery.</p></div></div><div class="refsect3"><a id="idm46044388964880" shape="rect"> </a><h4>echo - output diagnostic information</h4><a id="echo" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	    until their watchdog timers go off, aborting the mail delivery.</p></div></div><div class="refsect3"><a id="maildropfilter_echo___output_diagnostic_information" shape="rect"> </a><h4>echo - output diagnostic information</h4><a id="echo" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 echo <em class="replaceable"><code>expression</code></em>
 	    </pre></div></blockquote></div><p>
 	  <span class="command"><strong>maildrop</strong></span> will print the given text. This is usually used
@@ -617,7 +617,7 @@ echo <em class="replaceable"><code>expression</code></em>
 	  <span class="command"><strong>maildrop</strong></span> runs in embedded mode, but can be used for
 	  debugging
 	  purposes. Normally, a newline is printed after the text. If text is
-	  terminated with a \c, no newline will be printed.</p></div><div class="refsect3"><a id="idm46044388959936" shape="rect"> </a><h4>exception - trap fatal errors</h4><a id="exception" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  terminated with a \c, no newline will be printed.</p></div><div class="refsect3"><a id="maildropfilter_exception___trap_fatal_errors" shape="rect"> </a><h4>exception - trap fatal errors</h4><a id="exception" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 exception {
 
    ...
@@ -630,7 +630,7 @@ exception {
 	  anywhere within the
 	  block of statements enclosed by the <span class="command"><strong>exception</strong></span> clause,
 	  execution will
-	  resume immediately following the <span class="command"><strong>exception</strong></span> clause.</p></div><div class="refsect3"><a id="idm46044388954112" shape="rect"> </a><h4>exit - terminate filtering unconditionally</h4><a id="exit" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  resume immediately following the <span class="command"><strong>exception</strong></span> clause.</p></div><div class="refsect3"><a id="maildropfilter_exit___terminate_filtering_unconditionally" shape="rect"> </a><h4>exit - terminate filtering unconditionally</h4><a id="exit" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 exit
 	    </pre></div></blockquote></div><p>
 	  The <span class="command"><strong>exit</strong></span> statement immediately terminates filtering.
@@ -640,7 +640,7 @@ exit
 	  <span class="command"><strong>exit</strong></span> statement causes <span class="command"><strong>maildrop</strong></span> to
 	  terminate without delivering the message anywhere.</p><p>The <span class="command"><strong>exit</strong></span> statement is usually used when
 	  <span class="command"><strong>maildrop</strong></span> runs in <a class="ulink" href="maildrop.html#embedded" target="_top" shape="rect">embedded mode</a>, when message
-	  delivery instructions are not allowed.</p></div><div class="refsect3"><a id="idm46044388944528" shape="rect"> </a><h4>flock - create an manual flock() lock</h4><a id="flock" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  delivery instructions are not allowed.</p></div><div class="refsect3"><a id="maildropfilter_flock___create_an_manual_flock___lock" shape="rect"> </a><h4>flock - create an manual flock() lock</h4><a id="flock" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 flock <em class="replaceable"><code>expression</code></em> {
 
    ...
@@ -666,7 +666,7 @@ flock <em class="replaceable"><code>expression</code></em> {
 	    immediately. Use the <span class="command"><strong>exception</strong></span> statement in order to trap
 	    this
 	    exception condition, and execute an alternative set of filtering
-	    instructions.</p></div></div><div class="refsect3"><a id="idm46044388932912" shape="rect"> </a><h4>foreach - iterate over text sections matched by a pattern</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	    instructions.</p></div></div><div class="refsect3"><a id="maildropfilter_foreach___iterate_over_text_sections_matched_by_a_pattern" shape="rect"> </a><h4>foreach - iterate over text sections matched by a pattern</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 foreach /pattern/:options
 {
    ...
@@ -688,7 +688,7 @@ foreach (expression) =~ /pattern/:options
 		  Subpatterns are not processed.
 		  Only the <code class="varname">MATCH</code> variable will be set for each found
 		  pattern.</p></dd></dl></div><p>
-	</p></div><div class="refsect3"><a id="idm46044388925024" shape="rect"> </a><h4>if - conditional execution</h4><a id="if" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	</p></div><div class="refsect3"><a id="maildropfilter_if___conditional_execution" shape="rect"> </a><h4>if - conditional execution</h4><a id="if" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 if (<em class="replaceable"><code>expression</code></em>)
 {
    ...
@@ -763,7 +763,7 @@ elsif (<em class="replaceable"><code>expression</code></em>)
 	    </pre></div></blockquote></div><p>
 	  Consecutive occurences of <span class="command"><strong>elsif</strong></span> commands eliminate a
 	  significant amount of indentation, and the resulting code is more readable.
-	</p></div><div class="refsect3"><a id="idm46044388902864" shape="rect"> </a><h4>import - access original environment variable</h4><a id="import" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	</p></div><div class="refsect3"><a id="maildropfilter_import___access_original_environment_variable" shape="rect"> </a><h4>import - access original environment variable</h4><a id="import" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 import <em class="replaceable"><code>variable</code></em>
 	    </pre></div></blockquote></div><p>When <span class="command"><strong>maildrop</strong></span> starts,
 	  it normally imports the contents of the
@@ -803,7 +803,7 @@ PATH is /home/root/bin:/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
 	  <code class="literal">/bin:/usr/bin:/usr/local/bin</code>.
 	  However, the original contents of
 	  the <code class="varname">PATH</code> environment variable we different, and the
-	  <span class="command"><strong>import</strong></span> statement shows what it was.</p></div><div class="refsect3"><a id="idm46044388884496" shape="rect"> </a><h4>include - execute filtering instructions from another file</h4><a id="include" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  <span class="command"><strong>import</strong></span> statement shows what it was.</p></div><div class="refsect3"><a id="maildropfilter_include___execute_filtering_instructions_from_another_file" shape="rect"> </a><h4>include - execute filtering instructions from another file</h4><a id="include" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 include <em class="replaceable"><code>expression</code></em>
 	    </pre></div></blockquote></div><p>
 	  The include statement reads a file, and executes filtering instructions
@@ -818,7 +818,7 @@ include <em class="replaceable"><code>expression</code></em>
 	  If the specified file does not exist, or if there are any syntax errors in
 	  the file, <span class="command"><strong>maildrop</strong></span> reports the error, and terminates with
 	  a return
-	  code of <span class="errorcode">EX_TEMPFAIL</span>.</p></div><div class="refsect3"><a id="idm46044388873936" shape="rect"> </a><h4>log, logfile - log message deliveries</h4><a id="log" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  code of <span class="errorcode">EX_TEMPFAIL</span>.</p></div><div class="refsect3"><a id="maildropfilter_log__logfile___log_message_deliveries" shape="rect"> </a><h4>log, logfile - log message deliveries</h4><a id="log" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 logfile <em class="replaceable"><code>expression</code></em>
 
 log <em class="replaceable"><code>expression</code></em>
@@ -840,7 +840,7 @@ log <em class="replaceable"><code>expression</code></em>
 	  log file. The <span class="command"><strong>log</strong></span> statement works exactly like
 	  the <span class="command"><strong>echo</strong></span>
 	  statement, except that the text is written to the logfile, instead of
-	  standard output.</p></div><div class="refsect3"><a id="idm46044388860736" shape="rect"> </a><h4>system - execute a system command</h4><a id="system" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  standard output.</p></div><div class="refsect3"><a id="maildropfilter_system___execute_a_system_command" shape="rect"> </a><h4>system - execute a system command</h4><a id="system" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 system <em class="replaceable"><code>expression</code></em>
 	    </pre></div></blockquote></div><p>
 	  <em class="replaceable"><code>expression</code></em> specifies an external program
@@ -849,7 +849,7 @@ system <em class="replaceable"><code>expression</code></em>
 	  The subprocess's standard input gets connected to
 	  <code class="filename">/dev/null</code>, and the subprocess inherits
 	  the standard output and error from
-	   <span class="command"><strong>maildrop</strong></span>.</p></div><div class="refsect3"><a id="idm46044388854864" shape="rect"> </a><h4>to - deliver message to a mailbox</h4><a id="to" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	   <span class="command"><strong>maildrop</strong></span>.</p></div><div class="refsect3"><a id="maildropfilter_to___deliver_message_to_a_mailbox" shape="rect"> </a><h4>to - deliver message to a mailbox</h4><a id="to" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 to <em class="replaceable"><code>expression</code></em>
 	    </pre></div></blockquote></div><p>
 	  The <span class="command"><strong>to</strong></span> statement delivers the message to a mailbox.
@@ -893,7 +893,7 @@ to <em class="replaceable"><code>expression</code></em>
 	  the message to a file, formatted in traditional mailbox format.
 	  <span class="command"><strong>maildrop</strong></span> will use either dot-locking, or flock()-locking
 	  when
-	  delivering the message to the file.</p></div><div class="refsect3"><a id="idm46044388838496" shape="rect"> </a><h4>while - repeatedly execute a block of statements</h4><a id="while" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  delivering the message to the file.</p></div><div class="refsect3"><a id="maildropfilter_while___repeatedly_execute_a_block_of_statements" shape="rect"> </a><h4>while - repeatedly execute a block of statements</h4><a id="while" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 while (<em class="replaceable"><code>expression</code></em>)
 {
    ...
@@ -904,7 +904,7 @@ while (<em class="replaceable"><code>expression</code></em>)
 	  the statements inside the braces
 	  are executed.
 	  When <em class="replaceable"><code>expression</code></em> evaluates to a logical false,
-	  the while loop is over. Take care to avoid infinite loops.</p></div><div class="refsect3"><a id="idm46044388833488" shape="rect"> </a><h4>xfilter - filter message through another program</h4><a id="xfilter" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  the while loop is over. Take care to avoid infinite loops.</p></div><div class="refsect3"><a id="maildropfilter_xfilter___filter_message_through_another_program" shape="rect"> </a><h4>xfilter - filter message through another program</h4><a id="xfilter" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 xfilter <em class="replaceable"><code>expression</code></em>
 	    </pre></div></blockquote></div><p>
 	  <em class="replaceable"><code>expression</code></em> specifies an external program that
@@ -915,7 +915,7 @@ xfilter <em class="replaceable"><code>expression</code></em>
 	  program must terminate with an exit code of 0. If the external program does
 	  not terminate with an exit code of 0, or if it does not read the message from
 	  the standard input, <span class="command"><strong>maildrop</strong></span> terminates with an exit code of
-	  <span class="errorcode">EX_TEMPFAIL</span>.</p></div><div class="refsect3"><a id="idm46044388827808" shape="rect"> </a><h4>|| - logical or</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  <span class="errorcode">EX_TEMPFAIL</span>.</p></div><div class="refsect3"><a id="maildropfilter______logical_or" shape="rect"> </a><h4>|| - logical or</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 <em class="replaceable"><code>expression1</code></em> <span class="token">||</span> <em class="replaceable"><code>expression2</code></em>
 
 	    </pre></div></blockquote></div><p>
@@ -926,7 +926,7 @@ xfilter <em class="replaceable"><code>expression</code></em>
 	  <span class="command"><strong>maildrop</strong></span> uses the following concept of true/false:
 	  an empty text
 	  literal, or a text literal that consists of the single character "0" is a
-	  logical false value. Anything else is a logical true value.</p></div><div class="refsect3"><a id="idm46044388821568" shape="rect"> </a><h4>&amp;&amp; - logical and</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  logical false value. Anything else is a logical true value.</p></div><div class="refsect3"><a id="maildropfilter__amp__amp____logical_and" shape="rect"> </a><h4>&amp;&amp; - logical and</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 <em class="replaceable"><code>expression1</code></em> <span class="token">&amp;&amp;</span> <em class="replaceable"><code>expression2</code></em>
 
 	    </pre></div></blockquote></div><p>
@@ -937,7 +937,7 @@ xfilter <em class="replaceable"><code>expression</code></em>
 	  <span class="command"><strong>maildrop</strong></span> uses the following concept of true/false:
 	  an empty text
 	  literal, or a text literal that consists of the single character "0" is a
-	  logical false value. Anything else is a logical true value.</p></div><div class="refsect3"><a id="idm46044388815120" shape="rect"> </a><h4>&lt;, &lt;=, &gt;, &gt;=, ==, !=   - numerical comparison</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  logical false value. Anything else is a logical true value.</p></div><div class="refsect3"><a id="maildropfilter__lt____lt_____gt____gt_______________numerical_comparison" shape="rect"> </a><h4>&lt;, &lt;=, &gt;, &gt;=, ==, !=   - numerical comparison</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 <em class="replaceable"><code>expression1</code></em> <span class="token">&lt;</span> <em class="replaceable"><code>expression2</code></em>
 
 <em class="replaceable"><code>expression1</code></em> <span class="token">&lt;=</span> <em class="replaceable"><code>expression2</code></em>
@@ -958,7 +958,7 @@ xfilter <em class="replaceable"><code>expression</code></em>
 	  string 0.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>Ccomparisons are not associative:
 	    "<code class="literal">a &lt; b &lt; c</code>" is an error.
 	    If it is absolutely necessary, use
-	    "<code class="literal">(a &lt; b) &lt; c</code>".</p></div></div><div class="refsect3"><a id="idm46044388803120" shape="rect"> </a><h4>lt, le, gt, ge, eq, ne - text comparison</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	    "<code class="literal">(a &lt; b) &lt; c</code>".</p></div></div><div class="refsect3"><a id="maildropfilter_lt__le__gt__ge__eq__ne___text_comparison" shape="rect"> </a><h4>lt, le, gt, ge, eq, ne - text comparison</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 <em class="replaceable"><code>expression1</code></em> <span class="token">lt</span> <em class="replaceable"><code>expression2</code></em>
 
 <em class="replaceable"><code>expression1</code></em> <span class="token">le</span> <em class="replaceable"><code>expression2</code></em>
@@ -980,17 +980,17 @@ xfilter <em class="replaceable"><code>expression</code></em>
 	    Comparisons are not associative: "<code class="literal">a lt b lt c</code>"
 	    is an error. If it is
 	    absolutely necessary, use "<code class="literal">(a lt b) lt c</code>".
-	    (But why would you?).</p></div></div><div class="refsect3"><a id="idm46044388791568" shape="rect"> </a><h4>| - bitwise or</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	    (But why would you?).</p></div></div><div class="refsect3"><a id="maildropfilter_____bitwise_or" shape="rect"> </a><h4>| - bitwise or</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 <em class="replaceable"><code>expression1</code></em> <span class="token">|</span> <em class="replaceable"><code>expression2</code></em>
 	    </pre></div></blockquote></div><p>
 	  This is the bitwise or operator. Its result is a 32 bit
 	  integer, which is a bitwise-or combination of the left hand side and the
-	  right hand side.</p></div><div class="refsect3"><a id="idm46044388787696" shape="rect"> </a><h4>&amp; - bitwise and</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  right hand side.</p></div><div class="refsect3"><a id="maildropfilter__amp____bitwise_and" shape="rect"> </a><h4>&amp; - bitwise and</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 <em class="replaceable"><code>expression1</code></em> <span class="token">&amp;</span> <em class="replaceable"><code>expression2</code></em>
 	    </pre></div></blockquote></div><p>
 	  This is the bitwise and operator. Its result is a 32 bit
 	  integer, which is a bitwise-and combination of the left hand side and the
-	  right hand side.</p></div><div class="refsect3"><a id="idm46044388783824" shape="rect"> </a><h4>+, -, *, / - numerical operations</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  right hand side.</p></div><div class="refsect3"><a id="maildropfilter______________numerical_operations" shape="rect"> </a><h4>+, -, *, / - numerical operations</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 <em class="replaceable"><code>expression1</code></em> <span class="token">+</span> <em class="replaceable"><code>expression2</code></em>
 
 <em class="replaceable"><code>expression1</code></em> <span class="token">-</span> <em class="replaceable"><code>expression2</code></em>
@@ -1000,7 +1000,7 @@ xfilter <em class="replaceable"><code>expression</code></em>
 <em class="replaceable"><code>expression1</code></em> <span class="token">/</span> <em class="replaceable"><code>expression2</code></em>
 
 	    </pre></div></blockquote></div><p>
-	  These are numerical, floating point, operators.</p></div><div class="refsect3"><a id="idm46044388776672" shape="rect"> </a><h4>=~ /pattern/:options - pattern match against string</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  These are numerical, floating point, operators.</p></div><div class="refsect3"><a id="maildropfilter_____pattern__options___pattern_match_against_string" shape="rect"> </a><h4>=~ /pattern/:options - pattern match against string</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 <em class="replaceable"><code>expression</code></em> <span class="token">=~</span> /<em class="replaceable"><code>pattern</code></em>/:<em class="replaceable"><code>option</code></em>
 	    </pre></div></blockquote></div><p>
 	  The left hand side of the <span class="token">=~</span> operator can be any expression.
@@ -1010,13 +1010,13 @@ xfilter <em class="replaceable"><code>expression</code></em>
 	  <em class="replaceable"><code>expression</code></em> (if the options do not
 	  specify weighted scoring, the result is simply 1 if the pattern was found,
 	  0 if not).</p><p>
-	  See "<a class="ulink" href="#patterns" target="_top" shape="rect">Patterns</a>" for more information.</p></div><div class="refsect3"><a id="idm46044388770496" shape="rect"> </a><h4>/pattern/:options - pattern match against message</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  See "<a class="ulink" href="#patterns" target="_top" shape="rect">Patterns</a>" for more information.</p></div><div class="refsect3"><a id="maildropfilter__pattern__options___pattern_match_against_message" shape="rect"> </a><h4>/pattern/:options - pattern match against message</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 /<em class="replaceable"><code>pattern</code></em>/:<em class="replaceable"><code>option</code></em>
 	    </pre></div></blockquote></div><p>
 	  The result of this operator is the weighted match of the pattern against the
 	  current message (if the options do not specify weighted scoring, the result
 	  is simply 1 if the pattern was found, 0 if not).</p><p>
-	  See "<a class="ulink" href="#patterns" target="_top" shape="rect">Patterns</a>" for more information.</p></div><div class="refsect3"><a id="idm46044388765952" shape="rect"> </a><h4>!, ~ - logical/bitwise not operator.</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  See "<a class="ulink" href="#patterns" target="_top" shape="rect">Patterns</a>" for more information.</p></div><div class="refsect3"><a id="maildropfilter________logical_bitwise_not_operator_" shape="rect"> </a><h4>!, ~ - logical/bitwise not operator.</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 <span class="token">!</span> <em class="replaceable"><code>expression</code></em>
 
 <span class="token">~</span> <em class="replaceable"><code>expression</code></em>
@@ -1034,7 +1034,7 @@ xfilter <em class="replaceable"><code>expression</code></em>
 	  operator is a bitwise complement of its right hand
 	  side expression. The right hand side expression is evaluated as a 32 bit
 	  integer, and the result of this operator is a bitwise complement of the
-	  result.</p></div><div class="refsect3"><a id="idm46044388759248" shape="rect"> </a><h4>escape(string) - escape special characters in a string.</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  result.</p></div><div class="refsect3"><a id="maildropfilter_escape_string____escape_special_characters_in_a_string_" shape="rect"> </a><h4>escape(string) - escape special characters in a string.</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 <code class="function">escape</code>(<em class="replaceable"><code>expression</code></em>)
 	    </pre></div></blockquote></div><p>
 	  The <code class="function">escape</code> function returns
@@ -1070,13 +1070,12 @@ if ( /^From:\s*(.*)/ )
 	  <span class="command"><strong>to</strong></span> or <span class="command"><strong>cc</strong></span> commands.</p><p>
 	  Although using data from an external data source is dangerous, and it may
 	  result in inadvertent exploits, using the escape function should hopefully
-	  result in fewer surprises.</p></div><div class="refsect3"><a id="idm46044388742592" shape="rect"> </a><h4>gdbmopen, gdbmclose, gdbmfetch, gdbmstore - GDBM support in
-	  <span class="command"><strong>maildrop</strong></span></h4><p>
+	  result in fewer surprises.</p></div><div class="refsect3"><a id="maildropfilter_gdbmopen__gdbmclose__gdbmfetch__gdbmstore___gdbm_support_in_maildrop" shape="rect"> </a><h4>gdbmopen, gdbmclose, gdbmfetch, gdbmstore - GDBM support in <span class="command"><strong>maildrop</strong></span></h4><p>
 	  These functions provide support for GDBM database files. See <a class="ulink" href="maildropgdbm.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildropgdbm</span>(5)</span></a>
 	  for more information.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
 	    The system administrator can disable GDBM support in
 	    <span class="command"><strong>maildrop</strong></span>, so these commands may not be available to
-	    you.</p></div></div><div class="refsect3"><a id="idm46044388738176" shape="rect"> </a><h4>getaddr(string) - extract RFC 2822 addresses from a header.</h4><a id="getaddr" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	    you.</p></div></div><div class="refsect3"><a id="maildropfilter_getaddr_string____extract_rfc_2822_addresses_from_a_header_" shape="rect"> </a><h4>getaddr(string) - extract RFC 2822 addresses from a header.</h4><a id="getaddr" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 if ( /^From:\s*(.*)/ )
 {
    ADDR=getaddr($MATCH1)
@@ -1116,7 +1115,7 @@ foreach /^(To|Cc): .*/
 	    In certain rare situations,
 	    <a class="ulink" href="http://www.rfc-editor.org/rfc/rfc822.txt" target="_top" shape="rect">RFC 2822</a> allows
 	    spaces to be included in E-mail addresses, so this example is just
-	    educational.</p></div></div><div class="refsect3"><a id="idm46044388721376" shape="rect"> </a><h4>hasaddr(string) - Search for an address.</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	    educational.</p></div></div><div class="refsect3"><a id="maildropfilter_hasaddr_string____search_for_an_address_" shape="rect"> </a><h4>hasaddr(string) - Search for an address.</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 if ( hasaddr(<em class="replaceable"><code>string</code></em>) )
 {
    ...
@@ -1134,14 +1133,14 @@ if ( hasaddr(<em class="replaceable"><code>string</code></em>) )
 	  <code class="function">hasaddr</code> returns 1,
 	  otherwise it returns 0.</p><p>The comparison is case-insensitive. This actually violates
 	  <code class="literal">RFC822</code> (and several others) a little bit, because the user part
-	  of the address may be (but is not required to be) case sensitive.</p></div><div class="refsect3"><a id="idm46044388711296" shape="rect"> </a><h4>length (string) - length of a string</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  of the address may be (but is not required to be) case sensitive.</p></div><div class="refsect3"><a id="maildropfilter_length__string____length_of_a_string" shape="rect"> </a><h4>length (string) - length of a string</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 if (length(<em class="replaceable"><code>string</code></em>) &gt; 80)
 {
    ...
 }
 	    </pre></div></blockquote></div><p>
 	  The <code class="function">length</code> function returns the number of characters in
-	  <em class="replaceable"><code>string</code></em>.</p></div><div class="refsect3"><a id="idm46044388707280" shape="rect"> </a><h4>lookup (expr, 'filename', 'options') - read file for patterns</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  <em class="replaceable"><code>string</code></em>.</p></div><div class="refsect3"><a id="maildropfilter_lookup__expr___filename____options_____read_file_for_patterns" shape="rect"> </a><h4>lookup (expr, 'filename', 'options') - read file for patterns</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 if (lookup(<em class="replaceable"><code>expr</code></em>, <code class="filename">file</code>, "<em class="replaceable"><code>option</code></em>"))
 {
    ...
@@ -1183,7 +1182,7 @@ friend@public
 	    be tricky, and a slight miscalculation can cause mail to be unintentionally
 	    discarded. It is much desirable to first deliver message to a separate folder
 	    or mailbox, and once the filter is verified to work correctly, change it so
-	    the messages are discarded completely.</p></div></div><div class="refsect3"><a id="idm46044388689792" shape="rect"> </a><h4>substr(string,start [,count]) - return substring</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	    the messages are discarded completely.</p></div></div><div class="refsect3"><a id="maildropfilter_substr_string_start___count_____return_substring" shape="rect"> </a><h4>substr(string,start [,count]) - return substring</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 foo=substr($foo, 1, 10)
 	    </pre></div></blockquote></div><p>
 	  The <code class="function">substr</code> function
@@ -1192,23 +1191,23 @@ foo=substr($foo, 1, 10)
 	  If <em class="replaceable"><code>count</code></em> is
 	  specified, at most <em class="replaceable"><code>count</code></em> characters
 	  starting at position <em class="replaceable"><code>start</code></em> are kept, any excess is
-	  trimmed.</p></div><div class="refsect3"><a id="idm46044388684704" shape="rect"> </a><h4>time - return current time</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  trimmed.</p></div><div class="refsect3"><a id="maildropfilter_time___return_current_time" shape="rect"> </a><h4>time - return current time</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 foo=time
 	    </pre></div></blockquote></div><p>
 	  The <code class="function">time</code> function returns the current time, in
 	  seconds, since
 	  January 1, 1970. This function is useful when using GDBM files. See <a class="ulink" href="maildropex.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildropex</span>(7)</span></a>
-	  for an example of using the <code class="function">time</code> function.</p></div><div class="refsect3"><a id="idm46044388679632" shape="rect"> </a><h4>tolower(string) - Convert string to lowercase.</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  for an example of using the <code class="function">time</code> function.</p></div><div class="refsect3"><a id="maildropfilter_tolower_string____convert_string_to_lowercase_" shape="rect"> </a><h4>tolower(string) - Convert string to lowercase.</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 foo=tolower(<em class="replaceable"><code>string</code></em>)
 	    </pre></div></blockquote></div><p>
 	  This function returns the <em class="replaceable"><code>string</code></em>
 	  with all uppercase characters
-	  replaced by lowercase characters.</p></div><div class="refsect3"><a id="idm46044388676240" shape="rect"> </a><h4>toupper(string) - Convert string to uppercase.</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+	  replaced by lowercase characters.</p></div><div class="refsect3"><a id="maildropfilter_toupper_string____convert_string_to_uppercase_" shape="rect"> </a><h4>toupper(string) - Convert string to uppercase.</h4><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 foo=toupper(<em class="replaceable"><code>string</code></em>)
 	    </pre></div></blockquote></div><p>
 	  This function returns the <em class="replaceable"><code>string</code></em>
 	  with all lowercase characters
-	  replaced by uppercase characters.</p></div></div><div class="refsect2"><a id="idm46044388672720" shape="rect"> </a><h3>Statements</h3><p>
+	  replaced by uppercase characters.</p></div></div><div class="refsect2"><a id="maildropfilter_statements" shape="rect"> </a><h3>Statements</h3><p>
 	The <code class="systemitem">filter file</code> is read by
 	<span class="command"><strong>maildrop</strong></span>
 	(<code class="filename">$HOME/.mailfilter</code> or another file), and it
@@ -1218,13 +1217,13 @@ foo=toupper(<em class="replaceable"><code>string</code></em>)
 	a loosely - defined grammatical structure.</p><p>Statements are listed one per line. Multiple statements may be listed on
 	the same line by separating them with semicolons. To continue a long
 	statement on the next line, terminate the line with a backslash
-	character.</p></div></div><div class="refsect1"><a id="idm46044388668192" shape="rect"> </a><h2>BUGS</h2><p>
+	character.</p></div></div><div class="refsect1"><a id="maildropfilter_bugs" shape="rect"> </a><h2>BUGS</h2><p>
       If <code class="function">getaddr</code>() or <code class="function">hasaddr</code>()
       functions are used on broken headers, the results
       are unpredictable.</p><p><code class="function">hasaddr</code>() is completely case insensitive. This
       actually violates a few
       RFCs, because the userid portion of the address could be case-sensitive, but
-      it's not in too many cases, so there.</p></div><div class="refsect1"><a id="idm46044388664608" shape="rect"> </a><h2>SEE ALSO</h2><p>
+      it's not in too many cases, so there.</p></div><div class="refsect1"><a id="maildropfilter_see_also" shape="rect"> </a><h2>SEE ALSO</h2><p>
       <a class="ulink" href="lockmail.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">lockmail</span>(1)</span></a>,
       <a class="ulink" href="maildrop.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildrop</span>(1)</span></a>,
       <a class="ulink" href="maildropgdbm.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildropgdbm</span>(5)</span></a>,

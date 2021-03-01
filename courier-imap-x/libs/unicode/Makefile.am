@@ -57,14 +57,14 @@ update-www-htmlent:
 update-www-categories:
 	@SHELL@ $(srcdir)/update.sh Categories.txt http://www.unicode.org/notes/tn36/Categories.txt
 
-lib_LTLIBRARIES=libunicode.la
+lib_LTLIBRARIES=libcourier-unicode.la
 include_HEADERS=courier-unicode.h \
 	courier-unicode-categories-tab.h \
 	courier-unicode-script-tab.h
 
 man_MANS=$(srcdir)/man/courier-unicode.7 $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]convert.3 $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]convert_tocase.3 $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]fromu.3 $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]tou.3 $(srcdir)/man/unicode[\:][\:]iso_8859_1.3 $(srcdir)/man/unicode[\:][\:]linebreak_callback_base.3 $(srcdir)/man/unicode[\:][\:]linebreak_callback_save_buf.3 $(srcdir)/man/unicode[\:][\:]linebreak_iter.3 $(srcdir)/man/unicode[\:][\:]linebreakc_callback_base.3 $(srcdir)/man/unicode[\:][\:]linebreakc_iter.3 $(srcdir)/man/unicode[\:][\:]tolower.3 $(srcdir)/man/unicode[\:][\:]toupper.3 $(srcdir)/man/unicode[\:][\:]ucs_2.3 $(srcdir)/man/unicode[\:][\:]ucs_4.3 $(srcdir)/man/unicode[\:][\:]utf_8.3 $(srcdir)/man/unicode[\:][\:]wordbreak_callback_base.3 $(srcdir)/man/unicode_category_lookup.3 $(srcdir)/man/unicode_convert.3 $(srcdir)/man/unicode_convert_deinit.3 $(srcdir)/man/unicode_convert_fromu_init.3 $(srcdir)/man/unicode_convert_fromu_tobuf.3 $(srcdir)/man/unicode_convert_fromutf8.3 $(srcdir)/man/unicode_convert_init.3 $(srcdir)/man/unicode_convert_tobuf.3 $(srcdir)/man/unicode_convert_tocase.3 $(srcdir)/man/unicode_convert_tocbuf_fromutf8_init.3 $(srcdir)/man/unicode_convert_tocbuf_init.3 $(srcdir)/man/unicode_convert_tocbuf_toutf8_init.3 $(srcdir)/man/unicode_convert_tou_init.3 $(srcdir)/man/unicode_convert_tou_tobuf.3 $(srcdir)/man/unicode_convert_toutf8.3 $(srcdir)/man/unicode_convert_uc.3 $(srcdir)/man/unicode_default_chset.3 $(srcdir)/man/unicode_grapheme_break.3 $(srcdir)/man/unicode_html40ent_lookup.3 $(srcdir)/man/unicode_isalnum.3 $(srcdir)/man/unicode_isalpha.3 $(srcdir)/man/unicode_isblank.3 $(srcdir)/man/unicode_isdigit.3 $(srcdir)/man/unicode_isgraph.3 $(srcdir)/man/unicode_islower.3 $(srcdir)/man/unicode_ispunct.3 $(srcdir)/man/unicode_isspace.3 $(srcdir)/man/unicode_isupper.3 $(srcdir)/man/unicode_lb_end.3 $(srcdir)/man/unicode_lb_init.3 $(srcdir)/man/unicode_lb_next.3 $(srcdir)/man/unicode_lb_next_cnt.3 $(srcdir)/man/unicode_lb_set_opts.3 $(srcdir)/man/unicode_lbc_end.3 $(srcdir)/man/unicode_lbc_init.3 $(srcdir)/man/unicode_lbc_next.3 $(srcdir)/man/unicode_lbc_next_cnt.3 $(srcdir)/man/unicode_lbc_set_opts.3 $(srcdir)/man/unicode_lc.3 $(srcdir)/man/unicode_locale_chset.3 $(srcdir)/man/unicode_script.3 $(srcdir)/man/unicode_tc.3 $(srcdir)/man/unicode_u_ucs2_native.3 $(srcdir)/man/unicode_u_ucs4_native.3 $(srcdir)/man/unicode_uc.3 $(srcdir)/man/unicode_wb_end.3 $(srcdir)/man/unicode_wb_init.3 $(srcdir)/man/unicode_wb_next.3 $(srcdir)/man/unicode_wb_next_cnt.3 $(srcdir)/man/unicode_wbscan_end.3 $(srcdir)/man/unicode_wbscan_init.3 $(srcdir)/man/unicode_wbscan_next.3
 
-libunicode_la_SOURCES=\
+libcourier_unicode_la_SOURCES=\
 			courier-unicode-categories-tab.h \
 			courier-unicode-script-tab.h \
 			unicode.c unicodebuf.c \
@@ -83,10 +83,11 @@ libunicode_la_SOURCES=\
 			categoriestab.h \
 			unicode_categories.c
 
-libunicode_la_LDFLAGS=-version-info 5:0:1
+libcourier_unicode_la_LDFLAGS=-version-info 5:0:1
 
 EXTRA_DIST=$(noinst_SCRIPTS) $(man_MANS) $(PACKAGE).spec \
-	m4/courier-unicode.m4
+	m4/courier-unicode.m4 \
+	packaging/freebsd10/pkg-descr
 
 if UPDATE_UNICODE
 
@@ -122,33 +123,33 @@ unicode_htmlent.h: xhtml-lat1.ent xhtml-special.ent xhtml-symbol.ent mkhtmlent.p
 endif
 
 unicodetest_SOURCES=unicodetest.c
-unicodetest_DEPENDENCIES=libunicode.la
-unicodetest_LDADD=libunicode.la
+unicodetest_DEPENDENCIES=libcourier-unicode.la
+unicodetest_LDADD=libcourier-unicode.la
 unicodetest_LDFLAGS=-static
 
 graphemetest_SOURCES=graphemetest.c
-graphemetest_DEPENDENCIES=libunicode.la
-graphemetest_LDADD=libunicode.la
+graphemetest_DEPENDENCIES=libcourier-unicode.la
+graphemetest_LDADD=libcourier-unicode.la
 graphemetest_LDFLAGS=-static
 
 linebreaktest_SOURCES=linebreaktest.C
-linebreaktest_DEPENDENCIES=libunicode.la
-linebreaktest_LDADD=libunicode.la
+linebreaktest_DEPENDENCIES=libcourier-unicode.la
+linebreaktest_LDADD=libcourier-unicode.la
 linebreaktest_LDFLAGS=-static
 
 wordbreaktest_SOURCES=wordbreaktest.C
-wordbreaktest_DEPENDENCIES=libunicode.la
-wordbreaktest_LDADD=libunicode.la
+wordbreaktest_DEPENDENCIES=libcourier-unicode.la
+wordbreaktest_LDADD=libcourier-unicode.la
 wordbreaktest_LDFLAGS=-static
 
 enttest_SOURCES=enttest.c
-enttest_DEPENDENCIES=libunicode.la
-enttest_LDADD=libunicode.la
+enttest_DEPENDENCIES=libcourier-unicode.la
+enttest_LDADD=libcourier-unicode.la
 enttest_LDFLAGS=-static
 
 scripttest_SOURCES=scripttest.c
-scripttest_DEPENDENCIES=libunicode.la
-scripttest_LDADD=libunicode.la
+scripttest_DEPENDENCIES=libcourier-unicode.la
+scripttest_LDADD=libcourier-unicode.la
 scripttest_LDFLAGS=-static
 
 check-am: unicodetest
@@ -244,7 +245,7 @@ docs:
 if HAVE_DOCS
 all-am: INSTALL README.unicode
 
-README.unicode: html/index.html
+README: html/index.html
 	elinks -dump -no-numbering -no-references html/index.html >README.tmp
 	mv -f README.tmp README.unicode
 

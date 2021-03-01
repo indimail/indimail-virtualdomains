@@ -12,6 +12,7 @@ DOCS=	deliverquota.html.in deliverquota.8.in \
 	maildir.html maildir.5 \
 	maildiracl.html.in \
 	maildirmake.html.in maildirmake.1.in maildirquota.html maildirquota.7 \
+	maildirwatch.html maildirwatch.1 \
 	maildirkw.html maildirkw.1
 
 if HAVE_SGML
@@ -22,7 +23,7 @@ BUILT_SOURCES=maildirsharedrc.h maildirfilterconfig.h quotawarnmsg.h \
 	mailbot.h autoresponsequota.h $(noinst_DATA)
 endif
 
-noinst_DATA=deliverquota.html maildirmake.html maildiracl.html maildir.libdeps
+noinst_DATA=deliverquota.html maildirmake.html maildiracl.html
 man_MANS=deliverquota.8 maildirquota.7 maildirmake.1 maildiracl.1 sharedindexinstall.1 sharedindexsplit.1 maildirkw.1
 
 libmaildir_la_SOURCES=autoresponse.c autoresponse.h \
@@ -48,7 +49,7 @@ libmaildir_la_SOURCES=autoresponse.c autoresponse.h \
 	maildirquota.c maildirquota.h maildirrequota.c maildirrequota.h \
 	maildirwatch.c maildirwatch.h loginexec.c loginexec.h
 
-bin_PROGRAMS=deliverquota maildirmake maildirkw maildiracl
+bin_PROGRAMS=deliverquota maildirmake maildirkw maildiracl maildirwatch
 noinst_PROGRAMS=testmaildirfilter maildirkwtest maildiraclttest testmaildirsearch
 sbin_SCRIPTS=sharedindexinstall sharedindexsplit
 
@@ -64,12 +65,12 @@ maildirmake_DEPENDENCIES=libmaildir.la \
 			../rfc822/librfc822.la
 maildirmake_LDADD=libmaildir.la \
 			../numlib/libnumlib.la \
-			../rfc822/librfc822.la ../unicode/libunicode.la @LIBPCRE@
+			../rfc822/librfc822.la ../unicode/libcourier-unicode.la @LIBPCRE@
 maildirmake_LDFLAGS=-static
 
 testmaildirfilter_SOURCES=maildirfiltertypelist.h testmaildirfilter.c
 testmaildirfilter_DEPENDENCIES=libmaildir.la ../numlib/libnumlib.la
-testmaildirfilter_LDADD=libmaildir.la ../numlib/libnumlib.la ../unicode/libunicode.la @LIBPCRE@
+testmaildirfilter_LDADD=libmaildir.la ../numlib/libnumlib.la ../unicode/libcourier-unicode.la @LIBPCRE@
 testmaildirfilter_LDFLAGS=-static
 
 maildirkwtest_SOURCES=maildirkwtest.c
@@ -78,28 +79,32 @@ maildirkwtest_DEPENDENCIES=libmaildir.la
 maildirkwtest_LDFLAGS=-static
 
 maildirkw_SOURCES=maildirkw.c
-maildirkw_LDADD=libmaildir.la ../liblock/liblock.la ../numlib/libnumlib.la \
-		`cat maildir.libdeps`
+maildirkw_LDADD=libmaildir.la ../liblock/liblock.la ../numlib/libnumlib.la
 maildirkw_DEPENDENCIES=libmaildir.la ../liblock/liblock.la \
-	../numlib/libnumlib.la maildir.libdeps
+	../numlib/libnumlib.la
 maildirkw_LDFLAGS=-static
 
+maildirwatch_SOURCES=maildirwatchprog.c
+maildirwatch_LDADD=libmaildir.la ../liblock/liblock.la ../numlib/libnumlib.la
+maildirwatch_DEPENDENCIES=libmaildir.la ../liblock/liblock.la \
+	../numlib/libnumlib.la
+maildirwatch_LDFLAGS=-static
+
 maildiracl=maildiracl.c
-maildiracl_LDADD=libmaildir.la ../liblock/liblock.la ../numlib/libnumlib.la \
-			`cat maildir.libdeps`
+maildiracl_LDADD=libmaildir.la ../liblock/liblock.la ../numlib/libnumlib.la
 maildiracl_DEPENDENCIES=libmaildir.la ../liblock/liblock.la \
-		../numlib/libnumlib.la maildir.libdeps
+		../numlib/libnumlib.la
 maildiracl_LDFLAGS=-static
 
 maildiraclttest_SOURCES=testmaildiraclt.c
 maildiraclttest_LDADD=libmaildir.la ../liblock/liblock.la \
-		../numlib/libnumlib.la `cat maildir.libdeps`
+		../numlib/libnumlib.la
 maildiraclttest_DEPENDENCIES=libmaildir.la ../liblock/liblock.la \
-		../numlib/libnumlib.la maildir.libdeps
+		../numlib/libnumlib.la
 maildiraclttest_LDFLAGS=-static
 
 testmaildirsearch_SOURCES=testmaildirsearch.c
-testmaildirsearch_LDADD=libmaildir.la ../unicode/libunicode.la
+testmaildirsearch_LDADD=libmaildir.la ../unicode/libcourier-unicode.la
 testmaildirsearch_DEPENDENCIES=libmaildir.la
 
 EXTRA_DIST=README.maildirquota.html README.maildirquota.txt \
@@ -131,11 +136,9 @@ autoresponsequota.h: config.status
 
 quotawarnmsg.h: config.status
 	echo '#define QUOTAWARNMSG "$(sysconfdir)/quotawarnmsg"' >quotawarnmsg.h
-maildir.libdeps: config.status
-	echo @LIBFAM@ >maildir.libdeps
 
 clean-local:
-	rm -rf maildir.libdeps testmd
+	rm -rf testmd
 
 check-am:
 	@SHELL@ $(srcdir)/testsuite 2>&1 | cmp - $(srcdir)/testsuite.txt
@@ -188,6 +191,12 @@ maildirkw.html: maildirkw.sgml ../docbook/sgml2html
 
 maildirkw.1: maildirkw.sgml ../docbook/sgml2man
 	../docbook/sgml2man maildirkw.sgml maildirkw.1 "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/"
+
+maildirwatch.html: maildirwatch.sgml ../docbook/sgml2html
+	../docbook/sgml2html maildirwatch.sgml maildirwatch.html
+
+maildirwatch.1: maildirwatch.sgml ../docbook/sgml2man
+	../docbook/sgml2man maildirwatch.sgml maildirwatch.1
 
 endif
 

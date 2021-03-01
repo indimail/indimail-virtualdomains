@@ -320,7 +320,11 @@ const char	*ip, *port;
 
 	if (authmoduser(argc, argv, 60, 5))
 	{
-		writes("* OK IMAP4rev1 Server Ready.\r\n");
+		writes("* OK [CAPABILITY ");
+		imapcapability();
+		writes("] Courier-IMAP ready. "
+	       "Copyright 1998-2019 Double Precision, Inc.  "
+	       "See COPYING for distribution information.\r\n");
 		fprintf(stderr, "INFO: Connection, ip=[%s], port=[%s]\n", ip, port);
 	}
 	else

@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
-<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>makedat</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets V1.78.1"/><link rel="home" href="#idm255219627840" title="makedat"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>makedat</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets Vsnapshot"/><link rel="home" href="#makedat" title="makedat"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
 
 Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
 information.
 
---></head><body><div class="refentry"><a id="idm255219627840" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>makedat — create GDBM/DB files for maildrop</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">makedat</code>  {-src=<em class="replaceable"><code>textfile</code></em>} {-tmp=<em class="replaceable"><code>tmpfile</code></em>} {-file=<em class="replaceable"><code>gdbmfile</code></em>} [-cidr]</p></div></div><div class="refsect1"><a id="idm255220996240" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+--></head><body><div class="refentry"><a id="makedat" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>makedat — create GDBM/DB files for maildrop</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">makedat</code>  {-src=<em class="replaceable"><code>textfile</code></em>} {-tmp=<em class="replaceable"><code>tmpfile</code></em>} {-file=<em class="replaceable"><code>gdbmfile</code></em>} [-cidr]</p></div></div><div class="refsect1"><a id="makedat_description" shape="rect"> </a><h2>DESCRIPTION</h2><p>
 The gdbm family of functions in <span class="command"><strong>maildrop</strong></span> provides access
 to GDBM/DB databases - simple database files. The gdbm family of functions
 provide a way of quickly storing and looking up key/data pairs.</p><p>
@@ -53,15 +53,15 @@ instances of <span class="command"><strong>makedat</strong></span> using the sam
 The <code class="option">-cidr</code> flag specifies that the key is an IP netblock in
 CIDR notation. This flag requires the <span class="application">Net::CIDR</span>
 Perl module to be installed separately. Download Net::CIDR from
-<a class="ulink" href="http://www.cpan.org" target="_top" shape="rect">http://www.cpan.org</a>.</p></div><div class="refsect1"><a id="idm255215694592" shape="rect"> </a><h2>BUGS</h2><p>
+<a class="ulink" href="http://www.cpan.org" target="_top" shape="rect">http://www.cpan.org</a>.</p></div><div class="refsect1"><a id="makedat_bugs" shape="rect"> </a><h2>BUGS</h2><p>
 There are historical reasons why database functions in maildrop are called
 gdbm functions. The initial implementation used GDBM functions exclusively.
 The ability to use the DB library instead of the GDBM library has been added
-later.</p></div><div class="refsect1"><a id="idm255215693152" shape="rect"> </a><h2>EXAMPLE</h2><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+later.</p></div><div class="refsect1"><a id="makedat_example" shape="rect"> </a><h2>EXAMPLE</h2><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 makedat blacklist /etc/mail/blacklist.tmp /etc/mail/blacklist.dat
 </pre></div><p>
 Takes <code class="filename">blacklist</code>, and creates
 <code class="filename">/etc/mail/blacklist.dat</code>, using
-<code class="filename">/etc/mail/blacklist.tmp</code> as a temporary file.</p></div><div class="refsect1"><a id="idm255215688736" shape="rect"> </a><h2>SEE ALSO</h2><p>
+<code class="filename">/etc/mail/blacklist.tmp</code> as a temporary file.</p></div><div class="refsect1"><a id="makedat_see_also" shape="rect"> </a><h2>SEE ALSO</h2><p>
 <a class="ulink" href="maildrop.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildrop</span>(1)</span></a>,
 <a class="ulink" href="maildropgdbm.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildropgdbm</span>(5)</span></a>.</p></div></div></body></html>

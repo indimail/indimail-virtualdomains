@@ -5,7 +5,7 @@
 # Do not alter lines that begin with ##, they are used when upgrading
 # this configuration.
 #
-#  Copyright 2000 - 2019 Double Precision, Inc.  See COPYING for
+#  Copyright 2000 - 2021 Double Precision, Inc.  See COPYING for
 #  distribution information.
 #
 #  This configuration file sets various options for the Courier-IMAP server
@@ -138,7 +138,9 @@ COURIERTLS=@bindir@/couriertls
 #
 # TLSv1 - TLS 1.0, or higher.
 # TLSv1.1 - TLS1.1, or higher.
+# TLSv1.1++ TLS1.1, or higher, without client-initiated renegotiation.
 # TLSv1.2 - TLS1.2, or higher.
+# TLSv1.2++ TLS1.2, or higher, without client-initiated renegotiation.
 #
 # The default value is TLSv1
 
@@ -149,6 +151,8 @@ COURIERTLS=@bindir@/couriertls
 # TLS_CIPHER_LIST optionally sets the list of ciphers to be used by the
 # OpenSSL library.  In most situations you can leave TLS_CIPHER_LIST
 # undefined
+#
+# TLS_CIPHER_LIST="TLSv1:HIGH:!LOW:!MEDIUM:!EXP:!NULL:!aNULL@STRENGTH"
 #
 # See the OpenSSL ciphers(1) manual page for the format of this setting.
 
@@ -304,7 +308,7 @@ TLS_VERIFYPEER=NONE
 # field. The certificate's emailaddress subject must match exactly the login
 # ID in the courier-authlib database.
 
-##NAME: TLS_CACHE:0
+##NAME: TLS_CACHE:1
 #
 # A TLS/SSL session cache may slightly improve response for IMAP clients
 # that open multiple SSL sessions to the server.  TLS_CACHEFILE will be
@@ -313,6 +317,13 @@ TLS_VERIFYPEER=NONE
 
 TLS_CACHEFILE=@localstatedir@/couriersslcache
 TLS_CACHESIZE=524288
+
+##NAME: TLS_ALPN:0
+#
+# Application level protocol negotiation should be enabled by default, and
+# should be commented out only in case of compatibility issues.
+
+TLS_ALPN=imap
 
 ##NAME: MAILDIRPATH:0
 #

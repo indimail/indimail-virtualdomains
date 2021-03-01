@@ -125,7 +125,9 @@ COURIERTLS=@bindir@/couriertls
 #
 # TLSv1 - TLS 1.0, or higher.
 # TLSv1.1 - TLS1.1, or higher.
+# TLSv1.1++ TLS1.1, or higher, without client-initiated renegotiation.
 # TLSv1.2 - TLS1.2, or higher.
+# TLSv1.2++ TLS1.2, or higher, without client-initiated renegotiation.
 #
 # The default value is TLSv1.
 
@@ -143,6 +145,8 @@ TLS_STARTTLS_PROTOCOL="$TLS_PROTOCOL"
 # TLS_CIPHER_LIST optionally sets the list of ciphers to be used by the
 # OpenSSL library.  In most situations you can leave TLS_CIPHER_LIST
 # undefined
+#
+# TLS_CIPHER_LIST="TLSv1:HIGH:!LOW:!MEDIUM:!EXP:!NULL:!aNULL@STRENGTH"
 #
 # See the OpenSSL ciphers(1) manual page for the format of this setting.
 
@@ -204,7 +208,7 @@ TLS_STARTTLS_PROTOCOL="$TLS_PROTOCOL"
 # certificate files.
 
 TLS_CERTFILE=@certsdir@/pop3d.pem
- 
+
 ##NAME: TLS_PRIVATE_KEYFILE:0
 #
 # TLS_PRIVATE_KEYFILE - SSL/TLS private key for decrypting peer data.
@@ -299,7 +303,7 @@ TLS_VERIFYPEER=NONE
 # field. The certificate's emailaddress subject must match exactly the login
 # ID in the courier-authlib database.
 
-##NAME: TLS_CACHE:0
+##NAME: TLS_CACHE:1
 #
 # A TLS/SSL session cache may slightly improve response for long-running
 # POP3 clients. TLS_CACHEFILE will be automatically created, TLS_CACHESIZE
@@ -311,6 +315,13 @@ TLS_VERIFYPEER=NONE
 
 TLS_CACHEFILE=@localstatedir@/couriersslcache
 TLS_CACHESIZE=524288
+
+##NAME: TLS_ALPN:0
+#
+# Application level protocol negotiation should be enabled by default, and
+# should be commented out only in case of compatibility issues.
+
+TLS_ALPN=pop3
 
 ##NAME: MAILDIRPATH:0
 #

@@ -54,7 +54,7 @@ libimapd_la_SOURCES=mainloop.c imaptoken.c imaptoken.h imapwrite.c \
 	imapwrite.h capability.c externalauth.c smap.c smapsnapshot.c
 libimapd_la_LIBADD= ../rfc2045/librfc2045.la ../maildir/libmaildir.la \
 	../rfc822/librfc822.la ../liblock/liblock.la ../numlib/libnumlib.la \
-	../unicode/libunicode.la
+	../unicode/libcourier-unicode.la
 libimapd_la_LDFLAGS=-static
 
 imaplogin_SOURCES=imaplogin.c authenticate_auth.c
@@ -101,7 +101,7 @@ libpop3d_la_LDFLAGS=-static
 
 pop3d_SOURCES=pop3dserver.c pop3dcapa.c
 pop3d_DEPENDENCIES=libpop3d.la
-pop3d_LDADD=libpop3d.la ../authlib/libauthmod.la ../authlib/libauth.la ../unicode/libunicode.la
+pop3d_LDADD=libpop3d.la ../authlib/libauthmod.la ../authlib/libauth.la ../unicode/libcourier-unicode.la
 
 HTML2TXT=links -dump -no-numbering
 

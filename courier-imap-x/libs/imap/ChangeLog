@@ -1,3 +1,25 @@
+2021-02-23  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* Implement support for the TLS ALPN extension.
+
+2021-02-18  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* Replace FAM/Gamin with inotify.
+
+	* Install the maildirwatch tool.
+
+	* Remove the IMAP_ENHANCEDIDLE setting from the imapd configuration
+	file.
+
+	* Update RPM spec file.
+
+5.0.12
+
+2020-12-06  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* openssl: Add TLS_PROTOCOL setting to disable client-initiated
+	renegotiation.
+
 2020-11-30  Sam Varshavchik  <mrsam@courier-mta.com>
 
 	* imap: send corrupted Unicode alerts only for new messages.

@@ -4313,17 +4313,13 @@ int	uid=0;
 	}
     if (strcmp(curtoken->tokenbuf, "IDLE") == 0)
     {
-	     const char *p;
-
         if (nexttoken()->tokentype != IT_EOL)
 			return (-1);
 
       read_eol();
 
-      if ((p=getenv("IMAP_ENHANCEDIDLE")) == NULL
-		   || !atoi(p)
-		   || imapenhancedidle())
-		       imapidle();
+	  if (imapenhancedidle())
+	       imapidle();
       curtoken=nexttoken();
       if (strcmp(curtoken->tokenbuf, "DONE") == 0)
       {
