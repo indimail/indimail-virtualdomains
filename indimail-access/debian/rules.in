@@ -62,8 +62,8 @@ build-stamp:
 	if [ -d courier-imap-$(courier_version) ] ; then $(MAKE) -s -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
 	if [ -d fetchmail-$(fetchmail_version) ]  ; then $(MAKE) -s -C fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR); fi
 	${rm} -f  $(DESTDIR)$(prefix)/$(libd)/*.la
-	${rm} -f  $(DESTDIR)${prefix}/$(libd)/libunicode.a
-	${rm} -f  $(DESTDIR)${prefix}/$(libd)/libunicode.so
+	${rm} -f  $(DESTDIR)${prefix}/$(libd)/libcourier-unicode.a
+	${rm} -f  $(DESTDIR)${prefix}/$(libd)/libcourier-unicode.so
 	${rm} -rf $(DESTDIR)${shareddir}/aclocal
 	${rm} -rf $(DESTDIR)${prefix}/include
 	${rm} -rf $(DESTDIR)${mandir}/man3

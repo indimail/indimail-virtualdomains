@@ -1,21 +1,4 @@
 indimail-access (@version@-@release@) unstable; urgency=medium
 
-  * New package indimail-access
-  * Upgraded fetchmail to 6.4.6
-  * moved IMAP/POP3 proxy config from indimail-access to indimail-virtualdomains
-  * removed Pre-Depends indimail which created a circular dependency
-  * upgraded courier-imap to 5.0.11
-  * Add AC_PROG_CC_C99 to configure.ac
-  * increased soft mem for IMAP/POP3/poppass to 100Mb
-  * Removed creation of dkim key as that is part of indimail-mta package
-  * courier-imap: fixed compler warning on FreeBSD for rfc6533.c
-  * courier-imap: Fixes for Darwin. Use configure args --with-waitfunc=wait3 for Darwin
-  * courier-imap: Set LDFLAGS=/opt/local/lib when calling configure to avoid wrong libiconv getting picked
-  * postinstallation: update imap/pop3, proxy imap/pop3 authmodule with authindi
-  * maildirquota.c: break out of infinite loop when maildirfolder creation fails
-  * maildrop: alarmsleep.C: replaced deprecated function sigpause() with sigsuspend()
-  * stop start imap, pop3, fetchmail services on upgrade
-  * authpam.c: set EPERM on pam failures
-  * mod.h: reset uid, euid
-  * checkpassword.c: check return value of crypt() to fix SIGSEGV in authshadow
-  * post install: save variables
+  * upgraded courier-imap to 5.0.12
+  * upgraded fetchmail to 6.4.16

@@ -265,9 +265,9 @@ install -m 644 %{S:5} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissio
 install -m 644 %{S:6} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
 
-%{__rm} -f  %{buildroot}%{_libdir}/libunicode.la
-%{__rm} -f  %{buildroot}%{_libdir}/libunicode.a
-%{__rm} -f  %{buildroot}%{_libdir}/libunicode.so
+%{__rm} -f  %{buildroot}%{_libdir}/libcourier-unicode.la
+%{__rm} -f  %{buildroot}%{_libdir}/libcourier-unicode.a
+%{__rm} -f  %{buildroot}%{_libdir}/libcourier-unicode.so
 %{__rm} -f  %{buildroot}%{_prefix}/share/aclocal/courier-unicode.m4
 %{__rm} -rf %{buildroot}%{_prefix}/include
 %{__rm} -rf %{buildroot}%{mandir}/man3
@@ -357,10 +357,11 @@ done
 %endif
 # courier imap
 %attr(755,root,root)                    %{_prefix}/bin/maildirmake
+%attr(755,root,root)                    %{_prefix}/bin/maildirwatch
 %attr(755,root,root)                    %{_prefix}/bin/maildirkw
+%attr(755,root,root)                    %{_prefix}/bin/maildiracl
 %attr(755,root,root)                    %{_prefix}/bin/deliverquota
 %attr(755,root,root)                    %{_prefix}/bin/couriertls
-%attr(755,root,root)                    %{_prefix}/bin/maildiracl
 %attr(755,root,root)                    %{_prefix}/bin/imapd
 %attr(755,root,root)                    %{_prefix}/bin/pop3d
 %attr(755,root,root)                    %{_prefix}/bin/mailbot
@@ -413,6 +414,9 @@ done
 %lang(en) /usr/share/indimail/locale/en_GB/LC_MESSAGES/fetchmail.mo
 %lang(zh) /usr/share/indimail/locale/zh_CN/LC_MESSAGES/fetchmail.mo
 %lang(ja) /usr/share/indimail/locale/ja/LC_MESSAGES/fetchmail.mo
+%lang(ro) /usr/share/indimail/locale/ro/LC_MESSAGES/fetchmail.mo
+%lang(sr) /usr/share/indimail/locale/sr/LC_MESSAGES/fetchmail.mo
+
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 %attr(644,root,root)                    %{python3_sitelib}/__pycache__/*.pyc
 %attr(755,root,root)                    %{python3_sitelib}/fetchmailconf.py
@@ -500,8 +504,8 @@ done
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/reformail.html
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/reformime.html
 
-%{_libdir}/libunicode.so.4
-%{_libdir}/libunicode.so.4.1.0
+%{_libdir}/libcourier-unicode.so.4
+%{_libdir}/libcourier-unicode.so.4.1.0
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
