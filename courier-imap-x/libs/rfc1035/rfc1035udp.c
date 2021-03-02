@@ -71,12 +71,11 @@ rfc1035_udp_query_response_alloc(const char **queries,
 {
 	struct rfc1035_udp_query_responses *resps =
 		rfc1035_udp_query_response_alloc_common(n_queries);
-	int n;
 
 	if (!resps)
 		return 0;
 
-	for (n=0; n<n_queries; ++n)
+	for (int n=0; n<n_queries; ++n)
 	{
 		resps->queries[n].query=queries[n];
 		resps->queries[n].querylen=querylens[n];
@@ -92,13 +91,12 @@ rfc1035_udp_query_response_alloc_bis(struct querybuf *queries,
 {
 	struct rfc1035_udp_query_responses *resps =
 		rfc1035_udp_query_response_alloc_common(n_queries);
-	int n;
 
 	if (!resps)
 		return 0;
 
 
-	for (n=0; n<n_queries; ++n)
+	for (int n=0; n<n_queries; ++n)
 	{
 		resps->queries[n].query=queries[n].qbuf;
 		resps->queries[n].querylen=queries[n].qbuflen;

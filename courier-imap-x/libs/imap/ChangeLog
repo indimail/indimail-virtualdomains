@@ -1,17 +1,8 @@
-2021-02-23  Sam Varshavchik  <mrsam@courier-mta.com>
+5.0.13
 
-	* Implement support for the TLS ALPN extension.
+2021-03-01  Sam Varshavchik  <mrsam@courier-mta.com>
 
-2021-02-18  Sam Varshavchik  <mrsam@courier-mta.com>
-
-	* Replace FAM/Gamin with inotify.
-
-	* Install the maildirwatch tool.
-
-	* Remove the IMAP_ENHANCEDIDLE setting from the imapd configuration
-	file.
-
-	* Update RPM spec file.
+	* Fix handling of bad DNS queries
 
 5.0.12
 

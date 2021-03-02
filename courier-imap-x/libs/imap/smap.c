@@ -4215,7 +4215,9 @@ void smap()
 
 		if (strcmp(p, "IDLE") == 0)
 		{
-			if (imapenhancedidle())
+			if ((p=getenv("IMAP_ENHANCEDIDLE")) == NULL
+			    || !atoi(p)
+			    || imapenhancedidle())
 				imapidle();
 
 			read_timeout(60);

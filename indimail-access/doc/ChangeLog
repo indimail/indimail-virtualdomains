@@ -3,6 +3,10 @@ Release @version@-@release@ Start 01/03/2021
 - 01/03/2021
 01. upgraded courier-imap to 5.0.12
 02. upgraded fetchmail to 6.4.16
+- 02/03/2021
+03. upgraded courier-imap to 5.0.14
+04. upgraded unicode to 2.1.2
+05. upgraded maildrop to 3.0.2
 
 *
 Release @version@-@release@ Start 03/06/2020

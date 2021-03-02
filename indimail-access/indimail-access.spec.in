@@ -357,7 +357,6 @@ done
 %endif
 # courier imap
 %attr(755,root,root)                    %{_prefix}/bin/maildirmake
-%attr(755,root,root)                    %{_prefix}/bin/maildirwatch
 %attr(755,root,root)                    %{_prefix}/bin/maildirkw
 %attr(755,root,root)                    %{_prefix}/bin/maildiracl
 %attr(755,root,root)                    %{_prefix}/bin/deliverquota

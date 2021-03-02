@@ -42,7 +42,7 @@
 #endif
 
 #if AUTHLIB
-#include	<courierauth.h>
+#include	"authlib/auth.h"
 #endif
 
 #if	HAS_GETHOSTNAME

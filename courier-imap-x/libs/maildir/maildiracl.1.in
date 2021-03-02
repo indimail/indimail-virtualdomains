@@ -3,13 +3,13 @@
 .\"<!-- distribution information. -->
 .\"     Title: maildiracl
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 06/27/2015
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 11/04/2020
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "MAILDIRACL" "1" "06/27/2015" "Courier Mail Server" "Double Precision, Inc\&."
+.TH "MAILDIRACL" "1" "11/04/2020" "Courier Mail Server" "Double Precision, Inc\&."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -479,7 +479,7 @@ Author
 .IP " 1." 4
 \fBmaildirmake\fR(1)
 .RS 4
-\%[set $man.base.url.for.relative.links]/maildirmake.html
+\%http://www.courier-mta.org/maildirmake.html
 .RE
 .IP " 2." 4
 RFC 2086
@@ -489,5 +489,5 @@ RFC 2086
 .IP " 3." 4
 \fBmaildirkw\fR(1)
 .RS 4
-\%[set $man.base.url.for.relative.links]/maildirkw.html
+\%http://www.courier-mta.org/maildirkw.html
 .RE

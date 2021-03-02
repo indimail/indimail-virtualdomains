@@ -3,13 +3,13 @@
 .\"<!-- distribution information. -->
 .\"     Title: deliverquota
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 11/16/2019
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 07/12/2020
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "DELIVERQUOTA" "8" "11/16/2019" "Courier Mail Server" "Double Precision, Inc\&."
+.TH "DELIVERQUOTA" "8" "07/12/2020" "Courier Mail Server" "Double Precision, Inc\&."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------

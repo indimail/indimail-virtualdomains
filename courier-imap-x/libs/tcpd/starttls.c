@@ -550,7 +550,6 @@ static int dossl(int fd, int argn, int argc, char **argv)
 	if (!ssl)
 	{
 		close(fd);
-		tls_destroy(ctx);
 		return (1);
 	}
 

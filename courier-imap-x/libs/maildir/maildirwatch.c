@@ -1,5 +1,5 @@
 /*
-** Copyright 2002-2021 Double Precision, Inc.
+** Copyright 2002-2009 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -14,14 +14,24 @@
 #include <errno.h>
 #include <signal.h>
 #include <sys/signal.h>
-#if HAVE_INOTIFY_INIT
-#include <sys/inotify.h>
-#include <poll.h>
-#include <fcntl.h>
-#endif
 
 #ifndef PATH_MAX
 #define PATH_MAX 4096
+#endif
+
+
+#if HAVE_FAM
+static struct maildirwatch_fam *maildirwatch_currentfam;
+
+static void alarm_handler(int signum)
+{
+	static const char msg[]=
+		"Timeout initializing the FAM library. Your FAM library is broken.\n";
+
+	if (write(2, msg, sizeof(msg)-1) == -1)
+		;
+	kill(getpid(), SIGKILL);
+}
 #endif
 
 struct maildirwatch *maildirwatch_alloc(const char *maildir)
@@ -51,36 +61,38 @@ struct maildirwatch *maildirwatch_alloc(const char *maildir)
 
 	strcat(strcpy(w->maildir, wd), maildir);
 
-#if HAVE_INOTIFY_INIT
-#if HAVE_INOTIFY_INIT1
-#ifdef IN_CLOEXEC
-#else
-#undef HAVE_INOTIFY_INIT1
-#endif
-#ifdef IN_NONBLOCK
-#else
-#undef HAVE_INOTIFY_INIT1
-#endif
-#endif
-
-#if HAVE_INOTIFY_INIT1
-	w->inotify_fd=inotify_init1(IN_CLOEXEC | IN_NONBLOCK);
-#else
-	w->inotify_fd=inotify_init();
-
-	if (w->inotify_fd >= 0 &&
-	    (fcntl(w->inotify_fd, F_SETFL, O_NONBLOCK) < 0 ||
-	     fcntl(w->inotify_fd, F_SETFD, FD_CLOEXEC)))
+#if HAVE_FAM
+	if (!maildirwatch_currentfam)
 	{
-		close(w->inotify_fd);
-		w->inotify_fd=-1;
+		if ((maildirwatch_currentfam
+		     =malloc(sizeof(*maildirwatch_currentfam))) != NULL)
+		{
+			maildirwatch_currentfam->broken=0;
+			maildirwatch_currentfam->refcnt=0;
+
+			signal(SIGALRM, alarm_handler);
+			alarm(15);
+			if (FAMOpen(&maildirwatch_currentfam->fc) < 0)
+			{
+				errno=EIO;
+				free(maildirwatch_currentfam);
+				maildirwatch_currentfam=NULL;
+			}
+			alarm(0);
+			signal(SIGALRM, SIG_DFL);
+		}
 	}
-#endif
 
-	if (w->inotify_fd < 0)
+	if (!maildirwatch_currentfam)
 	{
-		maildirwatch_free(w);
+		free(w->maildir);
+		free(w);
 		w=NULL;
+	}
+	else
+	{
+		w->fam=maildirwatch_currentfam;
+		++w->fam->refcnt;
 	}
 #endif
 	return w;
@@ -88,10 +100,25 @@ struct maildirwatch *maildirwatch_alloc(const char *maildir)
 
 void maildirwatch_free(struct maildirwatch *w)
 {
-#if HAVE_INOTIFY_INIT
-	if (w->inotify_fd >= 0)
+#if HAVE_FAM
+	if (--w->fam->refcnt == 0)
 	{
-		close(w->inotify_fd);
+		w->fam->broken=1;
+		if (maildirwatch_currentfam &&
+		    maildirwatch_currentfam->broken)
+		{
+			/*
+			** Last reference to the current FAM connection,
+			** keep it active.
+			*/
+
+			w->fam->broken=0;
+		}
+		else /* Some other connection, with no more refs */
+		{
+			FAMClose(&w->fam->fc);
+			free(w->fam);
+		}
 	}
 #endif
 
@@ -101,191 +128,108 @@ void maildirwatch_free(struct maildirwatch *w)
 
 void maildirwatch_cleanup()
 {
+#if HAVE_FAM
+
+	if (maildirwatch_currentfam && maildirwatch_currentfam->refcnt == 0)
+	{
+		FAMClose(&maildirwatch_currentfam->fc);
+		free(maildirwatch_currentfam);
+		maildirwatch_currentfam=NULL;
+	}
+#endif
 }
 
-#if HAVE_INOTIFY_INIT
+#if HAVE_FAM
+static void maildirwatch_fambroken(struct maildirwatch *w)
+{
+	w->fam->broken=1;
+
+	if (maildirwatch_currentfam && maildirwatch_currentfam->broken)
+		maildirwatch_currentfam=NULL;
+	/* Broke the current connection, create another one, next time. */
+
+}
 
 /*
-** Poll the inotify file descriptor. Returns 0 on timeout, non-0 if
-** the inotify file descriptor becomes ready before the timeout expires.
+** If the current connection is marked as broken, try to reconnect.
 */
 
-static int poll_inotify(struct maildirwatch *w)
+static void maildirwatch_famunbreak(struct maildirwatch *w)
 {
+	struct maildirwatch *cpy;
+
+	if (!w->fam->broken)
+		return;
+
+	if ((cpy=maildirwatch_alloc(w->maildir)) == NULL)
+		return;
+
+	/*
+	** maildirwatch_alloc succeeds only with a good connection.
+	** If this is the last reference to the broken connection, close it.
+	*/
+
+	if (--w->fam->refcnt == 0)
+	{
+		FAMClose(&w->fam->fc);
+		free(w->fam);
+	}
+
+	w->fam=cpy->fam;
+	++w->fam->refcnt;
+
+	maildirwatch_free(cpy);
+}
+
+static int waitEvent(struct maildirwatch *w)
+{
+	int fd;
+	fd_set r;
+	struct timeval tv;
 	time_t now2;
 
 	int rc;
 
-	struct pollfd pfd;
-
-	while (w->now < w->timeout)
+	while ((rc=FAMPending(&w->fam->fc)) == 0)
 	{
-		pfd.fd=w->inotify_fd;
-		pfd.events=POLLIN;
+		if (w->now >= w->timeout)
+			return 0;
 
-		rc=poll(&pfd, 1, (w->timeout - w->now)*1000);
+		fd=FAMCONNECTION_GETFD(&w->fam->fc);
 
+		FD_ZERO(&r);
+		FD_SET(fd, &r);
+
+		tv.tv_sec= w->timeout - w->now;
+		tv.tv_usec=0;
+
+		select(fd+1, &r, NULL, NULL, &tv);
 		now2=time(NULL);
 
 		if (now2 < w->now)
-			return 1; /* System clock changed */
+			return 0; /* System clock changed */
 
 		w->now=now2;
-
-		if (rc && pfd.revents & POLLIN)
-			return 1;
 	}
 
-	return 0;
-}
-
-/*
-** read() inotify_events from the inotify handler.
-*/
-
-static int read_inotify_events(int fd,
-			       void (*callback)(struct inotify_event *ie,
-						void *arg),
-			       void *arg)
-{
-	char inotify_buffer[sizeof(struct inotify_event)+NAME_MAX+1];
-	int l;
-	char *iecp;
-
-	l=read(fd, inotify_buffer, sizeof(inotify_buffer));
-
-	if (l < 0 &&
-	    (errno == EAGAIN || errno == EWOULDBLOCK))
-		l=0; /* Non-blocking socket timeout */
-
-	if (l < 0)
-	{
-		fprintf(stderr, "ERR:inotify read: %s\n", strerror(errno));
-		return -1;
-	}
-
-	iecp=inotify_buffer;
-
-	while (iecp < inotify_buffer+l)
-	{
-		struct inotify_event *ie=
-			(struct inotify_event *)iecp;
-
-		iecp += sizeof(struct inotify_event)+ie->len;
-
-		(*callback)(ie, arg);
-	}
-	return 0;
-}
-
-struct unlock_info {
-	int handle;
-	int removed;
-	int deleted;
-};
-
-static void unlock_handler(struct inotify_event *ie,
-			   void *arg)
-{
-	struct unlock_info *ui=(struct unlock_info *)arg;
-
-	if (ie->wd == ui->handle)
-	{
-		if (ie->mask & IN_DELETE_SELF)
-			ui->removed=1;
-
-		if (ie->mask & IN_IGNORED)
-			ui->deleted=1;
-	}
+	return rc;
 }
 #endif
 
-static int do_maildirwatch_unlock(struct maildirwatch *w, int nseconds,
-				  const char *p)
-{
-#if HAVE_INOTIFY_INIT
-	int cancelled=0;
-
-	struct unlock_info ui;
-
-	ui.handle=inotify_add_watch(w->inotify_fd, p, IN_DELETE_SELF);
-	ui.removed=0;
-	ui.deleted=0;
-
-	if (ui.handle < 0)
-	{
-		if (errno == ENOENT)
-		{
-			/* Doesn't exist anymore, that's ok */
-			return 0;
-		}
-
-		fprintf(stderr, "ERR: %s: %s\n", p, strerror(errno));
-		return -1;
-	}
-
-	if (nseconds < 0)
-		nseconds=0;
-
-	time(&w->now);
-
-	w->timeout=w->now + nseconds;
-
-	do
-	{
-		errno=ETIMEDOUT;
-
-		if (!poll_inotify(w))
-		{
-			if (!cancelled)
-			{
-				/*
-				** Timeout on the lock, cancel the inotify.
-				*/
-				w->timeout=w->now+15;
-				cancelled=1;
-				inotify_rm_watch(w->inotify_fd, ui.handle);
-				continue;
-			}
-
-			fprintf(stderr, "ERR:inotify timeout: %s\n",
-				strerror(errno));
-
-			break;
-		}
-
-		read_inotify_events(w->inotify_fd, unlock_handler, &ui);
-
-		if (ui.removed && !cancelled)
-		{
-			w->timeout=w->now+15;
-			cancelled=1;
-			inotify_rm_watch(w->inotify_fd, ui.handle);
-		}
-
-		/* We don't terminate the loop until we get IN_IGNORED */
-
-	} while (!ui.deleted);
-
-	return ui.removed;
-#else
-
-	int n;
-
-	for (n=0; n<nseconds; ++n)
-	{
-		if (access(p, 0))
-			return 1;
-		sleep(1);
-	}
-	return 0;
-#endif
-}
 
 int maildirwatch_unlock(struct maildirwatch *w, int nseconds)
 {
+#if HAVE_FAM
+	FAMRequest fr;
+	FAMEvent fe;
+	int cancelled=0;
 	char *p;
-	int rc;
+
+	if (w->fam->broken)
+	{
+		errno=EIO;
+		return -1;
+	}
 
 	p=malloc(strlen(w->maildir)+ sizeof("/" WATCHDOTLOCK));
 
@@ -294,11 +238,86 @@ int maildirwatch_unlock(struct maildirwatch *w, int nseconds)
 
 	strcat(strcpy(p, w->maildir), "/" WATCHDOTLOCK);
 
-	rc=do_maildirwatch_unlock(w, nseconds, p);
-
+	errno=EIO;
+	if (FAMMonitorFile(&w->fam->fc, p, &fr, NULL) < 0)
+	{
+		free(p);
+		fprintf(stderr, "ERR:FAMMonitorFile: %s\n",
+			strerror(errno));
+		return -1;
+	}
 	free(p);
-	return rc;
+
+	if (nseconds < 0)
+		nseconds=0;
+
+	time(&w->now);
+
+	w->timeout=w->now + nseconds;
+
+	for (;;)
+	{
+		if (waitEvent(w) != 1)
+		{
+			errno=EIO;
+
+			if (!cancelled && FAMCancelMonitor(&w->fam->fc, &fr) == 0)
+			{
+				w->timeout=w->now+15;
+				cancelled=1;
+				continue;
+			}
+
+			if (!cancelled)
+				fprintf(stderr, "ERR:FAMCancelMonitor: %s\n",
+					strerror(errno));
+
+			maildirwatch_fambroken(w);
+			break;
+		}
+
+		errno=EIO;
+
+		if (FAMNextEvent(&w->fam->fc, &fe) != 1)
+		{
+			fprintf(stderr, "ERR:FAMNextEvent: %s\n",
+				strerror(errno));
+			maildirwatch_fambroken(w);
+			break;
+		}
+
+		if (fe.fr.reqnum != fr.reqnum)
+			continue;
+
+		if (fe.code == FAMDeleted && !cancelled)
+		{
+			errno=EIO;
+			if (FAMCancelMonitor(&w->fam->fc, &fr) == 0)
+			{
+				w->timeout=w->now+15;
+				cancelled=1;
+				continue;
+			}
+			fprintf(stderr, "ERR:FAMCancelMonitor: %s\n",
+				strerror(errno));
+			maildirwatch_fambroken(w);
+			break;
+		}
+
+		if (fe.code == FAMAcknowledge)
+			break;
+	}
+
+	if (w->fam->broken)
+		return -1;
+
+	return 0;
+#else
+	return -1;
+#endif
 }
+
+#define DIRCNT 3
 
 int maildirwatch_start(struct maildirwatch *w,
 		       struct maildirwatch_contents *mc)
@@ -308,7 +327,15 @@ int maildirwatch_start(struct maildirwatch *w,
 	time(&w->now);
 	w->timeout = w->now + 60;
 
-#if HAVE_INOTIFY_INIT
+#if HAVE_FAM
+
+	maildirwatch_famunbreak(w);
+
+	if (w->fam->broken)
+	{
+		errno=EIO;
+		return (1);
+	}
 
 	{
 		char *s=malloc(strlen(w->maildir)
@@ -319,89 +346,159 @@ int maildirwatch_start(struct maildirwatch *w,
 
 		strcat(strcpy(s, w->maildir), "/new");
 
-		mc->handles[0]=inotify_add_watch(w->inotify_fd, s,
-						 IN_CREATE |
-						 IN_DELETE |
-						 IN_MOVED_FROM |
-						 IN_MOVED_TO);
+		mc->endexists_received=0;
+		mc->ack_received=0;
+		mc->cancelled=0;
 
+		errno=EIO;
+
+		if (FAMMonitorDirectory(&w->fam->fc, s, &mc->new_req, NULL) < 0)
+		{
+			fprintf(stderr, "ERR:"
+				"FAMMonitorDirectory(%s) failed: %s\n",
+				s, strerror(errno));
+			free(s);
+			errno=EIO;
+			return (-1);
+		}
 
 		strcat(strcpy(s, w->maildir), "/cur");
+		errno=EIO;
 
-		mc->handles[1]=inotify_add_watch(w->inotify_fd, s,
-						 IN_CREATE |
-						 IN_DELETE |
-						 IN_MOVED_FROM |
-						 IN_MOVED_TO);
+		if (FAMMonitorDirectory(&w->fam->fc, s, &mc->cur_req, NULL) < 0)
+		{
+			fprintf(stderr, "ERR:"
+				"FAMMonitorDirectory(%s) failed: %s\n",
+				s, strerror(errno));
+
+			errno=EIO;
+
+			if (FAMCancelMonitor(&mc->w->fam->fc, &mc->new_req) < 0)
+			{
+				free(s);
+				maildirwatch_fambroken(w);
+				fprintf(stderr, "ERR:FAMCancelMonitor: %s\n",
+					strerror(errno));
+				errno=EIO;
+				return (-1);
+			}
+			mc->cancelled=1;
+			mc->ack_received=2;
+		}
 
 		strcat(strcpy(s, w->maildir), "/" KEYWORDDIR);
+		errno=EIO;
 
-		mc->handles[2]=inotify_add_watch(w->inotify_fd, s,
-						 IN_CREATE |
-						 IN_DELETE |
-						 IN_MOVED_FROM |
-						 IN_MOVED_TO);
+		if (FAMMonitorDirectory(&w->fam->fc, s,
+					&mc->courierimapkeywords_req, NULL)<0)
+		{
+			fprintf(stderr, "ERR:"
+				"FAMMonitorDirectory(%s) failed: %s\n",
+				s, strerror(errno));
+
+			errno=EIO;
+
+			if (FAMCancelMonitor(&mc->w->fam->fc, &mc->new_req)<0)
+			{
+				free(s);
+				maildirwatch_fambroken(w);
+				fprintf(stderr, "ERR:FAMCancelMonitor: %s\n",
+					strerror(errno));
+				errno=EIO;
+				return (-1);
+			}
+
+			errno=EIO;
+
+			if (FAMCancelMonitor(&mc->w->fam->fc, &mc->cur_req)<0)
+			{
+				free(s);
+				maildirwatch_fambroken(w);
+				fprintf(stderr, "ERR:FAMCancelMonitor: %s\n",
+					strerror(errno));
+				errno=EIO;
+				return (-1);
+			}
+
+			mc->cancelled=1;
+			mc->ack_received=1;
+		}
+
 		free(s);
 	}
-
 	return 0;
 #else
 	return 1;
 #endif
 }
 
+#define CANCEL(ww) \
+	errno=EIO; if (FAMCancelMonitor(&w->fam->fc, \
+			     &ww->new_req) || \
+	    FAMCancelMonitor(&w->fam->fc, \
+			     &ww->cur_req) || \
+	    FAMCancelMonitor(&w->fam->fc, \
+			     &ww->courierimapkeywords_req)) \
+	{\
+		maildirwatch_fambroken(w); \
+		fprintf(stderr, \
+			"ERR:FAMCancelMonitor: %s\n", \
+			strerror(errno)); \
+		return (-1); \
+	}
+
 int maildirwatch_started(struct maildirwatch_contents *mc,
 			 int *fdret)
 {
-#if HAVE_INOTIFY_INIT
-	int n;
-#endif
+#if HAVE_FAM
+	struct maildirwatch *w=mc->w;
 
-	*fdret= -1;
+	if (w->fam->broken)
+		return (1);
 
-#if HAVE_INOTIFY_INIT
+	*fdret=FAMCONNECTION_GETFD(&w->fam->fc);
 
-	for (n=0; n<sizeof(mc->handles)/sizeof(mc->handles[0]); ++n)
+	while (FAMPending(&w->fam->fc))
 	{
-		if (mc->handles[n] < 0)
-			return -1;
+		FAMEvent fe;
+
+		errno=EIO;
+
+		if (FAMNextEvent(&w->fam->fc, &fe) != 1)
+		{
+			fprintf(stderr, "ERR:FAMNextEvent: %s\n",
+				strerror(errno));
+			maildirwatch_fambroken(w);
+			return (-1);
+		}
+
+		switch (fe.code) {
+		case FAMDeleted:
+			if (!mc->cancelled)
+			{
+				mc->cancelled=1;
+				CANCEL(mc);
+			}
+			break;
+		case FAMAcknowledge:
+			if (++mc->ack_received >= DIRCNT)
+				return -1;
+			break;
+		case FAMEndExist:
+			++mc->endexists_received;
+			break;
+		default:
+			break;
+		}
 	}
 
-	*fdret=mc->w->inotify_fd;
-
-	return 1;
-
+	return (mc->endexists_received >= DIRCNT && mc->ack_received == 0);
 #else
 	*fdret= -1;
 
 	return 1;
 #endif
 }
-
-#if HAVE_INOTIFY_INIT
-
-struct check_info {
-	struct maildirwatch_contents *mc;
-	int *changed;
-	int handled;
-};
-
-static void check_handler(struct inotify_event *ie,
-			  void *arg)
-{
-	struct check_info *ci=(struct check_info *)arg;
-	int n;
-
-	ci->handled=1;
-
-	for (n=0; n<sizeof(ci->mc->handles)/sizeof(ci->mc->handles[0]); ++n)
-	{
-		if (ie->wd == ci->mc->handles[n])
-			*ci->changed=1;
-	}
-
-}
-#endif
 
 int maildirwatch_check(struct maildirwatch_contents *mc,
 		       int *changed,
@@ -410,12 +507,6 @@ int maildirwatch_check(struct maildirwatch_contents *mc,
 {
 	struct maildirwatch *w=mc->w;
 	time_t curTime;
-#if HAVE_INOTIFY_INIT
-	struct check_info ci;
-
-	ci.mc=mc;
-	ci.changed=changed;
-#endif
 
 	*changed=0;
 	*fdret=-1;
@@ -426,104 +517,100 @@ int maildirwatch_check(struct maildirwatch_contents *mc,
 		w->timeout=curTime; /* System clock changed */
 	w->now=curTime;
 
+#if HAVE_FAM
+
+	if (!w->fam->broken)
+	{
+		*fdret=FAMCONNECTION_GETFD(&w->fam->fc);
+
+		while (FAMPending(&w->fam->fc))
+		{
+			FAMEvent fe;
+
+			errno=EIO;
+
+			if (FAMNextEvent(&w->fam->fc, &fe) != 1)
+			{
+				fprintf(stderr, "ERR:FAMNextEvent: %s\n",
+					strerror(errno));
+				maildirwatch_fambroken(w);
+				return (-1);
+			}
+
+			switch (fe.code) {
+			case FAMDeleted:
+			case FAMCreated:
+			case FAMMoved:
+				if (!mc->cancelled)
+				{
+					mc->cancelled=1;
+					CANCEL(mc);
+				}
+				break;
+			case FAMAcknowledge:
+				++mc->ack_received;
+			default:
+				break;
+			}
+		}
+
+		*changed=mc->ack_received >= DIRCNT;
+		*timeout=60 * 60;
+		return 0;
+	}
+#endif
 	*timeout=60;
 
-#if HAVE_INOTIFY_INIT
-	if (maildirwatch_started(mc, fdret) > 0)
-	{
-		*timeout=60 * 60;
-
-		*fdret=w->inotify_fd;
-
-		ci.handled=1;
-
-		while (ci.handled)
-		{
-			ci.handled=0;
-			read_inotify_events(w->inotify_fd, check_handler, &ci);
-		}
-	}
-#endif
-	if (w->now >= w->timeout)
-	{
-                w->timeout = w->now + *timeout;
-		*changed=1;
-	}
+ 	if ( (*changed= w->now >= w->timeout) != 0)
+		w->timeout = w->now + 60;
 	return 0;
 }
-
-#if HAVE_INOTIFY_INIT
-
-struct end_info {
-	struct maildirwatch_contents *mc;
-	int unwatched;
-};
-
-static void end_handler(struct inotify_event *ie,
-			void *arg)
-{
-	struct end_info *ei=(struct end_info *)arg;
-	int n;
-
-	for (n=0; n<sizeof(ei->mc->handles)/sizeof(ei->mc->handles[0]); ++n)
-	{
-		if (ie->wd == ei->mc->handles[n] &&
-		    ie->mask & IN_IGNORED)
-		{
-			ei->mc->handles[n]=-1;
-			ei->unwatched=1;
-		}
-	}
-}
-
-static int maildir_end_unwatch(struct maildirwatch_contents *mc)
-{
-	int n;
-
-	for (n=0; n<sizeof(mc->handles)/sizeof(mc->handles[0]); ++n)
-	{
-		if (mc->handles[n] >= 0)
-		{
-			inotify_rm_watch(mc->w->inotify_fd,
-					 mc->handles[n]);
-			return 1;
-		}
-	}
-	return 0;
-}
-#endif
 
 void maildirwatch_end(struct maildirwatch_contents *mc)
 {
-#if HAVE_INOTIFY_INIT
-	struct end_info ei;
+#if HAVE_FAM
+	struct maildirwatch *w=mc->w;
 
-	time(&mc->w->now);
-	mc->w->timeout=mc->w->now + 15;
-
-	if (maildir_end_unwatch(mc)) /* Send the first inotify_rm_watch */
+	if (!w->fam->broken)
 	{
-		while (1)
+		if (!mc->cancelled)
 		{
-			if (poll_inotify(mc->w) != 1)
-			{
-				fprintf(stderr, "ERR:inotify timeout: %s\n",
-					strerror(errno));
-				break;
-			}
+			mc->cancelled=1;
 
-			ei.mc=mc;
-			ei.unwatched=0;
-			read_inotify_events(mc->w->inotify_fd,
-						end_handler, &ei);
-
-			if (ei.unwatched)
-			{
-				/* Send the next inotify_rm_watch? */
-				if (!maildir_end_unwatch(mc))
-					break; /* Nope, all done! */
-			}
+#define return(x)
+			CANCEL(mc);
+#undef return
 		}
+	}
+
+	while (!w->fam->broken && mc->ack_received < DIRCNT)
+	{
+		FAMEvent fe;
+
+		time(&w->now);
+		w->timeout=w->now + 15;
+
+		errno=EIO;
+
+		if (waitEvent(w) != 1)
+		{
+			fprintf(stderr, "ERR:FAMPending: timeout\n");
+			maildirwatch_fambroken(w);
+			break;
+		}
+
+		errno=EIO;
+
+		if (FAMNextEvent(&w->fam->fc, &fe) != 1)
+		{
+			fprintf(stderr, "ERR:FAMNextEvent: %s\n",
+				strerror(errno));
+			maildirwatch_fambroken(w);
+			break;
+		}
+
+		if (fe.code == FAMAcknowledge)
+			++mc->ack_received;
 	}
 #endif
 }

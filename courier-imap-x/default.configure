@@ -49,7 +49,7 @@ case "$SYSTEM" in
 		fi
 	fi
 	sysconfdir=/etc/indimail
-	extra="--with-authpam --with-authshadow"
+	extra="--without-authpwd --with-authpam --with-authshadow"
 	;;
 	*)
 	prefix=/usr

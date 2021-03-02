@@ -1,15 +1,15 @@
 '\" t
-.\"<!-- Copyright 2000-2015 Double Precision, Inc.  See COPYING for -->
+.\"<!-- Copyright 2000-2020 Double Precision, Inc.  See COPYING for -->
 .\"<!-- distribution information. -->
 .\"     Title: couriertcpd
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
-.\"      Date: 03/11/2017
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 11/04/2020
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "COURIERTCPD" "1" "03/11/2017" "Courier Mail Server" "Double Precision, Inc."
+.TH "COURIERTCPD" "1" "11/04/2020" "Courier Mail Server" "Double Precision, Inc."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -91,7 +91,7 @@ accepts connections only from the local system\&. When multiple port numbers are
 specifies more than one port number\&. See "\m[blue]\fBMultiple port list\fR\m[]\&\s-2\u[1]\d\s+2" below for more information\&.
 .RE
 .PP
-\-block=\fIzone\fR[,\fIvar\fR[/\fIn\&.n\&.n\&.n\fR][,\fImsg\fR]] or \-allow=\fIzone\fR[,\fIvar\fR[/\fIn\&.n\&.n\&.n\fR[,]]]
+\-block=\fIzone\fR[=\fIdisplay_zone\fR][,\fIvar\fR[/\fIn\&.n\&.n\&.n\fR][,\fImsg\fR]] or \-allow=\fIzone\fR[=\fIdisplay_zone\fR][,\fIvar\fR[/\fIn\&.n\&.n\&.n\fR[,]]]
 .RS 4
 Initialize the environment variable
 \fIvar\fR
@@ -601,6 +601,15 @@ makes a DNS query for
 \(lqd\&.c\&.b\&.a\&.dnsbl\&.example\&.com\(rq, for a connection from the IPv4 address
 \fIa\&.b\&.c\&.d\fR\&.
 .PP
+An optional
+\(lq=\fIdisplay_zone\fR\(rq
+follows the DNS zone\&. This sets the contents of
+\fIBLOCK_ZONE\fR
+DNS access list variable (see below), which defaults to the DNS zone name\&. This is only useful with
+\fB\-allow\fR, since
+\fB\-block\fR
+rejects the message, so nothing gets set anyway\&.
+.PP
 For IPv6 addresses, the DNS query consists of individual hexadecimal nybbles (in reverse order, like the IPv4 query)\&.
 .PP
 If the DNS query succeeds (more details below),
@@ -820,7 +829,7 @@ BLOCK_ZONE
 .RS 4
 .PP
 The DNS zone of the succesfull access list lookup, like
-\(lqdnsbl\&.example\&.com\(rq\&.
+\(lqdnsbl\&.example\&.com\(rq, or an explicit display zone name\&.
 .RE
 .PP
 \fB\-block\fR
@@ -904,21 +913,21 @@ Author
 .IP " 1." 4
 Multiple port list
 .RS 4
-\%[set $man.base.url.for.relative.links]/#list
+\%http://www.courier-mta.org/#list
 .RE
 .IP " 2." 4
 \fBmakesmtpaccess\fR(8)
 .RS 4
-\%[set $man.base.url.for.relative.links]/makesmtpaccess.html
+\%http://www.courier-mta.org/makesmtpaccess.html
 .RE
 .IP " 3." 4
 \fBmakeimapaccess\fR(8)
 .RS 4
-\%[set $man.base.url.for.relative.links]/makeimapaccess.html
+\%http://www.courier-mta.org/makeimapaccess.html
 .RE
 .IP " 4." 4
 \fBcourier\fR(8)
 	
 .RS 4
-\%[set $man.base.url.for.relative.links]/courier.html
+\%http://www.courier-mta.org/courier.html
 .RE

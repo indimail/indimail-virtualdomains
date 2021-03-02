@@ -308,7 +308,7 @@ TLS_VERIFYPEER=NONE
 # field. The certificate's emailaddress subject must match exactly the login
 # ID in the courier-authlib database.
 
-##NAME: TLS_CACHE:1
+##NAME: TLS_CACHE:0
 #
 # A TLS/SSL session cache may slightly improve response for IMAP clients
 # that open multiple SSL sessions to the server.  TLS_CACHEFILE will be
@@ -317,13 +317,6 @@ TLS_VERIFYPEER=NONE
 
 TLS_CACHEFILE=@localstatedir@/couriersslcache
 TLS_CACHESIZE=524288
-
-##NAME: TLS_ALPN:0
-#
-# Application level protocol negotiation should be enabled by default, and
-# should be commented out only in case of compatibility issues.
-
-TLS_ALPN=imap
 
 ##NAME: MAILDIRPATH:0
 #
