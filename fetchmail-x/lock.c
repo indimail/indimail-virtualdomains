@@ -67,8 +67,8 @@ void fm_lock_setup(struct runctl *ctl)
 static void unlockit(void)
 /* must-do actions for exit (but we can't count on being able to do malloc) */
 {
-    if (lockfile && lock_acquired)
-	unlink(lockfile) && truncate(lockfile, (off_t)0);
+    if (lockfile && lock_acquired && unlink(lockfile) && truncate(lockfile, (off_t)0))
+		;
 }
 
 void fm_lock_dispose(void)
