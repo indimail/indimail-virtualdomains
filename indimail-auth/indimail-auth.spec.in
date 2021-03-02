@@ -326,8 +326,8 @@ else
 fi
 %{_prefix}/bin/svstat %{servicedir}/pwdlookup >/dev/null 2>&1
 if [ $? -eq 0 ] ; then
-  %{__mkdir_p} %{rundir}/pwdlookup
-  touch %{rundir}/pwdlookup/.down
+  %{__mkdir_p} ${rundir}/pwdlookup
+  touch ${rundir}/pwdlookup/.down
   %{_prefix}/bin/svc -d %{servicedir}/pwdlookup
 fi
 
@@ -349,8 +349,8 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   fi
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="%{servicedir}/pwdlookup"
   %{_prefix}/bin/svok %{servicedir}/pwdlookup
-  if [ $? -eq 0 -a -f %{rundir}/pwdlookup/.down ] ; then
-    %{__rm} -f %{rundir}/pwdlookup/.down
+  if [ $? -eq 0 -a -f ${rundir}/pwdlookup/.down ] ; then
+    %{__rm} -f ${rundir}/pwdlookup/.down
     %{_prefix}/bin/svc -u %{servicedir}/pwdlookup
   fi
   exit 0
