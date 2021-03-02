@@ -836,7 +836,8 @@ SSL_CTX *tls_create_int(int isserver, const struct tls_info *info,
 	SSL_CTX_set_options(ctx, options);
 
 	if (!ssl_cipher_list)
-		ssl_cipher_list="TLSv1:HIGH:!LOW:!MEDIUM:!EXP:!NULL:!aNULL@STRENGTH";
+		ssl_cipher_list="PROFILE=SYSTEM";
+	/*- ssl_cipher_list="TLSv1:HIGH:!LOW:!MEDIUM:!EXP:!NULL:!aNULL@STRENGTH"; -*/
 
 	SSL_CTX_set_cipher_list(ctx, ssl_cipher_list);
 	SSL_CTX_set_timeout(ctx, session_timeout);
