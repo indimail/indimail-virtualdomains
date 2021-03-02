@@ -5,3 +5,4 @@ indimail-access (@version@-@release@) unstable; urgency=medium
   * upgraded courier-imap to 5.0.14
   * upgraded unicode to 2.1.2
   * upgraded maildrop to 3.0.2
+  * libcouriertls.c: replaced default cipher list to "PROFILE=SYSTEM"

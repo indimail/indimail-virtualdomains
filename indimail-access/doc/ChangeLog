@@ -7,6 +7,7 @@ Release @version@-@release@ Start 01/03/2021
 03. upgraded courier-imap to 5.0.14
 04. upgraded unicode to 2.1.2
 05. upgraded maildrop to 3.0.2
+06. libcouriertls.c: replaced default cipher list to "PROFILE=SYSTEM"
 
 *
 Release @version@-@release@ Start 03/06/2020
