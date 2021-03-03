@@ -7,6 +7,8 @@ Release 3.4 Start 14/02/2021
 - 03/03/2021
 03. indisrvr.c, tls.c - renamed SSL_CIPHER to TLS_CIPHER_LIST
 04. tls.c, tls.h, auth_admin.c - updated datatypes
+05. tls.c, tls.h - added cafile argument to tls_init()
+06. auth_admin.c - tls_init() changed for cafile argument
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020

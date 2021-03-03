@@ -4,3 +4,5 @@ indimail (@version@-@release@) unstable; urgency=low
   * post install: save variables
   * indisrvr.c, tls.c - renamed SSL_CIPHER to TLS_CIPHER_LIST
   * tls.c, tls.h, auth_admin.c - updated datatypes
+  * tls.c, tls.h - added cafile argument to tls_init()
+  * auth_admin.c - tls_init() changed for cafile argument

@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.3  2021-03-03 14:11:46+05:30  Cprogrammer
+ * added option to specify cafile
+ *
  * Revision 1.2  2021-03-03 14:00:37+05:30  Cprogrammer
  * renamed TLSCLIENTCIPHERS to TLS_CIPHER_LIST
  * fixed data types
@@ -52,12 +55,12 @@ verify_cb(int preverify_ok, X509_STORE_CTX * ctx)
 }
 
 int
-check_cert(SSL *ssl)
+check_cert(SSL *myssl)
 {
 	X509           *peer;
     char            peer_CN[256];
 
-    if (SSL_get_verify_result(ssl) != X509_V_OK) {
+    if (SSL_get_verify_result(myssl) != X509_V_OK) {
 		strerr_warn2("check_cert: Unable to get verify result: ",
 			ERR_error_string(ERR_get_error(), 0), 0);
 		return (1);
@@ -69,8 +72,7 @@ check_cert(SSL *ssl)
 	 */
 
     /*- Check the common name */
-    if (!(peer = SSL_get_peer_certificate(ssl)))
-	{
+    if (!(peer = SSL_get_peer_certificate(myssl))) {
 		strerr_warn2("check_cert: Unable to get peer certificate: ",
 			ERR_error_string(ERR_get_error(), 0), 0);
 		return (1);
@@ -84,7 +86,7 @@ check_cert(SSL *ssl)
 }
 
 int
-tls_init(int fd, char *clientcert)
+tls_init(int fd, char *clientcert, char *cafile)
 {
 	int             ret;
 	SSL            *myssl;
@@ -92,8 +94,7 @@ tls_init(int fd, char *clientcert)
 	BIO            *sbio;
 	char           *ciphers;
 
-	usessl = (access(clientcert, F_OK) ? 0 : 1);
-	if (!usessl)
+	if (!(usessl = (access(clientcert, F_OK) ? 0 : 1)))
 		return (0);
 	SSL_library_init();
 	if (!(ctx = SSL_CTX_new(SSLv23_client_method()))) {
@@ -134,6 +135,12 @@ tls_init(int fd, char *clientcert)
 			SSL_CTX_free(ctx);
 			return (1);
 		}
+		if (cafile && 1 != SSL_CTX_load_verify_locations(ctx, cafile, 0)) {
+			strerr_warn4("SSL_CTX_load_verify_locations: unable to load certificate: ",
+				clientcert, ": ", ERR_error_string(ERR_get_error(), 0), 0);
+			SSL_CTX_free(ctx);
+			return (1);
+		}
 	}
 	if (!(myssl = SSL_new(ctx))) {
 		strerr_warn2("unable to set up SSL session: ",
@@ -159,8 +166,7 @@ tls_init(int fd, char *clientcert)
 		return (1);
 	}
     SSL_set_bio(myssl, sbio, sbio); /*- cannot fail */
-    if ((ret = SSL_connect(myssl)) <= 0)
-	{
+    if ((ret = SSL_connect(myssl)) <= 0) {
 		SSL_free(myssl);
 		strerr_warn2("SSL_connect: SSL Handshake: ", ERR_error_string(ERR_get_error(), 0), 0);
 		/*- SSL_get_error(myssl, ret)); -*/
@@ -194,7 +200,7 @@ myssl_error_str()
 }
 
 ssize_t
-ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *ssl, char *buf, size_t len)
+ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *myssl, char *buf, size_t len)
 {
 	int             n = 0;
 	const long      end = t + time(NULL);
@@ -204,7 +210,7 @@ ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *ssl, char *buf, size
 		fd_set          fds;
 		struct timeval  tv;
 
-		const ssize_t   r = buf ? fun(ssl, buf, len) : fun(ssl);
+		const ssize_t   r = buf ? fun(myssl, buf, len) : fun(myssl);
 		if (r > 0)
 			return r;
 		if ((t = end - time(NULL)) < 0)
@@ -212,7 +218,7 @@ ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *ssl, char *buf, size
 		tv.tv_sec = t;
 		tv.tv_usec = 0;
 		FD_ZERO(&fds);
-		switch (SSL_get_error(ssl, r))
+		switch (SSL_get_error(myssl, r))
 		{
 		default:
 			return r;			/*- some other error */
@@ -235,21 +241,21 @@ ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *ssl, char *buf, size
 }
 
 int
-ssl_timeoutread(long t, int rfd, int wfd, SSL *ssl, char *buf, size_t len)
+ssl_timeoutread(long t, int rfd, int wfd, SSL *myssl, char *buf, size_t len)
 {
 	if (!buf)
 		return 0;
-	if (SSL_pending(ssl))
-		return SSL_read(ssl, buf, len);
-	return ssl_timeoutio(SSL_read, t, rfd, wfd, ssl, buf, len);
+	if (SSL_pending(myssl))
+		return SSL_read(myssl, buf, len);
+	return ssl_timeoutio(SSL_read, t, rfd, wfd, myssl, buf, len);
 }
 
 ssize_t
-ssl_timeoutwrite(long t, int rfd, int wfd, SSL *ssl, char *buf, size_t len)
+ssl_timeoutwrite(long t, int rfd, int wfd, SSL *myssl, char *buf, size_t len)
 {
 	if (!buf)
 		return 0;
-	return ssl_timeoutio(SSL_write, t, rfd, wfd, ssl, buf, len);
+	return ssl_timeoutio(SSL_write, t, rfd, wfd, myssl, buf, len);
 }
 #endif
 
