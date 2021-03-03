@@ -2,3 +2,5 @@ indimail (@version@-@release@) unstable; urgency=low
 
   * sql_adddomain.c,, sql_setpw.c : replaced CREATE TABLE statements with create_table() function
   * post install: save variables
+  * indisrvr.c, tls.c - renamed SSL_CIPHER to TLS_CIPHER_LIST
+  * tls.c, tls.h, auth_admin.c - updated datatypes
