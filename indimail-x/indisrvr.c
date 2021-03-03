@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.6  2021-03-03 13:56:23+05:30  Cprogrammer
+ * renamed SSL_CIPHER to TLS_CIPHER_LIST
+ *
  * Revision 1.5  2020-10-01 18:23:48+05:30  Cprogrammer
  * fixed compiler warning
  *
@@ -21,7 +24,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.5 2020-10-01 18:23:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.6 2021-03-03 13:56:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -255,7 +258,7 @@ load_certificate(char *certfile)
 	}
 	/* set prefered ciphers */
 #ifdef CRYPTO_POLICY_NON_COMPLIANCE
-	ptr = env_get("SSL_CIPHER");
+	ptr = env_get("TLS_CIPHER_LIST");
 	if (ptr && !SSL_CTX_set_cipher_list(myctx, ptr)) {
 		strerr_warn4("SSL_CTX_set_cipher_list: unable to set cipher list: ", ptr, ": "
 			ERR_error_string(ERR_get_error(), 0), 0);
