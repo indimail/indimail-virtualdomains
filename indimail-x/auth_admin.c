@@ -1,5 +1,8 @@
 /*
  * $Log: auth_admin.c,v $
+ * Revision 1.4  2021-03-03 14:12:38+05:30  Cprogrammer
+ * added cafile argument to tls_init()
+ *
  * Revision 1.3  2021-03-03 14:01:12+05:30  Cprogrammer
  * fixed data type for len
  *
@@ -33,7 +36,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: auth_admin.c,v 1.3 2021-03-03 14:01:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: auth_admin.c,v 1.4 2021-03-03 14:12:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -50,7 +53,7 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host, char *admin_por
 	}
 	getEnvConfigInt(&admin_timeout, "ADMIN_TIMEOUT", 120);
 #ifdef HAVE_SSL
-	if (clientcert && tls_init(sfd, clientcert))
+	if (clientcert && tls_init(sfd, clientcert, 0))
 		return (-1);
 #endif
 	if ((len = saferead(sfd, inbuf, sizeof(inbuf) - 1, admin_timeout)) == -1 || !len) {
