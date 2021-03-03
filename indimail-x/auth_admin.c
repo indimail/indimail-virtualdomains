@@ -1,5 +1,8 @@
 /*
  * $Log: auth_admin.c,v $
+ * Revision 1.3  2021-03-03 14:01:12+05:30  Cprogrammer
+ * fixed data type for len
+ *
  * Revision 1.2  2020-04-01 18:52:46+05:30  Cprogrammer
  * moved getEnvConfig to libqmail
  *
@@ -30,13 +33,14 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: auth_admin.c,v 1.2 2020-04-01 18:52:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: auth_admin.c,v 1.3 2021-03-03 14:01:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
 auth_admin(char *admin_user, char *admin_pass, char *admin_host, char *admin_port, char *clientcert)
 {
-	int             sfd, len, port, admin_timeout;
+	int             sfd, port, admin_timeout;
+	ssize_t         len;
 	char            inbuf[512];
 
 	scan_uint(admin_port, (unsigned int *) &port);
