@@ -1,5 +1,8 @@
 /*
  * $Log: tls.h,v $
+ * Revision 1.2  2021-03-03 14:00:54+05:30  Cprogrammer
+ * fixed data types
+ *
  * Revision 1.1  2019-04-13 23:39:28+05:30  Cprogrammer
  * tls.h
  *
@@ -10,8 +13,8 @@
 #include "config.h"
 #endif
 
-ssize_t         saferead(int, char *, int, int);
-ssize_t         safewrite(int, char *, int, int);
+ssize_t         saferead(int, char *, size_t, long);
+ssize_t         safewrite(int, char *, size_t, long);
 #ifdef HAVE_SSL
 int             tls_init(int, char *);
 void            ssl_free();

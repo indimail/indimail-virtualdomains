@@ -1,5 +1,9 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.2  2021-03-03 14:00:37+05:30  Cprogrammer
+ * renamed TLSCLIENTCIPHERS to TLS_CIPHER_LIST
+ * fixed data types
+ *
  * Revision 1.1  2019-04-18 08:36:33+05:30  Cprogrammer
  * Initial revision
  *
@@ -21,6 +25,8 @@
 #include <strerr.h>
 #include <env.h>
 #include <error.h>
+#include <timeoutread.h>
+#include <timeoutwrite.h>
 #endif
 
 static int      usessl = 0;
@@ -106,7 +112,7 @@ tls_init(int fd, char *clientcert)
 	 */
 	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_cb);
     /*- Set our cipher list */
-	ciphers = env_get("TLSCLIENTCIPHERS");
+	ciphers = env_get("TLS_CIPHER_LIST");
 #ifdef CRYPTO_POLICY_NON_COMPLIANCE
 	if (ciphers && !SSL_CTX_set_cipher_list(ctx, ciphers)) {
 		strerr_warn4("unable to set ciphers: ", ciphers, ": ",
@@ -187,8 +193,8 @@ myssl_error_str()
 	return (errno == ETIMEDOUT) ? "timed out" : error_str(errno);
 }
 
-int
-ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *ssl, char *buf, int len)
+ssize_t
+ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *ssl, char *buf, size_t len)
 {
 	int             n = 0;
 	const long      end = t + time(NULL);
@@ -198,7 +204,7 @@ ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *ssl, char *buf, int 
 		fd_set          fds;
 		struct timeval  tv;
 
-		const int       r = buf ? fun(ssl, buf, len) : fun(ssl);
+		const ssize_t   r = buf ? fun(ssl, buf, len) : fun(ssl);
 		if (r > 0)
 			return r;
 		if ((t = end - time(NULL)) < 0)
@@ -229,7 +235,7 @@ ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *ssl, char *buf, int 
 }
 
 int
-ssl_timeoutread(long t, int rfd, int wfd, SSL *ssl, char *buf, int len)
+ssl_timeoutread(long t, int rfd, int wfd, SSL *ssl, char *buf, size_t len)
 {
 	if (!buf)
 		return 0;
@@ -238,8 +244,8 @@ ssl_timeoutread(long t, int rfd, int wfd, SSL *ssl, char *buf, int len)
 	return ssl_timeoutio(SSL_read, t, rfd, wfd, ssl, buf, len);
 }
 
-int
-ssl_timeoutwrite(long t, int rfd, int wfd, SSL *ssl, char *buf, int len)
+ssize_t
+ssl_timeoutwrite(long t, int rfd, int wfd, SSL *ssl, char *buf, size_t len)
 {
 	if (!buf)
 		return 0;
@@ -247,17 +253,10 @@ ssl_timeoutwrite(long t, int rfd, int wfd, SSL *ssl, char *buf, int len)
 }
 #endif
 
-int             timeoutread(int, int, char *, int);
-int             timeoutwrite(int, int, char *, int);
-
 ssize_t
-saferead(fd, buf, len, timeout)
-	int             fd;
-	char           *buf;
-	int             len;
-	int             timeout;
+saferead(int fd, char *buf, size_t len, long timeout)
 {
-	int             r;
+	ssize_t         r;
 
 #ifdef HAVE_SSL
 	if (usessl) {
@@ -275,13 +274,9 @@ saferead(fd, buf, len, timeout)
 }
 
 ssize_t
-safewrite(fd, buf, len, timeout)
-	int             fd;
-	char           *buf;
-	int             len;
-	int             timeout;
+safewrite(int fd, char *buf, size_t len, long timeout)
 {
-	int             r;
+	ssize_t         r;
 
 #ifdef HAVE_SSL
 	if (usessl) {
