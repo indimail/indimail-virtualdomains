@@ -55,13 +55,42 @@ Local TCP/IP Port on which proxyimap, proxypop3 is running.
 \fBDESTPORT\fR
 Of the form protocol:port where protocol is either imap or pop3. Port is the TCP/IP port on
 the remote host offering the imap or pop3 protocol.
+
+.PP
+If you use the AUTOADDUSER environemnt variable to provision new users,
+adminclient will be used to execute various indimail commands. In this case
+additional environment variables will needed
+.TP
+\fBADMIN_USER\fR
+An existing user set using mgmtpass(8) program.
+.TP
+\fBADMIN_PASS\fR
+Password for the user
+.TP
+\fBADMIN_HOST\fR
+Host running indisrvr(8)
+.TP
+\fBADMIN_PORT\fR
+port on which indisrvr(8) is running
+.TP
+\fBCERTFILE\fR
+openssl certificate to use in case indisrvr(8) is running in TLS mode
+.TP
+\fBCAFILE\fR
+openssl cafile in case CA certificates is needed.
+.TP
+\fBMATCH_CN
+Match host with Common Name of the certificate that indisrvr(8) is running
+
 .PP
 Currently proxyimap and proxypop3 allow 5 bad login attempts, after which the connection is
 terminated.
+
 .PP
 It is also possible to set data timeout for the proxies through the environment variable
 DATA_TIMEOUT. The two proxies will terminate if it finds no data coming from either the
 client or the actual imap/pop3 server within the time in seconds specified by DATA_TIMEOUT.
+
 .PP
 vproxy is a generic proxy which passes data from file descriptor 0 to a TCP/IP connection and
 data from the TCP/IP connection to file descriptor 1. The TCP/IP connection is specified by
