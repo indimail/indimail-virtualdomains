@@ -1,5 +1,9 @@
 /*
  * $Log: auth_admin.c,v $
+ * Revision 1.5  2021-03-04 11:54:48+05:30  Cprogrammer
+ * added options to match host with common name
+ * added option to specify cafile
+ *
  * Revision 1.4  2021-03-03 14:12:38+05:30  Cprogrammer
  * added cafile argument to tls_init()
  *
@@ -36,11 +40,12 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: auth_admin.c,v 1.4 2021-03-03 14:12:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: auth_admin.c,v 1.5 2021-03-04 11:54:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
-auth_admin(char *admin_user, char *admin_pass, char *admin_host, char *admin_port, char *clientcert)
+auth_admin(char *admin_user, char *admin_pass, char *admin_host,
+	char *admin_port, char *clientcert, char *cafile, int match_cn)
 {
 	int             sfd, port, admin_timeout;
 	ssize_t         len;
@@ -53,7 +58,7 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host, char *admin_por
 	}
 	getEnvConfigInt(&admin_timeout, "ADMIN_TIMEOUT", 120);
 #ifdef HAVE_SSL
-	if (clientcert && tls_init(sfd, clientcert, 0))
+	if (clientcert && tls_init(sfd, match_cn ? admin_host : 0, clientcert, cafile))
 		return (-1);
 #endif
 	if ((len = saferead(sfd, inbuf, sizeof(inbuf) - 1, admin_timeout)) == -1 || !len) {
