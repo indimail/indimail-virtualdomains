@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 1.6  2021-03-04 12:45:18+05:30  Cprogrammer
+ * added option to specify CAFILE and match host with common name
+ *
  * Revision 1.5  2020-10-01 18:28:17+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -21,7 +24,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 1.5 2020-10-01 18:28:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 1.6 2021-03-04 12:45:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -82,9 +85,9 @@ int
 autoAddUser(char *email, char *pass, char *service)
 {
 	char           *admin_user, *admin_pass, *admin_host, *admin_port,
-                   *hard_quota, *ptr, *certfile;
+                   *hard_quota, *ptr, *certfile, *cafile;
 	static stralloc cmdbuf = {0}, encrypted = {0};
-	int             i, sfd;
+	int             i, sfd, match_cn;
 
 	if (!env_get("AUTOADDUSERS"))
 		return (1);
@@ -125,8 +128,11 @@ autoAddUser(char *email, char *pass, char *service)
 	if (!(certfile = (char *) env_get("CERTFILE"))) {
 		strerr_warn1("proxylogin: client certificate not specified", 0);
 		return (-1);
-	}
-	if ((sfd = auth_admin(admin_user, admin_pass, admin_host, admin_port, certfile)) == -1)
+	} 
+	cafile = (char *) env_get("CAFILE");
+	match_cn = env_get("MATCH_CN") ? 1 : 0;
+
+	if ((sfd = auth_admin(admin_user, admin_pass, admin_host, admin_port, certfile, cafile, match_cn)) == -1)
 		return (-1);
 	i = str_chr(service, ':');
 	if (i > 4) {
