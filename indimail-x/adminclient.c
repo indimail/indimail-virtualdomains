@@ -1,5 +1,9 @@
 /*
  * $Log: adminclient.c,v $
+ * Revision 1.3  2021-03-04 11:51:59+05:30  Cprogrammer
+ * added -m option to match host with common name
+ * added -C option to specify cafile
+ *
  * Revision 1.2  2019-04-22 22:24:12+05:30  Cprogrammer
  * added missing header strerr.h
  *
@@ -12,7 +16,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: adminclient.c,v 1.2 2019-04-22 22:24:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: adminclient.c,v 1.3 2021-03-04 11:51:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -47,11 +51,11 @@ int
 main(int argc, char **argv)
 {
 	char           *admin_user, *admin_pass, *admin_host, *admin_port, *cmmd,
-				   *cmdptr1, *cmdptr2, *certfile;
+				   *cmdptr1, *cmdptr2, *certfile, *cafile;
 	static stralloc cmdbuf = {0}, cmdName = {0};
-	int             sfd, i, j, k, input_read;
+	int             sfd, i, j, k, input_read, match_cn = 0;
 
-	certfile = admin_user = admin_pass = admin_host = admin_port = cmmd = (char *) 0;
+	certfile = cafile = admin_user = admin_pass = admin_host = admin_port = cmmd = (char *) 0;
 	input_read = 0;
 	for (i = 1; i < argc; i++) {
 		if (argv[i][0] != '-')
@@ -78,6 +82,12 @@ main(int argc, char **argv)
 			break;
 		case 'n':
 			certfile = *(argv + i + 1);
+			break;
+		case 'C':
+			cafile = *(argv + i + 1);
+			break;
+		case 'm':
+			match_cn = 1;
 			break;
 		case 'v':
 			verbose = 1;
@@ -112,7 +122,7 @@ main(int argc, char **argv)
 	}
 	if (verbose)
 		strmsg_out7("connecting to ", admin_host, "@", admin_port, " as ", admin_user, "\n");
-	if ((sfd = auth_admin(admin_user, admin_pass, admin_host, admin_port, certfile)) == -1) {
+	if ((sfd = auth_admin(admin_user, admin_pass, admin_host, admin_port, certfile, cafile, match_cn)) == -1) {
 		strerr_warn7("adminclient: auth_admin: ", admin_host, "@", admin_port, " as ", admin_user, ": ", &strerr_sys);
 		return (1);
 	}
