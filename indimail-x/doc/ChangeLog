@@ -13,6 +13,8 @@ Release 3.4 Start 14/02/2021
 07. auth_admin.c, tls.c - added option to match host with common name
 08. adminclient.c - added -m option to match host with common name
 09. adminclient.c - added -C option to specify cafile
+10. proxylogin.c - added option to specify CAFILE and match host with common
+    name
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020
