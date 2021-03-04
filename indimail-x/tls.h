@@ -1,5 +1,8 @@
 /*
  * $Log: tls.h,v $
+ * Revision 1.4  2021-03-04 11:56:25+05:30  Cprogrammer
+ * added host argument to match host with common name
+ *
  * Revision 1.3  2021-03-03 14:14:06+05:30  Cprogrammer
  * added cafile argument to tls_init()
  *
@@ -19,7 +22,7 @@
 ssize_t         saferead(int, char *, size_t, long);
 ssize_t         safewrite(int, char *, size_t, long);
 #ifdef HAVE_SSL
-int             tls_init(int, char *, char *);
+int             tls_init(int, char *, char *, char *);
 void            ssl_free();
 #endif
 

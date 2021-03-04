@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.4  2021-03-04 11:56:13+05:30  Cprogrammer
+ * added option to match host with common name
+ *
  * Revision 1.3  2021-03-03 14:11:46+05:30  Cprogrammer
  * added option to specify cafile
  *
@@ -21,6 +24,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <sys/select.h>
+#include <case.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -32,6 +36,7 @@
 #include <timeoutwrite.h>
 #endif
 
+#ifdef HAVE_SSL
 static int      usessl = 0;
 static char    *sslerr_str = 0;
 static SSL     *ssl = 0;
@@ -55,7 +60,7 @@ verify_cb(int preverify_ok, X509_STORE_CTX * ctx)
 }
 
 int
-check_cert(SSL *myssl)
+check_cert(SSL *myssl, char *host)
 {
 	X509           *peer;
     char            peer_CN[256];
@@ -77,16 +82,16 @@ check_cert(SSL *myssl)
 			ERR_error_string(ERR_get_error(), 0), 0);
 		return (1);
 	}
-    X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peer_CN, 256);
-	/*-
-    if (strcasecmp(peer_CN,host))
-    err_exit("Common name doesn't match host name");
-	*/
+    X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peer_CN, sizeof(peer_CN) - 1);
+	if (host && case_diffs(peer_CN, host)) {
+    	strerr_warn2("hostname doesn't match Common Name ", peer_CN, 0);
+		return (1);
+	}
 	return (0);
 }
 
 int
-tls_init(int fd, char *clientcert, char *cafile)
+tls_init(int fd, char *host, char *clientcert, char *cafile)
 {
 	int             ret;
 	SSL            *myssl;
@@ -174,7 +179,7 @@ tls_init(int fd, char *clientcert, char *cafile)
 		errno = EPROTO;
 		return (1);
 	}
-    return (check_cert(myssl));
+    return (check_cert(myssl, host));
 }
 
 const char     *
@@ -278,6 +283,7 @@ saferead(int fd, char *buf, size_t len, long timeout)
 #endif
 	return r;
 }
+#endif
 
 ssize_t
 safewrite(int fd, char *buf, size_t len, long timeout)
