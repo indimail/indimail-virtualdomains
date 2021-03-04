@@ -9,6 +9,10 @@ Release 3.4 Start 14/02/2021
 04. tls.c, tls.h, auth_admin.c - updated datatypes
 05. tls.c, tls.h - added cafile argument to tls_init()
 06. auth_admin.c - tls_init() changed for cafile argument
+- 04/03/2021
+07. auth_admin.c, tls.c - added option to match host with common name
+08. adminclient.c - added -m option to match host with common name
+09. adminclient.c - added -C option to specify cafile
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020

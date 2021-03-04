@@ -6,3 +6,6 @@ indimail (@version@-@release@) unstable; urgency=low
   * tls.c, tls.h, auth_admin.c - updated datatypes
   * tls.c, tls.h - added cafile argument to tls_init()
   * auth_admin.c - tls_init() changed for cafile argument
+  * auth_admin.c, tls.c - added option to match host with common name
+  * adminclient.c - added -m option to match host with common name
+  * adminclient.c - added -C option to specify cafile
