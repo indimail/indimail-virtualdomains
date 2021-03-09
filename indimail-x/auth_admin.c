@@ -1,5 +1,8 @@
 /*
  * $Log: auth_admin.c,v $
+ * Revision 1.6  2021-03-09 19:57:59+05:30  Cprogrammer
+ * use functions from tls.c
+ *
  * Revision 1.5  2021-03-04 11:54:48+05:30  Cprogrammer
  * added options to match host with common name
  * added option to specify cafile
@@ -31,6 +34,7 @@
 #include <strerr.h>
 #include <scan.h>
 #include <str.h>
+#include <env.h>
 #include <error.h>
 #include <getEnvConfig.h>
 #endif
@@ -40,7 +44,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: auth_admin.c,v 1.5 2021-03-04 11:54:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: auth_admin.c,v 1.6 2021-03-09 19:57:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -49,6 +53,9 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host,
 {
 	int             sfd, port, admin_timeout;
 	ssize_t         len;
+	SSL            *ssl;
+	SSL_CTX        *ctx;
+	char           *ciphers;
 	char            inbuf[512];
 
 	scan_uint(admin_port, (unsigned int *) &port);
@@ -58,8 +65,18 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host,
 	}
 	getEnvConfigInt(&admin_timeout, "ADMIN_TIMEOUT", 120);
 #ifdef HAVE_SSL
-	if (clientcert && tls_init(sfd, match_cn ? admin_host : 0, clientcert, cafile))
-		return (-1);
+	if (clientcert) {
+		if (!(ciphers = env_get("TLS_CIPHER_LIST")))
+			ciphers = "PROFILE=SYSTEM";
+		if (!(ctx = tls_init(clientcert, cafile, ciphers, client)))
+			return(-1);
+		if (!(ssl = tls_session(ctx, sfd, ciphers)))
+			return(-1);
+		SSL_CTX_free(ctx);
+		ctx = NULL;
+		if (tls_connect(ssl, match_cn ? admin_host : 0) == -1)
+			return(-1);
+	}
 #endif
 	if ((len = saferead(sfd, inbuf, sizeof(inbuf) - 1, admin_timeout)) == -1 || !len) {
 		close(sfd);

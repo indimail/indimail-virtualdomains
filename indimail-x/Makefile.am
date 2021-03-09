@@ -469,8 +469,8 @@ adminclient_LDADD = tls.lo auth_admin.lo adminCmmd.lo libindimail.la
 adminclient_DEPENDENCIES = tls.lo auth_admin.lo adminCmmd.lo libindimail.la
 
 indisrvr_SOURCES = indisrvr.c
-indisrvr_LDADD = sockwrite.lo checkPerm.lo libindimail.la @LIB_SOCKET@
-indisrvr_DEPENDENCIES = sockwrite.lo checkPerm.lo libindimail.la
+indisrvr_LDADD = checkPerm.lo tls.lo libindimail.la @LIB_SOCKET@
+indisrvr_DEPENDENCIES = tls.lo checkPerm.lo libindimail.la
 
 vdeloldusers_SOURCES = vdeloldusers.c
 vdeloldusers_LDADD = delunreadmails.lo getlastauth.lo \

@@ -1,5 +1,8 @@
 /*
  * $Log: tls.h,v $
+ * Revision 1.5  2021-03-09 19:59:12+05:30  Cprogrammer
+ * refactored tls code
+ *
  * Revision 1.4  2021-03-04 11:56:25+05:30  Cprogrammer
  * added host argument to match host with common name
  *
@@ -18,12 +21,30 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <sys/types.h>
+#ifdef HAVE_SSL
+#include <openssl/ssl.h>
+#endif
+
+enum tlsmode  {none = 0, client = 1, server = 2};
+enum starttls {smtp, pop3, unknown};
 
 ssize_t         saferead(int, char *, size_t, long);
 ssize_t         safewrite(int, char *, size_t, long);
+ssize_t         allwrite(int, char *, size_t);
 #ifdef HAVE_SSL
-int             tls_init(int, char *, char *, char *);
+SSL_CTX        *tls_init(char *, char *, char *, enum tlsmode);
+SSL            *tls_session(SSL_CTX *, int, char *);
+int             tls_connect(SSL *, char *);
+int             tls_accept(SSL *);
 void            ssl_free();
+int             translate(int, int, int, unsigned int);
+ssize_t         allwritessl(SSL *ssl, char *buf, size_t len);
+ssize_t         ssl_timeoutio(int (*fun) (), long, int, int, SSL *, char *, size_t);
+ssize_t         ssl_timeoutread(long, int, int, SSL *, char *, size_t);
+ssize_t         ssl_timeoutwrite(long, int, int, SSL *, char *, size_t);
+int             ssl_timeoutrehandshake(long, int, int, SSL *);
+const char     *myssl_error_str();
 #endif
 
 #endif

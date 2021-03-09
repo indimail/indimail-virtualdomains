@@ -10,3 +10,5 @@ indimail (@version@-@release@) unstable; urgency=low
   * adminclient.c - added -m option to match host with common name
   * adminclient.c - added -C option to specify cafile
   * proxylogin.c - added option to specify CAFILE and match host with common name
+  * tls.c, tls.h - refactored tls code
+  * auth_admin.c, indisrvr.c: use functions from tls.c

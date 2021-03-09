@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.7  2021-03-09 19:58:25+05:30  Cprogrammer
+ * use functions from tls.c
+ *
  * Revision 1.6  2021-03-09 15:33:58+05:30  Cprogrammer
  * renamed SSL_CIPHER to TLS_CIPHER_LIST
  *
@@ -24,7 +27,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.6 2021-03-09 15:33:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.7 2021-03-09 19:58:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -61,6 +64,7 @@ static char     sccsid[] = "$Id: indisrvr.c,v 1.6 2021-03-09 15:33:58+05:30 Cpro
 #ifdef HAVE_SSL
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include "tls.h"
 #endif
 #ifdef HAVE_QMAIL
 #include <sgetopt.h>
@@ -81,7 +85,6 @@ static char     sccsid[] = "$Id: indisrvr.c,v 1.6 2021-03-09 15:33:58+05:30 Cpro
 #include "checkPerm.h"
 #include "mgmtpassfuncs.h"
 #include "filewrt.h"
-#include "sockwrite.h"
 
 #define MAXBUF 4096
 
@@ -117,13 +120,14 @@ static void     SigUsr();
 static int      get_options(int argc, char **argv, char **, char **, int *);
 #ifdef HAVE_SSL
 static void     SigHup();
-int             translate(SSL *, int, int, int, unsigned int);
 #endif
 
 #ifdef HAVE_SSL
+SSL_CTX        *ctx;
+SSL            *ssl;
 static int      usessl = 0;
-static char    *certfile;
-SSL_CTX        *ctx = (SSL_CTX *) 0;
+unsigned long   dtimeout = 300;
+static char    *certfile, *cafile;
 #endif
 
 char            tbuf[2048];
@@ -135,156 +139,6 @@ die_nomem()
 	_exit(111);
 }
 
-#ifdef HAVE_SSL
-static int
-ssl_write(SSL *ssl, char *buf, int len)
-{
-	int             w;
-
-	while (len) {
-		if ((w = SSL_write(ssl, buf, len)) == -1) {
-			if (errno == EINTR)
-				continue;
-			return -1;	/*- note that some data may have been written */
-		}
-		if (w == 0)
-			;	/*- luser's fault */
-		buf += w;
-		len -= w;
-	}
-	return 0;
-}
-
-int
-translate(SSL *ssl, int out, int clearout, int clearerr, unsigned int iotimeout)
-{
-	fd_set          rfds;	/*- File descriptor mask for select -*/
-	struct timeval  timeout;
-	int             flagexitasap;
-	int             sslin;
-	int             retval, n, r;
-
-	timeout.tv_sec = iotimeout;
-	timeout.tv_usec = 0;
-	flagexitasap = 0;
-	if ((sslin = SSL_get_rfd(ssl)) == -1) {
-		filewrt(3, "translate: unable to set up SSL connection\n");
-		while ((n = ERR_get_error()))
-			filewrt(3, "translate: %s\n", ERR_error_string(n, 0));
-		return (-1);
-	}
-	if (SSL_accept(ssl) <= 0) {
-		filewrt(3, "translate: unable to accept SSL connection\n");
-		while ((n = ERR_get_error()))
-			filewrt(3, "translate: %s\n", ERR_error_string(n, 0));
-		return (-1);
-	}
-	while (!flagexitasap) {
-		FD_ZERO(&rfds);
-		FD_SET(sslin, &rfds);
-		FD_SET(clearout, &rfds);
-		FD_SET(clearerr, &rfds);
-		if ((retval = select(clearerr > sslin ? clearerr + 1 : sslin + 1, &rfds, (fd_set *) NULL, (fd_set *) NULL, &timeout)) < 0) {
-#ifdef ERESTART
-			if (errno == EINTR || errno == ERESTART)
-#else
-			if (errno == EINTR)
-#endif
-				continue;
-			filewrt(3, "translate: %s\n", error_str(errno));
-			return (-1);
-		} else
-		if (!retval) {
-			filewrt(3, "translate: timeout reached without input [%ld sec]\n", timeout.tv_sec);
-			return (-1);
-		}
-		if (FD_ISSET(sslin, &rfds)) {
-			/*- data on sslin */
-			if ((n = SSL_read(ssl, tbuf, sizeof(tbuf))) < 0) {
-				filewrt(3, "translate: unable to read from network: %s\n", error_str(errno));
-				flagexitasap = 1;
-			} else
-			if (n == 0)
-				flagexitasap = 1;
-			else
-			if ((r = sockwrite(out, tbuf, n)) < 0) {
-				filewrt(3, "translate: unable to write to client: %s\n", error_str(errno));
-				return (-1);
-			}
-		}
-		if (FD_ISSET(clearout, &rfds)) {
-			/*- data on clearout */
-			if ((n = read(clearout, tbuf, sizeof(tbuf))) < 0) {
-				filewrt(3, "translate: unable to read from client: %s\n", error_str(errno));
-				return (-1);
-			} else
-			if (n == 0)
-				flagexitasap = 1;
-			if ((r = ssl_write(ssl, tbuf, n)) < 0) {
-				filewrt(3, "translate: unable to write to network: %s\n", error_str(errno));
-				return (-1);
-			}
-		}
-		if (FD_ISSET(clearerr, &rfds)) {
-			/*- data on clearerr */
-			if ((n = read(clearerr, tbuf, sizeof(tbuf))) < 0) {
-				filewrt(3, "translate: unable to read from client: %s\n", error_str(errno));
-				return (-1);
-			} else
-			if (n == 0)
-				flagexitasap = 1;
-			if ((r = ssl_write(ssl, tbuf, n)) < 0) {
-				filewrt(3, "translate: unable to write to network: %s\n", error_str(errno));
-				return (-1);
-			}
-		}
-	} /*- while (!flagexitasap) */
-	return (0);
-}
-
-SSL_CTX *
-load_certificate(char *certfile)
-{
-	SSL_CTX        *myctx = (SSL_CTX *) 0;
-#ifdef CRYPTO_POLICY_NON_COMPLIANCE
-	char           *ptr;
-#endif
-
-    /* setup SSL context (load key and cert into ctx) */
-	if (!(myctx = SSL_CTX_new(SSLv23_server_method()))) {
-		strerr_warn2("SSL_CTX_new: unable to create SSL context: ",
-			ERR_error_string(ERR_get_error(), 0), 0);
-		return ((SSL_CTX *) 0);
-	}
-	/* set prefered ciphers */
-#ifdef CRYPTO_POLICY_NON_COMPLIANCE
-	ptr = env_get("TLS_CIPHER_LIST");
-	if (ptr && !SSL_CTX_set_cipher_list(myctx, ptr)) {
-		strerr_warn4("SSL_CTX_set_cipher_list: unable to set cipher list: ", ptr, ": "
-			ERR_error_string(ERR_get_error(), 0), 0);
-		SSL_CTX_free(myctx);
-		return ((SSL_CTX *) 0);
-	}
-#endif
-	if (SSL_CTX_use_certificate_chain_file(myctx, certfile)) {
-		if (SSL_CTX_use_RSAPrivateKey_file(myctx, certfile, SSL_FILETYPE_PEM) != 1) {
-			strerr_warn2("SSL_CTX_use_RSAPrivateKey: unable to load RSA private key: ",
-				ERR_error_string(ERR_get_error(), 0), 0);
-			SSL_CTX_free(myctx);
-			return ((SSL_CTX *) 0);
-		}
-		if (SSL_CTX_use_certificate_file(myctx, certfile, SSL_FILETYPE_PEM) != 1)
-		{
-			strerr_warn2("SSL_CTX_use_certificate_file: unable to load certificate: ",
-				ERR_error_string(ERR_get_error(), 0), 0);
-			SSL_CTX_free(myctx);
-			return ((SSL_CTX *) 0);
-		}
-	}
-	return (myctx);
-}
-#endif
-
 int
 main(argc, argv)
 	int             argc;
@@ -295,23 +149,21 @@ main(argc, argv)
 	struct sockaddr_in cliaddress;
 	int             addrlen, len, new;
 	struct linger   linger;
-#ifndef CRYPTO_POLICY_NON_COMPLIANCE
-	char           *cipher;
-#endif
 #ifdef ENABLE_IPV6
 	char            hostname[256], servicename[100];
 #endif
 #ifdef HAVE_SSL
-	BIO            *sbio;
-	SSL            *ssl;
-	int             r, status, retval, pi1[2], pi2[2], pi3[2];
+	char           *ciphers = NULL;
+	int             r, status, retval, pi1[2], pi2[2];
 #endif
 
 	if (get_options(argc, argv, &ipaddr, &port, &backlog))
 		return (1);
 	/*
 	 * dup fd 2 to 3 use 3 in child to print
-	 * erors on parents original error stream
+	 * erors on parents original error stream,
+	 * allowing child's errors to be logged to
+	 * parent's fd 2
 	 */
 	dup2(2, 3);
 	(void) signal(SIGTERM, SigTerm);
@@ -322,10 +174,12 @@ main(argc, argv)
 			strerr_warn3("indisrvr: missing certficate: ", certfile, ": ", &strerr_sys);
 			return (1);
 		}
-		(void) signal(SIGHUP, SigHup);
-		SSL_library_init();
-		if (!(ctx = load_certificate(certfile)))
+    	/* setup SSL context (load key and cert into ctx) */
+		if (!(ciphers = env_get("TLS_CIPHER_LIST")))
+			ciphers = "PROFILE=SYSTEM";
+		if (!(ctx = tls_init(certfile, cafile, ciphers, server)))
 			return (1);
+		(void) signal(SIGHUP, SigHup);
 	}
 #endif
 	linger.l_onoff = 1;
@@ -338,7 +192,7 @@ main(argc, argv)
 	addrlen = sizeof(cliaddress);
 	(void) signal(SIGCHLD, (void (*)()) SigChild);
 #ifdef HAVE_SSL
-	filewrt(3, "%d: IndiServer Ready with Address %s:%s backlog %d SSL=%d\n", getpid(), ipaddr, port, backlog, usessl);
+	filewrt(3, "%d: IndiServer Ready with Address %s:%s backlog %d cert=%s\n", getpid(), ipaddr, port, backlog, certfile);
 #else
 	filewrt(3, "%d: IndiServer Ready with Address %s:%s backlog %d SSL=%d\n", getpid(), ipaddr, port, backlog, 0);
 #endif
@@ -406,34 +260,26 @@ main(argc, argv)
 				}
 				break;
 			}
-			if (dup2(new, 0) == -1 || dup2(new, 1) == -1 || dup2(new, 2) == -1) {
-				strerr_warn1("indisrver: dup2 (0, 1, 2): ", &strerr_sys);
-				_exit(1);
-			}
+			if (dup2(new, 0) == -1 || dup2(new, 1) == -1 || dup2(new, 2) == -1)
+				strerr_die1sys(1, "indisrver: dup2 (0, 1, 2): ");
 			if (new != 0 && new != 1 && new != 2)
 				close(new);
 #ifdef HAVE_SSL
 			if (usessl == 1) {
-				if (pipe(pi1) != 0 || pipe(pi2) != 0 || pipe(pi3) != 0) {
-					filewrt(3, "unable to create pipe: %s\n", error_str(errno));
-					_exit(1);
-				}
+				if (pipe(pi1) != 0 || pipe(pi2) != 0)
+					strerr_die1sys(1, "unable to create pipe: ");
 				switch (fork())
 				{
 				case 0: /* command handlng child */
+					SSL_CTX_free(ctx);
 					close(pi1[1]);
 					close(pi2[0]);
-					close(pi3[0]);
-					if (dup2(pi1[0], 0) == -1 || dup2(pi2[1], 1) == -1 || dup2(pi3[1], 2) == -1) {
-						filewrt(3, "unable to set up descriptors: %s\n", error_str(errno));
-						_exit(1);
-					}
+					if (dup2(pi1[0], 0) == -1 || dup2(pi2[1], 1) == -1 || dup2(pi2[1], 2) == -1)
+						strerr_die1sys(1, "unable to setup descriptors: ");
 					if (pi1[0] != 0)
 						close(pi1[0]);
-					if (pi2[1] != 1)
+					if (pi2[1] != 1 && pi2[1] != 2)
 						close(pi2[1]);
-					if (pi3[1] != 2)
-						close(pi1[1]);
 					/*- signals are allready set in the parent */
 					n = call_prg();
 					close(0);
@@ -442,40 +288,26 @@ main(argc, argv)
 					close(3);
 					_exit(n);
 				case -1:
-					filewrt(3, "%d: unable to fork: %s\n", getpid(), error_str(errno));
-					_exit(1);
+					strerr_die1sys(1, "fork: ");
 				default:
 					break;
 				} /*- switch (fork()) */
 				close(pi1[0]);
 				close(pi2[1]);
-				close(pi3[1]);
-				if (!(ssl = SSL_new(ctx))) {
-					long e;
-					while ((e = ERR_get_error()))
-						filewrt(3, "%d: %s\n", getpid(), ERR_error_string(e, 0));
-					filewrt(3, "%d: unable to set up SSL session\n", getpid());
-					SSL_CTX_free(ctx);
+				if (!(ssl = tls_session(ctx, 1, ciphers))) {
+					filewrt(3, "%d: unable to setup SSL session: %s\n", getpid(), myssl_error_str());
+					SSL_shutdown(ssl);
+					SSL_free(ssl);
 					_exit(1);
 				}
 				SSL_CTX_free(ctx);
-#ifndef CRYPTO_POLICY_NON_COMPLIANCE
-				if (!(cipher = env_get("TLS_CIPHER_LIST")))
-					cipher = "PROFILE=SYSTEM";
-				if (!SSL_set_cipher_list(ssl, cipher)) {
-					strerr_warn4("indisrver: unable to set ciphers: ", cipher, ": ",
-						ERR_error_string(ERR_get_error(), 0), 0);
-					SSL_free(ssl);
-					return (1);
-				}
-#endif
-				if (!(sbio = BIO_new_socket(0, BIO_NOCLOSE))) {
-					filewrt(3, "%d: unable to set up BIO socket\n", getpid());
+				if (tls_accept(ssl)) {
+					filewrt(3, "%d: unable to accept SSL connection: %s\n", getpid(), myssl_error_str());
+					SSL_shutdown(ssl);
 					SSL_free(ssl);
 					_exit(1);
 				}
-				SSL_set_bio(ssl, sbio, sbio); /*- cannot fail */
-				n = translate(ssl, pi1[1], pi2[0], pi3[0], 3600);
+				n = translate(1, pi1[1], pi2[0], dtimeout);
 				SSL_shutdown(ssl);
 				SSL_free(ssl);
 				for (retval = -1;(r = waitpid(pid, &status, WNOHANG | WUNTRACED));) {
@@ -487,7 +319,8 @@ main(argc, argv)
 						continue;
 					if (WIFSTOPPED(status) || WIFSIGNALED(status)) {
 						if (verbose)
-							filewrt(3, "%d: killed by signal %d\n", pid, WIFSTOPPED(status) ? WSTOPSIG(status) : WTERMSIG(status));
+							filewrt(3, "%d: killed by signal %d\n", pid,
+									WIFSTOPPED(status) ? WSTOPSIG(status) : WTERMSIG(status));
 						retval = -1;
 					} else
 					if (WIFEXITED(status)) {
@@ -506,7 +339,7 @@ main(argc, argv)
 				if (retval)
 					_exit(retval);
 				_exit (0);
-			} else {
+			} else { /*- not ssl */
 				n = call_prg();
 				close(0);
 				close(1);
@@ -614,7 +447,9 @@ call_prg()
 		break;
 	}
 	if (getln(subfdinsmall, &line, &match, '\n') == -1) {
+		i = errno;
 		strerr_warn1("indisrvr: read stdin: ", &strerr_sys);
+		filewrt(3, "imdisrvr: read failed: %s\n", error_str(i));
 		return (-1);
 	}
 	if (verbose)
@@ -712,9 +547,9 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 	*ipaddr = *port = 0;
 	*backlog = -1;
 #ifdef HAVE_SSL
-	while ((c = getopt(argc, argv, "vi:p:b:n:")) != opteof)
+	while ((c = getopt(argc, argv, "vt:i:p:b:n:")) != opteof)
 #else
-	while ((c = getopt(argc, argv, "vi:p:b:")) != opteof)
+	while ((c = getopt(argc, argv, "vt:i:p:b:")) != opteof)
 #endif
 	{
 		switch (c)
@@ -728,6 +563,9 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 		case 'p':
 			*port = optarg;
 			break;
+		case 't':
+			scan_ulong(optarg, &dtimeout);
+			break;
 		case 'b':
 			scan_int(optarg, backlog);
 			break;
@@ -736,12 +574,15 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 			usessl = 1;
 			certfile = optarg;
 			break;
+		case 'c':
+			cafile = optarg;
+			break;
 #endif
 		default:
 #ifdef HAVE_SSL
-			strerr_warn1("usage: indisrvr -i ipaddr -p port -n certfile -b backlog", 0);
+			strerr_warn1("usage: indisrvr -i ipaddr -p port -n certfile -t timeout -b backlog", 0);
 #else
-			strerr_warn1("usage: indisrvr -i ipaddr -p port -b backlog", 0);
+			strerr_warn1("usage: indisrvr -i ipaddr -p port -t timeout -b backlog", 0);
 #endif
 			break;
 		}
@@ -749,9 +590,9 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 	if (!*ipaddr || !*port || *backlog == -1)
 	{
 #ifdef HAVE_SSL
-		strerr_warn1("usage: indisrvr -i ipaddr -p port -n certfile -b backlog", 0);
+		strerr_warn1("usage: indisrvr -i ipaddr -p port -n certfile -t timeout -b backlog", 0);
 #else
-		strerr_warn1("usage: indisrvr -i ipaddr -p port -b backlog", 0);
+		strerr_warn1("usage: indisrvr -i ipaddr -p port -t timeout -b backlog", 0);
 #endif
 		return (1);
 	}
@@ -802,7 +643,10 @@ SigHup(void)
 	filewrt(3, "%d: IndiServer received SIGHUP\n", getpid());
 	if (ctx)
 		SSL_CTX_free(ctx);
-	ctx = load_certificate(certfile);
+	if (ssl)
+		SSL_free(ssl);
+	ctx = NULL;
+	ssl = NULL;
 	(void) signal(SIGHUP, (void(*)()) SigHup);
 	errno = EINTR;
 	return;
