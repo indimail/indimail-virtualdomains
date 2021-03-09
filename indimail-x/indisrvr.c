@@ -1,6 +1,6 @@
 /*
  * $Log: indisrvr.c,v $
- * Revision 1.6  2021-03-03 13:56:23+05:30  Cprogrammer
+ * Revision 1.6  2021-03-09 15:33:58+05:30  Cprogrammer
  * renamed SSL_CIPHER to TLS_CIPHER_LIST
  *
  * Revision 1.5  2020-10-01 18:23:48+05:30  Cprogrammer
@@ -24,7 +24,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.6 2021-03-03 13:56:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.6 2021-03-09 15:33:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -460,7 +460,7 @@ main(argc, argv)
 				}
 				SSL_CTX_free(ctx);
 #ifndef CRYPTO_POLICY_NON_COMPLIANCE
-				if (!(cipher = env_get("SSL_CIPHER")))
+				if (!(cipher = env_get("TLS_CIPHER_LIST")))
 					cipher = "PROFILE=SYSTEM";
 				if (!SSL_set_cipher_list(ssl, cipher)) {
 					strerr_warn4("indisrver: unable to set ciphers: ", cipher, ": ",
