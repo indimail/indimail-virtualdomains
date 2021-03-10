@@ -18,6 +18,8 @@ Release 3.4 Start 14/02/2021
 - 09/03/2021
 11. tls.c, tls.h - refactored tls code
 12. auth_admin.c, indisrvr.c: use functions from tls.c
+- 10/03/2021
+13. tls.c: use set_essential_fd() to avoid deadlock
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020

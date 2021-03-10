@@ -1,5 +1,8 @@
 /*
  * $Log: tls.h,v $
+ * Revision 1.6  2021-03-10 19:46:32+05:30  Cprogrammer
+ * added proto for set_essential_fd()
+ *
  * Revision 1.5  2021-03-09 19:59:12+05:30  Cprogrammer
  * refactored tls code
  *
@@ -45,6 +48,7 @@ ssize_t         ssl_timeoutread(long, int, int, SSL *, char *, size_t);
 ssize_t         ssl_timeoutwrite(long, int, int, SSL *, char *, size_t);
 int             ssl_timeoutrehandshake(long, int, int, SSL *);
 const char     *myssl_error_str();
+void            set_essential_fd(int);
 #endif
 
 #endif
