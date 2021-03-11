@@ -1,5 +1,8 @@
 /*
  * $Log: vpriv_insert.c,v $
+ * Revision 1.2  2021-03-11 10:36:45+05:30  Cprogrammer
+ * fixed SQL syntax error
+ *
  * Revision 1.1  2019-04-15 12:29:09+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpriv_insert.c,v 1.1 2019-04-15 12:29:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpriv_insert.c,v 1.2 2021-03-11 10:36:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -53,7 +56,7 @@ vpriv_insert(char *user, char *program, char *cmdargs)
 			!stralloc_cats(&SqlBuf, program) ||
 			!stralloc_catb(&SqlBuf, "\", \"", 4) ||
 			!stralloc_cats(&SqlBuf, cmdargs && *cmdargs ? cmdargs : "*") ||
-			!stralloc_append(&SqlBuf, "\"") ||
+			!stralloc_catb(&SqlBuf, "\")", 2) ||
 			!stralloc_0(&SqlBuf))
 		die_nomem();
 	if (mysql_query(&mysql[0], SqlBuf.s)) {
