@@ -238,8 +238,8 @@ vrenamedomain_SOURCES = vrenamedomain.c
 vrenamedomain_LDADD = libindimail.la $(LIB_QMAIL)
 vrenamedomain_DEPENDENCIES = libindimail.la
 
-vmoddomain_SOURCES=vmoddomain.c
-vmoddomain_LDADD= libindimail.la
+vmoddomain_SOURCES = vmoddomain.c
+vmoddomain_LDADD = libindimail.la $(LIB_QMAIL)
 vmoddomain_DEPENDENCIES = libindimail.la
 
 vadduser_SOURCES = vadduser.c
@@ -311,15 +311,15 @@ vdelivermail_SOURCES = vdelivermail.c
 vdelivermail_LDADD = deliver_mail.lo qmail_remote.lo udpopen.lo libindimail.la $(LIB_QMAIL)
 vdelivermail_DEPENDENCIES = deliver_mail.lo qmail_remote.lo udpopen.lo libindimail.la
 
-vfilter_SOURCES=vfilter.c
-vfilter_LDADD= storeHeader.lo parseAddress.lo deliver_mail.lo \
+vfilter_SOURCES = vfilter.c
+vfilter_LDADD = storeHeader.lo parseAddress.lo deliver_mail.lo \
 	addressToken.lo getAddressBook.lo udpopen.lo \
 	eps-1.2/libeps.la libindimail.la $(LIB_QMAIL)
 vfilter_DEPENDENCIES=storeHeader.lo parseAddress.lo deliver_mail.lo \
 	addressToken.lo getAddressBook.lo udpopen.lo libindimail.la
 
-vcfilter_SOURCES=vcfilter.c
-vcfilter_LDADD= libindimail.la
+vcfilter_SOURCES = vcfilter.c
+vcfilter_LDADD = libindimail.la $(LIB_QMAIL)
 vcfilter_DEPENDENCIES = libindimail.la
 
 ismaildup_SOURCES = ismaildup.c
@@ -425,12 +425,11 @@ vpriv_SOURCES = vpriv.c
 vpriv_LDADD = libindimail.la $(LIB_QMAIL)
 vpriv_DEPENDENCIES = libindimail.la
 
-crc_SOURCES=crc.c
+crc_SOURCES = crc.c
 crc_LDADD = libindimail.la $(LIB_QMAIL)
 crc_DEPENDENCIES = libindimail.la
 
-crcdiff_SOURCES=crcdiff.c
-crcdiff_LDADD=
+crcdiff_SOURCES = crcdiff.c
 
 incrypt_SOURCES = incrypt.c
 incrypt_LDADD = libindimail.la @LIB_CRYPT@ $(LIB_QMAIL)
@@ -497,8 +496,8 @@ osh_SOURCES = osh.c
 osh_LDADD = @LIB_CURSES@ @LIB_TERMCAP@ exp.lo handlers.lo @LIB_QMAIL@
 osh_DEPENDENCIES = exp.lo handlers.lo
 
-updatefile_SOURCES=updatefile.c
-updatefile_LDADD= libindimail.la
+updatefile_SOURCES = updatefile.c
+updatefile_LDADD = libindimail.la $(LIB_QMAIL)
 updatefile_DEPENDENCIES = libindimail.la
 
 addaliasdomain.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h r_mkdir.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
