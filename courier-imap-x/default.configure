@@ -73,6 +73,6 @@ esac
 	--without-authcustom \
 	--without-authgeneric \
 	$extra
-if [ ! -f depcomp ] ; then
+if [ ! -f depcomp -a -f libs/unicode/depcomp ] ; then
 	cp libs/unicode/depcomp .
 fi
