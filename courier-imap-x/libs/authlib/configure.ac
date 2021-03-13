@@ -53,13 +53,18 @@ case "$host" in
 	;;
 *-*-linux*)
 	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -fPIC -Wall"
-	CFLAGS="$CFLAGS -Dlint -fPIC -I.. -I${srcdir}/../md5 -I${srcdir}/../sha1"
+	CFLAGS="$CFLAGS -Dlint -fPIC -I.."
 	LDFLAGS="$LDFLAGS -pie"
 	;;
 *-*-darwin*)
-	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include"
+	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I${srcdir}/../md5 -I${srcdir}/../sha1"
 	CXXFLAGS="$CXXFLAGS -DDARWIN -I/opt/local/include"
-	LDFLAGS="$LDFLAGS -L/opt/local/lib"
+	if test -d /opt/local/lib
+	then
+		LDFLAGS="$LDFLAGS -L/opt/local/lib"
+	else
+		LDFLAGS="$LDFLAGS -L/usr/local/lib"
+	fi
 	;;
 *-*-freebsd*)
 	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include"
