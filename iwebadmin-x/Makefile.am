@@ -23,7 +23,7 @@ COMMONSOURCES=iwebadmin.c alias.c autorespond.c forward.c mailinglist.c \
 		  common.c iwebadmin.h iwebadminx.h
 
 iwebadmin_SOURCES=$(COMMONSOURCES) 
-iwebadmin_LDADD=-lindimail $(LIB_QMAIL) $(LIB_CRYPT) $(LIB_SSL)
+iwebadmin_LDADD=-lindimail $(LIB_QMAIL) $(LIB_CRYPT)
 iwebadmin_LDFLAGS = $(AM_LDFLAGS)
 iwebadmin_CFLAGS = $(AM_CFLAGS)
 
