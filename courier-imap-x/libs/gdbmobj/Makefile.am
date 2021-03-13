@@ -26,7 +26,7 @@ else
 noinst_SCRIPTS=notfound
 
 notfound:
-	@exit 0
+	exit 0
 
 endif
 

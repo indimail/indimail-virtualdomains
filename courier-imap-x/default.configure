@@ -1,6 +1,6 @@
 #!/bin/sh
 if [ -d libs/imap ] ; then
-	mkdir m4
+	mkdir -p m4
 else
 	echo "Invalid working direcotry" 1>&2
 	exit 1
@@ -30,34 +30,34 @@ case "$SYSTEM" in
 	FreeBSD)
 	prefix=/usr/local
 	mandir=/usr/local/man
-	if [ -d /opt/local/lib ] ; then
-		libdir=/opt/local/lib
-	elif [ -d /usr/local/lib ] ; then
+	if [ -d /usr/local/lib ] ; then
+		libdir=/usr/local/lib
+	elif [ -d /opt/local/lib ] ; then
 		libdir=/opt/local/lib
 	else
 		libdir=/usr/lib
 	fi
 	sysconfdir=/usr/local/etc/indimail
-	export CPPFLAGS="-I/usr/local/include"
+	export CPPFLAGS="$CPPFLAGS -I/usr/local/include"
 	export CXXFLAGS="-I/usr/local/include"
-	export LDFLAGS="-L$libdir"
+	export LDFLAGS="$LDFLAGS -L$libdir"
 	extra="--with-authpwd --with-authpam"
 	;;
 	Darwin)
 	prefix=/usr/local
 	mandir=/usr/local/share/man
-	if [ -d /opt/local/lib ] ; then
-		libdir=/opt/local/lib
-	elif [ -d /usr/local/lib ] ; then
+	if [ -d /usr/local/lib ] ; then
+		libdir=/usr/local/lib
+	elif [ -d /opt/local/lib ] ; then
 		libdir=/opt/local/lib
 	else
 		libdir=/usr/lib
 	fi
 	sysconfdir=/usr/local/etc/indimail
 	export RANLIB="ranlib -c"
-	export CPPFLAGS="-I/opt/local/include"
+	export CPPFLAGS="$CPPFLAGS -I/opt/local/include"
 	export CXXFLAGS="-I/opt/local/include"
-	export LDFLAGS="-L$libdir"
+	export LDFLAGS="$LDFLAGS -L$libdir"
 	extra="--with-waitfunc=wait3 --with-authpam"
 	;;
 	Linux)
