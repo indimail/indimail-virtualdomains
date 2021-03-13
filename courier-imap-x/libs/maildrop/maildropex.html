@@ -1,0 +1,182 @@
+<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>maildropex</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets Vsnapshot"/><link rel="home" href="#maildropex" title="maildropex"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+
+Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
+information.
+
+--></head><body><div class="refentry"><a id="maildropex" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>maildropex — maildrop filtering language examples</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="informalexample"><p>
+<code class="filename">$HOME/.mailfilter</code>,
+<code class="filename">$HOME/.mailfilters/*</code>
+</p></div></div><div class="refsect1"><a id="maildropex_description" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+If <code class="filename">$HOME/.mailfilter</code> exists, filtering instructions in
+this file will be carried out prior to delivering the message. The filtering
+instructions may
+instruct <span class="command"><strong>maildrop</strong></span> to discard the message, save the
+message in a
+different mailbox, or forward the message to another address. If
+<code class="filename">$HOME/.mailfilter</code> does not exist,
+or does not provide explicit delivery
+instructions, <span class="command"><strong>maildrop</strong></span> delivers the message to the
+user's system mailbox.</p><p>
+The files in <code class="filename">$HOME/.mailfilters</code>
+are used when <span class="command"><strong>maildrop</strong></span> is
+invoked in embedded mode.</p></div><div class="refsect1"><a id="maildropex_examples" shape="rect"> </a><h2>EXAMPLES</h2><p>
+Take all mail that's sent to the 'auto' mailing list, and save it in
+<code class="filename">Mail/auto</code>. The 'auto' mailing list software adds a
+"<code class="literal">Delivered-To: auto@domain.com</code>" header to all messages:
+    </p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+if (/^Delivered-To: *auto@domain\.com$/)
+    to Mail/auto
+</pre></div></blockquote></div><p>
+After the <span class="command"><strong>to</strong></span> command delivers the message,
+<span class="command"><strong>maildrop</strong></span> automatically
+stops filtering and terminates without executing the subsequent instructions
+in the
+<code class="systemitem">filter file</code>.</p><p>
+Take all mail from <code class="email">&lt;<a class="email" href="mailto:boss@domain.com" shape="rect">boss@domain.com</a>&gt;</code> about the current project
+status, save it in <code class="filename">Mail/project</code>, then forward a copy to
+John:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+if (/^From: *boss@domain\.com/ \ 
+    &amp;&amp; /^Subject:.*[:wbreak:]project status[:wbreak:]/)
+{
+    cc "!john"
+    to Mail/project
+}
+</pre></div></blockquote></div><p>
+Note that it is necessary to use a backslash in order to continue the
+<span class="command"><strong>if</strong></span> statement on the next line.</p><p>
+Keep copies of the last 50 messages that you received in the
+<code class="filename">maildir</code>
+directory 'backup'. NOTE: 'backup' must be a <code class="filename">maildir</code>
+directory, not a
+mailbox. You can create a <code class="filename">maildir</code> using the
+<span class="command"><strong>maildirmake</strong></span>
+command.</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+cc backup
+`cd backup/new &amp;&amp; rm -f dummy \`ls -t | sed -e 1,50d\``
+</pre></div></blockquote></div><p>
+Put this at the beginning of your filter file, before any other filtering
+instructions. This is a good idea to have when you are learning
+<span class="command"><strong>maildrop</strong></span>. If you make a mistake and accidentally delete a
+message, you
+can recover it from the backup/new subdirectory.</p><p>
+Save messages that are at least 100 lines long (approximately) into
+<code class="filename">Mail/IN.Large:</code>:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+     if ( $LINES &gt; 100 )
+        to Mail/IN.Large
+</pre></div></blockquote></div><p>
+Send messages from the auto mailing list to the program 'archive', using a
+lock file to make sure that only one instance of the archive program will be
+running at the same time:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+     if (/^Delivered-To: *auto@domain\.com$/)
+        dotlock "auto.lock" {
+
+               to "|archive"
+        }
+</pre></div></blockquote></div><p>
+Check if the <code class="literal">Message-ID:</code> header in the message is identical
+to the same header
+that was recently seen. Discard the message if it is, otherwise continue to
+filter the message:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+`reformail -D 8000 duplicate.cache`
+if ( $RETURNCODE == 0 )
+    exit
+</pre></div></blockquote></div><p>
+      The <a class="ulink" href="reformail.html" target="_top" shape="rect">reformail</a> command maintains a
+      list of
+      recently seen Message-IDs in the file
+      <code class="filename">duplicate.cache</code>.
+    </p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	Unlike a similar feature in the <span class="command"><strong>formail</strong></span> command,
+	<a class="ulink" href="reformail.html" target="_top" shape="rect">reformail</a> takes care of locking
+	the file, so it's not necessary to implement your own locking
+	mechanism for this option.
+      </p></div><p>
+Here's a more complicated example. This fragment is intended to go right
+after the message has been filtered according to your regular rules, and just
+before the message should be saved in your mailbox:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+cc $DEFAULT
+xfilter "reformail -r -t"
+/^To:.*/
+getaddr($MATCH) =~ /^.*/;
+
+MATCH=tolower($MATCH)
+flock "vacation.lock" {
+        `fgrep -iqx "$MATCH" vacation.lst 2&gt;/dev/null || { \
+                  echo "$MATCH" &gt;&gt;vacation.lst ; \
+                  exit 1 ; \
+              } `
+}
+if ( $RETURNCODE == 0 )
+   exit
+to "| ( cat - ; echo ''; cat vacation.msg) | $SENDMAIL"
+</pre></div></blockquote></div><p>
+This code maintains a list of everyone who sent you mail in the file called
+<code class="filename">vacation.lst</code>.
+When a message is received from anyone that is not already on
+the list, the address is added to the list, and the contents of the file
+<code class="filename">vacation.msg</code> are mailed back to the sender.
+This is intended to reply notify
+people that you will not be answering mail for a short period of time.</p><p>
+The first statement saves the original message in your regular mailbox.
+Then,
+<a class="ulink" href="maildropfilter.html#xfilter" target="_top" shape="rect"><span class="command"><strong>xfilter</strong></span></a>
+is used to generate an
+autoreply header to the sender. The <code class="literal">To:</code> header in the
+autoreply - which was
+the sender of the original message - is extracted, and the <a class="ulink" href="maildropfilter.html#getaddr" target="_top" shape="rect"><span class="command"><strong>getaddr</strong></span></a>
+function is used to strip the
+person's name, leaving the address only. The file 
+<code class="filename">vacation.lst</code> is checked,
+using a lock file to guarantee atomic access and update (overkill, probably).
+Note that the backslashes are required.</p><p>
+If the address is already in the file, <span class="command"><strong>maildrop</strong></span> exits,
+otherwise the
+contents of <code class="filename">vacation.msg</code> are appended to the autoreply
+header, and mailed out.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+An easier to make a vacation script is with
+<a class="ulink" href="mailbot.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">mailbot</span>(1)</span></a>.</p></div><p>
+Here's a version of the vacation script that uses a GDBM database file
+instead. The difference between this script and the previous script is that
+the previous script will send a vacation message to a given E-mail address
+only once. The following script will store the time that the vacation message
+was sent in the GDBM file. If it's been at least a week since the vacation
+message has been sent to the given address, another vacation message will be
+sent.</p><p>
+Even though a GDBM database file is used, locking is still necessary
+because the GDBM library does not allow more than one process to open the same
+database file for writing:</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+cc $DEFAULT
+xfilter "reformail -r -t"
+/^To:.*/
+getaddr($MATCH) =~ /^.*/;
+MATCH=tolower($MATCH)
+flock "vacation.lock" {
+    current_time=time;
+    if (gdbmopen("vacation.dat", "C") == 0)
+    {
+       if ( (prev_time=gdbmfetch($MATCH)) ne "" &amp;&amp; \
+             $prev_time &gt;= $current_time - 60 * 60 * 24 * 7)
+       {
+           exit
+       }
+       gdbmstore($MATCH, $current_time)
+       gdbmclose
+    }
+}
+to "| ( cat - ; echo ''; cat vacation.msg) | $SENDMAIL"
+</pre></div></blockquote></div><p>
+This script requires that <span class="command"><strong>maildrop</strong></span> must be compiled with
+GDBM
+support enabled, which is done by default if GDBM libraries are present.</p><p>
+After you return from vacation, you can use a simple Perl script to obtain
+a list of everyone who sent you mail (of course, that can also be determined
+by examining your mailbox).</p></div><div class="refsect1"><a id="maildropex_see_also" shape="rect"> </a><h2>SEE ALSO</h2><p>
+<a class="ulink" href="maildrop.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildrop</span>(1)</span></a>,
+<a class="ulink" href="maildropfilter.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildropfilter</span>(7)</span></a>,
+<a class="ulink" href="reformail.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">reformail</span>(1)</span></a>,
+<a class="ulink" href="mailbot.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">mailbot</span>(1)</span></a>,
+<span class="citerefentry"><span class="refentrytitle">egrep</span>(1)</span>,
+<span class="citerefentry"><span class="refentrytitle">grep</span>(1)</span>,
+<span class="citerefentry"><span class="refentrytitle">sendmail</span>(8)</span>.
+</p></div></div></body></html>
