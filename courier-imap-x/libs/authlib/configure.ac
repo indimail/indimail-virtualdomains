@@ -67,7 +67,7 @@ case "$host" in
 	fi
 	;;
 *-*-freebsd*)
-	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include"
+	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I${srcdir}/../md5 -I${srcdir}/../sha1"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
 	;;
 esac
