@@ -378,7 +378,7 @@ mgmtpass_LDADD = libindimail.la
 mgmtpass_DEPENDENCIES = libindimail.la
 
 authindi_SOURCES = authindi.c
-authindi_LDADD = libindimail.la
+authindi_LDADD = libindimail.la $(LIB_QMAIL)
 authindi_DEPENDENCIES = libindimail.la
 
 vchkpass_SOURCES = vchkpass.c
