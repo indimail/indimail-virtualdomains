@@ -85,6 +85,9 @@ If you need MariaDB for Mac OSX, you can try MacPorts or Brew.
 
 ## Compile libqmail
 
+[![Ubuntu, Mac OSX](https://github.com/mbhangui/libqmail/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/c-cpp.yml)
+[![FreeBSD](https://github.com/mbhangui/libqmail/actions/workflows/freebsd.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/freebsd.yml)
+
 ```
 $ cd /usr/local/src
 $ git clone https://github.com/mbhangui/libqmail.git
@@ -233,6 +236,9 @@ $ sudo make install-strip
 
 ## Build indimail-mta-x
 
+[![Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/c-cpp.yml)
+[![FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/freebsd.yml)
+
 To configure the build for indimail-mta, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared, conf-libexec and conf-servicedir. Defaults are given in the table below. You can also use the script default.configure to set the below values.
 
 **Linux**
@@ -280,6 +286,9 @@ Note: for Darwin
 ```
 
 ## Build indimail
+
+[![Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/c-cpp.yml)
+[![FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/freebsd.yml)
 
 Rquired for Virtual Domains function.
 
