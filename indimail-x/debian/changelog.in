@@ -13,3 +13,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * tls.c, tls.h - refactored tls code
   * auth_admin.c, indisrvr.c: use functions from tls.c
   * tls.c: use set_essential_fd() to avoid deadlock
+  * vpriv_insert.c: fixed SQL syntax error
