@@ -1,0 +1,35 @@
+name: courier-imap Ubuntu, Mac OSX CI
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - indimail-x/courier-imap-x/*
+      - .github/workflows/courier-imap-c-cpp.yml
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: ${{ matrix.host }}-${{ matrix.config.name }}
+    runs-on: ${{ matrix.host }}
+    strategy:
+      fail-fast: false
+      matrix:
+        host: [ubuntu-latest, macos-latest]
+    
+    steps:
+    - name: extra_packages
+      run: |
+        if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig libidn2 pcre db48; fi
+        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libpam0g-dev libpcre3-dev libgdbm-dev libdb-dev libgcrypt20-dev libgamin-dev libssl-dev libidn11-dev; fi
+      env:
+        OS: ${{ matrix.host }}
+
+    - name: checkout_main
+      uses: actions/checkout@v2
+      
+    - name: build courier-imap
+      run: |
+        cd courier-imap-x; ./default.configure; make
