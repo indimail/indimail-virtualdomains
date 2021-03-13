@@ -1,6 +1,12 @@
 #!/bin/sh
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in -o ! -f depcomp ] ; then
 	autoreconf -fiv
+	automake -acf
+	if [ ! -f depcomp -a ! -f libs/unicode/depcomp ] ; then
+		cd libs/unicode
+		automake -acf
+		cd ../..
+	fi
 	if [ ! -f depcomp -a -f libs/unicode/depcomp ] ; then
 		cp libs/unicode/depcomp .
 	elif [ -f depcomp -a ! -f libs/unicode/depcomp ] ; then
