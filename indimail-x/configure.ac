@@ -1357,14 +1357,5 @@ AC_CHECK_LIB(nsl, gethostbyname,echo -lnsl >> socket.lib,,)
 ;;
 esac
 
-case $ENABLE_ENTERPRISE in
-1*|y*|Y*)
-echo "      Enterprise   = ON  --enable-enterprise-support=y"
-;;
-*)
-echo "      Enterprise   = OFF --enable-enterprise-support=n default"
-;;
-esac
-
 echo "-------------------------------------------------------------"
 ) | tee indimail.settings
