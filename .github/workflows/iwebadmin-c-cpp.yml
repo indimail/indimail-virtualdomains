@@ -37,8 +37,10 @@ jobs:
       with:
         repository: mbhangui/libqmail
         path: libqmail
-      
+
     - name: install_qmail
       run: cd libqmail;env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; sudo make install-strip
     - name: build iwebadmin
-      run: cd main/iwebadmin-x; ./default.configure; make
+      run: |
+        cd main/indimail-x; env CFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make
+        cd ../iwebadmin-x; ./default.configure; make
