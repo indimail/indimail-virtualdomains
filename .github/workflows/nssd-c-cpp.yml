@@ -1,0 +1,33 @@
+name: nssd Ubuntu, Mac OSX CI
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '**/nssd-x/**'
+      - .github/workflows/nssd-c-cpp.yml
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: ${{ matrix.host }}-${{ matrix.config.name }}
+    runs-on: ${{ matrix.host }}
+    strategy:
+      fail-fast: false
+      matrix:
+        host: [ubuntu-latest]
+    
+    steps:
+    - name: extra_packages
+      run: |
+        sudo apt-get install gcc g++ automake autoconf libtool libmysqlclient-dev
+      env:
+        OS: ${{ matrix.host }}
+
+    - name: checkout_main
+      uses: actions/checkout@v2
+      
+    - name: build nssd
+      run: cd nssd-x; ./default.configure; make
