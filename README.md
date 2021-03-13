@@ -287,10 +287,10 @@ Note: for Darwin
 
 ## Build indimail
 
-[![Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/c-cpp.yml)
-[![FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/freebsd.yml)
+[![indimail Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-c-cpp.yml)
+[![indimail FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-freebsd.yml)
 
-Rquired for Virtual Domains function.
+Rquired for providng multiple virtual domains on a single host.
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-x
@@ -365,6 +365,15 @@ $ sudo make install-strip
 ```
 
 (check version in indimail-virtualdomains/pam-multi-x/conf-version)
+
+### indimail-utils
+
+Indimail-utils stands for a collection of package having altermime, ripmime, fortune, mpack and flash
+
+[![indimail-utils Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml)
+[![indimail-utils FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-freebsd.yml)
+
+The steps for compiling and bulding each one of these components is below
 
 ### Build altermime
 
