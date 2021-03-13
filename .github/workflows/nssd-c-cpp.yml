@@ -1,4 +1,4 @@
-name: nssd Ubuntu, Mac OSX CI
+name: nssd Ubuntu CI
 
 on:
   push:
