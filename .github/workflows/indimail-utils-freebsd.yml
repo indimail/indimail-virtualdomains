@@ -1,0 +1,34 @@
+name: FreeBSD
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - indimail-x/*
+      - .github/workflows/indimail-utils-freebsd.yml
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  testfreebsd:
+    runs-on: macos-latest
+    name: FreeBSD
+    env:
+      MYTOKEN : ${{ secrets.MYTOKEN }}
+      MYTOKEN2: "value2"
+    steps:
+    - uses: actions/checkout@v2
+    - name: install indimail-utils
+      id: FreeBSD
+      uses: vmactions/freebsd-vm@v0.1.2
+      with:
+        envs: 'MYTOKEN MYTOKEN2'
+        usesh: true
+        prepare: pkg install -y curl automake autoconf libtool pkgconf
+        run: |
+          cd altermime-x; ./default.configure; make; make install
+          cd ../ripmime-x; ./default.configure; make; make install
+          cd ../fortune-x; ./default.configure; make; make install
+          cd ../mpack-x; ./default.configure; make; make install
+          cd ../flash-x; ./default.configure; make; make install
