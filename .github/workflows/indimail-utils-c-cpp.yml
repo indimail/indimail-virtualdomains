@@ -1,11 +1,15 @@
-name: Ubuntu, Mac OSX CI
+name: indimail-utils Ubuntu, Mac OSX CI
 
 on:
   push:
     branches:
       - master
     paths:
-      - indimail-x/*
+      - indimail-x/altermime-x/*
+      - indimail-x/ripmime-x/*
+      - indimail-x/fortune-x/*
+      - indimail-x/mpack-x/*
+      - indimail-x/flash-x/*
       - .github/workflows/indimail-utils-c-cpp.yml
   pull_request:
     branches: [ master ]
@@ -30,7 +34,7 @@ jobs:
     - name: checkout_main
       uses: actions/checkout@v2
       
-    - name: install_indimail-utils
+    - name: build indimail-utils
       run: |
         cd altermime-x; ./default.configure; make
         cd ../ripmime-x; ./default.configure; make

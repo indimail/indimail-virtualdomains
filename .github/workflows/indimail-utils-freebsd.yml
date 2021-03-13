@@ -1,11 +1,15 @@
-name: FreeBSD
+name: indimail-utils FreeBSD
 
 on:
   push:
     branches:
       - master
     paths:
-      - indimail-x/*
+      - indimail-x/altermime-x/*
+      - indimail-x/ripmime-x/*
+      - indimail-x/fortune-x/*
+      - indimail-x/mpack-x/*
+      - indimail-x/flash-x/*
       - .github/workflows/indimail-utils-freebsd.yml
   pull_request:
     branches: [ master ]
@@ -19,7 +23,7 @@ jobs:
       MYTOKEN2: "value2"
     steps:
     - uses: actions/checkout@v2
-    - name: install indimail-utils
+    - name: build indimail-utils
       id: FreeBSD
       uses: vmactions/freebsd-vm@v0.1.2
       with:

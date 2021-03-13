@@ -1,4 +1,4 @@
-name: FreeBSD
+name: indimail FreeBSD
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
       with:
         repository: mbhangui/libqmail
         path: libqmail
-    - name: install indimail
+    - name: build indimail
       id: FreeBSD
       uses: vmactions/freebsd-vm@v0.1.2
       with:
