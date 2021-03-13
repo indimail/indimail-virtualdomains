@@ -294,7 +294,7 @@ vsmtp_DEPENDENCIES = libindimail.la
 
 inlookup_SOURCES = inlookup.c
 inlookup_LDADD = ProcessInFifo.lo AliasInLookup.lo PwdInLookup.lo \
-	RelayInLookup.lo UserInLookup.lo VlimitInLookup.lo libindimail.la
+	RelayInLookup.lo UserInLookup.lo VlimitInLookup.lo libindimail.la $(LIB_QMAIL)
 inlookup_DEPENDENCIES = ProcessInFifo.lo AliasInLookup.lo PwdInLookup.lo RelayInLookup.lo \
 	UserInLookup.lo VlimitInLookup.lo libindimail.la
 
@@ -314,7 +314,7 @@ vdelivermail_DEPENDENCIES = deliver_mail.lo qmail_remote.lo udpopen.lo libindima
 vfilter_SOURCES=vfilter.c
 vfilter_LDADD= storeHeader.lo parseAddress.lo deliver_mail.lo \
 	addressToken.lo getAddressBook.lo udpopen.lo \
-	eps-1.2/libeps.la libindimail.la
+	eps-1.2/libeps.la libindimail.la $(LIB_QMAIL)
 vfilter_DEPENDENCIES=storeHeader.lo parseAddress.lo deliver_mail.lo \
 	addressToken.lo getAddressBook.lo udpopen.lo libindimail.la
 
@@ -323,7 +323,7 @@ vcfilter_LDADD= libindimail.la
 vcfilter_DEPENDENCIES = libindimail.la
 
 ismaildup_SOURCES = ismaildup.c
-ismaildup_LDADD = libindimail.la $(LIB_QMAIL)
+ismaildup_LDADD = libindimail.la $(LIB_QMAIL) @LIB_SSL@
 ismaildup_CFLAGS = -DMAIN
 ismaildup_DEPENDENCIES = libindimail.la
 
@@ -345,7 +345,7 @@ updaterules_DEPENDENCIES = libindimail.la
 
 inquerytest_SOURCES = inquerytest.c
 inquerytest_LDADD = ProcessInFifo.lo  AliasInLookup.lo PwdInLookup.lo \
-	RelayInLookup.lo UserInLookup.lo VlimitInLookup.lo libindimail.la -ldl
+	RelayInLookup.lo UserInLookup.lo VlimitInLookup.lo libindimail.la $(LIB_QMAIL) -ldl
 inquerytest_DEPENDENCIES = ProcessInFifo.lo  AliasInLookup.lo PwdInLookup.lo RelayInLookup.lo \
 	UserInLookup.lo VlimitInLookup.lo libindimail.la
 
@@ -446,13 +446,13 @@ resetquota_DEPENDENCIES = libindimail.la
 
 proxyimap_SOURCES = proxyimap.c
 proxyimap_LDADD = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
-	monkey.lo sockwrite.lo libindimail.la
+	monkey.lo sockwrite.lo libindimail.la $(LIB_QMAIL) @LIB_SSL@
 proxyimap_DEPENDENCIES = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
 	monkey.lo sockwrite.lo libindimail.la
 
 proxypop3_SOURCES = proxypop3.c
 proxypop3_LDADD = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
-	monkey.lo sockwrite.lo libindimail.la
+	monkey.lo sockwrite.lo libindimail.la $(LIB_QMAIL) @LIB_SSL@
 proxypop3_DEPENDENCIES = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
 	monkey.lo sockwrite.lo libindimail.la
 
@@ -465,22 +465,22 @@ vbulletin_LDADD = bulletin.lo libindimail.la $(LIB_QMAIL)
 vbulletin_DEPENDENCIES = bulletin.lo libindimail.la
 
 adminclient_SOURCES = adminclient.c
-adminclient_LDADD = tls.lo auth_admin.lo adminCmmd.lo libindimail.la $(LIB_QMAIL)
+adminclient_LDADD = tls.lo auth_admin.lo adminCmmd.lo libindimail.la $(LIB_QMAIL) @LIB_SSL@
 adminclient_DEPENDENCIES = tls.lo auth_admin.lo adminCmmd.lo libindimail.la
 
 indisrvr_SOURCES = indisrvr.c
-indisrvr_LDADD = checkPerm.lo tls.lo libindimail.la @LIB_SOCKET@ $(LIB_QMAIL)
+indisrvr_LDADD = checkPerm.lo tls.lo libindimail.la @LIB_SOCKET@ $(LIB_QMAIL) @LIB_SSL@
 indisrvr_DEPENDENCIES = tls.lo checkPerm.lo libindimail.la
 
 vdeloldusers_SOURCES = vdeloldusers.c
 vdeloldusers_LDADD = delunreadmails.lo getlastauth.lo \
-	trashpurge.lo getindimail.lo libindimail.la
+	trashpurge.lo getindimail.lo libindimail.la $(LIB_QMAIL)
 vdeloldusers_DEPENDENCIES = delunreadmails.lo getlastauth.lo \
 	trashpurge.lo getindimail.lo libindimail.la
 
 vfstab_SOURCES = vfstab.c
 vfstab_LDADD = vfstab_select.lo vfstab_insert.lo vfstab_update.lo \
-	vfstab_delete.lo vfstabNew.lo vfstab_status.lo getFreeFS.lo libindimail.la
+	vfstab_delete.lo vfstabNew.lo vfstab_status.lo getFreeFS.lo libindimail.la $(LIB_QMAIL)
 vfstab_DEPENDENCIES = vfstab_select.lo vfstab_insert.lo vfstab_update.lo \
 	vfstab_delete.lo vfstabNew.lo vfstab_status.lo getFreeFS.lo \
 	libindimail.la
