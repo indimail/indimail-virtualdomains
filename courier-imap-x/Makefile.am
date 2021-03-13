@@ -30,10 +30,10 @@ endif
 
 htmldir=$(docdir)/html
 MAILDROPHTML=lockmail.html maildiracl.html maildirkw.html \
-	maildirmake.html maildropex.html \
+	maildirmake.html \
 	maildir.html \
-	maildropfilter.html maildropgdbm.html maildrop.html mailbot.html \
-	makemime.html reformail.html reformime.html
+	maildropfilter.html maildrop.html \
+	makemime.html reformime.html
 
 html_DATA=$(MAILDROPHTML) manpage.css
 
@@ -198,18 +198,10 @@ maildirkw.html: libs/maildir/maildirkw.html
 	cp -f $(srcdir)/libs/maildir/maildirkw.html maildirkw.html
 maildirmake.html: libs/maildir/maildirmake.html
 	cp -f $(srcdir)/libs/maildir/maildirmake.html maildirmake.html
-mailbot.html: libs/maildrop/mailbot.html
-	cp -f $(srcdir)/libs/maildrop/mailbot.html mailbot.html
 maildrop.html: libs/maildrop/maildrop.html
 	cp -f $(srcdir)/libs/maildrop/maildrop.html maildrop.html
-reformail.html: libs/maildrop/reformail.html
-	cp -f $(srcdir)/libs/maildrop/reformail.html reformail.html
-maildropex.html: libs/maildrop/maildropex.html
-	cp -f $(srcdir)/libs/maildrop/maildropex.html maildropex.html
 maildropfilter.html: libs/maildrop/maildropfilter.html
 	cp -f $(srcdir)/libs/maildrop/maildropfilter.html maildropfilter.html
-maildropgdbm.html: libs/maildrop/maildropgdbm.html
-	cp -f $(srcdir)/libs/maildrop/maildropgdbm.html maildropgdbm.html
 makemime.html: libs/rfc2045/makemime.html
 	cp -f $(srcdir)/libs/rfc2045/makemime.html makemime.html
 reformime.html: libs/rfc2045/reformime.html
@@ -268,6 +260,8 @@ id=$(dollar)Id
 WWW=$$HOME/www/www.courier-mta.org
 
 htmldoc: INSTALL.html libs/imap/README.html $(MAILDROPHTML) libs/maildrop/maildroptips.html \
+	libs/maildrop/mailbot.html libs/maildrop/maildropex.html libs/maildrop/maildropgdbm.html \
+	libs/maildrop/reformail.html \
 	libs/maildir/README.maildirquota.html libs/maildir/README.sharedfolders.html \
 	libs/maildir/README.imapkeywords.html libs/imap/BUGS.html libs/imap/README.proxy.html libs/imap/README.html
 	for f in $^; do xsltproc --nonet $(srcdir)/imap-format.xsl $$f | perl -ne 's~\$(id):.*\$$~\$(id):'"$$h"'\$$~; print' >$(WWW)/imap/`basename $$f`; done
