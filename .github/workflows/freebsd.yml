@@ -6,7 +6,7 @@ on:
       - master
     paths:
       - indimail-x/*
-      - indimail-x/.github/workflows/freebsd.yml
+      - .github/workflows/freebsd.yml
   pull_request:
     branches: [ master ]
 
