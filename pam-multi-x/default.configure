@@ -25,10 +25,13 @@ case "$SYSTEM" in
 	prefix=/usr
 	mandir=$prefix/share/man
 	sysconfdir=/etc/indimail
+	arch=$(uname -m)
 	if [ -d /lib/security ] ; then
 		moduledir=/lib/security
 	elif [ -d /lib64/security ] ; then
 		moduledir=/lib64/security
+	elif [ -d $prefix/lib/$arch-linux-gnu ] ; then
+		moduledir=$prefix/lib/$arch-linux-gnu/security
 	fi
 	pam_confdir=/etc/pam.d
 	;;
