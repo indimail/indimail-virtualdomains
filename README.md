@@ -13,6 +13,28 @@ Messaging Platform based on [indimail-mta](https://github.com/mbhangui/indimail-
 * Look at [INSTALL-MINI](.github/INSTALL-MINI.md) for instructions on setting up an MINI Indimail Installation which uses QMQP protocol. indimail-mini is part of the indimail-mta package. You can use this from diskless clients, small devices, [SBCs](https://en.wikipedia.org/wiki/Single-board_computer) like the Raspberry PI, to push mails to any server running IndiMail or indimail-mta.
 * Look at [Docker/Podman](https://github.com/mbhangui/docker/blob/master/README.md) for instructions on using docker / podman containers for indimail. The big advantage of using a docker / podman image is you can save your configuration with the `docker commit ..` or `podman commit` to checkpoint your entire build and deploy the exact configuration on multiple hosts.
 
+**Complation Status (from Github Actions)**
+
+[![indimail ubuntu, mac osx ci](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-c-cpp.yml)
+[![indimail freebsd ci](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-freebsd.yml)
+[![courier-imap Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-c-cpp.yml)
+[![courier-imap FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-freebsd.yml)
+[![bogofilter Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-c-cpp.yml)
+[![bogofilter FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-freebsd.yml)
+[![indimail-utils Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml)
+[![indimail-utils FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-freebsd.yml)
+[![pam-multi Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/pam-multi-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/pam-multi-c-cpp.yml)
+[![pam-multi FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/pam-multi-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/pam-multi-freebsd.yml)
+[![nssd Ubuntu CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/nssd-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/nssd-c-cpp.yml)
+[![nssd FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/nssd-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/nssd-freebsd.yml)
+[![iwebadmin Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-c-cpp.yml)
+[![iwebadmin FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-freebsd.yml)
+
+[![indimail-mta Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml)
+[![indimail-mta FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-freebsd.yml)
+[![libqmail Ubuntu, Mac OSX](https://github.com/mbhangui/libqmail/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/c-cpp.yml)
+[![libqmail FreeBSD](https://github.com/mbhangui/libqmail/actions/workflows/freebsd.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/freebsd.yml)
+
 This document contains instructions for building indimail-mta from source.
 
 # Source Compiling/Linking
@@ -84,9 +106,6 @@ FreeBSD - Install the following using pkg
 If you need MariaDB for Mac OSX, you can try MacPorts or Brew.
 
 ## Compile libqmail
-
-[![Ubuntu, Mac OSX](https://github.com/mbhangui/libqmail/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/c-cpp.yml)
-[![FreeBSD](https://github.com/mbhangui/libqmail/actions/workflows/freebsd.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/freebsd.yml)
 
 ```
 $ cd /usr/local/src
@@ -215,6 +234,12 @@ $ make
 $ sudo make install-strip
 ```
 
+NOTE: for FreeBSD
+
+```
+# pkg install db5
+```
+
 NOTE: for Darwin
 
 ```
@@ -235,9 +260,6 @@ $ sudo make install-strip
 ```
 
 ## Build indimail-mta-x
-
-[![Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/c-cpp.yml)
-[![FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/freebsd.yml)
 
 To configure the build for indimail-mta, you need to configure conf-prefix, conf-qmail, conf-sysconfdir, conf-shared, conf-libexec and conf-servicedir. Defaults are given in the table below. You can also use the script default.configure to set the below values.
 
@@ -287,9 +309,6 @@ Note: for Darwin
 
 ## Build indimail
 
-[![indimail Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-c-cpp.yml)
-[![indimail FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-freebsd.yml)
-
 Rquired for providng multiple virtual domains on a single host.
 
 ```
@@ -314,7 +333,7 @@ $ sudo make install-strip
 NOTE: for FreeBSD
 
 ```
-# pkg install libidn
+# pkg install pcre libidn
 ```
 
 NOTE: for Darwin
@@ -366,12 +385,9 @@ $ sudo make install-strip
 
 (check version in indimail-virtualdomains/pam-multi-x/conf-version)
 
-### indimail-utils
+## indimail-utils
 
 Indimail-utils stands for a collection of package having altermime, ripmime, fortune, mpack and flash
-
-[![indimail-utils Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml)
-[![indimail-utils FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-freebsd.yml)
 
 The steps for compiling and bulding each one of these components is below
 
