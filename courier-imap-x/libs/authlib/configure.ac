@@ -57,7 +57,7 @@ case "$host" in
 	LDFLAGS="$LDFLAGS -pie"
 	;;
 *-*-darwin*)
-	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I${srcdir}/../md5 -I${srcdir}/../sha1"
+	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I${srcdir}/.."
 	CXXFLAGS="$CXXFLAGS -DDARWIN -I/opt/local/include"
 	if test -d /opt/local/lib
 	then
@@ -67,7 +67,7 @@ case "$host" in
 	fi
 	;;
 *-*-freebsd*)
-	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I${srcdir}/../md5 -I${srcdir}/../sha1"
+	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I${srcdir}/.."
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
 	;;
 esac

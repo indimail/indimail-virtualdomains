@@ -30,22 +30,34 @@ case "$SYSTEM" in
 	FreeBSD)
 	prefix=/usr/local
 	mandir=/usr/local/man
-	libdir=/usr/local/lib
+	if [ -d /opt/local/lib ] ; then
+		libdir=/opt/local/lib
+	elif [ -d /usr/local/lib ] ; then
+		libdir=/opt/local/lib
+	else
+		libdir=/usr/lib
+	fi
 	sysconfdir=/usr/local/etc/indimail
 	export CPPFLAGS="-I/usr/local/include"
 	export CXXFLAGS="-I/usr/local/include"
-	export LDFLAGS="-L/usr/local/lib"
+	export LDFLAGS="-L$libdir"
 	extra="--with-authpwd --with-authpam"
 	;;
 	Darwin)
 	prefix=/usr/local
 	mandir=/usr/local/share/man
-	libdir=/opt/local/lib
+	if [ -d /opt/local/lib ] ; then
+		libdir=/opt/local/lib
+	elif [ -d /usr/local/lib ] ; then
+		libdir=/opt/local/lib
+	else
+		libdir=/usr/lib
+	fi
 	sysconfdir=/usr/local/etc/indimail
 	export RANLIB="ranlib -c"
 	export CPPFLAGS="-I/opt/local/include"
 	export CXXFLAGS="-I/opt/local/include"
-	export LDFLAGS="-L/opt/local/lib"
+	export LDFLAGS="-L$libdir"
 	extra="--with-waitfunc=wait3 --with-authpam"
 	;;
 	Linux)
