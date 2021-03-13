@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - indimail-x/courier-imap-x/**
+      - indimail-x/courier-imap-x/'**'
       - .github/workflows/courier-imap-freebsd.yml
   pull_request:
     branches: [ master ]
