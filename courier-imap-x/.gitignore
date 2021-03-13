@@ -405,17 +405,14 @@ maildirkw
 *.BAK
 libs/unicode/courier-unicode.h
 lockmail.html
-mailbot.html
 maildiracl.html
 maildir.html
 maildirkw.html
 maildirmake.html
-maildropex.html
 maildropfilter.html
 maildrop.html
 makemime.html
 NEWS.html
-reformail.html
 reformime.html
 libs/authlib/README
 conf-release
