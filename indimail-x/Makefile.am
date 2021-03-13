@@ -223,19 +223,19 @@ MOSTLYCLEANFILES=vcaliasrev myslave controlsync bogofilter-qfe \
 	indimail_config.h debian/Makefile
 
 vadddomain_SOURCES = vadddomain.c
-vadddomain_LDADD = isvalid_domain.lo libindimail.la
+vadddomain_LDADD = isvalid_domain.lo libindimail.la $(LIB_QMAIL)
 vadddomain_DEPENDENCIES = isvalid_domain.lo libindimail.la
 
 vaddaliasdomain_SOURCES = vaddaliasdomain.c
-vaddaliasdomain_LDADD = libindimail.la
+vaddaliasdomain_LDADD = libindimail.la $(LIB_QMAIL)
 vaddaliasdomain_DEPENDENCIES = libindimail.la
 
 vdeldomain_SOURCES = vdeldomain.c
-vdeldomain_LDADD = libindimail.la
+vdeldomain_LDADD = libindimail.la $(LIB_QMAIL)
 vdeldomain_DEPENDENCIES = libindimail.la
 
 vrenamedomain_SOURCES = vrenamedomain.c
-vrenamedomain_LDADD = libindimail.la
+vrenamedomain_LDADD = libindimail.la $(LIB_QMAIL)
 vrenamedomain_DEPENDENCIES = libindimail.la
 
 vmoddomain_SOURCES=vmoddomain.c
@@ -243,37 +243,37 @@ vmoddomain_LDADD= libindimail.la
 vmoddomain_DEPENDENCIES = libindimail.la
 
 vadduser_SOURCES = vadduser.c
-vadduser_LDADD = libindimail.la
+vadduser_LDADD = libindimail.la $(LIB_QMAIL)
 vadduser_DEPENDENCIES = libindimail.la
 
 vgroup_SOURCES = vgroup.c
-vgroup_LDADD = libindimail.la
+vgroup_LDADD = libindimail.la $(LIB_QMAIL)
 vgroup_DEPENDENCIES = libindimail.la
 
 vpasswd_SOURCES = vpasswd.c
-vpasswd_LDADD = libindimail.la
+vpasswd_LDADD = libindimail.la $(LIB_QMAIL)
 vpasswd_DEPENDENCIES = libindimail.la
 
 vdeluser_SOURCES = vdeluser.c
-vdeluser_LDADD = libindimail.la
+vdeluser_LDADD = libindimail.la $(LIB_QMAIL)
 vdeluser_DEPENDENCIES = libindimail.la
 
 vmoduser_SOURCES = vmoduser.c
-vmoduser_LDADD = libindimail.la
+vmoduser_LDADD = libindimail.la $(LIB_QMAIL)
 vmoduser_DEPENDENCIES = libindimail.la
 
 vuserinfo_SOURCES = vuserinfo.c
-vuserinfo_LDADD = libindimail.la
+vuserinfo_LDADD = libindimail.la $(LIB_QMAIL)
 vuserinfo_DEPENDENCIES = libindimail.la
 
 dbinfo_SOURCES = dbinfo.c
-dbinfo_LDADD = libindimail.la
+dbinfo_LDADD = libindimail.la $(LIB_QMAIL)
 dbinfo.lo = LoadDbInfo.h iclose.h variables.h common.h \
 	get_indimailuidgid.h writemcdinfo.h LoadDbInfo.h runcmmd.h
 dbinfo_DEPENDENCIES = libindimail.la
 
 vdominfo_SOURCES = vdominfo.c
-vdominfo_LDADD = libindimail.la
+vdominfo_LDADD = libindimail.la $(LIB_QMAIL)
 vdominfo.lo = get_assign.h common.h check_group.h iclose.h \
 	variables.h get_indimailuidgid.h get_real_domain.h print_control.h \
 	common.h isvirtualdomain.h get_local_hostid.h \
@@ -281,15 +281,15 @@ vdominfo.lo = get_assign.h common.h check_group.h iclose.h \
 vdominfo_DEPENDENCIES = libindimail.la
 
 hostcntrl_SOURCES = hostcntrl.c
-hostcntrl_LDADD = libindimail.la
+hostcntrl_LDADD = libindimail.la $(LIB_QMAIL)
 hostcntrl_DEPENDENCIES = libindimail.la
 
 vhostid_SOURCES = vhostid.c
-vhostid_LDADD = libindimail.la
+vhostid_LDADD = libindimail.la $(LIB_QMAIL)
 vhostid_DEPENDENCIES = libindimail.la
 
 vsmtp_SOURCES = vsmtp.c
-vsmtp_LDADD = libindimail.la
+vsmtp_LDADD = libindimail.la $(LIB_QMAIL)
 vsmtp_DEPENDENCIES = libindimail.la
 
 inlookup_SOURCES = inlookup.c
@@ -299,16 +299,16 @@ inlookup_DEPENDENCIES = ProcessInFifo.lo AliasInLookup.lo PwdInLookup.lo RelayIn
 	UserInLookup.lo VlimitInLookup.lo libindimail.la
 
 tcplookup_SOURCES = tcplookup.c
-tcplookup_LDADD = libindimail.la
+tcplookup_LDADD = libindimail.la $(LIB_QMAIL)
 tcplookup_CFLAGS = -DMAIN
 tcplookup_DEPENDENCIES = libindimail.la
 
 printdir_SOURCES = printdir.c
-printdir_LDADD = libindimail.la
+printdir_LDADD = libindimail.la $(LIB_QMAIL)
 printdir_DEPENDENCIES = libindimail.la
 
 vdelivermail_SOURCES = vdelivermail.c
-vdelivermail_LDADD = deliver_mail.lo qmail_remote.lo udpopen.lo libindimail.la
+vdelivermail_LDADD = deliver_mail.lo qmail_remote.lo udpopen.lo libindimail.la $(LIB_QMAIL)
 vdelivermail_DEPENDENCIES = deliver_mail.lo qmail_remote.lo udpopen.lo libindimail.la
 
 vfilter_SOURCES=vfilter.c
@@ -323,24 +323,24 @@ vcfilter_LDADD= libindimail.la
 vcfilter_DEPENDENCIES = libindimail.la
 
 ismaildup_SOURCES = ismaildup.c
-ismaildup_LDADD = libindimail.la
+ismaildup_LDADD = libindimail.la $(LIB_QMAIL)
 ismaildup_CFLAGS = -DMAIN
 ismaildup_DEPENDENCIES = libindimail.la
 
 valias_SOURCES = valias.c
-valias_LDADD = libindimail.la
+valias_LDADD = libindimail.la $(LIB_QMAIL)
 valias_DEPENDENCIES = libindimail.la
 
 vcalias_SOURCES = vcalias.c
-vcalias_LDADD = libindimail.la
+vcalias_LDADD = libindimail.la $(LIB_QMAIL)
 vcalias_DEPENDENCIES = libindimail.la
 
 clearopensmtp_SOURCES = clearopensmtp.c
-clearopensmtp_LDADD = clear_open_smtp.lo libindimail.la
+clearopensmtp_LDADD = clear_open_smtp.lo libindimail.la $(LIB_QMAIL)
 clearopensmtp_DEPENDENCIES = clear_open_smtp.lo libindimail.la
 
 updaterules_SOURCES = updaterules.c
-updaterules_LDADD = libindimail.la
+updaterules_LDADD = libindimail.la $(LIB_QMAIL)
 updaterules_DEPENDENCIES = libindimail.la
 
 inquerytest_SOURCES = inquerytest.c
@@ -350,23 +350,23 @@ inquerytest_DEPENDENCIES = ProcessInFifo.lo  AliasInLookup.lo PwdInLookup.lo Rel
 	UserInLookup.lo VlimitInLookup.lo libindimail.la
 
 vreorg_SOURCES = vreorg.c
-vreorg_LDADD = libindimail.la
+vreorg_LDADD = libindimail.la $(LIB_QMAIL)
 vreorg_DEPENDENCIES = libindimail.la
 
 install_tables_SOURCES = install_tables.c
-install_tables_LDADD = libindimail.la
+install_tables_LDADD = libindimail.la $(LIB_QMAIL)
 install_tables_DEPENDENCIES = libindimail.la
 
 vtable_SOURCES = vtable.c
-vtable_LDADD = libindimail.la
+vtable_LDADD = libindimail.la $(LIB_QMAIL)
 vtable_DEPENDENCIES = libindimail.la
 
 hostsync_SOURCES = hostsync.c
-hostsync_LDADD = libindimail.la
+hostsync_LDADD = libindimail.la $(LIB_QMAIL)
 hostsync_DEPENDENCIES = libindimail.la
 
 vserverinfo_SOURCES = vserverinfo.c
-vserverinfo_LDADD = libindimail.la
+vserverinfo_LDADD = libindimail.la $(LIB_QMAIL)
 vserverinfo_DEPENDENCIES = libindimail.la
 
 initsvc_SOURCES = initsvc.c
@@ -374,7 +374,7 @@ initsvc_LDADD = common.lo fappend.lo $(LIB_QMAIL)
 initsvc_DEPENDENCIES = common.lo fappend.lo
 
 mgmtpass_SOURCES = mgmtpass.c
-mgmtpass_LDADD = libindimail.la
+mgmtpass_LDADD = libindimail.la $(LIB_QMAIL)
 mgmtpass_DEPENDENCIES = libindimail.la
 
 authindi_SOURCES = authindi.c
@@ -382,66 +382,66 @@ authindi_LDADD = libindimail.la $(LIB_QMAIL)
 authindi_DEPENDENCIES = libindimail.la
 
 vchkpass_SOURCES = vchkpass.c
-vchkpass_LDADD = libindimail.la
+vchkpass_LDADD = libindimail.la $(LIB_QMAIL)
 vchkpass_DEPENDENCIES = libindimail.la
 
 vsetpass_SOURCES = vsetpass.c
-vsetpass_LDADD = libindimail.la
+vsetpass_LDADD = libindimail.la $(LIB_QMAIL)
 vsetpass_DEPENDENCIES = libindimail.la
 
 vsetuserquota_SOURCES = vsetuserquota.c
-vsetuserquota_LDADD = libindimail.la
+vsetuserquota_LDADD = libindimail.la $(LIB_QMAIL)
 vsetuserquota_DEPENDENCIES = libindimail.la
 
 vacation_SOURCES = vacation.c
-vacation_LDADD = libindimail.la
+vacation_LDADD = libindimail.la $(LIB_QMAIL)
 vacation_DEPENDENCIES = libindimail.la
 
 sq_vacation_SOURCES = sq_vacation.c
-sq_vacation_LDADD = libindimail.la
+sq_vacation_LDADD = libindimail.la $(LIB_QMAIL)
 sq_vacation_DEPENDENCIES = libindimail.la
 
 vatrn_SOURCES = vatrn.c
-vatrn_LDADD = libindimail.la
+vatrn_LDADD = libindimail.la $(LIB_QMAIL)
 vatrn_DEPENDENCIES = libindimail.la
 
 vmoveuser_SOURCES = vmoveuser.c
-vmoveuser_LDADD = libindimail.la
+vmoveuser_LDADD = libindimail.la $(LIB_QMAIL)
 vmoveuser_DEPENDENCIES = libindimail.la
 
 vrenameuser_SOURCES = vrenameuser.c
-vrenameuser_LDADD = libindimail.la
+vrenameuser_LDADD = libindimail.la $(LIB_QMAIL)
 vrenameuser_DEPENDENCIES = libindimail.la
 
 vipmap_SOURCES = vipmap.c
-vipmap_LDADD = libindimail.la
+vipmap_LDADD = libindimail.la $(LIB_QMAIL)
 vipmap_DEPENDENCIES = libindimail.la
 
 vlimit_SOURCES = vlimit.c
-vlimit_LDADD = libindimail.la
+vlimit_LDADD = libindimail.la $(LIB_QMAIL)
 vlimit_DEPENDENCIES = libindimail.la
 
 vpriv_SOURCES = vpriv.c
-vpriv_LDADD = libindimail.la
+vpriv_LDADD = libindimail.la $(LIB_QMAIL)
 vpriv_DEPENDENCIES = libindimail.la
 
 crc_SOURCES=crc.c
-crc_LDADD = libindimail.la
+crc_LDADD = libindimail.la $(LIB_QMAIL)
 crc_DEPENDENCIES = libindimail.la
 
 crcdiff_SOURCES=crcdiff.c
 crcdiff_LDADD=
 
 incrypt_SOURCES = incrypt.c
-incrypt_LDADD = libindimail.la @LIB_CRYPT@
+incrypt_LDADD = libindimail.la @LIB_CRYPT@ $(LIB_QMAIL)
 incrypt_DEPENDENCIES = libindimail.la
 
 ipchange_SOURCES = ipchange.c
-ipchange_LDADD = libindimail.la
+ipchange_LDADD = libindimail.la $(LIB_QMAIL)
 ipchange_DEPENDENCIES = libindimail.la
 
 resetquota_SOURCES = resetquota.c
-resetquota_LDADD = libindimail.la
+resetquota_LDADD = libindimail.la $(LIB_QMAIL)
 resetquota_DEPENDENCIES = libindimail.la
 
 proxyimap_SOURCES = proxyimap.c
@@ -457,19 +457,19 @@ proxypop3_DEPENDENCIES = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
 	monkey.lo sockwrite.lo libindimail.la
 
 vproxy_SOURCES = vproxy.c
-vproxy_LDADD = monkey.lo sockwrite.lo libindimail.la
+vproxy_LDADD = monkey.lo sockwrite.lo libindimail.la $(LIB_QMAIL)
 vproxy_DEPENDENCIES = monkey.lo sockwrite.lo libindimail.la
 
 vbulletin_SOURCES = vbulletin.c
-vbulletin_LDADD = bulletin.lo libindimail.la
+vbulletin_LDADD = bulletin.lo libindimail.la $(LIB_QMAIL)
 vbulletin_DEPENDENCIES = bulletin.lo libindimail.la
 
 adminclient_SOURCES = adminclient.c
-adminclient_LDADD = tls.lo auth_admin.lo adminCmmd.lo libindimail.la
+adminclient_LDADD = tls.lo auth_admin.lo adminCmmd.lo libindimail.la $(LIB_QMAIL)
 adminclient_DEPENDENCIES = tls.lo auth_admin.lo adminCmmd.lo libindimail.la
 
 indisrvr_SOURCES = indisrvr.c
-indisrvr_LDADD = checkPerm.lo tls.lo libindimail.la @LIB_SOCKET@
+indisrvr_LDADD = checkPerm.lo tls.lo libindimail.la @LIB_SOCKET@ $(LIB_QMAIL)
 indisrvr_DEPENDENCIES = tls.lo checkPerm.lo libindimail.la
 
 vdeloldusers_SOURCES = vdeloldusers.c
@@ -486,11 +486,11 @@ vfstab_DEPENDENCIES = vfstab_select.lo vfstab_insert.lo vfstab_update.lo \
 	libindimail.la
 
 vpurge_SOURCES = vpurge.c
-vpurge_LDADD = purge_files.lo libindimail.la
+vpurge_LDADD = purge_files.lo libindimail.la $(LIB_QMAIL)
 vpurge_DEPENDENCIES = purge_files.lo libindimail.la
 
 chowkidar_SOURCES = chowkidar.c
-chowkidar_LDADD = LoadBMF.lo spam.lo libindimail.la
+chowkidar_LDADD = LoadBMF.lo spam.lo libindimail.la $(LIB_QMAIL)
 chowkidar_DEPENDENCIES = LoadBMF.lo spam.lo libindimail.la
 
 osh_SOURCES = osh.c
