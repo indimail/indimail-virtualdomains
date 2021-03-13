@@ -28,6 +28,16 @@ jobs:
 
     - name: checkout_main
       uses: actions/checkout@v2
+      with:
+        path: main
       
+    - name: checkout_qmail
+      uses: actions/checkout@v2
+      with:
+        repository: mbhangui/libqmail
+        path: libqmail
+      
+    - name: install_qmail
+      run: cd libqmail; ./default.configure; make; sudo make install-strip
     - name: build nssd
-      run: cd nssd-x; ./default.configure; make
+      run: cd main/nssd-x; ./default.configure; make

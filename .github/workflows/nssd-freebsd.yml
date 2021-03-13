@@ -19,6 +19,12 @@ jobs:
       MYTOKEN2: "value2"
     steps:
     - uses: actions/checkout@v2
+      with:
+        path: main
+    - uses: actions/checkout@v2
+      with:
+        repository: mbhangui/libqmail
+        path: libqmail
     - name: build nssd
       id: FreeBSD
       uses: vmactions/freebsd-vm@v0.1.2
@@ -27,4 +33,5 @@ jobs:
         usesh: true
         prepare: pkg install -y curl automake autoconf libtool pkgconf mysql80-server mysql80-client
         run: |
-          cd nssd-x; ./default.configure; make
+          cd libqmail; ./default.configure; make; make install-strip
+          cd ../main/nssd-x; ./default.configure; make
