@@ -31,4 +31,9 @@ jobs:
       uses: actions/checkout@v2
       
     - name: build courier-imap
-      run: cd courier-imap-x; ./default.configure; make
+      run: |
+        cd courier-imap-x
+        if [ "${OS}" = "macos-latest" ] ; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; else ./default.configure; fi
+        if [ "${OS}" = "macos-latest" ] ; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; else make; fi
+      env:
+        OS: ${{ matrix.host }}
