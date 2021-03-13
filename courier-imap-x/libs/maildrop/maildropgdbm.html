@@ -1,0 +1,135 @@
+<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>maildropgdbm</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets Vsnapshot"/><link rel="home" href="#maildropgdbm" title="maildropgdbm"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+
+Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
+information.
+
+--></head><body><div class="refentry"><a id="maildropgdbm" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>maildropgdbm — GDBM/DB support in maildrop</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+gdbmopen(filename, mode)
+
+gdbmclose
+
+gdbmfetch(key [,default])
+
+gdbmstore(key,value)
+</pre></div></div><div class="refsect1"><a id="maildropgdbm_description" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+The gdbm family of functions provides access to the GDBM library - a library
+of routines that manage simple database files. The library provides a way of
+quickly storing and looking up key/data pairs.</p><p>
+GDBM support in <span class="command"><strong>maildrop</strong></span> is optional, and may not be
+available to you.</p><p>GDBM support in <span class="command"><strong>maildrop</strong></span> can optionally be
+implemented using the DB library. This option is selected by the system
+administrator. If this is the
+case, these functions still work exactly as described below, except that they
+will operate on DB hash files, instead of GDBM files.</p><p>To see whether GDBM or DB support is used, run the command
+"<span class="command"><strong>maildrop -v"</strong></span>.</p><p>
+GDBM support is minimal, and simplistic. A filter file may have only one
+gdbm file open at the same time. However, the filter file can close the
+current gdbm file, and open another one. If another filter file is included
+using the include statement, the included filter file may open its own,
+separate, gdbm file.</p><p>
+A GDBM file contains a list of key/value pairs. All keys in the GDBM file
+are unique. After storing an arbitrary key/value pair in the GDBM file, the
+value associated with the given key can be quickly located and
+retrieved.</p><div class="refsect2"><a id="maildropgdbm_gdbmclose___close_gdbm_file" shape="rect"> </a><h3>gdbmclose - close gdbm file</h3><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+gdbmclose
+</pre></div></blockquote></div><p>
+This function closes the current GDBM file.</p></div><div class="refsect2"><a id="maildropgdbm_gdbmfetch___retrieve_data" shape="rect"> </a><h3>gdbmfetch - retrieve data</h3><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+gdbmfetch (<em class="replaceable"><code>key</code></em> [, <em class="replaceable"><code>options</code></em>] [, <em class="replaceable"><code>default</code></em>])
+</pre></div></blockquote></div><p>
+This function retrieves the data for the given key.
+<em class="replaceable"><code>key</code></em> is the key
+to retrieve. The <span class="command"><strong>gdbmfetch</strong></span> function returns the data
+associated with
+this key. If the key does not exist in the GDBM file,
+<span class="command"><strong>gdbmfetch</strong></span> returns
+the <span class="command"><strong>default</strong></span> argument. If the <span class="command"><strong>default</strong></span>
+argument is not specified,
+<span class="command"><strong>gdbmfetch</strong></span> returns empty text. Please note that the
+<span class="command"><strong>default</strong></span>
+argument is not actually evaluated unless the key does not exist in the GDBM
+file.</p><p>
+The <em class="replaceable"><code>options</code></em> argument specifies additional
+<span class="command"><strong>maildrop</strong></span> value-added features.
+The following functionality is not
+available in the GDBM library, but is rather provided by
+<span class="command"><strong>maildrop</strong></span>.</p><p>
+If the <em class="replaceable"><code>options</code></em> argument is set to "D", and the key could not be found in
+the GDBM database, and the key is of the form "user@domain", <span class="command"><strong>maildrop</strong></span>
+will then attempt to look up the key "user@". If that key is also not found,
+<span class="command"><strong>maildrop</strong></span> finally looks up the key "domain".</p><p>
+If "domain" is also not found, and domain is of the form
+"<code class="literal">a.b.c.d.tld</code>"
+(with variable number of period-separated sections),
+<span class="command"><strong>maildrop</strong></span> then
+attempts to look up the key
+"<code class="literal">b.c.d.tld</code>". If that key is not found,
+<span class="command"><strong>maildrop</strong></span> tries "<code class="literal">c.d.tld</code>",
+and so on, until a key
+is found, or there are no more subdomains to remove, at which point
+<span class="command"><strong>gdbmfetch</strong></span>
+will return either the <span class="command"><strong>default</strong></span> argument, or empty
+text.</p><p>
+If the <em class="replaceable"><code>options</code></em> argument is set to "D", and the
+key could not be
+found in the GDBM database, and the key is of the form
+"<code class="literal">a.b.c.d.tld</code>" (with
+variable number of period-separated sections),
+<span class="command"><strong>maildrop</strong></span> will also
+attempt to look up keys for successive higher-level domains in the GDBM
+database.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+GDBM databases are case sensitive.
+Make sure that the GDBM database is created using lowercase letters only,
+and use the
+<a class="ulink" href="maildropfilter.html#tolower" target="_top" shape="rect"><span class="command"><strong>tolower</strong></span></a>
+function to convert the key to lowercase.</p></div><p>
+If the <em class="replaceable"><code>options</code></em> argument is
+"<code class="literal">I</code>", and the key is not
+in the GDBM database, and the key is of the form "w.x.y.z" (with
+variable number of period-separated sections),
+<span class="command"><strong>maildrop</strong></span> then tries to
+look up the key "w.x.y", then "w.x",
+until
+a key is found, or there are no more sections to remove. Use this feature to
+look up IP-address based GDBM lists.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+These features are implemented by brute force: if the
+query doesn't succeed, try again. Take note of potential denial-of-service
+attacks where key is set to a long text string consisting mostly of periods,
+which will result in numerous GDBM queries that will take an excessive amount
+of time to complete.</p></div></div><div class="refsect2"><a id="maildropgdbm_gdbmopen___open_gdbm_file" shape="rect"> </a><h3>gdbmopen - open gdbm file</h3><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+gdbmopen (<em class="replaceable"><code>file</code></em> [, <em class="replaceable"><code>mode</code></em>])
+</pre></div></blockquote></div><p>
+<span class="command"><strong>gdbmopen</strong></span> opens the indicated GDBM file.
+The optional second argument specifies the following:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">"R"</span></dt><dd><p>
+Open this GDBM file for reading.</p></dd><dt><span class="term">"W"</span></dt><dd><p>
+Open this GDBM file for reading and writing.</p></dd><dt><span class="term">"C"</span></dt><dd><p>
+Open this GDBM file for reading and writing. If the
+GBDM file doesn't exist, create it.</p></dd><dt><span class="term">"N"</span></dt><dd><p>
+Create a new GDBM file. If the file exists, the existing
+file is deleted. The file is opened for reading and writing.</p></dd></dl></div><p>
+The <em class="replaceable"><code>mode</code></em> argument
+defaults to <code class="literal">"R"</code> is used. In embedded mode, only
+<code class="literal">"R"</code> is allowed.</p><p>
+The GDBM library allows multiple processes to read the same GDBM file at
+the same time, but it does not allow multiple access when the GDBM file is
+open for writing. Using
+<a class="ulink" href="maildropfilter.html#flock" target="_top" shape="rect"><span class="command"><strong>flock</strong></span></a>
+or
+<a class="ulink" href="maildropfilter.html#dotlock" target="_top" shape="rect"><span class="command"><strong>dotlock</strong></span></a>
+is highly recommended.</p><p>
+In delivery mode, <span class="command"><strong>maildrop</strong></span> runs from the recipient's home
+directory. Keep that in mind while specifying the filename.</p><p>
+The gdbmopen function returns 0 if the GDBM file was successfully opened,
+non-zero otherwise.</p></div><div class="refsect2"><a id="maildropgdbm_gdbmstore___store_data" shape="rect"> </a><h3>gdbmstore - store data</h3><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+gdbmstore(<em class="replaceable"><code>key</code></em>, <em class="replaceable"><code>value</code></em>)
+</pre></div></blockquote></div><p>
+<em class="replaceable"><code>key</code></em> is the key value to store in the GDBM file.
+<em class="replaceable"><code>value</code></em> is the
+value to store. If <em class="replaceable"><code>key</code></em> already exists in the GDBM
+file, <em class="replaceable"><code>value</code></em>
+replacest the old value.
+The <span class="command"><strong>gdbmstore</strong></span> function is only
+permitted if the GDBM file is opened for writing.
+If <em class="replaceable"><code>gdbmopen</code></em> opened
+the GDBM file for reading only, <span class="command"><strong>gdbmstore</strong></span>
+will return -1. Otherwise, <span class="command"><strong>gdbmstore</strong></span> returns 0.</p></div></div></div></body></html>
