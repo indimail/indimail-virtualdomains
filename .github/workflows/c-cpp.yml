@@ -3,7 +3,10 @@ name: Ubuntu, Mac OSX CI
 on:
   push:
     branches:
-      - '*'
+      - master
+    paths:
+      - indimail-x/*
+      - indimail-x/.github/workflows/c-cpp.yml
   pull_request:
     branches: [ master ]
 
@@ -19,8 +22,8 @@ jobs:
     steps:
     - name: extra_packages
       run: |
-        if [ "${OS}" = "macos-latest" ]; then brew install automake autoconf libtool pkgconfig openssl mysql; fi
-        if ] "${OS}" = "ubuntu-latest" ] ; then apt-get install gcc g++ automake autoconf libtool libldap2-dev libssl-dev libreadline-dev libncurses5-dev libncurses5 flex libpam0g-dev libpcre3-dev libgdbm-dev libdb-dev libgcrypt20-dev libgamin-dev python libidn11-dev; fi
+        if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig openssl mysql; fi
+        if [ "${OS}" = "ubuntu-latest" ] ; then apt-get install gcc g++ automake autoconf libtool libldap2-dev libssl-dev libreadline-dev libncurses5-dev libncurses5 flex; fi
       env:
         OS: ${{ matrix.host }}
 
