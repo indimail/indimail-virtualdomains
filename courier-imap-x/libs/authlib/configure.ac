@@ -53,7 +53,7 @@ case "$host" in
 	;;
 *-*-linux*)
 	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -fPIC -Wall"
-	CFLAGS="$CFLAGS -Dlint -fPIC -I.. -I${srcdir}/.."
+	CFLAGS="$CFLAGS -Dlint -fPIC -I.. -I${srcdir}/../md5 -I${srcdir}/../sha1"
 	LDFLAGS="$LDFLAGS -pie"
 	;;
 *-*-darwin*)
