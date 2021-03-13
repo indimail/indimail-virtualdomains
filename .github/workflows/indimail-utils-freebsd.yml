@@ -1,4 +1,4 @@
-name: indimail-utils FreeBSD
+name: indimail-utils FreeBSD CI
 
 on:
   push:
