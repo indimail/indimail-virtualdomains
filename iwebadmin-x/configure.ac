@@ -40,7 +40,7 @@ case "$host" in
 	;;
 *-*-darwin*)
 	idcommand="/usr/bin/id -u"
-	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I/opt/local/include/qmail -I/opt/local/include/indimail"
+	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I/opt/local/include/qmail -I/usr/local/include/indimail"
 	CPPFLAGS="$CPPFLAGS -I/opt/local/include/mysql"
 	CFLAGS="$CFLAGS -O3 -Wall"
 	LDFLAGS="$LDFLAGS -L/opt/local/lib"
@@ -63,9 +63,7 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS([mysql.h errno.h signal.h unistd.h])
 AC_CHECK_HEADERS([pwd.h ctype.h time.h stdlib.h sys/wait.h])
 dnl Checks for libraries.
-#AC_CHECK_LIB(ssl, SSL_CTX_new,     [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
 AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
-#AC_CHECK_LIB(dl, dlsym)
 AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],noqmail=t,)
 if test " $noqmail" = " t"
 then
