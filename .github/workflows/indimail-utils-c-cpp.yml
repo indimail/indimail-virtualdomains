@@ -5,11 +5,11 @@ on:
     branches:
       - master
     paths:
-      - indimail-x/altermime-x/'**'
-      - indimail-x/ripmime-x/'**'
-      - indimail-x/fortune-x/'**'
-      - indimail-x/mpack-x/'**'
-      - indimail-x/flash-x/'**'
+      - '**/indimail-x/altermime-x/**'
+      - '**/indimail-x/ripmime-x/**'
+      - '**/indimail-x/fortune-x/**'
+      - '**/indimail-x/mpack-x/**'
+      - '**/indimail-x/flash-x/**'
       - .github/workflows/indimail-utils-c-cpp.yml
   pull_request:
     branches: [ master ]
