@@ -7,6 +7,9 @@ on:
     paths:
       - '**/bogofilter-wordlist-x/**'
       - .github/workflows/bogofilter-wordlist-freebsd.yml
+      - '!**/bogofilter-wordlist-x/debian/*'
+      - '!**/bogofilter-wordlist-x/doc/*'
+      - '!**.md'
   pull_request:
     branches: [ master ]
 
@@ -25,5 +28,5 @@ jobs:
       with:
         envs: 'MYTOKEN MYTOKEN2'
         usesh: true
-        prepare: pkg install -y curl automake autoconf libtool pkgconf db5
+        prepare: pkg install -y curl automake autoconf libtool pkgconf
         run: cd bogofilter-wordlist-x; ./default.configure; make

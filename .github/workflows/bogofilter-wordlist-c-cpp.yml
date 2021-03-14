@@ -7,6 +7,9 @@ on:
     paths:
       - '**/bogofilter-wordlist-x/**'
       - .github/workflows/bogofilter-wordlist-c-cpp.yml
+      - '!**/bogofilter-wordlist-x/debian/*'
+      - '!**/bogofilter-wordlist-x/doc/*'
+      - '!**.md'
   pull_request:
     branches: [ master ]
 
@@ -22,8 +25,8 @@ jobs:
     steps:
     - name: extra_packages
       run: |
-        if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig berkeley-db; fi
-        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libgsl-dev bison flex libdb-dev; fi
+        if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig; fi
+        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool; fi
       env:
         OS: ${{ matrix.host }}
 

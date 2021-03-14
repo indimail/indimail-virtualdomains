@@ -7,6 +7,9 @@ on:
     paths:
       - '**/bogofilter-x/**'
       - .github/workflows/bogofilter-freebsd.yml
+      - '!**/bogofilter-x/debian/*'
+      - '!**/bogofilter-x/doc/*'
+      - '!**.md'
   pull_request:
     branches: [ master ]
 
