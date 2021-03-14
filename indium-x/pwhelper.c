@@ -1,5 +1,8 @@
 /*
  * $Log: pwhelper.c,v $
+ * Revision 2.4  2021-03-14 21:32:40+05:30  Cprogrammer
+ * fixed compilation error
+ *
  * Revision 2.3  2009-02-25 11:26:29+05:30  Cprogrammer
  * added proto for pipe_exec()
  *
@@ -15,7 +18,7 @@
 #include <string.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pwhelper.c,v 2.3 2009-02-25 11:26:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pwhelper.c,v 2.4 2021-03-14 21:32:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             pipe_exec(char **, char *, int);
@@ -35,8 +38,10 @@ main(int argc, char **argv)
 	return (pipe_exec(argv + 2, tmpbuf, 512));
 }
 
+#ifndef	lint
 void
 getversion_pwhelper_c()
 {
 	printf("%s\n", sccsid);
 }
+#endif
