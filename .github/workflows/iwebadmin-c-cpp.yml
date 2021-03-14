@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - '**/iwebadmin-x/**'
+      - '**/indimail-x/**'
       - .github/workflows/iwebadmin-c-cpp.yml
   pull_request:
     branches: [ master ]
