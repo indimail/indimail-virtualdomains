@@ -34,8 +34,8 @@ Messaging Platform based on [indimail-mta](https://github.com/mbhangui/indimail-
 
 [![indimail-mta Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml)
 [![indimail-mta FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-freebsd.yml)
-[![libqmail Ubuntu, Mac OSX](https://github.com/mbhangui/libqmail/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/c-cpp.yml)
-[![libqmail FreeBSD](https://github.com/mbhangui/libqmail/actions/workflows/freebsd.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/freebsd.yml)
+[![libqmail Ubuntu, Mac OSX](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-c-cpp.yml)
+[![libqmail FreeBSD](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-freebsd.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-freebsd.yml)
 
 This document contains instructions for building indimail-mta from source.
 
@@ -255,7 +255,7 @@ NOTE: for Darwin
 Optional. Required only if you want to use bogofilter for spam filtering
 
 ```
-$ cd /usr/local/src/indimail-virtualdomains/bogofilter-wordlist-1.0
+$ cd /usr/local/src/indimail-virtualdomains/bogofilter-wordlist-x
 $ ./default.configure
 $ make
 $ sudo make install-strip
@@ -335,13 +335,14 @@ $ sudo make install-strip
 NOTE: for FreeBSD
 
 ```
-# pkg install pcre libidn
+# pkg install pcre libidn gdbm
 ```
 
 NOTE: for Darwin
 
 ```
-$ sudo port install libidn2 pcre db48
+$ sudo port install pcre db48 gdbm libidn2
+$ sudo brew install pcre berkeley-db gdbm libidn
 ```
 
 (check version in indimail-virtualdomains/courier-imap-x/conf-version)
@@ -355,6 +356,18 @@ $ cd /usr/local/src/indimail-virtualdomans/fetchmail-x
 $ ./default.configure
 $ make
 $ sudo make install-strip
+```
+
+NOTE: For FreeBSD
+
+```
+# pkg install gettext
+```
+
+NOTE: For Darwin
+
+```
+$ sudo port install gettext
 ```
 
 (check version in indimail-virtualdomains/fetchmail-x/conf-version)
