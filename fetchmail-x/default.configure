@@ -27,7 +27,7 @@ case "$SYSTEM" in
 	if [ -d /usr/local/opt/openssl ] ; then
 		with_ssl="/usr/local/opt/openssl"
 		extra_args="--with-ssl=%with_ssl"
-	elif [ -d /opt/local/openssl ] ; the
+	elif [ -d /opt/local/openssl ] ; then
 		with_ssl="/opt/local"
 		extra_args="--with-ssl=%with_ssl"
 	else
