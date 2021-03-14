@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 1.6  2021-03-14 08:59:17+05:30  Cprogrammer
+ * treat no mysql.h as a warning instead of error
+ *
  * Revision 1.5  2020-10-18 07:47:25+05:30  Cprogrammer
  * added last_error_len field to dbinfo to keep track of allocated_length of last_error field
  *
@@ -20,7 +23,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 1.5 2020-10-18 07:47:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 1.6 2021-03-14 08:59:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -41,7 +44,7 @@ typedef unsigned long long umdir_t;
 #ifdef HAVE_MYSQL_H
 #include <mysql.h>
 #else
-#error "mysql.h not found"
+#warning "mysql.h not found"
 #endif
 #include "load_mysql.h"
 #ifdef HAVE_TIME_H
@@ -126,8 +129,10 @@ struct dbinfo
 	int             last_error_len;
 };
 typedef struct dbinfo DBINFO;
+#ifdef HAVE_MYSQL_H
 extern MYSQL    mysql[2];
 extern MYSQL  **MdaMysql;
+#endif
 extern DBINFO **RelayHosts;
 
 #ifdef CLUSTERED_SITE
