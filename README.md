@@ -33,6 +33,8 @@ Messaging Platform based on [indimail-mta](https://github.com/mbhangui/indimail-
 [![bogofilter-wordlist FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-freebsd.yml)
 [![indimail-utils Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml)
 [![indimail-utils FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-freebsd.yml)
+[![indium Ubuntu CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-c-cpp.yml)
+[![indium FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-freebsd.yml)
 
 [![indimail-mta Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml)
 [![indimail-mta FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-freebsd.yml)
