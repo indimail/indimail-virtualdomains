@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.46 2021-02-15 09:27:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.47 2021-03-14 12:47:52+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
