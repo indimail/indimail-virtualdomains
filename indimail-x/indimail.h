@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 1.7  2021-03-14 12:21:16+05:30  Cprogrammer
+ * add ability to include indimail.h without mysql.h
+ *
  * Revision 1.6  2021-03-14 08:59:17+05:30  Cprogrammer
  * treat no mysql.h as a warning instead of error
  *
@@ -23,7 +26,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 1.6 2021-03-14 08:59:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 1.7 2021-03-14 12:21:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -41,12 +44,16 @@ typedef unsigned long long umdir_t;
 #define SCNd64 "lld"
 #define SCNu64 "llu"
 #endif
+#ifdef REMOVE_MYSQL_H
+#undef HAVE_MYSQL_H
+#else
 #ifdef HAVE_MYSQL_H
 #include <mysql.h>
 #else
 #warning "mysql.h not found"
 #endif
 #include "load_mysql.h"
+#endif
 #ifdef HAVE_TIME_H
 #include <time.h>
 #endif
