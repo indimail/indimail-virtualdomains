@@ -16,11 +16,26 @@ case "$SYSTEM" in
 	prefix=/usr
 	mandir=$prefix/share/man
 	sysconfdir=/etc/indimail
+	extra_args="--with-ssl"
+	;;
+	Darwin)
+	prefix=/usr/local
+	mandir=/usr/local/share/man
+	sysconfdir=/usr/local/etc/indimail
+	# macport does it better. With brew you have to struggle
+	# to use openssl
+	brew_headache=`ls -d /usr/local/opt/openssl@* 2>/dev/null|sort -n -r |head -1`
+	if [ -n "$bbrew_headache" ] ; then
+		extra_args="--with-ssl=$brew_headache"
+	else
+		extra_args="--with-ssl"
+	fi
 	;;
 	*)
 	prefix=/usr
 	mandir=/usr/man
 	sysconfdir=/etc/indimail
+	extra_args="--with-ssl"
 	;;
 esac
 
@@ -28,5 +43,4 @@ esac
   --sysconfdir=$sysconfdir \
   --datarootdir=$prefix/share/indimail \
   --libexecdir=$prefix/libexec/indimail \
-  --mandir=$mandir \
-  --with-ssl
+  --mandir=$mandir $extra_args
