@@ -7,6 +7,7 @@ on:
     paths:
       - '**/courier-imap-x/**'
       - .github/workflows/courier-imap-c-cpp.yml
+      - '!**.md'
   pull_request:
     branches: [ master ]
 
@@ -22,7 +23,7 @@ jobs:
     steps:
     - name: extra_packages
       run: |
-        if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig libidn pcre berkeley-db gdbm; fi
+        if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig libidn pcre berkeley-db gdbm openssl; fi
         if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libpam0g-dev libpcre3-dev libgdbm-dev libdb-dev libgcrypt20-dev libgamin-dev libssl-dev libidn11-dev; fi
       env:
         OS: ${{ matrix.host }}
