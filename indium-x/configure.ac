@@ -35,7 +35,7 @@ case "$host" in
 	else
 		idcommand="/usr/bin/id -u mail"
 	fi
-	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -Wall"
+	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -Wall -I/usr/include/tcl"
 	CFLAGS="$CFLAGS -O4 -fPIC -Wall -fno-strict-aliasing"
 	;;
 *-*-darwin*)
