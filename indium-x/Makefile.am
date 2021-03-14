@@ -6,11 +6,9 @@ version = @VERSION@
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
 
-DEFS=-I. -I/usr/include/tcl8.5 -I/usr/include/tcl8.4 @auth_inc@ 
-
 libfbsql_LTLIBRARIES = libfbsql.la
 libfbsql_la_SOURCES = fbsql.c
-libfbsql_la_LIBADD = @auth_libs@
+libfbsql_la_LIBADD = $(LIB_MYSQL)
 libfbsql_la_LDFLAGS = -version-info @LIBVER@ -release @VERSION@
 
 libtai64_LTLIBRARIES = libtai64.la
@@ -55,7 +53,6 @@ edit = sed \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@mysql_prefix\@,$(mysql_prefix),g' \
-	-e 's,@auth_inc\@,$(auth_inc),g' \
 	-e 's,@libdir\@,$(libdir),g' \
 	-e 's,@scriptdir\@,$(shareddir)/indium/scripts,g' \
 	-e 's,@sharelibdir\@,$(shareddir)/indium/lib,g' \

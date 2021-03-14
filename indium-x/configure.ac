@@ -14,12 +14,6 @@ AC_LIB_PREPARE_MULTILIB
 AC_CONFIG_MACRO_DIR([m4])
 dnl Does not work on RHEL 5, CentOS 5 64 bit systems
 RPATH_LIB="$acl_libdirstem"
-
-dnl Checks for libraries.
-AC_CHECK_LIB(ssl, SSL_CTX_new, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
-#AC_CHECK_LIB(ssl, EVP_MD_CTX_init, [AC_SUBST([LIB_SSL], ["-lssl"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl)
-AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
-
 if test "$GCC" = yes ; then
 	CXXFLAGS="$CXXFLAGS -Wall"
 fi
@@ -36,14 +30,26 @@ case "$host" in
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	;;
 *-*-linux*)
-	idcommand="/usr/bin/id -u"
-	CPPFLAGS="$CPPFLAGS -DLINUX"
-	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	if test x"$FAKED_MODE" = x
+	then
+		idcommand="/usr/bin/id -u"
+	else
+		idcommand="/usr/bin/id -u mail"
+	fi
+	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -Wall"
+	CFLAGS="$CFLAGS -O4 -fPIC -Wall -fno-strict-aliasing"
 	;;
 *-*-darwin*)
 	idcommand="/usr/bin/id -u"
-	CPPFLAGS="$CPPFLAGS -DDARWIN"
-	CFLAGS="$CFLAGS -O4 -Wall -pie"
+	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I/opt/local/include/qmail"
+	CFLAGS="$CFLAGS -O3 -Wall"
+	LDFLAGS="$LDFLAGS -L/opt/local/lib"
+	;;
+*-*-freebsd*)
+	idcommand="/usr/bin/id -u"
+	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/include/tcl8.6"
+	CFLAGS="$CFLAGS -O3 -Wall -fPIC"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib"
 	;;
 *)
 	idcommand="/usr/bin/id -u"
@@ -65,14 +71,10 @@ AC_PROG_LN_S
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 
-# Checks for libraries.
-# FIXME: Replace `main' with a function in `-ltcl':
-AC_CHECK_LIB([tcl], [Tcl_Init])
-# FIXME: Replace `main' with a function in `-ltk':
-AC_CHECK_LIB([tk], [Tk_Init])
-
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h netinet/in.h stdlib.h string.h sys/socket.h unistd.h])
+CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/local/include/mysql -I/usr/local/mysql/include"
+AC_CHECK_HEADER(mysql.h)
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_UID_T
@@ -82,12 +84,26 @@ AC_TYPE_SIZE_T
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([memset putenv strcasecmp strchr strerror strncasecmp strrchr])
-AC_CHECK_LIB(ssl, EVP_MD_CTX_init, [AC_SUBST([LIB_SSL], ["-lssl"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl)
 
 if test -f /usr/lib/tclConfig.sh
 then
 	. /usr/lib/tclConfig.sh
+elif test -f /usr/lib64/tclConfig.sh
+then
+	. /usr/lib64/tclConfig.sh
+elif test -f /usr/local/lib/tclConfig.sh
+then
+	. /usr/local/lib/tclConfig.sh
 fi
+
+# Checks for libraries.
+# FIXME: Replace `main' with a function in `-ltcl':
+AC_CHECK_LIB([tcl8.6], [Tcl_Init])
+# FIXME: Replace `main' with a function in `-ltk':
+AC_CHECK_LIB([tk8.6], [Tk_Init])
+dnl Checks for libraries.
+AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
+
 
 shareddir=$prefix
 AC_ARG_ENABLE(shareddir, [  --enable-shareddir=dir       directory for shared files.],
@@ -106,84 +122,52 @@ AC_SUBST(DATE)
 
 AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directory.],[mysql_prefix=$enableval],[mysql_prefix=""])
 
-if test "$mysql_prefix" = ""
-then
-mysql_incdir=""
-for f in /usr/include/mysql /usr/local/mysql/include/mysql /usr/local/mysql/include
+mysqlbindir=""
+for f in /usr/local/mysql/bin/mysql /usr/bin/mysql
 do
-	if test -d $f
+	if test -f $f
 	then
-		mysql_incdir=$f
+		mysqlbindir="`dirname $f`"
 		break
 	fi
 done
-
-AC_ARG_ENABLE(mysqlincdir, [  --enable-mysqlincdir=""       directory where auth include files are.],
-mysql_incdir="$enableval",
-[
-	if test "$mysql_incdir" = ""
-	then
-		AC_MSG_ERROR([Unable to find your inc dir, specify --enable-mysqlincdir.])
-	fi
-])
-
-mysql_libdir=""
-for f in /usr/lib64/mysql /usr/local/mysql/lib64/mysql /usr/local/mysql/lib64 /usr/lib/mysql /usr/local/mysql/lib/mysql /usr/local/mysql/lib
-do
-	if test -d $f
-	then
-		mysql_libdir=$f
-		break
-	fi
-done
-AC_ARG_ENABLE(mysqllibdir, [  --enable-mysqllibdir=path-to-auth-libs directory where auth libs are.],
-mysql_libdir="$enableval",
-[
-	if test "$mysql_libdir" = ""
-	then
-		AC_MSG_ERROR([Unable to find your sql libraries dir, specify --enable-mysqllibdir.])
-	fi
-])
-mysqlPrefix="`dirname $mysql_libdir`"
-mysqlPrefix="`dirname $mysqlPrefix`"
-else
-	if test -d $mysql_prefix/include/mysql
-	then
-		mysql_incdir=$mysql_prefix/include/mysql
-	elif test -d $mysql_prefix/include
-	then
-		mysql_incdir=$mysql_prefix/include
-	else
-		mysql_incdir=$mysql_prefix/include/mysql
-	fi
-
 	if test -d $mysql_prefix/lib64/mysql
 	then
 		mysql_libdir=$mysql_prefix/lib64/mysql
-	elif test -d $mysql_prefix/lib64
+	elif
+	test -d $mysql_prefix/lib64
 	then
 		mysql_libdir=$mysql_prefix/lib64
-	elif test -d $mysql_prefix/lib/mysql
+	elif
+	test -d $mysql_prefix/lib/mysql
 	then
 		mysql_libdir=$mysql_prefix/lib/mysql
-	elif test -d $mysql_prefix/lib
+	elif
+	test -d $mysql_prefix/lib
 	then
 		mysql_libdir=$mysql_prefix/lib
+	elif
+	test -d $mysql_prefix/mysql/lib
+	then
+		mysql_libdir=$mysql_prefix/mysql/lib
 	else
 		mysql_libdir=$mysql_prefix/lib/mysql
 	fi
-fi
+	mysqlbindir=""
+	for f in /usr/local/mysql/bin/mysql /usr/bin/mysql
+	do
+		if test -f $f
+		then
+			mysqlbindir="`dirname $f`"
+			break
+		fi
+	done
 
-AC_CHECK_LIB(mysqlclient -L${mysql_libdir}, mysql_real_connect,libs="$libs -lmysqlclient",
-	AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
-
-auth_inc="$TCL_INCLUDE_SPEC -I$prefix/include/indimail -I$mysql_incdir"
-auth_libs="-L. -L$libdir -L$mysql_libdir -lmysqlclient"
+saveLIBS="$LIBS"
+AC_CHECK_LIB(mysqlclient -L$mysql_libdir, mysql_real_connect,[AC_SUBST([LIB_MYSQL], ["-L$mysql_libdir -lmysqlclient"])], 
+AC_MSG_ERROR([could not find libmysqlclient which is needed for MySQL support]),)
+LIBS=$saveLIBS
 
 AC_SUBST(mysql_prefix)
-AC_SUBST(mysql_incdir)
-AC_SUBST(mysql_libdir)
-AC_SUBST(auth_inc)
-AC_SUBST(auth_libs)
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
