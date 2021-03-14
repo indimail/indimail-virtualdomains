@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.20 2020-11-03 09:24:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.21 2021-03-14 12:48:20+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <indimail.h>
+#define REMOVE_MYSQL_H
 #include <indimail_compat.h>
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

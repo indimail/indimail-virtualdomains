@@ -1,5 +1,5 @@
 /*
- * $Id: util.c,v 1.8 2020-11-02 15:08:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: util.c,v 1.9 2021-03-14 12:48:26+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <indimail.h>
+#define REMOVE_MYSQL_H
 #include <indimail_compat.h>
 #ifdef HAVE_QMAIL
 #include <alloc.h>

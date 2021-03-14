@@ -1,5 +1,5 @@
 /*
- * $Id: cgi.c,v 1.4 2020-11-01 23:15:39+05:30 Cprogrammer Exp mbhangui $
+ * $Id: cgi.c,v 1.5 2021-03-14 12:47:37+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,7 +37,7 @@
 #include <alloc.h>
 #include <strerr.h>
 #endif
-#include "indimail.h"
+#define REMOVE_MYSQL_H
 #include "indimail_compat.h"
 #include "iwebadminx.h"
 #include "common.h"

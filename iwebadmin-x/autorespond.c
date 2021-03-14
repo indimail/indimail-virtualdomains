@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.11 2019-07-15 12:43:04+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.12 2021-03-14 12:47:34+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <indimail.h>
+#define REMOVE_MYSQL_H
 #include <indimail_compat.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

@@ -1,5 +1,8 @@
 /*
  * $Log: common.c,v $
+ * Revision 1.3  2021-03-14 12:47:42+05:30  Cprogrammer
+ * prevent including mysql.h in indimail.h
+ *
  * Revision 1.2  2020-10-30 12:43:40+05:30  Cprogrammer
  * add newline to separate functions
  *
@@ -13,8 +16,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <indimail_config.h>
-#include <indimail.h>
+#define REMOVE_MYSQL_H
 #include <indimail_compat.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
