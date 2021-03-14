@@ -22,6 +22,8 @@ Release 3.4 Start 14/02/2021
 13. tls.c: use set_essential_fd() to avoid deadlock
 - 10/03/2021
 14. vpriv_insert.c: fixed SQL syntax error
+- 14/03/2021
+15. Changes for making code github action, added workflow for CI
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020
