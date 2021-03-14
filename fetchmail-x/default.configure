@@ -24,9 +24,12 @@ case "$SYSTEM" in
 	sysconfdir=/usr/local/etc/indimail
 	# macport does it better. With brew you have to struggle
 	# to use openssl
-	brew_headache=`ls -d /usr/local/opt/openssl@* 2>/dev/null|sort -n -r |head -1`
-	if [ -n "$bbrew_headache" ] ; then
-		extra_args="--with-ssl=$brew_headache"
+	if [ -d /usr/local/opt/openssl ] ; then
+		with_ssl="/usr/local/opt/openssl"
+		extra_args="--with-ssl=%with_ssl"
+	elif [ -d /opt/local/openssl ] ; the
+		with_ssl="/opt/local"
+		extra_args="--with-ssl=%with_ssl"
 	else
 		extra_args="--with-ssl"
 	fi
