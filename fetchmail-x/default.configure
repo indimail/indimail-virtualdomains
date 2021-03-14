@@ -38,6 +38,11 @@ case "$SYSTEM" in
 	extra_args="--with-ssl"
 	;;
 esac
+echo ./configure --prefix=$prefix --enable-indimail \
+  --sysconfdir=$sysconfdir \
+  --datarootdir=$prefix/share/indimail \
+  --libexecdir=$prefix/libexec/indimail \
+  --mandir=$mandir $extra_args
 
 ./configure --prefix=$prefix --enable-indimail \
   --sysconfdir=$sysconfdir \
