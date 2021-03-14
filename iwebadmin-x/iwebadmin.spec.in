@@ -56,7 +56,6 @@ BuildRequires: glibc glibc-devel procps cpio
 BuildRequires: sed gettext-devel
 BuildRequires: findutils libqmail-devel libqmail
 BuildRequires: gzip autoconf automake libtool indimail-devel
-BuildRequires: mysql-devel
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 PreReq: permissions
