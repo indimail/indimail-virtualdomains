@@ -10,7 +10,6 @@ AC_CONFIG_HEADERS([config.h])
 AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indium@indimail.org")
 AM_INIT_AUTOMAKE
 
-AC_LIB_PREPARE_MULTILIB
 AC_CONFIG_MACRO_DIR([m4])
 dnl Does not work on RHEL 5, CentOS 5 64 bit systems
 RPATH_LIB="$acl_libdirstem"
