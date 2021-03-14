@@ -23,7 +23,7 @@ jobs:
     steps:
     - name: extra_packages
       run: |
-        if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig; brew reinstall openssl; fi
+        if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig openssl; fi
         if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool gettext autopoint; fi
       env:
         OS: ${{ matrix.host }}
@@ -33,7 +33,6 @@ jobs:
       
     - name: build fetchmail
       run: |
-        if [ "${OS}" = "macos-latest" ] ; then ls -lR /usr/local/; fi
         cd fetchmail-x
         if [ "${OS}" = "macos-latest" ] ; then env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; else ./default.configure; fi
         if [ "${OS}" = "macos-latest" ] ; then env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; else make; fi
