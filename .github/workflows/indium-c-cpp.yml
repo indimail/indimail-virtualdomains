@@ -1,0 +1,41 @@
+name: indium Ubuntu, Mac OSX CI
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '**/indium-x/**'
+      - .github/workflows/indium-c-cpp.yml
+      - '!**/indium-x/debian/*'
+      - '!**/indium-x/doc/*'
+      - '!**.md'
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: ${{ matrix.host }}-${{ matrix.config.name }}
+    runs-on: ${{ matrix.host }}
+    strategy:
+      fail-fast: false
+      matrix:
+        host: [ubuntu-latest, macos-latest]
+    
+    steps:
+    - name: extra_packages
+      run: |
+        if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig tcl-tk mysql; fi
+        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libmysqlclient-dev tcl-dev; fi
+      env:
+        OS: ${{ matrix.host }}
+
+    - name: checkout_main
+      uses: actions/checkout@v2
+      
+    - name: build indium
+      run: |
+        cd indium-x
+        ./default.configure; make
+      env:
+        OS: ${{ matrix.host }}
