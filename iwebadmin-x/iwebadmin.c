@@ -1,6 +1,6 @@
 /*
  * $Log: iwebadmin.c,v $
- * Revision 1.23  2021-03-14 11:50:10+05:30  Cprogrammer
+ * Revision 1.23  2021-03-14 12:20:39+05:30  Cprogrammer
  * add ability to include indimail.h without mysql.h
  *
  * Revision 1.22  2020-11-03 10:24:55+05:30  Cprogrammer
@@ -26,19 +26,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: iwebadmin.c,v 1.23 2021-03-14 11:50:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.23 2021-03-14 12:20:39+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 /*
  * we don't need mysql but we need indimail.h
- * undef HAVE_CONFIG_H and HAVE_MYSQL_H so that
+ * define HAVE_IWEBADMIN so that
  * indimail.h doesn't include mysql.h
  */
-#undef HAVE_CONFIG_H
-#include <indimail_config.h>
-#undef HAVE_MYSQL_H
+#define REMOVE_MYSQL_H
 #include <indimail_compat.h>
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
