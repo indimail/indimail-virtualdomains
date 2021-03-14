@@ -60,7 +60,7 @@ case "$host" in
 esac
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS([mysql.h errno.h signal.h unistd.h])
+AC_CHECK_HEADERS([errno.h signal.h unistd.h])
 AC_CHECK_HEADERS([pwd.h ctype.h time.h stdlib.h sys/wait.h])
 dnl Checks for libraries.
 AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
@@ -112,7 +112,6 @@ AC_ARG_ENABLE(htmldir, [  --enable-htmldir=DIR      HTTP server's base html dir.
         fi
     ] )
 AC_SUBST(htmldir)
-
 
 cgibindir=""
 
@@ -391,7 +390,6 @@ echo "         image dir = "$imagedir""
 echo "         image URL = "$imageurl""
 echo "      template dir = "$htmllibdir""
 echo "         ezmlm dir = "$ezmlmdir""
-echo "         ezmlm idx = "$ezmlmidx""
 echo "   ezmlm for MySQL = "$ezmlm_mysql""
 echo "              help = "$enable_help""
 echo "            libdir = "$libdir""
