@@ -1,6 +1,6 @@
 #
 #
-# $Id: indium.spec.in,v 1.27 2020-10-13 21:59:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.28 2021-03-14 21:35:05+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -36,6 +36,9 @@
 %define mysqlPrefix        @mysql_prefix@
 %endif
 %define nobwidget          1
+%if %{undefined nodebug}
+%global buildsubdir        ""
+%endif
 
 Summary: TCL/TK based Administration GUI for IndiMail
 Name: indium
@@ -56,8 +59,8 @@ AutoReq: Yes
 BuildRequires: tcl-devel rpm gcc gcc-c++ make coreutils grep
 BuildRequires: tk-devel glibc glibc-devel procps tcl tk cpio
 BuildRequires: sed gettext-devel
-BuildRequires: findutils openssl-devel openssl
-BuildRequires: gzip autoconf indimail-devel mysql-devel
+BuildRequires: findutils
+BuildRequires: gzip autoconf mysql-devel
 
 %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
 BuildRequires: chrpath
@@ -162,7 +165,11 @@ do
 done
 
 %if %nobwidget == 0
-. /usr/lib/tclConfig.sh
+if [ -f /usr/lib/tclConfig.sh ] ; then
+  . /usr/lib/tclConfig.sh
+elif [ -f /usr/lib64/tclConfig.sh ] ; then
+  . /usr/lib64/tclConfig.sh
+fi
 cd %{name}-%{version}
 if [ $TCL_VERSION -ne %{tcl_version} ] ; then
   echo "tcl version mismatch $TCL_VERSION != %{tcl_version}"
