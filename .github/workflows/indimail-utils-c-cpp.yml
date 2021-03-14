@@ -11,6 +11,7 @@ on:
       - '**/indimail-x/mpack-x/**'
       - '**/indimail-x/flash-x/**'
       - .github/workflows/indimail-utils-c-cpp.yml
+      - '!**.md'
   pull_request:
     branches: [ master ]
 

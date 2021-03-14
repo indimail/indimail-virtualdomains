@@ -1,0 +1,40 @@
+name: fetchmail Ubuntu, Mac OSX CI
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '**/fetchmail-x/**'
+      - .github/workflows/fetchmail-c-cpp.yml
+      - '!**.md'
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: ${{ matrix.host }}-${{ matrix.config.name }}
+    runs-on: ${{ matrix.host }}
+    strategy:
+      fail-fast: false
+      matrix:
+        host: [ubuntu-latest, macos-latest]
+    
+    steps:
+    - name: extra_packages
+      run: |
+        if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig openssl; fi
+        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool; fi
+      env:
+        OS: ${{ matrix.host }}
+
+    - name: checkout_main
+      uses: actions/checkout@v2
+      
+    - name: build fetchmail
+      run: |
+        cd fetchmail-x
+        if [ "${OS}" = "macos-latest" ] ; then env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; else ./default.configure; fi
+        if [ "${OS}" = "macos-latest" ] ; then env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; else make; fi
+      env:
+        OS: ${{ matrix.host }}

@@ -7,6 +7,7 @@ on:
     paths:
       - '**/pam-multi-x/**'
       - .github/workflows/pam-multi-c-cpp.yml
+      - '!**.md'
   pull_request:
     branches: [ master ]
 
