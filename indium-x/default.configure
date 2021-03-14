@@ -42,10 +42,24 @@ case "$SYSTEM" in
 	libdir=/usr/lib
 	;;
 esac
+if [ -d $prefix/include/mysql ] ; then
+	mysqlPrefix=$prefix
+elif [ -d /usr/local/include/mysql ] ; then
+	mysqlPrefix=/usr/local
+elif [ -d /usr/local/mysql/include ] ; then
+	mysqlPrefix=/usr/local/mysql
+fi
+echo ./configure --prefix=$prefix \
+  --libexecdir=$prefix/libexec/indimail \
+  --libdir=$libdir \
+  --sysconfdir=$sysconfdir \
+  --mandir=$mandir \
+  --enable-shareddir=$prefix/share/indimail \
+  --enable-mysqlprefix=$mysqlPrefix
 ./configure --prefix=$prefix \
   --libexecdir=$prefix/libexec/indimail \
   --libdir=$libdir \
   --sysconfdir=$sysconfdir \
   --mandir=$mandir \
   --enable-shareddir=$prefix/share/indimail \
-  --enable-mysqlprefix=$prefix
+  --enable-mysqlprefix=$mysqlPrefix
