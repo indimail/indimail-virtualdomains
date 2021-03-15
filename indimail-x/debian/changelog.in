@@ -15,3 +15,4 @@ indimail (@version@-@release@) unstable; urgency=low
   * tls.c: use set_essential_fd() to avoid deadlock
   * vpriv_insert.c: fixed SQL syntax error
   * Changes for making code github action, added workflow for CI
+  * indimail.h - allow inclusion without having mysql installed
