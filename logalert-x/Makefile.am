@@ -55,7 +55,7 @@ showbytes_SOURCES=showbytes.c
 
 #$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).c $@ -- flex
 lex.c: lex.l parser.h
-	 $(LEX) $(LFLAGS) -o$@ $^
+	 $(LEX) $(LFLAGS) -o $@ lex.l parser.h
 
 parser.h: parser.c
 logalert-rpmlintrc: logalert-rpmlintrc.in
