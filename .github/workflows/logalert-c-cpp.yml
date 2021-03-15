@@ -1,0 +1,49 @@
+name: logalert Ubuntu, Mac OSX CI
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '**/logalert-x/**'
+      - .github/workflows/logalert-c-cpp.yml
+      - '!**/logalert-x/debian/*'
+      - '!**/logalert-x/doc/*'
+      - '!**.md'
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: ${{ matrix.host }}-${{ matrix.config.name }}
+    runs-on: ${{ matrix.host }}
+    strategy:
+      fail-fast: false
+      matrix:
+        host: [ubuntu-latest, macos-latest]
+    
+    steps:
+    - name: extra_packages
+      run: |
+        if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig openssl mysql; fi
+        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libssl-dev libmysqlclient-dev libncurses5-dev; fi
+      env:
+        OS: ${{ matrix.host }}
+
+    - name: checkout_main
+      uses: actions/checkout@v2
+      with:
+        path: main
+      
+    - name: checkout_qmail
+      uses: actions/checkout@v2
+      with:
+        repository: mbhangui/libqmail
+        path: libqmail
+      
+    - name: install_qmail
+      run: cd libqmail;env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; sudo make install-strip
+    - name: build_virtualdomains
+      run: cd main/indimail-x; env CFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make install-strip
+    - name: build logalert
+      run: cd main/procmail-x; ./default.configure; make
