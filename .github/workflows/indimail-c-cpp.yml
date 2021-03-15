@@ -26,7 +26,7 @@ jobs:
     - name: extra_packages
       run: |
         if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig openssl mysql; fi
-        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libldap2-dev libssl-dev libreadline-dev libncurses5-dev libncurses5 flex; fi
+        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libssl-dev libmysqlclient-dev libncurses5-dev; fi
       env:
         OS: ${{ matrix.host }}
 
