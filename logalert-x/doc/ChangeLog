@@ -6,6 +6,9 @@ Release 0.3 Start 25/02/2010
 02. parser.y fixed return value of handle_conf_file()
 - 13-10-2020
 03. added debuginfo package
+- 15-03-2021
+04. use libidimail and remove common.c. Update common.h to remove functions
+    present in libindimail
 
 *
 2005-10-04      <gabriel@icaro.com.br>

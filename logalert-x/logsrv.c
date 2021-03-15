@@ -96,6 +96,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #endif
+#include <indimail/filewrt.h>
 #include "tls.h"
 #include "common.h"
 

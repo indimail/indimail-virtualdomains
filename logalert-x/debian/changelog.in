@@ -2,3 +2,4 @@ logalert (@version@-@release@) stable; urgency=low
 
   * parser.c, main.c, parser.y added -i option
   * parser.y fixed return value of handle_conf_file()
+  * use libidimail and remove common.c. Update common.h to remove functions present in libindimail

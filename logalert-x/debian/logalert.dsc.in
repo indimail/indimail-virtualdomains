@@ -9,4 +9,4 @@ Debtransform-Release: 1
 Debtransform-Files-Tar: debian.tar.gz
 Debtransform-Tar: logalert-@version@.tar.gz
 Standards-Version: 3.9.1
-Build-Depends: cdbs, debhelper (>= 9), gcc, g++, m4, autotools-dev, libqmail-dev, libindimail, libpcre3-dev, flex, bison
+Build-Depends: cdbs, debhelper (>= 9), gcc, g++, m4, autotools-dev, libqmail-dev, indimail-dev, libpcre3-dev, flex, bison

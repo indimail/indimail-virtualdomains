@@ -27,68 +27,12 @@ AC_PROG_CC
 AC_PROG_LEX
 AC_PROG_YACC
 
-# Checks for libraries.
-
 # Checks for header files.
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h stdarg.h stdlib.h string.h sys/time.h unistd.h getopt.h \
 				  pwd.h grp.h inttypes.h limits.h sys/syslimits.h sys/param.h \
 				  sys/wait.h rpc/rpc.h rpc/types.h])
-AC_CHECK_LIB(ssl, SSL_CTX_new, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
-tirpc="yes"
-AC_CHECK_LIB(tirpc, clnt_create, [AC_SUBST([LIB_RPC], ["-ltirpc"]) AC_DEFINE([HAVE_TIRPC], [1],[tirpc Library])],tirpc=no,-ltirpc)
-
-if test " $tirpc" = " yes"
-then
-    CPPFLAGS="-I/usr/include/tirpc $CXXFLAGS"
-    CXXFLAGS="-I/usr/include/tirpc $CXXFLAGS"
-fi
-
-have_pcre=no
-LIBPCREDIR=libpcre
-
-AC_ARG_WITH(libpcre,
-    [  --with-libpcre=DIR    Use an existing (compiled) pcre lib from DIR/include and DIR/lib. ],
-    [  case "$with_libpcre" in
-       yes)
-       ;;
-       *)
-    CXXFLAGS="-I$with_libpcre/include $CXXFLAGS"
-    LDFLAGS="-L$with_libpcre/lib $LDFLAGS"
-    have_pcre=yes
-        ;;
-  esac]
-)
-
-if test $have_pcre != yes ; then
-	AC_CHECK_HEADER(pcre.h,
-	  AC_CHECK_LIB(pcre, pcre_version, [have_pcre=yes ]),
-	    [AC_CHECK_HEADERS(pcre.h,
-            [AC_CHECK_LIB(pcre, pcre_version, [have_pcre=yes])]
-           )]
-        )
-
-fi
-
-if test $have_pcre != yes ; then
-	echo "I could not find pcre library/headere, therefore I'm using"
-	echo "regex.h header. Note that pcre is necessary to some funcionalities"
-	echo "in logalert. See documentation for further details."
-	echo "If you wish, visit http://www.pcre.org/"
-	AC_CHECK_HEADERS([regex.h])
-	AC_CHECK_FUNCS([regcomp])
-else
-
-	AC_DEFINE(HAVE_PCRE_H)
-	LIBPCRE_LIBS="-lpcre"
-	AC_SUBST(LIBPCRE_LIBS)
-	AC_SUBST(LIBPCREDIR)
-	AC_SUBST(PCRE_DEPENDS)
-	AC_SUBST(PCRE_CLEAN)
-	AC_SUBST(PCRE_DIST_CLEAN)
-
-fi
 
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -149,6 +93,62 @@ AC_FUNC_STAT
 AC_CHECK_FUNCS([alarm getcwd strchr strrchr])
 
 AC_DEFINE_UNQUOTED(PREFIX, "$prefix", installation directory)
+
+# Checks for libraries.
+AC_CHECK_LIB(ssl, SSL_CTX_new, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
+tirpc="yes"
+AC_CHECK_LIB(tirpc, clnt_create, [AC_SUBST([LIB_RPC], ["-ltirpc"]) AC_DEFINE([HAVE_TIRPC], [1],[tirpc Library])],tirpc=no,-ltirpc)
+
+if test " $tirpc" = " yes"
+then
+    CPPFLAGS="-I/usr/include/tirpc $CXXFLAGS"
+    CXXFLAGS="-I/usr/include/tirpc $CXXFLAGS"
+fi
+
+have_pcre=no
+LIBPCREDIR=libpcre
+
+AC_ARG_WITH(libpcre,
+    [  --with-libpcre=DIR    Use an existing (compiled) pcre lib from DIR/include and DIR/lib. ],
+    [  case "$with_libpcre" in
+       yes)
+       ;;
+       *)
+    CXXFLAGS="-I$with_libpcre/include $CXXFLAGS"
+    LDFLAGS="-L$with_libpcre/lib $LDFLAGS"
+    have_pcre=yes
+        ;;
+  esac]
+)
+
+if test $have_pcre != yes ; then
+	AC_CHECK_HEADER(pcre.h,
+	  AC_CHECK_LIB(pcre, pcre_version, [have_pcre=yes ]),
+	    [AC_CHECK_HEADERS(pcre.h,
+            [AC_CHECK_LIB(pcre, pcre_version, [have_pcre=yes])]
+           )]
+        )
+
+fi
+
+if test $have_pcre != yes ; then
+	echo "I could not find pcre library/headere, therefore I'm using"
+	echo "regex.h header. Note that pcre is necessary to some funcionalities"
+	echo "in logalert. See documentation for further details."
+	echo "If you wish, visit http://www.pcre.org/"
+	AC_CHECK_HEADERS([regex.h])
+	AC_CHECK_FUNCS([regcomp])
+else
+
+	AC_DEFINE(HAVE_PCRE_H)
+	LIBPCRE_LIBS="-lpcre"
+	AC_SUBST(LIBPCRE_LIBS)
+	AC_SUBST(LIBPCREDIR)
+	AC_SUBST(PCRE_DEPENDS)
+	AC_SUBST(PCRE_CLEAN)
+	AC_SUBST(PCRE_DIST_CLEAN)
+
+fi
 
 AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],noqmail=t,)
 if test " $noqmail" = " t"
