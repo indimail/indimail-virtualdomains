@@ -13,7 +13,6 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC
 AC_PROG_CC_C99
 AC_PROG_LIBTOOL
-AC_LIB_PREPARE_MULTILIB
 
 AC_PREFIX_DEFAULT(/usr)
 
@@ -33,7 +32,6 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h stdarg.h stdlib.h string.h sys/time.h unistd.h getopt.h \
 				  pwd.h grp.h inttypes.h limits.h sys/syslimits.h sys/param.h \
 				  sys/wait.h rpc/rpc.h rpc/types.h])
-
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
