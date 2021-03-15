@@ -1,0 +1,35 @@
+name: procmail FreeBSD CI
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '**/procmail-x/**'
+      - '**/indimail-x/**'
+      - .github/workflows/procmail-freebsd.yml
+      - '!**/procmail-x/debian/*'
+      - '!**/procmail-x/doc/*'
+      - '!**.md'
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  testfreebsd:
+    runs-on: macos-latest
+    name: FreeBSD
+    env:
+      MYTOKEN : ${{ secrets.MYTOKEN }}
+      MYTOKEN2: "value2"
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        path: main
+    - name: build procmail
+      id: FreeBSD
+      uses: vmactions/freebsd-vm@v0.1.2
+      with:
+        envs: 'MYTOKEN MYTOKEN2'
+        usesh: true
+        prepare: pkg install -y automake autoconf libtool pkgconf
+        run: cd procmail-x; ./default.configure; make
