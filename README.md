@@ -39,6 +39,8 @@ Messaging Platform based on [indimail-mta](https://github.com/mbhangui/indimail-
 [![logalert FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-freebsd.yml)
 [![indium Ubuntu CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-c-cpp.yml)
 [![indium FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-freebsd.yml)
+[![ircube Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-ubuntu-osx.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-ubuntu-osx.yml)
+[![ircube FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-freebsd.yml)
 
 [![libqmail Ubuntu, Mac OSX](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-c-cpp.yml)
 [![libqmail FreeBSD](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-freebsd.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-freebsd.yml)
