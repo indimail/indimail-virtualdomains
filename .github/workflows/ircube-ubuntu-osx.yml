@@ -6,7 +6,7 @@ on:
       - master
     paths:
       - '**/ircube-x/**'
-      - .github/workflows/ircube-c-cpp.yml
+      - .github/workflows/ircube-ubuntu-osx.yml
       - '!**/ircube-x/debian/*'
       - '!**/ircube-x/doc/*'
       - '!**.md'
