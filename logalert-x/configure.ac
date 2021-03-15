@@ -150,33 +150,6 @@ AC_CHECK_FUNCS([alarm getcwd strchr strrchr])
 
 AC_DEFINE_UNQUOTED(PREFIX, "$prefix", installation directory)
 
-AC_ARG_ENABLE(indimaildir, [  --enable-indimaildir=dir         directory where indimail is installed.],
-	indimaildir="$enableval", [])
-
-if test -z "$indimaildir"
-then
-	indimaildir=$prefix
-fi
-AC_DEFINE_UNQUOTED(INDIMAILDIR,"$indimaildir",indimaildir's home directory)
-#'
-
-if test -d /lib64 -a "$acl_libdirstem" = "lib"
-then
-	acl_libdirstem=lib64
-fi
-tlib=${prefix}/lib
-if test x$libdir = x$tlib
-then
-	dnl Does not work on RHEL 5, CentOS 5 64 bit systems
-	if test -d /lib64 -a "$acl_libdirstem" = "lib"
-	then
-		acl_libdirstem=lib64
-	fi
-	ilibdir=$prefix/$acl_libdirstem
-else
-	ilibdir=$libdir
-fi
-RPATH_LIB="$acl_libdirstem"
 AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],noqmail=t,)
 if test " $noqmail" = " t"
 then
@@ -187,6 +160,3 @@ AC_CHECK_LIB(indimail, filewrt, [AC_SUBST([LIB_INDIMAIL], ["-lindimail"]) AC_DEF
 AC_SUBST(indimaildir)
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
-
-echo "system lib dir = $acl_libdirstem $acl_libdirstem2 RPATH=$ilibdir"
-echo "  LIB_INDIMAIL = $LIB_INDIMAIL"

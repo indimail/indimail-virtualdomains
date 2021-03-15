@@ -10,6 +10,8 @@ on:
       - .github/workflows/iwebadmin-c-cpp.yml
       - '!**/iwebadmin-x/debian/*'
       - '!**/iwebadmin-x/doc/*'
+      - '!**/indimail-x/debian/*'
+      - '!**/indimail-x/doc/*'
       - '!**.md'
   pull_request:
     branches: [ master ]

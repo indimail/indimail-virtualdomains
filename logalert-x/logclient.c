@@ -1,5 +1,8 @@
 /*
  * $Log: logclient.c,v $
+ * Revision 1.9  2021-03-15 11:32:07+05:30  Cprogrammer
+ * removed common.h
+ *
  * Revision 1.8  2020-06-21 12:49:01+05:30  Cprogrammer
  * quench rpmlint
  *
@@ -52,14 +55,13 @@
 #ifdef SOLARIS
 #include <sys/systeminfo.h>
 #endif
-#include "common.h"
 #include "tls.h"
 
 #define MAXBUF 8192
 #define SEEKDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logclient.c,v 1.8 2020-06-21 12:49:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logclient.c,v 1.9 2021-03-15 11:32:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 

@@ -1,5 +1,8 @@
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.15  2021-03-15 11:32:19+05:30  Cprogrammer
+ * added sockread() function
+ *
  * Revision 1.14  2020-06-21 12:49:10+05:30  Cprogrammer
  * quench rpmlint
  *
@@ -93,8 +96,8 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #endif
-#include "common.h"
 #include "tls.h"
+#include "common.h"
 
 /*-
 program RPCLOG
@@ -117,7 +120,7 @@ program RPCLOG
 #define STATUSDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.14 2020-06-21 12:49:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.15 2021-03-15 11:32:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef __STDC__
@@ -717,6 +720,52 @@ write_bytes(int fd, umdir_t *Bytes)
 	return (0);
 }
 
+#define MAXNOBUFRETRY           60 /*- Defines maximum number of ENOBUF retries -*/
+#define SELECTTIMEOUT           30 /*- secs after which select will timeout -*/
+
+int
+sockread(fd, buffer, len)
+	int             fd;
+	char           *buffer;
+	int             len;
+{
+	char           *ptr;
+	int             rembytes, rbytes, retrycount;
+
+	for (retrycount = 0, rembytes = len, ptr = buffer; rembytes;)
+	{
+		errno = 0;
+		if ((rbytes = read(fd, ptr, rembytes)) == -1)
+		{
+#ifdef ERESTART
+			if (errno == EINTR || errno == ERESTART)
+#else
+			if (errno == EINTR)
+#endif
+				continue;
+			if (errno == ENOBUFS && retrycount++ < MAXNOBUFRETRY)
+			{
+				usleep(1000);
+				continue;
+			}
+#if defined(HPUX_SOURCE)
+			if (errno == EREMOTERELEASE)
+			{
+				rbytes = 0;
+				break;
+			}
+#endif
+			return (-1);
+		} else
+		if (!rbytes)	/* EOF */
+			break;;
+		rembytes -= rbytes;
+		if (!rembytes)
+			break;
+		ptr += rbytes;
+	}
+	return (len - rembytes);
+}
 
 int
 server(int silent)

@@ -1,5 +1,8 @@
 /*
  * $Log: incrmesg.c,v $
+ * Revision 1.7  2021-03-15 11:31:57+05:30  Cprogrammer
+ * removed common.h
+ *
  * Revision 1.6  2020-06-21 12:47:48+05:30  Cprogrammer
  * quench rpmlint
  *
@@ -44,13 +47,12 @@
 #ifdef SOLARIS
 #include <sys/systeminfo.h>
 #endif
-#include "common.h"
 
 #define MAXBUF  8192
 #define SEEKDIR "/var/tmp/incrmesg"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: incrmesg.c,v 1.6 2020-06-21 12:47:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: incrmesg.c,v 1.7 2021-03-15 11:31:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct msgtable

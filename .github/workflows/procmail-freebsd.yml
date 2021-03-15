@@ -6,7 +6,6 @@ on:
       - master
     paths:
       - '**/procmail-x/**'
-      - '**/indimail-x/**'
       - .github/workflows/procmail-freebsd.yml
       - '!**/procmail-x/debian/*'
       - '!**/procmail-x/doc/*'
@@ -23,8 +22,6 @@ jobs:
       MYTOKEN2: "value2"
     steps:
     - uses: actions/checkout@v2
-      with:
-        path: main
     - name: build procmail
       id: FreeBSD
       uses: vmactions/freebsd-vm@v0.1.2

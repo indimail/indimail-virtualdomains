@@ -27,7 +27,6 @@ AM_LFLAGS  = -Pc
 AM_YFLAGS  = -d
 
 edit = sed \
-	-e 's,@indimaildir\@,$(prefix),g' \
 	-e 's,@version\@,$(version),g' \
 	-e "s,@release\@,"`cat conf-release`",g" \
 	-e 's,@VERSION\@,$(VERSION),g' \
@@ -41,15 +40,15 @@ edit = sed \
 logalert_SOURCES = lex.c utils.c log.c parser.y process.c monitor.c action.c sig.c user.c main.c 
 logalert_LDADD = @LEXLIB@ @LIBPCRE_LIBS@
 
-logclient_SOURCES=logclient.c common.c tls.c
+logclient_SOURCES=logclient.c tls.c
 logclient_LDADD = $(LIB_INDIMAIL) $(LIB_SSL) $(LIB_QMAIL)
 
-logsrv_SOURCES=logsrv.c common.c tls.c
+logsrv_SOURCES=logsrv.c tls.c
 logsrv_LDADD = $(LIB_INDIMAIL) $(LIB_SSL) $(LIB_QMAIL) $(LIB_RPC)
 
 rpclog_LDADD=$(LIB_RPC)
 
-incrmesg_SOURCES=incrmesg.c common.c
+incrmesg_SOURCES=incrmesg.c
 incrmesg_LDADD = $(LIB_INDIMAIL)
 
 showbytes_SOURCES=showbytes.c
@@ -61,7 +60,7 @@ lex.c: lex.l parser.h
 parser.h: parser.c
 logalert-rpmlintrc: logalert-rpmlintrc.in
 	$(edit) logalert-rpmlintrc.in > $@
-logalert.spec: logalert.spec.in ChangeLog conf-version conf-release
+logalert.spec: logalert.spec.in doc/ChangeLog conf-version conf-release
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 logsrv.8: logsrv.man
 	$(edit) logsrv.man > $@
