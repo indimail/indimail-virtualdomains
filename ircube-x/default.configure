@@ -12,6 +12,11 @@ case "$SYSTEM" in
 	mandir=/usr/local/man
 	sysconfdir=/usr/local/etc/indimail
 	;;
+	Darwin)
+	prefix=/usr/local
+	mandir=/usr/local/share/man
+	sysconfdir=/usr/local/etc/indimail
+	;
 	Linux)
 	prefix=/usr
 	mandir=$prefix/share/man
