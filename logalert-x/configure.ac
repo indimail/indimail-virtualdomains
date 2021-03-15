@@ -43,31 +43,37 @@ AC_TYPE_UID_T
 
 case "$host" in
 
-    *-openbsd*)
-    AC_DEFINE(OPENBSD,,[Define if SOLARIS])
-    ;;
-
-    *-solaris*)
+*-*-solaris*)
     AC_DEFINE(SOLARIS,,[Define if SOLARIS])
+	CPPFLAGS="$CPPFLAGS -DSOLARIS"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
     ;;
 
-    *-sunos*)
+*-*-sunos4.1.1*)
     AC_DEFINE(SUNOS,,[Define if SUNOS])
+	CPPFLAGS="$CPPFLAGS -DSUNOS4"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
     ;;
 
-    *-linux*)
+*-*-linux*)
     AC_DEFINE(LINUX,,[Define if LINUX])
+	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -Wall"
+	CFLAGS="$CFLAGS -O4 -fPIC -fpie -Wall -fno-strict-aliasing"
     ;;
 
-    *-freebsd*)
+*-*-freebsd*)
     AC_DEFINE(FREEBSD,,[Define if FREEBSD])
+	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/includ/qmail -I/usr/local/include/indimail"
+	CFLAGS="$CFLAGS -O3 -Wall -fPIC"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib"
     ;;
+*-*-darwin*)
+	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I/opt/local/include/qmail"
+	CFLAGS="$CFLAGS -O3 -Wall"
+	LDFLAGS="$LDFLAGS -L/opt/local/lib"
+	;;
 
-    *-netbsd*)
-    AC_DEFINE(NETBSD,,[Define if SOLARIS])
-    ;;
-
-    *)
+*)
     AC_DEFINE(LINUX,,[Define if LINUX])
     ;;
 
