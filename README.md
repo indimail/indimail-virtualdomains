@@ -852,7 +852,7 @@ For latest details refer to [README](https://github.com/mbhangui/docker/blob/mas
 
 ## IRC / Matrix
 
-* Join me [#indimail:matrix.org](https://matrix.to/#/#indimail:matrix.org)
+* ![Matrix](https://img.shields.io/matrix/indimail:matrix.org)
 * IndiMail has an IRC channel #indimail-mta
 
 ## Mailing list
