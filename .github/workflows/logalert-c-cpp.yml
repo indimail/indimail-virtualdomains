@@ -8,10 +8,8 @@ on:
       - '**/logalert-x/**'
       - .github/workflows/logalert-c-cpp.yml
       - '!**/logalert-x/debian/*'
-      - '!**/logalert-x/doc/*'
+      - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:

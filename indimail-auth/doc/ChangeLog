@@ -1,0 +1,51 @@
+* 
+Release @version@-@release@ Start 21/05/2020
+01. changed nssd.sock path to /run/indimail
+02. changed nssd.pid path to /run/indimail
+03. nssd-1.2/configure.ac - fixed --enable-nssd-socket, --enable-nssd-config-path options
+- 12/06/2020
+04. configure.ac: define HAVE_LIBMARIADB using egrep st_mysql_res in mysql.h
+    to pull in MYSQL_RES typedef
+05. postinst: shutdown nssd before upgrade
+- 14/06/2020
+06. QA fixes on README, Makefile, specfile
+07. use svctool to set alternatives for pam-multi during package
+    installation/removal
+- 19/06/2020
+08. Add AC_PROG_CC_C99 to configure
+- 22/09/2020
+09. FreeBSD port
+- 24/09/2020
+10. spwd.c, pwd.c, misc.c, grp.c: renamed nsvs to nssd
+- 28/09/2020
+11. pipe_exec.c: display authmodule being executed in debug statements
+12. pam-checkpwd.c print authmodule name in error logs/debug statements
+13. pam-checkpwd.c added pid error logs/debug statements
+- 29/09/2020
+14. pop3, imap, pam-multi pam config: pam-multi.so uses getopt. argv0 must be supplied
+15. pam-multi.c: replace LOG_EMERG with LOG_INFO
+- 03/10/2020
+16. pam-multi.c: Darwin Port
+17. pam-support.c: Fixed compilation warnings
+18. default.configure, configure.ac: Darwin Port
+- 04/10/2020
+19. pam-multi.c: set optreset=1 for Darwin
+20. added pam-config files for Linux, Darwin
+21. set SYSTEM variable for Makefile to create pam config files based on
+    System
+- 05/10/2020
+22. set CPPFLAGS, CFLAGS, LDFLAGS for nssd, pam-multi
+- 13/10/2020
+23. added debuginfo package
+- 17/11/2020
+24. stop start pwdlookup service on upgrade
+- 19/01/2021
+25. pam-support.c: display pam function in failure
+- 27/01/2021
+26. pam-checkpwd.c: dovecot support added
+27. pam-checkpwd.c: env variable NATIVE_CHECKPASSWORD to comply exactly with
+    checkpassword protocol
+- 28/02/2021
+28. post install: save variables
+18/03/2021
+29. added obs triggers

@@ -1,0 +1,16 @@
+*
+Release @version@-@release@ Start 02/06/2020
+- 02/06/2020
+01. New package indimail-utils
+02. QA Fixes for documentation, RPM Lint fixes
+- 19/06/2020
+03. Add AC_PROG_CC_C99 to configure
+04. mpack - fixed possible buffer overflow in uudecode.c
+- 07/10/2020
+05. Fixed compiler warnings on Darwin
+- 12/10/2020
+06. exec.c: replaced sys_siglist with strsignal()
+- 13/10/2020
+07. added debuginfo package
+- 18/03/2021
+08. added github-obs integration

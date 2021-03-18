@@ -1,0 +1,36 @@
+name: indimail-utils obs trigger
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '**/altermime-x/**'
+      - '**/ripmime-x/**'
+      - '**/fortune-x/**'
+      - '**/mpack-x/**'
+      - '**/flash-x/**'
+      - .github/workflows/indimail-utils-obs.yml
+      - '!**/doc/*'
+      - '!**.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout_indimail-utils
+      uses: actions/checkout@v2
+
+    - name: prepare obs
+      run: sudo apt-get update; sudo apt-get install curl libncurses5-dev; cd indimail-utils; ./prepare_obs indimail-utils
+    - uses: actions/upload-artifact@v2
+      with:
+        name: indimail-utils
+        path: |
+          ~/*.tar.gz
+          ~/*.spec
+          ~/*.dsc
+    - shell: bash
+      name: trigger_obs
+      run: |
+        curl -H "Authorization: Token ${{secrets.indimail_utils_obs_token_value}}" -X POST https://build.opensuse.org/trigger/runservice

@@ -8,10 +8,8 @@ on:
       - '**/procmail-x/**'
       - .github/workflows/procmail-freebsd.yml
       - '!**/procmail-x/debian/*'
-      - '!**/procmail-x/doc/*'
+      - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   testfreebsd:

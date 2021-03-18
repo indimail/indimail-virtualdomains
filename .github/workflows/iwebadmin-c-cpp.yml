@@ -9,12 +9,9 @@ on:
       - '**/indimail-x/**'
       - .github/workflows/iwebadmin-c-cpp.yml
       - '!**/iwebadmin-x/debian/*'
-      - '!**/iwebadmin-x/doc/*'
       - '!**/indimail-x/debian/*'
-      - '!**/indimail-x/doc/*'
+      - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:
@@ -29,7 +26,7 @@ jobs:
     - name: extra_packages
       run: |
         if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig openssl mysql; fi
-        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libmysqlclient-dev; fi
+        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libssl-dev libmysqlclient-dev libncurses5-dev; fi
       env:
         OS: ${{ matrix.host }}
 

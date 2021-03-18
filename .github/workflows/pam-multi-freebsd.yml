@@ -7,9 +7,8 @@ on:
     paths:
       - '**/pam-multi-x/**'
       - .github/workflows/pam-multi-freebsd.yml
+      - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   testfreebsd:

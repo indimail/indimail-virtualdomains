@@ -1,0 +1,8 @@
+indimail-utils (@version@-@release@) unstable; urgency=medium
+
+  * New package indimail-utils
+  * QA Fixes for documentation, RPM Lint fixes
+  * Add AC_PROG_CC_C99 to configure
+  * mpack - fixed possible buffer overflow in uudecode.c
+  * Fixed compiler warnings on Darwin
+  * exec.c: replaced sys_siglist with strsignal()

@@ -8,10 +8,8 @@ on:
       - '**/indium-x/**'
       - .github/workflows/indium-c-cpp.yml
       - '!**/indium-x/debian/*'
-      - '!**/indium-x/doc/*'
+      - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:

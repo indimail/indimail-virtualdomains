@@ -8,10 +8,8 @@ on:
       - '**/bogofilter-wordlist-x/**'
       - .github/workflows/bogofilter-wordlist-c-cpp.yml
       - '!**/bogofilter-wordlist-x/debian/*'
-      - '!**/bogofilter-wordlist-x/doc/*'
+      - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:

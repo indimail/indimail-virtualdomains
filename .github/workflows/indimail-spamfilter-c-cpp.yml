@@ -1,17 +1,15 @@
-name: bogofilter Ubuntu, Mac OSX CI
+name: indimail-spamfilter Ubuntu, Mac OSX CI
 
 on:
   push:
     branches:
       - master
     paths:
-      - '**/bogofilter-x/**'
-      - .github/workflows/bogofilter-c-cpp.yml
-      - '!**/bogofilter-x/debian/*'
-      - '!**/bogofilter-x/doc/*'
+      - '**/indimail-spamfilter-x/**'
+      - .github/workflows/indimail-spamfilter-c-cpp.yml
+      - '!**/indimail-spamfilter-x/debian/*'
+      - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:
@@ -26,16 +24,16 @@ jobs:
     - name: extra_packages
       run: |
         if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig berkeley-db; fi
-        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libgsl-dev bison flex libdb-dev; fi
+        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool xmlto libgsl-dev bison flex libdb-dev; fi
       env:
         OS: ${{ matrix.host }}
 
     - name: checkout_main
       uses: actions/checkout@v2
       
-    - name: build bogofilter
+    - name: build indimail-spamfilter
       run: |
-        cd bogofilter-x
+        cd indimail-spamfilter-x
         ./default.configure; make
       env:
         OS: ${{ matrix.host }}

@@ -1,0 +1,32 @@
+name: ircube obs trigger
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '**/ircube-x/**'
+      - .github/workflows/ircube-obs.yml
+      - '!**/doc/*'
+      - '!**.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout_ircube
+      uses: actions/checkout@v2
+
+    - name: prepare obs
+      run: sudo apt-get update; sudo apt-get install curl; cd ircube-x; ./prepare_obs ircube
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ircube
+        path: |
+          ~/*.tar.gz
+          ~/*.spec
+          ~/*.dsc
+    - shell: bash
+      name: trigger_obs
+      run: |
+        curl -H "Authorization: Token ${{secrets.ircube_obs_token_value}}" -X POST https://build.opensuse.org/trigger/runservice

@@ -247,6 +247,30 @@ $ sudo make install or sudo ./qmake install
 
 Optional. Required only if you want to use bogofilter for spam filtering
 
+**RPM Based Distributions**
+Install the following packages using dnf/yum
+
+```
+Universal
+gcc gcc-c++ make coreutils grep glibc glibc-devel xmlto
+gzip autoconf automake libtool sed findutils gsl-devel
+flex bison libdb-devel
+
+openSUSE
+db-devel
+```
+
+**Debian Based Distributions**
+Install the following packages using apt
+
+```
+Universal
+gcc, g++, automake, libgsl-dev, bison, flex, libdb-dev, m4
+
+Debian 8
+libgsl0-dev
+```
+
 ```
 $ cd /usr/local/src/indimail-virtualdomains/bogofilter-x
 $ ./default.configure
@@ -257,7 +281,7 @@ $ sudo make install-strip
 NOTE: for FreeBSD
 
 ```
-# pkg install db5
+# pkg install db5 xmto
 ```
 
 NOTE: for Darwin

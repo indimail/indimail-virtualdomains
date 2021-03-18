@@ -8,10 +8,8 @@ on:
       - '**/ircube-x/**'
       - .github/workflows/ircube-freebsd.yml
       - '!**/ircube-x/debian/*'
-      - '!**/ircube-x/doc/*'
+      - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   testfreebsd:
