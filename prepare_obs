@@ -93,12 +93,17 @@ if [ -f $name.packages ] ; then
     prepare_artifacts $i $HOME/stage 1
     cd $SAVE
   done
+
+  # now build the master spec file and master dsc files
+  cd $SAVE
   if [ ! -f conf-version ] ; then
     echo "$name: conf-version: No such file or directory" 1>&2
     return 1
   fi
-  cd $SAVE
   ver=$(cat conf-version)
+  if [ ! -f conf-release ] ; then
+    echo 1.1 > conf-release
+  fi
   mkdir -p $HOME/stage
   echo "Preparing $name-$ver"
   cp -rp . $HOME/stage/$name-$ver
@@ -128,7 +133,7 @@ if [ -f $name.packages ] ; then
     fi
     ver=$(cat $pkg_dir/conf-version)
     /bin/rm -rf $HOME/stage/$pkg_name-$ver
-	/bin/rm -f $HOME/stage/$real_name
+    /bin/rm -f $HOME/stage/$real_name
   done
 else
   prepare_artifacts $1 $HOME/stage 0
