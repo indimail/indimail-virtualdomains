@@ -43,7 +43,6 @@ src/tests/t.config
 src/tests/t.query.config
 src/tests/t.crash-invalid-base64
 .deps/
-Makefile.in
 compile
 config.guess
 config.sub

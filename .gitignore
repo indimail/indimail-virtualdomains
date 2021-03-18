@@ -14,5 +14,6 @@ cscope.*
 *.BAK
 RCS
 stage
+indimail-spamfilter-x/Makefile.in
 .github/indimail-virtualdomains.wiki
 .github/indimail-mta.wiki
