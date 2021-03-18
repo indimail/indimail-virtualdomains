@@ -33,7 +33,9 @@ MAILDROPHTML=lockmail.html maildiracl.html maildirkw.html \
 	maildirmake.html \
 	maildir.html \
 	maildropfilter.html maildrop.html \
-	makemime.html reformime.html
+	makemime.html reformime.html \
+	mailbot.html maildropex.html \
+	maildropgdbm.html reformail.html
 
 html_DATA=$(MAILDROPHTML) manpage.css
 
@@ -206,6 +208,14 @@ makemime.html: libs/rfc2045/makemime.html
 	cp -f $(srcdir)/libs/rfc2045/makemime.html makemime.html
 reformime.html: libs/rfc2045/reformime.html
 	cp -f $(srcdir)/libs/rfc2045/reformime.html reformime.html
+mailbot.html: libs/maildrop/mailbot.html
+	cp -f $(srcdir)/libs/maildrop/mailbot.html mailbot.html
+maildropex.html: libs/maildrop/maildropex.html
+	cp -f $(srcdir)/libs/maildrop/maildropex.html maildropex.html
+maildropgdbm.html: libs/maildrop/maildropgdbm.html
+	cp -f $(srcdir)/libs/maildrop/maildropgdbm.html maildropgdbm.html
+reformail.html: libs/maildrop/reformail.html
+	cp -f $(srcdir)/libs/maildrop/reformail.html reformail.html
 
 # Copyright 2000 Double Precision, Inc.  See COPYING for
 # distribution information.
@@ -259,12 +269,14 @@ id=$(dollar)Id
 
 WWW=$$HOME/www/www.courier-mta.org
 
-htmldoc: INSTALL.html libs/imap/README.html $(MAILDROPHTML) libs/maildrop/maildroptips.html \
-	libs/maildrop/mailbot.html libs/maildrop/maildropex.html libs/maildrop/maildropgdbm.html \
-	libs/maildrop/reformail.html \
+htmldoc: INSTALL.html libs/imap/README.html $(MAILDROPHTML) \
+	libs/maildrop/maildroptips.html libs/maildrop/mailbot.html libs/maildrop/maildropex.html \
+	libs/maildrop/maildropgdbm.html libs/maildrop/reformail.html \
 	libs/maildir/README.maildirquota.html libs/maildir/README.sharedfolders.html \
 	libs/maildir/README.imapkeywords.html libs/imap/BUGS.html libs/imap/README.proxy.html libs/imap/README.html
-	for f in $^; do xsltproc --nonet $(srcdir)/imap-format.xsl $$f | perl -ne 's~\$(id):.*\$$~\$(id):'"$$h"'\$$~; print' >$(WWW)/imap/`basename $$f`; done
+	for f in $^; do xsltproc --nonet \
+		$(srcdir)/imap-format.xsl $$f | perl -ne 's~\$(id):.*\$$~\$(id):'"$$h"'\$$~; \
+		print' >$(WWW)/imap/`basename $$f`; done
 	rm -rf doc
 	mkdir doc
 	xsltproc -o doc/ $(srcdir)/imap.xsl $(srcdir)/imap.xml

@@ -412,6 +412,10 @@ maildirmake.html
 maildropfilter.html
 maildrop.html
 makemime.html
+mailbot.html
+maildropex.html
+maildropgdbm.html
+reformail.html
 NEWS.html
 reformime.html
 libs/authlib/README
