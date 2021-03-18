@@ -23,7 +23,7 @@ jobs:
     steps:
     - name: extra_packages
       run: |
-        if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig berkeley-db; fi
+        if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig xmlto berkeley-db; fi
         if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install gcc g++ automake autoconf libtool xmlto libgsl-dev bison flex libdb-dev; fi
       env:
         OS: ${{ matrix.host }}
