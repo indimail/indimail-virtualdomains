@@ -9,9 +9,8 @@ on:
       - '**/indimail-x/**'
       - .github/workflows/iwebadmin-freebsd.yml
       - '!**/iwebadmin-x/debian/*'
-      - '!**/iwebadmin-x/doc/*'
       - '!**/indimail-x/debian/*'
-      - '!**/indimail-x/doc/*'
+      - '!**/doc/*'
       - '!**.md'
 
 jobs:

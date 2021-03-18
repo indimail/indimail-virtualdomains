@@ -1,14 +1,14 @@
-name: bogofilter Ubuntu, Mac OSX CI
+name: indimail-spamfilter Ubuntu, Mac OSX CI
 
 on:
   push:
     branches:
       - master
     paths:
-      - '**/bogofilter-x/**'
-      - .github/workflows/bogofilter-c-cpp.yml
-      - '!**/bogofilter-x/debian/*'
-      - '!**/bogofilter-x/doc/*'
+      - '**/indimail-spamfilter-x/**'
+      - .github/workflows/indimail-spamfilter-c-cpp.yml
+      - '!**/indimail-spamfilter-x/debian/*'
+      - '!**/doc/*'
       - '!**.md'
 
 jobs:
@@ -31,9 +31,9 @@ jobs:
     - name: checkout_main
       uses: actions/checkout@v2
       
-    - name: build bogofilter
+    - name: build indimail-spamfilter
       run: |
-        cd bogofilter-x
+        cd indimail-spamfilter-x
         ./default.configure; make
       env:
         OS: ${{ matrix.host }}

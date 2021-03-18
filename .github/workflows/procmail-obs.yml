@@ -1,0 +1,32 @@
+name: procmail obs trigger
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '**/procmail-x/**'
+      - .github/workflows/procmail-obs.yml
+      - '!**/doc/*'
+      - '!**.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout_procmail
+      uses: actions/checkout@v2
+
+    - name: prepare obs
+      run: sudo apt-get update; sudo apt-get install curl; cd procmail-x; ./prepare_obs procmail
+    - uses: actions/upload-artifact@v2
+      with:
+        name: procmail
+        path: |
+          ~/*.tar.gz
+          ~/*.spec
+          ~/*.dsc
+    - shell: bash
+      name: trigger_obs
+      run: |
+        curl -H "Authorization: Token ${{secrets.procmail_obs_token_value}}" -X POST https://build.opensuse.org/trigger/runservice

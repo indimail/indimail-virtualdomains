@@ -8,7 +8,7 @@ on:
       - '**/indium-x/**'
       - .github/workflows/indium-freebsd.yml
       - '!**/indium-x/debian/*'
-      - '!**/indium-x/doc/*'
+      - '!**/doc/*'
       - '!**.md'
 
 jobs:

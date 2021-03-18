@@ -8,7 +8,7 @@ on:
       - '**/indimail-x/**'
       - .github/workflows/indimail-c-cpp.yml
       - '!**/indimail-x/debian/*'
-      - '!**/indimail-x/doc/*'
+      - '!**/doc/*'
       - '!**.md'
 
 jobs:

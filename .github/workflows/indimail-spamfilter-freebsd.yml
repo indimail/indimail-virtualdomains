@@ -1,14 +1,14 @@
-name: bogofilter FreeBSD CI
+name: indimail-spamfilter FreeBSD CI
 
 on:
   push:
     branches:
       - master
     paths:
-      - '**/bogofilter-x/**'
-      - .github/workflows/bogofilter-freebsd.yml
-      - '!**/bogofilter-x/debian/*'
-      - '!**/bogofilter-x/doc/*'
+      - '**/indimail-spamfilter-x/**'
+      - .github/workflows/indimail-spamfilter-freebsd.yml
+      - '!**/indimail-spamfilter-x/debian/*'
+      - '!**/doc/*'
       - '!**.md'
 
 jobs:
@@ -20,11 +20,11 @@ jobs:
       MYTOKEN2: "value2"
     steps:
     - uses: actions/checkout@v2
-    - name: build bogofilter
+    - name: build indimail-spamfilter
       id: FreeBSD
       uses: vmactions/freebsd-vm@v0.1.2
       with:
         envs: 'MYTOKEN MYTOKEN2'
         usesh: true
         prepare: pkg install -y curl automake autoconf libtool pkgconf xmlto db5
-        run: cd bogofilter-x; ./default.configure; make
+        run: cd indimail-spamfilter-x; ./default.configure; make

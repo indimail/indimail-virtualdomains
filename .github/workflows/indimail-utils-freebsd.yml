@@ -5,12 +5,13 @@ on:
     branches:
       - master
     paths:
-      - '**/indimail-x/altermime-x/**'
-      - '**/indimail-x/ripmime-x/**'
-      - '**/indimail-x/fortune-x/**'
-      - '**/indimail-x/mpack-x/**'
-      - '**/indimail-x/flash-x/**'
+      - '**/altermime-x/**'
+      - '**/ripmime-x/**'
+      - '**/fortune-x/**'
+      - '**/mpack-x/**'
+      - '**/flash-x/**'
       - .github/workflows/indimail-utils-freebsd.yml
+      - '!**/doc/*'
       - '!**.md'
 
 jobs:

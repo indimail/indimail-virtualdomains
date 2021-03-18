@@ -8,7 +8,7 @@ on:
       - '**/procmail-x/**'
       - .github/workflows/procmail-c-cpp.yml
       - '!**/procmail-x/debian/*'
-      - '!**/procmail-x/doc/*'
+      - '!**/doc/*'
       - '!**.md'
 
 jobs:

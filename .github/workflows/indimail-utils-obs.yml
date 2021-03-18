@@ -5,16 +5,14 @@ on:
     branches:
       - master
     paths:
-      - '**/indimail-x/altermime-x/**'
-      - '**/indimail-x/ripmime-x/**'
-      - '**/indimail-x/fortune-x/**'
-      - '**/indimail-x/mpack-x/**'
-      - '**/indimail-x/flash-x/**'
+      - '**/altermime-x/**'
+      - '**/ripmime-x/**'
+      - '**/fortune-x/**'
+      - '**/mpack-x/**'
+      - '**/flash-x/**'
       - .github/workflows/indimail-utils-obs.yml
       - '!**/doc/*'
       - '!**.md'
-      - '!**/*.freebsd.yml'
-      - '!**/*.c-cpp.yml'
 
 jobs:
   build:
@@ -24,7 +22,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: prepare obs
-      run: sudo apt-get update; sudo apt-get install curl; cd indimail-utils; ./prepare_obs indimail-utils
+      run: sudo apt-get update; sudo apt-get install curl libncurses5-dev; cd indimail-utils; ./prepare_obs indimail-utils
     - uses: actions/upload-artifact@v2
       with:
         name: indimail-utils
