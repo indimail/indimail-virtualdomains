@@ -1,0 +1,34 @@
+name: indium obs trigger
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '**/indium-x/**'
+      - .github/workflows/indium-obs.yml
+      - '!**/doc/*'
+      - '!**.md'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout_indium
+      uses: actions/checkout@v2
+
+    - name: prepare obs
+      run: |
+        sudo apt-get update; sudo apt-get install curl libmysqlclient-dev tcl-dev
+        cd indium-x; ./prepare_obs indium
+    - uses: actions/upload-artifact@v2
+      with:
+        name: indium
+        path: |
+          ~/*.tar.gz
+          ~/*.spec
+          ~/*.dsc
+    - shell: bash
+      name: trigger_obs
+      run: |
+        curl -H "Authorization: Token ${{secrets.indium_obs_token_value}}" -X POST https://build.opensuse.org/trigger/runservice
