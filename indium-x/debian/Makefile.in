@@ -16,7 +16,7 @@ all: rules postrm postinst debian.tar.gz dummy.tar.gz  \
 	indium.dsc indium-Debian_9.0.dsc indium-Debian_10.dsc
 
 clean:
-	/bin/rm -f rules postrm postinst indium.dsc debian.tar.gz dummy.tar.gz indium.install
+	/bin/rm -f rules postrm postinst indium.dsc debian.tar.gz dummy.tar.gz indium.install README
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
@@ -51,7 +51,7 @@ changelog: changelog.in ../conf-version ../conf-release
 	echo " -- Manvendra Bhangui <indimail-access@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
 	| $(edit) > $@
 
-dummy.tar.gz: README
-	tar cf - README |gzip > $@
+dummy.tar.gz:
+	echo "dummy file" > README; tar cf - README |gzip > $@
 debian.tar.gz: copyright rules control changelog postrm postinst compat indium.install
 	tar cf - copyright rules postrm postinst control changelog compat indium.install|gzip > $@
