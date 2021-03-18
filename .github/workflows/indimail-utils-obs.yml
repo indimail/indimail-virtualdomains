@@ -15,19 +15,6 @@ on:
       - '!**.md'
       - '!**/*.freebsd.yml'
       - '!**/*.c-cpp.yml'
-  pull_request:
-    branches: [ master ]
-    paths:
-      - '**/indimail-x/altermime-x/**'
-      - '**/indimail-x/ripmime-x/**'
-      - '**/indimail-x/fortune-x/**'
-      - '**/indimail-x/mpack-x/**'
-      - '**/indimail-x/flash-x/**'
-      - .github/workflows/indimail-auth-obs.yml
-      - '!**/doc/*'
-      - '!**.md'
-      - '!**/*.freebsd.yml'
-      - '!**/*.c-cpp.yml'
 
 jobs:
   build:
