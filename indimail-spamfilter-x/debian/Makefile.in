@@ -19,7 +19,7 @@ edit = sed \
 	-e 's,@DATE\@,$(DATE),g'
 
 all: rules changelog prerm postrm postinst indimail-spamfilter.install \
-	indimail-spamfilter-Debian_8.0.dsc indimail-spamfilter.dsc debian.tar.gz 
+	indimail-spamfilter-Debian_8.0.dsc indimail-spamfilter.dsc debian.tar.gz dummy.tar.gz
 
 prerm: prerm.in Makefile
 	$(edit) $@.in > $@
