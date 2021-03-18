@@ -11,4 +11,4 @@ Debtransform-Release: 1
 Debtransform-Files-Tar: debian.tar.gz
 Debtransform-Tar: indimail-spamfilter-@version@.tar.bz2
 Standards-Version: 3.9.1
-Build-Depends: cdbs, debhelper (>= 9), gcc, g++, automake, libgsl-dev, bison (>= 1.2), flex (>= 2.5), libdb-dev, m4
+Build-Depends: cdbs, debhelper (>= 9), gcc, g++, automake, xmlto, libgsl-dev, bison (>= 1.2), flex (>= 2.5), libdb-dev, m4
