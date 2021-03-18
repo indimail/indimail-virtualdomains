@@ -15,7 +15,7 @@ all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
 	iwebadmin.dsc iwebadmin-Debian_9.0.dsc iwebadmin-Debian_10.dsc
 
 clean:
-	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz _service
+	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz _service README
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
@@ -48,7 +48,7 @@ changelog: changelog.in ../conf-version ../conf-release
 	| $(edit) > $@
 _service: _service.in
 	$(edit) $@.in > $@
-dummy.tar.gz: README
-	tar cf - README |gzip > $@
+dummy.tar.gz:
+	echo "dummy file" > README; tar cf - README |gzip > $@
 debian.tar.gz: copyright rules control changelog postinst postrm compat iwebadmin.install
 	tar cf - copyright rules postinst postrm control changelog compat iwebadmin.install |gzip > $@

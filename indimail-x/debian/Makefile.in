@@ -29,7 +29,7 @@ distclean: clean
 clean:
 	/bin/rm -f rules indimail.prerm indimail.preinst indimail.postrm \
 	indimail.postinst indimail-dev.postinst indimail-dev.postrm \
-	debian.tar.gz dummy.tar.gz *.dsc *.install
+	debian.tar.gz dummy.tar.gz *.dsc *.install README
 
 noinst_SCRIPTS = indimail.prerm indimail.preinst indimail.postrm \
 				 indimail.postinst rules \
@@ -100,8 +100,8 @@ indimail-xUbuntu_18.04.dsc: indimail-xUbuntu_18.04.dsc.in Makefile ../conf-versi
 
 #sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
 
-dummy.tar.gz: README
-	tar cf - README |gzip > $@
+dummy.tar.gz:
+	echo "dummy file" > README; tar cf - README |gzip > $@
 debian.tar.gz: copyright indimail.preinst indimail.postinst indimail.prerm \
 indimail.postrm rules changelog compat indimail-dev.postinst \
 indimail-dev.postrm Makefile control indimail.cron.d control \

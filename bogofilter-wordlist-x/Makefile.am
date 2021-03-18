@@ -22,8 +22,8 @@ edit = sed \
 	-e "s|@release\@|"`cat conf-release`"|g" \
 	-e 's,@prefix\@,$(prefix),g'
 
-bogofilter-wordlist.spec: bogofilter-wordlist.spec.in conf-version conf-release
-	$(edit) $@.in > $@
+bogofilter-wordlist.spec: bogofilter-wordlist.spec.in catChangeLog doc/ChangeLog conf-version conf-release
+	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
 
 wordlist.db: training/easy_ham training/easy_ham_2 training/hard_ham \
 training/spam training/spam_2

@@ -9,7 +9,7 @@ all: rules debian.tar.gz dummy.tar.gz  \
 	bogofilter-wordlist.dsc
 
 clean:
-	/bin/rm -f rules *.dsc debian.tar.gz dummy.tar.gz
+	/bin/rm -f rules *.dsc debian.tar.gz dummy.tar.gz README
 
 edit = sed \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
@@ -27,7 +27,7 @@ changelog: changelog.in ../conf-version ../conf-release Makefile
 	echo " -- Manvendra Bhangui <indimail-spamfilter@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
 	| $(edit) > $@
 
-dummy.tar.gz: README
-	tar cf - README |gzip > $@
+dummy.tar.gz:
+	echo "dummy file" > README; tar cf - README |gzip > $@
 debian.tar.gz: copyright rules control changelog compat bogofilter-wordlist.install
 	tar cf - copyright rules control changelog compat bogofilter-wordlist.install|gzip > $@

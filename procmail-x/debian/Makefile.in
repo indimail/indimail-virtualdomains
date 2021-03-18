@@ -8,7 +8,7 @@ all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
 	procmail.dsc
 
 clean:
-	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz changelog
+	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz changelog README
 
 edit = sed \
 	-e 's,@version\@,$(version),g' \
@@ -29,7 +29,7 @@ changelog: changelog.in Makefile ../conf-version ../conf-release
 	echo " -- Manvendra Bhangui <indimail-virtualdomains@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
 	| $(edit) > $@
 
-dummy.tar.gz: README
-	tar cf - README |gzip > $@
+dummy.tar.gz:
+	echo "dummy file" > README; tar cf - README |gzip > $@
 debian.tar.gz: copyright rules control changelog postinst postrm compat
 	tar cf - copyright rules postinst postrm control changelog compat |gzip > $@

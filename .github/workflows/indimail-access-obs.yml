@@ -20,7 +20,7 @@ jobs:
 
     - name: prepare obs
       run: |
-        sudo apt-get update; sudo apt-get install curl automake libpam0g-dev libpcre3-dev libgdbm-dev libdb-dev libgcrypt20-dev libgamin-dev python libssl-dev bison flex libidn11-dev
+        sudo apt-get update; sudo apt-get install curl automake gettext autopoint libpam0g-dev libpcre3-dev libgdbm-dev libdb-dev libgcrypt20-dev libgamin-dev python libssl-dev bison flex libidn11-dev
         cd indimail-access; ./prepare_obs indimail-access
     - uses: actions/upload-artifact@v2
       with:
