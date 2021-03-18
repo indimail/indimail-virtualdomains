@@ -85,6 +85,7 @@ debian/postinst
 debian/prerm
 debian/postrm
 debian/rules
+debian/README
 indimail-spamfilter.spec
 configure.lineno
 perm_list.bogofilter

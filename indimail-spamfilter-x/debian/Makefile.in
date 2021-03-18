@@ -21,6 +21,8 @@ edit = sed \
 all: rules changelog prerm postrm postinst indimail-spamfilter.install \
 	indimail-spamfilter-Debian_8.0.dsc indimail-spamfilter.dsc debian.tar.gz dummy.tar.gz
 
+dummy.tar.gz:
+	echo "dummy files" > README;tar cf - README |gzip > $@
 prerm: prerm.in Makefile
 	$(edit) $@.in > $@
 postrm: postrm.in Makefile
@@ -47,4 +49,4 @@ indimail-spamfilter.install Makefile control
 
 clean:
 	/bin/rm -f rules *.dsc prerm postrm postinst changelog \
-	indimail-spamfilter.install debian.tar.gz
+	indimail-spamfilter.install debian.tar.gz README
