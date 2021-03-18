@@ -2,6 +2,9 @@ name: bogofilter Ubuntu, Mac OSX CI
 
 on:
   push:
+    pull_request:
+      - main
+      - master
     branches:
       - master
     paths:

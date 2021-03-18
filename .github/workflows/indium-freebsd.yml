@@ -2,6 +2,9 @@ name: indium FreeBSD CI
 
 on:
   push:
+    pull_request:
+      - main
+      - master
     branches:
       - master
     paths:
