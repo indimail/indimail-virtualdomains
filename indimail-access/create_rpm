@@ -107,7 +107,7 @@ if [ $copy_src -eq 1 ] ; then
 	list=`get_tar_files`
 	for i in $list
 	do
-		dir=`echo $i | sed -e 's{-[0-9].*tar.bz2{{g' -e 's{-[0-9].*tar.xz{{g'`
+		dir=`echo $i | sed -e 's{-[0-9].*tar.bz2{{g' -e 's{-[0-9].*tar.xz{{g' -e 's{-[0-9].*tar.gz{{g'`
 		echo "Versioning $dir"
 		if [ ! -d $dir-x ] ; then
 			echo "$dir-x: No such file or directory" 1>&2
@@ -116,11 +116,11 @@ if [ $copy_src -eq 1 ] ; then
 		case "$dir" in
 			courier-imap)
 			package_version=$courier_version
-			do_archive="bz2"
+			do_archive="gz"
 			;;
 			fetchmail)
 			package_version=$fetchmail_version
-			do_archive="xz"
+			do_archive="gz"
 			;;
 		esac
 		/bin/cp -rp "$dir"-x stage/$dir-"$package_version"
@@ -131,6 +131,16 @@ if [ $copy_src -eq 1 ] ; then
 		/bin/rm -rf autom4te.cache .deps
 		cd ..
 		case "$do_archive" in
+			gz)
+			echo "Archiving "$dir"-"$package_version".tar.gz in `pwd`"
+			tar \
+			--exclude=""$dir"-"$package_version"/.git" \
+			--exclude=""$dir"-"$package_version"/debian"  \
+			--exclude=""$dir"-"$package_version"/RCS" \
+			-cf - $dir-$package_version \
+			| gzip -c > $rpmbuild/SOURCES/"$dir"-"$package_version".tar.gz
+			SRC="$rpmbuild/SOURCES/"$dir"-"$package_version".tar.xz $SRC"
+			;;
 			xz)
 			echo "Archiving "$dir"-"$package_version".tar.xz in `pwd`"
 			tar \
