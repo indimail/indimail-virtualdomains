@@ -67,8 +67,6 @@ prepare_artifacts()
         cp debian/*.dsc $stage
         make -C debian clean >/dev/null
       fi
-      #remove debian directory
-      /bin/rm -rf $pkg_name-$ver/debian
     fi
     if [ -f $pkg_name-rpmlintrc ] ; then
       cp $pkg_name-rpmlintrc $stage
@@ -86,6 +84,8 @@ prepare_artifacts()
     ln -s $pkg_name-$ver $real_name
   fi
 
+  #remove debian directory
+  /bin/rm -rf $pkg_name-$ver/debian $pkg_name-$ver/autom4te.cache
   tar cfz $pkg_name-$ver.tar.gz $pkg_name-$ver
   if [ $multi_mode -eq 0 ] ; then
     /bin/rm -rf $pkg_name-$ver
