@@ -20,7 +20,7 @@ jobs:
     - name: prepare obs
       run: |
         sudo apt-get update
-        sudo apt-get install curl automake xmlto libgsl-dev libpcre3-dev libgcrypt20-dev python libssl-dev bison flex
+        sudo apt-get install curl automake xmlto libgsl-dev bison flex libdb-dev
         cd indimail-spamfilter-x; ./prepare_obs indimail-spamfilter-x
     - uses: actions/upload-artifact@v2
       with:
