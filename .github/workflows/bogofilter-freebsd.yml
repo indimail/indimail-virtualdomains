@@ -28,5 +28,5 @@ jobs:
       with:
         envs: 'MYTOKEN MYTOKEN2'
         usesh: true
-        prepare: pkg install -y curl automake autoconf libtool pkgconf xmto db5
+        prepare: pkg install -y curl automake autoconf libtool pkgconf xmlto db5
         run: cd bogofilter-x; ./default.configure; make
