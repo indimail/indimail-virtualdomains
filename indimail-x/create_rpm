@@ -46,7 +46,6 @@ while test $# -gt 0; do
     *)
     echo "invalid option [$1]"
     read key
-    usage 1
     ;;
     esac
 
