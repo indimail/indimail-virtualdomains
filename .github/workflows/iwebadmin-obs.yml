@@ -5,8 +5,7 @@ on:
     branches:
       - master
     paths:
-      - '**/nssd-x/**'
-      - '**/pam-multi-x/**'
+      - '**/iwebadmin-x/**'
       - .github/workflows/iwebadmin-obs.yml
       - '!**/doc/*'
       - '!**.md'
