@@ -1,8 +1,6 @@
 conf-release
 indimail-utils.spec
-doc
 debian/changelog
-debian/changelog.in
 debian/Makefile
 debian/debian.tar.gz
 debian/dummy.tar.gz
