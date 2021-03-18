@@ -26,6 +26,7 @@ fortunedatadir=@datarootdir@/fortunes
 fortunebin_PROGRAMS = fortune randstr
 fortunesbin_PROGRAMS = strfile unstr rot
 fortunedata_DATA=cookies ocookies
+noinst_SCRIPTS = copy_fortune
 man1_MANS=fortune.man randstr.man strfile.man unstr.man rot.man
 
 doc_list=AUTHORS-fortune README-fortune.md COPYING-fortune
