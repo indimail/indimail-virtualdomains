@@ -55,6 +55,13 @@
 #ifdef SOLARIS
 #include <sys/systeminfo.h>
 #endif
+#ifdef HAVE_INDIMAIL
+#include <indimail/tcpopen.h>
+#include <indimail/filewrt.h>
+#endif
+#ifdef HAVE_QMAIL
+#include <qmail/getEnvConfig.h>
+#endif
 #include "tls.h"
 
 #define MAXBUF 8192
@@ -288,7 +295,7 @@ consclnt(hostname, fname, clientcert)
 #endif
 		/*- send my hostname */
 		idx = strlen(lhost) + 1;
-		getEnvConfigInt((long *) &log_timeout, "LOGSRV_TIMEOUT", 120);
+		getEnvConfigInt(&log_timeout, "LOGSRV_TIMEOUT", 120);
 		if (safewrite(sockfd, lhost, idx, log_timeout) != idx)
 		{
 			filewrt(2, "unable to send hostname to %s\n", lhost);
@@ -451,8 +458,10 @@ checkfiles(fname, msgfp, seekval, seekfd)
 	}
 }
 
+#ifndef	lint
 void
 getversion_logclient_c()
 {
 	printf("%s\n", sccsid);
 }
+#endif

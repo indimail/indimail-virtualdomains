@@ -99,7 +99,12 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #endif
+#ifdef HAVE_INDIMAIL
 #include <indimail/filewrt.h>
+#endif
+#ifdef HAVE_QMAIL
+#include <qmail/getEnvConfig.h>
+#endif
 #include "tls.h"
 #include "common.h"
 
@@ -481,7 +486,7 @@ main(int argc, char **argv)
 			return (1);
 	}
 #endif
-	getEnvConfigInt((long *) &log_timeout, "LOGSRV_TIMEOUT", 120);
+	getEnvConfigInt(&log_timeout, "LOGSRV_TIMEOUT", 120);
 	if (!(statusdir = getenv("STATUSDIR")))
 		statusdir = STATUSDIR;
 	if (!foreground) {
@@ -924,8 +929,10 @@ SigTerm()
 	exit(0);
 }
 
+#ifndef	lint
 void
 getversion_logsrv_c()
 {
 	printf("%s\n", sccsid);
 }
+#endif

@@ -324,8 +324,10 @@ main(int argc, char **argv)
 	/* NOTREACHED */
 }
 
+#ifndef	lint
 void
 getversion_rpclog_c()
 {
 	printf("%s\n", sccsid);
 }
+#endif

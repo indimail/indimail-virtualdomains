@@ -49,8 +49,10 @@ main(int argc, char **argv)
 	_exit (0);
 }
 
+#ifndef	lint
 void
 getversion_showbytes_c()
 {
 	printf("%s\n", sccsid);
 }
+#endif

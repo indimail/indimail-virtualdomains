@@ -47,6 +47,9 @@
 #ifdef SOLARIS
 #include <sys/systeminfo.h>
 #endif
+#ifdef HAVE_INDIMAIL
+#include <indimail/tcpopen.h>
+#endif
 
 #define MAXBUF  8192
 #define SEEKDIR "/var/tmp/incrmesg"
@@ -303,8 +306,10 @@ checkfiles(fname, msgfp, seekval, seekfd)
 	}
 }
 
+#ifndef	lint
 void
 getversion_incrmesg_c()
 {
 	printf("%s\n", sccsid);
 }
+#endif
