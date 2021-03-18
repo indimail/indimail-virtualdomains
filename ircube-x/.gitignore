@@ -4,7 +4,6 @@ INSTALL
 *.gz
 aclocal.m4
 ./configure
-Makefile
 missing
 depcomp
 m4
