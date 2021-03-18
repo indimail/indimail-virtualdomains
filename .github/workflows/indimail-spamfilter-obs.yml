@@ -21,7 +21,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install curl automake xmlto libgsl-dev bison flex libdb-dev
-        cd indimail-spamfilter-x; ./prepare_obs indimail-spamfilter-x
+        cd indimail-spamfilter-x; ./prepare_obs indimail-spamfilter
     - uses: actions/upload-artifact@v2
       with:
         name: indimail-spamfilter
