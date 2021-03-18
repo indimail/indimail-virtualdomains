@@ -50,7 +50,7 @@ Group: System Environment/Base
 %else
 Group: Productivity/Networking/Email/Servers
 %endif
-Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.bz2
+Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 Source1: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 %if 0%{?suse_version} >= 1120
 Source2: http://downloads.sourceforge.net/indimail/%{name}-permissions.easy
