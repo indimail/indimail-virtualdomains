@@ -139,9 +139,7 @@ else
   prepare_artifacts $1 $HOME/stage 0
 fi
 ls -l $HOME/stage
-##############
-#mv $HOME/stage/* $HOME
+mv $HOME/stage/* $HOME
 rmdir $HOME/stage --ignore-fail-on-non-empty
-##############
 echo HOME=$HOME
 exit $?
