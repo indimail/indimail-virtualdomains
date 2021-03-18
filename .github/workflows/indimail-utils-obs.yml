@@ -15,8 +15,6 @@ on:
       - '!**.md'
       - '!**/*.freebsd.yml'
       - '!**/*.c-cpp.yml'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:

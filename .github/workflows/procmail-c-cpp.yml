@@ -2,9 +2,6 @@ name: procmail Ubuntu, Mac OSX CI
 
 on:
   push:
-    pull_request:
-      - main
-      - master
     branches:
       - master
     paths:
@@ -13,8 +10,6 @@ on:
       - '!**/procmail-x/debian/*'
       - '!**/procmail-x/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:

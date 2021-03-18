@@ -2,9 +2,6 @@ name: indimail-utils Ubuntu, Mac OSX CI
 
 on:
   push:
-    pull_request:
-      - main
-      - master
     branches:
       - master
     paths:
@@ -15,8 +12,6 @@ on:
       - '**/indimail-x/flash-x/**'
       - .github/workflows/indimail-utils-c-cpp.yml
       - '!**.md'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:

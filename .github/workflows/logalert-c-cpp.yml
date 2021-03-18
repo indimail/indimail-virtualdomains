@@ -2,9 +2,6 @@ name: logalert Ubuntu, Mac OSX CI
 
 on:
   push:
-    pull_request:
-      - main
-      - master
     branches:
       - master
     paths:
@@ -13,8 +10,6 @@ on:
       - '!**/logalert-x/debian/*'
       - '!**/logalert-x/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:

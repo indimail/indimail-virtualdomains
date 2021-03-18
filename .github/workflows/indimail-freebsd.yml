@@ -2,9 +2,6 @@ name: indimail FreeBSD CI
 
 on:
   push:
-    pull_request:
-      - main
-      - master
     branches:
       - master
     paths:
@@ -13,8 +10,6 @@ on:
       - '!**/indimail-x/debian/*'
       - '!**/indimail-x/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
 
 jobs:
   testfreebsd:
