@@ -1,7 +1,5 @@
 nssd-1.3
 pam-multi-1.2
-doc/ChangeLog
-debian/changelog.in
 debian/changelog
 conf-release
 indimail-auth.spec
@@ -17,4 +15,3 @@ debian/changelog
 debian/debian.tar.gz
 debian/dummy.tar.gz
 debian/*.dsc
-debian/indimail-auth.substvars
