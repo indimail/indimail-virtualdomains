@@ -50,7 +50,7 @@ stamp-ocookies: datfiles/off/unrotated
 	if [ " $(ENABLE_OFFENSIVE)" = " 1" ] ; then \
 	for i in $(OCOOKIES) ; do rot < datfiles/off/unrotated/$$i > datfiles/$$i && ./strfile -x datfiles/$$i >/dev/null || exit 1 ; done ; touch stamp-ocookies;fi
 
-install-data-hook:
+install-data-hook: copy_fortune
 	$(mkinstalldirs) $(DESTDIR)$(datarootdir)/doc || exit 1
 	for f in $(doc_list); do \
 		$(INSTALL_DATA) $$f $(DESTDIR)$(datarootdir)/doc/$$f || exit 1 ;\
