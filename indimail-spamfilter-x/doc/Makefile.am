@@ -16,7 +16,7 @@ html_MANS = bogofilter.html bogoutil.html bogoupgrade.html \
 
 all: $(man_MANS) $(html_MANS)
 
-CLEANFILES = $(man_MANS) $(html_MANS)
+#CLEANFILES = $(man_MANS) $(html_MANS)
 
 HTML_DOCS = bogofilter-faq.html bogofilter-faq-fr.html bogofilter-faq-it.html bogotune-faq.html
 XHTML_DOCS= bogofilter-faq-bg.xhtml

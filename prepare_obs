@@ -85,7 +85,7 @@ prepare_artifacts()
   fi
 
   #remove debian directory
-  /bin/rm -rf $pkg_name-$ver/debian $pkg_name-$ver/autom4te.cache
+  /bin/rm -rf $pkg_name-$ver/debian $pkg_name-$ver/autom4te.cache $pkg_name-$ver/.deps
   tar cfz $pkg_name-$ver.tar.gz $pkg_name-$ver
   if [ $multi_mode -eq 0 ] ; then
     /bin/rm -rf $pkg_name-$ver
