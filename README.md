@@ -801,6 +801,8 @@ Replace First M. Last with your name.
 
 # Binary Packages Build
 
+**Build Status on [Open Build Service](https://build.opensuse.org/project/show/home:mbhangui)**
+
 [![indimail obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-obs.yml)
 [![indimail-access obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-access-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-access-obs.yml)
 [![indimail-auth obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-auth-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-auth-obs.yml)
