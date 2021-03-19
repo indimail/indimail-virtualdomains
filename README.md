@@ -27,8 +27,8 @@ Messaging Platform based on [indimail-mta](https://github.com/mbhangui/indimail-
 [![courier-imap FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-freebsd.yml)
 [![fetchmail Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/fetchmail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/fetchmail-c-cpp.yml)
 [![fetchmail FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/fetchmail-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/fetchmail-freebsd.yml)
-[![bogofilter Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-c-cpp.yml)
-[![bogofilter FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-freebsd.yml)
+[![spamfilter Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-spamfilter-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-c-cpp.yml)
+[![spamfilter FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-spamfilter-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-freebsd.yml)
 [![bogofilter-wordlist Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-c-cpp.yml)
 [![bogofilter-wordlist FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-freebsd.yml)
 [![indimail-utils Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml)
@@ -800,6 +800,18 @@ You can also play around with the system at this point. Try POP3 (110), POP3s (9
 Replace First M. Last with your name.
 
 # Binary Packages Build
+
+[![indimail obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-obs.yml)
+[![indimail-access obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-access-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-access-obs.yml)
+[![indimail-auth obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-auth-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-auth-obs.yml)
+[![indimail-spamfilter obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-spamfilter-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-spamfilter-obs.yml)
+[![bogofilter-wordlist obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-obs.yml)
+[![indimail-utils obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-obs.yml)
+[![iwebadmin obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-obs.yml)
+[![ircube obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-obs.yml)
+[![procmail obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/procmail-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/procmail-obs.yml)
+[![logalert obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-obs.yml)
+[![indium obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-obs.yml)
 
 If you need to have indimail on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command. To generate RPM packages locally for all components refer to [Binary Packages](.github/CREATE-Packages.md).
 
