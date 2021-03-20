@@ -228,7 +228,12 @@ languages and applications need to dynamically load and use IndiMail.
 For more details visit %{url}
 
 %prep
+%if %build_on_obs == 1
+sh ../SOURCES/obs_script indimail-x indimail
+%setup -TDqn %{name}-%{version}
+%else
 %setup -q
+%endif
 
 %build
 ID=$(id -u)
@@ -1659,7 +1664,7 @@ fi
 
 # fix changelog for openSUSE buildservice
 %changelog
-* Sat Mar 20 2021 20:44:57 +0530 indimail-virtualdomains@indimail.org 3.4-1.1%{?dist}
+* Sun Mar 21 2021 04:44:28 +0530 indimail-virtualdomains@indimail.org 3.4-1.1%{?dist}
 Release 3.4 Start 14/02/2021
 01. sql_adddomain.c,, sql_setpw.c : replaced CREATE TABLE statements with
     create_table() function
