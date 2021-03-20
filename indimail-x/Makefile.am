@@ -206,7 +206,7 @@ noinst_SCRIPTS = vadddomain_handle vadduser_handle vdeldomain_handle \
 	vdeluser_handle vrenameuser_handle
 
 noinst_DATA = indimail-permissions.easy indimail-permissions.paranoid \
-	indimail-permissions.secure indimail.spec indimail-rpmlintrc
+	indimail-permissions.secure obs_dist indimail-rpmlintrc
 
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain vmoduser vpasswd \
 	vdeluser vrenameuser
@@ -780,8 +780,11 @@ usr.bin.freshclam: usr.bin.freshclam.in
 indimail_config.h: config.h
 	egrep -v "#define PACKAGE|#define VERSION" config.h > indimail_config.h
 
-debian/Makefile: debian/Makefile.in configure.ac conf-version
-	$(edit) $@.in > $@;
+obs_dist: debian/Makefile.in indimail.spec.in catChangeLog doc/ChangeLog \
+conf-version conf-release
+	$(edit) debian/Makefile.in > debian/Makefile
+	(cat indimail.spec.in;./catChangeLog) | $(edit) > obs_dist/indimail.spec
+	make -C debian;mv debian/debian.tar.gz obs_dist
 
 post_handle:
 	mkdir -p post_handle
@@ -808,8 +811,7 @@ conf-release:
 	if [ ! -f conf-release ] ; then \
 		echo 1.1 > conf-release; \
 	fi
-indimail.spec: indimail.spec.in catChangeLog doc/ChangeLog conf-version conf-release
-	(cat $@.in;./catChangeLog) | $(edit) > $@
+
 indimail-rpmlintrc: indimail-rpmlintrc.in
 	$(edit) indimail-rpmlintrc.in > $@
 login_tasks.3: login_tasks.9

@@ -82,7 +82,6 @@ indimail-release
 indimail-*-rpmlintrc
 indimail.settings
 indimail_settings.c
-indimail.spec
 indisrvr
 indisub.c
 indiversion
