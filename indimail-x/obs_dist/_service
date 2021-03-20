@@ -1,0 +1,15 @@
+<services>
+  <service name="tar_scm" mode="manual">
+    <param name="url">git://github.com/mbhangui/indimail-virtualdomains.git</param>
+    <param name="scm">git</param>
+    <param name="extract">obs_dist/indimail.changes</param>
+    <param name="extract">obs_dist/indimail.spec</param>
+    <param name="extract">obs_dist/*.dsc</param>
+    <param name="extract">obs_dist/debian.tar.gz</param>
+  </service>
+  <service name="recompress" mode="manual">
+    <param name="compression">gz</param>
+    <param name="file">*.tar</param>
+  </service>
+  <service name="set_version" mode="manual"/>
+</services>

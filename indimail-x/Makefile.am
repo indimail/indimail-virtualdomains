@@ -206,7 +206,7 @@ noinst_SCRIPTS = vadddomain_handle vadduser_handle vdeldomain_handle \
 	vdeluser_handle vrenameuser_handle
 
 noinst_DATA = indimail-permissions.easy indimail-permissions.paranoid \
-	indimail-permissions.secure obs_dist indimail-rpmlintrc
+	indimail-permissions.secure obs_dist obs_dist/indimail.spec indimail-rpmlintrc
 
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain vmoduser vpasswd \
 	vdeluser vrenameuser
@@ -780,11 +780,25 @@ usr.bin.freshclam: usr.bin.freshclam.in
 indimail_config.h: config.h
 	egrep -v "#define PACKAGE|#define VERSION" config.h > indimail_config.h
 
-obs_dist: debian/Makefile.in indimail.spec.in catChangeLog doc/ChangeLog \
-conf-version conf-release
+obs_dist: debian/build-stamp
+	mv debian/debian.tar.gz debian/*.dsc obs_dist
+
+debian/build-stamp: debian/Makefile debian/rules.in debian/indimail.prerm.in \
+debian/indimail.postrm.in debian/indimail.preinst.in debian/indimail.postinst.in \
+debian/indimail-dev.postrm.in debian/indimail-dev.postinst.in \
+debian/indimail.install.in debian/indimail-dev.install.in \
+debian/libindimail.install.in debian/indimail.cron.d.in \
+debian/indimail.dsc.in debian/indimail-Debian_10.dsc.in \
+debian/indimail-Debian_9.0.dsc.in debian/indimail-xUbuntu_18.04.dsc.in \
+debian/copyright debian/changelog.in debian/compat debian/control
+	make -C debian
+
+debian/Makefile: debian/Makefile.in
 	$(edit) debian/Makefile.in > debian/Makefile
+
+obs_dist/indimail.spec: indimail.spec.in doc/ChangeLog catChangeLog \
+conf-version conf-release
 	(cat indimail.spec.in;./catChangeLog) | $(edit) > obs_dist/indimail.spec
-	make -C debian;mv debian/debian.tar.gz obs_dist
 
 post_handle:
 	mkdir -p post_handle
