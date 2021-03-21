@@ -4,13 +4,6 @@ authgeneric
 authindi
 authpgsql
 bogofilter-qfe
-cdb*/config.h
-cdb*/config.log
-cdb*/config.status
-cdb*/libtool
-cdb*/Makefile
-cdb*/Makefile.in
-cdb*/stamp-h1
 chowkidar
 cindimail
 clearopensmtp

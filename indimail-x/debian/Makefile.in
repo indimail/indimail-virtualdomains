@@ -20,7 +20,7 @@ pkgconfigdir=@prefix@/lib/pkgconfig
 all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
 indimail.dsc indimail-Debian_10.dsc indimail-Debian_9.0.dsc \
 indimail-dev.postinst indimail-dev.postrm indimail-xUbuntu_18.04.dsc \
-debian.tar.gz dummy.tar.gz
+debian.tar.gz
 
 install: all
 install-strip: install
@@ -29,7 +29,7 @@ distclean: clean
 clean:
 	/bin/rm -f rules indimail.prerm indimail.preinst indimail.postrm \
 	indimail.postinst indimail-dev.postinst indimail-dev.postrm \
-	debian.tar.gz dummy.tar.gz *.dsc *.install README
+	debian.tar.gz *.dsc *.install README
 
 noinst_SCRIPTS = indimail.prerm indimail.preinst indimail.postrm \
 				 indimail.postinst rules \
@@ -37,7 +37,7 @@ noinst_SCRIPTS = indimail.prerm indimail.preinst indimail.postrm \
 MOSTLYCLEANFILES= indimail.prerm indimail.preinst indimail.postrm \
 				  indimail.postinst rules \
 				  indimail-dev.postinst indimail-dev.postrm \
-				  changelog debian.tar.gz dummy.tar.gz
+				  changelog debian.tar.gz
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
@@ -100,8 +100,6 @@ indimail-xUbuntu_18.04.dsc: indimail-xUbuntu_18.04.dsc.in Makefile ../conf-versi
 
 #sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp
 
-dummy.tar.gz:
-	echo "dummy file" > README; tar cf - README |gzip > $@
 debian.tar.gz: copyright indimail.preinst indimail.postinst indimail.prerm \
 indimail.postrm rules changelog compat indimail-dev.postinst \
 indimail-dev.postrm Makefile control indimail.cron.d control \

@@ -25,9 +25,6 @@ cp=/bin/cp
 
 DESTDIR=$(CURDIR)/debian/tmp
 
-#define genControl
-#$(shell if [ -d ../BUILD ] ; then ../BUILD/debian/gen_control; else debian/gen_control;fi)
-#endef
 libdir=@prefix@/lib
 pkgconfigdir=@prefix@/lib/pkgconfig
 
@@ -93,7 +90,6 @@ binary-indep: build install
 	dh_installdeb
 	dh_makeshlibs -V
 	dh_shlibdeps
-	#$(genControl)
 	dh_gencontrol
 	dh_installcron
 	dh_md5sums
