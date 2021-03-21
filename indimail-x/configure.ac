@@ -1113,7 +1113,7 @@ echo "            Prefix = $prefix"
 echo "   qmail directory = $qmaildir --enable-qmaildir=$qmaildir"
 echo " control directory = $controldir --enable-controldir=$controldir"
 echo " domains directory = $domaindir --enable-domaindir=$domaindir"
-echo "        sysconfdir = $q_sysconfdir"
+echo "        sysconfdir = $sysconfdir"
 echo "        servicedir = $servicedir"
 if test "$postfixdir" != ""
 then

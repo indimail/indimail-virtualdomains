@@ -21,7 +21,6 @@ all: rules indimail.prerm indimail.preinst indimail.postrm indimail.postinst \
 indimail.dsc indimail-Debian_10.dsc indimail-Debian_9.0.dsc \
 indimail-dev.postinst indimail-dev.postrm indimail-xUbuntu_18.04.dsc \
 debian.tar.gz dummy.tar.gz
-	touch build-stamp
 
 install: all
 install-strip: install
@@ -111,4 +110,5 @@ indimail.install indimail-dev.install libindimail.install docs
 		indimail.postrm rules changelog compat control \
 		indimail-dev.postinst indimail-dev.postrm \
 		indimail.cron.d  docs indimail.install \
-		indimail-dev.install libindimail.install |gzip > $@
+		indimail-dev.install libindimail.install |gzip > $@; \
+	touch build-stamp

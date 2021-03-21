@@ -206,7 +206,7 @@ noinst_SCRIPTS = vadddomain_handle vadduser_handle vdeldomain_handle \
 	vdeluser_handle vrenameuser_handle
 
 noinst_DATA = indimail-permissions.easy indimail-permissions.paranoid \
-	indimail-permissions.secure obs_dist obs_dist/indimail.spec indimail-rpmlintrc
+	indimail-permissions.secure indimail-rpmlintrc
 
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain vmoduser vpasswd \
 	vdeluser vrenameuser
@@ -781,7 +781,7 @@ indimail_config.h: config.h
 	egrep -v "#define PACKAGE|#define VERSION" config.h > indimail_config.h
 
 obs_dist: debian/build-stamp
-	mv debian/debian.tar.gz debian/*.dsc obs_dist
+	if [ -d debian ] ; then mv debian/debian.tar.gz debian/*.dsc obs_dist; fi
 
 debian/build-stamp: debian/Makefile debian/rules.in debian/indimail.prerm.in \
 debian/indimail.postrm.in debian/indimail.preinst.in debian/indimail.postinst.in \
