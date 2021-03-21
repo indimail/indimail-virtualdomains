@@ -228,7 +228,12 @@ languages and applications need to dynamically load and use IndiMail.
 For more details visit %{url}
 
 %prep
+%if %build_on_obs == 1
+sh ../SOURCES/obs_script indimail-x indimail
+%setup -TDqn %{name}-%{version}
+%else
 %setup -q
+%endif
 
 %build
 ID=$(id -u)
