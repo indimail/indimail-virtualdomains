@@ -23,7 +23,7 @@ default_domain=indimail.org
 rm=/bin/rm
 cp=/bin/cp
 
-DESTDIR=$(CURDIR)/debian/tmp
+DESTDIR=$(CURDIR)/tmp
 
 #define genControl
 #$(shell if [ -d ../BUILD ] ; then ../BUILD/debian/gen_control; else debian/gen_control;fi)
@@ -37,6 +37,11 @@ build-stamp:
 	#
 	# run configure script
 	#
+	if [ -f ../SOURCES/obs_script ] ; then \
+		sh ../SOURCES/obs_script indimail-x indimail; \
+	elif [ -f ../../SOURCES/obs_script ] ; then \
+		sh ../../SOURCES/obs_script indimail-x indimail; \
+	fi
 	./configure $(shell dpkg-buildflags --export=cmdline) \
 		--prefix=$(prefix) --libdir=$(prefix)/$(libd) \
 		--with-pkgconfigdir=$(pkgconfigdir) --libexecdir=$(libexecdir) \
@@ -93,7 +98,6 @@ binary-indep: build install
 	dh_installdeb
 	dh_makeshlibs -V
 	dh_shlibdeps
-	#$(genControl)
 	dh_gencontrol
 	dh_installcron
 	dh_md5sums
