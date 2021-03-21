@@ -194,9 +194,6 @@ autom4te.cache
 *.la
 .libs
 aclocal.m4
-cdb-1.0/aclocal.m4
-cdb-1.0/config.h.in
-cdb-1.0/m4/
 compile
 config.guess
 config.h
@@ -207,12 +204,10 @@ config.status
 config.sub
 eps-1.2/aclocal.m4
 eps-1.2/config.h.in
-eps-1.2/m4/
 indimail.mrtg.cfg
 install-sh
 libtool
 ltmain.sh
-m4
 missing
 stamp-h1
 debian/indimail.dsc
@@ -224,3 +219,9 @@ ChangeLog
 NEWS
 mytcplookup.c
 tcplookup.8
+debian/build-stamp
+m4/libtool.m4
+m4/ltoptions.m4
+m4/ltsugar.m4
+m4/ltversion.m4
+m4/lt~obsolete.m4
