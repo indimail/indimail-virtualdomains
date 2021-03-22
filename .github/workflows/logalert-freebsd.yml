@@ -2,14 +2,16 @@ name: logalert FreeBSD CI
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
     paths:
       - '**/logalert-x/**'
       - .github/workflows/logalert-freebsd.yml
       - '!**/logalert-x/debian/*'
       - '!**/doc/*'
       - '!**.md'
+  pull_request:
+    branches: [ master ]
+    types: [ synchronize ]
 
 jobs:
   testfreebsd:

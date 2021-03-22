@@ -2,14 +2,16 @@ name: procmail FreeBSD CI
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
     paths:
       - '**/procmail-x/**'
       - .github/workflows/procmail-freebsd.yml
       - '!**/procmail-x/debian/*'
       - '!**/doc/*'
       - '!**.md'
+  pull_request:
+    branches: [ master ]
+    types: [ synchronize ]
 
 jobs:
   testfreebsd:

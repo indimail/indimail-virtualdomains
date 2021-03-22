@@ -2,8 +2,7 @@ name: iwebadmin FreeBSD CI
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
     paths:
       - '**/iwebadmin-x/**'
       - '**/indimail-x/**'
@@ -12,6 +11,9 @@ on:
       - '!**/indimail-x/debian/*'
       - '!**/doc/*'
       - '!**.md'
+  pull_request:
+    branches: [ master ]
+    types: [ synchronize ]
 
 jobs:
   testfreebsd:

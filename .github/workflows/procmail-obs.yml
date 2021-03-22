@@ -2,13 +2,15 @@ name: procmail obs trigger
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
     paths:
       - '**/procmail-x/**'
       - .github/workflows/procmail-obs.yml
       - '!**/doc/*'
       - '!**.md'
+  pull_request:
+    branches: [ master ]
+    types: [ synchronize ]
 
 jobs:
   build:

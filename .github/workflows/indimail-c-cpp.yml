@@ -2,14 +2,16 @@ name: indimail Ubuntu, Mac OSX CI
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
     paths:
       - '**/indimail-x/**'
       - .github/workflows/indimail-c-cpp.yml
       - '!**/indimail-x/debian/*'
       - '!**/doc/*'
       - '!**.md'
+  pull_request:
+    branches: [ master ]
+    types: [ synchronize ]
 
 jobs:
   build:

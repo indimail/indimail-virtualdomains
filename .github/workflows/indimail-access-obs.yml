@@ -3,9 +3,6 @@ name: indimail-access obs trigger
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
     paths:
       - '**/courier-imap-x/**'
       - '**/fetchmail-x/**'
@@ -13,6 +10,9 @@ on:
       - .github/workflows/indimail-access-obs.yml
       - '!**/doc/*'
       - '!**.md'
+  pull_request:
+    branches: [ master ]
+    types: [ synchronize ]
 
 jobs:
   build:

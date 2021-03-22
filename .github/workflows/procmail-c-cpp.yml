@@ -2,14 +2,16 @@ name: procmail Ubuntu, Mac OSX CI
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
     paths:
       - '**/procmail-x/**'
       - .github/workflows/procmail-c-cpp.yml
       - '!**/procmail-x/debian/*'
       - '!**/doc/*'
       - '!**.md'
+  pull_request:
+    branches: [ master ]
+    types: [ synchronize ]
 
 jobs:
   build:

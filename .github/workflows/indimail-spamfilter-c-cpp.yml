@@ -2,14 +2,16 @@ name: indimail-spamfilter Ubuntu, Mac OSX CI
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
     paths:
       - '**/indimail-spamfilter-x/**'
       - .github/workflows/indimail-spamfilter-c-cpp.yml
       - '!**/indimail-spamfilter-x/debian/*'
       - '!**/doc/*'
       - '!**.md'
+  pull_request:
+    branches: [ master ]
+    types: [ synchronize ]
 
 jobs:
   build:
