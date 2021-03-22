@@ -2,8 +2,10 @@ name: indimail-access obs trigger
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    types: [ synchronize ]
     paths:
       - '**/courier-imap-x/**'
       - '**/fetchmail-x/**'

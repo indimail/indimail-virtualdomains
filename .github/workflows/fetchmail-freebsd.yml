@@ -2,8 +2,10 @@ name: fetchmail FreeBSD CI
 
 on:
   push:
-    branches:
-      - master
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    types: [ synchronize ]
     paths:
       - '**/fetchmail-x/**'
       - .github/workflows/fetchmail-freebsd.yml
