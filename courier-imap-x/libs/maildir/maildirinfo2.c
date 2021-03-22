@@ -16,7 +16,7 @@
 #endif
 
 #include	"maildirinfo.h"
-#include	"unicode/courier-unicode.h"
+#include	<unicode/courier-unicode.h>
 
 
 /* Count the size of the converted filename or foldername string */

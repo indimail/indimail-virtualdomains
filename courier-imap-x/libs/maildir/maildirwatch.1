@@ -1,0 +1,120 @@
+'\" t
+.\"<!-- Copyright 2021 Double Precision, Inc.  See COPYING for -->
+.\"<!-- distribution information. -->
+.\"     Title: maildirwatch
+.\"    Author: Sam Varshavchik
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 03/02/2021
+.\"    Manual: Double Precision, Inc.
+.\"    Source: Courier Mail Server
+.\"  Language: English
+.\"
+.TH "MAILDIRWATCH" "1" "03/02/2021" "Courier Mail Server" "Double Precision, Inc\&."
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+maildirwatch \- wait for changes to a maildir
+.SH "SYNOPSIS"
+.HP \w'\fBmaildirwatch\fR\ 'u
+\fBmaildirwatch\fR {\fImaildir\fR} {\fIcommand\fR} [\fIargument\fR...]
+.SH "DESCRIPTION"
+.PP
+\fBmaildirwatch\fR
+repeatedly invokes the
+\fB\fIcommand\fR\fR, with any optional
+\fB\fIargument\fR\fRs, an external command, as follows:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The first time the
+\fB\fIcommand\fR\fR
+gets executed is immediately after
+\fBmaildirwatch\fR
+starts\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Subsequent invocatons of
+\fB\fIcommand\fR\fR
+occur whenever there
+\fImay\fR
+be some kind of a change to the contents of the
+\fImaildir\fR\&.
+.sp
+\fBmaildirwatch\fR
+does not determine what, if anything, changed in the
+\fImaildir\fR\&.
+\fBmaildirwatch\fR
+might occasionally raise a false alarm and run the
+\fB\fIcommand\fR\fR
+even though nothing changed, but that\*(Aqs rare\&. It\*(Aqs also possible that by the time
+\fB\fIcommand\fR\fR
+actually runs, then whatever was changed in the
+\fImaildir\fR
+is no longer changed; it became what it was before it was changed (a mystery that will remain unsolved forever)\&. It\*(Aqs up to the
+\fB\fIcommand\fR\fR
+to intelligently figure out if it needs to do something about whatever it finds in the
+\fImaildir\fR\&.
+.RE
+.PP
+\fBmaildirwatch\fR
+is a rudimentary mechanism for writing shell scripts that deal with newly\-delivered mail, in some form or fashion\&.
+.SH "EXIT CODE"
+.PP
+A non\-zero exit code indicates that the specified
+\fImaildir\fR
+does not exist or is corrupted\&.
+.PP
+Otherwise
+\fBmaildirwatch\fR
+runs until the
+\fB\fIcommand\fR\fR
+exits with a non\-zero exit code\&.
+\fBmaildirwatch\fR
+prints
+\fB\fIcommand\fR\fR\*(Aqs exit code on standard output, and terminates with an exit code of 0\&.
+.SH "SEE ALSO"
+.PP
+\m[blue]\fB\fBmaildirmake\fR(1)\fR\m[]\&\s-2\u[1]\d\s+2\&.
+.SH "AUTHOR"
+.PP
+\fBSam Varshavchik\fR
+.RS 4
+Author
+.RE
+.SH "NOTES"
+.IP " 1." 4
+\fBmaildirmake\fR(1)
+.RS 4
+\%[set $man.base.url.for.relative.links]/maildirmake.html
+.RE

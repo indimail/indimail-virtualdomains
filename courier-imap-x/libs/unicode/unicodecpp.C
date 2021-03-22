@@ -1,5 +1,5 @@
 /*
-** Copyright 2011-2014 Double Precision, Inc.
+** Copyright 2011-2021 Double Precision, Inc.
 ** See COPYING for distribution information.
 **
 */
@@ -8,6 +8,48 @@
 #include	"courier-unicode.h"
 
 #include <algorithm>
+#include <exception>
+#include <new>
+
+
+namespace {
+#if 0
+}
+#endif
+
+template<typename callable>
+struct cb_wrapper {
+
+	const std::function<callable> &cb;
+	std::exception_ptr caught;
+
+	cb_wrapper(const std::function<callable> &cb) : cb{cb}
+	{
+	}
+
+	template<typename ...Args> void operator()(Args && ...args)
+	{
+		if (caught)
+			return;
+		try {
+			cb(std::forward<Args>(args)...);
+		} catch (...)
+		{
+			caught=std::current_exception();
+		}
+	}
+
+	void rethrow()
+	{
+		if (caught)
+			std::rethrow_exception(caught);
+	}
+};
+#if 0
+{
+#endif
+}
+
 
 extern "C" {
 
@@ -180,7 +222,10 @@ std::string unicode::iconvert::convert(const std::u32string &uc,
 	int err;
 
 	if (uc.empty())
+	{
+		errflag=false;
 		return buf;
+	}
 
 	if (unicode_convert_fromu_tobuf(&uc[0], uc.size(),
 					  dstcharset.c_str(), &c, &csize,
@@ -556,4 +601,579 @@ std::u32string unicode::toupper(const std::u32string &u)
 	std::transform(copy.begin(), copy.end(), copy.begin(), unicode_uc);
 
 	return copy;
+}
+
+
+unicode::bidi_calc_types::bidi_calc_types(const std::u32string &s)
+	: s{s}
+{
+	types.resize(s.size());
+	if (!s.empty())
+		unicode_bidi_calc_types(s.c_str(), s.size(), &types[0]);
+}
+
+unicode::bidi_calc_types::~bidi_calc_types()=default;
+
+void unicode::bidi_calc_types::setbnl(std::u32string &s)
+{
+	if (s.empty() || s.size() != types.size())
+		return;
+
+	unicode_bidi_setbnl(&s[0], &types[0], s.size());
+}
+
+std::tuple<std::vector<unicode_bidi_level_t>,
+	   struct unicode_bidi_direction>
+unicode::bidi_calc(const bidi_calc_types &s)
+{
+	return unicode::bidi_calc(s, UNICODE_BIDI_SKIP);
+}
+
+std::tuple<std::vector<unicode_bidi_level_t>,
+	   struct unicode_bidi_direction>
+unicode::bidi_calc(const bidi_calc_types &st,
+		   unicode_bidi_level_t paragraph_embedding_level)
+{
+	std::tuple<std::vector<unicode_bidi_level_t>,
+		   struct unicode_bidi_direction>
+		ret;
+	auto &direction_ret=std::get<1>(ret);
+
+	if (st.s.size() != st.types.size())
+	{
+		direction_ret.direction=UNICODE_BIDI_LR;
+		direction_ret.is_explicit=false;
+		return ret;
+	}
+
+	const unicode_bidi_level_t *initial_embedding_level=0;
+
+	if (paragraph_embedding_level == UNICODE_BIDI_LR ||
+	    paragraph_embedding_level == UNICODE_BIDI_RL)
+	{
+		initial_embedding_level=&paragraph_embedding_level;
+	}
+
+	std::get<0>(ret).resize(st.s.size());
+
+	if (initial_embedding_level)
+	{
+		direction_ret.direction=paragraph_embedding_level;
+		direction_ret.is_explicit=1;
+	}
+	else
+	{
+		direction_ret.direction= UNICODE_BIDI_LR;
+	}
+
+	if (st.s.size())
+	{
+		std::get<1>(ret)=
+			unicode_bidi_calc_levels(st.s.c_str(),
+						 &st.types[0],
+						 st.s.size(),
+						 &std::get<0>(ret)[0],
+						 initial_embedding_level);
+	}
+	return ret;
+}
+
+extern "C" {
+	static void reorder_callback(size_t i, size_t cnt,
+				     void *arg)
+	{
+		auto p=reinterpret_cast<cb_wrapper<void (size_t,
+							 size_t)> *>(arg);
+
+		(*p)(i, cnt);
+	}
+}
+
+int unicode::bidi_reorder(std::u32string &string,
+			  std::vector<unicode_bidi_level_t> &levels,
+			  const std::function<void (size_t, size_t)> &lambda,
+			  size_t pos,
+			  size_t n)
+{
+	size_t s=string.size();
+
+	if (s != levels.size())
+		return -1;
+
+	if (pos >= s)
+		return 0;
+
+	if (n > s-pos)
+		n=s-pos;
+	cb_wrapper<void (size_t, size_t)> cb{lambda};
+
+	unicode_bidi_reorder(&string[pos], &levels[pos], n,
+			     reorder_callback,
+			     reinterpret_cast<void *>(&cb));
+
+	cb.rethrow();
+	return 0;
+}
+
+void unicode::bidi_reorder(std::vector<unicode_bidi_level_t> &levels,
+			   const std::function<void (size_t, size_t)> &lambda,
+			   size_t pos,
+			   size_t n)
+{
+	size_t s=levels.size();
+
+	if (!s)
+		return;
+
+	if (pos >= s)
+		return;
+
+	if (n > s-pos)
+		n=s-pos;
+
+	cb_wrapper<void (size_t, size_t)> cb{lambda};
+
+	unicode_bidi_reorder(0, &levels[pos], n, reorder_callback,
+			     reinterpret_cast<void *>(&cb));
+	cb.rethrow();
+
+}
+
+extern "C" {
+	static void removed_callback(size_t i,
+				     void *arg)
+	{
+		auto p=reinterpret_cast<cb_wrapper<void (size_t)> *>(arg);
+
+		(*p)(i);
+	}
+}
+
+void unicode::bidi_cleanup(std::u32string &string,
+			   const std::function<void (size_t)> &lambda,
+			   int cleanup_options)
+{
+	if (string.empty())
+		return;
+
+	cb_wrapper<void (size_t)> cb{lambda};
+
+	size_t n=unicode_bidi_cleanup(&string[0],
+				      0,
+				      string.size(),
+				      cleanup_options,
+				      removed_callback,
+				      reinterpret_cast<void *>(&cb));
+	cb.rethrow();
+	string.resize(n);
+}
+
+int unicode::bidi_cleanup(std::u32string &string,
+			  std::vector<unicode_bidi_level_t> &levels,
+			  const std::function<void (size_t)> &lambda,
+			  int cleanup_options)
+{
+	if (levels.size() != string.size())
+		return -1;
+
+	if (levels.size() == 0)
+		return 0;
+
+	cb_wrapper<void (size_t)> cb{lambda};
+	size_t n=unicode_bidi_cleanup(&string[0],
+				      &levels[0],
+				      string.size(),
+				      cleanup_options,
+				      removed_callback,
+				      reinterpret_cast<void *>(&cb));
+	cb.rethrow();
+
+	string.resize(n);
+	levels.resize(n);
+	return 0;
+}
+
+int unicode::bidi_cleanup(std::u32string &string,
+			  std::vector<unicode_bidi_level_t> &levels,
+			  const std::function<void (size_t)> &lambda,
+			  int cleanup_options,
+			  size_t starting_pos,
+			  size_t n)
+{
+	size_t s=string.size();
+
+	if (levels.size() != s)
+		return -1;
+
+	if (starting_pos >= s)
+		return 0;
+
+	if (n > s-starting_pos)
+		n=s-starting_pos;
+
+	cb_wrapper<void (size_t)> cb{lambda};
+	unicode_bidi_cleanup(&string[starting_pos],
+			     &levels[starting_pos],
+			     n,
+			     cleanup_options,
+			     removed_callback,
+			     reinterpret_cast<void *>(&cb));
+	cb.rethrow();
+	return 0;
+}
+
+int unicode::bidi_logical_order(std::u32string &string,
+				std::vector<unicode_bidi_level_t> &levels,
+				unicode_bidi_level_t paragraph_embedding,
+				const std::function<void (size_t, size_t)>
+				&lambda,
+				size_t starting_pos,
+				size_t n)
+{
+	auto s=string.size();
+
+	if (s != levels.size())
+		return -1;
+
+	if (starting_pos >= s)
+		return 0;
+
+	if (n > s-starting_pos)
+		n=s-starting_pos;
+
+	cb_wrapper<void (size_t, size_t)> cb{lambda};
+	unicode_bidi_logical_order(&string[starting_pos],
+				   &levels[starting_pos], n,
+				   paragraph_embedding,
+				   &reorder_callback,
+				   reinterpret_cast<void *>(&cb));
+	cb.rethrow();
+	return 0;
+}
+
+void unicode::bidi_logical_order(std::vector<unicode_bidi_level_t> &levels,
+				 unicode_bidi_level_t paragraph_embedding,
+				 const std::function<void (size_t, size_t)>
+				 &lambda,
+				 size_t starting_pos,
+				 size_t n)
+{
+	auto s=levels.size();
+
+	if (starting_pos >= s)
+		return;
+
+	if (n > s-starting_pos)
+		n=s-starting_pos;
+
+	cb_wrapper<void (size_t, size_t)> cb{lambda};
+	unicode_bidi_logical_order(NULL, &levels[starting_pos], n,
+				   paragraph_embedding,
+				   &reorder_callback,
+				   reinterpret_cast<void *>(&cb));
+	cb.rethrow();
+}
+
+extern "C" {
+	static void embed_callback(const char32_t *string,
+				   size_t n,
+				   int is_part_of_string,
+				   void *arg)
+	{
+		auto p=reinterpret_cast<cb_wrapper<void
+						   (const char32_t *,
+						    size_t n,
+						    bool)> *>(arg);
+		(*p)(string, n, is_part_of_string != 0);
+	}
+}
+
+int unicode::bidi_embed(const std::u32string &string,
+			const std::vector<unicode_bidi_level_t> &levels,
+			unicode_bidi_level_t paragraph_embedding,
+			const std::function<void (const char32_t *string,
+						  size_t n,
+						  bool is_part_of_string)>
+			&lambda)
+{
+	if (string.size() != levels.size())
+		return -1;
+
+	if (string.empty())
+		return 0;
+
+	cb_wrapper<void (const char32_t *, size_t, bool)> cb{lambda};
+	unicode_bidi_embed(&string[0], &levels[0], string.size(),
+			   paragraph_embedding,
+			   embed_callback,
+			   reinterpret_cast<void *>(&cb));
+
+	cb.rethrow();
+	return 0;
+}
+
+std::u32string unicode::bidi_embed(const std::u32string &string,
+				   const std::vector<unicode_bidi_level_t
+				   > &levels,
+				   unicode_bidi_level_t paragraph_embedding)
+{
+	std::u32string new_string;
+
+	(void)bidi_embed(string, levels, paragraph_embedding,
+			 [&]
+			 (const char32_t *string,
+			  size_t n,
+			  bool ignored)
+			 {
+				 new_string.insert(new_string.end(),
+						   string, string+n);
+			 });
+
+	return new_string;
+}
+
+char32_t unicode::bidi_embed_paragraph_level(const std::u32string &string,
+					     unicode_bidi_level_t level)
+{
+	return unicode_bidi_embed_paragraph_level(string.c_str(),
+						  string.size(),
+						  level);
+}
+
+unicode_bidi_direction unicode::bidi_get_direction(const std::u32string &string,
+						   size_t starting_pos,
+						   size_t n)
+{
+	if (starting_pos >= string.size())
+		starting_pos=string.size();
+
+	if (string.size()-starting_pos < n)
+		n=string.size()-starting_pos;
+
+	return unicode_bidi_get_direction(string.c_str()+starting_pos, n);
+}
+
+bool unicode::bidi_needs_embed(const std::u32string &string,
+			       const std::vector<unicode_bidi_level_t> &levels,
+			       const unicode_bidi_level_t *paragraph_embedding,
+			       size_t starting_pos,
+			       size_t n)
+{
+	if (string.size() != levels.size())
+		return false;
+
+	auto s=levels.size();
+
+	if (starting_pos >= s)
+		return false;
+
+	if (n > s-starting_pos)
+		n=s-starting_pos;
+
+	return unicode_bidi_needs_embed(string.c_str(),
+					n == 0 ? NULL : &levels[starting_pos],
+					n,
+					paragraph_embedding) != 0;
+}
+
+std::u32string unicode::bidi_override(const std::u32string &s,
+				      unicode_bidi_level_t direction,
+				      int cleanup_options)
+{
+	std::u32string ret;
+
+	ret.reserve(s.size()+1);
+
+	ret.push_back(' ');
+	ret.insert(ret.end(), s.begin(), s.end());
+
+	bidi_cleanup(ret, [](size_t) {}, cleanup_options);
+	ret.at(0)=direction & 1 ? UNICODE_RLO : UNICODE_LRO;
+
+	return ret;
+}
+
+typedef void bidi_combinings_callback_t(unicode_bidi_level_t,
+					  size_t level_start,
+					  size_t n_chars,
+					  size_t comb_start,
+					  size_t n_comb_chars);
+
+extern "C" {
+	static void bidi_combinings_trampoline(unicode_bidi_level_t level,
+					       size_t level_start,
+					       size_t n_chars,
+					       size_t comb_start,
+					       size_t n_comb_chars,
+					       void *arg)
+	{
+		(*reinterpret_cast<cb_wrapper<bidi_combinings_callback_t> *>
+		 (arg))(level, level_start, n_chars, comb_start, n_comb_chars);
+	}
+};
+
+void unicode::bidi_combinings(const std::u32string &string,
+			      const std::vector<unicode_bidi_level_t> &levels,
+			      const std::function<void (unicode_bidi_level_t,
+							size_t level_start,
+							size_t n_chars,
+							size_t comb_start,
+							size_t n_comb_chars)>
+			      &callback)
+{
+	if (string.size() != levels.size() || string.empty())
+		return;
+
+	cb_wrapper<bidi_combinings_callback_t> cb{callback};
+
+	unicode_bidi_combinings(&string[0], &levels[0],
+				  string.size(),
+				  bidi_combinings_trampoline,
+				  &cb);
+	cb.rethrow();
+}
+
+void unicode::bidi_combinings(const std::u32string &string,
+			      const std::function<void (unicode_bidi_level_t,
+							size_t level_start,
+							size_t n_chars,
+							size_t comb_start,
+							size_t n_comb_chars)>
+			      &callback)
+{
+	if (string.empty())
+		return;
+
+	cb_wrapper<bidi_combinings_callback_t> cb{callback};
+
+	unicode_bidi_combinings(&string[0], nullptr,
+				  string.size(),
+				  bidi_combinings_trampoline,
+				  &cb);
+	cb.rethrow();
+}
+
+void unicode::decompose_default_reallocate(std::u32string &s,
+					   const std::vector<std::tuple<size_t,
+					   size_t>> &v)
+{
+	size_t i=0;
+
+	for (auto &t:v)
+		i += std::get<1>(t);
+
+	s.resize(s.size()+i);
+}
+
+namespace {
+
+	struct decompose_info {
+		std::u32string &s;
+		const std::function<void (std::u32string &,
+					  const std::vector<std::tuple<size_t,
+					  size_t>>)> &resizes;
+		std::exception_ptr caught;
+
+		void do_reallocate(unicode_decomposition_t *info,
+				   const size_t *offsets,
+				   const size_t *sizes,
+				   size_t n)
+		{
+			std::vector<std::tuple<size_t, size_t>> v;
+
+			v.reserve(n);
+
+			for (size_t i=0; i<n; ++i)
+				v.push_back(std::tuple<size_t,
+					    size_t>{offsets[i],
+						    sizes[i]});
+
+			resizes(s, v);
+
+			info->string=&s[0];
+		}
+	};
+};
+
+extern "C" {
+
+	static int decompose_reallocate(unicode_decomposition_t *info,
+					const size_t *offsets,
+					const size_t *sizes,
+					size_t n)
+	{
+		decompose_info *ptr=
+			reinterpret_cast<decompose_info *>(info->arg);
+
+		try {
+			ptr->do_reallocate(info, offsets, sizes, n);
+		} catch (...) {
+			ptr->caught=std::current_exception();
+			return -1;
+		}
+
+		return 0;
+	}
+}
+
+void unicode::decompose(std::u32string &s,
+			int decompose_flags,
+			const std::function<void (std::u32string &s,
+						  const std::vector<
+						  std::tuple<size_t,
+						  size_t>>)> &resizes)
+{
+	if (s.empty())
+		return;
+
+	decompose_info info={s, resizes};
+
+	unicode_decomposition_t uinfo;
+
+	unicode_decomposition_init(&uinfo, &s[0], s.size(), &info);
+	uinfo.decompose_flags=decompose_flags;
+	uinfo.reallocate=decompose_reallocate;
+	int rc=unicode_decompose(&uinfo);
+	unicode_decomposition_deinit(&uinfo);
+
+	if (info.caught)
+		std::rethrow_exception(info.caught);
+
+	if (rc)
+		/* unicode_decompose only returns non-0 itself for an enomem */
+		throw std::bad_alloc();
+}
+
+void unicode::compose_default_callback(unicode_composition_t &)
+{
+}
+
+namespace {
+	struct comps_raii {
+		unicode_composition_t comps;
+
+		~comps_raii()
+		{
+			unicode_composition_deinit(&comps);
+		}
+	};
+};
+
+void unicode::compose(std::u32string &s,
+		      int flags,
+		      const std::function<void (unicode_composition_t &)> &cb)
+{
+	if (s.empty())
+		return;
+
+	comps_raii comps;
+
+	if (unicode_composition_init(&s[0], s.size(), flags, &comps.comps))
+	{
+		throw std::bad_alloc(); /* The only reason */
+	}
+
+	cb(comps.comps);
+
+	s.resize(unicode_composition_apply(&s[0], s.size(), &comps.comps));
 }

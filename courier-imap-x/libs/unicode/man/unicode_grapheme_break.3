@@ -2,12 +2,12 @@
 .\"     Title: unicode_grapheme_break
 .\"    Author: Sam Varshavchik
 .\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 11/25/2020
+.\"      Date: 03/12/2021
 .\"    Manual: Courier Unicode Library
 .\"    Source: Courier Unicode Library
 .\"  Language: English
 .\"
-.TH "UNICODE_GRAPHEME_BRE" "3" "11/25/2020" "Courier Unicode Library" "Courier Unicode Library"
+.TH "UNICODE_GRAPHEME_BRE" "3" "03/12/2021" "Courier Unicode Library" "Courier Unicode Library"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -28,7 +28,7 @@
 .\" * MAIN CONTENT STARTS HERE *
 .\" -----------------------------------------------------------------
 .SH "NAME"
-unicode_grapheme_break \- unicode grapheme cluster boundary rules
+unicode_grapheme_break, unicode_grapheme_break_init, unicode_grapheme_break_next, unicode_grapheme_break_deinit \- unicode grapheme cluster boundary rules
 .SH "SYNOPSIS"
 .sp
 .ft B
@@ -36,14 +36,36 @@ unicode_grapheme_break \- unicode grapheme cluster boundary rules
 #include <courier\-unicode\&.h>
 .fi
 .ft
+.HP \w'unicode_grapheme_break_info_t\ unicode_grapheme_break_init('u
+.BI "unicode_grapheme_break_info_t unicode_grapheme_break_init(void);"
+.HP \w'int\ unicode_grapheme_next('u
+.BI "int unicode_grapheme_next(unicode_grapheme_break_info_t\ " "handle" ", char32_t\ " "c" ");"
+.HP \w'void\ unicode_grapheme_deinit('u
+.BI "void unicode_grapheme_deinit(unicode_grapheme_break_info_t\ " "handle" ");"
 .HP \w'int\ unicode_grapheme_break('u
 .BI "int unicode_grapheme_break(char32_t\ " "a" ", char32_t\ " "b" ");"
 .SH "DESCRIPTION"
 .PP
-\fBunicode_grapheme_break\fR() returns non\-zero if there is a grapheme break between the two unicode characters
+These functions implement the unicode grapheme cluster breaking algorithm\&. Invoke
+\fBunicode_grapheme_break_init\fR() to initialize the grapheme cluster breaking algorithm\&.
+\fBunicode_grapheme_break_init\fR() returns an opaque handle\&. Each subsequent call to
+\fBunicode_grapheme_break_next\fR() passes this handle, and the next character\&.
+\fBunicode_grapheme_break_next\fR() returns a non\-0 value if there\*(Aqs a grapheme break before the character, in a sequence of Unicode characters\&.
+\fBunicode_grapheme_break_deinit\fR() releases all reosurces used by the grapheme breaking handle, and the
+unicode_grapheme_break_info_t
+handle is no longer valid after this call\&.
+.PP
+The first call to
+\fBunicode_grapheme_break_next\fR() always returns non\-0, as per the GB1 rule\&.
+.PP
+\fBunicode_grapheme_break\fR() is a simplified interface that returns non\-zero if there is a grapheme break between two unicode characters
 \fIa\fR
 and
-\fIb\fR\&.
+\fIb\fR\&. This is is equivalent to calling
+\fBunicode_grapheme_break_init\fR(), followed by two calls to
+\fB unicode_grapheme_break_next\fR(), and finally
+\fBunicode_grapheme_break_deinit\fR(), then returning the result of the second call to
+\fBunicode_grapheme_break_next\fR()\&.
 .SH "SEE ALSO"
 .PP
 \m[blue]\fBTR\-29\fR\m[]\&\s-2\u[1]\d\s+2,
@@ -61,5 +83,5 @@ Author
 .IP " 1." 4
 TR-29
 .RS 4
-\%http://www.unicode.org/reports/tr29/tr29-27.html
+\%https://www.unicode.org/reports/tr29/tr29-37.html
 .RE

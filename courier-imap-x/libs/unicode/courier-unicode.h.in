@@ -2,7 +2,7 @@
 #define	courier_unicode_h
 
 /*
-** Copyright 2000-2018 Double Precision, Inc.
+** Copyright 2000-2021 Double Precision, Inc.
 ** See COPYING for distribution information.
 **
 */
@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <functional>
+#include <tuple>
 
 extern "C" {
 #endif
@@ -40,7 +42,7 @@ typedef uint32_t char32_t;
 #endif
 #endif
 
-#define COURIER_UNICODE_VERSION 210
+#define COURIER_UNICODE_VERSION @HVERSION@
 
 /*
 ** The system default character set, from the locale.
@@ -75,6 +77,24 @@ extern char32_t unicode_tc(char32_t);
 char32_t unicode_html40ent_lookup(const char *n);
 
 /*
+** East Asian Width lookup.
+**
+** unicode_eastasia looks up the EastAsianWidth property for the given
+** Unicode character.
+*/
+
+#define UNICODE_EASTASIA_A	'A'	/* Ambiguous */
+#define UNICODE_EASTASIA_F	'F'	/* Full width */
+#define UNICODE_EASTASIA_H	'H'	/* Half width */
+#define UNICODE_EASTASIA_N	'/'	/* Unassigned */
+#define UNICODE_EASTASIA_Na	'N'	/* Narrow */
+#define UNICODE_EASTASIA_W	'W'	/* Wide */
+
+typedef char unicode_eastasia_t;
+
+unicode_eastasia_t unicode_eastasia(char32_t);
+
+/*
 **
 ** Return "width" of unicode character.
 **
@@ -95,16 +115,20 @@ extern size_t unicode_wcwidth_str(const char32_t *c);
 /* Internal unicode table lookup functions */
 
 extern uint8_t unicode_tab_lookup(char32_t ch,
-				  const size_t *unicode_indextab,
-				  size_t unicode_indextab_sizeof,
+				  const size_t *unicode_starting_indextab,
+				  const char32_t *unicode_starting_pagetab,
+				  size_t unicode_tab_sizeof,
 				  const uint8_t (*unicode_rangetab)[2],
+				  size_t unicode_rangetab_sizeof,
 				  const uint8_t *unicode_classtab,
 				  uint8_t uclass);
 
 extern uint32_t unicode_tab32_lookup(char32_t ch,
-				     const size_t *unicode_indextab,
-				     size_t unicode_indextab_sizeof,
+				     const size_t *unicode_starting_indextab,
+				     const char32_t *unicode_starting_pagetab,
+				     size_t unicode_tab_sizeof,
 				     const uint8_t (*unicode_rangetab)[2],
+				     size_t unicode_rangetab_sizeof,
 				     const uint32_t *unicode_classtab,
 				     uint32_t uclass);
 
@@ -181,15 +205,66 @@ extern int unicode_islower(char32_t ch);
 extern int unicode_isupper(char32_t ch);
 
 /*
-** Implementation of grapheme cluster boundary rules, as per
-** http://www.unicode.org/reports/tr29/tr29-27.html
-** including  GB9a and GB9b.
+** Implementation of Unicode emoji classification, as per
+** http://www.unicode.org/reports/tr51/tr51-18.html
 **
-** Returns non-zero if there's a grapheme break between the two referenced
-** characters.
+** Given a char32_t, returns the character's emoji value, which is a bitmask:
+**
 */
 
-int unicode_grapheme_break(char32_t a, char32_t b);
+#define UNICODE_EMOJI_NONE			0
+#define UNICODE_EMOJI				1
+#define UNICODE_EMOJI_PRESENTATION		2
+#define UNICODE_EMOJI_MODIFIER			4
+#define UNICODE_EMOJI_MODIFIER_BASE		8
+#define UNICODE_EMOJI_COMPONENT			16
+#define UNICODE_EMOJI_EXTENDED_PICTOGRAPHIC	32
+
+typedef unsigned char unicode_emoji_t;
+
+extern unicode_emoji_t unicode_emoji_lookup(char32_t);
+
+/* Look up just one of the properties, returns non-0 if the char has it */
+
+extern int unicode_emoji(char32_t);
+extern int unicode_emoji_presentation(char32_t);
+extern int unicode_emoji_modifier(char32_t);
+extern int unicode_emoji_modifier_base(char32_t);
+extern int unicode_emoji_component(char32_t);
+extern int unicode_emoji_extended_pictographic(char32_t);
+
+/*
+** Implementation of grapheme cluster boundary rules, as per
+** http://www.unicode.org/reports/tr29/tr29-37.html
+** including  GB9a and GB9b.
+**
+** unicode_grapheme_break_init() allocates an opaque
+** unicode_grapheme_break_info_t handle, and
+** unicode_grapheme_break_destroy() destroys it.
+**
+** Passing the handle to unicode_grapheme_break_next() returns non-0 if
+** there's a grapheme break before the given character (and after the
+** character that got passed in the previous call).
+**
+** The first call to unicode_grapheme_break_next() returns 1, as per GB1.
+**
+** unicode_grapheme_break() is a simplified interface that returns non-0
+** if there is a grapheme break between the two characters. This simplified
+** interface is equivalent to calling unicode_grapheme_break_init(),
+** followed by two calls to unicode_grapheme_break_next(), and finally
+** unicode_grapheme_break_deinit(), and returns the result of the second
+** call to unicode_grapheme_break_next().
+*/
+
+struct unicode_grapheme_break_info_s;
+
+typedef struct unicode_grapheme_break_info_s *unicode_grapheme_break_info_t;
+
+extern unicode_grapheme_break_info_t unicode_grapheme_break_init();
+extern int unicode_grapheme_break_next(unicode_grapheme_break_info_t, char32_t);
+extern void unicode_grapheme_break_deinit(unicode_grapheme_break_info_t);
+
+extern int unicode_grapheme_break(char32_t a, char32_t b);
 
 typedef enum {
 
@@ -199,14 +274,14 @@ typedef enum {
 
 /*
 ** Look up the unicode script property, as per
-** http://www.unicode.org/reports/tr24/tr24-24.html
+** http://www.unicode.org/reports/tr24/tr24-31.html
 */
 
 unicode_script_t unicode_script(char32_t a);
 
 /*
 ** Implementation of line break rules, as per
-** http://www.unicode.org/reports/tr14/tr14-35.html
+** http://www.unicode.org/reports/tr14/tr14-45.html
 **
 ** Invoke unicode_lb_init() to initialize the linebreaking algorithm. The
 ** first parameter is a callback function that gets invoked with two
@@ -365,7 +440,7 @@ extern void unicode_lbc_set_opts(unicode_lbc_info_t i, int opts);
 
 /*
 ** Implemention of word break rules, as per
-** http://www.unicode.org/reports/tr29/tr29-27.html
+** http://www.unicode.org/reports/tr29/tr29-37.html
 **
 ** Invoke unicode_wb_init() to initialize the wordbreaking algorithm. The
 ** first parameter is a callback function that gets invoked with two
@@ -465,6 +540,261 @@ unicode_wbscan_info_t unicode_wbscan_init();
 int unicode_wbscan_next(unicode_wbscan_info_t i, char32_t ch);
 
 size_t unicode_wbscan_end(unicode_wbscan_info_t i);
+
+/* Unicode directional markers */
+
+#define UNICODE_LRM	0x200E /* Left-to-right marker */
+#define UNICODE_RLM	0x200F /* Right-to-left marker */
+#define UNICODE_ALM	0x061C /* Right-to-left Arabic marker */
+#define UNICODE_LRI	0x2066 /* Left-to-right isolate */
+#define UNICODE_RLI	0x2067 /* Right-to-left isolate */
+#define UNICODE_PDI	0x2069 /* Pop isolate */
+#define UNICODE_RLO	0x202e /* Right-to-left override */
+#define UNICODE_LRO	0x202d /* Left-to-right override */
+#define UNICODE_PDF	0x202c /* Pop directional override */
+
+#ifdef __cplusplus
+#if __cplusplus >= 201103L
+namespace unicode {
+	namespace literals {
+
+		constexpr char32_t LRM[]={UNICODE_LRM, 0};
+		constexpr char32_t RLM[]={UNICODE_RLM, 0};
+		constexpr char32_t ALM[]={UNICODE_ALM, 0};
+		constexpr char32_t LRI[]={UNICODE_LRI, 0};
+		constexpr char32_t RLI[]={UNICODE_RLI, 0};
+		constexpr char32_t PDI[]={UNICODE_PDI, 0};
+		constexpr char32_t RLO[]={UNICODE_RLO, 0};
+		constexpr char32_t LRO[]={UNICODE_LRO, 0};
+		constexpr char32_t PDF[]={UNICODE_PDF, 0};
+	}
+}
+#endif
+#endif
+
+typedef char unicode_bidi_bracket_type_t;
+
+#define UNICODE_BIDI_n  'n'
+#define UNICODE_BIDI_o	'o'
+#define UNICODE_BIDI_c	'c'
+
+extern char32_t unicode_bidi_mirror(char32_t c);
+
+extern char32_t unicode_bidi_bracket_type(char32_t c,
+					  unicode_bidi_bracket_type_t *ret);
+
+
+typedef unsigned char unicode_bidi_level_t;
+
+#define UNICODE_BIDI_LR		((unicode_bidi_level_t)0)
+#define UNICODE_BIDI_RL		((unicode_bidi_level_t)1)
+#define UNICODE_BIDI_SKIP	((unicode_bidi_level_t)254)
+
+/*
+** What unicode_bidi_direction returns.
+*/
+
+struct unicode_bidi_direction {
+
+	/* Direction of the given text */
+	unicode_bidi_level_t direction;
+
+	/*
+	** The direction is explicit, if not direction is UNICODE_BIDI_LR by
+	** default.
+	*/
+	int is_explicit;
+};
+
+struct unicode_bidi_direction unicode_bidi_get_direction(const char32_t *p,
+							 size_t n);
+
+struct unicode_bidi_direction unicode_bidi_calc(const char32_t *p, size_t n,
+						unicode_bidi_level_t *bufp,
+						const unicode_bidi_level_t *
+						initial_embedding_level);
+
+extern void unicode_bidi_reorder(char32_t *p,
+				 unicode_bidi_level_t *levels,
+				 size_t n,
+				 void (*reorder_callback)(size_t, size_t,
+							  void *),
+				 void *arg);
+
+/* BIDI_TYPE_LIST */
+typedef enum {
+	      UNICODE_BIDI_TYPE_AL,
+	      UNICODE_BIDI_TYPE_AN,
+	      UNICODE_BIDI_TYPE_B,
+	      UNICODE_BIDI_TYPE_BN,
+	      UNICODE_BIDI_TYPE_CS,
+	      UNICODE_BIDI_TYPE_EN,
+	      UNICODE_BIDI_TYPE_ES,
+	      UNICODE_BIDI_TYPE_ET,
+	      UNICODE_BIDI_TYPE_FSI,
+	      UNICODE_BIDI_TYPE_L,
+	      UNICODE_BIDI_TYPE_LRE,
+	      UNICODE_BIDI_TYPE_LRI,
+	      UNICODE_BIDI_TYPE_LRO,
+	      UNICODE_BIDI_TYPE_NSM,
+	      UNICODE_BIDI_TYPE_ON,
+	      UNICODE_BIDI_TYPE_PDF,
+	      UNICODE_BIDI_TYPE_PDI,
+	      UNICODE_BIDI_TYPE_R,
+	      UNICODE_BIDI_TYPE_RLE,
+	      UNICODE_BIDI_TYPE_RLI,
+	      UNICODE_BIDI_TYPE_RLO,
+	      UNICODE_BIDI_TYPE_S,
+	      UNICODE_BIDI_TYPE_WS,
+} enum_bidi_type_t;
+
+extern enum_bidi_type_t unicode_bidi_type(char32_t c);
+
+extern void unicode_bidi_calc_types(const char32_t *p, size_t n,
+				    enum_bidi_type_t *buf);
+
+extern void unicode_bidi_setbnl(char32_t *p,
+				const enum_bidi_type_t *types,
+				size_t n);
+
+extern struct unicode_bidi_direction
+unicode_bidi_calc_levels(const char32_t *p,
+			 const enum_bidi_type_t
+			 *types,
+			 size_t n,
+			 unicode_bidi_level_t *bufp,
+			 const unicode_bidi_level_t
+			 *initial_embedding_level);
+
+/* Bitmask options to unicode_bidi_cleanup */
+
+/*
+ In addition to removing embedding, override, and boundary-neutral
+ characters also remove isolation markers and implicit markers.
+*/
+
+#define UNICODE_BIDI_CLEANUP_EXTRA	1
+
+/*
+  Replace all characters classified as paragraph separators by a newline
+  character.
+*/
+
+#define UNICODE_BIDI_CLEANUP_BNL	2
+
+/*
+  Options for canonical rendering order.
+*/
+
+#define UNICODE_BIDI_CLEANUP_CANONICAL				\
+	(UNICODE_BIDI_CLEANUP_EXTRA | UNICODE_BIDI_CLEANUP_BNL)
+
+#ifdef __cplusplus
+#if __cplusplus >= 201103L
+namespace unicode {
+	namespace literals {
+		constexpr int CLEANUP_EXTRA=UNICODE_BIDI_CLEANUP_EXTRA;
+
+		constexpr int CLEANUP_BNL=UNICODE_BIDI_CLEANUP_BNL;
+
+		constexpr int CLEANUP_CANONICAL=UNICODE_BIDI_CLEANUP_CANONICAL;
+	}
+}
+#endif
+#endif
+
+extern size_t unicode_bidi_cleanup(char32_t *string,
+				   unicode_bidi_level_t *levels,
+				   size_t n,
+				   int options,
+				   void (*removed_callback)(size_t, void *),
+				   void *);
+
+extern size_t unicode_bidi_cleaned_size(const char32_t *string,
+					size_t n,
+					int options);
+
+extern void unicode_bidi_logical_order(char32_t *string,
+				       unicode_bidi_level_t *levels,
+				       size_t n,
+				       unicode_bidi_level_t paragraph_embedding,
+				       void (*reorder_callback)(size_t, size_t,
+								void *),
+				       void *arg);
+
+extern int unicode_bidi_needs_embed(const char32_t *string,
+				    const unicode_bidi_level_t *levels,
+				    size_t n,
+				    const unicode_bidi_level_t *
+				    paragraph_embedding);
+
+extern void unicode_bidi_embed(const char32_t *string,
+			       const unicode_bidi_level_t *levels,
+			       size_t n,
+			       unicode_bidi_level_t paragraph_embedding,
+			       void (*emit)(const char32_t *string,
+					    size_t n,
+					    int,
+					    void *arg),
+			       void *arg);
+
+extern char32_t unicode_bidi_embed_paragraph_level(const char32_t *str,
+						   size_t n,
+						   unicode_bidi_level_t);
+
+extern void unicode_bidi_combinings(const char32_t *str,
+				    const unicode_bidi_level_t *levels,
+				    size_t n,
+				    void (*combinings)
+				    (unicode_bidi_level_t level,
+				     size_t level_start,
+				     size_t n_chars,
+				     size_t comb_start,
+				     size_t n_comb_chars,
+				     void *arg),
+				    void *arg);
+
+/*
+** unicode_canonical() returns the canonical mapping of the given Unicode
+** character. The returned structure specifies:
+**
+** - A pointer to the canonical decomposition of the given character.
+** - Number of characters in the canonical decomposition.
+** - An optional formatting tag.
+**
+** A null pointer, and a 0 character count gets returned for characters
+** without a canonical decomposition.
+**
+*/
+
+typedef enum {
+	      UNICODE_CANONICAL_FMT_NONE=0,
+
+	      UNICODE_CANONICAL_FMT_CIRCLE,
+	      UNICODE_CANONICAL_FMT_COMPAT,
+	      UNICODE_CANONICAL_FMT_FINAL,
+	      UNICODE_CANONICAL_FMT_FONT,
+	      UNICODE_CANONICAL_FMT_FRACTION,
+	      UNICODE_CANONICAL_FMT_INITIAL,
+	      UNICODE_CANONICAL_FMT_ISOLATED,
+	      UNICODE_CANONICAL_FMT_MEDIAL,
+	      UNICODE_CANONICAL_FMT_NARROW,
+	      UNICODE_CANONICAL_FMT_NOBREAK,
+	      UNICODE_CANONICAL_FMT_SMALL,
+	      UNICODE_CANONICAL_FMT_SQUARE,
+	      UNICODE_CANONICAL_FMT_SUB,
+	      UNICODE_CANONICAL_FMT_SUPER,
+	      UNICODE_CANONICAL_FMT_VERTICAL,
+	      UNICODE_CANONICAL_FMT_WIDE,
+} unicode_canonical_fmt_t;
+
+typedef struct {
+	const char32_t *canonical_chars;
+	size_t n_canonical_chars;
+	unicode_canonical_fmt_t format;
+} unicode_canonical_t;
+
+extern unicode_canonical_t unicode_canonical(char32_t);
 
 /*
 ** A buffer that holds unicode characters, and dynamically grows as needed.
@@ -1000,6 +1330,68 @@ extern const char unicode_u_ucs2_native[];
 
 #define unicode_x_smap_modutf8 "x-smap-modutf8"
 
+extern uint8_t unicode_ccc(char32_t ch);
+
+#define UNICODE_DECOMPOSE_FLAG_QC	1
+#define UNICODE_DECOMPOSE_FLAG_COMPAT	2
+
+typedef struct unicode_decomposition {
+	char32_t *string;
+	size_t string_size;
+	int decompose_flags;
+
+	int (*reallocate)(struct unicode_decomposition *info,
+			  const size_t *offsets,
+			  const size_t *sizes,
+			  size_t n);
+
+	void *arg;
+} unicode_decomposition_t;
+
+extern void unicode_decomposition_init(unicode_decomposition_t *,
+				       char32_t *string,
+				       size_t string_size,
+				       void *arg);
+
+extern void unicode_decomposition_deinit(unicode_decomposition_t *);
+
+extern int unicode_decompose(unicode_decomposition_t *);
+
+extern size_t unicode_decompose_reallocate_size(unicode_decomposition_t *,
+						const size_t *sizes,
+						size_t n);
+
+struct unicode_compose_info {
+	size_t index;
+	size_t n_composed;
+	char32_t *composition;
+	size_t n_composition;
+};
+
+typedef struct {
+	struct unicode_compose_info **compositions;
+	size_t n_compositions;
+} unicode_composition_t;
+
+#define UNICODE_COMPOSE_FLAG_REMOVEUNUSED 1
+#define UNICODE_COMPOSE_FLAG_ONESHOT 128
+
+int unicode_composition_init(const char32_t *string,
+			     size_t string_size,
+			     int flags,
+			     unicode_composition_t *info);
+
+void unicode_composition_deinit(unicode_composition_t *info);
+
+size_t unicode_composition_apply(char32_t *string,
+				 size_t string_size,
+				 unicode_composition_t *info);
+
+int unicode_compose(char32_t *string,
+		    size_t string_size,
+		    int flags,
+		    size_t *new_size);
+
 #if 0
 {
 #endif
@@ -1407,11 +1799,11 @@ class linebreak_callback_base {
 	int opts;
 
 #if __cplusplus >= 201103L
- public:
+public:
 	linebreak_callback_base(const linebreak_callback_base &)=delete;
 	linebreak_callback_base &operator=(const
 					   linebreak_callback_base &)=delete;
- private:
+private:
 #else
 	linebreak_callback_base(const linebreak_callback_base &);
 	/* NOT IMPLEMENTED */
@@ -1420,7 +1812,7 @@ class linebreak_callback_base {
 					   linebreak_callback_base &);
 	/* NOT IMPLEMENTED */
 #endif
- public:
+public:
 	linebreak_callback_base();
 	virtual ~linebreak_callback_base();
 
@@ -1433,8 +1825,8 @@ class linebreak_callback_base {
 	linebreak_callback_base &operator<<(char32_t uc);
 
 	template<typename iter_type>
-		linebreak_callback_base &operator()(iter_type beg_iter,
-						    iter_type end_iter)
+	linebreak_callback_base &operator()(iter_type beg_iter,
+					    iter_type end_iter)
 	{
 		while (beg_iter != end_iter)
 			operator<<(*beg_iter++);
@@ -1442,17 +1834,17 @@ class linebreak_callback_base {
 	}
 
 	template<typename container_type>
-		linebreak_callback_base &operator()(const container_type &vec)
+	linebreak_callback_base &operator()(const container_type &vec)
 	{
 		return operator()(vec.begin(), vec.end());
 	}
- private:
+private:
 	virtual int callback(int);
 };
 
 class linebreak_callback_save_buf : public linebreak_callback_base {
 
- public:
+public:
 	std::list<int> lb_buf;
 
 	linebreak_callback_save_buf();
@@ -1460,7 +1852,7 @@ class linebreak_callback_save_buf : public linebreak_callback_base {
 
 	using linebreak_callback_base::operator<<;
 	using linebreak_callback_base::operator();
- private:
+private:
 	int callback(int value);
 };
 
@@ -1470,7 +1862,7 @@ class linebreak_callback_save_buf : public linebreak_callback_base {
 */
 
 template<typename input_t> class linebreak_iter
-: public std::iterator<std::input_iterator_tag, int, void>
+	: public std::iterator<std::input_iterator_tag, int, void>
 {
 	mutable input_t iter_value, end_iter_value;
 
@@ -1500,16 +1892,16 @@ template<typename input_t> class linebreak_iter
 
 	mutable value_type bufvalue;
 
- public:
- linebreak_iter(const input_t &iter_valueArg,
-		const input_t &iter_endvalueArg)
-	 : iter_value(iter_valueArg),
-		end_iter_value(iter_endvalueArg),
-		buf(new linebreak_callback_save_buf)
-		{
-		}
+public:
+	linebreak_iter(const input_t &iter_valueArg,
+		       const input_t &iter_endvalueArg)
+		: iter_value(iter_valueArg),
+		  end_iter_value(iter_endvalueArg),
+		  buf(new linebreak_callback_save_buf)
+	{
+	}
 
- linebreak_iter() : buf(NULL)
+	linebreak_iter() : buf(NULL)
 	{
 	}
 
@@ -1525,23 +1917,23 @@ template<typename input_t> class linebreak_iter
 			delete buf;
 	}
 
- linebreak_iter(const linebreak_iter<input_t> &v)
-	 : buf(NULL)
+	linebreak_iter(const linebreak_iter<input_t> &v)
+		: buf(NULL)
 	{
 		operator=(v);
 	}
 
 	linebreak_iter<input_t> &operator=(const
 					   linebreak_iter<input_t> &v)
-		{
-			if (buf)
-				delete buf;
-			buf=v.buf;
-			iter_value=v.iter_value;
-			end_iter_value=v.end_iter_value;
-			v.buf=NULL;
-			return *this;
-		}
+	{
+		if (buf)
+			delete buf;
+		buf=v.buf;
+		iter_value=v.iter_value;
+		end_iter_value=v.end_iter_value;
+		v.buf=NULL;
+		return *this;
+	}
 
 	bool operator==(const linebreak_iter<input_t> &v) const
 	{
@@ -1591,14 +1983,14 @@ class linebreakc_callback_base {
 	int opts;
 
 #if __cplusplus >= 201103L
- public:
+public:
 	linebreakc_callback_base(const linebreakc_callback_base &)
-		=delete;
+	=delete;
 
 	linebreakc_callback_base &operator=(const
 					    linebreakc_callback_base
 					    &)=delete;
- private:
+private:
 #else
 	linebreakc_callback_base(const linebreakc_callback_base &);
 	/* NOT IMPLEMENTED */
@@ -1609,7 +2001,7 @@ class linebreakc_callback_base {
 	/* NOT IMPLEMENTED */
 #endif
 
- public:
+public:
 	linebreakc_callback_base();
 	virtual ~linebreakc_callback_base();
 
@@ -1622,8 +2014,8 @@ class linebreakc_callback_base {
 	linebreakc_callback_base &operator<<(char32_t uc);
 
 	template<typename iter_type>
-		linebreakc_callback_base &operator()(iter_type beg_iter,
-						     iter_type end_iter)
+	linebreakc_callback_base &operator()(iter_type beg_iter,
+					     iter_type end_iter)
 	{
 		while (beg_iter != end_iter)
 			operator<<(*beg_iter++);
@@ -1636,13 +2028,13 @@ class linebreakc_callback_base {
 	{
 		return operator()(vec.begin(), vec.end());
 	}
- private:
+private:
 	virtual int callback(int, char32_t);
 };
 
 class linebreakc_callback_save_buf : public linebreakc_callback_base {
 
- public:
+public:
 	std::list<std::pair<int, char32_t> > lb_buf;
 
 	linebreakc_callback_save_buf();
@@ -1650,7 +2042,7 @@ class linebreakc_callback_save_buf : public linebreakc_callback_base {
 
 	using linebreakc_callback_base::operator<<;
 	using linebreakc_callback_base::operator();
- private:
+private:
 	int callback(int, char32_t);
 };
 
@@ -1663,8 +2055,8 @@ class linebreakc_callback_save_buf : public linebreakc_callback_base {
 */
 
 template<typename input_t> class linebreakc_iter
-: public std::iterator<std::input_iterator_tag,
-	std::pair<int, char32_t>, void>
+	: public std::iterator<std::input_iterator_tag,
+			       std::pair<int, char32_t>, void>
 {
 	mutable input_t iter_value, end_iter_value;
 
@@ -1695,16 +2087,16 @@ template<typename input_t> class linebreakc_iter
 
 	mutable value_type bufvalue;
 
- public:
- linebreakc_iter(const input_t &iter_valueArg,
-		 const input_t &iter_endvalueArg)
-	 : iter_value(iter_valueArg),
-		end_iter_value(iter_endvalueArg),
-		buf(new linebreakc_callback_save_buf)
-		{
-		}
+public:
+	linebreakc_iter(const input_t &iter_valueArg,
+			const input_t &iter_endvalueArg)
+		: iter_value(iter_valueArg),
+		  end_iter_value(iter_endvalueArg),
+		  buf(new linebreakc_callback_save_buf)
+	{
+	}
 
- linebreakc_iter() : buf(NULL)
+	linebreakc_iter() : buf(NULL)
 	{
 	}
 
@@ -1714,23 +2106,23 @@ template<typename input_t> class linebreakc_iter
 			delete buf;
 	}
 
- linebreakc_iter(const linebreakc_iter<input_t> &v)
-	 : buf(NULL)
+	linebreakc_iter(const linebreakc_iter<input_t> &v)
+		: buf(NULL)
 	{
 		operator=(v);
 	}
 
 	linebreakc_iter<input_t> &operator=(const
 					    linebreakc_iter<input_t> &v)
-		{
-			if (buf)
-				delete buf;
-			buf=v.buf;
-			iter_value=v.iter_value;
-			end_iter_value=v.end_iter_value;
-			v.buf=NULL;
-			return *this;
-		}
+	{
+		if (buf)
+			delete buf;
+		buf=v.buf;
+		iter_value=v.iter_value;
+		end_iter_value=v.end_iter_value;
+		v.buf=NULL;
+		return *this;
+	}
 
 	bool operator==(const linebreakc_iter<input_t> &v) const
 	{
@@ -1786,13 +2178,13 @@ class wordbreak_callback_base {
 	unicode_wb_info_t handle;
 
 #if __cplusplus >= 201103L
- public:
+public:
 	wordbreak_callback_base(const wordbreak_callback_base &)=delete;
 
 	wordbreak_callback_base &operator=(const
 					   wordbreak_callback_base &)
-		=delete;
- private:
+	=delete;
+private:
 #else
 	wordbreak_callback_base(const wordbreak_callback_base &);
 	/* NOT IMPLEMENTED */
@@ -1801,7 +2193,7 @@ class wordbreak_callback_base {
 					   wordbreak_callback_base &);
 	/* NOT IMPLEMENTED */
 #endif
- public:
+public:
 	wordbreak_callback_base();
 	virtual ~wordbreak_callback_base();
 
@@ -1812,8 +2204,8 @@ class wordbreak_callback_base {
 	wordbreak_callback_base &operator<<(char32_t uc);
 
 	template<typename iter_type>
-		wordbreak_callback_base &operator()(iter_type beg_iter,
-						    iter_type end_iter)
+	wordbreak_callback_base &operator()(iter_type beg_iter,
+					    iter_type end_iter)
 	{
 		while (beg_iter != end_iter)
 			operator<<(*beg_iter++);
@@ -1826,7 +2218,7 @@ class wordbreak_callback_base {
 	{
 		return operator()(vec.begin(), vec.end());
 	}
- private:
+private:
 	virtual int callback(bool);
 };
 
@@ -1839,10 +2231,10 @@ class wordbreakscan {
 	unicode_wbscan_info_t handle;
 
 #if __cplusplus >= 201103L
- public:
+public:
 	wordbreakscan(const wordbreakscan &)=delete;
 	wordbreakscan &operator=(const wordbreakscan &)=delete;
- private:
+private:
 #else
 	wordbreakscan(const wordbreakscan &);
 	/* NOT IMPLEMENTED */
@@ -1850,7 +2242,7 @@ class wordbreakscan {
 	wordbreakscan &operator=(const wordbreakscan &);
 	/* NOT IMPLEMENTED */
 #endif
- public:
+public:
 
 	wordbreakscan();
 	~wordbreakscan();
@@ -1885,6 +2277,240 @@ std::u32string tolower(const std::u32string &u);
 //! Convert unicode to uppercase
 
 std::u32string toupper(const std::u32string &u);
+
+//! Calculate bidirectional character types
+
+//! Passed as a parameter to bidi_calc(), supplying the string and the
+//! calculated bidirectional types.
+
+struct bidi_calc_types {
+	const std::u32string &s;
+
+	//! Calculated bidirectional types.
+
+	std::vector<enum_bidi_type_t> types;
+
+	//! A reference to an existing std::u32string
+
+	//! bidi_calc_types can be constructed only from a reference to
+	//! an existing std::u32string.
+	bidi_calc_types(const std::u32string &);
+
+#if __cplusplus >= 201103L
+	//! Deleted constructor
+
+	//! bidi_calc_types cannot be constructed from a temporary
+	//! std::u32string.
+	bidi_calc_types(std::u32string &&)=delete;
+#endif
+	//! Replace all paragraph breaks by newlines.
+
+	void setbnl(std::u32string &);
+
+	//! Destructor
+
+	~bidi_calc_types();
+};
+
+//! Calculate bidirectional embedding levels
+
+//! Returns the bidirectional embedding levels, and the paragraph
+//! embedding level.
+//!
+//! The first parameter can be implicitly converted from an existing
+//! std::u32string object. Alternatively a bidi_calc_types helper
+//! can be constructed explicitly, and then passed in directly.
+
+std::tuple<std::vector<unicode_bidi_level_t>,
+	   struct unicode_bidi_direction> bidi_calc(const bidi_calc_types &s);
+
+//! Calculate bidirectional embedding levels
+
+//! Overload calculates the embedding levels using a predetermined
+//! paragraph embedding level.
+//!
+//! Returns the bidirectional embedding levels, and the same paragraph
+//! embedding level.
+
+std::tuple<std::vector<unicode_bidi_level_t>,
+	   struct unicode_bidi_direction> bidi_calc(const bidi_calc_types &s,
+						    unicode_bidi_level_t level);
+
+//! Reorder bidirectional text
+
+//! Reorders the string and levels in place.
+//!
+//! Non-0 return value indicates the string and levels' sizes do not match.
+
+int bidi_reorder(std::u32string &string,
+		 std::vector<unicode_bidi_level_t> &levels,
+		 const std::function<void (size_t, size_t)>
+		 &reorder_callback=[](size_t, size_t){},
+		 size_t starting_pos=0,
+		 size_t n=(size_t)-1);
+
+//! Dry-run reorder bidirectional text
+void bidi_reorder(std::vector<unicode_bidi_level_t> &levels,
+		  const std::function<void (size_t, size_t)>
+		  &reorder_callback=[](size_t, size_t){},
+		  size_t starting_pos=0,
+		  size_t n=(size_t)-1);
+
+//! Remove directional markers
+
+//! Removes them from the string, in place. Optional lambda gets notified
+//! of the index (in the original string, of each removed marker.
+
+void bidi_cleanup(std::u32string &string,
+		  const std::function<void (size_t)> &removed_callback=
+		  [](size_t) {},
+		  int cleanup_options=0);
+
+//! Also remove them from the embedding direction level buffer.
+
+//! Returns non-0 in case of non-matching level buffer size.
+
+int bidi_cleanup(std::u32string &string,
+		 std::vector<unicode_bidi_level_t> &levels,
+		 const std::function<void (size_t)> &removed_callback=
+		 [](size_t) {},
+		 int cleanup_options=0);
+
+//! Clean up a substring of the unicode string.
+
+//! The substring gets specified by starting_pos and n.
+//!
+//! \note
+//! The removed position parameter to the removed_callback is based on
+//! the given starting_position. Add starting_pos to it to get the
+//! actual removed index.
+//!
+//! Returns non-0 in case of non-matching level buffer size.
+//!
+//! The final size of the returned string is determined by counting
+//! how many calls to removed_callback were made.
+
+int bidi_cleanup(std::u32string &string,
+		 std::vector<unicode_bidi_level_t> &levels,
+		 const std::function<void (size_t)> &removed_callback,
+		 int cleanup_options,
+		 size_t starting_pos,
+		 size_t n);
+
+//! Convert Unicode string from canonical rendering order to logical order.
+int bidi_logical_order(std::u32string &string,
+		       std::vector<unicode_bidi_level_t> &levels,
+		       unicode_bidi_level_t paragraph_embedding,
+		       const std::function<void (size_t, size_t)>
+		       &lambda=[](size_t,size_t){},
+		       size_t starting_pos=0,
+		       size_t n=(size_t)-1);
+
+//! Convert Unicode string from canonical rendering order to logical order.
+void bidi_logical_order(std::vector<unicode_bidi_level_t> &levels,
+			unicode_bidi_level_t paragraph_embedding,
+			const std::function<void (size_t, size_t)> &lambda,
+			size_t starting_pos=0,
+			size_t n=(size_t)-1);
+
+//! Whether directional and isolation markers are needed.
+
+bool bidi_needs_embed(const std::u32string &string,
+		      const std::vector<unicode_bidi_level_t> &levels,
+		      const unicode_bidi_level_t *paragraph_embedding=0,
+		      size_t starting_pos=0,
+		      size_t n=(size_t)-1);
+
+//! Embed directional and isolation markers
+
+//! Non-0 return value indicates the string and levels' sizes do not match.
+//!
+//! The lambda gets called repeatedly, to specify the contents of the
+//! string with embedded direction markers.
+
+int bidi_embed(const std::u32string &string,
+	       const std::vector<unicode_bidi_level_t> &levels,
+	       unicode_bidi_level_t paragraph_embedding,
+	       const std::function<void (const char32_t *string,
+					 size_t n,
+					 bool is_part_of_string)> &lambda);
+
+//! Embed directional and isolation markers
+
+//! \overload
+//!
+//! Provides a lambda that collects the new string, and returns it. An
+//! empty string gets returned if the string and levels' sizes do not match.
+
+std::u32string bidi_embed(const std::u32string &string,
+			  const std::vector<unicode_bidi_level_t> &levels,
+			  unicode_bidi_level_t paragraph_embedding);
+
+
+//! Identify contiguous sequences of combining characters
+
+//! Bounded by each embedding level.
+
+void bidi_combinings(const std::u32string &string,
+		     const std::vector<unicode_bidi_level_t> &levels,
+		     const std::function<void (unicode_bidi_level_t level,
+					       size_t level_start,
+					       size_t n_chars,
+					       size_t comb_start,
+					       size_t n_comb_chars)> &callback);
+
+//! Identify contiguous sequences of composition characters
+
+void bidi_combinings(const std::u32string &string,
+		     const std::function<void (unicode_bidi_level_t level,
+					       size_t level_start,
+					       size_t n_chars,
+					       size_t comb_start,
+					       size_t n_comb_chars)> &callback);
+
+//! Check if a directional marker needs to be inserted
+
+//! In order for the unicode string to have the specified default
+//! paragraph embedding level.
+
+char32_t bidi_embed_paragraph_level(const std::u32string &string,
+				    unicode_bidi_level_t level);
+
+//! Compute default direction of text
+
+unicode_bidi_direction bidi_get_direction(const std::u32string &string,
+					  size_t starting_pos=0,
+					  size_t n=(size_t)-1);
+
+//! Override bidi direction.
+std::u32string bidi_override(const std::u32string &s,
+			     unicode_bidi_level_t direction,
+			     int cleanup_options=0);
+
+constexpr int decompose_flag_qc=UNICODE_DECOMPOSE_FLAG_QC;
+constexpr int decompose_flag_compat=UNICODE_DECOMPOSE_FLAG_COMPAT;
+
+void decompose_default_reallocate(std::u32string &,
+				  const std::vector<std::tuple<size_t, size_t>>
+				  &);
+
+void decompose(std::u32string &,
+	       int flags=0,
+	       const std::function<void (std::u32string &,
+					 const std::vector<std::tuple<size_t,
+					 size_t>>)> &
+	       =decompose_default_reallocate);
+
+constexpr int compose_flag_removeunused=UNICODE_COMPOSE_FLAG_REMOVEUNUSED;
+
+constexpr int compose_flag_oneshot=UNICODE_COMPOSE_FLAG_ONESHOT;
+
+void compose_default_callback(unicode_composition_t &);
+
+void compose(std::u32string &string,
+	     int flags=0,
+	     const std::function<void (unicode_composition_t &)> &cb=
+	     compose_default_callback);
 
 #if 0
 {

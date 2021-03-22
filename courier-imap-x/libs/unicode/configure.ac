@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([courier-unicode], [2.1.2], [courier-users@lists.sourceforge.net])
+AC_INIT([courier-unicode], [2.2.2], [courier-users@lists.sourceforge.net])
 
 >confdefs.h  # Kill PACKAGE_ macros
 
@@ -22,6 +22,7 @@ AC_PROG_CC
 AC_PROG_CC_C99
 AC_PROG_CXX
 AX_COURIER_UNICODE_CXXFLAGS
+
 AC_SUBST(COURIER_UNICODE_CXXFLAGS)
 
 AC_PATH_PROGS(PERL, perl5 perl, perl, $LPATH)
@@ -116,5 +117,25 @@ fi
 CFLAGS="-I.. -I$srcdir/.. $CFLAGS"
 CXXFLAGS="-I.. -I$srcdir/.. $CXXFLAGS"
 
+set -- `echo "$VERSION" | tr '.' ' '`
+
+v=$1
+r=`echo "00"$2 | sed 's/.*(...)$/$1/'`
+p=$3
+
+if test "$p" = ""
+   then p="0"
+fi
+
+p=`echo "00"$p | sed 's/.*(...)$/$[]1/'`
+
+HVERSION="$v$r$p"
+AC_SUBST(HVERSION)
+
 AM_CONDITIONAL(HAVE_DOCS,[test -f $srcdir/docbook/icon.gif])
-AC_OUTPUT(Makefile courier-unicode.spec courier-unicode.h)
+AC_OUTPUT(Makefile
+	packaging/freebsd10/Makefile
+	courier-unicode.spec
+	courier-unicode.h
+	courier-unicode-version.m4
+)

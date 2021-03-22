@@ -36,7 +36,7 @@
 
 #include "config.h"
 
-#include "unicode/courier-unicode.h"
+#include <unicode/courier-unicode.h>
 
 #include <string.h>
 #include <stdlib.h>

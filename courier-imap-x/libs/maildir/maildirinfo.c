@@ -37,7 +37,7 @@
 
 #include	"maildirmisc.h"
 #include	"maildirnewshared.h"
-#include	"unicode/courier-unicode.h"
+#include	<unicode/courier-unicode.h>
 
 void maildir_info_destroy(struct maildir_info *info)
 {

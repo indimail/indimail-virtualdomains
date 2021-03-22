@@ -20,6 +20,7 @@ BUILT_SOURCES=	maildrop.html.in maildrop.1.in \
 
 noinst_LTLIBRARIES = libmdcommon.la
 
+
 libmdcommon_la_SOURCES=alarm.C alarm.h alarmsleep.C alarmsleep.h alarmtimer.C \
 	alarmtimer.h buffer.C buffer.h dotlock.C dotlock.h \
 	dotlockrefresh.C dotlockrefresh.h exittrap.C exittrap.h funcs.C \
@@ -45,8 +46,7 @@ maildrop_SOURCES=deliver.C deliverdotlock.C deliverdotlock.h \
 
 maildrop_DEPENDENCIES = libmdcommon.la
 
-maildrop_LDADD = libmdcommon.la \
-	@AUTHLDADD@ -lpcre
+maildrop_LDADD = libmdcommon.la @AUTHLDADD@ -lpcre
 maildrop_LDFLAGS=
 
 reformail_SOURCES=reformail.C
@@ -72,8 +72,10 @@ check-am:
 	./testsuite | cmp -s - $(srcdir)/testsuite.txt.idn
 	@SHELL@ $(srcdir)/testsuite2
 
-noinst_DATA=maildrop.html maildropfilter.html maildropgdbm.html
-man_MANS = mailbot.1 maildrop.1 maildropex.7 maildropfilter.7 maildropgdbm.7 makedat.1 reformail.1
+noinst_DATA=maildrop.html maildropfilter.html maildropgdbm.html \
+			maildropex.html mailbot.html reformail.html makedat.html
+man_MANS = mailbot.1 maildrop.1 maildropex.7 maildropfilter.7 \
+		   maildropgdbm.7 makedat.1 reformail.1
 
 if HAVE_SGML
 maildrop.html.in: maildrop.sgml ../docbook/sgml2html
@@ -90,14 +92,26 @@ maildropfilter.7.in: maildropfilter.sgml ../docbook/sgml2html
 	../docbook/sgml2man maildropfilter.sgml maildropfilter.7.in "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/maildrop/"
 	mv maildropfilter.7 maildropfilter.7.in
 
+maildropgdbm.html: maildropgdbm.sgml ../docbook/sgml2html
+	../docbook/sgml2html maildropgdbm.sgml maildropgdbm.html "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/maildrop/"
+
 maildropgdbm.7: maildropgdbm.sgml ../docbook/sgml2html
 	../docbook/sgml2man maildropgdbm.sgml maildropgdbm.7 "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/maildrop/"
+
+maildropex.html: maildropex.sgml ../docbook/sgml2html
+	../docbook/sgml2html maildropex.sgml maildropex.html "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/maildrop/"
 
 maildropex.7: maildropex.sgml ../docbook/sgml2html
 	../docbook/sgml2man maildropex.sgml maildropex.7 "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/maildrop/"
 
+mailbot.html: mailbot.sgml ../docbook/sgml2html
+	../docbook/sgml2html mailbot.sgml mailbot.html "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/maildrop/"
+
 mailbot.1: mailbot.sgml ../docbook/sgml2html
 	../docbook/sgml2man mailbot.sgml mailbot.1 "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/maildrop/"
+
+reformail.html: reformail.sgml ../docbook/sgml2html
+	../docbook/sgml2html reformail.sgml reformail.html "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/maildrop/"
 
 reformail.1: reformail.sgml ../docbook/sgml2html
 	../docbook/sgml2man reformail.sgml reformail.1 "--stringparam man.base.url.for.relative.links http://www.courier-mta.org/maildrop/"

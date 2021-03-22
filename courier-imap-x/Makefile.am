@@ -155,7 +155,7 @@ lpm-build:
 	$(MAKE) -$(MAKEFLAGS) dist
 	rm -rf lpm
 	mkdir lpm
-	lpbuild --srcbuild -o lpm @PACKAGE@-@VERSION@.tar.bz2
+	lpbuild --srcbuild -o lpm @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2
 
 publish:
 	lpbuild --resign lpm/*
@@ -167,13 +167,13 @@ publish:
 	rm -rf lpmtmp
 	lpm --sync repository && rsync -a -v --delete-after repository/. headache:lpmtool.com/www/repositories/courier-imap
 
-bump.rpm.release: @PACKAGE@.spec
+bump.rpm.release: @PACKAGE_NAME@.spec
 	VERSION="x"; \
 	test -f $(srcdir)/rpm.release && . $(srcdir)/rpm.release; \
 	NEXT_RELEASE=0; \
-	test "$$VERSION" = "@VERSION@" && NEXT_RELEASE="$$RELEASE"; \
+	test "$$VERSION" = "@PACKAGE_VERSION@" && NEXT_RELEASE="$$RELEASE"; \
 	RELEASE=`expr $$NEXT_RELEASE + 1`; \
-	echo "VERSION=@VERSION@" >$(srcdir)/rpm.release; \
+	echo "VERSION=@PACKAGE_VERSION@" >$(srcdir)/rpm.release; \
 	echo "RELEASE=$$RELEASE" >>$(srcdir)/rpm.release; \
 	sed 's/^Release: .*/Release: '$$RELEASE'%{courier_release}/' \
 		courier-imap.spec >courier-imap.spec.new ; \
@@ -255,19 +255,19 @@ install-configure-local:
 			@SYSCONFTOOL@ $$file;; esac ; done
 upload-beta:
 	test -z "$(SFPASSWD)" && exit 1; exit 0
-	rm -f @PACKAGE@-@VERSION@.tar.bz2.sig; gpg --detach-sign --default-key mrsam@courier-mta.com @PACKAGE@-@VERSION@.tar.bz2; test -f @PACKAGE@-@VERSION@.tar.bz2.sig || exit 1
-	~/src/sftools/release.pl mrsam $(SFPASSWD) courier imap-devel `echo @VERSION@|sed 's/.*\(........\)/\1/'` @PACKAGE@-@VERSION@.tar.bz2 @PACKAGE@-@VERSION@.tar.bz2.sig
+	rm -f @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2.sig; gpg --detach-sign --default-key mrsam@courier-mta.com @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2; test -f @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2.sig || exit 1
+	~/src/sftools/release.pl mrsam courier imap-devel `echo @PACKAGE_VERSION@|sed 's/.*\(........\)/\1/'` @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2 @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2.sig
 
 upload-dist:
 	test -z "$(SFPASSWD)" && exit 1; exit 0
-	rm -f @PACKAGE@-@VERSION@.tar.bz2.sig; gpg --detach-sign --default-key mrsam@courier-mta.com @PACKAGE@-@VERSION@.tar.bz2; test -f @PACKAGE@-@VERSION@.tar.bz2.sig || exit 1
-	set -e; v="@PACKAGE@/@VERSION@/`date +%Y%m%d%H%M%S`"; git tag -s $$v -m 'Tag version @VERSION@'; cd libs; git tag -s $$v -m 'Tag version @VERSION@'
-	socksify ~/src/sftools/release.pl mrsam $(SFPASSWD) courier imap @VERSION@ @PACKAGE@-@VERSION@.tar.bz2 @PACKAGE@-@VERSION@.tar.bz2.sig
+	rm -f @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2.sig; gpg --detach-sign --default-key mrsam@courier-mta.com @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2; test -f @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2.sig || exit 1
+	set -e; v="@PACKAGE_NAME@/@PACKAGE_VERSION@/`date +%Y%m%d%H%M%S`"; git tag -s $$v -m 'Tag version @PACKAGE_VERSION@'; cd libs; git tag -s $$v -m 'Tag version @PACKAGE_VERSION@'
+	socksify ~/src/sftools/release.pl mrsam courier imap @PACKAGE_VERSION@ @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2 @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2.sig
 
 dollar=$$
 id=$(dollar)Id
 
-WWW=$$HOME/www/www.courier-mta.org
+WWW=$$HOME/www/hostrocket/courier-mta.org
 
 htmldoc: INSTALL.html libs/imap/README.html $(MAILDROPHTML) \
 	libs/maildrop/maildroptips.html libs/maildrop/mailbot.html libs/maildrop/maildropex.html \
@@ -279,7 +279,7 @@ htmldoc: INSTALL.html libs/imap/README.html $(MAILDROPHTML) \
 		print' >$(WWW)/imap/`basename $$f`; done
 	rm -rf doc
 	mkdir doc
-	xsltproc -o doc/ $(srcdir)/imap.xsl $(srcdir)/imap.xml
+	xsltproc --nonet -o doc/ $(srcdir)/imap.xsl $(srcdir)/imap.xml
 	for f in doc/*.html; do \
 		echo $$f; \
 		tidy -i -asxml --doctype transitional \

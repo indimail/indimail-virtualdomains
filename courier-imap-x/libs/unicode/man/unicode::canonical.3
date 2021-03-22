@@ -1,0 +1,114 @@
+'\" t
+.\"     Title: unicode::canonical
+.\"    Author: Sam Varshavchik
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 03/12/2021
+.\"    Manual: Courier Unicode Library
+.\"    Source: Courier Unicode Library
+.\"  Language: English
+.\"
+.TH "UNICODE::CANONICAL" "3" "03/12/2021" "Courier Unicode Library" "Courier Unicode Library"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+unicode::canonical, unicode::decompose, unicode::decompose_default_reallocate, unicode::compose, unicode::compose_default_callback \- unicode canonical normalization and denormalization
+.SH "SYNOPSIS"
+.sp
+.ft B
+.nf
+#include <courier\-unicode\&.h>
+
+constexpr int decompose_flag_qc=UNICODE_DECOMPOSE_FLAG_QC;
+constexpr int decompose_flag_compat=UNICODE_DECOMPOSE_FLAG_COMPAT;
+
+constexpr int compose_flag_removeunused=UNICODE_COMPOSE_FLAG_REMOVEUNUSED;
+constexpr int compose_flag_oneshot=UNICODE_COMPOSE_FLAG_ONESHOT;
+.fi
+.ft
+.HP \w'void\ decompose_default_reallocate('u
+.BI "void decompose_default_reallocate(std::u32string\ &" "string" ", const\ std::vector<std::tuple<size_t,\ size_t>>\ &" "list" ");"
+.HP \w'void\ decompose('u
+.BI "void decompose(std::u32string\ &" "string" ", int\ " "flags" "=0, const\ std::function<void\ (std::u32string\ &,\ const\ std::vector<std::tuple<size_t,\ size_t>>)>\ &" "reallocate" "=decompose_default_reallocate);"
+.HP \w'void\ compose_default_callback('u
+.BI "void compose_default_callback(unicode_composition_t\ &" "compositions" ");"
+.HP \w'void\ compose('u
+.BI "void compose(std::u32string\ &" "string" ", int\ " "flags" "=0, const\ std::function<void\ (unicode_composition_t\ &)>\ &" "cb" "=compose_default_reallocate);"
+.SH "DESCRIPTION"
+.PP
+These functions implement the C++ interface for the
+\m[blue]\fBUnicode Canonical Decomposition and Composition\fR\m[]\&\s-2\u[1]\d\s+2, See the description of the underlying
+\fBunicode_canonical\fR(3)
+C library API for more information\&. C++ specific notes:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The C++ decomposition
+\fIreallocate\fR
+callback receives a single vector of
+\fIoffset\fR
+and
+\fIsize\fR
+tuples instead of two separate arrays or vectors\&.
+\fBunicode::decompose_default_reallocate\fR() is the C++ version of the default
+\fIreallocate\fR
+callback\&. It receives the receiving the same tuple vector parameter, too\&. The C++ interface use
+std::u32strings to represent Unicode text strings, and
+\fBunicode::decompose_default_reallocate\fR()
+\fBresize\fRs it\&.
+.sp
+Like the C callback, the C++ one gets called 0 or more times\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fBunicode::compose\fR() takes care of initializing, applying, and de\-initialization the
+unicode_composition_t
+object, for decomposition\&. The callback receives a reference to the
+unicode_composition_t
+object, which the callback should not modify in any way\&.
+.RE
+.SH "SEE ALSO"
+.PP
+\fBcourier-unicode\fR(7),
+\fBunicode_canonical\fR(3)\&.
+.SH "AUTHOR"
+.PP
+\fBSam Varshavchik\fR
+.RS 4
+Author
+.RE
+.SH "NOTES"
+.IP " 1." 4
+Unicode Canonical Decomposition and Composition
+.RS 4
+\%https://www.unicode.org/reports/tr15/tr15-50.html
+.RE

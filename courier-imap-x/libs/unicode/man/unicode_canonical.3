@@ -1,0 +1,868 @@
+'\" t
+.\"     Title: unicode_canonical
+.\"    Author: Sam Varshavchik
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 03/12/2021
+.\"    Manual: Courier Unicode Library
+.\"    Source: Courier Unicode Library
+.\"  Language: English
+.\"
+.TH "UNICODE_CANONICAL" "3" "03/12/2021" "Courier Unicode Library" "Courier Unicode Library"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+unicode_canonical, unicode_ccc, unicode_decomposition_init, unicode_decomposition_deinit, unicode_decompose, unicode_decompose_reallocate_size, unicode_compose, unicode_composition_init, unicode_composition_deinit, unicode_composition_apply \- unicode canonical normalization and denormalization
+.SH "SYNOPSIS"
+.sp
+.ft B
+.nf
+#include <courier\-unicode\&.h>
+.fi
+.ft
+.HP \w'unicode_canonical_t\ unicode_canonical('u
+.BI "unicode_canonical_t unicode_canonical(char32_t\ " "c" ");"
+.HP \w'uint8_t\ unicode_ccc('u
+.BI "uint8_t unicode_ccc(char32_t\ " "c" ");"
+.HP \w'void\ unicode_decomposition_init('u
+.BI "void unicode_decomposition_init(unicode_decomposition_t\ *" "info" ", char32_t\ *" "string" ", size_t\ *" "string_size" ", void\ *" "arg" ");"
+.HP \w'int\ unicode_decompose('u
+.BI "int unicode_decompose(unicode_decomposition_t\ *" "info" ");"
+.HP \w'void\ unicode_decomposition_deinit('u
+.BI "void unicode_decomposition_deinit(unicode_decomposition_t\ *" "info" ");"
+.HP \w'size_t\ unicode_decompose_reallocate_size('u
+.BI "size_t unicode_decompose_reallocate_size(unicode_decomposition_t\ *" "info" ", const\ size_t\ *" "sizes" ", size_t\ " "n" ");"
+.HP \w'int\ unicode_compose('u
+.BI "int unicode_compose(char32_t\ *" "string" ", size_t\ " "string_size" ", int\ " "flags" ", size_t\ *" "new_size" ");"
+.HP \w'int\ unicode_composition_init('u
+.BI "int unicode_composition_init(const\ char32_t\ *" "string" ", size_t\ " "string_size" ", int\ " "flags" ", unicode_composition_t\ *" "compositions" ");"
+.HP \w'void\ unicode_composition_deinit('u
+.BI "void unicode_composition_deinit(unicode_composition_t\ *" "compositions" ");"
+.HP \w'size_t\ unicode_composition_apply('u
+.BI "size_t unicode_composition_apply(char32_t\ *" "string" ", size_t\ " "string_size" ", unicode_composition_t\ *" "compositions" ");"
+.SH "DESCRIPTION"
+.PP
+These functions compose or decompose a Unicode string into a canonical or a compatible normalized form\&.
+.PP
+\fBunicode_canonical\fR() looks up the character\*(Aqs
+\m[blue]\fBcanonical and compatibility mapping\fR\m[]\&\s-2\u[1]\d\s+2\&.
+\fBunicode_canonical\fR() returns a structure with the following fields:
+.PP
+\fIcanonical_chars\fR
+.RS 4
+A pointer to the canonical or equivalent representation of the character\&.
+.RE
+.PP
+\fIn_canonical_chars\fR
+.RS 4
+Number of characters in the
+\fIcanonical_chars\fR\&.
+.RE
+.PP
+\fIformat\fR
+.RS 4
+A value of
+UNICODE_CANONICAL_FMT_NONE
+indicates a canonical mapping, other values indicate a compatibility equivalent mapping\&.
+.RE
+.PP
+A NULL
+\fIcanonical_chars\fR
+(with a 0
+\fIn_canonical_chars\fR) indicates that the character has no canonical or compatibility equivalence\&.
+.PP
+\fBunicode_ccc\fR() returns the character\*(Aqs canonical combining class value\&.
+.PP
+\fBunicode_decomposition_init\fR(),
+\fBunicode_decompose\fR() and
+\fBunicode_decomposition_deinit\fR() implement a complete interface for decomposing a Unicode string:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+unicode_decomposition_t info;
+
+unicode_decomposition_init(&info, before, (size_t)\-1, NULL);
+info\&.decompose_flags=UNICODE_DECOMPOSE_FLAG_QC;
+unicode_decompose(&info);
+unicode_decomposition_deinit(&info);
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+\fBunicode_decomposition_init\fR() initializes a new
+unicode_decomposition_t
+structure, that gets passed in as its first parameter\&. The second parameter is a pointer to a Unicode string, with the number of characters in the string in the third parameter\&. A string size of
+\-1
+indicates a
+\e0\-terminated string and calculates its
+\fIstring_size\fR
+(which does not include the trailing
+\e0\&. The last parameter is a
+void *, an opaque pointer that gets stored in the initialized
+unicode_decomposition_t
+object:
+.TS
+tab(:);
+l s s s s
+l l l s s
+l l l s s
+l l l s s
+l l l s s
+l l l l l
+l l l l l
+l l l l l
+l l l l l
+l l r
+l l l s s
+l s s s s.
+T{
+typedef struct\ \&unicode_decomposition\ \&{
+T}
+T{
+\ \&
+T}:T{
+char32_t
+T}:T{
+*\fIstring\fR;
+T}
+T{
+\ \&
+T}:T{
+size_t
+T}:T{
+\fIstring_size\fR;
+T}
+T{
+\ \&
+T}:T{
+int
+T}:T{
+\fIdecompose_flags\fR;
+T}
+T{
+\ \&
+T}:T{
+int
+T}:T{
+(*\fIreallocate)(\fR
+T}
+T{
+\ \&
+T}:T{
+\ \&
+T}:T{
+\ \&
+T}:T{
+struct\ \&unicode_decomposition
+T}:T{
+*\fIinfo\fR,
+T}
+T{
+\ \&
+T}:T{
+\ \&
+T}:T{
+\ \&
+T}:T{
+const\ \&size_t
+T}:T{
+*\fIoffsets\fR,
+T}
+T{
+\ \&
+T}:T{
+\ \&
+T}:T{
+\ \&
+T}:T{
+const\ \&size_t
+T}:T{
+*\fIsizes\fR,
+T}
+T{
+\ \&
+T}:T{
+\ \&
+T}:T{
+\ \&
+T}:T{
+size_t
+T}:T{
+\fIn\fR
+T}
+T{
+\ \&
+T}:T{
+\ \&
+T}:T{
+);
+T}
+T{
+\ \&
+T}:T{
+void
+T}:T{
+*\fIarg\fR;
+T}
+T{
+} unicode_decomposition_t;
+T}
+.TE
+.sp 1
+.PP
+\fBunicode_decompose\fR() proceeds and decomposes the
+\fIstring\fR
+and replaces it with its decomposed
+\fIstring\fR
+version\&.
+.PP
+unicode_decomposition_t\*(Aqs
+\fIstring\fR,
+\fIstring_size\fR
+and
+\fIarg\fR
+are copies of
+\fBunicode_decomposition_init\fR\*(Aqs parameters\&.
+\fBunicode_decomposition_init\fR
+initializes all other fields to their default values\&.
+.PP
+The
+\fIdecompose_flags\fR
+bitmask gets initialized to 0, and is a bit mask:
+.PP
+UNICODE_DECOMPOSE_FLAG_QC
+.RS 4
+Check each character\*(Aqs appropriate
+\(lqquick check\(rq
+property and skip decomposing Unicode characters that would get re\-composed by
+\fBunicode_composition_apply\fR()\&.
+.RE
+.PP
+UNICODE_DECOMPOSE_FLAG_COMPAT
+.RS 4
+Perform a compatibility decomposition instead of a canonical decomposition\&.
+.RE
+.PP
+\fIreallocate\fR
+is a pointer to a function that gets called to reallocate a larger
+\fIstring\fR\&.
+\fBunicode_decompose\fR() determines which characters in the
+\fIstring\fR
+need decomposing and calls the
+\fIreallocate\fR
+function pointer zero or more times\&. Each call to
+\fIreallocate\fR
+passes information about where new characters will get inserted into the
+\fIstring\fR\&.
+.PP
+\fIreallocate\fR
+only needs to grow the size of the buffer where
+\fIstring\fR
+points so that it\*(Aqs big enough to hold a larger, decomposed string; then update
+\fIstring\fR
+accordingly\&.
+\fIreallocate\fR
+should not update
+\fIstring_size\fR
+or make any changes to the existing
+\fIstring\fR, that\*(Aqs
+\fBunicode_decompose\fR()\*(Aqs job (after
+\fIreallocate\fR
+returns)\&.
+.PP
+The
+\fIreallocate\fR
+callback function receives the following parameters\&.
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A pointer to the
+unicode_decomposition_t
+and, notably, its
+\fIarg\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A pointer to the array of offset indexes in the
+\fIstring\fR
+where new characters will get inserted in order to hold the decomposed string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A pointer to the array that holds the number of characters that get inserted each corresponding offset\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The size of the two arrays\&.
+.RE
+.PP
+\fIreallocate\fR
+must update the
+\fIstring\fR
+if necessary to hold at least the number of characters that\*(Aqs the sum total of the initial
+\fIstring_size\fR
+and the sum total of al
+\fIsizes\fR\&.
+.PP
+\fBunicode_decomposition_init\fR() initializes the
+\fIreallocate\fR
+pointer to a default implementation that uses
+\fBrealloc\fR(3)
+and updates
+\fIstring\fR
+with its return value\&. The application can use its own
+\fIreallocate\fR
+to handle this task on its own, and use
+\fBunicode_decompose_reallocate_size\fR
+to compute the minimum string size:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+size_t unicode_decompose_reallocate_size(unicode_decomposition_t *info,
+                                         const size_t *sizes,
+                                         size_t n)
+{
+    size_t i;
+    size_t new_size=info\->string_size;
+
+    for (i=0; i<n; ++i)
+        new_size += sizes[i];
+
+    return new_size;
+}
+	      
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The
+\fIreallocate\fR
+function returns 0 on success and a non\-0 error code to report a failure; and
+\fIunicode_decompose\fR() does the same\&. The only error condition from
+\fIunicode_decompose\fR() is a non\-0 error code from the
+\fIreallocate\fR
+function\&. Otherwise: a successful decomposition results in
+\fIunicode_decompose\fR() returning 0 and
+\fBunicode_decomposition_init\fR()\*(Aqs
+\fIstring\fR
+pointing to the decomposed string and
+\fIstring_size\fR
+giving the number of characters in the decomposed string\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+\fIstring_size\fR
+does not include the trailing
+\e0
+character\&. The input string also has its
+\fIstring_size\fR
+specified without counting its
+\e0
+character\&. The default implementation of
+\fIreallocate\fR
+allocates an extra
+char32_t
+ands sets it to a
+\e0\&. Therefore:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+If the Unicode string before decomposition has a trailing
+\e0
+and no decomposition occurs, and no calls to
+\fIreallocate\fR
+takes place: the
+\fIstring\fR
+in the
+unicode_decomposition_t
+is unchanged and it\*(Aqs still
+\e0\-terminated\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The default
+\fIreallocate\fR
+allocates an extra
+char32_t
+ands sets it to a
+\e0; and it takes care of that for the decomposed string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+An application that provides its own replacement
+\fIreallocate\fR
+is responsible for doing the same, if it wants the decomposed string to be
+\e0
+terminated\&.
+.RE
+.sp .5v
+.RE
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Multiple calls to the
+\fIreallocate\fR
+callback are possible\&. Each call to
+\fIreallocate\fR
+reflect the prior calls\*(Aq decompositions\&. Example: the original string has five characters and the first call to
+\fIreallocate\fR
+had two offsets, at position 1 and 3, with a value of 1 for their both
+\fIsizes\fR\&. This effects transforming an original Unicode string "AAAAA" into "AXAAXAA" (with
+\(lqA\(rq
+representing unspecified characters in the original string, and
+\(lqX\(rq
+showing the two characters added in the first call to
+\fBreallocate\fR\&.
+.PP
+A second call to
+\fIvarname\fR
+with am offset at position 4, and a size of 1, results in the updated string of "AXAAYXAA" (with
+\(lqY\(rq) marking an unspecified character inserted by the second call\&.
+.sp .5v
+.RE
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+Unicode string decomposition involves replacing a given Unicode character with one or more other characters\&. The sizes given to
+\fIreallocate\fR
+reflect the net addition to the Unicode string\&. For example: decomposing one Unicode character into three decomposed characters results in a call to
+\fIreallocate\fR
+reporting an insert of two more characters\&.
+.sp .5v
+.RE
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+\fIoffsets\fR
+actually report the indices of each Unicode character that\*(Aqs getting decomposed\&. A 1:1 decomposition of a Unicode Character gets reported as an additional
+\fIsizes\fR
+entry of 0\&.
+.sp .5v
+.RE
+.PP
+\fBunicode_decomposition_deinit\fR() releases all resources and destroys the
+unicode_decomposition_t; it is no longer valid\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+\fBunicode_decomposition_deinit\fR() does not
+\fBfree\fR(3)
+the
+\fIstring\fR\&. The original string gets passed in to
+\fBunicode_decomposition_init\fR() and the decomposed string is left in the
+\fIstring\fR\&.
+.sp .5v
+.RE
+.PP
+The default implementation of the
+\fIreallocate\fR
+function assumes the
+\fIstring\fR
+is a
+\fBmalloc\fR(3)\-ed string, and
+\fBrealloc\fRs it\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+At this time
+\fBunicode_decomposition_deinit\fR() does nothing\&. All code should explicitly call it in order to remain forward\-compatible (at the source level)\&.
+.sp .5v
+.RE
+.PP
+\fBunicode_compose\fR() performs a canonical composition of a decomposed string\&. Its parameters are:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A pointer to the decomposed Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The number of characters in the Unicode string\&. The Unicode string does not need to be
+\e0\-terminated; if it is this number does not include it\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A flags bitmask, which can have the following values:
+.PP
+UNICODE_COMPOSE_FLAG_REMOVEUNUSED
+.RS 4
+Remove all combining marks after doing all canonical compositions\&. Normally any unused combining marks are left in place, in the combined text\&. This option removes them\&.
+.RE
+.PP
+UNICODE_COMPOSE_FLAG_ONESHOT
+.RS 4
+Perform canonical composition once per character, and do not attempt to combine any resulting combined characters again\&.
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A non\-NULL
+pointer to a
+size_t\&.
+.sp
+A successful composition sets this
+size_t
+to the number of characters in the combined string, and returns 0\&. The combined string gets placed back into the
+\fIstring\fR
+parameter, this string gets combined in place and this gives the size of the combined string\&.
+.sp
+\fBunicode_compose\fR() returns a non\-zero value to indicate an error\&.
+.RE
+.PP
+\fBunicode_composition_init\fR(),
+\fBunicode_composition_apply\fR() and
+\fBunicode_composition_deinit\fR() implement a detailed interface for canonical composition of a decomposed Unicode string:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+unicode_compositions_t compositions;
+
+if (unicode_composition_init(str, strsize, flags, &compositions) == 0)
+{
+    size_t new_size=unicode_composition_apply(str, strsize, &compositions);
+
+    unicode_composition_deinit(&compositions);
+}
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+The first two parameters to both
+\fBunicode_composition_init\fR() and
+\fBunicode_composition_apply\fR() are the same: the Unicode string and the number of characters (not including any trailing
+\e0
+character) in the Unicode string\&.
+.PP
+\fBunicode_composition_init\fR()\*(Aqs additional parameters are: any optional flags (see
+\fBunicode_compose()\fR
+for a list of available flags), and the address of a
+unicode_composition_t
+object\&. A non\-0 return from
+\fBunicode_composition_init\fR() indicates an error\&.
+\fBunicode_composition_init\fR() indicates success by returning 0 and initializing the
+unicode_composition_t\*(Aqs object which contains a pointer to an array of pointers to of
+unicode_compose_info
+objects, and the number of pointers\&.
+\fBunicode_composition_init\fR() does not change the string; the only thing it does is initialize the
+unicode_composition_t
+object\&.
+.PP
+\fBunicode_composition_apply\fR() applies the compositions to the
+\fIstring\fR, in place, and returns the new size of the
+\fIstring\fR
+(also not including the
+\e0
+byte, however it does append one if the composed string is smaller, so the composed string is
+\e0\-terminated if the decomposed string was)\&.
+.PP
+It is necessary to call
+\fBunicode_composition_deinit\fR() to free all memory that was allocated for the
+unicode_composition_t
+object:
+.TS
+tab(:);
+l s s
+l l l
+l l l
+l l l
+l l l
+l s s
+l s s
+l s s
+l l l
+l l l
+l s s.
+T{
+struct\ \&unicode_compose_info {
+T}
+T{
+\ \&
+T}:T{
+size_t
+T}:T{
+\fIindex\fR;
+T}
+T{
+\ \&
+T}:T{
+size_t
+T}:T{
+\fIn_composed\fR;
+T}
+T{
+\ \&
+T}:T{
+char32_t
+T}:T{
+*\fIcomposition\fR;
+T}
+T{
+\ \&
+T}:T{
+size_t
+T}:T{
+\fIn_composition\fR;
+T}
+T{
+};
+T}
+T{
+\ \&
+T}
+T{
+typedef\ \&struct\ \&{
+T}
+T{
+\ \&
+T}:T{
+struct\ \&unicode_compose_info
+T}:T{
+**\fIcompositions\fR;
+T}
+T{
+\ \&
+T}:T{
+size_t
+T}:T{
+\fIn_compositions\fR;
+T}
+T{
+} unicode_composition_t;
+T}
+.TE
+.sp 1
+.PP
+\fIindex\fR
+gives the character index in the
+\fIstring\fR
+where each composition occurs\&.
+\fIn_composed\fR
+gives the number of characters in the original string that get composed\&. The composed characters are the
+\fIcomposition\fR; and
+\fIn_composition\fR
+gives the number of composed characters\&.
+.PP
+Effectively: at the
+\fIindex\fR
+position in the original string, #\fIn_composed\fR
+characters get removed and there are #\fIn_composition\fR
+characters that replace them (always
+\fIn_composed\fR
+or less)\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+The
+UNICODE_COMPOSE_FLAG_REMOVEUNUSED
+flag has the effect of including the combining marks that did not get combined in the
+\fIn_composed\fR
+count\&. It\*(Aqs possible that, in this case,
+\fIn_composition\fR
+is 0\&. This indicates complete removal of the combining marks, without anything getting combined in their place\&.
+.sp .5v
+.RE
+.PP
+\fBunicode_composition_init\fR() sets
+unicode_composition_t\*(Aqs
+\fIcompositions\fR
+pointer to an array of pointers to
+unicode_compose_infos that are sorted according to their
+\fIindex\fR\&.
+\fIn_compositions\fR
+gives the number of pointers in the array, and is 0 if there are no compositions, the array is empty\&. The empty array gets interpreted accordingly when it gets passed to
+\fBunicode_composition_apply\fR() and
+\fBunicode_composition_deinit\fR(): nothing happens\&.
+\fBunicode_composition_apply\fR() simply returns the size of the unchanged
+\fIstring\fR, and
+\fBunicode_composition_deinit\fR() does a pro\-forma cleanup\&.
+.SH "SEE ALSO"
+.PP
+\m[blue]\fBTR\-15\fR\m[]\&\s-2\u[2]\d\s+2,
+\fBcourier-unicode\fR(7),
+\fBunicode::canonical\fR(3)\&.
+.SH "AUTHOR"
+.PP
+\fBSam Varshavchik\fR
+.RS 4
+Author
+.RE
+.SH "NOTES"
+.IP " 1." 4
+canonical and compatibility mapping
+.RS 4
+\%https://www.unicode.org/reports/tr15/tr15-50.html 
+.RE
+.IP " 2." 4
+TR-15
+.RS 4
+\%https://www.unicode.org/reports/tr15/tr15-50.html
+.RE

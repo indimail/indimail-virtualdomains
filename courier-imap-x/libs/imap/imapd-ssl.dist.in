@@ -318,6 +318,13 @@ TLS_VERIFYPEER=NONE
 TLS_CACHEFILE=@localstatedir@/couriersslcache
 TLS_CACHESIZE=524288
 
+##NAME: TLS_ALPN:0
+#
+# Application level protocol negotiation should be enabled by default, and
+# should be commented out only in case of compatibility issues.
+
+TLS_ALPN=imap
+
 ##NAME: MAILDIRPATH:0
 #
 # MAILDIRPATH - directory name of the maildir directory.

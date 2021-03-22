@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/><title>maildirwatch</title><link rel="stylesheet" type="text/css" href="style.css"/><meta name="generator" content="DocBook XSL Stylesheets Vsnapshot"/><link rel="home" href="#maildirwatch" title="maildirwatch"/><link xmlns="" rel="stylesheet" type="text/css" href="manpage.css"/><meta xmlns="" name="MSSmartTagsPreventParsing" content="TRUE"/><link xmlns="" rel="icon" href="icon.gif" type="image/gif"/><!--
+
+Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for distribution
+information.
+
+--></head><body><div class="refentry"><a id="maildirwatch" shape="rect"> </a><div class="titlepage"/><div class="refnamediv"><h2>Name</h2><p>maildirwatch — wait for changes to a maildir</p></div><div class="refsynopsisdiv"><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">maildirwatch</code>  {<em class="replaceable"><code>maildir</code></em>} {<em class="replaceable"><code>command</code></em>} [<em class="replaceable"><code>argument</code></em>...]</p></div></div><div class="refsect1"><a id="maildirwatch_description" shape="rect"> </a><h2>DESCRIPTION</h2><p>
+      <span class="command"><strong>maildirwatch</strong></span> repeatedly invokes the
+      <span class="command"><strong><em class="replaceable"><code>command</code></em></strong></span>, with any optional
+      <span class="command"><strong><em class="replaceable"><code>argument</code></em></strong></span>s, an external
+      command, as follows:
+    </p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>
+	  The first time the
+	  <span class="command"><strong><em class="replaceable"><code>command</code></em></strong></span> gets executed
+	  is immediately after
+	  <span class="command"><strong>maildirwatch</strong></span> starts.
+	</p></li><li class="listitem"><p>
+	  Subsequent invocatons of
+	  <span class="command"><strong><em class="replaceable"><code>command</code></em></strong></span> occur whenever
+	  there <span class="emphasis"><em>may</em></span> be some kind of a change
+	  to the contents of the
+	  <code class="filename"><em class="replaceable"><code>maildir</code></em></code>.
+	</p><p>
+	  <span class="command"><strong>maildirwatch</strong></span> does not determine what, if anything,
+	  changed in the
+	  <code class="filename"><em class="replaceable"><code>maildir</code></em></code>.
+	  <span class="command"><strong>maildirwatch</strong></span>
+	  might
+	  occasionally raise a false alarm and run the
+	  <span class="command"><strong><em class="replaceable"><code>command</code></em></strong></span> even though
+	  nothing changed, but that's rare. It's also possible that by
+	  the time <span class="command"><strong><em class="replaceable"><code>command</code></em></strong></span>
+	  actually runs, then whatever was changed in the
+	  <code class="filename"><em class="replaceable"><code>maildir</code></em></code> is no longer
+	  changed; it became what it was before it was changed (a mystery
+	  that will remain unsolved forever).
+	  It's up to the
+	  <span class="command"><strong><em class="replaceable"><code>command</code></em></strong></span> to
+	  intelligently figure out
+	  if it needs to do something about whatever it finds in the
+	  <code class="filename"><em class="replaceable"><code>maildir</code></em></code>.
+	</p></li></ul></div><p>
+      <span class="command"><strong>maildirwatch</strong></span> is a rudimentary mechanism for writing
+      shell scripts that deal with newly-delivered mail, in
+      some form or fashion.
+    </p></div><div class="refsect1"><a id="maildirwatch_exit" shape="rect"> </a><h2>EXIT CODE</h2><p>
+      A non-zero exit code indicates that the specified
+      <code class="filename"><em class="replaceable"><code>maildir</code></em></code> does not
+      exist or is corrupted.
+    </p><p>
+      Otherwise
+      <span class="command"><strong>maildirwatch</strong></span> runs until the
+      <span class="command"><strong><em class="replaceable"><code>command</code></em></strong></span> exits with a
+      non-zero exit code.
+      <span class="command"><strong>maildirwatch</strong></span> prints
+      <span class="command"><strong><em class="replaceable"><code>command</code></em></strong></span>'s exit code on
+      standard output, and terminates with an exit code of 0.
+    </p></div><div class="refsect1"><a id="maildirwatch_see_also" shape="rect"> </a><h2>SEE ALSO</h2><p>
+<a class="ulink" href="maildirmake.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildirmake</span>(1)</span></a>.</p></div></div></body></html>

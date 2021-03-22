@@ -92,6 +92,9 @@ libs/unicode/depcomp
 libs/unicode/install-sh
 libs/unicode/ltmain.sh
 libs/unicode/missing
+libs/unicode/courier-unicode-version.m4
+libs/unicode/biditest
+libs/unicode/biditest2
 libs/waitlib/Makefile.in
 libs/waitlib/aclocal.m4
 libs/waitlib/config.h.in
