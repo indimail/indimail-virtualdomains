@@ -1,32 +1,48 @@
 #
-# Copyright 2000-2017 Double Precision, Inc.  See COPYING for
+# Copyright 2000-2021 Double Precision, Inc.  See COPYING for
 # distribution information.
 
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 
 AM_CXXFLAGS= @COURIER_UNICODE_CXXFLAGS@
 
-noinst_SCRIPTS=update.sh \
-	mkultcase.pl unicodefilter.pl \
-	mkeastasianwidth.pl \
-	mkgraphemebreak.pl mklinebreak.pl mkwordbreak.pl mkcommon.pm \
-	mkhtmlent.pl
+noinst_SCRIPTS=update.sh		\
+	mkcommon.pm			\
+	mkbidi.pl			\
+	mkbidiclass.pl			\
+	mkbidiclassnames.pl		\
+	mkeastasianwidth.pl		\
+	mkemojidata.pl			\
+	mkgraphemebreak.pl		\
+	mkhtmlent.pl			\
+	mklinebreak.pl			\
+	mknormalization.pl		\
+	mkultcase.pl			\
+	mkwordbreak.pl
 
 noinst_PROGRAMS=unicodetest graphemetest linebreaktest wordbreaktest \
-	enttest scripttest
+	enttest scripttest biditest biditest2 normalizetest
 
 aclocaldir=$(datadir)/aclocal
-aclocal_DATA=m4/courier-unicode.m4
+aclocal_DATA=m4/courier-unicode.m4 courier-unicode-version.m4
 
 update-www:
 	@$(MAKE) update-www-unicode
 	@$(MAKE) update-www-eastasia
 	@$(MAKE) update-www-grapheme
+	@$(MAKE) update-www-emojidata
 	@$(MAKE) update-www-linebreak
 	@$(MAKE) update-www-wordbreak
 	@$(MAKE) update-www-scripts
 	@$(MAKE) update-www-htmlent
 	@$(MAKE) update-www-categories
+	@$(MAKE) update-www-bidi
+	@$(MAKE) update-www-unicode-copyright
+	@$(MAKE) update-www-composition
+
+update-www-unicode-copyright:
+	links -dump https://www.unicode.org/license.html >UNICODE-LICENSE.txt.tmp
+	mv UNICODE-LICENSE.txt.tmp UNICODE-LICENSE.txt
 
 update-www-unicode:
 	@SHELL@ $(srcdir)/update.sh UnicodeData.txt http://www.unicode.org/Public/UNIDATA/UnicodeData.txt
@@ -37,6 +53,9 @@ update-www-eastasia:
 
 update-www-grapheme:
 	@SHELL@ $(srcdir)/update.sh GraphemeBreakProperty.txt http://www.unicode.org/Public/UNIDATA/auxiliary/GraphemeBreakProperty.txt
+
+update-www-emojidata:
+	@SHELL@ $(srcdir)/update.sh emoji-data.txt https://www.unicode.org/Public/UCD/latest/ucd/emoji/emoji-data.txt
 
 update-www-linebreak:
 	@SHELL@ $(srcdir)/update.sh LineBreak.txt http://www.unicode.org/Public/UNIDATA/LineBreak.txt
@@ -57,12 +76,148 @@ update-www-htmlent:
 update-www-categories:
 	@SHELL@ $(srcdir)/update.sh Categories.txt http://www.unicode.org/notes/tn36/Categories.txt
 
+update-www-bidi:
+	@SHELL@ $(srcdir)/update.sh BidiBrackets.txt https://www.unicode.org/Public/UCD/latest/ucd/BidiBrackets.txt
+	@SHELL@ $(srcdir)/update.sh BidiMirroring.txt https://www.unicode.org/Public/UCD/latest/ucd/BidiMirroring.txt
+	@SHELL@ $(srcdir)/update.sh DerivedBidiClass.txt https://www.unicode.org/Public/UCD/latest/ucd/extracted/DerivedBidiClass.txt
+	@SHELL@ $(srcdir)/update.sh BidiTest.txt https://www.unicode.org/Public/UCD/latest/ucd/BidiTest.txt
+	@SHELL@ $(srcdir)/update.sh BidiCharacterTest.txt https://www.unicode.org/Public/UCD/latest/ucd/BidiCharacterTest.txt
+
+update-www-composition:
+	@SHELL@ $(srcdir)/update.sh DerivedNormalizationProps.txt https://www.unicode.org/Public/UCD/latest/ucd/DerivedNormalizationProps.txt
+
 lib_LTLIBRARIES=libcourier-unicode.la
 include_HEADERS=courier-unicode.h \
 	courier-unicode-categories-tab.h \
 	courier-unicode-script-tab.h
 
-man_MANS=$(srcdir)/man/courier-unicode.7 $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]convert.3 $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]convert_tocase.3 $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]fromu.3 $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]tou.3 $(srcdir)/man/unicode[\:][\:]iso_8859_1.3 $(srcdir)/man/unicode[\:][\:]linebreak_callback_base.3 $(srcdir)/man/unicode[\:][\:]linebreak_callback_save_buf.3 $(srcdir)/man/unicode[\:][\:]linebreak_iter.3 $(srcdir)/man/unicode[\:][\:]linebreakc_callback_base.3 $(srcdir)/man/unicode[\:][\:]linebreakc_iter.3 $(srcdir)/man/unicode[\:][\:]tolower.3 $(srcdir)/man/unicode[\:][\:]toupper.3 $(srcdir)/man/unicode[\:][\:]ucs_2.3 $(srcdir)/man/unicode[\:][\:]ucs_4.3 $(srcdir)/man/unicode[\:][\:]utf_8.3 $(srcdir)/man/unicode[\:][\:]wordbreak_callback_base.3 $(srcdir)/man/unicode_category_lookup.3 $(srcdir)/man/unicode_convert.3 $(srcdir)/man/unicode_convert_deinit.3 $(srcdir)/man/unicode_convert_fromu_init.3 $(srcdir)/man/unicode_convert_fromu_tobuf.3 $(srcdir)/man/unicode_convert_fromutf8.3 $(srcdir)/man/unicode_convert_init.3 $(srcdir)/man/unicode_convert_tobuf.3 $(srcdir)/man/unicode_convert_tocase.3 $(srcdir)/man/unicode_convert_tocbuf_fromutf8_init.3 $(srcdir)/man/unicode_convert_tocbuf_init.3 $(srcdir)/man/unicode_convert_tocbuf_toutf8_init.3 $(srcdir)/man/unicode_convert_tou_init.3 $(srcdir)/man/unicode_convert_tou_tobuf.3 $(srcdir)/man/unicode_convert_toutf8.3 $(srcdir)/man/unicode_convert_uc.3 $(srcdir)/man/unicode_default_chset.3 $(srcdir)/man/unicode_grapheme_break.3 $(srcdir)/man/unicode_html40ent_lookup.3 $(srcdir)/man/unicode_isalnum.3 $(srcdir)/man/unicode_isalpha.3 $(srcdir)/man/unicode_isblank.3 $(srcdir)/man/unicode_isdigit.3 $(srcdir)/man/unicode_isgraph.3 $(srcdir)/man/unicode_islower.3 $(srcdir)/man/unicode_ispunct.3 $(srcdir)/man/unicode_isspace.3 $(srcdir)/man/unicode_isupper.3 $(srcdir)/man/unicode_lb_end.3 $(srcdir)/man/unicode_lb_init.3 $(srcdir)/man/unicode_lb_next.3 $(srcdir)/man/unicode_lb_next_cnt.3 $(srcdir)/man/unicode_lb_set_opts.3 $(srcdir)/man/unicode_lbc_end.3 $(srcdir)/man/unicode_lbc_init.3 $(srcdir)/man/unicode_lbc_next.3 $(srcdir)/man/unicode_lbc_next_cnt.3 $(srcdir)/man/unicode_lbc_set_opts.3 $(srcdir)/man/unicode_lc.3 $(srcdir)/man/unicode_locale_chset.3 $(srcdir)/man/unicode_script.3 $(srcdir)/man/unicode_tc.3 $(srcdir)/man/unicode_u_ucs2_native.3 $(srcdir)/man/unicode_u_ucs4_native.3 $(srcdir)/man/unicode_uc.3 $(srcdir)/man/unicode_wb_end.3 $(srcdir)/man/unicode_wb_init.3 $(srcdir)/man/unicode_wb_next.3 $(srcdir)/man/unicode_wb_next_cnt.3 $(srcdir)/man/unicode_wbscan_end.3 $(srcdir)/man/unicode_wbscan_init.3 $(srcdir)/man/unicode_wbscan_next.3
+man_MANS= \
+        $(srcdir)/man/courier-unicode.7 \
+        $(srcdir)/man/unicode[\:][\:]bidi.3 \
+        $(srcdir)/man/unicode[\:][\:]bidi_calc.3 \
+        $(srcdir)/man/unicode[\:][\:]bidi_calc_types.3 \
+        $(srcdir)/man/unicode[\:][\:]bidi_cleanup.3 \
+        $(srcdir)/man/unicode[\:][\:]bidi_combinings.3 \
+        $(srcdir)/man/unicode[\:][\:]bidi_embed.3 \
+        $(srcdir)/man/unicode[\:][\:]bidi_embed_paragraph_level.3 \
+        $(srcdir)/man/unicode[\:][\:]bidi_get_direction.3 \
+        $(srcdir)/man/unicode[\:][\:]bidi_logical_order.3 \
+        $(srcdir)/man/unicode[\:][\:]bidi_needs_embed.3 \
+        $(srcdir)/man/unicode[\:][\:]bidi_override.3 \
+        $(srcdir)/man/unicode[\:][\:]bidi_reorder.3 \
+        $(srcdir)/man/unicode[\:][\:]canonical.3 \
+        $(srcdir)/man/unicode[\:][\:]compose.3 \
+        $(srcdir)/man/unicode[\:][\:]compose_default_callback.3 \
+        $(srcdir)/man/unicode[\:][\:]decompose.3 \
+        $(srcdir)/man/unicode[\:][\:]decompose_default_reallocate.3 \
+        $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]convert.3 \
+        $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]convert_tocase.3 \
+        $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]fromu.3 \
+        $(srcdir)/man/unicode[\:][\:]iconvert[\:][\:]tou.3 \
+        $(srcdir)/man/unicode[\:][\:]iso_8859_1.3 \
+        $(srcdir)/man/unicode[\:][\:]linebreak_callback_base.3 \
+        $(srcdir)/man/unicode[\:][\:]linebreak_callback_save_buf.3 \
+        $(srcdir)/man/unicode[\:][\:]linebreak_iter.3 \
+        $(srcdir)/man/unicode[\:][\:]linebreakc_callback_base.3 \
+        $(srcdir)/man/unicode[\:][\:]linebreakc_iter.3 \
+        $(srcdir)/man/unicode[\:][\:]tolower.3 \
+        $(srcdir)/man/unicode[\:][\:]toupper.3 \
+        $(srcdir)/man/unicode[\:][\:]ucs_2.3 \
+        $(srcdir)/man/unicode[\:][\:]ucs_4.3 \
+        $(srcdir)/man/unicode[\:][\:]utf_8.3 \
+        $(srcdir)/man/unicode[\:][\:]wordbreak.3 \
+        $(srcdir)/man/unicode[\:][\:]wordbreak_callback_base.3 \
+        $(srcdir)/man/unicode_bidi.3 \
+        $(srcdir)/man/unicode_bidi_bracket_type.3 \
+        $(srcdir)/man/unicode_bidi_calc.3 \
+        $(srcdir)/man/unicode_bidi_calc_levels.3 \
+        $(srcdir)/man/unicode_bidi_calc_types.3 \
+        $(srcdir)/man/unicode_bidi_cleaned_size.3 \
+        $(srcdir)/man/unicode_bidi_cleanup.3 \
+        $(srcdir)/man/unicode_bidi_combinings.3 \
+        $(srcdir)/man/unicode_bidi_direction.3 \
+        $(srcdir)/man/unicode_bidi_embed.3 \
+        $(srcdir)/man/unicode_bidi_embed_paragraph_level.3 \
+        $(srcdir)/man/unicode_bidi_logical_order.3 \
+        $(srcdir)/man/unicode_bidi_mirror.3 \
+        $(srcdir)/man/unicode_bidi_needs_embed.3 \
+        $(srcdir)/man/unicode_bidi_reorder.3 \
+        $(srcdir)/man/unicode_bidi_setbnl.3 \
+        $(srcdir)/man/unicode_bidi_type.3 \
+        $(srcdir)/man/unicode_canonical.3 \
+        $(srcdir)/man/unicode_category_lookup.3 \
+        $(srcdir)/man/unicode_ccc.3 \
+        $(srcdir)/man/unicode_compose.3 \
+        $(srcdir)/man/unicode_composition_apply.3 \
+        $(srcdir)/man/unicode_composition_deinit.3 \
+        $(srcdir)/man/unicode_composition_init.3 \
+        $(srcdir)/man/unicode_convert.3 \
+        $(srcdir)/man/unicode_convert_deinit.3 \
+        $(srcdir)/man/unicode_convert_fromu_init.3 \
+        $(srcdir)/man/unicode_convert_fromu_tobuf.3 \
+        $(srcdir)/man/unicode_convert_fromutf8.3 \
+        $(srcdir)/man/unicode_convert_init.3 \
+        $(srcdir)/man/unicode_convert_tobuf.3 \
+        $(srcdir)/man/unicode_convert_tocase.3 \
+        $(srcdir)/man/unicode_convert_tocbuf_fromutf8_init.3 \
+        $(srcdir)/man/unicode_convert_tocbuf_init.3 \
+        $(srcdir)/man/unicode_convert_tocbuf_toutf8_init.3 \
+        $(srcdir)/man/unicode_convert_tou_init.3 \
+        $(srcdir)/man/unicode_convert_tou_tobuf.3 \
+        $(srcdir)/man/unicode_convert_toutf8.3 \
+        $(srcdir)/man/unicode_convert_uc.3 \
+        $(srcdir)/man/unicode_decompose.3 \
+        $(srcdir)/man/unicode_decompose_reallocate_size.3 \
+        $(srcdir)/man/unicode_decomposition_deinit.3 \
+        $(srcdir)/man/unicode_decomposition_init.3 \
+        $(srcdir)/man/unicode_default_chset.3 \
+        $(srcdir)/man/unicode_emoji.3 \
+        $(srcdir)/man/unicode_emoji_component.3 \
+        $(srcdir)/man/unicode_emoji_extended_pictographic.3 \
+        $(srcdir)/man/unicode_emoji_lookup.3 \
+        $(srcdir)/man/unicode_emoji_modifier.3 \
+        $(srcdir)/man/unicode_emoji_modifier_base.3 \
+        $(srcdir)/man/unicode_emoji_presentation.3 \
+        $(srcdir)/man/unicode_grapheme_break.3 \
+        $(srcdir)/man/unicode_grapheme_break_deinit.3 \
+        $(srcdir)/man/unicode_grapheme_break_init.3 \
+        $(srcdir)/man/unicode_grapheme_break_next.3 \
+        $(srcdir)/man/unicode_html40ent_lookup.3 \
+        $(srcdir)/man/unicode_isalnum.3 \
+        $(srcdir)/man/unicode_isalpha.3 \
+        $(srcdir)/man/unicode_isblank.3 \
+        $(srcdir)/man/unicode_isdigit.3 \
+        $(srcdir)/man/unicode_isgraph.3 \
+        $(srcdir)/man/unicode_islower.3 \
+        $(srcdir)/man/unicode_ispunct.3 \
+        $(srcdir)/man/unicode_isspace.3 \
+        $(srcdir)/man/unicode_isupper.3 \
+        $(srcdir)/man/unicode_lb_end.3 \
+        $(srcdir)/man/unicode_lb_init.3 \
+        $(srcdir)/man/unicode_lb_next.3 \
+        $(srcdir)/man/unicode_lb_next_cnt.3 \
+        $(srcdir)/man/unicode_lb_set_opts.3 \
+        $(srcdir)/man/unicode_lbc_end.3 \
+        $(srcdir)/man/unicode_lbc_init.3 \
+        $(srcdir)/man/unicode_lbc_next.3 \
+        $(srcdir)/man/unicode_lbc_next_cnt.3 \
+        $(srcdir)/man/unicode_lbc_set_opts.3 \
+        $(srcdir)/man/unicode_lc.3 \
+        $(srcdir)/man/unicode_line_break.3 \
+        $(srcdir)/man/unicode_locale_chset.3 \
+        $(srcdir)/man/unicode_script.3 \
+        $(srcdir)/man/unicode_tc.3 \
+        $(srcdir)/man/unicode_u_ucs2_native.3 \
+        $(srcdir)/man/unicode_u_ucs4_native.3 \
+        $(srcdir)/man/unicode_uc.3 \
+        $(srcdir)/man/unicode_wb_end.3 \
+        $(srcdir)/man/unicode_wb_init.3 \
+        $(srcdir)/man/unicode_wb_next.3 \
+        $(srcdir)/man/unicode_wb_next_cnt.3 \
+        $(srcdir)/man/unicode_wbscan_end.3 \
+        $(srcdir)/man/unicode_wbscan_init.3 \
+        $(srcdir)/man/unicode_wbscan_next.3 \
+        $(srcdir)/man/unicode_word_break.3
 
 libcourier_unicode_la_SOURCES=\
 			courier-unicode-categories-tab.h \
@@ -76,49 +231,103 @@ libcourier_unicode_la_SOURCES=\
 			unicode_graphemebreak.c graphemebreaktab.h \
 			unicode_linebreak.c linebreaktab.h \
 			unicode_htmlent.c unicode_htmlent.h \
+			unicode_normalization.c \
+			normalization.h normalization_defs.h \
 			linebreaktab_internal.h \
 			unicode_wordbreak.c wordbreaktab.h scriptstab.h \
+			unicode_emoji.c emojitab.h \
 			wordbreaktab_internal.h \
 			unicode_scripts.c \
 			categoriestab.h \
+			unicode_bidi.c \
+			bidi_brackets.h \
+			bidi_brackets_v.h \
+			bidi_class.h \
+			bidi_mirroring.h \
 			unicode_categories.c
 
-libcourier_unicode_la_LDFLAGS=-version-info 5:0:1
+libcourier_unicode_la_LDFLAGS=-version-info 7:0:0
 
 EXTRA_DIST=$(noinst_SCRIPTS) $(man_MANS) $(PACKAGE).spec \
-	m4/courier-unicode.m4
+	m4/courier-unicode.m4 \
+	packaging/freebsd10/pkg-descr
 
 if UPDATE_UNICODE
 
+BUILT_SOURCES=unicode_ultcasetab.c \
+	bidi_brackets.h \
+	bidi_brackets_v.h \
+	bidi_class.h \
+	bidi_classnames.h \
+	bidi_mirroring.h \
+	categoriestab.h \
+	eastasianwidth.h \
+	emojitab.h \
+	graphemebreaktab.h \
+	linebreaktab.h \
+	normalization.h \
+	scriptstab.h \
+	unicode_htmlent.h \
+	wordbreaktab.h
+
 unicode_ultcasetab.c: UnicodeData.txt mkultcase.pl
-	@PERL@ $(srcdir)/mkultcase.pl >unicode_ultcasetab.c
+	@PERL@ -I$(srcdir) $(srcdir)/mkultcase.pl >unicode_ultcasetab.c
 
 eastasianwidth.h: EastAsianWidth.txt mkeastasianwidth.pl
-	@PERL@ $(srcdir)/mkeastasianwidth.pl >eastasianwidth.h
+	@PERL@ -I$(srcdir) $(srcdir)/mkeastasianwidth.pl >eastasianwidth.h
 
 graphemebreaktab.h: GraphemeBreakProperty.txt mkgraphemebreak.pl mkcommon.pm
-	@PERL@ $(srcdir)/mkgraphemebreak.pl >graphemebreaktab.h.tmp
+	@PERL@ -I$(srcdir) $(srcdir)/mkgraphemebreak.pl >graphemebreaktab.h.tmp
 	mv graphemebreaktab.h.tmp graphemebreaktab.h
 
 linebreaktab.h: LineBreak.txt UnicodeData.txt mklinebreak.pl mkcommon.pm
-	@PERL@ $(srcdir)/mklinebreak.pl >linebreaktab.h.tmp
+	@PERL@ -I$(srcdir) $(srcdir)/mklinebreak.pl >linebreaktab.h.tmp
 	mv linebreaktab.h.tmp linebreaktab.h
 
 wordbreaktab.h: WordBreakProperty.txt mkwordbreak.pl mkcommon.pm
-	@PERL@ $(srcdir)/mkwordbreak.pl >wordbreaktab.h.tmp
+	@PERL@ -I$(srcdir) $(srcdir)/mkwordbreak.pl >wordbreaktab.h.tmp
 	mv wordbreaktab.h.tmp wordbreaktab.h
 
+emojitab.h: emoji-data.txt mkemojidata.pl
+	@PERL@ -I$(srcdir) $(srcdir)/mkemojidata.pl >emojitab.h.tmp
+	mv emojitab.h.tmp emojitab.h
+
 scriptstab.h: Scripts.txt mkscripts.pl mkcommon.pm
-	@PERL@ $(srcdir)/mkscripts.pl >scriptstab.h.tmp
+	@PERL@ -I$(srcdir) $(srcdir)/mkscripts.pl >scriptstab.h.tmp
 	mv scriptstab.h.tmp scriptstab.h
 
 categoriestab.h: Categories.txt mkcategories.pl mkcommon.pm
-	@PERL@ $(srcdir)/mkcategories.pl >categoriestab.h.tmp
+	@PERL@ -I$(srcdir) $(srcdir)/mkcategories.pl >categoriestab.h.tmp
 	mv categoriestab.h.tmp categoriestab.h
 
 unicode_htmlent.h: xhtml-lat1.ent xhtml-special.ent xhtml-symbol.ent mkhtmlent.pl
-	@PERL@ $(srcdir)/mkhtmlent.pl >unicode_htmlent.h.tmp
+	@PERL@ -I$(srcdir) $(srcdir)/mkhtmlent.pl >unicode_htmlent.h.tmp
 	mv unicode_htmlent.h.tmp unicode_htmlent.h
+
+bidi_brackets.h: BidiBrackets.txt mkbidi.pl
+	@PERL@ -I$(srcdir) $(srcdir)/mkbidi.pl BidiBrackets.txt >bidi_brackets.h.tmp
+	mv bidi_brackets.h.tmp bidi_brackets.h
+
+bidi_brackets_v.h: BidiBrackets.txt mkbidi.pl
+	@PERL@ -I$(srcdir) $(srcdir)/mkbidi.pl BidiBrackets.txt 1 >bidi_brackets_v.h.tmp
+	mv bidi_brackets_v.h.tmp bidi_brackets_v.h
+
+bidi_class.h: DerivedBidiClass.txt mkbidiclass.pl mkcommon.pm
+	@PERL@ -I$(srcdir) $(srcdir)/mkbidiclass.pl >bidi_class.h.tmp
+	mv bidi_class.h.tmp bidi_class.h
+
+bidi_mirroring.h: BidiMirroring.txt mkbidi.pl
+	@PERL@ -I$(srcdir) $(srcdir)/mkbidi.pl BidiMirroring.txt >bidi_mirroring.h.tmp
+	mv bidi_mirroring.h.tmp bidi_mirroring.h
+
+bidi_classnames.h: unicode_bidi.c mkbidiclassnames.pl
+	@PERL@ $(srcdir)/mkbidiclassnames.pl <$(srcdir)/courier-unicode.h.in >bidi_classnames.h.tmp
+	mv bidi_classnames.h.tmp bidi_classnames.h
+
+normalization.h: DerivedNormalizationProps.txt UnicodeData.txt \
+			mknormalization.pl mkcommon.pm
+	@PERL@ -I$(srcdir) $(srcdir)/mknormalization.pl >normalization.h.tmp
+	mv normalization.h.tmp normalization.h
 endif
 
 unicodetest_SOURCES=unicodetest.c
@@ -150,6 +359,21 @@ scripttest_SOURCES=scripttest.c
 scripttest_DEPENDENCIES=libcourier-unicode.la
 scripttest_LDADD=libcourier-unicode.la
 scripttest_LDFLAGS=-static
+
+biditest_SOURCES=biditest.C bidi_classnames.h
+biditest_DEPENDENCIES=libcourier-unicode.la
+biditest_LDADD=libcourier-unicode.la
+biditest_LDFLAGS=-static
+
+biditest2_SOURCES=biditest2.C
+biditest2_DEPENDENCIES=libcourier-unicode.la
+biditest2_LDADD=libcourier-unicode.la
+biditest2_LDFLAGS=-static
+
+normalizetest_SOURCES=normalizetest.C
+normalizetest_DEPENDENCIES=libcourier-unicode.la
+normalizetest_LDADD=libcourier-unicode.la
+normalizetest_LDFLAGS=-static
 
 check-am: unicodetest
 	./unicodetest
@@ -210,12 +434,26 @@ check-am: unicodetest
 	test "`./graphemetest 0x0041 0x036F`" = "0"  # GB9
 	test "`./graphemetest 0x0041 0x0903`" = "0"  # GB9a
 	test "`./graphemetest 0x0041 0xAABB`" = "1"
-	test "`./graphemetest 0x036F 0x0041`" = "1"
+	test "`./graphemetest 0x036F 0x0041`" = "0"
 	test "`./graphemetest 0x0903 0x0041`" = "1"
-	exit 0; test "`./graphemetest 0xAABB 0x0041`" = "0" # GB9b N/A
-	test "`./graphemetest 0x0041 0x0041`" = "1"
+	test "`./graphemetest 0x0600 0x0041`" = "0" # GB9b
+	test "`./graphemetest 0x1F1E6 0x1f1FF`" = "0" # GB12, GB31
+	test "`./graphemetest 0x1F1E6 0x1F1E7 0x1f1FF`" = "1" # GB12, GB31
+	test "`./graphemetest 0x0041 0x0041`" = "1" # GB999
+	test "`./biditest 30`" = "30 30 n"
+	test "`./biditest 8261`" = "8262 8262 o"
+	test "`./biditest 8262`" = "8261 8261 c"
+	set -vx; test -f ./BidiTest.txt || exit 0; ./biditest
+	set -vx; test -f ./BidiCharacterTest.txt || exit 0; ./biditest2
+	./normalizetest
+
+if HAVE_DOCS
 
 docs:
+	rm -f docs.stamp
+	$(MAKE) docs.stamp
+
+docs.stamp:
 	rm -rf html.tmp
 	mkdir html.tmp
 	xsltproc --nonet -o html.tmp/ --xinclude \
@@ -224,8 +462,9 @@ docs:
 		--stringparam root.filename 'index' \
 		--stringparam generate.id.attributes 1 \
 		$(srcdir)/docbook/docbook.xsl $(srcdir)/book.xml
-	for f in html.tmp/*; do tidy -i -q --tidy-mark no --doctype transitional --input-encoding utf8 --output-encoding utf8 -asxml <$$f >$$f.tmp; xsltproc --nonet $$HOME/www/www.courier-mta.org/xsl/unicode.xsl $$f.tmp | perl -ne 's~\$(id):.*\$$~\$(id):'"$$h"'\$$~; print' >$$f; rm -f $$f.tmp; done
-
+	for f in html.tmp/*; do tidy -i -q --tidy-mark no --doctype transitional --input-encoding utf8 --output-encoding utf8 -asxml <$$f >$$f.tmp; mv -f $$f.tmp $$f; done
+	test -d $$HOME/www || exit 0; \
+	  for f in html.tmp/*; do xsltproc --nonet /var/www/html/www.courier-mta.org/courier-mta.org/xsl/unicode.xsl $$f | perl -ne 's~\$(id):.*\$$~\$(id):'"$$h"'\$$~; print' >$$f.tmp; mv -f $$f.tmp $$f; done
 	mkdir -p html
 	rm -f html/*
 	mv html.tmp/* html
@@ -233,24 +472,29 @@ docs:
 	rm -rf man.tmp
 	mkdir man.tmp
 	d=`cd $(srcdir); pwd`; cd man.tmp; xsltproc --nonet --xinclude \
-	http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl\
+        http://cdn.docbook.org/release/xsl-nons/current//manpages/docbook.xsl\
 		$$d/book.xml
 	mkdir -p man
 	rm -f man/*.[123456789]
 	mv man.tmp/* man
 	rm -rf html.tmp man.tmp
-	perl -p -i -e 's/:/[\\:]/g if s@^man_MANS=.*@"man_MANS=" . join(" ", map { "\$$(srcdir)/$$_" } glob("man/*.[123456789]"))@e' Makefile.am
+	perl -e '$$f=join("",<STDIN>); $$p=join("", map { " \\\n        \$$(srcdir)/$$_" } glob("man/*.[123456789]")); $$p=~s/:/\[\\:\]/g; $$f =~ s/\nman_MANS=([^\n]|\n[^\n])*/\nman_MANS=$$p/s; print $$f' <Makefile.am >Makefile.am.new
+	cmp Makefile.am Makefile.am.new || mv -f Makefile.am.new Makefile.am; rm -f Makefile.am.new
+	touch docs.stamp
 
-if HAVE_DOCS
-all-am: INSTALL README.unicode
+all-am: INSTALL README
 
 README: html/index.html
 	elinks -dump -no-numbering -no-references html/index.html >README.tmp
-	mv -f README.tmp README.unicode
+	mv -f README.tmp README
 
 INSTALL: html/INSTALL.html
 	elinks -dump -no-numbering -no-references html/INSTALL.html >INSTALL.tmp
 	mv -f INSTALL.tmp INSTALL
+
+html/index.html html/INSTALL.html $(man_MANS): docs.stamp
+	touch $@
+
 endif
 
 .PHONY: rpm
@@ -277,28 +521,28 @@ dorpm:
 		--define '_build_name_fmt %%{ARCH}/%%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm' \
 		--define '_tmppath %{_var}/tmp' \
 		--define '__spec_prep_pre %{___build_pre}' \
-		$(RPMFLAGS) @PACKAGE@-@VERSION@.tar.bz2
+		$(RPMFLAGS) @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2
 
 bump.rpm.release: $(PACKAGE).spec
 	VERSION="x"; \
 	test -f $(srcdir)/rpm.release && . $(srcdir)/rpm.release; \
-	NEXT_RELEASE=0; \
-	test "$$VERSION" = "@VERSION@" && NEXT_RELEASE="$$RELEASE"; \
+	NEXT_RELEASE=100; \
+	test "$$VERSION" = "@PACKAGE_VERSION@" && NEXT_RELEASE="$$RELEASE"; \
 	RELEASE=`expr $$NEXT_RELEASE + 1`; \
-	echo "VERSION=@VERSION@" >$(srcdir)/rpm.release; \
+	echo "VERSION=@PACKAGE_VERSION@" >$(srcdir)/rpm.release; \
 	echo "RELEASE=$$RELEASE" >>$(srcdir)/rpm.release; \
 	sed 's/^Release: .*/Release: '$$RELEASE'%{?dist}%{?courier_release}/' \
 		<$(PACKAGE).spec >$(PACKAGE).spec.new; \
 	mv $(PACKAGE).spec.new $(PACKAGE).spec
 
 upload-beta:
-	rm -f @PACKAGE@-@VERSION@.tar.bz2.sig; gpg --detach-sign --default-key mrsam@courier-mta.com @PACKAGE@-@VERSION@.tar.bz2; test -f @PACKAGE@-@VERSION@.tar.bz2.sig || exit 1
-	~/src/sftools/release.pl mrsam courier @PACKAGE@-devel `echo @VERSION@|sed 's/.*\(........\)/\1/'` @PACKAGE@-@VERSION@.tar.bz2 @PACKAGE@-@VERSION@.tar.bz2.sig
+	rm -f @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2.sig; gpg --detach-sign --default-key mrsam@courier-mta.com @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2; test -f @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2.sig || exit 1
+	~/src/sftools/release.pl mrsam courier @PACKAGE_NAME@-devel `echo @PACKAGE_VERSION@|sed 's/.*\(........\)/\1/'` @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2 @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2.sig
 
 upload-dist:
-	rm -f @PACKAGE@-@VERSION@.tar.bz2.sig; gpg --detach-sign --default-key mrsam@courier-mta.com @PACKAGE@-@VERSION@.tar.bz2; test -f @PACKAGE@-@VERSION@.tar.bz2.sig || exit 1
-	set -e; v="@PACKAGE@/@VERSION@/`date +%Y%m%d%H%M%S`"; git tag -s $$v -m 'Tag version @VERSION@'
-	socksify ~/src/sftools/release.pl mrsam courier $(PACKAGE) @VERSION@ @PACKAGE@-@VERSION@.tar.bz2 @PACKAGE@-@VERSION@.tar.bz2.sig
+	rm -f @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2.sig; gpg --detach-sign --default-key mrsam@courier-mta.com @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2; test -f @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2.sig || exit 1
+	set -e; v="@PACKAGE_NAME@/@PACKAGE_VERSION@/`date +%Y%m%d%H%M%S`"; git tag -s $$v -m 'Tag version @PACKAGE_VERSION@'
+	socksify ~/src/sftools/release.pl mrsam courier $(PACKAGE) @PACKAGE_VERSION@ @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2 @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2.sig
 
 distrelease:
 	$(MAKE) distcheck
@@ -310,4 +554,4 @@ distrelease:
 	$(MAKE) dist
 
 www:
-	rsync -a html/. $$HOME/www/www.courier-mta.org/unicode
+	rsync -a --delete-after html/. $$HOME/www/hostrocket/courier-mta.org/unicode

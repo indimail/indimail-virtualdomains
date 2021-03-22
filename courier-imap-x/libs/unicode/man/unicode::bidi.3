@@ -1,0 +1,365 @@
+'\" t
+.\"     Title: unicode::bidi
+.\"    Author: Sam Varshavchik
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 03/12/2021
+.\"    Manual: Courier Unicode Library
+.\"    Source: Courier Unicode Library
+.\"  Language: English
+.\"
+.TH "UNICODE::BIDI" "3" "03/12/2021" "Courier Unicode Library" "Courier Unicode Library"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+unicode::bidi, unicode::bidi_calc, unicode::bidi_calc_types, unicode::bidi_reorder, unicode::bidi_cleanup, unicode::bidi_logical_order, unicode::bidi_combinings, unicode::bidi_needs_embed, unicode::bidi_embed, unicode::bidi_embed_paragraph_level, unicode::bidi_get_direction, unicode::bidi_override \- unicode bi\-directional algorithm
+.SH "SYNOPSIS"
+.sp
+.nf
+#include <courier\-unicode\&.h>
+.fi
+.sp
+.nf
+struct unicode::bidi_calc_types\ \&{
+.
+\ \&\ \&bidi_calc_types(const std::u32string &\ \&string);
+.
+\ \&\ \&std::vector<unicode_bidi_type_t>\ \&types\ \&;
+.
+\ \&\ \&void\ \&setbnl(std::u32string &\ \&string);
+.
+}.fi
+.HP \w'std::tuple<std::vector<unicode_bidi_level_t>,\ struct\ unicode_bidi_direction>\ unicode::bidi_calc('u
+.BI "std::tuple<std::vector<unicode_bidi_level_t>, struct unicode_bidi_direction> unicode::bidi_calc(const\ unicode::bidi_calc_types\ &" "ustring" ");"
+.HP \w'std::tuple<std::vector<unicode_bidi_level_t>,\ struct\ unicode_bidi_direction>\ unicode::bidi_calc('u
+.BI "std::tuple<std::vector<unicode_bidi_level_t>, struct unicode_bidi_direction> unicode::bidi_calc(const\ unicode::bidi_calc_types\ &" "ustring" ", unicode_bidi_level_t\ " "embedding_level" ");"
+.HP \w'int\ unicode::bidi_reorder('u
+.BI "int unicode::bidi_reorder(std::u32string\ &" "string" ", std::vector<unicode_bidi_level_t>\ &" "embedding_level" ", const\ std::function<void\ (size_t,\ size_t)>\ &" "reorder_callback" "=[](size_t,\ size_t){}, size_t\ " "starting_pos" "=0, size_t\ " "n" "=(size_t)\-1);"
+.HP \w'void\ unicode::bidi_reorder('u
+.BI "void unicode::bidi_reorder(std::vector<unicode_bidi_level_t>\ &" "embedding_level" ", const\ std::function<void\ (size_t,\ size_t)>\ &" "reorder_callback" "=[](size_t,\ size_t){}, size_t\ " "starting_pos" "=0, size_t\ " "n" "=(size_t)\-1);"
+.HP \w'void\ unicode::bidi_cleanup('u
+.BI "void unicode::bidi_cleanup(std::u32string\ &" "string" ", const\ std::function<void\ (size_t)>\ &" "removed_callback" "=[](size_t){}, int\ " "cleanup_options" ");"
+.HP \w'int\ unicode::bidi_cleanup('u
+.BI "int unicode::bidi_cleanup(std::u32string\ &" "string" ", std::vector\ <unicode_bidi_level_t>\ &" "levels" ", const\ std::function<void\ (size_t)>\ &" "removed_callback" "=[](size_t){}, int\ " "cleanup_options" "=0);"
+.HP \w'int\ unicode::bidi_cleanup('u
+.BI "int unicode::bidi_cleanup(std::u32string\ &" "string" ", std::vector\ <unicode_bidi_level_t>\ &" "levels" ", const\ std::function<void\ (size_t)>\ &" "removed_callback" ", int\ " "cleanup_options" ", size_t\ " "starting_pos" ", size_t\ " "n" ");"
+.HP \w'int\ unicode::bidi_logical_order('u
+.BI "int unicode::bidi_logical_order(std::u32string\ &" "string" ", std::vector\ <unicode_bidi_level_t>\ &" "levels" ", unicode_bidi_level_t\ " "paragraph_embedding" ", const\ std::function<void\ (size_t,\ size_t)>\ &" "reorder_callback" "=[](size_t,\ size_t){}, size_t\ " "starting_pos" "=0, size_t\ " "n" "=(size_t)\-1);"
+.HP \w'void\ unicode::bidi_combinings('u
+.BI "void unicode::bidi_combinings(const\ std::u32string\ &" "string" ", const\ std::vector\ <unicode_bidi_level_t>\ &" "levels" ", const\ std::function\ <void\ (unicode_bidi_level_t\ level,\ size_t\ level_start,\ size_t\ n_chars,\ size_t\ comb_start,\ size_t\ n_comb_chars)>\ &" "callback" ");"
+.HP \w'void\ unicode::bidi_combinings('u
+.BI "void unicode::bidi_combinings(const\ std::u32string\ &" "string" ", const\ std::function\ <void\ (unicode_bidi_level_t\ level,\ size_t\ level_start,\ size_t\ n_chars,\ size_t\ comb_start,\ size_t\ n_comb_chars)>\ &" "callback" ");"
+.HP \w'void\ unicode::bidi_logical_order('u
+.BI "void unicode::bidi_logical_order(std::vector\ <unicode_bidi_level_t>\ &" "levels" ", unicode_bidi_level_t\ " "paragraph_embedding" ", const\ std::function<void\ (size_t,\ size_t)>\ &" "reorder_callback" ", size_t\ " "starting_pos" "=0, size_t\ " "n" "=(size_t)\-1);"
+.HP \w'bool\ unicode::bidi_needs_embed('u
+.BI "bool unicode::bidi_needs_embed(const\ std::u32string\ &" "string" ", const\ std::vector\ <unicode_bidi_level_t>\ &" "levels" ", const\ unicode_bidi_level_t\ (" "paragraph_embedding" "=NULL, size_t\ " "starting_pos" "=0, size_t\ " "n" "=(size_t)\-1);"
+.HP \w'int\ unicode::bidi_embed('u
+.BI "int unicode::bidi_embed(const\ std::u32string\ &" "string" ", const\ std::vector\ <unicode_bidi_level_t>\ &" "levels" ", unicode_bidi_level_t\ " "paragraph_embedding" ", const\ std::function<void\ (const\ char32_t\ *,\ size_t,\ bool)>\ &" "callback" ");"
+.HP \w'std::u32string\ unicode::bidi_embed('u
+.BI "std::u32string unicode::bidi_embed(const\ std::u32string\ &" "string" ", const\ std::vector\ <unicode_bidi_level_t>\ &" "levels" ", unicode_bidi_level_t\ " "paragraph_embedding" ");"
+.HP \w'char32_t\ unicode_bidi_embed_paragraph_level('u
+.BI "char32_t unicode_bidi_embed_paragraph_level(const\ std::u32string\ &" "string" ", unicode_bidi_level_t\ " "paragraph_embedding" ");"
+.HP \w'unicode_bidi_direction\ bidi_get_direction('u
+.BI "unicode_bidi_direction bidi_get_direction(const\ std::u32string\ &" "string" ", size_t\ " "starting_pos" "=0, size_t\ " "n" "=(size_t)\-1);"
+.HP \w'std::u32string\ bidi_override('u
+.BI "std::u32string bidi_override(const\ std::u32string\ &" "string" ", unicode_bidi_level_t\ " "direction" ", int\ " "cleanup_options" "=0);"
+.SH "DESCRIPTION"
+.PP
+These functions implement the C++ interface for the
+\m[blue]\fBUnicode Bi\-Directional algorithm\fR\m[]\&\s-2\u[1]\d\s+2\&. See the description of the underlying
+\fBunicode_bidi\fR(3)
+C library API for more information\&. C++ specific notes:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fBunicode::bidi_calc\fR
+returns the directional embedding value buffer and the calculated paragraph embedding level\&. Its
+\fIustring\fR
+is implicitly converted from a
+std::u32string:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+std::u32string text;
+
+auto [levels, direction]=unicode::bidi_calc(text);
+
+.fi
+.if n \{\
+.RE
+.\}
+Alternatively a
+unicode::bidi_calc_types
+objects gets constructed from the same
+std::u32string
+and then passed directly to
+\fBunicode::bidi_calc\fR:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+std::u32string text;
+
+unicode::bidi_calc_types types{text};
+
+types\&.setbnl(text); // Optional
+
+// types\&.types is a std::vector of enum_bidi_types_t values
+
+auto [levels, direction]=unicode::bidi_calc(types);
+
+.fi
+.if n \{\
+.RE
+.\}
+This provides the means to access the intermediate
+enum_bidi_types_t
+values that get calculated from the Unicode text string\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+In all cases the
+std::u32string
+cannot be a temporary object, and it must remain in scope until
+\fBunicode::bidi_calc\fR() returns\&.
+.sp .5v
+.RE
+The optional
+setbnl() method uses
+\fBunicode_bidi_setbnl\fR(3)
+to replace paragraph separators with newline characters, in the unicode string\&. It requires the same unicode string that was passed to the constructor as a parameter (because the constructor takes a constant reference, but this method modifies the string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Several C functions provide a
+\(lqdry\-run\(rq
+mode by passing a
+NULL
+pointer\&. The C++ API provides separate overloads, with and without the nullable parameter\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Several C functions accept a nullable function pointer, with the
+NULL
+function pointer specifying no callback\&. The C++ functions have a
+std::function
+parameter with a default do\-nothing closure\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Several C functions accept two parameters, a Unicode character pointer and the embedding level buffer, and a single parameter that specifies the size of both\&. The equivalent C++ function takes two discrete parameters, a
+std::u32string
+and a
+std::vector
+and returns an
+int; a negative value if their sizes differ, and 0 if their sizes match, and the requested function completes\&. The
+\fBunicode::bidi_embed\fR
+overload that returns a
+std::u32string
+returns an empty string in case of a mismatch\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fBunicode::bidi_reorder\fR
+reorders the entire
+\fIstring\fR
+and its
+\fIembedding_level\fRs by default\&. The optional
+\fIstarting_pos\fR
+and
+\fIn\fR
+parameters limit the reordering to the indicated subset of the original string (specified as the starting position offset index, and the number of characters)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fBunicode::bidi_reorder\fR,
+\fBunicode::bidi_cleanup\fR,
+\fBunicode::bidi_logical_order\fR,
+\fBunicode::bidi_needs_embed\fR
+and
+\fBunicode::bidi_get_direction\fR
+take two optional parameters (defaulted values or overloaded) specifying an optional starting position and number of characters that define a subset of the original string that gets reordered, cleaned up, or has its direction determined\&.
+.sp
+This
+\fBunicode::bidi_cleanup\fR
+does not trim off the passed in string and embedding level buffer, since it affects only a subset of the string\&. The number of times the removed character callback gets invoked indicates how much the substring should be trimmed off\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fBunicode::bidi_override\fR
+modifies the passed\-in
+\fIstring\fR
+as follows:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fBunicode::bidi_cleanup\fR() is applied with the specified, or defaulted,
+\fIcleanup_options\fR
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Either the
+LRO
+or an
+RLO
+override marker gets prepended to the Unicode string, forcing the entire string to be interpreted in a single rendering direction, when processed by the Unicode bi\-directional algorithm\&.
+.RE
+.sp
+\fBunicode::bidi_override\fR
+makes it possible to use a Unicode\-aware application or algorithm in a context that only works with text that\*(Aqs always displayed in a fixed direction, allowing graceful handling of input containing bi\-directional text\&.
+.RE
+.SS "unicode::literals namespace"
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+using namespace unicode::literals;
+
+std::u32string foo(std::u32string bar)
+{
+	return bar + LRO;
+}
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This namespace contains the following
+constexpr
+definitions:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+char32_t
+arrays with literal Unicode character strings containing Unicode directional, isolate, and override markers, like
+LRO,
+RLO
+and others\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+CLEANUP_EXTRA,
+CLEANUP_BNL, and
+CLEANUP_CANONICAL
+options for
+\fBunicode::bidi_cleanup\fR()\&.
+.RE
+.SH "SEE ALSO"
+.PP
+\fBcourier-unicode\fR(7),
+\fBunicode_bidi\fR(3)\&.
+.SH "AUTHOR"
+.PP
+\fBSam Varshavchik\fR
+.RS 4
+Author
+.RE
+.SH "NOTES"
+.IP " 1." 4
+Unicode Bi-Directional algorithm
+.RS 4
+\%https://www.unicode.org/reports/tr9/tr9-42.html
+.RE

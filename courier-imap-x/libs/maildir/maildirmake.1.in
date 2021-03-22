@@ -4,12 +4,12 @@
 .\"     Title: maildirmake
 .\"    Author: Sam Varshavchik
 .\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 03/01/2021
+.\"      Date: 03/02/2021
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "MAILDIRMAKE" "1" "03/01/2021" "Courier Mail Server" "Double Precision, Inc\&."
+.TH "MAILDIRMAKE" "1" "03/02/2021" "Courier Mail Server" "Double Precision, Inc\&."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -562,10 +562,11 @@ Encountering a bad folder during conversion strongly suggests the presence of an
 \m[blue]\fB\fBmaildir\fR(5)\fR\m[]\&\s-2\u[3]\d\s+2,
 \m[blue]\fB\fBmaildiracl\fR(1)\fR\m[]\&\s-2\u[2]\d\s+2,
 \m[blue]\fB\fBmaildirkw\fR(1)\fR\m[]\&\s-2\u[4]\d\s+2,
-\m[blue]\fB\fBmaildrop\fR(1)\fR\m[]\&\s-2\u[5]\d\s+2,
+\m[blue]\fB\fBmaildirwatch\fR(1)\fR\m[]\&\s-2\u[5]\d\s+2,
+\m[blue]\fB\fBmaildrop\fR(1)\fR\m[]\&\s-2\u[6]\d\s+2,
 \m[blue]\fB\fBmaildirquota\fR(7)\fR\m[]\&\s-2\u[1]\d\s+2,
-\m[blue]\fB\fBdeliverquota\fR(8)\fR\m[]\&\s-2\u[6]\d\s+2,
-\m[blue]\fB\fBmaildropfilter\fR(7)\fR\m[]\&\s-2\u[7]\d\s+2\&.
+\m[blue]\fB\fBdeliverquota\fR(8)\fR\m[]\&\s-2\u[7]\d\s+2,
+\m[blue]\fB\fBmaildropfilter\fR(7)\fR\m[]\&\s-2\u[8]\d\s+2\&.
 .SH "AUTHOR"
 .PP
 \fBSam Varshavchik\fR
@@ -594,16 +595,21 @@ Author
 \%http://www.courier-mta.org/maildirkw.html
 .RE
 .IP " 5." 4
+\fBmaildirwatch\fR(1)
+.RS 4
+\%http://www.courier-mta.org/maildirwatch.html
+.RE
+.IP " 6." 4
 \fBmaildrop\fR(1)
 .RS 4
 \%http://www.courier-mta.org/maildrop.html
 .RE
-.IP " 6." 4
+.IP " 7." 4
 \fBdeliverquota\fR(8)
 .RS 4
 \%http://www.courier-mta.org/deliverquota.html
 .RE
-.IP " 7." 4
+.IP " 8." 4
 \fBmaildropfilter\fR(7)
 .RS 4
 \%http://www.courier-mta.org/maildropfilter.html

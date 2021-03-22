@@ -1,3 +1,60 @@
+2.2.2
+
+2021-03-12  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* unicode_bidi.c: Implement unicode_bidi_combining(). Implement
+	canonical and compatibility decomposition and canonical composition.
+
+2021-03-06  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* unicode_bidi.c (unicode_bidi_needs_embed): Make its return code
+	what its documentation says its return code is.
+
+2021-02-24  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* Implement unicode_bidi_needs_embed(), unicode_bidi_cleaned_size(),
+	unicode::bidi_override,
+
+2.2.1
+
+2021-02-14  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* unicode_bidi_calc and unicode_bidi_calc_levels return a
+	unicode_bidi_direction object, to indicate whether the
+	computer paragraph embedding level was explicitly computed or
+	defaulted.
+
+2021-02-13  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* courier-unicode-version.m4: split version checking macro into its
+	own m4 file.
+
+	* unicode::bidi_calc - an empty string with an explicit embedding
+	level should return the requested embedding level.
+
+2.2
+2020-11-05  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* unicode::iconvert::convert, fix uninitialized variable.
+
+
+2020-11-04  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* spec file: add BuildRequires: %{__make} (will be required in F34).
+
+2020-07-11  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* Implement bidirectional algorithm, canonical or equivalent character
+	mappings.
+
+2020-07-04  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* Unicode 13 update. Adds lookup of EastAsianWidth property, emoji
+	property lookup, adds an alternative sequence-based grapheme API
+	that handles multi-character emoji rules.
+
+	* Add bidi property lookups.
+
 2.1.2
 
 2020-11-25  Sam Varshavchik  <mrsam@courier-mta.com>
@@ -11,6 +68,10 @@
 	* unicodebuf.c (unicode_buf_remove): Bug fix.
 
 2.1
+
+2020-04-21  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* Add AC_PROG_CC_C99 to configure
 
 2018-07-13  Sam Varshavchik  <mrsam@courier-mta.com>
 

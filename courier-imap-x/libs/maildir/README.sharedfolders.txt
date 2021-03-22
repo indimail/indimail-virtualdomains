@@ -732,20 +732,6 @@ Opening a shared folder
        message into the underlying sharable folder's tmp/cur directory, and
        it will show up after the next sync.
 
-1) Create Shared Maildir
-   /usr/bin/maildirmake -S /usr1/shared
-
-2) Create Folder
-   /usr/bin/maildirmake -s write -f Qmail /usr1/shared/
-   /usr/bin/maildirmake -s write -f Test /usr1/shared
-
-3) Create Entry in /etc/indimail/etc/maildirshared
-   qmail /usr1/shared
-
-Personal Shared Folders
-
-/usr/bin/maildirmake --add shared=/usr1/shared /usr1/manny/Maildir
-
 References
 
    Visible links

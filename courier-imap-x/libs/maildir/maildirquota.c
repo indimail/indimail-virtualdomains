@@ -645,7 +645,6 @@ static char *makenewmaildirsizename(const char *dir, int *fd)
 {
 char	hostname[256];
 struct	stat stat_buf;
-int     count;
 time_t	t;
 char	*p;
 
@@ -655,7 +654,7 @@ char	*p;
 	p=(char *)malloc(strlen(dir)+strlen(hostname)+130);
 	if (!p)	return (0);
 
-	for (count = 0;count < 10;count++)
+	for (;;)
 	{
 	char	tbuf[NUMBUFSIZE];
 	char	pbuf[NUMBUFSIZE];
@@ -670,11 +669,7 @@ char	*p;
 			(*fd=maildir_safeopen(p,
 				O_CREAT|O_RDWR|O_APPEND, 0644)) >= 0)
 			break;
-		sleep(1);
-	}
-	if (count == 10) {
-		free(p);
-		return (0);
+		sleep(3);
 	}
 	return (p);
 }

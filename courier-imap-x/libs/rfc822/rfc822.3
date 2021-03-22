@@ -3,13 +3,13 @@
 .\"<!-- distribution information. -->
 .\"     Title: rfc822
 .\"    Author: Sam Varshavchik
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 06/27/2015
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 11/04/2020
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "RFC822" "3" "06/27/2015" "Courier Mail Server" "Double Precision, Inc\&."
+.TH "RFC822" "3" "11/04/2020" "Courier Mail Server" "Double Precision, Inc\&."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -316,11 +316,11 @@ void rfc822tok_print(const struct rfc822token *list,
 void rfc822_print(const struct rfc822a *addrs,
         void (*print_func)(char, void *),
         void (*print_separator)(const char *, void *), void *callback_arg);
- 
+
 void rfc822_addrlist(const struct rfc822a *addrs,
                 void (*print_func)(char, void *),
                 void *callback_arg);
- 
+
 void rfc822_namelist(const struct rfc822a *addrs,
                 void (*print_func)(char, void *),
                 void *callback_arg);
@@ -451,26 +451,26 @@ E\-mail header format\&.
 int error=rfc2047_decode(const char *text,
                 int (*callback_func)(const char *, int, const char *, void *),
                 void *callback_arg);
- 
+
 extern char *str=rfc2047_decode_simple(const char *text);
- 
+
 extern char *str=rfc2047_decode_enhanced(const char *text,
                 const char *charset);
- 
+
 void rfc2047_print(const struct rfc822a *a,
         const char *charset,
         void (*print_func)(char, void *),
         void (*print_separator)(const char *, void *), void *);
 
- 
+
 char *buffer=rfc2047_encode_str(const char *string,
                 const char *charset);
- 
+
 int error=rfc2047_encode_callback(const char *string,
         const char *charset,
         int (*func)(const char *, size_t, void *),
         void *callback_arg);
- 
+
 char *buffer=rfc2047_encode_header(const struct rfc822a *a,
         const char *charset);
 .fi
@@ -585,15 +585,15 @@ RFC 2822
 .IP " 3." 4
 \fBrfc2045\fR(3)
 .RS 4
-\%[set $man.base.url.for.relative.links]/rfc2045.html
+\%http://www.courier-mta.org/rfc2045.html
 .RE
 .IP " 4." 4
 \fBreformail\fR(1)
 .RS 4
-\%[set $man.base.url.for.relative.links]/reformail.html
+\%http://www.courier-mta.org/reformail.html
 .RE
 .IP " 5." 4
 \fBreformime\fR(1)
 .RS 4
-\%[set $man.base.url.for.relative.links]/reformime.html
+\%http://www.courier-mta.org/reformime.html
 .RE

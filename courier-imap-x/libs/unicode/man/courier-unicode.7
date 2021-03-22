@@ -2,12 +2,12 @@
 .\"     Title: courier-unicode
 .\"    Author: Sam Varshavchik
 .\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 11/25/2020
+.\"      Date: 03/12/2021
 .\"    Manual: Courier Unicode Library
 .\"    Source: Courier Unicode Library
 .\"  Language: English
 .\"
-.TH "COURIER\-UNICODE" "7" "11/25/2020" "Courier Unicode Library" "Courier Unicode Library"
+.TH "COURIER\-UNICODE" "7" "03/12/2021" "Courier Unicode Library" "Courier Unicode Library"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -52,15 +52,20 @@ The C++ compiler must have C++11 support\&. Minimum usable version of gcc appear
 flag\&. Current versions of gcc use C++11, or higher, by default and do not require extra flags\&. Consult the packaging documentation for the Courier Unicode Library for information on any compiler flags that are needed to build software that links with this library\&.
 .SH "SEE ALSO"
 .PP
+\fBunicode_bidi\fR(3),
+\fBunicode_canonical\fR(3),
+\fBunicode_category_lookup\fR(3),
 \fBunicode_convert\fR(3),
 \fBunicode_default_chset\fR(3),
+\fBunicode_emoji_lookup\fR(3),
 \fBunicode_html40ent_lookup\fR(3),
-\fBunicode_category_lookup\fR(3),
 \fBunicode_grapheme_break\fR(3),
 \fBunicode_line_break\fR(3),
 \fBunicode_script\fR(3),
-\fBunicode_word_break\fR(3),
 \fBunicode_uc\fR(3),
+\fBunicode_word_break\fR(3),
+\fBunicode::bidi\fR(3),
+\fBunicode::canonical\fR(3),
 \fBunicode::iconvert::convert\fR(3),
 \fBunicode::iconvert::convert_tocase\fR(3),
 \fBunicode::iconvert::fromu\fR(3),
@@ -78,11 +83,10 @@ Author
 .IP " 1." 4
 Unicode Standard
 .RS 4
-\%http://www.unicode.org/standard/standard.html
+\%https://www.unicode.org/standard/standard.html
 .RE
 .IP " 2." 4
-
-	      \fBiconv\fR(3)
+\fBiconv\fR(3)
 .RS 4
-\%http://manpages.courier-mta.org/htmlman3/iconv.3.html
+\%https://manpages.courier-mta.org/htmlman3/iconv.3.html
 .RE

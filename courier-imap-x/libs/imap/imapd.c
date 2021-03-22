@@ -4313,27 +4313,23 @@ int	uid=0;
 	}
     if (strcmp(curtoken->tokenbuf, "IDLE") == 0)
     {
-	     const char *p;
-
-        if (nexttoken()->tokentype != IT_EOL)
+		if (nexttoken()->tokentype != IT_EOL)
 			return (-1);
 
-      read_eol();
+		read_eol();
 
-      if ((p=getenv("IMAP_ENHANCEDIDLE")) == NULL
-		   || !atoi(p)
-		   || imapenhancedidle())
-		       imapidle();
-      curtoken=nexttoken();
-      if (strcmp(curtoken->tokenbuf, "DONE") == 0)
-      {
-	       if (current_mailbox)
-		       doNoop(0);
-	       writes(tag);
-	       writes(" OK IDLE completed\r\n");
-	       return (0);
-       }
-       return (-1);
+		if (imapenhancedidle())
+			imapidle();
+		curtoken=nexttoken();
+		if (strcmp(curtoken->tokenbuf, "DONE") == 0)
+		{
+			if (current_mailbox)
+				doNoop(0);
+			writes(tag);
+			writes(" OK IDLE completed\r\n");
+			return (0);
+		}
+		return (-1);
     }
 	if (strcmp(curtoken->tokenbuf, "LOGOUT") == 0)
 	{
@@ -6989,7 +6985,7 @@ int main(int argc, char **argv)
 		struct maildirwatch *w;
 
 		if ((w=maildirwatch_alloc(".")) == NULL)
-			writes("* OK [ALERT] Filesystem notification initialization error -- contact your mail administrator (check for configuration errors with the FAM/Gamin library)\r\n");
+			writes("* OK [ALERT] Filesystem notification initialization error -- contact your mail administrator (check for inotify limits )\r\n");
 		else
 			maildirwatch_free(w);
 	}

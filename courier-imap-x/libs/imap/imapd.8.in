@@ -117,76 +117,13 @@ configuration files\&. These files are loaded into the environment by the system
 \fBcouriertcpd\fR\&.
 .SS "Realtime concurrent folder status updates"
 .PP
-Setting the
-IMAP_ENHANCEDIDLE
-to
-1
-in
-@sysconfdir@/imapd
-enables realtime concurrent folder status updates\&. When relatime folder status updates are enabled all IMAP mail clients that have the same folder open will be immediately notified of any changes to the folder\*(Aqs contents\&.
-.PP
 The
 Courier
 IMAP server always allows more than one mail client to have the same folder opened\&. However, when two or more clients have the same folder opened, the mail clients may not necessarily know when another client added or removed messages from the folder\&. The base IMAP protocol specification requires IMAP mail clients to explicitly check for any changes to the folder\*(Aqs contents\&. No provisions exists to notify the mail client immediately when the folder\*(Aqs contents are modified by another mail client\&.
 .PP
 The
 IDLE
-extension to the base IMAP protocol provides a delivery mechanism for notifying mail clients of changes to the mail folder\*(Aqs contents\&. Although at this time it\*(Aqs not known to which extent the
-IDLE
-extension is supported by IMAP mail clients, the
-Courier
-IMAP server fully implements the
-IDLE
-extension provided that the following requirements are met:
-.PP
-Gamin or FAM
-.RS 4
-Either
-\m[blue]\fBGamin\fR\m[]\&\s-2\u[3]\d\s+2
-or
-\m[blue]\fBFAM\fR\m[]\&\s-2\u[4]\d\s+2
-must be properly installed and configured prior to installing the
-Courier
-IMAP server\&.
-.sp
-Gamin/FAM
-is an application library that provides an interface to the operating system\*(Aqs kernel that applications can use to be notified when specific files or directories are changed, and the
-Courier
-IMAP server leverages this API to implement realtime concurrent folder status updates\&. According to the most recently available documentation,
-Gamin
-is a Linux\-specific library, and
-FAM
-builds and runs on Linux and IRIX\&.
-FAM
-should also build on other platforms, but without a supported kernel monitor FAM will fall back to a polling mode\&. At press time,
-FAM\*(Aqs web site reports that
-FAM
-succesfully builds (in polling mode) on FreeBSD and Solaris\&.
-.sp
-FAM
-(but not
-Gamin) also works with NFS filesystems\&. On NFS clients
-\fBfam\fR
-transparently forwards file monitoring requests to a peer
-\fBfam\fR
-process on the NFS server\&.
-.sp
-Installation and configuration of
-Gamin
-or
-FAM
-is beyond the scope of this document\&. This documentation presumes that Gamin or FAM is succesfully installed\&. Use the resources and tools on
-Gamin\*(Aqs or
-FAM\*(Aqs web site for assistance with setting them up\&. Systems that use GNOME or KDE desktops already have
-FAM
-or
-Gamin
-installed, as
-FAM
-or
-Gamin
-is used by the current versions of both desktops\&.
-.RE
+extension to the base IMAP protocol provides a delivery mechanism for notifying mail clients of changes to the mail folder\*(Aqs contents\&.
 .PP
 IDLE IMAP capability
 .RS 4
@@ -216,54 +153,14 @@ IDLE
 support in most IMAP mail clients is not known\&.
 .RE
 .PP
-\fBIMAP_ENHANCEDIDLE\fR
 .RS 4
-This setting in
-@sysconfdir@/imapd
-actually enables concurrent realtime folder status updates using the
-IDLE
-extension\&. Note that it is possible to enable the
-IDLE
-extension even if
-FAM
-or
-Gamin
-is not available, or without enabling either the
-\fBIMAP_USELOCKS\fR
-and/or
-\fBIMAP_ENHANCEDIDLE\fR
-settings\&. The resulting consequences are described are as follows:
-.sp
-.RS 4
-.ie n \{\
-\h'-04' 1.\h'+01'\c
-.\}
-.el \{\
-.sp -1
-.IP "  1." 4.2
-.\}
 Without
 \fBIMAP_USERLOCKS\fR
 there exists a small possibility that multiple mail clients will receive a slightly inconsistent folder index if both clients try to update the contents of the folder at the same time\&. Usually, the worst case result is that some clients will eventually end up downloading the same message twice from the server, and caching it incorrectly in the local cache (if the IMAP client caches message contents)\&. Clearing the local message cache will quickly eliminate any residual confusion that results from this situation\&.
-.RE
 .sp
-.RS 4
-.ie n \{\
-\h'-04' 2.\h'+01'\c
-.\}
-.el \{\
-.sp -1
-.IP "  2." 4.2
-.\}
-Without
-FAM
-or
-Gamin, and
-\fBIMAP_ENHANCEDIDLE\fR
-set, the
+Without inotify kernel interface, the
 Courier
 IMAP server will manually check for changes to the folder\*(Aqs contents every 60 seconds, in IDLE mode (instead of in real time)\&.
-.RE
 .RE
 .SS "Verifying realtime concurrent folder status updates"
 .PP
@@ -299,7 +196,7 @@ Prepare a test account with a couple of messages\&. Open two or three terminal w
 .RS 4
 .\}
 .nf
-S:* OK Courier\-IMAP ready\&. Copyright 1998\-2002 Double Precision, Inc\&.
+S:* OK Courier\-IMAP ready\&. Copyright 1998\-2021 Double Precision, Inc\&.
   See COPYING for distribution information\&.
 C:a login \fIuserid\fR \fIpassword\fR
 S:a OK LOGIN Ok\&.
@@ -346,20 +243,7 @@ for the duration of this test\&.
 .sp -1
 .IP "  2." 4.2
 .\}
-The last message from the server must be "entering ENHANCED idle mode"\&. Otherwise, it means that some of the necessary prerequisites have not been met\&. Verify that
-FAM
-or
-Gamin
-was set up prior to installing The
-Courier
-IMAP server (use
-\fBldd\fR(1)
-to verify that the
-\fBimapd\fR
-executable is linked with the
-libfam
-library), and verify the settings in the
-@sysconfdir@/imapd\&.
+The last message from the server must be "entering ENHANCED idle mode"\&. Otherwise, it means that some of the necessary prerequisites have not been met\&.
 .RE
 .sp
 .RS 4
@@ -376,7 +260,7 @@ Open another terminal window, connect to the server, and modify the flags of one
 .RS 4
 .\}
 .nf
-S:* OK Courier\-IMAP ready\&. Copyright 1998\-2002 Double Precision, Inc\&.
+S:* OK Courier\-IMAP ready\&. Copyright 1998\-2021 Double Precision, Inc\&.
   See COPYING for distribution information\&.
 C:a login \fIuserid\fR \fIpassword\fR
 S:a OK LOGIN Ok\&.
@@ -407,9 +291,7 @@ a OK STORE completed\&.
 .\}
 The last command sets the
 \eDeleted
-flag on the first message in the folder\&. Immediately after entering the last command, "* 1 FETCH (FLAGS (\eDeleted))" should also appear in all other terminal windows\&. On systems where
-FAM
-uses the fall\-back polling mode this response may appear after a brief delay of a few seconds\&. The delay should never exceed 15\-20 seconds\&.
+flag on the first message in the folder\&. Immediately after entering the last command, "* 1 FETCH (FLAGS (\eDeleted))" should also appear in all other terminal windows\&.
 .RE
 .sp
 .RS 4
@@ -491,7 +373,7 @@ message\&.
 .SH "SEE ALSO"
 .PP
 \m[blue]\fB\fBauthlib\fR(7)\fR\m[]\&\s-2\u[1]\d\s+2,
-\m[blue]\fB\fBuserdb\fR(8)\fR\m[]\&\s-2\u[5]\d\s+2
+\m[blue]\fB\fBuserdb\fR(8)\fR\m[]\&\s-2\u[3]\d\s+2
 .SH "AUTHOR"
 .PP
 \fBSam Varshavchik\fR
@@ -510,16 +392,6 @@ RFC 2060
 \%http://www.rfc-editor.org/rfc/rfc2060.txt
 .RE
 .IP " 3." 4
-Gamin
-.RS 4
-\%http://www.gnome.org/~veillard/gamin/
-.RE
-.IP " 4." 4
-FAM
-.RS 4
-\%http://oss.sgi.com/projects/fam/
-.RE
-.IP " 5." 4
 \fBuserdb\fR(8)
 .RS 4
 \%http://www.courier-mta.org/userdb.html

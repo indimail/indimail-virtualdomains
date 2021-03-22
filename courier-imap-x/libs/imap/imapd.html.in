@@ -60,13 +60,6 @@ Other environment variables are initialized from the
 <code class="filename">@sysconfdir@/imapd-ssl</code> configuration files.
 These files are loaded into the environment by the system startup script
 that runs <span class="command"><strong>couriertcpd</strong></span>.</p><div class="refsect2"><a id="imapd_realtime_concurrent_folder_status_updates" shape="rect"> </a><h3>Realtime concurrent folder status updates</h3><p>
-Setting the <code class="literal">IMAP_ENHANCEDIDLE</code> to
-<code class="literal">1</code> in
-<code class="filename">@sysconfdir@/imapd</code> enables realtime concurrent folder
-status updates.
-When relatime folder status updates are enabled all IMAP mail clients
-that have the same folder open will be
-immediately notified of any changes to the folder's contents.</p><p>
 The <span class="application">Courier</span> IMAP server always allows
 more than one mail client to have the
 same folder opened.
@@ -79,54 +72,7 @@ No provisions exists to notify the mail client immediately when the folder's
 contents are modified by another mail client.</p><p>
 The <code class="literal">IDLE</code> extension to the base IMAP protocol provides
 a delivery mechanism for notifying mail clients of changes to the mail
-folder's contents.  Although at this time it's not known to which extent
-the <code class="literal">IDLE</code> extension is supported by IMAP mail clients,
-the <span class="application">Courier</span> IMAP server fully implements
-the <code class="literal">IDLE</code>
-extension provided that the following requirements are met:
-</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><span class="application">Gamin</span> or <span class="application">FAM</span></span></dt><dd><p>
-Either <a class="ulink" href="http://www.gnome.org/~veillard/gamin/" target="_top" shape="rect">Gamin</a> or
-<a class="ulink" href="http://oss.sgi.com/projects/fam/" target="_top" shape="rect">FAM</a>
-must be properly installed and
-configured prior to installing
-the <span class="application">Courier</span> IMAP server.</p><p>
-<span class="application">Gamin</span>/<span class="application">FAM</span>
-is an application library that
-provides an interface to the operating system's kernel
-that applications can use to be notified when specific files
-or directories are changed, and the
-<span class="application">Courier</span> IMAP server leverages this API to
-implement realtime concurrent folder status updates.
-According to the most recently available documentation,
-<span class="application">Gamin</span> is a Linux-specific library, and
-<span class="application">FAM</span>
-builds and runs on Linux and IRIX.
-<span class="application">FAM</span>
-should also build on other platforms, but without a supported kernel monitor
-FAM will fall back to a polling mode.
-At press time,
-<span class="application">FAM</span>'s
-web site reports that
-<span class="application">FAM</span>
-succesfully builds (in polling mode) on FreeBSD and Solaris.</p><p>
-<span class="application">FAM</span> (but not <span class="application">Gamin</span>)
-also works with NFS filesystems.
-On NFS clients <span class="command"><strong>fam</strong></span> transparently forwards file monitoring
-requests to a peer <span class="command"><strong>fam</strong></span> process on the NFS server.</p><p>
-Installation and configuration of
-<span class="application">Gamin</span> or
-<span class="application">FAM</span> is beyond
-the scope of this document.  This documentation presumes that Gamin or FAM is
-succesfully installed.  Use the resources and tools on
-<span class="application">Gamin</span>'s or
-<span class="application">FAM</span>'s web site
-for assistance with setting them up.
-Systems that use GNOME or KDE desktops already have
-<span class="application">FAM</span> or
-<span class="application">Gamin</span>
-installed, as
-<span class="application">FAM</span> or <span class="application">Gamin</span>
-is used by the current versions of both desktops.</p></dd><dt><span class="term"><code class="literal">IDLE</code> IMAP capability</span></dt><dd><p>
+folder's contents.</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">IDLE</code> IMAP capability</span></dt><dd><p>
 <code class="literal">IDLE</code>
 must be listed in the
 <code class="envar">IMAP_CAPABILITY</code>
@@ -144,18 +90,7 @@ protocol extension.</span></dt><dd><p>
 Of course, an IMAP client that supports the <code class="literal">IDLE</code>
 protocol extension is required.
 At press time the status and extent of <code class="literal">IDLE</code> support
-in most IMAP mail clients is not known.</p></dd><dt><span class="term"><code class="envar">IMAP_ENHANCEDIDLE</code></span></dt><dd><p>
-This setting in <code class="filename">@sysconfdir@/imapd</code>
-actually enables concurrent realtime folder status updates using the
-<code class="literal">IDLE</code> extension.
-Note that it is possible to enable the <code class="literal">IDLE</code> extension
-even if
-<span class="application">FAM</span> or
-<span class="application">Gamin</span>
-is not available, or without
-enabling either the <code class="envar">IMAP_USELOCKS</code> and/or
-<code class="envar">IMAP_ENHANCEDIDLE</code> settings.
-The resulting consequences are described are as follows:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>
+in most IMAP mail clients is not known.</p></dd><dt/><dd><p>
 Without <code class="envar">IMAP_USERLOCKS</code> there exists a small possibility
 that multiple mail clients will receive a slightly inconsistent folder index
 if both clients try to update the contents of the folder at the same time.
@@ -163,13 +98,12 @@ Usually, the worst case result is that some clients will eventually end up
 downloading the same message twice from the server, and caching it incorrectly
 in the local cache (if the IMAP client caches message contents).
 Clearing the local message cache will quickly eliminate any residual
-confusion that results from this situation.</p></li><li class="listitem"><p>
-Without <span class="application">FAM</span> or <span class="application">Gamin</span>, and
-<code class="envar">IMAP_ENHANCEDIDLE</code> set, the
+confusion that results from this situation.</p><p>
+Without inotify kernel interface, the
 <span class="application">Courier</span> IMAP server will
 manually check for changes to the folder's contents every 60 seconds,
 in IDLE mode (instead of in real time).
-</p></li></ol></div></dd></dl></div></div><div class="refsect2"><a id="imapd_verifying_realtime_concurrent_folder_status_updates" shape="rect"> </a><h3>Verifying realtime concurrent folder status updates</h3><p>
+</p></dd></dl></div></div><div class="refsect2"><a id="imapd_verifying_realtime_concurrent_folder_status_updates" shape="rect"> </a><h3>Verifying realtime concurrent folder status updates</h3><p>
 Use the following procedure to verify that realtime concurrent folder status
 updates are properly working.
 It is helpful to be familiar with the IMAP protocol.
@@ -191,7 +125,7 @@ Prepare a test account with a couple of messages.
 Open two or three terminal windows.
 In each window, connect to the IMAP server, and enter IDLE mode:
 </p><pre class="programlisting" xml:space="preserve">
-S:* OK Courier-IMAP ready. Copyright 1998-2002 Double Precision, Inc.
+S:* OK Courier-IMAP ready. Copyright 1998-2021 Double Precision, Inc.
   See COPYING for distribution information.
 C:a login <em class="replaceable"><code>userid</code></em> <em class="replaceable"><code>password</code></em>
 S:a OK LOGIN Ok.
@@ -214,17 +148,10 @@ It may be necessary to adjust this setting in
 for the duration of this test.</p></div></li><li class="listitem"><p>
 The last message from the server must be "entering ENHANCED idle mode".
 Otherwise, it means that some of the necessary prerequisites have not been
-met.
-Verify that <span class="application">FAM</span>
-or <span class="application">Gamin</span> was set up prior to installing
-The <span class="application">Courier</span> IMAP server
-(use <span class="citerefentry"><span class="refentrytitle">ldd</span>(1)</span>
-to verify that the <span class="command"><strong>imapd</strong></span> executable is linked with
-the <code class="filename">libfam</code> library), and verify the settings in the
-<code class="filename">@sysconfdir@/imapd</code>.</p></li><li class="listitem"><p>
+met.</p></li><li class="listitem"><p>
 Open another terminal window, connect to the server, and modify the flags
 of one of the messages:</p><pre class="programlisting" xml:space="preserve">
-S:* OK Courier-IMAP ready. Copyright 1998-2002 Double Precision, Inc.
+S:* OK Courier-IMAP ready. Copyright 1998-2021 Double Precision, Inc.
   See COPYING for distribution information.
 C:a login <em class="replaceable"><code>userid</code></em> <em class="replaceable"><code>password</code></em>
 S:a OK LOGIN Ok.
@@ -245,9 +172,6 @@ message in the folder.
 Immediately after entering the last command,
 "<code class="literal">* 1 FETCH (FLAGS (\Deleted))</code>" should also appear
 in all other terminal windows.
-On systems where <span class="application">FAM</span> uses the fall-back polling
-mode this response may appear after a brief delay of a few seconds.
-The delay should never exceed 15-20 seconds.
 </p></li><li class="listitem"><p>
 Verify that all terminal windows reliably receive folder status updates in
 real time by alternatively entering the commands
@@ -290,5 +214,5 @@ These difference are acceptable; the important thing is to make sure that
 all terminal windows have the same <code class="literal">EXISTS</code> message.
 </p></li></ol></div></div></div><div class="refsect1"><a id="imapd_see_also" shape="rect"> </a><h2>SEE ALSO</h2><p>
 <a class="ulink" href="authlib.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">authlib</span>(7)</span></a>,
- 
+
 <a class="ulink" href="userdb.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">userdb</span>(8)</span></a></p></div></div></body></html>

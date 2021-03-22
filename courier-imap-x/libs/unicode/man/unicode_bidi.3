@@ -1,0 +1,1128 @@
+'\" t
+.\"     Title: unicode_bidi
+.\"    Author: Sam Varshavchik
+.\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
+.\"      Date: 03/12/2021
+.\"    Manual: Courier Unicode Library
+.\"    Source: Courier Unicode Library
+.\"  Language: English
+.\"
+.TH "UNICODE_BIDI" "3" "03/12/2021" "Courier Unicode Library" "Courier Unicode Library"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+unicode_bidi, unicode_bidi_calc_levels, unicode_bidi_calc_types, unicode_bidi_calc, unicode_bidi_reorder, unicode_bidi_cleanup, unicode_bidi_cleaned_size, unicode_bidi_logical_order, unicode_bidi_combinings, unicode_bidi_needs_embed, unicode_bidi_embed, unicode_bidi_embed_paragraph_level, unicode_bidi_direction, unicode_bidi_type, unicode_bidi_setbnl, unicode_bidi_mirror, unicode_bidi_bracket_type \- unicode bi\-directional algorithm
+.SH "SYNOPSIS"
+.sp
+.ft B
+.nf
+#include <courier\-unicode\&.h>
+
+unicode_bidi_level_t lr=UNICODE_BIDI_LR;
+.fi
+.ft
+.HP \w'void\ unicode_bidi_calc_types('u
+.BI "void unicode_bidi_calc_types(const\ char32_t\ *" "p" ", size_t\ " "n" ", unicode_bidi_type_t\ *" "types" ");"
+.HP \w'struct\ unicode_bidi_direction\ unicode_bidi_calc_levels('u
+.BI "struct unicode_bidi_direction unicode_bidi_calc_levels(const\ char32_t\ *" "p" ", const\ unicode_bidi_type_t\ *" "types" ", size_t\ " "n" ", unicode_bidi_level_t\ *" "levels" ", const\ unicode_bidi_level_t\ *" "initial_embedding_level" ");"
+.HP \w'struct\ unicode_bidi_direction\ unicode_bidi_calc('u
+.BI "struct unicode_bidi_direction unicode_bidi_calc(const\ char32_t\ *" "p" ", size_t\ " "n" ", unicode_bidi_level_t\ *" "levels" ", const\ unicode_bidi_level_t\ *" "initial_embedding_level" ");"
+.HP \w'void\ unicode_bidi_reorder('u
+.BI "void unicode_bidi_reorder(char32_t\ *" "string" ", unicode_bidi_level_t\ *" "levels" ", size_t\ " "n" ", void\ (*" "reorder_callback" ")(size_t,\ size_t,\ void\ *), void\ *" "arg" ");"
+.HP \w'size_t\ unicode_bidi_cleanup('u
+.BI "size_t unicode_bidi_cleanup(char32_t\ *" "string" ", unicode_bidi_level_t\ *" "levels" ", size_t\ " "n" ", int\ " "options" ", void\ (*" "removed_callback" ")(size_t,\ size_t,\ void\ *), void\ *" "arg" ");"
+.HP \w'size_t\ unicode_bidi_cleaned_size('u
+.BI "size_t unicode_bidi_cleaned_size(const\ char32_t\ *" "string" ", size_t\ " "n" ", int\ " "options" ");"
+.HP \w'void\ unicode_bidi_logical_order('u
+.BI "void unicode_bidi_logical_order(char32_t\ *" "string" ", unicode_bidi_level_t\ *" "levels" ", size_t\ " "n" ", unicode_bidi_level_t\ " "paragraph_embedding" ", void\ (*" "reorder_callback" ")(size_t\ index,\ size_t\ n,\ void\ *arg), void\ *" "arg" ");"
+.HP \w'void\ unicode_bidi_combinings('u
+.BI "void unicode_bidi_combinings(const\ char32_t\ *" "string" ", const\ unicode_bidi_level_t\ *" "levels" ", size_t\ " "n" ", void\ (*" "combinings" ")(unicode_bidi_level_t\ level,\ size_t\ level_start,\ size_t\ n_chars,\ size_t\ comb_start,\ size_t\ n_comb_chars,\ void\ *arg), void\ *" "arg" ");"
+.HP \w'int\ unicode_bidi_needs_embed('u
+.BI "int unicode_bidi_needs_embed(const\ char32_t\ *" "string" ", const\ unicode_bidi_level_t\ *" "levels" ", size_t\ " "n" ", const\ unicode_bidi_level_t\ " "*paragraph_embedding" ");"
+.HP \w'size_t\ unicode_bidi_embed('u
+.BI "size_t unicode_bidi_embed(const\ char32_t\ *" "string" ", const\ unicode_bidi_level_t\ *" "levels" ", size_t\ " "n" ", unicode_bidi_level_t\ " "paragraph_embedding" ", void\ (*" "emit" ")(const\ char32_t\ *string,\ size_t\ n,\ int\ is_part_of_string,\ void\ *arg), void\ *" "arg" ");"
+.HP \w'char32_t\ unicode_bidi_embed_paragraph_level('u
+.BI "char32_t unicode_bidi_embed_paragraph_level(const\ char32_t\ *" "string" ", size_t\ " "n" ", unicode_bidi_level_t\ " "paragraph_embedding" ");"
+.HP \w'char32_t\ bidi_mirror('u
+.BI "char32_t bidi_mirror(char32_t\ " "c" ");"
+.HP \w'char32_t\ bidi_bracket_type('u
+.BI "char32_t bidi_bracket_type(char32_t\ " "c" ", unicode_bracket_type_t\ *" "ret" ");"
+.HP \w'struct\ unicode_bidi_direction\ unicode_bidi_get_direction('u
+.BI "struct unicode_bidi_direction unicode_bidi_get_direction(char32_t\ *" "c" ", size_t\ " "n" ");"
+.HP \w'enum_bidi_type_t\ unicode_bidi_type('u
+.BI "enum_bidi_type_t unicode_bidi_type(char32_t\ " "c" ");"
+.HP \w'void\ unicode_bidi_setbnl('u
+.BI "void unicode_bidi_setbnl(char32_t\ *" "p" ", const\ unicode_bidi_type_t\ *" "types" ", size_t\ " "n" ");"
+.SH "DESCRIPTION"
+.PP
+These functions are related to the
+\m[blue]\fBUnicode Bi\-Directional algorithm\fR\m[]\&\s-2\u[1]\d\s+2\&. They implement the algorithm up to and including step L2, and provide additional functionality of returning miscellaneous bi\-directional\-related metadata of Unicode characters\&. There\*(Aqs also a basic algorithm that
+\(lqreverses\(rq
+the bi\-directional algorithm and produces a Unicode string with bi\-directional markers that results in the same bi\-directional string after reapplying the algorithm\&.
+.SS "Calculating bi\-directional rendering order"
+.PP
+The following process computes the rendering order of characters according to the Unicode Bi\-Directional algorithm:
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 1.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  1." 4.2
+.\}
+Allocate an array of
+unicode_bidi_type_t
+that\*(Aqs the same size as the Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 2.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  2." 4.2
+.\}
+Allocate an array of
+unicode_bidi_level_t
+that\*(Aqs the same size as the Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 3.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  3." 4.2
+.\}
+Use
+\fBunicode_bidi_calc_types\fR() to compute the Unicode string\*(Aqs characters\*(Aq bi\-directional types, and populate the
+unicode_bidi_type_t
+buffer\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 4.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  4." 4.2
+.\}
+Use
+\fBunicode_bidi_calc_levels\fR() to compute the Unicode string\*(Aqs characters\*(Aq bi\-directional embedding level (executes the Bi\-Directional algorithm up to and including step L1)\&. This populates the
+unicode_bidi_level_t
+buffer\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 5.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  5." 4.2
+.\}
+Alternatively: allocate only the
+unicode_bidi_level_t
+array and use
+\fBunicode_bidi_calc\fR(), which
+\fBmalloc\fR()s the
+unicode_bidi_type_t
+buffer, calls
+\fBunicode_bidi_calc_levels\fR(), and then
+\fBfree\fR()s the buffer\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 6.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  6." 4.2
+.\}
+Use
+\fBunicode_bidi_reorder\fR() to reverse any characters in the string, according to the algorithm (step L2), with an optional callback that reports which ranges of characters get reversed\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04' 7.\h'+01'\c
+.\}
+.el \{\
+.sp -1
+.IP "  7." 4.2
+.\}
+Use
+\fBunicode_bidi_cleanup\fR() to remove the characters from the string which are used by the bi\-directional algorithm, and are not needed for rendering the text\&.
+\fBunicode_bidi_cleaned_size\fR() is available to determine, in advance, how many characters will remain\&.
+.RE
+.PP
+The parameters to
+\fBunicode_bidi_calc_types\fR() are:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A pointer to the Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Number of characters in the Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A pointer to an array of
+unicode_bidi_type_t
+values\&. The caller is responsible for allocating and deallocating this array, which has the same size as the Unicode string\&.
+.RE
+.PP
+The parameters to
+\fBunicode_bidi_calc_levels\fR() are:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A pointer to the Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A pointer to the buffer that was passed to
+\fBunicode_bidi_calc_types\fR()\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Number of characters in the Unicode string and the
+unicode_bidi_type_t
+buffer\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A pointer to an array of
+unicode_bidi_level_t
+values\&. The caller is responsible for allocating and deallocating this array, which has the same size as the Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+An optional pointer to a
+UNICODE_BIDI_LR
+or
+UNICODE_BIDI_RL
+value\&. This sets the default paragraph direction level\&. A null pointer computes the default paragraph direction level based on the string, as specified by the "P" rules of the bi\-directional algorithm\&.
+.RE
+.PP
+The parameters to
+\fBunicode_bidi_calc\fR() are the same except for the
+unicode_bidi_type_t
+pointer\&.
+\fBunicode_bidi_calc\fR() allocates this buffer by itself and calls
+\fBunicode_bidi_calc_types\fR, and destroys the buffer before returning\&.
+.PP
+\fBunicode_bidi_calc\fR() and
+\fBunicode_bidi_calc_levels\fR() fill in the
+unicode_bidi_level_t
+array with the values corresponding to the embedding level of the corresponding character, according the Unicode Bidirection Algorithm (even values for left\-to\-right ordering, and odd values for right\-to\-left ordering)\&. A value of UNICODE_BIDI_SKIP designates directional markers (from step X9)\&.
+.PP
+\fBunicode_bidi_calc\fR() and
+\fBunicode_bidi_calc_levels\fR() return the resolved paragraph direction level, which always matches the passed in level, if specified, else it reports the derived one\&. These functions return a
+unicode_bidi_direction
+structure:
+.TS
+tab(:);
+l s s
+l l l
+l l l
+l s s.
+T{
+struct\ \&unicode_bidi_direction\ \&{
+T}
+T{
+\ \&
+T}:T{
+unicode_bidi_level_t
+T}:T{
+\fIdirection\fR;
+T}
+T{
+\ \&
+T}:T{
+int
+T}:T{
+\fIis_explicit\fR;
+T}
+T{
+};
+T}
+.TE
+.sp 1
+.PP
+\fIdirection\fR
+gives the paragraph embedding level,
+UNICODE_BIDI_LR
+or
+UNICODE_BIDI_RL\&.
+\fIis_explicit\fR
+indicates whether: the optional pointer to a
+UNICODE_BIDI_LR
+or
+UNICODE_BIDI_RL
+value was specified (and returned in
+\fIdirection\fR), or whether the
+\fIdirection\fR
+comes from an character with an explicit direction indication\&.
+.PP
+\fBunicode_bidi_reorder\fR() takes the actual unicode string together with the embedding values from
+\fBunicode_bidi_calc\fR
+or
+\fBunicode_bidi_calc_levels\fR(), then reverses the bi\-directional string, as specified by step L2 of the bi\-directional algorithm\&. The parameters to
+\fBunicode_bidi_reorder\fR() are:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A pointer to the Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A pointer to an array of
+unicode_bidi_level_t
+values\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Number of characters in the Unicode string and the
+unicode_bidi_level_t
+array\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+An optional
+\fIreorder_callback\fR
+function pointer\&.
+.RE
+.PP
+A non\-NULL
+\fIreorder_callback\fR
+gets invoked to report each reversed character range\&. The callback\*(Aqs first parameter is the index of the first reversed character, the second parameter is the number of reversed characters, starting at the given index of the Unicode string\&. The third parameter is the
+\fIarg\fR
+passthrough parameter\&.
+.PP
+\fBunicode_bidi_reorder\fR
+modifies its
+\fIstring\fR
+and
+\fIlevels\fR\&.
+\fIreorder_callback\fR
+gets invoked after reversing each consecutive range of values in the
+\fIstring\fR
+and
+\fIlevels\fR
+buffers\&. For example:
+\(lqreorder_callback(5, 7, arg)\(rq
+reports that character indexes #5 through #11 got reversed\&.
+.PP
+A NULL
+\fIstring\fR
+pointer leaves the
+\fIlevels\fR
+buffer unchanged, but still invokes the
+\fIreorder_callback\fR
+as if the character string, and their embedding values, were reversed\&.
+.PP
+The resulting string and embedding levels are in
+\(lqrendering order\(rq, but still contain bi\-directional embedding, override, boundary\-neutral, isolate, and marker characters\&.
+\fBunicode_bidi_cleanup\fR
+removes these characters and directional markers\&.
+.PP
+The parameters to
+\fBunicode_bidi_cleanup\fR() are:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The pointer to the unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A non\-null pointer to the directional embedding level buffer, of the same size as the string, also removes the corresponding values from the buffer, and the remaining values in the embedding level buffer get reset to levels
+UNICODE_BIDI_LR
+and
+UNICODE_BIDI_RL, only\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The size of the unicode string and the directional embedding buffer (if not NULL)\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A a bitmask that selects the following options (or 0 if no options):
+.PP
+UNICODE_BIDI_CLEANUP_EXTRA
+.RS 4
+In addition to removing all embedding, override, and boundry\-neutral characters as specified by step X9 of the bi\-directional algorithm (the default behavior without this flag), also remove all isolation markers and implicit markers\&.
+.RE
+.PP
+UNICODE_BIDI_CLEANUP_BNL
+.RS 4
+Replace all characters classified as paragraph separators with a newline character\&.
+.RE
+.PP
+UNICODE_BIDI_CLEANUP_CANONICAL
+.RS 4
+A combined set of
+UNICODE_BIDI_CLEANUP_EXTRA
+and
+UNICODE_BIDI_CLEANUP_BNL,
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A pointer to a function that gets repeatedly invoked with the index of the character that gets removed from the Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+An opaque pointer that gets forwarded to the callback\&.
+.RE
+.PP
+The function pointer (if not
+NULL) gets invoked to report the index of each removed character\&. The reported index is the index from the original string, and the callback gets invoked in strict order, from the first to the last removed character (if any)\&.
+.PP
+The character string and the embedding level values resulting from
+\fBunicode_bidi_cleanup\fR() with the
+UNICODE_BIDI_CLEANUP_CANONICAL
+are in
+\(lqcanonical rendering order\(rq\&.
+\fBunicode_bidi_logical_order\fR(),
+\fBunicode_bidi_needs_embed\fR() and
+\fBunicode_bidi_embed\fR() require the canonical rendering order for their string and embedding level values\&.
+.PP
+The parameters to
+\fBunicode_bidi_cleaned_size\fR() are a pointer to the unicode string, its size, and the bitmask option to
+\fBunicode_bidi_cleanup\fR()\&.
+.SS "Embedding bi\-directional markers in Unicode text strings"
+.PP
+\fBunicode_bidi_logical_order\fR() rearranges the string from rendering to its logical order\&.
+\fBunicode_bidi_embed\fR() adds various bi\-directional markers to a Unicode string in canonical rendering order\&. The resulting string is not guaranteed to be identical to the original Unicode bi\-directional string\&. The algorithm is fairly basic, but the resulting bi\-directional string produces the same canonical rendering order after applying
+\fBunicode_bidi_calc()\fR
+or
+\fBunicode_bidi_calc_levels\fR(),
+\fBunicode_reorder()\fR
+and
+\fBunicode_bidi_cleanup()\fR
+(with the canonical option), with the same paragraph_embedding level\&.
+\fBunicode_bidi_needs_embed\fR() attempts to heuristically determine whether
+\fBunicode_bidi_embed\fR() is required\&.
+.PP
+\fBunicode_bidi_logical_order\fR() gets called first, followed by
+\fBunicode_bidi_embed\fR() (or
+\fBunicode_bidi_needs_embed\fR() in order to determine whether bi\-directional markers are required)\&. Finally,
+\fBunicode_bidi_embed_paragraph_level\fR() optionally determines whether the resulting string\*(Aqs default paragraph embedding level matches the one used for the actual embedding direction, and if not returns a directional marker to be prepended to the Unicode character string, as a hint\&.
+.PP
+\fBunicode_bidi_logical_order\fR() factors in the characters\*(Aq embedding values, and the provided paragraph embedding value (UNICODE_BIDI_LR
+or
+UNICODE_BIDI_RL), and rearranges the characters and the embedding levels in left\-to\-right order, while simultaneously invoking the supplied reorder_callback indicating each range of characters whose relative order gets reversed\&. The
+\fBreorder_callback\fR() receives, as parameters:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The starting index of the first reversed character, in the string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Number of reversed characters\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Forwarded
+\fIarg\fR
+pointer value\&.
+.RE
+.PP
+This specifies a consecutive range of characters (and directional embedding values) that get reversed (first character in the range becomes the last character, and the last character becomes the first character)\&.
+.PP
+After
+\fBunicode_bidi_logical_order\fR(),
+\fBunicode_bidi_embed\fR() progressively invokes the passed\-in callback with the contents of a bi\-directional unicode string\&. The parameters to
+\fBunicode_bidi_embed\fR() are:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The directional embedding buffer, in canonical rendering order\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The size of the string and the embedding level buffer\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The paragraph embedding level, either
+UNICODE_BIDI_LR
+or
+UNICODE_BIDI_RL\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The pointer to the callback function\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+An opaque pointer argument that gets forwarded to the callback function\&.
+.RE
+.PP
+The callback receives pointers to various parts of the original string that gets passed to
+\fBunicode_bidi_embed\fR(), intermixed with bi\-directional markers, overrides, and isolates\&. The callback\*(Aqs parameters are:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The pointer to a Unicode string\&.
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+It is not a given that the callback receives pointers to progressively increasing pointers of the original string that gets passed to
+\fBunicode_bidi_embed\fR()\&. Some calls will be for individual bi\-directional markers, and
+\fBunicode_bidi_embed\fR() also performs some additional internal reordering, on the fly, after
+\fBunicode_bidi_logical_order\fR()\*(Aqs big hammer\&.
+.sp .5v
+.RE
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Number of characters in the Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Indication whether the Unicode string pointer is pointing to a part of the original Unicode string that\*(Aqs getting embedded\&. Otherwise this must be some marker character that\*(Aqs not present in the original Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Forwarded
+\fIarg\fR
+pointer value\&.
+.RE
+.PP
+The assembled unicode string should produce the same canonical rendering order, for the same paragraph embedding level\&.
+\fBunicode_bidi_embed_paragraph_level\fR() checks if the specified Unicode string computes the given default paragraph embedding level and returns 0 if it matches\&. Otherwise it returns a directional marker that should be
+\fIprepended\fR
+to the Unicode string to allow
+\fBunicode_bidi_calc\fR\*(Aqs (or
+\fBunicode_bidi_calc_levels\fR()) optional paragraph embedding level pointer\*(Aqs value to be
+NULL, but derive the same default embedding level\&. The parameters to
+\fBunicode_bidi_embed_paragraph_level\fR() are:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The size of the string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The paragraph embedding level, either
+UNICODE_BIDI_LR
+or
+UNICODE_BIDI_RL\&.
+.RE
+.PP
+\fBunicode_bidi_needs_embed\fR() attempts to heuristically determine whether the Unicode string, in logical order, requires bi\-directional markers\&. The parameters to
+\fBunicode_bidi_embed_paragraph_level\fR() are:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The directional embedding buffer, in logical order\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The size of the string and the embedding level buffer\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+A pointer to an explicit paragraph embedding level, either
+UNICODE_BIDI_LR
+or
+UNICODE_BIDI_RL; or a
+NULL
+pointer (see
+\fBunicode_bidi_calc_types\fR()\*(Aqs explanation for this parameter)\&.
+.RE
+.PP
+\fBunicode_bidi_needs_embed\fR() returns 0 if the Unicode string does not need explicit directional markers, or 1 if it does\&. This is done by using
+\fBunicode_bidi_calc()\fR,
+\fBunicode_bidi_reorder()\fR,
+\fBunicode_bidi_logical_order\fR
+and then checking if the end result is different from what was passed in\&.
+.SS "Combining character ranges"
+.PP
+\fBunicode_bidi_combinings\fR() reports consecutive sequences of one or more combining marks in bidirectional text (which can be either in rendering or logical order) that have the same embedding level\&. It takes the following parameters:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The directional embedding buffer, in logical or rendering order\&. A
+NULL
+value for this pointer is equivalent to a directional embedding buffer with a level of 0 for every character in the Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Number of characters in the Unicode string\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The pointer to the callback function\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+An opaque pointer argument that gets forwarded to the callback function\&.
+.RE
+.PP
+The callback function gets invoked for every consecutive sequence of one or more characters that have a canonical combining class other than 0, and with the same embedding level\&. The parameters to the callback function are:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The embedding level of the combining characters\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The starting index of a consecutive sequence of all characters with the same embedding level\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The number of characters with the same embedding level\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The starting index of a consecutive sequence of all characters with the same embedding level and a canonical combining class other than 0\&. This will always be equal to or greater than the value of the second parameter\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The number of consecutive characters with the characters with the same embedding level and a canonical combining class other than 0\&. The last character included in this sequence will always be less than or equal to the last character in the sequence defined by the second and the third parameters\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The opaque pointer argument that was passed to
+\fBunicode_bidi_combinings\fR\&.
+.RE
+.PP
+A consecutive sequence of Unicode characters with non\-0 combining classes but different embedding levels gets reported individually, for each consecutive sequence with the same embedding level\&.
+.PP
+This function helps with reordering the combining characters in right\-to\-left\-rendered text\&. Right\-to\-left text reversed by
+\fBunicode_bidi_reorder\fR() results in combining characters preceding their starter character\&. They get reversed no differently than any other character\&. The same thing also occurs after
+\fBunicode_bidi_logical_order\fR() reverses everything back\&. Use
+\fBunicode_bidi_combinings\fR
+to identify consecutive sequences of combining characters followed by their original starter\&.
+.PP
+The callback may reorder the characters identified by its third and the fourth parameters in the manner described below\&.
+\fBunicode_bidi_reorder\fR\*(Aqs parameter is pointers to a constant Unicode string; but it can modify the string (via an out\-of\-band mutable pointer) subject to the following conditions:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+The characters identified by the third and the fourth parameter may be modified\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+If the last character in this sequence is not the last character included in the range specified by the first and the second character, then one more character after the last character may also be modified\&.
+.sp
+This is, presumably, the original starter that preceded the combining characters before the entire sequence was reversed\&.
+.RE
+.PP
+Here\*(Aqs an example of a callback that reverses combining characters and their immediately\-following starter character:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+void reorder_right_to_left_combining(unicode_bidi_level_t level,
+                                     size_t level_start,
+                                     size_t n_chars,
+                                     size_t comb_start,
+                                     size_t n_comb_chars,
+                                     void *arg)
+{
+    /* Let\*(Aqs say that this is the Unicode string */
+    char32_t *buf=(char32_t *)arg;
+
+    if ((level & 1) == 0)
+        return; /* Left\-to\-right text not reversed */
+
+    char32_t *b=buf+comb_start;
+    char32_t *e=b+n_comb_chars;
+
+    /*
+    ** Include the starter characters in the reversed range\&.
+    ** The semantics of the combining characters with different
+    ** embedding levels \-\- so they get reported here separately \-\- is
+    ** not specified\&. This will reverse just the combining marks, and
+    ** they\*(Aqre on their own\&.
+    */
+
+    if (comb_start + n_comb_chars < level_start + n_chars)
+        ++e;
+
+    while (b < e)
+    {
+        char32_t t;
+
+        \-\-e;
+        t=*b;
+        *b=*e;
+        *e=t;
+        ++b;
+    }
+}
+.fi
+.if n \{\
+.RE
+.\}
+.SS "Miscellaneous utility functions"
+.PP
+\fBunicode_bidi_get_direction\fR
+takes a pointer to a unicode string, the number of characters in the unicode string, and determines default paragraph level level\&.
+\fBunicode_bidi_get_direction\fR
+returns a
+struct
+with the following fields:
+.PP
+\fIdirection\fR
+.RS 4
+This value is either
+UNICODE_BIDI_LR
+or
+UNICODE_BIDI_RL
+(left to right or right to left)\&.
+.RE
+.PP
+\fIis_explicit\fR
+.RS 4
+This value is a flag\&. A non\-0 value indicates that the embedding level was derived from an explicit character type (L,
+R
+or
+AL) from the stirng\&. A 0 value indicates the default paragraph direction, no explicit character was found in the string\&.
+.RE
+.PP
+\fBunicode_bidi_type\fR
+looks up each character\*(Aqs bi\-directional character type\&.
+.PP
+\fBunicode_bidi_setbnl\fR
+takes a pointer to a unicode string, a pointer to an array of
+enum_bidi_type_t
+values and the number of characters in the string and the array\&.
+\fBunicode_bidi_setbnl\fR
+replaces all paragraph separators in the unicode string with a newline character (same as the
+UNICODE_BIDI_CLEANUP_BNL
+option to
+\fBunicode_bidi_cleanup\fR\&.
+.PP
+\fBunicode_bidi_mirror\fR
+returns the glyph that\*(Aqs a mirror image of the parameter (i\&.e\&. an open parenthesis for a close parenthesis, and vice versa); or the same value if there is no mirror image (this is the
+Bidi_Mirrored=Yes
+property)\&.
+.PP
+\fBunicode_bidi_bracket_type\fR
+looks up each bracket character and returns its opposite, or the same value if the character is not a bracket that has an opposing bracket character (this is the
+Bidi_Paired_Bracket_type
+property)\&. A non\-NULL
+\fIret\fR
+gets initialized to either
+UNICODE_BIDI_o,
+UNICODE_BIDI_c
+or
+UNICODE_BIDI_n\&.
+.SH "SEE ALSO"
+.PP
+\m[blue]\fBTR\-9\fR\m[]\&\s-2\u[1]\d\s+2,
+\fBunicode::bidi\fR(3),
+\fBcourier-unicode\fR(7),
+.SH "AUTHOR"
+.PP
+\fBSam Varshavchik\fR
+.RS 4
+Author
+.RE
+.SH "NOTES"
+.IP " 1." 4
+Unicode Bi-Directional algorithm
+.RS 4
+\%https://www.unicode.org/reports/tr9/tr9-42.html
+.RE
