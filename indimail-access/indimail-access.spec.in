@@ -269,6 +269,7 @@ install -m 644 %{S:6} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissio
 %{__rm} -f  %{buildroot}%{_libdir}/libcourier-unicode.a
 %{__rm} -f  %{buildroot}%{_libdir}/libcourier-unicode.so
 %{__rm} -f  %{buildroot}%{_prefix}/share/aclocal/courier-unicode.m4
+%{__rm} -f  %{buildroot}%{_prefix}/share/aclocal/courier-unicode-version.m4
 %{__rm} -rf %{buildroot}%{_prefix}/include
 %{__rm} -rf %{buildroot}%{mandir}/man3
 # Compress the man pages
@@ -359,6 +360,7 @@ done
 %attr(755,root,root)                    %{_prefix}/bin/maildirmake
 %attr(755,root,root)                    %{_prefix}/bin/maildirkw
 %attr(755,root,root)                    %{_prefix}/bin/maildiracl
+%attr(755,root,root)                    %{_prefix}/bin/maildirwatch
 %attr(755,root,root)                    %{_prefix}/bin/deliverquota
 %attr(755,root,root)                    %{_prefix}/bin/couriertls
 %attr(755,root,root)                    %{_prefix}/bin/imapd
@@ -444,6 +446,7 @@ done
 %attr(0644,root,root) %{mandir}/man1/sharedindexinstall.1.gz
 %attr(0644,root,root) %{mandir}/man1/maildiracl.1.gz
 %attr(0644,root,root) %{mandir}/man1/maildirmake.1.gz
+%attr(0644,root,root) %{mandir}/man1/maildirwatch.1.gz
 %attr(0644,root,root) %{mandir}/man7/maildropgdbm.7.gz
 %attr(0644,root,root) %{mandir}/man7/maildropfilter.7.gz
 %attr(0644,root,root) %{mandir}/man7/maildropex.7.gz
@@ -503,8 +506,8 @@ done
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/reformail.html
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/html/reformime.html
 
-%{_libdir}/libcourier-unicode.so.4
-%{_libdir}/libcourier-unicode.so.4.1.0
+%{_libdir}/libcourier-unicode.so.7
+%{_libdir}/libcourier-unicode.so.7.0.0
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}

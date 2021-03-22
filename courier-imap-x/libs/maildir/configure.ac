@@ -8,6 +8,7 @@ AC_INIT(maildir, 0.11, [courier-maildrop@lists.sourceforge.net])
 >confdefs.h  # Kill PACKAGE_ macros
 
 AC_CONFIG_SRCDIR(maildirquota.c)
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR(../..)
 LPATH="$PATH:/usr/local/bin"
 AC_CANONICAL_SYSTEM

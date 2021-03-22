@@ -50,3 +50,27 @@ AC_MSG_ERROR([*** A compiler with C++11 Unicode support was not found])
 CXXFLAGS="$save_FLAGS"
 AC_LANG_POP([C++])
 ])
+
+AC_DEFUN([AX_COURIER_UNICODE_VERSION],[
+
+AC_MSG_CHECKING(courier-unicode library and version)
+
+AC_TRY_COMPILE([
+#include <courier-unicode.h>
+#ifndef COURIER_UNICODE_VERSION
+#define COURIER_UNICODE_VERSION 0
+#endif
+
+#if COURIER_UNICODE_VERSION < 210
+#error "courier-unicode 2.1 library is required"
+#endif
+
+],[],[],
+AC_MSG_ERROR([
+ERROR: The Courier Unicode Library 2.1 header files appear not to be installed.
+You may need to upgrade the library or install a separate development
+subpackage in addition to the main package.])
+)
+
+AC_MSG_RESULT([ok])
+])
