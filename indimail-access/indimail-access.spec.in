@@ -103,9 +103,6 @@ BuildRequires: perl
 BuildRequires: perl-generators
 BuildRequires: glibc-all-langpacks
 %endif
-%if 0%{?rhel_version} == 600 || %{defined centos_version} || %{defined centos_ver} || %{defined fedora_version} || %{defined sles_version} || %{defined suse_version}
-BuildRequires: gamin-devel
-%endif
 
 Requires: user(qmaill)
 Requires: group(nofiles)
