@@ -34,11 +34,13 @@ jobs:
         echo "workspace = $GITHUB_WORKSPACE"
         ls -l /home/runner/work
         echo ----
-        ls -l /home/runner/work/indimail-virtualdomains
+        ls -l /home/runner/work/_PiplineMapping
+        ls -l /home/runner/work/_actions
+        ls -l /home/runner/work/_temp
         mkdir ~/.ssh
         echo "${{secrets.sf_private_key}}" > ~/.private_key
         chmod 600 ~/.private_key
         echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
         tar cfz ~/procail_obs.tar.gz ~/*.tar.gz ~/*.spec ~/*.dsc
         # copy to /home/frs/project/indimail
-        scp -q -i ~/.private_key ~/procmail.tar.gz  "${{secrets.sf_user}}:/home/frs/project/indimail/github"
+        scp -q -i ~/.private_key ~/procmail_obs.tar.gz  "${{secrets.sf_user}}:/home/frs/project/indimail/github"
