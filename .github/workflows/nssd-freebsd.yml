@@ -11,6 +11,11 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/nssd-x/**'
+      - .github/workflows/nssd-freebsd.yml
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   testfreebsd:

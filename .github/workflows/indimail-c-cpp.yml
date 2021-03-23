@@ -12,6 +12,12 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/indimail-x/**'
+      - .github/workflows/indimail-c-cpp.yml
+      - '!**/indimail-x/debian/*'
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   build:

@@ -12,6 +12,12 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/bogofilter-wordlist-x/**'
+      - .github/workflows/bogofilter-wordlist-c-cpp.yml
+      - '!**/bogofilter-wordlist-x/debian/*'
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   build:

@@ -12,6 +12,12 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/procmail-x/**'
+      - .github/workflows/procmail-c-cpp.yml
+      - '!**/procmail-x/debian/*'
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   build:

@@ -11,6 +11,11 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/courier-imap-x/**'
+      - .github/workflows/courier-imap-freebsd.yml
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   testfreebsd:

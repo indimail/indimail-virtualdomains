@@ -11,6 +11,11 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/indimail-spamfilter-x/**'
+      - .github/workflows/indimail-spamfilter-obs.yml
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   build:

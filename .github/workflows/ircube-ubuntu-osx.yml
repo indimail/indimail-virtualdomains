@@ -12,6 +12,12 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/ircube-x/**'
+      - .github/workflows/ircube-ubuntu-osx.yml
+      - '!**/ircube-x/debian/*'
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   build:

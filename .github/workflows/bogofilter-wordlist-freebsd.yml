@@ -12,6 +12,12 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/bogofilter-wordlist-x/**'
+      - .github/workflows/bogofilter-wordlist-freebsd.yml
+      - '!**/bogofilter-wordlist-x/debian/*'
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   testfreebsd:

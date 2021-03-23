@@ -12,6 +12,12 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/ircube-x/**'
+      - .github/workflows/ircube-freebsd.yml
+      - '!**/ircube-x/debian/*'
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   testfreebsd:

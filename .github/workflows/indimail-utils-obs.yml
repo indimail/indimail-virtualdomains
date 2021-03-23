@@ -16,6 +16,16 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/altermime-x/**'
+      - '**/ripmime-x/**'
+      - '**/fortune-x/**'
+      - '**/mpack-x/**'
+      - '**/flash-x/**'
+      - '**/indimail-utils/**'
+      - .github/workflows/indimail-utils-obs.yml
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   build:

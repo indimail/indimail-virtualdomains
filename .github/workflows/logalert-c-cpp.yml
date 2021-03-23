@@ -12,6 +12,12 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/logalert-x/**'
+      - .github/workflows/logalert-c-cpp.yml
+      - '!**/logalert-x/debian/*'
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   build:

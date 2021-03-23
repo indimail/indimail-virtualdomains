@@ -11,6 +11,11 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/logalert-x/**'
+      - .github/workflows/logalert-obs.yml
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   build:

@@ -11,6 +11,11 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/iwebadmin-x/**'
+      - .github/workflows/iwebadmin-obs.yml
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   build:

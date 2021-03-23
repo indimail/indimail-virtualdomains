@@ -12,6 +12,12 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/indimail-spamfilter-x/**'
+      - .github/workflows/indimail-spamfilter-freebsd.yml
+      - '!**/indimail-spamfilter-x/debian/*'
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   testfreebsd:

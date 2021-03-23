@@ -12,6 +12,12 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/procmail-x/**'
+      - .github/workflows/procmail-freebsd.yml
+      - '!**/procmail-x/debian/*'
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   testfreebsd:

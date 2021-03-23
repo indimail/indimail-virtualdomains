@@ -11,6 +11,11 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/procmail-x/**'
+      - .github/workflows/procmail-obs.yml
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   build:
@@ -33,7 +38,7 @@ jobs:
       run: |
         mkdir ~/.ssh
         echo "${{secrets.sf_private_key}}" > ~/.private_key
-        chmod 600 ~/.ssh/id_ed25519
+        chmod 600 ~/.private_key
         echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
         #copy to /home/frs/project/indimail
         scp -q -i ~/.private_key *.tar.gz *.spec *.dsc "${{secrets.sf_user}}:/home/frs/project/indimail/github/procmail"

@@ -11,6 +11,11 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/fetchmail-x/**'
+      - .github/workflows/fetchmail-c-cpp.yml
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   build:

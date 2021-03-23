@@ -11,6 +11,11 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
+    paths:
+      - '**/pam-multi-x/**'
+      - .github/workflows/pam-multi-c-cpp.yml
+      - '!**/doc/*'
+      - '!**.md'
 
 jobs:
   build:
