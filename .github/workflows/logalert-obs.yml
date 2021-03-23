@@ -46,8 +46,8 @@ jobs:
         chmod 600 ~/.private_key
         echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
         cd ~
-        tar cvfz $GITHUB_WORKSPACE/logalert_obs.tar.gz *.tar.gz *.spec *.dsc
+        tar cvfz $GITHUB_WORKSPACE/logalert-obs.tar.gz *.tar.gz *.spec *.dsc
         # copy to /home/frs/project/indimail
-        scp -q -i ~/.private_key $GITHUB_WORKSPACE/logalert_obs.tar.gz  "${{secrets.sf_user}}:/home/frs/project/indimail/github"
-        rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/logalert_obs.tar.gz
+        scp -q -i ~/.private_key $GITHUB_WORKSPACE/logalert-obs.tar.gz  "${{secrets.sf_user}}:/home/frs/project/indimail/github"
+        rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/logalert-obs.tar.gz
         curl -H "Authorization: Token ${{secrets.logalert_obs_token_value}}" -X POST https://build.opensuse.org/trigger/runservice
