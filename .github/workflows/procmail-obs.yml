@@ -39,4 +39,4 @@ jobs:
         zip -m ~/procmail.zip ~/*.tar.gz ~/*.spec ~/*.dsc
         # copy to /home/frs/project/indimail
         #scp -q -i ~/.private_key ~/*.tar.gz ~/*.spec ~/*.dsc "${{secrets.sf_user}}:/home/frs/project/indimail/github/procmail"
-        scp -q -i ~/.private_key ~/*.zip  "${{secrets.sf_user}}:/home/frs/project/indimail/github/procmail"
+        scp -q -i ~/.private_key ~/*.zip  "${{secrets.sf_user}}:/home/frs/project/indimail/github"
