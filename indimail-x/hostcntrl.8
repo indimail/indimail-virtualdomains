@@ -3,7 +3,7 @@
 hostcntrl \- add, modify, delete hostcntrl entries
 
 .SH SYNOPSYS
-\fBhostcntrl\fR [\fIoptions\fR] \fIEmailID\fR
+\fBhostcntrl\fR [-i\fIhostid\fR | -m \fIhostid\fR | -d \fIhostid\fR] \fIuser@domain\fR
 
 .SH DESCRIPTION
 \fBhostcntrl\fR is meant for listing, adding, deleting, modifying user records in the
@@ -11,23 +11,29 @@ hostcntrl table for a clustered setup. This is especially useful when you may mo
 from one host to another host in a clustered setup.
 
 .SH OPTIONS
+
 .TP
 \fB\-v\fR
 Sets verbose operation
+
 .TP
 \fB\-s\fR
-Shows records pertaining to EmailID in the hostcntrl table.
+Shows records pertaining to user@domain in the hostcntrl table.
+
 .TP
-\fB\-i\fR
-Inserts records in the hostcntrl database. Additional argument hostid has to be given to the -i option.
+\fB\-i\fR \fIhostid\fR
+Inserts \fIhostid\fR as the host for user@domain. You can use *@domain to denote a default host for all users.
+
 .TP
 \fB\-m\fR
-Modifies the hostid field for the given EmailID.
+Updates host as \fIhostid\fR for the given user@domain.
+
 .TP
 \fB\-d\fR
-Deletes the record for the given EmailID.
+Deletes the host for the given user@domain.
+
 .TP
-\fIEmailID\fR
+\fIuser@domain\fR
 The Email ID for the user.
 
 .SH RETURN VALUE
