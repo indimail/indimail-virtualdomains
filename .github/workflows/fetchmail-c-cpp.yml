@@ -8,9 +8,6 @@ on:
       - .github/workflows/fetchmail-c-cpp.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   build:

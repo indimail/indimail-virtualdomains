@@ -12,9 +12,6 @@ on:
       - .github/workflows/indimail-utils-freebsd.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   testfreebsd:

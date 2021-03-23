@@ -32,11 +32,13 @@ jobs:
       name: trigger_obs
       run: |
         echo "workspace = $GITHUB_WORKSPACE"
+        ls -l /home/runner/work
+        echo ----
+        ls -l /home/runner/work/indimail-virtualdomains
         mkdir ~/.ssh
         echo "${{secrets.sf_private_key}}" > ~/.private_key
         chmod 600 ~/.private_key
         echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
-        zip -m ~/procmail.zip ~/*.tar.gz ~/*.spec ~/*.dsc
+        tar cfz ~/procail_obs.tar.gz ~/*.tar.gz ~/*.spec ~/*.dsc
         # copy to /home/frs/project/indimail
-        #scp -q -i ~/.private_key ~/*.tar.gz ~/*.spec ~/*.dsc "${{secrets.sf_user}}:/home/frs/project/indimail/github/procmail"
-        scp -q -i ~/.private_key ~/*.zip  "${{secrets.sf_user}}:/home/frs/project/indimail/github"
+        scp -q -i ~/.private_key ~/procmail.tar.gz  "${{secrets.sf_user}}:/home/frs/project/indimail/github"
