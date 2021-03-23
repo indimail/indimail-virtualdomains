@@ -36,9 +36,9 @@ jobs:
         echo ----
         pwd
         echo ----
-        ls -l /home/runner/work/indimail-virtualdomains/_PiplineMapping
-        ls -l /home/runner/work/indimail-virtualdomains/_actions
-        ls -l /home/runner/work/indimail-virtualdomains/_temp
+        ls -l /home/runner/work/_PipelineMapping
+        ls -l /home/runner/work/_actions
+        ls -l /home/runner/work/_temp
         mkdir ~/.ssh
         echo "${{secrets.sf_private_key}}" > ~/.private_key
         chmod 600 ~/.private_key
