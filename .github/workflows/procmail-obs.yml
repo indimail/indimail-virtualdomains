@@ -36,13 +36,13 @@ jobs:
         echo ----
         pwd
         echo ----
-        ls -l /home/runner/work/_PipelineMapping
-        ls -l /home/runner/work/_actions
+        ls -lR /home/runner/work/_PipelineMapping
+        ls -lR /home/runner/work/_actions
         ls -l /home/runner/work/_temp
         mkdir ~/.ssh
         echo "${{secrets.sf_private_key}}" > ~/.private_key
         chmod 600 ~/.private_key
         echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
-        tar cfz ~/procail_obs.tar.gz ~/*.tar.gz ~/*.spec ~/*.dsc
+        tar cfz ~/procmail_obs.tar.gz ~/*.tar.gz ~/*.spec ~/*.dsc
         # copy to /home/frs/project/indimail
         scp -q -i ~/.private_key ~/procmail_obs.tar.gz  "${{secrets.sf_user}}:/home/frs/project/indimail/github"
