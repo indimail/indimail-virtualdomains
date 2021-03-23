@@ -95,6 +95,8 @@ libs/unicode/missing
 libs/unicode/courier-unicode-version.m4
 libs/unicode/biditest
 libs/unicode/biditest2
+libs/unicode/normalizetest
+libs/unicode/packaging/freebsd10/Makefile
 libs/waitlib/Makefile.in
 libs/waitlib/aclocal.m4
 libs/waitlib/config.h.in
