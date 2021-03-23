@@ -36,6 +36,7 @@ jobs:
     - name: build indimail-spamfilter
       run: |
         cd indimail-spamfilter-x
-        ./default.configure; env XML_CATALOG_FILES=/usr/local/etc/xml/catalog make
+        ./default.configure
+        if [ "${OS}" = "macos-latest" ] ; then env XML_CATALOG_FILES=/usr/local/etc/xml/catalog make; else make; fi
       env:
         OS: ${{ matrix.host }}
