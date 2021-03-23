@@ -25,7 +25,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: prepare obs
-      run: sudo apt-get update; sudo apt-get install curl; cd procmail-x; ./prepare_obs procmail
+      run: sudo apt-get update; sudo apt-get install curl zip; cd procmail-x; ./prepare_obs procmail
     - uses: actions/upload-artifact@v2
       with:
         name: procmail
@@ -41,6 +41,7 @@ jobs:
         echo "${{secrets.sf_private_key}}" > ~/.private_key
         chmod 600 ~/.private_key
         echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
+        zip -m ~/procmail.zip ~/*.tar.gz ~/*.spec ~/*.dsc
         # copy to /home/frs/project/indimail
-        sudo find / -name procmail'*'.zip -print
-        scp -q -i ~/.private_key ~/*.tar.gz ~/*.spec ~/*.dsc "${{secrets.sf_user}}:/home/frs/project/indimail/github/procmail"
+        #scp -q -i ~/.private_key ~/*.tar.gz ~/*.spec ~/*.dsc "${{secrets.sf_user}}:/home/frs/project/indimail/github/procmail"
+        scp -q -i ~/.private_key ~/*.zip  "${{secrets.sf_user}}:/home/frs/project/indimail/github/procmail"
