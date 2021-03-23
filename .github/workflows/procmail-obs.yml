@@ -37,4 +37,3 @@ jobs:
         echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
         #copy to /home/frs/project/indimail
         scp -q -i ~/.private_key *.tar.gz *.spec *.dsc "${{secrets.sf_user}}:/home/frs/project/indimail/github/procmail"
-        #curl -H "Authorization: Token ${{secrets.procmail_obs_token_value}}" -X POST https://build.opensuse.org/trigger/runservice
