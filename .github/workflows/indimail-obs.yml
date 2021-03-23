@@ -11,11 +11,6 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
-    paths:
-      - '**/indimail-x/**'
-      - .github/workflows/indimail-obs.yml
-      - '!**/doc/*'
-      - '!**.md'
 
 jobs:
   build:

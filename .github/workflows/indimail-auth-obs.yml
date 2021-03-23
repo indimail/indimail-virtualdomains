@@ -12,12 +12,6 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
-    paths:
-      - '**/nssd-x/**'
-      - '**/pam-multi-x/**'
-      - .github/workflows/indimail-auth-obs.yml
-      - '!**/doc/*'
-      - '!**.md'
 
 jobs:
   build:

@@ -12,12 +12,6 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
-    paths:
-      - '**/indium-x/**'
-      - .github/workflows/indium-freebsd.yml
-      - '!**/indium-x/debian/*'
-      - '!**/doc/*'
-      - '!**.md'
 
 jobs:
   testfreebsd:

@@ -11,11 +11,6 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
-    paths:
-      - '**/fetchmail-x/**'
-      - .github/workflows/fetchmail-freebsd.yml
-      - '!**/doc/*'
-      - '!**.md'
 
 jobs:
   testfreebsd:

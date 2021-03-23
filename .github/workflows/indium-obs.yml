@@ -11,11 +11,6 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
-    paths:
-      - '**/indium-x/**'
-      - .github/workflows/indium-obs.yml
-      - '!**/doc/*'
-      - '!**.md'
 
 jobs:
   build:

@@ -15,15 +15,6 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
-    paths:
-      - '**/altermime-x/**'
-      - '**/ripmime-x/**'
-      - '**/fortune-x/**'
-      - '**/mpack-x/**'
-      - '**/flash-x/**'
-      - .github/workflows/indimail-utils-freebsd.yml
-      - '!**/doc/*'
-      - '!**.md'
 
 jobs:
   testfreebsd:

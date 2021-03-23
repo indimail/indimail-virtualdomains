@@ -11,11 +11,6 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
-    paths:
-      - '**/nssd-x/**'
-      - .github/workflows/nssd-c-cpp.yml
-      - '!**/doc/*'
-      - '!**.md'
 
 jobs:
   build:

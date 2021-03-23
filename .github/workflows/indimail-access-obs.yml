@@ -13,13 +13,6 @@ on:
   pull_request:
     branches: [ master ]
     types: [ synchronize ]
-    paths:
-      - '**/courier-imap-x/**'
-      - '**/fetchmail-x/**'
-      - '**/indimail-auth/**'
-      - .github/workflows/indimail-access-obs.yml
-      - '!**/doc/*'
-      - '!**.md'
 
 jobs:
   build:
