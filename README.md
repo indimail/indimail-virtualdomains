@@ -861,9 +861,7 @@ Currently, the list of supported distributions for IndiMail is
     * Red Hat
           o Fedora 33
           o Fedora 32
-          o Red Hat Enterprise Linux 6
           o Red Hat Enterprise Linux 7
-          o CentOS 6
           o CentOS 7
           o CentOS 8
 
