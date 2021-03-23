@@ -36,6 +36,10 @@ jobs:
     - shell: bash
       name: trigger_obs
       run: |
+        echo "listing of home"
+        ls -lR ~
+        echo "listing of workplace"
+        ls -l $GITHUB_WORKSPACE
         mkdir ~/.ssh
         echo "${{secrets.sf_private_key}}" > ~/.private_key
         chmod 600 ~/.private_key
