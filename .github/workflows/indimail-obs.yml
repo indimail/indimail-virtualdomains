@@ -41,4 +41,13 @@ jobs:
     - shell: bash
       name: trigger_obs
       run: |
+        mkdir ~/.ssh
+        echo "${{secrets.sf_private_key}}" > ~/.private_key
+        chmod 600 ~/.private_key
+        echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
+        cd ~
+        tar cvfz $GITHUB_WORKSPACE/indimail-obs.tar.gz *.tar.gz *.spec *.dsc
+        # copy to /home/frs/project/indimail
+        scp -q -i ~/.private_key $GITHUB_WORKSPACE/indimail-obs.tar.gz  "${{secrets.sf_user}}:/home/frs/project/indimail/github"
+        rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/indimail-obs.tar.gz
         curl -H "Authorization: Token ${{secrets.indimail_obs_token_value}}" -X POST https://build.opensuse.org/trigger/runservice
