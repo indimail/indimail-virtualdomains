@@ -1,0 +1,7 @@
+on: 
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'OBS Token'     
+        required: true
+        default: "${{secrets.indimail_obs_token_value}}"
