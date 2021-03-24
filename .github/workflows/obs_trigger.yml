@@ -1,7 +1,14 @@
 on: 
   workflow_dispatch:
     inputs:
-      logLevel:
+      obsToken:
         description: 'OBS Token'     
         required: true
         default: "${{secrets.indimail_obs_token_value}}"
+
+jobs:
+  obsTrigger:
+    runs-on: ubuntu-latest
+    steps:
+      run: |
+        curl -H "Authorization: Token ${{ github.event.inputs.obsToken }}" -X POST https://build.opensuse.org/trigger/runservice
