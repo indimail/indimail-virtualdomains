@@ -2,15 +2,11 @@ name: pam-multi FreeBSD CI
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/pam-multi-x/**'
       - .github/workflows/pam-multi-freebsd.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   testfreebsd:

@@ -2,7 +2,6 @@ name: indimail-utils FreeBSD CI
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/altermime-x/**'
       - '**/ripmime-x/**'
@@ -12,9 +11,6 @@ on:
       - .github/workflows/indimail-utils-freebsd.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   testfreebsd:

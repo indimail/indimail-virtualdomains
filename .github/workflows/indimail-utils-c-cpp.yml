@@ -2,7 +2,6 @@ name: indimail-utils Ubuntu, Mac OSX CI
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/altermime-x/**'
       - '**/ripmime-x/**'
@@ -12,9 +11,6 @@ on:
       - .github/workflows/indimail-utils-c-cpp.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   build:

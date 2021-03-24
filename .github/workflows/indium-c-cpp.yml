@@ -2,16 +2,12 @@ name: indium Ubuntu CI
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/indium-x/**'
       - .github/workflows/indium-c-cpp.yml
       - '!**/indium-x/debian/*'
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   build:

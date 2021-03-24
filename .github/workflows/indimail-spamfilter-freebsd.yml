@@ -2,16 +2,12 @@ name: indimail-spamfilter FreeBSD CI
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/indimail-spamfilter-x/**'
       - .github/workflows/indimail-spamfilter-freebsd.yml
       - '!**/indimail-spamfilter-x/debian/*'
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   testfreebsd:

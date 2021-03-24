@@ -2,16 +2,12 @@ name: indium FreeBSD CI
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/indium-x/**'
       - .github/workflows/indium-freebsd.yml
       - '!**/indium-x/debian/*'
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   testfreebsd:

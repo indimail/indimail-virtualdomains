@@ -2,15 +2,11 @@ name: iwebadmin obs trigger
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/iwebadmin-x/**'
       - .github/workflows/iwebadmin-obs.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   build:
@@ -26,7 +22,7 @@ jobs:
 
     - name: install_qmail
       run: |
-        sudo apt-get update; sudo apt-get install curl libssl-dev libmysqlclient-dev libncurses5-dev
+        sudo apt-get update; sudo apt-get install libssl-dev libmysqlclient-dev libncurses5-dev
         cd libqmail; ./default.configure; make; sudo make install-strip
     - name: build_virtualdomains
       run: cd indimail-x; ./default.configure; sudo make install-strip
@@ -42,4 +38,12 @@ jobs:
     - shell: bash
       name: trigger_obs
       run: |
-        curl -H "Authorization: Token ${{secrets.indimail_auth_obs_token_value}}" -X POST https://build.opensuse.org/trigger/runservice
+        mkdir ~/.ssh
+        echo "${{secrets.sf_private_key}}" > ~/.private_key
+        chmod 600 ~/.private_key
+        echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
+        cd ~
+        tar cvfz $GITHUB_WORKSPACE/iwebadmin-obs.tar.gz *.tar.gz *.spec *.dsc
+        # copy to /home/frs/project/indimail
+        scp -q -i ~/.private_key $GITHUB_WORKSPACE/iwebadmin-obs.tar.gz  "${{secrets.sf_user}}:${{secrets.sf_path}}"
+        rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/iwebadmin-obs.tar.gz

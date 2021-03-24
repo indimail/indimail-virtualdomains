@@ -2,15 +2,11 @@ name: nssd FreeBSD CI
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/nssd-x/**'
       - .github/workflows/nssd-freebsd.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   testfreebsd:

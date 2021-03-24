@@ -2,16 +2,12 @@ name: ircube FreeBSD CI
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/ircube-x/**'
       - .github/workflows/ircube-freebsd.yml
       - '!**/ircube-x/debian/*'
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   testfreebsd:

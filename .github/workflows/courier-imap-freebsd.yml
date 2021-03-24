@@ -2,15 +2,11 @@ name: courier-imap FreeBSD CI
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/courier-imap-x/**'
       - .github/workflows/courier-imap-freebsd.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   testfreebsd:

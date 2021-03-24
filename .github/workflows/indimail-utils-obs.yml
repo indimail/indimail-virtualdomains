@@ -2,7 +2,6 @@ name: indimail-utils obs trigger
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/altermime-x/**'
       - '**/ripmime-x/**'
@@ -13,9 +12,6 @@ on:
       - .github/workflows/indimail-utils-obs.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   build:
@@ -25,7 +21,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: prepare obs
-      run: sudo apt-get update; sudo apt-get install curl libncurses5-dev; cd indimail-utils; ./prepare_obs indimail-utils
+      run: sudo apt-get update; sudo apt-get install libncurses5-dev; cd indimail-utils; ./prepare_obs indimail-utils
     - uses: actions/upload-artifact@v2
       with:
         name: indimail-utils
@@ -36,4 +32,12 @@ jobs:
     - shell: bash
       name: trigger_obs
       run: |
-        curl -H "Authorization: Token ${{secrets.indimail_utils_obs_token_value}}" -X POST https://build.opensuse.org/trigger/runservice
+        mkdir ~/.ssh
+        echo "${{secrets.sf_private_key}}" > ~/.private_key
+        chmod 600 ~/.private_key
+        echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
+        cd ~
+        tar cvfz $GITHUB_WORKSPACE/indimail-utils-obs.tar.gz *.tar.gz *.spec *.dsc
+        # copy to /home/frs/project/indimail
+        scp -q -i ~/.private_key $GITHUB_WORKSPACE/indimail-utils-obs.tar.gz  "${{secrets.sf_user}}:${{secrets.sf_path}}"
+        rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/indimail-utils-obs.tar.gz

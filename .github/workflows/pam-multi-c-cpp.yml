@@ -2,15 +2,11 @@ name: pam-multi Ubuntu, Mac OSX CI
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/pam-multi-x/**'
       - .github/workflows/pam-multi-c-cpp.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   build:
