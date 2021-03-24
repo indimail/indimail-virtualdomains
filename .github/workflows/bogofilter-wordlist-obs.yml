@@ -33,6 +33,6 @@ jobs:
         echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
         cd ~
         tar cvfz $GITHUB_WORKSPACE/bogofilter-wordlist-obs.tar.gz *.tar.gz *.spec *.dsc
-        # copy to sf_path
-        scp -q -i ~/.private_key $GITHUB_WORKSPACE/bogofilter-wordlist-obs.tar.gz  "${{secrets.sf_user}}:${{secrets.sf_path}}"
+        # copy to sf_upload_path
+        scp -q -i ~/.private_key $GITHUB_WORKSPACE/bogofilter-wordlist-obs.tar.gz  "${{secrets.sf_user}}:${{secrets.sf_upload_path}}"
         rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/bogofilter-wordlist-obs.tar.gz
