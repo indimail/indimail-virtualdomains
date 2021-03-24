@@ -2,7 +2,6 @@ name: ircube FreeBSD CI
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/ircube-x/**'
       - .github/workflows/ircube-freebsd.yml

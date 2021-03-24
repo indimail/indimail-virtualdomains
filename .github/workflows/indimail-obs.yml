@@ -2,15 +2,11 @@ name: indimail obs trigger
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/indimail-x/**'
       - .github/workflows/indimail-obs.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   build:

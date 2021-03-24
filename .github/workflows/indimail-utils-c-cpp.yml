@@ -2,7 +2,6 @@ name: indimail-utils Ubuntu, Mac OSX CI
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/altermime-x/**'
       - '**/ripmime-x/**'

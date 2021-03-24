@@ -2,7 +2,6 @@ name: nssd Ubuntu CI
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/nssd-x/**'
       - .github/workflows/nssd-c-cpp.yml

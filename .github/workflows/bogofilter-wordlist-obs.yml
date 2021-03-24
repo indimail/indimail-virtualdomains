@@ -2,15 +2,11 @@ name: bogofilter-wordlist obs trigger
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/bogofilter-wordlist-x/**'
       - .github/workflows/bogofilter-wordlist-obs.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   build:

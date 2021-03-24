@@ -2,15 +2,11 @@ name: indium obs trigger
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/indium-x/**'
       - .github/workflows/indium-obs.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   build:

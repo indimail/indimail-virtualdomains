@@ -2,15 +2,11 @@ name: ircube obs trigger
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/ircube-x/**'
       - .github/workflows/ircube-obs.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   build:

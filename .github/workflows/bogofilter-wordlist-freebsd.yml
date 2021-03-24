@@ -2,7 +2,6 @@ name: bogofilter-wordlist FreeBSD CI
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/bogofilter-wordlist-x/**'
       - .github/workflows/bogofilter-wordlist-freebsd.yml

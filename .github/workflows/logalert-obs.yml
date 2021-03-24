@@ -2,15 +2,11 @@ name: logalert obs trigger
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/logalert-x/**'
       - .github/workflows/logalert-obs.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   build:

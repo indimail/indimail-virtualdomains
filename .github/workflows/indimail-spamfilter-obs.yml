@@ -2,15 +2,11 @@ name: indimail-spamfilter obs trigger
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/indimail-spamfilter-x/**'
       - .github/workflows/indimail-spamfilter-obs.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   build:

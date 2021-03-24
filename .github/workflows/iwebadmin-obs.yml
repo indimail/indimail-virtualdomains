@@ -2,15 +2,11 @@ name: iwebadmin obs trigger
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/iwebadmin-x/**'
       - .github/workflows/iwebadmin-obs.yml
       - '!**/doc/*'
       - '!**.md'
-  pull_request:
-    branches: [ master ]
-    types: [ synchronize ]
 
 jobs:
   build:

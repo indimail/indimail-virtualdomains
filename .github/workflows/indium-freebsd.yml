@@ -2,7 +2,6 @@ name: indium FreeBSD CI
 
 on:
   push:
-    branches: [ master ]
     paths:
       - '**/indium-x/**'
       - .github/workflows/indium-freebsd.yml
