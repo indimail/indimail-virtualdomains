@@ -12,7 +12,7 @@ on:
         # Friendly description to be shown in the UI instead of 'name'
         description: 'OBS Token'
         # Default value if no value is explicitly provided
-        default: "${{secrets.indimail_obs_token_value}}"
+        default:
         # Input has to be provided for the workflow to run
         required: true
 
