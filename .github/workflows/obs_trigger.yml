@@ -8,7 +8,9 @@ on:
 
 jobs:
   obsTrigger:
+    name: Run OBS trigger
     runs-on: ubuntu-latest
     steps:
-    - run: |
-        curl -H "Authorization: Token ${{ github.event.inputs.obsToken }}" -X POST https://build.opensuse.org/trigger/runservice
+      - name: trigger runservice
+        run: |
+          curl -H "Authorization: Token ${{ github.event.inputs.obsToken }}" -X POST https://build.opensuse.org/trigger/runservice
