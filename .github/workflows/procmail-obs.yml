@@ -20,7 +20,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: prepare obs
-      run: sudo apt-get update; sudo apt-get install curl zip; cd procmail-x; ./prepare_obs procmail
+      run: cd procmail-x; ./prepare_obs procmail
     - uses: actions/upload-artifact@v2
       with:
         name: procmail
@@ -38,6 +38,5 @@ jobs:
         cd ~
         tar cvfz $GITHUB_WORKSPACE/procmail-obs.tar.gz *.tar.gz *.spec *.dsc
         # copy to /home/frs/project/indimail
-        scp -q -i ~/.private_key $GITHUB_WORKSPACE/procmail-obs.tar.gz  "${{secrets.sf_user}}:/home/frs/project/indimail/github"
+        scp -q -i ~/.private_key $GITHUB_WORKSPACE/procmail-obs.tar.gz  "${{secrets.sf_user}}:${{secrets.sf_path}}"
         rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/procmail-obs.tar.gz
-        curl -H "Authorization: Token ${{secrets.procmail_obs_token_value}}" -X POST https://build.opensuse.org/trigger/runservice

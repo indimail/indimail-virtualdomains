@@ -27,7 +27,7 @@ jobs:
 
     - name: install_qmail
       run: |
-        sudo apt-get update; sudo apt-get install curl libssl-dev libpam0g-dev libmysqlclient-dev
+        sudo apt-get update; sudo apt-get install libssl-dev libpam0g-dev libmysqlclient-dev
         cd libqmail; ./default.configure; make; sudo make install-strip
     - name: prepare obs
       run: |
@@ -49,6 +49,5 @@ jobs:
         cd ~
         tar cvfz $GITHUB_WORKSPACE/indimail-auth-obs.tar.gz *.tar.gz *.spec *.dsc
         # copy to /home/frs/project/indimail
-        scp -q -i ~/.private_key $GITHUB_WORKSPACE/indimail-auth-obs.tar.gz  "${{secrets.sf_user}}:/home/frs/project/indimail/github"
+        scp -q -i ~/.private_key $GITHUB_WORKSPACE/indimail-auth-obs.tar.gz  "${{secrets.sf_user}}:${{secrets.sf_path}}"
         rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/indimail-auth-obs.tar.gz
-        curl -H "Authorization: Token ${{secrets.indimail_auth_obs_token_value}}" -X POST https://build.opensuse.org/trigger/runservice

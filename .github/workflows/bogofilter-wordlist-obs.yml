@@ -20,7 +20,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: prepare obs
-      run: sudo apt-get update; sudo apt-get install curl; cd bogofilter-wordlist-x; ./prepare_obs bogofilter-wordlist
+      run: cd bogofilter-wordlist-x; ./prepare_obs bogofilter-wordlist
     - uses: actions/upload-artifact@v2
       with:
         name: bogofilter-wordlist
@@ -37,7 +37,6 @@ jobs:
         echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
         cd ~
         tar cvfz $GITHUB_WORKSPACE/bogofilter-wordlist-obs.tar.gz *.tar.gz *.spec *.dsc
-        # copy to /home/frs/project/indimail
-        scp -q -i ~/.private_key $GITHUB_WORKSPACE/bogofilter-wordlist-obs.tar.gz  "${{secrets.sf_user}}:/home/frs/project/indimail/github"
+        # copy to sf_path
+        scp -q -i ~/.private_key $GITHUB_WORKSPACE/bogofilter-wordlist-obs.tar.gz  "${{secrets.sf_user}}:${{secrets.sf_path}}"
         rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/bogofilter-wordlist-obs.tar.gz
-        #curl -H "Authorization: Token ${{secrets.bogofilter_wordlist_obs_token_value}}" -X POST https://build.opensuse.org/trigger/runservice
