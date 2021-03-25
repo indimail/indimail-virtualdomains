@@ -5,6 +5,7 @@ on:
     paths:
       - '**/indimail-spamfilter-x/**'
       - '**/prepare_obs'
+      - '**/catChangeLog'
       - .github/workflows/indimail-spamfilter-obs.yml
       - '!**/doc/*'
       - '!**.md'
@@ -34,8 +35,9 @@ jobs:
         echo "${{secrets.sf_private_key}}" > ~/.private_key
         chmod 600 ~/.private_key
         echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
-        cd ~
-        tar cvfz $GITHUB_WORKSPACE/indimail-spamfilter-obs.tar.gz *.tar.gz *.spec *.dsc
+        cd ~/stage
+        tar cvfz $GITHUB_WORKSPACE/indimail-spamfilter-obs.tar.gz *
         # copy to /home/frs/project/indimail
         scp -q -i ~/.private_key $GITHUB_WORKSPACE/indimail-spamfilter-obs.tar.gz  "${{secrets.sf_user}}:${{secrets.sf_upload_path}}"
         rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/indimail-spamfilter-obs.tar.gz
+        rm -rf ~/stage
