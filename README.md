@@ -401,8 +401,6 @@ $ sudo port install pcre db48 gdbm libidn2
 $ sudo brew install pcre berkeley-db gdbm libidn
 ```
 
-Without libidn/libidn2, indimail-mta will get built without [Internationalized Email Addresses (RFC6531)](https://tools.ietf.org/html/rfc6531)
-
 (check version in indimail-virtualdomains/courier-imap-x/conf-version)
 
 ### Build fetchmail
