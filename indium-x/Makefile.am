@@ -61,6 +61,7 @@ edit = sed \
 	-e 's,@defaultdomain\@,$(defaultdomain),g' \
 	-e 's,@version\@,$(version),g' \
 	-e "s|@release\@|"`cat conf-release`"|g" \
+	-e 's|@email\@|'"`cat conf-email`"'|g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 pwhelper.lo: config.h

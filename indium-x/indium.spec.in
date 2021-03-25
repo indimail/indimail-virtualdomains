@@ -39,6 +39,9 @@
 %if %{undefined nodebug}
 %global buildsubdir        ""
 %endif
+%if %build_on_obs == 1
+%global packager @email@
+%endif
 
 Summary: TCL/TK based Administration GUI for IndiMail
 Name: indium

@@ -2,7 +2,6 @@
 AUTOMAKE_OPTIONS = 
 
 COFLAGS=-z+05:30
-email := $(shell cat conf-email)
 # search path for m4 macros
 ACLOCAL_AMFLAGS = -I m4
 
@@ -171,7 +170,7 @@ edit = sed \
 	-e 's}@version\@}$(VERSION)}g' \
 	-e 's}@spamfilter_version\@}$(spamfilter_version)}g' \
 	-e "s|@release\@|"`cat conf-release`"|g" \
-	-e "s,@email\@,"'$(email)'",g" \
+	-e 's|@email\@|'"`cat conf-email`"'|g' \
 	-e 's}@VERSION\@}$(VERSION)}g' \
 	-e 's}@DESTDIR\@}$(DESTDIR)}g' \
 	-e 's}@HOST\@}$(host)}g' \

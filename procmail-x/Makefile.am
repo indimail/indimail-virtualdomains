@@ -1,6 +1,5 @@
 ACLOCAL_AMFLAGS = -I m4
 COFLAGS=-z+05:30
-email := $(shell cat conf-email)
 RM	= /bin/rm -f
 DEVNULL = /dev/null
 DIST_COMMON=COPYING AUTHORS
@@ -79,6 +78,7 @@ edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
 	-e 's,@version\@,$(VERSION),g' \
 	-e "s|@release\@|"`cat conf-release`"|g" \
+	-e 's|@email\@|'"`cat conf-email`"'|g' \
 	-e 's,@VERSION\@,$(VERSION),g' \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
 	-e 's,@HOST\@,$(host),g' \

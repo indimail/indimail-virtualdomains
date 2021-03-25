@@ -1,8 +1,0 @@
-indium (@version@-@release@) unstable; urgency=low
-
-  * debian subdir for debian builds
-  * FHS version
-  * upgraded to secpanel 0.6.0
-  * Add AC_PROG_CC_C99 to configure
-  * RPM/debian Build Fixes
-  * added create_rpm, create_debian scripts

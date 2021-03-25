@@ -1,7 +1,6 @@
 @SET_MAKE@
 ACLOCAL_AMFLAGS = -I m4
 version=@VERSION@
-email := $(shell cat conf-email)
 COFLAGS=-z+05:30
 DEFS = @DEFS@ -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-unused-function -Wno-return-type
 INSTALL_PROGRAM = ${INSTALL}          -c
@@ -30,7 +29,7 @@ AM_YFLAGS  = -d
 edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e "s,@release\@,"`cat conf-release`",g" \
-	-e "s,@email\@,"'$(email)'",g" \
+	-e 's|@email\@|'"`cat conf-email`"'|g' \
 	-e 's,@VERSION\@,$(VERSION),g' \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
 	-e 's,@mandir\@,$(mandir),g' \

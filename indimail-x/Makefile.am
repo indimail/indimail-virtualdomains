@@ -1,7 +1,6 @@
 SUBDIRS=eps-1.2
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
-email=$(shell cat conf-email)
 
 DEFS=@DEFS@ -Dlint -fno-strict-aliasing -I. -I@prefix@/include/qmail -Ieps-1.2 -I@mysql_incdir@
 
@@ -730,7 +729,7 @@ edit = sed \
 	-e 's}@PACKAGE_VERSION\@}$(PACKAGE_VERSION)}g' \
 	-e 's}@version\@}$(VERSION)}g' \
 	-e "s|@release\@|"`cat conf-release`"|g" \
-	-e "s,@email\@,"'$(email)'",g" \
+	-e 's|@email\@|'"`cat conf-email`"'|g' \
 	-e 's}@pkgconfigdir\@}$(pkgconfigdir)}g' \
 	-e 's}@VERSION\@}$(VERSION)}g' \
 	-e 's}@DESTDIR\@}$(DESTDIR)}g' \

@@ -1,4 +1,0 @@
-iwebadmin (@version@-@release@) unstable; urgency=low
-
-  * Changes for making code github action, added workflow for CI
-  * compile without using mysql

@@ -22,6 +22,9 @@
 %if %{defined nodebug}
 %global debug_package %{nil}
 %endif
+%if %build_on_obs == 1
+%global packager @email@
+%endif
 
 %define _prefix            @prefix@
 %global mandir             @mandir@

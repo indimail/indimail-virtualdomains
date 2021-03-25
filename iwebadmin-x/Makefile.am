@@ -4,7 +4,6 @@ ACLOCAL_AMFLAGS=-I m4
 htmllibdir=@htmllibdir@
 htmldir=@htmldir@
 imagedir=@imagedir@
-email := $(shell cat conf-email)
 
 version=@VERSION@
 
@@ -47,6 +46,7 @@ edit = sed \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@version\@,$(version),g' \
 	-e "s|@release\@|"`cat conf-release`"|g" \
+	-e 's|@email\@|'"`cat conf-email`"'|g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 iwebadmin.o: config.h iwebadmin.h 

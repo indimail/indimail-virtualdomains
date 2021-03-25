@@ -1,6 +1,0 @@
-indimail-spamfilter (@version@-@release@) unstable; urgency=medium
-
-  * New package bogofilter
-  * upgraded bogofilter version to 1.2.5
-  * Add AC_PROG_CC_C99 to configure
-  * added debuginfo packages

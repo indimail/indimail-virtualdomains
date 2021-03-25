@@ -2,7 +2,6 @@
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
 version=@VERSION@
-email := $(shell cat conf-email)
 
 noinst_DATA = ircube.spec ircube.changes
 
@@ -13,7 +12,7 @@ edit = sed \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@version\@,$(version),g' \
 	-e "s|@release\@|"`cat conf-release`"|g" \
-	-e "s,@email\@,"'$(email)'",g" \
+	-e 's|@email\@|'"`cat conf-email`"'|g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 install-data-hook: 

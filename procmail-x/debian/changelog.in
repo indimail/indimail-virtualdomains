@@ -1,3 +1,0 @@
-procmail (@version@-@release@) stable; urgency=low
-
-  * debian subdir for debian builds
