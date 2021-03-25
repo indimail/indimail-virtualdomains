@@ -96,7 +96,7 @@ prepare_artifacts()
 
   if [ -f Makefile ] ; then
     make clean >/dev/null
-	find . -type d \( -name autom4te.cache -o -name .deps \) -exec /bin/rm -rf {} +
+	find . -type d \( -name autom4te.cache -o -name .deps \) -exec /bin/rm -rf {} + || true
   fi
 
   cp -rpf . $stage/$pkg_name-$ver
