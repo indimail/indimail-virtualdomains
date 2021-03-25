@@ -139,6 +139,7 @@ if [ -f $name.packages ] ; then
   fi
   mkdir -p $HOME/stage
   echo "Preparing $name-$ver"
+  cp -rp ../catChangeLog $HOME/stage # for spec file, changes, debian/changelog to get built
   cp -rp . $HOME/stage/$name-$ver
   cd $HOME/stage/$name-$ver
 
@@ -182,7 +183,7 @@ if [ -f $name.packages ] ; then
   fi
   cd $SAVE
   # do cleanup
-  /bin/rm -rf $HOME/stage/$name-$ver
+  /bin/rm -rf $HOME/stage/$name-$ver $HOME/stage/catChangeLog
   for pkg_dir in `cat $name.packages`
   do
     real_name=$(basename $pkg_dir)
