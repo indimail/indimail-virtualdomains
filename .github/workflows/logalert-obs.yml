@@ -32,10 +32,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: logalert
-        path: |
-          ~/*.tar.gz
-          ~/*.spec
-          ~/*.dsc
+        path: ~/stage
     - shell: bash
       name: trigger_obs
       run: |

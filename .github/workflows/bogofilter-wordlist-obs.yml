@@ -22,10 +22,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: bogofilter-wordlist
-        path: |
-          ~/*.tar.gz
-          ~/*.spec
-          ~/*.dsc
+        path: ~/stage
     - shell: bash
       name: trigger_obs
       run: |
