@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - '**/indimail-spamfilter-x/**'
+      - '**/prepare_obs'
       - .github/workflows/indimail-spamfilter-obs.yml
       - '!**/doc/*'
       - '!**.md'
