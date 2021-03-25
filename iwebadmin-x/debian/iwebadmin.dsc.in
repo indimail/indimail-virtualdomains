@@ -3,7 +3,7 @@ Source: iwebadmin
 Binary: iwebadmin
 Architecture: any
 Version: @version@-@release@
-Maintainer: Manvendra Bhangui <iwebadmin@indimail.org>
+Maintainer: @email@
 Homepage: http://indimail.sourceforge.net
 Section: Misc
 Priority: extra

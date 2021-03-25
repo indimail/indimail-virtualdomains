@@ -23,7 +23,7 @@
 %endif
 
 %if %build_on_obs == 1
-%global packager Manvendra Bhangui <manvendra@indimail.org>
+%global packager @email@
 %global dist redhat
 %global disttag rh
 %endif

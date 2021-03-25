@@ -3,6 +3,7 @@ mandir=/usr/share/man
 prefix=/usr
 version=$(shell cat ../conf-version)
 release=$(shell cat ../conf-release)
+email=$(shell cat ../conf-email)
 #
 
 all: rules debian.tar.gz dummy.tar.gz  \
@@ -16,16 +17,20 @@ edit = sed \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
+	-e 's,@email\@,$(email),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 rules: rules.in Makefile
 	$(edit) $@.in > $@; chmod +x $@;
 bogofilter-wordlist.dsc: bogofilter-wordlist.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-changelog: changelog.in ../conf-version ../conf-release Makefile
-	(cat $@.in; echo ""; \
-	echo " -- Manvendra Bhangui <indimail-spamfilter@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
-	| $(edit) > $@
+changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release ../conf-email
+	../catChangeLog --debian --name=logalert --state=unstable \
+		--urgency=low ../doc/ChangeLog > $@
+control: control.in ../conf-email
+	$(edit) $@.in > $@
+copyright: copyright.in ../conf-email
+	$(edit) $@.in > $@
 
 dummy.tar.gz:
 	echo "dummy file" > README; tar cf - README |gzip > $@

@@ -17,6 +17,8 @@ lex.c
 logalert-*rpmlintrc
 logalert_perm_list
 debian/changelog
+debian/control
+debian/copyright
 autom4te.cache
 .deps
 Makefile
@@ -38,3 +40,4 @@ m4
 missing
 stamp-h1
 conf-release
+logalert.changes

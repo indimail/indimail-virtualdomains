@@ -17,7 +17,7 @@ dnl set to "yes"    the "Trio" [v]snprintf library (which is
 dnl                 part of the bogofilter source).
 dnl ********************************************************
 dnl
-AC_INIT([bogofilter],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-spamfilter@indimail.org],indimail, [https://github.com/mbhangui/indimail-virtualdomains])
+AC_INIT([bogofilter],m4_normalize(m4_include([conf-version])),m4_normalize(m4_include([conf-email])),indimail, [https://github.com/mbhangui/indimail-virtualdomains])
 dnl
 AC_PREREQ([2.68])
 AC_CONFIG_MACRO_DIR([m4])

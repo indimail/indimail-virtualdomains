@@ -38,7 +38,7 @@
 %endif
 
 %if %build_on_obs == 1
-%global packager Manvendra Bhangui <manvendra@indimail.org>
+%global packager @email@
 %endif
 
 Summary: Mail Utility Package for indimail MTA

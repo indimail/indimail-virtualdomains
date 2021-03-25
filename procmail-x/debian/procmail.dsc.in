@@ -3,7 +3,7 @@ Source: procmail
 Binary: procmail
 Architecture: any
 Version: @version@-@release@
-Maintainer: Manvendra Bhangui <indimail-virtualdomains@indimail.org>
+Maintainer: @email@
 Homepage: https://github.com/mbhangui/indimail-virtualdomains
 Debtransform-Release: 1
 Debtransform-Files-Tar: debian.tar.gz

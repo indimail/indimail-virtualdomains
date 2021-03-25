@@ -1,13 +1,12 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.59])
-AC_INIT([nssd], m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-auth@indimail.org],nssd, [https://github.com/mbhangui/indimail-virtualdomains])
+AC_INIT([nssd], m4_normalize(m4_include([conf-version])),m4_normalize(m4_include([conf-email])),nssd, [https://github.com/mbhangui/indimail-virtualdomains])
 AC_CANONICAL_TARGET
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 LT_INIT([disable-static])
 AM_INIT_AUTOMAKE([foreign])
 AM_CONFIG_HEADER(config.h)
-AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-auth@indimail.org")
 
 dnl Checks for programs.
 AC_DISABLE_STATIC

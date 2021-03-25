@@ -2,6 +2,7 @@ prefix=@prefix@
 version=@version@
 release=@release@
 sysconfdir=@sysconfdir@
+email=$(shell cat ../conf-email)
 #
 
 all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
@@ -13,6 +14,7 @@ clean:
 edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
+	-e 's,@email\@,$(email),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
@@ -22,12 +24,15 @@ postinst: postinst.in Makefile
 	$(edit) $@.in > $@;
 postrm: postrm.in Makefile
 	$(edit) $@.in > $@;
-procmail.dsc: procmail.dsc.in Makefile
+procmail.dsc: procmail.dsc.in Makefile ../conf-email
 	$(edit) $@.in > $@
-changelog: changelog.in Makefile ../conf-version ../conf-release
-	(cat $@.in; echo ""; \
-	echo " -- Manvendra Bhangui <indimail-virtualdomains@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
-	| $(edit) > $@
+changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release ../conf-email
+	../catChangeLog --debian --name=procmail --state=unstable \
+		--urgency=low ../doc/ChangeLog > $@
+control: control.in ../conf-email
+	$(edit) $@.in > $@
+copyright: copyright.in ../conf-email
+	$(edit) $@.in > $@
 
 dummy.tar.gz:
 	echo "dummy file" > README; tar cf - README |gzip > $@

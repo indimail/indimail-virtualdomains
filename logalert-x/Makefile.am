@@ -1,6 +1,7 @@
 @SET_MAKE@
 ACLOCAL_AMFLAGS = -I m4
 version=@VERSION@
+email := $(shell cat conf-email)
 COFLAGS=-z+05:30
 DEFS = @DEFS@ -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-unused-function -Wno-return-type
 INSTALL_PROGRAM = ${INSTALL}          -c
@@ -15,7 +16,7 @@ man_MANS = logalert.8 logsrv.8 rpclog.8 incrmesg.1 logclient.1 showbytes.1
 mandir = @prefix@/share/man
 
 doc_DATA = LICENSE README.md
-noinst_SCRIPTS = logalert.spec logalert-rpmlintrc
+noinst_SCRIPTS = logalert.spec logalert-rpmlintrc logalert.changes
 
 MOSTLYCLEANFILES=lex.c parser.h parser.c logalert_perm_list debian/Makefile
 DISTCLEANFILES = *~
@@ -29,6 +30,7 @@ AM_YFLAGS  = -d
 edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e "s,@release\@,"`cat conf-release`",g" \
+	-e "s,@email\@,"'$(email)'",g" \
 	-e 's,@VERSION\@,$(VERSION),g' \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
 	-e 's,@mandir\@,$(mandir),g' \
@@ -60,8 +62,10 @@ lex.c: lex.l parser.h
 parser.h: parser.c
 logalert-rpmlintrc: logalert-rpmlintrc.in
 	$(edit) logalert-rpmlintrc.in > $@
-logalert.spec: logalert.spec.in doc/ChangeLog conf-version conf-release
-	(cat $@.in;./catChangeLog) | $(edit) > $@
+logalert.spec: logalert.spec.in doc/ChangeLog conf-version conf-release conf-email
+	(cat $@.in;./catChangeLog --spec doc/ChangeLog) | $(edit)> $@
+logalert.changes: doc/ChangeLog conf-version conf-release conf-email
+	./catChangeLog --changes doc/ChangeLog > $@
 logsrv.8: logsrv.man
 	$(edit) logsrv.man > $@
 logclient.1: logclient.man

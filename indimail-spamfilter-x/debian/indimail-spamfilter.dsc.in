@@ -3,7 +3,7 @@ Source: indimail-spamfilter
 Binary: indimail-spamfilter
 Architecture: any
 Version: @version@-@release@
-Maintainer: Manvendra Bhangui <indimail-spamfilter@indimail.org>
+Maintainer: @email@
 Homepage: https://github.com/mbhangui/indimail-virtualdomains
 Section: Misc
 Priority: extra

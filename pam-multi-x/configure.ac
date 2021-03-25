@@ -1,5 +1,5 @@
 AC_PREREQ([2.52])
-AC_INIT([pam-multi],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-auth@indimail.org],pam-multi,[https://github.com/mbhangui/indimail-virtualdomains])
+AC_INIT([pam-multi],m4_normalize(m4_include([conf-version])),m4_normalize(m4_include([conf-email])),pam-multi,[https://github.com/mbhangui/indimail-virtualdomains])
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 AM_INIT_AUTOMAKE([foreign])

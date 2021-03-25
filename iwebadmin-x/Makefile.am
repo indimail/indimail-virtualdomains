@@ -4,6 +4,7 @@ ACLOCAL_AMFLAGS=-I m4
 htmllibdir=@htmllibdir@
 htmldir=@htmldir@
 imagedir=@imagedir@
+email := $(shell cat conf-email)
 
 version=@VERSION@
 
@@ -27,7 +28,7 @@ iwebadmin_LDADD=$(LIB_INDIMAIL) $(LIB_QMAIL) $(LIB_CRYPT)
 iwebadmin_LDFLAGS = $(AM_LDFLAGS)
 iwebadmin_CFLAGS = $(AM_CFLAGS)
 
-noinst_DATA = iwebadmin.spec iwebadmin-rpmlintrc \
+noinst_DATA = iwebadmin.spec iwebadmin.changes iwebadmin-rpmlintrc \
 			  iwebadmin-permissions.easy iwebadmin-permissions.secure \
 			  iwebadmin-permissions.paranoid iwebadmin.perms iwebadmin-conf \
 			  iwebadmin-hooks
@@ -64,8 +65,10 @@ cgi.o: config.h iwebadmin.h iwebadminx.h
 limits.o: config.h iwebadmin.h iwebadminx.h 
 dotqmail.o: config.h iwebadmin.h iwebadminx.h 
 
-iwebadmin.spec: iwebadmin.spec.in conf-version conf-release doc/ChangeLog
-	(cat $@.in;./catChangeLog) | $(edit) > $@
+iwebadmin.spec: iwebadmin.spec.in conf-version conf-release doc/ChangeLog conf-email
+	(cat $@.in;./catChangeLog --spec doc/ChangeLog) | $(edit)> $@
+iwebadmin.changes: doc/ChangeLog conf-version conf-release conf-email
+	./catChangeLog --changes doc/ChangeLog > $@
 iwebadmin-rpmlintrc: iwebadmin-rpmlintrc.in
 	$(edit) iwebadmin-rpmlintrc.in > $@
 debian/Makefile: debian/Makefile.in conf-version conf-release

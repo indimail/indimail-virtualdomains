@@ -15,7 +15,7 @@
 %global _hardened_build    1
 %endif
 %if %build_on_obs == 1
-%global packager Manvendra Bhangui <manvendra@indimail.org>
+%global packager @email@
 %endif
 %global fedorareview       0
 

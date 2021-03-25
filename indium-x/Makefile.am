@@ -37,7 +37,7 @@ guilibexec_PROGRAMS = pwhelper
 
 guibin_SCRIPTS = indium litesrc supernotepad secpanel FMbrowse tkdiff
 
-noinst_DATA = indium.spec indium-rpmlintrc
+noinst_DATA = indium.spec indium.changes indium-rpmlintrc
 
 MOSTLYCLEANFILES = indium litesrc common.tcl fileman.tcl supernotepad secpanel FMbrowse \
 				   tkdiff
@@ -81,8 +81,10 @@ FMbrowse: FMbrowse.tcl
 	$(edit) $@.tcl > $@
 tkdiff: tkdiff.tcl
 	$(edit) $@.tcl > $@
-indium.spec: indium.spec.in conf-version conf-release
+indium.spec: indium.spec.in conf-version conf-release conf-email
 	(cat $@.in;./catChangeLog) | $(edit) > $@
+indium.changes: doc/ChangeLog conf-version conf-release conf-email
+	./catChangeLog --changes doc/ChangeLog > $@
 pwhelper.o: pwhelper.c
 	$(COMPILE) $(DEFS) -c pwhelper.c
 pwhelper$(EXEEXT): $(pwhelper_DEPENDENCIES) $(pwhelper_OBJECTS)

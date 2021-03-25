@@ -1,10 +1,13 @@
 conf-release
 indimail-utils.spec
+indimail-utils.changes
 debian/changelog
 debian/Makefile
 debian/debian.tar.gz
 debian/dummy.tar.gz
 debian/rules
+debian/copyright
+debian/control
 debian/obs_deb_prep
 debian/*.dsc
 debian/indimail-utils.install

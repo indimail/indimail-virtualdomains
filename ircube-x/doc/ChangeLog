@@ -6,7 +6,7 @@ Release 1.0 Start 13/03/2017
 2.  Created autoconfigure scripts
 3.  Added INSTALL file
 4.  Added testssl.php
-07/11/2018
+- 07/11/2018
 5.  fixed typos in README
 - 02/05/2020
 6.  added roundcubemail config script roundcube_config

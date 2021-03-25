@@ -9,6 +9,7 @@ logdir=@logdir@
 servicedir=@servicedir@
 version=$(shell cat ../conf-version)
 release=$(shell cat ../conf-release)
+email=$(shell cat ../conf-email)
 courier_version=@courier_version@
 fetchmail_version=@fetchmail_version@
 edit = sed \
@@ -23,6 +24,7 @@ edit = sed \
 	-e 's,@logdir\@,$(logdir),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
+	-e 's,@email\@,$(email),g' \
 	-e 's,@courier_version\@,$(courier_version),g' \
 	-e 's,@fetchmail_version\@,$(fetchmail_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
@@ -42,15 +44,19 @@ postinst: postinst.in Makefile
 	$(edit) $@.in > $@
 obs_deb_prep: obs_deb_prep.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-rules: rules.in Makefile ../conf-version ../conf-release
+rules: rules.in Makefile ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
 indimail-access.install: indimail-access.install.in Makefile
 	$(edit) $@.in > $@
-changelog: changelog.in ../conf-version ../conf-release
-	(cat $@.in; echo ""; \
-	echo " -- Manvendra Bhangui <indimail-access@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
-	| $(edit) > $@
-indimail-access.dsc: indimail-access.dsc.in Makefile ../conf-version ../conf-release
+changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release ../conf-email
+	../catChangeLog --debian --name=indimail-access --state=unstable \
+		--urgency=low ../doc/ChangeLog > $@
+control: control.in ../conf-email
+	$(edit) $@.in > $@
+copyright: copyright.in ../conf-email
+	$(edit) $@.in > $@
+indimail-access.dsc: indimail-access.dsc.in Makefile ../conf-version \
+../conf-release ../conf-email
 	$(edit) $@.in > $@
 debian.tar.gz: copyright rules prerm postrm preinst postinst changelog compat \
 indimail-access.install obs_deb_prep Makefile control

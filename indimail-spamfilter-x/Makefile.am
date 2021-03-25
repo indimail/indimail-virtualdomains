@@ -2,6 +2,7 @@
 AUTOMAKE_OPTIONS = 
 
 COFLAGS=-z+05:30
+email := $(shell cat conf-email)
 # search path for m4 macros
 ACLOCAL_AMFLAGS = -I m4
 
@@ -131,8 +132,10 @@ dist-hook:
 #
 noinst_PROGRAMS=bogogrep
 bogogrep_SOURCES=contrib/bogogrep.c
-noinst_DATA = indimail-spamfilter.spec indimail-spamfilter-rpmlintrc \
-			  indimail-spamfilter-permissions.easy indimail-spamfilter-permissions.secure \
+noinst_DATA = indimail-spamfilter.spec indimail-spamfilter.changes \
+			  indimail-spamfilter-rpmlintrc \
+			  indimail-spamfilter-permissions.easy \
+			  indimail-spamfilter-permissions.secure \
 			  indimail-spamfilter-permissions.paranoid
 
 EXTRA_DIST+= \
@@ -168,14 +171,18 @@ edit = sed \
 	-e 's}@version\@}$(VERSION)}g' \
 	-e 's}@spamfilter_version\@}$(spamfilter_version)}g' \
 	-e "s|@release\@|"`cat conf-release`"|g" \
+	-e "s,@email\@,"'$(email)'",g" \
 	-e 's}@VERSION\@}$(VERSION)}g' \
 	-e 's}@DESTDIR\@}$(DESTDIR)}g' \
 	-e 's}@HOST\@}$(host)}g' \
 	-e 's}@DATE\@}$(DATE)}g' \
 	-e 's}@prefix\@}$(prefix)}g'
 
-indimail-spamfilter.spec: indimail-spamfilter.spec.in catChangeLog doc/ChangeLog conf-version conf-release
+indimail-spamfilter.spec: indimail-spamfilter.spec.in catChangeLog doc/ChangeLog \
+conf-version conf-release conf-email
 	(cat $@.in;./catChangeLog) | $(edit) > $@
+indimail-spamfilter.changes: doc/ChangeLog conf-version conf-release conf-email
+	./catChangeLog --changes doc/ChangeLog > $@
 debian/Makefile: debian/Makefile.in configure.ac conf-version conf-release
 	$(edit) $@.in > $@;
 perm_list.bogofilter: perm_list.in

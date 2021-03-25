@@ -1,14 +1,14 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: indimail-auth
-Upstream-Contact: Manvendra Bhangui <indimail-auth@indimail.org>
+Upstream-Name: indimail-spamfilter
+Upstream-Contact: @email@
 Source: https://github.com/mbhangui/indimail-virtualdomains
 
 Files: *
-Copyright: 2020 <Manvendra Bhangui indimail-auth@indimail.org>
+Copyright: 2020 <Manvendra Bhangui mbhangui@gmail.com>
 License: GPL-3.0+
 
 Files: debian/*
-Copyright: 2020 Manvendra Bhangui <indimail-auth@indimail.org>
+Copyright: 2020 Manvendra Bhangui <mbhangui@gmail.com>
 License: GPL-3.0+
 
 License: GPL-3.0+

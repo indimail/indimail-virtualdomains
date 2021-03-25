@@ -1,7 +1,7 @@
 Source: indimail
 Section: mail
 Priority: extra
-Maintainer: Manvendra Bhangui <indimail-virtualdomains@indimail.org>
+Maintainer: @email@
 Standards-Version: 3.9.1
 Build-Depends: cdbs, debhelper (>= 9), gcc, g++, binutils, automake, libqmail-dev, libqmail, libssl-dev, libncurses5 (>= 5.7), libncurses5-dev (>= 5.7), mime-support, m4, gawk
 Homepage: https://github.com/mbhangui/indimail-virtualdomains
