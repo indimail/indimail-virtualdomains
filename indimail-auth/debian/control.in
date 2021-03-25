@@ -1,7 +1,7 @@
 Source: indimail-auth
 Section: mail
 Priority: optional
-Maintainer: Manvendra Bhangui <indimail-auth@indimail.org>
+Maintainer: @email@
 Standards-Version: 4.5.0
 Build-Depends: debhelper (>= 9), binutils, coreutils, libpam0g-dev, libqmail-dev
 Homepage: https://github.com/mbhangui/indimail-virtualdomains

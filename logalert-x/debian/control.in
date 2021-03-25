@@ -1,7 +1,7 @@
 Source: logalert
 Section: misc
 Priority: extra
-Maintainer: Manvendra Bhangui <mbhangui@gmail.com>
+Maintainer: @email@
 Standards-Version: 3.9.1
 Homepage: http://indimail.sourceforge.net
 Build-Depends: cdbs, debhelper (>= 9), gcc, g++, m4, autotools-dev, libqmail-dev, indimail-dev, libpcre3-dev, flex, bison

@@ -44,6 +44,9 @@ debian/README
 debian/debian.tar.gz
 debian/dummy.tar.gz
 debian/obs.mk
+debian/copyright
+debian/control
+procmail.changes
 depcomp
 install-sh
 ltmain.sh

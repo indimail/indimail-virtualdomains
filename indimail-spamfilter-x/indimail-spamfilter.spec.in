@@ -31,7 +31,7 @@
 %global url                https://github.com/mbhangui/indimail-virtualdomains
 
 %if %build_on_obs == 1
-%global packager Manvendra Bhangui <indimail-spamfilter@indimail.org>
+%global packager @email@
 %endif
 
 Summary: Fast anti-spam filtering by Bayesian statistical analysis

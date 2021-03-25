@@ -6,7 +6,7 @@ AC_INIT([procmail],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui p
 LT_INIT
 AC_CONFIG_SRCDIR([patchlevel.h])
 AC_CONFIG_HEADERS([config.h])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
 AC_DEFINE_UNQUOTED(PM_VERSION, $PACKAGE_VERSION, "Procmail Version")
 
 # Checks for programs.

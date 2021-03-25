@@ -1,6 +1,7 @@
 aclocal.m4
 debian/README
 bogofilter-wordlist.spec
+bogofilter-wordlist.changes
 configure
 install-sh
 m4/*
@@ -11,6 +12,8 @@ debian/*.dsc
 debian/debian.tar.gz
 debian/dummy.tar.gz
 debian/rules
+debian/copyright
+debian/control
 create_rpm
 autom4te.cache
 Makefile

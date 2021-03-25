@@ -1,8 +1,10 @@
 nssd-1.3
 pam-multi-1.2
-debian/changelog
 conf-release
 indimail-auth.spec
+debian/changelog
+debian/copyright
+debian/control
 debian/Makefile
 debian/rules
 debian/preinst
@@ -15,3 +17,4 @@ debian/changelog
 debian/debian.tar.gz
 debian/dummy.tar.gz
 debian/*.dsc
+indimail-auth.changes

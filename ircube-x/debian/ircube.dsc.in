@@ -3,7 +3,7 @@ Source: ircube
 Binary: ircube
 Architecture: any
 Version: @version@-@release@
-Maintainer: Manvendra Bhangui <manvendra@indimail.org>
+Maintainer: @email@
 Homepage: http://indimail.sourceforge.net
 Debtransform-Release: 1
 Debtransform-Files-Tar: debian.tar.gz

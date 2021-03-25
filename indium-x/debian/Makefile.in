@@ -7,6 +7,7 @@ mysql_prefix=@mysql_prefix@
 prefix=@prefix@
 version=@version@
 release=@release@
+email=$(shell cat ../conf-email)
 arch=$(shell uname -m)
 libd=$(shell if [ -d $(prefix)/lib/$(arch)-linux-gnu ] ; then echo lib/$(arch)-linux-gnu; else echo lib;fi)
 libdir=$(prefix)/$(libd)
@@ -30,6 +31,7 @@ edit = sed \
 	-e 's,@imagedir\@,$(imagedir),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
+	-e 's,@email\@,$(email),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 rules: rules.in Makefile
@@ -38,18 +40,24 @@ postrm: postrm.in Makefile
 	$(edit) $@.in > $@;
 postinst: postinst.in Makefile
 	$(edit) $@.in > $@;
-indium.dsc: indium.dsc.in Makefile ../conf-version ../conf-release
+indium.dsc: indium.dsc.in Makefile ../conf-version \
+../conf-release ../conf-email
 	$(edit) $@.in > $@
-indium-Debian_9.0.dsc: indium-Debian_9.0.dsc.in
+indium-Debian_9.0.dsc: indium-Debian_9.0.dsc.in ../conf-version \
+../conf-release ../conf-email
 	$(edit) $@.in > $@
-indium-Debian_10.dsc: indium-Debian_10.dsc.in
+indium-Debian_10.dsc: indium-Debian_10.dsc.in ../conf-version \
+../conf-release ../conf-email
 	$(edit) $@.in > $@
 indium.install: indium.install.in Makefile
 	$(edit) $@.in > $@
-changelog: changelog.in ../conf-version ../conf-release
-	(cat $@.in; echo ""; \
-	echo " -- Manvendra Bhangui <indimail-access@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
-	| $(edit) > $@
+changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release ../conf-email
+	../catChangeLog --debian --name=indium --state=unstable \
+		--urgency=low ../doc/ChangeLog > $@
+control: control.in ../conf-email
+	$(edit) $@.in > $@
+copyright: copyright.in ../conf-email
+	$(edit) $@.in > $@
 
 dummy.tar.gz:
 	echo "dummy file" > README; tar cf - README |gzip > $@

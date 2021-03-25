@@ -42,7 +42,7 @@
 %endif
 
 %if %build_on_obs == 1
-%global packager Manvendra Bhangui <indimail-auth@indimail.org>
+%global packager @email@
 %endif
 
 Summary: Name Service Sw

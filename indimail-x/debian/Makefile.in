@@ -11,6 +11,7 @@ mysql_prefix=@mysql_prefix@
 defaultdomain=@defaultdomain@
 version=@version@
 prefix=@prefix@
+email=$(shell cat ../conf-email)
 arch=$(shell uname -m)
 #
 
@@ -55,6 +56,7 @@ edit = sed \
 	-e 's,@defaultdomain\@,$(defaultdomain),g' \
 	-e 's,@version\@,$(version),g' \
 	-e "s|@release\@|"`cat ../conf-release`"|g" \
+	-e 's,@email\@,$(email),g' \
 	-e 's,@DESTDIR\@,$(DESTDIR),g' \
 	-e 's,@HOST\@,$(host),g' \
 	-e 's,@DATE\@,$(DATE),g' \
@@ -85,17 +87,25 @@ libindimail.install: libindimail.install.in ../conf-version ../conf-release
 indimail.cron.d: indimail.cron.d.in
 	$(edit) $@.in > $@
 
-changelog: changelog.in Makefile ../conf-version ../conf-release
-	(cat $@.in; echo ""; \
-	echo " -- Manvendra Bhangui <indimail-virtualdomains@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
-	| $(edit) > $@
-indimail.dsc: indimail.dsc.in Makefile ../conf-version ../conf-release
+changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release \
+../conf-email
+	../catChangeLog --debian --name=indimail --state=unstable \
+		--urgency=low ../doc/ChangeLog > $@
+control: control.in ../conf-email
+	$(edit) $@.in > $@
+copyright: copyright.in ../conf-email
+	$(edit) $@.in > $@
+indimail.dsc: indimail.dsc.in Makefile ../conf-version \
+../conf-release ../conf-email
 	$(edit) $@.in > $@;
-indimail-Debian_10.dsc: indimail-Debian_10.dsc.in Makefile ../conf-version ../conf-release
+indimail-Debian_10.dsc: indimail-Debian_10.dsc.in Makefile \
+../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@;
-indimail-Debian_9.0.dsc: indimail-Debian_9.0.dsc.in Makefile ../conf-version ../conf-release
+indimail-Debian_9.0.dsc: indimail-Debian_9.0.dsc.in Makefile \
+../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@;
-indimail-xUbuntu_18.04.dsc: indimail-xUbuntu_18.04.dsc.in Makefile ../conf-version ../conf-release
+indimail-xUbuntu_18.04.dsc: indimail-xUbuntu_18.04.dsc.in Makefile \
+../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@;
 
 #sed -e 's,@drelease\@,$(release),g' $@.tmp > $@; /bin/rm -f $@.tmp

@@ -55,7 +55,7 @@ BuildRequires: pcre-devel libqmail-devel indimail-devel
 BuildRequires: flex coreutils
 
 %if %build_on_obs == 1
-%define packager Manvendra Bhangui <manvendra@indimail.org>
+%define packager @email@
 %endif
 
 Requires: coreutils grep /bin/sh glibc

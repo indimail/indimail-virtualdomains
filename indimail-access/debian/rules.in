@@ -73,7 +73,7 @@ build-stamp:
 	echo ACCESS_version=$(version); \
 	echo ID=indimail-access; \
 	echo HOME_URL="https://github.com/mbhangui/indimail-virtualdomains"; \
-	echo PACKAGE_BUGREPORT=\"Manvendra Bhangui indimail-access@indimail.org\"; \
+	echo PACKAGE_BUGREPORT=\"@email@\"; \
 	) > indimail-access-release
 	touch build-stamp
 

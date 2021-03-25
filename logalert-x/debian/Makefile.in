@@ -3,6 +3,7 @@ mandir=@mandir@
 sysconfdir=@sysconfdir@
 version=$(shell cat ../conf-version)
 release=$(shell cat ../conf-release)
+email=$(shell cat ../conf-email)
 #
 
 all: rules postinst postrm debian.tar.gz logalert.dsc dummy.tar.gz
@@ -13,6 +14,7 @@ clean:
 edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
+	-e 's,@email\@,$(email),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@prefix\@,$(prefix),g'
@@ -23,11 +25,14 @@ postinst: postinst.in Makefile
 	$(edit) $@.in > $@;
 postrm: postrm.in Makefile
 	$(edit) $@.in > $@;
-changelog: changelog.in Makefile ../conf-version ../conf-release
-	(cat $@.in; echo ""; \
-	echo " -- Manvendra Bhangui <indimail-virtualdomains@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
-	| $(edit) > $@
-logalert.dsc: Makefile logalert.dsc.in ../conf-version ../conf-release
+changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release ../conf-email
+	../catChangeLog --debian --name=logalert --state=unstable \
+		--urgency=low ../doc/ChangeLog > $@
+control: control.in ../conf-email
+	$(edit) $@.in > $@
+copyright: copyright.in ../conf-email
+	$(edit) $@.in > $@
+logalert.dsc: Makefile logalert.dsc.in ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
 
 dummy.tar.gz: README

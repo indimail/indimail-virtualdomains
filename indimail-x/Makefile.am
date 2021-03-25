@@ -1,6 +1,7 @@
 SUBDIRS=eps-1.2
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
+email=$(shell cat conf-email)
 
 DEFS=@DEFS@ -Dlint -fno-strict-aliasing -I. -I@prefix@/include/qmail -Ieps-1.2 -I@mysql_incdir@
 
@@ -206,7 +207,7 @@ noinst_SCRIPTS = vadddomain_handle vadduser_handle vdeldomain_handle \
 	vdeluser_handle vrenameuser_handle
 
 noinst_DATA = indimail-permissions.easy indimail-permissions.paranoid \
-	indimail-permissions.secure indimail.spec indimail-rpmlintrc
+	indimail-permissions.secure indimail.spec indimail.changes indimail-rpmlintrc
 
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain vmoduser vpasswd \
 	vdeluser vrenameuser
@@ -729,6 +730,7 @@ edit = sed \
 	-e 's}@PACKAGE_VERSION\@}$(PACKAGE_VERSION)}g' \
 	-e 's}@version\@}$(VERSION)}g' \
 	-e "s|@release\@|"`cat conf-release`"|g" \
+	-e "s,@email\@,"'$(email)'",g" \
 	-e 's}@pkgconfigdir\@}$(pkgconfigdir)}g' \
 	-e 's}@VERSION\@}$(VERSION)}g' \
 	-e 's}@DESTDIR\@}$(DESTDIR)}g' \
@@ -808,8 +810,10 @@ conf-release:
 	if [ ! -f conf-release ] ; then \
 		echo 1.1 > conf-release; \
 	fi
-indimail.spec: indimail.spec.in catChangeLog doc/ChangeLog conf-version conf-release
-	(cat $@.in;./catChangeLog) | $(edit) > $@
+indimail.spec: indimail.spec.in catChangeLog doc/ChangeLog conf-version conf-release conf-email
+	(cat $@.in;./catChangeLog --spec doc/ChangeLog) | $(edit) > $@
+indimail.changes: catChangeLog doc/ChangeLog conf-version conf-release conf-email
+	./catChangeLog --changes doc/ChangeLog > $@
 indimail-rpmlintrc: indimail-rpmlintrc.in
 	$(edit) indimail-rpmlintrc.in > $@
 login_tasks.3: login_tasks.9

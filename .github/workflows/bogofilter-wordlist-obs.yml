@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - '**/bogofilter-wordlist-x/**'
+      - '**/prepare_obs'
+      - '**/catChangeLog'
       - .github/workflows/bogofilter-wordlist-obs.yml
       - '!**/doc/*'
       - '!**.md'
@@ -20,10 +22,7 @@ jobs:
     - uses: actions/upload-artifact@v2
       with:
         name: bogofilter-wordlist
-        path: |
-          ~/*.tar.gz
-          ~/*.spec
-          ~/*.dsc
+        path: ~/stage
     - shell: bash
       name: trigger_obs
       run: |
@@ -31,8 +30,9 @@ jobs:
         echo "${{secrets.sf_private_key}}" > ~/.private_key
         chmod 600 ~/.private_key
         echo "${{secrets.sf_known_hosts}}" > ~/.ssh/known_hosts
-        cd ~
-        tar cvfz $GITHUB_WORKSPACE/bogofilter-wordlist-obs.tar.gz *.tar.gz *.spec *.dsc
+        cd ~/stage
+        tar cvfz $GITHUB_WORKSPACE/bogofilter-wordlist-obs.tar.gz *
         # copy to sf_upload_path
         scp -q -i ~/.private_key $GITHUB_WORKSPACE/bogofilter-wordlist-obs.tar.gz  "${{secrets.sf_user}}:${{secrets.sf_upload_path}}"
         rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/bogofilter-wordlist-obs.tar.gz
+        rm -rf ~/stage

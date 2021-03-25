@@ -1,9 +1,10 @@
 ACLOCAL_AMFLAGS = -I m4
 COFLAGS=-z+05:30
+email := $(shell cat conf-email)
 RM	= /bin/rm -f
 DEVNULL = /dev/null
-DIST_COMMON=ChangeLog COPYING AUTHORS
-BUILT_SOURCES = procmail.spec procmail-rpmlintrc \
+DIST_COMMON=COPYING AUTHORS
+BUILT_SOURCES = procmail.spec procmail.changes procmail-rpmlintrc \
 	procmail-permissions.easy procmail-permissions.secure \
 	procmail-permissions.paranoid
 
@@ -94,8 +95,10 @@ procmail-permissions.paranoid: procmail-permissions.paranoid.in
 	$(edit) procmail-permissions.paranoid.in > $@
 procmail-rpmlintrc: procmail-rpmlintrc.in conf-version conf-release
 	$(edit) procmail-rpmlintrc.in > $@
-procmail.spec: procmail.spec.in conf-version conf-release ChangeLog
+procmail.spec: procmail.spec.in conf-version conf-release doc/ChangeLog conf-email
 	(cat $@.in;./catChangeLog) | $(edit) > $@
+procmail.changes: doc/ChangeLog conf-version conf-release conf-email
+	./catChangeLog --changes doc/ChangeLog > $@
 debian/Makefile: debian/Makefile.in conf-version conf-release
 	$(edit) $@.in > $@
 procmail_perm_list: procmail_perm_list.in

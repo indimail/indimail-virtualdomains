@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([iwebadmin],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui iwebadmin@indimail.org],iwebadmin, [https://github.com/mbhangui/indimail-virtualdomains])
+AC_INIT([iwebadmin],m4_normalize(m4_include([conf-version])),m4_normalize(m4_include(conf-email)),iwebadmin, [https://github.com/mbhangui/indimail-virtualdomains])
 AC_CANONICAL_TARGET
 LT_INIT
 AM_INIT_AUTOMAKE

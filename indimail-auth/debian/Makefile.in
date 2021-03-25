@@ -9,6 +9,7 @@ pam_moduledir=/lib/security
 pam_confdir=/etc/pam.d
 version=$(shell cat ../conf-version)
 release=$(shell cat ../conf-release)
+email=$(shell cat ../conf-email)
 nssd_version=@nssd_version@
 pam_multi_version=@pam_multi_version@
 edit = sed \
@@ -23,6 +24,7 @@ edit = sed \
 	-e 's,@servicedir\@,$(servicedir),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
+	-e 's,@email\@,$(email),g' \
 	-e 's,@nssd_version\@,$(nssd_version),g' \
 	-e 's,@pam_multi_version\@,$(pam_multi_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
@@ -43,19 +45,25 @@ postrm: postrm.in
 	$(edit) $@.in > $@
 obs_deb_prep: obs_deb_prep.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-rules: rules.in Makefile ../conf-version ../conf-release
+rules: rules.in Makefile ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
 indimail-auth.install: indimail-auth.install.in Makefile
 	$(edit) $@.in > $@
-changelog: changelog.in ../conf-version ../conf-release
-	(cat $@.in; echo ""; \
-	echo " -- Manvendra Bhangui <indimail-auth@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
-	| $(edit) > $@
-indimail-auth.dsc: indimail-auth.dsc.in Makefile ../conf-version ../conf-release
+changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release ../conf-email
+	../catChangeLog --debian --name=indimail-auth --state=unstable \
+		--urgency=low ../doc/ChangeLog > $@
+control: control.in ../conf-email
 	$(edit) $@.in > $@
-indimail-auth-Debian_10.dsc: indimail-auth-Debian_10.dsc.in Makefile ../conf-version ../conf-release
+copyright: copyright.in ../conf-email
 	$(edit) $@.in > $@
-indimail-auth-Debian_9.0.dsc: indimail-auth-Debian_9.0.dsc.in Makefile ../conf-version ../conf-release
+indimail-auth.dsc: indimail-auth.dsc.in Makefile ../conf-version ../conf-release \
+../conf-email
+	$(edit) $@.in > $@
+indimail-auth-Debian_10.dsc: indimail-auth-Debian_10.dsc.in Makefile ../conf-version \
+../conf-release ../conf-email
+	$(edit) $@.in > $@
+indimail-auth-Debian_9.0.dsc: indimail-auth-Debian_9.0.dsc.in Makefile ../conf-version \
+../conf-release ../conf-email
 	$(edit) $@.in > $@
 debian.tar.gz: copyright preinst postinst prerm postrm rules changelog compat \
 indimail-auth.install obs_deb_prep Makefile control

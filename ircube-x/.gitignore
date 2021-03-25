@@ -16,4 +16,7 @@ README.urls
 conf-release
 debian/ircube.dsc
 debian/changelog
+debian/copyright
+debian/control
 ircube.spec
+ircube.changes

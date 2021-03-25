@@ -25,6 +25,9 @@ debian/postrm
 debian/rules
 debian/changelog
 debian/README
+debian/control
+debian/copyright
+iwebadmin.changes
 ltmain.sh
 m4
 .deps

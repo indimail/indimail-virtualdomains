@@ -5,7 +5,7 @@ Priority: extra
 Binary: indimail
 Architecture: any
 Version: @version@-@release@
-Maintainer: Manvendra Bhangui <indimail-virtualdomains@indimail.org>
+Maintainer: @email@
 Homepage: https://github.com/mbhangui/indimail-virtualdomains
 Debtransform-Release: 1
 Debtransform-Tar: indimail-@version@.tar.gz

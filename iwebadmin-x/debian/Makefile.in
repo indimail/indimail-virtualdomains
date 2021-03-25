@@ -9,6 +9,7 @@ imagedir=@imagedir@
 version=@version@
 release=@release@
 sysconfdir=@sysconfdir@
+email=$(shell cat ../conf-email)
 #
 
 all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
@@ -28,6 +29,7 @@ edit = sed \
 	-e 's,@imagedir\@,$(imagedir),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
+	-e 's,@email\@,$(email),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
 rules: rules.in
@@ -36,16 +38,22 @@ postinst: postinst.in Makefile
 	$(edit) $@.in > $@;
 postrm: postrm.in Makefile
 	$(edit) $@.in > $@;
-iwebadmin.dsc: iwebadmin.dsc.in ../conf-version ../conf-release
+iwebadmin.dsc: iwebadmin.dsc.in ../conf-version \
+../conf-release ../conf-email
 	$(edit) $@.in > $@
-iwebadmin-Debian_9.0.dsc: iwebadmin-Debian_9.0.dsc.in ../conf-version ../conf-release
+iwebadmin-Debian_9.0.dsc: iwebadmin-Debian_9.0.dsc.in \
+../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
-iwebadmin-Debian_10.dsc: iwebadmin-Debian_10.dsc.in ../conf-version ../conf-release
+iwebadmin-Debian_10.dsc: iwebadmin-Debian_10.dsc.in \
+../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
-changelog: changelog.in ../conf-version ../conf-release
-	(cat $@.in; echo ""; \
-	echo " -- Manvendra Bhangui <iwebadmin@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
-	| $(edit) > $@
+control: control.in ../conf-email
+	$(edit) $@.in > $@
+copyright: copyright.in ../conf-email
+	$(edit) $@.in > $@
+changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release ../conf-email
+	../catChangeLog --debian --name=iwebadmin --state=unstable \
+		--urgency=low ../doc/ChangeLog > $@
 _service: _service.in
 	$(edit) $@.in > $@
 dummy.tar.gz:

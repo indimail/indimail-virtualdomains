@@ -7,10 +7,11 @@ mandir=/usr/share/man
 logdir=/var/log/svc
 pam_confdir=/etc/pam.d
 servicedir=/service
-version=$(shell cat conf-version)
+version := $(shell cat conf-version)
 release := $(shell cat conf-release 2>/dev/null||echo "1.1")
 nssd_version=$(shell cat ../nssd-x/conf-version)
 pam_multi_version=$(shell cat ../pam-multi-x/conf-version)
+email := $(shell cat conf-email)
 DATE=$(shell date)
 # if you change edit, change it in debian/Makefile.in too
 edit = sed \
@@ -24,15 +25,19 @@ edit = sed \
 	-e 's,@servicedir\@,$(servicedir),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
+	-e 's,@email\@,$(email),g' \
 	-e 's,@nssd_version\@,$(nssd_version),g' \
 	-e 's,@pam_multi_version\@,$(pam_multi_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
-all: indimail-auth.spec debian/Makefile
+all: indimail-auth.spec indimail-auth.changes debian/Makefile
 
 indimail-auth.spec: indimail-auth.spec.in catChangeLog Makefile \
-conf-version conf-release doc/ChangeLog ../nssd-x/conf-version ../pam-multi-x/conf-version
+conf-version conf-release doc/ChangeLog conf-email \
+../nssd-x/conf-version ../pam-multi-x/conf-version
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
+indimail-auth.changes: doc/ChangeLog conf-version conf-release conf-email
+	./catChangeLog --changes doc/ChangeLog > $@
 debian/Makefile: debian/Makefile.in conf-version conf-release \
 ../nssd-x/conf-version ../pam-multi-x/conf-version
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@

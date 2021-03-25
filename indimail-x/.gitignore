@@ -43,8 +43,9 @@ debian/*postrm
 debian/*preinst
 debian/*prerm
 debian/rules
-debian/_service
 debian/source
+debian/copyright
+debian/control
 displaytop
 eps*/config.h
 eps*/config.log
@@ -218,3 +219,4 @@ m4/ltoptions.m4
 m4/ltsugar.m4
 m4/ltversion.m4
 m4/lt~obsolete.m4
+indimail.changes

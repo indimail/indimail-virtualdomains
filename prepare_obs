@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # This script prepares artifacts that can be downloaded for openSUSE build service
-# It creates name.tar.gz, debian.tar.gz and name.spec
+# It creates name.tar.gz, debian.tar.gz and name.spec name.changes
 #
 set -e
 
@@ -48,12 +48,33 @@ prepare_artifacts()
   mkdir -p $stage
   if [ $multi_mode -eq 0 ] ; then
     # Create spec file
-    if [ -f $pkg_name.spec.in -a -f Makefile -a ! -f ./$pkg_name.spec ] ; then
-      make $pkg_name.spec
-    fi
-    if [ -f $pkg_name.spec ] ; then
-      cp $pkg_name.spec $stage
-    fi
+    for i in spec changes
+    do
+      if [ -f $pkg_name.$i.in -a -f Makefile -a ! -f $pkg_name.$i ] ; then
+        make $pkg_name.$i
+      fi
+    done
+
+    for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
+    do
+        if [ -f $pkg_name-$i.in -a -f Makefile -a ! -f $pkg_name-$i ] ; then
+          make $pkg_name-$i
+        fi
+    done
+
+    for i in spec changes
+    do
+      if [ -f $pkg_name.$i ] ; then
+        cp $pkg_name.$i $stage
+      fi
+    done
+
+    for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
+    do
+        if [ -f $pkg_name-$i ] ; then
+          cp $pkg_name-$i $stage
+        fi
+    done
   
     if [ -d debian ] ; then
       # Create debian.tar.gz
@@ -63,7 +84,7 @@ prepare_artifacts()
       # all indimail, indimail-mta packages have debian/Makefile
       if [ -f debian/Makefile ] ; then
         make -C debian
-        cp debian/debian.tar.gz $stage
+          cp debian/debian.tar.gz $stage
         cp debian/*.dsc $stage
         make -C debian clean >/dev/null
       fi
@@ -71,10 +92,11 @@ prepare_artifacts()
     if [ -f $pkg_name-rpmlintrc ] ; then
       cp $pkg_name-rpmlintrc $stage
     fi
-  fi
+  fi # multi-mode = 0
 
   if [ -f Makefile ] ; then
     make clean >/dev/null
+	find . -type d \( -name autom4te.cache -o -name .deps \) -exec /bin/rm -rf {} +
   fi
 
   cp -rpf . $stage/$pkg_name-$ver
@@ -84,8 +106,8 @@ prepare_artifacts()
     ln -s $pkg_name-$ver $real_name
   fi
 
-  #remove debian directory
-  /bin/rm -rf $pkg_name-$ver/debian $pkg_name-$ver/autom4te.cache $pkg_name-$ver/.deps
+  # remove debian directory from archive
+  /bin/rm -rf $pkg_name-$ver/debian
   tar cfz $pkg_name-$ver.tar.gz $pkg_name-$ver
   if [ $multi_mode -eq 0 ] ; then
     /bin/rm -rf $pkg_name-$ver
@@ -106,7 +128,6 @@ if [ -f $name.packages ] ; then
     cd $SAVE
   done
 
-  # now build the master spec file and master dsc files
   cd $SAVE
   if [ ! -f conf-version ] ; then
     echo "$name: conf-version: No such file or directory" 1>&2
@@ -118,12 +139,39 @@ if [ -f $name.packages ] ; then
   fi
   mkdir -p $HOME/stage
   echo "Preparing $name-$ver"
+  cp -rp ../catChangeLog $HOME/stage # for spec file, changes, debian/changelog to get built
   cp -rp . $HOME/stage/$name-$ver
   cd $HOME/stage/$name-$ver
-  if [ -f Makefile ] ; then
-    make $name.spec $name-rpmlintrc
-    cp $name.spec $name-rpmlintrc $HOME/stage
-  fi
+
+  # now build the master spec file and master dsc files
+  for i in spec changes
+  do
+    if [ -f $name.$i.in -a -f Makefile -a ! -f $name.$i ] ; then
+      make $name.$i
+    fi
+  done
+
+  for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
+  do
+      if [ -f $name-$i.in -a -f Makefile -a ! -f $name-$i ] ; then
+        make $name-$i
+      fi
+  done
+
+  for i in spec changes
+  do
+    if [ -f $name.$i ] ; then
+      cp $name.$i $stage
+    fi
+  done
+
+  for i in permissions.easy permissions.secure permissions.paranoid rpmlintrc
+  do
+      if [ -f $name-$i ] ; then
+        cp $name-$i $stage
+      fi
+  done
+
   if [ -f debian/Makefile.in ] ; then
     make debian/Makefile
   fi
@@ -134,7 +182,8 @@ if [ -f $name.packages ] ; then
     make -C debian clean >/dev/null
   fi
   cd $SAVE
-  /bin/rm -rf $HOME/stage/$name-$ver
+  # do cleanup
+  /bin/rm -rf $HOME/stage/$name-$ver $HOME/stage/catChangeLog
   for pkg_dir in `cat $name.packages`
   do
     real_name=$(basename $pkg_dir)
@@ -151,7 +200,5 @@ else
   prepare_artifacts $1 $HOME/stage 0
 fi
 ls -l $HOME/stage
-mv $HOME/stage/* $HOME
-rmdir $HOME/stage --ignore-fail-on-non-empty
-echo HOME=$HOME
+echo STAGE=$HOME/stage
 exit $?

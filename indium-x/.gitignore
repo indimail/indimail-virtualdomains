@@ -18,11 +18,14 @@ debian/postinst
 debian/postrm
 debian/README
 debian/rules
+debian/copyright
+debian/control
 fileman.tcl
 FMbrowse
 indium
 indium-rpmlintrc
 indium.spec
+indium.changes
 install-sh
 kd
 *.la

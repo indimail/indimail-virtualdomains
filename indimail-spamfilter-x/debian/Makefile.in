@@ -4,6 +4,7 @@ sysconfdir=@sysconfdir@
 version=@spamfilter_version@
 bogofilter_version=@version@
 release=@release@
+email=$(shell cat ../conf-email)
 libexecdir=@prefix@/libexec/indimail
 mandir=@prefix@/share/man
 edit = sed \
@@ -15,6 +16,7 @@ edit = sed \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
+	-e 's,@email\@,$(email),g' \
 	-e 's,@bogofilter_version\@,$(bogofilter_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
@@ -33,13 +35,18 @@ rules: rules.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
 indimail-spamfilter.install: indimail-spamfilter.install.in Makefile
 	$(edit) $@.in > $@
-changelog: changelog.in ../conf-version ../conf-release
-	(cat $@.in; echo ""; \
-	echo " -- Manvendra Bhangui <indimail-spamfilter@indimail.org>  `date +'%a, %d %b %Y %H:%M:%S %z'`" ) \
-	| $(edit) > $@
-indimail-spamfilter-Debian_8.0.dsc: indimail-spamfilter-Debian_8.0.dsc.in ../conf-version ../conf-release
+changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release ../conf-email
+	../catChangeLog --debian --name=logalert --state=unstable \
+		--urgency=low ../doc/ChangeLog > $@
+control: control.in ../conf-email
 	$(edit) $@.in > $@
-indimail-spamfilter.dsc: indimail-spamfilter.dsc.in Makefile ../conf-version ../conf-release
+copyright: copyright.in ../conf-email
+	$(edit) $@.in > $@
+indimail-spamfilter-Debian_8.0.dsc: indimail-spamfilter-Debian_8.0.dsc.in \
+../conf-version ../conf-release ../conf-email
+	$(edit) $@.in > $@
+indimail-spamfilter.dsc: indimail-spamfilter.dsc.in Makefile \
+../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
 debian.tar.gz: copyright rules prerm postrm postinst changelog compat \
 indimail-spamfilter.install Makefile control

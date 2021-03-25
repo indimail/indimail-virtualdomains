@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.85 2021-03-02 16:47:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.86 2021-03-25 11:38:50+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -46,7 +46,7 @@
 %global mysqlPrefix        @mysql_prefix@
 
 %if %build_on_obs == 1
-%global packager Manvendra Bhangui <manvendra@indimail.org>
+%global packager @email@
 %endif
 
 Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support

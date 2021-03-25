@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([IndiMail],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-virtualdomains@indimail.org],indimail, [https://github.com/mbhangui/indimail-virtualdomains])
+AC_INIT([IndiMail],m4_normalize(m4_include([conf-version])),m4_normalize(m4_include([conf-email])),indimail, [https://github.com/mbhangui/indimail-virtualdomains])
 AC_CONFIG_HEADERS([config.h])
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
