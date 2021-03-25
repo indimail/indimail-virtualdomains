@@ -85,7 +85,7 @@ gcc gcc-c++ make autoconf automaake libtool pkgconfig
 sed findutils diffutils gzip xz binutils coreutils grep flex bison
 glibc glibc-devel procps openssl openssl-devel mysql-devel
 libqmail-devel libqmail readline readline-devel ncurses-devel
-pam-devel libgcrypt-devel gdbm-devel libidn-devel pcre-devel
+pam-devel libgcrypt-devel gdbm-devel libidn-devel pcre-devel libidn2-devel
 gettext-devel python3 python3-devel (python python-devel on ancient distros)
 
 opensuse - openldap2-devel instead of openldap-devel
@@ -102,12 +102,26 @@ mime-support m4 gawk openssl procps sed bison
 findutils diffutils readline libreadline-dev xz gzip
 binutils coreutils grep flex libncurses5-dev libncurses5
 libpam0g-dev libpcre3-dev libgdbm-dev libdb-dev libgcrypt20-dev
-python libidn11-dev
+python libidn11-dev libidn2-0-dev
 
 Debian 9, Debian 10 - default-libmysqlclient-dev
 Remaining - libmysqlclient-dev
 Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 ```
+
+NOTE: For FreeBSD
+
+```
+# pkg install pkgconf libidn2
+```
+
+NOTE: for Darwin
+
+```
+# port install pkgconfig libidn2
+```
+
+Without libidn2, indimail-mta will get built without [Internationalized Email Addresses (RFC6531)](https://tools.ietf.org/html/rfc6531)
 
 FreeBSD / Darwin OSX
 
