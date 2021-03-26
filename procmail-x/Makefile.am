@@ -15,7 +15,7 @@ bin_PROGRAMS=procmail lockfile formail
 bin_SCRIPTS=mailstat
 
 SYSCONFDIR = @sysconfdir@
-sysconf_DATA = procmail_perm_list
+sysconf_DATA = procmail_perm_list procmail-release
 
 procmail_SOURCES=procmail.c cstdio.c common.c exopen.c goodies.c \
 	locking.c mailfold.c foldinfo.c misc.c pipes.c regexp.c robust.c \

@@ -159,4 +159,5 @@ AC_CHECK_LIB(indimail, filewrt, [AC_SUBST([LIB_INDIMAIL], ["-lindimail"]) AC_DEF
 
 AC_SUBST(indimaildir)
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([logalert-release:logalert-release.in],[], [])
 AC_OUTPUT

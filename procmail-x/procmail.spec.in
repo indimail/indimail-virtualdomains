@@ -118,6 +118,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(755,root,root)                              %{_prefix}/bin/formail
 %attr(755,root,root)                              %{_prefix}/bin/mailstat
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/procmail_perm_list
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/procmail-release
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120

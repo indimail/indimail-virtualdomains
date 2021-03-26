@@ -69,6 +69,8 @@ if [ $copy_src -eq 1 ] ; then
 	cd ..
 	echo "Versioning indimail-spamfilter-$version"
 	cp -rp indimail-spamfilter-x stage/indimail-spamfilter-$version
+	rm -f stage/indimail-spamfilter-$version/catChangeLog
+	cp indimail-spamfilter-x/catChangeLog stage/indimail-spamfilter-$version
 	cd stage/indimail-spamfilter-$version
 	echo "Cleaning indimail-spamfilter-$version"
 	make -s clean > /dev/null

@@ -102,6 +102,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0755,root,root)                          %{_prefix}/sbin/rpclog
 %attr(0755,root,root)                          %{_prefix}/sbin/logsrv
 %attr(644,root,root)      %config(noreplace)   %{sysconfdir}/logalert_perm_list
+%attr(444,root,root)      %config(noreplace)   %{sysconfdir}/%{name}-release
 
 %doc %attr(644,root,root)                      %{_prefix}/share/indimail/doc/logalert/LICENSE
 %doc %attr(644,root,root)                      %{_prefix}/share/indimail/doc/logalert/README.md

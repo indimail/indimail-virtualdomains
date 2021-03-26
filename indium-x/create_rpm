@@ -67,6 +67,8 @@ if [ $copy_src -eq 1 ] ; then
 	cd ..
 	echo "Versioning indium-$version"
 	cp -rp indium-x stage/indium-$version
+	rm -f stage/indium-$version/catChangeLog
+	cp indium-x/catChangeLog stage/indium-$version
 	cd stage/indium-$version
 	echo "Cleaning indium-$version"
 	make -s clean > /dev/null

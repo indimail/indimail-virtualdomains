@@ -63,6 +63,8 @@ if [ $copy_src -eq 1 ] ; then
 	cd ..
 	echo "Versioning procmail-$version"
 	cp -rp procmail-x stage/procmail-$version
+	rm -f stage/procmail-$version/catChangeLog
+	cp procmail-x/catChangeLog stage/procmail-$version
 	cd stage/procmail-$version
 	echo "Cleaning procmail-$version"
 	make -s clean > /dev/null

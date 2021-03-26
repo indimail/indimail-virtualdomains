@@ -155,7 +155,7 @@ echo "Description=\"IndiMail Authentication Package\""
 echo "AUTH_version="%{version}""
 echo "ID=%{name}"
 echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
-echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui indimail-auth@indimail.org\""
+echo "PACKAGE_BUGREPORT=\"'@email@'\""
 ) > %{name}-release
 
 %if %build_on_obs == 0

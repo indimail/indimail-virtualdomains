@@ -144,4 +144,5 @@ AC_CHECK_FUNCS([alarm endgrent endpwent gethostbyname gethostname getspnam memch
 AC_CHECK_LIB(m, pow)
 AC_CHECK_LIB(crypt, crypt)
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([procmail-release:procmail-release.in],[], [])
 AC_OUTPUT

@@ -59,9 +59,12 @@ if [ $copy_src -eq 1 ] ; then
 		/bin/rm -rf ../stage
 	fi
 	mkdir ../stage
+	cd ..
 	echo "Versioning ircube-$version"
-	cp -rp . ../stage/ircube-$version
-	cd ../stage/ircube-$version
+	cp -rp ircube-x stage/ircube-$version
+	rm -f stage/ircube-$version/catChangeLog
+	cp ircube-x/catChangeLog stage/ircube-$version
+	cd stage/ircube-$version
 	make -s clean
 	make -s distclean
 	/bin/rm -rf autom4te.cache

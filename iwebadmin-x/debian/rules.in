@@ -42,6 +42,14 @@ build-stamp:
 	#
 	#
 	$(MAKE) -s DESTDIR=$(DESTDIR)
+	( \
+	echo NAME=iwebadmin; \
+	echo Description=\"Unix Client-Server Program Interface\"; \
+	echo IWEBADMIN_version=$(version); \
+	echo ID=iwebadmin; \
+	echo HOME_URL="https://github.com/mbhangui/indimail-virtualdomains"; \
+	echo PACKAGE_BUGREPORT=\"'@email@'\"; \
+	) > iwebadmin-release
 	touch build-stamp
 
 clean:
@@ -58,10 +66,12 @@ install: build
 	dh_prep || dh_clean -k
 	dh_installdirs
 	$(MAKE) -s install DESTDIR=$(DESTDIR)
+	mkdir -p $(DESTDIR)$(sysconfdir)
 	if [ -f iwebadmin.perms ] ; then \
-		mkdir -p $(DESTDIR)$(sysconfdir); \
 		install -m 0644 iwebadmin.perms "$(DESTDIR)$(sysconfdir)"/iwebadmin.perms; \
 	fi
+	install -m 0644 iwebadmin-release "$(DESTDIR)$(sysconfdir)"/iwebadmin-release
+	/bin/rm -f iwebadmin-release
 
 binary-indep: build install
 	dh_testdir

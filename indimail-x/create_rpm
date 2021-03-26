@@ -86,6 +86,10 @@ if [ $copy_src -eq 1 ] ; then
 	cd ..
 	echo "Preparing indimail-"$version""
 	/bin/cp -rp indimail-x stage/indimail-"$version"
+	/bin/rm -f stage/indimail-"$version"/catChangeLog
+	/bin/cp indimail-x/catChangeLog stage/indimail-"$version"
+	rm -f stage/indimail-"$version"/catChangeLog
+	cp catChangeLog stage/indimail-"$version"
 	cd stage/indimail-"$version"
 	echo "Cleaning indimail-"$version""
 	make -s clean > /dev/null

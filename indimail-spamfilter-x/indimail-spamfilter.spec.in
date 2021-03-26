@@ -143,7 +143,7 @@ echo "Description=\"IndiMail Spamfilter Package\""
 echo "SPAMFILTER_version="%{version}""
 echo "ID=%{name}"
 echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
-echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui indimail-spamfilter@indimail.org\""
+echo "PACKAGE_BUGREPORT=\"'@email@'\""
 ) > %{name}-release
 
 #### bogofilter ######################

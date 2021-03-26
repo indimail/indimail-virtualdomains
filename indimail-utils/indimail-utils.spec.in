@@ -147,7 +147,7 @@ echo "Description=\"indimail utils package\""
 echo "indimail-util-version="%{version}""
 echo "ID=%{name}"
 echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
-echo "PACKAGE_BUGREPORT=\"Manvendra Bhangui indimail-utils@indimail.org\""
+echo "PACKAGE_BUGREPORT=\"'@email@'\""
 ) > %{name}-release
 
 extra_opt=""

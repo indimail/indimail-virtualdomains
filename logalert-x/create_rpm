@@ -65,6 +65,8 @@ if [ $copy_src -eq 1 ] ; then
 	cd ..
 	echo "Versioning logalert-$version"
 	cp -rp logalert-x stage/logalert-$version
+	rm -f stage/logalert-$version/catChangeLog
+	cp logalert-x/catChangeLog stage/logalert-$version
 	cd stage/logalert-$version
 	echo "Cleaning logalert-$version"
 	make -s clean > /dev/null

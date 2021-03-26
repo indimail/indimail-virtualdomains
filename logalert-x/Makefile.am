@@ -21,7 +21,7 @@ MOSTLYCLEANFILES=lex.c parser.h parser.c logalert_perm_list debian/Makefile
 DISTCLEANFILES = *~
 
 SYSCONFDIR = @sysconfdir@
-sysconf_DATA = logalert_perm_list
+sysconf_DATA = logalert_perm_list logalert-release
 
 AM_LFLAGS  = -Pc
 AM_YFLAGS  = -d

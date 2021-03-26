@@ -66,6 +66,8 @@ if [ $copy_src -eq 1 ] ; then
 	cd ..
 	echo "Versioning iwebadmin-$version"
 	cp -rp iwebadmin-x stage/iwebadmin-$version
+	rm -f stage/iwebadmin-$version/catChangeLog
+	cp iwebadmin-x/catChangeLog stage/iwebadmin-$version
 	cd stage/iwebadmin-$version
 	echo "Cleaning iwebadmin-$version"
 	make -s clean > /dev/null

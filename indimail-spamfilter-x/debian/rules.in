@@ -46,7 +46,7 @@ build-stamp:
 	echo BOGOFILTER_version=$(bogofilter_version); \
 	echo ID=indimail-spamfilter; \
 	echo HOME_URL="https://github.com/mbhangui/indimail-virtualdomains"; \
-	echo PACKAGE_BUGREPORT=\"@email@\"; \
+	echo PACKAGE_BUGREPORT=\"'@email@'\"; \
 	) > indimail-spamfilter-release
 	touch build-stamp
 
