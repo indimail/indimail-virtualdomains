@@ -24,10 +24,8 @@ edit = sed \
 	-e 's,@DATE\@,$(DATE),g'
 
 all: rules changelog indimail-utils.install \
-	indimail-utils.dsc debian.tar.gz dummy.tar.gz
+	indimail-utils.dsc debian.tar.gz
 
-dummy.tar.gz: README
-	tar cf - README |gzip > $@
 obs_deb_prep: obs_deb_prep.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
 rules: rules.in Makefile ../conf-version ../conf-release ../conf-email
@@ -50,5 +48,5 @@ indimail-utils.install obs_deb_prep Makefile control
 		obs_deb_prep control | gzip > $@
 
 clean:
-	/bin/rm -f rules dummy.tar.gz *.dsc changelog \
+	/bin/rm -f rules *.dsc changelog \
 	indimail-utils.install obs_deb_prep debian.tar.gz
