@@ -8,6 +8,6 @@ Version: @version@-@release@
 Maintainer: Manvendra Bhangui <indimail-auth@indimail.org>
 Homepage: https://github.com/mbhangui/indimail-virtualdomains
 Debtransform-Release: 1
-Debtransform-Files-Tar: debian.tar.gz
+Debtransform-Tar: debian.tar.gz
 Standards-Version: 3.9.1
 Build-Depends: cdbs, debhelper (>= 9), gcc, g++, binutils, coreutils, automake, libpam0g-dev, libqmail-dev, libqmail, libmysqlclient-dev, m4, gawk
