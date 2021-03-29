@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         host: [ubuntu-latest, macos-latest]
-    
+
     steps:
     - name: extra_packages
       run: |
@@ -27,7 +27,7 @@ jobs:
 
     - name: checkout_main
       uses: actions/checkout@v2
-      
+
     - name: build courier-imap
       run: |
         cd courier-imap-x
