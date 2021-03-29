@@ -34,8 +34,16 @@ edit = sed \
 	-e 's,@DATE\@,$(DATE),g'
 
 all: indimail-access.spec indimail-access.changes indimail-access-rpmlintrc \
-	indimail-access-permissions.easy indimail-access-permissions.secure \
-	indimail-access-permissions.paranoid perm_list.imap debian/Makefile
+indimail-access-permissions.easy indimail-access-permissions.secure \
+indimail-access-permissions.paranoid perm_list.imap debian/Makefile
+
+clean: indimail-access.spec indimail-access.changes indimail-access-rpmlintrc \
+indimail-access-permissions.easy indimail-access-permissions.secure \
+indimail-access-permissions.paranoid perm_list.imap debian/Makefile
+	/bin/rm -f indimail-access.spec indimail-access.changes \
+	indimail-access-rpmlintrc indimail-access-permissions.easy \
+	indimail-access-permissions.secure indimail-access-permissions.paranoid \
+	perm_list.imap debian/Makefile
 
 indimail-access.spec: indimail-access.spec.in catChangeLog Makefile \
 conf-version conf-release doc/ChangeLog conf-email \

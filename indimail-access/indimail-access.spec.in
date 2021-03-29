@@ -72,13 +72,12 @@ Group: Applications/Mail
 Group: Productivity/Networking/Email/Servers
 %endif
 Source1: http://downloads.sourceforge.net/indimail/courier-imap-%{courier_version}.tar.gz
-Source2: http://downloads.sourceforge.net/indimail/perm_list.imap
-Source3: http://downloads.sourceforge.net/indimail/fetchmail-%{fetchmail_version}.tar.gz
-Source4: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
+Source2: http://downloads.sourceforge.net/indimail/fetchmail-%{fetchmail_version}.tar.gz
+Source3: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 %if 0%{?suse_version} >= 1120
-Source5: http://downloads.sourceforge.net/indimail/%{name}-permissions.easy
-Source6: http://downloads.sourceforge.net/indimail/%{name}-permissions.secure
-Source7: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
+Source4: http://downloads.sourceforge.net/indimail/%{name}-permissions.easy
+Source5: http://downloads.sourceforge.net/indimail/%{name}-permissions.secure
+Source6: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
 %endif
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
@@ -251,15 +250,14 @@ do
 done
 
 %{__mkdir_p} %{buildroot}%{sysconfdir}
-install -m 0644 %{S:2} %{buildroot}%{sysconfdir}/perm_list.imap
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
 install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
 /bin/rm -f %{name}-rpm.info %{name}-release
 /bin/rm -f %{name}-rpm.info
 %if 0%{?suse_version} >= 1120
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
-install -m 644 %{S:5} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
-install -m 644 %{S:6} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
+install -m 644 %{S:4} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
+install -m 644 %{S:5} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
 
 %{__rm} -f  %{buildroot}%{_libdir}/libcourier-unicode.la
@@ -339,7 +337,6 @@ done
 %ghost %attr(0644,indimail,indimail)              %{sysconfdir}/tcp/tcp.pop3.cdb
 #
 
-%attr(444,root,root) %config(noreplace)           %{sysconfdir}/perm_list.imap
 %attr(600,root,root) %config(noreplace)           %{sysconfdir}/pop3d-ssl.dist
 %attr(600,root,root) %config(noreplace)           %{sysconfdir}/imapd-ssl.dist
 %attr(600,root,root) %config(noreplace)           %{sysconfdir}/pop3d.cnf

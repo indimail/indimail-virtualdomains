@@ -85,6 +85,9 @@ install: build
 	if [ -d courier-imap-$(courier_version) ] ; then $(MAKE) -s install -C courier-imap-$(courier_version) DESTDIR=$(DESTDIR); fi
 	if [ -d fetchmail-$(fetchmail_version) ]  ; then $(MAKE) -s install -C fetchmail-$(fetchmail_version) DESTDIR=$(DESTDIR); fi
 	mkdir -p $(DESTDIR)$(sysconfdir)
+	if [ -f perm_list.imap ] ; then \
+		install -m 0644 perm_list.imap "$(DESTDIR)$(sysconfdir)"/perm_list.imap; \
+	fi
 	install -m 0644 indimail-access-release "$(DESTDIR)$(sysconfdir)"/indimail-access-release
 	/bin/rm -f indimail-access-release
 
