@@ -31,10 +31,8 @@ edit = sed \
 
 all: rules changelog preinst postinst prerm postrm \
 	indimail-auth.install indimail-auth.dsc indimail-auth-Debian_10.dsc \
-	indimail-auth-Debian_9.0.dsc debian.tar.gz dummy.tar.gz
+	indimail-auth-Debian_9.0.dsc debian.tar.gz
 
-dummy.tar.gz: README
-	tar cf - README |gzip > $@
 preinst: preinst.in
 	$(edit) $@.in > $@
 postinst: postinst.in
