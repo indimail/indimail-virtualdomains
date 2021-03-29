@@ -8,7 +8,6 @@ configure
 depcomp
 install-sh
 confdefs.h
-INSTALL
 INSTALL.html
 libs/imap/imapd.cnf.gnutls
 libs/imap/pop3d.cnf.gnutls

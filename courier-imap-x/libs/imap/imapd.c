@@ -6985,7 +6985,7 @@ int main(int argc, char **argv)
 		struct maildirwatch *w;
 
 		if ((w=maildirwatch_alloc(".")) == NULL)
-			writes("* OK [ALERT] Filesystem notification initialization error -- contact your mail administrator (check for inotify limits )\r\n");
+			writes("* OK [ALERT] Inotify initialization error\r\n");
 		else
 			maildirwatch_free(w);
 	}

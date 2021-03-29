@@ -12,6 +12,8 @@ Release @version@-@release@ Start 01/03/2021
 07. upgraded courier-imap to 5.1.1
 08. upgraded unicode to 2.2.2
 09. upgraded maildrop to 3.0.3
+- 28/03/2021
+10. upgraded courier-imap to 5.1.2
 
 *
 Release @version@-@release@ Start 03/06/2020
