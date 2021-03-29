@@ -1,7 +1,0 @@
-The Debian Package indimail-auth
-----------------------------
-dh_make --native --single -p indimail-auth_1.0 \
-	--email indimail-auth@indimail.org
-Comments regarding the Package
-
- -- Manvendra Bhangui <indimail-auth@indimail.org>  Thu, 28 May 2020 13:47:55 +0530
