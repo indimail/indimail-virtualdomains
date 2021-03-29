@@ -5,6 +5,7 @@ on:
     paths:
       - '**/nssd-x/**'
       - '**/pam-multi-x/**'
+      - '**/indimail-auth/**'
       - '**/prepare_obs'
       - '**/catChangeLog'
       - .github/workflows/indimail-auth-obs.yml

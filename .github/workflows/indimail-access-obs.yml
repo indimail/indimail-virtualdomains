@@ -5,7 +5,7 @@ on:
     paths:
       - '**/courier-imap-x/**'
       - '**/fetchmail-x/**'
-      - '**/indimail-auth/**'
+      - '**/indimail-access/**'
       - '**/prepare_obs'
       - '**/catChangeLog'
       - .github/workflows/indimail-access-obs.yml
