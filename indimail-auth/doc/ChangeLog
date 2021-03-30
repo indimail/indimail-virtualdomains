@@ -41,7 +41,7 @@ Release @version@-@release@ Start 21/05/2020
 24. stop start pwdlookup service on upgrade
 - 19/01/2021
 25. pam-support.c: display pam function in failure
-- 27/01/2021
+- 27/01/2021 - indimail-3.3
 26. pam-checkpwd.c: dovecot support added
 27. pam-checkpwd.c: env variable NATIVE_CHECKPASSWORD to comply exactly with
     checkpassword protocol

@@ -10,7 +10,7 @@ Release @version@-@release@ Start 02/06/2020
 05. Fixed compiler warnings on Darwin
 - 12/10/2020
 06. exec.c: replaced sys_siglist with strsignal()
-- 13/10/2020
+- 13/10/2020 - indimail-3.3
 07. added debuginfo package
 - 18/03/2021
 08. added github-obs integration

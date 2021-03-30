@@ -1,8 +1,8 @@
-* Sat Jun 20 2020 01:30:05 +0530 mbhangui@gmail.com 3.23-1.1%{?dist}
-Release 3.23 Start 20/06/2020
+*
+Release @version@-@release@ Start 20/06/2020
 - 20/06/2020
 01. added setgroups() before setuid() call
-- 13/10/2020
+- 13/10/2020 - indimail-3.3
 02. added debuginfo package
 
 * Mon Sep 10 2001 Philip Guenther <guenther@sendmail.com>

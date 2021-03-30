@@ -1,5 +1,5 @@
-* Wed May 06 2020 11:03:34 +0530 mbhangui@gmail.com 1.0-1.1%{?dist}
-Release 1.0 Start 13/03/2017
+*
+Release @version@-@release@ Start 13/03/2017
 - 13/03/2017
 1.  Created package for roundcube plugins
 - 16/03/2017
@@ -23,6 +23,6 @@ Release 1.0 Start 13/03/2017
 13. roundcube_config - updated for CentOS8
 14. generate ircube.spec from ircube.spec.in
 15. fix for opensuse ssl.conf and wwwrun group
-- 01/02/2021
+- 01/02/2021 - indimail-3.3
 16. roundcube_config: Fix value of PRIV_PASS
 17. roundcube_config: fixed path of cleandb.sh

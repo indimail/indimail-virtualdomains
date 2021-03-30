@@ -1,5 +1,5 @@
 *
-Release 2.1 Start 13/03/2021
+Release @version@-@release@ Start 13/03/2021
 - 14/03/2021
 01. Changes for making code github action, added workflow for CI
 02. compile without using mysql
