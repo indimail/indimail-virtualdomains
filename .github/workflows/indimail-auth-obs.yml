@@ -9,6 +9,7 @@ on:
       - '**/prepare_obs'
       - '**/catChangeLog'
       - .github/workflows/indimail-auth-obs.yml
+      - '!**/obs/*'
       - '!**/doc/*'
       - '!**.md'
 
