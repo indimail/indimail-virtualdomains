@@ -380,7 +380,7 @@ $ sudo make install-strip
 
 ## Build courier-imap
 
-Required for IMAP, POP3 to retrieve your mails
+Required for IMAP, POP3 to retreive your mails
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/courier-imap-x
@@ -405,7 +405,7 @@ $ sudo brew install pcre berkeley-db gdbm libidn
 
 ### Build fetchmail
 
-Optional. Required only if you want fetchmail to retrieve your mails
+Optional. Required only if you want fetchmail to retreive your mails
 
 ```
 $ cd /usr/local/src/indimail-virtualdomans/fetchmail-x
