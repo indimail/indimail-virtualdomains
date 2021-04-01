@@ -125,7 +125,7 @@ Without libidn2, indimail-mta will get built without [Internationalized Email Ad
 
 FreeBSD / Darwin OSX
 
-You require a MySQL server provided either by Oracle or by MariaDB. You also require the MySQL client libraries (either libmysqlcliebt or libmariadb). The steps below will help you do that.
+You require a MySQL server provided either by Oracle or by MariaDB. You also require the MySQL client libraries (either libmysqlclient or libmariadb). The steps below will help you do that.
 
 FreeBSD - Install the following using pkg
 
