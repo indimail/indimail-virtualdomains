@@ -11,6 +11,8 @@ config.sub
 configure
 conf-release
 debian/changelog
+debian/control
+debian/copyright
 debian/*.dsc
 debian/*.gz
 debian/indium.install
@@ -18,14 +20,12 @@ debian/postinst
 debian/postrm
 debian/README
 debian/rules
-debian/copyright
-debian/control
 fileman.tcl
 FMbrowse
 indium
+indium.changes
 indium-rpmlintrc
 indium.spec
-indium.changes
 install-sh
 kd
 *.la
