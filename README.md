@@ -81,7 +81,7 @@ Install the following packages using dnf/yum
 
 ```
 Universal
-gcc gcc-c++ make autoconf automaake libtool pkgconfig
+gcc gcc-c++ make autoconf automake libtool pkgconfig
 sed findutils diffutils gzip xz binutils coreutils grep flex bison
 glibc glibc-devel procps openssl openssl-devel mysql-devel
 libqmail-devel libqmail readline readline-devel ncurses-devel
@@ -112,8 +112,8 @@ Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 **Arch Linux**
 
 ```
-# pacman -S --needed archlinux-keyring
 # pacman -S --refresh --sysupgrade
+# pacman -S --needed archlinux-keyring
 # pacman -S base-devel diffutils coreutils openssl openldap mysql libidn libidn2 python
 ```
 
@@ -168,8 +168,7 @@ $ git clone https://github.com/mbhangui/indimail-mta.git
 NOTE: For Darwin (Mac OSX), install [MacPorts](https://www.macports.org/) or brew. You can look at this [document](https://paolozaino.wordpress.com/2015/05/05/how-to-install-and-use-autotools-on-mac-os-x/) for installing MacPorts.
 
 ```
-# port install autoconf libtool automake pkgconfig
-# port install openssl
+# port install autoconf libtool automake pkgconfig openssl
 # port update outdated
 ```
 
