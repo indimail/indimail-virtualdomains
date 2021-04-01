@@ -109,19 +109,25 @@ Remaining - libmysqlclient-dev
 Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 ```
 
-NOTE: For FreeBSD
+**Arch Linux**
 
 ```
+# pacman -S --needed archlinux-keyring
+# pacman -S --refresh --sysupgrade
+# pacman -S base-devel diffutils coreutils openssl openldap mysql libidn libidn2 python
+```
+
+**NOTES**
+
+You need libi2nd, without which, indimail-mta will get built without [Internationalized Email Addresses (RFC6530)](https://tools.ietf.org/html/rfc6530)
+
+```
+FreeBSD
 # pkg install pkgconf libidn2
-```
 
-NOTE: for Darwin
-
-```
+Darwin
 # port install pkgconfig libidn2
 ```
-
-Without libidn2, indimail-mta will get built without [Internationalized Email Addresses (RFC6530)](https://tools.ietf.org/html/rfc6530)
 
 FreeBSD / Darwin OSX
 
@@ -539,6 +545,26 @@ $ sudo make install-strip
 ```
 
 (check version in indimail-virtualdomains/iwebadmin-x/conf-version)
+
+## Build indium
+
+Optional. This is a desktop based gui that runs under your desktop manager gnome, kde, etc. You need to have tcl-devel and tk-devel installed.
+
+```
+$ cd /usr/local/src/indimail-virtualdomains/indium-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
+```
+
+(check version in indimail-virtualdomains/indium-x/conf-version)
+
+**NOTE**
+
+```
+For arch linux
+$ sudo pacman -S tcl tk
+```
 
 ## Setup & Configuration
 

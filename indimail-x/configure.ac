@@ -9,11 +9,10 @@ VERSION=$PACKAGE_VERSION
 AM_INIT_AUTOMAKE
 
 # Checks for programs.
-AC_PROG_LIBTOOL
+LT_INIT
 AC_PROG_LN_S
 AC_PROG_AWK
 AC_PROG_CC
-AC_PROG_CC_C99
 AC_CANONICAL_HOST
 AC_PROG_INSTALL
 AC_CONFIG_MACRO_DIR([m4])
@@ -74,8 +73,8 @@ esac
 # Checks for libraries.
 
 # Checks for header files.
-AC_ISC_POSIX
-AC_HEADER_STDC
+AC_PROG_EGREP
+
 AC_CHECK_HEADERS([ctype.h fcntl.h stdlib.h string.h sys/wait.h sys/types.h sys/socket.h unistd.h time.h sys/time.h])
 saveCPPFLAGS="$CPPFLAGS"
 CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/local/include/mysql -I/usr/local/mysql/include"
@@ -511,7 +510,7 @@ AC_SUBST(indimailgid)
 
 AC_MSG_CHECKING(for indimail user!!!)
 
-AC_TRY_RUN( [
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 
 #include <stdio.h>
 #include <pwd.h>
@@ -562,7 +561,7 @@ FILE *f;
 	}
 	return(0);
 }
-], [AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+]])],[AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)],[])
 
 if test ! -f indimail.uid
 then
@@ -1007,7 +1006,7 @@ dnl is to autodetect IPv6 and use it where available.
 dnl
 
 AC_ARG_ENABLE(ipv6,
-  AC_HELP_STRING([--disable-ipv6],[disable IPv6 support]),
+  AS_HELP_STRING([--disable-ipv6],[disable IPv6 support]),
   [case "${enable_ipv6}" in
     n|no)
       AC_MSG_RESULT([disabling IPv6 at user request])
@@ -1024,7 +1023,7 @@ AC_ARG_ENABLE(ipv6,
       ipv6=yes
       ;;
     *)
-      AC_MSG_ERROR([Invalid --enable-ipv6 argument \`$enable_ipv6'])
+      AC_MSG_ERROR([Invalid --enable-ipv6 argument '$enable_ipv6'])
       ;;
     esac
   ], [
@@ -1049,7 +1048,7 @@ fi
 
 if test "X$ipv6" = "Xyes"; then
   TYPE_STRUCT_SOCKADDR_IN6([],[
-    AC_MSG_RESULT([Disabling IPv6 support: your system does not support \`struct sockaddr_in6'])
+    AC_MSG_RESULT([Disabling IPv6 support: your system does not support 'struct sockaddr_in6'])
     ipv6=no
   ])
   if test "X$ipv6" = "Xyes"; then
@@ -1093,7 +1092,8 @@ AC_SUBST(MODFLAGS)
 AC_SUBST(HOST)
 AC_CONFIG_FILES([libindimail.pc:libindimail.pc.in],[], [])
 AC_CONFIG_FILES([indimail-release:indimail-release.in],[], [])
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
 
 (
 echo "---------- $PACKAGE $VERSION $target ----------"
