@@ -106,3 +106,4 @@ doc/bogoupgrade.1in
 doc/bogoutil.1in
 doc/bogotune.htmlin
 ar-lib
+config.in
