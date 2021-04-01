@@ -18,3 +18,10 @@ indimail-spamfilter-x/Makefile.in
 ircube-x/Makefile
 .github/indimail-virtualdomains.wiki
 .github/indimail-mta.wiki
+conf-release
+configure~
+config.h.in~
+config.in~
+config.guess~
+config.sub~
+configure.ac~
