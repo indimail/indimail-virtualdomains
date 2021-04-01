@@ -114,18 +114,6 @@ fi
 
 AC_DEFINE_UNQUOTED(AUTHCHANGEPASS,$changepass, [ Whether password changing should be enabled ])
 
-AC_PATH_PROGS(EXPECT, expect, expect, $LPATH)
-if test "$EXPECT" = "expect"
-then
-	AC_MSG_WARN(-----------------------------------------------------)
-	AC_MSG_WARN(expect not found - will not be able to change passwds)
-	AC_MSG_WARN(in webmail)
-	AC_MSG_WARN(-----------------------------------------------------)
-	sleep 5
-else
-	AC_DEFINE_UNQUOTED(HAVE_EXPECT, 1, [ Whether expect(1) is installed ])
-fi
-
 AC_PATH_PROGS(PASSWD, passwd, passwd, $LPATH)
 AC_SUBST(PASSWD)
 AC_ARG_WITH(authchangepwdir, [],
