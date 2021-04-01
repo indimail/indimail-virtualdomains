@@ -55,7 +55,7 @@
 %global packager @email@
 %endif
 
-Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
+Summary: POP3, IMAP Fetchmail Services for IndiMail
 Name: indimail-access
 Version: @version@
 Release: @release@%{?dist}
