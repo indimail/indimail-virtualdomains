@@ -87,7 +87,7 @@ Requires: indimail-mta > 2.6
 BuildRequires: openssl-devel rpm gcc gcc-c++ make coreutils grep
 BuildRequires: glibc glibc-devel openssl procps binutils
 BuildRequires: gzip autoconf automake libtool pkgconfig
-BuildRequires: sed findutils
+BuildRequires: sed findutils procps
 BuildRequires: xz bison flex
 BuildRequires: gettext-devel
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
