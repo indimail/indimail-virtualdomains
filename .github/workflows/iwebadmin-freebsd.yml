@@ -5,6 +5,8 @@ on:
     paths:
       - '**/iwebadmin-x/**'
       - '**/indimail-x/**'
+      - '**/prepare_obs'
+      - '**/catChangeLog'
       - .github/workflows/iwebadmin-freebsd.yml
       - '!**/iwebadmin-x/debian/*'
       - '!**/indimail-x/debian/*'

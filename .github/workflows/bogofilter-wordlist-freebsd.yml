@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - '**/bogofilter-wordlist-x/**'
+      - '**/prepare_obs'
+      - '**/catChangeLog'
       - .github/workflows/bogofilter-wordlist-freebsd.yml
       - '!**/bogofilter-wordlist-x/debian/*'
       - '!**/doc/*'
