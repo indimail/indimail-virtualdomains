@@ -17,7 +17,6 @@ mandir=@mandir@
 arch=$(shell uname -m)
 # check https://wiki.debian.org/Multiarch/Implementation#Dynamic_debian.2F.2A_files
 libd=$(shell if [ -d $(prefix)/lib/$(arch)-linux-gnu ] ; then echo lib/$(arch)-linux-gnu; else echo lib;fi)
-libdir=@libdir@
 courier_version=@courier_version@
 fetchmail_version=@fetchmail_version@
 version=@version@

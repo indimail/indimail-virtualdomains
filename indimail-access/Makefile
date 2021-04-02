@@ -4,7 +4,6 @@ indimaildir=/var/indimail
 sysconfdir=/etc/indimail
 shareddir=/usr/share/indimail
 libexecdir=/usr/libexec/indimail
-libdir=/usr/lib
 servicedir=/service
 logdir=/var/log/svc
 mandir=/usr/share/man
@@ -21,7 +20,6 @@ edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
-	-e 's,@libdir\@,$(libdir),g' \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@servicedir\@,$(servicedir),g' \
 	-e 's,@logdir\@,$(logdir),g' \
@@ -29,13 +27,15 @@ edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
 	-e 's,@email\@,$(email),g' \
+	-e 's,@defaultDomain\@,$(defaultDomain),g' \
 	-e 's,@courier_version\@,$(courier_version),g' \
 	-e 's,@fetchmail_version\@,$(fetchmail_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
 all: indimail-access.spec indimail-access.changes indimail-access-rpmlintrc \
 indimail-access-permissions.easy indimail-access-permissions.secure \
-indimail-access-permissions.paranoid perm_list.imap debian/Makefile
+indimail-access-permissions.paranoid perm_list.imap debian/Makefile \
+PKGBUILD
 
 clean: indimail-access.spec indimail-access.changes indimail-access-rpmlintrc \
 indimail-access-permissions.easy indimail-access-permissions.secure \
@@ -49,6 +49,8 @@ indimail-access.spec: indimail-access.spec.in catChangeLog Makefile \
 conf-version conf-release doc/ChangeLog conf-email \
 ../fetchmail-x/conf-version ../courier-imap-x/conf-version
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
+PKGBUILD: PKGBUILD.in indimail-access.changes
+	cat $@.in | $(edit) > $@
 indimail-access.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
 indimail-access-rpmlintrc: indimail-access-rpmlintrc.in Makefile
