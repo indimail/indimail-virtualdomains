@@ -70,6 +70,8 @@ case "$SYSTEM" in
 		else
 			libdir=/usr/lib
 		fi
+    elif [ -f /etc/arch-release ] ; then
+        libdir=/usr/lib
 	else
 		if [ -d /usr/lib64 ] ; then
 			libdir=/usr/lib64

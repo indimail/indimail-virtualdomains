@@ -1,0 +1,317 @@
+# Maintainer: @email@
+pkgname=indimail-access
+pkgver=@version@
+pkgrel=@release@
+pkgdesc="POP3, IMAP Fetchmail Services for IndiMail"
+arch=('i686' 'x86_64')
+url="https://github.com/mbhangui/indimail-virtualdomains"
+license=('GPL3')
+groups=('base-devel')
+depends=('coreutils' 'python3' 'openssl')
+makedepends=('libidn' 'pkgconfig' 'gettext' 'flex' 'gdbm' 'sed' 'findutils')
+source=("courier-imap-@courier_version@.tar.gz" "fetchmail-@fetchmail_version@.tar.gz" "indimail-access-rpmlintrc")
+sha256sums=('SKIP' 'SKIP' 'SKIP')
+provides=('indimail-access' 'courier-imap=@courier_version@' 'fetchmail=@fetchmail_version@')
+options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+_sysconfdir=@sysconfdir@
+_myconfdir=$(echo ${_sysconfdir} | cut -c2-)
+backup=(${_myconfdir}/{'fetchmailrc','pop3d-ssl.dist','imapd-ssl.dist'}
+        ${_myconfdir}/{'pop3d.cnf','imapd.cnf','pop3d.dist','imapd.dist'}
+        ${_myconfdir}/{'authmodulelist','quotawarnmsg.example'}
+        ${_myconfdir}/tcp/{'tcp.imap','tcp.pop3'})
+changelog=$pkgname.changes
+_prefix=@prefix@
+_libexecdir=@libexecdir@
+_servicedir=@servicedir@
+_logdir=@logdir@
+_defaultDomain=@defaultDomain@
+_build_on_obs=0
+_nodksignatures=0
+
+build() {
+  cd "$srcdir/courier-imap-@courier_version@"
+  ./default.configure
+  make
+  cd "$srcdir/fetchmail-@fetchmail_version@"
+  ./default.configure
+  make
+  cd $srcdir
+  (
+  echo "NAME=${pkgname}"
+  echo "Description=\"IndiMail Access Package\""
+  echo "ACCESS_version="${pkgver}-${pkgrel}""
+  echo "ID=${pkgname}"
+  echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
+  echo "PACKAGE_BUGREPORT=\"'@email@'\""
+  ) > ${pkgname}-release
+}
+
+package() {
+  depends=('indimail-mta>2.6')
+  cd "$srcdir/courier-imap-@courier_version@"
+  make DESTDIR=${pkgdir} install
+  cd "$srcdir/fetchmail-@fetchmail_version@"
+  make DESTDIR=${pkgdir} install
+  mkdir -p "$pkgdir""${_sysconfdir}"
+  cd $srcdir
+  cp ${pkgname}-release ${pkgdir}${_sysconfdir}
+}
+
+pre_install() {
+if [ -d /run ] ; then
+  rundir=/run/svscan
+elif [ -d /var/run ] ; then
+  rundir=/var/run/svscan
+else
+  rundir=${_servicedir}
+fi
+for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
+  qmail-pop3d.110 qmail-pop3d-ssl.995 fetchmail
+do
+  ${_prefix}/bin/svstat ${_servicedir}/$i >/dev/null 2>&1
+  if [ $? -eq 0 ] ; then
+    mkdir -p ${rundir}/$i
+    touch ${rundir}/$i/.down
+    ${_prefix}/bin/svc -d {_servicedir}/$i
+  fi
+done
+}
+
+post_install() {
+  echo "Doing Post Install"
+  echo ""
+  echo " 1. Configure ${_logdir} for multilog"
+  echo " 2. Configure ${_servicedir}"
+  echo " 3. Configure fetchmail service"
+  echo " 4. Configure IMAP/POP3 services"
+  echo " 5. Configure tcprules database for IMAP, POP3"
+  echo ""
+
+  (
+  # Recreate ld.so links and cache
+  if [ "${_prefix}" != "/usr" ] ; then
+    if [ -d ${confdir}/ld.so.conf.d ] ; then
+      echo ${_prefix}/lib > ${confdir}/ld.so.conf.d/indimail-access-${HOSTTYPE}.conf
+    fi
+    /sbin/ldconfig
+  fi
+
+  for i in fetchmail imapd.143 imapd-ssl.993 pop3d.110 pop3d-ssl.995
+  do
+    mkdir -p ${_logdir}/$i
+    chown -R qmaill:nofiles ${_logdir}/$i
+  done
+
+  if [ ${_build_on_obs} -eq 1 ] ; then
+    default_domain=${_defaultDomain}
+  else
+    if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+      default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+    else
+      default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${_defaultDomain})
+    fi
+  fi
+
+  if [ " $HOSTTYPE" = " x86_64" ] ; then
+    fetchmail_mem=104857600
+    imap_pop3_mem=104857600
+    imapspop3_mem=104857600
+  else
+    fetchmail_mem=52428800
+    imap_pop3_mem=52428800
+    imapspop3_mem=52428800
+  fi
+
+  # fetchmail
+  if [ -d /run ] ; then
+    logfifo="/run/indimail/logfifo"
+    mkdir -p /run/indimail
+  elif [ -d /var/run ] ; then
+    logfifo="/var/run/indimail/logfifo"
+    mkdir -p /var/run/indimail
+  else
+    logfifo="/tmp/logfifo"
+  fi
+  if [ ${_nodksignatures} -eq 0 ] ; then
+    if [ -f ${_sysconfdir}/control/default ] ; then
+      ver_opt="both"
+    else
+      ver_opt="none"
+    fi
+  else
+    ver_opt="none"
+  fi
+  extra_opt=""
+  if [ -x ${_prefix}/bin/bogofilter ] ; then
+    extra_opt="--spamfilter=\"${_prefix}/bin/bogofilter -p -d ${_sysconfdir}\""
+    extra_opt="$extra_opt --logfilter=$logfifo --rejectspam=0 --spamexitcode=0"
+  fi
+  if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+    if [ -d ${confdir}/clamav ] ; then
+      mysysconfdir=${confdir}/clamav
+    elif [ -d ${confdir}/clamd.d ] ; then
+      mysysconfdir=${confdir}/clamd.d
+    elif [ -d ${sysconfdir} ] ; then
+      mysysconfdir=${sysconfdir}
+    else
+      mysysconfdir=${confdir}
+    fi
+    qhpsi="/usr/bin/clamdscan %s --config=${mysysconfdir}/scan.conf --fdpass --quiet --no-summary"
+    extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
+  fi
+  eval ${_prefix}/sbin/svctool --fetchmail --servicedir=${_servicedir} \
+    --qbase=${qbase} --qcount=${qcount} --qstart=1 \
+    --cntrldir=control --memory=${fetchmail_mem} --fsync --syncdir \
+    --dkverify=$ver_opt $extra_opt
+  #
+  # user has to create fetchmailrc before which fetchmail cannot be started
+  #
+  touch ${_servicedir}/fetchmail/down
+
+  # IMAP/POP3
+  ${_prefix}/sbin/svctool --imap=143 --servicedir=${_servicedir} --localip=0 --maxdaemons=40 \
+    --maxperip=25 --query-cache --default-domain=$default_domain --memory=${imap_pop3_mem} \
+    --starttls --infifo=infifo
+  ${_prefix}/sbin/svctool --imap=993 --servicedir=${_servicedir} --localip=0 --maxdaemons=40 \
+    --maxperip=25 --query-cache --default-domain=$default_domain --memory=${imapspop3_mem} \
+    --ssl --infifo=infifo
+  ${_prefix}/sbin/svctool --pop3=110 --servicedir=${_servicedir} --localip=0 --maxdaemons=40 \
+    --maxperip=25 --query-cache --default-domain=$default_domain --memory=${imap_pop3_mem} \
+    --starttls --infifo=infifo
+  ${_prefix}/sbin/svctool --pop3=995 --servicedir=${_servicedir} --localip=0 --maxdaemons=40 \
+    --maxperip=25 --query-cache --default-domain=$default_domain --memory=${imapspop3_mem} \
+    --ssl --infifo=infifo
+
+  # add courier-imap auth module authindi
+  if [ -f ${_libexecdir}/imapmodules/authindi ] ; then
+    echo "adding authindi as IMAP/POP3 auth module"
+    for i in `ls -d ${_servicedir}/qmail-pop3d* ${_servicedir}/qmail-imapd*`
+    do
+      if [ -s $i/variables/IMAPMODULES ] ; then
+        grep authindi $i/variables/IMAPMODULES > /dev/null
+        if [ $? -ne 0 ] ; then
+          AUTHM="`cat $i/variables/IMAPMODULES` authindi"
+          echo $AUTHM > $i/variables/IMAPMODULES
+        fi
+      fi
+    done
+  fi
+
+  # rebuild cdb
+  for i in imap pop3
+  do
+    for j in `/bin/ls ${_sysconfdir}/tcp/tcp*.$i 2>/dev/null`
+    do
+      t1=`date +'%s' -r $j`
+      if [ -f $j.cdb ] ; then
+        t2=`date +'%s' -r $j.cdb`
+      else
+        t2=0
+      fi
+      if [ $t1 -gt $t2 ] ; then
+        echo "Creating CDB $j.cdb"
+        ${_prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
+          && chown indimail:indimail $j.cdb
+      fi
+    done
+  done
+
+  # turn off automatic refresh for services during first time installation
+  svc_list=""
+  for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
+    qmail-pop3d.110 qmail-pop3d-ssl.995
+  do
+    svc_list="$svc_list ${_servicedir}/$i"
+    # save variables
+    ${_prefix}/sbin/svctool --servicedir=${_servicedir} --service-name=$i \
+      --export-variables=${_servicedir}/$i/variables/.variables  --force
+  done
+  ${_prefix}/sbin/svctool --servicedir=${_servicedir} --norefreshsvc="0 $svc_list"
+  ) >> /var/log/indimail-access-setup.log 2>&1
+  echo
+  echo "Check /var/log/indimail-access-setup.log for the detailed installation log!!!"
+}
+
+post_upgrade() {
+  # we are doing upgrade
+  (
+  echo "doing post upgrade activities"
+  if [ "${_prefix}" != "/usr" ] ; then
+    /sbin/ldconfig
+  fi
+
+  # refresh indimail services
+  svc_list=""
+  for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
+    qmail-pop3d.110 qmail-pop3d-ssl.995
+  do
+    if [ -z "$svc_list" ] ; then
+      svc_list="${_servicedir}/$i"
+    else
+      svc_list="$svc_list ${_servicedir}/$i"
+    fi
+  done
+  if [ -d /run ] ; then
+    rundir=/run/svscan
+  elif [ -d /var/run ] ; then
+    rundir=/var/run/svscan
+  else
+    rundir=${_servicedir}
+  fi
+  # restart services
+  ${_prefix}/sbin/svctool --servicedir=${_servicedir} --refreshsvc="$svc_list"
+  for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
+    qmail-pop3d.110 qmail-pop3d-ssl.995 fetchmail
+  do
+    ${_prefix}/bin/svok ${_servicedir}/$i
+    if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
+      rm -f ${rundir}/$i/.down
+      ${_prefix}/bin/svc -u ${_servicedir}/$i
+    fi
+  done
+  ) >> /var/log/indimail-access-setup.log 2>&1
+}
+
+post_remove() {
+  ID=$(id -u)
+  if [ $ID -ne 0 ] ; then
+    echo "You are not root" 1>&2
+    exit 1
+  fi
+  (
+  echo "removing startup services"
+  for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
+  qmail-pop3d.110 qmail-pop3d-ssl.995 \
+  qmail-imapd.4143 qmail-pop3d.4110
+  do
+    if [ -d ${_servicedir}/$i -o -L ${_servicedir}/$i ] ; then
+      touch ${_servicedir}/$i/down
+      svc -dx ${_servicedir}/$i
+    fi
+    if [ -d ${_servicedir}/$i/log -o -L ${_servicedir}/$i/log ] ; then
+      touch ${_servicedir}/$i/log/down
+      svc -dx ${_servicedir}/$i/log
+      fi
+    if [ -d ${_servicedir}/$i -o -L ${_servicedir}/$i ] ; then
+      rm -rf ${_servicedir}/$i || true
+    fi
+  done
+
+  echo "removing logs"
+  if [ -h ${_logdir} ] ; then
+    log_dir=`/bin/ls -ld ${_logdir} | /usr/bin/awk '{print $10}'`
+  else
+    log_dir=${_logdir}
+  fi
+
+  for i in fetchmail imapd.143 imapd-ssl.993
+  do
+    rm -rf $log_dir/$i
+  done
+
+  if [ "${_prefix}" != "/usr" ] ; then
+    echo "recreating ld.so cache"
+    /sbin/ldconfig
+  fi
+  ) >> /var/log/indimail-setup.log 2>&1
+}

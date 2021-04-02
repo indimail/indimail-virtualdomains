@@ -49,7 +49,10 @@ indimail-access.spec: indimail-access.spec.in catChangeLog Makefile \
 conf-version conf-release doc/ChangeLog conf-email \
 ../fetchmail-x/conf-version ../courier-imap-x/conf-version
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
-PKGBUILD: PKGBUILD.in indimail-access.changes
+PKGBUILD: PKGBUILD.in catChangeLog Makefile \
+conf-version conf-release doc/ChangeLog conf-email \
+../fetchmail-x/conf-version ../courier-imap-x/conf-version \
+indimail-access.changes
 	cat $@.in | $(edit) > $@
 indimail-access.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@

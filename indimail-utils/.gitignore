@@ -11,3 +11,4 @@ debian/control
 debian/obs_deb_prep
 debian/*.dsc
 debian/indimail-utils.install
+PKGBUILD

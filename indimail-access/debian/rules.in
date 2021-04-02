@@ -20,6 +20,7 @@ libd=$(shell if [ -d $(prefix)/lib/$(arch)-linux-gnu ] ; then echo lib/$(arch)-l
 courier_version=@courier_version@
 fetchmail_version=@fetchmail_version@
 version=@version@
+release=@release@
 rm=/bin/rm
 cp=/bin/cp
 
@@ -69,7 +70,7 @@ build-stamp:
 	( \
 	echo NAME=indimail-access; \
 	echo Description=\"IndiMail Authentication Package\"; \
-	echo ACCESS_version=$(version); \
+	echo ACCESS_version=$(version)-$(release); \
 	echo ID=indimail-access; \
 	echo HOME_URL="https://github.com/mbhangui/indimail-virtualdomains"; \
 	echo PACKAGE_BUGREPORT=\"'@email@'\"; \

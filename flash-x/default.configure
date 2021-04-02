@@ -50,6 +50,7 @@ esac
 ./configure \
 	--prefix=$prefix \
 	--libdir=$libdir \
+	--sysconfdir=$sysconfdir \
 	--datarootdir=$prefix/share/indimail \
 	--mandir=$mandir \
 	--enable-modbase=$prefix/lib/indimail

@@ -30,12 +30,17 @@ edit = sed \
 	-e 's,@pam_multi_version\@,$(pam_multi_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
-all: indimail-auth.spec indimail-auth.changes debian/Makefile
+all: indimail-auth.spec indimail-auth.changes debian/Makefile PKGBUILD
 
 indimail-auth.spec: indimail-auth.spec.in catChangeLog Makefile \
 conf-version conf-release doc/ChangeLog conf-email \
 ../nssd-x/conf-version ../pam-multi-x/conf-version
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
+PKGBUILD: PKGBUILD.in catChangeLog Makefile \
+conf-version conf-release doc/ChangeLog conf-email \
+../nssd-x/conf-version ../pam-multi-x/conf-version \
+indimail-auth.changes
+	cat $@.in | $(edit) > $@
 indimail-auth.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
 debian/Makefile: debian/Makefile.in conf-version conf-release \

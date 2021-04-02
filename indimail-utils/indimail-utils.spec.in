@@ -144,7 +144,7 @@ echo "------------------------------------------------------"
 (
 echo "NAME=%{name}"
 echo "Description=\"indimail utils package\""
-echo "indimail-util-version="%{version}""
+echo "indimail-util-version=%{version}-%{release}"
 echo "ID=%{name}"
 echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
 echo "PACKAGE_BUGREPORT=\"'@email@'\""

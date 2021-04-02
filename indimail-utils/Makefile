@@ -28,12 +28,17 @@ edit = sed \
 	-e 's,@mpack_version\@,$(mpack_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
-all: indimail-utils.spec indimail-utils.changes debian/Makefile
+all: indimail-utils.spec indimail-utils.changes debian/Makefile PKGBUILD
 
 indimail-utils.spec: indimail-utils.spec.in catChangeLog Makefile conf-email \
 conf-version conf-release ../altermime-x/conf-version ../ripmime-x/conf-version \
 ../mpack-x/conf-version ../flash-x/conf-version ../fortune-x/conf-version doc/ChangeLog
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
+PKGBUILD: PKGBUILD.in catChangeLog Makefile conf-email \
+conf-version conf-release ../altermime-x/conf-version ../ripmime-x/conf-version \
+../mpack-x/conf-version ../flash-x/conf-version ../fortune-x/conf-version doc/ChangeLog \
+indimail-utils.changes
+	cat $@.in | $(edit) > $@
 indimail-utils.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
 debian/Makefile: debian/Makefile.in ../altermime-x/conf-version ../ripmime-x/conf-version \

@@ -14,6 +14,7 @@ sysconfdir=@sysconfdir@
 libexecdir=@libexecdir@
 mandir=@mandir@
 version=@version@
+release=@release@
 nssd_version=@nssd_version@
 pam_multi_version=@pam_multi_version@
 pam_moduledir=@pam_moduledir@
@@ -76,7 +77,7 @@ build-stamp:
 	( \
 	echo NAME=indimail-auth; \
 	echo Description=\"IndiMail Authentication Package\"; \
-	echo AUTH_version=$(version); \
+	echo AUTH_version=$(version)-$(release); \
 	echo ID=indimail-auth; \
 	echo HOME_URL="https://github.com/mbhangui/indimail-virtualdomains"; \
 	echo PACKAGE_BUGREPORT=\"'@email@'\"; \

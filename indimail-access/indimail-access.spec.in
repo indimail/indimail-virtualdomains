@@ -193,7 +193,7 @@ echo "------------------------------------------------------"
 (
 echo "NAME=%{name}"
 echo "Description=\"IndiMail Access Package\""
-echo "ACCESS_version="%{version}""
+echo "ACCESS_version=%{version}-%{release}"
 echo "ID=%{name}"
 echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
 echo "PACKAGE_BUGREPORT=\"'@email@'\""
