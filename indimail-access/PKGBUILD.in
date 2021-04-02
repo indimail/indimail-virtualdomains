@@ -34,6 +34,7 @@ _nodksignatures=0
 build() {
   cd "$srcdir/courier-imap-@courier_version@"
   autoreconf -fi
+  automake -acf
   if [ ! -f depcomp -a -f libs/unicode/depcomp ] ; then
     cp libs/unicode/depcomp .
   elif [ -f depcomp -a ! -f libs/unicode/depcomp ] ; then
@@ -42,9 +43,6 @@ build() {
     echo "depcomp missing" 1>&2
     exit 1
   fi
-  cd libs/unicode
-  automake -acf
-  cd ../..
   ./configure --prefix=${_prefix} --libexecdir=${_libexecdir} --bindir=${_prefix}/bin \
     --mandir=${_mandir} --sysconfdir=${_sysconfdir} --libdir=${_libdir} \
     --datarootdir=${_shareddir} --with-certsdir=${_sysconfdir}/certs \
