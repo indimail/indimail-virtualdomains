@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT([courier-unicode], [2.2.2], [courier-users@lists.sourceforge.net])
+AC_INIT([courier-unicode],[2.2.2],[courier-users@lists.sourceforge.net])
 
 >confdefs.h  # Kill PACKAGE_ macros
 
@@ -15,7 +15,7 @@ AM_INIT_AUTOMAKE([foreign no-define dist-bzip2])
 dnl Checks for programs.
 
 AC_PROG_MAKE_SET
-AM_PROG_LIBTOOL
+LT_INIT
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_CC
@@ -45,13 +45,13 @@ dnl Checks for library functions.
 have_langinfo_l=0
 
 AC_CHECK_FUNC(nl_langinfo_l,[
-    AC_TRY_COMPILE([
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <langinfo.h>
-],[
+]], [[
     nl_langinfo_l(CODESET, (locale_t)0);
-],[
+]])],[
    have_langinfo_l=1
-   ])])
+   ],[])])
 
 if test "$have_langinfo_l" != 0
 then
@@ -62,15 +62,13 @@ else
 fi
 
 
-AC_TRY_COMPILE([
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <uchar.h>
-],[
+]], [[
 char32_t c=0;
-],
-[
+]])],[
 HAVE_UCHAR_H=1
-],
-[
+],[
 HAVE_UCHAR_H=0
 ])
 
@@ -133,9 +131,10 @@ HVERSION="$v$r$p"
 AC_SUBST(HVERSION)
 
 AM_CONDITIONAL(HAVE_DOCS,[test -f $srcdir/docbook/icon.gif])
-AC_OUTPUT(Makefile
+AC_CONFIG_FILES([Makefile
 	packaging/freebsd10/Makefile
 	courier-unicode.spec
 	courier-unicode.h
 	courier-unicode-version.m4
-)
+])
+AC_OUTPUT
