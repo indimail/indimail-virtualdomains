@@ -43,6 +43,9 @@ build() {
     echo "depcomp missing" 1>&2
     exit 1
   fi
+  cd libs/unicode
+  automake --copy --add-missing
+  cd ../..
   ./configure --prefix=${_prefix} --libexecdir=${_libexecdir} --bindir=${_prefix}/bin \
     --mandir=${_mandir} --sysconfdir=${_sysconfdir} --libdir=${_libdir} \
     --datarootdir=${_shareddir} --with-certsdir=${_sysconfdir}/certs \
