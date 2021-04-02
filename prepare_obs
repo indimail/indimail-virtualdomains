@@ -65,10 +65,10 @@ prepare_artifacts()
         fi
     done
 
-    for i in spec changes
+    for i in $pkg_name.spec $pkg_name.changes PKGBUILD
     do
-      if [ -f $pkg_name.$i ] ; then
-        cp $pkg_name.$i $stage
+      if [ -f $i ] ; then
+        cp $i $stage
       fi
     done
 
@@ -114,7 +114,7 @@ prepare_artifacts()
   fi
 
   # remove debian directory from archive
-  /bin/rm -rf $pkg_name-$ver/debian
+  /bin/rm -rf $pkg_name-$ver/debian $pkg_name-$ver/.git
   tar cfz $pkg_name-$ver.tar.gz $pkg_name-$ver
   if [ $multi_mode -eq 0 ] ; then
     /bin/rm -rf $pkg_name-$ver
