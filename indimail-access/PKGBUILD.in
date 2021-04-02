@@ -21,8 +21,11 @@ backup=(${_myconfdir}/{'fetchmailrc','pop3d-ssl.dist','imapd-ssl.dist'}
         ${_myconfdir}/tcp/{'tcp.imap','tcp.pop3'})
 changelog=$pkgname.changes
 _prefix=@prefix@
+_libdir=@prefix@/lib
+_shareddir=@shareddir@
 _libexecdir=@libexecdir@
 _servicedir=@servicedir@
+_mandir=@mandir@
 _logdir=@logdir@
 _defaultDomain=@defaultDomain@
 _build_on_obs=0
@@ -30,10 +33,18 @@ _nodksignatures=0
 
 build() {
   cd "$srcdir/courier-imap-@courier_version@"
-  ./default.configure
+  autoreconf -fiv
+  ./configure --prefix=${_prefix} --libexecdir=${_libexecdir} --bindir=${_prefix}/bin \
+    --mandir=${_mandir} --sysconfdir=${_sysconfdir} --libdir=${_libdir} \
+    --datarootdir=${_shareddir} --with-certsdir=${_sysconfdir}/certs \
+    --with-mailer=${_prefix}/bin/sendmail --disable-root-check --with-redhat \
+    --without-userdb --without-authcustom --without-authchangepwdir \
+    --without-authgeneric --with-authshadow --with-authpam --with-authpwd
   make
   cd "$srcdir/fetchmail-@fetchmail_version@"
-  ./default.configure
+  ./configure --prefix=${_prefix} --libexecdir=${_libexecdir} --sysconfdir=${_sysconfdir} \
+    --datarootdir=${_shareddir} --mandir=${_mandir} \
+    --enable-indimail --with-ssl
   make
   cd $srcdir
   (
