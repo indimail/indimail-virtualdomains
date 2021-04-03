@@ -33,25 +33,7 @@ _nodksignatures=0
 
 build() {
   cd "$srcdir/courier-imap-@courier_version@"
-  autoreconf -fi
-  automake -acf
-  if [ ! -f depcomp -a -f libs/unicode/depcomp ] ; then
-    cp libs/unicode/depcomp .
-  elif [ -f depcomp -a ! -f libs/unicode/depcomp ] ; then
-    cp ./depcomp libs/unicode/depcomp
-  elif [ ! -f depcomp -a ! -f libs/unicode/depcomp ] ; then
-    echo "depcomp missing" 1>&2
-    exit 1
-  fi
-  cd libs/unicode
-  automake --copy --add-missing
-  cd ../..
-  ./configure --prefix=${_prefix} --libexecdir=${_libexecdir} --bindir=${_prefix}/bin \
-    --mandir=${_mandir} --sysconfdir=${_sysconfdir} --libdir=${_libdir} \
-    --datarootdir=${_shareddir} --with-certsdir=${_sysconfdir}/certs \
-    --with-mailer=${_prefix}/bin/sendmail --disable-root-check --with-redhat \
-    --without-userdb --without-authcustom --without-authchangepwdir \
-    --without-authgeneric --with-authshadow --with-authpam --with-authpwd
+  ./default.configure
   make
   cd "$srcdir/fetchmail-@fetchmail_version@"
   ./configure --prefix=${_prefix} --libexecdir=${_libexecdir} --sysconfdir=${_sysconfdir} \
