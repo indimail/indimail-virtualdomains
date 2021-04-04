@@ -9,7 +9,7 @@ license=('GPL3')
 groups=('base-devel')
 depends=('coreutils' 'python3' 'openssl')
 makedepends=('libidn' 'pkgconfig' 'gettext' 'flex' 'gdbm' 'sed' 'findutils' 'procps')
-source=("courier-imap-@courier_version@.tar.gz" "fetchmail-@fetchmail_version@.tar.gz" "indimail-access-rpmlintrc")
+source=('courier-imap-@courier_version@.tar.gz' 'fetchmail-@fetchmail_version@.tar.gz' "${pkgname}.changes")
 sha256sums=('SKIP' 'SKIP' 'SKIP')
 provides=('indimail-access' 'courier-imap=@courier_version@' 'fetchmail=@fetchmail_version@')
 options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
@@ -19,7 +19,7 @@ backup=(${_myconfdir}/{'fetchmailrc','pop3d-ssl.dist','imapd-ssl.dist'}
         ${_myconfdir}/{'pop3d.cnf','imapd.cnf','pop3d.dist','imapd.dist'}
         ${_myconfdir}/{'authmodulelist','quotawarnmsg.example'}
         ${_myconfdir}/tcp/{'tcp.imap','tcp.pop3'})
-changelog=$pkgname.changes
+changelog=${pkgname}.changes
 _prefix=@prefix@
 _libdir=@prefix@/lib
 _shareddir=@shareddir@
@@ -40,6 +40,14 @@ build() {
     --datarootdir=${_shareddir} --mandir=${_mandir} \
     --enable-indimail --with-ssl
   make
+}
+
+package() {
+  depends=('indimail-mta>2.6')
+  cd "$srcdir/courier-imap-@courier_version@"
+  make DESTDIR=${pkgdir} install
+  cd "$srcdir/fetchmail-@fetchmail_version@"
+  make DESTDIR=${pkgdir} install
   cd $srcdir
   (
   echo "NAME=${pkgname}"
@@ -49,37 +57,32 @@ build() {
   echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
   echo "PACKAGE_BUGREPORT=\"'@email@'\""
   ) > ${pkgname}-release
+  install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
+  install -D -m 0644 ${pkgname}-release "$pkgdir"${_sysconfdir}/${pkgname}-release
 }
 
-package() {
-  depends=('indimail-mta>2.6')
-  cd "$srcdir/courier-imap-@courier_version@"
-  make DESTDIR=${pkgdir} install
-  cd "$srcdir/fetchmail-@fetchmail_version@"
-  make DESTDIR=${pkgdir} install
-  mkdir -p "$pkgdir""${_sysconfdir}"
-  cd $srcdir
-  cp ${pkgname}-release ${pkgdir}${_sysconfdir}
+stop_servce() {
+  if [ -d /run ] ; then
+    rundir=/run/svscan
+  elif [ -d /var/run ] ; then
+    rundir=/var/run/svscan
+  else
+    rundir=${_servicedir}
+  fi
+  for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
+    qmail-pop3d.110 qmail-pop3d-ssl.995 fetchmail
+  do
+    ${_prefix}/bin/svstat ${_servicedir}/$i >/dev/null 2>&1
+    if [ $? -eq 0 ] ; then
+      mkdir -p ${rundir}/$i
+      touch ${rundir}/$i/.down
+      ${_prefix}/bin/svc -d ${_servicedir}/$i
+    fi
+  done
 }
 
 pre_install() {
-if [ -d /run ] ; then
-  rundir=/run/svscan
-elif [ -d /var/run ] ; then
-  rundir=/var/run/svscan
-else
-  rundir=${_servicedir}
-fi
-for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
-  qmail-pop3d.110 qmail-pop3d-ssl.995 fetchmail
-do
-  ${_prefix}/bin/svstat ${_servicedir}/$i >/dev/null 2>&1
-  if [ $? -eq 0 ] ; then
-    mkdir -p ${rundir}/$i
-    touch ${rundir}/$i/.down
-    ${_prefix}/bin/svc -d {_servicedir}/$i
-  fi
-done
+  stop_service
 }
 
 post_install() {
@@ -237,6 +240,10 @@ post_install() {
   echo "Check /var/log/indimail-access-setup.log for the detailed installation log!!!"
 }
 
+pre_upgrade() {
+  stop_service
+}
+
 post_upgrade() {
   # we are doing upgrade
   (
@@ -278,11 +285,6 @@ post_upgrade() {
 }
 
 post_remove() {
-  ID=$(id -u)
-  if [ $ID -ne 0 ] ; then
-    echo "You are not root" 1>&2
-    exit 1
-  fi
   (
   echo "removing startup services"
   for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \

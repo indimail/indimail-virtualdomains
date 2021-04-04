@@ -1,0 +1,680 @@
+# Maintainer: @email@
+pkgname=('indimail' 'libindimail')
+pkgver=@version@
+pkgrel=@release@
+pkgdesc="Virtual Domains & Messaging Platform"
+arch=('i686' 'x86_64')
+url="https://github.com/mbhangui/indimail-virtualdomains"
+license=('GPL3')
+groups=('base-devel')
+depends=('coreutils' 'procps')
+makedepends=('pkgconfig' 'gettext' 'sed' 'findutils' 'ncurses' 'libqmail' 'mariadb-libs')
+source=("$pkgname-$pkgver.tar.gz")
+sha256sums=('SKIP')
+_sysconfdir=@sysconfdir@
+_myconfdir=$(echo ${_sysconfdir} | cut -c2-)
+options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+changelog=${pkgname}.changes
+_prefix=@prefix@
+_libdir=@prefix@/lib
+_libexecdir=@libexecdir@
+_servicedir=@servicedir@
+_mandir=@mandir@
+_logdir=@logdir@
+_defaultDomain=@defaultDomain@
+_build_on_obs=1
+_indimaildir=@indimaildir@
+_domaindir=@domaindir@
+_mbase=@basepath@
+_pkg_config_path=@prefix@/lib/pkgconfig
+_mysqlPrefix=@mysql_prefix@
+
+build() {
+  cd "$srcdir/indimail-@version@"
+  if [ ${_build_on_obs} -eq 1 ] ; then
+    default_domain=${_defaultDomain}
+  else
+    if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+      default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+    else
+      default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${_defaultDomain})
+    fi
+  fi
+  make clean >/dev/null 2>&1|| true; make distclean >/dev/null 2>&1 || true
+  autoreconf -fi
+  ./configure --prefix=${_prefix} --sysconfdir=${_sysconfdir} \
+    --mandir=${_mandir} --datarootdir=${_prefix}/share/indimail \
+    --with-pkgconfigdir=${_pkg_config_path} --libdir=${_libdir} \
+    --enable-domaindir=${_domaindir} --enable-mysqlprefix=${_mysqlPrefix} \
+    --libexecdir=${_libexecdir} --enable-qmaildir=${_indimaildir} \
+    --enable-basepath=${_mbase} --enable-logdir=${_logdir} \
+    --enable-tcprules-prog=${_prefix}/bin/tcprules \
+    --enable-tcpserver-file=${_sysconfdir}/tcp/tcp.smtp \
+    --enable-default-domain=${_defaultDomain} `cat config/indimail.opts`
+  make
+}
+
+package_indimail() {
+  backup=(${_myconfdir}/{'host.mysql','host.master','host.cntrl'}
+        ${_myconfdir}/{'osh.table','controfiles.i','procailrc','indimail.cnf'}
+        ${_myconfdir}/{'cronlist.i','indimail.mrtg.cfg','headerlist'}
+        ${_myconfdir}/tcp/tcp.poppass)
+  depends=('shadow' 'mysql' 'indimail-mta>2.6' 'libindimail')
+  install=archpkg1.install
+  conflicts=('indimail-mta<2.0')
+  provides=('indimail')
+  cd "$srcdir/indimail-@version@"
+  make DESTDIR=${pkgdir} install
+  make DESTDIR=${pkgdir} uninstall-pkgconfigDATA uninstall-libindimailLTLIBRARIES
+  rm -rf ${pkgdir}"${_pkg_config_path}"
+  install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
+  cd $srcdir
+  (
+  echo "NAME=${pkgname}"
+  echo "Description=\"IndiMail Virtual Domains\""
+  echo "version="${pkgver}-${pkgrel}""
+  echo "ID=${pkgname}"
+  echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
+  echo "PACKAGE_BUGREPORT=\"'@email@'\""
+  ) > ${pkgname}-release
+  install -Dm644 ${pkgname}-release "$pkgdir"${_sysconfdir}/${pkgname}-release
+}
+
+package_libindimail() {
+  install=archpkg2.install
+  cd "$srcdir/indimail-@version@"
+  make DESTDIR=${pkgdir} install-libindimailLTLIBRARIES install-pkgconfigDATA
+}
+
+#### INSTALL1 SCRIPTS ####
+_prefix=@prefix@
+_libdir=@prefix@/lib
+_libexecdir=@libexecdir@
+_servicedir=@servicedir@
+_logdir=@logdir@
+_defaultDomain=@defaultDomain@
+_build_on_obs=1
+_noproxy=0
+_uid=555
+_gid=555
+_username=indimail
+_groupname=indimail
+_indimaildir=@indimaildir@
+_qcount=5
+_qbase=@indimaildir@/queue
+_mbase=@basepath@
+_mysqlSocket=/var/run/mysqld/mysqld.sock
+_mysqlPrefix=@mysql_prefix@
+
+stop_service() {
+  # stop indimail services before upgrade
+  if [ -d /run ] ; then
+    rundir=/run/svscan
+  elif [ -d /var/run ] ; then
+    rundir=/var/run/svscan
+  else
+    rundir=${_servicedir}
+  fi
+  for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
+  qmail-poppass.106 qmail-logfifo
+  do
+    ${_prefix}/bin/svstat ${_servicedir}/$i >/dev/null 2>&1
+    if [ $? -eq 0 ] ; then
+      mkdir -p ${rundir}/$i
+      touch ${rundir}/$i/.down
+      ${_prefix}/bin/svc -d ${_servicedir}/$i
+    fi
+  done
+
+  if [ ${_noproxy} -eq 0 ] ; then
+    for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
+      proxy-pop3d.4110 proxy-pop3d-ssl.9110
+    do
+      ${_prefix}/bin/svstat ${_servicedir}/$i >/dev/null 2>&1
+      if [ $? -eq 0 ] ; then
+        mkdir -p ${rundir}/$i
+        touch ${rundir}/$i/.down
+          ${_prefix}/bin/svc -d ${_servicedir}/$i
+      fi
+    done
+  fi
+
+  # initialize setup log file
+  if [ -f ${_libexecdir}/iupgrade.sh ] ; then
+  (
+    echo "Running Custom Installation Script for pretrans"
+    /bin/sh ${_libexecdir}/iupgrade.sh pretrans noargs ${pkgver} $*
+  ) > /var/log/${pkgname}-setup.log 2>&1
+  fi
+}
+
+pre_install() {
+  (
+  echo "Checking for mandatory user/group mysql.."
+  /usr/bin/getent group  mysql > /dev/null || (echo "group mysql does not exist. Aborting..." && false)
+  if [ $? -ne 0 ] ; then
+    exit 1
+  fi
+  /usr/bin/getent passwd mysql > /dev/null || (echo "user  mysql does not exist. Aborting..." && false)
+  if [ $? -ne 0 ] ; then
+    exit 1
+  fi
+  #
+  # Create a users and groups. Do not report any problems if they already
+  # exists.
+  #
+  nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
+  if [ $nscd_up -ge 1 ] ; then
+    if [ -x ${confdir}/init.d/nscd ] ; then
+      ${confdir}/init.d/nscd stop
+    elif [ -f ${confdir}/lib/systemd/system/multi-user.target/nscd.service ] ; then
+      /bin/systemctl start nscd.service
+    fi
+  fi
+  echo "Adding IndiMail users/groups"
+  /usr/bin/getent group ${_groupname}  > /dev/null || /usr/sbin/groupadd -r -g ${_gid} ${_groupname} || true
+  if [ $? = 4 ] ; then
+    /usr/sbin/groupadd ${_groupname}
+  fi
+  # add for roundcube/php to access certs
+  /usr/bin/getent group apache    > /dev/null && /usr/sbin/usermod -aG qmail apache || true
+
+  /usr/bin/getent passwd ${_username} > /dev/null || /usr/sbin/useradd -r -g ${_groupname} -u ${_uid} -d ${_indimaildir} ${_username} || true
+  if [ $? = 4 ] ; then
+    /usr/sbin/useradd -r -g ${_groupname} -d ${_indimaildir} ${_username}
+  fi
+
+  if [ $nscd_up -ge 1 ] ; then
+    if [ -x ${confdir}/init.d/nscd ] ; then
+      ${confdir}/init.d/nscd start
+    elif [ -f ${confdir}/lib/systemd/system/multi-user.target/nscd.service ] ; then
+      /bin/systemctl start nscd.service
+    fi
+  fi
+  ) >> /var/log/indimail-setup.log 2>&1
+}
+
+post_install() {
+  echo "Doing Post Install"
+  echo ""
+  echo "1. Configure ${_logdir} for multilog"
+  echo "2. Configure ${_servicedir}"
+  echo "3. Configure IndiMail settings"
+  echo "4. Configure ${_sysconfdir}/indimail.cnf for MySQL service"
+  echo "5. Configure MySQL DB in ${_indimaildir}/mysqldb/data"
+  echo "6. Configure indisrvr, inlookup, poppass service"
+  echo "7. Configure tcprules database for popass"
+  echo "8. Configure selinux configuration"
+  echo "9. Configure default cron entries"
+  echo ""
+
+  (
+  # Recreate ld.so links and cache
+  if [ "${_prefx}" != "/usr" ] ; then
+    if [ -d ${confdir}/ld.so.conf.d ] ; then
+      echo ${_libdir} > ${confdir}/ld.so.conf.d/indimail-${HOSTTYPE}.conf
+    fi
+    /sbin/ldconfig
+  fi
+
+  if [ ${_build_on_obs} -eq 1 ] ; then
+    default_domain=${_defaultDomain}
+  else
+    if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+      default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+    else
+      default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${_defaultDomain})
+    fi
+  fi
+
+  if [ ${_noproxy} -eq 0 ] ; then
+    if [ " $HOSTTYPE" = " x86_64" ] ; then
+      imap_pop3_mem=104857600
+      imapspop3_mem=104857600
+    else
+      imap_pop3_mem=52428800
+      imapspop3_mem=52428800
+    fi
+    ${_prefix}/sbin/svctool --imap=4143 --servicedir=${_servicedir} --localip=0 --maxdaemons=40 \
+      --maxperip=25 --query-cache --default-domain=$default_domain --memory=${imap_pop3_mem} \
+      --proxy=143 --starttls --tlsprog=${_prefix}/bin/sslerator --infifo=infifo
+    ${_prefix}/sbin/svctool --imap=9143 --servicedir=${_servicedir} --localip=0 --maxdaemons=40 \
+      --maxperip=25 --query-cache --default-domain=$default_domain --memory=${imapspop3_mem} \
+      --proxy=143 --ssl --infifo=infifo
+    ${_prefix}/sbin/svctool --pop3=4110 --servicedir=${_servicedir} --localip=0 --maxdaemons=40 \
+      --maxperip=25 --query-cache --default-domain=$default_domain --memory=${imap_pop3_mem} \
+      --proxy=110 --starttls --tlsprog=${_prefix}/bin/sslerator --infifo=infifo
+    ${_prefix}/sbin/svctool --pop3=9110 --servicedir=${_servicedir} --localip=0 --maxdaemons=40 \
+      --maxperip=25 --query-cache --default-domain=$default_domain --memory=${imapspop3_mem} \
+      --proxy=110 --ssl --infifo=infifo
+
+    # add courier-imap auth module authindi
+    echo "adding authindi as Proxy IMAP/POP3 auth module"
+    for i in `ls -d ${_servicedir}/proxy-pop3d* ${_servicedir}/proxy-imapd*`
+    do
+      if [ -s $i/variables/IMAPMODULES ] ; then
+        grep authindi $i/variables/IMAPMODULES > /dev/null
+        if [ $? -ne 0 ] ; then
+          AUTHM="`cat $i/variables/IMAPMODULES` authindi"
+          echo $AUTHM > $i/variables/IMAPMODULES
+        fi
+      fi
+    done
+  fi
+
+  # add courier-imap auth module authindi
+  echo "adding authindi as IMAP/POP3 auth module"
+  for i in `ls -d ${_servicedir}/qmail-pop3d* ${_servicedir}/qmail-imapd*`
+  do
+    if [ -s $i/variables/IMAPMODULES ] ; then
+      grep authindi $i/variables/IMAPMODULES > /dev/null
+      if [ $? -ne 0 ] ; then
+        AUTHM="`cat $i/variables/IMAPMODULES` authindi"
+        echo $AUTHM > $i/variables/IMAPMODULES
+      fi
+    fi
+  done
+
+  # add checkpassword auth module vchkpass
+  echo "adding vchkpass as SMTP auth module"
+  for i in 465 587
+  do
+    if [ -s ${_servicedir}/qmail-smtpd.$i/variables/AUTHMODULES ] ; then
+      grep vchkpass ${_servicedir}/qmail-smtpd.$i/variables/AUTHMODULES > /dev/null
+      if [ $? -ne 0 ] ; then
+        AUTHM="`cat ${_servicedir}/qmail-smtpd.$i/variables/AUTHMODULES` /usr/sbin/vchkpass"
+        echo $AUTHM > ${_servicedir}/qmail-smtpd.$i/variables/AUTHMODULES
+      fi
+    fi
+  done
+
+  for i in logfifo inlookup indisrvr mrtg mysql.3306
+  do
+    mkdir -p ${_logdir}/$i
+    chown -R qmaill:nofiles ${_logdir}/$i
+  done
+
+  if [ ${_noproxy} -eq 0 ] ; then
+    for i in proxyIMAP.4143 proxyPOP3.4110
+    do
+      mkdir -p ${_logdir}/$i
+      chown -R qmaill:nofiles ${_logdir}/$i
+    done
+  fi
+
+  if [ -d /run ] ; then
+    logfifo="/run/indimail/logfifo"
+    mkdir -p /run/indimail
+  elif [ -d /var/run ] ; then
+    logfifo="/var/run/indimail/logfifo"
+    mkdir -p /var/run/indimail
+  else
+    logfifo="/tmp/logfifo"
+  fi
+
+  # fifolog service
+  ${_prefix}/sbin/svctool --fifologger=$logfifo --servicedir=${_servicedir}
+
+  # mrtg service
+  ${_prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=${_servicedir}
+
+  echo "Creating default mysql.host, tcprules, bogofilter-qfe, default domain dir"
+  ${_prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
+    --mysqlpass=ssh-1.5- --mysqlsocket=${_mysqlSocket} --default-domain=$default_domain
+
+  # MySQL
+  if [ -x ${_mysqlPrefix}/libexec/mysqld -o -x ${_mysqlPrefix}/sbin/mysqld -o -x ${_mysqlPrefix}/bin/mysqld ] ; then
+    error=`ps -e|grep mysqld|grep -v grep|wc -l` # another mysqld instance running ?
+    echo "Creating Database/Service for MySQL"
+    # MySQL Config Creation
+    ${_prefix}/sbin/svctool --config=mysql   --mysqlPrefix=${_mysqlPrefix} --mysqlsocket=${_mysqlSocket} \
+      --databasedir=${_indimaildir}/mysqldb
+    # MySQL Database Creation
+    ${_prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=${_mysqlPrefix} \
+      --databasedir=${_indimaildir}/mysqldb --base_path=${_mbase} --mysqlsocket="${_mysqlSocket}".tmp
+    # MySQL Supervise creation
+    ${_prefix}/sbin/svctool --mysql=3306 --servicedir=${_servicedir} --mysqlPrefix=${_mysqlPrefix} \
+      --databasedir=${_indimaildir}/mysqldb --config=${_sysconfdir}/indimail.cnf --default-domain=$default_domain
+    if [ ! -f ${_indimaildir}/mysqldb/data/indimail/indimail.frm -a ! -f ${_indimaildir}/mysqldb/data/indimail/indimail.ibd ] ; then
+      error=1
+    fi
+    if [ $error -gt 0 ] ; then
+      echo "Disabling mysqld service"
+      touch ${_servicedir}/mysql.3306/down
+    fi
+  else
+    echo "WARNING!!! Did not find mysqld in ${_mysqlPrefix}/{libexec,sbin}. Skipping MySQL configuration" 1>&2
+  fi
+
+  # IndiMail Daemons
+  #indisrvr
+  ${_prefix}/sbin/svctool --indisrvr=4000 --servicedir=${_servicedir} \
+    --localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
+    --certfile=${_sysconfdir}/certs/servercert.pem --ssl \
+    --hardquota=52428800 --base_path=${_mbase}
+
+  #inlookup
+  ${_prefix}/sbin/svctool --inlookup=infifo --servicedir=${_servicedir} --cntrldir=control \
+    --threads=5 --activeDays=60 --query-cache --password-cache --use-btree
+
+  #poppass
+  if [ " $HOSTTYPE" = " x86_64" ] ; then
+    poppass_mem=104857600
+  else
+    poppass_mem=52428800
+  fi
+  ${_prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
+    --memory=${poppass_mem} \
+    --certfile=${_sysconfdir}/certs/servercert.pem --ssl \
+    --setpassword=${_prefix}/sbin/vsetpass --servicedir=${_servicedir}
+
+  echo "Creating default indimail tcp access control files"
+  # rebuild cdb for poppass
+  for j in `/bin/ls ${_sysconfdir}/tcp/tcp*.poppass 2>/dev/null`
+  do
+    t1=`date +'%s' -r $j`
+    if [ -f $j.cdb ] ; then
+      t2=`date +'%s' -r $j.cdb`
+    else
+      t2=0
+    fi
+    if [ $t1 -gt $t2 ] ; then
+      echo "Creating CDB $j.cdb"
+      ${_prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
+        && chown indimail:indimail $j.cdb
+    fi
+  done
+  #update VIRTUAL_PKG_LIB for smtp service
+  indlib=`ls -d ${_libdir}/libindimail.so.*.*.* 2>/dev/null`
+  for port in 25 465 587
+  do
+    if [ -n "$indlib" -a -f "$indlib" ] ; then
+      echo $indlib > ${_servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
+    fi
+  done
+  if [ -n "$indlib" -a -f "$indlib" ] ; then
+    echo $indlib > ${_servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
+  fi
+
+  # turn off automatic refresh for services during first time installation
+  svc_list=""
+  for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
+  qmail-poppass.106 qmail-logfifo
+  do
+    svc_list="$svc_list ${_servicedir}/$i"
+    # save variables
+    ${_prefix}/sbin/svctool --servicedir=${_servicedir} --service-name=$i \
+      --export-variables=${_servicedir}/$i/variables/.variables  --force
+  done
+  if [ $noproxy -eq 0 ] ; then
+    for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
+      proxy-pop3d.4110 proxy-pop3d-ssl.9110
+    do
+      svc_list="$svc_list ${_servicedir}/$i"
+      ${_prefix}/sbin/svctool --servicedir=${_servicedir} --service-name=$i \
+        --export-variables=${_servicedir}/$i/variables/.variables  --force
+    done
+  fi
+
+  ${_prefix}/sbin/svctool --servicedir=${_servicedir} --norefreshsvc="0 $svc_list"
+
+  if [ -f ${_sysconfdir}/cronlist.i -a -d ${confdir}/cron.d ] ; then
+    echo "adding cron entries"
+    cp ${_sysconfdir}/cronlist.i ${confdir}/cron.d
+  fi
+
+  if [ -f ${_libexecdir}/iupgrade.sh ] ; then
+    echo "Running Custom Installation Script for post install"
+    /bin/sh ${_libexecdir}/iupgrade.sh post install ${pkgver} $*
+  fi
+  ) >> /var/log/indimail-setup.log 2>&1
+
+  if [ -f ${confdir}/init/svscan.conf -o -f ${confdir}/event.d/svscan ] ; then
+    echo "1. Execute /sbin/initctl emit qmailstart to start services"
+    count=1
+  elif [ -f ${confdir}/systemd/system/multi-user.target.wants/svscan.service ] ; then
+    echo "1. Execute /bin/systemctl start svscan to start services"
+    count=1
+  else
+    echo "1. Execute ${_prefix}/sbin/initsvc -on"
+    echo "2. Execute /sbin/init q to start services"
+    count=2
+  fi
+
+  count=`expr $count + 1`
+  echo "$count. Change your default domain in ${_sysconfdir}/control/defaultdomain"
+  count=`expr $count + 1`
+  echo "$count. You can optionally run the following command to verify installation"
+  echo "   sudo rpm -V indimail"
+
+  if [ ! -f ${_sysconfdir}/certs/servercert.pem ] ; then
+    count=`expr $count + 1`
+    echo "$count. You need to create CERTS for STARTTLS."
+    echo "   Run the following command to create Certificate for TLS/SSL"
+    echo "   ${_prefix}/sbin/svctool --config=cert --postmaster=postmaster@$default_domain --common_name=$default_domain"
+  fi
+  echo
+  echo "Check /var/log/indimail-setup.log for the detailed installation log!!!"
+}
+
+pre_upgrade() {
+  stop_service
+}
+
+post_upgrade() {
+  (
+  echo "doing post upgrade activities"
+  if [ "${_prefix}" != "/usr" ] ; then
+    /sbin/ldconfig
+  fi
+  if [ -f ${_libexecdir}/iupgrade.sh ] ; then
+    echo "Running Custom Upgrade Script for post upgrade"
+    /bin/sh ${_libexecdir}/iupgrade.sh post upgrade ${pkgver} $*
+  fi
+  ${_prefix}/sbin/svctool --fixsharedlibs
+
+  # start indimail services after upgrade
+  if [ -d /run ] ; then
+    rundir=/run/svscan
+  elif [ -d /var/run ] ; then
+    rundir=/var/run/svscan
+  else
+    rundir=${_servicedir}
+  fi
+  for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
+  qmail-poppass.106 qmail-logfifo
+  do
+    ${_prefix}/bin/svok ${_servicedir}/$i >/dev/null 2>&1
+    if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
+      rm -f ${rundir}/$i/.down
+      ${_prefix}/bin/svc -u ${_servicedir}/$i
+    fi
+  done
+  if [ ${_noproxy} -eq 0 ] ; then
+    for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
+      proxy-pop3d.4110 proxy-pop3d-ssl.9110
+    do
+      ${_prefix}/bin/svok ${_servicedir}/$i >/dev/null 2>&1
+      if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
+        rm -f ${rundir}/$i/.down
+        ${_prefix}/bin/svc -u ${_servicedir}/$i
+      fi
+    done
+  fi
+
+  # refresh indimail services
+  ${_prefix}/sbin/svctool --servicedir=${_servicedir} --refreshsvc="$svc_list"
+  indlib=`ls -d /usr/lib/libindimail.so.*.*.* 2>/dev/null`
+  for port in 25 465 587
+  do
+    if [ -n "$indlib" -a -f "$indlib" ] ; then
+      echo $indlib > ${_servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
+    fi
+  done
+  if [ -n "$indlib" -a -f "$indlib" ] ; then
+    echo $indlib > ${_servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
+  fi
+  ) >> /var/log/indimail-setup.log 2>&1
+}
+
+pre_remove() {
+(
+  (
+  if [ -f ${_libexecdir}/iupgrade.sh ] ; then
+    echo "Running Custom Un-Installation Script for preun upgrade"
+    /bin/sh ${_libexecdir}/iupgrade.sh preun upgrade ${pkgver} "$argv1"
+  fi
+  ) >> /var/log/indimail-setup.log 2>&1
+  if [ -f ${_prefix}/bin/svok ] ; then
+    ${_prefix}/bin/svok ${_servicedir}/.svscan/log 2>/dev/null
+    if [ $? -eq 0 ] ; then
+      if test -f ${confdir}/init/svscan.conf
+      then
+        echo "Giving IndiMail exactly 5 seconds to exit nicely"
+        /sbin/initctl emit qmailstop > /dev/null 2>&1
+      elif test -f ${confdir}/event.d/svscan
+      then
+        echo "Giving IndiMail exactly 5 seconds to exit nicely"
+        /sbin/initctl emit qmailstop > /dev/null 2>&1
+      elif test -f ${confdir}/systemd/system/multi-user.target.wants/svscan.service
+      then
+        echo "Giving IndiMail exactly 5 seconds to exit nicely"
+        /bin/systemctl stop svscan > /dev/null 2>&1
+      elif test -x ${_prefix}/sbin/initsvc
+      then
+        echo "Giving IndiMail exactly 5 seconds to exit nicely"
+        ${_prefix}/sbin/initsvc -off
+      fi
+      sleep 5
+    fi
+  fi
+
+  if [ -f ${_libexecdir}/iupgrade.sh ] ; then
+    echo "Running Custom Un-Installation Script for preun pre-uninstall"
+    /bin/sh ${_libexecdir}/iupgrade.sh preun uninstall ${pkgver} "$argv1"
+  fi
+  ) >> /var/log/$pkgname-setup.log 2>&1
+}
+
+post_remove() {
+  (
+  # remove all virtual domains
+  for i in `ls ${_indimaildir}/domains`
+  do
+    grep -wv "^+$i-" ${_sysconfdir}/users/assign > ${_sysconfdir}/users/assign.tmp
+    mv ${_sysconfdir}/users/assign.tmp ${_sysconfdir}/users/assign
+  done
+  if [ -x ${_prefix}/sbin/qmail-newu ] ; then
+    ${_prefix}/sbin/qmail-newu
+  fi
+  if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+  else
+    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${defaultDomain})
+  fi
+  rm -rf ${_indimaildir}/domains/$default_domain
+  for port in 465 25 587
+  do
+    > ${_servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
+  done
+
+  rm -f ${_sysconfdir}/indimail.mrtg.ok ${_sysconfdir}/system.mrtg.ok
+  echo "removing startup services"
+  for i in indisrvr.4000 inlookup.infifo mysql.3306 \
+    qmail-logfifo qmail-poppass.106 mrtg
+  do
+    if [ -d ${_servicedir}/$i -o -L ${_servicedir}/$i ] ; then
+      touch ${_servicedir}/$i/down
+      svc -dx ${_servicedir}/$i
+    fi
+    if [ -d ${_servicedir}/log/$i -o -L ${_servicedir}/log/$i ] ; then
+      touch ${_servicedir}/$i/log/down
+      svc -dx ${_servicedir}/$i/log
+    fi
+    if [ -d ${_servicedir}/$i -o -L ${_servicedir}/$i ] ; then
+      rm -rf ${_servicedir}/$i
+    fi
+  done
+
+  if [ ${_noproxy} -eq 0 ] ; then
+    for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
+      proxy-pop3d.4110 proxy-pop3d-ssl.9110
+    do
+      if [ -d ${_servicedir}/$i -o -L ${_servicedir}/$i ] ; then
+        touch ${_servicedir}/$i/down
+        svc -dx ${_servicedir}/$i
+      fi
+      if [ -d ${_servicedir}/log/$i -o -L ${_servicedir}/log/$i ] ; then
+        touch ${_servicedir}/$i/log/down
+        svc -dx ${_servicedir}/$i/log
+      fi
+      if [ -d ${_servicedir}/$i -o -L ${_servicedir}/$i ] ; then
+        rm -rf ${_servicedir}/$i
+      fi
+    done
+  fi
+
+  count=`/bin/ls ${_servicedir} 2>/dev/null| /usr/bin/wc -l`
+  if [ $count -eq 0 ] ; then # ignore disabled services
+    rm -rf ${_servicedir}
+  fi
+
+  if [ -d ${confdir}/cron.d ] ; then
+    echo "removing cron entries"
+    rm -f ${confdir}/cron.d/cronlist.i
+  fi
+
+  echo "removing logs"
+  rm -f ${_indimaildir}/mysqldb/logs/logisam.log
+  rm -f ${_indimaildir}/mysqldb/logs/logquery
+  rm -f ${_indimaildir}/mysqldb/logs/logslow
+  if [ -h ${_logdir} ] ; then
+    log_dir=`/bin/ls -ld ${_logdir} | /usr/bin/awk '{print $10}'`
+  else
+    log_dir=${_logdir}
+  fi
+
+  for i in indisrvr.4000 inlookup.infifo \
+  mrtg mysql.3306 poppass.106
+  do
+    rm -rf $log_dir/$i
+  done
+
+  if [ ${_noproxy} -eq 0 ] ; then
+    for i in proxyIMAP.4143 proxyIMAP.9143 \
+      proxyPOP3.4110 proxyPOP3.9110
+    do
+      rm -rf $log_dir/$i
+    done
+  fi
+
+  if [ "${_prefix}" != "/usr" ] ; then
+    echo "recreating ld.so cache"
+    /sbin/ldconfig
+  fi
+
+  if [ -f ${_libexecdir}/iupgrade.sh ] ; then
+    echo "Running Custom Un-Installation Script for postun uninstall"
+    /bin/sh ${_libexecdir}/iupgrade.sh postun uninstall ${pkgver} $*
+  fi
+  ) >> /var/log/indimail-setup.log 2>&1
+}
+#### END ####
+#### INSTALL2 SCRIPTS ####
+post_install() {
+  if [ "${_prefix}" != "/usr" ] ; then
+    /sbin/ldconfig
+  fi
+}
+
+post_upgrade() {
+  if [ "${_prefix}" != "/usr" ] ; then
+    /sbin/ldconfig
+  fi
+}
+
+post_remove() {
+  if [ "${_prefix}" != "/usr" ] ; then
+    /sbin/ldconfig
+  fi
+}

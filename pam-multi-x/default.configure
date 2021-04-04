@@ -3,52 +3,51 @@ if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
   autoreconf -fiv
 fi
 if [ ! -f conf-release ] ; then
-	echo 1.1 > conf-release
+  echo 1.1 > conf-release
 fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
-	FreeBSD)
-	prefix=/usr/local
-	mandir=/usr/local/man
-	sysconfdir=/usr/local/etc/indimail
-	pam_confdir=/usr/local/etc/pam.d
-	moduledir=/usr/lib
-	;;
-	Darwin)
-	prefix=/usr/local
-	mandir=/usr/local/share/man
-	sysconfdir=/usr/local/etc/indimail
-	pam_confdir=/usr/local/etc/pam.d
-	moduledir=/usr/local/lib/pam
-	;;
-	Linux)
-	prefix=/usr
-	mandir=$prefix/share/man
-	sysconfdir=/etc/indimail
-	arch=$(uname -m)
-	if [ -d /lib/security ] ; then
-		moduledir=/lib/security
-	elif [ -d /lib64/security ] ; then
-		moduledir=/lib64/security
-	elif [ -d $prefix/lib/$arch-linux-gnu ] ; then
-		moduledir=$prefix/lib/$arch-linux-gnu/security
-	fi
-	pam_confdir=/etc/pam.d
-	;;
-	*)
-	prefix=/usr
-	mandir=/usr/man
-	libdir=/usr/lib
-	sysconfdir=/etc/indimail
-	pam_confdir=/etc/pam.d
-	;;
+  FreeBSD)
+  prefix=/usr/local
+  mandir=/usr/local/man
+  sysconfdir=/usr/local/etc/indimail
+  pam_confdir=/usr/local/etc/pam.d
+  moduledir=/usr/lib
+  ;;
+  Darwin)
+  prefix=/usr/local
+  mandir=/usr/local/share/man
+  sysconfdir=/usr/local/etc/indimail
+  pam_confdir=/usr/local/etc/pam.d
+  moduledir=/usr/local/lib/pam
+  ;;
+  Linux)
+  prefix=/usr
+  mandir=$prefix/share/man
+  sysconfdir=/etc/indimail
+  arch=$(uname -m)
+  if [ -d /lib/security ] ; then
+    moduledir=/lib/security
+  elif [ -d /lib64/security ] ; then
+    moduledir=/lib64/security
+  elif [ -d $prefix/lib/$arch-linux-gnu ] ; then
+    moduledir=$prefix/lib/$arch-linux-gnu/security
+  fi
+  pam_confdir=/etc/pam.d
+  ;;
+  *)
+  prefix=/usr
+  mandir=/usr/man
+  sysconfdir=/etc/indimail
+  pam_confdir=/etc/pam.d
+  ;;
 esac
 if [ -d $prefix/include/mysql ] ; then
-	mysqlPrefix=$prefix
+  mysqlPrefix=$prefix
 elif [ -d /usr/local/include/mysql ] ; then
-	mysqlPrefix=/usr/local
+  mysqlPrefix=/usr/local
 elif [ -d /usr/local/mysql/include ] ; then
-	mysqlPrefix=/usr/local/mysql
+  mysqlPrefix=/usr/local/mysql
 fi
 
 ./configure --prefix=$prefix \

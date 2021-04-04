@@ -1,114 +1,114 @@
 #!/bin/sh
 if [ -d libs/imap ] ; then
-	mkdir -p m4
+  mkdir -p m4
 else
-	echo "Invalid working direcotry" 1>&2
-	exit 1
+  echo "Invalid working direcotry" 1>&2
+  exit 1
 fi
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in -o ! -f depcomp ] ; then
-	autoreconf -fiv
-	automake -acf
-	if [ ! -f depcomp -a ! -f libs/unicode/depcomp ] ; then
-		cd libs/unicode
-		automake -acf
-		cd ../..
-	fi
-	if [ ! -f depcomp -a -f libs/unicode/depcomp ] ; then
-		cp libs/unicode/depcomp .
-	elif [ -f depcomp -a ! -f libs/unicode/depcomp ] ; then
-		cp ./depcomp libs/unicode/depcomp
-	elif [ ! -f depcomp -a ! -f libs/unicode/depcomp ] ; then
-		echo "depcomp missing" 1>&2
-		exit 1
-	fi
+  autoreconf -fiv
+  automake -acf
+  if [ ! -f depcomp -a ! -f libs/unicode/depcomp ] ; then
+    cd libs/unicode
+    automake -acf
+    cd ../..
+  fi
+  if [ ! -f depcomp -a -f libs/unicode/depcomp ] ; then
+    cp libs/unicode/depcomp .
+  elif [ -f depcomp -a ! -f libs/unicode/depcomp ] ; then
+    cp ./depcomp libs/unicode/depcomp
+  elif [ ! -f depcomp -a ! -f libs/unicode/depcomp ] ; then
+    echo "depcomp missing" 1>&2
+    exit 1
+  fi
 fi
 if [ ! -f conf-release ] ; then
-	echo "1.1" > conf-release
+  echo "1.1" > conf-release
 fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
-	FreeBSD)
-	prefix=/usr/local
-	mandir=/usr/local/man
-	if [ -d /usr/local/lib ] ; then
-		libdir=/usr/local/lib
-	elif [ -d /opt/local/lib ] ; then
-		libdir=/opt/local/lib
-	else
-		libdir=/usr/lib
-	fi
-	sysconfdir=/usr/local/etc/indimail
-	export CPPFLAGS="$CPPFLAGS -I/usr/local/include"
-	export CXXFLAGS="-I/usr/local/include"
-	export LDFLAGS="$LDFLAGS -L$libdir"
-	extra="--with-authpwd --with-authpam"
-	;;
-	Darwin)
-	prefix=/usr/local
-	mandir=/usr/local/share/man
-	if [ -d /usr/local/lib ] ; then
-		libdir=/usr/local/lib
-	elif [ -d /opt/local/lib ] ; then
-		libdir=/opt/local/lib
-	else
-		libdir=/usr/lib
-	fi
-	sysconfdir=/usr/local/etc/indimail
-	export RANLIB="ranlib -c"
-	export CPPFLAGS="$CPPFLAGS -I/opt/local/include"
-	export CXXFLAGS="-I/opt/local/include"
-	export LDFLAGS="$LDFLAGS -L$libdir"
-	extra="--with-waitfunc=wait3 --with-authpam"
-	;;
-	Linux)
-	prefix=/usr
-	mandir=$prefix/share/man
-	arch=$(uname -m)
-	if [ -f /etc/debian_version ] ; then
-		if [ -d /usr/lib/$arch-linux-gnu ] ; then
-			libdir=/usr/lib/$arch-linux-gnu
-		else
-			libdir=/usr/lib
-		fi
-    elif [ -f /etc/arch-release ] ; then
-        libdir=/usr/lib
-	else
-		if [ -d /usr/lib64 ] ; then
-			libdir=/usr/lib64
-		elif [ -d /usr/lib ] ;then
-			libdir=/usr/lib
-		else
-			echo "could not find libdir " 1>&2
-			exit 1
-		fi
-	fi
-	sysconfdir=/etc/indimail
-	extra="--without-authpwd --with-authpam --with-authshadow"
-	;;
-	*)
-	prefix=/usr
-	mandir=/usr/man
-	libdir=/usr/lib
-	sysconfdir=/etc/indimail
-	extra="--with-authpam"
-	;;
+  FreeBSD)
+  prefix=/usr/local
+  mandir=/usr/local/man
+  if [ -d /usr/local/lib ] ; then
+    libdir=/usr/local/lib
+  elif [ -d /opt/local/lib ] ; then
+    libdir=/opt/local/lib
+  else
+    libdir=/usr/lib
+  fi
+  sysconfdir=/usr/local/etc/indimail
+  export CPPFLAGS="$CPPFLAGS -I/usr/local/include"
+  export CXXFLAGS="-I/usr/local/include"
+  export LDFLAGS="$LDFLAGS -L$libdir"
+  extra="--with-authpwd --with-authpam"
+  ;;
+  Darwin)
+  prefix=/usr/local
+  mandir=/usr/local/share/man
+  if [ -d /usr/local/lib ] ; then
+    libdir=/usr/local/lib
+  elif [ -d /opt/local/lib ] ; then
+    libdir=/opt/local/lib
+  else
+    libdir=/usr/lib
+  fi
+  sysconfdir=/usr/local/etc/indimail
+  export RANLIB="ranlib -c"
+  export CPPFLAGS="$CPPFLAGS -I/opt/local/include"
+  export CXXFLAGS="-I/opt/local/include"
+  export LDFLAGS="$LDFLAGS -L$libdir"
+  extra="--with-waitfunc=wait3 --with-authpam"
+  ;;
+  Linux)
+  prefix=/usr
+  mandir=$prefix/share/man
+  arch=$(uname -m)
+  if [ -f /etc/debian_version ] ; then
+    if [ -d /usr/lib/$arch-linux-gnu ] ; then
+      libdir=/usr/lib/$arch-linux-gnu
+    else
+      libdir=/usr/lib
+    fi
+  elif [ -f /etc/arch-release ] ; then
+    libdir=/usr/lib
+  else
+    if [ -d /usr/lib64 ] ; then
+      libdir=/usr/lib64
+    elif [ -d /usr/lib ] ;then
+      libdir=/usr/lib
+    else
+      echo "could not find libdir " 1>&2
+      exit 1
+    fi
+  fi
+  sysconfdir=/etc/indimail
+  extra="--without-authpwd --with-authpam --with-authshadow"
+  ;;
+  *)
+  prefix=/usr
+  mandir=/usr/man
+  libdir=/usr/lib
+  sysconfdir=/etc/indimail
+  extra="--with-authpam"
+  ;;
 esac
 ./configure --prefix=$prefix --disable-root-check \
-	--bindir=$prefix/bin \
-	--libdir=$libdir \
-	--with-redhat \
-	--with-mailer=$prefix/bin/sendmail \
-	--mandir=$mandir \
-	--sysconfdir=$sysconfdir \
-	--with-certsdir=$sysconfdir/certs \
-	--libexecdir=$prefix/libexec/indimail \
-	--datarootdir=$prefix/share/indimail \
-	--without-authchangepwdir \
-	--without-authcustom \
-	--without-authgeneric \
-	$extra
+  --bindir=$prefix/bin \
+  --libdir=$libdir \
+  --with-redhat \
+  --with-mailer=$prefix/bin/sendmail \
+  --mandir=$mandir \
+  --sysconfdir=$sysconfdir \
+  --with-certsdir=$sysconfdir/certs \
+  --libexecdir=$prefix/libexec/indimail \
+  --datarootdir=$prefix/share/indimail \
+  --without-authchangepwdir \
+  --without-authcustom \
+  --without-authgeneric \
+  $extra
 if [ ! -f depcomp -a -f libs/unicode/depcomp ] ; then
-	cp libs/unicode/depcomp .
+  cp libs/unicode/depcomp .
 elif [ -f depcomp -a ! -f libs/unicode/depcomp ] ; then
-	cp ./depcomp libs/unicode/depcomp
+  cp ./depcomp libs/unicode/depcomp
 fi

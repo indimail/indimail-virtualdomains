@@ -10,7 +10,7 @@ groups=('base-devel')
 depends=('coreutils' 'procps' 'binutils' 'mysql' 'indimail-mta')
 makedepends=('findutils' 'sed' 'pam' 'libqmail')
 conflicts=('indimail<3.2')
-source=("pam-multi-@pam_multi_version@.tar.gz" "nssd-@nssd_version@.tar.gz" "indimail-auth-rpmlintrc")
+source=('pam-multi-@pam_multi_version@.tar.gz' 'nssd-@nssd_version@.tar.gz' "${pkgname}.changes")
 sha256sums=('SKIP' 'SKIP' 'SKIP')
 provides=('indimail-auth' 'pam-multi=@pam_multi_version@' 'nssd=@nssd_version@')
 options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
@@ -18,7 +18,7 @@ _sysconfdir=@sysconfdir@
 _myconfdir=$(echo ${_sysconfdir} | cut -c2-)
 _pamconfdir=$(echo @pam_confdir@ | cut -c2-)
 backup=(${_pamconfdir}/{'pam-multi','pop3','imap'} ${_myconfdir}/${pkgname}-release)
-changelog=$pkgname.changes
+changelog=${pkgname}.changes
 _prefix=@prefix@
 _libexecdir=@libexecdir@
 _libdir=/usr/lib
@@ -66,6 +66,14 @@ build() {
   --enable-mysqlprefix=${_mysqlPrefix} \
   --enable-dlload-mysql=yes --enable-default-domain=$default_domain
   make
+}
+
+package() {
+  depends=('indimail-mta>2.6')
+  cd "$srcdir/nssd-@nssd_version@"
+  make DESTDIR=${pkgdir} install
+  cd "$srcdir/pam-multi-@pam_multi_version@"
+  make DESTDIR=${pkgdir} install
   cd $srcdir
   (
   echo "NAME=${pkgname}"
@@ -75,17 +83,8 @@ build() {
   echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
   echo "PACKAGE_BUGREPORT=\"'@email@'\""
   ) > ${pkgname}-release
-}
-
-package() {
-  depends=('indimail-mta>2.6')
-  cd "$srcdir/nssd-@nssd_version@"
-  make DESTDIR=${pkgdir} install
-  cd "$srcdir/pam-multi-@pam_multi_version@"
-  make DESTDIR=${pkgdir} install
-  mkdir -p "$pkgdir""${_sysconfdir}"
-  cd $srcdir
-  cp ${pkgname}-release ${pkgdir}${_sysconfdir}
+  install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
+  install -D -m 0644 ${pkgname}-release "$pkgdir"${_sysconfdir}/${pkgname}-release
 }
 
 pre_install() {
@@ -183,11 +182,11 @@ post_remove() {
     rm -rf ${_servicedir}/pwdlookup
   fi
   if [ -h ${_logdir} ] ; then
-    log_dir=`/bin/ls -ld %{logdir} | /usr/bin/awk '{print $10}'`
+    log_dir=`/bin/ls -ld %{_logdir} | /usr/bin/awk '{print $10}'`
   else
     log_dir=${_logdir}
   fi
-  rm -rf ${log_dir}/pwdlookup
+  rm -rf ${_log_dir}/pwdlookup
   rm -f ${_sysconfdir}/nssd.conf
   if [ "${_prefix}" != "/usr" ] ; then
     /sbin/ldconfig

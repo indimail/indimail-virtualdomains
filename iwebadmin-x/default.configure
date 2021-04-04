@@ -1,53 +1,53 @@
 #!/bin/sh
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
-	autoreconf -fiv
+  autoreconf -fiv
 fi
 if [ ! -f conf-release ] ; then
-	echo 1.1 > conf-release
+  echo 1.1 > conf-release
 fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
-	FreeBSD)
-	prefix=/usr/local
-	mandir=/usr/local/man
-	sysconfdir=/usr/local/etc/indimail
-	cgibindir=/usr/local/www/cgi-bin
-	htmldir=/usr/local/www/html
-	imagedir=/usr/local/www/images/iwebadmin
-	;;
-	Darwin)
-	prefix=/usr/local
-	mandir=/usr/local/man
-	sysconfdir=/usr/local/etc/indimail
-	cgibindir=/usr/local/www/cgi-bin
-	htmldir=/usr/local/www/html
-	imagedir=/usr/local/www/images/iwebadmin
-	;;
-	Linux)
-	prefix=/usr
-	mandir=$prefix/share/man
-	sysconfdir=/etc/indimail
-	cgibindir=/var/www/cgi-bin
-	htmldir=/var/www/html
-	imagedir=/var/www/html/images/iwebadmin
-	;;
-	*)
-	prefix=/usr
-	mandir=/usr/man
-	sysconfdir=/usr/etc/indimail
-	cgibindir=/var/www/cgi-bin
-	htmldir=/var/www/html
-	imagedir=/var/www/html/images/iwebadmin
-	;;
+  FreeBSD)
+  prefix=/usr/local
+  mandir=/usr/local/man
+  sysconfdir=/usr/local/etc/indimail
+  cgibindir=/usr/local/www/cgi-bin
+  htmldir=/usr/local/www/html
+  imagedir=/usr/local/www/images/iwebadmin
+  ;;
+  Darwin)
+  prefix=/usr/local
+  mandir=/usr/local/man
+  sysconfdir=/usr/local/etc/indimail
+  cgibindir=/usr/local/www/cgi-bin
+  htmldir=/usr/local/www/html
+  imagedir=/usr/local/www/images/iwebadmin
+  ;;
+  Linux)
+  prefix=/usr
+  mandir=$prefix/share/man
+  sysconfdir=/etc/indimail
+  cgibindir=/var/www/cgi-bin
+  htmldir=/var/www/html
+  imagedir=/var/www/html/images/iwebadmin
+  ;;
+  *)
+  prefix=/usr
+  mandir=/usr/man
+  sysconfdir=/usr/etc/indimail
+  cgibindir=/var/www/cgi-bin
+  htmldir=/var/www/html
+  imagedir=/var/www/html/images/iwebadmin
+  ;;
 esac
 ./configure --prefix=$prefix \
-	--sysconfdir=$sysconfdir \
-	--disable-ipauth \
-	--disable-trivial-password \
-	--enable-ezmlmdir=$prefix/bin \
-	--enable-domain-autofill \
-	--enable-modify-quota \
-	--enable-htmldir=$htmldir \
-	--enable-cgibindir=$cgibindir \
-	--enable-imagedir=$imagedir \
-	--enable-htmllibdir=$prefix/share/iwebadmin
+  --sysconfdir=$sysconfdir \
+  --disable-ipauth \
+  --disable-trivial-password \
+  --enable-ezmlmdir=$prefix/bin \
+  --enable-domain-autofill \
+  --enable-modify-quota \
+  --enable-htmldir=$htmldir \
+  --enable-cgibindir=$cgibindir \
+  --enable-imagedir=$imagedir \
+  --enable-htmllibdir=$prefix/share/iwebadmin

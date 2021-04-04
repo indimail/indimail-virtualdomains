@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.86 2021-03-25 11:38:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.87 2021-04-04 09:04:24+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -141,12 +141,6 @@ BuildRequires: chrpath
 %endif
 
 %if 0%{?suse_version}
-BuildRequires: openldap2-devel
-%else
-BuildRequires: openldap-devel
-%endif
-
-%if 0%{?suse_version}
 PreReq: permissions
 %endif
 
@@ -231,7 +225,6 @@ For more details visit %{url}
 %setup -q
 
 %build
-ID=$(id -u)
 (
 echo "---------------- INFORMATION ------------------------"
 echo target         %_target
@@ -263,25 +256,23 @@ fi
 %endif
 %configure --prefix=%{_prefix} --sysconfdir=%{sysconfdir} \
   --mandir=%{_prefix}/share/man --datarootdir=%{_prefix}/share/indimail \
-  --with-pkgconfigdir=%{_pkg_config_path} --libdir=%{_libdir} --enable-domaindir=%{domaindir} \
-  --enable-mysqlprefix=%{mysqlPrefix} \
-  --libexecdir=%{libexecdir} --mandir=%{mandir} --enable-qmaildir=%{indimaildir} \
+  --with-pkgconfigdir=%{_pkg_config_path} --libdir=%{_libdir} \
+  --enable-domaindir=%{domaindir} --enable-mysqlprefix=%{mysqlPrefix} \
+  --libexecdir=%{libexecdir} --enable-qmaildir=%{indimaildir} \
   --enable-basepath=@basepath@ --enable-logdir=%{logdir} \
-  --enable-tcprules-prog=%{_prefix}/bin/tcprules --enable-tcpserver-file=%{sysconfdir}/tcp/tcp.smtp \
+  --enable-tcprules-prog=%{_prefix}/bin/tcprules \
+  --enable-tcpserver-file=%{sysconfdir}/tcp/tcp.smtp \
   --enable-default-domain=${default_domain} `%{__cat} config/indimail.opts`
 
-if [ $ID -eq 0 ] ; then
-  if [ $nscd_up -ge 1 ] ; then
-    if [ -x %{_sysconfdir}/init.d/nscd ] ; then
-      %{_sysconfdir}/init.d/nscd start
-    elif [ -f %{_sysconfdir}/lib/systemd/system/multi-user.target/nscd.service ] ; then
-      /bin/systemctl start nscd.service
-    fi
+if [ $nscd_up -ge 1 ] ; then
+  if [ -x %{_sysconfdir}/init.d/nscd ] ; then
+    %{_sysconfdir}/init.d/nscd start
+  elif [ -f %{_sysconfdir}/lib/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl start nscd.service
   fi
 fi
 
 %install
-ID=$(id -u)
 %if 0%{?suse_version} >= 1120
 %if 0%{?build_cflags:1}
   CFLAGS="%{build_cflags} -fPIC -fno-lto"
@@ -383,7 +374,7 @@ do
   fi
 done
 (
-# host.mysql, host.cntrl, host.master, host.ldap
+# host.mysql, host.cntrl, host.master
 for i in `%{__cat} %{buildroot}%{sysconfdir}/controlfiles.i`
 do
   echo "%ghost %attr(0640,indimail,qmail) %config(noreplace,missingok) %{sysconfdir}/control/$i"
@@ -960,11 +951,6 @@ fi
 ### SCRIPTLET ###############################################################################
 %pretrans
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 
 # stop indimail services before upgrade
 if [ -d /run ] ; then
@@ -1009,11 +995,6 @@ fi
 ### SCRIPTLET ###############################################################################
 %pre
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -z "$argv1" ] ; then
   argv1=0
 fi
@@ -1087,12 +1068,6 @@ fi
 ### SCRIPTLET ###############################################################################
 %post
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
-
 if [ -z "$argv1" ] ; then
   argv1=0
 fi
@@ -1445,12 +1420,6 @@ echo "Check /var/log/indimail-setup.log for the detailed installation log!!!"
 ### SCRIPTLET ###############################################################################
 %preun
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
-
 (
 if [ -z "$argv1" ] ; then
   argv1=0
@@ -1498,11 +1467,6 @@ fi
 ### SCRIPTLET ###############################################################################
 %postun
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
   default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
 else
@@ -1634,11 +1598,6 @@ fi
 ### SCRIPTLET ###############################################################################
 %posttrans
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -f %{libexecdir}/iupgrade.sh ] ; then
 (
   echo "Running Custom Installation Script for posttrans"

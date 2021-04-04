@@ -206,7 +206,8 @@ noinst_SCRIPTS = vadddomain_handle vadduser_handle vdeldomain_handle \
 	vdeluser_handle vrenameuser_handle
 
 noinst_DATA = indimail-permissions.easy indimail-permissions.paranoid \
-	indimail-permissions.secure indimail.spec indimail.changes indimail-rpmlintrc
+	indimail-permissions.secure indimail.spec indimail.changes indimail-rpmlintrc \
+	PKGBUILD
 
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain vmoduser vpasswd \
 	vdeluser vrenameuser
@@ -809,10 +810,14 @@ conf-release:
 	if [ ! -f conf-release ] ; then \
 		echo 1.1 > conf-release; \
 	fi
-indimail.spec: indimail.spec.in catChangeLog doc/ChangeLog conf-version conf-release conf-email
+indimail.spec: indimail.spec.in catChangeLog doc/ChangeLog conf-version \
+conf-release conf-email
 	(cat $@.in;./catChangeLog --spec doc/ChangeLog) | $(edit) > $@
 indimail.changes: catChangeLog doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
+PKGBUILD: PKGBUILD.in catChangeLog doc/ChangeLog conf-version \
+conf-release conf-email indimail.changes
+	cat $@.in | $(edit) > $@
 indimail-rpmlintrc: indimail-rpmlintrc.in
 	$(edit) indimail-rpmlintrc.in > $@
 login_tasks.3: login_tasks.9
