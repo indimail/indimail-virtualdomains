@@ -168,4 +168,5 @@ LIBS=$saveLIBS
 
 AC_SUBST(mysql_prefix)
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([indium-release:indium-release.in],[], [])
 AC_OUTPUT

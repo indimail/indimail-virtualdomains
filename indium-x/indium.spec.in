@@ -26,7 +26,7 @@
 %define sysconfdir         @sysconfdir@
 %define tai_version        @version@
 %define fbsql_version      @version@
-%define bwidget_version    1.8.0
+%define bwidget_version    1.9.7
 %define tcl_version        8.6
 
 %if %build_on_obs != 0
@@ -448,51 +448,15 @@ fi
 %attr(644,root,root) %config(noreplace,missingok) %{sysconfdir}/default.profile
 %attr(644,root,root) %config(noreplace,missingok) %{sysconfdir}/filemanrc
 %attr(644,root,root) %config(noreplace,missingok) %{sysconfdir}/termdefs.txt
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/indium-release
 
 %clean
 %{__rm} -rf %{buildroot}
 
-#          install   erase   upgrade  reinstall
-# %% pre         1        -         2         2
-# %% post        1        -         2         2
-# %% preun       -        0         1         -
-# %% postun      -        0         1         -
-%pre 
-argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root"
-  exit 1
-fi
-
 %post
-argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root"
-  exit 1
-fi
 /sbin/ldconfig
 
-%preun
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root"
-  exit 1
-fi
-
 %postun
-argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root"
-  exit 1
-fi
-if [ $argv1 -eq 1 ] ; then
-  echo "recreating ld.so cache"
-  /sbin/ldconfig
-  exit 0
-fi
 echo "recreating ld.so cache"
 /sbin/ldconfig
 

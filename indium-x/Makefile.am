@@ -31,13 +31,16 @@ tclscript_DATA = global.tcl balloon.tcl base64.tcl combobox.tcl fileman.tcl help
 tcletc_DATA = default.config default.profile filemanrc termdefs.txt
 tcllib_DATA = userhelp.txt
 
+SYSCONFDIR = @sysconfdir@
+sysconf_DATA = indium-release
+
 all-local: .gitignore
 
 guilibexec_PROGRAMS = pwhelper
 
 guibin_SCRIPTS = indium litesrc supernotepad secpanel FMbrowse tkdiff
 
-noinst_DATA = indium.spec indium.changes indium-rpmlintrc
+noinst_DATA = indium.spec indium.changes indium-rpmlintrc PKGBUILD
 
 MOSTLYCLEANFILES = indium litesrc common.tcl fileman.tcl supernotepad secpanel FMbrowse \
 				   tkdiff
@@ -86,6 +89,9 @@ indium.spec: indium.spec.in conf-version conf-release conf-email
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 indium.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
+PKGBUILD: PKGBUILD.in catChangeLog doc/ChangeLog conf-version \
+conf-release conf-email indium.changes
+	cat $@.in | $(edit) > $@
 pwhelper.o: pwhelper.c
 	$(COMPILE) $(DEFS) -c pwhelper.c
 pwhelper$(EXEEXT): $(pwhelper_DEPENDENCIES) $(pwhelper_OBJECTS)
