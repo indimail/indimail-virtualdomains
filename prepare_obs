@@ -119,6 +119,9 @@ prepare_artifacts()
     if [ -f $pkg_name-rpmlintrc ] ; then
       cp $pkg_name-rpmlintrc $stage
     fi
+    if [ -f extra_src ] ; then
+      cp -rpf `grep -h -v "^#" extra_src` $stage
+    fi
   fi # multi-mode = 0
 
   cp -rpf . $stage/$pkg_name-$ver
@@ -233,6 +236,9 @@ if [ -f $name.packages ] ; then
         cp $name-$i $stage
       fi
   done
+  if [ -f extra_src ] ; then
+    cp -rpf `grep -h -v "^#" extra_src` $stage
+  fi
 
   if [ -f debian/Makefile.in ] ; then
     make debian/Makefile
