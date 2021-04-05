@@ -19,6 +19,7 @@ backup=(${_myconfdir}/{'fetchmailrc','pop3d-ssl.dist','imapd-ssl.dist'}
         ${_myconfdir}/{'pop3d.cnf','imapd.cnf','pop3d.dist','imapd.dist'}
         ${_myconfdir}/{'authmodulelist','quotawarnmsg.example'}
         ${_myconfdir}/tcp/{'tcp.imap','tcp.pop3'})
+install=archpkg.install
 changelog=${pkgname}.changes
 _prefix=@prefix@
 _libdir=@prefix@/lib

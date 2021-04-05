@@ -78,7 +78,7 @@ if [ $copy_src -eq 1 ] ; then
         STAGE=$HOME/stage/arch/$pkg_name-$ver
         echo Preparing $pkg_name-$ver
         cp -rpf . $STAGE
-        if [ ! -L STAGE ] ; then
+        if [ ! -L $HOME/stage/arch/$real_dir ] ; then
           ln -sr $STAGE $HOME/stage/arch/$real_dir
         fi
         cd $STAGE

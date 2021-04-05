@@ -7,7 +7,7 @@ arch=('i686' 'x86_64')
 url="https://github.com/mbhangui/indimail-virtualdomains"
 license=('GPL3')
 groups=('base-devel')
-depends=('coreutils' 'procps' 'binutils' 'mysql' 'indimail-mta')
+depends=('coreutils' 'procps' 'binutils' 'mariadb-libs')
 makedepends=('findutils' 'sed' 'pam' 'libqmail')
 conflicts=('indimail<3.2')
 source=('pam-multi-@pam_multi_version@.tar.gz' 'nssd-@nssd_version@.tar.gz' "${pkgname}.changes")
@@ -18,6 +18,7 @@ _sysconfdir=@sysconfdir@
 _myconfdir=$(echo ${_sysconfdir} | cut -c2-)
 _pamconfdir=$(echo @pam_confdir@ | cut -c2-)
 backup=(${_pamconfdir}/{'pam-multi','pop3','imap'} ${_myconfdir}/${pkgname}-release)
+install=archpkg.install
 changelog=${pkgname}.changes
 _prefix=@prefix@
 _libexecdir=@libexecdir@
@@ -87,6 +88,7 @@ package() {
   install -D -m 0644 ${pkgname}-release "$pkgdir"${_sysconfdir}/${pkgname}-release
 }
 
+#### INSTALL SCRIPTS ####
 pre_install() {
   if [ -d /run ] ; then
     rundir=/run/svscan
