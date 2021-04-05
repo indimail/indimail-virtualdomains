@@ -10,7 +10,7 @@ sysconf_DATA = wordlist.db
 
 noinst_DATA = bogofilter-wordlist.spec
 
-all-local: bogofilter-wordlist.spec bogofilter-wordlist.changes
+all-local: bogofilter-wordlist.spec bogofilter-wordlist.changes PKGBUILD
 install-data-local: wordlist.db
 
 install-data-hook: 
@@ -29,6 +29,9 @@ conf-version conf-release conf-email
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
 bogofilter-wordlist.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
+PKGBUILD: PKGBUILD.in catChangeLog doc/ChangeLog conf-version \
+conf-release conf-email bogofilter-wordlist.changes
+	cat $@.in | $(edit) > $@
 
 wordlist.db: training/easy_ham training/easy_ham_2 training/hard_ham \
 training/spam training/spam_2
