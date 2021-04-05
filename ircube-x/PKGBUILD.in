@@ -12,13 +12,12 @@ makedepends=('sed' 'findutils')
 source=("$pkgname-${pkgver}.tar.gz")
 sha256sums=('SKIP')
 _sysconfdir=@sysconfdir@
-_myconfdir=$(echo ${_sysconfdir} | cut -c2-)
-backup=("${_myconfdir}/wordlist.db")
 provides=("pkgname")
 options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
 changelog=$pkgname.changes
 _prefix=@prefix@
 _servicedir=@servicedir@
+_pluginbase=${_prefix}/share/roundcubemail
 
 build() {
   cd $srcdir/$pkgname-${pkgver}
