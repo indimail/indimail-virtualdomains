@@ -48,7 +48,7 @@ build() {
     --enable-domaindir=${_domaindir} --enable-mysqlprefix=${_mysqlPrefix} \
     --libexecdir=${_libexecdir} --enable-qmaildir=${_indimaildir} \
     --enable-basepath=${_mbase} --enable-logdir=${_logdir} \
-    --enable-tcprules-prog=${_prefix}/bin/tcprules \
+    --sbindir=${_prefix}/bin --enable-tcprules-prog=${_prefix}/bin/tcprules \
     --enable-tcpserver-file=${_sysconfdir}/tcp/tcp.smtp \
     --enable-default-domain=${_defaultDomain} `cat config/indimail.opts`
   make

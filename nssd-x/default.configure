@@ -9,6 +9,7 @@ SYSTEM=$(uname -s)
 case "$SYSTEM" in
   FreeBSD)
   prefix=/usr/local
+  sbindir=/usr/local/sbin
   mandir=/usr/local/man
   libdir=/usr/local/lib
   sysconfdir=/usr/local/etc/indimail
@@ -18,14 +19,17 @@ case "$SYSTEM" in
   mandir=$prefix/share/man
   arch=$(uname -m)
   if [ -f /etc/debian_version ] ; then
+    sbindir=/usr/sbin
     if [ -d /usr/lib/$arch-linux-gnu ] ; then
       libdir=/usr/lib/$arch-linux-gnu
     else
       libdir=/usr/lib
     fi
   elif [ -f /etc/arch-version ] ; then
+      sbindir=/usr/bin
       libdir=/usr/lib
   else
+    sbindir=/usr/sbin
     if [ -d /usr/lib64 ] ; then
       libdir=/usr/lib64
     elif [ -d /usr/lib ] ;then
@@ -39,6 +43,7 @@ case "$SYSTEM" in
   ;;
   *)
   prefix=/usr
+  sbindir=/usr/sbin
   mandir=/usr/man
   libdir=/usr/lib
   sysconfdir=/etc/indimail
@@ -59,8 +64,8 @@ else
   nssd_sock=/tmp/nssd.sock
 fi
 ./configure --prefix=$prefix \
+  --sbindir=$sbindir --mandir=$mandir \
   --sysconfdir=$sysconfdir \
-  --mandir=$mandir \
   --datarootdir=$prefix/share/indimail \
   --enable-nssd-socket=$nssd_sock \
   --enable-nssd-config-path=$sysconfdir/nssd.conf \

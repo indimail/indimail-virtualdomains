@@ -9,6 +9,7 @@ SYSTEM=$(uname -s)
 case "$SYSTEM" in
   FreeBSD)
   prefix=/usr/local
+  sbindir=/usr/local/sbin
   mandir=/usr/local/man
   sysconfdir=/usr/local/etc/indimail
   pam_confdir=/usr/local/etc/pam.d
@@ -16,6 +17,7 @@ case "$SYSTEM" in
   ;;
   Darwin)
   prefix=/usr/local
+  sbindir=/usr/local/sbin
   mandir=/usr/local/share/man
   sysconfdir=/usr/local/etc/indimail
   pam_confdir=/usr/local/etc/pam.d
@@ -25,6 +27,11 @@ case "$SYSTEM" in
   prefix=/usr
   mandir=$prefix/share/man
   sysconfdir=/etc/indimail
+  if [ -f /etc/arch-release ] ; then
+    sbindir=/usr/bin
+  else
+    sbindir=/usr/sbin
+  fi
   arch=$(uname -m)
   if [ -d /lib/security ] ; then
     moduledir=/lib/security
@@ -37,6 +44,7 @@ case "$SYSTEM" in
   ;;
   *)
   prefix=/usr
+  sbindir=/usr/sbin
   mandir=/usr/man
   sysconfdir=/etc/indimail
   pam_confdir=/etc/pam.d
@@ -52,7 +60,7 @@ fi
 
 ./configure --prefix=$prefix \
   --datarootdir=$prefix/share/indimail \
-  --mandir=$mandir \
+  --sbindir=$sbindir --mandir=$mandir \
   --enable-mysqlprefix=$mysqlPrefix \
   --enable-moduledir=$moduledir \
   --enable-controldir=$sysconfdir/control \

@@ -54,7 +54,7 @@ build() {
   cd "$srcdir/nssd-@nssd_version@"
   ./configure --prefix=${_prefix} --libexecdir=${_libexecdir} --sysconfdir=${_sysconfdir} \
   --mandir=${_mandir} --libdir=${_libdir} --datarootdir=${_shareddir} \
-  --enable-nssd-socket=${nssd_sock} \
+  --sbindir=${_prefix}/bin --enable-nssd-socket=${nssd_sock} \
   --enable-nssd-config-path=${_sysconfdir}/nssd.conf \
   --enable-mysqlprefix=${_mysqlPrefix} \
   --enable-dlload-mysql=yes --enable-default-domain=$default_domain
@@ -62,7 +62,7 @@ build() {
   cd "$srcdir/pam-multi-@pam_multi_version@"
   ./configure --prefix=${_prefix} --datarootdir=${_shareddir} \
   --mandir=${_mandir} --enable-moduledir=${_pam_moduledir} \
-  --enable-controldir=${_sysconfdir}/control \
+  --sbindir=${_prefix}/bin --enable-controldir=${_sysconfdir}/control \
   --enable-pamconfdir=${_pam_confdir} \
   --enable-mysqlprefix=${_mysqlPrefix} \
   --enable-dlload-mysql=yes --enable-default-domain=$default_domain

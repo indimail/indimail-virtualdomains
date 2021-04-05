@@ -10,6 +10,7 @@ SYSTEM=$(uname -s)
 case "$SYSTEM" in
   FreeBSD)
   prefix=/usr/local
+  sbindir=/usr/local/sbin
   mandir=/usr/local/man
   sysconfdir=/usr/local/etc/indimail
   servicedir=/usr/local/libexec/indimail/service
@@ -32,10 +33,16 @@ case "$SYSTEM" in
   mandir=$prefix/share/man
   sysconfdir=/etc/indimail
   servicedir=/service
+  if [ -f /etc/arch-release ] ; then
+      sbindir=/usr/bin
+  else
+      sbindir=/usr/sbin
+  fi
   ;;
   Darwin)
-  prefix=/opt/local
-  mandir=/opt/local/share/man
+  prefix=/usr/local
+  sbindir=/usr/local/sbin
+  mandir=/usr/local/share/man
   sysconfdir=/usr/local/etc/indimail
   servicedir=/usr/local/libexec/indimail/service
   extra="--with-libdb-prefix=/opt/local/lib/db48/"
@@ -44,6 +51,7 @@ case "$SYSTEM" in
   ;;
   *)
   prefix=/usr/local
+  sbindir=/usr/local/sbin
   mandir=/usr/local/share/man
   sysconfdir=/usr/local/etc/indimail
   servicedir=/service
@@ -51,7 +59,7 @@ case "$SYSTEM" in
 esac
 ./configure --prefix=$prefix \
   --enable-indimail \
-  --sysconfdir=$sysconfdir \
+  --sbindir=$sbindir --sysconfdir=$sysconfdir \
   --datarootdir=$prefix/share/indimail \
   --libexecdir=$prefix/libexec/indimail \
   --enable-servicedir=$servicedir \

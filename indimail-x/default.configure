@@ -9,6 +9,8 @@ SYSTEM=$(uname -s)
 case "$SYSTEM" in
   FreeBSD)
   prefix=/usr/local
+  sbindir=/usr/local/sbin
+  sysconfdir=/usr/local/etc/indimail
   sysconfdir=/usr/local/etc/indimail
   mandir=/usr/local/man
   servicedir=/usr/local/libexec/indimail/service
@@ -24,6 +26,7 @@ case "$SYSTEM" in
   base_path=/home/mail
   arch=$(uname -m)
   if [ -f /etc/debian_version ] ; then
+    sbindir=/usr/sbin
     if [ -d /usr/lib/$arch-linux-gnu ] ; then
       libdir=/usr/lib/$arch-linux-gnu
     else
@@ -31,9 +34,11 @@ case "$SYSTEM" in
     fi
     pkgconfigdir=/usr/lib/pkgconfig
   elif [ -f /etc/arch-release ] ; then
+    sbindir=/usr/bin
     libdir=/usr/lib
     pkgconfigdir=/usr/lib/pkgconfig
   else
+    sbindir=/usr/sbin
     if [ -d /usr/lib64 ] ; then
       libdir=/usr/lib64
       pkgconfigdir=/usr/lib64/pkgconfig
@@ -48,6 +53,7 @@ case "$SYSTEM" in
   ;;
   Darwin)
   prefix=/usr/local
+  sbindir=/usr/local/sbin
   sysconfdir=/usr/local/etc/indimail
   mandir=/usr/local/share/man
   servicedir=/usr/local/libexec/indimail/service
@@ -57,6 +63,8 @@ case "$SYSTEM" in
   ;;
   *)
   prefix=/usr
+  sbindir=/usr/sbin
+  sysconfdir=/usr/local/etc/indimail
   sysconfdir=/etc/indimail
   mandir=/usr/man
   servicedir=/service
@@ -73,7 +81,7 @@ fi
 ./configure \
   --prefix=$prefix \
   --datarootdir=$prefix/share/indimail \
-  --mandir=$mandir \
+  --sbindir=$sbindir --mandir=$mandir \
   --enable-qmaildir=/var/indimail \
   --enable-servicedir=$servicedir \
   --libdir=$libdir \

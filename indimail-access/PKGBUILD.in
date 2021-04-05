@@ -38,7 +38,7 @@ build() {
   make
   cd "$srcdir/fetchmail-@fetchmail_version@"
   ./configure --prefix=${_prefix} --libexecdir=${_libexecdir} --sysconfdir=${_sysconfdir} \
-    --datarootdir=${_shareddir} --mandir=${_mandir} \
+    --sbindir=${_prefix}/bin --datarootdir=${_shareddir} --mandir=${_mandir} \
     --enable-indimail --with-ssl
   make
 }

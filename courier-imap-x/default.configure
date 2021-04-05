@@ -29,6 +29,7 @@ SYSTEM=$(uname -s)
 case "$SYSTEM" in
   FreeBSD)
   prefix=/usr/local
+  sbindir=$prefix/sbin
   mandir=/usr/local/man
   if [ -d /usr/local/lib ] ; then
     libdir=/usr/local/lib
@@ -45,6 +46,7 @@ case "$SYSTEM" in
   ;;
   Darwin)
   prefix=/usr/local
+  sbindir=$prefix/sbin
   mandir=/usr/local/share/man
   if [ -d /usr/local/lib ] ; then
     libdir=/usr/local/lib
@@ -65,18 +67,21 @@ case "$SYSTEM" in
   mandir=$prefix/share/man
   arch=$(uname -m)
   if [ -f /etc/debian_version ] ; then
-    if [ -d /usr/lib/$arch-linux-gnu ] ; then
-      libdir=/usr/lib/$arch-linux-gnu
+    sbindir=$prefix/sbin
+    if [ -d $prefix/lib/$arch-linux-gnu ] ; then
+      libdir=$prefix/lib/$arch-linux-gnu
     else
-      libdir=/usr/lib
+      libdir=$prefix/lib
     fi
   elif [ -f /etc/arch-release ] ; then
-    libdir=/usr/lib
+    libdir=$prefix/lib
+    sbindir=$prefix/bin
   else
-    if [ -d /usr/lib64 ] ; then
-      libdir=/usr/lib64
-    elif [ -d /usr/lib ] ;then
-      libdir=/usr/lib
+    sbindir=$prefix/sbin
+    if [ -d $prefix/lib64 ] ; then
+      libdir=$prefix/lib64
+    elif [ -d $prefix/lib ] ;then
+      libdir=$prefix/lib
     else
       echo "could not find libdir " 1>&2
       exit 1
@@ -87,6 +92,7 @@ case "$SYSTEM" in
   ;;
   *)
   prefix=/usr
+  sbindir=$prefix/sbin
   mandir=/usr/man
   libdir=/usr/lib
   sysconfdir=/etc/indimail
@@ -95,6 +101,7 @@ case "$SYSTEM" in
 esac
 ./configure --prefix=$prefix --disable-root-check \
   --bindir=$prefix/bin \
+  --sbindir=$sbindir \
   --libdir=$libdir \
   --with-redhat \
   --with-mailer=$prefix/bin/sendmail \

@@ -9,6 +9,7 @@ SYSTEM=$(uname -s)
 case "$SYSTEM" in
   FreeBSD)
   prefix=/usr/local
+  sbindir=/usr/local/sbin
   mandir=/usr/local/man
   sysconfdir=/usr/local/etc/indimail
   ;;
@@ -16,10 +17,16 @@ case "$SYSTEM" in
   prefix=/usr
   mandir=$prefix/share/man
   sysconfdir=/etc/indimail
+  if [ -f /etc/arch-release ] ; then
+      sbindir=/usr/bin
+  else
+      sbindir=/usr/sbin
+  fi
   extra_args="--with-ssl"
   ;;
   Darwin)
   prefix=/usr/local
+  sbindir=/usr/local/sbin
   mandir=/usr/local/share/man
   sysconfdir=/usr/local/etc/indimail
   # macport does it better. With brew you have to struggle
@@ -36,19 +43,20 @@ case "$SYSTEM" in
   ;;
   *)
   prefix=/usr
+  sbindir=/usr/sbin
   mandir=/usr/man
   sysconfdir=/etc/indimail
   extra_args="--with-ssl"
   ;;
 esac
 echo ./configure --prefix=$prefix --enable-indimail \
-  --sysconfdir=$sysconfdir \
+  --sbindir=$sbindir --sysconfdir=$sysconfdir \
   --datarootdir=$prefix/share/indimail \
   --libexecdir=$prefix/libexec/indimail \
   --mandir=$mandir $extra_args
 
 ./configure --prefix=$prefix --enable-indimail \
-  --sysconfdir=$sysconfdir \
+  --sbindir=$sbindir --sysconfdir=$sysconfdir \
   --datarootdir=$prefix/share/indimail \
   --libexecdir=$prefix/libexec/indimail \
   --mandir=$mandir $extra_args
