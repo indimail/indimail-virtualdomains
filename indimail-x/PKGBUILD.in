@@ -68,16 +68,6 @@ package_indimail() {
   make DESTDIR=${pkgdir} uninstall-pkgconfigDATA uninstall-libindimailLTLIBRARIES
   rm -rf ${pkgdir}"${_pkg_config_path}"
   install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
-  cd $srcdir
-  (
-  echo "NAME=${pkgname}"
-  echo "Description=\"IndiMail Virtual Domains\""
-  echo "version="${pkgver}-${pkgrel}""
-  echo "ID=${pkgname}"
-  echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
-  echo "PACKAGE_BUGREPORT=\"'@email@'\""
-  ) > ${pkgname}-release
-  install -Dm644 ${pkgname}-release "$pkgdir"${_sysconfdir}/${pkgname}-release
 }
 
 package_libindimail() {
