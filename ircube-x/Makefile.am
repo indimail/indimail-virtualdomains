@@ -3,7 +3,7 @@ COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
 version=@VERSION@
 
-noinst_DATA = ircube.spec ircube.changes
+noinst_DATA = ircube.spec ircube.changes PKGBUILD
 
 ircubelibexecdir=@libexecdir@
 ircubelibexec_SCRIPTS = bogo-learn roundcube_config
@@ -26,3 +26,6 @@ ircube.spec: ircube.spec.in catChangeLog conf-version conf-release doc/ChangeLog
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 ircube.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
+PKGBUILD: PKGBUILD.in catChangeLog doc/ChangeLog conf-version \
+conf-release conf-email ircube.changes
+	cat $@.in | $(edit) > $@
