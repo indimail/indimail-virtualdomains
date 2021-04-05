@@ -16,6 +16,7 @@ _myconfdir=$(echo ${_sysconfdir} | cut -c2-)
 backup=(${_myconfdir}/{'bogofilter.cf','bogofilter.cf.example','perm_list.bogofilter'})
 provides=("pkgname")
 options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+install=archpkg.install
 changelog=$pkgname.changes
 _prefix=@prefix@
 _servicedir=@servicedir@
