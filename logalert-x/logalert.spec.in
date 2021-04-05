@@ -100,17 +100,17 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0755,root,root)                          %{_prefix}/bin/showbytes
 %attr(0755,root,root)                          %{_prefix}/sbin/rpclog
 %attr(0755,root,root)                          %{_prefix}/sbin/logsrv
-%attr(644,root,root)      %config(noreplace)   %{sysconfdir}/logalert.perms
-%attr(444,root,root)      %config(noreplace)   %{sysconfdir}/%{name}-release
+%attr(0644,root,root)     %config(noreplace)   %{sysconfdir}/logalert.perms
+%attr(0444,root,root)     %config(noreplace)   %{sysconfdir}/%{name}-release
 
-%doc %attr(644,root,root)                      %{_prefix}/share/indimail/doc/logalert/LICENSE
-%doc %attr(644,root,root)                      %{_prefix}/share/indimail/doc/logalert/README.md
+%doc %attr(0644,root,root)                     %{_prefix}/share/indimail/doc/logalert/LICENSE
+%doc %attr(0644,root,root)                     %{_prefix}/share/indimail/doc/logalert/README.md
 
-%doc %attr(644,root,root)                      %{_mandir}/man1/incrmesg.1.gz
-%doc %attr(644,root,root)                      %{_mandir}/man1/logclient.1.gz
-%doc %attr(644,root,root)                      %{_mandir}/man1/showbytes.1.gz
-%doc %attr(644,root,root)                      %{_mandir}/man8/logalert.8.gz
-%doc %attr(644,root,root)                      %{_mandir}/man8/logsrv.8.gz
-%doc %attr(644,root,root)                      %{_mandir}/man8/rpclog.8.gz
+%doc %attr(0644,root,root)                     %{_mandir}/man1/incrmesg.1.gz
+%doc %attr(0644,root,root)                     %{_mandir}/man1/logclient.1.gz
+%doc %attr(0644,root,root)                     %{_mandir}/man1/showbytes.1.gz
+%doc %attr(0644,root,root)                     %{_mandir}/man8/logalert.8.gz
+%doc %attr(0644,root,root)                     %{_mandir}/man8/logsrv.8.gz
+%doc %attr(0644,root,root)                     %{_mandir}/man8/rpclog.8.gz
 
 %changelog

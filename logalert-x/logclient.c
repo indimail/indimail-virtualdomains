@@ -1,5 +1,8 @@
 /*
  * $Log: logclient.c,v $
+ * Revision 1.10  2021-04-05 21:57:58+05:30  Cprogrammer
+ * fixed compilation errors
+ *
  * Revision 1.9  2021-03-15 11:32:07+05:30  Cprogrammer
  * removed common.h
  *
@@ -68,7 +71,7 @@
 #define SEEKDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logclient.c,v 1.9 2021-03-15 11:32:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logclient.c,v 1.10 2021-04-05 21:57:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
