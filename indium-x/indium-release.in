@@ -1,5 +1,5 @@
 NAME=@PACKAGE@
-Description="@PACKAGE_NAME@"
+Description="@PACKAGE_NAME@ - TCL/TK Administration GUI for IndiMail VirtualDomains"
 version="@PACKAGE_VERSION@"
 ID=@PACKAGE@
 HOME_URL="@PACKAGE_URL@"

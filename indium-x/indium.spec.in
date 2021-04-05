@@ -43,7 +43,7 @@
 %global packager @email@
 %endif
 
-Summary: TCL/TK based Administration GUI for IndiMail
+Summary: TCL/TK based Administration GUI for IndiMail VirtualDomains
 Name: indium
 Version: @version@
 Release: @release@%{?dist}
