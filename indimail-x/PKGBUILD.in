@@ -96,6 +96,40 @@ _mbase=@basepath@
 _mysqlSocket=/var/run/mysqld/mysqld.sock
 _mysqlPrefix=@mysql_prefix@
 
+fixperms()
+{
+  if [ $# -eq 3 ] ; then # directory
+    lin=$2
+    file=$3
+    if [ ! -d $file ] ; then
+      return 0
+    fi
+  elif [ $# = 2 ] ; then # file
+    lin=$1
+    file=$2
+    if [ ! -f $file ] ; then
+      return 0
+    fi
+  fi
+  perm=`echo $lin|cut -d\( -f2 | cut -d, -f1`
+  perm_f1=`echo $perm | cut -c1`
+  own=`echo $lin|cut -d\( -f2 | cut -d, -f2`
+  grp=`echo $lin|cut -d\( -f2 | cut -d, -f3|cut -d\) -f1`
+  if [ -f $file ] ; then
+    if [ $perm_f1 -eq 0 ] ; then # perm_f1 is 4755, 0644
+      /bin/chown $own:$grp $file
+      /bin/chmod $perm $file
+    else
+      echo $file
+      /bin/chown $own:$grp $file
+      /bin/chmod $perm $file
+    fi
+  elif [ -d $file ] ; then
+    /bin/chown $own:$grp $file
+    /bin/chmod $perm $file
+  fi
+}
+
 stop_service() {
   # stop indimail services before upgrade
   if [ -d /run ] ; then
@@ -185,6 +219,18 @@ pre_install() {
 }
 
 post_install() {
+  if [ -f ${_sysconfdir}/perm_list.indimail ] ; then
+    echo "Fixing Permissions"
+    (
+    /bin/grep -v "^#" ${_sysconfdir}/perm_list.indimail | while read line
+    do
+      if [ " $line" = " " ] ; then
+        continue
+      fi
+      fixperms $line
+    done
+    ) > ${sysconfdir_}/indimail-stat.override
+  fi
   echo "Doing Post Install"
   echo ""
   echo "1. Configure ${_logdir} for multilog"
@@ -453,6 +499,18 @@ pre_upgrade() {
 
 post_upgrade() {
   (
+  if [ -f ${_sysconfdir}/perm_list.indimail ] ; then
+    echo "Fixing Permissions"
+    (
+    /bin/grep -v "^#" ${_sysconfdir}/perm_list.indimail | while read line
+    do
+      if [ " $line" = " " ] ; then
+        continue
+      fi
+      fixperms $line
+    done
+    ) > ${sysconfdir_}/indimail-stat.override
+  fi
   echo "doing post upgrade activities"
   if [ "${_prefix}" != "/usr" ] ; then
     /sbin/ldconfig
