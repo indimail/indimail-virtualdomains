@@ -60,6 +60,7 @@ package() {
   install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
   install -D -m 0644 ${pkgname}-release "$pkgdir"${_sysconfdir}/${pkgname}-release
 }
+#### INSTALL SCRIPTS ####
 
 stop_servce() {
   if [ -d /run ] ; then
@@ -322,3 +323,4 @@ post_remove() {
   fi
   ) >> /var/log/indimail-setup.log 2>&1
 }
+#### END ####
