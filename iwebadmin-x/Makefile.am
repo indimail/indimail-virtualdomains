@@ -29,8 +29,11 @@ iwebadmin_CFLAGS = $(AM_CFLAGS)
 
 noinst_DATA = iwebadmin.spec iwebadmin.changes iwebadmin-rpmlintrc \
 			  iwebadmin-permissions.easy iwebadmin-permissions.secure \
-			  iwebadmin-permissions.paranoid iwebadmin.perms iwebadmin-conf \
+			  iwebadmin-permissions.paranoid iwebadmin-conf \
 			  iwebadmin-hooks PKGBUILD
+
+SYSCONFDIR = @sysconfdir@
+sysconf_DATA = iwebadmin.perms iwebadmin-release
 
 MOSTLYCLEANFILES = iwebadmin.perms
 
