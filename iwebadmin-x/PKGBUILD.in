@@ -1,0 +1,104 @@
+# Maintainer: @email@
+pkgname=iwebadmin
+pkgver=@version@
+pkgrel=@release@
+pkgdesc="WEB Administration GUI for IndiMail VirtualDomains"
+arch=('i686' 'x86_64')
+url="https://github.com/mbhangui/indimail-virtualdomains"
+license=('GPL3')
+groups=('base-devel')
+depends=('coreutils' 'mariadb-libs')
+makedepends=('sed' 'findutils' 'libqmail' 'libindimail')
+source=("$pkgname-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+_sysconfdir=@sysconfdir@
+_myconfdir=$(echo ${_sysconfdir} | cut -c2-)
+backup=(${_myconfdir}/{'iwebadmin-conf','iwebadmin-hooks','iwebadmin.perms'})
+provides=("pkgname")
+options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+changelog=$pkgname.changes
+_prefix=@prefix@
+_servicedir=@servicedir@
+_libexecdir=@libexecdir@
+_libdir=/usr/lib
+_shareddir=@shareddir@
+_mandir=@mandir@
+_mysqlPrefix=@mysql_prefix@
+
+build() {
+  cd $srcdir/$pkgname-${pkgver}
+  ./configure --prefix=${_prefix} \
+    --sysconfdir=${_sysconfdir} \
+    --libdir=${_libdir} \
+    --disable-ipauth \
+    --disable-trivial-password \
+    --enable-ezmlmdir=${_prefix}/bin \
+    --enable-domain-autofill \
+    --enable-modify-quota \
+    --enable-htmldir=@htmldir@ \
+    --enable-cgibindir=@cgibindir@ \
+    --enable-imagedir=@imagedir@ \
+    --enable-htmllibdir=@htmllibdir@
+  make -s
+}
+
+package() {
+  depends=('indimail>1.6' 'ezmlm-idx>7.2')
+  cd $srcdir/$pkgname-${pkgver}
+  make DESTDIR=${pkgdir} install
+  if [ -f iwebadmin.perms ] ; then
+    install -D -m 0644 iwebadmin.perms "${pkgdir}"${_sysconfdir}/iwebadmin.perms
+  fi
+}
+#### INSTALL SCRIPTS #####
+fixperms()
+{
+  if [ $# -eq 3 ] ; then # directory
+    lin=$2
+    file=$3
+    if [ ! -d $file ] ; then
+      return 0
+    fi
+  elif [ $# = 2 ] ; then # file
+    lin=$1
+    file=$2
+    if [ ! -f $file ] ; then
+      return 0
+    fi
+  fi
+  perm=`echo $lin|cut -d\( -f2 | cut -d, -f1`
+  perm_f1=`echo $perm | cut -c1`
+  own=`echo $lin|cut -d\( -f2 | cut -d, -f2`
+  grp=`echo $lin|cut -d\( -f2 | cut -d, -f3|cut -d\) -f1`
+  if [ $perm_f1 -eq 0 ] ; then
+    /bin/chown $own:$grp $file
+    /bin/chmod $perm $file
+  else
+    echo $file
+    /bin/chown $own:$grp $file
+    /bin/chmod $perm $file
+  fi
+}
+post_install() {
+  if [ -f ${_sysconfdir}/iwebadmin.perms ] ; then
+  echo "Fixing Permissions"
+    (
+    /bin/grep -v "^#" ${_sysconfdir}/iwebadmin.perms | while read line
+    do
+      fixperms $line
+    done
+    ) > ${_sysconfdir}/iwebadmin-stat.override
+  fi
+}
+
+post_upgrade() {
+  if [ -f ${_sysconfdir}/iwebadmin.perms ] ; then
+    echo "Fixing Permissions"
+    (
+    /bin/grep -v "^#" ${_sysconfdir}/iwebadmin.perms | while read line
+    do
+      fixperms $line
+    done
+    ) > ${_sysconfdir}/iwebadmin-stat.override
+  fi
+}

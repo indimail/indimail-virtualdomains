@@ -47,7 +47,54 @@ package() {
 }
 
 #### INSTALL SCRIPTS ####
+
+fixperms()
+{
+  if [ $# -eq 3 ] ; then # directory
+    lin=$2
+    file=$3
+    if [ ! -d $file ] ; then
+      return 0
+    fi
+  elif [ $# = 2 ] ; then # file
+    lin=$1
+    file=$2
+    if [ ! -f $file ] ; then
+      return 0
+    fi
+  fi
+  perm=`echo $lin|cut -d\( -f2 | cut -d, -f1`
+  perm_f1=`echo $perm | cut -c1`
+  own=`echo $lin|cut -d\( -f2 | cut -d, -f2`
+  grp=`echo $lin|cut -d\( -f2 | cut -d, -f3|cut -d\) -f1`
+  if [ -f $file ] ; then
+    if [ $perm_f1 -eq 0 ] ; then # perm_f1 is 4755, 0644
+      /bin/chown $own:$grp $file
+      /bin/chmod $perm $file
+    else
+      echo $file
+      /bin/chown $own:$grp $file
+      /bin/chmod $perm $file
+    fi
+  elif [ -d $file ] ; then
+    /bin/chown $own:$grp $file
+    /bin/chmod $perm $file
+  fi
+}
+
 post_install() {
+  if [ -f ${_sysconfdir}/perm_list.bogofilter ] ; then
+    echo "Fixing Permissions"
+    (
+    /bin/grep -v "^#" ${_sysconfdir}/perm_list.bogofilter | while read line
+    do
+      if [ " $line" = " " ] ; then
+        continue
+      fi
+      fixperms $line
+    done
+    ) > ${sysconfdir_}/indimail-spamfilter-stat.override
+  fi
   if [ -d /run ] ; then
     logfifo="/run/indimail/logfifo"
     mkdir_p /run/indimail
@@ -137,6 +184,21 @@ post_install() {
     if [ -x ${_prefix}/sbin/svctool ] ; then
       ${_prefix}/sbin/svctool --config=bogofilter
     fi
+  fi
+}
+
+post_upgrade() {
+  if [ -f ${_sysconfdir}/perm_list.bogofilter ] ; then
+    echo "Fixing Permissions"
+    (
+    /bin/grep -v "^#" ${_sysconfdir}/perm_list.bogofilter | while read line
+    do
+      if [ " $line" = " " ] ; then
+        continue
+      fi
+      fixperms $line
+    done
+    ) > ${sysconfdir_}/indimail-spamfilter-stat.override
   fi
 }
 

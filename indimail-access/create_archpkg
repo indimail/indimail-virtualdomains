@@ -110,6 +110,9 @@ if [ $copy_src -eq 1 ] ; then
     exit 1
   fi
   cp PKGBUILD $name.changes $pkg_dir
+  if [ -f extra_src ] ; then
+      cp -rpf `grep -h -v "^#" extra_src` $pkg_dir
+  fi
   total=$(grep "#### INSTALL.* ####" PKGBUILD | wc -l)
   echo "Total scripts in PKGBUILD=$total"
   if [ $total -le 1 ] ; then

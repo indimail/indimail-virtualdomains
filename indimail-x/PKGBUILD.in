@@ -65,7 +65,8 @@ package_indimail() {
   provides=('indimail')
   cd "$srcdir/indimail-@version@"
   make DESTDIR=${pkgdir} install
-  make DESTDIR=${pkgdir} uninstall-pkgconfigDATA uninstall-libindimailLTLIBRARIES
+  make DESTDIR=${pkgdir} uninstall-pkgconfigDATA uninstall-libindimailLTLIBRARIES \
+    uninstall-includeHEADERS
   rm -rf ${pkgdir}"${_pkg_config_path}"
   install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
 }
@@ -73,7 +74,8 @@ package_indimail() {
 package_libindimail() {
   install=archpkg2.install
   cd "$srcdir/indimail-@version@"
-  make DESTDIR=${pkgdir} install-libindimailLTLIBRARIES install-pkgconfigDATA
+  make DESTDIR=${pkgdir} install-includeHEADERS install-libindimailLTLIBRARIES \
+    install-pkgconfigDATA
 }
 
 #### INSTALL1 SCRIPTS ####
