@@ -16,6 +16,7 @@ _myconfdir=$(echo ${_sysconfdir} | cut -c2-)
 backup=(${_myconfdir}/procmail.perms)
 provides=("pkgname")
 options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+install=archpkg.install
 changelog=$pkgname.changes
 _prefix=@prefix@
 _servicedir=@servicedir@
@@ -31,4 +32,57 @@ build() {
 package() {
   cd $srcdir/$pkgname-${pkgver}
   make DESTDIR=${pkgdir} install
+}
+#### INSTALL SCRIPTS #####
+fixperms()
+{
+  if [ $# -eq 3 ] ; then # directory
+    lin=$2
+    file=$3
+    if [ ! -d $file ] ; then
+      return 0
+    fi
+  elif [ $# = 2 ] ; then # file
+    lin=$1
+    file=$2
+    if [ ! -f $file ] ; then
+      return 0
+    fi
+  fi
+  perm=`echo $lin|cut -d\( -f2 | cut -d, -f1`
+  perm_f1=`echo $perm | cut -c1`
+  own=`echo $lin|cut -d\( -f2 | cut -d, -f2`
+  grp=`echo $lin|cut -d\( -f2 | cut -d, -f3|cut -d\) -f1`
+  if [ $perm_f1 -eq 0 ] ; then
+    /bin/chown $own:$grp $file
+    /bin/chmod $perm $file
+  else
+    echo $file
+    /bin/chown $own:$grp $file
+    /bin/chmod $perm $file
+  fi
+}
+
+post_install() {
+  if [ -f ${_sysconfdir}/procmail.perms ] ; then
+  echo "Fixing Permissions"
+    (
+    /bin/grep -v "^#" ${_sysconfdir}/procmail.perms | while read line
+    do
+      fixperms $line
+    done
+    ) > ${_sysconfdir}/procmail-stat.override
+  fi
+}
+
+post_upgrade() {
+  if [ -f ${_sysconfdir}/procmail.perms ] ; then
+    echo "Fixing Permissions"
+    (
+    /bin/grep -v "^#" ${_sysconfdir}/procmail.perms | while read line
+    do
+      fixperms $line
+    done
+    ) > ${_sysconfdir}/procmail-stat.override
+  fi
 }
