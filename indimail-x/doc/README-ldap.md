@@ -1,4 +1,4 @@
-# Creating a shared Address Book for your IndiMail server
+# Creating a shared Address Book for your server
 
 ## Install openldap
 
@@ -323,15 +323,15 @@ uid: mbhangui
 cn: Manvendra Bhangui
 gn: Manvendra
 sn: Bhangui
-o: Consim Info Pvt. Ltd.
+o: Coconut Farms Pvt. Ltd.
 l: Mandaivelli
-street: #94 Coconut Republic
+street: #94 Banana Republic
 st: TN
 postalCode: 600028
-pager: +91 44 5555 1111
-homePhone: +91 44 5555 1234
-telephoneNumber: +91 44 5555 1235
-facsimileTelephoneNumber: +91 44 5555 1236
+pager: +91 44 5555 xxxx
+homePhone: +91 44 5555 xxxx
+telephoneNumber: +91 44 5555 xxxx
+facsimileTelephoneNumber: +91 44 5555 xxxx
 mobile: +91 99401xxxxx
 mail: m.bhangui@gmail.com
 objectClass: top
