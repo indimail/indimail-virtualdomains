@@ -58,10 +58,10 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root" >&2
 	exit 1
 fi
-if [ -f ${sysconfdir}/procmail_perm_list ] ; then
+if [ -f ${sysconfdir}/procmail.perms ] ; then
 	echo "Fixing Permissions"
 	(
-	/bin/grep -v "^#" ${sysconfdir}/procmail_perm_list | while read line
+	/bin/grep -v "^#" ${sysconfdir}/procmail.perms | while read line
 	do
 		fixperms $line
 	done

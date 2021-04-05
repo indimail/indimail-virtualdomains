@@ -2,6 +2,7 @@
 set -e
 
 prefix=@prefix@
+sysconfdir=@sysconfdir@
 
 setperm()
 {
@@ -58,12 +59,12 @@ if [ $ID -ne 0 ] ; then
 	echo "You are not root" >&2
 	exit 1
 fi
-if [ -f ${prefix}/etc/logalert_perm_list ] ; then
+if [ -f ${prefix}/etc/logalert.perms ] ; then
 	echo "Fixing Permissions"
 (
-/bin/grep -v "^#" ${prefix}/etc/logalert_perm_list | while read line
+/bin/grep -v "^#" ${sysconfdir}/logalert.perms | while read line
 do
 	fixperms $line
 done
-) > ${prefix}/etc/logalert_stat.override
+) > ${sysconfdir}/logalert-stat.override
 fi

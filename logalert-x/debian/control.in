@@ -8,6 +8,6 @@ Build-Depends: cdbs, debhelper (>= 9), gcc, g++, m4, autotools-dev, libqmail-dev
 
 Package: logalert
 Architecture: any
-Description: log archival and analysis
+Description: Logfile monitoring, alert and analysis tool
  .
  logalert provides tools for log archival and analysis

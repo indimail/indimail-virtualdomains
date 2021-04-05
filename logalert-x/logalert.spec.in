@@ -21,7 +21,7 @@
 %global debug_package %{nil}
 %endif
 
-Summary: Watch files for specific patterns
+Summary: Logfile monitoring, alert and analysis tool
 Name: logalert
 Version: @version@
 Release: @release@%{?dist}
@@ -36,7 +36,6 @@ URL: http://www.indimail.org
 Group: Productivity/Networking/Email/Utilities
 Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 Source1: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
-
 
 %if %build_on_obs == 1
 BuildRequires: -post-build-checks  
@@ -101,7 +100,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0755,root,root)                          %{_prefix}/bin/showbytes
 %attr(0755,root,root)                          %{_prefix}/sbin/rpclog
 %attr(0755,root,root)                          %{_prefix}/sbin/logsrv
-%attr(644,root,root)      %config(noreplace)   %{sysconfdir}/logalert_perm_list
+%attr(644,root,root)      %config(noreplace)   %{sysconfdir}/logalert.perms
 %attr(444,root,root)      %config(noreplace)   %{sysconfdir}/%{name}-release
 
 %doc %attr(644,root,root)                      %{_prefix}/share/indimail/doc/logalert/LICENSE

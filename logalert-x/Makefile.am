@@ -15,13 +15,13 @@ man_MANS = logalert.8 logsrv.8 rpclog.8 incrmesg.1 logclient.1 showbytes.1
 mandir = @prefix@/share/man
 
 doc_DATA = LICENSE README.md
-noinst_SCRIPTS = logalert.spec logalert-rpmlintrc logalert.changes
+noinst_SCRIPTS = logalert.spec logalert-rpmlintrc logalert.changes PKGBUILD
 
-MOSTLYCLEANFILES=lex.c parser.h parser.c logalert_perm_list debian/Makefile
+MOSTLYCLEANFILES=lex.c parser.h parser.c logalert.perms debian/Makefile
 DISTCLEANFILES = *~
 
 SYSCONFDIR = @sysconfdir@
-sysconf_DATA = logalert_perm_list logalert-release
+sysconf_DATA = logalert.perms logalert-release
 
 AM_LFLAGS  = -Pc
 AM_YFLAGS  = -d
@@ -65,14 +65,17 @@ logalert.spec: logalert.spec.in doc/ChangeLog conf-version conf-release conf-ema
 	(cat $@.in;./catChangeLog --spec doc/ChangeLog) | $(edit)> $@
 logalert.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
+PKGBUILD: PKGBUILD.in catChangeLog doc/ChangeLog conf-version \
+conf-release conf-email logalert.changes
+	cat $@.in | $(edit) > $@
 logsrv.8: logsrv.man
 	$(edit) logsrv.man > $@
 logclient.1: logclient.man
 	$(edit) logclient.man > $@
 debian/Makefile: debian/Makefile.in conf-version conf-release
 	$(edit) $@.in > $@
-logalert_perm_list: logalert_perm_list.in
-	$(edit) $@.in > $@
+logalert.perms: perm_list.in
+	$(edit) perm_list.in > $@
 install-data-hook:
 	$(mkinstalldirs)         $(DESTDIR)$(SYSCONFDIR)
-	$(INSTALL_DATA) logalert_perm_list $(DESTDIR)$(SYSCONFDIR)/logalert_perm_list  || exit 1
+	$(INSTALL_DATA) logalert.perms $(DESTDIR)$(SYSCONFDIR)/logalert.perms  || exit 1

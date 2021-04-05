@@ -24,7 +24,7 @@ man/procmailsc.5
 procmail
 procmail-rpmlintrc
 procmail.1
-procmail_perm_list
+procmail.perms
 procmailex.5
 procmailrc.5
 procmailsc.5
@@ -61,3 +61,4 @@ procmail-permissions.easy
 procmail-permissions.secure
 procmail-permissions.paranoid
 procmail-release
+PKGBUILD

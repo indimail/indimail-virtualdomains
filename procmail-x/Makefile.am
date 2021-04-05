@@ -5,17 +5,17 @@ DEVNULL = /dev/null
 DIST_COMMON=COPYING AUTHORS
 BUILT_SOURCES = procmail.spec procmail.changes procmail-rpmlintrc \
 	procmail-permissions.easy procmail-permissions.secure \
-	procmail-permissions.paranoid
+	procmail-permissions.paranoid PKGBUILD
 
 MOSTLYCLEANFILES=man/*.1 man/*.5 man/man.sed.* man/man.sed \
-	procmail_perm_list formail.1 lockfile.1 procmail.1 \
+	procmail.perms formail.1 lockfile.1 procmail.1 \
 	procmailex.5 procmailrc.5 procmailsc.5 debian/Makefile
 
 bin_PROGRAMS=procmail lockfile formail
 bin_SCRIPTS=mailstat
 
 SYSCONFDIR = @sysconfdir@
-sysconf_DATA = procmail_perm_list procmail-release
+sysconf_DATA = procmail.perms procmail-release
 
 procmail_SOURCES=procmail.c cstdio.c common.c exopen.c goodies.c \
 	locking.c mailfold.c foldinfo.c misc.c pipes.c regexp.c robust.c \
@@ -99,14 +99,17 @@ procmail.spec: procmail.spec.in conf-version conf-release doc/ChangeLog conf-ema
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 procmail.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
+PKGBUILD: PKGBUILD.in catChangeLog doc/ChangeLog conf-version \
+conf-release conf-email procmail.changes
+	cat $@.in | $(edit) > $@
 debian/Makefile: debian/Makefile.in conf-version conf-release
 	$(edit) $@.in > $@
-procmail_perm_list: procmail_perm_list.in
-	$(edit) $@.in > $@
+procmail.perms: perm_list.in
+	$(edit) perm_list.in > $@
 
 install-data-hook:
 	$(mkinstalldirs)         $(DESTDIR)@docdir@
-	$(INSTALL_DATA) procmail_perm_list $(DESTDIR)$(sysconfdir)/procmail_perm_list  || exit 1
+	$(INSTALL_DATA) procmail.perms $(DESTDIR)$(sysconfdir)/procmail.perms  || exit 1
 	if test `@idcommand@` = "0" ; then \
 		chown root:indimail $(DESTDIR)$(bindir)/procmail || true; \
 		chmod 4511 $(DESTDIR)$(bindir)/procmail || true; \

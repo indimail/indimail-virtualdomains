@@ -23,7 +23,8 @@ _servicedir=@servicedir@
 build() {
   cd $srcdir/$pkgname-${pkgver}
   HOME='.';export HOME
-  ./configure --prefix=${_prefix} --libexecdir=${_prefix}/libexec/indimail \
+  ./configure --prefix=${_prefix} --sbindir=${_prefix}/bin \
+  --libexecdir=${_prefix}/libexec/indimail \
   --sysconfdir=${_sysconfdir} --mandir=${_prefix}/share/man \
   --datarootdir=${_prefix}/share/indimail --enable-indimail
   make -s
