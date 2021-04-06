@@ -51,7 +51,7 @@ control: control.in ../conf-email
 	$(edit) $@.in > $@
 copyright: copyright.in ../conf-email
 	$(edit) $@.in > $@
-changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release ../conf-email
+changelog: ../doc/ChangeLog ../conf-version ../conf-release ../conf-email
 	../catChangeLog --debian --name=iwebadmin --state=unstable \
 		--urgency=low ../doc/ChangeLog > $@
 _service: _service.in

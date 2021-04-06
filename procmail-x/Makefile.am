@@ -95,12 +95,13 @@ procmail-permissions.paranoid: procmail-permissions.paranoid.in
 	$(edit) procmail-permissions.paranoid.in > $@
 procmail-rpmlintrc: procmail-rpmlintrc.in conf-version conf-release
 	$(edit) procmail-rpmlintrc.in > $@
-procmail.spec: procmail.spec.in conf-version conf-release doc/ChangeLog conf-email
+procmail.spec: procmail.spec.in conf-version conf-release \
+doc/ChangeLog conf-email
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 procmail.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
-PKGBUILD: PKGBUILD.in catChangeLog doc/ChangeLog conf-version \
-conf-release conf-email procmail.changes
+PKGBUILD: PKGBUILD.in conf-version conf-release conf-email \
+procmail.changes
 	cat $@.in | $(edit) > $@
 debian/Makefile: debian/Makefile.in conf-version conf-release
 	$(edit) $@.in > $@

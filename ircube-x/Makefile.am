@@ -22,10 +22,11 @@ install-data-hook:
 	cp README.md $(DESTDIR)@prefix@/share/indimail/doc/README-ircube.md || exit 1
 	cp COPYING $(DESTDIR)@prefix@/share/indimail/doc/COPYING.ircube || exit 1
 
-ircube.spec: ircube.spec.in catChangeLog conf-version conf-release doc/ChangeLog conf-email
+ircube.spec: ircube.spec.in catChangeLog conf-version conf-release \
+doc/ChangeLog conf-email
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 ircube.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
-PKGBUILD: PKGBUILD.in catChangeLog doc/ChangeLog conf-version \
-conf-release conf-email ircube.changes
+PKGBUILD: PKGBUILD.in conf-version conf-release \
+conf-email ircube.changes
 	cat $@.in | $(edit) > $@

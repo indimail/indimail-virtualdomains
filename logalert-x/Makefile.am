@@ -61,12 +61,13 @@ lex.c: lex.l parser.h
 parser.h: parser.c
 logalert-rpmlintrc: logalert-rpmlintrc.in
 	$(edit) logalert-rpmlintrc.in > $@
-logalert.spec: logalert.spec.in doc/ChangeLog conf-version conf-release conf-email
+logalert.spec: logalert.spec.in doc/ChangeLog conf-version \
+conf-release conf-email
 	(cat $@.in;./catChangeLog --spec doc/ChangeLog) | $(edit)> $@
 logalert.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
-PKGBUILD: PKGBUILD.in catChangeLog doc/ChangeLog conf-version \
-conf-release conf-email logalert.changes
+PKGBUILD: PKGBUILD.in conf-version conf-release conf-email \
+logalert.changes
 	cat $@.in | $(edit) > $@
 logsrv.8: logsrv.man
 	$(edit) logsrv.man > $@

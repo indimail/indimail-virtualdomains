@@ -45,26 +45,26 @@ indimail-access-permissions.paranoid perm_list.imap debian/Makefile
 	indimail-access-permissions.secure indimail-access-permissions.paranoid \
 	perm_list.imap debian/Makefile
 
-indimail-access.spec: indimail-access.spec.in catChangeLog Makefile \
+indimail-access.spec: indimail-access.spec.in \
 conf-version conf-release doc/ChangeLog conf-email \
 ../fetchmail-x/conf-version ../courier-imap-x/conf-version
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
-PKGBUILD: PKGBUILD.in catChangeLog Makefile \
-conf-version conf-release doc/ChangeLog conf-email \
+indimail-access.changes: doc/ChangeLog conf-version conf-release conf-email
+	./catChangeLog --changes doc/ChangeLog > $@
+PKGBUILD: PKGBUILD.in conf-version conf-release conf-email \
 ../fetchmail-x/conf-version ../courier-imap-x/conf-version \
 indimail-access.changes
 	cat $@.in | $(edit) > $@
-indimail-access.changes: doc/ChangeLog conf-version conf-release conf-email
-	./catChangeLog --changes doc/ChangeLog > $@
-indimail-access-rpmlintrc: indimail-access-rpmlintrc.in Makefile
+indimail-access-rpmlintrc: indimail-access-rpmlintrc.in
 	$(edit) $@.in > $@
-indimail-access-permissions.easy: indimail-access-permissions.easy.in Makefile
+indimail-access-permissions.easy: indimail-access-permissions.easy.in
 	$(edit) $@.in > $@
-indimail-access-permissions.secure: indimail-access-permissions.secure.in Makefile
+indimail-access-permissions.secure: indimail-access-permissions.secure.in
 	$(edit) $@.in > $@
-indimail-access-permissions.paranoid: indimail-access-permissions.paranoid.in Makefile
+indimail-access-permissions.paranoid: indimail-access-permissions.paranoid.in
 	$(edit) $@.in > $@
 perm_list.imap: perm_list.in
 	$(edit) perm_list.in > $@
-debian/Makefile: debian/Makefile.in ../fetchmail-x/conf-version ../courier-imap-x/conf-version conf-release
+debian/Makefile: debian/Makefile.in ../fetchmail-x/conf-version \
+../courier-imap-x/conf-version conf-release
 	$(edit) $@.in > $@

@@ -51,7 +51,7 @@ indium-Debian_10.dsc: indium-Debian_10.dsc.in ../conf-version \
 	$(edit) $@.in > $@
 indium.install: indium.install.in Makefile
 	$(edit) $@.in > $@
-changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release ../conf-email
+changelog: ../doc/ChangeLog ../conf-version ../conf-release ../conf-email
 	../catChangeLog --debian --name=indium --state=unstable \
 		--urgency=low ../doc/ChangeLog > $@
 control: control.in ../conf-email

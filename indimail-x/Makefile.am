@@ -810,13 +810,13 @@ conf-release:
 	if [ ! -f conf-release ] ; then \
 		echo 1.1 > conf-release; \
 	fi
-indimail.spec: indimail.spec.in catChangeLog doc/ChangeLog conf-version \
+indimail.spec: indimail.spec.in doc/ChangeLog conf-version \
 conf-release conf-email
 	(cat $@.in;./catChangeLog --spec doc/ChangeLog) | $(edit) > $@
-indimail.changes: catChangeLog doc/ChangeLog conf-version conf-release conf-email
+indimail.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
-PKGBUILD: PKGBUILD.in catChangeLog doc/ChangeLog conf-version \
-conf-release conf-email indimail.changes
+PKGBUILD: PKGBUILD.in conf-version conf-release conf-email \
+indimail.changes
 	cat $@.in | $(edit) > $@
 indimail-rpmlintrc: indimail-rpmlintrc.in
 	$(edit) indimail-rpmlintrc.in > $@

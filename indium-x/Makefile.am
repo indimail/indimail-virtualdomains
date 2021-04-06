@@ -89,8 +89,8 @@ indium.spec: indium.spec.in conf-version conf-release conf-email
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 indium.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
-PKGBUILD: PKGBUILD.in catChangeLog doc/ChangeLog conf-version \
-conf-release conf-email indium.changes
+PKGBUILD: PKGBUILD.in conf-version conf-release conf-email \
+indium.changes
 	cat $@.in | $(edit) > $@
 pwhelper.o: pwhelper.c
 	$(COMPILE) $(DEFS) -c pwhelper.c
