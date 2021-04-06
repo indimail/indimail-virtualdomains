@@ -221,7 +221,7 @@ MOSTLYCLEANFILES=vcaliasrev myslave controlsync bogofilter-qfe \
 	vadddomain_handle vadduser_handle vpasswd_handle vdeldomain_handle vaddaliasdomain_handle \
 	vrenamedomain_handle login_tasks.3 authgeneric usr.sbin.mysqld usr.sbin.clamd \
 	vmoduser_handle vmoduser.1 usr.bin.freshclam indimail.mod indimail.pp \
-	indimail_config.h debian/Makefile
+	indimail_config.h debian/Makefile archpkg*.install
 
 vadddomain_SOURCES = vadddomain.c
 vadddomain_LDADD = isvalid_domain.lo libindimail.la $(LIB_QMAIL)
