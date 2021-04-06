@@ -3,8 +3,8 @@ dnl
 dnl Copyright 1998 - 2018 Double Precision, Inc.  See COPYING for
 dnl distribution information.
 
-AC_PREREQ(2.59)
-AC_INIT(courier-imap,m4_normalize(m4_include([conf-version])), [courier-imap@lists.sourceforge.net])
+AC_PREREQ([2.59])
+AC_INIT([courier-imap],[m4_normalize(m4_include(conf-version))],[courier-imap@lists.sourceforge.net])
 AC_CONFIG_SRCDIR(libs/imap/imapd.c)
 AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE([foreign])
@@ -16,8 +16,7 @@ AC_PROG_AWK
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_LIBTOOL_DLOPEN
-AM_PROG_LIBTOOL
+LT_INIT([dlopen])
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_PATH_PROGS(SETENV, env)

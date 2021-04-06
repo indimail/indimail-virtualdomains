@@ -35,7 +35,7 @@ rules: rules.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
 indimail-spamfilter.install: indimail-spamfilter.install.in Makefile
 	$(edit) $@.in > $@
-changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release ../conf-email
+changelog: ../doc/ChangeLog ../conf-version ../conf-release ../conf-email
 	../catChangeLog --debian --name=indimail-spamfilter --state=unstable \
 		--urgency=low ../doc/ChangeLog > $@
 control: control.in ../conf-email

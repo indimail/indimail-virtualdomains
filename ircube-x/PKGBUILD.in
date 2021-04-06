@@ -1,0 +1,42 @@
+# Maintainer: @email@
+pkgname=ircube
+pkgver=@version@
+pkgrel=@release@
+pkgdesc="Collection of plugins for Roundcube Mail"
+arch=('i686' 'x86_64')
+url="https://github.com/mbhangui/indimail-virtualdomains"
+license=('GPL3')
+groups=('base-devel')
+depends=('coreutils')
+makedepends=('sed' 'findutils')
+source=("$pkgname-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+_sysconfdir=@sysconfdir@
+provides=("pkgname")
+options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+changelog=$pkgname.changes
+_prefix=@prefix@
+_servicedir=@servicedir@
+_pluginbase=${_prefix}/share/roundcubemail
+
+build() {
+  cd $srcdir/$pkgname-${pkgver}
+  ./configure --prefix=${_prefix} --libexecdir=${_prefix}/libexec/indimail --enable-plugindir=${_pluginbase}
+  make -s
+}
+
+package() {
+  depends=('iwebadmin' 'sed' 'indimail>=2.0' 'indimail-mta>=2.0')
+  cd $srcdir/$pkgname-${pkgver}
+  make DESTDIR=${pkgdir} install
+  cd $srcdir
+  (
+  echo "NAME=${pkgname}"
+  echo "Description=\"ircube - Collection of plugins for Roundcube Mail\""
+  echo "ircube_version=${pkgver}-${pkgrel}"
+  echo "ID=${pkgname}"
+  echo "HOME_URL=\"https://github.com/mbhangui/indimail-wordlist\""
+  echo "PACKAGE_BUGREPORT=\"'@email@'\""
+  ) > ${pkgname}-release
+  install -D -m 0644 ${pkgname}-release "$pkgdir""${_sysconfdir}"/${pkgname}-release
+}

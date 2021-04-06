@@ -10,6 +10,6 @@ Package: indium
 Architecture: any
 Depends: tcl8.6-dev, libmysqlclient16 (>= 5.1.21-1), ${misc:Depends}
 Pre-Depends: ${misc:Pre-Depends}
-Description: Web Administration GUI for IndiMail User Administration
+Description: TCL/TK based Administration GUI for IndiMail VirtualDomains
  .
  indium provides a TCL/TK frontent for administering IndiMail Users

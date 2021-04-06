@@ -152,7 +152,7 @@ echo "------------------------------------------------------"
 (
 echo "NAME=%{name}"
 echo "Description=\"IndiMail Authentication Package\""
-echo "AUTH_version="%{version}""
+echo "AUTH_version=%{version}-%{release}"
 echo "ID=%{name}"
 echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
 echo "PACKAGE_BUGREPORT=\"'@email@'\""
@@ -190,7 +190,7 @@ fi
 if [ pam-multi-%{pam_multi_version} ] ; then
   cd pam-multi-%{pam_multi_version}
   %configure --prefix=%{_prefix} --datarootdir=%{shareddir} \
-  --enable-moduledir=%{pam_moduledir} \
+  --mandir=%{mandir} --enable-moduledir=%{pam_moduledir} \
   --enable-controldir=%{sysconfdir}/control \
   --enable-pamconfdir=%{pam_confdir} \
   --enable-mysqlprefix=%{mysqlPrefix} \
@@ -339,6 +339,13 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
+if [ -d /run ] ; then
+  rundir=/run/svscan
+elif [ -d /var/run ] ; then
+  rundir=/var/run/svscan
+else
+  rundir=%{servicedir}
+fi
 
 if [ -z "$argv1" ] ; then
   argv1=0
@@ -367,7 +374,7 @@ echo ""
 # Recreate ld.so links and cache
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   if [ -d %{_sysconfdir}/ld.so.conf.d ] ; then
-    echo %{_libdir} > %{_sysconfdir}/ld.so.conf.d/indimail-%{_arch}.conf
+    echo %{_libdir} > %{_sysconfdir}/ld.so.conf.d/indimail-auth-%{_arch}.conf
   fi
   /sbin/ldconfig
 fi

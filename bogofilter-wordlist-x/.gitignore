@@ -21,3 +21,4 @@ config.log
 config.status
 debian/changelog
 conf-version
+PKGBUILD

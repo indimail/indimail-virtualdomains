@@ -8,6 +8,8 @@ on:
       - '**/fortune-x/**'
       - '**/mpack-x/**'
       - '**/flash-x/**'
+      - '**/prepare_obs'
+      - '**/catChangeLog'
       - .github/workflows/indimail-utils-c-cpp.yml
       - '!**/doc/*'
       - '!**.md'

@@ -377,8 +377,6 @@ case $HELP in
         ;;
 esac
 
-AC_OUTPUT(Makefile)
-
 echo ""
 echo "            $PACKAGE $VERSION"
 echo "            Current settings"
@@ -400,3 +398,7 @@ echo "           IP Auth = "$IPAUTH""
 echo "        User Index = "$USER_INDEX""
 echo "  Trivial Password = "$TRIVIAL_PASSWORD_ENABLED""
 echo " catchall accounts = "$CATCHALL_ENABLED""
+
+AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([iwebadmin-release:iwebadmin-release.in],[], [])
+AC_OUTPUT

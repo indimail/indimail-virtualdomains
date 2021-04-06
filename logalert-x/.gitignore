@@ -15,7 +15,7 @@ TODO
 ylwrap
 lex.c
 logalert-*rpmlintrc
-logalert_perm_list
+logalert.perms
 debian/changelog
 debian/control
 debian/copyright
@@ -42,3 +42,4 @@ stamp-h1
 conf-release
 logalert.changes
 logalert-release
+PKGBUILD

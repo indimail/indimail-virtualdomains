@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - '**/ircube-x/**'
+      - '**/prepare_obs'
+      - '**/catChangeLog'
       - .github/workflows/ircube-freebsd.yml
       - '!**/ircube-x/debian/*'
       - '!**/doc/*'

@@ -20,3 +20,4 @@ debian/copyright
 debian/control
 ircube.spec
 ircube.changes
+PKGBUILD

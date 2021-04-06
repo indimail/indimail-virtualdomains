@@ -10,6 +10,6 @@ Package: iwebadmin
 Architecture: any
 Depends: ${misc:Depends} ${shlibs:Depends}
 Pre-Depends: ${misc:Pre-Depends}
-Description: Web Administration GUI for IndiMail User Administration
+Description: Web Administration GUI for IndiMail VirtualDomains
  .
  iwebadmin provides a Web frontend for administering IndiMail Users

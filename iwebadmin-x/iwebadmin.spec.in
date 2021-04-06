@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.49 2021-03-26 18:13:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.50 2021-04-06 00:02:46+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -105,15 +105,6 @@ echo Build          %{name}-%{version}-%{release} Build %{_build} OS %{_os}
 echo "------------------------------------------------------"
 ) > %{name}-rpm.info
 
-(
-echo "NAME=%{name}"
-echo "Description=\"IndiMail iwebadmin Package\""
-echo "IWEBADMIN_version="%{version}""
-echo "ID=%{name}"
-echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
-echo "PACKAGE_BUGREPORT=\"'@email@'\""
-) > %{name}-release
-
 %configure --prefix=%{_prefix} \
   --sysconfdir=%{sysconfdir} \
   --libdir=%{_libdir} \
@@ -145,7 +136,6 @@ install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissio
 %endif
 %{__mkdir_p} %{buildroot}%{sysconfdir}
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
-install -m 0644 %{name}-release  %{buildroot}%{sysconfdir}/%{name}-release
 
 %if %{undefined nodebug}
   /bin/chmod -R 755 %{buildroot}@cgibindir@
@@ -162,6 +152,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(644,root,root) %config(noreplace)  %{sysconfdir}/%{name}-rpm.info
 %attr(644,root,root) %config(noreplace)  %{sysconfdir}/%{name}-conf
 %attr(644,root,root) %config(noreplace)  %{sysconfdir}/%{name}-hooks
+%attr(644,root,root) %config(noreplace)  %{sysconfdir}/%{name}.perms
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120

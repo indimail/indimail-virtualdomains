@@ -1,5 +1,8 @@
 /*
  * $Log: showbytes.c,v $
+ * Revision 1.4  2021-04-05 21:58:15+05:30  Cprogrammer
+ * fixed compilation errors
+ *
  * Revision 1.3  2020-06-21 12:49:33+05:30  Cprogrammer
  * quench rpmlint
  *
@@ -18,7 +21,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: showbytes.c,v 1.3 2020-06-21 12:49:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: showbytes.c,v 1.4 2021-04-05 21:58:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int

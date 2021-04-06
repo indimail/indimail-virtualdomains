@@ -17,6 +17,7 @@ fortune_vers=@fortune_version@
 flash_version=@flash_version@
 mpack_version=@mpack_version@
 version=@version@
+release=@release@
 mandir=/usr/share/man
 arch=$(shell uname -m)
 # check https://wiki.debian.org/Multiarch/Implementation#Dynamic_debian.2F.2A_files
@@ -87,7 +88,7 @@ build-stamp:
 	( \
 	echo NAME=indimail-utils; \
 	echo Description=\"IndiMail Authentication Package\"; \
-	echo AUTH_version=$(version); \
+	echo AUTH_version=$(version)-$(release); \
 	echo ID=indimail-utils; \
 	echo HOME_URL="https://github.com/mbhangui/indimail-virtualdomains"; \
 	echo PACKAGE_BUGREPORT=\"'@email@'\"; \

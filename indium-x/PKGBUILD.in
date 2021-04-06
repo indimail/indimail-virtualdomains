@@ -1,0 +1,41 @@
+# Maintainer: @email@
+pkgname=indium
+pkgver=@version@
+pkgrel=@release@
+pkgdesc="TCL/TK based Administration GUI for IndiMail"
+arch=('i686' 'x86_64')
+url="https://github.com/mbhangui/indimail-virtualdomains"
+license=('GPL3')
+groups=('base-devel')
+depends=('coreutils' 'procps' 'mariadb-libs' 'gettext')
+makedepends=('sed' 'findutils' 'tcl' 'tk')
+source=("$pkgname-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+_sysconfdir=@sysconfdir@
+_myconfdir=$(echo ${_sysconfdir} | cut -c2-)
+backup=(${_myconfdir}/{'default.config','default.profile','filemanrc','termdefs.txt'})
+provides=("pkgname")
+options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+changelog=$pkgname.changes
+_prefix=@prefix@
+_servicedir=@servicedir@
+_libexecdir=@libexecdir@
+_libdir=/usr/lib
+_shareddir=@shareddir@
+_mandir=@mandir@
+_mysqlPrefix=@mysql_prefix@
+
+build() {
+  cd $srcdir/$pkgname-${pkgver}
+  ./configure --prefix=${_prefix} --libdir=${_libdir} \
+  --libexecdir=${_libexecdir} --sysconfdir=${_sysconfdir} \
+  --enable-shareddir=${_shareddir} \
+  --mandir=${_mandir} --enable-mysqlprefix=${_mysqlPrefix}
+  make -s
+}
+
+package() {
+  depends=('indimail>1.6')
+  cd $srcdir/$pkgname-${pkgver}
+  make DESTDIR=${pkgdir} install
+}

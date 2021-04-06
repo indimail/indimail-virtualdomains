@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - '**/indimail-spamfilter-x/**'
+      - '**/prepare_obs'
+      - '**/catChangeLog'
       - .github/workflows/indimail-spamfilter-c-cpp.yml
       - '!**/indimail-spamfilter-x/debian/*'
       - '!**/doc/*'

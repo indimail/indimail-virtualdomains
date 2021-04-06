@@ -3,33 +3,41 @@ if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
   autoreconf -fiv
 fi
 if [ ! -f conf-release ] ; then
-	echo 1.1 > conf-release
+  echo 1.1 > conf-release
 fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
-	FreeBSD)
-	prefix=/usr/local
-	mandir=/usr/local/man
-	sysconfdir=/usr/local/etc/indimail
-	;;
-	Darwin)
-	prefix=/usr/local
-	mandir=/usr/local/share/man
-	sysconfdir=/usr/local/etc/indimail
-	;;
-	Linux)
-	prefix=/usr
-	mandir=$prefix/share/man
-	sysconfdir=/etc/indimail
-	;;
-	*)
-	prefix=/usr
-	mandir=/usr/man
-	sysconfdir=/usr/etc/indimail
-	;;
+  FreeBSD)
+  prefix=/usr/local
+  mandir=/usr/local/man
+  sbindir=/usr/local/sbin
+  sysconfdir=/usr/local/etc/indimail
+  ;;
+  Darwin)
+  prefix=/usr/local
+  sbindir=/usr/local/sbin
+  mandir=/usr/local/share/man
+  sysconfdir=/usr/local/etc/indimail
+  ;;
+  Linux)
+  prefix=/usr
+  mandir=$prefix/share/man
+  sysconfdir=/etc/indimail
+  if [ -f /etc/arch-release ] ; then
+    sbindir=/usr/bin
+  else
+    sbindir=/usr/sbin
+  fi
+  ;;
+  *)
+  prefix=/usr
+  sbindir=/usr/sbin
+  mandir=/usr/man
+  sysconfdir=/usr/etc/indimail
+  ;;
 esac
 ./configure \
-  --prefix=$prefix \
+  --prefix=$prefix --sbindir=$sbindir \
   --datarootdir=$prefix/share/indimail \
   --mandir=$mandir \
   --enable-cookiedir=$prefix/share/indimail/fortunes \

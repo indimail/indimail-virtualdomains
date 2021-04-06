@@ -81,7 +81,7 @@ Install the following packages using dnf/yum
 
 ```
 Universal
-gcc gcc-c++ make autoconf automaake libtool pkgconfig
+gcc gcc-c++ make autoconf automake libtool pkgconfig
 sed findutils diffutils gzip xz binutils coreutils grep flex bison
 glibc glibc-devel procps openssl openssl-devel mysql-devel
 libqmail-devel libqmail readline readline-devel ncurses-devel
@@ -109,19 +109,25 @@ Remaining - libmysqlclient-dev
 Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 ```
 
-NOTE: For FreeBSD
+**Arch Linux**
 
 ```
+# pacman -S --refresh --sysupgrade
+# pacman -S --needed archlinux-keyring
+# pacman -S base-devel diffutils coreutils openssl openldap mysql libidn libidn2 python
+```
+
+**NOTES**
+
+You need libi2nd, without which, indimail-mta will get built without [Internationalized Email Addresses (RFC6530)](https://tools.ietf.org/html/rfc6530)
+
+```
+FreeBSD
 # pkg install pkgconf libidn2
-```
 
-NOTE: for Darwin
-
-```
+Darwin
 # port install pkgconfig libidn2
 ```
-
-Without libidn2, indimail-mta will get built without [Internationalized Email Addresses (RFC6530)](https://tools.ietf.org/html/rfc6530)
 
 FreeBSD / Darwin OSX
 
@@ -162,8 +168,7 @@ $ git clone https://github.com/mbhangui/indimail-mta.git
 NOTE: For Darwin (Mac OSX), install [MacPorts](https://www.macports.org/) or brew. You can look at this [document](https://paolozaino.wordpress.com/2015/05/05/how-to-install-and-use-autotools-on-mac-os-x/) for installing MacPorts.
 
 ```
-# port install autoconf libtool automake pkgconfig
-# port install openssl
+# port install autoconf libtool automake pkgconfig openssl
 # port update outdated
 ```
 
@@ -540,6 +545,26 @@ $ sudo make install-strip
 
 (check version in indimail-virtualdomains/iwebadmin-x/conf-version)
 
+## Build indium
+
+Optional. This is a desktop based gui that runs under your desktop manager gnome, kde, etc. You need to have tcl-devel and tk-devel installed.
+
+```
+$ cd /usr/local/src/indimail-virtualdomains/indium-x
+$ ./default.configure
+$ make
+$ sudo make install-strip
+```
+
+(check version in indimail-virtualdomains/indium-x/conf-version)
+
+**NOTE**
+
+```
+For arch linux
+$ sudo pacman -S tcl tk
+```
+
 ## Setup & Configuration
 
 You are here because you decided to do a complete source installation. If you use source installation method, you need to setup various configuration and services. You can configure indimail/indimail-mta using /usr/sbin/svctool. `svctool` is a general purpose utility to configure indimail/indimail-mta services and configuration. At this point you should stop MySQL/MariaDB service if it is up.
@@ -857,6 +882,8 @@ NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to i
 ```
 Currently, the list of supported distributions for IndiMail is
 
+    * Arch Linux
+
     * SUSE
           o openSUSE_Leap_15.0
           o openSUSE_Leap_15.1
@@ -871,6 +898,7 @@ Currently, the list of supported distributions for IndiMail is
           o SUSE Linux Enterprise 15
           o SUSE Linux Enterprise 15 SP1
           o SUSE Linux Enterprise 15 SP2
+          o SUSE Linux Enterprise 15 SP3
 
     * Red Hat
           o Fedora 33
@@ -882,6 +910,10 @@ Currently, the list of supported distributions for IndiMail is
     * Debian
           o Debian  9.0
           o Debian 10.0
+          o Univention_4.3
+          o Univention_4.4
+
+    * Ubuntu
           o Ubuntu 16.04
           o Ubuntu 17.04
           o Ubuntu 18.04

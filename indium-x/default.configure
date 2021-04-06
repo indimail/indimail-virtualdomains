@@ -3,52 +3,54 @@ if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
 autoreconf -fiv
 fi
 if [ ! -f conf-release ] ; then
-	echo 1.1 > conf-release
+  echo 1.1 > conf-release
 fi
 mkdir -p m4
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
-	FreeBSD)
-	prefix=/usr/local
-	mandir=/usr/local/man
-	sysconfdir=/usr/local/etc/indimail
-	libdir=/usr/local/lib
-	;;
-	Linux)
-	prefix=/usr
-	mandir=$prefix/share/man
-	sysconfdir=/etc/indimail
-	arch=$(uname -m)
-	if [ -f /etc/debian_version ] ; then
-		if [ -d /usr/lib/$arch-linux-gnu ] ; then
-			libdir=/usr/lib/$arch-linux-gnu
-		else
-			libdir=/usr/lib
-		fi
-	else
-		if [ -d /usr/lib64 ] ; then
-			libdir=/usr/lib64
-		elif [ -d /usr/lib ] ;then
-			libdir=/usr/lib
-		else
-			echo "could not find libdir " 1>&2
-			exit 1
-		fi
-	fi
-	;;
-	*)
-	prefix=/usr
-	mandir=/usr/man
-	sysconfdir=/usr/etc/indimail
-	libdir=/usr/lib
-	;;
+  FreeBSD)
+  prefix=/usr/local
+  mandir=/usr/local/man
+  sysconfdir=/usr/local/etc/indimail
+  libdir=/usr/local/lib
+  ;;
+  Linux)
+  prefix=/usr
+  mandir=$prefix/share/man
+  sysconfdir=/etc/indimail
+  arch=$(uname -m)
+  if [ -f /etc/debian_version ] ; then
+    if [ -d /usr/lib/$arch-linux-gnu ] ; then
+      libdir=/usr/lib/$arch-linux-gnu
+    else
+      libdir=/usr/lib
+    fi
+  elif [ -f /etc/arch-version ] ; then
+      libdir=/usr/lib
+  else
+    if [ -d /usr/lib64 ] ; then
+      libdir=/usr/lib64
+    elif [ -d /usr/lib ] ;then
+      libdir=/usr/lib
+    else
+      echo "could not find libdir " 1>&2
+      exit 1
+    fi
+  fi
+  ;;
+  *)
+  prefix=/usr
+  mandir=/usr/man
+  sysconfdir=/usr/etc/indimail
+  libdir=/usr/lib
+  ;;
 esac
 if [ -d $prefix/include/mysql ] ; then
-	mysqlPrefix=$prefix
+  mysqlPrefix=$prefix
 elif [ -d /usr/local/include/mysql ] ; then
-	mysqlPrefix=/usr/local
+  mysqlPrefix=/usr/local
 elif [ -d /usr/local/mysql/include ] ; then
-	mysqlPrefix=/usr/local/mysql
+  mysqlPrefix=/usr/local/mysql
 fi
 echo ./configure --prefix=$prefix \
   --libexecdir=$prefix/libexec/indimail \

@@ -87,7 +87,7 @@ Requires: indimail-mta > 2.6
 BuildRequires: openssl-devel rpm gcc gcc-c++ make coreutils grep
 BuildRequires: glibc glibc-devel openssl procps binutils
 BuildRequires: gzip autoconf automake libtool pkgconfig
-BuildRequires: sed findutils
+BuildRequires: sed findutils procps
 BuildRequires: xz bison flex
 BuildRequires: gettext-devel
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
@@ -193,7 +193,7 @@ echo "------------------------------------------------------"
 (
 echo "NAME=%{name}"
 echo "Description=\"IndiMail Access Package\""
-echo "ACCESS_version="%{version}""
+echo "ACCESS_version=%{version}-%{release}"
 echo "ID=%{name}"
 echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
 echo "PACKAGE_BUGREPORT=\"'@email@'\""
@@ -514,11 +514,6 @@ done
 
 ### SCRIPTLET ###############################################################################
 %verifyscript
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 %if 0%{?suse_version} >= 1120
 %verify_permissions -e %{libexecdir}/imapmodules/authshadow
 %verify_permissions -e %{libexecdir}/imapmodules/authpam
@@ -547,17 +542,12 @@ done
 ### SCRIPTLET ###############################################################################
 %post
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 
 if [ -z "$argv1" ] ; then
   argv1=0
 fi
 if [ $argv1 -eq 2 ] ; then # upgrade
-# we are doing upgrade
+  # we are doing upgrade
   (
   echo "doing post upgrade activities"
   if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
@@ -763,16 +753,6 @@ echo "Check /var/log/indimail-access-setup.log for the detailed installation log
 ### SCRIPTLET ###############################################################################
 %postun
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
-if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
-else
-  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
-fi
 if [ -z "$argv1" ] ; then
   argv1=0
 fi

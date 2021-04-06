@@ -3,26 +3,26 @@ if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
   autoreconf -fiv
 fi
 if [ ! -f conf-release ] ; then
-	echo "1.1" > conf-release
+  echo "1.1" > conf-release
 fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
-	FreeBSD)
-	prefix=/usr/local
-	mandir=/usr/local/man
-	;;
-	Darwin)
-	prefix=/usr/local
-	mandir=/usr/local/share/man
-	;;
-	Linux)
-	prefix=/usr
-	mandir=$prefix/share/man
-	;;
-	*)
-	prefix=/usr
-	mandir=/usr/man
-	;;
+  FreeBSD)
+  prefix=/usr/local
+  mandir=/usr/local/man
+  ;;
+  Darwin)
+  prefix=/usr/local
+  mandir=/usr/local/share/man
+  ;;
+  Linux)
+  prefix=/usr
+  mandir=$prefix/share/man
+  ;;
+  *)
+  prefix=/usr
+  mandir=/usr/man
+  ;;
 esac
 ./configure \
   --prefix=$prefix \

@@ -1,28 +1,31 @@
 #!/bin/sh
 if [ ! -d m4 ] ; then
-mkdir m4
+  mkdir m4
+fi
+if [ ! -f conf-releae ] ; then
+  echo 1.1 > conf-release
 fi
 ./download.sh
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
-	autoreconf -fiv
+  autoreconf -fiv
 fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
-	FreeBSD)
-	prefix=/usr/local
-	sysconfdir=/usr/local/etc/indimail
-	;;
-	Darwin)
-	prefix=/usr/local
-	sysconfdir=/usr/local/etc/indimail
-	;;
-	Linux)
-	prefix=/usr
-	sysconfdir=/etc/indimail
-	;;
-	*)
-	prefix=/usr
-	sysconfdir=/usr/etc/indimail
-	;;
+  FreeBSD)
+  prefix=/usr/local
+  sysconfdir=/usr/local/etc/indimail
+  ;;
+  Darwin)
+  prefix=/usr/local
+  sysconfdir=/usr/local/etc/indimail
+  ;;
+  Linux)
+  prefix=/usr
+  sysconfdir=/etc/indimail
+  ;;
+  *)
+  prefix=/usr
+  sysconfdir=/usr/etc/indimail
+  ;;
 esac
 ./configure --prefix=$prefix --sysconfdir=$sysconfdir

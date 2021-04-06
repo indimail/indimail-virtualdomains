@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - '**/indimail-x/**'
+      - '**/prepare_obs'
+      - '**/catChangeLog'
       - .github/workflows/indimail-freebsd.yml
       - '!**/indimail-x/debian/*'
       - '!**/doc/*'

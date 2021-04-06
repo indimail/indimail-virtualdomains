@@ -24,7 +24,7 @@ rules: rules.in Makefile
 	$(edit) $@.in > $@; chmod +x $@;
 bogofilter-wordlist.dsc: bogofilter-wordlist.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release ../conf-email
+changelog: ../doc/ChangeLog ../conf-version ../conf-release ../conf-email
 	../catChangeLog --debian --name=bogofilter-wordlist --state=unstable \
 		--urgency=low ../doc/ChangeLog > $@
 control: control.in ../conf-email

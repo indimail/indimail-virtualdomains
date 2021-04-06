@@ -3,28 +3,36 @@ if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
   autoreconf -fiv
 fi
 if [ ! -f conf-release ] ; then
-	echo 1.1 > conf-release
+  echo 1.1 > conf-release
 fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
-	FreeBSD)
-	prefix=/usr/local
-	sysconfdir=/usr/local/etc/indimail
-	;;
-	Darwin)
-	prefix=/usr/local
-	sysconfdir=/usr/local/etc/indimail
-	;;
-	Linux)
-	prefix=/usr
-	sysconfdir=/etc/indimail
-	;;
-	*)
-	prefix=/usr
-	sysconfdir=/usr/etc/indimail
-	;;
+  FreeBSD)
+  prefix=/usr/local
+  sbindir=/usr/local/sbin
+  sysconfdir=/usr/local/etc/indimail
+  ;;
+  Darwin)
+  prefix=/usr/local
+  sbindir=/usr/local/sbin
+  sysconfdir=/usr/local/etc/indimail
+  ;;
+  Linux)
+  prefix=/usr
+  if [ -f /etc/arch-release ] ; then
+    sbindir=/usr/bin
+  else
+    sbindir=/usr/sbin
+  fi
+  sysconfdir=/etc/indimail
+  ;;
+  *)
+  prefix=/usr
+  sbindir=/usr/sbin
+  sysconfdir=/usr/etc/indimail
+  ;;
 esac
-./configure --prefix=$prefix \
-	--enable-sendmail-prog=$prefix/bin/sendmail \
-	--sysconfdir=$sysconfdir
+./configure --prefix=$prefix --sbindir=$sbindir \
+  --enable-sendmail-prog=$prefix/bin/sendmail \
+  --sysconfdir=$sysconfdir
 

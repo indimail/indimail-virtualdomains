@@ -1,5 +1,8 @@
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.17  2021-04-05 21:58:03+05:30  Cprogrammer
+ * fixed compilation errors
+ *
  * Revision 1.16  2021-03-15 12:50:29+05:30  Cprogrammer
  * include filewrt.h
  *
@@ -129,7 +132,7 @@ program RPCLOG
 #define STATUSDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.16 2021-03-15 12:50:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.17 2021-04-05 21:58:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef __STDC__

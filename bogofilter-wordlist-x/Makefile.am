@@ -10,7 +10,7 @@ sysconf_DATA = wordlist.db
 
 noinst_DATA = bogofilter-wordlist.spec
 
-all-local: bogofilter-wordlist.spec bogofilter-wordlist.changes
+all-local: bogofilter-wordlist.spec bogofilter-wordlist.changes PKGBUILD
 install-data-local: wordlist.db
 
 install-data-hook: 
@@ -24,11 +24,15 @@ edit = sed \
 	-e "s,@email\@,"'$(email)'",g" \
 	-e 's,@prefix\@,$(prefix),g'
 
-bogofilter-wordlist.spec: bogofilter-wordlist.spec.in catChangeLog doc/ChangeLog \
+bogofilter-wordlist.spec: bogofilter-wordlist.spec.in doc/ChangeLog \
 conf-version conf-release conf-email
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
-bogofilter-wordlist.changes: doc/ChangeLog conf-version conf-release conf-email
+bogofilter-wordlist.changes: doc/ChangeLog conf-version conf-release \
+conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
+PKGBUILD: PKGBUILD.in conf-version conf-release conf-email \
+bogofilter-wordlist.changes
+	cat $@.in | $(edit) > $@
 
 wordlist.db: training/easy_ham training/easy_ham_2 training/hard_ham \
 training/spam training/spam_2

@@ -1,5 +1,8 @@
 /*
  * $Log: rpclog.c,v $
+ * Revision 1.7  2021-04-05 21:58:09+05:30  Cprogrammer
+ * fixed compilation errors
+ *
  * Revision 1.6  2018-08-21 19:39:23+05:30  Cprogrammer
  * fix for rpc.h on openSUSE tumbleweed
  *
@@ -72,7 +75,7 @@
 #define SEND_MESSAGE ((u_long)1)
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rpclog.c,v 1.6 2018-08-21 19:39:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rpclog.c,v 1.7 2021-04-05 21:58:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct CONSOLE_MSG

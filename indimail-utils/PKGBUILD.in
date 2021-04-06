@@ -1,0 +1,56 @@
+# Maintainer: @email@
+pkgname=indimail-utils
+pkgver=@version@
+pkgrel=@release@
+pkgdesc="Mail utility altermime, ripmime, fortune, mpack & flash menu for IndiMail"
+arch=('i686' 'x86_64')
+url="https://github.com/mbhangui/indimail-virtualdomains"
+license=('GPL3')
+groups=('base-devel')
+depends=('coreutils' 'findutils' 'sed' 'ncurses')
+makedepends=('pkgconfig' 'readline')
+source=('altermime-@altermime_version@.tar.gz' 'ripmime-@ripmime_version@.tar.gz'
+    'fortune-@fortune_version@.tar.gz' 'mpack-@mpack_version@.tar.gz'
+    'flash-@flash_version@.tar.gz' "${pkgname}.changes")
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+provides=('indimail-utils' 'altermime=@altermime_version@' 'ripmime=@ripmime_version@'
+    'fortune=@fortune_version@' 'mpack=@mpack_version@' 'flash=@flash_version')
+options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+_sysconfdir=@sysconfdir@
+_myconfdir=$(echo ${_sysconfdir} | cut -c2-)
+backup=(${_myconfdir}/{'system.flashlogin','system.rc','system.menu','system.module','indimail-utils-release'})
+changelog=${pkgname}.changes
+
+build() {
+  for i in altermime-@altermime_version@ ripmime-@ripmime_version@ \
+    fortune-@fortune_version@ mpack-@mpack_version@ flash-@flash_version@
+  do
+    if [ -d $srcdir/$i ] ; then
+      cd $srcdir/$i
+      ./default.configure
+      make -s
+    fi
+  done
+}
+
+package() {
+  for i in altermime-@altermime_version@ ripmime-@ripmime_version@ \
+    fortune-@fortune_version@ mpack-@mpack_version@ flash-@flash_version@
+  do
+    if [ -d $srcdir/$i ] ; then
+      cd $srcdir/$i
+      make DESTDIR=${pkgdir} install
+    fi
+  done
+  cd $srcdir
+  (
+  echo "NAME=${pkgname}"
+  echo "Description=\"indimail utils package\""
+  echo "indimail-util-version="${pkgver}-${pkgrel}""
+  echo "ID=${pkgname}"
+  echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
+  echo "PACKAGE_BUGREPORT=\"'@email@'\""
+  ) > ${pkgname}-release
+  install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
+  install -D -m 0644 ${pkgname}-release "$pkgdir"${_sysconfdir}/${pkgname}-release
+}

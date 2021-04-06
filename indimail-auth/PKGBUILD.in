@@ -1,0 +1,196 @@
+# Maintainer: @email@
+pkgname=indimail-auth
+pkgver=@version@
+pkgrel=@release@
+pkgdesc="Name Service Swith and PAM services for IndiMail"
+arch=('i686' 'x86_64')
+url="https://github.com/mbhangui/indimail-virtualdomains"
+license=('GPL3')
+groups=('base-devel')
+depends=('coreutils' 'procps' 'binutils' 'mariadb-libs')
+makedepends=('findutils' 'sed' 'pam' 'libqmail')
+conflicts=('indimail<3.2')
+source=('pam-multi-@pam_multi_version@.tar.gz' 'nssd-@nssd_version@.tar.gz' "${pkgname}.changes")
+sha256sums=('SKIP' 'SKIP' 'SKIP')
+provides=('indimail-auth' 'pam-multi=@pam_multi_version@' 'nssd=@nssd_version@')
+options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+_sysconfdir=@sysconfdir@
+_myconfdir=$(echo ${_sysconfdir} | cut -c2-)
+_pamconfdir=$(echo @pam_confdir@ | cut -c2-)
+backup=(${_pamconfdir}/{'pam-multi','pop3','imap'} ${_myconfdir}/${pkgname}-release)
+install=archpkg.install
+changelog=${pkgname}.changes
+_prefix=@prefix@
+_libexecdir=@libexecdir@
+_libdir=/usr/lib
+_shareddir=@shareddir@
+_mandir=@mandir@
+_servicedir=@servicedir@
+_logdir=@logdir@
+_defaultDomain=@defaultDomain@
+_build_on_obs=0
+_mysqlPrefix=/usr
+_mysqlSocket=/var/run/mysqld/mysqld.sock
+_pam_moduledir=/lib/security
+_pam_confdir=@pam_confdir@
+
+build() {
+  if [ -d /run ] ; then
+    nssd_sock="/run/indimail/nssd.sock"
+  elif [ -d /var/run ] ; then
+    nssd_sock="/var/run/indimail/nssd.sock"
+  else
+    nssd_sock="/tmp/nssd.sock"
+  fi
+  if [ ${_build_on_obs} -eq 1 ] ; then
+    default_domain=${_defaultDomain}
+  else
+    if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+      default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+    else
+      default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${_defaultDomain})
+    fi
+  fi
+  cd "$srcdir/nssd-@nssd_version@"
+  ./configure --prefix=${_prefix} --libexecdir=${_libexecdir} --sysconfdir=${_sysconfdir} \
+  --mandir=${_mandir} --libdir=${_libdir} --datarootdir=${_shareddir} \
+  --sbindir=${_prefix}/bin --enable-nssd-socket=${nssd_sock} \
+  --enable-nssd-config-path=${_sysconfdir}/nssd.conf \
+  --enable-mysqlprefix=${_mysqlPrefix} \
+  --enable-dlload-mysql=yes --enable-default-domain=$default_domain
+  make
+  cd "$srcdir/pam-multi-@pam_multi_version@"
+  ./configure --prefix=${_prefix} --datarootdir=${_shareddir} \
+  --mandir=${_mandir} --enable-moduledir=${_pam_moduledir} \
+  --sbindir=${_prefix}/bin --enable-controldir=${_sysconfdir}/control \
+  --enable-pamconfdir=${_pam_confdir} \
+  --enable-mysqlprefix=${_mysqlPrefix} \
+  --enable-dlload-mysql=yes --enable-default-domain=$default_domain
+  make
+}
+
+package() {
+  depends=('indimail-mta>2.6')
+  cd "$srcdir/nssd-@nssd_version@"
+  make DESTDIR=${pkgdir} install
+  cd "$srcdir/pam-multi-@pam_multi_version@"
+  make DESTDIR=${pkgdir} install
+  cd $srcdir
+  (
+  echo "NAME=${pkgname}"
+  echo "Description=\"IndiMail Authentication Package\""
+  echo "AUTH_version=${pkgver}-${pkgrel}"
+  echo "ID=${pkgname}"
+  echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
+  echo "PACKAGE_BUGREPORT=\"'@email@'\""
+  ) > ${pkgname}-release
+  install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
+  install -D -m 0644 ${pkgname}-release "$pkgdir"${_sysconfdir}/${pkgname}-release
+}
+
+#### INSTALL SCRIPTS ####
+pre_install() {
+  if [ -d /run ] ; then
+    rundir=/run/svscan
+  elif [ -d /var/run ] ; then
+    rundir=/var/run/svscan
+  else
+    rundir=${_servicedir}
+  fi
+  ${_prefix}/bin/svstat ${_servicedir}/pwdlookup >/dev/null 2>&1
+  if [ $? -eq 0 ] ; then
+    mkdir -p ${rundir}/pwdlookup
+    touch ${rundir}/pwdlookup/.down
+    ${_prefix}/bin/svc -d ${_servicedir}/pwdlookup
+  fi
+}
+
+post_install() {
+  echo "Doing Post Install"
+  echo ""
+  echo " 1. Configure ${_logdir} for multilog"
+  echo " 2. Configure ${_servicedir}"
+  echo " 3. Configure nssd service"
+  echo " 4. Configure pam-multi as alternative for SMTP auth"
+  echo ""
+
+  # Recreate ld.so links and cache
+  if [ "${_prefix}" != "/usr" ] ; then
+    if [ -d ${confdir}/ld.so.conf.d ] ; then
+      echo ${_prefix}/lib > ${confdir}/ld.so.conf.d/indimail-auth-${HOSTTYPE}.conf
+    fi
+    /sbin/ldconfig
+  fi
+
+  mkdir -p ${_logdir}/pwdlookup
+  chown -R qmaill:nofiles ${_logdir}/pwdlookup
+  if [ -d /run ] ; then
+    nssd_sock="/run/indimail/nssd.sock"
+    mkdir -p /run/indimail
+  elif [ -d /var/run ] ; then
+    nssd_sock="/var/run/indimail/nssd.sock"
+    mkdir -p /var/run/indimail
+  else
+    nssd_sock="/tmp/nssd.sock"
+  fi
+
+  #nssd
+  ${_prefix}/sbin/svctool --pwdlookup=${nssd_sock} --threads=5 --timeout=-1 \
+    --mysqlhost=localhost --mysqluser=indimail \
+    --mysqlpass=ssh-1.5- --mysqlsocket=${_mysqlSocket} --servicedir=${_servicedir}
+
+  # turn off automatic refresh for services during first time installation
+  ${_prefix}/sbin/svctool --servicedir=${_servicedir} --norefreshsvc="0 ${_servicedir}/pwdlookup"
+  # save variables
+  ${_prefix}/sbin/svctool --servicedir=${_servicedir} --service-name=pwdlookup \
+    --export-variables=${_servicedir}/pwdlookup/variables/.variables --force
+
+  #pam-multi
+  ${_prefix}/sbin/svctool --config=add-alt
+}
+
+post_upgrade() {
+  if [ -d /run ] ; then
+    rundir=/run/svscan
+  elif [ -d /var/run ] ; then
+    rundir=/var/run/svscan
+  else
+    rundir=${_servicedir}
+  fi
+  if [ "${_prefix}" != "/usr" ] ; then
+    /sbin/ldconfig
+  fi
+  ${_prefix}/sbin/svctool --servicedir=${_servicedir} --refreshsvc="${_servicedir}/pwdlookup"
+  ${_prefix}/bin/svok ${_servicedir}/pwdlookup
+  if [ $? -eq 0 -a -f ${rundir}/pwdlookup/.down ] ; then
+    rm -f ${rundir}/pwdlookup/.down
+    ${_prefix}/bin/svc -u ${_servicedir}/pwdlookup
+  fi
+}
+
+post_remove() {
+  # remove pam module for smtp
+  ${_prefix}/sbin/svctool --config=remove-alt
+
+  if [ -d ${_servicedir}/pwdlookup -o -L ${_servicedir}/pwdlookup ] ; then
+    touch ${_servicedir}/pwdlookup/down
+    svc -dx ${_servicedir}/pwdlookup
+  fi
+  if [ -d ${_servicedir}/pwdlookup/log -o -L ${_servicedir}/pwdlookup/log ] ; then
+    touch ${_servicedir}/pwdlookup/log/down
+    svc -dx ${_servicedir}/pwdlookup/log
+  fi
+  if [ -d ${_servicedir}/pwdlookup -o -L ${_servicedir}/pwdlookup ] ; then
+    rm -rf ${_servicedir}/pwdlookup
+  fi
+  if [ -h ${_logdir} ] ; then
+    log_dir=`/bin/ls -ld %{_logdir} | /usr/bin/awk '{print $10}'`
+  else
+    log_dir=${_logdir}
+  fi
+  rm -rf ${_log_dir}/pwdlookup
+  rm -f ${_sysconfdir}/nssd.conf
+  if [ "${_prefix}" != "/usr" ] ; then
+    /sbin/ldconfig
+  fi
+}

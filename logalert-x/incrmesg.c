@@ -1,5 +1,8 @@
 /*
  * $Log: incrmesg.c,v $
+ * Revision 1.8  2021-04-05 21:57:22+05:30  Cprogrammer
+ * fixed compilation errors
+ *
  * Revision 1.7  2021-03-15 11:31:57+05:30  Cprogrammer
  * removed common.h
  *
@@ -55,7 +58,7 @@
 #define SEEKDIR "/var/tmp/incrmesg"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: incrmesg.c,v 1.7 2021-03-15 11:31:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: incrmesg.c,v 1.8 2021-04-05 21:57:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct msgtable

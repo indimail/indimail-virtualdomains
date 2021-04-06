@@ -1,0 +1,38 @@
+# Maintainer: @email@
+pkgname=logalert
+pkgver=@version@
+pkgrel=@release@
+pkgdesc="Logfile monitoring, alert and analysis tool"
+arch=('i686' 'x86_64')
+url="https://github.com/mbhangui/indimail-virtualdomains"
+license=('GPL3')
+groups=('base-devel')
+depends=('coreutils' 'procps' 'libtirpc' 'pcre' 'libqmail' 'libindimail')
+makedepends=('sed' 'findutils' 'bison' 'flex')
+source=("$pkgname-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+_sysconfdir=@sysconfdir@
+_myconfdir=$(echo ${_sysconfdir} | cut -c2-)
+backup=(${_myconfdir}/logalert.perms)
+provides=("pkgname")
+options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+changelog=$pkgname.changes
+_prefix=@prefix@
+_servicedir=@servicedir@
+_shareddir=@shareddir@
+_mandir=@mandir@
+
+build() {
+  cd $srcdir/$pkgname-${pkgver}
+  ./configure --prefix=${_prefix}  \
+    --sbindir=${_prefix}/bin \
+    --sysconfdir=${_sysconfdir} \
+    --mandir=${_mandir} \
+    --datarootdir=${_prefix}/share/indimail
+  make -s
+}
+
+package() {
+  cd $srcdir/$pkgname-${pkgver}
+  make DESTDIR=${pkgdir} install
+}

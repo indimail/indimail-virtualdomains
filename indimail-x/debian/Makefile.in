@@ -87,8 +87,7 @@ libindimail.install: libindimail.install.in ../conf-version ../conf-release
 indimail.cron.d: indimail.cron.d.in
 	$(edit) $@.in > $@
 
-changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release \
-../conf-email
+changelog: ../doc/ChangeLog ../conf-version ../conf-release ../conf-email
 	../catChangeLog --debian --name=indimail --state=unstable \
 		--urgency=low ../doc/ChangeLog > $@
 control: control.in ../conf-email

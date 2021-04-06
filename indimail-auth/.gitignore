@@ -18,3 +18,4 @@ debian/debian.tar.gz
 debian/dummy.tar.gz
 debian/*.dsc
 indimail-auth.changes
+PKGBUILD

@@ -42,3 +42,5 @@ conf-release
 iwebadmin-permissions.easy
 iwebadmin-permissions.paranoid
 iwebadmin-permissions.secure
+PKGBUILD
+iwebadmin-release

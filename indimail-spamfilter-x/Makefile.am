@@ -132,7 +132,7 @@ dist-hook:
 noinst_PROGRAMS=bogogrep
 bogogrep_SOURCES=contrib/bogogrep.c
 noinst_DATA = indimail-spamfilter.spec indimail-spamfilter.changes \
-			  indimail-spamfilter-rpmlintrc \
+			  indimail-spamfilter-rpmlintrc PKGBUILD \
 			  indimail-spamfilter-permissions.easy \
 			  indimail-spamfilter-permissions.secure \
 			  indimail-spamfilter-permissions.paranoid
@@ -177,11 +177,14 @@ edit = sed \
 	-e 's}@DATE\@}$(DATE)}g' \
 	-e 's}@prefix\@}$(prefix)}g'
 
-indimail-spamfilter.spec: indimail-spamfilter.spec.in catChangeLog doc/ChangeLog \
+indimail-spamfilter.spec: indimail-spamfilter.spec.in doc/ChangeLog \
 conf-version conf-release conf-email
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 indimail-spamfilter.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
+PKGBUILD: PKGBUILD.in conf-version conf-release conf-email \
+indimail-spamfilter.changes
+	cat $@.in | $(edit) > $@
 debian/Makefile: debian/Makefile.in configure.ac conf-version conf-release
 	$(edit) $@.in > $@;
 perm_list.bogofilter: perm_list.in

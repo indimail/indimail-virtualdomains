@@ -1,0 +1,43 @@
+# Maintainer: @email@
+pkgname=bogofilter-wordlist
+pkgver=@version@
+pkgrel=@release@
+pkgdesc="DPAM database for bogofilter in Berkely DB format"
+arch=('i686' 'x86_64')
+url="https://github.com/mbhangui/indimail-virtualdomains"
+license=('GPL3')
+groups=('base-devel')
+depends=('coreutils')
+makedepends=('sed' 'findutils' 'wget')
+source=("$pkgname-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+_sysconfdir=@sysconfdir@
+_myconfdir=$(echo ${_sysconfdir} | cut -c2-)
+backup=(${_myconfdir}/wordlist.db)
+provides=("pkgname")
+options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+changelog=$pkgname.changes
+_prefix=@prefix@
+_servicedir=@servicedir@
+
+build() {
+  cd $srcdir/$pkgname-${pkgver}
+  ./configure --sysconfdir=${_sysconfdir}
+  make -s
+}
+
+package() {
+  depends=('indimail-spamfilter')
+  cd $srcdir/$pkgname-${pkgver}
+  make DESTDIR=${pkgdir} install
+  cd $srcdir
+  (
+  echo "NAME=${pkgname}"
+  echo "Description=\"bogofilter-wordlist SPAM database for bogofilter in Berkeley DB format\""
+  echo "bogofilter-wordlist_version=${pkgver}-${pkgrel}"
+  echo "ID=${pkgname}"
+  echo "HOME_URL=\"https://github.com/mbhangui/indimail-wordlist\""
+  echo "PACKAGE_BUGREPORT=\"'@email@'\""
+  ) > ${pkgname}-release
+  install -D -m 0644 ${pkgname}-release "$pkgdir""${_sysconfdir}"/${pkgname}-release
+}

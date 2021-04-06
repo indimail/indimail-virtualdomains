@@ -29,8 +29,11 @@ iwebadmin_CFLAGS = $(AM_CFLAGS)
 
 noinst_DATA = iwebadmin.spec iwebadmin.changes iwebadmin-rpmlintrc \
 			  iwebadmin-permissions.easy iwebadmin-permissions.secure \
-			  iwebadmin-permissions.paranoid iwebadmin.perms iwebadmin-conf \
-			  iwebadmin-hooks
+			  iwebadmin-permissions.paranoid iwebadmin-conf \
+			  iwebadmin-hooks PKGBUILD
+
+SYSCONFDIR = @sysconfdir@
+sysconf_DATA = iwebadmin.perms iwebadmin-release
 
 MOSTLYCLEANFILES = iwebadmin.perms
 
@@ -69,6 +72,9 @@ iwebadmin.spec: iwebadmin.spec.in conf-version conf-release doc/ChangeLog conf-e
 	(cat $@.in;./catChangeLog --spec doc/ChangeLog) | $(edit)> $@
 iwebadmin.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
+PKGBUILD: PKGBUILD.in conf-version conf-release conf-email \
+iwebadmin.changes
+	cat $@.in | $(edit) > $@
 iwebadmin-rpmlintrc: iwebadmin-rpmlintrc.in
 	$(edit) iwebadmin-rpmlintrc.in > $@
 debian/Makefile: debian/Makefile.in conf-version conf-release

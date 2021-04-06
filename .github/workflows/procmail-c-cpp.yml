@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - '**/procmail-x/**'
+      - '**/prepare_obs'
+      - '**/catChangeLog'
       - .github/workflows/procmail-c-cpp.yml
       - '!**/procmail-x/debian/*'
       - '!**/doc/*'
