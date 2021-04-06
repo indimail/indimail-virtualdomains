@@ -14,6 +14,9 @@ version=$(cat conf-version)
 stage=$HOME/stage
 mkdir -p $stage
 meta_pkg=0
+if [ ! -f conf-release ] ; then
+    echo 1.1 > conf-release
+fi
 if [ -f $name.packages ] ; then
     meta_pkg=1
     for dir in `cat $name.packages`

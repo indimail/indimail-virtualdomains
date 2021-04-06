@@ -1,6 +1,9 @@
 #!/bin/sh
 if [ ! -d m4 ] ; then
-mkdir m4
+  mkdir m4
+fi
+if [ ! -f conf-releae ] ; then
+  echo 1.1 > conf-release
 fi
 ./download.sh
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
