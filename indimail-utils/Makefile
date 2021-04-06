@@ -44,3 +44,5 @@ indimail-utils.changes
 debian/Makefile: debian/Makefile.in ../altermime-x/conf-version ../ripmime-x/conf-version \
 ../mpack-x/conf-version ../flash-x/conf-version ../fortune-x/conf-version
 	$(edit) $@.in > $@
+clean:
+	/bin/rm -f indimail-utils.spec indimail-utils.changes debian/Makefile PKGBUILD

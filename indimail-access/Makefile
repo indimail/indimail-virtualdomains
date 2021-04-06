@@ -37,9 +37,7 @@ indimail-access-permissions.easy indimail-access-permissions.secure \
 indimail-access-permissions.paranoid perm_list.imap debian/Makefile \
 PKGBUILD
 
-clean: indimail-access.spec indimail-access.changes indimail-access-rpmlintrc \
-indimail-access-permissions.easy indimail-access-permissions.secure \
-indimail-access-permissions.paranoid perm_list.imap debian/Makefile
+clean:
 	/bin/rm -f indimail-access.spec indimail-access.changes \
 	indimail-access-rpmlintrc indimail-access-permissions.easy \
 	indimail-access-permissions.secure indimail-access-permissions.paranoid \

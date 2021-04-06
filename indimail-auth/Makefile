@@ -46,3 +46,6 @@ debian/Makefile: debian/Makefile.in conf-version conf-release \
 ../nssd-x/conf-version ../pam-multi-x/conf-version
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
 	$(edit) $@.in > $@
+clean:
+	/bin/rm -f indimail-auth.spec indimail-auth.changes PKGBUILD debian/Makefile
+
