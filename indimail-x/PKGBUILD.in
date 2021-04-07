@@ -76,6 +76,8 @@ package_libindimail() {
   cd "$srcdir/indimail-@version@"
   make DESTDIR=${pkgdir} install-includeHEADERS install-libindimailLTLIBRARIES \
     install-pkgconfigDATA
+  # fix WARNING: Package contains reference to $srcdir
+  sed -i "s{ -fdebug-prefix-map=${srcdir}=/usr/src/debug{{g" ${pkgdir}/usr/lib/pkgconfig/$pkgname.pc
 }
 
 #### INSTALL1 SCRIPTS ####
