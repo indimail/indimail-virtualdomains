@@ -20,9 +20,9 @@ Essential component required for providng MTA functions
 
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
+$ ./create_rpm     # for RPM
+$ ./create_debian  # for deb
+$ ./create_archpkg # for zst
 ```
 
 ## Build indimail-auth package
@@ -31,9 +31,9 @@ Optional component. Required only if you require a Name Service Switch & extra P
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-auth
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
+$ ./create_rpm     # for RPM
+$ ./create_debian  # for deb
+$ ./create_archpkg # for zst
 ```
 
 ## Build indimail-access package
@@ -42,9 +42,9 @@ Optional. You require this if you want IMAP/POP3 or fetchmail to retrieve your m
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-access
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
+$ ./create_rpm     # for RPM
+$ ./create_debian  # for deb
+$ ./create_archpkg # for zst
 ```
 
 ## Build indimail-utils package
@@ -53,9 +53,9 @@ Optional. Required only if you want utilities like altermime, ripmime, flash men
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-utils
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
+$ ./create_rpm     # for RPM
+$ ./create_debian  # for deb
+$ ./create_archpkg # for zst
 ```
 
 ## Build indimail-spamfilter package
@@ -64,17 +64,17 @@ Optional. Required only if you want to use bogofilter to filter SPAM mails
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/bogofilter-x
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
+$ ./create_rpm     # for RPM
+$ ./create_debian  # for deb
+$ ./create_archpkg # for zst
 ```
 
 ## Build indimail-virtualdomains package
 ```
 $ cd /usr/local/src/indimail-virtualdomains/indimail-x
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
+$ ./create_rpm     # for RPM
+$ ./create_debian  # for deb
+$ ./create_archpkg # for zst
 ```
 
 ## Build iwebadmin package
@@ -83,9 +83,9 @@ Required for a web administration front-end for administering your indimail-user
 
 ```
 $ cd /usr/local/src/indimail-virtualdomains/iwebadmin-x
-$ ./create_rpm    # for RPM
-or
-$ ./create_debian # for deb
+$ ./create_rpm     # for RPM
+$ ./create_debian  # for deb
+$ ./create_archpkg # for zst
 ```
 
 ## Install Packages
@@ -95,11 +95,17 @@ Installing and configuration is much simplied when you use the Binary Packages B
 **For RPM based distributions**
 
 ```
-$ sudo rpm -ivh rpm_file
+$ sudo rpm -ivh file.rpm
 ```
 
 **For Debian based distributions**
 
 ```
-$ sudo dpkg -i debian_file
+$ sudo dpkg -i file.db
+```
+
+**For Arch Linux**
+
+```
+$ sudo dpkg -i file.zst
 ```
