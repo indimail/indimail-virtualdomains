@@ -26,8 +26,8 @@ libindimail_la_LDFLAGS = -version-info @LIBVER@ $(LDFLAGS)
 libindimail_la_CFLAGS = -fPIC
 libindimaildir=@libdir@
 
-indimailbindir=@prefix@/bin
-indimailsbindir=@prefix@/sbin
+indimailbindir=@bindir@
+indimailsbindir=@sbindir@
 indimaillibexecdir=@libexecdir@
 indimailauthlibdir=@libexecdir@/imapmodules
 
