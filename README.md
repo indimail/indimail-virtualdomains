@@ -220,7 +220,7 @@ conf-shared|/usr/local/share/indimail
 conf-libexec|/usr/local/libexec/indimail
 conf-servicedir|/usr/local/etc/indimail/sv
 
-The build below depends on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make clean`. If you don't run default.configure, you can replace `make` with `./qmake`
+The build below depends on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make distclean`. If you don't run default.configure, you can replace `make` with `./qmake`
 
 ```
 $ cd /usr/local/src/indimail-mta/daemontools-x
@@ -251,7 +251,7 @@ conf-prefix|/usr/local
 conf-sysconfdir|/usr/local/etc/indimail
 conf-shared|/usr/local/share/indimail
 
-The build below depens on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make clean`. If you don't run default.configure, you can run replace `make` with `./qmake`
+The build below depens on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make distclean`. If you don't run default.configure, you can run replace `make` with `./qmake`
 
 ```
 $ cd /usr/local/src/indimail-mta/ucspi-tcp-x
@@ -352,7 +352,7 @@ You can refer to the detailed installation for indimail-mta [here](https://githu
 
 But in short you can install indimail-mta by follow the steps below
 
-The build below depens on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make clean`. If you don't run default.configure, you can run replace `make` with `./qmake`
+The build below depens on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make distclean`. If you don't run default.configure, you can run replace `make` with `./qmake`
 
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
