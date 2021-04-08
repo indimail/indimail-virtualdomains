@@ -124,6 +124,7 @@ Table of Contents
       * [4. Creating MySQL Configuration](#4-creating-mysql-configuration)
       * [5. MySQL Control File](#5-mysql-control-file)
       * [6. Configuring MySQL/MariaDB to use SSL/TLS](#6-configuring-mysqlmariadb-to-use-ssltls)
+      * [7. Configure MySQL/MariaDB access for svctool](#7-configure-mysqlmariadb-access-for-svctool)
    * [Using Docker Engine to Run IndiMail / IndiMail-MTA](#using-docker-engine-to-run-indimail--indimail-mta)
    * [Installation &amp; Repositories](#installation--repositories)
       * [Installing Indimail using DNF/YUM/APT Repository](#installing-indimail-using-dnfyumapt-repository)
@@ -135,7 +136,7 @@ Table of Contents
    * [History](#history)
    * [See also](#see-also)
 
-Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
+TOC Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 # INTRODUCTION
 
@@ -4154,6 +4155,24 @@ ssl-cert=/var/indimail/mysqldb/ssl/client-cert.pem
 ssl-key=/var/indimail/mysqldb/ssl/client-key.pem
 # This option is disabled by default
 #ssl-verify-server-cert
+```
+
+## 7. Configure MySQL/MariaDB access for svctool
+
+We learned how to setup and use MySQL/Mariadb database with indimail. The general purpose configuration tool, <u>svctool</u>, which requires the following variables to access the MySQL database
+
+Variable | Purpose
+-------- | --------------------
+MYSQL_PASS|Password for accessing <u>indimail</u> database in MySQL
+PRIV_PASS|Password for accessing <u>mysql</u> database in MySQL
+ADMIN_PASS|Password required by adminclient to execute remote commands
+TMPDIR|Temporary directory used by <u>svctool</u>
+
+You can have these stored as /etc/indimail/svctool.cnf owned by root and with no read/write access to group and others. e.g.
+
+```
+$ ls -l /etc/indimail/svctool.cnf 
+-r-------- 1 root root 28 Nov  2  2018 /etc/indimail/svctool.cnf
 ```
 
 # Using Docker Engine to Run IndiMail / IndiMail-MTA
