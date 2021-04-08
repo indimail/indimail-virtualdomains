@@ -59,7 +59,7 @@ This document contains instructions for building indimail-mta from source.
 
 # Source Compiling/Linking
 
-The steps below give instructions to build from source. If you need to deploy indimail-mta on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the package/packages can be deployed on multiple hosts. To generate RPM packages for all components refer to [Binary Packages](.github/CREATE-Packages.md)
+The steps below give instructions to build from source. If you need to deploy indimail-mta on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the package/packages can be deployed on multiple hosts. To generate RPM packages for all components refer to [Create Local Binary Packages](.github/CREATE-Packages.md)
 
 You can also use docker / podman images to deploy indimail. Look at the chapter [Docker / Podman Repository](#docker--podman-repository) below on how to do that. The big advantage of using a docker / podman image is you can save your configuration with the `docker commit ..` or `podman commit` to checkpoint your entire build and deploy the exact configuration on multiple hosts.
 
@@ -838,7 +838,15 @@ You can also play around with the system at this point. Try POP3 (110), POP3s (9
 
 Replace First M. Last with your name.
 
-# Binary Packages Build
+# Create Local Binary Packages
+
+If you need to have indimail on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command. To generate RPM packages locally for all components refer to [Binary Packages](.github/CREATE-Packages.md).
+
+You can also download pre-built binary packages from [openSUSE Build Service](https://build.opensuse.org/), described in the chapter [Binary Builds on OBS](#binary-builds-on-opensuse-build-service).
+
+NOTE: binary package for FreeBSD and OSX is in my TODO list.
+
+# Binary Builds on openSUSE Build Service
 
 **[Build Status on](https://build.opensuse.org/project/monitor/home:mbhangui) [Open Build Service](https://build.opensuse.org/project/show/home:mbhangui)**
 
@@ -853,14 +861,6 @@ Replace First M. Last with your name.
 [![procmail obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/procmail-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/procmail-obs.yml)
 [![logalert obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-obs.yml)
 [![indium obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-obs.yml)
-
-If you need to have indimail on multiple machines, you can build binary packages once and install the same package on multiple machines. The other big advantage of using a binary build is that the binary installation will give you fully functional, configured system using your hostname for defaults. You can always change these configuration files in /etc/indimail to cater to your requirements later. With a binary build, you don't need to run the `create_services` command. To generate RPM packages locally for all components refer to [Binary Packages](.github/CREATE-Packages.md).
-
-You can also download pre-built binary packages from [openSUSE Build Service](https://build.opensuse.org/), described in the chapter [Binary Builds on OBS](#binary-builds-on-opensuse-build-service).
-
-NOTE: binary package for FreeBSD and OSX is in my TODO list.
-
-# Binary Builds on openSUSE Build Service
 
 You can get binary RPM / Debian packages at
 
