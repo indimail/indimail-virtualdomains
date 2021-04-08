@@ -4172,7 +4172,12 @@ You can have these stored as /etc/indimail/svctool.cnf owned by root and with no
 
 ```
 $ ls -l /etc/indimail/svctool.cnf 
--r-------- 1 root root 28 Nov  2  2018 /etc/indimail/svctool.cnf
+-r-------- 1 root root 88 Nov  2  2018 /etc/indimail/svctool.cnf
+$ sudo cat /etc/indimail/svctool.cnf
+MYSQL_PASS="ssh-1.5-"
+PRIV_PASS="4-57343-"
+ADMIN_PASS="benhur20"
+TMPDIR="/tmp/indimail"
 ```
 
 # Using Docker Engine to Run IndiMail / IndiMail-MTA
