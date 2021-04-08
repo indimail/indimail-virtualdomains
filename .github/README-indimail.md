@@ -737,182 +737,176 @@ You can now also query the status of the running IndiMail service by using the s
 
 ```
 # systemctl status indimail.service
-● svscan.service - IndiMail Messaging Platform
+● svscan.service - SVscan Service
      Loaded: loaded (/usr/lib/systemd/system/svscan.service; enabled; vendor preset: disabled)
-     Active: active (running) since Wed 2020-06-10 07:15:06 IST; 3h 36min ago
-   Main PID: 1354 (svscan)
-      Tasks: 215 (limit: 9342)
-     Memory: 766.5M
+     Active: active (running) since Thu 2021-04-08 08:57:55 IST; 1h 8min ago
+   Main PID: 9266 (svscan)
+      Tasks: 218 (limit: 9341)
+     Memory: 475.3M
      CGroup: /system.slice/svscan.service
-             ├─ 1354 /usr/sbin/svscan /service
-             ├─ 1446 supervise log
-             ├─ 1448 supervise qmail-qmqpd.628
-             ├─ 1449 supervise log
-             ├─ 1450 supervise qmail-imapd.143
-             ├─ 1451 supervise log
-             ├─ 1452 supervise qmail-poppass.106
-             ├─ 1453 supervise log
-             ├─ 1454 supervise qmail-daned.1998
-             ├─ 1455 supervise log
-             ├─ 1456 supervise qmail-imapd-ssl.993
-             ├─ 1457 supervise log
-             ├─ 1458 supervise qmail-smtpd.25
-             ├─ 1459 supervise log
-             ├─ 1460 supervise indisrvr.4000
-             ├─ 1461 supervise log
-             ├─ 1462 supervise qmail-pop3d.110
-             ├─ 1463 supervise log
-             ├─ 1464 supervise qmail-smtpd.366
-             ├─ 1465 supervise log
-             ├─ 1466 supervise freshclam
-             ├─ 1467 supervise log
-             ├─ 1468 supervise qmail-pop3d-ssl.995
-             ├─ 1469 supervise log
-             ├─ 1470 supervise qmail-qmtpd.209
-             ├─ 1471 supervise log
-             ├─ 1472 supervise mrtg
-             ├─ 1473 supervise log
-             ├─ 1476 supervise qmail-logfifo
-             ├─ 1478 supervise log
-             ├─ 1479 supervise qscanq
-             ├─ 1480 supervise log
-             ├─ 1481 supervise mpdwatch
-             ├─ 1482 supervise log
-             ├─ 1483 supervise qmail-send.25
-             ├─ 1484 supervise log
-             ├─ 1485 supervise greylist.1999
-             ├─ 1486 supervise log
-             ├─ 1487 supervise qmail-smtpd.465
-             ├─ 1488 supervise log
-             ├─ 1489 supervise proxy-imapd.4143
-             ├─ 1490 supervise log
-             ├─ 1491 supervise fetchmail
-             ├─ 1492 supervise log
-             ├─ 1493 supervise qmail-smtpd.587
-             ├─ 1494 supervise log
-             ├─ 1495 supervise pwdlookup
-             ├─ 1496 supervise log
-             ├─ 1497 supervise proxy-imapd-ssl.9143
-             ├─ 1498 supervise log
-             ├─ 1499 supervise dietpi
-             ├─ 1500 supervise log
-             ├─ 1501 supervise libwatch
-             ├─ 1502 supervise log
-             ├─ 1503 supervise dnscache
-             ├─ 1504 supervise log
-             ├─ 1505 supervise proxy-pop3d-ssl.9110
-             ├─ 1506 supervise log
-             ├─ 1507 supervise inlookup.infifo
-             ├─ 1508 supervise log
-             ├─ 1509 supervise clamd
-             ├─ 1510 supervise log
-             ├─ 1511 supervise proxy-pop3d.4110
-             ├─ 1512 supervise log
-             ├─ 1513 supervise mysql.3306
-             ├─ 1514 supervise log
-             ├─ 1515 supervise udplogger.3000
-             ├─ 1516 supervise log
-             ├─ 1517 /usr/sbin/multilog t /var/log/svc/indisrvr.4000
-             ├─ 1518 /usr/sbin/multilog t /var/log/svc/smtpd.25
-             ├─ 1519 /usr/sbin/multilog t /var/log/svc/svscan
-             ├─ 1520 /usr/sbin/mysqld --defaults-file=/etc/indimail/indimail.cnf --port=3307 --basedir=/usr --datadir=/var/indimail/mysqldb/data --memlock --ssl --require-secure-transport --skip-external-locking --delay-key-write=all --skip-name-resolve --sql-mode=NO_ENGINE_SUBSTITUTION,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,STRICT_TRANS_TABLES --explicit-defaults-for-timestamp=TRUE --general-log=1 --general-log-file=/var/indimail/mysqldb/logs/general-log --slow-query-log=1 --slow-query-log-file=/var/indimail/mysqldb/logs/slowquery-log --log-queries-not-using-indexes --log-error-verbosity=3 --pid-file=/var/run/mysqld/mysqld.3306.pid
-             ├─ 1521 /usr/sbin/multilog t /var/log/svc/proxyPOP3.4110
-             ├─ 1522 /usr/sbin/multilog t /var/log/svc/mrtg
-             ├─ 1523 /usr/bin/tcpserver -v -c /service/proxy-pop3d.4110/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.pop3.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 4110 /usr/bin/proxypop3 /usr/bin/pop3d Maildir
-             ├─ 1524 /usr/sbin/qmail-daned -w /etc/indimail/control/tlsa.white -t 30 -s 5 -h 65535 127.0.0.1 /etc/indimail/control/tlsa.context
-             ├─ 1525 /usr/sbin/multilog t /var/log/svc/freshclam
-             ├─ 1526 /usr/bin/tcpserver -v -c /service/qmail-imapd-ssl.993/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 993 /usr/bin/couriertls -server -tcpd /usr/sbin/imaplogin /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authshadow /usr/bin/imapd Maildir
-             ├─ 1527 /usr/bin/tcpserver -v -H -R -l 0 -x /etc/indimail/tcp/tcp.smtp.cdb -c /service/qmail-smtpd.366/variables/MAXDAEMONS -o -b 150 -u 555 -g 555 0 366 /usr/sbin/qmail-smtpd
-             ├─ 1528 /usr/bin/tcpserver -v -H -R -l 0 -x /etc/indimail/tcp/tcp.poppass.cdb -X -c /service/qmail-poppass.106/variables/MAXDAEMONS -C 25 -o -b 40 -n /etc/indimail/certs/servercert.pem -u 555 -g 555 0 106 /usr/sbin/qmail-poppass argos.indimail.org /usr/sbin/vchkpass /bin/false
-             ├─ 1529 /usr/sbin/multilog t /var/log/svc/pop3d.110
-             ├─ 1530 /usr/sbin/multilog t /var/log/svc/smtpd.366
-             ├─ 1532 /usr/bin/qmail-cat /run/indimail/logfifo
-             ├─ 1533 /usr/bin/tcpserver -v -c /service/qmail-pop3d-ssl.995/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.pop3.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 995 /usr/bin/couriertls -server -tcpd /usr/sbin/pop3login /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authshadow /usr/bin/pop3d Maildir
-             ├─ 1534 /usr/sbin/indisrvr -i 0 -p 4000 -b 40 -n /etc/indimail/certs/servercert.pem
-             ├─ 1535 /usr/sbin/multilog t /var/log/svc/logfifo
-             ├─ 1549 /usr/sbin/multilog t /var/log/svc/qmqpd.628
-             ├─ 1551 /usr/sbin/multilog t /var/log/svc/dietpi
-             ├─ 1565 /usr/bin/mpdwatch -n
-             ├─ 1578 /usr/sbin/multilog t /var/log/svc/imapd.143
-             ├─ 1579 /usr/sbin/multilog t /var/log/svc/proxyIMAP.4143
-             ├─ 1581 /usr/sbin/multilog t /var/log/svc/poppass.106
-             ├─ 1582 /usr/bin/freshclam -v --stdout --datadir=/var/indimail/clamd -d -c 2 --config-file=/etc/freshclam.conf
-             ├─ 1583 /usr/sbin/multilog t /var/log/svc/imapd-ssl.993
-             ├─ 1584 /usr/sbin/multilog t /var/log/svc/mpdwatch
-             ├─ 1585 /usr/bin/tcpserver -v -h -R -l 0 -x /etc/indimail/tcp/tcp.smtp.cdb -c /service/qmail-smtpd.465/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 465 /usr/lib/indimail/plugins/rblsmtpd.so -rdnsbl-1.uceprotect.net -rzen.spamhaus.org /usr/lib/indimail/plugins/qmail_smtpd.so argos.indimail.org /bin/false
-             ├─ 1586 /usr/bin/tcpserver -v -c /service/qmail-pop3d.110/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.pop3.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 110 /usr/sbin/pop3login /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authshadow /usr/bin/pop3d Maildir
-             ├─ 1587 /usr/sbin/multilog t /var/log/svc/udplogger.3000
-             ├─ 1588 multilog t ./main
-             ├─ 1589 /usr/sbin/multilog t /var/log/svc/daned.1998
-             ├─ 1590 /usr/bin/tcpserver -v -H -R -l 0 -x /etc/indimail/tcp/tcp.smtp.cdb -c /service/qmail-smtpd.587/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 587 /usr/lib/indimail/plugins/qmail_smtpd.so
-             ├─ 1611 /usr/sbin/multilog t /var/log/svc/qscanq
-             ├─ 1612 /usr/sbin/multilog t /var/log/svc/pop3d-ssl.995
-             ├─ 1614 /usr/sbin/multilog t /var/log/svc/smtpd.465
-             ├─ 1615 /usr/sbin/udplogger -p 3000 -t 10 0
-             ├─ 1616 /usr/sbin/multilog t /var/log/svc/smtpd.587
-             ├─ 1617 /usr/bin/tcpserver -v -c /service/proxy-imapd.4143/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 4143 /usr/bin/proxyimap /usr/bin/imapd Maildir
-             ├─ 1618 /usr/sbin/multilog t /var/log/svc/greylist.1999
-             ├─ 1619 /usr/sbin/multilog t /var/log/svc/inlookup.infifo
-             ├─ 1621 /usr/bin/tcpserver -v -h -R -l 0 -x /etc/indimail/tcp/tcp.smtp.cdb -c /service/qmail-smtpd.25/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 25 /usr/lib/indimail/plugins/rblsmtpd.so -rdnsbl-1.uceprotect.net -rzen.spamhaus.org /usr/lib/indimail/plugins/qmail_smtpd.so
-             ├─ 1622 /usr/sbin/cleanq -l -s 200 /var/indimail/qscanq/root/scanq
-             ├─ 1623 /usr/bin/dnscache
-             ├─ 1624 /usr/sbin/qmail-daemon ./Maildir/
-             ├─ 1625 /usr/sbin/multilog t /var/log/svc/proxyPOP3.9110
-             ├─ 1626 /usr/sbin/multilog t /var/log/svc/pwdlookup
-             ├─ 1627 /usr/sbin/multilog t /var/log/svc/proxyIMAP.9143
-             ├─ 1628 /usr/sbin/qmail-greyd -w /etc/indimail/control/greylist.white -t 30 -g 24 -m 2 -s 5 -h 65535 127.0.0.1 /etc/indimail/control/greylist.context
-             ├─ 1629 /usr/sbin/multilog t /var/log/svc/deliver.25
-             ├─ 1630 /usr/bin/tcpserver -v -H -R -l 0 -x /etc/indimail/tcp/tcp.qmtp.cdb -c /service/qmail-qmtpd.209/variables/MAXDAEMONS -o -b 75 -u 555 -g 555 0 209 /usr/sbin/qmail-qmtpd
-             ├─ 1631 /usr/bin/tcpserver -v -c /service/qmail-imapd.143/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 143 /usr/sbin/imaplogin /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authshadow /usr/bin/imapd Maildir
-             ├─ 1632 /usr/bin/tcpserver -v -c /service/proxy-imapd-ssl.9143/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.imap.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 9143 /usr/bin/couriertls -server -tcpd /usr/bin/proxyimap /usr/bin/imapd Maildir
-             ├─ 1633 /usr/sbin/nssd -d notice
-             ├─ 1634 /bin/sh ./run
-             ├─ 1635 /usr/sbin/multilog t /var/log/svc/qmtpd.209
-             ├─ 1636 /usr/sbin/multilog t /var/log/svc/mysql.3306
-             ├─ 1637 /usr/sbin/multilog t /var/log/svc/clamd
-             ├─ 1640 /usr/bin/tcpserver -v -c /service/proxy-pop3d-ssl.9110/variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.pop3.cdb -X -o -b 40 -H -l 0 -R -u 555 -g 555 0 9110 /usr/bin/couriertls -server -tcpd /usr/bin/proxypop3 /usr/bin/pop3d Maildir
-             ├─ 1659 /usr/sbin/multilog t /var/log/svc/fetchmail
-             ├─ 1673 /usr/sbin/multilog t /var/log/svc/libwatch
-             ├─ 1689 qmail-send
-             ├─ 1691 qmail-send
-             ├─ 1692 qmail-lspawn ./Maildir/
-             ├─ 1693 qmail-rspawn
-             ├─ 1694 qmail-clean
-             ├─ 1695 qmail-todo
-             ├─ 1696 qmail-clean
-             ├─ 1697 qmail-lspawn ./Maildir/
-             ├─ 1698 qmail-rspawn
-             ├─ 1699 qmail-clean
-             ├─ 1700 qmail-todo
-             ├─ 1701 qmail-clean
-             ├─ 1702 qmail-send
-             ├─ 1703 qmail-lspawn ./Maildir/
-             ├─ 1704 qmail-rspawn
-             ├─ 1705 qmail-clean
-             ├─ 1706 qmail-todo
-             ├─ 1707 qmail-clean
-             ├─ 1708 qmail-send
-             ├─ 1709 qmail-lspawn ./Maildir/
-             ├─ 1710 qmail-rspawn
-             ├─ 1711 qmail-clean
-             ├─ 1712 qmail-todo
-             ├─ 1713 qmail-clean
-             ├─ 1714 qmail-send
-             ├─ 1715 qmail-lspawn ./Maildir/
-             ├─ 1716 qmail-rspawn
-             ├─ 1717 qmail-clean
-             ├─ 1718 qmail-todo
-             ├─ 1719 qmail-clean
-             ├─ 2387 /usr/sbin/inlookup -i 5 -c 5184000
-             ├─ 2389 /usr/sbin/inlookup -i 5 -c 5184000
-             ├─ 2390 /usr/sbin/inlookup -i 5 -c 5184000
-             ├─ 2391 /usr/sbin/inlookup -i 5 -c 5184000
-             ├─ 2392 /usr/sbin/inlookup -i 5 -c 5184000
-             ├─ 2393 /usr/sbin/inlookup -i 5 -c 5184000
-             ├─59137 sleep 60
-             └─59139 sleep 300
+             ├─ 9266 /usr/sbin/svscan /service
+             ├─ 9270 supervise log .svscan
+             ├─ 9272 supervise qmail-qmqpd.628
+             ├─ 9273 supervise log qmail-qmqpd.628
+             ├─ 9274 supervise resolvconf
+             ├─ 9275 supervise log resolvconf
+             ├─ 9278 supervise qmail-imapd.143
+             ├─ 9279 supervise log qmail-imapd.143
+             ├─ 9280 supervise qmail-poppass.106
+             ├─ 9281 supervise log qmail-poppass.106
+             ├─ 9282 supervise qmail-daned.1998
+             ├─ 9283 supervise log qmail-daned.1998
+             ├─ 9284 supervise qmail-imapd-ssl.993
+             ├─ 9285 supervise log qmail-imapd-ssl.993
+             ├─ 9286 supervise qmail-smtpd.25
+             ├─ 9287 supervise log qmail-smtpd.25
+             ├─ 9288 supervise indisrvr.4000
+             ├─ 9289 supervise log indisrvr.4000
+             ├─ 9290 supervise qmail-pop3d.110
+             ├─ 9291 supervise log qmail-pop3d.110
+             ├─ 9292 supervise qmail-smtpd.366
+             ├─ 9293 supervise log qmail-smtpd.366
+             ├─ 9294 supervise freshclam
+             ├─ 9295 supervise log freshclam
+             ├─ 9298 supervise qmail-pop3d-ssl.995
+             ├─ 9299 supervise log qmail-pop3d-ssl.995
+             ├─ 9300 supervise qmail-qmtpd.209
+             ├─ 9301 supervise log qmail-qmtpd.209
+             ├─ 9302 supervise mrtg
+             ├─ 9303 supervise log mrtg
+             ├─ 9305 supervise rsync.873
+             ├─ 9306 supervise log rsync.873
+             ├─ 9307 supervise qmail-logfifo
+             ├─ 9308 supervise log qmail-logfifo
+             ├─ 9309 supervise qscanq
+             ├─ 9310 supervise log qscanq
+             ├─ 9311 supervise qmail-send.25
+             ├─ 9312 supervise log qmail-send.25
+             ├─ 9313 supervise greylist.1999
+             ├─ 9314 supervise log greylist.1999
+             ├─ 9315 supervise qmail-smtpd.465
+             ├─ 9316 supervise log qmail-smtpd.465
+             ├─ 9317 supervise proxy-imapd.4143
+             ├─ 9318 supervise log proxy-imapd.4143
+             ├─ 9319 supervise fetchmail
+             ├─ 9320 supervise log fetchmail
+             ├─ 9321 supervise qmail-smtpd.587
+             ├─ 9322 supervise log qmail-smtpd.587
+             ├─ 9323 supervise pwdlookup
+             ├─ 9324 supervise log pwdlookup
+             ├─ 9325 supervise proxy-imapd-ssl.9143
+             ├─ 9326 supervise log proxy-imapd-ssl.9143
+             ├─ 9327 supervise dnscache
+             ├─ 9328 supervise log dnscache
+             ├─ 9329 supervise proxy-pop3d-ssl.9110
+             ├─ 9330 supervise log proxy-pop3d-ssl.9110
+             ├─ 9331 supervise inlookup.infifo
+             ├─ 9332 supervise log inlookup.infifo
+             ├─ 9333 supervise clamd
+             ├─ 9334 supervise log clamd
+             ├─ 9335 supervise proxy-pop3d.4110
+             ├─ 9336 supervise log proxy-pop3d.4110
+             ├─ 9337 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.pop3.cdb -X -o -b 40 -H -l argos.>
+             ├─ 9338 /usr/bin/dnscache
+             ├─ 9339 /usr/sbin/multilog t /var/log/svc/daned.1998
+             ├─ 9340 /usr/bin/tcpserver -v -H -R -l argos.indimail.org -x /etc/indimail/tcp/tcp.smtp.cdb -c variables/MAXDAEMONS -o>
+             ├─ 9341 /bin/sh ./run
+             ├─ 9342 /usr/bin/tcpserver -v -H -R -l argos.indimail.org -x /etc/indimail/tcp/tcp.qmtp.cdb -c variables/MAXDAEMONS -o>
+             ├─ 9343 /usr/sbin/multilog t /var/log/svc/smtpd.25
+             ├─ 9344 /usr/sbin/indisrvr -i 0 -p 4000 -b 40 -n /etc/indimail/certs/servercert.pem
+             ├─ 9345 /usr/sbin/multilog t /var/log/svc/poppass.106
+             ├─ 9346 /usr/bin/tcpserver -v -h -R -l argos.indimail.org -x /etc/indimail/tcp/tcp.smtp.cdb -c variables/MAXDAEMONS -o>
+             ├─ 9347 /usr/sbin/multilog t /var/log/svc/fetchmail
+             ├─ 9348 /usr/bin/qmail-cat /run/indimail/logfifo
+             ├─ 9349 /usr/sbin/multilog t /var/log/svc/pop3d-ssl.995
+             ├─ 9350 /usr/sbin/multilog t /var/log/svc/imapd.143
+             ├─ 9351 /usr/sbin/multilog t /var/log/svc/smtpd.465
+             ├─ 9352 /usr/sbin/cleanq -l -s 200 /var/indimail/qscanq/root/scanq
+             ├─ 9353 /usr/sbin/multilog t /var/log/svc/freshclam
+             ├─ 9354 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.imap.cdb -X -o -b 40 -H -l argos.>
+             ├─ 9355 /usr/sbin/multilog t /var/log/svc/imapd-ssl.993
+             ├─ 9356 /usr/sbin/multilog t /var/log/svc/greylist.1999
+             ├─ 9358 /usr/sbin/qmail-daned -w /etc/indimail/control/tlsa.white -t 30 -s 5 -h 65535 127.0.0.1 /etc/indimail/control/>
+             ├─ 9360 supervise mysql.3306
+             ├─ 9361 supervise log mysql.3306
+             ├─ 9362 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.imap.cdb -X -o -b 40 -H -l argos.>
+             ├─ 9363 /usr/sbin/multilog t /var/log/svc/qmtpd.209
+             ├─ 9364 supervise udplogger.3000
+             ├─ 9365 supervise log udplogger.3000
+             ├─ 9366 /usr/sbin/multilog t /var/log/svc/pwdlookup
+             ├─ 9367 /usr/bin/freshclam -v --stdout --datadir=/var/indimail/clamd -d -c 2 --config-file=/etc/freshclam.conf
+             ├─ 9369 /usr/sbin/multilog t /var/log/svc/deliver.25
+             ├─ 9370 /usr/sbin/multilog t /var/log/svc/resolvconf
+             ├─ 9371 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.pop3.cdb -X -o -b 40 -H -l argos.>
+             ├─ 9372 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.imap.cdb -X -o -b 40 -H -l argos.>
+             ├─ 9373 /usr/sbin/multilog t /var/log/svc/mrtg
+             ├─ 9374 /usr/sbin/multilog t /var/log/svc/smtpd.366
+             ├─ 9375 /usr/bin/tcpserver -v -H -R -l argos.indimail.org -x /etc/indimail/tcp/tcp.poppass.cdb -X -c variables/MAXDAEM>
+             ├─ 9376 /usr/sbin/multilog t /var/log/svc/proxyIMAP.9143
+             ├─ 9377 /usr/bin/tcpserver -v -H -R -l argos.indimail.org -x /etc/indimail/tcp/tcp.smtp.cdb -c variables/MAXDAEMONS -o>
+             ├─ 9378 /usr/sbin/multilog t /var/log/svc/indisrvr.4000
+             ├─ 9379 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.pop3.cdb -X -o -b 40 -H -l argos.>
+             ├─ 9380 /usr/sbin/multilog t /var/log/svc/qmqpd.628
+             ├─ 9381 /usr/sbin/multilog t /var/log/svc/pop3d.110
+             ├─ 9382 /usr/sbin/qmail-greyd -w /etc/indimail/control/greylist.white -t 30 -g 24 -m 2 -s 5 -h 65535 127.0.0.1 /etc/in>
+             ├─ 9383 /usr/sbin/multilog t /var/log/svc/qscanq
+             ├─ 9384 /usr/sbin/multilog t /var/log/svc/logfifo
+             ├─ 9385 /usr/sbin/multilog t /var/log/svc/rsyncd.873
+             ├─ 9386 /usr/sbin/multilog t /var/log/svc/proxyIMAP.4143
+             ├─ 9387 /usr/sbin/multilog t /var/log/svc/smtpd.587
+             ├─ 9388 /usr/sbin/multilog t /var/log/svc/svscan
+             ├─ 9390 /usr/bin/tcpserver -v -h -R -l argos.indimail.org -x /etc/indimail/tcp/tcp.smtp.cdb -c variables/MAXDAEMONS -o>
+             ├─ 9391 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.imap.cdb -X -o -b 40 -H -l argos.>
+             ├─ 9392 multilog t ./main
+             ├─ 9393 /usr/sbin/multilog t /var/log/svc/inlookup.infifo
+             ├─ 9402 /usr/sbin/mysqld --defaults-file=/etc/indimail/indimail.cnf --port=3306 --basedir=/usr --datadir=/var/indimail>
+             ├─ 9403 /usr/sbin/multilog t /var/log/svc/mysql.3306
+             ├─ 9405 /usr/sbin/multilog t /var/log/svc/proxyPOP3.4110
+             ├─ 9406 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.pop3.cdb -X -o -b 40 -H -l argos.>
+             ├─ 9407 /usr/sbin/multilog t /var/log/svc/proxyPOP3.9110
+             ├─ 9410 /usr/sbin/udplogger -p 3000 -t 10 0
+             ├─ 9415 /usr/sbin/multilog t /var/log/svc/udplogger.3000
+             ├─ 9422 /usr/sbin/multilog t /var/log/svc/clamd
+             ├─10486 /usr/sbin/qmail-daemon ./Maildir/
+             ├─10487 /usr/sbin/nssd -d notice
+             ├─10492 /usr/sbin/inlookup -i 5 -c 5184000
+             ├─10494 qmail-send
+             ├─10495 qmail-send
+             ├─10496 qmail-send
+             ├─10500 qmail-send
+             ├─10502 qmail-send
+             ├─10509 qmail-lspawn ./Maildir/
+             ├─10510 qmail-rspawn
+             ├─10511 qmail-clean
+             ├─10512 qmail-todo
+             ├─10513 qmail-clean
+             ├─10514 qmail-lspawn ./Maildir/
+             ├─10515 qmail-rspawn
+             ├─10516 qmail-clean
+             ├─10517 qmail-lspawn ./Maildir/
+             ├─10518 qmail-todo
+             ├─10519 qmail-clean
+             ├─10520 qmail-rspawn
+             ├─10521 qmail-clean
+             ├─10522 qmail-todo
+             ├─10523 qmail-lspawn ./Maildir/
+             ├─10524 qmail-clean
+             ├─10525 qmail-rspawn
+             ├─10526 qmail-clean
+             ├─10527 qmail-todo
+             ├─10528 qmail-lspawn ./Maildir/
+             ├─10529 qmail-rspawn
+             ├─10530 qmail-clean
+             ├─10531 qmail-todo
+             ├─10532 qmail-clean
+             ├─10533 qmail-clean
+             ├─10534 /usr/sbin/inlookup -i 5 -c 5184000
+             ├─10535 /usr/sbin/inlookup -i 5 -c 5184000
+             ├─10536 /usr/sbin/inlookup -i 5 -c 5184000
+             ├─10537 /usr/sbin/inlookup -i 5 -c 5184000
+             ├─10538 /usr/sbin/inlookup -i 5 -c 5184000
 
-Jun 10 07:15:06 argos.indimail.org systemd[1]: Started IndiMail Messaging Platform.
+Apr 08 08:57:55 argos.indimail.org systemd[1]: Started SVscan Service.
 ```
 
 IndiMail also proves the svps command which gives a neat display on the status of all services configured for IndiMail. You can omit the -a flag to omit the logging processes.
