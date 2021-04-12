@@ -33,7 +33,7 @@ I thank Dr. Daniel Bernstein for the following original packages at http://cr.yp
 8. mess822
 9. checkpassword
 
-My ex colleagues Sushant TS, Murali Panchapakesan, Govind Raghuram, Ramya Krishnan, Anuradha TP, Premnath Sah
+My ex colleagues Sushant TS, Murali Panchapakesan, Govind Raghuram, Radha V, Ramya Krishnan, Anuradha TP, Premnath Sah
 who came with lot of ideas and suggestion and snippets of code. A great number of bugs were identified by Ramya
 who became an expert in using strace after this. She also added the X-QHPSI, X-Quarantine-ID: and the VIRUSFORWARD
 code in qhpsi.
