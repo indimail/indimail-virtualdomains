@@ -222,11 +222,11 @@ To install IndiMail you can take the help of the following documents in the [ind
 File | Description
 ----- | --------------------
 README-indimail.md|Introduction to IndiMail (this file)
-INSTALL.md|Source Installation Instructions
-INSTALL-RPM.md|Install Instructions using RPM
-INSTALL-MYSQL.md|MySQL specific Installation Instructions
-README-CLUSTER.md|Steps on configuring a clustered setup
-Quick-INSTALL.md|A minimal documentation on Installation/Configuration)
+[INSTALL-indimail.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/INSTALL-indimail.md)|Source Installation Instructions
+[INSTALL-RPM.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/INSTALL-RPM.md)|Install Instructions using RPM
+[INSTALL-MYSQL.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/INSTALL-MYSQL.md)|MySQL specific Installation Instructions
+[README-CLUSTER.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-CLUSTER.md)|Steps on configuring a clustered setup
+[Quick-INSTALL.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/Quick-INSTALL.md)|A minimal documentation on Installation/Configuration)
 
 If you have enough experience on your belt you can dive into this [document](https://github.com/mbhangui/indimail-virtualdomains/blob/master/README.md "README").
 
