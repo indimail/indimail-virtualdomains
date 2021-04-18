@@ -301,6 +301,13 @@ else
 	AC_CHECK_PROG(QMAIL,qmail-inject,qmail-inject,)
 fi
 
+if test -x /usr/bin/qmail-inject
+then
+	INDIMAIL="/usr/bin/qmail-inject"
+else
+	AC_CHECK_PROG(INDIMAIL,qmail-inject,qmail-inject,)
+fi
+
 dnl Try to find sendmail.
 
 test "x$prefix" = xNONE && prefix=$ac_default_prefix
@@ -455,9 +462,9 @@ done
 
 # Not found, possibly qmail $HOME/Mailbox
 
-if test "$QMAIL" != ""
+if test "$QMAIL" != "" -o "$INDIMAIL" != ""
 then
-	SPOOLDIR="./Mailbox"
+	SPOOLDIR="./Maildir/"
 else
 	AC_MSG_ERROR(Cannot determine default mailbox)
 fi
