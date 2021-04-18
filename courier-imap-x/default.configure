@@ -99,7 +99,7 @@ esac
   --without-authchangepwdir \
   --without-authcustom \
   --without-authgeneric \
-  $extra
+  $extra --disable-dependency-tracking
 if [ ! -f depcomp -a -f libs/unicode/depcomp ] ; then
   cp libs/unicode/depcomp .
 elif [ -f depcomp -a ! -f libs/unicode/depcomp ] ; then
