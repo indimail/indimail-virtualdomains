@@ -8,7 +8,6 @@ AC_INIT(soxwrap, 0.50, [courier-users@lists.sourceforge.net])
 >confdefs.h  # Kill PACKAGE_ macros
 
 AC_CONFIG_SRCDIR(soxwrap.h)
-AC_CONFIG_AUX_DIR(../..)
 AM_INIT_AUTOMAKE([foreign no-define])
 
 AC_CONFIG_HEADERS(soxwrap_config.h)

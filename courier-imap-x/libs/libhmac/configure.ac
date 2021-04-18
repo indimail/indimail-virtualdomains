@@ -9,9 +9,7 @@ AC_INIT(libhmac, 1.00, [courier-users@lists.sourceforge.net])
 >confdefs.h  # Kill PACKAGE_ macros
 
 AC_CONFIG_SRCDIR(hmac.h)
-AC_CONFIG_AUX_DIR(../..)
 AM_INIT_AUTOMAKE([foreign no-define])
-
 
 AC_CONFIG_HEADERS(config.h)
 

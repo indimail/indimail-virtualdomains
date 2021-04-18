@@ -7,7 +7,6 @@ AC_INIT(maildrop, 3.0.3, [courier-users@lists.sourceforge.net])
 >confdefs.h  # Kill PACKAGE_ macros
 
 AC_CONFIG_SRCDIR(alarm.C)
-AC_CONFIG_AUX_DIR(../..)
 LPATH="$PATH:/usr/local/bin"
 AM_INIT_AUTOMAKE([foreign no-define])
 

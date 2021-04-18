@@ -9,7 +9,6 @@ AC_INIT(libsha1, 1.21, courier-users@lists.sourceforge.net)
 >confdefs.h  # Kill PACKAGE_ macros
 
 AC_CONFIG_SRCDIR([hmac.c])
-AC_CONFIG_AUX_DIR(../..)
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([foreign no-define])
 

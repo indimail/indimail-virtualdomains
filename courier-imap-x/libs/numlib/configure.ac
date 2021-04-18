@@ -9,7 +9,6 @@ AC_INIT(numlib, 0.10, courier-users@lists.sourceforge.net)
 >confdefs.h  # Kill PACKAGE_ macros
 
 AC_CONFIG_SRCDIR([atotimet.c])
-AC_CONFIG_AUX_DIR(../..)
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([foreign no-define])
  

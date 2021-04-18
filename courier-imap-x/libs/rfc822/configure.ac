@@ -8,7 +8,6 @@ AC_INIT(rfc822lib, 0.13, [courier-users@lists.sourceforge.net])
 >confdefs.h  # Kill PACKAGE_ macros
 
 AC_CONFIG_SRCDIR(rfc822.c)
-AC_CONFIG_AUX_DIR(../..)
 AM_INIT_AUTOMAKE([foreign no-define])
 AC_CONFIG_HEADERS(config.h)
 

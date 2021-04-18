@@ -8,7 +8,6 @@ AC_INIT(couriertcpd, 0.11, [courier-users@lists.sourceforge.net])
 >confdefs.h  # Kill PACKAGE_ macros
 
 AC_CONFIG_SRCDIR(tcpd.c)
-AC_CONFIG_AUX_DIR(../..)
 AM_INIT_AUTOMAKE([foreign no-define])
 LPATH="$PATH:/usr/local/bin"
 AC_CONFIG_HEADERS(config.h)

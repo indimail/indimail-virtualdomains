@@ -4,7 +4,6 @@
 AC_PREREQ([2.65])
 AC_INIT([courier-authlib], [1.0], [manvendra@indimail.org],indimail, [http://www.indimail.org])
 AC_CONFIG_SRCDIR(authoption.c)
-AC_CONFIG_AUX_DIR(../..)
 AC_CANONICAL_TARGET
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
