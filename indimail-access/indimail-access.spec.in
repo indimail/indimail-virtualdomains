@@ -416,7 +416,7 @@ done
 %attr(644,root,root)                    %{python3_sitelib}/__pycache__/*.pyc
 %attr(755,root,root)                    %{python3_sitelib}/fetchmailconf.py
 %else
-%if 0%{?centos_version} > 600 || 0%{?rhel_version} > 600 || %{defined fedora_version} || %{defined sles_version}
+%if 0%{?centos_version} > 600 || 0%{?rhel_version} > 600 || %{defined fedora_version} || %{defined sles_version} || 0%{?scientificlinux_version} > 600
 # fetchmailconf is not installed in fetchmail > 6.4.6 if python version < 2.7
 %attr(644,root,root)                    %{pythondir}/fetchmailconf.pyo
 %attr(644,root,root)                    %{pythondir}/fetchmailconf.pyc
