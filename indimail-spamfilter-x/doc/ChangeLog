@@ -10,3 +10,5 @@ Release @version@-@release@ Start 06/06/2020
 04. added debuginfo packages
 - 17/10/2020 - indimail-3.3
 05. enabled suse permissions
+- 18/04/2021
+06. added scientic linux distribution

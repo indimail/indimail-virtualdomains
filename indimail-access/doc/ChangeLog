@@ -14,6 +14,8 @@ Release @version@-@release@ Start 01/03/2021
 09. upgraded maildrop to 3.0.3
 - 28/03/2021
 10. upgraded courier-imap to 5.1.2
+- 18/04/2021
+11. added scientic linux distribution
 
 *
 Release 1.0-1.1 Start 03/06/2020
