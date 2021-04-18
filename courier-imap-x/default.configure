@@ -7,11 +7,6 @@ else
 fi
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in -o ! -f depcomp ] ; then
   autoreconf -fiv
-  automake -acf
-  if [ ! -f depcomp ] ; then
-    echo "depcomp missing" 1>&2
-    exit 1
-  fi
 fi
 if [ ! -f conf-release ] ; then
   echo "1.1" > conf-release
