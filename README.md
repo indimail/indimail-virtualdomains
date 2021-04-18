@@ -117,6 +117,21 @@ Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 # pacman -S base-devel diffutils coreutils openssl openldap mysql libidn libidn2 python
 ```
 
+**Gentoo Linux**
+
+```
+# emaint -a sync
+# emerge-webrsync
+# emerge -a app-portage/eix
+# eix-sync
+# emerge -a app-portage/layman
+# layman -S
+# etc-update
+# emerge -a systemd
+# emerge -a dev-db/mysql
+# emerge -a openldap
+```
+
 **NOTES**
 
 You need libi2nd, without which, indimail-mta will get built without [Internationalized Email Addresses (RFC6530)](https://tools.ietf.org/html/rfc6530)
@@ -358,8 +373,9 @@ The build below depens on several Makefiles. For the build to operate without er
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
 $ ./default.configure
 $ make or ./qmake
+# create users required by indimail-mta in /etc/passwd
+$ sudo ./svctool --config=users --nolog
 $ sudo make install or sudo ./qmake install
-$ sudo sh ./svctool --config=users --nolog
 ```
 
 (check version in indimail-mta/indimail-mta-x/conf-version)
