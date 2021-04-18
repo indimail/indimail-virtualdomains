@@ -5,7 +5,7 @@ AC_INIT([courier-unicode],[2.2.2],[courier-users@lists.sourceforge.net])
 >confdefs.h  # Kill PACKAGE_ macros
 
 AC_CONFIG_SRCDIR(unicodecpp.C)
-
+AC_CONFIG_AUX_DIR(../..)
 AC_CONFIG_MACRO_DIR([m4])
 
 LPATH="$PATH:/usr/local/bin"
