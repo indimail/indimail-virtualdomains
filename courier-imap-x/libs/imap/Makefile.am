@@ -2,8 +2,6 @@
 # Copyright 1998 - 2015 Double Precision, Inc.  See COPYING for
 # distribution information.
 
-ACLOCAL_AMFLAGS=-I ../../m4
-
 #CONFIG_STATUS_DEPENDENCIES = ../tcpd/couriertls.config
 
 DISTCLEANFILES=imapd.cnf pop3d.cnf

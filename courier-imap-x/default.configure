@@ -1,10 +1,4 @@
 #!/bin/sh
-if [ -d libs/imap ] ; then
-  mkdir -p m4
-else
-  echo "Invalid working direcotry" 1>&2
-  exit 1
-fi
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in -o ! -f depcomp ] ; then
   autoreconf -fiv
 fi
