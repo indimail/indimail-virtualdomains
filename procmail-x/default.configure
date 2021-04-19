@@ -11,11 +11,13 @@ case "$SYSTEM" in
   prefix=/usr/local
   sbindir=/usr/local/sbin
   sysconfdir=/usr/local/etc/indimail
+  mandir=/usr/local/man
   ;;
   Darwin)
   prefix=/usr/local
   sbindir=/usr/local/sbin
   sysconfdir=/usr/local/etc/indimail
+  mandir=/usr/local/share/man
   ;;
   Linux)
   prefix=/usr
@@ -25,14 +27,17 @@ case "$SYSTEM" in
     sbindir=/usr/sbin
   fi
   sysconfdir=/etc/indimail
+  mandir=/usr/share/man
   ;;
   *)
   prefix=/usr
   sbindir=/usr/sbin
   sysconfdir=/usr/etc/indimail
+  mandir=/usr/man
   ;;
 esac
 ./configure --prefix=$prefix --sbindir=$sbindir \
+  --mandir=$mandir \
   --enable-sendmail-prog=$prefix/bin/sendmail \
   --sysconfdir=$sysconfdir
 

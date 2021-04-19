@@ -13,6 +13,12 @@ case "$SYSTEM" in
   mandir=/usr/local/man
   sysconfdir=/usr/local/etc/indimail
   ;;
+  Darwin)
+  prefix=/usr/local
+  sbindir=/usr/local/sbin
+  mandir=/usr/local/share/man
+  sysconfdir=/usr/local/etc/indimail
+  ;;
   Linux)
   prefix=/usr
   if [ -f /etc/arch-release ] ; then

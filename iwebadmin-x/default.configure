@@ -17,7 +17,7 @@ case "$SYSTEM" in
   ;;
   Darwin)
   prefix=/usr/local
-  mandir=/usr/local/man
+  mandir=/usr/local/share/man
   sysconfdir=/usr/local/etc/indimail
   cgibindir=/usr/local/www/cgi-bin
   htmldir=/usr/local/www/html
