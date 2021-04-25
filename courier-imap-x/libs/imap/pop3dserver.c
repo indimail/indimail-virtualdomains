@@ -63,6 +63,7 @@
 #define LISTVERSION 3
 
 extern void pop3dcapa();
+extern void pop3dlang(const char *);
 static void acctout(const char *disc);
 void rfc2045_error(const char *p)
 {
@@ -1007,6 +1008,12 @@ int	c;
 		if (strcmp(p, "CAPA") == 0)
 		{
 			pop3dcapa();
+			continue;
+		}
+
+		if (strcmp(p, "LANG") == 0)
+		{
+			pop3dlang(strtok(NULL, "\r\n"));
 			continue;
 		}
 

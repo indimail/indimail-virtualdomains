@@ -1,3 +1,14 @@
+5.1.3
+
+2021-04-01  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* pop3d: pro-forma POP3 LANG extension.
+
+2021-03-28  Sam Varshavchik  <mrsam@courier-mta.com>
+
+	* pop3d-ssl.dist.in (TLS_STARTTLS_PROTOCOL): Remove duplicate entry
+	in the pop3d-ssl configuration file.
+
 5.1.2
 
 2021-03-25  Sam Varshavchik  <mrsam@courier-mta.com>

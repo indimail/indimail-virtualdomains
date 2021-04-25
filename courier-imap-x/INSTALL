@@ -508,7 +508,10 @@ Configure the maximum number of inotify file descriptors
    system userid, it will be necessary to adjust the Linux kernel's limit on
    the maximum number of file descriptors per userid,
    /proc/sys/fs/inotify/max_user_instances. A good rough metric would be the
-   maximum number of concurrent IMAP logins multiplied by 4.
+   maximum number of concurrent IMAP logins multiplied by 4. On very large
+   servers it may also be necessary to increase
+   /proc/sys/fs/inotify/max_user_watches, a rough metric would be at least 5
+   times the max_user_instances setting.
 
 Configuration file
 

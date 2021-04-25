@@ -28,6 +28,7 @@ static const char rcsid[] = "$Id: pop3login.c,v 1.11 2004/09/12 23:25:56 mrsam E
 #endif
 
 extern void     pop3dcapa();
+extern void pop3dlang(const char *);
 extern int      have_starttls();
 extern int      tls_required();
 static unsigned long bytes_sent_count = 0;
@@ -262,6 +263,11 @@ main(int argc, char **argv)
 			if (strcmp(p, "CAPA") == 0)
 			{
 				pop3dcapa();
+				continue;
+			} else
+			if (strcmp(p, "LANG") == 0)
+			{
+				pop3dlang(strtok(0, "\r\n"));
 				continue;
 			} else
 			if (strcmp(p, "STLS") == 0)
