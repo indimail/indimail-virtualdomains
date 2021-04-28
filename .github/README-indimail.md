@@ -690,6 +690,7 @@ $ sudo svc -u /service/qmail-smtpd* /service/qmail-send.25 /service/qmail-qm?pd.
 IndiMail compoments get started by indimail-mta service. It does not have it's own startup service, but rather places all its services under indimail-mta's svscan directory /service.
 
 [systemd](http://en.wikipedia.org/wiki/Systemd "systemd") is a system and service manager for Linux, compatible with SysV and LSB init scripts. systemd provides aggressive parallelization capabilities, uses socket and D-Bus activation for starting services, offers on-demand starting of daemons, keeps track of processes using Linux cgroups, supports snapshots and restoring of the system state, maintains mount and automount points and implements an elaborate transactional dependency-based service control logic. It can work as a drop-in replacement for sysvinit.
+
 The first step is to write the service configuration file for IndiMail in /lib/systemd/system/svscan.service
 
 ```
@@ -709,7 +710,23 @@ Alias=indimail-mta.service
 WantedBy=multi-user.target
 ```
 
-From Fedora 15 onwards, upstart has been replaced by a service called systemd. Due to improper rpm package upgrade scripts, some system services previously enabled in Fedora 14, may not be enabled after upgrading to Fedora 15. To determine if a service is impacted, run the systemctl status command as shown below.
+You can override values in the above file by creating a file override.conf in /lib/systemd/system/svscan.service.d. As an example, on a raspberry pi system, you should have svscan started only after the system clock is synchronized with a NTP source (many SBC don't have battery backed Real Time Clock - RTC). This ensures that svscan gets started when the system has a correct date, time so that logs created will not have absurd timestamps.
+
+```
+[Unit]
+Wants=time-sync.target
+After=local-fs.target remote-fs.target time-sync.target network.target network-online.target systemd-networkd-wait-online.service
+```
+
+So if you have a system without a battery backed RTC, you should do this (even when you do a binary installation)
+
+```
+$ sudo mkdir /lib/systemd/system/svscan.service.d
+$ sudo cp /usr/share/indimail/boot/systemd.override.conf /lib/systemd/system/svscan.service.d/override.conf
+$ sudo systemctl daemon-reload
+```
+
+NOTE: From Fedora 15 onwards, upstart has been replaced by a service called systemd. Due to improper rpm package upgrade scripts, some system services previously enabled in Fedora 14, may not be enabled after upgrading to Fedora 15. To determine if a service is impacted, run the systemctl status command as shown below.
 
 ```
 # systemctl is-enabled svscan.service && echo "Enabled on boot" || echo "Disabled on boot"
