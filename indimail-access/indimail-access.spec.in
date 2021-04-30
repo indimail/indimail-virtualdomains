@@ -624,7 +624,7 @@ done
   default_domain=defaultDomain
 %else
 if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
 else
   default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
 fi

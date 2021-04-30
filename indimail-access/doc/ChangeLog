@@ -18,6 +18,8 @@ Release @version@-@release@ Start 01/03/2021
 11. added scientic linux distribution
 - 25/04/2021
 12. updated courier-imap to version 5.1.3
+- 30/04/2021
+13. fixed syntax error getting HOSTNAME
 
 *
 Release 1.0-1.1 Start 03/06/2020

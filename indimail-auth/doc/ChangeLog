@@ -49,3 +49,5 @@ Release @version@-@release@ Start 21/05/2020
 28. post install: save variables
 - 18/03/2021
 29. added obs triggers
+- 30/04/2021
+13. fixed syntax error getting HOSTNAME
