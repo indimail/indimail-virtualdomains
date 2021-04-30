@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.87 2021-04-04 09:04:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.88 2021-04-30 11:54:51+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -247,7 +247,7 @@ fi
 
 %if %build_on_obs == 0
   if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
   else
     default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
   fi
@@ -1156,7 +1156,7 @@ fi
   default_domain=%{defaultDomain}
 %else
   if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
   else
     default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
   fi
@@ -1468,7 +1468,7 @@ fi
 %postun
 argv1=$1
 if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
 else
   default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
 fi

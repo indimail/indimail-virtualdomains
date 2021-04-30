@@ -25,6 +25,8 @@ Release @version@-@release@ Start 14/02/2021
 - 14/03/2021
 15. Changes for making code github action, added workflow for CI
 16. indimail.h - allow inclusion without having mysql installed
+- 30/04/2021
+17. spec, postinst: fixed syntax error getting HOSTNAME
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020
