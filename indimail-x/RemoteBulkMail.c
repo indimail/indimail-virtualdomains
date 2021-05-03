@@ -1,5 +1,8 @@
 /*
  * $Log: RemoteBulkMail.c,v $
+ * Revision 1.7  2021-05-03 12:47:26+05:30  Cprogrammer
+ * added missing guarding braces
+ *
  * Revision 1.6  2020-10-19 12:46:54+05:30  Cprogrammer
  * use /var/indomain/domains for domain/bulk_mail
  *
@@ -46,7 +49,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RemoteBulkMail.c,v 1.6 2020-10-19 12:46:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: RemoteBulkMail.c,v 1.7 2021-05-03 12:47:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -134,13 +137,14 @@ bulk_host_connect()
 		if ((in_mysql_real_connect(&bulkMySql, bulk_host, bulk_user, bulk_passwd,
 				bulk_database, bulk_port, bulk_socket, flags)))
 			return (&bulkMySql);
-		else
+		else {
 			strerr_warn12("bulk_host_connect: mysql_real_connect: ", bulk_database, "@", bulk_host,
 				", user ", bulk_user, ", port ", port, ", socket ",
 				bulk_socket ? bulk_socket : "TCP/IP",
 				!bulk_socket && use_ssl ? ": use_ssl=1: " : ": use_ssl=0: ",
 				(char *) in_mysql_error(&bulkMySql), 0);
 			return ((MYSQL *) 0);
+		}
 	}
 }
 
