@@ -27,6 +27,10 @@ Release @version@-@release@ Start 14/02/2021
 16. indimail.h - allow inclusion without having mysql installed
 - 30/04/2021
 17. spec, postinst: fixed syntax error getting HOSTNAME
+- 03/05/2021
+18. RemoteBulkMail.c: added missing guarding braces
+19. vdeloldusers.c: fix compiler warnings
+20. tcplookup.c: initialize rfd, wfd
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020
