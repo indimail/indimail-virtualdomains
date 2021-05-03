@@ -1,5 +1,8 @@
 /*
  * $Log: tcplookup.c,v $
+ * Revision 1.3  2021-05-03 12:47:51+05:30  Cprogrammer
+ * initialize rfd, wfd
+ *
  * Revision 1.2  2021-02-14 21:40:13+05:30  Cprogrammer
  * include <stdlib.h> for srand()
  *
@@ -46,7 +49,7 @@
 #include "variables.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: tcplookup.c,v 1.2 2021-02-14 21:40:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcplookup.c,v 1.3 2021-05-03 12:47:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            strnum[FMT_ULONG];
@@ -144,7 +147,7 @@ cleanup(int rfd, int wfd, void (*sig_pipe_save)(), char *fifo)
 }
 
 char           *
-prepare_wfifo(int *rfd, int *wfd, int *fifo_len, int *pipe_size, int bytes)
+prepare_wfifo(int *wfd, int *fifo_len, int *pipe_size, int bytes)
 {
 	static stralloc InFifo = { 0 };
 	char           *infifo_dir, *infifo;
@@ -301,8 +304,9 @@ tcplookup(int argc, char **argv, char **envp)
 	strnum[fmt_ulong(strnum, time(0))] = 0;
 	if (!stralloc_cats(&myfifo, strnum) || !stralloc_0(&myfifo))
 		die_nomem();
+	rfd = wfd = -1;
 	bytes = bytes - 7 + myfifo.len + sizeof(int); /*- "socket\0" */
-	wfifo = prepare_wfifo(&rfd, &wfd, &fifo_len, &pipe_size, bytes);
+	wfifo = prepare_wfifo(&wfd, &fifo_len, &pipe_size, bytes);
 	if ((sig_pipe_save = signal(SIGPIPE, SIG_IGN)) == SIG_ERR) {
 		cleanup(rfd, wfd, 0, 0);
 		strerr_warn1("tcplookup: signal: ", &strerr_sys);
