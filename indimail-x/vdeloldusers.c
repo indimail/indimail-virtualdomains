@@ -1,5 +1,8 @@
 /*
  * $Log: vdeloldusers.c,v $
+ * Revision 1.4  2021-05-03 12:48:00+05:30  Cprogrammer
+ * fix compiler warnings
+ *
  * Revision 1.3  2020-10-01 18:31:05+05:30  Cprogrammer
  * initialize activecount variable
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeloldusers.c,v 1.3 2020-10-01 18:31:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeloldusers.c,v 1.4 2021-05-03 12:48:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING
@@ -245,6 +248,7 @@ main(argc, argv)
 					c_option, i_option, p_option;
 	time_t          tmval, diff;
 
+	c_option = i_option = p_option = 0;
 	if (get_options(argc, argv, &Domain, &Age, &mailAge, &trashAge,
 			&purge_db, &report_only, &fast_option,
 			&c_option, &i_option, &p_option))
