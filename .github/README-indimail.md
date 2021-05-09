@@ -797,12 +797,12 @@ integers defined by environment variables QUEUE\_START and QUEUE\_COUNT as descr
 
 qmail-daemon also monitors qmail-send and qmail-todo and restart them if they goes down. qmail-start should be used if you desire to run only one queue. For running multiple parallel queues run qmail-daemon.
 
-qmali-daemon, qmail-start can be passed an argument - defaultdelivery. If defaultdelivery supplied, qmail-start or qmail-daemon passes it to qmail-lspawn. You can also have a control file named defaultdelivery. The mailbox type is picked up from the <u>defaultdelivery</u> control file. The table below outlines the choices for <u>defaultdelivery</u> control file
+qmali-daemon, qmail-start can be passed an argument - <u>defaultdelivery</u>. If <u>defaultdelivery</u> supplied, qmail-start or qmail-daemon passes it to qmail-lspawn. You can also have a control file named defaultdelivery. The mailbox type is picked up from the <u>defaultdelivery</u> control file. The table below outlines the choices for <u>defaultdelivery</u> control file
 
 Mailbox Format |Name|Location|defaultdelivery|Comments
 ---------------|----|--------|---------------|--------
-mbox|Mailbox|$HOME|./Mailbox|most common, works with 
-maildir|Maildir|$HOME|./Maildir/|more reliable, less
+mbox|Mailbox|$HOME|./Mailbox|most common, works with most MUAs
+maildir|Maildir|$HOME|./Maildir/|more reliable, less common MUA support
 mbox|username|/var/spool/mail|See INSTALL.vsm|traditional mailbox
 
 ### qmail-send, qmail-send
