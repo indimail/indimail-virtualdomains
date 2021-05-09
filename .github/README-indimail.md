@@ -21,6 +21,17 @@ Table of Contents
       * [Brief Feature List](#brief-feature-list)
    * [TERMINOLOGY used for commands](#terminology-used-for-commands)
    * [IndiMail Queue Mechanism](#indimail-queue-mechanism)
+   * [indimail-mta Internals](#indimail-mta-internals)
+      * [Programs](#programs)
+         * [qmail-multi](#qmail-multi)
+         * [qmail-queue](#qmail-queue)
+         * [qmail-daemon, qmail-start](#qmail-daemon-qmail-start)
+         * [qmail-send, qmail-send](#qmail-send-qmail-send)
+            * [Preprocessing](#preprocessing)
+            * [Delivery](#delivery)
+               * [Retry Schedules](#retry-schedules)
+            * [Cleanup](#cleanup)
+      * [Notes](#notes)
    * [Using systemd to start IndiMail](#using-systemd-to-start-indimail)
    * [Eliminating Duplicate Emails during local delivery](#eliminating-duplicate-emails-during-local-delivery)
    * [Using procmail with IndiMail](#using-procmail-with-indimail)
@@ -136,7 +147,7 @@ Table of Contents
    * [History](#history)
    * [See also](#see-also)
 
-TOC Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
+Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 # INTRODUCTION
 
@@ -639,9 +650,9 @@ The diagram below shows how qmail-multi(8) works ![qmail-multi](qmail_multi.png)
 
 You just need to configure the following environment variables to have the qmail-queue(8) frontends using qmail-multi(8)
 
-1. QUEUE_BASE – Base directory where all queues will be placed
-2. QUEUE_COUNT – number of queues
-3. QUEUE_START – numeric prefix of the first queue
+1. QUEUE\_BASE – Base directory where all queues will be placed
+2. QUEUE\_COUNT – number of queues
+3. QUEUE\_START – numeric prefix of the first queue
 
 e.g. If you want IndiMail to use 10 queues, this is what you will do
 
@@ -684,6 +695,225 @@ Now all you need is restart of all services to use the new QUEUE\_BASE, QUEUE\_C
 $ sudo svc -d /service/qmail-smtpd* /service/qmail-send.25 /service/qmail-qm?pd.*
 $ sudo svc -u /service/qmail-smtpd* /service/qmail-send.25 /service/qmail-qm?pd.*
 ```
+
+# indimail-mta Internals
+
+Here's the data flow in the indimail-mta suite:
+
+```
+qmail-smtpd ---> qmail-multi --- qmail-queue
+                      /               |
+qmail-inject ________/                |
+                                      |
+<-------------------------------------+
+|
++--> qmail-todo --- qmail-send --- qmail-rspawn --- qmail-remote
+                         |     \
+                    qmail-clean \_ qmail-lspawn --- qmail-local
+```
+Every message is added to a central queue directory by qmail-queue. qmail-queue is invoked by qmail-multi. The main purpose of qmail-multi is to select a queue in /var/indimail/queue directory and set the environment variable QUEUEDIR and exec qmail-queue. qmail-multi is invoked as needed, by setting QMAILQUEUE=/usr/sbin/qmail-queue, mostly by qmail-inject for locally generated messages, qmail-smtpd for messages received through SMTP, qmail-local for fqorwarded messages, or qmail-send for bounce messages.
+
+Every message is then pre-processed by qmail-todo and communicated to qmail-send for delivery.
+
+Every message is then delivered by qmail-send, in cooperation with qmail-lspawn and qmail-rspawn, and cleaned up by qmail-clean. These four programs are long-running daemons.
+
+The queue is designed to be crashproof, provided that the underlying filesystem is crashproof. All cleanups are handled by qmail-send and qmail-clean without human intervention. See section 6 for more details.
+
+## Programs
+
+### qmail-multi
+
+qmail-multi's job is to select a queue. indimail-mta uses multiple queue. If QUEUEDIR is set, it execs qmail-queue without doing anything. If QUEUEDIR is not defined, it uses QUEUE\_START, QUEUE\_COUNT and QUEUE\_BASE environment variables to set QUEUEDIR environment variable. QUEUE\_BASE is the common basename for all the queues. e.g. QUEUE\_BASE=/var/indimail/queue. Now, if QUEUE\_START is 1, QUEUE\_COUNT is 5, then qmail-multi will use the time to do a modulus operation and get a number ranging from 1 to 5. It will then set the QUEUEDIR environment variable to set any of the 5 queues in /var/indimail/queue. e.g. QUEUEDIR=/var/indimail/queue/queueX, where X is the number selected between 1 to 5. It then does a exec of qmail-queue. Throughout this document we will abbreviate /var/indimail/queue/queueX as queueX.
+
+### qmail-queue
+
+Each message in the queue is identified by a unique number, let's say 3016451. This number is related to the inode number of file created in queueX/pid directory. More on that below. From now on, we will refer to 3016451 as <u>inode</u> The queue is organized into several directories, each of which may contain files related to message 3016451:
+
+file|Description
+----|-----------
+queueX/mess/<u>inode</u>|the message
+queueX/todo/<u>inode</u>|the envelope: where the message came from, where it's going
+queueX/intd/<u>inode</u>|the envelope, under construction by qmail-queue
+queueX/info/<u>inode</u>|the envelope sender address, after preprocessing
+queueX/local/<u>inode</u>|local envelope recipient addresses, after preprocessing
+queueX/remote/<u>inode</u>|remote envelope recipient addresses, after preprocessing
+queueX/bounce/<u>inode</u>|permanent delivery errors
+
+Here are all possible states for a message.
+* \+ means a file exists
+* \- means it does not exist
+* \? means it may or may not exist.
+
+Message State|Possible states
+-------------|---------------
+S1|-mess -intd -todo -info -local -remote -bounce
+S2|+mess -intd -todo -info -local -remote -bounce
+S3|+mess +intd -todo -info -local -remote -bounce
+S4|+mess ?intd +todo ?info ?local ?remote -bounce (queued)
+S5|+mess -intd -todo +info ?local ?remote ?bounce (preprocessed)
+
+Guarantee: If queueX/mess/<u>inode</u> exists, it has inode number <u>inode</u>.
+
+qmail-queue's job is to accept a message from a client and submit it to the queue. It reads the message from file descriptor zero and the envelope from file descriptor one.
+
+qmail-queue adds a Received field to the message that looks like one of these
+
+* 	Received: (indimail-mta 37166 invoked by alias); 26 Sep 1995 04:46:54 -0000
+* 	Received: (indimail-mta 37166 invoked from network from w.x.y.z by host argos by uid 123); 26 Sep 1995 04:46:54 -0000
+* 	Received: (indimail-mta 37166 invoked for bounce); 26 Sep 1995 04:46:54 -0000
+
+where:
+
+* 	37166 is qmail-queue's process ID.
+* 	invoked by alias means qmail-queue was invoked by a process with uid of alias user. This will be through qmail-local reading processing a dot-qmail file
+* 	invoked from network means qmail-queue was invoked by user qmaild received from host w.x.y.z on host argos.
+* 	invoked from bounce means that this was a bounce generated by qmail-send running under uid qmails
+* 	26 Sep 1995 04:46:54 -OOOO is the time and date at which qmail-queue created the message.
+
+qmail-queue places a messages in the queue in four stages:
+
+1. 	To add a message to the queue, qmail-queue first creates a file in a separate directory, queueX/pid, with a unique name. The filesystem assigns that file a unique inode number. qmail-queue looks at that number, say 3016451. By the guarantee above, message 3016451 must be in state S1.
+2. 	The queueX/pid file is renamed to queueX/mess/split/<u>inode</u>, and the message is written to the file, moving to state S2. Here split is the remainder left from dividing inode number by the compile time conf-split value. For example, if inode is 3016451 and conf-split is the default, 151, then split is 75 (3016451 divided by 151 is 19976 which gives a remainder of (3016451 - 19976 * 151) = 75)
+3.	The file queueX/intd/<u>inode</u> is created and the envelope is written to it in the form
+
+	`u1011\0p28966\0Ftestuser@example.com\0Tuser1@a.com\0Tuser2@b.com\0`
+
+	It means the above message was sent by user tuser@example.com with uid 1011, process ID 28966 to two users user1@a.com, user2@b.com. At this point, we have moved to state S3
+4.	queueX/intd/<u>inode</u> is linked to queueX/todo/<u>inode</u>, moving the state to S4. At this instant, message has been successfully queued for further processing by qmail-todo, qmail-send. 
+
+At the moment queueX/todo/<u>inode</u> is created, the message has been queued. qmail-send eventually (within 25 minutes notices the new message, but to speed things up, qmail-queue writes a single byte to lock/trigger, a named pipe that qmail-send watches. When trigger contains readable data, qmail- send is awakened, empties trigger, and scans the todo directory.
+
+qmail-queue starts a 24-hour timer before touching any files, and commits suicide if the timer expires.
+
+Once a message is deposited in one of the indimail's queues, it will be sent by few programs working cooperatively. We will now look at qmail-daemon, qmail-start, qmail-send, qmail-lspawn, qmail-rspawn, qmail-local, and qmail-remote.
+
+### qmail-daemon, qmail-start
+
+qmail-start invokes qmail-send, qmail-todo, qmail-lspawn, qmail-rspawn, and qmail-clean, under the proper uids and gids for a single queue. These five daemons cooperate to deliver messages from the queue.
+
+qmail-daemon invokes multiple invocations of qmail-start to invoke qmail-send, qmail-todo, qmail-lspawn, qmail-rspawn,
+and qmail-clean, under the proper uids and gids for multiple queues. It starts multiple instances of qmail-send, qmail-todo, qmail-lspawn, qmail-rspawn and qmail-clean. The number of instances it runs is defined by the environment variable QUEUE\_COUNT. For each instance the queue is defined by qmail-daemon by setting the environment variable QUEUEDIR. A queue is defined by the
+integers defined by environment variables QUEUE\_START and QUEUE\_COUNT as described in section [qmail-multi](#qmail-multi).
+
+qmail-daemon also monitors qmail-send and qmail-todo and restart them if they goes down. qmail-start should be used if you desire to run only one queue. For running multiple parallel queues run qmail-daemon.
+
+qmali-daemon, qmail-start can be passed an argument - defaultdelivery. If defaultdelivery supplied, qmail-start or qmail-daemon passes it to qmail-lspawn. You can also have a control file named defaultdelivery. The mailbox type is picked up from the <u>defaultdelivery</u> control file. The table below outlines the choices for <u>defaultdelivery</u> control file
+
+Mailbox Format |Name|Location|defaultdelivery|Comments
+---------------|----|--------|---------------|--------
+mbox|Mailbox|$HOME|./Mailbox|most common, works with 
+maildir|Maildir|$HOME|./Maildir/|more reliable, less
+mbox|username|/var/spool/mail|See INSTALL.vsm|traditional mailbox
+
+### qmail-send, qmail-send
+
+Once a message has been queued, qmail-todo must decide which recipients are local and which recipients are remote. It may also rewrite some recipient addresses. qmail-todo/qmail-send process messages in the queue and pass them to qmail-rspawn and qmail-lspawn. We will talk about their function in the order that a message in the queue would experience them: preprocessing, delivery, and cleanup.
+
+#### Preprocessing
+
+qmail-todo does the preprocessing and like queuing, this is done in stages:
+
+1. 	When qmail-todo notices queueX/todo/<u>inode</u>, it knows that the message <u>inode</u> is in S4. qmail-todo deletes queueX/info/split/<u>inode</u>, queueX/local/split/<u>inode</u>, and queueX/remote/split/<u>inode</u>, if they exist. Then it reads through queueX/todo/<u>inode</u>.
+2. 	A new queueX/info/split/inode is created, containing the envelope sender address.
+3. 	If the message has local recipients, they're added to queueX/local/split/<u>inode</u>.
+4. 	If the message has remote recipients, they're added to queueX/remote/split/<u>inode</u>.
+5. 	queueX/intd/<u>inode</u> is deleted. The message is still in S4 at this point.
+6. 	queueX/todo/<u>inode</u> is deleted, moving to stage S5. At this instant the message has been succcesfully preprocessed. Recipients are considered local if the domain is listed in control/locals or the entire recipient or domain is listed in control/virtualdomains. If the recipient is virtual, the local part ofthe address is rewritten as specified in virtualdomains.
+
+#### Delivery
+
+Messages at S5 are handled as follows. Initially, all recipients in queueX/local/split/<u>inode</u> and queueX/remote/split/<u>inode</u> are marked NOT DONE, meaning that qmail-send should attempt to deliver to them. On its own schedule, qmail-send sends delivery commands to qmail-lspawn and qmail-rspawn using channels set up by qmail-start. When it receives responses from qmail-lspawn or qmail-rspawn that indicate successful delivery or permanent error, qmail-send changes their status in queueX/local/split/<u>inode</u> or queueX/remote/split/<u>inode</u> to DONE, meaning that it should not attempt further deliveries. When qmail-send receives a permanent error, it also records that in queueX/bounce/split/<u>inode</u>. Bounce messages are also handled on qmail-send's schedule. Bounces are handled by injecting a bounce message based on queueX/mess/split/<u>inode</u> and queueX/bounce/split/<u>inode</u>, and deleting queueX/bounce/split/<u>inode</u>. When all ofthe recipients in queueX/local/split/<u>inode</u> or queueX/remote/split/<u>inode</u> are marked DONE, the respective local or remote file is removed.
+
+qmail-send may at its leisure try to deliver a message to a NOT DONE address. If the message is successfully delivered, qmail-send marks the address as DONE. If the delivery attempt meets with permanent failure, qmail-send first appends a note to queueX/bounce/split/<u>inode</u>, creating queueX/bounce/split/<u>inode</u> if necessary; then it marks the address as DONE. Note that queueX/bounce/split/<u>inode</u> is not crashproof.
+
+qmail-send may handle queueX/bounce/split/<u>inode</u> at any time, as follows: it
+
+1. 	injects a new bounce message, created from queueX/bounce/split/<u>inode</u> and queueX/mess/split/<u>inode</u>;
+2. 	deletes queueX/bounce/split/<u>inode</u>.
+
+When all addresses in queueX/local/split/<u>inode</u> are DONE, qmail-send deletes queueX/local/split/<u>inode</u>. Same for queueX/remote/split/<u>inode</u>. 
+
+When queueX/local/split/<u>inode</u> and queueX/remote/split/<u>inode</u> are gone, qmail-send eliminates the message, as follows. First, if queueX/bounce/split/<u>inode</u> exists, qmail-send handles it as described above. Once queueX/bounce/split/<u>inode</u> is definitely gone, qmail-send deletes queueX/info/split/<u>inode</u>, moving to S2, and finally queueX/mess/split/<u>inode</u>, moving to S1.
+
+##### Retry Schedules
+
+qmail-send uses a simple formula to determine the times at which messages in the queue are retried. If attempts is the number of failed delivery attempts so far, and birth is the time at which a message entered the queue
+(determined from the creation time ofthe queue/info file), then:
+
+nextretry = birth + (attempts * c) * (attempts \*c)
+
+where c is a retry factor equal to 10 for local deliveries and 20 for remote deliveries. Table A-2 shows the complete retry schedule for a remote message that's never successfully delivered, with the default queuelifetime of 604,800 seconds. 
+
+* Remote Message Retry Schedule
+
+DELIVERY ATTEMPT|SECONDS|DAY-HOUR:MIN:SEC
+----------------|-------|----------------
+1|0|0-00:00:00
+2|400|0-00:06:40
+3|1,600|0-00:26:40
+4|3,600|0-01:00:00
+5|6,400|0-01:46:40
+6|10,000|0-02:46:40
+7|14,400|0-04:00:00
+8|19,600|0-05:26:40
+9|25,600|0-07:06:40
+10|32,400|0-09:00:00
+11|40,000|0-11:06:40
+12|48,400|0-13:26:40
+13|57,600|0-16:00:00
+14|67,600|0-18:46:40
+15|78,400|0-21:46:40
+16|90,000|1-01:00:00
+17|102,400|1-04:26:40
+18|115,600|1-08:06:40
+19|129,600|1-12:00:00
+20|144,400|1-16:06:40
+21|160,000|1-20:26:40
+22|176,400|2-01:00:00
+23|193,600|2-05:46:40
+24|211,600|2-10:46:40
+25|230,400|2-16:00:00
+26|250,000|2-21:26:40
+27|270,400|3-03:06:40
+28|291,600|3-09:00:00
+29|313,600|3-15:06:40
+30|336,400|3-21:26:40
+31|360,000|4-04:00:00
+32|384,400|4-10:46:40
+33|409,600|4-17:46:40
+34|435,600|5-01:00:00
+35|462,400|5-08:26:40
+36|490,000|5-16:06:40
+37|518,400|6-00:00:00
+38|547,600|6-08:06:40
+39|577,600|6-16:26:40
+40|608,400|7-01:00:00
+
+The local message retry schedule is similar, but because of the lower <u>c</u>, messages are retried twice as often.
+
+#### Cleanup
+
+When both queueX/local/split/<u>inode</u> and queueX/remote/split/<u>inode</u> have been removed, the message is dequeued by:
+
+1. 	Processing queueX/bounce/split/<u>inode</u>, if it exists.
+2. 	Deleting queueX/info/split/<u>inode</u>.
+3. 	Deleting queueX/mess/split/<u>inode</u>.
+
+Partially queued and partially dequeued messages left when a system crash interrupts qmail-queue or qmail-send are deleted by qmail-send using qmail-clean, another long-running daemon started by qmail-start. Messages with a queueX/mess/split/<u>inode</u> file and possibly an queueX/intd/<u>inode</u> but no todo, info, local, remote, or bounce, are safe to delete after 36 hours because qmail-queue kills itself after 24 hours. Similarly, files in the pid directory more than 36 hours old are also deleted.
+
+If the computer crashes while qmail-queue is trying to queue a message, or while qmail-send is eliminating a message, the message may be left in state S2 or S3.
+
+When qmail-send sees a message in state S2 or S3, other than one it is currently eliminating, where queueX/mess/split/<u>inode</u> is more than 36 hours old, it deletes queueX/intd/split/<u>inode</u> if that exists, then deletes queueX/mess/split/<u>inode</u>. Note that any qmail-queue handling the message must be dead.
+
+Similarly, when qmail-send sees a file in the queueX/pid directory that is more than 36 hours old, it deletes it.
+
+Cleanups are not necessary if the computer crashes while qmail-send is delivering a message. At worst a message may be delivered twice. (There is no way for a distributed mail system to eliminate the possibility of duplication. What if an SMTP connection is broken just before the server acknowledges successful receipt of the message. The client must assume the worst and send the message again. Similarly, if the computer crashes just before qmail-send marks a message as DONE, the new qmail-send must assume the worst and send the message again. The usual solutions in the database literature e.g., keeping log files amount to saying that it's the recipient's computer's job to discard duplicate messages.)
+
+## Notes
+
+Currently queueX/info/split/<u>inode</u> serves two purposes: first, it records the envelope sender; second, its modification time is used to decide when a message has been in the queue too long. In the future queueX/info/split/<u>inode</u> may store more information. Any non-backwards-compatible changes will be identified by version numbers.
+
+When qmail-queue has successfully placed a message into the queue, it pulls a trigger offered by qmail-send. Here is the current triggering mechanism: lock/trigger is a named pipe. Before scanning todo/, qmail-send opens lock/trigger O\_NDELAY for reading. It then selects for readability on lock/trigger. qmail-queue pulls the trigger by writing a byte O\_NDELAY to lock/trigger. This makes lock/trigger readable and wakes up qmail-send. Before scanning todo/ again, qmail-send closes and reopens lock/trigger.
 
 # Using systemd to start IndiMail
 
