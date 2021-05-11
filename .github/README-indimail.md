@@ -702,6 +702,17 @@ $ sudo svc -u /service/qmail-smtpd* /service/qmail-send.25 /service/qmail-qm?pd.
 
 Here's the data flow in the indimail-mta suite:
 
+```
+ qmail-smtpd --- qmail-multi --- qmail-queue --- qmail-todo
+               /                                 /    \
+qmail-inject _/                                 /      \___ qmail-clean
+                              _________________/
+                             /
+                         qmail-send --- qmail-rspawn --- qmail-remote
+                                    \
+                                     \_ qmail-lspawn --- qmail-local
+```
+
 The diagram below shows how qmail-multi(8) works ![qmail-multi](qmail_multi.png)
 
 Every message is added to a central queue directory by qmail-queue. qmail-queue is invoked by qmail-multi. The main purpose of qmail-multi is to select a queue as discussed in [IndiMail Queue Mechanism](#indimail-queue-mechanism). Here is a pictorial representation of the IndiMail queue. ![Pictorial](indimail_queue.png)
