@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 1.5  2021-05-26 10:31:36+05:30  Cprogrammer
+ * treat access on socket other than ENOENT as error
+ *
  * Revision 1.4  2020-08-08 10:51:43+05:30  Cprogrammer
  * added missing return on connect() failure
  *
@@ -20,7 +23,7 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <errno.h>
+#include <error.h>
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -86,6 +89,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
  *           other system / Pathname for a unix domain socket
  * service - Name of the service being requested.
  *           Can be NULL, if port > 0.
+ *           it could be a service in /etc/services if port < 0
  * port    - if == 0, nothin special, use port# of the service.
  *           if < 0, use a reserved port
  *           if > 0, it is the port# of server (host-byte-order)
@@ -111,16 +115,22 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 	char            localhost[MAXHOSTNAMELEN];
 
 	i = str_chr(host, '/');
-	if (host && *host && host[i] && !access(host, F_OK)) {
-		if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
+	if (host && *host && host[i]) {
+		if (!access(host, F_OK)) {
+			if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
+        		return -1;
+    		unixaddr.sun_family = AF_UNIX;
+    		str_copyb(unixaddr.sun_path, host, sizeof(unixaddr.sun_path));
+    		if (connect(fd, (struct sockaddr *) &unixaddr, sizeof(struct sockaddr_un)) == -1) {
+				i = errno;
+				close (fd);
+				errno = i;
+        		return -1;
+			}
+			return(fd);
+		} else
+		if (errno != error_noent)
         	return -1;
-    	unixaddr.sun_family = AF_UNIX;
-    	str_copyb(unixaddr.sun_path, host, sizeof(unixaddr.sun_path));
-    	if (connect(fd, (struct sockaddr *) &unixaddr, sizeof(struct sockaddr_un)) == -1) {
-			close (fd);
-        	return -1;
-		}
-		return(fd);
 	}
 #ifdef sun
 	if (sysinfo(SI_HOSTNAME, localhost, MAXHOSTNAMELEN) > MAXHOSTNAMELEN)
