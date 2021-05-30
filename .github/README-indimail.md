@@ -56,6 +56,7 @@ Table of Contents
       * [Addresses](#addresses)
       * [qmail-users](#qmail-users)
       * [Extension Addresses](#extension-addresses)
+   * [Controlling delivery rates](#controlling-delivery-rates)
    * [Distributing your outgoing mails from Multiple IP addresses](#distributing-your-outgoing-mails-from-multiple-ip-addresses)
    * [Processing Bounces](#processing-bounces)
       * [1. Using environment variable BOUNCEPROCESSOR](#1-using-environment-variable-bounceprocessor)
@@ -475,6 +476,7 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * QMAILLOCAL environment variable to run any executable/script instead of qmail-local
  * X-Forwarded-To, X-Forwarded-For headers
  * Message Disposition Notification (through qnotify)
+ * Domain based delivery rate control
 
 ## Other
 
@@ -1801,6 +1803,50 @@ If .qmail-ext doesn't exist, qmail-local will try some default .qmail files. For
 The vadddomain command creates the file .qmail-default in /var/domain/domains/domain\_name. Hence any email addressed to user@example.com gets controlled by /var/indimail/domains/example.com/.qmail-default.
 
 WARNING: For security, qmail-local replaces any dots in ext with colons before checking .qmail-ext. For convenience, qmail-local converts any uppercase letters in ext to lowercase.
+
+# Controlling delivery rates
+
+qmail-send has the ability to control jobs scheduled for delivery. Every queue can have a directory named <u>ratelimit</u> where you can store rate control defintion for a domain. These rate control definition files can be crated using the <b>drate</b> command. All you need to provide is a mathematical expression which defines your rate. e.g. 100/3600 means 100 emails per hour. This rate control works at the queue level. indimail-mta uses multiple queues. Each queue has its own delivery handled by by its own set of qmail-todo, qmail-send, qmail-lspawn, qmail-rspawn, qmail-clean daemons. Enforcing rate control on such a queue has a practical problem of having to define rate control definition for each queue. Instead of using qmail-send to handle rate control delivery, another daemon <b>slowq-send</b> handles the job better by having a queue dedicated for this. This queue is a special queue named as <u>slowq</u>. <b>slowq-send</b> also doesn't have its own qmail-todo process. We don't require it as we are not looking at high speed deliveries for this queue. <b>slowq-send</b> is started by <b>slowq-start</b> using a supevised service /service/slowq. Having a dedicated service for rate controlled delivery also avoids having the main queue clogged up with email that need to be held back from delivery.
+
+Below is an example of having emails to yahoo.com throttled to no more than 50 emails per hour
+
+```
+$ sudo drate -d yahoo.com -r 50/3600
+$ drate -d yahoo.com
+Conf   Rate: 50/3600 (0.0138888888)
+Email Count: 0
+Start  Time: Sun May 30 15:00:58 2021
+End    Time: Sun May 30 15:00:58 2021
+CurrentRate: 0.0000000000
+```
+
+During the coarse of delivery you can use the drate command to display the current delivery date.
+
+```
+$ drate -d argos.indimail.org
+Conf   Rate: 5/3600 (0.0013888888)
+Email Count: 232
+Start  Time: Fri May 28 16:17:11 2021
+End    Time: Sun May 30 14:36:38 2021
+CurrentRate: 0.0013780813
+```
+
+Once the delivery rate for a configured domain reaches the configured rate, emails will not be picked immediately up for delivery. The slowq-send logs will display when this happens. As you can see, the delivery finally happens when the delivery rate becomes lesser than the configured rate.
+
+```
+$ tail -11f /var/log/svc/slowq/current
+2021-05-30 19:52:04.017597500 new msg 919900
+2021-05-30 19:52:04.017634500 info msg 919900: bytes 792 from <mbhangui@argos.indimail.org> qp 6181 uid 1000 slowq
+2021-05-30 19:52:04.017731500 local: mbhangui@argos.indimail.org mbhangui@argos.indimail.org  slowq
+2021-05-30 19:52:04.017892500 warning: slowq: delivery rate exceeded [231/0.0013926904/0.0013888888] for argos.indimail.org; will try again later
+2021-05-30 19:53:45.102845500 warning: slowq: delivery rate exceeded [231/0.0013918429/0.0013888888] for argos.indimail.org; will try again later
+2021-05-30 19:58:45.203122500 warning: slowq: delivery rate exceeded [231/0.0013893316/0.0013888888] for argos.indimail.org; will try again later
+2021-05-30 20:07:05.303478500 starting delivery 4: msg 919900 to local mbhangui@argos.indimail.org slowq
+2021-05-30 20:07:05.303486500 status: local 1/10 remote 0/20 slowq
+2021-05-30 20:07:05.348209500 delivery 4: success: did_1+0+0/ slowq
+2021-05-30 20:07:05.348355500 status: local 0/10 remote 0/20 slowq
+2021-05-30 20:07:05.348398500 end msg 919900 slowq
+```
 
 # Distributing your outgoing mails from Multiple IP addresses
 
