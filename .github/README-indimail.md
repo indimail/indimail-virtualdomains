@@ -555,7 +555,7 @@ Cleanups are not necessary if the computer crashes while qmail-send is deliverin
 
 #### Global & Queue Specific Concurrency, Parallelism limits
 
-qmail-lspawn and qmail-rspawn can to multiple concurrent deliveries. The default concurrency limit are 5 for local deliveries and 10 for remote deliveries. These can be increased upto a maximum of 500 by setting it in the control files <b>concurrencylocal</b> for local deliveries and <b>concurrencyremote</b> for remote deliveries. These two (like any other indimail control files) lie in <u>/etc/indimail/control</u> directory. These concurrency limits are inherited by each of the indimail's multiple queues. Additionally indimail allows you to have queue specific concurrency limits. e.g. You can have the control files <b>concurrencyl.queue2</b>, <b>concurrencyr.queue2</b> for setting concurrency specific to <u>/var/indimail/queue/queue2</u>.
+qmail-lspawn and qmail-rspawn can do multiple concurrent deliveries. The default concurrency limit is 5 for local deliveries and 10 for remote deliveries. These can be increased upto a maximum of 500 by setting it in the control files <b>concurrencylocal</b> for local deliveries and <b>concurrencyremote</b> for remote deliveries. These two (like any other indimail control files) lie in <u>/etc/indimail/control</u> directory. These concurrency limits are inherited by each of the indimail's multiple queues. Additionally indimail allows you to have queue specific concurrency limits. e.g. You can have the control files <b>concurrencyl.queue2</b>, <b>concurrencyr.queue2</b> for setting concurrency specific to <u>/var/indimail/queue/queue2</u>.
 
 ## Notes
 
