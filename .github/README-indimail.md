@@ -56,7 +56,7 @@ Table of Contents
       * [Addresses](#addresses)
       * [qmail-users](#qmail-users)
       * [Extension Addresses](#extension-addresses)
-   * [Controlling delivery rates](#controlling-delivery-rates)
+   * [Controlling Delivery Rates](#controlling-delivery-rates)
    * [Distributing your outgoing mails from Multiple IP addresses](#distributing-your-outgoing-mails-from-multiple-ip-addresses)
    * [Processing Bounces](#processing-bounces)
       * [1. Using environment variable BOUNCEPROCESSOR](#1-using-environment-variable-bounceprocessor)
@@ -244,50 +244,6 @@ If you have enough experience on your belt you can dive into this [document](htt
 
 Once you have installed IndiMail, you will find all man pages in /usr/share/man and documents in /usr/share/indimail/doc. You can do man indimail to get started with understanding IndiMail.
 
-# Current Compilation status of all IndiMail & related packages
-
-This is obtained from github actions defined in each of the indimail repository. If during the development process, anything breaks, it will be visible here.
-
-[![indimail ubuntu, mac osx ci](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-c-cpp.yml)
-[![indimail freebsd ci](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-freebsd.yml)
-[![pam-multi Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/pam-multi-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/pam-multi-c-cpp.yml)
-[![pam-multi FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/pam-multi-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/pam-multi-freebsd.yml)
-[![nssd Ubuntu CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/nssd-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/nssd-c-cpp.yml)
-[![nssd FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/nssd-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/nssd-freebsd.yml)
-[![iwebadmin Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-c-cpp.yml)
-[![iwebadmin FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-freebsd.yml)
-[![courier-imap Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-c-cpp.yml)
-[![courier-imap FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-freebsd.yml)
-[![fetchmail Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/fetchmail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/fetchmail-c-cpp.yml)
-[![fetchmail FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/fetchmail-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/fetchmail-freebsd.yml)
-[![indimail-spamfilter Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-spamfilter-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-spamfilter-c-cpp.yml)
-[![indimail-spamfilter FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-spamfilter-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-spamfilter-freebsd.yml)
-[![bogofilter-wordlist Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-c-cpp.yml)
-[![bogofilter-wordlist FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-freebsd.yml)
-[![indimail-utils Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml)
-[![indimail-utils FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-freebsd.yml)
-[![procmail Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/procmail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/procmail-c-cpp.yml)
-[![procmail FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/procmail-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/procmail-freebsd.yml)
-[![logalert Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-c-cpp.yml)
-[![logalert FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-freebsd.yml)
-[![indium Ubuntu CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-c-cpp.yml)
-[![indium FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-freebsd.yml)
-[![ircube Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-ubuntu-osx.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-ubuntu-osx.yml)
-[![ircube FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-freebsd.yml)
-
-[![libqmail Ubuntu, Mac OSX](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-c-cpp.yml)
-[![libqmail FreeBSD](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-freebsd.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-freebsd.yml)
-[![libdkim Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-c-cpp.yml)
-[![libdkim FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-freebsd.yml)
-[![libsrs2 Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-c-cpp.yml)
-[![libsrs2 FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-freebsd.yml)
-[![indimail-mta Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml)
-[![indimail-mta FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-freebsd.yml)
-[![daemontools Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-c-cpp.yml)
-[![daemontools FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-freebsd.yml)
-[![ucspi-tcp Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-c-cpp.yml)
-[![ucspi-tcp FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-freebsd.yml)
-
 #DISCLAIMER
 
 There is no warranty implied or otherwise with this package. I believe in OpenSource Philosophy and this is an attempt to give back to the OpenSource community. However, I welcome anyone who can provide some assistance for building few missing features (building new features, testing and documentation).
@@ -295,326 +251,6 @@ There is no warranty implied or otherwise with this package. I believe in OpenSo
 # LICENSING
 
 IndiMail uses GPLv3 License. See file [LICENSE](https://github.com/mbhangui/indimail-virtualdomains/blob/master/LICENSE "GPLv3"). Additional licenses (if any) may be found in subfolder of each component that IndiMail uses.
-
-# Features
-
-## Speed
-
-IndiMail uses a modified [qmail](http://cr.yp.to/qmail.html "qmail") as the MTA. qmail's modular, lightweight design and sensible queue management provides IndiMail the speed to make it one of the fastest available message transfer agent.
-IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''qmail-multi'' uses multiple queues with each queue running its own qmail-send/qmail-todo, qmail-lspawn, qmail-rspawn processes. This allows IndiMail to process mails faster than what can be provided by qmail. A process named qmail-daemon monitors these processes and restarts them if they go down, which hasn't yet been observed to go down.
-
-## Setup
-
- * automatic adaptation to your UNIX variant
- * Linux, FreeBSD, OSX, SunOS, Solaris, and more
- * automatic per-host configuration - gnu autoconf
- * High degree of automation of configuration through ''svctool''
- * RPM/Debian packages for multiple Linux Distros. Binary packages follows Dave Sill's [LWQ](http://www.lifewithqmail.org/ "LWQ").
-
-## Security
-
- * clear separation between addresses, files, and programs
- * minimization of setuid code (qmail-queue, qhspi, qscanq, systpass)
- * minimization of root code (qmail-start, qmail-lspawn)
- * five-way trust partitioning---security in depth
- * optional logging of one-way hashes, entire contents, etc. (EXTRAQUEUE, mailarchive control file)
- * virus scanning through clamav/qscanq/avg
- * Inbuilt virus scanner
- * sender/recipient accesslist, hostaccess using ''tcprules''.
-
-## Message construction
-
- * RFC 822, RFC 1123
- * full support for address groups
- * automatic conversion of old-style address lists to RFC 822 format
- * sendmail hook for compatibility with current user agents
- * header line length limited only by memory
- * host masquerading (control/defaulthost)
- * user masquerading ($MAILUSER, $MAILHOST)
- * automatic Mail-Followup-To creation ($QMAILMFTFILE)
- * ability to add signature/content to messages using ''altermime''.
- * ARF Generator (Abuse Bounce Report Generator) for setting up Email Feedback Loop
-
-## SMTP service
-
- * RFC 2821, RFC 1123, RFC 1651, RFC 1652, RFC 1854, RFC 1870, RFC 1893
- * 8-bit clean
- * 931/1413/ident/TAP callback
- * relay control---stop unauthorized relaying by outsiders (control/rcpthosts)
- * no interference between relay control and aliases
- * automatic recognition of local IP addresses
- * per-buffer timeouts
- * hop counting
- * parallelism limit (tcpserver)
- * per host limit (tcpserver - MAXPERIP)
- * refusal of connections from known abusers(tcpserver, badmailfrom, badmailpatterns,<br />  badhelo, blackholedsender, blackholedpatterns, badhost, badip)
- * goodrcptto, goodrcptpatterns which override the above
- * blackholercpt, blackholercptpatterns for blackholing mails to specific senders.
- * Control files spamignore, blackholedsender, badmailfrom, relaymailfrom, badrcptto,<br />  chkrcptdomains, goodrcptto, blackholercpt, badip can be specified in plain text, cdb format or in MySQL tables.
- * relaying and message rewriting for authorized clients
- * authenticated SMTP PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 (HMAC (RFC 1321, RFC 2104, RFC 2554, RFC 2617))
- * STARTLS extension, TLS
- * Support for SMTPS
- * POP/IMAP before SMTP
- * ETRN (RFC 1985)
- * ODMR (RFC 2645)
- * RBL/ORBS support (rblsmtpd)
- * DNSBL (DNS Blacklist) Support
- * SURBL (SURBL Blacklist) support using surblfilter
- * SPAM Control (Reject/Tag/Accept) using Bayesian techniques
- * High Performance MS Virus Control via control file viruscheck and<br />  control file signatures
- * Content Filtering and blocking of prohibited attachments via control file bodycheck
- * Ability to reject/bounce mails for unknown/inactive users (CHECKRECIPIENT)
- * ability to have the RECIPIENT check for selective domains using control file chkrcptdomains
- * Antispoofing mode (turned on by environment variable ANTISPOOFING)
- * Masquerading ability.
- * Multiline greetings via control file smtpgreeting
- * Message Submission Agent – MSA (RFC 2476)
- * Domain IP address pair access control via control file hostaccess
- * Per User accesslist via control file accesslist
- * [SPF](http://www.openspf.org/ "openspf") – Sender Permitted From
- * [SRS](http://www.libsrs2.org/ "libsrs2") - Sender Rewriting Scheme
- * [Bounce Address Tag Validation (BATV)](http://www.linux-magazine.com/Online/News/IndiMail-1.6-Includes-Greylisting-and-BATV?category=13404 "batv")
- * Per User control of environment variable by envrules(rules file set by environment variable FROMRULES)
- * [Greylisting](http://www.gossamer-threads.com/lists/qmail/users/136761 "greylisting") capability using qmail-greyd or greydaemon
- * SMTP Plugins - External plugins using shared objects in /var/indimail/plugins to enhance functionality of MAIL, RCPT & DATA session.
- * Notify recipients when message size exceeds databyte limits (by setting environment variable DATABYTES_NOTIFY)
- * Enforce STARTTLS before AUTH
- * RFC 6530-32 Email Address Internationalization
-
-## Queue management
-
- * instant handling of messages added to queue
- * parallelism limit (control/concurrencyremote, control/concurrencylocal)
- * split queue directory---no slowdown when queue gets big
- * quadratic retry schedule---old messages tried less often
- * independent message retry schedules
- * automatic safe queueing---no loss of mail if system crashes
- * automatic per-recipient checkpointing
- * automatic queue cleanups (qmail-clean)
- * queue viewing (qmail-qread)
- * detailed delivery statistics (qmailanalog)
- * Configurable number of queues and time slicing algorithm for load balancing via qmail-multi. A queue in indimail is configurable by three environment variables QUEUE_BASE, QUEUE_COUNT, and QUEUE_START. A queue in IndiMail is a collection of queues. Each queue in the collection can have one or more SMTP listener but a single or no delivery (qmail-send) process. It is possible to have the entire queue collection without a delivery process (e.g. SMTP on port 366 – ODMR). The QUEUE_COUNT can be defined based on how powerful your host is (IO bandwidth, etc). NOTE: This configurable number of queues is possibe with a single installation and does not require you to install multiple instances of qmail.
- * Ability to hold local, remote or both deliveries (holdlocal, holdremote control file)
- * Qmail Queue Extra Header – Ability to pass extra headers to local and remote deliveries via qmail-queue (Environment variable QQEH).
- * External Virus scanning via QHPSI – Qmail High Performance Scanner Interface
- * Ability to extend QHPSI interface through plugins. The keyword plugin:shared_lib defined in the environment variable QHPSI denotes 'shared_lib' to be loaded.
- * Virus scanner qscanq. Ability to detect virus via a third party scanner defined by SCANCMD environment variable (clamscan, clamdscan, etc)
- * Blocking of prohibited filename extensions via qscanq program
- * [Domainkeys](https://en.wikipedia.org/wiki/DomainKeys "Yahoo Domainkeys") (qmail-dk) RFC 4870
- * [DomainKeys Identified Mail](http://marc.info/?l=qmail&m=123817543532399&w=2 "DKIM") with ADSP/SSP (qmail-dkim) RFC 4871
- * Set all header values listed in envheader control file as environment variables.
- * Log all headers listed in control file logheaders to stderr.
- * Remove all headers listed in control file removeheaders from email.
- * Ability to do line processing instead of block processing.
- * qmail-nullqueue – blackhole the mail silently.
- * rule based mail archival using control file mailarchive ([Sarbanes–Oxley_Act](https://en.wikipedia.org/wiki/Sarbanes%E2%80%93Oxley_Act "Sarbanes Oxley Act"), [Health_Insurance_Portability_and_Accountability_Act](https://en.wikipedia.org/wiki/Health_Insurance_Portability_and_Accountability_Act "HIPAA Compliance") compliance)
- * Added additional recipients for a message using extraqueue or mailarchive control file.
- * X-Originating-IP header to record the original IP from which the mail originates
-
-## Bounces
-
- * [QSBMF](https://cr.yp.to/proto/qsbmf.txt "QSBMF") bounce messages---both machine-readable and human-readable
- * [HCMSSC](https://cr.yp.to/proto/hcmssc.txt "HCMSSC") support---language-independent RFC 1893 error codes
- * double bounces sent to postmaster
- * Ability to discard double bounces
- * Ability to preserve [MIME](https://en.wikipedia.org/wiki/MIME "MIME") format when bouncing.
- * Control of bounce process via envrules (rules file controlled by environment variable BOUNCERULES or control files bounce.envrules)
- * limit size of bounce using control file bouncemaxbytes
- * Ability to process bounces using external bounce processor (environment variable BOUNCEPROCESSOR)
- * X-Bounced-Address header to indicate the bounced address.
-
-## Routing by domain
-
- * any number of names for local host (control/locals)
- * any number of virtual domains (control/virtualdomains)
- * domain wildcards (control/virtualdomains)
- * configurable percent hack support (control/percenthack)
- * Clustered Domain. Same virtual domain can exist on multiple hosts, each having its own set of users. Provides Load Balancing and infinite scalability.
-
-## Remote SMTP delivery
-
- * RFC 2821, RFC 974, RFC 1123, RFC 1870
- * 8-bit clean
- * automatic downed host backoffs
- * Configurable tcp timeouts for downed host backoffs.
- * automatic switchover to next best MX
- * artificial routing---smarthost, localnet, mailertable (control/smtproutes)
- * Support for jumbo ISP (control/smtproutes.cdb)
- * per-buffer timeouts
- * passive SMTP queue---perfect for SLIP/PPP (serialmail)
- * AutoTURN support (serialmail)
- * Authenticated SMTP (userid/passwd in control/smtproutes) - PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD
- * STARTTLS, TLS
- * Static and Dynamic Routing. (SMTPROUTES environment variable)
- * User based routing instead of normal DNS/smtproutes.
- * Spam control (SPAMFILTER environment variable)
- * Environment variable control via envrules (rules file controlled by environment variable RCPTRULES)
- * QMAILREMOTE environment variable to run any executable/script instead of qmail-remote
- * QMTP support, artificial routing using (control/qmtproutes)
- * ONSUCCESS_REMOTE, ONFAILURE_REMOTE scripts run on successful or failed remote deliveries environment variables SMTPTEXT, SMTPCODE available for these scripts
- * Domain based delivery rate control
- * IP address binding on domain, sender address, recipient address and random selection from a pool of IP addresses
- * Return Receipt Responder - rrt
- * IPV6 support
- * DANE verification ([RFC 7672](http://tools.ietf.org/html/rfc7672 "RFC 7672"))
- * RFC 6530-32 Email Address Internationalization using libidn2
-
-## Local delivery
-
- * user-controlled address hierarchy    : fred controls fred-anything
- * mbox delivery
- * reliable NFS delivery (maildir)
- * user-controlled program delivery: procmail etc. (qmail-command)
- * optional new-mail notification (qbiff)
- * detailed Delivered-To Headers
- * optional NRUDT return receipts (qreceipt)
- * autoresponder RFC 3834 compliance (provide Auto-Submitted, In-Reply-To, References fields (RFC 3834))
- * conditional filtering (condredirect, bouncesaying, vfilter)
- * Environment variable control via envrules (rules file controlled by environment variable RCPTRULES)
- * Eliminate duplicate messages
- * QMAILLOCAL environment variable to run any executable/script instead of qmail-local
- * X-Forwarded-To, X-Forwarded-For headers
- * Message Disposition Notification (through qnotify)
- * Domain based delivery rate control
-
-## Other
-
- * Unix Client Server Program Interface [ucspi]([http://cr.yp.to/proto/ucspi.txt "ucspi-tcp") through programs ''tcpserver'' and ''tcpclient''
- * Change concurrency of ''tcpserver'' without restart.
- * ability to load plugins in tcpserver - dynamically load shared objects given on command line. Load shared objects defined by env variables
-
-   ```
-   PLUGIN0, PLUGIN1, ...
-   ```
-
-   tcpserver plugin allows you to load qmail-smtpd, rblsmtpd once in memory
- * IPv4 CIDR extension and support for compact IPv6 addresses and CIDR notation
- * TLS/SSL Support in ''tcpserver''
- * STARTTLS extension in IMAP, STLS extension in POP3
- * Ability to restrict connection per IP (MAXPERIP)
- * run shutdown script if present on svc -d
- * ability to log ''svscan'' output using ''multilog''
- * nssd daemon providing [Name Service Switch](https://en.wikipedia.org/wiki/Name_Service_Switch "NSS") which allows extending of the system passwd database to IndiMail's database.
- * pam-multi - Generic [PAM](https://en.wikipedia.org/wiki/Pluggable_authentication_module "PAM") module allows any external programs to authenticate against IndiMails database.
- * multiple checkpassword modules sys-checkpwd, ldap-checkpwd, pam-checkpwd, vchkpass, systpass
- * ''inlookup'' – High Performance User Lookup Daemon.
- * ''indisrvr'' – Indimail Administration Daemon.
- * ''spawn-filter'' - Ability to add disclaimer, run multiple filters before<br />  local/remote delivery.
- * Post Execution Handle - Allows functionality of indimail to be extended by writing simple scripts
- * Proxy for IMAP/POP3 Protocol
- * On the fly migration of users by defining MIGRATEUSER environment variable.
- * ready to use QMQP service
- * ability to distribute QMQP traffic across multiple servers
- * ''sslerator'' - TLS/SSL protocol wrapper for non-tls aware applications
- * ''svctool'' – Configuration tool for IndiMail.
- * ''iwebadmin'' - CGI Web Frontend for IndiMail user administration.
- * mrtg graphs for detailed statistics
- * ability to specify commands in control files.
- * flash - ncurses customizable menu based Admin Tool
- * indium - Menu based administration tool written in tcl/tk
- * osh - Operator Shell (with configurable restricted command set) for Administrator
- * docker/podman support in daemontools
- * support /run, /var/run filesystem in daemontools
-
-## Brief Feature List
-
-Some of the features available in this package
-
-1.  svctool - A simple tool with command-line options which helps you to configure any configuration item in indimail (creation of supervise scripts, qmail configuration, installation of all default MySQL tables, creation of default aliases, users, etc)
-2.  configurable control files directory (using CONTROLDIR environment variable) (allows one to have multiple running copies of qmail using a single binary installation)
-3.  configurable queue directory (using QUEUEDIR environment variable) (allows one to have multiple queues on a host with a single qmail installation).
-    * qmail-multi (queue load balancer) uses qmail-queue to deposit mails across multiple queues. Each queue has its own qmail-send process. You can spread the individual queues across multiple filesystems on different controllers  to maximize on IO throughput.
-    * The number of queues is configurable by three environment variables **QUEUE_BASE**, **QUEUE_COUNT** and **QUEUE_START**. A queue in indimail is defined as a collection of multiple queues.
-    * Each queue in the collection can have one or more SMTP listener but a single delivery (qmail-send) processes. It is possible to have the entire queue collection without a delivery process (e.g. SMTP on port 366 ODMR). The QUEUE_COUNT can be defined based on how powerful your host is (IO bandwidth, etc). The configurable queue is possible with a single installation of indimail-mta and does not require you to have multiple indimail-mta installations (unlike qmail) to achieve this.
-4.  uses getpwnam to use uids/gids, home from /etc/passwd, /etc/group (allows me to transfer the binary to another machine regardless of the ids in /etc/passwd)
-5.  Hooks into local and remote deliveries
-    * QMAILLOCAL - Run executable defined by this instead of qmail-local
-    * QMAILREMOTE - Run executable defined by this instead of qmail-remote
-    * Theoretically one can exploit QMAILLOCAL, QMAILREMOTE variables to route mails for a domain across multiple mail stores.
-6.  Hook into qmail-remote's routing by using SMTPROUTE environment variable.
-    * Ability to do User Based Routing via SMTPROUTE environment. This gives the ability to split a domain across multiple hosts without using NFS to mount multiple filesystems on any host. One can even use a shell script, set the environment variable and deliver mails to users across multiple hosts. I call this dynamic SMTPROUTE.
-    * Additionally qmail-rspawn has the ability to connect to MySQL and set SMTPROUTES based on values in a MySQL table. The connection to MySQL is kept open. This gives qmail-rspawn to do high speed user lookups in MySQL and to deliver the mail for a single domain split across multiple mail stores.
-7.  Proxy for IMAP and POP3. Allows IMAP/POP3 protocol for users in a domain to be split across multiple hosts. Also allows seamless integration of proprietary email servers with indimail.  The proxy is generic and works with any IMAP/POP3 server. The proxy comes useful when you want to move out of a headache causing mail server like x-change and want to retain the same domain on the proprietary server. In conjunction with dynamic SMTPROUTES, you can migrate all your users to indimail, without any downtime/disruption to email service. The proxy and dynamic SMTPROUTES allow you to scale your email server horizontally without using NFS across geographical locations.
-8.  ETRN, ATRN, ODMR (RFC 2645) support
-9.  accesslist - restrictions between mail transactions between email ids (you can decide who can send mails to whom)
-10. bodycheck - checks on header/body on incoming emails (for spam, virus security and other needs)
-11. hostaccess - provides domain, IP address pair access list control. e.g. you can define from which set of addresses mail from yahoo.com will be accepted.
-12. chkrcptdomains - rcpt check on selective domains
-13. envrules - recipient/sender based - set or unset environment variables (qmail-smtpd, qmail-inject, qmail-local, qmail-remote) any variables which controls the behaviour of qmail-smtpd, qmail-inject, qmail-local, qmail-remote e.g. NODNSCHECKS, DATABYTES, RELAYCLIENT, BADMAILFROM, etc can be defined individually for a particular recipient or sender rather than a fixed value set at runtime.
-14. NULLQUEUE, qmail-nullqueue (blackhole support - like qmail-queue but mails go into a blackhole). I typically uses this in conjunction with envrules to trash the mail into blackhole without spending any disk IO.
-15. qmail-multi - run multiple filters (qmail-smtpd) (something like qmail-qfilter). Also distributes mails across multiple queues to do a load balancing act. qmail-multi allowed me to process massive rate of incoming mails at my earlier job with a ISP.
-16. envheaders - Any thing defined here e.g. Return-Path, qmail-queue sets Return-Path as an environment variable with the value found in Return-Path header in the email. This environment variable gets passed across the queue and is also available to qmail-local, qmail-remote
-17. logheaders - Any header defined in this control file, gets written to file descriptor 2 with the value found in the email.
-18. removeheaders - Any header defined here, qmail-queue will remove that header from the email
-19. quarantine or QUARANTINE env variable causes qmail-queue to replace the recipient list with the value defined in the control file or the environment variable. Additionally an environment variable X-Quarantine-ID: is set which holds the orignal recipient list.
-20. Added ability in qmail-queue to do line processing. Line processing allows qmail-queue to do some of the stuff mentioned above
-21. plugins support for QHPSI interface (qmail-queue). qmail-queue will use dlopen to load any shared objected defined by PLUGINDIR environment. Multiple plugins can be loaded. For details see man qmail-queue
-22. Message Submission Port (port 587) RFC 2476
-23. Integrated authenticated SMTP with Indimail (PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5, pop-bef-smtp)
-24. duplicate eliminator using 822header
-25. qmail-remote has configurable TCP timeout table (max_tolerance, min_backoff periods can be configured in smtproutes)
-26. Ability to change concurrency of tcpserver without restarting tcpserver
-27. Ability to restrict connections per IP
-28. multilog replaced buffer functions with substdio
-29. supervise can run script shutdown if present (when svc -d is issued)
-30. rfc3834 compliance for qmail-autoresponder (provide Auto-Submitted, In-Reply-To, References fields (RFC 3834))
-31. ability to add stupid disclaimer(s) to messages.
-32. InLookup serves as a high performance user lookup daemon for qmail-smtpd (rcpt checks, authenticated SMTP, RELAY check). Even the IMAP, POP3 authentication gets served by inlookup. inlookup preforks configurable number of daemons which opens multiple connections to MySQL and keep the connection open. The query results are cached too. This gives inlookup a decent database performance when handling millions of lookups in few hours. Programs like qmail-smtpd use a fifo to communicate with inlookup
-33. CHKRECIPIENT extension which rejects users not found in local MySQL or recipients.cdb database
-34. indisrvr Was written to ease mail server administration across multiple hosts. Allows ones to create, delete, modify users and run any command as defined in variables.c. indisrvr listens on a AF_INET/AF_INET6 socket.
-35. Identation of djb's code (using indent) so that a mortal like me could understand it :)
-36. Works with systemd - systemd is an event-based replacement for the init daemon
-37. Changed buffer libraries in daemontools to substdio.
-38. Can work with external virus scanners (QHPSI, or Len Budney's qscanq)
-39. qmail-queue custom error patch by Flavio Curti <fcu-software at no-way.org>
-40. Domainkey-Signature, DKIM-Signature with ADSP/SSP
-41. Greylisting Capability -  [Look Here](http://www.gossamer-threads.com/lists/qmail/users/136740?page=last "Greylisting")
-42. nssd - Name Service Switch daemon which extends systems password database to lookup IndiMail's database for authentication
-43. pam-multi - Generic PAM which allows external program using PAM to authenticate against IndiMail's database. Using pam-multi and nssd, you can use any IMAP server like dovecot, etc with IndiMail.
-44. Post execution Handle - Allows extending indimail's functionality by writing simple scripts
-45. sslerator - TLS/SSL protocol wrapper for non-tls aware applications.
-46. QMTP support in qmail-remote. QMTP support for mail transfers between IndiMail clusters.
-47. Configured installation time QMQP support on server.
-48. indimail-mini package providing QMQP client
-49. IPV6 Support
-50. Multiple checkpassword modules sys-checkpwd, ldap-checkpwd, pam-checkpwd, vchkpass and systpass
-51. iwebadmin - Web frontend for IndiMail User administration
-52. badhost, badip control files for spam control
-53. mailarchive control file (SOX, HIPAA compliance)
-54. Notify recipients when message size exceeds databyte limits
-55. Ability to run programs on successful or failed remote deliveries
-56. Ability to distribute QMQP traffic across servers.
-57. Abuse Report Format Generator using qarf
-58. Auto provision users in proxyimap/proxypop3
-59. DNSBL Support (DNS Blacklist) Author "Fabio Busatto" <fabio.busatto@sikurezza.org>
-60. SURBL Support (SURBL Blacklist). URL parsing code borrowed from surbl.c Pieter Droogendijk <pieter@binky.org.uk> http://binky.org.uk
-61. Message Disposition Notification using qnotify
-62. Return Receipt Responder - rrt
-63. Enforce STARTTLS before AUTH using FORCE_TLS environment variable
-64. Updated man pages.
-65. Jens Wehrenbrecht's IPv4 CIDR extension
-66. Li Minh Bui's IPv6 support for compact IPv6 addresses and CIDR notation support
-67. SRS support
-68. domain based delivery rate control using drate
-69. domain based queue using domainqueue control file
-70. Ability to drop bounces
-71. Ability to discard emails if filter exits 2
-72. goodrcpt, goodrcptpatterns
-73. udplogger service for logging messages through UDP
-74. docker/podman images for
-    * [indimail](https://hub.docker.com/repository/docker/cprogrammer/indimail "IndiMail")
-    * [indimail-mta](https://hub.docker.com/repository/docker/cprogrammer/indimail-mta "indimail-mta")
-    * [indimail-web](https://hub.docker.com/repository/docker/cprogrammer/indimail-web "RoundCubemail")
-75. [FHS](https://refspecs.linuxfoundation.org/FHS_3.0/fhs-3.0.pdf) compliance.
-76. Ed Neville - allow multiple Delivered-To in qmail-local using control file maxdeliveredto
-77. Ed Neville - configure TLS method in control/tlsclientmethod (qmail-smtpd), control/tlsservermethod (qmail-remote)
-78. roundcube support for password, autoresponder through roundcube plugin iwebadmin
-79. ezmlm-idx mailing list manager from [https://untroubled.org/ezmlm/](https://untroubled.org/ezmlm/ "ezmlm-idx")
-80. tcpserver plugin feature - dynamically load shared objects given on command line. Load shared objects defined by env variables PLUGIN0, PLUGIN1, ...
-    tcpserver plugin allows you to load qmail-smtpd, rblsmtpd once in memory
-81. tcpserver - enable mysql support by loading mysql library configured in /etc/indimail/control/mysql\_lib
-82. indimail-mta - enable virtual domain support by loading indimail shared library configured in /etc/indimail/control/libindimail
 
 # TERMINOLOGY used for commands
 
@@ -803,7 +439,7 @@ integers defined by environment variables QUEUE\_START and QUEUE\_COUNT as descr
 
 qmail-daemon also monitors qmail-send and qmail-todo and restart them if they goes down. qmail-start should be used if you desire to run only one queue. For running multiple parallel queues run qmail-daemon.
 
-qmali-daemon, qmail-start can be passed an argument - <u>defaultdelivery</u>. If <u>defaultdelivery</u> supplied, qmail-start or qmail-daemon passes it to qmail-lspawn. You can also have a control file named defaultdelivery. The mailbox type is picked up from the <u>defaultdelivery</u> control file. The table below outlines the choices for <u>defaultdelivery</u> control file
+qmali-daemon, qmail-start can be passed an argument - <b>defaultdelivery</b>. If <b>defaultdelivery</b> supplied, qmail-start or qmail-daemon passes it to qmail-lspawn. You can also have a control file named defaultdelivery. The mailbox type is picked up from the <b>defaultdelivery</b> control file. The table below outlines the choices for <b>defaultdelivery</b> control file
 
 Mailbox Format |Name|Location|defaultdelivery|Comments
 ---------------|----|--------|---------------|--------
@@ -914,6 +550,10 @@ When qmail-send sees a message in state S2 or S3, other than one it is currently
 Similarly, when qmail-send sees a file in the queueX/pid directory that is more than 36 hours old, it deletes it.
 
 Cleanups are not necessary if the computer crashes while qmail-send is delivering a message. At worst a message may be delivered twice. (There is no way for a distributed mail system to eliminate the possibility of duplication. What if an SMTP connection is broken just before the server acknowledges successful receipt of the message. The client must assume the worst and send the message again. Similarly, if the computer crashes just before qmail-send marks a message as DONE, the new qmail-send must assume the worst and send the message again. The usual solutions in the database literature e.g., keeping log files amount to saying that it's the recipient's computer's job to discard duplicate messages.)
+
+#### Global & Queue Specific Concurrency, Parallelism limits
+
+qmail-lspawn and qmail-rspawn can to multiple concurrent deliveries. The default concurrency limit are 5 for local deliveries and 10 for remote deliveries. These can be increased upto a maximum of 500 by setting it in the control files <b>concurrencylocal</b> for local deliveries and <b>concurrencyremote</b> for remote deliveries. These two (like any other indimail control files) lie in <u>/etc/indimail/control</u> directory. These concurrency limits are inherited by each of the indimail's multiple queues. Additionally indimail allows you to have queue specific concurrency limits. e.g. You can have the control files <b>concurrencyl.queue2</b>, <b>concurrencyr.queue2</b> for setting concurrency specific to <u>/var/indimail/queue/queue2</u>.
 
 ## Notes
 
@@ -1804,11 +1444,11 @@ The vadddomain command creates the file .qmail-default in /var/domain/domains/do
 
 WARNING: For security, qmail-local replaces any dots in ext with colons before checking .qmail-ext. For convenience, qmail-local converts any uppercase letters in ext to lowercase.
 
-# Controlling delivery rates
+# Controlling Delivery Rates
 
-<b>qmail-send</b> has the ability to control jobs scheduled for delivery. Every queue can have a directory named <u>ratelimit</u> where you can store rate control defintion for a domain. These rate control definition files can be crated using the <b>drate</b> command. All you need to provide is a mathematical expression which defines your rate. e.g. 100/3600 means 100 emails per hour. This rate control works at the queue level. indimail-mta uses multiple queues. Each queue has its own delivery handled by by its own set of qmail-todo, qmail-send, qmail-lspawn, qmail-rspawn, qmail-clean daemons. Enforcing rate control on such a queue has a practical problem of having to define rate control definition for each queue. Instead of using qmail-send to handle rate control delivery, another daemon <b>slowq-send</b> handles the job better by having a queue dedicated for this. This queue is a special queue named as <u>slowq</u>. <b>slowq-send</b> also doesn't have its own qmail-todo process. We don't require it as we are not looking at high speed deliveries for this queue. <b>slowq-send</b> is started by <b>slowq-start</b> using a supevised service in <b>/service/slowq</b>.
+<b>qmail-send</b> has the ability to control jobs scheduled for delivery. Every queue can have a directory named <b>ratelimit</b> where you can store rate control defintion for a domain. These rate control definition files can be crated using the <b>drate</b> command. All you need to provide is a mathematical expression which defines your rate. e.g. 100/3600 means 100 emails per hour. This rate control works at the queue level. indimail-mta uses multiple queues. Each queue has its own delivery handled by by its own set of qmail-todo, qmail-send, qmail-lspawn, qmail-rspawn, qmail-clean daemons. Enforcing rate control on such a queue has a practical problem of having to define rate control definition for each queue. Instead of using qmail-send to handle rate control delivery, another daemon <b>slowq-send</b> handles the job better by having a queue dedicated for this. This queue is a special queue named as <b>slowq</b>. <b>slowq-send</b> also doesn't have its own qmail-todo process. We don't require it as we are not looking at high speed deliveries for this queue. <b>slowq-send</b> is started by <b>slowq-start</b> using a supevised service in <u>/service/slowq</u>.
 
-To create this special slowq service for delivery rate control you can use svctool as below. This will also create logs to be in <b>/var/log/svc/slowq/current</b>.
+To create this special slowq service for delivery rate control you can use svctool as below. This will also create logs to be in <u>/var/log/svc/slowq/current</u>.
 
 ```
 $ sudo /usr/sbin/svctool --slowq --servicedir=/service \
@@ -1846,6 +1486,12 @@ Email Count: 232
 Start  Time: Fri May 28 16:17:11 2021
 End    Time: Sun May 30 14:36:38 2021
 CurrentRate: 0.0013780813
+```
+
+Now tha we have configured a separate queue <b>slowq</b> for rate controlled delivery, we need to queue emails for the configured domain in this queue rather than the any of the regular indimail-mta's multiple queues. To do that we must have any entry in the control file <b>domainqueue</b> to set the <b>QUEUEDIR</b> environment variable
+
+```
+argos.indimail.org:QUEUEDIR=/var/indimail/queue/slowq
 ```
 
 Once the delivery rate for a configured domain reaches the configured rate, emails will not be picked immediately up for delivery. The slowq-send logs will display when this happens. As you can see, the delivery finally happens when the delivery rate becomes lesser than the configured rate.
@@ -2110,8 +1756,8 @@ Reference
 
 # Envrules
 
-IndiMail allows you to configure most of its functionality through set of environment variables. In fact there more more than 200 features that can be controlled just by setting or un-setting environment variables. envrules is applicable to qmail-smtpd, qmail-inject, qmail-local, qmail-remote as well. It can also be used to control programs called by the above programs (e.g qmail-queue). IndiMail allows you to configure quite many things using environment variables. Just set the environment variable CONTROLDIR=control2 and all qmail components of IndiMail start looking for control files in /var/indimail/control2. You can set CONTROLDIR=/etc/indimail and all control files can be conveniently placed in /etc/indimail.
-Some of these environment variables can be set during the startup of various services. IndiMail has all its services configured as directories in the /service directory. As an example, if you want to force authenticated SMTP on all your users, setting the environment variable REQUIREAUTH allows you to do so.
+IndiMail allows you to configure most of its functionality through set of environment variables. In fact there more more than 200 features that can be controlled just by setting or un-setting environment variables. envrules is applicable to qmail-smtpd, qmail-inject, qmail-local, qmail-remote as well. It can also be used to control programs called by the above programs (e.g qmail-queue). IndiMail allows you to configure quite many things using environment variables. Just set the environment variable <b>CONTROLDIR=control2</b> and all qmail components of IndiMail start looking for control files in <u>/var/indimail/control2</u>. You can set <b>CONTROLDIR=/etc/indimail</b> and all control files can be conveniently placed in <u>/etc/indimail</u>.
+Some of these environment variables can be set during the startup of various services. IndiMail has all its services configured as directories in the /service directory. As an example, if you want to force authenticated SMTP on all your users, setting the environment variable <b>REQUIREAUTH</b> allows you to do so.
 
 ```
 $ sudo /bin/bash
@@ -2124,7 +1770,7 @@ sets the qmail-smtpd running on port 587 to force authentication.
 
 Setting environment variables in your startup script, in your .profile or your shell forces you to permanently set the environment variable to a specific value. Using **envrules**, IndiMail allows you to set these environment variables specific to different *senders* or *recipients* envrules allows IndiMail platform to be tuned differently for different users. No other messaging platform, to the best of my knowledge, is capable of doing that. Another way of saying is that envrules allows your IndiMail platform to dynamically change its behavior for each and every user.
 
-For the SMTP service, you can set different environment variables for different *senders*. All that is required is to define the following in the control file /etc/indimail/control/from.envrules. The format of this file is of the form
+For the SMTP service, you can set different environment variables for different *senders*. All that is required is to define the following in the control file <u>/etc/indimail/control/from.envrules</u>. The format of this file is of the form
 
 `pattern:envar1=val,envar2=val,...]`
 
@@ -2169,6 +1815,18 @@ The following list of environment variables which can be modified using envrules
 `USE_SYNCDIR, USE_FSYNC, and LOCALDOMAINS`
 
 Do man qmail-smtpd(8), spawn-filter(8) to know the full list of environment variables that can be controlled using envrules.
+
+# Domain Specific Queues
+
+This is actually an extension of [envrules](#envrules), but has its own control file named <b>domainqueue</b> for convenience. The control file <u>/etc/indimail/control/domainqueue</u> is of the form
+
+`pattern:envar1=val,envar2=val,...]`
+
+When the domain for an email being injected into the queue by qmail-smtpd or qmail-inject, matches <u>pattern</u>, the environment variable list gets set. In the example below, emails injected into the queue by qmail-inject go into the queue <u>/var/indimail/queue/slowq</u>
+
+`yahoo.com:QUEUEDIR=/var/indimail/queue/slowq`
+
+This feature becomes useful when setting domain specific delivery rate controls as mentioned in the chapter [Controlling Delivery Rates](#controlling-delivery-rates)
 
 # Setting up QMQP services
 
@@ -4467,14 +4125,14 @@ ssl-key=/var/indimail/mysqldb/ssl/client-key.pem
 
 ## 7. Configure MySQL/MariaDB access for svctool
 
-We learned how to setup and use MySQL/Mariadb database with indimail. The general purpose configuration tool, <u>svctool</u>, which requires the following variables to access the MySQL database
+We learned how to setup and use MySQL/Mariadb database with indimail. The general purpose configuration tool, <b>svctool</b>, which requires the following variables to access the MySQL database
 
 Variable | Purpose
 -------- | --------------------
-MYSQL_PASS|Password for accessing <u>indimail</u> database in MySQL
-PRIV_PASS|Password for accessing <u>mysql</u> database in MySQL
-ADMIN_PASS|Password required by adminclient to execute remote commands
-TMPDIR|Temporary directory used by <u>svctool</u>
+MYSQL_PASS|Password for accessing <b>indimail</b> database in MySQL
+PRIV_PASS|Password for accessing <b>mysql</b> database in MySQL. This is the MySQL superuser password.
+ADMIN_PASS|Password required by <b>adminclient</b> program to execute remote commands
+TMPDIR|Temporary directory used by <b>svctool</b>
 
 You can have these stored as /etc/indimail/svctool.cnf owned by root and with no read/write access to group and others. e.g.
 
@@ -4670,6 +4328,371 @@ There are four Mailing Lists for IndiMail
 4. Archive at [Google Groups](http://groups.google.com/group/indimail "Archive"). This groups acts as a remote archive for indimail-support and indimail-devel.
 
 There is also a [Project Tracker](http://sourceforge.net/tracker/?group_id=230686 "Project Trackerr") for IndiMail (Bugs, Feature Requests, Patches, Support Requests)
+
+# Features
+
+## Speed
+
+IndiMail uses a modified [qmail](http://cr.yp.to/qmail.html "qmail") as the MTA. qmail's modular, lightweight design and sensible queue management provides IndiMail the speed to make it one of the fastest available message transfer agent.
+IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''qmail-multi'' uses multiple queues with each queue running its own qmail-send/qmail-todo, qmail-lspawn, qmail-rspawn processes. This allows IndiMail to process mails faster than what can be provided by qmail. A process named qmail-daemon monitors these processes and restarts them if they go down, which hasn't yet been observed to go down.
+
+## Setup
+
+ * automatic adaptation to your UNIX variant
+ * Linux, FreeBSD, OSX, SunOS, Solaris, and more
+ * automatic per-host configuration - gnu autoconf
+ * High degree of automation of configuration through ''svctool''
+ * RPM/Debian packages for multiple Linux Distros. Binary packages follows Dave Sill's [LWQ](http://www.lifewithqmail.org/ "LWQ").
+
+## Security
+
+ * clear separation between addresses, files, and programs
+ * minimization of setuid code (qmail-queue, qhspi, qscanq, systpass)
+ * minimization of root code (qmail-start, qmail-lspawn)
+ * five-way trust partitioning---security in depth
+ * optional logging of one-way hashes, entire contents, etc. (EXTRAQUEUE, mailarchive control file)
+ * virus scanning through clamav/qscanq/avg
+ * Inbuilt virus scanner
+ * sender/recipient accesslist, hostaccess using ''tcprules''.
+
+## Message construction
+
+ * RFC 822, RFC 1123
+ * full support for address groups
+ * automatic conversion of old-style address lists to RFC 822 format
+ * sendmail hook for compatibility with current user agents
+ * header line length limited only by memory
+ * host masquerading (control/defaulthost)
+ * user masquerading ($MAILUSER, $MAILHOST)
+ * automatic Mail-Followup-To creation ($QMAILMFTFILE)
+ * ability to add signature/content to messages using ''altermime''.
+ * ARF Generator (Abuse Bounce Report Generator) for setting up Email Feedback Loop
+
+## SMTP service
+
+ * RFC 2821, RFC 1123, RFC 1651, RFC 1652, RFC 1854, RFC 1870, RFC 1893
+ * 8-bit clean
+ * 931/1413/ident/TAP callback
+ * relay control---stop unauthorized relaying by outsiders (control/rcpthosts)
+ * no interference between relay control and aliases
+ * automatic recognition of local IP addresses
+ * per-buffer timeouts
+ * hop counting
+ * parallelism limit (tcpserver)
+ * per host limit (tcpserver - MAXPERIP)
+ * refusal of connections from known abusers(tcpserver, badmailfrom, badmailpatterns,<br />  badhelo, blackholedsender, blackholedpatterns, badhost, badip)
+ * goodrcptto, goodrcptpatterns which override the above
+ * blackholercpt, blackholercptpatterns for blackholing mails to specific senders.
+ * Control files spamignore, blackholedsender, badmailfrom, relaymailfrom, badrcptto,<br />  chkrcptdomains, goodrcptto, blackholercpt, badip can be specified in plain text, cdb format or in MySQL tables.
+ * relaying and message rewriting for authorized clients
+ * authenticated SMTP PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 (HMAC (RFC 1321, RFC 2104, RFC 2554, RFC 2617))
+ * STARTLS extension, TLS
+ * Support for SMTPS
+ * POP/IMAP before SMTP
+ * ETRN (RFC 1985)
+ * ODMR (RFC 2645)
+ * RBL/ORBS support (rblsmtpd)
+ * DNSBL (DNS Blacklist) Support
+ * SURBL (SURBL Blacklist) support using surblfilter
+ * SPAM Control (Reject/Tag/Accept) using Bayesian techniques
+ * High Performance MS Virus Control via control file viruscheck and<br />  control file signatures
+ * Content Filtering and blocking of prohibited attachments via control file bodycheck
+ * Ability to reject/bounce mails for unknown/inactive users (CHECKRECIPIENT)
+ * ability to have the RECIPIENT check for selective domains using control file chkrcptdomains
+ * Antispoofing mode (turned on by environment variable ANTISPOOFING)
+ * Masquerading ability.
+ * Multiline greetings via control file smtpgreeting
+ * Message Submission Agent – MSA (RFC 2476)
+ * Domain IP address pair access control via control file hostaccess
+ * Per User accesslist via control file accesslist
+ * [SPF](http://www.openspf.org/ "openspf") – Sender Permitted From
+ * [SRS](http://www.libsrs2.org/ "libsrs2") - Sender Rewriting Scheme
+ * [Bounce Address Tag Validation (BATV)](http://www.linux-magazine.com/Online/News/IndiMail-1.6-Includes-Greylisting-and-BATV?category=13404 "batv")
+ * Per User control of environment variable by envrules(rules file set by environment variable FROMRULES)
+ * [Greylisting](http://www.gossamer-threads.com/lists/qmail/users/136761 "greylisting") capability using qmail-greyd or greydaemon
+ * SMTP Plugins - External plugins using shared objects in /var/indimail/plugins to enhance functionality of MAIL, RCPT & DATA session.
+ * Notify recipients when message size exceeds databyte limits (by setting environment variable DATABYTES_NOTIFY)
+ * Enforce STARTTLS before AUTH
+ * RFC 6530-32 Email Address Internationalization
+
+## Queue management
+
+ * instant handling of messages added to queue
+ * parallelism limit (control/concurrencyremote, control/concurrencylocal)
+ * queue specific parallelism limit (control/concurrencyr.queueX, control/concurrencyl.queueX)
+ * split queue directory---no slowdown when queue gets big
+ * quadratic retry schedule---old messages tried less often
+ * independent message retry schedules
+ * automatic safe queueing---no loss of mail if system crashes
+ * automatic per-recipient checkpointing
+ * automatic queue cleanups (qmail-clean)
+ * queue viewing (qmail-qread)
+ * detailed delivery statistics (qmailanalog)
+ * Configurable number of queues and time slicing algorithm for load balancing via qmail-multi. A queue in indimail is configurable by three environment variables QUEUE_BASE, QUEUE_COUNT, and QUEUE_START. A queue in IndiMail is a collection of queues. Each queue in the collection can have one or more SMTP listener but a single or no delivery (qmail-send) process. It is possible to have the entire queue collection without a delivery process (e.g. SMTP on port 366 – ODMR). The QUEUE_COUNT can be defined based on how powerful your host is (IO bandwidth, etc). NOTE: This configurable number of queues is possibe with a single installation and does not require you to install multiple instances of qmail.
+ * Ability to hold local, remote or both deliveries (holdlocal, holdremote control file)
+ * Qmail Queue Extra Header – Ability to pass extra headers to local and remote deliveries via qmail-queue (Environment variable QQEH).
+ * External Virus scanning via QHPSI – Qmail High Performance Scanner Interface
+ * Ability to extend QHPSI interface through plugins. The keyword plugin:shared_lib defined in the environment variable QHPSI denotes 'shared_lib' to be loaded.
+ * Virus scanner qscanq. Ability to detect virus via a third party scanner defined by SCANCMD environment variable (clamscan, clamdscan, etc)
+ * Blocking of prohibited filename extensions via qscanq program
+ * [Domainkeys](https://en.wikipedia.org/wiki/DomainKeys "Yahoo Domainkeys") (qmail-dk) RFC 4870
+ * [DomainKeys Identified Mail](http://marc.info/?l=qmail&m=123817543532399&w=2 "DKIM") with ADSP/SSP (qmail-dkim) RFC 4871
+ * Set all header values listed in envheader control file as environment variables.
+ * Log all headers listed in control file logheaders to stderr.
+ * Remove all headers listed in control file removeheaders from email.
+ * Ability to do line processing instead of block processing.
+ * qmail-nullqueue – blackhole the mail silently.
+ * rule based mail archival using control file mailarchive ([Sarbanes–Oxley_Act](https://en.wikipedia.org/wiki/Sarbanes%E2%80%93Oxley_Act "Sarbanes Oxley Act"), [Health_Insurance_Portability_and_Accountability_Act](https://en.wikipedia.org/wiki/Health_Insurance_Portability_and_Accountability_Act "HIPAA Compliance") compliance)
+ * Added additional recipients for a message using extraqueue or mailarchive control file.
+ * X-Originating-IP header to record the original IP from which the mail originates
+
+## Bounces
+
+ * [QSBMF](https://cr.yp.to/proto/qsbmf.txt "QSBMF") bounce messages---both machine-readable and human-readable
+ * [HCMSSC](https://cr.yp.to/proto/hcmssc.txt "HCMSSC") support---language-independent RFC 1893 error codes
+ * double bounces sent to postmaster
+ * Ability to discard double bounces
+ * Ability to preserve [MIME](https://en.wikipedia.org/wiki/MIME "MIME") format when bouncing.
+ * Control of bounce process via envrules (rules file controlled by environment variable BOUNCERULES or control files bounce.envrules)
+ * limit size of bounce using control file bouncemaxbytes
+ * Ability to process bounces using external bounce processor (environment variable BOUNCEPROCESSOR)
+ * X-Bounced-Address header to indicate the bounced address.
+
+## Routing by domain
+
+ * any number of names for local host (control/locals)
+ * any number of virtual domains (control/virtualdomains)
+ * domain wildcards (control/virtualdomains)
+ * configurable percent hack support (control/percenthack)
+ * Clustered Domain. Same virtual domain can exist on multiple hosts, each having its own set of users. Provides Load Balancing and infinite scalability.
+
+## Remote SMTP delivery
+
+ * RFC 2821, RFC 974, RFC 1123, RFC 1870
+ * 8-bit clean
+ * automatic downed host backoffs
+ * Configurable tcp timeouts for downed host backoffs.
+ * automatic switchover to next best MX
+ * artificial routing---smarthost, localnet, mailertable (control/smtproutes)
+ * Support for jumbo ISP (control/smtproutes.cdb)
+ * per-buffer timeouts
+ * passive SMTP queue---perfect for SLIP/PPP (serialmail)
+ * AutoTURN support (serialmail)
+ * Authenticated SMTP (userid/passwd in control/smtproutes) - PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD
+ * STARTTLS, TLS
+ * Static and Dynamic Routing. (SMTPROUTES environment variable)
+ * User based routing instead of normal DNS/smtproutes.
+ * Spam control (SPAMFILTER environment variable)
+ * Environment variable control via envrules (rules file controlled by environment variable RCPTRULES)
+ * QMAILREMOTE environment variable to run any executable/script instead of qmail-remote
+ * QMTP support, artificial routing using (control/qmtproutes)
+ * ONSUCCESS_REMOTE, ONFAILURE_REMOTE scripts run on successful or failed remote deliveries environment variables SMTPTEXT, SMTPCODE available for these scripts
+ * Domain based delivery rate control
+ * IP address binding on domain, sender address, recipient address and random selection from a pool of IP addresses
+ * Return Receipt Responder - rrt
+ * IPV6 support
+ * DANE verification ([RFC 7672](http://tools.ietf.org/html/rfc7672 "RFC 7672"))
+ * RFC 6530-32 Email Address Internationalization using libidn2
+
+## Local delivery
+
+ * user-controlled address hierarchy    : fred controls fred-anything
+ * mbox delivery
+ * reliable NFS delivery (maildir)
+ * user-controlled program delivery: procmail etc. (qmail-command)
+ * optional new-mail notification (qbiff)
+ * detailed Delivered-To Headers
+ * optional NRUDT return receipts (qreceipt)
+ * autoresponder RFC 3834 compliance (provide Auto-Submitted, In-Reply-To, References fields (RFC 3834))
+ * conditional filtering (condredirect, bouncesaying, vfilter)
+ * Environment variable control via envrules (rules file controlled by environment variable RCPTRULES)
+ * Eliminate duplicate messages
+ * QMAILLOCAL environment variable to run any executable/script instead of qmail-local
+ * X-Forwarded-To, X-Forwarded-For headers
+ * Message Disposition Notification (through qnotify)
+ * Domain based delivery rate control
+
+## Other
+
+ * Unix Client Server Program Interface [ucspi]([http://cr.yp.to/proto/ucspi.txt "ucspi-tcp") through programs ''tcpserver'' and ''tcpclient''
+ * Change concurrency of ''tcpserver'' without restart.
+ * ability to load plugins in tcpserver - dynamically load shared objects given on command line. Load shared objects defined by env variables
+
+   ```
+   PLUGIN0, PLUGIN1, ...
+   ```
+
+   tcpserver plugin allows you to load qmail-smtpd, rblsmtpd once in memory
+ * IPv4 CIDR extension and support for compact IPv6 addresses and CIDR notation
+ * TLS/SSL Support in ''tcpserver''
+ * STARTTLS extension in IMAP, STLS extension in POP3
+ * Ability to restrict connection per IP (MAXPERIP)
+ * run shutdown script if present on svc -d
+ * ability to log ''svscan'' output using ''multilog''
+ * nssd daemon providing [Name Service Switch](https://en.wikipedia.org/wiki/Name_Service_Switch "NSS") which allows extending of the system passwd database to IndiMail's database.
+ * pam-multi - Generic [PAM](https://en.wikipedia.org/wiki/Pluggable_authentication_module "PAM") module allows any external programs to authenticate against IndiMails database.
+ * multiple checkpassword modules sys-checkpwd, ldap-checkpwd, pam-checkpwd, vchkpass, systpass
+ * ''inlookup'' – High Performance User Lookup Daemon.
+ * ''indisrvr'' – Indimail Administration Daemon.
+ * ''spawn-filter'' - Ability to add disclaimer, run multiple filters before<br />  local/remote delivery.
+ * Post Execution Handle - Allows functionality of indimail to be extended by writing simple scripts
+ * Proxy for IMAP/POP3 Protocol
+ * On the fly migration of users by defining MIGRATEUSER environment variable.
+ * ready to use QMQP service
+ * ability to distribute QMQP traffic across multiple servers
+ * ''sslerator'' - TLS/SSL protocol wrapper for non-tls aware applications
+ * ''svctool'' – Configuration tool for IndiMail.
+ * ''iwebadmin'' - CGI Web Frontend for IndiMail user administration.
+ * mrtg graphs for detailed statistics
+ * ability to specify commands in control files.
+ * flash - ncurses customizable menu based Admin Tool
+ * indium - Menu based administration tool written in tcl/tk
+ * osh - Operator Shell (with configurable restricted command set) for Administrator
+ * docker/podman support in daemontools
+ * support /run, /var/run filesystem in daemontools
+
+## Brief Feature List
+
+Some of the features available in this package
+
+1.  svctool - A simple tool with command-line options which helps you to configure any configuration item in indimail (creation of supervise scripts, qmail configuration, installation of all default MySQL tables, creation of default aliases, users, etc)
+2.  configurable control files directory (using CONTROLDIR environment variable) (allows one to have multiple running copies of qmail using a single binary installation)
+3.  configurable queue directory (using QUEUEDIR environment variable) (allows one to have multiple queues on a host with a single qmail installation).
+    * qmail-multi (queue load balancer) uses qmail-queue to deposit mails across multiple queues. Each queue has its own qmail-send process. You can spread the individual queues across multiple filesystems on different controllers  to maximize on IO throughput.
+    * The number of queues is configurable by three environment variables **QUEUE_BASE**, **QUEUE_COUNT** and **QUEUE_START**. A queue in indimail is defined as a collection of multiple queues.
+    * Each queue in the collection can have one or more SMTP listener but a single delivery (qmail-send) processes. It is possible to have the entire queue collection without a delivery process (e.g. SMTP on port 366 ODMR). The QUEUE_COUNT can be defined based on how powerful your host is (IO bandwidth, etc). The configurable queue is possible with a single installation of indimail-mta and does not require you to have multiple indimail-mta installations (unlike qmail) to achieve this.
+4.  uses getpwnam to use uids/gids, home from /etc/passwd, /etc/group (allows me to transfer the binary to another machine regardless of the ids in /etc/passwd)
+5.  Hooks into local and remote deliveries
+    * QMAILLOCAL - Run executable defined by this instead of qmail-local
+    * QMAILREMOTE - Run executable defined by this instead of qmail-remote
+    * Theoretically one can exploit QMAILLOCAL, QMAILREMOTE variables to route mails for a domain across multiple mail stores.
+6.  Hook into qmail-remote's routing by using SMTPROUTE environment variable.
+    * Ability to do User Based Routing via SMTPROUTE environment. This gives the ability to split a domain across multiple hosts without using NFS to mount multiple filesystems on any host. One can even use a shell script, set the environment variable and deliver mails to users across multiple hosts. I call this dynamic SMTPROUTE.
+    * Additionally qmail-rspawn has the ability to connect to MySQL and set SMTPROUTES based on values in a MySQL table. The connection to MySQL is kept open. This gives qmail-rspawn to do high speed user lookups in MySQL and to deliver the mail for a single domain split across multiple mail stores.
+7.  Proxy for IMAP and POP3. Allows IMAP/POP3 protocol for users in a domain to be split across multiple hosts. Also allows seamless integration of proprietary email servers with indimail.  The proxy is generic and works with any IMAP/POP3 server. The proxy comes useful when you want to move out of a headache causing mail server like x-change and want to retain the same domain on the proprietary server. In conjunction with dynamic SMTPROUTES, you can migrate all your users to indimail, without any downtime/disruption to email service. The proxy and dynamic SMTPROUTES allow you to scale your email server horizontally without using NFS across geographical locations.
+8.  ETRN, ATRN, ODMR (RFC 2645) support
+9.  accesslist - restrictions between mail transactions between email ids (you can decide who can send mails to whom)
+10. bodycheck - checks on header/body on incoming emails (for spam, virus security and other needs)
+11. hostaccess - provides domain, IP address pair access list control. e.g. you can define from which set of addresses mail from yahoo.com will be accepted.
+12. chkrcptdomains - rcpt check on selective domains
+13. envrules - recipient/sender based - set or unset environment variables (qmail-smtpd, qmail-inject, qmail-local, qmail-remote) any variables which controls the behaviour of qmail-smtpd, qmail-inject, qmail-local, qmail-remote e.g. NODNSCHECKS, DATABYTES, RELAYCLIENT, BADMAILFROM, etc can be defined individually for a particular recipient or sender rather than a fixed value set at runtime.
+14. NULLQUEUE, qmail-nullqueue (blackhole support - like qmail-queue but mails go into a blackhole). I typically uses this in conjunction with envrules to trash the mail into blackhole without spending any disk IO.
+15. qmail-multi - run multiple filters (qmail-smtpd) (something like qmail-qfilter). Also distributes mails across multiple queues to do a load balancing act. qmail-multi allowed me to process massive rate of incoming mails at my earlier job with a ISP.
+16. envheaders - Any thing defined here e.g. Return-Path, qmail-queue sets Return-Path as an environment variable with the value found in Return-Path header in the email. This environment variable gets passed across the queue and is also available to qmail-local, qmail-remote
+17. logheaders - Any header defined in this control file, gets written to file descriptor 2 with the value found in the email.
+18. removeheaders - Any header defined here, qmail-queue will remove that header from the email
+19. quarantine or QUARANTINE env variable causes qmail-queue to replace the recipient list with the value defined in the control file or the environment variable. Additionally an environment variable X-Quarantine-ID: is set which holds the orignal recipient list.
+20. Added ability in qmail-queue to do line processing. Line processing allows qmail-queue to do some of the stuff mentioned above
+21. plugins support for QHPSI interface (qmail-queue). qmail-queue will use dlopen to load any shared objected defined by PLUGINDIR environment. Multiple plugins can be loaded. For details see man qmail-queue
+22. Message Submission Port (port 587) RFC 2476
+23. Integrated authenticated SMTP with Indimail (PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5, pop-bef-smtp)
+24. duplicate eliminator using 822header
+25. qmail-remote has configurable TCP timeout table (max_tolerance, min_backoff periods can be configured in smtproutes)
+26. Ability to change concurrency of tcpserver without restarting tcpserver
+27. Ability to restrict connections per IP
+28. multilog replaced buffer functions with substdio
+29. supervise can run script shutdown if present (when svc -d is issued)
+30. rfc3834 compliance for qmail-autoresponder (provide Auto-Submitted, In-Reply-To, References fields (RFC 3834))
+31. ability to add stupid disclaimer(s) to messages.
+32. InLookup serves as a high performance user lookup daemon for qmail-smtpd (rcpt checks, authenticated SMTP, RELAY check). Even the IMAP, POP3 authentication gets served by inlookup. inlookup preforks configurable number of daemons which opens multiple connections to MySQL and keep the connection open. The query results are cached too. This gives inlookup a decent database performance when handling millions of lookups in few hours. Programs like qmail-smtpd use a fifo to communicate with inlookup
+33. CHKRECIPIENT extension which rejects users not found in local MySQL or recipients.cdb database
+34. indisrvr Was written to ease mail server administration across multiple hosts. Allows ones to create, delete, modify users and run any command as defined in variables.c. indisrvr listens on a AF_INET/AF_INET6 socket.
+35. Identation of djb's code (using indent) so that a mortal like me could understand it :)
+36. Works with systemd - systemd is an event-based replacement for the init daemon
+37. Changed buffer libraries in daemontools to substdio.
+38. Can work with external virus scanners (QHPSI, or Len Budney's qscanq)
+39. qmail-queue custom error patch by Flavio Curti <fcu-software at no-way.org>
+40. Domainkey-Signature, DKIM-Signature with ADSP/SSP
+41. Greylisting Capability -  [Look Here](http://www.gossamer-threads.com/lists/qmail/users/136740?page=last "Greylisting")
+42. nssd - Name Service Switch daemon which extends systems password database to lookup IndiMail's database for authentication
+43. pam-multi - Generic PAM which allows external program using PAM to authenticate against IndiMail's database. Using pam-multi and nssd, you can use any IMAP server like dovecot, etc with IndiMail.
+44. Post execution Handle - Allows extending indimail's functionality by writing simple scripts
+45. sslerator - TLS/SSL protocol wrapper for non-tls aware applications.
+46. QMTP support in qmail-remote. QMTP support for mail transfers between IndiMail clusters.
+47. Configured installation time QMQP support on server.
+48. indimail-mini package providing QMQP client
+49. IPV6 Support
+50. Multiple checkpassword modules sys-checkpwd, ldap-checkpwd, pam-checkpwd, vchkpass and systpass
+51. iwebadmin - Web frontend for IndiMail User administration
+52. badhost, badip control files for spam control
+53. mailarchive control file (SOX, HIPAA compliance)
+54. Notify recipients when message size exceeds databyte limits
+55. Ability to run programs on successful or failed remote deliveries
+56. Ability to distribute QMQP traffic across servers.
+57. Abuse Report Format Generator using qarf
+58. Auto provision users in proxyimap/proxypop3
+59. DNSBL Support (DNS Blacklist) Author "Fabio Busatto" <fabio.busatto@sikurezza.org>
+60. SURBL Support (SURBL Blacklist). URL parsing code borrowed from surbl.c Pieter Droogendijk <pieter@binky.org.uk> http://binky.org.uk
+61. Message Disposition Notification using qnotify
+62. Return Receipt Responder - rrt
+63. Enforce STARTTLS before AUTH using FORCE_TLS environment variable
+64. Updated man pages.
+65. Jens Wehrenbrecht's IPv4 CIDR extension
+66. Li Minh Bui's IPv6 support for compact IPv6 addresses and CIDR notation support
+67. SRS support
+68. domain based delivery rate control using drate
+69. domain based queue using domainqueue control file
+70. Ability to drop bounces
+71. Ability to discard emails if filter exits 2
+72. goodrcpt, goodrcptpatterns
+73. udplogger service for logging messages through UDP
+74. docker/podman images for
+    * [indimail](https://hub.docker.com/repository/docker/cprogrammer/indimail "IndiMail")
+    * [indimail-mta](https://hub.docker.com/repository/docker/cprogrammer/indimail-mta "indimail-mta")
+    * [indimail-web](https://hub.docker.com/repository/docker/cprogrammer/indimail-web "RoundCubemail")
+75. [FHS](https://refspecs.linuxfoundation.org/FHS_3.0/fhs-3.0.pdf) compliance.
+76. Ed Neville - allow multiple Delivered-To in qmail-local using control file maxdeliveredto
+77. Ed Neville - configure TLS method in control/tlsclientmethod (qmail-smtpd), control/tlsservermethod (qmail-remote)
+78. roundcube support for password, autoresponder through roundcube plugin iwebadmin
+79. ezmlm-idx mailing list manager from [https://untroubled.org/ezmlm/](https://untroubled.org/ezmlm/ "ezmlm-idx")
+80. tcpserver plugin feature - dynamically load shared objects given on command line. Load shared objects defined by env variables PLUGIN0, PLUGIN1, ...
+    tcpserver plugin allows you to load qmail-smtpd, rblsmtpd once in memory
+81. tcpserver - enable mysql support by loading mysql library configured in /etc/indimail/control/mysql\_lib
+82. indimail-mta - enable virtual domain support by loading indimail shared library configured in /etc/indimail/control/libindimail
+
+# Current Compilation status of all IndiMail & related packages
+
+This is obtained from github actions defined in each of the indimail repository. If during the development process, anything breaks, it will be visible here.
+
+[![indimail ubuntu, mac osx ci](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-c-cpp.yml)
+[![indimail freebsd ci](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-freebsd.yml)
+[![pam-multi Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/pam-multi-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/pam-multi-c-cpp.yml)
+[![pam-multi FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/pam-multi-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/pam-multi-freebsd.yml)
+[![nssd Ubuntu CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/nssd-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/nssd-c-cpp.yml)
+[![nssd FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/nssd-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/nssd-freebsd.yml)
+[![iwebadmin Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-c-cpp.yml)
+[![iwebadmin FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-freebsd.yml)
+[![courier-imap Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-c-cpp.yml)
+[![courier-imap FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-freebsd.yml)
+[![fetchmail Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/fetchmail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/fetchmail-c-cpp.yml)
+[![fetchmail FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/fetchmail-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/fetchmail-freebsd.yml)
+[![indimail-spamfilter Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-spamfilter-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-spamfilter-c-cpp.yml)
+[![indimail-spamfilter FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-spamfilter-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-spamfilter-freebsd.yml)
+[![bogofilter-wordlist Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-c-cpp.yml)
+[![bogofilter-wordlist FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-freebsd.yml)
+[![indimail-utils Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml)
+[![indimail-utils FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-freebsd.yml)
+[![procmail Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/procmail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/procmail-c-cpp.yml)
+[![procmail FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/procmail-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/procmail-freebsd.yml)
+[![logalert Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-c-cpp.yml)
+[![logalert FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-freebsd.yml)
+[![indium Ubuntu CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-c-cpp.yml)
+[![indium FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-freebsd.yml)
+[![ircube Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-ubuntu-osx.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-ubuntu-osx.yml)
+[![ircube FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-freebsd.yml)
+
+[![libqmail Ubuntu, Mac OSX](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-c-cpp.yml)
+[![libqmail FreeBSD](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-freebsd.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-freebsd.yml)
+[![libdkim Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-c-cpp.yml)
+[![libdkim FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-freebsd.yml)
+[![libsrs2 Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-c-cpp.yml)
+[![libsrs2 FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-freebsd.yml)
+[![indimail-mta Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml)
+[![indimail-mta FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-freebsd.yml)
+[![daemontools Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-c-cpp.yml)
+[![daemontools FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-freebsd.yml)
+[![ucspi-tcp Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-c-cpp.yml)
+[![ucspi-tcp FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-freebsd.yml)
 
 # History
 
