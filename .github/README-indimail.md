@@ -6,7 +6,6 @@ Table of Contents
    * [INTRODUCTION](#introduction)
    * [LICENSING](#licensing)
    * [TERMINOLOGY used for commands](#terminology-used-for-commands)
-   * [IndiMail Queue Mechanism](#indimail-queue-mechanism)
    * [indimail-mta Internals](#indimail-mta-internals)
       * [Programs](#programs)
          * [qmail-multi](#qmail-multi)
@@ -19,6 +18,7 @@ Table of Contents
             * [Cleanup](#cleanup)
             * [Global &amp; Queue Specific Concurrency, Parallelism limits](#global--queue-specific-concurrency-parallelism-limits)
       * [Notes](#notes)
+   * [IndiMail Queue Mechanism](#indimail-queue-mechanism)
    * [Using systemd to start IndiMail](#using-systemd-to-start-indimail)
    * [Eliminating Duplicate Emails during local delivery](#eliminating-duplicate-emails-during-local-delivery)
    * [Using procmail with IndiMail](#using-procmail-with-indimail)
@@ -262,82 +262,6 @@ $ command      - command was executed by a non-privileged user
 $ sudo command - command requires root privilege to run. sudo was used to gain root privileges
 ```
 
-# IndiMail Queue Mechanism
-
-IndiMail has multiple queues and the queue destination directories are also configurable. You can have one IndiMail installation cater to multiple instances having different properties / configuration. To set up a new IndiMail instance requires you to just set few environment variables. Unlike qmail/netqmail, IndiMail doesn't force you to recompile each time you require a new instance. Multiple queues eliminates what is known as ['the silly qmail syndrome'](https://qmail.jms1.net/silly-qmail.shtml "silly-qmail-syndrome") and gives IndiMail the capability to perform better than a stock qmail installation. IndiMail's multiple queue architecture allows it to achieve tremendous inject rates using commodity hardware as can be read [here](http://groups.google.co.in/group/indimail/browse_thread/thread/f9e0b6214d88ca6d#).
-
-When you have massive injecting rates, your software may place multiple files in a single directory. This drastically reduces file system performance. IndiMail avoids this by injecting your email in a queue consisting of multiple directories and mails distributed as evenly as possible across these directories.
-
-Balancing of emails across multiple queues is achieved by the program qmail-multi(8), which is actually just a qmail-queue(8) replacement. Any qmail-queue frontend can use qmail-multi. The list of qmail-queue frontends in IndiMail are
-
-1. sendmail
-2. qmail-inject
-3. qmail-smtpd
-4. qmail-qmqpd
-5. qmail-qmtpd
-6. qreceipt
-7. condredirect
-8. dotforward
-9. fastforward
-10. forward
-11. maildirserial
-12. new-inject
-13. ofmipd
-14. replier
-15. rrforward
-
-You just need to configure the following environment variables to have the qmail-queue(8) frontends use qmail-multi(8)
-
-1. QUEUE\_BASE – Base directory where all queues will be placed
-2. QUEUE\_COUNT – number of queues
-3. QUEUE\_START – numeric prefix of the first queue
-4. QMAILQUEUE - Path of qmail-multi (/usr/sbin/qmail-multi)
-5. QUEUEDIR - Not required if you set QUEUE\_BASE, QUEUE\_COUNT, QUEUE\_START. Else it should be full path to a queue (e.g. /var/indimail/queue/queue3). If QUEUEDIR is set, then QUEUE\_BASE, QUEUE\_COUNT and QUEUE\_START are not used.
-
-qmail-multi's job is to select a queue. indimail-mta uses multiple queue. If QUEUEDIR is set, it execs qmail-queue without doing anything. If QUEUEDIR is not defined, it uses QUEUE\_START, QUEUE\_COUNT and QUEUE\_BASE environment variables to set QUEUEDIR environment variable. QUEUE\_BASE is the common basename for all the queues. e.g. QUEUE\_BASE=/var/indimail/queue. Now, if QUEUE\_START is 1, QUEUE\_COUNT is 5, then qmail-multi will use the time to do a modulus operation and get a number ranging from 1 to 5. It will then set the QUEUEDIR environment variable to set any of the 5 queues in /var/indimail/queue. e.g. QUEUEDIR=/var/indimail/queue/queueX, where X is the number selected between 1 to 5. It then does a exec of qmail-queue. Throughout this document we will abbreviate /var/indimail/queue/queueX as queueX.
-
-e.g. If you want IndiMail to use 10 queues, this is what you will do
-
-```
-$ sudo /bin/bash
-# for i in qmail-smtpd.25 qmail-smtpd.465 qmail-smtpd.587 qmail-send.25 \
-  qmail-qmqpd.628 qmail-qmtpd.209
-do
-  echo 10 > /service/$i/variables/QUEUE_COUNT
-  echo “/var/indimail/queue” > /service/$i/variables/QUEUE_BASE
-  echo “1” > /service/$i/variables/QUEUE_START
-done
-```
-
-You also need to make sure that you have ten queues in /var/indimail/queue.
-
-```
-$ sudo /bin/bash
-# for i 1 2 3 4 5 6 7 8 9 10
-do
-  /usr/bin/queue-fix /var/indimail/queue/queue”$i” > /dev/null
-done
-# exit
-$ ls -ld var/indimail/queue/queue*
-drwxr-x---. 12 qmailq qmail 4096 Mar 30  2017 /var/indimail/queue/queue1
-drwxr-x---. 12 qmailq qmail 4096 Dec  7 10:45 /var/indimail/queue/queue10
-drwxr-x---. 12 qmailq qmail 4096 Mar 30  2017 /var/indimail/queue/queue2
-drwxr-x---. 12 qmailq qmail 4096 Mar 30  2017 /var/indimail/queue/queue3
-drwxr-x---. 12 qmailq qmail 4096 Mar 30  2017 /var/indimail/queue/queue4
-drwxr-x---. 12 qmailq qmail 4096 Mar 30  2017 /var/indimail/queue/queue5
-drwxr-x---. 12 qmailq qmail 4096 Dec  7 10:45 /var/indimail/queue/queue6
-drwxr-x---. 12 qmailq qmail 4096 Dec  7 10:45 /var/indimail/queue/queue7
-drwxr-x---. 12 qmailq qmail 4096 Dec  7 10:45 /var/indimail/queue/queue8
-drwxr-x---. 12 qmailq qmail 4096 Dec  7 10:45 /var/indimail/queue/queue9
-```
-
-Now all you need is restart of all services to use the new QUEUE\_BASE, QUEUE\_COUNT, QUEUE\_START environment variables
-
-```
-$ sudo svc -d /service/qmail-smtpd* /service/qmail-send.25 /service/qmail-qm?pd.*
-$ sudo svc -u /service/qmail-smtpd* /service/qmail-send.25 /service/qmail-qm?pd.*
-```
-
 # indimail-mta Internals
 
 Here's the data flow in the indimail-mta suite:
@@ -562,6 +486,82 @@ qmail-lspawn and qmail-rspawn can do multiple concurrent deliveries. The default
 Currently queueX/info/split/<u>inode</u> serves two purposes: first, it records the envelope sender; second, its modification time is used to decide when a message has been in the queue too long. In the future queueX/info/split/<u>inode</u> may store more information. Any non-backwards-compatible changes will be identified by version numbers.
 
 When qmail-queue has successfully placed a message into the queue, it pulls a trigger offered by qmail-send. Here is the current triggering mechanism: lock/trigger is a named pipe. Before scanning todo/, qmail-send opens lock/trigger O\_NDELAY for reading. It then selects for readability on lock/trigger. qmail-queue pulls the trigger by writing a byte O\_NDELAY to lock/trigger. This makes lock/trigger readable and wakes up qmail-send. Before scanning todo/ again, qmail-send closes and reopens lock/trigger.
+
+# IndiMail Queue Mechanism
+
+IndiMail has multiple queues and the queue destination directories are also configurable. You can have one IndiMail installation cater to multiple instances having different properties / configuration. To set up a new IndiMail instance requires you to just set few environment variables. Unlike qmail/netqmail, IndiMail doesn't force you to recompile each time you require a new instance. Multiple queues eliminates what is known as ['the silly qmail syndrome'](https://qmail.jms1.net/silly-qmail.shtml "silly-qmail-syndrome") and gives IndiMail the capability to perform better than a stock qmail installation. IndiMail's multiple queue architecture allows it to achieve tremendous inject rates using commodity hardware as can be read [here](http://groups.google.co.in/group/indimail/browse_thread/thread/f9e0b6214d88ca6d#).
+
+When you have massive injecting rates, your software may place multiple files in a single directory. This drastically reduces file system performance. IndiMail avoids this by injecting your email in a queue consisting of multiple directories and mails distributed as evenly as possible across these directories.
+
+Balancing of emails across multiple queues is achieved by the program qmail-multi(8), which is actually just a qmail-queue(8) replacement. Any qmail-queue frontend can use qmail-multi. The list of qmail-queue frontends in IndiMail are
+
+1. sendmail
+2. qmail-inject
+3. qmail-smtpd
+4. qmail-qmqpd
+5. qmail-qmtpd
+6. qreceipt
+7. condredirect
+8. dotforward
+9. fastforward
+10. forward
+11. maildirserial
+12. new-inject
+13. ofmipd
+14. replier
+15. rrforward
+
+You just need to configure the following environment variables to have the qmail-queue(8) frontends use qmail-multi(8)
+
+1. QUEUE\_BASE – Base directory where all queues will be placed
+2. QUEUE\_COUNT – number of queues
+3. QUEUE\_START – numeric prefix of the first queue
+4. QMAILQUEUE - Path of qmail-multi (/usr/sbin/qmail-multi)
+5. QUEUEDIR - Not required if you set QUEUE\_BASE, QUEUE\_COUNT, QUEUE\_START. Else it should be full path to a queue (e.g. /var/indimail/queue/queue3). If QUEUEDIR is set, then QUEUE\_BASE, QUEUE\_COUNT and QUEUE\_START are not used.
+
+qmail-multi's job is to select a queue. indimail-mta uses multiple queue. If QUEUEDIR is set, it execs qmail-queue without doing anything. If QUEUEDIR is not defined, it uses QUEUE\_START, QUEUE\_COUNT and QUEUE\_BASE environment variables to set QUEUEDIR environment variable. QUEUE\_BASE is the common basename for all the queues. e.g. QUEUE\_BASE=/var/indimail/queue. Now, if QUEUE\_START is 1, QUEUE\_COUNT is 5, then qmail-multi will use the time to do a modulus operation and get a number ranging from 1 to 5. It will then set the QUEUEDIR environment variable to set any of the 5 queues in /var/indimail/queue. e.g. QUEUEDIR=/var/indimail/queue/queueX, where X is the number selected between 1 to 5. It then does a exec of qmail-queue. Throughout this document we will abbreviate /var/indimail/queue/queueX as queueX.
+
+e.g. If you want IndiMail to use 10 queues, this is what you will do
+
+```
+$ sudo /bin/bash
+# for i in qmail-smtpd.25 qmail-smtpd.465 qmail-smtpd.587 qmail-send.25 \
+  qmail-qmqpd.628 qmail-qmtpd.209
+do
+  echo 10 > /service/$i/variables/QUEUE_COUNT
+  echo “/var/indimail/queue” > /service/$i/variables/QUEUE_BASE
+  echo “1” > /service/$i/variables/QUEUE_START
+done
+```
+
+You also need to make sure that you have ten queues in /var/indimail/queue.
+
+```
+$ sudo /bin/bash
+# for i 1 2 3 4 5 6 7 8 9 10
+do
+  /usr/bin/queue-fix /var/indimail/queue/queue”$i” > /dev/null
+done
+# exit
+$ ls -ld var/indimail/queue/queue*
+drwxr-x---. 12 qmailq qmail 4096 Mar 30  2017 /var/indimail/queue/queue1
+drwxr-x---. 12 qmailq qmail 4096 Dec  7 10:45 /var/indimail/queue/queue10
+drwxr-x---. 12 qmailq qmail 4096 Mar 30  2017 /var/indimail/queue/queue2
+drwxr-x---. 12 qmailq qmail 4096 Mar 30  2017 /var/indimail/queue/queue3
+drwxr-x---. 12 qmailq qmail 4096 Mar 30  2017 /var/indimail/queue/queue4
+drwxr-x---. 12 qmailq qmail 4096 Mar 30  2017 /var/indimail/queue/queue5
+drwxr-x---. 12 qmailq qmail 4096 Dec  7 10:45 /var/indimail/queue/queue6
+drwxr-x---. 12 qmailq qmail 4096 Dec  7 10:45 /var/indimail/queue/queue7
+drwxr-x---. 12 qmailq qmail 4096 Dec  7 10:45 /var/indimail/queue/queue8
+drwxr-x---. 12 qmailq qmail 4096 Dec  7 10:45 /var/indimail/queue/queue9
+```
+
+Now all you need is restart of all services to use the new QUEUE\_BASE, QUEUE\_COUNT, QUEUE\_START environment variables
+
+```
+$ sudo svc -d /service/qmail-smtpd* /service/qmail-send.25 /service/qmail-qm?pd.*
+$ sudo svc -u /service/qmail-smtpd* /service/qmail-send.25 /service/qmail-qm?pd.*
+```
 
 # Using systemd to start IndiMail
 
