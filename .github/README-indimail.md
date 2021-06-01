@@ -1,4 +1,4 @@
-![IndiMail](indimail_logo.png "IndiMail")
+[IndiMail](indimail_logo.png "IndiMail")
 
 Table of Contents
 =================
@@ -285,13 +285,15 @@ qmail-multi is invoked as needed, by setting QMAILQUEUE=/usr/sbin/qmail-queue, m
 
 Every message is then pre-processed by qmail-todo and then processed by qmail-send for delivery, in cooperation with qmail-lspawn, qmail-rspawn and cleaned up by qmail-clean. These five programs are long-running daemons.
 
+The diagram also shows a separate queue named <b>slowq</b>. This queue is special. It is a single queue that has <b>slowq-send</b> processing it instead of <b>qmail-todo</b>, <b>qmail-send</b> pair. This queue has a feature where the deliveries can be rate controlled.
+
 The queue is designed to be crashproof, provided that the underlying filesystem is crashproof. All cleanups are handled by qmail-send and qmail-clean without human intervention.
 
 ## Programs
 
 ### qmail-multi
 
-We have already discussed qmail-multi in [IndiMail Queue Mechanism](#indimail-queue-mechanism). qmail-multi can also do spam filtering before a message gets queued. See [SPAM Control using bogofilter](#spam-control-using-bogofilter) for more details.
+qmail-multi is discussed in detail in [IndiMail Queue Mechanism](#indimail-queue-mechanism). qmail-multi can also do spam filtering before a message gets queued. See [SPAM Control using bogofilter](#spam-control-using-bogofilter) for more details.
 
 ### qmail-queue
 
@@ -599,6 +601,17 @@ Cleanups are not necessary if the computer crashes while qmail-send is deliverin
 
 qmail-lspawn and qmail-rspawn can do multiple concurrent deliveries. The default concurrency limit is 5 for local deliveries and 10 for remote deliveries. These can be increased upto a maximum of 500 by setting it in the control files <b>concurrencylocal</b> for local deliveries and <b>concurrencyremote</b> for remote deliveries. These two (like any other indimail control files) lie in <u>/etc/indimail/control</u> directory. These concurrency limits are inherited by each of the indimail's multiple queues. Additionally indimail allows you to have queue specific concurrency limits. e.g. You can have the control files <b>concurrencyl.queue2</b>, <b>concurrencyr.queue2</b> for setting concurrency specific to <u>/var/indimail/queue/queue2</u>.
 
+## Setting Environment Variables
+
+indimail-mta can be fine tuned, configured using environment variables (> 200) of them. There are many methods of setting them.
+
+1. Setting them in variables directory. All indimail services are configured as supervised services in <u>/service</u> directory. Each of these services has a directory named variables. In the variables directory, you just need to create a file and that creates an environment variable. The name of the environment variable is the filename and the value of the environment variable is the content of the file. An empty file, removes the environment variable. As an exercise, explore the directory <u>/service/qmail-smtpd.25/variables</u>
+2. Using control files from.envrules, fromd.envrules, rcpt.envrules, auth.envrules - These are control files used by programs like qmail-smtpd, qmail-inject. They match on the sender or recipient address. Here you can set or unset environment variables for a sender, recipient or any regular expression to match multipler sender or recipients. To know these environment variables, read the man pages for qmail-stmpd, qmail-inject, spawn-filter.
+3. Using control file domainqueue - This can be used to set environment variable for any recipient domain. Read the man page for qmail-smtpd, qmail-inject.
+4. Using environment directory <u>/etc/indimail/control/defaultqueue</u> - This is just like the supervise <b>variables</b> directory. The environment variables configured in this directory get used when calling qmail-inject, sendmail for injecting mails into the queue. Read the man page for qmail-inject.
+5. Using environment directory <u>$HOME/.defaultqueue</u> - This is just like the supervise <b>variables</b> directory. The environment variables configured in this directory get used when calling qmail-inject, sendmail for injecting mails into the queue. Here $HOME refers to the home directory of the user. Read the man page for qmail-inject.
+6. Nothing prevents a user from writing a shell script to set environment variables before calling any of indimail-mta programs. If you are familiar with UNIX, you will know how to set them.
+
 ## Notes
 
 Currently queueX/info/split/<u>inode</u> serves two purposes: first, it records the envelope sender; second, its modification time is used to decide when a message has been in the queue too long. In the future queueX/info/split/<u>inode</u> may store more information. Any non-backwards-compatible changes will be identified by version numbers.
@@ -607,11 +620,9 @@ When qmail-queue has successfully placed a message into the queue, it pulls a tr
 
 # IndiMail Queue Mechanism
 
-IndiMail has multiple queues and the queue destination directories are also configurable. You can have one IndiMail installation cater to multiple instances having different properties / configuration. To set up a new IndiMail instance requires you to just set few environment variables. Unlike qmail/netqmail, IndiMail doesn't force you to recompile each time you require a new instance. Multiple queues eliminates what is known as ['the silly qmail syndrome'](https://qmail.jms1.net/silly-qmail.shtml "silly-qmail-syndrome") and gives IndiMail the capability to perform better than a stock qmail installation. IndiMail's multiple queue architecture allows it to achieve tremendous inject rates using commodity hardware as can be read [here](http://groups.google.co.in/group/indimail/browse_thread/thread/f9e0b6214d88ca6d#).
+IndiMail has multiple queues and the queue destination directories are also configurable. You can have one IndiMail installation cater to multiple instances having different properties / configuration. To set up a new IndiMail instance requires you to just set few environment variables. Unlike qmail/netqmail, IndiMail doesn't force you to recompile each time you require a new instance. Multiple queues eliminates what is known as ['the silly qmail syndrome'](https://qmail.jms1.net/silly-qmail.shtml "silly-qmail-syndrome") and gives IndiMail the capability to perform better than a stock qmail installation. IndiMail's multiple queue architecture allows it to achieve tremendous inject rates using commodity hardware as can be read [here](http://groups.google.co.in/group/indimail/browse_thread/thread/f9e0b6214d88ca6d#). When you have massive injecting rates, your software may place multiple files in a single directory. This drastically reduces file system performance. IndiMail avoids this by injecting your email in a queue consisting of multiple directories and mails distributed as evenly as possible across these directories.
 
-When you have massive injecting rates, your software may place multiple files in a single directory. This drastically reduces file system performance. IndiMail avoids this by injecting your email in a queue consisting of multiple directories and mails distributed as evenly as possible across these directories.
-
-Balancing of emails across multiple queues is achieved by the program qmail-multi(8), which is actually just a qmail-queue(8) replacement. Any qmail-queue frontend can use qmail-multi. The list of qmail-queue frontends in IndiMail are
+Balancing of emails across multiple queues is achieved by the program <b>qmail-multi</b>, which is actually just a qmail-queue(8) replacement. Any qmail-queue frontend can use qmail-multi. The list of qmail-queue frontends in IndiMail are
 
 1. sendmail
 2. qmail-inject
@@ -680,6 +691,8 @@ Now all you need is restart of all services to use the new QUEUE\_BASE, QUEUE\_C
 $ sudo svc -d /service/qmail-smtpd* /service/qmail-send.25 /service/qmail-qm?pd.*
 $ sudo svc -u /service/qmail-smtpd* /service/qmail-send.25 /service/qmail-qm?pd.*
 ```
+
+indimail-mta also has a special queue <b>slowq</b> where the emails injected into this queue, the deliveries can be rate controlled. This is achived by setting the environment variable <b>QUEUEDIR</b>=<u>/var/indimail/queue/slowq</u>. indimail-mta provies you various [methods](#setting-environment-variables) to set environment variables. One of the method is using <b>domainqueue</b> control file discussed in [Controlling Delivery Rates](#controlling-delivery-rates).
 
 # Using systemd to start IndiMail
 
