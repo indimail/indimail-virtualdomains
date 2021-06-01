@@ -17,6 +17,7 @@ Table of Contents
                * [Retry Schedules](#retry-schedules)
             * [Cleanup](#cleanup)
             * [Global &amp; Queue Specific Concurrency, Parallelism limits](#global--queue-specific-concurrency-parallelism-limits)
+      * [Setting Environment Variables](#setting-environment-variables)
       * [Notes](#notes)
    * [IndiMail Queue Mechanism](#indimail-queue-mechanism)
    * [Using systemd to start IndiMail](#using-systemd-to-start-indimail)
