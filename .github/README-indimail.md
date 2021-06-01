@@ -1607,29 +1607,31 @@ $ sudo drate -d yahoo.com -r 50/3600
 $ drate -d yahoo.com
 Conf   Rate: 50/3600 (0.0138888888)
 Email Count: 0
-Start  Time: Sun May 30 15:00:58 2021
-End    Time: Sun May 30 15:00:58 2021
+Start  Time: Fri, 28 May 2021 21:47:11 +0530
+End    Time: Fri, 28 May 2021 21:47:11 +0530
+CurrentTime: Fri, 28 May 2021 21:48:23 +0530
 CurrentRate: 0.0000000000
 ```
 
-During the coarse of delivery you can use the drate command to display the current delivery date.
+During the course of delivery you can use the drate command to display the current delivery date.
 
 ```
-$ drate -d argos.indimail.org
+$ drate -d yahoo.com
 Conf   Rate: 5/3600 (0.0013888888)
-Email Count: 232
-Start  Time: Fri May 28 16:17:11 2021
-End    Time: Sun May 30 14:36:38 2021
-CurrentRate: 0.0013780813
+Email Count: 70
+Start  Time: Fri, 28 May 2021 21:47:11 +0530
+LastUpdated: Sat, 29 May 2021 22:07:41 +0530
+CurrentTime: Tue, 1 Jun 2021 10:23:01 +0530
+CurrentRate: 0.0002298473 OK
 ```
 
-Now tha we have configured a separate queue <b>slowq</b> for rate controlled delivery, we need to queue emails for the configured domain in this queue rather than the any of the regular indimail-mta's multiple queues. To do that we must have any entry in the control file <b>domainqueue</b> to set the <b>QUEUEDIR</b> environment variable
+Now that we have configured a separate queue <b>slowq</b> for rate controlled delivery, we need to queue emails for the configured domain in this queue rather than the any of the regular indimail-mta's multiple queues. To do that we must have any entry in the control file <b>domainqueue</b> to set the <b>QUEUEDIR</b> environment variable when using qmail-inject for sendmail.
 
 ```
 argos.indimail.org:QUEUEDIR=/var/indimail/queue/slowq
 ```
 
-Once the delivery rate for a configured domain reaches the configured rate, emails will not be picked immediately up for delivery. The slowq-send logs will display when this happens. As you can see, the delivery finally happens when the delivery rate becomes lesser than the configured rate.
+Once the delivery rate for a configured domain reaches the configured rate, emails will get queued but not be picked up immediately for delivery. The slowq-send logs will display when this happens. As you can see, the delivery finally happens when the delivery rate becomes lesser than the configured rate.
 
 ```
 $ tail -11f /var/log/svc/slowq/current
