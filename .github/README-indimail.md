@@ -1581,11 +1581,17 @@ WARNING: For security, qmail-local replaces any dots in ext with colons before c
 
 # Controlling Delivery Rates
 
-<b>qmail-send</b> has the ability to control jobs scheduled for delivery. Every queue can have a directory named <b>ratelimit</b> where you can store rate control defintion for a domain. These rate control definition files can be crated using the <b>drate</b> command. All you need to provide is a mathematical expression which defines your rate. e.g. 100/3600 means 100 emails per hour. This rate control works at the queue level. indimail-mta uses multiple queues. Each queue has its own delivery handled by by its own set of qmail-todo, qmail-send, qmail-lspawn, qmail-rspawn, qmail-clean daemons. Enforcing rate control on such a queue has a practical problem of having to define rate control definition for each queue. Instead of using qmail-send to handle rate control delivery, another daemon <b>slowq-send</b> handles the job better by having a queue dedicated for this. This queue is a special queue named as <b>slowq</b>. <b>slowq-send</b> also doesn't have its own qmail-todo process. We don't require it as we are not looking at high speed deliveries for this queue. <b>slowq-send</b> is started by <b>slowq-start</b> using a supevised service in <u>/service/slowq</u>.
+<b>qmail-send</b> has the ability to control delivery rates of jobs scheduled for delivery. Every queue can have a directory named <b>ratelimit</b> where you can store rate control definition for a domain. These rate control definition files can be created using the <b>drate</b> command. All you need to provide is a mathematical expression that defines your rate. e.g. 100/3600 means 100 emails per hour. This rate control works at the queue level. indimail-mta uses multiple queues. Each queue has its own delivery handled by by its own set of qmail-todo, qmail-send, qmail-lspawn, qmail-rspawn, qmail-clean daemons. Enforcing rate control on such a queue has a practical problem of having to define rate control definition for each and every queue.
+
+To avoid the practical problem of rate limiting every queue, we can use a dedicated queue to handle rate controllled delivery. The default indimail installation creates a special queue named as <b>slowq</b> and uses a daemon <b>slowq-send</b> instead of <b>qmail-send</b> to process the <u>slowq</u> queue. This is done by calling <b>slowq-start<b> instead of <b>qmail-daemon</b> / <b>qmail-start</b>. <b>slowq-send</b> doesn't have its own qmail-todo process. We don't require it as we aren't looking at high delivery rates for this queue. <b>slowq-start</b> is invoked using a supervised service in <u>/service/slowq</u>.
 
 To create this special slowq service for delivery rate control you can use svctool as below. This will also create logs to be in <u>/var/log/svc/slowq/current</u>.
 
 ```
+# Create supervised service to call slowq-start instead of qmail-start
+# This will also create a special queue in /var/indimail/queue/slowq that
+# has a subdir named ratelimit to store rate defintion files for any domain
+
 $ sudo /usr/sbin/svctool --slowq --servicedir=/service \
   --qbase=/var/indimail/queue --cntrldir=control \
   --persistdb --starttls --fsync --syncdir \
@@ -1603,7 +1609,13 @@ Having a dedicated service for rate controlled delivery also avoids having the m
 Below is an example of having emails to yahoo.com throttled to no more than 50 emails per hour
 
 ```
+# create rate control definition file for yahoo.com which
+# caps the delivery to a max of 50 emails per hour
+
 $ sudo drate -d yahoo.com -r 50/3600
+
+# Query the rate defition for yahoo.com
+
 $ drate -d yahoo.com
 Conf   Rate: 50/3600 (0.0138888888)
 Email Count: 0
@@ -1616,6 +1628,8 @@ CurrentRate: 0.0000000000
 During the course of delivery you can use the drate command to display the current delivery date.
 
 ```
+# Query the rate defition for yahoo.com
+
 $ drate -d yahoo.com
 Conf   Rate: 5/3600 (0.0013888888)
 Email Count: 70
@@ -1625,13 +1639,20 @@ CurrentTime: Tue, 1 Jun 2021 10:23:01 +0530
 CurrentRate: 0.0002298473 OK
 ```
 
-Now that we have configured a separate queue <b>slowq</b> for rate controlled delivery, we need to queue emails for the configured domain in this queue rather than the any of the regular indimail-mta's multiple queues. To do that we must have any entry in the control file <b>domainqueue</b> to set the <b>QUEUEDIR</b> environment variable when using qmail-inject for sendmail.
+Now that we have configured a separate queue <b>slowq</b> for rate controlled delivery, we need to queue emails for the configured domain in this queue rather than the any of the regular indimail-mta's multiple queues. To do that we must have any entry in the control file <b>domainqueue</b> to set the <b>QUEUEDIR</b> environment variable when using qmail-inject for sendmail. You can create, edit, delete entries from <b>domainqueue</b> using your favourite text editor.
 
 ```
+$ cat /etc/indimail/control/domainqueue
+# format of this file is
+# domain:env variables to set or unset.
+# e.g.
+# domain:ENV1=val1,ENV2=,ENV3=val3
+#
 argos.indimail.org:QUEUEDIR=/var/indimail/queue/slowq
+yahoo.com:QUEUEDIR=/var/indimail/queue/slowq
 ```
 
-Once the delivery rate for a configured domain reaches the configured rate, emails will get queued but not be picked up immediately for delivery. The slowq-send logs will display when this happens. As you can see, the delivery finally happens when the delivery rate becomes lesser than the configured rate.
+Once the delivery rate for a configured domain reaches the configured rate, emails will get queued but will not be picked up immediately for delivery. The slowq-send logs will display when this happens. As you can see, the delivery finally happens when the delivery rate becomes lesser than the configured rate.
 
 ```
 $ tail -11f /var/log/svc/slowq/current
