@@ -1585,7 +1585,7 @@ WARNING: For security, qmail-local replaces any dots in ext with colons before c
 
 To avoid the practical problem of rate limiting every queue, we can use a dedicated queue to handle rate controllled delivery. The default indimail installation creates a special queue named as <b>slowq</b> and uses a daemon <b>slowq-send</b> instead of <b>qmail-send</b> to process the <u>slowq</u> queue. This is done by calling <b>slowq-start<b> instead of <b>qmail-daemon</b> / <b>qmail-start</b>. <b>slowq-send</b> doesn't have its own qmail-todo process. We don't require it as we aren't looking at high delivery rates for this queue. <b>slowq-start</b> is invoked using a supervised service in <u>/service/slowq</u>.
 
-To create this special slowq service for delivery rate control you can use svctool as below. This will also create logs to be in <u>/var/log/svc/slowq/current</u>.
+To create this special slowq service for delivery rate control you can use svctool as below. This will also create the queue <u>/var/indimail/queue/slowq</u> and logs to be in <u>/var/log/svc/slowq/current</u>.
 
 ```
 # Create supervised service to call slowq-start instead of qmail-start
