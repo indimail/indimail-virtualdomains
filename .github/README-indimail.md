@@ -208,7 +208,7 @@ This document will refer to **IndiMail** as a combined package of indimail-virtu
 
 When you install indimail-virtualdomains, a shared library from the package is dynamically loaded by indimail-mta to provide virtual domain support in indimail-mta, along with the ability to work with IMAP/POP3 retrieval daemons.
 
-indimail-virtualdomains provides programs to manage multiple virtual domains on a single host. It allows extending any of the domains across multiple servers. With indimail-mta installed, two compoments - **qmail-rspawn**, **qmail-remote** can act as an SMTP router/interceptor. Both the components use a **MySQL** database to know the location of each and every user. Similarly, the Mail Delivery Agent (MDA) **vdelivermail** uses the same MySQL database, allowing it to re-route any email to any server where the user's mailbox is present. Additionally, indimail-virtualdomains provide **proxyimap** and **proxypop3** - proxies for IMAP and POP3 protocols, to retrieve the user's mailbox from any server. To deliver or retrieve any email, the user doesn't have to connect to any specific serer. This is a very powerful feature which allows indimail-mta to provide native horizontal scalability. It knows the location of each and every user and can distribute or retrieve mails for any user residing on any server located anywhere on the network. If one uses indimail-mta/IndiMail, one can simply add one more server and cater to more users without changing any configuration, software or hardware of existing servers.
+indimail-virtualdomains provides programs to manage multiple virtual domains on a single host. It allows extending any of the domains across multiple servers. With indimail-mta installed, two compoments - **qmail-rspawn**, **qmail-remote** can act as an SMTP router/interceptor. Both the components use a **MySQL** database to know the location of each and every user. Similarly, the Mail Delivery Agent (MDA) **vdelivermail** uses the same MySQL database, allowing it to re-route any email to any server where the user's mailbox is present. Additionally, indimail-virtualdomains provide **proxyimap** and **proxypop3** - proxies for IMAP and POP3 protocols, to retrieve the user's mailbox from any server. To deliver or retrieve any email, the user doesn't have to connect to any specific serer. This is a very powerful feature which allows IndiMail to provide native horizontal scalability. It knows the location of each and every user and can distribute or retrieve mails for any user residing on any server located anywhere on the network. If one uses IndiMail, one can simply add one more server and cater to more users without changing any configuration, software or hardware of existing servers.
 
 This does not force a filesystem architecture like NFS to be used for provisioning large number of users (typically in an ISP/MSP environment). In the architecture below, you can keep on increasing the number of servers (incoming relay, outgoing relay or mailstores) to cater to large number of users. This allows you to scale indimail easily to serve millions of users using commodity hardware. You can read the feature list to get an idea of the changes and new features that have been added over the original packages. You can see a pictorial representation of the ![architecture](indimail_arch.png "IndiMail Architecture")
 
@@ -224,7 +224,7 @@ To migrate from an existing proprietary mail server like MS Exchange requires 5 
 4. Modify your user's mail configuration to use SMTP, IMAP Proxy, POP3 Proxy ports on the IndiMail server (**proxypop3**, **proxyimap**)
 5. Change the MX to point to the indimail-mta server.
 
-indimail-mta/IndiMail is highly configurable. No hard-coded directories of qmail like /var/qmail/control or /var/qmail/queue. All directories are configurable at run time. indimail-mta has multiple queues and the queue destination directories are also configurable. You can have one IndiMail installation cater to multiple instances having different properties / configuration.  To set up a new IndiMail instance requires you to just set few environment variables. Unlike qmail/netqmail, indimail-mta doesn't force you to recompile each time you require a new instance.  Multiple queues eliminates what is known as ['the silly qmail syndrome'](https://qmail.jms1.net/silly-qmail.shtml "silly-qmail-syndrome") and gives indimail-mta the capability to perform better than a stock qmail installation. indimail-mta's multiple queue architecture allows it to achieve tremendous inject rates using commodity hardware as can be read [here](http://groups.google.co.in/group/indimail/browse_thread/thread/f9e0b6214d88ca6d#). You can see a pictorial representation of the queue as well as read the [indimail-mta INTERNALS](#indimail-mta-internals).
+IndiMail is highly configurable. No hard-coded directories of qmail like /var/qmail/control or /var/qmail/queue. All directories are configurable at run time. IndiMail has multiple queues and the queue destination directories are also configurable. You can have one IndiMail installation cater to multiple instances having different properties / configuration.  To set up a new IndiMail instance requires you to just set few environment variables. Unlike qmail/netqmail, IndiMail doesn't force you to recompile each time you require a new instance.  Multiple queues eliminates what is known as ['the silly qmail syndrome'](https://qmail.jms1.net/silly-qmail.shtml "silly-qmail-syndrome") and gives IndiMail the capability to perform better than a stock qmail installation. IndiMail's multiple queue architecture allows it to achieve tremendous inject rates using commodity hardware as can be read [here](http://groups.google.co.in/group/indimail/browse_thread/thread/f9e0b6214d88ca6d#). You can see a pictorial representation of the queue as well as read the [indimail-mta INTERNALS](#indimail-mta-internals).
 
 IndiMail is a pure messaging solution. It does not provide calendars, todo lists, address books, meeting requests and a web mail front-end. However, you can use [RoundCubemail](https://roundcube.net/ "RoundCubemail") or any web mail front-end that works with IMAP or POP3 protocol with IndiMail. If you decide to install [RoundCubemail](https://roundcube.net/ "RoundCubemail"), you can install the **ircube** package from the IndiMail's DNF/YUM/Debian [Repository](https://build.opensuse.org/package/show/home:indimail/ircube "ircube") to have a fully functional web mail front-end. The ircube package provides plugins for Rouncube Mail to manage your passwords, vacation and SPAM filters.
 
@@ -232,11 +232,11 @@ IndiMail administrators can use a web administration tool called **iwebadmin**. 
 
 IndiMail comes with a power tcl/tk administration client called [**indium**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indium-1.1 "indium"). It can be installed from source from [here](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indium-1.1 "indium") or from the [DNF/YUM/Debian Repository](https://build.opensuse.org/package/show/home:indimail/indium "indium repository") on the openSUSE Build Service.
 
-To install indimail-mta/IndiMail you can take the help of the following documents in the [indimail-x/doc subdirectory](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-x/doc "Documents Subdirectory") of [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains "indimail-virtualdomains") github repository. You can also jump to the section [Installing Indimail using DNF/YUM/APT Repository](#installing-indimail-using-dnfyumapt-repository) towards the bottom of this document.
+To install IndiMail you can take the help of the following documents in the [indimail-x/doc subdirectory](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-x/doc "Documents Subdirectory") of [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains "indimail-virtualdomains") github repository. You can also jump to the section [Installing Indimail using DNF/YUM/APT Repository](#installing-indimail-using-dnfyumapt-repository) towards the bottom of this document.
 
 File | Description
 ----- | --------------------
-README-indimail.md|Introduction to indimail-mta/IndiMail (this file)
+README-indimail.md|Introduction to IndiMail (this file)
 [INSTALL-indimail.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/INSTALL-indimail.md)|Detailed Source Installation Instructions. A simpler version is [this](https://github.com/mbhangui/indimail-virtualdomains/blob/master/README.md)
 [INSTALL-RPM.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/INSTALL-RPM.md)|Install Instructions using RPM
 [INSTALL-MYSQL.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/INSTALL-MYSQL.md)|MySQL specific Installation Instructions
@@ -245,7 +245,7 @@ README-indimail.md|Introduction to indimail-mta/IndiMail (this file)
 
 If you have enough experience on your belt you can dive into this [document](https://github.com/mbhangui/indimail-virtualdomains/blob/master/README.md "README").
 
-Once you have installed indimail-mta/IndiMail, you will find all man pages in /usr/share/man and documents in /usr/share/indimail/doc. You can do man indimail to get started with understanding indimail-mta/IndiMail.
+Once you have installed IndiMail, you will find all man pages in /usr/share/man and documents in /usr/share/indimail/doc. You can do man indimail to get started with understanding IndiMail.
 
 #DISCLAIMER
 
@@ -253,7 +253,7 @@ There is no warranty implied or otherwise with this package. I believe in OpenSo
 
 # LICENSING
 
-indimail-mta/IndiMail uses GPLv3 License. See file [LICENSE](https://github.com/mbhangui/indimail-virtualdomains/blob/master/LICENSE "GPLv3"). Additional licenses (if any) may be found in subfolder of each component that indimail-mta/IndiMail uses.
+IndiMail uses GPLv3 License. See file [LICENSE](https://github.com/mbhangui/indimail-virtualdomains/blob/master/LICENSE "GPLv3"). Additional licenses (if any) may be found in subfolder of each component that IndiMail uses.
 
 # TERMINOLOGY used for commands
 
@@ -278,23 +278,21 @@ qmail-inject _/                                 /      \___ qmail-clean
                                      \_ qmail-lspawn --- qmail-local
 ```
 
-The diagram below shows how qmail-multi(8) works ![qmail-multi](qmail_multi.png)
+The diagram below shows how <b>qmail-multi</b>(8) works ![qmail-multi](qmail_multi.png)
 
-Every message is added to a central queue directory by qmail-queue. qmail-queue is invoked by qmail-multi. The main purpose of qmail-multi is to select a queue as discussed in [indimail-mta Queue Mechanism](#indimail-mta-queue-mechanism). Here is a pictorial representation of the indimail-mta queue. ![Pictorial](indimail_queue.png)
+Every message is added to a central queue directory by <b>qmail-queue</b>. <b>qmail-queue</b> is invoked by <b>qmail-multi</b>. The main purpose of <b>qmail-multi</b> is to select a queue as discussed in [IndiMail Queue Mechanism](#indimail-queue-mechanism). Here is a pictorial representation of the IndiMail queue. ![Pictorial](indimail_queue.png)
 
-qmail-multi is invoked as needed, by setting QMAILQUEUE=/usr/sbin/qmail-queue, mostly by qmail-inject for locally generated messages, qmail-smtpd for messages received through SMTP, qmail-local for forwarded messages, or qmail-send for bounce messages.
+<b>qmail-multi</b> is invoked as needed, by setting QMAILQUEUE=/usr/sbin/qmail-queue, mostly by <b>qmail-inject</b> for locally generated messages, <b>qmail-smtpd</b> for messages received through SMTP, <b>qmail-local</b> for forwarded messages, or <b>qmail-send</b> for bounce messages.
 
-Every message is then pre-processed by qmail-todo and then processed by qmail-send for delivery, in cooperation with qmail-lspawn, qmail-rspawn and cleaned up by qmail-clean. These five programs are long-running daemons.
+Every message is then pre-processed by <b>qmail-todo</b> and then processed by <b>qmail-send</b> for delivery, in cooperation with <b>qmail-lspawn</b>, <b>qmail-rspawn</b> and cleaned up by <b>qmail-clean</b>. These five programs are long-running daemons. The diagram also shows a separate queue named <b>slowq</b>. This queue is special. It is a single queue that has <b>slowq-send</b> processing it instead of <b>qmail-todo</b>, <b>qmail-send</b> pair. This queue has a feature where the deliveries can be rate controlled.
 
-The diagram also shows a separate queue named <b>slowq</b>. This queue is special. It is a single queue that has <b>slowq-send</b> processing it instead of <b>qmail-todo</b>, <b>qmail-send</b> pair. This queue has a feature where the deliveries can be rate controlled.
-
-The queue is designed to be crashproof, provided that the underlying filesystem is crashproof. All cleanups are handled by qmail-send and qmail-clean without human intervention.
+The queue is designed to be crashproof, provided that the underlying filesystem is crashproof. All cleanups are handled by <b>qmail-send</b> and <b>qmail-clean</b> without human intervention.
 
 ## Programs
 
 ### qmail-multi
 
-qmail-multi is discussed in detail in [indimail-mta Queue Mechanism](#indimail-mta-queue-mechanism). qmail-multi can also do spam filtering before a message gets queued. See [SPAM Control using bogofilter](#spam-control-using-bogofilter) for more details.
+<b>qmail-multi</b> is a frontend for <b>qmail-queue</b>. It selects one of the multiple queues, sets the environment variable <b>QUEUEDIR</b> and calls <b>qmail-queue</b>. <b>qmail-multi</b> is discussed in detail in [IndiMail Queue Mechanism](#indimail-queue-mechanism). <b>qmail-multi</b> can also do spam filtering before a message gets queued. See [SPAM Control using bogofilter](#spam-control-using-bogofilter) for more details.
 
 ### qmail-queue
 
@@ -304,7 +302,7 @@ file|Description
 ----|-----------
 queueX/mess/<u>inode</u>|the message
 queueX/todo/<u>inode</u>|the envelope: where the message came from, where it's going
-queueX/intd/<u>inode</u>|the envelope, under construction by qmail-queue
+queueX/intd/<u>inode</u>|the envelope, under construction by <b>qmail-queue</b>
 queueX/info/<u>inode</u>|the envelope sender address, after preprocessing
 queueX/local/<u>inode</u>|local envelope recipient addresses, after preprocessing
 queueX/remote/<u>inode</u>|remote envelope recipient addresses, after preprocessing
@@ -325,9 +323,9 @@ S5|+mess -intd -todo +info ?local ?remote ?bounce (preprocessed)
 
 Guarantee: If queueX/mess/<u>inode</u> exists, it has inode number <u>inode</u>.
 
-qmail-queue's job is to accept a message from a client and submit it to the queue. It reads the message from file descriptor zero and the envelope from file descriptor one.
+<b>qmail-queue</b>'s job is to accept a message from a client and submit it to the queue. It reads the message from file descriptor zero and the envelope from file descriptor one.
 
-qmail-queue adds a Received field to the message that looks like one of these
+<b>qmail-queue</b> adds a Received field to the message that looks like one of these
 
 * 	Received: (indimail-mta 37166 invoked by alias); 26 Sep 1995 04:46:54 -0000
 * 	Received: (indimail-mta 37166 invoked from network from w.x.y.z by host argos by uid 123); 26 Sep 1995 04:46:54 -0000
@@ -335,40 +333,38 @@ qmail-queue adds a Received field to the message that looks like one of these
 
 where:
 
-* 	37166 is qmail-queue's process ID.
-* 	invoked by alias means qmail-queue was invoked by a process with uid of alias user. This will be through qmail-local reading processing a dot-qmail file
-* 	invoked from network means qmail-queue was invoked by user qmaild received from host w.x.y.z on host argos.
-* 	invoked from bounce means that this was a bounce generated by qmail-send running under uid qmails
-* 	26 Sep 1995 04:46:54 -OOOO is the time and date at which qmail-queue created the message.
+* 	37166 is <b>qmail-queue</b>'s process ID.
+* 	invoked by alias means <b>qmail-queue</b> was invoked by a process with uid of alias user. This will be through <b>qmail-local</b> reading processing a dot-qmail file
+* 	invoked from network means <b>qmail-queue</b> was invoked by user qmaild received from host w.x.y.z on host argos.
+* 	invoked from bounce means that this was a bounce generated by <b>qmail-send</b> running under uid qmails
+* 	26 Sep 1995 04:46:54 -OOOO is the time and date at which <b>qmail-queue</b> created the message.
 
-qmail-queue places a messages in the queue in four stages:
+<b>qmail-queue</b> places a messages in the queue in four stages:
 
-1. 	To add a message to the queue, qmail-queue first creates a file in a separate directory, queueX/pid, with a unique name. The filesystem assigns that file a unique inode number. qmail-queue looks at that number, say 3016451. By the guarantee above, message 3016451 must be in state S1.
+1. 	To add a message to the queue, <b>qmail-queue</b> first creates a file in a separate directory, queueX/pid, with a unique name. The filesystem assigns that file a unique inode number. <b>qmail-queue</b> looks at that number, say 3016451. By the guarantee above, message 3016451 must be in state S1.
 2. 	The queueX/pid file is renamed to queueX/mess/split/<u>inode</u>, and the message is written to the file, moving to state S2. Here split is the remainder left from dividing inode number by the compile time conf-split value. For example, if inode is 3016451 and conf-split is the default, 151, then split is 75 (3016451 divided by 151 is 19976 which gives a remainder of (3016451 - 19976 * 151) = 75)
 3.	The file queueX/intd/<u>inode</u> is created and the envelope is written to it in the form
 
 	`u1011\0p28966\0Ftestuser@example.com\0Tuser1@a.com\0Tuser2@b.com\0`
 
 	It means the above message was sent by user tuser@example.com with uid 1011, process ID 28966 to two users user1@a.com, user2@b.com. At this point, we have moved to state S3
-4.	queueX/intd/<u>inode</u> is linked to queueX/todo/<u>inode</u>, moving the state to S4. At this instant, message has been successfully queued for further processing by qmail-todo, qmail-send. 
+4.	queueX/intd/<u>inode</u> is linked to queueX/todo/<u>inode</u>, moving the state to S4. At this instant, message has been successfully queued for further processing by <b>qmail-todo</b>, <b>qmail-send</b>. 
 
-At the moment queueX/todo/<u>inode</u> is created, the message has been queued. qmail-send eventually (within 25 minutes notices the new message, but to speed things up, qmail-queue writes a single byte to lock/trigger, a named pipe that qmail-send watches. When trigger contains readable data, qmail- send is awakened, empties trigger, and scans the todo directory.
+At the moment queueX/todo/<u>inode</u> is created, the message has been queued. <b>qmail-send</b> eventually (within 25 minutes notices the new message, but to speed things up, <b>qmail-queue</b> writes a single byte to lock/trigger, a named pipe that <b>qmail-send</b> watches. When trigger contains readable data, qmail- send is awakened, empties trigger, and scans the todo directory.
 
-qmail-queue starts a 24-hour timer before touching any files, and commits suicide if the timer expires.
+<b>qmail-queue</b> starts a 24-hour timer before touching any files, and commits suicide if the timer expires.
 
-Once a message is deposited in one of the indimail's queues, it will be sent by few programs working cooperatively. We will now look at qmail-daemon, qmail-start, qmail-send, qmail-lspawn, qmail-rspawn, qmail-local, and qmail-remote.
+Once a message is deposited in one of the indimail's queues, it will be sent by few programs working cooperatively. We will now look at qmail-daemon, qmail-start, <b>qmail-send</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b>, <b>qmail-local</b>, and <b>qmail-remote</b>.
 
 ### qmail-daemon, qmail-start
 
-qmail-start invokes qmail-send, qmail-todo, qmail-lspawn, qmail-rspawn, and qmail-clean, under the proper uids and gids for a single queue. These five daemons cooperate to deliver messages from the queue.
+<b>qmail-daemon</b> invokes multiple invocations of <b>qmail-start</b> to invoke <b>qmail-send</b>, <b>qmail-todo</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b>, and <b>qmail-clean</b>, under the proper uids and gids for multiple queues. It starts multiple instances of <b>qmail-send</b>, <b>qmail-todo</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b> and <b>qmail-clean</b>. The number of instances it runs is defined by the environment variable QUEUE\_COUNT. For each instance the queue is defined by <b>qmail-daemon</b> by setting the environment variable <b>QUEUEDIR</b>. A queue is defined by the integers defined by environment variables QUEUE\_START and QUEUE\_COUNT as described in section [IndiMail Queue Mechanism](#indimail-queue-mechanism). <b>qmail-daemon</b> also monitors <b>qmail-send</b> and <b>qmail-todo</b> and restart them if they go down.
 
-qmail-daemon invokes multiple invocations of qmail-start to invoke qmail-send, qmail-todo, qmail-lspawn, qmail-rspawn,
-and qmail-clean, under the proper uids and gids for multiple queues. It starts multiple instances of qmail-send, qmail-todo, qmail-lspawn, qmail-rspawn and qmail-clean. The number of instances it runs is defined by the environment variable QUEUE\_COUNT. For each instance the queue is defined by qmail-daemon by setting the environment variable QUEUEDIR. A queue is defined by the
-integers defined by environment variables QUEUE\_START and QUEUE\_COUNT as described in section [qmail-multi](#qmail-multi).
+<b>qmail-start</b> invokes <b>qmail-send</b>, <b>qmail-todo</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b>, and <b>qmail-clean</b>, under the proper uids and gids for a single queue. These five daemons cooperate to deliver messages from the queue. <b>qmail-start</b> should be used if you desire to run only one queue. For running multiple parallel queues run <b>qmail-daemon</b>.
 
-qmail-daemon also monitors qmail-send and qmail-todo and restart them if they goes down. qmail-start should be used if you desire to run only one queue. For running multiple parallel queues run qmail-daemon.
+<b>slowq-start</b> invokes <b>slowq-send</b>, lspawn, <b>qmail-rspawn</b>, and <b>qmail-clean</b>, under the proper uids and gids for a single queue. These four daemons cooperate to deliver messages from the queue. <b>slowq-start</b> is invoked for the special queue <b>slowq</b> that can be rate controlled. We will talke about this in the chapter [Controlling Delivery Rates](#-controlling-delivery-rates).
 
-qmali-daemon, qmail-start can be passed an argument - <b>defaultdelivery</b>. If <b>defaultdelivery</b> supplied, qmail-start or qmail-daemon passes it to qmail-lspawn. You can also have a control file named defaultdelivery. The mailbox type is picked up from the <b>defaultdelivery</b> control file. The table below outlines the choices for <b>defaultdelivery</b> control file
+<b>qmail-daemon</b>, <b>qmail-start</b>, <b>slowq-start</b> can be passed an argument - <b>defaultdelivery</b>. If <b>defaultdelivery</b> supplied, <b>qmail-start</b> or <b>qmail-daemon</b> passes it to <b>qmail-lspawn</b>. You can also have a control file named defaultdelivery. The mailbox type is picked up from the <b>defaultdelivery</b> control file. The table below outlines the choices for <b>defaultdelivery</b> control file
 
 Mailbox Format |Name|Location|defaultdelivery|Comments
 ---------------|----|--------|---------------|--------
@@ -378,13 +374,13 @@ mbox|username|/var/spool/mail|See INSTALL.vsm|traditional mailbox
 
 ### qmail-send, qmail-send
 
-Once a message has been queued, qmail-todo must decide which recipients are local and which recipients are remote. It may also rewrite some recipient addresses. qmail-todo/qmail-send process messages in the queue and pass them to qmail-rspawn and qmail-lspawn. We will talk about their function in the order that a message in the queue would experience them: preprocessing, delivery, and cleanup.
+Once a message has been queued, <b>qmail-todo</b> must decide which recipients are local and which recipients are remote. It may also rewrite some recipient addresses. <b>qmail-todo</b>/<b>qmail-send</b> process messages in the queue and pass them to <b>qmail-rspawn</b> and <b>qmail-lspawn</b>. We will talk about their function in the order that a message in the queue would experience them: preprocessing, delivery, and cleanup.
 
 #### Preprocessing
 
-qmail-todo does the preprocessing and like queuing, this is done in stages:
+<b>qmail-todo</b> does the preprocessing and like queuing, this is done in stages:
 
-1. 	When qmail-todo notices queueX/todo/<u>inode</u>, it knows that the message <u>inode</u> is in S4. qmail-todo deletes queueX/info/split/<u>inode</u>, queueX/local/split/<u>inode</u>, and queueX/remote/split/<u>inode</u>, if they exist. Then it reads through queueX/todo/<u>inode</u>.
+1. 	When <b>qmail-todo</b> notices queueX/todo/<u>inode</u>, it knows that the message <u>inode</u> is in S4. <b>qmail-todo</b> deletes queueX/info/split/<u>inode</u>, queueX/local/split/<u>inode</u>, and queueX/remote/split/<u>inode</u>, if they exist. Then it reads through queueX/todo/<u>inode</u>.
 2. 	A new queueX/info/split/inode is created, containing the envelope sender address.
 3. 	If the message has local recipients, they're added to queueX/local/split/<u>inode</u>.
 4. 	If the message has remote recipients, they're added to queueX/remote/split/<u>inode</u>.
@@ -393,22 +389,22 @@ qmail-todo does the preprocessing and like queuing, this is done in stages:
 
 #### Delivery
 
-Messages at S5 are handled as follows. Initially, all recipients in queueX/local/split/<u>inode</u> and queueX/remote/split/<u>inode</u> are marked NOT DONE, meaning that qmail-send should attempt to deliver to them. On its own schedule, qmail-send sends delivery commands to qmail-lspawn and qmail-rspawn using channels set up by qmail-start. When it receives responses from qmail-lspawn or qmail-rspawn that indicate successful delivery or permanent error, qmail-send changes their status in queueX/local/split/<u>inode</u> or queueX/remote/split/<u>inode</u> to DONE, meaning that it should not attempt further deliveries. When qmail-send receives a permanent error, it also records that in queueX/bounce/split/<u>inode</u>. Bounce messages are also handled on qmail-send's schedule. Bounces are handled by injecting a bounce message based on queueX/mess/split/<u>inode</u> and queueX/bounce/split/<u>inode</u>, and deleting queueX/bounce/split/<u>inode</u>. When all ofthe recipients in queueX/local/split/<u>inode</u> or queueX/remote/split/<u>inode</u> are marked DONE, the respective local or remote file is removed.
+Messages at S5 are handled as follows. Initially, all recipients in queueX/local/split/<u>inode</u> and queueX/remote/split/<u>inode</u> are marked NOT DONE, meaning that <b>qmail-send</b> should attempt to deliver to them. On its own schedule, <b>qmail-send</b> sends delivery commands to <b>qmail-lspawn</b> and <b>qmail-rspawn</b> using channels set up by qmail-start. When it receives responses from <b>qmail-lspawn</b> or <b>qmail-rspawn</b> that indicate successful delivery or permanent error, <b>qmail-send</b> changes their status in queueX/local/split/<u>inode</u> or queueX/remote/split/<u>inode</u> to DONE, meaning that it should not attempt further deliveries. When <b>qmail-send</b> receives a permanent error, it also records that in queueX/bounce/split/<u>inode</u>. Bounce messages are also handled on <b>qmail-send</b>'s schedule. Bounces are handled by injecting a bounce message based on queueX/mess/split/<u>inode</u> and queueX/bounce/split/<u>inode</u>, and deleting queueX/bounce/split/<u>inode</u>. When all ofthe recipients in queueX/local/split/<u>inode</u> or queueX/remote/split/<u>inode</u> are marked DONE, the respective local or remote file is removed.
 
-qmail-send may at its leisure try to deliver a message to a NOT DONE address. If the message is successfully delivered, qmail-send marks the address as DONE. If the delivery attempt meets with permanent failure, qmail-send first appends a note to queueX/bounce/split/<u>inode</u>, creating queueX/bounce/split/<u>inode</u> if necessary; then it marks the address as DONE. Note that queueX/bounce/split/<u>inode</u> is not crashproof.
+<b>qmail-send</b> may at its leisure try to deliver a message to a NOT DONE address. If the message is successfully delivered, <b>qmail-send</b> marks the address as DONE. If the delivery attempt meets with permanent failure, <b>qmail-send</b> first appends a note to queueX/bounce/split/<u>inode</u>, creating queueX/bounce/split/<u>inode</u> if necessary; then it marks the address as DONE. Note that queueX/bounce/split/<u>inode</u> is not crashproof.
 
-qmail-send may handle queueX/bounce/split/<u>inode</u> at any time, as follows: it
+<b>qmail-send</b> may handle queueX/bounce/split/<u>inode</u> at any time, as follows: it
 
 1. 	injects a new bounce message, created from queueX/bounce/split/<u>inode</u> and queueX/mess/split/<u>inode</u>;
 2. 	deletes queueX/bounce/split/<u>inode</u>.
 
-When all addresses in queueX/local/split/<u>inode</u> are DONE, qmail-send deletes queueX/local/split/<u>inode</u>. Same for queueX/remote/split/<u>inode</u>. 
+When all addresses in queueX/local/split/<u>inode</u> are DONE, <b>qmail-send</b> deletes queueX/local/split/<u>inode</u>. Same for queueX/remote/split/<u>inode</u>. 
 
-When queueX/local/split/<u>inode</u> and queueX/remote/split/<u>inode</u> are gone, qmail-send eliminates the message, as follows. First, if queueX/bounce/split/<u>inode</u> exists, qmail-send handles it as described above. Once queueX/bounce/split/<u>inode</u> is definitely gone, qmail-send deletes queueX/info/split/<u>inode</u>, moving to S2, and finally queueX/mess/split/<u>inode</u>, moving to S1.
+When queueX/local/split/<u>inode</u> and queueX/remote/split/<u>inode</u> are gone, <b>qmail-send</b> eliminates the message, as follows. First, if queueX/bounce/split/<u>inode</u> exists, <b>qmail-send</b> handles it as described above. Once queueX/bounce/split/<u>inode</u> is definitely gone, <b>qmail-send</b> deletes queueX/info/split/<u>inode</u>, moving to S2, and finally queueX/mess/split/<u>inode</u>, moving to S1.
 
 ##### Retry Schedules
 
-Each message has its own retry schedule. The longer a message remains undeliverable, the less frequently qmail tries to send it. The retry schedule is not configurable. The tables below show the retry schedule for a message that's undeliverable to a recipient until it bounces (default queuelifetime of 604800 seconds). Local messages a similar, but more frequent, schedule than remote messages. qmail-send uses a simple formula to determine the times at which messages in the queue are retried. If attempts is the number of failed delivery attempts so far, and birth is the time at which a message entered the queue (determined from the creation time ofthe queue/info file), then:
+Each message has its own retry schedule. The longer a message remains undeliverable, the less frequently qmail tries to send it. The retry schedule is not configurable. The tables below show the retry schedule for a message that's undeliverable to a recipient until it bounces (default queuelifetime of 604800 seconds). Local messages a similar, but more frequent, schedule than remote messages. <b>qmail-send</b> uses a simple formula to determine the times at which messages in the queue are retried. If attempts is the number of failed delivery attempts so far, and birth is the time at which a message entered the queue (determined from the creation time ofthe queue/info file), then:
 
 nextretry = birth + (attempts \* <u>chanskip</u>) \* (attempts \* <u>chanskip</u>)
 
@@ -588,42 +584,42 @@ When both queueX/local/split/<u>inode</u> and queueX/remote/split/<u>inode</u> h
 2. 	Deleting queueX/info/split/<u>inode</u>.
 3. 	Deleting queueX/mess/split/<u>inode</u>.
 
-Partially queued and partially dequeued messages left when a system crash interrupts qmail-queue or qmail-send are deleted by qmail-send using qmail-clean, another long-running daemon started by qmail-start. Messages with a queueX/mess/split/<u>inode</u> file and possibly an queueX/intd/<u>inode</u> but no todo, info, local, remote, or bounce, are safe to delete after 36 hours because qmail-queue kills itself after 24 hours. Similarly, files in the pid directory more than 36 hours old are also deleted.
+Partially queued and partially dequeued messages left when a system crash interrupts <b>qmail-queue</b> or <b>qmail-send</b> are deleted by <b>qmail-send</b> using <b>qmail-clean</b>, another long-running daemon started by qmail-start. Messages with a queueX/mess/split/<u>inode</u> file and possibly an queueX/intd/<u>inode</u> but no todo, info, local, remote, or bounce, are safe to delete after 36 hours because <b>qmail-queue</b> kills itself after 24 hours. Similarly, files in the pid directory more than 36 hours old are also deleted.
 
-If the computer crashes while qmail-queue is trying to queue a message, or while qmail-send is eliminating a message, the message may be left in state S2 or S3.
+If the computer crashes while <b>qmail-queue</b> is trying to queue a message, or while <b>qmail-send</b> is eliminating a message, the message may be left in state S2 or S3.
 
-When qmail-send sees a message in state S2 or S3, other than one it is currently eliminating, where queueX/mess/split/<u>inode</u> is more than 36 hours old, it deletes queueX/intd/split/<u>inode</u> if that exists, then deletes queueX/mess/split/<u>inode</u>. Note that any qmail-queue handling the message must be dead.
+When <b>qmail-send</b> sees a message in state S2 or S3, other than one it is currently eliminating, where queueX/mess/split/<u>inode</u> is more than 36 hours old, it deletes queueX/intd/split/<u>inode</u> if that exists, then deletes queueX/mess/split/<u>inode</u>. Note that any <b>qmail-queue</b> handling the message must be dead.
 
-Similarly, when qmail-send sees a file in the queueX/pid directory that is more than 36 hours old, it deletes it.
+Similarly, when <b>qmail-send</b> sees a file in the queueX/pid directory that is more than 36 hours old, it deletes it.
 
-Cleanups are not necessary if the computer crashes while qmail-send is delivering a message. At worst a message may be delivered twice. (There is no way for a distributed mail system to eliminate the possibility of duplication. What if an SMTP connection is broken just before the server acknowledges successful receipt of the message. The client must assume the worst and send the message again. Similarly, if the computer crashes just before qmail-send marks a message as DONE, the new qmail-send must assume the worst and send the message again. The usual solutions in the database literature e.g., keeping log files amount to saying that it's the recipient's computer's job to discard duplicate messages.)
+Cleanups are not necessary if the computer crashes while <b>qmail-send</b> is delivering a message. At worst a message may be delivered twice. (There is no way for a distributed mail system to eliminate the possibility of duplication. What if an SMTP connection is broken just before the server acknowledges successful receipt of the message. The client must assume the worst and send the message again. Similarly, if the computer crashes just before <b>qmail-send</b> marks a message as DONE, the new <b>qmail-send</b> must assume the worst and send the message again. The usual solutions in the database literature e.g., keeping log files amount to saying that it's the recipient's computer's job to discard duplicate messages.)
 
 #### Global & Queue Specific Concurrency, Parallelism limits
 
-qmail-lspawn and qmail-rspawn can do multiple concurrent deliveries. The default concurrency limit is 5 for local deliveries and 10 for remote deliveries. These can be increased upto a maximum of 500 by setting it in the control files <b>concurrencylocal</b> for local deliveries and <b>concurrencyremote</b> for remote deliveries. These two (like any other indimail control files) lie in <u>/etc/indimail/control</u> directory. These concurrency limits are inherited by each of the indimail's multiple queues. Additionally indimail allows you to have queue specific concurrency limits. e.g. You can have the control files <b>concurrencyl.queue2</b>, <b>concurrencyr.queue2</b> for setting concurrency specific to <u>/var/indimail/queue/queue2</u>.
+<b>qmail-lspawn</b> and <b>qmail-rspawn</b> can do multiple concurrent deliveries. The default concurrency limit is 5 for local deliveries and 10 for remote deliveries. These can be increased upto a maximum of 500 by setting it in the control files <b>concurrencylocal</b> for local deliveries and <b>concurrencyremote</b> for remote deliveries. These two (like any other indimail control files) lie in <u>/etc/indimail/control</u> directory. These concurrency limits are inherited by each of the indimail's multiple queues. Additionally indimail allows you to have queue specific concurrency limits. e.g. You can have the control files <b>concurrencyl.queue2</b>, <b>concurrencyr.queue2</b> for setting concurrency specific to <u>/var/indimail/queue/queue2</u>.
 
 ## Setting Environment Variables
 
 indimail-mta can be fine tuned, configured using environment variables (> 200) of them. There are many methods of setting them.
 
-1. Setting them in variables directory. All indimail services are configured as supervised services in <u>/service</u> directory. Each of these services has a directory named variables. In the variables directory, you just need to create a file and that creates an environment variable. The name of the environment variable is the filename and the value of the environment variable is the content of the file. An empty file, removes the environment variable. As an exercise, explore the directory <u>/service/qmail-smtpd.25/variables</u>
-2. Using control files from.envrules, fromd.envrules, rcpt.envrules, auth.envrules - These are control files used by programs like qmail-smtpd, qmail-inject. They match on the sender or recipient address. Here you can set or unset environment variables for a sender, recipient or any regular expression to match multipler sender or recipients. To know these environment variables, read the man pages for qmail-stmpd, qmail-inject, spawn-filter.
-3. Using control file domainqueue - This can be used to set environment variable for any recipient domain. Read the man page for qmail-smtpd, qmail-inject.
-4. Using environment directory <u>/etc/indimail/control/defaultqueue</u> - This is just like the supervise <b>variables</b> directory. The environment variables configured in this directory get used when calling qmail-inject, sendmail for injecting mails into the queue. Read the man page for qmail-inject.
-5. Using environment directory <u>$HOME/.defaultqueue</u> - This is just like the supervise <b>variables</b> directory. The environment variables configured in this directory get used when calling qmail-inject, sendmail for injecting mails into the queue. Here $HOME refers to the home directory of the user. Read the man page for qmail-inject.
+1. Setting them in variables directory. All indimail services are configured as supervised services in <u>/service</u> directory. Each of these services has a directory named named after the service and a subdir inside it named <b>variables</b>. In the <b>variables</b> directory, you just need to create a file to create an environment variable. The name of the environment variable is the filename and the value of the environment variable is the content of the file. An empty file, removes the environment variable. As an exercise, explore the directory <u>/service/qmail-smtpd.25/variables</u>. All IndiMail services use the program <b>envdir</b>(8) to set environment variables from the <b>variables</b> directory.
+2. Using control files <b>from.envrules</b>, <b>fromd.envrules</b>, <b>rcpt.envrules</b>, <b>auth.envrules</b> - These are control files used by programs like <b>qmail-smtpd</b>, <b>qmail-inject</b>. They match on the sender or recipient address. Here you can set or unset environment variables for a sender, recipient or any regular expression to match multipler sender or recipients. To know these environment variables, read the man pages for qmail-stmpd, <b>qmail-inject</b>, <b>spawn-filter</b>.
+3. Using control file domainqueue - This can be used to set environment variable for any recipient domain. Read the man page for <b>qmail-smtpd</b>, <b>qmail-inject</b>.
+4. Using environment directory <u>/etc/indimail/control/defaultqueue</u> - This is just like the supervise <b>variables</b> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, sendmail for injecting mails into the queue. Read the man page for <b>qmail-inject</b>.
+5. Using environment directory <u>$HOME/.defaultqueue</u> - This is just like the supervise <b>variables</b> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, sendmail for injecting mails into the queue. Here $HOME refers to the home directory of the user. Read the man page for <b>qmail-inject</b>.
 6. Nothing prevents a user from writing a shell script to set environment variables before calling any of indimail-mta programs. If you are familiar with UNIX, you will know how to set them.
 
 ## Notes
 
 Currently queueX/info/split/<u>inode</u> serves two purposes: first, it records the envelope sender; second, its modification time is used to decide when a message has been in the queue too long. In the future queueX/info/split/<u>inode</u> may store more information. Any non-backwards-compatible changes will be identified by version numbers.
 
-When qmail-queue has successfully placed a message into the queue, it pulls a trigger offered by qmail-send. Here is the current triggering mechanism: lock/trigger is a named pipe. Before scanning todo/, qmail-send opens lock/trigger O\_NDELAY for reading. It then selects for readability on lock/trigger. qmail-queue pulls the trigger by writing a byte O\_NDELAY to lock/trigger. This makes lock/trigger readable and wakes up qmail-send. Before scanning todo/ again, qmail-send closes and reopens lock/trigger.
+When <b>qmail-queue</b> has successfully placed a message into the queue, it pulls a trigger offered by <b>qmail-send</b>. Here is the current triggering mechanism: lock/trigger is a named pipe. Before scanning todo/, <b>qmail-send</b> opens lock/trigger O\_NDELAY for reading. It then selects for readability on lock/trigger. <b>qmail-queue</b> pulls the trigger by writing a byte O\_NDELAY to lock/trigger. This makes lock/trigger readable and wakes up <b>qmail-send</b>. Before scanning todo/ again, <b>qmail-send</b> closes and reopens lock/trigger.
 
-# indimail-mta Queue Mechanism
+# IndiMail Queue Mechanism
 
-indimail-mta has multiple queues and the queue destination directories are also configurable. You can have one IndiMail installation cater to multiple instances having different properties / configuration. To set up a new IndiMail instance requires you to just set few environment variables. Unlike qmail/netqmail, IndiMail doesn't force you to recompile each time you require a new instance. Multiple queues eliminates what is known as ['the silly qmail syndrome'](https://qmail.jms1.net/silly-qmail.shtml "silly-qmail-syndrome") and gives indimail-mta the capability to perform better than a stock qmail installation. indimail-mta's multiple queue architecture allows it to achieve tremendous inject rates using commodity hardware as can be read [here](http://groups.google.co.in/group/indimail/browse_thread/thread/f9e0b6214d88ca6d#). When you have massive injecting rates, your software may place multiple files in a single directory. This drastically reduces file system performance. indimail-mta avoids this by injecting your email in a queue consisting of multiple directories and mails distributed as evenly as possible across these directories.
+IndiMail has multiple queues and the queue destination directories are also configurable. You can have one IndiMail installation cater to multiple instances having different properties / configuration. To set up a new IndiMail instance requires you to just set few environment variables. Unlike qmail/netqmail, IndiMail doesn't force you to recompile each time you require a new instance. Multiple queues eliminates what is known as ['the silly qmail syndrome'](https://qmail.jms1.net/silly-qmail.shtml "silly-qmail-syndrome") and gives IndiMail the capability to perform better than a stock qmail installation. IndiMail's multiple queue architecture allows it to achieve tremendous inject rates using commodity hardware as can be read [here](http://groups.google.co.in/group/indimail/browse_thread/thread/f9e0b6214d88ca6d#). When you have massive injecting rates, your software may place multiple files in a single directory. This drastically reduces file system performance. IndiMail avoids this by injecting your email in a queue consisting of multiple directories and mails distributed as evenly as possible across these directories.
 
-Balancing of emails across multiple queues is achieved by the program <b>qmail-multi</b>, which is actually just a qmail-queue(8) replacement. Any qmail-queue frontend can use qmail-multi. The list of qmail-queue frontends in indimail-mta are
+Balancing of emails across multiple queues is achieved by the program <b>qmail-multi</b>, which is actually just a <b>qmail-queue</b>(8) replacement. Any <b>qmail-queue</b> frontend can use <b>qmail-multi</b>. The list of <b>qmail-queue</b> frontends in IndiMail are
 
 1. sendmail
 2. qmail-inject
@@ -641,17 +637,17 @@ Balancing of emails across multiple queues is achieved by the program <b>qmail-m
 14. replier
 15. rrforward
 
-You just need to configure the following environment variables to have the qmail-queue(8) frontends use qmail-multi(8)
+You just need to configure the following environment variables to have the <b>qmail-queue</b>(8) frontends use <b>qmail-multi</b>(8)
 
 1. QUEUE\_BASE – Base directory where all queues will be placed
 2. QUEUE\_COUNT – number of queues
 3. QUEUE\_START – numeric prefix of the first queue
-4. QMAILQUEUE - Path of qmail-multi (/usr/sbin/qmail-multi)
+4. QMAILQUEUE - Path of <b>qmail-multi</b> (/usr/sbin/qmail-multi)
 5. QUEUEDIR - Not required if you set QUEUE\_BASE, QUEUE\_COUNT, QUEUE\_START. Else it should be full path to a queue (e.g. /var/indimail/queue/queue3). If QUEUEDIR is set, then QUEUE\_BASE, QUEUE\_COUNT and QUEUE\_START are not used.
 
-qmail-multi's job is to select a queue. indimail-mta uses multiple queue. If QUEUEDIR is set, it execs qmail-queue without doing anything. If QUEUEDIR is not defined, it uses QUEUE\_START, QUEUE\_COUNT and QUEUE\_BASE environment variables to set QUEUEDIR environment variable. QUEUE\_BASE is the common basename for all the queues. e.g. QUEUE\_BASE=/var/indimail/queue. Now, if QUEUE\_START is 1, QUEUE\_COUNT is 5, then qmail-multi will use the time to do a modulus operation and get a number ranging from 1 to 5. It will then set the QUEUEDIR environment variable to set any of the 5 queues in /var/indimail/queue. e.g. QUEUEDIR=/var/indimail/queue/queueX, where X is the number selected between 1 to 5. It then does a exec of qmail-queue. Throughout this document we will abbreviate /var/indimail/queue/queueX as queueX.
+<b>qmail-multi</b>'s job is to select a queue. indimail-mta uses multiple queue. If QUEUEDIR is set, it execs <b>qmail-queue</b> without doing anything. If QUEUEDIR is not defined, it uses QUEUE\_START, QUEUE\_COUNT and QUEUE\_BASE environment variables to set QUEUEDIR environment variable. QUEUE\_BASE is the common basename for all the queues. e.g. QUEUE\_BASE=/var/indimail/queue. Now, if QUEUE\_START is 1, QUEUE\_COUNT is 5, then <b>qmail-multi</b> will use the time to do a modulus operation and get a number ranging from 1 to 5. It will then set the QUEUEDIR environment variable to set any of the 5 queues in /var/indimail/queue. e.g. QUEUEDIR=/var/indimail/queue/queueX, where X is the number selected between 1 to 5. It then does a exec of <b>qmail-queue</b>. Throughout this document we will abbreviate /var/indimail/queue/queueX as queueX.
 
-e.g. If you want indimail-mta to use 10 queues, this is what you will do
+e.g. If you want IndiMail to use 10 queues, this is what you will do
 
 ```
 $ sudo /bin/bash
@@ -951,7 +947,7 @@ You can now also query the status of the running IndiMail service by using the s
              └─55890 sleep 300
 ```
 
-IndiMail also proves the <b>svps</b> command which gives a neat display on the status of all services configured for IndiMail. You can omit the -a flag to omit the logging processes.
+IndiMail also proves the svps command which gives a neat display on the status of all services configured for IndiMail. You can omit the -a flag to omit the logging processes.
 
 ```
 $ sudo svps -a
@@ -1024,7 +1020,7 @@ $ sudo svps -a
 
 # Eliminating Duplicate Emails during local delivery
 
-Often you will find program like MS outlook, notorious for sending duplicate emails, flooding your inbox. IndiMail allows you to quickly deal with this proprietary nonsense by turning on duplicate eliminator in **vdelivermail**(8) - the default MDA. To turn on the duplicate eliminator in vdelivermail, you need to set **ELIMINATE_DUPS** and **MAKE_SEEKABLE** environment variables.
+Often you will find program like MS outlook, notorious for sending duplicate emails, flooding your inbox. IndiMail allows you to quickly deal with this proprietary nonsense by turning on duplicate eliminator in **vdelivermail**(8) - the default MDA. To turn on the duplicate eliminator in <b>vdelivermail</b>, you need to set **ELIMINATE_DUPS** and **MAKE_SEEKABLE** environment variables.
 
 ```
 $ sudo /bin/bash
@@ -1034,7 +1030,7 @@ $ sudo /bin/bash
 # svc -u /service/qmail-send.25
 ```
 
-If you do not use vdelivermail and want to use your own delivery agent? Fear not by using ismaildup(1). ismaildup expects the email on standard input and is easily scriptable like the example below in a .qmail file.
+If you do not use <b>vdelivermail</b> and want to use your own delivery agent? Fear not by using <b>ismaildup</b>(1). <b>ismaildup</b> expects the email on standard input and is easily scriptable like the example below in a .qmail file.
 
 `|ismaildup /usr/bin/maildirdeliver /home/manny/Maildir/`
 
@@ -1088,7 +1084,7 @@ unset RPLINE
 | /usr/bin/maildirdeliver /home/mail/T2Zsym/example.com/testuser01/Maildir
 ```
 
-You can replace maildirdeliver in the last line with vdelivermail(8)
+You can replace maildirdeliver in the last line with <b>vdelivermail</b>(8)
 
 `| /usr/sbin/vdelivermail '' bounce-no-mailbox`
 
@@ -1117,7 +1113,7 @@ NOTE: If the program myfilter returns 100, the message will be bounced. If it re
 
 ### 1.1.2 Using QMAILQUEUE with qmail-qfilter
 
-You can use qmail-qfilter(1). qmail-qfilter allows you to run multiple filters passed as command line arguments to qmail-qfilter. Since QMAILQUEUE doesn't allow you to specify multiple arguments, you can write a shell script which calls qmail-qfilter and have the shell script defined as QMAILQUEUE environment variable.
+You can use <b>qmail-qfilter</b>(1). <b>qmail-qfilter</b> allows you to run multiple filters passed as command line arguments to <b>qmail-qfilter</b>. Since QMAILQUEUE doesn't allow you to specify multiple arguments, you can write a shell script which calls <b>qmail-qfilter</b> and have the shell script defined as QMAILQUEUE environment variable.
 
 ```
 $ sudo /bin/bash
@@ -1133,7 +1129,7 @@ NOTE: you can define QQF\_MAILQUEUE to /usr/bin/qmail-nullqueue to discard the m
 
 ### 1.1.3 Using QMAILQUEUE with your own program
 
-When you want to use your own program as QMAILQUEUE, then your program is responsible for queuing the email. It is trivial to queue the email by calling qmail-multi(8). You script can read the stdin for the raw message (headers + body) and pipe the output (maybe after modifications) to qmail-multi(8). If you are doing DK/DKIM signing, you can execute qmail-dk(8) instead of qmail-multi(8). You can have qmail-dk(8) call qmail-dkim(8) and qmail-dkim(8) calls qmail-multi(8). Assuming you want to do DK/DKIM signing, and myfilter calls qmail-dk(8), you can do the following
+When you want to use your own program as QMAILQUEUE, then your program is responsible for queuing the email. It is trivial to queue the email by calling <b>qmail-multi</b>(8). You script can read the stdin for the raw message (headers + body) and pipe the output (maybe after modifications) to <b>qmail-multi</b>(8). If you are doing DK/DKIM signing, you can execute <b>qmail-dk</b>(8) instead of <b>qmail-multi</b>(8). You can have <b>qmail-dk</b>(8) call <b>qmail-dkim</b>(8) and <b>qmail-dkim</b>(8) calls <b>qmail-multi</b>(8). Assuming you want to do DK/DKIM signing, and myfilter calls <b>qmail-dk</b>(8), you can do the following
 
 ```
 $ sudo /bin/bash
@@ -1144,7 +1140,7 @@ $ sudo /bin/bash
 # svc -u /service/qmail-smtpd.25
 ```
 
-NOTE: You can set the environment variable NULLQUEUE before calling qmail-multi to discard the mail completely (blackhole).
+NOTE: You can set the environment variable NULLQUEUE before calling <b>qmail-multi</b> to discard the mail completely (blackhole).
 
 ## 1.2 Filtering during local / remote delivery
 
@@ -1176,23 +1172,23 @@ exit 0
 
 ### 1.2.2 Using control file filterargs
 
-The control file filterargs gives you control to run filters individually for local or remote deliveries. It also allows you to run your filter for both local and remote deliveries. See spawn-filter(8) for full description on this control file.
+The control file filterargs gives you control to run filters individually for local or remote deliveries. It also allows you to run your filter for both local and remote deliveries. See <b>spawn-filter</b>(8) for full description on this control file.
 e.g. The following entry in /var/indimail/control/filterargs causes all mails to yahoo.com be fed through the filter dk-filter(8) for DK/DKIM signing.
 yahoo.com:remote:/usr/bin/dk-filter
 NOTE: If the program myfilter returns 100, the message will be bounced. If it returns 2, the message will be discarded (blackholed).
 
 ### 1.2.3 Using QMAILLOCAL or QMAILREMOTE environment variables
 
-If you define QMAILLOCAL, indimail will execute the program/script defined by the QMAILLOCAL variable for all local deliveries. The arguments passed to this program/script will be the same as that for qmail-local(8).
-Similarly, if you define QMAILREMOTE, indimail will execute the program/script defined by the QMAILREMOTE variable for all remote deliveries. The argument passed to this program/script are the same as that for qmail-remote(8).
-The raw email (header + body) is available on stdin. You can use 822header(8), 822body(8) for getting the headers and body. After your program is through with filtering, the output should be piped to qmail-local(8) for local deliveries and qmail-remote(8) for remote deliveries. You need to also call qmail-local / qmail-remote with the same arguments. i.e
+If you define QMAILLOCAL, indimail will execute the program/script defined by the QMAILLOCAL variable for all local deliveries. The arguments passed to this program/script will be the same as that for <b>qmail-local</b>(8).
+Similarly, if you define QMAILREMOTE, indimail will execute the program/script defined by the QMAILREMOTE variable for all remote deliveries. The argument passed to this program/script are the same as that for <b>qmail-remote</b>(8).
+The raw email (header + body) is available on stdin. You can use 822header(8), 822body(8) for getting the headers and body. After your program is through with filtering, the output should be piped to <b>qmail-local</b>(8) for local deliveries and <b>qmail-remote</b>(8) for remote deliveries. You need to also call <b>qmail-local</b> / <b>qmail-remote</b> with the same arguments. i.e
 
 ```
 exec qmail-local  "$@"     #(for local deliveries)
 exec qmail-remote "$@"     #(for remote deliveries)
 ```
 
-NOTE: You can exit with value 0 instead of calling qmail-local / qmail-remote to discard the mail completely (blackhole)
+NOTE: You can exit with value 0 instead of calling <b>qmail-local</b> / <b>qmail-remote</b> to discard the mail completely (blackhole)
 
 ## 1.3 Using dot-qmail(5) or valias(1)
 
@@ -1206,7 +1202,7 @@ NOTE: you can exit with value 0 instead of calling the maildirdeliver program to
 
 ## 1.4 Using IndiMail rule based filter - vfilter
 
-IndiMail's vfilter(8) mechanism allows you to create rule based filter based on any keyword in the message headers or message body. You can create a vfilter by calling the vcfilter(1) program.
+IndiMail's vfilter(8) mechanism allows you to create rule based filter based on any keyword in the message headers or message body. You can create a vfilter by calling the <b>vcfilter</b>(1) program.
 
 ```
 $ vcfilter -i -t myfilter -h 2 -c 0 -k "failure notice" -f /NoDeliver -b "2|/usr/local/bin/myfilter" testuser01@example.com
@@ -1500,9 +1496,8 @@ exit 111
 
 # IndiMail Delivery mechanism explained
 
-Any email that needs to be delivered needs to be put into a queue before it can be taken up for delivery. Email can be submitted to the queue using qmail-queue command or qmail\_open() function. The following programs use the qmail\_open() API -
-condredirect, dot-forward, fastforward, filterto, forward, maildirserial, new-inject, ofmipd, qmail-inject, qmail-local, qmail-qmqpd, qmail-qmtpd, qmail-queue, qmail-send, qreceipt, replier, rrforward, qmail-smtpd.
-Of these, qmail-smtpd and qmail-qmtpd accept an email for a domain only if the domain is listed in rcpthosts. Once an email is accepted into the queue, qmail-send(8) decides if the mail is to be delivered locally or to a remote address. If the email address corresponds to a domain listed in locals or virtualdomains control file, steps are taken to have the email delivered locally.
+Any email that needs to be delivered needs to be put into a queue before it can be taken up for delivery. Email can be submitted to the queue using <b>qmail-queue</b> command or qmail\_open() function. The following programs use the qmail\_open() API -
+<b>condredirect</b>, <b>dot-forward</b>, <b>fastforward</b>, <b>filterto</b>, <b>forward</b>, <b>maildirserial</b>, <b>new-inject</b>, <b>ofmipd</b>, <b>qmail-inject</b>, <b>qmail-local</b>, <b>qmail-qmqpd</b>, <b>qmail-qmtpd</b>, <b>qmail-queue</b>, <b>qmail-send</b>, <b>qreceipt</b>, <b>replier</b>, <b>rrforward</b>, <b>qmail-smtpd</b>. Of these, <b>qmail-smtpd</b> and <b>qmail-qmtpd</b> accept an email for a domain only if the domain is listed in rcpthosts. Once an email is accepted into the queue, <b>qmail-send</b>(8) decides if the mail is to be delivered locally or to a remote address. If the email address corresponds to a domain listed in locals or virtualdomains control file, steps are taken to have the email delivered locally.
 
 ## Delivery Mode
 
@@ -1548,7 +1543,7 @@ Here local is an address; user, uid, and gid are the account name, uid, and gid 
 
 `homedir/.qmaildashext`
 
-If there are several assignments for the same local address, qmail-lspawn will use the first one. local is interpreted without regard to case.
+If there are several assignments for the same local address, <b>qmail-lspawn</b> will use the first one. local is interpreted without regard to case.
 
 A wildcard assignment is a line of the form
 
@@ -1586,18 +1581,18 @@ will cause emails to `customer_care-delhi@example.com`, `customer_care-mumba@exa
 In the qmail system, you control all local addresses of the form user-anything, as well as the address user itself, where user is your account name. Delivery to user-anything is controlled by the file homedir/.qmail-anything. (These rules may be changed by editing the assign file as given above in qmail-users.
 
 The alias user controls all other addresses. Delivery to user is controlled by the file homedir/.qmail-user, where homedir is alias's home directory.
-In the following description, qmail-local is handling a message addressed to local@domain, where local is controlled by .qmail-ext. Here is what it does.
-If .qmail-ext is completely empty, qmail-local follows the defaultdelivery instructions set by your system administrator.
-If .qmail-ext doesn't exist, qmail-local will try some default .qmail files. For example, if ext is foo-bar, qmail-local will try first .qmail-foo-bar, then .qmail-foo-default, and finally .qmail-default. If none of these exist, qmail-local will bounce the message. (Exception: for the basic user address, qmail-local treats a nonexistent .qmail the same as an empty .qmail.)
+In the following description, <b>qmail-local</b> is handling a message addressed to local@domain, where local is controlled by .qmail-ext. Here is what it does.
+If .qmail-ext is completely empty, <b>qmail-local</b> follows the defaultdelivery instructions set by your system administrator.
+If .qmail-ext doesn't exist, <b>qmail-local</b> will try some default .qmail files. For example, if ext is foo-bar, <b>qmail-local</b> will try first .qmail-foo-bar, then .qmail-foo-default, and finally .qmail-default. If none of these exist, <b>qmail-local</b> will bounce the message. (Exception: for the basic user address, <b>qmail-local</b> treats a nonexistent .qmail the same as an empty .qmail.)
 The vadddomain command creates the file .qmail-default in /var/domain/domains/domain\_name. Hence any email addressed to user@example.com gets controlled by /var/indimail/domains/example.com/.qmail-default.
 
-WARNING: For security, qmail-local replaces any dots in ext with colons before checking .qmail-ext. For convenience, qmail-local converts any uppercase letters in ext to lowercase.
+WARNING: For security, <b>qmail-local</b> replaces any dots in ext with colons before checking .qmail-ext. For convenience, <b>qmail-local</b> converts any uppercase letters in ext to lowercase.
 
 # Controlling Delivery Rates
 
-<b>qmail-send</b> has the ability to control delivery rates of jobs scheduled for delivery. Every queue can have a directory named <b>ratelimit</b> where you can store rate control definition for a domain. These rate control definition files can be created using the <b>drate</b> command. All you need to provide is a mathematical expression that defines your rate. e.g. 100/3600 means 100 emails per hour. This rate control works at the queue level. indimail-mta uses multiple queues. Each queue has its own delivery handled by by its own set of qmail-todo, qmail-send, qmail-lspawn, qmail-rspawn, qmail-clean daemons. Enforcing rate control on such a queue has a practical problem of having to define rate control definition for each and every queue.
+<b>qmail-send</b> has the ability to control delivery rates of jobs scheduled for delivery. Every queue can have a directory named <b>ratelimit</b> where you can store rate control definition for a domain. These rate control definition files can be created using the <b>drate</b> command. All you need to provide is a mathematical expression that defines your rate. e.g. 100/3600 means 100 emails per hour. This rate control works at the queue level. indimail-mta uses multiple queues. Each queue has its own delivery handled by by its own set of <b>qmail-todo</b>, <b>qmail-send</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b>, <b>qmail-clean</b> daemons. Enforcing rate control on such a queue has a practical problem of having to define rate control definition for each and every queue.
 
-To avoid the practical problem of rate limiting every queue, we can use a dedicated queue to handle rate controllled delivery. The default indimail installation creates a special queue named as <b>slowq</b> and uses a daemon <b>slowq-send</b> instead of <b>qmail-send</b> to process the <u>slowq</u> queue. This is done by calling <b>slowq-start<b> instead of <b>qmail-daemon</b> / <b>qmail-start</b>. <b>slowq-send</b> doesn't have its own qmail-todo process. We don't require it as we aren't looking at high delivery rates for this queue. <b>slowq-start</b> is invoked using a supervised service in <u>/service/slowq</u>.
+To avoid the practical problem of rate limiting every queue, we can use a dedicated queue to handle rate controllled delivery. The default indimail installation creates a special queue named as <b>slowq</b> and uses a daemon <b>slowq-send</b> instead of <b>qmail-send</b> to process the <u>slowq</u> queue. This is done by calling <b>slowq-start<b> instead of <b>qmail-daemon</b> / <b>qmail-start</b>. <b>slowq-send</b> doesn't have its own <b>qmail-todo</b> process. We don't require it as we aren't looking at high delivery rates for this queue. <b>slowq-start</b> is invoked using a supervised service in <u>/service/slowq</u>.
 
 To create this special slowq service for delivery rate control you can use svctool as below. This will also create the queue <u>/var/indimail/queue/slowq</u> and logs to be in <u>/var/log/svc/slowq/current</u>.
 
@@ -1653,7 +1648,7 @@ CurrentTime: Tue, 1 Jun 2021 10:23:01 +0530
 CurrentRate: 0.0002298473 OK
 ```
 
-Now that we have configured a separate queue <b>slowq</b> for rate controlled delivery, we need to queue emails for the configured domain in this queue rather than the any of the regular indimail-mta's multiple queues. To do that we must have any entry in the control file <b>domainqueue</b> to set the <b>QUEUEDIR</b> environment variable when using qmail-inject for sendmail. You can create, edit, delete entries from <b>domainqueue</b> using your favourite text editor.
+Now that we have configured a separate queue <b>slowq</b> for rate controlled delivery, we need to queue emails for the configured domain in this queue rather than the any of the regular indimail-mta's multiple queues. To do that we must have any entry in the control file <b>domainqueue</b> to set the <b>QUEUEDIR</b> environment variable when using <b>qmail-inject</b> for sendmail. You can create, edit, delete entries from <b>domainqueue</b> using your favourite text editor.
 
 ```
 $ cat /etc/indimail/control/domainqueue
@@ -1666,7 +1661,7 @@ argos.indimail.org:QUEUEDIR=/var/indimail/queue/slowq
 yahoo.com:QUEUEDIR=/var/indimail/queue/slowq
 ```
 
-Once the delivery rate for a configured domain reaches the configured rate, emails will get queued but will not be picked up immediately for delivery. The slowq-send logs will display when this happens. As you can see, the delivery finally happens when the delivery rate becomes lesser than the configured rate.
+Once the delivery rate for a configured domain reaches the configured rate, emails will get queued but will not be picked up immediately for delivery. The <b>slowq-send</b> logs will display when this happens. As you can see, the delivery finally happens when the delivery rate becomes lesser than the configured rate.
 
 ```
 $ tail -11f /var/log/svc/slowq/current
@@ -1687,7 +1682,7 @@ $ tail -11f /var/log/svc/slowq/current
 
 Some mail providers like hotmail, yahoo restrict the number of connections from a single IP and the number of mails that can be delivered in an hour from a single IP. To increase your ability to deliver large number of genuine emails from your users to such sites, you may want to send out mails from multiple IP addresses.
 
-IndiMail has the ability to call a custom program instead of qmail-local(8) or qmail-remote(8). This is done by defining the environment variable QMAILLOCAL or QMAILREMOTE. qmail-remote(8) can use the environment variable OUTGOINGIP to set the IP address of the local interface when making outgoing connections. By writing a simple script and setting QMAILREMOTE environment variable pointing to this script, one can randomly chose an IP address from the control file
+IndiMail has the ability to call a custom program instead of <b>qmail-local</b>(8) or <b>qmail-remote</b>(8). This is done by defining the environment variable QMAILLOCAL or QMAILREMOTE. <b>qmail-remote</b>(8) can use the environment variable OUTGOINGIP to set the IP address of the local interface when making outgoing connections. By writing a simple script and setting QMAILREMOTE environment variable pointing to this script, one can randomly chose an IP address from the control file
 
 `/etc/indimail/control/outgoingip`
 
@@ -1756,7 +1751,7 @@ exec -a qmail-remote $PROG "$host" "$sender" "$qqeh" $size $*
 
 # Processing Bounces
 
-IndiMail allows a mechanism by which you can use your own script/program to handle bounces. All bounces in IndiMail is generated by qmail-send. qmail-send generates a bounce when qmail-lspawn or qmail-rspawn reports a permanent failed delivery. A bounce is generated by qmail-send by injecting a new mail in the queue using qmail-queue. This bounce generation by qmail-send can be modified in three ways
+IndiMail allows a mechanism by which you can use your own script/program to handle bounces. All bounces in IndiMail is generated by <b>qmail-send</b>. <b>qmail-send</b> generates a bounce when <b>qmail-lspawn</b> or <b>qmail-rspawn</b> reports a permanent failed delivery. A bounce is generated by <b>qmail-send</b> by injecting a new mail in the queue using <b>qmail-queue</b>. This bounce generation by <b>qmail-send</b> can be modified in three ways
 
 ## 1. Using environment variable BOUNCEPROCESSOR
 
@@ -1797,7 +1792,7 @@ causes all bounces generated for the sender support@indimail.org to be discarded
 
 ## 3. Using BOUNCEQUEUE environment variable to queue bounces
 
-qmail-send uses qmail-queue to queue bounces and aliases/forwards. This can be changed by using QMAILQUEUE environment variable. If a different queue program is desired for bounces, it can be set by using BOUNCEQUEUE environment variable.
+<b>qmail-send</b> uses <b>qmail-queue</b> to queue bounces and aliases/forwards. This can be changed by using QMAILQUEUE environment variable. If a different queue program is desired for bounces, it can be set by using BOUNCEQUEUE environment variable.
 e.g
 
 ```
@@ -1811,7 +1806,7 @@ disables bounces system-wide. Though disabling bounces may not be the right thin
 
 # Delivery Instructions for a virtual domain
 
-IndiMail uses a modified version of qmail as the MTA. For local deliveries, qmail-lspawn reads a series of local delivery commands from descriptor 0, invokes qmail-local to perform the deliveries. qmail-local reads a mail message and delivers to to a user by the procedure described in dot-qmail(5). IndiMail uses vdelivermail as the local delivery agent.
+IndiMail uses a modified version of qmail as the MTA. For local deliveries, <b>qmail-lspawn</b> reads a series of local delivery commands from descriptor 0, invokes <b>qmail-local</b> to perform the deliveries. <b>qmail-local</b> reads a mail message and delivers to to a user by the procedure described in dot-qmail(5). IndiMail uses <b>vdelivermail</b> as the local delivery agent.
 A virtual domain is created by the command vadddomain(1).
 
 `$ sudo vadddomain example.com some_password`
@@ -1861,7 +1856,7 @@ In both the above examples the file /etc/indimail/control/disclaimer contains th
 
 ## Option 2 - Set the FILTERARGS environment variable
 
-Just like filterargs control file, the environment variable FILTERARGS allows you to set any custom filter before your mail gets deposited into the queue by qmail-queue(8).
+Just like filterargs control file, the environment variable FILTERARGS allows you to set any custom filter before your mail gets deposited into the queue by <b>qmail-queue</b>(8).
 
 ```
 $ sudo /bin/bash
@@ -1879,7 +1874,7 @@ IndiMail provides multiple options for those who want their emails archived auto
 
 ## 1. using environment variable EXTRAQUEUE
 
-If EXTRAQUEUE environment variable is set to any environment variable, qmail-queue will deposit an extra copy of the email which it receives for putting it in the queue. Normally you would set EXTRAQUEUE variable in any of the clients which use qmail-queue. e.g. qmail-smtpd, qmail-inject, sendmail, etc. If you have setup IndiMail as per the official instructions, you can set EXTRAQUEUE for incoming and outgoing mails as given below
+If EXTRAQUEUE environment variable is set to any environment variable, <b>qmail-queue</b> will deposit an extra copy of the email which it receives for putting it in the queue. Normally you would set EXTRAQUEUE variable in any of the clients which use <b>qmail-queue</b>. e.g. <b>qmail-smtpd</b>, <b>qmail-inject</b>, sendmail, etc. If you have setup IndiMail as per the official instructions, you can set EXTRAQUEUE for incoming and outgoing mails as given below
 
 ```
 $ sudo /bin/bash
@@ -1928,7 +1923,7 @@ Reference
 
 # Envrules
 
-IndiMail allows you to configure most of its functionality through set of environment variables. In fact there more more than 200 features that can be controlled just by setting or un-setting environment variables. envrules is applicable to qmail-smtpd, qmail-inject, qmail-local, qmail-remote as well. It can also be used to control programs called by the above programs (e.g qmail-queue). IndiMail allows you to configure quite many things using environment variables. Just set the environment variable <b>CONTROLDIR=control2</b> and all qmail components of IndiMail start looking for control files in <u>/var/indimail/control2</u>. You can set <b>CONTROLDIR=/etc/indimail</b> and all control files can be conveniently placed in <u>/etc/indimail</u>.
+IndiMail allows you to configure most of its functionality through set of environment variables. In fact there more more than 200 features that can be controlled just by setting or un-setting environment variables. envrules is applicable to <b>qmail-smtpd</b>, <b>qmail-inject</b>, <b>qmail-local</b>, <b>qmail-remote</b> as well. It can also be used to control programs called by the above programs (e.g <b>qmail-queue</b>). IndiMail allows you to configure quite many things using environment variables. Just set the environment variable <b>CONTROLDIR=control2</b> and all qmail components of IndiMail start looking for control files in <u>/var/indimail/control2</u>. You can set <b>CONTROLDIR=/etc/indimail</b> and all control files can be conveniently placed in <u>/etc/indimail</u>.
 Some of these environment variables can be set during the startup of various services. IndiMail has all its services configured as directories in the /service directory. As an example, if you want to force authenticated SMTP on all your users, setting the environment variable <b>REQUIREAUTH</b> allows you to do so.
 
 ```
@@ -1938,7 +1933,7 @@ $ sudo /bin/bash
 # svc -u /service/qmail-smtpd.587
 ```
 
-sets the qmail-smtpd running on port 587 to force authentication.
+sets the <b>qmail-smtpd</b> running on port 587 to force authentication.
 
 Setting environment variables in your startup script, in your .profile or your shell forces you to permanently set the environment variable to a specific value. Using **envrules**, IndiMail allows you to set these environment variables specific to different *senders* or *recipients* envrules allows IndiMail platform to be tuned differently for different users. No other messaging platform, to the best of my knowledge, is capable of doing that. Another way of saying is that envrules allows your IndiMail platform to dynamically change its behavior for each and every user.
 
@@ -1956,13 +1951,13 @@ forces all users whose email ids end with 'consultant' to authenticate while sen
 
 Removes all message size restrictions for the user whose email address is ceo@example.com, by unsetting the environment variable **DATASIZE**.
 
-You can also set envrules on per recipient basis. This gets set for qmail-local & qmail-remote. The control file to be used in this case is /etc/indimail/control/rcpt.envrules. The filename can be overridden by **RCPTRULES** environment variable.
+You can also set envrules on per recipient basis. This gets set for <b>qmail-local</b> & <b>qmail-remote</b>. The control file to be used in this case is /etc/indimail/control/rcpt.envrules. The filename can be overridden by **RCPTRULES** environment variable.
 
 .e.g
 
 `*.yahoo.com:OUTGOINGIP=192.168.2.100`
 
-The **OUTGOINGIP** environment variable is used by qmail-remote to bind on a specific IP address when connecting to the remote SMTP server. The above envrule forces qmail-remote to use 192.168.2.100 as the outgoing IP address when sending mails to any recipient at yahoo.com.
+The **OUTGOINGIP** environment variable is used by <b>qmail-remote</b> to bind on a specific IP address when connecting to the remote SMTP server. The above envrule forces <b>qmail-remote</b> to use 192.168.2.100 as the outgoing IP address when sending mails to any recipient at yahoo.com.
 
 For SMTP service the following the following list of environment variables can be modified using envrules
 
@@ -1976,17 +1971,17 @@ The following list of environment variables can be modified using envrules if QM
 QREGEX, SPAMFILTER, LOGFILTER, SPAMFILTERARGS, FILTERARGS, SPAMEXITCODE, HAMEXITCODE, UNSUREEXITCODE, REJECTSPAM, SPAMREDIRECT, SPAMIGNORE, SPAMIGNOREPATTERNS, DATABYTES, MDA, MYSQL_INIT_COMMAND, MYSQL_READ_DEFAULT_FILE, MYSQL_READ_DEFAULT_GROUP, MYSQL_OPT_CONNECT_TIMEOUT, MYSQL_OPT_READ_TIMEOUT, MYSQL_OPT_WRITE_TIMEOUT, QUEUEDIR, QUEUE_BASE, QUEUE_START, QUEUE_COUNT, and TMPDIR
 ```
 
-The following list of environment variables which can be modified using envrules are specfic to qmail-remote.
+The following list of environment variables which can be modified using envrules are specfic to <b>qmail-remote</b>.
 
 ```
 CONTROLDIR, SMTPROUTE, SIGNKEY, OUTGOINGIP, DOMAINBINDINGS, AUTH_SMTP, MIN_PENALTY, and MAX_TOLERANCE
 ```
 
-The following list of environment variables which can be modified using envrules are specfic to qmail-local.
+The following list of environment variables which can be modified using envrules are specfic to <b>qmail-local</b>.
 
 `USE_SYNCDIR, USE_FSYNC, and LOCALDOMAINS`
 
-Do man qmail-smtpd(8), spawn-filter(8) to know the full list of environment variables that can be controlled using envrules.
+Do man <b>qmail-smtpd</b>(8), <b>spawn-filter</b>(8) to know the full list of environment variables that can be controlled using envrules.
 
 # Domain Specific Queues
 
@@ -1994,7 +1989,7 @@ This is actually an extension of [envrules](#envrules), but has its own control 
 
 `pattern:envar1=val,envar2=val,...]`
 
-When the domain for an email being injected into the queue by qmail-smtpd or qmail-inject, matches <u>pattern</u>, the environment variable list gets set. In the example below, emails injected into the queue by qmail-inject go into the queue <u>/var/indimail/queue/slowq</u>
+When the domain for an email being injected into the queue by <b>qmail-smtpd</b> or <b>qmail-inject</b>, matches <u>pattern</u>, the environment variable list gets set. In the example below, emails injected into the queue by <b>qmail-inject</b> go into the queue <u>/var/indimail/queue/slowq</u>
 
 `yahoo.com:QUEUEDIR=/var/indimail/queue/slowq`
 
@@ -2022,7 +2017,7 @@ Everything can be shared across hosts except for /etc/indimail/control/idhost.
 
 Remember that users won't be able to send mail if all the QMQP servers are down. Most sites have two or three independent QMQP servers.
 
-Note that users can still use all the qmail-inject environment variables to control the appearance of their outgoing messages. This will include environment variables in $HOME/.defaultqueue directory.
+Note that users can still use all the <b>qmail-inject</b> environment variables to control the appearance of their outgoing messages. This will include environment variables in $HOME/.defaultqueue directory.
 
 If you want to setup a SMTP service, it might be easier to install the entire indimail-mta package and remove the services qmail-send.25. You can use svctool to remove the service e.g.
 
@@ -2053,11 +2048,11 @@ $ sudo /usr/sbin/svctool --qmqp=628 --servicedir=/service \
 
 The above command will create a supervised service which runs qmail-qmqpd under tcpserver. In case you are setting up this service to relay mails to outside world, you might want to also specify --dkfilter, --qhpsi, --virus-filter, etc arguments to svctool(8) so that tasks like virus scanning, dk, domainkey signing, etc is done by the QMQP service.
 
-A QMQP server shouldn't even have to glance at incoming messages; its only job is to queue them for qmail-send(8). Hence you should allow access to QMQP service only from your authorized clients. You can edit the file /etc/indimail/tcp.qmqp to grant specific access to clients. If you make changes to tcp.qmqp, don't forget to run the qmailctl command
+A QMQP server shouldn't even have to glance at incoming messages; its only job is to queue them for <b>qmail-send</b>(8). Hence you should allow access to QMQP service only from your authorized clients. You can edit the file /etc/indimail/tcp.qmqp to grant specific access to clients. If you make changes to tcp.qmqp, don't forget to run the qmailctl command
 
 `$ sudo /usr/bin/qmailctl cdb`
 
-Note: Some of the tasks like virus/spam filtering, dk, dkim signing, etc can be done either by the client (if `QMAILQUEUE=/usr/sbin/qmail-multi`), or can be performed by QMQP service if **QMAILQUEUE** is defined as qmail-multi in the service's variable directory.
+Note: Some of the tasks like virus/spam filtering, dk, dkim signing, etc can be done either by the client (if `QMAILQUEUE=/usr/sbin/qmail-multi`), or can be performed by QMQP service if **QMAILQUEUE** is defined as <b>qmail-multi</b> in the service's variable directory.
 
 # Mini IndiMail Installation
 
@@ -2131,7 +2126,7 @@ Everything can be shared across hosts except for /etc/indimail/control/idhost.
 
 Remember that users won't be able to send mail if all the QMQP servers are down. Most sites have two or three independent QMQP servers.
 
-Note that users can still use all the qmail-inject environment variables to control the appearance of their outgoing messages. Also you can setup environment variables in $HOME/.defaultqueue
+Note that users can still use all the <b>qmail-inject</b> environment variables to control the appearance of their outgoing messages. Also you can setup environment variables in $HOME/.defaultqueue
 
 # Fedora - Using /usr/sbin/alternatives
 
@@ -2280,7 +2275,7 @@ clearopensmtp will clear all IP which have not authenticated in the past RELAY\_
 
 # Set up Authenticated SMTP
 
-IndiMail also provides you authenticated SMTP providing **AUTH PLAIN**, **AUTH LOGIN**, **AUTH CRAM-MD5**, **CRAM-SHA1**, **CRAM-SHA256**, **CRAM-SHA512**, **CRAM-RIPEMD**, **DIGEST_MD5** methods. Whenever a user successfully authenticates through SMTP, the **RELAYCLIENT** environment variable gets set. qmail-smtpd uses the **RELAYCLIENT** environment variable to allow relaying.
+IndiMail also provides you authenticated SMTP providing **AUTH PLAIN**, **AUTH LOGIN**, **AUTH CRAM-MD5**, **CRAM-SHA1**, **CRAM-SHA256**, **CRAM-SHA512**, **CRAM-RIPEMD**, **DIGEST_MD5** methods. Whenever a user successfully authenticates through SMTP, the **RELAYCLIENT** environment variable gets set. <b>qmail-smtpd</b> uses the **RELAYCLIENT** environment variable to allow relaying.
 
 Most of the email clients like thunderbird, evolution, outlook, outlook express have options to use authenticated SMTP.
 For a tutorial on authenticated SMTP, you can refer to this [tutorial](http://indimail.blogspot.com/2010/03/authenticated-smtp-tutorial.html "Authenticated SMTP tutorial")
@@ -2320,7 +2315,7 @@ IndiMail has a feature called **CHECKRECIPIENT** which allows indimail to check 
 
 You can selectively turn on **CHECKRECIPIENT** for selective domains by including those domains (prefixing the domain with '@' sign) in the control file /etc/indimail/control/chkrcptdomains.
 
-If the environment variable MAX\_RCPT\_ERRCOUNT is set qmail-smtpd will reject an email if in a SMTP session, the number of such recipients who do not exist, exceed MAX\_RCPT\_ERRCOUNT.
+If the environment variable MAX\_RCPT\_ERRCOUNT is set <b>qmail-smtpd</b> will reject an email if in a SMTP session, the number of such recipients who do not exist, exceed MAX\_RCPT\_ERRCOUNT.
 
 **CHECKRECIPIENT** also causes the RCPT TO command to be delayed by 5 seconds for every non-existent recipient, to make harvesting of email addresses difficult.
 
@@ -2339,7 +2334,7 @@ $
 
 A little known feature of IndiMail allows some of your control files to be in plain text, cdb or in MySQL. These control files include authdomains, badhelo, badext, badmailfrom, badrcptto, blackholedsender, blackholedrcpt, chkrcptdomains, goodrcptto, relaymailfrom and spamignore. If you have quite a large number of entries in any of the above control files, you can expect a significant performance gains by having these control files in cdb or MySQL.
 
-The mechanism is quite simple. For example, if you have the control file badmailfrom, qmail-smtpd will use badmailfrom. If you have the file badmailfrom.cdb, qmail-smtpd will first do cdb lookup in badmailfrom.cdb. To create badmailfrom.cdb, you need to run the command.
+The mechanism is quite simple. For example, if you have the control file badmailfrom, <b>qmail-smtpd</b> will use badmailfrom. If you have the file badmailfrom.cdb, <b>qmail-smtpd</b> will first do cdb lookup in badmailfrom.cdb. To create badmailfrom.cdb, you need to run the command.
 
 `$ sudo /usr/bin/qmail-cdb badmailfrom`
 
@@ -2349,7 +2344,7 @@ You can also have your entries in a MySQL table. Let say you have a MySQL server
 # echo "localhost:indimail:ssh-1.5-:indimail:badmailfrom" > badmailfrom.sql
 ```
 
-Once you have created a file badmailfrom.sql, qmail-smtpd will connect to the MySQL server on localhost and look for entry in the column 'email' in the table badmailfrom. If this table does not exist, qmail-smtpd will create an empty table using the following SQL create statement
+Once you have created a file badmailfrom.sql, <b>qmail-smtpd</b> will connect to the MySQL server on localhost and look for entry in the column 'email' in the table badmailfrom. If this table does not exist, <b>qmail-smtpd</b> will create an empty table using the following SQL create statement
 
 ```
 create table badmailfrom (email char(64) NOT NULL, \
@@ -2379,7 +2374,7 @@ Rather than making individual connections to MySQL for extracting information fr
 * It uses binary tree algorithm to search the cache before actually sending the query to the database.
 * IndiMail clients send requests for MySQL(1) queries to inlookup through the function inquery() using a fifo.
 * The inquery() API uses the InLookup service only if the environment variable QUERY_CACHE is set. If this environment variable is not set, the inquery() function makes a direct connecton to MySQL.
-* Clients which are currently using inquery are qmail-smtpd(1), proxyimap(8), proxypop3(8), vchkpass(8) and authindi(8).
+* Clients which are currently using inquery are <b>qmail-smtpd</b>(1), proxyimap(8), proxypop3(8), vchkpass(8) and authindi(8).
 * inlookup(8) service is one of the reasons why IndiMail is able to serve million+ users using commodity hardware.
 
 The program inquerytest simulates all the queries which inlookup supports and can be used as a test/diagnostic tool for submitting queries to inlookup. e.g
@@ -2487,7 +2482,7 @@ IndiMail has multiple methods to insert your script anywhere before the queue, a
 
 If you have installed indimail-spamfilter package, you will have [bogofilter](https://bogofilter.sourceforge.io/ "bogofilter") providing a bayesian spam filter.
 
-On of the easiest method to enable bogofilter is to set few environment variable for indimail's qmail-multi(8) the frontend for qmail-queue(8) program. e.g. to enable spam filter on the incoming SMTP on port 25:
+On of the easiest method to enable bogofilter is to set few environment variable for indimail's <b>qmail-multi</b>(8) the frontend for <b>qmail-queue</b>(8) program. e.g. to enable spam filter on the incoming SMTP on port 25:
 
 bogofilter requires training to work. You can refer to Section 3, Step 8 in the document [INSTALL](INSTALL-indimail.md). You can also have a pre-trained database installed by installing the **bogofilter-wordlist** package.
 
@@ -2499,7 +2494,7 @@ $ sudo /bin/bash
 # echo "1" > /service/qmail-smtpd.25/variables/MAKESEEKABLE
 ```
 
-Now qmail-multi(8) will pass every mail will pass through bogofilter before it passes to qmail-queue(8). You can refer to chapter [IndiMail Queue Mechanism](#indimail-queue-mechanism) and look at the picture to understand how it works. bogofilter(1) will add X-Bogosity in each and every mail. A spam mail will have the value `Yes` along with a probabality number (e.g. 0.999616 below). You can configure bogofilter in /etc/indimail/bogofilter.cf. The SMTP logs will also have lines having this X-Bogosity field. A detailed mechanism is depicted pictorially in the chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi).
+Now <b>qmail-multi</b>(8) will pass every mail will pass through bogofilter before it passes to <b>qmail-queue</b>(8). You can refer to chapter [IndiMail Queue Mechanism](#indimail-queue-mechanism) and look at the picture to understand how it works. bogofilter(1) will add X-Bogosity in each and every mail. A spam mail will have the value `Yes` along with a probabality number (e.g. 0.999616 below). You can configure bogofilter in /etc/indimail/bogofilter.cf. The SMTP logs will also have lines having this X-Bogosity field. A detailed mechanism is depicted pictorially in the chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi).
 
 ```
 X-Bogosity: Yes, spamicity=0.999616, cutoff=9.90e-01, ham_cutoff=0.00e+00, queueID=6cs66604wfk,
@@ -2509,18 +2504,18 @@ The method describe above is a global SPAM filter. It will happen for all users,
 
 There is another way you can do spam filtering - during local delivery (you could do for remote delivery, but what would be the point?). IndiMail allows you to call an external program during local/remote delivery by settting **QMAILLOCAL** / **QMAILREMOTE** environment variable. You could use any method to call bogofilter (either directly in *filterargs* control file, or your own script). You can see a Pictorial representation of how this happens. ![LocalFilter](indimail_spamfilter_local.png)
 
-You can also use vcfilter(1) to set up a filter that will place your spam emails in a designated folder for SPAM. Refer to the chapter [Writing Filters for IndiMail](#writing-filters-for-indiMail) for more details.
+You can also use <b>vcfilter</b>(1) to set up a filter that will place your spam emails in a designated folder for SPAM. Refer to the chapter [Writing Filters for IndiMail](#writing-filters-for-indiMail) for more details.
 
 # SPAM Control using badip control file
 
-IndiMail has many methods to help deal with spam. For detecting spam, IndiMail uses bogofilter a fast bayesian spam filter. IndiMail's qmail-smtpd which provides SMTP protocol is neatly integrated with bogofilter. When bogofilter detects spam, qmail-smtpd prints the X-Bogosity header as part of SMTP transaction log
+IndiMail has many methods to help deal with spam. For detecting spam, IndiMail uses bogofilter a fast bayesian spam filter. IndiMail's <b>qmail-smtpd</b> which provides SMTP protocol is neatly integrated with bogofilter. When bogofilter detects spam, <b>qmail-smtpd</b> prints the X-Bogosity header as part of SMTP transaction log
 
 ```
 $ grep "X-Bogosity, Yes" /var/log/svc/smtpd.25/current
 @400000004bc8183f01fcbc54 qmail-smtpd: pid 16158 from ::ffff:88.191.35.203 HELO X-Bogosity: Yes, spamicity=0.999616, cutoff=9.90e-01, ham_cutoff=0.00e+00, queueID=6cs66604wfk,
 ```
 
-The value "Yes" in X-Bogosity indicates spam. You can tell qmail-smtpd to reject such mails at SMTP just by doing
+The value "Yes" in X-Bogosity indicates spam. You can tell <b>qmail-smtpd</b> to reject such mails at SMTP just by doing
 
 ```
 # echo 1 > /service/qmail-smtpd.25/variables/REJECTSPAM
@@ -2562,7 +2557,7 @@ If your badip files becomes very large, you can also take advantage of IndiMail'
 
 A large fraction of today’s emails is infected by a virus or a worm. It is necessary to recognize those malicious emails as soon as possible already in the DATA phase of the SMTP conversation and to reject them.
 
-When you use IndiMail, it is ultimately qmail-queue which is responsible for queueing your messages. qmail-queue stores the message component of queued mails (captured duing DATA phase of the SMTP conversation) under the mess subdirectory.
+When you use IndiMail, it is ultimately <b>qmail-queue</b> which is responsible for queueing your messages. <b>qmail-queue</b> stores the message component of queued mails (captured duing DATA phase of the SMTP conversation) under the mess subdirectory.
 
 Files under the mess subdirectory are named after their i-node number. Let us look at a typical log sequence for a message received on the local system.
 
@@ -2576,11 +2571,11 @@ Files under the mess subdirectory are named after their i-node number. Let us lo
 @400000004b9da2f1091fa3d4 end msg 660188
 ```
 
-The above lines indicates that indimail-mta has received a new message, and its queue ID is 660188. What this means is that is qmail-queue has created a file named /var/indimail/queue/mess/NN/660188. The i-node number of the file is 660188. This is the queue file that contains the message. The queue ID is guaranteed to be unique as long as the message remains in the queue (you can't have two files with the same i-node in a filesystem).
+The above lines indicates that indimail-mta has received a new message, and its queue ID is 660188. What this means is that is <b>qmail-queue</b> has created a file named /var/indimail/queue/mess/NN/660188. The i-node number of the file is 660188. This is the queue file that contains the message. The queue ID is guaranteed to be unique as long as the message remains in the queue (you can't have two files with the same i-node in a filesystem).
 
-To perform virus scanning, it would be trivial to do virus scanning on the mess file above in qmail-queue itself. That is exactly what IndiMail does by using a feature called Qmail High Performance Virus Scanner (**QHPSI**). **QHPSI** was conceptualized by Erwin Hoffman. You can read here for more details.
+To perform virus scanning, it would be trivial to do virus scanning on the mess file above in <b>qmail-queue</b> itself. That is exactly what IndiMail does by using a feature called Qmail High Performance Virus Scanner (**QHPSI**). **QHPSI** was conceptualized by Erwin Hoffman. You can read here for more details.
 
-IndiMail takes **QHPSI** forward by adding the ability to add plugins. The **QHPSI** extension for qmail-queue allows to call an arbitary virus scanner directly, scanning the incoming data-stream on STDIN. Alternatively, it allows plugins to be loaded from the /usr/lib/indimail/plugins directory. This directory can be changed by defining PLUGINDIR environment variable. **QHPSI** can be advised to pass multiple arguments to the virus scanner for customization. To run external scanner or load scanner plugins, qmail-queue calls qhpsi, a program setuid to qscand. By default, qhpsi looks for the symbol virusscan to invoke the scanner. The symbol can be changed by setting the environment variable QUEUE_PLUGIN to the desired symbol.
+IndiMail takes **QHPSI** forward by adding the ability to add plugins. The **QHPSI** extension for <b>qmail-queue</b> allows to call an arbitary virus scanner directly, scanning the incoming data-stream on STDIN. Alternatively, it allows plugins to be loaded from the /usr/lib/indimail/plugins directory. This directory can be changed by defining PLUGINDIR environment variable. **QHPSI** can be advised to pass multiple arguments to the virus scanner for customization. To run external scanner or load scanner plugins, <b>qmail-queue</b> calls <b>qhpsi</b>, a program setuid to qscand. By default, <b>qhpsi</b> looks for the symbol virusscan to invoke the scanner. The symbol can be changed by setting the environment variable QUEUE_PLUGIN to the desired symbol.
 
 Today’s virus scanner -- in particluar Clam AV -- work in resource efficient client/server mode (clamd/clamdscan) and include the feature to detect virii/worms in the base64 encoded data stream. Thus, there is no necessity to call additional programs (like reformime or ripmime) except for the virus scanner itself.
 
@@ -2650,7 +2645,7 @@ $ cat /var/log/indimail/clamd/current
 @400000004b9da2a7061e372c /var/indimail/queue/queue2/mess/16/660188: OK
 ```
 
-Once you have **QHPSI** enabled, qmail-queue will add the header **X-QHPSI** in the mail. You will have the following header
+Once you have **QHPSI** enabled, <b>qmail-queue</b> will add the header **X-QHPSI** in the mail. You will have the following header
 
 `X-QHPSI: clean`
 
@@ -2677,7 +2672,7 @@ If you implement different method, than explained above, let me know.
 
 # SMTP Access List
 
-One of the feature that IndiMail adds to qmail-smtpd is accesslist between senders and recipients. Accesslist can be enabled by creating a control file /etc/indimail/control/accesslist. A line in accesslist is of the form
+One of the feature that IndiMail adds to <b>qmail-smtpd</b> is accesslist between senders and recipients. Accesslist can be enabled by creating a control file /etc/indimail/control/accesslist. A line in accesslist is of the form
 
 `type:sender:recipient`
 
@@ -2752,7 +2747,7 @@ SPAMEXITCODE=1
 
 (see the documentation on spamc for description of arguments to spamc program). You an also use -U socket_path, to use unix domain socket instead of -d host, which uses tcp/ip
 
-Since IndiMail uses envdir program to set environment variable, a simple way would be to set SPAMFILTER, SPAMEXITCODE is to do the following
+Since IndiMail uses <b>envdir</b> program to set environment variable, a simple way would be to set SPAMFILTER, SPAMEXITCODE is to do the following
 
 ```
 $ sudo /bin/bash
@@ -2810,7 +2805,7 @@ $ sudo /bin/bash
 
 Greylisting is a method of defending email users against spam, by temporarily rejecting any email from a IP/Sender which it does not recognize. As per SMTP, the originating server should after a delay retry. A server implementing greylisting should accept the mail if sufficient time has elapsed. If the mail is from a spammer it will probably not be retried since a spammer goes through thousands of email addresses and typically cannot afford the time delay to retry.
 
-IndiMail 1.6 onwards implements greylisting using qmail-greyd daemon. You additionally need to have the environment variable GREYIP defined for the qmail-smtpd process. The environment variable GREYIP specifies on which IP and port, qmail-greyd is accepting greylisting requests. qmail-smtpd uses UDP to send a triplet (IP+RETURN\_PATH+RECIPIENT) to the greylisting server and waits for an answer which tells qmail-smtpd to proceed ahead or to temporarily reject the mail. qmail-greyd also accepts a list of whitelisted IP addresses for which greylisting should not be done.
+IndiMail 1.6 onwards implements greylisting using <b>qmail-greyd</b> daemon. You additionally need to have the environment variable GREYIP defined for the <b>qmail-smtpd</b> process. The environment variable GREYIP specifies on which IP and port, <b>qmail-greyd</b> is accepting greylisting requests. <b>qmail-smtpd</b> uses UDP to send a triplet (IP+RETURN\_PATH+RECIPIENT) to the greylisting server and waits for an answer which tells <b>qmail-smtpd</b> to proceed ahead or to temporarily reject the mail. <b>qmail-greyd</b> also accepts a list of whitelisted IP addresses for which greylisting should not be done.
 
 ## 1. Enabling qmail-greyd greylisting server
 
@@ -2824,7 +2819,7 @@ NOTE: The above service has already been setup for you, if you have done a binar
 
 ## 2. Enabling greylisting in SMTP
 
-Assuming you've setup your qmail-smtpd service with tcpserver with the -x option (as in LWQ), you just need to update the cdb file referenced by this -x option. The source for this file is typically /etc/indimail/tcp.smtp. For example,
+Assuming you've setup your <b>qmail-smtpd</b> service with tcpserver with the -x option (as in LWQ), you just need to update the cdb file referenced by this -x option. The source for this file is typically /etc/indimail/tcp.smtp. For example,
 
 ```
 127.:allow,RELAYCLIENT=""
@@ -2841,7 +2836,7 @@ could become,
 :allow,GREYIP="127.0.0.1@1999"
 ```
 
-If you've setup qmail-greyd on a non-default address (perhaps you're running qmail-greyd on a separate machine), you'll also need to specify the address it's listening on - adjust the above to include GREYIP="192.168.5.5@1999", for example.
+If you've setup <b>qmail-greyd</b> on a non-default address (perhaps you're running <b>qmail-greyd</b> on a separate machine), you'll also need to specify the address it's listening on - adjust the above to include GREYIP="192.168.5.5@1999", for example.
 Finally, don't forget to update the cdb file corresponding to the source file you've just edited. If you have a LWQ setup that's
 
 ```
@@ -2849,7 +2844,7 @@ $ sudo /bin/bash
 # /usr/bin/qmailctl cdb
 ```
 
-Alternatively (and particularly if you're not using the -x option to tcpserver) you can enable greylisting for all SMTP connections by setting GREYIP in the environment in which qmail-smtpd is started - for example your variables directory for qmail-smtpd can contain a file with the name GREYIP
+Alternatively (and particularly if you're not using the -x option to tcpserver) you can enable greylisting for all SMTP connections by setting GREYIP in the environment in which <b>qmail-smtpd</b> is started - for example your variables directory for <b>qmail-smtpd</b> can contain a file with the name GREYIP
 
 ```
 $ sudo /bin/bash
@@ -3269,7 +3264,7 @@ namespace inbox {
 DomainKeys Identified Mail (DKIM) lets an organization take responsibility for a message while it is in transit. DKIM has been approved as a Proposed Standard by IETF and published it as RFC 4871. There are number of vendors/software available which provide DKIM signing. IndiMail is one of them. You can see the full list here.
 DKIM uses public-key cryptography to allow the sender to electronically sign legitimate emails in a way that can be verified by recipients. Prominent email service providers implementing DKIM (or its slightly different predecessor, DomainKeys) include Yahoo and Gmail. Any mail from these domains should carry a DKIM signature, and if the recipient knows this, they can discard mail that hasn't been signed, or has an invalid signature.
 
-IndiMail from version 1.5 onwards, comes with a drop-in replacement for qmail-queue for DKIM signature signing and verification (see qmail-dkim(8) for more details). You need the following steps to enable DKIM. IndiMail from version 1.5.1 onwards comes with a filter dk-filter, which can be enabled before mail is handed over to qmail-local or qmail-remote (see spawn-filter(8) for more details).
+IndiMail from version 1.5 onwards, comes with a drop-in replacement for <b>qmail-queue</b> for DKIM signature signing and verification (see <b>qmail-dkim</b>(8) for more details). You need the following steps to enable DKIM. IndiMail from version 1.5.1 onwards comes with a filter dk-filter, which can be enabled before mail is handed over to <b>qmail-local</b> or <b>qmail-remote</b> (see <b>spawn-filter</b>(8) for more details).
 
 You may want to look at an excellent [setup instructions](http://notes.sagredo.eu/node/92 "Roberto's Notes") by Roberto Puzzanghera for configuring dkim for qmail
 
@@ -3302,7 +3297,7 @@ Wait until it's on all DNS servers and that's it.
 
 ## Set SMTP to sign with DKIM signatures
 
-qmail-dkim uses openssl libraries and there is some amount of memory allocation that happens. You may want to increase your softlimit (if any) in your qmail-smtpd run script.
+<b>qmail-dkim</b> uses openssl libraries and there is some amount of memory allocation that happens. You may want to increase your softlimit (if any) in your <b>qmail-smtpd</b> run script.
 
 ```
 $ sudo /bin/bash
@@ -3340,8 +3335,8 @@ You may decide to consider ADSP as optional until the specifications are formali
 
 `# echo adsp > /service/smtpd.25/variables/SIGN_PRACTICE`
 
-You may not want to do DKIM signing/verificaton by SMTP. In that case, you have the choice of using the QMAILREMOTE, QMAILLOCAL environment variables which allows IndiMail to run any script before it gets passed to qmail-remote, qmail-local respectively.
-Setting qmail-remote to sign with DKIM signatures On your host which sends out outgoing mails, it only make sense to do DKIM signing and not verification.
+You may not want to do DKIM signing/verificaton by SMTP. In that case, you have the choice of using the QMAILREMOTE, QMAILLOCAL environment variables which allows IndiMail to run any script before it gets passed to <b>qmail-remote</b>, <b>qmail-local</b> respectively.
+Setting <b>qmail-remote</b> to sign with DKIM signatures On your host which sends out outgoing mails, it only make sense to do DKIM signing and not verification.
 
 ```
 $ sudo /bin/bash
@@ -3356,7 +3351,7 @@ $ sudo /bin/bash
 
 ## Setting qmail-local to verify DKIM signatures
 
-On your host which serves as your incoming gateway for your local domains, it only makes sense to do DKIM verification with qmail-local
+On your host which serves as your incoming gateway for your local domains, it only makes sense to do DKIM verification with <b>qmail-local</b>
 
 ```
 $ sudo /bin/bash
@@ -3372,13 +3367,13 @@ $ sudo /bin/bash
 
 Once you have installed your private key file and added your public key to your DNS data, you should test the server and make sure that your outbound message are having the proper signatures added to them. You can test it by sending an email to sa-test (at) sendmail dot net. This reflector will reply (within seconds) to the envelope sender with a status of the DomainKeys and DKIM signatures.
 
-If you experience problems, consult the qmail-dkim man page or post a comment below and I’ll try to help.
+If you experience problems, consult the <b>qmail-dkim</b> man page or post a comment below and I’ll try to help.
 You can also use the following for testing.
 
 * dktest@temporary.com, is Yahoo!'s testing server. When you send a message to this address, it will send you back a message telling you whether or not the domainkeys signature was valid.
 * sa-test@sendmail.net is a free service from the sendmail people. It's very similar to the Yahoo! address, but it also shows you the results of an SPF check as well.
 
-All the above was quite easy. If you don't think so, you can always use the magic options --dkverify (for verification) or `--dksign --private_key=domain_key_private_key_file` to svctool (svctool --help for all options) to create supervice run script for qmail-smtpd, qmail-send.
+All the above was quite easy. If you don't think so, you can always use the magic options --dkverify (for verification) or `--dksign --private_key=domain_key_private_key_file` to svctool (svctool --help for all options) to create supervice run script for <b>qmail-smtpd</b>, <b>qmail-send</b>.
 
 References
 
@@ -4506,7 +4501,7 @@ There is also a [Project Tracker](http://sourceforge.net/tracker/?group_id=23068
 ## Speed
 
 IndiMail uses a modified [qmail](http://cr.yp.to/qmail.html "qmail") as the MTA. qmail's modular, lightweight design and sensible queue management provides IndiMail the speed to make it one of the fastest available message transfer agent.
-IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''qmail-multi'' uses multiple queues with each queue running its own qmail-send/qmail-todo, qmail-lspawn, qmail-rspawn processes. This allows IndiMail to process mails faster than what can be provided by qmail. A process named qmail-daemon monitors these processes and restarts them if they go down, which hasn't yet been observed to go down.
+IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''qmail-multi'' uses multiple queues with each queue running its own <b>qmail-send</b>/qmail-todo, <b>qmail-lspawn</b>, <b>qmail-rspawn</b> processes. This allows IndiMail to process mails faster than what can be provided by qmail. A process named qmail-daemon monitors these processes and restarts them if they go down, which hasn't yet been observed to go down.
 
 ## Setup
 
@@ -4519,8 +4514,8 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
 ## Security
 
  * clear separation between addresses, files, and programs
- * minimization of setuid code (qmail-queue, qhspi, qscanq, systpass)
- * minimization of root code (qmail-start, qmail-lspawn)
+ * minimization of setuid code (<b>qmail-queue</b>, qhspi, qscanq, systpass)
+ * minimization of root code (qmail-start, <b>qmail-lspawn</b>)
  * five-way trust partitioning---security in depth
  * optional logging of one-way hashes, entire contents, etc. (EXTRAQUEUE, mailarchive control file)
  * virus scanning through clamav/qscanq/avg
@@ -4581,9 +4576,9 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * [SRS](http://www.libsrs2.org/ "libsrs2") - Sender Rewriting Scheme
  * [Bounce Address Tag Validation (BATV)](http://www.linux-magazine.com/Online/News/IndiMail-1.6-Includes-Greylisting-and-BATV?category=13404 "batv")
  * Per User control of environment variable by envrules(rules file set by environment variable FROMRULES)
- * [Greylisting](http://www.gossamer-threads.com/lists/qmail/users/136761 "greylisting") capability using qmail-greyd or greydaemon
+ * [Greylisting](http://www.gossamer-threads.com/lists/qmail/users/136761 "greylisting") capability using <b>qmail-greyd</b> or greydaemon
  * SMTP Plugins - External plugins using shared objects in /var/indimail/plugins to enhance functionality of MAIL, RCPT & DATA session.
- * Notify recipients when message size exceeds databyte limits (by setting environment variable DATABYTES_NOTIFY)
+ * Notify recipients when message size exceeds databyte limits (by setting environment variable DATABYTES\_NOTIFY)
  * Enforce STARTTLS before AUTH
  * RFC 6530-32 Email Address Internationalization
 
@@ -4600,15 +4595,15 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * automatic queue cleanups (qmail-clean)
  * queue viewing (qmail-qread)
  * detailed delivery statistics (qmailanalog)
- * Configurable number of queues and time slicing algorithm for load balancing via qmail-multi. A queue in indimail is configurable by three environment variables QUEUE_BASE, QUEUE_COUNT, and QUEUE_START. A queue in IndiMail is a collection of queues. Each queue in the collection can have one or more SMTP listener but a single or no delivery (qmail-send) process. It is possible to have the entire queue collection without a delivery process (e.g. SMTP on port 366 – ODMR). The QUEUE_COUNT can be defined based on how powerful your host is (IO bandwidth, etc). NOTE: This configurable number of queues is possibe with a single installation and does not require you to install multiple instances of qmail.
+ * Configurable number of queues and time slicing algorithm for load balancing via <b>qmail-multi</b>. A queue in indimail is configurable by three environment variables QUEUE\_BASE, QUEUE\_COUNT, and QUEUE\_START. A queue in IndiMail is a collection of queues. Each queue in the collection can have one or more SMTP listener but a single or no delivery (<b>qmail-send</b>) process. It is possible to have the entire queue collection without a delivery process (e.g. SMTP on port 366 – ODMR). The QUEUE\_COUNT can be defined based on how powerful your host is (IO bandwidth, etc). NOTE: This configurable number of queues is possibe with a single installation and does not require you to install multiple instances of qmail.
  * Ability to hold local, remote or both deliveries (holdlocal, holdremote control file)
- * Qmail Queue Extra Header – Ability to pass extra headers to local and remote deliveries via qmail-queue (Environment variable QQEH).
+ * Qmail Queue Extra Header – Ability to pass extra headers to local and remote deliveries via <b>qmail-queue</b> (Environment variable QQEH).
  * External Virus scanning via QHPSI – Qmail High Performance Scanner Interface
- * Ability to extend QHPSI interface through plugins. The keyword plugin:shared_lib defined in the environment variable QHPSI denotes 'shared_lib' to be loaded.
+ * Ability to extend QHPSI interface through plugins. The keyword plugin:shared\_lib defined in the environment variable QHPSI denotes 'shared\_lib' to be loaded.
  * Virus scanner qscanq. Ability to detect virus via a third party scanner defined by SCANCMD environment variable (clamscan, clamdscan, etc)
  * Blocking of prohibited filename extensions via qscanq program
- * [Domainkeys](https://en.wikipedia.org/wiki/DomainKeys "Yahoo Domainkeys") (qmail-dk) RFC 4870
- * [DomainKeys Identified Mail](http://marc.info/?l=qmail&m=123817543532399&w=2 "DKIM") with ADSP/SSP (qmail-dkim) RFC 4871
+ * [Domainkeys](https://en.wikipedia.org/wiki/DomainKeys "Yahoo Domainkeys") (<b>qmail-dk</b>) RFC 4870
+ * [DomainKeys Identified Mail](http://marc.info/?l=qmail&m=123817543532399&w=2 "DKIM") with ADSP/SSP (<b>qmail-dkim</b>) RFC 4871
  * Set all header values listed in envheader control file as environment variables.
  * Log all headers listed in control file logheaders to stderr.
  * Remove all headers listed in control file removeheaders from email.
@@ -4648,15 +4643,15 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * artificial routing---smarthost, localnet, mailertable (control/smtproutes)
  * Support for jumbo ISP (control/smtproutes.cdb)
  * per-buffer timeouts
- * passive SMTP queue---perfect for SLIP/PPP (serialmail)
- * AutoTURN support (serialmail)
+ * passive SMTP queue---perfect for SLIP/PPP (<b>serialmail</b>)
+ * AutoTURN support (<b>serialmail</b>)
  * Authenticated SMTP (userid/passwd in control/smtproutes) - PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD
  * STARTTLS, TLS
  * Static and Dynamic Routing. (SMTPROUTES environment variable)
  * User based routing instead of normal DNS/smtproutes.
  * Spam control (SPAMFILTER environment variable)
  * Environment variable control via envrules (rules file controlled by environment variable RCPTRULES)
- * QMAILREMOTE environment variable to run any executable/script instead of qmail-remote
+ * QMAILREMOTE environment variable to run any executable/script instead of <b>qmail-remote</b>
  * QMTP support, artificial routing using (control/qmtproutes)
  * ONSUCCESS_REMOTE, ONFAILURE_REMOTE scripts run on successful or failed remote deliveries environment variables SMTPTEXT, SMTPCODE available for these scripts
  * Domain based delivery rate control
@@ -4679,7 +4674,7 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * conditional filtering (condredirect, bouncesaying, vfilter)
  * Environment variable control via envrules (rules file controlled by environment variable RCPTRULES)
  * Eliminate duplicate messages
- * QMAILLOCAL environment variable to run any executable/script instead of qmail-local
+ * QMAILLOCAL environment variable to run any executable/script instead of <b>qmail-local</b>
  * X-Forwarded-To, X-Forwarded-For headers
  * Message Disposition Notification (through qnotify)
  * Domain based delivery rate control
@@ -4730,27 +4725,27 @@ Some of the features available in this package
 1.  svctool - A simple tool with command-line options which helps you to configure any configuration item in indimail (creation of supervise scripts, qmail configuration, installation of all default MySQL tables, creation of default aliases, users, etc)
 2.  configurable control files directory (using CONTROLDIR environment variable) (allows one to have multiple running copies of qmail using a single binary installation)
 3.  configurable queue directory (using QUEUEDIR environment variable) (allows one to have multiple queues on a host with a single qmail installation).
-    * qmail-multi (queue load balancer) uses qmail-queue to deposit mails across multiple queues. Each queue has its own qmail-send process. You can spread the individual queues across multiple filesystems on different controllers  to maximize on IO throughput.
+    * <b>qmail-multi</b> (queue load balancer) uses <b>qmail-queue</b> to deposit mails across multiple queues. Each queue has its own <b>qmail-send</b> process. You can spread the individual queues across multiple filesystems on different controllers  to maximize on IO throughput.
     * The number of queues is configurable by three environment variables **QUEUE_BASE**, **QUEUE_COUNT** and **QUEUE_START**. A queue in indimail is defined as a collection of multiple queues.
-    * Each queue in the collection can have one or more SMTP listener but a single delivery (qmail-send) processes. It is possible to have the entire queue collection without a delivery process (e.g. SMTP on port 366 ODMR). The QUEUE_COUNT can be defined based on how powerful your host is (IO bandwidth, etc). The configurable queue is possible with a single installation of indimail-mta and does not require you to have multiple indimail-mta installations (unlike qmail) to achieve this.
+    * Each queue in the collection can have one or more SMTP listener but a single delivery (<b>qmail-send</b>) processes. It is possible to have the entire queue collection without a delivery process (e.g. SMTP on port 366 ODMR). The QUEUE\_COUNT can be defined based on how powerful your host is (IO bandwidth, etc). The configurable queue is possible with a single installation of indimail-mta and does not require you to have multiple indimail-mta installations (unlike qmail) to achieve this.
 4.  uses getpwnam to use uids/gids, home from /etc/passwd, /etc/group (allows me to transfer the binary to another machine regardless of the ids in /etc/passwd)
 5.  Hooks into local and remote deliveries
-    * QMAILLOCAL - Run executable defined by this instead of qmail-local
-    * QMAILREMOTE - Run executable defined by this instead of qmail-remote
+    * QMAILLOCAL - Run executable defined by this instead of <b>qmail-local</b>
+    * QMAILREMOTE - Run executable defined by this instead of <b>qmail-remote</b>
     * Theoretically one can exploit QMAILLOCAL, QMAILREMOTE variables to route mails for a domain across multiple mail stores.
-6.  Hook into qmail-remote's routing by using SMTPROUTE environment variable.
+6.  Hook into <b>qmail-remote</b>'s routing by using SMTPROUTE environment variable.
     * Ability to do User Based Routing via SMTPROUTE environment. This gives the ability to split a domain across multiple hosts without using NFS to mount multiple filesystems on any host. One can even use a shell script, set the environment variable and deliver mails to users across multiple hosts. I call this dynamic SMTPROUTE.
-    * Additionally qmail-rspawn has the ability to connect to MySQL and set SMTPROUTES based on values in a MySQL table. The connection to MySQL is kept open. This gives qmail-rspawn to do high speed user lookups in MySQL and to deliver the mail for a single domain split across multiple mail stores.
+    * Additionally <b>qmail-rspawn</b> has the ability to connect to MySQL and set SMTPROUTES based on values in a MySQL table. The connection to MySQL is kept open. This gives <b>qmail-rspawn</b> to do high speed user lookups in MySQL and to deliver the mail for a single domain split across multiple mail stores.
 7.  Proxy for IMAP and POP3. Allows IMAP/POP3 protocol for users in a domain to be split across multiple hosts. Also allows seamless integration of proprietary email servers with indimail.  The proxy is generic and works with any IMAP/POP3 server. The proxy comes useful when you want to move out of a headache causing mail server like x-change and want to retain the same domain on the proprietary server. In conjunction with dynamic SMTPROUTES, you can migrate all your users to indimail, without any downtime/disruption to email service. The proxy and dynamic SMTPROUTES allow you to scale your email server horizontally without using NFS across geographical locations.
 8.  ETRN, ATRN, ODMR (RFC 2645) support
 9.  accesslist - restrictions between mail transactions between email ids (you can decide who can send mails to whom)
 10. bodycheck - checks on header/body on incoming emails (for spam, virus security and other needs)
 11. hostaccess - provides domain, IP address pair access list control. e.g. you can define from which set of addresses mail from yahoo.com will be accepted.
 12. chkrcptdomains - rcpt check on selective domains
-13. envrules - recipient/sender based - set or unset environment variables (qmail-smtpd, qmail-inject, qmail-local, qmail-remote) any variables which controls the behaviour of qmail-smtpd, qmail-inject, qmail-local, qmail-remote e.g. NODNSCHECKS, DATABYTES, RELAYCLIENT, BADMAILFROM, etc can be defined individually for a particular recipient or sender rather than a fixed value set at runtime.
+13. envrules - recipient/sender based - set or unset environment variables (qmail-smtpd, qmail-inject, <b>qmail-local</b>, <b>qmail-remote</b>) any variables which controls the behaviour of qmail-smtpd, qmail-inject, <b>qmail-local</b>, <b>qmail-remote</b> e.g. NODNSCHECKS, DATABYTES, RELAYCLIENT, BADMAILFROM, etc can be defined individually for a particular recipient or sender rather than a fixed value set at runtime.
 14. NULLQUEUE, qmail-nullqueue (blackhole support - like qmail-queue but mails go into a blackhole). I typically uses this in conjunction with envrules to trash the mail into blackhole without spending any disk IO.
-15. qmail-multi - run multiple filters (qmail-smtpd) (something like qmail-qfilter). Also distributes mails across multiple queues to do a load balancing act. qmail-multi allowed me to process massive rate of incoming mails at my earlier job with a ISP.
-16. envheaders - Any thing defined here e.g. Return-Path, qmail-queue sets Return-Path as an environment variable with the value found in Return-Path header in the email. This environment variable gets passed across the queue and is also available to qmail-local, qmail-remote
+15. <b>qmail-multi</b> - run multiple filters (qmail-smtpd) (something like <b>qmail-qfilter</b>). Also distributes mails across multiple queues to do a load balancing act. <b>qmail-multi</b> allowed me to process massive rate of incoming mails at my earlier job with a ISP.
+16. envheaders - Any thing defined here e.g. Return-Path, qmail-queue sets Return-Path as an environment variable with the value found in Return-Path header in the email. This environment variable gets passed across the queue and is also available to <b>qmail-local</b>, <b>qmail-remote</b>
 17. logheaders - Any header defined in this control file, gets written to file descriptor 2 with the value found in the email.
 18. removeheaders - Any header defined here, qmail-queue will remove that header from the email
 19. quarantine or QUARANTINE env variable causes qmail-queue to replace the recipient list with the value defined in the control file or the environment variable. Additionally an environment variable X-Quarantine-ID: is set which holds the orignal recipient list.
@@ -4759,7 +4754,7 @@ Some of the features available in this package
 22. Message Submission Port (port 587) RFC 2476
 23. Integrated authenticated SMTP with Indimail (PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5, pop-bef-smtp)
 24. duplicate eliminator using 822header
-25. qmail-remote has configurable TCP timeout table (max_tolerance, min_backoff periods can be configured in smtproutes)
+25. <b>qmail-remote</b> has configurable TCP timeout table (max\_tolerance, min\_backoff periods can be configured in smtproutes)
 26. Ability to change concurrency of tcpserver without restarting tcpserver
 27. Ability to restrict connections per IP
 28. multilog replaced buffer functions with substdio
@@ -4768,7 +4763,7 @@ Some of the features available in this package
 31. ability to add stupid disclaimer(s) to messages.
 32. InLookup serves as a high performance user lookup daemon for qmail-smtpd (rcpt checks, authenticated SMTP, RELAY check). Even the IMAP, POP3 authentication gets served by inlookup. inlookup preforks configurable number of daemons which opens multiple connections to MySQL and keep the connection open. The query results are cached too. This gives inlookup a decent database performance when handling millions of lookups in few hours. Programs like qmail-smtpd use a fifo to communicate with inlookup
 33. CHKRECIPIENT extension which rejects users not found in local MySQL or recipients.cdb database
-34. indisrvr Was written to ease mail server administration across multiple hosts. Allows ones to create, delete, modify users and run any command as defined in variables.c. indisrvr listens on a AF_INET/AF_INET6 socket.
+34. indisrvr Was written to ease mail server administration across multiple hosts. Allows ones to create, delete, modify users and run any command as defined in variables.c. indisrvr listens on a AF\_INET/AF\_INET6 socket.
 35. Identation of djb's code (using indent) so that a mortal like me could understand it :)
 36. Works with systemd - systemd is an event-based replacement for the init daemon
 37. Changed buffer libraries in daemontools to substdio.
@@ -4780,7 +4775,7 @@ Some of the features available in this package
 43. pam-multi - Generic PAM which allows external program using PAM to authenticate against IndiMail's database. Using pam-multi and nssd, you can use any IMAP server like dovecot, etc with IndiMail.
 44. Post execution Handle - Allows extending indimail's functionality by writing simple scripts
 45. sslerator - TLS/SSL protocol wrapper for non-tls aware applications.
-46. QMTP support in qmail-remote. QMTP support for mail transfers between IndiMail clusters.
+46. QMTP support in <b>qmail-remote</b>. QMTP support for mail transfers between IndiMail clusters.
 47. Configured installation time QMQP support on server.
 48. indimail-mini package providing QMQP client
 49. IPV6 Support
@@ -4814,7 +4809,7 @@ Some of the features available in this package
     * [indimail-web](https://hub.docker.com/repository/docker/cprogrammer/indimail-web "RoundCubemail")
 75. [FHS](https://refspecs.linuxfoundation.org/FHS_3.0/fhs-3.0.pdf) compliance.
 76. Ed Neville - allow multiple Delivered-To in qmail-local using control file maxdeliveredto
-77. Ed Neville - configure TLS method in control/tlsclientmethod (qmail-smtpd), control/tlsservermethod (qmail-remote)
+77. Ed Neville - configure TLS method in control/tlsclientmethod (qmail-smtpd), control/tlsservermethod (<b>qmail-remote</b>)
 78. roundcube support for password, autoresponder through roundcube plugin iwebadmin
 79. ezmlm-idx mailing list manager from [https://untroubled.org/ezmlm/](https://untroubled.org/ezmlm/ "ezmlm-idx")
 80. tcpserver plugin feature - dynamically load shared objects given on command line. Load shared objects defined by env variables PLUGIN0, PLUGIN1, ...
@@ -4870,9 +4865,9 @@ This is obtained from github actions defined in each of the indimail repository.
 
 Both indimail-mta and indimail-virtualdomains started in late 1999 as a combined package of unmodified qmail and modified vpopmail.
 
-indimail-mta started as a unmodified qmail-1.03. This was when I was employed by an ISP in late 1999. The ISP was using [Critical Path's ISOCOR](https://www.wsj.com/articles/SB940514435217077581) for providing Free and Paid email service. Then the dot com burst happened and ISP didn't have money to spend on upgrading the E3500, E450 [Sun Enterprise servers](https://en.wikipedia.org/wiki/Sun_Enterprise). The mandate was to move to an OSS/FS solution. After evaluating sendmail, postfix and qmail, we chose qmail. During production deployment, qmail couldn't scale on these servers. The issue was the queue's todo count kept on increasing. We applied the qmail-todo patch, but still we couldn't handle the incoming email rate. By now the customers were screaming, the corporate users were shooting out nasty emails. We tried a small hack the solved this problem. Compiled 20 different qmail setups, with conf-qmail as /var/qmail1, /var/qmail2, etc. Run qmail-send for each of these instance. A small shim was written which would get the current time and divide by 20. The remainder was used to do exec of /var/qmail1/bin/qmail-queue, /var/qmail2/bin/qmail-queue, etc. The shim was copied as /var/qmail/bin/qmail-queue. The IO problem got solved. But the problem with this solution was compiling the qmail source 20 times and copying the shim as qmail-queue. You couldn't compile qmail on one machine and use the backup of binaries on another machine. Things like uid, gid, the paths were all hardcoded in the source. That is how the base of indimail-mta took form by removing each and every hard coded uids, gids and paths. indimail-mta still does the same thing that was done in the year 2000. The installation creates multiple queues - /var/indimail/queue/queue1, /var/indimail/queue/queue2, etc. A new daemon named qmail-daemon uses QUEUE\_COUNT env variable to run multiple qmail-send instances. Each qmail-send instance can instruct qmail-queue to deposit mail in any of the queues installed. All programs use qmail-multi, a qmail-queue frontend to load balance the incoming email across multiple queues.
+indimail-mta started as a unmodified qmail-1.03. This was when I was employed by an ISP in late 1999. The ISP was using [Critical Path's ISOCOR](https://www.wsj.com/articles/SB940514435217077581) for providing Free and Paid email service. Then the dot com burst happened and ISP didn't have money to spend on upgrading the E3500, E450 [Sun Enterprise servers](https://en.wikipedia.org/wiki/Sun_Enterprise). The mandate was to move to an OSS/FS solution. After evaluating sendmail, postfix and qmail, we chose qmail. During production deployment, qmail couldn't scale on these servers. The issue was the queue's todo count kept on increasing. We applied the <b>qmail-todo</b> patch, but still we couldn't handle the incoming email rate. By now the customers were screaming, the corporate users were shooting out nasty emails. We tried a small hack the solved this problem. Compiled 20 different qmail setups, with conf-qmail as /var/qmail1, /var/qmail2, etc. Run <b>qmail-send</b> for each of these instance. A small shim was written which would get the current time and divide by 20. The remainder was used to do exec of /var/qmail1/bin/qmail-queue, /var/qmail2/bin/qmail-queue, etc. The shim was copied as /var/qmail/bin/qmail-queue. The IO problem got solved. But the problem with this solution was compiling the qmail source 20 times and copying the shim as <b>qmail-queue</b>. You couldn't compile qmail on one machine and use the backup of binaries on another machine. Things like uid, gid, the paths were all hardcoded in the source. That is how the base of indimail-mta took form by removing each and every hard coded uids, gids and paths. indimail-mta still does the same thing that was done in the year 2000. The installation creates multiple queues - /var/indimail/queue/queue1, /var/indimail/queue/queue2, etc. A new daemon named qmail-daemon uses QUEUE\_COUNT env variable to run multiple <b>qmail-send</b> instances. Each <b>qmail-send</b> instance can instruct <b>qmail-queue</b> to deposit mail in any of the queues installed. All programs use <b>qmail-multi</b>, a <b>qmail-queue</b> frontend to load balance the incoming email across multiple queues.
 
-indimail-virtualdomain started with a modified vpopmail base that could handle a distributed setup - Same domain on multiple servers. Having this kind of setup made the control file smtproutes unviable. email would arrive at a relay server for user@domain. But the domain '@domain' was preset on multiple hosts, with each host having it's own set of users. This required special routing and modification of qmail (especially qmail-remote) to route the traffic to the correct host. vdelivermail to had to be written to deliver email for a local domain to a remote host, in case the user wasn't present on the current host. New MySQL tables were created to store the host information for a user. This table would be used by qmail-local, qmail-remote, vdelivermail to route the mail to the write host. All this complicated stuff had to be done because the ISP where I worked, had no money to buy/upgrade costly servers to cater to users, who were multiplying at an exponential rate. The govt had just opened the license for providing internet services to private players. These were Indians who were tasting internet and free email for the first time. So the solution we decided was to buy multiple intel servers [Compaq Proliant](https://en.wikipedia.org/wiki/ProLiant) running Linux and make the qmail/vpopmail solution horizontally scalable. This was the origin of indimail-1.x which borrowed code from vpopmail, modified it for a domain on multiple hosts. indimail-2.x was a complete rewrite using djb style, using [libqmail](https://github.com/mbhangui/libqmail) as the standard library for all basic operations. All functions were discarded because they used the standard C library. The problem with indimail-2.x was linking with MySQL libraries, which caused significant issues building binary packages on [openSUSE build service](https://build.opensuse.org/). Binaries got built with MySQL/MariaDB libraries pulled by OBS, but when installed on a target machine, the user would have a completely different MySQL/MariaDB setup. Hence a decision was taken to load the library at runtime using dlopen/dlsym. This was the start of indimail-3.x. The source was moved from sourceforge.net to github and the project renamed as indimail-virtualdomains from the original name IndiMail. The modified source code of qmail was moved to github as indimail-mta.
+indimail-virtualdomain started with a modified vpopmail base that could handle a distributed setup - Same domain on multiple servers. Having this kind of setup made the control file smtproutes unviable. email would arrive at a relay server for user@domain. But the domain '@domain' was preset on multiple hosts, with each host having it's own set of users. This required special routing and modification of qmail (especially <b>qmail-remote</b>) to route the traffic to the correct host. <b>vdelivermail</b> to had to be written to deliver email for a local domain to a remote host, in case the user wasn't present on the current host. New MySQL tables were created to store the host information for a user. This table would be used by <b>qmail-local</b>, <b>qmail-remote</b>, <b>vdelivermail</b> to route the mail to the write host. All this complicated stuff had to be done because the ISP where I worked, had no money to buy/upgrade costly servers to cater to users, who were multiplying at an exponential rate. The govt had just opened the license for providing internet services to private players. These were Indians who were tasting internet and free email for the first time. So the solution we decided was to buy multiple intel servers [Compaq Proliant](https://en.wikipedia.org/wiki/ProLiant) running Linux and make the qmail/vpopmail solution horizontally scalable. This was the origin of indimail-1.x which borrowed code from vpopmail, modified it for a domain on multiple hosts. indimail-2.x was a complete rewrite using djb style, using [libqmail](https://github.com/mbhangui/libqmail) as the standard library for all basic operations. All functions were discarded because they used the standard C library. The problem with indimail-2.x was linking with MySQL libraries, which caused significant issues building binary packages on [openSUSE build service](https://build.opensuse.org/). Binaries got built with MySQL/MariaDB libraries pulled by OBS, but when installed on a target machine, the user would have a completely different MySQL/MariaDB setup. Hence a decision was taken to load the library at runtime using dlopen/dlsym. This was the start of indimail-3.x. The source was moved from sourceforge.net to github and the project renamed as indimail-virtualdomains from the original name IndiMail. The modified source code of qmail was moved to github as indimail-mta.
 
 # See also
 
