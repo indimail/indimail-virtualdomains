@@ -192,7 +192,7 @@ IndiMail is a messaging Platform comprising of multiple software packages includ
 
 [**indimail-utils**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils "indimail-utils")
 
-* Utilities ([altermime](http://pldaniels.com/altermime/ "altermime"), [ripMIME](https://pldaniels.com/ripmime/ "ripmime"), [mpack](https://github.com/mbhangui/indimail-virtualdomains/tree/master/mpack-x "mpack"), [fortune](https://en.wikipedia.org/wiki/Fortune_\(Unix\ "fortune")) and [flash](https://github.com/mbhangui/indimail-virtualdomains/tree/master/flash-x "flash"))
+* Utilities ([altermime](http://pldaniels.com/altermime/ "altermime"), [ripMIME](https://pldaniels.com/ripmime/ "ripmime"), [mpack](https://github.com/mbhangui/indimail-virtualdomains/tree/master/mpack-x "mpack"), [fortune](https://en.wikipedia.org/wiki/Fortune_\(Unix\ "fortune") and [flash](https://github.com/mbhangui/indimail-virtualdomains/tree/master/flash-x "flash"))
 * [logalert](https://github.com/mbhangui/indimail-virtualdomains/tree/master/logalert-0.3 "logalert")
 
 [**indimail-spamfilter**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/bogofilter-x "bogofilter")
@@ -201,9 +201,9 @@ IndiMail is a messaging Platform comprising of multiple software packages includ
 
 Core **IndiMail** consists of three main packages - [indimail-mta](https://github.com/mbhangui/indimail-mta "indimail-mta"), [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains "indimail-virtualdomains") and [indimail-access](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-access "indimail-access")
 
-* **indimail-mta** is a re-engineered version of [qmail](http://cr.yp.to/qmail.html "qmail").  **indimail-mta** provides you a MTA with all the features and functionality of **[qmail](http://cr.yp.to/qmail.html "qmail")** plus many additional features.
-* **indimail-virtualdomains** provides you tools to create and manage multiple virtual domains with its own set of users, who can send and receive mails.
-* **indimail-access** provides you IMAP/POP3 protocols & fetchmail utility. It allows the users to access their emails
+* **indimail-mta** is a re-engineered version of [qmail](http://cr.yp.to/qmail.html "qmail").  **indimail-mta** provides you a MTA with all the features and functionality of **[qmail](http://cr.yp.to/qmail.html "qmail")** plus many additional features. <b>indimail-mta</b> is an independent package. You can install it without requiring <b>indimail-virtualdomains</b> or <b>indimail-access</b>.
+* **indimail-virtualdomains** provides you tools to create and manage multiple virtual domains with its own set of users, who can send and receive mails. <b>indimail-virtualdomains</b> is dependent on <b>indimail-mta</b> to function.
+* **indimail-access** provides you IMAP/POP3 protocols & fetchmail utility. It allows the users to access their emails delivered by <b>indimail-mta</b> locally to a host to users in /etc/passwd or to <b>virtual users</b> on a host (or multiple hosts) on the network having <b>virtual domains</b> created by <b>indimail-virtualdomains</b>.
 
 This document will refer to **IndiMail** as a combined package of indimail-virtualdomains, indimail-mta & other packages namely indimail-access, indimail-auth, indimail-utils, indimail-spamfilter.
 
