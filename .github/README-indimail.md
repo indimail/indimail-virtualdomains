@@ -3,6 +3,7 @@
 Table of Contents
 =================
 
+   * [Table of Contents](#table-of-contents)
    * [INTRODUCTION](#introduction)
    * [LICENSING](#licensing)
    * [TERMINOLOGY used for commands](#terminology-used-for-commands)
@@ -24,21 +25,21 @@ Table of Contents
    * [Eliminating Duplicate Emails during local delivery](#eliminating-duplicate-emails-during-local-delivery)
    * [Using procmail with IndiMail](#using-procmail-with-indimail)
    * [Writing Filters for IndiMail](#writing-filters-for-indimail)
-      * [1.1 Filtering during SMTP (before mail gets queued)](#11-filtering-during-smtp-before-mail-gets-queued)
-         * [1.1.1 Using FILTERARGS environment variable](#111-using-filterargs-environment-variable)
-         * [1.1.2 Using QMAILQUEUE with qmail-qfilter](#112-using-qmailqueue-with-qmail-qfilter)
-         * [1.1.3 Using QMAILQUEUE with your own program](#113-using-qmailqueue-with-your-own-program)
-      * [1.2 Filtering during local / remote delivery](#12-filtering-during-local--remote-delivery)
-         * [1.2.1 Using FILTERARGS environment variable](#121-using-filterargs-environment-variable)
-         * [1.2.2 Using control file filterargs](#122-using-control-file-filterargs)
-         * [1.2.3 Using QMAILLOCAL or QMAILREMOTE environment variables](#123-using-qmaillocal-or-qmailremote-environment-variables)
-      * [1.3 Using dot-qmail(5) or valias(1)](#13-using-dot-qmail5-or-valias1)
-      * [1.4 Using IndiMail rule based filter - vfilter](#14-using-indimail-rule-based-filter---vfilter)
-      * [1.5 Examples Filters](#15-examples-filters)
-         * [1.5.1 FILTERARGS script](#151-filterargs-script)
-         * [1.5.2 QMAILQUEUE script](#152-qmailqueue-script)
-         * [1.5.3 QMAILREMOTE script](#153-qmailremote-script)
-         * [1.5.4 QMAILLOCAL script](#154-qmaillocal-script)
+      * [Filtering during SMTP (before mail gets queued)](#filtering-during-smtp-before-mail-gets-queued)
+         * [Using FILTERARGS environment variable](#using-filterargs-environment-variable)
+         * [Using QMAILQUEUE with qmail-qfilter](#using-qmailqueue-with-qmail-qfilter)
+         * [Using QMAILQUEUE with your own program](#using-qmailqueue-with-your-own-program)
+      * [Filtering during local / remote delivery](#filtering-during-local--remote-delivery)
+         * [Using FILTERARGS environment variable](#using-filterargs-environment-variable-1)
+         * [Using control file filterargs](#using-control-file-filterargs)
+         * [Using QMAILLOCAL or QMAILREMOTE environment variables](#using-qmaillocal-or-qmailremote-environment-variables)
+      * [Using dot-qmail(5) or valias(1)](#using-dot-qmail5-or-valias1)
+      * [Using IndiMail rule based filter - vfilter](#using-indimail-rule-based-filter---vfilter)
+      * [Examples Filters](#examples-filters)
+         * [FILTERARGS script](#filterargs-script)
+         * [QMAILQUEUE script](#qmailqueue-script)
+         * [QMAILREMOTE script](#qmailremote-script)
+         * [QMAILLOCAL script](#qmaillocal-script)
    * [IndiMail Delivery mechanism explained](#indimail-delivery-mechanism-explained)
       * [Delivery Mode](#delivery-mode)
       * [Addresses](#addresses)
@@ -47,16 +48,16 @@ Table of Contents
    * [Controlling Delivery Rates](#controlling-delivery-rates)
    * [Distributing your outgoing mails from Multiple IP addresses](#distributing-your-outgoing-mails-from-multiple-ip-addresses)
    * [Processing Bounces](#processing-bounces)
-      * [1. Using environment variable BOUNCEPROCESSOR](#1-using-environment-variable-bounceprocessor)
-      * [2. Using environment variable BOUNCERULES or control files bounce.envrules.](#2-using-environment-variable-bouncerules-or-control-files-bounceenvrules)
-      * [3. Using BOUNCEQUEUE environment variable to queue bounces](#3-using-bouncequeue-environment-variable-to-queue-bounces)
+      * [Using environment variable BOUNCEPROCESSOR](#using-environment-variable-bounceprocessor)
+      * [Using environment variable BOUNCERULES or control files bounce.envrules.](#using-environment-variable-bouncerules-or-control-files-bounceenvrules)
+      * [Using BOUNCEQUEUE environment variable to queue bounces](#using-bouncequeue-environment-variable-to-queue-bounces)
    * [Delivery Instructions for a virtual domain](#delivery-instructions-for-a-virtual-domain)
    * [Setting Disclaimers in your emails](#setting-disclaimers-in-your-emails)
       * [Option 1 - using /etc/indimail/control/filterargs](#option-1---using-etcindimailcontrolfilterargs)
       * [Option 2 - Set the FILTERARGS environment variable](#option-2---set-the-filterargs-environment-variable)
    * [Email Archiving](#email-archiving)
-      * [1. using environment variable EXTRAQUEUE](#1-using-environment-variable-extraqueue)
-      * [2. using control file mailarchive](#2-using-control-file-mailarchive)
+      * [using environment variable EXTRAQUEUE](#using-environment-variable-extraqueue)
+      * [using control file mailarchive](#using-control-file-mailarchive)
    * [Envrules](#envrules)
    * [Domain Specific Queues](#domain-specific-queues)
    * [Setting up QMQP services](#setting-up-qmqp-services)
@@ -82,23 +83,23 @@ Table of Contents
    * [SPAM Control using bogofilter](#spam-control-using-bogofilter)
    * [SPAM Control using badip control file](#spam-control-using-badip-control-file)
    * [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi)
-      * [1. Using tcprules](#1-using-tcprules)
-      * [2. Using envdir for SMTP service under supervise(8)](#2-using-envdir-for-smtp-service-under-supervise8)
+      * [Using tcprules](#using-tcprules)
+      * [Using envdir for SMTP service under supervise(8)](#using-envdir-for-smtp-service-under-supervise8)
    * [SMTP Access List](#smtp-access-list)
    * [Using spamassasin with IndiMail](#using-spamassasin-with-indimail)
    * [Greylisting in IndiMail](#greylisting-in-indimail)
-      * [1. Enabling qmail-greyd greylisting server](#1-enabling-qmail-greyd-greylisting-server)
-      * [2. Enabling greylisting in SMTP](#2-enabling-greylisting-in-smtp)
+      * [Enabling qmail-greyd greylisting server](#enabling-qmail-greyd-greylisting-server)
+      * [Enabling greylisting in SMTP](#enabling-greylisting-in-smtp)
    * [Configuring dovecot as the IMAP/POP3 server](#configuring-dovecot-as-the-imappop3-server)
       * [Installation](#installation)
          * [For RPM based systems](#for-rpm-based-systems)
          * [For Debian based systems](#for-debian-based-systems)
       * [Configuring Authentication Methods](#configuring-authentication-methods)
          * [Basic Configuration](#basic-configuration)
-         * [1 Use dovecot's SQL driver](#1-use-dovecots-sql-driver)
-         * [2 Using checkpassword](#2-using-checkpassword)
-         * [3 Using pam-multi](#3-using-pam-multi)
-         * [4 Using indimail's Name Service Switch](#4-using-indimails-name-service-switch)
+         * [Use dovecot's SQL driver](#use-dovecots-sql-driver)
+         * [Using checkpassword](#using-checkpassword)
+         * [Using pam-multi](#using-pam-multi)
+         * [Using indimail's Name Service Switch](#using-indimails-name-service-switch)
       * [Start dovecot](#start-dovecot)
       * [Migration from courier-imap to dovecot](#migration-from-courier-imap-to-dovecot)
          * [IMAP migration](#imap-migration)
@@ -119,13 +120,13 @@ Table of Contents
    * [RoundCube Installation for IndiMail](#roundcube-installation-for-indimail)
    * [Setting up MySQL](#setting-up-mysql)
       * [Storing Passwords](#storing-passwords)
-      * [1. Database Initialization](#1-database-initialization)
-      * [2. MySQL Startup](#2-mysql-startup)
-      * [3. Creating MySQL Users](#3-creating-mysql-users)
-      * [4. Creating MySQL Configuration](#4-creating-mysql-configuration)
-      * [5. MySQL Control File](#5-mysql-control-file)
-      * [6. Configuring MySQL/MariaDB to use SSL/TLS](#6-configuring-mysqlmariadb-to-use-ssltls)
-      * [7. Configure MySQL/MariaDB access for svctool](#7-configure-mysqlmariadb-access-for-svctool)
+      * [Database Initialization](#database-initialization)
+      * [MySQL Startup](#mysql-startup)
+      * [Creating MySQL Users](#creating-mysql-users)
+      * [Creating MySQL Configuration](#creating-mysql-configuration)
+      * [MySQL Control File](#mysql-control-file)
+      * [Configuring MySQL/MariaDB to use SSL/TLS](#configuring-mysqlmariadb-to-use-ssltls)
+      * [Configure MySQL/MariaDB access for svctool](#configure-mysqlmariadb-access-for-svctool)
    * [Using Docker Engine to Run IndiMail / IndiMail-MTA](#using-docker-engine-to-run-indimail--indimail-mta)
    * [Installation &amp; Repositories](#installation--repositories)
       * [Installing Indimail using DNF/YUM/APT Repository](#installing-indimail-using-dnfyumapt-repository)
@@ -1096,9 +1097,9 @@ It is not necessary for a filter to modify the email. You can have a filter just
 
 Let us say that we have written a script /usr/local/bin/myfilter. The myfilter program expects the raw email on stdin and outputs the email back (maybe modiying it) on stdout.
 
-## 1.1 Filtering during SMTP (before mail gets queued)
+## Filtering during SMTP (before mail gets queued)
 
-### 1.1.1 Using FILTERARGS environment variable
+### Using FILTERARGS environment variable
 
 The below configuration causes all inbound SMTP email to be fed through the filter /usr/local/bin/myfilter. You can use the programs 822header(1), 822body(1) inside myfilter to get and manipulate the headers and body (See 1.5.1).
 
@@ -1111,7 +1112,7 @@ $ sudo /bin/bash
 NOTE: If the program myfilter returns 100, the message will be bounced. If it returns 2, the message will be discarded (blackholed).
 ```
 
-### 1.1.2 Using QMAILQUEUE with qmail-qfilter
+### Using QMAILQUEUE with qmail-qfilter
 
 You can use <b>qmail-qfilter</b>(1). <b>qmail-qfilter</b> allows you to run multiple filters passed as command line arguments to <b>qmail-qfilter</b>. Since QMAILQUEUE doesn't allow you to specify multiple arguments, you can write a shell script which calls <b>qmail-qfilter</b> and have the shell script defined as QMAILQUEUE environment variable.
 
@@ -1127,7 +1128,7 @@ $ sudo /bin/bash
 
 NOTE: you can define QQF\_MAILQUEUE to /usr/bin/qmail-nullqueue to discard the mail (blackhole).
 
-### 1.1.3 Using QMAILQUEUE with your own program
+### Using QMAILQUEUE with your own program
 
 When you want to use your own program as QMAILQUEUE, then your program is responsible for queuing the email. It is trivial to queue the email by calling <b>qmail-multi</b>(8). You script can read the stdin for the raw message (headers + body) and pipe the output (maybe after modifications) to <b>qmail-multi</b>(8). If you are doing DK/DKIM signing, you can execute <b>qmail-dk</b>(8) instead of <b>qmail-multi</b>(8). You can have <b>qmail-dk</b>(8) call <b>qmail-dkim</b>(8) and <b>qmail-dkim</b>(8) calls <b>qmail-multi</b>(8). Assuming you want to do DK/DKIM signing, and myfilter calls <b>qmail-dk</b>(8), you can do the following
 
@@ -1142,9 +1143,9 @@ $ sudo /bin/bash
 
 NOTE: You can set the environment variable NULLQUEUE before calling <b>qmail-multi</b> to discard the mail completely (blackhole).
 
-## 1.2 Filtering during local / remote delivery
+## Filtering during local / remote delivery
 
-### 1.2.1 Using FILTERARGS environment variable
+### Using FILTERARGS environment variable
 
 The below configuration causes all local / remote deliveries to be fed through the filter /usr/local/bin/myfilter. You can use the programs 822header(1), 822body(1) inside myfilter to get and manipulate the headers and body.
 
@@ -1170,14 +1171,14 @@ fi
 exit 0
 ```
 
-### 1.2.2 Using control file filterargs
+### Using control file filterargs
 
 The control file filterargs gives you control to run filters individually for local or remote deliveries. It also allows you to run your filter for both local and remote deliveries. See <b>spawn-filter</b>(8) for full description on this control file.
 e.g. The following entry in /var/indimail/control/filterargs causes all mails to yahoo.com be fed through the filter dk-filter(8) for DK/DKIM signing.
 yahoo.com:remote:/usr/bin/dk-filter
 NOTE: If the program myfilter returns 100, the message will be bounced. If it returns 2, the message will be discarded (blackholed).
 
-### 1.2.3 Using QMAILLOCAL or QMAILREMOTE environment variables
+### Using QMAILLOCAL or QMAILREMOTE environment variables
 
 If you define QMAILLOCAL, indimail will execute the program/script defined by the QMAILLOCAL variable for all local deliveries. The arguments passed to this program/script will be the same as that for <b>qmail-local</b>(8).
 Similarly, if you define QMAILREMOTE, indimail will execute the program/script defined by the QMAILREMOTE variable for all remote deliveries. The argument passed to this program/script are the same as that for <b>qmail-remote</b>(8).
@@ -1190,7 +1191,7 @@ exec qmail-remote "$@"     #(for remote deliveries)
 
 NOTE: You can exit with value 0 instead of calling <b>qmail-local</b> / <b>qmail-remote</b> to discard the mail completely (blackhole)
 
-## 1.3 Using dot-qmail(5) or valias(1)
+## Using dot-qmail(5) or valias(1)
 
 Both .qmail files and valias mechanism allows you to execute your own programs for local deliveries. See the man pages for dot-qmail(5) and valias(1) for more details. After manipulating the original raw email on stdin, you can pipe the out to the program maildirdeliver(1) for the final delivery.
 Assuming you write the program myscript to call maildirdeliver program, you can use the valias command to add the following alias
@@ -1200,7 +1201,7 @@ Assuming you write the program myscript to call maildirdeliver program, you can 
 Now any mail sent to testuser01@example.com will be given to the program /usr/local/bin/myfilter as standard input.
 NOTE: you can exit with value 0 instead of calling the maildirdeliver program to discard the mail completely (blackhole).
 
-## 1.4 Using IndiMail rule based filter - vfilter
+## Using IndiMail rule based filter - vfilter
 
 IndiMail's vfilter(8) mechanism allows you to create rule based filter based on any keyword in the message headers or message body. You can create a vfilter by calling the <b>vcfilter</b>(1) program.
 
@@ -1210,11 +1211,11 @@ $ vcfilter -i -t myfilter -h 2 -c 0 -k "failure notice" -f /NoDeliver -b "2|/usr
 
 NOTE: you can exit with value 0 instead of putting anything on standard output to discard the mail completely (blackhole).
 
-## 1.5 Examples Filters
+## Examples Filters
 
 e.g. the below filter looks for emails having "failure notice" in the subject line and inserts the line "sorry about that" in the first line of the message body and puts the line “sent by IndiMail Messaging platform” in the last line
 
-### 1.5.1 FILTERARGS script
+### FILTERARGS script
 
 ```
 #!/bin/sh
@@ -1247,7 +1248,7 @@ fi
 exit 0
 ```
 
-### 1.5.2 QMAILQUEUE script
+### QMAILQUEUE script
 
 ```
 #!/bin/sh
@@ -1291,7 +1292,7 @@ exec /usr/bin/qmail-multi
 exit 111
 ```
 
-### 1.5.3 QMAILREMOTE script
+### QMAILREMOTE script
 
 ```
 #!/bin/sh
@@ -1369,7 +1370,7 @@ exec -a qmail-remote $PROG "$host" "$sender" "$qqeh" $size $*
 exit 111
 ```
 
-### 1.5.4 QMAILLOCAL script
+### QMAILLOCAL script
 
 ```
 #!/bin/sh
@@ -1753,7 +1754,7 @@ exec -a qmail-remote $PROG "$host" "$sender" "$qqeh" $size $*
 
 IndiMail allows a mechanism by which you can use your own script/program to handle bounces. All bounces in IndiMail is generated by <b>qmail-send</b>. <b>qmail-send</b> generates a bounce when <b>qmail-lspawn</b> or <b>qmail-rspawn</b> reports a permanent failed delivery. A bounce is generated by <b>qmail-send</b> by injecting a new mail in the queue using <b>qmail-queue</b>. This bounce generation by <b>qmail-send</b> can be modified in three ways
 
-## 1. Using environment variable BOUNCEPROCESSOR
+## Using environment variable BOUNCEPROCESSOR
 
 When you define the environment variable BOUNCEPROCESSOR as a valid path to a program or script, the program gets called whenever a delivery fails permanently. The program runs with the uid *qmails* and is passed the following five arguments
 
@@ -1774,7 +1775,7 @@ $ sudo /bin/bash
 
 There are few email marketing companies who are using BOUNCEPROCESSOR to insert the status of all bounces in MySQL table for their email marketing campaigns.
 
-## 2. Using environment variable BOUNCERULES or control files bounce.envrules.
+## Using environment variable BOUNCERULES or control files bounce.envrules.
 
 Using envrules, you can set specific environment variables only for bounced recipients. The format of this file is of the form
 
@@ -1790,7 +1791,7 @@ support@indimail.org:CONTROLDIR=control2,QMAILQUEUE=/usr/bin/qmail-nullqueue
 
 causes all bounces generated for the sender support@indimail.org to be discarded.
 
-## 3. Using BOUNCEQUEUE environment variable to queue bounces
+## Using BOUNCEQUEUE environment variable to queue bounces
 
 <b>qmail-send</b> uses <b>qmail-queue</b> to queue bounces and aliases/forwards. This can be changed by using QMAILQUEUE environment variable. If a different queue program is desired for bounces, it can be set by using BOUNCEQUEUE environment variable.
 e.g
@@ -1872,7 +1873,7 @@ Read **altermime**(1) man page for more details
 
 IndiMail provides multiple options for those who want their emails archived automatically. For easy retrieval, you can use tools like google desktop, beagle, etc If you use IndiMail, you have two methods to achieve automatic archiving of emails
 
-## 1. using environment variable EXTRAQUEUE
+## using environment variable EXTRAQUEUE
 
 If EXTRAQUEUE environment variable is set to any environment variable, <b>qmail-queue</b> will deposit an extra copy of the email which it receives for putting it in the queue. Normally you would set EXTRAQUEUE variable in any of the clients which use <b>qmail-queue</b>. e.g. <b>qmail-smtpd</b>, <b>qmail-inject</b>, sendmail, etc. If you have setup IndiMail as per the official instructions, you can set EXTRAQUEUE for incoming and outgoing mails as given below
 
@@ -1885,7 +1886,7 @@ $ sudo /bin/bash
 
 Now all your emails coming in and going out of the system, a copy will be sent to archive@example.com. If archive@example.com lies on IndiMail Messaging Platform, you can set filters (using vfilter(1)) to automatically deposit the mails in different folders. The folders can be decided on various criteria like date, sender, recipient, domain, etc.
 
-## 2. using control file mailarchive
+## using control file mailarchive
 
 This control file allows you to set up rule based archiving. For any specific sender or recipient, you can set a rule to select a destination email for archiving. This is much more flexible than using EXTRAQUEUE which allowed you to archive emails to a single email address. A line in the control file mailarchive can be of the form
 
@@ -2583,13 +2584,13 @@ You can see how the scanning works ![Pictorially](indimail_spamfilter_global.png
 
 To enable virus scanning in IndiMail during the SMTP data phase, you can implement either of the two methods below
 
-## 1. Using tcprules
+## Using tcprules
 
 Define QHPSI in tcp.smtp and rebuild tcp.smtp.cdb using tcprules.
 
 `:allow,QHPSI=’/usr/bin/clamdscan %s --quiet --no-summary’`
 
-## 2. Using envdir for SMTP service under supervise(8)
+## Using envdir for SMTP service under supervise(8)
 
 Define QHPSI in SMTP service's variable directory
 
@@ -2807,7 +2808,7 @@ Greylisting is a method of defending email users against spam, by temporarily re
 
 IndiMail 1.6 onwards implements greylisting using <b>qmail-greyd</b> daemon. You additionally need to have the environment variable GREYIP defined for the <b>qmail-smtpd</b> process. The environment variable GREYIP specifies on which IP and port, <b>qmail-greyd</b> is accepting greylisting requests. <b>qmail-smtpd</b> uses UDP to send a triplet (IP+RETURN\_PATH+RECIPIENT) to the greylisting server and waits for an answer which tells <b>qmail-smtpd</b> to proceed ahead or to temporarily reject the mail. <b>qmail-greyd</b> also accepts a list of whitelisted IP addresses for which greylisting should not be done.
 
-## 1. Enabling qmail-greyd greylisting server
+## Enabling qmail-greyd greylisting server
 
 ```
 $ sudo svctool --greylist=1999 --servicedir=/service --min-resend-min=2 \
@@ -2817,7 +2818,7 @@ $ sudo svctool --greylist=1999 --servicedir=/service --min-resend-min=2 \
 
 NOTE: The above service has already been setup for you, if you have done a binary installation of IndiMail/indimail-mta
 
-## 2. Enabling greylisting in SMTP
+## Enabling greylisting in SMTP
 
 Assuming you've setup your <b>qmail-smtpd</b> service with tcpserver with the -x option (as in LWQ), you just need to update the cdb file referenced by this -x option. The source for this file is typically /etc/indimail/tcp.smtp. For example,
 
@@ -2991,7 +2992,7 @@ ssl_cipher_list = PROFILE=SYSTEM
 
 There are four methods you can configure dovecot to work with indimail
 
-### 1 Use dovecot's SQL driver
+### Use dovecot's SQL driver
 
 file /etc/dovecot/conf.d/10-auth.conf
 
@@ -3064,7 +3065,7 @@ password_query = SELECT pw_passwd as password FROM indimail WHERE pw_name = '%n'
 #password_query = select pw_passwd as password FROM indimail LEFT JOIN vlimits ON indimail.pw_domain=vlimits.domain WHERE pw_name='%n' and pw_domain='%d' and !(pw_gid & 8) and ('%r'!='127.0.0.1' or !(pw_gid & 4)) and ( ('%r'!='127.0.0.1' or COALESCE(disable_webmail,0)!=1) and COALESCE(disable_imap,0)!=1 or (pw_gid & 8192) );
 ```
 
-### 2 Using checkpassword
+### Using checkpassword
 
 The checkpassword interface used by dovecot uses dovecot specific extensions. IndiMail provides `vchkpass`, a checkpassword implementation compatible with dovecot.
 
@@ -3087,7 +3088,7 @@ userdb {
 }
 ```
 
-### 3 Using pam-multi
+### Using pam-multi
 
 Create the file /etc/dovecot/conf.d/auth-indimail-conf.ext
 
@@ -3123,7 +3124,7 @@ file /etc/dovecot/conf.d/10-auth.conf
 !include auth-indimail.conf.ext
 ```
 
-### 4 Using indimail's Name Service Switch
+### Using indimail's Name Service Switch
 
 file /etc/dovecot/conf.d/10-auth.conf
 
@@ -3449,7 +3450,7 @@ Non SSL Version Install/Configuration
 1. Install RoundCube. On older systems, use the yum command
    `$ sudo dnf -y install roundcubemail php-mysqlnd`
 
-2. Connect to MySQL using a privileged user. IndiMail installation creates a privileged mysql user 'mysql'. It does not have the user 'root'. Look at the variable PRIV_PASS in /usr/sbin/svctool to know the password.
+2. Connect to MySQL using a privileged user. IndiMail installation creates a privileged mysql user 'mysql'. It does not have the user 'root'. Look at the variable PRIV\_PASS in /usr/sbin/svctool to know the password.
 
    ```
    $ /usr/bin/mysql -u mysql -p mysql
@@ -3851,7 +3852,7 @@ Enter password:
 
 Now for carrying out routine queries for the MySQL indimail database you can pass the option –login-path=indimail to /usr/bin/mysql client.
 
-## 1. Database Initialization
+## Database Initialization
 **Using svctool**
 
 svctool automates the process of MySQL db creation as required for IndiMail. You just need to run the following command
@@ -3949,7 +3950,7 @@ Now using the password obtained from var/log/mysqld.log, we will connect to MySQ
 
 Data directory initialization creates time zone tables in the mysql database but does not populate them. To do so, use the instructions in MySQL Server Time Zone Support.
 
-## 2. MySQL Startup
+## MySQL Startup
 
 If you have done a binary installation of MySQL (yum/dnf/apt-get or RPM/DEB installation), the post install scripts should have installed MySQL to be started during boot. The preferred method for IndiMail is using supervise, though not mandatory.
 
@@ -3991,7 +3992,7 @@ total 8
 -rwxr-xr-x. 1 root root  423 Feb  5 12:57 run
 ```
 
-NOTE: You don’t need the supervise supervise service if you use the system installation default. If you have created this service, you can have supervise not start up mysqld by issuing the following command
+NOTE: You don’t need the mysql supervise service if you use the system installation default. If you have created this service, you can have supervise not start up mysqld by issuing the following command
 
 `$ sudo touch /service/mysql.3306/down`
 
@@ -4002,7 +4003,7 @@ $ sudo systemctl disable mysqld.service # MySQL from Oracle (it could also be my
 $ sudo systemctl disable mariadb.service # MariaDB
 ```
 
-## 3. Creating MySQL Users
+## Creating MySQL Users
 If you have created the MySQL database manually, you will need to create the uses using the MySQL client /usr/bin/mysql. In Section 1, we noted down the MySQL password for the root user. You would have started MySQL service in Section 2. We will now connect to the database and create users using the following set of commands.
 
 First step is to connect using the password noted in Section 1 and change the password
@@ -4070,7 +4071,7 @@ MariaDB [(none)]> FLUSH PRIVILEGES;
 
 NOTE: After using the above commands, you will no longer have the MySQL user root. Instead you will use the user mysql for all privileged operations.
 
-## 4. Creating MySQL Configuration
+## Creating MySQL Configuration
 
 This involves creating indimail.cnf in /etc/indimail. This file looks like this
 
@@ -4137,7 +4138,7 @@ For MariaDB you might find a directory etc/my.cnf.d. In that case create a link 
 
 `$ ln -s /etc/indmail/indimail.cnf /etc/my.cnf.d/indimail.cnf`
 
-## 5. MySQL Control File
+## MySQL Control File
 
 Once you have MySQL up and running, you need to tell IndiMail how to use it. This is done by having the config file /etc/indimail/control/host.mysql. The format for this file is
 
@@ -4185,7 +4186,7 @@ skipped table badrcptto on master
 skipped table spamdb on master
 ```
 
-## 6. Configuring MySQL/MariaDB to use SSL/TLS
+## Configuring MySQL/MariaDB to use SSL/TLS
 
 MySQL/MariaDB can encrypt the connections between itself and its clients. To do that you need to create certificates. There are differences betweeen how you configure MySQL server and MariaDB server for SSL/TLS
 
@@ -4289,7 +4290,7 @@ ssl-key=/var/indimail/mysqldb/ssl/client-key.pem
 #ssl-verify-server-cert
 ```
 
-## 7. Configure MySQL/MariaDB access for svctool
+## Configure MySQL/MariaDB access for svctool
 
 We learned how to setup and use MySQL/Mariadb database with indimail. The general purpose configuration tool, <b>svctool</b>, which requires the following variables to access the MySQL database
 
