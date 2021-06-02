@@ -603,7 +603,7 @@ Cleanups are not necessary if the computer crashes while <b>qmail-send</b> is de
 indimail-mta can be fine tuned, configured using environment variables (> 200) of them. There are many methods of setting them.
 
 1. Setting them in variables directory. All indimail services are configured as supervised services in <u>/service</u> directory. Each of these services has a directory named named after the service and a subdir inside it named <b>variables</b>. In the <b>variables</b> directory, you just need to create a file to create an environment variable. The name of the environment variable is the filename and the value of the environment variable is the content of the file. An empty file, removes the environment variable. As an exercise, explore the directory <u>/service/qmail-smtpd.25/variables</u>. All IndiMail services use the program <b>envdir</b>(8) to set environment variables from the <b>variables</b> directory.
-2. Using control files <b>from.envrules</b>, <b>fromd.envrules</b>, <b>rcpt.envrules</b>, <b>auth.envrules</b> - These are control files used by programs like <b>qmail-smtpd</b>, <b>qmail-inject</b>. They match on the sender or recipient address. Here you can set or unset environment variables for a sender, recipient or any regular expression to match multipler sender or recipients. To know these environment variables, read the man pages for qmail-stmpd, <b>qmail-inject</b>, <b>spawn-filter</b>.
+2. Using control files <b>from.envrules</b>, <b>fromd.envrules</b>, <b>rcpt.envrules</b>, <b>auth.envrules</b> - These are control files used by programs like <b>qmail-smtpd</b>, <b>qmail-inject</b>. They match on the sender or recipient address. Here you can set or unset environment variables for a sender, recipient or any regular expression to match multipler sender or recipients. To know these environment variables, read the man pages for <b>qmail-smtpd</b>, <b>qmail-inject</b>, <b>spawn-filter</b>.
 3. Using control file domainqueue - This can be used to set environment variable for any recipient domain. Read the man page for <b>qmail-smtpd</b>, <b>qmail-inject</b>.
 4. Using environment directory <u>/etc/indimail/control/defaultqueue</u> - This is just like the supervise <b>variables</b> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, sendmail for injecting mails into the queue. Read the man page for <b>qmail-inject</b>.
 5. Using environment directory <u>$HOME/.defaultqueue</u> - This is just like the supervise <b>variables</b> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, sendmail for injecting mails into the queue. Here $HOME refers to the home directory of the user. Read the man page for <b>qmail-inject</b>.
@@ -3310,8 +3310,7 @@ $ sudo /bin/bash
 
 ## Set SMTP to verify DKIM signatures
 
-You can setup qmail-stmpd for verification by setting
-DKIMIVERIFY environment variable instead of DKIMSIGN environment variable.
+You can setup <b>qmail-smtpd</b> for verification by setting DKIMIVERIFY environment variable instead of DKIMSIGN environment variable.
 
 ```
 $ sudo /bin/bash
