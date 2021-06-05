@@ -1667,18 +1667,39 @@ yahoo.com:QUEUEDIR=/var/indimail/queue/slowq
 Once the delivery rate for a configured domain reaches the configured rate, emails will get queued but will not be picked up immediately for delivery. The <b>slowq-send</b> logs will display when this happens. As you can see, the delivery finally happens when the delivery rate becomes lesser than the configured rate.
 
 ```
-$ tail -11f /var/log/svc/slowq/current
-2021-05-30 19:52:04.017597500 new msg 919900
-2021-05-30 19:52:04.017634500 info msg 919900: bytes 792 from <mbhangui@argos.indimail.org> qp 6181 uid 1000 slowq
-2021-05-30 19:52:04.017731500 local: mbhangui@argos.indimail.org mbhangui@argos.indimail.org  slowq
-2021-05-30 19:52:04.017892500 warning: slowq: delivery rate exceeded [231/0.0013926904/0.0013888888] for argos.indimail.org; will try again later
-2021-05-30 19:53:45.102845500 warning: slowq: delivery rate exceeded [231/0.0013918429/0.0013888888] for argos.indimail.org; will try again later
-2021-05-30 19:58:45.203122500 warning: slowq: delivery rate exceeded [231/0.0013893316/0.0013888888] for argos.indimail.org; will try again later
-2021-05-30 20:07:05.303478500 starting delivery 4: msg 919900 to local mbhangui@argos.indimail.org slowq
-2021-05-30 20:07:05.303486500 status: local 1/10 remote 0/20 slowq
-2021-05-30 20:07:05.348209500 delivery 4: success: did_1+0+0/ slowq
-2021-05-30 20:07:05.348355500 status: local 0/10 remote 0/20 slowq
-2021-05-30 20:07:05.348398500 end msg 919900 slowq
+2021-06-05 20:42:52.803287500 new msg 932523
+2021-06-05 20:42:52.803328500 info msg 932523: bytes 792 from <mbhangui@argos.indimail.org> qp 116584 uid 1000 slowq
+2021-06-05 20:42:52.803475500 local: mbhangui@argos.indimail.org mbhangui@argos.indimail.org 932523 slowq
+2021-06-05 20:42:52.803574500 info: slowq argos.indimail.org msg 932523: rate [1/0.0000000000/0.0013888888] ok since 6 secs
+2021-06-05 20:42:52.803601500 starting delivery 4: msg 932523 to local mbhangui@argos.indimail.org slowq
+2021-06-05 20:42:52.803603500 status: local 1/5 remote 0/5 slowq
+2021-06-05 20:42:52.844974500 delivery 4: success: did_1+0+0/ slowq
+2021-06-05 20:42:52.845134500 status: local 0/5 remote 0/5 slowq
+2021-06-05 20:42:52.845236500 end msg 932523 slowq
+2021-06-05 20:42:57.593358500 new msg 932523
+2021-06-05 20:42:57.593401500 info msg 932523: bytes 792 from <mbhangui@argos.indimail.org> qp 116594 uid 1000 slowq
+2021-06-05 20:42:57.593688500 local: mbhangui@argos.indimail.org mbhangui@argos.indimail.org 932523 slowq
+2021-06-05 20:42:57.593692500 warning: slowq argos.indimail.org msg 932523: rate exceeded [2/0.0909090936/0.0013888888] need 709 secs; will try again later
+2021-06-05 20:42:57.593695500 status: local 0/5 remote 0/5 delayed jobs=1 slowq
+2021-06-05 20:43:11.447111500 new msg 933364
+2021-06-05 20:43:11.447160500 info msg 933364: bytes 792 from <mbhangui@argos.indimail.org> qp 116603 uid 1000 slowq
+2021-06-05 20:43:11.447436500 local: mbhangui@argos.indimail.org mbhangui@argos.indimail.org 933364 slowq
+2021-06-05 20:43:11.447439500 warning: slowq argos.indimail.org msg 933364: rate exceeded [2/0.0399999991/0.0013888888] need 695 secs; will try again later
+2021-06-05 20:43:11.447441500 status: local 0/5 remote 0/5 delayed jobs=2 slowq
+2021-06-05 20:54:47.546702500 info: slowq argos.indimail.org msg 932523: rate [2/0.0013869625/0.0013888888] ok since 1 secs
+2021-06-05 20:54:47.546711500 starting delivery 5: msg 932523 to local mbhangui@argos.indimail.org slowq
+2021-06-05 20:54:47.546715500 status: local 1/5 remote 0/5 delayed jobs=1 slowq
+2021-06-05 20:54:47.590367500 delivery 5: success: did_1+0+0/ slowq
+2021-06-05 20:54:47.590563500 status: local 0/5 remote 0/5 delayed jobs=1 slowq
+2021-06-05 20:54:47.590741500 warning: slowq argos.indimail.org msg 933364: rate exceeded [3/0.0027739251/0.0013888888] need 719 secs; will try again later
+2021-06-05 20:54:47.590748500 status: local 0/5 remote 0/5 delayed jobs=1 slowq
+2021-06-05 20:54:47.590829500 end msg 932523 slowq
+2021-06-05 21:06:48.690469500 info: slowq argos.indimail.org msg 933364: rate [3/0.0013869625/0.0013888888] ok since 2 secs
+2021-06-05 21:06:48.690478500 starting delivery 6: msg 933364 to local mbhangui@argos.indimail.org slowq
+2021-06-05 21:06:48.690483500 status: local 1/5 remote 0/5 slowq
+2021-06-05 21:06:48.734485500 delivery 6: success: did_1+0+0/ slowq
+2021-06-05 21:06:48.734666500 status: local 0/5 remote 0/5 slowq
+2021-06-05 21:06:48.734762500 end msg 933364 slowq
 ```
 
 # Distributing your outgoing mails from Multiple IP addresses
@@ -4655,13 +4676,13 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * Environment variable control via envrules (rules file controlled by environment variable RCPTRULES)
  * QMAILREMOTE environment variable to run any executable/script instead of <b>qmail-remote</b>
  * QMTP support, artificial routing using (control/qmtproutes)
- * ONSUCCESS_REMOTE, ONFAILURE_REMOTE scripts run on successful or failed remote deliveries environment variables SMTPTEXT, SMTPCODE available for these scripts
- * Domain based delivery rate control
+ * ONSUCCESS\_REMOTE, ONFAILURE\_REMOTE scripts run on successful or failed remote deliveries environment variables SMTPTEXT, SMTPCODE available for these scripts
  * IP address binding on domain, sender address, recipient address and random selection from a pool of IP addresses
  * Return Receipt Responder - rrt
  * IPV6 support
  * DANE verification ([RFC 7672](http://tools.ietf.org/html/rfc7672 "RFC 7672"))
  * RFC 6530-32 Email Address Internationalization using libidn2
+ * Domain based delivery rate control using drate command
 
 ## Local delivery
 
@@ -4679,7 +4700,7 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * QMAILLOCAL environment variable to run any executable/script instead of <b>qmail-local</b>
  * X-Forwarded-To, X-Forwarded-For headers
  * Message Disposition Notification (through qnotify)
- * Domain based delivery rate control
+ * Domain based delivery rate control using drate command
 
 ## Other
 
@@ -4794,7 +4815,7 @@ Some of the features available in this package
 60. SURBL Support (SURBL Blacklist). URL parsing code borrowed from surbl.c Pieter Droogendijk <pieter@binky.org.uk> http://binky.org.uk
 61. Message Disposition Notification using qnotify
 62. Return Receipt Responder - rrt
-63. Enforce STARTTLS before AUTH using FORCE_TLS environment variable
+63. Enforce STARTTLS before AUTH using FORCE\_TLS environment variable
 64. Updated man pages.
 65. Jens Wehrenbrecht's IPv4 CIDR extension
 66. Li Minh Bui's IPv6 support for compact IPv6 addresses and CIDR notation support
