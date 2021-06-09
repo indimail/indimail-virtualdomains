@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.10  2021-06-09 17:04:06+05:30  Cprogrammer
+ * BUG: Fixed read failing on fifo because of O_NDELAY flag
+ *
  * Revision 1.9  2021-02-07 19:54:52+05:30  Cprogrammer
  * respond to TCP/IP request when run under tcpserver
  *
@@ -104,7 +107,7 @@
 #include "FifoCreate.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.9 2021-02-07 19:54:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.10 2021-06-09 17:04:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -920,8 +923,8 @@ ProcessInFifo(int instNum)
 			strerr_warn3("InLookup: FifoCreate: ", fifo_path, ": ", &strerr_sys);
 			return (-1);
 		} else
-		if ((rfd = open_readwrite(fifo_path)) == -1) {
-			strerr_warn3("InLookup: open_readwrite: ", fifo_path, ": ", &strerr_sys);
+		if ((rfd = open(fifo_path, O_RDWR)) == -1) {
+			strerr_warn3("InLookup: open O_RDWR: ", fifo_path, ": ", &strerr_sys);
 			return (-1);
 		} else 
 		if ((pipe_size = fpathconf(rfd, _PC_PIPE_BUF)) == -1) {
@@ -965,12 +968,8 @@ ProcessInFifo(int instNum)
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	getTimeoutValues(&readTimeout, &writeTimeout, sysconfdir, controldir);
 	for (bytes = 0;getppid() != 1;) {
+		/*- read size of query buffer */
 		if ((idx = read(rfd, (char *) &bytes, sizeof(int))) == -1) {
-			strnum[fmt_uint(strnum, errno)] = 0;
-			logfunc("ProcessInFifo", "errno = ");
-			logfunc("ProcessInFifo", strnum);
-			logfunc("ProcessInFifo", "\n");
-			(tcpserver ? errflush : flush) ("ProcessInFifo");
 #ifdef ERESTART
 			if (errno != error_intr && errno != error_restart)
 #else
@@ -978,6 +977,10 @@ ProcessInFifo(int instNum)
 #endif
 			{
 				strerr_warn1("InLookup: read: ", &strerr_sys);
+				logfunc("ProcessInFifo", "read: ");
+				logfunc("ProcessInFifo", error_str(errno));
+				logfunc("ProcessInFifo", "\n");
+				(tcpserver ? errflush : flush) ("ProcessInFifo");
 				sleep(1);
 			}
 			continue;
@@ -985,12 +988,14 @@ ProcessInFifo(int instNum)
 		if (!idx) {
 			close(rfd);
 			if (!tcpserver) {
-				if ((rfd = open_readwrite(fifo_path)) == -1) {
-					strerr_warn3("InLookup: open_readwrite: ", fifo_path, ": ", &strerr_sys);
+				if ((rfd = open(fifo_path, O_RDWR)) == -1) {
+					strerr_warn3("InLookup: reopen O_RDWR: ", fifo_path, ": ", &strerr_sys);
 					signal(SIGPIPE, pstat);
 					return (-1);
-				} else
+				} else {
+					strerr_warn1("InLookup: aborted read from client", 0);
 					continue;
+				}
 			} else
 				return (0);
 		} else
@@ -1002,7 +1007,7 @@ ProcessInFifo(int instNum)
 			if (tcpserver)
 				return (1);
 			continue;
-		} else
+		} else /* another read to fetch query buffer */
 		if ((idx = timeoutread(readTimeout, rfd, QueryBuf, bytes)) == -1) {
 			strerr_warn1("InLookup: read-int: ", &strerr_sys);
 			if (tcpserver)
@@ -1012,12 +1017,14 @@ ProcessInFifo(int instNum)
 		if (!idx) {
 			if (!tcpserver) {
 				close(rfd);
-				if ((rfd = open_readwrite(fifo_path)) == -1) {
-					strerr_warn3("InLookup: open_readwrite: ", fifo_path, ": ", &strerr_sys);
+				if ((rfd = open(fifo_path, O_RDWR)) == -1) {
+					strerr_warn3("InLookup: reopen O_RDWR: ", fifo_path, ": ", &strerr_sys);
 					signal(SIGPIPE, pstat);
 					return (-1);
-				} else
+				} else {
+					strerr_warn1("InLookup: aborted read from client", 0);
 					continue;
+				}
 			} else
 				return (-1); /*- partial read */
 		}
