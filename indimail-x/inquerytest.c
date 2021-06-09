@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 1.5  2021-06-09 17:03:49+05:30  Cprogrammer
+ * BUG: Fixed SIGSEGV
+ *
  * Revision 1.4  2021-02-07 20:30:25+05:30  Cprogrammer
  * minor code optimization
  *
@@ -54,7 +57,7 @@
 #include "vlimits.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 1.4 2021-02-07 20:30:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 1.5 2021-06-09 17:03:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "inquerytest: fatal: "
@@ -231,6 +234,10 @@ main(int argc, char **argv)
 		strerr_die1x(100, usage);
 	if (optind < argc)
 		email = argv[optind++];
+	if (!email) {
+		strerr_warn1("inquerytest: email not specified", 0);
+		strerr_die1x(100, usage);
+	}
 	if (optind < argc)
 		ipaddr = argv[optind++];
 	switch (query_type)
@@ -239,7 +246,7 @@ main(int argc, char **argv)
 	case RELAY_QUERY:
 		if (query_type == RELAY_QUERY && !ipaddr) {
 			strerr_warn1("inquerytest: ipaddr must be specified for RELAY query", 0);
-			strerr_warn1(usage, 0);
+			strerr_die1x(100, usage);
 		}
 	case PWD_QUERY:
 #ifdef CLUSTERED_SITE
@@ -252,7 +259,7 @@ main(int argc, char **argv)
 	default:
 		strnum[fmt_uint(strnum, (unsigned int) query_type)] = 0;
 		strerr_warn3("inquerytest: Invalid query type [", strnum, "]", 0);
-		strerr_die2x(100, usage, 0);
+		strerr_die1x(100, usage);
 	}
 	if (infifo && *infifo) {
 		if (*infifo == '/' || *infifo == '.') {
