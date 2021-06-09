@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 1.6  2021-06-09 18:59:10+05:30  Cprogrammer
+ * test fifo for read to ensure inlookup process has opened fifo in write mode
+ *
  * Revision 1.5  2021-06-09 17:03:49+05:30  Cprogrammer
  * BUG: Fixed SIGSEGV
  *
@@ -57,7 +60,7 @@
 #include "vlimits.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 1.5 2021-06-09 17:03:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 1.6 2021-06-09 18:59:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "inquerytest: fatal: "
@@ -211,7 +214,7 @@ main(int argc, char **argv)
 	char           *ptr, *s, *infifo = 0, *infifo_dir, *controldir, *email = 0, *ipaddr = 0;
 	static stralloc InFifo = {0};
 	char            strnum[FMT_ULONG];
-	int             c, query_type = -1, fd = -1, status;
+	int             c, query_type = -1, fd = -1, status, fdt = -1;
 	pid_t           pid;
 
 	while ((c = getopt(argc, argv, "vq:i:")) != opteof) {
@@ -290,13 +293,13 @@ main(int argc, char **argv)
 			InFifo.len--;
 		}
 		if (access(InFifo.s, F_OK) || (fd = open(InFifo.s, O_WRONLY|O_NONBLOCK)) == -1) {
+			strerr_warn2("Creating FIFO ", InFifo.s, 0);
 			if (FifoCreate(InFifo.s) == -1) {
 				strerr_warn3("inquerytest: ", InFifo.s, ": ", &strerr_sys);
 				return (1);
 			}
-			if (!env_put2("INFIFO", InFifo.s)) {
+			if (!env_put2("INFIFO", InFifo.s))
 				strerr_die4sys(111, FATAL, "env_put2: INFIFO=", InFifo.s, ": ");
-			}
 			switch (pid = fork())
 			{
 			case -1:
@@ -308,6 +311,8 @@ main(int argc, char **argv)
 				signal(SIGCHLD, SigChild);
 				break;
 			}
+			if ((fdt = open(InFifo.s, O_RDONLY)) == -1)
+				strerr_die4sys(111, FATAL, "open: ", InFifo.s, ": ");
 		} else { /*- Fifo is present and open by inlookup */
 			if (!env_put2("INFIFO", InFifo.s))
 				strerr_die4sys(111, FATAL, "env_put2: INFIFO=", InFifo.s, ": ");
@@ -341,6 +346,8 @@ main(int argc, char **argv)
 		}
 		pid = -1;
 	}
+	if (fdt != -1)
+		close(fdt);
 	if (!(dbptr = inquery(query_type, email, ipaddr))) {
 		if (userNotFound)
 			strerr_warn2(email, ": No such user", 0);
