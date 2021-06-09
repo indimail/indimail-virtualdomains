@@ -36,6 +36,8 @@ Release @version@-@release@ Start 14/02/2021
 - 09/06/2021
 22. inquerytest.c: BUG - Fixed SIGSEGV
 23. ProcessInFifo.c: BUG: Fixed read failing on fifo because of O_NDELAY flag
+24. inquerytest: use fifo read to ensure inlookup service is ready to serve
+    requests.
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020
