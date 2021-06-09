@@ -42,7 +42,7 @@ Type of query to be tested as given below
 \fB\-i\fR \fIinfifo\fR
 Path of the fifo to be used for communication with InLookup. A null
 string (“”) makes inquerytest to use INFIFO environment variable if
-defined, or the default INFIFO file in /var/indimail/inquery if not defined.
+defined, or the default INFIFO file in INDIMAILDIR/inquery if not defined.
 \fIinquerytest\fR in these two cases will use an existing running InLookup.
 If a fifo path is given, inquerytest will invoke a new InLookup on the
 given fifo, run the test, terminate InLookup and delete the fifo after

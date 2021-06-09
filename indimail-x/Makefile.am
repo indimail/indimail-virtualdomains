@@ -856,6 +856,9 @@ vdelivermail.8: vdelivermail.9
 indimail.7: indimail.9
 	$(editman) indimail.9 > $@
 
+inquerytest.8: inquerytest.9
+	$(editman) inquerytest.9 > $@
+
 mytcplookup.c: tcplookup.c
 	cp tcplookup.c mytcplookup.c
 
