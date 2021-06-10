@@ -12,3 +12,6 @@ Release @version@-@release@ Start 06/06/2020
 05. enabled suse permissions
 - 18/04/2021
 06. added scientic linux distribution
+- 10/06/2021
+07. set/unset QMAILQUEUE=/usr/sbin/qmail-spamfilter on package
+    installation/removal

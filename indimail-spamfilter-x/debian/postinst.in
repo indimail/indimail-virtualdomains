@@ -113,15 +113,15 @@ esac
 #
 if [ -f ${sysconfdir}/perm_list.bogofilter ] ; then
 	echo "Fixing Permissions"
-(
-/bin/grep -v "^#" ${sysconfdir}/perm_list.bogofilter | while read line
-do
-	if [ " $line" = " " ] ; then
-		continue
-	fi
-	fixperms $line
-done
-) > ${sysconfdir}/bogofilter-stat.override
+	(
+	/bin/grep -v "^#" ${sysconfdir}/perm_list.bogofilter | while read line
+	do
+		if [ " $line" = " " ] ; then
+			continue
+		fi
+		fixperms $line
+	done
+	) > ${sysconfdir}/bogofilter-stat.override
 fi
 
 # Recreate ld.so links and cache
@@ -150,6 +150,13 @@ for port in 465 25
 do
   if [ ! -d ${servicedir}/qmail-smtpd.$port ] ; then
     continue
+  fi
+  if [ -f ${servicedir}/qmail-smtpd.$port/variables/QMAILQUEUE ] ; then
+    mv ${servicedir}/qmail-smtpd.$port/variables/QMAILQUEUE \
+      ${servicedir}/qmail-smtpd.$port/variables/SPAMQUEUE 
+    if [ $? -eq 0 ] ; then
+      echo "${prefix}/sbin/qmail-spamfilter" > ${servicedir}/qmail-smtpd.$port/variables/QMAILQUEUE
+    fi
   fi
   # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
   if [ ! -f ${servicedir}/qmail-smtpd.$port/variables/SPAMFILTER ] ; then
@@ -184,6 +191,13 @@ do
   fi
 done
 if [ -d ${servicedir}/fetchmail ] ; then
+  if [ -f ${servicedir}/fetchmail/variables/QMAILQUEUE ] ; then
+    mv ${servicedir}/fetchmail/variables/QMAILQUEUE \
+      ${servicedir}/fetchmail/variables/SPAMQUEUE 
+    if [ $? -eq 0 ] ; then
+      echo "${prefix}/sbin/qmail-spamfilter" > ${servicedir}/fetchmail/variables/QMAILQUEUE
+    fi
+  fi
   # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
   if [ ! -f $servicedir}/fetchmail/variables/SPAMFILTER ] ; then
     echo "${prefix}/bin/bogofilter -p -d ${sysconfdir}" > ${servicedir}/fetchmail/variables/SPAMFILTER

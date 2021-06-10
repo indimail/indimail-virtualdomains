@@ -113,6 +113,13 @@ post_install() {
     if [ ! -d ${_servicedir}/qmail-smtpd.$port ] ; then
       continue
     fi
+    if [ -f ${_servicedir}/qmail-smtpd.$port/variables/QMAILQUEUE ] ; then
+      mv ${_servicedir}/qmail-smtpd.$port/variables/QMAILQUEUE \
+        ${_servicedir}/qmail-smtpd.$port/variables/SPAMQUEUE 
+      if [ $? -eq 0 ] ; then
+        echo "${_prefix}/sbin/qmail-spamfilter" > ${_servicedir}/qmail-smtpd.$port/variables/QMAILQUEUE
+      fi
+    fi
     # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
     if [ ! -f ${_servicedir}/qmail-smtpd.$port/variables/SPAMFILTER ] ; then
       echo "${_prefix}/bin/bogofilter -p -d ${_sysconfdir}" > ${_servicedir}/qmail-smtpd.$port/variables/SPAMFILTER
@@ -146,6 +153,13 @@ post_install() {
     fi
   done
   if [ -d ${_servicedir}/fetchmail ] ; then
+    if [ -f ${_servicedir}/fetchmail/variables/QMAILQUEUE ] ; then
+      mv ${_servicedir}/fetchmail/variables/QMAILQUEUE \
+        ${_servicedir}/fetchmail/variables/SPAMQUEUE 
+      if [ $? -eq 0 ] ; then
+        echo "${_prefix}/sbin/qmail-spamfilter" > ${_servicedir}/fetchmail/variables/QMAILQUEUE
+      fi
+    fi
     # update SPAMFILTER and also change .options, so that refreshsvc doesn't lose the settings
     if [ ! -f ${_servicedir}/fetchmail/variables/SPAMFILTER ] ; then
       echo "${_prefix}/bin/bogofilter -p -d ${_sysconfdir}" > ${_servicedir}/fetchmail/variables/SPAMFILTER
@@ -214,6 +228,10 @@ post_remove() {
     if [ -f ${_servicedir}/$dir/variables/.options.nospamfilter ] ; then
       mv ${_servicedir}/$dir/variables/.options.nospamfilter \
         ${_servicedir}/$dir/variables/.options
+    fi
+    if [ -f ${_servicedir}/$dir/variables/SPAMQUEUE ] ; then
+      mv ${_servicedir}/$dir/variables/SPAMQUEUE \
+        ${_servicedir}/$dir/variables/QMAILQUEUE
     fi
   done
 }

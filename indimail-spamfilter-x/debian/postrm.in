@@ -69,5 +69,9 @@ do
     ${mv} ${servicedir}/$dir/variables/.options.nospamfilter \
       ${servicedir}/$dir/variables/.options
   fi
+  if [ -f ${servicedir}/$dir/variables/SPAMQUEUE ] ; then
+    ${mv} ${servicedir}/$dir/variables/SPAMQUEUE \
+      ${servicedir}/$dir/variables/QMAILQUEUE
+  fi
 done
 exit 0
