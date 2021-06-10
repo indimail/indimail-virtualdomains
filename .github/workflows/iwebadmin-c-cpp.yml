@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - '**/iwebadmin-x/**'
-      - '**/indimail-x/**'
       - '**/prepare_obs'
       - '**/catChangeLog'
       - .github/workflows/iwebadmin-c-cpp.yml

@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - '**/indium-x/**'
-      - '**/indimail-x/**'
       - '**/prepare_obs'
       - '**/catChangeLog'
       - .github/workflows/indium-c-cpp.yml

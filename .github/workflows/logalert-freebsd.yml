@@ -4,7 +4,6 @@ on:
   push:
     paths:
       - '**/logalert-x/**'
-      - '**/indimail-x/**'
       - '**/prepare_obs'
       - '**/catChangeLog'
       - .github/workflows/logalert-freebsd.yml
