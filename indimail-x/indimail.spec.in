@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.88 2021-04-30 11:54:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.89 2021-06-11 17:00:14+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -263,14 +263,6 @@ fi
   --enable-tcprules-prog=%{_prefix}/bin/tcprules \
   --enable-tcpserver-file=%{sysconfdir}/tcp/tcp.smtp \
   --enable-default-domain=${default_domain} `%{__cat} config/indimail.opts`
-
-if [ $nscd_up -ge 1 ] ; then
-  if [ -x %{_sysconfdir}/init.d/nscd ] ; then
-    %{_sysconfdir}/init.d/nscd start
-  elif [ -f %{_sysconfdir}/lib/systemd/system/multi-user.target/nscd.service ] ; then
-    /bin/systemctl start nscd.service
-  fi
-fi
 
 %install
 %if 0%{?suse_version} >= 1120
@@ -752,8 +744,6 @@ done
 %attr(644,root,root)                    %{_prefix}/include/indimail/maildir_to_domain.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/maildir_to_email.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/MailQuotaWarn.h
-%attr(644,root,root)                    %{_prefix}/include/indimail/MakeArgs.h
-%attr(644,root,root)                    %{_prefix}/include/indimail/makeseekable.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/make_user_dir.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/mdaMySQLConnect.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/mgmtpassfuncs.h

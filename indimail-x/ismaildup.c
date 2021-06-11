@@ -1,5 +1,8 @@
 /*
  * $Log: ismaildup.c,v $
+ * Revision 1.4  2021-06-11 17:00:40+05:30  Cprogrammer
+ * replaced makeseekable(), MakeArgs() with mktempfile(), makeargs() from libqmail
+ *
  * Revision 1.3  2020-10-01 18:25:44+05:30  Cprogrammer
  * fixed compiler warning
  *
@@ -47,10 +50,10 @@
 #include <getEnvConfig.h>
 #endif
 #include "dblock.h"
-#include "MakeArgs.h"
+#include "makeargs.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ismaildup.c,v 1.3 2020-10-01 18:25:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ismaildup.c,v 1.4 2021-06-11 17:00:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_SSL 
@@ -184,8 +187,8 @@ ismaildup(char *maildir)
 		if (dup2(pim[1], 1) == -1)
 			_exit(111);
 		binqqargs[0] = PREFIX"/bin/822header";
-		if ((ptr = env_get("ELIMINATE_DUPS_ARGS")) && !(argv = MakeArgs(ptr))) {
-			strerr_warn1("ismaildup: MakeArgs: ", &strerr_sys);
+		if ((ptr = env_get("ELIMINATE_DUPS_ARGS")) && !(argv = makeargs(ptr))) {
+			strerr_warn1("ismaildup: makeargs: ", &strerr_sys);
 			_exit(111);
 		}
 		if (ptr)
@@ -305,7 +308,7 @@ ismaildup(char *maildir)
 #endif
 
 #ifdef MAIN
-#include "makeseekable.h"
+#include "mktempfile.h"
 #include "get_message_size.h"
 
 int
@@ -321,8 +324,8 @@ main(int argc, char **argv)
 		_exit (100);
 	}
 #ifdef MAKE_SEEKABLE
-	if ((str = env_get("MAKE_SEEKABLE")) && *str != '0' && makeseekable(0)) {
-		strerr_warn1("ismaildup: makeseekable: ", &strerr_sys);
+	if ((str = env_get("MAKE_SEEKABLE")) && *str != '0' && mktempfile(0)) {
+		strerr_warn1("ismaildup: mktempfile: ", &strerr_sys);
 		_exit(111);
 	}
 #endif

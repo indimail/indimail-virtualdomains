@@ -1,5 +1,8 @@
 /*
  * $Log: runcmmd.c,v $
+ * Revision 1.2  2021-06-11 17:01:21+05:30  Cprogrammer
+ * replaced MakeArgs() with makeargs() from libqmail
+ *
  * Revision 1.1  2019-04-18 07:59:58+05:30  Cprogrammer
  * Initial revision
  *
@@ -29,11 +32,11 @@
 #include <strerr.h>
 #include <fmt.h>
 #endif
-#include "MakeArgs.h"
+#include "makeargs.h"
 #include "variables.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: runcmmd.c,v 1.1 2019-04-18 07:59:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: runcmmd.c,v 1.2 2021-06-11 17:01:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -50,7 +53,7 @@ runcmmd(char *cmmd, int useP)
 	case -1:
 		exit(1);
 	case 0:
-		if (!(argv = MakeArgs(cmmd)))
+		if (!(argv = makeargs(cmmd)))
 			exit(1);
 		if (useP)
 			execvp(*argv, argv);

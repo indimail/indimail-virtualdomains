@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 1.7  2021-06-11 16:59:11+05:30  Cprogrammer
+ * replaced makeseekable() with mktempfile() from libqmail
+ *
  * Revision 1.6  2020-04-01 18:54:28+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -64,7 +67,7 @@
 #include "user_over_quota.h"
 #include "parse_quota.h"
 #include "update_quota.h"
-#include "makeseekable.h"
+#include "mktempfile.h"
 #include "get_localtime.h"
 #include "variables.h"
 #include "maildir_to_email.h"
@@ -77,7 +80,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 1.6 2020-04-01 18:54:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 1.7 2021-06-11 16:59:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -678,8 +681,8 @@ open_command(char *command, int *write_fd)
 		if (dup2(pim[0], 0) == -1)
 			_exit(-1);
 #ifdef MAKE_SEEKABLE
-		if ((p = env_get("MAKE_SEEKABLE")) && *p != '0' && makeseekable(0)) {
-			strerr_warn1("deliver_mail: makeseekable: ", &strerr_sys);
+		if ((p = env_get("MAKE_SEEKABLE")) && *p != '0' && mktempfile(0)) {
+			strerr_warn1("deliver_mail: mktempfile: ", &strerr_sys);
 			_exit(111);
 		}
 #endif

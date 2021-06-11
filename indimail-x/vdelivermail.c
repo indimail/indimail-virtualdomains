@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 1.8  2021-06-11 17:01:38+05:30  Cprogrammer
+ * replaced makeseekable() with mktempfile() from libqmail
+ *
  * Revision 1.7  2020-10-20 13:59:43+05:30  Cprogrammer
  * skip creation of maildirfolder file for user's Maildir (INBOX)
  *
@@ -68,7 +71,7 @@
 #include "parse_quota.h"
 #endif
 #include "recalc_quota.h"
-#include "makeseekable.h"
+#include "mktempfile.h"
 #include "deliver_mail.h"
 #include "sql_getpw.h"
 #include "findhost.h"
@@ -87,7 +90,7 @@
 #include "get_message_size.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 1.7 2020-10-20 13:59:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 1.8 2021-06-11 17:01:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vdelivermail: fatal: "
@@ -851,8 +854,8 @@ main(int argc, char **argv)
 #endif
 	signal(SIGPIPE, SIG_IGN);
 #ifdef MAKE_SEEKABLE
-	if ((str = env_get("MAKE_SEEKABLE")) && *str != '0' && makeseekable(0)) {
-		strerr_warn1("vdelivermail: makeseekable: ", &strerr_sys);
+	if ((str = env_get("MAKE_SEEKABLE")) && *str != '0' && mktempfile(0)) {
+		strerr_warn1("vdelivermail: mktempfile: ", &strerr_sys);
 		_exit(111);
 	}
 #endif

@@ -80,7 +80,7 @@ static char     sccsid[] = "$Id: indisrvr.c,v 1.7 2021-03-09 19:58:25+05:30 Cpro
 #include <pw_comp.h>
 #endif
 #include "tcpbind.h"
-#include "MakeArgs.h"
+#include "makeargs.h"
 #include "variables.h"
 #include "checkPerm.h"
 #include "mgmtpassfuncs.h"
@@ -405,9 +405,9 @@ call_prg()
 		return (-1);
 	case 0:
 		(void) signal(SIGCHLD, SIG_DFL);
-		if (!(Argv = MakeArgs(ptr))) {
-			strerr_warn1("MakeArgs failed: ", &strerr_sys);
-			filewrt(3, "%d: MakeArgs failed: %s\n", getpid(), error_str(errno));
+		if (!(Argv = makeargs(ptr))) {
+			strerr_warn1("makeargs failed: ", &strerr_sys);
+			filewrt(3, "%d: makeargs failed: %s\n", getpid(), error_str(errno));
 			return (-1);
 		}
 		if (checkPerm(username.s, adminCommands[i].name, Argv)) {

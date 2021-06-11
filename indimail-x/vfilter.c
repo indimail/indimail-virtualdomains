@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 1.5  2021-06-11 17:01:55+05:30  Cprogrammer
+ * replaced Makeargs(), makeseekable() with makeargs(), mktempfile() from libqmail
+ *
  * Revision 1.4  2020-04-01 18:58:43+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 1.4 2020-04-01 18:58:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 1.5 2021-06-11 17:01:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -53,7 +56,7 @@ static char     sccsid[] = "$Id: vfilter.c,v 1.4 2020-04-01 18:58:43+05:30 Cprog
 #include <getEnvConfig.h>
 #endif
 #include "common.h"
-#include "MakeArgs.h"
+#include "makeargs.h"
 #include "get_real_domain.h"
 #include "get_message_size.h"
 #include "remove_quotes.h"
@@ -73,7 +76,7 @@ static char     sccsid[] = "$Id: vfilter.c,v 1.4 2020-04-01 18:58:43+05:30 Cprog
 #include "vfilter_display.h"
 #include "getAddressBook.h"
 #include "addressToken.h"
-#include "makeseekable.h"
+#include "mktempfile.h"
 
 #define FATAL   "vfilter: fatal: "
 #define WARN    "vfilter: warning: "
@@ -133,7 +136,7 @@ execMda(char **argptr, char **mda)
 
 	*mda = *vdelargs;
 	if ((x = env_get("MDA"))) {
-		if (!(argv = MakeArgs(x)))
+		if (!(argv = makeargs(x)))
 			die_nomem();
 		*mda = *argv;
 		if (*argv[0] != '/' && *argv[0] != '.')
@@ -158,7 +161,7 @@ execMda(char **argptr, char **mda)
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 1.4 $", *mda;
+	char           *revision = "$Revision: 1.5 $", *mda;
 	static stralloc XFilter = {0};
 	pid_t           pid;
 	int             i, tmp_stat, wait_status;
@@ -849,7 +852,7 @@ main(int argc, char **argv)
 	if (get_options(argc, argv, &bounce, &emailid, &user, &domain, &Maildir))
 		myExit(argc, argv, -1, 0, 0, 0);
 #ifdef MAKE_SEEKABLE
-	if ((str = env_get("MAKE_SEEKABLE")) && *str != '0' && makeseekable(0))
+	if ((str = env_get("MAKE_SEEKABLE")) && *str != '0' && mktempfile(0))
 		myExit(argc, argv, -1, 0, 0, 0);
 #endif
 	if (!(eps = eps_begin(INTERFACE_STREAM, (int *) &fd))) {
