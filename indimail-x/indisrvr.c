@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.8  2021-06-11 17:03:47+05:30  Cprogrammer
+ * replaced MakeArgs() with makeargs() from libqmail()
+ *
  * Revision 1.7  2021-03-09 19:58:25+05:30  Cprogrammer
  * use functions from tls.c
  *
@@ -27,7 +30,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.7 2021-03-09 19:58:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.8 2021-06-11 17:03:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
