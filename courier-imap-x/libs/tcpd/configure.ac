@@ -207,9 +207,8 @@ AC_TRY_COMPILE( [
 #include <stropts.h>
 #include <fcntl.h>
 ],[ {
-        struct strfdinsert      ins;
-        queue_t                 *pointer;
-	int i=I_FDINSERT;
+	(void)(sizeof(struct strfdinsert) +
+	        sizeof(queue_t) + I_FDINSERT)
 }
 ], tcpd_cv_svr3=yes, tcpd_cv_svr3=no))
 
@@ -222,6 +221,7 @@ changequote(<<,>>)
 
 #include	<stdio.h>
 #include	<unistd.h>
+#include	<stdlib.h>
 
 int main(int argc, char **argv)
 {
@@ -327,7 +327,7 @@ then
 		AC_MSG_CHECKING(whether OpenSSL requires Kerberos)
 		AC_TRY_COMPILE( [
 #include <openssl/ssl.h>
-], [ int x=1; ], :,
++], [ ], :,
 		 [
 			KRBFLAGS=`$KRB5CONFIG --cflags`
 			CFLAGS="$CFLAGS $KRBFLAGS"
@@ -335,7 +335,7 @@ then
 
 			AC_TRY_COMPILE( [
 #include <openssl/ssl.h>
-], [ int x=1; ], [ KRBLIBS="`$KRB5CONFIG --libs`" ],
+], [ ], [ KRBLIBS="`$KRB5CONFIG --libs`" ],
    AC_MSG_ERROR(OpenSSL test build failed) )
 			]
 )
@@ -520,7 +520,7 @@ else
 ],
 [
 EVP_CIPHER_CTX ctx;
-char dummy[1];
+unsigned char dummy[1];
 unsigned char a[1], b[1];
 
 EVP_CIPHER_CTX_init(&ctx);
@@ -567,11 +567,13 @@ RAND_bytes(dummy, 1);
 
 		AC_TRY_COMPILE( [
 #include <openssl/ssl.h>
+
+SSL *p;
 ],
 [
-SSL_get_servername((SSL *)0, TLSEXT_NAMETYPE_host_name);
+(void)SSL_get_servername(p, TLSEXT_NAMETYPE_host_name);
 ], [
-                AC_DEFINE_UNQUOTED(HAVE_OPENSSL_SNI,1,[ When OpenSSL supports SNI ])
+                AC_DEFINE_UNQUOTED(HAVE_OPENSSL_SNI,1,[ Whether OpenSSL supports SNI ])
 		])
 
 		TLSLIBRARY="$LIBCOURIERTLSOPENSSL"

@@ -31,7 +31,7 @@ then
 fi
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(sys/types.h sys/time.h unistd.h arpa/inet.h netinet/in.h)
+AC_CHECK_HEADERS(sys/types.h sys/time.h unistd.h arpa/inet.h netinet/in.h strings.h stdint.h)
 
 USENSL=no
 saveLIBS="$LIBS"
@@ -87,8 +87,11 @@ AC_ARG_WITH(int32,
 #if HAVE_SYS_TYPES_H
 #include	<sys/types.h>
 #endif
+#if HAVE_STDINT_H
+#include	<stdint.h>
+#endif
+uint32_t n;
 		],[
-			uint32_t	i=0;
 		], [ AC_MSG_RESULT(yes) ; int32="uint32_t"], [
 
 		AC_MSG_RESULT(no)
@@ -98,8 +101,11 @@ AC_ARG_WITH(int32,
 #if HAVE_SYS_TYPES_H
 #include	<sys/types.h>
 #endif
+#if HAVE_STDINT_H
+#include	<stdint.h>
+#endif
+u_int32_t n;
 			],[
-				u_int32_t	i=0;
 			], [AC_MSG_RESULT(yes); int32="u_int32_t"],[
 
 			AC_MSG_RESULT(no)
@@ -138,8 +144,11 @@ AC_ARG_WITH(int16,
 #if HAVE_SYS_TYPES_H
 #include	<sys/types.h>
 #endif
+#if HAVE_STDINT_H
+#include	<stdint.h>
+#endif
+uint16_t n;
 		],[
-			uint16_t	i=0;
 		], [ AC_MSG_RESULT(yes) ; int16="uint16_t"], [
 
 		AC_MSG_RESULT(no)
@@ -149,8 +158,11 @@ AC_ARG_WITH(int16,
 #if HAVE_SYS_TYPES_H
 #include	<sys/types.h>
 #endif
+#if HAVE_STDINT_H
+#include	<stdint.h>
+#endif
+u_int16_t n;
 			],[
-				u_int16_t	i=0;
 			], [AC_MSG_RESULT(yes); int16="u_int16_t"],[
 
 			AC_MSG_RESULT(no)
@@ -205,8 +217,6 @@ fi
 
 dnl Checks for library functions.
 
-AC_CHECK_FUNCS(strcasecmp)
-
 dnl Other checks
 
 if test "$GCC" = "yes"
@@ -228,10 +238,10 @@ AC_TRY_COMPILE( [
 #include <arpa/inet.h>
 
         ], [
-struct in6_addr in6a;
-struct sockaddr_in6 sain6;
-struct sockaddr_storage soas;
-int x=PF_INET6;
+	(void)(sizeof(struct in6_addr)+
+			     sizeof(struct sockaddr_in6)+
+			     sizeof(struct sockaddr_storage)+
+			     PF_INET6);
 
 	], rfc1035_cv_hasipv6structs=yes,
                 rfc1035_cv_hasipv6structs=no )
@@ -256,9 +266,9 @@ AC_TRY_COMPILE( [
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-] , [
 struct in6_addr in6a;
 
+] , [
 	in6a.s6_addr16 $LB 0 $RB =0;
 	in6a.s6_addr32 $LB 0 $RB =0;
 ],
@@ -269,9 +279,9 @@ AC_TRY_COMPILE( [
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+struct in6_addr in6a;
 
         ], [
-struct in6_addr in6a;
 
 	in6a.__u6_addr.__u6_addr16 $LB 0 $RB =0;
 	in6a.__u6_addr.__u6_addr32 $LB 0 $RB =0;
@@ -283,10 +293,9 @@ AC_TRY_COMPILE( [
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+ struct in6_addr in6a;
 
         ], [
-struct in6_addr in6a;
-
        in6a._S6_un._S6_u8 $LB 0 $RB = 0;
        in6a._S6_un._S6_u32 $LB 0 $RB = 0;
 
@@ -345,17 +354,17 @@ then
 fi
 
 AC_CACHE_CHECK([for alloca],
-	rfc1035_cv_alloca,
+	[rfc1035_cv_alloca],
 
 AC_TRY_COMPILE( [
 #include <stdio.h>
 #include <stdlib.h>
 
         ], [
-char *p=(char *)alloca(10);
+(void)(char *)alloca(10);
 
 	], rfc1035_cv_alloca=yes,
-                rfc1035_cv_alloca,=no )
+                rfc1035_cv_alloca=no )
 )
 
 ipv6=0

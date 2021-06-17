@@ -36,6 +36,63 @@ static unsigned long bytes_received_count = 0;
 
 char            tcpremoteip[28];
 
+static char getline_buf[1024];
+static size_t getline_buf_size=0;
+static size_t getline_i=0;
+
+static int safe_getc()
+{
+	if (getline_i >= getline_buf_size)
+	{
+		int n=read(0, getline_buf, sizeof(getline_buf));
+
+		if (n < 0)
+			n=0;
+
+		if (n == 0)
+			return -1;
+
+		getline_buf_size=n;
+		getline_i=0;
+	}
+
+	return (int)(unsigned char)getline_buf[getline_i++];
+}
+
+static void safe_fflush()
+{
+	getline_i=getline_buf_size=0;
+}
+
+static char *safe_fgets(char *buf, size_t buf_size)
+{
+	size_t i;
+
+	for (i=0; i+1 < buf_size; ++i)
+	{
+		int ch=safe_getc();
+
+		if (ch < 0)
+		{
+			if (i == 0)
+				return NULL;
+			break;
+		}
+
+		buf[i]=ch;
+		if (ch == '\n')
+		{
+			++i;
+			break;
+		}
+	}
+
+	if (i < buf_size)
+		buf[i]=0;
+
+	return buf;
+}
+
 static void
 printed(int cnt)
 {
@@ -102,7 +159,7 @@ starttls()
 	}
 	printed(printf("+OK Begin SSL/TLS negotiation now.\r\n"));
 	fflush(stdout);
-	fflush(stdin);
+	safe_fflush();
 	close(pipefd[1]);
 	close(0);
 	close(1);
@@ -112,7 +169,6 @@ starttls()
 		exit(1);
 	}
 	close(pipefd[0]);
-	fflush(stdin);
 	if (write(1, "", 1) == -1)
 		; /*- child - exec OK now */
 	while (wait(&waitstat) != p)
@@ -131,7 +187,7 @@ authresp(const char *s)
 
 	printed(printf("+ %s\r\n", s));
 	fflush(stdout);
-	if (fgets(buf, sizeof(buf), stdin) == 0)
+	if (safe_fgets(buf, sizeof(buf)) == 0)
 		return (0);
 	if ((p = strchr(buf, '\n')) == 0)
 		return (0);
@@ -187,7 +243,7 @@ main(int argc, char **argv)
 	}
 	fflush(stdout);
 	fflush(stderr);
-	while (fgets(buf, sizeof(buf), stdin))
+	while (safe_fgets(buf, sizeof(buf)))
 	{
 		bytes_received_count += strlen(buf);
 		c = 1;

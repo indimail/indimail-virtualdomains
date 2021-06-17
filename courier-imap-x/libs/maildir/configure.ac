@@ -74,7 +74,7 @@ AX_COURIER_UNICODE_CXXFLAGS
 AC_SUBST(COURIER_UNICODE_CXXFLAGS)
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(symlink readlink strcasecmp utime utimes)
+AC_CHECK_FUNCS(symlink readlink utime utimes)
 
 AC_CHECK_FUNCS(inotify_init inotify_init1)
 
@@ -85,7 +85,7 @@ AC_TRY_COMPILE([
 #include	<unistd.h>
 #endif
 
-extern "C" int gethostname(int,int);
+extern int gethostname(int,int);
 ],[
 ],maildir_cv_SYS_GETHOSTNAME=yes,maildir_cv_SYS_GETHOSTNAME=no
 )

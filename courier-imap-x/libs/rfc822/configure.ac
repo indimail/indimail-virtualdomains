@@ -28,7 +28,7 @@ dnl Checks for libraries.
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(locale.h)
+AC_CHECK_HEADERS(locale.h strings.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -57,28 +57,31 @@ fi
 AC_MSG_CHECKING([if Libidn should be used])
 AC_MSG_RESULT($libidn)
 
-AC_CHECK_FUNCS(strcasecmp strncasecmp setlocale)
+AC_CHECK_FUNCS(setlocale)
 
 AC_CACHE_CHECK([how to calculate alternate timezone],librfc822_cv_SYS_TIMEZONE,
 
 AC_TRY_COMPILE([
 #include	<time.h>
+time_t  t;
 ],[
-time_t	t=altzone;
+t=altzone;
 ], librfc822_cv_SYS_TIMEZONE=altzone,
 
 	AC_TRY_COMPILE([
 #include	<time.h>
+int n;
 ],[
-int	n=daylight;
+	n=daylight;
 	], librfc822_cv_SYS_TIMEZONE=daylight,
 
 	AC_TRY_COMPILE([
 #include	<time.h>
 
 extern struct tm dummy;
+long n;
 ],[
-long	n=dummy.tm_gmtoff;
+	n=dummy.tm_gmtoff;
 	] ,librfc822_cv_SYS_TIMEZONE=tm_gmtoff,
 		librfc822_cv_SYS_TIMEZONE=unknown
 			)
