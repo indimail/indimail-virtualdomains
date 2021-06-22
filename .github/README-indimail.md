@@ -719,7 +719,7 @@ Alias=indimail-mta.service
 WantedBy=multi-user.target
 ```
 
-You can override values in the above file by creating a file override.conf in /lib/systemd/system/svscan.service.d. As an example, on a raspberry pi system, you should have svscan started only after the system clock is synchronized with a NTP source (many SBC don't have battery backed Real Time Clock - RTC). This ensures that svscan gets started when the system has a correct date, time so that logs created will not have absurd timestamps.
+You can override values in the above file by creating a file override.conf in /etc/systemd/system/svscan.service.d. As an example, on a raspberry pi system, you should have svscan started only after the system clock is synchronized with a NTP source (many SBC don't have battery backed Real Time Clock - RTC). This ensures that svscan gets started when the system has a correct date, time so that logs created will not have absurd timestamps.
 
 ```
 [Unit]
@@ -730,8 +730,8 @@ After=local-fs.target remote-fs.target time-sync.target network.target network-o
 So if you have a system without a battery backed RTC, you should do this (even when you do a binary installation)
 
 ```
-$ sudo mkdir /lib/systemd/system/svscan.service.d
-$ sudo cp /usr/share/indimail/boot/systemd.override.conf /lib/systemd/system/svscan.service.d/override.conf
+$ sudo mkdir /etc/systemd/system/svscan.service.d
+$ sudo cp /usr/share/indimail/boot/systemd.override.conf /etc/systemd/system/svscan.service.d/override.conf
 $ sudo systemctl daemon-reload
 ```
 
@@ -745,14 +745,23 @@ To enable indimail service on boot, run the following systemctl command
 
 `# systemctl enable svscan.service`
 
-Now to start IndiMail you can use the usual service command
+Now to start IndiMail you can use any of the below commands.
 
 ```
-# service indimail start    (to start indimail)
-# service indimail stop     (to stop indimail)
+$ sudo systemctl start svscan # Linux
+or
+$ sudo service svscan start # Linux/FreeBSD
+or
+$ /etc/init.d/svscan start # Linux
+or
+$ sudo launchctl start org.indimail.svscan # Mac OSX
+or
+$ qmailctl start # Universal
 ```
 
-You can automate the above service creation for systemd by running the initsvc(1) command
+NOTE: FreeBSD uses /usr/local/etc/rc.d/svscan. OSX uses LaunchDaemon with the configuration in /Library/LaunchDaemons/org.indimail.svscan.plist
+
+You can automate the above service creation for systemd by running the initsvc(1) command. In fact the command works for Linux, FreeBSD and OSX to enable IndiMail to get started at boot (even though FreeBSD, OSX do not use systemd).
 
 ```
 # /usr/sbin/initsvc -on  (to enable indimail service)
