@@ -60,10 +60,10 @@ Table of Contents
    * [Envrules](#envrules)
    * [Domain Specific Queues](#domain-specific-queues)
    * [indimail-mini / qmta Installation](#indimail-mini--qmta-installation)
-      * [Using QMQP protocol provided by qmail-qmqpc / qmail-qmqpd](#using-qmqp-protocol-provided-by-qmail-qmqpc--qmail-qmqpd)
+      * [indimail-mini - Using QMQP protocol provided by qmail-qmqpc / qmail-qmqpd](#indimail-mini---using-qmqp-protocol-provided-by-qmail-qmqpc--qmail-qmqpd)
          * [How do I set up a QMQP service?](#how-do-i-set-up-a-qmqp-service)
          * [Client Setup - How do I install indimail-mini to use qmail-qmqpc](#client-setup---how-do-i-install-indimail-mini-to-use-qmail-qmqpc)
-      * [Using a minimal standalone MTA provided by qmta](#using-a-minimal-standalone-mta-provided-by-qmta)
+      * [qmta - Using a minimal standalone qmta-send MTA](#qmta---using-a-minimal-standalone-qmta-send-mta)
          * [How do I set up a standalone MTA using qmta-send](#how-do-i-set-up-a-standalone-mta-using-qmta-send)
    * [Fedora - Using /usr/sbin/alternatives](#fedora---using-usrsbinalternatives)
    * [Post Handle Scripts](#post-handle-scripts)
@@ -2029,9 +2029,9 @@ This feature becomes useful when setting domain specific delivery rate controls 
 
 # indimail-mini / qmta Installation
 
-indimail-mta installation have multiple daemons qmail-daemon/qmail-start, qmail-send, qmail-lspawn, qmail-rspawn and qmail-clean. indimail-mta installation is meant for servers that can withsand high loads resulting from high inbound/outbound mail traffic. For small servers which have minimal or sporadic traffic, you do not want the full indimail-mta installation. In such cases you can either install indimail-mini or qmta
+indimail-mta has multiple daemons qmail-daemon/qmail-start, qmail-send, qmail-lspawn, qmail-rspawn and qmail-clean for processing a queue. The standard indimail-mta installation is meant for servers that can withstand high loads resulting from high inbound/outbound mail traffic. For small servers which have minimal or sporadic traffic, the full indimail-mta installation isn't required or necessary. In such cases you can either install indimail-mini or qmta.
 
-## Using QMQP protocol provided by qmail-qmqpc / qmail-qmqpd
+## indimail-mini - Using QMQP protocol provided by qmail-qmqpc / qmail-qmqpd
 
 QMQP provides a centralized mail queue within a cluster of hosts. QMQP clients do not require local queue for queueing messages. QMQP is faster than SMTP. You can use QMQP to send mails from your relay servers to a server running QMQP service. The QMQP service can deliver mails to your local mailboxes or/and relay mails to the outside world. To use QMQP, you need a client that uses QMQP protocol and a server that provides the QMQP service. <b>qmail-qmqpc</b> which uses [QMQP](https://cr.yp.to/proto/qmqp.html) protocol, is a QMQP client. <b>qmail-qmqpd</b> is a server that provides a central hub offering the QMQP service. You can transfer both local and remote mails through the central hub. The central hub can also be a collection ofmultiple servers to aid performance. The QMQP protocol doesn't require clients to have a local queue. Many of my friends run web servers which need to send out emails using QMQP. If you already have an installation of indimail-mta on your network, you can quickly setup a indimail-mini installation on your web server, without impacting the performance of your web server, by using QMQP. QMQP service is provided by enabling qmail-qmqpd service on a server having indimail-mta installed. All other servers (including your webservers) can have a indimail-mini installation to use qmail-qmqpc to push emails to the central hub. The process for setting up QMQP service is outlined in the next chapter.
 
@@ -2131,9 +2131,9 @@ If you want to setup a SMTP service, it might be easier to install the entire in
 
 In case you setup SMTP service, you may want to handle tasks is dkim, virus and spam filtering. You can use QHPSI along with a virus scanner like clamav. You can also choose not to have these tasks done at the client end, but rather have it carried out by the QMQP service. For virus scanning refer to chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi). You can set QMAILQUEUE to qmail-multi, qmail-dkim, etc. However, you must remember to have qmail-qmqpc called at the end in case you change QMAILQUEUE to something other than qmail-qmqpc.
 
-## Using a minimal standalone MTA provided by qmta
+## qmta - Using a minimal standalone qmta-send MTA
 
-<b>qmta-send</b> which can work independently to transfer local and remote mails. This works like qmail-send of indimail-mta, but unlike qmail-send, it doesn't require mutiple daemons (qmail-todo, qmail-lspawn/qmail-rspawn, qmail-clean) to send out mails. <b>qmta-send</b> which requires just one uid <u>qmailq</u> to operate. In case you don't have a central host running QMQP (provided by qmail-qmqpd) or you have a small host that sends out insignificant number of emails in a day, then <b>qmta-send</b> is what you would want to setup. <b>qmta-send</b> is well suited for tiny computers like raspberry pi, banana pi and other [Single Board Computers](https://en.wikipedia.org/wiki/Single-board_computer).
+<b>qmta-send</b> can work like <b>qmail-send</b> to transfer local and remote mails, but unlike qmail-send, it doesn't require mutiple daemons (qmail-todo, qmail-lspawn/qmail-rspawn, qmail-clean) to process the queue. In case you don't have a central host running QMQP (provided by qmail-qmqpd) or you have a small host that sends out insignificant number of emails in a day, then <b>qmta-send</b> is what you would want to setup. <b>qmta-send</b> is well suited for tiny computers like raspberry pi, banana pi and other [Single Board Computers](https://en.wikipedia.org/wiki/Single-board_computer).
 
 ![image](indimail_mini.png)
 
@@ -2149,7 +2149,7 @@ Installation and setup is trivial if you use the RPM package.
 ```
 $ sudo rpm -ivh qmta
 $ sudo mkdir -p /var/indimail/queue
-$ sudo queue-fix /var/indimail/queue/queue1
+$ sudo queue-fix /var/indimail/queue/qmta
 $ cd /etc/indimail/control/defaultqueue
 $ sudo sh -c "echo /usr/sbin/qmail-queue > QMAILQUEUE"
 $ sudo sh -c "echo /var/indimail/queue/queue1 > QUEUEDIR"
