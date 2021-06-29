@@ -3,7 +3,6 @@
 Table of Contents
 =================
 
-   * [Table of Contents](#table-of-contents)
    * [INTRODUCTION](#introduction)
    * [LICENSING](#licensing)
    * [TERMINOLOGY used for commands](#terminology-used-for-commands)
@@ -60,12 +59,12 @@ Table of Contents
       * [using control file mailarchive](#using-control-file-mailarchive)
    * [Envrules](#envrules)
    * [Domain Specific Queues](#domain-specific-queues)
-   * [Setting up QMQP services](#setting-up-qmqp-services)
-      * [Client Setup](#client-setup)
-      * [QMQP Service](#qmqp-service)
-   * [Mini IndiMail Installation](#mini-indimail-installation)
+   * [indimail-mini / qmta Installation](#indimail-mini--qmta-installation)
+      * [Using QMQP protocol provided by qmail-qmqpc / qmail-qmqpd](#using-qmqp-protocol-provided-by-qmail-qmqpc--qmail-qmqpd)
          * [How do I set up a QMQP service?](#how-do-i-set-up-a-qmqp-service)
-         * [How do I install indimail-mini?](#how-do-i-install-indimail-mini)
+         * [Client Setup - How do I install indimail-mini to use qmail-qmqpc](#client-setup---how-do-i-install-indimail-mini-to-use-qmail-qmqpc)
+      * [Using a minimal standalone MTA provided by qmta](#using-a-minimal-standalone-mta-provided-by-qmta)
+         * [How do I set up a standalone MTA using qmta-send](#how-do-i-set-up-a-standalone-mta-using-qmta-send)
    * [Fedora - Using /usr/sbin/alternatives](#fedora---using-usrsbinalternatives)
    * [Post Handle Scripts](#post-handle-scripts)
    * [Relay Mechanism in IndiMail](#relay-mechanism-in-indimail)
@@ -348,10 +347,10 @@ where:
 2. 	The queueX/pid file is renamed to queueX/mess/split/<u>inode</u>, and the message is written to the file, moving to state S2. Here split is the remainder left from dividing inode number by the compile time conf-split value. For example, if inode is 3016451 and conf-split is the default, 151, then split is 75 (3016451 divided by 151 is 19976 which gives a remainder of (3016451 - 19976 * 151) = 75)
 3.	The file queueX/intd/<u>inode</u> is created and the envelope is written to it in the form
 
-	`u1011\0p28966\0Ftestuser@example.com\0Tuser1@a.com\0Tuser2@b.com\0`
+	`u1011\0p28966\0Ftuser@example.com\0Tuser1@a.com\0Tuser2@b.com\0`
 
 	It means the above message was sent by user tuser@example.com with uid 1011, process ID 28966 to two users user1@a.com, user2@b.com. At this point, we have moved to state S3
-4.	queueX/intd/<u>inode</u> is linked to queueX/todo/<u>inode</u>, moving the state to S4. At this instant, message has been successfully queued for further processing by <b>qmail-todo</b>, <b>qmail-send</b>. 
+4.	queueX/todo/<u>inode</u> is linked to queueX/intd/<u>inode</u>, moving the state to S4. At this instant, message has been successfully queued for further processing by <b>qmail-todo</b>, <b>qmail-send</b>. 
 
 At the moment queueX/todo/<u>inode</u> is created, the message has been queued. <b>qmail-send</b> eventually (within 25 minutes notices the new message, but to speed things up, <b>qmail-queue</b> writes a single byte to lock/trigger, a named pipe that <b>qmail-send</b> watches. When trigger contains readable data, qmail- send is awakened, empties trigger, and scans the todo directory.
 
@@ -2028,41 +2027,21 @@ When the domain for an email being injected into the queue by <b>qmail-smtpd</b>
 
 This feature becomes useful when setting domain specific delivery rate controls as mentioned in the chapter [Controlling Delivery Rates](#controlling-delivery-rates)
 
-# Setting up QMQP services
+# indimail-mini / qmta Installation
 
-QMQP is faster than SMTP. You can use QMQP to send mails from your relay servers to a server running QMQP service. The QMQP service can deliver mails to your local mailboxes or/and relay mails to the outside world.
+indimail-mta installation have multiple daemons qmail-daemon/qmail-start, qmail-send, qmail-lspawn, qmail-rspawn and qmail-clean. indimail-mta installation is meant for servers that can withsand high loads resulting from high inbound/outbound mail traffic. For small servers which have minimal or sporadic traffic, you do not want the full indimail-mta installation. In such cases you can either install indimail-mini or qmta
 
-## Client Setup
+## Using QMQP protocol provided by qmail-qmqpc / qmail-qmqpd
 
-QMQP provides a centralized mail queue within a cluster of hosts. QMQP clients do not require local queue for queueing messages.
+QMQP provides a centralized mail queue within a cluster of hosts. QMQP clients do not require local queue for queueing messages. QMQP is faster than SMTP. You can use QMQP to send mails from your relay servers to a server running QMQP service. The QMQP service can deliver mails to your local mailboxes or/and relay mails to the outside world. To use QMQP, you need a client that uses QMQP protocol and a server that provides the QMQP service. <b>qmail-qmqpc</b> which uses [QMQP](https://cr.yp.to/proto/qmqp.html) protocol, is a QMQP client. <b>qmail-qmqpd</b> is a server that provides a central hub offering the QMQP service. You can transfer both local and remote mails through the central hub. The central hub can also be a collection ofmultiple servers to aid performance. The QMQP protocol doesn't require clients to have a local queue. Many of my friends run web servers which need to send out emails using QMQP. If you already have an installation of indimail-mta on your network, you can quickly setup a indimail-mini installation on your web server, without impacting the performance of your web server, by using QMQP. QMQP service is provided by enabling qmail-qmqpd service on a server having indimail-mta installed. All other servers (including your webservers) can have a indimail-mini installation to use qmail-qmqpc to push emails to the central hub. The process for setting up QMQP service is outlined in the next chapter.
 
-For a minimal QMQP client installation, you need to have the following
+If you use a source installation, you can copy few binaries manually and run few commands manually, to have a indimail-mini installation. There is also a RPM package indimail-mini which does both installation and setup. An indimail-mini installation comes up with a bare minimum list of programs to enable you to send out mails.
 
-* forward, qmail-inject, rmail, sendmail, predate, datemail, mailsubj, qmail-showctl, qmaildirmake, maildir2mbox, maildirwatch in /usr/bin;
-* shared libs libsrs2-1.0\* from /usr/lib64
-* a symbolic link to qmail-qmqpc from /usr/sbin/qmail-queue;
-* symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail;
-* a list of IP addresses of QMQP servers, one per line, in /etc/indimail/control/qmqpservers;
-* a copy of /etc/indimail/control/me, /etc/indimail/control/defaultdomain, and /etc/indimail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
-* this host's name in /etc/indimail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision.
+### How do I set up a QMQP service?
 
-Everything can be shared across hosts except for /etc/indimail/control/idhost.
+You need to have at least one host on your network offering QMQP service to your clients. indimail-mta runs a QMQP service which handles incoming QMQP connections on port 628 using tcpserver. It uses multilog to store log messages under /var/log/svc/qmqpd.628. The QMQP service is actually provided by <b>qmail-qmqpd</b>
 
-Remember that users won't be able to send mail if all the QMQP servers are down. Most sites have two or three independent QMQP servers.
-
-Note that users can still use all the <b>qmail-inject</b> environment variables to control the appearance of their outgoing messages. This will include environment variables in $HOME/.defaultqueue directory.
-
-If you want to setup a SMTP service, it might be easier to install the entire indimail-mta package and remove the services qmail-send.25. You can use svctool to remove the service e.g.
-
-`$ sudo /usr/sbin/svctool --rmsvc qmail-send.25`
-
-In case the mails generated by the client is to be relayed to the outside world, you should set the SMTP service and have /usr/sbin/sendmail, /usr/lib/sendmail linked to /usr/bin/sendmail. This is to ensure that tasks like virus scanning, dk, dkim signing happen at the client end. You can also choose not to have these tasks done at the client end, but rather have it carried out by the QMQP service.
-
-## QMQP Service
-
-IndiMail runs a QMQP service which handles incoming QMQP connections on port 628 using tcpserver. It uses multilog to store log messages under /var/log/svc/qmqpd.628
-
-If you have installed IndiMail using the RPM, QMQP service is installed by default. However, you need to enable it.
+If you have installed indimail-mta using the RPM, QMQP service is installed by default. However, you need to enable it.
 
 ```
 $ sudo /bin/bash
@@ -2070,7 +2049,7 @@ $ sudo /bin/bash
 # /usr/bin/svc -u /service/qmail-qmqpd.628
 ```
 
-If you have installed IndiMail using the source, you may create the QMQP service using the following command
+If you have installed indimail-mta using the source, you may create the QMQP service using the following command
 
 ```
 $ sudo /usr/sbin/svctool --qmqp=628 --servicedir=/service \
@@ -2081,23 +2060,10 @@ $ sudo /usr/sbin/svctool --qmqp=628 --servicedir=/service \
 
 The above command will create a supervised service which runs qmail-qmqpd under tcpserver. In case you are setting up this service to relay mails to outside world, you might want to also specify --dkfilter, --qhpsi, --virus-filter, etc arguments to svctool(8) so that tasks like virus scanning, dk, domainkey signing, etc is done by the QMQP service.
 
-A QMQP server shouldn't even have to glance at incoming messages; its only job is to queue them for <b>qmail-send</b>(8). Hence you should allow access to QMQP service only from your authorized clients. You can edit the file /etc/indimail/tcp.qmqp to grant specific access to clients. If you make changes to tcp.qmqp, don't forget to run the qmailctl command
-
-`$ sudo /usr/bin/qmailctl cdb`
-
 Note: Some of the tasks like virus/spam filtering, dk, dkim signing, etc can be done either by the client (if `QMAILQUEUE=/usr/sbin/qmail-multi`), or can be performed by QMQP service if **QMAILQUEUE** is defined as <b>qmail-multi</b> in the service's variable directory.
 
-# Mini IndiMail Installation
+A QMQP server shouldn't even have to glance at incoming messages; its only job is to queue them for <b>qmail-send</b>(8). Hence you should allow access to QMQP service only from your authorized clients. You can edit the file /etc/indimail/tcp.qmqp to grant specific access to clients. Here's how to set up QMQP service to authorized client hosts on your indimail-mta server.
 
-IndiMail 1.7.3 onwards comes with option in svctool to install QMQP service. IndiMail 1.7.5 onwards comes with RPM package indimail-mini which will allow you to install a mini indimail installation. A mini indimail installation comes up with a bare minimum list of programs to enable you to send out mails. A indimail-mini installation doesn't have a mail queue. Instead it gives each new message to a central server through QMQP.
-
-Many of my friends run web servers which need to send out emails. If you already have an installation of IndiMail messaging server on your network, you can quickly setup a mini indimail installation on your web server, without impacting the performance by using QMQP. To use QMQP service, you need to have QMQP service running on your IndiMail messaging server. All other servers (including your webservers) can have a indimail-mini installation.
-
-![image](indimail_mini.png)
-
-### How do I set up a QMQP service?
-
-You need to have at least one host on your network offering QMQP service to your clients. IndiMail includes a QMQP server, qmail-qmqpd. Here's how to set up QMQP service to authorized client hosts on your IndiMail messaging server.
 first create /etc/indimail/tcp.qmqp in tcprules format to allow queueing from the authorized hosts. make sure to deny connections from unauthorized hosts. for example, if queueing is allowed from 1.2.3.\*:
 
 ```
@@ -2108,58 +2074,159 @@ first create /etc/indimail/tcp.qmqp in tcprules format to allow queueing from th
 Then create /etc/indimail//tcp/tcp.qmqp.cdb:
 
 ```
-$ sudo /usr/bin/tcprules /etc/indimail/tcp/tcp.qmqp.cdb \
-    /etc/indimail/tcp/qmqp.tmp < /etc/indimail/tcp/tcp.qmqp
+$ sudo qmailctl cdb
 ```
 
-You can change /var/indimail/etc/tcp.qmqp and run tcprules again at any time. Finally qmail-qmqpd to be run under supervise:
-NOTE: 628 is the TCP port for QMQP.
+You can change /var/indimail/etc/tcp.qmqp and run tcprules again at any time.
 
-```
-$ sudo /usr/sbin/svctool --qmqp=628 --servicedir=/service \
-  --qbase=/var/indimail/queue --qcount=5 --qstart=1 \
-  --cntrldir=control --localip=0 \
-  --maxdaemons=75 --maxperip=25 --fsync --syncdir \
-  --memory=104857600 --min-free=52428800
-```
-
-
-### How do I install indimail-mini?
+### Client Setup - How do I install indimail-mini to use qmail-qmqpc
 
 A indimail-mini installation is just like a indimail installation, except that it's much easier to set up:
 
 * You don't need MySQL
 * You don't need /var/indimail/alias. A indimail-mini installation doesn't do any local delivery.
+* You don't require daemontools, ucspi-tcp. You don't need to add anything to inetd.conf. A null client doesn't receive incoming mail.
 * You don't need indimail entries in /etc/group or /etc/passwd. indimail-mini runs with the same privileges as the user sending mail; it doesn't have any of its own files.
 * You don't need to start anything from your boot scripts. indimail-mini doesn't have a queue, so it doesn't need a long-running queue manager.
-* You don't need to add anything to inetd.conf. A null client doesn't receive incoming mail.
 
-Here's what you do need:
+Installation and setup is trivial if you use the RPM package.
 
-* forward, qmail-inject, sendmail, rmail predate, datemail, mailsubj, qmail-showctl, maildirmake, maildir2mbox, and maildirwatch in your path
-* shared libs libsrs2-1.0\* from /usr/lib64 (/usr/lib on 32 bit systems)
-* a symbolic link to /usr/sbin/qmail-qmqpc from /usr/sbin/qmail-queue;
+```
+$ sudo rpm -ivh indimail-mini
+```
+
+If you are doing a source installation then you need to manually copy few binaries and few shared librareis. Here's what you do need if you want to setup from a source installation.
+
+* The following binaries are required in the path
+  sendmail
+  qmail-inject
+  irmail
+  predate
+  datemail
+  mailsubj
+  qmail-showctl
+  srsfilter
+  qmail-qmqpc
+  qmail-direct
+* shared libs that the above binaries reference. You can use the ldd command (or otool -L command on OSX).
+* symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail;
+* a list of IP addresses of QMQP servers, one per line, in /etc/indimail/control/qmqpservers;
+* a copy of /etc/indimail/control/me, /etc/indimail/control/defaultdomain, and /etc/indimail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
+* this host's name in /etc/indimail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision. Everything can be shared across hosts except for /etc/indimail/control/idhost.
+* Setup QMAILQUEUE environment variable to have qmail-qmqpc called instead of qmail-queue when any client injects mails in the queue.
+  ```
+  # mkdir /etc/indimail/control/defaultqueue
+  # cd /etc/indimail/control/defaultqueue
+  # echo qmail-qmqpc > QMAILQUEUE
+  ```
+* All manual pages for the above binaries (not a hard requirement but good for future reference).
+
+Remember that users won't be able to send mail if all the QMQP servers are down. Most sites have two or three independent QMQP servers.
+
+Note that users can still use all the <b>qmail-inject</b> environment variables to control the appearance of their outgoing messages. This will include environment variables in $HOME/.defaultqueue directory.
+
+If you want to setup a SMTP service, it might be easier to install the entire indimail-mta package and remove the services qmail-send.25. You can use svctool to remove the service e.g.
+
+`$ sudo /usr/sbin/svctool --rmsvc qmail-send.25`
+
+In case you setup SMTP service, you may want to handle tasks is dkim, virus and spam filtering. You can use QHPSI along with a virus scanner like clamav. You can also choose not to have these tasks done at the client end, but rather have it carried out by the QMQP service. For virus scanning refer to chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi). You can set QMAILQUEUE to qmail-multi, qmail-dkim, etc. However, you must remember to have qmail-qmqpc called at the end in case you change QMAILQUEUE to something other than qmail-qmqpc.
+
+## Using a minimal standalone MTA provided by qmta
+
+<b>qmta-send</b> which can work independently to transfer local and remote mails. This works like qmail-send of indimail-mta, but unlike qmail-send, it doesn't require mutiple daemons (qmail-todo, qmail-lspawn/qmail-rspawn, qmail-clean) to send out mails. <b>qmta-send</b> which requires just one uid <u>qmailq</u> to operate. In case you don't have a central host running QMQP (provided by qmail-qmqpd) or you have a small host that sends out insignificant number of emails in a day, then <b>qmta-send</b> is what you would want to setup. <b>qmta-send</b> is well suited for tiny computers like raspberry pi, banana pi and other [Single Board Computers](https://en.wikipedia.org/wiki/Single-board_computer).
+
+![image](indimail_mini.png)
+
+### How do I set up a standalone MTA using qmta-send
+
+A qmta installation using qmta-send is just like an indimail-mini installation, except that it has a single queue named <u>qmta</u>. This queue is processed by a single daemon <b>qmta-send</b>. <b>qmta-send</b> is like <b>qmail-send</b> provided by indimail-mta, except that it doesn't require multiple daemons - <b>qmail-todo</b>, <b>qmail-lspawn</b>/<b>qmail-rspawn</b>, <b>qmail-clean</b>. Just like indimail-mini,
+
+* You don't require MySQL
+* You don't require daemontools, ucspi-tcp. You don't need to add anything to inetd.conf. A null client doesn't receive incoming mail.
+
+Installation and setup is trivial if you use the RPM package.
+
+```
+$ sudo rpm -ivh qmta
+$ sudo mkdir -p /var/indimail/queue
+$ sudo queue-fix /var/indimail/queue/queue1
+$ cd /etc/indimail/control/defaultqueue
+$ sudo sh -c "echo /usr/sbin/qmail-queue > QMAILQUEUE"
+$ sudo sh -c "echo /var/indimail/queue/queue1 > QUEUEDIR"
+```
+
+If you are doing a source installation then you need to manually copy few binaries and few shared librareis. Here's what you do need if you want to setup from a source installation.
+
+* The following binaries are required in the path
+  sendmail
+  qmail-inject
+  irmail
+  forward
+  predate
+  datemail
+  mailsubj
+  qmail-showctl
+  qmaildirmake
+  maildir2mbox
+  maildirwatch
+  srsfilter
+  queue-fix
+  qmail-qmqpc
+  qmail-direct
+  qmta-send
+  qmail-lspawn
+  qmail-local
+  qmail-rspawn
+  qmail-remote
+  qmail-clean
+  qmail-tcpok
+  qmail-tcpto
+* shared libs that the above binaries reference. You can use the ldd command (or otool -L command on OSX).
 * symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail;
 * a list of IP addresses of QMQP servers, one per line, in /etc/indimail/control/qmqpservers;
 * a copy of /etc/indimail/control/me, /etc/indimail/control/defaultdomain, and /etc/indimail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
 * this host's name in /etc/indimail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision.
-* All manual pages.
+* Following groups in /etc/group. You can add them by running the command `groupadd group_name`. Here <u>group_name</u> are listed below.
+  indimail
+  nofiles
+  qmail
+  qscand
+* Following users in /etc/passwd.
+  indimail
+  alias
+  qmailq
+  qmailr
+  qmails
+  qscand
 
-You can install all the above by manually copying the binaries and man pages from a host having standard IndiMail installation or you can install and setup just by using the indimail-mini RPM
+  You can add them by running the following command
+  ```
+  # useradd -r -g indimail -d /var/indimail indimail
+  # useradd -M -g nofiles  -d /var/indimail/alias  -s /sbin/nologin alias
+  # useradd -M -g qmail    -d /var/indimail/       -s /sbin/nologin qmailq
+  # useradd -M -g qmail    -d /var/indimail/       -s /sbin/nologin qmailr
+  # useradd -M -g qmail    -d /var/indimail/       -s /sbin/nologin qmails
+  # useradd -M -g qscand   -d /var/indimail/qscanq -G qmail,qscand -s /sbin/nologin qscand
+  ```
+* Setup QMAILQUEUE environment variable to have qmail-qmqpc called instead of qmail-queue when any client injects mails in the queue.
+  ```
+  # mkdir -p /etc/indimail/control/defaultqueue
+  # cd /etc/indimail/control/defaultqueue
+  # echo qmail-queue > QMAILQUEUE
+  ```
+* Create a single queue for qmta-send
+  ```
+  # mkdir -p /var/indimail/queue
+  # queue-fix /var/indimail/queue/qmta
+  # cd /etc/indimail/control/defaultqueue
+  # echo /var/indimail/queue/qmta > QUEUEDIR
+  ```
+* Run qmta-send
+  1. To run as a daemon run `qmta-send -dclr`. You can put this command in your system rc script.
+  2. To run as and when needed run `qmta-send -clr`. You can call this command using cron or a script.
+* All manual pages for the above binaries (not a hard requirement but good for future reference).
 
-`$ sudo rpm -ivh indimail-mini`
-
-Apart from the binaries, you need to do the following
-
-* a list of IP addresses of QMQP servers, one per line, in /etc/indimail/control/qmqpservers
-* a copy of /var/indimail/control/me, /etc/indimail/control/defaultdomain, and /etc/indimail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
-* this host's name in /etc/indimail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision.
-
-Everything can be shared across hosts except for /etc/indimail/control/idhost.
-
-Remember that users won't be able to send mail if all the QMQP servers are down. Most sites have two or three independent QMQP servers.
-
-Note that users can still use all the <b>qmail-inject</b> environment variables to control the appearance of their outgoing messages. Also you can setup environment variables in $HOME/.defaultqueue
+Note that users can still use all the <b>qmail-inject</b> environment variables to control the appearance of their outgoing messages. Also you can setup environment variables in $HOME/.defaultqueue apart from /etc/indimail/control/defaultqueue
 
 # Fedora - Using /usr/sbin/alternatives
 
