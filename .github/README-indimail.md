@@ -2095,9 +2095,9 @@ Installation and setup is trivial if you use the RPM package.
 $ sudo rpm -ivh indimail-mini
 ```
 
-If you are doing a source installation then you need to manually copy few binaries and few shared librareis. Here's what you do need if you want to setup from a source installation.
+If you are doing a source installation then you need to manually copy few binaries and few shared librareis. Here's what you do need if you want to setup QMQP on the client.
 
-* The following binaries are required in the path
+* The following binaries are required in the path (for source installation only).
   sendmail
   qmail-inject
   irmail
@@ -2108,18 +2108,18 @@ If you are doing a source installation then you need to manually copy few binari
   srsfilter
   qmail-qmqpc
   qmail-direct
-* shared libs that the above binaries reference. You can use the ldd command (or otool -L command on OSX).
-* symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail;
+* shared libs that the above binaries reference. You can use the ldd command (or otool -L command on OSX) (for source installation only).
+* symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail (for source installation only);
 * a list of IP addresses of QMQP servers, one per line, in /etc/indimail/control/qmqpservers;
 * a copy of /etc/indimail/control/me, /etc/indimail/control/defaultdomain, and /etc/indimail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
 * this host's name in /etc/indimail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision. Everything can be shared across hosts except for /etc/indimail/control/idhost.
-* Setup QMAILQUEUE environment variable to have qmail-qmqpc called instead of qmail-queue when any client injects mails in the queue.
+* Setup QMAILQUEUE environment variable to have qmail-qmqpc called instead of qmail-queue when any client injects mails in the queue (for source installation only).
   ```
   # mkdir /etc/indimail/control/defaultqueue
   # cd /etc/indimail/control/defaultqueue
   # echo qmail-qmqpc > QMAILQUEUE
   ```
-* All manual pages for the above binaries (not a hard requirement but good for future reference).
+* All manual pages for the above binaries (not a hard requirement but good for future reference) (for source installation only).
 
 Remember that users won't be able to send mail if all the QMQP servers are down. Most sites have two or three independent QMQP servers.
 
@@ -2148,11 +2148,6 @@ Installation and setup is trivial if you use the RPM package.
 
 ```
 $ sudo rpm -ivh qmta
-$ sudo mkdir -p /var/indimail/queue
-$ sudo queue-fix /var/indimail/queue/qmta
-$ cd /etc/indimail/control/defaultqueue
-$ sudo sh -c "echo /usr/sbin/qmail-queue > QMAILQUEUE"
-$ sudo sh -c "echo /var/indimail/queue/queue1 > QUEUEDIR"
 ```
 
 If you are doing a source installation then you need to manually copy few binaries and few shared librareis. Here's what you do need if you want to setup from a source installation.
@@ -2181,17 +2176,17 @@ If you are doing a source installation then you need to manually copy few binari
   qmail-clean
   qmail-tcpok
   qmail-tcpto
-* shared libs that the above binaries reference. You can use the ldd command (or otool -L command on OSX).
-* symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail;
+* shared libs that the above binaries reference. You can use the ldd command (or otool -L command on OSX) (for source installation only)
+* symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail; (for source installation only)
 * a list of IP addresses of QMQP servers, one per line, in /etc/indimail/control/qmqpservers;
 * a copy of /etc/indimail/control/me, /etc/indimail/control/defaultdomain, and /etc/indimail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
 * this host's name in /etc/indimail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision.
-* Following groups in /etc/group. You can add them by running the command `groupadd group_name`. Here <u>group_name</u> are listed below.
+* Following groups in /etc/group (for source installation only). You can add them by running the command `groupadd group_name`. Here <u>group_name</u> are listed below.
   indimail
   nofiles
   qmail
   qscand
-* Following users in /etc/passwd.
+* Following users in /etc/passwd (for source installation only).
   indimail
   alias
   qmailq
@@ -2208,13 +2203,13 @@ If you are doing a source installation then you need to manually copy few binari
   # useradd -M -g qmail    -d /var/indimail/       -s /sbin/nologin qmails
   # useradd -M -g qscand   -d /var/indimail/qscanq -G qmail,qscand -s /sbin/nologin qscand
   ```
-* Setup QMAILQUEUE environment variable to have qmail-qmqpc called instead of qmail-queue when any client injects mails in the queue.
+* Setup QMAILQUEUE environment variable to have qmail-qmqpc called instead of qmail-queue when any client injects mails in the queue (for source installation only).
   ```
   # mkdir -p /etc/indimail/control/defaultqueue
   # cd /etc/indimail/control/defaultqueue
   # echo qmail-queue > QMAILQUEUE
   ```
-* Create a single queue for qmta-send
+* Create a single queue for qmta-send (for source installation only).
   ```
   # mkdir -p /var/indimail/queue
   # queue-fix /var/indimail/queue/qmta
@@ -2222,8 +2217,9 @@ If you are doing a source installation then you need to manually copy few binari
   # echo /var/indimail/queue/qmta > QUEUEDIR
   ```
 * Run qmta-send
-  1. To run as a daemon run `qmta-send -dclr`. You can put this command in your system rc script.
-  2. To run as and when needed run `qmta-send -clr`. You can call this command using cron or a script.
+  1. To run as a daemon run `qmta-send -d`. You can put this command in your system rc script.
+  2. To run as and when needed run `qmta-send`. You can call this command using cron or a script.
+  3. If you have installed the qmta RPM/debian package, this will be already setup for you in systemd
 * All manual pages for the above binaries (not a hard requirement but good for future reference).
 
 Note that users can still use all the <b>qmail-inject</b> environment variables to control the appearance of their outgoing messages. Also you can setup environment variables in $HOME/.defaultqueue apart from /etc/indimail/control/defaultqueue
