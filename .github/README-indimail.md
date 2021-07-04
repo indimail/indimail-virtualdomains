@@ -18,6 +18,7 @@ Table of Contents
             * [Cleanup](#cleanup)
             * [Global &amp; Queue Specific Concurrency, Parallelism limits](#global--queue-specific-concurrency-parallelism-limits)
       * [Setting Environment Variables](#setting-environment-variables)
+      * [Taking Backups](#taking-backups)
       * [Notes](#notes)
    * [IndiMail Queue Mechanism](#indimail-queue-mechanism)
    * [Using systemd to start IndiMail](#using-systemd-to-start-indimail)
@@ -604,12 +605,43 @@ Cleanups are not necessary if the computer crashes while <b>qmail-send</b> is de
 
 indimail-mta can be fine tuned, configured using environment variables (> 200) of them. There are many methods of setting them.
 
-1. Setting them in variables directory. All indimail services are configured as supervised services in <u>/service</u> directory. Each of these services has a directory named named after the service and a subdir inside it named <b>variables</b>. In the <b>variables</b> directory, you just need to create a file to create an environment variable. The name of the environment variable is the filename and the value of the environment variable is the content of the file. An empty file, removes the environment variable. As an exercise, explore the directory <u>/service/qmail-smtpd.25/variables</u>. All IndiMail services use the program <b>envdir</b>(8) to set environment variables from the <b>variables</b> directory.
-2. Using control files <b>from.envrules</b>, <b>fromd.envrules</b>, <b>rcpt.envrules</b>, <b>auth.envrules</b> - These are control files used by programs like <b>qmail-smtpd</b>, <b>qmail-inject</b>. They match on the sender or recipient address. Here you can set or unset environment variables for a sender, recipient or any regular expression to match multipler sender or recipients. To know these environment variables, read the man pages for <b>qmail-smtpd</b>, <b>qmail-inject</b>, <b>spawn-filter</b>.
-3. Using control file domainqueue - This can be used to set environment variable for any recipient domain. Read the man page for <b>qmail-smtpd</b>, <b>qmail-inject</b>.
-4. Using environment directory <u>/etc/indimail/control/defaultqueue</u> - This is just like the supervise <b>variables</b> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, sendmail for injecting mails into the queue. Read the man page for <b>qmail-inject</b>.
-5. Using environment directory <u>$HOME/.defaultqueue</u> - This is just like the supervise <b>variables</b> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, sendmail for injecting mails into the queue. Here $HOME refers to the home directory of the user. Read the man page for <b>qmail-inject</b>.
+1. Setting them in variables directory. All indimail services are configured as supervised services in <u>/service</u> directory. Each of these services has a directory named named after the service and a subdir inside it named <u>variables</u>. In the <u>variables</u> directory, you just need to create a file to create an environment variable. The name of the environment variable is the filename and the value of the environment variable is the content of the file. An empty file, removes the environment variable. As an exercise, explore the directory <u>/service/qmail-smtpd.25/variables</u>. All IndiMail services use the program <b>envdir</b>(8) to set environment variables from the <u>variables</u> directory. You can have a link or a directory named .<u>dir</u> in the <u>variables</u> directory which points to another directory having environment variables. Using this you can recursively span across multiple directories safely due to a builtin check to prevent infinite recursion.
+
+2. Using environment directory <u>/etc/indimail/control/defaultqueue</u> - This is just like the supervise <u>variables</u> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, sendmail for injecting mails into the queue. Read the man page for <b>qmail-inject</b>. You can have a link or a directory named .<u>dir</u> in the <u>defaultqueue</u> directory which points to another directory having environment variables. Using this you can recursively span across multiple directories safely due to a builtin check to prevent infinite recursion.
+
+3. Using environment directory <u>$HOME/.defaultqueue</u> - This is just like the supervise <u>variables</u> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, sendmail for injecting mails into the queue. Here $HOME refers to the home directory of the user. Read the man page for <b>qmail-inject</b>. You can have a link or a directory named .<u>dir</u> in the <u>.defaultqueue</u> directory which points to another directory having environment variables. Using this you can recursively span across multiple directories safely due to a builtin check to prevent infinite recursion.
+
+4. Using control files <b>from.envrules</b>, <b>fromd.envrules</b>, <b>rcpt.envrules</b>, <b>auth.envrules</b> - These are control files used by programs like <b>qmail-smtpd</b>, <b>qmail-inject</b>. They match on the sender or recipient address. Here you can set or unset environment variables for a sender, recipient or any regular expression to match multipler sender or recipients. To know these environment variables, read the man pages for <b>qmail-smtpd</b>, <b>qmail-inject</b>, <b>spawn-filter</b>.
+
+5. Using control file domainqueue - This can be used to set environment variable for any recipient domain. Read the man page for <b>qmail-smtpd</b>, <b>qmail-inject</b>.
+
 6. Nothing prevents a user from writing a shell script to set environment variables before calling any of indimail-mta programs. If you are familiar with UNIX, you will know how to set them.
+
+## Taking Backups
+
+Once you have setup your indimail-mta system, you need to take regular backups. There are three types of backup.
+
+1. Backup of the mails. If you are using indimail-mta alone, you will need to backup the home directory of users for which indimail-mta does local deliveries. If you are using IndiMail Virtual Domains, the program <b>vadduser</b> will be creating home directories for users in this filesystem /home/mail filesystem. This can be changed by setting the BASE_PATH environment variable in $HOME/.defaultqueue or /etc/indimail/control/defaultqueue. You need to backup these directories using your backup tool, script or commands like tar, rsync, etc. indimail/indimail-mta doesn't provide you a tool to backup the user mails.
+
+2. Backup of IndiMail, indimail-mta configuration, services configuration. If you are using the IndiMail Virtual Domains, then your data in the MySQL indimail database too needs to be backed up. This can be done by running the command
+
+   ```
+   $ sudo /usr/sbin/svctool --backup=/backup_path_to_dir --mysqlPrefix=/usr --servicedir=/service
+   ```
+3. You also need to take a snapshot of your current configuration and keep it safe somewhere. This can be useful if you change something and things do not work. The entire configuration for indimail, indimail-mta and all services can be obtained by running the command
+
+   ```
+   Use The below command for an exhaustive configuration dump
+   of indimail/indimail-mta. This option requires root privileges
+
+   $ sudo /usr/sbin/svctool --dumpconfig
+
+   Use the below command for displaying the most routine
+   configuration. This option doesn't require root privileges
+   unless you use the -s option.
+
+   $ qmail-showctl -a
+   ```
 
 ## Notes
 
@@ -2906,7 +2938,7 @@ IndiMail 1.6 onwards implements greylisting using <b>qmail-greyd</b> daemon. You
 ## Enabling qmail-greyd greylisting server
 
 ```
-$ sudo svctool --greylist=1999 --servicedir=/service --min-resend-min=2 \
+$ sudo /ur/sbin/svctool --greylist=1999 --servicedir=/service --min-resend-min=2 \
    --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
    --save-interval=5 --whitelist=greylist.whitelist
 ```
