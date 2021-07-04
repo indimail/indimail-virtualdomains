@@ -10,8 +10,8 @@ Table of Contents
       * [Programs](#programs)
          * [qmail-multi](#qmail-multi)
          * [qmail-queue](#qmail-queue)
-         * [qmail-daemon, qmail-start](#qmail-daemon-qmail-start)
-         * [qmail-send, qmail-send](#qmail-send-qmail-send)
+         * [qmail-daemon, qmail-start, slowq-start, qmta-send](#qmail-daemon-qmail-start-slowq-start-qmta-send)
+         * [qmail-todo, qmail-send](#qmail-todo-qmail-send)
             * [Preprocessing](#preprocessing)
             * [Delivery](#delivery)
                * [Retry Schedules](#retry-schedules)
@@ -359,15 +359,17 @@ At the moment queueX/todo/<u>inode</u> is created, the message has been queued. 
 
 Once a message is deposited in one of the indimail's queues, it will be sent by few programs working cooperatively. We will now look at qmail-daemon, qmail-start, <b>qmail-send</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b>, <b>qmail-local</b>, and <b>qmail-remote</b>.
 
-### qmail-daemon, qmail-start
+### qmail-daemon, qmail-start, slowq-start, qmta-send
 
 <b>qmail-daemon</b> invokes multiple invocations of <b>qmail-start</b> to invoke <b>qmail-send</b>, <b>qmail-todo</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b>, and <b>qmail-clean</b>, under the proper uids and gids for multiple queues. It starts multiple instances of <b>qmail-send</b>, <b>qmail-todo</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b> and <b>qmail-clean</b>. The number of instances it runs is defined by the environment variable QUEUE\_COUNT. For each instance the queue is defined by <b>qmail-daemon</b> by setting the environment variable <b>QUEUEDIR</b>. A queue is defined by the integers defined by environment variables QUEUE\_START and QUEUE\_COUNT as described in section [IndiMail Queue Mechanism](#indimail-queue-mechanism). <b>qmail-daemon</b> also monitors <b>qmail-send</b> and <b>qmail-todo</b> and restart them if they go down.
 
 <b>qmail-start</b> invokes <b>qmail-send</b>, <b>qmail-todo</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b>, and <b>qmail-clean</b>, under the proper uids and gids for a single queue. These five daemons cooperate to deliver messages from the queue. <b>qmail-start</b> should be used if you desire to run only one queue. For running multiple parallel queues run <b>qmail-daemon</b>.
 
-<b>slowq-start</b> invokes <b>slowq-send</b>, lspawn, <b>qmail-rspawn</b>, and <b>qmail-clean</b>, under the proper uids and gids for a single queue. These four daemons cooperate to deliver messages from the queue. <b>slowq-start</b> is invoked for the special queue <b>slowq</b> that can be rate controlled. We will talke about this in the chapter [Controlling Delivery Rates](#-controlling-delivery-rates).
+<b>slowq-start</b> invokes <b>slowq-send</b>, lspawn, <b>qmail-rspawn</b>, and <b>qmail-clean</b>, under the proper uids and gids for a single queue. <b>slowq-send</b> is a special daemon that does the work of both <b>qmail-todo</b> and <b>qmail-send</b> but handles a single, special queue named <u>slowq</u>. These four daemons cooperate to deliver messages from the queue with control on the delivery rates. We will talke about this in the chapter [Controlling Delivery Rates](#-controlling-delivery-rates).
 
-<b>qmail-daemon</b>, <b>qmail-start</b>, <b>slowq-start</b> can be passed an argument - <b>defaultdelivery</b>. If <b>defaultdelivery</b> supplied, <b>qmail-start</b> or <b>qmail-daemon</b> passes it to <b>qmail-lspawn</b>. You can also have a control file named defaultdelivery. The mailbox type is picked up from the <b>defaultdelivery</b> control file. The table below outlines the choices for <b>defaultdelivery</b> control file
+<b>qmta-send</b> is a single daemon that does the work of <b>qmail-todo</b>, <b>qmail-send</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b> and <b>qmail-clean</b>. It handles a single special queue named <u>qmta</u>. You can use <b>qmta-send</b> instead of <b>qmail-todo</b>/<b>qmail-send</b> for small systems which have negligible or sporadic mail traffic. Single Board Computers are an excellent fit for <b>qmta-send</b>. <b>qmta-sed</b> can be started from the command line, in cron/shell scripts. It can be invoked to do just one time deliveries without running as a daemon. It can also be enabled to start at boot by enabling <b>qmta-service</b> <b>systemd.unit(5)</b> configuration using the <b>systemctl(1)</b> command. You can learn more about <b>qmta-send</b> in the chapter [qmta - Using a minimal standalone qmta-send MTA](#qmta---using-a-minimal-standalone-qmta-send-mta)
+
+<b>qmail-daemon</b>, <b>qmail-start</b>, <b>slowq-start</b>, <b>qmta-send</b> can be passed an argument - <b>defaultdelivery</b>. If <b>defaultdelivery</b> supplied, <b>qmail-start</b> or <b>qmail-daemon</b> passes it to <b>qmail-lspawn</b>. You can also have a control file named defaultdelivery. The mailbox type is picked up from the <b>defaultdelivery</b> control file. The table below outlines the choices for <b>defaultdelivery</b> control file
 
 Mailbox Format |Name|Location|defaultdelivery|Comments
 ---------------|----|--------|---------------|--------
@@ -375,7 +377,7 @@ mbox|Mailbox|$HOME|./Mailbox|most common, works with most MUAs
 maildir|Maildir|$HOME|./Maildir/|more reliable, less common MUA support
 mbox|username|/var/spool/mail|See INSTALL.vsm|traditional mailbox
 
-### qmail-send, qmail-send
+### qmail-todo, qmail-send
 
 Once a message has been queued, <b>qmail-todo</b> must decide which recipients are local and which recipients are remote. It may also rewrite some recipient addresses. <b>qmail-todo</b>/<b>qmail-send</b> process messages in the queue and pass them to <b>qmail-rspawn</b> and <b>qmail-lspawn</b>. We will talk about their function in the order that a message in the queue would experience them: preprocessing, delivery, and cleanup.
 
