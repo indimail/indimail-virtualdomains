@@ -605,17 +605,17 @@ Cleanups are not necessary if the computer crashes while <b>qmail-send</b> is de
 
 ## Setting Environment Variables
 
-indimail-mta can be fine tuned, configured using environment variables (> 200) of them. There are many methods of setting them.
+indimail-mta can be fine tuned, configured using environment variables (> 250) of them. This feature gives a significant edge to indimail-mta over qmail. It gives you the total flexibility to configure and customize indimail-mta. There are many methods of setting them.
 
 1. Setting them in variables directory. All indimail services are configured as supervised services in <u>/service</u> directory. Each of these services have a directory named named after the service and a subdir inside it named <u>variables</u>. In the <u>variables</u> directory, you just need to create a file to create an environment variable. The name of the environment variable is the filename and the value of the environment variable is the content of the file. An empty file, removes the environment variable. As an exercise, explore the directory <u>/service/qmail-smtpd.25/variables</u>. All IndiMail services use the program <b>envdir</b>(8) to set environment variables from the <u>variables</u> directory. You can have a link or a directory named .<u>dir</u> in the <u>variables</u> directory which points to another directory having environment variables. Using this you can recursively span across multiple directories and also do it safely because of a builtin check to prevent infinite recursion.
 
-2. Using environment directory <u>/etc/indimail/control/defaultqueue</u> - This is just like the supervise <u>variables</u> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, sendmail for injecting mails into the queue. Read the man page for <b>qmail-inject</b>. You can have a link or a directory named .<u>dir</u> in the <u>defaultqueue</u> directory which points to another directory having environment variables. Using this you can recursively span across multiple directories safely due to a builtin check to prevent infinite recursion.
+2. Using environment directory <u>/etc/indimail/control/defaultqueue</u> - This is just like the supervise <u>variables</u> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, sendmail. Read the man page for <b>qmail-inject</b>. You can have a link or a directory named .<u>dir</u> in the <u>defaultqueue</u> directory which points to another directory having environment variables. Using this you can recursively span across multiple directories safely due to a builtin check to prevent infinite recursion. This directory gets skipped if you have the <b>QUEUE_BASE</b> environment variable set.
 
-3. Using environment directory <u>$HOME/.defaultqueue</u> - This is just like the supervise <u>variables</u> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, sendmail for injecting mails into the queue. Here $HOME refers to the home directory of the user. Read the man page for <b>qmail-inject</b>. You can have a link or a directory named .<u>dir</u> in the <u>.defaultqueue</u> directory which points to another directory having environment variables. Using this you can recursively span across multiple directories safely due to a builtin check to prevent infinite recursion.
+3. Using environment directory <u>$HOME/.defaultqueue</u> - This is just like the supervise <u>variables</u> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, sendmail. Here $HOME refers to the home directory of the user. Read the man page for <b>qmail-inject</b>. You can have a link or a directory named .<u>dir</u> in the <u>.defaultqueue</u> directory which points to another directory having environment variables. Using this you can recursively span across multiple directories safely due to a builtin check to prevent infinite recursion. If you set <b>QUEUE_BASE</b> in this directory, then <u>/etc/indimail/cotrol/defaultqueue</u> gets skipped allowing you to override system configured environment variables.
 
 4. Using control files <b>from.envrules</b>, <b>fromd.envrules</b>, <b>rcpt.envrules</b>, <b>auth.envrules</b> - These are control files used by programs like <b>qmail-smtpd</b>, <b>qmail-inject</b>. They match on the sender or recipient address. Here you can set or unset environment variables for a sender, recipient or any regular expression to match multipler sender or recipients. To know these environment variables, read the man pages for <b>qmail-smtpd</b>, <b>qmail-inject</b>, <b>spawn-filter</b>.
 
-5. Using control file domainqueue - This can be used to set environment variable for any recipient domain. Read the man page for <b>qmail-smtpd</b>, <b>qmail-inject</b>.
+5. Using control file domainqueue - This can be used to set environment variable for any recipient domain. Read the man page for <b>qmail-smtpd</b>, <b>qmail-inject</b>. You can configure <b>domainqueue</b> to have indimail-mta configure differently for different domains.
 
 6. Nothing prevents a user from writing a shell script to set environment variables before calling any of indimail-mta programs. If you are familiar with UNIX, you will know how to set them.
 
@@ -2125,10 +2125,10 @@ A indimail-mini installation is just like a indimail installation, except that i
 * You don't need indimail entries in /etc/group or /etc/passwd. indimail-mini runs with the same privileges as the user sending mail; it doesn't have any of its own files.
 * You don't need to start anything from your boot scripts. indimail-mini doesn't have a queue, so it doesn't need a long-running queue manager.
 
-Installation and setup is trivial if you use the RPM package.
+Installation and setup is trivial if you use the RPM package (See the chapter [Installing Indimail using DNF/YUM/APT Repository](## Installing Indimail using DNF/YUM/APT Repository)).
 
 ```
-$ sudo rpm -ivh indimail-mini
+$ sudo dnf install indimail-mini
 ```
 
 If you are doing a source installation then you need to manually copy few binaries and few shared librareis. Here's what you do need if you want to setup QMQP on the client.
@@ -2178,10 +2178,42 @@ A qmta installation using qmta-send is just like an indimail-mini installation, 
 * You don't require MySQL
 * You don't require daemontools, ucspi-tcp. You don't need to add anything to inetd.conf. A null client doesn't receive incoming mail.
 
-Installation and setup is trivial if you use the RPM package.
+Installation and setup is trivial if you use the RPM package (See the chapter [Installing Indimail using DNF/YUM/APT Repository](## Installing Indimail using DNF/YUM/APT Repository)).
 
 ```
-$ sudo rpm -ivh qmta
+# Install qmta
+$ sudo dnf install qmta
+
+# enable qmta-send service
+$ sudo systemctl enable qmta-send
+Created symlink /etc/systemd/system/multi-user.target.wants/qmta-send.service → /usr/lib/systemd/system/qmta-send.service.
+
+# start qmta-send service
+$ sudo systemctl start qmta-send
+
+# check processes using the humble ps command
+$ ps -ef | grep qmta-send | grep -v grep
+qmailq     39977       1  0 22:53 ?        00:00:00 /usr/sbin/qmta-send -d ./Maildir/ splogger qmta-send
+qmaill     39978   39977  0 22:53 ?        00:00:00 splogger qmta-send
+root       39979   39977  0 22:53 ?        00:00:00 /usr/sbin/MTAlspawn -d ./Maildir/ splogger qmta-send
+qmailr     39980   39977  0 22:53 ?        00:00:00 /usr/sbin/MTArspawn -d ./Maildir/ splogger qmta-send
+
+# check processes using the mighty systemctl command
+$ sysemctl status qmta-send
+● qmta-send.service - qmta Mail Transport Agent
+     Loaded: loaded (/usr/lib/systemd/system/qmta-send.service; enabled; vendor preset: disabled)
+     Active: active (running) since Tue 2021-07-06 22:53:32 IST; 7s ago
+   Main PID: 39977 (qmta-send)
+      Tasks: 4 (limit: 9421)
+     Memory: 1.9M
+     CGroup: /system.slice/qmta-send.service
+             ├─39977 /usr/sbin/qmta-send -d ./Maildir/ splogger qmta-send
+             ├─39978 splogger qmta-send
+             ├─39979 /usr/sbin/MTAlspawn -d ./Maildir/ splogger qmta-send
+             └─39980 /usr/sbin/MTArspawn -d ./Maildir/ splogger qmta-send
+
+Jul 06 22:53:32 argos.indimail.org systemd[1]: Started qmta Mail Transport Agent.
+Jul 06 22:53:32 argos.indimail.org qmta-send[39978]: 1625592212.411851 status: local 0/10 remote 0/20
 ```
 
 If you are doing a source installation then you need to manually copy few binaries and few shared librareis. Here's what you do need if you want to setup from a source installation.
@@ -2210,7 +2242,7 @@ If you are doing a source installation then you need to manually copy few binari
   qmail-clean
   qmail-tcpok
   qmail-tcpto
-* shared libs that the above binaries reference. You can use the ldd command (or otool -L command on OSX) (for source installation only)
+* shared libs that the above binaries reference (libsrs2, libqmail). You can use the ldd command (or otool -L command on OSX) (for source installation only)
 * symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail; (for source installation only)
 * a list of IP addresses of QMQP servers, one per line, in /etc/indimail/control/qmqpservers;
 * a copy of /etc/indimail/control/me, /etc/indimail/control/defaultdomain, and /etc/indimail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
@@ -2253,14 +2285,49 @@ If you are doing a source installation then you need to manually copy few binari
 * Run qmta-send
   1. To run as a daemon run `qmta-send -d`. You can put this command in your system rc script.
   2. To run as and when needed run `qmta-send`. You can call this command using cron or a script.
-  3. If you have installed the qmta RPM/debian package, this will be already setup for you in systemd
+  3. If you have installed the qmta RPM/debian package, this will be already setup for you in systemd. Else you can copy qmta-send.service to systemd unit directory.
+  ```
+  # copy systemd unit file qmta-send.service
+  $ sudo cp qmta-send /usr/lib/systemd/system
+
+  # enable qmta-send service
+  $ sudo systemctl enable qmta-send
+  Created symlink /etc/systemd/system/multi-user.target.wants/qmta-send.service → /usr/lib/systemd/system/qmta-send.service.
+
+  # start qmta-send service
+  $ sudo systemctl start qmta-send
+
+  # check processes using the humble ps command
+  $ ps -ef | grep qmta-send | grep -v grep
+  qmailq     39977       1  0 22:53 ?        00:00:00 /usr/sbin/qmta-send -d ./Maildir/ splogger qmta-send
+  qmaill     39978   39977  0 22:53 ?        00:00:00 splogger qmta-send
+  root       39979   39977  0 22:53 ?        00:00:00 /usr/sbin/MTAlspawn -d ./Maildir/ splogger qmta-send
+  qmailr     39980   39977  0 22:53 ?        00:00:00 /usr/sbin/MTArspawn -d ./Maildir/ splogger qmta-send
+
+  # check processes using the mighty systemctl command
+  $ sysemctl status qmta-send
+  ● qmta-send.service - qmta Mail Transport Agent
+       Loaded: loaded (/usr/lib/systemd/system/qmta-send.service; enabled; vendor preset: disabled)
+       Active: active (running) since Tue 2021-07-06 22:53:32 IST; 7s ago
+     Main PID: 39977 (qmta-send)
+        Tasks: 4 (limit: 9421)
+       Memory: 1.9M
+       CGroup: /system.slice/qmta-send.service
+               ├─39977 /usr/sbin/qmta-send -d ./Maildir/ splogger qmta-send
+               ├─39978 splogger qmta-send
+               ├─39979 /usr/sbin/MTAlspawn -d ./Maildir/ splogger qmta-send
+               └─39980 /usr/sbin/MTArspawn -d ./Maildir/ splogger qmta-send
+
+  Jul 06 22:53:32 argos.indimail.org systemd[1]: Started qmta Mail Transport Agent.
+  Jul 06 22:53:32 argos.indimail.org qmta-send[39978]: 1625592212.411851 status: local 0/10 remote 0/20
+  ```
 * All manual pages for the above binaries (not a hard requirement but good for future reference).
 
 Note that users can still use all the <b>qmail-inject</b> environment variables to control the appearance of their outgoing messages. Also you can setup environment variables in $HOME/.defaultqueue apart from /etc/indimail/control/defaultqueue
 
-# Fedora - Using /usr/sbin/alternatives
+# Using /usr/sbin/alternatives
 
-Sometimes two or more Fedora package exist that serve the same purpose. The alternatives system provides a mechanism for selecting an active default application from several valid alternatives. You can use the alternatives system to configure as an alternative MTA for your system. Using alternatives, you don't have to create the links to /usr/bin/sendmail manually as instructed above.
+Sometimes two or more package exist that serve the same purpose. The alternatives system provides a mechanism for selecting an active default application from several valid alternatives. You can use the alternatives system to configure as an alternative MTA for your system. Using alternatives, you don't have to create the links to /usr/bin/sendmail manually as instructed above.
 
 ```
 $ sudo /usr/sbin/alternatives --install \
@@ -2271,6 +2338,8 @@ $ sudo /usr/sbin/alternatives --install \
     /usr/bin/sendmail
     /usr/sbin/alternatives --set mta /usr/bin/sendmail
 ```
+
+NOTE: archlinux doesn't have the alternatives command.
 
 # Post Handle Scripts
 
