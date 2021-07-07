@@ -605,7 +605,7 @@ Cleanups are not necessary if the computer crashes while <b>qmail-send</b> is de
 
 ## Setting Environment Variables
 
-indimail-mta can be fine tuned, configured using environment variables (> 250) of them. This feature gives a significant edge to indimail-mta over qmail. It gives you the total flexibility to configure and customize indimail-mta. There are many methods of setting them.
+indimail-mta can be fine tuned, configured using environment variables (> 250) of them. See the man page for indimail-env(5) and tcp-environ(5). This feature gives a significant edge to indimail-mta over qmail. It gives you the total flexibility to configure and customize indimail-mta. There are many methods of setting them.
 
 1. Setting them in variables directory. All indimail services are configured as supervised services in <u>/service</u> directory. Each of these services have a directory named named after the service and a subdir inside it named <u>variables</u>. In the <u>variables</u> directory, you just need to create a file to create an environment variable. The name of the environment variable is the filename and the value of the environment variable is the content of the file. An empty file, removes the environment variable. As an exercise, explore the directory <u>/service/qmail-smtpd.25/variables</u>. All IndiMail services use the program <b>envdir</b>(8) to set environment variables from the <u>variables</u> directory. You can have a link or a directory named .<u>dir</u> in the <u>variables</u> directory which points to another directory having environment variables. Using this you can recursively span across multiple directories and also do it safely because of a builtin check to prevent infinite recursion.
 
