@@ -619,10 +619,11 @@ indimail-mta can be fine tuned, configured using environment variables (> 250) o
 
 6. Nothing prevents a user from writing a shell script to set environment variables before calling any of indimail-mta programs. If you are familiar with UNIX, you will know how to set them.
 
-NOTE: It is trivial to display the environment variable that would be set for your service by using the envdir command along with the env command
+NOTE: It is trivial to display the environment variable that would be set for your service by using the envdir command along with the env command. In fact this is what the `svctool --print-variables --service-name=xxxx` or `minisvc --print-variables --service-name=xxx` do.
 
 ```
 # Display environment variables set for defaultqueue
+#
 $ envdir -c /etc/indimail/control/defaultqueue env
 USE_FSYNC=
 QUEUE_START=1
@@ -637,6 +638,11 @@ QUEUE_BASE=/var/indimail/queue
 MIN_FREE=52428800
 
 # Display environment variables set for SMTPS service
+# the same can be done by running
+# svctool --print-variables=qmail-smtpd.465
+# or
+# minisvc --print-variables=qmail-smtpd.465
+#
 $ sudo envdir -c /service/qmail-smtpd.465/variables env
 LOGFILTER=/run/indimail/logfifo
 DISABLE_PLUGIN=
