@@ -619,6 +619,72 @@ indimail-mta can be fine tuned, configured using environment variables (> 250) o
 
 6. Nothing prevents a user from writing a shell script to set environment variables before calling any of indimail-mta programs. If you are familiar with UNIX, you will know how to set them.
 
+NOTE: It is trivial to display the environment variable that would be set for your service by using the envdir command along with the env command
+
+```
+# Display environment variables set for defaultqueue
+$ envdir -c /etc/indimail/control/defaultqueue env
+USE_FSYNC=
+QUEUE_START=1
+QMAILQUEUE=/usr/sbin/qmail-dkim
+QUEUE_COUNT=5
+DKIMSIGN=/etc/indimail/control/domainkeys/%/default
+CONFSPLIT=151
+VIRUSCHECK=1
+QHPSI=/usr/bin/clamdscan %s --config=/etc/clamd.d/scan.conf --fdpass --quiet --no-summary
+USE_SYNCDIR=
+QUEUE_BASE=/var/indimail/queue
+MIN_FREE=52428800
+
+# Display environment variables set for SMTPS service
+$ sudo envdir -c /service/qmail-smtpd.465/variables env
+LOGFILTER=/run/indimail/logfifo
+DISABLE_PLUGIN=
+CONTROLDIR=/etc/indimail/control
+INFIFO=infifo
+USE_FSYNC=
+PLUGIN1=/usr/lib/indimail/plugins/rblsmtpd.so
+CHECKRECIPIENT=1
+QUEUE_START=1
+CHECKRELAY=
+USE_DLMOPEN=1
+SMTPS=
+DEFAULT_DOMAIN=argos.indimail.org
+QMAILQUEUE=/usr/sbin/qmail-dkim
+FIFODIR=/var/indimail/inquery
+SPAMEXITCODE=0
+PLUGIN0_dir=/var/indimail
+AUTHMODULES=/usr/sbin/sys-checkpwd /usr/sbin/vchkpass
+QUEUE_COUNT=5
+PORT=465
+SPAMFILTER=/usr/bin/bogofilter -p -d /etc/indimail
+RBLEHLO=1
+PASSWD_CACHE=
+MAXPERIP=25
+SOFT_MEM=536870912
+QUERY_CACHE=
+PLUGIN0=/usr/lib/indimail/plugins/qmail_smtpd.so
+CONFSPLIT=151
+PLUGIN0_init=smtp_init
+BODYCHECK=
+DKIMVERIFY=
+VIRUSCHECK=1
+VIRTUAL_PKG_LIB=/usr/lib64/libindimail.so.3.0.0
+QHPSI=/usr/bin/clamdscan %s --config=/etc/clamd.d/scan.conf --fdpass --quiet --no-summary
+USE_SYNCDIR=
+RBLCOMMAND=/usr/lib/indimail/plugins/rblsmtpd.so -rdnsbl-1.uceprotect.net -rzen.spamhaus.org
+UNSIGNED_SUBJECT=
+REJECTSPAM=0
+MASQUERADE=
+MAXDAEMONS=75
+QUEUE_BASE=/var/indimail/queue
+MAKE_SEEKABLE=1
+MIN_FREE=52428800
+PATH=/bin:/usr/bin:/usr/sbin:/sbin
+LOCALIP=0
+CERTDIR=/etc/indimail/certs
+```
+
 ## Taking Backups
 
 Once you have setup your indimail-mta system, you need to take regular backups. There are three types of backup.
