@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.4  2021-07-08 15:17:02+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
  * Revision 1.3  2020-04-01 18:58:53+05:30  Cprogrammer
  * added encrypt flag argument to mkpasswd()
  *
@@ -57,7 +60,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.3 2020-04-01 18:58:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.4 2021-07-08 15:17:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
