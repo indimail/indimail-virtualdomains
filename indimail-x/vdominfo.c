@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 1.5  2021-07-08 11:49:11+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
  * Revision 1.4  2020-06-16 17:56:39+05:30  Cprogrammer
  * moved setuserid function to libqmail
  *
@@ -56,7 +59,7 @@
 #include "vsmtp_select.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 1.4 2020-06-16 17:56:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 1.5 2021-07-08 11:49:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define VDOMTOKENS ":\n"
@@ -692,6 +695,8 @@ main(argc, argv)
 			strerr_warn2(Domain.s, ": domain does not exist", 0);
 			return(1);
 		}
+		if (!Uid)
+			strerr_die3x(100, "vdominfo: domain ", Domain.s, " with uid 0");
 		if (myuid != Uid && mygid != Gid && myuid != 0 && check_group(Gid, FATAL) != 1) {
 			strnum1[fmt_ulong(strnum1, Uid)] = 0;
 			strnum2[fmt_ulong(strnum2, Gid)] = 0;

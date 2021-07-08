@@ -1,5 +1,8 @@
 /*
  * $Log: vmoveuser.c,v $
+ * Revision 1.2  2021-07-08 11:49:41+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
  * Revision 1.1  2019-04-15 11:58:23+05:30  Cprogrammer
  * Initial revision
  *
@@ -39,7 +42,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoveuser.c,v 1.1 2019-04-15 11:58:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoveuser.c,v 1.2 2021-07-08 11:49:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoveuser: fatal: "
@@ -106,6 +109,8 @@ main(int argc, char **argv)
 		strerr_warn3("vmoveuser: domain ", real_domain, " does not exist", 0);
 		return (1);
 	}
+	if (!uid)
+		strerr_die3x(100, "vmovuser: domain ", real_domain, " with uid 0");
 #ifdef CLUSTERED_SITE
 	if ((err = is_distributed_domain(real_domain)) == -1) {
 		strerr_warn3("vmoveuser: unable to verify ", real_domain, " as a distributed domain", 0);

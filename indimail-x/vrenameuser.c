@@ -1,5 +1,8 @@
 /*
  * $Log: vrenameuser.c,v $
+ * Revision 1.4  2021-07-08 11:50:02+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
  * Revision 1.3  2020-06-16 17:56:51+05:30  Cprogrammer
  * moved setuserid function to libqmail
  *
@@ -38,7 +41,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenameuser.c,v 1.3 2020-06-16 17:56:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vrenameuser.c,v 1.4 2021-07-08 11:50:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vrenameuser: fatal: "
@@ -99,10 +102,14 @@ main(argc, argv)
 		strerr_warn3("vrenameuser", oldDomain.s, ": No such domain", 0);
 		return (1);
 	}
+	if (!uid1)
+		strerr_die3x(100, "vrenameuser: domain ", oldDomain.s, " with uid 0");
 	if(!get_assign(newDomain.s, 0, &uid2, &gid2)) {
 		strerr_warn3("vrenameuser", newDomain.s, ": No such domain", 0);
 		return (1);
 	}
+	if (!uid2)
+		strerr_die3x(100, "vrenameuser: domain ", newDomain.s, " with uid 0");
 	if (indimailuid == -1 || indimailgid == -1)
 		get_indimailuidgid(&indimailuid, &indimailgid);
 	myuid = getuid();
@@ -113,11 +120,9 @@ main(argc, argv)
 		strerr_warn5("vrenameuser: you must be root or domain user (uid=", strnum1, "/gid=", strnum2, ") to run this program", 0);
 		return (1);
 	}
-	if (uid1 != uid2) {
-		if (setuid(0)) {
-			strerr_warn1("vrenameuser: setuid: ", &strerr_sys);
-			return (1);
-		}
+	if (uid1 != uid2 && setuid(0)) {
+		strerr_warn1("vrenameuser: setuid: ", &strerr_sys);
+		return (1);
 	} else {
 		if(indimailuid == -1 || indimailgid == -1)
 			get_indimailuidgid(&indimailuid, &indimailgid);

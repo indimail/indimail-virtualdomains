@@ -292,6 +292,8 @@ main(argc, argv)
 		strerr_warn3("vmoduser: ", real_domain, ": domain does not exist", 0);
 		return (1);
 	}
+	if (!uid)
+		strerr_die3x(100, "vmoduser: domain ", real_domain, " with uid 0");
 	if (!stralloc_copy(&tmpbuf, &TheDir) ||
 			!stralloc_0(&tmpbuf))
 		die_nomem();

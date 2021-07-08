@@ -1,5 +1,8 @@
 /*
  * $Log: printdir.c,v $
+ * Revision 1.3  2021-07-08 11:44:23+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
  * Revision 1.2  2020-06-16 17:55:46+05:30  Cprogrammer
  * moved setuserid function to libqmail
  *
@@ -31,7 +34,7 @@
 #include "print_control.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: printdir.c,v 1.2 2020-06-16 17:55:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: printdir.c,v 1.3 2021-07-08 11:44:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -66,6 +69,8 @@ main(int argc, char **argv)
 		strerr_warn3("printdir: domain ", argv[1], " does not exist", 0);
 		return (-1);
 	}
+	if (!uid)
+		strerr_die3x(100, "printdir: domain ", argv[1], " with uid 0");
 	if ((myuid = getuid()) != uid) {
 		if (setuser_privileges(uid, gid, "indimail")) {
 			strnum1[fmt_ulong(strnum1, uid)] = 0;

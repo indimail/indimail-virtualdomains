@@ -1,5 +1,8 @@
 /*
  * $Log: vbulletin.c,v $
+ * Revision 1.5  2021-07-08 11:47:41+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
  * Revision 1.4  2020-10-19 12:47:03+05:30  Cprogrammer
  * use /var/indomain/domains for domain/bulk_mail
  *
@@ -65,7 +68,7 @@
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vbulletin.c,v 1.4 2020-10-19 12:47:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vbulletin.c,v 1.5 2021-07-08 11:47:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL            "vbulletin: fatal: "
@@ -337,6 +340,8 @@ process_domain(char *emailFile, char *excludeFile, char *domain)
 		strerr_warn2(domain, ": No such Domain", 0);
 		return (1);
 	}
+	if (!uid)
+		strerr_die3x(100, "vdeluser: domain ", domain, " with uid 0");
 	myuid = getuid();
 	mygid = getgid();
 	if (myuid != 0 && myuid != uid && mygid != gid && check_group(gid, FATAL) != 1) {
@@ -456,6 +461,8 @@ spost(char *EmailOrDomain, int method, char *emailFile, int bulk)
 		strerr_warn2(domain, ": No such Domain", 0);
 		return (1);
 	}
+	if (!uid)
+		strerr_die3x(100, "vbulletin: domain ", domain, " with uid 0");
 	if (fappend(emailFile, tmpbuf.s, "w", INDIMAIL_QMAIL_MODE, uid, gid)) {
 		strerr_warn5("vbulletin: fappend: ", emailFile, " --> ", tmpbuf.s, ": ", &strerr_sys);
 		return (-1);

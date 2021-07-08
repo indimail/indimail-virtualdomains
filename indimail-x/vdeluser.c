@@ -1,5 +1,8 @@
 /*
  * $Log: vdeluser.c,v $
+ * Revision 1.4  2021-07-08 11:49:05+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
  * Revision 1.3  2020-06-16 17:56:32+05:30  Cprogrammer
  * moved setuserid function to libqmail
  *
@@ -40,7 +43,7 @@
 #include "check_group.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeluser.c,v 1.3 2020-06-16 17:56:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeluser.c,v 1.4 2021-07-08 11:49:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vdeluser: warning: "
@@ -108,6 +111,8 @@ main(argc, argv)
 		strerr_warn2(domain.s, ": domain does not exist", 0);
 		return (-1);
 	}
+	if (!uid)
+		strerr_die3x(100, "vdeluser: domain ", domain.s, " with uid 0");
 	uidtmp = getuid();
 	gidtmp = getgid();
 	if (uidtmp != 0 && uidtmp != uid && gidtmp != gid && check_group(gid, FATAL) != 1) {

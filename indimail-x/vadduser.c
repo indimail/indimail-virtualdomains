@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 1.5  2021-07-08 11:46:09+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
  * Revision 1.4  2020-06-16 17:56:08+05:30  Cprogrammer
  * moved setuserid function to libqmail
  *
@@ -65,7 +68,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 1.4 2020-06-16 17:56:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 1.5 2021-07-08 11:46:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -143,6 +146,8 @@ main(argc, argv)
 		strerr_warn2(real_domain, ": domain does not exist", 0);
 		return (1);
 	}
+	if (!uid)
+		strerr_die3x(100, "vadduser: domain ", real_domain, " with uid 0");
 #ifdef ENABLE_DOMAIN_LIMITS
 	if (!stralloc_copys(&tmpbuf, domain_dir) ||
 			!stralloc_catb(&tmpbuf, ".domain_limits", 14) ||

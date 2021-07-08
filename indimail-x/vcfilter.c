@@ -1,5 +1,8 @@
 /*
  * $Log: vcfilter.c,v $
+ * Revision 1.5  2021-07-08 11:47:52+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
  * Revision 1.4  2020-06-16 17:56:23+05:30  Cprogrammer
  * moved setuserid function to libqmail
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 1.4 2020-06-16 17:56:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 1.5 2021-07-08 11:47:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -415,6 +418,8 @@ main(int argc, char **argv)
 		strerr_warn3("vcfilter: ", real_domain, ": domain does not exist", 0);
 		return (1);
 	}
+	if (!uid)
+		strerr_die3x(100, "vcfilter: domain ", real_domain, " with uid 0");
 	if (cluster_conn && sqlOpen_user(emailid, 0) == -1) {
 		if (userNotFound) {
 			strerr_warn3("vcfilter: ", emailid, ": No such user", 0);

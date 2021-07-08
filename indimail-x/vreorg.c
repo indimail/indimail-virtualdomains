@@ -1,5 +1,8 @@
 /*
  * $Log: vreorg.c,v $
+ * Revision 1.6  2021-07-08 11:51:29+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
  * Revision 1.5  2020-10-14 00:20:59+05:30  Cprogrammer
  * fixed infinite loop
  *
@@ -53,7 +56,7 @@
 #include "next_big_dir.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vreorg.c,v 1.5 2020-10-14 00:20:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vreorg.c,v 1.6 2021-07-08 11:51:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vreorg: fatal: "
@@ -135,6 +138,8 @@ main(int argc, char **argv)
 		strerr_warn3("vreorg: ", domain, ": No such domain", 0);
 		return (1);
 	}
+	if (!uid)
+		strerr_die3x(100, "vreorg: domain ", domain, " with uid 0");
 	if ((myuid = getuid()) != uid && setuser_privileges(uid, gid, "indimail")) {
 		strnum1[fmt_ulong(strnum1, uid)] = 0;
 		strnum2[fmt_ulong(strnum2, gid)] = 0;
