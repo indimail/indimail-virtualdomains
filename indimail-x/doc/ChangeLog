@@ -43,6 +43,14 @@ Release @version@-@release@ Start 14/02/2021
     makeargs from libqmail
 26. deliver_mail.c, ismaildup.c, vdelivermail.c, vfilter.c: replaced
     makeseekable with mktempfile from libqmail
+- 08/07/2021
+27.  printdir.c vadduser.c vbulletin.c vcfilter.c vdeluser.c vdominfo.c
+     vmoduser.c vmoveuser.c vrenameuser.c vreorg.c add check for
+     misconfigured assign file
+28.  add_domain_assign.c valiasinfo.c: removed QMAILDIR setting through env
+     variable
+29.  initsvc.c: removed LIBEXECDIR setting through env variable
+30.  controlfiles.i: added mcdinfo, mailalert.cfg
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020
@@ -140,8 +148,8 @@ Release 3.3 Start 06/09/2020
 56. authindi.c: added uid, gid in debug log
 - 26/01/2021
 57. sql_init.c, UserInLookup.c, sqlOpen_user.c, findmdahost.c, bulletin.c,
-	clear_open_smtp.c: renamed sql_init() to in_sql_init() to avoid clash with
-	dovecot sql authentication driver
+    clear_open_smtp.c: renamed sql_init() to in_sql_init() to avoid clash with
+    dovecot sql authentication driver
 58. vchkpass: support dovecot checkpassword implementation
 59. vchkpass: set HOME, userdb_uid, userdb_gid, EXTRA env variables for
     dovecot
