@@ -1,5 +1,8 @@
 /*
  * $Log: set_mysql_options.c,v $
+ * Revision 1.6  2021-07-08 15:15:50+05:30  Cprogrammer
+ * renamed CIPHER to MYSQL_OPT_SSL_CIPHER
+ *
  * Revision 1.5  2020-04-01 18:57:47+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -31,7 +34,7 @@
 #include <getEnvConfig.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: set_mysql_options.c,v 1.5 2020-04-01 18:57:47+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: set_mysql_options.c,v 1.6 2021-07-08 15:15:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define max_mysql_option_err_num 21
@@ -179,7 +182,8 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 
 	/*- SSL options */
 	if (use_ssl) {
-		getEnvConfigStr(&cipher, "CIPHER", 0); /*- DHE-RSA-AES256-SHA */
+		getEnvConfigStr(&cipher, "MYSQL_OPT_SSL_CIPHER", 0); /*- DHE-RSA-AES256-SHA */
+		/*- make secure connection with MySQL */
 		in_mysql_ssl_set(mysql, 0, 0, 0, 0, cipher); /*- this always returns 0 */
 	}
 
