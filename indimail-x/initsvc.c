@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 1.9  2021-07-08 11:32:44+05:30  Cprogrammer
+ * removed LIBEXECDIR setting through env variable
+ *
  * Revision 1.8  2020-10-06 14:53:02+05:30  Cprogrammer
  * fix for FreeBSD
  *
@@ -51,7 +54,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 1.8 2020-10-06 14:53:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 1.9 2021-07-08 11:32:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
@@ -166,7 +169,7 @@ int
 main(int argc, char **argv)
 {
 	char           *device = "/dev/console";
-	char           *libexecdir, *jobfile = 0, *print_cmd = 0, *jobdir = 0;
+	char           *jobfile = 0, *print_cmd = 0, *jobdir = 0;
 	int             fd, flag, debian_version;
 
 	if (argc != 2) {
@@ -192,7 +195,6 @@ main(int argc, char **argv)
 		strerr_warn1("usage: initsvc -on|-off|-status|-print", 0);
 		return (1);
 	}
-	getEnvConfigStr(&libexecdir, "LIBEXECDIR", LIBEXECDIR);
 	if (!access("/bin/systemctl", X_OK)) {
 		/* Install svscan.service */
 		if (access("/lib/systemd/system/svscan.service", F_OK)) {
@@ -394,7 +396,7 @@ main(int argc, char **argv)
 		debian_version = !access("/etc/debian_version", F_OK);
 		strerr_warn1("initsvc: manually add following entry for svscan in /etc/inittab", 0);
 		strerr_warn7(debian_version ? "SV:2345:" : "SV:345:",
-			flag == SV_ON ? "respawn:" : "off:", libexecdir, "/svscanboot <>", device, " 2<>", device, 0);
+			flag == SV_ON ? "respawn:" : "off:", LIBEXECDIR, "/svscanboot <>", device, " 2<>", device, 0);
 	} else
 		strerr_warn1("initsvc: system not supported for svscan startup", 0);
 	return (1);
