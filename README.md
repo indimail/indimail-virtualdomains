@@ -13,7 +13,7 @@ Messaging Platform based on [indimail-mta](https://github.com/mbhangui/indimail-
 * Look at [INSTALL-MINI](.github/INSTALL-MINI.md) for instructions on setting up an MINI Indimail Installation which uses QMQP protocol. indimail-mini is part of the indimail-mta package. You can use this from diskless clients, small devices, [SBCs](https://en.wikipedia.org/wiki/Single-board_computer) like the Raspberry PI, to push mails to any server running IndiMail or indimail-mta.
 * Look at [Docker/Podman](https://github.com/mbhangui/docker/blob/master/README.md) for instructions on using docker / podman containers for indimail. The big advantage of using a docker / podman image is you can save your configuration with the `docker commit ..` or `podman commit` to checkpoint your entire build and deploy the exact configuration on multiple hosts.
 
-Details for indimail-virtualdomains is [here](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md)
+A detailed [wiki](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) for indimail-virtualdomains is [here](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md)
 
 **Complation Status (from [Github Actions](https://github.com/mbhangui/indimail-virtualdomains/actions))**
 
