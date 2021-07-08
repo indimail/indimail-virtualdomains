@@ -733,7 +733,7 @@ editman = sed \
 	-e 's}INDIMAILDIR}$(indimaildir)}g' \
 	-e 's}@sysconfdir\@}$(sysconfdir)}g' \
 	-e 's}@qmaildir\@}$(qmaildir)}g' \
-	-e 's}CONTROLDIR}$(controldir)}g' \
+	-e 's}@controldir\@}$(controldir)}g' \
 	-e 's}@servicedir\@}$(servicedir)}g' \
 	-e 's}@prefix\@}$(prefix)}g'
 
