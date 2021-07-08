@@ -11,6 +11,7 @@ Messaging Platform based on [indimail-mta](https://github.com/mbhangui/indimail-
 * Look at [INSTALL-RPM](.github/INSTALL-RPM.md) for instructions on setting up IndiMail using RPM or Debian packages
 * Look at [Quick-INSTALL](.github/Quick-INSTALL.md) for instructions on installation and setup of an IndiMail server.
 * Look at [INSTALL-MINI](.github/INSTALL-MINI.md) for instructions on setting up an MINI Indimail Installation which uses QMQP protocol. indimail-mini is part of the indimail-mta package. You can use this for diskless clients, small devices, [SBCs](https://en.wikipedia.org/wiki/Single-board_computer) like the Raspberry PI, to push mails to any server running IndiMail or indimail-mta.
+* Look at [QMTA](.github/README-indimail.md#qmta---using-a-minimal-standalone-qmta-send-mta) for instructions on settig a minimal MTA that runs as a single daemon and uses minimal resources.
 * Look at [Docker/Podman](https://github.com/mbhangui/docker/blob/master/README.md) for instructions on using docker / podman containers for indimail. The big advantage of using a docker / podman image is you can save your configuration with the `docker commit ..` or `podman commit` to checkpoint your entire build and deploy the exact configuration on multiple hosts.
 
 A detailed [wiki](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) for indimail-virtualdomains is [here](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md)
