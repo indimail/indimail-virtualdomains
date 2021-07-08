@@ -1,5 +1,8 @@
 /*
  * $Log: vacation.c,v $
+ * Revision 1.6  2021-07-08 15:18:37+05:30  Cprogrammer
+ * fixed argument handling
+ *
  * Revision 1.5  2020-07-04 22:54:50+05:30  Cprogrammer
  * replaced utime() with utimes()
  *
@@ -57,18 +60,18 @@
 #include "runcmmd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vacation.c,v 1.5 2020-07-04 22:54:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vacation.c,v 1.6 2021-07-08 15:18:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
-#define FATAL   "vadduser: fatal: "
-#define WARN    "vadduser: warning: "
+#define FATAL   "vacation: fatal: "
+#define WARN    "vacation: warning: "
 
 #ifndef TMPDIR
 #define TMPDIR "/tmp"
 #endif
 
 static char    *usage =
-	"usage: vacation [email_addr] [vacation_mesg_file]\n"
+	"usage: vacation | vacation email_addr vacation_mesg_file\n"
 	"where vacation_mesg_file can be either of the following\n"
 	"-         for removing vacation\n"
 	"+         for adding new vacation with text from stdin\n"
@@ -85,10 +88,8 @@ get_options(int argc, char **argv, char **email, char **vacation_file)
 		*email = argv[optind++];
 	if (optind < argc)
 		*vacation_file = argv[optind++];
-	if (!*email || !*vacation_file) {
-		strerr_warn2(WARN, usage, 0);
-		return (1);
-	}
+	if (!*email || !*vacation_file)
+		strerr_die2x(100, WARN, usage);
 	return (0);
 }
 
@@ -109,7 +110,7 @@ getuserinfo(char *username, stralloc *homedir, stralloc *user, stralloc *domain)
 	if (!(real_domain = get_real_domain(domain->s)))
 		real_domain = domain->s;
 	if (!(mypw = sql_getpw(user->s, real_domain))) {
-		if(!userNotFound)
+		if (!userNotFound)
 			_exit(111);
 		strerr_warn4("vacation: no such user ", user->s, "@", real_domain, 0);
 		iclose();
@@ -148,9 +149,8 @@ vacation_check(stralloc *email, stralloc *homedir)
 		die_nomem();
 	if (stat(tmpbuf.s, &statbuf)) {
 		if (errno == 2) {
-			if ((fd = open_trunc(tmpbuf.s)) == -1) {
-				strerr_die3sys(111, "vacation: open: ", tmpbuf.s, ": ");
-			}
+			if ((fd = open_trunc(tmpbuf.s)) == -1)
+				strerr_die3sys(111, "vacation: open_trunc: ", tmpbuf.s, ": ");
 			close(fd);
 		}
 		return (0);
@@ -174,20 +174,16 @@ main(int argc, char **argv)
 	char            filename[sizeof (TMPDIR) + 19] = TMPDIR "/vacation.XXXXXXXX";
 	struct substdio ssin, ssout;
 
-	if (get_options(argc, argv, &email, &vacation_file))
-		return (1);
-	if(argc == 2 || argc == 3) {
-		if(!str_diffn(argv[1], "-h", 3)) {
-			strerr_warn2(WARN, usage, 0);
-			_exit(0);
-		}
+	if (argc == 3) {
+		if (get_options(argc, argv, &email, &vacation_file))
+			return (1);
+		if (!str_diffn(argv[1], "-h", 3))
+			strerr_die2x(100, WARN, usage);
 		return(add_vacation(argv[1], ((argc == 3) ? argv[2] : (char *) 0)));
 	} else
-	if(argc > 3) {
-		strerr_warn2(WARN, usage, 0);
-		_exit(0);
-	}
-	if((ptr = (char *) env_get("RECIPIENT")) != (char *) NULL) {
+	if (argc == 2 || argc > 3)
+		strerr_die2x(100, WARN, usage);
+	if ((ptr = (char *) env_get("RECIPIENT")) != (char *) NULL) {
 		i = str_chr(ptr, '-');
 		if (ptr[i]) {
 			if (!stralloc_copys(&fromid, ptr + i + 1) ||
@@ -209,7 +205,7 @@ main(int argc, char **argv)
 		strerr_warn1("vacation: No RECIPIENT in environment", 0);
 		_exit(0);
 	}
-	if(!(sender = env_get("SENDER"))) {
+	if (!(sender = env_get("SENDER"))) {
 		strerr_warn1("vacation: No SENDER in environment", 0);
 		_exit(0);
 	} else
@@ -359,15 +355,15 @@ main(int argc, char **argv)
 		}
 	}
 
-	if (substdio_put(&ssout, "-----------------------------------------------------------------------------\n", 78) ||
+	if (substdio_put(&ssout, "--------------------------------------------------------------------------\n", 75) ||
 			substdio_put(&ssout, "Note: Further Auto Response will be deferred to ", 48) ||
 			substdio_put(&ssout, toid.s, toid.len) ||
 			substdio_put(&ssout, "\n", 1) ||
-			substdio_put(&ssout, "      till 24 Hrs Elapses and a new message is received\n", 56) ||
+			substdio_put(&ssout, "      until 24 Hrs Elapses and a new message is received\n", 56) ||
 			substdio_put(&ssout, "      from ", 11) ||
 			substdio_put(&ssout, fromid.s, fromid.len) ||
 			substdio_put(&ssout, "\n", 1) ||
-			substdio_put(&ssout, "-----------------------------------------------------------------------------\n", 78) ||
+			substdio_put(&ssout, "--------------------------------------------------------------------------\n", 75) ||
 			substdio_flush(&ssout)) {
 			strerr_warn3("vacation: write error: ", filename, ": ", &strerr_sys);
 			close(wfd);
