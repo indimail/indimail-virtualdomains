@@ -44,13 +44,16 @@ Release @version@-@release@ Start 14/02/2021
 26. deliver_mail.c, ismaildup.c, vdelivermail.c, vfilter.c: replaced
     makeseekable with mktempfile from libqmail
 - 08/07/2021
-27.  printdir.c vadduser.c vbulletin.c vcfilter.c vdeluser.c vdominfo.c
-     vmoduser.c vmoveuser.c vrenameuser.c vreorg.c add check for
-     misconfigured assign file
-28.  add_domain_assign.c valiasinfo.c: removed QMAILDIR setting through env
-     variable
-29.  initsvc.c: removed LIBEXECDIR setting through env variable
-30.  controlfiles.i: added mcdinfo, mailalert.cfg
+27. printdir.c vadduser.c vbulletin.c vcfilter.c vdeluser.c vdominfo.c
+    vmoduser.c vmoveuser.c vrenameuser.c vreorg.c add check for
+    misconfigured assign file
+28. add_domain_assign.c valiasinfo.c: removed QMAILDIR setting through env
+    variable
+29. initsvc.c: removed LIBEXECDIR setting through env variable
+30. controlfiles.i: added mcdinfo, mailalert.cfg
+31. vacation.c: fixed argument handling
+32. add_vacation.c: added missing error handling
+33. removed sq_vacation
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020
