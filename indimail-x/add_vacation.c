@@ -1,5 +1,8 @@
 /*
  * $Log: add_vacation.c,v $
+ * Revision 1.2  2021-07-08 15:14:46+05:30  Cprogrammer
+ * add missing error check
+ *
  * Revision 1.1  2019-04-18 08:39:06+05:30  Cprogrammer
  * Initial revision
  *
@@ -40,7 +43,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_vacation.c,v 1.1 2019-04-18 08:39:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: add_vacation.c,v 1.2 2021-07-08 15:14:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -107,9 +110,8 @@ add_vacation(char *email, char *fname)
 			!stralloc_catb(&tmpbuf, "/.qmail", 7) ||
 			!stralloc_0(&tmpbuf))
 		die_nomem();
-	if ((fd1 = open_trunc(tmpbuf.s)) == -1) {
-		strerr_warn3("add_vacation: open", tmpbuf.s, ": ", &strerr_sys);
-	}
+	if ((fd1 = open_trunc(tmpbuf.s)) == -1)
+		strerr_die3sys(111, "add_vacation: open_trunc: ", tmpbuf.s, ": ");
 	substdio_fdbuf(&ssout, write, fd1, outbuf, sizeof(outbuf));
 	if (substdio_put(&ssout, "| ", 2) ||
 			substdio_puts(&ssout, PREFIX) ||
