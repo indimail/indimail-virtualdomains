@@ -35,7 +35,6 @@
 %attr(4555,root,root)                   @prefix@/bin/vdominfo
 %attr(4555,root,root)                   @prefix@/bin/vadddomain
 %attr(4555,root,root)                   @prefix@/bin/vdeldomain
-%attr(4755,root,qmail)                  @libexecdir@/sq_vacation
 #
 # Config files
 #

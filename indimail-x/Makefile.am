@@ -105,8 +105,7 @@ includedir=@prefix@/include/indimail
 
 setuid_list = bin/printdir bin/vaddaliasdomain bin/vadddomain bin/vadduser bin/vbulletin \
 	bin/vcfilter bin/vdeldomain bin/vdeluser bin/vmoduser bin/vmoveuser bin/vrenamedomain \
-	bin/vrenameuser bin/vsetuserquota bin/vdominfo bin/vuserinfo sbin/vreorg \
-	libexec/sq_vacation
+	bin/vrenameuser bin/vsetuserquota bin/vdominfo bin/vuserinfo sbin/vreorg
 
 doc_list= ChangeLog FAQ.pdf README-indimail.md README-ldap.md  \
 	README-vlimits.md COPYING-indimail
@@ -190,7 +189,7 @@ indimailsbin_PROGRAMS = inlookup tcplookup vdelivermail clearopensmtp \
 	ipchange adminclient indisrvr vdeloldusers vfstab \
 	osh chowkidar vpurge
 
-indimaillibexec_PROGRAMS = sq_vacation qmailmrtg7 updatefile
+indimaillibexec_PROGRAMS = qmailmrtg7 updatefile
 indimaillibexec_SCRIPTS = mailzipper overquota.sh controlsync cputime \
 	myslave bogofilter-qfe iupgrade.sh ilocal_upgrade.sh
 
@@ -396,10 +395,6 @@ vsetuserquota_DEPENDENCIES = libindimail.la
 vacation_SOURCES = vacation.c
 vacation_LDADD = libindimail.la $(LIB_QMAIL)
 vacation_DEPENDENCIES = libindimail.la
-
-sq_vacation_SOURCES = sq_vacation.c
-sq_vacation_LDADD = libindimail.la $(LIB_QMAIL)
-sq_vacation_DEPENDENCIES = libindimail.la
 
 vatrn_SOURCES = vatrn.c
 vatrn_LDADD = libindimail.la $(LIB_QMAIL)

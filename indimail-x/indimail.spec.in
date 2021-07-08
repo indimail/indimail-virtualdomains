@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.89 2021-06-11 17:00:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.90 2021-07-08 15:15:07+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -317,7 +317,6 @@ if [ -x /usr/bin/chrpath ] ; then
   done
 
   /usr/bin/chrpath -d %{buildroot}%{libexecdir}/imapmodules/authindi
-  /usr/bin/chrpath -d %{buildroot}%{libexecdir}/sq_vacation
   /usr/bin/chrpath -d %{buildroot}%{libexecdir}/qmailmrtg7
   /usr/bin/chrpath -d %{buildroot}%{imoduledir}/iauth.so
   /usr/bin/chrpath -d %{buildroot}%{imoduledir}/tcplookup.so
@@ -496,7 +495,6 @@ done
 %verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vdominfo
 %verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vadddomain
 %verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vdeldomain
-%verify (not user group mode caps) %attr(4555,root,root) %{libexecdir}/sq_vacation
 %else
 %attr(4555,root,root)                   %{_prefix}/bin/vrenameuser
 %attr(4555,root,root)                   %{_prefix}/bin/vmoveuser
@@ -512,7 +510,6 @@ done
 %attr(4555,root,root)                   %{_prefix}/bin/vdominfo
 %attr(4555,root,root)                   %{_prefix}/bin/vadddomain
 %attr(4555,root,root)                   %{_prefix}/bin/vdeldomain
-%attr(4555,root,root)                   %{libexecdir}/sq_vacation
 %endif
 
 # indimail binaries
@@ -934,7 +931,6 @@ fi
   %verify_permissions -e %{_prefix}/bin/vmoduser
   %verify_permissions -e %{_prefix}/bin/vcfilter
   %verify_permissions -e %{_prefix}/bin/vbulletin
-  %verify_permissions -e %{libexecdir}/sq_vacation
   %verify_permissions -e %{libexecdir}/imapmodules/authshadow
 %endif
 
@@ -1287,7 +1283,6 @@ fi
   %set_permissions %{_prefix}/bin/vrenamedomain
   %set_permissions %{_prefix}/bin/vrenameuser
   %set_permissions %{_prefix}/bin/vsetuserquota
-  %set_permissions %{libexecdir}/sq_vacation
 %else
   %run_permissions
 %endif
