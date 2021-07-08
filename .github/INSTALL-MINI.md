@@ -49,15 +49,32 @@ A indimail-mini installation is just like a indimail installation, except that i
 * You don't need to start anything from your boot scripts. indimail-mini doesn't have a queue, so it doesn't need a long-running queue manager.
 * You don't need to add anything to inetd.conf. A null client doesn't receive incoming mail. 
 
-Here's what you do need:
+If you install indimail-mini from the indimail repository (rpm, deb or arch packages), you needn't to anything. If you install from sources, here's what you do need:
 
-* qmail-qmqpc, forward, qmail-inject, sendmail, predate, datemail, mailsubj, qmail-showctl, maildirmake, maildir2mbox, maildirwatch, qail, elq, and pinq in /usr/bin;
-* a symbolic link to qmail-qmqpc from /usr/sbin/qmail-queue;
+* The following binaries are required in the path (for source installation only).
+  sendmail
+  qmail-inject
+  irmail
+  predate
+  datemail
+  mailsubj
+  qmail-showctl
+  srsfilter
+  qmail-qmqpc
+  qmail-direct
+* shared libs that the above binaries reference. You can use the ldd command (or otool -L command on OSX) (for source installation only).
+* A single line /usr/sbin/qmail-qmqpc in /etc/indimail/control/defaultqueue/QMAILQUEUE
 * symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail;
-* all the manual pages in /usr/share/man/man;
 * a list of IP addresses of QMQP servers, one per line, in /etc/indimail/control/qmqpservers;
 * a copy of /etc/indimail/control/me, /etc/indimail/control/defaultdomain, and /etc/indimail/control/plusdomain from your central server, so that qmail-inject uses appropriate host names in outgoing mail; and
-* this host's name in /etc/indimail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision. 
+* this host's name in /etc/indimail/control/idhost, so that qmail-inject generates Message-ID without any risk of collision. Everything can be shared across hosts except for /etc/indimail/control/idhost.
+* Setup QMAILQUEUE environment variable to have qmail-qmqpc called instead of qmail-queue when any client injects mails in the queue (for source installation only).
+  ```
+  # mkdir /etc/indimail/control/defaultqueue
+  # cd /etc/indimail/control/defaultqueue
+  # echo qmail-qmqpc > QMAILQUEUE
+  ```
+* All manual pages for the above binaries (not a hard requirement but good for future reference) (for source installation only).
 
 Everything can be shared across hosts except for /etc/indimail/control/idhost.
 
@@ -80,12 +97,14 @@ You don't need to worry about setting up redundant QMQP servers here. If the int
 
 ## What about mailing lists?
 
+If you are installing ezmlm-idx or ezmlm from indimail repository, there is nothing you need to do. Both use ezmlm-queue to queue mails and ezmlm-queue takes care of using qmail-qmqpc if it finds a indimail-mini binary install
+
 Here's how to set up ezmlm to send messages to a smarthost through QMQP:
 
-1. Create a /var/mini-indimail directory.
-2. Create a /var/mini-indimail/bin directory.
-3. Make a symbolic link to /usr/sbin/qmail-qmqpc from /var/mini-indimail/bin/qmail-queue.
+1. Create a /var/indimail-mini directory.
+2. Create a /var/indimail-mini/bin directory.
+3. Make a symbolic link to /usr/sbin/qmail-qmqpc from /var/indimail-mini/bin/qmail-queue.
 4. Put the smarthost's IP address into /etc/indimail/control/qmqpservers.
-5. Compile and install ezmlm with /var/mini-qmail in conf-qmail. 
+5. Compile and install ezmlm with /var/indimail-mini in conf-qmail. 
 
 You don't need to worry about setting up redundant QMQP servers here. If the smarthost is down, the message will stay in the local qmail queue and will be retried later. 
