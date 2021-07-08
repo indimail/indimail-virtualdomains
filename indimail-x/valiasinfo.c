@@ -1,5 +1,8 @@
 /*
  * $Log: valiasinfo.c,v $
+ * Revision 1.4  2021-07-08 11:46:52+05:30  Cprogrammer
+ * removed QMAILDIR setting through env variable
+ *
  * Revision 1.3  2020-04-01 18:58:29+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -42,7 +45,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valiasinfo.c,v 1.3 2020-04-01 18:58:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valiasinfo.c,v 1.4 2021-07-08 11:46:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -58,7 +61,7 @@ valiasinfo(char *user, char *domain)
 	int             flag1, fd, match;
 	static stralloc tmpbuf = {0}, Dir = {0}, line = {0};
 	struct passwd  *pw;
-	char           *qmaildir, *tmpalias, *ptr;
+	char           *tmpalias, *ptr;
 	struct substdio ssin;
 	char            inbuf[4096];
 #ifdef VALIAS
@@ -67,9 +70,8 @@ valiasinfo(char *user, char *domain)
 	uid_t           uid;
 	gid_t           gid;
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	if (!domain || !*domain) {
-		if (!stralloc_copys(&Dir, qmaildir) ||
+		if (!stralloc_copys(&Dir, QMAILDIR) ||
 				!stralloc_catb(&Dir, "/alias", 6) ||
 				!stralloc_0(&Dir))
 			die_nomem();
