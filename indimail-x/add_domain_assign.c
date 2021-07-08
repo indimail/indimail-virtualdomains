@@ -1,5 +1,8 @@
 /*
  * $Log: add_domain_assign.c,v $
+ * Revision 1.3  2021-07-08 11:30:50+05:30  Cprogrammer
+ * removed QMAILDIR setting through env variable
+ *
  * Revision 1.2  2020-04-01 18:52:28+05:30  Cprogrammer
  * moved getEnvConfig to libqmail
  *
@@ -30,7 +33,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_domain_assign.c,v 1.2 2020-04-01 18:52:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: add_domain_assign.c,v 1.3 2021-07-08 11:30:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -49,11 +52,10 @@ add_domain_assign(char *domain, char *domain_base_dir, uid_t uid, gid_t gid)
 {
 	static stralloc filename = {0}, tmpstr = {0};
 	int             fd;
-	char           *qmaildir, *assigndir;
+	char           *assigndir;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	int             i, j;
 
-	getEnvConfigStr(&qmaildir, "QMAILDIR", QMAILDIR);
 	getEnvConfigStr(&assigndir, "ASSIGNDIR", ASSIGNDIR);
 	/*- stat assign file, if it's not there create one */
 	if (!stralloc_copys(&filename, assigndir) ||
@@ -84,7 +86,7 @@ add_domain_assign(char *domain, char *domain_base_dir, uid_t uid, gid_t gid)
 				!stralloc_append(&tmpstr, ":") ||
 				!stralloc_catb(&tmpstr, strnum2, j) ||
 				!stralloc_append(&tmpstr, ":") ||
-				!stralloc_cats(&tmpstr, qmaildir) ||
+				!stralloc_cats(&tmpstr, QMAILDIR) ||
 				!stralloc_catb(&tmpstr, "/autoturn:-::", 13) ||
 				!stralloc_0(&tmpstr))
 			die_nomem();
