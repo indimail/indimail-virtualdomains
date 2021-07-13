@@ -123,7 +123,7 @@ BuildRequires: -post-build-checks
 %endif
 ################################# OBS ###############################
 
-Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
+Requires: procps /usr/bin/awk /usr/bin/which
 Requires: sed findutils pkgconfig
 Requires: coreutils grep /bin/sh glibc openssl
 Requires: /usr/bin/hostname
