@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.90 2021-07-08 15:15:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.91 2021-07-13 10:46:25+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -159,7 +159,7 @@ BuildRequires: -post-build-checks
 # rpm --showrc for all macros
 # rpm -qlp some-file.rpm
 Requires: /usr/sbin/useradd /usr/sbin/groupadd /usr/sbin/groupdel
-Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
+Requires: procps /usr/bin/awk /usr/bin/which
 Requires: sed findutils pkgconfig
 Requires: coreutils grep /bin/sh glibc openssl
 Requires: /usr/bin/hostname mrtg
