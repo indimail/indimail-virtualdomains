@@ -48,7 +48,7 @@ rules: rules.in Makefile ../conf-version ../conf-release ../conf-email
 indimail-auth.install: indimail-auth.install.in Makefile
 	$(edit) $@.in > $@
 changelog: ../doc/ChangeLog ../conf-version ../conf-release ../conf-email
-	../catChangeLog --debian --name=indimail-auth --state=unstable \
+	../catChangeLog --debian --name=indimail-auth --state=stable \
 		--urgency=low ../doc/ChangeLog > $@
 control: control.in ../conf-email
 	$(edit) $@.in > $@

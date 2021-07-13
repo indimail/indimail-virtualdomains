@@ -88,7 +88,7 @@ indimail.cron.d: indimail.cron.d.in
 	$(edit) $@.in > $@
 
 changelog: ../doc/ChangeLog ../conf-version ../conf-release ../conf-email
-	../catChangeLog --debian --name=indimail --state=unstable \
+	../catChangeLog --debian --name=indimail --state=stable \
 		--urgency=low ../doc/ChangeLog > $@
 control: control.in ../conf-email
 	$(edit) $@.in > $@

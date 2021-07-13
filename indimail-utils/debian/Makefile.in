@@ -33,7 +33,7 @@ rules: rules.in Makefile ../conf-version ../conf-release ../conf-email
 indimail-utils.install: indimail-utils.install.in Makefile
 	$(edit) $@.in > $@
 changelog: ../doc/ChangeLog ../conf-version ../conf-release ../conf-email
-	../catChangeLog --debian --name=indimail-utils --state=unstable \
+	../catChangeLog --debian --name=indimail-utils --state=stable \
 		--urgency=low ../doc/ChangeLog > $@
 control: control.in ../conf-email
 	$(edit) $@.in > $@

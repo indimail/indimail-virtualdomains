@@ -27,7 +27,7 @@ postrm: postrm.in Makefile
 procmail.dsc: procmail.dsc.in Makefile ../conf-email
 	$(edit) $@.in > $@
 changelog: ../doc/ChangeLog ../conf-version ../conf-release ../conf-email
-	../catChangeLog --debian --name=procmail --state=unstable \
+	../catChangeLog --debian --name=procmail --state=stable \
 		--urgency=low ../doc/ChangeLog > $@
 control: control.in ../conf-email
 	$(edit) $@.in > $@

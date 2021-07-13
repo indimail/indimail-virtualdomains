@@ -26,7 +26,7 @@ postinst: postinst.in Makefile
 postrm: postrm.in Makefile
 	$(edit) $@.in > $@;
 changelog: ../doc/ChangeLog ../conf-version ../conf-release ../conf-email
-	../catChangeLog --debian --name=logalert --state=unstable \
+	../catChangeLog --debian --name=logalert --state=stable \
 		--urgency=low ../doc/ChangeLog > $@
 control: control.in ../conf-email
 	$(edit) $@.in > $@

@@ -16,7 +16,7 @@ edit = sed \
 	-e 's,@email\@,$(email),g' \
 	-e 's,@prefix\@,$(prefix),g'
 changelog: ../doc/ChangeLog Makefile ../conf-version ../conf-release ../conf-email
-	../catChangeLog --debian --name=ircube --state=unstable \
+	../catChangeLog --debian --name=ircube --state=stable \
 		--urgency=low ../doc/ChangeLog > $@
 control: control.in ../conf-email
 	$(edit) $@.in > $@

@@ -52,7 +52,7 @@ control: control.in ../conf-email
 copyright: copyright.in ../conf-email
 	$(edit) $@.in > $@
 changelog: ../doc/ChangeLog ../conf-version ../conf-release ../conf-email
-	../catChangeLog --debian --name=iwebadmin --state=unstable \
+	../catChangeLog --debian --name=iwebadmin --state=stable \
 		--urgency=low ../doc/ChangeLog > $@
 _service: _service.in
 	$(edit) $@.in > $@
