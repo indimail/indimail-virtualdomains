@@ -619,11 +619,7 @@ indimail-mta can be fine tuned, configured using environment variables (> 250) o
 
 6. Nothing prevents a user from writing a shell script to set environment variables before calling any of indimail-mta programs. If you are familiar with UNIX, you will know how to set them.
 
-NOTE: The program <b>envdir</b> that indimail-mta uses, is very powerful. It has the ability to hyperlink additional directories using .<u>envdir</u> and .<u>envfile</u>.
-
-NOTE: It is trivial to display the environment variable that would be set for your service by using the envdir command along with the env command. In fact this is what the `svctool --print-variables --service-name=xxxx` or `minisvc --print-variables --service-name=xxx` do.
-
-NOTE: The following clients use <u>/etc/indimail/control/defaultqueue</u> and $HOME/.defaultqueue - <b>condredirect</b>, <b>dot-forward</b>, <b>fastforward</b>, <b>filterto</b>, <b>forward</b>, <b>maildirserial</b>, <b>new-inject</b>, <b>qmail-inject</b>, <b>qmail-q</b>read, <b>qmail-showctl</b>, <b>qmta-send</b>, <b>qnotify</b>, <b>qreceipt</b>, <b>queue-fix</b>, <b>replier</b>, <b>rrforward</b>, <b>rrt</b>, <b>qmail-tcpto</b>, <b>qmail-tcpok</b>.
+It is trivial to display the environment variable that would be set for your service by using the envdir command along with the env command. In fact this is what the `svctool --print-variables --service-name=xxxx` or `minisvc --print-variables --service-name=xxx` do.
 
 ```
 # Display environment variables set for defaultqueue
@@ -694,6 +690,10 @@ PATH=/bin:/usr/bin:/usr/sbin:/sbin
 LOCALIP=0
 CERTDIR=/etc/indimail/certs
 ```
+
+NOTE: The program <b>envdir</b> that indimail-mta uses, is very powerful. It has the ability to hyperlink additional directories/files having environment variables using .<u>envdir</u> and .<u>envfile</u>.
+
+NOTE: The following clients use <u>/etc/indimail/control/defaultqueue</u> and $HOME/.defaultqueue - <b>condredirect</b>, <b>dot-forward</b>, <b>fastforward</b>, <b>filterto</b>, <b>forward</b>, <b>maildirserial</b>, <b>new-inject</b>, <b>qmail-inject</b>, <b>qmail-q</b>read, <b>qmail-showctl</b>, <b>qmta-send</b>, <b>qnotify</b>, <b>qreceipt</b>, <b>queue-fix</b>, <b>replier</b>, <b>rrforward</b>, <b>rrt</b>, <b>qmail-tcpto</b>, <b>qmail-tcpok</b>.
 
 ## Taking Backups
 
