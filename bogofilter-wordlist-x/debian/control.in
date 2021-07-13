@@ -3,7 +3,7 @@ Section: misc
 Priority: extra
 Maintainer: @email@
 Standards-Version: 3.9.1
-Homepage: http://indimail.sourceforge.net
+Homepage: https://github.com/mbhangui/indimail-virtualdomains
 
 Package: bogofilter-wordlist
 Architecture: any

@@ -224,9 +224,9 @@ $TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
 # bogofilter
 # setuid binary
 %if 0%{?suse_version} >= 1120
-%verify (not user group mode caps) %attr(6551, root, indimail)  %{_prefix}/bin/bogofilter
+%verify (not user group mode caps) %attr(6511, root, indimail)  %{_prefix}/bin/bogofilter
 %else
-%attr(6551,root,indimail)               %{_prefix}/bin/bogofilter
+%attr(6511,root,indimail)               %{_prefix}/bin/bogofilter
 %endif
 %attr(755,root,root)                    %{_prefix}/bin/bogolexer
 %attr(755,root,root)                    %{_prefix}/bin/bogotune
