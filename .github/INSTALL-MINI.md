@@ -6,7 +6,7 @@ message to a central server through QMQP.
 There are three standard applications of indimail-mini:
 
 * At a large site, mail service is centralized on a few hosts. All other hosts are null clients running indimail-mini. Setting up the null clients is easy; see below.
-* A firewall sends all incoming messages to an internal gateway. The firewalls run indimail-mini plus qmail-smtpd. There's very little code to audit, and none of it runs as root.
+* A firewall sends all incoming messages to an internal gateway. The firewalls run indimail-mini plus mini-smtpd. There's very little code to audit, and none of it runs as root.
 * A computer sends mail to a huge mailing list through a better-connected smarthost. The computer runs indimail for its own local deliveries, but it also has ezmlm configured to use a separate indimail-mini installation for the mailing list. QMQP is typically 100 times faster than SMTP here; for example, you can send a 1000-recipient message through a 28.8 modem in about 10 seconds. 
 
 ## How do I set up a QMQP server?
@@ -84,16 +84,16 @@ Note that users can still use all the qmail-inject environment variables to cont
 
 ## What about firewalls?
 
-You won't need most of the indimail-mini programs on a firewall, but you will need qmail-smtpd to accept messages through SMTP. You can survive with a tiny configuration:
+You won't need most of the indimail-mini programs on a firewall, but you will need mini-smtpd to accept messages through SMTP. You can survive with a tiny configuration:
 
 * /usr/sbin/qmail-qmqpc;
-* /usr/sbin/qmail-smtpd;
+* /usr/sbin/mini-smtpd;
 * a symbolic link to qmail-qmqpc from /usr/sbin/qmail-queue;
 * the internal gateway's IP address in /etc/indimail/control/qmqpservers;
 * the firewall host's name in /etc/indimail/control/me; and
 * the list of acceptable domains in /etc/indimail/control/rcpthosts. 
 
-You don't need to worry about setting up redundant QMQP servers here. If the internal gateway is down, qmail-smtpd will temporarily reject the message, and the remote client will automatically try again later.
+You don't need to worry about setting up redundant QMQP servers here. If the internal gateway is down, mini-smtpd will temporarily reject the message, and the remote client will automatically try again later.
 
 ## What about mailing lists?
 
