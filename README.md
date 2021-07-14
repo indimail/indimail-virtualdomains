@@ -368,9 +368,9 @@ conf-servicedir|/usr/local/libexec/indimail/service
 
 You can refer to the detailed installation for indimail-mta [here](https://github.com/mbhangui/indimail-mta/blob/master/README.md)
 
-But in short you can install indimail-mta by follow the steps below
+But in short you can install indimail-mta by following the steps below
 
-The build below depens on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make distclean`. If you don't run default.configure, you can run replace `make` with `./qmake`
+The build below depends on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make distclean`. If you don't run default.configure, you can run replace `make` with `./qmake`
 
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
