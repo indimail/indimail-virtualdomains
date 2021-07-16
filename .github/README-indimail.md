@@ -617,7 +617,9 @@ indimail-mta can be fine tuned, configured using environment variables (> 250) o
 
 5. Using control file domainqueue - This can be used to set environment variable for any recipient domain. Read the man page for <b>qmail-smtpd</b>, <b>qmail-inject</b>. You can configure <b>domainqueue</b> to have indimail-mta configure differently for different domains.
 
-6. Nothing prevents a user from writing a shell script to set environment variables before calling any of indimail-mta programs. If you are familiar with UNIX, you will know how to set them.
+6. If you have installed ezmlm / ezmlm-idx, then you have an additional directory for configuring environment variables in <u>/etc/indimail/ezmlm/global_vars</u>.
+
+7. Nothing prevents a user from writing a shell script to set environment variables before calling any of indimail-mta programs. If you are familiar with UNIX, you will know how to set them.
 
 It is trivial to display the environment variable that would be set for your service by using the envdir command along with the env command. In fact this is what the `svctool --print-variables --service-name=xxxx` or `minisvc --print-variables --service-name=xxx` do.
 
@@ -2141,7 +2143,7 @@ indimail-mta has multiple daemons qmail-daemon/qmail-start, qmail-send, qmail-ls
 
 ## indimail-mini - Using QMQP protocol provided by qmail-qmqpc / qmail-qmqpd
 
-QMQP provides a centralized mail queue within a cluster of hosts. QMQP clients do not require local queue for queueing messages. QMQP is faster than SMTP. You can use QMQP to send mails from your relay servers (or any server) to servers running QMQP service. The QMQP server can deliver mails to your local mailboxes or/and relay mails to the outside world. In short, to use QMQP, you need a client that uses QMQP protocol and a server that provides the QMQP service. <b>qmail-qmqpc</b> which uses [QMQP](https://cr.yp.to/proto/qmqp.html) protocol, is a QMQP client. <b>qmail-qmqpd</b> is a server that provides a central hub offering the QMQP service. <b>qmail-qmqpd</b> can be run under <b>tcpserver</b> under port <u>628</u> on the central hubv. If you have qmail-send running on the central hub, you can deliver local as well as relay mails. The central hub can also be a collection of multiple servers to aid performance. You just need to enter the IP addresses of these servers in /etc/indimail/control/qmqpservers on the client. The QMQP protocol doesn't require clients to have a local queue. In fact you can use QMQP protocol on a truly diskless client which doesn't even have any remote filesystem mounted. If you run web servers which need to send out emails, you can use QMQP to send emails without impacting performance. This is because you don't have the overhead of running an MTA like sendmail, postfix or qmail/netqmail/notqmail/indimail-mta. If you already have an installation of indimail-mta on your network, you can quickly setup a indimail-mini installation on your web server. The sendmail client provided by indimail-mini is fully compatible with PHP, python and any software that uses sendmail interface to push out emails. QMQP service is provided by enabling qmail-qmqpd service on a server having indimail-mta installed. All other servers (including your webservers) can have a indimail-mini installation to use qmail-qmqpc to push emails to the central hub. The process for setting up QMQP service is outlined in the next chapter.
+QMQP provides a centralized mail queue within a cluster of hosts. QMQP clients do not require local queue for queueing messages. QMQP is faster than SMTP. You can use QMQP to send mails from your relay servers (or any server) to servers running QMQP service. The QMQP server can deliver mails to your local mailboxes or/and relay mails to the outside world. In short, to use QMQP, you need a client that uses QMQP protocol and a server that provides the QMQP service. <b>qmail-qmqpc</b> which uses [QMQP](https://cr.yp.to/proto/qmqp.html) protocol, is a QMQP client. <b>qmail-qmqpd</b> is a server that you run to provide a central hub offering the QMQP service. <b>qmail-qmqpd</b> can be run under <b>tcpserver</b> under port <u>628</u> on the central hub. If you have qmail-send running on the central hub, you can deliver local as well as relay mails. The central hub can also be a collection of multiple servers to aid performance. You just need to enter the IP addresses of these servers in /etc/indimail/control/qmqpservers on the client(s). The QMQP protocol doesn't require clients to have a local queue. In fact you can use QMQP protocol on a truly diskless client which doesn't even have any remote filesystem mounted. If you run web servers which need to send out emails, you can use QMQP to send emails without impacting performance. This is because you don't have the overhead of running an MTA like sendmail, postfix or qmail/netqmail/notqmail/indimail-mta. If you already have an installation of indimail-mta on your network, you can quickly setup a indimail-mini installation on your web server. The sendmail client provided by indimail-mini is fully compatible with PHP, python and any software that uses sendmail interface to push out emails. On a server, QMQP service is provided by having indimail-mta installed and enabling the qmail-qmqpd service. On the client you just need to have indimail-mini / indimail-mta or qmta installed and configure sendmail/qmail-inject to use qmail-qmqpc. If you install indimail-mini, the installation will configure sendmail/qmail-inject to use qmail-qmqpc. If you have ezmlm, indimail-mta, qmta installed, you need to set QMAILQUEUE to use qmail-qmqpc. You can refer to [Setting Environment Variables](#setting-environment-variables) to set your QMAILQUEUE variable. The process for setting up QMQP service is outlined in the next chapter.
 
 ![image](indimail_mini.png)
 
@@ -2162,10 +2164,17 @@ $ sudo /bin/bash
 If you have installed indimail-mta using the source, you may create the QMQP service using the following command
 
 ```
+Create the service using svctool
+
 $ sudo /usr/sbin/svctool --qmqp=628 --servicedir=/service \
   --qbase=/var/indimail/queue --qcount=5 --qstart=1 \
   --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
   --fsync --syncdir --memory=104857600 --min-free=52428800
+
+Send a sighup to svscan to activate the new service immediately
+rather than waiting for 5 minutes
+
+$ sudo kill -1 `cat /run/svscan/.svscan.pid`
 ```
 
 The above command will create a supervised service which runs qmail-qmqpd under tcpserver. In case you are setting up this service to relay mails to outside world, you might want to also specify --dkfilter, --qhpsi, --virus-filter, etc arguments to svctool(8) so that tasks like virus scanning, dk, domainkey signing, etc is done by the QMQP service.
@@ -2174,17 +2183,18 @@ Note: Some of the tasks like virus/spam filtering, dk, dkim signing, etc can be 
 
 A QMQP server shouldn't even have to glance at incoming messages; its only job is to queue them for <b>qmail-send</b>(8). Hence you should allow access to QMQP service only from your authorized clients. You can edit the file /etc/indimail/tcp.qmqp to grant specific access to clients. Here's how to set up QMQP service to authorized client hosts on your indimail-mta server.
 
-first create /etc/indimail/tcp.qmqp in tcprules format to allow queueing from the authorized hosts. make sure to deny connections from unauthorized hosts. for example, if queueing is allowed from 1.2.3.\*:
+first create /etc/indimail/tcp/tcp.qmqp in tcprules format to allow queueing from the authorized hosts. make sure to deny connections from unauthorized hosts. for example, if queueing is allowed from 1.2.3.\*:
 
 ```
 1.2.3.:allow
 :deny
 ```
 
-Then create /etc/indimail//tcp/tcp.qmqp.cdb:
+Then create /etc/indimail/tcp/tcp.qmqp.cdb:
 
 ```
 $ sudo qmailctl cdb
+building /etc/indimail/tcp/tcp.qmqp.cdb:                   [  OK  ]
 ```
 
 You can change /var/indimail/etc/tcp.qmqp and run tcprules again at any time.
