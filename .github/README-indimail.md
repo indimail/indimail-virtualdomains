@@ -2228,6 +2228,7 @@ If you are doing a source installation then you need to manually copy few binari
   srsfilter
   qmail-qmqpc
   qmail-direct
+  mini-smtpd
 * shared libs that the above binaries reference. You can use the ldd command (or otool -L command on OSX) (for source installation only).
 * symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail (for source installation only);
 * a list of IP addresses of QMQP servers, one per line, in /etc/indimail/control/qmqpservers;
@@ -2237,7 +2238,7 @@ If you are doing a source installation then you need to manually copy few binari
   ```
   # mkdir /etc/indimail/control/defaultqueue
   # cd /etc/indimail/control/defaultqueue
-  # echo qmail-qmqpc > QMAILQUEUE
+  # echo /usr/sbin/qmail-qmqpc > QMAILQUEUE
   ```
 * All manual pages for the above binaries (not a hard requirement but good for future reference) (for source installation only).
 
@@ -2245,11 +2246,15 @@ Remember that users won't be able to send mail if all the QMQP servers are down.
 
 Note that users can still use all the <b>qmail-inject</b> environment variables to control the appearance of their outgoing messages. This will include environment variables in $HOME/.defaultqueue directory.
 
-If you want to setup a SMTP service, it might be easier to install the entire indimail-mta package and remove the services qmail-send.25. You can use svctool to remove the service e.g.
+If you want to setup a SMTP service, you can setup mini-smtpd service. In case you setup SMTP service, you may want to handle tasks is dkim, virus and spam filtering. You can use QHPSI along with a virus scanner like clamav. You can also choose not to have these tasks done at the client end, but rather have it carried out by the QMQP service. For virus scanning refer to chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi). You can set QMAILQUEUE to qmail-multi, qmail-dkim, etc. However, you must remember to have qmail-qmqpc called at the end in case you change QMAILQUEUE to something other than qmail-qmqpc. If you need to setup mini-smtpd, here can be an option
 
-`$ sudo /usr/sbin/svctool --rmsvc qmail-send.25`
-
-In case you setup SMTP service, you may want to handle tasks is dkim, virus and spam filtering. You can use QHPSI along with a virus scanner like clamav. You can also choose not to have these tasks done at the client end, but rather have it carried out by the QMQP service. For virus scanning refer to chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi). You can set QMAILQUEUE to qmail-multi, qmail-dkim, etc. However, you must remember to have qmail-qmqpc called at the end in case you change QMAILQUEUE to something other than qmail-qmqpc.
+```
+sudo ./svctool --smtp=25 --servicedir=/service --skipsend --no-multi \
+	--qmailqueue=/usr/sbin/qmail-qmqpc --qmailsmtpd=/usr/sbin/mini-smtpd \
+    --cntrldir=control --localip=0 --maxdaemons=20 --maxperip=5 \
+    --memory=104857600 --min-free=52428800 \
+    --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net
+```
 
 ## qmta - Using a minimal standalone qmta-send MTA
 
@@ -2341,6 +2346,16 @@ $ You have mail in /home/mbhangui/Maildir
 
 As you can see above that qmta-send is very easy to setup and consumes very little resource (1.9M in this case). In the above case, /usr/sbin/MTAlspawn and /usr/sbin/MTArspawn are in fact qmta-send processes with exactly the same code as qmail-lspawn and qmail-rspawn. The only external process in the above case is the splogger command running with pid 258422. In future versions, I might make splogger too an internal process and eliminate the requirement of a separate binary. My ultimate goal for qmta-send is to subsume qmail-local and qmail-remote too.
 
+Just like for indimail-mini installation, If you want to setup a SMTP service, you can setup mini-smtpd service. In case you setup SMTP service, you may want to handle tasks is dkim, virus and spam filtering. You can use QHPSI along with a virus scanner like clamav. You can also choose not to have these tasks done at the client end, but rather have it carried out by the QMQP service. For virus scanning refer to chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi). You can set QMAILQUEUE to qmail-multi, qmail-dkim, etc. However, you must remember to have qmail-qmqpc called at the end in case you change QMAILQUEUE to something other than qmail-qmqpc. If you need to setup mini-smtpd, here can be an option
+
+```
+sudo ./svctool --smtp=25 --servicedir=/service --skipsend --no-multi \
+	--qmailqueue=/usr/sbin/qmail-qmqpc --qmailsmtpd=/usr/sbin/mini-smtpd \
+    --cntrldir=control --localip=0 --maxdaemons=20 --maxperip=5 \
+    --memory=104857600 --min-free=52428800 \
+    --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net
+```
+
 If you are doing a source installation then you need to manually copy few binaries and few shared libraries. Here's what you do need if you want to setup from a source installation.
 
 * The following binaries are required in the path
@@ -2367,6 +2382,7 @@ If you are doing a source installation then you need to manually copy few binari
   qmail-clean
   qmail-tcpok
   qmail-tcpto
+  mini-smtpd
 * shared libs that the above binaries reference (libsrs2, libqmail). You can use the ldd command (or otool -L command on OSX) (for source installation only)
 * symbolic links to /usr/bin/sendmail from /usr/sbin/sendmail and /usr/lib/sendmail; (for source installation only)
 * a list of IP addresses of QMQP servers, one per line, in /etc/indimail/control/qmqpservers;
