@@ -2266,7 +2266,37 @@ Installation and setup is trivial if you use the RPM package (See the chapter [I
 
 ```
 # Install qmta
-$ sudo dnf install qmta
+$ apt-get update && apt-get install qmta
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+The following additional packages will be installed:
+  libqmail libsrs2
+The following NEW packages will be installed:
+  libqmail libsrs2 qmta
+0 upgraded, 3 newly installed, 0 to remove and 0 not upgraded.
+Need to get 439 kB of archives.
+After this operation, 1605 kB of additional disk space will be used.
+Do you want to continue? [Y/n] y
+Get:1 http://download.opensuse.org/repositories/home:/mbhangui/Debian_10  libqmail 1.1-1.1+62.1 [118 kB]
+Get:2 http://download.opensuse.org/repositories/home:/mbhangui/Debian_10  libsrs2 1.0.18-1.1+10.1 [26.2 kB]
+Get:3 http://download.opensuse.org/repositories/home:/mbhangui/Debian_10  qmta 2.13-1.1+103.1 [295 kB]
+Fetched 439 kB in 1s (309 kB/s)
+Selecting previously unselected package libqmail.
+(Reading database ... 12408 files and directories currently installed.)
+Preparing to unpack .../libqmail_1.1-1.1+62.1_amd64.deb ...
+Unpacking libqmail (1.1-1.1+62.1) ...
+Selecting previously unselected package libsrs2.
+Preparing to unpack .../libsrs2_1.0.18-1.1+10.1_amd64.deb ...
+Unpacking libsrs2 (1.0.18-1.1+10.1) ...
+Selecting previously unselected package qmta.
+Preparing to unpack .../qmta_2.13-1.1+103.1_amd64.deb ...
+Adding IndiMail users/groups
+Unpacking qmta (2.13-1.1+103.1) ...
+Setting up libsrs2 (1.0.18-1.1+10.1) ...
+Setting up libqmail (1.1-1.1+62.1) ...
+Setting up qmta (2.13-1.1+103.1) ...
+Processing triggers for man-db (2.8.5-2) ...
 
 # enable qmta-send service
 $ sudo systemctl enable qmta-send
@@ -2277,30 +2307,41 @@ $ sudo systemctl start qmta-send
 
 # check processes using the humble ps command
 $ ps -ef | grep qmta-send | grep -v grep
-qmailq     39977       1  0 22:53 ?        00:00:00 /usr/sbin/qmta-send -d ./Maildir/ splogger qmta-send
-qmaill     39978   39977  0 22:53 ?        00:00:00 splogger qmta-send
-root       39979   39977  0 22:53 ?        00:00:00 /usr/sbin/MTAlspawn -d ./Maildir/ splogger qmta-send
-qmailr     39980   39977  0 22:53 ?        00:00:00 /usr/sbin/MTArspawn -d ./Maildir/ splogger qmta-send
+qmailq    258421       1  0 21:30 ?        00:00:00 /usr/sbin/qmta-send -d ./Maildir/ splogger qmta-send
+qmaill    258422  258421  0 21:30 ?        00:00:00 splogger qmta-send
+root      258423  258421  0 21:30 ?        00:00:00 /usr/sbin/MTAlspawn -d ./Maildir/ splogger qmta-send
+qmailr    258424  258421  0 21:30 ?        00:00:00 /usr/sbin/MTArspawn -d ./Maildir/ splogger qmta-send
 
 # check processes using the mighty systemctl command
-$ sysemctl status qmta-send
+$ systemctl status qmta-send
 ● qmta-send.service - qmta Mail Transport Agent
      Loaded: loaded (/usr/lib/systemd/system/qmta-send.service; enabled; vendor preset: disabled)
-     Active: active (running) since Tue 2021-07-06 22:53:32 IST; 7s ago
-   Main PID: 39977 (qmta-send)
+     Active: active (running) since Fri 2021-07-16 21:30:35 IST; 57s ago
+   Main PID: 258421 (qmta-send)
       Tasks: 4 (limit: 9421)
      Memory: 1.9M
      CGroup: /system.slice/qmta-send.service
-             ├─39977 /usr/sbin/qmta-send -d ./Maildir/ splogger qmta-send
-             ├─39978 splogger qmta-send
-             ├─39979 /usr/sbin/MTAlspawn -d ./Maildir/ splogger qmta-send
-             └─39980 /usr/sbin/MTArspawn -d ./Maildir/ splogger qmta-send
+             ├─258421 /usr/sbin/qmta-send -d ./Maildir/ splogger qmta-send
+             ├─258422 splogger qmta-send
+             ├─258423 /usr/sbin/MTAlspawn -d ./Maildir/ splogger qmta-send
+             └─258424 /usr/sbin/MTArspawn -d ./Maildir/ splogger qmta-send
 
-Jul 06 22:53:32 argos.indimail.org systemd[1]: Started qmta Mail Transport Agent.
-Jul 06 22:53:32 argos.indimail.org qmta-send[39978]: 1625592212.411851 status: local 0/10 remote 0/20
+Jul 16 21:30:35 argos.indimail.org systemd[1]: Started qmta Mail Transport Agent.
+Jul 16 21:30:35 argos.indimail.org qmta-send[258422]: 1626451235.303814 status: local 0/10 remote 0/20
+Jul 16 21:31:27 argos.indimail.org qmta-send[258422]: 1626451287.566547 new msg 1049084
+Jul 16 21:31:27 argos.indimail.org qmta-send[258422]: 1626451287.566607 info msg 1049084: bytes 366 from <root@argos.indimail.org> qp 258569 uid 0
+Jul 16 21:31:27 argos.indimail.org qmta-send[258422]: 1626451287.566665 local: root@argos.indimail.org mbhangui@argos.indimail.org 1049084 366 bytes
+Jul 16 21:31:27 argos.indimail.org qmta-send[258422]: 1626451287.567691 starting delivery 1: msg 1049084 to local mbhangui@argos.indimail.org
+Jul 16 21:31:27 argos.indimail.org qmta-send[258422]: 1626451287.567740 status: local 1/10 remote 0/20
+Jul 16 21:31:27 argos.indimail.org qmta-send[258422]: 1626451287.573755 delivery 1: success: did_1+0+0/
+Jul 16 21:31:27 argos.indimail.org qmta-send[258422]: 1626451287.573809 status: local 0/10 remote 0/20
+Jul 16 21:31:27 argos.indimail.org qmta-send[258422]: 1626451287.573876 end msg 1049084
+$ You have mail in /home/mbhangui/Maildir
 ```
 
-If you are doing a source installation then you need to manually copy few binaries and few shared librareis. Here's what you do need if you want to setup from a source installation.
+As you can see above that qmta-send is very easy to setup and consumes very little resource (1.9M in this case). In the above case, /usr/sbin/MTAlspawn and /usr/sbin/MTArspawn are in fact qmta-send processes with exactly the same code as qmail-lspawn and qmail-rspawn. The only external process in the above case is the splogger command running with pid 258422. In future versions, I might make splogger too an internal process and eliminate the requirement of a separate binary. My ultimate goal for qmta-send is to subsume qmail-local and qmail-remote too.
+
+If you are doing a source installation then you need to manually copy few binaries and few shared libraries. Here's what you do need if you want to setup from a source installation.
 
 * The following binaries are required in the path
   sendmail
