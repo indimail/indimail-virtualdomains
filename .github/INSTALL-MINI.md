@@ -15,21 +15,21 @@ Here's how to set up a central server to offer QMQP service to authorized client
 
 IndiMail includes a QMQP server, qmail-qmqpd. You also need to have tcpserver installed.
 
-first create /etc/indimail/etc/qmqp.tcp in tcprules format to allow queueing from the authorized hosts. make sure to deny connections from unauthorized hosts. for example, if queueing is allowed from 1.2.3.\*:
+first create /etc/indimail/tcp/qmqp.tcp in tcprules format to allow queueing from the authorized hosts. make sure to deny connections from unauthorized hosts. for example, if queueing is allowed from 1.2.3.\*:
 
 ```
 1.2.3.:allow
 :deny
 ```
 
-Then create /etc/indimail/etc/qmqp.cdb:
+Then create /etc/indimail/tcp/qmqp.cdb:
 
 ```
-$ sudo /usr/bin/tcprules /etc/indimail/etc/qmqp.cdb \
-  /etc/indimail/etc/qmqp.tmp < /etc/indimail/etc/qmqp.tcp
+$ sudo qmailctl cdb
+building /etc/indimail/tcp/tcp.qmqp.cdb:                   [  OK  ]
 ```
 
-You can change /etc/indimail/etc/qmqp.tcp and run tcprules again at any time. Finally qmail-qmqpd to be run under supervise:
+You can change /etc/indimail/tcp/qmqp.tcp and run qmailctl again at any time. Finally qmail-qmqpd to be run under supervise:
 
 ```
 sudo /usr/sbin/svctool --qmqp=628 --servicedir=/service --maxdaemons=75 --maxperip=25 \
@@ -72,7 +72,7 @@ If you install indimail-mini from the indimail repository (rpm, deb or arch pack
   ```
   # mkdir /etc/indimail/control/defaultqueue
   # cd /etc/indimail/control/defaultqueue
-  # echo qmail-qmqpc > QMAILQUEUE
+  # echo /usr/sbin/qmail-qmqpc > QMAILQUEUE
   ```
 * All manual pages for the above binaries (not a hard requirement but good for future reference) (for source installation only).
 
