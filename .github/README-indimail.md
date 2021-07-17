@@ -2258,7 +2258,9 @@ sudo ./svctool --smtp=25 --servicedir=/service --skipsend --no-multi \
 
 ## qmta - Using a minimal standalone qmta-send MTA
 
-<b>qmta-send</b> can work like <b>qmail-send</b> to transfer local and remote mails, but unlike qmail-send, it doesn't require mutiple daemons (qmail-todo, qmail-lspawn/qmail-rspawn, qmail-clean) to process the queue. In case you don't have a central host running QMQP (provided by qmail-qmqpd) or you have a small host that sends out insignificant number of emails in a day, then <b>qmta-send</b> is what you would want to setup. <b>qmta-send</b> is well suited for tiny computers like raspberry pi, banana pi and other [Single Board Computers](https://en.wikipedia.org/wiki/Single-board_computer).
+<b>qmta-send</b> can work like <b>qmail-send</b> to transfer local and remote mails, but unlike qmail-send, it doesn't require mutiple daemons (<b>qmail-todo</b>, <b>qmail-lspawn</b>/<b>qmail-rspawn</b>, <b>qmail-clean</b>) to process the queue. In case you don't have a central host running QMQP (provided by <b>qmail-qmqpd</b>) or you have a small host that sends out insignificant number of emails in a day, then <b>qmta-send</b> is what you would want to setup. <b>qmta-send</b> is well suited for tiny computers like raspberry pi, banana pi and other [Single Board Computers](https://en.wikipedia.org/wiki/Single-board_computer).
+
+<b>qmta-send</b> can process messages queued by clients with differing split directory value. The only required is that <b>qmta-send</b> should be running with a higher split dir value than that of the client. You can use the -<u>s</u> option to run with any split dir value.
 
 ### How do I set up a standalone MTA using qmta-send
 
@@ -2270,7 +2272,8 @@ A qmta installation using qmta-send is just like an indimail-mini installation, 
 Installation and setup is trivial if you use the RPM package (See the chapter [Installing Indimail using DNF/YUM/APT Repository](## Installing Indimail using DNF/YUM/APT Repository)).
 
 ```
-# Install qmta
+Install qmta (you can use yum / dnf / apt-get depending on your distribution)
+
 $ apt-get update && apt-get install qmta
 Reading package lists... Done
 Building dependency tree       
@@ -2303,21 +2306,25 @@ Setting up libqmail (1.1-1.1+62.1) ...
 Setting up qmta (2.13-1.1+103.1) ...
 Processing triggers for man-db (2.8.5-2) ...
 
-# enable qmta-send service
+enable qmta-send service
+
 $ sudo systemctl enable qmta-send
 Created symlink /etc/systemd/system/multi-user.target.wants/qmta-send.service → /usr/lib/systemd/system/qmta-send.service.
 
-# start qmta-send service
+start qmta-send service
+
 $ sudo systemctl start qmta-send
 
-# check processes using the humble ps command
+check processes using the humble ps command
+
 $ ps -ef | grep qmta-send | grep -v grep
 qmailq    258421       1  0 21:30 ?        00:00:00 /usr/sbin/qmta-send -d ./Maildir/ splogger qmta-send
 qmaill    258422  258421  0 21:30 ?        00:00:00 splogger qmta-send
 root      258423  258421  0 21:30 ?        00:00:00 /usr/sbin/MTAlspawn -d ./Maildir/ splogger qmta-send
 qmailr    258424  258421  0 21:30 ?        00:00:00 /usr/sbin/MTArspawn -d ./Maildir/ splogger qmta-send
 
-# check processes using the mighty systemctl command
+check processes using the mighty systemctl command
+
 $ systemctl status qmta-send
 ● qmta-send.service - qmta Mail Transport Agent
      Loaded: loaded (/usr/lib/systemd/system/qmta-send.service; enabled; vendor preset: disabled)
