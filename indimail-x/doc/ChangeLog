@@ -1,5 +1,7 @@
 *
 Release @version@-@release@ Start 14/02/2021
+======= Release Highlights ================================================
+===========================================================================
 - 23/02/2021
 01. sql_adddomain.c,, sql_setpw.c : replaced CREATE TABLE statements with
     create_table() function

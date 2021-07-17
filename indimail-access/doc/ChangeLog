@@ -1,5 +1,10 @@
 *
 Release @version@-@release@ Start 01/03/2021
+======= Release Highlights ================================================
+o courier-imap version upgraded to courier-imap-5.1.3
+o unicode version upgraded to 2.2.3
+o maildrop version upgraded to 3.0.3
+===========================================================================
 - 01/03/2021
 01. upgraded courier-imap to 5.0.12
 02. upgraded fetchmail to 6.4.16
@@ -25,7 +30,7 @@ Release @version@-@release@ Start 01/03/2021
 15. pop3login: use unbuffered reads, handle our own buffering.
 16. synced mailbolist.c, smap.c with courier-imap-5.1.3.20210615
 - 13/07/2021
-17. indimail-access.spec: removed chkcofig from Requires
+17. indimail-access.spec: removed chkconfig from Requires
 
 *
 Release 1.0-1.1 Start 03/06/2020

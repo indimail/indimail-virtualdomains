@@ -1,5 +1,11 @@
 * 
 Release @version@-@release@ Start 21/05/2020
+======= Release Highlights ================================================
+o use /run/indimail for nssd socket path
+o FreeBSD port
+o Darwin port of pam-multi
+o suport dovecot authentication
+===========================================================================
 01. changed nssd.sock path to /run/indimail
 02. changed nssd.pid path to /run/indimail
 03. nssd-1.2/configure.ac - fixed --enable-nssd-socket, --enable-nssd-config-path options
