@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.91 2021-07-13 10:46:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.92 2021-07-17 08:39:29+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1358,7 +1358,7 @@ do
 done
 fi
 
-%{_prefix}/sbin/svctool --servicedir=%{servicedir} --norefreshsvc="0 $svc_list"
+%{_prefix}/sbin/svctool --servicedir=%{servicedir} --autorefresh="0 $svc_list"
 
 # selinux
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
