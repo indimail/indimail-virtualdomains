@@ -31,6 +31,7 @@ o maildrop version upgraded to 3.0.3
 16. synced mailbolist.c, smap.c with courier-imap-5.1.3.20210615
 - 13/07/2021
 17. indimail-access.spec: removed chkconfig from Requires
+- 18/07/2021 - indimail-3.4.0-pre1
 
 *
 Release 1.0-1.1 Start 03/06/2020
