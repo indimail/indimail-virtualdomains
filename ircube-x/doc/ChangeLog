@@ -26,3 +26,4 @@ Release @version@-@release@ Start 13/03/2017
 - 01/02/2021 - indimail-3.3
 16. roundcube_config: Fix value of PRIV_PASS
 17. roundcube_config: fixed path of cleandb.sh
+- 18/07/2021 - indimail-3.4.0-pre1
