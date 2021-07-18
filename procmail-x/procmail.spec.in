@@ -8,7 +8,6 @@
 %global _prefix            @prefix@
 %global mandir             @mandir@
 %global sysconfdir         @sysconfdir@
-%define debug_package %{nil}
 
 %if %{defined _project}
 # define to 1 if building on openSUSE build service
