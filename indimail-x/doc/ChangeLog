@@ -58,6 +58,7 @@ Release @version@-@release@ Start 14/02/2021
 33. removed sq_vacation
 - 13/07/2021
 34. indimail.spec: removed chkconfig from Requires
+- 18/07/2021 - indimail-3.4.0-pre1
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020
