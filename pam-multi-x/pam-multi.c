@@ -1,5 +1,8 @@
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.20  2021-07-18 08:27:16+05:30  Cprogrammer
+ * fixed salt size
+ *
  * Revision 1.19  2020-10-04 09:21:32+05:30  Cprogrammer
  * set optreset=1 for Darwin
  *
@@ -195,7 +198,7 @@ static int      update_passwd(pam_handle_t *, const char *, const char *);
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.19 2020-10-04 09:21:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.20 2021-07-18 08:27:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -631,7 +634,7 @@ Arc4random(int start_num, int end_num)
  * Salt suitable for traditional DES and MD5 
  */
 void
-makesalt(char salt[SALTSIZE])
+makesalt(char salt[SALTSIZE + 1])
 {
 	int             i, len;
 	static int      seeded;
