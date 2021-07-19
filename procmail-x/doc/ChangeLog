@@ -4,7 +4,7 @@ Release @version@-@release@ Start 20/06/2020
 01. added setgroups() before setuid() call
 - 13/10/2020 - indimail-3.3
 02. added debuginfo package
-- 18/07/2021 - indimail-3.4.0-pre1
+- 18/07/2021 - indimail-3.4.0
 
 * Mon Sep 10 2001 Philip Guenther <guenther@sendmail.com>
 Release 3.2.2

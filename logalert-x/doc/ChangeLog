@@ -9,7 +9,7 @@ Release @version@-@release@ Start 25/02/2010
 - 15/03/2021
 04. use libidimail and remove common.c. Update common.h to remove functions
     present in libindimail
-- 18/07/2021 - indimail-3.4.0-pre1
+- 18/07/2021 - indimail-3.4.0
 
 *
 2005-10-04      <gabriel@icaro.com.br>

@@ -4,4 +4,4 @@ Release @version@-@release@ Start 16/03/2017
 01. First Release
 - 13/07/2021
 02. bogofiter-wordlist.spec: Removed indimail-spamfilter from Requires
-- 18/07/2021 - indimail-3.4.0-pre1
+- 18/07/2021 - indimail-3.4.0
