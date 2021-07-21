@@ -5,6 +5,9 @@ fi
 if [ ! -f conf-release ] ; then
   echo 1.1 > conf-release
 fi
+if [ ! -d m4 ] ; then
+	mkdir -p m4
+fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
   FreeBSD)
