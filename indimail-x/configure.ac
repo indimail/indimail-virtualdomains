@@ -84,7 +84,7 @@ CPPFLAGS=$saveCPPFLAGS
 AC_CHECK_HEADERS([dirent.h limits.h sys/ioctl.h net/if.h linux/sockios.h sys/sockio.h])
 AC_CHECK_HEADERS([openssl/evp.h sys/syscall.h sys/select.h sys/un.h])
 AC_CHECK_HEADERS([crypt.h inttypes.h])
-AC_CHECK_HEADERS([fnmatch.h udb.h elf.h magic.h a.out.h malloc.h sys/utsname.h sys/ipc.h])
+AC_CHECK_HEADERS([fnmatch.h udb.h elf.h magic.h a.out.h malloc.h sys/utsname.h sys/ipc.h asm/ioctls.h])
 
 AC_EGREP_HEADER(in_addr_t, netinet/in.h, AC_DEFINE(HAVE_IN_ADDR_T, 1, "have in_addr_t data type"),)
 
@@ -97,7 +97,7 @@ AC_TYPE_GETGROUPS
 
 # Checks for library functions.
 AC_FUNC_CHOWN
-AC_CHECK_FUNCS(strsignal fdatasync sigaction sigprocmask fnmatch gethostname fchown getmntent getmntinfo setenv unsetenv)
+AC_CHECK_FUNCS(strsignal fdatasync sigaction sigprocmask fnmatch gethostname fchown getmntent getmntinfo setenv unsetenv rresvport)
 defaultprefix="/usr"
 if test x$prefix = xNONE
 then
