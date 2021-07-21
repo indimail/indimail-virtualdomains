@@ -1,5 +1,8 @@
 /*
  * $Log: monkey.c,v $
+ * Revision 1.5  2021-07-21 14:05:05+05:30  Cprogrammer
+ * conditional compilation (alpine linux)
+ *
  * Revision 1.4  2020-10-01 18:26:49+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -58,7 +61,7 @@
 #include "sockwrite.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: monkey.c,v 1.4 2020-10-01 18:26:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: monkey.c,v 1.5 2021-07-21 14:05:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -110,7 +113,7 @@ monkey(char *host, char *servicename, char *startbuf, int skip_nl)
 		return (-1);
 	} 
 	retval = 1;
-#ifdef linux
+#if defined(ASM_IOCTLS_H) && defined(linux)
 #include <asm/ioctls.h>
 #endif
 	if (ioctl(0, FIONBIO, &retval) != -1) {

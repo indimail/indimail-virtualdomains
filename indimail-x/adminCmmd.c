@@ -1,5 +1,8 @@
 /*
  * $Log: adminCmmd.c,v $
+ * Revision 1.3  2021-07-21 14:04:21+05:30  Cprogrammer
+ * conditional compilation (alpine linux)
+ *
  * Revision 1.2  2020-04-01 18:52:41+05:30  Cprogrammer
  * moved getEnvConfig to libqmail
  *
@@ -47,7 +50,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: adminCmmd.c,v 1.2 2020-04-01 18:52:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: adminCmmd.c,v 1.3 2021-07-21 14:04:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      IOPlex(int, int);
@@ -143,7 +146,7 @@ IOPlex(int sockfd, int admin_timeout)
 	if ((pstat = signal(SIGPIPE, SIG_IGN)) == SIG_ERR)
 		return (-1);
 	retval = 1;
-#ifdef linux
+#if defined(ASM_IOCTLS_H) && defined(linux)
 #include <asm/ioctls.h>
 #endif
 	if (ioctl(0, FIONBIO, &retval) != -1) {
