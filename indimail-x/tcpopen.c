@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 1.6  2021-07-21 14:05:28+05:30  Cprogrammer
+ * deprecated rresvport function
+ *
  * Revision 1.5  2021-05-26 10:31:36+05:30  Cprogrammer
  * treat access on socket other than ENOENT as error
  *
@@ -95,7 +98,10 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
  *           if > 0, it is the port# of server (host-byte-order)
  */
 {
-	int             resvport, fd = -1, optval, retval, i;
+#ifdef HAVE_RRESVPORT
+	int             resvport;
+#endif
+	int             fd = -1, optval, retval, i;
 	char           *ptr, *hostptr;
 	struct servent *sp;
 #ifdef ENABLE_IPV6
@@ -181,11 +187,20 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 				if ((fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == -1)
 					break; /*- Try the next address record in the list. */
 			} else { /*- if (port < 0) */
+#ifdef HAVE_RRESVPORT
 				resvport = IPPORT_RESERVED - 1;
 				if ((fd = rresvport_af(&resvport, res->ai_family)) < 0) /*- RFC 2292 */ {
 					freeaddrinfo(res0);
 					return (-1);
 				}
+#else
+#ifdef EPROTONOSUPPORT
+				errno = EPROTONOSUPPORT;
+#else
+				errno = EINVAL;
+#endif
+				return (-1);
+#endif
 			}
 			for (errno = 0;;) {
 				if (!(retval = connect(fd, res->ai_addr, res->ai_addrlen)))
@@ -273,9 +288,18 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 			if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 				return (-1);
 		} else { /*- if (port < 0) */
+#ifdef HAVE_RRESVPORT
 			resvport = IPPORT_RESERVED - 1;
 			if ((fd = rresvport(&resvport)) < 0)
 				return (-1);
+#else
+#ifdef EPROTONOSUPPORT
+				errno = EPROTONOSUPPORT;
+#else
+				errno = EINVAL;
+#endif
+			return (-1);
+#endif
 		}
 #if !defined(linux) && !defined(CYGWIN) && !defined(WindowsNT)
 		if (!str_diffn(hostptr, "localhost", 10)) {
