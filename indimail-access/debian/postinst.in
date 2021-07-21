@@ -322,7 +322,7 @@ do
   ${prefix}/sbin/svctool --servicedir=${servicedir} --service-name=$i \
     --export-variables=${servicedir}/$i/variables/.variables  --force
 done
-${prefix}/sbin/svctool --servicedir=${servicedir} --norefreshsvc="0 $svc_list"
+${prefix}/sbin/svctool --servicedir=${servicedir} --autorefresh="0 $svc_list"
 ) >> /var/log/indimail-access-setup.log 2>&1
 echo
 echo "Check /var/log/indimail-access-setup.log for the detailed installation log!!!"

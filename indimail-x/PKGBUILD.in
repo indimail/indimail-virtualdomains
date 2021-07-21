@@ -456,7 +456,7 @@ post_install() {
     done
   fi
 
-  ${_prefix}/sbin/svctool --servicedir=${_servicedir} --norefreshsvc="0 $svc_list"
+  ${_prefix}/sbin/svctool --servicedir=${_servicedir} --autorefresh="0 $svc_list"
 
   if [ -f ${_sysconfdir}/cronlist.i -a -d ${confdir}/cron.d ] ; then
     echo "adding cron entries"

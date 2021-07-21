@@ -435,7 +435,7 @@ do
     --export-variables=${servicedir}/$i/variables/.variables  --force
 done
 fi
-${prefix}/sbin/svctool --servicedir=${servicedir} --norefreshsvc="0 $svc_list"
+${prefix}/sbin/svctool --servicedir=${servicedir} --autorefresh="0 $svc_list"
 ${prefix}/sbin/svctool --fixsharedlibs
 
 if [ -f ${libexecdir}/iupgrade.sh ] ; then

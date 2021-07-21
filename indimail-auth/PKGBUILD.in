@@ -140,7 +140,7 @@ post_install() {
     --mysqlpass=ssh-1.5- --mysqlsocket=${_mysqlSocket} --servicedir=${_servicedir}
 
   # turn off automatic refresh for services during first time installation
-  ${_prefix}/sbin/svctool --servicedir=${_servicedir} --norefreshsvc="0 ${_servicedir}/pwdlookup"
+  ${_prefix}/sbin/svctool --servicedir=${_servicedir} --autorefresh="0 ${_servicedir}/pwdlookup"
   # save variables
   ${_prefix}/sbin/svctool --servicedir=${_servicedir} --service-name=pwdlookup \
     --export-variables=${_servicedir}/pwdlookup/variables/.variables --force
