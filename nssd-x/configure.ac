@@ -10,7 +10,7 @@ AM_CONFIG_HEADER(config.h)
 
 dnl Checks for programs.
 AC_DISABLE_STATIC
-AC_PROG_LIBTOOL
+LT_INIT
 AC_PROG_LN_S
 AC_PROG_AWK
 AC_PROG_CC
@@ -20,7 +20,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_MAKE_SET
 
 dnl Checks for header files.
-AC_ISC_POSIX
+AC_SEARCH_LIBS([strerror],[cposix])
 AC_HEADER_STDC
 AC_C_CONST
 AC_TYPE_UID_T
@@ -295,4 +295,5 @@ echo "          data dir = $datarootdir --datarootdir=$datarootdir"
 echo "       socket Path = $socket_path --enable-nssd-socket-path=$socket_path"
 echo "       config Path = $config_path --enable-nssd-config-path=$config_path"
 ) | tee nssd.settings
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
