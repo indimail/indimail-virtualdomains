@@ -19,14 +19,14 @@
 /*- A SIGNIFICANT PORTION OF THIS CODE IS BASED ON GNU NSCD */
 
 /*
- * $Id: nssd.c,v 1.5 2020-09-24 11:11:37+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: nssd.c,v 1.6 2021-07-21 11:06:26+05:30 Cprogrammer Exp mbhangui $ 
  */
 #include "common.h"
 #include <errno.h>
 #include <pwd.h>
 #include <grp.h>
 #include <pthread.h>
-#include <sys/poll.h>
+#include <poll.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/un.h>
