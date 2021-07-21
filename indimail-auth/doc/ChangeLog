@@ -64,3 +64,4 @@ o suport dovecot authentication
 - 21/07/2021
 15. updated configure.ac
 16. nssd.c: replace sys/poll.h with poll.h
+17. util.c: include sys/select.h
