@@ -1,6 +1,7 @@
 #include "common.h"
 #include <stdarg.h>
 #include <stdlib.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 #include <string.h>
 #include <errno.h>
