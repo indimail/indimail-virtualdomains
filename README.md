@@ -372,7 +372,7 @@ conf-qmail|/var/indimail
 conf-sysconfdir|/usr/local/etc/indimail
 conf-shared|/usr/local/share/indimail
 conf-libexec|/usr/local/libexec/indimail
-conf-servicedir|/usr/local/libexec/indimail/service
+conf-servicedir|/usr/local/etc/indimail/sv
 
 You can refer to the detailed installation for indimail-mta [here](https://github.com/mbhangui/indimail-mta/blob/master/README.md)
 
