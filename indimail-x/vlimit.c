@@ -1,5 +1,8 @@
 /*
  * $Log: vlimit.c,v $
+ * Revision 1.6  2021-07-22 15:17:39+05:30  Cprogrammer
+ * conditional define of _XOPEN_SOURCE
+ *
  * Revision 1.5  2020-10-13 18:35:44+05:30  Cprogrammer
  * initialize struct tm for strptime() value too big error
  *
@@ -21,12 +24,14 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vlimit.c,v 1.5 2020-10-13 18:35:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vlimit.c,v 1.6 2021-07-22 15:17:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
 #ifdef HAVE_UNISTD_H
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE
+#endif
 #include <unistd.h>
 #endif
 #ifdef HAVE_PWD_H

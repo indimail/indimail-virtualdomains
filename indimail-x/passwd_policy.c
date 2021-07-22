@@ -1,5 +1,8 @@
 /*
  * $Log: passwd_policy.c,v $
+ * Revision 1.2  2021-07-22 15:17:23+05:30  Cprogrammer
+ * conditional define of _XOPEN_SOURCE
+ *
  * Revision 1.1  2019-04-14 21:10:21+05:30  Cprogrammer
  * Initial revision
  *
@@ -11,7 +14,9 @@
 #include <ctype.h>
 #endif
 #ifdef HAVE_UNISTD_H
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE
+#endif
 #include <unistd.h>
 #endif
 #ifdef HAVE_QMAIL
@@ -20,7 +25,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: passwd_policy.c,v 1.1 2019-04-14 21:10:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: passwd_policy.c,v 1.2 2021-07-22 15:17:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      get_dict(char *);

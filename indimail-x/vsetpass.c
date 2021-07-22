@@ -1,5 +1,8 @@
 /*
  * $Log: vsetpass.c,v $
+ * Revision 1.6  2021-07-22 15:17:42+05:30  Cprogrammer
+ * conditional define of _XOPEN_SOURCE
+ *
  * Revision 1.5  2020-09-28 13:28:36+05:30  Cprogrammer
  * added pid in debug statements
  *
@@ -21,7 +24,9 @@
 #include "config.h"
 #endif
 #ifdef HAVE_UNISTD_H
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE
+#endif
 #include <unistd.h>
 #endif
 #ifdef HAVE_QMAIL
@@ -51,7 +56,7 @@
 #include "getpeer.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vsetpass.c,v 1.5 2020-09-28 13:28:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetpass.c,v 1.6 2021-07-22 15:17:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE

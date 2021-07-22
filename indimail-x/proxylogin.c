@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 1.7  2021-07-22 15:17:27+05:30  Cprogrammer
+ * conditional define of _XOPEN_SOURCE
+ *
  * Revision 1.6  2021-03-04 12:45:18+05:30  Cprogrammer
  * added option to specify CAFILE and match host with common name
  *
@@ -24,7 +27,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 1.6 2021-03-04 12:45:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 1.7 2021-07-22 15:17:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -32,7 +35,9 @@ static char     sccsid[] = "$Id: proxylogin.c,v 1.6 2021-03-04 12:45:18+05:30 Cp
 #include <ctype.h>
 #endif
 #ifdef HAVE_UNISTD_H
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE
+#endif
 #include <unistd.h>
 #endif
 #ifdef HAVE_QMAIL

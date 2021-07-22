@@ -1,5 +1,8 @@
 /*
  * $Log: authpgsql.c,v $
+ * Revision 1.7  2021-07-22 15:16:45+05:30  Cprogrammer
+ * conditional define of _XOPEN_SOURCE
+ *
  * Revision 1.6  2020-09-28 13:28:08+05:30  Cprogrammer
  * added pid in debug statements
  *
@@ -30,7 +33,9 @@
 #include "vlimits.h"
 #endif
 #ifdef HAVE_UNISTD_H
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE
+#endif
 #include <unistd.h>
 #endif
 #ifdef HAVE_QMAIL
@@ -54,7 +59,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authpgsql.c,v 1.6 2020-09-28 13:28:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authpgsql.c,v 1.7 2021-07-22 15:16:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_PGSQL

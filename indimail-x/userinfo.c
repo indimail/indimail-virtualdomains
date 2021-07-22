@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 1.6  2021-07-22 15:17:31+05:30  Cprogrammer
+ * conditional define of _XOPEN_SOURCE
+ *
  * Revision 1.5  2020-10-13 18:35:14+05:30  Cprogrammer
  * initialize struct tm for strptime() value too big error
  *
@@ -20,7 +23,9 @@
 #include "config.h"
 #endif
 #ifdef HAVE_TIME_H
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE
+#endif
 #include <time.h>
 #endif
 #ifdef HAVE_UNISTD_H
@@ -77,7 +82,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 1.5 2020-10-13 18:35:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 1.6 2021-07-22 15:17:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
