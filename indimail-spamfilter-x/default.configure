@@ -13,7 +13,7 @@ case "$SYSTEM" in
   sbindir=/usr/local/sbin
   mandir=/usr/local/man
   sysconfdir=/usr/local/etc/indimail
-  servicedir=/usr/local/libexec/indimail/service
+  servicedir=/usr/local/etc/indimail/sv
   CPPFLAGS="-I/usr/local/include"
   LDFLAGS="-L/usr/local/lib"
   for i in db4 db5
@@ -44,7 +44,7 @@ case "$SYSTEM" in
   sbindir=/usr/local/sbin
   mandir=/usr/local/share/man
   sysconfdir=/usr/local/etc/indimail
-  servicedir=/usr/local/libexec/indimail/service
+  servicedir=/usr/local/etc/indimail/sv
   extra="--with-libdb-prefix=/opt/local/lib/db48/"
   export CPPFLAGS="-I/opt/local/include -I/opt/local/include/db48"
   export LDFLAGS="-L/opt/local/lib -L/opt/local/lib/db48"

@@ -13,7 +13,7 @@ case "$SYSTEM" in
   sysconfdir=/usr/local/etc/indimail
   sysconfdir=/usr/local/etc/indimail
   mandir=/usr/local/man
-  servicedir=/usr/local/libexec/indimail/service
+  servicedir=/usr/local/etc/indimail/sv
   base_path=/home/mail
   libdir=/usr/local/lib
   pkgconfigdir=/usr/local/libdata/pkgconfig
@@ -56,7 +56,7 @@ case "$SYSTEM" in
   sbindir=/usr/local/sbin
   sysconfdir=/usr/local/etc/indimail
   mandir=/usr/local/share/man
-  servicedir=/usr/local/libexec/indimail/service
+  servicedir=/usr/local/etc/indimail/sv
   base_path=/Users/mail
   libdir=/opt/local/lib
   pkgconfigdir=$libdir/pkgconfig
