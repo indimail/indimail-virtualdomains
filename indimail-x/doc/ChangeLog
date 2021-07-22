@@ -63,6 +63,12 @@ Release @version@-@release@ Start 14/02/2021
 35. adminCmmd.c, monkey.c: conditional compilation (alpine linux)
 36. tcpopen.c: deprecated rresvport
 37. configure.ac: check for asm/ioctl.h, rresvport function
+38. authpgsql.c default.configure doc/ChangeLog incrypt.c
+    passwd_policy.c proxylogin.c userinfo.c vchkpass.c
+    vlimit.c vsetpass.c: conditionally define _XOPEN_SOURCE
+39. default.configure: use /usr/local/etc/indimail/sv as
+    servicedir for darwin/freebsd
+
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020
