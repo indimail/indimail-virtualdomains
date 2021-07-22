@@ -4828,8 +4828,10 @@ IndiMail has a git repository at [here](https://github.com/mbhangui/indimail-vir
 
 ## IRC / Matrix
 
-* Join me https://matrix.to/#/#indimail:matrix.org
+* [Matrix Invite Link #indimail:matrix.org](https://matrix.to/#/#indimail:matrix.org)
 * IndiMail has an IRC channel #indimail-mta
+
+The matrix room and libera.chat channel have been bridged so joining either one should be sufficient.
 
 ## Mailing list
 
