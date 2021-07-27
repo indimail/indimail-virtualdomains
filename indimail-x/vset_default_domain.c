@@ -21,6 +21,7 @@
 #endif
 #include "ip_map.h"
 #include "host_in_locals.h"
+#include "vset_default_domain.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: vset_default_domain.c,v 1.2 2020-04-01 18:59:10+05:30 Cprogrammer Exp mbhangui $";
@@ -33,25 +34,26 @@ die_nomem()
 	_exit(111);
 }
 
+static stralloc defDomain = {0};
 /*
  * Set the default domain from either the DEFAULT_DOMAIN or ip_map
  */
-void
-vset_default_domain(stralloc *domain)
+char *
+vset_default_domain()
 {
 	char           *p;
 #ifdef IP_ALIAS_DOMAINS
 	static stralloc host = {0};
 #endif
 
-	if (domain->len)
-		return;
+	if (defDomain.len)
+		return defDomain.s;
 	if ((p = (char *) env_get("INDIMAIL_DOMAIN"))) {
-		if (!stralloc_copys(domain, p) ||
-				!stralloc_0(domain))
+		if (!stralloc_copys(&defDomain, p) ||
+				!stralloc_0(&defDomain))
 			die_nomem();
-		domain->len--;
-		return;
+		defDomain.len--;
+		return defDomain.s;
 	}
 #ifdef IP_ALIAS_DOMAINS
 	p = (char *) env_get("TCPLOCALIP");
@@ -62,19 +64,20 @@ vset_default_domain(stralloc *domain)
 	}
 	if (vget_ip_map(p, &host) == 0 && !host_in_locals(host.s)) {
 		if (host.len) {
-			if (!stralloc_copy(domain, &host) ||
-					!stralloc_0(domain))
+			if (!stralloc_copy(&defDomain, &host) ||
+					!stralloc_0(&defDomain))
 				die_nomem();
-			domain->len--;
+			defDomain.len--;
 		}
-		return;
+		return defDomain.s;
 	}
 #endif
-	if (!domain->len) {
+	if (!defDomain.len) {
 		getEnvConfigStr(&p, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
-		if (!stralloc_copys(domain, p) ||
-				!stralloc_0(domain))
+		if (!stralloc_copys(&defDomain, p) ||
+				!stralloc_0(&defDomain))
 			die_nomem();
-		domain->len--;
+		defDomain.len--;
 	}
+	return defDomain.s;
 }
