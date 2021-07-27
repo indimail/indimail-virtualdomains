@@ -1,5 +1,8 @@
 /*
  * $Log: smtp_port.c,v $
+ * Revision 1.5  2021-07-27 18:07:11+05:30  Cprogrammer
+ * set default domain using vset_default_domain
+ *
  * Revision 1.4  2020-04-01 18:57:55+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -29,15 +32,15 @@
 #include <str.h>
 #include <strerr.h>
 #include <scan.h>
-#include <getEnvConfig.h>
 #endif
 #include "indimail.h"
 #include "get_local_ip.h"
 #include "findhost.h"
 #include "create_table.h"
+#include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: smtp_port.c,v 1.4 2020-04-01 18:57:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: smtp_port.c,v 1.5 2021-07-27 18:07:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -70,7 +73,7 @@ smtp_port(char *srchost, char *domain, char *hostid)
 	if (open_central_db(0))
 		return (default_port);
 	if (!domain || !*domain) {
-		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+		ptr = vset_default_domain();
 		if (!stralloc_copys(&Domain, ptr) || !stralloc_0(&Domain))
 			die_nomem();
 		Domain.len--;

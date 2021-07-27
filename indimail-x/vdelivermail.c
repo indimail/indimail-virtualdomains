@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 1.9  2021-07-27 18:07:23+05:30  Cprogrammer
+ * set default domain using vset_default_domain
+ *
  * Revision 1.8  2021-06-11 17:01:38+05:30  Cprogrammer
  * replaced makeseekable() with mktempfile() from libqmail
  *
@@ -88,9 +91,10 @@
 #include "strToPw.h"
 #include "qmail_remote.h"
 #include "get_message_size.h"
+#include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 1.8 2021-06-11 17:01:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 1.9 2021-07-27 18:07:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vdelivermail: fatal: "
@@ -148,9 +152,8 @@ get_arguments(int argc, char **argv, char **user, char **domain, char **user_ext
 				*user = "postmaster";
 		}
 		if (!(tmpstr = env_get("HOST")))
-			*domain = ((tmpstr = env_get("DEFAULT_DOMAIN")) ? tmpstr : DEFAULT_DOMAIN);
-		else
-			*domain = tmpstr;
+			tmpstr = vset_default_domain();
+		*domain = tmpstr;
 		if (remove_quotes(user)) {
 			strerr_warn3("vdelivermail: invalid user [", *user, "]", 0);
 			vdl_exit(100);

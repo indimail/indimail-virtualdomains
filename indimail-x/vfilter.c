@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 1.6  2021-07-27 18:07:39+05:30  Cprogrammer
+ * set default domain using vset_default_domain
+ *
  * Revision 1.5  2021-06-11 17:01:55+05:30  Cprogrammer
  * replaced Makeargs(), makeseekable() with makeargs(), mktempfile() from libqmail
  *
@@ -21,7 +24,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 1.5 2021-06-11 17:01:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 1.6 2021-07-27 18:07:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -53,7 +56,6 @@ static char     sccsid[] = "$Id: vfilter.c,v 1.5 2021-06-11 17:01:55+05:30 Cprog
 #include <qprintf.h>
 #include <error.h>
 #include <sgetopt.h>
-#include <getEnvConfig.h>
 #endif
 #include "common.h"
 #include "makeargs.h"
@@ -70,13 +72,13 @@ static char     sccsid[] = "$Id: vfilter.c,v 1.5 2021-06-11 17:01:55+05:30 Cprog
 #include "evaluate.h"
 #include "parse_email.h"
 #include "lowerit.h"
-#include <getEnvConfig.h>
 #include "vfilter_header.h"
 #include "vfilter_select.h"
 #include "vfilter_display.h"
 #include "getAddressBook.h"
 #include "addressToken.h"
 #include "mktempfile.h"
+#include "vset_default_domain.h"
 
 #define FATAL   "vfilter: fatal: "
 #define WARN    "vfilter: warning: "
@@ -102,7 +104,7 @@ printBounce(char *bounce)
 
 	if (str_diffn(bounce, BOUNCE_ALL, str_len(BOUNCE_ALL) + 1)) {
 		out("vfilter", "Hi. This is the IndiMail MDA for ");
-		out("vfilter", (ptr = env_get("HOST")) ? ptr : DEFAULT_DOMAIN);
+		out("vfilter", (ptr = env_get("HOST")) ? ptr : vset_default_domain());
 		out("vfilter", "\n");
 		out("vfilter", "I'm afraid I cannot accept your message as a configured filter has decided\n");
 		out("vfilter", "to reject this mail\n");
@@ -161,7 +163,7 @@ execMda(char **argptr, char **mda)
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 1.5 $", *mda;
+	char           *revision = "$Revision: 1.6 $", *mda;
 	static stralloc XFilter = {0};
 	pid_t           pid;
 	int             i, tmp_stat, wait_status;
@@ -316,7 +318,7 @@ get_options(int argc, char **argv, char **bounce, stralloc *emailid, stralloc *u
 			}
 		}
 		if (local) {
-			getEnvConfigStr(&tmpstr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+			tmpstr = vset_default_domain();
 			if (!stralloc_copys(domain, tmpstr) || !stralloc_0(domain))
 				die_nomem();
 			domain->len--;
