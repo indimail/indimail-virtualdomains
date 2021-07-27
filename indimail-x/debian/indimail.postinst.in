@@ -253,18 +253,16 @@ if [ $noproxy -eq 0 ] ; then
   fi
   ${prefix}/sbin/svctool --imap=4143 --servicedir=$servicedir --localip=0 \
 	  --maxdaemons=40 --maxperip=25 --infifo=infifo \
-	  --default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=143 \
-	  --starttls
+	  --memory=$imap_pop3_mem --proxy=143 --starttls
   ${prefix}/sbin/svctool --imap=9143 --servicedir=$servicedir --localip=0 \
 	  --maxdaemons=40 --maxperip=25 --infifo=infifo \
-	  --default-domain=${default_domain} --memory=$imapspop3_mem --proxy=143 --ssl
+	  --memory=$imapspop3_mem --proxy=143 --ssl
   ${prefix}/sbin/svctool --pop3=4110 --servicedir=$servicedir --localip=0 \
 	  --maxdaemons=40 --maxperip=25 --infifo=infifo \
-	  --default-domain=${default_domain} --memory=$imap_pop3_mem --proxy=110 \
-	  --starttls
+	  --memory=$imap_pop3_mem --proxy=110 --starttls
   ${prefix}/sbin/svctool --pop3=9110 --servicedir=$servicedir --localip=0 \
 	  --maxdaemons=40 --maxperip=25 --infifo=infifo \
-	  --default-domain=${default_domain} --memory=$imapspop3_mem --proxy=110 --ssl
+	  --memory=$imapspop3_mem --proxy=110 --ssl
 
   # add courier-imap auth module authindi
   set +e
@@ -333,7 +331,7 @@ if [ -x ${mysqlPrefix}/libexec/mysqld -o -x ${mysqlPrefix}/sbin/mysqld ] ; then
     --databasedir=${indimaildir}/mysqldb --base_path=${mbase} --mysqlsocket="${mysqlSocket}".tmp
   # MySQL Supervise creation
   ${prefix}/sbin/svctool --mysql=3306 --servicedir=${servicedir} --mysqlPrefix=${mysqlPrefix} \
-    --databasedir=${indimaildir}/mysqldb --config=${sysconfdir}/indimail.cnf --default-domain=${default_domain}
+    --databasedir=${indimaildir}/mysqldb --config=${sysconfdir}/indimail.cnf
   if [ ! -f ${indimaildir}/mysqldb/data/indimail/indimail.frm -a ! -f ${indimaildir}/mysqldb/data/indimail/indimail.ibd ] ; then
     error=1
   fi
