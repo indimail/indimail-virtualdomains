@@ -68,7 +68,13 @@ Release @version@-@release@ Start 14/02/2021
     vlimit.c vsetpass.c: conditionally define _XOPEN_SOURCE
 39. default.configure: use /usr/local/etc/indimail/sv as
     servicedir for darwin/freebsd
-
+- 27/07/2021
+40. deliver_mail.c findhost.c LoadDbInfo.c Login_Tasks.c parse_email.c
+    smtp_port.c vdelivermail.c vfilter.c set default domain using
+    vset_default_domain
+41. ProcessInFifo.c: use getEnvConfigStr to set default domain
+42. vset_default_domain.c: changed vset_default_domain to return
+    default domain
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020

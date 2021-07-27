@@ -32,6 +32,8 @@ o maildrop version upgraded to 3.0.3
 - 13/07/2021
 17. indimail-access.spec: removed chkconfig from Requires
 - 18/07/2021 - indimail-3.4.0
+18. indimail-access.spec, debian/postinst: use default domain from global_vars
+    instead of local env variable
 
 *
 Release 1.0-1.1 Start 03/06/2020
