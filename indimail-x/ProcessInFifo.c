@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.11  2021-07-27 18:10:43+05:30  Cprogrammer
+ * use getEnvConfigStr to set default domain
+ *
  * Revision 1.10  2021-06-09 17:04:06+05:30  Cprogrammer
  * BUG: Fixed read failing on fifo because of O_NDELAY flag
  *
@@ -107,7 +110,7 @@
 #include "FifoCreate.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.10 2021-06-09 17:04:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.11 2021-07-27 18:10:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -1306,10 +1309,9 @@ ProcessInFifo(int instNum)
 				break;
 			case PWD_QUERY:
 				i = str_rchr(email, '@');
-				if (!email[i]) {
-					if (!(real_domain = env_get("DEFAULT_DOMAIN")))
-						real_domain = DEFAULT_DOMAIN;
-				} else
+				if (!email[i])
+					getEnvConfigStr(&real_domain, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+				else
 					real_domain = email + i + 1;
 				if (!use_btree || !(in = mk_in_entry(email)))
 					pw = PwdInLookup(email);
