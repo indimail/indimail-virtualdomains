@@ -98,9 +98,9 @@ include_HEADERS = addaliasdomain.h add_control.h add_domain_assign.h addressToke
 	vfilter_display.h vfilter_filterNo.h vfilter_header.h vfilter_insert.h \
 	vfilter_select.h vfilter_update.h vfstab.h vget_lastauth.h vgetpasswd.h \
 	vhostid_delete.h vhostid_insert.h vhostid_select.h vhostid_update.h VlimitInLookup.h \
-	vlimits.h vmake_maildir.h vpriv.h vquota_select.h vset_lastauth.h vset_lastdeliver.h \
-	vsmtp_delete_domain.h vsmtp_delete.h vsmtp_insert.h vsmtp_select.h vsmtp_update.h \
-	vupdate_rules.h wildmat.h indimail_config.h
+	vlimits.h vmake_maildir.h vpriv.h vquota_select.h vset_default_domain.h \
+	vset_lastauth.h vset_lastdeliver.h vsmtp_delete_domain.h vsmtp_delete.h vsmtp_insert.h \
+	vsmtp_select.h vsmtp_update.h vupdate_rules.h wildmat.h indimail_config.h
 includedir=@prefix@/include/indimail
 
 setuid_list = bin/printdir bin/vaddaliasdomain bin/vadddomain bin/vadduser bin/vbulletin \
