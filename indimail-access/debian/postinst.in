@@ -255,16 +255,16 @@ fi
 if [ $nocourierimap -eq 0 ] ; then
 	${prefix}/sbin/svctool --imap=143 --servicedir=$servicedir --localip=0 \
 		--maxdaemons=40 --maxperip=25 --infifo=infifo \
-		--starttls --default-domain=${default_domain} --memory=$imap_pop3_mem
+		--starttls --memory=$imap_pop3_mem
 	${prefix}/sbin/svctool --imap=993 --servicedir=$servicedir --localip=0 \
 		--maxdaemons=40 --maxperip=25 --infifo=infifo \
-		--default-domain=${default_domain} --memory=$imapspop3_mem --ssl
+		--memory=$imapspop3_mem --ssl
 	${prefix}/sbin/svctool --pop3=110 --servicedir=$servicedir --localip=0 \
 		--maxdaemons=40 --maxperip=25 --infifo=infifo \
-		--starttls --default-domain=${default_domain} --memory=$imap_pop3_mem
+		--starttls --memory=$imap_pop3_mem
 	${prefix}/sbin/svctool --pop3=995 --servicedir=$servicedir --localip=0 \
 		--maxdaemons=40 --maxperip=25 --infifo=infifo \
-		--default-domain=${default_domain} --memory=$imapspop3_mem --ssl
+		--memory=$imapspop3_mem --ssl
 
 	# add courier-imap auth module authindi
 	echo "adding authindi as IMAP/POP3 auth module"

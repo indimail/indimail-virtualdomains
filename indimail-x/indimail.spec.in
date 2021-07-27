@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.92 2021-07-17 08:39:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.93 2021-07-27 18:22:20+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1157,16 +1157,16 @@ if [ %noproxy -eq 0 ] ; then
 %global imapspop3_mem 52428800
 %endif
 %{_prefix}/sbin/svctool --imap=4143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-  --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imap_pop3_mem} \
+  --maxperip=25 --query-cache --memory=%{imap_pop3_mem} \
   --proxy=143 --starttls --tlsprog=%{_prefix}/bin/sslerator --infifo=infifo
 %{_prefix}/sbin/svctool --imap=9143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-  --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imapspop3_mem} \
+  --maxperip=25 --query-cache --memory=%{imapspop3_mem} \
   --proxy=143 --ssl --infifo=infifo
 %{_prefix}/sbin/svctool --pop3=4110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-  --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imap_pop3_mem} \
+  --maxperip=25 --query-cache --memory=%{imap_pop3_mem} \
   --proxy=110 --starttls --tlsprog=%{_prefix}/bin/sslerator --infifo=infifo
 %{_prefix}/sbin/svctool --pop3=9110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-  --maxperip=25 --query-cache --default-domain=$default_domain --memory=%{imapspop3_mem} \
+  --maxperip=25 --query-cache --memory=%{imapspop3_mem} \
   --proxy=110 --ssl --infifo=infifo
 
 # add courier-imap auth module authindi
@@ -1241,7 +1241,7 @@ fi
 
 echo "Creating default mysql.host, tcprules, bogofilter-qfe, default domain dir"
 %{_prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
-  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket} --default-domain=$default_domain
+  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
 
 # MySQL
 if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld -o -x %{mysqlPrefix}/bin/mysqld ] ; then
@@ -1255,7 +1255,7 @@ if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld -o -x %{m
       --databasedir=%{indimaildir}/mysqldb --base_path=%{mbase} --mysqlsocket="%{mysqlSocket}".tmp
   # MySQL Supervise creation
   %{_prefix}/sbin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
-    --databasedir=%{indimaildir}/mysqldb --config=%{sysconfdir}/indimail.cnf --default-domain=$default_domain
+    --databasedir=%{indimaildir}/mysqldb --config=%{sysconfdir}/indimail.cnf
   if [ ! -f %{indimaildir}/mysqldb/data/indimail/indimail.frm -a ! -f %{indimaildir}/mysqldb/data/indimail/indimail.ibd ] ; then
     error=1
   fi
