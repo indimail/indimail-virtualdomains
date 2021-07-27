@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbInfo.c,v $
+ * Revision 1.12  2021-07-27 18:05:36+05:30  Cprogrammer
+ * set default domain using vset_default_domain
+ *
  * Revision 1.11  2020-10-18 07:51:37+05:30  Cprogrammer
  * initialize last_error_len field of dbinfo
  *
@@ -90,9 +93,10 @@
 #include "isvirtualdomain.h"
 #include "common.h"
 #include "check_group.h"
+#include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.11 2020-10-18 07:51:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.12 2021-07-27 18:05:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static DBINFO **loadMCDInfo(int *);
@@ -911,7 +915,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 			localhost = "localhost";
 		str_copyb((*rhostsptr)->mdahost, localhost, DBINFO_BUFF);
 		str_copyb((*rhostsptr)->server, mysqlhost, DBINFO_BUFF);
-		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+		ptr = vset_default_domain();
 		str_copyb((*rhostsptr)->domain, ptr, DBINFO_BUFF);
 		scan_int(mysql_port, &(*rhostsptr)->port);
 		(*rhostsptr)->socket = mysql_socket;

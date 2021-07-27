@@ -1,5 +1,8 @@
 /*
  * $Log: parse_email.c,v $
+ * Revision 1.3  2021-07-27 18:06:44+05:30  Cprogrammer
+ * set default domain using vset_default_domain
+ *
  * Revision 1.2  2020-04-01 18:57:26+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -15,10 +18,11 @@
 #include <str.h>
 #include <getEnvConfig.h>
 #endif
+#include "vset_default_domain.h"
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: parse_email.c,v 1.2 2020-04-01 18:57:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: parse_email.c,v 1.3 2021-07-27 18:06:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -53,7 +57,7 @@ parse_email(char *email, stralloc *user, stralloc *domain)
 	if (*ptr)
 		ptr++;
 	else
-		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+		ptr = vset_default_domain();
 	if (!stralloc_copys(domain, ptr) || !stralloc_0(domain))
 		return (-1);
 	domain->len--;

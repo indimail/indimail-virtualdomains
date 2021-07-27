@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 1.8  2021-07-27 18:04:55+05:30  Cprogrammer
+ * set default domain using vset_default_domain
+ *
  * Revision 1.7  2021-06-11 16:59:11+05:30  Cprogrammer
  * replaced makeseekable() with mktempfile() from libqmail
  *
@@ -77,10 +80,11 @@
 #include "MailQuotaWarn.h"
 #include "r_mkdir.h"
 #include "udpopen.h"
+#include "vset_default_domain.h"
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 1.7 2021-06-11 16:59:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 1.8 2021-07-27 18:04:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -911,7 +915,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 				user.len = i;
 				domain = user.s + i + 1;
 			} else
-				getEnvConfigStr(&domain, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+				domain = vset_default_domain();
 		}
 		if (!str_diffn(quota, "AUTO", 5)) {
 			maildirquota = (char *) 0;

@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 1.10  2021-07-27 18:05:27+05:30  Cprogrammer
+ * set default domain using vset_default_domain
+ *
  * Revision 1.9  2020-04-30 19:26:37+05:30  Cprogrammer
  * changed scope of ssin to local
  *
@@ -49,7 +52,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 1.9 2020-04-30 19:26:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 1.10 2021-07-27 18:05:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -83,6 +86,7 @@ die_nomem()
 #include "variables.h"
 #include "set_mysql_options.h"
 #include "findhost.h"
+#include "vset_default_domain.h"
 
 static char     inbuf[512];
 static char     strnum[FMT_ULONG];
@@ -342,14 +346,14 @@ findhost(char *email, int connect_primarydb)
 			if (!(real_domain = get_real_domain(domain.s)))
 				return ((char *) 0);
 		} else {
-			getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+			ptr = vset_default_domain();
 			if (!stralloc_copys(&domain, ptr) || !stralloc_0(&domain))
 				die_nomem();
 			real_domain = domain.s;
 		}
 		user.s[len] = 0;
 	} else {
-		getEnvConfigStr(&ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+		ptr = vset_default_domain();
 		if (!stralloc_copys(&domain, ptr) || !stralloc_0(&domain))
 			die_nomem();
 		domain.len--;

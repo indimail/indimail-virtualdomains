@@ -1,5 +1,8 @@
 /*
  * $Log: Login_Tasks.c,v $
+ * Revision 1.4  2021-07-27 18:06:28+05:30  Cprogrammer
+ * set default domain using vset_default_domain
+ *
  * Revision 1.3  2020-04-01 18:56:52+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -61,9 +64,10 @@
 #include "MailQuotaWarn.h"
 #include "user_over_quota.h"
 #include "vset_lastdeliver.h"
+#include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: Login_Tasks.c,v 1.3 2020-04-01 18:56:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: Login_Tasks.c,v 1.4 2021-07-27 18:06:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -97,7 +101,7 @@ Login_Tasks(pw, User, ServiceType)
 			return (1);
 		domain = user.s + i + 1;
 	} else {
-		getEnvConfigStr(&domain, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
+		domain = vset_default_domain();
 		case_lowers(domain);
 		if (!stralloc_copy(&fqemail, &user) ||
 				!stralloc_append(&fqemail, "@") ||
