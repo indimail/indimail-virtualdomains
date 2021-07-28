@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.12  2021-07-28 12:19:56+05:30  Cprogrammer
+ * shortened display in logs on signal
+ *
  * Revision 1.11  2021-07-27 18:10:43+05:30  Cprogrammer
  * use getEnvConfigStr to set default domain
  *
@@ -110,7 +113,7 @@
 #include "FifoCreate.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.11 2021-07-27 18:10:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.12 2021-07-28 12:19:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -751,7 +754,7 @@ sig_hand(sig, code, scp, addr)
 			logfunc("ProcessInFifo", strnum);
 			logfunc("ProcessInFifo", " INFIFO ");
 			logfunc("ProcessInFifo", fifo_path ? fifo_path : "socket");
-			logfunc("ProcessInFifo", ", Got SIGUSR1 Dumping stats\n");
+			logfunc("ProcessInFifo", ", Dumping stats\n");
 			/*- flow through */
 		case SIGTERM:
 			cur_time = time(0);
@@ -823,7 +826,7 @@ sig_hand(sig, code, scp, addr)
 			logfunc("ProcessInFifo", strnum);
 			logfunc("ProcessInFifo", " INFIFO ");
 			logfunc("ProcessInFifo", fifo_path ? fifo_path : "socket");
-			logfunc("ProcessInFifo", ", Got SIGHUP Reconfiguring\n");
+			logfunc("ProcessInFifo", ", Reconfiguring\n");
 			(tcpserver ? errflush : flush) ("ProcessInFifo");
 			close_db();
 #ifdef QUERY_CACHE
