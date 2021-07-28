@@ -4816,9 +4816,7 @@ Currently, the list of supported distributions for IndiMail is
 
 ## Docker / Podman Repository
 
-The [docker repository](https://hub.docker.com/r/cprogrammer/indimail "Docker Repository") can be used to pull docker/podman images for indimail.
-
-For latest details refer to [README](https://github.com/mbhangui/docker/blob/master/README.md "Docker README ")
+Earlier I used to provide docker / podman container images on [docker hub](https://hub.docker.com/u/cprogrammer). But recently docker has removed the ability (without any warning) to connect with a github account unless you pay them a hefty sum every month. I cannot afford this and also as a principle, I no longer wlll support docker. I have deleted all containers that were hosted there. You can build your own images instead.  Refer to [README](https://github.com/mbhangui/docker/blob/master/README.md) on how to build your own container images. If you cannot build it on your own, ping me and I will be happy to build it for you.
 
 ## GIT Repository
 
