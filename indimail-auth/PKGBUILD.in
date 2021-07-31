@@ -214,7 +214,6 @@ post_upgrade() {
     /sbin/ldconfig
   fi
   # we are doing upgrade
-  (
   if [ -f ${_sysconfdir}/perm_list.auth ] ; then
     echo "Fixing Permissions"
     (
