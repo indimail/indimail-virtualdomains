@@ -1,6 +1,6 @@
 COFLAGS=-z+05:30
 prefix=/usr
-sysconfdir=/etc
+sysconfdir=/etc/indimail
 shareddir=/usr/share/indimail
 libexecdir=/usr/libexec/indimail
 mandir=/usr/share/man
