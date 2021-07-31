@@ -1,6 +1,6 @@
 COFLAGS=-z+05:30
 prefix=/usr
-sysconfdir=/etc/indimail
+sysconfdir=/etc
 shareddir=/usr/share/indimail
 libexecdir=/usr/libexec/indimail
 mandir=/usr/share/man
@@ -30,7 +30,8 @@ edit = sed \
 	-e 's,@pam_multi_version\@,$(pam_multi_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
-all: indimail-auth.spec indimail-auth.changes debian/Makefile PKGBUILD
+all: indimail-auth.spec indimail-auth.changes debian/Makefile PKGBUILD \
+perm_list.auth
 
 indimail-auth.spec: indimail-auth.spec.in \
 conf-version conf-release doc/ChangeLog conf-email \
@@ -46,6 +47,9 @@ debian/Makefile: debian/Makefile.in conf-version conf-release \
 ../nssd-x/conf-version ../pam-multi-x/conf-version
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
 	$(edit) $@.in > $@
+perm_list.auth: perm_list.in
+	$(edit) perm_list.in > $@
 clean:
-	/bin/rm -f indimail-auth.spec indimail-auth.changes PKGBUILD debian/Makefile
+	/bin/rm -f indimail-auth.spec indimail-auth.changes PKGBUILD \
+	debian/Makefile perm_list.auth
 

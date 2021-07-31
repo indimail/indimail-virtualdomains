@@ -19,3 +19,4 @@ debian/dummy.tar.gz
 debian/*.dsc
 indimail-auth.changes
 PKGBUILD
+perm_list.auth
