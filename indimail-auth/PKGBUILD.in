@@ -27,11 +27,11 @@ _shareddir=@shareddir@
 _mandir=@mandir@
 _servicedir=@servicedir@
 _logdir=@logdir@
-_defaultDomain=@defaultDomain@
+_defaultDomain=indimail.org
 _build_on_obs=0
 _mysqlPrefix=/usr
 _mysqlSocket=/var/run/mysqld/mysqld.sock
-_pam_moduledir=/lib/security
+_pam_moduledir=/usr/lib/security
 _pam_confdir=@pam_confdir@
 
 build() {
@@ -86,9 +86,50 @@ package() {
   ) > ${pkgname}-release
   install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
   install -D -m 0644 ${pkgname}-release "$pkgdir"${_sysconfdir}/${pkgname}-release
+  install -D -m 0644 perm_list.auth "${pkgdir}"${_sysconfdir}/perm_list.auth
 }
 
 #### INSTALL SCRIPTS ####
+_prefix=@prefix@
+_sysconfdir=@sysconfdir@
+_servicedir=@servicedir@
+_logdir=@logdir@
+_mysqlSocket=/var/run/mysqld/mysqld.sock
+
+fixperms()
+{
+  if [ $# -eq 3 ] ; then # directory
+    lin=$2
+    file=$3
+    if [ ! -d $file ] ; then
+      return 0
+    fi
+  elif [ $# = 2 ] ; then # file
+    lin=$1
+    file=$2
+    if [ ! -f $file ] ; then
+      return 0
+    fi
+  fi
+  perm=`echo $lin|cut -d\( -f2 | cut -d, -f1`
+  perm_f1=`echo $perm | cut -c1`
+  own=`echo $lin|cut -d\( -f2 | cut -d, -f2`
+  grp=`echo $lin|cut -d\( -f2 | cut -d, -f3|cut -d\) -f1`
+  if [ -f $file ] ; then
+    if [ $perm_f1 -eq 0 ] ; then # perm_f1 is 4755, 0644
+      /bin/chown $own:$grp $file
+      /bin/chmod $perm $file
+    else
+      echo $file
+      /bin/chown $own:$grp $file
+      /bin/chmod $perm $file
+    fi
+  elif [ -d $file ] ; then
+    /bin/chown $own:$grp $file
+    /bin/chmod $perm $file
+  fi
+}
+
 pre_install() {
   if [ -d /run ] ; then
     rundir=/run/svscan
@@ -106,6 +147,18 @@ pre_install() {
 }
 
 post_install() {
+  if [ -f ${_sysconfdir}/perm_list.auth ] ; then
+    echo "Fixing Permissions"
+    (
+    /bin/grep -v "^#" ${_sysconfdir}/perm_list.auth | while read line
+    do
+      if [ " $line" = " " ] ; then
+        continue
+      fi
+      fixperms $line
+    done
+    ) > ${_sysconfdir}/indimail-access-stat.override
+  fi
   echo "Doing Post Install"
   echo ""
   echo " 1. Configure ${_logdir} for multilog"
@@ -159,6 +212,20 @@ post_upgrade() {
   fi
   if [ "${_prefix}" != "/usr" ] ; then
     /sbin/ldconfig
+  fi
+  # we are doing upgrade
+  (
+  if [ -f ${_sysconfdir}/perm_list.auth ] ; then
+    echo "Fixing Permissions"
+    (
+    /bin/grep -v "^#" ${_sysconfdir}/perm_list.auth | while read line
+    do
+      if [ " $line" = " " ] ; then
+        continue
+      fi
+      fixperms $line
+    done
+    ) > ${_sysconfdir}/indimail-access-stat.override
   fi
   ${_prefix}/sbin/svctool --servicedir=${_servicedir} --refreshsvc="${_servicedir}/pwdlookup"
   ${_prefix}/bin/svok ${_servicedir}/pwdlookup

@@ -63,6 +63,13 @@ package() {
   install -D -m 0644 perm_list.imap "${pkgdir}"${_sysconfdir}/perm_list.imap
 }
 #### INSTALL SCRIPTS ####
+_prefix=@prefix@
+_libexecdir=@libexecdir@
+_servicedir=@servicedir@
+_logdir=@logdir@
+_defaultDomain=@defaultDomain@
+_build_on_obs=0
+_nodksignatures=0
 
 fixperms()
 {
@@ -98,7 +105,7 @@ fixperms()
   fi
 }
 
-stop_servce() {
+stop_service() {
   if [ -d /run ] ; then
     rundir=/run/svscan
   elif [ -d /var/run ] ; then
@@ -133,7 +140,7 @@ post_install() {
       fi
       fixperms $line
     done
-    ) > ${sysconfdir_}/indimail-access-stat.override
+    ) > ${_sysconfdir}/indimail-access-stat.override
   fi
   echo "Doing Post Install"
   echo ""
@@ -306,7 +313,7 @@ post_upgrade() {
       fi
       fixperms $line
     done
-    ) > ${sysconfdir_}/indimail-access-stat.override
+    ) > ${_sysconfdir}/indimail-access-stat.override
   fi
   echo "doing post upgrade activities"
   if [ "${_prefix}" != "/usr" ] ; then

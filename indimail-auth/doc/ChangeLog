@@ -65,3 +65,8 @@ o suport dovecot authentication
 15. updated configure.ac
 16. nssd.c: replace sys/poll.h with poll.h
 17. util.c: include sys/select.h
+- 31/07/2021
+18. PKGBUILD.in: Added missing variable definitions
+19. Makefile.am (pam-multi, nssd): use sbindir for sbin programs to fix
+    installation on arch linux
+40. default.configure: fixed pam module directory for arch linux

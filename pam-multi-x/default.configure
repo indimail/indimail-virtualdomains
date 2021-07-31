@@ -6,7 +6,7 @@ if [ ! -f conf-release ] ; then
   echo 1.1 > conf-release
 fi
 if [ ! -d m4 ] ; then
-	mkdir -p m4
+  mkdir -p m4
 fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
@@ -36,7 +36,9 @@ case "$SYSTEM" in
     sbindir=/usr/sbin
   fi
   arch=$(uname -m)
-  if [ -d /lib/security ] ; then
+  if [ -d /usr/lib/security ] ; then #arch linux
+    moduledir=/usr/lib/security
+  elif [ -d /lib/security ] ; then
     moduledir=/lib/security
   elif [ -d /lib64/security ] ; then
     moduledir=/lib64/security

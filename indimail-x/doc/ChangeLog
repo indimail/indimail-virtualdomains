@@ -75,6 +75,8 @@ Release @version@-@release@ Start 14/02/2021
 41. ProcessInFifo.c: use getEnvConfigStr to set default domain
 42. vset_default_domain.c: changed vset_default_domain to return
     default domain
+- 31/07/2021
+43. PKGBUILD.in: Added missing variable definitions
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020

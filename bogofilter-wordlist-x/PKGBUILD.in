@@ -27,7 +27,6 @@ build() {
 }
 
 package() {
-  depends=('indimail-spamfilter')
   cd $srcdir/$pkgname-${pkgver}
   make DESTDIR=${pkgdir} install
   cd $srcdir

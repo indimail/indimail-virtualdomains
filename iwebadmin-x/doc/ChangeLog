@@ -4,6 +4,8 @@ Release @version@-@release@ Start 13/03/2021
 01. Changes for making code github action, added workflow for CI
 02. compile without using mysql (removed mysql-devel from BuildRequires"
 - 18/07/2021 - indimail-3.4.0
+- 31/07/2021
+03. PKGBUILD.in: Added missing variable definitions
 
 * Mon Jul 15 2019 13:00:14 +0530 mbhangui@gmail.com 2.0-1.1%{?dist}
 Release 2.0 Start 27/04/2019

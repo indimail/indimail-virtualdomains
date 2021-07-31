@@ -713,6 +713,7 @@ post_remove() {
 }
 #### END ####
 #### INSTALL2 SCRIPTS ####
+_prefix=@prefix@
 post_install() {
   if [ "${_prefix}" != "/usr" ] ; then
     /sbin/ldconfig

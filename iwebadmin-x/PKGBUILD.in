@@ -52,6 +52,8 @@ package() {
   fi
 }
 #### INSTALL SCRIPTS #####
+_prefix=@prefix@
+_sysconfdir=@sysconfdir@
 fixperms()
 {
   if [ $# -eq 3 ] ; then # directory

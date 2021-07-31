@@ -34,6 +34,9 @@ package() {
   make DESTDIR=${pkgdir} install
 }
 #### INSTALL SCRIPTS #####
+_prefix=@prefix@
+_sysconfdir=@sysconfdir@
+_servicedir=@servicedir@
 fixperms()
 {
   if [ $# -eq 3 ] ; then # directory

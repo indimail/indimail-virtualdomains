@@ -49,6 +49,9 @@ package() {
 }
 
 #### INSTALL SCRIPTS ####
+_prefix=@prefix@
+_sysconfdir=@sysconfdir@
+_servicedir=@servicedir@
 
 fixperms()
 {
@@ -99,10 +102,10 @@ post_install() {
   fi
   if [ -d /run ] ; then
     logfifo="/run/indimail/logfifo"
-    mkdir_p /run/indimail
+    mkdir -p /run/indimail
   elif [ -d /var/run ] ; then
     logfifo="/var/run/indimail/logfifo"
-    mkdir_p /var/run/indimail
+    mkdir -p /var/run/indimail
   else
     logfifo="/tmp/logfifo"
   fi
