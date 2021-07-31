@@ -76,6 +76,7 @@ package() {
   cd "$srcdir/pam-multi-@pam_multi_version@"
   make DESTDIR=${pkgdir} install
   cd $srcdir
+  ls -l
   (
   echo "NAME=${pkgname}"
   echo "Description=\"IndiMail Authentication Package\""
