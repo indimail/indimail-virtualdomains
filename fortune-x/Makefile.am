@@ -18,8 +18,8 @@ COMMONSOURCES= fortune.c randstr.c rot.c strfile.c unstr.c
 
 fortune_SOURCES = fortune.c
 
-fortunebindir=@prefix@/bin
-fortunesbindir=@prefix@/sbin
+fortunebindir=@bindir@
+fortunesbindir=@sbindir@
 fortunedatadir=@datarootdir@/fortunes
 #fortunedata_INSTALL=./copy_fortune
 
