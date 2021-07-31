@@ -70,3 +70,4 @@ o suport dovecot authentication
 19. Makefile.am (pam-multi, nssd): use sbindir for sbin programs to fix
     installation on arch linux
 40. default.configure: fixed pam module directory for arch linux
+41. ArchLinux, Debian: added perm_list.auth
