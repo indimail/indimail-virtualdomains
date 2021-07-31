@@ -4,7 +4,7 @@ ACLOCAL_AMFLAGS=-I m4
 
 DEFS=@DEFS@ -fno-strict-aliasing -I@prefix@/include/qmail
 
-pamsbindir=@prefix@/sbin
+pamsbindir=@sbindir@
 pam_multidir=$(moduledir)
 noinst_FILES=pam-multi.la pam-multi.a
 

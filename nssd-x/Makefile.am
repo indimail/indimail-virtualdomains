@@ -14,7 +14,7 @@ libnss_nssd_la_LIBADD = $(LIB_QMAIL)
 libnss_nssd_la_DEPENDENCIES = common.h config.h nsvs.h
 libnss_nssd_la_LDFLAGS = -module -version-info @LIBVER@:0:0 -export-symbols @OS@.sym
 
-nssdsbindir=@prefix@/sbin
+nssdsbindir=@sbindir@
 nssdsbin_PROGRAMS = nssd
 nssd_SOURCES = nssd.c nssd_misc.c util.c config.c load_mysql.c
 nssd_CFLAGS  = @PTHREAD_CFLAGS@
