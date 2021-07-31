@@ -108,6 +108,9 @@ install: build
 	${rm} -f $(DESTDIR)$(pam_moduledir)/pam-multi.la
 	${rm} -f $(DESTDIR)$(pam_moduledir)/pam-multi.a
 	mkdir -p $(DESTDIR)$(sysconfdir)
+	if [ -f perm_list.auth ] ; then \
+		install -m 0644 perm_list.auth "$(DESTDIR)$(sysconfdir)"/perm_list.auth; \
+	fi
 	install -m 0644 indimail-auth-release "$(DESTDIR)$(sysconfdir)"/indimail-auth-release
 	/bin/rm -f indimail-auth-release
 
