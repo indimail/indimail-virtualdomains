@@ -11,7 +11,7 @@ depends=('coreutils' 'procps' 'binutils' 'mariadb-libs')
 makedepends=('findutils' 'sed' 'pam' 'libqmail')
 conflicts=('indimail<3.2')
 source=('pam-multi-@pam_multi_version@.tar.gz' 'nssd-@nssd_version@.tar.gz' 'perm_list.auth' "${pkgname}.changes")
-sha256sums=('SKIP' 'SKIP' 'SKIP')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
 provides=('indimail-auth' 'pam-multi=@pam_multi_version@' 'nssd=@nssd_version@')
 options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
 _sysconfdir=@sysconfdir@
