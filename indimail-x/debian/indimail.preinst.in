@@ -81,6 +81,9 @@ case "$1" in
 		qmail-poppass.106 qmail-logfifo proxy-imapd.4143 \
 		proxy-imapd-ssl.9143 \ proxy-pop3d.4110 proxy-pop3d-ssl.9110
 	do
+		if [ ! -d ${servicedir}/$i ] ; then
+			continue
+		fi
 		${prefix}/bin/svstat ${servicedir}/$i
 		if [ $? -eq 0 ] ; then
 			mkdir -p ${rundir}/$i

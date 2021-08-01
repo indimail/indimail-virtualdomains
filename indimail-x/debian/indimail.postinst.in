@@ -152,6 +152,9 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 		qmail-poppass.106 qmail-logfifo proxy-imapd.4143 \
 		proxy-imapd-ssl.9143 proxy-pop3d.4110 proxy-pop3d-ssl.9110
 	do
+		if [ ! -d ${servicedir}/$i ] ; then
+			continue
+		fi
 		${prefix}/bin/svok ${servicedir}/$i >/dev/null 2>&1
 		if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
 			rm -f ${rundir}/$i/.down
@@ -420,6 +423,9 @@ svc_list=""
 for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
 qmail-poppass.106 qmail-logfifo
 do
+  if [ ! -d ${servicedir}/$i ] ; then
+    continue
+  fi
   svc_list="$svc_list ${servicedir}/$i"
   # save variables
   ${prefix}/sbin/svctool --servicedir=${servicedir} --service-name=$i \
@@ -430,6 +436,9 @@ if [ $noproxy -eq 0 ] ; then
 for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
   proxy-pop3d.4110 proxy-pop3d-ssl.9110
 do
+  if [ ! -d ${servicedir}/$i ] ; then
+    continue
+  fi
   svc_list="$svc_list ${servicedir}/$i"
   ${prefix}/sbin/svctool --servicedir=${servicedir} --service-name=$i \
     --export-variables=${servicedir}/$i/variables/.variables  --force

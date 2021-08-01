@@ -1,4 +1,11 @@
 # Maintainer: @email@
+# $Log: PKGBUILD.in,v $
+# Revision 1.1  2021-08-01 12:00:53+05:30  Cprogrammer
+# Initial revision
+#
+#
+# $Id: PKGBUILD.in,v 1.1 2021-08-01 12:00:53+05:30 Cprogrammer Exp mbhangui $
+#
 pkgname=('indimail' 'libindimail')
 pkgver=@version@
 pkgrel=@release@
@@ -147,6 +154,9 @@ stop_service() {
   for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
   qmail-poppass.106 qmail-logfifo
   do
+    if [ ! -d ${_servicedir}/$i ] ; then
+      continue
+    fi
     ${_prefix}/bin/svstat ${_servicedir}/$i >/dev/null 2>&1
     if [ $? -eq 0 ] ; then
       mkdir -p ${rundir}/$i
@@ -159,6 +169,9 @@ stop_service() {
     for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
       proxy-pop3d.4110 proxy-pop3d-ssl.9110
     do
+      if [ ! -d ${_servicedir}/$i ] ; then
+        continue
+      fi
       ${_prefix}/bin/svstat ${_servicedir}/$i >/dev/null 2>&1
       if [ $? -eq 0 ] ; then
         mkdir -p ${rundir}/$i
@@ -442,6 +455,9 @@ post_install() {
   for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
   qmail-poppass.106 qmail-logfifo
   do
+    if [ ! -d ${_servicedir}/$i ] ; then
+      continue
+    fi
     svc_list="$svc_list ${_servicedir}/$i"
     # save variables
     ${_prefix}/sbin/svctool --servicedir=${_servicedir} --service-name=$i \
@@ -451,6 +467,9 @@ post_install() {
     for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
       proxy-pop3d.4110 proxy-pop3d-ssl.9110
     do
+      if [ ! -d ${_servicedir}/$i ] ; then
+        continue
+      fi
       svc_list="$svc_list ${_servicedir}/$i"
       ${_prefix}/sbin/svctool --servicedir=${_servicedir} --service-name=$i \
         --export-variables=${_servicedir}/$i/variables/.variables  --force
@@ -537,6 +556,9 @@ post_upgrade() {
   for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
   qmail-poppass.106 qmail-logfifo
   do
+    if [ ! -d ${_servicedir}/$i ] ; then
+      continue
+    fi
     ${_prefix}/bin/svok ${_servicedir}/$i >/dev/null 2>&1
     if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
       rm -f ${rundir}/$i/.down
@@ -547,6 +569,9 @@ post_upgrade() {
     for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
       proxy-pop3d.4110 proxy-pop3d-ssl.9110
     do
+      if [ ! -d ${_servicedir}/$i ] ; then
+        continue
+      fi
       ${_prefix}/bin/svok ${_servicedir}/$i >/dev/null 2>&1
       if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
         rm -f ${rundir}/$i/.down
