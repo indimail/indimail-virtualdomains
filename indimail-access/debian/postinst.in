@@ -137,6 +137,9 @@ if [ $upgrade -eq 1 ] ; then # upgrade
   for i in qmail-imapd.143 qmail-imapd-ssl.993 \
     qmail-pop3d.110 qmail-pop3d-ssl.995
   do
+	if [ ! -d ${servicedir}/$i ] ; then
+		continue
+	fi
     if [ -z "$svc_list" ] ; then
       svc_list="${servicedir}/$i"
     else
@@ -156,6 +159,9 @@ if [ $upgrade -eq 1 ] ; then # upgrade
     qmail-pop3d.110 qmail-pop3d-ssl.995 \
     fetchmail
   do
+	if [ ! -d ${servicedir}/$i ] ; then
+		continue
+	fi
     ${prefix}/bin/svok ${servicedir}/$i >/dev/null 2>&1
     if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
 	  rm -f ${rundir}/$i/.down
@@ -318,6 +324,9 @@ svc_list=""
 for i in fetchmail qmail-imapd.143 qmail-imapd-ssl.993 \
   qmail-pop3d.110 qmail-pop3d-ssl.995
 do
+  if [ ! -d ${servicedir}/$i ] ; then
+    continue
+  fi
   svc_list="$svc_list ${servicedir}/$i"
   ${prefix}/sbin/svctool --servicedir=${servicedir} --service-name=$i \
     --export-variables=${servicedir}/$i/variables/.variables  --force

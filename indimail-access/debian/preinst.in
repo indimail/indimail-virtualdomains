@@ -29,6 +29,9 @@ case "$1" in
 		qmail-pop3d.110 qmail-pop3d-ssl.995 \
 		fetchmail
 	do
+		if [ ! -d ${servicedir}/$i ] ; then
+			continue
+		fi
 		${prefix}/bin/svstat ${servicedir}/$i >/dev/null 2>&1
 		if [ $? -eq 0 ] ; then
 			mkdir -p ${rundir}/$i
