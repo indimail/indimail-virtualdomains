@@ -84,6 +84,7 @@ package_libindimail() {
 _prefix=@prefix@
 _libdir=@prefix@/lib
 _libexecdir=@libexecdir@
+_sysconfdir=@sysconfdir@
 _servicedir=@servicedir@
 _logdir=@logdir@
 _defaultDomain=@defaultDomain@
