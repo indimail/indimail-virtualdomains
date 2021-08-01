@@ -314,7 +314,9 @@ set -e
 ${prefix}/sbin/svctool --fifologger=$logfifo --servicedir=${servicedir}
 
 # mrtg service
-${prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=${servicedir}
+if [ -x /usr/bin/mrtg ] ; then
+	${prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=${servicedir}
+fi
 
 echo "Creating default indimail mysql config indimail.cnf"
 ${prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail \
