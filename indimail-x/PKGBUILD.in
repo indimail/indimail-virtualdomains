@@ -1,10 +1,13 @@
 # Maintainer: @email@
 # $Log: PKGBUILD.in,v $
+# Revision 1.2  2021-08-01 13:29:11+05:30  Cprogrammer
+# corrected variable name for nproxy
+#
 # Revision 1.1  2021-08-01 12:00:53+05:30  Cprogrammer
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.1 2021-08-01 12:00:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.2 2021-08-01 13:29:11+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail' 'libindimail')
 pkgver=@version@
@@ -463,7 +466,7 @@ post_install() {
     ${_prefix}/sbin/svctool --servicedir=${_servicedir} --service-name=$i \
       --export-variables=${_servicedir}/$i/variables/.variables  --force
   done
-  if [ $noproxy -eq 0 ] ; then
+  if [ ${_noproxy} -eq 0 ] ; then
     for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
       proxy-pop3d.4110 proxy-pop3d-ssl.9110
     do
