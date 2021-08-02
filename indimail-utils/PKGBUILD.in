@@ -17,6 +17,7 @@ provides=('indimail-utils' 'altermime=@altermime_version@' 'ripmime=@ripmime_ver
     'fortune=@fortune_version@' 'mpack=@mpack_version@' 'flash=@flash_version')
 options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
 _sysconfdir=@sysconfdir@
+_shareddir=@shareddir@
 _myconfdir=$(echo ${_sysconfdir} | cut -c2-)
 backup=(${_myconfdir}/{'system.flashlogin','system.rc','system.menu','system.module','indimail-utils-release'})
 changelog=${pkgname}.changes
@@ -34,6 +35,10 @@ build() {
 }
 
 package() {
+  mkdir -p ${pkgdir}${_sysconfdir}
+  mkdir -p ${pkgdir}${_shareddir}/doc
+  chmod 2755 ${pkgdir}${_sysconfdir}
+  chmod 0555 ${pkgdir}${_shareddir} ${pkgdir}${_shareddir}/doc
   for i in altermime-@altermime_version@ ripmime-@ripmime_version@ \
     fortune-@fortune_version@ mpack-@mpack_version@ flash-@flash_version@
   do

@@ -38,6 +38,8 @@ o maildrop version upgraded to 3.0.3
 19. PKGBUILD.in: Added missing variable definitions
 - 01/08/2021
 30. spec, PKGBUILD, debian pre/post: skip service if dir doesn't exist
+- 02/08/2021
+31. PKGBUILD: Fix permissions for directories
 
 *
 Release 1.0-1.1 Start 03/06/2020

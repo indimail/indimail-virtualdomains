@@ -72,6 +72,11 @@ build() {
 package() {
   depends=('indimail-mta>2.6')
   cd "$srcdir/nssd-@nssd_version@"
+  mkdir -p ${pkgdir}${_sysconfdir}
+  mkdir -p ${pkgdir}${_libexecdir}
+  mkdir -p ${pkgdir}${_shareddir}/doc
+  chmod 2755 ${pkgdir}${_sysconfdir}
+  chmod 0555 ${pkgdir}/libexecdir ${pkgdir}${_shareddir} ${pkgdir}${_shareddir}/doc
   make DESTDIR=${pkgdir} install
   cd "$srcdir/pam-multi-@pam_multi_version@"
   make DESTDIR=${pkgdir} install

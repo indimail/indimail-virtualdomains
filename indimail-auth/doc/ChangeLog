@@ -72,3 +72,5 @@ o suport dovecot authentication
 40. default.configure: fixed pam module directory for arch linux
 41. ArchLinux, Debian: added perm_list.auth
 42. PKGBUILD.in: added perm_list.auth to source array
+- 02/08/2021
+43. PKGBUILD: Fix permissions for directories

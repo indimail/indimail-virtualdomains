@@ -45,6 +45,10 @@ build() {
 
 package() {
   depends=('indimail-mta>2.6')
+  mkdir -p ${pkgdir}${_sysconfdir}
+  mkdir -p ${pkgdir}${_shareddir}/doc
+  chmod 2755 ${pkgdir}${_sysconfdir}
+  chmod 0555 ${pkgdir}${_shareddir} ${pkgdir}${_shareddir}/doc
   cd "$srcdir/courier-imap-@courier_version@"
   make DESTDIR=${pkgdir} install
   cd "$srcdir/fetchmail-@fetchmail_version@"

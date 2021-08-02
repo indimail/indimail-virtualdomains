@@ -28,11 +28,15 @@ build() {
     --sbindir=${_prefix}/bin \
     --sysconfdir=${_sysconfdir} \
     --mandir=${_mandir} \
-    --datarootdir=${_prefix}/share/indimail
+    --datarootdir=${_shareddir}
   make -s
 }
 
 package() {
   cd $srcdir/$pkgname-${pkgver}
+  mkdir -p ${pkgdir}${_sysconfdir}
+  chmod 2755 ${pkgdir}${_sysconfdir}
+  mkdir -p ${pkgdir}${_shareddir}/doc
+  chmod 0555 ${pkgdir}${_shareddir} ${pkgdir}${_shareddir}/doc
   make DESTDIR=${pkgdir} install
 }

@@ -15,3 +15,5 @@ Release @version@-@release@ Start 02/06/2020
 - 18/03/2021
 08. added github-obs integration
 - 18/07/2021 - indimail-3.4.0
+- 02/08/2021
+09. PKGBUILD: Fix permissions for directories
