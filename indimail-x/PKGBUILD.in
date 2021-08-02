@@ -74,9 +74,13 @@ package_indimail() {
   conflicts=('indimail-mta<2.0')
   provides=('indimail')
   cd "$srcdir/indimail-@version@"
+  mkdir -p ${pkgdir}${_sysconfdir}
+  chmod 2755 ${pkgdir}${_sysconfdir}
   make DESTDIR=${pkgdir} install
   make DESTDIR=${pkgdir} uninstall-pkgconfigDATA uninstall-libindimailLTLIBRARIES \
     uninstall-includeHEADERS
+  chmod 0555 ${pkgdir}${_indimaildir} ${pkgdir}${_libexecdir} ${pkgdir}${_shareddir} \
+	  ${pkgdir}${_shareddir}/doc
   rm -rf ${pkgdir}"${_pkg_config_path}"
   install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
 }
