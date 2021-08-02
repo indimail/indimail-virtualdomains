@@ -19,7 +19,7 @@ options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
 changelog=$pkgname.changes
 _prefix=@prefix@
 _servicedir=@servicedir@
-_shareddir=@shareddir@
+_shareddir=@prefix@/share/indimail
 _mandir=@mandir@
 
 build() {
