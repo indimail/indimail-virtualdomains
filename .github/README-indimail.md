@@ -1234,7 +1234,7 @@ NOTE: If the program myfilter returns 100, the message will be bounced. If it re
 
 ### Using QMAILQUEUE with qmail-qfilter
 
-You can use <b>qmail-qfilter</b>(1). <b>qmail-qfilter</b> allows you to run multiple filters passed as command line arguments to <b>qmail-qfilter</b>. Since QMAILQUEUE doesn't allow you to specify multiple arguments, you can write a shell script which calls <b>qmail-qfilter</b> and have the shell script defined as QMAILQUEUE environment variable.
+You can use <b>qmail-qfilter</b>(1). <b>qmail-qfilter</b> allows you to run multiple filters passed as command line arguments to <b>qmail-qfilter</b>. Since QMAILQUEUE doesn't allow you to specify multiple arguments, you can write a shell script which calls <b>qmail-qfilter</b> and have the shell script defined as QMAILQUEUE environment variable. The way qmail-qfilter works is simple - The original content is avaible on fd 0. If your filter writes anything on the stdout, that becomes the new mail. If doesn't output anything on the stdout, the mail is passed unchanged. The envelope is available on fd 0. If your scripts writes on fd 3, that becomes the new envelope. A filter that exits 0, passes the mail unchanged. A filter that simply executes /bin/cat also passes the mail unchanged, except that qmail-qfilter does a bit more work to make the new content as fd 0 for the next filter in the chain. You can have multiple filters passed to qmail-qfilter each separated by `--` (two dashes).
 
 ```
 $ sudo /bin/bash
@@ -1246,7 +1246,9 @@ $ sudo /bin/bash
 # svc -u /service/qmail-smtpd.25
 ```
 
-NOTE: you can define QQF\_MAILQUEUE to /usr/bin/qmail-nullqueue to discard the mail (blackhole).
+To make it easy, indimail-mta provides a qmail-qfilter frontend, <b>qfrontend</b> that calls all your filters. All you have to do is write your script with a filename that starts with `qf-` and place them in /usr/libexec/indimail/qfilters directory. To enable the filters edit the file /etc/indimail/control/qfilters and add the filename (without the full path) in this file. Take a look at existing filters in the /usr/libexec/indimail/qfilters.
+
+NOTE: you can define QQF\_MAILQUEUE to /usr/bin/qmail-nullqueue to discard the mail (blackhole) if you want to discard mails matching certain conditions that you want.
 
 ### Using QMAILQUEUE with your own program
 
