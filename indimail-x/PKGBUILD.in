@@ -78,6 +78,7 @@ package_indimail() {
   provides=('indimail')
   cd "$srcdir/indimail-@version@"
   mkdir -p ${pkgdir}${_sysconfdir}
+  mkdir -p ${pkgdir}${_shareddir}/doc
   chmod 2755 ${pkgdir}${_sysconfdir}
   make DESTDIR=${pkgdir} install
   make DESTDIR=${pkgdir} uninstall-pkgconfigDATA uninstall-libindimailLTLIBRARIES \
