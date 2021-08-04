@@ -50,7 +50,7 @@ logsrv_LDADD = $(LIB_INDIMAIL) $(LIB_SSL) $(LIB_QMAIL) $(LIB_RPC)
 rpclog_LDADD=$(LIB_RPC)
 
 incrmesg_SOURCES=incrmesg.c
-incrmesg_LDADD = $(LIB_INDIMAIL)
+incrmesg_LDADD = $(LIB_INDIMAIL) $(LIB_QMAIL)
 
 showbytes_SOURCES=showbytes.c
 
