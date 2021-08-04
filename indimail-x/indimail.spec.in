@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.96 2021-08-01 11:59:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.97 2021-08-04 11:09:17+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -685,7 +685,6 @@ done
 %attr(644,root,root)                    %{_prefix}/include/indimail/dir_control.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/Dirname.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/disable_mysql_escape.h
-%attr(644,root,root)                    %{_prefix}/include/indimail/evaluate.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/fappend.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/FifoCreate.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/filewrt.h
@@ -775,7 +774,6 @@ done
 %attr(644,root,root)                    %{_prefix}/include/indimail/remove_quotes.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/renameuser.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/replacestr.h
-%attr(644,root,root)                    %{_prefix}/include/indimail/r_mkdir.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/runcmmd.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/SendWelcomeMail.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/set_mysql_options.h
