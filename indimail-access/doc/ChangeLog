@@ -40,6 +40,8 @@ o maildrop version upgraded to 3.0.3
 30. spec, PKGBUILD, debian pre/post: skip service if dir doesn't exist
 - 02/08/2021
 31. PKGBUILD: Fix permissions for directories
+- 12/08/2021
+32. updated courier-imap to 5.1.4
 
 *
 Release 1.0-1.1 Start 03/06/2020
