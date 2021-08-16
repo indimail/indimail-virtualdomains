@@ -4754,7 +4754,7 @@ You can make your changes to the container and commit changes by using the docke
 I am also a newbie as far as docker is concerned. Do let me know your experience with network settings and other advanced docker topics, that you may be familiar with. Do send few bottles of beer my way if you can.
 
 NOTE:
-Currently IndiMail supports both docker and podman. Both commands are interchangeble. There is much that has happened since this chapter was written in Apr 2016. You should be actually reading [this](https://github.com/mbhangui/docker/blob/master/README.md "Docker README ").
+Currently IndiMail supports both docker and podman. Both commands are interchangeble. There is much that has happened since this chapter was written in Apr 2016. You should be actually reading [this](https://github.com/mbhangui/indimail-docker/blob/master/README.md "Docker README ").
 
 # Installation & Repositories
 
@@ -4820,9 +4820,9 @@ Currently, the list of supported distributions for IndiMail is
 
 The [docker repository](https://github.com/mbhangui?tab=packages) can be used to pull docker/podman images for indimail/indimail-mta
 
-For latest details refer to [README](https://github.com/mbhangui/docker/blob/master/README.md "Docker README ")
+For latest details refer to [README](https://github.com/mbhangui/indimail-docker/blob/master/README.md "Docker README ")
 
-Earlier I used to provide docker / podman container images on [docker hub](https://hub.docker.com/u/cprogrammer). But recently (Jul 25, 2021) docker, without any warning or communication, on the sly, has removed the ability to connect with a github account unless you pay them dollars every month - a questionable business practice. As a principle, I no longer support docker. I have deleted all container images that were hosted there. Instead of the Docker Container Registry, I now use the [Github Container Registry](https://github.blog/2020-09-01-introducing-github-container-registry/). You can also build your own images. Refer to [README](https://github.com/mbhangui/docker/blob/master/README.md) on how to build your own container images. If you cannot build it on your own, ping me and I will be happy to build it for you.
+Earlier I used to provide docker / podman container images on [docker hub](https://hub.docker.com/u/cprogrammer). But recently (Jul 25, 2021) docker, without any warning or communication, on the sly, has removed the ability to connect with a github account unless you pay them dollars every month - a questionable business practice. As a principle, I no longer support docker. I have deleted all container images that were hosted there. Instead of the Docker Container Registry, I now use the [Github Container Registry](https://github.blog/2020-09-01-introducing-github-container-registry/). You can also build your own images. Refer to [README](https://github.com/mbhangui/indimail-docker/blob/master/README.md) on how to build your own container images. If you cannot build it on your own, ping me and I will be happy to build it for you.
 
 ## GIT Repository
 
