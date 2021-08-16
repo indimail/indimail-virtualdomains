@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.99 2021-08-16 13:05:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.100 2021-08-16 22:53:31+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -167,7 +167,12 @@ Requires: /usr/bin/hostname mrtg
 %if 0%{?sles_version}
 Requires: mysql-community-server mysql-community-libs
 %else
-Requires: mysql-server mysql-libs
+Requires: mysql-server
+%if 0%{?suse_version}
+Requires: libmariadb3
+%else
+Requires: mysql-libs
+%endif
 %endif
 
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
