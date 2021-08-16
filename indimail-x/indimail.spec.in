@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.98 2021-08-15 11:09:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.99 2021-08-16 13:05:49+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1364,7 +1364,7 @@ do
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --service-name=$i \
     --export-variables=%{servicedir}/$i/variables/.variables  --force
 done
-if [ $noproxy -eq 0 ] ; then
+if [ %noproxy -eq 0 ] ; then
 for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
   proxy-pop3d.4110 proxy-pop3d-ssl.9110
 do
