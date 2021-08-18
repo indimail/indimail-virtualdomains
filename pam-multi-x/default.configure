@@ -63,7 +63,7 @@ elif [ -d /usr/local/mysql/include ] ; then
   mysqlPrefix=/usr/local/mysql
 fi
 
-if [ $(stat --format %Y configure.ac) -le $(stat --format %Y configure) ] ; then
+if [ -f Makefile -a $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
 	echo "Already configured"
 	exit 0
 fi
