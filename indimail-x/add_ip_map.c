@@ -54,8 +54,8 @@ add_ip_map(char *ip, char *domain)
 			!stralloc_0(&SqlBuf))
 		die_nomem();
 	if (mysql_query(&mysql[1], SqlBuf.s)) {
-		if(in_mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
-			if(create_table(ON_LOCAL, "ip_alias_map", IP_ALIAS_TABLE_LAYOUT))
+		if (in_mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
+			if (create_table(ON_LOCAL, "ip_alias_map", IP_ALIAS_TABLE_LAYOUT))
 				return(-1);
 			if (!mysql_query(&mysql[1], SqlBuf.s))
 				return(0);

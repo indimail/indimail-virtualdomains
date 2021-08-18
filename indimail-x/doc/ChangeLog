@@ -88,6 +88,8 @@ Release @version@-@release@ Start 14/02/2021
 48. indimail.spec, Makefile.am: removed r_mkdir, evalulate function
 - 16/08/2021
 49. indimail.spec: fixed noproxy variable
+- 18/08/2021
+50. vget_ip_map.c: create ip_alias_map table if absent
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020
