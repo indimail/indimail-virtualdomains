@@ -11,6 +11,7 @@ on:
       - '!**/indimail-x/debian/*'
       - '!**/doc/*'
       - '!**.md'
+  workflow_dispatch:
 
 jobs:
   testfreebsd:

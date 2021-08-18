@@ -10,6 +10,7 @@ on:
       - '!**/logalert-x/debian/*'
       - '!**/doc/*'
       - '!**.md'
+  workflow_dispatch:
 
 jobs:
   build:
