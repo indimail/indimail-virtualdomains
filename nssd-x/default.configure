@@ -66,6 +66,11 @@ elif [ -d /var/run ] ; then
 else
   nssd_sock=/tmp/nssd.sock
 fi
+
+if [ $(stat --format %Y configure.ac) -le $(stat --format %Y configure) ] ; then
+	echo "Already configured"
+	exit 0
+fi
 ./configure --prefix=$prefix \
   --sbindir=$sbindir --mandir=$mandir \
   --sysconfdir=$sysconfdir \

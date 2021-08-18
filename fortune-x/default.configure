@@ -36,6 +36,11 @@ case "$SYSTEM" in
   sysconfdir=/usr/etc/indimail
   ;;
 esac
+
+if [ $(stat --format %Y configure.ac) -le $(stat --format %Y configure) ] ; then
+	echo "Already configured"
+	exit 0
+fi
 ./configure \
   --prefix=$prefix --sbindir=$sbindir \
   --datarootdir=$prefix/share/indimail \

@@ -40,6 +40,11 @@ case "$SYSTEM" in
   imagedir=/var/www/html/images/iwebadmin
   ;;
 esac
+
+if [ $(stat --format %Y configure.ac) -le $(stat --format %Y configure) ] ; then
+	echo "Already configured"
+	exit 0
+fi
 ./configure --prefix=$prefix \
   --sysconfdir=$sysconfdir \
   --disable-ipauth \

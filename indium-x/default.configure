@@ -58,13 +58,11 @@ elif [ -d /usr/local/include/mysql ] ; then
 elif [ -d /usr/local/mysql/include ] ; then
   mysqlPrefix=/usr/local/mysql
 fi
-echo ./configure --prefix=$prefix \
-  --libexecdir=$prefix/libexec/indimail \
-  --libdir=$libdir \
-  --sysconfdir=$sysconfdir \
-  --mandir=$mandir \
-  --enable-shareddir=$prefix/share/indimail \
-  --enable-mysqlprefix=$mysqlPrefix
+
+if [ $(stat --format %Y configure.ac) -le $(stat --format %Y configure) ] ; then
+	echo "Already configured"
+	exit 0
+fi
 ./configure --prefix=$prefix \
   --libexecdir=$prefix/libexec/indimail \
   --libdir=$libdir \

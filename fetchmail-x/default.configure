@@ -55,6 +55,10 @@ echo ./configure --prefix=$prefix --enable-indimail \
   --libexecdir=$prefix/libexec/indimail \
   --mandir=$mandir $extra_args
 
+if [ $(stat --format %Y configure.ac) -le $(stat --format %Y configure) ] ; then
+	echo "Already configured"
+	exit 0
+fi
 ./configure --prefix=$prefix --enable-indimail \
   --sbindir=$sbindir --sysconfdir=$sysconfdir \
   --datarootdir=$prefix/share/indimail \
