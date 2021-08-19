@@ -113,7 +113,9 @@ Table of Contents
       * [Set SMTP to sign with DKIM signatures](#set-smtp-to-sign-with-dkim-signatures)
       * [Set SMTP to verify DKIM signatures](#set-smtp-to-verify-dkim-signatures)
       * [DKIM Author Domain Signing Practices](#dkim-author-domain-signing-practices)
-      * [Setting qmail-local to verify DKIM signatures](#setting-qmail-local-to-verify-dkim-signatures)
+      * [DKIM sign during remote delivery](#dkim-sign-during-remote-delivery)
+      * [DKIM sign during local delivery](#dkim-sign-during-local-delivery)
+      * [Setting local delivery to verify DKIM signatures](#setting-local-delivery-to-verify-dkim-signatures)
       * [Testing outbound signatures](#testing-outbound-signatures)
    * [iwebadmin – Web Administration of IndiMail](#iwebadmin--web-administration-of-indimail)
    * [Publishing statistics for IndiMail Server](#publishing-statistics-for-indimail-server)
@@ -3623,19 +3625,22 @@ You may want to look at an excellent [setup instructions](http://notes.sagredo.e
 $ sudo /bin/bash
 # mkdir -p /etcindimail/control/domainkeys
 # cd /etc/indimail/control/domainkeys
-# openssl genrsa -out rsa.private 1024
-# openssl rsa -in rsa.private -out rsa.public -pubout -outform PEM
-# mv rsa.private default
+# dknewkey /etc/indimail/control/default 1024
 # chown indimail:qmail default (name of our selector)
-# chmod 440 default
+# chmod 640 default
+# chmod 644 default.pub
 ```
 
 ## Create your DNS records
 
 ```
-$ grep -v ^- rsa.public | perl -e 'while(<>){chop;$l.=$_;}print "t=y; p=$l;\n";'
-  _domainkey.indimail.org.  IN TXT  "t=y; o=-;"
-  default._domainkey.indimail.org.  IN TXT  "DNS-public-key"
+$ cd /etc/indimail/control/domainkeys
+$ pubkey=$(openssl rsa -in default -pubout -outform PEM | grep -v '^--' | tr -d '\n')
+
+The next command will print the text that you need to put in your txt record for
+default._domainkey.indimail.org
+$ printf "default._domainkey.indimail.org\tIN\tTXT\t\"k=rsa; p=%s\"\n" "$pubkey"
+default._domainkey.indimail.org IN      TXT     "k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC2dvktnCXRavyuuoy2NUcHWpMp/Ia7Y5Y9tTwjjby7hS9wIvgecBz6UEMunOJdAZ2RVvSXKxPlxO4/rUgW6ow7vlEPY3IKagy+VFW1oHmvj4WU+BxZTJA2d8VrW9S9O1JMuPGGwdeYOC/Gcle/EviQtGYsz3jL/HrJb9rXXl4/gwIDAQAB"
 ```
 
 choose the selector (some\_name) and publish this into DNS TXT record for:
@@ -3655,7 +3660,6 @@ $ sudo /bin/bash
 # echo "/etc/indimail/control/domainkeys/default" > DKIMSIGN
 # svc -d /service/qmail-smtpd.25; svc -u /service/qmail-smtpd.25
 ```
-
 
 ## Set SMTP to verify DKIM signatures
 
@@ -3686,6 +3690,8 @@ You may decide to consider ADSP as optional until the specifications are formali
 You may not want to do DKIM signing/verificaton by SMTP. In that case, you have the choice of using the QMAILREMOTE, QMAILLOCAL environment variables which allows IndiMail to run any script before it gets passed to <b>qmail-remote</b>, <b>qmail-local</b> respectively.
 Setting <b>qmail-remote</b> to sign with DKIM signatures On your host which sends out outgoing mails, it only make sense to do DKIM signing and not verification.
 
+## DKIM sign during remote delivery
+
 ```
 $ sudo /bin/bash
 # cd /service/qmail-send.25/variables
@@ -3696,8 +3702,7 @@ $ sudo /bin/bash
 # svc -d /service/qmail-send.25; svc -u /service/qmail-send.25
 ```
 
-
-## Setting qmail-local to verify DKIM signatures
+## DKIM sign during local delivery
 
 On your host which serves as your incoming gateway for your local domains, it only makes sense to do DKIM verification with <b>qmail-local</b>
 
