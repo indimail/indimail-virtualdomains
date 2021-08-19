@@ -3639,8 +3639,8 @@ $ pubkey=$(openssl rsa -in default -pubout -outform PEM | grep -v '^--' | tr -d 
 
 The next command will print the text that you need to put in your txt record for
 default._domainkey.indimail.org
-$ printf "default._domainkey.indimail.org\tIN\tTXT\t\"k=rsa; p=%s\"\n" "$pubkey"
-default._domainkey.indimail.org IN      TXT     "k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC2dvktnCXRavyuuoy2NUcHWpMp/Ia7Y5Y9tTwjjby7hS9wIvgecBz6UEMunOJdAZ2RVvSXKxPlxO4/rUgW6ow7vlEPY3IKagy+VFW1oHmvj4WU+BxZTJA2d8VrW9S9O1JMuPGGwdeYOC/Gcle/EviQtGYsz3jL/HrJb9rXXl4/gwIDAQAB"
+$ printf "default._domainkey.indimail.org\tIN\tTXT\t\"v=DKIM1; k=rsa; p=%s\"\n" "$pubkey"
+default._domainkey.indimail.org IN      TXT     "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC2dvktnCXRavyuuoy2NUcHWpMp/Ia7Y5Y9tTwjjby7hS9wIvgecBz6UEMunOJdAZ2RVvSXKxPlxO4/rUgW6ow7vlEPY3IKagy+VFW1oHmvj4WU+BxZTJA2d8VrW9S9O1JMuPGGwdeYOC/Gcle/EviQtGYsz3jL/HrJb9rXXl4/gwIDAQAB"
 ```
 
 choose the selector (some\_name) and publish this into DNS TXT record for:
