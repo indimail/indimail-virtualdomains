@@ -118,11 +118,11 @@ proxy-pop3d.4110 proxy-pop3d-ssl.9110
 do
 	if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
 		touch ${servicedir}/$i/down
-		svc -dx ${servicedir}/$i || true
+		svc -dx ${servicedir}/$i >/dev/null 2>&1 || true
 	fi
 	if [ -d ${servicedir}/$i/log -o -L ${servicedir}/$i/log ] ; then
 		touch ${servicedir}/$i/log/down || true
-		svc -dx ${servicedir}/$i/log || true
+		svc -dx ${servicedir}/$i/log >/dev/null 2>&1 || true
 	fi
 	if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
 		${rm} -rf ${servicedir}/$i || true
@@ -135,11 +135,11 @@ qmail-poppass.106 mrtg qmail-logfifo
 do
 	if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
 		touch ${servicedir}/$i/down
-		svc -dx ${servicedir}/$i || true
+		svc -dx ${servicedir}/$i >/dev/null 2>&1 || true
 	fi
 	if [ -d ${servicedir}/log/$i -o -L ${servicedir}/log/$i ] ; then
 		touch ${servicedir}/$i/log/down
-		svc -dx ${servicedir}/$i/log || true
+		svc -dx ${servicedir}/$i/log >/dev/null 2>&1 || true
 	fi
 	if [ -d ${servicedir}/$i -o -L ${servicedir}/$i/log ] ; then
 		${rm} -rf ${servicedir}/$i || true

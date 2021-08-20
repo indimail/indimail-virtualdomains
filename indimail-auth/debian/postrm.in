@@ -73,11 +73,11 @@ esac
 ${prefix}/sbin/svctool --config=remove-alt
 if [ -d ${servicedir}/pwdlookup -o -L ${servicedir}/pwdlookup ] ; then
 	touch ${servicedir}/pwdlookup/down
-	svc -dx ${servicedir}/pwdlookup || true
+	svc -dx ${servicedir}/pwdlookup >/dev/null 2<&1 || true
 fi
 if [ -d ${servicedir}/pwdlookup/log -o -L ${servicedir}/pwdlookup/log ] ; then
 	touch ${servicedir}/pwdlookup/log
-	svc -dx ${servicedir}/pwdlookup/log || true
+	svc -dx ${servicedir}/pwdlookup/log >/dev/null 2<&1 || true
 fi
 if [ -d ${servicedir}/pwdlookup -o -L ${servicedir}/pwdlookup ] ; then
 	${rm} -rf ${servicedir}/pwdlookup || true

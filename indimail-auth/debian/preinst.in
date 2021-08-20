@@ -30,7 +30,7 @@ case "$1" in
 		if [ $? -eq 0 ] ; then
 			mkdir -p ${rundir}/pwdlookup
 			touch ${rundir}/pwdlookup/.down
-			${prefix}/bin/svc -d ${servicedir}/pwdlookup || true
+			${prefix}/bin/svc -d ${servicedir}/pwdlookup >/dev/null 2>&1 || true
 		fi
 		set -e
 	fi
