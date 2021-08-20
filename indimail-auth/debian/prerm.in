@@ -36,7 +36,7 @@ case "$1" in
 	fi
 	if [ -f ${prefix}/bin/svstat ] ; then
 		set +e
-		${prefix}/bin/svstat ${servicedir}/pwdlookup || true
+		${prefix}/bin/svstat ${servicedir}/pwdlookup >/dev/null 2>&1 || true
 		if [ $? -eq 0 ] ; then
 			mkdir -p ${rundir}/pwdlookup
 			touch ${rundir}/pwdlookup/.down
