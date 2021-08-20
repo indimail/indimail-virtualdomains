@@ -1,5 +1,8 @@
 # Maintainer: @email@
 # $Log: PKGBUILD.in,v $
+# Revision 1.5  2021-08-20 13:37:55+05:30  Cprogrammer
+# removed host compoment from default domain
+#
 # Revision 1.4  2021-08-15 11:09:52+05:30  Cprogrammer
 # create doc directory
 #
@@ -13,7 +16,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.4 2021-08-15 11:09:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.5 2021-08-20 13:37:55+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail' 'libindimail')
 pkgver=@version@
@@ -51,9 +54,9 @@ build() {
     default_domain=${_defaultDomain}
   else
     if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-      default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+      default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
     else
-      default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${_defaultDomain})
+      default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${_defaultDomain}) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
     fi
   fi
   make clean >/dev/null 2>&1|| true; make distclean >/dev/null 2>&1 || true
@@ -289,9 +292,9 @@ post_install() {
     default_domain=${_defaultDomain}
   else
     if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-      default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+      default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
     else
-      default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${_defaultDomain})
+      default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${_defaultDomain}) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
     fi
   fi
 
@@ -660,9 +663,9 @@ post_remove() {
     ${_prefix}/sbin/qmail-newu
   fi
   if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
+    default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
   else
-    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${defaultDomain})
+    default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${_defaultDomain}) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
   fi
   rm -rf ${_indimaildir}/domains/$default_domain
   for port in 465 25 587
