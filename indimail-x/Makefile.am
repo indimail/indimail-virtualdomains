@@ -33,7 +33,7 @@ indimailauthlibdir=@libexecdir@/imapmodules
 
 SYSCONFDIR = @sysconfdir@
 sysconf_DATA = indimail.settings controlfiles.i headerlist osh.table \
-	cronlist.i perm_list.indimail indimail.mrtg.cfg indimail-release
+	cronlist.i indimail.perms indimail.mrtg.cfg indimail-release
 
 pkgconfigdir=@pkgconfigdir@
 pkgconfig_DATA = libindimail.pc
@@ -213,7 +213,7 @@ post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain 
 MOSTLYCLEANFILES=vcaliasrev myslave controlsync bogofilter-qfe \
 	cronlist.i incrypt vdeluser_handle vrenameuser_handle \
 	cscope.* *.dSYM mailzipper mytcplookup.c tcplookup.8 \
-	perm_list.indimail dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
+	indimail.perms dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
 	vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
 	vcfilter.1 indimail.7 indimail.mrtg.cfg overquota.sh \
 	vadddomain_handle vadduser_handle vpasswd_handle vdeldomain_handle vaddaliasdomain_handle \
@@ -761,7 +761,7 @@ indimail-permissions.secure: indimail-permissions.secure.in
 	$(edit) $@.in > $@
 indimail-permissions.paranoid: indimail-permissions.paranoid.in
 	$(edit) $@.in > $@
-perm_list.indimail: perm_list.in
+indimail.perms: perm_list.in
 	$(edit) perm_list.in > $@
 usr.sbin.mysqld: usr.sbin.mysqld.in
 	$(edit) $@.in > $@

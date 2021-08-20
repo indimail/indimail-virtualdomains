@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.101 2021-08-20 17:40:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.102 2021-08-20 23:18:15+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -473,7 +473,7 @@ done
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/indimail.settings
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/%{name}-release
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/%{name}-rpm.info
-%attr(444,root,root) %config(noreplace)           %{sysconfdir}/perm_list.indimail
+%attr(444,root,root) %config(noreplace)           %{sysconfdir}/indimail.perms
 
 %attr(644,root,root)  %config(noreplace)          %{sysconfdir}/indimail.te
 %attr(644,root,root)  %config(noreplace)          %{sysconfdir}/indimail.fc
