@@ -37,6 +37,9 @@ case "$1" in
 	exit 0
 	;;
 	install)
+	mkdir -p /tmp/indimail-auth
+	chmod 700 /tmp/indimail-auth
+	touch /tmp/indimail-auth/.install
 	;;
 
     abort-upgrade)
