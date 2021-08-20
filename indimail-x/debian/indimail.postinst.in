@@ -89,23 +89,25 @@ if [ $ID -ne 0 ] ; then
 fi
 upgrade=0
 case "$1" in
-    configure)
-		if [ " $2" = " " ] ; then
-			echo "installing indimail @version@"
-		else
-			echo "upgrading to indimail $2"
+	configure)
+	if [ -f /tmp/indimail/.install ] ; then
+		upgrade=0
+		/bin/rm -f /tmp/indimail/.install
+	else
+		if [ -n "$2" ] ; then
 			upgrade=1
 		fi
-    ;;
+	fi
+	;;
 
-    abort-upgrade|abort-remove|abort-deconfigure)
+	abort-upgrade|abort-remove|abort-deconfigure)
 	exit 0
-    ;;
+	;;
 
-    *)
-        echo "postinst called with unknown argument \`$1'" >&2
-        exit 1
-    ;;
+	*)
+	echo "postinst called with unknown argument \`$1'" >&2
+	exit 1
+	;;
 esac
 
 # dh_installdeb will replace this with shell code automatically
@@ -116,17 +118,17 @@ esac
 #
 # We need to do this for debian. SIGH!!
 #
-if [ -f ${sysconfdir}/perm_list.indimail ] ; then
+if [ -f ${sysconfdir}/indimail.perms ] ; then
 	echo "Fixing Permissions"
-(
-/bin/grep -v "^#" ${sysconfdir}/perm_list.indimail | while read line
-do
-	if [ " $line" = " " ] ; then
-		continue
-	fi
-	fixperms $line
-done
-) > ${sysconfdir}/indimail-stat.override
+	(
+	/bin/grep -v "^#" ${sysconfdir}/indimail.perms | while read line
+	do
+		if [ " $line" = " " ] ; then
+			continue
+		fi
+		fixperms $line
+	done
+	) > ${sysconfdir}/indimail-stat.override
 fi
 
 if [ $upgrade -eq 1 ] ; then # upgrade
@@ -183,17 +185,17 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 fi
 # Recreate ld.so links and cache
 if [ ! "${prefix}" = "/usr" ] ; then
-echo "recreating ld.so cache"
-if [ -d /etc/ld.so.conf.d ] ; then
-(
-  if [ -d ${prefix}/lib64 ] ; then
-    echo ${prefix}/lib64
-  else
-    echo ${prefix}/lib
-  fi
-) > /etc/ld.so.conf.d/indimail-`uname -m`.conf
-fi
-/sbin/ldconfig
+	echo "recreating ld.so cache"
+	if [ -d /etc/ld.so.conf.d ] ; then
+		(
+		if [ -d ${prefix}/lib64 ] ; then
+			echo ${prefix}/lib64
+		else
+			echo ${prefix}/lib
+		fi
+		) > /etc/ld.so.conf.d/indimail-`uname -m`.conf
+	fi
+	/sbin/ldconfig
 fi
 
 echo "Doing Post Install"
