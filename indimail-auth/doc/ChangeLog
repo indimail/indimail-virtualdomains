@@ -75,3 +75,5 @@ o suport dovecot authentication
 - 02/08/2021
 43. PKGBUILD: Fix permissions for directories
 44. PKGBUILD.in fixed typos
+- 20/08/2021
+44. indimail-auth.spec, PKGBUILD removed host compoment from default domain
