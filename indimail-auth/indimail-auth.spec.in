@@ -160,9 +160,9 @@ echo "PACKAGE_BUGREPORT=\"'@email@'\""
 
 %if %build_on_obs == 0
   if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-    default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+    default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
   else
-    default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain}) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+    default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain}) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
   fi
 %else
   default_domain=%{defaultDomain}

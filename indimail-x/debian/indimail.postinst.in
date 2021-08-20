@@ -239,10 +239,10 @@ else
 fi
 
 if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-  default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+  default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 else
   defaultDomain=@defaultdomain@
-  default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${defaultDomain}) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+  default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${defaultDomain}) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 fi
 
 a_arch=`uname -m`
