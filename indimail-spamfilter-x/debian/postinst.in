@@ -111,10 +111,10 @@ esac
 #
 # We need to do this for debian. SIGH!!
 #
-if [ -f ${sysconfdir}/perm_list.bogofilter ] ; then
+if [ -f ${sysconfdir}/bogofilter.perms ] ; then
 	echo "Fixing Permissions"
 	(
-	/bin/grep -v "^#" ${sysconfdir}/perm_list.bogofilter | while read line
+	/bin/grep -v "^#" ${sysconfdir}/bogofilter.perms | while read line
 	do
 		if [ " $line" = " " ] ; then
 			continue

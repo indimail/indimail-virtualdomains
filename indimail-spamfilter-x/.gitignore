@@ -91,7 +91,7 @@ debian/control
 indimail-spamfilter.spec
 indimail-spamfilter.changes
 configure.lineno
-perm_list.bogofilter
+bogofilter.perms
 indimail-spamfilter-permissions.easy
 indimail-spamfilter-permissions.paranoid
 indimail-spamfilter-permissions.secure

@@ -215,7 +215,7 @@ $TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/%{name}-rpm.info
 %ghost %config(noreplace,missingok)               %{sysconfdir}/bogofilter.cf
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/bogofilter.cf.example
-%attr(644,root,root) %config(noreplace)           %{sysconfdir}/perm_list.bogofilter
+%attr(644,root,root) %config(noreplace)           %{sysconfdir}/bogofilter.perms
 
 %if 0%{?suse_version} >= 1120
 %attr(644,root,root) %config(noreplace)           %{_sysconfdir}/permissions.d/%{name}-permissions

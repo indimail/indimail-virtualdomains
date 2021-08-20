@@ -10,8 +10,8 @@ SUBDIRS = trio src . doc
 SYSCONFDIR = @sysconfdir@
 
 # what to build
-sysconf_DATA = bogofilter.cf.example perm_list.bogofilter
-MOSTLYCLEANFILES = perm_list.bogofilter debian/Makefile
+sysconf_DATA = bogofilter.cf.example bogofilter.perms
+MOSTLYCLEANFILES = bogofilter.perms debian/Makefile
 
 # ChangeLog, cvs2cl lives at http://www.red-bean.com/cvs2cl
 .PHONY:		$(srcdir)/changelog.txt
@@ -187,7 +187,7 @@ indimail-spamfilter.changes
 	cat $@.in | $(edit) > $@
 debian/Makefile: debian/Makefile.in configure.ac conf-version conf-release
 	$(edit) $@.in > $@;
-perm_list.bogofilter: perm_list.in
+bogofilter.perms: perm_list.in
 	$(edit) perm_list.in > $@;
 indimail-spamfilter-rpmlintrc: indimail-spamfilter-rpmlintrc.in
 	$(edit) indimail-spamfilter-rpmlintrc.in > $@
