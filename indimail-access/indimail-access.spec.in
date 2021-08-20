@@ -630,12 +630,12 @@ do
 done
 
 %if %build_on_obs == 1
-  default_domain=defaultDomain
+  default_domain=%{defaultDomain}
 %else
 if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
+  default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 else
-  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain})
+  default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain}) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 fi
 %endif
 
