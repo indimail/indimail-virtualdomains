@@ -34,6 +34,7 @@ _nodksignatures=0
 
 build() {
   cd "$srcdir/courier-imap-@courier_version@"
+  /bin/rm -f Makefile
   ./default.configure
   make
   cd "$srcdir/fetchmail-@fetchmail_version@"
