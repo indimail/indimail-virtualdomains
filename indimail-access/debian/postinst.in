@@ -93,15 +93,20 @@ fi
 
 upgrade=0
 case "$1" in
-    configure)
-	if [ -n "$2" ] ; then
-		upgrade=1
+	configure)
+	if [ -f /tmp/indimail-access/.install ] ; then
+		/bin/rm -rf /tmp/indimail-access
+		upgrade=0
+	else
+		if [ -n "$2" ] ; then
+			upgrade=1
+		fi
 	fi
 	;;
 
-    abort-upgrade|abort-remove|abort-deconfigure)
+	abort-upgrade|abort-remove|abort-deconfigure)
 	exit 0
- 	;;
+	;;
 
 	*)
 	echo "postinst called with unknown argument \`$1'" >&2
