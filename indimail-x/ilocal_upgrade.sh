@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: ilocal_upgrade.sh,v $
+# Revision 2.34  2021-08-20 23:17:48+05:30  Cprogrammer
+# fixes for non-existend dir/files
+#
 # Revision 2.33  2020-06-24 22:23:19+05:30  Cprogrammer
 # fixed setting supplementary groups
 #
@@ -100,7 +103,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: ilocal_upgrade.sh,v 2.33 2020-06-24 22:23:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.34 2021-08-20 23:17:48+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -120,7 +123,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.33 2020-06-24 22:23:19+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.34 2021-08-20 23:17:48+05:30 Cprogrammer Exp mbhangui $"
 if [ -d /var/indimail/mysqldb/data/indimail ] ; then
 	if [ ! -f /service/mysql.3306/down ] ; then
 		for i in mysqld mariadb mysql
@@ -139,15 +142,21 @@ fi
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.33 2020-06-24 22:23:19+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.34 2021-08-20 23:17:48+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do
+	if [ ! -d $i ] ; then
+		continue
+	fi
 	check_update_if_diff $i/variables/TLS_CACHEFILE /etc/indimail/certs/couriersslcache
 	check_update_if_diff $i/variables/TLS_CERTFILE /etc/indimail/certs/servercert.pem
 done
 for i in /service/qmail-poppass* /service/indisrvr.*
 do
+	if [ ! -d $i ] ; then
+		continue
+	fi
 	check_update_if_diff $i/variables/CERTFILE /etc/indimail/certs/servercert.pem
 done
 
@@ -198,6 +207,9 @@ fi
 update_nssd=0
 for j in /service/pwdlookup/run /service/pwdlookup/variables/.options
 do
+	if [ ! -f $j ] ; then
+		continue
+	fi
 	grep "/tmp/nssd.sock" $j > /dev/null
 	if [ $? -eq 0 ] ; then
 		update_nssd=1
