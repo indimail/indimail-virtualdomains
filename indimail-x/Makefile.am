@@ -78,7 +78,7 @@ include_HEADERS = addaliasdomain.h add_control.h add_domain_assign.h addressToke
 	load_mysql.h lowerit.h maildir_to_domain.h maildir_to_email.h MailQuotaWarn.h \
 	make_user_dir.h mdaMySQLConnect.h \
 	mgmtpassfuncs.h monkey.h MoveFile.h munch_domain.h mysql_stack.h \
-	next_big_dir.h no_of_days.h open_big_dir.h open_master.h open_smtp_relay.h \
+	next_big_dir.h open_big_dir.h open_master.h open_smtp_relay.h \
 	parseAddress.h parse_email.h parse_quota.h passwd_policy.h pathToFilesystem.h \
 	pipe_exec.h post_handle.h print_control.h ProcessInFifo.h proxylogin.h \
 	purge_files.h pwcomp.h PwdInLookup.h qmail_remote.h recalc_quota.h \
@@ -131,7 +131,7 @@ COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.
 	layout.c limits.c LoadDbInfo.c lockfile.c Login_Tasks.c lowerit.c \
 	maildir_to_domain.c maildir_to_email.c MailQuotaWarn.c make_user_dir.c \
 	mdaMySQLConnect.c mgmtpassfuncs.c MoveFile.c munch_domain.c \
-	mysql_query.c mysql_stack.c next_big_dir.c no_of_days.c open_big_dir.c \
+	mysql_query.c mysql_stack.c next_big_dir.c open_big_dir.c \
 	open_master.c open_smtp_relay.c parse_email.c parse_quota.c passwd_policy.c \
 	pathToFilesystem.c pipe_exec.c post_handle.c print_control.c \
 	pwcomp.c recalc_quota.c relay_select.c RemoteBulkMail.c remove_line.c \
@@ -593,7 +593,6 @@ munch_domain.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpassw
 mysql_query.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 mysql_stack.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 next_big_dir.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
-no_of_days.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 open_big_dir.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 open_master.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 parse_email.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h

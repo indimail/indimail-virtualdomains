@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 1.7  2021-08-21 12:52:33+05:30  Cprogrammer
+ * moved no_of_days.h to libqmail
+ *
  * Revision 1.6  2021-07-22 15:17:31+05:30  Cprogrammer
  * conditional define of _XOPEN_SOURCE
  *
@@ -54,10 +57,10 @@
 #include <subfd.h>
 #include <strerr.h>
 #include <getEnvConfig.h>
+#include <no_of_days.h>
 #endif
 #include "valiasinfo.h"
 #include "relay_select.h"
-#include "no_of_days.h"
 #ifdef VFILTER
 #include "vfilter_display.h"
 #endif
@@ -82,7 +85,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 1.6 2021-07-22 15:17:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 1.7 2021-08-21 12:52:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
