@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.102 2021-08-20 23:18:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.103 2021-08-21 12:56:09+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -753,7 +753,6 @@ done
 %attr(644,root,root)                    %{_prefix}/include/indimail/munch_domain.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/mysql_stack.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/next_big_dir.h
-%attr(644,root,root)                    %{_prefix}/include/indimail/no_of_days.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/open_big_dir.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/open_master.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/open_smtp_relay.h
