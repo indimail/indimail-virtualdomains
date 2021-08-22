@@ -55,9 +55,11 @@ echo ./configure --prefix=$prefix --enable-indimail \
   --libexecdir=$prefix/libexec/indimail \
   --mandir=$mandir $extra_args
 
-if [ -f Makefile -a $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
-	echo "Already configured"
-	exit 0
+if [ -f Makefile ] ; then
+	if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
+		echo "Already configured"
+		exit 0
+	fi
 fi
 ./configure --prefix=$prefix --enable-indimail \
   --sbindir=$sbindir --sysconfdir=$sysconfdir \

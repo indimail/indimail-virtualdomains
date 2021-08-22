@@ -59,9 +59,11 @@ elif [ -d /usr/local/mysql/include ] ; then
   mysqlPrefix=/usr/local/mysql
 fi
 
-if [ -f Makefile -a $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
-	echo "Already configured"
-	exit 0
+if [ -f Makefile ] ; then
+	if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
+		echo "Already configured"
+		exit 0
+	fi
 fi
 ./configure --prefix=$prefix \
   --libexecdir=$prefix/libexec/indimail \
