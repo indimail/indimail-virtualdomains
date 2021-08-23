@@ -28,6 +28,7 @@ build() {
   do
     if [ -d $srcdir/$i ] ; then
       cd $srcdir/$i
+	  touch configure.ac
       ./default.configure
       make -s
     fi
