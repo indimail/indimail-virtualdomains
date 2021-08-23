@@ -35,6 +35,8 @@ nocourierimap=0
 nofetchmail=0
 nodksignature=0
 dkimkeyfn=default
+defaultDomain=@defaultDomain@
+build_on_obs=0
 
 setperm()
 {
@@ -213,11 +215,15 @@ else
   logfifo="/tmp/logfifo"
 fi
 
+if [ $buiid_on_obs -eq 1 ] ; then
+	default_domain=$defaultDomain
+else
 if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
   default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 else
   defaultDomain=@defaultdomain@
   default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${defaultDomain}) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+fi
 fi
 a_arch=`uname -m`
 if [ " $a_arch" = " x86_64" ] ; then
@@ -265,16 +271,16 @@ fi
 # IMAP/POP3
 if [ $nocourierimap -eq 0 ] ; then
 	${prefix}/sbin/svctool --imap=143 --servicedir=$servicedir --localip=0 \
-		--maxdaemons=40 --maxperip=25 --infifo=infifo \
+		--maxdaemons=40 --maxperip=25 --infifo=infifo --default-domain=${default_domain} \
 		--starttls --memory=$imap_pop3_mem
 	${prefix}/sbin/svctool --imap=993 --servicedir=$servicedir --localip=0 \
-		--maxdaemons=40 --maxperip=25 --infifo=infifo \
+		--maxdaemons=40 --maxperip=25 --infifo=infifo --default-domain=${default_domain} \
 		--memory=$imapspop3_mem --ssl
 	${prefix}/sbin/svctool --pop3=110 --servicedir=$servicedir --localip=0 \
-		--maxdaemons=40 --maxperip=25 --infifo=infifo \
+		--maxdaemons=40 --maxperip=25 --infifo=infifo --default-domain=${default_domain} \
 		--starttls --memory=$imap_pop3_mem
 	${prefix}/sbin/svctool --pop3=995 --servicedir=$servicedir --localip=0 \
-		--maxdaemons=40 --maxperip=25 --infifo=infifo \
+		--maxdaemons=40 --maxperip=25 --infifo=infifo --default-domain=${default_domain} \
 		--memory=$imapspop3_mem --ssl
 
 	# add courier-imap auth module authindi

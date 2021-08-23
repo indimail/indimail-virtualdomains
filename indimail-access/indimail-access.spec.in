@@ -697,16 +697,16 @@ touch %{servicedir}/fetchmail/down
 
 # IMAP/POP3
 %{_prefix}/sbin/svctool --imap=143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-  --maxperip=25 --query-cache --memory=%{imap_pop3_mem} \
+  --maxperip=25 --query-cache --memory=%{imap_pop3_mem} --default-domain=${default_domain} \
   --starttls --infifo=infifo
 %{_prefix}/sbin/svctool --imap=993 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-  --maxperip=25 --query-cache --memory=%{imapspop3_mem} \
+  --maxperip=25 --query-cache --memory=%{imapspop3_mem} --default-domain=${default_domain} \
   --ssl --infifo=infifo
 %{_prefix}/sbin/svctool --pop3=110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-  --maxperip=25 --query-cache --memory=%{imap_pop3_mem} \
+  --maxperip=25 --query-cache --memory=%{imap_pop3_mem} --default-domain=${default_domain} \
   --starttls --infifo=infifo
 %{_prefix}/sbin/svctool --pop3=995 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
-  --maxperip=25 --query-cache --memory=%{imapspop3_mem} \
+  --maxperip=25 --query-cache --memory=%{imapspop3_mem} --default-domain=${default_domain} \
   --ssl --infifo=infifo
 
 # add courier-imap auth module authindi

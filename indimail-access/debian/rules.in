@@ -75,6 +75,7 @@ build-stamp:
 	echo HOME_URL="https://github.com/mbhangui/indimail-virtualdomains"; \
 	echo PACKAGE_BUGREPORT=\"'@email@'\"; \
 	) > indimail-access-release
+	if [ -f postinst -a -d /usr/src/packages/SOURCES.DEB ] ; then echo setting "build_on_obs=1"; sed -i 's{build_on_obs=.*{build_on_obs=1{' postinst; fi
 	touch build-stamp
 
 install: build

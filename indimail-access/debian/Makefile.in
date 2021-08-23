@@ -6,6 +6,7 @@ shareddir=@shareddir@
 mandir=@mandir@
 logdir=@logdir@
 servicedir=@servicedir@
+defaultDomain=@defaultDomain@
 version=$(shell cat ../conf-version)
 release=$(shell cat ../conf-release)
 email=$(shell cat ../conf-email)
@@ -23,6 +24,7 @@ edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
 	-e 's,@email\@,$(email),g' \
+	-e 's,@defaultDomain\@,$(defaultDomain),g' \
 	-e 's,@courier_version\@,$(courier_version),g' \
 	-e 's,@fetchmail_version\@,$(fetchmail_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
