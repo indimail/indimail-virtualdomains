@@ -73,6 +73,7 @@ if [ -f Makefile ] ; then
 		exit 0
 	fi
 fi
+default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 ./configure --prefix=$prefix \
   --sbindir=$sbindir --mandir=$mandir \
   --sysconfdir=$sysconfdir \
@@ -83,4 +84,4 @@ fi
   --enable-dlload-mysql=yes \
   --enable-mysqlprefix=$mysqlPrefix \
   --libdir=$libdir \
-  --enable-default-domain=`uname -n`
+  --enable-default-domain=$default_domain

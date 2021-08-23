@@ -85,6 +85,7 @@ if [ -f Makefile ] ; then
 		exit 0
 	fi
 fi
+default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 ./configure \
   --prefix=$prefix \
   --datarootdir=$prefix/share/indimail \
@@ -103,5 +104,5 @@ fi
   --enable-logdir=/var/log/svc \
   --enable-basepath=$base_path \
   --enable-tcprules-prog=$prefix/bin/tcprules \
-  --enable-default-domain=`uname -n` \
+  --enable-default-domain=$default_domain \
   `cat config/indimail.opts`
