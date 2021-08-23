@@ -629,14 +629,14 @@ do
   %{__chown} -R qmaill:nofiles %{logdir}/$i
 done
 
-%if %build_on_obs == 1
-  default_domain=%{defaultDomain}
+%if %build_on_obs == 0
+  if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+    default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+  else
+    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./' || echo %{defaultDomain})
+  fi
 %else
-if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-  default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
-else
-  default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain}) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
-fi
+  default_domain=%{defaultDomain}
 %endif
 
 %ifarch x86_64
