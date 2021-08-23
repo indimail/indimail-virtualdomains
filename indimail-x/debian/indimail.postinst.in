@@ -28,6 +28,8 @@ logdir=@logdir@
 mysqlPrefix=@mysql_prefix@
 servicedir=@servicedir@
 sysconfdir=@sysconfdir@
+default_domain=@defaultDomain@
+build_on_obs=0
 ####################################
 noproxy=0
 tcpserver_plugin=1
@@ -240,11 +242,12 @@ else
   logfifo="/tmp/logfifo"
 fi
 
-if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
-  default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
-else
-  defaultDomain=@defaultdomain@
-  default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${defaultDomain}) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+if [ $build_on_obs -eq 0 ] ; then
+	if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+		default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+	else
+		default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./' || echo ${default_domain})
+	fi
 fi
 
 a_arch=`uname -m`

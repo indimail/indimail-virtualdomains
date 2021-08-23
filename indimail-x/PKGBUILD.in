@@ -1,5 +1,8 @@
 # Maintainer: @email@
 # $Log: PKGBUILD.in,v $
+# Revision 1.6  2021-08-24 00:02:24+05:30  Cprogrammer
+# refactored setting of default_domain variable
+#
 # Revision 1.5  2021-08-20 17:42:22+05:30  Cprogrammer
 # removed host component form domain name
 #
@@ -16,7 +19,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.5 2021-08-20 17:42:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.6 2021-08-24 00:02:24+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail' 'libindimail')
 pkgver=@version@
@@ -40,7 +43,7 @@ _libexecdir=@libexecdir@
 _servicedir=@servicedir@
 _mandir=@mandir@
 _logdir=@logdir@
-_defaultDomain=@defaultDomain@
+_defaultDomain=@defaultdomain@
 _build_on_obs=0
 _indimaildir=@indimaildir@
 _domaindir=@domaindir@
@@ -56,7 +59,7 @@ build() {
     if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
       default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
     else
-      default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${_defaultDomain}) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+      default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./' || echo ${_defaultDomain})
     fi
   fi
   make clean >/dev/null 2>&1|| true; make distclean >/dev/null 2>&1 || true
@@ -69,7 +72,7 @@ build() {
     --enable-basepath=${_mbase} --enable-logdir=${_logdir} \
     --sbindir=${_prefix}/bin --enable-tcprules-prog=${_prefix}/bin/tcprules \
     --enable-tcpserver-file=${_sysconfdir}/tcp/tcp.smtp \
-    --enable-default-domain=${_defaultDomain} `cat config/indimail.opts`
+    --enable-default-domain=${default_domain} `cat config/indimail.opts`
   make
 }
 
@@ -294,7 +297,7 @@ post_install() {
     if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
       default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
     else
-      default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${_defaultDomain}) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+      default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./' || echo ${default_domain})
     fi
   fi
 
@@ -307,16 +310,16 @@ post_install() {
       imapspop3_mem=52428800
     fi
     ${_prefix}/sbin/svctool --imap=4143 --servicedir=${_servicedir} --localip=0 --maxdaemons=40 \
-      --maxperip=25 --query-cache --default-domain=$default_domain --memory=${imap_pop3_mem} \
+      --maxperip=25 --query-cache --default-domain=${default_domain} --memory=${imap_pop3_mem} \
       --proxy=143 --starttls --tlsprog=${_prefix}/bin/sslerator --infifo=infifo
     ${_prefix}/sbin/svctool --imap=9143 --servicedir=${_servicedir} --localip=0 --maxdaemons=40 \
-      --maxperip=25 --query-cache --default-domain=$default_domain --memory=${imapspop3_mem} \
+      --maxperip=25 --query-cache --default-domain=${default_domain} --memory=${imapspop3_mem} \
       --proxy=143 --ssl --infifo=infifo
     ${_prefix}/sbin/svctool --pop3=4110 --servicedir=${_servicedir} --localip=0 --maxdaemons=40 \
-      --maxperip=25 --query-cache --default-domain=$default_domain --memory=${imap_pop3_mem} \
+      --maxperip=25 --query-cache --default-domain=${default_domain} --memory=${imap_pop3_mem} \
       --proxy=110 --starttls --tlsprog=${_prefix}/bin/sslerator --infifo=infifo
     ${_prefix}/sbin/svctool --pop3=9110 --servicedir=${_servicedir} --localip=0 --maxdaemons=40 \
-      --maxperip=25 --query-cache --default-domain=$default_domain --memory=${imapspop3_mem} \
+      --maxperip=25 --query-cache --default-domain=${default_domain} --memory=${imapspop3_mem} \
       --proxy=110 --ssl --infifo=infifo
 
     # add courier-imap auth module authindi
@@ -391,7 +394,7 @@ post_install() {
 
   echo "Creating default mysql.host, tcprules, bogofilter-qfe, default domain dir"
   ${_prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
-    --mysqlpass=ssh-1.5- --mysqlsocket=${_mysqlSocket} --default-domain=$default_domain
+    --mysqlpass=ssh-1.5- --mysqlsocket=${_mysqlSocket} --default-domain=${default_domain}
 
   # MySQL
   if [ -x ${_mysqlPrefix}/libexec/mysqld -o -x ${_mysqlPrefix}/sbin/mysqld -o -x ${_mysqlPrefix}/bin/mysqld ] ; then
@@ -405,7 +408,7 @@ post_install() {
       --databasedir=${_indimaildir}/mysqldb --base_path=${_mbase} --mysqlsocket="${_mysqlSocket}".tmp
     # MySQL Supervise creation
     ${_prefix}/sbin/svctool --mysql=3306 --servicedir=${_servicedir} --mysqlPrefix=${_mysqlPrefix} \
-      --databasedir=${_indimaildir}/mysqldb --config=${_sysconfdir}/indimail.cnf --default-domain=$default_domain
+      --databasedir=${_indimaildir}/mysqldb --config=${_sysconfdir}/indimail.cnf --default-domain=${default_domain}
     if [ ! -f ${_indimaildir}/mysqldb/data/indimail/indimail.frm -a ! -f ${_indimaildir}/mysqldb/data/indimail/indimail.ibd ] ; then
       error=1
     fi
@@ -528,7 +531,7 @@ post_install() {
     count=`expr $count + 1`
     echo "$count. You need to create CERTS for STARTTLS."
     echo "   Run the following command to create Certificate for TLS/SSL"
-    echo "   ${_prefix}/sbin/svctool --config=cert --postmaster=postmaster@$default_domain --common_name=$default_domain"
+    echo "   ${_prefix}/sbin/svctool --config=cert --postmaster=postmaster@${default_domain} --common_name=${default_domain}"
   fi
   echo
   echo "Check /var/log/indimail-setup.log for the detailed installation log!!!"
@@ -667,7 +670,7 @@ post_remove() {
   else
     default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${_defaultDomain}) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
   fi
-  rm -rf ${_indimaildir}/domains/$default_domain
+  rm -rf ${_indimaildir}/domains/${default_domain}
   for port in 465 25 587
   do
     > ${_servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
