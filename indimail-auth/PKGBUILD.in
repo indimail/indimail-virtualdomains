@@ -27,7 +27,7 @@ _shareddir=@prefix@/share/indimail
 _mandir=@mandir@
 _servicedir=@servicedir@
 _logdir=@logdir@
-_defaultDomain=indimail.org
+_defaultDomain=@defaultDomain@
 _build_on_obs=0
 _mysqlPrefix=/usr
 _mysqlSocket=/var/run/mysqld/mysqld.sock
@@ -48,7 +48,7 @@ build() {
     if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
       default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
     else
-      default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo ${_defaultDomain}) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+      default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./' || echo ${_defaultDomain})
     fi
   fi
   cd "$srcdir/nssd-@nssd_version@"
@@ -57,7 +57,7 @@ build() {
   --sbindir=${_prefix}/bin --enable-nssd-socket=${nssd_sock} \
   --enable-nssd-config-path=${_sysconfdir}/nssd.conf \
   --enable-mysqlprefix=${_mysqlPrefix} \
-  --enable-dlload-mysql=yes --enable-default-domain=$default_domain
+  --enable-dlload-mysql=yes --enable-default-domain=${default_domain}
   make
   cd "$srcdir/pam-multi-@pam_multi_version@"
   ./configure --prefix=${_prefix} --datarootdir=${_shareddir} \
@@ -65,7 +65,7 @@ build() {
   --sbindir=${_prefix}/bin --enable-controldir=${_sysconfdir}/control \
   --enable-pamconfdir=${_pam_confdir} \
   --enable-mysqlprefix=${_mysqlPrefix} \
-  --enable-dlload-mysql=yes --enable-default-domain=$default_domain
+  --enable-dlload-mysql=yes --enable-default-domain=${default_domain}
   make
 }
 

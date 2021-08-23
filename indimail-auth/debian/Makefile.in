@@ -10,6 +10,7 @@ pam_confdir=/etc/pam.d
 version=$(shell cat ../conf-version)
 release=$(shell cat ../conf-release)
 email=$(shell cat ../conf-email)
+defaultDomain=@defaultDomain@
 nssd_version=@nssd_version@
 pam_multi_version=@pam_multi_version@
 edit = sed \
@@ -25,6 +26,7 @@ edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
 	-e 's,@email\@,$(email),g' \
+	-e 's,@defaultDomain\@,$(defaultDomain),g' \
 	-e 's,@nssd_version\@,$(nssd_version),g' \
 	-e 's,@pam_multi_version\@,$(pam_multi_version),g' \
 	-e 's,@DATE\@,$(DATE),g'

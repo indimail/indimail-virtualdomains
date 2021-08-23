@@ -19,7 +19,7 @@ nssd_version=@nssd_version@
 pam_multi_version=@pam_multi_version@
 pam_moduledir=@pam_moduledir@
 pam_confdir=@pam_confdir@
-default_domain=indimail.org
+default_domain=@defaultDomain@
 arch=$(shell uname -m)
 # check https://wiki.debian.org/Multiarch/Implementation#Dynamic_debian.2F.2A_files
 libd=$(shell if [ -d $(prefix)/lib/$(arch)-linux-gnu ] ; then echo lib/$(arch)-linux-gnu; else echo lib;fi)

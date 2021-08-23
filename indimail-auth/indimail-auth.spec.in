@@ -32,7 +32,7 @@
 %global pam_moduledir      /%{_lib}/security
 %global mysqlPrefix        /usr
 %global mysqlSocket        /var/run/mysqld/mysqld.sock
-%global defaultDomain      indimail.org
+%global defaultDomain      @defaultDomain@
 # Packages which do not use autosetup or setup macro
 # in the prep section have a problem in enabling debuginfo.
 # This isn't documented clearly anywhere. A workaround is
@@ -162,7 +162,7 @@ echo "PACKAGE_BUGREPORT=\"'@email@'\""
   if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
     default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
   else
-    default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || echo %{defaultDomain}) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./' || echo %{defaultDomain})
   fi
 %else
   default_domain=%{defaultDomain}

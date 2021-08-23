@@ -7,6 +7,7 @@ mandir=/usr/share/man
 logdir=/var/log/svc
 pam_confdir=/etc/pam.d
 servicedir=/service
+defaultDomain=indimail.org
 version := $(shell cat conf-version)
 release := $(shell cat conf-release 2>/dev/null||(echo "1.1" && echo 1.1>conf-releae))
 nssd_version=$(shell cat ../nssd-x/conf-version)
@@ -26,6 +27,7 @@ edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
 	-e 's,@email\@,$(email),g' \
+	-e 's,@defaultDomain\@,$(defaultDomain),g' \
 	-e 's,@nssd_version\@,$(nssd_version),g' \
 	-e 's,@pam_multi_version\@,$(pam_multi_version),g' \
 	-e 's,@DATE\@,$(DATE),g'
