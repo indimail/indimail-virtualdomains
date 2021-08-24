@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.8  2021-08-24 11:26:55+05:30  Cprogrammer
+ * added check for domain name validity
+ *
  * Revision 1.7  2020-09-17 14:48:23+05:30  Cprogrammer
  * FreeBSD fix
  *
@@ -56,6 +59,7 @@
 #include <fmt.h>
 #include <env.h>
 #include <str.h>
+#include <check_domain.h>
 #include <getEnvConfig.h>
 #endif
 #include "variables.h"
@@ -85,7 +89,7 @@
 #include "get_indimailuidgid.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.7 2020-09-17 14:48:23+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.8 2021-08-24 11:26:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -574,6 +578,8 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 		*passwd = argv[optind++];
 	if (!*domain)
 		strerr_die3x(100, WARN, "Domain not specified\n", usage);
+	if (!check_domain(*domain))
+		strerr_die3(111, WARN, "invalid domain: ", *domain, &check_domain_err);
 #ifdef CLUSTERED_SITE
 	if (distributed >=0 && (!*sqlserver || !*database || !*dbuser || !*dbpass || dbport == -1))
 		strerr_die3x(100, WARN, "specify sqlserver, database, dbuser, dbpass and dbport\n", usage);
