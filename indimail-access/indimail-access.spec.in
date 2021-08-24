@@ -36,7 +36,7 @@
 %global logdir             @logdir@
 %global servicedir         @servicedir@
 %global mandir             @mandir@
-%global defaultDomain      @defaultdomain@
+%global defaultDomain      @defaultDomain@
 %global courier_version    @courier_version@
 %global fetchmail_version  @fetchmail_version@
 %global url                https://github.com/mbhangui/indimail-virtualdomains
