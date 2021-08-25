@@ -330,7 +330,7 @@ if [ -f /etc/debian_version ] ; then
 	# debian / ubuntu
 	httpd_user="www-data"
 	httpd_group="www-data"
-	php_ini="ls /etc/php/*/apache2/php.ini"
+	php_ini=$(ls /etc/php/*/apache2/php.ini)
 elif [ $is_suse -eq 1 ] ; then
 	httpd_user="wwwrun"
 	httpd_group="www"
