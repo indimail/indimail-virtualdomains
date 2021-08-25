@@ -551,7 +551,7 @@ elif [ -f /etc/debian_version ] ; then
 		echo "    </FilesMatch>"
 		) > $tmp
 		$sed -i \
-			-e "/DocumentRoot/ r $tmp"
+			-e "/DocumentRoot/ r $tmp" \
 			-e "s}#ServerName www.example.com}ServerName mail.indimail.org}g" \
 			-e "s}ServerAdmin webmaster@localhost}ServerAdmin root@localhost}g" \
 		/etc/apache2/sites-available/000-default.conf
