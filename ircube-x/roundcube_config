@@ -458,10 +458,18 @@ if [ -n "$ssl_cnf" -a -f $ssl_cnf ] ; then
 	fi
 fi
 if [ -f /etc/centos-release ] ; then
-	centos_release=$(cat /etc/centos-release|awk '{print $4}'|cut -d.  -f1)
+	t=$(cat /etc/centos-release|awk '{print $1}')
+	if [ "$t" = "CentOS" ] ; then
+		centos_release=$(cat /etc/centos-release|awk '{print $4}'|cut -d.  -f1)
+	elif [ "$t" = "AlmaLinux" ] ; then
+		centos_release=$(cat /etc/centos-release|awk '{print $3}'|cut -d.  -f1)
+	else
+		echo "Unknown CentOS release" 1>&2
+	fi
+
 	case "$centos_release" in
 		7|8)
-		echo "configuring /etc/httpd/conf.d/roundcubemail.conf for CentOS $centos_release"
+		echo "configuring /etc/httpd/conf.d/roundcubemail.conf for $t $centos_release"
 		if [ -f /etc/httpd/conf.d/roundcubemail.conf ] ; then
 			$mv /etc/httpd/conf.d/roundcubemail.conf \
 				/etc/httpd/conf.d/roundcubemail.conf.BAK
@@ -658,21 +666,49 @@ if [ ! -d /service/php-fpm ] ; then
 fi
 
 if [ ! -d /service/httpd ] ; then
-	echo "Creating supervised service for apache2"
-	mkdir -p /service/httpd
-	touch /service/httpd/down
-	(
-	echo "#!/bin/sh"
-	echo "# created by roundcube_config for indimail+roundcube docker container"
-	echo "# service started by docker-entrypoint"
-	echo "#"
-	echo "if [ ! -d /usr/share/roundcubemail/config -a ! -L /usr/share/roundcubemail/config ] ; then"
-	echo "  echo \"ln -s /etc/roundcubemail /usr/share/roundcubemail/config\""
-	echo "  ln -s /etc/roundcubemail /usr/share/roundcubemail/config"
-	echo "fi"
-	echo "exec /usr/sbin/httpd -DFOREGROUND"
-	) > /service/httpd/run
-	chmod +x /service/httpd/run
+	if [ -x /usr/sbin/httpd ] ; then
+		echo "Creating supervised service for apache2"
+		mkdir -p /service/httpd
+		touch /service/httpd/down
+		(
+		echo "#!/bin/sh"
+		echo "# created by roundcube_config for indimail+roundcube docker container"
+		echo "# service started by docker-entrypoint"
+		echo "#"
+		echo "if [ ! -d /usr/share/roundcubemail/config -a ! -L /usr/share/roundcubemail/config ] ; then"
+		echo "  echo \"ln -s /etc/roundcubemail /usr/share/roundcubemail/config\""
+		echo "  ln -s /etc/roundcubemail /usr/share/roundcubemail/config"
+		echo "fi"
+		echo "exec /usr/sbin/httpd -DFOREGROUND"
+		) > /service/httpd/run
+		chmod +x /service/httpd/run
+	elif [ -x /usr/sbin/apache2 ] ; then
+		echo "Creating supervised service for apache2"
+		mkdir -p /service/httpd
+		touch /service/httpd/down
+		(
+		echo "#!/bin/sh"
+		echo "# created by roundcube_config for indimail+roundcube docker container"
+		echo "# service started by docker-entrypoint"
+		echo "#"
+		echo "if [ ! -d /usr/share/roundcubemail/config -a ! -L /usr/share/roundcubemail/config ] ; then"
+		echo "  echo \"ln -s /etc/roundcubemail /usr/share/roundcubemail/config\""
+		echo "  ln -s /etc/roundcubemail /usr/share/roundcubemail/config"
+		echo "fi"
+		echo "exec fghack /usr/sbin/apachectl -DFOREGROUND"
+		) > /service/httpd/run
+		chmod +x /service/httpd/run
+		(
+		echo "#!/bin/sh"
+		echo "# created by roundcube_config for indimail+roundcube docker container"
+		echo "# service started by docker-entrypoint"
+		echo "#"
+		echo "exec /usr/sbin/apachectl stop"
+		) > /service/httpd/shutdown
+		chmod +x /service/httpd/shutdown
+	else
+		echo "Couldn't find httpd/apache2" 1>&2
+	fi
 fi
 
 if [ -d /var/www/html ] ; then
