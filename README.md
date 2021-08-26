@@ -606,14 +606,15 @@ $ sudo ./create_services
 
 The script create\_services does the following.
 
-1. Creates MySQL user 'indimail' with password 'ssh-1.5-'. This user has access to indimail database.
-2. Creates MySQL user 'mysql' with '4-57343-'. This user has all MySQL privileges.
-3. Creates MySQL user 'admin' with 'benhur20'. This user has shutdown privilege in MySQL.
-4. Creates user 'admin' in indimail internal database for adminclient(8). This is used by indisrvr(8) for access to various IndiMail(7) programs. The password of this user is 'benhur20'
+1. Creates MySQL user 'indimail' with password 'ssh-1.5-'. This user has access to indimail database. You must use the mysql(1) client program to change this password after installation. After changing the password you have to edit /etc/indimail/control/host.mysql (on FreeBSD/Darwin /usr/local/etc/indimail/control/host.mysql)
+2. Creates MySQL user 'mysql' with '4-57343-'. This user has all MySQL privileges. You must use the mysql(1) client program to change this password after installation.
+3. Creates MySQL user 'admin' with 'benhur20'. This user has shutdown privilege in MySQL. You must use the mysql(1) client program to change this password after installation. After changing the password edit the file /service/mysql.3306/shutdown (/usr/local/etc/indimail/sv/mysql.3306/shutown on FreeBSD/Darwin).
+4. Creates user 'admin' in indimail internal database for adminclient(8). This is used by indisrvr(8) for access to various IndiMail(7) programs when indimail has been configured as a cluster/distributed domain. The password of this user is 'benhur20'. You can use mgmtpass(8) to change the password.
 5. You can also set MYSQL\_PASS, PRIV\_PASS, ADMIN\_PASS environent variables to set your own passwords before running create\_services.
-6. If you change the MySQL password for indimail after running create\_services, edit /etc/indimail/control/host.mysql. On FreeBSD/Darwin this file will be /usr/local/etc/indimail/host.mysql
+6. If you change the MySQL password for indimail after running create\_services, edit /etc/indimail/control/host.mysql. On FreeBSD/Darwin this file will be /usr/local/etc/indimail/control/host.mysql
+7. svctool requires credentials for MySQL user 'admin' for the mysqldump option. You are encouraged to read [Setting MySQL Guide](https://github.com/mbhangui/indimail-virtualdomains/wiki/IndiMail#setting-up-mysql), on how to save MySQL credentials.
 
-NOTE: The Darwin Mac OSX system is broken for sending emails because you can't remove /usr/sbin/sendmail. [System Integrity Protection (SIP)](https://en.wikipedia.org/wiki/System_Integrity_Protection) ensures that you cannot modify anything in /bin, /sbin, /usr, /System, etc. You could disable it by using csrutil in recover mode but that is not adviseable. See [this](https://www.howtogeek.com/230424/how-to-disable-system-integrity-protection-on-a-mac-and-why-you-shouldnt/). indimail-mta requires services in /service to configure all startup items. On Mac OS X, it uses `/etc/synthetic.conf' to create a virtual symlink of /service to /usr/local/etc/indimail/service. This file is created/modified by 'svctool --add-boot' command. For program that need to send mails, you will need to call /usr/local/bin/sendmail (indimal-mta's sendmail replacement). The OS and all utilites like cron, mailx, etc will continue to use /usr/sbin/sendmail. There is nothing you can do about it, other than fooling around with SIP.
+NOTE: The Darwin Mac OSX system is broken for sending emails because you can't remove /usr/sbin/sendmail. [System Integrity Protection (SIP)](https://en.wikipedia.org/wiki/System_Integrity_Protection) ensures that you cannot modify anything in /bin, /sbin, /usr, /System, etc. You could disable it by using csrutil in recover mode but that is not adviseable. See [this](https://www.howtogeek.com/230424/how-to-disable-system-integrity-protection-on-a-mac-and-why-you-shouldnt/). indimail-mta requires services in /service to configure all startup items. On Mac OS X, it uses `/etc/synthetic.conf' to create a virtual symlink of /service to /usr/local/etc/indimail/sv. This file is created/modified by 'svctool --add-boot' command. For program that need to send mails, you will need to call /usr/local/bin/sendmail (indimal-mta's sendmail replacement). The OS and all utilites like cron, mailx, etc will continue to use /usr/sbin/sendmail. There is nothing you can do about it, other than fooling around with SIP.
 
 ## Enable svscan to be started at boot
 
@@ -697,7 +698,7 @@ The svstat command can be used to query the status of various services. You can 
 
 The argument to svstat should be a directory in /service. Each directory in /service refers to an indimail-mta/indimail service. e.g. `/service/qmail-smtpd.25` refers to the SMTP service serving port 25.
 
-If you don't have /service create a link to /usr/libexec/indimail/service (/usr/local/libexec/indimail/service on FreeBSD and Darwin). I'm working on creating this link automatically during setup.
+If you don't have /service create a link to /etc/indimail/sv (/usr/local/etc/indimail/sv on FreeBSD/Darwin). I'm working on creating this link automatically during setup.
 
 ```
 $ sudo svstat /service/*
