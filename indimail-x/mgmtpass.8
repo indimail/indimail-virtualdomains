@@ -11,6 +11,27 @@ is used the the administration server \fBindisrvr(8)\fR. For users other than th
 the old password will be prompted, and only after successful authentication, will the password
 be changed. 
 
+\fBmgmtpass\fR(8) uses \fBcrypt(3)\fR routine to encrypt the password.
+You can set the environment variable \fBPASSWORD_HASH\fR to set the
+encryption method.
+
+.B PASSWORD_HASH
+identifies the encryption method used and this then determines how the rest
+of the password string is interpreted.
+The following values of
+.B PASSWORD_HASH
+are supported:
+.RS
+.TS
+l l.
+PASSWORD_HASH | Method
+_
+0             | DES
+1             | MD5
+2             | SHA-256
+3             | SHA-512
+.TE
+
 .SH OPTIONS
 .TP
 \fB\-u\fR \fIuser\fR
