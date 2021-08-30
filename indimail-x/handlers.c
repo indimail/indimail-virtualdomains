@@ -112,11 +112,8 @@ char           *strchr(), *strrchr();
 #include <syslog.h>
 #endif
 
-
 void
-logit(value)
-	char            value;
-
+logit(char value)
 {
 	extern FILE    *lg;
 
@@ -134,9 +131,7 @@ logit(value)
 }
 
 #ifdef SYSLOG
-syslog_entry(string, cont)
-	char           *string;
-	int             cont;		/*- 0 to log this NOW, 1 to wait for more data */
+syslog_entry(char *string, int cont) /*- cont 0 to log this NOW, 1 to wait for more data */
 {
 	static char     logentry[1024];
 
@@ -159,9 +154,7 @@ syslog_entry(string, cont)
 #endif
 
 int
-intable(what)
-	char           *what;
-
+intable(char *what)
 {
 	int             i;
 	int             ret = 0;
@@ -177,9 +170,7 @@ intable(what)
 
 #ifndef COMPILE_TABLE
 int
-acl(name, mode)
-	char           *name, mode;
-
+acl(char *name, int mode)
 {
 	/*
 	 * Returns 1 on a +, -1 on a -, and 0 on a not found 
@@ -257,10 +248,7 @@ acl(name, mode)
  * Return 1 on everything okay, 0 on something not accessible 
  */
 int
-check_access(argc, argv)
-	int             argc;
-	char           *argv[];
-
+check_access(int argc, char **argv)
 {
 	struct stat     buf;
 	int             i;
@@ -363,9 +351,8 @@ check_access(argc, argv)
 	return ret;
 }
 
-void
-fatal(mes)
-	char           *mes;
+__attribute__ ((noreturn)) void
+fatal(char *mes)
 
 {
 	perror(mes);
@@ -376,9 +363,7 @@ fatal(mes)
  * writeable returns 1 if the file is writeable, 0 otherwise 
  */
 int
-writeable(file)
-	char           *file;
-
+writeable(char *file)
 {
 	int             accessible;
 	char            temp[255];
@@ -449,10 +434,7 @@ writeable(file)
 }
 
 int
-i_alias(argc, argv)
-	int             argc;
-	char           *argv[];
-
+i_alias(int argc, char **argv)
 {
 	int             i, found = 0, aspace = 0;
 
@@ -510,10 +492,7 @@ i_alias(argc, argv)
 }
 
 int
-i_cp(argc, argv)
-	int             argc;
-	char           *argv[];
-
+i_cp(int argc, char **argv)
 {
 	if (argc != 3)
 	{
@@ -533,10 +512,7 @@ i_cp(argc, argv)
 }
 
 int
-i_ldcache(argc, argv)
-	int             argc;
-	char           *argv[];
-
+i_ldcache(int argc, char **argv)
 {
 	if (argc != 1)
 	{
@@ -551,10 +527,7 @@ i_ldcache(argc, argv)
 }
 
 int
-i_vi(argc, argv)
-	int             argc;
-	char           *argv[];
-
+i_vi(int argc, char **argv)
 {
 	if (argc != 2)
 	{
@@ -574,10 +547,7 @@ i_vi(argc, argv)
 }
 
 int
-i_rm(argc, argv)
-	int             argc;
-	char           *argv[];
-
+i_rm(int argc, char **argv)
 {
 	char            parent[255];
 	char           *n;
@@ -615,20 +585,14 @@ i_rm(argc, argv)
 	return(0);
 }
 
-int
-i_done(argc, argv)
-	int             argc;
-	char           *argv[];
-
+__attribute__ ((noreturn)) void
+i_done(int argc, char **argv)
 {
 	exit(0);	/*- Short circuit exit */
 }
 
 int
-i_cd(argc, argv)
-	int             argc;
-	char           *argv[];
-
+i_cd(int argc, char **argv)
 {
 	int             x;
 
@@ -653,10 +617,7 @@ i_cd(argc, argv)
 }
 
 int
-i_more(argc, argv)
-	int             argc;
-	char           *argv[];
-
+i_more(int argc, char **argv)
 {
 	FILE           *input_file;
 	char           *file_name;
@@ -780,9 +741,7 @@ i_more(argc, argv)
  */
 #ifdef DARWIN
 int
-execute(argc, argv)
-	int             argc;
-	char           *argv[];
+execute(int argc, char **argv)
 {
 	int             x;
 
@@ -797,9 +756,7 @@ execute(argc, argv)
 }
 #else
 int
-execute(argc, argv)
-	int             argc;
-	char           **argv;
+execute(int argc, char **argv)
 {
 	char          **av2;
 	int             fd;
@@ -861,10 +818,7 @@ execute(argc, argv)
 #endif
 
 int
-i_help(argc, argv)
-	int             argc;
-	char           *argv[];
-
+i_help(int argc, char **argv)
 {
 	int             i;
 	int             x = 1;
@@ -913,10 +867,7 @@ i_help(argc, argv)
 }
 
 int
-i_mount(argc, argv)
-	int             argc;
-	char           *argv[];
-
+i_mount(int argc, char **argv)
 {
 	char           *nargv[6];
 
@@ -943,9 +894,7 @@ i_mount(argc, argv)
 }
 
 int
-i_test(argc, argv)
-	int             argc;
-	char           *argv[];
+i_test(int argc, char **argv)
 {
 	extern int      prompt;
 
@@ -1002,11 +951,8 @@ i_test(argc, argv)
 	return(0);
 }
 
-int
-i_exit(argc, argv)
-	int             argc;
-	char           *argv[];
-
+__attribute__ ((noreturn)) void
+i_exit(int argc, char **argv)
 {
 	logout();	/*- Defined in main */
 	exit(0);

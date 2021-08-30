@@ -48,6 +48,7 @@
 #include <error.h>
 #include <env.h>
 #include <getEnvConfig.h>
+#include <noreturn.h>
 #endif
 #include "indimail.h"
 #include "get_indimailuidgid.h"
@@ -77,6 +78,9 @@ static char    *usage =
 	"7   - Domain       Query"
 	;
 
+#ifdef HAVE_QMAIL
+no_return
+#endif
 static void
 die_nomem()
 {
@@ -193,6 +197,9 @@ print_limits(struct vlimits *limits)
 	return;
 }
 
+#ifdef HAVE_QMAIL
+no_return
+#endif
 void
 SigChild()
 {

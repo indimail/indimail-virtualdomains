@@ -82,7 +82,7 @@ int i_alias();
 int i_more(); 
 int i_cd();  
 int i_pwd();
-int i_done();
+void i_done();
 int i_cp();
 int i_rm();
 int i_vi();
@@ -91,7 +91,7 @@ int i_ldcache();
 int execute();
 int i_mount();
 int i_test();
-int i_exit();
+void i_exit();
 void fatal(char *);
 
 struct entry {
@@ -170,6 +170,6 @@ extern struct alias AliasList[];
 extern int AliasCounter;
 extern char *FileList[];
 extern char **environ;
-extern void logit();
+extern void logit(char);
 void logout();
 #endif

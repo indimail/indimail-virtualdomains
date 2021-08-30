@@ -33,6 +33,7 @@ static char     sccsid[] = "$Id: clearopensmtp.c,v 1.4 2020-04-01 18:53:20+05:30
 #include <stralloc.h>
 #include <strerr.h>
 #include <getEnvConfig.h>
+#include <noreturn.h>
 #endif
 #include "dbload.h"
 #include "iopen.h"
@@ -51,6 +52,9 @@ static char    *usage =
 	"         -s (clear MySQL RELAY TABLE)"
 	;
 
+#ifdef HAVE_QMAIL
+no_return
+#endif
 void
 print_usage()
 {
@@ -61,6 +65,9 @@ print_usage()
 	_exit(100);
 }
 
+#ifdef HAVE_QMAIL
+no_return
+#endif
 static void
 die_nomem()
 {
