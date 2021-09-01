@@ -1,5 +1,8 @@
 /*
  * $Log: clearopensmtp.c,v $
+ * Revision 1.5  2021-09-01 18:28:06+05:30  Cprogrammer
+ * mark functions not returning as __attribute__ ((noreturn))
+ *
  * Revision 1.4  2020-04-01 18:53:20+05:30  Cprogrammer
  * moved getEnvConfig to libqmail
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: clearopensmtp.c,v 1.4 2020-04-01 18:53:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: clearopensmtp.c,v 1.5 2021-09-01 18:28:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY

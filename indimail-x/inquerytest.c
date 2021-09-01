@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 1.7  2021-09-01 18:29:48+05:30  Cprogrammer
+ * mark functions not returning as __attribute__ ((noreturn))
+ *
  * Revision 1.6  2021-06-09 18:59:10+05:30  Cprogrammer
  * test fifo for read to ensure inlookup process has opened fifo in write mode
  *
@@ -61,7 +64,7 @@
 #include "vlimits.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 1.6 2021-06-09 18:59:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 1.7 2021-09-01 18:29:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "inquerytest: fatal: "

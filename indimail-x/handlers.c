@@ -1,5 +1,8 @@
 /*
  * $Log: handlers.c,v $
+ * Revision 1.3  2021-09-01 18:28:19+05:30  Cprogrammer
+ * mark functions not returning as __attribute__ ((noreturn))
+ *
  * Revision 1.2  2020-11-21 15:59:39+05:30  Cprogrammer
  * use execv() in i_mount() instead of execute()
  *
@@ -31,7 +34,7 @@
  */
 
 #ifndef	lint
-static char    *rcsid = "@(#) $Id: handlers.c,v 1.2 2020-11-21 15:59:39+05:30 Cprogrammer Exp mbhangui $";
+static char    *rcsid = "@(#) $Id: handlers.c,v 1.3 2021-09-01 18:28:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
