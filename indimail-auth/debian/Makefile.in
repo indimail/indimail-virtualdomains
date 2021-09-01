@@ -32,8 +32,7 @@ edit = sed \
 	-e 's,@DATE\@,$(DATE),g'
 
 all: rules changelog preinst postinst prerm postrm \
-	indimail-auth.install indimail-auth.dsc indimail-auth-Debian_10.dsc \
-	indimail-auth-Debian_9.0.dsc debian.tar.gz
+	indimail-auth.install indimail-auth.dsc debian.tar.gz
 
 preinst: preinst.in
 	$(edit) $@.in > $@
