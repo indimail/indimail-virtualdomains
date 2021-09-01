@@ -99,7 +99,9 @@ Release @version@-@release@ Start 14/02/2021
 53. vadddomain: added check for domain name validity
 - 30/08/2021
 54. clearopensmtp.c, handlers.c, inquerytest.c, osh.h: mark functions not
-    returing as __attribute__ ((noreturn))
+    returning as __attribute__ ((noreturn))
+- 01/09/2021
+55. indimail.spec: removed use of chrpath
 
 no changes added to commit (use "git add" and/or "git commit -a")
 
