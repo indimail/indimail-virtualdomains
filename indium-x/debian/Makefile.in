@@ -14,10 +14,10 @@ libdir=$(prefix)/$(libd)
 #
 
 all: rules postrm postinst debian.tar.gz dummy.tar.gz  \
-	indium.dsc
+	indium.dsc indium-xUbuntu_16.04.dsc
 
 clean:
-	/bin/rm -f rules postrm postinst indium.dsc debian.tar.gz dummy.tar.gz indium.install README
+	/bin/rm -f rules postrm postinst *.dsc debian.tar.gz dummy.tar.gz indium.install README
 
 edit = sed \
 	-e 's,@indimaildir\@,$(indimaildir),g' \
@@ -41,6 +41,9 @@ postrm: postrm.in Makefile
 postinst: postinst.in Makefile
 	$(edit) $@.in > $@;
 indium.dsc: indium.dsc.in Makefile ../conf-version \
+../conf-release ../conf-email
+	$(edit) $@.in > $@
+indium-xUbuntu_16.04.dsc: indium-xUbuntu_16.04.dsc.in Makefile ../conf-version \
 ../conf-release ../conf-email
 	$(edit) $@.in > $@
 indium.install: indium.install.in Makefile
