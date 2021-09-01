@@ -96,12 +96,6 @@ copyright: copyright.in ../conf-email
 indimail.dsc: indimail.dsc.in Makefile ../conf-version \
 ../conf-release ../conf-email
 	$(edit) $@.in > $@;
-indimail-Debian_10.dsc: indimail-Debian_10.dsc.in Makefile \
-../conf-version ../conf-release ../conf-email
-	$(edit) $@.in > $@;
-indimail-Debian_9.0.dsc: indimail-Debian_9.0.dsc.in Makefile \
-../conf-version ../conf-release ../conf-email
-	$(edit) $@.in > $@;
 indimail-xUbuntu_18.04.dsc: indimail-xUbuntu_18.04.dsc.in Makefile \
 ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@;
