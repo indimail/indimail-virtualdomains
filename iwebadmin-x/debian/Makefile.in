@@ -13,7 +13,7 @@ email=$(shell cat ../conf-email)
 #
 
 all: rules postinst postrm debian.tar.gz dummy.tar.gz  \
-	iwebadmin.dsc iwebadmin-Debian_9.0.dsc iwebadmin-Debian_10.dsc
+	iwebadmin.dsc 
 
 clean:
 	/bin/rm -f rules postinst postrm *.dsc debian.tar.gz dummy.tar.gz _service README
@@ -40,12 +40,6 @@ postrm: postrm.in Makefile
 	$(edit) $@.in > $@;
 iwebadmin.dsc: iwebadmin.dsc.in ../conf-version \
 ../conf-release ../conf-email
-	$(edit) $@.in > $@
-iwebadmin-Debian_9.0.dsc: iwebadmin-Debian_9.0.dsc.in \
-../conf-version ../conf-release ../conf-email
-	$(edit) $@.in > $@
-iwebadmin-Debian_10.dsc: iwebadmin-Debian_10.dsc.in \
-../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
 control: control.in ../conf-email
 	$(edit) $@.in > $@
