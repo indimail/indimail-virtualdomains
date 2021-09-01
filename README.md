@@ -107,8 +107,8 @@ binutils coreutils grep flex libncurses5-dev libncurses5
 libpam0g-dev libpcre3-dev libgdbm-dev libdb-dev libgcrypt20-dev
 python libidn11-dev libidn2-0-dev
 
-Debian 9, Debian 10 - default-libmysqlclient-dev
-Remaining - libmysqlclient-dev
+Ubuntu 16.04, Debian 8 - libmysqlclient-dev
+Remaining - default-libmysqlclient-dev
 Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 ```
 
@@ -978,6 +978,7 @@ Currently, the list of supported distributions for IndiMail is
     * Debian
           o Debian  9.0
           o Debian 10.0
+          o Debian 11.0
           o Univention_4.3
           o Univention_4.4
 
