@@ -14,7 +14,7 @@ libdir=$(prefix)/$(libd)
 #
 
 all: rules postrm postinst debian.tar.gz dummy.tar.gz  \
-	indium.dsc indium-Debian_9.0.dsc indium-Debian_10.dsc
+	indium.dsc
 
 clean:
 	/bin/rm -f rules postrm postinst indium.dsc debian.tar.gz dummy.tar.gz indium.install README
@@ -41,12 +41,6 @@ postrm: postrm.in Makefile
 postinst: postinst.in Makefile
 	$(edit) $@.in > $@;
 indium.dsc: indium.dsc.in Makefile ../conf-version \
-../conf-release ../conf-email
-	$(edit) $@.in > $@
-indium-Debian_9.0.dsc: indium-Debian_9.0.dsc.in ../conf-version \
-../conf-release ../conf-email
-	$(edit) $@.in > $@
-indium-Debian_10.dsc: indium-Debian_10.dsc.in ../conf-version \
 ../conf-release ../conf-email
 	$(edit) $@.in > $@
 indium.install: indium.install.in Makefile
