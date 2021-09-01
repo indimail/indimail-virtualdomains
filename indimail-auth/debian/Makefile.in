@@ -58,12 +58,6 @@ copyright: copyright.in ../conf-email
 indimail-auth.dsc: indimail-auth.dsc.in Makefile ../conf-version ../conf-release \
 ../conf-email
 	$(edit) $@.in > $@
-indimail-auth-Debian_10.dsc: indimail-auth-Debian_10.dsc.in Makefile ../conf-version \
-../conf-release ../conf-email
-	$(edit) $@.in > $@
-indimail-auth-Debian_9.0.dsc: indimail-auth-Debian_9.0.dsc.in Makefile ../conf-version \
-../conf-release ../conf-email
-	$(edit) $@.in > $@
 debian.tar.gz: copyright preinst postinst prerm postrm rules changelog compat \
 indimail-auth.install obs_deb_prep Makefile control
 	tar cf - copyright preinst postinst prerm postrm rules changelog \
