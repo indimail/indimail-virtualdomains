@@ -32,7 +32,8 @@ edit = sed \
 	-e 's,@DATE\@,$(DATE),g'
 
 all: rules changelog preinst postinst prerm postrm \
-	indimail-auth.install indimail-auth.dsc debian.tar.gz
+indimail-auth.install indimail-auth.dsc indimail-auth-xUbuntu_16.04.dsc \
+debian.tar.gz
 
 preinst: preinst.in
 	$(edit) $@.in > $@
@@ -57,6 +58,9 @@ copyright: copyright.in ../conf-email
 	$(edit) $@.in > $@
 indimail-auth.dsc: indimail-auth.dsc.in Makefile ../conf-version ../conf-release \
 ../conf-email
+	$(edit) $@.in > $@
+indimail-auth-xUbuntu_16.04.dsc: indimail-auth-xUbuntu_16.04.dsc.in Makefile \
+../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
 debian.tar.gz: copyright preinst postinst prerm postrm rules changelog compat \
 indimail-auth.install obs_deb_prep Makefile control
