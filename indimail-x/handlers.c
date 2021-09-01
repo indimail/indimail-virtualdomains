@@ -1,5 +1,8 @@
 /*
  * $Log: handlers.c,v $
+ * Revision 1.4  2021-09-01 18:41:33+05:30  Cprogrammer
+ * reverted return type of i_exit to int
+ *
  * Revision 1.3  2021-09-01 18:28:19+05:30  Cprogrammer
  * mark functions not returning as __attribute__ ((noreturn))
  *
@@ -34,7 +37,7 @@
  */
 
 #ifndef	lint
-static char    *rcsid = "@(#) $Id: handlers.c,v 1.3 2021-09-01 18:28:19+05:30 Cprogrammer Exp mbhangui $";
+static char    *rcsid = "@(#) $Id: handlers.c,v 1.4 2021-09-01 18:41:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -954,7 +957,7 @@ i_test(int argc, char **argv)
 	return(0);
 }
 
-__attribute__ ((noreturn)) void
+__attribute__ ((noreturn)) int
 i_exit(int argc, char **argv)
 {
 	logout();	/*- Defined in main */

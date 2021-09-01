@@ -1,5 +1,8 @@
 /*
  * $Log: osh.h,v $
+ * Revision 1.3  2021-09-01 18:41:48+05:30  Cprogrammer
+ * reverted return type of i_exit to int
+ *
  * Revision 1.2  2021-09-01 18:29:59+05:30  Cprogrammer
  * updated function prototyps
  *
@@ -94,7 +97,7 @@ int i_ldcache();
 int execute();
 int i_mount();
 int i_test();
-void i_exit();
+int i_exit();
 void fatal(char *);
 
 struct entry {
