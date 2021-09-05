@@ -374,7 +374,7 @@ done
 
 %dir %attr(775,root,indimail)          %{domaindir}/domains
 %dir %attr(770,indimail,qmail)         %{indimaildir}/inquery
-%dir %attr(555,root,root)              %{libexecdir}/imapmodules
+%dir %attr(755,root,root)              %{libexecdir}/imapmodules
 %dir %attr(755,root,root)              %{_prefix}/lib/indimail/modules
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(755,root,root)              %{mandir}
@@ -384,7 +384,7 @@ done
 %dir %attr(755,root,root)              %{mandir}/man8
 %endif
 %if "%{_prefix}" != "/usr"
-%dir %attr(555,root,root)              %{_libdir}
+%dir %attr(755,root,root)              %{_libdir}
 %endif
 
 #
@@ -577,8 +577,8 @@ done
 %defattr(-, root, root, 0755)
 %dir %attr(755,root,root)              %{_prefix}/include/indimail
 %if "%{_prefix}" != "/usr"
-%dir %attr(555,root,root)              %{_libdir}
-%dir %attr(555,root,root)              %{mandir}/man3
+%dir %attr(755,root,root)              %{_libdir}
+%dir %attr(755,root,root)              %{mandir}/man3
 %endif
 %doc %attr(644,root,root)              %{mandir}/man3/*
 

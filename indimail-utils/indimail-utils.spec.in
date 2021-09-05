@@ -231,7 +231,7 @@ fi
 %dir %attr(755,root,root)              %{mandir}/man1
 %endif
 %if "%{_prefix}" != "/usr"
-%dir %attr(555,root,root)              %{_libdir}
+%dir %attr(755,root,root)              %{_libdir}
 %endif
 
 %dir %attr(755,root,root)              %{shareddir}/fortunes

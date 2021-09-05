@@ -87,11 +87,7 @@ fi
 
 %files
 %defattr(-,root,root)
-%dir %attr(555,root,qmail)        %{_prefix}
-%dir %attr(555,root,root)         %{_prefix}/sbin
-%dir %attr(555,root,qmail)        %{_prefix}/man/man8
-%dir %attr(555,root,root)         %{_libdir}
 %attr(555,root,root)              %{_prefix}/sbin/pam-checkpwd
 %attr(755,root,root)              %{security_dir}/pam-multi.so
-%attr(444,root,qmail)             %{_prefix}/man/man?/*
+%attr(644,root,root)              %{_prefix}/man/man?/*
 %docdir %{_prefix}/man

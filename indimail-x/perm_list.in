@@ -3,7 +3,7 @@
 #
 %dir %attr(0775,root,indimail)     @domaindir@/domains
 %dir %attr(0770,indimail,qmail)    @indimaildir@/inquery
-%dir %attr(0555,root,root)         @libexecdir@/imapmodules
+%dir %attr(0755,root,root)         @libexecdir@/imapmodules
 %dir %attr(0755,root,root)         @prefix@/lib/indimail/modules
 %dir %attr(0755,root,qmail)        @prefix@/share/indimail/table_config
 #
