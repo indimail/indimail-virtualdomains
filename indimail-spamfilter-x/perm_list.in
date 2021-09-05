@@ -1,4 +1,4 @@
 %attr(6551,root,indimail)   @prefix@/bin/bogofilter
 %dir %attr(2755,root,qmail) @sysconfdir@
-%dir %attr(0555,root,root)  @prefix@/share/indimail
-%dir %attr(0555,root,root)  @prefix@/share/indimail/doc
+%dir %attr(0755,root,root)  @prefix@/share/indimail
+%dir %attr(0755,root,root)  @prefix@/share/indimail/doc

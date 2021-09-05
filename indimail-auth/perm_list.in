@@ -1,4 +1,3 @@
-%dir %attr(0555,root,root)  @prefix@/bin
-%dir %attr(0555,root,root)  @libexecdir@
-%dir %attr(0555,root,root)  @prefix@/share/indimail
-%dir %attr(0555,root,root)  @prefix@/share/indimail/doc
+%dir %attr(0755,root,root)  @libexecdir@
+%dir %attr(0755,root,root)  @prefix@/share/indimail
+%dir %attr(0755,root,root)  @prefix@/share/indimail/doc

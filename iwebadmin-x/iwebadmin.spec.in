@@ -145,7 +145,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %files
 %defattr(-,root,root,-)
 %if "%{_prefix}" != "/usr"
-%dir %attr(555,root,qmail)               %{_prefix}
+%dir %attr(755,root,qmail)               %{_prefix}
 %endif
 
 %attr(644,root,root) %config(noreplace)  %{sysconfdir}/%{name}-release
