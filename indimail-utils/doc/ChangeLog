@@ -17,3 +17,5 @@ Release @version@-@release@ Start 02/06/2020
 - 18/07/2021 - indimail-3.4.0
 - 02/08/2021
 09. PKGBUILD: Fix permissions for directories
+- 05/09/2021
+10. changed permissions for dirs with 555 to 755

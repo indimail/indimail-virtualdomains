@@ -102,6 +102,8 @@ Release @version@-@release@ Start 14/02/2021
     returning as __attribute__ ((noreturn))
 - 01/09/2021
 55. indimail.spec: removed use of chrpath
+- 05/09/2021
+56. changed permissions for dirs with 555 to 755
 
 no changes added to commit (use "git add" and/or "git commit -a")
 
