@@ -1,5 +1,8 @@
 /*
  * $Log: sql_insertaliasdomain.c,v $
+ * Revision 1.2  2021-09-11 13:40:52+05:30  Cprogrammer
+ * added missing round brace
+ *
  * Revision 1.1  2019-04-14 22:51:45+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_insertaliasdomain.c,v 1.1 2019-04-14 22:51:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_insertaliasdomain.c,v 1.2 2021-09-11 13:40:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -49,7 +52,7 @@ sql_insertaliasdomain(char *old_domain, char *new_domain)
 			!stralloc_cats(&SqlBuf, new_domain) ||
 			!stralloc_catb(&SqlBuf, "\", \"", 4) ||
 			!stralloc_cats(&SqlBuf, old_domain) ||
-			!stralloc_append(&SqlBuf, "\"") ||
+			!stralloc_catb(&SqlBuf, "\" )", 3) ||
 			!stralloc_0(&SqlBuf))
 		die_nomem();
 	if (mysql_query(&mysql[0], SqlBuf.s) && (err = in_mysql_errno(&mysql[0])) != ER_DUP_ENTRY) {
