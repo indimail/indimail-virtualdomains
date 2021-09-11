@@ -1,5 +1,8 @@
 /*
  * $Log: get_real_domain.c,v $
+ * Revision 1.3  2021-09-11 13:36:34+05:30  Cprogrammer
+ * corrected wrong variable used for domain directory
+ *
  * Revision 1.2  2020-04-01 18:54:59+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -39,7 +42,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_real_domain.c,v 1.2 2020-04-01 18:54:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_real_domain.c,v 1.3 2021-09-11 13:36:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef QUERY_CACHE
@@ -306,7 +309,7 @@ get_real_domain(char *domain)
 		return ((char *) 0);
 	}
 	if (S_ISLNK(statbuf.st_mode)) {
-		if ((len = readlink(filename.s, Dir, sizeof(Dir))) == -1)
+		if ((len = readlink(dir.s, Dir, sizeof(Dir))) == -1)
 			return ((char *) 0);
 		if (len < sizeof(Dir))
 			Dir[len] = 0;
