@@ -1,5 +1,8 @@
 /*
  * $Log: sql_adduser.c,v $
+ * Revision 1.3  2021-09-11 13:39:49+05:30  Cprogrammer
+ * use getEnvConfig for domain directory
+ *
  * Revision 1.2  2020-04-01 18:58:00+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -35,7 +38,7 @@
 #include "getpeer.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_adduser.c,v 1.2 2020-04-01 18:58:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_adduser.c,v 1.3 2021-09-11 13:39:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -78,7 +81,8 @@ sql_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, char *
 	}
 	domstr = (char *) 0;
 	if (!domain || !*domain) {
-		if (!stralloc_copys(&dom_dir, DOMAINDIR) ||
+		getEnvConfigStr(&ptr, "DOMAINDIR", DOMAINDIR);
+		if (!stralloc_copys(&dom_dir, ptr) ||
 				!stralloc_catb(&dom_dir, "/users", 6) || !stralloc_0(&dom_dir))
 			die_nomem();
 		dom_dir.len--;

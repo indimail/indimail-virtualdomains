@@ -1,5 +1,8 @@
 /*
  * $Log: add_user_assign.c,v $
+ * Revision 1.4  2021-09-11 13:24:41+05:30  Cprogrammer
+ * use getEnvConfig for domain directory
+ *
  * Revision 1.3  2020-10-04 09:25:41+05:30  Cprogrammer
  * BUG: wrong variable passed to do_assign2()
  *
@@ -30,7 +33,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_user_assign.c,v 1.3 2020-10-04 09:25:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: add_user_assign.c,v 1.4 2021-09-11 13:24:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -44,6 +47,7 @@ void
 do_assign1(stralloc *s, char *user, char *dir)
 {
 	char            strnum[FMT_ULONG];
+	char           *ptr;
 	int             i;
 
 	if (!stralloc_copyb(s, "=", 1) ||
@@ -60,7 +64,8 @@ do_assign1(stralloc *s, char *user, char *dir)
 	if (!stralloc_catb(s, strnum, i) ||
 			!stralloc_append(s, ":"))
 		die_nomem();
-	if (!stralloc_cats(s, DOMAINDIR) || !stralloc_append(s, "/"))
+	getEnvConfigStr(&ptr, "DOMAINDIR", DOMAINDIR);
+	if (!stralloc_cats(s, ptr) || !stralloc_append(s, "/"))
 		die_nomem();
 	if (dir) {
 		if (!stralloc_cats(s, dir) || !stralloc_append(s, "/"))
@@ -75,6 +80,7 @@ void
 do_assign2(stralloc *s, char *user, char *dir)
 {
 	char            strnum[FMT_ULONG];
+	char           *ptr;
 	int             i;
 
 	if (!stralloc_copyb(s, "+", 1) ||
@@ -91,7 +97,8 @@ do_assign2(stralloc *s, char *user, char *dir)
 	if (!stralloc_catb(s, strnum, i) ||
 			!stralloc_append(s, ":"))
 		die_nomem();
-	if (!stralloc_cats(s, DOMAINDIR) || !stralloc_append(s, "/"))
+	getEnvConfigStr(&ptr, "DOMAINDIR", DOMAINDIR);
+	if (!stralloc_cats(s, ptr) || !stralloc_append(s, "/"))
 		die_nomem();
 	if (dir && *dir) {
 		if (!stralloc_cats(s, dir) || !stralloc_append(s, "/"))

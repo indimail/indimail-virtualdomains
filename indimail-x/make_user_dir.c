@@ -1,5 +1,8 @@
 /*
  * $Log: make_user_dir.c,v $
+ * Revision 1.2  2021-09-11 13:39:42+05:30  Cprogrammer
+ * use getEnvConfig for domain directory
+ *
  * Revision 1.1  2019-04-18 08:31:36+05:30  Cprogrammer
  * Initial revision
  *
@@ -18,6 +21,7 @@
 #include <stralloc.h>
 #include <strerr.h>
 #include <error.h>
+#include <getEnvConfig.h>
 #endif
 #include "variables.h"
 #include "vmake_maildir.h"
@@ -30,7 +34,7 @@
 #include "SendWelcomeMail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: make_user_dir.c,v 1.1 2019-04-18 08:31:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: make_user_dir.c,v 1.2 2021-09-11 13:39:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -54,7 +58,8 @@ make_user_dir(char *username, char *domain, uid_t uid, gid_t gid, int users_per_
 	if (!*username)
 		return ((char *) 0);
 	if (!domain || !*domain) {
-		if (!stralloc_copys(&tmp1, DOMAINDIR) ||
+		getEnvConfigStr(&tmpstr, "DOMAINDIR", DOMAINDIR);
+		if (!stralloc_copys(&tmp1, tmpstr) ||
 				!stralloc_append(&tmp1, "/") ||
 				!stralloc_catb(&tmp1, "/users", 7) || !stralloc_0(&tmp1))
 			die_nomem();
