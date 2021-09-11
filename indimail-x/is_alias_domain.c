@@ -1,5 +1,9 @@
 /*
  * $Log: is_alias_domain.c,v $
+ * Revision 1.2  2021-09-11 13:26:14+05:30  Cprogrammer
+ * use getEnvConfig for domain directory
+ * on system error, return -1 instead of exit
+ *
  * Revision 1.1  2019-04-18 08:25:36+05:30  Cprogrammer
  * Initial revision
  *
@@ -25,11 +29,12 @@
 #include <str.h>
 #include <strerr.h>
 #include <stralloc.h>
+#include <getEnvConfig.h>
 #endif
 #include "get_assign.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: is_alias_domain.c,v 1.1 2019-04-18 08:25:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: is_alias_domain.c,v 1.2 2021-09-11 13:26:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -51,16 +56,40 @@ is_alias_domain(char *domain)
 
 	if (get_assign(domain, &dir, NULL, NULL) == 0)
 		return (0);
-	if (lstat(dir.s, &statbuf))
-		strerr_die3sys(111, "is_alias_domain: lstat: ", dir.s, ": ");
-	if (S_ISLNK(statbuf.st_mode))
-		return (1);
+	if (lstat(dir.s, &statbuf)) {
+		if (errno != error_noent) {
+			strerr_warn3("is_alias_domain: lstat: ", dir.s, ": ", &strerr_sys);
+			return -1;
+		}
+		return (0);
+	}
+	if (S_ISLNK(statbuf.st_mode)) { /*- we sould do readlink and find out */
+		if ((t = readlink(dir.s, inbuf, sizeof(inbuf))) == -1) {
+			strerr_warn3("is_alias_domain: readlink: ", dir.s, ": ", &strerr_sys);
+			return -1;
+		}
+		if (t == sizeof(inbuf)) {
+			errno = ENAMETOOLONG;
+			strerr_warn3("is_alias_domain: readlink: ", dir.s, ": ", &strerr_sys);
+			return -1;
+		}
+		inbuf[t] = 0;
+		getEnvConfigStr(&ptr, "DOMAINDIR", DOMAINDIR);
+		if (!stralloc_copys(&line, ptr) ||
+				!stralloc_catb(&line, "/domains/", 9) ||
+				!stralloc_catb(&line, inbuf, t) ||
+				!stralloc_0(&line))
+			die_nomem();
+		return (access(line.s, F_OK) ? 0 : 1);
+	}
 	if (!stralloc_copy(&tmp, &dir) || !stralloc_catb(&tmp, "/.aliasdomains", 14) ||
 			!stralloc_0(&tmp))
 		die_nomem();
 	if ((fd = open_read(tmp.s)) == -1) {
-		if (errno != error_noent)
-			strerr_die3sys(111, "is_alias_domain: ", tmp.s, ": ");
+		if (errno != error_noent) {
+			strerr_warn3("is_alias_domain: open: ", tmp.s, ": ", &strerr_sys);
+			return -1;
+		}
 		return (0);
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
@@ -69,7 +98,8 @@ is_alias_domain(char *domain)
 			t = errno;
 			close(fd);
 			errno = t;
-			strerr_die3sys(111, "is_alias_domain: read: ", tmp.s, ": ");
+			strerr_warn3("is_alias_domain: read: ", tmp.s, ": ", &strerr_sys);
+			return -1;
 		}
 		if (!match && line.len == 0)
 			break;
