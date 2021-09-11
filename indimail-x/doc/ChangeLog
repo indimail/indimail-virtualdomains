@@ -104,6 +104,13 @@ Release @version@-@release@ Start 14/02/2021
 55. indimail.spec: removed use of chrpath
 - 05/09/2021
 56. changed permissions for dirs with 555 to 755
+- 11/09/2021
+57. add_user_assign.c, is_alias_domain.c, make_user_dir.c,
+    sql_adduser.c: use getEnvConfig for domain directory
+58. is_alias_domain: on system error, return -1 instead of exit
+59. get_real_domain.c: corrected wrong variable used for domain director
+60. inlookup.c: fixed wrong assignment of strnum2 for pid
+61. sql_insertaliasdomain.c: fixed missing round brace in sql statement
 
 no changes added to commit (use "git add" and/or "git commit -a")
 
