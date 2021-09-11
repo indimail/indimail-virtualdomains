@@ -1,5 +1,8 @@
 /*
  * $Log: isvirtualdomain.c,v $
+ * Revision 1.4  2021-09-11 13:38:48+05:30  Cprogrammer
+ * on system error return -1 instead of exit
+ *
  * Revision 1.3  2020-04-01 18:56:42+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -31,13 +34,13 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: isvirtualdomain.c,v 1.3 2020-04-01 18:56:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: isvirtualdomain.c,v 1.4 2021-09-11 13:38:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
 die_nomem()
 {
-	strerr_warn1("is_alias_domain: out of memory", 0);
+	strerr_warn1("isvirtualdomain: out of memory", 0);
 	_exit(111);
 }
 
@@ -65,8 +68,10 @@ isvirtualdomain(char *domain)
 			die_nomem();
 	}
 	if ((fd = open_read(tmp.s)) == -1) {
-		if (errno != error_noent)
-			strerr_die3sys(111, "is_alias_domain: ", tmp.s, ": ");
+		if (errno != error_noent) {
+			strerr_warn3("isvirtualdomain: open: ", tmp.s, ": ", &strerr_sys);
+			return -1;
+		}
 		return (0);
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
@@ -75,7 +80,8 @@ isvirtualdomain(char *domain)
 			t = errno;
 			close(fd);
 			errno = t;
-			strerr_die3sys(111, "is_alias_domain: read: ", tmp.s, ": ");
+			strerr_warn3("isvirtualdomain: read: ", tmp.s, ": ", &strerr_sys);
+			return -1;
 		}
 		if (!match && line.len == 0)
 			break;
