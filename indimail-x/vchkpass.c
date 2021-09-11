@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.11  2021-09-11 13:41:27+05:30  Cprogrammer
+ * fixed typo in error statement
+ *
  * Revision 1.10  2021-07-22 15:17:34+05:30  Cprogrammer
  * conditional define of _XOPEN_SOURCE
  *
@@ -71,7 +74,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.10 2021-07-22 15:17:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.11 2021-09-11 13:41:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -281,11 +284,11 @@ main(int argc, char **argv)
 	strnum[fmt_uint(strnum, (unsigned int) auth_method)] = 0;
 	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	if (env_get("DEBUG_LOGIN"))
-		strerr_warn14("vchkpass", "pid [", module_pid, ": login [", login, "] challenge [", challenge,
+		strerr_warn14("vchkpass: ", "pid [", module_pid, "]: login [", login, "] challenge [", challenge,
 			"] response [", response, "] pw_passwd [", crypt_pass, "] method [", strnum, "]", 0);
 	else
 	if (env_get("DEBUG"))
-		strerr_warn8("vchkpass", "pid [", module_pid, ": login [", login, "] method [", strnum, "]", 0);
+		strerr_warn8("vchkpass: ", "pid [", module_pid, "]: login [", login, "] method [", strnum, "]", 0);
 	if (pw_comp((unsigned char *) ologin, (unsigned char *) crypt_pass,
 		(unsigned char *) (*response ? challenge : 0),
 		(unsigned char *) (*response ? response : challenge), auth_method)) {
