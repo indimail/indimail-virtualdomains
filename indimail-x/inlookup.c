@@ -1,5 +1,8 @@
 /*
  * $Log: inlookup.c,v $
+ * Revision 1.6  2021-09-11 13:36:54+05:30  Cprogrammer
+ * fixed wrong assignment of strnum2 for pid
+ *
  * Revision 1.5  2021-02-07 20:26:13+05:30  Cprogrammer
  * make inlookup runable under tcpserver
  *
@@ -22,7 +25,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inlookup.c,v 1.5 2021-02-07 20:26:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inlookup.c,v 1.6 2021-09-11 13:36:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -326,7 +329,7 @@ main(int argc, char **argv)
 				for (idx = 0; idx < inst_count; idx++) {
 					if (pid_table[idx].pid == pid) {
 						strnum1[fmt_ulong(strnum1, idx + 1)] = 0;
-						strnum2[fmt_ulong(strnum1, pid)] = 0;
+						strnum2[fmt_ulong(strnum2, pid)] = 0;
 						strnum3[fmt_int(strnum3, WIFSIGNALED(wStat) ? WTERMSIG(wStat) : (WIFSTOPPED(wStat) ? WSTOPSIG(wStat) : -1))] = 0;
 						strerr_warn6("inlookup[", strnum1, "]: child [", strnum2, "] died with signal ", strnum3, 0);
 						if (fork_child(infifo, idx) == -1) {
@@ -347,7 +350,7 @@ main(int argc, char **argv)
 				for (idx = 0; idx < inst_count; idx++) {
 					if (pid_table[idx].pid == pid) {
 						strnum1[fmt_ulong(strnum1, idx + 1)] = 0;
-						strnum2[fmt_ulong(strnum1, pid)] = 0;
+						strnum2[fmt_ulong(strnum2, pid)] = 0;
 						strnum3[fmt_int(strnum3, tmp_stat)] = 0;
 						strerr_warn6("inlookup[", strnum1, "]: child [", strnum2, "] died with status ", strnum3, 0);
 						if (fork_child(infifo, idx) == -1) {
