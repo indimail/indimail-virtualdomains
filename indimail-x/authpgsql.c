@@ -1,5 +1,8 @@
 /*
  * $Log: authpgsql.c,v $
+ * Revision 1.8  2021-09-12 20:17:33+05:30  Cprogrammer
+ * moved replacestr to libqmail
+ *
  * Revision 1.7  2021-07-22 15:16:45+05:30  Cprogrammer
  * conditional define of _XOPEN_SOURCE
  *
@@ -48,8 +51,8 @@
 #include <str.h>
 #include <pw_comp.h>
 #include <getEnvConfig.h>
+#include <replacestr.h>
 #endif
-#include "replacestr.h"
 #include "inquery.h"
 #include "pipe_exec.h"
 #include "variables.h"
@@ -59,7 +62,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authpgsql.c,v 1.7 2021-07-22 15:16:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authpgsql.c,v 1.8 2021-09-12 20:17:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_PGSQL

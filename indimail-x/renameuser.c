@@ -1,5 +1,8 @@
 /*
  * $Log: renameuser.c,v $
+ * Revision 1.2  2021-09-12 20:17:53+05:30  Cprogrammer
+ * moved replacestr to libqmail
+ *
  * Revision 1.1  2019-04-15 12:36:45+05:30  Cprogrammer
  * Initial revision
  *
@@ -21,6 +24,7 @@
 #include <strerr.h>
 #include <fmt.h>
 #include <str.h>
+#include <replacestr.h>
 #endif
 #include "variables.h"
 #include "get_real_domain.h"
@@ -36,11 +40,10 @@
 #include "create_table.h"
 #include "valias_select.h"
 #include "valias_update.h"
-#include "replacestr.h"
 #include "deluser.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: renameuser.c,v 1.1 2019-04-15 12:36:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: renameuser.c,v 1.2 2021-09-12 20:17:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

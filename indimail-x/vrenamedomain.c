@@ -1,5 +1,8 @@
 /*
  * $Log: vrenamedomain.c,v $
+ * Revision 1.3  2021-09-12 20:18:04+05:30  Cprogrammer
+ * moved replacestr to libqmail
+ *
  * Revision 1.2  2019-06-07 15:43:14+05:30  Cprogrammer
  * removed not needed sgetopt.h include file
  *
@@ -36,6 +39,7 @@
 #include <open.h>
 #include <getln.h>
 #include <env.h>
+#include <replacestr.h>
 #endif
 #include "get_indimailuidgid.h"
 #include "variables.h"
@@ -50,13 +54,12 @@
 #include "del_domain_assign.h"
 #include "add_control.h"
 #include "CreateDomainDirs.h"
-#include "replacestr.h"
 #include "is_alias_domain.h"
 #include "sql_getall.h"
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenamedomain.c,v 1.2 2019-06-07 15:43:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vrenamedomain.c,v 1.3 2021-09-12 20:18:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vrenamedomain: warning: "

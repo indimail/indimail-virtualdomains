@@ -1,5 +1,8 @@
 /*
  * $Log: vreorg.c,v $
+ * Revision 1.7  2021-09-12 20:18:07+05:30  Cprogrammer
+ * moved replacestr to libqmail
+ *
  * Revision 1.6  2021-07-08 11:51:29+05:30  Cprogrammer
  * add check for misconfigured assign file
  *
@@ -39,13 +42,13 @@
 #include <scan.h>
 #include <str.h>
 #include <setuserid.h>
+#include <replacestr.h>
 #endif
 #include "get_assign.h"
 #include "common.h"
 #include "sql_getpw.h"
 #include "valias_select.h"
 #include "valias_update.h"
-#include "replacestr.h"
 #include "MoveFile.h"
 #include "sql_setpw.h"
 #include "variables.h"
@@ -56,7 +59,7 @@
 #include "next_big_dir.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vreorg.c,v 1.6 2021-07-08 11:51:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vreorg.c,v 1.7 2021-09-12 20:18:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vreorg: fatal: "

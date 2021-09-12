@@ -1,5 +1,8 @@
 /*
  * $Log: mysql_query.c,v $
+ * Revision 1.3  2021-09-12 20:17:50+05:30  Cprogrammer
+ * moved replacestr to libqmail
+ *
  * Revision 1.2  2019-05-28 17:41:45+05:30  Cprogrammer
  * added load_mysql.h for mysql interceptor function prototypes
  *
@@ -17,8 +20,8 @@
 #include <stralloc.h>
 #include <env.h>
 #include <str.h>
+#include <replacestr.h>
 #endif
-#include "replacestr.h"
 #ifdef mysql_query
 #undef mysql_query
 #endif
@@ -27,7 +30,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: mysql_query.c,v 1.2 2019-05-28 17:41:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mysql_query.c,v 1.3 2021-09-12 20:17:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      _es_opt;

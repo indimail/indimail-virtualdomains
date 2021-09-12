@@ -1,5 +1,8 @@
 /*
  * $Log: vmoveuser.c,v $
+ * Revision 1.3  2021-09-12 20:18:01+05:30  Cprogrammer
+ * moved replacestr to libqmail
+ *
  * Revision 1.2  2021-07-08 11:49:41+05:30  Cprogrammer
  * add check for misconfigured assign file
  *
@@ -22,6 +25,7 @@
 #include <fmt.h>
 #include <str.h>
 #include <env.h>
+#include <replacestr.h>
 #endif
 #include "post_handle.h"
 #include "get_indimailuidgid.h"
@@ -37,12 +41,11 @@
 #include "sql_setpw.h"
 #include "valias_select.h"
 #include "valias_update.h"
-#include "replacestr.h"
 #include "MoveFile.h"
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoveuser.c,v 1.2 2021-07-08 11:49:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoveuser.c,v 1.3 2021-09-12 20:18:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoveuser: fatal: "
