@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 1.8  2021-09-12 11:53:22+05:30  Cprogrammer
+ * removed unused variable controldir
+ *
  * Revision 1.7  2021-09-01 18:29:48+05:30  Cprogrammer
  * mark functions not returning as __attribute__ ((noreturn))
  *
@@ -64,7 +67,7 @@
 #include "vlimits.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 1.7 2021-09-01 18:29:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 1.8 2021-09-12 11:53:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "inquerytest: fatal: "
@@ -221,7 +224,7 @@ main(int argc, char **argv)
 	struct vlimits *lmt;
 #endif
 	void           *dbptr;
-	char           *ptr, *s, *infifo = 0, *infifo_dir, *controldir, *email = 0, *ipaddr = 0;
+	char           *ptr, *s, *infifo = 0, *infifo_dir, *email = 0, *ipaddr = 0;
 	static stralloc InFifo = {0};
 	char            strnum[FMT_ULONG];
 	int             c, query_type = -1, fd = -1, status, fdt = -1;
@@ -280,7 +283,6 @@ main(int argc, char **argv)
 				die_nomem();
 			InFifo.len--;
 		} else {
-			getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 			getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
 			if (*infifo_dir == '/') {
 				if (indimailuid == -1 || indimailgid == -1)
@@ -336,9 +338,8 @@ main(int argc, char **argv)
 				die_nomem();
 			InFifo.len--;
 		} else {
-			getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 			getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
-			if (*controldir == '/') {
+			if (*infifo_dir == '/') {
 				if (!stralloc_copys(&InFifo, infifo_dir) ||
 						!stralloc_append(&InFifo, "/") ||
 						!stralloc_cats(&InFifo, infifo) ||
