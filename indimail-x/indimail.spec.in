@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.106 2021-09-05 11:06:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.107 2021-09-12 19:56:10+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -736,7 +736,6 @@ done
 %attr(644,root,root)                    %{_prefix}/include/indimail/remove_line.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/remove_quotes.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/renameuser.h
-%attr(644,root,root)                    %{_prefix}/include/indimail/replacestr.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/runcmmd.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/SendWelcomeMail.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/set_mysql_options.h
