@@ -1,5 +1,8 @@
 /*
  * $Log: tcplookup.c,v $
+ * Revision 1.4  2021-09-12 11:53:07+05:30  Cprogrammer
+ * removed redundant multiple initialization of InFifo.len
+ *
  * Revision 1.3  2021-05-03 12:47:51+05:30  Cprogrammer
  * initialize rfd, wfd
  *
@@ -49,7 +52,7 @@
 #include "variables.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: tcplookup.c,v 1.3 2021-05-03 12:47:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcplookup.c,v 1.4 2021-09-12 11:53:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            strnum[FMT_ULONG];
@@ -174,7 +177,6 @@ prepare_wfifo(int *wfd, int *fifo_len, int *pipe_size, int bytes)
 				die_nomem();
 		}
 		for (idx = 1, len = InFifo.len;;idx++) {
-			InFifo.len = len;
 			strnum[fmt_ulong(strnum, (unsigned long) idx)] = 0;
 			if (!stralloc_catb(&InFifo, ".", 1) ||
 					!stralloc_cats(&InFifo, strnum) ||
@@ -182,12 +184,10 @@ prepare_wfifo(int *wfd, int *fifo_len, int *pipe_size, int bytes)
 				die_nomem();
 			if (access(InFifo.s, F_OK))
 				break;
+			InFifo.len = len;
 		}
 #ifdef RANDOM_BALANCING
 		srand(getpid() + time(0));
-#endif
-		InFifo.len = len;
-#ifdef RANDOM_BALANCING
 		strnum[fmt_ulong(strnum, 1 + (int) ((float) (idx - 1) * rand()/(RAND_MAX + 1.0)))] = 0;
 #else
 		strnum[fmt_ulong(strnum, 1 + (time(0) % (idx - 1)))] = 0;

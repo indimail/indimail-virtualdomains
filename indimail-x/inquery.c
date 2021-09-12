@@ -1,5 +1,8 @@
 /*
  * $Log: inquery.c,v $
+ * Revision 1.6  2021-09-12 11:52:36+05:30  Cprogrammer
+ * removed redundant multiple initialization of InFifo.len
+ *
  * Revision 1.5  2021-02-07 19:55:54+05:30  Cprogrammer
  * make request over TCP/IP (tcpclient) using fd 6 and 7.
  *
@@ -48,7 +51,7 @@
 #include "strToPw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 1.5 2021-02-07 19:55:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 1.6 2021-09-12 11:52:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -167,20 +170,17 @@ inquery(char query_type, char *email, char *ip)
 					return ((void *) 0);
 			}
 			for (idx = 1, len = InFifo.len;;idx++) {
-				InFifo.len = len;
 				strnum[fmt_ulong(strnum, (unsigned long) idx)] = 0;
 				if (!stralloc_catb(&InFifo, ".", 1) ||
 						!stralloc_cats(&InFifo, strnum) ||
 						!stralloc_0(&InFifo))
 					return ((void *) 0);
+				InFifo.len = len;
 				if (access(InFifo.s, F_OK))
 					break;
 			}
 #ifdef RANDOM_BALANCING
 			srand(getpid() + time(0));
-#endif
-			InFifo.len = len;
-#ifdef RANDOM_BALANCING
 			strnum[fmt_ulong(strnum, 1 + (int) ((float) (idx - 1) * rand()/(RAND_MAX + 1.0)))] = 0;
 #else
 			strnum[fmt_ulong(strnum, 1 + (time(0) % (idx - 1)))] = 0;
