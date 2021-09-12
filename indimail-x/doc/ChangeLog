@@ -111,8 +111,7 @@ Release @version@-@release@ Start 14/02/2021
 59. get_real_domain.c: corrected wrong variable used for domain director
 60. inlookup.c: fixed wrong assignment of strnum2 for pid
 61. sql_insertaliasdomain.c: fixed missing round brace in sql statement
-
-no changes added to commit (use "git add" and/or "git commit -a")
+62. FifoCreate.c: set permission mode of inquery fifo from FIFO_MODE env variable
 
 * Sunday 14 February 2021 11:34:04 PM IST
 Release 3.3 Start 06/09/2020
@@ -226,4 +225,4 @@ Release 3.3 Start 06/09/2020
 65. inquery.c, inlookup.c, ProcessInFifo.c - handle TCP/IP request under
     tcpclient/tcpserver
 - 24/02/2021
-66. tcplookup.c: include <stdlib.h> for srad()
+66. tcplookup.c: include <stdlib.h> for srand()
