@@ -249,6 +249,8 @@ struct method		/* describe methods for protocol state machine */
     int (*logout_cmd)(int, struct query *);
 				/* logout command */
     flag retry;			/* can getrange poll for new messages? */
+    int (*construct)(struct query *); /* session setup before first command */
+    int (*destruct)(struct query *); /* cleanup after session */
 };
 
 enum badheader { BHREJECT = 0, BHACCEPT };
@@ -265,7 +267,7 @@ struct hostdata		/* shared among all user connections to given server */
     int interval;			/* # cycles to skip between polls */
     int authenticate;			/* authentication mode to try */
     int timeout;			/* inactivity timout in seconds */
-    char *envelope;			/* envelope address list header */
+    char *envelope;			/* envelope address list header - WARNING - can take value STRING_DISABLED (-1)! */
     int envskip;			/* skip to numbered envelope header */
     char *qvirtual;			/* prefix removed from local user id */
     flag skip;				/* suppress poll in implicit mode? */
@@ -637,6 +639,7 @@ int prc_parse_file(const char *, const flag);
 int prc_filecheck(const char *, const flag);
 
 /* base64.c */
+unsigned len64frombits(unsigned inlen); /** calculate length needed to encode inlen octets. warnings: 1. caller needs to add 1 for a trailing \0 byte himself. 2. returns 0 for inlen 0! */
 int to64frombits(char *, const void *, int inlen, size_t outlen);
 int from64tobits(void *, const char *, int mxoutlen);
 

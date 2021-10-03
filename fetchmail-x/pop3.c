@@ -43,23 +43,29 @@ static char lastok[POPBUFSIZE+1];
 #endif /* OPIE_ENABLE */
 
 /* session variables initialized in capa_probe() or pop3_getauth() */
-flag done_capa = FALSE;
-#if defined(GSSAPI)
-flag has_gssapi = FALSE;
-#endif /* defined(GSSAPI) */
-#if defined(KERBEROS_V4) || defined(KERBEROS_V5)
-flag has_kerberos = FALSE;
-#endif /* defined(KERBEROS_V4) || defined(KERBEROS_V5) */
+/* some of these will not be accessed depending on fetchmail's
+ * compile-time configuration */
+static flag done_capa = FALSE;
+static flag has_gssapi = FALSE;
+static flag has_kerberos = FALSE;
 static flag has_cram = FALSE;
-#ifdef OPIE_ENABLE
-flag has_otp = FALSE;
-#endif /* OPIE_ENABLE */
-#ifdef NTLM_ENABLE
-flag has_ntlm = FALSE;
-#endif /* NTLM_ENABLE */
-#ifdef SSL_ENABLE
+static flag has_otp = FALSE;
+static flag has_ntlm = FALSE;
 static flag has_stls = FALSE;
-#endif /* SSL_ENABLE */
+
+static void clear_sessiondata(void) {
+    /* must match defaults above */
+#ifdef OPIE_ENABLE
+    memset(lastok, 0, sizeof(lastok));
+#endif
+    done_capa = FALSE;
+    has_gssapi = FALSE;
+    has_kerberos = FALSE;
+    has_cram = FALSE;
+    has_otp = FALSE;
+    has_ntlm = FALSE;
+    has_stls = FALSE;
+}
 
 /* mailbox variables initialized in pop3_getrange() */
 static int last;
@@ -108,6 +114,20 @@ static int do_pop3_ntlm(int sock, struct query *ctl,
 
 #define DOTLINE(s)	(s[0] == '.' && (s[1]=='\r'||s[1]=='\n'||s[1]=='\0'))
 
+static int pop3_setup(struct query *ctl)
+{
+    (void)ctl;
+    clear_sessiondata();
+    return PS_SUCCESS;
+}
+
+static int pop3_cleanup(struct query *ctl)
+{
+    (void)ctl;
+    clear_sessiondata();
+    return PS_SUCCESS;
+}
+
 static int pop3_ok (int sock, char *argbuf)
 /* parse command response */
 {
@@ -126,12 +146,12 @@ static int pop3_ok (int sock, char *argbuf)
 	    bufp++;
 
 	if (*bufp)
-	  *(bufp++) = '\0';
+	    *(bufp++) = '\0';
 
 	if (strcmp(buf,"+OK") == 0)
 	{
 #ifdef OPIE_ENABLE
-	    strcpy(lastok, bufp);
+	    strlcpy(lastok, bufp, sizeof(lastok));
 #endif /* OPIE_ENABLE */
 	    ok = 0;
 	}
@@ -222,12 +242,15 @@ static int capa_probe(int sock)
     if (ok == PS_SUCCESS)
     {
 	char buffer[64];
+	char *cp;
 
 	/* determine what authentication methods we have available */
 	while ((ok = gen_recv(sock, buffer, sizeof(buffer))) == 0)
 	{
 	    if (DOTLINE(buffer))
 		break;
+
+	    for (cp = buffer; *cp; cp++) *cp = toupper((unsigned char)*cp);
 
 #ifdef SSL_ENABLE
 	    if (strstr(buffer, "STLS"))
@@ -286,21 +309,6 @@ static int pop3_getauth(int sock, struct query *ctl, char *greeting)
     char *commonname;
 #endif /* SSL_ENABLE */
 
-    done_capa = FALSE;
-#if defined(GSSAPI)
-    has_gssapi = FALSE;
-#endif /* defined(GSSAPI) */
-#if defined(KERBEROS_V4) || defined(KERBEROS_V5)
-    has_kerberos = FALSE;
-#endif /* defined(KERBEROS_V4) || defined(KERBEROS_V5) */
-    has_cram = FALSE;
-#ifdef OPIE_ENABLE
-    has_otp = FALSE;
-#endif /* OPIE_ENABLE */
-#ifdef SSL_ENABLE
-    has_stls = FALSE;
-#endif /* SSL_ENABLE */
-
     /* Set this up before authentication quits early. */
     set_peek_capable(ctl);
 
@@ -332,9 +340,6 @@ static int pop3_getauth(int sock, struct query *ctl, char *greeting)
 	}
 	peek_capable = 0;
     }
-    if (ctl->server.authenticate == A_SSH) {
-        return PS_SUCCESS;
-    }
 
 #ifdef SDPS_ENABLE
     /*
@@ -348,33 +353,6 @@ static int pop3_getauth(int sock, struct query *ctl, char *greeting)
 
    switch (ctl->server.protocol) {
     case P_POP3:
-#ifdef RPA_ENABLE
-	/* XXX FIXME: AUTH probing (RFC1734) should become global */
-	/* CompuServe POP3 Servers as of 990730 want AUTH first for RPA */
-	if (strstr(ctl->remotename, "@compuserve.com"))
-	{
-	    /* AUTH command should return a list of available mechanisms */
-	    if (gen_transact(sock, "AUTH") == 0)
-	    {
-		char buffer[10];
-		flag has_rpa = FALSE;
-
-		while ((ok = gen_recv(sock, buffer, sizeof(buffer))) == 0)
-		{
-		    if (DOTLINE(buffer))
-			break;
-		    if (strncasecmp(buffer, "rpa", 3) == 0)
-			has_rpa = TRUE;
-		}
-		if (has_rpa && !POP3_auth_rpa(ctl->remotename, 
-					      ctl->password, sock))
-		    return(PS_SUCCESS);
-	    }
-
-	    return(PS_AUTHFAIL);
-	}
-#endif /* RPA_ENABLE */
-
 	/*
 	 * CAPA command may return a list including available
 	 * authentication mechanisms and STLS capability.
@@ -411,8 +389,8 @@ static int pop3_getauth(int sock, struct query *ctl, char *greeting)
 #ifdef SSL_ENABLE
 		    if (must_starttls(ctl)) {
 			/* fail with mandatory STLS without repoll */
-			report(stderr, GT_("TLS is mandatory for this session, but server refused CAPA command.\n"));
-			report(stderr, GT_("The CAPA command is however necessary for TLS.\n"));
+			report(stderr, GT_("STLS is mandatory for this session, but server refused CAPA command.\n"));
+			report(stderr, GT_("CAPA command support is, however, necessary for STLS.\n"));
 			return ok;
 		    } else if (maybe_starttls(ctl)) {
 			/* defeat opportunistic STLS */
@@ -464,14 +442,14 @@ static int pop3_getauth(int sock, struct query *ctl, char *greeting)
 		    * guarantee a secure capability re-probe.
 		    */
 		   set_timeout(0);
-		   done_capa = FALSE;
-		   ok = capa_probe(sock);
-		   if (ok != PS_SUCCESS) {
-		       return ok;
-		   }
 		   if (outlevel >= O_VERBOSE)
 		   {
 		       report(stdout, GT_("%s: upgrade to TLS succeeded.\n"), commonname);
+		   }
+		   clear_sessiondata();
+		   ok = capa_probe(sock);
+		   if (ok != PS_SUCCESS) {
+		       return ok;
 		   }
 	       } else if (must_starttls(ctl)) {
 		   /* Config required TLS but we couldn't guarantee it, so we must
@@ -499,6 +477,48 @@ static int pop3_getauth(int sock, struct query *ctl, char *greeting)
 	    }
 	} /* maybe_starttls() */
 #endif /* SSL_ENABLE */
+
+	if (ctl->server.authenticate == A_SSH) {
+		return PS_SUCCESS;
+	}
+
+#ifdef RPA_ENABLE
+	/* XXX FIXME: AUTH probing (RFC1734) should become global */
+	/* CompuServe POP3 Servers as of 990730 want AUTH first for RPA */
+	if (strstr(ctl->remotename, "@compuserve.com")
+	&& ctl->server.authenticate == A_ANY)
+	{
+	    /* AUTH command should return a list of available mechanisms. */
+	    /* 2021 update: it is unclear which software still supports RPA these days.
+	       This behavior (AUTH without a method argument, to query) 
+	       is not sanctioned by RFC-1734 but was/is apparently 
+	       supported by Compuserve and Microsoft for their NTLM:
+	       https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-pop3/cb6829e1-d6f4-447b-9092-2671a257563c
+	    */
+	    if (gen_transact(sock, "AUTH") == 0)
+	    {
+		char buffer[10];
+		flag has_rpa = FALSE;
+		int err;
+
+		while ((err = gen_recv(sock, buffer, sizeof(buffer))) == 0)
+		{
+		    if (DOTLINE(buffer))
+			break;
+		    if (strncasecmp(buffer, "rpa", 3) == 0)
+			has_rpa = TRUE;
+		}
+		if (err) {
+		    return err;
+		}
+		if (has_rpa && !POP3_auth_rpa(ctl->remotename, 
+					      ctl->password, sock))
+		    return PS_SUCCESS;
+	    }
+
+	    return PS_AUTHFAIL;
+	}
+#endif /* RPA_ENABLE */
 
 	/*
 	 * OK, we have an authentication type now.
@@ -558,6 +578,7 @@ static int pop3_getauth(int sock, struct query *ctl, char *greeting)
     {
 	report(stderr,
 	   GT_("Required NTLM capability not compiled into fetchmail\n"));
+	return PS_AUTHFAIL;
     }
 #endif
 
@@ -691,7 +712,7 @@ static int pop3_getauth(int sock, struct query *ctl, char *greeting)
     /* this is for servers which claim to support TLS, but actually
      * don't! */
     if (connection_may_have_tls_errors
-		    && (ok == PS_SOCKET || ok == PS_PROTOCOL))
+	    && (ok == PS_SOCKET || ok == PS_PROTOCOL))
     {
 	xfree(ctl->sslproto);
 	ctl->sslproto = xstrdup("");
@@ -1379,6 +1400,8 @@ static const struct method pop3 =
     NULL,		/* no action at end of mailbox */
     pop3_logout,	/* log out, we're done */
     FALSE,		/* no, we can't re-poll */
+    pop3_setup,		/* setup method */
+    pop3_cleanup	/* cleanup method */
 };
 
 int doPOP3 (struct query *ctl)

@@ -6,54 +6,69 @@ Preface
 
 Note: there is a separate document "README.SSL-SERVER" describing the server- 
 side requirements for proper SSL support.  It has checklist-style and is not 
-specific to fetchmail.
+specific to fetchmail. This document is about the client-side (fetchmail side)
+setup.
 
 In case of troubles, mail the README.SSL-SERVER file to your ISP and 
 have them check their server configuration against it.
 
-Note that fetchmail up to version 6.3.26 confused SSL/TLS protocol levels with
-whether a service needs to use in-band negotiation (STLS/STARTTLS for
-POP3/IMAP4) or is totally SSL-wrapped on a separate port.
+Note that fetchmail up to version 6.3.26 used to confuse SSL/TLS protocol 
+levels with whether a service needs to use in-band negotiation (STLS/STARTTLS 
+for POP3/IMAP4) or is totally SSL-wrapped ("Implicit TLS") on a separate port.
+Fetchmail 6.4 seeks to fix that to some extent without breaking the 
+command-line and rcfile interfaces too much (see --ssl and --sslproto options,
+below and in the manual).
 
-Also, fetchmail 6.4.0 and newer releases changed some of the semantics
-as the result of a bug-fix, and will auto-negotiate TLSv1 or newer only.
-If your server does not support this, you may have to specify --sslproto
-ssl3+.  This is in order to prefer the newer TLS protocols, because SSLv2
-and v3 are broken.
+fetchmail 6.4.0 will auto-negotiate TLSv1 or newer only.
 
-	-- Matthias Andree, 2019-08-18
+Fetchmail 6.4.22 supports OpenSSL 3.0.0 and 1.1.1.
+
+	-- Matthias Andree, 2021-09-09
 
 
 Quickstart
 ----------
 
-Use an up-to-date release of OpenSSL v1.1.1 or newer, so as to get
+Use an up-to-date release of OpenSSL v1.1.1 or v3.0.0 or newer, so as to get
 TLSv1.3 support.  Older OpenSSL versions are unsupported upstream, and 
-fetchmail rejects versions before v1.0.2 and warns about versions before v1.1.1.
+fetchmail rejects versions before v1.0.2 and warns about versions before 
+v1.1.1.
 
 In all four examples below, the (--)sslcertck has become redundant
-since fetchmail v6.4.0 but since fetchmail 6.3 releases will be in circulation
-for a while, we'll leave it here to be safe.
+since fetchmail v6.4.0, but since fetchmail 6.3 releases will be in circulation
+for too long, (--)sslcertck will remain in the examples below for now.
+
+For use of SSL or TLS on a separate port (recommended), called Implicit TLS,
+the whole TCP connection is SSL-encrypted from the very beginning (SSL- or 
+TLS-wrapped), use these command line options (in the rcfile,
+omit all leading "--"):
+
+    --ssl --sslproto tls1.2+ --sslcertck
+
+or these options in the rcfile (after the respective "user"... options)
+
+      ssl   sslproto tls1.2+   sslcertck
+
 
 For use of SSL or TLS with in-band negotiation on the regular service's port, 
-i. e. with STLS or STARTTLS, use these command line options
+i. e. with STLS or STARTTLS, use these command line options (omitting --ssl or 
+ssl):
 
-    --sslproto auto --sslcertck
-
-or these options in the rcfile (after the respective "user"... options)
-
-      sslproto auto   sslcertck
-
-
-For use of SSL or TLS on a separate port, if the whole TCP connection is 
-SSL-encrypted from the very beginning (SSL- or TLS-wrapped), use these
-command line options (in the rcfile, omit all leading "--"):
-
-    --ssl --sslproto auto --sslcertck
+    --sslproto tls1.2+ --sslcertck
 
 or these options in the rcfile (after the respective "user"... options)
 
-      ssl   sslproto auto   sslcertck
+      sslproto tls1.2+   sslcertck
+
+
+With up to date OpenSSL libraries (1.1.1 or newer), and with recent
+software on the server, you can alternatively configure tls1.3+.
+
+For some older services, you may need to use tls1.1+ or tls1+ for compatibility 
+instead of the tls1.2+ above.  In such situations, you should ask the service 
+provider or server operator to upgrade their TLS implementation such that
+TLS v1.3 be supported, and once that happens, update your fetchmail configuration
+to tls1.3+ or tls1.2+.
 
 
 Background and use (long version :-))

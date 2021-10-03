@@ -171,7 +171,9 @@ static const struct method pop2 =
     NULL,				/* how to mark a message as seen */
     NULL,				/* how to end mailbox processing */
     pop2_logout,			/* log out, we're done */
-    FALSE				/* no, we can't re-poll */
+    FALSE,				/* no, we can't re-poll */
+    NULL,				/* no constructor */
+    NULL				/* no destructor */
 };
 
 int doPOP2 (struct query *ctl)

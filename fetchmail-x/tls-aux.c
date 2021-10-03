@@ -6,10 +6,9 @@
 #include <string.h>
 #include <openssl/x509.h>
 
-/** return a constant copy of the default SSL certificate path
- * the directory with hashed certificates, see
- * SSL_CTX_load_verify_locations(3),
- * not to be modified by caller. */
+/** return a constant copy of the default SSL certificate path, i. e.
+ * the directory with hashed certificates, see SSL_CTX_load_verify_locations(3).
+ * Return value not to be modified by caller. */
 const char *get_default_cert_path(void) {
 	const char *rb = (char *)0, *tmp;
 
@@ -21,9 +20,9 @@ const char *get_default_cert_path(void) {
 }
 
 /** return a constant copy of the default SSL certificate file
- * the directory with hashed certificates, see
- * SSL_CTX_load_verify_locations(3),
- * not to be modified by caller. */
+ * with a concatenation of all trusted certificates,
+ * the so-called certificate bundle. See SSL_CTX_load_verify_locations(3),
+ * Return value not to be modified by caller. */
 const char *get_default_cert_file(void) {
 	const char *rb = (char *)0, *tmp;
 

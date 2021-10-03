@@ -17,8 +17,12 @@ extern "C" {
 #define XMALLOCTYPE char
 #endif
 
+#if !defined __GNUC__ || __GNUC__ < 2
+# define __attribute__(xyz)    /* Ignore. */
+#endif
+
 /** Allocate \a n characters of memory, abort program on failure. */
-XMALLOCTYPE *xmalloc(size_t n);
+XMALLOCTYPE *xmalloc(size_t n) __attribute__((malloc));
 
 /** Reallocate \a n characters of memory, abort program on failure. */
 XMALLOCTYPE *xrealloc(/*@null@*/ void *, size_t n);

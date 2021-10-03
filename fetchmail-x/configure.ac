@@ -3,7 +3,7 @@ dnl Autoconfigure input file for fetchmail
 # Fetchmail automatic configuration support
 #
 # Eric S. Raymond <esr@thyrsus.com>
-# 2004 - 2020 Matthias Andree <matthias.andree@gmx.de>
+# 2004 - 2021 Matthias Andree <matthias.andree@gmx.de>
 #
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -36,7 +36,6 @@ AM_CONDITIONAL([HAVE_PYTHON], [test "$PYTHON" != :])
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_AWK
 AC_PROG_CC
-AC_PROG_CC_C99
 AM_PROG_CC_C_O
 AC_PROG_INSTALL
 AC_PROG_CPP			dnl Later checks need this.
@@ -134,10 +133,6 @@ rhapsody*)
     AC_MSG_NOTICE(found Rhapsody - Removing -s load flag)
     LDFLAGS=`echo $LDFLAGS | sed "s/-s //"`
     ;;
-linux*)
-	CFLAGS="$CFLAGS -fPIC -fpie"
-	LDFLAGS="$LDFLAGS -pie"
-	;;
 esac
 
 AC_CACHE_SAVE
@@ -785,7 +780,7 @@ then
     CFLAGS="$CFLAGS -I/usr/kerberos/include"
     ###	OpenBSD comes with ssl headers
   else
-	AC_MSG_ERROR([SSL support enabled, but OpenSSL not found in $with_ssl])
+    AC_MSG_ERROR([SSL support enabled, but OpenSSL not found])
   fi
   PKG_CHECK_MODULES([SSL],[libssl libcrypto],[LIBS="$LIBS $SSL_LIBS"],[
     AS_MESSAGE([SSL-check: pkg-config check failed, using traditional probe])
@@ -810,7 +805,7 @@ then
     AC_MSG_RESULT($i)
   ])
   AC_DEFINE(SSL_ENABLE, 1, [Define if you want SSL support compiled in])
-  AS_MESSAGE(Enabling SSL support in $with_ssl.)
+  AS_MESSAGE(Enabling SSL support.)
 else
   AC_MSG_WARN(Disabling SSL support.)
   AC_MSG_WARN(Consider re-running configure --with-ssl.)

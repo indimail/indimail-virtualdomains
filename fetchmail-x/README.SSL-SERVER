@@ -9,6 +9,11 @@ In order to let any mail client (not just fetchmail) verify server certificates
 properly, so that users can be sure their connection is not eavesdropped, there 
 are several requirements that need to be fulfilled.
 
+0. Provide modern TLS implementations:
+
+   Make sure the server supports TLS 1.2 and 1.3.
+   Older versions are deprecated and may preclude modern clients.
+
 1. Match certificate and DNS names:
 
    The server certificate's "common name" or "subject alternative name" must 

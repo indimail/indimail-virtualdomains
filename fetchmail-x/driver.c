@@ -866,6 +866,7 @@ static int do_session(
     SIGHANDLERTYPE alrmsave;
 
     ctl->server.base_protocol = proto;
+    stage = STAGE_GETAUTH;
 
     msgsizes = NULL;
     pass = 0;
@@ -963,6 +964,12 @@ static int do_session(
 			GT_("pre-connection command failed with status %d\n"), WEXITSTATUS(err));
 	    err = PS_SYNTAX;
 	    goto closeUp;
+	}
+
+	/* initialize protocol */
+	if (ctl->server.base_protocol->construct) {
+	    err = (ctl->server.base_protocol->construct)(ctl);
+	    if (err) goto cleanUp;
 	}
 
 	/* open a socket to the mail server */
@@ -1153,7 +1160,6 @@ static int do_session(
 	    goto cleanUp;
 
 	/* try to get authorized to fetch mail */
-	stage = STAGE_GETAUTH;
 	if (ctl->server.base_protocol->getauth)
 	{
 	    set_timeout(mytimeout);
@@ -1243,10 +1249,18 @@ is restored."));
 			   ctl->remotename,
 			   ctl->server.truename);
 		}
+		else if (err == PS_SOCKET)
+		{
+		    report(stderr, GT_("Socket or TLS error on %s@%s\n"),
+			   ctl->remotename,
+			   ctl->server.truename);
+		}
 		else
+		{
 		    report(stderr, GT_("Unknown login or authentication error on %s@%s\n"),
 			   ctl->remotename,
 			   ctl->server.truename);
+		}
 		    
 		goto cleanUp;
 	    }
@@ -1538,6 +1552,11 @@ is restored."));
 	if (mailserver_socket_temp != -1) {
 	    cleanupSockClose(mailserver_socket_temp);
 	    mailserver_socket_temp = -1;
+	}
+
+	/* clean up protocol */
+	if (ctl->server.base_protocol->destruct) {
+	    ctl->server.base_protocol->destruct(ctl);
 	}
     }
 
