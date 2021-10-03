@@ -11,6 +11,8 @@ AM_YFLAGS=		-t -d
 # without building a few dozen other files first.
 BUILT_SOURCES=		rcfile_y.h socket.$(OBJEXT)
 
+MOSTLYCLEANFILES = rcfile_y.h rcfile_y.c
+
 bin_PROGRAMS=		fetchmail
 
 dist_noinst_SCRIPTS=	specgen.sh
