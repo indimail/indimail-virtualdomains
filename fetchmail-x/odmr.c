@@ -256,6 +256,8 @@ static const struct method odmr =
     NULL,		/* no mailbox support */
     odmr_logout,	/* log out, we're done */
     FALSE,		/* no, we can't re-poll */
+    NULL,		/* no constructor */
+    NULL		/* no destructor */
 };
 
 int doODMR (struct query *ctl)

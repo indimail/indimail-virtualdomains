@@ -35,8 +35,21 @@ static int preauth = FALSE;
 /* session variables initialized in capa_probe() or imap_getauth() */
 static char capabilities[MSGBUFSIZE+1];
 static int imap_version = IMAP4;
-static flag do_idle = FALSE, has_idle = FALSE;
+static flag has_idle = FALSE;
 static int expunge_period = 1;
+
+static void clear_sessiondata(void) {
+	/* must match defaults above */
+	preauth = FALSE;
+	memset(capabilities, 0, sizeof(capabilities));
+	imap_version = IMAP4;
+	has_idle = FALSE;
+	expunge_period = 1;
+}
+
+/* the next ones need to be kept in synch - C89 does not consider strlen() 
+ * a const initializer */
+const char *const capa_begin = " [CAPABILITY "; const unsigned capa_len = 13;
 
 /* mailbox variables initialized in imap_getrange() */
 static int count = 0, oldcount = 0, recentcount = 0, unseen = 0, deletions = 0;
@@ -51,6 +64,56 @@ static int actual_deletions = 0;
 static int saved_timeout = 0, idle_timeout = 0;
 static time_t idle_start_time = 0;
 
+static int imap_setup(struct query *ctl)
+{
+    (void)ctl;
+    clear_sessiondata();
+    return PS_SUCCESS;
+}
+
+static int imap_cleanup(struct query *ctl)
+{
+    (void)ctl;
+    clear_sessiondata();
+    return PS_SUCCESS;
+}
+
+static void copy_capabilities(const char *buf)
+{
+    strlcpy(capabilities, buf, sizeof(capabilities));
+    capabilities[strcspn(capabilities, "]")] = '\0'; /* truncate at ] */
+
+    /* UW-IMAP server 10.173 notifies in all caps, but RFC2060 says we
+       should expect a response in mixed-case */
+    if (strstr(capabilities, "IMAP4REV1")) {
+       imap_version = IMAP4rev1; /* RFC-3501 (2060) */
+       if (outlevel >= O_DEBUG)
+           report(stdout, GT_("Protocol identified as IMAP4 rev 1\n"));
+    } else if (strstr(capabilities, "IMAP4")) {
+       imap_version = IMAP4; /* RFC-1730 */
+       if (outlevel >= O_DEBUG)
+           report(stdout, GT_("Protocol identified as IMAP4 rev 0\n"));
+    } else {
+       imap_version = IMAP2;
+       if (outlevel >= O_DEBUG)
+           report(stdout, GT_("Protocol identified as IMAP2 or IMAP2BIS\n"));
+    }
+
+    /*
+     * Handle idling.  We depend on coming through here on startup
+     * and after each timeout (including timeouts during idles).
+     */
+    if (strstr(capabilities, "IDLE"))
+       has_idle = TRUE;
+    else
+       has_idle = FALSE;
+    if (outlevel >= O_VERBOSE)
+       report(stdout, GT_("will idle after poll\n")); /* FIXME: rename this to can... idle for next release */
+
+    peek_capable = (imap_version >= IMAP4);
+}
+
+
 static int imap_untagged_response(int sock, const char *buf)
 /* interpret untagged status responses */
 {
@@ -59,7 +122,7 @@ static int imap_untagged_response(int sock, const char *buf)
     if (stage == STAGE_GETAUTH
 	    && !strncmp(buf, "* CAPABILITY", 12))
     {
-	strlcpy(capabilities, buf + 12, sizeof(capabilities));
+	copy_capabilities(buf + 12);
     }
     else if (stage == STAGE_GETAUTH
 	    && !strncmp(buf, "* PREAUTH", 9))
@@ -190,6 +253,7 @@ static int imap_response(int sock, char *argbuf, struct RecvSplit *rs)
 /* parse command response */
 {
     char buf[MSGBUFSIZE+1];
+    char *tmp;
 
     do {
 	int	ok;
@@ -206,6 +270,9 @@ static int imap_response(int sock, char *argbuf, struct RecvSplit *rs)
 	for (cp = buf; *cp; cp++)
 	    if (islower((unsigned char)*cp))
 		*cp = toupper((unsigned char)*cp);
+
+	/* FIXME: does not look for or handle command continuation requests,
+	 * i. e. the token "+" instead of tag or "*" */
 
 	/* untagged responses start with "* " */
 	if (buf[0] == '*' && buf[1] == ' ') {
@@ -224,6 +291,19 @@ static int imap_response(int sock, char *argbuf, struct RecvSplit *rs)
 	    }
 	    else if (ok != PS_SUCCESS)
 		return(ok);
+	}
+
+	/* on login, the server may volunteer new CAPABILITY information
+	 * with the tagged OK response, record it */
+	/* WARNING: this must match with what's in imap_getauth()! */
+	if (stage == STAGE_GETAUTH
+		&& (tmp = strstr(buf, capa_begin)))
+	{
+	    copy_capabilities(tmp + capa_len);
+
+	    if (outlevel >= O_DEBUG) {
+		report(stdout, GT_("found updated capabilities list\n"));
+	    }
 	}
 
 	if (stage == STAGE_IDLE)
@@ -334,87 +414,54 @@ static void imap_canonicalize(char *result, char *raw, size_t maxlen)
 static int capa_probe(int sock, struct query *ctl)
 /* set capability variables from a CAPA probe */
 {
-    int	ok;
+    int	err;
+
+    (void)ctl;
 
     /* probe to see if we're running IMAP4 and can use RFC822.PEEK */
-    capabilities[0] = '\0';
-    if ((ok = gen_transact(sock, "CAPABILITY")) == PS_SUCCESS)
-    {
-	char	*cp;
-
-	/* capability checks are supposed to be caseblind */
-	for (cp = capabilities; *cp; cp++)
-	    *cp = toupper((unsigned char)*cp);
-
-	/* UW-IMAP server 10.173 notifies in all caps, but RFC2060 says we
-	   should expect a response in mixed-case */
-	if (strstr(capabilities, "IMAP4REV1"))
-	{
-	    imap_version = IMAP4rev1;
-	    if (outlevel >= O_DEBUG)
-		report(stdout, GT_("Protocol identified as IMAP4 rev 1\n"));
-	}
-	else
-	{
-	    imap_version = IMAP4;
-	    if (outlevel >= O_DEBUG)
-		report(stdout, GT_("Protocol identified as IMAP4 rev 0\n"));
-	}
-    }
-    else if (ok == PS_ERROR)
-    {
-	imap_version = IMAP2;
-	if (outlevel >= O_DEBUG)
-	    report(stdout, GT_("Protocol identified as IMAP2 or IMAP2BIS\n"));
-    }
-    else
-	return ok;
-
-    /* 
-     * Handle idling.  We depend on coming through here on startup
-     * and after each timeout (including timeouts during idles).
-     */
-    do_idle = ctl->idle;
-    if (ctl->idle)
-    {
-	if (strstr(capabilities, "IDLE"))
-	    has_idle = TRUE;
-	else
-	    has_idle = FALSE;
-	if (outlevel >= O_VERBOSE)
-	    report(stdout, GT_("will idle after poll\n"));
+    memset(capabilities, 0, sizeof capabilities);
+    err = gen_transact(sock, "CAPABILITY");
+    /* if successful, copy_capabilities() will have handled it */
+    if (err == PS_ERROR) {
+	/* this is OK for IMAP2 which did not support a CAPABILITY command */
+	err = PS_SUCCESS;
     }
 
-    peek_capable = (imap_version >= IMAP4);
-
-    return PS_SUCCESS;
+    return err;
 }
 
-static int do_authcert (int sock, const char *command, const char *name)
+static int do_auth_external (int sock, const char *command, const char *name)
 /* do authentication "external" (authentication provided by client cert) */
 {
+    /* FIXME: not compliant with RFC 4422 (SASL) without RFC 4959 (SASL-IR)- 
+     * does not support the usual server challenge/response
+     */
     char buf[256];
 
+    if (!strstr(capabilities, "SASL-IR")) {
+	report(stderr, GT_("server did not advertise SASL-IR extension but fetchmail's implementation requires it for AUTHENTICATE EXTERNAL\n"));
+	return PS_AUTHFAIL;
+    }
     if (name && name[0])
     {
-        size_t len = strlen(name);
-        if ((len / 3) + ((len % 3) ? 4 : 0)  < sizeof(buf))
+	size_t len = strlen(name);
+        if (len64frombits(len) + 1  <= sizeof(buf)) /* +1: need to fit \0 byte */
             to64frombits (buf, name, strlen(name), sizeof buf);
         else
             return PS_AUTHFAIL; /* buffer too small. */
     }
     else
-        buf[0]=0;
+    {
+        strcpy(buf, "=");
+    }
     return gen_transact(sock, "%s EXTERNAL %s",command,buf);
 }
 
+/** apply for connection authorization, possibly executing STARTTLS */
 static int imap_getauth(int sock, struct query *ctl, char *greeting)
-/* apply for connection authorization */
 {
     int ok = 0;
     char *commonname;
-
-    (void)greeting;
 
     /*
      * Assumption: expunges are cheap, so we want to do them
@@ -425,17 +472,12 @@ static int imap_getauth(int sock, struct query *ctl, char *greeting)
     else
 	expunge_period = 1;
 
-    if ((ok = capa_probe(sock, ctl)))
-	return ok;
-
-    /* 
-     * If either (a) we saw a PREAUTH token in the greeting, or
-     * (b) the user specified ssh preauthentication, then we're done.
-     */
-    if (preauth || ctl->server.authenticate == A_SSH)
-    {
-        preauth = FALSE;  /* reset for the next session */
-        return(PS_SUCCESS);
+    /* check if imap_ok() has already parsed CAPABILITY from the greeting when 
+     * driver.c ran it on the server's greeting message - note this must match 
+     * with what's in imap_response()! */
+    if (!strstr(greeting, capa_begin)) {
+	int err = capa_probe(sock, ctl);
+	if (err) return err;
     }
 
     commonname = ctl->server.pollname;
@@ -445,6 +487,14 @@ static int imap_getauth(int sock, struct query *ctl, char *greeting)
 	commonname = ctl->sslcommonname;
 
 #ifdef SSL_ENABLE
+    /* Defend against a PREAUTH-prevents-STARTTLS attack */
+    if (preauth && must_starttls(ctl)) {
+	report(stderr, GT_("%s: configuration requires TLS, but STARTTLS is not permitted "
+				"because of authenticated state (PREAUTH). Aborting connection.  Server permitting, try --ssl instead (see manual).\n"), commonname);
+        preauth = FALSE;  /* reset for the next session */
+	return PS_SOCKET;
+    }
+
     if (maybe_starttls(ctl)) {
 	if ((strstr(capabilities, "STARTTLS") && maybe_starttls(ctl))
 		|| must_starttls(ctl)) /* if TLS is mandatory, ignore capabilities */
@@ -456,6 +506,11 @@ static int imap_getauth(int sock, struct query *ctl, char *greeting)
 			ctl->sslcertfile, ctl->sslcertpath, ctl->sslfingerprint, commonname,
 			ctl->server.pollname, &ctl->remotename)) != -1)
 	    {
+		if (outlevel >= O_VERBOSE)
+		{
+		    report(stdout, GT_("%s: upgrade to TLS succeeded.\n"), commonname);
+		}
+
 		/*
 		 * RFC 2595 says this:
 		 *
@@ -469,11 +524,10 @@ static int imap_getauth(int sock, struct query *ctl, char *greeting)
 		 * Now that we're confident in our TLS connection we can
 		 * guarantee a secure capability re-probe.
 		 */
+		clear_sessiondata();
 		if ((ok = capa_probe(sock, ctl)))
-		    return ok;
-		if (outlevel >= O_VERBOSE)
 		{
-		    report(stdout, GT_("%s: upgrade to TLS succeeded.\n"), commonname);
+		    return ok;
 		}
 	    } else if (must_starttls(ctl)) {
 		/* Config required TLS but we couldn't guarantee it, so we must
@@ -504,11 +558,24 @@ static int imap_getauth(int sock, struct query *ctl, char *greeting)
     }
 #endif /* SSL_ENABLE */
 
+    /* 
+     * If either (a) we saw a PREAUTH token in the greeting, or
+     * (b) the user specified ssh preauthentication, then we're done.
+     */
+    if (preauth || ctl->server.authenticate == A_SSH)
+    {
+        preauth = FALSE;  /* reset for the next session */
+        return(PS_SUCCESS);
+    }
+
     /*
      * Time to authenticate the user.
      * Try the protocol variants that don't require passwords first.
      */
-    ok = PS_AUTHFAIL;
+    ok = PS_AUTHFAIL; /* formally, never read,
+			 but let's leave this in place as a safe default
+			 for future maintenance */
+    (void)ok;
 
     /* Yahoo hack - we'll just try ID if it was offered by the server,
      * and IGNORE errors. */
@@ -519,19 +586,23 @@ static int imap_getauth(int sock, struct query *ctl, char *greeting)
 	}
     }
 
-    if ((ctl->server.authenticate == A_ANY 
+    if (ctl->server.authenticate == A_ANY 
          || ctl->server.authenticate == A_EXTERNAL)
-	&& strstr(capabilities, "AUTH=EXTERNAL"))
     {
-        ok = do_authcert(sock, "AUTHENTICATE", ctl->remotename);
-	if (ok)
-        {
-            /* SASL cancellation of authentication */
-            gen_send(sock, "*");
-            if (ctl->server.authenticate != A_ANY)
-                return ok;
-        } else {
-            return ok;
+	if (!strstr(capabilities, "AUTH=EXTERNAL")) {
+	    if (ctl->server.authenticate == A_EXTERNAL) {
+		report(stderr, GT_("%s: --auth external requested but server does not advertise it.\n"), commonname);
+		return PS_AUTHFAIL;
+	    }
+	} else {
+	    int err = do_auth_external(sock, "AUTHENTICATE", ctl->remotename);
+	    if (err)
+	    {
+		if (ctl->server.authenticate != A_ANY)
+		    return err;
+	    } else {
+		return PS_SUCCESS;
+	    }
 	}
     }
 
@@ -630,42 +701,44 @@ static int imap_getauth(int sock, struct query *ctl, char *greeting)
 
     /* 
      * We're stuck with sending the password en clair.
-     * The reason for this odd-looking logic is that some
-     * servers return LOGINDISABLED even though login 
-     * actually works.  So arrange things in such a way that
-     * setting auth passwd makes it ignore this capability.
-     */
-    if((ctl->server.authenticate==A_ANY&&!strstr(capabilities,"LOGINDISABLED"))
-	|| ctl->server.authenticate == A_PASSWORD)
+     * Older fetchmail versions permitted overriding LOGINDISABLED, documenting 
+     * that it still works on some servers, but 6.4.22 disables this. */
+    if (ctl->server.authenticate == A_ANY
+	    || ctl->server.authenticate == A_PASSWORD)
     {
-	/* these sizes guarantee no buffer overflow */
-	char *remotename, *password;
-	size_t rnl, pwl;
-	rnl = 2 * strlen(ctl->remotename) + 1;
-	pwl = 2 * strlen(ctl->password) + 1;
-	remotename = (char *)xmalloc(rnl);
-	password = (char *)xmalloc(pwl);
+	if (strstr(capabilities, "LOGINDISABLED")) {
+	    if (ctl->server.authenticate == A_PASSWORD) {
+		report(stderr, GT_("%s: --auth password requested but server forbids it (LOGINDISABLED).\n"), commonname);
+		return PS_AUTHFAIL;
+	    }
+	} else {
+	    /* these sizes guarantee no buffer overflow */
+	    static char *remotename, *password; /* XXX FIXME: not thread-safe but dynamic buffer is leaky on timeout */
+	    size_t rnl, pwl;
+	    rnl = 2 * strlen(ctl->remotename) + 1;
+	    pwl = 2 * strlen(ctl->password) + 1;
+	    if (remotename) xfree(remotename);
+	    remotename = (char *)xmalloc(rnl);
+	    if (password) xfree(password);
+	    password = (char *)xmalloc(pwl);
 
-	imap_canonicalize(remotename, ctl->remotename, rnl);
-	imap_canonicalize(password, ctl->password, pwl);
+	    imap_canonicalize(remotename, ctl->remotename, rnl);
+	    imap_canonicalize(password, ctl->password, pwl);
 
-	snprintf(shroud, sizeof (shroud), "\"%s\"", password);
-	ok = gen_transact(sock, "LOGIN \"%s\" \"%s\"", remotename, password);
-	memset(shroud, 0x55, sizeof(shroud));
-	shroud[0] = '\0';
-	memset(password, 0x55, strlen(password));
-	free(password);
-	free(remotename);
-	if (ok)
-	{
-	    if(ctl->server.authenticate != A_ANY)
-                return ok;
+	    snprintf(shroud, sizeof (shroud), "\"%s\"", password);
+	    ok = gen_transact(sock, "LOGIN \"%s\" \"%s\"", remotename, password);
+	    memset(shroud, 0x55, sizeof(shroud));
+	    shroud[0] = '\0';
+	    memset(password, 0x55, strlen(password));
+	    xfree(password);
+	    xfree(remotename);
+	    return ok; /* this assumes that password is the last authentication method to try */
 	}
-	else
-	    return(ok);
     }
 
-    return(ok);
+    /* if we're here, we've run out of authentication methods */
+    report(stderr, GT_("%s: we've run out of authentication methods and cannot log in.\n"), commonname);
+    return PS_AUTHFAIL;
 }
 
 static int internal_expunge(int sock)
@@ -895,7 +968,7 @@ static int imap_getrange(int sock,
 	 *
 	 * this is a while loop because imap_idle() might return on other
 	 * mailbox changes also */
-	while (recentcount == 0 && do_idle) {
+	while (recentcount == 0 && ctl->idle && has_idle) {
 	    smtp_close(ctl, 1);
 	    ok = imap_idle(sock);
 	    if (ok)
@@ -952,7 +1025,7 @@ static int imap_getrange(int sock,
 					count), count);
 	}
 
-	if (count == 0 && do_idle)
+	if (count == 0 && ctl->idle && has_idle)
 	{
 	    /* no messages?  then we may need to idle until we get some */
 	    while (count == 0) {
@@ -1402,6 +1475,8 @@ static const struct method imap =
     imap_end_mailbox_poll,	/* end-of-mailbox processing */
     imap_logout,	/* expunge and exit */
     TRUE,		/* yes, we can re-poll */
+    imap_setup,		/* setup method */
+    imap_cleanup	/* cleanup method */
 };
 
 int doIMAP(struct query *ctl)

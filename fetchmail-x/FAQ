@@ -124,9 +124,10 @@ How to set up well-known security and authentication methods
    K2. How can I use fetchmail with IPv6 and IPsec?
    K3. How can I get fetchmail to work with ssh?
    K4. What do I have to do to use the IMAP-GSS protocol?
-   K5. How can I use fetchmail with SSL?
+   K5. How can I use fetchmail with SSL or TLS?
    K6. How can I tell fetchmail not to try TLS if the server advertises
-   it? Why does fetchmail use SSL even though not configured?
+   it? Why does fetchmail use STARTTLS, STLS, TLS or SSL even though not
+   configured?
 
 Runtime fatal errors
 
@@ -1697,7 +1698,7 @@ K4. What do I have to do to use the IMAP-GSS protocol?
    Now you don't have to worry about your password appearing in cleartext
    in your .fetchmailrc, or across the network.
 
-K5. How can I use fetchmail with SSL?
+K5. How can I use fetchmail with SSL or TLS?
 
    You'll need to have the OpenSSL libraries installed, and they should at
    least be version 1.1.1. Configure with --with-ssl (default since
@@ -1707,11 +1708,12 @@ K5. How can I use fetchmail with SSL?
    installation directory as an argument to --with-ssl after an equal
    sign.
 
-   Fetchmail binaries built this way support ssl, sslkey, and sslcert
-   options that control SSL encryption, and will automatically use tls if
-   the server offers it. You will need to have an SSL/TLS-enabled
-   mailserver to use these options. See the manual page for details and
-   some words of care on the limited security provided.
+   Fetchmail binaries built this way support ssl and tls, sslkey, and
+   sslcert options that control SSL encryption, and will automatically try
+   to negotiate starttls or stlsif the server offers it. You will need to
+   have an SSL/TLS-enabled mailserver to use these options. See the manual
+   page for details and some words of care on the limited security
+   provided.
 
    If your open OpenSSL session dies with a message that complains "PRNG
    not seeded", update or improve your operating system. This means that
@@ -1733,10 +1735,10 @@ poll MYSERVER port 993 plugin "openssl s_client -connect %h:%p"
 
    You should note that SSL or TLS are only secure against a
    "man-in-the-middle" attack if the client is able to verify that the
-   peer's public key is the correct one, and has not been substituted by
-   an attacker. fetchmail can do this in one of two ways: by verifying the
-   SSL certificate, or by checking the fingerprint of the peer's public
-   key.
+   presented peer's public key is the correct one, and has not been
+   substituted by an attacker along the way. fetchmail can do this in one
+   of two ways: by verifying the SSL certificate, or by checking the
+   fingerprint of the peer's public key.
 
    There are three parts to TLS certificate verification: checking that
    the domain name in the certificate matches the hostname you asked to
@@ -1765,14 +1767,13 @@ s
    a self-signed certificate), then this certificate validation will
    always fail.
 
-   Certificate verification is always attempted. If it fails, by default a
-   warning is printed but the connection carries on (which means you are
-   not protected against attack). If your server's certificate has been
-   properly set up and verifies correctly, then add the "sslcertck" option
-   to enforce validation. If your server doesn't have a valid certificate
-   though (e.g. it has a self-signed certificate) then it will never
-   verify, and the only way you can protect yourself is by checking the
-   fingerprint.
+   Certificate verification is always attempted. If it fails, since
+   v6.4.0, by default the connection aborts (6.3 and older would carry on
+   after printing a warning, unless --sslcertck was in effect). If your
+   server doesn't have a valid certificate though (e.g. it has a
+   self-signed certificate) then it will never verify, and the only way
+   you can protect yourself is by checking the fingerprint. You should
+   then contact the operator and as for properly issued certificates.
 
    To check the peer fingerprint: first use fetchmail -v once to connect
    to the host, at a time when you are pretty sure that there is no attack
@@ -1790,15 +1791,26 @@ poll pop3.example.com proto pop3 uidl no dns
    happened.
 
 K6. How can I tell fetchmail not to use TLS if the server advertises it? Why
-does fetchmail use SSL even though not configured?
+does fetchmail use STARTTLS, STLS, TLS or SSL even though not configured?
 
+   Some options in fetchmail - including sslcertck that has become the
+   default in v6.4.0 - require fetchmail to negotiate SSL or TLS. In other
+   situations, fetchmail tries to negotiate SSL or TLS opportunistically:
    Some servers advertise STLS (POP3) or STARTTLS (IMAP), and fetchmail
    will automatically attempt TLS negotiation if SSL was enabled at
    compile time. This can however cause problems if the upstream didn't
    configure his certificates properly.
 
+   In some situations, the server does not offer STARTTLS or STLS, but it
+   would offer a TLS-wrapped operation on a dedicated, separate port. In
+   such a situation, adding ssl to the rcfile (or --ssl on the command
+   line) is all there is to it. Fetchmail will use the default port for
+   the "secure" service and negotiate TLS or SSL right away.
+
    In order to prevent fetchmail 6.4.0 and newer versions from trying STLS
-   or STARTTLS negotiation, add this option:
+   or STARTTLS negotiation, and only as a last resort because it exposes
+   all communication to potential eavesdroppers, you could add this
+   option:
 sslproto ''
      __________________________________________________________________
 

@@ -10,7 +10,6 @@
 
 #include "config.h"
 #include "fetchmail.h"
-#include "tls-aux.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -83,7 +82,20 @@ extern int h_errno;
 #endif /* ndef h_errno */
 
 #ifdef HAVE_SOCKETPAIR
-static char *const *parse_plugin(const char *plugin, const char *host, const char *service)
+static void free_plugindata(char **argvec)
+{
+    if (argvec) {
+	xfree(*argvec);
+	xfree(argvec);
+    }
+}
+
+/** parse plugin and interpolate %h and %p with single-quoted host and service.  
+ * Returns a malloc()ed pointer to a NULL-terminated vector of pointers, of 
+ * which the first is also malloc()ed and the 2nd and later ones (if present) 
+ * are pointers into the same memory region - these serve as input for the 
+ * argument vector of execvp() in handle_plugin. */
+static char **parse_plugin(const char *plugin, const char *host, const char *service)
 {
 	char **argvec;
 	const char *c, *p;
@@ -107,12 +119,7 @@ static char *const *parse_plugin(const char *plugin, const char *host, const cha
 
 	/* we need to discount 2 bytes for each placeholder */
 	plugin_copy_len = plugin_len + (host_len - 2) * host_count + (service_len - 2) * service_count;
-	plugin_copy = (char *)malloc(plugin_copy_len + 1);
-	if (!plugin_copy)
-	{
-		report(stderr, GT_("fetchmail: malloc failed\n"));
-		return NULL;
-	}
+	plugin_copy = (char *)xmalloc(plugin_copy_len + 1);
 
 	while (plugin_offset < plugin_len && plugin_copy_offset < plugin_copy_len)
 	{	if ((plugin[plugin_offset] == '%') && (plugin[plugin_offset + 1] == 'h'))
@@ -143,6 +150,7 @@ static char *const *parse_plugin(const char *plugin, const char *host, const cha
 		return NULL;
 	}
 	memset(argvec, 0, vecsiz);
+	argvec[0] = plugin_copy; /* make sure we can free() it in every case */
 	for (p = cp = plugin_copy, i = 0; *cp; cp++)
 	{	if ((!isspace((unsigned char)*cp)) && (cp == p ? 1 : isspace((unsigned char)*p))) {
 			argvec[i] = cp;
@@ -162,21 +170,29 @@ static int handle_plugin(const char *host,
 /* get a socket mediated through a given external command */
 {
     int fds[2];
-    char *const *argvec;
+    char **argvec;
 
     /*
      * The author of this code, Felix von Leitner <felix@convergence.de>, says:
      * he chose socketpair() instead of pipe() because socketpair creates 
      * bidirectional sockets while allegedly some pipe() implementations don't.
      */
+    argvec = parse_plugin(plugin,host,service);
+    if (!argvec || !*argvec[0]) {
+	free_plugindata(argvec);
+	report(stderr, GT_("fetchmail: plugin for host %s service %s is empty, cannot run!\n"), host, service);
+	return -1;
+    }
     if (socketpair(AF_UNIX,SOCK_STREAM,0,fds))
     {
 	report(stderr, GT_("fetchmail: socketpair failed\n"));
+	free_plugindata(argvec);
 	return -1;
     }
     switch (fork()) {
 	case -1:
 		/* error */
+		free_plugindata(argvec);
 		report(stderr, GT_("fetchmail: fork failed\n"));
 		return -1;
 	case 0:	/* child */
@@ -191,15 +207,12 @@ static int handle_plugin(const char *host,
 		(void) close(fds[0]);
 		if (outlevel >= O_VERBOSE)
 		    report(stderr, GT_("running %s (host %s service %s)\n"), plugin, host, service);
-		argvec = parse_plugin(plugin,host,service);
-		if (argvec == NULL)
-			_exit(EXIT_FAILURE);
 		execvp(*argvec, argvec);
 		report(stderr, GT_("execvp(%s) failed\n"), *argvec);
 		_exit(EXIT_FAILURE);
 		break;
 	default:	/* parent */
-		/* NOP */
+		free_plugindata(argvec);
 		break;
     }
     /* fds[0] is the child's end; close it for proper EOF detection */
@@ -321,10 +334,10 @@ int SockOpen(const char *host, const char *service,
 	    if (e != EAFNOSUPPORT)
 		acterr = errno;
 
-	    if (outlevel >= O_VERBOSE)
+	    if (outlevel >= O_VERBOSE) {
 		report_complete(stdout, GT_("connection failed.\n"));
-	    if (outlevel >= O_VERBOSE)
 		report(stderr, GT_("connection to %s:%s [%s/%s] failed: %s.\n"), host, service, buf, pb, strerror(e));
+	    }
 	    snprintf(errbuf+strlen(errbuf), sizeof(errbuf)-strlen(errbuf), GT_("name %d: connection to %s:%s [%s/%s] failed: %s.\n"), ord, host, service, buf, pb, strerror(e));
 	    fm_close(i);
 	    i = -1;
@@ -377,11 +390,16 @@ va_dcl {
 }
 
 #ifdef SSL_ENABLE
+#if 0
+/* this is not to be enabled in stable releases to avoid
+ * compatibility issues */
 /* OPENSSL_NO_SSL_INTERN: 
    transitional feature for OpenSSL 1.0.1 up to and excluding 1.1.0 
    to make sure we do not access internal structures! */
 #define OPENSSL_NO_SSL_INTERN 1
 #define OPENSSL_NO_DEPRECATED 23
+#endif
+#include "tls-aux.h"
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/pem.h>
@@ -1045,8 +1063,6 @@ static int OSSL110_proto_version_logic(int sock, const char **myproto,
 		report(stderr,
 		        GT_("Invalid SSL protocol '%s' specified, using default autoselect (auto).\n"),
 		        *myproto);
-		report(stderr, "fetchmail internal error in OSSL110_proto_version_logic\n");
-		abort();
 	}
 	return 0;
 }
@@ -1231,7 +1247,7 @@ int SSLOpen(int sock, char *mycert, char *mykey, const char *myproto, int certck
 			*remotename = xstrdup(buffer);
 		}
 		SSL_use_certificate_file(_ssl_context[sock], mycert, SSL_FILETYPE_PEM);
-		SSL_use_RSAPrivateKey_file(_ssl_context[sock], mykey, SSL_FILETYPE_PEM);
+		SSL_use_PrivateKey_file(_ssl_context[sock], mykey, SSL_FILETYPE_PEM);
 	}
 
 	if (SSL_set_fd(_ssl_context[sock], sock) == 0 

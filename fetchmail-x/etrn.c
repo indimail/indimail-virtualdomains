@@ -143,6 +143,8 @@ static const struct method etrn =
     NULL,		/* no mailbox support */
     etrn_logout,	/* log out, we're done */
     FALSE,		/* no, we can't re-poll */
+    NULL,		/* no constructor */
+    NULL		/* no destructor */
 };
 
 int doETRN (struct query *ctl)
