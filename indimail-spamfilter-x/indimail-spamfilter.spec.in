@@ -76,6 +76,9 @@ BuildRequires: libdb-devel
 BuildRequires: db4-devel
 %endif
 %endif
+%if %{defined nodebug}
+BuildRequires: chrpath
+%endif
 
 %if 0%{?suse_version} >= 1120
 PreReq: permissions
@@ -178,6 +181,8 @@ install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissio
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
 install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
 /bin/rm -f %{name}-rpm.info %{name}-release
+
+# if we are building with debug package
 %if %{undefined nodebug}
   for i in bogofilter bogoutil bogotune
   do
