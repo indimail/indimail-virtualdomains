@@ -76,7 +76,7 @@ BuildRequires: libdb-devel
 BuildRequires: db4-devel
 %endif
 %endif
-%if %{defined nodebug}
+%if %{undefined nodebug}
 BuildRequires: chrpath
 %endif
 
