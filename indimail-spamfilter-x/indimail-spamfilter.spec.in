@@ -70,7 +70,7 @@ BuildRequires: flex bison
 %if 0%{?suse_version}
 BuildRequires: db-devel
 %else
-%if 0%{?fedora_version} > 17 || 0%{?centos_version} > 600 || 0%{?rhel_version} > 600 || 0%{?centos_ver} > 7 || 0%{?scientificlinux_version} > 600
+%if 0%{?fedora_version} > 17 || 0%{?centos_version} > 600 || 0%{?rhel_version} > 600 || 0%{?centos_ver} > 7 || 0%{?scientificlinux_version} > 600 || 0%{?openeuler_version} > 2000
 BuildRequires: libdb-devel
 %else
 BuildRequires: db4-devel
