@@ -753,11 +753,16 @@ Balancing of emails across multiple queues is achieved by the program <b>qmail-m
 
 You just need to configure the following environment variables to have the <b>qmail-queue</b>(8) frontends use <b>qmail-multi</b>(8)
 
-1. QUEUE\_BASE – Base directory where all queues will be placed
-2. QUEUE\_COUNT – number of queues
-3. QUEUE\_START – numeric prefix of the first queue
-4. QMAILQUEUE - Path of <b>qmail-multi</b> (/usr/sbin/qmail-multi)
-5. QUEUEDIR - Not required if you set QUEUE\_BASE, QUEUE\_COUNT, QUEUE\_START. Else it should be full path to a queue (e.g. /var/indimail/queue/queue3). If QUEUEDIR is set, then QUEUE\_BASE, QUEUE\_COUNT and QUEUE\_START are not used.
+1. QMAILQUEUE - Path of <b>qmail-multi</b> (/usr/sbin/qmail-multi)
+2. QUEUE\_BASE – Base directory where all queues will be placed
+3. QUEUE\_COUNT – number of queues
+4. QUEUE\_START – numeric prefix of the first queue
+
+When using dynamic queues, the following additional variables are needed
+5. QUEUE\_MAX - The maximum number of queues that <b>qscheduler</b> will use
+6. QUEUE\_LOAD - The ratio of concurrency to the total concurrency multplied by 100 is the queue load. When the average QUEUE_LOAD for all queues goes beyond <b>QUEUE\_LOAD</b>, qscheduler increases the queue count.
+
+7. QUEUEDIR - Not required if you set QUEUE\_BASE, QUEUE\_COUNT, QUEUE\_START. Else it should be full path to a queue (e.g. /var/indimail/queue/queue3). If QUEUEDIR is set, then QUEUE\_BASE, QUEUE\_COUNT and QUEUE\_START are not used.
 
 <b>qmail-multi</b>'s job is to select a queue. indimail-mta uses multiple queue. If QUEUEDIR is set, it execs <b>qmail-queue</b> without doing anything. If QUEUEDIR is not defined, it uses QUEUE\_START, QUEUE\_COUNT and QUEUE\_BASE environment variables to set QUEUEDIR environment variable. QUEUE\_BASE is the common basename for all the queues. e.g. QUEUE\_BASE=/var/indimail/queue. Now, if QUEUE\_START is 1, QUEUE\_COUNT is 5, then <b>qmail-multi</b> will use the time to do a modulus operation and get a number ranging from 1 to 5. It will then set the QUEUEDIR environment variable to set any of the 5 queues in /var/indimail/queue. e.g. QUEUEDIR=/var/indimail/queue/queueX, where X is the number selected between 1 to 5. It then does a exec of <b>qmail-queue</b>. Throughout this document we will abbreviate /var/indimail/queue/queueX as queueX.
 
