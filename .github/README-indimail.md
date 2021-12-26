@@ -10,7 +10,7 @@ Table of Contents
       * [Programs](#programs)
          * [qmail-multi](#qmail-multi)
          * [qmail-queue](#qmail-queue)
-         * [qmail-daemon, qmail-start, slowq-start, qmta-send](#qmail-daemon-qmail-start-slowq-start-qmta-send)
+         * [qscheduler, qmail-start, slowq-start, qmta-send](#qscheduler-qmail-start-slowq-start-qmta-send)
          * [qmail-todo, qmail-send](#qmail-todo-qmail-send)
             * [Preprocessing](#preprocessing)
             * [Delivery](#delivery)
@@ -287,7 +287,7 @@ The diagram below shows how <b>qmail-multi</b>(8) works ![qmail-multi](qmail_mul
 
 Every message is added to a central queue directory by <b>qmail-queue</b>. <b>qmail-queue</b> is invoked by <b>qmail-multi</b>. The main purpose of <b>qmail-multi</b> is to select a queue as discussed in [IndiMail Queue Mechanism](#indimail-queue-mechanism). Here is a pictorial representation of the IndiMail queue. ![Pictorial](indimail_queue.png)
 
-<b>qmail-multi</b> is invoked as needed, by setting QMAILQUEUE=/usr/sbin/qmail-queue, mostly by <b>qmail-inject</b> for locally generated messages, <b>qmail-smtpd</b> for messages received through SMTP, <b>qmail-local</b> for forwarded messages, or <b>qmail-send</b> for bounce messages.
+<b>qmail-multi</b> is invoked as needed, by setting QMAILQUEUE=/usr/sbin/qmail-multi, mostly by <b>qmail-inject</b> for locally generated messages, <b>qmail-smtpd</b> for messages received through SMTP, <b>qmail-local</b> for forwarded messages, or <b>qmail-send</b> for bounce messages.
 
 Every message is then pre-processed by <b>qmail-todo</b> and then processed by <b>qmail-send</b> for delivery, in cooperation with <b>qmail-lspawn</b>, <b>qmail-rspawn</b> and cleaned up by <b>qmail-clean</b>. These five programs are long-running daemons. The diagram also shows a separate queue named <b>slowq</b>. This queue is special. It is a single queue that has <b>slowq-send</b> processing it instead of <b>qmail-todo</b>, <b>qmail-send</b> pair. This queue has a feature where the deliveries can be rate controlled. <b>slowq-send</b> is like the orignal qmail's <b>qmail-send</b> and unlike it, <b>slowq-send</b> does both pre-procesinsg and scheduling and is not as fast as <b>qmail-send</b> and hence the name. However the queue <b>slowq</b> ain't a queue where we require speed, and so it is ok.
 
@@ -359,19 +359,19 @@ At the moment queueX/todo/<u>inode</u> is created, the message has been queued. 
 
 <b>qmail-queue</b> starts a 24-hour timer before touching any files, and commits suicide if the timer expires.
 
-Once a message is deposited in one of the indimail's queues, it will be sent by few programs working cooperatively. We will now look at qmail-daemon, qmail-start, <b>qmail-send</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b>, <b>qmail-local</b>, and <b>qmail-remote</b>.
+Once a message is deposited in one of the indimail's queues, it will be sent by few programs working cooperatively. We will now look at qscheduler, qmail-start, <b>qmail-send</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b>, <b>qmail-local</b>, and <b>qmail-remote</b>.
 
-### qmail-daemon, qmail-start, slowq-start, qmta-send
+### qscheduler, qmail-start, slowq-start, qmta-send
 
-<b>qmail-daemon</b> invokes multiple invocations of <b>qmail-start</b> to invoke <b>qmail-send</b>, <b>qmail-todo</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b>, and <b>qmail-clean</b>, under the proper uids and gids for multiple queues. It starts multiple instances of <b>qmail-send</b>, <b>qmail-todo</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b> and <b>qmail-clean</b>. The number of instances it runs is defined by the environment variable <b>QUEUE\_COUNT</b>. For each instance the queue is defined by <b>qmail-daemon</b> by setting the environment variable <b>QUEUEDIR</b>. A queue is defined by the integers defined by environment variables <b>QUEUE\_START</b> and <b>QUEUE\_COUNT</b> as described in section [IndiMail Queue Mechanism](#indimail-queue-mechanism). <b>qmail-daemon</b> also monitors <b>qmail-send</b> and <b>qmail-todo</b> and restart them if they go down.
+<b>qscheduler</b> invokes multiple invocations of <b>qmail-start</b> to invoke <b>qmail-send</b>, <b>qmail-todo</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b>, and <b>qmail-clean</b>, under the proper uids and gids for multiple queues. It starts multiple instances of <b>qmail-send</b>, <b>qmail-todo</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b> and <b>qmail-clean</b>. The number of instances it runs is defined by the environment variable <b>QUEUE\_COUNT</b>. For each instance the queue is defined by <b>qscheduler</b> by setting the environment variable <b>QUEUEDIR</b>. A queue is defined by the integers defined by environment variables <b>QUEUE\_START</b> and <b>QUEUE\_COUNT</b> as described in section [IndiMail Queue Mechanism](#indimail-queue-mechanism). <b>qscheduler</b> also monitors <b>qmail-send</b> and <b>qmail-todo</b> and restart them if they go down.
 
-<b>qmail-start</b> invokes <b>qmail-send</b>, <b>qmail-todo</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b>, and <b>qmail-clean</b>, under the proper uids and gids for a single queue. These five daemons cooperate to deliver messages from the queue. <b>qmail-start</b> should be used if you desire to run only one queue. For running multiple parallel queues run <b>qmail-daemon</b>.
+<b>qmail-start</b> invokes <b>qmail-send</b>, <b>qmail-todo</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b>, and <b>qmail-clean</b>, under the proper uids and gids for a single queue. These five daemons cooperate to deliver messages from the queue. <b>qmail-start</b> should be used if you desire to run only one queue. For running multiple parallel queues run <b>qscheduler</b>.
 
 <b>slowq-start</b> invokes <b>slowq-send</b>, <b>qmail-lspawn></b>, <b>qmail-rspawn</b>, and <b>qmail-clean</b>, under the proper uids and gids for a single queue. <b>slowq-send</b> is a special daemon that does the work of both <b>qmail-todo</b> and <b>qmail-send</b> but handles a single, special queue named <u>slowq</u>. These four daemons cooperate to deliver messages from the queue with control on the delivery rates. We will talk about this in the chapter [Controlling Delivery Rates](#controlling-delivery-rates).
 
 <b>qmta-send</b> does the work of <b>qmail-todo</b>, <b>qmail-send</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b> and <b>qmail-clean</b> in a single daemon. It handles a single special queue named <u>qmta</u>. You can use <b>qmta-send</b> instead of <b>qmail-todo</b>/<b>qmail-send</b> for small systems which have negligible or sporadic mail traffic. Single Board Computers are an excellent fit for <b>qmta-send</b>. <b>qmta-send</b> can be started on the command line, in RC scripts or in cron/shell scripts. It can be invoked to do just one time delivery without running as a daemon. It can also be enabled to start at boot by enabling <b>qmta-service</b> <b>systemd.unit(5)</b> configuration using the <b>systemctl(1)</b> command. You can learn more about <b>qmta-send</b> in the chapter [qmta - Using a minimal standalone qmta-send MTA](#qmta---using-a-minimal-standalone-qmta-send-mta)
 
-<b>qmail-daemon</b>, <b>qmail-start</b>, <b>slowq-start</b>, <b>qmta-send</b> can be passed an argument - <b>defaultdelivery</b>. If <b>defaultdelivery</b> supplied, <b>qmail-start</b> or <b>qmail-daemon</b> passes it to <b>qmail-lspawn</b>. You can also have a control file named defaultdelivery. The mailbox type is picked up from the <b>defaultdelivery</b> control file. The table below outlines the choices for <b>defaultdelivery</b> control file
+<b>qscheduler</b>, <b>qmail-start</b>, <b>slowq-start</b>, <b>qmta-send</b> can be passed an argument - <b>defaultdelivery</b>. If <b>defaultdelivery</b> supplied, <b>qmail-start</b> or <b>qscheduler</b> passes it to <b>qmail-lspawn</b>. You can also have a control file named defaultdelivery. The mailbox type is picked up from the <b>defaultdelivery</b> control file. The table below outlines the choices for <b>defaultdelivery</b> control file
 
 Mailbox Format |Name|Location|defaultdelivery|Comments
 ---------------|----|--------|---------------|--------
@@ -882,201 +882,210 @@ You can automate the above service creation for systemd by running the initsvc(1
 You can now also query the status of the running IndiMail service by using the systemctl command
 
 ```
-# systemctl status indimail.service
+# systemctl status svscan.service
 ● svscan.service - SVscan Service
      Loaded: loaded (/usr/lib/systemd/system/svscan.service; enabled; vendor preset: disabled)
-     Active: active (running) since Thu 2021-10-21 08:57:40 IST; 1h 35min ago
-   Main PID: 2576 (svscan)
-      Tasks: 230 (limit: 9408)
+     Active: active (running) since Sun 2021-12-26 07:44:17 IST; 4h 11min ago
+   Main PID: 1041 (svscan)
+      Tasks: 229 (limit: 9405)
      Memory: 2.3G
      CGroup: /system.slice/svscan.service
-             ├─ 2576 /usr/sbin/svscan /service
-             ├─ 2713 supervise log .svscan
-             ├─ 2715 /usr/sbin/multilog t /var/log/svc/svscan
-             ├─ 2720 supervise qmail-qmqpd.628
-             ├─ 2721 supervise log qmail-qmqpd.628
-             ├─ 2722 supervise resolvconf
-             ├─ 2723 supervise log resolvconf
-             ├─ 2724 supervise mpdev
-             ├─ 2725 supervise log mpdev
-             ├─ 2726 supervise qmail-imapd.143
-             ├─ 2727 supervise log qmail-imapd.143
-             ├─ 2728 supervise qmail-poppass.106
-             ├─ 2729 supervise log qmail-poppass.106
-             ├─ 2730 supervise qmail-daned.1998
-             ├─ 2731 supervise log qmail-daned.1998
-             ├─ 2732 supervise qmail-imapd-ssl.993
-             ├─ 2733 supervise log qmail-imapd-ssl.993
-             ├─ 2734 supervise qmail-smtpd.25
-             ├─ 2735 supervise log qmail-smtpd.25
-             ├─ 2736 supervise indisrvr.4000
-             ├─ 2737 supervise log indisrvr.4000
-             ├─ 2738 supervise qmail-pop3d.110
-             ├─ 2739 supervise log qmail-pop3d.110
-             ├─ 2740 supervise slowq-send
-             ├─ 2741 supervise log slowq-send
-             ├─ 2742 supervise update
-             ├─ 2743 supervise log update
-             ├─ 2744 supervise qmail-smtpd.366
-             ├─ 2745 supervise log qmail-smtpd.366
-             ├─ 2746 supervise freshclam
-             ├─ 2747 supervise log freshclam
-             ├─ 2748 /bin/sh ./run
-             ├─ 2749 /usr/sbin/multilog t /var/log/svc/qmqpd.628
-             ├─ 2750 supervise fclient
-             ├─ 2751 supervise log fclient
-             ├─ 2752 supervise qmail-pop3d-ssl.995
-             ├─ 2753 supervise log qmail-pop3d-ssl.995
-             ├─ 2754 supervise qmail-qmtpd.209
-             ├─ 2755 supervise log qmail-qmtpd.209
-             ├─ 2756 supervise mrtg
-             ├─ 2757 supervise log mrtg
-             ├─ 2758 supervise rsync.873
-             ├─ 2759 supervise log rsync.873
-             ├─ 2760 supervise qmail-logfifo
-             ├─ 2761 supervise log qmail-logfifo
-             ├─ 2762 supervise qscanq
-             ├─ 2763 supervise log qscanq
-             ├─ 2764 /usr/sbin/qmail-daned -w /etc/indimail/control/tlsa.white -t 30 -s 5 -h 65535 127.0.0.1 /etc/indimail/control/tlsa.context
-             ├─ 2765 supervise qmail-send.25
-             ├─ 2766 supervise log qmail-send.25
-             ├─ 2767 supervise greylist.1999
-             ├─ 2768 supervise log greylist.1999
-             ├─ 2769 supervise qmail-smtpd.465
-             ├─ 2770 supervise log qmail-smtpd.465
-             ├─ 2771 /usr/sbin/multilog t /var/log/svc/daned.1998
-             ├─ 2772 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.imap.cdb -X -o -b 40 -H -l argos.indimail.org -R -u 555 -g 555 0 993 /usr/bin/couriertls -server -tcpd /usr/sbin/imaplogin /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authpwd /usr/libexec/indimail/imapmodules/authshadow /usr/libexec/indimail/imapmodules/authpam /usr/bin/imapd Maildir
-             ├─ 2773 /usr/sbin/indisrvr -i 0 -p 4000 -b 40 -t 300 -n /etc/indimail/certs/servercert.pem
-             ├─ 2774 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.pop3.cdb -X -o -b 40 -H -l argos.indimail.org -R -u 555 -g 555 0 110 /usr/sbin/pop3login /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authpwd /usr/libexec/indimail/imapmodules/authshadow /usr/libexec/indimail/imapmodules/authpam /usr/bin/pop3d Maildir
-             ├─ 2775 /usr/sbin/multilog t /var/log/svc/mpdev
-             ├─ 2776 /usr/bin/tcpserver -v -H -R -l argos.indimail.org -x /etc/indimail/tcp/tcp.poppass.cdb -X -c variables/MAXDAEMONS -C 25 -o -b 40 -n /etc/indimail/certs/servercert.pem -u 1024 -g 1014 0 106 /usr/sbin/qmail-poppass argos.indimail.org /usr/sbin/vchkpass /bin/false
-             ├─ 2777 /usr/sbin/multilog t /var/log/svc/poppass.106
-             ├─ 2778 slowq-send /var/indimail/queue/slowq
-             ├─ 2779 /usr/bin/freshclam -v --stdout --datadir=/var/indimail/clamd -d -c 2 --config-file=/etc/freshclam.conf
-             ├─ 2780 /usr/sbin/multilog t /var/log/svc/imapd-ssl.993
-             ├─ 2781 /usr/bin/tcpserver -v -h -R -l argos.indimail.org -x /etc/indimail/tcp/tcp.smtp.cdb -c variables/MAXDAEMONS -o -b 75 -u 1024 -g 1015 0 25 /usr/lib/indimail/plugins/rblsmtpd.so -rdnsbl-1.uceprotect.net -rzen.spamhaus.org /usr/lib/indimail/plugins/qmail_smtpd.so
-             ├─ 2782 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.pop3.cdb -X -o -b 40 -H -l argos.indimail.org -R -u 555 -g 555 0 995 /usr/bin/couriertls -server -tcpd /usr/sbin/pop3login /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authpwd /usr/libexec/indimail/imapmodules/authshadow /usr/libexec/indimail/imapmodules/authpam /usr/bin/pop3d Maildir
-             ├─ 2784 /usr/bin/tcpserver -v -H -R -l argos.indimail.org -x /etc/indimail/tcp/tcp.smtp.cdb -c variables/MAXDAEMONS -o -b 150 -u 1024 -g 1015 0 366 /usr/sbin/qmail-smtpd
-             ├─ 2785 /usr/sbin/multilog t /var/log/svc/slowq
-             ├─ 2786 /usr/sbin/multilog t /var/log/svc/indisrvr.4000
-             ├─ 2787 /usr/sbin/multilog t /var/log/svc/smtpd.366
-             ├─ 2788 supervise proxy-imapd.4143
-             ├─ 2789 supervise log proxy-imapd.4143
-             ├─ 2790 /bin/sh ./run
-             ├─ 2791 supervise fetchmail
-             ├─ 2792 supervise log fetchmail
-             ├─ 2793 supervise qmail-smtpd.587
-             ├─ 2794 supervise log qmail-smtpd.587
-             ├─ 2795 supervise pwdlookup
-             ├─ 2796 supervise log pwdlookup
-             ├─ 2797 supervise proxy-imapd-ssl.9143
-             ├─ 2798 supervise log proxy-imapd-ssl.9143
-             ├─ 2799 /usr/bin/tcpserver -v -h -R -l argos.indimail.org -x /etc/indimail/tcp/tcp.smtp.cdb -c variables/MAXDAEMONS -o -b 75 -u 1024 -g 1015 0 465 /usr/lib/indimail/plugins/rblsmtpd.so -rdnsbl-1.uceprotect.net -rzen.spamhaus.org /usr/lib/indimail/plugins/qmail_smtpd.so argos.indimail.org /usr/sbin/sys-checkpwd /usr/sbin/vchkpass /bin/false
-             ├─ 2800 supervise dnscache
-             ├─ 2801 supervise log dnscache
-             ├─ 2802 /usr/sbin/multilog t /var/log/svc/logfifo
-             ├─ 2803 supervise proxy-pop3d-ssl.9110
-             ├─ 2804 supervise log proxy-pop3d-ssl.9110
-             ├─ 2805 supervise inlookup.infifo
-             ├─ 2806 supervise log inlookup.infifo
-             ├─ 2807 supervise clamd
-             ├─ 2808 supervise log clamd
-             ├─ 2809 supervise proxy-pop3d.4110
-             ├─ 2810 supervise log proxy-pop3d.4110
-             ├─ 2812 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.imap.cdb -X -o -b 40 -H -l argos.indimail.org -R -u 555 -g 555 0 143 /usr/sbin/imaplogin /usr/libexec/indimail/imapmodules/authindi /usr/libexec/indimail/imapmodules/authpwd /usr/libexec/indimail/imapmodules/authshadow /usr/libexec/indimail/imapmodules/authpam /usr/bin/imapd Maildir
-             ├─ 2813 /usr/sbin/cleanq -l -s 200 /var/indimail/qscanq/root/scanq
-             ├─ 2814 /usr/sbin/multilog t /var/log/svc/freshclam
-             ├─ 2815 /usr/sbin/multilog t /var/log/svc/update
-             ├─ 2816 /usr/sbin/multilog t /var/log/svc/pop3d.110
-             ├─ 2817 /usr/sbin/multilog t /var/log/svc/smtpd.25
-             ├─ 2818 /usr/sbin/multilog t /var/log/svc/pop3d-ssl.995
-             ├─ 2819 /usr/sbin/multilog t /var/log/svc/fclient
-             ├─ 2820 /usr/sbin/multilog t /var/log/svc/qmtpd.209
-             ├─ 2821 /usr/sbin/multilog t /var/log/svc/imapd.143
-             ├─ 2822 /usr/bin/qmail-cat /run/indimail/logfifo
-             ├─ 2824 /usr/sbin/qmail-greyd -w /etc/indimail/control/greylist.white -t 30 -g 24 -m 2 -s 5 -h 65535 127.0.0.1 /etc/indimail/control/greylist.context
-             ├─ 2825 /usr/sbin/multilog t /var/log/svc/rsyncd.873
-             ├─ 2826 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.imap.cdb -X -o -b 40 -H -l argos.indimail.org -R -u 555 -g 555 0 4143 /usr/bin/proxyimap /usr/bin/imapd Maildir
-             ├─ 2827 /usr/sbin/multilog t /var/log/svc/deliver.25
-             ├─ 2828 /usr/sbin/multilog t /var/log/svc/greylist.1999
-             ├─ 2829 /usr/bin/dnscache
-             ├─ 2830 /usr/bin/tcpserver -v -H -R -l argos.indimail.org -x /etc/indimail/tcp/tcp.smtp.cdb -c variables/MAXDAEMONS -o -b 75 -u 1024 -g 1015 0 587 /usr/lib/indimail/plugins/qmail_smtpd.so argos.indimail.org /usr/sbin/sys-checkpwd /usr/sbin/vchkpass /bin/false
-             ├─ 2831 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.pop3.cdb -X -o -b 40 -H -l argos.indimail.org -R -u 555 -g 555 0 9110 /usr/bin/couriertls -server -tcpd /usr/bin/proxypop3 /usr/bin/pop3d Maildir
-             ├─ 2832 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.imap.cdb -X -o -b 40 -H -l argos.indimail.org -R -u 555 -g 555 0 9143 /usr/bin/couriertls -server -tcpd /usr/bin/proxyimap /usr/bin/imapd Maildir
-             ├─ 2833 /usr/sbin/multilog t /var/log/svc/mrtg
-             ├─ 2834 /usr/sbin/multilog t /var/log/svc/smtpd.465
-             ├─ 2835 multilog t ./main
-             ├─ 2837 /usr/sbin/clamd --config-file=/etc/clamd.d/scan.conf
-             ├─ 2838 supervise mysql.3306
-             ├─ 2839 supervise log mysql.3306
-             ├─ 2840 supervise udplogger.3000
-             ├─ 2841 supervise log udplogger.3000
-             ├─ 2842 /usr/sbin/multilog t /var/log/svc/qscanq
-             ├─ 2843 /usr/sbin/multilog t /var/log/svc/proxyIMAP.4143
-             ├─ 2844 /usr/sbin/multilog t /var/log/svc/smtpd.587
-             ├─ 2845 /usr/sbin/multilog t /var/log/svc/fetchmail
-             ├─ 2847 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.pop3.cdb -X -o -b 40 -H -l argos.indimail.org -R -u 555 -g 555 0 4110 /usr/bin/proxypop3 /usr/bin/pop3d Maildir
-             ├─ 2848 /usr/sbin/multilog t /var/log/svc/proxyPOP3.4110
-             ├─ 2849 /usr/sbin/multilog t /var/log/svc/resolvconf
-             ├─ 2852 /usr/sbin/multilog t /var/log/svc/pwdlookup
-             ├─ 2853 /usr/sbin/udplogger -p 3000 -t 10 0
-             ├─ 2854 /usr/sbin/mysqld --defaults-file=/etc/indimail/indimail.cnf --port=3306 --basedir=/usr --datadir=/var/indimail/mysqldb/data --memlock --ssl --require-secure-transport --skip-external-locking --delay-key-write=all --skip-name-resolve --sql-mode=NO_ENGINE_SUBSTITUTION,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,STRICT_TRANS_TABLES --explicit-defaults-for-timestamp=TRUE --general-log=1 --general-log-file=/var/indimail/mysqldb/logs/general-log --slow-query-log=1 --slow-query-log-file=/var/indimail/mysqldb/logs/slowquery-log --log-queries-not-using-indexes --log-error-verbosity=3 --pid-file=/run/mysqld/mysqld.3306.pid
-             ├─ 2897 qmail-lspawn ./Maildir/ /var/indimail/queue/slowq
-             ├─ 2898 qmail-rspawn /var/indimail/queue/slowq
-             ├─ 2899 qmail-clean /var/indimail/queue/slowq slowq-send
-             ├─ 2900 /bin/sh ./run
-             ├─ 2901 /usr/bin/inotify -n /etc
-             ├─ 2902 /bin/sh ./run
-             ├─ 2910 /usr/sbin/multilog t /var/log/svc/clamd
-             ├─ 2911 /usr/sbin/multilog t /var/log/svc/udplogger.3000
-             ├─ 2912 /usr/sbin/multilog t /var/log/svc/mysql.3306
-             ├─ 2914 /usr/sbin/multilog t /var/log/svc/inlookup.infifo
-             ├─ 2915 /usr/sbin/multilog t /var/log/svc/proxyPOP3.9110
-             ├─ 2916 /usr/sbin/multilog t /var/log/svc/proxyIMAP.9143
-             ├─ 3112 /usr/sbin/qmail-daemon ./Maildir/
-             ├─ 3115 qmail-send /var/indimail/queue/queue1
-             ├─ 3116 qmail-send /var/indimail/queue/queue2
-             ├─ 3117 qmail-send /var/indimail/queue/queue3
-             ├─ 3118 qmail-send /var/indimail/queue/queue4
-             ├─ 3119 qmail-send /var/indimail/queue/queue5
-             ├─ 3120 qmail-lspawn ./Maildir/ /var/indimail/queue/queue3
-             ├─ 3121 qmail-rspawn /var/indimail/queue/queue3
-             ├─ 3122 qmail-clean /var/indimail/queue/queue3 qmail-send
-             ├─ 3123 qmail-todo /var/indimail/queue/queue3
-             ├─ 3124 qmail-lspawn ./Maildir/ /var/indimail/queue/queue1
-             ├─ 3125 qmail-clean /var/indimail/queue/queue3 qmail-todo
-             ├─ 3126 qmail-rspawn /var/indimail/queue/queue1
-             ├─ 3127 qmail-lspawn ./Maildir/ /var/indimail/queue/queue4
-             ├─ 3128 qmail-clean /var/indimail/queue/queue1 qmail-send
-             ├─ 3129 qmail-rspawn /var/indimail/queue/queue4
-             ├─ 3130 qmail-todo /var/indimail/queue/queue1
-             ├─ 3131 qmail-clean /var/indimail/queue/queue4 qmail-send
-             ├─ 3132 qmail-todo /var/indimail/queue/queue4
-             ├─ 3133 qmail-clean /var/indimail/queue/queue1 qmail-todo
-             ├─ 3134 qmail-clean /var/indimail/queue/queue4 qmail-todo
-             ├─ 3135 qmail-lspawn ./Maildir/ /var/indimail/queue/queue2
-             ├─ 3136 qmail-rspawn /var/indimail/queue/queue2
-             ├─ 3137 qmail-clean /var/indimail/queue/queue2 qmail-send
-             ├─ 3138 qmail-todo /var/indimail/queue/queue2
-             ├─ 3139 qmail-clean /var/indimail/queue/queue2 qmail-todo
-             ├─ 3140 qmail-lspawn ./Maildir/ /var/indimail/queue/queue5
-             ├─ 3141 qmail-rspawn /var/indimail/queue/queue5
-             ├─ 3142 qmail-clean /var/indimail/queue/queue5 qmail-send
-             ├─ 3143 qmail-todo /var/indimail/queue/queue5
-             ├─ 3144 qmail-clean /var/indimail/queue/queue5 qmail-todo
-             ├─ 4193 /usr/sbin/inlookup -i 5 -c 5184000
-             ├─ 4205 /usr/sbin/nssd -d notice
-             ├─ 4268 /usr/sbin/inlookup -i 5 -c 5184000
-             ├─ 4269 /usr/sbin/inlookup -i 5 -c 5184000
-             ├─ 4270 /usr/sbin/inlookup -i 5 -c 5184000
-             ├─ 4271 /usr/sbin/inlookup -i 5 -c 5184000
-             ├─ 4272 /usr/sbin/inlookup -i 5 -c 5184000
-             ├─15932 sh -c 
-    sleep 10; /usr/libexec/pistop/client sleep 2>&1
-             ├─16020 sleep 300
-             ├─16021 /usr/bin/sh /usr/libexec/pistop/client sleep
-             └─16022 sleep 20
+             ├─ 1041 /usr/sbin/svscan /service
+             ├─ 1066 supervise log .svscan
+             ├─ 1068 /usr/sbin/multilog t /var/log/svc/svscan
+             ├─ 1080 supervise qmail-qmqpd.628
+             ├─ 1081 supervise log qmail-qmqpd.628
+             ├─ 1082 supervise resolvconf
+             ├─ 1083 supervise log resolvconf
+             ├─ 1084 supervise mpdev
+             ├─ 1085 supervise log mpdev
+             ├─ 1086 supervise qmail-imapd.143
+             ├─ 1087 supervise log qmail-imapd.143
+             ├─ 1088 supervise qmail-poppass.106
+             ├─ 1089 supervise log qmail-poppass.106
+             ├─ 1090 supervise qmail-daned.1998
+             ├─ 1091 supervise log qmail-daned.1998
+             ├─ 1092 supervise qmail-imapd-ssl.993
+             ├─ 1093 supervise log qmail-imapd-ssl.993
+             ├─ 1094 supervise qmail-smtpd.25
+             ├─ 1095 supervise log qmail-smtpd.25
+             ├─ 1096 /usr/bin/tcpserver -v -H -R -l argos.indimail.org -x /etc/indimail/tcp/tcp.poppass.cdb -X -c variables/MAXDAEMONS -C 25 -o -b 40 -n /etc/indimail/certs/servercert.pem -u 1024 -g 1014 0 106 /usr/sbin/qmail-poppass argos.indimail.org /usr/sbin/vchkpass /bin/false
+             ├─ 1097 /usr/sbin/multilog t /var/log/svc/qmqpd.628
+             ├─ 1098 supervise indisrvr.4000
+             ├─ 1099 supervise log indisrvr.4000
+             ├─ 1100 supervise qmail-pop3d.110
+             ├─ 1101 supervise log qmail-pop3d.110
+             ├─ 1102 supervise slowq-send
+             ├─ 1103 supervise log slowq-send
+             ├─ 1104 supervise update
+             ├─ 1105 /usr/sbin/qmail-daned -w /etc/indimail/control/tlsa.white -t 30 -s 5 -h 65535 127.0.0.1 /etc/indimail/control/tlsa.context
+             ├─ 1106 supervise log update
+             ├─ 1107 supervise qmail-smtpd.366
+             ├─ 1108 supervise log qmail-smtpd.366
+             ├─ 1109 supervise freshclam
+             ├─ 1110 supervise log freshclam
+             ├─ 1111 supervise fclient
+             ├─ 1112 supervise log fclient
+             ├─ 1113 supervise qmail-pop3d-ssl.995
+             ├─ 1114 supervise log qmail-pop3d-ssl.995
+             ├─ 1115 supervise qmail-qmtpd.209
+             ├─ 1116 supervise log qmail-qmtpd.209
+             ├─ 1117 supervise mrtg
+             ├─ 1118 supervise log mrtg
+             ├─ 1119 supervise rsync.873
+             ├─ 1120 supervise log rsync.873
+             ├─ 1121 supervise qmail-logfifo
+             ├─ 1122 supervise log qmail-logfifo
+             ├─ 1123 supervise qscanq
+             ├─ 1124 supervise log qscanq
+             ├─ 1125 supervise qmail-send.25
+             ├─ 1126 supervise log qmail-send.25
+             ├─ 1127 supervise greylist.1999
+             ├─ 1128 supervise log greylist.1999
+             ├─ 1129 supervise qmail-smtpd.465
+             ├─ 1130 supervise log qmail-smtpd.465
+             ├─ 1131 supervise proxy-imapd.4143
+             ├─ 1132 supervise log proxy-imapd.4143
+             ├─ 1133 supervise fetchmail
+             ├─ 1134 supervise log fetchmail
+             ├─ 1135 supervise qmail-smtpd.587
+             ├─ 1136 supervise log qmail-smtpd.587
+             ├─ 1137 supervise pwdlookup
+             ├─ 1138 supervise log pwdlookup
+             ├─ 1140 /usr/bin/freshclam -v --stdout --datadir=/var/indimail/clamd -d -c 2 --config-file=/etc/freshclam.conf
+             ├─ 1141 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.imap.cdb -X -o -b 40 -H -l argos.indimail.org -R -u 555 -g 555 0 993 /usr/bin/couriertls -server -tcpd /usr/sbin/imaplogin /usr/libexec/indimail/imapmodules/authpwd /usr/libexec/indimail/imapmodules/authshadow /usr/libexec/indimail/imapmodules/authpam /usr/libexec/indimail/imapmodules/authindi /usr/bin/imapd Maildir
+             ├─ 1143 /usr/bin/tcpserver -v -H -R -l argos.indimail.org -x /etc/indimail/tcp/tcp.smtp.cdb -c variables/MAXDAEMONS -o -b 150 -u 1024 -g 1015 0 366 /usr/sbin/qmail-smtpd
+             ├─ 1144 /usr/sbin/indisrvr -i 0 -p 4000 -b 40 -t 300 -n /etc/indimail/certs/servercert.pem
+             ├─ 1145 supervise proxy-imapd-ssl.9143
+             ├─ 1146 supervise log proxy-imapd-ssl.9143
+             ├─ 1147 supervise dnscache
+             ├─ 1148 supervise log dnscache
+             ├─ 1149 supervise proxy-pop3d-ssl.9110
+             ├─ 1150 supervise log proxy-pop3d-ssl.9110
+             ├─ 1151 supervise inlookup.infifo
+             ├─ 1152 supervise log inlookup.infifo
+             ├─ 1153 supervise clamd
+             ├─ 1154 supervise log clamd
+             ├─ 1155 supervise proxy-pop3d.4110
+             ├─ 1156 supervise log proxy-pop3d.4110
+             ├─ 1157 supervise mysql.3306
+             ├─ 1158 supervise log mysql.3306
+             ├─ 1159 supervise udplogger.3000
+             ├─ 1160 supervise log udplogger.3000
+             ├─ 1161 /bin/sh ./run
+             ├─ 1162 /usr/sbin/multilog t /var/log/svc/poppass.106
+             ├─ 1163 /bin/sh ./run
+             ├─ 1164 /usr/bin/tcpserver -v -h -R -l argos.indimail.org -x /etc/indimail/tcp/tcp.smtp.cdb -c variables/MAXDAEMONS -o -b 75 -u 1024 -g 1015 0 25 /usr/lib/indimail/plugins/rblsmtpd.so -rdnsbl-1.uceprotect.net -rzen.spamhaus.org /usr/lib/indimail/plugins/qmail_smtpd.so
+             ├─ 1166 /usr/sbin/cleanq -l -s 200 /var/indimail/qscanq/root/scanq
+             ├─ 1167 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.pop3.cdb -X -o -b 40 -H -l argos.indimail.org -R -u 555 -g 555 0 995 /usr/bin/couriertls -server -tcpd /usr/sbin/pop3login /usr/libexec/indimail/imapmodules/authpwd /usr/libexec/indimail/imapmodules/authshadow /usr/libexec/indimail/imapmodules/authpam /usr/libexec/indimail/imapmodules/authindi /usr/bin/pop3d Maildir
+             ├─ 1168 /usr/sbin/multilog t /var/log/svc/indisrvr.4000
+             ├─ 1169 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.imap.cdb -X -o -b 40 -H -l argos.indimail.org -R -u 555 -g 555 0 143 /usr/sbin/imaplogin /usr/libexec/indimail/imapmodules/authpwd /usr/libexec/indimail/imapmodules/authshadow /usr/libexec/indimail/imapmodules/authpam /usr/libexec/indimail/imapmodules/authindi /usr/bin/imapd Maildir
+             ├─ 1171 /usr/sbin/qmail-greyd -w /etc/indimail/control/greylist.white -t 30 -g 24 -m 2 -s 5 -h 65535 127.0.0.1 /etc/indimail/control/greylist.context
+             ├─ 1172 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.pop3.cdb -X -o -b 40 -H -l argos.indimail.org -R -u 555 -g 555 0 110 /usr/sbin/pop3login /usr/libexec/indimail/imapmodules/authpwd /usr/libexec/indimail/imapmodules/authshadow /usr/libexec/indimail/imapmodules/authpam /usr/libexec/indimail/imapmodules/authindi /usr/bin/pop3d Maildir
+             ├─ 1173 slowq-send /var/indimail/queue/slowq
+             ├─ 1174 /usr/bin/qmail-cat /run/indimail/logfifo
+             ├─ 1175 /usr/sbin/multilog t /var/log/svc/smtpd.366
+             ├─ 1176 /usr/sbin/mysqld --defaults-file=/etc/indimail/indimail.cnf --port=3306 --basedir=/usr --datadir=/var/indimail/mysqldb/data --memlock --ssl --require-secure-transport --skip-external-locking --delay-key-write=all --skip-name-resolve --sql-mode=NO_ENGINE_SUBSTITUTION,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,STRICT_TRANS_TABLES --explicit-defaults-for-timestamp=TRUE --general-log=1 --general-log-file=/var/indimail/mysqldb/logs/general-log --slow-query-log=1 --slow-query-log-file=/var/indimail/mysqldb/logs/slowquery-log --log-queries-not-using-indexes --log-error-verbosity=3 --pid-file=/run/mysqld/mysqld.3306.pid
+             ├─ 1177 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.imap.cdb -X -o -b 40 -H -l argos.indimail.org -R -u 555 -g 555 0 9143 /usr/bin/couriertls -server -tcpd /usr/bin/proxyimap /usr/bin/imapd Maildir
+             ├─ 1178 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.imap.cdb -X -o -b 40 -H -l argos.indimail.org -R -u 555 -g 555 0 4143 /usr/bin/proxyimap /usr/bin/imapd Maildir
+             ├─ 1179 /usr/sbin/udplogger -p 3000 -t 10 0
+             ├─ 1180 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.pop3.cdb -X -o -b 40 -H -l argos.indimail.org -R -u 555 -g 555 0 4110 /usr/bin/proxypop3 /usr/bin/pop3d Maildir
+             ├─ 1181 /usr/sbin/clamd --config-file=/etc/clamd.d/scan.conf
+             ├─ 1182 /usr/bin/tcpserver -v -H -R -l argos.indimail.org -x /etc/indimail/tcp/tcp.smtp.cdb -c variables/MAXDAEMONS -o -b 75 -u 1024 -g 1015 0 587 /usr/lib/indimail/plugins/qmail_smtpd.so argos.indimail.org /usr/sbin/sys-checkpwd /usr/sbin/vchkpass /bin/false
+             ├─ 1184 /usr/bin/tcpserver -v -h -R -l argos.indimail.org -x /etc/indimail/tcp/tcp.smtp.cdb -c variables/MAXDAEMONS -o -b 75 -u 1024 -g 1015 0 465 /usr/lib/indimail/plugins/rblsmtpd.so -rdnsbl-1.uceprotect.net -rzen.spamhaus.org /usr/lib/indimail/plugins/qmail_smtpd.so argos.indimail.org /usr/sbin/sys-checkpwd /usr/sbin/vchkpass /bin/false
+             ├─ 1185 /usr/bin/dnscache
+             ├─ 1187 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C 25 -x /etc/indimail/tcp/tcp.pop3.cdb -X -o -b 40 -H -l argos.indimail.org -R -u 555 -g 555 0 9110 /usr/bin/couriertls -server -tcpd /usr/bin/proxypop3 /usr/bin/pop3d Maildir
+             ├─ 1188 /usr/sbin/multilog t /var/log/svc/update
+             ├─ 1190 multilog t ./main
+             ├─ 1191 /usr/sbin/multilog t /var/log/svc/inlookup.infifo
+             ├─ 1194 /usr/sbin/multilog t /var/log/svc/slowq
+             ├─ 1195 /usr/sbin/multilog t /var/log/svc/imapd.143
+             ├─ 1196 /usr/sbin/multilog t /var/log/svc/logfifo
+             ├─ 1197 /usr/sbin/multilog t /var/log/svc/pop3d.110
+             ├─ 1200 /usr/sbin/multilog t /var/log/svc/pop3d-ssl.995
+             ├─ 1201 /usr/sbin/multilog t /var/log/svc/mrtg
+             ├─ 1203 /usr/sbin/multilog t /var/log/svc/mpdev
+             ├─ 1204 /usr/sbin/multilog t /var/log/svc/smtpd.25
+             ├─ 1205 /usr/sbin/multilog t /var/log/svc/resolvconf
+             ├─ 1206 /usr/sbin/multilog t /var/log/svc/qmtpd.209
+             ├─ 1208 /usr/sbin/multilog t /var/log/svc/freshclam
+             ├─ 1209 /usr/sbin/multilog t /var/log/svc/fclient
+             ├─ 1211 /usr/sbin/multilog t /var/log/svc/daned.1998
+             ├─ 1213 /usr/sbin/multilog t /var/log/svc/imapd-ssl.993
+             ├─ 1214 /usr/sbin/multilog t /var/log/svc/pwdlookup
+             ├─ 1215 /usr/sbin/multilog t /var/log/svc/greylist.1999
+             ├─ 1217 /usr/sbin/multilog t /var/log/svc/rsyncd.873
+             ├─ 1218 /usr/sbin/multilog t /var/log/svc/proxyIMAP.4143
+             ├─ 1219 /usr/sbin/multilog t /var/log/svc/smtpd.465
+             ├─ 1220 /usr/sbin/multilog t /var/log/svc/deliver.25
+             ├─ 1221 /usr/sbin/multilog t /var/log/svc/smtpd.587
+             ├─ 1224 /usr/sbin/multilog t /var/log/svc/proxyIMAP.9143
+             ├─ 1225 /usr/sbin/multilog t /var/log/svc/proxyPOP3.9110
+             ├─ 1226 /usr/sbin/multilog t /var/log/svc/proxyPOP3.4110
+             ├─ 1227 /usr/sbin/multilog t /var/log/svc/clamd
+             ├─ 1229 /usr/sbin/multilog t /var/log/svc/mysql.3306
+             ├─ 1230 /usr/sbin/multilog t /var/log/svc/udplogger.3000
+             ├─ 1231 /usr/sbin/multilog t /var/log/svc/fetchmail
+             ├─ 1232 /usr/sbin/multilog t /var/log/svc/qscanq
+             ├─ 1290 /bin/sh ./run
+             ├─ 1291 /usr/bin/inotify -n /etc
+             ├─ 1292 /bin/sh ./run
+             ├─ 1380 qmail-lspawn ./Maildir/ /var/indimail/queue/slowq
+             ├─ 1381 qmail-rspawn /var/indimail/queue/slowq
+             ├─ 1382 qmail-clean /var/indimail/queue/slowq slowq-send
+             ├─ 1713 /usr/sbin/qscheduler -d ./Maildir/
+             ├─ 1716 qmail-send -d /var/indimail/queue/queue1
+             ├─ 1717 qmail-send -d /var/indimail/queue/queue2
+             ├─ 1718 qmail-send -d /var/indimail/queue/queue3
+             ├─ 1719 qmail-send -d /var/indimail/queue/queue4
+             ├─ 1720 qmail-send -d /var/indimail/queue/queue5
+             ├─ 1721 qmail-lspawn ./Maildir/ /var/indimail/queue/queue4
+             ├─ 1722 qmail-rspawn /var/indimail/queue/queue4
+             ├─ 1723 qmail-clean /var/indimail/queue/queue4 qmail-todo
+             ├─ 1724 qmail-todo -d /var/indimail/queue/queue4
+             ├─ 1725 qmail-clean /var/indimail/queue/queue4 qmail-send
+             ├─ 1726 qmail-lspawn ./Maildir/ /var/indimail/queue/queue3
+             ├─ 1727 qmail-rspawn /var/indimail/queue/queue3
+             ├─ 1728 qmail-clean /var/indimail/queue/queue3 qmail-todo
+             ├─ 1729 qmail-todo -d /var/indimail/queue/queue3
+             ├─ 1730 qmail-clean /var/indimail/queue/queue3 qmail-send
+             ├─ 1731 qmail-lspawn ./Maildir/ /var/indimail/queue/queue1
+             ├─ 1732 qmail-rspawn /var/indimail/queue/queue1
+             ├─ 1733 qmail-clean /var/indimail/queue/queue1 qmail-todo
+             ├─ 1734 qmail-todo -d /var/indimail/queue/queue1
+             ├─ 1735 qmail-clean /var/indimail/queue/queue1 qmail-send
+             ├─ 1736 qmail-lspawn ./Maildir/ /var/indimail/queue/queue5
+             ├─ 1737 qmail-rspawn /var/indimail/queue/queue5
+             ├─ 1738 qmail-clean /var/indimail/queue/queue5 qmail-todo
+             ├─ 1739 qmail-todo -d /var/indimail/queue/queue5
+             ├─ 1740 qmail-clean /var/indimail/queue/queue5 qmail-send
+             ├─ 1744 qmail-lspawn ./Maildir/ /var/indimail/queue/queue2
+             ├─ 1746 qmail-rspawn /var/indimail/queue/queue2
+             ├─ 1747 qmail-clean /var/indimail/queue/queue2 qmail-todo
+             ├─ 1748 qmail-todo -d /var/indimail/queue/queue2
+             ├─ 1749 qmail-clean /var/indimail/queue/queue2 qmail-send
+             ├─ 3247 /usr/sbin/nssd -d notice
+             ├─ 3255 /usr/sbin/inlookup -i 5 -c 5184000
+             ├─ 3278 /usr/sbin/inlookup -i 5 -c 5184000
+             ├─ 3279 /usr/sbin/inlookup -i 5 -c 5184000
+             ├─ 3280 /usr/sbin/inlookup -i 5 -c 5184000
+             ├─ 3281 /usr/sbin/inlookup -i 5 -c 5184000
+             ├─ 3282 /usr/sbin/inlookup -i 5 -c 5184000
+             ├─12992 sleep 300
+             ├─13031 sh -c "\n    sleep 10; /usr/libexec/pistop/client sleep 2>&1"
+             ├─13038 /usr/bin/sh /usr/libexec/pistop/client sleep
+             └─13039 sleep 20
 
+Dec 26 07:44:27 argos.indimail.org qmail-lspawn[1721]: (nssd) 1721: _open_socket: connect: /run/indimail/nssd.sock: (errno 2) No such file or directory
+Dec 26 07:44:27 argos.indimail.org qmail-lspawn[1726]: (nssd) 1726: _open_socket: connect: /run/indimail/nssd.sock: (errno 2) No such file or directory
+Dec 26 07:44:27 argos.indimail.org qmail-lspawn[1731]: (nssd) 1731: _open_socket: connect: /run/indimail/nssd.sock: (errno 2) No such file or directory
+Dec 26 07:44:27 argos.indimail.org qmail-rspawn[1722]: (nssd) 1722: _open_socket: connect: /run/indimail/nssd.sock: (errno 2) No such file or directory
+Dec 26 07:44:27 argos.indimail.org qmail-rspawn[1727]: (nssd) 1727: _open_socket: connect: /run/indimail/nssd.sock: (errno 2) No such file or directory
+Dec 26 07:44:27 argos.indimail.org qmail-rspawn[1732]: (nssd) 1732: _open_socket: connect: /run/indimail/nssd.sock: (errno 2) No such file or directory
+Dec 26 07:44:27 argos.indimail.org qmail-lspawn[1736]: (nssd) 1736: _open_socket: connect: /run/indimail/nssd.sock: (errno 2) No such file or directory
+Dec 26 07:44:27 argos.indimail.org qmail-rspawn[1737]: (nssd) 1737: _open_socket: connect: /run/indimail/nssd.sock: (errno 2) No such file or directory
+Dec 26 07:44:27 argos.indimail.org qmail-rspawn[1746]: (nssd) 1746: _open_socket: connect: /run/indimail/nssd.sock: (errno 2) No such file or directory
+Dec 26 07:44:27 argos.indimail.org qmail-lspawn[1744]: (nssd) 1744: _open_socket: connect: /run/indimail/nssd.sock: (errno 2) No such file or directory
 ```
 
 IndiMail also proves the svps command which gives a neat display on the status of all services configured for IndiMail. You can omit the -a flag to omit the logging processes.
@@ -1635,7 +1644,7 @@ Any email that needs to be delivered needs to be put into a queue before it can 
 
 ## Delivery Mode
 
-The delivery mode depends on the argument passed to qmail-daemon during startup. The script /service/qmail-send.25/run passes the content of the file /etc/indimail/control/defaultdelivery as an argument to qmail-daemon.
+The delivery mode depends on the argument passed to qscheduler during startup. The script /service/qmail-send.25/run passes the content of the file /etc/indimail/control/defaultdelivery as an argument to qscheduler.
 See INSTALL.mbox, INSTALL.maildir, and INSTALL.vsm for more information.
 To select your default mailbox type, just enter the defaultdelivery value from the table into /var/indimail/control/defaultdelivery.
 e.g., to select the standard qmail Maildir delivery, do:
@@ -1726,7 +1735,7 @@ WARNING: For security, <b>qmail-local</b> replaces any dots in ext with colons b
 
 <b>qmail-send</b> has the ability to control delivery rates of jobs scheduled for delivery. Every queue can have a directory named <b>ratelimit</b> where you can store rate control definition for a domain. These rate control definition files can be created using the <b>drate</b> command. All you need to provide is a mathematical expression that defines your rate. e.g. 100/3600 means 100 emails per hour. This rate control works at the queue level. indimail-mta uses multiple queues. Each queue has its own delivery handled by by its own set of <b>qmail-todo</b>, <b>qmail-send</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b>, <b>qmail-clean</b> daemons. Enforcing rate control on such a queue has a practical problem of having to define rate control definition for each and every queue.
 
-To avoid the practical problem of rate limiting every queue, we can use a dedicated queue to handle rate controllled delivery. The default indimail installation creates a special queue named as <b>slowq</b> and uses a daemon <b>slowq-send</b> instead of <b>qmail-send</b> to process the <u>slowq</u> queue. This is done by calling <b>slowq-start<b> instead of <b>qmail-daemon</b> / <b>qmail-start</b>. <b>slowq-send</b> doesn't have its own <b>qmail-todo</b> process. We don't require it as we aren't looking at high delivery rates for this queue. <b>slowq-start</b> is invoked using a supervised service in <u>/service/slowq</u>.
+To avoid the practical problem of rate limiting every queue, we can use a dedicated queue to handle rate controllled delivery. The default indimail installation creates a special queue named as <b>slowq</b> and uses a daemon <b>slowq-send</b> instead of <b>qmail-send</b> to process the <u>slowq</u> queue. This is done by calling <b>slowq-start<b> instead of <b>qscheduler</b> / <b>qmail-start</b>. <b>slowq-send</b> doesn't have its own <b>qmail-todo</b> process. We don't require it as we aren't looking at high delivery rates for this queue. <b>slowq-start</b> is invoked using a supervised service in <u>/service/slowq</u>.
 
 To create this special slowq service for delivery rate control you can use svctool as below. This will also create the queue <u>/var/indimail/queue/slowq</u> and logs to be in <u>/var/log/svc/slowq/current</u>.
 
@@ -2152,7 +2161,7 @@ This feature becomes useful when setting domain specific delivery rate controls 
 
 # indimail-mini / qmta Installation
 
-indimail-mta has multiple daemons qmail-daemon/qmail-start, qmail-send, qmail-lspawn, qmail-rspawn and qmail-clean for processing a queue. The standard indimail-mta installation is meant for servers that can withstand high loads resulting from high inbound/outbound mail traffic. For small servers which have minimal or sporadic traffic, the full indimail-mta installation isn't required or necessary. In such cases you can either install indimail-mini to use QMQP protocol or qmta to use standard delivery mechanisms. indimail-mini comprises of just 10 binaries, whereas qmta comprises of 25 binaries. For most cases, you just require one binary <b>qmail-qmqpc</b> if you use indimail-mini. If you use qmta, for most cases you just require <b>qmta-send</b> and <b>qmail-queue</b> to process and send mails.
+indimail-mta has multiple daemons qscheduler/qmail-start, qmail-send, qmail-lspawn, qmail-rspawn and qmail-clean for processing a queue. The standard indimail-mta installation is meant for servers that can withstand high loads resulting from high inbound/outbound mail traffic. For small servers which have minimal or sporadic traffic, the full indimail-mta installation isn't required or necessary. In such cases you can either install indimail-mini to use QMQP protocol or qmta to use standard delivery mechanisms. indimail-mini comprises of just 10 binaries, whereas qmta comprises of 25 binaries. For most cases, you just require one binary <b>qmail-qmqpc</b> if you use indimail-mini. If you use qmta, for most cases you just require <b>qmta-send</b> and <b>qmail-queue</b> to process and send mails.
 
 ## indimail-mini - Using QMQP protocol provided by qmail-qmqpc / qmail-qmqpd
 
@@ -4869,7 +4878,7 @@ There is also a [Project Tracker](http://sourceforge.net/tracker/?group_id=23068
 ## Speed
 
 IndiMail uses a modified [qmail](http://cr.yp.to/qmail.html "qmail") as the MTA. qmail's modular, lightweight design and sensible queue management provides IndiMail the speed to make it one of the fastest available message transfer agent.
-IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''qmail-multi'' uses multiple queues with each queue running its own <b>qmail-send</b>/qmail-todo, <b>qmail-lspawn</b>, <b>qmail-rspawn</b> processes. This allows IndiMail to process mails faster than what can be provided by qmail. A process named qmail-daemon monitors these processes and restarts them if they go down, which hasn't yet been observed to go down.
+IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''qmail-multi'' uses multiple queues with each queue running its own <b>qmail-send</b>/qmail-todo, <b>qmail-lspawn</b>, <b>qmail-rspawn</b> processes. This allows IndiMail to process mails faster than what can be provided by qmail. A process named qscheduler monitors these processes and restarts them if they go down, which hasn't yet been observed to go down.
 
 ## Setup
 
@@ -5233,7 +5242,7 @@ This is obtained from github actions defined in each of the indimail repository.
 
 Both indimail-mta and indimail-virtualdomains started in late 1999 as a combined package of unmodified qmail and modified [vpopmail](https://www.inter7.com/vpopmail-virtualized-email/).
 
-indimail-mta started as a unmodified qmail-1.03. This was when I was employed by an ISP in late 1999. The ISP was using [Critical Path's ISOCOR](https://www.wsj.com/articles/SB940514435217077581) for providing Free and Paid email service. Then the dot com burst happened and ISP didn't have money to spend on upgrading the E3500, E450 [Sun Enterprise servers](https://en.wikipedia.org/wiki/Sun_Enterprise). The mandate was to move to an OSS/FS solution. After evaluating sendmail, postfix and qmail, we chose qmail. During production deployment, qmail couldn't scale on these servers. The issue was the queue's todo count kept on increasing. We applied the <b>qmail-todo</b> and the <b>big-todo</b> patch, but still we couldn't handle the incoming email rate. By now the customers were screaming, the corporate users were shooting out nasty emails. We tried a small hack which solved this problem. Compiled 20 different qmail setups, with conf-qmail as /var/qmail1, /var/qmail2, etc. Run <b>qmail-send</b> for each of these instance. A small shim was written which would get the current time and divide by 20. The remainder was used to do exec of /var/qmail1/bin/qmail-queue, /var/qmail2/bin/qmail-queue, etc. The shim was copied as /var/qmail/bin/qmail-queue. The IO problem got solved. But the problem with this solution was compiling the qmail source 20 times and copying the shim as <b>qmail-queue</b>. You couldn't compile qmail on one machine and use the backup of binaries on another machine. Things like uid, gid, the paths were all hardcoded in the source. That is how the base of indimail-mta took form by removing each and every hard coded uids, gids and paths. indimail-mta still does the same thing that was done in the year 2000. The installation creates multiple queues - /var/indimail/queue/queue1, /var/indimail/queue/queue2, etc. A new daemon named qmail-daemon uses QUEUE\_COUNT env variable to run multiple <b>qmail-send</b> instances. Each <b>qmail-send</b> instance picks up mail from a particular queue. All client programs use <b>qmail-multi</b>, a <b>qmail-queue</b> frontend to load balance the incoming email across multiple queues. At one point of time in late 2000, indimail was handling 3.2 million users with two E450 server as relay servers (indimail-mta), one E3500 Sun Microsystem servers and 5 Compaq Proliant DL380 running indimail-virtualdomains.
+indimail-mta started as a unmodified qmail-1.03. This was when I was employed by an ISP in late 1999. The ISP was using [Critical Path's ISOCOR](https://www.wsj.com/articles/SB940514435217077581) for providing Free and Paid email service. Then the dot com burst happened and ISP didn't have money to spend on upgrading the E3500, E450 [Sun Enterprise servers](https://en.wikipedia.org/wiki/Sun_Enterprise). The mandate was to move to an OSS/FS solution. After evaluating sendmail, postfix and qmail, we chose qmail. During production deployment, qmail couldn't scale on these servers. The issue was the queue's todo count kept on increasing. We applied the <b>qmail-todo</b> and the <b>big-todo</b> patch, but still we couldn't handle the incoming email rate. By now the customers were screaming, the corporate users were shooting out nasty emails. We tried a small hack which solved this problem. Compiled 20 different qmail setups, with conf-qmail as /var/qmail1, /var/qmail2, etc. Run <b>qmail-send</b> for each of these instance. A small shim was written which would get the current time and divide by 20. The remainder was used to do exec of /var/qmail1/bin/qmail-queue, /var/qmail2/bin/qmail-queue, etc. The shim was copied as /var/qmail/bin/qmail-queue. The IO problem got solved. But the problem with this solution was compiling the qmail source 20 times and copying the shim as <b>qmail-queue</b>. You couldn't compile qmail on one machine and use the backup of binaries on another machine. Things like uid, gid, the paths were all hardcoded in the source. That is how the base of indimail-mta took form by removing each and every hard coded uids, gids and paths. indimail-mta still does the same thing that was done in the year 2000. The installation creates multiple queues - /var/indimail/queue/queue1, /var/indimail/queue/queue2, etc. A new daemon named qscheduler uses QUEUE\_COUNT env variable to run multiple <b>qmail-send</b> instances. Each <b>qmail-send</b> instance picks up mail from a particular queue. All client programs use <b>qmail-multi</b>, a <b>qmail-queue</b> frontend to load balance the incoming email across multiple queues. At one point of time in late 2000, indimail was handling 3.2 million users with two E450 server as relay servers (indimail-mta), one E3500 Sun Microsystem servers and 5 Compaq Proliant DL380 running indimail-virtualdomains.
 
 indimail-virtualdomain started with a modified vpopmail base that could handle a distributed setup - Same domain on multiple servers. Having this kind of setup made the control file smtproutes unviable. email would arrive at a relay server for user@domain. But the domain '@domain' was present on multiple hosts, with each host having it's own set of users. This required special routing and modification of qmail (especially <b>qmail-remote</b>) to route the traffic to the correct host. <b>vdelivermail</b> to had to be written to deliver email for a local domain to a remote host, in case the user wasn't present on the current host. New MySQL tables were created to store the host information for a user. This table would be used by <b>qmail-local</b>, <b>qmail-remote</b>, <b>vdelivermail</b> to route the mail to the write host. All this complicated stuff had to be done because the ISP where I worked, had no money to buy/upgrade costly servers to cater to users, who were multiplying at an exponential rate. The govt had just opened the license for providing internet services to private players. These were Indians who were tasting internet and free email for the first time. So the solution we decided was to buy multiple intel servers [Compaq Proliant](https://en.wikipedia.org/wiki/ProLiant) running Linux and make the qmail/vpopmail solution horizontally scalable. This was the origin of indimail-1.x which borrowed code from vpopmail, modified it for a domain on multiple hosts. indimail-2.x was a complete rewrite using djb style, using [libqmail](https://github.com/mbhangui/libqmail) as the standard library for all basic operations. All functions were discarded because they used the standard C library. The problem with indimail-2.x was linking with MySQL libraries, which caused significant issues building binary packages on [openSUSE build service](https://build.opensuse.org/). Binaries got built with MySQL/MariaDB libraries pulled by OBS, but when installed on a target machine, the user would have a completely different MySQL/MariaDB setup. Hence a decision was taken to load the library at runtime using dlopen/dlsym. This was the start of indimail-3.x. The source was moved from sourceforge.net to github and the project renamed as indimail-virtualdomains from the original name IndiMail. The modified source code of qmail was moved to github as indimail-mta.
 
