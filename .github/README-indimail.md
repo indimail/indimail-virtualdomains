@@ -759,6 +759,7 @@ You just need to configure the following environment variables to have the <b>qm
 4. QUEUE\_START – numeric prefix of the first queue
 
 When using dynamic queues, the following additional variables are needed
+
 5. QUEUE\_MAX - The maximum number of queues that <b>qscheduler</b> will use
 6. QUEUE\_LOAD - The ratio of concurrency to the total concurrency multplied by 100 is the queue load. When the average QUEUE_LOAD for all queues goes beyond <b>QUEUE\_LOAD</b>, qscheduler increases the queue count.
 
