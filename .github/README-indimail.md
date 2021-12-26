@@ -1096,7 +1096,7 @@ Dec 26 07:44:27 argos.indimail.org qmail-rspawn[1746]: (nssd) 1746: _open_socket
 Dec 26 07:44:27 argos.indimail.org qmail-lspawn[1744]: (nssd) 1744: _open_socket: connect: /run/indimail/nssd.sock: (errno 2) No such file or directory
 ```
 
-IndiMail also proves the svps command which gives a neat display on the status of all services configured for IndiMail. You can omit the -a flag to omit the logging processes.
+IndiMail also provides the svps command which gives a neat display on the status of all services configured for IndiMail. You can omit the -a flag to omit the logging processes.
 
 ```
 $ sudo svps -a
