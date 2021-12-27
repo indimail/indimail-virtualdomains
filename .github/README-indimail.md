@@ -1989,7 +1989,7 @@ The above command creates a virtual domain with delivery instructions in /var/in
 /usr/sbin/vdelivermail '' delivery_instruction_for_non_existing_user
 ```
 
-The `delivery\_instruction\_for\_non\_existing\_user` can have one of the following 5 forms
+The `delivery_instruction_for_non_existing_user` can have one of the following 5 forms
 
  1. delete
  2. bounce-no-mailbox
