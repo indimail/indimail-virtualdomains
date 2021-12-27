@@ -297,7 +297,7 @@ The queue is designed to be crashproof, provided that the underlying filesystem 
 
 ### qmail-multi
 
-<b>qmail-multi</b> is a frontend for <b>qmail-queue</b>. It selects one of the multiple queues, sets the environment variable <b>QUEUEDIR</b> and calls <b>qmail-queue</b>. <b>qmail-multi</b> is discussed in detail in [IndiMail Queue Mechanism](#indimail-queue-mechanism). <b>qmail-multi</b> can also do spam filtering before a message gets queued. See [SPAM Control using bogofilter](#spam-control-using-bogofilter) for more details.
+<b>qmail-multi</b> is a frontend for <b>qmail-queue</b>. It selects one of the multiple queues, sets the environment variable <b>QUEUEDIR</b> and calls <b>qmail-queue</b>. <b>qmail-multi</b> is discussed in detail in [IndiMail Queue Mechanism](#indimail-queue-mechanism).
 
 ### qmail-queue
 
@@ -2209,7 +2209,7 @@ $ sudo kill -1 `cat /run/svscan/.svscan.pid`
 
 The above command will create a supervised service which runs qmail-qmqpd under tcpserver. In case you are setting up this service to relay mails to outside world, you might want to also specify --dkfilter, --qhpsi, --virus-filter, etc arguments to svctool(8) so that tasks like virus scanning, dk, domainkey signing, etc is done by the QMQP service.
 
-Note: Some of the tasks like virus/spam filtering, dk, dkim signing, etc can be done either by the client (if `QMAILQUEUE=/usr/sbin/qmail-multi`), or can be performed by QMQP service if **QMAILQUEUE** is defined as <b>qmail-multi</b> in the service's variable directory.
+Note: Some of the tasks like virus/spam filtering, dk, dkim signing, etc can be done either by the client (if `QMAILQUEUE=/usr/sbin/qmail-spamfilter`), or can be performed by QMQP service if **QMAILQUEUE** is defined as <b>qmail-multi</b> in the service's variable directory.
 
 A QMQP server shouldn't even have to glance at incoming messages; its only job is to queue them for <b>qmail-send</b>(8). Hence you should allow access to QMQP service only from your authorized clients. You can edit the file /etc/indimail/tcp.qmqp to grant specific access to clients. Here's how to set up QMQP service to authorized client hosts on your indimail-mta server.
 
@@ -4981,6 +4981,7 @@ IndiMail provides ''qmail-multi'', a drop-in replacement to ''qmail-queue''. ''q
  * queue viewing (qmail-qread)
  * detailed delivery statistics (qmailanalog)
  * Configurable number of queues and time slicing algorithm for load balancing via <b>qmail-multi</b>. A queue in indimail is configurable by three environment variables QUEUE\_BASE, QUEUE\_COUNT, and QUEUE\_START. A queue in IndiMail is a collection of queues. Each queue in the collection can have one or more SMTP listener but a single or no delivery (<b>qmail-send</b>) process. It is possible to have the entire queue collection without a delivery process (e.g. SMTP on port 366 – ODMR). The QUEUE\_COUNT can be defined based on how powerful your host is (IO bandwidth, etc). NOTE: This configurable number of queues is possibe with a single installation and does not require you to install multiple instances of qmail.
+ * dynamic number, based on queue load, using qscheduler.
  * Ability to hold local, remote or both deliveries (holdlocal, holdremote control file)
  * Qmail Queue Extra Header – Ability to pass extra headers to local and remote deliveries via <b>qmail-queue</b> (Environment variable QQEH).
  * External Virus scanning via QHPSI – Qmail High Performance Scanner Interface
