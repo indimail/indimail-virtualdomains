@@ -67,12 +67,12 @@ AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_C
 AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],noqmail=t,)
 if test " $noqmail" = " t"
 then
-  AC_MSG_ERROR(Could not find qmail library.)
+	AC_MSG_ERROR(Could not find qmail library.)
 fi
 AC_CHECK_LIB(indimail, iopen, [AC_SUBST([LIB_INDIMAIL], ["-lindimail"]) AC_DEFINE([HAVE_INDIMAIL], [1],[indimail Library])],noindimail=t,)
 if test " $noindimail" = " t"
 then
-  AC_MSG_ERROR(Could not find indimail library.)
+	AC_MSG_ERROR(Could not find indimail library.)
 fi
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -98,110 +98,108 @@ fi
 htmldir=""
 for f in /var/www/html /home/httpd/html /usr/local/apache/htdocs /usr/local/www/data
 do
-    if test -d $f
-    then
-        htmldir=$f
-    fi
+	if test -d $f
+	then
+		htmldir=$f
+	fi
 done
-AC_ARG_ENABLE(htmldir, [  --enable-htmldir=DIR      HTTP server's base html dir.],
-    htmldir="$enableval",
-    [
-        if test "$htmldir" = ""
-        then
-            AC_MSG_ERROR([Unable to find your html base directory, specify --enable-htmldir.])
-        fi
-    ] )
+AC_ARG_ENABLE(htmldir, [  --enable-htmldir=DIR      HTTP server's base html dir.], htmldir="$enableval",
+	[
+	if test "$htmldir" = ""
+	then
+		AC_MSG_ERROR([Unable to find your html base directory, specify --enable-htmldir.])
+	fi
+	])
 AC_SUBST(htmldir)
 
 cgibindir=""
 
 for f in var/www /home/httpd /usr/local/apache /usr/local/www /var/lib/httpd /usr/local/www $htmldir
 do
-    if test -d $f/cgi-bin
-    then
-        cgibindir=$f/cgi-bin
-    fi
+	if test -d $f/cgi-bin
+	then
+		cgibindir=$f/cgi-bin
+	fi
 done
 
 AC_ARG_ENABLE(cgibindir, [  --enable-cgibindir=DIR    HTTP server's cgi-bin directory.],
-    cgibindir="$enableval",
-    [
-        if test "$cgibindir" = ""
-        then
-            AC_MSG_ERROR([Unable to find your cgi-bin directory, specify --enable-cgibindir.])
-        fi
-    ] )
+	cgibindir="$enableval",
+	[
+	if test "$cgibindir" = ""
+	then
+		AC_MSG_ERROR([Unable to find your cgi-bin directory, specify --enable-cgibindir.])
+	fi
+	])
 AC_SUBST(cgibindir)
 
 imageurl="/images/iwebadmin"
 AC_ARG_ENABLE(imageurl, [  --enable-imageurl=URL     URL to image files [/images/iwebadmin].],
-    imageurl="$enableval",
-    [
-        if test "$imageurl" = ""
-        then
-            AC_MSG_ERROR([Unable to find your html url, specify --enable-imageurl.])
-        fi
-    ] )
+	imageurl="$enableval",
+	[
+	if test "$imageurl" = ""
+	then
+		AC_MSG_ERROR([Unable to find your html url, specify --enable-imageurl.])
+	fi
+	])
 AC_SUBST(imageurl)
-AC_DEFINE_UNQUOTED(IMAGEURL, "$imageurl","")
+AC_DEFINE_UNQUOTED(IMAGEURL, "$imageurl","URL to image files")
 
 imagedir=""
 for f in /var/www/html /home/httpd/html /usr/local/apache/htdocs /usr/local/www/data $htmldir
 do
-    if test -d $f
-    then
-        imagedir=$f$imageurl
-    fi
+	if test -d $f
+	then
+		imagedir=$f$imageurl
+	fi
 done
 AC_ARG_ENABLE(imagedir, [  --enable-imagedir=DIR     Where to put the image files [DocumentRoot/images/iwebadmin].],
-    imagedir="$enableval",
-    [
-        if test "$imagedir" = ""
-        then
-            AC_MSG_ERROR([Unable to find your html image directory, specify --enable-imagedir.])
-        fi
-    ] )
+	imagedir="$enableval",
+	[
+	if test "$imagedir" = ""
+	then
+		AC_MSG_ERROR([Unable to find your html image directory, specify --enable-imagedir.])
+	fi
+	])
 AC_SUBST(imagedir)
 
 htmllibdir="$prefix/share/iwebadmin"
 
 AC_ARG_ENABLE(htmllibdir, [  --enable-htmllibdir=DIR   iwebadmin HTML library directory.],
-    htmllibdir="$enableval",
-    [
-        if test "$htmllibdir" = ""
-        then
-            AC_MSG_ERROR([Unable to find your htmllibdir directory, specify --enable-htmllibdir.])
-        fi
-    ] )
+	htmllibdir="$enableval",
+	[
+	if test "$htmllibdir" = ""
+	then
+		AC_MSG_ERROR([Unable to find your htmllibdir directory, specify --enable-htmllibdir.])
+	fi
+	])
 AC_SUBST(htmllibdir,$htmllibdir)
-AC_DEFINE_UNQUOTED(HTMLLIBDIR, "$htmllibdir","")
+AC_DEFINE_UNQUOTED(HTMLLIBDIR, "$htmllibdir","iwebadmin HTML library directory")
 
 
 ezmlmdir=""
 for f in /usr/bin /usr/local/bin
 do
-    if test -f $f/ezmlm-make
-    then
-        ezmlmdir=$f
-    fi
+	if test -f $f/ezmlm-make
+	then
+		ezmlmdir=$f
+	fi
 done
 
-AC_ARG_ENABLE(ezmlmdir, [  --enable-ezmlmdir=PATH    Path to ezmlm binaries or =n to disable.],
-    ezmlmdir="$enableval",
-    [
-        if test "$ezmlmdir" = ""
-        then
-            AC_MSG_ERROR([Unable to find your ezmlmdir user, specify --enable-ezmlmdir.])
-        fi
-    ] )
-AC_DEFINE_UNQUOTED(EZMLMDIR,"$ezmlmdir","")
+AC_ARG_ENABLE(ezmlmdir, [  --enable-ezmlmdir=PATH    Path to ezmlm binaries.],
+	ezmlmdir="$enableval",
+	[
+	if test "$ezmlmdir" = ""
+	then
+		AC_MSG_ERROR([Unable to find your ezmlmdir user, specify --enable-ezmlmdir.])
+	fi
+	])
+AC_DEFINE_UNQUOTED(EZMLMDIR, "$ezmlmdir", "PATH to ezmlm binaries")
 
 ezmlm_mysql=yes
-AC_ARG_ENABLE(ezmlm-mysql, [  --disable-ezmlm-mysql         Disable MySQL options for mailing lists.],
-    ezmlm_mysql="$enableval",)
+AC_ARG_ENABLE(ezmlm-mysql, [  --disable-ezmlm-mysql         Disable MySQL options for mailing lists.], ezmlm_mysql="$enableval",)
 case $ezmlm_mysql in
 	1*|y*|Y*)
-	AC_DEFINE_UNQUOTED(ENABLE_MYSQL,1,"")
+	AC_DEFINE_UNQUOTED(ENABLE_MYSQL, 1, "MySQL options for mailing lists")
 	;;
 	*)
 	;;
@@ -210,57 +208,54 @@ esac
 cgipath="/cgi-bin/iwebadmin"
 
 AC_ARG_ENABLE(cgipath, [  --enable-cgipath=PATH     URL path for cgi [/cgi-bin/iwebadmin].],
-    cgipath="$enableval",
-    [
-        if test "$cgipath" = ""
-        then
-            AC_MSG_ERROR([Unable to find your cgipath directory, specify --enable-cgipath.])
-        fi
-    ] )
-AC_DEFINE_UNQUOTED(CGIPATH,"$cgipath","")
+	cgipath="$enableval",
+	[
+	if test "$cgipath" = ""
+	then
+		AC_MSG_ERROR([Unable to find your cgipath directory, specify --enable-cgipath.])
+	fi
+	])
+AC_DEFINE_UNQUOTED(CGIPATH, "$cgipath", "URL path for CGI directory")
 
 indimailuser="indimail"
 AC_ARG_ENABLE(indimailuser, [  --enable-indimailuser=USER        User indimail was installed as [indimail].],
-    indimailuser="$enableval",
-    [
-        if test "$indimailuser" = ""
-        then
-            AC_MSG_ERROR([Unable to find your indimailuser user, specify --enable-indimailuser.])
-        fi
-    ] )
-AC_DEFINE_UNQUOTED(INDIMAILUSER,"$indimailuser","")
+	indimailuser="$enableval",
+	[
+	if test "$indimailuser" = ""
+	then
+		AC_MSG_ERROR([Unable to find your indimailuser user, specify --enable-indimailuser.])
+	fi
+	])
+AC_DEFINE_UNQUOTED(INDIMAILUSER, "$indimailuser", "indimail user name")
 AC_SUBST(indimailuser)
-   
+
 indimailgroup="indimail"
 AC_ARG_ENABLE(indimailgroup, [  --enable-indimailgroup=GROUP      Group indimail was installed as [indimail].],
-    indimailgroup="$enableval",
-    [
-        if test "$indimailgroup" = ""
-        then
-            AC_MSG_ERROR([Unable to find your indimailgroup group, specify --enable-indimailgroup.])
-        fi
-    ] )
-AC_DEFINE_UNQUOTED(INDIMAILGROUP,"$indimailgroup","")
+	indimailgroup="$enableval",
+	[
+	if test "$indimailgroup" = ""
+	then
+		AC_MSG_ERROR([Unable to find your indimailgroup group, specify --enable-indimailgroup.])
+	fi
+	])
+AC_DEFINE_UNQUOTED(INDIMAILGROUP, "$indimailgroup", "indimail group name")
 AC_SUBST(indimailgroup)
 
 maxusersperpage=15
-AC_ARG_ENABLE(maxusersperpage, [  --enable-maxusersperpage=#    Number of users to display on a page [15].],
-    maxusersperpage="$enableval",)
-AC_DEFINE_UNQUOTED(MAXUSERSPERPAGE,$maxusersperpage,"")
+AC_ARG_ENABLE(maxusersperpage, [  --enable-maxusersperpage=#    Number of users to display on a page [15].], maxusersperpage="$enableval",)
+AC_DEFINE_UNQUOTED(MAXUSERSPERPAGE, $maxusersperpage, "Number of users to displa on a page")
 
 maxaliasesperpage=25
-AC_ARG_ENABLE(maxaliasesperpage, [  --enable-maxaliasesperpage=#  Number of aliases to display on a page [25].],
-    maxaliasesperpage="$enableval",)
-AC_DEFINE_UNQUOTED(MAXALIASESPERPAGE,$maxaliasesperpage,"")
+AC_ARG_ENABLE(maxaliasesperpage, [  --enable-maxaliasesperpage=#  Number of aliases to display on a page [25].], maxaliasesperpage="$enableval",)
+AC_DEFINE_UNQUOTED(MAXALIASESPERPAGE, $maxaliasesperpage, "Number of aliases to display on a page")
 
 NO_CACHE=no
-AC_ARG_ENABLE(no-cache, [  --enable-no-cache   Prohibit caching via http headers.],
-    NO_CACHE="$enableval",)
+AC_ARG_ENABLE(no-cache, [  --enable-no-cache   Prohibit caching via http headers.], NO_CACHE="$enableval",)
 
 case $NO_CACHE in
 	1*|y*|Y*)
 	NO_CACHE=1
-	AC_DEFINE_UNQUOTED(NO_CACHE,$NO_CACHE,"")
+	AC_DEFINE_UNQUOTED(NO_CACHE, $NO_CACHE, "No Cache enabled or not")
 	echo "checking whether we should prohibit caching... yes"
 	;;
 	*)
@@ -270,12 +265,12 @@ esac
 
 IPAUTH=yes
 AC_ARG_ENABLE(ipauth, [  --disable-ipauth    Disable IP address checks (NAT/proxy systems may not use the same IP for the whole session).],
-    IPAUTH="$enableval",)
+	IPAUTH="$enableval",)
 
 case $IPAUTH in
 	1*|y*|Y*)
 	IPAUTH=1
-	AC_DEFINE_UNQUOTED(IPAUTH,$IPAUTH,"")
+	AC_DEFINE_UNQUOTED(IPAUTH, $IPAUTH, "IP address check")
 	echo "checking whether to require ip authentication... yes"
 	;;
 	*)
@@ -288,7 +283,7 @@ AC_ARG_ENABLE(user-index, [  --disable-user-index   Don't display user index on 
 case $USER_INDEX in
 1*|y*|Y*)
 	USER_INDEX=1
-	AC_DEFINE_UNQUOTED(USER_INDEX,$USER_INDEX,"")
+	AC_DEFINE_UNQUOTED(USER_INDEX, $USER_INDEX, "display user index on show users page or not")
 	echo "checking whether to display user index... yes"
 	;;
 	*)
@@ -297,91 +292,89 @@ case $USER_INDEX in
 esac
 
 AC_ARG_ENABLE(modify-quota, [  --enable-modify-quota  Allow domain admin (postmaster) to modify user quotas.],
-    MODIFY_QUOTA="$enableval",)
+	MODIFY_QUOTA="$enableval",)
 
 case $MODIFY_QUOTA in
 1*|y*|Y*)
 	MODIFY_QUOTA=yes
-        AC_DEFINE_UNQUOTED(MODIFY_QUOTA,1,"")
-        echo "checking whether to allow admins to modify user quotas... yes"
-        ;;
-*)
-        MODIFY_QUOTA=no
-        echo "checking whether to allow admins to modify user quotas... no"
-        ;;
+	AC_DEFINE_UNQUOTED(MODIFY_QUOTA, 1, "Allow domain admin (postmaster) to modify user quotas")
+	echo "checking whether to allow admins to modify user quotas... yes"
+	;;
+	*)
+	MODIFY_QUOTA=no
+	echo "checking whether to allow admins to modify user quotas... no"
+	;;
 esac
 
 AC_ARG_ENABLE(domain-autofill, [  --enable-domain-autofill  Autofill the domain on login page based on the hostname that accesses iwebadmin.],
-   DOMAIN_AUTOFILL="$enableval",)
+	DOMAIN_AUTOFILL="$enableval",)
 
 case $DOMAIN_AUTOFILL in
 1*|y*|Y*)
-      DOMAIN_AUTOFILL=yes
-      AC_DEFINE_UNQUOTED(DOMAIN_AUTOFILL,1,"")
-      echo "checking whether to autofill domain name on login page... yes"
-      ;;
-*)
-      DOMAIN_AUTOFILL=no
-      echo "checking whether to autofill domain name on login page... no"
-      ;;
+	DOMAIN_AUTOFILL=yes
+	AC_DEFINE_UNQUOTED(DOMAIN_AUTOFILL, 1, "autofill domain on login page")
+	echo "checking whether to autofill domain name on login page... yes"
+	;;
+	*)
+	DOMAIN_AUTOFILL=no
+	echo "checking whether to autofill domain name on login page... no"
+	;;
 esac
 
 
 CATCHALL_ENABLED=yes
-AC_ARG_ENABLE(catchall, [  --disable-catchall  Disable the use of catchall accounts.],
-   CATCHALL_ENABLED="$enableval",)
+AC_ARG_ENABLE(catchall, [  --disable-catchall  Disable the use of catchall accounts.], CATCHALL_ENABLED="$enableval",)
 
 case $CATCHALL_ENABLED in
 1*|y*|Y*)
-      CATCHALL_ENABLED=yes
-      AC_DEFINE_UNQUOTED(CATCHALL_ENABLED,1,"")
-      echo "checking whether to enable catchall accounts... yes"
-      ;;
-*)
-      CATCHALL_ENABLED=no
-      echo "checking whether to enable catchall accounts... no"
-      ;;
+	CATCHALL_ENABLED=yes
+	AC_DEFINE_UNQUOTED(CATCHALL_ENABLED,1,"")
+	echo "checking whether to enable catchall accounts... yes"
+	;;
+	*)
+	CATCHALL_ENABLED=no
+	echo "checking whether to enable catchall accounts... no"
+	;;
 esac
 
 
 TRIVIAL_PASSWORD_ENABLED=yes
-AC_ARG_ENABLE(trivial-password, [  --disable-trivial-password  Disable the use of trivial password.],
-   TRIVIAL_PASSWORD_ENABLED="$enableval",)
+AC_ARG_ENABLE(trivial-password, [  --disable-trivial-password  Disable the use of trivial password.], TRIVIAL_PASSWORD_ENABLED="$enableval",)
 
 case $TRIVIAL_PASSWORD_ENABLED in
 1*|y*|Y*)
-      TRIVIAL_PASSWORD_ENABLED=yes
-      AC_DEFINE_UNQUOTED(TRIVIAL_PASSWORD_ENABLED,1,"")
-      echo "checking whether to enable trivial password... yes"
-      ;;
-*)
-      TRIVIAL_PASSWORD_ENABLED=no
-      echo "checking whether to enable trivial password... no"
-      ;;
+	TRIVIAL_PASSWORD_ENABLED=yes
+	AC_DEFINE_UNQUOTED(TRIVIAL_PASSWORD_ENABLED,1,"")
+	echo "checking whether to enable trivial password... yes"
+	;;
+	*)
+	TRIVIAL_PASSWORD_ENABLED=no
+	echo "checking whether to enable trivial password... no"
+	;;
 esac
 
 HELP=no
-AC_ARG_ENABLE(help, [  --enable-help  Display help links on login page.],
-    HELP="$enableval",)
+AC_ARG_ENABLE(help, [  --enable-help  Display help links on login page.], HELP="$enableval",)
 
 case $HELP in
 1*|y*|Y*)
-        enable_help="yes"
-        AC_SUBST(enable_help)
-        AC_DEFINE_UNQUOTED(HELP,1,"")
-        echo "checking whether to show help pages... yes"
-        ;;
-*)
-        enable_help="no"
-        echo "checking whether to show help pages... no"
-        ;;
+	enable_help="yes"
+	AC_SUBST(enable_help)
+	AC_DEFINE_UNQUOTED(HELP,1,"")
+	echo "checking whether to show help pages... yes"
+	;;
+	*)
+	enable_help="no"
+	echo "checking whether to show help pages... no"
+	;;
 esac
+AC_DEFINE_UNQUOTED(PREFIX, "$prefix", "")
 
 echo ""
 echo "            $PACKAGE $VERSION"
 echo "            Current settings"
 echo "---------------------------------------"
-echo "       exec_prefix = "$exec_prefix""
+echo "            prefix = "$prefix""
 echo "       cgi-bin dir = "$cgibindir""
 echo "          html dir = "$htmldir""
 echo "         image dir = "$imagedir""
