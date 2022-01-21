@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.9 2021-03-14 12:47:39+05:30 Cprogrammer Exp mbhangui $
+ * $Id: command.c,v 1.10 2022-01-21 14:14:39+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -381,7 +381,7 @@ setdefaultaccount()
 		} else {
 			substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
 			if (substdio_put(&ssout, "| ", 2) ||
-					substdio_puts(&ssout, INDIMAILDIR) ||
+					substdio_puts(&ssout, PREFIX) ||
 					substdio_put(&ssout, "/sbin/", 6) ||
 					substdio_put(&ssout, use_vfilter ? "vfilter" : "vdelivermail", use_vfilter ? 7 : 12) ||
 					substdio_put(&ssout, " '' ", 4) ||
