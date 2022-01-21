@@ -8,7 +8,7 @@ Release @version@-@release@ Start 13/03/2021
 03. PKGBUILD.in: Added missing variable definitions
 - 05/09/2021
 04. changed permissions for dirs with 555 to 755
-21/01/2022
+- 21/01/2022
 05. autoresponder.c: fixed missing new lines
 06. autoresponder.c, command.c: replace INDIMAILDIR with install time prefix
 07. configure.ac: replace INDIMAILDIR with install time prefix
@@ -23,7 +23,6 @@ Release @version@-@release@ Start 13/03/2021
 15. html/mod_user.html: renamed vacation to autoresp
 16. autoresponder.c: renamed vacation to autoresp, .vacation.msg to
     .autoresp.msg
-17
 
 * Mon Jul 15 2019 13:00:14 +0530 mbhangui@gmail.com 2.0-1.1%{?dist}
 Release 2.0 Start 27/04/2019
