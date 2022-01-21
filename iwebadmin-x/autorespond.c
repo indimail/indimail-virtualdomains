@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.13 2022-01-21 14:13:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.14 2022-01-21 22:43:43+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -75,7 +75,7 @@ show_autorespond_line(char *user, char *dom, time_t mytime, char *dir)
 
 	sort_init();
 	if (!stralloc_copy(&TmpBuf, &RealDir) ||
-			!stralloc_catb(&TmpBuf, "/vacation", 9) ||
+			!stralloc_catb(&TmpBuf, "/autoresp", 9) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
 	if (access(TmpBuf.s, F_OK) && errno == 2)
@@ -253,7 +253,7 @@ addautorespondnow()
 	}
 	/*- Make the autoresponder directory */
 	if (!stralloc_copy(&TmpBuf, &RealDir) ||
-			!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+			!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
 			!stralloc_cat(&TmpBuf, &ActionUser) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
@@ -265,7 +265,7 @@ addautorespondnow()
 		ack("143", TmpBuf.s);
 	}
 	/*- Make the autoresponder message file */
-	if (!stralloc_catb(&TmpBuf, "/.vacation.msg", 14) ||
+	if (!stralloc_catb(&TmpBuf, "/.autoresp.msg", 14) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
 	TmpBuf.len--;
@@ -324,11 +324,11 @@ addautorespondnow()
 				!stralloc_cats(&TmpBuf, PREFIX) ||
 				!stralloc_catb(&TmpBuf, "/bin/autoresponder -q ", 22) ||
 				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+				!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
 				!stralloc_cat(&TmpBuf, &ActionUser) ||
-				!stralloc_catb(&TmpBuf, "/.vacation.msg ", 15) ||
+				!stralloc_catb(&TmpBuf, "/.autoresp.msg ", 15) ||
 				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+				!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
 				!stralloc_cat(&TmpBuf, &ActionUser) ||
 				!stralloc_0(&TmpBuf))
 			die_nomem();
@@ -339,11 +339,11 @@ addautorespondnow()
 				!stralloc_cat(&TmpBuf, &RealDir) ||
 				!stralloc_catb(&TmpBuf, "/content-type ", 14) ||
 				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+				!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
 				!stralloc_cat(&TmpBuf, &ActionUser) ||
-				!stralloc_catb(&TmpBuf, "/.vacation.msg ", 15) ||
+				!stralloc_catb(&TmpBuf, "/.autoresp.msg ", 15) ||
 				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+				!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
 				!stralloc_cat(&TmpBuf, &ActionUser) ||
 				!stralloc_0(&TmpBuf))
 			die_nomem();
@@ -388,7 +388,7 @@ delautorespondnow()
 	valias_delete(ActionUser.s, Domain.s, 0);
 	/*- delete the autoresponder directory */
 	if (!stralloc_copy(&TmpBuf, &RealDir) ||
-			!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+			!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
 			!stralloc_cat(&TmpBuf, &ActionUser) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
@@ -499,7 +499,7 @@ modautorespondnow()
 	}
 	/*- Make the autoresponder directory */
 	if (!stralloc_copy(&TmpBuf, &RealDir) ||
-			!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+			!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
 			!stralloc_cat(&TmpBuf, &ActionUser) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
@@ -511,7 +511,7 @@ modautorespondnow()
 		ack("143", TmpBuf.s);
 	}
 	/*- Make the autoresponder message file */
-	if (!stralloc_catb(&TmpBuf, "/.vacation.msg", 14) ||
+	if (!stralloc_catb(&TmpBuf, "/.autoresp.msg", 14) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
 	TmpBuf.len--;
@@ -551,11 +551,11 @@ modautorespondnow()
 				!stralloc_cats(&TmpBuf, PREFIX) ||
 				!stralloc_catb(&TmpBuf, "/bin/autoresponder -q ", 22) ||
 				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+				!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
 				!stralloc_cat(&TmpBuf, &ActionUser) ||
-				!stralloc_catb(&TmpBuf, "/.vacation.msg ", 15) ||
+				!stralloc_catb(&TmpBuf, "/.autoresp.msg ", 15) ||
 				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+				!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
 				!stralloc_cat(&TmpBuf, &ActionUser) ||
 				!stralloc_0(&TmpBuf))
 			die_nomem();
@@ -566,11 +566,11 @@ modautorespondnow()
 				!stralloc_cat(&TmpBuf, &RealDir) ||
 				!stralloc_catb(&TmpBuf, "/content-type ", 14) ||
 				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+				!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
 				!stralloc_cat(&TmpBuf, &ActionUser) ||
-				!stralloc_catb(&TmpBuf, "/.vacation.msg ", 15) ||
+				!stralloc_catb(&TmpBuf, "/.autoresp.msg ", 15) ||
 				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+				!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
 				!stralloc_cat(&TmpBuf, &ActionUser) ||
 				!stralloc_0(&TmpBuf))
 			die_nomem();
@@ -607,7 +607,7 @@ count_autoresponders()
 			CurAutoResponders++;
 	}
 	if (!stralloc_copy(&TmpBuf, &RealDir) ||
-			!stralloc_catb(&TmpBuf, "/vacation", 9) ||
+			!stralloc_catb(&TmpBuf, "/autoresp", 9) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
 	if (access(TmpBuf.s, F_OK) && errno == 2)
