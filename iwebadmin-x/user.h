@@ -1,5 +1,5 @@
 /*
- * $Id: user.h,v 1.2 2019-07-15 12:57:00+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.h,v 1.3 2022-01-21 22:31:05+05:30 Cprogrammer Exp mbhangui $
  */
 
 void            adduser();
@@ -15,6 +15,7 @@ int             get_catchall();
 void            moduser();
 void            modusergo();
 void            modusernow();
+int             migrate_vacation(char *dir, char *user);
 void            parse_users_dotqmail(char newchar);
 void            setremotecatchall();
 void            setremotecatchallnow();
