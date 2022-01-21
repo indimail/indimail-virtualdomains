@@ -1,5 +1,8 @@
 /*
  * $Log: iwebadmin.c,v $
+ * Revision 1.24  2022-01-21 22:38:52+05:30  Cprogrammer
+ * migrate vacation directory to autoresp
+ *
  * Revision 1.23  2021-03-14 12:20:39+05:30  Cprogrammer
  * add ability to include indimail.h without mysql.h
  *
@@ -26,7 +29,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: iwebadmin.c,v 1.23 2021-03-14 12:20:39+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.24 2022-01-21 22:38:52+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -114,6 +117,7 @@ gid_t           Gid;
 char            Lang[40], Pagenumber[FMT_ULONG];
 
 extern char *crypt(const char *, const char *);
+extern int rename(const char *oldpath, const char *newpath);
 
 void
 iwebadmin_suid(gid_t Gid, uid_t Uid)
@@ -311,6 +315,13 @@ main(argc, argv)
 		if (chdir(RealDir.s) < 0) {
 			copy_status_mesg(html_text[171]);
 			strerr_warn3("iwebdmin: chdir: ", RealDir.s, ": ", &strerr_sys);
+			iclose();
+			show_login();
+			exit(0);
+		}
+		if (!access("vacation", F_OK) && rename("vacation", "autoresp")) {
+			copy_status_mesg(html_text[321]);
+			strerr_warn1("iwebdmin: rename: vacation -> autoresp", &strerr_sys);
 			iclose();
 			show_login();
 			exit(0);
