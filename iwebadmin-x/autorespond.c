@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.12 2021-03-14 12:47:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.13 2022-01-21 14:13:20+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
-#include <stdio.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -279,11 +278,7 @@ addautorespondnow()
 	if (substdio_put(&ssout, "Reference: ", 11) ||
 			substdio_put(&ssout, Alias.s, Alias.len) ||
 			substdio_put(&ssout, "\n", 1) ||
-			substdio_put(&ssout, "Subject: This is an autoresponse From: ", 39) ||
-			substdio_put(&ssout, ActionUser.s, ActionUser.len) ||
-			substdio_put(&ssout, "@", 1) ||
-			substdio_put(&ssout, Domain.s, Domain.len) ||
-			substdio_put(&ssout, " Re: ", 5) ||
+			substdio_put(&ssout, "Subject: ", 9) ||
 			substdio_put(&ssout, Alias.s, Alias.len) ||
 			substdio_put(&ssout, "\n", 1))
 	{
@@ -296,7 +291,8 @@ addautorespondnow()
 		if ((*(html_text[i]) == ' ') || (*(html_text[i]) == '\t') || 
 			(*(html_text[i]) == '\r') || (*(html_text[i]) == '\n') || (!(*(html_text[i]))))
 			continue;
-		if (substdio_puts(&ssout, html_text[i])) {
+		if (substdio_puts(&ssout, html_text[i]) ||
+				substdio_put(&ssout, "\n", 1)) {
 			strerr_warn3("write: ", TmpBuf.s, ": ", &strerr_sys);
 			ack("150", TmpBuf.s);
 		}
@@ -304,7 +300,6 @@ addautorespondnow()
 	if (substdio_put(&ssout, "MIME-Version: 1.0\n", 18) ||
 			substdio_put(&ssout, "\n", 1) ||
 			substdio_put(&ssout, Message.s, Message.len) ||
-			substdio_put(&ssout, "\n", 1) ||
 			substdio_flush(&ssout))
 	{
 		strerr_warn3("write: ", TmpBuf.s, ": ", &strerr_sys);
@@ -326,7 +321,7 @@ addautorespondnow()
 		die_nomem();
 	if (access(TmpBuf.s, R_OK)) {
 		if (!stralloc_copyb(&TmpBuf, "|", 1) ||
-				!stralloc_cats(&TmpBuf, INDIMAILDIR) ||
+				!stralloc_cats(&TmpBuf, PREFIX) ||
 				!stralloc_catb(&TmpBuf, "/bin/autoresponder -q ", 22) ||
 				!stralloc_cat(&TmpBuf, &RealDir) ||
 				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
@@ -339,7 +334,7 @@ addautorespondnow()
 			die_nomem();
 	} else {
 		if (!stralloc_copyb(&TmpBuf, "|", 1) ||
-				!stralloc_cats(&TmpBuf, INDIMAILDIR) ||
+				!stralloc_cats(&TmpBuf, PREFIX) ||
 				!stralloc_catb(&TmpBuf, "/bin/autoresponder -q -T ", 25) ||
 				!stralloc_cat(&TmpBuf, &RealDir) ||
 				!stralloc_catb(&TmpBuf, "/content-type ", 14) ||
@@ -469,7 +464,7 @@ modautorespondnow()
 			}
 			len = plen + 28;
 		}
-	} else
+	} else /*- subject */
 	if (!Alias.len) {
 		len = str_len(html_text[178]) + ActionUser.len;
 		for (plen = 0;;) {
@@ -527,15 +522,11 @@ modautorespondnow()
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
 	if (substdio_put(&ssout, "Reference: ", 11) ||
 			substdio_put(&ssout, Alias.s, Alias.len) ||
-			substdio_put(&ssout, "Subject: This is an autoresponse From: ", 39) ||
-			substdio_put(&ssout, ActionUser.s, ActionUser.len) ||
-			substdio_put(&ssout, "@", 1) ||
-			substdio_put(&ssout, Domain.s, Domain.len) ||
-			substdio_put(&ssout, " Re: ", 5) ||
+			substdio_put(&ssout, "\n", 1) ||
+			substdio_put(&ssout, "Subject: ", 9) ||
 			substdio_put(&ssout, Alias.s, Alias.len) ||
 			substdio_put(&ssout, "\n\n", 2) || 
 			substdio_put(&ssout, Message.s, Message.len) ||
-			substdio_put(&ssout, "\n", 1) ||
 			substdio_flush(&ssout))
 	{
 		strerr_warn3("write: ", TmpBuf.s, ": ", &strerr_sys);
@@ -557,7 +548,7 @@ modautorespondnow()
 		die_nomem();
 	if (access(TmpBuf.s, R_OK)) {
 		if (!stralloc_copyb(&TmpBuf, "|", 1) ||
-				!stralloc_cats(&TmpBuf, INDIMAILDIR) ||
+				!stralloc_cats(&TmpBuf, PREFIX) ||
 				!stralloc_catb(&TmpBuf, "/bin/autoresponder -q ", 22) ||
 				!stralloc_cat(&TmpBuf, &RealDir) ||
 				!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
@@ -570,7 +561,7 @@ modautorespondnow()
 			die_nomem();
 	} else {
 		if (!stralloc_copyb(&TmpBuf, "|", 1) ||
-				!stralloc_cats(&TmpBuf, INDIMAILDIR) ||
+				!stralloc_cats(&TmpBuf, PREFIX) ||
 				!stralloc_catb(&TmpBuf, "/bin/autoresponder -q -T ", 25) ||
 				!stralloc_cat(&TmpBuf, &RealDir) ||
 				!stralloc_catb(&TmpBuf, "/content-type ", 14) ||
