@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.20 2021-03-14 12:48:23+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.21 2022-01-21 22:32:35+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -73,6 +73,8 @@
 #define HOOK_DELUSER     "deluser"
 #define HOOK_MODUSER     "moduser"
 #endif
+
+extern int rename(const char *oldpath, const char *newpath);
 
 extern int create_flag;
 
@@ -801,7 +803,7 @@ set_qmaildefault(char *opt)
 	} else {
 		substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
 		if (substdio_put(&ssout, "| ", 2) ||
-				substdio_puts(&ssout, INDIMAILDIR) ||
+				substdio_puts(&ssout, PREFIX) ||
 				substdio_put(&ssout, "/sbin/", 6) ||
 				substdio_put(&ssout, use_vfilter ? "vfilter" : "vdelivermail", use_vfilter ? 7 : 12) ||
 				substdio_put(&ssout, " '' ", 4) ||
@@ -947,7 +949,33 @@ get_catchall()
 }
 
 int
-makevacation(substdio *out, char *dir)
+migrate_vacation(char *dir, char *user)
+{
+	int             len;
+
+	if (!stralloc_copys(&TmpBuf, dir) ||
+			!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
+			!stralloc_cats(&TmpBuf, user) ||
+			!stralloc_catb(&TmpBuf, "/.vacation.msg", 14) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	len = TmpBuf.len;
+	if (!stralloc_cats(&TmpBuf, dir) ||
+			!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
+			!stralloc_cats(&TmpBuf, user) ||
+			!stralloc_catb(&TmpBuf, "/.autoresp.msg", 14) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	if (!access(TmpBuf.s, F_OK) && rename(TmpBuf.s, TmpBuf.s + len)) {
+		copy_status_mesg(html_text[322]);
+		strerr_warn5("migratevacation: rename: ", TmpBuf.s, " --> ", TmpBuf.s + len, ": ",  &strerr_sys);
+		return 1;
+	}
+	return 0;
+}
+
+int
+makeautoresp(substdio *out, char *dir)
 {
 	static stralloc subject = {0};
 	int             fd;
@@ -960,9 +988,11 @@ makevacation(substdio *out, char *dir)
 		copy_status_mesg(html_text[216]);
 		return 1;
 	}
-	/*- make the vacation directory */
+	if (migrate_vacation(dir, ActionUser.s))
+		return 1;
+	/*- make the autoresp directory */
 	if (!stralloc_copys(&TmpBuf, dir) ||
-			!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+			!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
 			!stralloc_cat(&TmpBuf, &ActionUser) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
@@ -970,56 +1000,52 @@ makevacation(substdio *out, char *dir)
 		copy_status_mesg(html_text[143]);
 		strnum1[fmt_uint(strnum1, getuid())] = 0;
 		strnum2[fmt_uint(strnum2, getgid())] = 0;
-		strerr_warn7("makevacation: ", TmpBuf.s, ": uid =", strnum1, ", gid=", strnum2, ": ", &strerr_sys);
+		strerr_warn7("makeautoresp: ", TmpBuf.s, ": uid =", strnum1, ", gid=", strnum2, ": ", &strerr_sys);
 		return (1);
 	}
 	if (!stralloc_copys(&TmpBuf, dir) ||
 			!stralloc_catb(&TmpBuf, "/content-type", 13) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
-	if (access(TmpBuf.s, R_OK)) {
-		if (substdio_puts(out, INDIMAILDIR) ||
-				substdio_put(out, "/bin/autoresponder -q ", 22) ||
+	if (substdio_put(out, "|", 1) ||
+			substdio_puts(out, PREFIX) ||
+			substdio_put(out, "/bin/autoresponder -q ", 22))
+	{
+		copy_status_mesg(html_text[144]);
+		strerr_warn3("makeautoresp: write: ", TmpBuf.s, ": ", &strerr_sys);
+		return (1);
+	}
+	if (!access(TmpBuf.s, R_OK)) {
+		if (substdio_put(out, "-T ", 3) ||
 				substdio_puts(out, dir) ||
-				substdio_put(out, "/vacation", 9) ||
-				substdio_put(out, ActionUser.s, ActionUser.len) ||
-				substdio_put(out, "/.vacation.msg ", 15) ||
-				substdio_puts(out, dir) ||
-				substdio_put(out, "/vacation/", 10) ||
-				substdio_put(out, ActionUser.s, ActionUser.len) ||
-				substdio_put(out, "\n", 1) ||
-				substdio_flush(out))
+				substdio_put(out, "/content-type ", 14))
 		{
 			copy_status_mesg(html_text[144]);
-			strerr_warn3("makevacation: write: ", TmpBuf.s, ": ", &strerr_sys);
-			return (1);
-		}
-	} else {
-		if (substdio_puts(out, INDIMAILDIR) ||
-				substdio_put(out, "/bin/autoresponder -q -T ", 25) ||
-				substdio_puts(out, dir) ||
-				substdio_put(out, "/content-type ", 14) ||
-				substdio_puts(out, dir) ||
-				substdio_put(out, "/vacation", 9) ||
-				substdio_put(out, ActionUser.s, ActionUser.len) ||
-				substdio_put(out, "/.vacation.msg ", 15) ||
-				substdio_puts(out, dir) ||
-				substdio_put(out, "/vacation/", 10) ||
-				substdio_put(out, ActionUser.s, ActionUser.len) ||
-				substdio_put(out, "\n", 1) ||
-				substdio_flush(out))
-		{
-			copy_status_mesg(html_text[144]);
-			strerr_warn3("makevacation: write: ", TmpBuf.s, ": ", &strerr_sys);
+			strerr_warn3("makeautoresp: write: ", TmpBuf.s, ": ", &strerr_sys);
 			return (1);
 		}
 	}
+	if (substdio_puts(out, dir) ||
+			substdio_put(out, "/autoresp/", 10) ||
+			substdio_put(out, ActionUser.s, ActionUser.len) ||
+			substdio_put(out, "/.autoresp.msg ", 15) ||
+			substdio_puts(out, dir) ||
+			substdio_put(out, "/autoresp/", 10) ||
+			substdio_put(out, ActionUser.s, ActionUser.len) ||
+			substdio_put(out, "\n", 1) ||
+			substdio_flush(out))
+	{
+		copy_status_mesg(html_text[144]);
+		strerr_warn3("makeautoresp: write: ", TmpBuf.s, ": ", &strerr_sys);
+		return (1);
+	}
+
 	GetValue(TmpCGI, &Message, "vmessage=");
 	/*- set up the message file */
 	if (!stralloc_copys(&TmpBuf, dir) ||
-			!stralloc_catb(&TmpBuf, "/vacation/", 10) ||
+			!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
 			!stralloc_cat(&TmpBuf, &ActionUser) ||
-			!stralloc_catb(&TmpBuf, "/.vacation.msg", 14) ||
+			!stralloc_catb(&TmpBuf, "/.autoresp.msg", 14) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
 	TmpBuf.len--;
@@ -1044,11 +1070,10 @@ makevacation(substdio *out, char *dir)
 			substdio_put(&ssout, subject.s, subject.len) ||
 			substdio_put(&ssout, "\n\n", 2) ||
 			substdio_put(&ssout, Message.s, Message.len) ||
-			substdio_put(&ssout, "\n", 1) ||
 			substdio_flush(&ssout))
 	{
 		copy_status_mesg(html_text[144]);
-		strerr_warn3("makevacation: write: ", TmpBuf.s, ": ", &strerr_sys);
+		strerr_warn3("makeautoresp: write: ", TmpBuf.s, ": ", &strerr_sys);
 		return (1);
 	}
 	close(fd);
@@ -1060,7 +1085,7 @@ modusergo()
 {
 	char           *tmpstr, *ptr, *cptr;
 	long            q;
-	int             fd, ret_code, count, vacation = 0, saveacopy = 0, emptydotqmail, err, i;
+	int             fd, ret_code, count, autoresp = 0, saveacopy = 0, emptydotqmail, err, i;
 	struct passwd  *vpw = 0;
 	static stralloc box = {0}, cforward = {0}, dotqmailfn = {0}, triv_pass = {0};
 	char           *olddotqmail = 0;
@@ -1177,18 +1202,19 @@ modusergo()
 	} else 
 	if (vpw->pw_gid != orig_gid)
 		sql_setpw(vpw, Domain.s);
-	/*- get the value of the vacation checkbox */
-	GetValue(TmpCGI, &box, "vacation=");
+
+	/*- get the value of the autoresp checkbox */
+	GetValue(TmpCGI, &box, "autoresp=");
 	if (!str_diff(box.s, "on"))
-		vacation = 1;
+		autoresp = 1;
 	/*- if they want to save a copy */
 	GetValue(TmpCGI, &box, "fsaved=");
 	if (!str_diff(box.s, "on"))
 		saveacopy = 1;
 	/*- get the value of the cforward radio button */
 	GetValue(TmpCGI, &cforward, "cforward=");
-	if (!str_diff(cforward.s, "vacation"))
-		vacation = 1;
+	if (!str_diff(cforward.s, "autoresp"))
+		autoresp = 1;
 	/*- open old .qmail file if it exists and load it into memory */
 	if (!stralloc_copys(&dotqmailfn, vpw->pw_dir) ||
 			!stralloc_catb(&dotqmailfn, "/.qmail", 7) ||
@@ -1292,13 +1318,13 @@ modusergo()
 		}
 		/*- this isn't enough to consider the .qmail file non-empty */
 	}
-	if (vacation) {
-		err = makevacation(&ssout, RealDir.s);
+	if (autoresp) {
+		err = makeautoresp(&ssout, RealDir.s);
 		emptydotqmail = 0;
 	} else {
-		/*- delete old vacation directory */
+		/*- delete old autoresp directory */
 		if (!stralloc_copy(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/vacation", 9) ||
+				!stralloc_catb(&TmpBuf, "/autoresp", 9) ||
 				!stralloc_cat(&TmpBuf, &ActionUser) ||
 				!stralloc_0(&TmpBuf))
 			die_nomem();
@@ -1325,16 +1351,15 @@ parse_users_dotqmail(char newchar)
 	static struct passwd *vpw = 0;
 	char           *ptr;
 	static int      fd1 = -1, fd2 = -1;
-	int             match, j;
+	int             match, j, inheader, found_subject;
 	static stralloc fn1 = {0}, fn2 = {0}, line = {0};
-	int             inheader;
 	static unsigned int dotqmail_flags = 0;
 	char            inbuf1[1024], inbuf2[1024];
 	struct substdio ssin1, ssin2;
 #define DOTQMAIL_STANDARD	(1<<0)
 #define DOTQMAIL_FORWARD	(1<<1)
 #define DOTQMAIL_SAVECOPY	(1<<3)
-#define DOTQMAIL_VACATION	(1<<4)
+#define DOTQMAIL_AUTORESP	(1<<4)
 #define DOTQMAIL_BLACKHOLE	(1<<8)
 #define DOTQMAIL_OTHERPGM	(1<<14)
 
@@ -1347,10 +1372,10 @@ parse_users_dotqmail(char newchar)
 				!stralloc_catb(&fn1, "/.qmail", 7) ||
 				!stralloc_0(&fn1))
 			die_nomem();
-		if ((fd1 = open_read(fn1.s)) == -1) {
+		if ((fd1 = open_read(fn1.s)) == -1)
 			/*- no .qmail file, standard delivery */
 			dotqmail_flags = DOTQMAIL_STANDARD;
-		} else {
+		else {
 			substdio_fdbuf(&ssin1, read, fd1, inbuf1, sizeof(inbuf1));
 			for (;;) {
 				if (getln(&ssin1, &line, &match, '\n') == -1) {
@@ -1371,7 +1396,7 @@ parse_users_dotqmail(char newchar)
 					}
 					exit(0);
 				}
-				if (line.len == 0)
+				if (!line.len)
 					break;
 				if (match) {
 					line.len--;
@@ -1401,11 +1426,11 @@ parse_users_dotqmail(char newchar)
 						dotqmail_flags |= DOTQMAIL_BLACKHOLE;
 					else
 					if (str_str(line.s, "/autoresponder ") != NULL) {
-						dotqmail_flags |= DOTQMAIL_VACATION;
+						dotqmail_flags |= DOTQMAIL_AUTORESP;
 						if (!stralloc_copy(&fn2, &RealDir) ||
-								!stralloc_catb(&fn2, "/vacation/", 10) ||
+								!stralloc_catb(&fn2, "/autoresp/", 10) ||
 								!stralloc_cat(&fn2, &ActionUser) ||
-								!stralloc_catb(&fn2, "/.vacation.msg", 14) ||
+								!stralloc_catb(&fn2, "/.autoresp.msg", 14) ||
 								!stralloc_0(&fn2))
 							die_nomem();
 						fd2 = open_read(fn2.s);
@@ -1430,7 +1455,7 @@ parse_users_dotqmail(char newchar)
 			/*- clear OTHERPGM flag, as it tells us nothing at this point */
 			dotqmail_flags &= ~DOTQMAIL_OTHERPGM;
 			/*- if forward and save-a-copy are set, it will actually set the spam flag */
-			if ((dotqmail_flags & DOTQMAIL_FORWARD))
+			if (dotqmail_flags & DOTQMAIL_FORWARD)
 				dotqmail_flags |= DOTQMAIL_SAVECOPY;
 			/*- if forward is not set, clear save-a-copy */
 			if (!(dotqmail_flags & DOTQMAIL_FORWARD))
@@ -1448,7 +1473,7 @@ parse_users_dotqmail(char newchar)
 		case '0': /* standard delivery checkbox */
 		case '1': /* forward delivery checkbox */
 		case '3': /* save-a-copy checkbox */
-		case '4': /* vacation checkbox */
+		case '4': /* autoresp checkbox */
 		case '8': /* blackhole checkbox */
 		case '9': /* spam check checkbox */
 			if (dotqmail_flags & (1 << (newchar - '0'))) {
@@ -1459,8 +1484,7 @@ parse_users_dotqmail(char newchar)
 		case '2': /* forwarding addresses */
 			if (fd1 != -1) {
 				lseek(fd1, 0, SEEK_SET);
-				ssin1.p = 0;
-				ssin1.n = sizeof(inbuf1);
+				substdio_fdbuf(&ssin1, read, fd1, inbuf1, sizeof(inbuf1));
 				j = 0;
 				for (;;) {
 					if (getln(&ssin1, &line, &match, '\n') == -1) {
@@ -1481,6 +1505,8 @@ parse_users_dotqmail(char newchar)
 						}
 						exit(0);
 					}
+					if (!line.len)
+						break;
 					if (match) {
 						line.len--;
 						line.s[line.len] = 0;
@@ -1507,14 +1533,12 @@ parse_users_dotqmail(char newchar)
 				}
 			}
 			break;
-		case '5': /* vacation subject */
+		case '5': /* autoresp subject */
 			if (fd2 != -1) {
-				substdio_fdbuf(&ssin2, read, fd2, inbuf2, sizeof(inbuf2));
 				lseek(fd2, 0, SEEK_SET);
-				ssin2.p = 0;
-				ssin2.n = sizeof(inbuf2);
+				substdio_fdbuf(&ssin2, read, fd2, inbuf2, sizeof(inbuf2));
 				/*- scan headers for Subject */
-				for (;;) {
+				for (found_subject = 0;;) {
 					if (getln(&ssin2, &line, &match, '\n') == -1) {
 						strerr_warn3("parse_users_dotqmail: read: ", fn2.s, ": ", &strerr_sys);
 						out(html_text[144]);
@@ -1533,6 +1557,8 @@ parse_users_dotqmail(char newchar)
 						}
 						exit(0);
 					}
+					if (!line.len)
+						break;
 					if (line.s[0] == '\n')
 						break;
 					if (match) {
@@ -1543,7 +1569,7 @@ parse_users_dotqmail(char newchar)
 							die_nomem();
 						line.len--;
 					}
-					if (!case_diffb(line.s, 9, "Subject: ")) {
+					if (!found_subject && !case_diffb(line.s, 9, "Subject: ")) {
 						if ((ptr = str_str(line.s, "Subject: This is an autoresponse From:"))) {
 							if ((ptr = str_str(line.s, "Re: ")))
 								ptr += 4;
@@ -1552,21 +1578,23 @@ parse_users_dotqmail(char newchar)
 							printh("%H", ptr);
 						} else
 							printh("%H", line.s + 9);
+						found_subject = 1;
+					} else
+					if (!found_subject && !case_diffb(line.s, 11, "Reference: ")) {
+						if (!found_subject) {
+							found_subject = 1;
+							printh("%H", line.s + 11);
+						}
 					}
-					if (!case_diffb(line.s, 11, "Reference: "))
-						printh("%H", line.s + 11);
 				}
 			}
 			break;
-		case '6': /* vacation message */
+		case '6': /* autoresp message */
 			if (fd2 != -1) {
-				substdio_fdbuf(&ssin2, read, fd2, inbuf2, sizeof(inbuf2));
 				lseek(fd2, 0, SEEK_SET);
-				ssin2.p = 0;
-				ssin2.n = sizeof(inbuf2);
+				substdio_fdbuf(&ssin2, read, fd2, inbuf2, sizeof(inbuf2));
 				/* read from file, skipping headers (look for first blank line) */
-				inheader = 1;
-				for (;;) {
+				for (inheader = 1;;) {
 					if (getln(&ssin2, &line, &match, '\n') == -1) {
 						strerr_warn3("parse_users_dotqmail: read: ", fn2.s, ": ", &strerr_sys);
 						out(html_text[144]);
@@ -1585,8 +1613,15 @@ parse_users_dotqmail(char newchar)
 						}
 						exit(0);
 					}
-					if (!inheader)
+					if (!line.len)
+						break;
+					if (!stralloc_0(&line))
+						die_nomem();
+					line.len--;
+					if (!inheader) {
 						printh("%H", line.s);
+						continue;
+					} else
 					if (line.s[0] == '\n')
 						inheader = 0;
 				}
