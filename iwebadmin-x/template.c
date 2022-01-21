@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.21 2021-03-14 12:48:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.22 2022-01-21 23:32:20+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -154,7 +154,7 @@ putch(int ch, substdio *ss)
 int
 send_template_now(char *filename)
 {
-	int             i, fd1, fd2, match, inchar;
+	int             i, fd1, fd2, match, inchar, migflag = 0;
 	char           *ptr, *alias_line, *qnote = " MB";
 	struct stat     mystat;
 	char            qconvert[FMT_ULONG], inbuf1[1024], inbuf2[1024],
@@ -314,22 +314,38 @@ send_template_now(char *filename)
 							strerr_warn1("Domain is null", 0);
 						break;
 					}
-					if ((alias_line = valias_select(ActionUser.s, Domain.s))) {
-						i = str_rchr(alias_line, '/');
+					/*
+					 * autoresponse@example.com -> &testuser01@example.com
+					 * autoresponse@example.com -> |/usr/bin/autoresponder -q
+					 *   /var/indimail/domains/example.com/vacation/autoresponse/.vacation.msg
+					 *   /var/indimail/domains/example.com/vacation/autoresponse
+					 */
+					for (;;) {
+						if (!(alias_line = valias_select(ActionUser.s, Domain.s)))
+							break;
+						if (str_str(alias_line, "bin/autoresponder"))
+							continue;
+						i = str_rchr(alias_line, '&');
 						if (alias_line[i])
-							for (ptr = alias_line + i - 1; ptr != alias_line && *ptr != '/'; ptr--);
-						if (*ptr == '/') {
-							if (!Domain.len) {
-								strerr_warn1("Domain is null", 0);
-								printh("value=\"%H\"></td>\n", ptr + 1);
-							} else
-								printh("value=\"%H@%H\"></td>\n", ptr + 1, Domain.len ? Domain.s : "");
-						} else
 							printh("value=\"%H\"></td>\n", *alias_line == '&' ? alias_line + 1 : alias_line);
+						else
+						if ((ptr = str_str(alias_line, "/Maildir/"))) {
+							*ptr = 0;
+							for (ptr -= 1; ptr != alias_line && *ptr != '/'; ptr--);
+							if (*ptr == '/') {
+								if (Domain.len)
+									printh("value=\"%H@%H\"></td>\n", ptr + 1, Domain.s);
+								else
+									printh("value=\"%H\"></td>\n", ptr + 1);
+							}
+						} else
+							printh("value=\"%H\"></td>\n", alias_line);
 					}
-					if (!stralloc_copyb(&TmpBuf, "vacation/", 9) ||
+					if (!migflag++)
+						migrate_vacation(RealDir.s, ActionUser.s);
+					if (!stralloc_copyb(&TmpBuf, "autoresp/", 9) ||
 							!stralloc_cat(&TmpBuf, &ActionUser) ||
-							!stralloc_catb(&TmpBuf, "/.vacation.msg", 14) ||
+							!stralloc_catb(&TmpBuf, "/.autoresp.msg", 14) ||
 							!stralloc_0(&TmpBuf))
 						die_nomem();
 					if ((fd2 = open_read(TmpBuf.s)) == -1) {
@@ -339,7 +355,7 @@ send_template_now(char *filename)
 						ack("150", TmpBuf.s);
 					}
 					substdio_fdbuf(&ssin2, read, fd2, inbuf2, sizeof(inbuf2));
-					/*- read Reference: and Subjec: line */
+					/*- read Reference: and Subject: line */
 					for (i = 0; i < 2; i++) {
 						if (getln(&ssin2, &line, &match, '\n') == -1) {
 							strerr_warn3("send_template_now: ", TmpBuf.s, ": ", &strerr_sys);
@@ -376,7 +392,7 @@ send_template_now(char *filename)
 					out("       <textarea cols=80 rows=40 name=\"message\">");
 
 					/*- Skip custom headers */
-					while(1) {
+					while (1) {
 						if (getln(&ssin2, &line, &match, '\n') == -1) {
 							strerr_warn3("send_template_now: ", TmpBuf.s, ": ", &strerr_sys);
 							out(html_text[144]);
@@ -390,7 +406,6 @@ send_template_now(char *filename)
 						if (!line.len || line.s[0] == '\r' || line.s[0] == '\n')
 							break;
 					}
-					out(line.s);
 					for (;;) {
 						if (getln(&ssin2, &line, &match, '\n') == -1) {
 							strerr_warn3("send_template_now: ", TmpBuf.s, ": ", &strerr_sys);
@@ -429,9 +444,17 @@ send_template_now(char *filename)
 					show_counts();
 					break;
 				case 'I':
+					if (!ActionUser.len)
+						strerr_warn1("User is null", 0);
 					show_dotqmail_file(ActionUser.s);
 					break;
-				case 'i': /* check for user forward and forward/store vacation */
+				case 'i': /* check for user forward and forward/store autoresponder */
+					if (!ActionUser.len)
+						strerr_warn1("User is null", 0);
+					if (!RealDir.len)
+						strerr_warn1("RealDir is null", 0);
+					if (!migflag++)
+						migrate_vacation(RealDir.s, ActionUser.s);
 					parse_users_dotqmail(getch(&ssin1));
 					break;
 				case 'J': /* show mailbox flag status */
