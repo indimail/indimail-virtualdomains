@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.14 2022-01-21 22:43:43+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.15 2022-01-22 20:19:21+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -155,7 +155,7 @@ addautorespond()
 void
 addautorespondnow()
 {
-	int             i = 0, len, plen, fd;
+	int             i = 0, len, plen, fd, flag = 0;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG], outbuf[1024];
 	struct substdio ssout;
 
@@ -319,35 +319,27 @@ addautorespondnow()
 			!stralloc_catb(&TmpBuf, "/content-type", 13) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
-	if (access(TmpBuf.s, R_OK)) {
-		if (!stralloc_copyb(&TmpBuf, "|", 1) ||
-				!stralloc_cats(&TmpBuf, PREFIX) ||
-				!stralloc_catb(&TmpBuf, "/bin/autoresponder -q ", 22) ||
+	if (!access(TmpBuf.s, R_OK))
+		flag = 1;
+	if (!stralloc_copyb(&TmpBuf, "|", 1) ||
+			!stralloc_cats(&TmpBuf, PREFIX) ||
+			!stralloc_catb(&TmpBuf, "/bin/autoresponder -q ", 22))
+		die_nomem();
+	if (flag) {
+		if (!stralloc_catb(&TmpBuf, "-T ", 3) ||
 				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
-				!stralloc_cat(&TmpBuf, &ActionUser) ||
-				!stralloc_catb(&TmpBuf, "/.autoresp.msg ", 15) ||
-				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
-				!stralloc_cat(&TmpBuf, &ActionUser) ||
-				!stralloc_0(&TmpBuf))
-			die_nomem();
-	} else {
-		if (!stralloc_copyb(&TmpBuf, "|", 1) ||
-				!stralloc_cats(&TmpBuf, PREFIX) ||
-				!stralloc_catb(&TmpBuf, "/bin/autoresponder -q -T ", 25) ||
-				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/content-type ", 14) ||
-				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
-				!stralloc_cat(&TmpBuf, &ActionUser) ||
-				!stralloc_catb(&TmpBuf, "/.autoresp.msg ", 15) ||
-				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
-				!stralloc_cat(&TmpBuf, &ActionUser) ||
-				!stralloc_0(&TmpBuf))
+				!stralloc_catb(&TmpBuf, "/content-type ", 14))
 			die_nomem();
 	}
+	if (!stralloc_cat(&TmpBuf, &RealDir) ||
+			!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
+			!stralloc_cat(&TmpBuf, &ActionUser) ||
+			!stralloc_catb(&TmpBuf, "/.autoresp.msg ", 15) ||
+			!stralloc_cat(&TmpBuf, &RealDir) ||
+			!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
+			!stralloc_cat(&TmpBuf, &ActionUser) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
 	valias_insert(ActionUser.s, Domain.s, TmpBuf.s, 1);
 	/*- Report success */
 	len = str_len(html_text[180]) + ActionUser.len + Domain.len + 28;
@@ -430,7 +422,7 @@ modautorespond()
 void
 modautorespondnow()
 {
-	int             fd, len, plen;
+	int             fd, len, plen, flag = 0;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG], outbuf[1024];
 	struct substdio ssout;
 
@@ -546,35 +538,27 @@ modautorespondnow()
 			!stralloc_catb(&TmpBuf, "/content-type", 13) ||
 			!stralloc_0(&TmpBuf))
 		die_nomem();
-	if (access(TmpBuf.s, R_OK)) {
-		if (!stralloc_copyb(&TmpBuf, "|", 1) ||
-				!stralloc_cats(&TmpBuf, PREFIX) ||
-				!stralloc_catb(&TmpBuf, "/bin/autoresponder -q ", 22) ||
+	if (!access(TmpBuf.s, R_OK))
+		flag = 1;
+	if (!stralloc_copyb(&TmpBuf, "|", 1) ||
+			!stralloc_cats(&TmpBuf, PREFIX) ||
+			!stralloc_catb(&TmpBuf, "/bin/autoresponder -q ", 22))
+		die_nomem();
+	if (flag) {
+		if (!stralloc_catb(&TmpBuf, "-T ", 3) ||
 				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
-				!stralloc_cat(&TmpBuf, &ActionUser) ||
-				!stralloc_catb(&TmpBuf, "/.autoresp.msg ", 15) ||
-				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
-				!stralloc_cat(&TmpBuf, &ActionUser) ||
-				!stralloc_0(&TmpBuf))
-			die_nomem();
-	} else {
-		if (!stralloc_copyb(&TmpBuf, "|", 1) ||
-				!stralloc_cats(&TmpBuf, PREFIX) ||
-				!stralloc_catb(&TmpBuf, "/bin/autoresponder -q -T ", 25) ||
-				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/content-type ", 14) ||
-				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
-				!stralloc_cat(&TmpBuf, &ActionUser) ||
-				!stralloc_catb(&TmpBuf, "/.autoresp.msg ", 15) ||
-				!stralloc_cat(&TmpBuf, &RealDir) ||
-				!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
-				!stralloc_cat(&TmpBuf, &ActionUser) ||
-				!stralloc_0(&TmpBuf))
+				!stralloc_catb(&TmpBuf, "/content-type ", 14))
 			die_nomem();
 	}
+	if (!stralloc_cat(&TmpBuf, &RealDir) ||
+			!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
+			!stralloc_cat(&TmpBuf, &ActionUser) ||
+			!stralloc_catb(&TmpBuf, "/.autoresp.msg ", 15) ||
+			!stralloc_cat(&TmpBuf, &RealDir) ||
+			!stralloc_catb(&TmpBuf, "/autoresp/", 10) ||
+			!stralloc_cat(&TmpBuf, &ActionUser) ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
 	valias_insert(ActionUser.s, Domain.s, TmpBuf.s, 1);
 	/*- Report success */
 	len = str_len(html_text[183]) + ActionUser.len + Domain.len + 28;
