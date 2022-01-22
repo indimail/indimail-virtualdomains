@@ -23,6 +23,9 @@ Release @version@-@release@ Start 13/03/2021
 15. html/mod_user.html: renamed vacation to autoresp
 16. autoresponder.c: renamed vacation to autoresp, .vacation.msg to
     .autoresp.msg
+- 22/01/2022
+17. autorespond.c: reduced loc by removing duplicated code
+18. user.c: discontinue use of Reference for getting subject
 
 * Mon Jul 15 2019 13:00:14 +0530 mbhangui@gmail.com 2.0-1.1%{?dist}
 Release 2.0 Start 27/04/2019
