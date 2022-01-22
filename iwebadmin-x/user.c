@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.21 2022-01-21 22:32:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.22 2022-01-22 20:22:03+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1062,10 +1062,7 @@ makeautoresp(substdio *out, char *dir)
 	if (substdio_put(&ssout, "Reference: ", 11) ||
 			substdio_put(&ssout, subject.s, subject.len) ||
 			substdio_put(&ssout, "\n", 1) ||
-			substdio_put(&ssout, "Subject: This is an autoresponse From: ", 39) ||
-			substdio_put(&ssout, ActionUser.s, ActionUser.len) ||
-			substdio_put(&ssout, "@", 1) ||
-			substdio_put(&ssout, Domain.s, Domain.len) ||
+			substdio_put(&ssout, "Subject: Autoresponse - ", 24) ||
 			substdio_put(&ssout, " Re: ", 5) ||
 			substdio_put(&ssout, subject.s, subject.len) ||
 			substdio_put(&ssout, "\n\n", 2) ||
@@ -1351,7 +1348,7 @@ parse_users_dotqmail(char newchar)
 	static struct passwd *vpw = 0;
 	char           *ptr;
 	static int      fd1 = -1, fd2 = -1;
-	int             match, j, inheader, found_subject;
+	int             match, j, inheader;
 	static stralloc fn1 = {0}, fn2 = {0}, line = {0};
 	static unsigned int dotqmail_flags = 0;
 	char            inbuf1[1024], inbuf2[1024];
@@ -1538,7 +1535,7 @@ parse_users_dotqmail(char newchar)
 				lseek(fd2, 0, SEEK_SET);
 				substdio_fdbuf(&ssin2, read, fd2, inbuf2, sizeof(inbuf2));
 				/*- scan headers for Subject */
-				for (found_subject = 0;;) {
+				for (;;) {
 					if (getln(&ssin2, &line, &match, '\n') == -1) {
 						strerr_warn3("parse_users_dotqmail: read: ", fn2.s, ": ", &strerr_sys);
 						out(html_text[144]);
@@ -1569,22 +1566,15 @@ parse_users_dotqmail(char newchar)
 							die_nomem();
 						line.len--;
 					}
-					if (!found_subject && !case_diffb(line.s, 9, "Subject: ")) {
-						if ((ptr = str_str(line.s, "Subject: This is an autoresponse From:"))) {
+					if (!case_diffb(line.s, 9, "Subject: ")) {
+						if ((ptr = str_str(line.s, "Subject: Autoresponse - "))) {
 							if ((ptr = str_str(line.s, "Re: ")))
 								ptr += 4;
 							else
-								ptr += 39;
+								ptr = line.s + 24;
 							printh("%H", ptr);
 						} else
 							printh("%H", line.s + 9);
-						found_subject = 1;
-					} else
-					if (!found_subject && !case_diffb(line.s, 11, "Reference: ")) {
-						if (!found_subject) {
-							found_subject = 1;
-							printh("%H", line.s + 11);
-						}
 					}
 				}
 			}
