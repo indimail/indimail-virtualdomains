@@ -1,5 +1,8 @@
 /*
  * $Log: setuserquota.c,v $
+ * Revision 1.3  2022-01-31 17:34:19+05:30  Cprogrammer
+ * fixed setting of quota=NOQUOTA
+ *
  * Revision 1.2  2020-04-01 18:57:50+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -22,6 +25,7 @@
 #include <strerr.h>
 #include <fmt.h>
 #include <getEnvConfig.h>
+#include <str.h>
 #endif
 #include "lowerit.h"
 #include "sql_getpw.h"
@@ -30,7 +34,7 @@
 #include "sql_setquota.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: setuserquota.c,v 1.2 2020-04-01 18:57:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: setuserquota.c,v 1.3 2022-01-31 17:34:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -63,21 +67,26 @@ setuserquota(char *username, char *domain, char *quota)
 	else
 		getEnvConfigStr(&domain_ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
 	lowerit(domain_ptr);
-	if ((size_limit = parse_quota(quota, &count_limit)) == -1) {
-		strerr_warn3("setuserquota: parse_quota: ", quota, ": ", &strerr_sys);
-		return (1);
-	}
-	if (count_limit) {
-		if (!stralloc_copyb(&tmp, strnum, fmt_ulong(strnum, (unsigned long) size_limit)) ||
-				!stralloc_catb(&tmp, "S,", 2) ||
-				!stralloc_catb(&tmp, strnum, fmt_ulong(strnum, (unsigned long) count_limit)) ||
-				!stralloc_catb(&tmp, "C", 1) ||
-				!stralloc_0(&tmp))
+	if (!str_diffn(quota, "NOQUOTA", 7)) {
+		if (!stralloc_copyb(&tmp, "NOQUOTA", 7) || !stralloc_0(&tmp))
 			die_nomem();
 	} else {
-		if (!stralloc_copyb(&tmp, strnum, fmt_ulong(strnum, (unsigned long) size_limit)) ||
-				!stralloc_0(&tmp))
-			die_nomem();
+		if ((size_limit = parse_quota(quota, &count_limit)) == -1) {
+			strerr_warn3("setuserquota: parse_quota: ", quota, ": ", &strerr_sys);
+			return (1);
+		}
+		if (count_limit) {
+			if (!stralloc_copyb(&tmp, strnum, fmt_ulong(strnum, (unsigned long) size_limit)) ||
+					!stralloc_catb(&tmp, "S,", 2) ||
+					!stralloc_catb(&tmp, strnum, fmt_ulong(strnum, (unsigned long) count_limit)) ||
+					!stralloc_catb(&tmp, "C", 1) ||
+					!stralloc_0(&tmp))
+				die_nomem();
+		} else {
+			if (!stralloc_copyb(&tmp, strnum, fmt_ulong(strnum, (unsigned long) size_limit)) ||
+					!stralloc_0(&tmp))
+				die_nomem();
+		}
 	}
 	if ((i = sql_setquota(username, domain_ptr, tmp.s)) == -1) {
 		strerr_warn3("setuserquota: Failed to set quota to [", tmp.s, "]", 0);
