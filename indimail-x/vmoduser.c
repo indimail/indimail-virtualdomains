@@ -1,7 +1,7 @@
 /*
  * $Log: vmoduser.c,v $
- * Revision 1.4  2021-07-08 15:17:02+05:30  Cprogrammer
- * add check for misconfigured assign file
+ * Revision 1.4  2022-01-31 17:36:17+05:30  Cprogrammer
+ * fixed args passed to post handle script
  *
  * Revision 1.3  2020-04-01 18:58:53+05:30  Cprogrammer
  * added encrypt flag argument to mkpasswd()
@@ -60,7 +60,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.4 2021-07-08 15:17:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.4 2022-01-31 17:36:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -295,8 +295,6 @@ main(argc, argv)
 		strerr_warn3("vmoduser: ", real_domain, ": domain does not exist", 0);
 		return (1);
 	}
-	if (!uid)
-		strerr_die3x(100, "vmoduser: domain ", real_domain, " with uid 0");
 	if (!stralloc_copy(&tmpbuf, &TheDir) ||
 			!stralloc_0(&tmpbuf))
 		die_nomem();
@@ -473,10 +471,11 @@ main(argc, argv)
 	if (!err) {
 		for (i = 1, tmpbuf.len = 0; i < argc; i++) {
 			if (!stralloc_append(&tmpbuf, " ") ||
-					!stralloc_cats(&tmpbuf, argv[i]) ||
-					!stralloc_0(&tmpbuf))
+					!stralloc_cats(&tmpbuf, argv[i]))
 				die_nomem();
 		}
+		if (!stralloc_0(&tmpbuf))
+			die_nomem();
 		if (!(ptr = env_get("POST_HANDLE"))) {
 			char           *base_argv0;
 
