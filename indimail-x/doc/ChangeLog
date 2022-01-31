@@ -4,6 +4,10 @@ Release @version@-@release@ Start 14/02/2021
 ===========================================================================
 - 12/02/2021
 01. moved replacestr to libqmail
+- 31/01/2022
+02. setuserquota.c: fixed setting of quota=NOQUOTA
+03. vmoduser.c: Fixed args passed to post handle
+04. vmoduser.c: removed leftover debug statement
 
 *
 Release 3.4.0 Start 14/02/2021
