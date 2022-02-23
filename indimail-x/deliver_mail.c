@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 1.9  2022-02-23 12:34:49+05:30  Cprogrammer
+ * fix message failing with overquota error for users having unlimited quota
+ *
  * Revision 1.8  2021-07-27 18:04:55+05:30  Cprogrammer
  * set default domain using vset_default_domain
  *
@@ -84,7 +87,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 1.8 2021-07-27 18:04:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 1.9 2022-02-23 12:34:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -951,7 +954,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 				die_nomem();
 			homedir.len--;
 		}
-		if (str_diffn(maildirquota, "NOQUOTA,", 8)) {
+		if (str_diffn(maildirquota, "NOQUOTA\0", 8) && str_diffn(maildirquota, "NOQUOTA,", 8)) {
 			/*
 			 * If the user has insufficient quota to accept
 			 * the current message and the msg size < OVERQUOTA_MAILSIZE bytes
