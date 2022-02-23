@@ -40,6 +40,9 @@ while test $# -gt 0; do
     --verbose)
 	verbose=1
     ;;
+	--clean)
+	clean="--clean"
+	;;
     --release=*)
 	release=$optarg
     ;;
@@ -154,11 +157,11 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		cp indimail-x/indimail.spec /tmp
 	fi
 	if [ $verbose -eq 0 ] ; then
-		echo "rpmbuild -ba --clean --quiet /tmp/indimail.spec"
-		rpmbuild -ba --clean --quiet /tmp/indimail.spec
+		echo "rpmbuild -ba $clean --quiet /tmp/indimail.spec"
+		rpmbuild -ba $clean --quiet /tmp/indimail.spec
 	else
-		echo "rpmbuild -ba --clean /tmp/indimail.spec"
-		rpmbuild -ba --clean /tmp/indimail.spec
+		echo "rpmbuild -ba $clean /tmp/indimail.spec"
+		rpmbuild -ba $clean /tmp/indimail.spec
 	fi
 	if [ $? -eq 0 ] ; then
 		/bin/rm -f /tmp/indimail.spec
