@@ -3,6 +3,7 @@
 # distribution information.
 
 AM_CXXFLAGS=@COURIER_UNICODE_CXXFLAGS@
+AM_CFLAGS=@PCRE_CFLAGS@
 
 noinst_LTLIBRARIES=libmaildir.la
 
@@ -15,18 +16,20 @@ DOCS=	deliverquota.html.in deliverquota.8.in \
 	maildirwatch.html maildirwatch.1 \
 	maildirkw.html maildirkw.1
 
+BUILT_SOURCES=maildirsharedrc.h maildirfilterconfig.h quotawarnmsg.h \
+	mailbot.h autoresponsequota.h $(noinst_DATA) libmaildir.deps
+
 if HAVE_SGML
-BUILT_SOURCES=maildirsharedrc.h maildirfilterconfig.h quotawarnmsg.h \
-	mailbot.h autoresponsequota.h $(noinst_DATA) $(DOCS)
-else
-BUILT_SOURCES=maildirsharedrc.h maildirfilterconfig.h quotawarnmsg.h \
-	mailbot.h autoresponsequota.h $(noinst_DATA)
+BUILT_SOURCES += $(DOCS)
 endif
 
 noinst_DATA=deliverquota.html maildirmake.html deliverquota.8 maildirmake.1 \
 	maildiracl.html maildiracl.1
 man_MANS=deliverquota.8 maildirquota.7 maildirmake.1 maildiracl.1 \
 		 sharedindexinstall.1 sharedindexsplit.1 maildirkw.1 maildirwatch.1
+
+libmaildir.deps: config.status
+	echo "$(PCRE_LDFLAGS)" >libmaildir.deps
 
 libmaildir_la_SOURCES=autoresponse.c autoresponse.h \
 	maildiraclt.c maildiraclt.h \
@@ -67,12 +70,12 @@ maildirmake_DEPENDENCIES=libmaildir.la \
 			../rfc822/librfc822.la
 maildirmake_LDADD=libmaildir.la \
 			../numlib/libnumlib.la \
-			../rfc822/librfc822.la ../unicode/libcourier-unicode.la @LIBPCRE@
+			../rfc822/librfc822.la ../unicode/libcourier-unicode.la @PCRE_LDFLAGS@
 maildirmake_LDFLAGS=-static
 
 testmaildirfilter_SOURCES=maildirfiltertypelist.h testmaildirfilter.c
 testmaildirfilter_DEPENDENCIES=libmaildir.la ../numlib/libnumlib.la
-testmaildirfilter_LDADD=libmaildir.la ../numlib/libnumlib.la ../unicode/libcourier-unicode.la @LIBPCRE@
+testmaildirfilter_LDADD=libmaildir.la ../numlib/libnumlib.la ../unicode/libcourier-unicode.la @PCRE_LDFLAGS@
 testmaildirfilter_LDFLAGS=-static
 
 maildirkwtest_SOURCES=maildirkwtest.c
@@ -144,7 +147,7 @@ clean-local:
 
 check-am:
 	@SHELL@ $(srcdir)/testsuite 2>&1 | cmp - $(srcdir)/testsuite.txt
-	test "@LIBPCRE@" != "" || exit 0 ; @SHELL@ $(srcdir)/testsuite2 2>&1 | cmp - $(srcdir)/testsuite2.txt
+	test "@PCRE_LDFLAGS@" != "" || exit 0 ; @SHELL@ $(srcdir)/testsuite2 2>&1 | cmp - $(srcdir)/testsuite2.txt
 	LC_ALL=C; export LC_ALL; ./maildirkwtest | cmp -s - $(srcdir)/maildirkwtest.txt
 	LC_ALL=C; export LC_ALL; ./maildiraclttest
 	./testmaildirsearch iso-8859-1 needle haystack; test $$? = 2 && exit 0; exit 1

@@ -265,6 +265,7 @@ libs/maildir/maildirwatch
 libs/maildir/quotawarnmsg.h
 libs/maildir/testmaildirfilter
 libs/maildir/testmaildirsearch
+libs/maildir/libmaildir.deps
 libs/makedat/.deps/
 libs/makedat/Makefile
 libs/makedat/autom4te.cache/
