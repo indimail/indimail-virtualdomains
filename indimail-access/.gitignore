@@ -7,7 +7,7 @@ debian/postinst
 debian/changelog
 debian/indimail-access-docs.docs
 debian/rules
-debian/indimail-access.dsc
+debian/*.dsc
 debian/indimail-access.install
 debian/prerm
 debian/postrm
