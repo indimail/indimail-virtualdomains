@@ -31,7 +31,7 @@ AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h stdarg.h stdlib.h string.h sys/time.h unistd.h getopt.h \
 				  pwd.h grp.h inttypes.h limits.h sys/syslimits.h sys/param.h \
-				  sys/wait.h rpc/rpc.h rpc/types.h])
+				  sys/wait.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -96,14 +96,25 @@ AC_DEFINE_UNQUOTED(PREFIX, "$prefix", installation directory)
 
 # Checks for libraries.
 AC_CHECK_LIB(ssl, SSL_CTX_new, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
-tirpc="yes"
-AC_CHECK_LIB(tirpc, clnt_create, [AC_SUBST([LIB_RPC], ["-ltirpc"]) AC_DEFINE([HAVE_TIRPC], [1],[tirpc Library])],tirpc=no,-ltirpc)
+AC_CHECK_HEADER(rpc/rpc.h,[have_rpc=yes],
+  [have_rpc=no && AC_CHECK_LIB(tirpc, clnt_create, [have_tirpc=yes && AC_SUBST([LIB_RPC], ["-ltirpc"]) AC_DEFINE([HAVE_TIRPC], [1],[tirpc Library])],[have_tirpc=no],-ltirpc)])
 
-if test " $tirpc" = " yes"
+if test " $have_rpc" = " yes"
+then
+    AC_CHECK_HEADERS([rpc/types.h])
+fi
+if test " $have_tirpc" = " yes"
 then
     CPPFLAGS="-I/usr/include/tirpc $CXXFLAGS"
     CXXFLAGS="-I/usr/include/tirpc $CXXFLAGS"
+    AC_CHECK_HEADERS([tirpc/rpc/rpc.h tirpc/rpc/types.h])
 fi
+AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],noqmail=t,)
+if test " $noqmail" = " t"
+then
+  AC_MSG_ERROR(Could not find qmail library.)
+fi
+AC_CHECK_LIB(indimail, filewrt, [AC_SUBST([LIB_INDIMAIL], ["-lindimail"]) AC_DEFINE([HAVE_INDIMAIL], [1],[indimail Library])],,-lindimail)
 
 have_pcre=no
 LIBPCREDIR=libpcre
@@ -149,13 +160,6 @@ else
 	AC_SUBST(PCRE_DIST_CLEAN)
 
 fi
-
-AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],noqmail=t,)
-if test " $noqmail" = " t"
-then
-  AC_MSG_ERROR(Could not find qmail library.)
-fi
-AC_CHECK_LIB(indimail, filewrt, [AC_SUBST([LIB_INDIMAIL], ["-lindimail"]) AC_DEFINE([HAVE_INDIMAIL], [1],[indimail Library])],,-lindimail)
 
 AC_SUBST(indimaildir)
 AC_CONFIG_FILES([Makefile])
