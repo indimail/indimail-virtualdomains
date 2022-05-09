@@ -1,5 +1,8 @@
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.18  2022-05-10 01:13:45+05:30  Cprogrammer
+ * 'fixes for including rpc/tirpc headers'
+ *
  * Revision 1.17  2021-04-05 21:58:03+05:30  Cprogrammer
  * fixed compilation errors
  *
@@ -86,15 +89,20 @@
 #ifdef HAVE_RPC_TYPES_H
 #include <rpc/types.h>
 #endif
+
 /*- tirpc */
 #ifdef HAVE_TIRPC
 #ifndef HAVE_RPC_RPC_H
+#ifdef HAVE_TIRPC_RPC_RPC_H
 #include <tirpc/rpc/rpc.h>
-#endif
+#endif /*- #ifdef HAVE_TIRPC_RPC_RPC_H */
+#endif /*- #ifdef HAVE_RPC_RPC_H */
 #ifndef HAVE_RPC_TYPES_H
+#ifdef HAVE_TIRPC_RPC_TYPES_H
 #include <tirpc/rpc/types.h>
-#endif
-#endif
+#endif /*- #ifdef HAVE_TIRPC_RPC_TYPES_H */
+#endif /*- #ifndef HAVE_RPC_TYPES_H */
+#endif /*- #ifdef HAVE_TIRPC */
 
 #include <signal.h>
 #include <errno.h>
@@ -104,6 +112,7 @@
 #endif
 #ifdef HAVE_INDIMAIL
 #include <indimail/filewrt.h>
+#include <indimail/tcpbind.h>
 #endif
 #ifdef HAVE_QMAIL
 #include <qmail/getEnvConfig.h>
@@ -132,7 +141,7 @@ program RPCLOG
 #define STATUSDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.17 2021-04-05 21:58:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.18 2022-05-10 01:13:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef __STDC__

@@ -96,7 +96,7 @@ AC_DEFINE_UNQUOTED(PREFIX, "$prefix", installation directory)
 
 # Checks for libraries.
 AC_CHECK_LIB(ssl, SSL_CTX_new, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
-AC_CHECK_HEADER(rpc/rpc.h,[have_rpc=yes],
+AC_CHECK_HEADERS([rpc/rpc.h],[have_rpc=yes],
   [have_rpc=no && AC_CHECK_LIB(tirpc, clnt_create, [have_tirpc=yes && AC_SUBST([LIB_RPC], ["-ltirpc"]) AC_DEFINE([HAVE_TIRPC], [1],[tirpc Library])],[have_tirpc=no],-ltirpc)])
 
 if test " $have_rpc" = " yes"
