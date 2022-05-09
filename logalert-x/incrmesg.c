@@ -1,5 +1,8 @@
 /*
  * $Log: incrmesg.c,v $
+ * Revision 1.9  2022-05-10 01:11:02+05:30  Cprogrammer
+ * include r_mkdir.h
+ *
  * Revision 1.8  2021-04-05 21:57:22+05:30  Cprogrammer
  * fixed compilation errors
  *
@@ -50,6 +53,9 @@
 #ifdef SOLARIS
 #include <sys/systeminfo.h>
 #endif
+#ifdef HAVE_QMAIL
+#include <qmail/r_mkdir.h>
+#endif
 #ifdef HAVE_INDIMAIL
 #include <indimail/tcpopen.h>
 #endif
@@ -58,7 +64,7 @@
 #define SEEKDIR "/var/tmp/incrmesg"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: incrmesg.c,v 1.8 2021-04-05 21:57:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: incrmesg.c,v 1.9 2022-05-10 01:11:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct msgtable
