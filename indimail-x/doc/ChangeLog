@@ -11,6 +11,8 @@ Release @version@-@release@ Start 14/02/2021
 - 23/02/2022
 05. deliver_mail.c: fix message failing with overquota error for users having
     unlimited quota
+- 10/05/2022
+06. moved tcpopen, tcpbind, udpopen, isnum, qdirname to libqmail
 
 *
 Release 3.4.0 Start 14/02/2021

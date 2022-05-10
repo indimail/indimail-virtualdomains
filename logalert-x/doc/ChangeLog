@@ -14,6 +14,7 @@ Release @version@-@release@ Start 25/02/2010
 05. PKGBUILD: Fix permissions for directories
 - 10/05/2022
 06. Fixes for inclusion of Sun Microsystem's RPCSVC library
+07. moved tcpopen, tcpbind, udpopen, isnum, qdirname to libqmail
 
 *
 2005-10-04      <gabriel@icaro.com.br>
