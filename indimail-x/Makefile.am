@@ -63,7 +63,7 @@ include_HEADERS = addaliasdomain.h add_control.h add_domain_assign.h addressToke
 	CreateDomainDirs.h create_table.h dbinfoAdd.h dbinfoDel.h dbinfoSelect.h \
 	dbinfoUpdate.h dbload.h dblock.h del_control.h del_domain_assign.h \
 	deldomain.h deliver_mail.h delunreadmails.h del_user_assign.h \
-	delusercntrl.h deluser.h dir_control.h Dirname.h \
+	delusercntrl.h deluser.h dir_control.h \
 	disable_mysql_escape.h fappend.h FifoCreate.h filewrt.h \
 	findhost.h findmdahost.h fstabChangeCounters.h getactualpath.h \
 	getAddressBook.h get_assign.h getFreeFS.h getindimail.h \
@@ -73,7 +73,7 @@ include_HEADERS = addaliasdomain.h add_control.h add_domain_assign.h addressToke
 	hostcntrl_select.h host_in_locals.h iadddomain.h iadduser.h iclose.h \
 	in_bsearch.h indimail_compat.h indimail.h inquery.h iopen.h ipasswd.h \
 	ip_map.h is_alias_domain.h is_already_running.h is_distributed_domain.h \
-	islocalif.h ismaildup.h isnum.h is_user_present.h isvalid_domain.h \
+	islocalif.h ismaildup.h is_user_present.h isvalid_domain.h \
 	isvirtualdomain.h layout.h LoadBMF.h LoadDbInfo.h lockfile.h Login_Tasks.h \
 	load_mysql.h lowerit.h maildir_to_domain.h maildir_to_email.h MailQuotaWarn.h \
 	make_user_dir.h mdaMySQLConnect.h \
@@ -90,7 +90,7 @@ include_HEADERS = addaliasdomain.h add_control.h add_domain_assign.h addressToke
 	sql_getflags.h sql_gethostid.h sql_getip.h sql_getpw.h sql_get_realdomain.h \
 	sql_init.h sql_insertaliasdomain.h sqlOpen_user.h sql_passwd.h sql_renamedomain.h \
 	SqlServer.h sql_setpw.h sql_setquota.h sql_updateflag.h storeHeader.h \
-	strToPw.h tcpbind.h tcpopen.h tls.h trashpurge.h udpopen.h update_file.h \
+	strToPw.h tls.h trashpurge.h update_file.h \
 	update_local_hostid.h update_newu.h update_quota.h update_rules.h \
 	updusercntrl.h userinfo.h UserInLookup.h user_over_quota.h valiasCount.h \
 	valias_delete_domain.h valias_delete.h valiasinfo.h valias_insert.h \
@@ -118,7 +118,7 @@ COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.
 	CreateDomainDirs.c create_table.c dbinfoAdd.c dbinfoDel.c dbinfoSelect.c \
 	dbinfoUpdate.c dbload.c dec_dir_control.c del_atrn_map.c del_control.c \
 	del_domain_assign.c deldomain.c del_ip_map.c del_user_assign.c compat.c \
-	deluser.c delusercntrl.c Dirname.c fappend.c \
+	deluser.c delusercntrl.c fappend.c \
 	FifoCreate.c filewrt.c findhost.c findmdahost.c fstabChangeCounters.c \
 	getactualpath.c get_assign.c getDbLock.c \
 	get_indimailuidgid.c get_local_hostid.c get_local_ip.c get_localtime.c \
@@ -127,7 +127,7 @@ COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.
 	host_in_locals.c iadddomain.c iadduser.c iclose.c inc_dir.c \
 	inc_dir_control.c init_dir_control.c inquery.c iopen.c \
 	ipasswd.c is_alias_domain.c is_already_running.c is_distributed_domain.c \
-	islocalif.c ismaildup.c isnum.c is_user_present.c isvirtualdomain.c \
+	islocalif.c ismaildup.c is_user_present.c isvirtualdomain.c \
 	layout.c limits.c LoadDbInfo.c lockfile.c Login_Tasks.c lowerit.c \
 	maildir_to_domain.c maildir_to_email.c MailQuotaWarn.c make_user_dir.c \
 	mdaMySQLConnect.c mgmtpassfuncs.c MoveFile.c munch_domain.c \
@@ -143,7 +143,7 @@ COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.
 	sql_getflags.c sql_gethostid.c sql_getip.c sql_getpw.c \
 	sql_get_realdomain.c sql_init.c sql_insertaliasdomain.c sqlOpen_user.c \
 	sql_passwd.c sql_renamedomain.c SqlServer.c sql_setpw.c sql_setquota.c \
-	sql_updateflag.c strToPw.c tcpbind.c tcpopen.c update_file.c \
+	sql_updateflag.c strToPw.c update_file.c \
 	update_local_hostid.c update_newu.c update_quota.c update_rules.c \
 	upd_atrn_map.c upd_ip_map.c updusercntrl.c userinfo.c user_over_quota.c \
 	valiasCount.c valias_delete.c valias_delete_domain.c valiasinfo.c \
@@ -307,15 +307,15 @@ printdir_LDADD = libindimail.la $(LIB_QMAIL)
 printdir_DEPENDENCIES = libindimail.la
 
 vdelivermail_SOURCES = vdelivermail.c
-vdelivermail_LDADD = deliver_mail.lo qmail_remote.lo udpopen.lo libindimail.la $(LIB_QMAIL)
-vdelivermail_DEPENDENCIES = deliver_mail.lo qmail_remote.lo udpopen.lo libindimail.la
+vdelivermail_LDADD = deliver_mail.lo qmail_remote.lo libindimail.la $(LIB_QMAIL)
+vdelivermail_DEPENDENCIES = deliver_mail.lo qmail_remote.lo libindimail.la
 
 vfilter_SOURCES = vfilter.c
 vfilter_LDADD = storeHeader.lo parseAddress.lo deliver_mail.lo \
-	addressToken.lo getAddressBook.lo udpopen.lo \
+	addressToken.lo getAddressBook.lo \
 	eps-1.2/libeps.la libindimail.la $(LIB_QMAIL)
 vfilter_DEPENDENCIES=storeHeader.lo parseAddress.lo deliver_mail.lo \
-	addressToken.lo getAddressBook.lo udpopen.lo libindimail.la
+	addressToken.lo getAddressBook.lo libindimail.la
 
 vcfilter_SOURCES = vcfilter.c
 vcfilter_LDADD = libindimail.la $(LIB_QMAIL)
@@ -536,7 +536,6 @@ del_ip_map.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.
 del_user_assign.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 deluser.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 delusercntrl.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
-Dirname.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 fappend.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 FifoCreate.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 filewrt.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
@@ -573,7 +572,6 @@ is_already_running.lo: config.h variables.h valias_insert.h isvalid_domain.h vge
 is_distributed_domain.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 islocalif.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 ismaildup.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
-isnum.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 is_user_present.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 isvirtualdomain.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 layout.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
@@ -639,8 +637,6 @@ sql_setpw.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h
 sql_setquota.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 sql_updateflag.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 strToPw.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
-tcpbind.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
-tcpopen.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 update_file.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 update_local_hostid.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
 update_newu.lo: config.h variables.h valias_insert.h isvalid_domain.h vgetpasswd.h check_group.h get_assign.h iclose.h post_handle.h is_user_present.h get_local_ip.h get_local_hostid.h get_local_ip.h is_distributed_domain.h LoadDbInfo.h vgetpasswd.h SqlServer.h iadddomain.h deldomain.h iadduser.h setuserquota.h vhostid_select.h vhostid_insert.h dbinfoAdd.h get_indimailuidgid.h
