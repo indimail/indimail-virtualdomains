@@ -1,5 +1,8 @@
 /*
  * $Log: runcmmd.c,v $
+ * Revision 1.3  2022-05-10 20:01:40+05:30  Cprogrammer
+ * use headers from include path
+ *
  * Revision 1.2  2021-06-11 17:01:21+05:30  Cprogrammer
  * replaced MakeArgs() with makeargs() from libqmail
  *
@@ -31,12 +34,12 @@
 #ifdef HAVE_QMAIL
 #include <strerr.h>
 #include <fmt.h>
+#include <makeargs.h>
 #endif
-#include "makeargs.h"
 #include "variables.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: runcmmd.c,v 1.2 2021-06-11 17:01:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: runcmmd.c,v 1.3 2022-05-10 20:01:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int

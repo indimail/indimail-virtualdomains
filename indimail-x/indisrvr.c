@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.9  2022-05-10 20:00:52+05:30  Cprogrammer
+ * use headers from include path
+ *
  * Revision 1.8  2021-06-11 17:03:47+05:30  Cprogrammer
  * replaced MakeArgs() with makeargs() from libqmail()
  *
@@ -30,7 +33,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.8 2021-06-11 17:03:47+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.9 2022-05-10 20:00:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -81,9 +84,9 @@ static char     sccsid[] = "$Id: indisrvr.c,v 1.8 2021-06-11 17:03:47+05:30 Cpro
 #include <fmt.h>
 #include <str.h>
 #include <pw_comp.h>
+#include <tcpbind.h>
+#include <makeargs.h>
 #endif
-#include "tcpbind.h"
-#include "makeargs.h"
 #include "variables.h"
 #include "checkPerm.h"
 #include "mgmtpassfuncs.h"

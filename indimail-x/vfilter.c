@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 1.8  2022-05-10 20:01:51+05:30  Cprogrammer
+ * use headers from include path
+ *
  * Revision 1.7  2021-09-12 20:17:58+05:30  Cprogrammer
  * moved replacestr to libqmail
  *
@@ -27,7 +30,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 1.7 2021-09-12 20:17:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 1.8 2022-05-10 20:01:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -60,19 +63,18 @@ static char     sccsid[] = "$Id: vfilter.c,v 1.7 2021-09-12 20:17:58+05:30 Cprog
 #include <error.h>
 #include <sgetopt.h>
 #include <replacestr.h>
+#include <makeargs.h>
+#include <evaluate.h>
 #endif
 #include "common.h"
-#include "makeargs.h"
 #include "get_real_domain.h"
 #include "get_message_size.h"
 #include "remove_quotes.h"
-#include "evaluate.h"
 #include "eps.h"
 #include "storeHeader.h"
 #include "deliver_mail.h"
 #include "sql_getpw.h"
 #include "variables.h"
-#include "evaluate.h"
 #include "parse_email.h"
 #include "lowerit.h"
 #include "vfilter_header.h"
@@ -166,7 +168,7 @@ execMda(char **argptr, char **mda)
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 1.7 $", *mda;
+	char           *revision = "$Revision: 1.8 $", *mda;
 	static stralloc XFilter = {0};
 	pid_t           pid;
 	int             i, tmp_stat, wait_status;

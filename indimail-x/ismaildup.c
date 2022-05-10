@@ -1,5 +1,8 @@
 /*
  * $Log: ismaildup.c,v $
+ * Revision 1.5  2022-05-10 20:01:31+05:30  Cprogrammer
+ * use headers from include path
+ *
  * Revision 1.4  2021-06-11 17:00:40+05:30  Cprogrammer
  * replaced makeseekable(), MakeArgs() with mktempfile(), makeargs() from libqmail
  *
@@ -48,12 +51,12 @@
 #include <fmt.h>
 #include <env.h>
 #include <getEnvConfig.h>
+#include <makeargs.h>
 #endif
 #include "dblock.h"
-#include "makeargs.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ismaildup.c,v 1.4 2021-06-11 17:00:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ismaildup.c,v 1.5 2022-05-10 20:01:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_SSL 
