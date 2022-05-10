@@ -7,6 +7,7 @@ on:
       - .github/workflows/courier-imap-c-cpp.yml
       - '!**/doc/*'
       - '!**.md'
+  workflow_dispatch:
 
 jobs:
   build:
