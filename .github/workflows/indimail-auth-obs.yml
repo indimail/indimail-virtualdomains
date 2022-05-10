@@ -12,6 +12,7 @@ on:
       - '!**/obs/*'
       - '!**/doc/*'
       - '!**.md'
+  workflow_dispatch:
 
 jobs:
   build:
