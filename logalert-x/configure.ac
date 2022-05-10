@@ -98,6 +98,7 @@ AC_DEFINE_UNQUOTED(PREFIX, "$prefix", installation directory)
 AC_CHECK_LIB(ssl, SSL_CTX_new, [AC_SUBST([LIB_SSL], ["-lssl -lcrypto"]) AC_DEFINE([HAVE_SSL], [1],[OpenSSL Library])],,-lssl -lcrypto)
 AC_CHECK_HEADERS([rpc/rpc.h],[have_rpc=yes],
   [have_rpc=no && AC_CHECK_LIB(tirpc, clnt_create, [have_tirpc=yes && AC_SUBST([LIB_RPC], ["-ltirpc"]) AC_DEFINE([HAVE_TIRPC], [1],[tirpc Library])],[have_tirpc=no],-ltirpc)])
+AC_CHECK_LIB(tirpc, clnt_create, [have_tirpc=yes && AC_SUBST([LIB_RPC], ["-ltirpc"]) AC_DEFINE([HAVE_TIRPC], [1],[tirpc Library])],[have_tirpc=no],-ltirpc)
 
 if test " $have_rpc" = " yes"
 then
@@ -143,7 +144,7 @@ if test $have_pcre != yes ; then
 fi
 
 if test $have_pcre != yes ; then
-	echo "I could not find pcre library/headere, therefore I'm using"
+	echo "I could not find pcre library/headers, therefore I'm using"
 	echo "regex.h header. Note that pcre is necessary to some funcionalities"
 	echo "in logalert. See documentation for further details."
 	echo "If you wish, visit http://www.pcre.org/"
