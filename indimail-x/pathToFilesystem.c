@@ -1,5 +1,8 @@
 /*
  * $Log: pathToFilesystem.c,v $
+ * Revision 1.5  2022-05-10 20:04:58+05:30  Cprogrammer
+ * replaced Dirname with qdirname from libqmail
+ *
  * Revision 1.4  2020-09-21 07:55:34+05:30  Cprogrammer
  * fixed unterminated stralloc variable
  *
@@ -32,12 +35,12 @@
 #include <str.h>
 #include <strerr.h>
 #include <error.h>
+#include <qdirname.h>
 #endif
-#include "Dirname.h"
 #include "getactualpath.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pathToFilesystem.c,v 1.4 2020-09-21 07:55:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pathToFilesystem.c,v 1.5 2022-05-10 20:04:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -75,7 +78,7 @@ pathToFilesystem(char *path)
 	 * directory recursively
 	 */
 	for (ptr = path; access(ptr, F_OK);) {
-		if (!(ptr = Dirname(ptr)))
+		if (!(ptr = qdirname(ptr)))
 			break;
 		if (!access(ptr, F_OK))
 			break;
