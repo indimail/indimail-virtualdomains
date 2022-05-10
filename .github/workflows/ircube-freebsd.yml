@@ -10,6 +10,7 @@ on:
       - '!**/ircube-x/debian/*'
       - '!**/doc/*'
       - '!**.md'
+  workflow_dispatch:
 
 jobs:
   testfreebsd:
