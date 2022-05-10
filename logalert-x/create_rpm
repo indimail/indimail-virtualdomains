@@ -23,6 +23,9 @@ while test $# -gt 0; do
     --verbose)
 	verbose=1
     ;;
+	--clean)
+	clean="--clean"
+	;;
     *)
     echo "invalid option [$1]"
     read key
@@ -125,11 +128,11 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		cp logalert-x/logalert.spec /tmp
 	fi
 	if [ $verbose -eq 0 ] ; then
-		echo "rpmbuild -ba --clean --quiet /tmp/logalert.spec"
-		rpmbuild -ba --clean --quiet /tmp/logalert.spec
+		echo "rpmbuild -ba $clean --quiet /tmp/logalert.spec"
+		rpmbuild -ba $clean --quiet /tmp/logalert.spec
 	else
-		echo "rpmbuild -ba --clean /tmp/logalert.spec"
-		rpmbuild -ba --clean /tmp/logalert.spec
+		echo "rpmbuild -ba $clean /tmp/logalert.spec"
+		rpmbuild -ba $clean /tmp/logalert.spec
 	fi
 	if [ $? -eq 0 ] ; then
 		/bin/rm -f /tmp/logalert.spec
