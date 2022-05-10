@@ -1,5 +1,8 @@
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.19  2022-05-10 20:10:07+05:30  Cprogrammer
+ * use tcpbind from libqmail
+ *
  * Revision 1.18  2022-05-10 01:13:45+05:30  Cprogrammer
  * 'fixes for including rpc/tirpc headers'
  *
@@ -112,10 +115,10 @@
 #endif
 #ifdef HAVE_INDIMAIL
 #include <indimail/filewrt.h>
-#include <indimail/tcpbind.h>
 #endif
 #ifdef HAVE_QMAIL
 #include <qmail/getEnvConfig.h>
+#include <qmail/tcpbind.h>
 #endif
 #include "tls.h"
 #include "common.h"
@@ -141,7 +144,7 @@ program RPCLOG
 #define STATUSDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.18 2022-05-10 01:13:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.19 2022-05-10 20:10:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef __STDC__
