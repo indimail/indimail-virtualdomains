@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.107 2021-09-12 19:56:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.108 2022-05-10 20:48:10+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -647,7 +647,6 @@ done
 %attr(644,root,root)                    %{_prefix}/include/indimail/delusercntrl.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/deluser.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/dir_control.h
-%attr(644,root,root)                    %{_prefix}/include/indimail/Dirname.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/disable_mysql_escape.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/fappend.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/FifoCreate.h
@@ -691,7 +690,6 @@ done
 %attr(644,root,root)                    %{_prefix}/include/indimail/is_distributed_domain.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/islocalif.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/ismaildup.h
-%attr(644,root,root)                    %{_prefix}/include/indimail/isnum.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/is_user_present.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/isvalid_domain.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/isvirtualdomain.h
@@ -767,11 +765,8 @@ done
 %attr(644,root,root)                    %{_prefix}/include/indimail/sql_updateflag.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/storeHeader.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/strToPw.h
-%attr(644,root,root)                    %{_prefix}/include/indimail/tcpbind.h
-%attr(644,root,root)                    %{_prefix}/include/indimail/tcpopen.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/tls.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/trashpurge.h
-%attr(644,root,root)                    %{_prefix}/include/indimail/udpopen.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/update_file.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/update_local_hostid.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/update_newu.h
