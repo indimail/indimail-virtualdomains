@@ -1,5 +1,8 @@
 /*
  * $Log: logclient.c,v $
+ * Revision 1.11  2022-05-10 20:09:57+05:30  Cprogrammer
+ * use tcpopen from libqmail
+ *
  * Revision 1.10  2021-04-05 21:57:58+05:30  Cprogrammer
  * fixed compilation errors
  *
@@ -59,10 +62,10 @@
 #include <sys/systeminfo.h>
 #endif
 #ifdef HAVE_INDIMAIL
-#include <indimail/tcpopen.h>
 #include <indimail/filewrt.h>
 #endif
 #ifdef HAVE_QMAIL
+#include <qmail/tcpopen.h>
 #include <qmail/getEnvConfig.h>
 #endif
 #include "tls.h"
@@ -71,7 +74,7 @@
 #define SEEKDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logclient.c,v 1.10 2021-04-05 21:57:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logclient.c,v 1.11 2022-05-10 20:09:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 

@@ -1,5 +1,8 @@
 /*
  * $Log: incrmesg.c,v $
+ * Revision 1.10  2022-05-10 20:09:47+05:30  Cprogrammer
+ * use tcpopen from libqmail
+ *
  * Revision 1.9  2022-05-10 01:11:02+05:30  Cprogrammer
  * include r_mkdir.h
  *
@@ -55,16 +58,14 @@
 #endif
 #ifdef HAVE_QMAIL
 #include <qmail/r_mkdir.h>
-#endif
-#ifdef HAVE_INDIMAIL
-#include <indimail/tcpopen.h>
+#include <qmail/tcpopen.h>
 #endif
 
 #define MAXBUF  8192
 #define SEEKDIR "/var/tmp/incrmesg"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: incrmesg.c,v 1.9 2022-05-10 01:11:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: incrmesg.c,v 1.10 2022-05-10 20:09:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct msgtable
