@@ -1,5 +1,8 @@
 /*
  * $Log: auth_admin.c,v $
+ * Revision 1.7  2022-05-10 20:00:04+05:30  Cprogrammer
+ * corrected misleading error message string
+ *
  * Revision 1.6  2021-03-09 19:57:59+05:30  Cprogrammer
  * use functions from tls.c
  *
@@ -44,7 +47,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: auth_admin.c,v 1.6 2021-03-09 19:57:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: auth_admin.c,v 1.7 2022-05-10 20:00:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -143,7 +146,7 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host,
 		ssl_free();
 #endif
 		if (write(1, inbuf, len) == -1)
-			strerr_warn1("tcpopen: unable to write to stdout", &strerr_sys);
+			strerr_warn1("unable to write to stdout", &strerr_sys);
 		errno = EPROTO;
 		return (-1);
 	}
