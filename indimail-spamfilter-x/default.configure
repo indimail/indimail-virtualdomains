@@ -1,4 +1,5 @@
 #!/bin/sh
+echo "default.configure called with $# args [$*]"
 prefix=/usr
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
   autoreconf -fiv
@@ -46,8 +47,12 @@ case "$SYSTEM" in
   sysconfdir=/usr/local/etc/indimail
   servicedir=/usr/local/etc/indimail/sv
   extra="--with-libdb-prefix=/opt/local/lib/db48/"
-  export CPPFLAGS="-I/opt/local/include -I/opt/local/include/db48"
-  export LDFLAGS="-L/opt/local/lib -L/opt/local/lib/db48"
+  if [ -z "$CPPFLAGS" ] ; then
+      export CPPFLAGS="-I/opt/local/include -I/opt/local/include/db48"
+  fi
+  if [ -z "$LDFLAGS" ] ; then
+      export LDFLAGS="-L/opt/local/lib -L/opt/local/lib/db48"
+  fi
   ;;
   *)
   prefix=/usr/local
@@ -59,10 +64,13 @@ case "$SYSTEM" in
 esac
 
 if [ -f Makefile ] ; then
-	if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
-		echo "Already configured"
-		exit 0
-	fi
+    if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
+       echo "Already configured"
+       exit 0
+    fi
+fi
+if [ $# -ne 0 ] ; then
+    extra=$*
 fi
 ./configure --prefix=$prefix \
   --enable-indimail \
