@@ -62,6 +62,9 @@ while test $# -gt 0; do
     --verbose)
 	verbose=1
     ;;
+	--clean)
+	clean="--clean"
+	;;
     *)
     echo "invalid option [$1]"
     read key
@@ -185,11 +188,11 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		cp indimail-auth/indimail-auth.spec /tmp
 	fi
 	if [ $verbose -eq 0 ] ; then
-		echo "rpmbuild -ba --clean --quiet /tmp/indimail-auth.spec"
-		rpmbuild -ba --clean --quiet /tmp/indimail-auth.spec
+		echo "rpmbuild -ba $clean --quiet /tmp/indimail-auth.spec"
+		rpmbuild -ba $clean --quiet /tmp/indimail-auth.spec
 	else
-		echo "rpmbuild -ba --clean /tmp/indimail-auth.spec"
-		rpmbuild -ba --clean /tmp/indimail-auth.spec
+		echo "rpmbuild -ba $clean /tmp/indimail-auth.spec"
+		rpmbuild -ba $clean /tmp/indimail-auth.spec
 	fi
 	if [ $? -eq 0 ] ; then
 		/bin/rm -f /tmp/indimail-auth.spec
