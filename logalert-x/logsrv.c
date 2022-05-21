@@ -1,5 +1,8 @@
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.20  2022-05-21 11:11:36+05:30  Cprogrammer
+ * openssl 3.0.0 port
+ *
  * Revision 1.19  2022-05-10 20:10:07+05:30  Cprogrammer
  * use tcpbind from libqmail
  *
@@ -144,7 +147,7 @@ program RPCLOG
 #define STATUSDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.19 2022-05-10 20:10:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.20 2022-05-21 11:11:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef __STDC__
@@ -183,10 +186,8 @@ ssl_write(SSL *ssl, char *buf, int len)
 {
 	int             w;
 
-	while (len)
-	{
-		if ((w = SSL_write(ssl, buf, len)) == -1)
-		{
+	while (len) {
+		if ((w = SSL_write(ssl, buf, len)) == -1) {
 			if (errno == EINTR)
 				continue;
 			return -1;	/*- note that some data may have been written */
@@ -207,13 +208,10 @@ sockwrite(fd, wbuf, len)
 	char           *ptr;
 	int             rembytes, wbytes;
 
-	for (ptr = wbuf, rembytes = len; rembytes;)
-	{
-		for (;;)
-		{
+	for (ptr = wbuf, rembytes = len; rembytes;) {
+		for (;;) {
 			errno = 0;
-			if ((wbytes = write(fd, ptr, rembytes)) == -1)
-			{
+			if ((wbytes = write(fd, ptr, rembytes)) == -1) {
 #ifdef ERESTART
 				if (errno == EINTR || errno == ERESTART)
 #else
@@ -244,28 +242,24 @@ translate(SSL *ssl, int out, int clearout, int clearerr, unsigned int iotimeout)
 	timeout.tv_sec = iotimeout;
 	timeout.tv_usec = 0;
 	flagexitasap = 0;
-	if ((sslin = SSL_get_rfd(ssl)) == -1)
-	{
+	if ((sslin = SSL_get_rfd(ssl)) == -1) {
 		fprintf(stderr, "translate: unable to set up SSL connection\n");
 		while ((n = ERR_get_error()))
 			fprintf(stderr, "translate: %s\n", ERR_error_string(n, 0));
 		return (-1);
 	}
-	if (SSL_accept(ssl) <= 0)
-	{
+	if (SSL_accept(ssl) <= 0) {
 		fprintf(stderr, "translate: unable to accept SSL connection\n");
 		while ((n = ERR_get_error()))
 			fprintf(stderr, "translate: %s\n", ERR_error_string(n, 0));
 		return (-1);
 	}
-	while (!flagexitasap)
-	{
+	while (!flagexitasap) {
 		FD_ZERO(&rfds);
 		FD_SET(sslin, &rfds);
 		FD_SET(clearout, &rfds);
 		FD_SET(clearerr, &rfds);
-		if ((retval = select(clearerr > sslin ? clearerr + 1 : sslin + 1, &rfds, (fd_set *) NULL, (fd_set *) NULL, &timeout)) < 0)
-		{
+		if ((retval = select(clearerr > sslin ? clearerr + 1 : sslin + 1, &rfds, (fd_set *) NULL, (fd_set *) NULL, &timeout)) < 0) {
 #ifdef ERESTART
 			if (errno == EINTR || errno == ERESTART)
 #else
@@ -275,56 +269,46 @@ translate(SSL *ssl, int out, int clearout, int clearerr, unsigned int iotimeout)
 			fprintf(stderr, "translate: %s\n", strerror(errno));
 			return (-1);
 		} else
-		if (!retval)
-		{
+		if (!retval) {
 			fprintf(stderr, "translate: timeout reached without input [%ld sec]\n", timeout.tv_sec);
 			return (-1);
 		}
-		if (FD_ISSET(sslin, &rfds))
-		{
+		if (FD_ISSET(sslin, &rfds)) {
 			/*- data on sslin */
-			if ((n = SSL_read(ssl, tbuf, sizeof(tbuf))) < 0)
-			{
+			if ((n = SSL_read(ssl, tbuf, sizeof(tbuf))) < 0) {
 				fprintf(stderr, "translate: unable to read from network: %s\n", strerror(errno));
 				flagexitasap = 1;
 			} else
 			if (n == 0)
 				flagexitasap = 1;
 			else
-			if ((r = sockwrite(out, tbuf, n)) < 0)
-			{
+			if ((r = sockwrite(out, tbuf, n)) < 0) {
 				fprintf(stderr, "translate: unable to write to client: %s\n", strerror(errno));
 				return (-1);
 			}
 		}
-		if (FD_ISSET(clearout, &rfds))
-		{
+		if (FD_ISSET(clearout, &rfds)) {
 			/*- data on clearout */
-			if ((n = read(clearout, tbuf, sizeof(tbuf))) < 0)
-			{
+			if ((n = read(clearout, tbuf, sizeof(tbuf))) < 0) {
 				fprintf(stderr, "translate: unable to read from client: %s\n", strerror(errno));
 				return (-1);
 			} else
 			if (n == 0)
 				flagexitasap = 1;
-			if ((r = ssl_write(ssl, tbuf, n)) < 0)
-			{
+			if ((r = ssl_write(ssl, tbuf, n)) < 0) {
 				fprintf(stderr, "translate: unable to write to network: %s\n", strerror(errno));
 				return (-1);
 			}
 		}
-		if (FD_ISSET(clearerr, &rfds))
-		{
+		if (FD_ISSET(clearerr, &rfds)) {
 			/*- data on clearerr */
-			if ((n = read(clearerr, tbuf, sizeof(tbuf))) < 0)
-			{
+			if ((n = read(clearerr, tbuf, sizeof(tbuf))) < 0) {
 				fprintf(stderr, "translate: unable to read from client: %s\n", strerror(errno));
 				return (-1);
 			} else
 			if (n == 0)
 				flagexitasap = 1;
-			if ((r = ssl_write(ssl, tbuf, n)) < 0)
-			{
+			if ((r = ssl_write(ssl, tbuf, n)) < 0) {
 				fprintf(stderr, "translate: unable to write to network: %s\n", strerror(errno));
 				return (-1);
 			}
@@ -342,8 +326,7 @@ load_certificate(char *certfile)
 #endif
 
     /* setup SSL context (load key and cert into ctx) */
-	if (!(myctx = SSL_CTX_new(SSLv23_server_method())))
-	{
+	if (!(myctx = SSL_CTX_new(SSLv23_server_method()))) {
 		fprintf(stderr, "SSL_CTX_new: unable to create SSL context: %s\n",
 			ERR_error_string(ERR_get_error(), 0));
 		return ((SSL_CTX *) 0);
@@ -351,25 +334,30 @@ load_certificate(char *certfile)
 	/* set prefered ciphers */
 #ifdef CRYPTO_POLICY_NON_COMPLIANCE
 	cipher = getenv("SSL_CIPHER");
-	if (cipher && !SSL_CTX_set_cipher_list(myctx, cipher))
-	{
+	if (cipher && !SSL_CTX_set_cipher_list(myctx, cipher)) {
 		fprintf(stderr, "SSL_CTX_set_cipher_list: unable to set cipher list: %s\n",
 			ERR_error_string(ERR_get_error(), 0));
 		SSL_CTX_free(myctx);
 		return ((SSL_CTX *) 0);
 	}
 #endif
-	if (SSL_CTX_use_certificate_chain_file(myctx, certfile))
-	{
-		if (SSL_CTX_use_RSAPrivateKey_file(myctx, certfile, SSL_FILETYPE_PEM) != 1)
-		{
+	if (SSL_CTX_use_certificate_chain_file(myctx, certfile)) {
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+		if (SSL_CTX_use_PrivateKey_file(myctx, certfile, SSL_FILETYPE_PEM) != 1) {
+			fprintf(stderr, "SSL_CTX_use_PrivateKey: unable to load private key: %s\n",
+				ERR_error_string(ERR_get_error(), 0));
+			SSL_CTX_free(myctx);
+			return ((SSL_CTX *) 0);
+		}
+#else
+		if (SSL_CTX_use_RSAPrivateKey_file(myctx, certfile, SSL_FILETYPE_PEM) != 1) {
 			fprintf(stderr, "SSL_CTX_use_RSAPrivateKey: unable to load RSA private key: %s\n",
 				ERR_error_string(ERR_get_error(), 0));
 			SSL_CTX_free(myctx);
 			return ((SSL_CTX *) 0);
 		}
-		if (SSL_CTX_use_certificate_file(myctx, certfile, SSL_FILETYPE_PEM) != 1)
-		{
+#endif
+		if (SSL_CTX_use_certificate_file(myctx, certfile, SSL_FILETYPE_PEM) != 1) {
 			fprintf(stderr, "SSL_CTX_use_certificate_file: unable to load certificate: %s\n",
 			ERR_error_string(ERR_get_error(), 0));
 			SSL_CTX_free(myctx);
@@ -437,8 +425,7 @@ SigChild(void)
 	int             status;
 	pid_t           pid;
 
-	for (;(pid = waitpid(-1, &status, WNOHANG | WUNTRACED));)
-	{
+	for (;(pid = waitpid(-1, &status, WNOHANG | WUNTRACED));) {
 #ifdef ERESTART
 		if (pid == -1 && (errno == EINTR || errno == ERESTART))
 #else
@@ -488,10 +475,8 @@ main(int argc, char **argv)
 		return (1);
 	}
 #ifdef HAVE_SSL
-	if (usessl == 1)
-	{
-		if (access(certfile, F_OK))
-		{
+	if (usessl == 1) {
+		if (access(certfile, F_OK)) {
 			fprintf(stderr, "missing certficate: %s: %s\n", certfile, strerror(errno));
 			return (1);
 		}
@@ -577,17 +562,13 @@ main(int argc, char **argv)
 			(void) signal(SIGCHLD, SIG_IGN);
 			(void) signal(SIGHUP, SIG_IGN);
 			(void) close(bindfd);
-			if (setsockopt(sfd, SOL_SOCKET, SO_LINGER, (char *) &linger, sizeof(linger)) == -1)
-			{
+			if (setsockopt(sfd, SOL_SOCKET, SO_LINGER, (char *) &linger, sizeof(linger)) == -1) {
 				close(sfd);
 				exit(1);
 			}
-			for (;;)
-			{
-				if (setsockopt(sfd, SOL_SOCKET, SO_SNDBUF, (void *) &len, sizeof(int)) == -1)
-				{
-					if (errno == ENOBUFS)
-					{
+			for (;;) {
+				if (setsockopt(sfd, SOL_SOCKET, SO_SNDBUF, (void *) &len, sizeof(int)) == -1) {
+					if (errno == ENOBUFS) {
 						usleep(1000);
 						continue;
 					}
@@ -596,12 +577,9 @@ main(int argc, char **argv)
 				}
 				break;
 			}
-			for (;;)
-			{
-				if (setsockopt(sfd, SOL_SOCKET, SO_RCVBUF, (void *) &len, sizeof(int)) == -1)
-				{
-					if (errno == ENOBUFS)
-					{
+			for (;;) {
+				if (setsockopt(sfd, SOL_SOCKET, SO_RCVBUF, (void *) &len, sizeof(int)) == -1) {
+					if (errno == ENOBUFS) {
 						usleep(1000);
 						continue;
 					}
@@ -616,12 +594,10 @@ main(int argc, char **argv)
 			if (sfd != 0 && sfd != 3 && sfd != 4)
 				close(sfd);
 #ifdef HAVE_SSL
-			if (usessl == 1)
-			{
+			if (usessl == 1) {
 				int             n;
 
-				if (pipe(pi1) != 0 || pipe(pi2) != 0 || pipe(pi3) != 0)
-				{
+				if (pipe(pi1) != 0 || pipe(pi2) != 0 || pipe(pi3) != 0) {
 					fprintf(stderr, "unable to create pipe: %s\n", strerror(errno));
 					exit(1);
 				}
@@ -631,8 +607,7 @@ main(int argc, char **argv)
 					close(pi1[1]);
 					close(pi2[0]);
 					close(pi3[0]);
-					if (dup2(pi1[0], 0) == -1 || dup2(pi2[1], 3) == -1 || dup2(pi3[1], 4) == -1)
-					{
+					if (dup2(pi1[0], 0) == -1 || dup2(pi2[1], 3) == -1 || dup2(pi3[1], 4) == -1) {
 						fprintf(stderr, "unable to set up descriptors: %s\n", strerror(errno));
 						exit(1);
 					}
@@ -659,8 +634,7 @@ main(int argc, char **argv)
 				close(pi1[0]);
 				close(pi2[1]);
 				close(pi3[1]);
-				if (!(ssl = SSL_new(ctx)))
-				{
+				if (!(ssl = SSL_new(ctx))) {
 					long e;
 					while ((e = ERR_get_error()))
 						fprintf(stderr, "%d: %s\n", getpid(), ERR_error_string(e, 0));
@@ -672,16 +646,14 @@ main(int argc, char **argv)
 #ifndef CRYPTO_POLICY_NON_COMPLIANCE
 				if (!ptr)
 					ptr = "PROFILE=SYSTEM";
-				if (!SSL_set_cipher_list(ssl, ptr))
-				{
+				if (!SSL_set_cipher_list(ssl, ptr)) {
 					fprintf(stderr, "unable to set ciphers: %s: %s\n", ptr,
 						ERR_error_string(ERR_get_error(), 0));
 					SSL_free(ssl);
 					return (1);
 				}
 #endif
-				if (!(sbio = BIO_new_socket(0, BIO_NOCLOSE)))
-				{
+				if (!(sbio = BIO_new_socket(0, BIO_NOCLOSE))) {
 					fprintf(stderr, "%d: unable to set up BIO socket\n", getpid());
 					SSL_free(ssl);
 					_exit(1);
@@ -690,21 +662,18 @@ main(int argc, char **argv)
 				n = translate(ssl, pi1[1], pi2[0], pi3[0], 3600);
 				SSL_shutdown(ssl);
 				SSL_free(ssl);
-				for (retval = -1;(r = waitpid(pid, &status, WNOHANG | WUNTRACED));)
-				{
+				for (retval = -1;(r = waitpid(pid, &status, WNOHANG | WUNTRACED));) {
 #ifdef ERESTART
 					if (r == -1 && (errno == EINTR || errno == ERESTART))
 #else
 					if (r == -1 && errno == EINTR)
 #endif
 						continue;
-					if (WIFSTOPPED(status) || WIFSIGNALED(status))
-					{
+					if (WIFSTOPPED(status) || WIFSIGNALED(status)) {
 						fprintf(stderr, "%d: killed by signal %d\n", pid, WIFSTOPPED(status) ? WSTOPSIG(status) : WTERMSIG(status));
 						retval = -1;
 					} else
-					if (WIFEXITED(status))
-					{
+					if (WIFEXITED(status)) {
 						retval = WEXITSTATUS(status);
 						fprintf(stderr, "%d: normal exit return status %d\n", pid, retval);
 					}
@@ -715,8 +684,7 @@ main(int argc, char **argv)
 				if (retval)
 					_exit(retval);
 				_exit (0);
-			} else /*- if (usessl == 1) */
-			{
+			} else { /*- if (usessl == 1) */
 				(void) server(silent);
 				_exit(1);
 			}
@@ -756,25 +724,21 @@ sockread(fd, buffer, len)
 	char           *ptr;
 	int             rembytes, rbytes, retrycount;
 
-	for (retrycount = 0, rembytes = len, ptr = buffer; rembytes;)
-	{
+	for (retrycount = 0, rembytes = len, ptr = buffer; rembytes;) {
 		errno = 0;
-		if ((rbytes = read(fd, ptr, rembytes)) == -1)
-		{
+		if ((rbytes = read(fd, ptr, rembytes)) == -1) {
 #ifdef ERESTART
 			if (errno == EINTR || errno == ERESTART)
 #else
 			if (errno == EINTR)
 #endif
 				continue;
-			if (errno == ENOBUFS && retrycount++ < MAXNOBUFRETRY)
-			{
+			if (errno == ENOBUFS && retrycount++ < MAXNOBUFRETRY) {
 				usleep(1000);
 				continue;
 			}
 #if defined(HPUX_SOURCE)
-			if (errno == EREMOTERELEASE)
-			{
+			if (errno == EREMOTERELEASE) {
 				rbytes = 0;
 				break;
 			}
@@ -876,9 +840,8 @@ server(int silent)
 					break;
 			}
 			if (*ptr)
-			{
 				bytes += strlen(ptr + 1);
-			} else {
+			else {
 				bytes += strlen(buffer);
 				filewrt(2, "error-%s", ptr+1);
 			}

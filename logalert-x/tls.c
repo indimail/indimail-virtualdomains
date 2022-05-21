@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.3  2022-05-21 11:11:43+05:30  Cprogrammer
+ * openssl 3.0.0 port
+ *
  * Revision 1.2  2016-06-21 13:31:22+05:30  Cprogrammer
  * use SSL_set_cipher_list as part of crypto-policy-compliance
  *
@@ -48,8 +51,7 @@ check_cert(SSL *ssl)
 	X509           *peer;
     char            peer_CN[256];
     
-    if (SSL_get_verify_result(ssl) != X509_V_OK)
-	{
+    if (SSL_get_verify_result(ssl) != X509_V_OK) {
 		fprintf(stderr, "check_cert: Unable to get peer certificate %s\n", 
 			ERR_error_string(ERR_get_error(), 0));
 		return (1);
@@ -61,8 +63,7 @@ check_cert(SSL *ssl)
 	 */
 
     /*- Check the common name */
-    if (!(peer = SSL_get_peer_certificate(ssl)))
-	{
+    if (!(peer = SSL_get_peer_certificate(ssl))) {
 		fprintf(stderr, "check_cert: Unable to get peer certificate %s\n", 
 			ERR_error_string(ERR_get_error(), 0));
 		return (1);
@@ -88,14 +89,12 @@ tls_init(int fd, char *clientcert)
 	if (!usessl)
 		return (0);
 	SSL_library_init();
-	if (!(ctx = SSL_CTX_new(SSLv23_client_method())))
-	{
+	if (!(ctx = SSL_CTX_new(SSLv23_client_method()))) {
 		fprintf(stderr, "SSL_CTX_new: unable to create SSL context: %s\n",
 			ERR_error_string(ERR_get_error(), 0));
 		return (1);
 	}
-	if (!SSL_CTX_load_verify_locations(ctx, clientcert, NULL))
-	{
+	if (!SSL_CTX_load_verify_locations(ctx, clientcert, NULL)) {
 		fprintf(stderr, "TLS unable to load %s: %s\n", clientcert,
 			ERR_error_string(ERR_get_error(), 0));
 		SSL_CTX_free(ctx);
@@ -108,33 +107,37 @@ tls_init(int fd, char *clientcert)
     /*- Set our cipher list */
 	ciphers = getenv("TLSCLIENTCIPHERS");
 #ifdef CRYPTO_POLICY_NON_COMPLIANCE
-	if (ciphers && !SSL_CTX_set_cipher_list(ctx, ciphers))
-	{
+	if (ciphers && !SSL_CTX_set_cipher_list(ctx, ciphers)) {
 		fprintf(stderr, "unable to set ciphers: %s: %s\n", ciphers,
 			ERR_error_string(ERR_get_error(), 0));
 		SSL_CTX_free(ctx);
 		return (1);
 	}
 #endif
-	if (SSL_CTX_use_certificate_chain_file(ctx, clientcert))
-	{
-		if (SSL_CTX_use_RSAPrivateKey_file(ctx, clientcert, SSL_FILETYPE_PEM) != 1)
-		{
+	if (SSL_CTX_use_certificate_chain_file(ctx, clientcert)) {
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+		if (SSL_CTX_use_PrivateKey_file(ctx, clientcert, SSL_FILETYPE_PEM) != 1) {
+			fprintf(stderr, "SSL_CTX_use_PrivateKey: unable to load private key: %s: %s\n",
+				clientcert, ERR_error_string(ERR_get_error(), 0));
+			SSL_CTX_free(ctx);
+			return (1);
+		}
+#else
+		if (SSL_CTX_use_RSAPrivateKey_file(ctx, clientcert, SSL_FILETYPE_PEM) != 1) {
 			fprintf(stderr, "SSL_CTX_use_RSAPrivateKey: unable to load RSA private key: %s: %s\n",
 				clientcert, ERR_error_string(ERR_get_error(), 0));
 			SSL_CTX_free(ctx);
 			return (1);
 		}
-		if (SSL_CTX_use_certificate_file(ctx, clientcert, SSL_FILETYPE_PEM) != 1)
-		{
+#endif
+		if (SSL_CTX_use_certificate_file(ctx, clientcert, SSL_FILETYPE_PEM) != 1) {
 			fprintf(stderr, "SSL_CTX_use_certificate_file: unable to load certificate: %s: %s\n",
 				clientcert, ERR_error_string(ERR_get_error(), 0));
 			SSL_CTX_free(ctx);
 			return (1);
 		}
 	}
-	if (!(myssl = SSL_new(ctx)))
-	{
+	if (!(myssl = SSL_new(ctx))) {
 		fprintf(stderr, "unable to set up SSL session: %s\n", 
 			ERR_error_string(ERR_get_error(), 0));
 		SSL_CTX_free(ctx);
@@ -145,23 +148,20 @@ tls_init(int fd, char *clientcert)
 #ifndef CRYPTO_POLICY_NON_COMPLIANCE
 	if (!ciphers)
 		ciphers = "PROFILE=SYSTEM";
-	if (!SSL_set_cipher_list(myssl, ciphers))
-	{
+	if (!SSL_set_cipher_list(myssl, ciphers)) {
 		fprintf(stderr, "unable to set ciphers: %s: %s\n", ciphers,
 			ERR_error_string(ERR_get_error(), 0));
 		SSL_free(myssl);
 		return (1);
 	}
 #endif
-    if (!(sbio = BIO_new_socket(fd, BIO_NOCLOSE)))
-	{
+    if (!(sbio = BIO_new_socket(fd, BIO_NOCLOSE))) {
 		fprintf(stderr, "BIO_new_socket failed\n");
 		SSL_free(myssl);
 		return (1);
 	}
     SSL_set_bio(myssl, sbio, sbio); /*- cannot fail */
-    if ((ret = SSL_connect(myssl)) <= 0)
-	{
+    if ((ret = SSL_connect(myssl)) <= 0) {
 		SSL_free(myssl);
 		fprintf(stderr, "SSL_connect: SSL Handshake: %s\n", 
 			ERR_error_string(ERR_get_error(), 0));
@@ -268,10 +268,8 @@ saferead(fd, buf, len, timeout)
 	int             r;
 
 #ifdef HAVE_SSL
-	if (usessl)
-	{
-		if ((r = ssl_timeoutread(timeout, fd, fd, ssl, buf, len)) < 0)
-		{
+	if (usessl) {
+		if ((r = ssl_timeoutread(timeout, fd, fd, ssl, buf, len)) < 0) {
 			sslerr_str = (char *) myssl_error_str();
 			if (sslerr_str)
 				fprintf(stderr, "read: %s\n", sslerr_str);
@@ -294,10 +292,8 @@ safewrite(fd, buf, len, timeout)
 	int             r;
 
 #ifdef HAVE_SSL
-	if (usessl)
-	{
-		if ((r = ssl_timeoutwrite(timeout, fd, fd, ssl, buf, len)) < 0)
-		{
+	if (usessl) {
+		if ((r = ssl_timeoutwrite(timeout, fd, fd, ssl, buf, len)) < 0) {
 			sslerr_str = (char *) myssl_error_str();
 			if (sslerr_str)
 				fprintf(stderr, "write: %s\n", sslerr_str);
@@ -354,7 +350,7 @@ va_dcl
 void
 getversion_tls_c()
 {
-	static char    *x = "$Id: tls.c,v 1.2 2016-06-21 13:31:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tls.c,v 1.3 2022-05-21 11:11:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
