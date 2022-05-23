@@ -486,10 +486,10 @@ check_spooldir() {
   fi
 }
 
-AC_CACHE_CHECK(location of system mailboxes,maildrop_cv_SYS_INSTALL_MBOXDIR,
-check_spooldir
-maildrop_cv_SYS_INSTALL_MBOXDIR="$MBOX_DIR"
-)
+if test "$with_INDIMAIL" != "yes"
+then
+	AC_CACHE_CHECK(location of system mailboxes,maildrop_cv_SYS_INSTALL_MBOXDIR, check_spooldir maildrop_cv_SYS_INSTALL_MBOXDIR="$MBOX_DIR")
+fi
 
 AC_CACHE_CHECK(whether maildrop should reset its group ID,maildrop_cv_SYS_INSTALL_RESET_GID,
 check_spooldir
