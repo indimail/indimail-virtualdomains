@@ -293,6 +293,14 @@ fi
 AC_DEFINE_UNQUOTED(DEFAULT_PATH,"$maildrop_cv_SYS_DEFAULT_PATH",
 	[ Default value of the PATH variable ])
 
+###	use option --enable-indimail to compile in the INDIMAIL support
+AC_ARG_ENABLE(indimail,
+	[  --enable-indimail            compile in INDIMAIL protocol support],
+	[with_INDIMAIL=$enableval],
+	[with_INDIMAIL=no])
+test "$with_INDIMAIL" = "yes" && AC_DEFINE(INDIMAIL,1,Define if you want INDIMAIL support compiled in)
+AM_CONDITIONAL(INDIMAIL, test "$with_INDIMAIL" = yes)
+
 if test -x /var/qmail/bin/qmail-inject
 then
 	QMAIL="/var/qmail/bin/qmail-inject"
@@ -300,13 +308,6 @@ else
 	AC_CHECK_PROG(QMAIL,qmail-inject,qmail-inject,)
 fi
 
-if test -x /usr/bin/qmail-inject
-then
-	INDIMAIL="/usr/bin/qmail-inject"
-else
-	AC_CHECK_PROG(INDIMAIL,qmail-inject,qmail-inject,)
-fi
- 
 AC_CHECK_PROG(PCRE2, pcre2-config, yes, no)
 
 if test "$PCRE2" = "no"
@@ -468,7 +469,7 @@ done
 
 # Not found, possibly qmail $HOME/Mailbox
 
-if test "$QMAIL" != "" -o "$INDIMAIL" != ""
+if test "$QMAIL" != "" -o "$with_INDIMAIL" != ""
 then
 	SPOOLDIR="./Maildir/"
 else

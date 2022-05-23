@@ -51,6 +51,7 @@ o maildrop version upgraded to 3.0.3
 - 23/05/2022
 36. updated maildrop to 3.0.7
 37. courier-imap/default.configure: added --force option
+38. courier-imap - added --enable-indimail to maildrop/configure.ac
 
 *
 Release 1.0-1.1 Start 03/06/2020
