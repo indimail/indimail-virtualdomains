@@ -88,7 +88,7 @@ gcc gcc-c++ make autoconf automake libtool pkgconfig
 sed findutils diffutils gzip xz binutils coreutils grep flex bison
 glibc glibc-devel procps openssl openssl-devel mysql-devel
 libqmail-devel libqmail readline readline-devel ncurses-devel
-pam-devel libgcrypt-devel gdbm-devel libidn-devel pcre-devel libidn2-devel
+pam-devel libgcrypt-devel gdbm-devel libidn-devel pcre-devel pcre2-devel libidn2-devel
 gettext-devel python3 python3-devel (python python-devel on ancient distros)
 
 opensuse - openldap2-devel instead of openldap-devel
@@ -140,7 +140,7 @@ Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 ```
 # apk add gcc g++ make git autoconf automake libtool m4 sed
 # apk add openssl-dev mysql-dev musl-nscd-dev fts-dev
-# apk add libidn-dev libidn2-dev pcre-dev libtirpc-dev ncurses-dev
+# apk add libidn-dev libidn2-dev pcre-dev pcre2-dev libtirpc-dev ncurses-dev
 # apk add linux-pam-dev gdbm-dev db-dev gsl-dev xmlto
 ```
 
@@ -424,14 +424,14 @@ $ sudo make install-strip
 NOTE: for FreeBSD
 
 ```
-# pkg install pcre libidn gdbm
+# pkg install pcre pcre2 libidn gdbm
 ```
 
 NOTE: for Darwin
 
 ```
-$ sudo port install pcre db48 gdbm libidn2
-$ sudo brew install pcre berkeley-db gdbm libidn
+$ sudo port install pcre pcre2 db48 gdbm libidn2
+$ sudo brew install pcre pcre2 berkeley-db gdbm libidn
 ```
 
 (check version in indimail-virtualdomains/courier-imap-x/conf-version)

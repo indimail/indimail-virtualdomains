@@ -24,5 +24,5 @@ jobs:
       with:
         envs: 'MYTOKEN MYTOKEN2'
         usesh: true
-        prepare: pkg install -y curl automake autoconf libtool pkgconf pcre libidn gdbm
+        prepare: pkg install -y curl automake autoconf libtool pkgconf pcre pcre2 libidn gdbm
         run: cd courier-imap-x; ./default.configure; make
