@@ -79,8 +79,29 @@ case "$SYSTEM" in
   extra="--with-authpam"
   ;;
 esac
+force=0
+while test $# -gt 0; do
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
+	;;
+    *) optarg=
+	;;
+    esac
 
-if [ -f Makefile ] ; then
+    case "$1" in
+	--force)
+	force=1
+	;;
+    *)
+    echo "invalid option [$1]"
+    read key
+    exit 1
+    ;;
+    esac
+    shift
+done
+
+if [ $force -eq 0 -a -f Makefile ] ; then
 	if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
 		echo "Already configured"
 		exit 0
