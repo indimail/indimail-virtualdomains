@@ -5,12 +5,14 @@
 
 AlarmSleep::AlarmSleep(unsigned nseconds) : flag(0)
 {
-	sigset_t new_mask;
-	sigemptyset(&new_mask);
+	sigset_t ss;
+
+	sigemptyset(&ss);
+
 	Set(nseconds);
 	do
 	{
-		sigsuspend(&new_mask);
+		sigsuspend(&ss);
 	} while (!flag);
 	Cancel();
 }

@@ -2,7 +2,7 @@ dnl
 dnl Copyright 1998 - 2021 Double Precision, Inc.  See COPYING for
 dnl distribution information.
 
-AC_INIT(maildrop, 3.0.3, [courier-users@lists.sourceforge.net])
+AC_INIT(maildrop, 3.0.7, [courier-users@lists.sourceforge.net])
 
 >confdefs.h  # Kill PACKAGE_ macros
 
@@ -158,7 +158,7 @@ AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_HEADER_TIME
 AC_HEADER_DIRENT
-AC_CHECK_HEADERS(fcntl.h memory.h sys/file.h sys/time.h sys/stat.h unistd.h strings.h locale.h pcre.h pcre/pcre.h)
+AC_CHECK_HEADERS(fcntl.h memory.h sys/file.h sys/time.h sys/stat.h unistd.h strings.h locale.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_MODE_T
@@ -267,7 +267,7 @@ AC_TRY_COMPILE([
 #include	<unistd.h>
 #endif
 
-extern "C" int gethostname(int,int);
+extern int gethostname(int,int);
 ],[
 ],maildir_cv_SYS_GETHOSTNAME=yes,maildir_cv_SYS_GETHOSTNAME=no
 )
@@ -305,6 +305,13 @@ then
 	INDIMAIL="/usr/bin/qmail-inject"
 else
 	AC_CHECK_PROG(INDIMAIL,qmail-inject,qmail-inject,)
+fi
+ 
+AC_CHECK_PROG(PCRE2, pcre2-config, yes, no)
+
+if test "$PCRE2" = "no"
+then
+	AC_MSG_ERROR([pcre2-config was not found, please install PCRE2])
 fi
 
 dnl Try to find sendmail.
