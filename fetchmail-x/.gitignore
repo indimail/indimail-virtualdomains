@@ -35,3 +35,6 @@ compile
 py-compile
 ylwrap
 conf-release
+ar-lib
+compile
+ylwrap
