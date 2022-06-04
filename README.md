@@ -85,7 +85,7 @@ Install the following packages using dnf/yum
 ```
 Universal
 gcc gcc-c++ make autoconf automake libtool pkgconfig
-sed findutils diffutils gzip xz binutils coreutils grep flex bison
+file sed findutils diffutils gzip xz binutils coreutils grep flex bison
 glibc glibc-devel procps openssl openssl-devel mysql-devel
 libqmail-devel libqmail readline readline-devel ncurses-devel
 pam-devel libgcrypt-devel gdbm-devel libidn-devel pcre-devel pcre2-devel libidn2-devel
@@ -101,15 +101,15 @@ Install the following packages using apt
 Universal
 cdbs debhelper gcc g++ automake autoconf libtool
 libqmail-dev libqmail libldap2-dev libssl-dev
-mime-support m4 gawk openssl procps sed bison
+mime-support m4 gawk openssl procps file sed bison
 findutils diffutils readline libreadline-dev xz gzip
 binutils coreutils grep flex libncurses5-dev libncurses5
-libpam0g-dev libpcre3-dev libgdbm-dev libdb-dev libgcrypt20-dev
+libpam0g-dev libpcre2-dev libpcre3-dev libgdbm-dev libdb-dev libgcrypt20-dev
 python libidn11-dev libidn2-0-dev
 
 Ubuntu 16.04, Debian 8 - libmysqlclient-dev
+Ubuntu 16.04 - libcom-err2
 Remaining - default-libmysqlclient-dev
-Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 ```
 
 **Arch Linux**
