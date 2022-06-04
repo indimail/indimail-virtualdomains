@@ -19,15 +19,9 @@
 #if	HAVE_UTIME_H
 #include	<utime.h>
 #endif
-#if TIME_WITH_SYS_TIME
-#include	<sys/time.h>
 #include	<time.h>
-#else
 #if HAVE_SYS_TIME_H
 #include	<sys/time.h>
-#else
-#include	<time.h>
-#endif
 #endif
 #if HAVE_LOCALE_H
 #include	<locale.h>
@@ -686,7 +680,7 @@ static void do_listcmd(struct list_hier **head,
 							strerror(errno));
 					}
 
-					maildir_aclt_list_destroy(&aclt_list);
+					maildir_info_destroy(&minfo);
 				}
 				else
 				{
@@ -3141,6 +3135,7 @@ static int dosetdeleteacl(void *cb_arg, int dodelete)
 		maildir_aclt_list_destroy(&aclt_list);
 		return 0;
 	}
+	free(path);
 
 	cnt=0;
 	maildir_aclt_list_enum(&aclt_list,
@@ -3761,6 +3756,7 @@ void smap()
 
 			if (strchr(rights_buf, ACL_LOOKUP[0]) == NULL)
 			{
+				free(t);
 				accessdenied(ACL_LOOKUP);
 				continue;
 			}
@@ -3780,6 +3776,7 @@ void smap()
 
 				if (imapscan_maildir(infoptr, t, 1, 1, NULL))
 				{
+					free(t);
 					writes("-ERR Cannot read"
 					       " folder status: ");
 					writes(strerror(errno));
@@ -3788,6 +3785,7 @@ void smap()
 				}
 			}
 
+			free(t);
 			writes("* STATUS EXISTS=");
 			writen(infoptr->nmessages+infoptr->left_unseen);
 
@@ -3905,6 +3903,8 @@ void smap()
 				if (maildir_info_smap_find(&minfo, fn,
 							   getenv("AUTHENTICATED")) == 0)
 				{
+					maildir_smapfn_free(fn);
+
 					if (minfo.homedir && minfo.maildir)
 					{
 						maildir_aclt_list list;
@@ -3938,6 +3938,7 @@ void smap()
 						{
 							if (q)
 								free(q);
+							maildir_aclt_list_destroy(&list);
 							maildir_info_destroy(&minfo);
 							accessdenied(ACL_DELETEFOLDER);
 							continue;
@@ -3948,6 +3949,10 @@ void smap()
 								   minfo.maildir);
 					}
 					maildir_info_destroy(&minfo);
+				}
+				else
+				{
+					maildir_smapfn_free(fn);
 				}
 			}
 
@@ -4075,6 +4080,8 @@ void smap()
 			{
 				writes("+OK Folder renamed.\n");
 			}
+			maildir_smapfn_free(fnsrc);
+			maildir_smapfn_free(fndst);
 			maildir_info_destroy(&msrc);
 			maildir_info_destroy(&mdst);
 			continue;

@@ -1,8 +1,8 @@
 #
 # Copyright 1998 - 2015 Double Precision, Inc.  See COPYING for
 # distribution information.
-
 #CONFIG_STATUS_DEPENDENCIES = ../tcpd/couriertls.config
+ACLOCAL_AMFLAGS="-Im4"
 
 DISTCLEANFILES=imapd.cnf pop3d.cnf
 CLEANFILES=imapd.8 imapd.html mkimapdcert.html mkimapdcert.8 \
@@ -12,14 +12,15 @@ CLEANFILES=imapd.8 imapd.html mkimapdcert.html mkimapdcert.8 \
 
 EXTRA_DIST=testsuite testsuite.txt smaptestsuite smaptestsuite.txt \
 	testsuitevalgrind \
-	BUGS BUGS.html README.imap README.html \
+	BUGS BUGS.html common.authpam imapd.authpam \
 	makeimapaccess.8.in makeimapaccess.html.in \
 	imapd.html.in imapd.8.in \
 	mkdhparams.html.in mkdhparams.8.in \
 	mkimapdcert.html.in mkimapdcert.8.in \
 	mkpop3dcert.html.in mkpop3dcert.8.in \
 	pop3d.html.in pop3d.8.in \
-	imapd.cnf.gnutls pop3d.cnf.gnutls
+	imapd.cnf.gnutls pop3d.cnf.gnutls \
+	pop3testsuite pop3testsuite.txt
 
 bin_PROGRAMS=imapd pop3d
 sbin_PROGRAMS=imaplogin pop3login
@@ -27,7 +28,7 @@ libexec_SCRIPTS=mkimapdcert mkpop3dcert mkdhparams
 
 sysconf_DATA = imapd.dist imapd-ssl.dist pop3d.dist pop3d-ssl.dist imapd.cnf pop3d.cnf
 noinst_DATA=imapd.html makeimapaccess.html mkdhparams.html mkimapdcert.html \
-	mkpop3dcert.html pop3d.html 
+	mkpop3dcert.html pop3d.html README.imap
 man_MANS=mkdhparams.8 mkimapdcert.8 mkpop3dcert.8 imapd.8 pop3d.8 imaplogin.8 pop3login.8 \
 		 makeimapaccess.8
 
@@ -102,13 +103,14 @@ pop3d_SOURCES=pop3dserver.c pop3dcapa.c
 pop3d_DEPENDENCIES=libpop3d.la
 pop3d_LDADD=libpop3d.la ../authlib/libauthmod.la ../authlib/libauth.la ../unicode/libcourier-unicode.la
 
-HTML2TXT=links -dump -no-numbering
-
 README.imap: README.html
-	$(HTML2TXT) README.html >README.imap
+	@links@ -dump -no-numbering README.html >README.imap
 
 BUGS: BUGS.html
-	$(HTML2TXT) BUGS.html >BUGS
+	@links@ -dump -no-numbering BUGS.html >BUGS
+
+README.proxy: README.proxy.html
+	@links@ -dump -no-numbering README.proxy.html >README.proxy
 
 imapd.html: imapd.html.in
 	./config.status --file=imapd.html

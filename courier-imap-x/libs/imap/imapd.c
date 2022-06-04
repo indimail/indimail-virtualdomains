@@ -36,15 +36,9 @@
 #if	HAVE_UTIME_H
 #include	<utime.h>
 #endif
-#if TIME_WITH_SYS_TIME
-#include	<sys/time.h>
 #include	<time.h>
-#else
 #if HAVE_SYS_TIME_H
 #include	<sys/time.h>
-#else
-#include	<time.h>
-#endif
 #endif
 #if HAVE_LOCALE_H
 #include	<locale.h>
@@ -4911,6 +4905,8 @@ int	uid=0;
 
 			if ((did_exist=folder_exists(orig_mailbox)) != 0)
 			{
+				const char *p;
+
 				if (acl_read_folder(&l,
 						    mi.homedir,
 						    mi.maildir) < 0)
@@ -4923,8 +4919,13 @@ int	uid=0;
 					maildir_info_destroy(&mi);
 					return (0);
 				}
-				maildir_acl_delete(mi.homedir, mi.maildir);
-				/* Clear out fluff */
+
+				p=strchr(mi.maildir, '.');
+				if (p)
+				{
+					maildir_acl_delete(mi.homedir, p);
+					/* Clear out fluff */
+				}
 			}
 
 			if (mdcreate(mailbox))
@@ -5269,6 +5270,21 @@ int	uid=0;
 			return (-1);
 		}
 
+		/* check if this is a shared read-only folder */
+
+		if (is_sharedsubdir(mailbox) &&
+			maildir_sharedisro(mailbox))
+			ro=1;
+
+		for (p=current_mailbox_acl; *p; p++)
+			if (strchr(ACL_INSERT ACL_EXPUNGE
+				   ACL_SEEN ACL_WRITE ACL_DELETEMSGS,
+				   *p))
+				break;
+
+		if (*p == 0)
+			ro=1;
+
 		if (imapscan_maildir(&current_maildir_info, mailbox, 0, ro,
 				     NULL))
 		{
@@ -5279,12 +5295,6 @@ int	uid=0;
 		}
 		current_mailbox=mailbox;
 
-		/* check if this is a shared read-only folder */
-
-		if (is_sharedsubdir(mailbox) &&
-			maildir_sharedisro(mailbox))
-			ro=1;
-
 		current_mailbox_ro=ro;
 
 		mailboxflags(ro);
@@ -5294,15 +5304,6 @@ int	uid=0;
 		writes("] Ok\r\n");
 		myrights();
 		writes(tag);
-
-		for (p=current_mailbox_acl; *p; p++)
-			if (strchr(ACL_INSERT ACL_EXPUNGE
-				   ACL_SEEN ACL_WRITE ACL_DELETEMSGS,
-				   *p))
-				break;
-
-		if (*p == 0)
-			ro=1;
 
 		writes(ro ? " OK [READ-ONLY] Ok\r\n":" OK [READ-WRITE] Ok\r\n");
 		return (0);
@@ -6020,7 +6021,7 @@ int	uid=0;
 					libmail_kwmDestroy(storeinfo_s.keywords);
 					free(msgset);
 					writes(tag);
-					writes(" NO An error occured while"
+					writes(" NO An error occurred while"
 					       " updating keywords: ");
 					writes(strerror(errno));
 					writes(".\r\n");
@@ -6596,16 +6597,11 @@ int	uid=0;
 
 static void dogethostname()
 {
-char	buf[2048];
-char	*p;
+	char	buf[2048];
 
 	if (gethostname(buf, sizeof(buf)) < 0)
 		strcpy(buf, "courier-imap");
-	p=malloc(strlen(buf)+sizeof("HOSTNAME="));
-	if (!p)
-		write_error_exit(0);
-	strcat(strcpy(p, "HOSTNAME="), buf);
-	putenv(p);
+	setenv("HOSTNAME", buf, 1);
 }
 
 #if 0
@@ -6788,14 +6784,13 @@ int main(int argc, char **argv)
 	{
 		const char *p;
 
-		putenv("TCPREMOTEIP=127.0.0.1");
-		putenv("TCPREMOTEPORT=0");
+		setenv("TCPREMOTEIP", "127.0.0.1", 1);
+		setenv("TCPREMOTEPORT", "0", 1);
 
 		p=getenv("AUTHENTICATED");
 		if (!p || !*p)
 		{
 			struct passwd *pw=getpwuid(getuid());
-			char *me;
 
 			if (!pw)
 			{
@@ -6805,12 +6800,7 @@ int main(int argc, char **argv)
 				exit(1);
 			}
 
-			me=malloc(sizeof("AUTHENTICATED=")+strlen(pw->pw_name));
-			if (!me)
-				write_error_exit(0);
-
-			strcat(strcpy(me, "AUTHENTICATED="), pw->pw_name);
-			putenv(me);
+			setenv("AUTHENTICATED", pw->pw_name, 1);
 		}
 	}
 
@@ -6829,7 +6819,7 @@ int main(int argc, char **argv)
 	if (!protocol || !*protocol)
 		protocol="IMAP";
 
-	putenv("IMAP_STARTTLS=NO");	/* No longer grok STARTTLS */
+	setenv("IMAP_STARTTLS", "NO", 1);	/* No longer grok STARTTLS */
 
 	/* We use select() with a timeout, so use non-blocking filedescs */
 

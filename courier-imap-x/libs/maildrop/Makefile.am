@@ -1,4 +1,5 @@
 #
+ACLOCAL_AMFLAGS="-Im4"
 # Copyright 1998 - 2009 Double Precision, Inc.  See COPYING for
 # distribution information.
 

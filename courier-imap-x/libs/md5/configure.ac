@@ -4,7 +4,7 @@ dnl Copyright 1998 - 2004 Double Precision, Inc.  See COPYING for
 dnl distribution information.
 
 AC_PREREQ(2.59)
-AC_INIT(libmd5, 1.21, courier-users@lists.sourceforge.net)
+AC_INIT([libmd5],[1.21],[courier-users@lists.sourceforge.net])
 
 >confdefs.h  # Kill PACKAGE_ macros
 
@@ -19,8 +19,7 @@ AC_PROG_AWK
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_CC
-AC_PROG_CC_C99
-AC_PROG_LIBTOOL
+LT_INIT
 
 if test "$GCC" = yes
 then
@@ -32,7 +31,6 @@ CFLAGS="$CFLAGS -I$srcdir/.. -I.."
 dnl Checks for libraries.
 
 dnl Checks for header files.
-AC_HEADER_STDC
 
 AC_CHECK_HEADERS(sys/types.h stdint.h)
 
@@ -44,7 +42,7 @@ AC_ARG_WITH(int32,
 
 		AC_MSG_CHECKING(for uint32_t)
 
-		AC_TRY_COMPILE([
+		AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #if HAVE_SYS_TYPES_H
 #include	<sys/types.h>
 #endif
@@ -52,13 +50,13 @@ AC_ARG_WITH(int32,
 #include	<stdint.h>
 #endif
 uint32_t i;
-		],[
-		], [ AC_MSG_RESULT(yes) ; int32="uint32_t"], [
+		]], [[
+		]])],[ AC_MSG_RESULT(yes) ; int32="uint32_t"],[
 
 		AC_MSG_RESULT(no)
 		AC_MSG_CHECKING(for u_int_32_t)
 
-		AC_TRY_COMPILE([
+		AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #if HAVE_SYS_TYPES_H
 #include	<sys/types.h>
 #endif
@@ -66,8 +64,8 @@ uint32_t i;
 #include	<stdint.h>
 #endif
 u_int32_t	i;
-			],[
-			], [AC_MSG_RESULT(yes); int32="u_int32_t"],[
+			]], [[
+			]])],[AC_MSG_RESULT(yes); int32="u_int32_t"],[
 
 			AC_MSG_RESULT(no)
 
@@ -80,7 +78,7 @@ u_int32_t	i;
 					AC_CHECK_SIZEOF(unsigned short, 0)
 					if test "$ac_cv_sizeof_unsigned_short" != 4
 					then
-						AC_ERROR(--with-int32 option is required)
+						AC_MSG_ERROR(--with-int32 option is required)
 					fi
 					int32="unsigned short"
 				fi
@@ -102,4 +100,5 @@ AC_SYS_LARGEFILE
 
 dnl Checks for library functions.
 
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT

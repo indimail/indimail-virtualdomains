@@ -17,15 +17,9 @@
 #if	HAVE_UTIME_H
 #include	<utime.h>
 #endif
-#if TIME_WITH_SYS_TIME
-#include	<sys/time.h>
 #include	<time.h>
-#else
 #if HAVE_SYS_TIME_H
 #include	<sys/time.h>
-#else
-#include	<time.h>
-#endif
 #endif
 
 
@@ -203,6 +197,7 @@ int main()
 		    strcmp(maildir_aclt_ascstr(&a), "l") == 0);
 		maildir_aclt_destroy(&a);
 	}
+	maildir_aclt_list_destroy(&l);
 
 	exit(0);
 	return (0);

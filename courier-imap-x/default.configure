@@ -1,10 +1,4 @@
 #!/bin/sh
-if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in -o ! -f depcomp ] ; then
-  autoreconf -fiv
-fi
-if [ ! -f conf-release ] ; then
-  echo "1.1" > conf-release
-fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
   FreeBSD)
@@ -28,10 +22,10 @@ case "$SYSTEM" in
   prefix=/usr/local
   sbindir=$prefix/sbin
   mandir=/usr/local/share/man
-  if [ -d /usr/local/lib ] ; then
-    libdir=/usr/local/lib
-  elif [ -d /opt/local/lib ] ; then
+  if [ -d /opt/local/lib ] ; then
     libdir=/opt/local/lib
+  elif [ -d /usr/local/lib ] ; then
+    libdir=/usr/local/lib
   else
     libdir=/usr/lib
   fi
@@ -101,17 +95,41 @@ while test $# -gt 0; do
   shift
 done
 
-if [ $force -eq 0 -a -f Makefile ] ; then
-  if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
-    echo "Already configured"
-    exit 0
-  fi
+if [ ! -d m4 ] ; then
+  mkdir m4
 fi
-./configure --prefix=$prefix --disable-root-check \
+if [ ! -f conf-release ] ; then
+  echo "1.1" > conf-release
+fi
+for i in imap authlib maildrop
+do
+  if [ ! -d libs/$i/m4 ] ; then
+    mkdir -p libs/$i/m4
+  fi
+done
+if [ $force -eq 1 -o ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in -o ! -f depcomp ] ; then
+  autoreconf -fiv
+fi
+if [ $force -eq 0 -a -f Makefile ] ; then
+  case "$SYSTEM" in
+    Darwin|FreeBSD)
+    if [ $(stat -f %m configure.ac) -le $(stat -f %m Makefile) ] ; then
+      echo "Already configured"
+      exit 0
+    fi
+    ;;
+    *)
+    if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
+      echo "Already configured"
+      exit 0
+    fi
+    ;;
+  esac
+fi
+./configure --prefix=$prefix \
   --bindir=$prefix/bin \
   --sbindir=$sbindir \
   --libdir=$libdir \
-  --with-redhat \
   --enable-indimail \
   --with-mailer=$prefix/bin/sendmail \
   --mandir=$mandir \

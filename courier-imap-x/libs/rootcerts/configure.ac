@@ -2,11 +2,12 @@ dnl
 dnl Copyright 2001-2008 Double Precision, Inc.  See COPYING for
 dnl distribution information.
 
-AC_INIT(rootcerts, 0.50, [courier-users@lists.sourceforge.net])
+AC_INIT([rootcerts],[0.50],[courier-users@lists.sourceforge.net])
 
 >confdefs.h  # Kill PACKAGE_ macros
 
 AC_CONFIG_SRCDIR(rootcertsdir.cnf.in)
+AC_CONFIG_AUX_DIR(../..)
 AM_INIT_AUTOMAKE([foreign no-define])
 LPATH="$PATH:/usr/local/bin"
 
@@ -49,4 +50,5 @@ fi
 
 AC_SUBST(certdb)
 
-AC_OUTPUT(Makefile rootcertsdir.cnf)
+AC_CONFIG_FILES([Makefile rootcertsdir.cnf])
+AC_OUTPUT

@@ -2,12 +2,12 @@
 .\"     Title: unicode_word_break
 .\"    Author: Sam Varshavchik
 .\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 03/12/2021
+.\"      Date: 04/16/2022
 .\"    Manual: Courier Unicode Library
 .\"    Source: Courier Unicode Library
 .\"  Language: English
 .\"
-.TH "UNICODE_WORD_BREAK" "3" "03/12/2021" "Courier Unicode Library" "Courier Unicode Library"
+.TH "UNICODE_WORD_BREAK" "3" "04/16/2022" "Courier Unicode Library" "Courier Unicode Library"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -89,7 +89,7 @@ the corresponding character\&. A zero value indicates that a word break is prohi
 \fIbefore\fR
 the corresponding character\&.
 .PP
-The callback function should return 0\&. A non\-zero value indicates to the word breaking algorithm that an error has occured\&.
+The callback function should return 0\&. A non\-zero value indicates to the word breaking algorithm that an error has occurred\&.
 \fBunicode_wb_next\fR() and
 \fBunicode_wb_next_cnt\fR() return zero either if they never invoked the callback function, or if each call to the callback function returned zero\&. A non zero return from the callback function results in
 \fBunicode_wb_next\fR() and

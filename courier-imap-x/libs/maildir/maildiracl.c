@@ -194,6 +194,8 @@ int main(int argc, char *argv[])
 			else perror(maildir);
 			exit(1);
 		}
+		maildir_aclt_list_destroy(&l);
+		maildir_aclt_destroy(&a);
 	}
 
 	if (strcmp(cmd, deletecmd) == 0)
@@ -232,6 +234,8 @@ int main(int argc, char *argv[])
 			else perror(maildir);
 			exit(1);
 		}
+
+		maildir_aclt_list_destroy(&l);
 	}
 
 	if (strcmp(cmd, computecmd) == 0)
@@ -260,6 +264,8 @@ int main(int argc, char *argv[])
 		}
 
 		printf("%s\n", maildir_aclt_ascstr(&a));
+
+		maildir_aclt_list_destroy(&l);
 	}
 
 	return (0);

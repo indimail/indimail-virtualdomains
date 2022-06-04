@@ -409,19 +409,48 @@ static void load_dh_params(SSL_CTX *ctx, const char *filename,
 	const struct tls_info *info=SSL_CTX_get_app_data(ctx);
 
 	BIO	*bio;
-	DH	*dh;
 
 	if (*cert_file_flags)
 		return;
 
 	if ((bio=BIO_new_file(filename, "r")) != 0)
 	{
+#if HAVE_PEM_READ_BIO_PARAMETERS_EX
+
+		OSSL_LIB_CTX *libctx=OSSL_LIB_CTX_get0_global_default();
+
+		EVP_PKEY *pkey=PEM_read_bio_Parameters_ex(bio, NULL, libctx,
+							  NULL);
+
+		if (pkey)
+		{
+			if (EVP_PKEY_is_a(pkey, "DH"))
+			{
+				if (SSL_CTX_set0_tmp_dh_pkey(ctx, pkey))
+				{
+					*cert_file_flags = 1;
+				}
+				else
+				{
+					EVP_PKEY_free(pkey);
+				}
+			}
+			else
+			{
+				EVP_PKEY_free(pkey);
+			}
+		}
+
+#else
+		DH	*dh;
+
 		if ((dh=PEM_read_bio_DHparams(bio, NULL, NULL, NULL)) != 0)
 		{
 			SSL_CTX_set_tmp_dh(ctx, dh);
 			*cert_file_flags = 1;
 			DH_free(dh);
 		}
+#endif
 		else
 		{
 			/*
@@ -997,6 +1026,8 @@ SSL_CTX *tls_create_int(int isserver, const struct tls_info *info,
 			SSLeay_add_ssl_algorithms();
 #endif
 
+#if OPENSSL_VERSION_MAJOR < 3
+
 			while (RAND_status() != 1)
 			{
 				const char *p=random128();
@@ -1004,6 +1035,7 @@ SSL_CTX *tls_create_int(int isserver, const struct tls_info *info,
 
 				RAND_add(p, l, l/16);
 			}
+#endif
 		}
 	}
 

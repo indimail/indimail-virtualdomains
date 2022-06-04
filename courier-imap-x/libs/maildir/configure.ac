@@ -3,14 +3,14 @@ dnl
 dnl Copyright 1998 - 2001 Double Precision, Inc.  See COPYING for
 dnl distribution information.
 
-AC_INIT(maildir, 0.11, [courier-maildrop@lists.sourceforge.net])
+AC_INIT([maildir],[0.11],[courier-maildrop@lists.sourceforge.net])
 
 >confdefs.h  # Kill PACKAGE_ macros
 
 AC_CONFIG_SRCDIR(maildirquota.c)
 AC_CONFIG_MACRO_DIR([m4])
 LPATH="$PATH:/usr/local/bin"
-AC_CANONICAL_SYSTEM
+AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE([foreign no-define])
 AC_CONFIG_HEADERS(config.h)
 
@@ -18,11 +18,9 @@ dnl Checks for programs.
 AC_PROG_AWK
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_CC
-AC_PROG_CC_C99
 AC_PROG_INSTALL
 AC_PROG_LN_S
-AC_LIBTOOL_DLOPEN
-AM_PROG_LIBTOOL
+LT_INIT
 
 AC_PROG_CXX
 
@@ -45,9 +43,15 @@ dnl Checks for libraries.
 
 dnl Checks for header files.
 AC_HEADER_DIRENT
-AC_HEADER_STDC
-AC_HEADER_TIME
-AC_CHECK_HEADERS(sys/stat.h sys/wait.h fcntl.h unistd.h sysexits.h utime.h)
+AC_CHECK_HEADERS(sys/time.h sys/stat.h sys/wait.h fcntl.h unistd.h sysexits.h utime.h)
+
+#AC_CHECK_HEADERS_ONCE([sys/time.h])
+## Obsolete code to be removed.
+#if test $ac_cv_header_sys_time_h = yes; then
+#  AC_DEFINE([TIME_WITH_SYS_TIME],[1],[Define to 1 if you can safely include both <sys/time.h>
+#	     and <time.h>.  This macro is obsolete.])
+#fi
+## End of obsolete code.
 
 AC_CHECK_PROG(PCRE2, pcre2-config, yes, no)
 
@@ -57,16 +61,22 @@ then
 	PCRE_LDFLAGS="`pcre2-config --libs8`"
 	PCRE_CFLAGS="`pcre2-config --cflags`"
 fi
+if test -f /usr/bin/elinks
+then
+	links=/usr/bin/elinks
+else
+	links=/usr/bin/links
+fi
+AC_SUBST(links)
 AC_SUBST(PCRE_LDFLAGS)
 AC_SUBST(PCRE_CFLAGS)
-
 AC_SUBST(LIBPCRE)
 
 AC_HEADER_SYS_WAIT
 
-AC_LANG_CPLUSPLUS
+AC_LANG([C++])
 AC_CHECK_HEADERS(vector vector.h)
-AC_LANG_C
+AC_LANG([C])
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -85,15 +95,15 @@ AC_CHECK_FUNCS(inotify_init inotify_init1)
 
 AC_CACHE_CHECK([for missing gethostname prototype],maildir_cv_SYS_GETHOSTNAME,
 
-AC_TRY_COMPILE([
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #if HAVE_UNISTD_H
 #include	<unistd.h>
 #endif
 
 extern int gethostname(int,int);
-],[
-],maildir_cv_SYS_GETHOSTNAME=yes,maildir_cv_SYS_GETHOSTNAME=no
-)
+]], [[
+]])],[maildir_cv_SYS_GETHOSTNAME=yes],[maildir_cv_SYS_GETHOSTNAME=no
+])
 
 )
 
@@ -155,4 +165,5 @@ else
 	[ Maildir target separator ])
 fi
 
-AC_OUTPUT(Makefile sharedindexinstall sharedindexsplit)
+AC_CONFIG_FILES([Makefile sharedindexinstall sharedindexsplit])
+AC_OUTPUT

@@ -55,7 +55,7 @@ libmaildir_la_SOURCES=autoresponse.c autoresponse.h \
 	maildirwatch.c maildirwatch.h loginexec.c loginexec.h
 
 bin_PROGRAMS=deliverquota maildirmake maildirkw maildiracl maildirwatch
-noinst_PROGRAMS=testmaildirfilter maildirkwtest maildiraclttest testmaildirsearch
+noinst_PROGRAMS=testmaildirfilter maildirkwtest maildiraclttest testmaildirsearch maildirkwtest2
 sbin_SCRIPTS=sharedindexinstall sharedindexsplit
 
 deliverquota_SOURCES=deliverquota.c
@@ -83,11 +83,16 @@ maildirkwtest_LDADD=libmaildir.la
 maildirkwtest_DEPENDENCIES=libmaildir.la
 maildirkwtest_LDFLAGS=-static
 
-maildirkw_SOURCES=maildirkw.c
+maildirkw_SOURCES=maildirkw.C
 maildirkw_LDADD=libmaildir.la ../liblock/liblock.la ../numlib/libnumlib.la
 maildirkw_DEPENDENCIES=libmaildir.la ../liblock/liblock.la \
 	../numlib/libnumlib.la
 maildirkw_LDFLAGS=-static
+
+maildirkwtest2_SOURCES=maildirkw.C maildirkwtest2.c
+maildirkwtest2_LDADD=$(maildirkw_LDADD)
+maildirkwtest2_DEPENDENCIES=$(maildirkw_DEPENDENCIES)
+maildirkwtest2_LDFLAGS=-static
 
 maildirwatch_SOURCES=maildirwatchprog.c
 maildirwatch_LDADD=libmaildir.la ../liblock/liblock.la ../numlib/libnumlib.la
@@ -119,13 +124,11 @@ EXTRA_DIST=README.maildirquota.html README.maildirquota.txt \
 	maildirkwtest.txt \
 	testsuite testsuite.txt testsuite2 testsuite2.txt quotawarnmsg $(DOCS)
 
-HTML2TXT=links -dump -no-numbering
-
 README.maildirquota.txt: README.maildirquota.html
-	$(HTML2TXT) README.maildirquota.html >README.maildirquota.txt
+	@links@ -dump -no-numbering README.maildirquota.html >README.maildirquota.txt
 
 README.sharedfolders.txt: README.sharedfolders.html
-	$(HTML2TXT) README.sharedfolders.html >README.sharedfolders.txt
+	@links@ -dump -no-numbering README.sharedfolders.html >README.sharedfolders.txt
 
 mailbot.h: config.status
 	echo '#define MAILBOT "@MAILBOT@"' >mailbot.h

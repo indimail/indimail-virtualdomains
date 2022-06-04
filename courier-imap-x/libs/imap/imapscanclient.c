@@ -878,7 +878,7 @@ char	*p;
 
 	if (!filename)
 	{
-		return (0);
+		return (-1);
 	}
 
 	p=strrchr(filename, '/')+1;

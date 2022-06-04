@@ -33,7 +33,7 @@ extern unsigned long header_count, body_count;
 extern unsigned long bytes_received_count, bytes_sent_count;
 extern time_t start_time;
 
-static RETSIGTYPE sigexit(int n)
+static void sigexit(int n)
 {
 	static char byemsg[]="* BYE IMAP4erv1 server shut down by signal.\r\n";
 	const char *a=getenv("AUTHENTICATED");
@@ -71,9 +71,6 @@ static RETSIGTYPE sigexit(int n)
 		; /* Suppress gcc warning */
 
 	exit(0);
-#if	RETSIGTYPE != void
-	return (0);
-#endif
 }
 
 

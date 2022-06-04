@@ -104,6 +104,7 @@ char	*p ;
 		switch (tok->tokentype)	{
 		case IT_ATOM:
 		case IT_NUMBER:
+		case IT_QUOTED_STRING:
 			break;
 		default:
 			return (0);

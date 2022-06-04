@@ -29,15 +29,9 @@
 #if	HAVE_SYS_STAT_H
 #include	<sys/stat.h>
 #endif
-#if TIME_WITH_SYS_TIME
-#include <sys/time.h>
 #include <time.h>
-#else
 #if HAVE_SYS_TIME_H
-#include <sys/time.h>
-#else
-#include <time.h>
-#endif
+#include	<sys/time.h>
 #endif
 #include	<stdio.h>
 #include	<stdlib.h>
@@ -61,6 +55,14 @@
 
 #define POP3DLIST "courierpop3dsizelist"
 #define LISTVERSION 3
+
+#ifndef RUNTIME_START
+#define RUNTIME_START time(NULL)
+#endif
+
+#ifndef RUNTIME_CUR
+#define RUNTIME_CUR time(NULL)
+#endif
 
 extern void pop3dcapa();
 extern void pop3dlang(const char *);
@@ -188,7 +190,7 @@ static struct msglist **readpop3dlist(unsigned long *uid)
 	int vernum=0;
 	unsigned long size;
 
-	uidv=time(NULL);
+	uidv=RUNTIME_CUR;
 
 	if (fp == NULL ||
 	    fgets(linebuf, sizeof(linebuf)-1, fp) == NULL ||
@@ -296,6 +298,9 @@ static int savepop3dlist(struct msglist **a, size_t cnt,
 
 	struct maildir_tmpcreate_info createInfo;
 
+#ifdef SAVEHOOK
+	SAVEHOOK();
+#endif
 	maildir_tmpcreate_init(&createInfo);
 
 	createInfo.uniq="pop3";
@@ -485,7 +490,9 @@ static void sortmsgs()
 	}
 
 	if (prev_list[n])
+	{
 		savesizes=1;
+	}
 
 	for (i=0; prev_list[i]; i++)
 	{
@@ -727,7 +734,7 @@ static void do_retr(unsigned i, unsigned *lptr)
 	p = getenv("ENABLE_UTF8_COMPLIANCE");
 	if ((p && *p) && msglist_a[i]->isutf8 && !utf8_enabled)
 	{
-		sprintf(boundary, "=_%d-%d", (int)getpid(), (int)time(NULL));
+		sprintf(boundary, "=_%d-%d", (int)getpid(), (int)RUNTIME_CUR);
 
 		sprintf(wrapheader, MIMEWRAPTXT, boundary, boundary, boundary,
 			mime_message_type);
@@ -909,7 +916,7 @@ static void acctout(const char *disc)
 
 	libmail_str_size_t(top_count, num1);
 	libmail_str_size_t(retr_count, num2);
-	libmail_str_time_t(time(NULL)-start_time, num3);
+	libmail_str_time_t(RUNTIME_CUR-start_time, num3);
 	libmail_str_size_t(bytes_received_count, numAR);
 	libmail_str_size_t(bytes_sent_count, numAS);
 
@@ -944,13 +951,10 @@ static void acctout(const char *disc)
 	free(p);
 }
 
-static RETSIGTYPE bye(int signum)
+static void bye(int signum)
 {
 	acctout("INFO: TIMEOUT");
 	exit(0);
-#if	RETSIGTYPE != void
-	return (0);
-#endif
 }
 
 static void loop()
@@ -1137,7 +1141,7 @@ uid_t  euid, uid;
 		}
 	}
 	authmodclient();
-	time(&start_time);
+	start_time=RUNTIME_START;
 	if ((authaddr=getenv("AUTHADDR")) == NULL ||
 	    *authaddr == 0)
 	{

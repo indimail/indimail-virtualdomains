@@ -2,11 +2,10 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.65])
-AC_INIT([courier-authlib], [1.0], [manvendra@indimail.org],indimail, [http://www.indimail.org])
+AC_INIT([courier-authlib],[1.0],[manvendra@indimail.org],[indimail],[http://www.indimail.org])
+>confdefs.h  # Kill PACKAGE_ macros
 AC_CONFIG_SRCDIR(authoption.c)
 AC_CANONICAL_TARGET
-PACKAGE=$PACKAGE_NAME
-VERSION=$PACKAGE_VERSION
 LT_INIT
 AM_INIT_AUTOMAKE([foreign no-define])
 AC_CONFIG_HEADERS([config.h])
@@ -14,9 +13,7 @@ AC_DEFINE_UNQUOTED(PACKAGE_BUGREPORT, "indimail-support@lists.sourceforge.net")
 
 # Checks for programs.
 AC_PROG_CC
-AC_PROG_CC_C99
-AC_PROG_LIBTOOL
-AC_CONFIG_MACRO_DIR([../../m4])
+AC_CONFIG_MACRO_DIR([m4])
 LPATH="$PATH:/usr/local/bin"
 AC_PATH_PROGS(PERL, perl5 perl, perl, $LPATH)
 if test "$PERL" = "perl"
@@ -82,7 +79,7 @@ AC_CHECK_FUNC(crypt, AC_DEFINE_UNQUOTED(HAVE_CRYPT, 1,
 LIBS="$saveLIBS"
 AC_CACHE_CHECK([for crypt() prototype],userdb_cv_NEED_CRYPT_PROTOTYPE,
 
-	AC_TRY_COMPILE( [
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 	       #if HAVE_CRYPT_H
                #include <crypt.h>
                #endif
@@ -91,8 +88,7 @@ AC_CACHE_CHECK([for crypt() prototype],userdb_cv_NEED_CRYPT_PROTOTYPE,
 	       #endif
 	       int crypt(int, int);
 
-		], [], userdb_cv_NEED_CRYPT_PROTOTYPE=1,
-			userdb_cv_NEED_CRYPT_PROTOTYPE=0 )
+		]], [[]])],[userdb_cv_NEED_CRYPT_PROTOTYPE=1],[userdb_cv_NEED_CRYPT_PROTOTYPE=0 ])
 
 	)
 
@@ -330,4 +326,5 @@ AC_SUBST(LIBAUTH)
 AC_SUBST(STATIC_LIST)
 AC_SUBST(AUTHMODULES)
 #AC_CONFIG_FILES([Makefile])
-AC_OUTPUT(Makefile installlist modulelist)
+AC_CONFIG_FILES([Makefile installlist modulelist])
+AC_OUTPUT

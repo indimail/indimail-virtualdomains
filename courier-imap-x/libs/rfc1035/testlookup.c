@@ -310,7 +310,7 @@ char	ptrbuf[RFC1035_MAXNAMESIZE+1];
 
 	if (q_type[0] && q_type[1])
 	{
-		char namebuf[RFC1035_MAXNAMESIZE+2];
+		char namebuf[RFC1035_MAXNAMESIZE+1];
 
 		size_t l=strlen(q_name);
 
@@ -332,7 +332,7 @@ char	ptrbuf[RFC1035_MAXNAMESIZE+1];
 		replyp=rfc1035_resolve(&res, RFC1035_OPCODE_QUERY,
 				       q_name, q_type[0], q_class);
 	}
-	free(q_type);
+
 	if (!replyp)
 	{
 		perror(argv[0]);
@@ -358,5 +358,6 @@ char	ptrbuf[RFC1035_MAXNAMESIZE+1];
 	}
 	rfc1035_replyfree(replyp);
 	rfc1035_destroy_resolv(&res);
+	free(q_type);
 	return (0);
 }

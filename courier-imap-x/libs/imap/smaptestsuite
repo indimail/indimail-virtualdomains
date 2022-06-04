@@ -3,7 +3,7 @@ then
     IMAPINVOKE="./imapd"
 fi
 
-SED='s/UIDVALIDITY [0-9]*/UIDVALIDITY/;s/INTERNALDATE "[^"]*"/INTERNALDATE -DATE-/g;s/SNAPSHOT "[^"]*"/SNAPSHOT -SNAPSHOT-/g;s/SNAPSHOTEXISTS "[^"]*"/SNAPSHOTEXISTS -SNAPSHOT-/g;s:^-ERR .*:-ERR --error--:'
+SED='s/UIDVALIDITY [0-9]*/UIDVALIDITY/;s/INTERNALDATE "[^"]*"/INTERNALDATE -DATE-/g;s/SNAPSHOT "[^"]*"/SNAPSHOT -SNAPSHOT-/g;s/SNAPSHOTEXISTS "[^"]*"/SNAPSHOTEXISTS -SNAPSHOT-/g;s/ADD "UID=[^"]*/ADD "UID=<uid>/;s:^-ERR .*:-ERR --error--:'
 
 rm -rf confmdtest
 ../maildir/maildirmake confmdtest
@@ -610,7 +610,14 @@ OPEN INBOX
 SETACL INBOX "" -owner i
 COPY 1-4 "" INBOX
 DELETEACL INBOX "" -owner
-COPY 1-4 "" INBOX
+COPY 1 "" INBOX
+NOOP
+COPY 2 "" INBOX
+NOOP
+COPY 3 "" INBOX
+NOOP
+COPY 4 "" INBOX
+NOOP
 CLOSE
 CREATE INBOX a
 MKDIR INBOX b
@@ -661,8 +668,53 @@ test message
 EOF
 	n=`expr $n + 1`
 done
-env AUTHENTICATED=confmdtest IMAP_BROKENUIDV=1 IMAP_KEYWORDS=1 MOVE_EXPUNGE_TO_TRASH=1 MAILDIR=confmdtest PROTOCOL=SMAP1 $IMAPINVOKE <<EOF | sed "$SED"
+env AUTHENTICATED=user1 IMAP_BROKENUIDV=1 IMAP_KEYWORDS=1 MOVE_EXPUNGE_TO_TRASH=1 MAILDIR=confmdtest PROTOCOL=SMAP1 $IMAPINVOKE <<EOF | sed "$SED"
 OPEN INBOX
 EXPUNGE
+SETACL INBOX "" -owner c
+MKDIR INBOX subdir
+CREATE INBOX subdir
+SETACL INBOX "" -owner ""
+MKDIR INBOX subdir
+CREATE INBOX subdir
+SETACL INBOX "" -owner x
+RMDIR INBOX subdir
+SETACL INBOX "" -owner ""
+RMDIR INBOX subdir
+SETACL INBOX subdir "" -owner x
+DELETE INBOX subdir
+SETACL INBOX subdir "" -owner ""
+DELETE INBOX subdir
+CREATE INBOX Trash
+MOVE 1 "" INBOX Trash
+OPEN INBOX Trash
+STORE 1 "INTERNALDATE=10 Jan 2022 09:00:00 -0500"
+STORE 1 +KEYWORDS=-Label1
+STORE 1 +KEYWORDS=-Label2
 LOGOUT
 EOF
+
+f="`echo confmdtest/.Trash/cur/*`"
+
+$PERL -e "use POSIX qw(strftime); print strftime(\"%m/%Y\\n\", localtime [stat('$f')]->[9])"
+
+rm -rf confmdtest
+../maildir/maildirmake confmdtest || exit 1
+
+echo '#! /bin/sh' >confsendmail
+echo 'echo $* >'`pwd`'/confsendmail.out' >>confsendmail
+echo "cat >>`pwd`/confsendmail.out" >>confsendmail
+chmod +x confsendmail
+
+env AUTHENTICATED=user1 IMAP_BROKENUIDV=1 IMAP_KEYWORDS=1 MOVE_EXPUNGE_TO_TRASH=1 MAILDIR=confmdtest PROTOCOL=SMAP1 SENDMAIL=`pwd`/confsendmail $IMAPINVOKE <<EOF | sed "$SED"
+OPEN INBOX
+ADD FOLDER INBOX "" "MAILFROM=user@example.com" "RCPTTO=recipient@example.com" "RCPTTO=recipient2@example.com" "NOTIFY=success,delay,fail" FLAGS=REPLIED KEYWORDS=keyword1 {.}
+Subject: test message 1
+
+test message 1
+.
+OPEN INBOX
+FETCH 1 CONTENTS=BODY FLAGS KEYWORDS
+EOF
+cat confsendmail.out
+rm -rf confsendmail confsendmail.out confmdtest

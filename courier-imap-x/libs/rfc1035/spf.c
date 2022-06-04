@@ -12,15 +12,9 @@
 #include	<string.h>
 #include	<errno.h>
 #include	<sys/types.h>
-#if TIME_WITH_SYS_TIME
-#include	<sys/time.h>
 #include	<time.h>
-#else
 #if HAVE_SYS_TIME_H
 #include	<sys/time.h>
-#else
-#include	<time.h>
-#endif
 #endif
 #include	<idna.h>
 
@@ -1046,7 +1040,7 @@ static void setexp(const char *exp,
 	{
 		set_err_msg(info->errmsg_buf,
 			    info->errmsg_buf_size,
-			    "A DNS lookup error occured while"
+			    "A DNS lookup error occurred while"
 			    " fetching the SPF explanation record.");
 	}
 	else

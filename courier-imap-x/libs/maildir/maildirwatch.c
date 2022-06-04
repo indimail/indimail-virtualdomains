@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <signal.h>
+#include <time.h>
 #include <sys/signal.h>
 #if HAVE_INOTIFY_INIT
 #include <sys/inotify.h>

@@ -21,18 +21,18 @@
 %endif
 %endif
 
-%define using_systemd %(test -d /etc/systemd && echo 1 || echo 0)
+%define using_systemd %(test -d /lib/systemd && echo 1 || echo 0)
 
 %define _missing_doc_files_terminate_build 1
 %define _unpackaged_files_terminate_build 1
 
-Summary: Courier-IMAP @VERSION@ IMAP server
+Summary: Courier-IMAP @PACKAGE_VERSION@ IMAP server
 Name: @PACKAGE@
-Version: @VERSION@
+Version: @PACKAGE_VERSION@
 Release: 1%{courier_release}
 License: GPL
 Group: Applications/Mail
-Source: %{name}-@VERSION@.tar.bz2
+Source: %{name}-@PACKAGE_VERSION@.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Requires: coreutils sed
 %if %suse_version
@@ -49,10 +49,12 @@ Requires(preun):  systemd
 Requires: courier-authlib >= 0.60.6.20080629
 BuildRequires: gcc-c++
 BuildRequires: procps-ng
+BuildRequires: gdbm-devel
 BuildRequires: coreutils perl
 BuildRequires: courier-authlib-devel >= 0.60.6.20080629
 BuildRequires: libidn-devel
 BuildRequires: courier-unicode-devel
+BuildRequires: %{__make}
 
 %define use_openssl %(rpm -q openssl-devel >/dev/null 2>&1 && echo 1 && exit 0; echo 0)
 
@@ -64,7 +66,7 @@ BuildRequires:      libgcrypt-devel gnutls-devel /usr/bin/certtool
 Requires:	  /usr/bin/certtool
 %endif
 
-%define is_fedora %(if rpm -q fedora-release >/dev/null 2>/dev/null; then echo "1"; exit 0; fi; echo "1"; exit 1)
+%define is_fedora %(if rpm -q fedora-release >/dev/null 2>/dev/null; then echo "1"; exit 0; fi; echo "0"; exit 1)
 
 %if %is_fedora
 BuildRequires: perl-generators
@@ -74,12 +76,6 @@ BuildRequires: /usr/lib/locale/locale-archive
 Obsoletes: %{name}-ldap
 Obsoletes: %{name}-mysql
 Obsoletes: %{name}-pgsql
-
-%if %suse_version
-BuildRequires: rpm >= 3.0.5 /usr/bin/sed %([ %{suse_version} -gt 819 ] && echo /usr/include/fam.h)
-%else
-BuildRequires: rpm >= 4.0.2 sed /usr/include/fam.h
-%endif
 
 #  RH 7.0 resets sysconfdir & mandir, put them back where they belong
 
@@ -97,7 +93,7 @@ BuildRequires: rpm >= 4.0.2 sed /usr/include/fam.h
 # SuSE specific settings
 %if %suse_version
 # some templates for SuSE distribs.
-%define templdir	${RPM_BUILD_DIR}/%{name}-@VERSION@/packaging/suse
+%define templdir	${RPM_BUILD_DIR}/%{name}-@PACKAGE_VERSION@/packaging/suse
 %define _sysconfdir	/etc/courier-imap
 %define	_mandir		/usr/share/man
 %define initlndir	/usr/sbin
@@ -118,20 +114,22 @@ full Courier mail server.  Install the Courier package instead.
 %define xflags %{nil}
 %endif
 
-PATH=/usr/bin:$PATH %configure %{?notice_option} \
-	--with-redhat \
-	%{?xflags: %{xflags}}
-
 %build
+
+%configure %{?notice_option} -C %{?xflags: %{xflags}}
+
 %{__make} %{_smp_mflags}
 %{__make} check
 
 %install
 
 %{__rm} -rf $RPM_BUILD_ROOT
-%{__mkdir_p} $RPM_BUILD_ROOT%{pamconfdir}
 %{__mkdir_p} $RPM_BUILD_ROOT%{initdir}
 %{__make} install DESTDIR=$RPM_BUILD_ROOT
+
+%{__mkdir_p} $RPM_BUILD_ROOT%{pamconfdir}
+%{__install} libs/imap/imapd.pam $RPM_BUILD_ROOT%{pamconfdir}/imap
+%{__install} libs/imap/pop3d.pam $RPM_BUILD_ROOT%{pamconfdir}/pop3
 
 %if %using_systemd
 %{__mkdir_p} $RPM_BUILD_ROOT%{_datadir}
@@ -224,6 +222,7 @@ then
 	:
 else
 	MANPATH="%{_mandir}:\$MANPATH"
+	MANPATH="\`echo \$MANPATH | sed 's/:\$//'\`"
 	export MANPATH
 	PATH="%{_bindir}:\$PATH"
 	if test -w /etc
@@ -245,8 +244,6 @@ endif
 echo "\$MANPATH" | tr ':' '\012' | fgrep -qx %{_mandir}
 
 if ( \$? ) then
-	true
-else
 	setenv MANPATH "%{_mandir}:\$MANPATH"
 	setenv PATH "%{_bindir}:\$PATH"
 	test -w /etc
@@ -255,10 +252,12 @@ else
 	else
 		setenv PATH "%{_sbindir}:\$PATH"
 	endif
+
+	setenv MANPATH \`echo \$MANPATH | sed 's/:\$//'\`
+	setenv PATH    \`echo \$PATH | sed 's/:\$//'\`
 endif
 EOF
 
-%{__cp} libs/imap/README README.imap
 %{__cp} libs/imap/README.proxy* .
 %{__cp} libs/maildir/README.maildirquota.txt README.maildirquota
 %{__cp} libs/maildir/README.sharedfolders.txt README.sharedfolders
@@ -313,15 +312,10 @@ fi
 %{_datadir}/sysconftool `%{__cat} %{_datadir}/configlist` >/dev/null
 %endif
 
-# Fix up permissions
-chown --reference=%{_datadir}/dhparams.pem.dist %{_datadir}/dhparams.pem
-for f in %{_datadir}/imapd.pem %{_datadir}/pop3d.pem
-do
-	if test -f "$f"
-	then
-		chown --reference=%{_datadir}/dhparams.pem.dist "$f"
-	fi
-done
+test -f %{_datadir}/dhparams.pem || ln %{_datadir}/dhparams.pem.dist %{_datadir}/dhparams.pem
+
+test -f %{_datadir}/imapd.pem || %{_sbindir}/mkimapdcert
+test -f %{_datadir}/pop3d.pem || %{_sbindir}/mkpop3dcert
 
 %preun
 %if %using_systemd
@@ -387,7 +381,7 @@ fi
 %{_datadir}/mk*
 %{_datadir}/sysconftool
 
-%doc NEWS AUTHORS COPYING libs/imap/BUGS README README.imap README.maildirquota
+%doc NEWS AUTHORS COPYING libs/imap/BUGS README README.maildirquota
 %doc README.sharedfolders
 %doc README.proxy*
 

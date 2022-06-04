@@ -2,11 +2,12 @@
 # Copyright 2000-2021 Double Precision, Inc.  See COPYING for
 # distribution information.
 
-ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
+ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -Im4
 
-AM_CXXFLAGS= @COURIER_UNICODE_CXXFLAGS@
+AM_CXXFLAGS = @COURIER_UNICODE_CXXFLAGS@
 
 noinst_SCRIPTS=update.sh		\
+	mkcategories.pl			\
 	mkcommon.pm			\
 	mkbidi.pl			\
 	mkbidiclass.pl			\
@@ -17,6 +18,7 @@ noinst_SCRIPTS=update.sh		\
 	mkhtmlent.pl			\
 	mklinebreak.pl			\
 	mknormalization.pl		\
+	mkscripts.pl			\
 	mkultcase.pl			\
 	mkwordbreak.pl
 
@@ -41,7 +43,7 @@ update-www:
 	@$(MAKE) update-www-composition
 
 update-www-unicode-copyright:
-	links -dump https://www.unicode.org/license.html >UNICODE-LICENSE.txt.tmp
+	@links@ -dump -no-numbering https://www.unicode.org/license.html >UNICODE-LICENSE.txt.tmp
 	mv UNICODE-LICENSE.txt.tmp UNICODE-LICENSE.txt
 
 update-www-unicode:
@@ -246,7 +248,11 @@ libcourier_unicode_la_SOURCES=\
 			bidi_mirroring.h \
 			unicode_categories.c
 
-libcourier_unicode_la_LDFLAGS=-version-info 7:0:0
+libcourier_unicode_la_LDFLAGS=-version-info @LIBVERSION_INFO@
+
+DATE := $(shell date -R)
+dist-hook:
+	rm -f $(distdir)/courier-unicode.h
 
 EXTRA_DIST=$(noinst_SCRIPTS) $(man_MANS) $(PACKAGE).spec \
 	m4/courier-unicode.m4 \
@@ -472,7 +478,7 @@ docs.stamp:
 	rm -rf man.tmp
 	mkdir man.tmp
 	d=`cd $(srcdir); pwd`; cd man.tmp; xsltproc --nonet --xinclude \
-        http://cdn.docbook.org/release/xsl-nons/current//manpages/docbook.xsl\
+        http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl\
 		$$d/book.xml
 	mkdir -p man
 	rm -f man/*.[123456789]
@@ -485,11 +491,11 @@ docs.stamp:
 all-am: INSTALL README
 
 README: html/index.html
-	elinks -dump -no-numbering -no-references html/index.html >README.tmp
+	@links@ -dump -no-numbering -no-references html/index.html >README.tmp
 	mv -f README.tmp README
 
 INSTALL: html/INSTALL.html
-	elinks -dump -no-numbering -no-references html/INSTALL.html >INSTALL.tmp
+	@links@ -dump -no-numbering -no-references html/INSTALL.html >INSTALL.tmp
 	mv -f INSTALL.tmp INSTALL
 
 html/index.html html/INSTALL.html $(man_MANS): docs.stamp
@@ -503,7 +509,7 @@ rpm:
 	$(MAKE) bump.rpm.release
 	$(MAKE) dist
 	$(MAKE) dorpm
-	$$HOME/repos.sh
+	$$HOME/bin/rpmrepos.sh
 
 dorpm:
 	rm -rf rpm/BUILD/*

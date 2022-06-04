@@ -12,22 +12,33 @@ describes the <span class="command"><strong>maildirmake</strong></span> command 
 <span class="application">Courier</span> mail server,
 which creates an extended form of maildirs that implements
 additional extensions beyond the basic maildir properties that were first
-implemented in the Qmail mail server.</p></div><div class="refsect1"><a id="options" shape="rect"> </a><h2>OPTIONS</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">-S</code></span></dt><dd>create a "sharable" maildir.  A sharable maildir has
+implemented in the Qmail mail server.</p></div><div class="refsect1"><a id="options" shape="rect"> </a><h2>OPTIONS</h2><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">-S</code></span></dt><dd><p>create a "sharable" maildir.  A sharable maildir has
 slightly different permissions which allows creation of publicly-shared
-folders.</dd><dt><span class="term"><code class="literal">-q</code> <em class="replaceable"><code>quota</code></em></span></dt><dd>install a quota on the maildir.
+folders.</p></dd><dt><span class="term"><code class="literal">-q</code> <em class="replaceable"><code>quota</code></em></span></dt><dd><p>install a quota on the maildir.
 	    See
 	    <a class="ulink" href="maildirquota.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildirquota</span>(7)</span></a>
 	    for more information.
 	    The specified maildir gets automatically created if it does not
 	    exist; otherwise the existing maildir's quota gets updated.
-	  </dd><dt><span class="term"><code class="literal">-f</code> <em class="replaceable"><code>folder</code></em></span></dt><dd>do not create a maildir, but create a folder in an
-existing maildir.</dd><dt><span class="term"><code class="literal">-F</code> <em class="replaceable"><code>folder</code></em></span></dt><dd>Like the <code class="literal">-f</code> option, except
+	    <em class="replaceable"><code>quota</code></em> may be:
+	  </p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><em class="replaceable"><code>####S</code></em></span></dt><dd><p>
+		  Specifies the quota in the total number of bytes for all
+		  messages.
+		  <span class="quote">“<span class="quote">10000000S</span>”</span> specifies a quota of ten million
+		  bytes.
+		</p></dd><dt><span class="term"><em class="replaceable"><code>####C</code></em></span></dt><dd><p>
+		  Specifies the quota in the total number of messages in
+		  the maildir.
+		  <span class="quote">“<span class="quote">10000S</span>”</span> specifies a quota of ten thousand
+		  messages.
+		</p></dd></dl></div></dd><dt><span class="term"><code class="literal">-f</code> <em class="replaceable"><code>folder</code></em></span></dt><dd><p>do not create a maildir, but create a folder in an
+existing maildir.</p></dd><dt><span class="term"><code class="literal">-F</code> <em class="replaceable"><code>folder</code></em></span></dt><dd><p>Like the <code class="literal">-f</code> option, except
 	    that the folder's name is given using the system locale's
 	    character set. Non-Latin characters in the folder's name
 	    must be given to the <code class="literal">-f</code> option using IMAP's
 	    UTF8 encoding. The <code class="literal">-F</code> option
 	    takes the folder name specified using the console's character
-	    set.</dd><dt><span class="term"><code class="literal">-s</code> <em class="replaceable"><code>mode</code></em></span></dt><dd>create a publicly accessible folder in an
+	    set.</p></dd><dt><span class="term"><code class="literal">-s</code> <em class="replaceable"><code>mode</code></em></span></dt><dd><p>create a publicly accessible folder in an
 existing sharable maildir.  First, use the <code class="option">-S</code> option to
 create a sharable maildir.
 Then, run <span class="command"><strong>maildirmake</strong></span> again with the
@@ -40,20 +51,20 @@ write messages to this folder;
 write messages to this folder;
 <code class="literal">group</code> - only allow members of
 your own system group to access messages in this folder (instead of
-everyone).</dd><dt><span class="term"><code class="literal">--add</code> <em class="replaceable"><code>name</code></em>=<em class="replaceable"><code>pathname</code></em>,
-<code class="literal">--del</code> <em class="replaceable"><code>name</code></em></span></dt><dd>
+everyone).</p></dd><dt><span class="term"><code class="literal">--add</code> <em class="replaceable"><code>name</code></em>=<em class="replaceable"><code>pathname</code></em>,
+<code class="literal">--del</code> <em class="replaceable"><code>name</code></em></span></dt><dd><p>
 create or delete the directories and links needed to
-access shared folders.  See below for more information.</dd><dt><span class="term"><code class="literal">--checkutf8</code> <em class="replaceable"><code>maildir</code></em> <em class="replaceable"><code>maildirfilter</code></em></span></dt><dd>
+access shared folders.  See below for more information.</p></dd><dt><span class="term"><code class="literal">--checkutf8</code> <em class="replaceable"><code>maildir</code></em> <em class="replaceable"><code>maildirfilter</code></em></span></dt><dd><p>
 	    Perform a sanity check to verify that a pre-unicode format
 	    maildir can be converted to a unicode-format maildir.
 	    See <span class="quote">“<span class="quote">Converting pre-unicode format maildirs</span>”</span>, below,
 	    for more information.
-	  </dd><dt><span class="term"><code class="literal">--convutf8</code> <em class="replaceable"><code>maildir</code></em> <em class="replaceable"><code>maildirfilter</code></em></span></dt><dd>
+	  </p></dd><dt><span class="term"><code class="literal">--convutf8</code> <em class="replaceable"><code>maildir</code></em> <em class="replaceable"><code>maildirfilter</code></em></span></dt><dd><p>
 	    Convert a pre-unicode format
 	    maildir can be converted to a unicode-format maildir.
 	    See <span class="quote">“<span class="quote">Converting pre-unicode format maildirs</span>”</span>, below,
 	    for more information.
-	  </dd></dl></div><div class="refsect2"><a id="folders" shape="rect"> </a><h3>FOLDERS</h3><p>
+	  </p></dd></dl></div><div class="refsect2"><a id="folders" shape="rect"> </a><h3>FOLDERS</h3><p>
 This <span class="command"><strong>maildirmake</strong></span> command supports enhanced maildirs that
 contain folders.</p><p>
 By itself, <span class="command"><strong>maildirmake</strong></span> makes a new subdirectory

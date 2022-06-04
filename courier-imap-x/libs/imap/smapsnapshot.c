@@ -19,15 +19,9 @@
 #if	HAVE_UTIME_H
 #include	<utime.h>
 #endif
-#if TIME_WITH_SYS_TIME
-#include	<sys/time.h>
 #include	<time.h>
-#else
 #if HAVE_SYS_TIME_H
 #include	<sys/time.h>
-#else
-#include	<time.h>
-#endif
 #endif
 #if HAVE_LOCALE_H
 #include	<locale.h>
@@ -145,6 +139,7 @@ static void delete_snapshot(struct snapshot_list *snn)
 	{
 		strcat(strcat(strcpy(p, snapshot_dir), "/"), snn->filename);
 		unlink(p);
+		free(p);
 	}
 
 	free(snn->filename);
@@ -621,6 +616,14 @@ int snapshot_init(const char *folder, const char *snapshot)
 		--cnt;
 	}
 
+	while (sl)
+	{
+		snn=sl;
+		sl=sl->next;
+		free(snn->filename);
+		free(snn->prev);
+		free(snn);
+	}
 	return rc;
 }
 

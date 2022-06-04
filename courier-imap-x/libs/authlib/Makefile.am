@@ -1,4 +1,5 @@
-AUTOMAKE = srcdir=${srcdir} @SHELL@ ${srcdir}/../../automake.fix @AUTOMAKE@
+#AUTOMAKE = srcdir=${srcdir} @SHELL@ ${srcdir}/../../automake.fix @AUTOMAKE@
+ACLOCAL_AMFLAGS="-Im4"
 
 noinst_LTLIBRARIES=libauth.la libauthmod.la
 EXTRA_LTLIBRARIES=libauthpam.la libauthpwd.la libauthshadow.la libauthcustom.la

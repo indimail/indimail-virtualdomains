@@ -4,12 +4,12 @@
 .\"     Title: maildirmake
 .\"    Author: Sam Varshavchik
 .\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 03/02/2021
+.\"      Date: 04/14/2022
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "MAILDIRMAKE" "1" "03/02/2021" "Courier Mail Server" "Double Precision, Inc\&."
+.TH "MAILDIRMAKE" "1" "04/14/2022" "Courier Mail Server" "Double Precision, Inc\&."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -55,6 +55,22 @@ create a "sharable" maildir\&. A sharable maildir has slightly different permiss
 install a quota on the maildir\&. See
 \m[blue]\fB\fBmaildirquota\fR(7)\fR\m[]\&\s-2\u[1]\d\s+2
 for more information\&. The specified maildir gets automatically created if it does not exist; otherwise the existing maildir\*(Aqs quota gets updated\&.
+\fIquota\fR
+may be:
+.PP
+\fI####S\fR
+.RS 4
+Specifies the quota in the total number of bytes for all messages\&.
+\(lq10000000S\(rq
+specifies a quota of ten million bytes\&.
+.RE
+.PP
+\fI####C\fR
+.RS 4
+Specifies the quota in the total number of messages in the maildir\&.
+\(lq10000S\(rq
+specifies a quota of ten thousand messages\&.
+.RE
 .RE
 .PP
 \-f \fIfolder\fR

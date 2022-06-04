@@ -1,18 +1,106 @@
    Link: Courier Unicode Library (start)
    Link: Courier Unicode Library (parent)
    Link: Courier Unicode Library (previous)
-   Link: Manual pages (next)
+   Link: Using the library (next)
 
 Installation and usage
 
-   Download the current version of the library from
-   https://www.courier-mta.org/download.html#unicode. Use the downloaded
-   tarball to prepare an appropriate installation package for your operating
-   system distribution. The typical sequence of commands is:
+  RPM and DEB packages
 
- ./configure    # Takes the default configure script options
- make
- make install DESTDIR=/tmp/courier-unicode-instimage # For example.
+   These are not the same packages as the ones from various distributions'
+   repositories. These packages carry an higher internal revision level in
+   order to prevent them from getting upgraded by the distribution packaging.
+   This packaging exists in order to have a convenient way of updating after
+   a release without waiting for the distribution's package to get built.
+
+  Note
+
+   If a distribution package is already installed it should be removed
+   completely before switching to the upstream version (dnf remove or apt
+   purge). Preserve any existing configuration files, beforehand, in order to
+   reconfigure the package.
+
+  Note
+
+   These packages use their own, generic, installation layout that may
+   deviate slightly from the package installation conventions that's
+   preferred by the distributions.
+
+    RPM builds
+
+   It is not necessary to unpack this tarball in order to build this tarball.
+
+   Run “dnf install rpm-build” if it's not installed already, then:
+
+             $ rpmbuild -ta courier-unicode-VERSION.tar.bz2
+
+
+   If this fails due to any missing dependencies, install them. This builds
+   the main “courier-unicode” package with runtime libraries, and the
+   “courier-unicode-devel” package with link libraries and header files.
+
+             $ rpmbuild --define 'compat 1' -ta courier-unicode-VERSION.tar.bz2
+
+
+   Setting the “compat 1” flag during an RPM build produces a
+   differently-named “compatibility” runtime package, with its version as
+   part of the package's name. The compatibility package gets installed
+   together with the newer version of this library that introduces a binary
+   ABI change. This supports a transition period during which other software
+   that's built to the compatibility package's ABI version continue to load
+   the compatibility package's library at runtime, while new software can be
+   built against the newer ABI.
+
+    DEB builds
+
+   Run “apt install devscripts debhelper”, if it's not installed already.
+   Create an empty directory, and copy/move the tarball into it:
+
+             $ mkdir tmp
+             $ mv courier-unicode-VERSION.tar.bz2 tmp
+             $ cd tmp
+
+
+   Unpack the tarball and cd into the unpacked subdirectory:
+
+             $ tar xvf courier-unicode-VERSION.tar.bz2
+             $ cd courier-unicode-VERSION
+
+
+   Run the courier-debuild script, which is a wrapper for debuild, and
+   forwards its parameters to it:
+
+             $ ./courier-debuild -us -uc
+
+
+  Note
+
+   The above steps must be followed strictly. The courier-debuild script
+   expects the distributed tarball in its parent directory.
+
+   This eventually produces a deb subdirectory with .deb packages that can be
+   installed with "dpkg -i":
+
+     * The “libcourier-unicode-dev” package contains the development
+       libraries and header files, for building other packages that use the
+       Courier Unicode Library.
+
+     * The “libcourier-unicode<N>” package contains the runtime library.
+
+             $ DEBGCC=10 ./courier-debuild -us -uc
+
+
+   Setting the DEBGCC environment variable selects a non-default gcc version.
+
+  Note
+
+   All Courier packages should be built using the same version of gcc.
+
+  Manual
+
+           ./configure    # Takes the default configure script options
+           make
+           make install DESTDIR=/tmp/courier-unicode-instimage # For example.
 
    The library uses a stock configure script, make and make install command
    that respects the DESTDIR setting to create an installation image in the
@@ -24,47 +112,25 @@ Installation and usage
    version of the library, or remove any files from an older version that do
    not exist any more in the new version. Use the created installation image
    to prepare an installable package in a native package format for your
-   operating system distribution. Use your native system distribution's
-   package manager to properly install and update this library.
+   operating system distribution. Use your distribution's native package
+   manager to properly install and update this library.
 
-   To use the library, “#include <courier-unicode.h>” and link with
-   -lcourier-unicode. The C++ compiler must have C++11 support. Minimum
-   usable version of gcc appears to be gcc 4.4 with the -std=c++0x flag.
-   Current versions of gcc use C++11, or higher, by default and do not
-   require extra flags. For C++ code, as usual, the compiler and compilation
-   flags for compiling any code that uses this library must be ABI-compatible
-   too.
+  Maintainer Mode (see README in the git repository to set up)
 
-   The Courier Unicode library installs an autoconf macro to probe for C++11
-   support. In your configure.ac
+   make rpm or make deb, as appropriate, will:
 
-           AX_COURIER_UNICODE_VERSION
-           AX_COURIER_UNICODE_CXXFLAGS
+    1. Increment an internal release number.
 
-           AC_SUBST(COURIER_UNICODE_CXXFLAGS)
+    2. Run make dist.
 
+    3. Proceed and build a new release, creating the native packages in the
+       rpm or deb subdirectory.
 
-   Then, in Makefile.am:
-
-           AM_CXXFLAGS = @COURIER_UNICODE_CXXFLAGS@
-
-
-   The AX_COURIER_UNICODE_VERSION macro checks the minimum library version,
-   which defaults to the build version. An optional parameter explicitly
-   specifies which version of the Courier Unicode library is the minimum
-   version required, i.e.:
-
-         AX_COURIER_UNICODE_VERSION(2.2.0)
-
-   AX_COURIER_UNICODE_CXXFLAGS sets COURIER_UNICODE_CXXFLAGS to the
-   appropriate option for older gcc compilers that require an option to
-   enable C++11 support.
-
-   The starting point for the library documentation is courier-unicode(7).
-   Refer to the included manual pages, and the HTML version of the man pages
-   for more information.
+    4. Execute either $HOME/bin/rpmrepos.sh or $HOME/bin/debrepos.sh. This
+       can be a script that does nothing, or it's intended to be the
+       maintainer's script that pushes out the packages to a repository.
 
    --------------------------------------------------------------------------
 
-   Prev                                                                  Next
-   Courier Unicode Library                  Home                 Manual pages
+   Prev                                                                  Next
+   Courier Unicode Library               Home               Using the library

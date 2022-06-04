@@ -42,7 +42,7 @@ html_DATA=$(MAILDROPHTML) manpage.css
 sysconf_DATA=quotawarnmsg.example
 libexec_SCRIPTS=imapd.rc imapd-ssl.rc pop3d.rc pop3d-ssl.rc
 
-HTML2TXT=links -dump -no-numbering -no-references
+HTML2TXT=@links@ -dump -no-numbering -no-references
 
 NEWS: NEWS.html
 	$(HTML2TXT) NEWS.html >NEWS
@@ -96,12 +96,11 @@ install-data-local: install-man
 uninstall-local:
 	rm -f $(DESTDIR)$(bindir)/couriertls
 
-INSTALL.txt: INSTALL.html
-	$(HTML2TXT) INSTALL.html >INSTALL.txt
-
 #
 # For maintainer's use only
 #
+
+DATE := $(shell date -R)
 
 dist-hook: courier-imap.spec
 	test -f $(srcdir)/rpm.release && cp $(srcdir)/rpm.release $(distdir) \
@@ -147,25 +146,7 @@ build-rpm:
 		--define '_tmppath %{_var}/tmp' \
 		--define '__spec_prep_pre %{___build_pre}' \
 		@PACKAGE@-@VERSION@.tar.bz2
-
-lpm: lpm-build
-
-lpm-build:
-	$(MAKE) -$(MAKEFLAGS) bump.rpm.release
-	$(MAKE) -$(MAKEFLAGS) dist
-	rm -rf lpm
-	mkdir lpm
-	lpbuild --srcbuild -o lpm @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2
-
-publish:
-	lpbuild --resign lpm/*
-	rm -rf lpmtmp
-	mkdir lpmtmp
-	ln lpm/* lpmtmp
-	mv lpmtmp/*.src.lp repository/`lpm -q --distribution`/sources
-	mv lpmtmp/*.lp repository/`lpm -q --distribution`/packages
-	rm -rf lpmtmp
-	lpm --sync repository && rsync -a -v --delete-after repository/. headache:lpmtool.com/www/repositories/courier-imap
+	$$HOME/bin/rpmrepos.sh
 
 bump.rpm.release: @PACKAGE_NAME@.spec
 	VERSION="x"; \

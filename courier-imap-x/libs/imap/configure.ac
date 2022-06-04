@@ -4,7 +4,7 @@ dnl
 dnl Copyright 1998 - 2018 Double Precision, Inc.  See COPYING for
 dnl distribution information.
 
-AC_INIT(courier-imap, 5.0.10, [courier-users@lists.sourceforge.net])
+AC_INIT([courier-imap],[5.1.8],[courier-users@lists.sourceforge.net])
 
 >confdefs.h  # Kill PACKAGE_ macros
 
@@ -15,16 +15,13 @@ LPATH="$PATH:/usr/local/bin"
 
 AC_CONFIG_HEADERS(config.h)
 dnl Checks for programs.
-AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_CC
-AC_PROG_CC_C99
 AC_PROG_AWK
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_CXX
-AC_LIBTOOL_DLOPEN
-AM_PROG_LIBTOOL
-AC_CONFIG_MACRO_DIR([../../m4])
+AC_CONFIG_MACRO_DIR([m4])
+LT_INIT
 AC_PATH_PROGS(PERL, perl5 perl, perl, $LPATH)
 
 if test "$PERL" = "perl"
@@ -55,6 +52,11 @@ AC_ARG_WITH(mailer,
 ]
 )
 AC_SUBST(SENDMAIL)
+
+AC_ARG_ENABLE(root-check, [  --disable-root-check    Allow build as root (make check will fail)],
+	rootcheck="$enableval",
+	rootcheck="yes")
+AC_SUBST(rootcheck)
 
 OPENSSL_PATH=$PATH:/sbin:/usr/sbin:/usr/local/sbin:/usr/local/bin
 
@@ -99,9 +101,10 @@ AC_ARG_WITH(piddir, [  --with-piddir         Directory where imapd.pid is create
 AC_SUBST(piddir)
 
 dnl Checks for header files.
-AC_HEADER_STDC
+
 AC_CHECK_HEADERS(locale.h unistd.h sys/stat.h sys/wait.h time.h sys/time.h sys/utsname.h utime.h inttypes.h strings.h)
-AC_HEADER_TIME
+AC_CHECK_HEADERS_ONCE([sys/time.h])
+
 AC_HEADER_DIRENT
 AC_HEADER_SYS_WAIT
 
@@ -109,7 +112,6 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_INLINE
 AC_TYPE_SIZE_T
-AC_TYPE_SIGNAL
 AC_SYS_LARGEFILE
 
 AC_CACHE_CHECK([for socklen_t],
@@ -280,6 +282,12 @@ AC_SUBST(certsdir)
 mydatadir="$datadir"
 AC_SUBST(mydatadir)   # Avoid useless autoconf warning
 
+if test -f /etc/pam.d/common-auth
+then
+	cp $srcdir/common.authpam imapd.pam
+	cp $srcdir/common.authpam pop3d.pam
+fi
+
 AM_CONDITIONAL(HAVE_SGML, test -d ${srcdir}/../docbook)
 
 # This gets built by the make rule, and is not in the git repo
@@ -352,7 +360,16 @@ then
 AC_SUBST(cacerts)
 fi
 
-AC_OUTPUT(Makefile imapd.dist imapd-ssl.dist pop3d.dist pop3d-ssl.dist
+if test -f /usr/bin/elinks
+then
+	links=/usr/bin/elinks
+else
+	links=/usr/bin/links
+fi
+AC_SUBST(links)
+
+AC_CONFIG_FILES([Makefile imapd.dist imapd-ssl.dist pop3d.dist pop3d-ssl.dist
 	testsuitefix.pl mkimapdcert mkpop3dcert mkdhparams
 	imapd.cnf.gnutls pop3d.cnf.gnutls
-	imapd.cnf.openssl pop3d.cnf.openssl)
+	imapd.cnf.openssl pop3d.cnf.openssl])
+AC_OUTPUT
