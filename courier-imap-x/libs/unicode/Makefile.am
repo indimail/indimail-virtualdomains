@@ -26,7 +26,7 @@ noinst_PROGRAMS=unicodetest graphemetest linebreaktest wordbreaktest \
 	enttest scripttest biditest biditest2 normalizetest
 
 aclocaldir=$(datadir)/aclocal
-aclocal_DATA=m4/courier-unicode.m4 courier-unicode-version.m4
+aclocal_DATA=courier-unicode.m4 courier-unicode-version.m4
 
 update-www:
 	@$(MAKE) update-www-unicode
@@ -255,7 +255,7 @@ dist-hook:
 	rm -f $(distdir)/courier-unicode.h
 
 EXTRA_DIST=$(noinst_SCRIPTS) $(man_MANS) $(PACKAGE).spec \
-	m4/courier-unicode.m4 \
+	courier-unicode.m4 \
 	packaging/freebsd10/pkg-descr
 
 if UPDATE_UNICODE

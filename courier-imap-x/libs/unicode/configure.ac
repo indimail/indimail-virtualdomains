@@ -166,6 +166,7 @@ AC_CONFIG_FILES(Makefile
 	courier-unicode.spec
 	courier-unicode.h
 	courier-unicode-version.m4
+	courier-unicode.m4
 )
 
 AC_OUTPUT

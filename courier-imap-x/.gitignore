@@ -389,6 +389,7 @@ ltsugar.m4
 ltversion.m4
 aclocal.m4
 courier-unicode-version.m4
+courier-unicode.m4
 *_config.h.in~
 *_config.h.in
 INSTALL

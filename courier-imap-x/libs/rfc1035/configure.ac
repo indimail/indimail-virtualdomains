@@ -221,7 +221,7 @@ dnl Other checks
 
 if test "$GCC" = "yes"
 then
-	CFLAGS="$CFLAGS -Wall"
+	CFLAGS="$CFLAGS -Wall -std=c99"
 fi
 
 CFLAGS="$CFLAGS -I$srcdir/.. -I.."

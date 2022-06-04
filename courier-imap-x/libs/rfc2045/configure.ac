@@ -2,19 +2,20 @@ dnl
 dnl Copyright 1998 - 2011 Double Precision, Inc.  See COPYING for
 dnl distribution information.
 AC_INIT([rfc2045lib],[0.20],[courier-maildrop@lists.sourceforge.net])
+AC_CONFIG_MACRO_DIR([m4])
 
 >confdefs.h  # Kill PACKAGE_ macros
 
 AC_CONFIG_SRCDIR(rfc2045.c)
-AC_CONFIG_AUX_DIR(../..)
 AM_INIT_AUTOMAKE([foreign no-define])
 AC_CONFIG_HEADERS(rfc2045_config.h)
 
 dnl Checks for programs.
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_CC
+dnl commented below
+#AC_PROG_CC_C99
 AC_PROG_CXX
-#AX_COURIER_UNICODE_CXXFLAGS
 LT_INIT
 
 if test "$GCC" = yes ; then
@@ -22,10 +23,7 @@ if test "$GCC" = yes ; then
         CFLAGS="$CFLAGS -Wall"
 fi
 
-dnl Checks for libraries.
-
 dnl Checks for header files.
-
 AC_CHECK_HEADERS(unistd.h sys/wait.h strings.h locale.h)
 
 AC_CACHE_CHECK([for missing gethostname prototype],rfc2045_cv_SYS_GETHOSTNAME,
@@ -54,6 +52,7 @@ AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
 AC_TYPE_PID_T
 AC_SYS_LARGEFILE
+AX_COURIER_UNICODE_CXXFLAGS
 AC_SUBST(COURIER_UNICODE_CXXFLAGS)
 
 dnl Checks for library functions.

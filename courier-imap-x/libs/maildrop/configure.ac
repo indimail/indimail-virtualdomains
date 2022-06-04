@@ -3,6 +3,7 @@ dnl Copyright 1998 - 2021 Double Precision, Inc.  See COPYING for
 dnl distribution information.
 
 AC_INIT([maildrop],[3.0.8],[courier-maildrop@lists.sourceforge.net])
+AC_CONFIG_MACRO_DIR([m4])
 
 >confdefs.h  # Kill PACKAGE_ macros
 

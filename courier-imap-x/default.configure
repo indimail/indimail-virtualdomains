@@ -101,7 +101,7 @@ fi
 if [ ! -f conf-release ] ; then
   echo "1.1" > conf-release
 fi
-for i in imap authlib maildrop
+for i in imap authlib maildrop unicode rfc2045 maildir
 do
   if [ ! -d libs/$i/m4 ] ; then
     mkdir -p libs/$i/m4
