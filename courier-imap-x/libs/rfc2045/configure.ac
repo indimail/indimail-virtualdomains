@@ -78,7 +78,7 @@ AC_ARG_ENABLE(mimecharset,
 	RFC2045CHARSET="$enableval", RFC2045CHARSET="utf-8")
 
 CFLAGS="$CFLAGS -I.. -I${srcdir}/.."
-CXXFLAGS="$CXXFLAGS -I.. -I${srcdir}/.."
+CXXFLAGS="-std=c++11 $CXXFLAGS -I.. -I${srcdir}/.."
 AC_SUBST(rfc822includedir)
 
 AC_SUBST(RFC2045CHARSET)

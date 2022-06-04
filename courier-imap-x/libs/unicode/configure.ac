@@ -19,7 +19,7 @@ LT_INIT
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_CC
-AC_PROG_CC_C99
+#AC_PROG_CC_C99
 AC_PROG_CXX
 AX_COURIER_UNICODE_CXXFLAGS
 
@@ -113,7 +113,7 @@ then
 	CFLAGS="$CFLAGS -Wall -fexceptions"
 fi
 CFLAGS="-I.. -I$srcdir/.. $CFLAGS"
-CXXFLAGS="-I.. -I$srcdir/.. $CXXFLAGS"
+CXXFLAGS="-std=c++11 -I.. -I$srcdir/.. $CXXFLAGS"
 
 set -- `echo "$VERSION" | tr '.' ' '`
 

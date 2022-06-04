@@ -37,7 +37,7 @@ then
 fi
 
 CFLAGS="$CFLAGS -I${srcdir}/.. -I.. -I${srcdir}/../.. -I../.."
-CXXFLAGS="$CXXFLAGS -I${srcdir}/.. -I.. -I${srcdir}/../.. -I../.."
+CXXFLAGS="-std=c++11 $CXXFLAGS -I${srcdir}/.. -I.. -I${srcdir}/../.. -I../.."
 
 dnl Checks for libraries.
 
