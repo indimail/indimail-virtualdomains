@@ -96,7 +96,7 @@ BuildRequires: python3 python3-devel
 BuildRequires: python python-devel
 %endif
 
-BuildRequires: libgcrypt-devel gdbm-devel libidn-devel pcre-devel pam-devel
+BuildRequires: libgcrypt-devel gdbm-devel libidn-devel pcre2-devel pam-devel
 BuildRequires: perl
 %if %{defined fedora_version}
 BuildRequires: perl-generators
