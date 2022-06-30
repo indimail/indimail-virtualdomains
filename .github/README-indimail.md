@@ -3,6 +3,7 @@
 Table of Contents
 =================
 
+   * [Table of Contents](#table-of-contents)
    * [INTRODUCTION](#introduction)
    * [LICENSING](#licensing)
    * [TERMINOLOGY used for commands](#terminology-used-for-commands)
@@ -66,7 +67,7 @@ Table of Contents
          * [Client Setup - How do I install indimail-mini to use qmail-qmqpc](#client-setup---how-do-i-install-indimail-mini-to-use-qmail-qmqpc)
       * [qmta - Using a minimal standalone qmta-send MTA](#qmta---using-a-minimal-standalone-qmta-send-mta)
          * [How do I set up a standalone MTA using qmta-send](#how-do-i-set-up-a-standalone-mta-using-qmta-send)
-   * [Fedora - Using /usr/sbin/alternatives](#fedora---using-usrsbinalternatives)
+   * [Using /usr/sbin/alternatives](#using-usrsbinalternatives)
    * [Post Handle Scripts](#post-handle-scripts)
    * [Relay Mechanism in IndiMail](#relay-mechanism-in-indimail)
       * [Using tcp.smtp](#using-tcpsmtp)
@@ -115,7 +116,6 @@ Table of Contents
       * [DKIM Author Domain Signing Practices](#dkim-author-domain-signing-practices)
       * [DKIM sign during remote delivery](#dkim-sign-during-remote-delivery)
       * [DKIM sign during local delivery](#dkim-sign-during-local-delivery)
-      * [Setting local delivery to verify DKIM signatures](#setting-local-delivery-to-verify-dkim-signatures)
       * [Testing outbound signatures](#testing-outbound-signatures)
    * [iwebadmin – Web Administration of IndiMail](#iwebadmin--web-administration-of-indimail)
    * [Publishing statistics for IndiMail Server](#publishing-statistics-for-indimail-server)
@@ -151,6 +151,9 @@ Table of Contents
       * [Other](#other)
       * [Brief Feature List](#brief-feature-list)
    * [Current Compilation status of all IndiMail &amp; related packages](#current-compilation-status-of-all-indimail--related-packages)
+   * [Performance / Benchmarks](#performance--benchmarks)
+      * [Observations](#observations)
+      * [Results](#results)
    * [History](#history)
    * [See also](#see-also)
 
@@ -5247,6 +5250,27 @@ This is obtained from github actions defined in each of the indimail repository.
 [![daemontools FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-freebsd.yml)
 [![ucspi-tcp Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-c-cpp.yml)
 [![ucspi-tcp FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-freebsd.yml)
+
+# Performance / Benchmarks
+
+As stated earlier, indimal-mta was built for supporting few million users with as little hardware as possible. The queue design gives indimail-mta unparalled performance. All details are available [here](https://github.com/mbhangui/indimail-mta/tree/master/indimail-mta-x/qmail-perf).
+
+## Observations
+
+* qmail based MTAs that use an external todo processor demonstrate a lower qtime
+* external todo processor has a remarkable impact on the local concurrency. The concurrency never reaches high values with high inject rates.
+* processing todo in batches has a significant impact on qmail-send performance and delivery times by as much as 30%. But this has an impact on the delivery of the first email.
+* Increasting directory split has negligible effect in qmail-perf test and filesystem test
+* statically linked binaries give much better performance. With dynamic linking, indimail-mta performs the worst amongst all MTAs.
+* When delivery rate increase inject rate decreases
+* The biggest impact on local delivery rate are the fsync() calls. Changing fsync() to fdatasync() did not result in improving the delivery rate. Disabling fsync() resulted in local deliveries increasing by 6x.
+	* Disabling fsync, ext4 gave the best performance in the test carried out
+	* Using fsync, zfs gave the best performance in the tests carried out
+* netqmail gives the best injection rate. One of the reason is statically compiled uids, gids which avoids the need to do passwd, group entry lookups uisng the getpw, getgr libc functions.
+
+## Results
+
+Results on [Google Sheet](https://docs.google.com/spreadsheets/d/1Dfr1c1RXh18Lc47fmGymTRV5nL9DRviS9Gy8kqH5iZM/edit?usp=sharing)
 
 # History
 
