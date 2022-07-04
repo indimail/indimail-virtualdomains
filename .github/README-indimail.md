@@ -3803,6 +3803,13 @@ The screen shots are below
 ![iwebadmin1](iwebadmin1.png)
 ![iwebadmin2](iwebadmin2.png)
 ![iwebadmin3](iwebadmin3.png)
+![iwebadmin4](iwebadmin4.png)
+![iwebadmin5](iwebadmin5.png)
+![iwebadmin6](iwebadmin6.png)
+![iwebadmin7](iwebadmin7.png)
+![iwebadmin9](iwebadmin8.png)
+![iwebadmin9](iwebadmin9.png)
+![iwebadmin10](iwebadmin10.png)
 
 
 # Publishing statistics for IndiMail Server
