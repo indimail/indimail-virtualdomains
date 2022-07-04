@@ -16,6 +16,7 @@ on:
       - '!**/*.1'
       - '!**/doc/*'
       - '!**.md'
+      - '!**.png'
   workflow_dispatch:
 
 jobs:
