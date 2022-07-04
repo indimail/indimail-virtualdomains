@@ -3793,9 +3793,10 @@ The RPM / Yum / APT Repo file can be installed using instructions at
 http://software.opensuse.org/download.html?project=home:indimail&amp;package=iwebadmin
 
 After installation, you just need to go to http://127.0.0.1/cgi-bin/iwebadmin
-The image assets get installed in /var/www/html/images/iwebadmin
-The html assets get installed in /usr/share/iwebadmin/html
-The language files get installed in /usr/share/iwebadmin/lang
+
+* The image assets get installed in /var/www/html/images/iwebadmin
+* The html assets get installed in /usr/share/iwebadmin/html
+* The language files get installed in /usr/share/iwebadmin/lang
 
 The screen shots are below
 
