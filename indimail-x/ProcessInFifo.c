@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.13  2022-07-04 22:23:56+05:30  Cprogrammer
+ * fixed typo
+ *
  * Revision 1.12  2021-07-28 12:19:56+05:30  Cprogrammer
  * shortened display in logs on signal
  *
@@ -113,7 +116,7 @@
 #include "FifoCreate.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.12 2021-07-28 12:19:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.13 2022-07-04 22:23:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -393,7 +396,7 @@ cache_active_pwd(time_t tval)
 			!stralloc_catb(&SqlBuf, "JOIN lastauth ON pw_name = user AND pw_domain = domain WHERE ", 61) ||
 			!stralloc_catb(&SqlBuf, "UNIX_timestamp(lastauth.timestamp) >= UNIX_timestamp() - ", 57) ||
 			!stralloc_catb(&SqlBuf, strnum, fmt_ulong(strnum, act_secs)) ||
-			!stralloc_catb(&SqlBuf, " AND service in (\"imap\", \"pop3\", \"wtbm\") ", 41) ||
+			!stralloc_catb(&SqlBuf, " AND service in (\"imap\", \"pop3\", \"webm\") ", 41) ||
 			!stralloc_catb(&SqlBuf, "GROUP BY pw_name, pw_domain ORDER BY lastauth.timestamp desc", 60) ||
 			!stralloc_0(&SqlBuf))
 		die_nomem();

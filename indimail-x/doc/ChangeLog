@@ -15,6 +15,8 @@ Release @version@-@release@ Start 14/02/2021
 06. moved tcpopen, tcpbind, udpopen, isnum, qdirname to libqmail
 - 18/05/2022
 07. tls.c: openssl 3.0.0 port
+- 04/07/2022
+08. ProcessInFifo.c: Fixed typo
 
 *
 Release 3.4.0 Start 14/02/2021
