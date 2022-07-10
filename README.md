@@ -1,20 +1,4 @@
-# Installation (source and binary)
-
-## indimail-virtualdomains Introduction
-
-Messaging Platform based on [indimail-mta](https://github.com/mbhangui/indimail-mta) for MTA (modified qmail), [IndiMail-VirtualDomains](https://github.com/mbhangui/indimail-virtualdomains) for Virtual Domains, [Courier-IMAP](https://www.courier-mta.org/imap/) for IMAP/POP3
-
-* Look at [README-indimail](.github/README-indimail.md) for details on IndiMail, indimail-mta. indimail needs indimail-mta to be installed, instructions for installing the same are included below. You can also read this [README](https://github.com/mbhangui/indimail-mta/blob/master/README.md) for details specific to installing indimail-mta alone.
-* Look at [README-CLUSTER](.github/README-CLUSTER.md) for details on setting up an IndiMail Cluster
-* Look at [INSTALL](.github/INSTALL-indimail.md) for very detailed Source Installation instructions. You may not need that if you follow instructions below in this document itself.
-* Look at [INSTALL-MYSQL](.github/INSTALL-MYSQL.md) for instructions on configuring a MySQL/MariaDB server for IndiMail.
-* Look at [INSTALL-RPM](.github/INSTALL-RPM.md) for instructions on setting up IndiMail using RPM or Debian packages
-* Look at [Quick-INSTALL](.github/Quick-INSTALL.md) for instructions on installation and setup of an IndiMail server.
-* Look at [INSTALL-MINI](.github/INSTALL-MINI.md) for instructions on setting up an MINI Indimail Installation which uses QMQP protocol. indimail-mini is part of the indimail-mta package. You can use this for diskless clients, small devices, [SBCs](https://en.wikipedia.org/wiki/Single-board_computer) like the Raspberry PI, to push mails to any server running IndiMail or indimail-mta.
-* Look at [QMTA](.github/README-indimail.md#qmta---using-a-minimal-standalone-qmta-send-mta) for instructions on settig a minimal MTA that runs as a single daemon and uses minimal resources.
-* Look at [Docker/Podman](https://github.com/mbhangui/indimail-docker/blob/master/README.md) for instructions on using docker / podman containers for indimail. The big advantage of using a docker / podman image is you can save your configuration with the `docker commit ..` or `podman commit` to checkpoint your entire build and deploy the exact configuration on multiple hosts.
-
-A detailed [wiki](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) for indimail-virtualdomains is [here](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md)
+[![Matrix](https://img.shields.io/matrix/indimail:matrix.org.svg)](https://matrix.to/#/#indimail:matrix.org)
 
 **Complation Status (from [Github Actions](https://github.com/mbhangui/indimail-virtualdomains/actions))**
 
@@ -58,9 +42,27 @@ A detailed [wiki](https://github.com/mbhangui/indimail-virtualdomains/blob/maste
 [![ucspi-tcp Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-c-cpp.yml)
 [![ucspi-tcp FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-freebsd.yml)
 
-This document contains instructions for building indimail-mta from source.
+# indimail-virtualdomains Introduction
 
-# Source Compiling/Linking
+Messaging Platform based on [indimail-mta](https://github.com/mbhangui/indimail-mta) for MTA (modified qmail), [IndiMail-VirtualDomains](https://github.com/mbhangui/indimail-virtualdomains) for Virtual Domains, [Courier-IMAP](https://www.courier-mta.org/imap/) for IMAP/POP3
+
+* Look at [README-indimail](.github/README-indimail.md) for details on IndiMail, indimail-mta. indimail needs indimail-mta to be installed, instructions for installing the same are included below. You can also read this [README](https://github.com/mbhangui/indimail-mta/blob/master/README.md) for details specific to installing indimail-mta alone.
+* Look at [README-CLUSTER](.github/README-CLUSTER.md) for details on setting up an IndiMail Cluster
+* Look at [INSTALL](.github/INSTALL-indimail.md) for very detailed Source Installation instructions. You may not need that if you follow instructions below in this document itself.
+* Look at [INSTALL-MYSQL](.github/INSTALL-MYSQL.md) for instructions on configuring a MySQL/MariaDB server for IndiMail.
+* Look at [INSTALL-RPM](.github/INSTALL-RPM.md) for instructions on setting up IndiMail using RPM or Debian packages
+* Look at [Quick-INSTALL](.github/Quick-INSTALL.md) for instructions on installation and setup of an IndiMail server.
+* Look at [INSTALL-MINI](.github/INSTALL-MINI.md) for instructions on setting up an MINI Indimail Installation which uses QMQP protocol. indimail-mini is part of the indimail-mta package. You can use this for diskless clients, small devices, [SBCs](https://en.wikipedia.org/wiki/Single-board_computer) like the Raspberry PI, to push mails to any server running IndiMail or indimail-mta.
+* Look at [QMTA](.github/README-indimail.md#qmta---using-a-minimal-standalone-qmta-send-mta) for instructions on settig a minimal MTA that runs as a single daemon and uses minimal resources.
+* Look at [Docker/Podman](https://github.com/mbhangui/indimail-docker/blob/master/README.md) for instructions on using docker / podman containers for indimail. The big advantage of using a docker / podman image is you can save your configuration with the `docker commit ..` or `podman commit` to checkpoint your entire build and deploy the exact configuration on multiple hosts.
+
+[README-indimail](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) is a detailed wiki for indimail-virtualdomains.
+
+This document contains instructions for building indimail-virtualdomains from source. indimail-virtualdomains compiles and runs on all linux distros (Fedora, Debian, openSUSE, SLES), Arch Linux, Gentoo, Alpine Linux, FreeBSD and Mac OS X. Let me know if you want it on any other OS not mentioned in this document. The correct way to read this document is from top to bottom and follow the instructions serially. If you click on any link, you need to come back to this document.
+
+To install you need to do the following
+
+# Building the Source - Compilation and Linking
 
 The steps below give instructions to build from source. If you need to deploy indimail-mta on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the package/packages can be deployed on multiple hosts. To generate RPM packages for all components refer to [Create Local Binary Packages](.github/CREATE-Packages.md). This document contains instructions for building indimail-virtualdomains from source. indimail-virtualdomains compiles and runs on all linux distros, Arch Linux, Gentoo, FreeBSD and Mac OS X. Let me know if you want me to try it on any other OS.
 
@@ -1006,7 +1008,7 @@ Earlier I used to provide docker / podman container images on [docker hub](https
 
 ## IRC / Matrix
 
-![Matrix](https://img.shields.io/matrix/indimail:matrix.org)
+[![Matrix](https://img.shields.io/matrix/indimail:matrix.org.svg)](https://matrix.to/#/#indimail:matrix.org)
 
 * [Matrix Invite Link #indimail:matrix.org](https://matrix.to/#/#indimail:matrix.org)
 * IndiMail has an [IRC channel on libera](https://libera.chat/) #indimail-mta
