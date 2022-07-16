@@ -17,6 +17,8 @@ Release @version@-@release@ Start 14/02/2021
 07. tls.c: openssl 3.0.0 port
 - 04/07/2022
 08. ProcessInFifo.c: Fixed typo
+- 16/07/2022
+09. indimail-rpmlintrc, indimail-spec: fixes for openSUSE tumbleweed
 
 *
 Release 3.4.0 Start 14/02/2021

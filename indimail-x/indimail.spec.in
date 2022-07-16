@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.108 2022-05-10 20:48:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.109 2022-07-16 17:33:43+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -831,10 +831,6 @@ done
 %{_libdir}/libeps.so.1.0.0
 %{_libdir}/libindimail.so.3
 %{_libdir}/libindimail.so.3.0.0
-
-%clean
-[ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
-%{__rm} -fr %{_builddir}/%{name}-%{version}
 
 #            install   erase   upgrade  reinstall
 # pretrans      0        -         0
