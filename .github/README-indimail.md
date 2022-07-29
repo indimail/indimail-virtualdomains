@@ -2655,7 +2655,7 @@ clearopensmtp will clear all IP which have not authenticated in the past RELAY\_
 
 # Set up Authenticated SMTP
 
-IndiMail also provides you authenticated SMTP providing **AUTH PLAIN**, **AUTH LOGIN**, **AUTH CRAM-MD5**, **CRAM-SHA1**, **CRAM-SHA256**, **CRAM-SHA512**, **CRAM-RIPEMD**, **DIGEST_MD5** methods. Whenever a user successfully authenticates through SMTP, the **RELAYCLIENT** environment variable gets set. <b>qmail-smtpd</b> uses the **RELAYCLIENT** environment variable to allow relaying.
+IndiMail also provides you authenticated SMTP providing **AUTH PLAIN**, **AUTH LOGIN**, **AUTH CRAM-MD5**, **CRAM-SHA1**, **CRAM-SHA224**, **CRAM-SHA256**, **CRAM-SHA384**, **CRAM-SHA512**, **CRAM-RIPEMD**, **DIGEST_MD5**, **SCRAM-SHA-1**, **SCRAM-SHA-256** methods. Whenever a user successfully authenticates through SMTP, the **RELAYCLIENT** environment variable gets set. <b>qmail-smtpd</b> uses the **RELAYCLIENT** environment variable to allow relaying.
 
 Most of the email clients like thunderbird, evolution, outlook, outlook express have options to use authenticated SMTP.
 For a tutorial on authenticated SMTP, you can refer to this [tutorial](http://indimail.blogspot.com/2010/03/authenticated-smtp-tutorial.html "Authenticated SMTP tutorial")
@@ -4949,7 +4949,7 @@ IndiMail provides a multi-queue version of the original ''qmail-queue'' program.
  * blackholercpt, blackholercptpatterns for blackholing mails to specific senders.
  * Control files spamignore, blackholedsender, badmailfrom, relaymailfrom, badrcptto,<br />  chkrcptdomains, goodrcptto, blackholercpt, badip can be specified in plain text, cdb format or in MySQL tables.
  * relaying and message rewriting for authorized clients
- * authenticated SMTP PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 (HMAC (RFC 1321, RFC 2104, RFC 2554, RFC 2617))
+ * authenticated SMTP PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5, SCRAM-SHA-1, SCRAM-SHA-256 (HMAC (RFC 1321, RFC 2104, RFC 2554, RFC 2617))
  * STARTLS extension, TLS
  * Support for SMTPS
  * POP/IMAP before SMTP
@@ -5043,7 +5043,7 @@ IndiMail provides a multi-queue version of the original ''qmail-queue'' program.
  * per-buffer timeouts
  * passive SMTP queue---perfect for SLIP/PPP (<b>serialmail</b>)
  * AutoTURN support (<b>serialmail</b>)
- * Authenticated SMTP (userid/passwd in control/smtproutes) - PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD
+ * Authenticated SMTP (userid/passwd in control/smtproutes) - PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD
  * STARTTLS, TLS
  * Static and Dynamic Routing. (SMTPROUTES environment variable)
  * User based routing instead of normal DNS/smtproutes.
@@ -5150,7 +5150,7 @@ Some of the features available in this package
 20. Added ability in qmail-queue to do line processing. Line processing allows qmail-queue to do some of the stuff mentioned above
 21. plugins support for QHPSI interface (qmail-queue). qmail-queue will use dlopen to load any shared objected defined by PLUGINDIR environment. Multiple plugins can be loaded. For details see man qmail-queue
 22. Message Submission Port (port 587) RFC 2476
-23. Integrated authenticated SMTP with Indimail (PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5, pop-bef-smtp)
+23. Integrated authenticated SMTP with Indimail (PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5, pop-bef-smtp)
 24. duplicate eliminator using 822header
 25. <b>qmail-remote</b> has configurable TCP timeout table (max\_tolerance, min\_backoff periods can be configured in smtproutes)
 26. Ability to change concurrency of tcpserver without restarting tcpserver
