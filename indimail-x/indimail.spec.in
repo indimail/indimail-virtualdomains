@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.109 2022-07-16 17:33:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.110 2022-07-31 10:06:09+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1168,7 +1168,7 @@ do
   fi
 done
 
-for i in logfifo inlookup indisrvr mrtg mysql.3306
+for i in logfifo inlookup.infifo indisrvr.4000 mrtg mysql.3306
 do
   %{__mkdir_p} %{logdir}/$i
   %{__chown} -R qmaill:nofiles %{logdir}/$i
