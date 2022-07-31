@@ -89,9 +89,9 @@ Universal
 gcc gcc-c++ make autoconf automake libtool pkgconfig
 file sed findutils diffutils gzip xz binutils coreutils grep flex bison
 glibc glibc-devel procps openssl openssl-devel mysql-devel
-libqmail-devel libqmail readline readline-devel ncurses-devel
+readline readline-devel ncurses-devel libtirpc-devel
 pam-devel libgcrypt-devel gdbm-devel libidn-devel pcre-devel pcre2-devel libidn2-devel
-gettext-devel python3 python3-devel (python python-devel on ancient distros)
+libgsasl-devel gettext-devel python3 python3-devel (python python-devel on ancient distros)
 
 opensuse - openldap2-devel instead of openldap-devel
 ```
@@ -102,12 +102,12 @@ Install the following packages using apt
 ```
 Universal
 cdbs debhelper gcc g++ automake autoconf libtool
-libqmail-dev libqmail libldap2-dev libssl-dev
+libldap2-dev libssl-dev libtirpc-dev
 mime-support m4 gawk openssl procps file sed bison
 findutils diffutils readline libreadline-dev xz gzip
 binutils coreutils grep flex libncurses5-dev libncurses5
 libpam0g-dev libpcre2-dev libpcre3-dev libgdbm-dev libdb-dev libgcrypt20-dev
-python libidn11-dev libidn2-0-dev
+python libidn11-dev libidn2-0-dev libgsasl7-dev
 
 Ubuntu 16.04, Debian 8 - libmysqlclient-dev
 Ubuntu 16.04 - libcom-err2
@@ -119,7 +119,7 @@ Remaining - default-libmysqlclient-dev
 ```
 # pacman -S --refresh --sysupgrade
 # pacman -S --needed archlinux-keyring
-# pacman -S base-devel diffutils coreutils openssl openldap mysql libidn libidn2 python
+# pacman -S base-devel diffutils coreutils openssl openldap mysql libidn libidn2 python gsasl libtirpc
 ```
 
 **Gentoo Linux**
@@ -135,6 +135,8 @@ Remaining - default-libmysqlclient-dev
 # emerge -a systemd
 # emerge -a dev-db/mysql
 # emerge -a openldap
+# emerge -a net-libs/libgsasl
+# emerge -a net-libs/libtirpc
 ```
 
 **alpine Linux**
@@ -149,13 +151,14 @@ Remaining - default-libmysqlclient-dev
 **NOTES**
 
 You need libidn2, without which, indimail-mta will get built without [Internationalized Email Addresses (RFC6530)](https://tools.ietf.org/html/rfc6530)
+You need gsasl/libgsasl for SCRAM AUTH methods (SCRAM-SHA-1, SCRAM-SHA-256)
 
 ```
 FreeBSD
-# pkg install pkgconf libidn2
+# pkg install pkgconf libidn2 libgsasl
 
 Darwin
-# port install pkgconfig libidn2
+# port install pkgconfig libidn2 gsasl
 ```
 
 FreeBSD / Darwin OSX
