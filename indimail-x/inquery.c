@@ -1,5 +1,8 @@
 /*
  * $Log: inquery.c,v $
+ * Revision 1.7  2022-07-31 10:06:35+05:30  Cprogrammer
+ * use TMPDIR for /tmp
+ *
  * Revision 1.6  2021-09-12 11:52:36+05:30  Cprogrammer
  * removed redundant multiple initialization of InFifo.len
  *
@@ -51,7 +54,7 @@
 #include "strToPw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 1.6 2021-09-12 11:52:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 1.7 2022-07-31 10:06:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -127,7 +130,11 @@ inquery(char query_type, char *email, char *ip)
 	if ((tcpclient = env_get("TCPCLIENT")))
 		tcpclient = env_get("TCPREMOTEIP");
 	if (!tcpclient) {
-		if (!stralloc_copyb(&myfifo, "/tmp/", 5))
+		if (!(ptr = env_get("TMPDIR")))
+			ptr = "/tmp/";
+		if (!stralloc_copys(&myfifo, ptr))
+			return ((void *) 0);
+		if (myfifo.s[myfifo.len -1] != '/' && !stralloc_append(&myfifo, "/"))
 			return ((void *) 0);
 		strnum[fmt_ulong(strnum, getpid())] = 0;
 		if (!stralloc_cats(&myfifo, strnum))
@@ -138,6 +145,12 @@ inquery(char query_type, char *email, char *ip)
 	} else
 	if (!stralloc_copyb(&myfifo, "socket", 6) || !stralloc_0(&myfifo))
 		return ((void *) 0);
+	if (verbose) {
+		out("inquery", "Using MYFIFO=");
+		out("inquery", myfifo.s);
+		out("inquery", "\n");
+		flush("inquery");
+	}
 	if (!stralloc_cat(&querybuf, &myfifo)) /*- fifo */
 		return ((void *) 0);
 	if (ip && *ip && !stralloc_cats(&querybuf, ip)) /*- ip */
