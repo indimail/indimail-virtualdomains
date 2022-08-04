@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 1.8  2022-08-04 14:42:22+05:30  Cprogrammer
+ * display scram password if existing
+ *
  * Revision 1.7  2021-08-21 12:52:33+05:30  Cprogrammer
  * moved no_of_days.h to libqmail
  *
@@ -85,7 +88,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 1.7 2021-08-21 12:52:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 1.8 2022-08-04 14:42:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -273,6 +276,12 @@ userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid
 		flush("userinfo");
 		return (1);
 	}
+	if (!str_diffn(mypw->pw_passwd, "{SCRAM-SHA-1}", 13))
+		passwd_hash = "SCRAM-SHA-1";
+	else
+	if (!str_diffn(mypw->pw_passwd, "{SCRAM-SHA-256}", 15))
+		passwd_hash = "SCRAM-SHA-256";
+	else
 	if (mypw->pw_passwd[0] == '$' && mypw->pw_passwd[2] == '$') {
 		switch(mypw->pw_passwd[1])
 		{
