@@ -22,6 +22,12 @@ Release @version@-@release@ Start 14/02/2021
 - 31/07/2022
 10. inquery.c: use TMPDIR for /tmp
 11. indimail.spec: fixed service dir name for inlookup, indisrvr
+- 04/08/2022
+12. inquery.c: refactored code
+13. authindi.c, vchkpass.c: authenticate using SCRAM salted password
+14. ProcessInFifo.c, sql_getpw.c: fetch scram password
+15. userinfo.c: display scram password if existing
+16. indimail.h: added scram column to indimail/indibak tables
 
 *
 Release 3.4.0 Start 14/02/2021
