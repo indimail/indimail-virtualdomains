@@ -1,5 +1,8 @@
 /*
  * $Log: sql_getpw.c,v $
+ * Revision 1.2  2022-08-04 14:41:49+05:30  Cprogrammer
+ * fetch scram password
+ *
  * Revision 1.1  2019-04-18 15:49:41+05:30  Cprogrammer
  * Initial revision
  *
@@ -30,7 +33,7 @@
 #include "strToPw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_getpw.c,v 1.1 2019-04-18 15:49:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_getpw.c,v 1.2 2022-08-04 14:41:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef QUERY_CACHE
@@ -102,6 +105,10 @@ sql_getpw(char *user, char *domain)
 		return ((struct passwd *) 0);
 	if (!(real_domain = get_real_domain(_domain.s)))
 		real_domain = _domain.s;
+	if (!stralloc_copyb(&SqlBuf, "select high_priority pw_name, ", 30) ||
+			!stralloc_catb(&SqlBuf, "pw_passwd, scram, pw_uid, pw_gid, ", 34) ||
+			!stralloc_catb(&SqlBuf, "pw_gecos, pw_dir, pw_shell from ", 32))
+		die_nomem();
 	if (site_size == LARGE_SITE) {
 		domstr = (char *) 0;
 		if (!real_domain || !*real_domain)
@@ -109,34 +116,32 @@ sql_getpw(char *user, char *domain)
 		else
 		if (domain && *domain)
 			domstr = munch_domain(real_domain);
-		if (!stralloc_copyb(&SqlBuf, "select high_priority pw_name, pw_passwd, pw_uid, pw_gid, ", 57) ||
-			!stralloc_catb(&SqlBuf, "pw_gecos, pw_dir, pw_shell from ", 32) ||
-			!stralloc_cats(&SqlBuf, domstr) ||
-			!stralloc_catb(&SqlBuf, " where pw_name = \"", 18) ||
-			!stralloc_cat(&SqlBuf, &_user) ||
-			!stralloc_append(&SqlBuf, "\"") || !stralloc_0(&SqlBuf))
+		if (!stralloc_cats(&SqlBuf, domstr) ||
+				!stralloc_catb(&SqlBuf, " where pw_name = \"", 18) ||
+				!stralloc_cat(&SqlBuf, &_user) ||
+				!stralloc_append(&SqlBuf, "\"") || !stralloc_0(&SqlBuf))
 			die_nomem();
 	} else {
-		if (!stralloc_copyb(&SqlBuf, "select high_priority pw_name, pw_passwd, pw_uid, pw_gid, ", 57) ||
-			!stralloc_catb(&SqlBuf, "pw_gecos, pw_dir, pw_shell from ", 32) ||
-			!stralloc_cats(&SqlBuf, default_table) ||
-			!stralloc_catb(&SqlBuf, " where pw_name = \"", 18) ||
-			!stralloc_cat(&SqlBuf, &_user) ||
-			!stralloc_catb(&SqlBuf, "\" and pw_domain = \"", 19) ||
-			!stralloc_cats(&SqlBuf, real_domain) ||
-			!stralloc_append(&SqlBuf, "\"") || !stralloc_0(&SqlBuf))
-			die_nomem();
-	}
-	for (pass = 1;pass <= 2;pass++) {
-		if (pass == 2) {
-			if (!stralloc_copyb(&SqlBuf, "select high_priority pw_name, pw_passwd, pw_uid, pw_gid, ", 57) ||
-				!stralloc_catb(&SqlBuf, "pw_gecos, pw_dir, pw_shell from ", 32) ||
-				!stralloc_cats(&SqlBuf, inactive_table) ||
+		if (!stralloc_cats(&SqlBuf, default_table) ||
 				!stralloc_catb(&SqlBuf, " where pw_name = \"", 18) ||
 				!stralloc_cat(&SqlBuf, &_user) ||
 				!stralloc_catb(&SqlBuf, "\" and pw_domain = \"", 19) ||
 				!stralloc_cats(&SqlBuf, real_domain) ||
 				!stralloc_append(&SqlBuf, "\"") || !stralloc_0(&SqlBuf))
+			die_nomem();
+	}
+	for (pass = 1;pass <= 2;pass++) {
+		if (pass == 2) {
+			if (!stralloc_copyb(&SqlBuf, "select high_priority pw_name, ", 30) ||
+					!stralloc_catb(&SqlBuf, "pw_passwd, scram, pw_uid, pw_gid, ", 34) ||
+					!stralloc_catb(&SqlBuf, "pw_gecos, pw_dir, pw_shell from ", 32))
+				die_nomem();
+			if (!stralloc_cats(&SqlBuf, inactive_table) ||
+					!stralloc_catb(&SqlBuf, " where pw_name = \"", 18) ||
+					!stralloc_cat(&SqlBuf, &_user) ||
+					!stralloc_catb(&SqlBuf, "\" and pw_domain = \"", 19) ||
+					!stralloc_cats(&SqlBuf, real_domain) ||
+					!stralloc_append(&SqlBuf, "\"") || !stralloc_0(&SqlBuf))
 				die_nomem();
 		}
 		if (mysql_query(&mysql[1], SqlBuf.s)) {
@@ -144,7 +149,7 @@ sql_getpw(char *user, char *domain)
 			if (err == ER_NO_SUCH_TABLE || err == ER_SYNTAX_ERROR)
 				userNotFound = 1;
 			else
-				strerr_warn4("sql_getpw: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
+				strerr_warn4("sql_getpw: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
 			return ((struct passwd *) 0);
 		}
 		if (!(res = in_mysql_store_result(&mysql[1]))) {
@@ -155,6 +160,8 @@ sql_getpw(char *user, char *domain)
 			break;
 		else
 			in_mysql_free_result(res);
+		if (site_size == LARGE_SITE)
+			break;
 	}
 	if (!row_count) {
 		userNotFound = 1;
@@ -166,28 +173,36 @@ sql_getpw(char *user, char *domain)
 		if (!stralloc_copys(&_user, row[0]) || !stralloc_0(&_user))
 			die_nomem();
 		_user.len--;
-		if (!stralloc_copys(&IPass, row[1]) || !stralloc_0(&IPass))
-			die_nomem();
-		IPass.len--;
-		scan_uint(row[2], &pwent.pw_uid);
-		scan_uint(row[3], &pwent.pw_gid);
-		if (pwent.pw_gid & BOUNCE_MAIL)
-			is_overquota = 1;
-		if (!stralloc_copys(&IGecos, row[4]) || !stralloc_0(&IGecos))
-			die_nomem();
-		IGecos.len--;
-		if (!stralloc_copys(&IDir, row[5]) || !stralloc_0(&IDir))
-			die_nomem();
-		IDir.len--;
-		if (!stralloc_copys(&IShell, row[6]) || !stralloc_0(&IShell))
-			die_nomem();
-		IShell.len--;
 		if (!stralloc_copy(&IUser, &_user) || !stralloc_0(&IUser))
 			die_nomem();
 		IUser.len--;
 		if (!stralloc_copy(&IDomain, &_domain) || !stralloc_0(&IDomain))
 			die_nomem();
 		IDomain.len--;
+		if (row[2]) {
+			if (!stralloc_copys(&IPass, row[2]) ||
+					!stralloc_append(&IPass, ",") ||
+					!stralloc_cats(&IPass, row[1]) ||
+					!stralloc_0(&IPass))
+				die_nomem();
+		} else {
+			if (!stralloc_copys(&IPass, row[1]) || !stralloc_0(&IPass))
+				die_nomem();
+		}
+		IPass.len--;
+		scan_uint(row[3], &pwent.pw_uid);
+		scan_uint(row[4], &pwent.pw_gid);
+		if (pwent.pw_gid & BOUNCE_MAIL)
+			is_overquota = 1;
+		if (!stralloc_copys(&IGecos, row[5]) || !stralloc_0(&IGecos))
+			die_nomem();
+		IGecos.len--;
+		if (!stralloc_copys(&IDir, row[6]) || !stralloc_0(&IDir))
+			die_nomem();
+		IDir.len--;
+		if (!stralloc_copys(&IShell, row[7]) || !stralloc_0(&IShell))
+			die_nomem();
+		IShell.len--;
 		in_mysql_free_result(res);
 		pwent.pw_name = _user.s;
 		pwent.pw_passwd = IPass.s;
@@ -203,7 +218,7 @@ sql_getpw(char *user, char *domain)
 		}
 #endif
 		return (&pwent);
-	} 
+	} /*- if ((row = in_mysql_fetch_row(res))) */
 	in_mysql_free_result(res);
 	return ((struct passwd *) 0);
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.14  2022-08-04 14:41:01+05:30  Cprogrammer
+ * fetch scram password
+ *
  * Revision 1.13  2022-07-04 22:23:56+05:30  Cprogrammer
  * fixed typo
  *
@@ -116,7 +119,7 @@
 #include "FifoCreate.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.13 2022-07-04 22:23:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.14 2022-08-04 14:41:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -365,7 +368,7 @@ cache_active_pwd(time_t tval)
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;
 	static stralloc SqlBuf = {0}, email = {0};
-	int             use_btree, max_btree_count, err;
+	int             use_btree, max_btree_count, err, i, len1, len2;
 	static time_t   act_secs;
 	char           *ptr;
 	INENTRY        *in, *re, *retval;
@@ -391,7 +394,7 @@ cache_active_pwd(time_t tval)
 		in_root = 0;
 		btree_count = 0;
 	}
-	if (!stralloc_copyb(&SqlBuf, "SELECT pw_name, pw_domain, pw_passwd, pw_uid, pw_gid, ", 54) ||
+	if (!stralloc_copyb(&SqlBuf, "SELECT pw_name, pw_domain, pw_passwd, scram, pw_uid, pw_gid, ", 61) ||
 			!stralloc_catb(&SqlBuf, "pw_gecos, pw_dir, pw_shell FROM indimail ", 41) ||
 			!stralloc_catb(&SqlBuf, "JOIN lastauth ON pw_name = user AND pw_domain = domain WHERE ", 61) ||
 			!stralloc_catb(&SqlBuf, "UNIX_timestamp(lastauth.timestamp) >= UNIX_timestamp() - ", 57) ||
@@ -439,12 +442,22 @@ cache_active_pwd(time_t tval)
 			} else {/*- New entry in was added.  */
 				in->in_pw.pw_name = in_strdup(row[0]);
 				in->domain = in_strdup(row[1]);
-				in->in_pw.pw_passwd = in_strdup(row[2]);
-				in->in_pw.pw_gecos = in_strdup(row[5]);
-				in->in_pw.pw_dir = in_strdup(row[6]);
-				in->in_pw.pw_shell = in_strdup(row[7]);
-				scan_uint(row[3], &in->in_pw.pw_uid);
-				scan_uint(row[4], &in->in_pw.pw_gid);
+				if (row[3]) {
+					i = (len2 = str_len(row[3])) + (len1 = str_len(row[2])) + 2;
+					if (!(ptr = (char *) alloc(sizeof(char) * i)))
+						die_nomem();
+					str_copyb(ptr, row[3], len2);
+					str_copyb(ptr + len2, ",", 1);
+					str_copyb(ptr + len2 + 1, row[2], len1);
+					ptr[len1 + len2 + 1] = 0;
+					in->in_pw.pw_passwd = ptr; /*- scram,pw_passwd */
+				} else
+					in->in_pw.pw_passwd = in_strdup(row[2]); /*- pw_passwd */
+				scan_uint(row[4], &in->in_pw.pw_uid);
+				scan_uint(row[5], &in->in_pw.pw_gid);
+				in->in_pw.pw_gecos = in_strdup(row[6]);
+				in->in_pw.pw_dir = in_strdup(row[7]);
+				in->in_pw.pw_shell = in_strdup(row[8]);
 				in->pwStat = 1;
 				btree_count++;
 				if (max_btree_count > 0 && btree_count >= max_btree_count)
@@ -536,6 +549,7 @@ isig_usr1()
 	logfunc("ProcessInFifo", ", Domain Query ");
 	strnum[fmt_uint(strnum, dom_query_count)] = 0;
 	logfunc("ProcessInFifo", strnum);
+
 	logfunc("ProcessInFifo", " Cached Nodes ");
 	strnum[fmt_uint(strnum, btree_count)] = 0;
 	logfunc("ProcessInFifo", strnum);
