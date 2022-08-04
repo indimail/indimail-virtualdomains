@@ -57,6 +57,12 @@ Fully qualified email address.
 \fIip_address\fR
 IP address (TCPREMOTEIP) recorded in relay table after successful authentication through IMAP/POP3 for the email address email. This option is valid for the Host Query type.
 
+.SH EXAMPLE USAGE
+.EX
+$ sudo setuidgid -g qmail qmaild mkdir -p /tmp/inquerytest
+$ sudo setuidgid -g qmail qmaild env TMPDIR=/tmp/inquerytest FIFO_MODE=0666 /usr/sbin/inquerytest -v -q 8 -i "" testuser02@example.com
+.EE
+
 .SH RETURN VALUE
 0 for success, 1 for any failure. Prints diagnostics on stdout and failures on stderr.
 
