@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 1.12  2022-08-04 14:37:42+05:30  Cprogrammer
+ * authenticate using SCRAM salted password
+ *
  * Revision 1.11  2021-01-19 22:45:13+05:30  Cprogrammer
  * added uid, gid in debug
  *
@@ -57,6 +60,8 @@
 #include <subfd.h>
 #include <getln.h>
 #include <pw_comp.h>
+#include <authmethods.h>
+#include <get_scram_secrets.h>
 #endif
 #include "parse_email.h"
 #include "get_assign.h"
@@ -76,7 +81,7 @@
 #include "sql_getpw.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.11 2021-01-19 22:45:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.12 2022-08-04 14:37:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -546,7 +551,22 @@ main(int argc, char **argv)
 			return (1);
 		}
 	}
-	crypt_pass = pw->pw_passwd;
+	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
+		if ((i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, &crypt_pass)) != 6) {
+			if (write(2, "AUTHFAILURE\n", 12) == -1)
+				;
+			close_connection();
+			if (auth_method > 2) {
+				if (challenge)
+					alloc_free (challenge);
+				alloc_free (login);
+			}
+			execv(!str_diff("pop3", service) ? *pop3args : *imapargs, argv);
+			strerr_warn4(prog_name, ": execv ", !str_diff("pop3", service) ? *pop3args : *imapargs, ": ", &strerr_sys);
+			return (1);
+		}
+	} else
+		crypt_pass = pw->pw_passwd;
 	strnum[fmt_uint(strnum, (unsigned int) auth_method)] = 0;
 	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	if ((ptr = env_get("DEBUG_LOGIN")) && *ptr > '0') {

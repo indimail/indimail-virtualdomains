@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.12  2022-08-04 14:43:02+05:30  Cprogrammer
+ * authenticate using SCRAM salted password
+ *
  * Revision 1.11  2021-09-11 13:41:27+05:30  Cprogrammer
  * fixed typo in error statement
  *
@@ -59,6 +62,8 @@
 #include <error.h>
 #include <pw_comp.h>
 #include <getEnvConfig.h>
+#include <authmethods.h>
+#include <get_scram_secrets.h>
 #endif
 #include "parse_email.h"
 #include "sqlOpen_user.h"
@@ -74,7 +79,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.11 2021-09-11 13:41:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.12 2022-08-04 14:43:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -280,7 +285,14 @@ main(int argc, char **argv)
 	} else
 	if (pw->pw_gid & NO_RELAY)
 		norelay = 1;
-	crypt_pass = pw->pw_passwd;
+	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
+		if ((i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, &crypt_pass)) != 6) {
+			out("vchkpass", "553-Sorry, unable to get secrets (#5.7.1)\r\n");
+			flush("vchkpass");
+			_exit (1);
+		}
+	} else
+		crypt_pass = pw->pw_passwd;
 	strnum[fmt_uint(strnum, (unsigned int) auth_method)] = 0;
 	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	if (env_get("DEBUG_LOGIN"))
