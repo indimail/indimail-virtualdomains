@@ -1,5 +1,8 @@
 /*
  * $Log: strToPw.c,v $
+ * Revision 1.3  2022-08-04 14:42:08+05:30  Cprogrammer
+ * added comments
+ *
  * Revision 1.2  2019-04-16 15:14:19+05:30  Cprogrammer
  * fix for getting all fields
  *
@@ -25,7 +28,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: strToPw.c,v 1.2 2019-04-16 15:14:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: strToPw.c,v 1.3 2022-08-04 14:42:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -93,39 +96,39 @@ strToPw(char *pwbuf, int len)
 			IUser.len--;
 			pwent.pw_name = IUser.s;
 			break;
-		case 1:
+		case 1: /*- password */
 			if (!stralloc_copys(&IPass, cptr) || !stralloc_0(&IPass))
 				die_nomem();
 			IPass.len--;
 			pwent.pw_passwd = IPass.s;
 			break;
-		case 2:
+		case 2: /*- uid */
 			scan_uint(cptr, &pwent.pw_uid);
 			break;
-		case 3:
+		case 3: /*- gid */
 			scan_uint(cptr, &pwent.pw_gid);
 			if (pwent.pw_gid & BOUNCE_MAIL)
 				is_overquota = 1;
 			break;
-		case 4:
+		case 4: /*- gecos */
 			if (!stralloc_copys(&IGecos, cptr) || !stralloc_0(&IGecos))
 				die_nomem();
 			IGecos.len--;
 			pwent.pw_gecos = IGecos.s;
 			break;
-		case 5:
+		case 5: /*- home dir */
 			if (!stralloc_copys(&IDir, cptr) || !stralloc_0(&IDir))
 				die_nomem();
 			IDir.len--;
 			pwent.pw_dir = IDir.s;
 			break;
-		case 6:
+		case 6: /*- quota */
 			if (!stralloc_copys(&IShell, cptr) || !stralloc_0(&IShell))
 				die_nomem();
 			IShell.len--;
 			pwent.pw_shell = IShell.s;
 			break;
-		case 7:
+		case 7: /*- active/inactive flag */
 			scan_int(cptr, &is_inactive);
 			break;
 		}
