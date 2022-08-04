@@ -1,5 +1,8 @@
 /*
  * $Log: inquery.c,v $
+ * Revision 1.8  2022-08-04 14:39:07+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.7  2022-07-31 10:06:35+05:30  Cprogrammer
  * use TMPDIR for /tmp
  *
@@ -54,7 +57,7 @@
 #include "strToPw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 1.7 2022-07-31 10:06:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 1.8 2022-08-04 14:39:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -151,19 +154,21 @@ inquery(char query_type, char *email, char *ip)
 		out("inquery", "\n");
 		flush("inquery");
 	}
-	if (!stralloc_cat(&querybuf, &myfifo)) /*- fifo */
-		return ((void *) 0);
-	if (ip && *ip && !stralloc_cats(&querybuf, ip)) /*- ip */
-		return ((void *) 0);
-	if (!stralloc_0(&querybuf))
+	if (!stralloc_cat(&querybuf, &myfifo) /*- fifo */ ||
+			(ip && *ip && !stralloc_cats(&querybuf, ip)) /*- ip */ ||
+			!stralloc_0(&querybuf))
 		return ((void *) 0);
 	ptr = querybuf.s;
-	*((int *) ptr) = querybuf.len - sizeof(int);
+	*((int *) ptr) = querybuf.len - sizeof(int); /*- datasize */
+	/*-
+	 * bytes = datasize + sizeof(int)
+	 * i  = total length of data that needs to be transmitted to inlookup
+	 */
 	bytes = querybuf.len;
 
 	if (!tcpclient) {
 		if (!(infifo = env_get("INFIFO")))
-			infifo = INFIFO;
+			infifo = INFIFO; /*- the string "infifo" */
 		/*- Open the Fifos */
 		if (*infifo == '/' || *infifo == '.') {
 			if (!stralloc_copys(&InFifo, infifo) || !stralloc_0(&InFifo))
@@ -282,24 +287,8 @@ inquery(char query_type, char *email, char *ip)
 		case LIMIT_QUERY:
 #endif
 		case DOMAIN_QUERY:
-			if (*controldir == '/') {
-				if (!stralloc_copys(&tmp, controldir) ||
-						!stralloc_catb(&tmp, "/timeoutread", 12)) {
-					if (!tcpclient)
-						cleanup(rfd, -1, 0, myfifo.s);
-					return ((void *) 0);
-				}
-			} else {
-				if (!stralloc_copys(&tmp, sysconfdir) ||
-						!stralloc_catb(&tmp, "/", 1) ||
-						!stralloc_cats(&tmp, controldir) ||
-						!stralloc_catb(&tmp, "/timeoutread", 12)) {
-					if (!tcpclient)
-						cleanup(rfd, -1, 0, myfifo.s);
-					return ((void *) 0);
-				}
-			}
-			if (!stralloc_0(&tmp)) {
+			tmp.len -= 6; /*- change timeoutwrite\0 to timeoutread\0 */
+			if (!stralloc_catb(&tmp, "read", 4) || !stralloc_0(&tmp)) {
 				if (!tcpclient)
 					cleanup(rfd, -1, 0, myfifo.s);
 				return ((void *) 0);
@@ -312,6 +301,7 @@ inquery(char query_type, char *email, char *ip)
 				close(fd);
 				scan_ulong(strnum, (unsigned long *) &readTimeout);
 			}
+			/*- read an int to get size of data to be further read */
 			if ((idx = timeoutread(readTimeout, rfd, (char *) &intBuf, sizeof(int))) == -1 || !idx) {
 				if (!tcpclient)
 					cleanup(rfd, -1, 0, myfifo.s);
@@ -342,7 +332,7 @@ inquery(char query_type, char *email, char *ip)
 #ifdef ENABLE_DOMAIN_LIMITS
 				case LIMIT_QUERY:
 #endif
-					if (!intBuf) { /*- error on remote inlookup */
+					if (!intBuf) { /*- error reading from remote inlookup */
 						if (!tcpclient) {
 							close(rfd);
 							unlink(myfifo.s);
