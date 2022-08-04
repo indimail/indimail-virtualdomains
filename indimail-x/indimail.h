@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 1.8  2022-08-04 14:46:28+05:30  Cprogrammer
+ * added scram column to store scram passwords
+ *
  * Revision 1.7  2021-03-14 12:21:16+05:30  Cprogrammer
  * add ability to include indimail.h without mysql.h
  *
@@ -26,7 +29,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 1.7 2021-03-14 12:21:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 1.8 2022-08-04 14:46:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -253,6 +256,7 @@ pw_gid int, \
 pw_gecos char(48) not null, \
 pw_dir char(156), \
 pw_shell char(30), \
+scram char(255), \
 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null, \
 primary key (pw_name, pw_domain), index pw_gecos (pw_gecos(25)), index pw_uid (pw_uid) "
 
@@ -265,6 +269,7 @@ pw_gid int, \
 pw_gecos char(48), \
 pw_dir char(156), \
 pw_shell char(30), \
+scram char(255), \
 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null, \
 primary key(pw_name)"
 
