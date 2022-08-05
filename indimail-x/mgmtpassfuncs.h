@@ -1,5 +1,8 @@
 /*
  * $Log: mgmtpassfuncs.h,v $
+ * Revision 1.2  2022-08-05 21:12:05+05:30  Cprogrammer
+ * added encrypt_flag argument to mgmtsetpass()
+ *
  * Revision 1.1  2019-04-13 23:39:27+05:30  Cprogrammer
  * mgmtpassfuncs.h
  *
@@ -24,7 +27,7 @@ int             isDisabled(char *);
 int             mgmtpassinfo(char *, int);
 int             setpassword(char *);
 char           *mgmtgetpass(char *, int *);
-int             mgmtsetpass(char *, char *, uid_t, gid_t, time_t, time_t);
+int             mgmtsetpass(char *, char *, uid_t, gid_t, time_t, time_t, int);
 int             mgmtadduser(char *, char *, uid_t, gid_t, time_t, time_t);
 
 #endif

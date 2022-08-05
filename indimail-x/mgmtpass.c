@@ -1,5 +1,8 @@
 /*
  * $Log: mgmtpass.c,v $
+ * Revision 1.3  2022-08-05 21:10:45+05:30  Cprogrammer
+ * added encrypt_flag argument to mgmtsetpass()
+ *
  * Revision 1.2  2019-04-22 23:13:52+05:30  Cprogrammer
  * added missing strerr.h
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: mgmtpass.c,v 1.2 2019-04-22 23:13:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mgmtpass.c,v 1.3 2022-08-05 21:10:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "mgmtpass: fatal: "
@@ -69,7 +72,7 @@ main(int argc, char **argv)
 			}
 			if (*(argv + idx + 1)) {
 				tmval = time(0);
-				return (mgmtsetpass(user, *(argv + idx + 1), getuid(), getgid(), tmval, tmval));
+				return (mgmtsetpass(user, *(argv + idx + 1), getuid(), getgid(), tmval, tmval, 1));
 			} 
 			break;
 		case 'i':

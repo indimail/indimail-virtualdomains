@@ -1,5 +1,8 @@
 /*
  * $Log: mgmtpassfuncs.c,v $
+ * Revision 1.4  2022-08-05 21:11:53+05:30  Cprogrammer
+ * added encrypt_flag argument to mgmtsetpass()
+ *
  * Revision 1.3  2020-04-01 18:57:07+05:30  Cprogrammer
  * added encrypt flag to mkpasswd()
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.3 2020-04-01 18:57:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.4 2022-08-05 21:11:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -406,8 +409,7 @@ setpassword(char *user)
 		}
 	}
 	lastupdate = (time_t) time(0);
-	encrypt_flag = 1;
-	mgmtsetpass(user, newpass1, getuid(), getgid(), lastupdate, lastupdate);
+	mgmtsetpass(user, newpass1, getuid(), getgid(), lastupdate, lastupdate, 0);
 	if (newpass1)
 		alloc_free(newpass1);
 	return (0);
@@ -480,7 +482,7 @@ mgmtgetpass(char *username, int *status)
 }
 
 int
-mgmtsetpass(char *username, char *pass, uid_t uid, gid_t gid, time_t lastaccess, time_t lastupdate)
+mgmtsetpass(char *username, char *pass, uid_t uid, gid_t gid, time_t lastaccess, time_t lastupdate, int encrypt_flag)
 {
 	static stralloc crypted = {0};
 	char            strnum[FMT_ULONG];
@@ -493,12 +495,13 @@ mgmtsetpass(char *username, char *pass, uid_t uid, gid_t gid, time_t lastaccess,
 		strerr_warn1("mgmtsetpass: failed to open master db", 0);
 		return (-1);
 	}
-	if (encrypt_flag) {
+	if (encrypt_flag)
+		mkpasswd(pass, &crypted, 1);
+	else {
 		if (!stralloc_copys(&crypted, pass) || !stralloc_0(&crypted))
 			die_nomem();
 		crypted.len--;
-	} else
-		mkpasswd(pass, &crypted, encrypt_flag);
+	}
 	cur_time = time(0);
 	tmptr = localtime(&cur_time);
 	if (!stralloc_copyb(&SqlBuf, "update low_priority mgmtaccess set pass=\"", 41) ||
@@ -563,6 +566,6 @@ mgmtadduser(char *username, char *pass, uid_t uid, gid_t gid, time_t lastaccess,
 			return (-1);
 		}
 	}
-	return (mgmtsetpass(username, pass, uid, gid, lastaccess, lastupdate));
+	return (mgmtsetpass(username, pass, uid, gid, lastaccess, lastupdate, 1));
 }
 #endif
