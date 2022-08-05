@@ -1,5 +1,8 @@
 /*
  * $Log: sql_adduser.c,v $
+ * Revision 1.4  2022-08-05 22:42:38+05:30  Cprogrammer
+ * renamed apop argument to uid_flag
+ *
  * Revision 1.3  2021-09-11 13:39:49+05:30  Cprogrammer
  * use getEnvConfig for domain directory
  *
@@ -38,7 +41,7 @@
 #include "getpeer.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_adduser.c,v 1.3 2021-09-11 13:39:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_adduser.c,v 1.4 2022-08-05 22:42:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -49,7 +52,7 @@ die_nomem()
 }
 
 char           *
-sql_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, char *Quota, int apop, int actFlag)
+sql_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, char *Quota, int uid_flag, int actFlag)
 {
 	static stralloc dirbuf = {0}, quota = {0}, dom_dir = {0}, SqlBuf = {0};
 	char           *domstr, *ptr;
@@ -124,7 +127,7 @@ sql_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, char *
 				!stralloc_catb(&SqlBuf, "\", \"", 4) ||
 				!stralloc_cats(&SqlBuf, pass) ||
 				!stralloc_catb(&SqlBuf, "\", ", 3) ||
-				!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, apop)) ||
+				!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, uid_flag)) ||
 				!stralloc_catb(&SqlBuf, ", 0, \"", 6) ||
 				!stralloc_cats(&SqlBuf, gecos) ||
 				!stralloc_catb(&SqlBuf, "\", \"", 4) ||
@@ -149,7 +152,7 @@ sql_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, char *
 				!stralloc_catb(&SqlBuf, "\", \"", 4) ||
 				!stralloc_cats(&SqlBuf, pass) ||
 				!stralloc_catb(&SqlBuf, "\", ", 3) ||
-				!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, apop)) ||
+				!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, uid_flag)) ||
 				!stralloc_catb(&SqlBuf, ", 0, \"", 6) ||
 				!stralloc_cats(&SqlBuf, gecos) ||
 				!stralloc_catb(&SqlBuf, "\", \"", 4) ||
