@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 1.6  2022-08-05 21:18:08+05:30  Cprogrammer
+ * added encrypt_flag argument to iadduser()
+ *
  * Revision 1.5  2021-07-08 11:46:09+05:30  Cprogrammer
  * add check for misconfigured assign file
  *
@@ -68,7 +71,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 1.5 2021-07-08 11:46:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 1.6 2022-08-05 21:18:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -81,9 +84,9 @@ stralloc        mdahost = {0}, hostid = {0};
 #endif
 int             apop, Random, balance_flag, actFlag = 1;
 
-extern int      encrypt_flag, create_flag;
+extern int      create_flag;
 
-int             get_options(int, char **, char **, int *, int *);
+int             get_options(int, char **, char **, int *, int *, int *);
 int             checklicense(char *, int, long, char *, int);
 
 static char    *usage =
@@ -93,7 +96,7 @@ static char    *usage =
 	"         -q          quota (in bytes) (sets the users quota)\n"
 	"         -l level    users per level\n"
 	"         -c          comment (sets the gecos comment field)\n"
-	"         -e          Standard Encrypted Password\n"
+	"         -e          Standard Encrypted Password on command line\n"
 	"         -r [len]    generate a len (default 8) char random password\n"
 	"         -b          Balance distribution across filesystems\n"
 	"         -B basepath Specify the base directory for user's home directory\n"
@@ -119,7 +122,7 @@ main(argc, argv)
 	int             argc;
 	char           *argv[];
 {
-	int             i, j, pass_len = 8, users_per_level = 0, fd, match;
+	int             i, j, pass_len = 8, users_per_level = 0, fd, match, encrypt_flag = 1;
 	mdir_t          q, c;
 	char           *real_domain, *ptr, *base_argv0, *base_path, *domain_dir;
 	static stralloc tmpbuf = {0}, quotaVal = {0}, line = {0};
@@ -132,7 +135,7 @@ main(argc, argv)
 #endif
 	struct substdio ssin;
 
-	if (get_options(argc, argv, &base_path, &pass_len, &users_per_level))
+	if (get_options(argc, argv, &base_path, &pass_len, &users_per_level, &encrypt_flag))
 		return (1);
 	/*- parse the email address into user and domain */
 	parse_email(Email.s, &User, &Domain);
@@ -317,10 +320,10 @@ main(argc, argv)
 		die_nomem();
 #ifdef CLUSTERED_SITE
 	if ((i = iadduser(User.s, real_domain, mdahost.s, Passwd.s, Gecos.s, quotaVal.s,
-		users_per_level, apop, actFlag)) < 0)
+		users_per_level, apop, actFlag, encrypt_flag)) < 0)
 #else
 	if ((i = iadduser(User.s, real_domain, 0, Passwd.s, Gecos.s, quotaVal.s,
-		users_per_level, apop, actFlag)) < 0)
+		users_per_level, apop, actFlag, encrypt_flag)) < 0)
 #endif
 	{
 		if (errno == EEXIST)
@@ -347,7 +350,7 @@ main(argc, argv)
 }
 
 int
-get_options(int argc, char **argv, char **base_path, int *pass_len, int *users_per_level)
+get_options(int argc, char **argv, char **base_path, int *pass_len, int *users_per_level, int *encrypt_flag)
 {
 	int             c;
 
@@ -382,7 +385,7 @@ get_options(int argc, char **argv, char **base_path, int *pass_len, int *users_p
 				die_nomem();
 			break;
 		case 'e':
-			encrypt_flag = 1;
+			*encrypt_flag = 0;
 			break;
 		case 'd':
 #ifdef CLUSTERED_SITE
