@@ -21,7 +21,7 @@ tcplookupdir=@libdir@
 
 libindimail_LTLIBRARIES = libindimail.la
 libindimail_la_SOURCES = $(COMMONSOURCES)
-libindimail_la_LIBADD = @LIB_MYSQL@ @LIB_QMAIL@ @LIB_SSL@ -lm
+libindimail_la_LIBADD = @LIB_MYSQL@ @LIB_QMAIL@ @LIB_SSL@ @LIB_GSASL@ -lm
 libindimail_la_LDFLAGS = -version-info @LIBVER@ $(LDFLAGS)
 libindimail_la_CFLAGS = -fPIC
 libindimaildir=@libdir@
@@ -33,14 +33,14 @@ indimailauthlibdir=@libexecdir@/imapmodules
 
 SYSCONFDIR = @sysconfdir@
 sysconf_DATA = indimail.settings controlfiles.i headerlist osh.table \
-	cronlist.i indimail.perms indimail.mrtg.cfg indimail-release
+	cronlist.i indimail.perms indimail.mrtg.cfg indimail-release indimail.schema
 
 pkgconfigdir=@pkgconfigdir@
 pkgconfig_DATA = libindimail.pc
 
 BUILT_SOURCES = indimail_config.h
 man_MANS=adminclient.8 chowkidar.8 clearopensmtp.8 crc.1 crcdiff.1 \
-	incrypt.1 dbinfo.8 hostcntrl.8 hostsync.8 indimail.7 \
+	ischema.1 incrypt.1 dbinfo.8 hostcntrl.8 hostsync.8 indimail.7 \
 	IndiMail.7 indisrvr.8 initsvc.1 inlookup.8 InLookup.8 inquerytest.8 \
 	install_tables.8 ipchange.8 ismaildup.1 login_tasks.3 \
 	mgmtpass.8 osh.8 postdel.8 printdir.1 proxyimap.8 proxypop3.8 \
@@ -69,7 +69,7 @@ include_HEADERS = addaliasdomain.h add_control.h add_domain_assign.h addressToke
 	getAddressBook.h get_assign.h getFreeFS.h getindimail.h \
 	get_indimailuidgid.h getlastauth.h get_local_hostid.h get_local_ip.h \
 	get_localtime.h get_message_size.h get_Mplexdir.h getpeer.h GetPrefix.h \
-	get_real_domain.h GetSMTProute.h getuidgid.h \
+	get_real_domain.h GetSMTProute.h getuidgid.h gsasl_mkpasswd.h \
 	hostcntrl_select.h host_in_locals.h iadddomain.h iadduser.h iclose.h \
 	in_bsearch.h indimail_compat.h indimail.h inquery.h iopen.h ipasswd.h \
 	ip_map.h is_alias_domain.h is_already_running.h is_distributed_domain.h \
@@ -123,7 +123,7 @@ COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.
 	getactualpath.c get_assign.c getDbLock.c \
 	get_indimailuidgid.c get_local_hostid.c get_local_ip.c get_localtime.c \
 	get_message_size.c get_Mplexdir.c getpeer.c GetPrefix.c get_real_domain.c \
-	GetSMTProute.c hostcntrl_select.c \
+	GetSMTProute.c gsasl_mkpasswd.c hostcntrl_select.c \
 	host_in_locals.c iadddomain.c iadduser.c iclose.c inc_dir.c \
 	inc_dir_control.c init_dir_control.c inquery.c iopen.c \
 	ipasswd.c is_alias_domain.c is_already_running.c is_distributed_domain.c \
@@ -182,7 +182,7 @@ indimailbin_PROGRAMS = vadddomain vdeldomain vadduser vdeluser vuserinfo \
 	vpriv crc crcdiff incrypt vgroup proxyimap proxypop3 \
 	vproxy vbulletin
 
-indimailsbin_PROGRAMS = inlookup tcplookup vdelivermail clearopensmtp \
+indimailsbin_PROGRAMS = inlookup ischema tcplookup vdelivermail clearopensmtp \
 	updaterules vfilter vmoddomain inquerytest vreorg vtable \
 	install_tables hostsync vserverinfo initsvc \
 	mgmtpass vchkpass vsetpass resetquota \
@@ -383,6 +383,10 @@ authindi_DEPENDENCIES = libindimail.la
 vchkpass_SOURCES = vchkpass.c
 vchkpass_LDADD = libindimail.la $(LIB_QMAIL)
 vchkpass_DEPENDENCIES = libindimail.la
+
+ischema_SOURCES = ischema.c
+ischema_LDADD = libindimail.la $(LIB_QMAIL)
+ischema_DEPENDENCIES = libindimail.la
 
 vsetpass_SOURCES = vsetpass.c
 vsetpass_LDADD = libindimail.la $(LIB_QMAIL)
@@ -837,6 +841,8 @@ vmoveuser.1: vmoveuser.9
 vdelivermail.8: vdelivermail.9
 	cat vdelivermail.9 | sed s}INDIMAIL}$(indimaildir)}g \
 		| sed s}LIBEXECDIR}$(libexecdir)}g > $@
+ischema.1: ischema.9
+	cat ischema.9 | sed s}SYSCONFDIR}$(sysconfdir)}g>$@
 indimail.7: indimail.9
 	$(editman) indimail.9 > $@
 
