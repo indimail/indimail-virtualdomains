@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 1.4  2022-08-05 21:21:57+05:30  Cprogrammer
+ * added option to update scram passwords
+ *
  * Revision 1.3  2020-04-01 18:59:07+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -26,6 +29,7 @@
 #include <env.h>
 #include <str.h>
 #include <makesalt.h>
+#include <scan.h>
 #endif
 #include "parse_email.h"
 #include "get_real_domain.h"
@@ -35,9 +39,10 @@
 #include "post_handle.h"
 #include "variables.h"
 #include "indimail.h"
+#include "gsasl_mkpasswd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.3 2020-04-01 18:59:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.4 2022-08-05 21:21:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -45,36 +50,74 @@ static char     sccsid[] = "$Id: vpasswd.c,v 1.3 2020-04-01 18:59:07+05:30 Cprog
 
 static char    *usage =
 	"usage: vpasswd [options] email_address [password]\n"
-	"options: -V (print version number)\n"
-	"         -v (verbose)\n"
-	"         -a (use apop, pop is default)\n"
+	"options: -v (verbose)\n"
+	"         -h hash\n"
 	"         -e encrypted password (set the encrypted password field)\n"
-	"         -r Generate a random password"
+	"         -r Generate a random password of specfied length\n"
+	"         -i iteration_count (if generating a SCRAM password\n"
+	"         -s salt (if generating SCRAM password)\n"
+	"            NOTE: If salt is not specified, it will be generated\n"
 	;
-extern int      encrypt_flag;
 
 int
-get_options(int argc, char **argv, char **email, char **passwd, int *apop)
+get_options(int argc, char **argv, char **email, char **clear_text, int *encrypt_flag, int *scram, int *iter, char **salt)
 {
-	int             c, Random;
+	int             c, i, r, Random, passwd_len = 8;
 	char           *ptr;
 
-	*email = *passwd = 0;
-	*apop = USE_POP;
+	*email = *clear_text = *salt = 0;
+	*iter = 4096;
+	*scram = 0;
+	*encrypt_flag = 1;
 	Random = 0;
-	while ((c = getopt(argc, argv, "vrae")) != opteof) {
+	while ((c = getopt(argc, argv, "veh:r:i:s:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
 			verbose = 1;
-		case 'a':
-			*apop = USE_APOP;
+			break;
+		case 'h':
+			if (!str_diffn(optarg, "DES", 3))
+				r = env_put2("PASSWORD_HASH", "0");
+			else
+			if (!str_diffn(optarg, "MD5", 3))
+				r = env_put2("PASSWORD_HASH", "1");
+			else
+			if (!str_diffn(optarg, "SHA-256", 7))
+				r = env_put2("PASSWORD_HASH", "2");
+			else
+			if (!str_diffn(optarg, "SHA-512", 7))
+				r = env_put2("PASSWORD_HASH", "3");
+			else
+			if (!str_diffn(optarg, "SCRAM-SHA-1", 11)) {
+				r = env_put2("PASSWORD_HASH", "3");
+				*scram = 1;
+			} else
+			if (!str_diffn(optarg, "SCRAM-SHA-256", 13)) {
+				r = env_put2("PASSWORD_HASH", "3");
+				*scram = 2;
+			} else
+				strerr_die4x(100, WARN, optarg, ": wrong hash method\n", usage);
+			if (!r)
+				strerr_die1x(111, "out of memory");
+			*encrypt_flag = 1;
+			break;
+		case 'i':
+			scan_int(optarg, iter);
+			break;
+		case 's':
+			i = str_chr(optarg, ',');
+			if (optarg[i]) {
+				strerr_die3x(100, WARN, optarg, ": salt cannot have a comma character");
+			}
+			*salt = optarg;
 			break;
 		case 'r':
 			Random = 1;
+			scan_int(optarg, &passwd_len);
 			break;
 		case 'e':
-			encrypt_flag = 1;
+			*encrypt_flag = 0;
 			break;
 		default:
 			strerr_warn2(WARN, usage, 0);
@@ -85,19 +128,20 @@ get_options(int argc, char **argv, char **email, char **passwd, int *apop)
 		*email = argv[optind++];
 	if (*email) {
 		if (optind < argc)
-			*passwd = argv[optind++];
+			*clear_text = argv[optind++];
 		else {
-			if (Random)
-				ptr = genpass(8);
-			else
+			if (Random) {
+				ptr = genpass(passwd_len);
+				strerr_warn3("Generated random passwd [", ptr, "]", 0);
+			} else
 			if (!(ptr = vgetpasswd(*email))) {
 				strerr_warn2(WARN, usage, 0);
 				return (1);
 			}
-			*passwd = ptr;
+			*clear_text = ptr;
 		}
 	}
-	if (!*email || !*passwd) {
+	if (!*email || !*clear_text) {
 		strerr_warn2(WARN, usage, 0);
 		return (1);
 	}
@@ -109,11 +153,11 @@ main(argc, argv)
 	int             argc;
 	char           *argv[];
 {
-	int             i, apop;
-	char           *real_domain, *ptr, *email, *passwd, *base_argv0;
-	static stralloc user = {0}, domain = {0};
+	int             i, encrypt_flag, scram, iter;
+	char           *real_domain, *ptr, *email, *clear_text, *base_argv0, *b64salt;
+	static stralloc user = {0}, domain = {0}, result = {0};
 
-	if (get_options(argc, argv, &email, &passwd, &apop))
+	if (get_options(argc, argv, &email, &clear_text, &encrypt_flag, &scram, &iter, &b64salt))
 		return (1);
 	parse_email(email, &user, &domain);
 	if (!domain.len) {
@@ -125,7 +169,16 @@ main(argc, argv)
 		strerr_warn2(domain.s, ": No such domain\n", 0);
 		return (1);
 	}
-	if ((i = ipasswd(user.s, real_domain, passwd, apop)) != 1) {
+	switch (scram)
+	{
+	case 1: /*- SCRAM-SHA-1 */
+		gsasl_mkpasswd(verbose, "SCRAM-SHA-1", iter, b64salt, clear_text, &result);
+		break;
+	case 2: /*- SCRAM-SHA-256 */
+		gsasl_mkpasswd(verbose, "SCRAM-SHA-256", iter, b64salt, clear_text, &result);
+		break;
+	}
+	if ((i = ipasswd(user.s, real_domain, clear_text, encrypt_flag, scram ? result.s : 0)) != 1) {
 		if (!i)
 			strerr_warn5("vpasswd: ", user.s, "@", real_domain, ": No such user", 0);
 		iclose();
@@ -134,8 +187,7 @@ main(argc, argv)
 		return (1);
 	}
 	iclose();
-	if (!(ptr = env_get("POST_HANDLE")))
-	{
+	if (!(ptr = env_get("POST_HANDLE"))) {
 		i = str_rchr(argv[0], '/');
 		if (!*(base_argv0 = (argv[0] + i)))
 			base_argv0 = argv[0];
