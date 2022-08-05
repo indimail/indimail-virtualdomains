@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 1.8  2022-08-05 21:12:37+05:30  Cprogrammer
+ * added encrypt_flag argument to autoAddUser()
+ *
  * Revision 1.7  2021-07-22 15:17:27+05:30  Cprogrammer
  * conditional define of _XOPEN_SOURCE
  *
@@ -27,7 +30,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 1.7 2021-07-22 15:17:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 1.8 2022-08-05 21:12:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -87,7 +90,7 @@ die_nomem()
 }
 
 int
-autoAddUser(char *email, char *pass, char *service)
+autoAddUser(char *email, char *pass, char *service, int encrypt_flag)
 {
 	char           *admin_user, *admin_pass, *admin_host, *admin_port,
                    *hard_quota, *ptr, *certfile, *cafile;
@@ -96,13 +99,14 @@ autoAddUser(char *email, char *pass, char *service)
 
 	if (!env_get("AUTOADDUSERS"))
 		return (1);
-	if (encrypt_flag) {
+	if (encrypt_flag)
+		mkpasswd(pass, &encrypted, encrypt_flag);
+	else {
 		if (!stralloc_copys(&encrypted, pass) ||
 				!stralloc_0(&encrypted))
 			die_nomem();
 		encrypted.len--;
-	} else
-		mkpasswd(pass, &encrypted, encrypt_flag);
+	}
 	getEnvConfigStr(&ptr, "ADDUSERCMD", PREFIX"/bin/autoadduser");
 	if (!access(ptr, X_OK)) {
 		if (!stralloc_copys(&cmdbuf, ptr) ||
@@ -253,7 +257,7 @@ proxylogin(char **argv, char *service, char *userid, char *plaintext, char *remo
 	mailstore = (char *) 0;
 	if (!(mailstore = inquery(HOST_QUERY, email, 0))) {
 		if (userNotFound) {
-			switch ((retval = autoAddUser(email, plaintext, service)))
+			switch ((retval = autoAddUser(email, plaintext, service, 1)))
 			{
 			case -1:
 				strmsg_out1("proxylogin: autoAddUser failed\n");
