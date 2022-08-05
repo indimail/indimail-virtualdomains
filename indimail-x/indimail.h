@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 1.9  2022-08-05 21:05:03+05:30  Cprogrammer
+ * added ischema table
+ *
  * Revision 1.8  2022-08-04 14:46:28+05:30  Cprogrammer
  * added scram column to store scram passwords
  *
@@ -29,7 +32,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 1.8 2022-08-04 14:46:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 1.9 2022-08-05 21:05:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -474,6 +477,12 @@ program     char(64) not null, \
 cmdswitches char(128), \
 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 primary key(user, program)"
+
+#define SCHEMA_TABLE_LAYOUT "\
+id INT NOT NULL AUTO_INCREMENT, \
+comment TEXT NOT NULL, \
+timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
+primary key(id)"
 
 #define ATCHARS                 "@%:"
 #define MSG_BUF_SIZE            8192
