@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 1.5  2022-08-05 23:15:01+05:30  Cprogrammer
+ * conditional compilation of gsasl code
+ *
  * Revision 1.4  2022-08-05 21:21:57+05:30  Cprogrammer
  * added option to update scram passwords
  *
@@ -42,7 +45,7 @@
 #include "gsasl_mkpasswd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.4 2022-08-05 21:21:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.5 2022-08-05 23:15:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -89,6 +92,7 @@ get_options(int argc, char **argv, char **email, char **clear_text, int *encrypt
 			if (!str_diffn(optarg, "SHA-512", 7))
 				r = env_put2("PASSWORD_HASH", "3");
 			else
+#ifdef HAVE_GSASL
 			if (!str_diffn(optarg, "SCRAM-SHA-1", 11)) {
 				r = env_put2("PASSWORD_HASH", "3");
 				*scram = 1;
@@ -97,6 +101,7 @@ get_options(int argc, char **argv, char **email, char **clear_text, int *encrypt
 				r = env_put2("PASSWORD_HASH", "3");
 				*scram = 2;
 			} else
+#endif
 				strerr_die4x(100, WARN, optarg, ": wrong hash method\n", usage);
 			if (!r)
 				strerr_die1x(111, "out of memory");
@@ -169,6 +174,7 @@ main(argc, argv)
 		strerr_warn2(domain.s, ": No such domain\n", 0);
 		return (1);
 	}
+#ifdef HAVE_GSASL
 	switch (scram)
 	{
 	case 1: /*- SCRAM-SHA-1 */
@@ -178,6 +184,7 @@ main(argc, argv)
 		gsasl_mkpasswd(verbose, "SCRAM-SHA-256", iter, b64salt, clear_text, &result);
 		break;
 	}
+#endif
 	if ((i = ipasswd(user.s, real_domain, clear_text, encrypt_flag, scram ? result.s : 0)) != 1) {
 		if (!i)
 			strerr_warn5("vpasswd: ", user.s, "@", real_domain, ": No such user", 0);
