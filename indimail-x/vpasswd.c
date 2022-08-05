@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 1.6  2022-08-05 23:39:53+05:30  Cprogrammer
+ * compile gsasl code for libgsasl version >= 1.8.1
+ *
  * Revision 1.5  2022-08-05 23:15:01+05:30  Cprogrammer
  * conditional compilation of gsasl code
  *
@@ -45,7 +48,7 @@
 #include "gsasl_mkpasswd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.5 2022-08-05 23:15:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.6 2022-08-05 23:39:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -93,6 +96,7 @@ get_options(int argc, char **argv, char **email, char **clear_text, int *encrypt
 				r = env_put2("PASSWORD_HASH", "3");
 			else
 #ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 			if (!str_diffn(optarg, "SCRAM-SHA-1", 11)) {
 				r = env_put2("PASSWORD_HASH", "3");
 				*scram = 1;
@@ -101,6 +105,7 @@ get_options(int argc, char **argv, char **email, char **clear_text, int *encrypt
 				r = env_put2("PASSWORD_HASH", "3");
 				*scram = 2;
 			} else
+#endif
 #endif
 				strerr_die4x(100, WARN, optarg, ": wrong hash method\n", usage);
 			if (!r)

@@ -1,5 +1,8 @@
 /*
  * $Log: gsasl_mkpasswd.c,v $
+ * Revision 1.2  2022-08-05 23:39:15+05:30  Cprogrammer
+ * compile gsasl code for libgsasl version >= 1.8.1
+ *
  * Revision 1.1  2022-08-05 20:58:01+05:30  Cprogrammer
  * Initial revision
  *
@@ -29,9 +32,10 @@
 #define NO_ERR     0
 
 #ifndef	lint
-static char     sccsid[] = "$Id: gsasl_mkpasswd.c,v 1.1 2022-08-05 20:58:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: gsasl_mkpasswd.c,v 1.2 2022-08-05 23:39:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 int
 gsasl_mkpasswd(int verbose, char *mechanism, int iteration_count, char *b64salt_arg, char *password, stralloc *result)
 {
@@ -112,4 +116,5 @@ gsasl_mkpasswd(int verbose, char *mechanism, int iteration_count, char *b64salt_
 	}
 	return NO_ERR;
 }
+#endif
 #endif
