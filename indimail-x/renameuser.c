@@ -1,5 +1,8 @@
 /*
  * $Log: renameuser.c,v $
+ * Revision 1.4  2022-08-05 22:57:27+05:30  Cprogrammer
+ * removed apop argument to iadduser()
+ *
  * Revision 1.3  2022-08-05 21:14:38+05:30  Cprogrammer
  * added encrypt_flag argument to iadduser()
  *
@@ -46,7 +49,7 @@
 #include "deluser.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: renameuser.c,v 1.3 2022-08-05 21:14:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: renameuser.c,v 1.4 2022-08-05 22:57:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -162,7 +165,7 @@ renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *
 		return (-1);
 	}
 	if ((err = iadduser(newUser->s, newDomain->s, 0, pw->pw_passwd, pw->pw_gecos,
-		pw->pw_shell, 0, 1, !inactive_flag, 0)) == -1)
+		pw->pw_shell, 0, !inactive_flag, 0)) == -1)
 	{
 		return (-1);
 	} else
