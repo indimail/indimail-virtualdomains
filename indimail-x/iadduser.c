@@ -1,5 +1,8 @@
 /*
  * $Log: iadduser.c,v $
+ * Revision 1.3  2022-08-05 21:02:18+05:30  Cprogrammer
+ * added encrypt_flag argument
+ *
  * Revision 1.2  2020-04-01 18:55:09+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -53,7 +56,7 @@
 #define ALLOWCHARS              " .!#$%&'*+-/=?^_`{|}~\""
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iadduser.c,v 1.2 2020-04-01 18:55:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iadduser.c,v 1.3 2022-08-05 21:02:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -99,7 +102,7 @@ die_nomem()
  */
 int
 iadduser(char *username, char *domain, char *mdahost, char *password,
-		 char *gecos, char *quota, int max_users_per_level, int apop, int actFlag)
+		 char *gecos, char *quota, int max_users_per_level, int apop, int actFlag, int encrypt_flag)
 {
 	static stralloc Dir = {0}, Crypted = {0}, tmpbuf = {0}, line = {0};
 	char            estr[2], inbuf[512];
