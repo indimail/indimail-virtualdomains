@@ -1,0 +1,33 @@
+.TH ischema 1
+.SH NAME
+ischema \- indimail schema updater
+
+.SH SYNOPSYS
+\fBischema\fR [-\fIu\fR]
+
+.SH DESCRIPTION
+\fBischema\fR updates indimail schema definitions from
+SYSCONFDIR/indimail.schema. Without the -u option it displays the current
+schema id.
+
+The file indimail.schema has 5 fields separated by the colon character.
+
+.EX
+field1 - ID
+field2 - sql statement (sql) or command (cmd)
+field3 - Ignore errors when executing the sql statement or command
+field4 - Comment
+field4 - Sql statement or shell command to be executed
+.EE
+
+The IndiMail database has a schema ID which is the value of the ID column
+of therow having the largest id in the MySQL(1) table \fIischema\fR. Lines
+in the file indimail.schema, which have an ID greater than the schema ID
+gets updated. \fBischema\fR is run on every indimail upgrades. If there are
+updates, the schema gets along with the \fIischema\fR table.
+
+.SH RETURN VALUE
+0 on success. 100 for incorrect usage and 111 for temporary errors
+
+.SH "SEE ALSO"
+IndiMail(7)
