@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.5  2022-08-05 21:20:58+05:30  Cprogrammer
+ * reversed encrypt_flag setting for mkpasswd() change in encrypt_flag
+ *
  * Revision 1.4  2022-01-31 17:36:17+05:30  Cprogrammer
  * fixed args passed to post handle script
  *
@@ -60,7 +63,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.4 2022-01-31 17:36:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.5 2022-08-05 21:20:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -114,7 +117,7 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 		stralloc *Passwd, stralloc *DateFormat, stralloc *Quota, stralloc *vacation_file, 
 		int *toggle, int *GidFlag, int *ClearFlags, int *QuotaFlag, int *set_vacation)
 {
-	int             c;
+	int             c, encrypt_flag = 1;
 
 	*toggle = *ClearFlags = 0;
 	*QuotaFlag = 0;
@@ -141,7 +144,7 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 			*ClearFlags = 1;
 			break;
 		case 'e':
-			encrypt_flag = 1;
+			encrypt_flag = 0;
 			/*- flow through */
 		case 'P':
 			mkpasswd(optarg, Passwd, encrypt_flag);
