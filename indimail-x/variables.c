@@ -1,5 +1,9 @@
 /*
  * $Log: variables.c,v $
+ * Revision 1.3  2022-08-05 21:19:04+05:30  Cprogrammer
+ * added ischema table
+ * removed encrypt_flag
+ *
  * Revision 1.2  2019-04-15 21:58:18+05:30  Cprogrammer
  * added dir_control.h for vdir struct definition
  *
@@ -17,7 +21,7 @@
 #include "dir_control.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: variables.c,v 1.2 2019-04-15 21:58:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: variables.c,v 1.3 2022-08-05 21:19:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 vdir_type       vdir;
@@ -27,7 +31,6 @@ int             site_size = SITE_SIZE;
 int             userNotFound = 0;
 int             is_open = 0;
 stralloc        mysql_host = {0};
-int             encrypt_flag;
 char           *indi_port, *default_table, *inactive_table, *cntrl_table;
 mdir_t          CurBytes, CurCount;
 uid_t           indimailuid = -1;
@@ -200,6 +203,7 @@ ADMINCOMMAND adminCommands[] = {
 };
 
 IndiMAILTable IndiMailTable[] = {
+	{ON_LOCAL, "ischema",      SCHEMA_TABLE_LAYOUT},
 	{ON_LOCAL, "atrn_map",     ATRN_MAP_LAYOUT},
 	{ON_LOCAL, "bulkmail",     BULKMAIL_TABLE_LAYOUT},
 	{ON_LOCAL, "fstab",        FSTAB_TABLE_LAYOUT},
