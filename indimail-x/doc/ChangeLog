@@ -28,6 +28,24 @@ Release @version@-@release@ Start 14/02/2021
 14. ProcessInFifo.c, sql_getpw.c: fetch scram password
 15. userinfo.c: display scram password if existing
 16. indimail.h: added scram column to indimail/indibak tables
+- 05/08/2022
+17. iadduser.c: added encrypt_flag argument
+18. dbinfo.c: replaced fprintf with strerr_warn1
+19. configure.ac: added check for gsasl.h, libgsasl
+20. ilocal_upgrade.sh: run schema update
+21. added ischema program for schema updates to indimail database
+22. indimail.spec: added ischema - schema update program for indimail database
+23. ipasswd.[c,h]: added scram argument to update scram password
+24. mgmtpass.c, mgmtpassfuncs.c: added encrypt_flag argument to mgmtsetpass()
+25. proxylogin.c: added encrypt_flag argument to autoAddUser()
+26. renameuser.c, vadduser.c: added encrypt_flag argument to iadduser()
+27. sql_passwd.[c,h]: added scram argument to update scram password
+28. vmoduser.c: reversed encrypt_flag setting for mkpasswd() change in
+    encrypt_flag
+29. vpasswd.c: added option to update scram passwords
+30. variables.c: added ischema table, removed encrypt_flag global variable
+31. indimail.h: added ischema table
+32. gsasl_mkpasswd.c: added gsasl_mkpasswd() for updating scram passwords
 
 *
 Release 3.4.0 Start 14/02/2021
