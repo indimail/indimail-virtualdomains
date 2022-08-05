@@ -1,5 +1,8 @@
 /*
  * $Log: vsetpass.c,v $
+ * Revision 1.7  2022-08-05 21:23:42+05:30  Cprogrammer
+ * reversed encrypt_flag setting for mkpasswd() change in encrypt_flag
+ *
  * Revision 1.6  2021-07-22 15:17:42+05:30  Cprogrammer
  * conditional define of _XOPEN_SOURCE
  *
@@ -56,7 +59,7 @@
 #include "getpeer.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vsetpass.c,v 1.6 2021-07-22 15:17:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetpass.c,v 1.7 2022-08-05 21:23:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -236,7 +239,7 @@ main(int argc, char **argv)
 		print_error("exec");
 		_exit (111);
 	}
-	mkpasswd(new_pass, &Crypted, encrypt_flag);
+	mkpasswd(new_pass, &Crypted, 1);
 	if (env_get("DEBUG_LOGIN")) 
 		strerr_warn11("vsetpass: login [", login, "] old_pass [",
 				old_pass, "] new_pass [", new_pass, "] response [", response, "] pw_passwd [", Crypted.s, "]", 0);
