@@ -1,5 +1,8 @@
 /*
  * $Log: iadduser.c,v $
+ * Revision 1.4  2022-08-05 22:40:35+05:30  Cprogrammer
+ * removed apop argument to iadduser()
+ *
  * Revision 1.3  2022-08-05 21:02:18+05:30  Cprogrammer
  * added encrypt_flag argument
  *
@@ -56,7 +59,7 @@
 #define ALLOWCHARS              " .!#$%&'*+-/=?^_`{|}~\""
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iadduser.c,v 1.3 2022-08-05 21:02:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iadduser.c,v 1.4 2022-08-05 22:40:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -102,14 +105,14 @@ die_nomem()
  */
 int
 iadduser(char *username, char *domain, char *mdahost, char *password,
-		 char *gecos, char *quota, int max_users_per_level, int apop, int actFlag, int encrypt_flag)
+		 char *gecos, char *quota, int max_users_per_level, int actFlag, int encrypt_flag)
 {
 	static stralloc Dir = {0}, Crypted = {0}, tmpbuf = {0}, line = {0};
 	char            estr[2], inbuf[512];
 	char           *tmpstr, *dir, *ptr, *allow_chars;
 	uid_t           uid;
 	gid_t           gid;
-	int             t, fd, match, ulen, u_level = 0, i;
+	int             uid_flag = 0, t, fd, match, ulen, u_level = 0, i;
 	struct substdio ssin;
 #ifdef CLUSTERED_SITE
 	static stralloc SqlBuf = {0};
@@ -149,7 +152,7 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 			if (isupper((int) *ptr))
 				*ptr = tolower(*ptr);
 		}
-		apop = 1;
+		uid_flag = 1;
 #ifdef CLUSTERED_SITE
 		if ((err = is_distributed_domain(domain)) == -1) {
 			strerr_die3x(111, "iadduser: unable to verify ", domain, " as a distributed domain");
@@ -157,7 +160,7 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 		if (err == 1) { /*- distributed domain */
 			if (open_master())
 				strerr_die1x(111, "iadduser: Failed to open Master Db");
-			apop = ADD_FLAG;
+			uid_flag = ADD_FLAG;
 			if ((err = is_user_present(username, domain)) == 1)
 				strerr_die5x(100, "username ", username, "@", domain, " exists");
 			else
@@ -220,11 +223,11 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 		dir = (char *) 0;
 	if (domain && *domain) {
 		mkpasswd(password, &Crypted, encrypt_flag);
-		ptr = sql_adduser(username, domain, Crypted.s, gecos, dir, quota, apop, actFlag);
+		ptr = sql_adduser(username, domain, Crypted.s, gecos, dir, quota, uid_flag, actFlag);
 		if (!ptr || !*ptr)
 			return (-1);
 #ifdef CLUSTERED_SITE
-		if (apop == ADD_FLAG) {
+		if (uid_flag == ADD_FLAG) {
 			/*- Get hostid of the Local machine */
 			if (mdahost && *mdahost) {
 				if (!(ptr = sql_gethostid(mdahost)))
