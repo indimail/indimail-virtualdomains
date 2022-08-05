@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfo.c,v $
+ * Revision 1.5  2022-08-05 21:01:35+05:30  Cprogrammer
+ * replaced fprintf with strerr_warn1
+ *
  * Revision 1.4  2020-04-01 18:54:05+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfo.c,v 1.4 2020-04-01 18:54:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbinfo.c,v 1.5 2022-08-05 21:01:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -322,7 +325,7 @@ editdbinfo(char *filename)
 int
 main()
 {
-	fprintf(stderr, "IndiMail not configured with --enable-user-cluster=y\n");
+	strerr_warn1("IndiMail not configured with --enable-user-cluster=y", 0);
 	return (0);
 }
 #endif
