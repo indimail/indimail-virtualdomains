@@ -1,5 +1,8 @@
 /*
  * $Log: sql_passwd.c,v $
+ * Revision 1.2  2022-08-05 21:15:25+05:30  Cprogrammer
+ * added scram argument to update scram password
+ *
  * Revision 1.1  2019-04-14 22:55:58+05:30  Cprogrammer
  * Initial revision
  *
@@ -24,7 +27,7 @@
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_passwd.c,v 1.1 2019-04-14 22:55:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_passwd.c,v 1.2 2022-08-05 21:15:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -35,7 +38,7 @@ die_nomem()
 }
 
 int
-sql_passwd(char *user, char *domain, char *pass, int apop)
+sql_passwd(char *user, char *domain, char *pass, char *scram)
 {
 	char           *tmpstr;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
@@ -66,28 +69,29 @@ sql_passwd(char *user, char *domain, char *pass, int apop)
 			tmpstr = MYSQL_LARGE_USERS_TABLE;
 		else
 			tmpstr = munch_domain(domain);
-		if (!stralloc_copyb(&SqlBuf, "update low_priority ", 20) ||
-				!stralloc_cats(&SqlBuf, tmpstr) ||
-				!stralloc_catb(&SqlBuf, " set pw_passwd = \"", 18) ||
-				!stralloc_cats(&SqlBuf, pass) ||
-				!stralloc_catb(&SqlBuf, "\" where pw_name = \"", 19) ||
-				!stralloc_cats(&SqlBuf, user) ||
-				!stralloc_append(&SqlBuf, "\"") ||
-				!stralloc_0(&SqlBuf))
-			die_nomem();
-	} else {
-		if (!stralloc_copyb(&SqlBuf, "update low_priority ", 20) ||
-				!stralloc_cats(&SqlBuf, default_table) ||
-				!stralloc_catb(&SqlBuf, " set pw_passwd = \"", 18) ||
-				!stralloc_cats(&SqlBuf, pass) ||
-				!stralloc_catb(&SqlBuf, "\" where pw_name = \"", 19) ||
-				!stralloc_cats(&SqlBuf, user) ||
-				!stralloc_catb(&SqlBuf, "\" and pw_domain = \"", 19) ||
-				!stralloc_cats(&SqlBuf, domain) ||
-				!stralloc_append(&SqlBuf, "\"") ||
-				!stralloc_0(&SqlBuf))
+	} else
+		tmpstr = default_table;
+	if (!stralloc_copyb(&SqlBuf, "update low_priority ", 20) ||
+			!stralloc_cats(&SqlBuf, tmpstr) ||
+			!stralloc_catb(&SqlBuf, " set pw_passwd = \"", 18) ||
+			!stralloc_cats(&SqlBuf, pass))
+		die_nomem();
+	if (scram) {
+		if (!stralloc_catb(&SqlBuf, "\", scram = \"", 12) ||
+			!stralloc_cats(&SqlBuf, scram))
+		die_nomem();
+	}
+	if (!stralloc_catb(&SqlBuf, "\" where pw_name = \"", 19) ||
+			!stralloc_cats(&SqlBuf, user))
+		die_nomem();
+	if (site_size == SMALL_SITE) {
+		if (!stralloc_catb(&SqlBuf, "\" and pw_domain = \"", 19) ||
+				!stralloc_cats(&SqlBuf, domain))
 			die_nomem();
 	}
+	if (!stralloc_append(&SqlBuf, "\"") || !stralloc_0(&SqlBuf))
+		die_nomem();
+
 	if (mysql_query(&mysql[1], SqlBuf.s)) {
 		strerr_warn4("sql_passwd: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
 		return (-1);
@@ -97,8 +101,14 @@ sql_passwd(char *user, char *domain, char *pass, int apop)
 		if (!stralloc_copyb(&SqlBuf, "update low_priority ", 20) ||
 				!stralloc_cats(&SqlBuf, inactive_table) ||
 				!stralloc_catb(&SqlBuf, " set pw_passwd = \"", 18) ||
-				!stralloc_cats(&SqlBuf, pass) ||
-				!stralloc_catb(&SqlBuf, "\" where pw_name = \"", 19) ||
+				!stralloc_cats(&SqlBuf, pass))
+			die_nomem();
+		if (scram) {
+			if (!stralloc_catb(&SqlBuf, "\", scram = \"", 12) ||
+				!stralloc_cats(&SqlBuf, scram))
+			die_nomem();
+		}
+		if (!stralloc_catb(&SqlBuf, "\" where pw_name = \"", 19) ||
 				!stralloc_cats(&SqlBuf, user) ||
 				!stralloc_catb(&SqlBuf, "\" and pw_domain = \"", 19) ||
 				!stralloc_cats(&SqlBuf, domain) ||
