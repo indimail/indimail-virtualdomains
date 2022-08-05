@@ -1,5 +1,9 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.9  2022-08-05 22:43:57+05:30  Cprogrammer
+ * removed apop argument
+ * added encrypt_flag argument to iadduser()
+ *
  * Revision 1.8  2021-08-24 11:26:55+05:30  Cprogrammer
  * added check for domain name validity
  *
@@ -89,7 +93,7 @@
 #include "get_indimailuidgid.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.8 2021-08-24 11:26:55+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.9 2022-08-05 22:43:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -98,7 +102,6 @@ static char     rcsid[] = "$Id: vadddomain.c,v 1.8 2021-08-24 11:26:55+05:30 Cpr
 #ifdef CLUSTERED_SITE
 int             dbport, use_ssl = 1, distributed;
 #endif
-int             Apop;
 uid_t           Uid;
 gid_t           Gid;
 stralloc        dirbuf = { 0 };
@@ -407,7 +410,7 @@ main(argc, argv)
 	}
 #endif
 	if ((err = iadduser("postmaster", domain, 0, passwd, "Postmaster", 0, users_per_level,
-		Apop, 1)) != VA_SUCCESS) {
+		1, 1)) != VA_SUCCESS) {
 		if (errno != EEXIST) {
 			deldomain(domain);
 			iclose();
@@ -465,7 +468,6 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 		get_indimailuidgid(&indimailuid, &indimailgid);
 	Uid = indimailuid;
 	Gid = indimailgid;
-	Apop = USE_POP;
 #ifdef CLUSTERED_SITE
 	s = optbuf;
 	s += fmt_strn(s, "atT:q:l:bB:e:u:vCci:g:d:D:S:U:P:s:p:O", 35);
@@ -549,9 +551,6 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 			break;
 		case 'g':
 			scan_uint(optarg, (unsigned int *) &Gid);
-			break;
-		case 'a':
-			Apop = USE_APOP;
 			break;
 #ifdef VFILTER
 		case 'f':

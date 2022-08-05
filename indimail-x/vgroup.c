@@ -1,5 +1,9 @@
 /*
  * $Log: vgroup.c,v $
+ * Revision 1.4  2022-08-05 22:44:59+05:30  Cprogrammer
+ * removed apop argument to iadduser()
+ * added encrypt flag to iadduser()
+ *
  * Revision 1.3  2019-06-07 15:51:55+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -15,7 +19,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 1.3 2019-06-07 15:51:55+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 1.4 2022-08-05 22:44:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -207,7 +211,7 @@ addGroup(char *user, char *domain, char *mdahost, char *gecos, char *passwd, cha
 			!stralloc_cats(&tmpbuf, gecos ? gecos : user) ||
 			!stralloc_0(&tmpbuf))
 		die_nomem();
-	if ((i = iadduser(user, domain, mdahost, passwd, tmpbuf.s, quota, 0, USE_POP, 1)) < 0)
+	if ((i = iadduser(user, domain, mdahost, passwd, tmpbuf.s, quota, 0, 1, 1)) < 0)
 		return (i);
 	if (!(pw = sql_getpw(user, domain))) {
 		strerr_warn4(user, "@", domain, ": sql_getpw failed: ", &strerr_sys);

@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 1.7  2022-08-05 22:44:37+05:30  Cprogrammer
+ * removed apop argument to iadduser()
+ *
  * Revision 1.6  2022-08-05 21:18:08+05:30  Cprogrammer
  * added encrypt_flag argument to iadduser()
  *
@@ -71,7 +74,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 1.6 2022-08-05 21:18:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vadduser.c,v 1.7 2022-08-05 22:44:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -82,7 +85,7 @@ stralloc        Email = {0}, User = {0}, Domain = {0}, Passwd = {0},
 #ifdef CLUSTERED_SITE
 stralloc        mdahost = {0}, hostid = {0};
 #endif
-int             apop, Random, balance_flag, actFlag = 1;
+int             Random, balance_flag, actFlag = 1;
 
 extern int      create_flag;
 
@@ -320,10 +323,10 @@ main(argc, argv)
 		die_nomem();
 #ifdef CLUSTERED_SITE
 	if ((i = iadduser(User.s, real_domain, mdahost.s, Passwd.s, Gecos.s, quotaVal.s,
-		users_per_level, apop, actFlag, encrypt_flag)) < 0)
+		users_per_level, actFlag, encrypt_flag)) < 0)
 #else
 	if ((i = iadduser(User.s, real_domain, 0, Passwd.s, Gecos.s, quotaVal.s,
-		users_per_level, apop, actFlag, encrypt_flag)) < 0)
+		users_per_level, actFlag, encrypt_flag)) < 0)
 #endif
 	{
 		if (errno == EEXIST)
@@ -355,7 +358,6 @@ get_options(int argc, char **argv, char **base_path, int *pass_len, int *users_p
 	int             c;
 
 	Email.len = Passwd.len = Domain.len = Quota.len = 0;
-	apop = USE_POP;
 	actFlag = 1;
 	*base_path = 0;
 #ifdef CLUSTERED_SITE
@@ -376,9 +378,6 @@ get_options(int argc, char **argv, char **base_path, int *pass_len, int *users_p
 			break;
 		case 'i':
 			actFlag = 0;
-			break;
-		case 'a':
-			apop = USE_APOP;
 			break;
 		case 'c':
 			if (!stralloc_copys(&Gecos, optarg) || !stralloc_0(&Gecos))
