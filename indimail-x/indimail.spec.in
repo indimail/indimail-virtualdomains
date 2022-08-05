@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.111 2022-08-05 21:05:46+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.112 2022-08-05 23:14:47+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -672,6 +672,7 @@ done
 %attr(644,root,root)                    %{_prefix}/include/indimail/GetPrefix.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/get_real_domain.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/GetSMTProute.h
+%attr(644,root,root)                    %{_prefix}/include/indimail/gsasl_mkpasswd.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/smtp_port.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/getuidgid.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/hostcntrl_select.h
