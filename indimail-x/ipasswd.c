@@ -1,5 +1,8 @@
 /*
  * $Log: ipasswd.c,v $
+ * Revision 1.3  2022-08-05 21:08:50+05:30  Cprogrammer
+ * update scram password
+ *
  * Revision 1.2  2020-04-01 18:56:04+05:30  Cprogrammer
  * added encrypt flag to mkpasswd()
  *
@@ -33,7 +36,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ipasswd.c,v 1.2 2020-04-01 18:56:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ipasswd.c,v 1.3 2022-08-05 21:08:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -47,7 +50,7 @@ die_nomem()
  * update a users virtual password file entry with a different password
  */
 int
-ipasswd(char *username, char *domain, char *password, int apop)
+ipasswd(char *username, char *domain, char *password, int encrypt_flag, char *scram_passwd)
 {
 	struct passwd  *pw;
 	char           *ptr;
@@ -79,35 +82,29 @@ ipasswd(char *username, char *domain, char *password, int apop)
 		strerr_warn1("User not allowed to change passwd", 0);
 		return (-1);
 	}
-	if (apop & USE_APOP) {
-		i = sql_passwd (username, domain, password, apop);
-		iclose();
-		return (i);
-	} else {
-		mkpasswd(password, &Crypted, encrypt_flag);
-		if ((i = sql_passwd(username, domain, Crypted.s, apop)) == 1) {
+	mkpasswd(password, &Crypted, encrypt_flag);
+	if ((i = sql_passwd(username, domain, Crypted.s, scram_passwd)) == 1) {
 			if (!stralloc_copys(&Dir, pw->pw_dir) ||
-					!stralloc_catb(&Dir, "/Maildir", 8) ||
-					!stralloc_0(&Dir))
-				die_nomem();
-			if (access(Dir.s, F_OK))
-				quota = 0l;
-			else {
+				!stralloc_catb(&Dir, "/Maildir", 8) ||
+				!stralloc_0(&Dir))
+			die_nomem();
+		if (access(Dir.s, F_OK))
+			quota = 0l;
+		else {
 #ifdef USE_MAILDIRQUOTA
-				quota = check_quota(Dir.s, 0);
+			quota = check_quota(Dir.s, 0);
 #else
-				quota = check_quota(Dir.s);
-#endif
-			}
-#ifdef ENABLE_AUTH_LOGGING
-			if (!(ptr = GetPeerIPaddr())) {
-				strerr_warn1("ipasswd: GetPeerIPaddr: ", &strerr_sys);
-				return (-1);
-			}
-			vset_lastauth(username, domain, "pass", ptr, pw->pw_gecos, quota);
+			quota = check_quota(Dir.s);
 #endif
 		}
-		iclose();
-		return (i);
+#ifdef ENABLE_AUTH_LOGGING
+		if (!(ptr = GetPeerIPaddr())) {
+			strerr_warn1("ipasswd: GetPeerIPaddr: ", &strerr_sys);
+			return (-1);
+		}
+		vset_lastauth(username, domain, "pass", ptr, pw->pw_gecos, quota);
+#endif
 	}
+	iclose();
+	return (i);
 }
