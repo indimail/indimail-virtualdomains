@@ -85,6 +85,7 @@ AC_CHECK_HEADERS([dirent.h limits.h sys/ioctl.h net/if.h linux/sockios.h sys/soc
 AC_CHECK_HEADERS([openssl/evp.h sys/syscall.h sys/select.h sys/un.h])
 AC_CHECK_HEADERS([crypt.h inttypes.h])
 AC_CHECK_HEADERS([fnmatch.h udb.h elf.h magic.h a.out.h malloc.h sys/utsname.h sys/ipc.h asm/ioctls.h])
+AC_CHECK_HEADERS([gsasl.h])
 
 AC_EGREP_HEADER(in_addr_t, netinet/in.h, AC_DEFINE(HAVE_IN_ADDR_T, 1, "have in_addr_t data type"),)
 
@@ -150,6 +151,7 @@ then
     	AC_MSG_ERROR(Could not find curses/ncurses library.)
 	fi
 fi
+AC_CHECK_LIB(gsasl, gsasl_init, [AC_SUBST([LIB_GSASL], ["-lgsasl"]) AC_DEFINE([HAVE_GSASL], [1],[GNU SASL Library])],,-lgsasl)
 
 AC_DEFINE_UNQUOTED(USE_MYSQL,$USE_MYSQL,Use MySQL for primary authentication)
 
