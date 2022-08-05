@@ -32,7 +32,7 @@ jobs:
     - name: extra_packages
       run: |
         if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig openssl mysql gsasl; fi
-        if [ "${OS}" = "ubuntu-22.04" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libssl-dev libmysqlclient-dev libncurses5-dev libgsasl-dev; fi
+        if [ "${OS}" = "ubuntu-22.04" ] ; then sudo apt-get install gcc g++ automake autoconf libtool libssl-dev libmysqlclient-dev libncurses5-dev libgsasl-dev libsodium-dev; fi
       env:
         OS: ${{ matrix.host }}
 
