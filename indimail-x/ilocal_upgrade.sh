@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: ilocal_upgrade.sh,v $
+# Revision 2.35  2022-08-05 21:03:55+05:30  Cprogrammer
+# run schema update
+#
 # Revision 2.34  2021-08-20 23:17:48+05:30  Cprogrammer
 # fixes for non-existend dir/files
 #
@@ -103,7 +106,7 @@
 # upgrade script for indimail 2.1
 #
 #
-# $Id: ilocal_upgrade.sh,v 2.34 2021-08-20 23:17:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.35 2022-08-05 21:03:55+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -123,7 +126,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.34 2021-08-20 23:17:48+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.35 2022-08-05 21:03:55+05:30 Cprogrammer Exp mbhangui $"
 if [ -d /var/indimail/mysqldb/data/indimail ] ; then
 	if [ ! -f /service/mysql.3306/down ] ; then
 		for i in mysqld mariadb mysql
@@ -142,7 +145,7 @@ fi
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.34 2021-08-20 23:17:48+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.35 2022-08-05 21:03:55+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do
@@ -256,6 +259,8 @@ fi
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
 /usr/sbin/svctool --fixsharedlibs
+# upgrade indimail schema
+/usr/sbin/ischema -u
 } 
 
 case $1 in
