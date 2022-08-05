@@ -46,6 +46,10 @@ Release @version@-@release@ Start 14/02/2021
 30. variables.c: added ischema table, removed encrypt_flag global variable
 31. indimail.h: added ischema table
 32. gsasl_mkpasswd.c: added gsasl_mkpasswd() for updating scram passwords
+33. iadduser.[c,h]: removed apop argument to iadduser()
+34. sql_adduser: renamed apop argument to uid_flag
+35. vadduser, vadddomain: removed apop argument to iadduser()
+36. vgroup: added encrypt_flag argument to iadduser
 
 *
 Release 3.4.0 Start 14/02/2021
