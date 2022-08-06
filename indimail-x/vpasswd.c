@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 1.7  2022-08-06 11:19:07+05:30  Cprogrammer
+ * include gsasl.h
+ *
  * Revision 1.6  2022-08-05 23:39:53+05:30  Cprogrammer
  * compile gsasl code for libgsasl version >= 1.8.1
  *
@@ -37,6 +40,10 @@
 #include <makesalt.h>
 #include <scan.h>
 #endif
+#ifdef HAVE_GSASL_H
+#include <gsasl.h>
+#include "gsasl_mkpasswd.h"
+#endif
 #include "parse_email.h"
 #include "get_real_domain.h"
 #include "vgetpasswd.h"
@@ -45,10 +52,10 @@
 #include "post_handle.h"
 #include "variables.h"
 #include "indimail.h"
-#include "gsasl_mkpasswd.h"
+#include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.6 2022-08-05 23:39:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.7 2022-08-06 11:19:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -62,7 +69,7 @@ static char    *usage =
 	"         -r Generate a random password of specfied length\n"
 	"         -i iteration_count (if generating a SCRAM password\n"
 	"         -s salt (if generating SCRAM password)\n"
-	"            NOTE: If salt is not specified, it will be generated\n"
+	"            NOTE: If salt is not specified, it will be generated"
 	;
 
 int
@@ -107,7 +114,18 @@ get_options(int argc, char **argv, char **email, char **clear_text, int *encrypt
 			} else
 #endif
 #endif
-				strerr_die4x(100, WARN, optarg, ": wrong hash method\n", usage);
+			{
+				errout("vpasswd", WARN);
+				errout("vpasswd", optarg);
+				errout("vpasswd", ": wrong hash method\n");
+				errout("vpasswd", "Supported HASH Methods: DES MD5 SHA-256 SHA-512");
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+				errout("vpasswd", " SCRAM-SHA-1 SCRAM-SHA-256");
+#endif
+				errout("vpasswd", "\n");
+				errflush("vpasswd");
+				strerr_die2x(100, WARN, usage);
+			}
 			if (!r)
 				strerr_die1x(111, "out of memory");
 			*encrypt_flag = 1;
