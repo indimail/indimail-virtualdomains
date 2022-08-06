@@ -44,7 +44,7 @@ case "$host" in
 	else
 		idcommand="/usr/bin/id -u mail"
 	fi
-	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -Wall"
+	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -I/usr/include/qmail -Wall"
 	CFLAGS="$CFLAGS -O4 -fPIC -fpie -Wall -fno-strict-aliasing"
 	LDFLAGS="$LDFLAGS -pie"
 	MODFLAGS="-O4 -fPIC -shared -Wall"
@@ -86,6 +86,7 @@ AC_CHECK_HEADERS([openssl/evp.h sys/syscall.h sys/select.h sys/un.h])
 AC_CHECK_HEADERS([crypt.h inttypes.h])
 AC_CHECK_HEADERS([fnmatch.h udb.h elf.h magic.h a.out.h malloc.h sys/utsname.h sys/ipc.h asm/ioctls.h])
 AC_CHECK_HEADERS([gsasl.h])
+AC_CHECK_HEADERS([sodium_random.h])
 
 AC_EGREP_HEADER(in_addr_t, netinet/in.h, AC_DEFINE(HAVE_IN_ADDR_T, 1, "have in_addr_t data type"),)
 
@@ -152,6 +153,7 @@ then
 	fi
 fi
 AC_CHECK_LIB(gsasl, gsasl_init, [AC_SUBST([LIB_GSASL], ["-lgsasl"]) AC_DEFINE([HAVE_GSASL], [1],[GNU SASL Library])],,-lgsasl)
+AC_CHECK_LIB(qmail, sodium_random, [AC_DEFINE([HAVE_SODIUM_RANDOM], [1],[sodium_random function])],,)
 
 AC_DEFINE_UNQUOTED(USE_MYSQL,$USE_MYSQL,Use MySQL for primary authentication)
 
