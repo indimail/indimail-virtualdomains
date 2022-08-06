@@ -1,5 +1,8 @@
 /*
  * $Log: iwebadmin.c,v $
+ * Revision 1.25  2022-08-06 19:32:32+05:30  Cprogrammer
+ * new argument encrypt_flag to ipasswd()
+ *
  * Revision 1.24  2022-01-21 22:38:52+05:30  Cprogrammer
  * migrate vacation directory to autoresp
  *
@@ -29,7 +32,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: iwebadmin.c,v 1.24 2022-01-21 22:38:52+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.25 2022-08-06 19:32:32+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -253,7 +256,7 @@ main(argc, argv)
 	char           *pi, *rm;
 	int             i, fd, len;
 	struct passwd  *pw;
-	extern int      encrypt_flag;
+	int             encrypt_flag = 1;
 	char            strnum[FMT_ULONG], outbuf[2048];
 	struct substdio ssout;
 
@@ -374,7 +377,7 @@ main(argc, argv)
 			}
 			load_limits();
 			if (!access(".trivial_passwords", F_OK))
-				encrypt_flag = 1;
+				encrypt_flag = 0;
 			if (!(pw = sql_getpw(Username.s, Domain.s))) {
 				copy_status_mesg(html_text[198]);
 				if (debug)
@@ -396,7 +399,7 @@ main(argc, argv)
 			if (!Password1.len)
 				copy_status_mesg(html_text[234]);
 			else
-			if ((i = ipasswd(Username.s, Domain.s, Password1.s, USE_POP)) != 1)
+			if ((i = ipasswd(Username.s, Domain.s, Password1.s, encrypt_flag, 0)) != 1)
 				copy_status_mesg(html_text[140]);
 #ifndef TRIVIAL_PASSWORD_ENABLED
 			else

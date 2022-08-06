@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.22 2022-01-22 20:22:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.23 2022-08-06 19:32:28+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1091,7 +1091,7 @@ modusergo()
 	char            qconvert[11];
 #endif
 	struct stat     sb;
-	extern int      encrypt_flag;
+	int             encrypt_flag = 1;
 	const char     *flagfields[] = { "zeroflag=", "oneflag=", "twoflag=", "threeflag=" };
 	const gid_t     gidflags[] = { V_USER0, V_USER1, V_USER2, V_USER3 };
 	gid_t           orig_gid;
@@ -1124,8 +1124,8 @@ modusergo()
 				!stralloc_0(&triv_pass))
 			die_nomem();
 		if (!access(triv_pass.s, F_OK))
-			encrypt_flag = 1;
-		ret_code = ipasswd(ActionUser.s, Domain.s, Password1.s, USE_POP);
+			encrypt_flag = 0;
+		ret_code = ipasswd(ActionUser.s, Domain.s, Password1.s, encrypt_flag, 0);
 		if (ret_code != 1) {
 			copy_status_mesg(html_text[140]);
 			if (!stralloc_catb(&StatusMessage, " (error code ", 13) ||
