@@ -1,5 +1,8 @@
 /*
  * $Log: gsasl_mkpasswd.c,v $
+ * Revision 1.3  2022-08-06 11:16:59+05:30  Cprogrammer
+ * use gsasl_nonce() if sodium_random() function is missing
+ *
  * Revision 1.2  2022-08-05 23:39:15+05:30  Cprogrammer
  * compile gsasl code for libgsasl version >= 1.8.1
  *
@@ -14,7 +17,9 @@
 #include <gsasl.h>
 #endif
 #include <str.h>
+#ifdef HAVE_SODIUM_RANDOM_H
 #include <sodium_random.h>
+#endif
 #include <base64.h>
 #include <stralloc.h>
 #include <alloc.h>
@@ -32,7 +37,7 @@
 #define NO_ERR     0
 
 #ifndef	lint
-static char     sccsid[] = "$Id: gsasl_mkpasswd.c,v 1.2 2022-08-05 23:39:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: gsasl_mkpasswd.c,v 1.3 2022-08-06 11:16:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
@@ -71,7 +76,12 @@ gsasl_mkpasswd(int verbose, char *mechanism, int iteration_count, char *b64salt_
 	} else {
 		salt = salt_buf;
 		saltlen = sizeof (salt_buf);
+#ifdef HAVE_SODIUM_RANDOM
 		sodium_random(salt, saltlen);
+#else
+		if ((res = gsasl_nonce(salt, saltlen)) != GSASL_OK)
+			return GSASL_ERR;
+#endif
 		if (!stralloc_copyb(&in, salt, saltlen) ||
 				b64encode(&in, &b64) == -1)
 			return MEMORY_ERR;
