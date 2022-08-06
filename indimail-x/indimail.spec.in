@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.113 2022-08-06 00:03:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.114 2022-08-06 19:33:53+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -104,7 +104,15 @@ BuildRequires: openssl-devel rpm gcc gcc-c++ make coreutils grep
 BuildRequires: glibc glibc-devel openssl procps ncurses-devel
 BuildRequires: gzip autoconf automake libtool pkgconfig
 BuildRequires: sed findutils binutils
-BuildRequires: mysql-devel libqmail-devel libqmail libsodium-devel libgsasl-devel
+BuildRequires: mysql-devel libqmail-devel libqmail libgsasl-devel
+%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version} && %{undefined scientificlinux_version}
+BuildRequires: libsodium-devel
+%endif
+%if !0%{?is_opensuse}
+%if 0%{?suse_version} != 1315 && 0%{?sle_version} != 120000 && 0%{?sle_version} != 120100 && 0%{?sle_version} != 120500 && 0%{?sle_version} != 120200 && 0%{?sle_version} != 120300 && 0%{?sle_version} != 120400
+BuildRequires: libsodium-devel
+%endif
+%endif
 
 %if %{defined fedora_version} || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 BuildRequires: redhat-lsb-core
