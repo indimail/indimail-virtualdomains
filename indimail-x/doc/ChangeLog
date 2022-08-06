@@ -53,7 +53,7 @@ Release @version@-@release@ Start 14/02/2021
 37. renameuser.c: removed apop argument to iadduser()
 - 06/08/2022
 38. gsasl_mkpasswd.c: use gsasl_nonce() if sodium_random() function is missing
-39.
+39. vpasswd.c: fix compilation when libgsasl is missing or of wrong version
 40. configure.ac: Added check for sodium_random() function
 
 *
