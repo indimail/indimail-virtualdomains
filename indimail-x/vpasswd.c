@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 1.8  2022-08-06 19:34:25+05:30  Cprogrammer
+ * fix compilation when libgsasl is missing or of wrong version
+ *
  * Revision 1.7  2022-08-06 11:19:07+05:30  Cprogrammer
  * include gsasl.h
  *
@@ -55,7 +58,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.7 2022-08-06 11:19:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.8 2022-08-06 19:34:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -198,6 +201,7 @@ main(argc, argv)
 		return (1);
 	}
 #ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	switch (scram)
 	{
 	case 1: /*- SCRAM-SHA-1 */
@@ -207,6 +211,7 @@ main(argc, argv)
 		gsasl_mkpasswd(verbose, "SCRAM-SHA-256", iter, b64salt, clear_text, &result);
 		break;
 	}
+#endif
 #endif
 	if ((i = ipasswd(user.s, real_domain, clear_text, encrypt_flag, scram ? result.s : 0)) != 1) {
 		if (!i)
