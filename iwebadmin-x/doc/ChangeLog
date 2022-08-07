@@ -26,9 +26,12 @@ Release @version@-@release@ Start 13/03/2021
 - 22/01/2022
 17. autorespond.c: reduced loc by removing duplicated code
 18. user.c: discontinue use of Reference for getting subject
-- 06/08/2022
+- 07/08/2022
 19. user.c, iwebadmin.c: new argument encrypt_flag to ipasswd()
-19. user.c: new argument scram to sql_setpw()
+20. user.c: new argument scram to sql_setpw()
+21. configure.ac: added check for gsasl_mkpasswd in libindimail
+22. iwebadmin.c, user.c: use gsasl_mkpasswd to update SCRAM passwords
+23. iwebadminx.h: added variables b64salt, result, scram, iter_count
 
 * Mon Jul 15 2019 13:00:14 +0530 mbhangui@gmail.com 2.0-1.1%{?dist}
 Release 2.0 Start 27/04/2019
