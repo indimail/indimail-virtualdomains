@@ -55,13 +55,15 @@ Release @version@-@release@ Start 14/02/2021
 38. gsasl_mkpasswd.c: use gsasl_nonce() if sodium_random() function is missing
 39. vpasswd.c: fix compilation when libgsasl is missing or of wrong version
 40. configure.ac: Added check for sodium_random() function
-- 01/08/2022
+- 07/08/2022
 41. sql_setpw.[c,h]: added scram argument to set scram password
 42. vadddomain.c, vadduser.c: Removed apop setting
 43. vmoduser.c: added option to update scram passwords
 44. vmoduser_handle.in: updated options to vmoduser
 45. vmovuser.c, vreorg.c, vset_lastdeliver.c: updated for scram argument to
     sql_getpw()
+46. gsasl_mkpasswd.[c.h]: added gsasl_mkpasswd_err() function
+47. vpasswd.c, vmoduser.c: check return value of gsasl_mkpasswd() function
 
 *
 Release 3.4.0 Start 14/02/2021
