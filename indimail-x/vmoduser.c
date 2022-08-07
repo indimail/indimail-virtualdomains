@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.6  2022-08-07 13:06:42+05:30  Cprogrammer
+ * added option to set scram password
+ *
  * Revision 1.5  2022-08-05 21:20:58+05:30  Cprogrammer
  * reversed encrypt_flag setting for mkpasswd() change in encrypt_flag
  *
@@ -36,7 +39,12 @@
 #include <sgetopt.h>
 #include <env.h>
 #include <str.h>
+#include <scan.h>
 #include <mkpasswd.h>
+#endif
+#ifdef HAVE_GSASL_H
+#include <gsasl.h>
+#include "gsasl_mkpasswd.h"
 #endif
 #include "getpeer.h"
 #include "get_indimailuidgid.h"
@@ -61,9 +69,10 @@
 #include "iclose.h"
 #include "variables.h"
 #include "post_handle.h"
+#include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.5 2022-08-05 21:20:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.6 2022-08-07 13:06:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -82,6 +91,9 @@ static char    *usage =
 	"         -c comment               (set the comment/gecos field)\n"
 	"         -P passwd                (set the password field)\n"
 	"         -e encrypted_passwd      (set the encrypted password field)\n"
+	"         -h hash                  (use one of DES, MD5, SHA256, SHA512, SCRAM-SHA-1, SCRAM-SHA-256)\n"
+	"                                  hash methods\n"
+	"         -i iteration_count       (if generating a SCRAM password\n"
 	"         -D date format           (Delivery to a Date Folder)\n"
 	"         -l vacation_message_file (sets up Auto Responder)\n"
 	"                                  (some special values for vacation_message_file)\n"
@@ -114,17 +126,22 @@ die_nomem()
 
 int
 get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Domain, stralloc *Gecos,
-		stralloc *Passwd, stralloc *DateFormat, stralloc *Quota, stralloc *vacation_file, 
-		int *toggle, int *GidFlag, int *ClearFlags, int *QuotaFlag, int *set_vacation)
+		stralloc *Passwd, stralloc *DateFormat, stralloc *Quota,
+		stralloc *vacation_file, int *toggle, int *GidFlag, int *ClearFlags,
+		int *QuotaFlag, int *set_vacation, char **clear_text,
+		char **salt, int *iter, int *scram)
 {
-	int             c, encrypt_flag = 1;
+	int             c, r, i, encrypt_flag = 1;
 
 	*toggle = *ClearFlags = 0;
 	*QuotaFlag = 0;
+	*clear_text = *salt = 0;
+	*scram = 0;
+	*iter = 4096;
 #ifdef ENABLE_AUTH_LOGGING
-	while ((c = getopt(argc, argv, "avutnxD:c:q:dpwisobr0123he:l:P:")) != opteof) 
+	while ((c = getopt(argc, argv, "avutnxD:c:q:dpwisobr0123he:l:P:I:H:S:")) != opteof) 
 #else
-	while ((c = getopt(argc, argv, "avuxD:c:q:dpwisobr0123he:l:P:")) != opteof) 
+	while ((c = getopt(argc, argv, "avuxD:c:q:dpwisobr0123he:l:P:I:H:S:")) != opteof) 
 #endif
 	{
 		switch (c)
@@ -147,7 +164,63 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 			encrypt_flag = 0;
 			/*- flow through */
 		case 'P':
-			mkpasswd(optarg, Passwd, encrypt_flag);
+			mkpasswd(*clear_text = optarg, Passwd, encrypt_flag);
+			if (verbose) {
+				errout("vmoduser", "Password set as ");
+				errout("vmoduser", Passwd->s);
+				errout("vmoduser", "\n");
+				errflush("vmoduser");
+			}
+			break;
+		case 'I':
+			scan_int(optarg, iter);
+			break;
+		case 'H':
+			if (!str_diffn(optarg, "DES", 3))
+				r = env_put2("PASSWORD_HASH", "0");
+			else
+			if (!str_diffn(optarg, "MD5", 3))
+				r = env_put2("PASSWORD_HASH", "1");
+			else
+			if (!str_diffn(optarg, "SHA-256", 7))
+				r = env_put2("PASSWORD_HASH", "2");
+			else
+			if (!str_diffn(optarg, "SHA-512", 7))
+				r = env_put2("PASSWORD_HASH", "3");
+			else
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+			if (!str_diffn(optarg, "SCRAM-SHA-1", 11)) {
+				r = env_put2("PASSWORD_HASH", "3");
+				*scram = 1;
+			} else
+			if (!str_diffn(optarg, "SCRAM-SHA-256", 13)) {
+				r = env_put2("PASSWORD_HASH", "3");
+				*scram = 2;
+			} else
+#endif
+#endif
+			{
+				errout("vmoduser", WARN);
+				errout("vmoduser", optarg);
+				errout("vmoduser", ": wrong hash method\n");
+				errout("vmoduser", "Supported HASH Methods: DES MD5 SHA-256 SHA-512");
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+				errout("vmoduser", " SCRAM-SHA-1 SCRAM-SHA-256");
+#endif
+				errout("vmoduser", "\n");
+				errflush("vmoduser");
+				strerr_die2x(100, WARN, usage);
+			}
+			if (!r)
+				strerr_die1x(111, "out of memory");
+			encrypt_flag = 1;
+			break;
+		case 'S':
+			i = str_chr(optarg, ',');
+			if (optarg[i])
+				strerr_die3x(100, WARN, optarg, ": salt cannot have a comma character");
+			*salt = optarg;
 			break;
 		case 'D':
 			if (!stralloc_copys(DateFormat, optarg) ||
@@ -219,7 +292,7 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 			break;
 		case 'h':
 		default:
-			strerr_warn2(WARN, usage, 0);
+			strerr_die2x(100, WARN, usage);
 			return (1);
 		}
 	}
@@ -229,10 +302,8 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 			die_nomem();
 		Email->len--;
 	}
-	if (!Email->len) {
-		strerr_warn2(WARN, usage, 0);
-		return (1);
-	}
+	if (!Email->len)
+		strerr_die2x(100, WARN, usage);
 	return (0);
 }
 
@@ -243,14 +314,14 @@ main(argc, argv)
 {
 	static stralloc Email = {0}, User = {0}, Domain = {0}, Gecos = {0},
 					Passwd = {0}, DateFormat = {0}, Quota = {0}, vacation_file = {0},
-					tmpbuf = {0}, tmpQuota = {0};
+					tmpbuf = {0}, tmpQuota = {0}, result = {0};
 	int             GidFlag = 0, QuotaFlag = 0, toggle = 0, ClearFlags,
-					set_vacation = 0, err, fd, i;
+					set_vacation = 0, err, fd, i, scram, iter;
 	uid_t           uid;
 	gid_t           gid;
 	struct passwd   PwTmp;
 	struct passwd  *pw;
-	char           *real_domain, *ptr;
+	char           *real_domain, *ptr, *clear_text, *b64salt;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	mdir_t          quota = 0, ul;
 #ifdef USE_MAILDIRQUOTA
@@ -263,7 +334,8 @@ main(argc, argv)
 #endif
 
 	if (get_options(argc, argv, &User, &Email, &Domain, &Gecos, &Passwd,
-			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags, &QuotaFlag, &set_vacation))
+			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
+			&QuotaFlag, &set_vacation, &clear_text, &b64salt, &iter, &scram))
 		return (1);
 	if (indimailuid == -1 || indimailgid == -1)
 		get_indimailuidgid(&indimailuid, &indimailgid);
@@ -275,6 +347,19 @@ main(argc, argv)
 		strerr_warn5("vmoduser: you must be root or domain user (uid=", strnum1, "/gid=", strnum2, ") to run this program", 0);
 		return (1);
 	}
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	switch (scram)
+	{
+	case 1: /*- SCRAM-SHA-1 */
+		gsasl_mkpasswd(verbose, "SCRAM-SHA-1", iter, b64salt, clear_text, &result);
+		break;
+	case 2: /*- SCRAM-SHA-256 */
+		gsasl_mkpasswd(verbose, "SCRAM-SHA-256", iter, b64salt, clear_text, &result);
+		break;
+	}
+#endif
+#endif
 	if (QuotaFlag == 1 || set_vacation) {
 		if (uid && setuid(0)) {
 			strerr_warn1("vmoduser: setuid-root: ", &strerr_sys);
@@ -404,7 +489,8 @@ main(argc, argv)
 			err = deluser(User.s, real_domain, 2);
 	}
 #endif
-	if ((Gecos.len || Passwd.len || ClearFlags || GidFlag || QuotaFlag) && (err = sql_setpw(pw, real_domain))) {
+	if ((Gecos.len || Passwd.len || ClearFlags || GidFlag || QuotaFlag) &&
+			(err = sql_setpw(pw, real_domain, scram ? result.s : 0))) {
 		strerr_warn1("vmoduser: sql_setpw failed", 0);
 		return (1);
 	}
