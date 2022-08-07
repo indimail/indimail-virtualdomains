@@ -74,6 +74,7 @@ if test " $noindimail" = " t"
 then
 	AC_MSG_ERROR(Could not find indimail library.)
 fi
+AC_CHECK_LIB(indimail, gsasl_mkpasswd, [AC_DEFINE([HAVE_GSASL_MKPASSWD], [1],[gsasl_mkpasswd function])],,)
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
