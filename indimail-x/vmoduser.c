@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.7  2022-08-07 20:41:18+05:30  Cprogrammer
+ * check return value of gsasl_mkpasswd() function
+ *
  * Revision 1.6  2022-08-07 13:06:42+05:30  Cprogrammer
  * added option to set scram password
  *
@@ -72,7 +75,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.6 2022-08-07 13:06:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.7 2022-08-07 20:41:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -91,9 +94,9 @@ static char    *usage =
 	"         -c comment               (set the comment/gecos field)\n"
 	"         -P passwd                (set the password field)\n"
 	"         -e encrypted_passwd      (set the encrypted password field)\n"
-	"         -h hash                  (use one of DES, MD5, SHA256, SHA512, SCRAM-SHA-1, SCRAM-SHA-256)\n"
-	"                                  hash methods\n"
-	"         -i iteration_count       (if generating a SCRAM password\n"
+	"         -H hash                  (use one of DES, MD5, SHA256, SHA512, SCRAM-SHA-1, SCRAM-SHA-256 hash)\n"
+	"         -S salt                  (Use a fixed base64 encoded salt)\n"
+	"         -I iter_count            (Use iter_count instead of default 4096 for generationg SCRAM password\n"
 	"         -D date format           (Delivery to a Date Folder)\n"
 	"         -l vacation_message_file (sets up Auto Responder)\n"
 	"                                  (some special values for vacation_message_file)\n"
@@ -293,7 +296,6 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 		case 'h':
 		default:
 			strerr_die2x(100, WARN, usage);
-			return (1);
 		}
 	}
 	if (optind < argc) {
@@ -344,18 +346,19 @@ main(argc, argv)
 	if (uid != 0 && uid != indimailuid && gid != indimailgid && check_group(indimailgid, FATAL) != 1) {
 		strnum1[fmt_ulong(strnum1, indimailuid)] = 0;
 		strnum2[fmt_ulong(strnum2, indimailgid)] = 0;
-		strerr_warn5("vmoduser: you must be root or domain user (uid=", strnum1, "/gid=", strnum2, ") to run this program", 0);
-		return (1);
+		strerr_die5x(100, "vmoduser: you must be root or domain user (uid=", strnum1, "/gid=", strnum2, ") to run this program");
 	}
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	switch (scram)
 	{
 	case 1: /*- SCRAM-SHA-1 */
-		gsasl_mkpasswd(verbose, "SCRAM-SHA-1", iter, b64salt, clear_text, &result);
+		if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-1", iter, b64salt, clear_text, &result)) != NO_ERR)
+			strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
 		break;
 	case 2: /*- SCRAM-SHA-256 */
-		gsasl_mkpasswd(verbose, "SCRAM-SHA-256", iter, b64salt, clear_text, &result);
+		if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-256", iter, b64salt, clear_text, &result)) != NO_ERR)
+			strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
 		break;
 	}
 #endif

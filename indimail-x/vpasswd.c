@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 1.10  2022-08-07 20:40:51+05:30  Cprogrammer
+ * check return value of gsasl_mkpasswd() function
+ *
  * Revision 1.9  2022-08-07 13:12:16+05:30  Cprogrammer
  * updated usage string
  *
@@ -61,7 +64,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.9 2022-08-07 13:12:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.10 2022-08-07 20:40:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -70,13 +73,12 @@ static char     sccsid[] = "$Id: vpasswd.c,v 1.9 2022-08-07 13:12:16+05:30 Cprog
 static char    *usage =
 	"usage: vpasswd [options] email_address [password]\n"
 	"options: -v (verbose)\n"
-	"         -h hash (use one of DES, MD5, SHA256, SHA512, SCRAM-SHA-1, SCRAM-SHA-256)\n"
-	"            hash methods\n"
-	"         -e encrypted password (set the encrypted password field)\n"
-	"         -r Generate a random password of specfied length\n"
-	"         -i iteration_count (if generating a SCRAM password\n"
-	"         -s salt (if generating SCRAM password)\n"
-	"            NOTE: If salt is not specified, it will be generated"
+	"         -h hash       (use one of DES, MD5, SHA256, SHA512, SCRAM-SHA-1, SCRAM-SHA-256 hash method)\n"
+	"         -e encrypted  (set the encrypted password field)\n"
+	"         -r            (Generate a random password of specfied length)\n"
+	"         -i iter_count (Use iter_count instead of 4096 for generating SCRAM password)\n"
+	"         -s salt       (Use a fixed base64 encoded salt for generating SCRAM password)\n"
+	"                       (If salt is not specified, it will be generated)"
 	;
 
 int
@@ -209,10 +211,12 @@ main(argc, argv)
 	switch (scram)
 	{
 	case 1: /*- SCRAM-SHA-1 */
-		gsasl_mkpasswd(verbose, "SCRAM-SHA-1", iter, b64salt, clear_text, &result);
+		if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-1", iter, b64salt, clear_text, &result)) != NO_ERR)
+			strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
 		break;
 	case 2: /*- SCRAM-SHA-256 */
-		gsasl_mkpasswd(verbose, "SCRAM-SHA-256", iter, b64salt, clear_text, &result);
+		if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-256", iter, b64salt, clear_text, &result)) != NO_ERR)
+			strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
 		break;
 	}
 #endif
