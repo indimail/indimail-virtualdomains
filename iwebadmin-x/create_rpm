@@ -23,6 +23,9 @@ while test $# -gt 0; do
     --verbose)
 	verbose=1
     ;;
+	--clean)
+	clean="--clean"
+	;;
     *)
     echo "invalid option [$1]"
     read key
@@ -128,11 +131,11 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		cp iwebadmin-x/iwebadmin.spec /tmp
 	fi
 	if [ $verbose -eq 0 ] ; then
-		echo "rpmbuild -ba --clean --quiet /tmp/iwebadmin.spec"
-		rpmbuild -ba --clean --quiet /tmp/iwebadmin.spec
+		echo "rpmbuild -ba $clean --quiet /tmp/iwebadmin.spec"
+		rpmbuild -ba $clean --quiet /tmp/iwebadmin.spec
 	else
-		echo "rpmbuild -ba --clean /tmp/iwebadmin.spec"
-		rpmbuild -ba --clean /tmp/iwebadmin.spec
+		echo "rpmbuild -ba $clean /tmp/iwebadmin.spec"
+		rpmbuild -ba $clean /tmp/iwebadmin.spec
 	fi
 	if [ $? -eq 0 ] ; then
 		/bin/rm -f /tmp/iwebadmin.spec
