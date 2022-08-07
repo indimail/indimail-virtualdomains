@@ -13,7 +13,7 @@ International language support via the language settings on their browser.
 
 iwebadmin is configured to run under a web server. See README on instructions
 to set this up. It uses configuration file /etc/indimail/iwebadmin-conf to
-set various options
+set various options as given below.
 
 .TP
 .I no-fortune
@@ -31,6 +31,22 @@ Disable ezmlm-idx mailing list feature
 .TP
 .I debug
 Sets iwebadmin in debug mode
+
+.TP
+.I scram-sha-1
+Sets password for SCRAM-SHA-1
+
+.TP
+.I scram-sha-256
+Sets password for SCRAM-SHA-256
+
+.TP
+.I iter-count=xxxx
+Sets iteration count for SCRAM passwords where xxxx is the iteration count
+
+.TP
+.I salt=xxxxxxxxxxxxxxxx
+Sets a fixed 16bytes base64 encoded salt for SCRAM password generation
 
 .SH FILES
 /usr/share/doc/iwebadmin/AUTHORS
