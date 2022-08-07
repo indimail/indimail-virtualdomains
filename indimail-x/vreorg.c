@@ -1,5 +1,8 @@
 /*
  * $Log: vreorg.c,v $
+ * Revision 1.8  2022-08-07 13:10:17+05:30  Cprogrammer
+ * updated for scram argument to sql_getpw()
+ *
  * Revision 1.7  2021-09-12 20:18:07+05:30  Cprogrammer
  * moved replacestr to libqmail
  *
@@ -59,7 +62,7 @@
 #include "next_big_dir.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vreorg.c,v 1.7 2021-09-12 20:18:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vreorg.c,v 1.8 2022-08-07 13:10:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vreorg: fatal: "
@@ -240,7 +243,7 @@ main(int argc, char **argv)
 		}
 		/*- update database */
 		pw->pw_dir = tmp.s;
-		if (sql_setpw(pw, domain) && !access(tmp.s, F_OK) && MoveFile(tmp.s, OldDir.s)) {
+		if (sql_setpw(pw, domain, 0) && !access(tmp.s, F_OK) && MoveFile(tmp.s, OldDir.s)) {
 			strerr_warn5("vreorg: MoveFile: ", tmp.s, " =-> ", OldDir.s, ": ", &strerr_sys);
 			continue;
 		}

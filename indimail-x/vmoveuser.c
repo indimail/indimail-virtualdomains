@@ -1,5 +1,8 @@
 /*
  * $Log: vmoveuser.c,v $
+ * Revision 1.4  2022-08-07 13:09:58+05:30  Cprogrammer
+ * updated for scram argument to sql_getpw()
+ *
  * Revision 1.3  2021-09-12 20:18:01+05:30  Cprogrammer
  * moved replacestr to libqmail
  *
@@ -45,7 +48,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoveuser.c,v 1.3 2021-09-12 20:18:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoveuser.c,v 1.4 2022-08-07 13:09:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoveuser: fatal: "
@@ -190,7 +193,7 @@ main(int argc, char **argv)
 		return (1);
 	}
 	/*- update database */
-	if ((i = sql_setpw(pw, Domain))) {
+	if ((i = sql_setpw(pw, Domain, NULL))) {
 		strerr_warn1("vmoveuser: sql_setpw failed", 0);
 		if (!access(NewDir, F_OK) && MoveFile(NewDir, OldDir.s))
 			strerr_warn5("vmoveuser: MoveFile: ", NewDir, " --> ", OldDir.s, ": ", &strerr_sys);

@@ -1,5 +1,8 @@
 /*
  * $Log: vset_lastdeliver.c,v $
+ * Revision 1.2  2022-08-07 13:10:20+05:30  Cprogrammer
+ * updated for scram argument to sql_getpw()
+ *
  * Revision 1.1  2019-04-15 12:50:04+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vset_lastdeliver.c,v 1.1 2019-04-15 12:50:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vset_lastdeliver.c,v 1.2 2022-08-07 13:10:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING
@@ -95,7 +98,7 @@ vset_lastdeliver(char *user, char *domain, int quota)
 		if (quota)
 			pw->pw_gid |= BOUNCE_MAIL;
 		if (pw->pw_gid != gid)
-			return (sql_setpw(pw, domain));
+			return (sql_setpw(pw, domain, NULL));
 	}
 	return (0);
 }
