@@ -11,4 +11,4 @@ Debtransform-Release: 1
 Debtransform-Tar: indimail-@version@.tar.gz
 Debtransform-Files-Tar: debian.tar.gz
 Standards-Version: 3.9.1
-Build-Depends: cdbs, debhelper (>= 10), gcc, g++, binutils, coreutils, automake, pkg-config, libqmail-dev, libqmail, libssl-dev, libmysqlclient-dev, libncurses5 (>= 5.7), libncurses5-dev (>= 5.7), libcom-err2, libsodium-dev, libgsasl7-dev, mime-support, m4, gawk
+Build-Depends: cdbs, debhelper (>= 10), gcc, g++, binutils, coreutils, automake, pkg-config, libqmail-dev, libqmail, libssl-dev, libmysqlclient-dev, libncurses5 (>= 5.7), libncurses5-dev (>= 5.7), libcom-err2, libgsasl7-dev, mime-support, m4, gawk
