@@ -1,7 +1,7 @@
 /*
  * $Log: vadduser.c,v $
- * Revision 1.7  2022-08-05 22:44:37+05:30  Cprogrammer
- * removed apop argument to iadduser()
+ * Revision 1.7  2022-08-07 13:04:37+05:30  Cprogrammer
+ * removed apop setting
  *
  * Revision 1.6  2022-08-05 21:18:08+05:30  Cprogrammer
  * added encrypt_flag argument to iadduser()
@@ -74,7 +74,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vadduser.c,v 1.7 2022-08-05 22:44:37+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadduser.c,v 1.7 2022-08-07 13:04:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -99,7 +99,7 @@ static char    *usage =
 	"         -q          quota (in bytes) (sets the users quota)\n"
 	"         -l level    users per level\n"
 	"         -c          comment (sets the gecos comment field)\n"
-	"         -e          Standard Encrypted Password on command line\n"
+	"         -e          Set password as clear text password given on command line\n"
 	"         -r [len]    generate a len (default 8) char random password\n"
 	"         -b          Balance distribution across filesystems\n"
 	"         -B basepath Specify the base directory for user's home directory\n"
@@ -108,7 +108,6 @@ static char    *usage =
 	"         -m mdahost  (host on which the account needs to be created - specify mdahost)\n"
 	"         -h hostid   (host on which the account needs to be created - specify hostid)\n"
 #endif
-	"         -a          (sets the account to use APOP, default is POP)\n"
 	"         -i          (sets the account as inactive)"
 	;
 

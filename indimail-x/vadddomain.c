@@ -1,8 +1,7 @@
 /*
  * $Log: vadddomain.c,v $
- * Revision 1.9  2022-08-05 22:43:57+05:30  Cprogrammer
- * removed apop argument
- * added encrypt_flag argument to iadduser()
+ * Revision 1.9  2022-08-07 13:04:26+05:30  Cprogrammer
+ * removed apop setting
  *
  * Revision 1.8  2021-08-24 11:26:55+05:30  Cprogrammer
  * added check for domain name validity
@@ -93,7 +92,7 @@
 #include "get_indimailuidgid.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.9 2022-08-05 22:43:57+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.9 2022-08-07 13:04:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -122,7 +121,6 @@ static char    *usage =
 	"         -d dir (sets the dir to use for this domain)\n"
 	"         -i uid (sets the uid to use for this domain)\n"
 	"         -g gid (sets the gid to use for this domain)\n"
-	"         -a sets the account to use APOP, default is POP\n"
 	"         -f Sets the Domain with VFILTER capability\n"
 	"         -t Sets the Domain for ETRN/ATRN\n"
 	"         -T ipaddr Sets the Domain for AUTOTURN from IP ipaddr\n"
