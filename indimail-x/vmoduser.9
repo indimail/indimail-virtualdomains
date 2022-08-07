@@ -8,14 +8,15 @@ vmoduser \- Modify virtual user attributes
 .SH DESCRIPTION
 .PP
 .B vmoduser
-modifies attributes of an email account by modifying fields in the authentication tables
-indimail or indibak. \fBvmoduser\fR has the setuid bit set to root and must be run as
-root or indimail user.
+modifies attributes of an email account by modifying fields in the
+authentication tables indimail or indibak. \fBvmoduser\fR has the setuid
+bit set to root and must be run as root or indimail user.
 
 .SH POST HANDLE
-If the environment variable POST_HANDLE is set, \fBvmoduser\fR executes the program defined by
-the POST_HANDLE environment variable, passing all arguments passed to vmoduser. If POST_HANDLE
-is not defined, the program/script LIBEXECDIR/vmoduser will be executed.
+If the environment variable POST_HANDLE is set, \fBvmoduser\fR executes the
+program defined by the POST_HANDLE environment variable, passing all
+arguments passed to vmoduser. If POST_HANDLE is not defined, the
+program/script LIBEXECDIR/vmoduser will be executed.
 
 .SH OPTIONS
 .PP
@@ -30,50 +31,89 @@ i.e. Moves the user between indimail and indibak
 
 .TP
 \fB\-q\fR \fIquota\fR
-Changes the quota for the user. Changes the field pw_shell in indimail or indibak.
-You can also use +\fIquota\fR to increase the existing quota by amount specified by
-\fIquota\fR. You can also use -\fIquota\fR to decrease the existing quota by amount
-specified by \fIquota\fR. You can use k/K, m/M, g/G for kibibytes, mebibytes and
-gibibytes respectively, when specifying a value for \fIquota\fR.
+Changes the quota for the user. Changes the field pw_shell in indimail or
+indibak.  You can also use +\fIquota\fR to increase the existing quota by
+amount specified by \fIquota\fR. You can also use -\fIquota\fR to decrease
+the existing quota by amount specified by \fIquota\fR. You can use k/K,
+m/M, g/G for kibibytes, mebibytes and gibibytes respectively, when
+specifying a value for \fIquota\fR.
 
-If the domain has domain limits set using vmoddomlimits(1), then domain limits apply. Also,
-this option will not be allowed if permission for modifying quota is disabled in domain limits.
+If the domain has domain limits set using vmoddomlimits(1), then domain
+limits apply. Also, this option will not be allowed if permission for
+modifying quota is disabled in domain limits.
 
 .TP
 \fB\-c\fR \fIcomment\fR
-Changes the gecos (comment) field for the user. Changes the field pw_gecos in indimail or
-indibak.
+Changes the gecos (comment) field for the user. Changes the field pw_gecos
+in indimail or indibak.
 
 .TP
 \fB\-P\fR \fIclear_text\fR
-Changes the password for the user after encrypting the clear text password given on the
-command line. Changes the field pw_passwd in indimail or indibak.
+Sets an encrypted password for the user after encrypting the clear text
+password given on the command line. Changes the field pw_passwd in indimail
+or indibak. Changes the pw_passwd field in indimail/indibak tables.
 
 .TP
 \fB\-e\fR \fIencrypted_passwd\fR
-Changes the encrypted password for the user as given after '\fB\-e\fR' argument (without performing
-any encryption). It is expected to supply a crypted password using crypt(3) library call.
-Changes the field pw_passwd in indimail or indibak.
+Changes the passwd for the user as given after '\fB\-e\fR'
+argument (without performing any encryption). It is expected to supply a
+crypted password using crypt(3) library call. You can use this to set
+clear-text password for CRAM/SCRAM methods. Changes the \fIpw_passwd\fR
+field in indimail/indibak tables.
+
+.TP
+\fB\-H\fR \fIhash\fR
+Sets the hash method for encryption.
+.RS
+.nf
+.ta 5c 10c
+HASH        	Value
+------------	-----------
+DES	DES encryption (shouldn't be used)
+MD5	MD5 encryption (shouldn't be used)
+SHA256	SHA256 encryption
+SHA512	SHA512 encryption
+SCRAM-SHA-1	SHA1 encryption suitable for SCRAM-SHA-1. This will set SCRAM
+	password in the \fIscram\fR field in indimail/indibak tables.
+SCRAM-SHA-256	SHA256 encryption suitable for SCRAM-SHA-256. This will
+	set SCRAM password in the \fIscram\fR field in indimail/indibak tables.
+.fi
+.RE
+
+.TP
+\fB\-S\fR \fIsalt\fR
+Specify a base64 encoded salt to be used when generating SCRAM password. If
+not specified, this will be generated using libsodium/gsasl.
+
+.TP
+\fB\-I\fR \fIiteration\fR
+Specify the iteration count to be used when generating SCRAM password. The
+default is 4096.
 
 .TP
 \fB\-D\fR \fIdate_format\fR
-Delivery to a date folder instead of Maildir (Inbox) as per format specification \fIdate_format\fR. 
-\fBvdelivermail\fR(8) uses \fBstrftime\fR(3) to process the date format. This format is maintained
-in the file \fIfolder.dateformat\fR in user's Maildir.
+Delivery to a date folder instead of Maildir (Inbox) as per format
+specification \fIdate_format\fR. \fBvdelivermail\fR(8) uses
+\fBstrftime\fR(3) to process the date format. This format is maintained in
+the file \fIfolder.dateformat\fR in user's Maildir.
 
 .EX
-The format %b-%Y will cause emails to be delivered to Apr-2014 if the delivery date happens to
-be anytime in Apr 2014
+The format %b-%Y will cause emails to be delivered to Apr-2014 if the
+delivery date happens to be anytime in Apr 2014
 .EE
 
 .TP
 \fB\-l\fR \fIvacation_messsage_file\fR
-Sets up autoresponder for the user. It creates .qmail file in user's homedir containing
-path to the autoresponder program vacation. If vacation_message_file is specified
-as '\fB-\fR', autoresponder is removed. If it is specified as '\fB+\fR', the text for autoresponder
-is taken from STDIN. Any other value is taken as a file containing text for the autoresponder.
+Sets up autoresponder for the user. It creates .qmail file in user's
+homedir containing path to the autoresponder program vacation. If
+vacation_message_file is specified as '\fB-\fR', autoresponder is removed.
+If it is specified as '\fB+\fR', the text for autoresponder is taken from
+STDIN. Any other value is taken as a file containing text for the
+autoresponder.
+
 .PP
-The following options are bit flags in the gid int field. (pw_gid in indimail or indibak)
+The following options are bit flags in the gid int field. (pw_gid in
+indimail or indibak)
 
 .TP
 \fB\-t\fR
@@ -160,4 +200,5 @@ V_USER6	| 0x8000
 0 in case of success and non-zero in case of any failure.
 
 .SH "SEE ALSO"
-vsetuserquota(1), vpasswd(1), vmoddomlimits(1), resetquota(8), vdelivermail(8), strftime(3)
+vsetuserquota(1), vpasswd(1), vmoddomlimits(1), resetquota(8),
+vdelivermail(8), strftime(3), incrypt(1), crypt(3), gsasl(1)
