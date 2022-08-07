@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.23 2022-08-06 19:32:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.24 2022-08-07 19:29:13+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1195,10 +1195,10 @@ modusergo()
 	 */
 	if (Gecos.len && str_diff(Gecos.s, vpw->pw_gecos)) {
 		vpw->pw_gecos = Gecos.s;
-		sql_setpw(vpw, Domain.s);
+		sql_setpw(vpw, Domain.s, 0);
 	} else 
 	if (vpw->pw_gid != orig_gid)
-		sql_setpw(vpw, Domain.s);
+		sql_setpw(vpw, Domain.s, 0);
 
 	/*- get the value of the autoresp checkbox */
 	GetValue(TmpCGI, &box, "autoresp=");
