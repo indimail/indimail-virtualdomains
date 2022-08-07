@@ -1,5 +1,8 @@
 /*
  * $Log: sql_setpw.c,v $
+ * Revision 1.3  2022-08-07 13:02:02+05:30  Cprogrammer
+ * added scram argument to set scram password
+ *
  * Revision 1.2  2021-02-23 21:41:18+05:30  Cprogrammer
  * replaced CREATE TABLE statements with create_table() function
  *
@@ -35,7 +38,7 @@
 #include "create_table.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_setpw.c,v 1.2 2021-02-23 21:41:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_setpw.c,v 1.3 2022-08-07 13:02:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -46,7 +49,7 @@ die_nomem()
 }
 
 int
-sql_setpw(struct passwd *inpw, char *domain)
+sql_setpw(struct passwd *inpw, char *domain, char *scram)
 {
 	static stralloc SqlBuf = {0};
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
@@ -55,7 +58,7 @@ sql_setpw(struct passwd *inpw, char *domain)
 	uid_t           myuid;
 	uid_t           uid;
 	gid_t           gid;
-	int             err;
+	int             err, rows_updated = 0;
 
 	if (indimailuid == -1 || indimailgid == -1)
 		get_indimailuidgid(&indimailuid, &indimailgid);
@@ -106,8 +109,14 @@ sql_setpw(struct passwd *inpw, char *domain)
 			!stralloc_catb(&SqlBuf, "\", pw_dir = \"", 13) ||
 			!stralloc_cats(&SqlBuf, inpw->pw_dir) ||
 			!stralloc_catb(&SqlBuf, "\", pw_shell = \"", 15) ||
-			!stralloc_cats(&SqlBuf, inpw->pw_shell) ||
-			!stralloc_catb(&SqlBuf, "\" where pw_name = \"", 19) ||
+			!stralloc_cats(&SqlBuf, inpw->pw_shell))
+		die_nomem();
+	if (scram) {
+		if (!stralloc_catb(&SqlBuf, "\", scram = \"", 12) ||
+				!stralloc_cats(&SqlBuf, scram))
+			die_nomem();
+	}
+	if (!stralloc_catb(&SqlBuf, "\" where pw_name = \"", 19) ||
 			!stralloc_cats(&SqlBuf, inpw->pw_name) ||
 			!stralloc_catb(&SqlBuf, "\" and pw_domain = \"", 19) ||
 			!stralloc_cats(&SqlBuf, domain) ||
@@ -115,11 +124,17 @@ sql_setpw(struct passwd *inpw, char *domain)
 			!stralloc_0(&SqlBuf))
 		die_nomem();
 	if (mysql_query(&mysql[1], SqlBuf.s)) {
-		strerr_warn4("sql_setpw: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
-		return (-1);
-	}
-	err = in_mysql_affected_rows(&mysql[1]);
-	if (!err && site_size == SMALL_SITE) {
+		if (in_mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
+			if (create_table(ON_LOCAL, default_table, SMALL_TABLE_LAYOUT))
+				return -1;
+			rows_updated = 0;
+		} else {
+			strerr_warn4("sql_setpw: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
+			return (-1);
+		}
+	} else
+		rows_updated = in_mysql_affected_rows(&mysql[1]);
+	if (!rows_updated && site_size == SMALL_SITE) {
 		if (!stralloc_copyb(&SqlBuf, "update low_priority ", 20) ||
 				!stralloc_cats(&SqlBuf, inactive_table) ||
 				!stralloc_catb(&SqlBuf, " set pw_passwd = \"", 18) ||
@@ -133,8 +148,14 @@ sql_setpw(struct passwd *inpw, char *domain)
 				!stralloc_catb(&SqlBuf, "\", pw_dir = \"", 13) ||
 				!stralloc_cats(&SqlBuf, inpw->pw_dir) ||
 				!stralloc_catb(&SqlBuf, "\", pw_shell = \"", 15) ||
-				!stralloc_cats(&SqlBuf, inpw->pw_shell) ||
-				!stralloc_catb(&SqlBuf, "\" where pw_name = \"", 19) ||
+				!stralloc_cats(&SqlBuf, inpw->pw_shell))
+			die_nomem();
+		if (scram) {
+			if (!stralloc_catb(&SqlBuf, "\", scram = \"", 12) ||
+					!stralloc_cats(&SqlBuf, scram))
+				die_nomem();
+		}
+		if (!stralloc_catb(&SqlBuf, "\" where pw_name = \"", 19) ||
 				!stralloc_cats(&SqlBuf, inpw->pw_name) ||
 				!stralloc_catb(&SqlBuf, "\" and pw_domain = \"", 19) ||
 				!stralloc_cats(&SqlBuf, domain) ||
@@ -145,24 +166,20 @@ sql_setpw(struct passwd *inpw, char *domain)
 			if (in_mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
 				if (create_table(ON_LOCAL, inactive_table, SMALL_TABLE_LAYOUT))
 					return -1;
-				err = 0;
+				rows_updated = 0;
 			} else {
 				strerr_warn4("sql_setpw: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
 				return (-1);
 			}
 		} else
-			err = in_mysql_affected_rows(&mysql[1]);
+			rows_updated = in_mysql_affected_rows(&mysql[1]);
 	}
-	if (!err)
+	if (!rows_updated)
 		strerr_warn1("0 rows updated", 0);
-	if (!err || err == -1)
-		err = 1;
-	else
-	{
+	else {
 #ifdef QUERY_CACHE
 		sql_getpw_cache(0);
 #endif
-		err = 0;
 	}
-	return (err);
+	return (0);
 }
