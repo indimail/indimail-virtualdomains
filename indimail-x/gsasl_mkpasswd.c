@@ -1,5 +1,8 @@
 /*
  * $Log: gsasl_mkpasswd.c,v $
+ * Revision 1.4  2022-08-07 20:38:42+05:30  Cprogrammer
+ * added gsasl_mkpasswd_err()
+ *
  * Revision 1.3  2022-08-06 11:16:59+05:30  Cprogrammer
  * use gsasl_nonce() if sodium_random() function is missing
  *
@@ -26,28 +29,41 @@
 #include <fmt.h>
 #include <byte.h>
 #include "common.h"
-
-#ifdef HAVE_GSASL
-#define DEFAULT_SALT_SIZE 12
-
-#define USAGE_ERR  1
-#define MEMORY_ERR 2
-#define SODIUM_ERR 3
-#define GSASL_ERR  4
-#define NO_ERR     0
+#include "gsasl_mkpasswd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: gsasl_mkpasswd.c,v 1.3 2022-08-06 11:16:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: gsasl_mkpasswd.c,v 1.4 2022-08-07 20:38:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
+#ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+static int      res;
+
+const char     *gsasl_mkpasswd_err(int err)
+{
+	switch(err)
+	{
+	case USAGE_ERR:
+		return "usage error";
+	case MEMORY_ERR:
+		return "out of memory";
+	case SODIUM_ERR:
+		return "error in libsodium";
+	case GSASL_ERR:
+		return (gsasl_strerror(res));
+	case NO_ERR:
+		return "no error";
+	}
+	return "unknown error";
+}
+
 int
 gsasl_mkpasswd(int verbose, char *mechanism, int iteration_count, char *b64salt_arg, char *password, stralloc *result)
 {
 	char            salt_buf[DEFAULT_SALT_SIZE];
 	char           *salt, *hexsaltedpassword, *b64salt;
 	size_t          saltlen, b64saltlen, hashlen = 0;
-	int             i, hash = 0, res;
+	int             i, hash = 0;
 	char            saltedpassword[GSASL_HASH_MAX_SIZE];
 	char            clientkey[GSASL_HASH_MAX_SIZE], serverkey[GSASL_HASH_MAX_SIZE],
 					storedkey[GSASL_HASH_MAX_SIZE], strnum[FMT_ULONG];
