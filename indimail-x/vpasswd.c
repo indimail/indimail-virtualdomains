@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 1.9  2022-08-07 13:12:16+05:30  Cprogrammer
+ * updated usage string
+ *
  * Revision 1.8  2022-08-06 19:34:25+05:30  Cprogrammer
  * fix compilation when libgsasl is missing or of wrong version
  *
@@ -58,7 +61,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.8 2022-08-06 19:34:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.9 2022-08-07 13:12:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -67,7 +70,8 @@ static char     sccsid[] = "$Id: vpasswd.c,v 1.8 2022-08-06 19:34:25+05:30 Cprog
 static char    *usage =
 	"usage: vpasswd [options] email_address [password]\n"
 	"options: -v (verbose)\n"
-	"         -h hash\n"
+	"         -h hash (use one of DES, MD5, SHA256, SHA512, SCRAM-SHA-1, SCRAM-SHA-256)\n"
+	"            hash methods\n"
 	"         -e encrypted password (set the encrypted password field)\n"
 	"         -r Generate a random password of specfied length\n"
 	"         -i iteration_count (if generating a SCRAM password\n"
