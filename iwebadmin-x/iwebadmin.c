@@ -1,5 +1,8 @@
 /*
  * $Log: iwebadmin.c,v $
+ * Revision 1.26  2022-08-07 21:45:41+05:30  Cprogrammer
+ * set SCRAM passwords using gsasl_mkpasswd()
+ *
  * Revision 1.25  2022-08-06 19:32:32+05:30  Cprogrammer
  * new argument encrypt_flag to ipasswd()
  *
@@ -32,7 +35,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: iwebadmin.c,v 1.25 2022-08-06 19:32:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.26 2022-08-07 21:45:41+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -74,6 +77,9 @@
 #endif
 #include <pwd.h>
 #include <dirent.h>
+#ifdef HAVE_GSASL_MKPASSWD
+#include "gsasl_mkpasswd.h"
+#endif
 #include "alias.h"
 #include "auth.h"
 #include "autorespond.h"
@@ -93,9 +99,11 @@ stralloc        Username = {0}, Domain = {0}, Password = {0}, Gecos = {0},
 				Quota = {0}, Time = {0}, ActionUser = {0}, Newu = {0},
 				Password1 = {0}, Password2 = {0}, Crypted = {0}, Alias = {0},
 				LineData = {0}, Action = {0}, Message = {0}, SearchUser = {0},
-				TmpBuf = {0}, RealDir = {0}, line = {0}, StatusMessage = {0};
+				TmpBuf = {0}, RealDir = {0}, line = {0}, StatusMessage = {0},
+				b64salt = {0}, result = {0};
 int             CGIValues[256];
-int             ezmlm_idx = -1, ezmlm_make = -1, debug = 0, enable_fortune = 1;
+int             ezmlm_idx = -1, ezmlm_make = -1, debug = 0, enable_fortune = 1,
+				scram = 0, iter_count = 4096;
 time_t          mytime;
 char           *TmpCGI = NULL;
 int             Compressed;
@@ -222,7 +230,7 @@ conf_iwebadmin()
 				break;
 			if (match) {
 				line.len--;
-				line.s[line.len] = 0;
+				line.s[line.len] = 0; /*- remove newline */
 			} else {
 				if (!stralloc_0(&line))
 					die_nomem();
@@ -239,6 +247,20 @@ conf_iwebadmin()
 			else
 			if (!str_diffn(line.s, "debug", 5))
 				debug = 1;
+			if (!str_diffn(line.s, "scram-sha-1", 12))
+				scram = 1;
+			else
+			if (!str_diffn(line.s, "scram-sha-256", 14))
+				scram = 2;
+			else
+			if (!str_diffn(line.s, "iter-count=", 11))
+				scan_int(line.s + 11, &iter_count);
+			else
+			if (!str_diffn(line.s, "salt=", 5)) {
+				if (!stralloc_copyb(&b64salt, line.s + 5, line.len - 5) ||
+						!stralloc_0(&b64salt))
+					die_nomem();
+			}
 		}
 		close(fd);
 	}
@@ -398,20 +420,32 @@ main(argc, argv)
 			else
 			if (!Password1.len)
 				copy_status_mesg(html_text[234]);
-			else
-			if ((i = ipasswd(Username.s, Domain.s, Password1.s, encrypt_flag, 0)) != 1)
-				copy_status_mesg(html_text[140]);
 #ifndef TRIVIAL_PASSWORD_ENABLED
 			else
 			if (str_str(Username.s, Password1.s) != NULL)
 				copy_status_mesg(html_text[320]);
 #endif
-			else { /* success */
-				copy_status_mesg(html_text[139]);
-				strerr_warn5("iwebadmin: ", Username.s, "@", Domain.s, ": password changed", 0);
-				Password.len = 0;
-				send_template("change_password_success.html");
-				return 0;
+			else {
+#ifdef HAVE_GSASL_MKPASSWD
+				switch (scram)
+				{
+				case 1: /*- SCRAM-SHA-1 */
+					gsasl_mkpasswd(0, "SCRAM-SHA-1", iter_count, b64salt.len ? b64salt.s : 0, Password1.s, &result);
+					break;
+				case 2: /*- SCRAM-SHA-256 */
+					gsasl_mkpasswd(0, "SCRAM-SHA-256", iter_count, b64salt.len ? b64salt.s : 0, Password1.s, &result);
+					break;
+				}
+#endif
+				if ((i = ipasswd(Username.s, Domain.s, Password1.s, encrypt_flag, scram ? result.s : 0)) != 1)
+					copy_status_mesg(html_text[140]);
+				else { /* success */
+					copy_status_mesg(html_text[139]);
+					strerr_warn5("iwebadmin: ", Username.s, "@", Domain.s, ": password changed", 0);
+					Password.len = 0;
+					send_template("change_password_success.html");
+					return 0;
+				}
 			}
 		}
 		send_template("change_password.html");

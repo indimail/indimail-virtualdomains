@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.24 2022-08-07 19:29:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.25 2022-08-07 21:39:13+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -48,6 +48,9 @@
 #include <strerr.h>
 #include <error.h>
 #include <case.h>
+#endif
+#ifdef HAVE_GSASL_MKPASSWD
+#include "gsasl_mkpasswd.h"
 #endif
 #include "alias.h"
 #include "cgi.h"
@@ -1125,7 +1128,18 @@ modusergo()
 			die_nomem();
 		if (!access(triv_pass.s, F_OK))
 			encrypt_flag = 0;
-		ret_code = ipasswd(ActionUser.s, Domain.s, Password1.s, encrypt_flag, 0);
+#ifdef HAVE_GSASL_MKPASSWD
+		switch (scram)
+		{
+		case 1: /*- SCRAM-SHA-1 */
+			gsasl_mkpasswd(0, "SCRAM-SHA-1", iter_count, b64salt.len ? b64salt.s : 0, Password1.s, &result);
+			break;
+		case 2: /*- SCRAM-SHA-256 */
+			gsasl_mkpasswd(0, "SCRAM-SHA-256", iter_count, b64salt.len ? b64salt.s : 0, Password1.s, &result);
+			break;
+		}
+#endif
+		ret_code = ipasswd(ActionUser.s, Domain.s, Password1.s, encrypt_flag, scram ? result.s : 0);
 		if (ret_code != 1) {
 			copy_status_mesg(html_text[140]);
 			if (!stralloc_catb(&StatusMessage, " (error code ", 13) ||
