@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.13  2022-08-23 08:21:44+05:30  Cprogrammer
+ * display AUTH method as a string instead of a number
+ *
  * Revision 1.12  2022-08-04 14:43:02+05:30  Cprogrammer
  * authenticate using SCRAM salted password
  *
@@ -79,7 +82,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.12 2022-08-04 14:43:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.13 2022-08-23 08:21:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -146,17 +149,18 @@ main(int argc, char **argv)
 		if (!count)
 			break;
 		offset += count;
-		if (offset >= (authlen + 1))
+		if (offset >= (authlen + 1)) /*- string greater than 512 */
 			_exit(2);
 	}
+	/*- max permissible length is offset */
 	count = 0;
 	login = authstr + count; /*- username */
 	for (;authstr[count] && count < offset;count++);
-	if (count == offset || (count + 1) == offset)
+	if (count == offset || (count + 1) == offset) /*- found a non-null beyond offset */
 		_exit(2);
 
 	count++;
-	challenge = authstr + count; /*- challenge (or plain text) */
+	challenge = authstr + count; /*- challenge (or plain text password) */
 	for (;authstr[count] && count < offset;count++);
 	if (count == offset || (count + 1) == offset)
 		_exit(2);
@@ -164,6 +168,7 @@ main(int argc, char **argv)
 	count++;
 	response = authstr + count; /*- response (cram-md5, cram-sha1, etc) */
 	for (; authstr[count] && count < offset; count++);
+
 	if (count == offset || (count + 1) == offset)
 		auth_method = 0;
 	else
@@ -293,14 +298,14 @@ main(int argc, char **argv)
 		}
 	} else
 		crypt_pass = pw->pw_passwd;
-	strnum[fmt_uint(strnum, (unsigned int) auth_method)] = 0;
 	module_pid[fmt_ulong(module_pid, getpid())] = 0;
+	ptr = get_authmethod(auth_method);
 	if (env_get("DEBUG_LOGIN"))
 		strerr_warn14("vchkpass: ", "pid [", module_pid, "]: login [", login, "] challenge [", challenge,
-			"] response [", response, "] pw_passwd [", crypt_pass, "] method [", strnum, "]", 0);
+			"] response [", response, "] pw_passwd [", crypt_pass, "] authmethod [", ptr, "]", 0);
 	else
 	if (env_get("DEBUG"))
-		strerr_warn8("vchkpass: ", "pid [", module_pid, "]: login [", login, "] method [", strnum, "]", 0);
+		strerr_warn8("vchkpass: ", "pid [", module_pid, "]: login [", login, "] authmethod [", ptr, "]", 0);
 	if (pw_comp((unsigned char *) ologin, (unsigned char *) crypt_pass,
 		(unsigned char *) (*response ? challenge : 0),
 		(unsigned char *) (*response ? response : challenge), auth_method)) {

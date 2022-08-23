@@ -64,6 +64,8 @@ Release @version@-@release@ Start 14/02/2021
     sql_getpw()
 46. gsasl_mkpasswd.[c.h]: added gsasl_mkpasswd_err() function
 47. vpasswd.c, vmoduser.c: check return value of gsasl_mkpasswd() function
+- 23/08/2022
+48. vchkpass.c: display AUTH method as a string instead of a number
 
 *
 Release 3.4.0 Start 14/02/2021
