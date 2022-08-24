@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 1.11  2022-08-24 18:35:53+05:30  Cprogrammer
+ * made setting hash method and scram method independent
+ *
  * Revision 1.10  2022-08-07 20:40:51+05:30  Cprogrammer
  * check return value of gsasl_mkpasswd() function
  *
@@ -46,8 +49,10 @@
 #include <strerr.h>
 #include <env.h>
 #include <str.h>
+#include <fmt.h>
 #include <makesalt.h>
 #include <scan.h>
+#include <hashmethods.h>
 #endif
 #ifdef HAVE_GSASL_H
 #include <gsasl.h>
@@ -64,7 +69,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.10 2022-08-07 20:40:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.11 2022-08-24 18:35:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -73,26 +78,38 @@ static char     sccsid[] = "$Id: vpasswd.c,v 1.10 2022-08-07 20:40:51+05:30 Cpro
 static char    *usage =
 	"usage: vpasswd [options] email_address [password]\n"
 	"options: -v (verbose)\n"
-	"         -h hash       (use one of DES, MD5, SHA256, SHA512, SCRAM-SHA-1, SCRAM-SHA-256 hash method)\n"
 	"         -e encrypted  (set the encrypted password field)\n"
 	"         -r            (Generate a random password of specfied length)\n"
+	"         -h hash       (use one of DES, MD5, SHA256, SHA512, hash method)\n"
+	"         -m SCRAM method (use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method\n"
+	"         -S salt       (Use a fixed base64 encoded salt for generating SCRAM password)\n"
+	"                       (If salt is not specified, it will be generated)\n"
 	"         -i iter_count (Use iter_count instead of 4096 for generating SCRAM password)\n"
-	"         -s salt       (Use a fixed base64 encoded salt for generating SCRAM password)\n"
-	"                       (If salt is not specified, it will be generated)"
+	"         -H            (display this usage)"
 	;
 
 int
 get_options(int argc, char **argv, char **email, char **clear_text, int *encrypt_flag, int *scram, int *iter, char **salt)
 {
-	int             c, i, r, Random, passwd_len = 8;
+	int             c, i, Random, passwd_len = 8;
 	char           *ptr;
+	char            optstr[14], strnum[FMT_ULONG];
 
 	*email = *clear_text = *salt = 0;
 	*iter = 4096;
 	*scram = 0;
-	*encrypt_flag = 1;
+	*encrypt_flag = -1;
 	Random = 0;
-	while ((c = getopt(argc, argv, "veh:r:i:s:")) != opteof) {
+	/*- make sure optstr has enough size to hold all options + 1 */
+	i = 0;
+	i += fmt_strn(optstr + i, "veh:r:", 6);
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	i += fmt_strn(optstr + i, "m:S:I:", 6);
+#endif
+#endif
+	optstr[i] = 0;
+	while ((c = getopt(argc, argv, optstr)) != opteof) {
 		switch (c)
 		{
 		case 'v':
@@ -100,61 +117,65 @@ get_options(int argc, char **argv, char **email, char **clear_text, int *encrypt
 			break;
 		case 'h':
 			if (!str_diffn(optarg, "DES", 3))
-				r = env_put2("PASSWORD_HASH", "0");
+				strnum[fmt_int(strnum, DES_HASH)] = 0;
 			else
 			if (!str_diffn(optarg, "MD5", 3))
-				r = env_put2("PASSWORD_HASH", "1");
+				strnum[fmt_int(strnum, MD5_HASH)] = 0;
 			else
 			if (!str_diffn(optarg, "SHA-256", 7))
-				r = env_put2("PASSWORD_HASH", "2");
+				strnum[fmt_int(strnum, SHA256_HASH)] = 0;
 			else
 			if (!str_diffn(optarg, "SHA-512", 7))
-				r = env_put2("PASSWORD_HASH", "3");
-			else
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-			if (!str_diffn(optarg, "SCRAM-SHA-1", 11)) {
-				r = env_put2("PASSWORD_HASH", "3");
-				*scram = 1;
-			} else
-			if (!str_diffn(optarg, "SCRAM-SHA-256", 13)) {
-				r = env_put2("PASSWORD_HASH", "3");
-				*scram = 2;
-			} else
-#endif
-#endif
-			{
+				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
+			else {
 				errout("vpasswd", WARN);
 				errout("vpasswd", optarg);
 				errout("vpasswd", ": wrong hash method\n");
-				errout("vpasswd", "Supported HASH Methods: DES MD5 SHA-256 SHA-512");
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-				errout("vpasswd", " SCRAM-SHA-1 SCRAM-SHA-256");
-#endif
-				errout("vpasswd", "\n");
+				errout("vpasswd", "Supported HASH Methods: DES MD5 SHA-256 SHA-512\n");
 				errflush("vpasswd");
 				strerr_die2x(100, WARN, usage);
 			}
-			if (!r)
+			if (!env_put2("PASSWORD_HASH", strnum))
 				strerr_die1x(111, "out of memory");
 			*encrypt_flag = 1;
 			break;
-		case 'i':
-			scan_int(optarg, iter);
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+		case 'm':
+			if (!str_diffn(optarg, "SCRAM-SHA-1", 11))
+				*scram = 1;
+			else
+			if (!str_diffn(optarg, "SCRAM-SHA-256", 13))
+				*scram = 2;
+			else {
+				errout("vpasswd", WARN);
+				errout("vpasswd", optarg);
+				errout("vpasswd", ": wrong SCRAM method\n");
+				errout("vpasswd", "Supported SCRAM Methods: SCRAM-SHA-1 SCRAM-SHA-256\n");
+				errflush("vpasswd");
+				strerr_die2x(100, WARN, usage);
+			}
 			break;
-		case 's':
+		case 'S':
 			i = str_chr(optarg, ',');
 			if (optarg[i]) {
 				strerr_die3x(100, WARN, optarg, ": salt cannot have a comma character");
 			}
 			*salt = optarg;
 			break;
+		case 'I':
+			scan_int(optarg, iter);
+			break;
+#endif
+#endif
 		case 'r':
 			Random = 1;
 			scan_int(optarg, &passwd_len);
 			break;
 		case 'e':
-			*encrypt_flag = 0;
+			/*- ignore encrypt flag option if -h option is provided */
+			if (*encrypt_flag == -1)
+				*encrypt_flag = 0;
 			break;
 		default:
 			strerr_warn2(WARN, usage, 0);
@@ -182,6 +203,8 @@ get_options(int argc, char **argv, char **email, char **clear_text, int *encrypt
 		strerr_warn2(WARN, usage, 0);
 		return (1);
 	}
+	if (*encrypt_flag == -1)
+		*encrypt_flag = 1;
 	return (0);
 }
 

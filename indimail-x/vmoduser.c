@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.8  2022-08-24 18:35:17+05:30  Cprogrammer
+ * made setting hash method and scram method independent
+ *
  * Revision 1.7  2022-08-07 20:41:18+05:30  Cprogrammer
  * check return value of gsasl_mkpasswd() function
  *
@@ -44,6 +47,7 @@
 #include <str.h>
 #include <scan.h>
 #include <mkpasswd.h>
+#include <hashmethods.h>
 #endif
 #ifdef HAVE_GSASL_H
 #include <gsasl.h>
@@ -75,7 +79,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.7 2022-08-07 20:41:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.8 2022-08-24 18:35:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -94,13 +98,15 @@ static char    *usage =
 	"         -c comment               (set the comment/gecos field)\n"
 	"         -P passwd                (set the password field)\n"
 	"         -e encrypted_passwd      (set the encrypted password field)\n"
-	"         -H hash                  (use one of DES, MD5, SHA256, SHA512, SCRAM-SHA-1, SCRAM-SHA-256 hash)\n"
+	"         -h hash                  (use one of DES, MD5, SHA256, SHA512 hash)\n"
+	"         -m SCRAM method          (use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method)\n"
 	"         -S salt                  (Use a fixed base64 encoded salt)\n"
 	"         -I iter_count            (Use iter_count instead of default 4096 for generationg SCRAM password\n"
 	"         -D date format           (Delivery to a Date Folder)\n"
 	"         -l vacation_message_file (sets up Auto Responder)\n"
 	"                                  (some special values for vacation_message_file)\n"
 	"                                  ('-' to remove vacation, '+' to take mesage from stdin)\n"
+	"         -H                       (display this usage)\n\n"
 	"the following options are bit flags in the gid int field\n"
 	"         -t ( toggle bit flags in the gid int field for below operations )\n"
 	"         -u ( set no dialup flag )\n"
@@ -134,18 +140,27 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 		int *QuotaFlag, int *set_vacation, char **clear_text,
 		char **salt, int *iter, int *scram)
 {
-	int             c, r, i, encrypt_flag = 1;
+	int             c, i, encrypt_flag = -1;
+	char            optstr[40], strnum[FMT_ULONG];
 
 	*toggle = *ClearFlags = 0;
 	*QuotaFlag = 0;
 	*clear_text = *salt = 0;
 	*scram = 0;
 	*iter = 4096;
+	/*- make sure optstr has enough size to hold all options + 1 */
+	i = 0;
+	i += fmt_strn(optstr + i, "avutxHD:c:q:dpwisobr0123h:e:l:P:", 32);
 #ifdef ENABLE_AUTH_LOGGING
-	while ((c = getopt(argc, argv, "avutnxD:c:q:dpwisobr0123he:l:P:I:H:S:")) != opteof) 
-#else
-	while ((c = getopt(argc, argv, "avuxD:c:q:dpwisobr0123he:l:P:I:H:S:")) != opteof) 
+	i += fmt_strn(optstr + i, "n", 1);
 #endif
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	i += fmt_strn(optstr + i, "m:S:I:", 6);
+#endif
+#endif
+	optstr[i] = 0;
+	while ((c = getopt(argc, argv, optstr)) != opteof) 
 	{
 		switch (c)
 		{
@@ -164,7 +179,9 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 			*ClearFlags = 1;
 			break;
 		case 'e':
-			encrypt_flag = 0;
+			/*- ignore encrypt flag option if -h option is provided */
+			if (encrypt_flag == -1)
+				encrypt_flag = 0;
 			/*- flow through */
 		case 'P':
 			mkpasswd(*clear_text = optarg, Passwd, encrypt_flag);
@@ -175,49 +192,46 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 				errflush("vmoduser");
 			}
 			break;
-		case 'I':
-			scan_int(optarg, iter);
-			break;
-		case 'H':
+		case 'h':
 			if (!str_diffn(optarg, "DES", 3))
-				r = env_put2("PASSWORD_HASH", "0");
+				strnum[fmt_int(strnum, DES_HASH)] = 0;
 			else
 			if (!str_diffn(optarg, "MD5", 3))
-				r = env_put2("PASSWORD_HASH", "1");
+				strnum[fmt_int(strnum, MD5_HASH)] = 0;
 			else
 			if (!str_diffn(optarg, "SHA-256", 7))
-				r = env_put2("PASSWORD_HASH", "2");
+				strnum[fmt_int(strnum, SHA256_HASH)] = 0;
 			else
 			if (!str_diffn(optarg, "SHA-512", 7))
-				r = env_put2("PASSWORD_HASH", "3");
-			else
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-			if (!str_diffn(optarg, "SCRAM-SHA-1", 11)) {
-				r = env_put2("PASSWORD_HASH", "3");
-				*scram = 1;
-			} else
-			if (!str_diffn(optarg, "SCRAM-SHA-256", 13)) {
-				r = env_put2("PASSWORD_HASH", "3");
-				*scram = 2;
-			} else
-#endif
-#endif
-			{
+				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
+			else {
 				errout("vmoduser", WARN);
 				errout("vmoduser", optarg);
 				errout("vmoduser", ": wrong hash method\n");
-				errout("vmoduser", "Supported HASH Methods: DES MD5 SHA-256 SHA-512");
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-				errout("vmoduser", " SCRAM-SHA-1 SCRAM-SHA-256");
-#endif
-				errout("vmoduser", "\n");
+				errout("vmoduser", "Supported HASH Methods: DES MD5 SHA-256 SHA-512\n");
 				errflush("vmoduser");
 				strerr_die2x(100, WARN, usage);
 			}
-			if (!r)
+			if (!env_put2("PASSWORD_HASH", strnum))
 				strerr_die1x(111, "out of memory");
 			encrypt_flag = 1;
+			break;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+		case 'm':
+			if (!str_diffn(optarg, "SCRAM-SHA-1", 11))
+				*scram = 1;
+			else
+			if (!str_diffn(optarg, "SCRAM-SHA-256", 13))
+				*scram = 2;
+			else {
+				errout("vmoduser", WARN);
+				errout("vmoduser", optarg);
+				errout("vmoduser", ": wrong SCRAM method\n");
+				errout("vmoduser", "Supported SCRAM Methods: SCRAM-SHA-1 SCRAM-SHA-256\n");
+				errflush("vmoduser");
+				strerr_die2x(100, WARN, usage);
+			}
 			break;
 		case 'S':
 			i = str_chr(optarg, ',');
@@ -225,6 +239,11 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 				strerr_die3x(100, WARN, optarg, ": salt cannot have a comma character");
 			*salt = optarg;
 			break;
+		case 'I':
+			scan_int(optarg, iter);
+			break;
+#endif
+#endif
 		case 'D':
 			if (!stralloc_copys(DateFormat, optarg) ||
 					!stralloc_0(DateFormat))
@@ -293,7 +312,7 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 		case 'a':
 			*GidFlag |= QA_ADMIN;
 			break;
-		case 'h':
+		case 'H':
 		default:
 			strerr_die2x(100, WARN, usage);
 		}
@@ -306,6 +325,8 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 	}
 	if (!Email->len)
 		strerr_die2x(100, WARN, usage);
+	if (encrypt_flag == -1)
+		encrypt_flag = 1;
 	return (0);
 }
 
