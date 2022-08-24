@@ -152,34 +152,40 @@ indimail
 indibak
 .sp -1
 .IP \n+[step]
-lastauth
-.sp -1
-.IP \n+[step]
 valias
 .sp -1
 .IP \n+[step]
 vlimits
 .sp -1
 .IP \n+[step]
-ip_alias_map
+userquota
 .sp -1
 .IP \n+[step]
-userquota
+relay
+.sp -1
+.IP \n+[step]
+lastauth
 .sp -1
 .IP \n+[step]
 atrn_map
 .sp -1
 .IP \n+[step]
-vlog
+dir_control
 .sp -1
 .IP \n+[step]
 fstab
+.sp -1
+.IP \n+[step]
+ip_alias_map
 .sp -1
 .IP \n+[step]
 vfilter
 .sp -1
 .IP \n+[step]
 mailing_list
+.sp -1
+.IP \n+[step]
+vlog
 .sp -1
 .IP \n+[step]
 bulkmail
@@ -285,6 +291,93 @@ see the section on 'Environment Variables' to understand that.
 In case you do not require a multi-host setup, IndiMail does not require \fBcentral database\fR.
 Programs just need to connect to the \fBlocal database\fR which can be configured by having the
 control file @controldir@/host.mysql.
+
+.SH LOCAL DATABASE
+
+The local database consists of the following tables
+
+.nr step 1 1
+.IP \n[step] 3
+indimail
+.sp -1
+.IP \n+[step]
+indibak
+.sp -1
+.IP \n+[step]
+valias
+.sp -1
+.IP \n+[step]
+vlimits
+.sp -1
+.IP \n+[step]
+userquota
+.sp -1
+.IP \n+[step]
+relay
+.sp -1
+.IP \n+[step]
+lastauth
+.sp -1
+.IP \n+[step]
+atrn_map
+.sp -1
+.IP \n+[step]
+dir_control
+.sp -1
+.IP \n+[step]
+fstab
+.sp -1
+.IP \n+[step]
+ip_alias_map
+.sp -1
+.IP \n+[step]
+vfilter
+.sp -1
+.IP \n+[step]
+mailing_list
+.sp -1
+.IP \n+[step]
+vlog
+.sp -1
+.IP \n+[step]
+bulkmail
+
+.PP
+The main local table is the \fIindimail\fR table. It has the following columns
+
+.nr step 1 1
+.IP \n[step] 3
+pw_name - This has the username
+.sp -1
+.IP \n+[step]
+pw_domain - This has the domain name
+.sp -1
+.IP \n+[step]
+pw_passwd - This has an encryted password
+.sp -1
+.IP \n+[step]
+pw_uid
+.sp -1
+.IP \n+[step]
+pw_gid
+.sp -1
+.IP \n+[step]
+pw_gecos
+.sp -1
+.IP \n+[step]
+pw_dir
+.sp -1
+.IP \n+[step]
+pw_shell
+.sp -1
+.IP \n+[step]
+scram
+.sp -1
+.IP \n+[step]
+salted
+.sp -1
+.IP \n+[step]
+timestamp
 
 .SH Virtual Domains
 .PP
