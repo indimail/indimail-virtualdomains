@@ -1,5 +1,8 @@
 /*
  * $Log: strToPw.c,v $
+ * Revision 1.4  2022-08-25 18:11:59+05:30  Cprogrammer
+ * handle additional hex salted passwod and clear text password in pw_passwd field
+ *
  * Revision 1.3  2022-08-04 14:42:08+05:30  Cprogrammer
  * added comments
  *
@@ -28,7 +31,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: strToPw.c,v 1.3 2022-08-04 14:42:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: strToPw.c,v 1.4 2022-08-25 18:11:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -42,7 +45,7 @@ struct passwd  *
 strToPw(char *pwbuf, int len)
 {
 	char           *ptr, *cptr, *tmp;
-	int             row_count, pwstruct_len;
+	int             row_count, pwstruct_len, is_scram = 0;
 	static struct passwd pwent;
 	static stralloc __PWstruct = {0}, _pwstruct = {0};
 	static stralloc IUser = {0}, IPass = {0}, IGecos = {0}, IDir = {0}, IShell = {0};
@@ -78,9 +81,19 @@ strToPw(char *pwbuf, int len)
 		return ((struct passwd *) 0);
 	}
 	for (row_count = 0, cptr = ptr = _pwstruct.s; *ptr; ptr++) {
-		if (*ptr == ':')
+		if (*ptr == ':') {
+			/* skip past hexsaltedpw and saltedpw */
+			if (row_count == 1 && !str_diffn(cptr,"{SCRAM-SHA-", 11)) {
+				for (ptr += 1; *ptr; ptr++) {
+					if (*ptr == ':') {
+						is_scram++;
+						if (is_scram == 2)
+							break;
+					}
+				}
+			}
 			*ptr = 0;
-		else
+		} else
 			continue;
 		switch (row_count)
 		{
