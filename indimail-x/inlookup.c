@@ -1,5 +1,8 @@
 /*
  * $Log: inlookup.c,v $
+ * Revision 1.7  2022-08-25 18:16:42+05:30  Cprogrammer
+ * re-positioned location of include config.h
+ *
  * Revision 1.6  2021-09-11 13:36:54+05:30  Cprogrammer
  * fixed wrong assignment of strnum2 for pid
  *
@@ -20,14 +23,13 @@
  * Initial revision
  *
  */
+#ifndef	lint
+static char     sccsid[] = "$Id: inlookup.c,v 1.7 2022-08-25 18:16:42+05:30 Cprogrammer Exp mbhangui $";
+#endif
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
-#ifndef	lint
-static char     sccsid[] = "$Id: inlookup.c,v 1.6 2021-09-11 13:36:54+05:30 Cprogrammer Exp mbhangui $";
-#endif
-
 #ifdef CLUSTERED_SITE
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
