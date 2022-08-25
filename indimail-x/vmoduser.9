@@ -24,7 +24,7 @@ program/script LIBEXECDIR/vmoduser will be executed.
 \fB\-v\fR
 Sets verbose mode
 
-.TP
+.TP 3
 \fB\-n\fR
 Toggles between Inactive and Active state for the user
 i.e. Moves the user between indimail and indibak
@@ -99,11 +99,19 @@ Sets the SCRAM method for encryption. This will set SCRAM password in the
 .nf
 .ta 5c 10c
 SCRAM method	Value
--------------	-----------
 SCRAM-SHA-1	SHA1 encryption suitable for SCRAM-SHA-1.
 SCRAM-SHA-256	SHA256 encryption suitable for SCRAM-SHA-256.
 .fi
 .RE
+
+.TP 3
+\fB\-C\fR
+Sets up authentication suitable for CRAM-MD5, CRAM-SHA1, CRAM-SHA224,
+CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD and DIGEST-MD5 methods.
+This will additionally store the clear text credentials and a hex-encoded
+salted password for SCRAM methods. This allows the above mentioned
+authentication mechanisms to work along with the PLAIN, LOGIN and the SCRAM
+methods.
 
 .TP 3
 \fB\-S\fR \fIsalt\fR
@@ -126,7 +134,6 @@ the file \fIfolder.dateformat\fR in user's Maildir.
 The format %b-%Y will cause emails to be delivered to Apr-2014 if the
 delivery date happens to be anytime in Apr 2014
 .EE
-.RS
 
 .TP 3
 \fB\-l\fR \fIvacation_messsage_file\fR
@@ -199,28 +206,25 @@ Clear all flags
 .PP
 The values of pw_gid corresponding to the above options are as below.
 
-.RS
 .nf
 .ta 5c 10c
-Option        	Value
---------------	-----------
+Option	Value
 
-NO_PASSWD_CHNG	| 0x01
-NO_POP	| 0x02
-NO_WEBMAIL	| 0x04
-NO_IMAP	| 0x08
-BOUNCE_MAIL	| 0x10
-NO_RELAY	| 0x20
-NO_DIALUP	| 0x40
-QA_ADMIN	| 0x80
-V_USER0	| 0x100
-V_USER1	| 0x200
-V_USER2	| 0x400
-V_USER3	| 0x800
-V_USER4	| 0x2000
-V_USER6	| 0x8000
+NO_PASSWD_CHNG	0x01
+NO_POP	0x02
+NO_WEBMAIL	0x04
+NO_IMAP	0x08
+BOUNCE_MAIL	0x10
+NO_RELAY	0x20
+NO_DIALUP	0x40
+QA_ADMIN	0x80
+V_USER0	0x100
+V_USER1	0x200
+V_USER2	0x400
+V_USER3	0x800
+V_USER4	0x2000
+V_USER6	0x8000
 .fi
-.RE
 
 .SH RETURN VALUES
 0 in case of success and non-zero in case of any failure.
