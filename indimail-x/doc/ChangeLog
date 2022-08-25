@@ -79,6 +79,7 @@ Release @version@-@release@ Start 14/02/2021
     authentication
 52. strToPw.c handle additional hex salted passwod and clear text password in
     pw_passwd field
+53. strToPw.c: use colon_count to fix logic for cram/non-cram passwords
 
 *
 Release 3.4.0 Start 14/02/2021
