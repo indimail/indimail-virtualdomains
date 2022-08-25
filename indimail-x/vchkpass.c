@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.14  2022-08-25 18:03:04+05:30  Cprogrammer
+ * fetch clear text passwords for CRAM authentication
+ *
  * Revision 1.13  2022-08-23 08:21:44+05:30  Cprogrammer
  * display AUTH method as a string instead of a number
  *
@@ -82,7 +85,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.13 2022-08-23 08:21:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.14 2022-08-25 18:03:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -115,7 +118,8 @@ die_nomem()
 int
 main(int argc, char **argv)
 {
-	char           *authstr, *login, *ologin, *response, *challenge, *crypt_pass, *ptr, *cptr;
+	char           *authstr, *login, *ologin, *response, *challenge, *cleartxt, 
+				   *crypt_pass, *ptr, *cptr;
 	char            strnum[FMT_ULONG], module_pid[FMT_ULONG];
 	static stralloc user = {0}, fquser = {0}, domain = {0}, buf = {0};
 	int             i, count, offset, norelay = 0, status, auth_method, native_checkpassword;
@@ -291,7 +295,8 @@ main(int argc, char **argv)
 	if (pw->pw_gid & NO_RELAY)
 		norelay = 1;
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
-		if ((i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, &crypt_pass)) != 6) {
+		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, &cleartxt, &crypt_pass);
+		if (i != 6 && i != 8) {
 			out("vchkpass", "553-Sorry, unable to get secrets (#5.7.1)\r\n");
 			flush("vchkpass");
 			_exit (1);

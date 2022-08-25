@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 1.13  2022-08-25 18:02:20+05:30  Cprogrammer
+ * fetch clear text passwords for CRAM authentication
+ *
  * Revision 1.12  2022-08-04 14:37:42+05:30  Cprogrammer
  * authenticate using SCRAM salted password
  *
@@ -81,7 +84,7 @@
 #include "sql_getpw.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.12 2022-08-04 14:37:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.13 2022-08-25 18:02:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -192,7 +195,7 @@ base64_cleanup()
 int
 main(int argc, char **argv)
 {
-	char           *buf, *authstr, *login, *challenge, *response, *crypt_pass, *ptr,
+	char           *buf, *authstr, *login, *challenge, *response, *cleartxt, *crypt_pass, *ptr,
 				   *real_domain, *prog_name, *service, *auth_type, *auth_data, *mailstore;
 	char           *(imapargs[]) = { PREFIX"/sbin/imaplogin", LIBEXECDIR"/imapmodules/authindi",
 					PREFIX"/bin/imapd", "Maildir", 0 };
@@ -552,7 +555,8 @@ main(int argc, char **argv)
 		}
 	}
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
-		if ((i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, &crypt_pass)) != 6) {
+		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, &cleartxt, &crypt_pass);
+		if (i != 6 && i != 8) {
 			if (write(2, "AUTHFAILURE\n", 12) == -1)
 				;
 			close_connection();
