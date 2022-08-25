@@ -1,5 +1,9 @@
 /*
  * $Log: gsasl_mkpasswd.c,v $
+ * Revision 1.5  2022-08-25 17:56:51+05:30  Cprogrammer
+ * store hex encoded password for GSASL_SCRAM_SALTED_PASSWORD property in libgsasl
+ * store clear text password for CRAM authentication methods if docram is set
+ *
  * Revision 1.4  2022-08-07 20:38:42+05:30  Cprogrammer
  * added gsasl_mkpasswd_err()
  *
@@ -32,7 +36,7 @@
 #include "gsasl_mkpasswd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: gsasl_mkpasswd.c,v 1.4 2022-08-07 20:38:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: gsasl_mkpasswd.c,v 1.5 2022-08-25 17:56:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_GSASL
@@ -58,7 +62,7 @@ const char     *gsasl_mkpasswd_err(int err)
 }
 
 int
-gsasl_mkpasswd(int verbose, char *mechanism, int iteration_count, char *b64salt_arg, char *password, stralloc *result)
+gsasl_mkpasswd(int verbose, char *mechanism, int iteration_count, char *b64salt_arg, int docram, char *cleartxt, stralloc *result)
 {
 	char            salt_buf[DEFAULT_SALT_SIZE];
 	char           *salt, *hexsaltedpassword, *b64salt;
@@ -104,7 +108,7 @@ gsasl_mkpasswd(int verbose, char *mechanism, int iteration_count, char *b64salt_
 		b64salt = b64.s;
 		b64saltlen = b64.len;
 	}
-	if ((res = gsasl_scram_secrets_from_password(hash, password, iteration_count,
+	if ((res = gsasl_scram_secrets_from_password(hash, cleartxt, iteration_count,
 			salt, saltlen, saltedpassword, clientkey, serverkey, storedkey)) != GSASL_OK)
 		return GSASL_ERR;
 	if (!stralloc_copyb(&in, storedkey, hashlen) ||
@@ -112,10 +116,16 @@ gsasl_mkpasswd(int verbose, char *mechanism, int iteration_count, char *b64salt_
 			!stralloc_copyb(&in, serverkey, hashlen) ||
 			b64encode(&in, &b64serverkey) == -1)
 		return MEMORY_ERR;
+
+	if (!(hexsaltedpassword = (char *) alloc(hashlen * 2 + 1)))
+		return MEMORY_ERR;
+	i = fmt_hexdump(hexsaltedpassword, saltedpassword, hashlen);
+	hexsaltedpassword[i] = 0;
+
 	strnum[i = fmt_int(strnum, iteration_count)] = 0;
 	/*-
 	 * generate password of the form
-	 * {SCRAM-SHA-256}iter_count,salt,stored_key,server_key[,salted_password]
+	 * {SCRAM-SHA-256}iter_count,salt,stored_key,server_key[:hexsaltedpassword,cleartxt]
 	 */
 	if (!stralloc_copyb(result, "{", 1) ||
 			!stralloc_cats(result, mechanism) ||
@@ -126,17 +136,22 @@ gsasl_mkpasswd(int verbose, char *mechanism, int iteration_count, char *b64salt_
 			!stralloc_append(result, ",") ||
 			!stralloc_catb(result, b64storedkey.s, b64storedkey.len) ||
 			!stralloc_append(result, ",") ||
-			!stralloc_catb(result, b64serverkey.s, b64serverkey.len) ||
-			!stralloc_0(result))
+			!stralloc_catb(result, b64serverkey.s, b64serverkey.len))
+		return MEMORY_ERR;
+	if (docram && (!stralloc_append(result, ":") ||
+				!stralloc_cats(result, hexsaltedpassword) ||
+				!stralloc_append(result, ":") ||
+				!stralloc_cats(result, cleartxt) ||
+				!stralloc_0(result)))
 		return MEMORY_ERR;
 	if (verbose) {
-		if (!(hexsaltedpassword = (char *) alloc(hashlen * 2 + 1)))
-			return MEMORY_ERR;
-		i = fmt_hexdump(hexsaltedpassword, saltedpassword, hashlen);
-		hexsaltedpassword[i] = 0;
 		out("gsasl", result->s);
-		out("gsasl", ",");
+		out("gsasl", ":");
 		out("gsasl", hexsaltedpassword);
+		if (docram) {
+			out("gsasl", ":");
+			out("gsasl", cleartxt);
+		}
 		out("gsasl", "\n");
 		flush("gsasl");
 	}
