@@ -1,5 +1,8 @@
 /*
  * $Log: gsasl_mkpasswd.h,v $
+ * Revision 1.3  2022-08-25 18:15:41+05:30  Cprogrammer
+ * added additional parameters - docram, cleartxt parameters to gsasl_mkpasswd()
+ *
  * Revision 1.2  2022-08-07 20:38:54+05:30  Cprogrammer
  * added gsasl_mkpasswd_err()
  *
@@ -18,7 +21,7 @@
 #define GSASL_ERR  4
 #define NO_ERR     0
 
-int             gsasl_mkpasswd(int, char *, int, char *, char *, stralloc *);
+int             gsasl_mkpasswd(int, char *, int, char *, int, char *, stralloc *);
 const char     *gsasl_mkpasswd_err(int);
 
 #endif
