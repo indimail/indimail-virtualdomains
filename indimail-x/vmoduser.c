@@ -1,5 +1,10 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.9  2022-08-25 18:07:49+05:30  Cprogrammer
+ * Make password compatible with CRAM and SCRAM
+ * 1. store hex-encoded salted password for setting GSASL_SCRAM_SALTED_PASSWORD property in libgsasl
+ * 2. store clear text password for CRAM authentication methods
+ *
  * Revision 1.8  2022-08-24 18:35:17+05:30  Cprogrammer
  * made setting hash method and scram method independent
  *
@@ -79,7 +84,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.8 2022-08-24 18:35:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.9 2022-08-25 18:07:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -99,6 +104,7 @@ static char    *usage =
 	"         -P passwd                (set the password field)\n"
 	"         -e encrypted_passwd      (set the encrypted password field)\n"
 	"         -h hash                  (use one of DES, MD5, SHA256, SHA512 hash)\n"
+	"         -C                       (Store clear txt and scram hex salted passowrd in database\n"
 	"         -m SCRAM method          (use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method)\n"
 	"         -S salt                  (Use a fixed base64 encoded salt)\n"
 	"         -I iter_count            (Use iter_count instead of default 4096 for generationg SCRAM password\n"
@@ -137,17 +143,23 @@ int
 get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Domain, stralloc *Gecos,
 		stralloc *Passwd, stralloc *DateFormat, stralloc *Quota,
 		stralloc *vacation_file, int *toggle, int *GidFlag, int *ClearFlags,
-		int *QuotaFlag, int *set_vacation, char **clear_text,
+		int *QuotaFlag, int *set_vacation, int *docram, char **clear_text,
 		char **salt, int *iter, int *scram)
 {
 	int             c, i, encrypt_flag = -1;
-	char            optstr[40], strnum[FMT_ULONG];
+	char            optstr[41], strnum[FMT_ULONG];
 
 	*toggle = *ClearFlags = 0;
 	*QuotaFlag = 0;
-	*clear_text = *salt = 0;
-	*scram = 0;
-	*iter = 4096;
+	*clear_text = 0;
+	if (salt)
+		*salt = 0;
+	if (docram)
+		*docram = 0;
+	if (scram)
+		*scram = 0;
+	if (iter)
+		*iter = 4096;
 	/*- make sure optstr has enough size to hold all options + 1 */
 	i = 0;
 	i += fmt_strn(optstr + i, "avutxHD:c:q:dpwisobr0123h:e:l:P:", 32);
@@ -156,9 +168,11 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 #endif
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	i += fmt_strn(optstr + i, "m:S:I:", 6);
+	i += fmt_strn(optstr + i, "Cm:S:I:", 7);
 #endif
 #endif
+	if ((i + 1) > sizeof(optstr))
+		strerr_die2x(100, FATAL, "allocated space for getopt string not enough");
 	optstr[i] = 0;
 	while ((c = getopt(argc, argv, optstr)) != opteof) 
 	{
@@ -216,9 +230,14 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 				strerr_die1x(111, "out of memory");
 			encrypt_flag = 1;
 			break;
+		case 'C':
+			*docram = 1;
+			break;
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'm':
+			if (!scram)
+				break;
 			if (!str_diffn(optarg, "SCRAM-SHA-1", 11))
 				*scram = 1;
 			else
@@ -234,12 +253,16 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 			}
 			break;
 		case 'S':
+			if (!salt)
+				break;
 			i = str_chr(optarg, ',');
 			if (optarg[i])
 				strerr_die3x(100, WARN, optarg, ": salt cannot have a comma character");
 			*salt = optarg;
 			break;
 		case 'I':
+			if (!iter)
+				break;
 			scan_int(optarg, iter);
 			break;
 #endif
@@ -337,14 +360,14 @@ main(argc, argv)
 {
 	static stralloc Email = {0}, User = {0}, Domain = {0}, Gecos = {0},
 					Passwd = {0}, DateFormat = {0}, Quota = {0}, vacation_file = {0},
-					tmpbuf = {0}, tmpQuota = {0}, result = {0};
+					tmpbuf = {0}, tmpQuota = {0};
 	int             GidFlag = 0, QuotaFlag = 0, toggle = 0, ClearFlags,
-					set_vacation = 0, err, fd, i, scram, iter;
+					set_vacation = 0, err, fd, i;
 	uid_t           uid;
 	gid_t           gid;
 	struct passwd   PwTmp;
 	struct passwd  *pw;
-	char           *real_domain, *ptr, *clear_text, *b64salt;
+	char           *real_domain, *ptr, *clear_text;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	mdir_t          quota = 0, ul;
 #ifdef USE_MAILDIRQUOTA
@@ -355,11 +378,32 @@ main(argc, argv)
 	struct vlimits  limits;
 	int             domain_limits;
 #endif
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	static stralloc result = {0};
+	char           *b64salt;
+	int             scram, iter, docram;
+#endif
+#endif
 
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	if (get_options(argc, argv, &User, &Email, &Domain, &Gecos, &Passwd,
 			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
-			&QuotaFlag, &set_vacation, &clear_text, &b64salt, &iter, &scram))
+			&QuotaFlag, &set_vacation, &docram, &clear_text, &b64salt, &iter, &scram))
 		return (1);
+#else
+	if (get_options(argc, argv, &User, &Email, &Domain, &Gecos, &Passwd,
+			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
+			&QuotaFlag, &set_vacation, 0, 0, 0, 0, 0))
+		return (1);
+#endif
+#else
+	if (get_options(argc, argv, &User, &Email, &Domain, &Gecos, &Passwd,
+			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
+			&QuotaFlag, &set_vacation, 0, 0, 0, 0, 0))
+		return (1);
+#endif
 	if (indimailuid == -1 || indimailgid == -1)
 		get_indimailuidgid(&indimailuid, &indimailgid);
 	uid = getuid();
@@ -374,11 +418,11 @@ main(argc, argv)
 	switch (scram)
 	{
 	case 1: /*- SCRAM-SHA-1 */
-		if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-1", iter, b64salt, clear_text, &result)) != NO_ERR)
+		if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-1", iter, b64salt, docram, clear_text, &result)) != NO_ERR)
 			strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
 		break;
 	case 2: /*- SCRAM-SHA-256 */
-		if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-256", iter, b64salt, clear_text, &result)) != NO_ERR)
+		if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-256", iter, b64salt, docram, clear_text, &result)) != NO_ERR)
 			strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
 		break;
 	}
