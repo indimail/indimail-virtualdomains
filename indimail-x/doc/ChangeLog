@@ -68,6 +68,17 @@ Release @version@-@release@ Start 14/02/2021
 48. vchkpass.c: display AUTH method as a string instead of a number
 49. vpasswd.c, vmoduser.c: made setting hash method and scram method
     independent of each other
+- 25/08/2022
+50. gsasl_mkasswd.c, vpasswd.c, vmoduser.c: Make password compatible with
+    CRAM & SCRAM
+    1. store hex-encoded salted password for setting
+       GSASL_SCRAM_SALTED_PASSWORD property in libgsasl.
+    2. store clear text password for CRAM authentication
+       methods
+51. authindi.c, vchkpass.c: fetch clear text passwords for CRAM
+    authentication
+52. strToPw.c handle additional hex salted passwod and clear text password in
+    pw_passwd field
 
 *
 Release 3.4.0 Start 14/02/2021
