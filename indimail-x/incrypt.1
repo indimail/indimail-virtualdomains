@@ -5,23 +5,45 @@ incrypt
 
 .SH SYNOPSYS
 incrypt
-.I key
+.I passphrase
 .I salt
 
 .SH DESCRIPTION
-incrypt is a command line impementation of crypt(3) password encryption function.
-It is based on the Data Encryption Standard algorithm with variations
-intended (among other things) to discourage use of hardware implementations of a key search.
+incrypt is a command line impementation of crypt(3) password encryption
+function. The crypt functions irreversibly “hash” phrase for storage in the
+system password database (shadow(5)) using a cryptographic “hashing
+method.” The result of this operation is called a “hashed passphrase” or
+just a “hash.” Hashing methods are described in crypt(5).
 
-\fIkey\fR is a user's typed password.
+\fIkey\fR controls which hashing method to use, and also supplies various
+parameters to the chosen method, most importantly a random “salt” which en‐
+sures that no two stored hashes are the same, even if the phrase strings
+are the same.
 
-\fIsalt\fR is a two-character string chosen from the set [a-zA-Z0-9./]. This string is used to perturb the algorithm in one of
-4096 different ways.
+The original hashing method from Unix V7, based on the DES block cipher.
+Because DES is cheap on modern hardware, because there are only 4096 pos‐
+sible salts and 2**56 possible hashes, and because it truncates passphrases
+to 8 characters, it is feasible to discover any passphrase hashed with this
+method. It should only be used if you absolutely have to generate hashes
+that will work on an old operating system that supports nothing else.
 
-By taking the lowest 7 bits of each of the first eight characters of the key, a 56-bit key is obtained. This 56-bit key
-is used to encrypt repeatedly a constant string (usually a string consisting of all zeros). The returned value points to
-the encrypted password, a series of 13 printable ASCII characters (the first two characters represent the salt itself).
-The return value points to static data whose content is overwritten by each call.
+It is based on the Data Encryption Standard algorithm with
+variations intended (among other things) to discourage use of hardware
+implementations of a key search.
+
+\fIpassphrase\fR is a user's typed password.
+
+\fIsalt\fR is a two-character string chosen from the set [a-zA-Z0-9./].
+This string is used to perturb the algorithm in one of 4096 different
+ways.
+
+By taking the lowest 7 bits of each of the first eight characters of the
+key, a 56-bit key is obtained. This 56-bit key is used to encrypt
+repeatedly a constant string (usually a string consisting of all zeros).
+The returned value points to the encrypted password, a series of 13
+printable ASCII characters (the first two characters represent the salt
+itself).  The return value points to static data whose content is
+overwritten by each call.
 
 If
 .I salt
