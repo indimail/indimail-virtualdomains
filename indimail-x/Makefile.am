@@ -103,13 +103,6 @@ include_HEADERS = addaliasdomain.h add_control.h add_domain_assign.h addressToke
 	vsmtp_select.h vsmtp_update.h vupdate_rules.h wildmat.h indimail_config.h
 includedir=@prefix@/include/indimail
 
-setuid_list = bin/printdir bin/vaddaliasdomain bin/vadddomain bin/vadduser bin/vbulletin \
-	bin/vcfilter bin/vdeldomain bin/vdeluser bin/vmoduser bin/vmoveuser bin/vrenamedomain \
-	bin/vrenameuser bin/vsetuserquota bin/vdominfo bin/vuserinfo sbin/vreorg
-
-doc_list= ChangeLog FAQ.pdf README-indimail.md README-ldap.md  \
-	README-vlimits.md COPYING-indimail
-
 COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.c add_ip_map.c \
 	add_user_assign.c addusercntrl.c add_vacation.c atrn_access.c autoturn_dir.c \
 	backfill.c bulk_mail.c check_group.c Check_Login.c check_quota.c close_big_dir.c \
@@ -203,12 +196,19 @@ noinst_SCRIPTS = vadddomain_handle vadduser_handle vdeldomain_handle \
 	vaddaliasdomain_handle vrenamedomain_handle vpasswd_handle vmoduser_handle \
 	vdeluser_handle vrenameuser_handle
 
+setuid_list = bin/printdir bin/vaddaliasdomain bin/vadddomain bin/vadduser bin/vbulletin \
+	bin/vcfilter bin/vdeldomain bin/vdeluser bin/vmoduser bin/vmoveuser bin/vrenamedomain \
+	bin/vrenameuser bin/vsetuserquota bin/vdominfo bin/vuserinfo sbin/vreorg
+
 noinst_DATA = indimail-permissions.easy indimail-permissions.paranoid \
 	indimail-permissions.secure indimail.spec indimail.changes indimail-rpmlintrc \
 	PKGBUILD
 
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain vmoduser vpasswd \
 	vdeluser vrenameuser
+
+doc_list= ChangeLog FAQ.pdf README-indimail.md README-ldap.md  \
+	README-vlimits.md COPYING-indimail
 
 MOSTLYCLEANFILES=vcaliasrev myslave controlsync bogofilter-qfe \
 	cronlist.i incrypt vdeluser_handle vrenameuser_handle \
