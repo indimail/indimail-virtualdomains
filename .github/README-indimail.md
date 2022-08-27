@@ -2706,10 +2706,10 @@ The authentication information stored in the authentication database is not suff
 
 The SCRAM method also allows the server to advertise channel binding. Channel Binding allows the server to enforce TLS and safeguard the connection from main-in-the-middle-attack. IndiMail supports the [tls-unique](https://www.rfc-editor.org/rfc/rfc5929.html) channel binding for TLS1.2 and [tls-exporter](https://www.rfc-editor.org/rfc/rfc9266.html) channel binding for TLS1.3 and above. When the server supports channel binding, it advertises 
 
-IndiMail supports SCRAM-SHA-1 and SCRAM-SHA-256 SCRAM authentication methods. qmail-smtpd advertises these methods to an EHLO response. qmail-remote issues the EHLO command to get the capability of the remote server. qmail-smtpd and qmail-remote also support channel binding. Hence qmail-smtpd advertises SCRAM-SHA-1-PLUS and SCRAM-SHA-256-PLUS authentication methods. Similarly qmail-remote uses tls-unique or the tls-exporter channel binding when the remote spports SCRAM-SHA*-PLUS methods. You can use the <b>vpasswd</b> program to set password for SCRAM authentication. For example, the below password will allow AUTH LOGIN, PLAIN and all SCRAM methods to work.
+IndiMail supports SCRAM-SHA-1 and SCRAM-SHA-256 SCRAM authentication methods. qmail-smtpd advertises these methods to an EHLO response. qmail-remote issues the EHLO command to get the capability of the remote server. qmail-smtpd and qmail-remote also support channel binding. Hence qmail-smtpd advertises SCRAM-SHA-1-PLUS and SCRAM-SHA-256-PLUS authentication methods. Similarly qmail-remote uses tls-unique or the tls-exporter channel binding when the remote supports SCRAM-SHA*-PLUS methods. You can use the <b>vpasswd</b> program to set password for SCRAM authentication. For example, the below password will allow AUTH LOGIN, PLAIN and all SCRAM methods to work.
 
 ```
-sudo vpasswd -C -m SCRAM-SHA-256 manny@example.com supersecret
+sudo vpasswd -m SCRAM-SHA-256 manny@example.com supersecret
 name          : manny@example.com
 passwd        : {SCRAM-SHA-256}4096,HWvKDMG1R9hSSt/e,thk3p9gV604V9A2chgmW/ovPgucUtFRhHJgfeWi2pJ4=,IvIc99nIBYdKFqW+ZTz1Ioz5nIxWXJDegzPlkq41tic=,$5$7.Jwtq6QiQaLsguq$RXUJkrI5PUhtqGa4jKGbLPZaLmJiGdpqXhe68qtqyE/ (SCRAM-SHA-256)
 uid           : 1
