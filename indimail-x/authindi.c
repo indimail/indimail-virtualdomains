@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 1.14  2022-08-27 12:05:20+05:30  Cprogrammer
+ * fixed logic for fetching clear txt password for cram methods
+ *
  * Revision 1.13  2022-08-25 18:02:20+05:30  Cprogrammer
  * fetch clear text passwords for CRAM authentication
  *
@@ -63,8 +66,8 @@
 #include <subfd.h>
 #include <getln.h>
 #include <pw_comp.h>
-#include <authmethods.h>
 #include <get_scram_secrets.h>
+#include <noreturn.h>
 #endif
 #include "parse_email.h"
 #include "get_assign.h"
@@ -83,10 +86,6 @@
 #include "pipe_exec.h"
 #include "sql_getpw.h"
 
-#ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.13 2022-08-25 18:02:20+05:30 Cprogrammer Exp mbhangui $";
-#endif
-
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
 #define AUTH_SIZE 512
@@ -94,7 +93,43 @@ static char     sccsid[] = "$Id: authindi.c,v 1.13 2022-08-25 18:02:20+05:30 Cpr
 #define AUTH_SIZE 512
 #endif
 
-static int      exec_local(char **, char *, char *, struct passwd *, char *);
+#ifndef AUTH_LOGIN
+#define AUTH_LOGIN       1
+#endif
+#ifndef AUTH_PLAIN
+#define AUTH_PLAIN       2
+#endif
+#ifndef AUTH_CRAM_MD5
+#define AUTH_CRAM_MD5    3
+#endif
+#ifndef AUTH_CRAM_SHA1
+#define AUTH_CRAM_SHA1   4
+#endif
+#ifndef AUTH_CRAM_SHA224
+#define AUTH_CRAM_SHA224 5
+#endif
+#ifndef AUTH_CRAM_SHA256
+#define AUTH_CRAM_SHA256 6
+#endif
+#ifndef AUTH_CRAM_SHA384
+#define AUTH_CRAM_SHA384 7
+#endif
+#ifndef AUTH_CRAM_SHA512
+#define AUTH_CRAM_SHA512 8
+#endif
+#ifndef AUTH_CRAM_RIPEMD
+#define AUTH_CRAM_RIPEMD 9
+#endif
+#ifndef AUTH_DIGEST_MD5
+#define AUTH_DIGEST_MD5  10
+#endif
+
+#define FATAL "authindi: fatal: "
+#define WARN  "authindi: warn: "
+
+#ifndef lint
+static char     sccsid[] = "$Id: authindi.c,v 1.14 2022-08-27 12:05:20+05:30 Cprogrammer Exp mbhangui $";
+#endif
 
 static stralloc tmpbuf = {0};
 static int      authlen = AUTH_SIZE;
@@ -103,8 +138,7 @@ static char     strnum[FMT_ULONG], module_pid[FMT_ULONG], euidstr[FMT_ULONG];
 static void
 die_nomem()
 {
-	strerr_warn1("authindi: out of memory", 0);
-	_exit(111);
+	strerr_die2x(111, FATAL, "out of memory");
 }
 
 void
@@ -192,11 +226,155 @@ base64_cleanup()
 	alloc_free((char *) decoding_table);
 }
 
+/*- This executes imapd, pop3. */
+static void noreturn
+failure1(char **argv, int auth_method, char *service,
+		char *imapargs[], char *pop3args[], char *authstr, char *challenge)
+{
+	if (write(2, "AUTHFAILURE\n", 12) == -1)
+		;
+	close_connection();
+	if (auth_method > AUTH_PLAIN) {
+		if (challenge) {
+			alloc_free(challenge);
+			challenge = 0;
+		}
+		alloc_free(authstr);
+	}
+	execv(!str_diff("pop3", service) ? *pop3args : *imapargs, argv);
+	strerr_die4x(111, FATAL, "execv ", !str_diff("pop3", service) ? *pop3args : *imapargs, ": ");
+}
+
+/*- This executes next auth module. */
+static void noreturn
+next_module(char **argv, char *buf, int offset, int auth_method, char *authstr, char *challenge)
+{
+	close_connection();
+	if (auth_method > AUTH_PLAIN) {
+		if (challenge) {
+			alloc_free(challenge);
+			challenge = 0;
+		}
+		alloc_free(authstr);
+	}
+	pipe_exec(argv, buf, offset);
+	_exit(111);
+}
+
+no_return void
+exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *service)
+{
+	static stralloc Maildir = {0}, TheUser = {0}, line = {0};
+	char           *ptr;
+	int             i, status, fd, match;
+	char            inbuf[4096];
+	struct substdio ssin;
+#ifdef USE_MAILDIRQUOTA
+	mdir_t          size_limit, count_limit;
+#endif
+
+	for (i = 0, ptr = userid; *ptr && *ptr != '@'; i++, ptr++);
+	if (!stralloc_copyb(&TheUser, userid, i) ||
+			!stralloc_0(&TheUser))
+		die_nomem();
+	TheUser.len--;
+	if (Check_Login(service, TheDomain, pw->pw_gecos)) {
+		close_connection();
+		strerr_die3x(100, WARN, "Login not permitted for ", service);
+	}
+	close_connection();
+	if (!env_put2("AUTHENTICATED", userid))
+		die_nomem();
+	if (!stralloc_copy(&tmpbuf, &TheUser) ||
+			!stralloc_append(&tmpbuf, "@") ||
+			!stralloc_cats(&tmpbuf, TheDomain) ||
+			!stralloc_0(&tmpbuf))
+		die_nomem();
+	if (!env_put2("AUTHADDR", tmpbuf.s))
+		die_nomem();
+	if (!env_put2("AUTHFULLNAME", pw->pw_gecos))
+		die_nomem();
+#ifdef USE_MAILDIRQUOTA	
+	if ((size_limit = parse_quota(pw->pw_shell, &count_limit)) == -1)
+		strerr_die3x(100, "unable to parse_quota [", pw->pw_shell, "]");
+	if (!stralloc_copyb(&tmpbuf, strnum, fmt_ulong(strnum, (unsigned long) size_limit)) ||
+			!stralloc_catb(&tmpbuf, "S,", 2) ||
+			!stralloc_catb(&tmpbuf, strnum, fmt_ulong(strnum, (unsigned long) count_limit)) ||
+			!stralloc_append(&tmpbuf, "C") ||
+			!stralloc_0(&tmpbuf))
+		die_nomem();
+#else
+	if (!stralloc_copys(&tmpbuf, pw->pw_shell) ||
+			!stralloc_append(&tmpbuf, "S") ||
+			!stralloc_0(&tmpbuf))
+		die_nomem();
+#endif
+	if (!env_put2("MAILDIRQUOTA", tmpbuf.s) ||
+			!env_put2("HOME", pw->pw_dir) ||
+			!env_put2("AUTHSERVICE", service))
+		die_nomem();
+	switch ((status = Login_Tasks(pw, userid, service)))
+	{
+		case 2:
+			if (!stralloc_copys(&Maildir, (ptr = env_get("TMP_MAILDIR")) ? ptr : pw->pw_dir) ||
+					!stralloc_0(&Maildir))
+				die_nomem();
+			Maildir.len--;
+			break;
+		case 3:
+			if ((ptr = env_get("EXIT_ONERROR"))) {
+				if ((ptr = env_get("MSG_ONERROR")) && !access(ptr, F_OK)) {
+					if ((fd = open_read(ptr)) == -1)
+						strerr_warn4(FATAL, "open: ", ptr, ": ", &strerr_sys);
+					else {
+						substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+						for (;;) {
+							if (getln(&ssin, &line, &match, '\n') == -1) {
+								strerr_warn4(FATAL, "read: ", ptr, ": ", &strerr_sys);
+								close(fd);
+								break;
+							}
+							if (!line.len)
+								break;
+							if (substdio_put(subfdoutsmall, line.s, line.len)) {
+								close(fd);
+								break;
+							}
+						}
+						substdio_flush(subfdoutsmall);
+						close(fd);
+					}
+				}
+				strerr_die2x(100, FATAL, "POSTAUTH: Error on Exit");
+			}
+			if (!stralloc_copys(&Maildir, (ptr = env_get("TMP_MAILDIR")) ? ptr : pw->pw_dir) ||
+					!stralloc_0(&Maildir))
+				die_nomem();
+			Maildir.len--;
+			break;
+		default:
+			if (!stralloc_copys(&Maildir, pw->pw_dir) || !stralloc_0(&Maildir))
+				die_nomem();
+			Maildir.len--;
+			break;
+	}
+	if (chdir(Maildir.s))
+		strerr_die4sys(111, FATAL, "chdir: ", Maildir.s, ": ");
+	if (!stralloc_copy(&tmpbuf, &Maildir) ||
+			!stralloc_catb(&tmpbuf, "/Maildir", 8) ||
+			!stralloc_0(&tmpbuf))
+		die_nomem();
+	if (!env_put2("MAILDIR", tmpbuf.s))
+		die_nomem();
+	execv(argv[0], argv);
+	strerr_die4sys(111, FATAL, "exec: ", argv[1], ": ");
+}
+
 int
 main(int argc, char **argv)
 {
 	char           *buf, *authstr, *login, *challenge, *response, *cleartxt, *crypt_pass, *ptr,
-				   *real_domain, *prog_name, *service, *auth_type, *auth_data, *mailstore;
+				   *real_domain, *service, *auth_type, *auth_data, *mailstore, *pass;
 	char           *(imapargs[]) = { PREFIX"/sbin/imaplogin", LIBEXECDIR"/imapmodules/authindi",
 					PREFIX"/bin/imapd", "Maildir", 0 };
 	char           *(pop3args[]) = { PREFIX"/sbin/pop3login", LIBEXECDIR"/imapmodules/authindi",
@@ -218,21 +396,15 @@ main(int argc, char **argv)
 	ptr = env_get("AUTHADDR");
 	if (ptr && *ptr) {
 		execv(*(argv + argc - 2), argv + argc - 2);
-		strerr_warn3("execv: ", *(argv + argc - 2), ": ", &strerr_sys);
+		strerr_die4sys(111, FATAL, "execv: ", *(argv + argc - 2), ": ");
 	}
 	i = str_rchr(argv[0], '/');
-	if (argv[0][i])
-		prog_name = argv[0] + i + 1;
-	else
-		prog_name = argv[0];
-	if (argc < 3) {
-		strerr_warn2(prog_name, ": no more modules will be tried", 0);
-		return (1);
-	}
+	if (argc < 3)
+		strerr_die2x(100, FATAL, "no more modules will be tried");
 	if (debug) {
 		strnum[fmt_uint(strnum, (unsigned int) getuid())] = 0;
 		euidstr[fmt_uint(euidstr, (unsigned int) geteuid())] = 0;
-		strerr_warn8(prog_name, " uid [", strnum, "] euid [", euidstr, "] next_module [", argv[1], "]", 0);
+		strerr_warn8(WARN, " uid [", strnum, "] euid [", euidstr, "] next_module [", argv[1], "]", 0);
 	}
 	if (!(authstr = alloc((authlen + 1) * sizeof(char)))) {
 		if (write(2, "AUTHFAILURE\n", 12) == -1)
@@ -252,8 +424,7 @@ main(int argc, char **argv)
 	 * argv[3]=Maildir
 	 */
 	for (offset = 0;;) {
-		do
-		{
+		do {
 			count = read(3, authstr + offset, authlen + 1 - offset);
 #ifdef ERESTART
 		} while (count == -1 && (errno == EINTR || errno == ERESTART));
@@ -261,15 +432,15 @@ main(int argc, char **argv)
 		} while (count == -1 && errno == EINTR);
 #endif
 		if (count == -1) {
-			strerr_warn1("authindi: read: ", &strerr_sys);
-			return (1);
+			alloc_free(authstr);
+			strerr_die2x(111, FATAL, "read: ");
 		} else
 		if (!count)
 			break;
 		offset += count;
 		if (offset >= (authlen + 1)) {
-			strerr_warn2(prog_name, ": auth data too long", 0);
-			return (2);
+			alloc_free(authstr);
+			strerr_die2x(2, FATAL, "auth data too long");
 		}
 	}
 	if (!(buf = alloc((offset + 1) * sizeof(char)))) {
@@ -282,16 +453,18 @@ main(int argc, char **argv)
 	service = authstr + count; /*- service */
 	for (;authstr[count] != '\n' && count < offset;count++);
 	if (count == offset || (count + 1) == offset) {
-		strerr_warn2(prog_name, ": auth data too short", 0);
-		return (2);
+		alloc_free(buf);
+		alloc_free(authstr);
+		strerr_die2x(2, FATAL, "auth data too short");
 	}
 	authstr[count++] = 0;
 
 	auth_type = authstr + count; /* type (login, plain, cram-md5, cram-sha1 or pass) */
 	for (;authstr[count] != '\n' && count < offset;count++);
 	if (count == offset || (count + 1) == offset) {
-		strerr_warn2(prog_name, ": auth data too short", 0);
-		return (2);
+		alloc_free(buf);
+		alloc_free(authstr);
+		strerr_die2x(2, FATAL, "auth data too short");
 	}
 	authstr[count++] = 0;
 	if (!str_diffn(auth_type, "pass", 5))
@@ -321,17 +494,17 @@ main(int argc, char **argv)
 		auth_method = 0;
 
 	login = authstr + count; /*- username or challenge */
-	for (cram_md5_len = 0;authstr[count] != '\n' && count < offset;count++, cram_md5_len++);
+	for (cram_md5_len = 0; authstr[count] != '\n' && count < offset;count++, cram_md5_len++);
 	if (count == offset || (count + 1) == offset) {
-		strerr_warn2(prog_name, ": auth data too short", 0);
-		return (2);
+		alloc_free(buf);
+		alloc_free(authstr);
+		strerr_die2x(2, FATAL, ": auth data too short");
 	}
 	authstr[count++] = 0;
-	if (auth_method > 2) {
+	if (auth_method > AUTH_PLAIN) {
 		if (!(ptr = b64_decode((unsigned char *) login, cram_md5_len, &out_len))) {
-			strerr_warn1("authindi: b64_decode failure", 0);
-			pipe_exec(argv, buf, offset);
-			return (1);
+			strerr_warn2(FATAL, "b64_decode failure", 0);
+			failure1(argv, auth_method, service, imapargs, pop3args, authstr, 0);
 		}
 		challenge = ptr;
 	} else
@@ -340,15 +513,12 @@ main(int argc, char **argv)
 	auth_data = authstr + count; /*- (plain text password or cram-md5 response) */
 	for (cram_md5_len = 0;authstr[count] != '\n' && count < offset;count++, cram_md5_len++);
 	authstr[count++] = 0;
-	if (auth_method > 2) {
+	if (auth_method > AUTH_PLAIN) {
 		if (!(ptr = b64_decode((unsigned char *) auth_data, cram_md5_len, &out_len))) {
-			if (challenge)
-				alloc_free (challenge);
-			strerr_warn1("authindi: b64_decode failure", 0);
-			pipe_exec(argv, buf, offset);
-			return (1);
+			strerr_warn2(FATAL, "b64_decode failure", 0);
+			failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 		}
-		for (login = ptr;*ptr && !isspace(*ptr);ptr++);
+		for (login = ptr; *ptr && !isspace(*ptr);ptr++);
 		*ptr = 0;
 		response = ptr + 1;
 	} else
@@ -358,27 +528,14 @@ main(int argc, char **argv)
 		for (;authstr[count] != '\n' && count < offset;count++);
 		authstr[count++] = 0;
 	}
-	if (!str_diffn(auth_type, "pass", 5))
-	{
-		strerr_warn2(prog_name, ": Password Change not supported", 0);
-		if (auth_method > 2) {
-			if (challenge)
-				alloc_free (challenge);
-			alloc_free (login);
-		}
-		pipe_exec(argv, buf, offset);
-		return (1);
+	if (!str_diffn(auth_type, "pass", 5)) {
+		strerr_warn2(FATAL, "Password Change not supported", 0);
+		failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 	}
 	parse_email(login, &user, &domain);
 	if (!get_assign(domain.s, 0, &uid, &gid)) {
-		strerr_warn4(prog_name, ": domain ", domain.s, " does not exist", 0);
-		if (auth_method > 2) {
-			if (challenge)
-				alloc_free (challenge);
-			alloc_free (login);
-		}
-		pipe_exec(argv, buf, offset);
-		return (1);
+		strerr_warn4(FATAL, "domain ", domain.s, " does not exist", 0);
+		failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 	}
 	if (!(real_domain = get_real_domain(domain.s)))
 		real_domain = domain.s;
@@ -389,14 +546,8 @@ main(int argc, char **argv)
 		die_nomem();
 #ifdef CLUSTERED_SITE
 	if ((count = is_distributed_domain(real_domain)) == -1) {
-		strerr_warn2(real_domain, ": is_distributed_domain failed", 0);
-		if (auth_method > 2) {
-			if (challenge)
-				alloc_free (challenge);
-			alloc_free (login);
-		}
-		pipe_exec(argv, buf, offset);
-		return (1);
+		strerr_warn3(FATAL, real_domain, ": is_distributed_domain failed", 0);
+		failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 	} else
 	if (count) {
 #ifdef QUERY_CACHE
@@ -409,49 +560,25 @@ main(int argc, char **argv)
 #endif
 		if (!mailstore) {
 			if (!userNotFound)
-				strerr_warn2("No mailstore for ", Email.s, 0);
-			if (auth_method > 2) {
-				if (challenge)
-					alloc_free (challenge);
-				alloc_free (login);
-			}
-			pipe_exec(argv, buf, offset);
-			return (1);
+				strerr_warn3(FATAL, "No mailstore for ", Email.s, 0);
+			failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 		}
 		i = str_rchr(mailstore, ':');
 		if (mailstore[i])
 			mailstore[i] = 0;
 		else {
-			strerr_warn4("authindi: invalid mailstore [", mailstore, "] for ", Email.s, 0);
-			if (auth_method > 2) {
-				if (challenge)
-					alloc_free (challenge);
-				alloc_free (login);
-			}
-			pipe_exec(argv, buf, offset);
-			return (1);
+			strerr_warn5(FATAL, "invalid mailstore [", mailstore, "] for ", Email.s, 0);
+			next_module(argv, buf, offset, auth_method, login, challenge);
 		}
 		for(; *mailstore && *mailstore != ':'; mailstore++);
 		if  (*mailstore != ':') {
-			strerr_warn4("authindi: invalid mailstore [", mailstore, "] for ", Email.s, 0);
-			if (auth_method > 2) {
-				if (challenge)
-					alloc_free (challenge);
-				alloc_free (login);
-			}
-			pipe_exec(argv, buf, offset);
-			return (1);
+			strerr_warn5(FATAL, "invalid mailstore [", mailstore, "] for ", Email.s, 0);
+			failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 		}
 		mailstore++;
 		if (!islocalif(mailstore)) {
-			strerr_warn4(Email.s, " not on local (mailstore ", mailstore, ")", 0);
-			if (auth_method > 2) {
-				if (challenge)
-					alloc_free (challenge);
-				alloc_free (login);
-			}
-			pipe_exec(argv, buf, offset);
-			return (1);
+			strerr_warn5(FATAL, Email.s, " not on local (mailstore ", mailstore, ")", 0);
+			failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 		}
 	}
 #endif /*- CLUSTERED_SITE */
@@ -460,46 +587,29 @@ main(int argc, char **argv)
 		pw = inquery(PWD_QUERY, Email.s, 0);
 	else {
 		if (iopen((char *) 0)) {
-			strerr_warn1("failed to connect to local db", 0);
-			if (auth_method > 2) {
-				if (challenge)
-					alloc_free (challenge);
-				alloc_free (login);
-			}
-			pipe_exec(argv, buf, offset);
+			strerr_warn2(FATAL, "failed to connect to local db", 0);
+			failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 		}
 		pw = sql_getpw(user.s, real_domain);
 	}
 #else
 	if (iopen((char *) 0)) {
-		strerr_warn1("failed to connect to local db", 0);
-		if (auth_method > 2) {
-			if (challenge)
-				alloc_free (challenge);
-			alloc_free (login);
-		}
-		pipe_exec(argv, buf, offset);
+		strerr_warn2(FATAL, "failed to connect to local db", 0);
+		next_module(argv, buf, offset, auth_method, login, challenge);
 	}
 	pw = sql_getpw(user.s, real_domain);
 #endif
 	if (!pw) {
 		if(!userNotFound)
 #ifdef QUERY_CACHE
-			strerr_warn6(prog_name, ": ", Email.s, ": ",
+			strerr_warn5(FATAL, Email.s, ": ",
 					env_get("QUERY_CACHE") ? "inquery: " : "iopen: ",
 					errno ? error_str(errno) : "AUTHFAILURE", 0);
 #else
-			strerr_warn5(prog_name, ": ", Email.s, ": iopen: ",
+			strerr_warn4(FATAL, Email.s, ": iopen: ",
 					errno ? error_str(errno) : "AUTHFAILURE", 0);
 #endif
-		if (auth_method > 2) {
-			if (challenge)
-				alloc_free (challenge);
-			alloc_free (login);
-		}
-		pipe_exec(argv, buf, offset);
-		close_connection();
-		return (1);
+		next_module(argv, buf, offset, auth_method, login, challenge);
 	}
 	/*
 	 * Look at what type of connection we are trying to auth.
@@ -508,108 +618,77 @@ main(int argc, char **argv)
 	 */
 	if (str_diff("webmail", service) == 0) {
 		if (pw->pw_gid & NO_WEBMAIL) {
-			strerr_warn2(prog_name, ": webmail disabled for this account", 0);
-			if (write(2, "AUTHFAILURE\n", 12) == -1)
-				;
-			close_connection();
-			if (auth_method > 2) {
-				if (challenge)
-					alloc_free (challenge);
-				alloc_free (login);
-			}
-			execv(!str_diff("pop3", service) ? *pop3args : *imapargs, argv);
-			strerr_warn4(prog_name, ": execv ", !str_diff("pop3", service) ? *pop3args : *imapargs, ": ", &strerr_sys);
-			return (1);
+			strerr_warn2(WARN, "webmail disabled for this account", 0);
+			failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 		}
 	} else
 	if (str_diff("pop3", service) == 0) {
 		if (pw->pw_gid & NO_POP) {
-			strerr_warn2(prog_name, ": pop3 disabled for this account", 0);
-			if (write(2, "AUTHFAILURE\n", 12) == -1)
-				;
-			close_connection();
-			if (auth_method > 2) {
-				if (challenge)
-					alloc_free (challenge);
-				alloc_free (login);
-			}
-			execv(!str_diff("pop3", service) ? *pop3args : *imapargs, argv);
-			strerr_warn4(prog_name, ": execv ", !str_diff("pop3", service) ? *pop3args : *imapargs, ": ", &strerr_sys);
-			return (1);
+			strerr_warn2(WARN, "pop3 disabled for this account", 0);
+			failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 		}
 	} else
 	if (str_diff("imap", service) == 0) {
 		if (pw->pw_gid & NO_IMAP) {
-			strerr_warn2(prog_name, ": imap disabled for this account", 0);
-			if (write(2, "AUTHFAILURE\n", 12) == -1)
-				;
-			close_connection();
-			if (auth_method > 2) {
-				if (challenge)
-					alloc_free (challenge);
-				alloc_free (login);
-			}
-			execv(!str_diff("pop3", service) ? *pop3args : *imapargs, argv);
-			strerr_warn4(prog_name, ": execv ", !str_diff("pop3", service) ? *pop3args : *imapargs, ": ", &strerr_sys);
-			return (1);
+			strerr_warn2(WARN, "imap disabled for this account", 0);
+			failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 		}
 	}
+	crypt_pass = (char *) NULL;
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
 		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, &cleartxt, &crypt_pass);
 		if (i != 6 && i != 8) {
-			if (write(2, "AUTHFAILURE\n", 12) == -1)
-				;
-			close_connection();
-			if (auth_method > 2) {
-				if (challenge)
-					alloc_free (challenge);
-				alloc_free (login);
-			}
-			execv(!str_diff("pop3", service) ? *pop3args : *imapargs, argv);
-			strerr_warn4(prog_name, ": execv ", !str_diff("pop3", service) ? *pop3args : *imapargs, ": ", &strerr_sys);
-			return (1);
+			strerr_warn2(FATAL, "unable to get secrets", 0);
+			next_module(argv, buf, offset, auth_method, authstr, challenge);
 		}
-	} else
-		crypt_pass = pw->pw_passwd;
-	strnum[fmt_uint(strnum, (unsigned int) auth_method)] = 0;
+		if (i == 8) {
+			switch (auth_method)
+			{
+			case AUTH_CRAM_MD5:
+			case AUTH_CRAM_SHA1:
+			case AUTH_CRAM_SHA224:
+			case AUTH_CRAM_SHA256:
+			case AUTH_CRAM_SHA384:
+			case AUTH_CRAM_SHA512:
+			case AUTH_CRAM_RIPEMD:
+			case AUTH_DIGEST_MD5:
+				pass = cleartxt;
+				break;
+			default:
+				pass = crypt_pass;
+				break;
+			}
+		} else
+			pass = crypt_pass;
+	} else {
+		i = 0;
+		pass = crypt_pass = pw->pw_passwd;
+	}
 	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	if ((ptr = env_get("DEBUG_LOGIN")) && *ptr > '0') {
-		if (response)
-			strerr_warn16(prog_name, ": pid [", module_pid, "] service[", service, "] authmeth [",
-				strnum, "] login [", login, "] challenge [",
-				challenge, "] response [", response, "] pw_passwd [", crypt_pass, "]", 0);
-		else 
-			strerr_warn14(prog_name, ": pid [", module_pid, "] service[", service, "] authmeth [", strnum, "] login [",
-				login, "] auth [", auth_data, "] pw_passwd [", crypt_pass, "]", 0);
+		substdio_puts(subfderr, "debug_login: pid [");
+		strerr_warn16( module_pid, "] service[", service, "]: login [",
+				login, "] challenge [", challenge, "] response [", response,
+				"] password [", pass, "] crypted [", crypt_pass, "] authmethod [",
+				auth_type, "]", 0);
 	} else
 	if (debug)
-		strerr_warn10(prog_name, ": pid [", module_pid, "] service[", service,
-				"] authmeth [", strnum, "] login [", login, "]", 0);
-	if (pw_comp((unsigned char *) login, (unsigned char *) crypt_pass,
-		(unsigned char *) (auth_method > 2 ? challenge : 0),
-		(unsigned char *) (auth_method > 2 ? response : auth_data), auth_method))
-	{
+		strerr_warn9("debug: pid [", module_pid, "] service[", service,
+				"]: login [", login, "] authmethod [", ptr, "]", 0);
+	if (pw_comp((unsigned char *) login, (unsigned char *) pass,
+		(unsigned char *) (auth_method > AUTH_PLAIN ? challenge : 0),
+		(unsigned char *) (auth_method > AUTH_PLAIN ? response : auth_data), auth_method)) {
 		if (argc == 3) {
-			strerr_warn2(prog_name, ": no more modules will be tried", 0);
-			if (write(2, "AUTHFAILURE\n", 12) == -1)
-				;
-			close_connection();
-			execv(!str_diff("pop3", service) ? *pop3args : *imapargs, argv);
-			strerr_warn4(prog_name, ": execv ", !str_diff("pop3", service) ? *pop3args : *imapargs, ": ", &strerr_sys);
-			return (1);
+			strerr_warn2(FATAL, "no more modules will be tried", 0);
+			failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 		}
-		close_connection();
-		if (auth_method > 2) {
-			if (challenge)
-				alloc_free (challenge);
-			alloc_free (login);
-		}
-		pipe_exec(argv, buf, offset);
-		return (1);
+		next_module(argv, buf, offset, auth_method, authstr, challenge);
 	}
-	if (auth_method > 2) {
-		if (challenge)
-			alloc_free (challenge);
+	if (auth_method > AUTH_PLAIN) {
+		if (challenge) {
+			alloc_free(challenge);
+			challenge = 0;
+		}
 	}
 #ifdef ENABLE_DOMAIN_LIMITS
 	if (env_get("DOMAIN_LIMITS")) {
@@ -617,172 +696,30 @@ main(int argc, char **argv)
 #ifdef QUERY_CACHE
 		if (!env_get("QUERY_CACHE")) {
 			if (vget_limits(real_domain, &limits)) {
-				strerr_warn3(prog_name, ": unable to get domain limits for for ", real_domain, 0);
-				close_connection();
-				if (auth_method > 2)
-					alloc_free (login);
-				pipe_exec(argv, buf, offset);
-				return (1);
+				strerr_warn3(FATAL, "unable to get domain limits for for ", real_domain, 0);
+				failure1(argv, auth_method, service, imapargs, pop3args, authstr, 0);
 			}
 			lmt = &limits;
 		} else
 			lmt = inquery(LIMIT_QUERY, login, 0);
 #else
 		if (vget_limits(real_domain, &limits)) {
-			strerr_warn3(prog_name, ": unable to get domain limits for for ", real_domain, 0);
-			close_connection();
-			if (auth_method > 2)
-				alloc_free (login);
-			pipe_exec(argv, buf, offset);
-			return (1);
+			strerr_warn3(FATAL, "unable to get domain limits for for ", real_domain, 0);
+			failure1(argv, auth_method, service, imapargs, pop3args, authstr, 0);
 		}
 		lmt = &limits;
 #endif
 		curtime = time(0);
 		if (lmt->domain_expiry > -1 && curtime > lmt->domain_expiry) {
-			strerr_warn2(prog_name, ": Sorry, your domain has expired", 0);
-			if (write(2, "AUTHFAILURE\n", 12) == -1)
-				;
-			close_connection();
-			if (auth_method > 2)
-				alloc_free (login);
-			execv(!str_diff("pop3", service) ? *pop3args : *imapargs, argv);
-			strerr_warn4(prog_name, ": execv ", !str_diff("pop3", service) ? *pop3args : *imapargs, ": ", &strerr_sys);
-			return (1);
+			strerr_warn2(FATAL, "Sorry, your domain has expired", 0);
+			failure1(argv, auth_method, service, imapargs, pop3args, authstr, 0);
 		} else
 		if (lmt->passwd_expiry > -1 && curtime > lmt->passwd_expiry) {
-			strerr_warn2(prog_name, ": Sorry, your password has expired", 0);
-			if (write(2, "AUTHFAILURE\n", 12) == -1)
-				;
-			close_connection();
-			if (auth_method > 2)
-				alloc_free (login);
-			execv(!str_diff("pop3", service) ? *pop3args : *imapargs, argv);
-			strerr_warn4(prog_name, ": execv ", !str_diff("pop3", service) ? *pop3args : *imapargs, ": ", &strerr_sys);
+			strerr_warn2(FATAL, "Sorry, your password has expired", 0);
+			failure1(argv, auth_method, service, imapargs, pop3args, authstr, 0);
 		} 
 	}
 #endif
+	alloc_free(authstr);
 	exec_local(argv + argc - 2, login, real_domain, pw, service);
-	if (auth_method > 2)
-		alloc_free (login);
-	return (0);
-}
-
-static int
-exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *service)
-{
-	static stralloc Maildir = {0}, TheUser = {0}, line = {0};
-	char           *ptr;
-	int             i, status, fd, match;
-	char            inbuf[4096];
-	struct substdio ssin;
-#ifdef USE_MAILDIRQUOTA
-	mdir_t          size_limit, count_limit;
-#endif
-
-	for (i = 0, ptr = userid; *ptr && *ptr != '@'; i++, ptr++);
-	if (!stralloc_copyb(&TheUser, userid, i) ||
-			!stralloc_0(&TheUser))
-		die_nomem();
-	TheUser.len--;
-	if (Check_Login(service, TheDomain, pw->pw_gecos)) {
-		strerr_warn2("Login not permitted for ", service, 0);
-		close_connection();
-		return (1);
-	}
-	if (!env_put2("AUTHENTICATED", userid))
-		strerr_die3sys(111, "authindi: env_put2: AUTHENTICATED=", userid, ": ");
-	if (!stralloc_copy(&tmpbuf, &TheUser) ||
-			!stralloc_append(&tmpbuf, "@") ||
-			!stralloc_cats(&tmpbuf, TheDomain) ||
-			!stralloc_0(&tmpbuf))
-		die_nomem();
-	if (!env_put2("AUTHADDR", tmpbuf.s))
-		strerr_die3sys(111, "authindi: env_put2: AUTHADDR=", tmpbuf.s, ": ");
-	if (!env_put2("AUTHFULLNAME", pw->pw_gecos))
-		strerr_die3sys(111, "authindi: env_put2: AUTHFULLNAME=", pw->pw_gecos, ": ");
-#ifdef USE_MAILDIRQUOTA	
-	if ((size_limit = parse_quota(pw->pw_shell, &count_limit)) == -1) {
-		strerr_warn3("parse_quota: ", pw->pw_shell, ": ", &strerr_sys);
-		close_connection();
-		return (1);
-	}
-	if (!stralloc_copyb(&tmpbuf, strnum, fmt_ulong(strnum, (unsigned long) size_limit)) ||
-			!stralloc_catb(&tmpbuf, "S,", 2) ||
-			!stralloc_catb(&tmpbuf, strnum, fmt_ulong(strnum, (unsigned long) count_limit)) ||
-			!stralloc_append(&tmpbuf, "C") ||
-			!stralloc_0(&tmpbuf))
-		die_nomem();
-#else
-	if (!stralloc_copys(&tmpbuf, pw->pw_shell) ||
-			!stralloc_append(&tmpbuf, "S") ||
-			!stralloc_0(&tmpbuf))
-		die_nomem();
-#endif
-	if (!env_put2("MAILDIRQUOTA", tmpbuf.s))
-		strerr_die3sys(111, "authindi: env_put2: MAILDIRQUOTA=", tmpbuf.s, ": ");
-	if (!env_put2("HOME", pw->pw_dir))
-		strerr_die3sys(111, "authindi: env_put2: HOME=", pw->pw_dir, ": ");
-	if (!env_put2("AUTHSERVICE", service))
-		strerr_die3sys(111, "authindi: env_put2: AUTHSERVICE=", service, ": ");
-	switch ((status = Login_Tasks(pw, userid, service)))
-	{
-		case 2:
-			if (!stralloc_copys(&Maildir, (ptr = env_get("TMP_MAILDIR")) ? ptr : pw->pw_dir) ||
-					!stralloc_0(&Maildir))
-				die_nomem();
-			Maildir.len--;
-			break;
-		case 3:
-			if ((ptr = env_get("EXIT_ONERROR"))) {
-				if ((ptr = env_get("MSG_ONERROR")) && !access(ptr, F_OK)) {
-					if ((fd = open_read(ptr)) == -1)
-						strerr_warn3("authindi: open: ", ptr, ": ", &strerr_sys);
-					else {
-						substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-						for (;;) {
-							if (getln(&ssin, &line, &match, '\n') == -1) {
-								strerr_warn3("authindi: read: ", ptr, ": ", &strerr_sys);
-								close(fd);
-								break;
-							}
-							if (!line.len)
-								break;
-							if (substdio_put(subfdoutsmall, line.s, line.len)) {
-								close(fd);
-								break;
-							}
-						}
-						substdio_flush(subfdoutsmall);
-						close(fd);
-					}
-				}
-				strerr_warn1("POSTAUTH: Error on Exit", 0);
-				return(1);
-			}
-			if (!stralloc_copys(&Maildir, (ptr = env_get("TMP_MAILDIR")) ? ptr : pw->pw_dir) ||
-					!stralloc_0(&Maildir))
-				die_nomem();
-			Maildir.len--;
-			break;
-		default:
-			if (!stralloc_copys(&Maildir, pw->pw_dir) || !stralloc_0(&Maildir))
-				die_nomem();
-			Maildir.len--;
-			break;
-	}
-	close_connection();
-	if (chdir(Maildir.s)) {
-		strerr_warn3("authindi: chdir: ", Maildir.s, ": ", &strerr_sys);
-		return (1);
-	}
-	if (!stralloc_copy(&tmpbuf, &Maildir) ||
-			!stralloc_catb(&tmpbuf, "/Maildir", 8) ||
-			!stralloc_0(&tmpbuf))
-		die_nomem();
-	if (!env_put2("MAILDIR", tmpbuf.s))
-		strerr_die3sys(111, "authindi: env_put2: AUTHSERVICE=", service, ": ");
-	execv(argv[0], argv);
-	strerr_warn3("authindi: exec: ", argv[1], ": ", &strerr_sys);
-	return (1);
 }

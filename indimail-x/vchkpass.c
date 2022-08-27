@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.15  2022-08-27 12:04:41+05:30  Cprogrammer
+ * fixed logic for fetching clear txt password for cram methods
+ *
  * Revision 1.14  2022-08-25 18:03:04+05:30  Cprogrammer
  * fetch clear text passwords for CRAM authentication
  *
@@ -85,7 +88,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.14 2022-08-25 18:03:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.15 2022-08-27 12:04:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -119,7 +122,7 @@ int
 main(int argc, char **argv)
 {
 	char           *authstr, *login, *ologin, *response, *challenge, *cleartxt, 
-				   *crypt_pass, *ptr, *cptr;
+				   *crypt_pass, *ptr, *cptr, *pass;
 	char            strnum[FMT_ULONG], module_pid[FMT_ULONG];
 	static stralloc user = {0}, fquser = {0}, domain = {0}, buf = {0};
 	int             i, count, offset, norelay = 0, status, auth_method, native_checkpassword;
@@ -294,6 +297,7 @@ main(int argc, char **argv)
 	} else
 	if (pw->pw_gid & NO_RELAY)
 		norelay = 1;
+	crypt_pass = (char *) NULL;
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
 		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, &cleartxt, &crypt_pass);
 		if (i != 6 && i != 8) {
@@ -301,17 +305,38 @@ main(int argc, char **argv)
 			flush("vchkpass");
 			_exit (1);
 		}
-	} else
-		crypt_pass = pw->pw_passwd;
+		if (i == 8) {
+			switch (auth_method)
+			{
+			case AUTH_CRAM_MD5:
+			case AUTH_CRAM_SHA1:
+			case AUTH_CRAM_SHA224:
+			case AUTH_CRAM_SHA256:
+			case AUTH_CRAM_SHA384:
+			case AUTH_CRAM_SHA512:
+			case AUTH_CRAM_RIPEMD:
+			case AUTH_DIGEST_MD5:
+				pass = cleartxt;
+				break;
+			default:
+				pass = crypt_pass;
+				break;
+			}
+		} else
+			pass = crypt_pass;
+	} else {
+		i = 0;
+		pass = crypt_pass = pw->pw_passwd;
+	}
 	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	ptr = get_authmethod(auth_method);
-	if (env_get("DEBUG_LOGIN"))
-		strerr_warn14("vchkpass: ", "pid [", module_pid, "]: login [", login, "] challenge [", challenge,
-			"] response [", response, "] pw_passwd [", crypt_pass, "] authmethod [", ptr, "]", 0);
-	else
+	if ((ptr = env_get("DEBUG_LOGIN")) && *ptr > '0') {
+		strerr_warn16("vchkpass: ", "pid [", module_pid, "]: login [", login, "] challenge [", challenge,
+			"] response [", response, "] password [", pass, "] crypted [", crypt_pass, "] authmethod [", ptr, "]", 0);
+	} else
 	if (env_get("DEBUG"))
 		strerr_warn8("vchkpass: ", "pid [", module_pid, "]: login [", login, "] authmethod [", ptr, "]", 0);
-	if (pw_comp((unsigned char *) ologin, (unsigned char *) crypt_pass,
+	if (pw_comp((unsigned char *) ologin, (unsigned char *) pass,
 		(unsigned char *) (*response ? challenge : 0),
 		(unsigned char *) (*response ? response : challenge), auth_method)) {
 		native_checkpassword ? _exit (1) : pipe_exec(argv, authstr, offset);

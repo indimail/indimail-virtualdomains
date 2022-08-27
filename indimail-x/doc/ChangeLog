@@ -82,6 +82,9 @@ Release @version@-@release@ Start 14/02/2021
 53. strToPw.c: use colon_count to fix logic for cram/non-cram passwords
 - 26/08/2022
 54. incrypt.c: validate user input and use in_crypt from libqmail
+- 27/08/2022
+55. authindi.c, vchkpass.c: fixed logic for fetching clear txt password for
+    cram methods
 
 *
 Release 3.4.0 Start 14/02/2021
