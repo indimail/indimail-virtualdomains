@@ -2647,7 +2647,7 @@ $ incrypt supersecret 'edYmuYDig/cqixyh'
 "$5$edYmuYDig/cqixyh$0HWa5eEOn2MH2TuLfy51YsRPkcuEFWbRPqGs6m3/uS0"
 ```
 
-The other thing to notice in the password field is that it starts with $5$. This is a SHA256 hashed password. If it is $4$, it would have been a SHA1 hashed password, $1$ it would have been a MD5 hashed password. See crypt(5) for more details. You can use the -h argument to vpasswd to set a specific hash method (MD5, SHA1 or SHA256). With so much computing power available today, one shouldn't use any hash below SHA256.
+The other thing to notice in the password field is that it starts with `$5$`. This is a SHA256 hashed password. If it is `$4$`, it would have been a SHA1 hashed password, `$1$` it would have been a MD5 hashed password. See crypt(5) for more details. You can use the -h argument to vpasswd to set a specific hash method (MD5, SHA1 or SHA256). With so much computing power available today, one shouldn't use any hash below SHA256.
 
 In my opinion, using this scheme with TLS enabled connection is the most secure way to setup authentication. Your database is safe and by using TLS, you are safeguarded from [MITM](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) and credentials getting leaked by [sniffing attacks](https://en.wikipedia.org/wiki/Sniffing_attack).
 
@@ -2685,7 +2685,7 @@ Activ Date    : (127.0.0.1) Tue Jul  2 09:33:55 2019
 Delivery Time : No Mails Delivered yet / Per Day Limit not configured
 ```
 
-There are many authentication methods in the CRAM family. IndiMail supports [CRAM-MD5](https://en.wikipedia.org/wiki/CRAM-MD5), CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, [CRAM-RIPEMD](https://en.wikipedia.org/wiki/RIPEMD), [DIGEST-MD5](https://www.rfc-editor.org/rfc/rfc2831). CRAM-Md5 uses HMAC-MD5 hash based message authentication code. CRAM-SHA1 uses HMAC-SHA1. CRAM-SHA224 uses HMAC-SHA224. See [this](https://en.wikipedia.org/wiki/HMAC#:~:text=In%20cryptography%2C%20an%20HMAC%20(sometimes,and%20a%20secret%20cryptographic%20key.) for more details.
+There are many authentication methods in the CRAM family. IndiMail supports [CRAM-MD5](https://en.wikipedia.org/wiki/CRAM-MD5), CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, [CRAM-RIPEMD](https://en.wikipedia.org/wiki/RIPEMD), [DIGEST-MD5](https://www.rfc-editor.org/rfc/rfc2831). CRAM-Md5 uses HMAC-MD5 hash based message authentication code. CRAM-SHA1 uses HMAC-SHA1. CRAM-SHA224 uses HMAC-SHA224. See [this](https://en.wikipedia.org/wiki/HMAC) for more details.
 
 Please think twice about enabling clear text passwords using the -e option to <b>vpasswd</b> program.
 
