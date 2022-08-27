@@ -2651,7 +2651,7 @@ The other thing to notice in the password field is that it starts with $5$. This
 
 In my opinion, using this scheme with TLS enabled connection is the most secure way to setup authentication. Your database is safe and by using TLS, you are safeguarded from [MITM](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) and credentials getting leaked by [sniffing attacks](https://en.wikipedia.org/wiki/Sniffing_attack).
 
-### Challenge Response Authentication Mechanisms
+## Challenge Response Authentication Mechanisms
 
 qmail-smtpd and qmail-remote also support various CRAM mechanisms. These methods have one side (the server) issue a challenge and the other side (client) respond with an answer. What is exchanged between the client and the server are the challenge and response. Passwords are not exchanged on the network, thus safeguarding you against sniffing and eavesdropping attacks. Though this method makes authentication safe even in a un-encrypted channel, the downside is that the both server and client need to know the clear text passwords. So for the CRAM authentication to work, the server requires the clear text passwords to be stored in the database. The huge security risk of using CRAM is safeguarding your database containing user's passwords. If the database is stolen, the thief walks away with all the passwords. If you are still ok after reading this, the <b>vpasswd</b> program can be used to store passwords in clear text by passing the -e arguments.
 
@@ -2689,7 +2689,7 @@ There are many authentication methods in the CRAM family. IndiMail supports [CRA
 
 Please think twice about enabling clear text passwords using the -e option to <b>vpasswd</b> program.
 
-### Salted Challenge Response Authentication Mechanism
+## Salted Challenge Response Authentication Mechanism
 
 From [RFC-5802](https://www.rfc-editor.org/rfc/rfc5802)
 
