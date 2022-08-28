@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 1.9  2022-08-28 12:03:43+05:30  Cprogrammer
+ * fixed display string for DES/un-encrypted password
+ *
  * Revision 1.8  2022-08-04 14:42:22+05:30  Cprogrammer
  * display scram password if existing
  *
@@ -88,7 +91,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 1.8 2022-08-04 14:42:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 1.9 2022-08-28 12:03:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -298,8 +301,10 @@ userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid
 				passwd_hash = "$?$";
 				break;
 		}
-	} else
-		passwd_hash = "DES";
+	} else {
+		i = str_len(mypw->pw_passwd);
+		passwd_hash = i == 13 ? "DES/cleartxt" : "un-encrypted";
+	}
 	if (DisplayName || DisplayAll) {
 		out("userinfo", "name          : ");
 		out("userinfo", mypw->pw_name);
