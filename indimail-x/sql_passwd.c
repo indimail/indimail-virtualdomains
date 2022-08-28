@@ -1,5 +1,8 @@
 /*
  * $Log: sql_passwd.c,v $
+ * Revision 1.3  2022-08-28 12:01:49+05:30  Cprogrammer
+ * set scram field to NULL when not given
+ *
  * Revision 1.2  2022-08-05 21:15:25+05:30  Cprogrammer
  * added scram argument to update scram password
  *
@@ -27,7 +30,7 @@
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_passwd.c,v 1.2 2022-08-05 21:15:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_passwd.c,v 1.3 2022-08-28 12:01:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -78,10 +81,14 @@ sql_passwd(char *user, char *domain, char *pass, char *scram)
 		die_nomem();
 	if (scram) {
 		if (!stralloc_catb(&SqlBuf, "\", scram = \"", 12) ||
-			!stralloc_cats(&SqlBuf, scram))
+			!stralloc_cats(&SqlBuf, scram) ||
+			!stralloc_append(&SqlBuf, "\""))
 		die_nomem();
-	}
-	if (!stralloc_catb(&SqlBuf, "\" where pw_name = \"", 19) ||
+	} else
+	if (!stralloc_catb(&SqlBuf, "\", scram = NULL", 15))
+		die_nomem();
+
+	if (!stralloc_catb(&SqlBuf, " where pw_name = \"", 18) ||
 			!stralloc_cats(&SqlBuf, user))
 		die_nomem();
 	if (site_size == SMALL_SITE) {
