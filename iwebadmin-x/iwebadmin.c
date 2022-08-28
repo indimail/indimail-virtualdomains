@@ -1,5 +1,8 @@
 /*
  * $Log: iwebadmin.c,v $
+ * Revision 1.27  2022-08-28 14:51:11+05:30  Cprogrammer
+ * additional docram argument added to gsasl_mkpasswd
+ *
  * Revision 1.26  2022-08-07 21:45:41+05:30  Cprogrammer
  * set SCRAM passwords using gsasl_mkpasswd()
  *
@@ -35,7 +38,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: iwebadmin.c,v 1.26 2022-08-07 21:45:41+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.27 2022-08-28 14:51:11+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -430,10 +433,10 @@ main(argc, argv)
 				switch (scram)
 				{
 				case 1: /*- SCRAM-SHA-1 */
-					gsasl_mkpasswd(0, "SCRAM-SHA-1", iter_count, b64salt.len ? b64salt.s : 0, Password1.s, &result);
+					gsasl_mkpasswd(0, "SCRAM-SHA-1", iter_count, b64salt.len ? b64salt.s : 0, 0, Password1.s, &result);
 					break;
 				case 2: /*- SCRAM-SHA-256 */
-					gsasl_mkpasswd(0, "SCRAM-SHA-256", iter_count, b64salt.len ? b64salt.s : 0, Password1.s, &result);
+					gsasl_mkpasswd(0, "SCRAM-SHA-256", iter_count, b64salt.len ? b64salt.s : 0, 0, Password1.s, &result);
 					break;
 				}
 #endif

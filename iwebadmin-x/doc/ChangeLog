@@ -32,6 +32,9 @@ Release @version@-@release@ Start 13/03/2021
 21. configure.ac: added check for gsasl_mkpasswd in libindimail
 22. iwebadmin.c, user.c: use gsasl_mkpasswd to update SCRAM passwords
 23. iwebadminx.h: added variables b64salt, result, scram, iter_count
+- 28/08/2022
+24. iwebadmin.c: additional docram argument added to gsasl_mkpasswd
+25. user.c: additional docram argument added to gsasl_mkpasswd
 
 * Mon Jul 15 2019 13:00:14 +0530 mbhangui@gmail.com 2.0-1.1%{?dist}
 Release 2.0 Start 27/04/2019
