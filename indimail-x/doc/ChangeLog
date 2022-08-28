@@ -86,10 +86,12 @@ Release @version@-@release@ Start 14/02/2021
 55. authindi.c, vchkpass.c: fixed logic for fetching clear txt password for
     cram methods
 56. gsasl_mkpasswd.c: fixed null terminatin when docram was 0
+- 28/08/2022
 57. incrypt.c: added option to specify salt and hash method
 58. mgmtpassfuncs.c: allow configureable salt size using env variable SALTSIZE
 59. sql_passwd.c: set scram field to NULL when not given
 60. userinfo.c: fixed display string for DES/un-encrypted password
+61. vmoduser.c: fix compilation error for non gsasl build
 
 *
 Release 3.4.0 Start 14/02/2021

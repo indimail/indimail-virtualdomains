@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.10  2022-08-28 15:11:23+05:30  Cprogrammer
+ * fix compilation error for non gsasl build
+ *
  * Revision 1.9  2022-08-25 18:07:49+05:30  Cprogrammer
  * Make password compatible with CRAM and SCRAM
  * 1. store hex-encoded salted password for setting GSASL_SCRAM_SALTED_PASSWORD property in libgsasl
@@ -84,7 +87,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.9 2022-08-25 18:07:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.10 2022-08-28 15:11:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -231,7 +234,8 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 			encrypt_flag = 1;
 			break;
 		case 'C':
-			*docram = 1;
+			if (docram)
+				*docram = 1;
 			break;
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
@@ -557,8 +561,17 @@ main(argc, argv)
 			err = deluser(User.s, real_domain, 2);
 	}
 #endif
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	ptr = result.s;
+#else
+	ptr = (char *) NULL;
+#endif
+#else
+	ptr = (char *) NULL;
+#endif
 	if ((Gecos.len || Passwd.len || ClearFlags || GidFlag || QuotaFlag) &&
-			(err = sql_setpw(pw, real_domain, scram ? result.s : 0))) {
+			(err = sql_setpw(pw, real_domain, ptr))) {
 		strerr_warn1("vmoduser: sql_setpw failed", 0);
 		return (1);
 	}
