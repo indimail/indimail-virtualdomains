@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 1.13  2022-08-28 15:28:18+05:30  Cprogrammer
+ * fix compilation error for non gsasl build
+ *
  * Revision 1.12  2022-08-25 18:06:36+05:30  Cprogrammer
  * Make password compatible with CRAM and SCRAM
  * 1. store hex-encoded salted password for setting GSASL_SCRAM_SALTED_PASSWORD property in libgsasl
@@ -74,7 +77,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.12 2022-08-25 18:06:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.13 2022-08-28 15:28:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -284,9 +287,14 @@ main(argc, argv)
 		break;
 	/*- more cases will get below when devils come up with a new RFC */
 	}
+	ptr = scram ? result.s : 0;
+#else
+	ptr = 0;
 #endif
+#else
+	ptr = 0;
 #endif
-	if ((i = ipasswd(user.s, real_domain, clear_text, encrypt_flag, scram ? result.s : 0)) != 1) {
+	if ((i = ipasswd(user.s, real_domain, clear_text, encrypt_flag, ptr)) != 1) {
 		if (!i)
 			strerr_warn5("vpasswd: ", user.s, "@", real_domain, ": No such user", 0);
 		iclose();

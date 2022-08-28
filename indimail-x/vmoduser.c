@@ -563,7 +563,7 @@ main(argc, argv)
 #endif
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	ptr = result.s;
+	ptr = scram ? result.s : 0;
 #else
 	ptr = (char *) NULL;
 #endif
