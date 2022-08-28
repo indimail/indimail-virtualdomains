@@ -1,5 +1,8 @@
 /*
  * $Log: gsasl_mkpasswd.c,v $
+ * Revision 1.6  2022-08-28 11:43:19+05:30  Cprogrammer
+ * fixed null terminatin when docram was 0
+ *
  * Revision 1.5  2022-08-25 17:56:51+05:30  Cprogrammer
  * store hex encoded password for GSASL_SCRAM_SALTED_PASSWORD property in libgsasl
  * store clear text password for CRAM authentication methods if docram is set
@@ -27,16 +30,18 @@
 #ifdef HAVE_SODIUM_RANDOM_H
 #include <sodium_random.h>
 #endif
+#ifdef HAVE_QMAIL
 #include <base64.h>
 #include <stralloc.h>
 #include <alloc.h>
 #include <fmt.h>
 #include <byte.h>
+#endif
 #include "common.h"
 #include "gsasl_mkpasswd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: gsasl_mkpasswd.c,v 1.5 2022-08-25 17:56:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: gsasl_mkpasswd.c,v 1.6 2022-08-28 11:43:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_GSASL
@@ -125,7 +130,7 @@ gsasl_mkpasswd(int verbose, char *mechanism, int iteration_count, char *b64salt_
 	strnum[i = fmt_int(strnum, iteration_count)] = 0;
 	/*-
 	 * generate password of the form
-	 * {SCRAM-SHA-256}iter_count,salt,stored_key,server_key[:hexsaltedpassword,cleartxt]
+	 * {SCRAM-SHA-256}iter_count,salt,stored_key,server_key[:hexsaltedpassword:cleartxt]
 	 */
 	if (!stralloc_copyb(result, "{", 1) ||
 			!stralloc_cats(result, mechanism) ||
@@ -141,14 +146,16 @@ gsasl_mkpasswd(int verbose, char *mechanism, int iteration_count, char *b64salt_
 	if (docram && (!stralloc_append(result, ":") ||
 				!stralloc_cats(result, hexsaltedpassword) ||
 				!stralloc_append(result, ":") ||
-				!stralloc_cats(result, cleartxt) ||
-				!stralloc_0(result)))
+				!stralloc_cats(result, cleartxt)))
 		return MEMORY_ERR;
+	if (!stralloc_0(result))
+		return MEMORY_ERR;
+	result->len--;
 	if (verbose) {
 		out("gsasl", result->s);
-		out("gsasl", ":");
-		out("gsasl", hexsaltedpassword);
-		if (docram) {
+		if (!docram) {
+			out("gsasl", ":");
+			out("gsasl", hexsaltedpassword);
 			out("gsasl", ":");
 			out("gsasl", cleartxt);
 		}
