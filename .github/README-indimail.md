@@ -2643,7 +2643,7 @@ Delivery Time : No Mails Delivered yet / Per Day Limit not configured
 If you notice the passwd field above, you will see the string `$5$edYmuYDig/cqixyh$0HWa5eEOn2MH2TuLfy51YsRPkcuEFWbRPqGs6m3/uS0`. This is actually an encrypted password with the salt as `edYmuYDig/cqixyh` and the encrypted value as `0HWa5eEOn2MH2TuLfy51YsRPkcuEFWbRPqGs6m3/uS0`. You can use the system crypt(3) function to encrypt the passphrase `supersecret` using `edYmuYDig/cqixyh` as the salt, you will always get the result `$5$edYmuYDig/cqixyh$0HWa5eEOn2MH2TuLfy51YsRPkcuEFWbRPqGs6m3/uS0`. As an example, you can use the `incrypt` program to verify this
 
 ```
-$ incrypt supersecret 'edYmuYDig/cqixyh'
+$ incrypt -S 'edYmuYDig/cqixyh' supersecret
 "$5$edYmuYDig/cqixyh$0HWa5eEOn2MH2TuLfy51YsRPkcuEFWbRPqGs6m3/uS0"
 ```
 
