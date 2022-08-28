@@ -2647,7 +2647,7 @@ $ incrypt -S 'edYmuYDig/cqixyh' supersecret
 "$5$edYmuYDig/cqixyh$0HWa5eEOn2MH2TuLfy51YsRPkcuEFWbRPqGs6m3/uS0"
 ```
 
-The other thing to notice in the password field is that it starts with `$5$`. This is a SHA256 hashed password. If it is `$4$`, it would have been a SHA1 hashed password, `$1$` it would have been a MD5 hashed password. See crypt(5) for more details. You can use the -h argument to vpasswd to set a specific hash method (MD5, SHA1 or SHA256). With so much computing power available today, one shouldn't use any hash below SHA256.
+The other thing to notice in the password field is that it starts with `$5$`. This is a SHA256 hashed password. If it is `$6$`, it would have been a SHA512 hashed password, `$1$` it would have been a MD5 hashed password. See crypt(5) for more details. You can use the -h argument to vpasswd to set a specific hash method (MD5, SHA256 or SHA512). With so much computing power available today, one shouldn't use any hash below SHA256.
 
 In my opinion, using this scheme with TLS enabled connection is the most secure way to setup authentication. Your database is safe and by using TLS, you are safeguarded from [MITM](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) and credentials getting leaked by [sniffing attacks](https://en.wikipedia.org/wiki/Sniffing_attack).
 
