@@ -1,5 +1,8 @@
 /*
  * $Log: mgmtpassfuncs.c,v $
+ * Revision 1.5  2022-08-28 12:00:46+05:30  Cprogrammer
+ * allow configureable salt size using env variable SALTSIZE
+ *
  * Revision 1.4  2022-08-05 21:11:53+05:30  Cprogrammer
  * added encrypt_flag argument to mgmtsetpass()
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.4 2022-08-05 21:11:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.5 2022-08-28 12:00:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -38,6 +41,7 @@ static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.4 2022-08-05 21:11:53+05:30
 #include <makesalt.h>
 #include <in_crypt.h>
 #include <pw_comp.h>
+#include <getEnvConfig.h>
 #endif
 #include "mgmtpassfuncs.h"
 #include "passwd_policy.h"
@@ -325,9 +329,9 @@ mgmtpassinfo(char *username, int print_flag)
 int
 setpassword(char *user)
 {
-	char            salt[SALTSIZE + 1];
+	static stralloc salt = {0};
 	char           *newpass1, *newpass2, *pwdptr, *passwd, *crypt_pass;
-	int             i1, i2, plen;
+	int             i1, i2, plen, saltsize;
 	time_t          lastupdate;
 
 	pwdptr = mgmtgetpass(user, 0);
@@ -354,7 +358,10 @@ setpassword(char *user)
 	}
 	newpass1 = newpass2 = (char *) 0;
 	for (i1 = 0; i1 < SETPAS_MAX_ATTEMPTS; i1++) {
-		makesalt(salt, SALTSIZE);
+		getEnvConfigInt(&saltsize, "SALTSIZE", SALTSIZE);
+		if (!stralloc_ready(&salt, saltsize + 1))
+			die_nomem();
+		makesalt(salt.s, saltsize);
 		for (i2 = 1;;i2++) {
 			if (i2 > SETPAS_MAX_ATTEMPTS)
 			{
@@ -374,7 +381,7 @@ setpassword(char *user)
 			}
 			break;
 		}
-		if (!(crypt_pass = (char *) in_crypt(passwd, salt))) {
+		if (!(crypt_pass = (char *) in_crypt(passwd, salt.s))) {
 			strerr_warn1("Error with in_crypt() module: ", &strerr_sys);
 			continue;
 		}
@@ -384,7 +391,7 @@ setpassword(char *user)
 		str_copy(newpass1, crypt_pass);
 
 		passwd = (char *) getpass("Re-enter new password: ");
-		if (!(crypt_pass = (char *) in_crypt(passwd, salt))) {
+		if (!(crypt_pass = (char *) in_crypt(passwd, salt.s))) {
 			strerr_warn1("Error with in_crypt() module: ", &strerr_sys);
 			continue;
 		}
