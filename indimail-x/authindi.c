@@ -227,7 +227,7 @@ base64_cleanup()
 }
 
 /*- This executes imapd, pop3. */
-static void noreturn
+no_return static void
 failure1(char **argv, int auth_method, char *service,
 		char *imapargs[], char *pop3args[], char *authstr, char *challenge)
 {
@@ -246,7 +246,7 @@ failure1(char **argv, int auth_method, char *service,
 }
 
 /*- This executes next auth module. */
-static void noreturn
+no_return static void
 next_module(char **argv, char *buf, int offset, int auth_method, char *authstr, char *challenge)
 {
 	close_connection();
