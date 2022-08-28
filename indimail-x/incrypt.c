@@ -83,7 +83,7 @@ main(int argc, char **argv)
 		}
 	}
 	if (!*salt) {
-		if (makesalt(salt, SALTSIZE))
+		if (makesalt(salt, SALTSIZE) == -1)
 			strerr_die1sys(111, "failed to generate salt: ");
 		if (verbose) {
 			out("incrypt", "generated salt [");

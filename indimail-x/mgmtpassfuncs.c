@@ -1,6 +1,6 @@
 /*
  * $Log: mgmtpassfuncs.c,v $
- * Revision 1.5  2022-08-28 12:00:46+05:30  Cprogrammer
+ * Revision 1.5  2022-08-28 12:36:38+05:30  Cprogrammer
  * allow configureable salt size using env variable SALTSIZE
  *
  * Revision 1.4  2022-08-05 21:11:53+05:30  Cprogrammer
@@ -21,7 +21,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.5 2022-08-28 12:00:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.5 2022-08-28 12:36:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -361,7 +361,8 @@ setpassword(char *user)
 		getEnvConfigInt(&saltsize, "SALTSIZE", SALTSIZE);
 		if (!stralloc_ready(&salt, saltsize + 1))
 			die_nomem();
-		makesalt(salt.s, saltsize);
+		if (makesalt(salt.s, saltsize) == -1)
+			strerr_die1sys(111, "failed to generate salt: ");
 		for (i2 = 1;;i2++) {
 			if (i2 > SETPAS_MAX_ATTEMPTS)
 			{
