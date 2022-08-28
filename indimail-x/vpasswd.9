@@ -88,10 +88,11 @@ salted password for SCRAM methods. This allows the above mentioned
 authentication mechanisms to work along with the PLAIN, LOGIN and the SCRAM
 methods.
 
-.TP
+.TP 3
 \fB\-S\fR \fIsalt\fR
 Specify a base64 encoded salt to be used when generating SCRAM password. If
-not specified, this will be generated using libsodium/gsasl.
+not specified, this will be generated using libsodium/gsasl. Here base64
+implies characters [0-9], [a-z], [A-Z] and the two characters [./].
 
 .TP
 \fB\-I\fR \fIiteration\fR

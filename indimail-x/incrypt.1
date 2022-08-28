@@ -4,8 +4,7 @@
 incrypt
 
 .SH SYNOPSYS
-incrypt
-.I passphrase
+\fBincrypt\fR [ -h hash ] [ -s salt ] passphrase
 .I salt
 
 .SH DESCRIPTION
@@ -15,35 +14,10 @@ system password database (shadow(5)) using a cryptographic “hashing
 method.” The result of this operation is called a “hashed passphrase” or
 just a “hash.” Hashing methods are described in crypt(5).
 
-\fIkey\fR controls which hashing method to use, and also supplies various
+\fIhash\fR controls which hashing method to use, and also supplies various
 parameters to the chosen method, most importantly a random “salt” which en‐
 sures that no two stored hashes are the same, even if the phrase strings
 are the same.
-
-The original hashing method from Unix V7, based on the DES block cipher.
-Because DES is cheap on modern hardware, because there are only 4096 pos‐
-sible salts and 2**56 possible hashes, and because it truncates passphrases
-to 8 characters, it is feasible to discover any passphrase hashed with this
-method. It should only be used if you absolutely have to generate hashes
-that will work on an old operating system that supports nothing else.
-
-It is based on the Data Encryption Standard algorithm with
-variations intended (among other things) to discourage use of hardware
-implementations of a key search.
-
-\fIpassphrase\fR is a user's typed password.
-
-\fIsalt\fR is a two-character string chosen from the set [a-zA-Z0-9./].
-This string is used to perturb the algorithm in one of 4096 different
-ways.
-
-By taking the lowest 7 bits of each of the first eight characters of the
-key, a 56-bit key is obtained. This 56-bit key is used to encrypt
-repeatedly a constant string (usually a string consisting of all zeros).
-The returned value points to the encrypted password, a series of 13
-printable ASCII characters (the first two characters represent the salt
-itself).  The return value points to static data whose content is
-overwritten by each call.
 
 If
 .I salt
@@ -80,9 +54,8 @@ _
 .TE
 .RE
 
-So $5$\fIsalt\fP$\fIencrypted\fP is an SHA-256 encoded
-password and $6$\fIsalt\fP$\fIencrypted\fP is an
-SHA-512 encoded one.
+So $5$\fIsalt\fP$\fIencrypted\fP is an SHA-256 encoded password and
+$6$\fIsalt\fP$\fIencrypted\fP is an SHA-512 encoded one.
 
 "\fIsalt\fP" stands for the up to 16 characters following "$\fIid\fP$" in
 the salt. The encrypted part of the password string is the actual computed
@@ -108,6 +81,55 @@ portion of this key space that is generally used by humans for passwords.
 Hence, password selection should, at minimum, avoid common words and names.
 The use of a passwd(1) program that checks for crackable passwords during
 the selection process is recommended.
+
+.SH OPTIONS
+
+.TP 3
+\fB\-h\fR \fIhash\fR
+Specifiy hash which is one of DES, MD5, SHA-256, SHA-512,
+.RS
+.nf
+.ta 5c 10c
+HASH        	Value	Description
+DES	0	DES encryption (shouldn't be used)
+MD5	1	MD5 encryption (shouldn't be used)
+SHA-256	2	SHA256 encryption
+SHA-512	3	SHA512 encryption
+.fi
+.RE
+
+.TP 3
+\fB\-S\fR \fIsalt\fR
+Specify a base64 encoded salt to be used when generating SCRAM password. If
+not specified, this will be generated using libsodium/gsasl. Here base64
+implies characters [0-9], [a-z], [A-Z] and the two characters [./].
+
+.SH NOTE on DES Encryption
+The original hashing method from Unix V7, based on the DES block cipher.
+Because DES is cheap on modern hardware, because there are only 4096
+possible salts and 2**56 possible hashes, and because it truncates
+passphrases to 8 characters, it is feasible to discover any passphrase
+hashed with this method. It should only be used if you absolutely have to
+generate hashes that will work on an old operating system that supports
+nothing else.
+
+It is based on the Data Encryption Standard algorithm with variations
+intended (among other things) to discourage use of hardware implementations
+of a key search.
+
+\fIpassphrase\fR is a user's typed password.
+
+\fIsalt\fR is a two-character string chosen from the set [a-zA-Z0-9./].
+This string is used to perturb the algorithm in one of 4096 different
+ways.
+
+By taking the lowest 7 bits of each of the first eight characters of the
+key, a 56-bit key is obtained. This 56-bit key is used to encrypt
+repeatedly a constant string (usually a string consisting of all zeros).
+The returned value points to the encrypted password, a series of 13
+printable ASCII characters (the first two characters represent the salt
+itself).  The return value points to static data whose content is
+overwritten by each call.
 
 .SH RETURN VALUES
 On success, the encrypted password is printed on stdout. On error, non zero
