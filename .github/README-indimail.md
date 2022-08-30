@@ -2789,6 +2789,16 @@ done
 echo 1 > DISABLE_DIGEST_MD5
 ```
 
+Once you have enabled authentication methods, you can use toolks like swak(1), gsasl(1) to test the method. Few examples are given below.
+
+```
+$ gsasl --no-cb -d --hostname=argos.indimail.org --x509-ca-file="" -a manny@example.com --password supersecret --mechanism SCRAM-SHA-256 --smtp --connect argos:587
+
+$ gsasl -d --hostname=argos.indimail.org --x509-ca-file="" -a manny@example.com --password supersecret --mechanism SCRAM-SHA-256-PLUS --smtp --connect argos:587
+
+$ swaks --to testuser@example.com --server localhost -port 587 --a CRAM-SHA1 -au manny@example.com -ap supersecret
+```
+
 ## Enabling authentication methods for qmail-remote
 
 qmail-remote supports the same authentication mechanism that qmail-smtpd supports but as a client. It requires the user credentials to be present in the file <u>/etc/indimail/control/smtproutes</u> or the environment variable <b>SMTPROUTE</b>. As an example, let us use the same password for the user `manny` that we set above
@@ -2801,6 +2811,11 @@ Remote host said: 250 ok 1661621762 qp 126027
 $ env SMTPROUTE='example.com:127.0.0.1:587 manny@example.com supersecret' AUTH_SMTP="SCRAM-SHA-256" qmail-remote example.com testuser@example.com "" 10 manny@example.com </tmp/a
 rFrom: <testuser@example.com> RCPT: <manny@example.com> K127.0.0.1 accepted message - Protocol SMTP.
 Remote host said: 250 ok 1661621906 qp 126055
+
+$ env SMTPROUTE='example.com:127.0.0.1:587 manny@example.com supersecret' AUTH_SMTP="SCRAM-SHA-256-PLUS" qmail-remote example.com testuser@example.com "" 10 testuser01@example.com </tmp/a
+rFrom: <testuser@example.com> RCPT: <manny@example.com> K127.0.0.1 accepted message - Protocol SMTP.
+
+$ gsasl --no-cb -d --hostname=argos.indimail.org --x509-ca-file="" -a manny@example.com --password supersecret --mechanism SCRAM-SHA-256 --smtp --connect argos:587
 ```
 
 If you are going to user <u>smtproutes</u> file to store user credentials, have the file owned by <b>qmailr</b> and permissions <b>0600</b>
@@ -5164,7 +5179,7 @@ IndiMail provides a multi-queue version of the original ''qmail-queue'' program.
  * blackholercpt, blackholercptpatterns for blackholing mails to specific senders.
  * Control files spamignore, blackholedsender, badmailfrom, relaymailfrom, badrcptto,<br />  chkrcptdomains, goodrcptto, blackholercpt, badip can be specified in plain text, cdb format or in MySQL tables.
  * relaying and message rewriting for authorized clients
- * authenticated SMTP PLAIN, LOGIN, CRAM-MD5 (HMAC), CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5, SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS (RFC 1321, RFC 2104, RFC 2554, RFC 2617, RFC 5802, RFC 7677, RFC 5056, RFC 5929, RFC 9266)
+ * authenticated SMTP PLAIN, LOGIN, CRAM-MD5 (HMAC), CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5, SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS (RFC 1321, RFC 2104, RFC 2554, RFC 2617, RFC 5802, RFC 7677, RFC 5056, RFC 5929, RFC 9l66). Supports tls-unique and tls-exporter channel bindings.
  * STARTLS extension, TLS
  * Support for SMTPS
  * POP/IMAP before SMTP
@@ -5258,7 +5273,7 @@ IndiMail provides a multi-queue version of the original ''qmail-queue'' program.
  * per-buffer timeouts
  * passive SMTP queue---perfect for SLIP/PPP (<b>serialmail</b>)
  * AutoTURN support (<b>serialmail</b>)
- * Authenticated SMTP (username/password in control/smtproutes) - PLAIN, LOGIN, CRAM-MD5 (HMAC), CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5, SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS (RFC 1321, RFC 2104, RFC 2554, RFC 2617, RFC 5802, RFC 7677, RFC 5056, RFC 5929, RFC 9266)
+ * Authenticated SMTP (username/password in control/smtproutes) - PLAIN, LOGIN, CRAM-MD5 (HMAC), CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5, SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS (RFC 1321, RFC 2104, RFC 2554, RFC 2617, RFC 5802, RFC 7677, RFC 5056, RFC 5929, RFC 9266). Supports tls-unique, tls-exporter channel binding.
  * STARTTLS, TLS
  * Static and Dynamic Routing. (SMTPROUTES environment variable)
  * User based routing instead of normal DNS/smtproutes.
