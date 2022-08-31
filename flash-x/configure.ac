@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ([2.71])
+AC_PREREQ([2.59])
 AC_INIT([flash],[m4_normalize(m4_include(conf-version))],[Manvendra Bhangui indimail-utils@indimail.org],[flash],[https://github.com/mbhangui/indimail-virtualdomains])
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
