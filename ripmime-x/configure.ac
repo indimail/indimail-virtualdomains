@@ -10,7 +10,6 @@ AC_CANONICAL_HOST
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_MAKE_SET
-AC_PROG_CC_C99
 CFLAGS="$CFLAGS -Wall -O3 -fPIC"
 echo "host=[$host]"
 case "$host" in

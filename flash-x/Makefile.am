@@ -23,6 +23,8 @@ flash_DEPENDENCIES = libflash.la
 
 doc_list=README-flash.md COPYING-flash AUTHORS-flash
 
+man_MANS=flash.1
+
 MOSTLYCLEANFILES=$(modules_list) system.menu system.rc
 all-local: system.menu system.rc modules
 

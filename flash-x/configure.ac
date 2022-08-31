@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ([2.59])
-AC_INIT([flash],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui indimail-utils@indimail.org],flash, [https://github.com/mbhangui/indimail-virtualdomains])
+AC_PREREQ([2.71])
+AC_INIT([flash],[m4_normalize(m4_include(conf-version))],[Manvendra Bhangui indimail-utils@indimail.org],[flash],[https://github.com/mbhangui/indimail-virtualdomains])
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 LT_INIT
@@ -11,8 +11,8 @@ AM_CONFIG_HEADER(config.h)
 dnl Checks for programs.
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_CC
-AC_PROG_CC_C99
-AC_PROG_LIBTOOL
+dnl AC_REQUIRE(AC_PROG_CC)
+LT_INIT
 AC_PROG_INSTALL
 
 LIBVER=1:0:0
@@ -24,7 +24,7 @@ then
 	ac_configure_args="$ac_configure_args -prefix=$prefix"
 fi
 
-AC_ISC_POSIX
+AC_SEARCH_LIBS([strerror],[cposix])
 
 case "$host" in
 *-*-freebsd*)
@@ -94,12 +94,6 @@ fi
 AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
 AC_CHECK_FUNCS(setenv unsetenv strsignal)
 
-dnl Checks for header files.
-AC_HEADER_STDC
-
-dnl Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
-
 AC_PROG_INSTALL
 
 AC_ARG_ENABLE(
@@ -124,4 +118,5 @@ AC_DEFINE(PATH_TO_GPL,"COPYING","")
 AC_DEFINE(PATH_TO_HELP,"system.help","")
 AC_DEFINE(DEFAULT_MENU,"system.menu","")
 
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
