@@ -11,7 +11,7 @@ install_sh_SCRIPT = $(install_sh)     -c
 bin_PROGRAMS=logclient incrmesg logalert showbytes
 sbin_PROGRAMS=logsrv rpclog
 
-man_MANS = logalert.8 logsrv.8 rpclog.8 incrmesg.1 logclient.1 showbytes.1
+man_MANS = logalert.8 logsrv.8 rpclog.8 incrmesg.1 logclient.1 showbytes.8
 mandir = @prefix@/share/man
 
 doc_DATA = LICENSE README.md
