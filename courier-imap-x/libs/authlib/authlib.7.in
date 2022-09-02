@@ -20,6 +20,7 @@ authlib \- Courier Authentication Library
 
 \fBauthshadow\fR \fB\fIcommand\fB\fR [ \fB\fIarg\fB\fR\fI ...\fR ]
 
+\fBauthindi\fR \fB\fIcommand\fB\fR [ \fB\fIarg\fB\fR\fI ...\fR ]
 
 \fBauthcustom\fR \fB\fIcommand\fB\fR [ \fB\fIarg\fB\fR\fI ...\fR ]
 
@@ -56,6 +57,9 @@ authenticates from the
 \fBauthshadow\fR
 like authpwd except passwords
 are read from \fI/etc/shadow\fR\&.
+.TP
+\fBauthindi\fR
+authenticate against indimail's MySQL database
 .TP
 \fBauthcustom\fR
 this is a stub where custom authentication code

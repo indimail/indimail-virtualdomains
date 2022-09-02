@@ -63,7 +63,7 @@ if HAVE_PAM
 authpamc=authpam.c preauthpam.c authwait.h authpwd.c
 authpamlib=libauthpam.la
 authpamobj=authpam.lo preauthpam.lo
-manpam=authman.7
+manpam=authpam.7
 else
 authpamc=
 authpamlib=
@@ -148,9 +148,9 @@ authchangepwdir.h: config.status
 	echo '#define AUTHCHANGEPWDIR "@authchangepwdir@"' >authchangepwdir.h
 
 man7=authlib.7
-man_LINKS=$(manpam) $(manpwd) $(manshadow) $(mancustom)
+man_LINKS=$(manpwd)
 man7dir=$(mandir)/man7
-man_MANS=authlib.7
+man_MANS=authlib.7 authindi.7 $(manshadow) $(manpam) $(mancustom)
 
 authlib.7: authlib.7.in
 	CONFIG_FILES=authlib.7 CONFIG_HEADERS= $(SHELL) ./config.status
