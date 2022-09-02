@@ -447,9 +447,9 @@ done
 %attr(0644,root,root) %{mandir}/man7/authlib.7.gz
 %attr(0644,root,root) %{mandir}/man7/authshadow.7.gz
 %attr(0644,root,root) %{mandir}/man7/authpwd.7.gz
+%attr(0644,root,root) %{mandir}/man7/authindi.7.gz
 %attr(0644,root,root) %{mandir}/man7/authpam.7.gz
 %attr(0644,root,root) %{mandir}/man7/authcustom.7.gz
-                      %{mandir}/man7/authman.7.gz
 %attr(0644,root,root) %{mandir}/man7/maildirquota.7.gz
 %attr(0644,root,root) %{mandir}/man7/courier-unicode.7.gz
 %attr(0644,root,root) %{mandir}/man8/makeimapaccess.8.gz
