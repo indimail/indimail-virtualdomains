@@ -1,6 +1,9 @@
 *
 Release @version@-@release@ Start 14/02/2021
 ======= Release Highlights ================================================
+o added support for SCRAM authentication in password field (vpasswd, vmoduser)
+o added support for CRAM authentication in password field (vpasswd, vmoduser)
+o Converted man pages to markdown for indimail wiki
 ===========================================================================
 - 12/02/2021
 01. moved replacestr to libqmail
