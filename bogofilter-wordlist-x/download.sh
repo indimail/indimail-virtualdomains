@@ -27,6 +27,7 @@ do
 		if [ $? -eq 0 ] ; then
 			echo "Extracted $i"
 		fi
+		/bin/rm -f $i
 	else
 		echo "$dir already present"
 	fi
