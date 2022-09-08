@@ -1,4 +1,4 @@
-*
+* Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail-spamfilter@indimail.org> 3.23.0-1.1%{?dist}
 Release @version@-@release@ Start 20/06/2020
 - 20/06/2020
 01. added setgroups() before setuid() call
@@ -7,6 +7,7 @@ Release @version@-@release@ Start 20/06/2020
 - 18/07/2021 - indimail-3.4.0
 - 31/07/2021
 03. PKGBUILD.in: Added missing variable definitions
+- 08/09/2022 - indimail-3.4.1
 
 * Mon Sep 10 2001 Philip Guenther <guenther@sendmail.com>
 Release 3.2.2

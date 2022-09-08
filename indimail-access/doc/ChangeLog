@@ -1,9 +1,10 @@
-*
-Release @version@-@release@ Start 01/03/2021
+* Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail-access@indimail.org> 1.1.0-1.1%{?dist}
+Release @version@-@release@ Start 01/03/2021 End 08/09/2022
 ======= Release Highlights ================================================
-o courier-imap version upgraded to courier-imap-5.1.4
 o unicode version upgraded to 2.2.3
-o maildrop version upgraded to 3.0.3
+o fetchmail version upgraded to 6.4.22
+o courier-imap version upgraded to courier-imap-5.1.7
+o maildrop version upgraded to 3.0.7
 ===========================================================================
 - 01/03/2021
 01. upgraded courier-imap to 5.0.12
@@ -22,7 +23,7 @@ o maildrop version upgraded to 3.0.3
 - 18/04/2021
 11. added scientic linux distribution
 - 25/04/2021
-12. updated courier-imap to version 5.1.3
+12. upgraded courier-imap to version 5.1.3
 - 30/04/2021
 13. fixed syntax error getting HOSTNAME
 - 17/06/2021
@@ -41,17 +42,18 @@ o maildrop version upgraded to 3.0.3
 - 02/08/2021
 31. PKGBUILD: Fix permissions for directories
 - 12/08/2021
-32. updated courier-imap to 5.1.4
+32. upgraded courier-imap to 5.1.4
 - 05/09/2021
 33. changed permissions for dirs with 555 to 755
 - 03/10/2021
 34. upgraded fetchmail to 6.4.22
 - 08/04/2022
-35. updated courier-imap to 5.1.7
+35. upgraded courier-imap to 5.1.7
 - 23/05/2022
-36. updated maildrop to 3.0.7
+36. upgraded maildrop to 3.0.7
 37. courier-imap/default.configure: added --force option
 38. courier-imap - added --enable-indimail to maildrop/configure.ac
+- 08/09/2022 - indimail-3.4.1
 
 *
 Release 1.0-1.1 Start 03/06/2020
