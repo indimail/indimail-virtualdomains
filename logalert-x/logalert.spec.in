@@ -108,9 +108,9 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 %doc %attr(0644,root,root)                     %{_mandir}/man1/incrmesg.1.gz
 %doc %attr(0644,root,root)                     %{_mandir}/man1/logclient.1.gz
-%doc %attr(0644,root,root)                     %{_mandir}/man1/showbytes.1.gz
 %doc %attr(0644,root,root)                     %{_mandir}/man8/logalert.8.gz
 %doc %attr(0644,root,root)                     %{_mandir}/man8/logsrv.8.gz
+%doc %attr(0644,root,root)                     %{_mandir}/man8/showbytes.8.gz
 %doc %attr(0644,root,root)                     %{_mandir}/man8/rpclog.8.gz
 
 %changelog
