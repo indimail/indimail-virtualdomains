@@ -1,5 +1,9 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 1.15  2022-09-10 21:41:56+05:30  Cprogrammer
+ * use authmethods.h for AUTH type definitions
+ * execute next module if domain not in qmail assign file
+ *
  * Revision 1.14  2022-08-27 12:05:20+05:30  Cprogrammer
  * fixed logic for fetching clear txt password for cram methods
  *
@@ -66,6 +70,7 @@
 #include <subfd.h>
 #include <getln.h>
 #include <pw_comp.h>
+#include <authmethods.h>
 #include <get_scram_secrets.h>
 #include <noreturn.h>
 #endif
@@ -93,42 +98,11 @@
 #define AUTH_SIZE 512
 #endif
 
-#ifndef AUTH_LOGIN
-#define AUTH_LOGIN       1
-#endif
-#ifndef AUTH_PLAIN
-#define AUTH_PLAIN       2
-#endif
-#ifndef AUTH_CRAM_MD5
-#define AUTH_CRAM_MD5    3
-#endif
-#ifndef AUTH_CRAM_SHA1
-#define AUTH_CRAM_SHA1   4
-#endif
-#ifndef AUTH_CRAM_SHA224
-#define AUTH_CRAM_SHA224 5
-#endif
-#ifndef AUTH_CRAM_SHA256
-#define AUTH_CRAM_SHA256 6
-#endif
-#ifndef AUTH_CRAM_SHA384
-#define AUTH_CRAM_SHA384 7
-#endif
-#ifndef AUTH_CRAM_SHA512
-#define AUTH_CRAM_SHA512 8
-#endif
-#ifndef AUTH_CRAM_RIPEMD
-#define AUTH_CRAM_RIPEMD 9
-#endif
-#ifndef AUTH_DIGEST_MD5
-#define AUTH_DIGEST_MD5  10
-#endif
-
 #define FATAL "authindi: fatal: "
 #define WARN  "authindi: warn: "
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.14 2022-08-27 12:05:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.15 2022-09-10 21:41:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -494,7 +468,7 @@ main(int argc, char **argv)
 		auth_method = 0;
 
 	login = authstr + count; /*- username or challenge */
-	for (cram_md5_len = 0; authstr[count] != '\n' && count < offset;count++, cram_md5_len++);
+	for (cram_md5_len = 0; authstr[count] != '\n' && count < offset; count++, cram_md5_len++);
 	if (count == offset || (count + 1) == offset) {
 		alloc_free(buf);
 		alloc_free(authstr);
@@ -518,7 +492,7 @@ main(int argc, char **argv)
 			strerr_warn2(FATAL, "b64_decode failure", 0);
 			failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 		}
-		for (login = ptr; *ptr && !isspace(*ptr);ptr++);
+		for (login = ptr; *ptr && !isspace(*ptr); ptr++);
 		*ptr = 0;
 		response = ptr + 1;
 	} else
@@ -530,12 +504,12 @@ main(int argc, char **argv)
 	}
 	if (!str_diffn(auth_type, "pass", 5)) {
 		strerr_warn2(FATAL, "Password Change not supported", 0);
-		failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
+		next_module(argv, buf, offset, auth_method, login, challenge);
 	}
 	parse_email(login, &user, &domain);
 	if (!get_assign(domain.s, 0, &uid, &gid)) {
 		strerr_warn4(FATAL, "domain ", domain.s, " does not exist", 0);
-		failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
+		next_module(argv, buf, offset, auth_method, login, challenge);
 	}
 	if (!(real_domain = get_real_domain(domain.s)))
 		real_domain = domain.s;
@@ -568,7 +542,7 @@ main(int argc, char **argv)
 			mailstore[i] = 0;
 		else {
 			strerr_warn5(FATAL, "invalid mailstore [", mailstore, "] for ", Email.s, 0);
-			next_module(argv, buf, offset, auth_method, login, challenge);
+			failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 		}
 		for(; *mailstore && *mailstore != ':'; mailstore++);
 		if  (*mailstore != ':') {
@@ -595,7 +569,7 @@ main(int argc, char **argv)
 #else
 	if (iopen((char *) 0)) {
 		strerr_warn2(FATAL, "failed to connect to local db", 0);
-		next_module(argv, buf, offset, auth_method, login, challenge);
+		failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 	}
 	pw = sql_getpw(user.s, real_domain);
 #endif
@@ -609,7 +583,7 @@ main(int argc, char **argv)
 			strerr_warn4(FATAL, Email.s, ": iopen: ",
 					errno ? error_str(errno) : "AUTHFAILURE", 0);
 #endif
-		next_module(argv, buf, offset, auth_method, login, challenge);
+		failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 	}
 	/*
 	 * Look at what type of connection we are trying to auth.
@@ -639,7 +613,7 @@ main(int argc, char **argv)
 		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, &cleartxt, &crypt_pass);
 		if (i != 6 && i != 8) {
 			strerr_warn2(FATAL, "unable to get secrets", 0);
-			next_module(argv, buf, offset, auth_method, authstr, challenge);
+			failure1(argv, auth_method, service, imapargs, pop3args, authstr, challenge);
 		}
 		if (i == 8) {
 			switch (auth_method)
