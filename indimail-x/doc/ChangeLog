@@ -96,6 +96,8 @@ o Converted man pages to markdown for indimail wiki
 60. userinfo.c: fixed display string for DES/un-encrypted password
 61. vmoduser.c, vpasswd.c: fix compilation error for non gsasl build
 - 08/09/2022 - Final release indimail-3.4.1
+62. authindi.c: hotfix: fix domain absent in assign causing AUTHFAILURE for
+    system users 
 
 *
 Release 3.4.0 Start 14/02/2021
