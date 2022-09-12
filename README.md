@@ -952,7 +952,7 @@ NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to i
 4. [indimail-utils](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils) (Multiple utilities that can work with indimail/indimail-mta - [altermime](http://pldaniels.com/altermime/), [ripMIME](https://pldaniels.com/ripmime/), [mpack](https://github.com/mbhangui/indimail-virtualdomains/tree/master/mpack-x), [fortune](https://en.wikipedia.org/wiki/Fortune_(Unix)) and [flash](https://github.com/mbhangui/indimail-virtualdomains/tree/master/flash-x) - customizable menu based admin interface)
 
 ```
-Currently, the list of supported distributions for IndiMail is
+Currently, the list of supported binary distributions for IndiMail is
 
     * Arch Linux
 
@@ -979,10 +979,8 @@ Currently, the list of supported distributions for IndiMail is
           o Scientific Linux 7
           o CentOS 7
           o CentOS 8
-          o CentOS 8 Stream
 
     * Debian
-          o Debian  9.0
           o Debian 10.0
           o Debian 11.0
           o Univention_4.3
@@ -990,12 +988,8 @@ Currently, the list of supported distributions for IndiMail is
 
     * Ubuntu
           o Ubuntu 16.04
-          o Ubuntu 17.04
           o Ubuntu 18.04
-          o Ubuntu 19.04
           o Ubuntu 20.04
-          o Ubuntu 21.04
-          o Ubuntu 21.10
           o Ubuntu 22.04
 ```
 
