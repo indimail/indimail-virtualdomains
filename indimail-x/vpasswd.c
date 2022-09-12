@@ -85,16 +85,18 @@ static char     sccsid[] = "$Id: vpasswd.c,v 1.13 2022-08-28 15:28:18+05:30 Cpro
 
 static char    *usage =
 	"usage: vpasswd [options] email_address [password]\n"
-	"options: -v (verbose)\n"
-	"         -e encrypted  (set the encrypted password field)\n"
-	"         -C            (Store clear txt and scram hex salted passowrd in database\n"
-	"         -r            (Generate a random password of specfied length)\n"
-	"         -h hash       (use one of DES, MD5, SHA256, SHA512, hash method)\n"
-	"         -m SCRAM method (use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method\n"
-	"         -S salt       (Use a fixed base64 encoded salt for generating SCRAM password)\n"
-	"                       (If salt is not specified, it will be generated)\n"
-	"         -i iter_count (Use iter_count instead of 4096 for generating SCRAM password)\n"
-	"         -H            (display this usage)"
+	"options\n"
+	"  -e encrypted    - set the encrypted password field\n"
+	"  -C              - store clear txt and scram hex salted password in database\n"
+	"                    This allows CRAM methods to be used\n"
+	"  -r              - generate a random password of specfied length\n"
+	"  -h hash         - use one of DES, MD5, SHA256, SHA512, hash method\n"
+	"  -m SCRAM method - use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method\n"
+	"  -S salt         - use a fixed base64 encoded salt for generating SCRAM password\n"
+	"                  - if salt is not specified, it will be generated\n"
+	"  -I iter_count   - use iter_count instead of 4096 for generating SCRAM password\n"
+	"  -v              - sets verbose output\n"
+	"  -H              - display this usage"
 	;
 
 int
@@ -118,7 +120,7 @@ get_options(int argc, char **argv, char **email, char **clear_text,
 	Random = 0;
 	/*- make sure optstr has enough size to hold all options + 1 */
 	i = 0;
-	i += fmt_strn(optstr + i, "veh:r:", 6);
+	i += fmt_strn(optstr + i, "Hveh:r:", 6);
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	i += fmt_strn(optstr + i, "Cm:S:I:", 7);
