@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 1.14  2022-09-13 22:10:17+05:30  Cprogrammer
+ * formated usage
+ *
  * Revision 1.13  2022-08-28 15:28:18+05:30  Cprogrammer
  * fix compilation error for non gsasl build
  *
@@ -77,7 +80,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.13 2022-08-28 15:28:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.14 2022-09-13 22:10:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -105,7 +108,7 @@ get_options(int argc, char **argv, char **email, char **clear_text,
 {
 	int             c, i, Random, passwd_len = 8;
 	char           *ptr;
-	char            optstr[14], strnum[FMT_ULONG];
+	char            optstr[15], strnum[FMT_ULONG];
 
 	*email = *clear_text = 0;
 	if (salt)
@@ -120,7 +123,7 @@ get_options(int argc, char **argv, char **email, char **clear_text,
 	Random = 0;
 	/*- make sure optstr has enough size to hold all options + 1 */
 	i = 0;
-	i += fmt_strn(optstr + i, "Hveh:r:", 6);
+	i += fmt_strn(optstr + i, "Hveh:r:", 7);
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	i += fmt_strn(optstr + i, "Cm:S:I:", 7);
