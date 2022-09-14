@@ -253,6 +253,71 @@ else
 fi
 }
 
+create_mysql_db()
+{
+ps -ef|grep mysqld|egrep -v "systemctl|grep" > /dev/null 2>&1
+if [ $? -ne 0 -o ! -S /var/run/mysqld/mysqld.sock ] ; then
+	if [ -x /service/mysql.3306/run ] ; then
+		echo "Starting MySQL server"
+		/service/mysql.3306/run >/dev/null 2>&1 &
+		count=0
+		while true
+		do
+		if [ -f /var/run/mysqld/mysqld.3306.pid ] ; then
+				pid=`cat /var/run/mysqld/mysqld.3306.pid`
+			elif [ -f /run/mysqld/mysqld.3306.pid ] ; then
+				pid=`cat /var/run/mysqld/mysqld.3306.pid`
+			else
+				pid=""
+			fi
+			if [ -n "$pid" ] ; then
+				echo "Checking MySQLD pid=$pid"
+				kill -0 $pid
+				if [ $? -eq 0 ] ; then
+					echo "$count: found a running MySQL server with pid=$pid" 1>&2
+					sleep 2
+					break
+				else
+					echo "$count: Did not find a running MySQL server with pid=$pid" 1>&2
+					sleep 5
+				fi
+			else
+				echo "$count: Did not find a running MySQL server" 1>&2
+				sleep 5
+			fi
+			if [ $count -gt 10 ] ; then
+				break
+			fi
+			count=`expr $count + 1`
+		done
+	fi
+fi
+if [ -n "$MYSQL_SOCKET" ] ; then
+	mysql_sock=$MYSQL_SOCKET
+else
+	mysql_sock=/var/run/mysqld/mysqld.sock
+fi
+if [ -S $mysqld_sock ] ; then
+	echo "adding roundcube user"
+	(
+		echo "CREATE DATABASE IF NOT EXISTS RoundCube_db;"
+		echo "CREATE USER roundcube IDENTIFIED BY 'subscribed';"
+		echo "GRANT ALL PRIVILEGES ON RoundCube_db.* TO roundcube;"
+		echo "FLUSH PRIVILEGES;"
+	) | /usr/bin/mysql -u mysql -p"$PRIV_PASS" mysql
+	if [ -f $rcube_base/SQL/mysql.initial.sql ] ; then
+		echo "initializing roundcube db"
+		/usr/bin/mysql -u roundcube -psubscribed RoundCube_db < $rcube_base/SQL/mysql.initial.sql
+	fi
+	if [ -x /service/mysql.3306/shutdown ] ; then
+		/service/mysql.3306/shutdown
+		echo "shutdown MySQL server"
+	fi
+else
+	echo "Couldn't find a running MySQL server: mysqld.sock missing"
+fi
+}
+
 grep openSUSE /etc/os-release > /dev/null 2>&1
 if [ $? -eq 0 ] ; then
 	is_suse=1
@@ -266,64 +331,10 @@ if [ $is_suse -eq 1 ] ; then
 else
 	rcube_base=/usr/share/roundcubemail
 fi
+
 echo "Creating MySQL DB for roundcube"
 if [ ! -d /var/indimail/mysqldb/data/RoundCube_db ] ; then
-	ps -ef|grep mysqld|egrep -v "systemctl|grep" > /dev/null 2>&1
-	if [ $? -ne 0 -o ! -S /var/run/mysqld/mysqld.sock ] ; then
-		if [ -x /service/mysql.3306/run ] ; then
-			echo "Starting MySQL server"
-			/service/mysql.3306/run >/dev/null 2>&1 &
-			count=0
-			while true
-			do
-				if [ -f /var/run/mysqld/mysqld.3306.pid ] ; then
-					pid=`cat /var/run/mysqld/mysqld.3306.pid`
-				elif [ -f /run/mysqld/mysqld.3306.pid ] ; then
-					pid=`cat /var/run/mysqld/mysqld.3306.pid`
-				else
-					pid=""
-				fi
-				if [ -n "$pid" ] ; then
-					echo "Checking MySQLD pid=$pid"
-					kill -0 $pid
-					if [ $? -eq 0 ] ; then
-						echo "$count: found a running MySQL server with pid=$pid" 1>&2
-						sleep 2
-						break
-					else
-						echo "$count: Did not find a running MySQL server with pid=$pid" 1>&2
-						sleep 5
-					fi
-				else
-					echo "$count: Did not find a running MySQL server" 1>&2
-					sleep 5
-				fi
-				if [ $count -gt 10 ] ; then
-					break
-				fi
-				count=`expr $count + 1`
-			done
-		fi
-	fi
-	if [ -S /var/run/mysqld/mysqld.sock ] ; then
-		echo "adding roundcube user"
-		(
-			echo "CREATE DATABASE IF NOT EXISTS RoundCube_db;"
-			echo "CREATE USER roundcube IDENTIFIED BY 'subscribed';"
-			echo "GRANT ALL PRIVILEGES ON RoundCube_db.* TO roundcube;"
-			echo "FLUSH PRIVILEGES;"
-		) | /usr/bin/mysql -u mysql -p"$PRIV_PASS" mysql
-		if [ -f $rcube_base/SQL/mysql.initial.sql ] ; then
-			echo "initializing roundcube db"
-			/usr/bin/mysql -u roundcube -psubscribed RoundCube_db < $rcube_base/SQL/mysql.initial.sql
-		fi
-		if [ -x /service/mysql.3306/shutdown ] ; then
-			/service/mysql.3306/shutdown
-			echo "shutdown MySQL server"
-		fi
-	else
-		echo "Couldn't find a running MySQL server: mysqld.sock missing"
-	fi
+	create_mysql_db
 fi
 
 if [ -f /etc/debian_version ] ; then
@@ -343,7 +354,7 @@ else
 fi
 
 # same for all distros
-# RoundCube DB setup
+# RoundCube config
 if [ $is_suse -eq 1 -a -f /etc/roundcubemail/config.inc.php ] ; then
 	if [ ! -f /etc/roundcubemail/config.inc.php.orig ] ; then
 		$mv /etc/roundcubemail/config.inc.php /etc/roundcubemail/config.inc.php.orig
@@ -577,10 +588,10 @@ echo "Adding qmail as supplementary group to $httpd_group"
 /usr/bin/getent passwd $httpd_user >/dev/null && /usr/sbin/usermod -aG qmail $httpd_user
 
 # setting up php-fpm on openSUSE distributions is crazy
-# the standard directories are too different /srv/www instead
+# the standard directories are too different. /srv/www instead
 # of /var/www. I find I have wasted too much time to make things
-# work. So I'm giving up for suse distributions. If anyone of you
-# reads this and can fix things, I will owe you some beer.
+# work. So I'm giving up on suse distributions. If anyone of you
+# reads this and can fix things, I owe you beer.
 
 if [ $is_suse -eq 1 ] ; then
 	# I give up
@@ -620,7 +631,7 @@ if [ $is_suse -eq 1 ] ; then
 	fi
 fi
 
-if [ -f $php_fpm_www_conf ] ; then
+if [ -n "$php_fpm_www_conf" -a -f $php_fpm_www_conf ] ; then
 	echo "fixing $php_fpm_www_conf"
 	$sed -i \
 		-e "s}^user = nobody}user = $httpd_user}" \
@@ -632,7 +643,7 @@ if [ -f $php_fpm_www_conf ] ; then
 		-e 's}^listen.acl_users.};&}' \
 	$php_fpm_www_conf
 fi
-if [ -f $php_fpm_conf ] ; then
+if [ -n "$php_fpm_conf" -a -f $php_fpm_conf ] ; then
 	echo "fixing $php_fpm_conf"
 	$sed -i -e "s{^pid =.*{pid = /run/php/php-fpm.pid{g" \
 		$php_fpm_conf
