@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.28 2022-09-14 17:28:07+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.29 2022-09-14 18:21:41+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1245,23 +1245,21 @@ modusergo()
 		saveacopy = 1;
 	/*- get the value of the cforward radio button */
 	GetValue(TmpCGI, &cforward, "cforward=");
-	if (!str_diff(cforward.s, "disable") && !autoresp) {
-		call_hooks(HOOK_MODUSER, ActionUser.s, Domain.s, Password1.s, Gecos.s);
-		moduser();
-		return;
-	}
 	/*- open old .qmail file if it exists and load it into memory */
 	if (!stralloc_copys(&dotqmailfn, vpw->pw_dir) ||
 			!stralloc_catb(&dotqmailfn, "/.qmail", 7) ||
 			!stralloc_0(&dotqmailfn))
 		die_nomem();
-	err = stat(dotqmailfn.s, &sb);
-	if (err == -1 && errno == error_noent) {
+	if (!str_diff(cforward.s, "disable") && !access(dotqmailfn.s, F_OK))
+		unlink(dotqmailfn.s);
+
+	if (!str_diff(cforward.s, "disable") && !autoresp) {
 		call_hooks(HOOK_MODUSER, ActionUser.s, Domain.s, Password1.s, Gecos.s);
 		moduser();
 		return;
-	} else
-	if (err == -1) {
+	}
+	err = stat(dotqmailfn.s, &sb);
+	if (err == -1 && errno != error_noent) {
 		copy_status_mesg(html_text[150]);
 		if (!stralloc_catb(&StatusMessage, ": ", 2) ||
 				!stralloc_cats(&StatusMessage, error_str(errno)) ||
@@ -1278,7 +1276,12 @@ modusergo()
 		moduser();
 		return;
 	}
-	if ((olddotqmail = (char *) alloc(sb.st_size))) {
+	if (!err && sb.st_size && !(olddotqmail = (char *) alloc(sb.st_size))) {
+		copy_status_mesg(html_text[201]);
+		iclose();
+		exit(0);
+	}
+	if (olddotqmail) {
 		if ((fd = open_read(dotqmailfn.s)) != -1) {
 			if (read(fd, olddotqmail, sb.st_size) == -1)
 				strerr_warn2(dotqmailfn.s, ": read: ", &strerr_sys);
