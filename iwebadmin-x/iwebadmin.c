@@ -1,5 +1,9 @@
 /*
  * $Log: iwebadmin.c,v $
+ * Revision 1.28  2022-09-14 13:56:39+05:30  Cprogrammer
+ * added u_scram variable for scram checkbox
+ * log ip address for authentication failures
+ *
  * Revision 1.27  2022-08-28 14:51:11+05:30  Cprogrammer
  * additional docram argument added to gsasl_mkpasswd
  *
@@ -38,7 +42,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: iwebadmin.c,v 1.27 2022-08-28 14:51:11+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.28 2022-09-14 13:56:39+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -106,7 +110,7 @@ stralloc        Username = {0}, Domain = {0}, Password = {0}, Gecos = {0},
 				b64salt = {0}, result = {0};
 int             CGIValues[256];
 int             ezmlm_idx = -1, ezmlm_make = -1, debug = 0, enable_fortune = 1,
-				scram = 0, iter_count = 4096;
+				scram = 0, u_scram = 0, cram = 0, iter_count = 4096;
 time_t          mytime;
 char           *TmpCGI = NULL;
 int             Compressed;
@@ -370,7 +374,7 @@ main(argc, argv)
 		if (Username.len && !Password.len && (Password1.len || Password2.len)) {
 			/*- username entered, but no password */
 			copy_status_mesg(html_text[198]);
-			strerr_warn5("iwebadmin: ", Username.s, "@", Domain.s, ": No password", 0);
+			strerr_warn7("iwebadmin: IP ", ip_addr, ":", Username.s, "@", Domain.s, ": No password", 0);
 		} else
 		if (Username.len && Password.len) {
 			i = str_chr(Username.s, '@');
@@ -405,18 +409,15 @@ main(argc, argv)
 				encrypt_flag = 0;
 			if (!(pw = sql_getpw(Username.s, Domain.s))) {
 				copy_status_mesg(html_text[198]);
-				if (debug)
-					strerr_warn5("iwebadmin: ", Username.s, "@", Domain.s, ": No such user", 0);
+				strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": No such user", 0);
 			} else
 			if (pw->pw_gid & NO_PASSWD_CHNG) {
 				copy_status_mesg(html_text[20]);
-				if (debug)
-					strerr_warn5("iwebadmin: ", Username.s, "@", Domain.s, ": password change denied", 0);
+				strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": password change denied", 0);
 			} else
 			if (auth_user(pw, Password.s)) {
 				copy_status_mesg(html_text[198]);
-				if (debug)
-					strerr_warn5("iwebadmin: ", Username.s, "@", Domain.s, ": incorrect password", 0);
+				strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": incorrect password", 0);
 			} else
 			if (str_diffn(Password1.s, Password2.s, Password1.len > Password2.len ? Password1.len : Password2.len) != 0)
 				copy_status_mesg(html_text[200]);
@@ -444,7 +445,7 @@ main(argc, argv)
 					copy_status_mesg(html_text[140]);
 				else { /* success */
 					copy_status_mesg(html_text[139]);
-					strerr_warn5("iwebadmin: ", Username.s, "@", Domain.s, ": password changed", 0);
+					strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": password changed", 0);
 					Password.len = 0;
 					send_template("change_password_success.html");
 					return 0;
@@ -485,16 +486,14 @@ main(argc, argv)
 		load_limits();
 		if (!(pw = sql_getpw(Username.s, Domain.s))) {
 			copy_status_mesg(html_text[198]);
-			if (debug)
-				strerr_warn5("iwebadmin: ", Username.s, "@", Domain.s, ": No such user", 0);
+			strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": No such user", 0);
 			iclose();
 			show_login();
 			exit(0);
 		}
 		if (auth_user(pw, Password.s)) {
 			copy_status_mesg(html_text[198]);
-			if (debug)
-				strerr_warn5("iwebadmin: ", Username.s, "@", Domain.s, ": incorrect password", 0);
+			strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": incorrect password", 0);
 			iclose();
 			show_login();
 			exit(0);
@@ -593,7 +592,7 @@ load_lang(char *lang)
 	substdio_fdbuf(&ssin, read, lang_fd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
-			strerr_warn3("load_lang: read: ", lang, ": ", &strerr_sys);
+			strerr_warn3("iwebadmin: load_lang: read: ", lang, ": ", &strerr_sys);
 			close(lang_fd);
 			return;
 		}
