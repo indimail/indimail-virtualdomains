@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.27 2022-09-14 17:08:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.28 2022-09-14 17:28:07+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1138,10 +1138,10 @@ modusergo()
 			switch (scram)
 			{
 			case 1: /*- SCRAM-SHA-1 */
-				gsasl_mkpasswd(0, "SCRAM-SHA-1", iter_count, b64salt.len ? b64salt.s : 0, 0, Password1.s, &result);
+				gsasl_mkpasswd(0, "SCRAM-SHA-1", iter_count, b64salt.len ? b64salt.s : 0, cram, Password1.s, &result);
 				break;
 			case 2: /*- SCRAM-SHA-256 */
-				gsasl_mkpasswd(0, "SCRAM-SHA-256", iter_count, b64salt.len ? b64salt.s : 0, 0, Password1.s, &result);
+				gsasl_mkpasswd(0, "SCRAM-SHA-256", iter_count, b64salt.len ? b64salt.s : 0, cram, Password1.s, &result);
 				break;
 			}
 		}
