@@ -2,55 +2,9 @@
         <body bgcolor="#ffffff" onload="init();">
 
 <script language="Javascript" type="text/javascript">
-<!--
-function init()
-{
-document.logon.gecos.focus();
-}
-//-->
 </script>
 
 <script type="text/javascript">
-<!--
-function enablefields(txt)
-{
-  if (txt=="disable")
-  {
-    document.forms[0].nforward.disabled=true;
-    document.forms[0].fsaved.disabled=true;
-##ts document.forms[0].spamcheck.disabled=false; ##tt
-  }
-  else if (txt=="forward")
-  {
-    document.forms[0].nforward.disabled=false;
-    document.forms[0].fsaved.disabled=false;
-##ts document.forms[0].spamcheck.disabled=false; ##tt
-  }
-  else if (txt=="blackhole")
-  {
-    document.forms[0].nforward.disabled=true;
-    document.forms[0].fsaved.disabled=true;
-##ts document.forms[0].spamcheck.disabled=true; ##tt
-  }
-  else
-  {
-    document.forms[0].nforward.disabled=false;
-    document.forms[0].fsaved.disabled=false;
-##ts document.forms[0].spamcheck.disabled=false; ##tt
-  }
-}
-
-function GetSelected()
-{
-   var i;
-   for( i=0; i<document.forms[0].cforward.length; ++i)
-      if( document.forms[0].cforward[i].checked)
-         return document.forms[0].cforward[i].value;
-   // default (non selected)
-   return -1;
-}
-
-//-->
 </script>
 
     <center>
@@ -90,6 +44,14 @@ function GetSelected()
         <td align="right">##X091</td>
         <td align="left"><input type="password" name="password2" maxlength=128 size=16></td>
       </tr>
+      <tr>
+        <td align="right">##X022</td>
+        <td align="left"><input type="checkbox" name="cram" ##J0>&nbsp;##X023</td>
+      </tr>
+      <tr>
+        <td align="right">##X024</td>
+        <td align="left"><input type="checkbox" name="scram" ##J9>&nbsp;##X025</td>
+      </tr>
 ##tq      <tr>
         <td align="right">##X249:</td>
         <td align="left">
@@ -108,22 +70,19 @@ function GetSelected()
         <td align="left">
           <input type="radio" name="cforward"
 onClick="document.forms[0].nforward.disabled=true;
-document.forms[0].fsaved.disabled=true;
-##ts document.forms[0].spamcheck.disabled=false; ##tt"
+document.forms[0].fsaved.disabled=true;"
 value="disable" ##i0> ##X205
 <HR>
           <input type="radio" name="cforward"
 onClick="document.forms[0].nforward.disabled=true;
-document.forms[0].fsaved.disabled=true;
-##ts document.forms[0].spamcheck.disabled=true; ##tt"
+document.forms[0].fsaved.disabled=true;"
 value="blackhole" ##i8> ##X303
 <HR>
         <input type="radio" name="cforward"
 onClick="document.forms[0].nforward.disabled=false;
 document.forms[0].fsaved.disabled=false;
 document.forms[0].nforward.select()
-document.forms[0].nforward.focus()
-##ts document.forms[0].spamcheck.disabled=false; ##tt"
+document.forms[0].nforward.focus()"
 value="forward" ##i1>&nbsp;##X211&nbsp;<input type="text" size="35" name="nforward" 
 value="##i2"><BR>
 &nbsp; &nbsp; <input type="checkbox" name="fsaved" ##i3> ##X210&nbsp;
@@ -139,16 +98,9 @@ value="on" ##i4> ##X212<BR>
 <textarea name="vmessage" rows="10" cols="60">##i6</textarea>
 <HR>
       <table cellpadding="1" cellspacing="1" border="0">
-##ts
-      <tr>
-         <td align="right">##X304:</td>
-         <td align="left">
-            <input type="checkbox" name="spamcheck" ##i9>
-         </td>
-      </tr>
-##tt
 
     <!-- user mailbox flags
+    user mailbox flags -->
     <tr>
     <td align=right valign=top>##X296:</td>
     <td align="left">
@@ -173,7 +125,6 @@ value="on" ##i4> ##X212<BR>
      <input type="radio" name="threeflag" value="off" ##J8>##X298
     </td>
     </tr>
-    user mailbox flags -->
 
     <tr>
      <td colspan=2 align=right>
@@ -184,10 +135,6 @@ value="on" ##i4> ##X212<BR>
    </form>
 
 <script type="text/javascript">
-<!--
-  // alert( GetSelected() );
-  enablefields( GetSelected() );
-//-->
 </script>
         </td>
       </tr>
