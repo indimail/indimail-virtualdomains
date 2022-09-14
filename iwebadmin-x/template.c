@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.22 2022-01-21 23:32:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.23 2022-09-14 13:57:12+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -48,6 +48,7 @@
 #include <fmt.h>
 #include <strerr.h>
 #include <error.h>
+#include <get_scram_secrets.h>
 #endif
 #include "alias.h"
 #include "autorespond.h"
@@ -881,11 +882,35 @@ int
 check_mailbox_flags(char newchar)
 {
 	struct passwd *vpw = NULL;
+	char          *cleartext = NULL, *ptr = NULL;
+	int            i;
 
 	if (!(vpw = sql_getpw(ActionUser.s, Domain.s)))
 		return -1;
+	if (!str_diffn(vpw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(vpw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
+		i = get_scram_secrets(vpw->pw_passwd, 0, 0, 0, 0, 0, 0, &cleartext, &ptr);
+		if (i != 6 && i != 8) {
+			strerr_warn1("unable to get secrets", 0);
+			out(html_text[026]);
+			out(" ");
+			out(TmpBuf.s);
+			out(" 1<BR>\n");
+			flush();
+			return -1;
+		}
+		vpw->pw_passwd = ptr;
+	} else
+		i = 0;
 	switch (newchar)
 	{
+	case '0':
+		if (cram || cleartext)
+			out("checked");
+		break;
+	case '9':
+		if (u_scram || i == 6 || i == 8)
+			out("checked");
+		break;
 	case '1': /* "checked" if V_USER0 is set */
 		if (vpw->pw_gid & V_USER0) {
 			out("checked");
