@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.26 2022-08-28 14:51:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.27 2022-09-14 17:08:35+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -48,6 +48,7 @@
 #include <strerr.h>
 #include <error.h>
 #include <case.h>
+#include <get_scram_secrets.h>
 #endif
 #ifdef HAVE_GSASL_MKPASSWD
 #include "gsasl_mkpasswd.h"
@@ -1128,18 +1129,26 @@ modusergo()
 			die_nomem();
 		if (!access(triv_pass.s, F_OK))
 			encrypt_flag = 0;
+		GetValue(TmpCGI, &box, "cram=");
+		cram = !str_diff(box.s, "on") ? 1 : 0;
+		GetValue(TmpCGI, &box, "scram=");
+		u_scram = !str_diff(box.s, "on") ? 1 : 0;
 #ifdef HAVE_GSASL_MKPASSWD
-		switch (scram)
-		{
-		case 1: /*- SCRAM-SHA-1 */
-			gsasl_mkpasswd(0, "SCRAM-SHA-1", iter_count, b64salt.len ? b64salt.s : 0, 0, Password1.s, &result);
-			break;
-		case 2: /*- SCRAM-SHA-256 */
-			gsasl_mkpasswd(0, "SCRAM-SHA-256", iter_count, b64salt.len ? b64salt.s : 0, 0, Password1.s, &result);
-			break;
+		if (u_scram) {
+			switch (scram)
+			{
+			case 1: /*- SCRAM-SHA-1 */
+				gsasl_mkpasswd(0, "SCRAM-SHA-1", iter_count, b64salt.len ? b64salt.s : 0, 0, Password1.s, &result);
+				break;
+			case 2: /*- SCRAM-SHA-256 */
+				gsasl_mkpasswd(0, "SCRAM-SHA-256", iter_count, b64salt.len ? b64salt.s : 0, 0, Password1.s, &result);
+				break;
+			}
 		}
+		ret_code = ipasswd(ActionUser.s, Domain.s, Password1.s, encrypt_flag, u_scram ? result.s : 0);
+#else
+		ret_code = ipasswd(ActionUser.s, Domain.s, Password1.s, encrypt_flag, 0);
 #endif
-		ret_code = ipasswd(ActionUser.s, Domain.s, Password1.s, encrypt_flag, scram ? result.s : 0);
 		if (ret_code != 1) {
 			copy_status_mesg(html_text[140]);
 			if (!stralloc_catb(&StatusMessage, " (error code ", 13) ||
@@ -1150,6 +1159,21 @@ modusergo()
 		} else
 			copy_status_mesg(html_text[139]);
 	}
+	vpw = sql_getpw(ActionUser.s, Domain.s);
+	if (!str_diffn(vpw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(vpw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
+		i = get_scram_secrets(vpw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &ptr);
+		if (i != 6 && i != 8) {
+			strerr_die1x(1, "iwebadmin: unable to get secrets");
+			out(html_text[026]);
+			out(" ");
+			out(TmpBuf.s);
+			out(" 1<BR>\n");
+			flush();
+			moduser();
+			return;
+		}
+		vpw->pw_passwd = ptr;
+	}
 #ifdef MODIFY_QUOTA
 	/*
 	 * strings used: 307 = "Invalid Quota", 308 = "Quota set to unlimited",
@@ -1158,7 +1182,6 @@ modusergo()
 	if (AdminType == DOMAIN_ADMIN) {
 		GetValue(TmpCGI, &Quota, "quota=");
 		scan_long(Quota.s, &q);
-		vpw = sql_getpw(ActionUser.s, Domain.s);
 		if (!Quota.len || !str_diff(vpw->pw_shell, Quota.s)) {
 		/*- Blank or no change, do nothing */
 		} else
@@ -1190,7 +1213,6 @@ modusergo()
 	}
 #endif
 	GetValue(TmpCGI, &Gecos, "gecos=");
-	vpw = sql_getpw(ActionUser.s, Domain.s);
 	/*- check for the V_USERx flags and set accordingly */
 	/*- new code by Tom Collins <tom@tomlogic.com>, Dec 2004 */
 	/*- replaces code by James Raftery <james@now.ie>, 12 Dec. 2002 */
@@ -1212,8 +1234,7 @@ modusergo()
 		sql_setpw(vpw, Domain.s, 0);
 	} else 
 	if (vpw->pw_gid != orig_gid)
-		sql_setpw(vpw, Domain.s, 0);
-
+		i = sql_setpw(vpw, Domain.s, 0);
 	/*- get the value of the autoresp checkbox */
 	GetValue(TmpCGI, &box, "autoresp=");
 	if (!str_diff(box.s, "on"))
@@ -1224,20 +1245,44 @@ modusergo()
 		saveacopy = 1;
 	/*- get the value of the cforward radio button */
 	GetValue(TmpCGI, &cforward, "cforward=");
-	if (!str_diff(cforward.s, "autoresp"))
-		autoresp = 1;
+	if (!str_diff(cforward.s, "disable") && !autoresp) {
+		call_hooks(HOOK_MODUSER, ActionUser.s, Domain.s, Password1.s, Gecos.s);
+		moduser();
+		return;
+	}
 	/*- open old .qmail file if it exists and load it into memory */
 	if (!stralloc_copys(&dotqmailfn, vpw->pw_dir) ||
 			!stralloc_catb(&dotqmailfn, "/.qmail", 7) ||
 			!stralloc_0(&dotqmailfn))
 		die_nomem();
-	if (!(err = stat(dotqmailfn.s, &sb))) {
-		if ((olddotqmail = (char *) alloc(sb.st_size))) {
-			if ((fd = open_read(dotqmailfn.s)) != -1) {
-				if (read(fd, olddotqmail, sb.st_size) == -1)
-					strerr_warn2(dotqmailfn.s, ": read: ", &strerr_sys);
-				close(fd);
-			}
+	err = stat(dotqmailfn.s, &sb);
+	if (err == -1 && errno == error_noent) {
+		call_hooks(HOOK_MODUSER, ActionUser.s, Domain.s, Password1.s, Gecos.s);
+		moduser();
+		return;
+	} else
+	if (err == -1) {
+		copy_status_mesg(html_text[150]);
+		if (!stralloc_catb(&StatusMessage, ": ", 2) ||
+				!stralloc_cats(&StatusMessage, error_str(errno)) ||
+				!stralloc_0(&StatusMessage))
+			die_nomem();
+		out("<h3>");
+		out(dotqmailfn.s);
+		out(" ");
+		out(html_text[150]);
+		out(": ");
+		out(error_str(errno));
+		out("</h3>\n");
+		flush();
+		moduser();
+		return;
+	}
+	if ((olddotqmail = (char *) alloc(sb.st_size))) {
+		if ((fd = open_read(dotqmailfn.s)) != -1) {
+			if (read(fd, olddotqmail, sb.st_size) == -1)
+				strerr_warn2(dotqmailfn.s, ": read: ", &strerr_sys);
+			close(fd);
 		}
 	}
 	if ((fd = open_trunc(dotqmailfn.s)) == -1) {
@@ -1254,8 +1299,8 @@ modusergo()
 		out(error_str(errno));
 		out("</h3>\n");
 		flush();
-		iclose();
-		exit(0);
+		moduser();
+		return;
 	}
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
 	/*
@@ -1329,6 +1374,7 @@ modusergo()
 		}
 		/*- this isn't enough to consider the .qmail file non-empty */
 	}
+	substdio_flush(&ssout);
 	if (autoresp) {
 		err = makeautoresp(&ssout, RealDir.s);
 		emptydotqmail = 0;
@@ -1346,8 +1392,7 @@ modusergo()
 		unlink(dotqmailfn.s);
 	if (err) {
 		moduser();
-		iclose();
-		exit(0);
+		return;
 	}
 	call_hooks(HOOK_MODUSER, ActionUser.s, Domain.s, Password1.s, Gecos.s);
 	moduser();
