@@ -1,21 +1,29 @@
 #!/bin/sh
+#
+# $Id: vmoduser_handle.in,v 2.5 2022-09-14 08:48:00+05:30 Cprogrammer Exp mbhangui $
+#
 verbose=0
 toggle=0
 args=$*
-while getopts vVnq:c:P:e:D:l:S:H:I: opt
+while getopts vVnq:c:P:e:h:Cm:S:I:D:l:H0123456789 opt
 do
 	case $opt in
-		V) echo $Id: vmoduser_handle.in,v 2.3 2022-08-07 13:08:11+05:30 Cprogrammer Exp mbhangui $;;
+		V) echo $Id: vmoduser_handle.in,v 2.5 2022-09-14 08:48:00+05:30 Cprogrammer Exp mbhangui $;;
 		v) verbose=1;;
 		n) toggle=1;;
 		q) quota="$OPTARG";;
 		c) gecos="$OPTARG";;
 		P) passwd="$OPTARG";;
 		e) epasswd="$OPTARG";;
-		l) vacation_file="$OPTARG";;
+		h) HASH=$OPTARG;;
+		C) cram=1;;
+		m) scram_method=$OPTARG;;
 		S) b64salt="$OPTARG";;
-		H) HASH="$OPTARG";;
 		I) iter="$OPTARG";;
+		D) dateFormat=$OPTARG;;
+		l) vacation_file="$OPTARG";;
+		0-9) ;;
+		H) help=1;;
 		?) exit 1;;
 	esac
 done
@@ -27,3 +35,9 @@ shift $((OPTIND-1))
 if [ $verbose -ne 0 ] ; then
 	@prefix@/bin/vuserinfo $@
 fi
+#
+# $Log: vmoduser_handle.in,v $
+# Revision 2.5  2022-09-14 08:48:00+05:30  Cprogrammer
+# added all vmoduser getopt options
+#
+#
