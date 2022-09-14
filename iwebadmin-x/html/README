@@ -14,12 +14,11 @@ The templates which use each value are listed below each item.
 Tag values H, n, Q, R, r, W, w are not defined in the source code.
 
 Tag values b, f, h, l, m, N, O are defined in template.c, but never
-used in a current template.  N isn't used anywhere either, but 
-it might be handy to use.  If the rest are obsolete it may be best 
+used in a current template. N isn't used anywhere either, but 
+it might be handy to use. If the rest are obsolete it may be best 
 to remove them.
 
 Tag value H is not defined in template.c but is used in header.html.
-
 
 To see which templates use a particular tag:
 
@@ -186,7 +185,7 @@ a particular tag, leave '-v' out of the second grep.
 
 		4	return 'checked ' if vacation message
 
-                5	return subject of vacation message
+		5	return subject of vacation message
 
 		6	return body of vacation message
 
@@ -216,7 +215,7 @@ the one data is buffered for.)
 
 ##j	Show number of mailing lists.  If (MaxMailingLists) > -1 this
 	returns (CurrMailingLists)/(MaxMailingLists) else it returns
-        (CurrMailingLists) followed by text string 229  [unlimited].
+	(CurrMailingLists) followed by text string 229  [unlimited].
 
 	show_mailinglist
 
@@ -233,7 +232,7 @@ the one data is buffered for.)
 -------------------------------------------------------------------------
 
 ##k	Show number of forwards.  If (MaxForwards) > -1 this returns
-        (CurForwards)/(MaxForwards) else it returns (CurForwards) followed
+	(CurForwards)/(MaxForwards) else it returns (CurForwards) followed
 	by text string 229  [unlimited].
 
 	show_forwards

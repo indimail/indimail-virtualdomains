@@ -1,17 +1,14 @@
 # What is it?
 
-iwebadmin is a cgi program for administering indimail.
-This version of iwebadmin is a hack of QmailAdmin https://www.inter7.com/qmailadmin-project
+iwebadmin is a cgi program for administering indimail. This version of iwebadmin is a hack of QmailAdmin https://www.inter7.com/qmailadmin-project
 
 Requirements
 
 - A UNIX computer (Linux/Solaris/BSD) and C compiler (gcc)
 
-- A web server (Apache, Zeus)
-    http://www.apache.org/
+- A web server [Apache](http://www.apache.org/)
 
-- indimail-virtualdomains
-  https://github.com/mbhangui/indimail-virtualdomains
+- [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains)
 
 - ezmlm / ezmlm-idx installed in /usr/bin
     - http://cr.yp.to/ezmlm.html
@@ -20,40 +17,27 @@ Requirements
 
 # Updates?
 
-Latest version is available at:
-
-https://github.com/mbhangui/indimail-virtualdomains/tree/master/iwebadmin-x
-
-Please refer your suggestions/bug reports to iwebadmin@indimail.org
+Latest version is available at https://github.com/mbhangui/indimail-virtualdomains/tree/master/iwebadmin-x. Please refer your suggestions/bug reports to iwebadmin@indimail.org
 
 # Install guide 
 
-iwebadmin 1.3 and later requires indimail 1.7 or later.
-iwebadmin 1.4 and later requires indimail 2.x or later.
+iwebadmin 1.3 and later requires indimail 1.7 or later. iwebadmin 1.4 and later requires indimail 2.x or later.
 
-If you are installing on x86\_64 platform (64-bit Intel/AMD processor),
-or if configure exits with an "Invalid configuration" error,
-you will need to run `libtoolize --force` in the IwebAdmin source
-directory before following any other instructions in this guide.
+If you are installing on x86\_64 platform (64-bit Intel/AMD processor), or if configure exits with an "Invalid configuration" error, you will need to run `libtoolize --force` in the IwebAdmin source directory before following any other instructions in this guide.
 
-iwebadmin needs to install into directories
+iwebadmin needs root to install into directories
 
 - /usr/share/iwebadmin - lang and html directory,
 - /var/www/cg-bin      - the web server's cgi-bin directory
 - /var/www/html/image  - web server's image directory.
-Hence root.
 
-Since iwebadmin is a suid binary, make sure it's installed on
-a volume that isn't mounted with the 'nosuid' option in /etc/fstab.
+Since iwebadmin is a suid binary, make sure it's installed on a volume that isn't mounted with the 'nosuid' option in /etc/fstab.
 
-Be root before you follow the rest of the instructions or
-your installation will fail. 
+Be root before you follow the rest of the instructions or your installation will fail. 
 
 If you have problems using 'make', try using 'gmake' instead.
 
-Note to people who did not read the above paragraph:
-When you give up on your installation, try reading
-the above information then starting from scratch.
+Note to people who did not read the above paragraph: When you give up on your installation, try reading the above information then starting from scratch.
 
 1.  fast install guide.. 
     type as root: 
@@ -95,8 +79,7 @@ the above information then starting from scratch.
     *Use this if your cgi bin is not in a standard location
     --enable-cgibindir={dir}   HTTP server's cgi-bin directory.
 
-    Since iwebadmin is a suid binary, make sure the cgi-bin directory is
-    on a volume that isn't mounted with the 'nosuid' option in /etc/fstab.
+    Since iwebadmin is a suid binary, make sure the cgi-bin directory is on a volume that isn't mounted with the 'nosuid' option in /etc/fstab.
 
     Use this if your don't want the HTML templates to be in /usr/share/iwebadmin
 
@@ -193,7 +176,9 @@ the above information then starting from scratch.
 
    Lastly, you can set default quotas on a per domain basis.  Just include this line in your .iwebadmin-limits file:
 
+    ```
     default_quota <quota>
+    ```
 
    The format of \<quota> is the same used for other command line tools like vadduser, vsetuserquota, and vmoduser.
    
@@ -221,8 +206,7 @@ the above information then starting from scratch.
 
     user = set the user name in the login page.
 
-    returnhttp and returntext (both must be used) = create a link to 
-    returnhttp on all iwebadmin pages with returntext for its label.
+    returnhttp and returntext (both must be used) = create a link to returnhttp on all iwebadmin pages with returntext for its label.
 
 - For using nginx, you can create /etc/nginx/default.d/iwebadmin.conf
 
@@ -276,7 +260,6 @@ the above information then starting from scratch.
 
 8 .  Enjoy
 
-    If you have any questions or comments please email indimail-support@lists.sourceforge.net or join the mailing list at
-    http://groups.google.com/group/indimail
+    If you have any questions or comments please email indimail-support@lists.sourceforge.net or join the [mailing list](http://groups.google.com/group/indimail)
 
 $Id: INSTALL,v 1.8 2017-03-18 14:20:57+05:30 Cprogrammer Exp mbhangui $
