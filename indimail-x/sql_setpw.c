@@ -62,6 +62,7 @@ sql_setpw(struct passwd *inpw, char *domain, char *scram)
 	static stralloc SqlBuf = {0};
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	struct passwd  *pw;
+	struct passwd   PwTmp;
 	char           *tmpstr;
 	uid_t           myuid;
 	uid_t           uid;
@@ -94,6 +95,8 @@ sql_setpw(struct passwd *inpw, char *domain, char *scram)
 	}
 	if ((err = iopen((char *) 0)) != 0)
 		return (err);
+	PwTmp = *inpw; /*- structure copy */
+	inpw = &PwTmp;
 	if (!(pw = sql_getpw(inpw->pw_name, domain))) {
 		if (userNotFound)
 			strerr_warn5("sql_setpw: ", inpw->pw_name, "@", domain, ": No such user", 0);
