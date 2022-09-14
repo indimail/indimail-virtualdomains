@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.11  2022-09-14 13:41:26+05:30  Cprogrammer
+ * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
+ *
  * Revision 1.10  2022-08-28 15:11:23+05:30  Cprogrammer
  * fix compilation error for non gsasl build
  *
@@ -56,6 +59,7 @@
 #include <scan.h>
 #include <mkpasswd.h>
 #include <hashmethods.h>
+#include <get_scram_secrets.h>
 #endif
 #ifdef HAVE_GSASL_H
 #include <gsasl.h>
@@ -87,7 +91,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.10 2022-08-28 15:11:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.11 2022-09-14 13:41:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -144,13 +148,13 @@ die_nomem()
 
 int
 get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Domain, stralloc *Gecos,
-		stralloc *Passwd, stralloc *DateFormat, stralloc *Quota,
+		stralloc *enc_pass, stralloc *DateFormat, stralloc *Quota,
 		stralloc *vacation_file, int *toggle, int *GidFlag, int *ClearFlags,
 		int *QuotaFlag, int *set_vacation, int *docram, char **clear_text,
 		char **salt, int *iter, int *scram)
 {
 	int             c, i, encrypt_flag = -1;
-	char            optstr[41], strnum[FMT_ULONG];
+	char            optstr[56], strnum[FMT_ULONG];
 
 	*toggle = *ClearFlags = 0;
 	*QuotaFlag = 0;
@@ -165,7 +169,7 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 		*iter = 4096;
 	/*- make sure optstr has enough size to hold all options + 1 */
 	i = 0;
-	i += fmt_strn(optstr + i, "avutxHD:c:q:dpwisobr0123h:e:l:P:", 32);
+	i += fmt_strn(optstr + i, "avutxHD:c:q:dpwisobr0123h:e:l:P:0123456789", 42);
 #ifdef ENABLE_AUTH_LOGGING
 	i += fmt_strn(optstr + i, "n", 1);
 #endif
@@ -177,8 +181,7 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 	if ((i + 1) > sizeof(optstr))
 		strerr_die2x(100, FATAL, "allocated space for getopt string not enough");
 	optstr[i] = 0;
-	while ((c = getopt(argc, argv, optstr)) != opteof) 
-	{
+	while ((c = getopt(argc, argv, optstr)) != opteof) {
 		switch (c)
 		{
 		case 'v':
@@ -201,10 +204,10 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 				encrypt_flag = 0;
 			/*- flow through */
 		case 'P':
-			mkpasswd(*clear_text = optarg, Passwd, encrypt_flag);
+			mkpasswd(*clear_text = optarg, enc_pass, encrypt_flag);
 			if (verbose) {
-				errout("vmoduser", "Password set as ");
-				errout("vmoduser", Passwd->s);
+				errout("vmoduser", "encrypted password set as ");
+				errout("vmoduser", enc_pass->s);
 				errout("vmoduser", "\n");
 				errflush("vmoduser");
 			}
@@ -233,12 +236,12 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 				strerr_die1x(111, "out of memory");
 			encrypt_flag = 1;
 			break;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'C':
 			if (docram)
 				*docram = 1;
 			break;
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'm':
 			if (!scram)
 				break;
@@ -363,7 +366,7 @@ main(argc, argv)
 	char           *argv[];
 {
 	static stralloc Email = {0}, User = {0}, Domain = {0}, Gecos = {0},
-					Passwd = {0}, DateFormat = {0}, Quota = {0}, vacation_file = {0},
+					enc_pass = {0}, DateFormat = {0}, Quota = {0}, vacation_file = {0},
 					tmpbuf = {0}, tmpQuota = {0};
 	int             GidFlag = 0, QuotaFlag = 0, toggle = 0, ClearFlags,
 					set_vacation = 0, err, fd, i;
@@ -392,18 +395,18 @@ main(argc, argv)
 
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	if (get_options(argc, argv, &User, &Email, &Domain, &Gecos, &Passwd,
+	if (get_options(argc, argv, &User, &Email, &Domain, &Gecos, &enc_pass,
 			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
 			&QuotaFlag, &set_vacation, &docram, &clear_text, &b64salt, &iter, &scram))
 		return (1);
 #else
-	if (get_options(argc, argv, &User, &Email, &Domain, &Gecos, &Passwd,
+	if (get_options(argc, argv, &User, &Email, &Domain, &Gecos, &enc_pass,
 			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
 			&QuotaFlag, &set_vacation, 0, 0, 0, 0, 0))
 		return (1);
 #endif
 #else
-	if (get_options(argc, argv, &User, &Email, &Domain, &Gecos, &Passwd,
+	if (get_options(argc, argv, &User, &Email, &Domain, &Gecos, &enc_pass,
 			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
 			&QuotaFlag, &set_vacation, 0, 0, 0, 0, 0))
 		return (1);
@@ -419,16 +422,18 @@ main(argc, argv)
 	}
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	switch (scram)
-	{
-	case 1: /*- SCRAM-SHA-1 */
-		if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-1", iter, b64salt, docram, clear_text, &result)) != NO_ERR)
-			strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
-		break;
-	case 2: /*- SCRAM-SHA-256 */
-		if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-256", iter, b64salt, docram, clear_text, &result)) != NO_ERR)
-			strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
-		break;
+	if (clear_text) {
+		switch (scram)
+		{
+		case 1: /*- SCRAM-SHA-1 */
+			if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-1", iter, b64salt, docram, clear_text, &result)) != NO_ERR)
+				strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
+			break;
+		case 2: /*- SCRAM-SHA-256 */
+			if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-256", iter, b64salt, docram, clear_text, &result)) != NO_ERR)
+				strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
+			break;
+		}
 	}
 #endif
 #endif
@@ -497,8 +502,18 @@ main(argc, argv)
 	pw = &PwTmp;
 	if (Gecos.len)
 		pw->pw_gecos = Gecos.s;
-	if (Passwd.len)
-		pw->pw_passwd = Passwd.s;
+	if (enc_pass.len)
+		pw->pw_passwd = enc_pass.s;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
+		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &ptr);
+		if (i != 6 && i != 8)
+			strerr_die1x(1, "vmoduser: unable to get secrets");
+		pw->pw_passwd = ptr;
+	}
+#endif
+#endif
 	if (ClearFlags == 1)
 		pw->pw_gid = 0;
 	else
@@ -570,7 +585,7 @@ main(argc, argv)
 #else
 	ptr = (char *) NULL;
 #endif
-	if ((Gecos.len || Passwd.len || ClearFlags || GidFlag || QuotaFlag) &&
+	if ((Gecos.len || enc_pass.len || ClearFlags || GidFlag || QuotaFlag) &&
 			(err = sql_setpw(pw, real_domain, ptr))) {
 		strerr_warn1("vmoduser: sql_setpw failed", 0);
 		return (1);
@@ -590,7 +605,7 @@ main(argc, argv)
 		quota = recalc_quota(tmpbuf.s, 2);
 #endif
 	}
-	if (Passwd.len) {
+	if (enc_pass.len) {
 		if (!quota) {
 			if (!stralloc_copys(&tmpbuf, pw->pw_dir) ||
 					!stralloc_catb(&tmpbuf, "/Maildir", 8) ||
@@ -655,8 +670,9 @@ main(argc, argv)
 			else
 				base_argv0++;
 			return (post_handle("%s/%s%s", LIBEXECDIR, base_argv0, tmpbuf.s));
-		} else
+		} else {
 			return (post_handle("%s%s", ptr, tmpbuf.s));
+		}
 	}
 	return (err);
 }

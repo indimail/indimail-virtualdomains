@@ -1,5 +1,8 @@
 /*
  * $Log: vsetpass.c,v $
+ * Revision 1.8  2022-09-14 08:48:10+05:30  Cprogrammer
+ * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
+ *
  * Revision 1.7  2022-08-05 21:23:42+05:30  Cprogrammer
  * reversed encrypt_flag setting for mkpasswd() change in encrypt_flag
  *
@@ -43,6 +46,10 @@
 #include <pw_comp.h>
 #include <mkpasswd.h>
 #include <getEnvConfig.h>
+#include <get_scram_secrets.h>
+#endif
+#ifdef HAVE_GSASL_H
+#include <gsasl.h>
 #endif
 #include "sqlOpen_user.h"
 #include "iopen.h"
@@ -59,7 +66,7 @@
 #include "getpeer.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vsetpass.c,v 1.7 2022-08-05 21:23:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetpass.c,v 1.8 2022-09-14 08:48:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -226,7 +233,26 @@ main(int argc, char **argv)
 		flush("vsetpass");
 		_exit (1);
 	}
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	crypt_pass = (char *) NULL;
+	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
+		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &crypt_pass);
+		if (i != 6 && i != 8) {
+			out("vsetpass", "454 unable to get secrets (#4.3.0)\r\n");
+			flush("vsetpass");
+			strerr_die1(1, "vsetpass: unable to get secrets", 0);
+		}
+	} else {
+		i = 0;
+		crypt_pass = pw->pw_passwd;
+	}
+#else
 	crypt_pass = pw->pw_passwd;
+#endif
+#else
+	crypt_pass = pw->pw_passwd;
+#endif
 	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	if (env_get("DEBUG_LOGIN"))
 		strerr_warn13("vsetpass: pid [", module_pid, "] login [", login, "] old_pass [",

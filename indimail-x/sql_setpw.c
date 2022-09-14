@@ -1,5 +1,8 @@
 /*
  * $Log: sql_setpw.c,v $
+ * Revision 1.4  2022-09-14 08:47:41+05:30  Cprogrammer
+ * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
+ *
  * Revision 1.3  2022-08-07 13:02:02+05:30  Cprogrammer
  * added scram argument to set scram password
  *
@@ -25,6 +28,11 @@
 #include <strerr.h>
 #include <stralloc.h>
 #include <fmt.h>
+#include <str.h>
+#include <get_scram_secrets.h>
+#endif
+#ifdef HAVE_GSASL_H
+#include <gsasl.h>
 #endif
 #include "iopen.h"
 #include "get_indimailuidgid.h"
@@ -38,7 +46,7 @@
 #include "create_table.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_setpw.c,v 1.3 2022-08-07 13:02:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_setpw.c,v 1.4 2022-09-14 08:47:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -59,6 +67,12 @@ sql_setpw(struct passwd *inpw, char *domain, char *scram)
 	uid_t           uid;
 	gid_t           gid;
 	int             err, rows_updated = 0;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	static stralloc result = {0};
+	int             i;
+#endif
+#endif
 
 	if (indimailuid == -1 || indimailgid == -1)
 		get_indimailuidgid(&indimailuid, &indimailgid);
@@ -87,8 +101,25 @@ sql_setpw(struct passwd *inpw, char *domain, char *scram)
 			strerr_warn5("sql_setpw: ", inpw->pw_name, "@", domain, ": temporary database error", 0);
 		return (-1);
 	}
+
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
+		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &tmpstr);
+		if (i != 6 && i != 8)
+			strerr_die1x(1, "sql_getpw: unable to get secrets");
+		pw->pw_passwd = tmpstr;
+	}
+	if (!pwcomp(pw, copyPwdStruct(inpw)) && !str_diffn(scram, result.s, result.len))
+		return (0);
+#else
 	if (!pwcomp(pw, copyPwdStruct(inpw)))
 		return (0);
+#endif
+	if (!pwcomp(pw, copyPwdStruct(inpw)))
+		return (0);
+#endif
+
 	if (site_size == LARGE_SITE) {
 		if (!domain || *domain)
 			tmpstr = MYSQL_LARGE_USERS_TABLE;

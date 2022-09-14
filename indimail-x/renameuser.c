@@ -1,5 +1,8 @@
 /*
  * $Log: renameuser.c,v $
+ * Revision 1.5  2022-09-14 08:47:36+05:30  Cprogrammer
+ * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
+ *
  * Revision 1.4  2022-08-05 22:57:27+05:30  Cprogrammer
  * removed apop argument to iadduser()
  *
@@ -31,10 +34,15 @@
 #include <fmt.h>
 #include <str.h>
 #include <replacestr.h>
+#include <get_scram_secrets.h>
+#endif
+#ifdef HAVE_GSASL_H
+#include <gsasl.h>
 #endif
 #include "variables.h"
 #include "get_real_domain.h"
 #include "get_assign.h"
+#include "sql_setpw.h"
 #include "is_distributed_domain.h"
 #include "open_master.h"
 #include "is_user_present.h"
@@ -49,7 +57,7 @@
 #include "deluser.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: renameuser.c,v 1.4 2022-08-05 22:57:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: renameuser.c,v 1.5 2022-09-14 08:47:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -75,6 +83,12 @@ renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *
 #endif
 	struct passwd  *pw;
 	int             i, err, inactive_flag;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	static stralloc result = {0};
+	char           *enc_pass;
+#endif
+#endif
 
 	if (!oldUser->len || !newUser->len || !oldDomain->len || !newDomain->len || !isalpha((int) *newUser->s)) {
 		strerr_warn1("renameuser: Illegal Username/domain", 0);
@@ -164,11 +178,21 @@ renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *
 		strerr_warn3("Domain ", real_domain, " does not exist", 0);
 		return (-1);
 	}
+
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
+		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &enc_pass);
+		if (i != 6 && i != 8)
+			strerr_die1x(1, "renameuser: unable to get secrets");
+		pw->pw_passwd = enc_pass;
+	}
+#endif
+#endif
 	if ((err = iadduser(newUser->s, newDomain->s, 0, pw->pw_passwd, pw->pw_gecos,
 		pw->pw_shell, 0, !inactive_flag, 0)) == -1)
-	{
 		return (-1);
-	} else
+	else
 	if (!(pw = sql_getpw(newUser->s, newDomain->s))) {
 		if (userNotFound)
 			strerr_warn4(newUser->s, "@", newDomain->s, ": No such user", 0);
@@ -181,6 +205,15 @@ renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *
 		strerr_warn5("renameuser: MoveFile: ", oldDir.s, " --> ", pw->pw_dir, ": ", &strerr_sys);
 		return (-1);
 	}
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	if (result.len && (err = sql_setpw(pw, newDomain->s, result.s))) {
+		strerr_warn1("renameuser: sql_setpw failed", 0);
+		return (-1);
+	}
+#endif
+#endif
+
 #ifdef ENABLE_AUTH_LOGGING
 	if (!stralloc_copyb(&SqlBuf, "update low_priority lastauth set user=\"", 39) ||
 			!stralloc_cat(&SqlBuf, newUser) ||

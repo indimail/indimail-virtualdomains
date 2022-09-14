@@ -1,5 +1,8 @@
 /*
  * $Log: iauth.c,v $
+ * Revision 1.7  2022-09-13 22:04:09+05:30  Cprogrammer
+ * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
+ *
  * Revision 1.6  2020-10-04 08:34:13+05:30  Cprogrammer
  * allow size paramter to be null
  *
@@ -79,6 +82,10 @@
 #include <fmt.h>
 #include <scan.h>
 #include <getEnvConfig.h>
+#include <get_scram_secrets.h>
+#endif
+#ifdef HAVE_GSASL_H
+#include <gsasl.h>
 #endif
 #include "sqlOpen_user.h"
 #include "iopen.h"
@@ -98,7 +105,7 @@
 #include "common.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: iauth.c,v 1.6 2020-10-04 08:34:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iauth.c,v 1.7 2022-09-13 22:04:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      defaultTask(char *, char *, struct passwd *, char *, int);
@@ -124,6 +131,7 @@ i_auth(char *email, char *service, int *size, int debug)
 	char            strnum[FMT_ULONG];
 	uid_t           uid;
 	gid_t           gid;
+	int             i;
 	struct passwd  *pw;
 
 	_global_pw = (struct passwd *) 0;
@@ -190,7 +198,25 @@ i_auth(char *email, char *service, int *size, int debug)
 		close_connection();
 		return ((char *) 0);
 	}
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	crypt_pass = (char *) NULL;
+	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
+		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &crypt_pass);
+		if (i != 6 && i != 8) {
+			close_connection();
+			strerr_warn1("i_auth: unable to get secrets", 0);
+		}
+	} else {
+		i = 0;
+		crypt_pass = pw->pw_passwd;
+	}
+#else
 	crypt_pass = pw->pw_passwd;
+#endif
+#else
+	crypt_pass = pw->pw_passwd;
+#endif
 	if (env_get("DEBUG_LOGIN"))
 		strerr_warn7("i_auth: service[", service ? service : "null", "] email [", email, "] pw_passwd [", crypt_pass, "]", 0);
 	close_connection();
