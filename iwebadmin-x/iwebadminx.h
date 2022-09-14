@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadminx.h,v 1.4 2022-08-07 21:46:12+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadminx.h,v 1.5 2022-09-14 13:56:57+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -54,4 +54,4 @@ extern int      CurMailingLists;
 extern int      Uid;
 extern int      Gid;
 extern char     Lang[40];
-extern int      scram, iter_count;
+extern int      scram, u_scram, cram, iter_count;
