@@ -1,5 +1,4 @@
 /*
- * $Id: user.c,v 1.30 2022-09-15 12:50:01+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -15,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ *
+ * $Id: user.c,v 1.30 2022-09-15 23:11:39+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -107,7 +108,7 @@ show_user_lines(char *user, char *dom, time_t mytime, char *dir)
 
 	/*- Get the default catchall box name */
 	if ((fd = open_read(".qmail-default")) == -1) {
-		/*- report error opening .qmail-default and return */
+		/*- report error opening .qmail-default and exit */
 		out("<tr><td colspan=\"");
 		strnum[fmt_int(strnum, colspan)] = 0;
 		out(strnum);
@@ -115,7 +116,8 @@ show_user_lines(char *user, char *dom, time_t mytime, char *dir)
 		out(html_text[144]);
 		out(" .qmail-default</tr></td>");
 		flush();
-		return (1);
+		iclose();
+		_exit(0);
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
@@ -123,7 +125,8 @@ show_user_lines(char *user, char *dom, time_t mytime, char *dir)
 		out(html_text[144]);
 		out(" .qmail-default 1<BR>\n");
 		flush();
-		return (1);
+		iclose();
+		_exit(0);
 	}
 	if (match) {
 		line.len--;
@@ -362,7 +365,8 @@ adduser()
 		out(html_text[142]);
 		out("\n");
 		flush();
-		return;
+		iclose();
+		_exit(0);
 	}
 	if (MaxPopAccounts != -1 && CurPopAccounts >= MaxPopAccounts) {
 		if (!stralloc_copys(&StatusMessage, html_text[199]) ||
@@ -372,7 +376,8 @@ adduser()
 			die_nomem();
 		StatusMessage.len--;
 		show_menu();
-		return;
+		iclose();
+		_exit(0);
 	}
 	send_template("add_user.html");
 }
@@ -384,7 +389,9 @@ moduser()
 				(AdminType == USER_ADMIN &&
 				 !str_diffn(ActionUser.s, Username.s, ActionUser.len > Username.len ? ActionUser.len : Username.len)))) {
 		copy_status_mesg(html_text[142]);
-		return;
+		show_menu();
+		iclose();
+		_exit(0);
 	}
 	send_template("mod_user.html");
 }
@@ -405,7 +412,9 @@ addusernow()
 	load_limits();
 	if (AdminType != DOMAIN_ADMIN) {
 		copy_status_mesg(html_text[142]);
-		return;
+		show_menu();
+		iclose();
+		_exit(0);
 	}
 
 	if (MaxPopAccounts != -1 && CurPopAccounts >= MaxPopAccounts) {
@@ -416,7 +425,8 @@ addusernow()
 			die_nomem();
 		StatusMessage.len--;
 		show_menu();
-		return;
+		iclose();
+		_exit(0);
 	}
 	GetValue(TmpCGI, &Newu, "newu=");
 	if (fixup_local_name(Newu.s)) {
@@ -426,7 +436,8 @@ addusernow()
 			die_nomem();
 		StatusMessage.len--;
 		adduser();
-		return;
+		iclose();
+		_exit(0);
 	}
 	if (check_local_user(Newu.s)) {
 		len = str_len(html_text[175]) + Newu.len + 28;
@@ -441,7 +452,8 @@ addusernow()
 			len = plen + 28;
 		}
 		adduser();
-		return;
+		iclose();
+		_exit(0);
 	}
 #ifdef MODIFY_QUOTA
 	GetValue(TmpCGI, &Quota, "quota=");
@@ -451,13 +463,15 @@ addusernow()
 	if (str_diffn(Password1.s, Password2.s, Password1.len > Password2.len ? Password1.len : Password2.len)) {
 		copy_status_mesg(html_text[200]);
 		adduser();
-		return;
+		iclose();
+		_exit(0);
 	}
 #ifndef TRIVIAL_PASSWORD_ENABLED
 	if (str_str(Newu.s, Password1.s)) {
 		copy_status_mesg(html_text[320]);
 		adduser();
-		return;
+		iclose();
+		_exit(0);
 	}
 #endif
 
@@ -465,7 +479,8 @@ addusernow()
 	if (!Password1.len) {
 		copy_status_mesg(html_text[234]);
 		adduser();
-		return;
+		iclose();
+		_exit(0);
 	}
 #endif
 	if (!stralloc_copy(&email, &Newu) ||
@@ -485,9 +500,9 @@ addusernow()
 	GetValue(TmpCGI, &TmpBuf, "number_of_mailinglist=");
 	scan_int(TmpBuf.s, &num);
 	if (num > 0) {
-		if (!(mailingListNames = (char **) alloc(sizeof (char *) * num))) {
+		if (!(mailingListNames = (char **) alloc(sizeof (char *) * num)))
 			die_nomem();
-		} else {
+		else {
 			for (cnt = 0; cnt < num; cnt++) {
 				if (!stralloc_copys(&tmp1, "subscribe") ||
 						!stralloc_catb(&tmp1, strnum, fmt_int(strnum, cnt)) ||
@@ -508,7 +523,7 @@ addusernow()
 								!stralloc_0(&tmp2))
 							die_nomem();
 						execl(tmp1.s, "ezmlm-sub", tmp2.s, email.s, NULL);
-						exit(127);
+						_exit(127);
 					} else {
 						wait(&pid);
 					}
@@ -682,11 +697,15 @@ delusergo()
 
 	if (AdminType != DOMAIN_ADMIN) {
 		copy_status_mesg(html_text[142]);
-		return;
+		show_users();
+		iclose();
+		_exit(0);
 	}
 	if (deluser(ActionUser.s, Domain.s, 1) ) {
 		copy_status_mesg(html_text[145]);
-		return;
+		show_users();
+		iclose();
+		_exit(0);
 	}
 	len = ActionUser.len + str_len(html_text[141]) + 28;
 	for (plen = 0;;) {
@@ -808,7 +827,8 @@ set_qmaildefault(char *opt)
 		close(fd);
 	}
 	show_users();
-	return;
+	iclose();
+	_exit(0);
 }
 
 void
@@ -831,7 +851,7 @@ setremotecatchallnow()
 			len = plen + 28;
 		}
 		setremotecatchall();
-		return;
+		_exit(0);
 	}
 	if (Newu.s[0] == '@') {
 		/*- forward all mail to external domain */
@@ -871,16 +891,18 @@ get_catchall()
 		out(html_text[144]);
 		out(" .qmail-default</td><tr>\n");
 		flush();
-		return;
+		iclose();
+		_exit(0);
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
 		strerr_warn1("get_catchall: read: .qmail-default", &strerr_sys);
 		out(html_text[144]);
 		out(" .qmail-default 1<BR>\n");
-		flush();
 		close(fd);
-		return;
+		flush();
+		iclose();
+		_exit(0);
 	}
 	if (match) {
 		line.len--;
@@ -897,9 +919,10 @@ get_catchall()
 	if (!*ptr) {
 		out(html_text[159]);
 		out(" .qmail-default 1<BR>\n");
-		flush();
 		close(fd);
-		return;
+		flush();
+		iclose();
+		_exit(0);
 	}
 	close(fd);
 	if (str_str(line.s, " bounce-no-mailbox\n")) {
@@ -1088,19 +1111,23 @@ modusergo()
 	if (!(AdminType == DOMAIN_ADMIN ||
 			(AdminType == USER_ADMIN && !str_diffn(ActionUser.s, Username.s, ActionUser.len > Username.len ? ActionUser.len : Username.len)))) {
 		copy_status_mesg(html_text[142]);
-		return;
+		moduser();
+		iclose();
+		_exit(0);
 	}
 	if (Password1.len && Password2.len) {
 		if (str_diff(Password1.s, Password2.s)) {
 			copy_status_mesg(html_text[200]);
 			moduser();
-			return;
+			iclose();
+			_exit(0);
 		}
 #ifndef TRIVIAL_PASSWORD_ENABLED
 		if (str_str(ActionUser.s, Password1.s)) {
 			copy_status_mesg(html_text[320]);
 			moduser();
-			return;
+			iclose();
+			_exit(0);
 		}
 #endif
 		if (!stralloc_copy(&triv_pass, &RealDir) ||
@@ -1144,11 +1171,9 @@ modusergo()
 		i = get_scram_secrets(vpw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &ptr);
 		if (i != 6 && i != 8) {
 			strerr_die1x(1, "iwebadmin: unable to get secrets");
-			out(html_text[026]);
-			out(" 1<BR>\n");
-			flush();
+			copy_status_mesg(html_text[026]);
 			moduser();
-			return;
+			_exit(0);
 		}
 		vpw->pw_passwd = ptr;
 	}
@@ -1251,7 +1276,6 @@ modusergo()
 		out(": ");
 		out(error_str(errno));
 		out("</h3>\n");
-		flush();
 		moduser();
 		return;
 	}
@@ -1277,7 +1301,6 @@ modusergo()
 		out(": ");
 		out(error_str(errno));
 		out("</h3>\n");
-		flush();
 		moduser();
 		return;
 	}
@@ -1430,7 +1453,7 @@ parse_users_dotqmail(char newchar)
 						close(fd2);
 						fd2 = -1;
 					}
-					return;
+					_exit(0);
 				}
 				if (!line.len)
 					break;
@@ -1539,7 +1562,7 @@ parse_users_dotqmail(char newchar)
 							close(fd2);
 							fd2 = -1;
 						}
-						return;
+						_exit(0);
 					}
 					if (!line.len)
 						break;
@@ -1591,7 +1614,7 @@ parse_users_dotqmail(char newchar)
 							close(fd2);
 							fd2 = -1;
 						}
-						return;
+						_exit(0);
 					}
 					if (!line.len)
 						break;
@@ -1640,7 +1663,7 @@ parse_users_dotqmail(char newchar)
 							close(fd2);
 							fd2 = -1;
 						}
-						return;
+						_exit(0);
 					}
 					if (!line.len)
 						break;
@@ -1661,3 +1684,10 @@ parse_users_dotqmail(char newchar)
 			break;
 	}
 }
+
+/*-
+ * $Log: user.c,v $
+ * Revision 1.30  2022-09-15 23:11:39+05:30  Cprogrammer
+ * replaced exit with _exit
+ *
+ */

@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.10 2022-01-21 14:14:39+05:30 Cprogrammer Exp mbhangui $
+ * $Id: command.c,v 1.11 2022-09-15 23:10:54+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -82,7 +82,7 @@ process_commands(char *cmmd)
 				/*- malformed request -- missing fields */
 				show_menu();
 				iclose();
-				exit(0);
+				_exit(0);
 			}
 		}
 	} else
@@ -313,7 +313,7 @@ process_commands(char *cmmd)
 	if (!str_diff(cmmd, "showcounts"))
 		show_counts();
 	iclose();
-	exit(0);
+	_exit(0);
 }
 
 void
@@ -391,7 +391,7 @@ setdefaultaccount()
 					substdio_put(&ssout, "\n", 1) ||
 					substdio_flush(&ssout))
 			{
-				strerr_warn1("set_qmaildefault: write: ", &strerr_sys);
+				strerr_warn1("setdefaultaccount: write: ", &strerr_sys);
 				out(html_text[144]);
 				out(" .qmail-default<br>\n");
 				flush();
@@ -402,5 +402,5 @@ setdefaultaccount()
 	}
 	show_users();
 	iclose();
-	exit(0);
+	_exit(0);
 }
