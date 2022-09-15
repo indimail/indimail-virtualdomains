@@ -1,0 +1,23 @@
+#!/bin/sh
+echo "Searching templates"
+for i in A B C D E F G H I J K L M N O P Q R S T U V W X Y Z \
+	a b c d e f g h i j k l m n o p q r s t u v w x y z
+do
+	grep -c '##'$i html/*.html|grep -v ':0' > /dev/null
+	if [ $? -ne 0 ] ; then
+		echo $i ----
+		grep -c '##'$i html/*.html|grep -v ':0'
+		echo
+	fi
+done
+echo "Searching template.c"
+for i in A B C D E F G H I J K L M N O P Q R S T U V W X Y Z \
+	a b c d e f g h i j k l m n o p q r s t u v w x y z
+do
+	grep "				case '$i'" template.c >/dev/null
+	if [ $? -ne 0 ] ; then
+		echo $i ----
+		grep "				case '$i'" template.c
+		echo
+	fi
+done
