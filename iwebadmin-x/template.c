@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.23 2022-09-14 13:57:12+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.24 2022-09-15 12:51:02+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -874,8 +874,7 @@ send_template_now(char *filename)
 
 /*
  * Display status of mailbox flags 
- */
-/*
+ *
  * James Raftery <james@now.ie> 12 Dec. 2002 / 15 Apr. 2003 
  */
 int
@@ -892,8 +891,6 @@ check_mailbox_flags(char newchar)
 		if (i != 6 && i != 8) {
 			strerr_warn1("unable to get secrets", 0);
 			out(html_text[026]);
-			out(" ");
-			out(TmpBuf.s);
 			out(" 1<BR>\n");
 			flush();
 			return -1;
