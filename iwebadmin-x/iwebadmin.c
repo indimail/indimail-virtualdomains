@@ -1,5 +1,8 @@
 /*
  * $Log: iwebadmin.c,v $
+ * Revision 1.30  2022-09-15 17:48:40+05:30  Cprogrammer
+ * fixed SIGSEGV
+ *
  * Revision 1.29  2022-09-15 12:48:33+05:30  Cprogrammer
  * extract encrypted password using get_scram_secrets
  *
@@ -45,7 +48,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: iwebadmin.c,v 1.29 2022-09-15 12:48:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.30 2022-09-15 17:48:40+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -180,6 +183,8 @@ auth_user(struct passwd *pw, char *password)
 	char           *ptr = NULL, *cleartext = NULL, *https;
 	int             i;
 
+	if (!pw)
+		return (1);
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
 		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, &cleartext, &ptr);
 		if (i != 6 && i != 8) {
@@ -187,7 +192,7 @@ auth_user(struct passwd *pw, char *password)
 			out(html_text[026]);
 			out(" 1<BR>\n");
 			flush();
-			return -1;
+			return (1);
 		}
 	} else {
 		ptr = pw->pw_passwd;
@@ -196,7 +201,7 @@ auth_user(struct passwd *pw, char *password)
 	if (!str_diff(ptr, (char *) crypt(password, ptr)))
 		return (0);
 	https = env_get("HTTPS");
-	if (str_diff(https, "on"))
+	if (https && str_diff(https, "on"))
 		return 1;
 	/*- 
 	 * Authtenticate case where you have CRAM-MD5 but clients do
@@ -204,7 +209,7 @@ auth_user(struct passwd *pw, char *password)
 	 */
 	if (!access(".trivial_passwords", F_OK) && !str_diff(pw->pw_passwd, password))
 		return (0);
-	if (!str_diff(cleartext, password))
+	if (cleartext && !str_diff(cleartext, password))
 		return (0);
 	copy_status_mesg(html_text[198]);
 	return (1);
