@@ -1,5 +1,8 @@
 /*
  * $Log: iwebadmin.c,v $
+ * Revision 1.29  2022-09-15 12:48:33+05:30  Cprogrammer
+ * extract encrypted password using get_scram_secrets
+ *
  * Revision 1.28  2022-09-14 13:56:39+05:30  Cprogrammer
  * added u_scram variable for scram checkbox
  * log ip address for authentication failures
@@ -42,7 +45,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: iwebadmin.c,v 1.28 2022-09-14 13:56:39+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.29 2022-09-15 12:48:33+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -76,6 +79,7 @@
 #include <scan.h>
 #include <fmt.h>
 #include <strerr.h>
+#include <get_scram_secrets.h>
 #endif
 #define _USE_XOPEN
 #define _XOPEN_SOURCE
@@ -173,13 +177,34 @@ iwebadmin_suid(gid_t Gid, uid_t Uid)
 int
 auth_user(struct passwd *pw, char *password)
 {
-	if (!str_diff(pw->pw_passwd, (char *) crypt(password, pw->pw_passwd)))
+	char           *ptr = NULL, *cleartext = NULL, *https;
+	int             i;
+
+	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
+		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, &cleartext, &ptr);
+		if (i != 6 && i != 8) {
+			strerr_warn1("unable to get secrets", 0);
+			out(html_text[026]);
+			out(" 1<BR>\n");
+			flush();
+			return -1;
+		}
+	} else {
+		ptr = pw->pw_passwd;
+		i = 0;
+	}
+	if (!str_diff(ptr, (char *) crypt(password, ptr)))
 		return (0);
+	https = env_get("HTTPS");
+	if (str_diff(https, "on"))
+		return 1;
 	/*- 
 	 * Authtenticate case where you have CRAM-MD5 but clients do
 	 * not have cram-md5 authentication mechanism 
 	 */
 	if (!access(".trivial_passwords", F_OK) && !str_diff(pw->pw_passwd, password))
+		return (0);
+	if (!str_diff(cleartext, password))
 		return (0);
 	copy_status_mesg(html_text[198]);
 	return (1);
