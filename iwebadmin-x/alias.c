@@ -1,5 +1,5 @@
 /*
- * $Id: alias.c,v 1.6 2021-03-14 12:47:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: alias.c,v 1.7 2022-09-15 17:47:44+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
-#include <stdio.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
