@@ -1,5 +1,5 @@
 /*
- * $Id: user.h,v 1.3 2022-01-21 22:31:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.h,v 1.4 2022-09-15 12:51:37+05:30 Cprogrammer Exp mbhangui $
  */
 
 void            adduser();
@@ -11,7 +11,7 @@ void            deleteall();
 void            ideluser();
 void            delusergo();
 void            delusernow();
-int             get_catchall();
+void            get_catchall();
 void            moduser();
 void            modusergo();
 void            modusernow();
