@@ -1,5 +1,8 @@
 /*
  * $Log: common.c,v $
+ * Revision 1.4  2022-09-15 23:11:09+05:30  Cprogrammer
+ * display out of memory error message in die_nomem()
+ *
  * Revision 1.3  2021-03-14 12:47:42+05:30  Cprogrammer
  * prevent including mysql.h in indimail.h
  *
@@ -49,16 +52,6 @@ copy_status_mesg(char *str)
 }
 
 void
-die_nomem()
-{
-	extern char    *html_text[MAX_LANG_STR + 1];
-
-	copy_status_mesg(html_text[201]);
-	iclose();
-	exit(0);
-}
-
-void
 out(char *str)
 {
 	if (!str || !*str)
@@ -73,6 +66,18 @@ flush()
 {
 	if (substdio_flush(subfdoutsmall) == -1)
 		strerr_die1sys(111, "iwebadmin: write: ");
+}
+
+void
+die_nomem()
+{
+	extern char    *html_text[MAX_LANG_STR + 1];
+
+	out(html_text[201]);
+	out("1<BR>\n");
+	flush();
+	iclose();
+	_exit(0);
 }
 
 void
