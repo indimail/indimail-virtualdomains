@@ -15,8 +15,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: user.c,v 1.30 2022-09-15 23:11:39+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.31 2022-09-16 00:22:33+05:30 Cprogrammer Exp mbhangui $
  */
+#include <stdio.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -1240,12 +1241,10 @@ modusergo()
 		i = sql_setpw(vpw, Domain.s, 0);
 	/*- get the value of the autoresp checkbox */
 	GetValue(TmpCGI, &box, "autoresp=");
-	if (!str_diff(box.s, "on"))
-		autoresp = 1;
+	autoresp = !str_diff(box.s, "on") ? 1 : 0;
 	/*- if they want to save a copy */
 	GetValue(TmpCGI, &box, "fsaved=");
-	if (!str_diff(box.s, "on"))
-		saveacopy = 1;
+	saveacopy = !str_diff(box.s, "on") ? 1 : 0;
 	/*- get the value of the cforward radio button */
 	GetValue(TmpCGI, &cforward, "cforward=");
 	/*- open old .qmail file if it exists and load it into memory */
@@ -1467,15 +1466,19 @@ parse_users_dotqmail(char newchar)
 				}
 				switch (line.s[0])
 				{
-				case 0:	 /* blank line, ignore */
+				case 0:	/* blank line, ignore */
 					break;
 				case '.':
 				case '/': /* maildir delivery */
 					/*- see if it's the user's maildir */
-					if (1)
+					if (!stralloc_copys(&TmpBuf, vpw->pw_dir) ||
+							!stralloc_catb(&TmpBuf, "/Maildir/", 9) ||
+							!stralloc_0(&TmpBuf))
+						die_nomem();
+					if (!str_diff(TmpBuf.s, line.s))
 						dotqmail_flags |= DOTQMAIL_SAVECOPY;
 					break;
-				case '|':		/* program delivery */
+				case '|': /* program delivery */
 					/*-
 					 * in older versions of QmailAdmin, we used "|/bin/true delete"
 					 * for blackhole accounts.  Since the path to true may vary,
@@ -1513,9 +1516,6 @@ parse_users_dotqmail(char newchar)
 				dotqmail_flags = DOTQMAIL_BLACKHOLE;
 			/*- clear OTHERPGM flag, as it tells us nothing at this point */
 			dotqmail_flags &= ~DOTQMAIL_OTHERPGM;
-			/*- if forward and save-a-copy are set, it will actually set the spam flag */
-			if (dotqmail_flags & DOTQMAIL_FORWARD)
-				dotqmail_flags |= DOTQMAIL_SAVECOPY;
 			/*- if forward is not set, clear save-a-copy */
 			if (!(dotqmail_flags & DOTQMAIL_FORWARD))
 				dotqmail_flags &= ~DOTQMAIL_SAVECOPY;
@@ -1534,7 +1534,6 @@ parse_users_dotqmail(char newchar)
 		case '3': /* save-a-copy checkbox */
 		case '4': /* autoresp checkbox */
 		case '8': /* blackhole checkbox */
-		case '9': /* spam check checkbox */
 			if (dotqmail_flags & (1 << (newchar - '0'))) {
 				out("checked ");
 				flush();
@@ -1687,6 +1686,9 @@ parse_users_dotqmail(char newchar)
 
 /*-
  * $Log: user.c,v $
+ * Revision 1.31  2022-09-16 00:22:33+05:30  Cprogrammer
+ * fixed saveacopy functionality
+ *
  * Revision 1.30  2022-09-15 23:11:39+05:30  Cprogrammer
  * replaced exit with _exit
  *
