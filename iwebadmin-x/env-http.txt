@@ -1,0 +1,37 @@
+HTTP_ACCEPT_ENCODING=gzip, deflate
+SERVER_NAME=argos
+HTTP_ORIGIN=http://argos
+UNIQUE_ID=YyLFn7koSd-hkS7c5rFtiwAAAAc
+SCRIPT_NAME=/cgi-bin/iwebadmin
+GATEWAY_INTERFACE=CGI/1.1
+SERVER_SOFTWARE=Apache/2.4.54 (Fedora Linux) OpenSSL/3.0.5
+DOCUMENT_ROOT=/var/www/html
+HTTP_UPGRADE_INSECURE_REQUESTS=1
+PWD=/var/indimail/domains/example.com
+REQUEST_URI=/cgi-bin/iwebadmin
+SERVER_SIGNATURE=
+REQUEST_SCHEME=http
+QUERY_STRING=
+HTTP_ACCEPT_LANGUAGE=en-US,en;q=0.9
+CONTEXT_DOCUMENT_ROOT=/var/www/cgi-bin/
+HTTP_ACCEPT=text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+REMOTE_PORT=58791
+SERVER_ADMIN=root@localhost
+HTTP_HOST=argos
+HTTP_CONNECTION=keep-alive
+SERVER_ADDR=192.168.2.107
+HTTP_DNT=1
+HTTP_USER_AGENT=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36
+CONTEXT_PREFIX=/cgi-bin/
+SHLVL=1
+CONTENT_LENGTH=85
+HTTP_REFERER=http://argos/cgi-bin/iwebadmin/com/logout?user=postmaster&dom=example.com&time=1663218061
+SERVER_PROTOCOL=HTTP/1.1
+SERVER_PORT=80
+SCRIPT_FILENAME=/var/www/cgi-bin/iwebadmin
+REMOTE_ADDR=192.168.2.103
+HTTP_CACHE_CONTROL=max-age=0
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+CONTENT_TYPE=application/x-www-form-urlencoded
+REQUEST_METHOD=POST
+_=/usr/bin/env

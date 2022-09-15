@@ -1,0 +1,80 @@
+HTTP_ACCEPT_ENCODING=gzip, deflate, br
+SSL_SERVER_S_DN_CN=argos
+SERVER_NAME=argos
+SSL_COMPRESS_METHOD=NULL
+SSL_SERVER_S_DN_Email=postmaster@example.com
+SSL_VERSION_INTERFACE=mod_ssl/2.4.54
+HTTPS=on
+HTTP_ORIGIN=https://argos
+UNIQUE_ID=YyLGHCwAwnZIeRrpkYJAywAAAAE
+SSL_SESSION_ID=9fa3e79be76f16ba6d3aefdc382564d1b3fda45780301006093b9b3d38b10b80
+SCRIPT_NAME=/cgi-bin/iwebadmin
+GATEWAY_INTERFACE=CGI/1.1
+SSL_SERVER_I_DN_Email=postmaster@example.com
+SERVER_SOFTWARE=Apache/2.4.54 (Fedora Linux) OpenSSL/3.0.5
+SSL_SESSION_RESUMED=Initial
+DOCUMENT_ROOT=/var/www/html
+HTTP_UPGRADE_INSECURE_REQUESTS=1
+PWD=/var/indimail/domains/example.com
+SSL_SERVER_S_DN_ST=GOA
+REQUEST_URI=/cgi-bin/iwebadmin
+SSL_PROTOCOL=TLSv1.3
+SERVER_SIGNATURE=
+SSL_SERVER_I_DN_ST=GOA
+REQUEST_SCHEME=https
+SSL_CIPHER=TLS_AES_256_GCM_SHA384
+QUERY_STRING=
+HTTP_ACCEPT_LANGUAGE=en-US,en;q=0.9
+SSL_SECURE_RENEG=false
+HTTP_SEC_FETCH_DEST=document
+SSL_SERVER_I_DN=emailAddress=postmaster@example.com,CN=argos,OU=Automatically-generated SSL key,O=IndiMail Server,L=Porvorim,ST=GOA,C=IN
+SSL_SERVER_A_SIG=sha256WithRSAEncryption
+CONTEXT_DOCUMENT_ROOT=/var/www/cgi-bin/
+SSL_SERVER_M_VERSION=3
+SSL_VERSION_LIBRARY=OpenSSL/3.0.5
+HTTP_ACCEPT=text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
+HTTP_SEC_CH_UA="Google Chrome";v="105", "Not)A;Brand";v="8", "Chromium";v="105"
+SSL_SERVER_S_DN=emailAddress=postmaster@example.com,CN=argos,OU=Automatically-generated SSL key,O=IndiMail Server,L=Porvorim,ST=GOA,C=IN
+REMOTE_PORT=59052
+SSL_SERVER_S_DN_C=IN
+SSL_SERVER_I_DN_OU=Automatically-generated SSL key
+SSL_SERVER_S_DN_L=Porvorim
+SSL_SERVER_S_DN_O=IndiMail Server
+SERVER_ADMIN=root@localhost
+HTTP_HOST=argos
+SSL_TLS_SNI=argos
+HTTP_SEC_FETCH_USER=?1
+HTTP_SEC_FETCH_SITE=same-origin
+HTTP_CONNECTION=keep-alive
+SERVER_ADDR=192.168.2.107
+HTTP_DNT=1
+SSL_CIPHER_EXPORT=false
+SSL_CIPHER_USEKEYSIZE=256
+HTTP_USER_AGENT=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36
+CONTEXT_PREFIX=/cgi-bin/
+SHLVL=1
+HTTP_SEC_CH_UA_PLATFORM="macOS"
+CONTENT_LENGTH=85
+HTTP_SEC_CH_UA_MOBILE=?0
+HTTP_SEC_FETCH_MODE=navigate
+SSL_SERVER_A_KEY=rsaEncryption
+HTTP_REFERER=https://argos/cgi-bin/iwebadmin/com/logout?user=postmaster&dom=example.com&time=1663223199
+SSL_SERVER_V_START=Jan 20 12:28:15 2022 GMT
+SSL_CIPHER_ALGKEYSIZE=256
+SSL_CLIENT_VERIFY=NONE
+SSL_SERVER_M_SERIAL=25927078B33CC3E73AC03AF8496FD15FCF0C42B9
+SERVER_PROTOCOL=HTTP/1.1
+SERVER_PORT=443
+SCRIPT_FILENAME=/var/www/cgi-bin/iwebadmin
+SSL_SERVER_V_END=Jan 21 12:28:15 2023 GMT
+REMOTE_ADDR=192.168.2.103
+SSL_SERVER_S_DN_OU=Automatically-generated SSL key
+HTTP_CACHE_CONTROL=max-age=0
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+SSL_SERVER_I_DN_CN=argos
+CONTENT_TYPE=application/x-www-form-urlencoded
+SSL_SERVER_I_DN_C=IN
+SSL_SERVER_I_DN_O=IndiMail Server
+SSL_SERVER_I_DN_L=Porvorim
+REQUEST_METHOD=POST
+_=/usr/bin/env
