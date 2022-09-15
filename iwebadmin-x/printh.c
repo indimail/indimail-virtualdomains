@@ -1,5 +1,5 @@
 /*
- * $Id: printh.c,v 1.3 2019-07-15 12:52:21+05:30 Cprogrammer Exp mbhangui $
+ * $Id: printh.c,v 1.4 2022-09-15 17:48:50+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 2004 Tom Logic LLC 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,11 +20,6 @@
 #include "printh.h"
 #include <subfd.h>
 #include <substdio.h>
-/*
- * included from printh.h:
- * #include <stdlib.h>
- * #include <stdarg.h>
- */
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
