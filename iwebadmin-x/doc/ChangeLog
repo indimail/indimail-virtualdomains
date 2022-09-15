@@ -10,6 +10,12 @@ Release @version@-@release@ Start 14/09/2022 End --/--/20--
 06. template.c: activate cram, scram checkboxes
 07. user.c: activate cram, scram functionality
 08. added functionality to set passwords for cram, scram authentication
+- 15/09/2022
+09. html/*.html: Moved status message to bottom
+10. iwebadmin.c: Extract encrypted password from SCRAM type passwords to
+    fix authentication failure
+11. user.c: removed exit from multiple places to fix premature failure of
+    scripts
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail-iwebadmin@indimail.org> 2.1.0-1.1%{?dist}
 Release @version@-@release@ Start 13/03/2021 End 08/09/2022
