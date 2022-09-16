@@ -19,10 +19,7 @@ Change '##A' to the tag of interest. To see which templates do NOT use a particu
 ## Tags
 
 \##~ Current selected language (e.g., "en"). Could be useful in selecting alternate graphics for alternate languages.
-
 \##A Send the user name currently being acted upon. (ActionUser) If postmaster was editing someone this would be someone. Used in add\_listdig, add\_listmod, add\_listuser, del\_autorespond\_confirm, del\_forward\_confirm, del\_listdig, del\_listmod, del\_listuser, del\_mailinglist\_confirm, del\_user\_confirm, mod\_autorespond, mod\_dotqmail, mod-mailinglist-idx, mod-user, show\_digest\_subscribers, show\_moderators, show\_subscribers
-
-
 \##a Send the Alias of a mailing list. (Alias). Used in mod\_mailinglist
 \##B Show number of pop accounts. If MaxPopAccounts is > -1 then it shows (MaxPopAccounts) else it shows string 229 [unlimited]. Used in show\_users
 \##b Show the lines inside a alias table. Calls function show\_dowqmail\_lines. Not used in any current template files.
@@ -102,3 +99,43 @@ Rather than using a/u it might be a good idea to use a/A. A lower case value is 
 \##y Return http. This calls get\_session\_val("returnhttp="). Used in  show\_login
 \##Z Send the image URL directory. Used to create the path for <IMG> tags. (IMAGEURL). Used in mail\_menu, show\_login
 \##z Send the domain name for the show\_login page. If Domain is set it is used, else if "dom=" is set in the incoming URL its value is used, else if DOMAIN\_AUTOFILL is set the domain name being viewed, else nothing is sent. Used in show\_login
+
+# TESTING
+iwebadmin can be tested by running at shell prompt. You just need to pass PATH\_INFO, REQUEST\_METHOD, QUERY\_STRING environment variables
+
+## Login
+
+Ensure that the parameters in QUERY\_STRING are uriencode
+```
+env PATH_INFO="" REQUEST_METHOD=POST \
+	QUERY_STRING="username=postmaster&domain=example.com&password=xxxx&time=$(date +%s)" \
+	/var/www/cgi-bin/iwebadmin
+```
+
+# Logout
+```
+sudo env PATH_INFO="/com/logout" REQUEST_METHOD=POST \
+	QUERY_STRING="user=postmaster&dom=example.com&time=1663337051" \
+	/var/www/cgi-bin/iwebadmin
+```
+
+## Other Items
+
+```
+LIST="showmenu quick showusers showaliases showforwards showmailinglists showautoresponders \
+	adduser addusernow setdefault bounceall deleteall setremotecatchall setremotecatchallnow \
+	addlistmodnow dellistmod dellistmodnow addlistmod showlistmod addlistdig addlistdignow \
+	dellistdig dellistdignow showlistdig moduser modusernow deluser delusernow moddotqmail \
+	moddotqmailnow deldotqmail deldotqmailnow adddotqmail adddotqmailnow addmailinglist \
+	delmailinglist delmailinglistnow addlistusernow dellistuser dellistusernow addlistuser \
+	addmailinglistnow modmailinglist modmailinglistnow modautorespond addautorespond \
+	addautorespondnow modautorespondnow showlistusers delautorespond delautorespondnow \
+	logout showcounts"
+
+for i in $LIST
+do
+	sudo env PATH_INFO=/com/$i REQUEST_METHOD=GET \
+		QUERY_STRING="user=postmaster&dom=example.com&time=1663330058" \
+		/var/www/cgi-bin/iwebadmin >/tmp/a.html
+done
+```
