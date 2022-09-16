@@ -1,5 +1,9 @@
 /*
  * $Log: iwebadmin.c,v $
+ * Revision 1.31  2022-09-16 21:19:52+05:30  Cprogrammer
+ * added more information in debug mode
+ * fixed typos
+ *
  * Revision 1.30  2022-09-15 17:48:40+05:30  Cprogrammer
  * fixed SIGSEGV
  *
@@ -48,7 +52,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: iwebadmin.c,v 1.30 2022-09-15 17:48:40+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.31 2022-09-16 21:19:52+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -305,32 +309,36 @@ conf_iwebadmin()
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	const char     *ip_addr = env_get("REMOTE_ADDR");
 	const char     *x_forward = env_get("HTTP_X_FORWARDED_FOR");
 	static stralloc tmp = {0}, returnhttp = {0}, returntext = {0};
 	char           *pi, *rm;
-	int             i, fd, len;
+	int             i, fd, len, dbgfd = -1;
 	struct passwd  *pw;
 	int             encrypt_flag = 1;
-	char            strnum[FMT_ULONG], outbuf[2048];
-	struct substdio ssout;
+	char            strnum[FMT_ULONG], outbuf[2048], dbgbuf[1024];
+	struct substdio ssout, ssdbg;
 
 	mytime = time(0);
 	conf_iwebadmin();
-	if (debug)
+	if (debug) {
+		if (access("/tmp/iwebadmin.debug", F_OK))
+			dbgfd = open_trunc("/tmp/iwebadmin.debug");
+		else
+			dbgfd = open_append("/tmp/iwebadmin.debug");
+		if (dbgfd == -1)
+			strerr_die1sys(111, "iwebadmin: /tmp/iwebadmin.debug: ");
+		substdio_fdbuf(&ssdbg, write, dbgfd, dbgbuf, sizeof(dbgbuf));
+
+		for (i = 0; environ[i]; i++) {
+			substdio_puts(&ssdbg, environ[i]);
+			substdio_put(&ssdbg, "\n", 1);
+		}
+		substdio_flush(&ssdbg);
 		while (!access("/tmp/gdb.wait", F_OK))
 			sleep(1);
-	if (debug) {
-		strnum[fmt_int(strnum, argc)] = 0;
-		strerr_warn2("iwebdmin: argc = ", strnum, 0);
-		for (i = 0;i < argc;i++) {
-			strnum[fmt_int(strnum, i)] = 0;
-			strerr_warn4("iwebdmin: argv[", strnum, "] = ", argv[i], 0);
-		}
 	}
 	init_globals();
 	if (x_forward)
@@ -351,11 +359,21 @@ main(argc, argv)
 	if (!(TmpCGI = env_get("QUERY_STRING")))
 		TmpCGI = "";
 	if (debug) {
-		strerr_warn2("iwebdmin: PATH_INFO=", pi, 0);
-		strerr_warn2("iwebdmin: REQUEST_METHOD=", rm, 0);
-		strerr_warn2("iwebdmin: QUERY_STRING=", TmpCGI, 0);
+		if (pi) {
+			substdio_put(&ssdbg, "PATH_INFO=[", 11);
+			substdio_puts(&ssdbg, pi);
+			substdio_put(&ssdbg, "]\n", 2);
+		}
+		substdio_put(&ssdbg, "REQUEST_METHOD=[", 16);
+		substdio_puts(&ssdbg, rm);
+		substdio_put(&ssdbg, "]\n", 2);
+		substdio_put(&ssdbg, "QUERY_STRING=[", 14);
+		substdio_puts(&ssdbg, TmpCGI);
+		substdio_put(&ssdbg, "]\n", 2);
+		substdio_flush(&ssdbg);
+		close(dbgfd);
 	}
-	if (pi && !str_diffn(pi, "/com/", 5)) {
+	if (pi && !str_diffn(pi, "/com/", 5)) { /*- all commands minus authentication and password change and */
 		GetValue(TmpCGI, &Username, "user=");
 		GetValue(TmpCGI, &Domain, "dom=");
 		GetValue(TmpCGI, &Time, "time=");
@@ -376,14 +394,14 @@ main(argc, argv)
 		iwebadmin_suid(Gid, Uid);
 		if (chdir(RealDir.s) < 0) {
 			copy_status_mesg(html_text[171]);
-			strerr_warn3("iwebdmin: chdir: ", RealDir.s, ": ", &strerr_sys);
+			strerr_warn3("iwebadmin: chdir: ", RealDir.s, ": ", &strerr_sys);
 			iclose();
 			show_login();
 			exit(0);
 		}
 		if (!access("vacation", F_OK) && rename("vacation", "autoresp")) {
 			copy_status_mesg(html_text[321]);
-			strerr_warn1("iwebdmin: rename: vacation -> autoresp", &strerr_sys);
+			strerr_warn1("iwebadmin: rename: vacation -> autoresp", &strerr_sys);
 			iclose();
 			show_login();
 			exit(0);
@@ -423,14 +441,14 @@ main(argc, argv)
 			/*- attempt to authenticate user */
 			if (!get_assign(Domain.s, &RealDir, &Uid, &Gid)) {
 				copy_status_mesg(html_text[19]);
-				strerr_warn3("iwebdmin: get_assign failed for ", Domain.s, ": ", 0);
+				strerr_warn3("iwebadmin: get_assign failed for ", Domain.s, ": ", 0);
 				send_template("change_password.html");
 				return 0;
 			}
 			iwebadmin_suid(Gid, Uid);
 			if (chdir(RealDir.s) < 0) {
 				copy_status_mesg(html_text[171]);
-				strerr_warn3("iwebdmin: chdir: ", RealDir.s, ": ", &strerr_sys);
+				strerr_warn3("iwebadmin: chdir: ", RealDir.s, ": ", &strerr_sys);
 				send_template("change_password.html");
 				return 0;
 			}
