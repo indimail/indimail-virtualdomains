@@ -1,5 +1,5 @@
 /*
- * $Id: util.c,v 1.9 2021-03-14 12:48:26+05:30 Cprogrammer Exp mbhangui $
+ * $Id: util.c,v 1.10 2022-09-16 11:14:44+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,6 +37,9 @@
 #endif
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
 #endif
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
@@ -520,15 +523,19 @@ quota_to_bytes(char returnval[], char *quota)
 
 	if (!quota)
 		return 1;
-	if ((tmp = strtoll(quota, NULL, 10))) {
-		tmp *= 1048576;
-		returnval[i = fmt_double(returnval, tmp, 0)] = 0;
-		returnval[i - 1] = 0; /*- remove . */
-		return 0;
-	} else {
+	tmp = strtoll(quota, NULL, 10);
+#if defined(LLONG_MIN) && defined(LLONG_MAX)
+	if (tmp == LLONG_MIN || tmp == LLONG_MAX) {
+#else
+	if (errno == ERANGE) {
+#endif
 		str_copy(returnval, "");
 		return 1;
 	}
+	tmp *= 1048576;
+	returnval[i = fmt_double(returnval, tmp, 0)] = 0;
+	returnval[i - 1] = 0; /*- remove . */
+	return 0;
 }
 
 /*
@@ -545,17 +552,26 @@ quota_to_megabytes(char *returnval, char *quota)
 	if (!quota)
 		return 1;
 	i = str_len(quota);
-	if ((quota[i - 1] == 'M') || (quota[i - 1] == 'm'))
-		tmp = strtol(quota, NULL, 10);		/* already in megabytes */
-	else
-	if ((quota[i - 1] == 'K') || (quota[i - 1] == 'k'))
-		tmp = strtol(quota, NULL, 10) * 1024;	/* convert kilobytes to megabytes */
-	else
-	if ((tmp = strtol(quota, NULL, 10)))
-		tmp /= 1048576.0;
-	else {
+	tmp = strtoll(quota, NULL, 10);
+#if defined(LLONG_MIN) && defined(LLONG_MAX)
+	if (tmp == LLONG_MIN || tmp == LLONG_MAX) {
+#else
+	if (errno == ERANGE) {
+#endif
 		str_copy(returnval, "");
 		return 1;
+	}
+	switch(quota[i - 1])
+	{
+	case 'm':
+	case 'M':
+		break;
+	case 'k':
+	case 'K':
+		tmp /= 1024.0; /*- convert kilobytes to megabytes */
+		break;
+	default:
+		tmp /= 1048576.0; /*- convert bytes to megabytes */
 	}
 	returnval[i = fmt_double(returnval, tmp, 2)] = 0;
 	return 0;
