@@ -34,16 +34,16 @@ Answer: Put the hook "##V" in the desired html location.
 3. What are html/header.html and html/footer.html for?
 
 Answer: Each time iwebadmin sends an html file, it first sends header.html, 
-then the template file, and then footer.html.  By default, the initial html
-common to all html templates is in header.html.  Like wise, the ending html
-common to all templates is in footer.html.  If you want unique header/footer
+then the template file, and then footer.html. By default, the initial html
+common to all html templates is in header.html. Like wise, the ending html
+common to all templates is in footer.html. If you want unique header/footer
 information in the template files, you can move this from of header.html and
-footer.html information back into each template file.  But leave header.html
+footer.html information back into each template file. But leave header.html
 and footer.html empty, as deleting them will generate an error.
 
 4. How do I include other files in the templates?
 
-Answer:  Use the hook ##N<filename># to include non-template files.  There are 
+Answer: Use the hook ##N<filename># to include non-template files. There are 
 a few restrictions in doing this:
 
     1. The file must be in the HTMLLIBDIR, or a subdirectory thereof.
