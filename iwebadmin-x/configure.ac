@@ -61,7 +61,7 @@ esac
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS([errno.h signal.h unistd.h])
-AC_CHECK_HEADERS([pwd.h ctype.h time.h stdlib.h sys/wait.h])
+AC_CHECK_HEADERS([pwd.h ctype.h time.h stdlib.h limits.h sys/wait.h])
 dnl Checks for libraries.
 AC_CHECK_LIB(crypt, crypt, [AC_SUBST([LIB_CRYPT], ["-lcrypt"]) AC_DEFINE([HAVE_CRYPT], [1],[crypt Library])],,)
 AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],noqmail=t,)
