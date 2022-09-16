@@ -37,19 +37,18 @@ Change '##A' to the tag of interest. To see which templates do NOT use a particu
 \##h Show the counts, not sure which ones... Calls function show\_counts. Not used in any current templates.  
 \##I No comment in source code. Calls function show\_dotqmail\_file. Used in mod\_dotqmail  
 \##i? Check for user forward and forward/store vacation. Calls function check\_user\_forward\_vacation. This accepts a number after the letter in place of the ?. Values are:   
-  0 return 'checked ' if there is no .qmail file (Standard delivery)
-  1 return 'checked ' if this is a forward
-  2 return address forwarded to
-  3 return 'checked ' if local copy is to be saved
-  4 return 'checked ' if vacation message
-  5 return subject of vacation message
-  6 return body of vacation message
-  7 return gecos (real name) field from sql\_getpw
-  8 return 'checked ' if this is a blackhole
-  9 return 'checked ' if spam checking is enabled mod\_user (10 times).
+  0 return 'checked ' if there is no .qmail file (Standard delivery)  
+  1 return 'checked ' if this is a forward  
+  2 return address forwarded to  
+  3 return 'checked ' if local copy is to be saved  
+  4 return 'checked ' if vacation message  
+  5 return subject of vacation message  
+  6 return body of vacation message  
+  7 return gecos (real name) field from sql\_getpw  
+  8 return 'checked ' if this is a blackhole  
+  9 return 'checked ' if spam checking is enabled mod\_user (10 times).  
 
-Note: check\_user\_forward\_vacation is terribly inefficient. This needs to check for the first use of any of its request values and do all its file
-reading ONE TIME, storing values in static variables for the rest of the calls. (May need to make sure we are still looking at the same user as the one data is buffered for.)  
+Note: check\_user\_forward\_vacation is terribly inefficient. This needs to check for the first use of any of its request values and do all its file reading ONE TIME, storing values in static variables for the rest of the calls. (May need to make sure we are still looking at the same user as the one data is buffered for.)  
 \##J Show mailbox flag status. Calls function check\_mailbox\_flags. Used in mod\_user (8 times)  
 \##j Show number of mailing lists. If (MaxMailingLists) > -1 this returns (CurrMailingLists)/(MaxMailingLists) else it returns (CurrMailingLists) followed by text string 229 [unlimited]. Used in show\_mailinglist  
 \##K Show number of autoresponders. If (MaxForwards) > -1 this returns (CurrAutoResponders)/(MaxAutoResponders) else it returns (CurrAutoResponders) followed by text string 229 [unlimited]. Used in show\_autorespond  
@@ -61,11 +60,10 @@ reading ONE TIME, storing values in static variables for the rest of the calls. 
 \##N Parse include files. This is a fairly long section of inline code that either displays a template file doing ## substitution or sometimes displays text string 144. [file permission error]. Not used in any current templates.  
 \##n not used. Not used in any current templates.  
 \##O Build a pulldown menu of all POP/IMAP users. This calls function sql\_getall then builds an option tag for each entry returned.  
- <option value=(pw\_name)>(pw\_name)</option>
- not used in any current templates.
+     <option value=(pw\_name)>(pw\_name)</option>  
+     not used in any current templates.  
 \##o Show the mailing list moderators. This calls function show\_list\_groupnow. Used in show\_moderators  
-\##P Display mailing list prefix. This calls function get\_mailinglist\_prefix.  
- mod\_mailinglist-idx
+\##P Display mailing list prefix. This calls function get\_mailinglist\_prefix, mod\_mailinglist-idx  
 \##p Show POP/IMAP users. This calls function show\_user\_lines. Used in show\_users  
 \##Q not used. not used in any current templates.  
 \##q Display user's quota. This prints the quota in megabytes, or if the user is a DOMAIN\_ADMIN the string 'NOQUOTA', else text string 229 [unlimited]. Used in mod\_user  
@@ -75,21 +73,35 @@ reading ONE TIME, storing values in static variables for the rest of the calls. 
 \##s Show the catchall name. Calls the function get\_catchall. Used in show\_users  
 \##T Send the time parameter. (Mytime) used in every template except show\_login. (2-3 times in most)  
 \##t? Contitionally Transmit a block of text. This calls function transmit\_block. It requires one character parameter to replace the ?. This character defines a condition, and the text between the beginning block and the end marker ##tt will only be sent if the condition is met. The possible condition values are:  
-  a Administrative commands. Unless the user is an administrator, the text within a ##ta block will not be sent.
-  h Help. This text will only be sent if --enable-help was set in ./configure.
-  m MySQL. This text will only be sent if --enable-exmlm-mysql was set in ./configure.
-  q Modify Quota. This text will only be sent if --enable-modify-quota was set in ./configure.
-  s Modify Spam. This text will only be sent if --enable-modify-spam was set in ./configure.
-  t This is the end tag. All text after this will be sent normally.
-  u User. Not administrator. This is the opposite of the 'a' tag, and can be used to provide an alternate value for non-administrators.
- add\_user (4 times), mod\_user (18 times), show\_login (2 times)
+  a Administrative commands. Unless the user is an administrator, the text within a ##ta block will not be sent.  
+  h Help. This text will only be sent if --enable-help was set in ./configure.  
+  m MySQL. This text will only be sent if --enable-exmlm-mysql was set in ./configure.  
+  q Modify Quota. This text will only be sent if --enable-modify-quota was set in ./configure.  
+  s Modify Spam. This text will only be sent if --enable-modify-spam was set in ./configure.  
+  t This is the end tag. All text after this will be sent normally.  
+  u User. Not administrator. This is the opposite of the 'a' tag, and can be used to provide an alternate value for non-administrators.  
+ add\_user (4 times), mod\_user (18 times), show\_login (2 times)  
 
 Rather than using a/u it might be a good idea to use a/A. A lower case value is displayed when the thing is set, and the upper case is displayed when the thing is not set. That way if someone needs to do something on not modify-spam they can use S. Maybe it will never happen, but it happened with a/u so why not the others...  
 \##U Send the username parameter. (Username) used in every template except show\_login. (2-3 times in most)  
 \##u Show the users. This calls function show\_users not used in any current template.  
 \##V Show version number. This is a link to the github link for iwebadmin.  QA\_PACKAGE is appended to the URL, and QA\_VERSION is the string that is displayed as the link. Used in show\_login  
 \##v Display the main menu. This is a fairly long section of inline code, with a note that it should be moved to a function. It checks various things to decide which items should appear in the main menu. Quite a few text strings are conditionally displayed.  
-  001 [iso-8859-1], 061 [Email Accounts], 077 [Mail Robots], 080 [List], 111 [Modify User], 122 [Forwards], 124 [Quick Links], 125 [New Email Account], 127 [New Forward], 128 [New Mail Robot], 129 [New Mailing List], 229 [unlimited], 249 [Quota], 253 [Limit:], 254 [Used:]. Used in main\_menu
+  001 [iso-8859-1]  
+  061 [Email Accounts]  
+  077 [Mail Robots]  
+  080 [List]  
+  111 [Modify User]  
+  122 [Forwards]  
+  124 [Quick Links]  
+  125 [New Email Account]  
+  127 [New Forward]  
+  128 [New Mail Robot]  
+  129 [New Mailing List]  
+  229 [unlimited]  
+  249 [Quota]  
+  253 [Limit:]  
+  254 [Used:]. Used in main\_menu  
 \##W not used. Not used in any current templates.  
 \##w not used. Not used in any current templates.  
 \##X??? This tag gets a block of text from the dictionary and displays it in the template. This tag is always followed by three digits, which are used as an index into the translation dictionary. Used in every template, plus header.  
