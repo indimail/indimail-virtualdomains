@@ -16,6 +16,11 @@ Release @version@-@release@ Start 14/09/2022 End --/--/20--
     fix authentication failure
 - 16/09/2022
 11. user.c: fixed saveacopy functionality
+12. template.c: fixed path for check_quota ('Q' show quota usage)
+13. configure.ac: added limits.h to AC_CHECK_HEADERS
+14. util.c: check return value of strtoll
+15. iwebadmin.c: added more info in debug mode
+16. html/README: added test cases
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail-iwebadmin@indimail.org> 2.1.0-1.1%{?dist}
 Release @version@-@release@ Start 13/03/2021 End 08/09/2022
