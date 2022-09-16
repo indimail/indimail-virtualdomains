@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.24 2022-09-15 12:51:02+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.25 2022-09-16 10:34:13+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -625,6 +625,7 @@ send_template_now(char *filename)
 
 						quota_to_megabytes(qconvert, vpw->pw_shell);
 						if (!stralloc_copys(&TmpBuf, vpw->pw_dir) ||
+								!stralloc_catb(&TmpBuf, "/Maildir", 8) ||
 								!stralloc_0(&TmpBuf))
 							die_nomem();
 						diskquota = check_quota(TmpBuf.s, &maxmsg);
