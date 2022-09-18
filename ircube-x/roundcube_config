@@ -643,7 +643,7 @@ if [ -n "$php_fpm_www_conf" -a -f $php_fpm_www_conf ] ; then
 		-e 's}^listen.acl_users.};&}' \
 	$php_fpm_www_conf
 fi
-if [ -n "$php_fpm_conf" -a -f $php_fpm_conf ] ; then
+if [ -n "$php_fpm_conf" -a -f "$php_fpm_conf" ] ; then
 	echo "fixing $php_fpm_conf"
 	$sed -i -e "s{^pid =.*{pid = /run/php/php-fpm.pid{g" \
 		$php_fpm_conf
