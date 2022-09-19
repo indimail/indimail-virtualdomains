@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 1.10  2022-09-19 21:14:46+05:30  Cprogrammer
+ * added salted column to indimail
+ *
  * Revision 1.9  2022-08-05 21:05:03+05:30  Cprogrammer
  * added ischema table
  *
@@ -32,7 +35,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 1.9 2022-08-05 21:05:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 1.10 2022-09-19 21:14:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -260,6 +263,7 @@ pw_gecos char(48) not null, \
 pw_dir char(156), \
 pw_shell char(30), \
 scram char(255), \
+salted char(128), \
 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null, \
 primary key (pw_name, pw_domain), index pw_gecos (pw_gecos(25)), index pw_uid (pw_uid) "
 
@@ -273,6 +277,7 @@ pw_gecos char(48), \
 pw_dir char(156), \
 pw_shell char(30), \
 scram char(255), \
+salted char(128), \
 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null, \
 primary key(pw_name)"
 
