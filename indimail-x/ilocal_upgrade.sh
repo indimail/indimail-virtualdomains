@@ -261,7 +261,7 @@ fi
 /usr/sbin/svctool --fixsharedlibs
 # upgrade indimail schema
 /usr/sbin/ischema -u
-} 
+}
 
 case $1 in
 	post)
