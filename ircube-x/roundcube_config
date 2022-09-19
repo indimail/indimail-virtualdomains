@@ -608,6 +608,9 @@ else #debian /etc/php/7.3/fpm/pool.d/www.conf
 	php_fpm_www_conf=`ls /etc/php/*/fpm/pool.d/www.conf 2>/dev/null`
 	php_fpm_conf=$(ls /etc/php/*/fpm/php-fpm.conf)
 fi
+if [ -z "$php_fpm_conf" -a -f /etc/php-fpm.conf ] ; then
+	php_fpm_conf=/etc/php-fpm.conf
+fi
 if [ $is_suse -eq 1 ] ; then
 	if [ -f /etc/php7/fpm/php-fpm.conf.default ] ; then
 		$cp /etc/php7/fpm/php-fpm.conf.default /etc/php7/fpm/php-fpm.conf
