@@ -1,5 +1,8 @@
 /*
  * $Log: sql_setpw.c,v $
+ * Revision 1.5  2022-09-19 21:15:25+05:30  Cprogrammer
+ * fixed password struct getting overwritten with call to sql_getpw
+ *
  * Revision 1.4  2022-09-14 08:47:41+05:30  Cprogrammer
  * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
  *
@@ -46,7 +49,7 @@
 #include "create_table.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_setpw.c,v 1.4 2022-09-14 08:47:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_setpw.c,v 1.5 2022-09-19 21:15:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
