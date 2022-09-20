@@ -697,6 +697,13 @@ if [ ! -d /service/httpd ] ; then
 	if [ -x /usr/sbin/httpd ] ; then
 		echo "Creating supervised service for apache2"
 		mkdir -p /service/httpd
+		if [ -d /run ] ; then
+			rundir=/run
+		elif [ -d /var/run ] ; then
+			rundir=/var/run
+		else
+			rundir=/run
+		fi
 		touch /service/httpd/down
 		(
 		echo "#!/bin/sh"
@@ -707,6 +714,7 @@ if [ ! -d /service/httpd ] ; then
 		echo "  echo \"ln -s /etc/roundcubemail /usr/share/roundcubemail/config\""
 		echo "  ln -s /etc/roundcubemail /usr/share/roundcubemail/config"
 		echo "fi"
+		echo "mkdir -p $rundir/httpd
 		echo "exec /usr/sbin/httpd -DFOREGROUND"
 		) > /service/httpd/run
 		chmod +x /service/httpd/run
