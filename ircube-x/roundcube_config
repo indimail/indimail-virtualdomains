@@ -523,6 +523,8 @@ if [ -f /etc/centos-release ] ; then
 				-e "/<\/Files>/ r $tmp" \
 				-e "s{^    <FilesMatch \\\.(php|phar)$>{#&{g" \
 				-e "s{^        SetHandler application/x-httpd-php{#&{g" \
+				-e "s{^        SetHandler \"proxy:unix:.*\"{#&{g" \
+				-e "s{^#        SetHandler \"proxy:unix:/run/php-fpm/www.sock|fcgi://localhost\"{#       SetHandler \"proxy:unix:/run/php/php-fpm.sock|fcgi://localhost\"{g" \
 				-e "s{^    </FilesMatch>{#&{g" \
 				/etc/httpd/conf.d/php.conf
 			/bin/rm -f $tmp
@@ -610,13 +612,18 @@ else #debian /etc/php/7.3/fpm/pool.d/www.conf
 fi
 if [ -z "$php_fpm_conf" -a -f /etc/php-fpm.conf ] ; then
 	php_fpm_conf=/etc/php-fpm.conf
+	echo "fixing pid in $php_fpm_conf"
+	$sed -i \
+		-e "s{^;pid =.*{pid = /run/php/php-fpm.pid{g" \
+		-e "s{^pid =.*{pid = /run/php/php-fpm.pid{g" \
+		$php_fpm_conf
 fi
 if [ $is_suse -eq 1 ] ; then
 	if [ -f /etc/php7/fpm/php-fpm.conf.default ] ; then
 		$cp /etc/php7/fpm/php-fpm.conf.default /etc/php7/fpm/php-fpm.conf
 	fi
 	if [ -f /etc/php7/fpm/php-fpm.conf ] ; then
-		echo "fixing /etc/php7/fpm/php-fpm.conf"
+		echo "fixing pid in /etc/php7/fpm/php-fpm.conf"
 		$sed -i -e "s{^;pid =.*{pid = /run/php/php-fpm.pid{g" \
 			/etc/php7/fpm/php-fpm.conf
 	fi
@@ -670,6 +677,7 @@ if [ ! -d /service/php-fpm ] ; then
 		echo "# created by roundcube_config for indimail+roundcube docker container"
 		echo "# service started by docker-entrypoint"
 		echo "#"
+		echo "exec 2>&1"
 		echo "mkdir -p $sockdir"
 		echo "exec $php_fpm -O -F"
 		) > /service/php-fpm/run
