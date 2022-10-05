@@ -563,7 +563,7 @@ CONTROLDIR         |qmail-smtpd  |used    |The directory containing control file
                    |qmail-send   |        |
                    |qmail-showctl|        |
                    |qmail-spamdb |        |
-                   |qmail-todo   |        |
+                   |todo-proc    |        |
                    |qmail-command|        |
 -------------------|-------------|--------|----------------------------------------
 QUEUEDIR           |qmail-queue  |used    |queue path from where to pick up mails
@@ -573,7 +573,7 @@ QUEUEDIR           |qmail-queue  |used    |queue path from where to pick up mail
                    |qmail-send   |        |
                    |qmail-tcpok  |        |
                    |qmail-tcpto  |        |
-                   |qmail-todo   |        |
+                   |todo-proc    |        |
                    |spawn-filter |        |
                    |qmail-lspawn |        |
                    |qmail-rspawn |        |
@@ -907,7 +907,7 @@ BOUNCEPROCESSOR    |qmail-send   |used    |External bounceprocess to call for
                    |             |        |handling bounces.
 BOUNCEQUEUE        |qmail-send   |        |Queue to be used for injecting bounces
 TODO_INTERVAL      |qmail-send   |        |To set the minumum time interval between
-                   |qmail-todo   |        |two todo runs. By increasing this you
+                   |todo-proc    |        |two todo runs. By increasing this you
                    |             |        |can reduce the disk IO. But there is a
                    |             |        |latency on mail delivery times 
 -------------------|-------------|--------|----------------------------------------
@@ -1100,11 +1100,11 @@ SCANINTERVAL       |svscan       |used    |Time interval in which svscan should 
 USE_FSYNC          |qmail-queue  |used    |Causes fsync() to be used for all
                    |qmail-local  |        |open files. This makes IndiMail crash
                    |qmail-send   |        |proof with a minor performance penalty
-                   |qmail-todo   |        |
+                   |todo-proc    |        |
 USE_SYNCDIR        |qmail-queue  |used    |Emulates BSD style synchronous
                    |qmail-local  |        |directories.
                    |qmail-send   |        |
-                   |qmail-todo   |        |
+                   |todo-proc    |        |
 ROUTES             |qmail-rspawn |used    |If defined as static, control/smtproutes
                    |             |        |or control/qmtproutes is used. Else hostcntrl
                    |             |        |is used to set SMTPROUTE / QMTPROUTE
@@ -2199,7 +2199,7 @@ qmail-clean     - clean up the queue directory
 qmail-send      - deliver mail messages from the queue
 .sp -1
 .IP \n+[step]
-qmail-todo      - process todo messages from the queue
+todo-proc       - process todo messages from the queue
 .sp -1
 .IP \n+[step]
 spawn-filter    - Interceptor for qmail-local / qmail-remote
