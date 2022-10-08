@@ -9,6 +9,8 @@ Release @version@-@release@ Start 08/09/2021 End --/--/----
     encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
 04. sql_setpw.c: fixed password struct getting overwritten with call to
     sql_getpw()
+- 08/10/2022
+05. vfilter_display.c: Fixed SIGSEGV
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail@indimail.org> 3.4.1-1.1%{?dist}
 Release @version@-@release@ Start 14/02/2021 End 08/09/2022
