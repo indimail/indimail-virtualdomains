@@ -1,5 +1,9 @@
 /*
  * $Log: vfilter_display.c,v $
+ * Revision 1.2  2022-10-08 23:46:27+05:30  Cprogrammer
+ * fixed SIGSEGV
+ * fixed formatting
+ *
  * Revision 1.1  2019-04-18 08:33:56+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +13,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter_display.c,v 1.1 2019-04-18 08:33:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter_display.c,v 1.2 2022-10-08 23:46:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -70,15 +74,20 @@ format_filter_display(int type, int filter_no, char *emailid, stralloc *filter_n
 		qprintf(subfdoutsmall, " ", "%s");
 		qprintf(subfdoutsmall, keyword->len ? keyword->s : "N/A", "%-15s");
 		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, !str_diffn(folder->s, "/NoDeliver", 11) ? "Void" : folder->s + 1, "%-15s");
+		qprintf(subfdoutsmall, !str_diffn(folder->s, "/NoDeliver", 11) ? "Void" : folder->s, "%-15s");
 		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, (bounce_action == 1 || bounce_action == 3) ? "Yes" : "No", "%s");
-		if (bounce_action > 1)
+		qprintf(subfdoutsmall, (bounce_action == 1 || bounce_action == 3) ? "Yes" : "No", "%-6s");
+		qprintf(subfdoutsmall, " ", "%s");
+		if (bounce_action == 2 || bounce_action == 3)
 			qprintf(subfdoutsmall, forward->s, "%s");
+		else
+			qprintf(subfdoutsmall, "No", "%s");
 		qprintf(subfdoutsmall, "\n", "%s");
 		qprintf_flush(subfdoutsmall);
 	} else { /*- raw display*/
 		if (!stralloc_copy(&_filterName, filter_name) || !stralloc_0(&_filterName))
+			die_nomem();
+		if (!stralloc_copy(&_keyword, keyword) || !stralloc_0(&_keyword))
 			die_nomem();
 		for (ptr = _filterName.s; *ptr; ptr++) {
 			if (isspace((int) *ptr))
@@ -105,7 +114,8 @@ format_filter_display(int type, int filter_no, char *emailid, stralloc *filter_n
 		qprintf(subfdoutsmall, " ", "%s");
 		qprintf(subfdoutsmall, folder->s, "%s");
 		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, bounce_action ? (bounce_action == 2 ? forward->s : "Bounce") : (str_diffn(folder->s, "/NoDeliver", 11) ? "Deliver" : "Vapour"), "%s");
+		qprintf(subfdoutsmall, bounce_action ? ((bounce_action == 2 || bounce_action == 3) ? forward->s : "Bounce") : (str_diffn(folder->s,
+						"/NoDeliver", 11) ? "Deliver" : "Vapour"), "%s");
 		qprintf(subfdoutsmall, "\n", "%s");
 		qprintf_flush(subfdoutsmall);
 	}
@@ -127,7 +137,7 @@ vfilter_display(char *emailid, int disp_type)
 		if (i == -2)
 			break;
 		if (!j++ && !disp_type) {
-			out("vfilter_display", "No  EmailId                       FilterName Header          Comparision                Keyword         Folder          Bounce Delivery\n");
+			out("vfilter_display", "No  EmailId                       FilterName           Header          Comparision                Keyword         Folder          Bounce Forward\n");
 			out("vfilter_display", "--------------------------------------------------------------------------------------------------------------------------------------------------\n");
 			flush("vfilter_display");
 		}
