@@ -1,8 +1,9 @@
-[IndiMail](indimail_logo.png "IndiMail")
+![IndiMail](indimail_logo.png "IndiMail")
 
 Table of Contents
 =================
 
+   * [Table of Contents](#table-of-contents)
    * [INTRODUCTION](#introduction)
    * [LICENSING](#licensing)
    * [TERMINOLOGY used for commands](#terminology-used-for-commands)
@@ -47,7 +48,8 @@ Table of Contents
       * [Extension Addresses](#extension-addresses)
    * [Controlling Delivery Rates](#controlling-delivery-rates)
    * [Distributing your outgoing mails from Multiple IP addresses](#distributing-your-outgoing-mails-from-multiple-ip-addresses)
-   * [Processing Bounces](#processing-bounces)
+   * [Handling Bounces](#handling-bounces)
+      * [Bounce Address Tag Validation (BATV)](#bounce-address-tag-validation-batv)
       * [Using environment variable BOUNCEPROCESSOR](#using-environment-variable-bounceprocessor)
       * [Using environment variable BOUNCERULES or control files bounce.envrules.](#using-environment-variable-bouncerules-or-control-files-bounceenvrules)
       * [Using BOUNCEQUEUE environment variable to queue bounces](#using-bouncequeue-environment-variable-to-queue-bounces)
@@ -93,6 +95,9 @@ Table of Contents
       * [Using envdir for SMTP service under supervise(8)](#using-envdir-for-smtp-service-under-supervise8)
    * [SMTP Access List](#smtp-access-list)
    * [Using spamassasin with IndiMail](#using-spamassasin-with-indimail)
+   * [SRS implementation in IndiMail](#srs-implementation-in-indimail)
+      * [Configuration Parameters](#configuration-parameters)
+   * [SPF implementation in IndiMail](#spf-implementation-in-indimail)
    * [Greylisting in IndiMail](#greylisting-in-indimail)
       * [Enabling qmail-greyd greylisting server](#enabling-qmail-greyd-greylisting-server)
       * [Enabling greylisting in SMTP](#enabling-greylisting-in-smtp)
@@ -159,6 +164,7 @@ Table of Contents
    * [Performance / Benchmarks](#performance--benchmarks)
       * [Observations](#observations)
       * [Results](#results)
+   * [Credits](#credits)
    * [History](#history)
    * [See also](#see-also)
 
@@ -254,7 +260,8 @@ README-indimail.md|Introduction to IndiMail (this file)
 [INSTALL-RPM.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/INSTALL-RPM.md)|Install Instructions using RPM
 [INSTALL-MYSQL.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/INSTALL-MYSQL.md)|MySQL specific Installation Instructions
 [README-CLUSTER.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-CLUSTER.md)|Steps on configuring a clustered setup
-[Quick-INSTALL.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/Quick-INSTALL.md)|A minimal documentation on Installation/Configuration)
+[Quick-INSTALL.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/Quick-INSTALL.md)|A minimal documentation on Installation/Configuration
+[Man Pages](https://github.com/mbhangui/indimail-virtualdomains/wiki/1-Man-Pages)|Link to Man Pages for all General commands, administrative commands, file formats, APIs and Miscelleneous topics
 
 If you have enough experience on your belt you can dive into this [document](https://github.com/mbhangui/indimail-virtualdomains/blob/master/README.md "README").
 
@@ -373,7 +380,7 @@ Once a message is deposited in one of the indimail's queues, it will be sent by 
 
 <b>qmail-start</b> invokes <b>qmail-send</b>, <b>qmail-todo</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b>, and <b>qmail-clean</b>, under the proper uids and gids for a single queue. These five daemons cooperate to deliver messages from the queue. <b>qmail-start</b> should be used if you desire to run only one queue. For running multiple parallel queues run <b>qscheduler</b>.
 
-<b>slowq-start</b> invokes <b>slowq-send</b>, <b>qmail-lspawn></b>, <b>qmail-rspawn</b>, and <b>qmail-clean</b>, under the proper uids and gids for a single queue. <b>slowq-send</b> is a special daemon that does the work of both <b>qmail-todo</b> and <b>qmail-send</b> but handles a single, special queue named <u>slowq</u>. These four daemons cooperate to deliver messages from the queue with control on the delivery rates. We will talk about this in the chapter [Controlling Delivery Rates](#controlling-delivery-rates).
+<b>slowq-start</b> invokes <b>slowq-send</b>, <b>qmail-lspawn></b>, <b>qmail-rspawn</b>, and <b>qmail-clean</b>, under the proper uids and gids for a single queue. <b>slowq-send</b> is a special daemon that does the work of both <b>qmail-todo</b> and <b>qmail-send</b> but handles a single, special queue named <u>slowq</u>. It also has an inbuilt dedicated todo processor and doesn't require a seperate <b>qmail-todo</b> process.  These four daemons cooperate to deliver messages from the queue with control on the delivery rates. We will talk about this in the chapter [Controlling Delivery Rates](#controlling-delivery-rates).
 
 <b>qmta-send</b> does the work of <b>qmail-todo</b>, <b>qmail-send</b>, <b>qmail-lspawn</b>, <b>qmail-rspawn</b> and <b>qmail-clean</b> in a single daemon. It handles a single special queue named <u>qmta</u>. You can use <b>qmta-send</b> instead of <b>qmail-todo</b>/<b>qmail-send</b> for small systems which have negligible or sporadic mail traffic. Single Board Computers are an excellent fit for <b>qmta-send</b>. <b>qmta-send</b> can be started on the command line, in RC scripts or in cron/shell scripts. It can be invoked to do just one time delivery without running as a daemon. It can also be enabled to start at boot by enabling <b>qmta-service</b> <b>systemd.unit(5)</b> configuration using the <b>systemctl(1)</b> command. You can learn more about <b>qmta-send</b> in the chapter [qmta - Using a minimal standalone qmta-send MTA](#qmta---using-a-minimal-standalone-qmta-send-mta)
 
@@ -1330,7 +1337,7 @@ exit 0
 ### Using control file filterargs
 
 The control file filterargs gives you control to run filters individually for local or remote deliveries. It also allows you to run your filter for both local and remote deliveries. See <b>spawn-filter</b>(8) for full description on this control file.
-e.g. The following entry in /var/indimail/control/filterargs causes all mails to yahoo.com be fed through the filter dk-filter(8) for DK/DKIM signing.
+e.g. The following entry in /etc/indimail/control/filterargs causes all mails to yahoo.com be fed through the filter dk-filter(8) for DK/DKIM signing.
 yahoo.com:remote:/usr/bin/dk-filter
 NOTE: If the program myfilter returns 100, the message will be bounced. If it returns 2, the message will be discarded (blackholed).
 
@@ -1660,7 +1667,7 @@ Any email that needs to be delivered needs to be put into a queue before it can 
 
 The delivery mode depends on the argument passed to qscheduler during startup. The script /service/qmail-send.25/run passes the content of the file /etc/indimail/control/defaultdelivery as an argument to qscheduler.
 See INSTALL.mbox, INSTALL.maildir, and INSTALL.vsm for more information.
-To select your default mailbox type, just enter the defaultdelivery value from the table into /var/indimail/control/defaultdelivery.
+To select your default mailbox type, just enter the defaultdelivery value from the table into /etc/indimail/control/defaultdelivery.
 e.g., to select the standard qmail Maildir delivery, do:
 
 `echo ./Maildir/ >/etc/indimail/control/defaultdelivery`
@@ -1927,9 +1934,18 @@ fi
 exec -a qmail-remote $PROG "$host" "$sender" "$qqeh" $size $*
 ```
 
-# Processing Bounces
+# Handling Bounces
 
-IndiMail allows a mechanism by which you can use your own script/program to handle bounces. All bounces in IndiMail is generated by <b>qmail-send</b>. <b>qmail-send</b> generates a bounce when <b>qmail-lspawn</b> or <b>qmail-rspawn</b> reports a permanent failed delivery. A bounce is generated by <b>qmail-send</b> by injecting a new mail in the queue using <b>qmail-queue</b>. This bounce generation by <b>qmail-send</b> can be modified in three ways
+## Bounce Address Tag Validation (BATV)
+
+The sender address can be forged by spammers to look like a legitimate email address. If that email address belongs to you, all bounce backs will be received by your server. Your server ends up handling the entire processing load for the spammer. BATV allows your SMTP server to determine if the original email was ever initiated from your server. This is done by <b>qmail-remote</b> marking each outbound email message with a key. When the bounce back arrives, <b>qmail-smtpd</b> will identify that the key is either present or is not present. If the key is not present then <b>qmail-smtpd</b> knows it is not a valid bounce back and drops the email. This feature is known as [Bounce Address Tag Validation (BATV)](https://www.ietf.org/archive/id/draft-levine-smtp-batv-01.html).
+BATV allows the qmail-smtpd to distinguish between legitimate and illegitimate bounce (NDR) messages. Once you configure BATV, all outbound messages sent by qmail-remote will be tagged using BATV. This can be done by define SIGNKEY environment variable for specific users or groups by using envrules. See [Envrules](#envrules). To enable BATV in IndiMail, all you need to do is create the signkey control file. You can define <b>SIGNKEY</b> environment variable to refer to another control file.
+
+```
+echo "384738kdktkfdj" > /etc/indimail/control/signkey
+```
+
+We just learnt how to configure IndiMail to rejected forged bounces. For legitimate bounces/NDRs, IndiMail allows a mechanism by which you can use your own script/program to handle bounces. All bounces in IndiMail is generated by <b>qmail-send</b>. <b>qmail-send</b> generates a bounce when <b>qmail-lspawn</b> or <b>qmail-rspawn</b> reports a permanent failed delivery. A bounce is generated by <b>qmail-send</b> by injecting a new mail in the queue using <b>qmail-queue</b>. This bounce generation by <b>qmail-send</b> can be modified in three ways
 
 ## Using environment variable BOUNCEPROCESSOR
 
@@ -2101,7 +2117,7 @@ Reference
 
 # Envrules
 
-IndiMail allows you to configure most of its functionality through set of environment variables. In fact there more more than 200 features that can be controlled just by setting or un-setting environment variables. envrules is applicable to <b>qmail-smtpd</b>, <b>qmail-inject</b>, <b>qmail-local</b>, <b>qmail-remote</b> as well. It can also be used to control programs called by the above programs (e.g <b>qmail-queue</b>). IndiMail allows you to configure quite many things using environment variables. Just set the environment variable <b>CONTROLDIR=control2</b> and all qmail components of IndiMail start looking for control files in <u>/var/indimail/control2</u>. You can set <b>CONTROLDIR=/etc/indimail</b> and all control files can be conveniently placed in <u>/etc/indimail</u>.
+IndiMail allows you to configure most of its functionality through set of environment variables. In fact there more more than 200 features that can be controlled just by setting or un-setting environment variables. envrules is applicable to <b>qmail-smtpd</b>, <b>qmail-inject</b>, <b>qmail-local</b>, <b>qmail-remote</b> as well. It can also be used to control programs called by the above programs (e.g <b>qmail-queue</b>). IndiMail allows you to configure quite many things using environment variables. Just set the environment variable <b>CONTROLDIR=control2</b> and all qmail components of IndiMail start looking for control files in <u>/etc/indimail/control2</u>. You can set <b>CONTROLDIR=/etc/indimail</b> and all control files can be conveniently placed in <u>/etc/indimail</u>.
 Some of these environment variables can be set during the startup of various services. IndiMail has all its services configured as directories in the /service directory. As an example, if you want to force authenticated SMTP on all your users, setting the environment variable <b>REQUIREAUTH</b> allows you to do so.
 
 ```
@@ -2143,7 +2159,7 @@ For SMTP service the following the following list of environment variables can b
 REQUIREAUTH, QREGEX, ENFORCE_FQDN_HELO, DATABYTES, BADHELOCHECK, BADHELO, BADHOST, BADHOSTCHECK, TCPPARANOID, NODNSCHECK, VIRUSCHECK, VIRUSFORWARD, REMOVEHEADERS, ENVHEADERS, LOGHEADERS, LOGHEADERFD, SIGNATURES, BODYCHECK, BADMAILFROM, BADMAILFROMPATTERNS, BOUNCEMAIL, CUGMAIL, MASQUERADE, BADRCPTTO, BADRCPTPATTERNS, GOODRCPTTO, GOODRCPTPATTERNS, GREYIP, GREETDELAY, CLIENTCA, TLSCIPHERS, SERVERCERT, BLACKHOLERCPT, BLACKHOLERCPTPATTERNS, SIGNKEY, SIGNKEYSTALE, SPFBEHAVIOR, TMPDIR, TARPITCOUNT, TARPITDELAY, MAXRECIPIENTS, MAX_RCPT_ERRCOUNT, AUTH_ALL, CHECKRELAY, CONTROLDIR, ANTISPOOFING, CHECKRECIPIENT, SPAMFILTER, LOGFILTER, SPAMFILTERARGS, SPAMEXITCODE, REJECTSPAM, SPAMREDIRECT, SPAMIGNORE, SPAMIGNOREPATTERNS, FILTERARGS, QUEUEDIR, QUEUE_BASE, QUEUE_START, QUEUE_COUNT, QMAILQUEUE, QUEUEPROG, RELAYCLIENT, QQEH, BADEXT, BADEXTPATTERNS, ACCESSLIST, EXTRAQUEUE, QUARANTINE, QHPSI, QHPSIMINSIZE, QHPSIMAXSIZE, QHPSIRC, QHPSIRN, USE_FSYNC, SCANCMD, PLUGINDIR, QUEUE_PLUGIN, PASSWORD_HASH, MAKESEEKABLE, MIN_FREE, ERROR_FD, DKSIGN, DKVERIFY, DKSIGNOPTIONS, DKQUEUE, DKEXCLUDEHEADERS, DKIMSIGN, DKIMVERIFY, DKIMPRACTICE, DKIMIDENTITY, DKIMEXPIRE, SIGN_PRACTICE DKIMQUEUE, SIGNATUREDOMAINS, and NOSIGNATUREDOMAINS
 ```
 
-The following list of environment variables can be modified using envrules if QMAILLOCAL and QMAILREMOTE is set to /var/indimail/bin/spawn-filter.
+The following list of environment variables can be modified using envrules if QMAILLOCAL and QMAILREMOTE is set to /usr/sbin/spawn-filter.
 
 ```
 QREGEX, SPAMFILTER, LOGFILTER, SPAMFILTERARGS, FILTERARGS, SPAMEXITCODE, HAMEXITCODE, UNSUREEXITCODE, REJECTSPAM, SPAMREDIRECT, SPAMIGNORE, SPAMIGNOREPATTERNS, DATABYTES, MDA, MYSQL_INIT_COMMAND, MYSQL_READ_DEFAULT_FILE, MYSQL_READ_DEFAULT_GROUP, MYSQL_OPT_CONNECT_TIMEOUT, MYSQL_OPT_READ_TIMEOUT, MYSQL_OPT_WRITE_TIMEOUT, QUEUEDIR, QUEUE_BASE, QUEUE_START, QUEUE_COUNT, and TMPDIR
@@ -2219,7 +2235,7 @@ The above command will create a supervised service which runs qmail-qmqpd under 
 
 Note: Some of the tasks like virus/spam filtering, dk, dkim signing, etc can be done either by the client (if `QMAILQUEUE=/usr/sbin/qmail-spamfilter`), or can be performed by QMQP service if **QMAILQUEUE** is defined as <b>qmail-qmqpc</b> in the service's variable directory.
 
-A QMQP server shouldn't even have to glance at incoming messages; its only job is to queue them for <b>qmail-send</b>(8). Hence you should allow access to QMQP service only from your authorized clients. You can edit the file /etc/indimail/tcp.qmqp to grant specific access to clients. Here's how to set up QMQP service to authorized client hosts on your indimail-mta server.
+A QMQP server shouldn't even have to glance at incoming messages; its only job is to queue them for <b>qmail-send</b>(8). Hence you should allow access to QMQP service only from your authorized clients. You can edit the file /etc/indimail/tcp/tcp.qmqp to grant specific access to clients. Here's how to set up QMQP service to authorized client hosts on your indimail-mta server.
 
 first create /etc/indimail/tcp/tcp.qmqp in tcprules format to allow queueing from the authorized hosts. make sure to deny connections from unauthorized hosts. for example, if queueing is allowed from 1.2.3.\*:
 
@@ -2235,7 +2251,7 @@ $ sudo qmailctl cdb
 building /etc/indimail/tcp/tcp.qmqp.cdb:                   [  OK  ]
 ```
 
-You can change /var/indimail/etc/tcp.qmqp and run tcprules again at any time.
+You can change /etc/indimail/tcp/tcp.qmqp and run tcprules again at any time.
 
 ### Client Setup - How do I install indimail-mini to use qmail-qmqpc
 
@@ -2551,7 +2567,7 @@ exec /usr/bin/vuserinfo $1
 because of the above, this is what happens when you add a user
 
 ```
-$ sudo /var/indimail/bin/vadduser test05@example.com
+$ sudo /usr/bin/vadduser test05@example.com
 New IndiMail password for test05@example.com:
 Retype new IndiMail password:
 name : test05@example.com
@@ -2616,7 +2632,7 @@ name          : manny@example.com
 passwd        : $5$edYmuYDig/cqixyh$0HWa5eEOn2MH2TuLfy51YsRPkcuEFWbRPqGs6m3/uS0 (SHA256)
 uid           : 1
 gid           : 0
--all services available
+                -all services available
 gecos         : manny
 dir           : /home/mail/L2P/example.com/manny
 quota         : 524288000 [500.00 MiB]
@@ -2706,7 +2722,7 @@ The authentication information stored in the authentication database is not suff
 
 The SCRAM method also allows the server to advertise channel binding. Channel Binding allows the server to enforce TLS and safeguard the connection from main-in-the-middle-attack. IndiMail supports the [tls-unique](https://www.rfc-editor.org/rfc/rfc5929.html) channel binding for TLS1.2 and [tls-exporter](https://www.rfc-editor.org/rfc/rfc9266.html) channel binding for TLS1.3 and above. When the server supports channel binding, it advertises 
 
-IndiMail supports SCRAM-SHA-1 and SCRAM-SHA-256 SCRAM authentication methods. qmail-smtpd advertises these methods to an EHLO response. qmail-remote issues the EHLO command to get the capability of the remote server. qmail-smtpd and qmail-remote also support channel binding. Hence qmail-smtpd advertises SCRAM-SHA-1-PLUS and SCRAM-SHA-256-PLUS authentication methods. Similarly qmail-remote uses tls-unique or the tls-exporter channel binding when the remote supports SCRAM-SHA*-PLUS methods. You can use the <b>vpasswd</b> program to set password for SCRAM authentication. For example, the below password will allow AUTH LOGIN, PLAIN and all SCRAM methods to work.
+IndiMail supports SCRAM-SHA-1 and SCRAM-SHA-256 SCRAM authentication methods. qmail-smtpd advertises these methods to an EHLO response. qmail-remote issues the EHLO command to get the capability of the remote server. qmail-smtpd and qmail-remote also support channel binding. Hence qmail-smtpd advertises SCRAM-SHA-1-PLUS and SCRAM-SHA-256-PLUS authentication methods. Similarly qmail-remote uses tls-unique or the tls-exporter channel binding when the remote supports SCRAM-SHA\*-PLUS methods. You can use the <b>vpasswd</b> program to set password for SCRAM authentication. For example, the below password will allow AUTH LOGIN, PLAIN and all SCRAM methods to work.
 
 ```
 sudo vpasswd -m SCRAM-SHA-256 manny@example.com supersecret
@@ -2771,7 +2787,7 @@ Inact Date    : Not yet Inactivated
 Activ Date    : (127.0.0.1) Tue Jul  2 09:33:55 2019
 Delivery Time : No Mails Delivered yet / Per Day Limit not configured
 ```
-You will notice two additional fields - the hex salted password `a8bac1a24c7aa2725630c9ab6813a631b366c79c6bc959bf344d3af8e685a375` and the clear text password following it (separated by a colon). This kind of password will allow you to use AUTH PLAIN, LOGIN, all CRAM methods and all SCRAM / SCRAM-PLUS methods. But it will be at the cost of the security of your user's passwords. If you use SCRAM authentication, you can disable all CRAM authentication methods. This will give you the safety of encrypted passwords as well the safety in the eventuality that your database gets stolen.
+You will notice two additional fields - the hex salted password `a8bac1a24c7aa2725630c9ab6813a631b366c79c6bc959bf344d3af8e685a375` and the clear text password following it (separated by a colon). This kind of password will allow you to use AUTH PLAIN, LOGIN, all CRAM methods and all SCRAM / SCRAM-PLUS methods. But the problem with enabling CRAM auth methods is that attackers can get hold of the clear text passwords for all your users if your database is stolen. If you use SCRAM authentication, you can disable all CRAM authentication methods and also not use the -<u>C</u> argument to <b>vpasswd</b>. This will give you the safety of of having all your passwrods encrypted in the database.
 
 ## Authentication SMTP mechanism in qmail-smtpd
 
@@ -2789,7 +2805,7 @@ done
 echo 1 > DISABLE_DIGEST_MD5
 ```
 
-Once you have enabled authentication methods, you can use toolks like swak(1), gsasl(1) to test the method. Few examples are given below.
+Once you have enabled authentication methods, you can use tools like swak(1), gsasl(1) to test the method. Few examples are given below.
 
 ```
 $ gsasl --no-cb -d --hostname=argos.indimail.org --x509-ca-file="" -a manny@example.com --password supersecret --mechanism SCRAM-SHA-256 --smtp --connect argos:587
@@ -2842,8 +2858,8 @@ NOTE: you should use 1 & 2 only if if the host having the sender's IP is under y
 Your startup script for the qmail smtp server must use the tcpserver -x file option, similar to this startup line.
 
 ```
-env - PATH="/usr/bin" tcpserver -H -R -x /etc/indimail/tcp.smtp.cdb \
-  -c 20 -u 555 -g 555 0 smtp /var/indimail/bin/qmail-smtpd 2>&1
+env - PATH="/usr/bin" tcpserver -H -R -x /etc/indimail/tcp/tcp.smtp.cdb \
+  -c 20 -u 555 -g 555 0 smtp /usr/sbin/qmail-smtpd 2>&1
 ```
 
 IndiMail uses -x option to tcpserver and hence you need not bother about the above line. You however need to edit /etc/indimail/tcp.smtp and put in lines for all static IP's that you will always want to relay access to.
@@ -3411,11 +3427,112 @@ $ sudo /bin/bash
 # echo 0 > /service/qmail-smtpd.25/variables/SPAMEXITCODE
 ```
 
+# SRS implementation in IndiMail
+
+The Sender Rewriting Scheme (SRS) is a scheme for bypassing the Sender Policy Framework's (SPF) methods of preventing forged sender addresses. SPF "breaks" email forwarding. SRS is a way to fix it. SRS is a simple way for forwarding MTAs to rewrite the sender address. The original concept was published in [draft-mengwong-sender-rewrite](http://www.open-spf.org/svn/project/specs/drafts/draft-mengwong-sender-rewrite-01.txt) and further expanded on in a [paper by Shevek](http://www.open-spf.org/srs/srs.pdf). IndiMail's SRS implementation has been adapted from Marcelo Coelho's [qmail SRS patch](http://www.mco2.com.br/opensource/qmail/srs/).
+
+## Configuration Parameters
+
+To configure SRS in IndiMail you need to at the least configure the control files <u>srs_domain</u> and <u>srs_secrets</u>. The various SRS parameters are given in the table below.
+
+Parameters|Description|Example
+----------|-----------|-------
+<u>srs_domain</u>|A domain to use in rewritten addresses. If not set, SRS is disabled.|srs.indimail.org
+<u>srs_secrets</u>|A random string to generate and check SRS addresses. You can specify a list of secrets (one per line). The first secret in the list is used for generating new SRS addresses. All secrets on the list may be used to verify SRS addresses.|b1YI?,uL7f=oH
+<u>srs_maxage</u>|The maximum permitted age of a rewritten address. SRS rewritten addresses expire after a specified number of days. libsrs2 default is 21, but I believe that a week is enougth to get all bounces, so I recommend you to use 7.|7
+<u>srs_hashlength</u>|The hash length to generate in a rewritten address. The hash length is a measure of security in the SRS system; longer is more secure.|4
+<u>srs_hashmin</u>|The hash length to require when checking an address. If the hash length is increased, there may be SRS addresses from your MTA in the wild which use a shorter hash length. This parameter may be set to permit checking of hashes shorter than srs\_hashlength. This parameter must be at most srs\_hashlength.|4
+<u>srs_separator</u>|The separator to appear immediately after SRS[01] in rewritten addresses. This must be -, + or =. Default value is =.|=
+<u>srs_alwaysrewrite</u>|Skip rcpthosts check and perform SRS rewriting for all forwarding, even when not required. This must be 0 (disabled) or 1 (enabled). Default value is 0 (disabled).|0
+
+Now that we have described the SRS parameters, we can go ahead and configure SRS by following the below steps.
+
+1. Configure <u>srs domain</u> control file
+
+		$ cd /etc/indimail/control
+		$ sudo bash
+		# echo srs.domain.tld > srs_domain
+
+2. Configure <u>srs_secrets</u>
+
+		$ cd /etc/indimail/control
+		$ sudo bash
+		# tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\]^_`{|}~' \
+			</dev/urandom | head -c 13 > srs_secrets
+
+3. Configure optional parameters
+
+		$ cd /etc/indimail/control
+		$ sudo bash
+		# echo 7 > srs_maxage
+		# echo 4 > srs_hashlength
+		# echo 4 > srs_hashmin
+		# echo = > srs_separator
+		# echo 0 > srs_alwaysrewrite
+
+4. Configure indimail to receive mails for your SRS domain.
+
+		$ cd /etc/indimail/control
+		$ sudo bash
+		# echo srs.domain.tld         > rcpthosts
+		# echo srs.domain.tld:srs     > virtualdomains
+		# cd /var/indimail/alias
+		# echo "| /usr/bin/srsfilter" > .qmail-srs-default
+		# svc -h /service/qmail-send.25
+
+# SPF implementation in IndiMail
+
+Sender Policy Framework (SPF) is an email authentication method designed to detect forging sender addresses during the delivery of the email. It is text record in DNS which allows to designate permitted senders for mails depending on the domain name. The goal is to disallow sender address forgery. qmail-smtpd checks incoming mails, adds Received-SPF lines and optionally blocks undesired SMTP transactions. The check is performed at the envelope level. SPF allows the receiving mail server to check during mail delivery that a mail claiming to come from a specific domain is submitted by an IP address authorized by that domain's administrators. The list of authorized sending hosts and IP addresses for a domain is published in the DNS records for that domain. You can use <b>dnstxt</b> program to get the published TXT records in DNS. You can use the <b>spfquery</b> program to check if an IP address is permitted to send mails on behalf of a domain. e.g.
+
+```
+$ dnstxt rr.com
+v=spf1 ip4:24.30.203.0/24 ip4:24.28.200.0/24 ip4:24.28.204.0/24 ip4:24.30.218.0/24 ip4:75.180.132.0/24 ip4:71.74.56.0/24 ip4:107.14.166.0/24 ip4:107.14.73.0/24 +mx ~all
+$ spfquery 24.30.203.1 rr.com postmaster@rr.com
+result=pass
+Received-SPF: pass (localhost: SPF record at rr.com designates 24.30.203.1 as permitted sender)
+```
+
+Indimail's SPF implementation has been adapted from [SPF implementation for qmail](https://www.saout.de/misc/spf/) written by Jana Saout and Christophe Saout. There are 5 configuration file in /etc/indimail/control directory that are used for configuring SPF.
+
+* <b>spfbehavior</b> Use this to turn on SPF checking. The default value is 0 (off). You can specify a value between 0 and 6:
+	- 0 Never do SPF lookups, don't create Received-SPF headers
+	* 1 Only create Received-SPF headers, never block
+	* 2 Use temporary errors when you have DNS lookup problems
+	* 3 Reject mails when SPF resolves to fail (deny)
+	* 4 Reject mails when SPF resolves to softfail
+	* 5 Reject mails when SPF resolves to neutral
+	* 6 Reject mails when SPF does not resolve to pass
+	
+	Values bigger than 3 are strongly discouraged, you probably want to go with 2 or 3.
+	
+	Important: This setting can be overridden using the environment variable <b>SPFBEHAVIOR</b>, e.g. from tcpserver rules or from the supervise variables directory.
+
+	Note: If <b>RELAYCLIENT</b> is set, SPF checks won't run at all.
+
+* <b>spfrules</b> You can specify a line with local rules. Local rules means: Rules that are executed before the real SPF rules for a domain would fail (fail, softfail, neutral). They are also executed for domains that don't publish SPF entries. It is suggested to add
+
+		include:spf.trusted-forwarder.org
+	
+	You can also add mechanisms to trust known mail servers like backup MX servers, though I suggest that you should at least also use tcprules (to modify <b>SPFBEHAVIOR</b>).
+
+* <b>spfguess</b> You can specify a line with guess rules. Guess rules means: Rules that are used if the domain doesn't publish SPF rules. The local spfrules are always executed afterwards. It is suggested to use <i>a/24 mx/24 ptr</i>. This isn't needed but generally gives good results (for spam filters scoring Received-SPF lines).
+
+* <b>spfexp</b> You can override the default SPF explanation if you want. The explanation is the line returned to the SMTP sender when a mail is rejected at the SMTP level. You can use macro expansion. If a domain specifies its own explanation it is going to be used instead.
+
+	The SMTP answer when rejecting mails will look like:
+	
+		550 the expanded SPF explanation (#5.7.1)
+
+	If you want the macro expansion explained look at the SPF draft.
+
+* spfipv6 You can turn on spf for ipv6 connections by setting to value 1 or 0 to disable. You can override this control file with environment variable <b>USE\_SPFIPV6</b>.
+
+
 # Greylisting in IndiMail
 
-Greylisting is a method of defending email users against spam, by temporarily rejecting any email from a IP/Sender which it does not recognize. As per SMTP, the originating server should after a delay retry. A server implementing greylisting should accept the mail if sufficient time has elapsed. If the mail is from a spammer it will probably not be retried since a spammer goes through thousands of email addresses and typically cannot afford the time delay to retry.
+Greylisting is a method of defending email users against spam, by temporarily rejecting any email from a IP/Sender which it does not recognize. As per SMTP, the originating server should retry after a delay. A server implementing greylisting should accept the mail if sufficient time has elapsed. If the mail is from a spammer it will probably not be retried since a spammer goes through thousands of email addresses and typically cannot afford the time delay to retry.
 
-IndiMail 1.6 onwards implements greylisting using <b>qmail-greyd</b> daemon. You additionally need to have the environment variable GREYIP defined for the <b>qmail-smtpd</b> process. The environment variable GREYIP specifies on which IP and port, <b>qmail-greyd</b> is accepting greylisting requests. <b>qmail-smtpd</b> uses UDP to send a triplet (IP+RETURN\_PATH+RECIPIENT) to the greylisting server and waits for an answer which tells <b>qmail-smtpd</b> to proceed ahead or to temporarily reject the mail. <b>qmail-greyd</b> also accepts a list of whitelisted IP addresses for which greylisting should not be done.
+IndiMail 1.6 onwards implements greylisting using <b>qmail-greyd</b> daemon. You additionally need to set the environment variable GREYIP defined for the <b>qmail-smtpd</b> process. The environment variable GREYIP specifies on which IP and port, <b>qmail-greyd</b> is accepting greylisting requests. <b>qmail-smtpd</b> uses UDP to send a triplet (IP+RETURN\_PATH+RECIPIENT) to the greylisting server and waits for an answer which tells <b>qmail-smtpd</b> to proceed ahead or to temporarily reject the mail. <b>qmail-greyd</b> also accepts a list of whitelisted IP addresses for which greylisting should not be done.
 
 ## Enabling qmail-greyd greylisting server
 
@@ -3454,14 +3571,12 @@ $ sudo /bin/bash
 # /usr/bin/qmailctl cdb
 ```
 
-Alternatively (and particularly if you're not using the -x option to tcpserver) you can enable greylisting for all SMTP connections by setting GREYIP in the environment in which <b>qmail-smtpd</b> is started - for example your variables directory for <b>qmail-smtpd</b> can contain a file with the name GREYIP
+Alternatively (and particularly if you're not using the -x option to tcpserver) you can enable greylisting for all SMTP connections by setting GREYIP environment variable for <b>qmail-smtpd</b> service.
 
 ```
 $ sudo /bin/bash
 # echo GREYIP=\"127.0.0.1@1999\" > /service/qmail-smtpd.25/variables/GREYIP
 ```
-
-NOTE: The above instructions are for IndiMail/indimail-mta 2.x and above. For 1.x releases, use /var/indimail/etc for the location of tcp.smtp and tcp.smtp.cdb
 
 # Configuring dovecot as the IMAP/POP3 server
 
@@ -4988,7 +5103,7 @@ We now have a running container and can attach to it and use it like any functio
 ```
 $ docker exec -ti fd09c7ca75be /bin/bash --login
 #
-# /var/indimail/bin/svstat /service/\*
+# /usr/bin/svstat /service/\*
 /service/fetchmail: down 10036 seconds spid 45058 
 /service/greylist.1999: up 10036 seconds pid 45102 
 /service/indisrvr.4000: up 10036 seconds pid 45090 
@@ -5018,7 +5133,7 @@ $ docker exec -ti fd09c7ca75be /bin/bash --login
 /service/udplogger.3000: up 10036 seconds pid 45150 
 ```
 
-You now have a fully functional mail server with a pre-configured virtual domain indimail.org and a pre-configured virtual user testuser01@indimail.org. You can use IMAP/POP3/SMTP to your heart's content. If not satisfied, try out the ssl enabled services IMAPS/POP3S/SMTPS or STARTTLS command. If still not satisfied, read the man pages in /var/indimail/man/\*. You can stop the container by executing the docker stop command.
+You now have a fully functional mail server with a pre-configured virtual domain indimail.org and a pre-configured virtual user testuser01@indimail.org. You can use IMAP/POP3/SMTP to your heart's content. If not satisfied, try out the ssl enabled services IMAPS/POP3S/SMTPS or STARTTLS command. If still not satisfied, read the man pages. You can stop the container by executing the docker stop command.
 
 `$ docker stop fd09c7ca75be`
 
@@ -5130,6 +5245,8 @@ There is also a [Project Tracker](http://sourceforge.net/tracker/?group_id=23068
 IndiMail uses a modified [qmail](http://cr.yp.to/qmail.html "qmail") as the MTA. qmail's modular, lightweight design and sensible queue management provides IndiMail the speed to make it one of the fastest available message transfer agent.
 IndiMail provides a multi-queue version of the original ''qmail-queue'' program. IndiMail uses multiple queues with each queue running its own <b>qmail-send</b>/qmail-todo, <b>qmail-lspawn</b>, <b>qmail-rspawn</b> processes. This allows IndiMail to process mails faster than what can be provided by qmail. A process named qscheduler monitors these processes and restarts them if they go down, which hasn't yet been observed to go down.
 
+Note: qmail-todo is a dedicated todo processor whose basic working comes from the ext-todo patch for qmail by Claudio Jeker <jeker@n-r-g.com> and Andre Oppermann <opi@nrg4u.com>, (c) 1998,1999,2000,2001,2002 Internet Business Solutions Ltd.
+
 ## Setup
 
  * automatic adaptation to your UNIX variant
@@ -5199,12 +5316,12 @@ IndiMail provides a multi-queue version of the original ''qmail-queue'' program.
  * Message Submission Agent – MSA (RFC 2476)
  * Domain IP address pair access control via control file hostaccess
  * Per User accesslist via control file accesslist
- * [SPF](http://www.openspf.org/ "openspf") – Sender Permitted From
+ * [SPF](http://www.openspf.org/ "openspf") – Sender Permitted From. Adapted from [SPF implementation for qmail](https://www.saout.de/misc/spf/)
  * [SRS](http://www.libsrs2.org/ "libsrs2") - Sender Rewriting Scheme
  * [Bounce Address Tag Validation (BATV)](http://www.linux-magazine.com/Online/News/IndiMail-1.6-Includes-Greylisting-and-BATV?category=13404 "batv")
  * Per User control of environment variable by envrules(rules file set by environment variable FROMRULES)
  * [Greylisting](http://www.gossamer-threads.com/lists/qmail/users/136761 "greylisting") capability using <b>qmail-greyd</b> or greydaemon
- * SMTP Plugins - External plugins using shared objects in /var/indimail/plugins to enhance functionality of MAIL, RCPT & DATA session.
+ * SMTP Plugins - External plugins using shared objects in /usr/lib/indimail/plugins to enhance functionality of MAIL, RCPT & DATA session.
  * Notify recipients when message size exceeds databyte limits (by setting environment variable DATABYTES\_NOTIFY)
  * Enforce STARTTLS before AUTH
  * RFC 6530-32 Email Address Internationalization
@@ -5495,8 +5612,8 @@ As stated earlier, indimal-mta was built for supporting few million users with a
 
 ## Observations
 
-* qmail based MTAs that use an external todo processor demonstrate a lower qtime
-* external todo processor has a remarkable impact on the local concurrency. The concurrency never reaches high values with high inject rates.
+* qmail based MTAs that use an dedicated todo processor demonstrate a lower qtime
+* dedicated todo processor has a remarkable impact on the local concurrency. The concurrency never reaches high values with high inject rates.
 * processing todo in batches has a significant impact on qmail-send performance and delivery times by as much as 30%. But this has an impact on the delivery of the first email.
 * Increasing directory split has negligible effect in qmail-perf test and filesystem test
 * statically linked binaries give much better performance. With dynamic linking, indimail-mta performs the worst amongst all MTAs.
@@ -5509,6 +5626,10 @@ As stated earlier, indimal-mta was built for supporting few million users with a
 ## Results
 
 Results on [Google Sheet](https://docs.google.com/spreadsheets/d/1Dfr1c1RXh18Lc47fmGymTRV5nL9DRviS9Gy8kqH5iZM/edit?usp=sharing)
+
+# Credits
+
+This project has been built on the work of many. If I have missed out anyone, do let me know and I will be glad to add it to the [list](https://github.com/mbhangui/indimail-mta/blob/master/indimail-mta-x/doc/CREDITS). This is a comprehensive list and I have tried by best to list all contributions made by other whose work I have picked up to build bits and pieces of IndiMail.
 
 # History
 
