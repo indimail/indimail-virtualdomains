@@ -5629,7 +5629,7 @@ Results on [Google Sheet](https://docs.google.com/spreadsheets/d/1Dfr1c1RXh18Lc4
 
 # Credits
 
-This project has been built on the work of many. If I have missed out anyone, do let me know and I will be glad to add it to the [list](https://github.com/mbhangui/indimail-mta/blob/master/indimail-mta-x/doc/CREDITS). This is a comprehensive list and I have tried by best to list all contributions made by other whose work I have picked up to build bits and pieces of IndiMail.
+This project has been built on the work of many. If I have missed out anyone, do let me know and I will be glad to add it to the [list](https://github.com/mbhangui/indimail-mta/blob/master/indimail-mta-x/doc/CREDITS.md). This is a comprehensive list and I have tried by best to list all contributions made by other whose work I have picked up to build bits and pieces of IndiMail.
 
 # History
 
