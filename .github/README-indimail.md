@@ -3429,11 +3429,14 @@ $ sudo /bin/bash
 
 # SRS implementation in IndiMail
 
-The Sender Rewriting Scheme (SRS) is a scheme for bypassing the Sender Policy Framework's (SPF) methods of preventing forged sender addresses. SPF "breaks" email forwarding. SRS is a way to fix it. SRS is a simple way for forwarding MTAs to rewrite the sender address. The original concept was published in [draft-mengwong-sender-rewrite](http://www.open-spf.org/svn/project/specs/drafts/draft-mengwong-sender-rewrite-01.txt) and further expanded on in a [paper by Shevek](http://www.open-spf.org/srs/srs.pdf). IndiMail's SRS implementation has been adapted from Marcelo Coelho's [qmail SRS patch](http://www.mco2.com.br/opensource/qmail/srs/).
+Hosts which adopt the [Sender Permitted From (SPF)](https://en.wikipedia.org/wiki/Sender_Policy_Framework) convention face a challenge when required to forward mail. If the forwarding host does not change the sender domain, it will fail the SPF test and may not be able to hand the message off to the recipient. 
+The [Sender Rewriting Scheme (SRS)](https://en.wikipedia.org/wiki/Sender_Rewriting_Scheme) is a scheme for bypassing the Sender Policy Framework's (SPF) methods of preventing forged sender addresses. SPF "breaks" email forwarding. SRS is a way to fix it. SRS is a simple way for forwarding MTAs to rewrite the sender address. The original concept was published in [draft-mengwong-sender-rewrite](http://www.open-spf.org/svn/project/specs/drafts/draft-mengwong-sender-rewrite-01.txt) and further expanded on in a [paper by Shevek](http://www.open-spf.org/srs/srs.pdf). IndiMail's SRS implementation has been adapted from Marcelo Coelho's [qmail SRS patch](http://www.mco2.com.br/opensource/qmail/srs/), which uses a [forked](https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x) version of the [libsrs2](https://www.libsrs2.org/) library. The Sender Rewriting Scheme is depicted pictorially below, taken from [open-spf.org](http://www.open-spf.org/SRS/).
+
+![Sender Rewriting Scheme](Sender-Rewriting-Scheme.png "SRS")
 
 ## Configuration Parameters
 
-To configure SRS in IndiMail you need to at the least configure the control files <u>srs_domain</u> and <u>srs_secrets</u>. The various SRS parameters are given in the table below.
+SRS is configured by setting libsrs2 parameters. To configure SRS in IndiMail you need to at the least configure the control files <u>srs_domain</u> and <u>srs_secrets</u>. The various SRS control files are given in the table below. Each control file controls SRS parameter of the same name as the control file. e.g. The control file <b>srs_domain</b> controls the libsrs2 parameter <u>srs_domain</u>.
 
 Parameters|Description|Example
 ----------|-----------|-------
@@ -3453,14 +3456,14 @@ Now that we have described the SRS parameters, we can go ahead and configure SRS
 		$ sudo bash
 		# echo srs.domain.tld > srs_domain
 
-2. Configure <u>srs_secrets</u>
+2. Configure <u>srs_secrets</u> control file
 
 		$ cd /etc/indimail/control
 		$ sudo bash
 		# tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\]^_`{|}~' \
 			</dev/urandom | head -c 13 > srs_secrets
 
-3. Configure optional parameters
+3. Configure optional control files / parameters
 
 		$ cd /etc/indimail/control
 		$ sudo bash
@@ -3475,9 +3478,18 @@ Now that we have described the SRS parameters, we can go ahead and configure SRS
 		$ cd /etc/indimail/control
 		$ sudo bash
 		# echo srs.domain.tld         > rcpthosts
+
+		The below steps are not needed if you use qmail-smtpd. qmail-smtpd by
+		itself has the ability to decode a SRS address. But you can do the below
+		steps in case you are using mini-smtpd or other methods to receive mails
+		from outside like ofmipd, qmail-smtpd from qmail, netqmail, notqmail, etc.
+		In such cases you require srsfilter to decode SRS addresses.
+
+		$ cd /etc/indimail/control
+		$ sudo bash
 		# echo srs.domain.tld:srs     > virtualdomains
 		# cd /var/indimail/alias
-		# echo "| /usr/bin/srsfilter" > .qmail-srs-default
+		# echo "|/usr/bin/srsfilter" > .qmail-srs-default
 		# svc -h /service/qmail-send.25
 
 # SPF implementation in IndiMail
