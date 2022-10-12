@@ -84,6 +84,7 @@ Table of Contents
       * [Using control file relaydomains](#using-control-file-relaydomains)
       * [Using control file relaymailfrom](#using-control-file-relaymailfrom)
    * [CHECKRECIPIENT - Check Recipients during SMTP](#checkrecipient---check-recipients-during-smtp)
+   * [SMTP Access List](#smtp-access-list)
    * [IndiMail Control Files Formats](#indimail-control-files-formats)
    * [Inlookup database connection pooling service](#inlookup-database-connection-pooling-service)
    * [Setting limits for your domain](#setting-limits-for-your-domain)
@@ -93,11 +94,10 @@ Table of Contents
    * [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi)
       * [Using tcprules](#using-tcprules)
       * [Using envdir for SMTP service under supervise(8)](#using-envdir-for-smtp-service-under-supervise8)
-   * [SMTP Access List](#smtp-access-list)
    * [Using spamassasin with IndiMail](#using-spamassasin-with-indimail)
+   * [SPF implementation in IndiMail](#spf-implementation-in-indimail)
    * [SRS implementation in IndiMail](#srs-implementation-in-indimail)
       * [Configuration Parameters](#configuration-parameters)
-   * [SPF implementation in IndiMail](#spf-implementation-in-indimail)
    * [Greylisting in IndiMail](#greylisting-in-indimail)
       * [Enabling qmail-greyd greylisting server](#enabling-qmail-greyd-greylisting-server)
       * [Enabling greylisting in SMTP](#enabling-greylisting-in-smtp)
@@ -2956,6 +2956,59 @@ $ sudo /bin/bash
 $
 ```
 
+# SMTP Access List
+
+One of the feature that IndiMail adds to <b>qmail-smtpd</b> is accesslist between senders and recipients. Accesslist can be enabled by creating a control file /etc/indimail/control/accesslist. A line in accesslist is of the form
+
+`type:sender:recipient`
+
+where *type* is either the word 'from' or 'rcpt'. *sender* and *recipient* can be the actual *sender*, *recipient*, a wildcard or a regular expression (uses regex(3))
+
+The accesslist happens during SMTP session and mails which get restricted get rejected with permanent 5xx code.
+
+To give some examples
+
+```
+rcpt:ceo@indimail.org:country_distribution_list@indimail.org
+rcpt:md@indimail.org:country_distribution_list@indimail.org
+from:recruiter@gmail.com:hr_manager@indimail.org
+```
+
+* The above accesslist implies that only the users with email `ceo@indimail.org` and `md@indimail.org` can send a mail to the email `country_distribution_list@indimail.org`
+* The 3rd line implies that all outside mails from the sender `recruiter@gmail.com` will be rejected at SMTP unless the recipient is `hr_manager@indimail.org`
+
+IndiMail also provides a program called uacl to test this accesslist. uacl is useful especially when you use wildcards or regular expressions.
+
+An extreme example where you want to restrict the communication between two domains only
+
+```
+$ cat /etc/indimail/control/accesslist
+rcpt:*example.com:*@example1.com
+from:*@example1.com:*@example.com
+
+
+$ uacl test@example.com test@example1.com
+rule no 1: rcpt:*example.com:*@example1.com
+matched recipient [test@example1.com] with [*@example1.com]
+matched sender [test@example.com] with [*example.com] --&gt; access allowed
+$
+$ uacl test@indimail.org test@example1.com
+rule no 1: rcpt:*example.com:*@example1.com
+matched recipient [test@example1.com] with [*@example1.com]
+sender not matched [test@indimail.org] --&gt; access denied
+$
+$ uacl test@example1.com test@example.com
+rule no 2: from:*@example1.com:*@example.com
+matched sender [test@example1.com] with [*@example1.com]
+matched recipient [test@example.com] with [*@example.com] --&gt; access allowed
+$
+$ uacl test@example1.com manvendra@indimail.org
+rule no 2: from:*@example1.com:*@example.com
+matched sender [test@example1.com] with [*@example1.com]
+recipient not matched [manvendra@indimail.org] --&gt; access denied
+$
+```
+
 # IndiMail Control Files Formats
 
 A little known feature of IndiMail allows some of your control files to be in plain text, cdb or in MySQL. These control files include authdomains, badhelo, badext, badmailfrom, badrcptto, blackholedsender, blackholedrcpt, chkrcptdomains, goodrcptto, relaymailfrom and spamignore. If you have quite a large number of entries in any of the above control files, you can expect a significant performance gains by having these control files in cdb or MySQL.
@@ -3296,59 +3349,6 @@ One can also create a vfilter to deliver such email to the quarantine folder
 
 If you implement different method, than explained above, let me know.
 
-# SMTP Access List
-
-One of the feature that IndiMail adds to <b>qmail-smtpd</b> is accesslist between senders and recipients. Accesslist can be enabled by creating a control file /etc/indimail/control/accesslist. A line in accesslist is of the form
-
-`type:sender:recipient`
-
-where *type* is either the word 'from' or 'rcpt'. *sender* and *recipient* can be the actual *sender*, *recipient*, a wildcard or a regular expression (uses regex(3))
-
-The accesslist happens during SMTP session and mails which get restricted get rejected with permanent 5xx code.
-
-To give some examples
-
-```
-rcpt:ceo@indimail.org:country_distribution_list@indimail.org
-rcpt:md@indimail.org:country_distribution_list@indimail.org
-from:recruiter@gmail.com:hr_manager@indimail.org
-```
-
-* The above accesslist implies that only the users with email `ceo@indimail.org` and `md@indimail.org` can send a mail to the email `country_distribution_list@indimail.org`
-* The 3rd line implies that all outside mails from the sender `recruiter@gmail.com` will be rejected at SMTP unless the recipient is `hr_manager@indimail.org`
-
-IndiMail also provides a program called uacl to test this accesslist. uacl is useful especially when you use wildcards or regular expressions.
-
-An extreme example where you want to restrict the communication between two domains only
-
-```
-$ cat /etc/indimail/control/accesslist
-rcpt:*example.com:*@example1.com
-from:*@example1.com:*@example.com
-
-
-$ uacl test@example.com test@example1.com
-rule no 1: rcpt:*example.com:*@example1.com
-matched recipient [test@example1.com] with [*@example1.com]
-matched sender [test@example.com] with [*example.com] --&gt; access allowed
-$
-$ uacl test@indimail.org test@example1.com
-rule no 1: rcpt:*example.com:*@example1.com
-matched recipient [test@example1.com] with [*@example1.com]
-sender not matched [test@indimail.org] --&gt; access denied
-$
-$ uacl test@example1.com test@example.com
-rule no 2: from:*@example1.com:*@example.com
-matched sender [test@example1.com] with [*@example1.com]
-matched recipient [test@example.com] with [*@example.com] --&gt; access allowed
-$
-$ uacl test@example1.com manvendra@indimail.org
-rule no 2: from:*@example1.com:*@example.com
-matched sender [test@example1.com] with [*@example1.com]
-recipient not matched [manvendra@indimail.org] --&gt; access denied
-$
-```
-
 # Using spamassasin with IndiMail
 
 Just few days back a user asked me whether spamassassin can be used with IndiMail.
@@ -3427,6 +3427,53 @@ $ sudo /bin/bash
 # echo 0 > /service/qmail-smtpd.25/variables/SPAMEXITCODE
 ```
 
+# SPF implementation in IndiMail
+
+Sender Policy Framework (SPF) is an email authentication method designed to detect forging sender addresses during the delivery of the email. It is text record in DNS which allows to designate permitted senders for mails depending on the domain name. The goal is to disallow sender address forgery. qmail-smtpd checks incoming mails, adds Received-SPF lines and optionally blocks undesired SMTP transactions. The check is performed at the envelope level. SPF allows the receiving mail server to check during mail delivery that a mail claiming to come from a specific domain is submitted by an IP address authorized by that domain's administrators. The list of authorized sending hosts and IP addresses for a domain is published in the DNS records for that domain. You can use <b>dnstxt</b> program to get the published TXT records in DNS. You can use the <b>spfquery</b> program to check if an IP address is permitted to send mails on behalf of a domain. e.g.
+
+```
+$ dnstxt rr.com
+v=spf1 ip4:24.30.203.0/24 ip4:24.28.200.0/24 ip4:24.28.204.0/24 ip4:24.30.218.0/24 ip4:75.180.132.0/24 ip4:71.74.56.0/24 ip4:107.14.166.0/24 ip4:107.14.73.0/24 +mx ~all
+$ spfquery 24.30.203.1 rr.com postmaster@rr.com
+result=pass
+Received-SPF: pass (localhost: SPF record at rr.com designates 24.30.203.1 as permitted sender)
+```
+
+Indimail's SPF implementation has been adapted from [SPF implementation for qmail](https://www.saout.de/misc/spf/) written by Jana Saout and Christophe Saout. There are 5 configuration file in /etc/indimail/control directory that are used for configuring SPF.
+
+* <b>spfbehavior</b> Use this to turn on SPF checking. The default value is 0 (off). You can specify a value between 0 and 6:
+	- 0 Never do SPF lookups, don't create Received-SPF headers
+	* 1 Only create Received-SPF headers, never block
+	* 2 Use temporary errors when you have DNS lookup problems
+	* 3 Reject mails when SPF resolves to fail (deny)
+	* 4 Reject mails when SPF resolves to softfail
+	* 5 Reject mails when SPF resolves to neutral
+	* 6 Reject mails when SPF does not resolve to pass
+	
+	Values bigger than 3 are strongly discouraged, you probably want to go with 2 or 3.
+	
+	Important: This setting can be overridden using the environment variable <b>SPFBEHAVIOR</b>, e.g. from tcpserver rules or from the supervise variables directory.
+
+	Note: If <b>RELAYCLIENT</b> is set, SPF checks won't run at all.
+
+* <b>spfrules</b> You can specify a line with local rules. Local rules means: Rules that are executed before the real SPF rules for a domain would fail (fail, softfail, neutral). They are also executed for domains that don't publish SPF entries. It is suggested to add
+
+		include:spf.trusted-forwarder.org
+	
+	You can also add mechanisms to trust known mail servers like backup MX servers, though I suggest that you should at least also use tcprules (to modify <b>SPFBEHAVIOR</b>).
+
+* <b>spfguess</b> You can specify a line with guess rules. Guess rules means: Rules that are used if the domain doesn't publish SPF rules. The local spfrules are always executed afterwards. It is suggested to use <i>a/24 mx/24 ptr</i>. This isn't needed but generally gives good results (for spam filters scoring Received-SPF lines).
+
+* <b>spfexp</b> You can override the default SPF explanation if you want. The explanation is the line returned to the SMTP sender when a mail is rejected at the SMTP level. You can use macro expansion. If a domain specifies its own explanation it is going to be used instead.
+
+	The SMTP answer when rejecting mails will look like:
+	
+		550 the expanded SPF explanation (#5.7.1)
+
+	If you want the macro expansion explained look at the SPF draft.
+
+* spfipv6 You can turn on spf for ipv6 connections by setting to value 1 or 0 to disable. You can override this control file with environment variable <b>USE\_SPFIPV6</b>.
+
 # SRS implementation in IndiMail
 
 Hosts which adopt the [Sender Permitted From (SPF)](https://en.wikipedia.org/wiki/Sender_Policy_Framework) convention face a challenge when required to forward mail. If the forwarding host does not change the sender domain, it will fail the SPF test and may not be able to hand the message off to the recipient. 
@@ -3491,54 +3538,6 @@ Now that we have described the SRS parameters, we can go ahead and configure SRS
 		# cd /var/indimail/alias
 		# echo "|/usr/bin/srsfilter" > .qmail-srs-default
 		# svc -h /service/qmail-send.25
-
-# SPF implementation in IndiMail
-
-Sender Policy Framework (SPF) is an email authentication method designed to detect forging sender addresses during the delivery of the email. It is text record in DNS which allows to designate permitted senders for mails depending on the domain name. The goal is to disallow sender address forgery. qmail-smtpd checks incoming mails, adds Received-SPF lines and optionally blocks undesired SMTP transactions. The check is performed at the envelope level. SPF allows the receiving mail server to check during mail delivery that a mail claiming to come from a specific domain is submitted by an IP address authorized by that domain's administrators. The list of authorized sending hosts and IP addresses for a domain is published in the DNS records for that domain. You can use <b>dnstxt</b> program to get the published TXT records in DNS. You can use the <b>spfquery</b> program to check if an IP address is permitted to send mails on behalf of a domain. e.g.
-
-```
-$ dnstxt rr.com
-v=spf1 ip4:24.30.203.0/24 ip4:24.28.200.0/24 ip4:24.28.204.0/24 ip4:24.30.218.0/24 ip4:75.180.132.0/24 ip4:71.74.56.0/24 ip4:107.14.166.0/24 ip4:107.14.73.0/24 +mx ~all
-$ spfquery 24.30.203.1 rr.com postmaster@rr.com
-result=pass
-Received-SPF: pass (localhost: SPF record at rr.com designates 24.30.203.1 as permitted sender)
-```
-
-Indimail's SPF implementation has been adapted from [SPF implementation for qmail](https://www.saout.de/misc/spf/) written by Jana Saout and Christophe Saout. There are 5 configuration file in /etc/indimail/control directory that are used for configuring SPF.
-
-* <b>spfbehavior</b> Use this to turn on SPF checking. The default value is 0 (off). You can specify a value between 0 and 6:
-	- 0 Never do SPF lookups, don't create Received-SPF headers
-	* 1 Only create Received-SPF headers, never block
-	* 2 Use temporary errors when you have DNS lookup problems
-	* 3 Reject mails when SPF resolves to fail (deny)
-	* 4 Reject mails when SPF resolves to softfail
-	* 5 Reject mails when SPF resolves to neutral
-	* 6 Reject mails when SPF does not resolve to pass
-	
-	Values bigger than 3 are strongly discouraged, you probably want to go with 2 or 3.
-	
-	Important: This setting can be overridden using the environment variable <b>SPFBEHAVIOR</b>, e.g. from tcpserver rules or from the supervise variables directory.
-
-	Note: If <b>RELAYCLIENT</b> is set, SPF checks won't run at all.
-
-* <b>spfrules</b> You can specify a line with local rules. Local rules means: Rules that are executed before the real SPF rules for a domain would fail (fail, softfail, neutral). They are also executed for domains that don't publish SPF entries. It is suggested to add
-
-		include:spf.trusted-forwarder.org
-	
-	You can also add mechanisms to trust known mail servers like backup MX servers, though I suggest that you should at least also use tcprules (to modify <b>SPFBEHAVIOR</b>).
-
-* <b>spfguess</b> You can specify a line with guess rules. Guess rules means: Rules that are used if the domain doesn't publish SPF rules. The local spfrules are always executed afterwards. It is suggested to use <i>a/24 mx/24 ptr</i>. This isn't needed but generally gives good results (for spam filters scoring Received-SPF lines).
-
-* <b>spfexp</b> You can override the default SPF explanation if you want. The explanation is the line returned to the SMTP sender when a mail is rejected at the SMTP level. You can use macro expansion. If a domain specifies its own explanation it is going to be used instead.
-
-	The SMTP answer when rejecting mails will look like:
-	
-		550 the expanded SPF explanation (#5.7.1)
-
-	If you want the macro expansion explained look at the SPF draft.
-
-* spfipv6 You can turn on spf for ipv6 connections by setting to value 1 or 0 to disable. You can override this control file with environment variable <b>USE\_SPFIPV6</b>.
-
 
 # Greylisting in IndiMail
 
