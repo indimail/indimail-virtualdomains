@@ -3461,7 +3461,7 @@ Now that we have described the SRS parameters, we can go ahead and configure SRS
 		$ cd /etc/indimail/control
 		$ sudo bash
 		# tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\]^_`{|}~' \
-			</dev/urandom | head -c 13 > srs_secrets
+			</dev/urandom | head -c 28 > srs_secrets
 
 3. Configure optional control files / parameters
 
