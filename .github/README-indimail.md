@@ -1945,7 +1945,7 @@ BATV allows the qmail-smtpd to distinguish between legitimate and illegitimate b
 echo "384738kdktkfdj" > /etc/indimail/control/batvkey
 ```
 
-You can exclude signing for remote deliveries to hosts that don't support signing by having the host in the control file <u>batvnosignremote</u>. You can also exclude signing for mails for your own domains by having the domain in the control file <u>batvnosignaturelocals</u>.
+You can exclude signing for remote deliveries to hosts that don't support signing by having the host in the control file <u>batvnosignremote</u>. You can also exclude signing for mails for your own domains by having the domain in the control file <u>batvnosignlocals</u>.
 
 You can also control the validity period for bounces by creating the control file <u>batvkeystale</u>. The default validity is 7 days.
 
