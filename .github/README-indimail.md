@@ -1939,10 +1939,12 @@ exec -a qmail-remote $PROG "$host" "$sender" "$qqeh" $size $*
 ## Bounce Address Tag Validation (BATV)
 
 The sender address can be forged by spammers to look like a legitimate email address. If that email address belongs to you, all bounce backs will be received by your server. Your server ends up handling the entire processing load for the spammer. BATV allows your SMTP server to determine if the original email was ever initiated from your server. This is done by <b>qmail-remote</b> marking each outbound email message with a key. When the bounce back arrives, <b>qmail-smtpd</b> will identify that the key is either present or not present. If the key is not present then <b>qmail-smtpd</b> knows it is not a valid bounce back and drops the email. This feature is known as [Bounce Address Tag Validation (BATV)](https://www.ietf.org/archive/id/draft-levine-smtp-batv-01.html).
-BATV allows the qmail-smtpd to distinguish between legitimate and illegitimate bounce (NDR) messages. Once you configure BATV, all outbound messages sent by qmail-remote will be tagged using BATV. This can be done by define BATVKEY environment variable for specific users or groups by using envrules. See [Envrules](#envrules). To enable BATV in IndiMail, all you need to do is create the <u>batvkey</u> control file. You can define <b>BATVKEY</b> environment variable to refer to another control file.
+BATV allows the qmail-smtpd to distinguish between legitimate and illegitimate bounce (NDR) messages. Once you configure BATV, all outbound messages sent by qmail-remote will be tagged using BATV. To enable BATV in IndiMail, all you need to do is create the <u>batvkey</u> control file. You can define <b>BATVKEY</b> environment variable to refer to another control file. You can also define BATVKEY environment variable for specific users or groups by using envrules. See [Envrules](#envrules).
 
 ```
-echo "384738kdktkfdj" > /etc/indimail/control/batvkey
+$ cd /etc/indimail/control
+$ sudo bash
+# tr -dc 'A-Za-z0-9' </dev/urandom | head -c 16 > batvkey
 ```
 
 You can exclude signing for remote deliveries to hosts that don't support signing by having the host in the control file <u>batvnosignremote</u>. You can also exclude signing for mails for your own domains by having the domain in the control file <u>batvnosignlocals</u>.
@@ -3512,7 +3514,7 @@ Now that we have described the SRS parameters, we can go ahead and configure SRS
 		$ cd /etc/indimail/control
 		$ sudo bash
 		# tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\]^_`{|}~' \
-			</dev/urandom | head -c 28 > srs_secrets
+			</dev/urandom | head -c 24 > srs_secrets
 
 3. Configure optional control files / parameters
 
