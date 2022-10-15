@@ -2164,7 +2164,7 @@ The **OUTGOINGIP** environment variable is used by <b>qmail-remote</b> to bind o
 For SMTP service the following the following list of environment variables can be modified using envrules
 
 ```
-REQUIREAUTH, QREGEX, ENFORCE_FQDN_HELO, DATABYTES, BADHELOCHECK, BADHELO, BADHOST, BADHOSTCHECK, TCPPARANOID, NODNSCHECK, VIRUSCHECK, VIRUSFORWARD, REMOVEHEADERS, ENVHEADERS, LOGHEADERS, LOGHEADERFD, SIGNATURES, BODYCHECK, BADMAILFROM, BADMAILFROMPATTERNS, BOUNCEMAIL, CUGMAIL, MASQUERADE, BADRCPTTO, BADRCPTPATTERNS, GOODRCPTTO, GOODRCPTPATTERNS, GREYIP, GREETDELAY, CLIENTCA, TLSCIPHERS, SERVERCERT, BLACKHOLERCPT, BLACKHOLERCPTPATTERNS, SIGNKEY, SIGNKEYSTALE, SPFBEHAVIOR, TMPDIR, TARPITCOUNT, TARPITDELAY, MAXRECIPIENTS, MAX_RCPT_ERRCOUNT, AUTH_ALL, CHECKRELAY, CONTROLDIR, ANTISPOOFING, CHECKRECIPIENT, SPAMFILTER, LOGFILTER, SPAMFILTERARGS, SPAMEXITCODE, REJECTSPAM, SPAMREDIRECT, SPAMIGNORE, SPAMIGNOREPATTERNS, FILTERARGS, QUEUEDIR, QUEUE_BASE, QUEUE_START, QUEUE_COUNT, QMAILQUEUE, QUEUEPROG, RELAYCLIENT, QQEH, BADEXT, BADEXTPATTERNS, ACCESSLIST, EXTRAQUEUE, QUARANTINE, QHPSI, QHPSIMINSIZE, QHPSIMAXSIZE, QHPSIRC, QHPSIRN, USE_FSYNC, SCANCMD, PLUGINDIR, QUEUE_PLUGIN, PASSWORD_HASH, MAKESEEKABLE, MIN_FREE, ERROR_FD, DKSIGN, DKVERIFY, DKSIGNOPTIONS, DKQUEUE, DKEXCLUDEHEADERS, DKIMSIGN, DKIMVERIFY, DKIMPRACTICE, DKIMIDENTITY, DKIMEXPIRE, SIGN_PRACTICE DKIMQUEUE, SIGNATUREDOMAINS, and NOSIGNATUREDOMAINS
+REQUIREAUTH, QREGEX, ENFORCE_FQDN_HELO, DATABYTES, BADHELOCHECK, BADHELO, BADHOST, BADHOSTCHECK, TCPPARANOID, NODNSCHECK, VIRUSCHECK, VIRUSFORWARD, REMOVEHEADERS, ENVHEADERS, LOGHEADERS, LOGHEADERFD, SIGNATURES, BODYCHECK, BADMAILFROM, BADMAILFROMPATTERNS, BOUNCEMAIL, CUGMAIL, MASQUERADE, BADRCPTTO, BADRCPTPATTERNS, GOODRCPTTO, GOODRCPTPATTERNS, GREYIP, GREETDELAY, CLIENTCA, TLSCIPHERS, SERVERCERT, BLACKHOLERCPT, BLACKHOLERCPTPATTERNS, SIGNKEY, SIGNKEYSTALE, SPFBEHAVIOR, SPFIPV6, SPFRULES, SPFGUESS, SPFEXP, TMPDIR, TARPITCOUNT, TARPITDELAY, MAXRECIPIENTS, MAX_RCPT_ERRCOUNT, AUTH_ALL, CHECKRELAY, CONTROLDIR, ANTISPOOFING, CHECKRECIPIENT, SPAMFILTER, LOGFILTER, SPAMFILTERARGS, SPAMEXITCODE, REJECTSPAM, SPAMREDIRECT, SPAMIGNORE, SPAMIGNOREPATTERNS, FILTERARGS, QUEUEDIR, QUEUE_BASE, QUEUE_START, QUEUE_COUNT, QMAILQUEUE, QUEUEPROG, RELAYCLIENT, QQEH, BADEXT, BADEXTPATTERNS, ACCESSLIST, EXTRAQUEUE, QUARANTINE, QHPSI, QHPSIMINSIZE, QHPSIMAXSIZE, QHPSIRC, QHPSIRN, USE_FSYNC, SCANCMD, PLUGINDIR, QUEUE_PLUGIN, PASSWORD_HASH, MAKESEEKABLE, MIN_FREE, ERROR_FD, DKSIGN, DKVERIFY, DKSIGNOPTIONS, DKQUEUE, DKEXCLUDEHEADERS, DKIMSIGN, DKIMVERIFY, DKIMPRACTICE, DKIMIDENTITY, DKIMEXPIRE, SIGN_PRACTICE DKIMQUEUE, BATVKEY, BATVKEYSTALE, BATVNOSIGNLOCALS, BATVNOSIGNREMOTE, SRS_DOMAIN, SRS_SECRETS, SRS_MAXAGE, SRS_HASHLENGTH, SRS_HASHMIN, SRS_ALWAYSREWRITE, SRS_SEPARATOR, SIGNATUREDOMAINS, and NOSIGNATUREDOMAINS
 ```
 
 The following list of environment variables can be modified using envrules if QMAILLOCAL and QMAILREMOTE is set to /usr/sbin/spawn-filter.
@@ -3468,9 +3468,9 @@ Indimail's SPF implementation has been adapted from [SPF implementation for qmai
 
 		include:spf.trusted-forwarder.org
 	
-	You can also add mechanisms to trust known mail servers like backup MX servers, though I suggest that you should at least also use tcprules (to modify <b>SPFBEHAVIOR</b>).
+	You can also add mechanisms to trust known mail servers like backup MX servers, though I suggest that you should at least also use tcprules or envrules (to modify <b>SPFBEHAVIOR</b>).
 
-* <b>spfguess</b> You can specify a line with guess rules. Guess rules means: Rules that are used if the domain doesn't publish SPF rules. The local spfrules are always executed afterwards. It is suggested to use <i>a/24 mx/24 ptr</i>. This isn't needed but generally gives good results (for spam filters scoring Received-SPF lines).
+* <b>spfguess</b> You can specify a line with guess rules. Guess rules means: Rules that are used if the domain doesn't publish SPF rules. The local spfrules are always executed afterwards. It is suggested to use <i>a/24 mx/24 ptr</i>. This isn't needed but generally gives good results (for spam filters scoring Received-SPF lines). The filename can be overriden by <b>SPFGUESS\fR environment variable.
 
 * <b>spfexp</b> You can override the default SPF explanation if you want. The explanation is the line returned to the SMTP sender when a mail is rejected at the SMTP level. You can use macro expansion. If a domain specifies its own explanation it is going to be used instead.
 
@@ -3478,7 +3478,7 @@ Indimail's SPF implementation has been adapted from [SPF implementation for qmai
 	
 		550 the expanded SPF explanation (#5.7.1)
 
-	If you want the macro expansion explained look at the SPF draft.
+	If you want the macro expansion explained look at the SPF draft. The filename can be overriden by <b>SPFEXP\fR environment variable.
 
 * spfipv6 You can turn on spf for ipv6 connections by setting to value 1 or 0 to disable. You can override this control file with environment variable <b>USE\_SPFIPV6</b>.
 
@@ -3491,17 +3491,17 @@ The [Sender Rewriting Scheme (SRS)](https://en.wikipedia.org/wiki/Sender_Rewriti
 
 ## Configuration Parameters
 
-SRS is configured by setting libsrs2 parameters. To configure SRS in IndiMail you need to at the least configure the control files <u>srs_domain</u> and <u>srs_secrets</u>. The various SRS control files are given in the table below. Each control file controls SRS parameter of the same name as the control file. e.g. The control file <b>srs_domain</b> controls the libsrs2 parameter <u>srs_domain</u>.
+SRS is configured by setting libsrs2 parameters. To configure SRS in IndiMail you need to at the least configure the control files <u>srs_domain</u> and <u>srs_secrets</u>. The various SRS control files are given in the table below. Each control file controls SRS parameter of the same name as the control file. e.g. The control file <u>srs_domain</u> controls the libsrs2 parameter <b>srs_domain</b>. Each control filename can be overriden by corresponding environment variable with capital letters. e.g. The environment variable <b>SRS_DOMAIN</b> overrides the the control file <u>srs_domain</u>
 
 Parameters|Description|Example
 ----------|-----------|-------
-<u>srs_domain</u>|A domain to use in rewritten addresses. If not set, SRS is disabled.|srs.indimail.org
-<u>srs_secrets</u>|A random string to generate and check SRS addresses. You can specify a list of secrets (one per line). The first secret in the list is used for generating new SRS addresses. All secrets on the list may be used to verify SRS addresses.|b1YI?,uL7f=oH
-<u>srs_maxage</u>|The maximum permitted age of a rewritten address. SRS rewritten addresses expire after a specified number of days. libsrs2 default is 21, but I believe that a week is enougth to get all bounces, so I recommend you to use 7.|7
-<u>srs_hashlength</u>|The hash length to generate in a rewritten address. The hash length is a measure of security in the SRS system; longer is more secure.|4
-<u>srs_hashmin</u>|The hash length to require when checking an address. If the hash length is increased, there may be SRS addresses from your MTA in the wild which use a shorter hash length. This parameter may be set to permit checking of hashes shorter than srs\_hashlength. This parameter must be at most srs\_hashlength.|4
-<u>srs_separator</u>|The separator to appear immediately after SRS[01] in rewritten addresses. This must be -, + or =. Default value is =.|=
-<u>srs_alwaysrewrite</u>|Skip rcpthosts check and perform SRS rewriting for all forwarding, even when not required. This must be 0 (disabled) or 1 (enabled). Default value is 0 (disabled).|0
+<b>srs_domain</b>|A domain to use in rewritten addresses. If not set, SRS is disabled.|srs.indimail.org
+<b>srs_secrets</b>|A random string to generate and check SRS addresses. You can specify a list of secrets (one per line). The first secret in the list is used for generating new SRS addresses. All secrets on the list may be used to verify SRS addresses.|b1YI?,uL7f=oH
+<b>srs_maxage</b>|The maximum permitted age of a rewritten address. SRS rewritten addresses expire after a specified number of days. libsrs2 default is 21, but I believe that a week is enougth to get all bounces, so I recommend you to use 7.|7
+<b>srs_hashlength</b>|The hash length to generate in a rewritten address. The hash length is a measure of security in the SRS system; longer is more secure.|4
+<b>srs_hashmin</b>|The hash length to require when checking an address. If the hash length is increased, there may be SRS addresses from your MTA in the wild which use a shorter hash length. This parameter may be set to permit checking of hashes shorter than srs\_hashlength. This parameter must be at most srs\_hashlength.|4
+<b>srs_separator</b>|The separator to appear immediately after SRS[01] in rewritten addresses. This must be -, + or =. Default value is =.|=
+<b>srs_alwaysrewrite</b>|Skip rcpthosts check and perform SRS rewriting for all forwarding, even when not required. This must be 0 (disabled) or 1 (enabled). Default value is 0 (disabled).|0
 
 Now that we have described the SRS parameters, we can go ahead and configure SRS by following the below steps.
 
