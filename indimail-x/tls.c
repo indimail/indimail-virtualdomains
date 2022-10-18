@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.8  2022-10-18 14:17:06+05:30  Cprogrammer
+ * removed getversion_tls_c()
+ *
  * Revision 1.7  2022-05-18 23:50:06+05:30  Cprogrammer
  * openssl 3.0.0 port
  *
@@ -45,6 +48,10 @@
 #include <timeoutwrite.h>
 #endif
 #include "tls.h"
+
+#ifndef	lint
+static char     rcsid[] = "$Id: tls.c,v 1.8 2022-10-18 14:17:06+05:30 Cprogrammer Exp mbhangui $";
+#endif
 
 static enum tlsmode usessl = none;
 static char    *sslerr_str;
@@ -535,12 +542,3 @@ safewrite(int fd, char *buf, size_t len, long timeout)
 #endif
 	return r;
 }
-
-#ifndef	lint
-void
-getversion_tls_c()
-{
-	if (write(1, sccsid, 0) == -1)
-		;
-}
-#endif
