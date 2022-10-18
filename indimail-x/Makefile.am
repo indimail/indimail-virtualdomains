@@ -178,7 +178,7 @@ indimailbin_PROGRAMS = vadddomain vdeldomain vadduser vdeluser vuserinfo \
 indimailsbin_PROGRAMS = inlookup ischema tcplookup vdelivermail clearopensmtp \
 	updaterules vfilter vmoddomain inquerytest vreorg vtable \
 	install_tables hostsync vserverinfo initsvc \
-	mgmtpass vchkpass vsetpass resetquota \
+	mgmtpass vchkpass vsetpass resetquota postdel \
 	ipchange adminclient indisrvr vdeloldusers vfstab \
 	osh chowkidar vpurge
 
@@ -437,6 +437,9 @@ incrypt_DEPENDENCIES = libindimail.la
 ipchange_SOURCES = ipchange.c
 ipchange_LDADD = libindimail.la $(LIB_QMAIL)
 ipchange_DEPENDENCIES = libindimail.la
+
+postdel_SOURCES = postdel.c
+postdel_LDADD = $(LIB_QMAIL)
 
 resetquota_SOURCES = resetquota.c
 resetquota_LDADD = libindimail.la $(LIB_QMAIL)

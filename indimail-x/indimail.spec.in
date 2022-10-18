@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.117 2022-09-08 08:35:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.118 2022-10-18 14:16:54+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -522,6 +522,7 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/vchkpass
 %attr(755,root,root)                    %{_prefix}/sbin/vsetpass
 %attr(755,root,root)                    %{_prefix}/sbin/vdelivermail
+%attr(755,root,root)                    %{_prefix}/sbin/postdel
 %attr(755,root,root)                    %{_prefix}/sbin/vdeloldusers
 %attr(755,root,root)                    %{_prefix}/sbin/vpurge
 %attr(755,root,root)                    %{_prefix}/sbin/vfilter
