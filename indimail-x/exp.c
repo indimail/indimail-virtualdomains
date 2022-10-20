@@ -1,5 +1,8 @@
 /*
  * $Log: exp.c,v $
+ * Revision 1.2  2022-10-20 11:57:30+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.1  2019-04-14 18:33:22+05:30  Cprogrammer
  * Initial revision
  *
@@ -31,7 +34,7 @@
  */
 
 #ifndef	lint
-static char    *rcsid = "@(#) $Id: exp.c,v 1.1 2019-04-14 18:33:22+05:30 Cprogrammer Exp mbhangui $";
+static char    *rcsid = "@(#) $Id: exp.c,v 1.2 2022-10-20 11:57:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -75,9 +78,7 @@ char           *strchr(), *strrchr();
 #include "osh.h"
 
 int
-instring(target, key)
-	char           *target, *key;
-
+instring(char *target, char *key)
 {
 	char            c;
 #ifdef STDC_HEADERS
@@ -96,10 +97,7 @@ instring(target, key)
 }
 
 int
-reg_match(target, pattern)
-	char           *target;
-	char           *pattern;
-
+reg_match(char *target, char *pattern)
 {
 	char           *tcopy = (char *) malloc(strlen(target) + 1);
 	char           *pcopy = (char *) malloc(strlen(pattern) + 1);
@@ -187,11 +185,7 @@ insert_alias(alias, argc, argv)
 }	/*- *Of routine */
 
 char           *
-expand(argv, argc, word)
-	char           *argv[MAXARG + 1];
-	int            *argc;
-	char           *word;
-
+expand(char *argv[MAXARG + 1], int *argc, char *word)
 {
 	int             oarg, i;
 	DIR            *dirp;

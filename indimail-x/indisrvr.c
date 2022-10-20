@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.10  2022-10-20 11:57:41+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.9  2022-05-10 20:00:52+05:30  Cprogrammer
  * use headers from include path
  *
@@ -33,7 +36,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.9 2022-05-10 20:00:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.10 2022-10-20 11:57:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -146,9 +149,7 @@ die_nomem()
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             n, socket_desc, pid, backlog;
 	char           *port, *ipaddr;

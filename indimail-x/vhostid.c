@@ -1,5 +1,8 @@
 /*
  * $Log: vhostid.c,v $
+ * Revision 1.4  2022-10-20 11:58:58+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.3  2019-06-07 15:50:40+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vhostid.c,v 1.3 2019-06-07 15:50:40+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vhostid.c,v 1.4 2022-10-20 11:58:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -109,9 +112,7 @@ get_options(int argc, char **argv, char **hostid, char **ipaddr, int *hostaction
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	char           *tmphost_line, *ptr, *hostid, *ipaddr;
 	char            strnum[FMT_ULONG];

@@ -1,5 +1,8 @@
 /*
  * $Log: osh.c,v $
+ * Revision 1.3  2022-10-20 11:58:04+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.2  2020-10-01 18:27:28+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -30,7 +33,7 @@
  */
 
 #ifndef lint
-static char    *rcsid = "@(#) $Id: osh.c,v 1.2 2020-10-01 18:27:28+05:30 Cprogrammer Exp mbhangui $";
+static char    *rcsid = "@(#) $Id: osh.c,v 1.3 2022-10-20 11:58:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -139,8 +142,7 @@ static struct hand Internal[] = {
 void            getEnvConfigStr(char **, char *, char *);
 
 static TOKEN
-gettoken(iword)
-	char           *iword;
+gettoken(char *iword)
 {
 	enum
 	{ NEUTRAL, GTGT, INQUOTE, INWORD }
@@ -229,9 +231,7 @@ static char     inputstring[1024];
 int             prompt = 0;
 
 static void
-iopen(argc, argv)
-	int             argc;
-	char           *argv[];
+iopen(int argc, char **argv)
 {
 	int             i = (-1);
 	int             found = 0;
@@ -283,9 +283,7 @@ iopen(argc, argv)
 static char    *pgetcptr = NULL;
 
 void
-pungetc(value, fp)
-	int             value;
-	FILE           *fp;
+pungetc(int value, FILE *fp)
 {
 	if (fp)
 	{
@@ -390,9 +388,7 @@ entrysig()
 }
 
 static int
-redirect(srcfd, srcfile, dstfd, dstfile, append, bckgrnd)
-	int             srcfd, dstfd, append, bckgrnd;
-	char           *srcfile, *dstfile;
+redirect(int srcfd, char *srcfile, int dstfd, char *dstfile, int append, int bckgrnd)
 {
 	int             flags, fd;
 	char           *test[1];
@@ -527,9 +523,7 @@ redirect(srcfd, srcfile, dstfd, dstfile, append, bckgrnd)
 
 
 int
-builtin(argc, argv, srcfd, srcfile, dstfd, dstfile, append, bckgrnd)
-	int             argc, srcfd, dstfd, append, bckgrnd;
-	char           *argv[], *srcfile, *dstfile;
+builtin(int argc, char **argv, int srcfd, char *srcfile, int dstfd, char *dstfile, int append, int bckgrnd)
 {
 	register int    i = (-1);
 	int             pid;
@@ -611,10 +605,7 @@ builtin(argc, argv, srcfd, srcfile, dstfd, dstfile, append, bckgrnd)
 }
 
 int
-invoke(argc, argv, srcfd, srcfile, dstfd, dstfile, append, bckgrnd)
-	int             argc, srcfd, dstfd, append, bckgrnd;
-	char           *argv[], *srcfile, *dstfile;
-
+invoke(int argc, char **argv, int srcfd, char *srcfile, int dstfd, char *dstfile, int append, int bckgrnd)
 {
 	int             pid;
 
@@ -634,8 +625,7 @@ invoke(argc, argv, srcfd, srcfile, dstfd, dstfile, append, bckgrnd)
 
 
 static TOKEN
-command(waitpid, makepipe, pipepfd)
-	int            *waitpid, *pipepfd, makepipe;
+command(int *waitpid, int makepipe, int *pipepfd)
 {
 	TOKEN           token, term;
 	int             argc, srcfd, dstfd, pid, pfd[2], append = 0;
@@ -814,9 +804,7 @@ command(waitpid, makepipe, pipepfd)
 }	/*- of command */
 
 #ifndef HAVE_GETHOSTNAME
-gethostname(host, len)
-	char           *host;
-	int             len;
+gethostname(char *host, int len)
 {
 	struct utsname  name;
 
@@ -844,8 +832,7 @@ do_prompt()
 }
 
 void
-pwdcopy(from, to)
-	struct passwd  *from, *to;
+pwdcopy(struct passwd *from, struct passwd *to)
 {
 	to->pw_name = (char *) malloc(strlen(from->pw_name) + 1);
 	strcpy(to->pw_name, from->pw_name);
@@ -861,8 +848,7 @@ pwdcopy(from, to)
 }
 
 void
-grpcopy(from, to)
-	struct group   *from, *to;
+grpcopy(struct group *from, struct group *to)
 {
 	/*
 	 * Only copy what we use 
@@ -872,9 +858,7 @@ grpcopy(from, to)
 }
 
 int
-ingroup(what)
-	char           *what;
-
+ingroup(char *what)
 {
 	GETGROUPS_T     groups[NGROUPS];
 	struct group   *gr;
@@ -893,10 +877,7 @@ ingroup(what)
 }
 
 void
-get_table(name, group)
-	char           *name;
-	char           *group;
-
+get_table(char *name, char *group)
 {
 	FILE           *table;
 	char           *ptr;
@@ -1016,9 +997,7 @@ get_table(name, group)
 }
 
 int
-main(argc, argv)				/*- real shell */
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv) /*- real shell */
 {
 	int             pid;
 	TOKEN           term;
@@ -1142,8 +1121,7 @@ main(argc, argv)				/*- real shell */
 #endif
 
 void
-statusprt(pid, status)
-	int             pid, status;
+statusprt(int pid, int status)
 {
 
 	int             code;
@@ -1197,8 +1175,7 @@ statusprt(pid, status)
 }
 
 void
-waitfor(pid)
-	int             pid;
+waitfor(int pid)
 {
 	int             wpid, status;
 

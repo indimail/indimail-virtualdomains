@@ -1,5 +1,8 @@
 /*
  * $Log: hostcntrl.c,v $
+ * Revision 1.5  2022-10-20 11:57:37+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.4  2019-06-07 15:59:31+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: hostcntrl.c,v 1.4 2019-06-07 15:59:31+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: hostcntrl.c,v 1.5 2022-10-20 11:57:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -125,9 +128,7 @@ get_options(int argc, char **argv, char **email, char **hostid, int *action)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	int             action, i;
 	static stralloc HostID = {0}, user = {0}, domain = {0};

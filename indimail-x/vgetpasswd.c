@@ -1,5 +1,8 @@
 /*
  * $Log: vgetpasswd.c,v $
+ * Revision 1.2  2022-10-20 11:58:55+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.1  2019-04-18 07:59:28+05:30  Cprogrammer
  * Initial revision
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgetpasswd.c,v 1.1 2019-04-18 07:59:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vgetpasswd.c,v 1.2 2022-10-20 11:58:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef sun
@@ -36,8 +39,7 @@ die_nomem()
  * prompt the command line and get a password twice, that matches 
  */
 char           *
-vgetpasswd(user)
-	char           *user;
+vgetpasswd(char *user)
 {
 	char           *ptr;
 	static stralloc pass1 = {0}, pass2 = {0}, tmpstr = {0};

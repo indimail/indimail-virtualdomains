@@ -1,5 +1,8 @@
 /*
  * $Log: qmailmrtg7.c,v $
+ * Revision 1.2  2022-10-20 11:58:15+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.1  2019-04-18 08:36:13+05:30  Cprogrammer
  * Initial revision
  *
@@ -39,7 +42,7 @@
 #include <dirent.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg7.c,v 1.1 2019-04-18 08:36:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg7.c,v 1.2 2022-10-20 11:58:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define MAX_BUFF 1000
@@ -446,8 +449,7 @@ count_files(char *diri)
 }
 
 int
-get_size(diri)
-	char           *diri;
+get_size(char *diri)
 {
 	int             i;
 	int             count;

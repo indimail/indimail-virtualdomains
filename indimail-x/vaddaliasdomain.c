@@ -1,5 +1,8 @@
 /*
  * $Log: vaddaliasdomain.c,v $
+ * Revision 1.4  2022-10-20 11:58:22+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.3  2020-06-16 17:56:01+05:30  Cprogrammer
  * moved setuserid function to libqmail
  *
@@ -35,7 +38,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vaddaliasdomain.c,v 1.3 2020-06-16 17:56:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vaddaliasdomain.c,v 1.4 2022-10-20 11:58:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vaddaliasdomain: fatal: "
@@ -77,9 +80,7 @@ get_options(int argc, char **argv, char **domain_new, char **domain_old)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	char           *ptr, *domain_old, *domain_new, *base_argv0;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];

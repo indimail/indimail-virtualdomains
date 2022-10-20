@@ -1,5 +1,8 @@
 /*
  * $Log: vuserinfo.c,v $
+ * Revision 1.3  2022-10-20 11:59:24+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.2  2019-06-07 15:39:32+05:30  Cprogrammer
  * use sgetopt library for getopt()
  *
@@ -42,7 +45,7 @@
 #define FATAL   "vuserinfo: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vuserinfo.c,v 1.2 2019-06-07 15:39:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vuserinfo.c,v 1.3 2022-10-20 11:59:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char           *usage =
@@ -70,9 +73,7 @@ die_nomem()
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	static stralloc Email = {0}, User = {0}, Domain = {0};
 	char            opt_str[56];

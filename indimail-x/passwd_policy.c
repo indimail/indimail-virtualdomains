@@ -1,5 +1,8 @@
 /*
  * $Log: passwd_policy.c,v $
+ * Revision 1.3  2022-10-20 11:58:08+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.2  2021-07-22 15:17:23+05:30  Cprogrammer
  * conditional define of _XOPEN_SOURCE
  *
@@ -25,7 +28,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: passwd_policy.c,v 1.2 2021-07-22 15:17:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: passwd_policy.c,v 1.3 2022-10-20 11:58:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      get_dict(char *);
@@ -71,15 +74,13 @@ passwd_policy(char *passwd)
 }
 
 static int
-get_dict(passwd)
-	char           *passwd;
+get_dict(char *passwd)
 {
 	return (0);
 }
 
 static int
-get_hist(passwd)
-	char           *passwd;
+get_hist(char *passwd)
 {
 	return (0);
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: vsetuserquota.c,v $
+ * Revision 1.3  2022-10-20 11:59:18+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.2  2019-06-07 15:40:53+05:30  Cprogrammer
  * use sgetopt library for getopt()
  *
@@ -40,7 +43,7 @@
 #include "setuserquota.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsetuserquota.c,v 1.2 2019-06-07 15:40:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetuserquota.c,v 1.3 2022-10-20 11:59:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vsetuserquota: fatal: "
@@ -89,9 +92,7 @@ die_nomem()
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	int             i;
 	uid_t           uid;

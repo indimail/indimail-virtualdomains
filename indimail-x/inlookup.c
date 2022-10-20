@@ -1,5 +1,8 @@
 /*
  * $Log: inlookup.c,v $
+ * Revision 1.8  2022-10-20 11:57:46+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.7  2022-08-25 18:16:42+05:30  Cprogrammer
  * re-positioned location of include config.h
  *
@@ -24,7 +27,7 @@
  *
  */
 #ifndef	lint
-static char     sccsid[] = "$Id: inlookup.c,v 1.7 2022-08-25 18:16:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inlookup.c,v 1.8 2022-10-20 11:57:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -212,10 +215,7 @@ isig_term()
 }
 #else
 static void
-sig_hand(sig, code, scp, addr)
-	int             sig, code;
-	struct sigcontext *scp;
-	char           *addr;
+sig_hand(int sig, int code, struct sigcontext *scp, char *addr)
 {
 	int             idx;
 

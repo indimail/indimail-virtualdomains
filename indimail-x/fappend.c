@@ -1,5 +1,8 @@
 /*
  * $Log: fappend.c,v $
+ * Revision 1.2  2022-10-20 11:57:33+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.1  2019-04-18 08:35:51+05:30  Cprogrammer
  * Initial revision
  *
@@ -22,16 +25,13 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: fappend.c,v 1.1 2019-04-18 08:35:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: fappend.c,v 1.2 2022-10-20 11:57:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /* function to append a file to another file */
 int
-fappend(readfile, appndfile, mode, perm, uid, gid)
-	char           *readfile, *appndfile, *mode;
-	mode_t          perm;
-	uid_t           uid;
-	gid_t           gid;
+fappend(char *readfile, char *appndfile, char *mode, mode_t perm,
+		uid_t uid, gid_t gid)
 {
 	char            buffer[2048], strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	int             fin, fout;

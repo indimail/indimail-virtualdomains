@@ -1,5 +1,8 @@
 /*
  * $Log: CopyEmailFile.c,v $
+ * Revision 1.2  2022-10-20 11:56:57+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.1  2019-04-18 08:38:38+05:30  Cprogrammer
  * Initial revision
  *
@@ -33,7 +36,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: CopyEmailFile.c,v 1.1 2019-04-18 08:38:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: CopyEmailFile.c,v 1.2 2022-10-20 11:56:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -49,13 +52,9 @@ die_nomem()
  * 1 - Link email to file in bulk_mail
  */
 int
-CopyEmailFile(homedir, fname, email, To, From, Subject, setDate, copy_method, message_size)
-	const char     *homedir;
-	char           *fname;
-	const char     *email;
-	char           *To, *From, *Subject;
-	int             setDate, copy_method;
-	long            message_size;
+CopyEmailFile(const char *homedir, char *fname, const char *email,
+		char *To, char *From, char *Subject, int setDate,
+		int copy_method, long message_size)
 {
 	time_t          tm;
 	int             wfd, rfd, count, i, j, k;

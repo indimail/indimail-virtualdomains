@@ -1,5 +1,8 @@
 /*
  * $Log: vdeluser.c,v $
+ * Revision 1.5  2022-10-20 11:58:44+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.4  2021-07-08 11:49:05+05:30  Cprogrammer
  * add check for misconfigured assign file
  *
@@ -43,7 +46,7 @@
 #include "check_group.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeluser.c,v 1.4 2021-07-08 11:49:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeluser.c,v 1.5 2022-10-20 11:58:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vdeluser: warning: "
@@ -93,9 +96,7 @@ get_options(int argc, char **argv, stralloc *email)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	int             i;
 	char           *ptr, *base_argv0;

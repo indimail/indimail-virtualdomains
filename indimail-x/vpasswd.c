@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 1.15  2022-10-20 11:59:10+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.14  2022-09-13 22:10:17+05:30  Cprogrammer
  * formated usage
  *
@@ -80,7 +83,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.14 2022-09-13 22:10:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.15 2022-10-20 11:59:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -242,9 +245,7 @@ get_options(int argc, char **argv, char **email, char **clear_text,
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	int             i, encrypt_flag;
 	char           *real_domain, *ptr, *email, *clear_text, *base_argv0;

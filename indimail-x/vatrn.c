@@ -1,5 +1,8 @@
 /*
  * $Log: vatrn.c,v $
+ * Revision 1.3  2022-10-20 11:58:33+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.2  2019-06-07 15:55:03+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -25,7 +28,7 @@
 #include "parse_email.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vatrn.c,v 1.2 2019-06-07 15:55:03+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vatrn.c,v 1.3 2022-10-20 11:58:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL     "vatrn: fatal: "
@@ -106,9 +109,7 @@ get_options(int argc, char **argv, int *Action, char **emailid,
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	int             result, Action;
 	char           *email, *domain_list, *old_domain;

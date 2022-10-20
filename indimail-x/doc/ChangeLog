@@ -13,6 +13,8 @@ Release @version@-@release@ Start 08/09/2021 End --/--/----
 05. vfilter_display.c: Fixed SIGSEGV
 - 18/10/2022
 06. postdel.c: added wrapper for postfix delivery to indimail virtualdomains.
+- 20/10/2022
+07. Converted function prototypes to ansic
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail@indimail.org> 3.4.1-1.1%{?dist}
 Release @version@-@release@ Start 14/02/2021 End 08/09/2022

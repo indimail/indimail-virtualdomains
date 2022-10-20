@@ -1,5 +1,8 @@
 /*
  * $Log: vrenameuser.c,v $
+ * Revision 1.5  2022-10-20 11:59:15+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.4  2021-07-08 11:50:02+05:30  Cprogrammer
  * add check for misconfigured assign file
  *
@@ -41,7 +44,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenameuser.c,v 1.4 2021-07-08 11:50:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vrenameuser.c,v 1.5 2022-10-20 11:59:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vrenameuser: fatal: "
@@ -83,9 +86,7 @@ get_options(int argc, char **argv, char **oldEmail, char **newEmail)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	uid_t           uid1, uid2, myuid;
 	gid_t           gid1, gid2, mygid;

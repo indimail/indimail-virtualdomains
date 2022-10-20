@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 1.8  2022-10-20 11:58:27+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.7  2022-08-07 13:04:37+05:30  Cprogrammer
  * removed apop setting
  *
@@ -74,7 +77,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadduser.c,v 1.7 2022-08-07 13:04:37+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadduser.c,v 1.8 2022-10-20 11:58:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -120,9 +123,7 @@ die_nomem()
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	int             i, j, pass_len = 8, users_per_level = 0, fd, match, encrypt_flag = 1;
 	mdir_t          q, c;

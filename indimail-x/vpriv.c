@@ -1,5 +1,8 @@
 /*
  * $Log: vpriv.c,v $
+ * Revision 1.4  2022-10-20 11:59:12+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.3  2019-06-07 15:44:10+05:30  Cprogrammer
  * use sgetopt library for getopt()
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpriv.c,v 1.3 2019-06-07 15:44:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpriv.c,v 1.4 2022-10-20 11:59:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -131,9 +134,7 @@ get_options(int argc, char **argv, char **user, char **program,
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	int             action, err, i;
 	char           *ptr, *user, *program, *cmdargs, *oldcmdargs;

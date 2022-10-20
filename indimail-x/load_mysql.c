@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.11  2022-10-20 11:57:49+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.10  2020-10-18 07:52:43+05:30  Cprogrammer
  * renamed closeLibrary() to incloseLibrary()
  *
@@ -41,7 +44,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.10 2020-10-18 07:52:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.11 2022-10-20 11:57:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
@@ -98,8 +101,7 @@ static stralloc libfn = { 0 };
 static char     inbuf[2048];
 
 static void
-striptrailingwhitespace(sa)
-	stralloc       *sa;
+striptrailingwhitespace(stralloc *sa)
 {
 	while (sa->len > 0)
 	{
@@ -117,9 +119,7 @@ striptrailingwhitespace(sa)
 }
 
 static int
-control_readline(sa, fn)
-	stralloc       *sa;
-	char           *fn;
+control_readline(stralloc *sa, char *fn)
 {
 	substdio        ss;
 	int             fd, match;

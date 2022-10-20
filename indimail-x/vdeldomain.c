@@ -1,5 +1,8 @@
 /*
  * $Log: vdeldomain.c,v $
+ * Revision 1.4  2022-10-20 11:58:39+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.3  2020-04-01 18:58:35+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -51,7 +54,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeldomain.c,v 1.3 2020-04-01 18:58:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeldomain.c,v 1.4 2022-10-20 11:58:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char    *usage =
@@ -105,9 +108,7 @@ get_options(int argc, char **argv, stralloc *Domain, int *mcd_remove)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	int             i, err, mcd_remove = 0;
 	uid_t           uid;

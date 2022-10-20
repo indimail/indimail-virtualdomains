@@ -1,5 +1,8 @@
 /*
  * $Log: wildmat.c,v $
+ * Revision 1.2  2022-10-20 11:59:27+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.1  2019-04-14 13:05:04+05:30  Cprogrammer
  * Initial revision
  *
@@ -8,7 +11,7 @@
  *
  */
 /*-** wildmat.c.orig	Wed Dec  3 11:46:31 1997
- * $Revision: 1.1 $
+ * $Revision: 1.2 $
  * Do shell-style pattern matching for ?, \, [], and * characters.
  * Might not be robust in face of malformed patterns; e.g., "foo[a-"
  * could cause a segmentation violation.  It is 8bit clean.
@@ -49,7 +52,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: wildmat.c,v 1.1 2019-04-14 13:05:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: wildmat.c,v 1.2 2022-10-20 11:59:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define TRUE			 1
@@ -65,9 +68,7 @@ static char     sccsid[] = "$Id: wildmat.c,v 1.1 2019-04-14 13:05:04+05:30 Cprog
 
 /*- Match text and p, return TRUE, FALSE, or ABORT.  */
 static int
-DoMatch(text, p)
-	register char  *text;
-	register char  *p;
+DoMatch(register char *text, register char *p)
 {
 	register int    last;
 	register int    matched;

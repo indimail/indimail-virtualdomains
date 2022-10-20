@@ -1,5 +1,8 @@
 /*
  * $Log: Check_Login.c,v $
+ * Revision 1.2  2022-10-20 11:56:35+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.1  2019-04-18 08:31:54+05:30  Cprogrammer
  * Initial revision
  *
@@ -17,12 +20,11 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: Check_Login.c,v 1.1 2019-04-18 08:31:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: Check_Login.c,v 1.2 2022-10-20 11:56:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
-Check_Login(service, domain, type)
-	const char *service, *domain, *type;
+Check_Login(const char *service, const char *domain, const char *type)
 {
 	static stralloc tmp1 = {0}, tmp2 = {0};
 

@@ -1,5 +1,8 @@
 /*
  * $Log: pwcomp.c,v $
+ * Revision 1.2  2022-10-20 11:58:11+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.1  2019-04-14 21:05:08+05:30  Cprogrammer
  * Initial revision
  *
@@ -15,12 +18,11 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pwcomp.c,v 1.1 2019-04-14 21:05:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pwcomp.c,v 1.2 2022-10-20 11:58:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
-pwcomp(pw1, pw2)
-	struct passwd  *pw1, *pw2;
+pwcomp(struct passwd *pw1, struct passwd *pw2)
 {
 	if (!pw1 || !pw2)
 		return (1);

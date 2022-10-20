@@ -1,5 +1,8 @@
 /*
  * $Log: valias.c,v $
+ * Revision 1.4  2022-10-20 11:58:30+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.3  2019-06-07 15:55:21+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias.c,v 1.3 2019-06-07 15:55:21+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: valias.c,v 1.4 2022-10-20 11:58:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -131,9 +134,7 @@ get_options(int argc, char **argv, char **email, stralloc *alias, stralloc *doma
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	char           *email, *aliasline, *oaliasline, *tmpalias_line;
 	char            strnum[FMT_ULONG];

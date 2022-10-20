@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.12  2022-10-20 11:59:07+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.11  2022-09-14 13:41:26+05:30  Cprogrammer
  * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
  *
@@ -91,7 +94,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.11 2022-09-14 13:41:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.12 2022-10-20 11:59:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -361,9 +364,7 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	static stralloc Email = {0}, User = {0}, Domain = {0}, Gecos = {0},
 					enc_pass = {0}, DateFormat = {0}, Quota = {0}, vacation_file = {0},

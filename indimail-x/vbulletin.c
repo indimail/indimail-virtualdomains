@@ -1,5 +1,8 @@
 /*
  * $Log: vbulletin.c,v $
+ * Revision 1.6  2022-10-20 11:58:36+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.5  2021-07-08 11:47:41+05:30  Cprogrammer
  * add check for misconfigured assign file
  *
@@ -68,7 +71,7 @@
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vbulletin.c,v 1.5 2021-07-08 11:47:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vbulletin.c,v 1.6 2022-10-20 11:58:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL            "vbulletin: fatal: "
@@ -499,9 +502,7 @@ spost(char *EmailOrDomain, int method, char *emailFile, int bulk)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	DIR            *entry;
 	struct dirent  *dp;

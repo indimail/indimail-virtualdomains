@@ -1,5 +1,8 @@
 /*
  * $Log: update_rules.c,v $
+ * Revision 1.3  2022-10-20 11:58:19+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.2  2020-04-01 18:58:16+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: update_rules.c,v 1.2 2020-04-01 18:58:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: update_rules.c,v 1.3 2022-10-20 11:58:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY
@@ -54,8 +57,7 @@ die_nomem()
 }
 
 int
-update_rules(lock)
-	int             lock;
+update_rules(int lock)
 {
 #ifdef FILE_LOCKING
 	int             lockfd = -1;

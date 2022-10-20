@@ -1,5 +1,8 @@
 /*
  * $Log: vdeloldusers.c,v $
+ * Revision 1.5  2022-10-20 11:58:41+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.4  2021-05-03 12:48:00+05:30  Cprogrammer
  * fix compiler warnings
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeloldusers.c,v 1.4 2021-05-03 12:48:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeloldusers.c,v 1.5 2022-10-20 11:58:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING
@@ -234,9 +237,7 @@ LocateUser(Table, username, init_flag)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	register char **ptr, **tmp, **lastauthptr, **indimailptr;
 	unsigned long   totalcount, activecount = 0, count, purged;

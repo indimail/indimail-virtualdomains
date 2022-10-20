@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 1.6  2022-10-20 11:58:48+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.5  2021-07-08 11:49:11+05:30  Cprogrammer
  * add check for misconfigured assign file
  *
@@ -59,7 +62,7 @@
 #include "vsmtp_select.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 1.5 2021-07-08 11:49:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 1.6 2022-10-20 11:58:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define VDOMTOKENS ":\n"
@@ -666,9 +669,7 @@ display_all_domains(stralloc *Domain, stralloc *Dir, int DisplayName, int Displa
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	uid_t           myuid, Uid;
 	gid_t           mygid, Gid;

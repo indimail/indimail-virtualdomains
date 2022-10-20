@@ -1,5 +1,8 @@
 /*
  * $Log: vipmap.c,v $
+ * Revision 1.4  2022-10-20 11:59:02+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.3  2019-06-07 15:46:28+05:30  Cprogrammer
  * use sgetopt library for getopt()
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vipmap.c,v 1.3 2019-06-07 15:46:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vipmap.c,v 1.4 2022-10-20 11:59:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IP_ALIAS_DOMAINS
@@ -94,9 +97,7 @@ get_options(int argc, char **argv, int *action, char **ip, char **domain)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	int             result, first, Action;
 	static stralloc s_ip = {0}, s_domain = {0};

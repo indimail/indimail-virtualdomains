@@ -1,5 +1,8 @@
 /*
  * $Log: vsmtp.c,v $
+ * Revision 1.4  2022-10-20 11:59:21+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.3  2019-06-07 15:40:32+05:30  Cprogrammer
  * use sgetopt library for getopt()
  *
@@ -37,7 +40,7 @@
 #include "smtp_port.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsmtp.c,v 1.3 2019-06-07 15:40:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsmtp.c,v 1.4 2022-10-20 11:59:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vsmtp: fatal: "
@@ -135,9 +138,7 @@ get_options(int argc, char **argv, char **mdahost, char **mta, stralloc *hostid,
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	char           *tmpsmtp, *ptr, *cptr, *mdahost, *mta, *dst_ip;
 	char            strnum[FMT_ULONG];

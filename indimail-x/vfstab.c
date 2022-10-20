@@ -1,5 +1,8 @@
 /*
  * $Log: vfstab.c,v $
+ * Revision 1.4  2022-10-20 11:58:52+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.3  2019-06-07 15:52:18+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -32,7 +35,7 @@
 #include "getFreeFS.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfstab.c,v 1.3 2019-06-07 15:52:18+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vfstab.c,v 1.4 2022-10-20 11:58:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL         "vfstab: fatal: "
@@ -150,9 +153,7 @@ die_nomem()
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	char          *mdaHost, *fileSystem, *tmpfstab;
 	static stralloc tmp = {0};

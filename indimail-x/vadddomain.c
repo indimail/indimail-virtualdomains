@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.10  2022-10-20 11:58:24+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.9  2022-08-07 13:04:26+05:30  Cprogrammer
  * removed apop setting
  *
@@ -92,7 +95,7 @@
 #include "get_indimailuidgid.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.9 2022-08-07 13:04:26+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.10 2022-10-20 11:58:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -147,9 +150,7 @@ die_nomem(char *prefix)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
 	int             err, fd, i;
 	uid_t           uid;
