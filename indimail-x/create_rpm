@@ -178,7 +178,11 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 			for i in indimail indimail-devel libindimail
 			do
 				echo $i
-				rpmlint $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
+				if [ -f $HOME/.config/$i.rpmlintrc ] ; then
+					rpmlint -r $HOME/.config/$i.rpmlintrc $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
+				else
+					rpmlint $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
+				fi
 				echo ------------------------
 			done
 			echo indimail-"$version"-"1.$release".$dist.src.rpm
