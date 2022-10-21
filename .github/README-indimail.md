@@ -2730,7 +2730,7 @@ The authentication information stored in the authentication database is not suff
 
 The SCRAM method also allows the server to advertise channel binding. Channel Binding allows the server to enforce TLS and safeguard the connection from main-in-the-middle-attack. IndiMail supports the [tls-unique](https://www.rfc-editor.org/rfc/rfc5929.html) channel binding for TLS1.2 and [tls-exporter](https://www.rfc-editor.org/rfc/rfc9266.html) channel binding for TLS1.3 and above. When the server supports channel binding, it advertises 
 
-IndiMail supports SCRAM-SHA-1 and SCRAM-SHA-256 SCRAM authentication methods. qmail-smtpd advertises these methods to an EHLO response. qmail-remote issues the EHLO command to get the capability of the remote server. qmail-smtpd and qmail-remote also support channel binding. Hence qmail-smtpd advertises SCRAM-SHA-1-PLUS and SCRAM-SHA-256-PLUS authentication methods. Similarly qmail-remote uses tls-unique or the tls-exporter channel binding when the remote supports SCRAM-SHA\*-PLUS methods. You can use the <b>vpasswd</b> program to set password for SCRAM authentication. For example, the below password will allow AUTH LOGIN, PLAIN and all SCRAM methods to work.
+IndiMail supports SCRAM-SHA-1 and SCRAM-SHA-256 SCRAM authentication methods. qmail-smtpd advertises these methods to an EHLO response. qmail-remote issues the EHLO command to get the capability of the remote server. Both qmail-smtpd and qmail-remote support channel binding too. Hence qmail-smtpd advertises SCRAM-SHA-1-PLUS and SCRAM-SHA-256-PLUS authentication methods. Similarly qmail-remote uses tls-unique or the tls-exporter channel binding when the remote supports SCRAM-SHA\*-PLUS methods. You can use the <b>vpasswd</b> (or <b>vmoduser</b>) program to set passwords enabled for SCRAM authentication. For example, the below password will allow AUTH LOGIN, PLAIN and all SCRAM methods to work.
 
 ```
 sudo vpasswd -m SCRAM-SHA-256 manny@example.com supersecret
@@ -2764,7 +2764,7 @@ Delivery Time : No Mails Delivered yet / Per Day Limit not configured
 
 If you carefully notice the passwd field, you will see the password starting with {SCRAM-SHA-256}. The iteration count is 4096. This is the iteration used by the algorithm. The salt is `HWvKDMG1R9hSSt/e`, the stored key is `thk3p9gV604V9A2chgmW/ovPgucUtFRhHJgfeWi2pJ4=`, the server key is `IvIc99nIBYdKFqW+ZTz1Ioz5nIxWXJDegzPlkq41tic=` and finally the salted password that will be used for AUTH LOGIN and AUTH PLAIN is `$5$7.Jwtq6QiQaLsguq$RXUJkrI5PUhtqGa4jKGbLPZaLmJiGdpqXhe68qtqyE/`. The stored key and the server key is all that the server requires to verify if the client's response to the challenge was correct or not.
 
-To additionally allow CRAM methods, use the -C argument to <b>vpasswd</b>
+To additionally allow CRAM methods, use the -C argument to <b>vpasswd</b> (or <b>vmoduser</b>).
 
 ```
 sudo vpasswd -C -m SCRAM-SHA-256 manny@example.com supersecret
@@ -2795,7 +2795,7 @@ Inact Date    : Not yet Inactivated
 Activ Date    : (127.0.0.1) Tue Jul  2 09:33:55 2019
 Delivery Time : No Mails Delivered yet / Per Day Limit not configured
 ```
-You will notice two additional fields - the hex salted password `a8bac1a24c7aa2725630c9ab6813a631b366c79c6bc959bf344d3af8e685a375` and the clear text password following it (separated by a colon). This kind of password will allow you to use AUTH PLAIN, LOGIN, all CRAM methods and all SCRAM / SCRAM-PLUS methods. But the problem with enabling CRAM auth methods is that attackers can get hold of the clear text passwords for all your users if your database is stolen. If you use SCRAM authentication, you can disable all CRAM authentication methods and also not use the -<u>C</u> argument to <b>vpasswd</b>. This will give you the safety of of having all your passwrods encrypted in the database.
+You will notice two additional fields - the hex salted password `a8bac1a24c7aa2725630c9ab6813a631b366c79c6bc959bf344d3af8e685a375` and the clear text password following it (separated by a colon). This kind of password will allow you to use AUTH PLAIN, LOGIN, all CRAM methods and all SCRAM / SCRAM-PLUS methods. But the problem with enabling CRAM auth methods is that attackers can get hold of the clear text passwords for all your users if your database is stolen. If you use SCRAM authentication, you can disable all CRAM authentication methods and also not use the -<b>C</b> argument to <b>vpasswd</b>. This will give you the safety of of having all your passwrods encrypted in the database.
 
 ## Authentication SMTP mechanism in qmail-smtpd
 
@@ -2822,6 +2822,8 @@ $ gsasl -d --hostname=argos.indimail.org --x509-ca-file="" -a manny@example.com 
 
 $ swaks --to testuser@example.com --server localhost -port 587 --a CRAM-SHA1 -au manny@example.com -ap supersecret
 ```
+
+NOTE: SCRAM authentication has a design flaw. It doesn't have a mechanism to negotiate the SCRAM variant to use. The result of this is that one will be restricted to create users wth passwords supporing just one fixed variant. You can use either SCRAM-SHA-1 or SCRAM-SHA-256 and not both. See https://blog.josefsson.org/2021/06/08/whats-wrong-with-scram/. The other way is to break the unique user+domain combination for <u>indimail</u> table in the MySQL database and store passwords for all variants when you add/modify users. That would make password management having gargantuan complications and prone to password mismatch within the different variants. And what do you do if these armchair RFC writers come up with a new SCRAM variant? Ask the users to change passwords to support the new SCRAM variant?
 
 ## Enabling authentication methods for qmail-remote
 
