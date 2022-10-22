@@ -1,5 +1,8 @@
 /*
  * $Log: handlers.c,v $
+ * Revision 1.5  2022-10-22 12:54:04+05:30  Cprogrammer
+ * BUG Fixed copying out of bounds
+ *
  * Revision 1.4  2021-09-01 18:41:33+05:30  Cprogrammer
  * reverted return type of i_exit to int
  *
@@ -37,7 +40,7 @@
  */
 
 #ifndef	lint
-static char    *rcsid = "@(#) $Id: handlers.c,v 1.4 2021-09-01 18:41:33+05:30 Cprogrammer Exp mbhangui $";
+static char    *rcsid = "@(#) $Id: handlers.c,v 1.5 2022-10-22 12:54:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -782,7 +785,7 @@ execute(int argc, char **argv)
 	int             x;
 
 
-	av2 = (char **) malloc(argc + 1);
+	av2 = (char **) malloc(sizeof(char *) * (argc + 2));
 	x = getuid();
 	if (geteuid() == 0 && setuid(0))
 		fatal("setuid");
