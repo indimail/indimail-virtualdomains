@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 1.10  2022-10-22 12:53:21+05:30  Cprogrammer
+ * changed Received: header to qmail style format
+ *
  * Revision 1.9  2022-02-23 12:34:49+05:30  Cprogrammer
  * fix message failing with overquota error for users having unlimited quota
  *
@@ -87,7 +90,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 1.9 2022-02-23 12:34:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 1.10 2022-10-22 12:53:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -708,7 +711,7 @@ open_command(char *command, int *write_fd)
 }
 
 static void
-format_delivered_to1(stralloc *delivered_to, char *rpline, char *dtline,
+format_delivered_to1(stralloc *delivered_to, char *hostname, char *rpline, char *dtline,
 	char *qqeh, char *xfilter, char *domain, char *email, char *address)
 {
 	if (!stralloc_copys(delivered_to, rpline))
@@ -728,9 +731,11 @@ format_delivered_to1(stralloc *delivered_to, char *rpline, char *dtline,
 		die_nomem();
 	if (!stralloc_cats(delivered_to, xfilter ? xfilter : "X-Filter: None") ||
 			!stralloc_append(delivered_to, "\n") ||
-			!stralloc_catb(delivered_to, "Received: (indimail ", 20) ||
+			!stralloc_catb(delivered_to, "Received: indimail-virtual ", 27) ||
 			!stralloc_catb(delivered_to, strnum, fmt_ulong(strnum, getpid())) ||
-			!stralloc_catb(delivered_to, " invoked by uid ", 16) ||
+			!stralloc_catb(delivered_to, " by host ", 9) ||
+			!stralloc_cats(delivered_to, hostname) ||
+			!stralloc_catb(delivered_to, " (invoked by uid ", 17) ||
 			!stralloc_catb(delivered_to, strnum, fmt_ulong(strnum, getuid())) ||
 			!stralloc_catb(delivered_to, "); ", 3) ||
 			!stralloc_cats(delivered_to, get_localtime()) ||
@@ -867,7 +872,41 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 			return (-2);
 		}
 		email = maildir_to_email(address, Domain);
-		format_delivered_to1(&DeliveredTo, rpline, dtline, qqeh, xfilter, Domain, email, address);
+		getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
+		if (*controldir == '/') {
+			if (!stralloc_copys(&tmpbuf, controldir) ||
+					!stralloc_catb(&tmpbuf, "/me", 3) ||
+					!stralloc_0(&tmpbuf))
+				die_nomem();
+		} else {
+			getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+			if (!stralloc_copys(&tmpbuf, sysconfdir) ||
+					!stralloc_append(&tmpbuf, "/") ||
+					!stralloc_cats(&tmpbuf, controldir) ||
+					!stralloc_catb(&tmpbuf, "/me", 3) ||
+					!stralloc_0(&tmpbuf))
+				die_nomem();
+		}
+		if ((fd = open_read(tmpbuf.s)) == -1) {
+			if (errno != error_noent)
+				strerr_die3sys(111, "deliver_mail: open: ", tmpbuf.s, ": ");
+			return (-2);
+		}
+		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		if (getln(&ssin, &hostname, &match, '\n') == -1) {
+			strerr_warn2(tmpbuf.s, ": EOF. indimail (#5.1.2): ", &strerr_sys);
+			close(fd);
+			return (-2);
+		}
+		if (!match || !hostname.len) {
+			strerr_warn2(tmpbuf.s, ": bad line. indimail (#5.1.2): ", &strerr_sys);
+			close(fd);
+			return (-2);
+		}
+		hostname.len--;
+		hostname.s[hostname.len] = 0; /*- remove newline */
+		close(fd);
+		format_delivered_to1(&DeliveredTo, hostname.s, rpline, dtline, qqeh, xfilter, Domain, email, address);
 		MsgSize += DeliveredTo.len;
 		ptr1 = env_get("MAILSIZE_LIMIT");
 		ptr2 = env_get("MAILCOUNT_LIMIT");
@@ -1076,40 +1115,6 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 		}
 #endif
 		/*- Format the email file name */
-		getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
-		if (*controldir == '/') {
-			if (!stralloc_copys(&tmpbuf, controldir) ||
-					!stralloc_catb(&tmpbuf, "/me", 3) ||
-					!stralloc_0(&tmpbuf))
-				die_nomem();
-		} else {
-			getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
-			if (!stralloc_copys(&tmpbuf, sysconfdir) ||
-					!stralloc_append(&tmpbuf, "/") ||
-					!stralloc_cats(&tmpbuf, controldir) ||
-					!stralloc_catb(&tmpbuf, "/me", 3) ||
-					!stralloc_0(&tmpbuf))
-				die_nomem();
-		}
-		if ((fd = open_read(tmpbuf.s)) == -1) {
-			if (errno != error_noent)
-				strerr_die3sys(111, "deliver_mail: open: ", tmpbuf.s, ": ");
-			return (-2);
-		}
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-		if (getln(&ssin, &hostname, &match, '\n') == -1) {
-			strerr_warn2(tmpbuf.s, ": EOF. indimail (#5.1.2): ", &strerr_sys);
-			close(fd);
-			return (-2);
-		}
-		if (!match || !hostname.len) {
-			strerr_warn2(tmpbuf.s, ": bad line. indimail (#5.1.2): ", &strerr_sys);
-			close(fd);
-			return (-2);
-		}
-		hostname.len--;
-		hostname.s[hostname.len] = 0; /*- remove newline */
-		close(fd);
 		pid = getpid() + counter++;
 		umask(0077);
 		time(&tm);
