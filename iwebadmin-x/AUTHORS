@@ -2,8 +2,7 @@ Please note that this version of iwebadmin is a forked version of Qmailadmin
 available at sourceforge.net. It has been hacked to work with IndiMail.
 
 I have absolutely no knowledge of how things on web work. However, using a bit of
-common sense, I have been able to make it work (mostly) with IndiMail. Few things
-like autoresponder, may not work. I will work on it.
+common sense, I have been able to make it work (mostly) with IndiMail.
 Please don't bug the original authors if this does not work.
 
 Note that QmailAdmin is now a SourceForge project.  Please check there for 
