@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: user.c,v 1.31 2022-09-16 00:22:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.32 2022-10-24 18:05:38+05:30 Cprogrammer Exp mbhangui $
  */
 #include <stdio.h>
 #ifdef HAVE_CONFIG_H
@@ -1009,6 +1009,9 @@ makeautoresp(substdio *out, char *dir)
 		die_nomem();
 	if (r_mkdir(TmpBuf.s, 0750, Uid, Gid)) {
 		copy_status_mesg(html_text[143]);
+		if (!stralloc_catb(&StatusMessage, " /autoresp/user", 14) ||
+				!stralloc_0(&StatusMessage))
+			die_nomem();
 		strnum1[fmt_uint(strnum1, getuid())] = 0;
 		strnum2[fmt_uint(strnum2, getgid())] = 0;
 		strerr_warn7("makeautoresp: ", TmpBuf.s, ": uid =", strnum1, ", gid=", strnum2, ": ", &strerr_sys);
@@ -1023,6 +1026,9 @@ makeautoresp(substdio *out, char *dir)
 			substdio_put(out, "/bin/autoresponder -q ", 22))
 	{
 		copy_status_mesg(html_text[144]);
+		if (!stralloc_catb(&StatusMessage, " .qmail", 7) ||
+				!stralloc_0(&StatusMessage))
+			die_nomem();
 		strerr_warn3("makeautoresp: write: ", TmpBuf.s, ": ", &strerr_sys);
 		return (1);
 	}
@@ -1032,6 +1038,9 @@ makeautoresp(substdio *out, char *dir)
 				substdio_put(out, "/content-type ", 14))
 		{
 			copy_status_mesg(html_text[144]);
+			if (!stralloc_catb(&StatusMessage, " .qmail", 7) ||
+					!stralloc_0(&StatusMessage))
+				die_nomem();
 			strerr_warn3("makeautoresp: write: ", TmpBuf.s, ": ", &strerr_sys);
 			return (1);
 		}
@@ -1047,6 +1056,9 @@ makeautoresp(substdio *out, char *dir)
 			substdio_flush(out))
 	{
 		copy_status_mesg(html_text[144]);
+		if (!stralloc_catb(&StatusMessage, " .qmail", 7) ||
+				!stralloc_0(&StatusMessage))
+			die_nomem();
 		strerr_warn3("makeautoresp: write: ", TmpBuf.s, ": ", &strerr_sys);
 		return (1);
 	}
@@ -1061,10 +1073,8 @@ makeautoresp(substdio *out, char *dir)
 		die_nomem();
 	TmpBuf.len--;
 	if ((fd = open_trunc(TmpBuf.s)) == -1) {
-		copy_status_mesg(html_text[150]);
-		if (!stralloc_append(&StatusMessage, " ") ||
-				!stralloc_cat(&StatusMessage, &TmpBuf) ||
-				!stralloc_append(&StatusMessage, "\n") ||
+		copy_status_mesg(html_text[144]);
+		if (!stralloc_catb(&StatusMessage, " .autoresp.msg", 14) ||
 				!stralloc_0(&StatusMessage))
 			die_nomem();
 		return 1;
@@ -1081,6 +1091,9 @@ makeautoresp(substdio *out, char *dir)
 			substdio_flush(&ssout))
 	{
 		copy_status_mesg(html_text[144]);
+		if (!stralloc_catb(&StatusMessage, " .autoresp.msg", 14) ||
+				!stralloc_0(&StatusMessage))
+			die_nomem();
 		strerr_warn3("makeautoresp: write: ", TmpBuf.s, ": ", &strerr_sys);
 		return (1);
 	}
@@ -1093,7 +1106,7 @@ modusergo()
 {
 	char           *tmpstr, *ptr, *cptr;
 	long            q;
-	int             fd, ret_code, count, autoresp = 0, saveacopy = 0, emptydotqmail, err, i;
+	int             fd, ret_code, count, autoresp = 0, saveacopy = 0, rmdotqmail = 1, err, i;
 	struct passwd  *vpw = 0;
 	static stralloc box = {0}, cforward = {0}, dotqmailfn = {0}, triv_pass = {0};
 	char           *olddotqmail = 0;
@@ -1263,43 +1276,39 @@ modusergo()
 	}
 	err = stat(dotqmailfn.s, &sb);
 	if (err == -1 && errno != error_noent) {
-		copy_status_mesg(html_text[150]);
-		if (!stralloc_catb(&StatusMessage, ": ", 2) ||
-				!stralloc_cats(&StatusMessage, error_str(errno)) ||
+		copy_status_mesg(html_text[144]);
+		if (!stralloc_catb(&StatusMessage, " .qmail", 7) ||
 				!stralloc_0(&StatusMessage))
 			die_nomem();
-		out("<h3>");
-		out(dotqmailfn.s);
-		out(" ");
-		out(html_text[150]);
-		out(": ");
-		out(error_str(errno));
-		out("</h3>\n");
 		moduser();
 		return;
 	}
 	if (!err && sb.st_size && !(olddotqmail = (char *) alloc(sb.st_size)))
 		die_nomem();
-	if (olddotqmail) {
+	if (olddotqmail) { /* copy existing .qmail to memory */
 		if ((fd = open_read(dotqmailfn.s)) != -1) {
-			if (read(fd, olddotqmail, sb.st_size) == -1)
+			if (read(fd, olddotqmail, sb.st_size) == -1) {
 				strerr_warn2(dotqmailfn.s, ": read: ", &strerr_sys);
+				copy_status_mesg(html_text[144]);
+				if (!stralloc_catb(&StatusMessage, " .qmail", 7) ||
+						!stralloc_0(&StatusMessage))
+					die_nomem();
+				moduser();
+				return;
+			}
 			close(fd);
 		}
+		/*- do not delete .qmail on error */
+		rmdotqmail = 0;
 	}
+	dotqmailfn.len -= 5; /*- change dotqmailfns.s from .qmail to .qxxxx */
+	if (!stralloc_catb(&dotqmailfn, "xxxx", 4))
+		die_nomem();
 	if ((fd = open_trunc(dotqmailfn.s)) == -1) {
-		copy_status_mesg(html_text[150]);
-		if (!stralloc_catb(&StatusMessage, ": ", 2) ||
-				!stralloc_cats(&StatusMessage, error_str(errno)) ||
+		copy_status_mesg(html_text[144]);
+		if (!stralloc_catb(&StatusMessage, " .qxxxx", 7) ||
 				!stralloc_0(&StatusMessage))
 			die_nomem();
-		out("<h3>");
-		out(dotqmailfn.s);
-		out(" ");
-		out(html_text[150]);
-		out(": ");
-		out(error_str(errno));
-		out("</h3>\n");
 		moduser();
 		return;
 	}
@@ -1308,7 +1317,6 @@ modusergo()
 	 * Scan through old .qmail and write out any unrecognized program delivery
 	 * lines to the new .qmail file.
 	 */
-	emptydotqmail = 1;
 	if (olddotqmail) {
 		for (ptr = cptr = olddotqmail; *cptr; cptr++) {
 			if (*cptr == '\n') {
@@ -1338,8 +1346,11 @@ modusergo()
 		GetValue(TmpCGI, &box, "nforward=");
 		/*- If nothing was entered, error */
 		if (!box.len) {
+			close(fd);
 			copy_status_mesg(html_text[215]);
-			err = 1;
+			unlink(dotqmailfn.s);
+			moduser();
+			return;
 		} else {
 			tmpstr = str_tok(box.s, " ,;\n");
 			/*- tmpstr points to first non-token */
@@ -1358,7 +1369,7 @@ modusergo()
 						substdio_puts(&ssout, tmpstr);
 						substdio_put(&ssout, "\n", 1);
 					}
-					emptydotqmail = 0;
+					rmdotqmail = 0;
 					++count;
 				}
 				tmpstr = str_tok(NULL, " ,;\n");
@@ -1368,17 +1379,32 @@ modusergo()
 	if (str_diff(cforward.s, "forward") || saveacopy) {
 		if (!str_diff(cforward.s, "blackhole")) {
 			substdio_put(&ssout, "# delete\n", 9);
-			emptydotqmail = 0;
+			rmdotqmail = 0;
 		} else {
+			/*- this isn't enough to consider the .qmail file non-empty */
 			substdio_puts(&ssout, vpw->pw_dir);
 			substdio_put(&ssout, "/Maildir/\n", 10);
 		}
-		/*- this isn't enough to consider the .qmail file non-empty */
 	}
-	substdio_flush(&ssout);
+	if (substdio_flush(&ssout) == -1) {
+		copy_status_mesg(html_text[144]);
+		if (!stralloc_catb(&StatusMessage, " .qmail", 7) ||
+				!stralloc_0(&StatusMessage))
+			die_nomem();
+		close(fd);
+		unlink(dotqmailfn.s);
+		moduser();
+		return;
+	}
 	if (autoresp) {
-		err = makeautoresp(&ssout, RealDir.s);
-		emptydotqmail = 0;
+		if (!makeautoresp(&ssout, RealDir.s))
+			rmdotqmail = 0;
+		else {
+			close(fd);
+			unlink(dotqmailfn.s);
+			moduser();
+			return;
+		}
 	} else {
 		/*- delete old autoresp directory */
 		if (!stralloc_copy(&TmpBuf, &RealDir) ||
@@ -1389,11 +1415,25 @@ modusergo()
 		vdelfiles(TmpBuf.s, ActionUser.s, Domain.s);
 	}
 	close(fd);
-	if (emptydotqmail)
-		unlink(dotqmailfn.s);
 	if (err) {
+		unlink(dotqmailfn.s);
 		moduser();
 		return;
+	}
+	if (rmdotqmail)
+		unlink(dotqmailfn.s);
+	else {
+		dotqmailfn.len -= 4; /*- change dotqmailfns.s from .qmail to .qxxxx */
+		if (!stralloc_copy(&TmpBuf, &dotqmailfn) ||
+				!stralloc_catb(&TmpBuf, "mail", 4) ||
+				!stralloc_0(&TmpBuf))
+			die_nomem();
+		if (rename(dotqmailfn.s, TmpBuf.s)) {
+			unlink(dotqmailfn.s);
+			copy_status_mesg(html_text[144]);
+			moduser();
+			return;
+		}
 	}
 	call_hooks(HOOK_MODUSER, ActionUser.s, Domain.s, Password1.s, Gecos.s);
 	copy_status_mesg(html_text[119]);
@@ -1686,6 +1726,9 @@ parse_users_dotqmail(char newchar)
 
 /*-
  * $Log: user.c,v $
+ * Revision 1.32  2022-10-24 18:05:38+05:30  Cprogrammer
+ * refactored user modification page
+ *
  * Revision 1.31  2022-09-16 00:22:33+05:30  Cprogrammer
  * fixed saveacopy functionality
  *
