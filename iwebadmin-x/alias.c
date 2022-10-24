@@ -1,5 +1,5 @@
 /*
- * $Id: alias.c,v 1.7 2022-09-15 17:47:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: alias.c,v 1.8 2022-10-24 11:52:59+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -530,7 +530,7 @@ moddotqmailnow()
 		else
 		if (dotqmail_del_line(ActionUser.s, LineData.s)) {
 			copy_status_mesg(html_text[150]);
-			if (!stralloc_catb(&StatusMessage, " 1", 2) ||
+			if (!stralloc_catb(&StatusMessage, " valias delete", 14) ||
 					!stralloc_0(&StatusMessage))
 				die_nomem();
 			StatusMessage.len--;
@@ -656,7 +656,7 @@ adddotqmail_shared(char *forwardname, stralloc *dest, int create)
 	if (str_diff(dest->s, "#") == 0) {
 		if (dotqmail_add_line(forwardname, "#")) {
 			copy_status_mesg(html_text[150]);
-			if (!stralloc_catb(&StatusMessage, " 2", 2) ||
+			if (!stralloc_catb(&StatusMessage, " valias insert", 14) ||
 					!stralloc_0(&StatusMessage))
 				die_nomem();
 			StatusMessage.len--;
@@ -702,7 +702,7 @@ adddotqmail_shared(char *forwardname, stralloc *dest, int create)
 	TmpBuf.len--;
 	if (dotqmail_add_line(forwardname, TmpBuf.s)) {
 		copy_status_mesg(html_text[150]);
-		if (!stralloc_catb(&StatusMessage, " 2", 2) ||
+		if (!stralloc_catb(&StatusMessage, " valias insert", 14) ||
 				!stralloc_0(&StatusMessage))
 			die_nomem();
 		StatusMessage.len--;

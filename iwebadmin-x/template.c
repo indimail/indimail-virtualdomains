@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.25 2022-09-16 10:34:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.26 2022-10-24 16:58:33+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -167,7 +167,7 @@ send_template_now(char *filename)
 	if (str_str(filename, "/") || str_str(filename, "..")) {
 		out("warning: invalid file name ");
 		out(filename);
-		out("\n");
+		out("<br>");
 		flush();
 		return (-1);
 	}
@@ -198,7 +198,7 @@ send_template_now(char *filename)
 		out(html_text[144]);
 		out(" ");
 		out(TmpBuf.s);
-		out("<br>\n");
+		out("<br>");
 		flush();
 		return 0;
 	}
@@ -210,7 +210,7 @@ send_template_now(char *filename)
 			out(html_text[144]);
 			out(" ");
 			out(TmpBuf.s);
-			out("<br>\n");
+			out("<br>");
 			flush();
 			close(fd1);
 			return 0;
@@ -353,20 +353,16 @@ send_template_now(char *filename)
 						strnum1[fmt_uint(strnum1, getuid())] = 0;
 						strnum2[fmt_uint(strnum2, getgid())] = 0;
 						strerr_warn7("send_template_now: ", TmpBuf.s, ": uid=", strnum1, ", gid=", strnum2, ": ", &strerr_sys);
-						ack("150", TmpBuf.s);
+						close(fd2);
+						ack("144", "read .autoresp.msg");
 					}
 					substdio_fdbuf(&ssin2, read, fd2, inbuf2, sizeof(inbuf2));
 					/*- read Reference: and Subject: line */
 					for (i = 0; i < 2; i++) {
 						if (getln(&ssin2, &line, &match, '\n') == -1) {
 							strerr_warn3("send_template_now: ", TmpBuf.s, ": ", &strerr_sys);
-							out(html_text[144]);
-							out(" ");
-							out(TmpBuf.s);
-							out(" 1<BR>\n");
 							close(fd2);
-							flush();
-							return (1);
+							ack("144", "read .autoresp.msg");
 						}
 						if (!line.len)
 							break;
@@ -396,13 +392,8 @@ send_template_now(char *filename)
 					while (1) {
 						if (getln(&ssin2, &line, &match, '\n') == -1) {
 							strerr_warn3("send_template_now: ", TmpBuf.s, ": ", &strerr_sys);
-							out(html_text[144]);
-							out(" ");
-							out(TmpBuf.s);
-							out(" 1<BR>\n");
-							flush();
 							close(fd2);
-							return (1);
+							ack("144", "read .autoresp.msg");
 						}
 						if (!line.len || line.s[0] == '\r' || line.s[0] == '\n')
 							break;
@@ -410,13 +401,8 @@ send_template_now(char *filename)
 					for (;;) {
 						if (getln(&ssin2, &line, &match, '\n') == -1) {
 							strerr_warn3("send_template_now: ", TmpBuf.s, ": ", &strerr_sys);
-							out(html_text[144]);
-							out(" ");
-							out(TmpBuf.s);
-							out(" 1<BR>\n");
-							flush();
 							close(fd2);
-							return (1);
+							ack("144", "read .autoresp.msg");
 						}
 						if (!line.len)
 							break;

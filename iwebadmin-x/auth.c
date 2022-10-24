@@ -1,5 +1,5 @@
 /*
- * $Id: auth.c,v 1.6 2021-03-14 12:47:30+05:30 Cprogrammer Exp mbhangui $
+ * $Id: auth.c,v 1.7 2022-10-24 11:57:57+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -86,8 +86,8 @@ auth_system(ip_addr, pw)
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
 		strerr_warn3("auth_system: read: ", TmpBuf.s, ": ", &strerr_sys);
-		copy_status_mesg(html_text[150]);
-		if (!stralloc_catb(&StatusMessage, " 3", 2) ||
+		copy_status_mesg(html_text[144]);
+		if (!stralloc_catb(&StatusMessage, " .qw", 4) ||
 				!stralloc_0(&StatusMessage))
 			die_nomem();
 		close(fd);
@@ -101,7 +101,7 @@ auth_system(ip_addr, pw)
 	GetValue(line.s, &ip_value, "ip_addr=");
 	if (str_diff(ip_addr, ip_value.s) != 0) {
 		unlink(TmpBuf.s);
-		copy_status_mesg(html_text[150]);
+		copy_status_mesg(html_text[142]);
 		if (!stralloc_catb(&StatusMessage, " 4 (", 4) ||
 				!stralloc_cats(&StatusMessage, ip_addr) ||
 				!stralloc_catb(&StatusMessage, " != ", 4) ||
@@ -157,8 +157,8 @@ auth_user_domain(const char *ip_addr, struct passwd *pw)
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
 		strerr_warn3("auth_system: read: ", TmpBuf.s, ": ", &strerr_sys);
-		copy_status_mesg(html_text[150]);
-		if (!stralloc_catb(&StatusMessage, " 5", 2) ||
+		copy_status_mesg(html_text[144]);
+		if (!stralloc_catb(&StatusMessage, " .qw", 4) ||
 				!stralloc_0(&StatusMessage))
 			die_nomem();
 		close(fd);
@@ -171,7 +171,7 @@ auth_user_domain(const char *ip_addr, struct passwd *pw)
 	GetValue(line.s, &ip_value, "ip_addr=");
 	if (str_diff(ip_addr, ip_value.s)) {
 		unlink(TmpBuf.s);
-		copy_status_mesg(html_text[150]);
+		copy_status_mesg(html_text[142]);
 		if (!stralloc_catb(&StatusMessage, " 6 (", 4) ||
 				!stralloc_cats(&StatusMessage, ip_addr) ||
 				!stralloc_catb(&StatusMessage, " != ", 4) ||

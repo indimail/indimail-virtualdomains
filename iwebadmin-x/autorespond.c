@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.15 2022-01-22 20:19:21+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.16 2022-10-24 12:00:41+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -262,7 +262,7 @@ addautorespondnow()
 		strnum1[fmt_uint(strnum1, getuid())] = 0;
 		strnum2[fmt_uint(strnum2, getgid())] = 0;
 		strerr_warn7("mkdir: ", TmpBuf.s, ": uid=", strnum1, ", gid=", strnum2, ": ", &strerr_sys);
-		ack("143", TmpBuf.s);
+		ack("143", "autoresp/user");
 	}
 	/*- Make the autoresponder message file */
 	if (!stralloc_catb(&TmpBuf, "/.autoresp.msg", 14) ||
@@ -271,7 +271,7 @@ addautorespondnow()
 	TmpBuf.len--;
 	if ((fd = open_trunc(TmpBuf.s)) == -1) {
 		strerr_warn3("open: ", TmpBuf.s, ": ", &strerr_sys);
-		ack("150", TmpBuf.s);
+		ack("144", "write .autoresp.msg");
 	}
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
 	/*- subject in iwebadmin autoresponder panel */
@@ -283,7 +283,7 @@ addautorespondnow()
 			substdio_put(&ssout, "\n", 1))
 	{
 		strerr_warn3("write: ", TmpBuf.s, ": ", &strerr_sys);
-		ack("150", TmpBuf.s);
+		ack("144", "write .autoresp.msg");
 	}
 	for (i = 400; i < 450; i++) {
 		if (html_text[i] == NULL)
@@ -294,7 +294,7 @@ addautorespondnow()
 		if (substdio_puts(&ssout, html_text[i]) ||
 				substdio_put(&ssout, "\n", 1)) {
 			strerr_warn3("write: ", TmpBuf.s, ": ", &strerr_sys);
-			ack("150", TmpBuf.s);
+			ack("144", "write .autoresp.msg");
 		}
 	}
 	if (substdio_put(&ssout, "MIME-Version: 1.0\n", 18) ||
@@ -303,7 +303,7 @@ addautorespondnow()
 			substdio_flush(&ssout))
 	{
 		strerr_warn3("write: ", TmpBuf.s, ": ", &strerr_sys);
-		ack("150", TmpBuf.s);
+		ack("144", "write .autoresp.msg");
 	}
 	close(fd);
 	/*- Make the autoresponder .qmail file */
@@ -500,7 +500,7 @@ modautorespondnow()
 		strnum1[fmt_uint(strnum1, getuid())] = 0;
 		strnum2[fmt_uint(strnum2, getgid())] = 0;
 		strerr_warn7("mkdir: ", TmpBuf.s, ": uid=", strnum1, ", gid=", strnum2, ": ", &strerr_sys);
-		ack("143", TmpBuf.s);
+		ack("143", "autoresp/user");
 	}
 	/*- Make the autoresponder message file */
 	if (!stralloc_catb(&TmpBuf, "/.autoresp.msg", 14) ||
@@ -509,7 +509,7 @@ modautorespondnow()
 	TmpBuf.len--;
 	if ((fd = open_trunc(TmpBuf.s)) == -1) {
 		strerr_warn3("open: ", TmpBuf.s, ": ", &strerr_sys);
-		ack("150", TmpBuf.s);
+		ack("144", ".autoresp");
 	}
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
 	if (substdio_put(&ssout, "Reference: ", 11) ||
@@ -522,7 +522,7 @@ modautorespondnow()
 			substdio_flush(&ssout))
 	{
 		strerr_warn3("write: ", TmpBuf.s, ": ", &strerr_sys);
-		ack("150", TmpBuf.s);
+		ack("144", ".autoresp");
 	}
 	close(fd);
 	/*- Make the autoresponder .qmail file */
