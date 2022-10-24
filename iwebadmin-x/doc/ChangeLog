@@ -21,6 +21,10 @@ Release @version@-@release@ Start 14/09/2022 End --/--/20--
 14. util.c: check return value of strtoll
 15. iwebadmin.c: added more info in debug mode
 16. html/README: added test cases
+- 24/09/2022
+17. user.c: refactored user modification page
+18. alias.c, auth.c, autorespond.c, template.c: corrected error messages
+19. added new error messages to lang files
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail-iwebadmin@indimail.org> 2.1.0-1.1%{?dist}
 Release @version@-@release@ Start 13/03/2021 End 08/09/2022
