@@ -17,6 +17,14 @@
 016 Nom de la Liste de diffusion
 017 E-mail du responsable :
 018 Archiver
+019 Unable to get domain details from assign file
+020 You don't have permission to change password
+021 Challenge Response Setup
+022 Store clear text Passwords
+023 CRAM auth
+024 Store SCRAM secrets
+025 SCRAM auth
+026 Unable to get SCRAM secrets
 039 R&eacute;pond aux demandes administrative et permet la recherche dans les archives.
 053 Activer le support SQL
 054 Hôte
@@ -109,13 +117,13 @@
 141 Utilisateur supprim&eacute; avec succ&egrave;s.
 142 Pas d'autorisation
 143 Erreur de permission sur le r&eacute;pertoire
-144 Erreur de permission sur le fichier.
+144 Error opening file
 145 Utilisateur non valide, erreur interne.
 146 Redirection impossible.
 147 Rediriger maintenant.
 148 Adresse email invalide.
 149 Impossible de supprimer la derni&egrave;re entr&eacute;e
-150 Erreur de fichier
+150 valias error
 151 Ligne supprim&eacute;e avec succ&egrave;s.
 152 Redirection ajout&eacute;e avec succ&egrave;s.
 153 L'utilisateur n'existe pas.
@@ -286,3 +294,8 @@
 318 setgid() a échoué, incapable de continuer
 319 setuid() a échoué, incapable de continuer
 320 Mot de passe invalide: il peut être facilement deviné par le nom d'utilisateur
+321 Unable to migrate vacation dir to autoresp dir
+322 Unable to migrate vacation.msg to autoresp.msg
+323 Unable to rename temp file to .qmail
+400 Content-type: text/plain
+401 Content-transfer-encoding: 7bit

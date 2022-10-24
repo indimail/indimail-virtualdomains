@@ -17,6 +17,14 @@
 016 Levelezõ lista neve
 017 Listagazda email címe: 
 018 Arhivált
+019 Unable to get domain details from assign file
+020 You don't have permission to change password
+021 Challenge Response Setup
+022 Store clear text Passwords
+023 CRAM auth
+024 Store SCRAM secrets
+025 SCRAM auth
+026 Unable to get SCRAM secrets
 039 Respond to adminstrative requests and allow archive retrieval.
 053 MySQL támogatás bekapcsolása
 054 Host
@@ -109,13 +117,13 @@
 141 felhasználó sikeresen törölve
 142 Nincs jogosultság
 143 konyvtár jogosultsági hiba
-144 fájl jogosultsági hiba
+144 Error opening file
 145 Nem létezõ felhasználó - Belsõ Hiba
 146 Nem tudom elkészíteni az átiranyítás
 147 Átirányít most
 148 Érvénytelen email cím
 149 Az utolsó bejegyzés nem törölhetõ
-150 Fájl hiba
+150 valias error
 151 Sor sikeresen törölve
 152 Továbbító sikeresen hozzáadva
 153 Felhasználói név nem létezik
@@ -286,3 +294,8 @@
 318 setgid () nem, nem tudja folytatni
 319 setuid () nem, nem tudja folytatni
 320 Érvénytelen jelszó: könnyen kitalálható a felhasználóneveddel
+321 Unable to migrate vacation dir to autoresp dir
+322 Unable to migrate vacation.msg to autoresp.msg
+323 Unable to rename temp file to .qmail
+400 Content-type: text/plain
+401 Content-transfer-encoding: 7bit

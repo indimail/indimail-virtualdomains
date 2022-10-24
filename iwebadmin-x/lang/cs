@@ -17,6 +17,14 @@
 016 Jméno poštovní konference:
 017 Poštovní úèet správce konference:
 018 Archivování
+019 Unable to get domain details from assign file
+020 You don't have permission to change password
+021 Challenge Response Setup
+022 Store clear text Passwords
+023 CRAM auth
+024 Store SCRAM secrets
+025 SCRAM auth
+026 Unable to get SCRAM secrets
 039 Odpovídej na administrativní podnìt a zpøístupni archív.
 053 Zapni podporu MySQL(nešahat, pokud nevím co dìlám)
 054 Poèítaè
@@ -109,13 +117,13 @@
 141 Uživatel smazán úspìšnì
 142 Žádná autorizace
 143 Pøístup do adresáøe zamítnut
-144 Pøístup k souboru zamítnut
+144 Error opening file
 145 Neplatný uživatel Interní chyba
 146 Není možné vytvoøit pøesmìrování
 147 Pøesmìrovat teï
 148 Špatná poštovní adresa
 149 Nelze smazat poslední záznam
-150 Chyba souboru
+150 valias error
 151 Øádek smazán úspìšnì
 152 Øádek pøidaný úspìšnì
 153 Uživatelské jméno neexistuje
@@ -286,3 +294,8 @@
 318 setgid() no, no puede continuar
 319 setuid() no, no puede continuar
 320 Contraseña no válida: que puede ser fácilmente adivinado por el nombre de usuario
+321 Unable to migrate vacation dir to autoresp dir
+322 Unable to migrate vacation.msg to autoresp.msg
+323 Unable to rename temp file to .qmail
+400 Content-type: text/plain
+401 Content-transfer-encoding: 7bit

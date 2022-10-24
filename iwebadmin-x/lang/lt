@@ -17,6 +17,14 @@
 016 Konferencijos adresas:
 017 Konferencijos savininko pašto adresas: 
 018 Su archyvu
+019 Unable to get domain details from assign file
+020 You don't have permission to change password
+021 Challenge Response Setup
+022 Store clear text Passwords
+023 CRAM auth
+024 Store SCRAM secrets
+025 SCRAM auth
+026 Unable to get SCRAM secrets
 039 Atsako už administracines užklausas bei leidžia archyvo gavimą.
 053 Įjungti MySQL palaikymą
 054 Serveris
@@ -109,13 +117,13 @@
 141 vartotojas sėkmingai ištrintas
 142 Nėra autorizavimo
 143 katalogo teisių klaida
-144 bylos teisių klaida
+144 Error opening file
 145 Klaidingas vartotojas - Vidinė klaida
 146 Nepavyko sukurti nukreipimo
 147 Nukreipti
 148 Klaidingas pašto adresas
 149 Negalima ištrinti paskutinio įrašo
-150 Bylos klaida
+150 valias error
 151 Eilutė sėkmingai ištrinta
 152 Persiuntimas sukurtas sėkmingai
 153 Tokio vartotojo nėra
@@ -286,3 +294,8 @@
 318 setgid () nepavyko, negali tęsti
 319 setuid () nepavyko, negali tęsti
 320 Neteisingas slaptažodis: ji gali būti lengvai atspėti iš vardo
+321 Unable to migrate vacation dir to autoresp dir
+322 Unable to migrate vacation.msg to autoresp.msg
+323 Unable to rename temp file to .qmail
+400 Content-type: text/plain
+401 Content-transfer-encoding: 7bit

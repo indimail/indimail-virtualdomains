@@ -17,6 +17,14 @@
 016 Naam verzendlijst
 017 E-mail adres eigenaar verzendlijst:
 018 Berichten archiveren
+019 Unable to get domain details from assign file
+020 You don't have permission to change password
+021 Challenge Response Setup
+022 Store clear text Passwords
+023 CRAM auth
+024 Store SCRAM secrets
+025 SCRAM auth
+026 Unable to get SCRAM secrets
 039 Abonnees kunnen het archief opvragen per e-mail. (optie 'Extern beheer' moet zijn ingeschakeld)
 053 SQL gebruiken
 054 Host
@@ -109,13 +117,13 @@
 141 gebruiker succesvol gewijzigd
 142 Geen toestemming
 143 fout in recht op toegang tot map
-144 fout in recht op toegang tot bestand
+144 Error opening file
 145 Ongeldige gebruiker interne fout
 146 Kan geen omleiding opzetten
 147 Nu omleiding uitvoeren 
 148 Ongeldig e-mail adress
 149 Kan laatste toevoeging niet verwijderen
-150 Bestandsfout
+150 valias error
 151 Regel succesvol verwijderd
 152 Doorstuur succesvol toegevoegd
 153 Gebruikersnaam bestaat niet
@@ -286,3 +294,8 @@
 318 setgid () is mislukt, niet in staat om verder te gaan
 319 setuid () is mislukt, niet in staat om verder te gaan
 320 Ongeldig wachtwoord: het gemakkelijk kan worden geraden van de gebruikersnaam
+321 Unable to migrate vacation dir to autoresp dir
+322 Unable to migrate vacation.msg to autoresp.msg
+323 Unable to rename temp file to .qmail
+400 Content-type: text/plain
+401 Content-transfer-encoding: 7bit

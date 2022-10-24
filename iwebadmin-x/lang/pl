@@ -17,6 +17,14 @@
 016 Nazwa listy wysy³kowej
 017 Adres emailowy w³asciciela listy: 
 018 Archiwizacja
+019 Unable to get domain details from assign file
+020 You don't have permission to change password
+021 Challenge Response Setup
+022 Store clear text Passwords
+023 CRAM auth
+024 Store SCRAM secrets
+025 SCRAM auth
+026 Unable to get SCRAM secrets
 039 Odpowiadaæ na ¿±dania administracyjne i pozwoliæ na odzyskiwanie archiwów.
 053 W³±cz obs³ugê SQL
 054 Host
@@ -109,13 +117,13 @@
 141 u¿ytkownik zosta³ skasowany
 142 Nie ma autoryzacji
 143 b³±d praw do katalogu
-144 b³±d praw do pliku
+144 Error opening file
 145 Niew³a¶ciwy u¿ytkownik - Wewnêtrzny b³±d
 146 Nie mogê zrobiæ przekierowania
 147 Przekieruj teraz
 148 Niew³a¶ciwy adres email
 149 Nie mogê skasowaæ ostatniej pozycji
-150 B³±d pliku
+150 valias error
 151 Linia skasowana pomy¶lnie
 152 Dodano przkierowanie
 153 U¿ytkownik nie istnieje
@@ -286,3 +294,8 @@
 318 setgid() failed, unable to continue
 319 setuid() failed, unable to continue
 320 Invalid password: it can be easily guessed from the username
+321 Unable to migrate vacation dir to autoresp dir
+322 Unable to migrate vacation.msg to autoresp.msg
+323 Unable to rename temp file to .qmail
+400 Content-type: text/plain
+401 Content-transfer-encoding: 7bit

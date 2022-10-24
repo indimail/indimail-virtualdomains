@@ -17,6 +17,14 @@
 016 Имя списка рассылки:
 017 Список адресов электронной почты владельцев
 018 Архив
+019 Unable to get domain details from assign file
+020 You don't have permission to change password
+021 Challenge Response Setup
+022 Store clear text Passwords
+023 CRAM auth
+024 Store SCRAM secrets
+025 SCRAM auth
+026 Unable to get SCRAM secrets
 039 Отвечать на административные запросы и разрешить получать архив.
 053 Включить поддержку MySQL
 054 Хост
@@ -109,13 +117,13 @@
 141 пользователь успешно удалён
 142 Нет Авторизации
 143 ошибка прав доступа к директории
-144 ошибка прав доступа к файлу
+144 Error opening file
 145 Invalid User Internal Error
 146 Не могу выполнить пересылку
 147 Переслать сейчас
 148 Неправильный адрес электронной почты
 149 Не могу удалить последнюю запись
-150 File error
+150 valias error
 151 Строка удалена успешно
 152 Пересылка добавлена успешно
 153 Имя пользователя не существует
@@ -286,3 +294,8 @@
 318 setgid () не удалось, не в состоянии продолжать
 319 SETUID () не удалось, не в состоянии продолжать
 320 Неверный пароль: он может быть легко догадаться по имени пользователя
+321 Unable to migrate vacation dir to autoresp dir
+322 Unable to migrate vacation.msg to autoresp.msg
+323 Unable to rename temp file to .qmail
+400 Content-type: text/plain
+401 Content-transfer-encoding: 7bit

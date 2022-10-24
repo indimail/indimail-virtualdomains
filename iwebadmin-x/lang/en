@@ -117,13 +117,13 @@
 141 user deleted successfully
 142 No Authorization
 143 directory permission error
-144 file open/read/write/permission error
+144 Error opening file
 145 Invalid User Internal Error
 146 Cannot Do redirect
 147 Redirect Now
 148 Invalid Email Address
 149 Cannot Delete Last Entry
-150 File error
+150 valias error
 151 Line Deleted Successfully
 152 Forward added successfully
 153 Username does not exists
@@ -296,5 +296,6 @@
 320 Invalid password: it can be easily guessed from the username
 321 Unable to migrate vacation dir to autoresp dir
 322 Unable to migrate vacation.msg to autoresp.msg
+323 Unable to rename temp file to .qmail
 400 Content-type: text/plain
 401 Content-transfer-encoding: 7bit

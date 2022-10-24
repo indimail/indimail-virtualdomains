@@ -17,6 +17,14 @@
 016 Име на мейлинг листа:
 017 Имейл адрес на притежателя на листа: 
 018 Архивиран
+019 Unable to get domain details from assign file
+020 You don't have permission to change password
+021 Challenge Response Setup
+022 Store clear text Passwords
+023 CRAM auth
+024 Store SCRAM secrets
+025 SCRAM auth
+026 Unable to get SCRAM secrets
 039 Отговори на административните изисквания и разреши изтегляне на архиви.
 053 Разреши поддръжка на SQL
 054 Хост
@@ -109,13 +117,13 @@
 141 Потребителят беше изтрит успешно
 142 Липса на ауторизация
 143 нарушение на правата за достъп до директорията
-144 нарушение на правата за достъп до файла
+144 Error opening file
 145 Невалиден потребител - вътрешна грешка
 146 Не мога да препращам
 147 Препрати сега
 148 Грешен имейл адрес
 149 Не мога да изтрия последното въвеждане
-150 Файлова грешка
+150 valias error
 151 Линията беше изтрита успешно
 152 Препратката беше добавена успешно
 153 Несъществуващо потребителско име
@@ -286,3 +294,8 @@
 318 Неуспешна смяна на групата чрез setgid(), нататък е твърде опасно
 319 Неуспешна смяна на потребителя чрез setuid(), нататък е твърде опасно
 320 Невалидна парола, може да бъде отгатната лесно чрез потребителското име
+321 Unable to migrate vacation dir to autoresp dir
+322 Unable to migrate vacation.msg to autoresp.msg
+323 Unable to rename temp file to .qmail
+400 Content-type: text/plain
+401 Content-transfer-encoding: 7bit

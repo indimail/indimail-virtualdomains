@@ -17,6 +17,14 @@
 016 Email Listesi adý
 017 Liste sahibinin eposta adresi: 
 018 Arþivlenmiþ
+019 Unable to get domain details from assign file
+020 You don't have permission to change password
+021 Challenge Response Setup
+022 Store clear text Passwords
+023 CRAM auth
+024 Store SCRAM secrets
+025 SCRAM auth
+026 Unable to get SCRAM secrets
 039 Liste yönetimi ile alakalý mesajlara cevap ver.Arþivlerin gönderilmesine izin ver.
 053 SQL desteðini aktif hale getir
 054 SQL sunucusu
@@ -109,13 +117,13 @@
 141 Kullanýcý baþarý ile silindi
 142 &#304;zin Yok
 143 Dizin izin haklarý hatasý
-144 Dosya izin hatasý
+144 Error opening file
 145 Olmayan kullanýcý Program hatasý
 146 Tekrar yönlendirmeyi gerçekleþtiremiyor
 147 Tekrar yönlendirmeyi þimdi yap
 148 Var olmayan Email Hesabý
 149 En son girilen deðeri silinemiyor
-150 Dosya hatasý
+150 valias error
 151 Satýr baþarý ile silindi
 152 Yönlendirme baþarý ile eklendi
 153 Kullanýcý adý yok
@@ -286,3 +294,8 @@
 318 setgid () gagal, tidak dapat melanjutkan
 319 setuid () gagal, tidak dapat melanjutkan
 320 tidak valid password: dapat dengan mudah ditebak dari username
+321 Unable to migrate vacation dir to autoresp dir
+322 Unable to migrate vacation.msg to autoresp.msg
+323 Unable to rename temp file to .qmail
+400 Content-type: text/plain
+401 Content-transfer-encoding: 7bit

@@ -17,6 +17,14 @@
 016 ¥á¡¼¥ê¥ó¥°¥ê¥¹¥ÈÌ¾
 017 ¥ê¥¹¥È¥ª¡¼¥Ê¡¼¤Î¥á¡¼¥ë¥¢¥É¥ì¥¹: 
 018 ¥¢¡¼¥«¥¤¥Ö¤ËÊİÂ¸
+019 Unable to get domain details from assign file
+020 You don't have permission to change password
+021 Challenge Response Setup
+022 Store clear text Passwords
+023 CRAM auth
+024 Store SCRAM secrets
+025 SCRAM auth
+026 Unable to get SCRAM secrets
 039 ´ÉÍı¼Ô¤ÎÍ×µá¤Ë±şÅú¤·¡¢¥¢¡¼¥«¥¤¥Ö¤Î¸¡º÷¤òµö²Ä¤¹¤ë
 053 SQL¥µ¥İ¡¼¥È¤òÍ­¸ú¤Ë¤¹¤ë
 054 ¥Û¥¹¥È
@@ -109,13 +117,13 @@
 141 ¥æ¡¼¥¶¡¼¤òºï½ü¤·¤Ş¤·¤¿
 142 ¸¢¸Â¤¬¤¢¤ê¤Ş¤»¤ó
 143 ¥Ç¥£¥ì¥¯¥È¥ê¤Î¾µÇ§¥¨¥é¡¼¤Ç¤¹
-144 ¥Õ¥¡¥¤¥ë¤Î¾µÇ§¥¨¥é¡¼¤Ç¤¹
+144 Error opening file
 145 ÆâÉô¥¨¥é¡¼ ÉÔÀµ¤Ê¥æ¡¼¥¶¡¼¤Ç¤¹
 146 ¥ê¥À¥¤¥ì¥¯¥È¤Ç¤­¤Ş¤»¤ó
 147 ¥ê¥À¥¤¥ì¥¯¥È¤·¤Æ¤¯¤À¤µ¤¤
 148 ÉÔÀµ¤Ê¥á¡¼¥ë¥¢¥É¥ì¥¹¤Ç¤¹
 149 ºÇ¸å¤Î¥¨¥ó¥È¥ê¡¼¤òºï½ü¤Ç¤­¤Ş¤»¤ó¤Ç¤·¤¿
-150 ¥Õ¥¡¥¤¥ë ¥¨¥é¡¼
+150 valias error
 151 ¹Ô¤òºï½ü¤·¤Ş¤·¤¿
 152 Å¾Á÷Àè¤òÄÉ²Ã¤·¤Ş¤·¤¿
 153 ¥æ¡¼¥¶¡¼Ì¾¤ÏÂ¸ºß¤·¤Ş¤»¤ó
@@ -286,3 +294,8 @@
 318 setgidï¼ˆï¼‰ã¯ã€ç¶šã‘ã‚‹ã“ã¨ãŒã§ããªã„å¤±æ•—ã—ã¾ã—ãŸ
 319 setuidï¼ˆï¼‰ã¯ã€ç¶šã‘ã‚‹ã“ã¨ãŒã§ããªã„å¤±æ•—ã—ã¾ã—ãŸ
 320 ç„¡åŠ¹ãªãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ï¼šãã‚Œã¯ç°¡å˜ã«ãƒ¦ãƒ¼ã‚¶åã‹ã‚‰æ¨æ¸¬ã™ã‚‹ã“ã¨ãŒã§ãã¾ã™
+321 Unable to migrate vacation dir to autoresp dir
+322 Unable to migrate vacation.msg to autoresp.msg
+323 Unable to rename temp file to .qmail
+400 Content-type: text/plain
+401 Content-transfer-encoding: 7bit

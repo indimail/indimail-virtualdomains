@@ -17,6 +17,14 @@
 016 Postituslistan nimi:
 017 Listan omistajan s&auml;hk&ouml;postiosoite: 
 018 Arkistoidaan
+019 Unable to get domain details from assign file
+020 You don't have permission to change password
+021 Challenge Response Setup
+022 Store clear text Passwords
+023 CRAM auth
+024 Store SCRAM secrets
+025 SCRAM auth
+026 Unable to get SCRAM secrets
 039 Salli et&auml;hallinta ja viestien noutaminen arkistosta.
 053 MySQL -tuki
 054 Palvelin
@@ -109,13 +117,13 @@
 141 laatikko poistettu
 142 Ei k&auml;ytt&ouml;oikeutta
 143 virhe kansion k&auml;ytt&ouml;oikeuksissa
-144 virhe tiedoston k&auml;ytt&ouml;oikeuksissa
+144 Error opening file
 145 Virhe: tuntematon k&auml;ytt&auml;j&auml;
 146 Virhe: k&auml;&auml;nt&ouml; ei onnistu
 147 K&auml;&auml;nn&auml; nyt
 148 S&auml;hk&ouml;postiosoite ei kelpaa
 149 Viimeist&auml; ei voi poistaa
-150 Tiedostovirhe
+150 valias error
 151 Rivi poistettu
 152 Edelleenohjaus lis&auml;tty
 153 K&auml;ytt&auml;j&auml;tunnusta ei l&ouml;ydy
@@ -286,3 +294,8 @@
 318 setgid() epäonnistui, voi jatkaa
 319 setuid() epäonnistui, voi jatkaa
 320 Virheellinen salasana: se voidaan helposti arvata mistä käyttäjätunnuksen
+321 Unable to migrate vacation dir to autoresp dir
+322 Unable to migrate vacation.msg to autoresp.msg
+323 Unable to rename temp file to .qmail
+400 Content-type: text/plain
+401 Content-transfer-encoding: 7bit

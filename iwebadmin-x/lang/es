@@ -17,6 +17,14 @@
 016 Nombre de la lista de correo
 017 Dirección E-mail del propietario de la lista:
 018 Archivados
+019 Unable to get domain details from assign file
+020 You don't have permission to change password
+021 Challenge Response Setup
+022 Store clear text Passwords
+023 CRAM auth
+024 Store SCRAM secrets
+025 SCRAM auth
+026 Unable to get SCRAM secrets
 039 Responder a las peticiones administrativas y permitir la obtención del archivo.
 053 Habilitar soporte SQL
 054 Servidor
@@ -109,13 +117,13 @@
 141 usuario borrado correctamente
 142 Sin autorización
 143 Error en permisos de directorio
-144 Error en permisos de fichero
+144 Error opening file
 145 Error Interno de Usuario Inválido
 146 No se puede re-direccionar
 147 Re-direccionar ahora
 148 Dirección de E-mail inválida
 149 No se puede eliminar la última entrada
-150 Error de fichero
+150 valias error
 151 Linea Borrada Correctamente
 152 Re-envío añadido correctamente
 153 Usuario inexistente
@@ -286,3 +294,8 @@
 318 setgid() falhado, incapaz de continuar
 319 setuid() falhado, incapaz de continuar
 320 Senha inválida: ele pode ser facilmente adivinhado a partir do nome de usuário
+321 Unable to migrate vacation dir to autoresp dir
+322 Unable to migrate vacation.msg to autoresp.msg
+323 Unable to rename temp file to .qmail
+400 Content-type: text/plain
+401 Content-transfer-encoding: 7bit

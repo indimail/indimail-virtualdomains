@@ -17,6 +17,14 @@
 016 Meldingsliste navn
 017 Liste innehavers e-postadresse: 
 018 Arkivér
+019 Unable to get domain details from assign file
+020 You don't have permission to change password
+021 Challenge Response Setup
+022 Store clear text Passwords
+023 CRAM auth
+024 Store SCRAM secrets
+025 SCRAM auth
+026 Unable to get SCRAM secrets
 039 Responder til administrative henvendelser og tillat arkivtilgang.
 053 Aktiver SQL st&oslash;tte
 054 Vert
@@ -109,13 +117,13 @@
 141 er slettet
 142 Ingen tillatelse
 143 katalog tilgangsfeil
-144 fil tilgangsfeil
+144 Error opening file
 145 Feil bruker, intern feil
 146 Kan ikke omadressere
 147 Omadresser n&aring;
 148 Feil p&aring; e-postadresse
 149 Kan ikke slette siste valg
-150 Fil feil
+150 valias error
 151 Linje slettet
 152 Videresending vellykket lagt til
 153 Brukernavn eksisterer ikke
@@ -286,3 +294,8 @@
 318 setgid () feilet, ute av stand til å fortsette
 319 setuid () feilet, ute av stand til å fortsette
 320 Ugyldig passord: det kan være lett å gjette fra brukernavnet
+321 Unable to migrate vacation dir to autoresp dir
+322 Unable to migrate vacation.msg to autoresp.msg
+323 Unable to rename temp file to .qmail
+400 Content-type: text/plain
+401 Content-transfer-encoding: 7bit
