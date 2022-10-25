@@ -1,5 +1,5 @@
 /*
- * $Id: alias.c,v 1.8 2022-10-24 11:52:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: alias.c,v 1.9 2022-10-25 23:49:25+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -738,13 +738,12 @@ deldotqmailnow()
 		iclose();
 		exit(0);
 	}
-	/*- check to see if we already have a user with this name */
 	if (fixup_local_name(ActionUser.s)) {
-		len = str_len(html_text[160]) + Alias.len + 28;
+		len = str_len(html_text[160]) + ActionUser.len + 28;
 		for (plen = 0;;) {
 			if (!stralloc_ready(&StatusMessage, len))
 				die_nomem();
-			plen = snprinth(StatusMessage.s, len, "%s %H\n", html_text[160], Alias.s);
+			plen = snprinth(StatusMessage.s, len, "%s %H\n", html_text[160], ActionUser.s);
 			if (plen < len) {
 				StatusMessage.len = plen;
 				break;
@@ -756,12 +755,12 @@ deldotqmailnow()
 		exit(0);
 	}
 
-	if (!(dotqmail_delete_files(ActionUser.s))) {
+	if (!dotqmail_delete_files(ActionUser.s)) {
 		len = str_len(html_text[167]) + ActionUser.len + 28;
 		for (plen = 0;;) {
 			if (!stralloc_ready(&StatusMessage, len))
 				die_nomem();
-			plen = snprinth(StatusMessage.s, len, "%s %H %H\n", html_text[167], Alias.s, ActionUser.s);
+			plen = snprinth(StatusMessage.s, len, "%s %H\n", html_text[167], ActionUser.s);
 			if (plen < len) {
 				StatusMessage.len = plen;
 				break;
@@ -773,7 +772,7 @@ deldotqmailnow()
 		for (plen = 0;;) {
 			if (!stralloc_ready(&StatusMessage, len))
 				die_nomem();
-			plen = snprinth(StatusMessage.s, len, "%s %H %H\n", html_text[168], Alias.s, ActionUser.s);
+			plen = snprinth(StatusMessage.s, len, "%s %H\n", html_text[168], ActionUser.s);
 			if (plen < len) {
 				StatusMessage.len = plen;
 				break;
