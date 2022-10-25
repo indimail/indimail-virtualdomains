@@ -25,6 +25,12 @@ Release @version@-@release@ Start 14/09/2022 End --/--/20--
 17. user.c: refactored user modification page
 18. alias.c, auth.c, autorespond.c, template.c: corrected error messages
 19. added new error messages to lang files
+- 25/09/2022
+20. user.c: added comments
+21. html/mod_user.html: Added input box for scram base64 salt
+22. command.c: get input for scram base64salt
+23. template.c, iwebadmin.c: get base64 salt from database
+24. lang/*: added string for 'SCRAM salt'"
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail-iwebadmin@indimail.org> 2.1.0-1.1%{?dist}
 Release @version@-@release@ Start 13/03/2021 End 08/09/2022
