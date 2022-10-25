@@ -25,6 +25,7 @@
 024 Store SCRAM secrets
 025 SCRAM auth
 026 Unable to get SCRAM secrets
+027 SCRAM Salt
 039 Odpovídej na administrativní podnìt a zpøístupni archív.
 053 Zapni podporu MySQL(nešahat, pokud nevím co dìlám)
 054 Poèítaè

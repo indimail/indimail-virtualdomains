@@ -25,6 +25,7 @@
 024 Store SCRAM secrets
 025 SCRAM auth
 026 Unable to get SCRAM secrets
+027 SCRAM Salt
 039 Abonnees kunnen het archief opvragen per e-mail. (optie 'Extern beheer' moet zijn ingeschakeld)
 053 SQL gebruiken
 054 Host

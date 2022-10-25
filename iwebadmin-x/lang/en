@@ -25,6 +25,7 @@
 024 Store SCRAM secrets
 025 SCRAM auth
 026 Unable to get SCRAM secrets
+027 SCRAM Salt
 039 Respond to administrative requests and allow archive retrieval.
 053 Enable MySQL support for ezmlm-idx
 054 Host
