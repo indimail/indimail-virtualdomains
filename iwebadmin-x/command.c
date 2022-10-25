@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.11 2022-09-15 23:10:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: command.c,v 1.12 2022-10-25 11:52:28+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -188,6 +188,7 @@ process_commands(char *cmmd)
 		GetValue(TmpCGI, &Password1, "password1=");
 		GetValue(TmpCGI, &Password2, "password2=");
 		GetValue(TmpCGI, &Gecos, "gecos=");
+		GetValue(TmpCGI, &b64salt, "b64salt=");
 		modusergo();
 	} else
 	if (!str_diff(cmmd, "deluser")) {
