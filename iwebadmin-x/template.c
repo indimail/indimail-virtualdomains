@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.26 2022-10-24 16:58:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.27 2022-10-25 11:53:10+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -268,9 +268,6 @@ send_template_now(char *filename)
 						out(html_text[229]);
 					}
 					break;
-				case 'b': /* show the lines inside a alias table (not used, see ##d) */
-					show_dotqmail_lines(Username.s, Domain.s, mytime);
-					break;
 				case 'C': /* send the CGIPATH parameter */
 					out(CGIPATH);
 					break;
@@ -412,10 +409,12 @@ send_template_now(char *filename)
 					out("</textarea>");
 					flush();
 					break;
-				case 'f': /* show the forwards */
+#if 0
+				case '#f': /* show the forwards */
 					if (AdminType == DOMAIN_ADMIN)
 						show_forwards(Username.s, Domain.s, mytime);
 					break;
+#endif
 				case 'G': /*- show the mailing list digest subscribers */
 					if (AdminType == DOMAIN_ADMIN)
 						show_list_group_now(2);
@@ -427,9 +426,11 @@ send_template_now(char *filename)
 					GetValue(TmpCGI, &value1, "returnhttp=");
 					printh("%C", value1.s);
 					break;
-				case 'h': /* show the counts */
+#if 0
+				case '#h': /* show the counts */
 					show_counts();
 					break;
+#endif
 				case 'I':
 					if (!ActionUser.len)
 						strerr_warn1("User is null", 0);
@@ -500,10 +501,12 @@ send_template_now(char *filename)
 						out(html_text[229]);
 					}
 					break;
-				case 'l': /* show the aliases stuff */
+#if 0
+				case '#l': /* show the aliases stuff */
 					if (AdminType == DOMAIN_ADMIN)
 						show_aliases();
 					break;
+#endif
 				case 'L': /* login username */
 					if (Username.len)
 						printh("%H", Username.s);
@@ -517,11 +520,31 @@ send_template_now(char *filename)
 					if (AdminType == DOMAIN_ADMIN)
 						show_list_group_now(0);
 					break;
-				case 'm': /* show the mailing lists */
+				case 'm': /* scram details */
+					i = getch(&ssin1);
+					switch (i)
+					{
+					case '1':
+						printh("%d", iter_count);
+						break;
+					case '2':
+						if (scram == 1)
+							printh("%H", "scram-sha-1");
+						else
+						if (scram == 2)
+							printh("%H", "scram-sha-256");
+						break;
+					case '3':
+						printh("%H", b64salt.len ? b64salt.s : "");
+						break;
+					}
+					break;
+#if 0
+				case '#m': /* show the mailing lists */
 					if (AdminType == DOMAIN_ADMIN)
 						show_mailing_lists();
 					break;
-				case 'N': /* parse include files */
+				case '#N': /* parse include files */
 					i = getch(&ssin1);
 					if (i == '/')
 						out(html_text[144]);
@@ -546,11 +569,13 @@ send_template_now(char *filename)
 							send_template_now(TmpBuf.s);
 					}
 					break;
+#endif
 				case 'n': /* show returntext (from TmpCGI) */
 					GetValue(TmpCGI, &value1, "returntext=");
 					printh("%H", value1.s);
 					break;
-				case 'O': /* build a pulldown menu of all POP/IMAP users */
+#if 0
+				case '#O': /* build a pulldown menu of all POP/IMAP users */
 					if (!Domain.len)
 						strerr_warn1("Domain is null ", 0);
 					else {
@@ -568,6 +593,7 @@ send_template_now(char *filename)
 						}
 					}
 					break;
+#endif
 				case 'o': /* show the mailing list moderators */
 					if (AdminType == DOMAIN_ADMIN)
 						show_list_group_now(1);
@@ -654,29 +680,35 @@ send_template_now(char *filename)
 					if (value1.len)
 						printh("<A HREF=\"%C\">%H</A>", value2.s, value1.s);
 					break;
-				case 'r': /* show the autoresponder stuff */
+#if 0
+				case '#r': /* show the autoresponder stuff */
 					if (AdminType == DOMAIN_ADMIN)
 						show_autoresponders(Username.s, Domain.s, mytime);
 					break;
+#endif
 				case 'S': /* send the status message parameter */
 					out(StatusMessage.s);
 					break;
 				case 's': /* show the catchall name */
 					get_catchall();
 					break;
-				case 'T': /* send the time parameter */
+#if 0
+				case '#T': /* send the time parameter */
 					strnum1[fmt_ulong(strnum1, (unsigned long) mytime)] = 0;
 					out(strnum1);
 					break;
+#endif
 				case 't': /* transmit block?  */
 					transmit_block(&ssin1);
 					break;
 				case 'U': /* send the username parameter */
 					printh("%H", Username.len ? Username.s : "");
 					break;
-				case 'u': /* show the users */
+#if 0
+				case '#u': /* show the users */
 					show_users(Username.s, Domain.s, mytime);
 					break;
+#endif
 				case 'V': /* show version number */
 					out("<a href=\"https://github.com/mbhangui/indimail-virtualdomains/tree/master/iwebadmin-x\">");
 					out(PACKAGE);
@@ -868,13 +900,13 @@ int
 check_mailbox_flags(char newchar)
 {
 	struct passwd *vpw = NULL;
-	char          *cleartext = NULL, *ptr = NULL;
+	char          *cleartext = NULL, *ptr = NULL, *salt = NULL;
 	int            i;
 
 	if (!(vpw = sql_getpw(ActionUser.s, Domain.s)))
 		return -1;
 	if (!str_diffn(vpw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(vpw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
-		i = get_scram_secrets(vpw->pw_passwd, 0, 0, 0, 0, 0, 0, &cleartext, &ptr);
+		i = get_scram_secrets(vpw->pw_passwd, 0, 0, &salt, 0, 0, 0, &cleartext, &ptr);
 		if (i != 6 && i != 8) {
 			strerr_warn1("unable to get secrets", 0);
 			out(html_text[026]);
@@ -883,6 +915,8 @@ check_mailbox_flags(char newchar)
 			return -1;
 		}
 		vpw->pw_passwd = ptr;
+		if (salt && (!stralloc_copys(&b64salt, salt) || !stralloc_0(&b64salt)))
+			die_nomem();
 	} else
 		i = 0;
 	switch (newchar)

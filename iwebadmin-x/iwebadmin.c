@@ -1,5 +1,8 @@
 /*
  * $Log: iwebadmin.c,v $
+ * Revision 1.32  2022-10-25 11:52:50+05:30  Cprogrammer
+ * update b64salt from database
+ *
  * Revision 1.31  2022-09-16 21:19:52+05:30  Cprogrammer
  * added more information in debug mode
  * fixed typos
@@ -52,7 +55,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: iwebadmin.c,v 1.31 2022-09-16 21:19:52+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.32 2022-10-25 11:52:50+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -184,13 +187,13 @@ iwebadmin_suid(gid_t Gid, uid_t Uid)
 int
 auth_user(struct passwd *pw, char *password)
 {
-	char           *ptr = NULL, *cleartext = NULL, *https;
+	char           *ptr = NULL, *cleartext = NULL, *salt = NULL, *https;
 	int             i;
 
 	if (!pw)
 		return (1);
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
-		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, &cleartext, &ptr);
+		i = get_scram_secrets(pw->pw_passwd, 0, 0, &salt, 0, 0, 0, &cleartext, &ptr);
 		if (i != 6 && i != 8) {
 			strerr_warn1("unable to get secrets", 0);
 			out(html_text[026]);
@@ -198,6 +201,8 @@ auth_user(struct passwd *pw, char *password)
 			flush();
 			return (1);
 		}
+		if (salt && (!stralloc_copys(&b64salt, salt) || !stralloc_0(&b64salt)))
+			die_nomem();
 	} else {
 		ptr = pw->pw_passwd;
 		i = 0;
