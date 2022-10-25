@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: user.c,v 1.32 2022-10-24 18:05:38+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.33 2022-10-25 11:53:29+05:30 Cprogrammer Exp mbhangui $
  */
 #include <stdio.h>
 #ifdef HAVE_CONFIG_H
@@ -1129,6 +1129,10 @@ modusergo()
 		iclose();
 		_exit(0);
 	}
+	/*
+	 * Password1, Password2, gecos and b64salt
+	 * is set in the function process_commands
+	 */
 	if (Password1.len && Password2.len) {
 		if (str_diff(Password1.s, Password2.s)) {
 			copy_status_mesg(html_text[200]);
@@ -1726,6 +1730,9 @@ parse_users_dotqmail(char newchar)
 
 /*-
  * $Log: user.c,v $
+ * Revision 1.33  2022-10-25 11:53:29+05:30  Cprogrammer
+ * added comments
+ *
  * Revision 1.32  2022-10-24 18:05:38+05:30  Cprogrammer
  * refactored user modification page
  *
