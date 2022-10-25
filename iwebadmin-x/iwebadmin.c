@@ -807,7 +807,7 @@ quickAction(char *username, int action)
 	 * calls quickAction() passes ActionUser as the username parameter
 	 * in hopes that someday we'll remove the globals and pass parameters.
 	 *
-	 * first check for alias/forward, autorepsonder (or even mailing list) 
+	 * first check for alias/forward, autoresponder (or even mailing list) 
 	 */
 	if ((aliasline = valias_select(username, Domain.s))) {
 		/*
@@ -819,7 +819,7 @@ quickAction(char *username, int action)
 		ar = str_str(aliasline, "/autoresponder ");
 		ez = str_str(aliasline, "/ezmlm-reject ");
 		if (ar && space && (ar < space)) {
-			/* autorepsonder */
+			/* autoresponder */
 			if (action == ACTION_MODIFY)
 				modautorespond();
 			else
