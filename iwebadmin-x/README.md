@@ -40,10 +40,9 @@ If you have problems using 'make', try using 'gmake' instead.
 Note to people who did not read the above paragraph: When you give up on your installation, try reading the above information then starting from scratch.
 
 1.  fast install guide.. 
-    type as root: 
 
     ```
-    # ./configure --prefix=/usr --sysconfdir=/etc/indimail \
+    $ ./configure --prefix=/usr --sysconfdir=/etc/indimail \
         --disable-ipauth --disable-trivial-password
         --enable-ezmlmdir=/usr/bin --enable-domain-autofill \
         --enable-modify-quota --enable-htmldir=/var/www/html
@@ -54,8 +53,8 @@ Note to people who did not read the above paragraph: When you give up on your in
     or you can run `./default.configure` instead of the above configure command
 
     ```
-    # make
-    # make install-strip
+    $ make
+    $ sudo make install-strip
     ```
 
     If it works, you are done!

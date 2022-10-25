@@ -6,9 +6,8 @@ When iwebadmin encounters ## while parsing a template file, it looks at the foll
 
 The templates which use each value are listed below each item.
 
-1. Tag values w is not defined in the source code.
-2. Tag values b, f, h, l, m, r, u, w, N, O, T are not used in a current template. Except for w, they are defined in template.c. It may best to remove them.
-3. Tag value H is not defined in template.c but is used in header.html.
+1. Tag values b, f, h, l, r, u, w, N, O, T not defined in template.c
+2. Tag values b, f, h, l, r, u, w, N, O, T are not used in a current template.
 
 To see which templates use a particular tag:
 
@@ -22,7 +21,6 @@ Change '##A' to the tag of interest. To see which templates do NOT use a particu
 \##A Send the user name currently being acted upon. (ActionUser) If postmaster was editing someone this would be someone. Used in add\_listdig, add\_listmod, add\_listuser, del\_autorespond\_confirm, del\_forward\_confirm, del\_listdig, del\_listmod, del\_listuser, del\_mailinglist\_confirm, del\_user\_confirm, mod\_autorespond, mod\_dotqmail, mod-mailinglist-idx, mod-user, show\_digest\_subscribers, show\_moderators, show\_subscribers  
 \##a Send the Alias of a mailing list. (Alias). Used in mod\_mailinglist  
 \##B Show number of pop accounts. If MaxPopAccounts is > -1 then it shows (MaxPopAccounts) else it shows string 229 [unlimited]. Used in show\_users  
-\##b Show the lines inside a alias table. Calls function show\_dowqmail\_lines. Not used in any current template files.  
 \##C Send the CGIPATH. This is frequently used as part of the Action= in forms, and in building URLs for links. (CGIPATH). Used in ALL templates. Not used in header, footer or colortable.  
 \##c Show the lines inside a mailing list table. Calls the function show\_mailing\_list\_line2. Used in add\_user  
 \##D Send the domain name. (Domain). Used in all templates except show\_login.  
@@ -30,11 +28,9 @@ Change '##A' to the tag of interest. To see which templates do NOT use a particu
 \##E This will be used to parse mod\_mailinglist-idx.html. Calls the function show\_current\_list\_values. Used in add\_mailinglist-idx, mod\_mailinglist-idx  
 \##e calls show\_mailing\_list\_line. Displays a block of mailing lists. Used in show\_mailinglist  
 \##F Display the contents of the autoresponder's message file. This is a fairly long block of inline code, with a note it should be moved to another file. Used in mod\_autorespond  
-\##f Show the forwards. Calls show\_forwards. Not used in any template files.  
 \##G Show the mailing list Digest Subscribers. This calls function show\_list\_group\_now(2). Used in show\_digest\_subscribers  
 \##g Show the lines inside a autorespond table. Calls the function show\_autorespond\_line. Used in show\_autorespond  
-\##H not used header.html  
-\##h Show the counts, not sure which ones... Calls function show\_counts. Not used in any current templates.  
+\##H used in change\_password.html
 \##I No comment in source code. Calls function show\_dotqmail\_file. Used in mod\_dotqmail  
 \##i? Check for user forward and forward/store vacation. Calls function check\_user\_forward\_vacation. This accepts a number after the letter in place of the ?. Values are:   
   0 return 'checked ' if there is no .qmail file (Standard delivery)  
@@ -54,21 +50,19 @@ Note: check\_user\_forward\_vacation is terribly inefficient. This needs to chec
 \##K Show number of autoresponders. If (MaxForwards) > -1 this returns (CurrAutoResponders)/(MaxAutoResponders) else it returns (CurrAutoResponders) followed by text string 229 [unlimited]. Used in show\_autorespond  
 \##k Show number of forwards. If (MaxForwards) > -1 this returns (CurForwards)/(MaxForwards) else it returns (CurForwards) followed by text string 229 [unlimited]. Used in show\_forwards  
 \##L Login username. If (Username) is set it is shown, elseif "user=" is set in the Get parms it is used, else the string 'postmaster' is sent. If postmaster was editing someone this would be postmaster. Used in show\_login  
-\##l Show the aliases stuff. This calls function show\_aliases. Not used in any current templates.  
 \##M Show the mailing list subscribers. The function show\_list\_group\_now is called. Used in show\_subscribers  
-\##m Show the mailing lists. The function show\_mailing\_lists is called. Not used in any current templates.  
+\##m? Show SCRAM parameters. This accepts a number after the letter in place of the ?. Values are:
+  0
+  1 return the SCRAM iter count
+  2 return the SCRAM auth method (SCRAM-SHA-1, SCRAM-SHA-256)
+  3 return the SCRAM base64 encoded salt
+
 \##N Parse include files. This is a fairly long section of inline code that either displays a template file doing ## substitution or sometimes displays text string 144. [file permission error]. Not used in any current templates.  
-\##n not used. Not used in any current templates.  
-\##O Build a pulldown menu of all POP/IMAP users. This calls function sql\_getall then builds an option tag for each entry returned.  
-     <option value=(pw\_name)>(pw\_name)</option>  
-     not used in any current templates.  
+\##n used in change\_password.html
 \##o Show the mailing list moderators. This calls function show\_list\_groupnow. Used in show\_moderators  
 \##P Display mailing list prefix. This calls function get\_mailinglist\_prefix, mod\_mailinglist-idx  
 \##p Show POP/IMAP users. This calls function show\_user\_lines. Used in show\_users  
-\##Q not used. not used in any current templates.  
 \##q Display user's quota. This prints the quota in megabytes, or if the user is a DOMAIN\_ADMIN the string 'NOQUOTA', else text string 229 [unlimited]. Used in mod\_user  
-\##R not used. Not used in any current templates.  
-\##r Show the autoresponder stuff. This calls function show\_autoresponders. not used in any current templates.  
 \##S Send the status message parameter. (StatusMessage) used in ALL templates  
 \##s Show the catchall name. Calls the function get\_catchall. Used in show\_users  
 \##T Send the time parameter. (Mytime) used in every template except show\_login. (2-3 times in most)  
@@ -84,7 +78,6 @@ Note: check\_user\_forward\_vacation is terribly inefficient. This needs to chec
 
 Rather than using a/u it might be a good idea to use a/A. A lower case value is displayed when the thing is set, and the upper case is displayed when the thing is not set. That way if someone needs to do something on not modify-spam they can use S. Maybe it will never happen, but it happened with a/u so why not the others...  
 \##U Send the username parameter. (Username) used in every template except show\_login. (2-3 times in most)  
-\##u Show the users. This calls function show\_users not used in any current template.  
 \##V Show version number. This is a link to the github link for iwebadmin.  QA\_PACKAGE is appended to the URL, and QA\_VERSION is the string that is displayed as the link. Used in show\_login  
 \##v Display the main menu. This is a fairly long section of inline code, with a note that it should be moved to a function. It checks various things to decide which items should appear in the main menu. Quite a few text strings are conditionally displayed.  
   001 [iso-8859-1]  
@@ -102,8 +95,6 @@ Rather than using a/u it might be a good idea to use a/A. A lower case value is 
   249 [Quota]  
   253 [Limit:]  
   254 [Used:]. Used in main\_menu  
-\##W not used. Not used in any current templates.  
-\##w not used. Not used in any current templates.  
 \##X??? This tag gets a block of text from the dictionary and displays it in the template. This tag is always followed by three digits, which are used as an index into the translation dictionary. Used in every template, plus header.  
 \##x Exit / logout link/text. This builds a link with the url returned by get\_session\_val("returnhttp and the link is get\_session\_val("returntext"). Used in every template except show\_login.  
 \##Y Return text. This calls get\_session\_val("returntext="). Used in show\_login  
