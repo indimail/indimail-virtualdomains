@@ -15,9 +15,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: user.c,v 1.33 2022-10-25 11:53:29+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.31 2022-10-26 22:30:20+05:30 Cprogrammer Exp mbhangui $
  */
-#include <stdio.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -1730,14 +1729,8 @@ parse_users_dotqmail(char newchar)
 
 /*-
  * $Log: user.c,v $
- * Revision 1.33  2022-10-25 11:53:29+05:30  Cprogrammer
- * added comments
- *
- * Revision 1.32  2022-10-24 18:05:38+05:30  Cprogrammer
+ * Revision 1.31  2022-10-26 22:30:20+05:30  Cprogrammer
  * refactored user modification page
- *
- * Revision 1.31  2022-09-16 00:22:33+05:30  Cprogrammer
- * fixed saveacopy functionality
  *
  * Revision 1.30  2022-09-15 23:11:39+05:30  Cprogrammer
  * replaced exit with _exit
