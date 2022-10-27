@@ -21,6 +21,10 @@ Release @version@-@release@ Start 08/09/2021 End --/--/----
 10. deliver_mail.c: Changed Received header to be consistent with qmail style
 - 27/10/2022
 11. valias_delete_domain.c: delete entries for alias instead of real domain
+12. iadduser.c: add to hostcntrl only for distributed domains
+13. is_user_present.c: make variables static to avoid clash
+14. sql_deldomain.c, sql_deluser.c, sql_getpw.c, sql_passwd.c, sql_setpw.c,
+    sql_setquota.c, sql_updateflag.c: refactored sql code into do_sql()
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail@indimail.org> 3.4.1-1.1%{?dist}
 Release @version@-@release@ Start 14/02/2021 End 08/09/2022
