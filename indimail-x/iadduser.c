@@ -1,5 +1,8 @@
 /*
  * $Log: iadduser.c,v $
+ * Revision 1.5  2022-10-27 17:06:18+05:30  Cprogrammer
+ * add to hostcntrl only if domain is distrbuted
+ *
  * Revision 1.4  2022-08-05 22:40:35+05:30  Cprogrammer
  * removed apop argument to iadduser()
  *
@@ -59,7 +62,7 @@
 #define ALLOWCHARS              " .!#$%&'*+-/=?^_`{|}~\""
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iadduser.c,v 1.4 2022-08-05 22:40:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iadduser.c,v 1.5 2022-10-27 17:06:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -116,7 +119,7 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 	struct substdio ssin;
 #ifdef CLUSTERED_SITE
 	static stralloc SqlBuf = {0};
-	int             err;
+	int             err, is_dist = 0;
 #endif
 
 	if (!username || !*username || !isalnum((int) *username))
@@ -154,10 +157,9 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 		}
 		uid_flag = 1;
 #ifdef CLUSTERED_SITE
-		if ((err = is_distributed_domain(domain)) == -1) {
+		if ((is_dist = is_distributed_domain(domain)) == -1)
 			strerr_die3x(111, "iadduser: unable to verify ", domain, " as a distributed domain");
-		}
-		if (err == 1) { /*- distributed domain */
+		if (is_dist == 1) { /*- distributed domain */
 			if (open_master())
 				strerr_die1x(111, "iadduser: Failed to open Master Db");
 			uid_flag = ADD_FLAG;
@@ -227,7 +229,7 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 		if (!ptr || !*ptr)
 			return (-1);
 #ifdef CLUSTERED_SITE
-		if (uid_flag == ADD_FLAG) {
+		if (is_dist == 1 && uid_flag == ADD_FLAG) {
 			/*- Get hostid of the Local machine */
 			if (mdahost && *mdahost) {
 				if (!(ptr = sql_gethostid(mdahost)))
@@ -266,7 +268,7 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 			if (!err)
 				sql_updateflag(username, domain, 1); /*- Reset the pw_uid flag to 1 */
 			/* - don't bother for if (err) as hostsync should take care */
-		}
+		} /*- if (is_dist == 1 && uid_flag == ADD_FLAG) */
 #endif
 	} else
 	if (add_user_assign(username, dir))
