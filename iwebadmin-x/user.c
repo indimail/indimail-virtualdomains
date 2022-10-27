@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: user.c,v 1.31 2022-10-26 22:30:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.32 2022-10-27 17:34:35+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -407,6 +407,10 @@ addusernow()
 #endif
 	char            strnum[FMT_ULONG];
 	struct passwd  *mypw;
+#ifdef HAVE_GSASL_MKPASSWD
+	static stralloc box = {0};
+	int             encrypt_flag = 1;
+#endif
 
 	count_users();
 	load_limits();
@@ -531,7 +535,7 @@ addusernow()
 			}
 		}
 	}
-	/*- add the user then get the vpopmail password structure */
+	/*- add the user then get the indimail password structure */
 	create_flag = 1;
 	if (iadduser(Newu.s, Domain.s, 0, Password1.s, Gecos.s, 0, 0, USE_POP, 1) == 0 &&
 #ifdef MYSQL_REPLICATION
@@ -554,6 +558,40 @@ addusernow()
 				setuserquota(Newu.s, Domain.s, qconvert);
 		}
 #endif
+		/*-----------------------------------------------*/
+#ifdef HAVE_GSASL_MKPASSWD
+		if (!stralloc_copy(&tmp1, &RealDir) ||
+				!stralloc_catb(&tmp1, "/.trivial_passwords", 19) ||
+				!stralloc_0(&tmp1))
+			die_nomem();
+		if (!access(tmp1.s, F_OK))
+			encrypt_flag = 0;
+		GetValue(TmpCGI, &box, "cram=");
+		cram = !str_diff(box.s, "on") ? 1 : 0;
+		GetValue(TmpCGI, &box, "scram=");
+		u_scram = !str_diff(box.s, "on") ? 1 : 0;
+		if (u_scram) {
+			switch (scram)
+			{
+			case 1: /*- SCRAM-SHA-1 */
+				gsasl_mkpasswd(0, "SCRAM-SHA-1", iter_count, b64salt.len ? b64salt.s : 0, cram, Password1.s, &result);
+				break;
+			case 2: /*- SCRAM-SHA-256 */
+				gsasl_mkpasswd(0, "SCRAM-SHA-256", iter_count, b64salt.len ? b64salt.s : 0, cram, Password1.s, &result);
+				break;
+			}
+		}
+		error = ipasswd(Newu.s, Domain.s, Password1.s, encrypt_flag, u_scram ? result.s : 0);
+		if (error != 1) {
+			copy_status_mesg(html_text[140]);
+			if (!stralloc_catb(&StatusMessage, " (error code ", 13) ||
+					!stralloc_catb(&StatusMessage, strnum, fmt_int(strnum, error)) ||
+					!stralloc_append(&StatusMessage, ")") ||
+					!stralloc_0(&StatusMessage))
+				die_nomem();
+		}
+#endif
+		/*-----------------------------------------------*/
 		/*- report success */
 		len = str_len(html_text[2]) + str_len(html_text[119]) + Newu.len + Domain.len + Gecos.len + 28;
 		for (plen = 0;;) {
@@ -1729,6 +1767,9 @@ parse_users_dotqmail(char newchar)
 
 /*-
  * $Log: user.c,v $
+ * Revision 1.32  2022-10-27 17:34:35+05:30  Cprogrammer
+ * added feature to create passwords for SCRAM for new user addition
+ *
  * Revision 1.31  2022-10-26 22:30:20+05:30  Cprogrammer
  * refactored user modification page
  *
