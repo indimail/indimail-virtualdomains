@@ -1,5 +1,8 @@
 /*
  * $Log: is_user_present.c,v $
+ * Revision 1.2  2022-10-27 17:07:22+05:30  Cprogrammer
+ * make variables static to avoid clash
+ *
  * Revision 1.1  2019-04-20 08:13:51+05:30  Cprogrammer
  * Initial revision
  *
@@ -25,7 +28,7 @@
 #include "findhost.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: is_user_present.c,v 1.1 2019-04-20 08:13:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: is_user_present.c,v 1.2 2022-10-27 17:07:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -39,9 +42,9 @@ static char     sccsid[] = "$Id: is_user_present.c,v 1.1 2019-04-20 08:13:51+05:
 static char     _cacheSwitch = 1;
 #endif
 
-stralloc        User = { 0 };
-stralloc        Domain = { 0 };
-stralloc        SqlBuf = { 0 };
+static stralloc User = { 0 };
+static stralloc Domain = { 0 };
+static stralloc SqlBuf = { 0 };
 
 static void
 die_nomem()
@@ -103,8 +106,10 @@ is_user_present(char *user, char *domain)
 	in_mysql_free_result(res);
 	if (!stralloc_copys(&User, user) || !stralloc_0(&User))
 		die_nomem();
+	User.len--;
 	if (!stralloc_copys(&Domain, domain) || !stralloc_0(&Domain))
 		die_nomem();
+	Domain.len--;
 	if (!ret)
 		userNotFound = 1;
 	return (is_present = ret);
