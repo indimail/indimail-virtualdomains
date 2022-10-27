@@ -1,5 +1,8 @@
 /*
  * $Log: sql_getpw.c,v $
+ * Revision 1.3  2022-10-27 17:14:31+05:30  Cprogrammer
+ * refactored sql code into do_sql()
+ *
  * Revision 1.2  2022-08-04 14:41:49+05:30  Cprogrammer
  * fetch scram password
  *
@@ -33,7 +36,7 @@
 #include "strToPw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_getpw.c,v 1.2 2022-08-04 14:41:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_getpw.c,v 1.3 2022-10-27 17:14:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef QUERY_CACHE
@@ -47,17 +50,51 @@ die_nomem()
 	_exit(111);
 }
 
+static int
+do_sql(stralloc *user, char *domain, char *table, MYSQL_RES **res)
+{
+	static stralloc SqlBuf = {0};
+	int             err;
+
+	if (!stralloc_copyb(&SqlBuf, "select high_priority pw_name, ", 30) ||
+			!stralloc_catb(&SqlBuf, "pw_passwd, scram, pw_uid, pw_gid, ", 34) ||
+			!stralloc_catb(&SqlBuf, "pw_gecos, pw_dir, pw_shell from ", 32) ||
+			!stralloc_cats(&SqlBuf, table) ||
+			!stralloc_catb(&SqlBuf, " where pw_name = \"", 18) ||
+			!stralloc_cat(&SqlBuf, user) ||
+			!stralloc_append(&SqlBuf, "\""))
+		die_nomem();
+	if (site_size == SMALL_SITE &&
+			(!stralloc_catb(&SqlBuf, " and pw_domain = \"", 18) ||
+			 !stralloc_cats(&SqlBuf, domain) ||
+			 !stralloc_append(&SqlBuf, "\"")))
+		die_nomem();
+	if (!stralloc_0(&SqlBuf))
+		die_nomem();
+	if (mysql_query(&mysql[1], SqlBuf.s)) {
+		err = in_mysql_errno(&mysql[1]);
+		if (err == ER_NO_SUCH_TABLE || err == ER_SYNTAX_ERROR)
+			userNotFound = 1;
+		else
+			strerr_warn4("sql_getpw: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
+		return -1;
+	}
+	if (!(*res = in_mysql_store_result(&mysql[1])))
+		die_nomem();
+	return (in_mysql_num_rows(*res));
+}
+
 struct passwd  *
 sql_getpw(char *user, char *domain)
 {
 	char           *domstr, *pwstruct, *real_domain, *ptr;
-	int             row_count, pass, err;
+	int             row_count;
+	MYSQL_RES      *res = (MYSQL_RES *) NULL;
+	MYSQL_ROW       row;
 	static struct passwd pwent;
 	static stralloc IPass = {0}, IGecos = {0}, IDir = {0}, IShell = {0};
-	static stralloc SqlBuf = {0}, _user = {0}, _domain = {0};
+	static stralloc _user = {0}, _domain = {0};
 	static stralloc IUser = {0}, IDomain = {0};
-	MYSQL_RES      *res;
-	MYSQL_ROW       row;
 #ifdef ENABLE_DOMAIN_LIMITS
 	struct vlimits  limits;
 #endif
@@ -105,10 +142,6 @@ sql_getpw(char *user, char *domain)
 		return ((struct passwd *) 0);
 	if (!(real_domain = get_real_domain(_domain.s)))
 		real_domain = _domain.s;
-	if (!stralloc_copyb(&SqlBuf, "select high_priority pw_name, ", 30) ||
-			!stralloc_catb(&SqlBuf, "pw_passwd, scram, pw_uid, pw_gid, ", 34) ||
-			!stralloc_catb(&SqlBuf, "pw_gecos, pw_dir, pw_shell from ", 32))
-		die_nomem();
 	if (site_size == LARGE_SITE) {
 		domstr = (char *) 0;
 		if (!real_domain || !*real_domain)
@@ -116,59 +149,22 @@ sql_getpw(char *user, char *domain)
 		else
 		if (domain && *domain)
 			domstr = munch_domain(real_domain);
-		if (!stralloc_cats(&SqlBuf, domstr) ||
-				!stralloc_catb(&SqlBuf, " where pw_name = \"", 18) ||
-				!stralloc_cat(&SqlBuf, &_user) ||
-				!stralloc_append(&SqlBuf, "\"") || !stralloc_0(&SqlBuf))
-			die_nomem();
-	} else {
-		if (!stralloc_cats(&SqlBuf, default_table) ||
-				!stralloc_catb(&SqlBuf, " where pw_name = \"", 18) ||
-				!stralloc_cat(&SqlBuf, &_user) ||
-				!stralloc_catb(&SqlBuf, "\" and pw_domain = \"", 19) ||
-				!stralloc_cats(&SqlBuf, real_domain) ||
-				!stralloc_append(&SqlBuf, "\"") || !stralloc_0(&SqlBuf))
-			die_nomem();
-	}
-	for (pass = 1;pass <= 2;pass++) {
-		if (pass == 2) {
-			if (!stralloc_copyb(&SqlBuf, "select high_priority pw_name, ", 30) ||
-					!stralloc_catb(&SqlBuf, "pw_passwd, scram, pw_uid, pw_gid, ", 34) ||
-					!stralloc_catb(&SqlBuf, "pw_gecos, pw_dir, pw_shell from ", 32))
-				die_nomem();
-			if (!stralloc_cats(&SqlBuf, inactive_table) ||
-					!stralloc_catb(&SqlBuf, " where pw_name = \"", 18) ||
-					!stralloc_cat(&SqlBuf, &_user) ||
-					!stralloc_catb(&SqlBuf, "\" and pw_domain = \"", 19) ||
-					!stralloc_cats(&SqlBuf, real_domain) ||
-					!stralloc_append(&SqlBuf, "\"") || !stralloc_0(&SqlBuf))
-				die_nomem();
-		}
-		if (mysql_query(&mysql[1], SqlBuf.s)) {
-			err = in_mysql_errno(&mysql[1]);
-			if (err == ER_NO_SUCH_TABLE || err == ER_SYNTAX_ERROR)
-				userNotFound = 1;
-			else
-				strerr_warn4("sql_getpw: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
+	} else
+		domstr = default_table;
+	if ((row_count = do_sql(&_user, real_domain, domstr, &res)) == -1)
+		return ((struct passwd *) 0);
+	else
+	if (site_size == SMALL_SITE && !row_count) {
+		if ((row_count = do_sql(&_user, real_domain, inactive_table, &res)) == -1)
 			return ((struct passwd *) 0);
-		}
-		if (!(res = in_mysql_store_result(&mysql[1]))) {
-			strerr_warn2("sql_getpw: in_mysql_store_result: ", (char *) in_mysql_error(&mysql[1]), 0);
-			return ((struct passwd *) 0);
-		}
-		if ((row_count = in_mysql_num_rows(res)))
-			break;
 		else
-			in_mysql_free_result(res);
-		if (site_size == LARGE_SITE)
-			break;
+		if (row_count)
+			is_inactive = 1;
 	}
 	if (!row_count) {
 		userNotFound = 1;
 		return ((struct passwd *) 0);
 	}
-	if (pass == 2)
-		is_inactive = 1;
 	if ((row = in_mysql_fetch_row(res))) {
 		if (!stralloc_copys(&_user, row[0]) || !stralloc_0(&_user))
 			die_nomem();

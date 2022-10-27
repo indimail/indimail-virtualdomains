@@ -1,5 +1,8 @@
 /*
  * $Log: sql_passwd.c,v $
+ * Revision 1.4  2022-10-27 17:16:08+05:30  Cprogrammer
+ * refactored sql code into do_sql()
+ *
  * Revision 1.3  2022-08-28 12:01:49+05:30  Cprogrammer
  * set scram field to NULL when not given
  *
@@ -30,7 +33,7 @@
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_passwd.c,v 1.3 2022-08-28 12:01:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_passwd.c,v 1.4 2022-10-27 17:16:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -40,14 +43,53 @@ die_nomem()
 	_exit(111);
 }
 
+static int
+do_sql(char *user, char *domain, char *pass, char *scram, char *table)
+{
+	static stralloc SqlBuf = {0};
+
+	if (!stralloc_copyb(&SqlBuf, "update low_priority ", 20) ||
+			!stralloc_cats(&SqlBuf, table) ||
+			!stralloc_catb(&SqlBuf, " set pw_passwd = \"", 18) ||
+			!stralloc_cats(&SqlBuf, pass))
+		die_nomem();
+	if (scram) {
+		if (!stralloc_catb(&SqlBuf, "\", scram = \"", 12) ||
+			!stralloc_cats(&SqlBuf, scram) ||
+			!stralloc_append(&SqlBuf, "\""))
+		die_nomem();
+	} else
+	if (!stralloc_catb(&SqlBuf, "\", scram = NULL", 15))
+		die_nomem();
+
+	if (!stralloc_catb(&SqlBuf, " where pw_name = \"", 18) ||
+			!stralloc_cats(&SqlBuf, user) ||
+			!stralloc_append(&SqlBuf, "\""))
+		die_nomem();
+	if (!stralloc_0(&SqlBuf))
+		die_nomem();
+	if (site_size == SMALL_SITE) {
+		if (!stralloc_catb(&SqlBuf, " and pw_domain = \"", 18) ||
+				!stralloc_cats(&SqlBuf, domain))
+			die_nomem();
+	}
+	if (!stralloc_0(&SqlBuf))
+		die_nomem();
+
+	if (mysql_query(&mysql[1], SqlBuf.s)) {
+		strerr_warn4("sql_passwd: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
+		return (-1);
+	}
+	return (in_mysql_affected_rows(&mysql[1]));
+}
+
 int
 sql_passwd(char *user, char *domain, char *pass, char *scram)
 {
 	char           *tmpstr;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
-	int             err;
+	int             row_count;
 	uid_t           myuid, uid;
-	static stralloc SqlBuf = {0};
 
 	if (indimailuid == -1 || indimailgid == -1)
 		get_indimailuidgid(&indimailuid, &indimailgid);
@@ -74,62 +116,12 @@ sql_passwd(char *user, char *domain, char *pass, char *scram)
 			tmpstr = munch_domain(domain);
 	} else
 		tmpstr = default_table;
-	if (!stralloc_copyb(&SqlBuf, "update low_priority ", 20) ||
-			!stralloc_cats(&SqlBuf, tmpstr) ||
-			!stralloc_catb(&SqlBuf, " set pw_passwd = \"", 18) ||
-			!stralloc_cats(&SqlBuf, pass))
-		die_nomem();
-	if (scram) {
-		if (!stralloc_catb(&SqlBuf, "\", scram = \"", 12) ||
-			!stralloc_cats(&SqlBuf, scram) ||
-			!stralloc_append(&SqlBuf, "\""))
-		die_nomem();
-	} else
-	if (!stralloc_catb(&SqlBuf, "\", scram = NULL", 15))
-		die_nomem();
-
-	if (!stralloc_catb(&SqlBuf, " where pw_name = \"", 18) ||
-			!stralloc_cats(&SqlBuf, user))
-		die_nomem();
-	if (site_size == SMALL_SITE) {
-		if (!stralloc_catb(&SqlBuf, "\" and pw_domain = \"", 19) ||
-				!stralloc_cats(&SqlBuf, domain))
-			die_nomem();
-	}
-	if (!stralloc_append(&SqlBuf, "\"") || !stralloc_0(&SqlBuf))
-		die_nomem();
-
-	if (mysql_query(&mysql[1], SqlBuf.s)) {
-		strerr_warn4("sql_passwd: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
-		return (-1);
-	}
-	err = in_mysql_affected_rows(&mysql[1]);
-	if (!err && site_size == SMALL_SITE) {
-		if (!stralloc_copyb(&SqlBuf, "update low_priority ", 20) ||
-				!stralloc_cats(&SqlBuf, inactive_table) ||
-				!stralloc_catb(&SqlBuf, " set pw_passwd = \"", 18) ||
-				!stralloc_cats(&SqlBuf, pass))
-			die_nomem();
-		if (scram) {
-			if (!stralloc_catb(&SqlBuf, "\", scram = \"", 12) ||
-				!stralloc_cats(&SqlBuf, scram))
-			die_nomem();
-		}
-		if (!stralloc_catb(&SqlBuf, "\" where pw_name = \"", 19) ||
-				!stralloc_cats(&SqlBuf, user) ||
-				!stralloc_catb(&SqlBuf, "\" and pw_domain = \"", 19) ||
-				!stralloc_cats(&SqlBuf, domain) ||
-				!stralloc_append(&SqlBuf, "\"") ||
-				!stralloc_0(&SqlBuf))
-			die_nomem();
-		if (mysql_query(&mysql[1], SqlBuf.s)) {
-			strerr_warn4("sql_passwd: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
-			return (-1);
-		}
-		err = in_mysql_affected_rows(&mysql[1]);
-	}
+	if ((row_count = do_sql(user, domain, pass, scram, tmpstr)) == -1)
+		return -1;
+	if (site_size == SMALL_SITE && !row_count && (row_count = do_sql(user, domain, pass, scram, inactive_table)) == -1)
+		return -1;
 #ifdef QUERY_CACHE
-	if (err == 1)
+	if (row_count == 1)
 		sql_getpw_cache(0);
 #endif
 	return (1);

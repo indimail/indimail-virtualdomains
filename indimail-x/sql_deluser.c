@@ -1,5 +1,8 @@
 /*
  * $Log: sql_deluser.c,v $
+ * Revision 1.2  2022-10-27 17:10:06+05:30  Cprogrammer
+ * refactored sql code into do_sql()
+ *
  * Revision 1.1  2019-04-14 22:52:26+05:30  Cprogrammer
  * Initial revision
  *
@@ -24,7 +27,7 @@
 #include "munch_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_deluser.c,v 1.1 2019-04-14 22:52:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_deluser.c,v 1.2 2022-10-27 17:10:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -34,10 +37,34 @@ die_nomem()
 	_exit(111);
 }
 
+static int
+do_sql(char *user, char *domain, char *table)
+{
+	static stralloc SqlBuf = {0};
+
+	if (!stralloc_copyb(&SqlBuf, "delete low_priority from ", 25) ||
+			!stralloc_cats(&SqlBuf, table) ||
+			!stralloc_catb(&SqlBuf, " where pw_name = \"", 18) ||
+			!stralloc_cats(&SqlBuf, user) ||
+			!stralloc_append(&SqlBuf, "\""))
+		die_nomem();
+	if (site_size == SMALL_SITE &&
+			(!stralloc_catb(&SqlBuf, " and pw_domain = \"", 18) ||
+			 !stralloc_cats(&SqlBuf, domain) ||
+			 !stralloc_append(&SqlBuf, "\"")))
+		die_nomem();
+	if (!stralloc_0(&SqlBuf))
+		die_nomem();
+	if (mysql_query(&mysql[1], SqlBuf.s)) {
+		strerr_warn4("sql_deluser: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
+		return (-1);
+	} 
+	return (in_mysql_affected_rows(&mysql[1]));
+}
+
 int
 sql_deluser(char *user, char *domain)
 {
-	static stralloc SqlBuf = {0};
 	char           *tmpstr;
 	int             err;
 
@@ -60,44 +87,12 @@ sql_deluser(char *user, char *domain)
 			tmpstr = MYSQL_LARGE_USERS_TABLE;
 		else
 			tmpstr = munch_domain(domain);
-		if (!stralloc_copyb(&SqlBuf, "delete low_priority from ", 25) ||
-				!stralloc_cats(&SqlBuf, tmpstr) ||
-				!stralloc_catb(&SqlBuf, " where pw_name = \"", 18) ||
-				!stralloc_cats(&SqlBuf, user) ||
-				!stralloc_append(&SqlBuf, "\"") ||
-				!stralloc_0(&SqlBuf))
-			die_nomem();
 	} else
-		if (!stralloc_copyb(&SqlBuf, "delete low_priority from ", 25) ||
-				!stralloc_cats(&SqlBuf, default_table) ||
-				!stralloc_catb(&SqlBuf, " where pw_name = \"", 18) ||
-				!stralloc_cats(&SqlBuf, user) ||
-				!stralloc_catb(&SqlBuf, "\" and pw_domain = \"", 19) ||
-				!stralloc_cats(&SqlBuf, domain) ||
-				!stralloc_append(&SqlBuf, "\"") ||
-				!stralloc_0(&SqlBuf))
-			die_nomem();
-	if (mysql_query(&mysql[1], SqlBuf.s)) {
-		strerr_warn4("sql_deluser: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
-		return (1);
-	} 
-	err = in_mysql_affected_rows(&mysql[1]);
-	if (!err && site_size == SMALL_SITE) {
-		if (!stralloc_copyb(&SqlBuf, "delete low_priority from ", 25) ||
-				!stralloc_cats(&SqlBuf, inactive_table) ||
-				!stralloc_catb(&SqlBuf, " where pw_name = \"", 18) ||
-				!stralloc_cats(&SqlBuf, user) ||
-				!stralloc_catb(&SqlBuf, "\" and pw_domain = \"", 19) ||
-				!stralloc_cats(&SqlBuf, domain) ||
-				!stralloc_append(&SqlBuf, "\"") ||
-				!stralloc_0(&SqlBuf))
-			die_nomem();
-		if (mysql_query(&mysql[1], SqlBuf.s)) {
-			strerr_warn4("sql_deluser: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
-			return (1);
-		} 
-		err = in_mysql_affected_rows(&mysql[1]);
-	}
+		tmpstr = default_table;
+
+	err = do_sql(user, domain, tmpstr);
+	if (site_size == SMALL_SITE && !err)
+		err = do_sql(user, domain, inactive_table);
 	if (!err || err == -1)
 		err = 1;
 	else

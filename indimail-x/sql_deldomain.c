@@ -1,5 +1,8 @@
 /*
  * $Log: sql_deldomain.c,v $
+ * Revision 1.3  2022-10-27 17:28:29+05:30  Cprogrammer
+ * refactored sql code into do_sql()
+ *
  * Revision 1.2  2019-07-02 17:06:02+05:30  Cprogrammer
  * open master db before deleting from hostcntrl
  *
@@ -32,7 +35,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_deldomain.c,v 1.2 2019-07-02 17:06:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_deldomain.c,v 1.3 2022-10-27 17:28:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <mysqld_error.h>
@@ -42,6 +45,30 @@ die_nomem()
 {
 	strerr_warn1("sql_deldomaain: out of memory", 0);
 	_exit(111);
+}
+
+static int
+do_sql(char *domain, char *table, stralloc *sqlbuf)
+{
+	if (site_size == LARGE_SITE) {
+		if (!stralloc_copyb(sqlbuf, "drop table ", 11) ||
+				!stralloc_cats(sqlbuf, table))
+			die_nomem();
+	} else {
+		if (!stralloc_copyb(sqlbuf, "delete low_priority from ", 25) ||
+				!stralloc_cats(sqlbuf, table) ||
+				!stralloc_catb(sqlbuf, " where pw_domain = \"", 20) ||
+				!stralloc_cats(sqlbuf, domain) ||
+				!stralloc_append(sqlbuf, "\""))
+			die_nomem();
+	}
+	if (!stralloc_0(sqlbuf))
+		die_nomem();
+	if (mysql_query(&mysql[1], sqlbuf->s)) {
+		strerr_warn4("sql_deldomain: ", sqlbuf->s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
+		return -1;
+	}
+	return 0;
 }
 
 int
@@ -74,34 +101,16 @@ sql_deldomain(char *domain)
 #endif
 	}
 	if (site_size == LARGE_SITE) {
-		tmpstr = munch_domain(domain);
-		if (!stralloc_copyb(&SqlBuf, "drop table ", 11) ||
-				!stralloc_cats(&SqlBuf, tmpstr) || !stralloc_0(&SqlBuf))
-			die_nomem();
+		if ((err = do_sql(domain, munch_domain(domain), &SqlBuf)) == -1)
+			return -1;
 	} else {
-		if (!stralloc_copyb(&SqlBuf, "delete low_priority from ", 25) ||
-				!stralloc_cats(&SqlBuf, default_table) ||
-				!stralloc_catb(&SqlBuf, " where pw_domain = \"", 20) ||
-				!stralloc_cats(&SqlBuf, domain) ||
-				!stralloc_append(&SqlBuf, "\"") || !stralloc_0(&SqlBuf))
-			die_nomem();
+		if ((err = do_sql(domain, default_table, &SqlBuf)) == -1)
+			return -1;
+		else
+		if (!err && (err = do_sql(domain, inactive_table, &SqlBuf)) == -1)
+			return -1;
 	}
-	if (mysql_query(&mysql[1], SqlBuf.s)) {
-		strerr_warn4("sql_deldomain: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
-		err = (err ? 1 : 0);
-	}
-	if (site_size == SMALL_SITE) {
-		if (!stralloc_copyb(&SqlBuf, "delete low_priority from ", 25) ||
-				!stralloc_cats(&SqlBuf, inactive_table) ||
-				!stralloc_catb(&SqlBuf, " where pw_domain = \"", 20) ||
-				!stralloc_cats(&SqlBuf, domain) ||
-				!stralloc_append(&SqlBuf, "\"") || !stralloc_0(&SqlBuf))
-			die_nomem();
-		if (mysql_query(&mysql[1], SqlBuf.s) && in_mysql_errno(&mysql[1]) != ER_NO_SUCH_TABLE) {
-			strerr_warn4("sql_deldomain: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
-			err = (err ? 1 : 0);
-		}
-	}
+
 #ifdef ENABLE_AUTH_LOGGING
 	if (!stralloc_copyb(&SqlBuf, "delete low_priority from lastauth where domain = \"", 50) ||
 			!stralloc_cats(&SqlBuf, domain) ||
@@ -113,7 +122,7 @@ sql_deldomain(char *domain)
 	}
 #endif
 #ifdef VALIAS
-	err = (valias_delete_domain(domain) ? 1 : err);
+	err = valias_delete_domain(domain) ? 1 : err;
 #endif
 #ifdef CLUSTERED_SITE
 	if (is_dist) {
@@ -128,7 +137,9 @@ sql_deldomain(char *domain)
 			strerr_warn1("sql_deldomain: failed to open master db", 0);
 			return (-1);
 		}
-		if (!stralloc_copyb(&SqlBuf, "delete low_priority from hostcntrl where pw_domain = \"", 54) ||
+		if (!stralloc_copyb(&SqlBuf, "delete low_priority from ", 25) ||
+				!stralloc_cats(&SqlBuf, cntrl_table) ||
+				!stralloc_catb(&SqlBuf, " where pw_domain = \"", 20) ||
 				!stralloc_cats(&SqlBuf, domain) ||
 				!stralloc_catb(&SqlBuf, "\" and host = \"", 14) ||
 				!stralloc_cats(&SqlBuf, tmpstr) ||
