@@ -37,17 +37,14 @@ int
 valias_delete_domain(char *domain)
 {
 	int             err;
-	char           *real_domain;
 	static stralloc SqlBuf = {0};
 
 	if (!domain || !*domain)
 		return (1);
 	if ((err = iopen((char *) 0)) != 0)
 		return (err);
-	if (!(real_domain = get_real_domain(domain)))
-		real_domain = domain;
 	if (!stralloc_copyb(&SqlBuf, "delete low_priority from valias where domain = \"", 48) ||
-			!stralloc_cats(&SqlBuf, real_domain) ||
+			!stralloc_cats(&SqlBuf, domain) ||
 			!stralloc_append(&SqlBuf, "\"") ||
 			!stralloc_0(&SqlBuf))
 		die_nomem();
