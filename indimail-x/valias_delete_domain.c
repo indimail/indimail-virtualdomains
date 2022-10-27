@@ -1,5 +1,8 @@
 /*
  * $Log: valias_delete_domain.c,v $
+ * Revision 1.2  2022-10-27 17:29:20+05:30  Cprogrammer
+ * delete entries for alias instead of real domain
+ *
  * Revision 1.1  2019-04-15 11:59:49+05:30  Cprogrammer
  * Initial revision
  *
@@ -20,7 +23,7 @@
 #include "iopen.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias_delete_domain.c,v 1.1 2019-04-15 11:59:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valias_delete_domain.c,v 1.2 2022-10-27 17:29:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
