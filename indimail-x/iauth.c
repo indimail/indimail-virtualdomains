@@ -1,5 +1,8 @@
 /*
  * $Log: iauth.c,v $
+ * Revision 1.8  2022-10-29 21:36:14+05:30  Cprogrammer
+ * removed compiler warning for unused variable
+ *
  * Revision 1.7  2022-09-13 22:04:09+05:30  Cprogrammer
  * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
  *
@@ -105,7 +108,7 @@
 #include "common.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: iauth.c,v 1.7 2022-09-13 22:04:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iauth.c,v 1.8 2022-10-29 21:36:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      defaultTask(char *, char *, struct passwd *, char *, int);
@@ -131,7 +134,11 @@ i_auth(char *email, char *service, int *size, int debug)
 	char            strnum[FMT_ULONG];
 	uid_t           uid;
 	gid_t           gid;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	int             i;
+#endif
+#endif
 	struct passwd  *pw;
 
 	_global_pw = (struct passwd *) 0;
