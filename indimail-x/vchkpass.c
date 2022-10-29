@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.16  2022-10-29 23:10:52+05:30  Cprogrammer
+ * fixed display of auth method in logs
+ *
  * Revision 1.15  2022-08-27 12:04:41+05:30  Cprogrammer
  * fixed logic for fetching clear txt password for cram methods
  *
@@ -88,7 +91,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.15 2022-08-27 12:04:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.16 2022-10-29 23:10:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -329,13 +332,15 @@ main(int argc, char **argv)
 		pass = crypt_pass = pw->pw_passwd;
 	}
 	module_pid[fmt_ulong(module_pid, getpid())] = 0;
-	ptr = get_authmethod(auth_method);
 	if ((ptr = env_get("DEBUG_LOGIN")) && *ptr > '0') {
+		ptr = get_authmethod(auth_method);
 		strerr_warn16("vchkpass: ", "pid [", module_pid, "]: login [", login, "] challenge [", challenge,
 			"] response [", response, "] password [", pass, "] crypted [", crypt_pass, "] authmethod [", ptr, "]", 0);
 	} else
-	if (env_get("DEBUG"))
+	if (env_get("DEBUG")) {
+		ptr = get_authmethod(auth_method);
 		strerr_warn8("vchkpass: ", "pid [", module_pid, "]: login [", login, "] authmethod [", ptr, "]", 0);
+	}
 	if (pw_comp((unsigned char *) ologin, (unsigned char *) pass,
 		(unsigned char *) (*response ? challenge : 0),
 		(unsigned char *) (*response ? response : challenge), auth_method)) {
