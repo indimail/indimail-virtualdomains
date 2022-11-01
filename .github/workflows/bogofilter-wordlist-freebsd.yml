@@ -18,14 +18,13 @@ jobs:
     name: FreeBSD
     env:
       MYTOKEN : ${{ secrets.MYTOKEN }}
-      MYTOKEN2: "value2"
     steps:
     - uses: actions/checkout@v2
     - name: build bogofilter-wordlist
       id: FreeBSD
-      uses: vmactions/freebsd-vm@v0.2.1
+      uses: vmactions/freebsd-vm@v0.2.9
       with:
-        envs: 'MYTOKEN MYTOKEN2'
+        envs: 'MYTOKEN'
         usesh: true
         prepare: pkg install -y automake autoconf libtool pkgconf wget
         run: cd bogofilter-wordlist-x; ./default.configure; make

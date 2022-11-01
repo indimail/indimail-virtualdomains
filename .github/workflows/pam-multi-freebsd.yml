@@ -15,7 +15,6 @@ jobs:
     name: FreeBSD
     env:
       MYTOKEN : ${{ secrets.MYTOKEN }}
-      MYTOKEN2: "value2"
     steps:
     - uses: actions/checkout@v2
       with:
@@ -26,9 +25,9 @@ jobs:
         path: libqmail
     - name: build pam-multi
       id: FreeBSD
-      uses: vmactions/freebsd-vm@v0.2.1
+      uses: vmactions/freebsd-vm@v0.2.9
       with:
-        envs: 'MYTOKEN MYTOKEN2'
+        envs: 'MYTOKEN'
         usesh: true
         prepare: pkg install -y curl automake autoconf libtool pkgconf mysql80-server mysql80-client
         run: |
