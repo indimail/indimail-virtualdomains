@@ -1,5 +1,8 @@
 /*
  * $Log: renameuser.c,v $
+ * Revision 1.6  2022-11-02 14:56:35+05:30  Cprogrammer
+ * restore scram password while renaming user
+ *
  * Revision 1.5  2022-09-14 08:47:36+05:30  Cprogrammer
  * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
  *
@@ -57,7 +60,7 @@
 #include "deluser.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: renameuser.c,v 1.5 2022-09-14 08:47:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: renameuser.c,v 1.6 2022-11-02 14:56:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -71,11 +74,10 @@ int
 renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *newDomain)
 {
 	static stralloc oldDir = {0}, SqlBuf = {0};
-	char           *real_domain;
+	char           *real_domain, *ptr;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 #ifdef VALIAS
 	static stralloc User = {0}, oldEmail = {0}, newEmail = {0}, tmp_domain = {0};
-	char           *ptr;
 #endif
 #ifdef CLUSTERED_SITE
 	static stralloc tmpbuf = {0};
@@ -85,7 +87,7 @@ renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *
 	int             i, err, inactive_flag;
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	static stralloc result = {0};
+	static stralloc scram = {0};
 	char           *enc_pass;
 #endif
 #endif
@@ -179,6 +181,7 @@ renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *
 		return (-1);
 	}
 
+	ptr = (char *) NULL;
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
@@ -186,11 +189,19 @@ renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *
 		if (i != 6 && i != 8)
 			strerr_die1x(1, "renameuser: unable to get secrets");
 		pw->pw_passwd = enc_pass;
+		i = str_rchr(pw->pw_passwd, ',');
+		if (pw->pw_passwd[i]) {
+			if (!stralloc_copyb(&scram, pw->pw_passwd, i) ||
+					!stralloc_0(&scram))
+				die_nomem();
+			scram.len--;
+			ptr = scram.s;
+		}
 	}
 #endif
 #endif
 	if ((err = iadduser(newUser->s, newDomain->s, 0, pw->pw_passwd, pw->pw_gecos,
-		pw->pw_shell, 0, !inactive_flag, 0)) == -1)
+		pw->pw_shell, 0, !inactive_flag, 0, ptr)) == -1)
 		return (-1);
 	else
 	if (!(pw = sql_getpw(newUser->s, newDomain->s))) {
@@ -205,14 +216,6 @@ renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *
 		strerr_warn5("renameuser: MoveFile: ", oldDir.s, " --> ", pw->pw_dir, ": ", &strerr_sys);
 		return (-1);
 	}
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	if (result.len && (err = sql_setpw(pw, newDomain->s, result.s))) {
-		strerr_warn1("renameuser: sql_setpw failed", 0);
-		return (-1);
-	}
-#endif
-#endif
 
 #ifdef ENABLE_AUTH_LOGGING
 	if (!stralloc_copyb(&SqlBuf, "update low_priority lastauth set user=\"", 39) ||
