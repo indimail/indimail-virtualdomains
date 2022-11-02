@@ -1,5 +1,8 @@
 # Maintainer: @email@
 # $Log: PKGBUILD.in,v $
+# Revision 1.7  2022-11-02 16:54:35+05:30  Cprogrammer
+# added gsasl library to make depends
+#
 # Revision 1.6  2021-08-24 00:02:24+05:30  Cprogrammer
 # refactored setting of default_domain variable
 #
@@ -19,7 +22,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.6 2021-08-24 00:02:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.7 2022-11-02 16:54:35+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail' 'libindimail')
 pkgver=@version@
