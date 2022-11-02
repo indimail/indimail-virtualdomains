@@ -27,6 +27,11 @@ Release @version@-@release@ Start 08/09/2021 End --/--/----
     sql_setquota.c, sql_updateflag.c: refactored sql code into do_sql()
 - 29/10/2022
 15. vchkpass.c: fixed display of auth method in logs
+- 02/11/2022
+16. vadddomain.c, vadduser.c, vgroup.c: added feature to add scram password
+    during user addition
+17. vmoduser.c, vpasswd.c: set usage string depeding on gsasl availability
+18. renameuser.c: restore scram password while renaming user
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail@indimail.org> 3.4.1-1.1%{?dist}
 Release @version@-@release@ Start 14/02/2021 End 08/09/2022
