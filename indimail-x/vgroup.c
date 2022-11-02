@@ -1,6 +1,6 @@
 /*
  * $Log: vgroup.c,v $
- * Revision 1.5  2022-11-02 15:54:41+05:30  Cprogrammer
+ * Revision 1.5  2022-11-02 20:15:00+05:30  Cprogrammer
  * added feature to add scram password during user addition
  *
  * Revision 1.4  2022-08-05 22:44:59+05:30  Cprogrammer
@@ -22,7 +22,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 1.5 2022-11-02 15:54:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 1.5 2022-11-02 20:15:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -77,17 +77,17 @@ static char    *usage =
 	"  -V                - print version number\n"
 	"  -v                - verbose\n"
 	"  -a                - add new group\n"
-	"  -r [len]        - generate a len (default 8) char random password\n"
-	"  -e password     - set the encrypted password field\n"
-	"  -h hash         - use one of DES, MD5, SHA256, SHA512, hash method\n"
+	"  -r len            - generate a random password of length=len\n"
+	"  -e password       - set the encrypted password field\n"
+	"  -h hash           - use one of DES, MD5, SHA256, SHA512, hash method\n"
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	"  -C              - store clear txt and scram hex salted password in database\n"
-	"                    This allows CRAM methods to be used\n"
-	"  -m SCRAM method - use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method\n"
-	"  -S salt         - use a fixed base64 encoded salt for generating SCRAM password\n"
-	"                  - if salt is not specified, it will be generated\n"
-	"  -I iter_count   - use iter_count instead of 4096 for generating SCRAM password\n"
+	"  -C                - store clear txt and scram hex salted password in database\n"
+	"                      This allows CRAM methods to be used\n"
+	"  -m SCRAM method   - use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method\n"
+	"  -S salt           - use a fixed base64 encoded salt for generating SCRAM password\n"
+	"                    - if salt is not specified, it will be generated\n"
+	"  -I iter_count     - use iter_count instead of 4096 for generating SCRAM password\n"
 #endif
 #endif
 #ifdef CLUSTERED_SITE
@@ -106,7 +106,7 @@ static int
 get_options(int argc, char **argv, int *option, char **group, char **gecos,
 	char **member, char **old_member, char **passwd,
 	char **hostid, char **mdahost, char **quota, int *ignore,
-	int *encrypt_flag, int *docram, int *scram, int *iter, char **salt, int *random)
+	int *encrypt_flag, int *random, int *docram, int *scram, int *iter, char **salt)
 {
 	int             c, i;
 	char            optstr[27], strnum[FMT_ULONG];
@@ -114,6 +114,7 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos,
 	*group = *gecos = *member = *old_member = *passwd = *hostid = *mdahost = *quota = 0;
 	*option = -1;
 	*ignore = 0;
+	*random = 0;
 	*encrypt_flag = -1;
 	if (salt)
 		*salt = 0;
@@ -358,7 +359,7 @@ main(int argc, char **argv)
 				   *mdahost, *Quota, *real_domain, *ptr;
 	char            strnum[FMT_ULONG];
 	mdir_t          q;
-	int             i, option, ignore = 0, ret = -1, encrypt_flag, random = 0;
+	int             i, option, ignore = 0, ret = -1, encrypt_flag, random;
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	int             scram, iter, docram;
@@ -370,17 +371,17 @@ main(int argc, char **argv)
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	i = get_options(argc, argv, &option, &group, &gecos, &member, &old_member,
-			&passwd, &hostid, &mdahost, &Quota, &ignore, &encrypt_flag, &docram,
-			&scram, &iter, &b64salt, &random);
+			&passwd, &hostid, &mdahost, &Quota, &ignore, &encrypt_flag, &random,
+			&docram, &scram, &iter, &b64salt);
 #else
 	i = get_options(argc, argv, &option, &group, &gecos, &member, &old_member,
-			&passwd, &hostid, &mdahost, &Quota, &ignore, &encrypt_flag, 0,
-			0, 0, 0, &random);
+			&passwd, &hostid, &mdahost, &Quota, &ignore, &encrypt_flag, &random,
+			0, 0, 0, 0);
 #endif
 #else
 	i = get_options(argc, argv, &option, &group, &gecos, &member, &old_member,
-			&passwd, &hostid, &mdahost, &Quota, &ignore, &encrypt_flag, 0,
-			0, 0, 0, &random);
+			&passwd, &hostid, &mdahost, &Quota, &ignore, &encrypt_flag, &random,
+			0, 0, 0, 0);
 #endif
 	if (i)
 		return (i);

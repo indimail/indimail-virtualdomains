@@ -1,10 +1,7 @@
 /*
  * $Log: vadddomain.c,v $
- * Revision 1.10  2022-11-02 15:54:37+05:30  Cprogrammer
+ * Revision 1.10  2022-11-02 20:03:34+05:30  Cprogrammer
  * added feature to add scram password during user addition
- *
- * Revision 1.10  2022-10-20 11:58:24+05:30  Cprogrammer
- * converted function prototype to ansic
  *
  * Revision 1.9  2022-08-07 13:04:26+05:30  Cprogrammer
  * removed apop setting
@@ -105,7 +102,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.10 2022-11-02 15:54:37+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.10 2022-11-02 20:03:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -140,7 +137,7 @@ static char    *usage =
 	"  -T ipaddr                  - sets the Domain for AUTOTURN from IP ipaddr\n"
 	"  -O                         - optimize adding, for bulk adds set this for all\n"
 	"                               except the last one\n"
-	"  -r [len]                   - generate a len (default 8) char random password\n"
+	"  -r len                     - generate a random password of length=len\n"
 	"  -e password                - set the encrypted password field\n"
 	"  -h hash                    - use one of DES, MD5, SHA256, SHA512, hash method\n"
 #ifdef HAVE_GSASL
@@ -164,15 +161,232 @@ static char    *usage =
 #endif
 	;
 
-void            get_options(int argc, char **argv, char **, char **,
-					char **, char **, char **, char **, char **, char **,
-					char **, char **, char **, char **, int *, int *,
-					int *, int *, int *, char **);
 static void
 die_nomem(char *prefix)
 {
 	strerr_warn2(prefix, ": out of memory", 0);
 	_exit (111);
+}
+
+void
+get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd,
+	char **domain, char **user, char **quota, char **bounceEmail, char **ipaddr,
+	char **database, char **sqlserver, char **dbuser, char **dbpass,
+	int *encrypt_flag, int *random, int *docram, int *scram, int *iter, char **salt)
+{
+	int             c, i;
+	struct passwd  *mypw;
+	char            optstr[51], strnum[FMT_ULONG];
+
+	if (indimailuid == -1 || indimailgid == -1)
+		get_indimailuidgid(&indimailuid, &indimailgid);
+	Uid = indimailuid;
+	Gid = indimailgid;
+	*encrypt_flag = -1;
+	*random = 0;
+	if (salt)
+		*salt = 0;
+	if (iter)
+		*iter = 4096;
+	if (scram)
+		*scram = 0;
+	if (docram)
+		*docram = 0;
+	/*- make sure optstr has enough size to hold all options + 1 */
+	i = 0;
+	i += fmt_strn(optstr + i, "ateh:T:q:l:bB:E:u:vRi:g:d:Or:", 29);
+#ifdef CLUSTERED_SITE
+	i += fmt_strn(optstr + i, "D:H:U:P:s:p:c", 13);
+#endif
+#ifdef VFILTER
+	i += fmt_strn(optstr + i, "f", 1);
+#endif
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	i += fmt_strn(optstr + i, "Cm:S:I:", 7);
+#endif
+#endif
+	if ((i + 1) > sizeof(optstr))
+		strerr_die2x(100, FATAL, "allocated space for getopt string not enough");
+	optstr[i] = 0;
+	while ((c = getopt(argc, argv, optstr)) != opteof) {
+		switch (c)
+		{
+		case 'B':
+			if (use_etrn)
+				strerr_die3x(100, WARN, "option -B not valid for ETRN/ATRN/AUTORUN\n", usage);
+			else
+				*base_path = optarg;
+			break;
+		case 'v':
+			verbose = 1;
+			break;
+		case 'd':
+			*dir_t = optarg;
+			break;
+		case 'R':
+			chk_rcpt = 1;
+			break;
+		case 'r':
+			scan_uint(optarg, (unsigned int *) random);
+			break;
+		case 'h':
+			if (!str_diffn(optarg, "DES", 3))
+				strnum[fmt_int(strnum, DES_HASH)] = 0;
+			else
+			if (!str_diffn(optarg, "MD5", 3))
+				strnum[fmt_int(strnum, MD5_HASH)] = 0;
+			else
+			if (!str_diffn(optarg, "SHA-256", 7))
+				strnum[fmt_int(strnum, SHA256_HASH)] = 0;
+			else
+			if (!str_diffn(optarg, "SHA-512", 7))
+				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
+			else {
+				errout("vadddomain", WARN);
+				errout("vadddomain", optarg);
+				errout("vadddomain", ": wrong hash method\n");
+				errout("vadddomain", "Supported HASH Methods: DES MD5 SHA-256 SHA-512\n");
+				errflush("vadddomain");
+				strerr_die2x(100, WARN, usage);
+			}
+			if (!env_put2("PASSWORD_HASH", strnum))
+				strerr_die1x(111, "out of memory");
+			*encrypt_flag = 1;
+			break;
+		case 'e':
+			/*- ignore encrypt flag option if -h option is provided */
+			if (*encrypt_flag == -1)
+				*encrypt_flag = 0;
+			break;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+		case 'C':
+			if (docram)
+				*docram = 1;
+			break;
+		case 'm':
+			if (!scram)
+				break;
+			if (!str_diffn(optarg, "SCRAM-SHA-1", 11))
+				*scram = 1;
+			else
+			if (!str_diffn(optarg, "SCRAM-SHA-256", 13))
+				*scram = 2;
+			else {
+				errout("vadduser", WARN);
+				errout("vadduser", optarg);
+				errout("vadduser", ": wrong SCRAM method\n");
+				errout("vadduser", "Supported SCRAM Methods: SCRAM-SHA-1 SCRAM-SHA-256\n");
+				errflush("vadduser");
+				strerr_die2x(100, WARN, usage);
+			}
+			break;
+		case 'S':
+			if (!salt)
+				break;
+			i = str_chr(optarg, ',');
+			if (optarg[i]) {
+				strerr_die3x(100, WARN, optarg, ": salt cannot have a comma character");
+			}
+			*salt = optarg;
+			break;
+		case 'I':
+			if (!iter)
+				break;
+			scan_int(optarg, iter);
+			break;
+#endif
+#endif
+#ifdef CLUSTERED_SITE
+		case 'c':
+			distributed = 1;
+			break;
+		case 'D':
+			if (distributed == -1)
+				distributed = 0;
+			*database = optarg;
+			break;
+		case 's':
+			scan_int(optarg, &use_ssl);
+			break;
+		case 'H':
+			*sqlserver = optarg;
+			break;
+		case 'U':
+			*dbuser = optarg;
+			break;
+		case 'P':
+			*dbpass = optarg;
+			break;
+		case 'p':
+			scan_int(optarg, &dbport);
+			break;
+#endif
+		case 'u':
+			*user = optarg;
+			if (*user) {
+				if ((mypw = getpwnam(*user)) != NULL) {
+					if (!stralloc_copys(&dirbuf, mypw->pw_dir))
+						die_nomem(FATAL);
+					else
+					if (!stralloc_0(&dirbuf))
+						die_nomem(FATAL);
+					Uid = mypw->pw_uid;
+					Gid = mypw->pw_gid;
+				} else
+					strerr_die3x(100, "user ", *user, " not found in /etc/passwd");
+			}
+			break;
+		case 'q':
+			*quota = optarg;
+			break;
+		case 'l':
+			scan_int(optarg, &users_per_level);
+			break;
+		case 'E':
+			*bounceEmail = optarg;
+			break;
+		case 'i':
+			scan_uint(optarg, (unsigned int *) &Uid);
+			break;
+		case 'g':
+			scan_uint(optarg, (unsigned int *) &Gid);
+			break;
+#ifdef VFILTER
+		case 'f':
+			use_vfilter = 1;
+			break;
+#endif
+		case 't': /*- ETRN/ATRN Support */
+			use_etrn = 1;
+			break;
+		case 'T': /*- AUTOTURN Support */
+			*ipaddr = optarg;
+			use_etrn = 2;
+			break;
+		case 'O':
+			OptimizeAddDomain = 1;
+			break;
+		default:
+			strerr_die2x(100, WARN, usage);
+		}
+	}
+	if (optind < argc)
+		*domain = argv[optind++];
+	if (optind < argc)
+		*passwd = argv[optind++];
+	if (!*domain)
+		strerr_die3x(100, WARN, "Domain not specified\n", usage);
+	if (!check_domain(*domain))
+		strerr_die3(111, WARN, "invalid domain: ", *domain, &check_domain_err);
+#ifdef CLUSTERED_SITE
+	if (distributed >=0 && (!*sqlserver || !*database || !*dbuser || !*dbpass || dbport == -1))
+		strerr_die3x(100, WARN, "specify sqlserver, database, dbuser, dbpass and dbport\n", usage);
+#endif
+	if (*encrypt_flag == -1)
+		*encrypt_flag = 1;
+	return;
 }
 
 int
@@ -528,225 +742,4 @@ main(int argc, char **argv)
 		return (post_handle("%s/%s %s", LIBEXECDIR, base_argv0, domain));
 	} else
 		return (post_handle("%s %s", ptr, domain));
-}
-
-void
-get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd,
-	char **domain, char **user, char **quota, char **bounceEmail, char **ipaddr,
-	char **database, char **sqlserver, char **dbuser, char **dbpass,
-	int *encrypt_flag, int *random, int *docram, int *scram, int *iter, char **salt)
-{
-	int             c, i;
-	struct passwd  *mypw;
-	char            optstr[51], strnum[FMT_ULONG];
-
-	if (indimailuid == -1 || indimailgid == -1)
-		get_indimailuidgid(&indimailuid, &indimailgid);
-	Uid = indimailuid;
-	Gid = indimailgid;
-	*encrypt_flag = -1;
-	*random = 0;
-	if (salt)
-		*salt = 0;
-	if (iter)
-		*iter = 4096;
-	if (scram)
-		*scram = 0;
-	if (docram)
-		*docram = 0;
-	/*- make sure optstr has enough size to hold all options + 1 */
-	i = 0;
-	i += fmt_strn(optstr + i, "ateh:T:q:l:bB:E:u:vRi:g:d:Or:", 29);
-#ifdef CLUSTERED_SITE
-	i += fmt_strn(optstr + i, "D:H:U:P:s:p:c", 13);
-#endif
-#ifdef VFILTER
-	i += fmt_strn(optstr + i, "f", 1);
-#endif
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	i += fmt_strn(optstr + i, "Cm:S:I:", 7);
-#endif
-#endif
-	if ((i + 1) > sizeof(optstr))
-		strerr_die2x(100, FATAL, "allocated space for getopt string not enough");
-	optstr[i] = 0;
-	while ((c = getopt(argc, argv, optstr)) != opteof) {
-		switch (c)
-		{
-		case 'B':
-			if (use_etrn)
-				strerr_die3x(100, WARN, "option -B not valid for ETRN/ATRN/AUTORUN\n", usage);
-			else
-				*base_path = optarg;
-			break;
-		case 'v':
-			verbose = 1;
-			break;
-		case 'd':
-			*dir_t = optarg;
-			break;
-		case 'R':
-			chk_rcpt = 1;
-			break;
-		case 'r':
-			scan_uint(optarg, (unsigned int *) random);
-			break;
-		case 'h':
-			if (!str_diffn(optarg, "DES", 3))
-				strnum[fmt_int(strnum, DES_HASH)] = 0;
-			else
-			if (!str_diffn(optarg, "MD5", 3))
-				strnum[fmt_int(strnum, MD5_HASH)] = 0;
-			else
-			if (!str_diffn(optarg, "SHA-256", 7))
-				strnum[fmt_int(strnum, SHA256_HASH)] = 0;
-			else
-			if (!str_diffn(optarg, "SHA-512", 7))
-				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
-			else {
-				errout("vadddomain", WARN);
-				errout("vadddomain", optarg);
-				errout("vadddomain", ": wrong hash method\n");
-				errout("vadddomain", "Supported HASH Methods: DES MD5 SHA-256 SHA-512\n");
-				errflush("vadddomain");
-				strerr_die2x(100, WARN, usage);
-			}
-			if (!env_put2("PASSWORD_HASH", strnum))
-				strerr_die1x(111, "out of memory");
-			*encrypt_flag = 1;
-			break;
-		case 'e':
-			/*- ignore encrypt flag option if -h option is provided */
-			if (*encrypt_flag == -1)
-				*encrypt_flag = 0;
-			break;
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-		case 'C':
-			if (docram)
-				*docram = 1;
-			break;
-		case 'm':
-			if (!scram)
-				break;
-			if (!str_diffn(optarg, "SCRAM-SHA-1", 11))
-				*scram = 1;
-			else
-			if (!str_diffn(optarg, "SCRAM-SHA-256", 13))
-				*scram = 2;
-			else {
-				errout("vadduser", WARN);
-				errout("vadduser", optarg);
-				errout("vadduser", ": wrong SCRAM method\n");
-				errout("vadduser", "Supported SCRAM Methods: SCRAM-SHA-1 SCRAM-SHA-256\n");
-				errflush("vadduser");
-				strerr_die2x(100, WARN, usage);
-			}
-			break;
-		case 'S':
-			if (!salt)
-				break;
-			i = str_chr(optarg, ',');
-			if (optarg[i]) {
-				strerr_die3x(100, WARN, optarg, ": salt cannot have a comma character");
-			}
-			*salt = optarg;
-			break;
-		case 'I':
-			if (!iter)
-				break;
-			scan_int(optarg, iter);
-			break;
-#endif
-#endif
-#ifdef CLUSTERED_SITE
-		case 'c':
-			distributed = 1;
-			break;
-		case 'D':
-			if (distributed == -1)
-				distributed = 0;
-			*database = optarg;
-			break;
-		case 's':
-			scan_int(optarg, &use_ssl);
-			break;
-		case 'H':
-			*sqlserver = optarg;
-			break;
-		case 'U':
-			*dbuser = optarg;
-			break;
-		case 'P':
-			*dbpass = optarg;
-			break;
-		case 'p':
-			scan_int(optarg, &dbport);
-			break;
-#endif
-		case 'u':
-			*user = optarg;
-			if (*user) {
-				if ((mypw = getpwnam(*user)) != NULL) {
-					if (!stralloc_copys(&dirbuf, mypw->pw_dir))
-						die_nomem(FATAL);
-					else
-					if (!stralloc_0(&dirbuf))
-						die_nomem(FATAL);
-					Uid = mypw->pw_uid;
-					Gid = mypw->pw_gid;
-				} else
-					strerr_die3x(100, "user ", *user, " not found in /etc/passwd");
-			}
-			break;
-		case 'q':
-			*quota = optarg;
-			break;
-		case 'l':
-			scan_int(optarg, &users_per_level);
-			break;
-		case 'E':
-			*bounceEmail = optarg;
-			break;
-		case 'i':
-			scan_uint(optarg, (unsigned int *) &Uid);
-			break;
-		case 'g':
-			scan_uint(optarg, (unsigned int *) &Gid);
-			break;
-#ifdef VFILTER
-		case 'f':
-			use_vfilter = 1;
-			break;
-#endif
-		case 't': /*- ETRN/ATRN Support */
-			use_etrn = 1;
-			break;
-		case 'T': /*- AUTOTURN Support */
-			*ipaddr = optarg;
-			use_etrn = 2;
-			break;
-		case 'O':
-			OptimizeAddDomain = 1;
-			break;
-		default:
-			strerr_die2x(100, WARN, usage);
-		}
-	}
-	if (optind < argc)
-		*domain = argv[optind++];
-	if (optind < argc)
-		*passwd = argv[optind++];
-	if (!*domain)
-		strerr_die3x(100, WARN, "Domain not specified\n", usage);
-	if (!check_domain(*domain))
-		strerr_die3(111, WARN, "invalid domain: ", *domain, &check_domain_err);
-#ifdef CLUSTERED_SITE
-	if (distributed >=0 && (!*sqlserver || !*database || !*dbuser || !*dbpass || dbport == -1))
-		strerr_die3x(100, WARN, "specify sqlserver, database, dbuser, dbpass and dbport\n", usage);
-#endif
-	if (*encrypt_flag == -1)
-		*encrypt_flag = 1;
-	return;
 }

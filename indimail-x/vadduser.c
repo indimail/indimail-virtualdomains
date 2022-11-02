@@ -1,6 +1,6 @@
 /*
  * $Log: vadduser.c,v $
- * Revision 1.9  2022-11-02 14:21:52+05:30  Cprogrammer
+ * Revision 1.9  2022-11-02 20:03:48+05:30  Cprogrammer
  * added feature to add scram password during user addition
  *
  * Revision 1.8  2022-10-20 11:58:27+05:30  Cprogrammer
@@ -86,7 +86,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadduser.c,v 1.9 2022-11-02 14:21:52+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadduser.c,v 1.9 2022-11-02 20:03:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -115,7 +115,7 @@ static char    *usage =
 	"  -b              - Balance distribution across filesystems\n"
 	"  -B basepath     - Specify the base directory for user's home directory\n"
 	"  -d              - Create the homedir (ignored if -h option is given)\n"
-	"  -r [len]        - generate a len (default 8) char random password\n"
+	"  -r len          - generate a random password of length=len\n"
 	"  -e password     - set the encrypted password field\n"
 	"  -h hash         - use one of DES, MD5, SHA256, SHA512, hash method\n"
 #ifdef HAVE_GSASL
@@ -168,17 +168,17 @@ main(int argc, char **argv)
 
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	if (get_options(argc, argv, &base_path, &random, &users_per_level,
-				&encrypt_flag, &docram, &scram, &iter, &b64salt))
+	if (get_options(argc, argv, &base_path, &users_per_level,
+				&encrypt_flag, &random, &docram, &scram, &iter, &b64salt))
 		return (1);
 #else
-	if (get_options(argc, argv, &base_path, &random, &users_per_level,
-				&encrypt_flag, 0, 0, 0, 0))
+	if (get_options(argc, argv, &base_path, &users_per_level,
+				&encrypt_flag, &random, 0, 0, 0, 0))
 		return (1);
 #endif
 #else
-	if (get_options(argc, argv, &base_path, &random, &users_per_level,
-				&encrypt_flag, 0, 0, 0, 0))
+	if (get_options(argc, argv, &base_path, &users_per_level,
+				&encrypt_flag, &random, 0, 0, 0, 0))
 		return (1);
 #endif
 	/*- parse the email address into user and domain */
