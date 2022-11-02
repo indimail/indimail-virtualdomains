@@ -1,6 +1,6 @@
 /*
  * $Log: vgroup.c,v $
- * Revision 1.5  2022-11-02 14:21:56+05:30  Cprogrammer
+ * Revision 1.5  2022-11-02 15:54:41+05:30  Cprogrammer
  * added feature to add scram password during user addition
  *
  * Revision 1.4  2022-08-05 22:44:59+05:30  Cprogrammer
@@ -22,7 +22,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 1.5 2022-11-02 14:21:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 1.5 2022-11-02 15:54:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -367,10 +367,24 @@ main(int argc, char **argv)
 #endif
 #endif
 
-	if (get_options(argc, argv, &option, &group, &gecos, &member, &old_member,
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	i = get_options(argc, argv, &option, &group, &gecos, &member, &old_member,
 			&passwd, &hostid, &mdahost, &Quota, &ignore, &encrypt_flag, &docram,
-			&scram, &iter, &b64salt, &random))
-		return (1);
+			&scram, &iter, &b64salt, &random);
+#else
+	i = get_options(argc, argv, &option, &group, &gecos, &member, &old_member,
+			&passwd, &hostid, &mdahost, &Quota, &ignore, &encrypt_flag, 0,
+			0, 0, 0, &random);
+#endif
+#else
+	i = get_options(argc, argv, &option, &group, &gecos, &member, &old_member,
+			&passwd, &hostid, &mdahost, &Quota, &ignore, &encrypt_flag, 0,
+			0, 0, 0, &random);
+#endif
+	if (i)
+		return (i);
+
 	parse_email(group, &User, &Domain);
 	if (option != ADDNEW_GROUP) {
 #ifdef CLUSTERED_SITE

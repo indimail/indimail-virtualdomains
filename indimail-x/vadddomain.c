@@ -1,6 +1,6 @@
 /*
  * $Log: vadddomain.c,v $
- * Revision 1.10  2022-11-02 14:44:52+05:30  Cprogrammer
+ * Revision 1.10  2022-11-02 15:54:37+05:30  Cprogrammer
  * added feature to add scram password during user addition
  *
  * Revision 1.10  2022-10-20 11:58:24+05:30  Cprogrammer
@@ -105,7 +105,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.10 2022-11-02 14:44:52+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.10 2022-11-02 15:54:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -210,9 +210,21 @@ main(int argc, char **argv)
 	dbport = -1;
 	distributed = -1;
 #endif
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	get_options(argc, argv, &base_path, &dir_t, &passwd, &domain, &user,
 		&quota, &bounceEmail, &ipaddr, &database, &sqlserver, &dbuser, &dbpass,
 		&encrypt_flag, &random, &docram, &scram, &iter, &b64salt);
+#else
+	get_options(argc, argv, &base_path, &dir_t, &passwd, &domain, &user,
+		&quota, &bounceEmail, &ipaddr, &database, &sqlserver, &dbuser, &dbpass,
+		&encrypt_flag, &random, 0, 0, 0, 0);
+#endif
+#else
+	get_options(argc, argv, &base_path, &dir_t, &passwd, &domain, &user,
+		&quota, &bounceEmail, &ipaddr, &database, &sqlserver, &dbuser, &dbpass,
+		&encrypt_flag, &random, 0, 0, 0, 0);
+#endif
 	if (!isvalid_domain(domain))
 		strerr_die3x(100, WARN, "Invalid domain ", domain);
 	if (!use_etrn && !passwd) {
