@@ -46,11 +46,11 @@ This options disables the internal encryption routine which encrypts the
 password provided on the command line. This option sets the encrypted
 password field exactly as given on the command line without any encryption.
 It expects you to give a standard encrypted password or you can use
-this to set plaintext/salted password for CRAM, SCRAM authentication
-methods.
+this to set plaintext/salted password for CRAM authentication.
 .TP
-\fB\-r\fR
-Generates Random Password. Need not give password on command line.
+\fB\-r\fR \fIlen\fR
+Generates Random Password of length \fIlen\fR. Need not give password on
+command line.
 .TP
 \fB\-h\fR \fIhash\fR
 Specifiy hash which is one of DES, MD5, SHA-256, SHA-512,

@@ -7,7 +7,7 @@ vadduser \- Add a new user to a virtual domain
 [
 .I options
 ]
-.I email_address
+.I address
 .I password
 
 .SH DESCRIPTION
@@ -103,11 +103,11 @@ This options disables the internal encryption routine which encrypts the
 password provided on the command line. This option sets the encrypted
 password field exactly as given on the command line without any encryption.
 It expects you to give a standard encrypted password or you can use
-this to set plaintext/salted password for CRAM, SCRAM authentication
-methods.
+this to set plaintext/salted password for CRAM authentication.
 .TP
 \fB\-r\fR
-Generates Random Password. Need not give password on command line.
+Generates Random Password of length \fIlen\fR. Need not give password on
+command line.
 .TP
 \fB\-h\fR \fIhash\fR
 Specifiy hash which is one of DES, MD5, SHA-256, SHA-512,
@@ -194,7 +194,7 @@ For a clustered domain, this option can be used to create the user on a specific
 For a clustered domain, this option can be used to create the user on a specific cluster
 having Mail Delivery Host as \fImdahost\fR.
 .TP
-\fIemail_address\fR
+\fIaddress\fR
 The new email address of the user. Requires the domain name as well as the user name. For
 example: user@domain.com. If the domain name is not specified the user is added to the
 default domain. 
@@ -210,8 +210,8 @@ to the  active table indimail.
 
 .SH POST HANDLE
 If the environment variable POST_HANDLE is set, \fBvadduser\fR executes the program defined by
-the POST_HANDLE environment variable, passing \fIemail_address\fR as a parameter. If POST_HANDLE
-is not defined, the program/script LIBEXECDIR/vadduser will be executed with \fIemail_address\fR
+the POST_HANDLE environment variable, passing \fIaddress\fR as a parameter. If POST_HANDLE
+is not defined, the program/script LIBEXECDIR/vadduser will be executed with \fIaddress\fR
 as a parameter.
 
 .SH RETURN VALUE
