@@ -1,5 +1,8 @@
 /*
  * $Log: iadduser.c,v $
+ * Revision 1.6  2022-11-02 12:43:44+05:30  Cprogrammer
+ * added feature to add scram password during user addition
+ *
  * Revision 1.5  2022-10-27 17:06:18+05:30  Cprogrammer
  * add to hostcntrl only if domain is distrbuted
  *
@@ -62,7 +65,7 @@
 #define ALLOWCHARS              " .!#$%&'*+-/=?^_`{|}~\""
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iadduser.c,v 1.5 2022-10-27 17:06:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iadduser.c,v 1.6 2022-11-02 12:43:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -108,7 +111,8 @@ die_nomem()
  */
 int
 iadduser(char *username, char *domain, char *mdahost, char *password,
-		 char *gecos, char *quota, int max_users_per_level, int actFlag, int encrypt_flag)
+		 char *gecos, char *quota, int max_users_per_level, int actFlag,
+		 int encrypt_flag, char *scram_passwd)
 {
 	static stralloc Dir = {0}, Crypted = {0}, tmpbuf = {0}, line = {0};
 	char            estr[2], inbuf[512];
@@ -225,7 +229,8 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 		dir = (char *) 0;
 	if (domain && *domain) {
 		mkpasswd(password, &Crypted, encrypt_flag);
-		ptr = sql_adduser(username, domain, Crypted.s, gecos, dir, quota, uid_flag, actFlag);
+		ptr = sql_adduser(username, domain, Crypted.s, gecos, dir, quota,
+				uid_flag, actFlag, scram_passwd);
 		if (!ptr || !*ptr)
 			return (-1);
 #ifdef CLUSTERED_SITE

@@ -1,5 +1,8 @@
 /*
  * $Log: vgroup.c,v $
+ * Revision 1.5  2022-11-02 14:21:56+05:30  Cprogrammer
+ * added feature to add scram password during user addition
+ *
  * Revision 1.4  2022-08-05 22:44:59+05:30  Cprogrammer
  * removed apop argument to iadduser()
  * added encrypt flag to iadduser()
@@ -19,7 +22,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 1.4 2022-08-05 22:44:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 1.5 2022-11-02 14:21:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -33,6 +36,14 @@ static char     sccsid[] = "$Id: vgroup.c,v 1.4 2022-08-05 22:44:59+05:30 Cprogr
 #include <strerr.h>
 #include <str.h>
 #include <fmt.h>
+#include <scan.h>
+#include <env.h>
+#include <makesalt.h>
+#include <hashmethods.h>
+#endif
+#ifdef HAVE_GSASL_H
+#include <gsasl.h>
+#include "gsasl_mkpasswd.h"
 #endif
 #include "parse_email.h"
 #include "sqlOpen_user.h"
@@ -49,6 +60,7 @@ static char     sccsid[] = "$Id: vgroup.c,v 1.4 2022-08-05 22:44:59+05:30 Cprogr
 #include "valias_insert.h"
 #include "valias_delete.h"
 #include "valias_update.h"
+#include "common.h"
 #include "variables.h"
 
 #define ADDNEW_GROUP  0
@@ -61,35 +73,79 @@ static char     sccsid[] = "$Id: vgroup.c,v 1.4 2022-08-05 22:44:59+05:30 Cprogr
 static char    *usage =
 	"usage1: vgroup -a [-cqvVhmI] groupAddress [password]\n"
 	"usage2: vgroup    [-iduovV]  groupAddress\n\n"
-	"options: -V (print version number)\n"
-	"         -v (verbose)\n"
-	"         -a (Add new group)\n"
-#ifdef CLUSTERED_SITE
-	"         -h hostid   (host on which the group needs to be created - specify hostid)\n"
-	"         -m mdahost  (host on which the group needs to be created - specify mdahost)\n"
-	"         -I Ignore requirement of of groupAddress to be local\n"
+	"options\n"
+	"  -V                - print version number\n"
+	"  -v                - verbose\n"
+	"  -a                - add new group\n"
+	"  -r [len]        - generate a len (default 8) char random password\n"
+	"  -e password     - set the encrypted password field\n"
+	"  -h hash         - use one of DES, MD5, SHA256, SHA512, hash method\n"
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	"  -C              - store clear txt and scram hex salted password in database\n"
+	"                    This allows CRAM methods to be used\n"
+	"  -m SCRAM method - use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method\n"
+	"  -S salt         - use a fixed base64 encoded salt for generating SCRAM password\n"
+	"                  - if salt is not specified, it will be generated\n"
+	"  -I iter_count   - use iter_count instead of 4096 for generating SCRAM password\n"
 #endif
-	"         -c comment (sets the gecos comment field)\n"
-	"         -q quota_in_bytes (sets the users quota)\n"
-	"         -i member_email_address (insert member to group)\n"
-	"         -d member_email_address (delete member from group)\n"
-	"         -u newMemberEmail -o oldMemberEmail (update member with a new address)"
+#endif
+#ifdef CLUSTERED_SITE
+	"  -H hostid         - host on which the group needs to be created - specify hostid\n"
+	"  -M mdahost        - host on which the group needs to be created - specify mdahost\n"
+	"  -n                - Ignore requirement of of groupAddress to be local\n"
+#endif
+	"  -c comment        - sets the gecos comment field\n"
+	"  -q quota_in_bytes - sets the users quota\n"
+	"  -i member_address - insert member to group\n"
+	"  -d member_address - delete member from group\n"
+	"  -u new -o old     - update old member with a new address)"
 	;
 
 static int
-get_options(int argc, char **argv, int *option, char **group, char **gecos, char **member, char **old_member, char **passwd,
-	char **hostid, char **mdahost, char **quota, int *ignore)
+get_options(int argc, char **argv, int *option, char **group, char **gecos,
+	char **member, char **old_member, char **passwd,
+	char **hostid, char **mdahost, char **quota, int *ignore,
+	int *encrypt_flag, int *docram, int *scram, int *iter, char **salt, int *random)
 {
-	int             c;
+	int             c, i;
+	char            optstr[27], strnum[FMT_ULONG];
 
 	*group = *gecos = *member = *old_member = *passwd = *hostid = *mdahost = *quota = 0;
 	*option = -1;
 	*ignore = 0;
-	while ((c = getopt(argc, argv, "vaIc:i:d:o:u:h:m:q:")) != opteof) {
+	*encrypt_flag = -1;
+	if (salt)
+		*salt = 0;
+	if (iter)
+		*iter = 4096;
+	if (scram)
+		*scram = 0;
+	if (docram)
+		*docram = 0;
+	/*- make sure optstr has enough size to hold all options + 1 */
+	i = 0;
+	i += fmt_strn(optstr + i, "vanc:i:d:o:u:q:", 15);
+#ifdef CLUSTERED_SITE
+	i += fmt_strn(optstr + i, "H:M:", 4);
+#endif
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	i += fmt_strn(optstr + i, "Cm:S:I:", 7);
+#endif
+#endif
+	if ((i + 1) > sizeof(optstr))
+		strerr_die2x(100, FATAL, "allocated space for getopt string not enough");
+	optstr[i] = 0;
+
+	while ((c = getopt(argc, argv, optstr)) != opteof) {
 		switch (c)
 		{
 		case 'v':
 			verbose = 1;
+			break;
+		case 'r':
+			scan_uint(optarg, (unsigned int *) random);
 			break;
 		case 'a':
 			switch (*option)
@@ -103,7 +159,7 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos, char
 			}
 			*option = ADDNEW_GROUP;
 			break;
-		case 'I':
+		case 'n':
 			*ignore = 1;
 			break;
 		case 'c':
@@ -158,12 +214,80 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos, char
 			}
 			*option = UPDATE_MEMBER;
 			*old_member = optarg;
-			break;
-#ifdef CLUSTERED_SITE
 		case 'h':
-			*hostid = optarg;
+			if (!str_diffn(optarg, "DES", 3))
+				strnum[fmt_int(strnum, DES_HASH)] = 0;
+			else
+			if (!str_diffn(optarg, "MD5", 3))
+				strnum[fmt_int(strnum, MD5_HASH)] = 0;
+			else
+			if (!str_diffn(optarg, "SHA-256", 7))
+				strnum[fmt_int(strnum, SHA256_HASH)] = 0;
+			else
+			if (!str_diffn(optarg, "SHA-512", 7))
+				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
+			else {
+				errout("vgroup", WARN);
+				errout("vgroup", optarg);
+				errout("vgroup", ": wrong hash method\n");
+				errout("vgroup", "Supported HASH Methods: DES MD5 SHA-256 SHA-512\n");
+				errflush("vgroup");
+				strerr_die2x(100, WARN, usage);
+			}
+			if (!env_put2("PASSWORD_HASH", strnum))
+				strerr_die1x(111, "out of memory");
+			*encrypt_flag = 1;
+			break;
+		case 'e':
+			/*- ignore encrypt flag option if -h option is provided */
+			if (*encrypt_flag == -1)
+				*encrypt_flag = 0;
+			break;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+		case 'C':
+			if (docram)
+				*docram = 1;
 			break;
 		case 'm':
+			if (!scram)
+				break;
+			if (!str_diffn(optarg, "SCRAM-SHA-1", 11))
+				*scram = 1;
+			else
+			if (!str_diffn(optarg, "SCRAM-SHA-256", 13))
+				*scram = 2;
+			else {
+				errout("vgroup", WARN);
+				errout("vgroup", optarg);
+				errout("vgroup", ": wrong SCRAM method\n");
+				errout("vgroup", "Supported SCRAM Methods: SCRAM-SHA-1 SCRAM-SHA-256\n");
+				errflush("vgroup");
+				strerr_die2x(100, WARN, usage);
+			}
+			break;
+		case 'S':
+			if (!salt)
+				break;
+			i = str_chr(optarg, ',');
+			if (optarg[i]) {
+				strerr_die3x(100, WARN, optarg, ": salt cannot have a comma character");
+			}
+			*salt = optarg;
+			break;
+		case 'I':
+			if (!iter)
+				break;
+			scan_int(optarg, iter);
+			break;
+#endif
+#endif
+			break;
+#ifdef CLUSTERED_SITE
+		case 'H':
+			*hostid = optarg;
+			break;
+		case 'M':
 			*mdahost = optarg;
 			break;
 #endif
@@ -188,8 +312,12 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos, char
 		strerr_warn2(WARN, usage, 0);
 		return (1);
 	}
-	if (!*passwd)
-		*passwd = vgetpasswd(*gecos ? *gecos : *group);
+	if (!*passwd) {
+		if (*random)
+			*passwd = genpass(*random);
+		else
+			*passwd = vgetpasswd(*gecos ? *gecos : *group);
+	}
 	return (0);
 }
 
@@ -201,7 +329,8 @@ die_nomem()
 }
 
 int
-addGroup(char *user, char *domain, char *mdahost, char *gecos, char *passwd, char *quota)
+addGroup(char *user, char *domain, char *mdahost, char *gecos,
+		char *passwd, char *quota, int encrypt_flag, char *scram)
 {
 	struct passwd  *pw;
 	static stralloc tmpbuf = {0};
@@ -211,7 +340,7 @@ addGroup(char *user, char *domain, char *mdahost, char *gecos, char *passwd, cha
 			!stralloc_cats(&tmpbuf, gecos ? gecos : user) ||
 			!stralloc_0(&tmpbuf))
 		die_nomem();
-	if ((i = iadduser(user, domain, mdahost, passwd, tmpbuf.s, quota, 0, 1, 1)) < 0)
+	if ((i = iadduser(user, domain, mdahost, passwd, tmpbuf.s, quota, 0, 1, encrypt_flag, scram)) < 0)
 		return (i);
 	if (!(pw = sql_getpw(user, domain))) {
 		strerr_warn4(user, "@", domain, ": sql_getpw failed: ", &strerr_sys);
@@ -226,16 +355,21 @@ main(int argc, char **argv)
 	static stralloc User = {0}, Domain = {0}, alias_line = {0}, old_alias = {0},
 					quotaVal = {0};
 	char           *group, *gecos, *member, *old_member, *passwd, *hostid, 
-				   *mdahost, *Quota, *real_domain;
+				   *mdahost, *Quota, *real_domain, *ptr;
 	char            strnum[FMT_ULONG];
 	mdir_t          q;
-#ifdef CLUSTERED_SITE
-	char           *ptr;
+	int             i, option, ignore = 0, ret = -1, encrypt_flag, random = 0;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	int             scram, iter, docram;
+	static stralloc result = {0};
+	char           *b64salt;
 #endif
-	int             i, option, ignore = 0, ret = -1;
+#endif
 
-	if (get_options(argc, argv, &option, &group, &gecos, &member, &old_member, &passwd,
-		&hostid, &mdahost, &Quota, &ignore))
+	if (get_options(argc, argv, &option, &group, &gecos, &member, &old_member,
+			&passwd, &hostid, &mdahost, &Quota, &ignore, &encrypt_flag, &docram,
+			&scram, &iter, &b64salt, &random))
 		return (1);
 	parse_email(group, &User, &Domain);
 	if (option != ADDNEW_GROUP) {
@@ -301,7 +435,34 @@ main(int argc, char **argv)
 					strmsg_out5("Connected to MDAhost ", mdahost, " SqlServer ", ptr, "\n");
 			} 
 #endif
-			ret = addGroup(User.s, real_domain, mdahost, gecos, passwd, quotaVal.s);
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+			switch (scram)
+			{
+			case 1: /*- SCRAM-SHA-1 */
+				if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-1", iter, b64salt, docram, passwd, &result)) != NO_ERR)
+					strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
+				break;
+			case 2: /*- SCRAM-SHA-256 */
+				if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-256", iter, b64salt, docram, passwd, &result)) != NO_ERR)
+					strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
+				break;
+			/*- more cases will get below when devils come up with a new RFC */
+			}
+			ptr = scram ? result.s : 0;
+#else
+			ptr = 0;
+#endif
+#else
+			ptr = 0;
+#endif
+			ret = addGroup(User.s, real_domain, mdahost, gecos, passwd, quotaVal.s, encrypt_flag, ptr);
+			if (!ret && random) {
+				out("vgroup", "Password is ");
+				out("vgroup", passwd);
+				out("vgroup", "\n");
+				flush("vgroup");
+			}
 			break;
 		case INSERT_MEMBER:
 			if (*member == '.') {

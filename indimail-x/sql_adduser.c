@@ -1,5 +1,8 @@
 /*
  * $Log: sql_adduser.c,v $
+ * Revision 1.5  2022-11-02 12:44:30+05:30  Cprogrammer
+ * added feature to add scram password during user addition
+ *
  * Revision 1.4  2022-08-05 22:42:38+05:30  Cprogrammer
  * renamed apop argument to uid_flag
  *
@@ -41,7 +44,7 @@
 #include "getpeer.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_adduser.c,v 1.4 2022-08-05 22:42:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_adduser.c,v 1.5 2022-11-02 12:44:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -52,7 +55,8 @@ die_nomem()
 }
 
 char           *
-sql_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, char *Quota, int uid_flag, int actFlag)
+sql_adduser(char *user, char *domain, char *pass, char *gecos, char *dir,
+		char *Quota, int uid_flag, int actFlag, char *scram)
 {
 	static stralloc dirbuf = {0}, quota = {0}, dom_dir = {0}, SqlBuf = {0};
 	char           *domstr, *ptr;
@@ -121,13 +125,22 @@ sql_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, char *
 			domstr = MYSQL_LARGE_USERS_TABLE;
 		if (!stralloc_copyb(&SqlBuf, "insert low_priority into  ", 26) ||
 				!stralloc_cats(&SqlBuf, domstr) ||
-				!stralloc_catb(&SqlBuf, " (pw_name, pw_passwd, pw_uid, pw_gid, pw_gecos, pw_dir, pw_shell)", 65) ||
+				!stralloc_catb(&SqlBuf, scram ? 
+					" (pw_name, pw_passwd, scram, pw_uid, pw_gid, pw_gecos, pw_dir, pw_shell)" :
+					" (pw_name, pw_passwd, pw_uid, pw_gid, pw_gecos, pw_dir, pw_shell)", scram ? 72 : 65) ||
 				!stralloc_catb(&SqlBuf, " values (\"", 10) ||
 				!stralloc_cats(&SqlBuf, user) ||
 				!stralloc_catb(&SqlBuf, "\", \"", 4) ||
 				!stralloc_cats(&SqlBuf, pass) ||
-				!stralloc_catb(&SqlBuf, "\", ", 3) ||
-				!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, uid_flag)) ||
+				!stralloc_catb(&SqlBuf, "\", ", 3))
+			die_nomem();
+		if (scram) {
+			if (!stralloc_append(&SqlBuf, "\"") ||
+					!stralloc_cats(&SqlBuf, scram) ||
+					!stralloc_catb(&SqlBuf, "\", ", 3))
+			die_nomem();
+		}
+		if (!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, uid_flag)) ||
 				!stralloc_catb(&SqlBuf, ", 0, \"", 6) ||
 				!stralloc_cats(&SqlBuf, gecos) ||
 				!stralloc_catb(&SqlBuf, "\", \"", 4) ||
@@ -144,15 +157,25 @@ sql_adduser(char *user, char *domain, char *pass, char *gecos, char *dir, char *
 		}
 		if (!stralloc_copyb(&SqlBuf, "insert low_priority into  ", 26) ||
 				!stralloc_cats(&SqlBuf, rfc_ids[i] || actFlag ? default_table : inactive_table) ||
-				!stralloc_catb(&SqlBuf, " (pw_name, pw_domain, pw_passwd, pw_uid, pw_gid, pw_gecos, pw_dir, pw_shell)", 76) ||
+				!stralloc_catb(&SqlBuf, scram ? 
+					" (pw_name, pw_domain, pw_passwd, scram, pw_uid, pw_gid, pw_gecos, pw_dir, pw_shell)" :
+					" (pw_name, pw_domain, pw_passwd, pw_uid, pw_gid, pw_gecos, pw_dir, pw_shell)",
+					scram ? 83 : 76) ||
 				!stralloc_catb(&SqlBuf, " values (\"", 10) ||
 				!stralloc_cats(&SqlBuf, user) ||
 				!stralloc_catb(&SqlBuf, "\", \"", 4) ||
 				!stralloc_cats(&SqlBuf, domain) ||
 				!stralloc_catb(&SqlBuf, "\", \"", 4) ||
 				!stralloc_cats(&SqlBuf, pass) ||
-				!stralloc_catb(&SqlBuf, "\", ", 3) ||
-				!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, uid_flag)) ||
+				!stralloc_catb(&SqlBuf, "\", ", 3))
+			die_nomem();
+		if (scram) {
+			if (!stralloc_append(&SqlBuf, "\"") ||
+					!stralloc_cats(&SqlBuf, scram) ||
+					!stralloc_catb(&SqlBuf, "\", ", 3))
+			die_nomem();
+		}
+		if (!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, uid_flag)) ||
 				!stralloc_catb(&SqlBuf, ", 0, \"", 6) ||
 				!stralloc_cats(&SqlBuf, gecos) ||
 				!stralloc_catb(&SqlBuf, "\", \"", 4) ||

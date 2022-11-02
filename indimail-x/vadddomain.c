@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.10  2022-11-02 14:44:52+05:30  Cprogrammer
+ * added feature to add scram password during user addition
+ *
  * Revision 1.10  2022-10-20 11:58:24+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -67,6 +70,12 @@
 #include <str.h>
 #include <check_domain.h>
 #include <getEnvConfig.h>
+#include <makesalt.h>
+#include <hashmethods.h>
+#endif
+#ifdef HAVE_GSASL_H
+#include <gsasl.h>
+#include "gsasl_mkpasswd.h"
 #endif
 #include "variables.h"
 #include "valias_insert.h"
@@ -93,9 +102,10 @@
 #include "vhostid_insert.h"
 #include "dbinfoAdd.h"
 #include "get_indimailuidgid.h"
+#include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.10 2022-10-20 11:58:24+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.10 2022-11-02 14:44:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -104,44 +114,60 @@ static char     rcsid[] = "$Id: vadddomain.c,v 1.10 2022-10-20 11:58:24+05:30 Cp
 #ifdef CLUSTERED_SITE
 int             dbport, use_ssl = 1, distributed;
 #endif
-uid_t           Uid;
-gid_t           Gid;
-stralloc        dirbuf = { 0 };
-stralloc        AliasLine = { 0 };
-stralloc        tmpbuf = { 0 };
+static uid_t    Uid;
+static gid_t    Gid;
+static stralloc dirbuf = { 0 };
+static stralloc AliasLine = { 0 };
+static stralloc tmpbuf = { 0 };
 static int      chk_rcpt, users_per_level = 0;
 
 static char    *usage =
 	"usage: vaddomain [options] virtual_domain [postmaster password]\n"
-	"options: -V print version number\n"
-	"         -v verbose\n"
-	"         -q quota_in_bytes (sets the quota for postmaster account)\n"
-	"         -l level (users per level)\n"
-	"         -C (Do recipient check for this domain)\n"
-	"         -e [email_address|maildir] (forwards all non matching user to this address [*])\n"
-	"         -u user (sets the uid/gid based on a user in /etc/passwd)\n"
-	"         -B basepath Specify the base directory for postmaster's home directory\n"
-	"         -d dir (sets the dir to use for this domain)\n"
-	"         -i uid (sets the uid to use for this domain)\n"
-	"         -g gid (sets the gid to use for this domain)\n"
-	"         -f Sets the Domain with VFILTER capability\n"
-	"         -t Sets the Domain for ETRN/ATRN\n"
-	"         -T ipaddr Sets the Domain for AUTOTURN from IP ipaddr\n"
-	"         -O optimize adding, for bulk adds set this for all\n"
-	"            except the last one"
+	"options\n"
+	"  -V                         - print version number\n"
+	"  -v                         - verbose\n"
+	"  -q quota_in_bytes          - sets the quota for postmaster account\n"
+	"  -l level                   - users per level\n"
+	"  -R                         - Do recipient check for this domain\n"
+	"  -E [email_address|maildir] - forwards all non matching user to this address [*]\n"
+	"  -u user                    - sets the uid/gid based on a user in /etc/passwd\n"
+	"  -B basepath                - specify the base directory for postmaster's home directory\n"
+	"  -d dir                     - sets the dir to use for this domain\n"
+	"  -i uid                     - sets the uid to use for this domain\n"
+	"  -g gid                     - sets the gid to use for this domain\n"
+	"  -f                         - sets the Domain with VFILTER capability\n"
+	"  -t                         - sets the Domain for ETRN/ATRN\n"
+	"  -T ipaddr                  - sets the Domain for AUTOTURN from IP ipaddr\n"
+	"  -O                         - optimize adding, for bulk adds set this for all\n"
+	"                               except the last one\n"
+	"  -r [len]                   - generate a len (default 8) char random password\n"
+	"  -e password                - set the encrypted password field\n"
+	"  -h hash                    - use one of DES, MD5, SHA256, SHA512, hash method\n"
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	"  -C                         - store clear txt and scram hex salted password in database\n"
+	"                               This allows CRAM methods to be used\n"
+	"  -m SCRAM method            - use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method\n"
+	"  -S salt                    - use a fixed base64 encoded salt for generating SCRAM password\n"
+	"                             - if salt is not specified, it will be generated\n"
+	"  -I iter_count              - use iter_count instead of 4096 for generating SCRAM password\n"
+#endif
+#endif
 #ifdef CLUSTERED_SITE
-	"\n"
-	"         -D database (adds a clustered domain, extra options apply as below)\n"
-	"         -S SqlServer host/IP\n"
-	"         -U Database User\n"
-	"         -P Database Password\n"
-	"         -p Database Port\n"
-	"         -c Add domain as a clustered domain"
+	"  -D database                - database name. adds a clustered domain, extra\n"
+	"                               options apply as below\n"
+	"  -H host                    - sqlServer host/IP\n"
+	"  -U user                    - database User\n"
+	"  -P pass                    - database Password\n"
+	"  -p port                    - database Port\n"
+	"  -c                         - add domain as a clustered domain"
 #endif
 	;
 
-void            get_options(int argc, char **argv, char **, char **, char **, char **,
-					char **, char **, char **, char **, char **, char **, char **, char **);
+void            get_options(int argc, char **argv, char **, char **,
+					char **, char **, char **, char **, char **, char **,
+					char **, char **, char **, char **, int *, int *,
+					int *, int *, int *, char **);
 static void
 die_nomem(char *prefix)
 {
@@ -152,7 +178,7 @@ die_nomem(char *prefix)
 int
 main(int argc, char **argv)
 {
-	int             err, fd, i;
+	int             err, fd, i, encrypt_flag, random;
 	uid_t           uid;
 	gid_t           gid;
 	extern int      create_flag;
@@ -169,6 +195,13 @@ main(int argc, char **argv)
 	char           *hostid, *localIP;
 	int             is_dist, user_present, total;
 #endif
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	int             scram, iter, docram;
+	static stralloc result = {0};
+	char           *b64salt;
+#endif
+#endif
 
 	base_path = dir_t = passwd = domain = user = quota = bounceEmail = ipaddr = (char *) 0;
 #ifdef CLUSTERED_SITE
@@ -177,12 +210,17 @@ main(int argc, char **argv)
 	dbport = -1;
 	distributed = -1;
 #endif
-	get_options(argc, argv, &base_path, &dir_t, &passwd, &domain, &user, &quota, 
-		&bounceEmail, &ipaddr, &database, &sqlserver, &dbuser, &dbpass);
+	get_options(argc, argv, &base_path, &dir_t, &passwd, &domain, &user,
+		&quota, &bounceEmail, &ipaddr, &database, &sqlserver, &dbuser, &dbpass,
+		&encrypt_flag, &random, &docram, &scram, &iter, &b64salt);
 	if (!isvalid_domain(domain))
 		strerr_die3x(100, WARN, "Invalid domain ", domain);
-	if (!use_etrn && !passwd)
-		passwd = vgetpasswd("postmaster");
+	if (!use_etrn && !passwd) {
+		if (random)
+			passwd = genpass(random);
+		else
+			passwd = vgetpasswd("postmaster");
+	}
 	if (indimailuid == -1 || indimailgid == -1)
 		get_indimailuidgid(&indimailuid, &indimailgid);
 	uid = getuid();
@@ -408,13 +446,40 @@ main(int argc, char **argv)
 		}
 	}
 #endif
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	switch (scram)
+	{
+	case 1: /*- SCRAM-SHA-1 */
+		if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-1", iter, b64salt, docram, passwd, &result)) != NO_ERR)
+			strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
+		break;
+	case 2: /*- SCRAM-SHA-256 */
+		if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-256", iter, b64salt, docram, passwd, &result)) != NO_ERR)
+			strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
+		break;
+	/*- more cases will get below when devils come up with a new RFC */
+	}
+	ptr = scram ? result.s : 0;
+#else
+	ptr = 0;
+#endif
+#else
+	ptr = 0;
+#endif
 	if ((err = iadduser("postmaster", domain, 0, passwd, "Postmaster", 0, users_per_level,
-		1, 1)) != VA_SUCCESS) {
+		1, encrypt_flag, ptr)) != VA_SUCCESS) {
 		if (errno != EEXIST) {
 			deldomain(domain);
 			iclose();
 			_exit(111);
 		}
+	}
+	if (random) {
+		out("vadddomain", "Password is ");
+		out("vadddomain", passwd);
+		out("vadddomain", "\n");
+		flush("vadddomain");
 	}
 	/* set quota for postmaster */
 	if (quota)
@@ -456,29 +521,45 @@ main(int argc, char **argv)
 void
 get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd,
 	char **domain, char **user, char **quota, char **bounceEmail, char **ipaddr,
-	char **database, char **sqlserver, char **dbuser, char **dbpass)
+	char **database, char **sqlserver, char **dbuser, char **dbpass,
+	int *encrypt_flag, int *random, int *docram, int *scram, int *iter, char **salt)
 {
-	int             c;
+	int             c, i;
 	struct passwd  *mypw;
-	char            optbuf[40];
-	char           *s;
+	char            optstr[51], strnum[FMT_ULONG];
 
 	if (indimailuid == -1 || indimailgid == -1)
 		get_indimailuidgid(&indimailuid, &indimailgid);
 	Uid = indimailuid;
 	Gid = indimailgid;
+	*encrypt_flag = -1;
+	*random = 0;
+	if (salt)
+		*salt = 0;
+	if (iter)
+		*iter = 4096;
+	if (scram)
+		*scram = 0;
+	if (docram)
+		*docram = 0;
+	/*- make sure optstr has enough size to hold all options + 1 */
+	i = 0;
+	i += fmt_strn(optstr + i, "ateh:T:q:l:bB:E:u:vRi:g:d:Or:", 29);
 #ifdef CLUSTERED_SITE
-	s = optbuf;
-	s += fmt_strn(s, "atT:q:l:bB:e:u:vCci:g:d:D:S:U:P:s:p:O", 35);
-#else
-	s = optbuf;
-	s += fmt_strn(s, "atT:q:l:bB:e:u:vCi:g:d:O", 24);
+	i += fmt_strn(optstr + i, "D:H:U:P:s:p:c", 13);
 #endif
 #ifdef VFILTER
-	s += fmt_strn(s, "f", 1);
+	i += fmt_strn(optstr + i, "f", 1);
 #endif
-	*s++ = 0;
-	while ((c = getopt(argc, argv, optbuf)) != opteof) {
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	i += fmt_strn(optstr + i, "Cm:S:I:", 7);
+#endif
+#endif
+	if ((i + 1) > sizeof(optstr))
+		strerr_die2x(100, FATAL, "allocated space for getopt string not enough");
+	optstr[i] = 0;
+	while ((c = getopt(argc, argv, optstr)) != opteof) {
 		switch (c)
 		{
 		case 'B':
@@ -493,9 +574,80 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 		case 'd':
 			*dir_t = optarg;
 			break;
-		case 'C':
+		case 'R':
 			chk_rcpt = 1;
 			break;
+		case 'r':
+			scan_uint(optarg, (unsigned int *) random);
+			break;
+		case 'h':
+			if (!str_diffn(optarg, "DES", 3))
+				strnum[fmt_int(strnum, DES_HASH)] = 0;
+			else
+			if (!str_diffn(optarg, "MD5", 3))
+				strnum[fmt_int(strnum, MD5_HASH)] = 0;
+			else
+			if (!str_diffn(optarg, "SHA-256", 7))
+				strnum[fmt_int(strnum, SHA256_HASH)] = 0;
+			else
+			if (!str_diffn(optarg, "SHA-512", 7))
+				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
+			else {
+				errout("vadddomain", WARN);
+				errout("vadddomain", optarg);
+				errout("vadddomain", ": wrong hash method\n");
+				errout("vadddomain", "Supported HASH Methods: DES MD5 SHA-256 SHA-512\n");
+				errflush("vadddomain");
+				strerr_die2x(100, WARN, usage);
+			}
+			if (!env_put2("PASSWORD_HASH", strnum))
+				strerr_die1x(111, "out of memory");
+			*encrypt_flag = 1;
+			break;
+		case 'e':
+			/*- ignore encrypt flag option if -h option is provided */
+			if (*encrypt_flag == -1)
+				*encrypt_flag = 0;
+			break;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+		case 'C':
+			if (docram)
+				*docram = 1;
+			break;
+		case 'm':
+			if (!scram)
+				break;
+			if (!str_diffn(optarg, "SCRAM-SHA-1", 11))
+				*scram = 1;
+			else
+			if (!str_diffn(optarg, "SCRAM-SHA-256", 13))
+				*scram = 2;
+			else {
+				errout("vadduser", WARN);
+				errout("vadduser", optarg);
+				errout("vadduser", ": wrong SCRAM method\n");
+				errout("vadduser", "Supported SCRAM Methods: SCRAM-SHA-1 SCRAM-SHA-256\n");
+				errflush("vadduser");
+				strerr_die2x(100, WARN, usage);
+			}
+			break;
+		case 'S':
+			if (!salt)
+				break;
+			i = str_chr(optarg, ',');
+			if (optarg[i]) {
+				strerr_die3x(100, WARN, optarg, ": salt cannot have a comma character");
+			}
+			*salt = optarg;
+			break;
+		case 'I':
+			if (!iter)
+				break;
+			scan_int(optarg, iter);
+			break;
+#endif
+#endif
 #ifdef CLUSTERED_SITE
 		case 'c':
 			distributed = 1;
@@ -508,7 +660,7 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 		case 's':
 			scan_int(optarg, &use_ssl);
 			break;
-		case 'S':
+		case 'H':
 			*sqlserver = optarg;
 			break;
 		case 'U':
@@ -542,7 +694,7 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 		case 'l':
 			scan_int(optarg, &users_per_level);
 			break;
-		case 'e':
+		case 'E':
 			*bounceEmail = optarg;
 			break;
 		case 'i':
@@ -582,5 +734,7 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 	if (distributed >=0 && (!*sqlserver || !*database || !*dbuser || !*dbpass || dbport == -1))
 		strerr_die3x(100, WARN, "specify sqlserver, database, dbuser, dbpass and dbport\n", usage);
 #endif
+	if (*encrypt_flag == -1)
+		*encrypt_flag = 1;
 	return;
 }
