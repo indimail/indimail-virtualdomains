@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: user.c,v 1.33 2022-11-02 14:25:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.33 2022-11-02 16:21:15+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -399,7 +399,7 @@ moduser()
 void
 addusernow()
 {
-	int             cnt = 0, num, pid, error, len, plen;
+	int             cnt = 0, num, pid, error, len, plen, encrypt_flag = 1;
 	char          **mailingListNames;
 	char           *ptr;
 	static stralloc email = {0}, tmp1 = {0}, tmp2 = {0};
@@ -410,7 +410,6 @@ addusernow()
 	struct passwd  *mypw;
 #ifdef HAVE_GSASL_MKPASSWD
 	static stralloc box = {0};
-	int             encrypt_flag = 1;
 #endif
 
 	count_users();
@@ -539,13 +538,13 @@ addusernow()
 	/*- add the user then get the indimail password structure */
 	create_flag = 1;
 	/*-----------------------------------------------*/
-#ifdef HAVE_GSASL_MKPASSWD
 	if (!stralloc_copy(&tmp1, &RealDir) ||
 			!stralloc_catb(&tmp1, "/.trivial_passwords", 19) ||
 			!stralloc_0(&tmp1))
 		die_nomem();
 	if (!access(tmp1.s, F_OK))
 		encrypt_flag = 0;
+#ifdef HAVE_GSASL_MKPASSWD
 	GetValue(TmpCGI, &box, "cram=");
 	cram = !str_diff(box.s, "on") ? 1 : 0;
 	GetValue(TmpCGI, &box, "scram=");
@@ -1763,7 +1762,7 @@ parse_users_dotqmail(char newchar)
 
 /*-
  * $Log: user.c,v $
- * Revision 1.33  2022-11-02 14:25:25+05:30  Cprogrammer
+ * Revision 1.33  2022-11-02 16:21:15+05:30  Cprogrammer
  * add scram password if selected during user addition
  *
  * Revision 1.32  2022-10-27 17:34:35+05:30  Cprogrammer
