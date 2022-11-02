@@ -4,9 +4,9 @@ vgroup \- create distribution groups for set of users in a virtual domain
 
 .SH SYNOPSYS
 .PP
-\fBvgroup\fR \fB\-a\fR [\fB\-h\fR] [\fB\-c\fR][\fBq\fR] [\fB\-v\fR] \fIgroupAddress\fR [\fIpassword\fR]
+\fBvgroup\fR \fB\-a\fR [\fB\-n\fR] [\fB\-c\fR][\fBq\fR] [\fB\-v\fR] \fIgroupAddress\fR [\fIpassword\fR]
 .PP
-\fBvgroup\fR [\fB\-i\fR \fIaliasLine\fR] [\fB\-d\fR \fIaliasLine\fR] [\fB\-u\fR \fInewaliasLine\fR  \fB\-o\fR \fIoldaliasLine\fR] [\fB\-v\fR] \fIgroupAddress\fR
+\fBvgroup\fR [\fB\-i\fR \fIaliasLine\fR] [\fB\-d\fR \fIaliasLine\fR] [\fB\-u\fR \fInewaliasLine\fR \fB\-o\fR \fIoldaliasLine\fR] [\fB\-v\fR] \fIgroupAddress\fR
 
 .SH DESCRIPTION
 \fBvgroup\fR implements groups functionality in IndiMail. It is a utility to add groups.
@@ -30,7 +30,7 @@ more explanation). vgroup has been written for user convenience alone.
 .SH OPTIONS
 .PP
 Common Options
-.TP
+.TP 3
 \fB\-v\fR
 Sets verbose mode while vgroup is operating
 .TP
@@ -39,6 +39,61 @@ Email address for the group.
 
 .PP
 Options for adding a New Group.
+.TP 3
+\fB\-e\fR
+Set the encrypted Password field
+This options disables the internal encryption routine which encrypts the
+password provided on the command line. This option sets the encrypted
+password field exactly as given on the command line without any encryption.
+It expects you to give a standard encrypted password or you can use
+this to set plaintext/salted password for CRAM, SCRAM authentication
+methods.
+.TP
+\fB\-r\fR
+Generates Random Password. Need not give password on command line.
+.TP
+\fB\-h\fR \fIhash\fR
+Specifiy hash which is one of DES, MD5, SHA-256, SHA-512,
+.RS
+.nf
+.ta 5c 10c
+HASH        	Value	Description
+DES	0	DES encryption (shouldn't be used)
+MD5	1	MD5 encryption (shouldn't be used)
+SHA-256	2	SHA256 encryption
+SHA-512	3	SHA512 encryption
+.fi
+.RE
+.TP
+\fB\-m\fR \fIscram\fR
+Specifiy scram method which is one of SCRAM-SHA-1, SCRAM-SHA-256
+.RS
+.nf
+.ta 5c 10c
+SCRAM method	Description
+-------------	-----------
+SCRAM-SHA-1	SHA1 encryption suitable for SCRAM-SHA-1.
+SCRAM-SHA-256	SHA256 encryption suitable for SCRAM-SHA-256.
+.fi
+.tc
+.RE
+.TP
+\fB\-C\fR
+Sets up authentication suitable for CRAM-MD5, CRAM-SHA1, CRAM-SHA224,
+CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD and DIGEST-MD5 methods.
+This will additionally store the clear text credentials and a hex-encoded
+salted password for SCRAM methods. This allows the above mentioned
+authentication mechanisms to work along with the PLAIN, LOGIN and the SCRAM
+methods.
+.TP 3
+\fB\-S\fR \fIsalt\fR
+Specify a base64 encoded salt to be used when generating SCRAM password. If
+not specified, this will be generated using libsodium/gsasl. Here base64
+implies characters [0-9], [a-z], [A-Z] and the two characters [./].
+.TP
+\fB\-I\fR \fIiteration\fR
+Specify the iteration count to be used when generating SCRAM password. The
+default is 4096.
 .TP
 \fIpasswd\fR
 Passwd for the user. If not given, user will be prompted.
@@ -46,11 +101,11 @@ Passwd for the user. If not given, user will be prompted.
 \fB\-a\fR
 Add a new group.
 .TP
-\fB\-h\fR \fIhostid\fR
+\fB\-H\fR \fIhostid\fR
 For a clustered domain, this option can be used to create the user on a specific host having
 \fIhostid\fR as the hostid.
 .TP
-\fB\-m\fR \fImdahost\fR
+\fB\-M\fR \fImdahost\fR
 For a clustered domain, this option can be used to create the user on a specific cluster
 having Mail Delivery Host as \fImdahost\fR.
 .TP
@@ -65,7 +120,7 @@ field starts with the word 'IndiGroup'.
 Sets the Quota for the group. This should be set in case the group will also function as a
 normal user and receive mails.
 .TP
-\fB\-I\fR
+\fB\-n\fR
 Ignore requirement of groupAddress to be a local address on the node where vgroup is
 being run (option valid for clustered domain only)
 

@@ -29,7 +29,7 @@ Create the \fB.qmail-default\fR file in the domains directory.
 .IP \n+[step]
 Add the domain to qmail assign file.
 .IP \n+[step]
-Add the domain to chkrcptdomains ('-C' option).
+Add the domain to chkrcptdomains ('-R' option).
 .IP \n+[step]
 Add the domain to rcpthosts, virtualdomains (and etrnhosts for domains with ETRN/AUTOTURN support).
 .IP \n+[step]
@@ -53,9 +53,64 @@ as a parameter.
 .PP
 \fIvirtual_domain\fR is mandatory. Rest are optional. If \fIpostmaster_password\fR is not given, \fBvadddomain\fR
 will prompt for the password.
-.TP
+.TP 3
 \fB\-v\fR
 make \fBvaddomain\fR be verbose
+.TP
+\fB\-e\fR
+Set the encrypted Password field
+This options disables the internal encryption routine which encrypts the
+password provided on the command line. This option sets the encrypted
+password field exactly as given on the command line without any encryption.
+It expects you to give a standard encrypted password or you can use
+this to set plaintext/salted password for CRAM, SCRAM authentication
+methods.
+.TP
+\fB\-r\fR
+Generates Random Password. Need not give password on command line.
+.TP
+\fB\-h\fR \fIhash\fR
+Specifiy hash which is one of DES, MD5, SHA-256, SHA-512,
+.RS
+.nf
+.ta 5c 10c
+HASH        	Value	Description
+DES	0	DES encryption (shouldn't be used)
+MD5	1	MD5 encryption (shouldn't be used)
+SHA-256	2	SHA256 encryption
+SHA-512	3	SHA512 encryption
+.fi
+.RE
+.TP
+\fB\-m\fR \fIscram\fR
+Specifiy scram method which is one of SCRAM-SHA-1, SCRAM-SHA-256
+.RS
+.nf
+.ta 5c 10c
+SCRAM method	Description
+-------------	-----------
+SCRAM-SHA-1	SHA1 encryption suitable for SCRAM-SHA-1.
+SCRAM-SHA-256	SHA256 encryption suitable for SCRAM-SHA-256.
+.fi
+.tc
+.RE
+.TP
+\fB\-C\fR
+Sets up authentication suitable for CRAM-MD5, CRAM-SHA1, CRAM-SHA224,
+CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD and DIGEST-MD5 methods.
+This will additionally store the clear text credentials and a hex-encoded
+salted password for SCRAM methods. This allows the above mentioned
+authentication mechanisms to work along with the PLAIN, LOGIN and the SCRAM
+methods.
+.TP 3
+\fB\-S\fR \fIsalt\fR
+Specify a base64 encoded salt to be used when generating SCRAM password. If
+not specified, this will be generated using libsodium/gsasl. Here base64
+implies characters [0-9], [a-z], [A-Z] and the two characters [./].
+.TP
+\fB\-I\fR \fIiteration\fR
+Specify the iteration count to be used when generating SCRAM password. The
+default is 4096.
 .TP
 \fB\-B\fR \fIbase_path\fR
 sets the BASE PATH for user's home directory for users created on this domain. This
@@ -76,7 +131,7 @@ sets the quota for postmaster account
 \fB\-b\fR
 bounces all mail that doesn't match a user, default
 .TP
-\fB\-e\fR
+\fB\-E\fR
 email_address (forwards all non matching user to this address)
 .TP
 \fB\-u\fR \fIuser\fR
@@ -92,7 +147,7 @@ sets the uid to use for this domain
 \fB\-g\fR \fIgid\fR
 sets the gid to use for this domain
 .TP
-\fB\-C\fR
+\fB\-R\fR
 Sets RECIPIENT Check for this domain. \fBqmail-smtpd(8)\fR verifies all users in the RCPT TO command.
 .TP
 \fB\-O\fR
@@ -108,10 +163,10 @@ Enable ETRN support for the domain
 Enable AUTOTURN Support from the IP ip_address
 .TP
 \fB\-D\fR \fIdatabase\fR
-Adds domain information to dbinfo table. This implies use of the \fB-S\fR, \fB-U\fR, \fB-P\fR, \fB-L\fR
+Adds domain information to dbinfo table. This implies use of the \fB-H\fR, \fB-U\fR, \fB-P\fR, \fB-L\fR
 options additionally
 .TP
-\fB\-S\fR \fISqlServer\fR
+\fB\-H\fR \fISqlServer\fR
 IP address or hostname of MySQL(1) server
 .TP
 \fB\-U\fR \fIUser\fR
@@ -124,7 +179,7 @@ Password for the user to access the MySQL database
 Port to connect to for accessing the database
 .TP
 \fB\-c\fR
-Adds a clustered domain.  This implies use of the \fB-S\fR, \fB-U\fR, \fB-P\fR, \fB-L\fR options
+Adds a clustered domain. This implies use of the \fB-H\fR, \fB-U\fR, \fB-P\fR, \fB-L\fR options
 .TP
 \fIvirtual_domain\fR
 Name of the new virtual domain. \fInew_domain\fR can contain alphanumeric characters besides '-' and '.' . However the first and

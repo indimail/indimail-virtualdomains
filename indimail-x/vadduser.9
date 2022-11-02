@@ -91,17 +91,66 @@ create the next directory or sub directory and store the new users directory the
 Over a period of time, due to large no of deletions of users, the Directory Structure Layout
 for all users can be regenerated using the program \fBvreorg(8)\fR.
 
-.SH POST HANDLE
-If the environment variable POST_HANDLE is set, \fBvadduser\fR executes the program defined by
-the POST_HANDLE environment variable, passing \fIemail_address\fR as a parameter. If POST_HANDLE
-is not defined, the program/script LIBEXECDIR/vadduser will be executed with \fIemail_address\fR
-as a parameter.
-
 .SH OPTIONS
 .PP
-.TP
+.TP 3
 \fB\-v\fR
 Set verbose mode.
+.TP
+\fB\-e\fR
+Set the encrypted Password field
+This options disables the internal encryption routine which encrypts the
+password provided on the command line. This option sets the encrypted
+password field exactly as given on the command line without any encryption.
+It expects you to give a standard encrypted password or you can use
+this to set plaintext/salted password for CRAM, SCRAM authentication
+methods.
+.TP
+\fB\-r\fR
+Generates Random Password. Need not give password on command line.
+.TP
+\fB\-h\fR \fIhash\fR
+Specifiy hash which is one of DES, MD5, SHA-256, SHA-512,
+.RS
+.nf
+.ta 5c 10c
+HASH        	Value	Description
+DES	0	DES encryption (shouldn't be used)
+MD5	1	MD5 encryption (shouldn't be used)
+SHA-256	2	SHA256 encryption
+SHA-512	3	SHA512 encryption
+.fi
+.RE
+.TP
+\fB\-m\fR \fIscram\fR
+Specifiy scram method which is one of SCRAM-SHA-1, SCRAM-SHA-256
+.RS
+.nf
+.ta 5c 10c
+SCRAM method	Description
+-------------	-----------
+SCRAM-SHA-1	SHA1 encryption suitable for SCRAM-SHA-1.
+SCRAM-SHA-256	SHA256 encryption suitable for SCRAM-SHA-256.
+.fi
+.tc
+.RE
+.TP
+\fB\-C\fR
+Sets up authentication suitable for CRAM-MD5, CRAM-SHA1, CRAM-SHA224,
+CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD and DIGEST-MD5 methods.
+This will additionally store the clear text credentials and a hex-encoded
+salted password for SCRAM methods. This allows the above mentioned
+authentication mechanisms to work along with the PLAIN, LOGIN and the SCRAM
+methods.
+.TP 3
+\fB\-S\fR \fIsalt\fR
+Specify a base64 encoded salt to be used when generating SCRAM password. If
+not specified, this will be generated using libsodium/gsasl. Here base64
+implies characters [0-9], [a-z], [A-Z] and the two characters [./].
+.TP
+\fB\-I\fR \fIiteration\fR
+Specify the iteration count to be used when generating SCRAM password. The
+default is 4096.
 .TP
 \fB\-c\fR \fIComment\fR
 Set Comment (Sets the gecos comment field)
@@ -109,12 +158,6 @@ Set Comment (Sets the gecos comment field)
 \fB\-d\fR
 Create the directory for the user. If this option is not given, the home directory is not
 created. It gets created when the user logs in either through IMAP4 or POP3 protocol.
-.TP
-\fB\-e\fR \fIpasswd\fR
-Expects a Standard Encrypted Password to be given on command line.
-.TP
-\fB\-r\fR
-Generates Random Password. Need not give password on command line.
 .TP
 \fB\-B\fR \fIbase_path\fR
 Set the base path for the user's home directory. This overrides the base path defined in the domain's
@@ -143,11 +186,11 @@ this option will not be allowed if permission for creating quota is disabled in 
 
 You can use the suffix k/K, m/M, g/G to specify quota in Kb, Mb or Gb.
 .TP
-\fB\-h\fR \fIhostid\fR
+\fB\-H\fR \fIhostid\fR
 For a clustered domain, this option can be used to create the user on a specific host having
 \fIhostid\fR as the hostid.
 .TP
-\fB\-m\fR \fImdahost\fR
+\fB\-M\fR \fImdahost\fR
 For a clustered domain, this option can be used to create the user on a specific cluster
 having Mail Delivery Host as \fImdahost\fR.
 .TP
@@ -164,6 +207,12 @@ vadduser will prompt standard in for the password. The password must be typed in
 The user is added to the inactive table indibak (except for RFC ids postmaster and abuse)
 and is treated as an inactive user until the user logs in, upon which the user record is moved
 to the  active table indimail.
+
+.SH POST HANDLE
+If the environment variable POST_HANDLE is set, \fBvadduser\fR executes the program defined by
+the POST_HANDLE environment variable, passing \fIemail_address\fR as a parameter. If POST_HANDLE
+is not defined, the program/script LIBEXECDIR/vadduser will be executed with \fIemail_address\fR
+as a parameter.
 
 .SH RETURN VALUE
 0 if all steps were successful, non-zero otherwise. If any of the steps fail, a diagnostic
