@@ -126,4 +126,5 @@ do
 		$chmod 644 @controldir@/$i
 	fi
 done
+vuserinfo postmaster@$1
 exit 0
