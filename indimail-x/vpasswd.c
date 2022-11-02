@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 1.16  2022-11-02 12:45:58+05:30  Cprogrammer
+ * set usage string depeding on gsasl availability
+ *
  * Revision 1.15  2022-10-20 11:59:10+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -83,7 +86,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.15 2022-10-20 11:59:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.16 2022-11-02 12:45:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -92,15 +95,19 @@ static char     sccsid[] = "$Id: vpasswd.c,v 1.15 2022-10-20 11:59:10+05:30 Cpro
 static char    *usage =
 	"usage: vpasswd [options] email_address [password]\n"
 	"options\n"
-	"  -e encrypted    - set the encrypted password field\n"
+	"  -r              - generate a random password of specfied length\n"
+	"  -e password     - set the encrypted password field\n"
+	"  -h hash         - use one of DES, MD5, SHA256, SHA512, hash method\n"
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	"  -C              - store clear txt and scram hex salted password in database\n"
 	"                    This allows CRAM methods to be used\n"
-	"  -r              - generate a random password of specfied length\n"
-	"  -h hash         - use one of DES, MD5, SHA256, SHA512, hash method\n"
 	"  -m SCRAM method - use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method\n"
 	"  -S salt         - use a fixed base64 encoded salt for generating SCRAM password\n"
 	"                  - if salt is not specified, it will be generated\n"
 	"  -I iter_count   - use iter_count instead of 4096 for generating SCRAM password\n"
+#endif
+#endif
 	"  -v              - sets verbose output\n"
 	"  -H              - display this usage"
 	;

@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.13  2022-11-02 12:45:15+05:30  Cprogrammer
+ * set usage string depeding on gsasl availability
+ *
  * Revision 1.12  2022-10-20 11:59:07+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -94,7 +97,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.12 2022-10-20 11:59:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.13 2022-11-02 12:45:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -112,12 +115,16 @@ static char    *usage =
 	"         -q quota                 (set quota to quota bytes, +/- to increase/decrease curr value)\n"
 	"         -c comment               (set the comment/gecos field)\n"
 	"         -P passwd                (set the password field)\n"
-	"         -e encrypted_passwd      (set the encrypted password field)\n"
+	"         -e                       (set the encrypted password field as given by -P option)\n"
 	"         -h hash                  (use one of DES, MD5, SHA256, SHA512 hash)\n"
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	"         -C                       (Store clear txt and scram hex salted passowrd in database\n"
 	"         -m SCRAM method          (use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method)\n"
 	"         -S salt                  (Use a fixed base64 encoded salt)\n"
 	"         -I iter_count            (Use iter_count instead of default 4096 for generationg SCRAM password\n"
+#endif
+#endif
 	"         -D date format           (Delivery to a Date Folder)\n"
 	"         -l vacation_message_file (sets up Auto Responder)\n"
 	"                                  (some special values for vacation_message_file)\n"
