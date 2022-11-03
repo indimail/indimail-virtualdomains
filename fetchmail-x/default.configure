@@ -49,12 +49,9 @@ case "$SYSTEM" in
   extra_args="--with-ssl"
   ;;
 esac
-echo ./configure --prefix=$prefix --enable-indimail \
-  --sbindir=$sbindir --sysconfdir=$sysconfdir \
-  --datarootdir=$prefix/share/indimail \
-  --libexecdir=$prefix/libexec/indimail \
-  --mandir=$mandir $extra_args
-
+if [ ! -d m4 -a -f configure.ac -a -f Makefile.am ] ; then
+	mkdir -p m4
+fi
 if [ -f Makefile ] ; then
 	if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
 		echo "Already configured"

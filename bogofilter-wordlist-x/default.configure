@@ -1,14 +1,4 @@
 #!/bin/sh
-if [ ! -d m4 ] ; then
-  mkdir m4
-fi
-if [ ! -f conf-releae ] ; then
-  echo 1.1 > conf-release
-fi
-./download.sh
-if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
-  autoreconf -fiv
-fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
   FreeBSD)
@@ -28,6 +18,16 @@ case "$SYSTEM" in
   sysconfdir=/usr/etc/indimail
   ;;
 esac
+if [ ! -d m4 -a -f configure.ac -a -f Makefile.am ] ; then
+	mkdir -p m4
+fi
+if [ ! -f conf-releae ] ; then
+  echo 1.1 > conf-release
+fi
+./download.sh
+if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
+  autoreconf -fiv
+fi
 if [ -f Makefile ] ; then
 	if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
 		echo "Already configured"

@@ -29,6 +29,9 @@ case "$SYSTEM" in
   ;;
 esac
 
+if [ ! -d m4 -a -f configure.ac -a -f Makefile.am ] ; then
+	mkdir -p m4
+fi
 if [ -f Makefile ] ; then
 	if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
 		echo "Already configured"

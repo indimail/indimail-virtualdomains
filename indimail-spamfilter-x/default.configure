@@ -63,14 +63,17 @@ case "$SYSTEM" in
   ;;
 esac
 
+if [ $# -ne 0 ] ; then
+    extra=$*
+fi
+if [ ! -d m4 -a -f configure.ac -a -f Makefile.am ] ; then
+	mkdir -p m4
+fi
 if [ -f Makefile ] ; then
     if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
        echo "Already configured"
        exit 0
     fi
-fi
-if [ $# -ne 0 ] ; then
-    extra=$*
 fi
 ./configure --prefix=$prefix \
   --enable-indimail \

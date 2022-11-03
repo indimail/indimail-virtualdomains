@@ -1,13 +1,4 @@
 #!/bin/sh
-if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
-  autoreconf -fiv
-fi
-if [ ! -f conf-release ] ; then
-  echo 1.1 > conf-release
-fi
-if [ ! -d m4 ] ; then
-  mkdir -p m4
-fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
   FreeBSD)
@@ -63,6 +54,15 @@ elif [ -d /usr/local/mysql/include ] ; then
   mysqlPrefix=/usr/local/mysql
 fi
 
+if [ ! -d m4 -a -f configure.ac -a -f Makefile.am ] ; then
+	mkdir -p m4
+fi
+if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
+  autoreconf -fiv
+fi
+if [ ! -f conf-release ] ; then
+  echo 1.1 > conf-release
+fi
 if [ -f Makefile ] ; then
 	if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
 		echo "Already configured"
