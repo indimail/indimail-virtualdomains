@@ -6,59 +6,88 @@ vchkpass \- checkpassword program for IndiMail authentication
 \fBvchkpass\fR \fBprog\fR \fIargs\fR
 
 .SH DESCRIPTION
-\fBvchkpass\fR supports authentication for ESMTP AUTH option in \fBqmail-smtpd(8)\fR,
-allowing the LOGIN, PLAIN, and CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 AUTH types.
-\fBvchkpass\fR looks up userid in IndiMail's Virtual Database
-.PP
-As reflected in the \fBqmail-smtpd(8)\fR man page, \fBqmail-smtpd(8)\fR must be invoked with
-three arguments: hostname, path of the checkpassword programs. If these
-arguments are missing, \fBqmail-smtpd(8)\fR will not advertise availability of AUTH.
-.PP
-\fBvchkpass\fR reads descriptor 3 through end of file and then closes
-descriptor 3. There must be at most 512 bytes of data before end of file. If it invokes an
-\fIprog\fR, it opens a pipe duping the read descriptor as 3 for
-the \fBprog\fR. The write end of the pipe is duped to descriptor 4
-and the data which was earlier read on descriptor 3 is written back on descriptor 4.
-The \fIprog\fR program is invoked when vchkpass doesn't support authentication for the
-supplied login name.
-.PP
-For LOGIN, PLAIN AUTH types, the information supplied on descriptor 3 is a login name
-terminated by \\0 and password terminated by \\0. \fBvchkpass\fR encrypts the password using
-cyrpt(3) routine and compares it against the value present in the passwd database. The encrypted
-password can be in DES, MD5, SHA-256 or SHA-512 hash.
-.PP
-For CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 AUTH type, the information supplied on
-descriptor 3 is a login name terminated by \\0, a cram-md5 challenge terminated by \\0, and
-a cram-md5 response terminated by \\0. \fBvchkpass\fR encrypts the
-challenge with keyed MD5 using passwords from passwd database. It's compared with
-response (3rd parameter) and if they are the same then vchkpass uses execvp to
-run subprogram with the given arguments. If they differ then it returns -1.
-.PP
-If challenge and response differ, \fBvchkpass\fR exits 1. If \fBvchkpass\fR
-is misused, it may instead exit 2. If there is a temporary problem checking the password,
-\fBvchkpass\fR exits 111.
-.PP
-hostname is simply used to form the CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 challenge.
-\fBqmail-smtpd\fR invokes \fBvchkpass\fR, feeding it the username and password, in the case
-of LOGIN or PLAIN, or the username, challenge, and response, in the case of CRAM-MD5,
-CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5. If the password checks out, \fBvchkpass\fR
-exits with a status of 0. If password is unacceptable, \fBvchkpass\fR runs \fIprog\fR
-You can have a chain of \fIprog\fR on the command line with the last \fIprog\fR being
-\fB/bin/false\fR.
+\fBvchkpass\fR(8) supports authentication for ESMTP AUTH option in
+\fBqmail-smtpd(8)\fR, allowing the LOGIN, PLAIN, CRAM-MD5, CRAM-SHA1,
+CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5
+AUTH types. \fBvchkpass\fR(8) looks up userid in IndiMail's MySQL Database.
+It uses the \fIpw_passwd\fR field for LOGIN, PLAIN, CRAM-MD5, CRAM-SHA1,
+CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA523 in the MySQL
+\fIindimail\fR or \fIindibak\fR tables. For SCRAM authentication methods
+the \fIscram\fR field will be used in addition to the \fIpw_passwd\fR
+field. The pw_passwd field in the \fIindimail\fR MySQL table is normally
+encrypted using crypt(3). This works for LOGIN and PLAIN authentication.
+For CRAM authentication methods one can store un-encrypted
+value by passing the -e option to \fBvadduser\fR(1), \fBvpasswd\fR(1),
+\fBvmoduser\fR(1). However, LOGIN and PLAIN methods will not authenticate
+when passwords are stored un-encrypted. If you want to have authentication
+work for LOGIN, PLAIN and the CRAM methods, one can store the passwords
+encrypted, set the environment variable \fBENABLE_CRAM\fR and have clients
+supply encrypted passwords as the password. If you set the passwords for
+SCRAM authentication, then one can store both encrypted and un-encrypted
+passwords in the database (-m and -C option when using \fBvadduser\fR(1),
+\fBvmoduser\fR(1), \fBvpasswd\fR(1)). In such a case all authentication
+methods will work. Additionally, if you set the passwords for SCRAM, then
+you need not set \fBENABLE_CRAM\fR environment variable.
 
-.PP
-\fBvchkpass\fR does not authenticate if user is inactive. A user is active if one logs in using
-IMAP or POP3 protocol. If \fBALLOW_INACTIVE\fR is defined, \fBvchkpass\fR will proceed regardless
-of the user's active or inactive status.
+As reflected in the \fBqmail-smtpd\fR(8) man page, \fBqmail-smtpd\fR(8)
+must be invoked with three arguments: hostname, path of the checkpassword
+programs. If these arguments are missing, \fBqmail-smtpd(8)\fR will not
+advertise availability of AUTH.
 
-If the environment variable \fBDOMAIN_LIMITS\fR is defined, \fBvchkpass\fR validates domain
-expiry and password expiry set by \fBvmoduser(1)\fR program.
+\fBvchkpass\fR(8) reads descriptor 3 through end of file and then closes
+descriptor 3. There must be at most 512 bytes of data before end of file.
+If it invokes an \fIprog\fR, it opens a pipe duping the read descriptor as
+3 for the \fBprog\fR. The write end of the pipe is duped to descriptor 4
+and the data which was earlier read on descriptor 3 is written back on
+descriptor 4. The \fIprog\fR program is invoked when \fBvchkpass\fR(8)
+doesn't support authentication for the supplied login name.
 
-On successful authentication, \fBvchkpass\fR can execute a script defined by environment
-variable \fBPOSTAUTH\fR. In that case, the return value of \fBvchkpass\fR will be the
-return value of \fBPOSTAUTH\fR program/script.
+For LOGIN, PLAIN AUTH types, the information supplied on descriptor 3 is a
+login name terminated by \\0 and password terminated by \\0.
+\fBvchkpass\fR(8) encrypts the password using cyrpt(3) routine and compares
+it against the value present in the passwd database. The encrypted password
+can be in DES, MD5, SHA-256 or SHA-512 hash. The hash can be selected when
+creating users with \fBvadduser\fR(1) or modifying it using
+\fBvmoduser\fR(1) or \fBvpasswd\fR(1).
 
-.PP
+For CRAM-MD5, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384,
+CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5 AUTH type, the information supplied on
+descriptor 3 is a login name terminated by \\0, a cram-md5 challenge
+terminated by \\0, and a cram-md5 response terminated by \\0.
+\fBvchkpass\fR(7) encrypts the challenge with keyed MD5 using passwords
+from passwd database. It's compared with response (3rd parameter) and if
+they are the same then \fBvchkpass\fR(8) uses execvp to run subprogram with
+the given arguments. If they differ then it returns -1.
+
+If challenge and response differ, \fBvchkpass\fR(8) exits 1. If
+\fBvchkpass\fR(8) is misused, it may instead exit 2. If there is a
+temporary problem checking the password, \fBvchkpass\fR(8) exits 111.
+
+hostname is simply used to form the CRAM-MD5, CRAM-SHA1, CRAM-SHA224,
+CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5 challenge.
+\fBqmail-smtpd\fR invokes \fBvchkpass\fR(8), feeding it the username and
+password, for LOGIN or PLAIN methods or the username, challenge, and
+response, for CRAM-MD5, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384,
+CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5. If the password checks out,
+\fBvchkpass\fR(8) exits with a status of 0. If password is unacceptable,
+\fBvchkpass\fR(8) runs \fIprog\fR. You can have a chain of \fIprog\fR on
+the command line with the last \fIprog\fR being \fB/bin/false\fR to
+terminate the authentication process.
+
+\fBvchkpass\fR(8) does not authenticate if user is inactive. A user is
+active if one logs in using IMAP or POP3 protocol. If \fBALLOW_INACTIVE\fR
+is defined, \fBvchkpass\fR(8) will proceed regardless of the user's active
+or inactive status.
+
+If the environment variable \fBDOMAIN_LIMITS\fR is defined,
+\fBvchkpass\fR(8) validates domain expiry and password expiry set by
+\fBvmoduser\fR(1) program.
+
+On successful authentication, \fBvchkpass\fR(8) can execute a script
+defined by environment variable \fBPOSTAUTH\fR. In that case, the return
+value of \fBvchkpass\fR(8) will be the return value of \fBPOSTAUTH\fR
+program/script.
+
 MUAs and AUTH types tested with this software are:
 
 .IP \[bu] 2
@@ -78,18 +107,20 @@ Thunderbird - LOGIN, PLAIN
 
 .SH OPTIONS
 \fBalternate_checkpassword_program\fR
-Path to an alternate checkpassword utility which supports additional authentication
-advertised by qmail-smtpd.
+Path to an alternate checkpassword utility which supports additional
+authentication advertised by qmail-smtpd.
 
 .SH RETURN VALUE
-If the password is acceptable, \fBvchkpass\fR exits 0. If \fBvchkpass\fR is misused, it may
-instead exit 2. If there is a temporary problem checking the password, \fBvchkpass\fR exits 111.
+If the password is acceptable, \fBvchkpass\fR(8) exits 0. If
+\fBvchkpass\fR(8) is misused, it may instead exit 2. If there is a
+temporary problem checking the password, \fBvchkpass\fR(8) exits 111.
 
-If the password is unacceptable, \fBvchkpass\fR runs \fIprog\fR. \fIprog\fR consists of one or more
-arguments.
+If the password is unacceptable, \fBvchkpass\fR(8) runs \fIprog\fR.
+\fIprog\fR consists of one or more arguments.
 
-If the environment variable \fBNATIVE_CHECKPASSWORD\fR is set, \fBvchkpass\fR will run \fIprog\fR
-on successful authentication and exit 1 if password is unacceptable.
+If the environment variable \fBNATIVE_CHECKPASSWORD\fR is set,
+\fBvchkpass\fR(8) will run \fIprog\fR on successful authentication and exit
+1 if password is unacceptable.
 
 .SH "SEE ALSO"
 qmail-smtpd(8),

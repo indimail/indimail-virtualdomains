@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.17  2022-11-05 21:13:57+05:30  Cprogrammer
+ * use ENABLE_CRAM to allow use of pw_passwd field of indimail, indibak for authentication
+ *
  * Revision 1.16  2022-10-29 23:10:52+05:30  Cprogrammer
  * fixed display of auth method in logs
  *
@@ -91,7 +94,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.16 2022-10-29 23:10:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.17 2022-11-05 21:13:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -128,7 +131,8 @@ main(int argc, char **argv)
 				   *crypt_pass, *ptr, *cptr, *pass;
 	char            strnum[FMT_ULONG], module_pid[FMT_ULONG];
 	static stralloc user = {0}, fquser = {0}, domain = {0}, buf = {0};
-	int             i, count, offset, norelay = 0, status, auth_method, native_checkpassword;
+	int             i, count, offset, norelay = 0, status, auth_method,
+					native_checkpassword, enable_cram;
 	struct passwd  *pw;
 #ifdef ENABLE_DOMAIN_LIMITS
 	time_t          curtime;
@@ -143,6 +147,8 @@ main(int argc, char **argv)
 		strerr_warn3("alloc-", strnum, ": ", &strerr_sys);
 		_exit(111);
 	}
+	/*- allow pw_passwd field to be used for CRAM authentication */
+	enable_cram = env_get("ENABLE_CRAM") ? 1 : 0;
 	for (offset = 0;;) {
 		do {
 			count = read(3, authstr + offset, authlen + 1 - offset);
@@ -153,7 +159,7 @@ main(int argc, char **argv)
 #endif
 		if (count == -1) {
 			print_error("read error");
-			strerr_warn1("syspass: read: ", &strerr_sys);
+			strerr_warn1("vchkpass: read: ", &strerr_sys);
 			_exit(111);
 		} else
 		if (!count)
@@ -170,13 +176,13 @@ main(int argc, char **argv)
 		_exit(2);
 
 	count++;
-	challenge = authstr + count; /*- challenge (or plain text password) */
+	challenge = authstr + count; /*- challenge for CRAM methods (or plain text password for LOGIN/PLAIN) */
 	for (;authstr[count] && count < offset;count++);
 	if (count == offset || (count + 1) == offset)
 		_exit(2);
 
 	count++;
-	response = authstr + count; /*- response (cram-md5, cram-sha1, etc) */
+	response = authstr + count; /*- response (CRAM methods, etc) */
 	for (; authstr[count] && count < offset; count++);
 
 	if (count == offset || (count + 1) == offset)
@@ -301,6 +307,22 @@ main(int argc, char **argv)
 	if (pw->pw_gid & NO_RELAY)
 		norelay = 1;
 	crypt_pass = (char *) NULL;
+		/*- we have three situation
+		 * 1. We have set SCRAM method in (-m option in vadddomain, vadduser, vpasswd,
+		 *    vmoduser, vgroup)
+		 *    a. For CRAM methods we use the clear text passwords in variable cleartxt
+		 *    b. For SCRAM methods, we can use stored key/server key or hex salted passwords
+		 *    c. For LOGIN, PLAIN we use the crypt_pass in variable crypt_pass
+		 * 2. We don't have SCRAM passwords
+		 *    a. we use crypted password in variable crypt_pass for LOGIN, PLAIN.
+		 *       we expect a crypted password using crypt(3) is stored in pw_password field
+		 *    b. we use crypted password in variable crypt_pass for CRAM methods (-e option in
+		 *       vadddomain, vadduser, vpasswd, vmoduser, vgroup)
+		 *       but it is expected that the pw_passwd field has the clear text passwords stored for
+		 *       CRAM to succeed.
+		 *    c. b. implies that the crypted password can be supplied by the client for password
+		 *       when using CRAM
+		 */
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
 		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, &cleartxt, &crypt_pass);
 		if (i != 6 && i != 8) {
@@ -308,7 +330,7 @@ main(int argc, char **argv)
 			flush("vchkpass");
 			_exit (1);
 		}
-		if (i == 8) {
+		if (i == 8) { /* both cleartxt and hexsalted passwords are stored in db */
 			switch (auth_method)
 			{
 			case AUTH_CRAM_MD5:
@@ -319,31 +341,50 @@ main(int argc, char **argv)
 			case AUTH_CRAM_SHA512:
 			case AUTH_CRAM_RIPEMD:
 			case AUTH_DIGEST_MD5:
-				pass = cleartxt;
+				pass = cleartxt; /*- use the clear text password stored in db. */
 				break;
 			default:
-				pass = crypt_pass;
+				if (enable_cram)
+					pass = crypt_pass;
+				else
+					pass = (auth_method > 2 && auth_method < 11) ? NULL : crypt_pass;
 				break;
 			}
-		} else
-			pass = crypt_pass;
+		} else {
+			if (enable_cram)
+				pass = crypt_pass;
+			else
+				pass = (auth_method > 2 && auth_method < 11) ? NULL : crypt_pass;
+		}
 	} else {
 		i = 0;
-		pass = crypt_pass = pw->pw_passwd;
+		crypt_pass = pw->pw_passwd;
+		if (enable_cram)
+			pass = crypt_pass;
+		else
+			pass = (auth_method > 2 && auth_method < 11) ? NULL : crypt_pass;
 	}
 	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	if ((ptr = env_get("DEBUG_LOGIN")) && *ptr > '0') {
 		ptr = get_authmethod(auth_method);
-		strerr_warn16("vchkpass: ", "pid [", module_pid, "]: login [", login, "] challenge [", challenge,
-			"] response [", response, "] password [", pass, "] crypted [", crypt_pass, "] authmethod [", ptr, "]", 0);
+		strerr_warn16("vchkpass: ", "pid [", module_pid, "]: login [", login,
+				"] challenge [", challenge, "] response [", response,
+				"] password [", pass ? pass : "cram-disabled", "] crypted [",
+				crypt_pass, "] authmethod [", ptr, "]", 0);
 	} else
 	if (env_get("DEBUG")) {
 		ptr = get_authmethod(auth_method);
-		strerr_warn8("vchkpass: ", "pid [", module_pid, "]: login [", login, "] authmethod [", ptr, "]", 0);
+		strerr_warn8("vchkpass: ", "pid [", module_pid, "]: login [", login,
+				"] authmethod [", ptr, "]", 0);
+	}
+	if (!pass) {
+		native_checkpassword ? _exit (1) : pipe_exec(argv, authstr, offset);
+		print_error("exec");
+		_exit (111);
 	}
 	if (pw_comp((unsigned char *) ologin, (unsigned char *) pass,
-		(unsigned char *) (*response ? challenge : 0),
-		(unsigned char *) (*response ? response : challenge), auth_method)) {
+				(unsigned char *) (*response ? challenge : 0),
+				(unsigned char *) (*response ? response : challenge), auth_method)) {
 		native_checkpassword ? _exit (1) : pipe_exec(argv, authstr, offset);
 		print_error("exec");
 		_exit (111);
