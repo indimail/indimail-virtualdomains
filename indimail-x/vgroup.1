@@ -81,10 +81,10 @@ SCRAM-SHA-256	SHA256 encryption suitable for SCRAM-SHA-256.
 \fB\-C\fR
 Sets up authentication suitable for CRAM-MD5, CRAM-SHA1, CRAM-SHA224,
 CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD and DIGEST-MD5 methods.
-This will additionally store the clear text credentials and a hex-encoded
-salted password for SCRAM methods. This allows the above mentioned
-authentication mechanisms to work along with the PLAIN, LOGIN and the SCRAM
-methods.
+This works by storing the clear text credentials in the database. if the
+\-\fIm\fR option is select, this will additionally store a hex-encoded
+salted password for SCRAM methods, which can be used instead of clear text
+passwords by clients (for SCRAM authentication).
 .TP 3
 \fB\-S\fR \fIsalt\fR
 Specify a base64 encoded salt to be used when generating SCRAM password. If
