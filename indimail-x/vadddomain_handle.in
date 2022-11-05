@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.21  2022-11-05 21:12:54+05:30  Cprogrammer
+# added vuserinfo of postmaster account
+#
 # Revision 2.20  2020-09-21 07:57:01+05:30  Cprogrammer
 # added /usr/sbin for FreeBSD for chown command
 #
@@ -63,7 +66,7 @@
 # post handle for vadddomain
 #
 #
-# $Id: vadddomain_handle.in,v 2.20 2020-09-21 07:57:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.21 2022-11-05 21:12:54+05:30 Cprogrammer Exp mbhangui $
 
 # send sighup to inlookup service to reload domains
 (
