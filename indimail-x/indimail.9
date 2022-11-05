@@ -703,8 +703,12 @@ PLUGINn_init       |             |        |by using PLUGINn variable. PLUGIN_DIR
 -------------------|-------------|--------|----------------------------------------
 TRIVIAL_PASSWORDS  |iwebadmin    |used    |If set, allows use of unsafe plain text
                    |             |        |passwords
-DISABLE_CRYPT      |vchkpass     |        |Disable crypt method in AUTH Login
+DISABLE_CRYPT      |vchkpass     |used    |Disable crypt method in AUTH LOGIN, PLAIN
+                   |qmail-smtpd  |        |Disables both AUTH LOGIN and PLAIN
                    |authindi     |        |
+ENABLE_CRAM        |vchkpass     |used    |Allow crypted password field to be used as
+                   |             |        |password for CRAM authentcation methods
+NATIVE_PASSWORD    |vchkpass     |used    |Sets authentication for dovecot checkpassword
 DISABLE_AUTH_LOGIN |qmail-smtpd  |        |Disable AUTH LOGIN method
                    |qmail-remote |        |
 DISABLE_AUTH_PLAIN |qmail-smtpd  |        |Disable AUTH PLAIN method
