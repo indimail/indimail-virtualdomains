@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.14  2022-11-08 17:17:56+05:30  Cprogrammer
+ * removed compiler warning for unused variable
+ *
  * Revision 1.13  2022-11-02 12:45:15+05:30  Cprogrammer
  * set usage string depeding on gsasl availability
  *
@@ -97,7 +100,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.13 2022-11-02 12:45:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.14 2022-11-08 17:17:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -382,7 +385,7 @@ main(int argc, char **argv)
 	gid_t           gid;
 	struct passwd   PwTmp;
 	struct passwd  *pw;
-	char           *real_domain, *ptr, *clear_text;
+	char           *real_domain, *ptr;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	mdir_t          quota = 0, ul;
 #ifdef USE_MAILDIRQUOTA
@@ -396,7 +399,7 @@ main(int argc, char **argv)
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	static stralloc result = {0};
-	char           *b64salt;
+	char           *b64salt, *clear_text;
 	int             scram, iter, docram;
 #endif
 #endif
