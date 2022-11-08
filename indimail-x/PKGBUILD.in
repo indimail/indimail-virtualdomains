@@ -1,5 +1,8 @@
 # Maintainer: @email@
 # $Log: PKGBUILD.in,v $
+# Revision 1.8  2022-11-08 17:17:40+05:30  Cprogrammer
+# added gsasl dependency for libindimail
+#
 # Revision 1.7  2022-11-02 16:54:35+05:30  Cprogrammer
 # added gsasl library to make depends
 #
@@ -22,7 +25,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.7 2022-11-02 16:54:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.8 2022-11-08 17:17:40+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail' 'libindimail')
 pkgver=@version@
@@ -84,7 +87,7 @@ package_indimail() {
         ${_myconfdir}/{'osh.table','controfiles.i','procailrc','indimail.cnf'}
         ${_myconfdir}/{'cronlist.i','indimail.mrtg.cfg','headerlist'}
         ${_myconfdir}/tcp/tcp.poppass)
-  depends=('shadow' 'mysql' 'indimail-mta>2.6' 'libindimail')
+  depends=('shadow' 'mysql' 'indimail-mta>2.6' 'libindimail' 'gsasl')
   install=archpkg1.install
   conflicts=('indimail-mta<2.0')
   provides=('indimail')
