@@ -47,7 +47,7 @@ lockfile$(EXEEXT): lockfile.$(OBJEXT) $(lockfile_DEPENDENCIES)
 formail$(EXEEXT): formail.$(OBJEXT) $(formail_DEPENDENCIES)
 	$(COMPILE) $(CFLAGS) $@.$(OBJEXT) $(formail_DEPENDENCIES) -o $@ $(LDFLAGS)
 
-man_MANS=procmail.1 formail.1 lockfile.1 procmailrc.5 procmailsc.5 procmailex.5
+man_MANS=procmail.1 formail.1 lockfile.1 mailstat.1 procmailrc.5 procmailsc.5 procmailex.5
 
 procmail.1: man/procmail.man man/man.sed
 	cd man;$(SHELL) mansed $(SHELL) procmail.man $@ "$(RM)" $(DEVNULL)
