@@ -8,7 +8,7 @@ url="https://github.com/mbhangui/indimail-virtualdomains"
 license=('GPL3')
 groups=('base-devel')
 depends=('coreutils' 'findutils' 'sed' 'ncurses')
-makedepends=('pkgconfig' 'readline')
+makedepends=('pkgconfig' 'readline' 'gzip')
 source=('altermime-@altermime_version@.tar.gz' 'ripmime-@ripmime_version@.tar.gz'
     'fortune-@fortune_version@.tar.gz' 'mpack-@mpack_version@.tar.gz'
     'flash-@flash_version@.tar.gz' "${pkgname}.changes")

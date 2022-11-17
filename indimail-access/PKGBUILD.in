@@ -8,7 +8,7 @@ url="https://github.com/mbhangui/indimail-virtualdomains"
 license=('GPL3')
 groups=('base-devel')
 depends=('coreutils' 'python3' 'openssl')
-makedepends=('libidn' 'pkgconfig' 'gettext' 'flex' 'gdbm' 'sed' 'findutils' 'procps')
+makedepends=('libidn' 'pkgconfig' 'gettext' 'flex' 'gdbm' 'sed' 'findutils' 'procps' 'gzip')
 source=('courier-imap-@courier_version@.tar.gz' 'fetchmail-@fetchmail_version@.tar.gz' 'perm_list.imap' "${pkgname}.changes")
 sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
 provides=('indimail-access' 'courier-imap=@courier_version@' 'fetchmail=@fetchmail_version@')
