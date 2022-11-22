@@ -36,9 +36,13 @@
 %define mysqlPrefix        @mysql_prefix@
 %endif
 %define nobwidget          1
+
+%if 0
 %if %{undefined nodebug}
 %global buildsubdir        ""
 %endif
+%endif
+
 %if %build_on_obs == 1
 %global packager @email@
 %endif

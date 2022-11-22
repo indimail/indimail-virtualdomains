@@ -37,8 +37,10 @@
 # in the prep section have a problem in enabling debuginfo.
 # This isn't documented clearly anywhere. A workaround is
 # to define buildsubdir
+%if 0
 %if %{undefined nodebug}
 %global buildsubdir        ""
+%endif
 %endif
 
 %if %build_on_obs == 1
