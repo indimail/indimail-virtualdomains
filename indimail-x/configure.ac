@@ -428,7 +428,7 @@ AC_ARG_ENABLE(postfixdir, [  --enable-postfixdir=dir       directory where Postf
 
 controldir="$sysconfdir/control"
 AC_ARG_ENABLE(controldir, [  --enable-controldir=dir       directory for control files.],
-	controdir="$enableval",
+	controldir="$enableval",
 	[
 	 	if test "$controldir" != ""
 		then
