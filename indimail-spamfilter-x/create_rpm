@@ -12,6 +12,7 @@ if [ -f /etc/debian_version ] ; then
 fi
 
 verbose=0
+clean=""
 while test $# -gt 0; do
     case "$1" in
     -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
@@ -23,6 +24,9 @@ while test $# -gt 0; do
     case "$1" in
     --verbose)
 	verbose=1
+    ;;
+    --clean)
+	clean="--clean"
     ;;
     --release=*)
 	release=$optarg
@@ -130,11 +134,11 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		cp indimail-spamfilter-x/indimail-spamfilter.spec /tmp
 	fi
 	if [ $verbose -eq 0 ] ; then
-		echo "rpmbuild -ba --clean --quiet /tmp/indimail-spamfilter.spec"
-		rpmbuild -ba --clean --quiet /tmp/indimail-spamfilter.spec
+		echo "rpmbuild -ba $clean --quiet /tmp/indimail-spamfilter.spec"
+		rpmbuild -ba $clean --quiet /tmp/indimail-spamfilter.spec
 	else
-		echo "rpmbuild -ba --clean /tmp/indimail-spamfilter.spec"
-		rpmbuild -ba --clean /tmp/indimail-spamfilter.spec
+		echo "rpmbuild -ba $clean /tmp/indimail-spamfilter.spec"
+		rpmbuild -ba $clean /tmp/indimail-spamfilter.spec
 	fi
 	if [ $? -eq 0 ] ; then
 		/bin/rm -f /tmp/indimail-spamfilter.spec

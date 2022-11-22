@@ -8,6 +8,7 @@ if [ -f /etc/debian_version ] ; then
 fi
 
 verbose=0
+clean=""
 while test $# -gt 0; do
     case "$1" in
     -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
@@ -20,13 +21,16 @@ while test $# -gt 0; do
     --release=*)
 	release=$optarg
     ;;
+	--clean)
+	clean="--clean"
+	;;
     --verbose)
 	verbose=1
     ;;
     *)
     echo "invalid option [$1]"
     read key
-    usage 1
+    exit 1
     ;;
     esac
 
@@ -129,11 +133,11 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		cp procmail-x/procmail.spec /tmp
 	fi
 	if [ $verbose -eq 0 ] ; then
-		echo "rpmbuild -ba --clean --quiet /tmp/procmail.spec"
-		rpmbuild -ba --clean --quiet /tmp/procmail.spec
+		echo "rpmbuild -ba $clean --quiet /tmp/procmail.spec"
+		rpmbuild -ba $clean --quiet /tmp/procmail.spec
 	else
-		echo "rpmbuild -ba --clean /tmp/procmail.spec"
-		rpmbuild -ba --clean /tmp/procmail.spec
+		echo "rpmbuild -ba $clean /tmp/procmail.spec"
+		rpmbuild -ba $clean /tmp/procmail.spec
 	fi
 	if [ $? -eq 0 ] ; then
 		/bin/rm -f /tmp/procmail.spec

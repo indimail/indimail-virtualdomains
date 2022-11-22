@@ -3,6 +3,7 @@ rcsflag=0
 version=$(head -1 conf-version)
 
 verbose=0
+clean=""
 while test $# -gt 0; do
     case "$1" in
     -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
@@ -18,10 +19,13 @@ while test $# -gt 0; do
     --verbose)
 	verbose=1
     ;;
+    --clean)
+	clean="--clean"
+    ;;
     *)
     echo "invalid option [$1]"
     read key
-    usage 1
+    exit 1
     ;;
     esac
 
@@ -117,9 +121,9 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		cp ircube-x/ircube.spec /tmp
 	fi
 	if [ $verbose -eq 0 ] ; then
-		rpmbuild -ba --clean --quiet /tmp/ircube.spec
+		rpmbuild -ba $clean --quiet /tmp/ircube.spec
 	else
-		rpmbuild -ba --clean /tmp/ircube.spec
+		rpmbuild -ba $clean /tmp/ircube.spec
 	fi
 	/bin/rm -f /tmp/ircube.spec
 	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
