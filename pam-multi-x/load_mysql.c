@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.13  2022-11-23 15:49:46+05:30  Cprogrammer
+ * renamed mysql_lib to libmysql
+ *
  * Revision 1.12  2020-10-05 18:42:36+05:30  Cprogrammer
  * fixed compilation warning on Darwin
  *
@@ -47,7 +50,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.12 2020-10-05 18:42:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.13 2022-11-23 15:49:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
@@ -300,7 +303,7 @@ initMySQLlibrary(char **errstr)
 	if (phandle)
 		return (0);
 	if (!(ptr = env_get("MYSQL_LIB")))
-		ptr = CONTROLDIR"/mysql_lib";
+		ptr = CONTROLDIR"/libmysql";
 	else
 		ptr = "MYSQL_LIB";
 	if (!(phandle = loadLibrary(&phandle, ptr, &i, errstr))) {

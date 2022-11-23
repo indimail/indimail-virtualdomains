@@ -80,3 +80,4 @@ o suport dovecot authentication
 - 05/09/2021
 46. changed permissions for dirs with 555 to 755
 - 08/09/2022 - indimail-3.4.1
+47. nssd/load_mysql.c, pam-multi/load_mysql.c: renamed mysql_lib to libmysql
