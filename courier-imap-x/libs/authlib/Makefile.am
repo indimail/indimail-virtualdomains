@@ -155,7 +155,7 @@ man_MANS=authlib.7 authindi.7 $(manshadow) $(manpam) $(mancustom)
 authlib.7: authlib.7.in
 	CONFIG_FILES=authlib.7 CONFIG_HEADERS= $(SHELL) ./config.status
 
-install-data-local:
+install-data-local: authlib.7
 	test "$(man_LINKS)" = "" && exit 0; \
 	$(mkinstalldirs) $(DESTDIR)$(man7dir) ; \
 	for f in $(man_MANS) "" ; do \
