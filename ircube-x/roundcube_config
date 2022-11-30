@@ -714,7 +714,7 @@ if [ ! -d /service/httpd ] ; then
 		echo "  echo \"ln -s /etc/roundcubemail /usr/share/roundcubemail/config\""
 		echo "  ln -s /etc/roundcubemail /usr/share/roundcubemail/config"
 		echo "fi"
-		echo "mkdir -p $rundir/httpd
+		echo "mkdir -p $rundir/httpd"
 		echo "exec /usr/sbin/httpd -DFOREGROUND"
 		) > /service/httpd/run
 		chmod +x /service/httpd/run
