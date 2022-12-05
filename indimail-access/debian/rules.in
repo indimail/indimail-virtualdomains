@@ -39,6 +39,7 @@ build-stamp:
 	#
 	if [ -d courier-imap-$(courier_version) ] ; then \
 		cd courier-imap-$(courier_version); \
+		autoreconf -fiv; \
 		./configure $(shell dpkg-buildflags --export=cmdline) \
 			--prefix=${prefix} --libexecdir=${libexecdir} --bindir=${prefix}/bin \
 			--mandir=${mandir} --sysconfdir=${sysconfdir} --libdir=${prefix}/${libd} \
@@ -46,10 +47,16 @@ build-stamp:
 			--with-mailer=${prefix}/bin/sendmail --disable-root-check \
 			--without-userdb --without-authcustom --without-authchangepwdir \
 			--without-authgeneric --with-authshadow --with-authpwd; \
+		if [ ! -f depcomp -a -f libs/unicode/depcomp ] ; then \
+			cp libs/unicode/depcomp .; \
+		elif [ -f depcomp -a ! -f libs/unicode/depcomp ] ; then \
+			cp ./depcomp libs/unicode/depcomp; \
+		fi; \
 		cd ..; \
 	fi
 	if [ -d fetchmail-$(fetchmail_version) ] ; then \
 		cd fetchmail-$(fetchmail_version); \
+		autoreconf -fiv; \
 		./configure $(shell dpkg-buildflags --export=cmdline) \
 			--prefix=${prefix} --libexecdir=${libexecdir} --sysconfdir=${sysconfdir} \
 			--datarootdir=${shareddir} --mandir=${mandir} \

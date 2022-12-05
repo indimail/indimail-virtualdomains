@@ -271,13 +271,6 @@ install -m 644 %{S:5} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissio
 %{__rm} -rf %{buildroot}%{mandir}/man3
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
-if [ -f %{buildroot}%{mandir}/man7/authlib.7.gz ] ; then
-  for i in authshadow.7 authpwd.7 authpam.7 authcustom.7
-  do
-    %{__rm} -f %{buildroot}%{mandir}/man7/$i
-    echo ".so man7/authlib.7" |gzip -c > %{buildroot}%{mandir}/man7/$i.gz
-  done
-fi
 
 # Create these files so that %%ghost does not complain
 %{__mkdir_p} %{buildroot}%{sysconfdir}/tcp
@@ -451,7 +444,6 @@ done
 %attr(0644,root,root) %{mandir}/man7/authpwd.7.gz
 %attr(0644,root,root) %{mandir}/man7/authindi.7.gz
 %attr(0644,root,root) %{mandir}/man7/authpam.7.gz
-%attr(0644,root,root) %{mandir}/man7/authcustom.7.gz
 %attr(0644,root,root) %{mandir}/man7/maildirquota.7.gz
 %attr(0644,root,root) %{mandir}/man7/courier-unicode.7.gz
 %attr(0644,root,root) %{mandir}/man8/makeimapaccess.8.gz

@@ -30,7 +30,10 @@ edit = sed \
 	-e 's,@DATE\@,$(DATE),g'
 
 all: rules changelog prerm postrm preinst postinst indimail-access.install \
-	indimail-access.dsc indimail-access-xUbuntu_22.04.dsc debian.tar.gz
+	indimail-access.dsc indimail-access-xUbuntu_16.04.dsc \
+	indimail-access-Univention_4.3.dsc \
+	indimail-access-Univention_4.4.dsc \
+	indimail-access-xUbuntu_22.04.dsc debian.tar.gz
 
 prerm: prerm.in Makefile
 	$(edit) $@.in > $@
@@ -54,6 +57,15 @@ control: control.in ../conf-email
 copyright: copyright.in ../conf-email
 	$(edit) $@.in > $@
 indimail-access.dsc: indimail-access.dsc.in Makefile ../conf-version \
+../conf-release ../conf-email
+	$(edit) $@.in > $@
+indimail-access-xUbuntu_16.04.dsc: indimail-access-xUbuntu_16.04.dsc.in Makefile ../conf-version \
+../conf-release ../conf-email
+	$(edit) $@.in > $@
+indimail-access-Univention_4.3.dsc: indimail-access-xUbuntu_16.04.dsc.in Makefile ../conf-version \
+../conf-release ../conf-email
+	$(edit) $@.in > $@
+indimail-access-Univention_4.4.dsc: indimail-access-xUbuntu_16.04.dsc.in Makefile ../conf-version \
 ../conf-release ../conf-email
 	$(edit) $@.in > $@
 indimail-access-xUbuntu_22.04.dsc: indimail-access-xUbuntu_22.04.dsc.in Makefile ../conf-version \

@@ -148,31 +148,21 @@ authchangepwdir.h: config.status
 	echo '#define AUTHCHANGEPWDIR "@authchangepwdir@"' >authchangepwdir.h
 
 man7=authlib.7
-man_LINKS=$(manpwd)
 man7dir=$(mandir)/man7
-man_MANS=authlib.7 authindi.7 $(manshadow) $(manpam) $(mancustom)
+man_MANS=authlib.7 authindi.7 $(manpwd) $(manshadow) $(manpam) $(mancustom)
 
 authlib.7: authlib.7.in
 	CONFIG_FILES=authlib.7 CONFIG_HEADERS= $(SHELL) ./config.status
 
 install-data-local: authlib.7
-	test "$(man_LINKS)" = "" && exit 0; \
 	$(mkinstalldirs) $(DESTDIR)$(man7dir) ; \
 	for f in $(man_MANS) "" ; do \
 		test "$$f" = "" && continue ; \
-		$(INSTALL) -C -m 644 $$f $(DESTDIR)$(man7dir) ; done ; \
-	cd $(DESTDIR)$(man7dir) || exit 1 ; \
-		for f in $(man_LINKS) "" ; do \
-			test "$$f" = "" && continue ; \
-			rm -f $$f; $(LN_S) authlib.7 $$f ; \
-			echo "$(LN_S) authlib.7 $$f" ; \
-			test -w /etc && chown bin $$f && chgrp bin $$f ; \
-			done ; exit 0
+		$(INSTALL) -C -m 644 $$f $(DESTDIR)$(man7dir) ; done
 
 uninstall-local:
 	cd $(DESTDIR)$(man7dir) 2>/dev/null || exit 0 ; \
-		test "$(man_LINKS)" = "" && exit 0; \
-		rm -f $(man_LINKS) $(man_MANS)
+		rm -f $(man_MANS)
 
 dist-hook:
 	for f in $(BUILT_SOURCES) ; do rm -f $(distdir)/$$f; done
