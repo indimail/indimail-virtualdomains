@@ -973,21 +973,22 @@ Currently, the list of supported binary distributions for IndiMail is
           o SUSE Linux Enterprise 15 SP4
 
     * Red Hat
-          o Fedora 35
           o Fedora 36
+          o Fedora 37
           o Red Hat Enterprise Linux 7
           o Scientific Linux 7
           o CentOS 7
           o CentOS 8
+          o CentOS 8 Stream
+          o CentOS 9 Stream
+          o AlmaLinux 8
+          o AlmaLinux 9
 
     * Debian
           o Debian 10.0
           o Debian 11.0
-          o Univention_4.3
-          o Univention_4.4
 
     * Ubuntu
-          o Ubuntu 16.04
           o Ubuntu 18.04
           o Ubuntu 20.04
           o Ubuntu 22.04
