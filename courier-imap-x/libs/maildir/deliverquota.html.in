@@ -57,8 +57,11 @@ below
 <span class="command"><strong>deliverquota</strong></span> delivers the message to the maildir
 and terminates with
 exit code 0 if the message can be delivered without going over quota.</p><p>
-If the maildir is over its specified quota, <span class="command"><strong>deliverquota</strong></span>
-terminates with exit code 77 (EX_NOPERM).</p></div><div class="refsect1"><a id="seealso" shape="rect"> </a><h2>SEE ALSO</h2><p>
+      If the maildir is over its specified quota: the maildrop version of
+      <span class="command"><strong>deliverquota</strong></span>
+      terminates with an exit code 77 (EX_NOPERM); the Courier version of
+      <span class="command"><strong>deliverquota</strong></span>
+      terminates with an exit code 75 (EX_TEMPFAIL).</p></div><div class="refsect1"><a id="seealso" shape="rect"> </a><h2>SEE ALSO</h2><p>
 <a class="ulink" href="maildirquota.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildirquota</span>(7)</span></a>,
 <a class="ulink" href="maildirmake.html" target="_top" shape="rect"><span class="citerefentry"><span class="refentrytitle">maildirmake</span>(1)</span></a>.
 </p></div></div></body></html>

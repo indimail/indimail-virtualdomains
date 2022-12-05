@@ -52,7 +52,7 @@ BuildRequires: procps-ng
 BuildRequires: gdbm-devel
 BuildRequires: coreutils perl
 BuildRequires: courier-authlib-devel >= 0.60.6.20080629
-BuildRequires: libidn-devel
+BuildRequires: libidn2-devel
 BuildRequires: courier-unicode-devel
 BuildRequires: %{__make}
 
@@ -171,7 +171,7 @@ cat $RPM_BUILD_ROOT/%{_datadir}/dhparams.pem.dist.tmp >>$RPM_BUILD_ROOT/%{_datad
 rm -f $RPM_BUILD_ROOT/%{_datadir}/dhparams.pem.dist.tmp
 
 %{__mkdir_p} $RPM_BUILD_ROOT/etc/cron.monthly
-%{__ln_s} %{_sbindir}/mkdhparams $RPM_BUILD_ROOT/etc/cron.monthly/courier-imap-mkdhparams
+%{__ln_s} `realpath -m --relative-to /etc/cron.monthly %{_sbindir}/mkdhparams` $RPM_BUILD_ROOT/etc/cron.monthly/courier-imap-mkdhparams
 
 #
 # Fix imapd.dist

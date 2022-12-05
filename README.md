@@ -90,7 +90,7 @@ gcc gcc-c++ make autoconf automake libtool pkgconfig
 file sed findutils diffutils gzip xz binutils coreutils grep flex bison
 glibc glibc-devel procps openssl openssl-devel mysql-devel
 readline readline-devel ncurses-devel libtirpc-devel
-pam-devel libgcrypt-devel gdbm-devel libidn-devel pcre-devel pcre2-devel libidn2-devel
+pam-devel libgcrypt-devel gdbm-devel pcre-devel pcre2-devel libidn2-devel
 libgsasl-devel gettext-devel python3 python3-devel (python python-devel on ancient distros)
 
 opensuse - openldap2-devel instead of openldap-devel
@@ -107,7 +107,7 @@ mime-support m4 gawk openssl procps file sed bison
 findutils diffutils readline libreadline-dev xz gzip
 binutils coreutils grep flex libncurses5-dev libncurses5
 libpam0g-dev libpcre2-dev libpcre3-dev libgdbm-dev libdb-dev libgcrypt20-dev
-python libidn11-dev libidn2-0-dev libgsasl7-dev
+python libidn2-0-dev libgsasl7-dev
 
 Ubuntu 16.04, Debian 8 - libmysqlclient-dev
 Ubuntu 16.04 - libcom-err2
@@ -119,7 +119,7 @@ Remaining - default-libmysqlclient-dev
 ```
 # pacman -S --refresh --sysupgrade
 # pacman -S --needed archlinux-keyring
-# pacman -S base-devel diffutils coreutils openssl openldap mysql libidn libidn2 python gsasl libtirpc
+# pacman -S base-devel diffutils coreutils openssl openldap mysql libidn2 python gsasl libtirpc
 ```
 
 **Gentoo Linux**
@@ -144,7 +144,7 @@ Remaining - default-libmysqlclient-dev
 ```
 # apk add gcc g++ make git autoconf automake libtool m4 sed
 # apk add openssl-dev mysql-dev musl-nscd-dev fts-dev
-# apk add libidn-dev libidn2-dev pcre-dev pcre2-dev libtirpc-dev ncurses-dev
+# apk add libidn2-dev pcre-dev pcre2-dev libtirpc-dev ncurses-dev
 # apk add linux-pam-dev gdbm-dev db-dev gsl-dev xmlto
 ```
 
@@ -429,14 +429,14 @@ $ sudo make install-strip
 NOTE: for FreeBSD
 
 ```
-# pkg install pcre pcre2 libidn gdbm
+# pkg install pcre pcre2 libidn2 gdbm
 ```
 
 NOTE: for Darwin
 
 ```
 $ sudo port install pcre pcre2 db48 gdbm libidn2
-$ sudo brew install pcre pcre2 berkeley-db gdbm libidn
+$ sudo brew install pcre pcre2 berkeley-db gdbm libidn2
 ```
 
 (check version in indimail-virtualdomains/courier-imap-x/conf-version)

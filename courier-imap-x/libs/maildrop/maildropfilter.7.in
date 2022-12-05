@@ -4,12 +4,12 @@
 .\"     Title: maildropfilter
 .\"    Author: Sam Varshavchik
 .\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 11/04/2020
+.\"      Date: 11/12/2022
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "MAILDROPFILTER" "7" "11/04/2020" "Courier Mail Server" "Double Precision, Inc\&."
+.TH "MAILDROPFILTER" "7" "11/12/2022" "Courier Mail Server" "Double Precision, Inc\&."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -391,9 +391,8 @@ prior to version 2\&.0 (included in the
 Courier
 mail server 0\&.51, and earlier), used a built\-in pattern matching engine, instead of using the
 PCRE
-library (see the
-\(lqPatterns\(rq
-section)\&.
+library (see
+the section called \(lqPatterns\(rq)\&.
 \fBmaildrop\fR
 1\&.x used a different syntax for patterns, which is no longer described in this manual page\&. The old pattern matching engine is still available, by setting
 \fIMAILDROP_OLD_REGEXP\fR
@@ -698,7 +697,7 @@ maildrop option, below)\&. Do not include option settings in the
 .IP \(bu 2.3
 .\}
 Named subpatterns are not implemented\&. Numbered subpatterns are implemented, see
-\(lqPattern Match Results\(rq, below\&.
+the section called \(lqPattern Match Results\(rq, below\&.
 .RE
 .sp
 .RS 4
@@ -889,6 +888,48 @@ header is usually much more complicated, and can\*(Aqt be handled that easily\&.
 Subpatterns are not processed in the
 foreach
 statement\&.
+.sp .5v
+.RE
+.if n \{\
+.sp
+.\}
+.RS 4
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.br
+.ps +1
+\fBNote\fR
+.ps -1
+.br
+.PP
+The contents of all
+\fIMATCH\fR
+variables use UTF\-8 encoding\&. As explained in
+the section called \(lqPatterns\(rq
+the message gets transcoded into a canonical UTF\-8 format, replacing MIME\-encoded headers with their UTF\-8 equivalent\&. Consequently,
+\fIMATCH\fR
+variables that represent matched text are in UTF\-8\&. For example:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+if (/^Subject: *(\&.*)/)
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+This sets
+\fIMATCH\fR
+to what\*(Aqs in the
+\(lqSubject\(rq
+header, which could possibly use MIME\-encoding, for example:
+\(lqSubject: =?UTF\-8?B?SMOzbGEh?=\(rq\&. The resulting
+\fIMATCH\fR
+shows
+\(lqHóla!\(rq\&.
 .sp .5v
 .RE
 .SS "Conversion of maildrop 1\&.x patterns to 2\&.0"

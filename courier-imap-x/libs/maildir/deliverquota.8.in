@@ -4,12 +4,12 @@
 .\"     Title: deliverquota
 .\"    Author: Sam Varshavchik
 .\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 07/12/2020
+.\"      Date: 11/12/2022
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "DELIVERQUOTA" "8" "07/12/2020" "Courier Mail Server" "Double Precision, Inc\&."
+.TH "DELIVERQUOTA" "8" "11/12/2022" "Courier Mail Server" "Double Precision, Inc\&."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -94,9 +94,11 @@ percent full\&.
 \fBdeliverquota\fR
 delivers the message to the maildir and terminates with exit code 0 if the message can be delivered without going over quota\&.
 .PP
-If the maildir is over its specified quota,
+If the maildir is over its specified quota: the maildrop version of
 \fBdeliverquota\fR
-terminates with exit code 77 (EX_NOPERM)\&.
+terminates with an exit code 77 (EX_NOPERM); the Courier version of
+\fBdeliverquota\fR
+terminates with an exit code 75 (EX_TEMPFAIL)\&.
 .SH "SEE ALSO"
 .PP
 \m[blue]\fB\fBmaildirquota\fR(7)\fR\m[]\&\s-2\u[1]\d\s+2,

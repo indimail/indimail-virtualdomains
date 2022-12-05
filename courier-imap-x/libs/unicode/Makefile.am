@@ -529,6 +529,19 @@ dorpm:
 		--define '__spec_prep_pre %{___build_pre}' \
 		$(RPMFLAGS) @PACKAGE_NAME@-@PACKAGE_VERSION@.tar.bz2
 
+deb-pbuild: bump.deb.release
+	@test -z "$(PBUILD)" || exit 0; echo "Set PBUILD please"; exit 1
+	. deb.release; \
+	R="`echo $(PBUILD) | tr '.' '+'`"; \
+	sed 's/^\([^ ][^ ]*\).*/\1 (@VERSION@-'$$RELEASE'+'$$R') devel; urgency=medium/' \
+		<packaging/debian/changelog >packaging/debian/changelog.new; \
+	mv packaging/debian/changelog.new packaging/debian/changelog
+	$(MAKE) dist
+	rm -rf @PACKAGE@-@VERSION@ deb/pbuild
+	tar xf @PACKAGE@-@VERSION@.tar.bz2
+	cd @PACKAGE@-@VERSION@ && chmod +x ./courier-debuild && ./courier-debuild -us -uc && mv deb ../deb/pbuild
+	rm -rf @PACKAGE@-@VERSION@
+
 bump.rpm.release: $(PACKAGE).spec
 	VERSION="x"; \
 	test -f $(srcdir)/rpm.release && . $(srcdir)/rpm.release; \
@@ -537,8 +550,10 @@ bump.rpm.release: $(PACKAGE).spec
 	RELEASE=`expr $$NEXT_RELEASE + 1`; \
 	echo "VERSION=@PACKAGE_VERSION@" >$(srcdir)/rpm.release; \
 	echo "RELEASE=$$RELEASE" >>$(srcdir)/rpm.release; \
-	sed 's/^Release: .*/Release: '$$RELEASE'%{?dist}%{?courier_release}/' \
-		<$(PACKAGE).spec >$(PACKAGE).spec.new; \
+	. /etc/lsb-release; \
+	R=`echo $$DISTRIB_RELEASE | tr '.' '+'`; \
+	sed 's/^\([^ ][^ ]*\).*/\1 (@VERSION@-'$$RELEASE'+'$$R') devel; urgency=medium/' \
+ 		<packaging/debian/changelog >packaging/debian/changelog.new; \
 	mv $(PACKAGE).spec.new $(PACKAGE).spec
 
 upload-beta:

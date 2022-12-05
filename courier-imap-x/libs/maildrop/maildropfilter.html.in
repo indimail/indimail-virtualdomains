@@ -223,9 +223,8 @@ MAILBOX="${HOME-WORD}/Mailbox"
 	      (included in the <span class="application">Courier</span> mail server 0.51,
 	      and earlier), used a built-in pattern matching engine, instead of using the
 	      <acronym class="acronym">PCRE</acronym>
-	      library (see the
-	      <span class="quote">“<span class="quote"><a class="link" href="#patterns" shape="rect">Patterns</a></span>”</span>
-	      section).
+	      library (see
+	      <a class="xref" href="#patterns" shape="rect">the section called “Patterns”</a>).
 	      <span class="command"><strong>maildrop</strong></span> 1.x used a different syntax for patterns, which
 	      is no longer described in this manual page.
 	      The old pattern matching engine is still available, by
@@ -410,7 +409,7 @@ DIR=`ls`
 	    doing so will lead to undefined results.</p></li><li class="listitem"><p>
 	    Named subpatterns are not implemented.
 	    Numbered subpatterns are implemented, see
-	    <span class="quote">“<span class="quote"><a class="link" href="#patmatch" shape="rect">Pattern Match Results</a></span>”</span>,
+	    <a class="xref" href="#patmatch" shape="rect">the section called “Pattern Match Results”</a>,
 	    below.
 	  </p></li><li class="listitem"><p>
 	    The search pattern gets executed not against the raw message text,
@@ -515,7 +514,21 @@ From: postmaster@localhost
 	more complicated, and can't be handled that easily.
 	This is just an illustrative example.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
 	  Subpatterns are not processed in the <code class="literal">foreach</code>
-	  statement.</p></div></div><div class="refsect2"><a id="conversion" shape="rect"> </a><h3>Conversion of <span class="command"><strong>maildrop</strong></span> 1.x patterns to 2.0</h3><p>
+	  statement.</p></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
+	  The contents of all <code class="varname">MATCH</code> variables use UTF-8
+	  encoding. As explained in <a class="xref" href="#maildropfilter_patterns" title="Patterns" shape="rect">the section called “Patterns”</a>
+	  the message gets transcoded into a canonical UTF-8 format,
+	  replacing MIME-encoded headers with their UTF-8 equivalent.
+	  Consequently, <code class="varname">MATCH</code> variables that represent
+	  matched text are in UTF-8. For example:
+	</p><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
+if (/^Subject: *(.*)/)</pre></div></blockquote></div><p>
+	  This sets <code class="varname">MATCH</code> to what's in the
+	  <span class="quote">“<span class="quote">Subject</span>”</span> header, which could possibly use MIME-encoding,
+	  for example: <span class="quote">“<span class="quote">Subject: =?UTF-8?B?SMOzbGEh?=</span>”</span>.
+	  The resulting <code class="varname">MATCH</code> shows
+	  <span class="quote">“<span class="quote">Hóla!</span>”</span>.
+	</p></div></div><div class="refsect2"><a id="conversion" shape="rect"> </a><h3>Conversion of <span class="command"><strong>maildrop</strong></span> 1.x patterns to 2.0</h3><p>
 	Although the new <acronym class="acronym">PCRE</acronym>-based pattern matching code in
 	<span class="command"><strong>maildrop</strong></span> is completely different from the built-in
 	pattern matching code in <span class="command"><strong>maildrop</strong></span> 1.x, very few changes
