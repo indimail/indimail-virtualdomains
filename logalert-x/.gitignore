@@ -2,6 +2,7 @@ obs.mk
 logalert
 showbytes
 logsrv
+logsrv.8
 incrmesg
 rpclog
 logclient

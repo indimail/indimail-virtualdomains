@@ -1,5 +1,8 @@
 /*
  * $Log: logclient.c,v $
+ * Revision 1.12  2022-12-06 12:05:21+05:30  Cprogrammer
+ * removed filewrt
+ *
  * Revision 1.11  2022-05-10 20:09:57+05:30  Cprogrammer
  * use tcpopen from libqmail
  *
@@ -61,9 +64,6 @@
 #ifdef SOLARIS
 #include <sys/systeminfo.h>
 #endif
-#ifdef HAVE_INDIMAIL
-#include <indimail/filewrt.h>
-#endif
 #ifdef HAVE_QMAIL
 #include <qmail/tcpopen.h>
 #include <qmail/getEnvConfig.h>
@@ -74,7 +74,7 @@
 #define SEEKDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logclient.c,v 1.11 2022-05-10 20:09:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logclient.c,v 1.12 2022-12-06 12:05:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -150,9 +150,7 @@ get_options(int argc, char **argv, char **hostname, char **certfile, int *foregr
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 #ifdef HOSTVALIDATE	
 	struct hostent *hostptr;
@@ -185,10 +183,7 @@ main(argc, argv)
 }
 
 int
-consclnt(hostname, fname, clientcert)
-	char          *hostname;
-	char         **fname;
-	char          *clientcert;
+consclnt(char *hostname, char **fname, char *clientcert)
 {
 	char            lhost[MAXHOSTNAMELEN], seekfile[MAXBUF];
 	int             sockfd, idx, fcount;
@@ -204,7 +199,7 @@ consclnt(hostname, fname, clientcert)
 #endif
 	if ((fcount = (int) sysconf(_SC_OPEN_MAX)) == -1)
 	{
-		(void) fprintf(stderr, "sysconf: %s\n", strerror(errno));
+		fprintf(stderr, "sysconf: %s\n", strerror(errno));
 		return(1);
 	}
 #ifdef SERVER
@@ -304,7 +299,7 @@ consclnt(hostname, fname, clientcert)
 		getEnvConfigInt(&log_timeout, "LOGSRV_TIMEOUT", 120);
 		if (safewrite(sockfd, lhost, idx, log_timeout) != idx)
 		{
-			filewrt(2, "unable to send hostname to %s\n", lhost);
+			fprintf(stderr, "unable to send hostname to %s\n", lhost);
 #ifdef HAVE_SSL
 			ssl_free();
 #endif
@@ -317,9 +312,7 @@ consclnt(hostname, fname, clientcert)
 
 /* function for I/O multiplexing */
 static int
-IOplex(lhost, sockfd)
-	char           *lhost;
-	int             sockfd;
+IOplex(char *lhost, int sockfd)
 {
 	register int    Bytes;
 	int             sleepinterval;
@@ -345,7 +338,7 @@ IOplex(lhost, sockfd)
 		{
 			if (errno == EINTR)
 				continue;
-			(void) filewrt(2, "select: %s\n", strerror(errno));
+			fprintf(stderr, "select: %s\n", strerror(errno));
 			(void) sslwrt(sockfd, log_timeout, "select: %s\n", strerror(errno));
 			return (-1);
 		}
@@ -409,11 +402,7 @@ IOplex(lhost, sockfd)
 }
 
 static int
-checkfiles(fname, msgfp, seekval, seekfd)
-    char           *fname;
-    FILE           *msgfp;
-	long            *seekval;
-	int             seekfd;
+checkfiles(char *fname, FILE *msgfp, long *seekval, int seekfd)
 {
 	int             fd, msgfd, count;
 	long            tmpseekval;

@@ -1,5 +1,8 @@
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.21  2022-12-06 12:05:36+05:30  Cprogrammer
+ * removed filewrt
+ *
  * Revision 1.20  2022-05-21 11:11:36+05:30  Cprogrammer
  * openssl 3.0.0 port
  *
@@ -89,25 +92,22 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+
+/*- tirpc */
+#ifdef HAVE_TIRPC
+#ifdef HAVE_TIRPC_RPC_RPC_H
+#include <tirpc/rpc/rpc.h>
+#endif /*- #ifdef HAVE_TIRPC_RPC_RPC_H */
+#ifdef HAVE_TIRPC_RPC_TYPES_H
+#include <tirpc/rpc/types.h>
+#endif /*- #ifdef HAVE_TIRPC_RPC_TYPES_H */
+#else /* no tirpc */
 #ifdef HAVE_RPC_RPC_H
 #include <rpc/rpc.h>
 #endif
 #ifdef HAVE_RPC_TYPES_H
 #include <rpc/types.h>
 #endif
-
-/*- tirpc */
-#ifdef HAVE_TIRPC
-#ifndef HAVE_RPC_RPC_H
-#ifdef HAVE_TIRPC_RPC_RPC_H
-#include <tirpc/rpc/rpc.h>
-#endif /*- #ifdef HAVE_TIRPC_RPC_RPC_H */
-#endif /*- #ifdef HAVE_RPC_RPC_H */
-#ifndef HAVE_RPC_TYPES_H
-#ifdef HAVE_TIRPC_RPC_TYPES_H
-#include <tirpc/rpc/types.h>
-#endif /*- #ifdef HAVE_TIRPC_RPC_TYPES_H */
-#endif /*- #ifndef HAVE_RPC_TYPES_H */
 #endif /*- #ifdef HAVE_TIRPC */
 
 #include <signal.h>
@@ -115,9 +115,6 @@
 #ifdef HAVE_SSL
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-#endif
-#ifdef HAVE_INDIMAIL
-#include <indimail/filewrt.h>
 #endif
 #ifdef HAVE_QMAIL
 #include <qmail/getEnvConfig.h>
@@ -143,13 +140,21 @@ program RPCLOG
 
 #define MAXBUF    8192
 #define PIDFILE   "/tmp/logsrv.pid"
-#define PORT      "logsrv"
+#define PORT      "logsrv" /*- 6340 */
 #define STATUSDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.20 2022-05-21 11:11:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.21 2022-12-06 12:05:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
+#if !defined(HAVE_TIRPC) && !defined(HAVE_RPC_RPC_H)
+int
+main(int argc, char **argv)
+{
+	fprintf(stderr, "no usage rpc/svc library found\n");
+	exit (111);
+}
+#else
 #ifdef __STDC__
 int             main(int, char **);
 int             server(int);
@@ -200,10 +205,7 @@ ssl_write(SSL *ssl, char *buf, int len)
 }
 
 int
-sockwrite(fd, wbuf, len)
-	int             fd;
-	char           *wbuf;
-	int             len;
+sockwrite(int fd, char *wbuf, int len)
 {
 	char           *ptr;
 	int             rembytes, wbytes;
@@ -379,7 +381,7 @@ SigHup(void)
 #endif
 
 int
-get_options(int argc, char **argv, int *foreground, int *silent)
+get_options(int argc, char **argv, int *background, int *silent)
 {
 	int             c, errflag = 0;
 
@@ -396,8 +398,8 @@ get_options(int argc, char **argv, int *foreground, int *silent)
 		case 's':
 			*silent = 1;
 			break;
-		case 'f':
-			*foreground = 1;
+		case 'b':
+			*background = 1;
 			break;
 		case 'r':
 			rpcflag = 1;
@@ -442,9 +444,9 @@ void
 usage(char *pname)
 {
 #ifdef HAVE_SSL
-	filewrt(2, "Usage: %s [-s] [-f] [-n certfile] [-r rpchost]\n", pname);
+	fprintf(stderr, "Usage: %s [-s] [-b] [-n certfile] [-r rpchost]\n", pname);
 #else
-	filewrt(2, "Usage: %s [-s] [-f] [-r rpchost]\n", pname);
+	fprintf(stderr, "Usage: %s [-s] [-b] [-r rpchost]\n", pname);
 #endif
 	return;
 }
@@ -456,7 +458,7 @@ main(int argc, char **argv)
 {
 	FILE           *pidfp;
 	char           *ptr;
-	int             pid, bindfd, sfd, foreground = 0, silent = 0, len;
+	int             pid, bindfd, sfd, background = 0, silent = 0, len;
 	struct sockaddr_in remotaddr;	/* for peer socket address */
 	int             inaddrlen = sizeof(struct sockaddr_in);
 	struct linger   linger;
@@ -470,7 +472,7 @@ main(int argc, char **argv)
 		progname++;
 	else
 		progname = argv[0];
-	if (get_options(argc, argv, &foreground, &silent)) {
+	if (get_options(argc, argv, &background, &silent)) {
 		usage(progname);
 		return (1);
 	}
@@ -489,39 +491,37 @@ main(int argc, char **argv)
 	getEnvConfigInt(&log_timeout, "LOGSRV_TIMEOUT", 120);
 	if (!(statusdir = getenv("STATUSDIR")))
 		statusdir = STATUSDIR;
-	if (!foreground) {
+	if (background) {
 		if ((pidfp = fopen(PIDFILE, "r"))) {
 			if (fscanf(pidfp, "%d", &logsrvpid) != 1) ;
 			(void) fclose(pidfp);
 			if (logsrvpid && !kill(logsrvpid, 0)) {
-				(void) filewrt(2, "%s is already running\n", progname);
+				fprintf(stderr, "%s is already running\n", progname);
 				return (0);
 			} else
 			if (logsrvpid && errno == EACCES) {
-				(void) filewrt(2, "%s is already running\n", progname);
+				fprintf(stderr, "%s is already running\n", progname);
 				return (1);
 			}
 		}
 		switch (logsrvpid = fork())
 		{
 		case -1:
-			filewrt(2, "fork: %s\n", strerror(errno));
+			fprintf(stderr, "fork: %s\n", strerror(errno));
 			return (1);
 		case 0:
 			(void) setsid();
 			(void) close(0);
-			(void) close(1);
-			(void) close(2);
 			logsrvpid = getpid();
 			break;
 		default:
 			if ((pidfp = fopen(PIDFILE, "w"))) {
-				(void) fprintf(pidfp, "%d", logsrvpid);
+				fprintf(pidfp, "%d", logsrvpid);
 				(void) fclose(pidfp);
 				return(0);
 			} else {
-				filewrt(2, "%s: %s\n", PIDFILE, strerror(errno));
-				_exit(1);
+				fprintf(stderr, "%s: %s\n", PIDFILE, strerror(errno));
+				exit(1);
 			}
 		}
 	} else
@@ -531,8 +531,8 @@ main(int argc, char **argv)
 	if (!(ptr = getenv("PORT")))
 		ptr = PORT;
 	if ((bindfd = tcpbind("0", ptr, 5)) == -1) {
-		(void) filewrt(2, "tcpsockbind failed for port %s\n", ptr);
-		_exit (1);
+		fprintf(stderr, "tcpsockbind failed for port %s\n", ptr);
+		exit (1);
 	}
 	signal(SIGTERM, SigTerm);
 	for (;;) {
@@ -546,16 +546,16 @@ main(int argc, char **argv)
 				 * have to add more cases here
 				 */
 			default:
-				(void) filewrt(2, "accept: %s\n", strerror(errno));
-				if (!foreground)
+				fprintf(stderr, "accept: %s\n", strerror(errno));
+				if (background)
 					(void) unlink(PIDFILE);
-				_exit(1);
+				exit(1);
 			}
 		}
 		switch (pid = fork())
 		{
 		case -1:
-			(void) filewrt(2, "fork: %s\n", strerror(errno));
+			fprintf(stderr, "fork: %s\n", strerror(errno));
 			(void) close(sfd);
 		case 0:
 			(void) signal(SIGTERM, SIG_DFL);
@@ -624,7 +624,7 @@ main(int argc, char **argv)
 					close(0);
 					close(3);
 					close(4);
-					_exit(1);
+					exit(1);
 				case -1:
 					fprintf(stderr, "%d: unable to fork: %s\n", getpid(), strerror(errno));
 					break;
@@ -640,7 +640,7 @@ main(int argc, char **argv)
 						fprintf(stderr, "%d: %s\n", getpid(), ERR_error_string(e, 0));
 					fprintf(stderr, "%d: unable to set up SSL session\n", getpid());
 					SSL_CTX_free(ctx);
-					_exit(1);
+					exit(1);
 				}
 				SSL_CTX_free(ctx);
 #ifndef CRYPTO_POLICY_NON_COMPLIANCE
@@ -656,7 +656,7 @@ main(int argc, char **argv)
 				if (!(sbio = BIO_new_socket(0, BIO_NOCLOSE))) {
 					fprintf(stderr, "%d: unable to set up BIO socket\n", getpid());
 					SSL_free(ssl);
-					_exit(1);
+					exit(1);
 				}
 				SSL_set_bio(ssl, sbio, sbio); /*- cannot fail */
 				n = translate(ssl, pi1[1], pi2[0], pi3[0], 3600);
@@ -680,17 +680,17 @@ main(int argc, char **argv)
 					break;
 				} /*- for (; pid = waitpid(-1, &status, WNOHANG | WUNTRACED);) -*/
 				if (n)
-					_exit(n);
+					exit(n);
 				if (retval)
-					_exit(retval);
-				_exit (0);
+					exit(retval);
+				exit (0);
 			} else { /*- if (usessl == 1) */
 				(void) server(silent);
-				_exit(1);
+				exit(1);
 			}
 #else
 		(void) server(silent);
-		_exit(1);
+		exit(1);
 #endif
 		default:
 			(void) close(sfd);
@@ -702,11 +702,11 @@ int
 write_bytes(int fd, umdir_t *Bytes)
 {
 	if (lseek(fd, sizeof(pid_t), SEEK_SET) == -1) {
-		(void) filewrt(2, "lseek: %s\n", strerror(errno));
+		fprintf(stderr, "lseek: %s\n", strerror(errno));
 		return (-1);
 	}
 	if (write(fd, (char *) Bytes, sizeof(umdir_t)) == -1) {
-		(void) filewrt(2, "write_bytes: %s\n", strerror(errno));
+		fprintf(stderr, "write_bytes: %s\n", strerror(errno));
 		return (-1);
 	}
 	return (0);
@@ -716,10 +716,7 @@ write_bytes(int fd, umdir_t *Bytes)
 #define SELECTTIMEOUT           30 /*- secs after which select will timeout -*/
 
 int
-sockread(fd, buffer, len)
-	int             fd;
-	char           *buffer;
-	int             len;
+sockread(int fd, char *buffer, int len)
 {
 	char           *ptr;
 	int             rembytes, rbytes, retrycount;
@@ -767,7 +764,7 @@ server(int silent)
 	char           *ptr, *(parm[1]);
 
 	if ((retval = sockread(0, hostname, MAXHOSTNAMELEN)) == -1) {
-		(void) filewrt(2, "read: %s\n", strerror(errno));
+		fprintf(stderr, "read: %s\n", strerror(errno));
 		if (write(3, "1", 1) == -1) ;
 		return (1);
 	} else
@@ -775,7 +772,7 @@ server(int silent)
 		return(1);
 	hostname[retval] = 0;
 	if (!(socketfp = fdopen(0, "r"))) {
-		(void) filewrt(2, "fdopen: %s\n", strerror(errno));
+		fprintf(stderr, "fdopen: %s\n", strerror(errno));
 		if (write(3, "1", 1) == -1) ;
 		return (1);
 	}
@@ -783,41 +780,41 @@ server(int silent)
 	(void) sprintf(statusfile, "%s/%s.status", statusdir, hostname);
 	if (!access(statusfile, R_OK)) {
 		if ((fd = open(statusfile, O_RDWR, 0644)) == -1) {
-			(void) filewrt(2, "creat: %s %s\n", statusfile, strerror(errno));
+			fprintf(stderr, "creat: %s %s\n", statusfile, strerror(errno));
 			return(1);
 		}
 		if ((n = read(fd, (char *) &pid, sizeof(pid_t))) == -1) {
-			(void) filewrt(2, "readpid: %s: %s\n", statusfile, strerror(errno));
+			fprintf(stderr, "readpid: %s: %s\n", statusfile, strerror(errno));
 			return(1);
 		}
 		if (n == sizeof(pid_t)) {
 			if ((n = read(fd, (char *) &bytes, sizeof(umdir_t))) == -1) {
-				(void) filewrt(2, "readbytes: %s: %s\n", statusfile, strerror(errno));
+				fprintf(stderr, "readbytes: %s: %s\n", statusfile, strerror(errno));
 				return(1);
 			}
 		}
 	} else {
 		if ((fd = open(statusfile, O_CREAT|O_RDWR, 0644)) == -1) {
-			(void) filewrt(2, "creat: %s %s\n", statusfile, strerror(errno));
+			fprintf(stderr, "creat: %s %s\n", statusfile, strerror(errno));
 			return(1);
 		}
 		bytes = 0;
 	}
 	if (lseek(fd, 0, SEEK_SET) == -1) {
-		(void) filewrt(2, "lseek: %s\n", strerror(errno));
+		fprintf(stderr, "lseek: %s\n", strerror(errno));
 		return (-1);
 	}
 	pid = getpid();
 	if (write(fd, (char *) &pid, sizeof(pid_t)) != sizeof(pid_t)) {
-		(void) filewrt(2, "write: %s: %s\n", statusfile, strerror(errno));
+		fprintf(stderr, "write: %s: %s\n", statusfile, strerror(errno));
 		return(1);
 	}
-	filewrt(1, "Connection request from %s\n", hostname);
+	printf("Connection request from %s\n", hostname);
 	(void) signal(SIGTERM, SigTerm);
 	for (;; sleep(5)) {
 		for (;;) {
 			if (!fgets(buffer, MAXBUF - 1, socketfp) || feof(socketfp)) {
-				(void) filewrt(2, "client terminated on %s\n", hostname);
+				fprintf(stderr, "client terminated on %s\n", hostname);
 				shutdown(0, 0);
 				return (1);
 			}
@@ -828,8 +825,8 @@ server(int silent)
 					return(1);
 				}
 			} 
-			if (!silent && filewrt(1, "%s", buffer) == -1) {
-				(void) filewrt(2, "filewrt: out: %s\n", strerror(errno));
+			if (!silent && write(1, buffer, str_len(buffer)) == -1) {
+				fprintf(stderr, "write: out: %s\n", strerror(errno));
 				shutdown(0, 0);
 				return(1);
 			}
@@ -843,10 +840,10 @@ server(int silent)
 				bytes += strlen(ptr + 1);
 			else {
 				bytes += strlen(buffer);
-				filewrt(2, "error-%s", ptr+1);
+				fprintf(stderr, "error-%s", ptr+1);
 			}
 			if (write_bytes(fd, &bytes) == -1) {
-				(void) filewrt(2, "write_bytes: %s\n", strerror(errno));
+				fprintf(stderr, "write_bytes: %s\n", strerror(errno));
 				shutdown(0, 0);
 				return(1);
 			}
@@ -862,7 +859,7 @@ log_msg(char **str)
 
 	if (!flag) {
 		if (!(cl = clnt_create(loghost, RPCLOG, CLOGVERS, "tcp"))) {
-			filewrt(2, "clnt_create: %s\n", clnt_spcreateerror(loghost));
+			fprintf(stderr, "clnt_create: %s\n", clnt_spcreateerror(loghost));
 			return (-1);
 		}
 		flag++;
@@ -885,7 +882,7 @@ send_message_1(char **argp, CLIENT *clnt)
 	(void) memset((char *) &res, 0, sizeof(res));
 	if (clnt_call(clnt, SEND_MESSAGE, (xdrproc_t) xdr_wrapstring, (char *) argp,
 			(xdrproc_t) xdr_int, (char *) &res, TIMEOUT) != RPC_SUCCESS) {
-		filewrt(2, "clnt_call: %s\n", clnt_sperror(clnt, loghost));
+		fprintf(stderr, "clnt_call: %s\n", clnt_sperror(clnt, loghost));
 		return (NULL);
 	}
 	return (&res);
@@ -895,7 +892,7 @@ void
 SigTerm()
 {
 	if (logsrvpid == getpid()) {
-		filewrt(2, "Sending SIGTERM to PROCESS GROUP %d\n", logsrvpid);
+		fprintf(stderr, "Sending SIGTERM to PROCESS GROUP %d\n", logsrvpid);
 		(void) signal(SIGTERM, SIG_IGN);
 		kill(-logsrvpid, SIGTERM);
 	}
@@ -913,4 +910,6 @@ getversion_logsrv_c()
 {
 	printf("%s\n", sccsid);
 }
+#endif
+
 #endif

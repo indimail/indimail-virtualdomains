@@ -59,7 +59,7 @@ case "$host" in
     ;;
 
 *-*-freebsd*)
-	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/includ/qmail -I/usr/local/include/indimail"
+	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/includ/qmail"
 	CFLAGS="$CFLAGS -O3 -Wall -fPIC"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
     ;;
@@ -103,19 +103,19 @@ AC_CHECK_LIB(tirpc, clnt_create, [have_tirpc=yes && AC_SUBST([LIB_RPC], ["-ltirp
 if test " $have_rpc" = " yes"
 then
     AC_CHECK_HEADERS([rpc/types.h])
-fi
-if test " $have_tirpc" = " yes"
+elif test " $have_tirpc" = " yes"
 then
     CPPFLAGS="-I/usr/include/tirpc $CXXFLAGS"
     CXXFLAGS="-I/usr/include/tirpc $CXXFLAGS"
     AC_CHECK_HEADERS([tirpc/rpc/rpc.h tirpc/rpc/types.h])
+else
+  AC_MSG_ERROR(Could not find any usable rpc library.)
 fi
 AC_CHECK_LIB(qmail, substdio_fdbuf, [AC_SUBST([LIB_QMAIL], ["-lqmail"]) AC_DEFINE([HAVE_QMAIL], [1],[qmail Library])],noqmail=t,)
 if test " $noqmail" = " t"
 then
   AC_MSG_ERROR(Could not find qmail library.)
 fi
-AC_CHECK_LIB(indimail, filewrt, [AC_SUBST([LIB_INDIMAIL], ["-lindimail"]) AC_DEFINE([HAVE_INDIMAIL], [1],[indimail Library])],,-lindimail)
 
 have_pcre=no
 LIBPCREDIR=libpcre
@@ -162,7 +162,6 @@ else
 
 fi
 
-AC_SUBST(indimaildir)
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([logalert-release:logalert-release.in],[], [])
 AC_OUTPUT

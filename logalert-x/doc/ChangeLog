@@ -20,6 +20,9 @@ Release @version@-@release@ Start 25/02/2010
 - 08/09/2022 - indimail-3.4.1
 - 05/12/2022
 09. logalert.spec: added bison to buildrequires
+- 06/12/2022
+10. logalert.spec: added rockylinux, almalinux
+11. logclient.c, logsrv.c: removed dependency on libindimail
 
 *
 2005-10-04      <gabriel@icaro.com.br>
