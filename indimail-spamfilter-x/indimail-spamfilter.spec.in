@@ -70,7 +70,7 @@ BuildRequires: flex bison
 %if 0%{?suse_version}
 BuildRequires: db-devel
 %else
-%if 0%{?fedora_version} > 17 || 0%{?centos_version} > 600 || 0%{?rhel_version} > 600 || 0%{?centos_ver} > 7 || 0%{?scientificlinux_version} > 600 || 0%{?openeuler_version} > 2000 || 0%{?almalinux_version} > 700 || "%_target_vendor" = "redhat"
+%if 0%{?fedora_version} > 17 || 0%{?centos_version} > 600 || 0%{?rhel_version} > 600 || 0%{?centos_ver} > 7 || 0%{?scientificlinux_version} > 600 || 0%{?openeuler_version} > 2000 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700
 BuildRequires: libdb-devel
 %else
 BuildRequires: db4-devel
@@ -131,7 +131,7 @@ echo target_alias   %_target_alias
 echo target_cpu     %_target_cpu
 echo target_os      %_target_os
 echo target_vendor  %_target_vendor
-%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7 || 0%{?almalinux_version} > 700 || "%_target_vendor" = "redhat"
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700
 echo pythondir      %{python3_sitelib}
 %else
 echo pythondir      %{pythondir}
