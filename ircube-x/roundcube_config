@@ -60,11 +60,7 @@ echo "    'sauserprefs',"
 echo "    'markasjunk2',"
 echo "    'iwebadmin',"
 echo ");"
-if [ $is_suse -eq 1 ] ; then
 echo "\$config['skin'] = 'elastic';"
-else
-echo "\$config['skin'] = 'larry';"
-fi
 }
 
 create_roundcube_httpd_conf()
@@ -468,28 +464,32 @@ if [ -n "$ssl_cnf" -a -f $ssl_cnf ] ; then
 		$ssl_cnf
 	fi
 fi
-if [ -f /etc/centos-release ] ; then
-	t=$(cat /etc/centos-release|awk '{print $1}')
+if [ -f /etc/centos-release -o -f /etc/almalinux-release -o -f /etc/rockylinux-release ] ; then
+	t=$(cat /etc/redhat-release|awk '{print $1}')
 	if [ "$t" = "CentOS" ] ; then
-		centos_release=$(cat /etc/centos-release|awk '{print $4}'|cut -d.  -f1)
+		os_release=$(cat /etc/centos-release|awk '{print $4}'|cut -d.  -f1)
 	elif [ "$t" = "AlmaLinux" ] ; then
-		centos_release=$(cat /etc/centos-release|awk '{print $3}'|cut -d.  -f1)
+		os_release=$(cat /etc/almalinux-release|awk '{print $3}'|cut -d.  -f1)
+	elif [ "$t" = "RockyLinux" ] ; then
+		os_release=$(cat /etc/rockylinux-release|awk '{print $3}'|cut -d.  -f1)
 	else
 		echo "Unknown CentOS release" 1>&2
 	fi
 
-	case "$centos_release" in
-		7|8)
-		echo "configuring /etc/httpd/conf.d/roundcubemail.conf for $t $centos_release"
-		if [ -f /etc/httpd/conf.d/roundcubemail.conf ] ; then
+	case "$os_release" in
+		7|8|9)
+		echo "configuring /etc/httpd/conf.d/roundcubemail.conf for $t $os_release"
+		if [ -f /etc/httpd/conf.d/roundcubemail.conf -a ! -f /etc/httpd/conf.d/roundcubemail.conf.BAK ] ; then
 			$mv /etc/httpd/conf.d/roundcubemail.conf \
 				/etc/httpd/conf.d/roundcubemail.conf.BAK
 		fi
 		create_roundcube_centos_httpd_conf > /etc/httpd/conf.d/roundcubemail.conf
 		if [ -f /etc/httpd/conf.modules.d/00-mpm.conf ] ; then
 			echo "configuring /etc/httpd/conf.modules.d/00-mpm.conf"
-			$mv /etc/httpd/conf.modules.d/00-mpm.conf \
-				/etc/httpd/conf.modules.d/00-mpm.conf.BAK
+			if [ ! -f /etc/httpd/conf.modules.d/00-mpm.conf.BAK ] ; then
+				$mv /etc/httpd/conf.modules.d/00-mpm.conf \
+					/etc/httpd/conf.modules.d/00-mpm.conf.BAK
+			fi
 			$cp /etc/httpd/conf.modules.d/00-mpm.conf.BAK \
 				/etc/httpd/conf.modules.d/00-mpm.conf
 			sed -i \
@@ -499,8 +499,10 @@ if [ -f /etc/centos-release ] ; then
 		fi
 		if [ -f /etc/httpd/conf.d/php.conf ] ; then
 			echo "configuring /etc/httpd/conf.d/php.conf"
-			$mv /etc/httpd/conf.d/php.conf \
-				/etc/httpd/conf.d/php.conf.BAK
+			if [ ! -f /etc/httpd/conf.d/php.conf.BAK ] ; then
+				$mv /etc/httpd/conf.d/php.conf \
+					/etc/httpd/conf.d/php.conf.BAK
+			fi
 			$cp /etc/httpd/conf.d/php.conf.BAK \
 				/etc/httpd/conf.d/php.conf
 			tmp=$(mktemp -t httpd.tmp.XXXXXXXXXX)
@@ -524,7 +526,7 @@ if [ -f /etc/centos-release ] ; then
 				-e "s{^    <FilesMatch \\\.(php|phar)$>{#&{g" \
 				-e "s{^        SetHandler application/x-httpd-php{#&{g" \
 				-e "s{^        SetHandler \"proxy:unix:.*\"{#&{g" \
-				-e "s{^#        SetHandler \"proxy:unix:/run/php-fpm/www.sock|fcgi://localhost\"{#       SetHandler \"proxy:unix:/run/php/php-fpm.sock|fcgi://localhost\"{g" \
+				-e "s{^.*SetHandler \"proxy:unix:/run/php-fpm/www.sock|fcgi://localhost\"{        SetHandler \"proxy:unix:/run/php/php-fpm.sock|fcgi://localhost\"{g" \
 				-e "s{^    </FilesMatch>{#&{g" \
 				/etc/httpd/conf.d/php.conf
 			/bin/rm -f $tmp
