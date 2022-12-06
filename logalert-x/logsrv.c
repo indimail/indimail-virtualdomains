@@ -1,7 +1,7 @@
 /*
  * $Log: logsrv.c,v $
- * Revision 1.21  2022-12-06 12:05:36+05:30  Cprogrammer
- * removed filewrt
+ * Revision 1.21  2022-12-06 12:24:59+05:30  Cprogrammer
+ * removed filewrt to remove dependency on libindimail
  *
  * Revision 1.20  2022-05-21 11:11:36+05:30  Cprogrammer
  * openssl 3.0.0 port
@@ -93,21 +93,25 @@
 #include <netinet/in.h>
 #endif
 
-/*- tirpc */
-#ifdef HAVE_TIRPC
-#ifdef HAVE_TIRPC_RPC_RPC_H
-#include <tirpc/rpc/rpc.h>
-#endif /*- #ifdef HAVE_TIRPC_RPC_RPC_H */
-#ifdef HAVE_TIRPC_RPC_TYPES_H
-#include <tirpc/rpc/types.h>
-#endif /*- #ifdef HAVE_TIRPC_RPC_TYPES_H */
-#else /* no tirpc */
 #ifdef HAVE_RPC_RPC_H
 #include <rpc/rpc.h>
 #endif
 #ifdef HAVE_RPC_TYPES_H
 #include <rpc/types.h>
 #endif
+
+/*- tirpc */
+#ifdef HAVE_TIRPC
+#ifndef HAVE_RPC_RPC_H
+#ifdef HAVE_TIRPC_RPC_RPC_H
+#include <tirpc/rpc/rpc.h>
+#endif /*- #ifdef HAVE_TIRPC_RPC_RPC_H */
+#endif /*- #ifdef HAVE_RPC_RPC_H */
+#ifndef HAVE_RPC_TYPES_H
+#ifdef HAVE_TIRPC_RPC_TYPES_H
+#include <tirpc/rpc/types.h>
+#endif /*- #ifdef HAVE_TIRPC_RPC_TYPES_H */
+#endif /*- #ifndef HAVE_RPC_TYPES_H */
 #endif /*- #ifdef HAVE_TIRPC */
 
 #include <signal.h>
@@ -144,7 +148,7 @@ program RPCLOG
 #define STATUSDIR PREFIX"/tmp/"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.21 2022-12-06 12:05:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.21 2022-12-06 12:24:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #if !defined(HAVE_TIRPC) && !defined(HAVE_RPC_RPC_H)
