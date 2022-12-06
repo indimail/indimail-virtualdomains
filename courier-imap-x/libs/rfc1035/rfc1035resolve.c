@@ -13,7 +13,11 @@
 #endif
 #include	<stdlib.h>
 #include	<string.h>
+#if defined(LIBIDN1)
+#include	<idna.h>
+#elif defined(LIBIDN2)
 #include	<idn2.h>
+#endif
 
 static void putqbuf(const char *p, unsigned l, void *q)
 {
@@ -58,8 +62,11 @@ struct rfc1035_reply
 	for (n=0; n<nqueries; ++n)
 	{
 		idna_queries[n]=queries[n];
-		if (idn2_to_ascii_8z(idna_queries[n].name, &buffers[n], 0)
-		    != IDNA_SUCCESS)
+#if defined(LIBIDN1)
+		if (idna_to_ascii_8z(idna_queries[n].name, &buffers[n], 0) != IDNA_SUCCESS)
+#elif defined(LIBIDN2)
+		if (idn2_to_ascii_8z(idna_queries[n].name, &buffers[n], 0) != IDNA_SUCCESS)
+#endif
 		{
 			errno=EINVAL;
 			while (n)

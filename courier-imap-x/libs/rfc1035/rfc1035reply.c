@@ -7,7 +7,11 @@
 #include	<stdlib.h>
 #include	<string.h>
 #include	<errno.h>
+#if defined(LIBIDN1)
+#include	<idna.h>
+#elif defined(LIBIDN2)
 #include	<idn2.h>
+#endif
 
 void rfc1035_replyfree(struct rfc1035_reply *p)
 {
@@ -77,8 +81,13 @@ int	cnt=0;
 
 		namebuf[i]=0;
 
+#if defined(LIBIDN1)
+		if (idna_to_unicode_8z8z(namebuf, &p, 0) != IDNA_SUCCESS)
+			return (0);
+#elif defined(LIBIDN2)
 		if (idn2_to_unicode_8z8z(namebuf, &p, 0) != IDNA_SUCCESS)
 			return (0);
+#endif
 
 		if (strlen(p) >= RFC1035_MAXNAMESIZE)
 		{

@@ -8,7 +8,11 @@
 #include	<string.h>
 #include	<stdlib.h>
 #include	<arpa/inet.h>
+#if defined(LIBIDN1)
+#include	<idna.h>
+#elif defined(LIBIDN2)
 #include	<idn2.h>
+#endif
 
 /* Convenient function to do forward IP lookup */
 
@@ -249,8 +253,13 @@ int rfc1035_a(struct rfc1035_res *res,
 
 	/* Convert requested hostname to UTF-8, with fallback */
 
+#if defined(LIBIDN1)
+	if (idna_to_unicode_8z8z(name, &p, 0) != IDNA_SUCCESS)
+		return rfc1035_unicode(res, name, iaptr, iasize);
+#elif defined(LIBIDN2)
 	if (idn2_to_unicode_8z8z(name, &p, 0) != IDNA_SUCCESS)
 		return rfc1035_unicode(res, name, iaptr, iasize);
+#endif
 
 	r=rfc1035_unicode(res, p, iaptr, iasize);
 

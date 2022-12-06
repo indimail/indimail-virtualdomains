@@ -16,7 +16,11 @@
 #if HAVE_SYS_TIME_H
 #include	<sys/time.h>
 #endif
+#if defined(LIBIDN1)
+#include	<idna.h>
+#elif defined(LIBIDN2)
 #include	<idn2.h>
+#endif
 
 struct rfc1035_spf_info {
 	const char *mailfrom;
@@ -1327,7 +1331,11 @@ static char *get_macro(struct rfc1035_spf_info *info, char name)
 		p=strrchr(v, '@');
 
 		/* Find domain, convert to ACE */
+#if defined(LIBIDN1)
+		if (!p || idna_to_ascii_8z(++p, &buf, 0) != IDNA_SUCCESS)
+#elif defined(LIBIDN2)
 		if (!p || idn2_to_ascii_8z(++p, &buf, 0) != IDNA_SUCCESS)
+#endif
 			break;
 
 		/* Buffer for local part + ACE domain */

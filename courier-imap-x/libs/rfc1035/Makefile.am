@@ -4,7 +4,7 @@
 
 
 noinst_LIBRARIES=librfc1035.a
-AM_CFLAGS=@LIBIDN_CFLAGS@
+AM_CFLAGS=@LIBIDN1_CFLAGS@ @LIBIDN2_CFLAGS@
 
 librfc1035_a_SOURCES= \
 		rfc1035.c rfc1035.h rfc1035an.c \
@@ -24,7 +24,7 @@ testlookup_DEPENDENCIES=librfc1035.a ../rfc822/libencode.la ../md5/libmd5.la \
 	../random128/librandom128.la ../soxwrap/libsoxwrap.a \
 	../soxwrap/soxlibs.dep
 testlookup_LDADD=librfc1035.a ../rfc822/libencode.la ../soxwrap/libsoxwrap.a ../md5/libmd5.la \
-	../random128/librandom128.la `cat ../soxwrap/soxlibs.dep` @LIBIDN_LIBS@
+	../random128/librandom128.la `cat ../soxwrap/soxlibs.dep` @LIBIDN1_LIBS@ @LIBIDN2_LIBS@
 testlookup_LDFLAGS=-static
 
 EXTRA_DIST=testsuite.txt
@@ -35,7 +35,7 @@ testspf_DEPENDENCIES=librfc1035.a ../rfc822/libencode.la ../md5/libmd5.la \
 	../soxwrap/soxlibs.dep
 testspf_LDADD=librfc1035.a ../rfc822/libencode.la ../md5/libmd5.la \
 	../random128/librandom128.la ../soxwrap/libsoxwrap.a \
-	`cat ../soxwrap/soxlibs.dep` @LIBIDN_LIBS@
+	`cat ../soxwrap/soxlibs.dep` @LIBIDN1_LIBS@ @LIBIDN2_LIBS@
 testspf_LDFLAGS=-static
 
 mycheck:

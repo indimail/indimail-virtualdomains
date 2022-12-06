@@ -10,11 +10,11 @@ librfc822_la_SOURCES=rfc822.c rfc822.h rfc822hdr.c rfc822hdr.h \
                   rfc822_mkdate.c rfc822_parsedt.c rfc2047u.c \
                   rfc2047.c rfc2047.h imapsubj.c imaprefs.h imaprefs.c \
 		  encodeautodetect.c
-librfc822_la_LIBADD = $(LIBIDN_LIBS)
+librfc822_la_LIBADD = $(LIBIDN1_LIBS) $(LIBIDN2_LIBS)
 
 DISTCLEANFILES=rfc822.config
 
-AM_CFLAGS = $(LIBIDN_CFLAGS)
+AM_CFLAGS = $(LIBIDN1_CFLAGS) $(LIBIDN2_CFLAGS)
 
 libencode_la_SOURCES=encode.c encode.h
 

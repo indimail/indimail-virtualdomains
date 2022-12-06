@@ -58,6 +58,8 @@ o maildrop version upgraded to 3.0.7
 39. upgraded maildrop to 3.1.0
 40. upgraded courier-imap to 5.2.0
 41. courier-imap: replaced libidn with libidn2
+- 06/01/2022
+42. courier-imap: added portability for both libidn1 and libidn2
 
 *
 Release 1.0-1.1 Start 03/06/2020

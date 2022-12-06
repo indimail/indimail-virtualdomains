@@ -22,7 +22,11 @@
 #include	<stdlib.h>
 #include	<ctype.h>
 #include	<netdb.h>
+#if defined(LIBIDN1)
+#include	<idna.h>
+#elif defined(LIBIDN2)
 #include	<idn2.h>
+#endif
 #if HAVE_DIRENT_H
 #include <dirent.h>
 #define NAMLEN(dirent) strlen((dirent)->d_name)
@@ -205,13 +209,19 @@ static int hostmatch(const struct tls_info *info, const char *domain)
 		}
 	}
 
-	if (idn2_to_unicode_8z8z(verify_domain, &idn_domain1, 0)
-	    != IDNA_SUCCESS)
+#if defined(LIBIDN1)
+	if (idna_to_unicode_8z8z(verify_domain, &idn_domain1, 0) != IDNA_SUCCESS)
 		idn_domain1=0;
 
-	if (idn2_to_unicode_8z8z(p, &idn_domain2, 0)
-	    != IDNA_SUCCESS)
+	if (idna_to_unicode_8z8z(p, &idn_domain2, 0) != IDNA_SUCCESS)
 		idn_domain2=0;
+#elif defined(LIBIDN2)
+	if (idn2_to_unicode_8z8z(verify_domain, &idn_domain1, 0) != IDNA_SUCCESS)
+		idn_domain1=0;
+
+	if (idn2_to_unicode_8z8z(p, &idn_domain2, 0) != IDNA_SUCCESS)
+		idn_domain2=0;
+#endif
 
 	rc=hostmatch_utf8(idn_domain1 ? idn_domain1:info->peer_verify_domain,
 			  idn_domain2 ? idn_domain2:p);
@@ -1559,9 +1569,11 @@ SSL *tls_connect(SSL_CTX *ctx, int fd)
 
 		if (info->peer_verify_domain)
 		{
-			if (idn2_to_unicode_8z8z(info->peer_verify_domain,
-						 &idn_domain1, 0)
-			    != IDNA_SUCCESS)
+#if defined(LIBIDN1)
+			if (idna_to_unicode_8z8z(info->peer_verify_domain, &idn_domain1, 0) != IDNA_SUCCESS)
+#elif defined(LIBIDN1)
+			if (idn2_to_unicode_8z8z(info->peer_verify_domain, &idn_domain1, 0) != IDNA_SUCCESS)
+#endif
 				idn_domain1=0;
 		}
 		SSL_set_connect_state(ssl);

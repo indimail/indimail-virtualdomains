@@ -13,8 +13,10 @@
 
 #include	"rfc822hdr.h"
 #include	"rfc2047.h"
-#if LIBIDN
-#include <idn2.h>
+#if defined(LIBIDN1)
+#include	<idna.h>
+#elif defined(LIBIDN2)
+#include	<idn2.h>
 #endif
 
 
@@ -43,7 +45,7 @@ static char *rfc822_encode_domain_int(const char *pfix,
 {
 	char *q;
 
-#if LIBIDN
+#if defined(LIBIDN1) || defined(LIBIDN2)
 	int err;
 	char *p;
 	size_t s=strlen(domain)+16;
@@ -60,7 +62,11 @@ static char *rfc822_encode_domain_int(const char *pfix,
 	memset(cpy, 0, s);
 	strcpy(cpy, domain);
 
+#if defined(LIBIDN1)
+	err=idna_to_ascii_8z(cpy, &p, 0);
+#elif defined(LIBIDN2)
 	err=idn2_to_ascii_8z(cpy, &p, 0);
+#endif
 	free(cpy);
 
 	if (err != IDNA_SUCCESS)

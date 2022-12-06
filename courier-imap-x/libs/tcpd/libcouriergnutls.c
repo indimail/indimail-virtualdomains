@@ -18,7 +18,11 @@
 #include	<stdlib.h>
 #include	<ctype.h>
 #include	<netdb.h>
+#if defined(LIBIDN1)
+#include	<idna.h>
+#elif defined(LIBIDN2)
 #include	<idn2.h>
+#endif
 #if HAVE_DIRENT_H
 #include <dirent.h>
 #define NAMLEN(dirent) strlen((dirent)->d_name)
@@ -578,8 +582,11 @@ static int name_check(ssl_handle ssl,
 	const char *p;
 	int rc;
 
-	if (idn2_to_unicode_8z8z(ssl->info_cpy.peer_verify_domain,
-				 &idn_domain, 0) != IDNA_SUCCESS)
+#if defined(LIBIDN1)
+	if (idna_to_unicode_8z8z(ssl->info_cpy.peer_verify_domain, &idn_domain, 0) != IDNA_SUCCESS)
+#elif defined(LIBIDN2)
+	if (idn2_to_unicode_8z8z(ssl->info_cpy.peer_verify_domain, &idn_domain, 0) != IDNA_SUCCESS)
+#endif
 		idn_domain=0;
 
 	p=idn_domain ? idn_domain:ssl->info_cpy.peer_verify_domain;
@@ -976,7 +983,11 @@ static char *check_cert(const char *filename,
 		char *p;
 		char *retfile;
 
+#if defined(LIBIDN1)
+		if (idna_to_ascii_8z(req_dn, &p, 0) != IDNA_SUCCESS)
+#elif defined(LIBIDN2)
 		if (idn2_to_ascii_8z(req_dn, &p, 0) != IDNA_SUCCESS)
+#endif
 			p=0;
 
 		if (p)
@@ -1167,8 +1178,11 @@ static int get_server_cert(gnutls_session_t session,
 		char *namebuf;
 
 		/* Convert to UTF8 */
-		if (idn2_to_unicode_8z8z(vhost_buf, &utf8, 0)
-		    != IDNA_SUCCESS)
+#if defined(LIBIDN1)
+		if (idna_to_unicode_8z8z(vhost_buf, &utf8, 0) != IDNA_SUCCESS)
+#elif defined(LIBIDN1)
+		if (idn2_to_unicode_8z8z(vhost_buf, &utf8, 0) != IDNA_SUCCESS)
+#endif
 			utf8=0;
 
 		namebuf=utf8 ? utf8:vhost_buf;
@@ -1543,8 +1557,11 @@ static int name_set(ssl_handle ssl, ssl_context ctx)
 	const char *p;
 	int rc;
 
-	if (idn2_to_unicode_8z8z(ctx->info_cpy.peer_verify_domain,
-				 &idn_domain, 0) != IDNA_SUCCESS)
+#if defined(LIBIDN1)
+	if (idna_to_unicode_8z8z(ctx->info_cpy.peer_verify_domain, &idn_domain, 0) != IDNA_SUCCESS)
+#elif defined(LIBIDN2)
+	if (idn2_to_unicode_8z8z(ctx->info_cpy.peer_verify_domain, &idn_domain, 0) != IDNA_SUCCESS)
+#endif
 		idn_domain=0;
 
 	p=idn_domain ? idn_domain:ctx->info_cpy.peer_verify_domain;
