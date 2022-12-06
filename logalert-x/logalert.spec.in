@@ -44,7 +44,7 @@ BuildRequires: -post-build-checks
 %if %{defined suse_version} || %{defined sles_version}
 BuildRequires: bison
 %endif
-%if 0%{?fedora_version} > 27 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?almalinux_version} > 700 || %{defined rockylinux_version} || "%_target_vendor" = "redhat"
+%if 0%{?fedora_version} > 27 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700
 BuildRequires: libtirpc libtirpc-devel
 %endif
 %if 0%{?suse_version} >= 1550 || 0%{?sle_version} >= 150300
@@ -85,12 +85,6 @@ echo target_os      %_target_os
 echo target_vendor  %_target_vendor
 echo Project        %{_project}
 echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
-%if %{defined rockylinux_version}
-echo 0%{?rockylinux_version}
-%endif
-%if %{defined almalinux_version}
-echo 0%{?almalinux_version}
-%endif
 echo "------------------------------------------------------"
 ) > %{name}-rpm.info
 %configure --prefix=%{_prefix}  \
