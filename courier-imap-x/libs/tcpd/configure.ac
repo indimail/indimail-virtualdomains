@@ -176,15 +176,6 @@ else
 	AC_DEFINE_UNQUOTED(socklen_t, int, [ Default definition for socklen_t ])
 fi
 
-dnl Checks for library functions.
-
-PKG_CHECK_MODULES(LIBIDN, libidn2 >= 0.0.0, [libidn=yes], [libidn=no])
-
-if test "$libidn" != "yes"
-then
-	AC_MSG_ERROR([libidn not found])
-fi
-
 AC_CHECK_FUNCS(setpgrp setpgid)
 AC_CHECK_FUNC(setpgrp,
 	[
