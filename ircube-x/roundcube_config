@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/sh
 chown=$(which chown)
 chmod=$(which chmod)
 cp=$(which cp)
@@ -314,6 +314,44 @@ else
 fi
 }
 
+configure_php_conf()
+{
+	if [ -f /etc/httpd/conf.d/php.conf ] ; then
+		echo "configuring /etc/httpd/conf.d/php.conf"
+		if [ ! -f /etc/httpd/conf.d/php.conf.BAK ] ; then
+			$mv /etc/httpd/conf.d/php.conf \
+				/etc/httpd/conf.d/php.conf.BAK
+		fi
+		$cp /etc/httpd/conf.d/php.conf.BAK \
+			/etc/httpd/conf.d/php.conf
+		tmp=$(mktemp -t httpd.tmp.XXXXXXXXXX)
+		(
+		echo ""
+		echo "# Tell the PHP interpreter to handle files with a .php extension."
+		echo ""
+		echo "# Proxy declaration"
+		echo "<Proxy \"unix:/run/php/php-fpm.sock|fcgi://php-fpm\">"
+		echo "    # we must declare a parameter in here (doesn't matter which) or it'll not register the proxy ahead of time"
+		echo "    ProxySet disablereuse=off"
+		echo "</Proxy>"
+		echo ""
+		echo "# Redirect to the proxy"
+		echo "<FilesMatch \.php$>"
+		echo "    SetHandler proxy:fcgi://php-fpm"
+		echo "</FilesMatch>"
+		) > $tmp
+		$sed -i \
+			-e "/<\/Files>/ r $tmp" \
+			-e "s{^    <FilesMatch \\\.(php|phar)$>{#&{g" \
+			-e "s{^        SetHandler application/x-httpd-php{#&{g" \
+			-e "s{^        SetHandler \"proxy:unix:.*\"{#&{g" \
+			-e "s{^.*SetHandler \"proxy:unix:/run/php-fpm/www.sock|fcgi://localhost\"{        SetHandler \"proxy:unix:/run/php/php-fpm.sock|fcgi://localhost\"{g" \
+			-e "s{^    </FilesMatch>{#&{g" \
+			/etc/httpd/conf.d/php.conf
+		/bin/rm -f $tmp
+	fi
+}
+
 grep openSUSE /etc/os-release > /dev/null 2>&1
 if [ $? -eq 0 ] ; then
 	is_suse=1
@@ -464,7 +502,7 @@ if [ -n "$ssl_cnf" -a -f $ssl_cnf ] ; then
 		$ssl_cnf
 	fi
 fi
-if [ -f /etc/centos-release -o -f /etc/almalinux-release -o -f /etc/rockylinux-release ] ; then
+if [ -f /etc/centos-release -o -f /etc/almalinux-release -o -f /etc/rockylinux-release -o -f /etc/fedora-release ] ; then
 	t=$(cat /etc/redhat-release|awk '{print $1}')
 	if [ "$t" = "CentOS" ] ; then
 		os_release=$(cat /etc/centos-release|awk '{print $4}'|cut -d.  -f1)
@@ -472,9 +510,12 @@ if [ -f /etc/centos-release -o -f /etc/almalinux-release -o -f /etc/rockylinux-r
 		os_release=$(cat /etc/almalinux-release|awk '{print $3}'|cut -d.  -f1)
 	elif [ "$t" = "RockyLinux" ] ; then
 		os_release=$(cat /etc/rockylinux-release|awk '{print $3}'|cut -d.  -f1)
+	elif [ "$t" = "Fedora" ] ; then
+		os_release=$(cat /etc/fedora-release|awk '{print $3}'|cut -d.  -f1)
 	else
-		echo "Unknown CentOS release" 1>&2
+		echo "Unknown Redhat OS release" 1>&2
 	fi
+	configure_php_conf
 
 	case "$os_release" in
 		7|8|9)
@@ -496,40 +537,6 @@ if [ -f /etc/centos-release -o -f /etc/almalinux-release -o -f /etc/rockylinux-r
 				-e 's{LoadModule mpm_prefork_module.*{#&{g' \
 				-e 's{#LoadModule mpm_event_module{LoadModule mpm_event_module{g' \
 					/etc/httpd/conf.modules.d/00-mpm.conf
-		fi
-		if [ -f /etc/httpd/conf.d/php.conf ] ; then
-			echo "configuring /etc/httpd/conf.d/php.conf"
-			if [ ! -f /etc/httpd/conf.d/php.conf.BAK ] ; then
-				$mv /etc/httpd/conf.d/php.conf \
-					/etc/httpd/conf.d/php.conf.BAK
-			fi
-			$cp /etc/httpd/conf.d/php.conf.BAK \
-				/etc/httpd/conf.d/php.conf
-			tmp=$(mktemp -t httpd.tmp.XXXXXXXXXX)
-			(
-			echo ""
-			echo "# Tell the PHP interpreter to handle files with a .php extension."
-			echo ""
-			echo "# Proxy declaration"
-			echo "<Proxy \"unix:/run/php/php-fpm.sock|fcgi://php-fpm\">"
-			echo "    # we must declare a parameter in here (doesn't matter which) or it'll not register the proxy ahead of time"
-			echo "    ProxySet disablereuse=off"
-			echo "</Proxy>"
-			echo ""
-			echo "# Redirect to the proxy"
-			echo "<FilesMatch \.php$>"
-			echo "    SetHandler proxy:fcgi://php-fpm"
-			echo "</FilesMatch>"
-			) > $tmp
-			$sed -i \
-				-e "/<\/Files>/ r $tmp" \
-				-e "s{^    <FilesMatch \\\.(php|phar)$>{#&{g" \
-				-e "s{^        SetHandler application/x-httpd-php{#&{g" \
-				-e "s{^        SetHandler \"proxy:unix:.*\"{#&{g" \
-				-e "s{^.*SetHandler \"proxy:unix:/run/php-fpm/www.sock|fcgi://localhost\"{        SetHandler \"proxy:unix:/run/php/php-fpm.sock|fcgi://localhost\"{g" \
-				-e "s{^    </FilesMatch>{#&{g" \
-				/etc/httpd/conf.d/php.conf
-			/bin/rm -f $tmp
 		fi
 		;;
 		*)
