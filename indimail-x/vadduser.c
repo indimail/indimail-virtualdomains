@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 1.10  2022-12-07 16:50:04+05:30  Cprogrammer
+ * fixed incorrect order of arguments in get_options
+ *
  * Revision 1.9  2022-11-02 20:03:48+05:30  Cprogrammer
  * added feature to add scram password during user addition
  *
@@ -86,7 +89,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadduser.c,v 1.9 2022-11-02 20:03:48+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadduser.c,v 1.10 2022-12-07 16:50:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -399,9 +402,9 @@ main(int argc, char **argv)
 }
 
 int
-get_options(int argc, char **argv, char **base_path, int *random,
-		int *users_per_level, int *encrypt_flag, int *docram,
-		int *scram, int *iter, char **salt)
+get_options(int argc, char **argv, char **base_path, int *users_per_level,
+		int *encrypt_flag, int *random, int *docram, int *scram, int *iter,
+		char **salt)
 {
 	int             c, i;
 	char            strnum[FMT_ULONG], optstr[30];
