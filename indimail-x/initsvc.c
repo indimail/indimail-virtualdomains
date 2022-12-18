@@ -1,6 +1,6 @@
 /*
  * $Log: initsvc.c,v $
- * Revision 1.10  2022-12-18 19:25:22+05:30  Cprogrammer
+ * Revision 1.10  2022-12-18 19:42:41+05:30  Cprogrammer
  * log additional wait status
  *
  * Revision 1.9  2021-07-08 11:32:44+05:30  Cprogrammer
@@ -46,6 +46,9 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif
 #ifdef HAVE_QMAIL
 #include <str.h>
 #include <fmt.h>
@@ -57,7 +60,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 1.10 2022-12-18 19:25:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 1.10 2022-12-18 19:42:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
