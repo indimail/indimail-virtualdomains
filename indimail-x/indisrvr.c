@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.11  2022-12-18 19:24:01+05:30  Cprogrammer
+ * log additional wait status
+ *
  * Revision 1.10  2022-10-20 11:57:41+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -36,7 +39,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.10 2022-10-20 11:57:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.11 2022-12-18 19:24:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -324,10 +327,15 @@ main(int argc, char **argv)
 					if (r == -1 && errno == EINTR)
 #endif
 						continue;
-					if (WIFSTOPPED(status) || WIFSIGNALED(status)) {
+					if (WIFSTOPPED(status) || WIFCONTINUED(status)) {
 						if (verbose)
-							filewrt(3, "%d: killed by signal %d\n", pid,
-									WIFSTOPPED(status) ? WSTOPSIG(status) : WTERMSIG(status));
+							filewrt(3, "%d: %s by signal %d\n", pid, WIFSTOPPED(status) ? "stopped" : "started",
+									WIFSTOPPED(status) ? WSTOPSIG(status) : SIGCONT);
+						continue;
+					} else
+					if (WIFSIGNALED(status)) {
+						if (verbose)
+							filewrt(3, "%d: killed by signal %d\n", pid, WTERMSIG(status));
 						retval = -1;
 					} else
 					if (WIFEXITED(status)) {
@@ -441,9 +449,15 @@ call_prg()
 		else
 		if (i == -1)
 			break;
-		if (WIFSTOPPED(status) || WIFSIGNALED(status)) {
+		if (WIFSTOPPED(status) || WIFCONTINUED(status)) {
 			if (verbose)
-				filewrt(3, "%d: killed by signal %d\n", pid, WIFSTOPPED(status) ? WSTOPSIG(status) : WTERMSIG(status));
+				filewrt(3, "%d: %s by signal %d\n", pid, WIFSTOPPED(status) ? "stopped" : "started",
+					WIFSTOPPED(status) ? WSTOPSIG(status) : SIGCONT);
+			continue;
+		} else
+		if (WIFSIGNALED(status)) {
+			if (verbose)
+				filewrt(3, "%d: killed by signal %d\n", pid, WTERMSIG(status));
 			retval = -1;
 		} else
 		if (WIFEXITED(status)) {

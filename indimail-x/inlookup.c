@@ -1,5 +1,8 @@
 /*
  * $Log: inlookup.c,v $
+ * Revision 1.9  2022-12-18 19:25:52+05:30  Cprogrammer
+ * handle SIGCONT
+ *
  * Revision 1.8  2022-10-20 11:57:46+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -27,7 +30,7 @@
  *
  */
 #ifndef	lint
-static char     sccsid[] = "$Id: inlookup.c,v 1.8 2022-10-20 11:57:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inlookup.c,v 1.9 2022-12-18 19:25:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -327,12 +330,25 @@ main(int argc, char **argv)
 			else
 			if (pid == -1)
 				break;
-			if (WIFSTOPPED(wStat) || WIFSIGNALED(wStat)) {
+			if (WIFSTOPPED(wStat) || WIFCONTINUED(wStat)) {
 				for (idx = 0; idx < inst_count; idx++) {
 					if (pid_table[idx].pid == pid) {
 						strnum1[fmt_ulong(strnum1, idx + 1)] = 0;
 						strnum2[fmt_ulong(strnum2, pid)] = 0;
-						strnum3[fmt_int(strnum3, WIFSIGNALED(wStat) ? WTERMSIG(wStat) : (WIFSTOPPED(wStat) ? WSTOPSIG(wStat) : -1))] = 0;
+						strnum3[fmt_int(strnum3, WIFSTOPPED(wStat) ? WSTOPSIG(wStat) : SIGCONT)] = 0;
+						strerr_warn6("inlookup[", strnum1, "]: child [", strnum2,
+								WIFSTOPPED(wStat) ? "] stopped by singal " : "] started by signal ", 
+								strnum3, 0);
+					}
+				}
+				continue;
+			} else
+			if (WIFSIGNALED(wStat)) {
+				for (idx = 0; idx < inst_count; idx++) {
+					if (pid_table[idx].pid == pid) {
+						strnum1[fmt_ulong(strnum1, idx + 1)] = 0;
+						strnum2[fmt_ulong(strnum2, pid)] = 0;
+						strnum3[fmt_int(strnum3, WTERMSIG(wStat))] = 0;
 						strerr_warn6("inlookup[", strnum1, "]: child [", strnum2, "] died with signal ", strnum3, 0);
 						if (fork_child(infifo, idx) == -1) {
 							strnum1[fmt_ulong(strnum1, idx + 1)] = 0;

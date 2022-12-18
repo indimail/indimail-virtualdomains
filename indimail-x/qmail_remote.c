@@ -1,5 +1,8 @@
 /*
  * $Log: qmail_remote.c,v $
+ * Revision 1.4  2022-12-18 19:27:24+05:30  Cprogrammer
+ * recoded wait logic
+ *
  * Revision 1.3  2020-04-01 18:57:40+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: qmail_remote.c,v 1.3 2020-04-01 18:57:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: qmail_remote.c,v 1.4 2022-12-18 19:27:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_SYS_TYPES_H
@@ -174,7 +177,7 @@ qmail_remote(char *user, char *domain)
 		die_nomem();
 	if ((msize = get_message_size()) == -1)
 		return (-2);
-	msg_size[i = fmt_ulong(msg_size, (unsigned long) msize)] = 0;
+	msg_size[fmt_ulong(msg_size, (unsigned long) msize)] = 0;
 	switch (pid = vfork())
 	{
 	case -1:
@@ -207,31 +210,16 @@ qmail_remote(char *user, char *domain)
 	err = decode(pim1[0]);
 	close(pim1[0]);
 	for(;;) {
-		pid = wait(&wait_status);
-#ifdef ERESTART
-		if(pid == -1 && (errno == EINTR || errno == ERESTART))
-#else
-		if(pid == -1 && errno == EINTR)
-#endif
-			continue;
-		else
-		if(pid == -1)
-			return (-2);
-		break;
-	}
-	if(WIFSTOPPED(wait_status) || WIFSIGNALED(wait_status)) {
-		strerr_warn1("qmail-remote crashed.", 0);
-		return (111);
-	} else
-	if(WIFEXITED(wait_status)) {
-		switch (WEXITSTATUS(wait_status))
-		{
-		case 0:
+		if (!(i = waitpid(pid, &wait_status, 0)))
 			break;
-		case 111:
-			return (111);
-		default:
-			return (100);
+		else
+		if (i == -1) {
+#ifdef ERESTART
+			if(errno == EINTR || errno == ERESTART)
+#else
+			if(errno == EINTR)
+#endif
+				continue;
 		}
 	}
 	return (err);

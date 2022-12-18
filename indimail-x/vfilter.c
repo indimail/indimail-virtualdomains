@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 1.9  2022-12-18 19:28:05+05:30  Cprogrammer
+ * recoded wait logic
+ *
  * Revision 1.8  2022-05-10 20:01:51+05:30  Cprogrammer
  * use headers from include path
  *
@@ -30,7 +33,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 1.8 2022-05-10 20:01:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 1.9 2022-12-18 19:28:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -65,6 +68,7 @@ static char     sccsid[] = "$Id: vfilter.c,v 1.8 2022-05-10 20:01:51+05:30 Cprog
 #include <replacestr.h>
 #include <makeargs.h>
 #include <evaluate.h>
+#include <wait.h>
 #endif
 #include "common.h"
 #include "get_real_domain.h"
@@ -158,6 +162,8 @@ execMda(char **argptr, char **mda)
 	return (1);
 }
 
+static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
+
 /*
  * status value :
  *  -1 : Filter failure - pass it to vdelivermail
@@ -168,11 +174,10 @@ execMda(char **argptr, char **mda)
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 1.8 $", *mda;
+	char           *revision = "$Revision: 1.9 $", *mda;
 	static stralloc XFilter = {0};
 	pid_t           pid;
-	int             i, tmp_stat, wait_status;
-	static int      _status;
+	int             i, werr, wait_status, _status;
 
 	_status = status;
 	if (interactive)
@@ -205,42 +210,38 @@ myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *fo
 				_exit(111);
 			default: /*- parent */
 				for (;;) {
-					pid = wait(&wait_status);
+					if (!(i = wait_pid(&wait_status, pid)))
+						break;
+					else
+					if (i == -1) {
 #ifdef ERESTART
-					if (pid == -1 && (errno == error_intr || errno == error_restart))
+						if (errno == error_intr || errno == error_restart)
 #else
-					if (pid == -1 && errno == error_intr)
+						if (errno == error_intr)
 #endif
+							continue;
+						strnum1[fmt_ulong(strnum1, pid)] = 0;
+						strerr_warn3("vfilter: waitpid: ", strnum1, ": ", &strerr_sys);
+						_status = -1;
+					}
+					if (!(i = wait_handler(wait_status, &werr)))
 						continue;
 					else
-					if (pid == -1) {
-						strerr_warn3("vfilter: ", mda, ". indimail bug", 0);
+					if (werr == -1) {
+						strnum1[fmt_ulong(strnum1, pid)] = 0;
+						strerr_warn3("vfilter: ", strnum1, ": internal wait handler error", 0);
+						_status = -1;
+					} else
+					if (werr) {
+						strnum1[fmt_ulong(strnum1, pid)] = 0;
+						strnum2[fmt_uint(strnum2, werr)] = 0;
+						strerr_warn4("vfilter: ", strnum1, ": killed by signal ", strnum2, 0);
 						_status = -1;
 					}
-					break;
-				}
-				if (_status == -1)
-					break;
-				if (WIFSTOPPED(wait_status) || WIFSIGNALED(wait_status)) {
-					strerr_warn3("vfilter: ", mda, " crashed", 0);
-					_status = -1;
-				} else
-				if (WIFEXITED(wait_status)) {
-					switch ((tmp_stat = WEXITSTATUS(wait_status)))
-					{
-					case 0:
-						if (!bounce)
-							_exit(0);
-						break;
-					case 100:
-					case 111:
-						_exit(tmp_stat);
-					default:
-						strerr_warn2("vfilter: Unable to run ", mda, 0);
+					if (i)
 						_status = -1;
-						break;
-					}
-				}
+					break;
+				} /*- for (;;) */
 				break;
 			} /*- switch (pid = vfork()) */
 		} /*- if (case_diffb(DestFolder, 10, "/NoDeliver")) */
@@ -293,7 +294,6 @@ get_options(int argc, char **argv, char **bounce, stralloc *emailid, stralloc *u
 {
 	int             c, local;
 	char           *tmpstr, *real_domain = 0;
-	char            strnum[FMT_ULONG];
 	static stralloc pwstruct = {0};
 	struct passwd  *pw;
 
@@ -450,9 +450,9 @@ get_options(int argc, char **argv, char **bounce, stralloc *emailid, stralloc *u
 			!stralloc_append(&pwstruct, ":") ||
 			!stralloc_cats(&pwstruct, pw->pw_passwd) ||
 			!stralloc_append(&pwstruct, ":") ||
-			!stralloc_catb(&pwstruct, strnum, fmt_uint(strnum, pw->pw_uid)) ||
+			!stralloc_catb(&pwstruct, strnum1, fmt_uint(strnum1, pw->pw_uid)) ||
 			!stralloc_append(&pwstruct, ":") ||
-			!stralloc_catb(&pwstruct, strnum, fmt_uint(strnum, pw->pw_gid)) ||
+			!stralloc_catb(&pwstruct, strnum1, fmt_uint(strnum1, pw->pw_gid)) ||
 			!stralloc_append(&pwstruct, ":") ||
 			!stralloc_cats(&pwstruct, pw->pw_gecos && *pw->pw_gecos ? pw->pw_gecos : pw->pw_name) ||
 			!stralloc_append(&pwstruct, ":") ||
@@ -460,7 +460,7 @@ get_options(int argc, char **argv, char **bounce, stralloc *emailid, stralloc *u
 			!stralloc_append(&pwstruct, ":") ||
 			!stralloc_cats(&pwstruct, local ? "NOQUOTA" : pw->pw_shell) ||
 			!stralloc_append(&pwstruct, ":") ||
-			!stralloc_catb(&pwstruct, strnum, fmt_uint(strnum, local ? 0 : is_inactive)) ||
+			!stralloc_catb(&pwstruct, strnum1, fmt_uint(strnum1, local ? 0 : is_inactive)) ||
 			!stralloc_0(&pwstruct))
 		die_nomem();
 	if (!env_put2("PWSTRUCT", pwstruct.s)) {
@@ -480,7 +480,6 @@ get_options(int argc, char **argv, char **bounce, stralloc *emailid, stralloc *u
 int
 numerical_compare(char *data, char *expression)
 {
-	char            strnum[FMT_ULONG];
 	char           *ptr;
 	int             i;
 	static stralloc buf = {0};
@@ -526,17 +525,17 @@ numerical_compare(char *data, char *expression)
 	case RESULT_OK:
 		if (result.type == T_INT) {
 			if (interactive && verbose) {
-				strnum[fmt_long(strnum, result.ival)] = 0;
+				strnum1[fmt_long(strnum1, result.ival)] = 0;
 				out("vfilter", "result = ");
-				out("vfilter", strnum);
+				out("vfilter", strnum1);
 				out("vilfter", "\n");
 			}
 			return (result.ival);
 		} else {
-				strnum[fmt_double(strnum, result.rval, 2)] = 0;
+				strnum1[fmt_double(strnum1, result.rval, 2)] = 0;
 			if (interactive && verbose) {
 				out("vfilter", "result = ");
-				out("vfilter", strnum);
+				out("vfilter", strnum1);
 				out("vilfter", "\n");
 				flush("vfilter");
 			}
@@ -555,7 +554,6 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 	int             i, j, email_len, filter_opt, ret = 0, global_filter = 0,
 					max_header_value;
 	char           *str, *real_domain;
-	char            strnum[FMT_ULONG];
 	char          **tmp_ptr, **address_list;
 	static char   **header_list;
 	struct header **ptr;
@@ -659,9 +657,9 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 			} /*- for(ret = 0, ptr = hptr;ptr && *ptr && !ret;ptr++) */
 			if (!ret) {
 				if (interactive && verbose) {
-					strnum[fmt_uint(strnum, *filter_no)] = 0;
+					strnum1[fmt_uint(strnum1, *filter_no)] = 0;
 					out("vfilter", "Matched Filter No ");
-					out("vfilter", strnum);
+					out("vfilter", strnum1);
 					out("vfilter", " Comparision ");
 					out("vfilter", vfilter_comparision[*comparision]);
 					out("vfilter", "\n");
@@ -691,9 +689,9 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if (!case_diffb(*tmp_ptr, keyword->len, keyword->s)) {
 								if (interactive && verbose) {
-									strnum[fmt_uint(strnum, (unsigned int) *filter_no)] = 0;
+									strnum1[fmt_uint(strnum1, (unsigned int) *filter_no)] = 0;
 									out("vfilter", "Matched Filter No ");
-									out("vfilter", strnum);
+									out("vfilter", strnum1);
 									out("vfilter", " Data ");
 									out("vfilter", *tmp_ptr);
 									out("vfilter", " Keyword ");
@@ -709,9 +707,9 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if (str_str(*tmp_ptr, keyword->s)) {
 								if (interactive && verbose) {
-									strnum[fmt_uint(strnum, (unsigned int) *filter_no)] = 0;
+									strnum1[fmt_uint(strnum1, (unsigned int) *filter_no)] = 0;
 									out("vfilter", "Matched Filter No ");
-									out("vfilter", strnum);
+									out("vfilter", strnum1);
 									out("vfilter", " Data ");
 									out("vfilter", *tmp_ptr);
 									out("vfilter", " Keyword ");
@@ -732,9 +730,9 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						}
 						if (!ret) {
 							if (interactive && verbose) {
-								strnum[fmt_uint(strnum, (unsigned int) *filter_no)] = 0;
+								strnum1[fmt_uint(strnum1, (unsigned int) *filter_no)] = 0;
 								out("vfilter", "Matched Filter No ");
-								out("vfilter", strnum);
+								out("vfilter", strnum1);
 								out("vfilter", " Data ");
 								out("vfilter", *tmp_ptr);
 								out("vfilter", " Keyword ");
@@ -750,9 +748,9 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 							if (!str_diffn(*tmp_ptr, keyword->s, keyword->len))
 							{
 								if (interactive && verbose) {
-									strnum[fmt_uint(strnum, (unsigned int) *filter_no)] = 0;
+									strnum1[fmt_uint(strnum1, (unsigned int) *filter_no)] = 0;
 									out("vfilter", "Matched Filter No ");
-									out("vfilter", strnum);
+									out("vfilter", strnum1);
 									out("vfilter", " Data ");
 									out("vfilter", *tmp_ptr);
 									out("vfilter", " Keyword ");
@@ -768,9 +766,9 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if ((str = str_str(*tmp_ptr, keyword->s)) && !case_diffb(str, keyword->len, keyword->s)) {
 								if (interactive && verbose) {
-									strnum[fmt_uint(strnum, (unsigned int) *filter_no)] = 0;
+									strnum1[fmt_uint(strnum1, (unsigned int) *filter_no)] = 0;
 									out("vfilter", "Matched Filter No ");
-									out("vfilter", strnum);
+									out("vfilter", strnum1);
 									out("vfilter", " Comparision ");
 									out("vfilter", vfilter_comparision[*comparision]);
 									out("vfilter", " Data ");
@@ -789,9 +787,9 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if (numerical_compare(*tmp_ptr, keyword->s)) {
 								if (interactive && verbose) {
-									strnum[fmt_uint(strnum, (unsigned int) *filter_no)] = 0;
+									strnum1[fmt_uint(strnum1, (unsigned int) *filter_no)] = 0;
 									out("vfilter", "Matched Filter No ");
-									out("vfilter", strnum);
+									out("vfilter", strnum1);
 									out("vfilter", " Data ");
 									out("vfilter", *tmp_ptr);
 									out("vfilter", " Keyword ");
@@ -815,9 +813,9 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 #endif
 							{
 								if (interactive && verbose) {
-									strnum[fmt_uint(strnum, (unsigned int) *filter_no)] = 0;
+									strnum1[fmt_uint(strnum1, (unsigned int) *filter_no)] = 0;
 									out("vfilter", "Matched Filter No ");
-									out("vfilter", strnum);
+									out("vfilter", strnum1);
 									out("vfilter", " Comparision ");
 									out("vfilter", vfilter_comparision[*comparision]);
 									out("vfilter", " Keyword ");

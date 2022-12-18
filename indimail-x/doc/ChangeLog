@@ -42,6 +42,11 @@ Release @version@-@release@ Start 08/09/2021 End --/--/----
 - 07/12/2022
 22. vadduser.c: fixed incorrect order of arguments in get_options
 23. indimail.spec: skip lsb-core on obs builds
+- 18/12/2022
+23. deliver_mail.c, ismaildup.c, postdel.c, qmail_remote.c, vfilter.c:
+    recoded wait logic
+24. indisrvr.c, initsvc.c: log additional wait status
+25. inlookup.c, runcmmd.c: handle SIGCONT
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail@indimail.org> 3.4.1-1.1%{?dist}
 Release @version@-@release@ Start 14/02/2021 End 08/09/2022

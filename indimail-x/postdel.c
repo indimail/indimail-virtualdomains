@@ -1,10 +1,13 @@
 /*
  * $Log: postdel.c,v $
+ * Revision 1.2  2022-12-18 19:27:02+05:30  Cprogrammer
+ * recoded wait logic
+ *
  * Revision 1.1  2022-10-18 14:18:44+05:30  Cprogrammer
  * Initial revision
  *
  *
- * $Id: postdel.c,v 1.1 2022-10-18 14:18:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: postdel.c,v 1.2 2022-12-18 19:27:02+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -20,10 +23,12 @@
 #include <env.h>
 #include <sgetopt.h>
 #include <str.h>
+#include <fmt.h>
+#include <wait.h>
 #include <noreturn.h>
 
 #ifndef	lint
-static char     rcsid[] = "$Id: postdel.c,v 1.1 2022-10-18 14:18:44+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: postdel.c,v 1.2 2022-12-18 19:27:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -103,7 +108,8 @@ int
 main(int argc, char **argv)
 {
 	char           *ext, *host, *sender;
-	int             use_filter, wait_status, tmp_stat;
+	int             i, werr, use_filter, wait_status;
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	pid_t           pid;
 
 	if(get_options(argc, argv, &ext, &host, &sender, &use_filter))
@@ -135,32 +141,36 @@ main(int argc, char **argv)
 			strerr_die1sys(EX_OSERR, "postdel: fatal: ");
 		default:
 			for(;;) {
-				pid = wait(&wait_status);
+				if (!(i = wait_pid(&wait_status, pid)))
+					break;
+				else
+				if (i == -1) {
 #ifdef ERESTART
-				if(pid == -1 && (errno == error_intr || errno == error_restart))
+					if(errno == error_intr || errno == error_restart)
 #else
-				if(pid == -1 && errno == error_intr)
+					if(errno == error_intr)
 #endif
+						continue;
+					strerr_die1sys(EX_TEMPFAIL, "postdel: fatal: waitpid: ");
+				} else
+				if (!(i = wait_handler(wait_status, &werr)))
 					continue;
 				else
-				if(pid == -1)
-					strerr_die1x(EX_SOFTWARE, "postdel: fatal: indimail bug");
-				break;
-			}
-			if(WIFSTOPPED(wait_status) || WIFSIGNALED(wait_status))
-				strerr_die3sys(EX_TEMPFAIL, "postdel: fatal: ", *vdelargs, " crashed");
-			else
-			if(WIFEXITED(wait_status)) {
-				switch ((tmp_stat = WEXITSTATUS(wait_status)))
-				{
-				case 0:
-					_exit(0);
-				case 100:
-					_exit(EX_NOUSER);
-				default:
-					_exit(EX_TEMPFAIL);
+				if (werr == -1) {
+					strnum1[fmt_ulong(strnum1, pid)] = 0;
+					strerr_warn3("postdel: ", strnum1, ": internal wait handler error", 0);
+					strerr_die1sys(EX_SOFTWARE, "postdel: fatal: internal wait hanlder error: ");
+				} else
+				if (werr) {
+					strnum1[fmt_ulong(strnum1, pid)] = 0;
+					strnum2[fmt_uint(strnum2, werr)] = 0;
+					strerr_die4x(EX_TEMPFAIL, "postdel: ", strnum1, ": killed by signal ", strnum2);
 				}
-			}
+				if (i) {
+					strnum1[fmt_uint(strnum1, i)] = 0;
+					strerr_die3x(EX_TEMPFAIL, "postdel: fatal: vdelivermail exited with ", strnum1, " return code");
+				}
+			} /*- for(;;) */
 			break;
 	}
 	_exit(EX_TEMPFAIL); return(0); /*- for stupid solaris */

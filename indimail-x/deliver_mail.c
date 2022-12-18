@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 1.11  2022-12-18 19:23:05+05:30  Cprogrammer
+ * recoded wait logic
+ *
  * Revision 1.10  2022-10-22 12:53:21+05:30  Cprogrammer
  * changed Received: header to qmail style format
  *
@@ -69,6 +72,7 @@
 #include <error.h>
 #include <fmt.h>
 #include <scan.h>
+#include <wait.h>
 #include <getEnvConfig.h>
 #endif
 #include "dblock.h"
@@ -90,11 +94,11 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 1.10 2022-10-22 12:53:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 1.11 2022-12-18 19:23:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
-static char     strnum[FMT_ULONG];
+static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
 static void
 die_nomem()
@@ -433,13 +437,13 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
 		close(fd);
 		if (count > mail_limit && size > size_limit) {
 			if (substdio_put(subfderr, "Dir has insufficient quota. Mail count and size exceeded. ", 58) ||
-					substdio_put(subfderr, strnum, fmt_ulong(strnum, count)) ||
+					substdio_put(subfderr, strnum1, fmt_ulong(strnum1, count)) ||
 					substdio_put(subfderr, "/", 1) ||
-					substdio_put(subfderr, strnum, fmt_ulong(strnum, mail_limit)) ||
+					substdio_put(subfderr, strnum1, fmt_ulong(strnum1, mail_limit)) ||
 					substdio_put(subfderr, " ", 1) ||
-					substdio_put(subfderr, strnum, fmt_ulong(strnum, size)) ||
+					substdio_put(subfderr, strnum1, fmt_ulong(strnum1, size)) ||
 					substdio_put(subfderr, "/", 1) ||
-					substdio_put(subfderr, strnum, fmt_ulong(strnum, size_limit)) ||
+					substdio_put(subfderr, strnum1, fmt_ulong(strnum1, size_limit)) ||
 					substdio_put(subfderr, ". indimail (#5.1.4)", 19))
 			{
 				strerr_warn1("deliver_mail: unable to write to stderr", &strerr_sys);
@@ -452,9 +456,9 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
 		} else {
 			if (count > mail_limit) {
 				if (substdio_put(subfderr, "Dir has insufficient quota. Mail count exceeded. ", 49) ||
-					substdio_put(subfderr, strnum, fmt_ulong(strnum, count)) ||
+					substdio_put(subfderr, strnum1, fmt_ulong(strnum1, count)) ||
 					substdio_put(subfderr, "/", 1) ||
-					substdio_put(subfderr, strnum, fmt_ulong(strnum, mail_limit)) ||
+					substdio_put(subfderr, strnum1, fmt_ulong(strnum1, mail_limit)) ||
 					substdio_put(subfderr, ". indimail (#5.1.4)", 19))
 				{
 					strerr_warn1("deliver_mail: unable to write to stderr", &strerr_sys);
@@ -467,9 +471,9 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
 			}
 			if (size > size_limit) {
 				if (substdio_put(subfderr, "Dir has insufficient quota. Mail size exceeded. ", 48) ||
-					substdio_put(subfderr, strnum, fmt_ulong(strnum, size)) ||
+					substdio_put(subfderr, strnum1, fmt_ulong(strnum1, size)) ||
 					substdio_put(subfderr, "/", 1) ||
-					substdio_put(subfderr, strnum, fmt_ulong(strnum, size_limit)) ||
+					substdio_put(subfderr, strnum1, fmt_ulong(strnum1, size_limit)) ||
 					substdio_put(subfderr, ". indimail (#5.1.4)", 19))
 				{
 					strerr_warn1("deliver_mail: unable to write to stderr", &strerr_sys);
@@ -496,9 +500,9 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
 	}
 	if (substdio_put(&ssout, datebuf, 19) ||
 			substdio_put(&ssout, " ", 1) ||
-			substdio_put(&ssout, strnum, fmt_ulong(strnum, count)) ||
+			substdio_put(&ssout, strnum1, fmt_ulong(strnum1, count)) ||
 			substdio_put(&ssout, " ", 1) ||
-			substdio_put(&ssout, strnum, fmt_ulong(strnum, size)) ||
+			substdio_put(&ssout, strnum1, fmt_ulong(strnum1, size)) ||
 			substdio_put(&ssout, "\n", 1) ||
 			substdio_flush(&ssout)) {
 		strerr_warn3("deliver_mail: write error: ", fileName.s, ": ", &strerr_sys);
@@ -732,11 +736,11 @@ format_delivered_to1(stralloc *delivered_to, char *hostname, char *rpline, char 
 	if (!stralloc_cats(delivered_to, xfilter ? xfilter : "X-Filter: None") ||
 			!stralloc_append(delivered_to, "\n") ||
 			!stralloc_catb(delivered_to, "Received: indimail-virtual ", 27) ||
-			!stralloc_catb(delivered_to, strnum, fmt_ulong(strnum, getpid())) ||
+			!stralloc_catb(delivered_to, strnum1, fmt_ulong(strnum1, getpid())) ||
 			!stralloc_catb(delivered_to, " by host ", 9) ||
 			!stralloc_cats(delivered_to, hostname) ||
 			!stralloc_catb(delivered_to, " (invoked by uid ", 17) ||
-			!stralloc_catb(delivered_to, strnum, fmt_ulong(strnum, getuid())) ||
+			!stralloc_catb(delivered_to, strnum1, fmt_ulong(strnum1, getuid())) ||
 			!stralloc_catb(delivered_to, "); ", 3) ||
 			!stralloc_cats(delivered_to, get_localtime()) ||
 			!stralloc_append(delivered_to, "\n") ||
@@ -762,9 +766,9 @@ format_delivered_to2(stralloc *delivered_to, char *faddr, char *dtline,
 	if (!stralloc_cats(delivered_to, xfilter ? xfilter : "X-Filter: None") ||
 			!stralloc_append(delivered_to, "\n") ||
 			!stralloc_catb(delivered_to, "Received: (indimail ", 20) ||
-			!stralloc_catb(delivered_to, strnum, fmt_ulong(strnum, getpid())) ||
+			!stralloc_catb(delivered_to, strnum1, fmt_ulong(strnum1, getpid())) ||
 			!stralloc_catb(delivered_to, " invoked by uid ", 16) ||
-			!stralloc_catb(delivered_to, strnum, fmt_ulong(strnum, getuid())) ||
+			!stralloc_catb(delivered_to, strnum1, fmt_ulong(strnum1, getuid())) ||
 			!stralloc_catb(delivered_to, "); ", 3) ||
 			!stralloc_cats(delivered_to, get_localtime()) ||
 			!stralloc_append(delivered_to, "\n") ||
@@ -784,13 +788,13 @@ format_local_filename(stralloc *file, stralloc *file_new, char *address,
 			!stralloc_catb(file, "tmp/", 4))
 		die_nomem();
 	i = file->len;
-	if (!stralloc_catb(file, strnum, fmt_ulong(strnum, tm)) ||
+	if (!stralloc_catb(file, strnum1, fmt_ulong(strnum1, tm)) ||
 			!stralloc_append(file, ".") ||
-			!stralloc_catb(file, strnum, fmt_ulong(strnum, pid)) ||
+			!stralloc_catb(file, strnum1, fmt_ulong(strnum1, pid)) ||
 			!stralloc_append(file, ".") ||
 			!stralloc_cat(file, hostname) ||
 			!stralloc_catb(file, ",S=", 3) ||
-			!stralloc_catb(file, strnum, fmt_ulong(strnum, MsgSize)) ||
+			!stralloc_catb(file, strnum1, fmt_ulong(strnum1, MsgSize)) ||
 			!stralloc_0(file))
 		die_nomem();
 	if (!stralloc_copy(file_new, file))
@@ -814,8 +818,8 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 	char *Domain, mdir_t *QuotaCount, mdir_t *QuotaSize)
 {
 	time_t          tm;
-	int             i, wait_status, write_fd, is_injected, is_file, sfd, code,
-					ret, fd, match;
+	int             i, wait_status, write_fd, is_injected, is_file, sfd,
+					ret, fd, match, werr;
 	static stralloc local_file = {0}, local_file_new = {0}, hostname = {0},
 	                DeliveredTo = {0}, user = {0}, homedir = {0},
 					date_dir = {0};
@@ -923,16 +927,16 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 							!stralloc_cats(&local_file, address) ||
 							!stralloc_append(&local_file, " "))
 						die_nomem();
-					strnum[i = fmt_ulong(strnum, (unsigned long) MsgSize)] = 0;
-					if (!stralloc_catb(&local_file, strnum, i) ||
+					strnum1[i = fmt_ulong(strnum1, (unsigned long) MsgSize)] = 0;
+					if (!stralloc_catb(&local_file, strnum1, i) ||
 							!stralloc_append(&local_file, " "))
 						die_nomem();
-					strnum[i = fmt_ulong(strnum, (unsigned long) dailyMsgSize)] = 0;
-					if (!stralloc_catb(&local_file, strnum, i) ||
+					strnum1[i = fmt_ulong(strnum1, (unsigned long) dailyMsgSize)] = 0;
+					if (!stralloc_catb(&local_file, strnum1, i) ||
 							!stralloc_append(&local_file, " "))
 						die_nomem();
-					strnum[i = fmt_ulong(strnum, (unsigned long) dailyMsgCount)] = 0;
-					if (!stralloc_catb(&local_file, strnum, i) ||
+					strnum1[i = fmt_ulong(strnum1, (unsigned long) dailyMsgCount)] = 0;
+					if (!stralloc_catb(&local_file, strnum1, i) ||
 							!stralloc_append(&local_file, " "))
 						die_nomem();
 					if (!stralloc_cats(&local_file, ptr1 ? ptr1 : "0S") ||
@@ -1016,16 +1020,16 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 							!stralloc_cats(&local_file, address) ||
 							!stralloc_append(&local_file, " "))
 						die_nomem();
-					strnum[i = fmt_ulong(strnum, (unsigned long) MsgSize)] = 0;
-					if (!stralloc_catb(&local_file, strnum, i) ||
+					strnum1[i = fmt_ulong(strnum1, (unsigned long) MsgSize)] = 0;
+					if (!stralloc_catb(&local_file, strnum1, i) ||
 							!stralloc_append(&local_file, " "))
 						die_nomem();
-					strnum[i = fmt_ulong(strnum, (unsigned long) CurBytes)] = 0;
-					if (!stralloc_catb(&local_file, strnum, i) ||
+					strnum1[i = fmt_ulong(strnum1, (unsigned long) CurBytes)] = 0;
+					if (!stralloc_catb(&local_file, strnum1, i) ||
 							!stralloc_append(&local_file, " "))
 						die_nomem();
-					strnum[i = fmt_ulong(strnum, (unsigned long) CurCount)] = 0;
-					if (!stralloc_catb(&local_file, strnum, i) ||
+					strnum1[i = fmt_ulong(strnum1, (unsigned long) CurCount)] = 0;
+					if (!stralloc_catb(&local_file, strnum1, i) ||
 							!stralloc_append(&local_file, " "))
 						die_nomem();
 					if (!stralloc_cats(&local_file, maildirquota) ||
@@ -1094,11 +1098,11 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 				if (alert_host && alert_port && *alert_host && *alert_port) {
 					if ((sfd = udpopen(alert_host, alert_port)) != -1) {
 						substdio_fdbuf(&ssout, write, sfd, outbuf, sizeof(outbuf));
-						strnum[i = fmt_ulong(strnum, MsgSize)] = 0;
+						strnum1[i = fmt_ulong(strnum1, MsgSize)] = 0;
 						if (substdio_put(&ssout, user.s, user.len) ||
 								substdio_put(&ssout, "@", 1) ||
 								substdio_puts(&ssout, domain) ||
-								substdio_put(&ssout, strnum, i) ||
+								substdio_put(&ssout, strnum1, i) ||
 								substdio_put(&ssout, "\n", 1) ||
 								substdio_flush(&ssout) == -1)
 							strerr_warn1("deliver_mail: write error: alert_host: ", &strerr_sys);
@@ -1354,26 +1358,35 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 		 */
 		close(write_fd);
 		for (;;) {
-			pid = wait(&wait_status);
+			if (!(i = wait_pid(&wait_status, pid)))
+				break;
+			else
+			if (i == -1) {
 #ifdef ERESTART
-			if (pid == -1 && (errno == EINTR || errno == ERESTART))
+				if (errno == EINTR || errno == ERESTART)
 #else
-			if (pid == -1 && errno == EINTR)
+				if (errno == EINTR)
 #endif
+					continue;
+				strnum1[fmt_ulong(strnum1, pid)] = 0;
+				strerr_warn3("deliver_mail: waitpid: ", strnum1, ": ", &strerr_sys);
+				return (-2);
+			}
+			if (!(i = wait_handler(wait_status, &werr)))
 				continue;
 			else
-			if (pid == -1) {
-				strerr_warn1("qmail-inject crashed. indimail bug", 0);
-				return (111);
+			if (werr == -1) {
+				strnum1[fmt_ulong(strnum1, pid)] = 0;
+				strerr_warn3("deliver_mail: ", strnum1, ": internal wait handler error", 0);
+				return (-2);
+			} else
+			if (werr) {
+				strnum1[fmt_ulong(strnum1, pid)] = 0;
+				strnum2[fmt_uint(strnum2, werr)] = 0;
+				strerr_warn4("deliver_mail: ", strnum1, ": killed by signal ", strnum2, 0);
+				return (-2);
 			}
-			break;
-		}
-		if (WIFSTOPPED(wait_status) || WIFSIGNALED(wait_status)) {
-			strerr_warn1("qmail-inject crashed.", 0);
-			return (111);
-		} else
-		if (WIFEXITED(wait_status)) {
-			switch (code = WEXITSTATUS(wait_status))
+			switch (i)
 			{
 			case 0:
 				return (0);
@@ -1387,15 +1400,15 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 			case 78: 
 			case 112:
 			case 100:
-				strnum[fmt_uint(strnum, code)] = 0;
-				strerr_warn5("deliver_mail: ", *address == '|' ? cmmd : address, " failed code(", strnum, "). Permanent error", 0);
+				strnum1[fmt_uint(strnum1, i)] = 0;
+				strerr_warn5("deliver_mail: ", *address == '|' ? cmmd : address, " failed code(", strnum1, "). Permanent error", 0);
 				_exit(100);
 			default:
-				strnum[fmt_uint(strnum, code)] = 0;
-				strerr_warn5("deliver_mail: ", *address == '|' ? cmmd : address, " failed code(", strnum, "). Temporary error", 0);
+				strnum1[fmt_uint(strnum1, i)] = 0;
+				strerr_warn5("deliver_mail: ", *address == '|' ? cmmd : address, " failed code(", strnum1, "). Temporary error", 0);
 				_exit(111);
 			}
-		}
+		} /*- for (;;) */
 	}
 	return (0);
 }

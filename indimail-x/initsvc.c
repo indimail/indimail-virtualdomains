@@ -1,5 +1,8 @@
 /*
  * $Log: initsvc.c,v $
+ * Revision 1.10  2022-12-18 19:25:22+05:30  Cprogrammer
+ * log additional wait status
+ *
  * Revision 1.9  2021-07-08 11:32:44+05:30  Cprogrammer
  * removed LIBEXECDIR setting through env variable
  *
@@ -54,7 +57,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: initsvc.c,v 1.9 2021-07-08 11:32:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: initsvc.c,v 1.10 2022-12-18 19:25:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define SV_ON    1
@@ -95,11 +98,15 @@ systemd_control(char *operation)
 			strerr_warn1("initsvc: wait: ", &strerr_sys);
 			return (1);
 		}
-		if (WIFSTOPPED(wStat) || WIFSIGNALED(wStat)) {
+		if (WIFSTOPPED(wStat) || WIFCONTINUED(wStat)) {
 			strnum1[fmt_ulong(strnum1, (unsigned long) pid)] = 0;
-			strnum2[fmt_int(strnum2,
-				WIFSIGNALED(wStat) ? WTERMSIG(wStat) : (WIFSTOPPED(wStat) ? WSTOPSIG(wStat) : -1))] = 0;
-			strerr_warn4("initsvc: child [", strnum1, "] died with signal ", strnum2, 0);
+			strnum2[fmt_int(strnum2, WIFSTOPPED(wStat) ? WIFSTOPPED(wStat) : SIGCONT)] = 0;
+			strerr_warn3("initsvc: child [", strnum1, WIFSTOPPED(wStat) ? "] stopped" : "] started", 0);
+		} else
+		if (WIFSIGNALED(wStat)) {
+			strnum1[fmt_ulong(strnum1, (unsigned long) pid)] = 0;
+			strnum2[fmt_int(strnum2, WTERMSIG(wStat))] = 0;
+			strerr_warn4("initsvc: child [", strnum1, "] killed by signal ", strnum2, 0);
 		} else
 		if (WIFEXITED(wStat)) {
 			if (!(status = WEXITSTATUS(wStat))) {
@@ -114,11 +121,17 @@ systemd_control(char *operation)
 						strerr_warn1("initsvc: wait: ", &strerr_sys);
 						return (1);
 					}
-					if (WIFSTOPPED(cStat) || WIFSIGNALED(cStat)) {
+					if (WIFSTOPPED(cStat) || WIFCONTINUED(cStat)) {
 						strnum1[fmt_ulong(strnum1, (unsigned long) pid)] = 0;
-						strnum2[fmt_int(strnum2,
-							WIFSIGNALED(cStat) ? WTERMSIG(cStat) : (WIFSTOPPED(cStat) ? WSTOPSIG(cStat) : -1))] = 0;
-						strerr_warn4("initsvc: child [", strnum1, "] died with signal ", strnum2, 0);
+						strnum2[fmt_int(strnum2, WIFSTOPPED(cStat) ? WSTOPSIG(cStat) : SIGCONT)] = 0;
+						strerr_warn3("initsvc: child [", strnum1, WIFSTOPPED(wStat) ? "] stopped" : "] started", 0);
+						return (-1);
+					} else
+					if (WIFSIGNALED(cStat)) {
+						strnum1[fmt_ulong(strnum1, (unsigned long) pid)] = 0;
+						strnum2[fmt_int(strnum2, WTERMSIG(cStat))] = 0;
+						strerr_warn4("initsvc: child [", strnum1, "] killed by signal ", strnum2, 0);
+						return (-1);
 					} else
 					if (WIFEXITED(cStat))
 						return (WEXITSTATUS(cStat));
@@ -141,11 +154,17 @@ systemd_control(char *operation)
 						strerr_warn1("initsvc: wait: ", &strerr_sys);
 						return (1);
 					}
-					if (WIFSTOPPED(cStat) || WIFSIGNALED(cStat)) {
+					if (WIFSTOPPED(cStat) || WIFCONTINUED(cStat)) {
 						strnum1[fmt_ulong(strnum1, (unsigned long) pid)] = 0;
-						strnum2[fmt_int(strnum2,
-							WIFSIGNALED(cStat) ? WTERMSIG(cStat) : (WIFSTOPPED(cStat) ? WSTOPSIG(cStat) : -1))] = 0;
-						strerr_warn4("initsvc: child [", strnum1, "] died with signal ", strnum2, 0);
+						strnum2[fmt_int(strnum2, WIFSTOPPED(cStat) ? WSTOPSIG(cStat) : SIGCONT)] = 0;
+						strerr_warn3("initsvc: child [", strnum1, WIFSTOPPED(wStat) ? "] stopped" : "] started", 0);
+						return (1);
+					} else
+					if (WIFSIGNALED(cStat)) {
+						strnum1[fmt_ulong(strnum1, (unsigned long) pid)] = 0;
+						strnum2[fmt_int(strnum2, WTERMSIG(cStat))] = 0;
+						strerr_warn4("initsvc: child [", strnum1, "] killed by signal ", strnum2, 0);
+						return (-1);
 					} else
 					if (WIFEXITED(cStat))
 						return (WEXITSTATUS(cStat));

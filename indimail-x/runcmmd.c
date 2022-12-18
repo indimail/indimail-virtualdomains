@@ -1,5 +1,8 @@
 /*
  * $Log: runcmmd.c,v $
+ * Revision 1.4  2022-12-18 19:27:45+05:30  Cprogrammer
+ * handle SIGCONT
+ *
  * Revision 1.3  2022-05-10 20:01:40+05:30  Cprogrammer
  * use headers from include path
  *
@@ -39,7 +42,7 @@
 #include "variables.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: runcmmd.c,v 1.3 2022-05-10 20:01:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: runcmmd.c,v 1.4 2022-12-18 19:27:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -71,8 +74,7 @@ runcmmd(char *cmmd, int useP)
 	else
 	if ((pstat[1] = signal(SIGQUIT, SIG_IGN)) == SIG_ERR)
 		return (-1);
-	for (retval = -1;;)
-	{
+	for (retval = -1;;) {
 		i = wait(&status);
 #ifdef ERESTART
 		if (i == -1 && (errno == EINTR || errno == ERESTART))
@@ -85,16 +87,23 @@ runcmmd(char *cmmd, int useP)
 			break;
 		if (i != pid)
 			continue;
-		if (WIFSTOPPED(status) || WIFSIGNALED(status)) {
+		if (WIFSTOPPED(status) || WIFCONTINUED(status)) {
 			if (verbose) {
 				strnum1[fmt_ulong(strnum1, getpid())] = 0;
-				strnum2[fmt_uint(strnum2, WIFSTOPPED(status) ? WSTOPSIG(status) : WTERMSIG(status))] = 0;
+				strnum2[fmt_uint(strnum2, WIFSTOPPED(status) ? WSTOPSIG(status) : SIGCONT)] = 0;
+				strerr_warn3(strnum1, WIFSTOPPED(status) ? " stopped by signal " : " started by signal ", strnum2, 0);
+			}
+			continue;
+		} else
+		if (WIFSIGNALED(status)) {
+			if (verbose) {
+				strnum1[fmt_ulong(strnum1, getpid())] = 0;
+				strnum2[fmt_uint(strnum2, WTERMSIG(status))] = 0;
 				strerr_warn3(strnum1, ": killed by signal ", strnum2, 0);
 			}
 			retval = -1;
 		} else
-		if (WIFEXITED(status))
-		{
+		if (WIFEXITED(status)) {
 			retval = WEXITSTATUS(status);
 			if (verbose) {
 				strnum1[fmt_ulong(strnum1, getpid())] = 0;

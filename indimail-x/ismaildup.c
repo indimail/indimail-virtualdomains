@@ -1,5 +1,8 @@
 /*
  * $Log: ismaildup.c,v $
+ * Revision 1.6  2022-12-18 19:26:39+05:30  Cprogrammer
+ * recoded wait logic
+ *
  * Revision 1.5  2022-05-10 20:01:31+05:30  Cprogrammer
  * use headers from include path
  *
@@ -52,12 +55,15 @@
 #include <env.h>
 #include <getEnvConfig.h>
 #include <makeargs.h>
+#include <wait.h>
 #endif
 #include "dblock.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ismaildup.c,v 1.5 2022-05-10 20:01:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ismaildup.c,v 1.6 2022-12-18 19:26:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
+
+static char     strnum[FMT_ULONG];
 
 #ifdef HAVE_SSL 
 static void
@@ -73,7 +79,7 @@ duplicateMD5(char *fileName, char *md5buffer)
 	static stralloc line = {0};
 	char           *ptr;
 	unsigned long   interval;
-	char            inbuf[512], outbuf[512], strnum[FMT_ULONG];
+	char            inbuf[512], outbuf[512];
 	int             i, fd, match;
 #ifdef FILE_LOCKING
 	int             lockfd;
@@ -159,13 +165,13 @@ duplicateMD5(char *fileName, char *md5buffer)
 int
 ismaildup(char *maildir)
 {
-	int             md_len, error, code, wait_status, i, n, pim[2];
-	long unsigned   pid;
+	int             md_len, error, code, wait_status, i, werr, n, pim[2];
+	pid_t           pid;
 	static stralloc dupfile = {0}, md5sum = {0};
 	char          **argv;
 	char           *ptr;
 	char           *binqqargs[8];
-	char            inbuf[512], strnum[FMT_ULONG];
+	char            inbuf[512], strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	EVP_MD_CTX     *mdctx;
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 	EVP_MD_CTX     mdctxO;
@@ -174,13 +180,13 @@ ismaildup(char *maildir)
 	unsigned char   md_value[EVP_MAX_MD_SIZE];
 
 	if (pipe(pim) == -1)
-		return (0);
+		_exit(111);
 	switch (pid = vfork())
 	{
 	case -1:
 		close(pim[0]);
 		close(pim[1]);
-		return (0);
+		_exit(111);
 	case 0:
 		if (lseek(0, 0l, SEEK_SET) < 0) {
 			strerr_warn1("ismaildup: lseek: ", &strerr_sys);
@@ -196,8 +202,7 @@ ismaildup(char *maildir)
 		}
 		if (ptr)
 			execv(*binqqargs, argv);
-		else
-		{
+		else {
 			binqqargs[1] = "-X";
 			binqqargs[2] = "received";
 			binqqargs[3] = "-X";
@@ -215,12 +220,12 @@ ismaildup(char *maildir)
 	OpenSSL_add_all_digests();
 	if (!(md = EVP_get_digestbyname("md5"))) {
 		strerr_warn1("ismaildup: Unknown message digest md5", 0);
-		return (-1);
+		_exit (111);
 	}
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	if (!(mdctx = EVP_MD_CTX_new())) {
 		strerr_warn1("ismaildup: Digest create failure", 0);
-		return (-1);
+		_exit (111);
 	}
 #else
 	mdctx = &mdctxO;
@@ -233,7 +238,7 @@ ismaildup(char *maildir)
 #else
 		EVP_MD_CTX_cleanup(mdctx);
 #endif
-		return (-1);
+		_exit (111);
 	}
 	error = 0;
 	for (;;) {
@@ -258,30 +263,40 @@ ismaildup(char *maildir)
 		}
 	}
 	for (;;) {
-		if ((pid = wait(&wait_status)) == -1) {
+		if (!(i = wait_pid(&wait_status, pid)))
+			break;
+		else
+		if (i == -1) {
 #ifdef ERESTART
 			if (errno == EINTR || errno == ERESTART)
 #else
 			if (errno == EINTR)
 #endif
 				continue;
-			strerr_warn1("ismaildup: 822header crashed. indimail bug", 0);
-			return (0);
+			strnum1[fmt_ulong(strnum1, pid)] = 0;
+			strerr_warn3("ismaildup: waitpid: ", strnum1, ": ", &strerr_sys);
+			error = 1;
+			break;
 		}
-		break;
-	}
-	if (WIFSTOPPED(wait_status) || WIFSIGNALED(wait_status)) {
-		strerr_warn1("822header crashed.", 0);
-		return (0);
-	} else
-	if (WIFEXITED(wait_status)) {
-		if ((code = WEXITSTATUS(wait_status))) {
-			strnum[fmt_int(strnum, code)] = 0;
-			strerr_warn3("ismaildup: 822header failed code(", strnum, ")", 0);
-			return (0);
+		if (!(i = wait_handler(wait_status, &werr)))
+			continue;
+		else
+		if (werr == -1) {
+			strnum1[fmt_ulong(strnum1, pid)] = 0;
+			strerr_warn3("ismaildup: ", strnum1, ": internal wait handler error", 0);
+			error = 1;
+		} else
+		if (werr) {
+			strnum1[fmt_ulong(strnum1, pid)] = 0;
+			strnum2[fmt_uint(strnum2, werr)] = 0;
+			strerr_warn4("ismaildup: ", strnum1, ": killed by signal ", strnum2, 0);
+			error = 1;
+		} else {
+			code = i;
+			break;
 		}
 	}
-	if (!error) {
+	if (!error && !code) {
 		EVP_DigestFinal_ex(mdctx, md_value, (unsigned int *) &md_len);
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 		EVP_MD_CTX_free(mdctx);
@@ -289,8 +304,8 @@ ismaildup(char *maildir)
 		EVP_MD_CTX_cleanup(mdctx);
 #endif
 		for (n = 0; n < md_len; n++) {
-			strnum[i = fmt_hexbyte(strnum, md_value[n])] = 0;
-			if (!stralloc_catb(&md5sum, strnum, i))
+			strnum1[i = fmt_hexbyte(strnum1, md_value[n])] = 0;
+			if (!stralloc_catb(&md5sum, strnum1, i))
 				die_nomem();
 		}
 		if (!stralloc_0(&md5sum))
@@ -306,6 +321,8 @@ ismaildup(char *maildir)
 #else
 	EVP_MD_CTX_cleanup(mdctx);
 #endif
+	if (error || code)
+		_exit(111);
 	return (0);
 }
 #endif
