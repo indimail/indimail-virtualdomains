@@ -934,6 +934,18 @@ NOTE: binary package for FreeBSD and OSX is in my TODO list.
 [![logalert obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-obs.yml)
 [![indium obs trigger](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-obs.yml)
 
+[![indimail](https://build.opensuse.org/projects/home:mbhangui/packages/indimail/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indimail)
+[![indimail-access](https://build.opensuse.org/projects/home:mbhangui/packages/indimail-access/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indimail-access)
+[![indimail-auth](https://build.opensuse.org/projects/home:mbhangui/packages/indimail-auth/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indimail-auth)
+[![indimail-spamfilter](https://build.opensuse.org/projects/home:mbhangui/packages/indimail-spamfilter/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indimail-spamfilter)
+[![indimail-utils](https://build.opensuse.org/projects/home:mbhangui/packages/indimail-utils/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indimail-utils)
+[![bogofilter-wordlist](https://build.opensuse.org/projects/home:mbhangui/packages/bogofilter-wordlist/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/bogofilter-wordlist)
+[![iwebadmin](https://build.opensuse.org/projects/home:mbhangui/packages/iwebadmin/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/iwebadmin)
+[![ircube](https://build.opensuse.org/projects/home:mbhangui/packages/ircube/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/ircube)
+[![logalert](https://build.opensuse.org/projects/home:mbhangui/packages/logalert/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/logalert)
+[![procmail](https://build.opensuse.org/projects/home:mbhangui/packages/procmail/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/procmail)
+[![indium](https://build.opensuse.org/projects/home:mbhangui/packages/indium/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indium)
+
 You can get binary RPM / Debian packages at
 
 * [Stable Releases](http://download.opensuse.org/repositories/home:/indimail/)
