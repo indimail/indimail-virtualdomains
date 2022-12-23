@@ -84,6 +84,8 @@ install-exec-hook:
 	chmod 755 $(DESTDIR)$(sysconfdir)/imapaccess
 
 install-data-local: install-man
+	$(mkinstalldirs) $(DESTDIR)$(sysconfdir)
+	$(mkinstalldirs) $(DESTDIR)$(mandir)
 	$(INSTALL_DATA) libs/authlib/modulelist $(DESTDIR)$(sysconfdir)/authmodulelist
 	for f in $(man_MANS); do chmod a+r $(DESTDIR)$(mandir)/*/$$f; done
 	@echo "Do not forget to run make install-configure"
