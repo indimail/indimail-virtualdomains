@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 1.9  2022-12-25 12:13:29+05:30  Cprogrammer
+ * authenticate using SCRAM salted password
+ *
  * Revision 1.8  2022-08-05 21:12:37+05:30  Cprogrammer
  * added encrypt_flag argument to autoAddUser()
  *
@@ -30,7 +33,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 1.8 2022-08-05 21:12:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 1.9 2022-12-25 12:13:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -57,6 +60,10 @@ static char     sccsid[] = "$Id: proxylogin.c,v 1.8 2022-08-05 21:12:37+05:30 Cp
 #include <mkpasswd.h>
 #include <pw_comp.h>
 #include <getEnvConfig.h>
+#include <get_scram_secrets.h>
+#endif
+#ifdef HAVE_GSASL
+#include <gsasl.h>
 #endif
 #include "runcmmd.h"
 #include "auth_admin.h"
@@ -169,7 +176,12 @@ static int
 LocalLogin(char **argv, char *email, char *TheUser, char *TheDomain, char *service, 
 	char *imaptag, char *plaintext)
 {
-	char           *p;
+	char           *p, *crypt_pass;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	int             i;
+#endif
+#endif
 	struct passwd  *pw;
 
 	if (!(pw = inquery(PWD_QUERY, email, 0))) {
@@ -211,9 +223,26 @@ LocalLogin(char **argv, char *email, char *TheUser, char *TheDomain, char *servi
 	}
 	p = plaintext;
 	remove_quotes(&p);
-	if (pw->pw_passwd[0] && !pw_comp(0, (unsigned char *) pw->pw_passwd, 0,
-		(unsigned char *) p, 0))
-	{
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	crypt_pass = (char *) NULL;
+	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
+		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &crypt_pass);
+		if (i != 6 && i != 8) {
+			strerr_warn1("proxylogin: unable to get secrets", 0);
+			return (-1);
+		}
+	} else {
+		i = 0;
+		crypt_pass = pw->pw_passwd;
+	}
+#else
+	crypt_pass = pw->pw_passwd;
+#endif
+#else
+	crypt_pass = pw->pw_passwd;
+#endif
+	if (pw->pw_passwd[0] && !pw_comp(0, (unsigned char *) crypt_pass, 0, (unsigned char *) p, 0)) {
 		if (!str_diffn(service, "imap", 4)) {
 			if (!env_put2("IMAPLOGINTAG", imaptag))
 				strerr_die3sys(111, "proxylogin: env_put2: IMAPLOGINTAG=", imaptag, ": ");
@@ -308,8 +337,9 @@ proxylogin(char **argv, char *service, char *userid, char *plaintext, char *remo
 		return (1);
 	}
 	mailstore++;
-	if (islocalif(mailstore)) /* - Prevent LoopBak */
+	if (islocalif(mailstore)) { /* - Prevent LoopBak */
 		return (LocalLogin(argv, email, TheUser.s, TheDomain.s, service, imaptag, plaintext));
+	}
 	else { /*- if (islocalif(mailstore)) */
 		if (!str_diffn(service, "imap", 4)) {
 			if (!stralloc_copys(&loginbuf, imaptag) ||
