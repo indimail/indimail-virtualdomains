@@ -1,5 +1,8 @@
 /*
  * $Log: proxyimap.c,v $
+ * Revision 1.3  2022-12-25 20:32:53+05:30  Cprogrammer
+ * allow any TLS/SSL helper program other than sslerator, couriertls
+ *
  * Revision 1.2  2019-04-22 23:14:34+05:30  Cprogrammer
  * added missing strerr.h
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxyimap.c,v 1.2 2019-04-22 23:14:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxyimap.c,v 1.3 2022-12-25 20:32:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -190,15 +193,12 @@ main(int argc, char **argv)
 				if (!env_unset("BADLOGINS") || !env_unset("IMAP_STARTTLS"))
 					die_nomem();
 				alarm(0);
-				p = ptr = env_get("COURIERTLS");
-				if (ptr) {
-					c = str_rchr(ptr, '/');
-					if (ptr[c])
-						p = ptr + c + 1;
-				} else
-					p = 0;
-				if (!ptr || (p && !str_diff(p, "sslerator"))) {
-					binqqargs[0] = PREFIX"/bin/sslerator";
+				if (!(ptr = env_get("COURIERTLS")))
+					ptr = PREFIX"/bin/sslerator";
+				c = str_rchr(ptr, '/');
+				p = ptr[c] ? ptr + c + 1 : ptr;
+				if (str_diff(p, "couriertls")) {
+					binqqargs[0] = ptr;
 					binqqargs[1] = argv[0];
 					binqqargs[2] = argv[1]; 
 					binqqargs[3] = argv[2];

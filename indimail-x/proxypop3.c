@@ -1,5 +1,8 @@
 /*
  * $Log: proxypop3.c,v $
+ * Revision 1.4  2022-12-25 20:32:45+05:30  Cprogrammer
+ * allow any TLS/SSL helper program other than sslerator, couriertls
+ *
  * Revision 1.3  2019-04-22 23:14:49+05:30  Cprogrammer
  * added missing strerr.h
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxypop3.c,v 1.3 2019-04-22 23:14:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxypop3.c,v 1.4 2022-12-25 20:32:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -159,16 +162,12 @@ main(int argc, char **argv)
 			if (!env_unset("BADLOGINS") || !env_unset("POP3_STARTTLS"))
 				die_nomem();
 			alarm(0);
-			r = ptr = env_get("COURIERTLS");
-			if (ptr) {
-				c = str_rchr(ptr, '/');
-				if (ptr[c])
-					r = ptr + c + 1;
-			} else
-				r = 0;
-
-			if (!ptr || (r && !str_diff(r, "sslerator"))) {
-				binqqargs[0] = PREFIX"/bin/sslerator";
+			if (!(ptr = env_get("COURIERTLS")))
+				ptr = PREFIX"/bin/sslerator";
+			c = str_rchr(ptr, '/');
+			r = ptr[c] ? ptr + c + 1 : ptr;
+			if (str_diff(r, "couriertls")) {
+				binqqargs[0] = ptr;
 				binqqargs[1] = argv[0];
 				binqqargs[2] = argv[1]; 
 				binqqargs[3] = argv[2];

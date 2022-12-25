@@ -37,6 +37,10 @@ tcp.pop3
 w.x.y.z:allow,POP3CLIENT=""
 .EE
 
+\fBproxyimap\fR and \fBproxypop3\fR supports TLS/SSL and STARTTLS sessions.
+For TLS/SSL session you can use \fBtcpserver\fR(1) with -n option or use
+the \fBcouriertls\fR(1) program.
+
 If you set the \fBAUTOADDUSER\fR environment variable, users can be automatically added by
 using the \fBadminclient(8)\fR protocol to connect to \fBindisrvr(8)\fR. The auto provisioning
 happens only if the user does not exist in IndiMail's authentication database. If you set the
@@ -45,7 +49,7 @@ passed as an argument.
 
 Following environment variables are needed by these two proxies to start up
 
-.TP
+.TP 4
 \fBTCPREMOTEIP\fR
 IP address of remote host.
 .TP
@@ -55,12 +59,28 @@ Local TCP/IP Port on which proxyimap, proxypop3 is running.
 \fBDESTPORT\fR
 Of the form protocol:port where protocol is either imap or pop3. Port is the TCP/IP port on
 the remote host offering the imap or pop3 protocol.
+.TP
+\fBCOURIERTLS\fR
+The program to run to enable TLS/SSL session if the client issues the
+\fBSTARTTLS\fR command. If not set, the program \fBsslerator\fR(8) will be
+used. One can also use dotls(1) or the couriertls(1) programs. In fact, you
+can use any program that can encrypt data on descriptors 0 and 1 and can
+print a BANNER on descriptor 1 before initiating a TLS/SSL session. This
+banner should be one of the following
+
+.EX
+for imap
+IMAPTAG Begin SSL/TLS negotiation now.
+
+for pop3
++OK Begin SSL/TLS negotiation now.
+.EE
 
 .PP
 If you use the AUTOADDUSER environemnt variable to provision new users,
 adminclient will be used to execute various indimail commands. In this case
 additional environment variables will needed
-.TP
+.TP 4
 \fBADMIN_USER\fR
 An existing user set using mgmtpass(8) program.
 .TP
@@ -98,7 +118,7 @@ data from the TCP/IP connection to file descriptor 1. The TCP/IP connection is s
 needs to be supplied to the application listening on port port on host host.
 
 .SH OPTIONS
-.TP
+.TP 4
 \fIpath_of_imapd\fR
 Specifies the full path of IndiMail's imapd executable
 .TP
@@ -119,4 +139,5 @@ username and PASS passwd sequence to login.
 0 for success and 1 for failure in which case all diagnostics are printed on stdout.
 
 .SH "SEE ALSO"
-authindi(8), adminclient(8), indisrvr(8)
+authindi(8), adminclient(8), indisrvr(8), sslerator(8), dotls(1),
+tcpserver(1), couriertls(1).
