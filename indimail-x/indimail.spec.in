@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.119 2022-12-07 16:52:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.120 2023-01-03 22:01:33+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -774,7 +774,6 @@ done
 %attr(644,root,root)                    %{_prefix}/include/indimail/sql_updateflag.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/storeHeader.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/strToPw.h
-%attr(644,root,root)                    %{_prefix}/include/indimail/tls.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/trashpurge.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/update_file.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/update_local_hostid.h
