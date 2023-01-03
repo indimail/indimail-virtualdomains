@@ -1,5 +1,11 @@
 /*
  * $Log: auth_admin.c,v $
+ * Revision 1.8  2023-01-03 21:08:36+05:30  Cprogrammer
+ * renamed ADMIN_TIMEOUT to TIMEOUTDATA
+ * replaced safewrite, saferead with tlswrite, tlsread from tls library in libqmail
+ * replaced tls code with TLS library from libqmail
+ * added env variable TIMEOUTCONN for connection timeout
+ *
  * Revision 1.7  2022-05-10 20:00:04+05:30  Cprogrammer
  * corrected misleading error message string
  *
@@ -43,18 +49,19 @@
 #endif
 #include "tcpopen.h"
 #ifdef HAVE_SSL
-#include "tls.h"
+#include <tls.h>
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: auth_admin.c,v 1.7 2022-05-10 20:00:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: auth_admin.c,v 1.8 2023-01-03 21:08:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
 auth_admin(char *admin_user, char *admin_pass, char *admin_host,
-	char *admin_port, char *clientcert, char *cafile, int match_cn)
+	char *admin_port, char *clientcert, char *cafile, char *crlfile,
+	int match_cn)
 {
-	int             sfd, port, admin_timeout;
+	int             sfd, port, timeoutdata, timeoutconn;
 	ssize_t         len;
 	SSL            *ssl;
 	SSL_CTX        *ctx;
@@ -66,22 +73,23 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host,
 		strerr_warn5("tcpopen: ", admin_host, ":", admin_port, ": ", &strerr_sys);
 		return (-1);
 	}
-	getEnvConfigInt(&admin_timeout, "ADMIN_TIMEOUT", 120);
+	getEnvConfigInt(&timeoutdata, "TIMEOUTDATA", 120);
+	getEnvConfigInt(&timeoutconn, "TIMEOUTCONN", 60);
 #ifdef HAVE_SSL
 	if (clientcert) {
 		if (!(ciphers = env_get("TLS_CIPHER_LIST")))
 			ciphers = "PROFILE=SYSTEM";
-		if (!(ctx = tls_init(clientcert, cafile, ciphers, client)))
+		if (!(ctx = tls_init(0, clientcert, cafile, crlfile, ciphers, client)))
 			return(-1);
-		if (!(ssl = tls_session(ctx, sfd, ciphers)))
+		if (!(ssl = tls_session(ctx, sfd)))
 			return(-1);
 		SSL_CTX_free(ctx);
 		ctx = NULL;
-		if (tls_connect(ssl, match_cn ? admin_host : 0) == -1)
+		if (tls_connect(timeoutconn, sfd, sfd, ssl, match_cn ? admin_host : 0) == -1)
 			return(-1);
 	}
 #endif
-	if ((len = saferead(sfd, inbuf, sizeof(inbuf) - 1, admin_timeout)) == -1 || !len) {
+	if ((len = tlsread(sfd, inbuf, sizeof(inbuf) - 1, timeoutdata)) == -1 || !len) {
 		close(sfd);
 #ifdef HAVE_SSL
 		ssl_free();
@@ -98,7 +106,7 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host,
 		return (-1);
 	}
 	len = str_len(admin_user);
-	if (safewrite(sfd, admin_user, len, admin_timeout) != len || safewrite(sfd, "\n", 1, admin_timeout) != 1) {
+	if (tlswrite(sfd, admin_user, len, timeoutdata) != len || tlswrite(sfd, "\n", 1, timeoutdata) != 1) {
 		close(sfd);
 #ifdef HAVE_SSL
 		ssl_free();
@@ -106,7 +114,7 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host,
 		errno = EPROTO;
 		return (-1);
 	} else
-	if ((len = saferead(sfd, inbuf, sizeof(inbuf) - 1, admin_timeout)) == -1 || !len) {
+	if ((len = tlsread(sfd, inbuf, sizeof(inbuf) - 1, timeoutdata)) == -1 || !len) {
 		close(sfd);
 #ifdef HAVE_SSL
 		ssl_free();
@@ -124,7 +132,7 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host,
 		return (-1);
 	}
 	len = str_len(admin_pass);
-	if (safewrite(sfd, admin_pass, len, admin_timeout) != len || safewrite(sfd, "\n", 1, admin_timeout) != 1) {
+	if (tlswrite(sfd, admin_pass, len, timeoutdata) != len || tlswrite(sfd, "\n", 1, timeoutdata) != 1) {
 		close(sfd);
 #ifdef HAVE_SSL
 		ssl_free();
@@ -132,7 +140,7 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host,
 		errno = EPROTO;
 		return (-1);
 	} else
-	if ((len = saferead(sfd, inbuf, sizeof(inbuf) - 1, admin_timeout)) == -1 || !len) {
+	if ((len = tlsread(sfd, inbuf, sizeof(inbuf) - 1, timeoutdata)) == -1 || !len) {
 		close(sfd);
 #ifdef HAVE_SSL
 		ssl_free();

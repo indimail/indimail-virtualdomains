@@ -1,5 +1,8 @@
 /*
  * $Log: proxypop3.c,v $
+ * Revision 1.5  2023-01-03 21:15:39+05:30  Cprogrammer
+ * added 'proxypop3' identifier in connection log message
+ *
  * Revision 1.4  2022-12-25 20:32:45+05:30  Cprogrammer
  * allow any TLS/SSL helper program other than sslerator, couriertls
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxypop3.c,v 1.4 2022-12-25 20:32:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxypop3.c,v 1.5 2023-01-03 21:15:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -80,7 +83,8 @@ main(int argc, char **argv)
 	signal(SIGALRM, bye);
 	if (AuthModuser(argc, argv, 60, 5)) {
 		if (!env_get("SSLERATOR")) {
-			strerr_warn3("INFO: Connection, remoteip=[", remoteip, "]", 0);
+			strnum[fmt_ulong(strnum, getpid())] = 0;
+			strerr_warn5("INFO: proxypop3: Connection, pid ", strnum, ", remoteip=[", remoteip, "]", 0);
 			strmsg_out1("+OK POP3 Server Ready.\r\n");
 		}
 		if (!env_put2("BADLOGINS", "0"))

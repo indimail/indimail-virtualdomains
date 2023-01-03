@@ -1,5 +1,8 @@
 /*
  * $Log: adminclient.c,v $
+ * Revision 1.4  2023-01-03 21:05:41+05:30  Cprogrammer
+ * added -r option to specify certification revocation list
+ *
  * Revision 1.3  2021-03-04 11:51:59+05:30  Cprogrammer
  * added -m option to match host with common name
  * added -C option to specify cafile
@@ -16,7 +19,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: adminclient.c,v 1.3 2021-03-04 11:51:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: adminclient.c,v 1.4 2023-01-03 21:05:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -51,11 +54,12 @@ int
 main(int argc, char **argv)
 {
 	char           *admin_user, *admin_pass, *admin_host, *admin_port, *cmmd,
-				   *cmdptr1, *cmdptr2, *certfile, *cafile;
+				   *cmdptr1, *cmdptr2, *certfile, *cafile, *crlfile;
 	static stralloc cmdbuf = {0}, cmdName = {0};
 	int             sfd, i, j, k, input_read, match_cn = 0;
 
-	certfile = cafile = admin_user = admin_pass = admin_host = admin_port = cmmd = (char *) 0;
+	certfile = cafile = crlfile = NULL;
+	admin_user = admin_pass = admin_host = admin_port = cmmd = NULL;
 	input_read = 0;
 	for (i = 1; i < argc; i++) {
 		if (argv[i][0] != '-')
@@ -86,6 +90,9 @@ main(int argc, char **argv)
 		case 'C':
 			cafile = *(argv + i + 1);
 			break;
+		case 'r':
+			crlfile = *(argv + i + 1);
+			break;
 		case 'm':
 			match_cn = 1;
 			break;
@@ -93,7 +100,7 @@ main(int argc, char **argv)
 			verbose = 1;
 			break;
 		default:
-			strerr_warn1("usage: adminclient [-h adminHost -p adminPort -u adminUser -P adminPasswd] [-n certfile] [-i] -c cmmd [-v]", 0);
+			strerr_warn1("usage: adminclient -h adminHost -p adminPort -u adminUser -P adminPasswd [-n certfile] [-i] -c cmmd [-v]", 0);
 			strnum[0] = argv[i][1];
 			strnum[1] = 0;
 			strerr_warn2("invalid option ", strnum, 0);
@@ -101,28 +108,28 @@ main(int argc, char **argv)
 		}
 	}
 	if (!admin_host && !(admin_host = (char *) env_get("ADMIN_HOST"))) {
-		strerr_warn1("usage: adminclient [-h adminHost -p adminPort -u adminUser -P adminPasswd] [-n certfile] [-i] -c cmmd [-v]\n", 0);
+		strerr_warn1("usage: adminclient -h adminHost -p adminPort -u adminUser -P adminPasswd [-n certfile] [-i] -c cmmd [-v]", 0);
 		return (1);
 	} else
 	if (!admin_port && !(admin_port = (char *) env_get("ADMIN_PORT"))) {
-		strerr_warn1("usage: adminclient [-h adminHost -p adminPort -u adminUser -P adminPasswd] [-n certfile] [-i] -c cmmd [-v]\n", 0);
+		strerr_warn1("usage: adminclient -h adminHost -p adminPort -u adminUser -P adminPasswd [-n certfile] [-i] -c cmmd [-v]", 0);
 		return (1);
 	} else
 	if (!admin_user && !(admin_user = (char *) env_get("ADMIN_USER"))) {
-		strerr_warn1("usage: adminclient [-h adminHost -p adminPort -u adminUser -P adminPasswd] [-n certfile] [-i] -c cmmd [-v]\n", 0);
+		strerr_warn1("usage: adminclient -h adminHost -p adminPort -u adminUser -P adminPasswd [-n certfile] [-i] -c cmmd [-v]", 0);
 		return (1);
 	} else
 	if (!admin_pass && !(admin_pass = (char *) env_get("ADMIN_PASS"))) {
-		strerr_warn1("usage: adminclient [-h adminHost -p adminPort -u adminUser -P adminPasswd] [-n certfile] [-i] -c cmmd [-v]\n", 0);
+		strerr_warn1("usage: adminclient -h adminHost -p adminPort -u adminUser -P adminPasswd [-n certfile] [-i] -c cmmd [-v]", 0);
 		return (1);
 	} else
 	if (!cmmd) {
-		strerr_warn1("usage: adminclient [-h adminHost -p adminPort -u adminUser -P adminPasswd] [-n certfile] [-i] -c cmmd [-v]\n", 0);
+		strerr_warn1("usage: adminclient -h adminHost -p adminPort -u adminUser -P adminPasswd [-n certfile] [-i] -c cmmd [-v]", 0);
 		return (1);
 	}
 	if (verbose)
 		strmsg_out7("connecting to ", admin_host, "@", admin_port, " as ", admin_user, "\n");
-	if ((sfd = auth_admin(admin_user, admin_pass, admin_host, admin_port, certfile, cafile, match_cn)) == -1) {
+	if ((sfd = auth_admin(admin_user, admin_pass, admin_host, admin_port, certfile, cafile, crlfile, match_cn)) == -1) {
 		strerr_warn7("adminclient: auth_admin: ", admin_host, "@", admin_port, " as ", admin_user, ": ", &strerr_sys);
 		return (1);
 	}

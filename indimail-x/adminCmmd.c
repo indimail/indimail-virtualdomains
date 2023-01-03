@@ -1,5 +1,9 @@
 /*
  * $Log: adminCmmd.c,v $
+ * Revision 1.4  2023-01-03 21:04:50+05:30  Cprogrammer
+ * renamed ADMIN_TIMEOUT to TIMEOUTDATA
+ * replaced safewrite, saferead with tlswrite, tlsread from tls library in libqmail
+ *
  * Revision 1.3  2021-07-21 14:04:21+05:30  Cprogrammer
  * conditional compilation (alpine linux)
  *
@@ -50,7 +54,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: adminCmmd.c,v 1.3 2021-07-21 14:04:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: adminCmmd.c,v 1.4 2023-01-03 21:04:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      IOPlex(int, int);
@@ -58,46 +62,46 @@ static int      IOPlex(int, int);
 int
 adminCmmd(int sfd, int inputRead, char *cmdbuf, int len)
 {
-	int             i, retval, n, admin_timeout;
+	int             i, retval, n, timeoutdata;
 	char            inbuf[512], strnum[FMT_ULONG];
 	char           *ptr;
 
-	getEnvConfigInt(&admin_timeout, "ADMIN_TIMEOUT", 120);
-	if ((n = safewrite(sfd, cmdbuf, len, admin_timeout)) != len) {
+	getEnvConfigInt(&timeoutdata, "TIMEOUTDATA", 120);
+	if ((n = tlswrite(sfd, cmdbuf, len, timeoutdata)) != len) {
 		strnum[fmt_int(strnum, n)] = 0;
-		strerr_warn3("adminCmmd: safewrite: ", strnum, " bytes: ", &strerr_sys);
+		strerr_warn3("adminCmmd: tlswrite: ", strnum, " bytes: ", &strerr_sys);
 #ifdef HAVE_SSL
 		ssl_free();
 #endif
 		return (-1);
 	}
-	if ((n = safewrite(sfd, "\n", 1, admin_timeout)) != 1) { /*- To send the command */
+	if ((n = tlswrite(sfd, "\n", 1, timeoutdata)) != 1) { /*- To send the command */
 		strnum[fmt_int(strnum, n)] = 0;
-		strerr_warn3("adminCmmd: safewrite: ", strnum, " bytes: ", &strerr_sys);
+		strerr_warn3("adminCmmd: tlswrite: ", strnum, " bytes: ", &strerr_sys);
 #ifdef HAVE_SSL
 		ssl_free();
 #endif
 		return (-1);
 	}
-	if ((n = safewrite(sfd, "\n", 1, admin_timeout)) != 1) { /*- to make indisrvr go forward after wait() */
+	if ((n = tlswrite(sfd, "\n", 1, timeoutdata)) != 1) { /*- to make indisrvr go forward after wait() */
 		strnum[fmt_int(strnum, n)] = 0;
-		strerr_warn3("adminCmmd: safewrite: ", strnum, " bytes: ", &strerr_sys);
+		strerr_warn3("adminCmmd: tlswrite: ", strnum, " bytes: ", &strerr_sys);
 #ifdef HAVE_SSL
 		ssl_free();
 #endif
 		return (-1);
 	}
 	if (inputRead)
-		IOPlex(sfd, admin_timeout);
+		IOPlex(sfd, timeoutdata);
 	for (retval = -1;;) {
-		if ((n = saferead(sfd, inbuf, sizeof(inbuf) - 1, admin_timeout)) < 0) {
+		if ((n = tlsread(sfd, inbuf, sizeof(inbuf) - 1, timeoutdata)) < 0) {
 #ifdef ERESTART
 			if (errno == EINTR || errno == ERESTART)
 #else
 			if (errno == EINTR)
 #endif
 				continue;
-			strerr_warn1("adminCmmd: saferead: ", &strerr_sys);
+			strerr_warn1("adminCmmd: tlsread: ", &strerr_sys);
 #ifdef HAVE_SSL
 			ssl_free();
 #endif
@@ -132,7 +136,7 @@ adminCmmd(int sfd, int inputRead, char *cmdbuf, int len)
 }
 
 static int
-IOPlex(int sockfd, int admin_timeout)
+IOPlex(int sockfd, int timeoutdata)
 {
 	fd_set          rfds;	/*- File descriptor mask for select -*/
 	struct timeval  timeout, Timeout;
@@ -236,8 +240,8 @@ IOPlex(int sockfd, int admin_timeout)
 			if (!retval)	/*- EOF from client -*/
 				break;
 			/*- Write to Remote Server -*/
-			if (safewrite(sockfd, sockbuf, retval, admin_timeout) != retval) {
-				strerr_warn1("adminCmmd: safewrite: ", &strerr_sys);
+			if (tlswrite(sockfd, sockbuf, retval, timeoutdata) != retval) {
+				strerr_warn1("adminCmmd: tlswrite: ", &strerr_sys);
 				signal(SIGPIPE, pstat);
 				return (-1);
 			}

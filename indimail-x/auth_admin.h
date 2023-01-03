@@ -1,5 +1,8 @@
 /*
  * $Log: auth_admin.h,v $
+ * Revision 1.3  2023-01-03 21:09:38+05:30  Cprogrammer
+ * added crlfile argument to auth_admin()
+ *
  * Revision 1.2  2021-03-04 11:55:29+05:30  Cprogrammer
  * added cafile, match_cn arguments
  *
@@ -10,6 +13,6 @@
 #ifndef AUTH_ADMIN_H
 #define AUTH_ADMIN_H
 
-int             auth_admin(char *, char *, char *, char *, char *, char *, int);
+int             auth_admin(char *, char *, char *, char *, char *, char *, char *, int);
 
 #endif

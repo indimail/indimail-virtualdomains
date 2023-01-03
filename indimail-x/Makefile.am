@@ -90,7 +90,7 @@ include_HEADERS = addaliasdomain.h add_control.h add_domain_assign.h addressToke
 	sql_getflags.h sql_gethostid.h sql_getip.h sql_getpw.h sql_get_realdomain.h \
 	sql_init.h sql_insertaliasdomain.h sqlOpen_user.h sql_passwd.h sql_renamedomain.h \
 	SqlServer.h sql_setpw.h sql_setquota.h sql_updateflag.h storeHeader.h \
-	strToPw.h tls.h trashpurge.h update_file.h \
+	strToPw.h trashpurge.h update_file.h \
 	update_local_hostid.h update_newu.h update_quota.h update_rules.h \
 	updusercntrl.h userinfo.h UserInLookup.h user_over_quota.h valiasCount.h \
 	valias_delete_domain.h valias_delete.h valiasinfo.h valias_insert.h \
@@ -446,15 +446,15 @@ resetquota_LDADD = libindimail.la $(LIB_QMAIL)
 resetquota_DEPENDENCIES = libindimail.la
 
 proxyimap_SOURCES = proxyimap.c
-proxyimap_LDADD = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
+proxyimap_LDADD = proxylogin.lo auth_admin.lo adminCmmd.lo \
 	monkey.lo sockwrite.lo libindimail.la $(LIB_QMAIL) @LIB_SSL@
-proxyimap_DEPENDENCIES = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
+proxyimap_DEPENDENCIES = proxylogin.lo auth_admin.lo adminCmmd.lo \
 	monkey.lo sockwrite.lo libindimail.la
 
 proxypop3_SOURCES = proxypop3.c
-proxypop3_LDADD = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
+proxypop3_LDADD = proxylogin.lo auth_admin.lo adminCmmd.lo \
 	monkey.lo sockwrite.lo libindimail.la $(LIB_QMAIL) @LIB_SSL@
-proxypop3_DEPENDENCIES = proxylogin.lo tls.lo auth_admin.lo adminCmmd.lo \
+proxypop3_DEPENDENCIES = proxylogin.lo auth_admin.lo adminCmmd.lo \
 	monkey.lo sockwrite.lo libindimail.la
 
 vproxy_SOURCES = vproxy.c
@@ -466,12 +466,12 @@ vbulletin_LDADD = bulletin.lo libindimail.la $(LIB_QMAIL)
 vbulletin_DEPENDENCIES = bulletin.lo libindimail.la
 
 adminclient_SOURCES = adminclient.c
-adminclient_LDADD = tls.lo auth_admin.lo adminCmmd.lo libindimail.la $(LIB_QMAIL) @LIB_SSL@
-adminclient_DEPENDENCIES = tls.lo auth_admin.lo adminCmmd.lo libindimail.la
+adminclient_LDADD = auth_admin.lo adminCmmd.lo libindimail.la $(LIB_QMAIL) @LIB_SSL@
+adminclient_DEPENDENCIES = auth_admin.lo adminCmmd.lo libindimail.la
 
 indisrvr_SOURCES = indisrvr.c
-indisrvr_LDADD = checkPerm.lo tls.lo libindimail.la @LIB_SOCKET@ $(LIB_QMAIL) @LIB_SSL@
-indisrvr_DEPENDENCIES = tls.lo checkPerm.lo libindimail.la
+indisrvr_LDADD = checkPerm.lo libindimail.la @LIB_SOCKET@ $(LIB_QMAIL) @LIB_SSL@
+indisrvr_DEPENDENCIES = checkPerm.lo libindimail.la
 
 vdeloldusers_SOURCES = vdeloldusers.c
 vdeloldusers_LDADD = delunreadmails.lo getlastauth.lo \

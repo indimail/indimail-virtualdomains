@@ -1,5 +1,11 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.12  2023-01-03 21:35:28+05:30  Cprogrammer
+ * replaced tls code with TLS library from libqmail
+ * added -T option to specify connection timeout
+ * added -r option to specify crl file
+ * added -d option to specify certificate dir
+ *
  * Revision 1.11  2022-12-18 19:24:01+05:30  Cprogrammer
  * log additional wait status
  *
@@ -39,7 +45,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.11 2022-12-18 19:24:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.12 2023-01-03 21:35:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -76,7 +82,7 @@ static char     sccsid[] = "$Id: indisrvr.c,v 1.11 2022-12-18 19:24:01+05:30 Cpr
 #ifdef HAVE_SSL
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-#include "tls.h"
+#include <tls.h>
 #endif
 #ifdef HAVE_QMAIL
 #include <sgetopt.h>
@@ -139,7 +145,8 @@ SSL_CTX        *ctx;
 SSL            *ssl;
 static int      usessl = 0;
 unsigned long   dtimeout = 300;
-static char    *certfile, *cafile;
+unsigned long   ctimeout = 60;
+static char    *certfile, *cafile, *crlfile, *certdir;
 #endif
 
 char            tbuf[2048];
@@ -180,14 +187,16 @@ main(int argc, char **argv)
 	(void) signal(SIGUSR2, SigUsr);
 #ifdef HAVE_SSL
 	if (usessl == 1) {
-		if (access(certfile, F_OK)) {
-			strerr_warn3("indisrvr: missing certficate: ", certfile, ": ", &strerr_sys);
-			return (1);
-		}
+		set_certdir(certdir);
+		if (!certfile)
+			strerr_die1x(1, "indisrvr: certificate must be provided");
+		else
+		if (access(certfile, R_OK))
+			strerr_die3sys(1, "indisrvr: ", certfile, ": ");
     	/* setup SSL context (load key and cert into ctx) */
 		if (!(ciphers = env_get("TLS_CIPHER_LIST")))
 			ciphers = "PROFILE=SYSTEM";
-		if (!(ctx = tls_init(certfile, cafile, ciphers, server)))
+		if (!(ctx = tls_init(0, certfile, cafile, crlfile, ciphers, server)))
 			return (1);
 		(void) signal(SIGHUP, SigHup);
 	}
@@ -304,20 +313,20 @@ main(int argc, char **argv)
 				} /*- switch (fork()) */
 				close(pi1[0]);
 				close(pi2[1]);
-				if (!(ssl = tls_session(ctx, 1, ciphers))) {
+				if (!(ssl = tls_session(ctx, 1))) {
 					filewrt(3, "%d: unable to setup SSL session: %s\n", getpid(), myssl_error_str());
 					SSL_shutdown(ssl);
 					SSL_free(ssl);
 					_exit(1);
 				}
 				SSL_CTX_free(ctx);
-				if (tls_accept(ssl)) {
+				if (tls_accept(ctimeout, 0, 1, ssl)) {
 					filewrt(3, "%d: unable to accept SSL connection: %s\n", getpid(), myssl_error_str());
 					SSL_shutdown(ssl);
 					SSL_free(ssl);
 					_exit(1);
 				}
-				n = translate(1, pi1[1], pi2[0], dtimeout);
+				n = translate(0, 1, pi1[1], pi2[0], dtimeout);
 				SSL_shutdown(ssl);
 				SSL_free(ssl);
 				for (retval = -1;(r = waitpid(pid, &status, WNOHANG | WUNTRACED));) {
@@ -564,13 +573,14 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 
 #ifdef HAVE_SSL
 	certfile = 0;
+	certdir = SYSCONFDIR"/certs";
 #endif
 	*ipaddr = *port = 0;
 	*backlog = -1;
 #ifdef HAVE_SSL
-	while ((c = getopt(argc, argv, "vt:i:p:b:n:")) != opteof)
+	while ((c = getopt(argc, argv, "vt:T:i:p:b:n:c:r:d:")) != opteof)
 #else
-	while ((c = getopt(argc, argv, "vt:i:p:b:")) != opteof)
+	while ((c = getopt(argc, argv, "vt:T:i:p:b:")) != opteof)
 #endif
 	{
 		switch (c)
@@ -587,10 +597,16 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 		case 't':
 			scan_ulong(optarg, &dtimeout);
 			break;
+		case 'T':
+			scan_ulong(optarg, &ctimeout);
+			break;
 		case 'b':
 			scan_int(optarg, backlog);
 			break;
 #ifdef HAVE_SSL
+		case 'd':
+			certdir = optarg;
+			break;
 		case 'n':
 			usessl = 1;
 			certfile = optarg;
@@ -598,12 +614,15 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 		case 'c':
 			cafile = optarg;
 			break;
+		case 'r':
+			crlfile = optarg;
+			break;
 #endif
 		default:
 #ifdef HAVE_SSL
-			strerr_warn1("usage: indisrvr -i ipaddr -p port -n certfile -t timeout -b backlog", 0);
+			strerr_warn1("usage: indisrvr -i ipaddr -p port [-d certdir] -n certfile [-c cafile -r crlfile] -t timeoutdata -T timeoutconn -b backlog", 0);
 #else
-			strerr_warn1("usage: indisrvr -i ipaddr -p port -t timeout -b backlog", 0);
+			strerr_warn1("usage: indisrvr -i ipaddr -p port -t timeoutdata -T timeoutconn -b backlog", 0);
 #endif
 			break;
 		}
@@ -611,9 +630,9 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 	if (!*ipaddr || !*port || *backlog == -1)
 	{
 #ifdef HAVE_SSL
-		strerr_warn1("usage: indisrvr -i ipaddr -p port -n certfile -t timeout -b backlog", 0);
+		strerr_warn1("usage: indisrvr -i ipaddr -p port [-d certdir] -n certfile [-c cafile -r crlfile] -t timeoutdata -T timeoutconn -b backlog", 0);
 #else
-		strerr_warn1("usage: indisrvr -i ipaddr -p port -t timeout -b backlog", 0);
+		strerr_warn1("usage: indisrvr -i ipaddr -p port -t timeoutdata -T timeoutconn -b backlog", 0);
 #endif
 		return (1);
 	}
