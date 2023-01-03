@@ -4,6 +4,7 @@ indisrvr \- IndiMail administration server
 
 .SH SYNOPSYS
 \fBindisrvr\fR \fB\-i\fR \fIIP_Address\fR \fB\-p\fR \fIport\fR \fB\-b\fR \fIbacklog\fR [\fB\-n\fR \fIcertfile\fR]
+  [-c cafile -r crlfile] [-t timeoutdata -T timeoutconn]
 
 .SH DESCRIPTION
 \fBindisrvr\fR is the administration server for administering IndiMail's clustered domains.
@@ -43,8 +44,31 @@ A TCP/IP port or service in /etc/services on which indisrvr needs to bind.
 \fB\-b\fR \fIbacklog\fR
 Max backlog to be maintained after which the client should get connection refused
 .TP
+\fB\-d\fR \fIcertdir\fR
+certificate directory for RSA/DH parameter files
+.TP
 \fB\-n\fR \fIcertfile\fR
 A PEM certificate causes indisrvr to negotiate TLS encryption with clients.
+.TP
+-\fBc\fR \fIcafile\fR
+Specify \fIcafile\fR as the file containing CA certificates. Sometimes,
+special CA certificates are needed if an intermediate certificate used
+by your issuing CA expires. Note that the file given with -c is passed
+to SSL_CTX_load_verify_locations and thus may contain several CA
+certificates, which will be used during SSL connection negotiation to
+close any gap in the certificate chain.
+.TP
+-\fBr\fR \fIcrlfile\fR
+A list of Certificate Revocation Lists (CRLs). If present it
+should contain the CRLs of the CAs in \fIcafile\fR and client certs that
+will be checked for revocation.
+.TP
+\fB\-t\fR \fItimeoutdata\fR
+Quit if read or write to/from commands or application exceeds
+\fItimeoutdata\fR seconds.
+.TP
+\fB\-T\fR \fItimeoutconn\fR
+Timeout on TLS/SSL accept if attempt exceeds \fItimeoutconn\fR seconds.
 
 .SH RETURN VALUE
 Always returns non-zero status, which means the server died due to some reasons. Most likely

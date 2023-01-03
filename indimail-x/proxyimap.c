@@ -1,5 +1,8 @@
 /*
  * $Log: proxyimap.c,v $
+ * Revision 1.4  2023-01-03 21:16:40+05:30  Cprogrammer
+ * added 'proxyimap' identifier in connection log message
+ *
  * Revision 1.3  2022-12-25 20:32:53+05:30  Cprogrammer
  * allow any TLS/SSL helper program other than sslerator, couriertls
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxyimap.c,v 1.3 2022-12-25 20:32:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxyimap.c,v 1.4 2023-01-03 21:16:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -82,8 +85,11 @@ main(int argc, char **argv)
 	} 
 	signal(SIGALRM, bye);
 	if (AuthModuser(argc, argv, 60, 5)) {
-		strmsg_out1("* OK IMAP4rev1 Server Ready.\r\n");
-		strerr_warn3("INFO: Connection, remoteip=[", remoteip, "]", 0);
+		if (!env_get("SSLERATOR")) {
+			strnum[fmt_ulong(strnum, getpid())] = 0;
+			strerr_warn5("INFO: proxyimap: Connection, pid ", strnum, ", remoteip=[", remoteip, "]", 0);
+			strmsg_out1("* OK IMAP4rev1 Server Ready.\r\n");
+		}
 		if (!env_put2("BADLOGINS", "0"))
 			die_nomem();
 	} else {

@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 1.10  2023-01-03 21:48:21+05:30  Cprogrammer
+ * added crlfile argument for auth_admin()
+ *
  * Revision 1.9  2022-12-25 12:13:29+05:30  Cprogrammer
  * authenticate using SCRAM salted password
  *
@@ -33,7 +36,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 1.9 2022-12-25 12:13:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 1.10 2023-01-03 21:48:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -100,7 +103,7 @@ int
 autoAddUser(char *email, char *pass, char *service, int encrypt_flag)
 {
 	char           *admin_user, *admin_pass, *admin_host, *admin_port,
-                   *hard_quota, *ptr, *certfile, *cafile;
+                   *hard_quota, *ptr, *certfile, *cafile, *crlfile;
 	static stralloc cmdbuf = {0}, encrypted = {0};
 	int             i, sfd, match_cn;
 
@@ -146,9 +149,10 @@ autoAddUser(char *email, char *pass, char *service, int encrypt_flag)
 		return (-1);
 	} 
 	cafile = (char *) env_get("CAFILE");
+	crlfile = (char *) env_get("CRLFILE");
 	match_cn = env_get("MATCH_CN") ? 1 : 0;
 
-	if ((sfd = auth_admin(admin_user, admin_pass, admin_host, admin_port, certfile, cafile, match_cn)) == -1)
+	if ((sfd = auth_admin(admin_user, admin_pass, admin_host, admin_port, certfile, cafile, crlfile, match_cn)) == -1)
 		return (-1);
 	i = str_chr(service, ':');
 	if (i > 4) {

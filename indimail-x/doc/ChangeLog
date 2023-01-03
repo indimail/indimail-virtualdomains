@@ -51,6 +51,22 @@ Release @version@-@release@ Start 08/09/2021 End --/--/----
 26. proxylogin.c: authenticate using SCRAM salted password
 27. proxyimap, proxypop3: allow any TLS/SSL helper program other than
     sslerator, couriertls
+- 03/01/2023
+28. adminCmmd.c, auth_admin.c: renamed ADMIN_TIMEOUT to TIMEOUTDATA
+29. adminCmmd.c, auth_admin.c: replaced safewrite, saferead with tlswrite,
+    tlsread from tls library in libqmail
+30. adminclient.c:  added -r option to specify certification revocation list
+31. auth_admin.c: replaced tls code with TLS library from libqmail
+32. auth_admin.c: added env variable TIMEOUTCONN for connection timeout
+33. auth_admin.h: added crlfile argument to auth_admin()
+34. get_local_ip.c: replaced hints.ai_socktype from SOCK_DGRAM to SOCK_STREAM
+35. indisrvr.c: replaced tls code with TLS library from libqmail
+36. indisrvr.c: added -T option to specify connection timeout
+37. indisrvr.c: added -r option to specify crl file
+38. indisrvr.c: added -d option to specify certificate dir
+39. proxyimap.c: added 'proxyimap' identifier in connection log message
+40. proxypop3.c: added 'proxypop3' identifier in connection log message
+41. proxylogin.c: added crlfile argument for auth_admin()
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail@indimail.org> 3.4.1-1.1%{?dist}
 Release @version@-@release@ Start 14/02/2021 End 08/09/2022

@@ -1,5 +1,8 @@
 /*
  * $Log: get_local_ip.c,v $
+ * Revision 1.4  2023-01-03 21:11:09+05:30  Cprogrammer
+ * replaced hints.ai_socktype from SOCK_DGRAM to SOCK_STREAM
+ *
  * Revision 1.3  2020-04-01 18:54:49+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -44,7 +47,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_local_ip.c,v 1.3 2020-04-01 18:54:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_local_ip.c,v 1.4 2023-01-03 21:11:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc hostbuf = { 0 };
@@ -120,7 +123,7 @@ get_local_ip(int family)
 	byte_zero((char *) &hints, sizeof(hints));
 	/* set-up hints structure */
 	hints.ai_family = family > 0 ? family : PF_UNSPEC; /*- Allow IPv4 or IPv6 */
-	hints.ai_socktype = SOCK_DGRAM; /*- Datagram socket */
+	hints.ai_socktype = SOCK_STREAM; /*- Datagram socket */
 	hints.ai_flags = 0;
 	hints.ai_protocol = 0; /*- Any protocol */
 	if ((error = getaddrinfo(TmpBuf.s, 0, &hints, &res0))) {
