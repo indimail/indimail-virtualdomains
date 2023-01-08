@@ -140,7 +140,26 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 		/bin/sh ${libexecdir}/iupgrade.sh post upgrade @version@ $* || true
 	fi
 
-	# refresh indimail services
+    # refresh indimail services
+    svc_list=""
+    for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
+    qmail-poppass.106
+    do
+      if [ ! -d ${servicedir}/$i ] ; then
+        continue
+      fi
+      svc_list="$svc_list ${servicedir}/$i"
+    done
+    if [ $noproxy -eq 0 ] ; then
+      for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
+        proxy-pop3d.4110 proxy-pop3d-ssl.9110
+      do
+        if [ ! -d ${servicedir}/$i ] ; then
+          continue
+        fi
+        svc_list="$svc_list ${servicedir}/$i"
+      done
+    fi
 	${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
 
 	# start indimail services after upgrade
@@ -153,7 +172,7 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 	fi
 	set +e
 	for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
-		qmail-poppass.106 qmail-logfifo proxy-imapd.4143 \
+		qmail-poppass.106 proxy-imapd.4143 \
 		proxy-imapd-ssl.9143 proxy-pop3d.4110 proxy-pop3d-ssl.9110
 	do
 		if [ ! -d ${servicedir}/$i ] ; then
@@ -426,7 +445,7 @@ echo "Turning off automatic refresh"
 # turn off automatic refresh for services during first time installation
 svc_list=""
 for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
-qmail-poppass.106 qmail-logfifo
+qmail-poppass.106
 do
   if [ ! -d ${servicedir}/$i ] ; then
     continue

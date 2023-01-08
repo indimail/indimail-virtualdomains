@@ -315,20 +315,17 @@ main(int argc, char **argv)
 				close(pi2[1]);
 				if (!(ssl = tls_session(ctx, 1))) {
 					filewrt(3, "%d: unable to setup SSL session: %s\n", getpid(), myssl_error_str());
-					SSL_shutdown(ssl);
-					SSL_free(ssl);
 					_exit(1);
 				}
 				SSL_CTX_free(ctx);
 				if (tls_accept(ctimeout, 0, 1, ssl)) {
+					ssl = 0;
 					filewrt(3, "%d: unable to accept SSL connection: %s\n", getpid(), myssl_error_str());
-					SSL_shutdown(ssl);
-					SSL_free(ssl);
 					_exit(1);
 				}
 				n = translate(0, 1, pi1[1], pi2[0], dtimeout);
-				SSL_shutdown(ssl);
-				SSL_free(ssl);
+				ssl_free();
+				ssl = 0;
 				for (retval = -1;(r = waitpid(pid, &status, WNOHANG | WUNTRACED));) {
 #ifdef ERESTART
 					if (r == -1 && (errno == EINTR || errno == ERESTART))
