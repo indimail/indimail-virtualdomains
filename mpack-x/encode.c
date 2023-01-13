@@ -246,8 +246,8 @@ encode(FILE * infile, FILE * applefile, char *fname, FILE * descfile, char *subj
 			fprintf(outfile, "Content-Transfer-Encoding: base64\n");
 			fprintf(outfile, "Content-Disposition: inline; filename=\"%s\"\n", cleanfname);
 			fprintf(outfile, "Content-MD5: %s\n\n", digest);
-			free(digest);
 			written += (114 + strlen(type) + 2 * strlen(cleanfname) + strlen(digest));
+			free(digest);
 		}
 		if (written == maxsize)
 			written--;			/*- avoid a nasty fencepost error */
