@@ -70,6 +70,8 @@ Release @version@-@release@ Start 08/09/2021 End --/--/----
 - 08/01/2023
 42. indisrvr.c: fixed potential double free if tls_accept fails
 43. postinstall: fixed refresh of services
+- 03/01/2023
+44. mpack-x/encode.c: Fixed usage of variable after free
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail@indimail.org> 3.4.1-1.1%{?dist}
 Release @version@-@release@ Start 14/02/2021 End 08/09/2022

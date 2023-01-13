@@ -147,8 +147,6 @@ EXTRA_DIST=authwait.h authpam.c preauthpam.c authpwd.c preauthpwd.c \
 authchangepwdir.h: config.status
 	echo '#define AUTHCHANGEPWDIR "@authchangepwdir@"' >authchangepwdir.h
 
-man7=authlib.7
-man7dir=$(mandir)/man7
 man_MANS=authlib.7 authindi.7 $(manpwd) $(manshadow) $(manpam) $(mancustom)
 
 authlib.7: authlib.7.in
@@ -166,16 +164,3 @@ uninstall-local:
 
 dist-hook:
 	for f in $(BUILT_SOURCES) ; do rm -f $(distdir)/$$f; done
-
-install-perms:
-	@$(MAKE) install-perms-recursive
-	@$(MAKE) install-perms-local
-
-install-perms-recursive:
-	@>permissions.dat
-	@SUBDIRS="$(SUBDIRS)" ; for f in $$SUBDIRS ; do ( cd $$f && $(MAKE) $(AM_MAKEFLAGS) install-perms ) ; cat /dev/null >>$$f/permissions.dat ; cat $$f/permissions.dat >>permissions.dat ; done
-
-install-perms-local:
-	@test "$(man_MANS)" = "" && exit 0 ; \
-	for f in $(man_MANS) $(man_LINKS) ; do \
-	echo $(man7dir)/$$f 644 bin bin man >>permissions.dat ; done
