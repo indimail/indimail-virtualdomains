@@ -144,50 +144,22 @@ main(int argc, char **argv)
 	switch (action)
 	{
 	case V_SELECT_ALL:
-		qprintf(subfdoutsmall, "User", "%-20s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, "Domain", "%-20s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, "Host ID", "%-9s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, "IP Address", "%-15s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, "Added On\n", "%s");
+		subprintf(subfdoutsmall, "%-20s %-20s %-9s %-15s Added on\n", "User", "Domain", "Host ID", "IP Address");
 		for(;;) {
 			if (!(row = hostcntrl_select_all()))
 				break;
 			ipaddr = ((ipaddr = sql_getip(row[2])) ? ipaddr : "????");
 			scan_ulong(row[3], (unsigned long *) &tmval);
-			qprintf(subfdoutsmall, row[0], "%-20s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, row[1], "%-20s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, row[2], "%-9s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, ipaddr, "%-15s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, ctime(&tmval), "%s");
+			subprintf(subfdoutsmall, "%-20s %-20s %-9s %-15s %s\n", row[0], row[1], row[2], ipaddr, ctime(&tmval));
 		}
-		qprintf_flush(subfdoutsmall);
+		substdio_flush(subfdoutsmall);
 		break;
 	case V_USER_SELECT:
 		if (!hostcntrl_select(user.s, domain.s, &tmval, &HostID)) {
 			ipaddr = ((ipaddr = sql_getip(HostID.s)) ? ipaddr : "????");
-			qprintf(subfdoutsmall, "Email", "%-25s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, "HOST ID", "%-11s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, "IP Address", "%-16s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, "Added On\n", "%s");
-			qprintf(subfdoutsmall, emailid, "%-25s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, HostID.s, "%-11s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, ipaddr, "%-16s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, ctime(&tmval), "%s");
-			qprintf_flush(subfdoutsmall);
+			subprintf(subfdoutsmall, "%-25s %-11s %-16s Added On\n", "Email", "Host ID", "IP Address");
+			subprintf(subfdoutsmall, "%-25s %-11s %-16s %s\n", emailid, HostID.s, ipaddr, ctime(&tmval));
+			substdio_flush(subfdoutsmall);
 			return(0);
 		} else
 			return (1);

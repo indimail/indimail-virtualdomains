@@ -274,9 +274,8 @@ spamReport(int spamNumber, char *outfile)
 	if ((fd = open_append(outfile)) == -1)
 		strerr_die3sys(111, "spam: open: ", outfile, ": ");
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
-	qprintf(subfderr, "Spammer's Email Address", "%-40s");
-	qprintf(subfderr, "Mail Count\n", "%s");
-	qprintf_flush(subfderr);
+	subprintf(subfderr, "%-40s Mail Count\n", "Spammer's Email Address");
+	substdio_flush(subfderr);
 	if(!maxaddr) {
 		getEnvConfigStr(&ptr, "MAXADDR", MAXADDR);
 		scan_int(ptr, &maxaddr);
@@ -320,11 +319,7 @@ spamReport(int spamNumber, char *outfile)
 						return (-1);
 					}
 				}
-				qprintf(subfderr, p->mail, "%-40s");
-				qprintf(subfderr, " ", "%s");
-				strnum[fmt_ulong(strnum, (unsigned long) p->cnt)] = 0;
-				qprintf(subfderr, strnum, "%s");
-				qprintf(subfderr, "\n", "%s");
+				subprintf(subfderr, "%-40s %d\n", p->mail, p->cnt);
 			}
 		}
 	}
@@ -332,7 +327,7 @@ spamReport(int spamNumber, char *outfile)
 		strerr_warn3("spam: write: ", outfile, ": ", &strerr_sys);
 		return (-1);
 	}
-	qprintf_flush(subfderr);
+	substdio_flush(subfderr);
 	close(fd);
 	if (substdio_put(subfderr, "Bounces: ", 9) ||
 			substdio_put(subfderr, strnum, fmt_int(strnum, bounce)) ||

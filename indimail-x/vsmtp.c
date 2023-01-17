@@ -173,16 +173,8 @@ main(int argc, char **argv)
 			if (!(dst_ip = sql_getip(dst_hostid.s)))
 				dst_ip = "x.x.x.x";
 			if (!oldport)
-				qprintf(subfdoutsmall, "Source HostIP        Destination HostID IP Address         -> Port\n", "%s");
-			strnum[fmt_uint(strnum, (unsigned int) port)] = 0;
-			qprintf(subfdoutsmall, src_ip.s, "%-20s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, dst_hostid.s, "%-18s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, dst_ip, "%-18s");
-			qprintf(subfdoutsmall, " -> ", "%s");
-			qprintf(subfdoutsmall, strnum, "%s");
-			qprintf(subfdoutsmall, "\n", "%s");
+				subprintf(subfdoutsmall, "Source HostIP        Destination HostID IP Address         -> Port\n");
+			subprintf(subfdoutsmall, "%-20s %-18s %-18s -> %d\n", src_ip.s, dst_hostid.s, dst_ip, port);
 			qprintf_flush(subfdoutsmall);
 			err = 0;
 		}

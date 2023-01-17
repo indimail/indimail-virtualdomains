@@ -159,7 +159,6 @@ main(int argc, char **argv)
 	static stralloc tmp = {0};
 	char            strnum[FMT_ULONG];
 	int             status, flag, retval, fstabAction, FStabstatus = -1;
-	float           load;
 	long            max_users, cur_users, max_size, cur_size;
 	long            size_quota = -1, user_quota = -1;
 
@@ -181,27 +180,11 @@ main(int argc, char **argv)
 					strerr_warn1("unable to write output: ", &strerr_sys);
 				retval = 0;
 			}
-			load = cur_size ? ((float) (cur_users * 1024 * 1024)/ (float) cur_size) : 0.1;
-			qprintf(subfdoutsmall, tmpfstab, "%-20s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, mdaHost, "%-20s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, status == FS_ONLINE ? "ONLINE  " : "OFFLINE ", "%s");
-			strnum[fmt_ulong(strnum, (unsigned long) max_users)] = 0;
-			qprintf(subfdoutsmall, strnum, "%10s");
-			qprintf(subfdoutsmall, " ", "%s");
-			strnum[fmt_ulong(strnum, (unsigned long) cur_users)] = 0;
-			qprintf(subfdoutsmall, strnum, "%10s");
-			qprintf(subfdoutsmall, "  ", "%s");
-			strnum[fmt_ulong(strnum, (unsigned long) max_size/1024)] = 0;
-			qprintf(subfdoutsmall, strnum, "%10s");
-			qprintf(subfdoutsmall, "  Kb  ", "%s");
-			strnum[fmt_ulong(strnum, (unsigned long) cur_size/1024)] = 0;
-			qprintf(subfdoutsmall, strnum, "%10s");
-			qprintf(subfdoutsmall, "  Kb ", "%s");
-			strnum[fmt_double(strnum, load, 4)] = 0;
-			qprintf(subfdoutsmall, strnum, "%6s");
-			if (substdio_put(subfdoutsmall, "\n", 1) || substdio_flush(subfdoutsmall))
+			subprintf(subfdoutsmall, "%-20s %-20s %s %10ld %10ld %10ld  Kb  %10ld  Kb  %6.4f\n",
+					tmpfstab, mdaHost, status == FS_ONLINE ? "ONLINE  " : "OFFLINE ",
+					max_users, cur_users, max_size/1024, cur_size/1024,
+					cur_size ? ((float) (cur_users * 1024 * 1024)/ (float) cur_size) : 0.1);
+			if (substdio_flush(subfdoutsmall))
 				strerr_warn1("unable to write output: ", &strerr_sys);
 		}
 		break;

@@ -90,9 +90,7 @@ main(int argc, char **argv)
 		strerr_warn3("could not find domain ", Domain, " in indimail assign file", 0);
 		return (-1);
 	}
-	out("vcalias", "Looking in ");
-	out("vcalias", Dir.s);
-	out("vcalias", "\n");
+	subprintf(subfdoutsmall, "Looking in %s\n", Dir.s);
 	flush("vcalias");
 	if (chdir(Dir.s)) {
 		strerr_warn3("valias: chdir: ", Dir.s, ": ", &strerr_sys);
@@ -104,9 +102,7 @@ main(int argc, char **argv)
 		return (-1);
 	}
 	/*- search for .qmail files */
-	out("vcalias", "Converting from Filesystem to MYSQL for domain ");
-	out("vcalias", Domain);
-	out("vcalias", "\n");
+	subprintf(subfdoutsmall, "Converting from Filesystem to MYSQL for domain %s\n", Domain);
 	flush("vcalias");
 	if ((err = iopen((char *) 0)) != 0)
 		return (err);
@@ -119,7 +115,7 @@ main(int argc, char **argv)
 		else
 		if (str_diffn(dp->d_name, ".qmail-", 7))
 			continue;
-		/*- printf("Converting %-20s", dp->d_name + 7); -*/
+		subprintf(subfdoutsmall, "Processing %-20s\n", dp->d_name);
 		AliasName= dp->d_name + 7;
 		if ((fd = open_read(dp->d_name)) == -1) {
 			strerr_warn3("vcalias: open: ", dp->d_name, ": ", &strerr_sys);
@@ -152,13 +148,11 @@ main(int argc, char **argv)
 					iclose();
 					die_nomem();
 				}
-				qprintf(subfdoutsmall, "Converting ", "%s");
+				subprintf(subfdoutsmall, "Converting ");
 			} else
-				qprintf(subfdoutsmall, "           ", "%s");
-			qprintf(subfdoutsmall, Dir.s, "-%30s");
-			qprintf(subfdoutsmall, " -> ", "%s");
-			qprintf(subfdoutsmall, line.s, "%s");
-			qprintf_flush(subfdoutsmall);
+				subprintf(subfdoutsmall, "           ");
+			subprintf(subfdoutsmall, "%-30s -> %s\n", Dir.s, line.s);
+			flush("vcalias");
 			/*- Convert ':' to '.' */
 			for (ptr = AliasName;*ptr;ptr++) {
 				if (*ptr == ':')
@@ -188,10 +182,12 @@ main(int argc, char **argv)
 				break;
 			}
 		} /*- for (err = 0, flag = 0;;flag++) */
+		subprintf(subfdoutsmall, "\n");
+		flush("vcalias");
 		close(fd);
 		if (!err && unlink(dp->d_name))
 			strerr_warn3("vcalias: unlink: ", dp->d_name, ": ", &strerr_sys);
-	}
+	} /*- for (;;) */
 	iclose();
 	return (0);
 }

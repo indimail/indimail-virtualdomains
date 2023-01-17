@@ -311,24 +311,12 @@ main(int argc, char **argv)
 			diff = time(0) - tmval;
 			count++;
 			if (verbose && isAtty) {
-				if (diff) {
-					if (substdio_put(subfdoutsmall, "\r", 1))
-						strerr_die1sys(111, "unable to write to stdout");
-					strnum[fmt_int(strnum, count)] = 0;
-					qprintf(subfdoutsmall, strnum, "%-7s");
-					if (substdio_put(subfdoutsmall, " ", 1))
-						strerr_die1sys(111, "unable to write to stdout");
-					strnum[i = fmt_double(strnum, count / diff, 2)] = 0;
-					if (substdio_put(subfdoutsmall, strnum, i) || substdio_flush(subfdoutsmall))
-						strerr_die1sys(111, "unable to write to stdout");
-				} else {
-					if (substdio_put(subfdoutsmall, "\r ", 2))
-						strerr_die1sys(111, "unable to write to stdout");
-					strnum[fmt_int(strnum, count)] = 0;
-					qprintf(subfdoutsmall, strnum, "%-7s");
-					if (substdio_put(subfdoutsmall, " Inf", 1) || substdio_flush(subfdoutsmall))
-						strerr_die1sys(111, "unable to write to stdout");
-				}
+				if (diff)
+					subprintf(subfdoutsmall, "\r%-7d %.2f", count, (float) count/diff);
+				else
+					subprintf(subfdoutsmall, "\r%-7d Inf", count);
+				if (substdio_flush(subfdoutsmall))
+					strerr_die1sys(111, "unable to write to stdout");
 			}
 		}
 		if (verbose && isAtty)

@@ -49,7 +49,6 @@ format_filter_display(int type, int filter_no, char *emailid, stralloc *filter_n
 {
 	static stralloc _filterName = {0}, _keyword = {0};
 	char           *ptr, *_hname;
-	char            strnum[FMT_ULONG];
 	int             max_header_value;
 	static char   **header_list;
 
@@ -61,28 +60,14 @@ format_filter_display(int type, int filter_no, char *emailid, stralloc *filter_n
 			_hname = "invalid header";
 		else
 			_hname = header_list[header_name];
-		strnum[fmt_uint(strnum, filter_no)] = 0;
-		qprintf(subfdoutsmall, strnum, "%3s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, emailid, "%-29s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, filter_name->s, "%-20s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, header_name == -1 ? "N/A" : _hname, "%-15s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, vfilter_comparision[comparision], "%-26s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, keyword->len ? keyword->s : "N/A", "%-15s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, !str_diffn(folder->s, "/NoDeliver", 11) ? "Void" : folder->s, "%-15s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, (bounce_action == 1 || bounce_action == 3) ? "Yes" : "No", "%-6s");
-		qprintf(subfdoutsmall, " ", "%s");
-		if (bounce_action == 2 || bounce_action == 3)
-			qprintf(subfdoutsmall, forward->s, "%s");
-		else
-			qprintf(subfdoutsmall, "No", "%s");
-		qprintf(subfdoutsmall, "\n", "%s");
+		subprintf(subfdout, "%3d %-29s %-20s %-15s %-26s %-15s %-15s %-6s %s\n",
+				filter_no, emailid, filter_name->s,
+				header_name == -1 ? "N/A" : _hname,
+				vfilter_comparision[comparision],
+				keyword->len ? keyword->s : "N/A",
+				!str_diffn(folder->s, "/NoDeliver", 11) ? "Void" : folder->s,
+				(bounce_action == 1 || bounce_action == 3) ? "Yes" : "No",
+				(bounce_action == 2 || bounce_action == 3) ? forward->s : "No");
 		qprintf_flush(subfdoutsmall);
 	} else { /*- raw display*/
 		if (!stralloc_copy(&_filterName, filter_name) || !stralloc_0(&_filterName))
@@ -97,26 +82,11 @@ format_filter_display(int type, int filter_no, char *emailid, stralloc *filter_n
 			if (isspace((int) *ptr))
 				*ptr = '~';
 		}
-		strnum[fmt_uint(strnum, filter_no)] = 0;
-		qprintf(subfdoutsmall, strnum, "%s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, emailid, "%s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, _filterName.s, "%s");
-		qprintf(subfdoutsmall, " ", "%s");
-		strnum[fmt_uint(strnum, header_name)] = 0;
-		qprintf(subfdoutsmall, strnum, "%s");
-		qprintf(subfdoutsmall, " ", "%s");
-		strnum[fmt_uint(strnum, comparision)] = 0;
-		qprintf(subfdoutsmall, strnum, "%s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, _keyword.len ? _keyword.s : "N/A", "%s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, folder->s, "%s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, bounce_action ? ((bounce_action == 2 || bounce_action == 3) ? forward->s : "Bounce") : (str_diffn(folder->s,
-						"/NoDeliver", 11) ? "Deliver" : "Vapour"), "%s");
-		qprintf(subfdoutsmall, "\n", "%s");
+		subprintf(subfdout, "%d %s %s %d %d %s %s %s\n",
+				filter_no, emailid, _filterName.s, header_name, comparision,
+				_keyword.len ? _keyword.s : "N/A",
+				folder->s,
+				bounce_action ? ((bounce_action == 2 || bounce_action == 3) ? forward->s : "Bounce") : (str_diffn(folder->s, "/NoDeliver", 11) ? "Deliver" : "Vapour"));
 		qprintf_flush(subfdoutsmall);
 	}
 	return;

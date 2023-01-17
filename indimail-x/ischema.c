@@ -198,17 +198,8 @@ main(int argc, char **argv)
 		if (l_id <= id)
 			continue;
 		u_count++;
-		qprintf(subfdout, lid_str, "%3s");
-		qprintf(subfdout, ": command=", "%10s");
-		qprintf(subfdout, command, "%5s");
-		qprintf(subfdout, ", ignore=", "%9s");
-		qprintf(subfdout, ignore, "%3s");
-		qprintf(subfdout, ", comment=", "%10s");
-		qprintf(subfdout, comment, "%25s");
-		qprintf(subfdout, ", sql=", "%6s");
-		qprintf(subfdout, sql_stmt, "%s");
-		qprintf(subfdout, "\n", "%s");
-		qprintf_flush(subfdout);
+		subprintf(subfdout, "%3s: command=%5s, ignore=%3s, commend=%25s, sql=%s\n", lid_str, command, ignore, comment, sql_stmt);
+		substdio_flush(subfdout);
 		ign = str_diff(ignore, "YES") ? 0 : 1;
 		if (!str_diff(command, "sql")) {
 			if (mysql_query(&mysql[1], sql_stmt)) {

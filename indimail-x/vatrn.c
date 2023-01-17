@@ -142,17 +142,12 @@ main(int argc, char **argv)
 			if (!(ptr = show_atrn_map(&user, &domain)))
 				break;
 			result = 0;
-			qprintf(subfdoutsmall, user, "%-20s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, domain, "%-20s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, ptr, "%s");
-			qprintf(subfdoutsmall, "\n", "%s");
-			qprintf_flush(subfdoutsmall);
+			subprintf(subfdoutsmall, "%-20s %-20s %s\n", user, domain, ptr);
+			substdio_flush(subfdoutsmall);
 		}
 		if (result && verbose) {
-			qprintf(subfdoutsmall, "No ATRN Maps present\n", "%s");
-			qprintf_flush(subfdoutsmall);
+			subprintf(subfdoutsmall, "No ATRN Maps present\n");
+			substdio_flush(subfdoutsmall);
 		}
 		break;
 	default:

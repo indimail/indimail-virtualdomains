@@ -165,16 +165,10 @@ main(int argc, char **argv)
 	switch (action)
 	{
 	case V_PRIV_SELECT:
-		for(;;)
-		{
+		for(;;) {
 			if (!(ptr = vpriv_select(&user, &program)))
 				break;
-			qprintf(subfdoutsmall, user, "%-20s");
-			qprintf(subfdoutsmall, " --> ", "%s");
-			qprintf(subfdoutsmall, program, "%-20s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, ptr, "%s");
-			qprintf(subfdoutsmall, "\n", "%s");
+			subprintf(subfdoutsmall, "%-20s --> %-20s %s\n", user, program, ptr);
 		}
 		qprintf_flush(subfdoutsmall);
 		break;

@@ -102,7 +102,7 @@ usage()
 			strnum[fmt_uint(strnum, (unsigned int) i)] = 0;
 			errout("vcfilter", strnum);
 			errout("vcfilter", " - ");
-			qprintf(subfderr, header_list[i], "%-25s");
+			subprintf(subfderr, "%-25s", header_list[i]);
 			errout("vcfilter", "          ");
 			if ((i + 1) < 10)
 				errout("vcfilter", "  ");
@@ -142,7 +142,7 @@ usage()
 			strnum[fmt_uint(strnum, (unsigned int) i)] = 0;
 			errout("vcfilter", strnum);
 			errout("vcfilter", " - ");
-			qprintf(subfderr, vfilter_comparision[i], "%-25s");
+			subprintf(subfderr, "%-25s", vfilter_comparision[i]);
 			errout("vcfilter", "          ");
 			if ((i + 1) < 10)
 				errout("vcfilter", "  ");

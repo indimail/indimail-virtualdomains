@@ -214,11 +214,8 @@ LoadBMF(int *total, char *bmf)
 	} else {
 		file_time = statbuf.st_mtime;
 		if (verbose) {
-			qprintf(subfdoutsmall, "File  UNIX  ", "%s");
-			qprintf(subfdoutsmall, badmailfrom.s, "%40s");
-			qprintf(subfdoutsmall, " Modification Time ", "%s");
-			qprintf(subfdoutsmall, ctime(&file_time), "%s");
-			qprintf_flush(subfdoutsmall);
+			subprintf(subfdoutsmall, "File UNIX %40s Modification Time %s", badmailfrom.s, ctime(&file_time));
+			substdio_flush(subfdoutsmall);
 		}
 	}
 	if (open_master()) {
@@ -284,13 +281,10 @@ LoadBMF(int *total, char *bmf)
 					mcd_time = mtime;
 			}
 			if (verbose) {
-				qprintf(subfdoutsmall, "Table MySQL ", "%s");
-				qprintf(subfdoutsmall, badmail_flag ? bmf : "spam", "%40s");
-				qprintf(subfdoutsmall, " Modification Time ", "%s");
-				qprintf(subfdoutsmall, ctime(&mcd_time), "%s");
+				subprintf(subfdoutsmall, "Table MySQL %40s Modification Time %s", badmail_flag ? bmf : "spam", ctime(&mcd_time));
 				if (mcd_time == file_time)
-					qprintf(subfdoutsmall, "Nothing to update\n", "%s");
-				qprintf_flush(subfdoutsmall);
+					subprintf(subfdoutsmall, "Nothing to update\n");
+				substdio_flush(subfdoutsmall);
 			}
 			if (mcd_time == file_time) {
 				in_mysql_free_result(res);

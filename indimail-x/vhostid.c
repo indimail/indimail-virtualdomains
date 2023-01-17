@@ -123,25 +123,17 @@ main(int argc, char **argv)
 	switch (hostaction)
 	{
 	case HOST_SELECT:
-		qprintf(subfdoutsmall, "Hostid", "%-30s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, "IP Address\n", "%s");
-		if(hostid && (tmphost_line = sql_getip(hostid))) {
-			qprintf(subfdoutsmall, hostid, "%-30s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, tmphost_line, "%s");
-			qprintf(subfdoutsmall, "\n", "%s");
-		} else
+		subprintf(subfdoutsmall, "%-30s %s\n", "HostID", "IP Address");
+		if(hostid && (tmphost_line = sql_getip(hostid)))
+			subprintf(subfdoutsmall, "%-30s %s\n", hostid, tmphost_line);
+		else
 		for(;;) {
 			if(!(tmphost_line = vhostid_select())) /*- "hostid ip_address */
 				break;
 			for (hostid = ptr = tmphost_line; *ptr && !isspace(*ptr); ptr++);
 			*ptr++ = 0;
 			for (;*ptr && isspace(*ptr); ptr++);
-			qprintf(subfdoutsmall, hostid, "%-30s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, ptr, "%s");
-			qprintf(subfdoutsmall, "\n", "%s");
+			subprintf(subfdoutsmall, "%-30s %s\n", hostid, ptr);
 		}
 		qprintf_flush(subfdoutsmall);
 		break;
@@ -157,9 +149,7 @@ main(int argc, char **argv)
 	case HOST_LOCAL:
 		if (hostid && *hostid) {
 			if (!update_local_hostid(hostid)) {
-				qprintf(subfdoutsmall, "updated local hostid to ", "%s");
-				qprintf(subfdoutsmall, hostid, "%s");
-				qprintf(subfdoutsmall, "\n", "%s");
+				subprintf(subfdoutsmall, "updated local hostid to %s\n", hostid);
 				qprintf_flush(subfdoutsmall);
 				return (0);
 			} else
@@ -167,8 +157,7 @@ main(int argc, char **argv)
 		}
 		if (!(hostid = get_local_hostid()))
 			strerr_die1sys(111, "vhostid: failed to get localhostid");
-		qprintf(subfdoutsmall, hostid, "%s");
-		qprintf(subfdoutsmall, "\n", "%s");
+		subprintf(subfdoutsmall, "%s\n", hostid);
 		qprintf_flush(subfdoutsmall);
 		break;
 	default:

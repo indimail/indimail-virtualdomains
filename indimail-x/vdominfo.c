@@ -256,16 +256,9 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 					*x++ = 0;
 				else
 					x = ptr;
-				if (x != ptr) { /*- ip */
-					qprintf(subfdout, ptr, "%-18s");
-					qprintf(subfdout, " ", "%s");
-				}
-				qprintf(subfdout, x, "%+20s");
-				out("vdominfo", "@");
-				qprintf(subfdout, domain, "%-35s");
-				strnum[fmt_uint(strnum, Port)] = 0;
-				out("vdominfo", strnum);
-				out("vdominfo", "\n");
+				if (x != ptr) /*- ip */
+					subprintf(subfdout, "%-18s ", ptr);
+				subprintf(subfdout, "%+20s@-%35s %d\n", x, domain, Port);
 			}
 		}
 #endif
@@ -442,17 +435,9 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 					*x++ = 0;
 				else
 					x = ptr;
-				if (x != ptr) { /*- ip */
-					qprintf(subfdout, ptr, "%-18s");
-					qprintf(subfdout, " ", "%s");
-				}
-				qprintf(subfdout, x, "%+20s");
-				out("vdominfo", "@");
-				qprintf(subfdout, domain, "%-35s");
-				len = str_len(ptr) + str_len(domain);
-				strnum[fmt_uint(strnum, Port)] = 0;
-				out("vdominfo", strnum);
-				out("vdominfo", "\n");
+				if (x != ptr) /*- ip */
+					subprintf(subfdout, "%-18s ", ptr);
+				subprintf(subfdout, "%+20s@-%35s %d\n", x, domain, Port);
 			}
 		}
 #endif
