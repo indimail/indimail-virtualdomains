@@ -44,6 +44,18 @@ die_nomem()
 }
 
 void
+print_hyphen(substdio *ss, char *c, int num)
+{
+	int             i;
+
+	for (i = 0; i < num; i++)
+		if (substdio_put(ss, c, 1))
+			strerr_die1sys(111, "unable to write to stdout");
+	if (substdio_put(ss, "\n", 1) == -1)
+		strerr_die1sys(111, "unable to write to stdout");
+}
+
+void
 format_filter_display(int type, int filter_no, char *emailid, stralloc *filter_name, int header_name, int comparision,
 		stralloc *keyword, stralloc *folder, stralloc *forward, int bounce_action)
 {
@@ -60,15 +72,15 @@ format_filter_display(int type, int filter_no, char *emailid, stralloc *filter_n
 			_hname = "invalid header";
 		else
 			_hname = header_list[header_name];
-		subprintf(subfdout, "%3d %-29s %-20s %-15s %-26s %-15s %-15s %-6s %s\n",
+		if (subprintf(subfdout, "%3d %-29s %-20s %-15s %-26s %-15s %-15s %-6s %s\n",
 				filter_no, emailid, filter_name->s,
 				header_name == -1 ? "N/A" : _hname,
 				vfilter_comparision[comparision],
 				keyword->len ? keyword->s : "N/A",
 				!str_diffn(folder->s, "/NoDeliver", 11) ? "Void" : folder->s,
 				(bounce_action == 1 || bounce_action == 3) ? "Yes" : "No",
-				(bounce_action == 2 || bounce_action == 3) ? forward->s : "No");
-		qprintf_flush(subfdoutsmall);
+				(bounce_action == 2 || bounce_action == 3) ? forward->s : "No") == -1)
+			strerr_die1sys(111, "unable to write to stdout");
 	} else { /*- raw display*/
 		if (!stralloc_copy(&_filterName, filter_name) || !stralloc_0(&_filterName))
 			die_nomem();
@@ -82,13 +94,15 @@ format_filter_display(int type, int filter_no, char *emailid, stralloc *filter_n
 			if (isspace((int) *ptr))
 				*ptr = '~';
 		}
-		subprintf(subfdout, "%d %s %s %d %d %s %s %s\n",
+		if (subprintf(subfdout, "%d %s %s %d %d %s %s %s\n",
 				filter_no, emailid, _filterName.s, header_name, comparision,
 				_keyword.len ? _keyword.s : "N/A",
 				folder->s,
-				bounce_action ? ((bounce_action == 2 || bounce_action == 3) ? forward->s : "Bounce") : (str_diffn(folder->s, "/NoDeliver", 11) ? "Deliver" : "Vapour"));
-		qprintf_flush(subfdoutsmall);
+				bounce_action ? ((bounce_action == 2 || bounce_action == 3) ? forward->s : "Bounce") : (str_diffn(folder->s, "/NoDeliver", 11) ? "Deliver" : "Vapour")) == -1)
+			strerr_die1sys(111, "unable to write to stdout");
 	}
+	if (substdio_flush(subfdout) == -1)
+		strerr_die1sys(111, "unable to write to stdout");
 	return;
 }
 
@@ -107,20 +121,21 @@ vfilter_display(char *emailid, int disp_type)
 		if (i == -2)
 			break;
 		if (!j++ && !disp_type) {
-			out("vfilter_display", "No  EmailId                       FilterName           Header          Comparision                Keyword         Folder          Bounce Forward\n");
-			out("vfilter_display", "--------------------------------------------------------------------------------------------------------------------------------------------------\n");
-			flush("vfilter_display");
+			if (subprintf(subfdout,
+					"No  EmailId                       FilterName"
+					"           Header          Comparision      "
+					"          Keyword         Folder          "
+					"Bounce Forward\n") == -1)
+				strerr_die1sys(111, "unable to write to stdout");
+			print_hyphen(subfdout, "-", 144);
 		}
 		status = 0;
 		format_filter_display(disp_type, filter_no, emailid, &filter_name, header_name, comparision, &keyword, &folder, 
 			&forward, bounce_action);
-		if (!disp_type) {
-			out("vfilter_display", "----------------------------------------------"
-				"----------------------------------------------"
-				"----------------------------------------------"
-				"--------\n");
-		}
 	}
+	print_hyphen(subfdout, "-", 144);
+	if (substdio_flush(subfdout) == -1)
+		strerr_die1sys(111, "unable to write to stdout");
 	if (status == -1 && i == -2)
 		return(-2);
 	return(status);

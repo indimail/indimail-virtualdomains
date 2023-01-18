@@ -112,25 +112,29 @@ printBounce(char *bounce)
 	char           *ptr, *user, *domain;
 
 	if (str_diffn(bounce, BOUNCE_ALL, str_len(BOUNCE_ALL) + 1)) {
-		subprintf(subfdout, "Hi. This is the IndiMail MDA for %s\n",
-				(ptr = env_get("HOST")) ? ptr : vset_default_domain());
-		subprintf(subfdout,
-				"I'm afraid I cannot accept your message as a configured filter has decided\n",
-				"to reject this mail\n",
-				"Please refrain from sending such mail in future\n");
+		if (subprintf(subfdout, "Hi. This is the IndiMail MDA for %s\n",
+				(ptr = env_get("HOST")) ? ptr : vset_default_domain()) == -1)
+			strerr_die1sys(111, "unable to write to stdout");
+		if (subprintf(subfdout,
+				"I'm afraid I cannot accept your message as a configured filter has decided\n"
+				"to reject this mail\n"
+				"Please refrain from sending such mail in future\n") == -1)
+			strerr_die1sys(111, "unable to write to stdout");
 	} else {
 		/*- get the last parameter in the .qmail-default file */
 		if (!(ptr = env_get("EXT")))
-			user = "???????";
+			user = "<>";
 		else
 			user = ptr;
 		if (!(ptr = env_get("HOST")))
 			domain = (ptr = env_get("DEFAULT_DOMAIN")) ? ptr : DEFAULT_DOMAIN;
 		else
 			domain = ptr;
-		subprintf(subfdout, "No Account %s@%s here by that name. indimail (#5.1.5)", user, domain);
+		if (subprintf(subfdout, "No Account %s@%s here by that name. indimail (#5.1.5)", user, domain) == -1)
+			strerr_die1sys(111, "unable to write to stdout");
 	}
-	flush("vfilter");
+	if (substdio_flush(subfdout))
+		strerr_die1sys(111, "unable to write to stdout");
 	return;
 }
 
@@ -245,8 +249,10 @@ myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *fo
 			if (bounce > 0) {
 				if (bounce == 2 || bounce == 3) {
 					if (interactive && verbose) {
-						subprintf(subfdout, "Delivering to %s\n", forward);
-						flush("vfilter");
+						if (subprintf(subfdout, "Delivering to %s\n", forward))
+							strerr_die1sys(111, "unable to write to stdout");
+						if (substdio_flush(subfdout) == -1)
+							strerr_die1sys(111, "unable to write to stdout");
 					}
 					i = deliver_mail(forward, 0, "NOQUOTA", 0, 0, DEFAULT_DOMAIN, 0, 0);
 					if (i == -1 || i == -4) {
@@ -271,8 +277,10 @@ myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *fo
 				}
 			}
 			if (DestFolder && *DestFolder && !case_diffb(DestFolder, 10, "/NoDeliver")) {
-				subprintf(subfdout, "Mail BlackHoled\n");
-				flush("vfilter");
+				if (subprintf(subfdout, "Mail BlackHoled\n"))
+					strerr_die1sys(111, "unable to write to stdout");
+				if (substdio_flush(subfdout) == -1)
+					strerr_die1sys(111, "unable to write to stdout");
 			}
 			_exit(0);
 		}
@@ -494,39 +502,51 @@ numerical_compare(char *data, char *expression)
 	{
 	case ERROR_SYNTAX:
 		if (interactive && verbose) {
-			out("vfilter", "syntax error\n");
-			flush("vfilter");
+			if (subprintf(subfdout, "syntax error\n") == -1)
+				strerr_die1sys(111, "unable to write to stdout");
+			if (substdio_flush(subfdout) == -1)
+				strerr_die1sys(111, "unable to write to stdout");
 		}
 		return (-1);
 	case ERROR_VARNOTFOUND:
 		if (interactive && verbose) {
-			out("vfilter", "variable not found\n");
-			flush("vfilter");
+			if (subprintf(subfdout, "variable not found\n") == -1)
+				strerr_die1sys(111, "unable to write to stdout");
+			if (substdio_flush(subfdout) == -1)
+				strerr_die1sys(111, "unable to write to stdout");
 		}
 		return (-1);
 	case ERROR_NOMEM:
 		if (interactive && verbose) {
-			out("vfilter", "not enough memory\n");
-			flush("vfilter");
+			if (subprintf(subfdout, "not enough memory\n") == -1)
+				strerr_die1sys(111, "unable to write to stdout");
+			if (substdio_flush(subfdout) == -1)
+				strerr_die1sys(111, "unable to write to stdout");
 		}
 		return (-1);
 	case ERROR_DIV0:
 		if (interactive && verbose) {
-			out("vfilter", "division by zero\n");
-			flush("vfilter");
+			if (subprintf(subfdout, "division by zero\n") == -1)
+				strerr_die1sys(111, "unable to write to stdout");
+			if (substdio_flush(subfdout) == -1)
+				strerr_die1sys(111, "unable to write to stdout");
 		}
 		return (-1);
 	case RESULT_OK:
 		if (result.type == T_INT) {
 			if (interactive && verbose) {
-				subprintf(subfdout, "result = %d\n", result.ival);
-				flush("vfilter");
+				if (subprintf(subfdout, "result = %d\n", result.ival))
+					strerr_die1sys(111, "unable to write to stdout");
+				if (substdio_flush(subfdout) == -1)
+					strerr_die1sys(111, "unable to write to stdout");
 			}
 			return (result.ival);
 		} else {
 			if (interactive && verbose) {
-				subprintf(subfdout, "result = %.2f\n", result.rval);
-				flush("vfilter");
+				if (subprintf(subfdout, "result = %.2f\n", result.rval))
+					strerr_die1sys(111, "unable to write to stdout");
+				if (substdio_flush(subfdout) == -1)
+					strerr_die1sys(111, "unable to write to stdout");
 			}
 			return (0);
 		}
@@ -549,8 +569,10 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 	static stralloc tmpUser = {0}, tmpDomain = {0};
 
 	if (interactive && verbose) {
-		subprintf(subfdout, "Processing Filter %s\n", filterid);
-		flush("vfilter");
+		if (subprintf(subfdout, "Processing Filter %s\n", filterid))
+			strerr_die1sys(111, "unable to write to stdout");
+		if (substdio_flush(subfdout) == -1)
+			strerr_die1sys(111, "unable to write to stdout");
 	}
 	if (!str_diffn(filterid, "prefilt@", 8) || !str_diffn(filterid, "postfilt@", 9))
 		global_filter = 1;
@@ -568,16 +590,29 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 		if (i == -2)
 			break;
 		if (interactive && verbose && !j++) {
-			if (global_filter)
-				subprintf(subfdout, "No  global Filter                 FilterName Header          Comparision                Keyword         Folder          Action\n");
-			else
-				subprintf(subfdout, "No  EmailId                       FilterName Header          Comparision                Keyword         Folder          Action\n");
-			subprintf(subfdout, "-----------------------------------------------------------------------------------------------------------------------------------------\n");
+			if (global_filter) {
+				if (subprintf(subfdout,
+							"No  global Filter                 "
+							"FilterName Header          "
+							"Comparision                "
+							"Keyword         Folder          Action\n"))
+					strerr_die1sys(111, "unable to write to stdout");
+			} else {
+				if (subprintf(subfdout,
+							"No  EmailId                       "
+							"FilterName Header          "
+							"Comparision                "
+							"Keyword         Folder          "
+							"Action\n"))
+					strerr_die1sys(111, "unable to write to stdout");
+			}
+			print_hyphen(subfdout, "=", 137);
 		}
 		if (interactive && verbose)
 			format_filter_display(0, *filter_no, filterid, filter_name, *header_name, *comparision,
 				keyword, folder, forward, *bounce_action);
-		flush("vfilter");
+		if (substdio_flush(subfdout) == -1)
+			strerr_die1sys(111, "unable to write to stdout");
 		/*
 		 * comparision 5 - Sender not in Address Book
 		 * comparision 6 - ID not in To, Cc, Bcc
@@ -585,8 +620,7 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 		if (!global_filter && (*comparision == 5 || *comparision == 6)) {
 			address_list = getAddressBook(filterid);
 			if (interactive && verbose)
-				subprintf(subfdout,
-					"-----------------------------------------------------------------------------------------------------------------------------------------\n");
+				print_hyphen(subfdout, "=", 137);
 			for (ret = 0, ptr = hptr; ptr && *ptr && !ret; ptr++) {
 				if (!case_diffb((*ptr)->name, 4, "From") || !case_diffb((*ptr)->name, 11, "Return-Path"))
 					filter_opt = 1;
@@ -640,12 +674,15 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						}
 					}
 				} /*- for(tmp_ptr = (*ptr)->data;tmp_ptr && *tmp_ptr && !ret;tmp_ptr++) */
-				flush("vfilter");
+				if (substdio_flush(subfdout) == -1)
+					strerr_die1sys(111, "unable to write to stdout");
 			} /*- for(ret = 0, ptr = hptr;ptr && *ptr && !ret;ptr++) */
 			if (!ret) {
 				if (interactive && verbose) {
-					subprintf(subfdout, "Matched Filter No %d Comparision %s\n", *filter_no, vfilter_comparision[*comparision]);
-					flush("vfilter");
+					if (subprintf(subfdout, "Matched Filter No %d Comparision %s\n", *filter_no, vfilter_comparision[*comparision]))
+						strerr_die1sys(111, "unable to write to stdout");
+					if (substdio_flush(subfdout) == -1)
+						strerr_die1sys(111, "unable to write to stdout");
 				}
 				myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
 			}
@@ -671,8 +708,10 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if (!case_diffb(*tmp_ptr, keyword->len, keyword->s)) {
 								if (interactive && verbose) {
-									subprintf(subfdout, "Matched Filter No %d Data %s Keyword %s\n", *filter_no, *tmp_ptr, keyword->s);
-									flush("vfilter");
+									if (subprintf(subfdout, "Matched Filter No %d Data %s Keyword %s\n", *filter_no, *tmp_ptr, keyword->s))
+										strerr_die1sys(111, "unable to write to stdout");
+									if (substdio_flush(subfdout) == -1)
+										strerr_die1sys(111, "unable to write to stdout");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
 							}
@@ -682,8 +721,10 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if (str_str(*tmp_ptr, keyword->s)) {
 								if (interactive && verbose) {
-									subprintf(subfdout, "Matched Filter No %d Data %s Keyword %s\n", *filter_no, *tmp_ptr, keyword->s);
-									flush("vfilter");
+									if (subprintf(subfdout, "Matched Filter No %d Data %s Keyword %s\n", *filter_no, *tmp_ptr, keyword->s))
+										strerr_die1sys(111, "unable to write to stdout");
+									if (substdio_flush(subfdout) == -1)
+										strerr_die1sys(111, "unable to write to stdout");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
 							}
@@ -698,8 +739,10 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						}
 						if (!ret) {
 							if (interactive && verbose) {
-								subprintf(subfdout, "Matched Filter No %d Data %s Keyword %s\n", *filter_no, *tmp_ptr, keyword->s);
-								flush("vfilter");
+								if (subprintf(subfdout, "Matched Filter No %d Data %s Keyword %s\n", *filter_no, *tmp_ptr, keyword->s))
+									strerr_die1sys(111, "unable to write to stdout");
+								if (substdio_flush(subfdout) == -1)
+									strerr_die1sys(111, "unable to write to stdout");
 							}
 							myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
 						}
@@ -709,8 +752,10 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 							if (!str_diffn(*tmp_ptr, keyword->s, keyword->len))
 							{
 								if (interactive && verbose) {
-									subprintf(subfdout, "Matched Filter No %d Data %s Keyword %s\n", *filter_no, *tmp_ptr, keyword->s);
-									flush("vfilter");
+									if (subprintf(subfdout, "Matched Filter No %d Data %s Keyword %s\n", *filter_no, *tmp_ptr, keyword->s))
+										strerr_die1sys(111, "unable to write to stdout");
+									if (substdio_flush(subfdout) == -1)
+										strerr_die1sys(111, "unable to write to stdout");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
 							}
@@ -720,9 +765,11 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if ((str = str_str(*tmp_ptr, keyword->s)) && !case_diffb(str, keyword->len, keyword->s)) {
 								if (interactive && verbose) {
-									subprintf(subfdout, "Matched Filter No %d Comparision %s Data %s Keyword %s\n",
-											*filter_no, vfilter_comparision[*comparision], *tmp_ptr, keyword->s);
-									flush("vfilter");
+									if (subprintf(subfdout, "Matched Filter No %d Comparision %s Data %s Keyword %s\n",
+											*filter_no, vfilter_comparision[*comparision], *tmp_ptr, keyword->s))
+										strerr_die1sys(111, "unable to write to stdout");
+									if (substdio_flush(subfdout) == -1)
+										strerr_die1sys(111, "unable to write to stdout");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
 							}
@@ -733,9 +780,11 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if (numerical_compare(*tmp_ptr, keyword->s)) {
 								if (interactive && verbose) {
-									subprintf(subfdout, "Matched Filter No %d Data %s Keyword %s Folder %s\n",
-											*filter_no, *tmp_ptr, keyword->s, folder->s);
-									flush("vfilter");
+									if (subprintf(subfdout, "Matched Filter No %d Data %s Keyword %s Folder %s\n",
+											*filter_no, *tmp_ptr, keyword->s, folder->s))
+										strerr_die1sys(111, "unable to write to stdout");
+									if (substdio_flush(subfdout) == -1)
+										strerr_die1sys(111, "unable to write to stdout");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
 							}
@@ -751,9 +800,11 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 #endif
 							{
 								if (interactive && verbose) {
-									subprintf(subfdout, "Matched Filter No %d Comparision %s Keyword %s\n",
-											*filter_no, vfilter_comparision[*comparision], keyword->s);
-									flush("vfilter");
+									if (subprintf(subfdout, "Matched Filter No %d Comparision %s Keyword %s\n",
+											*filter_no, vfilter_comparision[*comparision], keyword->s))
+										strerr_die1sys(111, "unable to write to stdout");
+									if (substdio_flush(subfdout) == -1)
+										strerr_die1sys(111, "unable to write to stdout");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
 							}
@@ -782,8 +833,10 @@ main(int argc, char **argv)
 	int             i, ret = 0, fd = 0, header_name, comparision, bounce_action, filter_no, MsgSize;
 
 	if (!(MsgSize = get_message_size())) {
-		out("vfilter", "Discarding 0 size message\n");
-		flush("vfilter");
+		if (subprintf(subfdout, "Discarding 0 size message\n") == -1)
+			strerr_die1sys(111, "unable to write to stdout");
+		if (substdio_flush(subfdout) == -1)
+			strerr_die1sys(111, "unable to write to stdout");
 		_exit(0);
 	}
 	if (get_options(argc, argv, &bounce, &emailid, &user, &domain, &Maildir))
@@ -800,25 +853,33 @@ main(int argc, char **argv)
 		if ((h->name) && h->data) {
 			storeHeader(&hptr, h);
 			if (interactive && verbose) {
-				subprintf(subfdout, "%s: %s\n", (char *) h->name, (char *) h->data);
-				flush("vfilter");
+				if (subprintf(subfdout, "%s: %s\n", (char *) h->name, (char *) h->data))
+					strerr_die1sys(111, "unable to write to stdout");
+				if (substdio_flush(subfdout) == -1)
+					strerr_die1sys(111, "unable to write to stdout");
 			}
 		}
 		eps_header_free(eps);
 	}
 	if (interactive && verbose) {
-		out("vfilter", "\n");
-		flush("vfilter");
+		if (subprintf(subfdout, "\n") == -1)
+			strerr_die1sys(111, "unable to write to stdout");
+		if (substdio_flush(subfdout) == -1)
+			strerr_die1sys(111, "unable to write to stdout");
 	}
 	for (l = eps_next_line(eps); l; l = eps_next_line(eps)) {
 		if (interactive && verbose) {
-			subprintf(subfdout, "%s\n", (char *) l);
-			flush("vfilter");
+			if (subprintf(subfdout, "%s\n", (char *) l))
+				strerr_die1sys(111, "unable to write to stdout");
+			if (substdio_flush(subfdout) == -1)
+				strerr_die1sys(111, "unable to write to stdout");
 		}
 	}
 	if (interactive && verbose) {
-		out("vfilter", "\n");
-		flush("vfilter");
+		if (subprintf(subfdout, "\n") == -1)
+			strerr_die1sys(111, "unable to write to stdout");
+		if (substdio_flush(subfdout) == -1)
+			strerr_die1sys(111, "unable to write to stdout");
 	}
 	while ((!(eps->u->b->eof)) && (eps->content_type & CON_MULTI)) {
 		if (!(ret = mime_init_stream(eps)))
@@ -827,20 +888,26 @@ main(int argc, char **argv)
 			if ((h->name) && (h->data)) {
 				storeHeader(&hptr, h);
 				if (interactive && verbose) {
-					subprintf(subfdout, "%s: %s\n", (char *) h->name, (char *) h->data);
-					flush("vfilter");
+					if (subprintf(subfdout, "%s: %s\n", (char *) h->name, (char *) h->data))
+						strerr_die1sys(111, "unable to write to stdout");
+					if (substdio_flush(subfdout) == -1)
+						strerr_die1sys(111, "unable to write to stdout");
 				}
 			}
 			header_kill(h);
 		}
 		if (interactive && verbose) {
-			out("vfilter", "\n");
-			flush("vfilter");
+			if (subprintf(subfdout, "\n") == -1)
+				strerr_die1sys(111, "unable to write to stdout");
+			if (substdio_flush(subfdout) == -1)
+				strerr_die1sys(111, "unable to write to stdout");
 		}
 		for (l = mime_next_line(eps); l; l = mime_next_line(eps)) {
 			if (interactive && verbose) {
-				subprintf(subfdout, "%s\n", (char *) l);
-				flush("vfilter");
+				if (subprintf(subfdout, "%s\n", (char *) l))
+					strerr_die1sys(111, "unable to write to stdout");
+				if (substdio_flush(subfdout) == -1)
+					strerr_die1sys(111, "unable to write to stdout");
 			}
 		}
 	}
@@ -848,12 +915,15 @@ main(int argc, char **argv)
 	/*- Filter Engine */
 	for (ptr = hptr; ptr && *ptr; ptr++) {
 		if (verbose && interactive)
-			subprintf(subfdout, "%-25s", (*ptr)->name);
+			if (subprintf(subfdout, "%-25s", (*ptr)->name))
+				strerr_die1sys(111, "unable to write to stdout");
 		for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 			lowerit(*tmp_ptr);
 			if (verbose && interactive) {
-				subprintf(subfdout, "                          -> %s\n", *tmp_ptr);
-				flush("vfilter");
+				if (subprintf(subfdout, "                          -> %s\n", *tmp_ptr))
+					strerr_die1sys(111, "unable to write to stdout");
+				if (substdio_flush(subfdout) == -1)
+					strerr_die1sys(111, "unable to write to stdout");
 			}
 		}
 	}
@@ -917,8 +987,10 @@ main(int argc, char **argv)
 		process_filter(argc, argv, hptr, filterid.s, &filter_no, &filter_name, &header_name,
 			&comparision, &keyword, &folder, &bounce_action, &forward);
 	if (interactive && verbose) {
-		out("vfilter", "Passed All Filters\n");
-		flush("vfilter");
+		if (subprintf(subfdout, "Passed All Filters\n") == -1)
+			strerr_die1sys(111, "unable to write to stdout");
+		if (substdio_flush(subfdout) == -1)
+			strerr_die1sys(111, "unable to write to stdout");
 	}
 	myExit(argc, argv, 0, 0, 0, 0);
 	return (0);/*- Not reached */

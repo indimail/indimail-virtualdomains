@@ -12,9 +12,11 @@
 #ifdef VFILTER
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
+#include <substdio.h>
 #endif
 
 int             vfilter_display(char *, int);
+void            print_hyphen(substdio *, char *, int);
 void            format_filter_display(int, int, char *, stralloc *, int, int, stralloc *, stralloc *, stralloc *, int);
 
 #endif

@@ -144,22 +144,29 @@ main(int argc, char **argv)
 	switch (action)
 	{
 	case V_SELECT_ALL:
-		subprintf(subfdoutsmall, "%-20s %-20s %-9s %-15s Added on\n", "User", "Domain", "Host ID", "IP Address");
+		if (subprintf(subfdoutsmall, "%-20s %-20s %-9s %-15s Added on\n", "User", "Domain", "Host ID", "IP Address") == -1)
+			strerr_die1sys(111, "write: unable to write output: ");
+
 		for(;;) {
 			if (!(row = hostcntrl_select_all()))
 				break;
 			ipaddr = ((ipaddr = sql_getip(row[2])) ? ipaddr : "????");
 			scan_ulong(row[3], (unsigned long *) &tmval);
-			subprintf(subfdoutsmall, "%-20s %-20s %-9s %-15s %s\n", row[0], row[1], row[2], ipaddr, ctime(&tmval));
+			if (subprintf(subfdoutsmall, "%-20s %-20s %-9s %-15s %s\n", row[0], row[1], row[2], ipaddr, ctime(&tmval)) == -1)
+				strerr_die1sys(111, "write: unable to write output: ");
 		}
-		substdio_flush(subfdoutsmall);
+		if (substdio_flush(subfdoutsmall) == -1)
+			strerr_die1sys(111, "write: unable to write output: ");
 		break;
 	case V_USER_SELECT:
 		if (!hostcntrl_select(user.s, domain.s, &tmval, &HostID)) {
 			ipaddr = ((ipaddr = sql_getip(HostID.s)) ? ipaddr : "????");
-			subprintf(subfdoutsmall, "%-25s %-11s %-16s Added On\n", "Email", "Host ID", "IP Address");
-			subprintf(subfdoutsmall, "%-25s %-11s %-16s %s\n", emailid, HostID.s, ipaddr, ctime(&tmval));
-			substdio_flush(subfdoutsmall);
+			if (subprintf(subfdoutsmall, "%-25s %-11s %-16s Added On\n", "Email", "Host ID", "IP Address") == -1)
+				strerr_die1sys(111, "write: unable to write output: ");
+			if (subprintf(subfdoutsmall, "%-25s %-11s %-16s %s\n", emailid, HostID.s, ipaddr, ctime(&tmval)) == -1)
+				strerr_die1sys(111, "write: unable to write output: ");
+			if (substdio_flush(subfdoutsmall) == -1)
+				strerr_die1sys(111, "write: unable to write output: ");
 			return(0);
 		} else
 			return (1);

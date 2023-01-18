@@ -142,12 +142,16 @@ main(int argc, char **argv)
 			if (!(ptr = show_atrn_map(&user, &domain)))
 				break;
 			result = 0;
-			subprintf(subfdoutsmall, "%-20s %-20s %s\n", user, domain, ptr);
-			substdio_flush(subfdoutsmall);
+			if (subprintf(subfdoutsmall, "%-20s %-20s %s\n", user, domain, ptr) == -1)
+				strerr_die1sys(111, "write: unable to write output: ");
+			if (substdio_flush(subfdoutsmall) == -1)
+				strerr_die1sys(111, "write: unable to write output: ");
 		}
 		if (result && verbose) {
-			subprintf(subfdoutsmall, "No ATRN Maps present\n");
-			substdio_flush(subfdoutsmall);
+			if (subprintf(subfdoutsmall, "No ATRN Maps present\n") == -1)
+				strerr_die1sys(111, "write: unable to write output: ");
+			if (substdio_flush(subfdoutsmall) == -1)
+				strerr_die1sys(111, "write: unable to write output: ");
 		}
 		break;
 	default:

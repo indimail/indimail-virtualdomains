@@ -123,19 +123,23 @@ main(int argc, char **argv)
 	switch (hostaction)
 	{
 	case HOST_SELECT:
-		subprintf(subfdoutsmall, "%-30s %s\n", "HostID", "IP Address");
-		if(hostid && (tmphost_line = sql_getip(hostid)))
-			subprintf(subfdoutsmall, "%-30s %s\n", hostid, tmphost_line);
-		else
+		if (subprintf(subfdoutsmall, "%-30s %s\n", "HostID", "IP Address") == -1)
+			strerr_die1sys(111, "unable to write to stdout");
+		if(hostid && (tmphost_line = sql_getip(hostid))) {
+			if (subprintf(subfdoutsmall, "%-30s %s\n", hostid, tmphost_line) == -1)
+				strerr_die1sys(111, "unable to write to stdout");
+		} else
 		for(;;) {
 			if(!(tmphost_line = vhostid_select())) /*- "hostid ip_address */
 				break;
 			for (hostid = ptr = tmphost_line; *ptr && !isspace(*ptr); ptr++);
 			*ptr++ = 0;
 			for (;*ptr && isspace(*ptr); ptr++);
-			subprintf(subfdoutsmall, "%-30s %s\n", hostid, ptr);
+			if (subprintf(subfdoutsmall, "%-30s %s\n", hostid, ptr) == -1)
+				strerr_die1sys(111, "unable to write to stdout");
 		}
-		qprintf_flush(subfdoutsmall);
+		if (substdio_flush(subfdoutsmall) == -1)
+			strerr_die1sys(111, "unable to write to stdout");
 		break;
 	case HOST_INSERT:
 		vhostid_insert(hostid, ipaddr);
@@ -149,16 +153,20 @@ main(int argc, char **argv)
 	case HOST_LOCAL:
 		if (hostid && *hostid) {
 			if (!update_local_hostid(hostid)) {
-				subprintf(subfdoutsmall, "updated local hostid to %s\n", hostid);
-				qprintf_flush(subfdoutsmall);
+				if (subprintf(subfdoutsmall, "updated local hostid to %s\n", hostid) == -1)
+					strerr_die1sys(111, "unable to write to stdout");
+				if (substdio_flush(subfdoutsmall) == -1)
+					strerr_die1sys(111, "unable to write to stdout");
 				return (0);
 			} else
 				_exit(111);
 		}
 		if (!(hostid = get_local_hostid()))
 			strerr_die1sys(111, "vhostid: failed to get localhostid");
-		subprintf(subfdoutsmall, "%s\n", hostid);
-		qprintf_flush(subfdoutsmall);
+		if (subprintf(subfdoutsmall, "%s\n", hostid) == -1)
+			strerr_die1sys(111, "unable to write to stdout");
+		if (substdio_flush(subfdoutsmall) == -1)
+			strerr_die1sys(111, "unable to write to stdout");
 		break;
 	default:
 		strnum[fmt_uint(strnum, (unsigned int) hostaction)] = 0;

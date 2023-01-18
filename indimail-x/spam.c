@@ -274,8 +274,10 @@ spamReport(int spamNumber, char *outfile)
 	if ((fd = open_append(outfile)) == -1)
 		strerr_die3sys(111, "spam: open: ", outfile, ": ");
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
-	subprintf(subfderr, "%-40s Mail Count\n", "Spammer's Email Address");
-	substdio_flush(subfderr);
+	if (subprintf(subfderr, "%-40s Mail Count\n", "Spammer's Email Address") == -1)
+		strerr_die1sys(111, "write: unable to write output: ");
+	if (substdio_flush(subfderr) == -1)
+		strerr_die1sys(111, "write: unable to write output: ");
 	if(!maxaddr) {
 		getEnvConfigStr(&ptr, "MAXADDR", MAXADDR);
 		scan_int(ptr, &maxaddr);
@@ -303,31 +305,31 @@ spamReport(int spamNumber, char *outfile)
 			if (p->cnt >= spamNumber && !isIgnored(p->mail)) {
 				spamcnt++;
 				if(flag) {
-					if (substdio_puts(&ssout, p->mail) ||
-							substdio_put(&ssout, "\n", 1))
+					if (substdio_puts(&ssout, p->mail) == -1 ||
+							substdio_put(&ssout, "\n", 1) == -1)
 					{
 						strerr_warn3("spam: write: ", outfile, ": ", &strerr_sys);
 						return (-1);
 					}
 				} else {
-					if (substdio_puts(&ssout, p->mail) ||
-							substdio_put(&ssout, " ", 1) ||
-							substdio_put(&ssout, strnum, fmt_ulong(strnum, (unsigned long) p->cnt)) ||
-							substdio_put(&ssout, "\n", 1))
+					if (substdio_puts(&ssout, p->mail) == -1 ||
+							substdio_put(&ssout, " ", 1) == -1 ||
+							substdio_put(&ssout, strnum, fmt_ulong(strnum, (unsigned long) p->cnt)) == -1 ||
+							substdio_put(&ssout, "\n", 1) == -1)
 					{
 						strerr_warn3("spam: write: ", outfile, ": ", &strerr_sys);
 						return (-1);
 					}
 				}
-				subprintf(subfderr, "%-40s %d\n", p->mail, p->cnt);
+				if (subprintf(subfderr, "%-40s %d\n", p->mail, p->cnt) == -1)
+					strerr_die1sys(111, "write: unable to write output: ");
 			}
 		}
 	}
-	if (substdio_flush(&ssout)) {
+	if (substdio_flush(&ssout) == -1) {
 		strerr_warn3("spam: write: ", outfile, ": ", &strerr_sys);
 		return (-1);
 	}
-	substdio_flush(subfderr);
 	close(fd);
 	if (substdio_put(subfderr, "Bounces: ", 9) ||
 			substdio_put(subfderr, strnum, fmt_int(strnum, bounce)) ||
@@ -339,6 +341,8 @@ spamReport(int spamNumber, char *outfile)
 		strerr_warn1("spam: unable to write to stderr: ", &strerr_sys);
 		return (-1);
 	}
+	if (substdio_flush(subfderr) == -1)
+		strerr_warn1("spam: unable to write to stderr: ", &strerr_sys);
 	if (flag && spamcnt) {
 		spamprog[0] = PREFIX"/sbin/qmail-cdb";
 		i = str_rchr(outfile, '/');
@@ -430,9 +434,9 @@ readLogFile(char *fn, int type, int count)
 				return (-1);
 			}
 			substdio_fdbuf(&ssout, write, keyfd, outbuf, sizeof(outbuf));
-			if (substdio_put(&ssout, strnum, fmt_ulong(strnum, seekPos)) ||
-					substdio_put(&ssout, "\n", 1) ||
-					substdio_flush(&ssout)) {
+			if (substdio_put(&ssout, strnum, fmt_ulong(strnum, seekPos)) == -1 ||
+					substdio_put(&ssout, "\n", 1) == -1 ||
+					substdio_flush(&ssout) == -1) {
 				strerr_warn3("readLogFile: write: ", keyfile.s, ": ", &strerr_sys);
 				close(fd);
 				close(keyfd);

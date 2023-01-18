@@ -198,8 +198,11 @@ main(int argc, char **argv)
 		if (l_id <= id)
 			continue;
 		u_count++;
-		subprintf(subfdout, "%3s: command=%5s, ignore=%3s, commend=%25s, sql=%s\n", lid_str, command, ignore, comment, sql_stmt);
-		substdio_flush(subfdout);
+		if (subprintf(subfdout, "%3s: command=%-5s ignore=%-3s comment=%-25s sql=%s\n",
+					lid_str, command, ignore, comment, sql_stmt) == -1)
+			strerr_die1sys(111, "write: unable to write output: ");
+		if (substdio_flush(subfdout) == -1)
+			strerr_die1sys(111, "write: unable to write output: ");
 		ign = str_diff(ignore, "YES") ? 0 : 1;
 		if (!str_diff(command, "sql")) {
 			if (mysql_query(&mysql[1], sql_stmt)) {

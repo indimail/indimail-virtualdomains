@@ -311,11 +311,14 @@ main(int argc, char **argv)
 			diff = time(0) - tmval;
 			count++;
 			if (verbose && isAtty) {
-				if (diff)
-					subprintf(subfdoutsmall, "\r%-7d %.2f", count, (float) count/diff);
-				else
-					subprintf(subfdoutsmall, "\r%-7d Inf", count);
-				if (substdio_flush(subfdoutsmall))
+				if (diff) {
+					if (subprintf(subfdoutsmall, "\r%7d %.2f", count, (float) count/diff) == -1)
+						strerr_die1sys(111, "unable to write to stdout");
+				} else {
+					if (subprintf(subfdoutsmall, "\r%7d Inf", count) == -1)
+						strerr_die1sys(111, "unable to write to stdout");
+				}
+				if (substdio_flush(subfdoutsmall) == -1)
 					strerr_die1sys(111, "unable to write to stdout");
 			}
 		}
@@ -383,14 +386,9 @@ main(int argc, char **argv)
 	}
 	if (verbose && !report_only) {
 		strnum[i = fmt_ulong(strnum, (unsigned long) purged)] = 0;
-		if (substdio_put(subfdoutsmall, "Purged ", 7) ||
-				substdio_put(subfdoutsmall, strnum, i) ||
-				substdio_put(subfdoutsmall, "/", 1))
+		if (subprintf(subfdoutsmall, "Purged %ld/%ld Inactive Users\n", purged, totalcount) == -1)
 			strerr_die1sys(111, "unable to write to stdout");
-		strnum[i = fmt_ulong(strnum, (unsigned long) totalcount)] = 0;
-		if (substdio_put(subfdoutsmall, strnum, i) ||
-				substdio_put(subfdoutsmall, " Inactive Users\n", 16) ||
-				substdio_flush(subfdoutsmall))
+		if (substdio_flush(subfdoutsmall) == -1)
 			strerr_die1sys(111, "unable to write to stdout");
 	}
 	if (c_option || i_option || p_option) {
@@ -432,15 +430,15 @@ trash_clean:
 				LocateUser(indimailptr, *ptr, !count++);
 		} else {
 			if (verbose) {
-				if (substdio_put(subfdoutsmall, "Deleting Folders", 16))
+				if (subprintf(subfdoutsmall, "Deleting Folders ") == -1)
 					strerr_die1sys(111, "unable to write to stdout");
 				for (tmp = mailboxArr; *tmp; tmp++) {
-					if (substdio_put(subfdoutsmall, " ", 1) ||
-							substdio_puts(subfdoutsmall, *tmp))
+					if (subprintf(subfdoutsmall, " %s", *tmp) == -1)
 						strerr_die1sys(111, "unable to write to stdout");
 				}
-				if (substdio_puts(subfdoutsmall, ctime(&tmval)) ||
-						substdio_flush(subfdoutsmall))
+				if (subprintf(subfdoutsmall,  "%s", ctime(&tmval)) == -1) 
+					strerr_die1sys(111, "unable to write to stdout");
+				if (substdio_flush(subfdoutsmall) == -1)
 					strerr_die1sys(111, "unable to write to stdout");
 			}
 		}

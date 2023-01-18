@@ -214,8 +214,11 @@ LoadBMF(int *total, char *bmf)
 	} else {
 		file_time = statbuf.st_mtime;
 		if (verbose) {
-			subprintf(subfdoutsmall, "File UNIX %40s Modification Time %s", badmailfrom.s, ctime(&file_time));
-			substdio_flush(subfdoutsmall);
+			if (subprintf(subfdoutsmall, "File UNIX %-40s Modification Time %s",
+						badmailfrom.s, ctime(&file_time)) == -1)
+				strerr_die1sys(111, "write: unable to write output: ");
+			if (substdio_flush(subfdoutsmall) == -1)
+				strerr_die1sys(111, "write: unable to write output: ");
 		}
 	}
 	if (open_master()) {
@@ -281,10 +284,14 @@ LoadBMF(int *total, char *bmf)
 					mcd_time = mtime;
 			}
 			if (verbose) {
-				subprintf(subfdoutsmall, "Table MySQL %40s Modification Time %s", badmail_flag ? bmf : "spam", ctime(&mcd_time));
+				if (subprintf(subfdoutsmall, "Table MySQL %-40s Modification Time %s",
+							badmail_flag ? bmf : "spam", ctime(&mcd_time)) == -1)
+					strerr_die1sys(111, "write: unable to write output: ");
 				if (mcd_time == file_time)
-					subprintf(subfdoutsmall, "Nothing to update\n");
-				substdio_flush(subfdoutsmall);
+					if (subprintf(subfdoutsmall, "Nothing to update\n") == -1)
+						strerr_die1sys(111, "write: unable to write output: ");
+				if (substdio_flush(subfdoutsmall) == -1)
+					strerr_die1sys(111, "write: unable to write output: ");
 			}
 			if (mcd_time == file_time) {
 				in_mysql_free_result(res);

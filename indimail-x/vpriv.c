@@ -168,9 +168,11 @@ main(int argc, char **argv)
 		for(;;) {
 			if (!(ptr = vpriv_select(&user, &program)))
 				break;
-			subprintf(subfdoutsmall, "%-20s --> %-20s %s\n", user, program, ptr);
+			if (subprintf(subfdoutsmall, "%-20s --> %-20s %s\n", user, program, ptr) == -1)
+				strerr_die1sys(111, "unable to write to stdout");
 		}
-		qprintf_flush(subfdoutsmall);
+		if (substdio_flush(subfdoutsmall) == -1)
+			strerr_die1sys(111, "unable to write to stdout");
 		break;
 	case V_PRIV_INSERT:
 		return (vpriv_insert(user, program, cmdargs));

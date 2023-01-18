@@ -173,9 +173,15 @@ main(int argc, char **argv)
 			if (!(dst_ip = sql_getip(dst_hostid.s)))
 				dst_ip = "x.x.x.x";
 			if (!oldport)
-				subprintf(subfdoutsmall, "Source HostIP        Destination HostID IP Address         -> Port\n");
-			subprintf(subfdoutsmall, "%-20s %-18s %-18s -> %d\n", src_ip.s, dst_hostid.s, dst_ip, port);
-			qprintf_flush(subfdoutsmall);
+				if (subprintf(subfdoutsmall,
+						"Source HostIP        "
+						"Destination HostID IP Address"
+						"-> Port\n") == -1)
+					strerr_die1sys(111, "unable to write to stdout");
+			if (subprintf(subfdoutsmall, "%-20s %-18s %-18s -> %d\n", src_ip.s, dst_hostid.s, dst_ip, port) == -1)
+				strerr_die1sys(111, "unable to write to stdout");
+			if (substdio_flush(subfdoutsmall) == -1)
+				strerr_die1sys(111, "unable to write to stdout");
 			err = 0;
 		}
 		break;
