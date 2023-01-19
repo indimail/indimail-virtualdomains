@@ -152,7 +152,7 @@ main(int argc, char **argv)
 				break;
 			ipaddr = ((ipaddr = sql_getip(row[2])) ? ipaddr : "????");
 			scan_ulong(row[3], (unsigned long *) &tmval);
-			if (subprintf(subfdoutsmall, "%-20s %-20s %-9s %-15s %s\n", row[0], row[1], row[2], ipaddr, ctime(&tmval)) == -1)
+			if (subprintf(subfdoutsmall, "%-20s %-20s %-9s %-15s %s", row[0], row[1], row[2], ipaddr, ctime(&tmval)) == -1)
 				strerr_die1sys(111, "write: unable to write output: ");
 		}
 		if (substdio_flush(subfdoutsmall) == -1)
@@ -163,7 +163,7 @@ main(int argc, char **argv)
 			ipaddr = ((ipaddr = sql_getip(HostID.s)) ? ipaddr : "????");
 			if (subprintf(subfdoutsmall, "%-25s %-11s %-16s Added On\n", "Email", "Host ID", "IP Address") == -1)
 				strerr_die1sys(111, "write: unable to write output: ");
-			if (subprintf(subfdoutsmall, "%-25s %-11s %-16s %s\n", emailid, HostID.s, ipaddr, ctime(&tmval)) == -1)
+			if (subprintf(subfdoutsmall, "%-25s %-11s %-16s %s", emailid, HostID.s, ipaddr, ctime(&tmval)) == -1)
 				strerr_die1sys(111, "write: unable to write output: ");
 			if (substdio_flush(subfdoutsmall) == -1)
 				strerr_die1sys(111, "write: unable to write output: ");
