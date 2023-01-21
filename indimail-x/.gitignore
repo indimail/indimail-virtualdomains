@@ -224,3 +224,4 @@ PKGBUILD
 inquerytest.8
 ischema
 ischema.1
+depcomp

@@ -6,7 +6,8 @@ AC_INIT([IndiMail],m4_normalize(m4_include([conf-version])),m4_normalize(m4_incl
 AC_CONFIG_HEADERS([config.h])
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
-AM_INIT_AUTOMAKE
+dnl AM_INIT_AUTOMAKE([])
+AM_INIT_AUTOMAKE([foreign no-dist])
 
 # Checks for programs.
 LT_INIT
@@ -44,14 +45,15 @@ case "$host" in
 	else
 		idcommand="/usr/bin/id -u mail"
 	fi
-	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -I/usr/include/qmail -Wall"
-	CFLAGS="$CFLAGS -O4 -fPIC -fpie -Wall -fno-strict-aliasing"
+	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -I/usr/include/qmail -Wall -Wformat=2 -Wformat-security -Wformat-signedness -Wformat-overflow -Wsuggest-attribute=format -Wmissing-format-attribute"
+	CFLAGS="$CFLAGS -O4 -fPIC -fpie -Wall"
 	LDFLAGS="$LDFLAGS -pie"
 	MODFLAGS="-O4 -fPIC -shared -Wall"
 	;;
 *-*-darwin*)
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I/opt/local/include/qmail"
+	CPPFLAGS="$CPPFLAGS -Wformat=2 -Wformat-security -Wmissing-format-attribute"
 	CFLAGS="$CFLAGS -O3 -Wall"
 	LDFLAGS="$LDFLAGS -L/opt/local/lib"
 	MODFLAGS="-g -O3 -bundle -Wall -undefined dynamic_lookup"
@@ -59,6 +61,7 @@ case "$host" in
 *-*-freebsd*)
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/include/qmail"
+	CPPFLAGS="$CPPFLAGS -Wformat=2 -Wformat-security -Wmissing-format-attribute"
 	CFLAGS="$CFLAGS -O3 -Wall -fPIC"
 	MODFLAGS="-g -O3 -fPIC -shared -Wall"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
