@@ -1,8 +1,9 @@
+include Makefile.@SYSTEM@
 SUBDIRS=eps-1.2
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
 
-DEFS=@DEFS@ -Dlint -fno-strict-aliasing -I. -I@prefix@/include/qmail -Ieps-1.2 -I@mysql_incdir@
+DEFS=@DEFS@ -Dlint -I. -I@prefix@/include/qmail -Ieps-1.2 -I@mysql_incdir@
 
 iauth_LTLIBRARIES = iauth.la
 iauth_la_SOURCES = iauth.c
@@ -501,9 +502,6 @@ updatefile_SOURCES = updatefile.c
 updatefile_LDADD = libindimail.la $(LIB_QMAIL)
 updatefile_DEPENDENCIES = libindimail.la
 
-deliver_mail.$(OBJEXT) : CPPFLAGS += -Wno-format-nonliteral
-deliver_mail.lo : CPPFLAGS += -Wno-format-nonliteral
-
 edit = sed \
 	-e 's}@indimaildir\@}$(indimaildir)}g' \
 	-e 's}@qmaildir\@}$(qmaildir)}g' \
@@ -743,5 +741,3 @@ uninstall-hook:
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status --recheck
-
-#AUTOMAKE_OPTIONS = foreign no-dist -Wformat=2 -Wformat-security -Wformat-signedness  -Wformat-overflow -Wsuggest-attribute=format -Wmissing-format-attribute

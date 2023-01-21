@@ -6,8 +6,7 @@ AC_INIT([IndiMail],m4_normalize(m4_include([conf-version])),m4_normalize(m4_incl
 AC_CONFIG_HEADERS([config.h])
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
-dnl AM_INIT_AUTOMAKE([])
-AM_INIT_AUTOMAKE([foreign no-dist])
+AM_INIT_AUTOMAKE([foreign subdir-objects silent-rules no-dist])
 
 # Checks for programs.
 LT_INIT
@@ -49,6 +48,7 @@ case "$host" in
 	CFLAGS="$CFLAGS -O4 -fPIC -fpie -Wall"
 	LDFLAGS="$LDFLAGS -pie"
 	MODFLAGS="-O4 -fPIC -shared -Wall"
+	SYSTEM=Linux
 	;;
 *-*-darwin*)
 	idcommand="/usr/bin/id -u"
@@ -57,6 +57,7 @@ case "$host" in
 	CFLAGS="$CFLAGS -O3 -Wall"
 	LDFLAGS="$LDFLAGS -L/opt/local/lib"
 	MODFLAGS="-g -O3 -bundle -Wall -undefined dynamic_lookup"
+	SYSTEM=Darwin
 	;;
 *-*-freebsd*)
 	idcommand="/usr/bin/id -u"
@@ -65,6 +66,7 @@ case "$host" in
 	CFLAGS="$CFLAGS -O3 -Wall -fPIC"
 	MODFLAGS="-g -O3 -fPIC -shared -Wall"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
+	SYSTEM=FreeBSD
 	;;
 *)
 	idcommand="/usr/bin/id -u"
@@ -1097,6 +1099,7 @@ AC_SUBST(idcommand)
 AC_SUBST(LIBVER)
 AC_SUBST(MODFLAGS)
 AC_SUBST(HOST)
+AC_SUBST(SYSTEM)
 AC_CONFIG_FILES([libindimail.pc:libindimail.pc.in],[], [])
 AC_CONFIG_FILES([indimail-release:indimail-release.in],[], [])
 AC_CONFIG_FILES([Makefile])
