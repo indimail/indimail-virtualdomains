@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.13  2023-01-21 13:29:53+05:30  Cprogrammer
+ * replaced SSL_shutdown, SSL_free iwth ssl_free
+ *
  * Revision 1.12  2023-01-03 21:35:28+05:30  Cprogrammer
  * replaced tls code with TLS library from libqmail
  * added -T option to specify connection timeout
@@ -45,7 +48,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.12 2023-01-03 21:35:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.13 2023-01-21 13:29:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
