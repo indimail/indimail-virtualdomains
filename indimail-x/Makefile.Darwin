@@ -1,0 +1,4 @@
+deliver_mail.lo:
+	/bin/sh ./libtool --tag=CC --mode=compile cc -g -O2 -I. -DHAVE_CONFIG_H \
+		$(DEFS) $(CPPFLAGS) $(CFLAGS) -MT deliver_mail.lo -MD -MP -MF \
+		.deps/deliver_mail.Tpo -c -o deliver_mail.lo deliver_mail.c
