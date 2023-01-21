@@ -26,6 +26,7 @@
 #include <strerr.h>
 #include <error.h>
 #include <fmt.h>
+#include <subfd.h>
 #endif
 #include "common.h"
 #include "variables.h"
@@ -70,9 +71,7 @@ vdelfiles(char *dir, char *user, char *domain)
 	}
 	if (!S_ISDIR(statbuf.st_mode)) {
 		if (verbose) {
-			out("vdelfiles", "Removing File ");
-			out("vdelfiles", dir);
-			out("vdelfiles", "\n");
+			subprintfe(subfdout, "vdelfiles", "Removing File %s\n", dir);
 			flush("vdelfiles");
 		}
 		if (unlink(dir)) {
@@ -113,9 +112,7 @@ vdelfiles(char *dir, char *user, char *domain)
 		}
 		if (!S_ISDIR(statbuf.st_mode)) {
 			if (verbose) {
-				out("vdelfiles", "Removing File ");
-				out("vdelfiles", file_name);
-				out("vdelfiles", "\n");
+				subprintfe(subfdout, "vdelfiles", "Removing File %s\n", file_name);
 				flush("vdelfiles");
 			}
 			if (unlink(file_name) == -1)
@@ -131,9 +128,7 @@ vdelfiles(char *dir, char *user, char *domain)
 	alloc_free(file_name);
 	closedir(entry);
 	if (verbose) {
-		out("vdelfiles", "Removing Dir ");
-		out("vdelfiles", dir);
-		out("vdelfiles", "\n");
+		subprintfe(subfdout, "vdelfiles", "Removing Dir %s\n", dir);
 		flush("vdelfiles");
 	}
 	if (rmdir(dir)) {

@@ -21,19 +21,17 @@
 #include <stralloc.h>
 #include <strerr.h>
 #include <str.h>
-#include <fmt.h>
 #include <scan.h>
 #include <sgetopt.h>
 #include <substdio.h>
 #include <subfd.h>
 #include <getln.h>
-#include <qprintf.h>
 #endif
 #include "iopen.h"
+#include "common.h"
 #include "iclose.h"
 #include "variables.h"
 #include "create_table.h"
-#include "common.h"
 
 #ifndef	lint
 static char     rcsid[] = "$Id: ischema.c,v 1.1 2022-08-05 19:23:26+05:30 Cprogrammer Exp mbhangui $";
@@ -59,7 +57,6 @@ int
 update_schema(char *sql_stmt)
 {
 	int             err;
-	char            strnum[FMT_ULONG];
 
 	if (mysql_query(&mysql[1], sql_stmt)) {
 		strerr_warn5(FATAL, "mysql_query [", sql_stmt, "]: ", (char *) in_mysql_error(&mysql[1]), 0);
@@ -69,10 +66,8 @@ update_schema(char *sql_stmt)
 		strerr_warn3(WARN, "mysql_affected_rows: ", (char *) in_mysql_error(&mysql[1]), 0);
 		return -1;
 	}
-	strnum[fmt_int(strnum, err)] = 0;
-	out("ischema", strnum);
-	out("ischema", " rows updated\n");
-	flush("ischema");
+	subprintfe(subfdout, "ischema", "%d rows updated\n", err);
+	flush("LoadBMF");
 	return err;
 }
 
@@ -123,20 +118,16 @@ main(int argc, char **argv)
 		_exit(111);
 	}
 	if ((row = in_mysql_fetch_row(res))) {
-		out("ischema", "Schema Version = ");
-		if (row[0]) {
-			out("ischema", row[0]);
+		subprintfe(subfdout, "ischema", "Schema Version = %s\n", row[0] ? row[0] : "0");
+		if (row[0])
 			scan_int(row[0], &id);
-		} else {
-			out("ischema", "0");
+		else
 			id = 0;
-		}
-		out("ischema", "\n");
-	} else {
-		errout("ischema", "no rows fetched\n");
-	}
+	} else
+	subprintfe(subfderr, "ischema", "no rows fetched\n");
 	flush("ischema");
-	errflush("ischema");
+	if (substdio_flush(subfderr) == -1)
+		strerr_die1sys(111, "write: unable to write output: ");
 	if (!update_mode)
 		_exit(0);
 	if ((fd = open_read(SYSCONFDIR"/indimail.schema")) == -1)
@@ -198,11 +189,9 @@ main(int argc, char **argv)
 		if (l_id <= id)
 			continue;
 		u_count++;
-		if (subprintf(subfdout, "%3s: command=%-5s ignore=%-3s comment=%-25s sql=%s\n",
-					lid_str, command, ignore, comment, sql_stmt) == -1)
-			strerr_die1sys(111, "write: unable to write output: ");
-		if (substdio_flush(subfdout) == -1)
-			strerr_die1sys(111, "write: unable to write output: ");
+		subprintfe(subfdout, "ischema", "%3s: command=%-5s ignore=%-3s comment=%-25s sql=%s\n",
+					lid_str, command, ignore, comment, sql_stmt);
+		flush("ischema");
 		ign = str_diff(ignore, "YES") ? 0 : 1;
 		if (!str_diff(command, "sql")) {
 			if (mysql_query(&mysql[1], sql_stmt)) {
@@ -228,7 +217,7 @@ main(int argc, char **argv)
 	} /*- for (;;) */
 	close(fd);
 	if (!u_count) {
-		out("ischema", "no schema updates available\n");
+		subprintfe(subfdout, "ischema", "no schema updates available\n");
 		flush("ischema");
 	}
 	return 0;

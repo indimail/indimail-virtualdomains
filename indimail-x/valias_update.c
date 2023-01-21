@@ -21,7 +21,7 @@ static char     sccsid[] = "$Id: valias_update.c,v 1.1 2019-04-15 12:03:26+05:30
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <strerr.h>
-#include <fmt.h>
+#include <subfd.h>
 #endif
 #include "iopen.h"
 #include "create_table.h"
@@ -41,7 +41,6 @@ valias_update(char *alias, char *domain, char *old_alias_line, char *alias_line)
 {
 	int             err;
 	char           *real_domain;
-	char            strnum[FMT_ULONG];
 	static stralloc SqlBuf = {0};
 
 	if (!domain || !*domain)
@@ -80,16 +79,7 @@ valias_update(char *alias, char *domain, char *old_alias_line, char *alias_line)
 	if (!verbose)
 		return (0);
 	if (err) {
-		out("valias_update", "Updated alias line ");
-		out("valias_update", alias_line);
-		out("valias_update", " for alias ");
-		out("valias_update", alias);
-		out("valias_update", "@");
-		out("valias_update", real_domain);
-		out("valias_update", " (");
-		strnum[fmt_uint(strnum, err)] = 0;
-		out("valias_update", strnum);
-		out("valias_update", " entries)\n");
+		subprintfe(subfdout, "valias_update", "Updated alias line %s for alias %s@%s (%d entries)", alias_line, alias, real_domain, err);
 		flush("valias_update");
 	} else 
 		strerr_warn6("No alias line ", alias_line, " for alias ", alias, "@", real_domain, 0);

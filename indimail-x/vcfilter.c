@@ -40,7 +40,6 @@ static char     sccsid[] = "$Id: vcfilter.c,v 1.5 2021-07-08 11:47:52+05:30 Cpro
 #include <error.h>
 #include <str.h>
 #include <open.h>
-#include <qprintf.h>
 #include <subfd.h>
 #include <setuserid.h>
 #endif
@@ -77,7 +76,7 @@ void
 usage()
 {
 	int             i;
-	subprintf(subfderr,
+	subprintfe(subfderr, "vcfilter",
 			"usage: vcfilter [options] emailid\n"
 			"options: -v verbose\n"
 			"         -C connect to Cluster\n"
@@ -91,25 +90,25 @@ usage()
 			"             -1 - If comparision (-c option) is 5 or 6\n");
 	for (i = 0; header_list[i];) {
 		if (header_list[i + 1]) {
-			subprintf(subfderr, "%11s %3d - %-28s %8s %3d - %s\n",
+			subprintfe(subfderr, "vcfilter", "%11s %3d - %-28s %8s %3d - %s\n",
 					" ", i, header_list[i], " ", i + 1, header_list[i + 1]);
 			i += 2;
 		} else {
-			subprintf(subfderr, "%11s %3d - %s\n", " ", i, header_list[i]);
+			subprintfe(subfderr, "vcfilter", "%11s %3d - %s\n", " ", i, header_list[i]);
 			i++;
 		}
 	}
-	subprintf(subfderr, "         -c comparision\n");
+	subprintfe(subfderr, "vcfilter", "         -c comparision\n");
 	for (i = 0; vfilter_comparision[i];) {
 		if (vfilter_comparision[i + 1]) {
-			subprintf(subfderr, "%11s %3d - %-28s %8s %3d - %s\n", " ", i, vfilter_comparision[i], " ", i + 1, vfilter_comparision[i + 1]);
+			subprintfe(subfderr, "vcfilter", "%11s %3d - %-28s %8s %3d - %s\n", " ", i, vfilter_comparision[i], " ", i + 1, vfilter_comparision[i + 1]);
 			i += 2;
 		} else {
-			subprintf(subfderr, "%11s %3d - %s\n", " ", i, vfilter_comparision[i]);
+			subprintfe(subfderr, "vcfilter", "%11s %3d - %s\n", " ", i, vfilter_comparision[i]);
 			i++;
 		}
 	}
-	subprintf(subfderr,
+	subprintfe(subfderr, "vcfilter",
 			"         -k keyword [\"\" string if comparision (-c option) is 5 or 6]\n"
 			"         -f folder [Specify /NoDeliver for delivery to be junked]\n"
 			"         -b bounce action\n"
@@ -119,7 +118,7 @@ usage()
 			"              2'|program'     - Feed mail to another program\n"
 			"              3'&user@domain' - Forward to another id and Bounce\n"
 			"              3'|program'     - Feed mail to another program and Bounce\n");
-	substdio_flush(subfderr);
+	flush("vcfilter");
 }
 
 static void

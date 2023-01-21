@@ -67,6 +67,7 @@
 #include <setuserid.h>
 #include <makesalt.h>
 #include <hashmethods.h>
+#include <subfd.h>
 #endif
 #ifdef HAVE_GSASL_H
 #include <gsasl.h>
@@ -286,11 +287,7 @@ main(int argc, char **argv)
 			return (1);
 		}
 		if (verbose) {
-			out("vadduser", "Adding to MDAhost ");
-			out("vadduser", mdahost.s);
-			out("vadduser", " SqlServer ");
-			out("vadduser", ptr);
-			out("vadduser", "\n");
+			subprintfe(subfdout, "vadduser", "Adding to MDAhost %s SqlServer %s\n", mdahost.s, ptr);
 			flush("vadduser");
 		}
 	} 
@@ -385,9 +382,7 @@ main(int argc, char **argv)
 	}
 	iclose();
 	if (random) {
-		out("vadduser", "Password is ");
-		out("vadduser", Passwd.s);
-		out("vadduser", "\n");
+		subprintfe(subfdout, "vadduser", "Password is %s\n", Passwd.s);
 		flush("vadduser");
 	}
 	if (!(ptr = env_get("POST_HANDLE"))) {
@@ -465,14 +460,8 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 			else
 			if (!str_diffn(optarg, "SHA-512", 7))
 				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
-			else {
-				errout("vadduser", WARN);
-				errout("vadduser", optarg);
-				errout("vadduser", ": wrong hash method\n");
-				errout("vadduser", "Supported HASH Methods: DES MD5 SHA-256 SHA-512\n");
-				errflush("vadduser");
-				strerr_die2x(100, WARN, usage);
-			}
+			else
+				strerr_die5x(100, FATAL, "wrong hash method ", optarg, ". Supported HASH Methods: DES MD5 SHA-256 SHA-512\n", usage);
 			if (!env_put2("PASSWORD_HASH", strnum))
 				strerr_die1x(111, "out of memory");
 			*encrypt_flag = 1;
@@ -496,22 +485,15 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 			else
 			if (!str_diffn(optarg, "SCRAM-SHA-256", 13))
 				*scram = 2;
-			else {
-				errout("vadduser", WARN);
-				errout("vadduser", optarg);
-				errout("vadduser", ": wrong SCRAM method\n");
-				errout("vadduser", "Supported SCRAM Methods: SCRAM-SHA-1 SCRAM-SHA-256\n");
-				errflush("vadduser");
-				strerr_die2x(100, WARN, usage);
-			}
+			else
+				strerr_die5x(100, FATAL, "wrong SCRAM method ", optarg, ". Supported SCRAM Methods: SCRAM-SHA1 SCRAM-SHA-256\n", usage);
 			break;
 		case 'S':
 			if (!salt)
 				break;
 			i = str_chr(optarg, ',');
-			if (optarg[i]) {
+			if (optarg[i])
 				strerr_die3x(100, WARN, optarg, ": salt cannot have a comma character");
-			}
 			*salt = optarg;
 			break;
 		case 'I':

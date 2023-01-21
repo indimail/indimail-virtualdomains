@@ -26,7 +26,7 @@ static char     sccsid[] = "$Id: dbinfoSelect.c,v 1.2 2019-04-20 08:10:35+05:30 
 #include <strerr.h>
 #include <env.h>
 #include <str.h>
-#include <fmt.h>
+#include <subfd.h>
 #endif
 #include "variables.h"
 #include "dbload.h"
@@ -45,7 +45,6 @@ dbinfoSelect(char *filename, char *domain, char *mdahost, int row_format)
 {
 	DBINFO        **rhostsptr;
 	MYSQL         **mysqlptr;
-	char            strnum[FMT_ULONG];
 	int             count, is_dist;
 	int             first_flag = 0, i;
 	char           *ptr;
@@ -61,133 +60,72 @@ dbinfoSelect(char *filename, char *domain, char *mdahost, int row_format)
 			continue;
 		if (row_format) {
 			first_flag++;
-			out("dbinfoSelect", (*rhostsptr)->isLocal ? "auto " : "DBINFO ");
-			out("dbinfoSelect", " ");
-			out("dbinfoSelect", (*rhostsptr)->domain);
-			out("dbinfoSelect", " ");
 			i = is_distributed_domain((*rhostsptr)->domain);
-			if (i == -1)
-				out("dbinfoSelect", "-1 ");
+			subprintfe(subfdout, "dbinfoSelect", "%s %s %2d %s %s " ,
+					(*rhostsptr)->isLocal ? "auto " : "DBINFO ", (*rhostsptr)->domain, i > 0 ? 1 : i,
+					(*rhostsptr)->server, (*rhostsptr)->mdahost);
+			if ((*mysqlptr)->unix_socket)
+				subprintfe(subfdout, "dbinfoSelect", "%s 0 ", (*mysqlptr)->unix_socket);
 			else
-			if (!i)
-				out("dbinfoSelect", "0 ");
-			else
-				out("dbinfoSelect", "1 ");
-			out("dbinfoSelect", (*rhostsptr)->server);
-			out("dbinfoSelect", " ");
-			out("dbinfoSelect", (*rhostsptr)->mdahost);
-			out("dbinfoSelect", " ");
-			if ((*mysqlptr)->unix_socket) {
-				out("dbinfoSelect", (*mysqlptr)->unix_socket);
-				out("dbinfoSelect", " 0 ");
-			} else {
-				strnum[fmt_uint(strnum, (*mysqlptr)->port)] = 0;
-				out("dbinfoSelect", strnum);
-				out("dbinfoSelect", " ");
-				strnum[fmt_uint(strnum, (*rhostsptr)->use_ssl)] = 0;
-				out("dbinfoSelect", strnum);
-				out("dbinfoSelect", " ");
-			}
-			out("dbinfoSelect", (*rhostsptr)->database);
-			out("dbinfoSelect", " ");
-			out("dbinfoSelect", (*rhostsptr)->user);
-			out("dbinfoSelect", " ");
-			if (filename) {
-				out("dbinfoSelect", filename);
-				out("dbinfoSelect", " ");
-			}
-			out("dbinfoSelect", (*rhostsptr)->password);
-			out("dbinfoSelect", " ");
-			out("dbinfoSelect", "\n");
+				subprintfe(subfdout, "dbinfoSelect", "%u %d ", (*mysqlptr)->port, (*rhostsptr)->use_ssl);
+			subprintfe(subfdout, "dbinfoSelect", "%s %s ", (*rhostsptr)->database, (*rhostsptr)->user);
+			if (filename)
+				subprintfe(subfdout, "dbinfoSelect", "%s ", filename);
+			subprintfe(subfdout, "dbinfoSelect", "%s\n", (*rhostsptr)->password);
 			flush("dbinfoSelect");
 			continue;
 		}
-		if (!first_flag++) {
-			out("dbinfoSelect", "MySQL Client Version: ");
-			out("dbinfoSelect", (char *) in_mysql_get_client_info());
-			out("dbinfoSelect", "\n");
-			flush("dbinfoSelect");
-		}
-		out("dbinfoSelect", "connection to  ");
-		out("dbinfoSelect", (char *) in_mysql_get_host_info(*mysqlptr));
-		out("dbinfoSelect", "\n");
-		out("dbinfoSelect", "protocol       ");
-		strnum[fmt_uint(strnum, in_mysql_get_proto_info(*mysqlptr))] = 0;
-		out("dbinfoSelect", strnum);
-		out("dbinfoSelect", "\n");
-		out("dbinfoSelect", "server version ");
-		out("dbinfoSelect",  (char *) in_mysql_get_server_info(*mysqlptr));
-		out("dbinfoSelect", "\n");
-		out("dbinfoSelect", "domain         ");
-		out("dbinfoSelect", (*rhostsptr)->domain);
-		if ((is_dist = is_distributed_domain((*rhostsptr)->domain)) == -1) {
-			out("dbinfoSelect", " - can't figure out dist flag\n");
-		} else {
-			out("dbinfoSelect", " - ");
-			out("dbinfoSelect", is_dist == 1 ? "Distributed\n" : "Non Distributed\n");
-		}
-		strnum[fmt_uint(strnum, count)] = 0;
-		out("dbinfoSelect", "sqlserver[");
-		if (count < 10)
-			out("dbinfoSelect", "00");
+		if (!first_flag++)
+			subprintfe(subfdout, "dbinfoSelect", "MySQL Client Version: %s\n",
+					(char *) in_mysql_get_client_info());
+		subprintfe(subfdout, "dbinfoSelect", "connection to  %s\n",
+				(char *) in_mysql_get_host_info(*mysqlptr));
+		subprintfe(subfdout, "dbinfoSelect", "protocol       %u\n",
+				in_mysql_get_proto_info(*mysqlptr));
+		subprintfe(subfdout, "dbinfoSelect", "server version %s\n",
+			(char *) in_mysql_get_server_info(*mysqlptr));
+		subprintfe(subfdout, "dbinfoSelect", "domain         %s", (*rhostsptr)->domain);
+		if ((is_dist = is_distributed_domain((*rhostsptr)->domain)) == -1)
+			subprintfe(subfdout, "dbinfoSelect", " - can't figure out dist flag\n");
 		else
-		if (count < 100)
-			out("dbinfoSelect", "0");
-		out("dbinfoSelect", strnum);
-		out("dbinfoSlect", "] ");
-		out("dbinfoSelect", (*rhostsptr)->server);
-		out("dbinfoSelect", "\n");
-		if (*((*rhostsptr)->mdahost)) {
-			out("dbinfoSelect", "mda host       ");
-			out("dbinfoSelect", (*rhostsptr)->mdahost);
-			out("dbinfoSelect", "\n");
+			subprintfe(subfdout, "dbinfoSelect", " - %s\n",
+					is_dist == 1 ? "Distributed" : "Non Distributed");
+		subprintfe(subfdout, "dbinfoSelect", "sqlserver[%03d] %s\n",
+				count, (*rhostsptr)->server);
+		if (*((*rhostsptr)->mdahost))
+			subprintfe(subfdout, "dbinfoSelect", "mda host       %s\n",
+					(*rhostsptr)->mdahost);
+		if ((*mysqlptr)->unix_socket)
+			subprintfe(subfdout, "dbinfoSelect", "Unix   Socket  %s\n",
+					(*mysqlptr)->unix_socket);
+		else {
+			subprintfe(subfdout, "dbinfoSelect", "TCP/IP Port    %d\n",
+					(*rhostsptr)->port);
+			subprintfe(subfdout, "dbinfoSelect", "Use SSL        %s\n",
+					(*rhostsptr)->use_ssl ? "Yes" : "No");
+			if ((*rhostsptr)->use_ssl)
+   				subprintfe(subfdout, "dbinfoSelect", "SSL Cipher     %s\n",
+						(char *) in_mysql_get_ssl_cipher(*mysqlptr));
 		}
-		if ((*mysqlptr)->unix_socket) {
-			out("dbinfoSelect", "Unix   Socket  ");
-			out("dbinfoSelect", (*mysqlptr)->unix_socket);
-			out("dbinfoSelect", "\n");
-		} else {
-			strnum[fmt_uint(strnum, (*rhostsptr)->port)] = 0;
-			out("dbinfoSelect", "TCP/IP Port    ");
-			out("dbinfoSelect", strnum);
-			out("dbinfoSelect", "\n");
-			out("dbinfoSelect", "Use SSL        ");
-			out("dbinfoSelect", (*rhostsptr)->use_ssl ? "Yes" : "No");
-			out("dbinfoSelect", "\n");
-			if ((*rhostsptr)->use_ssl) {
-   				out("dbinfoSelect", "SSL Cipher     ");
-				out("dbinfoSelect", (char *) in_mysql_get_ssl_cipher(*mysqlptr));
-				out("dbinfoSelect", "\n");
-			}
-		}
-		out("dbinfoSelect", "database       ");
-		out("dbinfoSelect", (*rhostsptr)->database);
-		out("dbinfoSelect", "\n");
-		out("dbinfoSelect", "user           ");
-		out("dbinfoSelect", (*rhostsptr)->user);
-		out("dbinfoSelect", "\n");
-		out("dbinfoSelect", "password       ");
-		out("dbinfoSelect", (*rhostsptr)->password);
-		out("dbinfoSelect", "\n");
-		out("dbinfoSelect", "fd             ");
-		strnum[fmt_int(strnum, (*rhostsptr)->fd)] = 0;
-		out("dbinfoSelect", strnum);
-		out("dbinfoSelect", "\n");
-		out("dbinfoSelect", "DBINFO Method  ");
-		out("dbinfoSelect", (*rhostsptr)->isLocal ? "Auto\n" : "DBINFO\n");
-		if ((*rhostsptr)->fd == -1) {
-			out("dbinfoSelect", "MySQL Stat     mysql_real_connect: ");
-			out("dbinfoSelect",  (char *) in_mysql_error((*mysqlptr)));
-			out("dbinfoSelect", "\n");
-		} else
-		if ((ptr = (char *) in_mysql_stat((*mysqlptr)))) {
-			out("dbinfoSelect", "MySQL Stat     ");
-			out("dbinfoSelect", ptr);
-		} else {
-			out("dbinfoSelect", "MySQL Stat     ");
-			out("dbinfoSelect", (char *) in_mysql_error((*mysqlptr)));
-		}
-		out("dbinfoSelect", "\n");
+		subprintfe(subfdout, "dbinfoSelect", "database       %s\n",
+				(*rhostsptr)->database);
+		subprintfe(subfdout, "dbinfoSelect", "user           %s\n",
+				(*rhostsptr)->user);
+		subprintfe(subfdout, "dbinfoSelect", "password       %s\n",
+				(*rhostsptr)->password);
+		subprintfe(subfdout, "dbinfoSelect", "fd             %d\n",
+				(*rhostsptr)->fd);
+		subprintfe(subfdout, "dbinfoSelect", "DBINFO Method  %s\n",
+				(*rhostsptr)->isLocal ? "Auto" : "DBINFO");
+		if ((*rhostsptr)->fd == -1)
+			subprintfe(subfdout, "dbinfoSelect", "MySQL Stat     mysql_real_connect: %s\n",
+					(char *) in_mysql_error((*mysqlptr)));
+		else
+		if ((ptr = (char *) in_mysql_stat((*mysqlptr))))
+			subprintfe(subfdout, "dbinfoSelect", "MySQL Stat     %s\n", ptr);
+		else
+			subprintfe(subfdout, "dbinfoSelect", "MySQL Stat     %s\n",
+					(char *) in_mysql_error((*mysqlptr)));
 		out("dbinfoSelect", "--------------------------\n");
 		flush("dbinfoSelect");
 	}

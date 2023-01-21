@@ -60,6 +60,7 @@
 #include <byte.h>
 #include <open.h>
 #include <getEnvConfig.h>
+#include <subfd.h>
 #endif
 #include "iclose.h"
 #include "lowerit.h"
@@ -266,23 +267,8 @@ prepare_maildir(char *dir, uid_t uid, gid_t gid)
 void
 quota_message(char *ptr, mdir_t msgsize, mdir_t MailQuotaCount, mdir_t MailQuotaSize)
 {
-	errout("vdelivermail", ptr);
-	errout("vdelivermail", " has insufficient quota. ");
-	strnum[fmt_ulong(strnum, msgsize)] = 0;
-	errout("vdelivermail", strnum);
-	errout("vdelivermail", "/");
-	strnum[fmt_ulong(strnum, CurBytes)] = 0;
-	errout("vdelivermail", strnum);
-	errout("vdelivermail", ":");
-	strnum[fmt_ulong(strnum, CurCount)] = 0;
-	errout("vdelivermail", strnum);
-	errout("vdelivermail", "/");
-	strnum[fmt_ulong(strnum, MailQuotaCount)] = 0;
-	errout("vdelivermail", strnum);
-	errout("vdelivermail", ":");
-	strnum[fmt_ulong(strnum, MailQuotaSize)] = 0;
-	errout("vdelivermail", strnum);
-	errout("vdelivermail", ". indimail (#5.1.4)");
+	subprintfe(subfderr, "vdelivermail", "%s has insufficient quota. %ld/%ld:%ld/%ld:%ld. indimail (#5.1.4)",
+			ptr, msgsize, CurBytes, CurCount, MailQuotaCount, MailQuotaSize);
 	errflush("vdelivermail");
 	return;
 }
@@ -518,17 +504,8 @@ processMail(struct passwd *pw, char *user, char *domain, mdir_t MsgSize)
 					die_nomem();
 				runcmmd(TheDir.s, 0);
 			}
-			errout("vdelivermail", "account ");
-			errout("vdelivermail", user);
-			errout("vdelivermail", "@");
-			errout("vdelivermail", domain);
-			errout("vdelivermail", " locked/overquota ");
-			strnum[fmt_ulong(strnum, cur_size)] = 0;
-			errout("vdelivermail", strnum);
-			errout("vdelivermail", " / ");
-			strnum[fmt_ulong(strnum, mail_size_limit)] = 0;
-			errout("vdelivermail", strnum);
-			errout("vdelivermail", ". indimail (#5.1.1)");
+			subprintfe(subfderr, "vdelivermail", "account %s@%s locked/overquota %ld/%ld. indimail (#5.1.1)",
+					user, domain, cur_size, mail_size_limit);
 			errflush("vdelivermail");
 			getEnvConfigStr(&ptr, "HOLDOVERQUOTA", "holdoverquota");
 			if (ptr && *ptr == '/') {

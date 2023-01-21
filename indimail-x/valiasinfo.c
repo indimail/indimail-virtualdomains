@@ -37,12 +37,13 @@
 #include <open.h>
 #include <getln.h>
 #include <substdio.h>
+#include <subfd.h>
 #include <getEnvConfig.h>
 #endif
+#include "common.h"
 #include "get_assign.h"
 #include "sql_getpw.h"
 #include "valias_select.h"
-#include "common.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: valiasinfo.c,v 1.4 2021-07-08 11:46:52+05:30 Cprogrammer Exp mbhangui $";
@@ -114,16 +115,12 @@ valiasinfo(char *user, char *domain)
 				for (ptr = line.s; *ptr && isspace((int) *ptr); ptr++);
 				if (!*ptr)
 					continue;
-				out("valiasinfo", !flag1++ ? "Forwarding    : " : "              : ");
-				out("valiasinfo", *ptr == '&' ? ptr + 1 : ptr);
-				out("valiasinfo", "\n");
+				subprintfe(subfdout, "valiasinfo", !flag1++ ? "Forwarding    : %s\n" : "              : %s\n",
+						*ptr == '&' ? ptr + 1 : ptr);
 			}
 			close(fd);
-			if (!flag1++) {
-				out("valiasinfo", "Forwarding    : ");
-				out("valiasinfo", Dir.s);
-				out("valiasinfo", "/Maildir/\n");
-			}
+			if (!flag1++)
+				subprintfe(subfdout, "valiasinfo", "Forwarding    : %s/Maildir/\n", Dir.s);
 			flush("valiasinfo");
 		}
 		if ((pw = sql_getpw(user, domain)) != (struct passwd *) 0) {
@@ -154,9 +151,8 @@ valiasinfo(char *user, char *domain)
 					for (ptr = line.s; *ptr && isspace((int) *ptr); ptr++);
 					if (!*ptr)
 						continue;
-					out("valiasinfo", !flag1++ ? "Forwarding    : " : "              : ");
-					out("valiasinfo", *ptr == '&' ? ptr + 1 : ptr);
-					out("valiasinfo", "\n");
+					subprintfe(subfdout, "valiasinfo", !flag1++ ? "Forwarding    : %s\n" : "              : %s\n",
+							*ptr == '&' ? ptr + 1 : ptr);
 				}
 				flush("valiasinfo");
 				close(fd);
@@ -170,9 +166,7 @@ valiasinfo(char *user, char *domain)
 			break;
 		if (*tmpalias == '&')
 			tmpalias++;
-		out("valiasinfo", !flag2++ ? "Forwarding    : " : "              : ");
-		out("valiasinfo", tmpalias);
-		out("valiasinfo", "\n");
+		subprintfe(subfdout, "valiasinfo", !flag2++ ? "Forwarding    : %s\n" : "              : %s\n", tmpalias);
 	}
 	flush("valiasinfo");
 	return(flag1 + flag2);

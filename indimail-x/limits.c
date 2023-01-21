@@ -40,6 +40,7 @@ static char     sccsid[] = "$Id: limits.c,v 1.3 2019-04-22 23:12:57+05:30 Cprogr
 #include <fmt.h>
 #include <strerr.h>
 #include <stralloc.h>
+#include <subfd.h>
 #endif
 #include "indimail.h"
 #include "create_table.h"
@@ -173,7 +174,6 @@ int
 vdel_limits(char *domain)
 {
 	int             err;
-	char            strnum[FMT_ULONG];
 
 	if ((err = iopen((char *) 0)) != 0)
 		return (err);
@@ -198,18 +198,11 @@ vdel_limits(char *domain)
 	if (!verbose)
 		return (0);
 	if (err && verbose) {
-		out("vdel_limits", "Deleted limits (");
-		strnum[fmt_uint(strnum, err)] = 0;
-		out("vdel_limits", strnum);
-		out("vdel_limits", " entries) for domain ");
-		out("vdel_limits", domain);
-		out("vdel_limits", "\n");
+		subprintfe(subfdout, "vdel_limits", "Deleted limits (%d entries) for domain %s\n", err, domain);
 		flush("vdel_limits");
 	} else
 	if (verbose) {
-		out("vdel_limits", "No limits for domain ");
-		out("vdel_limits", domain);
-		out("vdel_limits", "\n");
+		subprintfe(subfdout, "vdel_limits", "No limits for domain %s\n", domain);
 		flush("vdel_limits");
 	}
 	return 0;
@@ -304,15 +297,10 @@ vset_limits(char *domain, struct vlimits *limits)
 	}
 	if (!verbose)
 		return (err ? 0 : 1);
-	if (err) {
-		out("vset_limits", "Added limits for domain ");
-		out("vset_limits", domain);
-		out("vset_limits", "\n");
-	} else {
-		out("vset_limits", "No limits added for domain ");
-		out("vset_limits", domain);
-		out("vset_limits", "\n");
-	}
+	if (err)
+		subprintfe(subfdout, "vdel_limits", "Added limits for domain %s\n", domain);
+	else
+		subprintfe(subfdout, "vdel_limits", "No limits added for domain %s\n", domain);
 	flush("vset_limits");
 	return (err ? 0 : 1);
 }

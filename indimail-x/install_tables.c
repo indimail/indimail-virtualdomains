@@ -20,6 +20,7 @@
 #include <strerr.h>
 #include <env.h>
 #include <getEnvConfig.h>
+#include <subfd.h>
 #endif
 #include "create_table.h"
 #include "open_master.h"
@@ -62,9 +63,8 @@ main(int argc, char **argv)
 			strerr_warn2("install_tables: failed to create table ", i == 0 ? default_table : inactive_table, 0);
 			return (1);
 		} else {
-			out("install_tables", "created table ");
-			out("install_tables", i == 0 ? default_table : inactive_table);
-			out("install_tables", " on local\n");
+			subprintfe(subfdout, "install_tables", "created table %s on local\n",
+					i == 0 ? default_table : inactive_table);
 			flush("install_tables");
 		}
 	}
@@ -73,9 +73,7 @@ main(int argc, char **argv)
 	if (create_table(ON_LOCAL, relay_table, RELAY_TABLE_LAYOUT))
 		return (1);
 	else {
-		out("install_tables", "created table ");
-		out("install_tables", relay_table);
-		out("install_tables", " on local\n");
+		subprintfe(subfdout, "install_tables", "created table %s on local\n", relay_table);
 		flush("install_tables");
 	}
 #endif
@@ -99,10 +97,9 @@ main(int argc, char **argv)
 		hostmaster_present = open_master() ? 0 : 1;
 	for (i = 0; IndiMailTable[i].table_name; i++) {
 		if (IndiMailTable[i].which == ON_MASTER && !hostmaster_present) {
-			out("install_tables", "skipped table ");
-			out("install_tables", IndiMailTable[i].table_name);
-			out("install_tables", " on ");
-			out("install_tables", IndiMailTable[i].which == ON_LOCAL ? "local\n" : "master\n");
+			subprintfe(subfdout, "install_tables", "skipped table %s on %s\n",
+					IndiMailTable[i].table_name,
+					IndiMailTable[i].which == ON_LOCAL ? "local" : "master");
 			flush("install_tables");
 			continue;
 		}
@@ -110,10 +107,9 @@ main(int argc, char **argv)
 			strerr_warn2("install_tables: failed to create table ", IndiMailTable[i].table_name, 0);
 			return (1);
 		} else {
-			out("install_tables", "created table ");
-			out("install_tables", IndiMailTable[i].table_name);
-			out("install_tables", " on ");
-			out("install_tables", IndiMailTable[i].which == ON_LOCAL ? "local\n" : "master\n");
+			subprintfe(subfdout, "install_tables", "created table %s on %s",
+					IndiMailTable[i].table_name,
+					IndiMailTable[i].which == ON_LOCAL ? "local" : "master");
 			flush("install_tables");
 		}
 	}
@@ -123,9 +119,7 @@ main(int argc, char **argv)
 	if (create_table(ON_MASTER, cntrl_table, CNTRL_TABLE_LAYOUT))
 		return (1);
 	else {
-		out("install_tables", "created table ");
-		out("install_tables", cntrl_table);
-		out("install_tables", " on master\n");
+		subprintfe(subfdout, "install_tables", "created table %s on master\n", cntrl_table);
 		flush("install_tables");
 	}
 #endif

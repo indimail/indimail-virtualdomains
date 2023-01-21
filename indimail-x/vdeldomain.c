@@ -192,7 +192,7 @@ main(int argc, char **argv)
 			base_argv0 = argv[0];
 		else
 			base_argv0++;
-		return (post_handle("%s/%s %s", LIBEXECDIR, base_argv0, Domain));
+		return (post_handle("%s/%s %s", LIBEXECDIR, base_argv0, Domain.s));
 	} else
-		return (post_handle("%s %s", ptr, Domain));
+		return (post_handle("%s %s", ptr, Domain.s));
 }

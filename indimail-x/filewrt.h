@@ -19,7 +19,8 @@
 #endif
 
 #ifdef HAVE_STDARG_H
-int             filewrt     __P((int, char *, ...));
+int             filewrt     __P((int, char *, ...))
+					__attribute__ ((format (printf, 2, 3)));
 #else
 int             filewrt     ();
 #endif

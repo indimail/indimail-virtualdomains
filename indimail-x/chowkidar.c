@@ -128,12 +128,12 @@ main(int argc, char **argv)
 					if (isspace((int) *ptr))
 						break;
 					if (substdio_put(subfdout, ptr, 1))
-						strerr_die1sys(111, "unable to write to stdout; ");
+						strerr_die1sys(111, "write: Unable to write output: ");
 				}
 				if (substdio_put(subfdout, "\n", 1))
-					strerr_die1sys(111, "unable to write to stdout; ");
+					strerr_die1sys(111, "write: Unable to write output: ");
 				if (substdio_flush(subfdout))
-					strerr_die1sys(111, "unable to write to stdout; ");
+					strerr_die1sys(111, "write: Unable to write output: ");
 			}
 			return(0);
 			break;

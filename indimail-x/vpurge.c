@@ -28,8 +28,8 @@ static char     sccsid[] = "$Id: vpurge.c,v 1.1 2019-04-18 08:33:36+05:30 Cprogr
 #include <substdio.h>
 #include <subfd.h>
 #include <scan.h>
-#include <fmt.h>
 #endif
+#include "common.h"
 #include "variables.h"
 #include "indimail.h"
 #include "sql_getpw.h"
@@ -51,7 +51,6 @@ int
 main(int argc, char **argv)
 {
 	int             err, days, free_space;
-	char            strnum[FMT_ULONG];
 	static stralloc user = {0}, domain = {0}, maildir = {0};
 	struct passwd  *pw;
 	mdir_t          quota;
@@ -73,17 +72,7 @@ main(int argc, char **argv)
 		else
 		if (!err)
 			break;
-		if (substdio_put(subfdout, user.s, user.len) ||
-				substdio_put(subfdout, "@", 1) ||
-				substdio_put(subfdout, domain.s, domain.len) ||
-				substdio_put(subfdout, " ", 1) ||
-				substdio_put(subfdout, strnum, fmt_ulong(strnum, quota)) ||
-				substdio_put(subfdout, " ", 1) ||
-				substdio_puts(subfdout, ctime(&timestamp)))
-		{
-			strerr_warn1("vpurge: unable to write to stdout", &strerr_sys);
-			_exit (111);
-		}
+		subprintfe(subfdout, "vpurge", "%s@%s %ld %s", user.s, domain.s, quota, ctime(&timestamp));
 		if (!(pw = sql_getpw(user.s, domain.s))) {
 			if (userNotFound)
 				strerr_warn5("sql_getpw: ", user.s, "@", domain.s, ": No such user", 0);
@@ -97,13 +86,7 @@ main(int argc, char **argv)
 			die_nomem();
 		if (user_over_quota(maildir.s, pw->pw_shell, free_space)) {
 			for (days = 30; days >= 0; days -= 5) {
-				if (substdio_put(subfdout, "Purging files greater than ", 27) ||
-						substdio_put(subfdout, strnum, fmt_uint(strnum, (unsigned int) days)) ||
-						substdio_put(subfdout, " days\n", 6))
-				{
-					strerr_warn1("vpurge: unable to write to stdout", &strerr_sys);
-					_exit (111);
-				}
+				subprintfe(subfdout, "vpurge", "Purging files greater than %d days\n", days);
 				purge_files(maildir.s, days);
 #ifdef USE_MAILDIRQUOTA
 				recalc_quota(maildir.s, 0, 0, 0, 2);
@@ -113,32 +96,19 @@ main(int argc, char **argv)
 				quota = check_quota(maildir.s);
 #endif
 				if (user_over_quota(maildir.s, pw->pw_shell, free_space)) {
-					if (substdio_put(subfdout, "user still over quota ", 22) ||
-							substdio_put(subfdout, strnum, fmt_ulong(strnum, quota)) ||
-							substdio_put(subfdout, "\n", 1))
-					{
-						strerr_warn1("vpurge: unable to write to stdout", &strerr_sys);
-						_exit (111);
-					}
+					subprintfe(subfdout, "vpurge", "user %s@%s still over quota %ld\n",
+							user.s, domain.s, quota);
 					continue;
 				}
-				if (substdio_put(subfdout, "removing bounce for user ", 25) ||
-						substdio_put(subfdout, user.s, user.len) ||
-						substdio_put(subfdout, "\n", 1))
-				{
-					strerr_warn1("vpurge: unable to write to stdout", &strerr_sys);
-					_exit (111);
-				}
+				subprintfe(subfdout, "vpurge", "removing bounce for user %s@%s\n",
+						user.s, domain.s);
 				vset_lastdeliver(user.s, domain.s, 0);
 				break;
 			}
 		} else
 			vset_lastdeliver(user.s, domain.s, 0);
 	} /*- for(;;) */
-	if (substdio_flush(subfdout)) {
-		strerr_warn1("vpurge: unable to write to stdout", &strerr_sys);
-		_exit (111);
-	}
+	flush("vpurge");
 	return(0);
 }
 #else

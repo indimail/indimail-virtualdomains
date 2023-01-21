@@ -281,11 +281,11 @@ main(argc, argv)
 	if (!modicount)
 		return (0);
 	printf("----------------------------------------------------\n");
-	printf("1. Current      Checksum : %ld\n", newcrc);
-	printf("2. Old          Checksum : %ld\n", oldcrc);
-	printf("3. Net Difference  (Cal) : %ld\n", diffcrc);
-	printf("5. Current CRC - Old CRC : %ld\n", newcrc - oldcrc);
-	printf("6. Total         Changes : %ld\n", modicount);
+	printf("1. Current      Checksum : %lu\n", newcrc);
+	printf("2. Old          Checksum : %lu\n", oldcrc);
+	printf("3. Net Difference  (Cal) : %lu\n", diffcrc);
+	printf("5. Current CRC - Old CRC : %lu\n", newcrc - oldcrc);
+	printf("6. Total         Changes : %lu\n", modicount);
 	printf("----------------------------------------------------\n");
 	if (diffcrc == (newcrc - oldcrc))
 		printf("Checksum Reconcialation Done\n");

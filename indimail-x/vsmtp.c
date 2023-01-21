@@ -28,8 +28,8 @@
 #include <scan.h>
 #include <fmt.h>
 #include <subfd.h>
-#include <qprintf.h>
 #endif
+#include "common.h"
 #include "parse_email.h"
 #include "vsmtp_select.h"
 #include "vsmtp_insert.h"
@@ -173,15 +173,14 @@ main(int argc, char **argv)
 			if (!(dst_ip = sql_getip(dst_hostid.s)))
 				dst_ip = "x.x.x.x";
 			if (!oldport)
-				if (subprintf(subfdoutsmall,
+				subprintfe(subfdout,
+						"vsmtp",
 						"Source HostIP        "
 						"Destination HostID IP Address"
-						"-> Port\n") == -1)
-					strerr_die1sys(111, "unable to write to stdout");
-			if (subprintf(subfdoutsmall, "%-20s %-18s %-18s -> %d\n", src_ip.s, dst_hostid.s, dst_ip, port) == -1)
-				strerr_die1sys(111, "unable to write to stdout");
-			if (substdio_flush(subfdoutsmall) == -1)
-				strerr_die1sys(111, "unable to write to stdout");
+						"-> Port\n");
+			subprintfe(subfdout, "vsmtp", "%-20s %-18s %-18s -> %d\n",
+					src_ip.s, dst_hostid.s, dst_ip, port);
+			flush("vsmtp");
 			err = 0;
 		}
 		break;

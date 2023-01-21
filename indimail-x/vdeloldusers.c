@@ -41,14 +41,13 @@ static char     sccsid[] = "$Id: vdeloldusers.c,v 1.5 2022-10-20 11:58:41+05:30 
 #include <sgetopt.h>
 #include <alloc.h>
 #include <strerr.h>
-#include <strmsg.h>
 #include <str.h>
-#include <fmt.h>
 #include <scan.h>
-#include <qprintf.h>
 #include <subfd.h>
 #endif
 #include "is_already_running.h"
+#include "common.h"
+#include "get_localtime.h"
 #include "getlastauth.h"
 #include "variables.h"
 #include "getindimail.h"
@@ -65,7 +64,6 @@ static char     sccsid[] = "$Id: vdeloldusers.c,v 1.5 2022-10-20 11:58:41+05:30 
 void            SigExit();
 
 char          **skipGecos, **mailboxArr;
-char            strnum[FMT_ULONG];
 int             shouldexit;
 
 static char    *usage =
@@ -244,7 +242,7 @@ main(int argc, char **argv)
 	char           *Domain;
 	struct stat     statbuf;
 	static stralloc CurDir = {0};
-	int             i, Age, mailAge, trashAge, purge_db, report_only,
+	int             Age, mailAge, trashAge, purge_db, report_only,
 					fast_option, len, isAtty, do_lastauth,
 					c_option, i_option, p_option;
 	time_t          tmval, diff;
@@ -260,10 +258,8 @@ main(int argc, char **argv)
 	}
 	isAtty = (isatty(1) && isatty(2));
 	signal(SIGUSR1, SigExit);
-	if (verbose) {
-		tmval = time(0);
-		strmsg_out2("Total  User List ", ctime(&tmval));
-	}
+	if (verbose)
+		subprintfe(subfdout, "vdeloldusers", "Total  User List %s", get_localtime());
 	if (c_option || i_option || p_option)
 		indimailptr = getindimail(Domain, 1, skipGecos, &totalcount);
 	else /*- For deleting trash ignore skipGecos */
@@ -275,16 +271,12 @@ main(int argc, char **argv)
 			strerr_warn1("unlink: /tmp/vdeloldusers.PID", &strerr_sys);
 		return (1);
 	}
-	if (verbose) {
-		strnum[fmt_ulong(strnum, (unsigned long) totalcount)] = 0;
-		strmsg_out2(strnum, " Total Entries\n");
-	}
+	if (verbose)
+		subprintfe(subfdout, "vdeloldusers", " Total Entries %lu\n", totalcount);
 	if (!c_option && !i_option && !p_option)
 		goto trash_clean;
-	if (verbose) {
-		tmval = time(0);
-		strmsg_out2("Active User List ", ctime(&tmval));
-	}
+	if (verbose)
+		subprintfe(subfdout, "vdeloldusers", "Active  User List %s", get_localtime());
 	if (c_option || i_option || p_option)
 		lastauthptr = getlastauth(Domain, Age, 1, 1, &activecount);
 	else
@@ -296,34 +288,27 @@ main(int argc, char **argv)
 			strerr_warn1("unlink: /tmp/vdeloldusers.PID", &strerr_sys);
 		return (1);
 	}
-	if (verbose) {
-		strnum[fmt_ulong(strnum, (unsigned long) activecount)] = 0;
-		strmsg_out2(strnum, " Active Entries\n");
-	}
-	if (verbose) {
-		tmval = time(0);
-		strmsg_out2("Dedup  User List ", ctime(&tmval));
-	}
+	if (verbose)
+		subprintfe(subfdout, "vdeloldusers", "%lu Active Entries\n", activecount);
+	if (verbose)
+		subprintfe(subfdout, "vdeloldusers", "Dedup  User List %s", get_localtime());
 	if (c_option || i_option || p_option) {
+		tmval = time(0);
 		for (purged = count = 0, ptr = lastauthptr; ptr && *ptr; ptr++) {
 			if (LocateUser(indimailptr, *ptr, 0))
 				purged++;
 			diff = time(0) - tmval;
 			count++;
 			if (verbose && isAtty) {
-				if (diff) {
-					if (subprintf(subfdoutsmall, "\r%7d %.2f", count, (float) count/diff) == -1)
-						strerr_die1sys(111, "unable to write to stdout");
-				} else {
-					if (subprintf(subfdoutsmall, "\r%7d Inf", count) == -1)
-						strerr_die1sys(111, "unable to write to stdout");
-				}
-				if (substdio_flush(subfdoutsmall) == -1)
-					strerr_die1sys(111, "unable to write to stdout");
+				if (diff)
+					subprintfe(subfdout, "vdeloldusers", "\r%7lu %.2f", count, (float) count/diff);
+				else
+					subprintfe(subfdout, "vdeloldusers", "\r%7lu Inf", count);
+				flush("vdeloldusuers");
 			}
 		}
 		if (verbose && isAtty)
-			strmsg_out1("\n");
+			out("vdeloldusers", "\n");
 	}
 	if (totalcount == activecount)	/*- all records are active users */
 		purge_db = 0;
@@ -334,7 +319,7 @@ main(int argc, char **argv)
 				if (fast_option) {
 					purged++;
 					if (verbose)
-						strmsg_out2(*ptr, "\n");
+						subprintfe(subfdout, "vdeloldusers", "%s\n", *ptr);
 					continue;
 				}
 				len = str_len(*ptr);
@@ -348,7 +333,7 @@ main(int argc, char **argv)
 				}
 				purged++;
 				if (verbose)
-					strmsg_out2(*ptr, "\n");
+					subprintfe(subfdout, "vdeloldusers", "%s\n", *ptr);
 			}
 			continue;
 		}
@@ -380,16 +365,13 @@ main(int argc, char **argv)
 			continue;
 		}
 		if (verbose && !purged)
-			strmsg_out2("Purging Inactive Users ", ctime(&tmval));
+			subprintfe(subfdout, "vdeloldusers", "Purging Inactive Users %s\n", get_localtime());
 		if (!deluser(*ptr, Domain, purge_db))
 			purged++;
 	}
 	if (verbose && !report_only) {
-		strnum[i = fmt_ulong(strnum, (unsigned long) purged)] = 0;
-		if (subprintf(subfdoutsmall, "Purged %ld/%ld Inactive Users\n", purged, totalcount) == -1)
-			strerr_die1sys(111, "unable to write to stdout");
-		if (substdio_flush(subfdoutsmall) == -1)
-			strerr_die1sys(111, "unable to write to stdout");
+		subprintfe(subfdout, "vdeloldusers", "Purged %lu/%lu Inactive Users\n", purged, totalcount);
+		flush("vdeloldusuers");
 	}
 	if (c_option || i_option || p_option) {
 		for (ptr = lastauthptr; ptr && *ptr; ptr++)
@@ -397,10 +379,8 @@ main(int argc, char **argv)
 		alloc_free((char *) lastauthptr);
 	}
 	if (report_only) {
-		if (verbose) {
-			tmval = time(0);
-			strmsg_out2("Program Complete ", ctime(&tmval));
-		}
+		if (verbose)
+			subprintfe(subfdout, "vdeloldusers", "Program Complete %s\n", get_localtime());
 		iclose();
 		if (unlink("/tmp/vdeloldusers.PID") == -1)
 			strerr_warn1("unlink: /tmp/vdeloldusers.PID", &strerr_sys);
@@ -423,23 +403,18 @@ trash_clean:
 		}
 		if (do_lastauth) {
 			if (verbose)
-				strmsg_out2("Deleting Trash ", ctime(&tmval));
+				subprintfe(subfdout, "vdeloldusers", "Deleting Trash %s\n", get_localtime());
 			/*- Get Users Active in the Last trashAge Days */
 			lastauthptr = getlastauth(Domain, trashAge, 1, 1, &activecount);
 			for (count = 0, ptr = lastauthptr; ptr && *ptr; ptr++)
 				LocateUser(indimailptr, *ptr, !count++);
 		} else {
 			if (verbose) {
-				if (subprintf(subfdoutsmall, "Deleting Folders ") == -1)
-					strerr_die1sys(111, "unable to write to stdout");
-				for (tmp = mailboxArr; *tmp; tmp++) {
-					if (subprintf(subfdoutsmall, " %s", *tmp) == -1)
-						strerr_die1sys(111, "unable to write to stdout");
-				}
-				if (subprintf(subfdoutsmall,  "%s", ctime(&tmval)) == -1) 
-					strerr_die1sys(111, "unable to write to stdout");
-				if (substdio_flush(subfdoutsmall) == -1)
-					strerr_die1sys(111, "unable to write to stdout");
+				subprintfe(subfdout, "vdeloldusers", "Deleting Folders ");
+				for (tmp = mailboxArr; *tmp; tmp++)
+					subprintfe(subfdout, "vdeloldusers", " %s", *tmp);
+				subprintfe(subfdout, "vdeloldusers",  "%s", ctime(&tmval));
+				flush("vdeloldusuers");
 			}
 		}
 		for (ptr = indimailptr; ptr && *ptr; ptr++) {
@@ -459,10 +434,8 @@ trash_clean:
 				mailboxpurge(*ptr + str_len(*ptr) + 2, *tmp, trashAge, 1);
 		}
 	} /*- if (mailboxArr) */
-	if (verbose) {
-		tmval = time(0);
-		strmsg_out2("Program Complete ", ctime(&tmval));
-	}
+	if (verbose)
+		subprintfe(subfdout, "vdeloldusers", "Program Complete %s\n", get_localtime());
 	iclose();
 	if (unlink("/tmp/vdeloldusers.PID") == -1)
 		strerr_warn1("unlink: /tmp/vdeloldusers.PID", &strerr_sys);

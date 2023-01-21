@@ -22,6 +22,7 @@ static char     sccsid[] = "$Id: vfilter_insert.c,v 1.1 2019-04-15 10:47:19+05:3
 #include <stralloc.h>
 #include <strerr.h>
 #include <fmt.h>
+#include <subfd.h>
 #endif
 #include "iopen.h"
 #include "variables.h"
@@ -97,19 +98,10 @@ vfilter_insert(char *emailid, char *filter_name, int header_name, int comparisio
 	if(!verbose)
 		return (err > 0 ? 0 : 1);
 	if(err) {
-		strnum[fmt_uint(strnum, (unsigned int) filter_no)] = 0;
-		out("vfilter_insert", "added filter No ");
-		out("vfilter_insert", strnum);
-		out("vfilter_insert", " for ");
-		out("vfilter_insert", emailid);
-		out("vfilter_insert", "\n");
+		subprintfe(subfdout, "vfilter_insert", "added filter No %d for %s\n", filter_no, emailid);
 		flush("vfilter_insert");
 	} else {
-		errout("vfilter_insert", "vcfilter: filter No ");
-		errout("vfilter_insert", strnum);
-		errout("vfilter_insert", " failed for ");
-		errout("vfilter_insert", emailid);
-		errout("vfilter_insert", "\n");
+		subprintfe(subfderr, "vfilter_insert", "vcfilter: filter No %d failed for %s\n", filter_no, emailid);
 		errflush("vfilter_insert");
 	}
 	return (err > 0 ? 0 : 1);

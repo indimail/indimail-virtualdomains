@@ -120,13 +120,7 @@ main(int argc, char **argv)
 			strerr_warn2(argv[1], ": domain does not exist", 0);
 			return (1);
 		} 
-		out("vrenamedomain", "Renaming alias domain ");
-		out("vrenamedomain", argv[1]); 
-		out("vrenamedomain", " (");
-		out("vrenamedomain", real_domain); 
-		out("vrenamedomain", ") to ");
-		out("vrenamedomain", argv[2]); 
-		out("vrenamedomain", "\n");
+		subprintfe(subfdout, "vrenamedomain", "Renaming alias domain %s (%s) to %s\n", argv[1], real_domain, argv[2]);
 		flush("vrenamedomain");
 		if (addaliasdomain(real_domain, argv[2]))
 			strerr_warn4("vaddaliasdomain: ", real_domain, " -> ", argv[2], 0);
@@ -149,11 +143,7 @@ main(int argc, char **argv)
 	if (!stralloc_copy(&NewDir, &tmpbuf) || !stralloc_0(&NewDir))
 		die_nomem();
 	NewDir.len--;
-	out("vrenamedomain", "Renaming real domain ");
-	out("vrenamedomain", argv[1]);
-	out("vrenamedomain", " to ");
-	out("vrenamedomain", argv[2]);
-	out("vrenamedomain", "\n");
+	subprintfe(subfdout, "vrenamedomain", "Renaming real domain %s to %s\n", argv[1], argv[2]);
 	flush("vrenamedomain");
 	if ((tmpstr = str_str(tmpbuf.s, "/domains")) != (char *) 0)
 		*tmpstr = 0;
@@ -181,8 +171,7 @@ main(int argc, char **argv)
 	}
 	if (fd != -1) {
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-		out("vrenamedomain", "Relinking domains aliased to ");
-		out("vrenamedomain", argv[1]);
+		subprintfe(subfdout, "vrenamedomain", "Relinking domains aliased to %s\n", argv[1]);
 		for (;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1) {
 				strerr_warn3("vrenamedomain: read: ", tmpbuf.s, ": ", &strerr_sys);
@@ -224,15 +213,7 @@ main(int argc, char **argv)
 					getch(ch);
 					continue;
 				}
-				out("vrenamedomain", "Linked Domain ");
-				out("vrenamedomain", line.s);
-				out("vrenamedomain", " to ");
-				out("vrenamedomain", argv[2]);
-				out("vrenamedomain", " [");
-				out("vrenamedomain", OldDir.s);
-				out("vrenamedomain", "->");
-				out("vrenamedomain", NewDir.s);
-				out("vrenamedomain", "]\n");
+				subprintfe(subfdout, "vrenamedomain", "Linked Domain %s to %s [%s->%s]\n", line.s, argv[2], OldDir.s, NewDir.s);
 				flush("vrenamedomain");
 			}
 		}

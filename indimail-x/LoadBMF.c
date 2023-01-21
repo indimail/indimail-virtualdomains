@@ -41,9 +41,7 @@ static char     sccsid[] = "$Id: LoadBMF.c,v 1.3 2020-07-04 22:53:05+05:30 Cprog
 #include <stralloc.h>
 #include <strerr.h>
 #include <error.h>
-#include <qprintf.h>
 #include <str.h>
-#include <fmt.h>
 #include <scan.h>
 #include <subfd.h>
 #include <substdio.h>
@@ -51,10 +49,10 @@ static char     sccsid[] = "$Id: LoadBMF.c,v 1.3 2020-07-04 22:53:05+05:30 Cprog
 #include <open.h>
 #include <getEnvConfig.h>
 #endif
+#include "common.h"
 #include "variables.h"
 #include "open_master.h"
 #include "create_table.h"
-#include "common.h"
 #include "disable_mysql_escape.h"
 
 static char   **LoadBMF_internal(int *, char *);
@@ -78,7 +76,6 @@ UpdateSpamTable(char *bmf)
 	static stralloc SqlBuf = {0}, badmailfrom = {0};
 	char           *sysconfdir, *controldir;
 	int             badmail_flag, err, es_opt = 0;
-	char            strnum[FMT_ULONG];
 
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/') {
@@ -103,9 +100,7 @@ UpdateSpamTable(char *bmf)
 		return (-1);
 	}
 	if (verbose) {
-		out("LoadBMF", "Updating Table ");
-		out("LoadBMF", bmf);
-		out("LoadBMF", "\n");
+		subprintfe(subfdout, "LoadBMF", "Updating Table %s\n", bmf);
 		flush("LoadBMF");
 	}
 	if (!str_diffn(bmf, "badmailfrom", 12) || !str_diffn(bmf, "badrcptto", 10) || !str_diffn(bmf, "spamdb", 7))
@@ -162,9 +157,7 @@ UpdateSpamTable(char *bmf)
 	if (err && utimes(badmailfrom.s, 0))
 		strerr_warn3("LoadBMF: utime: ", badmailfrom.s, ": ", &strerr_sys);
 	if (verbose) {
-		strnum[fmt_ulong(strnum, (unsigned long) err)] = 0;
-		out("LoadBMF", strnum);
-		out("LoadBMF", " rows affected\n");
+		subprintfe(subfdout, "LoadBMF", "%d rows affected\n", err);
 		flush("LoadBMF");
 	}
 	return (err);
@@ -214,11 +207,9 @@ LoadBMF(int *total, char *bmf)
 	} else {
 		file_time = statbuf.st_mtime;
 		if (verbose) {
-			if (subprintf(subfdoutsmall, "File UNIX %-40s Modification Time %s",
-						badmailfrom.s, ctime(&file_time)) == -1)
-				strerr_die1sys(111, "write: unable to write output: ");
-			if (substdio_flush(subfdoutsmall) == -1)
-				strerr_die1sys(111, "write: unable to write output: ");
+			subprintfe(subfdout, "LoadBMF", "File UNIX %-40s Modification Time %s",
+						badmailfrom.s, ctime(&file_time));
+			flush("LoadBMF");
 		}
 	}
 	if (open_master()) {
@@ -284,14 +275,11 @@ LoadBMF(int *total, char *bmf)
 					mcd_time = mtime;
 			}
 			if (verbose) {
-				if (subprintf(subfdoutsmall, "Table MySQL %-40s Modification Time %s",
-							badmail_flag ? bmf : "spam", ctime(&mcd_time)) == -1)
-					strerr_die1sys(111, "write: unable to write output: ");
+				subprintfe(subfdout, "LoadBMF", "Table MySQL %-40s Modification Time %s",
+							badmail_flag ? bmf : "spam", ctime(&mcd_time));
 				if (mcd_time == file_time)
-					if (subprintf(subfdoutsmall, "Nothing to update\n") == -1)
-						strerr_die1sys(111, "write: unable to write output: ");
-				if (substdio_flush(subfdoutsmall) == -1)
-					strerr_die1sys(111, "write: unable to write output: ");
+					subprintfe(subfdout, "LoadBMF", "Nothing to update\n");
+				flush("LoadBMF");
 			}
 			if (mcd_time == file_time) {
 				in_mysql_free_result(res);
@@ -302,9 +290,7 @@ LoadBMF(int *total, char *bmf)
 				sync_mcd = 0;
 				if ((err = UpdateSpamTable(bmf)) > 0) { /*- Reload entries from mysql if this happens */
 					if (verbose) {
-						out("LoadBMF", "Reloading Table ");
-						out("LoadBMF", badmail_flag ? bmf : "spam");
-						out("LoadBMF", "\n");
+						subprintfe(subfdout, "LoadBMF", "Reloading Table %s\n", badmail_flag ? bmf : "spam");
 						flush("LoadBMF");
 					}
 					in_mysql_free_result(res);
@@ -335,11 +321,7 @@ LoadBMF(int *total, char *bmf)
 			return ((char **) 0);
 		else {
 			if (verbose) {
-				out("LoadBMF", "Syncing time of ");
-				out("LoadBMF", badmailfrom.s);
-				out("LoadBMF", " with Table ");
-				out("LoadBMF", bmf);
-				out("LoadBMF", "\n");
+				subprintfe(subfdout, "LoadBMF", "Syncing time of %s with Table %s\n", badmailfrom.s, bmf);
 				flush("LoadBMF");
 			}
 			if (!err && (file_time = BMFTimestamp(badmail_flag, bmf)) == -1) {
@@ -354,9 +336,7 @@ LoadBMF(int *total, char *bmf)
 	} else
 	if (sync_file && res) {
 		if (verbose) {
-			out("LoadBMF", "Updating File ");
-			out("LoadBMF", badmailfrom.s);
-			out("LoadBMF", "\n");
+			subprintfe(subfdout, "LoadBMF", "Updating File %s\n", badmailfrom.s);
 			flush("LoadBMF");
 		}
 		if ((fd = open_trunc(badmailfrom.s)) == -1) {
@@ -395,7 +375,7 @@ LoadBMF(int *total, char *bmf)
 			strerr_warn3("LoadBMF: utime: ", badmailfrom.s, ": ", &strerr_sys);
 	} else
 	if (verbose) {
-		out("LoadBMF", "Nothing to update\n");
+		subprintfe(subfdout, "LoadBMF", "Nothing to update\n");
 		flush("LoadBMF");
 	}
 	return (LoadBMF_internal(total, bmf));

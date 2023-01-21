@@ -58,6 +58,7 @@
 #include <str.h>
 #include <strerr.h>
 #include <getEnvConfig.h>
+#include <subfd.h>
 #include "LoadDbInfo.h"
 #include "set_mysql_options.h"
 #include "islocalif.h"
@@ -219,7 +220,7 @@ OpenDatabases()
 	static int      total;
 	int             count, idx;
 	int             fd[3];
-	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG], strnum3[FMT_ULONG];
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	extern int      loadDbinfoTotal();
 
 	if (RelayHosts)
@@ -272,50 +273,12 @@ OpenDatabases()
 					continue;
 				} else
 					(*ptr)->fd = (*mysqlptr)->net.fd;
-				if (verbose) {
-					strnum1[fmt_uint(strnum1, count)] = 0;
-					strnum2[fmt_uint(strnum2, (*ptr)->fd)] = 0;
-					strnum3[fmt_uint(strnum3, (*ptr)->port)] = 0;
-					out("dbload", "connection ");
-					out("dbload", strnum1);
-					out("dbload", " fd ");
-					out("dbload", strnum2);
-					out("dbload", ": ");
-					out("dbload", (*ptr)->domain);
-					out("dbload", " database ");
-					out("dbload", (*ptr)->database);
-					out("dbload", " server ");
-					out("dbload", (*ptr)->server);
-					out("dbload", " user ");
-					out("dbload", (*ptr)->user);
-					out("dbload", " ");
-					out("dbload", strnum3);
-					out("dbload", "\n");
-					flush("dbload");
-				}
-			} else {
+			} else
 				(*ptr)->fd = (*mysqlptr)->net.fd;
-				if (verbose) {
-					strnum1[fmt_uint(strnum1, count)] = 0;
-					strnum2[fmt_uint(strnum2, (*ptr)->fd)] = 0;
-					strnum3[fmt_uint(strnum3, (*ptr)->port)] = 0;
-					out("dbload", "connection ");
-					out("dbload", strnum1);
-					out("dbload", " fd ");
-					out("dbload", strnum2);
-					out("dbload", ": ");
-					out("dbload", (*ptr)->domain);
-					out("dbload", " database ");
-					out("dbload", (*ptr)->database);
-					out("dbload", " server ");
-					out("dbload", (*ptr)->server);
-					out("dbload", " user ");
-					out("dbload", (*ptr)->user);
-					out("dbload", " ");
-					out("dbload", strnum3);
-					out("dbload", "\n");
-					flush("dbload");
-				}
+			if (verbose) {
+				subprintfe(subfdout, "dbload", "connection %03d fd %d: %-30s database %s server %s user %s %d\n",
+						count, (*ptr)->fd, (*ptr)->domain, (*ptr)->database, (*ptr)->server, (*ptr)->user, (*ptr)->port);
+				flush("dbload");
 			}
 		}
 	} 

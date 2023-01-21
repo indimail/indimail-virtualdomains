@@ -19,6 +19,7 @@ static char     sccsid[] = "$Id: parseAddress.c,v 1.1 2019-04-18 08:31:48+05:30 
 #ifdef HAVE_QMAIL
 #include <strerr.h>
 #include <stralloc.h>
+#include <subfd.h>
 #endif
 #include "storeHeader.h"
 #include "common.h"
@@ -51,31 +52,24 @@ parseAddress(struct header_t *h, stralloc *addr_buf)
 		return;
 	}
 	if (verbose) {
-		out("parseAddress", (char *) h->name);
-		out("parseAddress", ": ");
-		out("parseAddress", g->group ? "(of group " : "");
-		out("parseAddress", g->group ? g->group : "");
-		out("parseAddress", g->group ? ")" : "\0");
+		if (g->group)
+			subprintfe(subfdout, "parseAddress", "%s (of group %s)\n", (char *) h->name, g->group);
+		else
+			subprintfe(subfdout, "parseAddress", "%s\n", (char *) h->name);
 		flush("parseAddress");
 	}
 	for (a = g->members; a->next; a = a->next) {
 		if (a->next->user && a->next->domain) {
 			if (verbose) {
-				if (a->next->name) {
-					out("parseAddress", "  (");
-					out("parseAddress", a->next->name ? a->next->name : "");
-					out("parseAddress", ") { [");
-					out("parseAddress", a->next->user ? a->next->user : "N/A");
-					out("parseAddress", "] @ [");
-					out("parseAddress", a->next->domain ? a->next->domain : "N/A");
-					out("parseAddress", "] }\n");
-				} else {
-					out("parseAddress", "  { [");
-					out("parseAddress", a->next->user ? a->next->user : "N/A");
-					out("parseAddress", "] @ [");
-					out("parseAddress", a->next->domain ? a->next->domain : "N/A");
-					out("parseAddress", "] }\n");
-				}
+				if (a->next->name)
+					subprintfe(subfdout, "parseAddress", "  (%s) { [%s] @ [%s] }\n",
+							a->next->name ? a->next->name : "",
+							a->next->user ? a->next->user : "N/A",
+							a->next->domain ? a->next->domain : "N/A");
+				else
+					subprintfe(subfdout, "parseAddress", "  { [%s] @ [%s] }\n",
+							a->next->user ? a->next->user : "N/A",
+							a->next->domain ? a->next->domain : "N/A");
 				flush("parseAddress");
 			}
 			if (a->next->user) {

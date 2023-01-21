@@ -7,6 +7,7 @@
 #include "indimail.h"
 #include <stdio.h>
 #include <unistd.h>
+#include "filewrt.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: filewrt.c,v 1.1 2019-04-18 08:35:53+05:30 Cprogrammer Exp mbhangui $";

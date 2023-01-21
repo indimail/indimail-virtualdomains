@@ -21,7 +21,7 @@ static char     sccsid[] = "$Id: valias_delete.c,v 1.1 2019-04-15 12:03:57+05:30
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <strerr.h>
-#include <fmt.h>
+#include <subfd.h>
 #endif
 #include "get_real_domain.h"
 #include "is_distributed_domain.h"
@@ -42,7 +42,6 @@ int
 valias_delete(char *alias, char *domain, char *alias_line)
 {
 	int             err;
-	char            strnum[FMT_ULONG];
 	static stralloc SqlBuf = {0};
 	char           *real_domain;
 
@@ -105,13 +104,8 @@ valias_delete(char *alias, char *domain, char *alias_line)
 			if (create_table(ON_LOCAL, "valias", VALIAS_TABLE_LAYOUT))
 				return (-1);
 			if (verbose) {
-				out("valias_delete", "No alias line ");
-				out("valias_delete", alias_line ? alias_line: " ");
-				out("valias_delete", " for alias ");
-				out("valias_delete", alias);
-				out("valias_delete", "@");
-				out("valias_delete", real_domain);
-				out("valias_delete", "\n");
+				subprintfe(subfdout, "valias_delete", "No alias line %s for alias %s@%s\n",
+						alias_line ? alias_line : " ", alias, real_domain);
 				flush("valias_delete");
 			}
 			return (0);
@@ -127,26 +121,13 @@ valias_delete(char *alias, char *domain, char *alias_line)
 	if (!verbose)
 		return (0);
 	if (err && verbose) {
-		out("valias_delete", "Deleted alias line ");
-		out("valias_delete", alias_line);
-		out("valias_delete", " for alias ");
-		out("valias_delete", alias);
-		out("valias_delete", "@");
-		out("valias_delete", real_domain);
-		out("valias_delete", " (");
-		strnum[fmt_uint(strnum, err)] = 0;
-		out("valias_delete", strnum);
-		out("valias_delete", " entries)\n");
+		subprintfe(subfdout, "valias_delete", "Deleted alias line %s for alias %s@%s (%d) entries\n",
+				alias_line, alias, real_domain, err);
 		flush("valias_delete");
 	} else
 	if (verbose) {
-		out("valias_delete", "No alias line ");
-		out("valias_delete", alias_line ? alias_line: " ");
-		out("valias_delete", " for alias ");
-		out("valias_delete", alias);
-		out("valias_delete", "@");
-		out("valias_delete", real_domain);
-		out("valias_delete", "\n");
+		subprintfe(subfdout, "valias_delete", "No alias line %s for alias %s@%s\n",
+				alias_line ? alias_line : " ", alias, real_domain);
 		flush("valias_delete");
 	}
 	return (0);

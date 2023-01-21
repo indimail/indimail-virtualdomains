@@ -32,6 +32,7 @@ static char     sccsid[] = "$Id: valias.c,v 1.4 2022-10-20 11:58:30+05:30 Cprogr
 #include <sgetopt.h>
 #include <stralloc.h>
 #include <strerr.h>
+#include <subfd.h>
 #include <fmt.h>
 #endif
 #include "iopen.h"
@@ -153,24 +154,14 @@ main(int argc, char **argv)
 			for(;;) {
 				if(!(tmpalias_line = valias_select_all(&alias, &domain)))
 					break;
-				out("valias", alias.s);
-				out("valias", "@");
-				out("valias", domain.s);
-				out("valias", " -> ");
-				out("valias", tmpalias_line);
-				out("valias", "\n");
+				subprintfe(subfdout, "valias", "%s@%s -> %s\n", alias.s, domain.s, tmpalias_line);
 			}
 			flush("valias");
 		} else {
 			for(;;) {
 				if(!(tmpalias_line = valias_select(alias.s, domain.s)))
 					break;
-				out("valias", alias.s);
-				out("valias", "@");
-				out("valias", domain.s);
-				out("valias", " -> ");
-				out("valias", tmpalias_line);
-				out("valias", "\n");
+				subprintfe(subfdout, "valias", "%s@%s -> %s\n", alias.s, domain.s, tmpalias_line);
 			}
 			flush("valias");
 		}
@@ -188,12 +179,7 @@ main(int argc, char **argv)
 			for(;;) {
 				if (valias_track(email, &alias, &domain))
 					break;
-				out("valias", alias.s);
-				out("valias", "@");
-				out("valias", domain.s);
-				out("valias", " -> ");
-				out("valias", email);
-				out("valias", "\n");
+				subprintfe(subfdout, "valias", "%s@%s -> %s\n", alias.s, domain.s, email);
 				flush("valias");
 			}
 		break;

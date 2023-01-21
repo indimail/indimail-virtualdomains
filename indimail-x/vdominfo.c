@@ -43,12 +43,11 @@
 #include <strerr.h>
 #include <substdio.h>
 #include <subfd.h>
-#include <qprintf.h>
 #include <getEnvConfig.h>
 #include <setuserid.h>
 #endif
-#include "get_assign.h"
 #include "common.h"
+#include "get_assign.h"
 #include "check_group.h"
 #include "iclose.h"
 #include "variables.h"
@@ -56,7 +55,6 @@
 #include "isvirtualdomain.h"
 #include "get_real_domain.h"
 #include "print_control.h"
-#include "common.h"
 #include "get_local_hostid.h"
 #include "get_local_ip.h"
 #include "vsmtp_select.h"
@@ -182,7 +180,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 #endif
 {
 	char           *real_domain, *base_path;
-	char            strnum[FMT_ULONG], inbuf[512];
+	char            inbuf[512];
 	struct substdio ssin;
 	unsigned long   total;
 	int             fd, i, match, users_per_level = 0;
@@ -195,15 +193,13 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 	if (!(real_domain = get_real_domain(domain)))
 		return;
 	if (DisplayAll) {
-		subprintf(subfdout, "---- Domain %-25s -------------------------------\n", domain);
+		subprintfe(subfdout, "vdominfo", "---- Domain %-25s -------------------------------\n", domain);
 		if (!str_diff(real_domain, domain))
-			subprintf(subfdout, "    domain: %s\n", domain);
+			subprintfe(subfdout, "vdominfo", "    domain: %s\n", domain);
 		else
-			subprintf(subfdout, "    domain: %s aliased to %s\n", domain, real_domain);
-		strnum[fmt_ulong(strnum, uid)] = 0;
-		strnum[fmt_ulong(strnum, gid)] = 0;
-		subprintf(subfdout, "       uid: %d\n", uid);
-		subprintf(subfdout, "       gid: %d\n", gid);
+			subprintfe(subfdout, "vdominfo", "    domain: %s aliased to %s\n", domain, real_domain);
+		subprintfe(subfdout, "vdominfo", "       uid: %u\n", uid);
+		subprintfe(subfdout, "vdominfo", "       gid: %u\n", gid);
 #ifdef CLUSTERED_SITE
 		getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 		if (*controldir == '/') {
@@ -222,13 +218,13 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 		}
 		if ((host_cntrl = !access(host_path.s, F_OK))) {
 			if ((hostid = get_local_hostid()))
-				subprintf(subfdout, "   host ID: %s\n", hostid);
+				subprintfe(subfdout, "vdominfo", "   host ID: %s\n", hostid);
 			else 
-				subprintf(subfdout, "   host ID: ???\n");
-			if ((ptr = get_local_ip(PF_INET))) {
-				subprintf(subfdout, "   IP Addr: %s\n", ptr);
-			} else
-				subprintf(subfdout, "   IP Addr: ???\n");
+				subprintfe(subfdout, "vdominfo", "   host ID: ???\n");
+			if ((ptr = get_local_ip(PF_INET)))
+				subprintfe(subfdout, "vdominfo", "   IP Addr: %s\n", ptr);
+			else
+				subprintfe(subfdout, "vdominfo", "   IP Addr: ???\n");
 			for (total = 0; (ptr = vsmtp_select(domain, &Port)) != NULL; total++) {
 				/*-
 				 * src_host hostid
@@ -236,18 +232,18 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 				 * "           : src_host hostid@domain port"
 				 * "           : *        hostid@domain port"
 				 */
-				subprintf(subfdout, total ? "          : " : "Ports     : ");
+				subprintfe(subfdout, "vdominfo", total ? "          : " : "Ports     : ");
 				for (x = ptr; *x && *x != ' '; x++);
 				if (*x == ' ')
 					*x++ = 0; /*- x=hostid */
 				else /*- hostid=* */
 					x = ptr; /*- x=src_host */
-				subprintf(subfdout, "%-18s ", x == ptr ? "*" : ptr); /*- src_host */
-				subprintf(subfdout, "%+20s@-%35s %d\n", x, domain, Port);
+				subprintfe(subfdout, "vdominfo", "%18s ", x == ptr ? "*" : ptr); /*- src_host */
+				subprintfe(subfdout, "vdominfo", "%20s@-%35s %d\n", x, domain, Port);
 			}
 		}
 #endif
-		subprintf(subfdout, "Domain Dir: %s\n", dir);
+		subprintfe(subfdout, "vdominfo", "Domain Dir: %s\n", dir);
 		if (!str_diff(real_domain, domain)) {
 			if (!stralloc_copys(&tmpbuf, dir) ||
 					!stralloc_catb(&tmpbuf, "/.base_path", 11) ||
@@ -257,7 +253,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 				if (errno != error_noent)
 					strerr_die3sys(111, "vdominfo: open: ", tmpbuf.s, ": ");
 				getEnvConfigStr(&base_path, "BASE_PATH", BASE_PATH);
-				subprintf(subfdout, "  Base Dir: %s\n", base_path);
+				subprintfe(subfdout, "vdominfo", "  Base Dir: %s\n", base_path);
 			} else {
 				substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 				for (;;) {
@@ -274,7 +270,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 				}
 				close(fd);
 				if (line.len)
-					subprintf(subfdout, "  Base Dir: %s\n", line.s);
+					subprintfe(subfdout, "vdominfo", "  Base Dir: %s\n", line.s);
 			}
 			if (!stralloc_copys(&tmpbuf, dir) ||
 					!stralloc_catb(&tmpbuf, "/.users_per_level", 17) ||
@@ -306,12 +302,12 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 					!stralloc_0(&tmpbuf))
 				die_nomem();
 			total = print_control(tmpbuf.s, domain, users_per_level, 0);
-			subprintf(subfdout, "     Users: %d\n", total);
+			subprintfe(subfdout, "vdominfo", "     Users: %lu\n", total);
 			if (!stralloc_copys(&tmpbuf, dir) ||
 					!stralloc_catb(&tmpbuf, "/.domain_limits", 15) ||
 					!stralloc_0(&tmpbuf))
 				die_nomem();
-			subprintf(subfdout, "   vlimits: %s\n", access(tmpbuf.s, F_OK) ? "disabled" : "enabled");
+			subprintfe(subfdout, "vdominfo", "   vlimits: %s\n", access(tmpbuf.s, F_OK) ? "disabled" : "enabled");
 			if (!stralloc_copys(&tmpbuf, dir) ||
 					!stralloc_catb(&tmpbuf, "/.aliasdomains", 14) ||
 					!stralloc_0(&tmpbuf))
@@ -332,20 +328,20 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 						line.len--;
 						line.s[line.len] = 0; /*- remove newline */
 						if (!i++)
-							subprintf(subfdout, "AliasDomains:\n");
-						subprintf(subfdout, "%s\n", line.s);
+							subprintfe(subfdout, "vdominfo", "AliasDomains:\n");
+						subprintfe(subfdout, "vdominfo", "%s\n", line.s);
 					}
 				}
 				close(fd);
 			}
 		}
 	} else {
-		subprintf(subfdout, "---- Domain %s ----------------\n", domain);
+		subprintfe(subfdout, "vdominfo", "---- Domain %s ----------------\n", domain);
 		if (DisplayName) {
 			if (!str_diff(real_domain, domain))
-				subprintf(subfdout, "    domain: %s\n", domain);
+				subprintfe(subfdout, "vdominfo", "    domain: %s\n", domain);
 			else
-				subprintf(subfdout, "    domain: %s aliased to %s\n", domain, real_domain);
+				subprintfe(subfdout, "vdominfo", "    domain: %s aliased to %s\n", domain, real_domain);
 #ifdef CLUSTERED_SITE
 			getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 			if (*controldir == '/') {
@@ -364,37 +360,37 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 			}
 			if ((host_cntrl = !access(host_path.s, F_OK))) {
 				if ((hostid = get_local_hostid()))
-					subprintf(subfdout, "   host ID: %s\n", hostid);
+					subprintfe(subfdout, "vdominfo", "   host ID: %s\n", hostid);
 				else 
-					subprintf(subfdout, "   host ID: ???\n");
+					subprintfe(subfdout, "vdominfo", "   host ID: ???\n");
 				if ((ptr = get_local_ip(PF_INET)))
-					subprintf(subfdout, "   IP Addr: %s\n", ptr);
+					subprintfe(subfdout, "vdominfo", "   IP Addr: %s\n", ptr);
 				else
-					subprintf(subfdout, "   IP Addr: ???\n");
+					subprintfe(subfdout, "vdominfo", "   IP Addr: ???\n");
 			}
 #endif
 		}
 		if (DisplayUid)
-			subprintf(subfdout, "       uid: %d\n", uid);
+			subprintfe(subfdout, "vdominfo", "       uid: %u\n", uid);
 		if (DisplayGid)
-			subprintf(subfdout, "       gid: %d\n", gid);
+			subprintfe(subfdout, "vdominfo", "       gid: %u\n", gid);
 #ifdef CLUSTERED_SITE
 		if (DisplayPort && host_cntrl) {
 			for (total = 0;(ptr = vsmtp_select(domain, &Port)) != NULL;total++) {
-				subprintf(subfdout, total ? "          :" : "Ports     : ");
+				subprintfe(subfdout, "vdominfo", total ? "          :" : "Ports     : ");
 				for (x = ptr;*x && *x != ' '; x++);
 				if (*x == ' ')
 					*x++ = 0;
 				else
 					x = ptr;
 				if (x != ptr) /*- ip */
-					subprintf(subfdout, "%-18s ", ptr);
-				subprintf(subfdout, "%+20s@-%35s %d\n", x, domain, Port);
+					subprintfe(subfdout, "vdominfo", "%-18s ", ptr);
+				subprintfe(subfdout, "vdominfo", "+%20s@-%35s %d\n", x, domain, Port);
 			}
 		}
 #endif
 		if (DisplayDir)
-			subprintf(subfdout, "Domain Dir: %s\n", dir);
+			subprintfe(subfdout, "vdominfo", "Domain Dir: %s\n", dir);
 		if (!str_diff(real_domain, domain)) {
 			if (DisplayBaseDir) {
 				if (!stralloc_copys(&tmpbuf, dir) ||
@@ -405,7 +401,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 					if (errno != error_noent)
 						strerr_die3sys(111, "vdominfo: open: ", tmpbuf.s, ": ");
 					getEnvConfigStr(&base_path, "BASE_PATH", BASE_PATH);
-					subprintf(subfdout, "  Base Dir: %s\n", base_path);
+					subprintfe(subfdout, "vdominfo", "  Base Dir: %s\n", base_path);
 				} else {
 					substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 					for (;;) {
@@ -422,7 +418,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 					}
 					close(fd);
 					if (line.len)
-						subprintf(subfdout, "  Base Dir: %s\n", line.s);
+						 subprintfe(subfdout, "vdominfo", "  Base Dir: %s\n", line.s);
 				}
 			}
 			if (DisplayTotalUsers) {
@@ -456,12 +452,12 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 						!stralloc_0(&tmpbuf))
 					die_nomem();
 				total = print_control(tmpbuf.s, domain, users_per_level, 0);
-				subprintf(subfdout, "     Users: %s\n", total);
+				subprintfe(subfdout, "vdominfo", "     Users: %lu\n", total);
 				if (!stralloc_copys(&tmpbuf, dir) ||
 						!stralloc_catb(&tmpbuf, "/.domain_limits", 15) ||
 						!stralloc_0(&tmpbuf))
 					die_nomem();
-				subprintf(subfdout, "   vlimits: %s\n", access(tmpbuf.s, F_OK) ? "disabled" : "enabled");
+				subprintfe(subfdout, "vdominfo", "   vlimits: %s\n", access(tmpbuf.s, F_OK) ? "disabled" : "enabled");
 			}
 			if (DisplayAliasDomains) {
 				if (!stralloc_copys(&tmpbuf, dir) ||
@@ -484,8 +480,8 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 							line.len--;
 							line.s[line.len] = 0; /*- remove newline */
 							if (!i++)
-								subprintf(subfdout, "AliasDomains:\n");
-							subprintf(subfdout, "%s\n", line.s);
+								subprintfe(subfdout, "vdominfo", "AliasDomains:\n");
+							subprintfe(subfdout, "vdominfo", "%s\n", line.s);
 						}
 					}
 					close(fd);

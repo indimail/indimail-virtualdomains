@@ -28,6 +28,7 @@
 #endif
 #include "skip_system_files.h"
 #include "variables.h"
+#include "common.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: purge_files.c,v 1.1 2019-04-18 08:31:52+05:30 Cprogrammer Exp mbhangui $";
@@ -84,15 +85,11 @@ purge_files(char *dirname, int days)
 				strerr_warn3("purge_files: unlink: ", tmpbuf.s, ": ", &strerr_sys);
 				continue;
 			}
-			if (verbose) {
-				if (substdio_put(subfdout, "removed file ", 13) ||
-						substdio_put(subfdout, tmpbuf.s, tmpbuf.len))
-					strerr_warn1("purge_file: unable to write to stdout", &strerr_sys);
-			}
+			if (verbose)
+				subprintfe(subfdout, "vpurge", "removed file %s\n", tmpbuf.s);
 		}
 	}
-	if (substdio_flush(subfdout))
-		strerr_warn1("purge_file: unable to write to stdout", &strerr_sys);
+	flush("vpurge");
 	closedir(entry);
 	return (0);
 }

@@ -18,6 +18,7 @@
 #include <stralloc.h>
 #include <strerr.h>
 #endif
+#include "mysql_stack.h"
 
 static void
 die_nomem()
@@ -52,13 +53,17 @@ va_dcl
 #ifdef HAVE_STDARG_H
 		va_start(ap, fmt);
 #endif
+		/*- vasprintf is a GNU extension */
 		if (vasprintf(&mysqlstr, fmt, ap) == -1) {
 			strerr_warn1("mysql_stack: vasprintf: ", &strerr_sys);
 			return ((char *) 0);
 		}
 		va_end(ap);
-		if (!stralloc_cats(&mysqlQueryStr, mysqlstr))
+		if (!stralloc_cats(&mysqlQueryStr, mysqlstr)) {
+			free(mysqlstr);
 			return ((char *) 0);
+		}
+		free(mysqlstr);
 		return (mysqlQueryStr.s);
 	} else {
 		if (!mysqlQueryStr.len)

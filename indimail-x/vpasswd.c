@@ -160,14 +160,8 @@ get_options(int argc, char **argv, char **email, char **clear_text,
 			else
 			if (!str_diffn(optarg, "SHA-512", 7))
 				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
-			else {
-				errout("vpasswd", WARN);
-				errout("vpasswd", optarg);
-				errout("vpasswd", ": wrong hash method\n");
-				errout("vpasswd", "Supported HASH Methods: DES MD5 SHA-256 SHA-512\n");
-				errflush("vpasswd");
-				strerr_die2x(100, WARN, usage);
-			}
+			else
+				strerr_die5x(100, FATAL, "wrong hash method ", optarg, ". Supported HASH Methods: DES MD5 SHA-256 SHA-512\n", usage);
 			if (!env_put2("PASSWORD_HASH", strnum))
 				strerr_die1x(111, "out of memory");
 			*encrypt_flag = 1;
@@ -186,14 +180,8 @@ get_options(int argc, char **argv, char **email, char **clear_text,
 			else
 			if (!str_diffn(optarg, "SCRAM-SHA-256", 13))
 				*scram = 2;
-			else {
-				errout("vpasswd", WARN);
-				errout("vpasswd", optarg);
-				errout("vpasswd", ": wrong SCRAM method\n");
-				errout("vpasswd", "Supported SCRAM Methods: SCRAM-SHA-1 SCRAM-SHA-256\n");
-				errflush("vpasswd");
-				strerr_die2x(100, WARN, usage);
-			}
+			else
+				strerr_die5x(100, FATAL, "wrong SCRAM method ", optarg, ". Supported SCRAM Methods: SCRAM-SHA1 SCRAM-SHA-256\n", usage);
 			break;
 		case 'S':
 			if (!salt)

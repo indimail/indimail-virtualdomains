@@ -37,9 +37,9 @@ static char     sccsid[] = "$Id: hostcntrl.c,v 1.5 2022-10-20 11:57:37+05:30 Cpr
 #include <sgetopt.h>
 #include <fmt.h>
 #include <scan.h>
-#include <qprintf.h>
 #include <subfd.h>
 #endif
+#include "common.h"
 #include "variables.h"
 #include "parse_email.h"
 #include "sql_getip.h"
@@ -144,29 +144,22 @@ main(int argc, char **argv)
 	switch (action)
 	{
 	case V_SELECT_ALL:
-		if (subprintf(subfdoutsmall, "%-20s %-20s %-9s %-15s Added on\n", "User", "Domain", "Host ID", "IP Address") == -1)
-			strerr_die1sys(111, "write: unable to write output: ");
-
+		subprintfe(subfdoutsmall, "hostcntrl", "%-20s %-20s %-9s %-15s Added on\n", "User", "Domain", "Host ID", "IP Address");
 		for(;;) {
 			if (!(row = hostcntrl_select_all()))
 				break;
 			ipaddr = ((ipaddr = sql_getip(row[2])) ? ipaddr : "????");
 			scan_ulong(row[3], (unsigned long *) &tmval);
-			if (subprintf(subfdoutsmall, "%-20s %-20s %-9s %-15s %s", row[0], row[1], row[2], ipaddr, ctime(&tmval)) == -1)
-				strerr_die1sys(111, "write: unable to write output: ");
+			subprintfe(subfdoutsmall, "hostcntrl", "%-20s %-20s %-9s %-15s %s", row[0], row[1], row[2], ipaddr, ctime(&tmval));
 		}
-		if (substdio_flush(subfdoutsmall) == -1)
-			strerr_die1sys(111, "write: unable to write output: ");
+		flush("hostcntrl");
 		break;
 	case V_USER_SELECT:
 		if (!hostcntrl_select(user.s, domain.s, &tmval, &HostID)) {
 			ipaddr = ((ipaddr = sql_getip(HostID.s)) ? ipaddr : "????");
-			if (subprintf(subfdoutsmall, "%-25s %-11s %-16s Added On\n", "Email", "Host ID", "IP Address") == -1)
-				strerr_die1sys(111, "write: unable to write output: ");
-			if (subprintf(subfdoutsmall, "%-25s %-11s %-16s %s", emailid, HostID.s, ipaddr, ctime(&tmval)) == -1)
-				strerr_die1sys(111, "write: unable to write output: ");
-			if (substdio_flush(subfdoutsmall) == -1)
-				strerr_die1sys(111, "write: unable to write output: ");
+			subprintfe(subfdoutsmall, "hostcntrl", "%-25s %-11s %-16s Added On\n", "Email", "Host ID", "IP Address");
+			subprintfe(subfdoutsmall, "hostcntrl", "%-25s %-11s %-16s %s", emailid, HostID.s, ipaddr, ctime(&tmval));
+			flush("hostcntrl");
 			return(0);
 		} else
 			return (1);

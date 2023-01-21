@@ -44,15 +44,13 @@ static char     sccsid[] = "$Id: vcalias.c,v 1.4 2020-04-09 18:32:08+05:30 Cprog
 #include <substdio.h>
 #include <subfd.h>
 #include <str.h>
-#include <fmt.h>
 #include <getln.h>
-#include <qprintf.h>
 #endif
 #include "get_assign.h"
-#include "common.h"
 #include "iopen.h"
 #include "iclose.h"
 #include "create_table.h"
+#include "common.h"
 #include "variables.h"
 
 static void
@@ -90,24 +88,20 @@ main(int argc, char **argv)
 		strerr_warn3("could not find domain ", Domain, " in indimail assign file", 0);
 		return (-1);
 	}
-	if (subprintf(subfdoutsmall, "Looking in %s\n", Dir.s) == -1)
-		strerr_die1sys(111, "write: unable to write output: ");
-	if (substdio_flush(subfdoutsmall))
-		strerr_die1sys(111, "write: unable to write output: ");
+	subprintfe(subfdout, "vcalias", "Looking in %s\n", Dir.s);
+	flush("vcalias");
 	if (chdir(Dir.s)) {
-		strerr_warn3("valias: chdir: ", Dir.s, ": ", &strerr_sys);
+		strerr_warn3("vcalias: chdir: ", Dir.s, ": ", &strerr_sys);
 		return (-1);
 	}
 	/*- open the directory */
 	if (!(entry = opendir(Dir.s))) {
-		strerr_warn3("valias: opendir: ", Dir.s, ": ", &strerr_sys);
+		strerr_warn3("vcalias: opendir: ", Dir.s, ": ", &strerr_sys);
 		return (-1);
 	}
 	/*- search for .qmail files */
-	if (subprintf(subfdoutsmall, "Converting from Filesystem to MYSQL for domain %s\n", Domain) == -1)
-		strerr_die1sys(111, "write: unable to write output: ");
-	if (substdio_flush(subfdoutsmall))
-		strerr_die1sys(111, "write: unable to write output: ");
+	subprintfe(subfdout, "vcalias", "Converting from Filesystem to MYSQL for domain %s\n", Domain);
+	flush("vcalias");
 	if ((err = iopen((char *) 0)) != 0)
 		return (err);
 	for (;;) {
@@ -119,8 +113,7 @@ main(int argc, char **argv)
 		else
 		if (str_diffn(dp->d_name, ".qmail-", 7))
 			continue;
-		if (subprintf(subfdoutsmall, "Processing %-20s\n", dp->d_name) == -1)
-			strerr_die1sys(111, "write: unable to write output: ");
+		subprintfe(subfdout, "vcalias", "Processing %-20s\n", dp->d_name);
 		AliasName= dp->d_name + 7;
 		if ((fd = open_read(dp->d_name)) == -1) {
 			strerr_warn3("vcalias: open: ", dp->d_name, ": ", &strerr_sys);
@@ -153,15 +146,11 @@ main(int argc, char **argv)
 					iclose();
 					die_nomem();
 				}
-				if (subprintf(subfdoutsmall, "Converting ") == -1)
-					strerr_die1sys(111, "write: unable to write output: ");
+				subprintfe(subfdout, "vcalias", "Converting ");
 			} else
-			if (subprintf(subfdoutsmall, "           ") == -1)
-				strerr_die1sys(111, "write: unable to write output: ");
-			if (subprintf(subfdoutsmall, "%-30s -> %s\n", Dir.s, line.s) == -1)
-				strerr_die1sys(111, "write: unable to write output: ");
-			if (substdio_flush(subfdoutsmall))
-				strerr_die1sys(111, "write: unable to write output: ");
+				subprintfe(subfdout, "vcalias", "           ");
+			subprintfe(subfdout, "vcalias", "%-30s -> %s\n", Dir.s, line.s);
+			flush("vcalias");
 			/*- Convert ':' to '.' */
 			for (ptr = AliasName;*ptr;ptr++) {
 				if (*ptr == ':')
@@ -191,10 +180,8 @@ main(int argc, char **argv)
 				break;
 			}
 		} /*- for (err = 0, flag = 0;;flag++) */
-		if (subprintf(subfdoutsmall, "\n") == -1)
-			strerr_die1sys(111, "write: unable to write output: ");
-		if (substdio_flush(subfdoutsmall))
-			strerr_die1sys(111, "write: unable to write output: ");
+		subprintfe(subfdout, "vcalias", "\n");
+		flush("vcalias");
 		close(fd);
 		if (!err && unlink(dp->d_name))
 			strerr_warn3("vcalias: unlink: ", dp->d_name, ": ", &strerr_sys);

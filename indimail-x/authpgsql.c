@@ -175,11 +175,7 @@ pg_getpw(char *user, char *domain)
 void
 print_error(char *str)
 {
-	out("authpgsql", "454-");
-	out("authpgsql", str);
-	out("authpgsql", ": ");
-	out("authpgsql", error_str(errno));
-	out("authpgsql", " (#4.3.0)\r\n");
+	subprintfe(subfdout, "authpgsql", "454-%s: %s (#4.3.0)\r\n", str, error_str(errno));
 	flush("authpgsql");
 }
 
@@ -277,9 +273,8 @@ main(int argc, char **argv)
 	parse_email(login, &user, &domain);
 	pgc = PQconnectdb("user=postgress,database=indimail");
 	if (PQstatus(pgc) == CONNECTION_BAD) {
-		out("pgsql", "454-failed to connect to database (");
-		out("pgsql", PQerrorMessage(pgc));
-		out("pgsql", ") (#4.3.0)\r\n");
+		subprintfe(subfdout, "pgsql", "454-failed to connect to database (%s) (#4.3.0)\r\n",
+				PQerrorMessage(pgc));
 		flush("pgsql");
 		_exit(111);
 	}
@@ -327,9 +322,7 @@ main(int argc, char **argv)
 		if (!env_get("QUERY_CACHE")) {
 			if (vget_limits(domain.s, &limits)) {
 				strerr_warn2("authpgsql: unable to get domain limits for for ", domain.s, 0);
-				out("authpgsql", "454-unable to get domain limits for ");
-				out("authpgsql", domain.s);
-				out("authpgsql", "\r\n");
+				subprintfe(sufdout, "authpgsql", "454-unable to get domain limits for %s (#4.3.0)\r\n", domain.s);
 				flush("authpgsql");
 				_exit(111);
 			}
@@ -339,9 +332,7 @@ main(int argc, char **argv)
 #else
 		if (vget_limits(domain.s, &limits)) {
 			strerr_warn2("authpgsql: unable to get domain limits for for ", domain.s, 0);
-			out("authpgsql", "454-unable to get domain limits for ");
-			out("authpgsql", domain.s);
-			out("authpgsql", "\r\n");
+			subprintfe(sufdout, "authpgsql", "454-unable to get domain limits for %s (#4.3.0)\r\n", domain.s);
 			flush("authpgsql");
 			_exit(111);
 		}
@@ -372,7 +363,6 @@ main(int argc, char **argv)
 	/*- Not reached */
 	return (0);
 }
-
 #else
 #include <unistd.h>
 #include <strerr.h>
@@ -382,11 +372,7 @@ main(int argc, char **argv)
 void
 print_error(char *str)
 {
-	out("authpgsql", "454-");
-	out("authpgsql", str);
-	out("authpgsql", ": ");
-	out("authpgsql", error_str(errno));
-	out("authpgsql", " (#4.3.0)\r\n");
+	subprintfe(subfdout, "authpgsql", "454-%s: %s (#4.3.0)\r\n", str, error_str(errno));
 	flush("authpgsql");
 }
 

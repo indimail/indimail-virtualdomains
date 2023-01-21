@@ -29,6 +29,7 @@
 #include <str.h>
 #include <env.h>
 #include <replacestr.h>
+#include <subfd.h>
 #endif
 #include "post_handle.h"
 #include "get_indimailuidgid.h"
@@ -199,14 +200,7 @@ main(int argc, char **argv)
 			strerr_warn5("vmoveuser: MoveFile: ", NewDir, " --> ", OldDir.s, ": ", &strerr_sys);
 		return (1);
 	}
-	out("vmoveuser", User);
-	out("vmoveuser", "@");
-	out("vmoveuser", Domain);
-	out("vmoveuser", " old ");
-	out("vmoveuser", OldDir.s);
-	out("vmoveuser", " new ");
-	out("vmoveuser", NewDir);
-	out("vmoveuser", " done\n");
+	subprintfe(subfdout, "vmoveuser", "%s@%s old %s new %s done", User, Domain, OldDir.s, NewDir);
 	flush("vmoveuser");
 	if (!(tmpstr = env_get("POST_HANDLE"))) {
 		i = str_rchr(argv[0], '/');
@@ -216,5 +210,5 @@ main(int argc, char **argv)
 			base_argv0++;
 		return (post_handle("%s/%s %s@%s %s %s", LIBEXECDIR, base_argv0, User, real_domain, OldDir.s, NewDir));
 	} else
-		return (post_handle("%s %s@%s %s %s", tmpstr, User, real_domain, OldDir, NewDir));
+		return (post_handle("%s %s@%s %s %s", tmpstr, User, real_domain, OldDir.s, NewDir));
 }

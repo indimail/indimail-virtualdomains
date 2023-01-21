@@ -86,9 +86,7 @@ main(int argc, char **argv)
 		if (makesalt(salt, SALTSIZE) == -1)
 			strerr_die1sys(111, "failed to generate salt: ");
 		if (verbose) {
-			out("incrypt", "generated salt [");
-			out("incrypt", salt);
-			out("incrypt", "]\n");
+			subprintfe(subfdout, "incrypt", "generated salt [%s]\n", salt);
 			flush("incrypt");
 		}
 	} else {
@@ -106,10 +104,7 @@ main(int argc, char **argv)
 		strerr_die2x(100, FATAL, "invalid character used in passphrase");
 	if (!(ptr = in_crypt(passphrase, salt)))
 		strerr_die5x(100, FATAL, "failed to crypt passphrase ", passphrase, " with salt ", salt);
-	if (substdio_put(subfdout, "\"", 1) ||
-			substdio_puts(subfdout, ptr) ||
-			substdio_put(subfdout, "\"\n", 2) ||
-			substdio_flush(subfdout))
-		strerr_die2sys(111, WARN, "unable to write to stdout");
+	subprintfe(subfdout, "incrypt", "\"%s\"\n", ptr);
+	flush("incrypt");
 	return(0);
 }

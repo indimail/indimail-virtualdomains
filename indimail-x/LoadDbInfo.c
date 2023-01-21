@@ -83,6 +83,7 @@
 #include <scan.h>
 #include <env.h>
 #include <getEnvConfig.h>
+#include <subfd.h>
 #endif
 #include "create_table.h"
 #include "get_local_ip.h"
@@ -276,10 +277,7 @@ LoadDbInfo_TXT(int *total)
 	} else {
 		file_time = statbuf.st_mtime;
 		if (verbose) {
-			out("LoadDbInfo", "File UNIX  ");
-			out("LoadDbInfo", mcdFile.s);
-			out("LoadDbInfo", " Modification Time ");
-			out("LoadDbInfo", ctime(&file_time));
+			subprintfe(subfdout, "LoadDbInfo", "File UNIX  %s Modification Time %s", mcdFile.s, ctime(&file_time));
 			flush("LoadDbInfo");
 		}
 	}
@@ -332,9 +330,7 @@ LoadDbInfo_TXT(int *total)
 			}
 			in_mysql_free_result(res);
 			if (verbose) {
-				out("LoadDbInfo", "File MySQL ");
-				out("LoadDbInfo", mcdFile.s);
-				out("LoadDbInfo", ctime(&mcd_time));
+				subprintfe(subfdout, "LoadDbInfo", "Table MySQL %s Modification Time %s", mcdFile.s, ctime(&mcd_time));
 				flush("LoadDbInfo");
 				if (mcd_time == file_time) {
 					out("LoadDbInfo", "Nothing to update\n");
@@ -412,9 +408,7 @@ LoadDbInfo_TXT(int *total)
 	} else
 	if (sync_file) {
 		if (verbose) {
-			out("LoadDbInfo", "Updating File ");
-			out("LoadDbInfo", mcdFile.s);
-			out("LoadDbInfo", "\n");
+			subprintfe(subfdout, "LoadDbInfo", "Updating File %s\n", mcdFile.s);
 			flush("LoadDbInfo");
 		}
 		if (!stralloc_copyb(&SqlBuf, "select high_priority domain, distributed, server, ", 50) ||

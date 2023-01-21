@@ -433,7 +433,7 @@ call_prg()
 		}
 		if (checkPerm(username.s, adminCommands[i].name, Argv)) {
 			strerr_warn6(username.s, ": ", adminCommands[i].name, " args [", ptr, "]: permission denied", 0);
-			filewrt(3, "%s: %s args [%s]: permission denied\n", username, adminCommands[i].name, ptr);
+			filewrt(3, "%s: %s args [%s]: permission denied\n", username.s, adminCommands[i].name, ptr);
 			_exit(1);
 		}
 		if (verbose)

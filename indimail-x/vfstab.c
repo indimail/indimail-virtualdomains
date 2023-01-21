@@ -25,11 +25,11 @@
 #include <strerr.h>
 #include <subfd.h>
 #include <substdio.h>
-#include <qprintf.h>
 #include <fmt.h>
 #include <scan.h>
 #include <sgetopt.h>
 #endif
+#include "common.h"
 #include "variables.h"
 #include "vfstab.h"
 #include "getFreeFS.h"
@@ -180,13 +180,12 @@ main(int argc, char **argv)
 					strerr_warn1("unable to write output: ", &strerr_sys);
 				retval = 0;
 			}
-			if (subprintf(subfdoutsmall, "%-20s %-20s %s %10ld %10ld %10ld  Kb  %10ld  Kb  %6.4f\n",
+			subprintfe(subfdoutsmall, "vfstab", "%-20s %-20s %s %10ld %10ld %10ld  Kb  %10ld  Kb  %6.4f\n",
 					tmpfstab, mdaHost, status == FS_ONLINE ? "ONLINE  " : "OFFLINE ",
 					max_users, cur_users, max_size/1024, cur_size/1024,
-					cur_size ? ((float) (cur_users * 1024 * 1024)/ (float) cur_size) : 0.1) == -1)
+					cur_size ? ((float) (cur_users * 1024 * 1024)/ (float) cur_size) : 0.1);
 				strerr_warn1("unable to write output: ", &strerr_sys);
-			if (substdio_flush(subfdoutsmall))
-				strerr_warn1("unable to write output: ", &strerr_sys);
+			flush("vfstab");
 		}
 		break;
 	case FSTAB_INSERT:

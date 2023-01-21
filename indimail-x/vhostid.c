@@ -32,9 +32,9 @@ static char     sccsid[] = "$Id: vhostid.c,v 1.4 2022-10-20 11:58:58+05:30 Cprog
 #include <sgetopt.h>
 #include <fmt.h>
 #include <strerr.h>
-#include <qprintf.h>
 #include <subfd.h>
 #endif
+#include "common.h"
 #include "sql_getip.h"
 #include "vhostid_select.h"
 #include "vhostid_insert.h"
@@ -123,23 +123,19 @@ main(int argc, char **argv)
 	switch (hostaction)
 	{
 	case HOST_SELECT:
-		if (subprintf(subfdoutsmall, "%-30s %s\n", "HostID", "IP Address") == -1)
-			strerr_die1sys(111, "unable to write to stdout");
-		if(hostid && (tmphost_line = sql_getip(hostid))) {
-			if (subprintf(subfdoutsmall, "%-30s %s\n", hostid, tmphost_line) == -1)
-				strerr_die1sys(111, "unable to write to stdout");
-		} else
+		subprintfe(subfdout, "vhostid", "%-30s %s\n", "HostID", "IP Address");
+		if(hostid && (tmphost_line = sql_getip(hostid)))
+			subprintfe(subfdout, "vhostid", "%-30s %s\n", hostid, tmphost_line);
+		else
 		for(;;) {
 			if(!(tmphost_line = vhostid_select())) /*- "hostid ip_address */
 				break;
 			for (hostid = ptr = tmphost_line; *ptr && !isspace(*ptr); ptr++);
 			*ptr++ = 0;
 			for (;*ptr && isspace(*ptr); ptr++);
-			if (subprintf(subfdoutsmall, "%-30s %s\n", hostid, ptr) == -1)
-				strerr_die1sys(111, "unable to write to stdout");
+			subprintfe(subfdout, "vhostid", "%-30s %s\n", hostid, ptr);
 		}
-		if (substdio_flush(subfdoutsmall) == -1)
-			strerr_die1sys(111, "unable to write to stdout");
+		flush("vhostid");
 		break;
 	case HOST_INSERT:
 		vhostid_insert(hostid, ipaddr);
@@ -153,20 +149,16 @@ main(int argc, char **argv)
 	case HOST_LOCAL:
 		if (hostid && *hostid) {
 			if (!update_local_hostid(hostid)) {
-				if (subprintf(subfdoutsmall, "updated local hostid to %s\n", hostid) == -1)
-					strerr_die1sys(111, "unable to write to stdout");
-				if (substdio_flush(subfdoutsmall) == -1)
-					strerr_die1sys(111, "unable to write to stdout");
+				subprintfe(subfdout, "vhostid", "updated local hostid to %s\n", hostid);
+				flush("vhostid");
 				return (0);
 			} else
 				_exit(111);
 		}
 		if (!(hostid = get_local_hostid()))
 			strerr_die1sys(111, "vhostid: failed to get localhostid");
-		if (subprintf(subfdoutsmall, "%s\n", hostid) == -1)
-			strerr_die1sys(111, "unable to write to stdout");
-		if (substdio_flush(subfdoutsmall) == -1)
-			strerr_die1sys(111, "unable to write to stdout");
+		subprintfe(subfdout, "vhostid", "%s\n", hostid);
+		flush("vhostid");
 		break;
 	default:
 		strnum[fmt_uint(strnum, (unsigned int) hostaction)] = 0;

@@ -19,10 +19,10 @@
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <strerr.h>
-#include <qprintf.h>
 #include <subfd.h>
 #include <sgetopt.h>
 #endif
+#include "common.h"
 #include "variables.h"
 #include "atrn_map.h"
 #include "parse_email.h"
@@ -142,16 +142,12 @@ main(int argc, char **argv)
 			if (!(ptr = show_atrn_map(&user, &domain)))
 				break;
 			result = 0;
-			if (subprintf(subfdoutsmall, "%-20s %-20s %s\n", user, domain, ptr) == -1)
-				strerr_die1sys(111, "write: unable to write output: ");
-			if (substdio_flush(subfdoutsmall) == -1)
-				strerr_die1sys(111, "write: unable to write output: ");
+			subprintfe(subfdout, "vatrn", "%-20s %-20s %s\n", user, domain, ptr);
+			flush("vatrn");
 		}
 		if (result && verbose) {
-			if (subprintf(subfdoutsmall, "No ATRN Maps present\n") == -1)
-				strerr_die1sys(111, "write: unable to write output: ");
-			if (substdio_flush(subfdoutsmall) == -1)
-				strerr_die1sys(111, "write: unable to write output: ");
+			subprintfe(subfdout, "vatrn", "No ATRN Maps present\n");
+			flush("vatrn");
 		}
 		break;
 	default:

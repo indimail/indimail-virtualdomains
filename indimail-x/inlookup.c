@@ -60,6 +60,7 @@ static char     sccsid[] = "$Id: inlookup.c,v 1.9 2022-12-18 19:25:52+05:30 Cpro
 #include <env.h>
 #include <alloc.h>
 #include <getEnvConfig.h>
+#include <subfd.h>
 #endif
 #include "variables.h"
 #include "ProcessInFifo.h"
@@ -111,21 +112,8 @@ fork_child(char *infifo, int instNum)
 				die_nomem();
 			if (!env_put2("INFIFO", pid_table[instNum].infifo.s))
 				strerr_die4sys(111, FATAL, "env_put2: INFIFO=", pid_table[instNum].infifo.s, ": ");
-			out("inlookup", "InLookup[");
-			strnum[fmt_uint(strnum, instNum + 1)] = 0;
-			out("inlookup", strnum);
-			out("inlookup", "] PPID ");
-			strnum[fmt_ulong(strnum, getppid())] = 0;
-			out("inlookup", strnum);
-			out("inlookup", " PID ");
-			strnum[fmt_ulong(strnum, getpid())] = 0;
-			out("inlookup", strnum);
-			out("inlookup", " Ready with INFIFO=");
-			out("inlookup", infifo);
-			out("inlookup", ".");
-			strnum[fmt_uint(strnum, instNum + 1)] = 0;
-			out("inlookup", strnum);
-			out("inlookup", "\n");
+			subprintfe(subfdout, "inlookup", "InLookup[%d] PPID %d PID %d Ready with INFIFO=%s.%d\n",
+					instNum + 1, getppid(), getpid(), infifo, instNum + 1);
 			flush("inlookup");
 			i = ProcessInFifo(instNum + 1);
 			sleep(5);
@@ -308,10 +296,7 @@ main(int argc, char **argv)
 				return (1);
 			else
 			if (!wStat) {
-				out("inlookup", "cached ");
-				strnum1[fmt_uint(strnum1, btree_count)] = 0;
-				out("inlookup", strnum1);
-				out("inlookup", " records\n");
+				subprintfe(subfdout, "inlookup", "cached %d records\n", btree_count);
 				flush("inlookup");
 			}
 		}
@@ -398,9 +383,7 @@ main(int argc, char **argv)
 	} else {
 		if (!env_put2("INFIFO", infifo))
 			strerr_die4sys(111, FATAL, "env_put2: INFIFO=", infifo, ": ");
-		out("inlookup", "InLookup INFIFO=");
-		out("inlookup", infifo);
-		out("inlookup", "\n");
+		subprintfe(subfdout, "inlookup", "InLookup INFIFO=%s\n", infifo);
 		flush("inlookup");
 		return (ProcessInFifo(0));
 	}

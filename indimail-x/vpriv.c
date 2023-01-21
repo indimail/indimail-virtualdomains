@@ -33,7 +33,7 @@ static char     sccsid[] = "$Id: vpriv.c,v 1.4 2022-10-20 11:59:12+05:30 Cprogra
 #endif
 #include "get_indimailuidgid.h"
 #include "variables.h"
-#include "qprintf.h"
+#include "common.h"
 #include "vpriv.h"
 #include "check_group.h"
 #include "mgmtpassfuncs.h"
@@ -168,11 +168,10 @@ main(int argc, char **argv)
 		for(;;) {
 			if (!(ptr = vpriv_select(&user, &program)))
 				break;
-			if (subprintf(subfdoutsmall, "%-20s --> %-20s %s\n", user, program, ptr) == -1)
-				strerr_die1sys(111, "unable to write to stdout");
+			subprintfe(subfdout, "vpriv", "%-20s --> %-20s %s\n",
+					user, program, ptr);
 		}
-		if (substdio_flush(subfdoutsmall) == -1)
-			strerr_die1sys(111, "unable to write to stdout");
+		flush("vpriv");
 		break;
 	case V_PRIV_INSERT:
 		return (vpriv_insert(user, program, cmdargs));

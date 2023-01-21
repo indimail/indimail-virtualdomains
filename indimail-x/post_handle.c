@@ -22,6 +22,7 @@
 #include <strerr.h>
 #include "indimail.h"
 #include "runcmmd.h"
+#include "post_handle.h"
 
 #ifndef	lint
 static char     sccsid[] = "$Id: post_handle.c,v 1.2 2019-04-22 23:14:24+05:30 Cprogrammer Exp mbhangui $";
