@@ -277,7 +277,7 @@ LoadDbInfo_TXT(int *total)
 	} else {
 		file_time = statbuf.st_mtime;
 		if (verbose) {
-			subprintfe(subfdout, "LoadDbInfo", "File UNIX  %s Modification Time %s", mcdFile.s, ctime(&file_time));
+			subprintfe(subfdout, "LoadDbInfo", "File UNIX  %-40s Modification Time %s", mcdFile.s, ctime(&file_time));
 			flush("LoadDbInfo");
 		}
 	}
@@ -330,7 +330,7 @@ LoadDbInfo_TXT(int *total)
 			}
 			in_mysql_free_result(res);
 			if (verbose) {
-				subprintfe(subfdout, "LoadDbInfo", "Table MySQL %s Modification Time %s", mcdFile.s, ctime(&mcd_time));
+				subprintfe(subfdout, "LoadDbInfo", "Table MySQL %-40s Modification Time %s", mcdFile.s, ctime(&mcd_time));
 				flush("LoadDbInfo");
 				if (mcd_time == file_time) {
 					out("LoadDbInfo", "Nothing to update\n");
