@@ -388,7 +388,6 @@ main(int argc, char **argv)
 	}
 trash_clean:
 	if (mailboxArr) {
-		tmval = time(0);
 		for (tmp = mailboxArr, do_lastauth = 1; *tmp; tmp++) {
 			if (!str_diffn(*tmp, ".Trash", 7)) {
 				/*-
@@ -413,7 +412,7 @@ trash_clean:
 				subprintfe(subfdout, "vdeloldusers", "Deleting Folders ");
 				for (tmp = mailboxArr; *tmp; tmp++)
 					subprintfe(subfdout, "vdeloldusers", " %s", *tmp);
-				subprintfe(subfdout, "vdeloldusers",  "%s", ctime(&tmval));
+				subprintfe(subfdout, "vdeloldusers",  "%s", get_localtime());
 				flush("vdeloldusuers");
 			}
 		}
