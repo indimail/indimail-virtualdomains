@@ -164,7 +164,7 @@ main(int argc, char **argv)
 #else
 				strerr_warn1("iopen: failed to connect to db: ", &strerr_sys);
 #endif
-			subprintfe(subfdout, "vsetpass", "454-failed to connect to database (%s) (#4.3.0)\r\n", error_str(errno));
+			subprintfe(subfdout, "vsetpass", "454-failed to connect to database: %s (#4.3.0)\r\n", error_str(errno));
 			flush("vsetpass");
 			_exit (111);
 		}
@@ -184,7 +184,7 @@ main(int argc, char **argv)
 #else
 			strerr_warn1("iopen: failed to connect to db: ", &strerr_sys);
 #endif
-		subprintfe(subfdout, "vsetpass", "454-failed to connect to database (%s) (#4.3.0)\r\n", error_str(errno));
+		subprintfe(subfdout, "vsetpass", "454-failed to connect to database: %s (#4.3.0)\r\n", error_str(errno));
 		flush("vsetpass");
 		_exit (111);
 	}

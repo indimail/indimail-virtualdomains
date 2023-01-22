@@ -245,7 +245,7 @@ main(int argc, char **argv)
 #else
 				strerr_warn1("iopen: failed to connect to db: ", &strerr_sys);
 #endif
-			subprintfe(subfdout, "vchkpass", "454-failed to connect to database (%s) (#4.3.0)\r\n", error_str(errno));
+			subprintfe(subfdout, "vchkpass", "454-failed to connect to database: %s (#4.3.0)\r\n", error_str(errno));
 			flush("vchkpass");
 			_exit (111);
 		}

@@ -273,7 +273,8 @@ main(int argc, char **argv)
 	parse_email(login, &user, &domain);
 	pgc = PQconnectdb("user=postgress,database=indimail");
 	if (PQstatus(pgc) == CONNECTION_BAD) {
-		subprintfe(subfdout, "pgsql", "454-failed to connect to database (%s) (#4.3.0)\r\n",
+		strerr_warn1("authpgsql: PQconnectdb: failed to connect to db: ", &strerr_sys);
+		subprintfe(subfdout, "pgsql", "454-failed to connect to database: %s (#4.3.0)\r\n",
 				PQerrorMessage(pgc));
 		flush("pgsql");
 		_exit(111);
