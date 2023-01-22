@@ -44,7 +44,8 @@ case "$host" in
 	else
 		idcommand="/usr/bin/id -u mail"
 	fi
-	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -I/usr/include/qmail -Wall -Wformat=2 -Wformat-security -Wformat-signedness -Wformat-overflow -Wsuggest-attribute=format -Wmissing-format-attribute"
+	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -I/usr/include/qmail -Wall"
+	EXTRACPPFLAGS="-Wformat=2 -Wformat-security -Wformat-signedness -Wformat-overflow -Wsuggest-attribute=format -Wmissing-format-attribute -Wdfkdjf"
 	CFLAGS="$CFLAGS -O4 -fPIC -fpie -Wall"
 	LDFLAGS="$LDFLAGS -pie"
 	MODFLAGS="-O4 -fPIC -shared -Wall"
@@ -53,7 +54,7 @@ case "$host" in
 *-*-darwin*)
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DDARWIN -I/opt/local/include -I/opt/local/include/qmail"
-	CPPFLAGS="$CPPFLAGS -Wformat=2 -Wformat-security -Wmissing-format-attribute"
+	EXTRACPPFLAGS="-Wformat=2 -Wformat-security -Wmissing-format-attribute"
 	CFLAGS="$CFLAGS -O3 -Wall"
 	LDFLAGS="$LDFLAGS -L/opt/local/lib"
 	MODFLAGS="-g -O3 -bundle -Wall -undefined dynamic_lookup"
@@ -62,7 +63,7 @@ case "$host" in
 *-*-freebsd*)
 	idcommand="/usr/bin/id -u"
 	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/include/qmail"
-	CPPFLAGS="$CPPFLAGS -Wformat=2 -Wformat-security -Wmissing-format-attribute"
+	EXTRACPPFLAGS="-Wformat=2 -Wformat-security -Wmissing-format-attribute"
 	CFLAGS="$CFLAGS -O3 -Wall -fPIC"
 	MODFLAGS="-g -O3 -fPIC -shared -Wall"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
@@ -587,6 +588,27 @@ then
 	indimaildir=$qmaildir
 else
 	indimaildir=`cat indimail.dir`
+fi
+if test -n "$EXTRACPPFLAGS"
+then
+	AC_MSG_CHECKING(extra cppflags)
+	echo "int main() { return 0; }" >/tmp/testccflags.c
+	flags=""
+	found=0
+	for i in ${EXTRACPPFLAGS}
+	do
+		${CC} -Wformat=2 $i -c /tmp/testccflags.c 2>/dev/null
+		if test $? -eq 0
+		then
+			found=1
+			flags="$flags $i"
+		fi
+	done
+	if test $found -eq 1
+	then
+		CPPFLAGS="$CPPFLAGS -Wformat=2 $flags"
+	fi
+	echo done
 fi
 
 DATE=`date`
