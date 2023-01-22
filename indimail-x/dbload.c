@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 1.13  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.12  2020-10-18 07:35:53+05:30  Cprogrammer
  * use alloc() instead of alloc_re()
  *
@@ -67,7 +70,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 1.12 2020-10-18 07:35:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 1.13 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static MYSQL   *is_duplicate_conn(MYSQL **, DBINFO **);

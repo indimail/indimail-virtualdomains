@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.11  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.10  2022-11-02 20:03:34+05:30  Cprogrammer
  * added feature to add scram password during user addition
  *
@@ -103,7 +106,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.10 2022-11-02 20:03:34+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.11 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "

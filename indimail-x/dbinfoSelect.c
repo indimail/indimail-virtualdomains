@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfoSelect.c,v $
+ * Revision 1.3  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.2  2019-04-20 08:10:35+05:30  Cprogrammer
  * allow negative values for fd
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoSelect.c,v 1.2 2019-04-20 08:10:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbinfoSelect.c,v 1.3 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

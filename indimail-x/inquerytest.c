@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 1.9  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.8  2021-09-12 11:53:22+05:30  Cprogrammer
  * removed unused variable controldir
  *
@@ -70,7 +73,7 @@
 #include "vlimits.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 1.8 2021-09-12 11:53:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 1.9 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "inquerytest: fatal: "

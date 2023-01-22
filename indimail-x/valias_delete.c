@@ -1,5 +1,8 @@
 /*
  * $Log: valias_delete.c,v $
+ * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.1  2019-04-15 12:03:57+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias_delete.c,v 1.1 2019-04-15 12:03:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valias_delete.c,v 1.2 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS

@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbInfo.c,v $
+ * Revision 1.13  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.12  2021-07-27 18:05:36+05:30  Cprogrammer
  * set default domain using vset_default_domain
  *
@@ -97,7 +100,7 @@
 #include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.12 2021-07-27 18:05:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.13 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static DBINFO **loadMCDInfo(int *);

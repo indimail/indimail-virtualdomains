@@ -1,5 +1,8 @@
 /*
  * $Log: ischema.c,v $
+ * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.1  2022-08-05 19:23:26+05:30  Cprogrammer
  * Initial revision
  *
@@ -34,7 +37,7 @@
 #include "create_table.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: ischema.c,v 1.1 2022-08-05 19:23:26+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: ischema.c,v 1.2 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "ischema: fatal: "

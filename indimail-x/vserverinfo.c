@@ -1,5 +1,8 @@
 /*
  * $Log: vserverinfo.c,v $
+ * Revision 1.3  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.2  2019-06-07 15:41:24+05:30  Cprogrammer
  * use sgetopt library for getopt()
  *
@@ -29,7 +32,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vserverinfo.c,v 1.2 2019-06-07 15:41:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vserverinfo.c,v 1.3 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      display_user, display_passwd, display_database, display_port,

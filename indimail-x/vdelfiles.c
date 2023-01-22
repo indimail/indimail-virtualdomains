@@ -1,5 +1,8 @@
 /*
  * $Log: vdelfiles.c,v $
+ * Revision 1.3  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.2  2020-10-18 07:54:49+05:30  Cprogrammer
  * use alloc() instead of alloc_re()
  *
@@ -32,7 +35,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelfiles.c,v 1.2 2020-10-18 07:54:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelfiles.c,v 1.3 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*

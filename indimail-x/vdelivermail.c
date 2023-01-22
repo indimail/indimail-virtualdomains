@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.9  2021-07-27 18:07:23+05:30  Cprogrammer
  * set default domain using vset_default_domain
  *
@@ -95,7 +98,7 @@
 #include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 1.9 2021-07-27 18:07:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 1.10 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vdelivermail: fatal: "

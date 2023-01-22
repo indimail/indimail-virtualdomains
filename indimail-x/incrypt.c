@@ -1,5 +1,8 @@
 /*
  * $Log: incrypt.c,v $
+ * Revision 1.3  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.2  2022-08-28 11:57:37+05:30  Cprogrammer
  * added option to specify salt and hash method
  *

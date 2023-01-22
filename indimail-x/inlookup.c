@@ -1,5 +1,8 @@
 /*
  * $Log: inlookup.c,v $
+ * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.9  2022-12-18 19:25:52+05:30  Cprogrammer
  * handle SIGCONT
  *
@@ -30,7 +33,7 @@
  *
  */
 #ifndef	lint
-static char     sccsid[] = "$Id: inlookup.c,v 1.9 2022-12-18 19:25:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inlookup.c,v 1.10 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H

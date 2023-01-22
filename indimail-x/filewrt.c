@@ -1,5 +1,8 @@
 /*
  * $Log: filewrt.c,v $
+ * Revision 1.2  2023-01-22 10:36:09+05:30  Cprogrammer
+ * include filewrt.h for filewrt function prototype
+ *
  * Revision 1.1  2019-04-18 08:35:53+05:30  Cprogrammer
  * Initial revision
  *
@@ -10,7 +13,7 @@
 #include "filewrt.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: filewrt.c,v 1.1 2019-04-18 08:35:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: filewrt.c,v 1.2 2023-01-22 10:36:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_STDARG_H

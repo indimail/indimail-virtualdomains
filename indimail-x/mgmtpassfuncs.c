@@ -1,5 +1,8 @@
 /*
  * $Log: mgmtpassfuncs.c,v $
+ * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.5  2022-08-28 12:36:38+05:30  Cprogrammer
  * allow configureable salt size using env variable SALTSIZE
  *
@@ -21,7 +24,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.5 2022-08-28 12:36:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.6 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

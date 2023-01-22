@@ -1,5 +1,8 @@
 /*
  * $Log: spam.c,v $
+ * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.3  2020-10-01 18:29:19+05:30  Cprogrammer
  * initialize pos variable
  *
@@ -47,7 +50,7 @@
 #include "lowerit.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: spam.c,v 1.3 2020-10-01 18:29:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: spam.c,v 1.4 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define BADMAIL 1

@@ -1,5 +1,8 @@
 /*
  * $Log: vsetpass.c,v $
+ * Revision 1.9  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.8  2022-09-14 08:48:10+05:30  Cprogrammer
  * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
  *
@@ -67,7 +70,7 @@
 #include "getpeer.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vsetpass.c,v 1.8 2022-09-14 08:48:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetpass.c,v 1.9 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE

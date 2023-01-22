@@ -1,5 +1,8 @@
 /*
  * $Log: crcdiff.c,v $
+ * Revision 1.2  2023-01-22 10:35:57+05:30  Cprogrammer
+ * fixed data type passed to printf
+ *
  * Revision 1.1  2019-04-14 20:58:10+05:30  Cprogrammer
  * Initial revision
  *
@@ -87,7 +90,7 @@ char            new_line[BUF_SIZE];
 char            old_line[BUF_SIZE];
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crcdiff.c,v 1.1 2019-04-14 20:58:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crcdiff.c,v 1.2 2023-01-22 10:35:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int

@@ -1,5 +1,8 @@
 /*
  * $Log: vfilter_display.c,v $
+ * Revision 1.3  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.2  2022-10-08 23:46:27+05:30  Cprogrammer
  * fixed SIGSEGV
  * fixed formatting
@@ -13,7 +16,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter_display.c,v 1.2 2022-10-08 23:46:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter_display.c,v 1.3 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER

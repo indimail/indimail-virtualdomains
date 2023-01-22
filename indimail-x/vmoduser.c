@@ -1,5 +1,8 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.15  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.14  2022-11-08 17:17:56+05:30  Cprogrammer
  * removed compiler warning for unused variable
  *
@@ -101,7 +104,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.14 2022-11-08 17:17:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.15 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "

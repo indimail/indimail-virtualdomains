@@ -1,5 +1,8 @@
 /*
  * $Log: vpasswd.c,v $
+ * Revision 1.17  2023-01-22 10:30:38+05:30  Cprogrammer
+ * reformatted error message
+ *
  * Revision 1.16  2022-11-02 12:45:58+05:30  Cprogrammer
  * set usage string depeding on gsasl availability
  *
@@ -86,7 +89,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.16 2022-11-02 12:45:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.17 2023-01-22 10:30:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "

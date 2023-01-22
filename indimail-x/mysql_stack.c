@@ -1,5 +1,8 @@
 /*
  * $Log: mysql_stack.c,v $
+ * Revision 1.2  2023-01-22 10:34:48+05:30  Cprogrammer
+ * free allocated string
+ *
  * Revision 1.1  2019-04-14 21:13:26+05:30  Cprogrammer
  * Initial revision
  *

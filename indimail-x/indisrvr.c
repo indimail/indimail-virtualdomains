@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.14  2023-01-22 10:35:30+05:30  Cprogrammer
+ * fixed incorrectly passed stralloc * instead of char *
+ *
  * Revision 1.13  2023-01-21 13:29:53+05:30  Cprogrammer
  * replaced SSL_shutdown, SSL_free iwth ssl_free
  *
@@ -48,7 +51,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.13 2023-01-21 13:29:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.14 2023-01-22 10:35:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

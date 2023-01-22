@@ -1,5 +1,8 @@
 /*
  * $Log: vmoddomain.c,v $
+ * Revision 1.3  2023-01-22 10:32:00+05:30  Cprogrammer
+ * reformatted error message strings
+ *
  * Revision 1.2  2019-06-07 15:45:51+05:30  Cprogrammer
  * use sgetopt library for getopt()
  *
@@ -31,7 +34,6 @@
 #include <fmt.h>
 #include <str.h>
 #include <substdio.h>
-#include <subfd.h>
 #endif
 #include "get_indimailuidgid.h"
 #include "get_assign.h"
@@ -43,7 +45,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomain.c,v 1.2 2019-06-07 15:45:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoddomain.c,v 1.3 2023-01-22 10:32:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vmoddomain: warning: "

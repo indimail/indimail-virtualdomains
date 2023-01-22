@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.18  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.17  2022-11-05 21:13:57+05:30  Cprogrammer
  * use ENABLE_CRAM to allow use of pw_passwd field of indimail, indibak for authentication
  *
@@ -95,7 +98,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.17 2022-11-05 21:13:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.18 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE

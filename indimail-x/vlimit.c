@@ -1,5 +1,8 @@
 /*
  * $Log: vlimit.c,v $
+ * Revision 1.7  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.6  2021-07-22 15:17:39+05:30  Cprogrammer
  * conditional define of _XOPEN_SOURCE
  *
@@ -24,7 +27,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vlimit.c,v 1.6 2021-07-22 15:17:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vlimit.c,v 1.7 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS

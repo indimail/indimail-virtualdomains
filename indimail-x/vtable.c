@@ -1,5 +1,8 @@
 /*
  * $Log: vtable.c,v $
+ * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.3  2019-06-07 15:40:14+05:30  Cprogrammer
  * use sgetopt library for getopt()
  *
@@ -37,7 +40,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vtable.c,v 1.3 2019-06-07 15:40:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vtable.c,v 1.4 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vtable: fatal: "

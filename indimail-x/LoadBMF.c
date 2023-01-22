@@ -1,5 +1,8 @@
 /*
  * $Log: LoadBMF.c,v $
+ * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.3  2020-07-04 22:53:05+05:30  Cprogrammer
  * replaced utime() with utimes()
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadBMF.c,v 1.3 2020-07-04 22:53:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadBMF.c,v 1.4 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

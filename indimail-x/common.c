@@ -1,5 +1,8 @@
 /*
  * $Log: common.c,v $
+ * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.1  2019-04-14 20:57:45+05:30  Cprogrammer
  * Initial revision
  *

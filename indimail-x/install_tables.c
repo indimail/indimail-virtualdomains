@@ -1,5 +1,8 @@
 /*
  * $Log: install_tables.c,v $
+ * Revision 1.3  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.2  2020-04-01 18:55:57+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -30,7 +33,7 @@
 #include "disable_mysql_escape.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: install_tables.c,v 1.2 2020-04-01 18:55:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: install_tables.c,v 1.3 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

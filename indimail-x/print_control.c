@@ -1,5 +1,8 @@
 /*
  * $Log: print_control.c,v $
+ * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.1  2019-04-14 21:04:19+05:30  Cprogrammer
  * Initial revision
  *
@@ -23,7 +26,7 @@
 #include "dir_control.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: print_control.c,v 1.1 2019-04-14 21:04:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: print_control.c,v 1.2 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 unsigned long

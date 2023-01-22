@@ -1,5 +1,8 @@
 /*
  * $Log: vcalias.c,v $
+ * Revision 1.5  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.4  2020-04-09 18:32:08+05:30  Cprogrammer
  * close MySQL on exit and return on read error
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcalias.c,v 1.4 2020-04-09 18:32:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcalias.c,v 1.5 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #if defined(VALIAS)

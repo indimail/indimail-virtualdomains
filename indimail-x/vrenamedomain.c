@@ -1,5 +1,8 @@
 /*
  * $Log: vrenamedomain.c,v $
+ * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.3  2021-09-12 20:18:04+05:30  Cprogrammer
  * moved replacestr to libqmail
  *
@@ -59,7 +62,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenamedomain.c,v 1.3 2021-09-12 20:18:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vrenamedomain.c,v 1.4 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vrenamedomain: warning: "

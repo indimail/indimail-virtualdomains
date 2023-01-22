@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.9  2022-08-28 12:03:43+05:30  Cprogrammer
  * fixed display string for DES/un-encrypted password
  *
@@ -89,7 +92,7 @@
 #include "userinfo.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 1.9 2022-08-28 12:03:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 1.10 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);

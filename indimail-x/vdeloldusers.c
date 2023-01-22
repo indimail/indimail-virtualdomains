@@ -1,5 +1,8 @@
 /*
  * $Log: vdeloldusers.c,v $
+ * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.5  2022-10-20 11:58:41+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -21,7 +24,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeloldusers.c,v 1.5 2022-10-20 11:58:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeloldusers.c,v 1.6 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING

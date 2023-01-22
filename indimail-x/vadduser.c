@@ -1,5 +1,8 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 1.11  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.10  2022-12-07 16:50:04+05:30  Cprogrammer
  * fixed incorrect order of arguments in get_options
  *
@@ -90,7 +93,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadduser.c,v 1.10 2022-12-07 16:50:04+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadduser.c,v 1.11 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "

@@ -1,5 +1,8 @@
 /*
  * $Log: valiasinfo.c,v $
+ * Revision 1.5  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.4  2021-07-08 11:46:52+05:30  Cprogrammer
  * removed QMAILDIR setting through env variable
  *
@@ -46,7 +49,7 @@
 #include "valias_select.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valiasinfo.c,v 1.4 2021-07-08 11:46:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valiasinfo.c,v 1.5 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void

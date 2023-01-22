@@ -1,5 +1,8 @@
 /*
  * $Log: vhostid.c,v $
+ * Revision 1.5  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.4  2022-10-20 11:58:58+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vhostid.c,v 1.4 2022-10-20 11:58:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vhostid.c,v 1.5 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

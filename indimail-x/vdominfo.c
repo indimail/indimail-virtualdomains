@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 1.7  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.6  2022-10-20 11:58:48+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -60,7 +63,7 @@
 #include "vsmtp_select.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 1.6 2022-10-20 11:58:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 1.7 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define VDOMTOKENS ":\n"
