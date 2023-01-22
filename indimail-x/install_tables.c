@@ -107,7 +107,7 @@ main(int argc, char **argv)
 			strerr_warn2("install_tables: failed to create table ", IndiMailTable[i].table_name, 0);
 			return (1);
 		} else {
-			subprintfe(subfdout, "install_tables", "created table %s on %s",
+			subprintfe(subfdout, "install_tables", "created table %s on %s\n",
 					IndiMailTable[i].table_name,
 					IndiMailTable[i].which == ON_LOCAL ? "local" : "master");
 			flush("install_tables");
