@@ -105,7 +105,7 @@ valias_delete(char *alias, char *domain, char *alias_line)
 				return (-1);
 			if (verbose) {
 				subprintfe(subfdout, "valias_delete", "No alias line %s for alias %s@%s\n",
-						alias_line ? alias_line : " ", alias, real_domain);
+						alias_line ? alias_line : "", alias, real_domain);
 				flush("valias_delete");
 			}
 			return (0);
