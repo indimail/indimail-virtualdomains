@@ -1,5 +1,8 @@
 /*
  * $Log: hostsync.c,v $
+ * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.3  2019-06-07 15:59:55+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: hostsync.c,v 1.3 2019-06-07 15:59:55+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: hostsync.c,v 1.4 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -30,6 +33,7 @@ static char     sccsid[] = "$Id: hostsync.c,v 1.3 2019-06-07 15:59:55+05:30 mbha
 #include <strerr.h>
 #include <fmt.h>
 #include <sgetopt.h>
+#include <subfd.h>
 #endif
 #include "is_already_running.h"
 #include "is_distributed_domain.h"
@@ -127,21 +131,13 @@ main(int argc, char **argv)
 			strnum[fmt_uint(strnum, (unsigned int) ret)] = 0;
 			strerr_warn2("hostsync: Invalid case ", strnum, 0);
 		}
-		if (verbose) {
-			out("hostsync", "user ");
-			out("hostsync", pw->pw_name);
-			out("hostsync", "@");
-			out("hostsync", domain);
-			out("hostsync", "\n");
-		}
 		first++;
+		if (verbose)
+			subprintfe(subfdout, "hostsync", "user %s@%s\n", pw->pw_name, domain);
 		flush("hostsync");
 	}
 	if (verbose) {
-		strnum[fmt_uint(strnum, (unsigned int) (first - 1))] = 0;
-		out("hostsync", "Synced ");
-		out("hostsync", strnum);
-		out("hostsync", " entries\n");
+		subprintfe(subfdout, "hostsync", "Synced %d entries\n", first - 1);
 		flush("hostsync");
 	}
 	iclose();

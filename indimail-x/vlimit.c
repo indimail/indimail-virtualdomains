@@ -1,5 +1,8 @@
 /*
  * $Log: vlimit.c,v $
+ * Revision 1.7  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.6  2021-07-22 15:17:39+05:30  Cprogrammer
  * conditional define of _XOPEN_SOURCE
  *
@@ -24,7 +27,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vlimit.c,v 1.6 2021-07-22 15:17:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vlimit.c,v 1.7 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -52,8 +55,8 @@ static char     sccsid[] = "$Id: vlimit.c,v 1.6 2021-07-22 15:17:39+05:30 Cprogr
 #include <strerr.h>
 #include <error.h>
 #include <scan.h>
-#include <fmt.h>
 #include <str.h>
+#include <subfd.h>
 #endif
 #include "vlimits.h"
 #include "get_assign.h"
@@ -148,9 +151,7 @@ get_options(int argc, char **argv, char **Domain, char **DomainQuota, char **Def
 		switch (c)
 		{
 		case 'v':
-			out("vlimits", "version: ");
-			out("vlimits", VERSION);
-			out("vlimits", "\n");
+			subprintfe(subfdout, "vlimits", "version: %s\n", VERSION);
 			flush("vlimits");
 			break;
 		case 's':
@@ -341,7 +342,6 @@ main(int argc, char *argv[])
 					PermQuotaFlag, PermDefaultQuotaFlag, ShowLimits,
 					DeleteLimits;
 	long            domain_expiry = 0, passwd_expiry = 0;
-	char            strnum[FMT_ULONG];
 
 
 	if (get_options(argc, argv, &Domain, &DomainQuota, &DefaultUserQuota, &DomainMaxMsgCount,
@@ -659,110 +659,68 @@ main(int argc, char *argv[])
 		return (-1);
 	}
 	if (ShowLimits) {
-		out("vlimits", "Domain Expiry Date   : ");
-		out("vlimits", limits.domain_expiry == -1 ? "Never Expires\n" : ctime(&limits.domain_expiry));
-		out("vlimits", "Password Expiry Date : ");
-		out("vlimits", limits.passwd_expiry == -1 ? "Never Expires\n" : ctime(&limits.passwd_expiry));
-		out("vlimits", "Max Domain Quota     : ");
-		strnum[fmt_ulong(strnum, (unsigned long) limits.diskquota)] = 0;
-		out("vlimits", strnum);
-		out("vlimits", "\n");
-		out("vlimits", "Max Domain Messages  : ");
-		strnum[fmt_ulong(strnum, (unsigned long) limits.maxmsgcount)] = 0;
-		out("vlimits", strnum);
-		out("vlimits", "\n");
+		subprintfe(subfdout, "vlimits", "Domain Expiry Date   : %s",
+				limits.domain_expiry == -1 ? "Never Expires\n" : ctime(&limits.domain_expiry));
+		subprintfe(subfdout, "vlimits", "Password Expiry Date : %s",
+				limits.passwd_expiry == -1 ? "Never Expires\n" : ctime(&limits.passwd_expiry));
+		subprintfe(subfdout, "vlimits", "Max Domain Quota     : %13lu\n", (unsigned long) limits.diskquota);
+		subprintfe(subfdout, "vlimits", "Max Domain Messages  : %13lu\n", (unsigned long) limits.maxmsgcount);
 		if (limits.defaultquota == -1)
-			out("vlimits", "Default User Quota   : unlimited\n");
-		else {
-			out("vlimits", "Default User Quota   : ");
-			strnum[fmt_ulong(strnum, (unsigned long) limits.defaultquota)] = 0;
-			out("vlimits", strnum);
-			out("vlimits", "\n");
-		}
-		out("vlimits", "Default User Messages: ");
-		strnum[fmt_ulong(strnum, (unsigned long) limits.defaultmaxmsgcount)] = 0;
-		out("vlimits", strnum);
+			subprintfe(subfdout, "vlimits", "Default User Quota   : unlimited\n");
+		else
+			subprintfe(subfdout, "vlimits", "Default User Quota   : %13lu\n", (unsigned long) limits.defaultquota);
+		subprintfe(subfdout, "vlimits", "Default User Messages: %13lu\n", (unsigned long) limits.defaultmaxmsgcount);
+		subprintfe(subfdout, "vlimits", "Max Pop Accounts     : %13d\n", limits.maxpopaccounts);
+		subprintfe(subfdout, "vlimits", "Max Aliases          : %13d\n", limits.maxaliases);
+		subprintfe(subfdout, "vlimits", "Max Forwards         : %13d\n", limits.maxforwards);
+		subprintfe(subfdout, "vlimits", "Max Autoresponders   : %13d\n", limits.maxautoresponders);
+		subprintfe(subfdout, "vlimits", "Max Mailinglists     : %13d\n", limits.maxmailinglists);
 		out("vlimits", "\n");
-		out("vlimits", "Max Pop Accounts     : ");
-		strnum[fmt_int(strnum, limits.maxpopaccounts)] = 0;
-		out("vlimits", strnum);
+		subprintfe(subfdout, "vlimits", "GID Flags:\n");
+		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_imap ? "NO_IMAP" : "IMAP");
+		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_smtp ? "NO_SMTP" : "SMTP");
+		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_pop ? "NO_POP" : "POP3");
+		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_webmail ? "NO_WEBMAIL" : "WEBMAIL");
+		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_passwordchanging ? "NO_PASSWD_CHNG" : "PASSWD CHNG");
+		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_relay ? "NO_RELAY" : "RELAY");
+		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_dialup ? "NO_DIALUP" : "DIALUP");
 		out("vlimits", "\n");
-		out("vlimits", "Max Aliases          : ");
-		strnum[fmt_int(strnum, limits.maxaliases)] = 0;
-		out("vlimits", strnum);
-		out("vlimits", "\n");
-		out("vlimits", "Max Forwards         : ");
-		strnum[fmt_int(strnum, limits.maxforwards)] = 0;
-		out("vlimits", strnum);
-		out("vlimits", "\n");
-		out("vlimits", "Max Autoresponders   : ");
-		strnum[fmt_int(strnum, limits.maxautoresponders)] = 0;
-		out("vlimits", strnum);
-		out("vlimits", "\n");
-		out("vlimits", "Max Mailinglists     : ");
-		strnum[fmt_int(strnum, limits.maxmailinglists)] = 0;
-		out("vlimits", strnum);
-		out("vlimits", "\n");
-		out("vlimits", "GID Flags:\n");
-		if (limits.disable_imap != 0)
-			out("vlimits", "  NO_IMAP\n");
-		if (limits.disable_smtp != 0)
-			out("vlimits", "  NO_SMTP\n");
-		if (limits.disable_pop != 0)
-			out("vlimits", "  NO_POP\n");
-		if (limits.disable_webmail != 0)
-			out("vlimits", "  NO_WEBMAIL\n");
-		if (limits.disable_passwordchanging != 0)
-			out("vlimits", "  NO_PASSWD_CHNG\n");
-		if (limits.disable_relay != 0)
-			out("vlimits", "  NO_RELAY\n");
-		if (limits.disable_dialup != 0)
-			out("vlimits", "  NO_DIALUP\n");
-		out("vlimits", "Flags for non postmaster accounts:\n");
-		out("vlimits", "  pop account           : ");
-		out("vlimits", limits.perm_account & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE ");
-		out("vlimits", limits.perm_account & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY ");
-		out("vlimits", limits.perm_account & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE ");
-		out("vlimits", "\n");
-		out("vlimits", "  alias                 : ");
-		out("vlimits", limits.perm_alias & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE ");
-		out("vlimits", limits.perm_alias & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY ");
-		out("vlimits", limits.perm_alias & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE ");
-		out("vlimits", "\n");
-		out("vlimits", "  forward               : ");
-		out("vlimits", limits.perm_forward & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE ");
-		out("vlimits", limits.perm_forward & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY ");
-		out("vlimits", limits.perm_forward & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE ");
-		out("vlimits", "\n");
-		out("vlimits", "  autoresponder         : ");
-		out("vlimits", limits.perm_autoresponder & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE ");
-		out("vlimits", limits.perm_autoresponder & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY ");
-		out("vlimits", limits.perm_autoresponder & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE ");
-		out("vlimits", "\n");
-		out("vlimits", "  mailinglist           : ");
-		out("vlimits", limits.perm_maillist & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE ");
-		out("vlimits", limits.perm_maillist & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY ");
-		out("vlimits", limits.perm_maillist & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE ");
-		out("vlimits", "\n");
-		out("vlimits", "  mailinglist users     : ");
-		out("vlimits", limits.perm_maillist_users & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE ");
-		out("vlimits", limits.perm_maillist_users & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY ");
-		out("vlimits", limits.perm_maillist_users & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE ");
-		out("vlimits", "\n");
-		out("vlimits", "  mailinglist moderators: ");
-		out("vlimits", limits.perm_maillist_moderators & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE ");
-		out("vlimits", limits.perm_maillist_moderators & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY ");
-		out("vlimits", limits.perm_maillist_moderators & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE ");
-		out("vlimits", "\n");
-		out("vlimits", "  domain quota          : ");
-		out("vlimits", limits.perm_quota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE ");
-		out("vlimits", limits.perm_quota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY ");
-		out("vlimits", limits.perm_quota & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE ");
-		out("vlimits", "\n");
-		out("vlimits", "  default quota         : ");
-		out("vlimits", limits.perm_defaultquota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE ");
-		out("vlimits", limits.perm_defaultquota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY ");
-		out("vlimits", "\n");
+		subprintfe(subfdout, "vlimits", "Flags for non postmaster accounts:\n");
+		subprintfe(subfdout, "vlimits", "  pop account           : %12s %12s %12s\n",
+				limits.perm_account & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+				limits.perm_account & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
+				limits.perm_account & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
+		subprintfe(subfdout, "vlimits", "  alias                 : %12s %12s %12s\n",
+				limits.perm_alias & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+				limits.perm_alias & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
+				limits.perm_alias & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
+		subprintfe(subfdout, "vlimits", "  forward               : %12s %12s %12s\n",
+				limits.perm_forward & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+				limits.perm_forward & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
+				limits.perm_forward & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
+		subprintfe(subfdout, "vlimits", "  autoresponder         : %12s %12s %12s\n",
+				limits.perm_autoresponder & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+				limits.perm_autoresponder & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
+				limits.perm_autoresponder & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
+		subprintfe(subfdout, "vlimits", "  mailinglist           : %12s %12s %12s\n",
+				limits.perm_maillist & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+				limits.perm_maillist & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
+				limits.perm_maillist & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
+		subprintfe(subfdout, "vlimits", "  mailinglist users     : %12s %12s %12s\n",
+				limits.perm_maillist_users & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+				limits.perm_maillist_users & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
+				limits.perm_maillist_users & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
+		subprintfe(subfdout, "vlimits", "  mailinglist moderators: %12s %12s %12s\n",
+				limits.perm_maillist_moderators & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+				limits.perm_maillist_moderators & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
+				limits.perm_maillist_moderators & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
+		subprintfe(subfdout, "vlimits", "  domain quota          : %12s %12s %12s\n",
+				limits.perm_quota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+				limits.perm_quota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
+				limits.perm_quota & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
+		subprintfe(subfdout, "vlimits", "  default quota         : %12s %12s\n",
+				limits.perm_defaultquota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+				limits.perm_defaultquota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY");
 		flush("vlimits");
 		return (0);
 	}

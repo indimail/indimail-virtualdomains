@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 1.9  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.8  2021-09-12 11:53:22+05:30  Cprogrammer
  * removed unused variable controldir
  *
@@ -55,6 +58,9 @@
 #include <env.h>
 #include <getEnvConfig.h>
 #include <noreturn.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <fmt.h>
 #endif
 #include "indimail.h"
 #include "get_indimailuidgid.h"
@@ -67,7 +73,7 @@
 #include "vlimits.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 1.8 2021-09-12 11:53:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 1.9 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "inquerytest: fatal: "
@@ -97,108 +103,65 @@ die_nomem()
 void
 print_limits(struct vlimits *limits)
 {
-	char            strnum[FMT_ULONG];
-
-	out("inquerytest", "Domain Expiry Date   : ");
-	out("inquerytest", limits->domain_expiry == -1 ? "Never Expires\n" : ctime(&limits->domain_expiry));
-	out("inquerytest", "Password Expiry Date : ");
-	out("inquerytest", limits->passwd_expiry == -1 ? "Never Expires\n" : ctime(&limits->passwd_expiry));
-	out("inquerytest", "Max Domain Quota     : ");
-	strnum[fmt_long(strnum, limits->diskquota)] = 0;
-	out("inquerytest", strnum);
+	subprintfe(subfdout, "inquerytest", "Domain Expiry Date   : %s",
+			limits->domain_expiry == -1 ? "Never Expires\n" : ctime(&limits->domain_expiry));
+	subprintfe(subfdout, "inquerytest", "Password Expiry Date : %s\n",
+			limits->passwd_expiry == -1 ? "Never Expires\n" : ctime(&limits->passwd_expiry));
+	subprintfe(subfdout, "inquerytest", "Max Domain Quota     : %13lu\n", limits->diskquota);
+	subprintfe(subfdout, "inquerytest", "Max Domain Messages  : %13lu\n", limits->maxmsgcount);
+	subprintfe(subfdout, "inquerytest", "Default User Quota   : %13ld\n", limits->defaultquota);
+	subprintfe(subfdout, "inquerytest", "Default User Messages: %13lu\n", limits->defaultmaxmsgcount);
+	subprintfe(subfdout, "inquerytest", "Max Pop Accounts     : %13d\n", limits->maxpopaccounts);
+	subprintfe(subfdout, "inquerytest", "Max Aliases          : %13d\n", limits->maxaliases);
+	subprintfe(subfdout, "inquerytest", "Max Forwards         : %13d\n", limits->maxforwards);
+	subprintfe(subfdout, "inquerytest", "Max Autoresponders   : %13d\n", limits->maxautoresponders);
+	subprintfe(subfdout, "inquerytest", "Max Mailinglists     : %13d\n", limits->maxmailinglists);
 	out("inquerytest", "\n");
-	out("inquerytest", "Max Domain Messages  : ");
-	strnum[fmt_long(strnum, limits->maxmsgcount)] = 0;
-	out("inquerytest", strnum);
+	subprintfe(subfdout, "inquerytest", "GID Flags:\n");
+	subprintfe(subfdout, "inquerytest", "  %s\n", limits->disable_imap ? "NO_IMAP" : "IMAP");
+	subprintfe(subfdout, "inquerytest", "  %s\n", limits->disable_smtp ? "NO_SMTP" : "SMTP");
+	subprintfe(subfdout, "inquerytest", "  %s\n", limits->disable_pop ? "NO_POP" : "POP3");
+	subprintfe(subfdout, "inquerytest", "  %s\n", limits->disable_webmail ? "NO_WEBMAIL" : "WEBMAIL");
+	subprintfe(subfdout, "inquerytest", "  %s\n", limits->disable_passwordchanging ? "NO_PASSWD_CHNG" : "PASSWD CHNG");
+	subprintfe(subfdout, "inquerytest", "  %s\n", limits->disable_relay ? "NO_RELAY" : "RELAY");
+	subprintfe(subfdout, "inquerytest", "  %s\n", limits->disable_dialup ? "NO_DIALUP" : "DIALUP");
 	out("inquerytest", "\n");
-	out("inquerytest", "Default User Quota   : ");
-	strnum[fmt_long(strnum, limits->defaultquota)] = 0;
-	out("inquerytest", strnum);
-	out("inquerytest", "\n");
-	out("inquerytest", "Default User Messages: ");
-	strnum[fmt_long(strnum, limits->defaultmaxmsgcount)] = 0;
-	out("inquerytest", strnum);
-	out("inquerytest", "\n");
-	out("inquerytest", "Max Pop Accounts     : ");
-	strnum[fmt_int(strnum, limits->maxpopaccounts)] = 0;
-	out("inquerytest", strnum);
-	out("inquerytest", "\n");
-	out("inquerytest", "Max Aliases          : ");
-	strnum[fmt_int(strnum, limits->maxaliases)] = 0;
-	out("inquerytest", strnum);
-	out("inquerytest", "\n");
-	out("inquerytest", "Max Forwards         : ");
-	strnum[fmt_int(strnum, limits->maxforwards)] = 0;
-	out("inquerytest", strnum);
-	out("inquerytest", "\n");
-	out("inquerytest", "Max Autoresponders   : ");
-	strnum[fmt_int(strnum, limits->maxautoresponders)] = 0;
-	out("inquerytest", strnum);
-	out("inquerytest", "\n");
-	out("inquerytest", "Max Mailinglists     : ");
-	strnum[fmt_int(strnum, limits->maxmailinglists)] = 0;
-	out("inquerytest", strnum);
-	out("inquerytest", "\n");
-	out("inquerytest", "GID Flags:\n");
-	if (limits->disable_imap != 0)
-		out("inquerytest", "  NO_IMAP\n");
-	if (limits->disable_smtp != 0)
-		out("inquerytest", "  NO_SMTP\n");
-	if (limits->disable_pop != 0)
-		out("inquerytest", "  NO_POP\n");
-	if (limits->disable_webmail != 0)
-		out("inquerytest", "  NO_WEBMAIL\n");
-	if (limits->disable_passwordchanging != 0)
-		out("inquerytest", "  NO_PASSWD_CHNG\n");
-	if (limits->disable_relay != 0)
-		out("inquerytest", "  NO_RELAY\n");
-	if (limits->disable_dialup != 0)
-		out("inquerytest", "  NO_DIALUP\n");
-	out("inquerytest", "Flags for non postmaster accounts:\n");
-	out("inquerytest", "  pop account           : ");
-	out("inquerytest", (limits->perm_account & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-	out("inquerytest", (limits->perm_account & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-	out("inquerytest", (limits->perm_account & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-	out("inquerytest", "\n");
-	out("inquerytest", "  alias                 : ");
-	out("inquerytest", (limits->perm_alias & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-	out("inquerytest", (limits->perm_alias & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-	out("inquerytest", (limits->perm_alias & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-	out("inquerytest", "\n");
-	out("inquerytest", "  forward               : ");
-	out("inquerytest", (limits->perm_forward & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-	out("inquerytest", (limits->perm_forward & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-	out("inquerytest", (limits->perm_forward & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-	out("inquerytest", "\n");
-	out("inquerytest", "  autoresponder         : ");
-	out("inquerytest", (limits->perm_autoresponder & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-	out("inquerytest", (limits->perm_autoresponder & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-	out("inquerytest", (limits->perm_autoresponder & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-	out("inquerytest", "\n");
-	out("inquerytest", "  mailinglist           : ");
-	out("inquerytest", (limits->perm_maillist & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-	out("inquerytest", (limits->perm_maillist & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-	out("inquerytest", (limits->perm_maillist & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-	out("inquerytest", "\n");
-	out("inquerytest", "  mailinglist users     : ");
-	out("inquerytest", (limits->perm_maillist_users & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-	out("inquerytest", (limits->perm_maillist_users & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-	out("inquerytest", (limits->perm_maillist_users & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-	out("inquerytest", "\n");
-	out("inquerytest", "  mailinglist moderators: ");
-	out("inquerytest", (limits->perm_maillist_moderators & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-	out("inquerytest", (limits->perm_maillist_moderators & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-	out("inquerytest", (limits->perm_maillist_moderators & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-	out("inquerytest", "\n");
-	out("inquerytest", "  domain quota          : ");
-	out("inquerytest", (limits->perm_quota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-	out("inquerytest", (limits->perm_quota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-	out("inquerytest", (limits->perm_quota & VLIMIT_DISABLE_DELETE ? "DENY_DELETE  " : "ALLOW_DELETE "));
-	out("inquerytest", "\n");
-	out("inquerytest", "  default quota         : ");
-	out("inquerytest", (limits->perm_defaultquota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE  " : "ALLOW_CREATE "));
-	out("inquerytest", (limits->perm_defaultquota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY  " : "ALLOW_MODIFY "));
-	out("inquerytest", "\n");
+	subprintfe(subfdout, "inquerytest", "Flags for non postmaster accounts:\n");
+	subprintfe(subfdout, "inquerytest", "  pop account           : %12s %12s %12s\n",
+			limits->perm_account & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+			limits->perm_account & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
+			limits->perm_account & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
+	subprintfe(subfdout, "inquerytest", "  alias                 : %12s %12s %12s\n",
+			limits->perm_alias & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+			limits->perm_alias & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
+			limits->perm_alias & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
+	subprintfe(subfdout, "inquerytest", "  forward               : %12s %12s %12s\n",
+			limits->perm_forward & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+			limits->perm_forward & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
+			limits->perm_forward & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
+	subprintfe(subfdout, "inquerytest", "  autoresponder         : %12s %12s %12s\n",
+			limits->perm_autoresponder & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+			limits->perm_autoresponder & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
+			limits->perm_autoresponder & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
+	subprintfe(subfdout, "inquerytest", "  mailinglist           : %12s %12s %12s\n",
+			limits->perm_maillist & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+			limits->perm_maillist & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
+			limits->perm_maillist & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
+	subprintfe(subfdout, "inquerytest", "  mailinglist users     : %12s %12s %12s\n",
+			limits->perm_maillist_users & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+			limits->perm_maillist_users & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
+			limits->perm_maillist_users & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
+	subprintfe(subfdout, "inquerytest", "  mailinglist moderators: %12s %12s %12s\n",
+			limits->perm_maillist_moderators & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+			limits->perm_maillist_moderators & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
+			limits->perm_maillist_moderators & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
+	subprintfe(subfdout, "inquerytest", "  domain quota          : %12s %12s %12s\n",
+			limits->perm_quota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+			limits->perm_quota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
+			limits->perm_quota & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
+	subprintfe(subfdout, "inquerytest", "  default quota         : %12s %12s\n",
+			limits->perm_defaultquota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
+			limits->perm_defaultquota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY");
 	flush("inquerytest");
 	return;
 }
@@ -403,53 +366,29 @@ main(int argc, char **argv)
 			out("inquerytest", " is an alias\n");
 			break;
 		default:
-			strnum[fmt_int(strnum, (int) *((int *) dbptr))] = 0;
-			out("inquerytest", " has unknown status [");
-			out("inquerytest", strnum);
-			out("inquerytest", "]\n");
+			subprintfe(subfdout, "inquerytest", " has unknown status [%d]\n", (int) *((int *) dbptr));
 			break;
 		}
 		flush("inquerytest");
 		break;
 	case RELAY_QUERY:
-		out("inquerytest", email);
-		out("inquerytest", " is ");
-		out("inquerytest", (int) *((int *) dbptr) == 1 ? "authenticated" : "not authenticated");
-		out("inquerytest", " on ");
-		out("inquerytest", ipaddr);
-		out("inquerytest", "\n");
+		subprintfe(subfdout, "inquerytest", "%s is %s on %s\n", email,
+				(int) *((int *) dbptr) == 1 ? "authenticated" : "not authenticated",
+				ipaddr);
 		flush("inquerytest");
 		break;
 	case PWD_QUERY:
 		pw = (struct passwd *) dbptr;
-		out("inquerytest", "pw_name  : ");
-		out("inquerytest", pw->pw_name);
-		out("inquerytest", "\n");
-		out("inquerytest", "pw_passwd: ");
-		out("inquerytest", pw->pw_passwd);
-		out("inquerytest", "\n");
-		out("inquerytest", "pw_uid   : ");
-		strnum[fmt_uint(strnum, (unsigned int) pw->pw_uid)] = 0;
-		out("inquerytest", strnum);
-		out("inquerytest", "\n");
-		out("inquerytest", "pw_gid   : ");
-		strnum[fmt_uint(strnum, (unsigned int) pw->pw_gid)] = 0;
-		out("inquerytest", strnum);
-		out("inquerytest", "\n");
-		out("inquerytest", "pw_gecos : ");
-		out("inquerytest", pw->pw_gecos);
-		out("inquerytest", "\n");
-		out("inquerytest", "pw_dir   : ");
-		out("inquerytest", pw->pw_dir);
-		out("inquerytest", "\n");
-		out("inquerytest", "pw_shell : ");
-		out("inquerytest", pw->pw_shell);
-		out("inquerytest", "\n");
-		out("inquerytest", "Table    : ");
 		getEnvConfigStr(&default_table, "MYSQL_TABLE", MYSQL_DEFAULT_TABLE);
 		getEnvConfigStr(&inactive_table, "MYSQL_INACTIVE_TABLE", MYSQL_INACTIVE_TABLE);
-		out("inquerytest", is_inactive ? inactive_table : default_table);
-		out("inquerytest", "\n");
+		subprintfe(subfdout, "inquerytest", "pw_name  : %s\n", pw->pw_name);
+		subprintfe(subfdout, "inquerytest", "pw_passwd: %s\n", pw->pw_passwd);
+		subprintfe(subfdout, "inquerytest", "pw_uid   : %u\n", pw->pw_uid);
+		subprintfe(subfdout, "inquerytest", "pw_gid   : %u\n", pw->pw_gid);
+		subprintfe(subfdout, "inquerytest", "pw_gecos : %s\n", pw->pw_gecos);
+		subprintfe(subfdout, "inquerytest", "pw_dir   : %s\n", pw->pw_dir);
+		subprintfe(subfdout, "inquerytest", "pw_shell : %s\n", pw->pw_shell);
+		subprintfe(subfdout, "inquerytest", "Table    : %s\n", is_inactive ? inactive_table : default_table);
 		flush("inquerytest");
 		break;
 	case LIMIT_QUERY:
@@ -458,10 +397,7 @@ main(int argc, char **argv)
 		break;
 #ifdef CLUSTERED_SITE
 	case HOST_QUERY:
-		out("inquerytest", email);
-		out("inquerytest", ": SMTPROUTE is ");
-		out("inquerytest", (char *) dbptr);
-		out("inquerytest", "\n");
+		subprintfe(subfdout, "inquerytest", "%s: SMTPROUTE is %s\n", email, (char *) dbptr);
 		flush("inquerytest");
 		break;
 #endif
@@ -470,27 +406,20 @@ main(int argc, char **argv)
 			strerr_warn2(email, ": No aliases\n", 0);
 			break;
 		}
-		out("inquerytest", "Alias List for ");
-		out("inquerytest", email);
-		out("inquerytest", "\n");
+		subprintfe(subfdout, "inquerytest", "Alias List for %s\n", email);
 		for (ptr = s = (char *) dbptr; *s; s++) {
 			if (*s == '\n') {
 				*s = 0;
-				out("inquerytest", ptr);
-				out("inquerytest", "\n");
+				subprintfe(subfdout, "inquerytest", "%s\n", ptr);
 				ptr = s + 1;
 				*s = '\n';
 			}
 		}
-		out("inquerytest", ptr);
-		out("inquerytest", "\n");
+		subprintfe(subfdout, "inquerytest", "%s\n", ptr);
 		flush("inquerytest");
 		break;
 	case DOMAIN_QUERY:
-		out("inquerytest", email);
-		out("inquerytest", ": Real Domain is ");
-		out("inquerytest", (char *) dbptr);
-		out("inquerytest", "\n");
+		subprintfe(subfdout, "inquerytest", "%s: Real Domain is %s\n", email, (char *) dbptr);
 		flush("inquerytest");
 		break;
 	default:

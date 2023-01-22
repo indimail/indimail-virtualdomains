@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 1.13  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.12  2020-10-18 07:35:53+05:30  Cprogrammer
  * use alloc() instead of alloc_re()
  *
@@ -58,6 +61,7 @@
 #include <str.h>
 #include <strerr.h>
 #include <getEnvConfig.h>
+#include <subfd.h>
 #include "LoadDbInfo.h"
 #include "set_mysql_options.h"
 #include "islocalif.h"
@@ -66,7 +70,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 1.12 2020-10-18 07:35:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 1.13 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static MYSQL   *is_duplicate_conn(MYSQL **, DBINFO **);
@@ -219,7 +223,7 @@ OpenDatabases()
 	static int      total;
 	int             count, idx;
 	int             fd[3];
-	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG], strnum3[FMT_ULONG];
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	extern int      loadDbinfoTotal();
 
 	if (RelayHosts)
@@ -272,50 +276,12 @@ OpenDatabases()
 					continue;
 				} else
 					(*ptr)->fd = (*mysqlptr)->net.fd;
-				if (verbose) {
-					strnum1[fmt_uint(strnum1, count)] = 0;
-					strnum2[fmt_uint(strnum2, (*ptr)->fd)] = 0;
-					strnum3[fmt_uint(strnum3, (*ptr)->port)] = 0;
-					out("dbload", "connection ");
-					out("dbload", strnum1);
-					out("dbload", " fd ");
-					out("dbload", strnum2);
-					out("dbload", ": ");
-					out("dbload", (*ptr)->domain);
-					out("dbload", " database ");
-					out("dbload", (*ptr)->database);
-					out("dbload", " server ");
-					out("dbload", (*ptr)->server);
-					out("dbload", " user ");
-					out("dbload", (*ptr)->user);
-					out("dbload", " ");
-					out("dbload", strnum3);
-					out("dbload", "\n");
-					flush("dbload");
-				}
-			} else {
+			} else
 				(*ptr)->fd = (*mysqlptr)->net.fd;
-				if (verbose) {
-					strnum1[fmt_uint(strnum1, count)] = 0;
-					strnum2[fmt_uint(strnum2, (*ptr)->fd)] = 0;
-					strnum3[fmt_uint(strnum3, (*ptr)->port)] = 0;
-					out("dbload", "connection ");
-					out("dbload", strnum1);
-					out("dbload", " fd ");
-					out("dbload", strnum2);
-					out("dbload", ": ");
-					out("dbload", (*ptr)->domain);
-					out("dbload", " database ");
-					out("dbload", (*ptr)->database);
-					out("dbload", " server ");
-					out("dbload", (*ptr)->server);
-					out("dbload", " user ");
-					out("dbload", (*ptr)->user);
-					out("dbload", " ");
-					out("dbload", strnum3);
-					out("dbload", "\n");
-					flush("dbload");
-				}
+			if (verbose) {
+				subprintfe(subfdout, "dbload", "connection %03d fd %d: %-30s database %s server %s user %s %d\n",
+						count, (*ptr)->fd, (*ptr)->domain, (*ptr)->database, (*ptr)->server, (*ptr)->user, (*ptr)->port);
+				flush("dbload");
 			}
 		}
 	} 

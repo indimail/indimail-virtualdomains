@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbInfo.c,v $
+ * Revision 1.13  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.12  2021-07-27 18:05:36+05:30  Cprogrammer
  * set default domain using vset_default_domain
  *
@@ -83,6 +86,7 @@
 #include <scan.h>
 #include <env.h>
 #include <getEnvConfig.h>
+#include <subfd.h>
 #endif
 #include "create_table.h"
 #include "get_local_ip.h"
@@ -96,7 +100,7 @@
 #include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.12 2021-07-27 18:05:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.13 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static DBINFO **loadMCDInfo(int *);
@@ -276,10 +280,7 @@ LoadDbInfo_TXT(int *total)
 	} else {
 		file_time = statbuf.st_mtime;
 		if (verbose) {
-			out("LoadDbInfo", "File UNIX  ");
-			out("LoadDbInfo", mcdFile.s);
-			out("LoadDbInfo", " Modification Time ");
-			out("LoadDbInfo", ctime(&file_time));
+			subprintfe(subfdout, "LoadDbInfo", "File UNIX  %-40s Modification Time %s", mcdFile.s, ctime(&file_time));
 			flush("LoadDbInfo");
 		}
 	}
@@ -332,9 +333,7 @@ LoadDbInfo_TXT(int *total)
 			}
 			in_mysql_free_result(res);
 			if (verbose) {
-				out("LoadDbInfo", "File MySQL ");
-				out("LoadDbInfo", mcdFile.s);
-				out("LoadDbInfo", ctime(&mcd_time));
+				subprintfe(subfdout, "LoadDbInfo", "Table MySQL %-40s Modification Time %s", mcdFile.s, ctime(&mcd_time));
 				flush("LoadDbInfo");
 				if (mcd_time == file_time) {
 					out("LoadDbInfo", "Nothing to update\n");
@@ -412,9 +411,7 @@ LoadDbInfo_TXT(int *total)
 	} else
 	if (sync_file) {
 		if (verbose) {
-			out("LoadDbInfo", "Updating File ");
-			out("LoadDbInfo", mcdFile.s);
-			out("LoadDbInfo", "\n");
+			subprintfe(subfdout, "LoadDbInfo", "Updating File %s\n", mcdFile.s);
 			flush("LoadDbInfo");
 		}
 		if (!stralloc_copyb(&SqlBuf, "select high_priority domain, distributed, server, ", 50) ||

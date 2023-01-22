@@ -1,5 +1,8 @@
 /*
  * $Log: vpriv.c,v $
+ * Revision 1.5  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.4  2022-10-20 11:59:12+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpriv.c,v 1.4 2022-10-20 11:59:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpriv.c,v 1.5 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -33,7 +36,7 @@ static char     sccsid[] = "$Id: vpriv.c,v 1.4 2022-10-20 11:59:12+05:30 Cprogra
 #endif
 #include "get_indimailuidgid.h"
 #include "variables.h"
-#include "qprintf.h"
+#include "common.h"
 #include "vpriv.h"
 #include "check_group.h"
 #include "mgmtpassfuncs.h"
@@ -165,18 +168,13 @@ main(int argc, char **argv)
 	switch (action)
 	{
 	case V_PRIV_SELECT:
-		for(;;)
-		{
+		for(;;) {
 			if (!(ptr = vpriv_select(&user, &program)))
 				break;
-			qprintf(subfdoutsmall, user, "%-20s");
-			qprintf(subfdoutsmall, " --> ", "%s");
-			qprintf(subfdoutsmall, program, "%-20s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, ptr, "%s");
-			qprintf(subfdoutsmall, "\n", "%s");
+			subprintfe(subfdout, "vpriv", "%-20s --> %-20s %s\n",
+					user, program, ptr);
 		}
-		qprintf_flush(subfdoutsmall);
+		flush("vpriv");
 		break;
 	case V_PRIV_INSERT:
 		return (vpriv_insert(user, program, cmdargs));

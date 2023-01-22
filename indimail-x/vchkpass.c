@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.18  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.17  2022-11-05 21:13:57+05:30  Cprogrammer
  * use ENABLE_CRAM to allow use of pw_passwd field of indimail, indibak for authentication
  *
@@ -76,6 +79,7 @@
 #include <env.h>
 #include <error.h>
 #include <pw_comp.h>
+#include <subfd.h>
 #include <getEnvConfig.h>
 #include <authmethods.h>
 #include <get_scram_secrets.h>
@@ -94,7 +98,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.17 2022-11-05 21:13:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.18 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -109,11 +113,7 @@ int             authlen = AUTH_SIZE;
 void
 print_error(char *str)
 {
-	out("vchkpass", "454-");
-	out("vchkpass", str);
-	out("vchkpass", ": ");
-	out("vchkpass", error_str(errno));
-	out("vchkpass", " (#4.3.0)\r\n");
+	subprintfe(subfdout, "vchkpass", "454-%s: %s (#4.3.0)\r\n", str, error_str(errno));
 	flush("vchkpass");
 }
 
@@ -248,9 +248,7 @@ main(int argc, char **argv)
 #else
 				strerr_warn1("iopen: failed to connect to db: ", &strerr_sys);
 #endif
-			out("vchkpass", "454-failed to connect to database (");
-			out("vchkpass", error_str(errno));
-			out("vchkpass", ") (#4.3.0)\r\n");
+			subprintfe(subfdout, "vchkpass", "454-failed to connect to database: %s (#4.3.0)\r\n", error_str(errno));
 			flush("vchkpass");
 			_exit (111);
 		}
@@ -276,9 +274,7 @@ main(int argc, char **argv)
 #else
 			strerr_warn1("iopen: failed to connect to db: ", &strerr_sys);
 #endif
-		out("vchkpass", "454-failed to connect to database (");
-		out("vchkpass", error_str(errno));
-		out("vchkpass", ") (#4.3.0)\r\n");
+		subprintfe(subfdout, "vchkpass", "454-failed to connect to database (%s) (#4.3.0)\r\n", error_str(errno));
 		flush("vchkpass");
 		_exit (111);
 	}
@@ -396,9 +392,7 @@ main(int argc, char **argv)
 		if (!env_get("QUERY_CACHE")) {
 			if (vget_limits(domain.s, &limits)) {
 				strerr_warn2("vchkpass: unable to get domain limits for for ", domain.s, 0);
-				out("vchkpass", "454-unable to get domain limits for ");
-				out("vchkpass", domain.s);
-				out("vchkpass", "\r\n");
+				subprintfe(subfdout, "vchkpass", "454-unable to get domain limits for %s (#4.3.0)\r\n", domain.s);
 				flush("vchkpass");
 				_exit (111);
 			}
@@ -408,9 +402,7 @@ main(int argc, char **argv)
 #else
 		if (vget_limits(domain.s, &limits)) {
 			strerr_warn2("vchkpass: unable to get domain limits for for ", domain.s, 0);
-			out("vchkpass", "454-unable to get domain limits for ");
-			out("vchkpass", domain.s);
-			out("vchkpass", "\r\n");
+			subprintfe(subfdout, "vchkpass", "454-unable to get domain limits for %s (#4.3.0)\r\n", domain.s);
 			flush("vchkpass");
 			_exit (111);
 		}

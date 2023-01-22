@@ -1,5 +1,8 @@
 /*
  * $Log: spam.c,v $
+ * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.3  2020-10-01 18:29:19+05:30  Cprogrammer
  * initialize pos variable
  *
@@ -34,7 +37,6 @@
 #include <open.h>
 #include <env.h>
 #include <getln.h>
-#include <qprintf.h>
 #include <scan.h>
 #include <fmt.h>
 #include <byte.h>
@@ -42,12 +44,13 @@
 #include <subfd.h>
 #include <getEnvConfig.h>
 #endif
+#include "common.h"
 #include "spam.h"
 #include "wildmat.h"
 #include "lowerit.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: spam.c,v 1.3 2020-10-01 18:29:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: spam.c,v 1.4 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define BADMAIL 1
@@ -274,9 +277,8 @@ spamReport(int spamNumber, char *outfile)
 	if ((fd = open_append(outfile)) == -1)
 		strerr_die3sys(111, "spam: open: ", outfile, ": ");
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
-	qprintf(subfderr, "Spammer's Email Address", "%-40s");
-	qprintf(subfderr, "Mail Count\n", "%s");
-	qprintf_flush(subfderr);
+	subprintfe(subfderr, "spam", "%-40s Mail Count\n", "Spammer's Email Address");
+	errflush("spam");
 	if(!maxaddr) {
 		getEnvConfigStr(&ptr, "MAXADDR", MAXADDR);
 		scan_int(ptr, &maxaddr);
@@ -304,46 +306,33 @@ spamReport(int spamNumber, char *outfile)
 			if (p->cnt >= spamNumber && !isIgnored(p->mail)) {
 				spamcnt++;
 				if(flag) {
-					if (substdio_puts(&ssout, p->mail) ||
-							substdio_put(&ssout, "\n", 1))
+					if (substdio_puts(&ssout, p->mail) == -1 ||
+							substdio_put(&ssout, "\n", 1) == -1)
 					{
 						strerr_warn3("spam: write: ", outfile, ": ", &strerr_sys);
 						return (-1);
 					}
 				} else {
-					if (substdio_puts(&ssout, p->mail) ||
-							substdio_put(&ssout, " ", 1) ||
-							substdio_put(&ssout, strnum, fmt_ulong(strnum, (unsigned long) p->cnt)) ||
-							substdio_put(&ssout, "\n", 1))
+					if (substdio_puts(&ssout, p->mail) == -1 ||
+							substdio_put(&ssout, " ", 1) == -1 ||
+							substdio_put(&ssout, strnum, fmt_ulong(strnum, (unsigned long) p->cnt)) == -1 ||
+							substdio_put(&ssout, "\n", 1) == -1)
 					{
 						strerr_warn3("spam: write: ", outfile, ": ", &strerr_sys);
 						return (-1);
 					}
 				}
-				qprintf(subfderr, p->mail, "%-40s");
-				qprintf(subfderr, " ", "%s");
-				strnum[fmt_ulong(strnum, (unsigned long) p->cnt)] = 0;
-				qprintf(subfderr, strnum, "%s");
-				qprintf(subfderr, "\n", "%s");
+				subprintfe(subfderr, "spam", "%-40s %d\n", p->mail, p->cnt);
 			}
 		}
 	}
-	if (substdio_flush(&ssout)) {
+	if (substdio_flush(&ssout) == -1) {
 		strerr_warn3("spam: write: ", outfile, ": ", &strerr_sys);
 		return (-1);
 	}
-	qprintf_flush(subfderr);
 	close(fd);
-	if (substdio_put(subfderr, "Bounces: ", 9) ||
-			substdio_put(subfderr, strnum, fmt_int(strnum, bounce)) ||
-			substdio_put(subfderr, "\n", 1) ||
-			substdio_put(subfderr, strnum, fmt_int(strnum, spamcnt)) ||
-			substdio_put(subfderr, " Spammers detected\n", 19) ||
-			substdio_flush(subfderr))
-	{
-		strerr_warn1("spam: unable to write to stderr: ", &strerr_sys);
-		return (-1);
-	}
+	subprintfe(subfderr, "spam", "Bounces: %d\n%d Spammers detected\n", bounce, spamcnt);
+	errflush("spam");
 	if (flag && spamcnt) {
 		spamprog[0] = PREFIX"/sbin/qmail-cdb";
 		i = str_rchr(outfile, '/');
@@ -435,9 +424,9 @@ readLogFile(char *fn, int type, int count)
 				return (-1);
 			}
 			substdio_fdbuf(&ssout, write, keyfd, outbuf, sizeof(outbuf));
-			if (substdio_put(&ssout, strnum, fmt_ulong(strnum, seekPos)) ||
-					substdio_put(&ssout, "\n", 1) ||
-					substdio_flush(&ssout)) {
+			if (substdio_put(&ssout, strnum, fmt_ulong(strnum, seekPos)) == -1 ||
+					substdio_put(&ssout, "\n", 1) == -1 ||
+					substdio_flush(&ssout) == -1) {
 				strerr_warn3("readLogFile: write: ", keyfile.s, ": ", &strerr_sys);
 				close(fd);
 				close(keyfd);
@@ -542,7 +531,6 @@ print_list(int list)
 	maddr         **hash_tab;
 	maddr          *sym;
 	char           *ptr;
-	char            strnum[FMT_ULONG];
 	int             i;
 
 	switch (list)
@@ -560,16 +548,10 @@ print_list(int list)
 	getEnvConfigStr(&ptr, "MAXADDR", MAXADDR);
 	scan_int(ptr, &maxaddr);
 	for (i = 0; i < maxaddr; i++) {
-		for (sym = hash_tab[i]; sym; sym = sym->next) {
-			if (substdio_puts(subfderr, sym->mail) ||
-					substdio_put(subfderr, " ", 1) ||
-					substdio_put(subfderr, strnum, fmt_uint(strnum, sym->cnt)) ||
-					substdio_put(subfderr, " mails\n", 7))
-				strerr_warn1("spam: unable to write to stderr: ", &strerr_sys);
-		}
+		for (sym = hash_tab[i]; sym; sym = sym->next)
+			subprintfe(subfderr, "spam", "%s %d mails\n", sym->mail, sym->cnt);
 	}
-	if (substdio_flush(subfderr))
-		strerr_warn1("spam: unable to write to stderr: ", &strerr_sys);
+	errflush("spam");
 	return;
 }
 

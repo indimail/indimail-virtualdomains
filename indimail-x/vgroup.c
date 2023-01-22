@@ -1,5 +1,8 @@
 /*
  * $Log: vgroup.c,v $
+ * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.5  2022-11-02 20:15:00+05:30  Cprogrammer
  * added feature to add scram password during user addition
  *
@@ -22,7 +25,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 1.5 2022-11-02 20:15:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 1.6 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -40,6 +43,7 @@ static char     sccsid[] = "$Id: vgroup.c,v 1.5 2022-11-02 20:15:00+05:30 Cprogr
 #include <env.h>
 #include <makesalt.h>
 #include <hashmethods.h>
+#include <subfd.h>
 #endif
 #ifdef HAVE_GSASL_H
 #include <gsasl.h>
@@ -227,14 +231,8 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos,
 			else
 			if (!str_diffn(optarg, "SHA-512", 7))
 				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
-			else {
-				errout("vgroup", WARN);
-				errout("vgroup", optarg);
-				errout("vgroup", ": wrong hash method\n");
-				errout("vgroup", "Supported HASH Methods: DES MD5 SHA-256 SHA-512\n");
-				errflush("vgroup");
-				strerr_die2x(100, WARN, usage);
-			}
+			else
+				strerr_die5x(100, FATAL, "wrong hash method ", optarg, ". Supported HASH Methods: DES MD5 SHA-256 SHA-512\n", usage);
 			if (!env_put2("PASSWORD_HASH", strnum))
 				strerr_die1x(111, "out of memory");
 			*encrypt_flag = 1;
@@ -258,14 +256,8 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos,
 			else
 			if (!str_diffn(optarg, "SCRAM-SHA-256", 13))
 				*scram = 2;
-			else {
-				errout("vgroup", WARN);
-				errout("vgroup", optarg);
-				errout("vgroup", ": wrong SCRAM method\n");
-				errout("vgroup", "Supported SCRAM Methods: SCRAM-SHA-1 SCRAM-SHA-256\n");
-				errflush("vgroup");
-				strerr_die2x(100, WARN, usage);
-			}
+			else
+				strerr_die5x(100, FATAL, "wrong SCRAM method ", optarg, ". Supported SCRAM Methods: SCRAM-SHA1 SCRAM-SHA-256\n", usage);
 			break;
 		case 'S':
 			if (!salt)
@@ -473,9 +465,7 @@ main(int argc, char **argv)
 #endif
 			ret = addGroup(User.s, real_domain, mdahost, gecos, passwd, quotaVal.s, encrypt_flag, ptr);
 			if (!ret && random) {
-				out("vgroup", "Password is ");
-				out("vgroup", passwd);
-				out("vgroup", "\n");
+				subprintfe(subfdout, "vgroup", "Password is %s\n", passwd);
 				flush("vgroup");
 			}
 			break;

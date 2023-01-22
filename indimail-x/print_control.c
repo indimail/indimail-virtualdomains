@@ -1,5 +1,8 @@
 /*
  * $Log: print_control.c,v $
+ * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.1  2019-04-14 21:04:19+05:30  Cprogrammer
  * Initial revision
  *
@@ -14,16 +17,16 @@
 #include <getln.h>
 #include <open.h>
 #include <substdio.h>
+#include <subfd.h>
 #include <stralloc.h>
 #include <error.h>
 #include <strerr.h>
-#include <fmt.h>
 #endif
 #include "common.h"
 #include "dir_control.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: print_control.c,v 1.1 2019-04-14 21:04:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: print_control.c,v 1.2 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 unsigned long
@@ -33,7 +36,7 @@ print_control(char *filename, char *domain, int max_users_per_level, int silent)
 	static stralloc line = {0};
 	int             fd, match, users_per_level = 0;
 	unsigned long   total = 0;
-	char            inbuf[512], strnum[FMT_ULONG];
+	char            inbuf[512];
 	struct substdio ssin;
 
 	if ((fd = open_read(filename)) == -1) {
@@ -59,85 +62,25 @@ print_control(char *filename, char *domain, int max_users_per_level, int silent)
 			if (*ptr == '_')
 				*ptr = '/';
 		if (!silent) {
-			out("print_control", "Dir Control     = ");
-			out("print_control", line.s);
+			subprintfe(subfdout, "print_control", "Dir Control     = %s\n", line.s);
+			subprintfe(subfdout, "print_control", "cur users       = %lu\n", vdir.cur_users);
+			subprintfe(subfdout, "print_control", "dir prefix      = %s\n", vdir.the_dir);
+			subprintfe(subfdout, "print_control", "Users per level = %d\n", users_per_level);
+			subprintfe(subfdout, "print_control", "level_cur       = %d\n", vdir.level_cur);
+			subprintfe(subfdout, "print_control", "level_max       = %d\n", vdir.level_max);
+			subprintfe(subfdout, "print_control", "level_index 0   = %d\n", vdir.level_index[0]);
+			subprintfe(subfdout, "print_control", "            1   = %d\n", vdir.level_index[1]);
+			subprintfe(subfdout, "print_control", "            2   = %d\n", vdir.level_index[2]);
+			subprintfe(subfdout, "print_control", "level_start 0   = %d\n", vdir.level_start[0]);
+			subprintfe(subfdout, "print_control", "            1   = %d\n", vdir.level_start[1]);
+			subprintfe(subfdout, "print_control", "            2   = %d\n", vdir.level_start[2]);
+			subprintfe(subfdout, "print_control", "level_end   0   = %d\n", vdir.level_end[0]);
+			subprintfe(subfdout, "print_control", "            1   = %d\n", vdir.level_end[1]);
+			subprintfe(subfdout, "print_control", "            2   = %d\n", vdir.level_end[2]);
+			subprintfe(subfdout, "print_control", "level_mod   0   = %d\n", vdir.level_mod[0]);
+			subprintfe(subfdout, "print_control", "            1   = %d\n", vdir.level_mod[1]);
+			subprintfe(subfdout, "print_control", "            2   = %d\n", vdir.level_mod[2]);
 			out("print_control", "\n");
-
-			strnum[fmt_uint(strnum, vdir.cur_users)] = 0;
-			out("print_control", "cur users       = ");
-			out("print_control", strnum);
-			out("print_control", "\n");
-
-			out("print_control", "dir prefix      = ");
-			out("print_control", vdir.the_dir);
-			out("print_control", "\n");
-
-			strnum[fmt_uint(strnum, users_per_level)] = 0;
-			out("print_control", "Users per level = ");
-			out("print_control", strnum);
-			out("print_control", "\n");
-
-			strnum[fmt_uint(strnum, vdir.level_cur)] = 0;
-			out("print_control", "level_cur       = ");
-			out("print_control", strnum);
-			out("print_control", "\n");
-
-			strnum[fmt_uint(strnum, vdir.level_max)] = 0;
-			out("print_control", "level_max       = ");
-			out("print_control", strnum);
-			out("print_control", "\n");
-
-			strnum[fmt_uint(strnum, vdir.level_index[0])] = 0;
-			out("print_control", "level_index 0   = ");
-			out("print_control", strnum);
-			out("print_control", "\n");
-			strnum[fmt_uint(strnum, vdir.level_index[1])] = 0;
-			out("print_control", "            1   = ");
-			out("print_control", strnum);
-			out("print_control", "\n");
-			strnum[fmt_uint(strnum, vdir.level_index[2])] = 0;
-			out("print_control", "            2   = ");
-			out("print_control", strnum);
-			out("print_control", "\n");
-
-			strnum[fmt_uint(strnum, vdir.level_start[0])] = 0;
-			out("print_control", "level_start 0   = ");
-			out("print_control", strnum);
-			out("print_control", "\n");
-			strnum[fmt_uint(strnum, vdir.level_start[1])] = 0;
-			out("print_control", "            1   = ");
-			out("print_control", strnum);
-			out("print_control", "\n");
-			strnum[fmt_uint(strnum, vdir.level_start[2])] = 0;
-			out("print_control", "            2   = ");
-			out("print_control", strnum);
-			out("print_control", "\n");
-
-			strnum[fmt_uint(strnum, vdir.level_end[0])] = 0;
-			out("print_control", "level_end   0   = ");
-			out("print_control", strnum);
-			out("print_control", "\n");
-			strnum[fmt_uint(strnum, vdir.level_end[1])] = 0;
-			out("print_control", "            1   = ");
-			out("print_control", strnum);
-			out("print_control", "\n");
-			strnum[fmt_uint(strnum, vdir.level_end[2])] = 0;
-			out("print_control", "            2   = ");
-			out("print_control", strnum);
-			out("print_control", "\n");
-
-			strnum[fmt_uint(strnum, vdir.level_mod[0])] = 0;
-			out("print_control", "level_mod   0   = ");
-			out("print_control", strnum);
-			out("print_control", "\n");
-			strnum[fmt_uint(strnum, vdir.level_mod[1])] = 0;
-			out("print_control", "            1   = ");
-			out("print_control", strnum);
-			out("print_control", "\n");
-			strnum[fmt_uint(strnum, vdir.level_mod[2])] = 0;
-			out("print_control", "            2   = ");
-			out("print_control", strnum);
-			out("print_control", "\n\n");
 		}
 		total += vdir.cur_users;
 	}

@@ -1,5 +1,8 @@
 /*
  * $Log: vmoddomain.c,v $
+ * Revision 1.3  2023-01-22 10:32:00+05:30  Cprogrammer
+ * reformatted error message strings
+ *
  * Revision 1.2  2019-06-07 15:45:51+05:30  Cprogrammer
  * use sgetopt library for getopt()
  *
@@ -42,7 +45,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomain.c,v 1.2 2019-06-07 15:45:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoddomain.c,v 1.3 2023-01-22 10:32:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vmoddomain: warning: "
@@ -56,22 +59,23 @@ int             set_domain_limits(char *, uid_t, gid_t, int);
 static void
 usage()
 {
-	errout("vmoddomain", "usage: vmoddomain [options] domain\n");
-	errout("vmoddomain", "options: -V         (print version number)\n");
-	errout("vmoddomain", "         -v         (verbose)\n");
-	errout("vmoddomain", "         -l 0|1     Enable Domain Limits\n");
-	errout("vmoddomain", "         -f 0|1     Enable VFILTER capability\n");
-	errout("vmoddomain", "         -h handler (can be one of the following\n");
- 	errout("vmoddomain", "                    ");
-	errout("vmoddomain", DELETE_ALL);
- 	errout("vmoddomain", "\n");
- 	errout("vmoddomain", "                    ");
-	errout("vmoddomain", BOUNCE_ALL);
- 	errout("vmoddomain", "\n");
-	errout("vmoddomain", "                    Maildir    - Maildir Path\n");
-	errout("vmoddomain", "                    email      - Email Addres\n");
-	errout("vmoddomain", "                    IP Address - SMTPROUTE/QMTPROUTE spec)\n");
-	errout("vmoddomain", "you need to specify handler and vfilter option or domain limits\n");
+	errout("vmoddomain",
+			"usage: vmoddomain [options] domain\n"
+			"options: -V         (print version number)\n"
+			"         -v         (verbose)\n"
+			"         -l 0|1     Enable Domain Limits\n"
+			"         -f 0|1     Enable VFILTER capability\n"
+			"         -h handler (can be one of the following\n"
+			"                    "
+			DELETE_ALL
+			"\n"
+			"                    "
+			BOUNCE_ALL
+			"\n"
+			"                    Maildir    - Maildir Path\n"
+			"                    email      - Email Addres\n"
+			"                    IP Address - SMTPROUTE/QMTPROUTE spec)\n"
+			"you need to specify handler and vfilter option or domain limits\n");
 	errflush("vmoddomain");
 	return;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: crcdiff.c,v $
+ * Revision 1.2  2023-01-22 10:35:57+05:30  Cprogrammer
+ * fixed data type passed to printf
+ *
  * Revision 1.1  2019-04-14 20:58:10+05:30  Cprogrammer
  * Initial revision
  *
@@ -87,7 +90,7 @@ char            new_line[BUF_SIZE];
 char            old_line[BUF_SIZE];
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crcdiff.c,v 1.1 2019-04-14 20:58:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crcdiff.c,v 1.2 2023-01-22 10:35:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -281,11 +284,11 @@ main(argc, argv)
 	if (!modicount)
 		return (0);
 	printf("----------------------------------------------------\n");
-	printf("1. Current      Checksum : %ld\n", newcrc);
-	printf("2. Old          Checksum : %ld\n", oldcrc);
-	printf("3. Net Difference  (Cal) : %ld\n", diffcrc);
-	printf("5. Current CRC - Old CRC : %ld\n", newcrc - oldcrc);
-	printf("6. Total         Changes : %ld\n", modicount);
+	printf("1. Current      Checksum : %lu\n", newcrc);
+	printf("2. Old          Checksum : %lu\n", oldcrc);
+	printf("3. Net Difference  (Cal) : %lu\n", diffcrc);
+	printf("5. Current CRC - Old CRC : %lu\n", newcrc - oldcrc);
+	printf("6. Total         Changes : %lu\n", modicount);
 	printf("----------------------------------------------------\n");
 	if (diffcrc == (newcrc - oldcrc))
 		printf("Checksum Reconcialation Done\n");

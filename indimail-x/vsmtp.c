@@ -1,5 +1,8 @@
 /*
  * $Log: vsmtp.c,v $
+ * Revision 1.5  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.4  2022-10-20 11:59:21+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -28,8 +31,8 @@
 #include <scan.h>
 #include <fmt.h>
 #include <subfd.h>
-#include <qprintf.h>
 #endif
+#include "common.h"
 #include "parse_email.h"
 #include "vsmtp_select.h"
 #include "vsmtp_insert.h"
@@ -40,7 +43,7 @@
 #include "smtp_port.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsmtp.c,v 1.4 2022-10-20 11:59:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsmtp.c,v 1.5 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vsmtp: fatal: "
@@ -173,17 +176,14 @@ main(int argc, char **argv)
 			if (!(dst_ip = sql_getip(dst_hostid.s)))
 				dst_ip = "x.x.x.x";
 			if (!oldport)
-				qprintf(subfdoutsmall, "Source HostIP        Destination HostID IP Address         -> Port\n", "%s");
-			strnum[fmt_uint(strnum, (unsigned int) port)] = 0;
-			qprintf(subfdoutsmall, src_ip.s, "%-20s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, dst_hostid.s, "%-18s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, dst_ip, "%-18s");
-			qprintf(subfdoutsmall, " -> ", "%s");
-			qprintf(subfdoutsmall, strnum, "%s");
-			qprintf(subfdoutsmall, "\n", "%s");
-			qprintf_flush(subfdoutsmall);
+				subprintfe(subfdout,
+						"vsmtp",
+						"Source HostIP        "
+						"Destination HostID IP Address"
+						"-> Port\n");
+			subprintfe(subfdout, "vsmtp", "%-20s %-18s %-18s -> %d\n",
+					src_ip.s, dst_hostid.s, dst_ip, port);
+			flush("vsmtp");
 			err = 0;
 		}
 		break;

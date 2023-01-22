@@ -1,5 +1,8 @@
 /*
  * $Log: vdeldomain.c,v $
+ * Revision 1.5  2023-01-22 10:32:24+05:30  Cprogrammer
+ * fixed incorrectly passed stralloc * instead of char *
+ *
  * Revision 1.4  2022-10-20 11:58:39+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -54,7 +57,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeldomain.c,v 1.4 2022-10-20 11:58:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeldomain.c,v 1.5 2023-01-22 10:32:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char    *usage =
@@ -192,7 +195,7 @@ main(int argc, char **argv)
 			base_argv0 = argv[0];
 		else
 			base_argv0++;
-		return (post_handle("%s/%s %s", LIBEXECDIR, base_argv0, Domain));
+		return (post_handle("%s/%s %s", LIBEXECDIR, base_argv0, Domain.s));
 	} else
-		return (post_handle("%s %s", ptr, Domain));
+		return (post_handle("%s %s", ptr, Domain.s));
 }

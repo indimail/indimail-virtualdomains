@@ -1,5 +1,8 @@
 /*
  * $Log: filewrt.h,v $
+ * Revision 1.2  2023-01-22 10:34:58+05:30  Cprogrammer
+ * use __attribute__ ((format (printf, 2, 3))) for filewrt function prototype
+ *
  * Revision 1.1  2019-04-13 23:39:27+05:30  Cprogrammer
  * filewrt.h
  *
@@ -19,7 +22,8 @@
 #endif
 
 #ifdef HAVE_STDARG_H
-int             filewrt     __P((int, char *, ...));
+int             filewrt     __P((int, char *, ...))
+					__attribute__ ((format (printf, 2, 3)));
 #else
 int             filewrt     ();
 #endif

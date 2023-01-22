@@ -1,5 +1,8 @@
 /*
  * $Log: vatrn.c,v $
+ * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.3  2022-10-20 11:58:33+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -19,16 +22,16 @@
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <strerr.h>
-#include <qprintf.h>
 #include <subfd.h>
 #include <sgetopt.h>
 #endif
+#include "common.h"
 #include "variables.h"
 #include "atrn_map.h"
 #include "parse_email.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vatrn.c,v 1.3 2022-10-20 11:58:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vatrn.c,v 1.4 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL     "vatrn: fatal: "
@@ -142,17 +145,12 @@ main(int argc, char **argv)
 			if (!(ptr = show_atrn_map(&user, &domain)))
 				break;
 			result = 0;
-			qprintf(subfdoutsmall, user, "%-20s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, domain, "%-20s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, ptr, "%s");
-			qprintf(subfdoutsmall, "\n", "%s");
-			qprintf_flush(subfdoutsmall);
+			subprintfe(subfdout, "vatrn", "%-20s %-20s %s\n", user, domain, ptr);
+			flush("vatrn");
 		}
 		if (result && verbose) {
-			qprintf(subfdoutsmall, "No ATRN Maps present\n", "%s");
-			qprintf_flush(subfdoutsmall);
+			subprintfe(subfdout, "vatrn", "No ATRN Maps present\n");
+			flush("vatrn");
 		}
 		break;
 	default:

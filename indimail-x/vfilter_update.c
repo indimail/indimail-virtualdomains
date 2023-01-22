@@ -1,5 +1,8 @@
 /*
  * $Log: vfilter_update.c,v $
+ * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.1  2019-04-15 11:15:14+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter_update.c,v 1.1 2019-04-15 11:15:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter_update.c,v 1.2 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -22,6 +25,7 @@ static char     sccsid[] = "$Id: vfilter_update.c,v 1.1 2019-04-15 11:15:14+05:3
 #include <stralloc.h>
 #include <strerr.h>
 #include <fmt.h>
+#include <subfd.h>
 #endif
 #include "iopen.h"
 #include "variables.h"
@@ -80,25 +84,9 @@ vfilter_update(char *emailid, int filter_no, int header_name, int comparision,
 	if(!verbose)
 		return ((err >= 0 && !terr) ? 0 : 1);
 	if(err) {
-		strnum[fmt_uint(strnum, (unsigned int) filter_no)] = 0;
-		out("vfilter_update", "updated filter no ");
-		out("vfilter_update", strnum);
-		out("vfilter_update", " header ");
-		strnum[fmt_uint(strnum, (unsigned int) header_name)] = 0;
-		out("vfilter_update", strnum);
-		out("vfilter_update", " keyword [");
-		out("vfilter_update", keyword);
-		out("vfilter_update", "] comparision ");
-		strnum[fmt_uint(strnum, (unsigned int) comparision)] = 0;
-		out("vfilter_update", strnum);
-		out("vfilter_update", " folder ");
-		out("vfilter_update", folder);
-		out("vfilter_update", " bounce action ");
-		strnum[fmt_uint(strnum, (unsigned int) bounce_action)] = 0;
-		out("vfilter_update", strnum);
-		out("vfilter_update", " email [");
-		out("vfilter_update", emailid);
-		out("vfilter_update", "]\n");
+		subprintfe(subfdout, "vfilter_update",
+				"updated filter no %d header %d keyword [%s] comparision %d folder %s bounce_action %d email [%s]\n",
+				filter_no, header_name, keyword, comparision, folder, bounce_action, emailid);
 		flush("vfilter_update");
 	} else {
 		strnum[fmt_uint(strnum, (unsigned int) filter_no)] = 0;

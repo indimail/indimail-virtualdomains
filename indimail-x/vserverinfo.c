@@ -1,5 +1,8 @@
 /*
  * $Log: vserverinfo.c,v $
+ * Revision 1.3  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.2  2019-06-07 15:41:24+05:30  Cprogrammer
  * use sgetopt library for getopt()
  *
@@ -19,7 +22,6 @@
 #include <strerr.h>
 #include <str.h>
 #include <subfd.h>
-#include <fmt.h>
 #endif
 #include "variables.h"
 #include "parse_email.h"
@@ -30,7 +32,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vserverinfo.c,v 1.2 2019-06-07 15:41:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vserverinfo.c,v 1.3 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      display_user, display_passwd, display_database, display_port,
@@ -111,7 +113,6 @@ main(int argc, char **argv)
 	DBINFO        **rhostsptr;
 	int             i, total, found;
 	char           *mdahost, *server, *domain, *email, *mailstore, *real_domain;
-	char            strnum[FMT_ULONG];
 	static stralloc User = {0}, Domain = {0};
 
 	if (get_options(argc, argv, &mdahost, &server, &domain, &email))
@@ -154,48 +155,20 @@ main(int argc, char **argv)
 			if ((mdahost && !str_diffn((*rhostsptr)->mdahost, mdahost, DBINFO_BUFF))
 					|| (server && !str_diffn((*rhostsptr)->server, server, DBINFO_BUFF))
 				) {
-				if (server) {
-					strnum[fmt_uint(strnum, (unsigned int) found + 1)] = 0;
-					out("vserverinfo", "Record  : ");
-					if (found + 1 < 10)
-						out("vserverinfo", "00");
-					else
-					if (found + 1 < 100)
-						out("vserverinfo", "0");
-					out("vserverinfo", strnum);
-					out("vserverinfo", "\n");
-				}
-				if (display_server || display_all) {
-					out("vserverinfo", "server  : ");
-					out("vserverinfo", (*rhostsptr)->server);
-					out("vserverinfo", "\n");
-				}
-				if (display_mdahost || display_all) {
-					out("vserverinfo", "mdahost : ");
-					out("vserverinfo", (*rhostsptr)->mdahost);
-					out("vserverinfo", "\n");
-				}
-				if (display_user || display_all) {
-					out("vserverinfo", "user    : ");
-					out("vserverinfo", (*rhostsptr)->user);
-					out("vserverinfo", "\n");
-				}
-				if (display_passwd || display_all) {
-					out("vserverinfo", "password: ");
-					out("vserverinfo", (*rhostsptr)->password);
-					out("vserverinfo", "\n");
-				}
-				if (display_port || display_all) {
-					strnum[fmt_uint(strnum, (unsigned int) (*rhostsptr)->port)] = 0;
-					out("vserverinfo", "port    : ");
-					out("vserverinfo", strnum);
-					out("vserverinfo", "\n");
-				}
-				if (display_database || display_all) {
-					out("vserverinfo", "database: ");
-					out("vserverinfo", (*rhostsptr)->database);
-					out("vserverinfo", "\n");
-				}
+				if (server)
+					subprintfe(subfdout, "vserverinfo", "Record  : %03d\n", found + 1);
+				if (display_server || display_all)
+					subprintfe(subfdout, "vserverinfo", "server  : %s\n", (*rhostsptr)->server);
+				if (display_mdahost || display_all)
+					subprintfe(subfdout, "vserverinfo", "mdahost : %s\n", (*rhostsptr)->mdahost);
+				if (display_user || display_all)
+					subprintfe(subfdout, "vserverinfo", "user    : %s\n", (*rhostsptr)->user);
+				if (display_passwd || display_all)
+					subprintfe(subfdout, "vserverinfo", "password: %s\n", (*rhostsptr)->password);
+				if (display_port || display_all)
+					subprintfe(subfdout, "vserverinfo", "password: %d\n", (*rhostsptr)->port);
+				if (display_database || display_all)
+					subprintfe(subfdout, "vserverinfo", "password: %s\n", (*rhostsptr)->database);
 				flush("vserverinfo");
 				found++;
 			}

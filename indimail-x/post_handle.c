@@ -1,5 +1,8 @@
 /*
  * $Log: post_handle.c,v $
+ * Revision 1.3  2023-01-22 10:33:51+05:30  Cprogrammer
+ * include post_handle.h for function prototype
+ *
  * Revision 1.2  2019-04-22 23:14:24+05:30  Cprogrammer
  * added missing strerr.h
  *
@@ -22,9 +25,10 @@
 #include <strerr.h>
 #include "indimail.h"
 #include "runcmmd.h"
+#include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: post_handle.c,v 1.2 2019-04-22 23:14:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: post_handle.c,v 1.3 2023-01-22 10:33:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_STDARG_H

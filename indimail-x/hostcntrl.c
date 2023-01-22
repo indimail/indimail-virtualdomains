@@ -1,5 +1,8 @@
 /*
  * $Log: hostcntrl.c,v $
+ * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.5  2022-10-20 11:57:37+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -21,7 +24,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: hostcntrl.c,v 1.5 2022-10-20 11:57:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: hostcntrl.c,v 1.6 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -37,9 +40,9 @@ static char     sccsid[] = "$Id: hostcntrl.c,v 1.5 2022-10-20 11:57:37+05:30 Cpr
 #include <sgetopt.h>
 #include <fmt.h>
 #include <scan.h>
-#include <qprintf.h>
 #include <subfd.h>
 #endif
+#include "common.h"
 #include "variables.h"
 #include "parse_email.h"
 #include "sql_getip.h"
@@ -144,50 +147,22 @@ main(int argc, char **argv)
 	switch (action)
 	{
 	case V_SELECT_ALL:
-		qprintf(subfdoutsmall, "User", "%-20s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, "Domain", "%-20s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, "Host ID", "%-9s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, "IP Address", "%-15s");
-		qprintf(subfdoutsmall, " ", "%s");
-		qprintf(subfdoutsmall, "Added On\n", "%s");
+		subprintfe(subfdout, "hostcntrl", "%-20s %-20s %-9s %-15s Added on\n", "User", "Domain", "Host ID", "IP Address");
 		for(;;) {
 			if (!(row = hostcntrl_select_all()))
 				break;
 			ipaddr = ((ipaddr = sql_getip(row[2])) ? ipaddr : "????");
 			scan_ulong(row[3], (unsigned long *) &tmval);
-			qprintf(subfdoutsmall, row[0], "%-20s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, row[1], "%-20s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, row[2], "%-9s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, ipaddr, "%-15s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, ctime(&tmval), "%s");
+			subprintfe(subfdout, "hostcntrl", "%-20s %-20s %-9s %-15s %s", row[0], row[1], row[2], ipaddr, ctime(&tmval));
 		}
-		qprintf_flush(subfdoutsmall);
+		flush("hostcntrl");
 		break;
 	case V_USER_SELECT:
 		if (!hostcntrl_select(user.s, domain.s, &tmval, &HostID)) {
 			ipaddr = ((ipaddr = sql_getip(HostID.s)) ? ipaddr : "????");
-			qprintf(subfdoutsmall, "Email", "%-25s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, "HOST ID", "%-11s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, "IP Address", "%-16s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, "Added On\n", "%s");
-			qprintf(subfdoutsmall, emailid, "%-25s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, HostID.s, "%-11s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, ipaddr, "%-16s");
-			qprintf(subfdoutsmall, " ", "%s");
-			qprintf(subfdoutsmall, ctime(&tmval), "%s");
-			qprintf_flush(subfdoutsmall);
+			subprintfe(subfdout, "hostcntrl", "%-25s %-11s %-16s Added On\n", "Email", "Host ID", "IP Address");
+			subprintfe(subfdout, "hostcntrl", "%-25s %-11s %-16s %s", emailid, HostID.s, ipaddr, ctime(&tmval));
+			flush("hostcntrl");
 			return(0);
 		} else
 			return (1);

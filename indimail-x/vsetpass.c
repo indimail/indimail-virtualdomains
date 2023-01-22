@@ -1,5 +1,8 @@
 /*
  * $Log: vsetpass.c,v $
+ * Revision 1.9  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.8  2022-09-14 08:48:10+05:30  Cprogrammer
  * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
  *
@@ -47,6 +50,7 @@
 #include <mkpasswd.h>
 #include <getEnvConfig.h>
 #include <get_scram_secrets.h>
+#include <subfd.h>
 #endif
 #ifdef HAVE_GSASL_H
 #include <gsasl.h>
@@ -66,7 +70,7 @@
 #include "getpeer.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vsetpass.c,v 1.8 2022-09-14 08:48:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetpass.c,v 1.9 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -81,11 +85,7 @@ int             authlen = AUTH_SIZE;
 void
 print_error(char *str)
 {
-	out("vsetpass", "454-");
-	out("vchkpass", str);
-	out("vchkpass", ": ");
-	out("vsetpass", error_str(errno));
-	out("vsetpass", " (#4.3.0)\r\n");
+	subprintfe(subfdout, "vsetpass", "454-%s: %s (#4.3.0)\r\n", str, error_str(errno));
 	flush("vsetpass");
 }
 
@@ -167,9 +167,7 @@ main(int argc, char **argv)
 #else
 				strerr_warn1("iopen: failed to connect to db: ", &strerr_sys);
 #endif
-			out("vsetpass", "454-failed to connect to database (");
-			out("vsetpass", error_str(errno));
-			out("vsetpass", ") (#4.3.0)\r\n");
+			subprintfe(subfdout, "vsetpass", "454-failed to connect to database: %s (#4.3.0)\r\n", error_str(errno));
 			flush("vsetpass");
 			_exit (111);
 		}
@@ -189,9 +187,7 @@ main(int argc, char **argv)
 #else
 			strerr_warn1("iopen: failed to connect to db: ", &strerr_sys);
 #endif
-		out("vsetpass", "454-failed to connect to database (");
-		out("vsetpass", error_str(errno));
-		out("vsetpass", ") (#4.3.0)\r\n");
+		subprintfe(subfdout, "vsetpass", "454-failed to connect to database: %s (#4.3.0)\r\n", error_str(errno));
 		flush("vsetpass");
 		_exit (111);
 	}

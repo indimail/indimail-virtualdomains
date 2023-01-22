@@ -1,5 +1,8 @@
 /*
  * $Log: vtable.c,v $
+ * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.3  2019-06-07 15:40:14+05:30  Cprogrammer
  * use sgetopt library for getopt()
  *
@@ -29,6 +32,7 @@
 #include <open.h>
 #include <substdio.h>
 #include <getln.h>
+#include <subfd.h>
 #endif
 #include "variables.h"
 #include "mysql_stack.h"
@@ -36,15 +40,15 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vtable.c,v 1.3 2019-06-07 15:40:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vtable.c,v 1.4 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
-#define FATAL   "vadduser: fatal: "
-#define WARN    "vadduser: warning: "
+#define FATAL   "vtable: fatal: "
+#define WARN    "vtable: warning: "
 
 int             verbose;
 static char    *usage =
-	"usage: vtable [options] vtable_file\n"
+	"usage: vtable [options] vtable_file1 vtable_file2 ...\n"
 	"options: -v verbose\n"
 	"         -S MySQL Server IP\n"
 	"         -p MySQL Port\n"
@@ -121,13 +125,8 @@ main(int argc, char **argv)
 		&mysql_user, &mysql_pass, &filename))
 		return (1);
 	if (verbose) {
-		out("vtable", "connecting to mysql ");
-		out("vatable", mysql_host);
-		out("vtable", ":");
-		out("vtable", port ? port : mysql_sock);
-		out("vtable", " db ");
-		out("vtable", mysql_db);
-		out("vtable", "\n");
+		subprintfe(subfdout, "vtable", "connecting to mysql %s:%s db %s\n",
+				mysql_host, port ? port : mysql_sock, mysql_db);
 		flush("vtable");
 	}
 	if (!mysql_Init(&vmysql))
@@ -143,9 +142,7 @@ main(int argc, char **argv)
 	}
 	for (errors = 0, fptr = filename; *fptr; fptr++) {
 		if (verbose) {
-			out("vtable", "processing ");
-			out("vtable", *fptr);
-			out("vtable", "\n");
+			subprintfe(subfdout, "vtable", "processing %s\n", *fptr);
 			flush("vtable");
 		}
 		if ((fd = open_read(*fptr)) == -1) {
@@ -160,9 +157,14 @@ main(int argc, char **argv)
 				close(fd);
 				return (1);
 			}
-			if (line.len == 0 || !match)
+			if (line.len == 0)
+				break;
+			if (!match) {
 				strerr_warn3("vtable", *fptr, "incomplete line", 0);
-			else
+				if (!stralloc_0(&line))
+					die_nomem();
+				line.len--;
+			} else
 			if (match) {
 				line.len--;
 				line.s[line.len] = 0; /*- remove newline */
@@ -173,21 +175,19 @@ main(int argc, char **argv)
 			for (ptr = line.s; *ptr && isspace((int) *ptr); ptr++);
 			if (!*ptr)
 				continue;
-			mysql_stack(line.s);
-			mysql_stack(" ");
+			mysql_stack("%s ", line.s);
 		}
-		if (!(ptr = mysql_stack(0))) {
+		close(fd);
+		if (!(ptr = mysql_stack(0)))
 			strerr_warn1("vtable: mysql_stack returned NULL", 0);
-		} else {
+		else {
 			if (verbose) {
-				out("vtable", ptr);
-				out("vtable", "\n");
+				subprintfe(subfdout, "vtable", "%s\n", ptr);
 				flush("vtable");
 			}
 			if (mysql_query(&vmysql, ptr))
 				strerr_warn4("vtable: mysql_query: ", ptr, ": ", (char *) in_mysql_error(&vmysql), 0);
 		}
-		close(fd);
 	}
 	in_mysql_close(&vmysql);
 	return (errors);

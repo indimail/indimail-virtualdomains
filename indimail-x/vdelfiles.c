@@ -1,5 +1,8 @@
 /*
  * $Log: vdelfiles.c,v $
+ * Revision 1.3  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.2  2020-10-18 07:54:49+05:30  Cprogrammer
  * use alloc() instead of alloc_re()
  *
@@ -26,12 +29,13 @@
 #include <strerr.h>
 #include <error.h>
 #include <fmt.h>
+#include <subfd.h>
 #endif
 #include "common.h"
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelfiles.c,v 1.2 2020-10-18 07:54:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelfiles.c,v 1.3 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -70,9 +74,7 @@ vdelfiles(char *dir, char *user, char *domain)
 	}
 	if (!S_ISDIR(statbuf.st_mode)) {
 		if (verbose) {
-			out("vdelfiles", "Removing File ");
-			out("vdelfiles", dir);
-			out("vdelfiles", "\n");
+			subprintfe(subfdout, "vdelfiles", "Removing File %s\n", dir);
 			flush("vdelfiles");
 		}
 		if (unlink(dir)) {
@@ -113,9 +115,7 @@ vdelfiles(char *dir, char *user, char *domain)
 		}
 		if (!S_ISDIR(statbuf.st_mode)) {
 			if (verbose) {
-				out("vdelfiles", "Removing File ");
-				out("vdelfiles", file_name);
-				out("vdelfiles", "\n");
+				subprintfe(subfdout, "vdelfiles", "Removing File %s\n", file_name);
 				flush("vdelfiles");
 			}
 			if (unlink(file_name) == -1)
@@ -131,9 +131,7 @@ vdelfiles(char *dir, char *user, char *domain)
 	alloc_free(file_name);
 	closedir(entry);
 	if (verbose) {
-		out("vdelfiles", "Removing Dir ");
-		out("vdelfiles", dir);
-		out("vdelfiles", "\n");
+		subprintfe(subfdout, "vdelfiles", "Removing Dir %s\n", dir);
 		flush("vdelfiles");
 	}
 	if (rmdir(dir)) {

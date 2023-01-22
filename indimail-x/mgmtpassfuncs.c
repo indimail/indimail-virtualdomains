@@ -1,5 +1,8 @@
 /*
  * $Log: mgmtpassfuncs.c,v $
+ * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.5  2022-08-28 12:36:38+05:30  Cprogrammer
  * allow configureable salt size using env variable SALTSIZE
  *
@@ -21,7 +24,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.5 2022-08-28 12:36:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.6 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -42,6 +45,7 @@ static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.5 2022-08-28 12:36:38+05:30
 #include <in_crypt.h>
 #include <pw_comp.h>
 #include <getEnvConfig.h>
+#include <subfd.h>
 #endif
 #include "mgmtpassfuncs.h"
 #include "passwd_policy.h"
@@ -292,32 +296,17 @@ mgmtpassinfo(char *username, int print_flag)
 		return (0);
 	}
 	if ((row = in_mysql_fetch_row(res))) {
-		out("mgmtpass", "User        : ");
-		out("mgmtpass", username);
-		out("mgmtpass", "\n");
-		out("mgmtpass", "Pass        : ");
-		out("mgmtpass", row[0]);
-		out("mgmtpass", "\n");
-		out("mgmtpass", "Uid         : ");
-		out("mgmtpass", row[1]);
-		out("mgmtpass", "\n");
-		out("mgmtpass", "Gid         : ");
-		out("mgmtpass", row[2]);
-		out("mgmtpass", "\n");
+		subprintfe(subfdout, "mgmtpass", "User        : %s\n", username);
+		subprintfe(subfdout, "mgmtpass", "Pass        : %s\n", row[0]);
+		subprintfe(subfdout, "mgmtpass", "Uid         : %s\n", row[1]);
+		subprintfe(subfdout, "mgmtpass", "Gid         : %s\n", row[2]);
 		scan_ulong(row[3], (unsigned long *) &tmval);
-		out("mgmtpass", "Last Access : ");
-		out("mgmtpass", ctime(&tmval));
+		subprintfe(subfdout, "mgmtpass", "Last Access : %s", ctime(&tmval));
 		scan_ulong(row[4], (unsigned long *) &tmval);
-		out("mgmtpass", "Last Update : ");
-		out("mgmtpass", ctime(&tmval));
-		out("mgmtpass", "Attempts    : ");
-		out("mgmtpass", row[5]);
-		out("mgmtpass", "\n");
-		out("mgmtpass", "Status      : ");
-		out("mgmtpass", row[6]);
-		out("mgmtpass", " (");
-		out("mgmtpass", isDisabled(username) ? "Disabled" : "Enabled");
-		out("mgmtpass", ")\n");
+		subprintfe(subfdout, "mgmtpass", "Last Update : %s", ctime(&tmval));
+		subprintfe(subfdout, "mgmtpass", "Attempts    : %s\n", row[5]);
+		subprintfe(subfdout, "mgmtpass", "Status      : %s (%s)\n", row[6],
+				isDisabled(username) ? "Disabled" : "Enabled");
 		flush("mgmtpass");
 		in_mysql_free_result(res);
 		return (0);

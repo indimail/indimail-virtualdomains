@@ -1,5 +1,8 @@
 /*
  * $Log: chowkidar.c,v $
+ * Revision 1.4  2023-01-22 10:36:25+05:30  Cprogrammer
+ * updated error message
+ *
  * Revision 1.3  2020-04-01 18:53:13+05:30  Cprogrammer
  * moved getEnvConfig to libqmail
  *
@@ -40,7 +43,7 @@
 #define SPAMDB  3
 
 #ifndef	lint
-static char     sccsid[] = "$Id: chowkidar.c,v 1.3 2020-04-01 18:53:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: chowkidar.c,v 1.4 2023-01-22 10:36:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "chowkidar: fatal: "
@@ -78,7 +81,7 @@ die_nomem()
 int
 main(int argc, char **argv)
 {
-	char           *ptr, *revision = "$Revision: 1.3 $";
+	char           *ptr, *revision = "$Revision: 1.4 $";
 	int             spamNumber, spamFilter, c, silent, type, relative;
 	static stralloc ignfile = {0}, bad_from_rcpt_file = {0};
 	char           *filename = (char *) 0, *outfile = (char *) 0;
@@ -128,12 +131,12 @@ main(int argc, char **argv)
 					if (isspace((int) *ptr))
 						break;
 					if (substdio_put(subfdout, ptr, 1))
-						strerr_die1sys(111, "unable to write to stdout; ");
+						strerr_die1sys(111, "write: Unable to write output: ");
 				}
 				if (substdio_put(subfdout, "\n", 1))
-					strerr_die1sys(111, "unable to write to stdout; ");
+					strerr_die1sys(111, "write: Unable to write output: ");
 				if (substdio_flush(subfdout))
-					strerr_die1sys(111, "unable to write to stdout; ");
+					strerr_die1sys(111, "write: Unable to write output: ");
 			}
 			return(0);
 			break;

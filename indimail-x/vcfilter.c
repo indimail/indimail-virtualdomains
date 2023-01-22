@@ -1,5 +1,8 @@
 /*
  * $Log: vcfilter.c,v $
+ * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.5  2021-07-08 11:47:52+05:30  Cprogrammer
  * add check for misconfigured assign file
  *
@@ -21,7 +24,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 1.5 2021-07-08 11:47:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 1.6 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -40,7 +43,6 @@ static char     sccsid[] = "$Id: vcfilter.c,v 1.5 2021-07-08 11:47:52+05:30 Cpro
 #include <error.h>
 #include <str.h>
 #include <open.h>
-#include <qprintf.h>
 #include <subfd.h>
 #include <setuserid.h>
 #endif
@@ -77,109 +79,49 @@ void
 usage()
 {
 	int             i;
-	char            strnum[FMT_ULONG];
-
-	errout("vcfilter", "usage: vcfilter [options] emailid\n");
-	errout("vcfilter", "options: -v verbose\n");
-	errout("vcfilter", "         -C connect to Cluster\n");
-	errout("vcfilter", "         -r raw display (for -s option)\n");
-	errout("vcfilter", "         -s show filter(s)\n");
-	errout("vcfilter", "         -i add filter\n");
-	errout("vcfilter", "         -d filter_no delete filter(s)\n");
-	errout("vcfilter", "         -u filter_no update filter\n");
-	errout("vcfilter", "         -t Filter Name (textual description of filter)\n");
-	errout("vcfilter", "         -h header value\n");
-	errout("vcfilter", "            ");
-	errout("vcfilrer", " -1 - If comparision (-c option) is 5 or 6\n");
+	subprintfe(subfderr, "vcfilter",
+			"usage: vcfilter [options] emailid\n"
+			"options: -v verbose\n"
+			"         -C connect to Cluster\n"
+			"         -r raw display (for -s option)\n"
+			"         -s show filter(s)\n"
+			"         -i add filter\n"
+			"         -d filter_no delete filter(s)\n"
+			"         -u filter_no update filter\n"
+			"         -t Filter Name (textual description of filter)\n"
+			"         -h header value\n"
+			"             -1 - If comparision (-c option) is 5 or 6\n");
 	for (i = 0; header_list[i];) {
 		if (header_list[i + 1]) {
-			errout("vcfilter", "            ");
-			if (i < 10)
-				errout("vcfilter", "  ");
-			else
-			if (i < 100)
-				errout("vcfilter", " ");
-			strnum[fmt_uint(strnum, (unsigned int) i)] = 0;
-			errout("vcfilter", strnum);
-			errout("vcfilter", " - ");
-			qprintf(subfderr, header_list[i], "%-25s");
-			errout("vcfilter", "          ");
-			if ((i + 1) < 10)
-				errout("vcfilter", "  ");
-			else
-			if ((i + 1) < 100)
-				errout("vcfilter", " ");
-			strnum[fmt_uint(strnum, (unsigned int) (i + 1))] = 0;
-			errout("vcfilter", strnum);
-			errout("vcfilter", " - ");
-			errout("vcfilter", header_list[i + 1]);
-			errout("vcfilter", "\n");
+			subprintfe(subfderr, "vcfilter", "%11s %3d - %-28s %8s %3d - %s\n",
+					" ", i, header_list[i], " ", i + 1, header_list[i + 1]);
 			i += 2;
 		} else {
-			errout("vcfilter", "            ");
-			if (i < 10)
-				errout("vcfilter", "  ");
-			else
-			if (i < 100)
-				errout("vcfilter", " ");
-			strnum[fmt_uint(strnum, (unsigned int) i)] = 0;
-			errout("vcfilter", strnum);
-			errout("vcfilter", " - ");
-			errout("vcfilter", header_list[i]);
-			errout("vcfilter", "\n");
+			subprintfe(subfderr, "vcfilter", "%11s %3d - %s\n", " ", i, header_list[i]);
 			i++;
 		}
 	}
-	errout("vcfilter", "         -c comparision\n");
+	subprintfe(subfderr, "vcfilter", "         -c comparision\n");
 	for (i = 0; vfilter_comparision[i];) {
 		if (vfilter_comparision[i + 1]) {
-			errout("vcfilter", "            ");
-			if (i < 10)
-				errout("vcfilter", "  ");
-			else
-			if (i < 100)
-				errout("vcfilter", " ");
-			strnum[fmt_uint(strnum, (unsigned int) i)] = 0;
-			errout("vcfilter", strnum);
-			errout("vcfilter", " - ");
-			qprintf(subfderr, vfilter_comparision[i], "%-25s");
-			errout("vcfilter", "          ");
-			if ((i + 1) < 10)
-				errout("vcfilter", "  ");
-			else
-			if ((i + 1) < 100)
-				errout("vcfilter", " ");
-			strnum[fmt_uint(strnum, (unsigned int) (i + 1))] = 0;
-			errout("vcfilter", strnum);
-			errout("vcfilter", " - ");
-			errout("vcfilter", vfilter_comparision[i + 1]);
-			errout("vcfilter", "\n");
+			subprintfe(subfderr, "vcfilter", "%11s %3d - %-28s %8s %3d - %s\n", " ", i, vfilter_comparision[i], " ", i + 1, vfilter_comparision[i + 1]);
 			i += 2;
 		} else {
-			errout("vcfilter", "            ");
-			if (i < 10)
-				errout("vcfilter", "  ");
-			else
-			if (i < 100)
-				errout("vcfilter", " ");
-			strnum[fmt_uint(strnum, (unsigned int) i)] = 0;
-			errout("vcfilter", strnum);
-			errout("vcfilter", " - ");
-			errout("vcfilter", vfilter_comparision[i]);
-			errout("vcfilter", "\n");
+			subprintfe(subfderr, "vcfilter", "%11s %3d - %s\n", " ", i, vfilter_comparision[i]);
 			i++;
 		}
 	}
-	errout("vcfilter", "         -k keyword [\"\" string if comparision (-c option) is 5 or 6]\n");
-	errout("vcfilter", "         -f folder [Specify /NoDeliver for delivery to be junked]\n");
-	errout("vcfilter", "         -b bounce action\n");
-	errout("vcfilter", "              0               - Do not Bounce to sender\n");
-	errout("vcfilter", "              1               - Bounce to sender\n");
-	errout("vcfilter", "              2'&user@domain' - Forward to another id\n");
-	errout("vcfilter", "              2'|program'     - Feed mail to another program\n");
-	errout("vcfilter", "              3'&user@domain' - Forward to another id and Bounce\n");
-	errout("vcfilter", "              3'|program'     - Feed mail to another program and Bounce\n");
-	errflush("vfilter");
+	subprintfe(subfderr, "vcfilter",
+			"         -k keyword [\"\" string if comparision (-c option) is 5 or 6]\n"
+			"         -f folder [Specify /NoDeliver for delivery to be junked]\n"
+			"         -b bounce action\n"
+			"              0               - Do not Bounce to sender\n"
+			"              1               - Bounce to sender\n"
+			"              2'&user@domain' - Forward to another id\n"
+			"              2'|program'     - Feed mail to another program\n"
+			"              3'&user@domain' - Forward to another id and Bounce\n"
+			"              3'|program'     - Feed mail to another program and Bounce\n");
+	flush("vcfilter");
 }
 
 static void

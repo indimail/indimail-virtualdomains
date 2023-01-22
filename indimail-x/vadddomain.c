@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.11  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.10  2022-11-02 20:03:34+05:30  Cprogrammer
  * added feature to add scram password during user addition
  *
@@ -69,6 +72,7 @@
 #include <getEnvConfig.h>
 #include <makesalt.h>
 #include <hashmethods.h>
+#include <subfd.h>
 #endif
 #ifdef HAVE_GSASL_H
 #include <gsasl.h>
@@ -102,7 +106,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.10 2022-11-02 20:03:34+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.11 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -242,14 +246,8 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 			else
 			if (!str_diffn(optarg, "SHA-512", 7))
 				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
-			else {
-				errout("vadddomain", WARN);
-				errout("vadddomain", optarg);
-				errout("vadddomain", ": wrong hash method\n");
-				errout("vadddomain", "Supported HASH Methods: DES MD5 SHA-256 SHA-512\n");
-				errflush("vadddomain");
-				strerr_die2x(100, WARN, usage);
-			}
+			else
+				strerr_die5x(100, FATAL, "wrong hash method ", optarg, ". Supported HASH Methods: DES MD5 SHA-256 SHA-512\n", usage);
 			if (!env_put2("PASSWORD_HASH", strnum))
 				strerr_die1x(111, "out of memory");
 			*encrypt_flag = 1;
@@ -273,14 +271,8 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 			else
 			if (!str_diffn(optarg, "SCRAM-SHA-256", 13))
 				*scram = 2;
-			else {
-				errout("vadduser", WARN);
-				errout("vadduser", optarg);
-				errout("vadduser", ": wrong SCRAM method\n");
-				errout("vadduser", "Supported SCRAM Methods: SCRAM-SHA-1 SCRAM-SHA-256\n");
-				errflush("vadduser");
-				strerr_die2x(100, WARN, usage);
-			}
+			else
+				strerr_die5x(100, FATAL, "wrong SCRAM method ", optarg, ". Supported SCRAM Methods: SCRAM-SHA1 SCRAM-SHA-256\n", usage);
 			break;
 		case 'S':
 			if (!salt)
@@ -702,9 +694,7 @@ main(int argc, char **argv)
 		}
 	}
 	if (random) {
-		out("vadddomain", "Password is ");
-		out("vadddomain", passwd);
-		out("vadddomain", "\n");
+		subprintfe(subfdout, "vadddomain", "Password is %s\n", passwd);
 		flush("vadddomain");
 	}
 	/* set quota for postmaster */
