@@ -144,21 +144,21 @@ main(int argc, char **argv)
 	switch (action)
 	{
 	case V_SELECT_ALL:
-		subprintfe(subfdoutsmall, "hostcntrl", "%-20s %-20s %-9s %-15s Added on\n", "User", "Domain", "Host ID", "IP Address");
+		subprintfe(subfdout, "hostcntrl", "%-20s %-20s %-9s %-15s Added on\n", "User", "Domain", "Host ID", "IP Address");
 		for(;;) {
 			if (!(row = hostcntrl_select_all()))
 				break;
 			ipaddr = ((ipaddr = sql_getip(row[2])) ? ipaddr : "????");
 			scan_ulong(row[3], (unsigned long *) &tmval);
-			subprintfe(subfdoutsmall, "hostcntrl", "%-20s %-20s %-9s %-15s %s", row[0], row[1], row[2], ipaddr, ctime(&tmval));
+			subprintfe(subfdout, "hostcntrl", "%-20s %-20s %-9s %-15s %s", row[0], row[1], row[2], ipaddr, ctime(&tmval));
 		}
 		flush("hostcntrl");
 		break;
 	case V_USER_SELECT:
 		if (!hostcntrl_select(user.s, domain.s, &tmval, &HostID)) {
 			ipaddr = ((ipaddr = sql_getip(HostID.s)) ? ipaddr : "????");
-			subprintfe(subfdoutsmall, "hostcntrl", "%-25s %-11s %-16s Added On\n", "Email", "Host ID", "IP Address");
-			subprintfe(subfdoutsmall, "hostcntrl", "%-25s %-11s %-16s %s", emailid, HostID.s, ipaddr, ctime(&tmval));
+			subprintfe(subfdout, "hostcntrl", "%-25s %-11s %-16s Added On\n", "Email", "Host ID", "IP Address");
+			subprintfe(subfdout, "hostcntrl", "%-25s %-11s %-16s %s", emailid, HostID.s, ipaddr, ctime(&tmval));
 			flush("hostcntrl");
 			return(0);
 		} else
