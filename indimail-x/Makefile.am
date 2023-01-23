@@ -1,4 +1,3 @@
-include Makefile.@SYSTEM@
 SUBDIRS=eps-1.2
 COFLAGS=-z+05:30
 ACLOCAL_AMFLAGS=-I m4
@@ -316,6 +315,8 @@ vfilter_LDADD = storeHeader.lo parseAddress.lo deliver_mail.lo \
 	eps-1.2/libeps.la libindimail.la $(LIB_QMAIL)
 vfilter_DEPENDENCIES=storeHeader.lo parseAddress.lo deliver_mail.lo \
 	addressToken.lo getAddressBook.lo libindimail.la
+
+include Makefile.@SYSTEM@
 
 vcfilter_SOURCES = vcfilter.c
 vcfilter_LDADD = libindimail.la $(LIB_QMAIL)
