@@ -489,8 +489,13 @@ static int imap_getauth(int sock, struct query *ctl, char *greeting)
 #ifdef SSL_ENABLE
     /* Defend against a PREAUTH-prevents-STARTTLS attack */
     if (preauth && must_starttls(ctl)) {
-	report(stderr, GT_("%s: configuration requires TLS, but STARTTLS is not permitted "
-				"because of authenticated state (PREAUTH). Aborting connection.  Server permitting, try --ssl instead (see manual).\n"), commonname);
+	if (ctl->server.plugin && A_SSH == ctl->server.authenticate) {
+		report(stderr, GT_("%s: configuration requires TLS, but STARTTLS is not permitted "
+					"because of authenticated state (PREAUTH). Aborting connection.  If your plugin is secure, you can defeat STARTTLS with --sslproto '' (see manual).\n"), commonname);
+	} else {
+		report(stderr, GT_("%s: configuration requires TLS, but STARTTLS is not permitted "
+					"because of authenticated state (PREAUTH). Aborting connection.  Server permitting, try --ssl instead (see manual).\n"), commonname);
+	}
         preauth = FALSE;  /* reset for the next session */
 	return PS_SOCKET;
     }

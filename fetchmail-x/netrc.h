@@ -40,7 +40,7 @@ typedef struct _netrc_entry {
 __BEGIN_DECLS
 /* Parse FILE as a .netrc file (as described in ftp(1)), and return a
    list of entries.  NULL is returned if the file could not be
-   parsed. */
+   parsed. Diagnostic messages are through report(), except for fopen() errors with ENOENT. */
 netrc_entry *parse_netrc __P((char *file));
 
 /* Return the netrc entry from LIST corresponding to HOST.  NULL is

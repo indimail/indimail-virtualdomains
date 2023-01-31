@@ -55,9 +55,9 @@
 #endif /* ENETUNREACH */
 
 #ifdef SSL_ENABLE
+#include "tls-aux.h"		/* compatibility and helper functions */
 #include <openssl/ssl.h>	/* for OPENSSL_NO_SSL2 and ..._SSL3 checks */
 #include <openssl/opensslv.h>	/* for version queries */
-#include "tls-aux.h"		/* compatibility and helper functions */
 #endif
 
 /* prototypes for internal functions */
@@ -149,11 +149,11 @@ static void printcopyright(FILE *fp) {
 		   "                   Robert M. Funk, Graham Wilson\n"
 		   "Copyright (C) 2005 - 2012 Sunil Shetye\n"
 		   "Copyright (C) 2005 - %d Matthias Andree\n"
-		   ), 2021);
+		   ), 2023);
 	fprintf(fp, GT_("Fetchmail comes with ABSOLUTELY NO WARRANTY. This is free software, and you\n"
 		   "are welcome to redistribute it under certain conditions. For details,\n"
 		   "please see the file COPYING in the source or documentation directory.\n"));
-#ifdef SSL_ENABLE
+#if defined(SSL_ENABLE) && !defined(USING_WOLFSSL)
 	/* Do not translate this */
 	fprintf(fp, "This product includes software developed by the OpenSSL Project\nfor use in the OpenSSL Toolkit. (http://www.openssl.org/)\n");
 #endif
@@ -273,7 +273,11 @@ int main(int argc, char **argv)
 #ifndef SSL_ENABLE
 	"-SSL"
 #else
+#ifdef USING_WOLFSSL
+	"+WOLFSSL"
+#else
 	"+SSL-SSLv2"
+#endif
 #if (HAVE_DECL_SSLV3_CLIENT_METHOD + 0 == 0) || defined(OPENSSL_NO_SSL3)
 	"-SSLv3"
 #endif
@@ -316,12 +320,15 @@ int main(int argc, char **argv)
 	printf(GT_("OpenSSL: %s\nEngines: %s\n"),
 			OpenSSL_version(OPENSSL_DIR),
 			OpenSSL_version(OPENSSL_ENGINES_DIR));
-#if !HAVE_DECL_TLS1_3_VERSION || defined(OPENSSL_NO_TLS1_3)
+# if !HAVE_DECL_TLS1_3_VERSION || defined(OPENSSL_NO_TLS1_3)
 	printf(GT_("WARNING: Your SSL/TLS library does not support TLS v1.3.\n"));
-#endif
-#ifdef LIBRESSL_VERSION_NUMBER
-	printf(GT_("WARNING: Compiled against LibreSSL, which is not a supported configuration.\n"));
-#endif
+# endif
+# if defined(LIBRESSL_VERSION_NUMBER) && !defined(__OpenBSD__)
+	/* OpenBSD ships LibreSSL as part of the base system, so is exempt
+	 * because it can pull the GPL v2 clause 3 exception */
+	printf(GT_("ERROR: Compiled against LibreSSL, which is a copyright violation for lack of GPL clause 2b exception. See COPYING. Aborting.\n"));
+	exit(PS_UNDEFINED);
+# endif
 #else
 	printf(GT_("WARNING: Compiled without SSL/TLS.\n"));
 #endif
@@ -353,13 +360,13 @@ int main(int argc, char **argv)
 	    xfree(run.logfile);
 	}
 
-#if 0
+# if 0
 	/* not in daemon mode -> turn off logfile option */
 	if (0 == run.poll_interval) {
 	    if (outlevel >= O_NORMAL) { fprintf(stderr, GT_("Not running in daemon mode, ignoring logfile option.\n")); }
 	    xfree(run.logfile);
 	}
-#endif
+# endif
 
 	/* log file not writable -> turn off logfile option */
 	if (run.logfile && 0 != access(run.logfile, F_OK)) {

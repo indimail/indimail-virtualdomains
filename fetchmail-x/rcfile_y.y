@@ -461,8 +461,6 @@ int prc_parse_file (const char *pathname, const flag securecheck)
     prc_errflag = 0;
     querylist = hosttail = (struct query *)NULL;
 
-    /*(void)yytoknum; work around compiler warning */
-
     errno = 0;
 
     /* Check that the file is secure */

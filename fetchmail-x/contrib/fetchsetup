@@ -64,8 +64,8 @@ echo "protocol $PROTO" >> $HOME/.fetchmailrc
 echo 'username "'$USR'"' >> $HOME/.fetchmailrc
 echo 'password "'$PASS'"' >> $HOME/.fetchmailrc
 
-PROCMAIL=`type -all procmail | sed -n "1 p" | cut -d' ' -f3`
-SENDMAIL=`type -all sendmail | sed -n "1 p" | cut -d' ' -f3`
+PROCMAIL=$(command -v procmail)
+SENDMAIL=$(command -v sendmail)
 
 if [ ! "$PROCMAIL" = "" ]; then
     echo 'mda "'$PROCMAIL -d %s'"' >> $HOME/.fetchmailrc

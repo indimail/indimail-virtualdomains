@@ -1,0 +1,13 @@
+# /usr/lib/systemd/user/fetchmail.service
+# or any other location per man:systemd.unit(5)
+[Unit]
+Description=Fetchmail Daemon
+Documentation=man:fetchmail(1)
+
+[Service]
+ExecStart=fetchmail --nodetach --daemon 300
+ExecStop=fetchmail --quit
+Restart=always
+
+[Install]
+WantedBy=default.target

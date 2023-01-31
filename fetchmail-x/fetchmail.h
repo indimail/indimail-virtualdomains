@@ -590,7 +590,7 @@ char *rcpt_address(struct query *, const char *, int);
 int stuffline(struct query *, char *);
 int open_sink(struct query*, struct msgblk *, int*, int*);
 void release_sink(struct query *);
-int close_sink(struct query *, struct msgblk *, flag);
+int close_sink(struct query *, struct msgblk *, flag); /**< \returns TRUE for successful delivery and FALSE for failure. */
 int open_warning_by_mail(struct query *);
 #if defined(HAVE_STDARG_H)
 void stuff_warning(const char *,

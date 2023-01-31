@@ -115,7 +115,7 @@ done
 git diff -G '^"(Project-Id-Version|PO-Revision-Date):' --name-only po/*.po \
 | while read pofile ; do
 	if ! handle_po "$pofile" "Update" "to" ; then
-		echo "There were errors updating $nfile" >&2 ; rc=1
+		echo "There were errors updating $pofile" >&2 ; rc=1
 	fi
 done
 

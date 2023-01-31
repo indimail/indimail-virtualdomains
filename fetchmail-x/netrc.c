@@ -17,6 +17,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include "netrc.h"
 #include "i18n.h"
@@ -84,6 +85,7 @@ parse_netrc (char *file)
     const char *premature_token;
     netrc_entry *current, *retval;
     int ln;
+    int error_flag = 0;
 
     /* The latest token we've seen in the file. */
     enum
@@ -97,6 +99,9 @@ parse_netrc (char *file)
     if (!fp)
     {
 	/* Just return NULL if we can't open the file. */
+	if (ENOENT != errno) {
+	    report(stderr, "%s: cannot open file for reading: %s\n", file, strerror(errno));
+	}
 	return NULL;
     }
 
@@ -216,7 +221,7 @@ parse_netrc (char *file)
 
 	    if (premature_token)
 	    {
-		fprintf (stderr,
+		report(stderr,
 			 GT_("%s:%d: warning: found \"%s\" before any host names\n"),
 			 file, ln, premature_token);
 		premature_token = NULL;
@@ -255,18 +260,32 @@ parse_netrc (char *file)
 
 		else
 		{
-		    fprintf (stderr, GT_("%s:%d: warning: unknown token \"%s\"\n"),
+		    report(stderr, GT_("%s:%d: warning: unknown token \"%s\"\n"),
 			     file, ln, tok);
 		}
 	    }
 	}
     }
 
-    fclose (fp);
+    if (ferror(fp)) {
+	report(stderr, GT_("%s: error reading file (%s).\n"), file, strerror(errno));
+	error_flag = 1;
+	clearerr(fp);
+    }
+
+    if (fclose(fp)) {
+	report(stderr, GT_("%s: error reading file (%s).\n"), file, strerror(errno));
+	error_flag = 1;
+    }
 
     /* Finalize the last machine entry we found. */
     maybe_add_to_list (&current, &retval);
     free (current);
+
+    if (error_flag) {
+	free_netrc(retval);
+	return NULL;
+    }
 
     /* Reverse the order of the list so that it appears in file order. */
     current = retval;
@@ -345,21 +364,22 @@ int main (int argc, char **argv)
 	case 4:
 	    break;
 	default:
-	    fprintf (stderr, "Usage: %s <file> [<host> <login>]\n", argv[0]);
+	    fprintf(stderr, "Usage: %s <file> [<host> <login>]\n", argv[0]);
 	    exit(EXIT_FAILURE);
     }
 
-    if (stat (file, &sb))
+    report_init(1);
+
+    if (stat(file, &sb))
     {
-	fprintf (stderr, "%s: cannot stat %s: %s\n", argv[0], file,
+	fprintf(stderr, "PRE-CHECK for %s: cannot stat %s: %s\n", argv[0], file,
 		 strerror (errno));
-	exit (1);
     }
 
-    head = parse_netrc (file);
+    head = parse_netrc(file);
     if (!head)
     {
-	fprintf (stderr, "%s: no entries found in %s\n", argv[0], file);
+	fprintf(stderr, "%s: read error or no entries found in %s\n", argv[0], file);
 	exit (1);
     }
 

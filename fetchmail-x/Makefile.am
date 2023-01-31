@@ -3,6 +3,9 @@
 SUBDIRS=		. po
 AUTOMAKE_OPTIONS=	1.12 foreign no-dist-gzip dist-xz subdir-objects dist-lzip
 
+.DELETE_ON_ERROR:	# yes please
+.PRECIOUS:		test-suite.log
+
 AM_CPPFLAGS=		-I$(srcdir)/libesmtp
 ACLOCAL_AMFLAGS=	-I m4 -I m4-local
 AM_YFLAGS=		-t -d
@@ -10,8 +13,6 @@ AM_YFLAGS=		-t -d
 # early in order to fail it early on outdated OpenSSL libraries,
 # without building a few dozen other files first.
 BUILT_SOURCES=		rcfile_y.h socket.$(OBJEXT)
-
-MOSTLYCLEANFILES = rcfile_y.h rcfile_y.c
 
 bin_PROGRAMS=		fetchmail
 
@@ -25,7 +26,10 @@ nodist_bin_SCRIPTS=	fetchmailconf
 python_PYTHON=		$(pys)
 dist_man1_MANS+=	$(pym)
 
-CLEANFILES=		$(nodist_bin_SCRIPTS)
+CLEANFILES=		$(nodist_bin_SCRIPTS) \
+			fetchmail-man.html \
+			fetchmail.html \
+			fetchmail.rst
 
 # for gettext (used by fetchmail.c, NOT by GNU gettext)
 localedir=		$(datadir)/locale
@@ -201,38 +205,35 @@ EXTRA_DIST=	$(DISTDOCS) $(distdirs) \
 		m4-local/ac_ma_search_package.m4 \
 		$(TESTS) t.rc t.regression \
 		dist-tools/html2txt \
-		dist-tools/manServer.pl \
 		dist-tools/git-commit-po-updates.sh \
 		Doxyfile
 
 fetchmailconf:
-	( echo '#! /bin/sh' && echo 'exec @PYTHON@ @pythondir@/fetchmailconf.py "$$@"' ) >$@ && chmod +x $@ || { rm -f $@ ; exit 1; }
+	( echo '#! /bin/sh' && echo 'exec @PYTHON@ @pythondir@/fetchmailconf.py "$$@"' ) >$@ && chmod +x $@
 
 FAQ: fetchmail-FAQ.html $(srcdir)/dist-tools/html2txt
-	AWK=$(AWK) $(SHELL) $(srcdir)/dist-tools/html2txt $(srcdir)/fetchmail-FAQ.html >$@ || { rm -f $@ ; exit 1 ; }
+	AWK=$(AWK) $(SHELL) $(srcdir)/dist-tools/html2txt $(srcdir)/fetchmail-FAQ.html >$@
 
 fetchmail-FAQ.pdf: fetchmail-FAQ.html fetchmail-FAQ.book bighand.png
 	$(AWK) '/^[ \t]*<h1/ {sec++; } {if (sec < 2 || sec > 3) print $0;}' <$(srcdir)/fetchmail-FAQ.html >fetchmail-FAQ-print.html
-	htmldoc --logoimage $(srcdir)/bighand.png --batch $(srcdir)/fetchmail-FAQ.book || { rm -f $@ ; exit 1 ; }
+	$(HTMLDOC) --logoimage $(srcdir)/bighand.png --batch $(srcdir)/fetchmail-FAQ.book
 	rm -f fetchmail-FAQ-print.html
 
 FEATURES: fetchmail-features.html $(srcdir)/dist-tools/html2txt
-	AWK=$(AWK) $(SHELL) $(srcdir)/dist-tools/html2txt $(srcdir)/fetchmail-features.html >$@ || { rm -f $@ ; exit 1 ; }
+	AWK=$(AWK) $(SHELL) $(srcdir)/dist-tools/html2txt $(srcdir)/fetchmail-features.html >$@
 
 NOTES: design-notes.html esrs-design-notes.html $(srcdir)/dist-tools/html2txt
 	   echo "This file contains two articles reformatted from HTML." > $@ \
 	&& echo "------------------------------------------------------" >> $@ \
 	&& echo "" >> $@ \
 	&& AWK=$(AWK) $(SHELL) $(srcdir)/dist-tools/html2txt $(srcdir)/design-notes.html >>$@ \
-	&& AWK=$(AWK) $(SHELL) $(srcdir)/dist-tools/html2txt $(srcdir)/esrs-design-notes.html >>$@ \
-	|| { rm -f $@ ; exit 1 ; }
+	&& AWK=$(AWK) $(SHELL) $(srcdir)/dist-tools/html2txt $(srcdir)/esrs-design-notes.html >>$@
 
 TODO: todo.html $(srcdir)/dist-tools/html2txt
-	AWK=$(AWK) $(SHELL) $(srcdir)/dist-tools/html2txt $(srcdir)/todo.html >$@ || { rm -f $@ ; exit 1 ; }
+	AWK=$(AWK) $(SHELL) $(srcdir)/dist-tools/html2txt $(srcdir)/todo.html >$@
 
-fetchmail-man.html: fetchmail.man $(srcdir)/dist-tools/manServer.pl
-	env - "PATH=$$PATH" perl -T $(srcdir)/dist-tools/manServer.pl $(srcdir)/fetchmail.man >$@ \
-	|| { rm -f $@ ; exit 1 ; }
+fetchmail-man.html: fetchmail.html
+	sed -Ee '/<colgroup>/,/<\/colgroup>/d' $< >$@
 
 dist-hook: fetch-translations
 	cd $(distdir) && find $(distdirs) po -name .git -type d -prune -exec rm -rf '{}' ';'
@@ -255,6 +256,7 @@ fetch-translations:
 import-translations: fetch-translations
 	cd $(top_builddir)/po && $(MAKE) update-po
 	@printf '\n=== You can use dist-tools/git-commit-po-updates.sh to check these updates in. ===\n\n'
+	$(SHELL) $(top_srcdir)/dist-tools/git-commit-po-updates.sh -n
 
 git-check:
 	@set -x && if test -d $(PACKAGE)-$(VERSION)-export ; then chmod -R u+rwX $(PACKAGE)-$(VERSION)-export ; fi && \
@@ -264,9 +266,13 @@ git-check:
 	cd $(PACKAGE)-$(VERSION)-export && chmod -R u+rwX . && autoreconf -i -f -s -v \
 	&& mkdir _build && cd _build && ../configure && $(MAKE) distcheck
 
-SUFFIXES = .html .txt
+SUFFIXES = .html .txt .rst
 .txt.html:
-	asciidoc --unsafe -a toc -a data-uri -o $@ $< || { rm -f $@ ; exit 1 ; }
+	asciidoc --unsafe --attribute toc --attribute data-uri -o $@ $<
+.man.rst:
+	pandoc --from man --to rst --table-of-contents --standalone --output $@ $<
+.rst.html:
+	$(RST2HTML) --title "Fetchmail Manual" --strip-comments --rfc-references $< $@
 
 # default to some non-default options when using "make distcheck"
 AM_DISTCHECK_CONFIGURE_FLAGS=--with-ssl

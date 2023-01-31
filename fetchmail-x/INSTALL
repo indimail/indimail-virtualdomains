@@ -18,7 +18,27 @@ running fetchmail.
 
 1. PREPARATIONS: USEFUL THINGS TO INSTALL FIRST
 
-1.1 OpenSSL
+1.1 Choose a TLS/SSL library.
+
+OpenSSL has been used for a long time and is tested and proven.
+See README.SSL for details.
+
+Forked libraries deriving from OpenSSL and under the SSLeay or OpenSSL license
+cannot be used due to licensing issues, and are not supported.
+This affects, f.i., LibreSSL, unless it is part of the operating system
+(f. i., on OpenBSD).  However, LibreSSL diverges from OpenSSL and is
+not supported by the fetchmail maintainer.
+
+Since 6.4.27, there has been experimental support for wolfSSL 5.1.1 or newer,
+which is under GNU GPL v2 or later license and hence may be easier for
+a consistent GPLv2+ licensing of fetchmail.  This support requires a C99
+or newer compiler, and requires up-to-date wolfSSL versions as wolfSSL keeps
+fixing vulnerabilities in newer version, so new fetchmail releases will
+consistently raise the bar on wolfSSL version.
+
+Choose between OpenSSL or wolfSSL.
+
+1.1a OpenSSL
 
 If you are installing OpenSSL yourself, it is recommended that you build
 shared OpenSSL libraries, it works better and updating OpenSSL does not
@@ -27,6 +47,17 @@ then require you to reinstall all applications that use OpenSSL.
 Try after unpacking OpenSSL:
 
 	./config shared && make && make test && make install
+
+1.1b wolfSSL
+
+If you are installing wolfSSL yourself, be sure to use a hardened build
+with all OpenSSL APIs (as of 5.1.1) - you may add --enable-debug,
+and note that --enable-opensslextra does NOT suffice.
+
+	./configure --enable-opensslall --enable-harden
+	make && make test && make install
+
+fetchmail's configure option --with-wolfssl takes precedence over --with-ssl.
 
 1.2 gettext (internationalization)
 
@@ -66,7 +97,31 @@ configure option '--with-included-gettext'.
 
 Installing fetchmail is easy.  From within this directory, type:
 
-	./configure
+When using OpenSSL:
+
+  ./configure
+
+  It is possible to either specify the install path, or pkg-config
+  module name, with --with-ssl, examples:
+
+  ./configure --with-ssl=/opt/openssl3
+
+  ./configure --with-ssl=eopenssl30
+
+When using wolfSSL (adjust the trust file location, see below):
+
+  ./configure --with-wolfssl \
+  WOLFSSL_TRUST_FILE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+
+Here, you need to adjust the file path according to where your ca_cert_nss or
+ca-certificates package installs the default trust bundle in PEM format with
+BEGIN CERTIFICATE lines.
+wolfSSL 5.1 cannot parse BEGIN TRUSTED CERTIFICATE bundles.
+
+Some typical locations as of 2021 are:
+on Fedora Linux:  /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+on Debian/Ubuntu: /etc/ssl/certs/ca-certificates.crt
+on FreeBSD:       /usr/local/share/certs/ca-root-nss.crt
 
 The autoconfiguration script will spend a bit of time figuring out the
 specifics of your system.  If you want to specify a particular compiler

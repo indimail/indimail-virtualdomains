@@ -4,6 +4,7 @@
 #ifdef SSL_ENABLE
 #include <stdlib.h>
 #include <string.h>
+#include "tls-aux.h"
 #include <openssl/x509.h>
 
 /** return a constant copy of the default SSL certificate path, i. e.

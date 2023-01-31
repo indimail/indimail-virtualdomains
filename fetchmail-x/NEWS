@@ -55,8 +55,6 @@ removed from a 6.5.0 or newer release.)
   requirements (dependencies), such as Boost or other class libraries.
 * The softbounce option default will change to "false" in the next release.
 * The --bsmtp - mode of operation may be removed in a future release.
-* Given that OpenSSL is severely underdocumented, and needs license exceptions,
-  fetchmail may switch to a different SSL library.
 * SSLv3 support may be removed from a future fetchmail release. It has been
   obsolete for many years and found insecure. Use TLS.
 * Fetchmailconf is deprecated and will be removed from a future release.
@@ -66,6 +64,11 @@ removed from a 6.5.0 or newer release.)
   fetchmail versions.
 * Nonstandard protocol extensions (such as SDPS/*ENV) may be removed from future 
   fetchmail versions.
+* Future fetchmail releases (even minor ones) may change undocumented parts of 
+  the .netrc parser in incompatible ways to enhance compatibility with typical
+  ftp(1) .netrc parsers.
+* Apparently OPIE is dying. I only have this support on FreeBSD, and
+  FreeBSD 14 (slated for release in 2023) is about to remove it.
 
 # KNOWN BUGS AND WORKAROUNDS
 * Fetchmail does not handle messages without Message-ID header well
@@ -88,6 +91,252 @@ removed from a 6.5.0 or newer release.)
   verbose mode even though --idle is not given, as an artifact of the 6.4.22 
   security fixes. Fetchmail means "could idle after poll", but this would
   have required another loop through the translators.
+* aka ... hostnames are not considered for upstream server X.509 certificate
+  verification, aka was meant for alias detection with multidrop mailboxes.
+* When compiled against wolfSSL, some diagnostics and messages of fetchmail are 
+  hardcoded to read "OpenSSL"; this was found only after the call for 
+  translations had been sent out already.
+* FreeBSD's OPIE implementation cannot be found when using a C++ compiler.
+  This should not affect the normal build, which uses a C compiler.
+
+--------------------------------------------------------------------------------
+fetchmail-6.4.36 (released 2023-01-28, 31710 LoC):
+
+# TRANSLATIONS: language translations were updated by these fine people:
+(in alphabetical order of language codes):
+* cs:    Petr Pisar [Czech]
+* es:    Cristian Othón Martínez Vera [Spanish]
+* fr:    Frédéric Marchal [French]
+* ja:    Takeshi Hamasaki [Japanese]
+* pl:    Jakub Bogusz [Polish]
+* ro:    Remus-Gabriel Chelu [Romanian]
+* sq:    Besnik Bleta [Albanian]
+* sv:    Göran Uddeborg [Swedish]
+
+--------------------------------------------------------------------------------
+fetchmail-6.4.35 (released 2023-01-04, 31707 LoC):
+
+# BREAKING CHANGES:
+* Fetchmail now warns about OpenSSL before 1.1.1s or 3.0.7,
+  and rejects wolfSSL older than 5.5.1.
+
+# TRANSLATIONS: language translations were updated by these fine people:
+(in reverse alphabetical order of language codes so as not to prefer people):
+* sv:    Göran Uddeborg [Swedish]
+* eo:    Keith Bowes [Esperanto]
+
+--------------------------------------------------------------------------------
+fetchmail-6.4.34 (released 2022-10-15, 31701 LoC):
+
+# CRITICAL BUG FIXES:
+* When an SMTP receiver refuses delivery, a message would be deleted from
+  the mail store in spite of a softbounce option that is enabled.
+  Bug report, analysis and patch by Horváth Zsolt. Gitlab, fixes #50.
+
+# BUILD NOTE:
+* If you are reusing config.cache from prior builds, this may cause
+  issues with finding Python or some libraries.  In case of trouble,
+  remove config.cache and retry.
+
+# TRANSLATIONS: language translations were updated by this fine person:
+* sr:    Мирослав Николић (Miroslav Nikolić) [Serbian]
+
+--------------------------------------------------------------------------------
+fetchmail-6.4.33 (released 2022-08-27, 31696 LoC):
+
+# TRANSLATIONS: language translations were updated by this fine person:
+* fr:    Frédéric Marchal [French]
+
+# CONTRIBUTED SCRIPT CHANGES:
+* contrib/fetchsetup improvements by Matěj Cepl
+* contrib/runfetchmail improvements by Matěj Cepl
+
+--------------------------------------------------------------------------------
+fetchmail-6.4.32 (released 2022-07-30, 31696 LoC):
+
+# FIXES:
+* Use configure to find rst2html, some systems install it only with .py suffix,
+  others only without, and some install both.
+* Update README.maintainer
+
+# TRANSLATIONS: language translations were updated by these fine people:
+(in alphabetical order of language codes so as not to prefer people):
+* cs:    Petr Pisar [Czech]
+* es:    Cristian Othón Martínez Vera [Spanish]
+* ja:    Takeshi Hamasaki [Japanese]
+* pl:    Jakub Bogusz [Polish]
+* ro:    Remus-Gabriel Chelu [Romanian]
+* sq:    Besnik Bleta [Albanian]
+* sv:    Göran Uddeborg [Swedish]
+
+--------------------------------------------------------------------------------
+fetchmail-6.4.31 (released 2022-07-16, 31694 LoC):
+
+# BUG FIXES:
+* Try to fix ./configure --with-ssl=... for systems that have multiple OpenSSL
+  versions installed.  Issues reported by Dennis Putnam.
+* The netrc parser now reports its errors to syslog or logfile when appropriate,
+  previously it would always log to stderr.
+* Add error checking to .netrc parser.
+
+# CHANGES:
+* manpage: use .UR/.UE macros instead of .URL for URIs.
+* manpage: fix contractions. Found with FreeBSD's igor tool.
+* manpage: HTML now built with pandoc -> python-docutils
+  (manServer.pl was dropped)
+
+--------------------------------------------------------------------------------
+fetchmail-6.4.30 (released 2022-04-26, 31666 LoC):
+
+# BREAKING CHANGES:
+* Bump wolfSSL minimum required version to 5.2.0 to pull in security fix.
+
+# CHANGES:
+* Using OpenSSL 1.* before 1.1.1n elicits a compile-time warning.
+* Using OpenSSL 3.* before 3.0.2  elicits a compile-time warning.
+* configure.ac was tweaked in order to hopefully fix cross-compilation issues
+  report, and different patch suggested, by Fabrice Fontaine,
+  https://gitlab.com/fetchmail/fetchmail/-/merge_requests/42
+
+# TRANSLATIONS: language translations were updated by this fine person:
+* ro:    Remus-Gabriel Chelu [Romanian]
+
+--------------------------------------------------------------------------------
+fetchmail-6.4.29 (released 2022-03-20, 31661 LoC):
+
+# TRANSLATIONS: language translations were updated by this fine person:
+* vi:    Trần Ngọc Quân [Vietnamese]
+
+--------------------------------------------------------------------------------
+fetchmail-6.4.28 (released 2022-03-05, 31661 LoC):
+
+# DOCUMENTATION:
+* Fix a typo in the manual page, courtesy of Jeremy Petch.
+
+# TRANSLATIONS: language translations were updated by this fine person:
+* es:    Cristian Othón Martínez Vera [Spanish]
+
+--------------------------------------------------------------------------------
+fetchmail-6.4.27 (released 2022-01-26, 31661 LoC):
+
+# BREAKING CHANGES:
+* Bump wolfSSL minimum required version to 5.1.1 to pull in security fix.
+
+# TRANSLATIONS: language translations were updated by this fine person:
+* ro:    Remus-Gabriel Chelu [Romanian]
+
+--------------------------------------------------------------------------------
+fetchmail-6.4.26 (released 2021-12-26, 31661 LoC):
+
+# FIXES:
+* When using wolfSSL 5.0.0, work around a bug that appears to hit wolfSSL when
+  receiving handshake records while still in SSL_peek(). Workaround is to read
+  1 byte and cache it, then call SSL_peek() again.
+  This affects only some servers. https://github.com/wolfSSL/wolfssl/issues/4593
+
+# TRANSLATIONS: language translations were updated by this fine person:
+* sr:    Мирослав Николић (Miroslav Nikolić) [Serbian]
+
+--------------------------------------------------------------------------------
+fetchmail-6.4.25 (released 2021-12-10, 31653 LoC):
+
+# BREAKING CHANGES:
+* Since distributions continue patching for LibreSSL use, which cannot be
+  linked legally, block out LibreSSL in configure.ac and socket.c, and
+  refer to COPYING, unless on OpenBSD (which ships it in the base system).
+  OpenSSL and wolfSSL 5 can be used.  SSL-related documentation was updated, do 
+  re-read COPYING, INSTALL, README, README.packaging, README.SSL.
+* Bump OpenSSL version requirement to 1.0.2f in order to safely remove
+  the obsolete OpenSSL flag SSL_OP_SINGLE_DH_USE. This blocks out 1.0.2e and 
+  older 1.0.2 versions. 1.0.2f was a security fix release, and 1.0.2u is 
+  publicly available from https://www.openssl.org/source/old/1.0.2/
+* Some of the configure.ac fiddling MIGHT have broken cross-compilation
+  again. The maintainer does not test cross-compiling fetchmail; if you
+  have difficulties, try setting PKG_CONFIG_LIBDIR to the pkg-config path
+  containing your target/host libraries, or see if --with-ssl-prefix or 
+  --with-wolfssl-prefix, or overriding LDFLAGS/LIBS/CPPFLAGS, can help.
+  Feedback solicited on compliant systems that are before end-of-life.
+
+# BUG FIXES:
+* 6.4.24's workaround for OpenSSL 1.0.2's X509_V_FLAG_TRUSTED_FIRST flag
+  contained a typo and would not kick in properly.
+* Library and/or rpath setting from configure.ac was fixed.
+
+# ADDITIONS:
+* Added an example systemd unit file and instructions to contrib/systemd/
+  which runs fetchmail as a daemon with 5-minute poll intervals.
+  Courteously contributed by Barak A. Pearlmutter, Debian Bug#981464.
+* fetchmail can now be used with wolfSSL 5's OpenSSL compatibility layer,
+  see INSTALL and README.SSL. This is considered experimental.
+  Feedback solicited.
+
+# CHANGES:
+* The getstats.py dist-tool now counts lines of .ac and .am files.
+* ./configure --with-ssl now supports pkg-config module names, too. See INSTALL.
+
+# TRANSLATIONS: language translations were updated by these fine people:
+(in reverse alphabetical order of language codes so as not to prefer people):
+* sv:    Göran Uddeborg [Swedish]
+* sq:    Besnik Bleta [Albanian]
+* pl:    Jakub Bogusz [Polish]
+* ja:    Takeshi Hamasaki [Japanese]
+* fr:    Frédéric Marchal [French]
+* eo:    Keith Bowes [Esperanto]
+* cs:    Petr Pisar [Czech]
+
+# CREDITS:
+* Thanks to Corey Halpin for testing release candidates.
+
+--------------------------------------------------------------------------------
+fetchmail-6.4.24 (released 2021-11-20, 30218 LoC):
+
+# OPENSSL AND LICENSING NOTE:
+> see fetchmail-6.4.22 below, and the file COPYING.
+
+  Note that distribution of packages linked with LibreSSL is not feasible
+  due to a missing GPLv2 clause 2(b) exception.
+
+# COMPATIBILITY:
+* Bison 3.8 dropped yytoknum altogether, breaking compilation due to a
+  warning workaround. Remove the cast of yytoknum to void.  This may cause
+  a compiler warning to reappear with older Bison versions.
+* OpenSSL 1.0.2: Workaround for systems that keep the expired DST Root CA X3 
+  certificate in its trust store because OpenSSL by default prefers the 
+  untrusted certificate and fails.  Fetchmail now sets the 
+  X509_V_FLAG_TRUSTED_FIRST flag (on OpenSSL 1.0.2 only).
+  This is workaround #2 from the OpenSSL Blog.  For details, see both:
+  https://www.openssl.org/blog/blog/2021/09/13/LetsEncryptRootCertExpire/
+  https://letsencrypt.org/docs/dst-root-ca-x3-expiration-september-2021/
+
+  NOTE: OpenSSL 1.0.2 is end of life, it is assumed that the OpenSSL library
+  is kept up to date by a distributor or via OpenSSL support contract.
+  Where this is not the case, please upgrade to a supported OpenSSL version.
+
+# DOCUMENTATION:
+* The manual page was revised after re-checking with mandoc -Tlint, aspell,
+  igor. Some more revisions were made for clarity.
+
+# TRANSLATIONS: language translations were updated by these fine people:
+* sv:    Göran Uddeborg [Swedish]
+* pl:    Jakub Bogusz [Polish]
+* fr:    Frédéric Marchal [French]
+* cs:    Petr Pisar [Czech]
+* eo:    Keith Bowes [Esperanto]
+* ja:    Takeshi Hamasaki [Japanese]
+
+--------------------------------------------------------------------------------
+fetchmail-6.4.23 (released 2021-10-31, 30206 LoC):
+
+# USABILITY:
+* For common ssh-based IMAP PREAUTH setups (i. e. those that use a plugin
+  - no matter its contents - and that set auth ssh), change the STARTTLS 
+  error message to suggest sslproto '' instead.
+  This is a commonly reported issue after the CVE-2021-39272 fix in 6.4.22.
+  Fixes Redhat Bugzilla 2008160. Fixes GitLab #39.
+
+# TRANSLATIONS: language translations were updated by these fine people:
+* ja:    Takeshi Hamasaki [Japanese]
+* sr:	 Мирослав Николић (Miroslav Nikolić) [Serbian]
 
 --------------------------------------------------------------------------------
 fetchmail-6.4.22 (released 2021-09-13, 30201 LoC):

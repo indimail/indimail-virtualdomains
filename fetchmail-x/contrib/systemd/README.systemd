@@ -1,0 +1,23 @@
+To run fetchmail as a systemd user service, for an individual user:
+
+(1) Configuration
+
+Set up your .fetchmailrc so that "fetchmail --nodetach" actually
+fetches your mail correctly.
+
+(2) Tell systemd to run it as a service
+
+Allow daemons to keep running after you log out (optional):
+$ sudo loginctl enable-linger $USERNAME
+
+Make the service available:
+$ systemctl --user enable fetchmail.service
+
+Actually turn it on:
+$ systemctl --user start fetchmail.service
+
+Monitor it, to check if it's okay:
+$ systemctl --user status fetchmail.service
+
+Monitor it harder:
+$ journalctl --user -xeu fetchmail.service

@@ -11,23 +11,53 @@ Carl E. Harris, George M. Sipe, Graham Wilson, Matthias Andree and Sunil Shetye.
 
 SSL library considerations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-If linking against OpenSSL versions under dual OpenSSL/SSLeay license (f. i. 
-OpenSSL 1.1.1x and older) is enabled at configure/compile time, the 
+If linking against OpenSSL versions under dual OpenSSL/SSLeay license (f. i.
+OpenSSL 1.1.1x and older) is enabled at configure/compile time, the
 following clause applies:
 | This product includes software developed by the OpenSSL Project
 | for use in the OpenSSL Toolkit. (http://www.openssl.org/)
 
+|Linking fetchmail statically or dynamically with other modules is making
+|a combined work based on fetchmail. Thus, the terms and conditions
+|of the GNU General Public License cover the whole combination.
+|
+|In addition, as a special exception, the copyright holders of fetchmail
+|give you permission to combine fetchmail with free software programs or 
+|libraries that are released with code included in the standard release of 
+|OpenSSL under the OpenSSL or SSLeay license (or modified versions of such
+|code, with unchanged license).
+|
+|You may copy and distribute such a system following the terms of the GNU GPL
+|for fetchmail and the licenses of the other code concerned,
+|provided that you include the source code of that other code when and as the
+|GNU GPL requires distribution of source code.
+|
+|Note that people who make modified versions of fetchmail are not obligated to
+|grant this special exception for their modified versions; it is their choice
+|whether to do so. The GNU General Public License gives permission to release
+|a modified version without this exception; this exception also makes it
+|possible to release a modified version which carries forward this exception.
+|
+|In short:
 Specific permission is granted for the GPLed code in this distribution to
 be linked to OpenSSL without invoking GPL clause 2(b).
 
 Note that this permission applies to OpenSSL, and OpenSSL only.
 
+The Free Software Foundation asserts that a GPL v2 clause 2b exception is
+required even for dynamically linked binaries. See
+https://www.gnu.org/licenses/gpl-faq.en.html#GPLStaticVsDynamic
 
-If linking against OpenSSL versions licensed under the Apache License version 
+
+If linking against OpenSSL versions licensed under the Apache License version
 2.0 (for instance, OpenSSL 3.0.x), note that this library is incompatible with
-the GPLv2, so that effectively, distributors need to pull the "or any later version"
+the GPLv2, so that effectively, distributors need to use the "or any later version"
 grant in the GPLv2 and apply the GPLv3 which is considered compatible with the
 Apache License 2.0 by the FSF and the ASF.
+
+
+Fetchmail can be linked against wolfSSL,
+which is under GNU General Public License v2, or optionally, any later version.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The support for SMB authentication is copyright by Andrew Tridgell and
@@ -65,7 +95,7 @@ Stenberg and also under a liberal license:
  | MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE AUTHORS AND
  | CONTRIBUTORS ACCEPT NO RESPONSIBILITY IN ANY CONCEIVABLE MANNER.
 
-The libesmtp/* files functions are (C) by Brian Stafford, see the respective 
+The libesmtp/* files functions are (C) by Brian Stafford, see the respective
 file headers for details (LGPL v2.1 or later).
 
 The KAME/* files are (C) Copyright (C) 1995, 1996, 1997, and 1998 WIDE

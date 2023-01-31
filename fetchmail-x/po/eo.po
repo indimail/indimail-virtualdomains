@@ -3,14 +3,14 @@
 # This file is distributed under the same license as the fetchmail package.
 # Sian Mountbatten <poenikatu@fastmail.co.uk>, 2012
 # Felipe Castro <fefcas@gmail.com>, 2013, 2019.
-# Keith Bowes <zooplah@gmail.com>, 2020, 2021.
+# Keith Bowes <zooplah@gmail.com>, 2020, 2021, 2023.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: fetchmail 6.4.22.rc1\n"
+"Project-Id-Version: fetchmail 6.4.31\n"
 "Report-Msgid-Bugs-To: fetchmail-devel@lists.sourceforge.net\n"
-"POT-Creation-Date: 2021-09-13 15:12+0200\n"
-"PO-Revision-Date: 2021-08-27 12:32-0400\n"
+"POT-Creation-Date: 2023-01-28 10:43+0100\n"
+"PO-Revision-Date: 2023-01-01 15:16-0500\n"
 "Last-Translator: Keith Bowes <zooplah@gmail.com>\n"
 "Language-Team: Esperanto <translation-team-eo@lists.sourceforge.net>\n"
 "Language: eo\n"
@@ -194,8 +194,8 @@ msgstr "fetchmail alfrontas ripetitajn tempolimojn"
 #: driver.c:931
 #, c-format
 msgid ""
-"Fetchmail saw more than %d timeouts while attempting to get mail from %s@"
-"%s.\n"
+"Fetchmail saw more than %d timeouts while attempting to get mail from "
+"%s@%s.\n"
 msgstr ""
 "Fetchmail alfrontis pli ol %d atingitajn tempolimojn dum penado havigi la "
 "poŝton de %s@%s.\n"
@@ -694,12 +694,12 @@ msgstr "fetchmail: vokita kun"
 msgid "could not get current working directory\n"
 msgstr "ne eblis havigi nunan labordosierujon\n"
 
-#: fetchmail.c:306
+#: fetchmail.c:310
 #, c-format
 msgid "This is fetchmail release %s"
 msgstr "Ĉi tio estas fetchmail eldono %s"
 
-#: fetchmail.c:309
+#: fetchmail.c:313
 #, c-format
 msgid ""
 "Compiled with SSL library %#lx \"%s\"\n"
@@ -708,7 +708,7 @@ msgstr ""
 "Kompilumita kun la SSL-biblioteko %#lx \"%s\"\n"
 "Plenumiĝas kun la SSL-biblioteko %#lx \"%s\"\n"
 
-#: fetchmail.c:313
+#: fetchmail.c:317
 #, c-format
 msgid ""
 "OpenSSL: %s\n"
@@ -717,39 +717,43 @@ msgstr ""
 "OpenSSL: %s\n"
 "Motoroj: %s\n"
 
-#: fetchmail.c:317
+#: fetchmail.c:321
 msgid "WARNING: Your SSL/TLS library does not support TLS v1.3.\n"
 msgstr "AVERTO: Via SSL/TLS-biblioteko ne komprenas eldonon 1.3 de TLS.\n"
 
-#: fetchmail.c:320
+#: fetchmail.c:326
 msgid ""
-"WARNING: Compiled against LibreSSL, which is not a supported configuration.\n"
-msgstr "AVERTO: Kompilumita kontraŭ LibreSSL, kie ne estas subtenata.\n"
+"ERROR: Compiled against LibreSSL, which is a copyright violation for lack of "
+"GPL clause 2b exception. See COPYING. Aborting.\n"
+msgstr ""
+"ERARO: Kompilumita kontraŭ LibreSSL, kiu estas kopirajta malobservo pro la "
+"manko de escepto por klaŭzo 2b de la GPL-permesilo (dosiero COPYING). "
+"Haltigas.\n"
 
-#: fetchmail.c:323
+#: fetchmail.c:330
 msgid "WARNING: Compiled without SSL/TLS.\n"
 msgstr "AVERTO: Kompilumita sen SSL/TLS.\n"
 
-#: fetchmail.c:349
+#: fetchmail.c:356
 msgid "The nodetach option is in effect, ignoring logfile option.\n"
 msgstr "La opcio nodetach aktivas, ni preteratentas la opcion logfile.\n"
 
-#: fetchmail.c:356
+#: fetchmail.c:363
 msgid "Not running in daemon mode, ignoring logfile option.\n"
 msgstr "Ni ne rulas laŭ demona reĝimo, ni preteratentas la opcion logfile.\n"
 
-#: fetchmail.c:363
+#: fetchmail.c:370
 #, c-format
 msgid "Logfile \"%s\" does not exist, ignoring logfile option.\n"
 msgstr ""
 "La protokoldosiero \"%s\" ne ekzistas, ni preteratentas la opcion logfile.\n"
 
-#: fetchmail.c:369
+#: fetchmail.c:376
 #, c-format
 msgid "Logfile \"%s\" is not writable, aborting.\n"
 msgstr "La protokoldosiero \"%s\" ne skribeblas, ni ĉesas.\n"
 
-#: fetchmail.c:387
+#: fetchmail.c:394
 #, c-format
 msgid ""
 "syslog and logfile options are both set, ignoring syslog, and logging to %s"
@@ -757,47 +761,47 @@ msgstr ""
 "La opcioj syslog kaj logfile estas ambaŭ aktivaj, ni preterpasas syslog kaj "
 "protokolas en %s"
 
-#: fetchmail.c:478
+#: fetchmail.c:485
 #, c-format
 msgid "Taking options from command line%s%s\n"
 msgstr "Prenante opciojn el komandlinio%s%s\n"
 
-#: fetchmail.c:479
+#: fetchmail.c:486
 msgid " and "
 msgstr " kaj "
 
-#: fetchmail.c:484
+#: fetchmail.c:491
 #, c-format
 msgid "No mailservers set up -- perhaps %s is missing?\n"
 msgstr "Neniu poŝtserviloj starigitaj -- eble %s mankas?\n"
 
-#: fetchmail.c:505
+#: fetchmail.c:512
 msgid "fetchmail: no mailservers have been specified.\n"
 msgstr "fetchmail: neniu poŝtserviloj estas specifitaj.\n"
 
-#: fetchmail.c:517
+#: fetchmail.c:524
 msgid "fetchmail: no other fetchmail is running\n"
 msgstr "fetchmail: neniu alia fetchmail rulas\n"
 
-#: fetchmail.c:523
+#: fetchmail.c:530
 #, c-format
 msgid "fetchmail: error killing %s fetchmail at %ld; bailing out.\n"
 msgstr "fetchmail: eraro haltigante %s fetchmail ĉe %ld; ni foriras.\n"
 
-#: fetchmail.c:524 fetchmail.c:533
+#: fetchmail.c:531 fetchmail.c:540
 msgid "background"
 msgstr "fono"
 
-#: fetchmail.c:524 fetchmail.c:533
+#: fetchmail.c:531 fetchmail.c:540
 msgid "foreground"
 msgstr "malfono"
 
-#: fetchmail.c:532
+#: fetchmail.c:539
 #, c-format
 msgid "fetchmail: %s fetchmail at %ld killed.\n"
 msgstr "fetchmail: %s fetchmail ĉe %ld ĉesigita.\n"
 
-#: fetchmail.c:555
+#: fetchmail.c:562
 msgid ""
 "fetchmail: can't check mail while another fetchmail to same host is "
 "running.\n"
@@ -805,7 +809,7 @@ msgstr ""
 "fetchmail: ne eblas kontroli poŝton dum alia fetchmail por la sama gastigejo "
 "rulas.\n"
 
-#: fetchmail.c:561
+#: fetchmail.c:568
 #, c-format
 msgid ""
 "fetchmail: can't poll specified hosts with another fetchmail running at "
@@ -814,207 +818,207 @@ msgstr ""
 "fetchmail: ne eblas enketi specifitajn gastigejojn kun alia fetchmail "
 "rulanta ĉe %ld.\n"
 
-#: fetchmail.c:568
+#: fetchmail.c:575
 #, c-format
 msgid "fetchmail: another foreground fetchmail is running at %ld.\n"
 msgstr "fetchmail: alia malfona fetchmail rulas ĉe %ld.\n"
 
-#: fetchmail.c:578
+#: fetchmail.c:585
 msgid ""
 "fetchmail: can't accept options while a background fetchmail is running.\n"
 msgstr "fetchmail: ne eblas akcepti opciojn dum fona fetchmail rulas.\n"
 
-#: fetchmail.c:590
+#: fetchmail.c:597
 #, c-format
 msgid "fetchmail: background fetchmail at %ld awakened.\n"
 msgstr "fetchmail: fona fetchmail ĉe %ld estis vekigata.\n"
 
-#: fetchmail.c:602
+#: fetchmail.c:609
 #, c-format
 msgid "fetchmail: elder sibling at %ld died mysteriously.\n"
 msgstr "fetchmail: pli aĝa gefrato ĉe %ld mortis mistere.\n"
 
-#: fetchmail.c:617
+#: fetchmail.c:624
 #, c-format
 msgid "fetchmail: can't find a password for %s@%s.\n"
 msgstr "fetchmail: ne eblas trovi pasvorton por %s@%s.\n"
 
-#: fetchmail.c:621
+#: fetchmail.c:628
 #, c-format
 msgid "Enter password for %s@%s: "
 msgstr "Enmetu pasvorton por %s@%s: "
 
-#: fetchmail.c:663
+#: fetchmail.c:670
 msgid "fetchmail: Cannot detach into background. Aborting.\n"
 msgstr "fetchmail: Ne eblas malfiksiĝi en fonon. Ni ĉesas.\n"
 
-#: fetchmail.c:667
+#: fetchmail.c:674
 #, c-format
 msgid "starting fetchmail %s daemon\n"
 msgstr "ekigo de fetchmail-demono %s\n"
 
-#: fetchmail.c:683 fetchmail.c:685
+#: fetchmail.c:690 fetchmail.c:692
 #, c-format
 msgid "could not open %s to append logs to\n"
 msgstr "ne eblis malfermi %s por postmeti protokolojn\n"
 
-#: fetchmail.c:704
+#: fetchmail.c:711
 msgid "--check mode enabled, not fetching mail\n"
 msgstr "reĝimo --check ebligita, ni ne alportas poŝton\n"
 
-#: fetchmail.c:726
+#: fetchmail.c:733
 #, c-format
 msgid "couldn't time-check %s (error %d)\n"
 msgstr "ne eblis tempkontroli %s (eraro %d)\n"
 
-#: fetchmail.c:731
+#: fetchmail.c:738
 #, c-format
 msgid "restarting fetchmail (%s changed)\n"
 msgstr "reekigo de fetchmail (%s ŝanĝis)\n"
 
-#: fetchmail.c:735
+#: fetchmail.c:742
 msgid "attempt to re-exec may fail as directory has not been restored\n"
 msgstr "provo re-ruli povos malsukcesi ĉar dosierujo ne estas restarigita\n"
 
-#: fetchmail.c:761
+#: fetchmail.c:768
 msgid "attempt to re-exec fetchmail failed\n"
 msgstr "provo re-ruli fetchmail malsukcesis\n"
 
-#: fetchmail.c:791
+#: fetchmail.c:798
 #, c-format
 msgid "poll of %s skipped (failed authentication or too many timeouts)\n"
 msgstr ""
 "enketo de %s estas preterpasita (malsukcesa aŭtentiko aŭ tro da tempolimoj)\n"
 
-#: fetchmail.c:803
+#: fetchmail.c:810
 #, c-format
 msgid "interval not reached, not querying %s\n"
 msgstr "intervalo ne atingita, ni ne informpetas %s\n"
 
-#: fetchmail.c:841
+#: fetchmail.c:848
 msgid "Query status=0 (SUCCESS)\n"
 msgstr "Informpeta stato=0 (SUKCESO)\n"
 
-#: fetchmail.c:843
+#: fetchmail.c:850
 msgid "Query status=1 (NOMAIL)\n"
 msgstr "Informpeta stato=1 (NEPOŜTO)\n"
 
-#: fetchmail.c:845
+#: fetchmail.c:852
 msgid "Query status=2 (SOCKET)\n"
 msgstr "Informpeta stato=2 (INGO)\n"
 
-#: fetchmail.c:847
+#: fetchmail.c:854
 msgid "Query status=3 (AUTHFAIL)\n"
 msgstr "Informpeta stato=3 (AŬTFIASKO)\n"
 
-#: fetchmail.c:849
+#: fetchmail.c:856
 msgid "Query status=4 (PROTOCOL)\n"
 msgstr "Informpeta stato=4 (PROTOKOLO)\n"
 
-#: fetchmail.c:851
+#: fetchmail.c:858
 msgid "Query status=5 (SYNTAX)\n"
 msgstr "Informpeta stato=5 (SINTAKSO)\n"
 
-#: fetchmail.c:853
+#: fetchmail.c:860
 msgid "Query status=6 (IOERR)\n"
 msgstr "Informpeta stato=6 (ENELERAR)\n"
 
-#: fetchmail.c:855
+#: fetchmail.c:862
 msgid "Query status=7 (ERROR)\n"
 msgstr "Informpeta stato=7 (ERARO)\n"
 
-#: fetchmail.c:857
+#: fetchmail.c:864
 msgid "Query status=8 (EXCLUDE)\n"
 msgstr "Informpeta stato=8 (ELBARI)\n"
 
-#: fetchmail.c:859
+#: fetchmail.c:866
 msgid "Query status=9 (LOCKBUSY)\n"
 msgstr "Informpeta stato=9 (ŜLOSILOKUPATA)\n"
 
-#: fetchmail.c:861
+#: fetchmail.c:868
 msgid "Query status=10 (SMTP)\n"
 msgstr "Informpeta stato=10 (SMTP)\n"
 
-#: fetchmail.c:863
+#: fetchmail.c:870
 msgid "Query status=11 (DNS)\n"
 msgstr "Informpeta stato=11 (DNS)\n"
 
-#: fetchmail.c:865
+#: fetchmail.c:872
 msgid "Query status=12 (BSMTP)\n"
 msgstr "Informpeta stato=12 (BSMTP)\n"
 
-#: fetchmail.c:867
+#: fetchmail.c:874
 msgid "Query status=13 (MAXFETCH)\n"
 msgstr "Informpeta stato=13 (MAKSALPORT)\n"
 
-#: fetchmail.c:869
+#: fetchmail.c:876
 #, c-format
 msgid "Query status=%d\n"
 msgstr "Informpeta stato=%d\n"
 
-#: fetchmail.c:911
+#: fetchmail.c:918
 msgid "All connections are wedged.  Exiting.\n"
 msgstr "Ĉiuj konektoj estas fendita. Ni ĉesas.\n"
 
-#: fetchmail.c:919
+#: fetchmail.c:926
 #, c-format
 msgid "sleeping at %s for %d seconds\n"
 msgstr "dormado je %s dum %d sekundoj\n"
 
-#: fetchmail.c:943
+#: fetchmail.c:950
 #, c-format
 msgid "awakened by %s\n"
 msgstr "vekigita de %s\n"
 
-#: fetchmail.c:946
+#: fetchmail.c:953
 #, c-format
 msgid "awakened by signal %d\n"
 msgstr "vekigita de la signalo %d\n"
 
-#: fetchmail.c:954
+#: fetchmail.c:961
 #, c-format
 msgid "awakened at %s\n"
 msgstr "vekigita je %s\n"
 
-#: fetchmail.c:959
+#: fetchmail.c:966
 #, c-format
 msgid "normal termination, status %d\n"
 msgstr "normala finiĝo, stato %d\n"
 
-#: fetchmail.c:1123
+#: fetchmail.c:1130
 msgid "couldn't time-check the run-control file\n"
 msgstr "ne eblis tempkontroli la rul-kontrolan dosieron\n"
 
-#: fetchmail.c:1157
+#: fetchmail.c:1164
 #, c-format
 msgid "Warning: multiple mentions of host %s in config file\n"
 msgstr "Averto: pluraj mencioj de gastigejo %s en agorda dosiero\n"
 
-#: fetchmail.c:1196
+#: fetchmail.c:1203
 msgid ""
-"fetchmail: Error: multiple \"defaults\" records in config file, or \"defaults"
-"\" is not the first record.\n"
+"fetchmail: Error: multiple \"defaults\" records in config file, or "
+"\"defaults\" is not the first record.\n"
 msgstr ""
 "fetchmail: Eraro: pluraj rikordoj \"defaults\" en agorda dosiero, aŭ "
 "\"defaults\" ne estas la una rikordo.\n"
 
-#: fetchmail.c:1326
+#: fetchmail.c:1333
 msgid "SSL support is not compiled in.\n"
 msgstr "Subteno al SSL ne estas enkompilumita.\n"
 
-#: fetchmail.c:1333
+#: fetchmail.c:1340
 msgid "KERBEROS v4 support is configured, but not compiled in.\n"
 msgstr "Subteno al KERBEROS v4 estas agordita, sed ne enkompilumita.\n"
 
-#: fetchmail.c:1339
+#: fetchmail.c:1346
 msgid "KERBEROS v5 support is configured, but not compiled in.\n"
 msgstr "Subteno al KERBEROS v5 estas agordita, sed ne enkompilumita.\n"
 
-#: fetchmail.c:1345
+#: fetchmail.c:1352
 msgid "GSSAPI support is configured, but not compiled in.\n"
 msgstr "Subteno al GSSAPI estas agordita, sed ne enkompilumita.\n"
 
-#: fetchmail.c:1375
+#: fetchmail.c:1382
 #, c-format
 msgid ""
 "fetchmail: warning: no DNS available to check multidrop fetches from %s\n"
@@ -1022,16 +1026,16 @@ msgstr ""
 "fetchmail: averto: neniu DNS disponeblas por kontroli mult-falaj alportoj el "
 "%s\n"
 
-#: fetchmail.c:1386
+#: fetchmail.c:1393
 #, c-format
 msgid "warning: multidrop for %s requires envelope option!\n"
 msgstr "averto: mult-falo por %s postulas kovertan opcion!\n"
 
-#: fetchmail.c:1387
+#: fetchmail.c:1394
 msgid "warning: Do not ask for support if all mail goes to postmaster!\n"
 msgstr "averto: Ne petu subtenon se ĉiu poŝto iras al la poŝtestro!\n"
 
-#: fetchmail.c:1404
+#: fetchmail.c:1411
 #, c-format
 msgid ""
 "fetchmail: %s configuration invalid, specify positive port number for "
@@ -1040,12 +1044,12 @@ msgstr ""
 "fetchmail: %s agordo nevalida, specifu pozitivan pordan numeron por servo aŭ "
 "pordo\n"
 
-#: fetchmail.c:1411
+#: fetchmail.c:1418
 #, c-format
 msgid "fetchmail: %s configuration invalid, RPOP requires a privileged port\n"
 msgstr "fetchmail: %s agordo nevalida, RPOP postulas privilegian pordon\n"
 
-#: fetchmail.c:1417
+#: fetchmail.c:1424
 #, c-format
 msgid ""
 "WARNING: %s configuration invalid, you normally need --ssl for port 995/"
@@ -1054,7 +1058,7 @@ msgstr ""
 "AVERTO: %s agordo nevalida, oni ordinare bezonas la parametron --ssl por "
 "pordo 995/servo pop3s\n"
 
-#: fetchmail.c:1418
+#: fetchmail.c:1425
 #, c-format
 msgid ""
 "WARNING: %s configuration invalid, you normally need port 995/service pop3s "
@@ -1063,7 +1067,7 @@ msgstr ""
 "AVERTO: %s agordo nevalida, oni ordinare bezonas pordon 995/servon pop3 por "
 "--ssl.\n"
 
-#: fetchmail.c:1421
+#: fetchmail.c:1428
 #, c-format
 msgid ""
 "WARNING: %s configuration invalid, you normally need --ssl for port 993/"
@@ -1072,7 +1076,7 @@ msgstr ""
 "AVERTO: nevalida agordo %s, oni ordinare bezonas parametron --ssl por pordo "
 "993/servo imaps.\n"
 
-#: fetchmail.c:1422
+#: fetchmail.c:1429
 #, c-format
 msgid ""
 "WARNING: %s configuration invalid, you normally need port 993/service imaps "
@@ -1081,327 +1085,327 @@ msgstr ""
 "AVERTO: %s agordo nevalida, oni ordinare bezonas pordon 993/servon imaps por "
 "--ssl.\n"
 
-#: fetchmail.c:1440
+#: fetchmail.c:1447
 #, c-format
 msgid "%s configuration invalid, LMTP can't use default SMTP port\n"
 msgstr "%s agordo nevalida, LMTP ne povas uzi aprioran SMTP pordon\n"
 
-#: fetchmail.c:1454
+#: fetchmail.c:1461
 msgid "Both fetchall and keep on in daemon or idle mode is a mistake!\n"
 msgstr ""
 "Kaj 'fetchall' kaj 'keep' aktivaj sub demona aŭ senokupa reĝimo estas "
 "eraro!\n"
 
-#: fetchmail.c:1464
+#: fetchmail.c:1471
 msgid ""
 "fetchmail: Error: idle mode does not work for multiple folders or accounts!\n"
 msgstr ""
 "fetchmail: Eraro: senokupa reĝimo ne funkcias por multoblaj dosierujoj aŭ "
 "kontoj!\n"
 
-#: fetchmail.c:1488
+#: fetchmail.c:1495
 #, c-format
 msgid "terminated with signal %d\n"
 msgstr "ĉesigita kun signalo %d\n"
 
-#: fetchmail.c:1561
+#: fetchmail.c:1568
 #, c-format
 msgid "%s querying %s (protocol %s) at %s: poll started\n"
 msgstr "%s informpetas %s (protokolo %s) ĉe %s: enketo estas komencita\n"
 
-#: fetchmail.c:1586
+#: fetchmail.c:1593
 msgid "POP2 support is not configured.\n"
 msgstr "Subteno al POP2 ne estas agordita.\n"
 
-#: fetchmail.c:1598
+#: fetchmail.c:1605
 msgid "POP3 support is not configured.\n"
 msgstr "Subteno al POP3 ne estas agordita.\n"
 
-#: fetchmail.c:1608
+#: fetchmail.c:1615
 msgid "IMAP support is not configured.\n"
 msgstr "Subteno al IMAP ne estas agordita.\n"
 
-#: fetchmail.c:1614
+#: fetchmail.c:1621
 msgid "ETRN support is not configured.\n"
 msgstr "Subteno al ETRN ne estas agordita.\n"
 
-#: fetchmail.c:1622
+#: fetchmail.c:1629
 msgid "ODMR support is not configured.\n"
 msgstr "Subteno al ODMR ne estas agordita.\n"
 
-#: fetchmail.c:1629
+#: fetchmail.c:1636
 msgid "unsupported protocol selected.\n"
 msgstr "nesubtenata protokolo estis elektata.\n"
 
-#: fetchmail.c:1640
+#: fetchmail.c:1647
 #, c-format
 msgid "%s querying %s (protocol %s) at %s: poll completed\n"
 msgstr "%s informpetas %s (protokolo %s) ĉe %s: enketo kompletita\n"
 
-#: fetchmail.c:1665
+#: fetchmail.c:1672
 #, c-format
 msgid "Poll interval is %d seconds\n"
 msgstr "Enketa intervalo estas %d sekundoj\n"
 
-#: fetchmail.c:1667
+#: fetchmail.c:1674
 #, c-format
 msgid "Logfile is %s\n"
 msgstr "Protokoldosiero estas %s\n"
 
-#: fetchmail.c:1669
+#: fetchmail.c:1676
 #, c-format
 msgid "Idfile is %s\n"
 msgstr "Id-dosiero estas %s\n"
 
-#: fetchmail.c:1672
+#: fetchmail.c:1679
 msgid "Progress messages will be logged via syslog\n"
 msgstr "Progresmesaĝoj estos protokolitaj per syslog\n"
 
-#: fetchmail.c:1675
+#: fetchmail.c:1682
 msgid "Fetchmail will masquerade and will not generate Received\n"
 msgstr "Fetchmail maskiĝos kaj ne generos Received\n"
 
-#: fetchmail.c:1677
+#: fetchmail.c:1684
 msgid "Fetchmail will show progress dots even in logfiles.\n"
 msgstr "Fetchmail montros progrespunktojn eĉ en protokolaj dosieroj.\n"
 
-#: fetchmail.c:1679
+#: fetchmail.c:1686
 #, c-format
 msgid "Fetchmail will forward misaddressed multidrop messages to %s.\n"
 msgstr "Fetchmail plusendos misadresitajn mult-falajn mesaĝojn al %s.\n"
 
-#: fetchmail.c:1683
+#: fetchmail.c:1690
 msgid "Fetchmail will direct error mail to the postmaster.\n"
 msgstr "Fetchmail direktos erarpoŝton al la poŝtestro.\n"
 
-#: fetchmail.c:1685
+#: fetchmail.c:1692
 msgid "Fetchmail will direct error mail to the sender.\n"
 msgstr "Fetchmail direktos erarpoŝton al la sendinto.\n"
 
-#: fetchmail.c:1688
+#: fetchmail.c:1695
 msgid "Fetchmail will treat permanent errors as permanent (drop messages).\n"
 msgstr "Fetchmail traktos daŭrantajn erarojn kiel daŭraj (faligi mesaĝojn).\n"
 
-#: fetchmail.c:1690
+#: fetchmail.c:1697
 msgid "Fetchmail will treat permanent errors as temporary (keep messages).\n"
 msgstr ""
 "Fetchmail traktos daŭrantajn erarojn kiel provizorajn (gardi mesaĝojn).\n"
 
-#: fetchmail.c:1697
+#: fetchmail.c:1704
 #, c-format
 msgid "Options for retrieving from %s@%s:\n"
 msgstr "Opcioj por havigado el %s@%s:\n"
 
-#: fetchmail.c:1701
+#: fetchmail.c:1708
 #, c-format
 msgid "  Mail will be retrieved via %s\n"
 msgstr "  Poŝto estos havigata per %s\n"
 
-#: fetchmail.c:1704
+#: fetchmail.c:1711
 #, c-format
 msgid "  Poll of this server will occur every %d interval.\n"
 msgid_plural "  Poll of this server will occur every %d intervals.\n"
 msgstr[0] "  Enketo de ĉi tiu servilo okazos je ĉiu %d intervalo.\n"
 msgstr[1] "  Enketo de ĉi tiu servilo okazos je ĉiu %d intervaloj.\n"
 
-#: fetchmail.c:1708
+#: fetchmail.c:1715
 #, c-format
 msgid "  True name of server is %s.\n"
 msgstr "  Vera nomo de servilo estas %s.\n"
 
-#: fetchmail.c:1711
+#: fetchmail.c:1718
 msgid "  This host will not be queried when no host is specified.\n"
 msgstr ""
 "  Ĉi tiu gastigejo ne estos informpetita kiam neniu gastigejo estas "
 "specifita.\n"
 
-#: fetchmail.c:1712
+#: fetchmail.c:1719
 msgid "  This host will be queried when no host is specified.\n"
 msgstr ""
 "  Ĉi tiu gastigejo estos informpetita kiam neniu gastigejo estas specifita.\n"
 
-#: fetchmail.c:1716
+#: fetchmail.c:1723
 msgid "  Password will be prompted for.\n"
 msgstr "  Pasvorto estos atendata.\n"
 
-#: fetchmail.c:1720
+#: fetchmail.c:1727
 #, c-format
 msgid "  APOP secret = \"%s\".\n"
 msgstr "  APOP-sekreto = \"%s\".\n"
 
-#: fetchmail.c:1723
+#: fetchmail.c:1730
 #, c-format
 msgid "  RPOP id = \"%s\".\n"
 msgstr "  RPOP-id = \"%s\".\n"
 
-#: fetchmail.c:1726
+#: fetchmail.c:1733
 #, c-format
 msgid "  Password = \"%s\".\n"
 msgstr "  Pasvorto = \"%s\".\n"
 
-#: fetchmail.c:1735
+#: fetchmail.c:1742
 #, c-format
 msgid "  Protocol is KPOP with Kerberos %s authentication"
 msgstr "  Protokolo estas KPOP kun autentikigo Kerberos %s"
 
-#: fetchmail.c:1738
+#: fetchmail.c:1745
 #, c-format
 msgid "  Protocol is %s"
 msgstr "  Protokolo estas %s"
 
-#: fetchmail.c:1740
+#: fetchmail.c:1747
 #, c-format
 msgid " (using service %s)"
 msgstr " (uzado de servo %s)"
 
-#: fetchmail.c:1742
+#: fetchmail.c:1749
 msgid " (using default port)"
 msgstr " (uzado de apriora pordo)"
 
-#: fetchmail.c:1744
+#: fetchmail.c:1751
 msgid " (forcing UIDL use)"
 msgstr " (perforto uzi UIDL)"
 
-#: fetchmail.c:1750
+#: fetchmail.c:1757
 msgid "  All available authentication methods will be tried.\n"
 msgstr "  Ĉiuj disponeblaj aŭtentikaj metodoj estos provataj.\n"
 
-#: fetchmail.c:1753
+#: fetchmail.c:1760
 msgid "  Password authentication will be forced.\n"
 msgstr "  Pasvorta aŭtentikigo estos perfortatata.\n"
 
-#: fetchmail.c:1756
+#: fetchmail.c:1763
 msgid "  MSN authentication will be forced.\n"
 msgstr "  MSN-aŭtentikigo estos perfortatata.\n"
 
-#: fetchmail.c:1759
+#: fetchmail.c:1766
 msgid "  NTLM authentication will be forced.\n"
 msgstr "  NTLM-aŭtentikigo estos perfortata.\n"
 
-#: fetchmail.c:1762
+#: fetchmail.c:1769
 msgid "  OTP authentication will be forced.\n"
 msgstr "  OTP-aŭtentikigo estos perfortatata.\n"
 
-#: fetchmail.c:1765
+#: fetchmail.c:1772
 msgid "  CRAM-MD5 authentication will be forced.\n"
 msgstr "  CRAM-MD5-aŭtentikigo estos perfortata.\n"
 
-#: fetchmail.c:1768
+#: fetchmail.c:1775
 msgid "  GSSAPI authentication will be forced.\n"
 msgstr "  GSSAPI-aŭtentikigo estos perfortata.\n"
 
-#: fetchmail.c:1771
+#: fetchmail.c:1778
 msgid "  Kerberos V4 authentication will be forced.\n"
 msgstr "  Kerberos-V4-aŭtentikigo estos perfortata.\n"
 
-#: fetchmail.c:1774
+#: fetchmail.c:1781
 msgid "  Kerberos V5 authentication will be forced.\n"
 msgstr "  Kerberos-V5-aŭtentikigo estos perfortata.\n"
 
-#: fetchmail.c:1777
+#: fetchmail.c:1784
 msgid "  End-to-end encryption assumed.\n"
 msgstr "  Fino-al-fina ĉifro estas supozata.\n"
 
-#: fetchmail.c:1781
+#: fetchmail.c:1788
 #, c-format
 msgid "  Mail service principal is: %s\n"
 msgstr "  Poŝta serva ĉefo estas: %s\n"
 
-#: fetchmail.c:1784
+#: fetchmail.c:1791
 msgid "  SSL encrypted sessions enabled.\n"
 msgstr "  SSL-ĉifritaj seancoj estas ebligitaj.\n"
 
-#: fetchmail.c:1786
+#: fetchmail.c:1793
 #, c-format
 msgid "  SSL protocol: %s.\n"
 msgstr "  SSL-protokolo: %s.\n"
 
-#: fetchmail.c:1788
+#: fetchmail.c:1795
 msgid "  SSL server certificate checking enabled.\n"
 msgstr "  SSL-servila atestila kontrolado estas ebligita.\n"
 
-#: fetchmail.c:1790
+#: fetchmail.c:1797
 msgid "  SSL server certificate checking disabled.\n"
 msgstr "  SSL-servila atestila kontrolado estas malebligita.\n"
 
-#: fetchmail.c:1792
+#: fetchmail.c:1799
 #, c-format
 msgid "  SSL default trusted certificate file: %s\n"
 msgstr "  Apriora SSL-fidinda atestila dosiero: %s\n"
 
-#: fetchmail.c:1794
+#: fetchmail.c:1801
 #, c-format
 msgid "  SSL trusted certificate file: %s\n"
 msgstr "  SSL-fidinda atestila dosiero: %s\n"
 
-#: fetchmail.c:1795
+#: fetchmail.c:1802
 #, c-format
 msgid "  SSL default trusted certificate directory: %s\n"
 msgstr "  Apriora SSL-fidinda atestila dosierujo: %s\n"
 
-#: fetchmail.c:1797
+#: fetchmail.c:1804
 #, c-format
 msgid "  SSL trusted certificate directory: %s\n"
 msgstr "  SSL-fidinda atestila dosierujo: %s\n"
 
-#: fetchmail.c:1799
+#: fetchmail.c:1806
 #, c-format
 msgid "  SSL server CommonName: %s\n"
 msgstr "  SSL-servilo CommonName: %s\n"
 
-#: fetchmail.c:1801
+#: fetchmail.c:1808
 #, c-format
 msgid "  SSL key fingerprint (checked against the server key): %s\n"
 msgstr ""
 "  SSL-ŝlosila fingropremo (kontrolita kontraŭ la servila ŝlosilo): %s\n"
 
-#: fetchmail.c:1804
+#: fetchmail.c:1811
 #, c-format
 msgid "  Server nonresponse timeout is %d seconds"
 msgstr "  Servila neresponda tempolimo estas %d sekundoj"
 
-#: fetchmail.c:1806
+#: fetchmail.c:1813
 msgid " (default).\n"
 msgstr " (apriore).\n"
 
-#: fetchmail.c:1813
+#: fetchmail.c:1820
 msgid "  Default mailbox selected.\n"
 msgstr "  Apriora poŝtskatolo estas elektita.\n"
 
-#: fetchmail.c:1818
+#: fetchmail.c:1825
 msgid "  Selected mailboxes are:"
 msgstr "  Elektitaj poŝtskatoloj estas:"
 
-#: fetchmail.c:1824
+#: fetchmail.c:1831
 msgid "  All messages will be retrieved (--all on).\n"
 msgstr "  Ĉiuj mesaĝoj estos havigataj (--all aktiva).\n"
 
-#: fetchmail.c:1825
+#: fetchmail.c:1832
 msgid "  Only new messages will be retrieved (--all off).\n"
 msgstr "  Nur novaj mesaĝoj estos havigataj (--all malaktiva).\n"
 
-#: fetchmail.c:1827
+#: fetchmail.c:1834
 msgid "  Fetched messages will be kept on the server (--keep on).\n"
 msgstr "  Alportitaj mesaĝoj estos tenataj en la servilo (--keep aktiva).\n"
 
-#: fetchmail.c:1828
+#: fetchmail.c:1835
 msgid "  Fetched messages will not be kept on the server (--keep off).\n"
 msgstr ""
 "  Alportitaj mesaĝoj ne estos gardataj ĉe la servilo (--keep malaktiva).\n"
 
-#: fetchmail.c:1830
+#: fetchmail.c:1837
 msgid "  Old messages will be flushed before message retrieval (--flush on).\n"
 msgstr ""
 "  Malnovaj mesaĝoj estos forigataj antaŭ mesaĝhavigo (--flush aktiva).\n"
 
-#: fetchmail.c:1831
+#: fetchmail.c:1838
 msgid ""
 "  Old messages will not be flushed before message retrieval (--flush off).\n"
 msgstr ""
 "  Malnovaj mesaĝoj ne estos forigataj antaŭ mesaĝhavigo (--flush "
 "malaktiva).\n"
 
-#: fetchmail.c:1833
+#: fetchmail.c:1840
 msgid ""
 "  Oversized messages will be flushed before message retrieval (--limitflush "
 "on).\n"
@@ -1409,7 +1413,7 @@ msgstr ""
 "  Trograndaj mesaĝoj estos forigataj antaŭ mesaĝhavigo (--limitflush "
 "aktiva).\n"
 
-#: fetchmail.c:1834
+#: fetchmail.c:1841
 msgid ""
 "  Oversized messages will not be flushed before message retrieval (--"
 "limitflush off).\n"
@@ -1417,339 +1421,339 @@ msgstr ""
 "  Trograndaj mesaĝoj ne estos forigataj antaŭ mesaĝhavigo (--limitflush "
 "malaktiva).\n"
 
-#: fetchmail.c:1836
+#: fetchmail.c:1843
 msgid "  Rewrite of server-local addresses is enabled (--norewrite off).\n"
 msgstr ""
 "  Reskribo de servila-lokaj adresoj estas ebligita (--norewrite malaktiva).\n"
 
-#: fetchmail.c:1837
+#: fetchmail.c:1844
 msgid "  Rewrite of server-local addresses is disabled (--norewrite on).\n"
 msgstr ""
 "  Reskribo de servila-lokaj adresoj estas malebligita (--norewrite aktiva).\n"
 
-#: fetchmail.c:1839
+#: fetchmail.c:1846
 msgid "  Carriage-return stripping is enabled (stripcr on).\n"
 msgstr "  Ĉaretrevena forigo estas ebligita (stripcr aktiva).\n"
 
-#: fetchmail.c:1840
+#: fetchmail.c:1847
 msgid "  Carriage-return stripping is disabled (stripcr off).\n"
 msgstr "  Ĉaretrevena forigo estas malebligita (stripcr malaktiva).\n"
 
-#: fetchmail.c:1842
+#: fetchmail.c:1849
 msgid "  Carriage-return forcing is enabled (forcecr on).\n"
 msgstr "  Ĉaretrevena perforto estas ebligita (forecdr aktiva).\n"
 
-#: fetchmail.c:1843
+#: fetchmail.c:1850
 msgid "  Carriage-return forcing is disabled (forcecr off).\n"
 msgstr "  Ĉaretrevena perforto estas malebligita (forcecr malaktiva).\n"
 
-#: fetchmail.c:1845
+#: fetchmail.c:1852
 msgid ""
 "  Interpretation of Content-Transfer-Encoding is disabled (pass8bits on).\n"
 msgstr ""
 "  Interpretado de Content-Transfer-Encoding estas malebligita (pass8bits "
 "aktiva).\n"
 
-#: fetchmail.c:1846
+#: fetchmail.c:1853
 msgid ""
 "  Interpretation of Content-Transfer-Encoding is enabled (pass8bits off).\n"
 msgstr ""
 "  Interpretado de Content-Transfer-Encoding estas ebligita (paas8bits "
 "malaktiva).\n"
 
-#: fetchmail.c:1848
+#: fetchmail.c:1855
 msgid "  MIME decoding is enabled (mimedecode on).\n"
 msgstr "  MIME-malĉifro estas ebligita (mimedecode aktiva).\n"
 
-#: fetchmail.c:1849
+#: fetchmail.c:1856
 msgid "  MIME decoding is disabled (mimedecode off).\n"
 msgstr "  MIME-malĉifro estas malebligita (mimedecode malaktiva).\n"
 
-#: fetchmail.c:1851
+#: fetchmail.c:1858
 msgid "  Idle after poll is enabled (idle on).\n"
 msgstr "  Senokupado post enketo estas ebligita (idle aktiva).\n"
 
-#: fetchmail.c:1852
+#: fetchmail.c:1859
 msgid "  Idle after poll is disabled (idle off).\n"
 msgstr "  Senokupado post enketo malebligita (idle malaktiva).\n"
 
-#: fetchmail.c:1854
+#: fetchmail.c:1861
 msgid "  Nonempty Status lines will be discarded (dropstatus on)\n"
 msgstr "  Nevakaj linioj Status estos forĵetataj (dropstatus aktiva)\n"
 
-#: fetchmail.c:1855
+#: fetchmail.c:1862
 msgid "  Nonempty Status lines will be kept (dropstatus off)\n"
 msgstr "  Nevakaj linioj Status estos tenataj (dropstatus malaktiva)\n"
 
-#: fetchmail.c:1857
+#: fetchmail.c:1864
 msgid "  Delivered-To lines will be discarded (dropdelivered on)\n"
 msgstr "  Linioj Delivered-To estos forĵetataj (dropdelivered aktiva)\n"
 
-#: fetchmail.c:1858
+#: fetchmail.c:1865
 msgid "  Delivered-To lines will be kept (dropdelivered off)\n"
 msgstr "  Linioj Delivered-To estos tenataj (dropdelivered malaktiva)\n"
 
-#: fetchmail.c:1862
+#: fetchmail.c:1869
 #, c-format
 msgid "  Message size limit is %d octets (--limit %d).\n"
 msgstr "  Grando-limo de mesaĝo estas %d bitokoj (--limit %d).\n"
 
-#: fetchmail.c:1865
+#: fetchmail.c:1872
 msgid "  No message size limit (--limit 0).\n"
 msgstr "  Neniu grando-limo de mesaĝo (--limit 0).\n"
 
-#: fetchmail.c:1867
+#: fetchmail.c:1874
 #, c-format
 msgid "  Message size warning interval is %d seconds (--warnings %d).\n"
 msgstr ""
 "  Intervalo de averto pri mesaĝo-grando estas %d sekundoj (--warnings %d).\n"
 
-#: fetchmail.c:1870
+#: fetchmail.c:1877
 msgid "  Size warnings on every poll (--warnings 0).\n"
 msgstr "  Avertoj pri grando je ĉiu enketo (--warnings 0).\n"
 
-#: fetchmail.c:1873
+#: fetchmail.c:1880
 #, c-format
 msgid "  Received-message limit is %d (--fetchlimit %d).\n"
 msgstr "  Limo por Received-message estas %d (--fetchlimit %d).\n"
 
-#: fetchmail.c:1876
+#: fetchmail.c:1883
 msgid "  No received-message limit (--fetchlimit 0).\n"
 msgstr "  Neniu limo por received-message (--fetchlimit 0).\n"
 
-#: fetchmail.c:1878
+#: fetchmail.c:1885
 #, c-format
 msgid "  Fetch message size limit is %d (--fetchsizelimit %d).\n"
 msgstr "  Grando-limo por mesaĝ-alporto estas %d (--fetchsizelimit %d).\n"
 
-#: fetchmail.c:1881
+#: fetchmail.c:1888
 msgid "  No fetch message size limit (--fetchsizelimit 0).\n"
 msgstr "  Neniu grando-limo por mesaĝ-alporto (--fetchsizelimit 0).\n"
 
-#: fetchmail.c:1885
+#: fetchmail.c:1892
 msgid "  Do binary search of UIDs during each poll (--fastuidl 1).\n"
 msgstr "  Faru duuman serĉon de UID-oj dum ĉiu enketo (--fastuidl 1).\n"
 
-#: fetchmail.c:1887
+#: fetchmail.c:1894
 #, c-format
 msgid "  Do binary search of UIDs during %d out of %d polls (--fastuidl %d).\n"
 msgstr "  Faru duuman serĉon de UID-oj dum %d el %d enketoj (--fastuidl %d).\n"
 
-#: fetchmail.c:1890
+#: fetchmail.c:1897
 msgid "   Do linear search of UIDs during each poll (--fastuidl 0).\n"
 msgstr "   Faru linearan serĉon de UID-oj dum ĉiu enketo (--fastuidl 0).\n"
 
-#: fetchmail.c:1892
+#: fetchmail.c:1899
 #, c-format
 msgid "  SMTP message batch limit is %d.\n"
 msgstr "  Stapla limo de SMTP-mesaĝo estas %d.\n"
 
-#: fetchmail.c:1894
+#: fetchmail.c:1901
 msgid "  No SMTP message batch limit (--batchlimit 0).\n"
 msgstr "  Neniu stapla limo de SMTP-mesaĝo (--batchlimit 0).\n"
 
-#: fetchmail.c:1898
+#: fetchmail.c:1905
 #, c-format
 msgid "  Deletion interval between expunges forced to %d (--expunge %d).\n"
 msgstr ""
 "  La forig-intervalo inter forviŝoj estas perfortita al %d (--expunge %d).\n"
 
-#: fetchmail.c:1900
+#: fetchmail.c:1907
 msgid "  No forced expunges (--expunge 0).\n"
 msgstr "  Neniu perfortita forviŝo (--expurge 0).\n"
 
-#: fetchmail.c:1907
+#: fetchmail.c:1914
 msgid "  Domains for which mail will be fetched are:"
 msgstr "  Domajnoj por kiuj poŝto estos alportataj:"
 
-#: fetchmail.c:1912 fetchmail.c:1932
+#: fetchmail.c:1919 fetchmail.c:1939
 msgid " (default)"
 msgstr " (apriore)"
 
-#: fetchmail.c:1917
+#: fetchmail.c:1924
 #, c-format
 msgid "  Messages will be appended to %s as BSMTP\n"
 msgstr "  Mesaĝoj estos postmetataj al %s kiel BSMTP\n"
 
-#: fetchmail.c:1919
+#: fetchmail.c:1926
 #, c-format
 msgid "  Messages will be delivered with \"%s\".\n"
 msgstr "  Mesaĝoj estos transdonataj kun \"%s\".\n"
 
-#: fetchmail.c:1926
+#: fetchmail.c:1933
 #, c-format
 msgid "  Messages will be %cMTP-forwarded to:"
 msgstr "  Mesaĝoj estos %cMTP-plusendataj al:"
 
-#: fetchmail.c:1937
+#: fetchmail.c:1944
 #, c-format
 msgid "  Host part of MAIL FROM line will be %s\n"
 msgstr "  Gastigeja parto de la linio MAIL FROM estos %s\n"
 
-#: fetchmail.c:1940
+#: fetchmail.c:1947
 #, c-format
 msgid "  Address to be put in RCPT TO lines shipped to SMTP will be %s\n"
 msgstr "  Adreso metota en linioj RCPT TO, sendata al SMTP estos %s\n"
 
-#: fetchmail.c:1949
+#: fetchmail.c:1956
 msgid "  Recognized listener spam block responses are:"
 msgstr "  Rekonataj aŭskultantaj spam-blokaj respondoj estas:"
 
-#: fetchmail.c:1955
+#: fetchmail.c:1962
 msgid "  Spam-blocking disabled\n"
 msgstr "  Spam-blokado malebligita\n"
 
-#: fetchmail.c:1958
+#: fetchmail.c:1965
 #, c-format
 msgid "  Server connection will be brought up with \"%s\".\n"
 msgstr "  Servila konekto estos starigataj kun \"%s\".\n"
 
-#: fetchmail.c:1961
+#: fetchmail.c:1968
 msgid "  No pre-connection command.\n"
 msgstr "  Neniu antaŭ-konekta komando.\n"
 
-#: fetchmail.c:1963
+#: fetchmail.c:1970
 #, c-format
 msgid "  Server connection will be taken down with \"%s\".\n"
 msgstr "  Servila konekto estos ĉesigata kun \"%s\".\n"
 
-#: fetchmail.c:1966
+#: fetchmail.c:1973
 msgid "  No post-connection command.\n"
 msgstr "  Neniu antaŭ-konekta komando.\n"
 
-#: fetchmail.c:1969
+#: fetchmail.c:1976
 msgid "  No localnames declared for this host.\n"
 msgstr "  Neniu 'localnames' estas deklarita por ĉi tiu gastigejo.\n"
 
-#: fetchmail.c:1979
+#: fetchmail.c:1986
 msgid "  Multi-drop mode: "
 msgstr "  Mult-fala reĝimo: "
 
-#: fetchmail.c:1981
+#: fetchmail.c:1988
 msgid "  Single-drop mode: "
 msgstr "  Unuop-fala reĝimo: "
 
-#: fetchmail.c:1983
+#: fetchmail.c:1990
 #, c-format
 msgid "%d local name recognized.\n"
 msgid_plural "%d local names recognized.\n"
 msgstr[0] "%d loka nomo rekonita.\n"
 msgstr[1] "%d lokaj nomoj rekonitaj.\n"
 
-#: fetchmail.c:1998
+#: fetchmail.c:2005
 msgid "  DNS lookup for multidrop addresses is enabled.\n"
 msgstr "  DNS-serĉo por mult-falaj adresoj estas ebligita.\n"
 
-#: fetchmail.c:1999
+#: fetchmail.c:2006
 msgid "  DNS lookup for multidrop addresses is disabled.\n"
 msgstr "  DNS-serĉo por mult-falaj adresoj estas malebligita.\n"
 
-#: fetchmail.c:2003
+#: fetchmail.c:2010
 msgid ""
 "  Server aliases will be compared with multidrop addresses by IP address.\n"
 msgstr ""
 "  Servilaj alinomoj estos komparataj kun mult-falaj adresoj per IP adreso.\n"
 
-#: fetchmail.c:2005
+#: fetchmail.c:2012
 msgid "  Server aliases will be compared with multidrop addresses by name.\n"
 msgstr ""
 "  Servilaj alinomoj estos komparataj kun mult-falaj adresoj per nomo.\n"
 
-#: fetchmail.c:2008
+#: fetchmail.c:2015
 msgid "  Envelope-address routing is disabled\n"
 msgstr "  Enkursigo per kovert-adreso estas malebligita\n"
 
-#: fetchmail.c:2011
+#: fetchmail.c:2018
 #, c-format
 msgid "  Envelope header is assumed to be: %s\n"
 msgstr "  Koverta ĉapo estas supozata esti: %s\n"
 
-#: fetchmail.c:2014
+#: fetchmail.c:2021
 #, c-format
 msgid "  Number of envelope headers to be skipped over: %d\n"
 msgstr "  Nombro da kovertaj ĉapoj por esti pretersaltataj: %d\n"
 
-#: fetchmail.c:2017
+#: fetchmail.c:2024
 #, c-format
 msgid "  Prefix %s will be removed from user id\n"
 msgstr "  Prefikso %s estos forigata de la uzanto-id\n"
 
-#: fetchmail.c:2020
+#: fetchmail.c:2027
 msgid "  No prefix stripping\n"
 msgstr "  Neniu prefiksa forigo\n"
 
-#: fetchmail.c:2025
+#: fetchmail.c:2032
 msgid "  Predeclared mailserver aliases:"
 msgstr "  Antaŭdeklaritaj poŝtservilaj alinomoj:"
 
-#: fetchmail.c:2033
+#: fetchmail.c:2040
 msgid "  Local domains:"
 msgstr "  Lokaj domajnoj:"
 
-#: fetchmail.c:2043
+#: fetchmail.c:2050
 #, c-format
 msgid "  Connection must be through interface %s.\n"
 msgstr "  La konekto devas esti tra interfaco %s.\n"
 
-#: fetchmail.c:2045
+#: fetchmail.c:2052
 msgid "  No interface requirement specified.\n"
 msgstr "  Neniu interfaca postulo estas specifita.\n"
 
-#: fetchmail.c:2047
+#: fetchmail.c:2054
 #, c-format
 msgid "  Polling loop will monitor %s.\n"
 msgstr "  Enketa iteracio observados %s.\n"
 
-#: fetchmail.c:2049
+#: fetchmail.c:2056
 msgid "  No monitor interface specified.\n"
 msgstr "  Neniu observ-interfaco estas specifita.\n"
 
-#: fetchmail.c:2053
+#: fetchmail.c:2060
 #, c-format
 msgid "  Server connections will be made via plugin %s (--plugin %s).\n"
 msgstr ""
 "  Servilaj konektoj estos farataj per la enkonektilo %s (--plugin %s).\n"
 
-#: fetchmail.c:2055
+#: fetchmail.c:2062
 msgid "  No plugin command specified.\n"
 msgstr "  Neniu enkonekta komando estas specifita.\n"
 
-#: fetchmail.c:2057
+#: fetchmail.c:2064
 #, c-format
 msgid "  Listener connections will be made via plugout %s (--plugout %s).\n"
 msgstr ""
 "  Aŭskultantaj konektoj estos faritaj per la elkonektilo %s (--plugout %s).\n"
 
-#: fetchmail.c:2059
+#: fetchmail.c:2066
 msgid "  No plugout command specified.\n"
 msgstr "  Neniu elkonektila komando estas specifita.\n"
 
-#: fetchmail.c:2066
+#: fetchmail.c:2073
 msgid "  No UIDs saved from this host.\n"
 msgstr "  Neniu UID konservita el ĉi tiu gastigejo.\n"
 
-#: fetchmail.c:2069
+#: fetchmail.c:2076
 #, c-format
 msgid "  %d UIDs saved.\n"
 msgstr "  %d UID-oj konservitaj.\n"
 
-#: fetchmail.c:2075
+#: fetchmail.c:2082
 msgid "  Poll trace information will be added to the Received header.\n"
 msgstr "  Enket-spura informo estos aldonata al la ĉapo Received.\n"
 
-#: fetchmail.c:2077
+#: fetchmail.c:2084
 msgid "  No poll trace information will be added to the Received header.\n"
 msgstr "  Neniu enket-spura informo estos aldonata al la ĉapo Received.\n"
 
-#: fetchmail.c:2082
+#: fetchmail.c:2089
 msgid "  Messages with bad headers will be rejected.\n"
 msgstr "  Mesaĝoj kun malbonaj ĉapoj estos malakceptataj.\n"
 
-#: fetchmail.c:2085
+#: fetchmail.c:2092
 msgid "  Messages with bad headers will be passed on.\n"
 msgstr "  Mesaĝoj kun malbonaj ĉapoj estos pasataj.\n"
 
-#: fetchmail.c:2090
+#: fetchmail.c:2097
 #, c-format
 msgid "  Pass-through properties \"%s\".\n"
 msgstr "  Trapasaj atributoj \"%s\".\n"
@@ -1914,7 +1918,18 @@ msgstr ""
 "servo ne reklamis la etendon SASL_IR sed la efektivigo de fetchmail postulas "
 "ĝin por AUTHENTICATE EXTERNAL\n"
 
-#: imap.c:492
+#: imap.c:493
+#, c-format
+msgid ""
+"%s: configuration requires TLS, but STARTTLS is not permitted because of "
+"authenticated state (PREAUTH). Aborting connection.  If your plugin is "
+"secure, you can defeat STARTTLS with --sslproto '' (see manual).\n"
+msgstr ""
+"%s: agordo postulas je TLS, sed STARTTLS ne estas permesata pro aŭtentigita "
+"stato (PREAUTH). Konekto abortita. Se la kromprogramo sekuras, vi povas "
+"superregi kontraŭ STARTTLS per --sslproto '' (vidu manlibron).\n"
+
+#: imap.c:496
 #, c-format
 msgid ""
 "%s: configuration requires TLS, but STARTTLS is not permitted because of "
@@ -1922,118 +1937,118 @@ msgid ""
 "--ssl instead (see manual).\n"
 msgstr ""
 "%s: agordo postulas je TLS, sed STARTTLS ne estas permesata pro aŭtentigita "
-"stato (PREAUTH). Konekto abortita. Se la servila permesas, anstataŭe provu "
+"stato (PREAUTH). Konekto abortita. Se la servilo permesas, anstataŭe provu "
 "kun --ssl (vidu manlibron).\n"
 
-#: imap.c:511 pop3.c:447
+#: imap.c:516 pop3.c:447
 #, c-format
 msgid "%s: upgrade to TLS succeeded.\n"
 msgstr "%s: promociigo al TLS sukcesis.\n"
 
-#: imap.c:536 pop3.c:458
+#: imap.c:541 pop3.c:458
 #, c-format
 msgid "%s: upgrade to TLS failed.\n"
 msgstr "%s: promociigo al TLS malsukcesis.\n"
 
-#: imap.c:541
+#: imap.c:546
 #, c-format
 msgid "%s: opportunistic upgrade to TLS failed, trying to continue\n"
 msgstr "%s: oportuneca promociigo al TLS malsukcesis, ni provas daŭrigi\n"
 
-#: imap.c:556
+#: imap.c:561
 #, c-format
 msgid "%s: WARNING: server offered STARTTLS but sslproto '' given.\n"
 msgstr "%s: AVERTO: la servilo oferis STARTTLS sed sslproto '' estis donita.\n"
 
-#: imap.c:594
+#: imap.c:599
 #, c-format
 msgid "%s: --auth external requested but server does not advertise it.\n"
 msgstr "%s: --auth eksteraĵo petita sed servilo ne reklamas ĝin.\n"
 
-#: imap.c:678
+#: imap.c:683
 msgid "Required OTP capability not compiled into fetchmail\n"
 msgstr "Postulata OTP-kapablo ne estas kompilita en fetchmail\n"
 
-#: imap.c:698 pop3.c:580
+#: imap.c:703 pop3.c:580
 msgid "Required NTLM capability not compiled into fetchmail\n"
 msgstr "Postulata NTLM-kapablo ne estas kompilita en fetchmail\n"
 
-#: imap.c:711
+#: imap.c:716
 #, c-format
 msgid "%s: --auth password requested but server forbids it (LOGINDISABLED).\n"
 msgstr ""
 "%s: --auth pasvorto petita sed la servilo malpermasas ĝin (LOGINDISABLED).\n"
 
-#: imap.c:740
+#: imap.c:745
 #, c-format
 msgid "%s: we've run out of authentication methods and cannot log in.\n"
 msgstr "%s: ni elĉerpis permesatajn aŭtentikigilojn kaj ne povas ensaluti.\n"
 
-#: imap.c:764
+#: imap.c:769
 #, c-format
 msgid "mail expunge mismatch (%d actual != %d expected)\n"
 msgstr "poŝta forviŝa malkongruo (%d akutala != %d atendata)\n"
 
-#: imap.c:891
+#: imap.c:896
 #, c-format
 msgid "%lu is unseen\n"
 msgstr "%lu estas nevidita\n"
 
-#: imap.c:941 pop3.c:852 pop3.c:864 pop3.c:1109 pop3.c:1116
+#: imap.c:946 pop3.c:852 pop3.c:864 pop3.c:1109 pop3.c:1116
 #, c-format
 msgid "%u is unseen\n"
 msgstr "%u estas nevidita\n"
 
-#: imap.c:976 imap.c:1035
+#: imap.c:981 imap.c:1040
 msgid "re-poll failed\n"
 msgstr "re-enketo malsukcesis\n"
 
-#: imap.c:984 imap.c:1040
+#: imap.c:989 imap.c:1045
 #, c-format
 msgid "%d message waiting after re-poll\n"
 msgid_plural "%d messages waiting after re-poll\n"
 msgstr[0] "%d mesaĝo atendas post re-enketo\n"
 msgstr[1] "%d mesaĝoj atendas post re-enketo\n"
 
-#: imap.c:1001
+#: imap.c:1006
 msgid "mailbox selection failed\n"
 msgstr "poŝtskatola elekto malsukcesis\n"
 
-#: imap.c:1005
+#: imap.c:1010
 #, c-format
 msgid "%d message waiting after first poll\n"
 msgid_plural "%d messages waiting after first poll\n"
 msgstr[0] "%d mesaĝo atendas post unua enketo\n"
 msgstr[1] "%d mesaĝoj atendas post unua enketo\n"
 
-#: imap.c:1019
+#: imap.c:1024
 msgid "expunge failed\n"
 msgstr "forviŝo malsukcesis\n"
 
-#: imap.c:1023
+#: imap.c:1028
 #, c-format
 msgid "%d message waiting after expunge\n"
 msgid_plural "%d messages waiting after expunge\n"
 msgstr[0] "%d mesaĝo atendas post forviŝo\n"
 msgstr[1] "%d mesaĝoj atendas post forviŝo\n"
 
-#: imap.c:1062
+#: imap.c:1067
 msgid "search for unseen messages failed\n"
 msgstr "serĉo por neviditaj mesaĝoj malsukcesis\n"
 
-#: imap.c:1067 pop3.c:873
+#: imap.c:1072 pop3.c:873
 #, c-format
 msgid "%u is first unseen\n"
 msgstr "%u estas la unua nevidita\n"
 
-#: imap.c:1151
+#: imap.c:1156
 msgid ""
 "Warning: ignoring bogus data for message sizes returned by the server.\n"
 msgstr ""
 "Averto: ni ignoras falsajn datumojn por mesaĝaj grandoj revenitaj de la "
 "servilo.\n"
 
-#: imap.c:1250 imap.c:1257
+#: imap.c:1255 imap.c:1262
 #, c-format
 msgid "Incorrect FETCH response: %s.\n"
 msgstr "Nekorekta FETCH-respondo: %s.\n"
@@ -2176,15 +2191,20 @@ msgstr "fetchmail: ŝlosil-kreo malsukcesis, pid-dosieron \"%s\": %s.\n"
 msgid "fetchmail: cannot remove or truncate pidfile \"%s\": %s\n"
 msgstr "fetchmail: ne eblas forigi aŭ mallongigi pid-dosieron \"%s\": %s\n"
 
-#: netrc.c:220
+#: netrc.c:225
 #, c-format
 msgid "%s:%d: warning: found \"%s\" before any host names\n"
 msgstr "%s:%d: averto: estis trovata \"%s\" antaŭ iun ajn gastigejnomon\n"
 
-#: netrc.c:258
+#: netrc.c:263
 #, c-format
 msgid "%s:%d: warning: unknown token \"%s\"\n"
 msgstr "%s:%d: averto: nekonata ĵetono \"%s\"\n"
+
+#: netrc.c:271 netrc.c:277
+#, c-format
+msgid "%s: error reading file (%s).\n"
+msgstr "%s: eraro dum legi dosieron (%s).\n"
 
 #: ntlmsubr.c:35
 msgid "Warning: received malformed challenge to \"AUTH(ENTICATE) NTLM\"!\n"
@@ -3220,134 +3240,134 @@ msgstr ""
 "Konektaj eraroj por ĉi tiu enketo:\n"
 "%s"
 
-#: socket.c:435
+#: socket.c:450
 #, c-format
 msgid "OpenSSL reported: %s\n"
 msgstr "OpenSSL raportis: %s\n"
 
-#: socket.c:670
+#: socket.c:690
 #, c-format
-msgid "SSL verify callback depth %d: preverify_ok == %d, err = %d, %s\n"
-msgstr "SSL kontrola retrovoka profundo %d: preverify_ok == %d, err = %d, %s\n"
+msgid "SSL verify callback depth %d: verify_ok == %d, err = %d, %s\n"
+msgstr "SSL kontrola retrovoka profundo %d: verify_ok == %d, err = %d, %s\n"
 
-#: socket.c:676
+#: socket.c:696
 msgid "Server certificate:\n"
 msgstr "Servila atestilo:\n"
 
-#: socket.c:681
+#: socket.c:701
 #, c-format
 msgid "Certificate chain, from root to peer, starting at depth %d:\n"
 msgstr "Atestila ĉeno, de radiko al samtavolo, komencas ĉe profundo %d:\n"
 
-#: socket.c:684
+#: socket.c:704
 #, c-format
 msgid "Certificate at depth %d:\n"
 msgstr "Atestilo ĉe profundo %d:\n"
 
-#: socket.c:690
+#: socket.c:710
 #, c-format
 msgid "Issuer Organization: %s\n"
 msgstr "Eldonanta organizo: %s\n"
 
-#: socket.c:693
+#: socket.c:713
 msgid "Warning: Issuer Organization Name too long (possibly truncated).\n"
 msgstr "Averto: Eldonanta Organiza Nomo tro longas (eble distranĉita).\n"
 
-#: socket.c:695
+#: socket.c:715
 msgid "Unknown Organization\n"
 msgstr "Nekonata organizo\n"
 
-#: socket.c:697
+#: socket.c:717
 #, c-format
 msgid "Issuer CommonName: %s\n"
 msgstr "Eldonanta Komun-nomo: %s\n"
 
-#: socket.c:700
+#: socket.c:720
 msgid "Warning: Issuer CommonName too long (possibly truncated).\n"
 msgstr "Averto: Eldonanta Komun-nomo tro longas (eble distranĉita).\n"
 
-#: socket.c:702
+#: socket.c:722
 msgid "Unknown Issuer CommonName\n"
 msgstr "Nekonata Eldonanta Komun-nomo\n"
 
-#: socket.c:708
+#: socket.c:728
 #, c-format
 msgid "Subject CommonName: %s\n"
 msgstr "Tema Komun-nomo: %s\n"
 
-#: socket.c:714
+#: socket.c:734
 msgid "Bad certificate: Subject CommonName too long!\n"
 msgstr "Malbona atestilo: Tema Komun-nomo tro longas!\n"
 
-#: socket.c:720
+#: socket.c:740
 msgid "Bad certificate: Subject CommonName contains NUL, aborting!\n"
 msgstr "Malbona atestilo: Tema Komun-nomo enhavas SENVALOROn, ni ĉesigas!\n"
 
-#: socket.c:748
+#: socket.c:768
 #, c-format
 msgid "Subject Alternative Name: %s\n"
 msgstr "Tema Alternativa Nomo: %s\n"
 
-#: socket.c:754
+#: socket.c:774
 msgid "Bad certificate: Subject Alternative Name contains NUL, aborting!\n"
 msgstr ""
 "Malbona atestilo: Tema Alternativa Nomo enhavas SENVALOROn, ni ĉesigas!\n"
 
-#: socket.c:771
+#: socket.c:791
 #, c-format
 msgid "Server CommonName mismatch: %s != %s\n"
 msgstr "Servila Komun-noma nekongruo: %s != %s\n"
 
-#: socket.c:778
+#: socket.c:798
 msgid "Server name not set, could not verify certificate!\n"
 msgstr "Servila nomo ne estas difinita, ne eblis kontroli atestilon!\n"
 
-#: socket.c:783
+#: socket.c:803
 msgid "Unknown Server CommonName\n"
 msgstr "Nekonata Servila Komun-nomo\n"
 
-#: socket.c:785
+#: socket.c:805
 msgid "Server name not specified in certificate!\n"
 msgstr "Servila nomo ne estas specifita en atestilo!\n"
 
-#: socket.c:797
+#: socket.c:817
 msgid "EVP_md5() failed!\n"
 msgstr "EVP_md5() malsukcesis!\n"
 
-#: socket.c:801
+#: socket.c:821
 msgid "Out of memory!\n"
 msgstr "Memoro estas elĉerpita!\n"
 
-#: socket.c:809
+#: socket.c:829
 msgid "Digest text buffer too small!\n"
 msgstr "Resuma teksta bufro tro malgrandas!\n"
 
-#: socket.c:815
+#: socket.c:835
 #, c-format
 msgid "%s key fingerprint: %s\n"
 msgstr "%s ŝlosila fingropremo: %s\n"
 
-#: socket.c:819
+#: socket.c:839
 #, c-format
 msgid "%s fingerprints match.\n"
 msgstr "%s fingropremoj kongruas.\n"
 
-#: socket.c:821
+#: socket.c:841
 #, c-format
 msgid "%s fingerprints do not match!\n"
 msgstr "%s fingropremoj ne kongruas!\n"
 
-#: socket.c:833
+#: socket.c:853
 #, c-format
 msgid "Server certificate verification error: %s\n"
 msgstr "Servila atestila kontrola eraro: %s\n"
 
-#: socket.c:848
+#: socket.c:868
 #, c-format
 msgid "Broken certification chain at: %s\n"
 msgstr "Rompita atestila ĉeno ĉe: %s\n"
 
-#: socket.c:850
+#: socket.c:870
 msgid ""
 "This could mean that the server did not provide the intermediate CA's "
 "certificate(s), which is nothing fetchmail could do anything about.  For "
@@ -3358,12 +3378,12 @@ msgstr ""
 "CA, pri kiu fetchmail povas fari nenion.  Por detaloj, bonvolu konsulti la "
 "dokumenton README.SSL-SERVER, kiu venas kun fetchmail.\n"
 
-#: socket.c:860
+#: socket.c:880
 #, c-format
 msgid "Missing trust anchor certificate: %s\n"
 msgstr "Mankas fidinda ankra atestilo: %s\n"
 
-#: socket.c:863
+#: socket.c:883
 msgid ""
 "This could mean that the root CA's signing certificate is not in the trusted "
 "CA certificate location, or that c_rehash needs to be run on the certificate "
@@ -3376,48 +3396,55 @@ msgstr ""
 "sslcertpath kaj --sslcertfile en la manlibro. Vidu je README.SSL por "
 "detaloj.\n"
 
-#: socket.c:937 socket.c:1013
+#: socket.c:957 socket.c:1033
 msgid "Your OpenSSL version does not support SSLv3.\n"
 msgstr "Via versio de OpenSSL ne subtenas SSLv3.\n"
 
-#: socket.c:955 socket.c:1031
+#: socket.c:975 socket.c:1051
 msgid "Your OpenSSL version does not support TLS v1.1.\n"
 msgstr "Via versio de OpenSSL ne subtenas TLS v1.1.\n"
 
-#: socket.c:966 socket.c:1042
+#: socket.c:986 socket.c:1062
 msgid "Your OpenSSL version does not support TLS v1.2.\n"
 msgstr "Via versio de OpenSSL ne subtenas TLS v1.2.\n"
 
-#: socket.c:977 socket.c:1053
+#: socket.c:997 socket.c:1073
 msgid "Your OpenSSL version does not support TLS v1.3.\n"
 msgstr "Via versio de OpenSSL ne subtenas TLS v1.3.\n"
 
-#: socket.c:986 socket.c:1063
+#: socket.c:1006 socket.c:1083
 #, c-format
 msgid "Invalid SSL protocol '%s' specified, using default autoselect (auto).\n"
 msgstr ""
 "Nevalida SSL-protokolo '%s' estas specifita, ni uzas aŭtomatan elekton "
 "(auto).\n"
 
-#: socket.c:1094
+#: socket.c:1122
+#, fuzzy, c-format
+msgid ""
+"Loaded wolfSSL library %#lx older than headers %#lx, refusing to work.\n"
+msgstr ""
+"Ŝargita biblioteko OpenSSL %#lx pli malnova ol kapoj %#lx, rifuzas funkcii.\n"
+
+#: socket.c:1128
 #, c-format
 msgid ""
 "Loaded OpenSSL library %#lx older than headers %#lx, refusing to work.\n"
 msgstr ""
 "Ŝargita biblioteko OpenSSL %#lx pli malnova ol kapoj %#lx, rifuzas funkcii.\n"
 
-#: socket.c:1099
+#: socket.c:1133
 #, c-format
 msgid ""
 "Loaded OpenSSL library %#lx newer than headers %#lx, trying to continue.\n"
 msgstr ""
 "Ŝargita biblioteko OpenSSL %#lx pli nova ol kapoj %#lx, provas daŭrigi.\n"
 
-#: socket.c:1119
+#: socket.c:1153
 msgid "File descriptor out of range for SSL"
 msgstr "Dosiera priskribilo forestas de la intervalo por SSL"
 
-#: socket.c:1140
+#: socket.c:1175
 msgid ""
 "Note that some distributions disable older protocol versions in weird non-"
 "standard ways. Try a newer protocol version.\n"
@@ -3425,7 +3452,14 @@ msgstr ""
 "Rimarku ke kelkaj distribuoj malebligas pli malnovajn versiojn de protokolo "
 "laŭ stranga maniero. Provu pli novan version de protokolo.\n"
 
-#: socket.c:1208
+#: socket.c:1237
+#, c-format
+msgid "Cannot load verify locations (file=\"%s\", dir=\"%s\"), error %d:\n"
+msgstr ""
+"Ne eblas ŝargi aŭtentigajn lokojn (dosiero=\"%s\", dosierujo=\"%s\"), eraro "
+"%d:\n"
+
+#: socket.c:1272
 #, c-format
 msgid ""
 "Warning: SSL_set_tlsext_host_name(%p, \"%s\") failed (code %#lx), trying to "
@@ -3434,7 +3468,16 @@ msgstr ""
 "Averto: SSL_set_tlsext_host_name(%p, \"%s\") malsukcesis (kodo %#lx), ni "
 "provas daŭrigi.\n"
 
-#: socket.c:1223
+#: socket.c:1286
+#, c-format
+msgid ""
+"fetchmail: sock %d: wolfSSL_check_domain_name(%#p, \"%s\") returned %d, "
+"trying to continue\n"
+msgstr ""
+"fetchmail: ŝtopilingo %d: wolfSSL_check_domain_name(%#p, \"%s\"), %d "
+"redonita, ni provas daŭrigi\n"
+
+#: socket.c:1302
 #, c-format
 msgid ""
 "Warning: X509_VERIFY_PARAM_set1_host(%p, \"%s\") failed (code %#x), trying "
@@ -3443,34 +3486,34 @@ msgstr ""
 "Averto: X509_VERIFY_PARAM_set1_host(%p, \"%s\") malsukcesis (kodo %#x), ni "
 "provas daŭrigi.\n"
 
-#: socket.c:1260
+#: socket.c:1355
 msgid "Server shut down connection prematurely during SSL_connect().\n"
 msgstr "La servilo malŝaltis la konekton tro frue dum SSL_connect().\n"
 
-#: socket.c:1263
+#: socket.c:1358
 #, c-format
 msgid "System error during SSL_connect(): %s\n"
 msgstr "Sistem-eraro dum SSL_connect(): %s\n"
 
-#: socket.c:1263
+#: socket.c:1358
 msgid "handshake failed at protocol or connection level."
 msgstr "kvitanco malsukcesis ĉe protokola aŭ konekta nivelo."
 
-#: socket.c:1283
+#: socket.c:1378
 msgid "Cannot obtain current SSL/TLS cipher - no session established?\n"
 msgstr "Ne eblas preni kurantan ĉifron de SSL/TLS - ĉu neniun seancon?\n"
 
-#: socket.c:1286
+#: socket.c:1381
 #, c-format
 msgid "SSL/TLS: using protocol %s, cipher %s, %d/%d secret/processed bits\n"
 msgstr ""
 "SSL/TLS: uzas protokolon %s, ĉifron %s, %d/%d sekretaj/procezitaj bitoj\n"
 
-#: socket.c:1293
+#: socket.c:1388
 msgid "Certificate/fingerprint verification was somehow skipped!\n"
 msgstr "Atestila/fingroprema kontrolo estis iel preterpasita!\n"
 
-#: socket.c:1310
+#: socket.c:1405
 msgid ""
 "Warning: the connection is insecure, continuing anyways. (Better use --"
 "sslcertck!)\n"
@@ -3478,11 +3521,11 @@ msgstr ""
 "Averto: la konekto estas nesekura, ni daŭrigas tamen. (Plibonas uzi --"
 "sslcertck!)\n"
 
-#: socket.c:1352
+#: socket.c:1447
 msgid "Cygwin socket read retry\n"
 msgstr "Reprovo legi Cygwin-ingon\n"
 
-#: socket.c:1355
+#: socket.c:1450
 msgid "Cygwin socket read retry failed!\n"
 msgstr "Reprovo legi Cygwin-ingon fiaskis!\n"
 

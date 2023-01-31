@@ -4,7 +4,7 @@
 %define have_python 1
 
 Name:		fetchmail
-Version:	6.4.22
+Version:	6.4.36
 Release:	1
 Vendor:		The Community Fetchmail Project
 Packager:	Fetchmail Developers <fetchmail-devel@lists.sourceforge.net>
@@ -205,5 +205,5 @@ rm -rf $RPM_BUILD_ROOT %{_builddir}/%name-%version
 %endif
 
 %changelog
-* Mon Sep 13 2021 <fetchmail-devel@lists.sourceforge.net> 6.4.22
+* Sat Jan 28 2023 <fetchmail-devel@lists.sourceforge.net> 6.4.36
 - See the project NEWS file for recent changes.

@@ -1420,7 +1420,7 @@ int close_sink(struct query *ctl, struct msgblk *msg, flag forward)
 	    {
 		report(stderr, GT_("SMTP listener refused delivery\n"));
 	        smtp_rset(ctl);    /* stay on the safe side */
-		return(TRUE);
+		return !run.softbounce;
 	    }
 	}
 
