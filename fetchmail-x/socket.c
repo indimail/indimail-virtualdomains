@@ -1295,6 +1295,7 @@ no_verify_load:
 	 * permit the other hostnames through SSL? */
 	/* https://wiki.openssl.org/index.php/Hostname_validation */
 	{
+#if OPENSSL_VERSION_NUMBER >= 0x1000200fL
 	    int r;
 	    X509_VERIFY_PARAM *param = SSL_get0_param(_ssl_context[sock]);
 
@@ -1304,6 +1305,7 @@ no_verify_load:
 			(void *)_ssl_context[sock], servercname, r);
 		ERR_print_errors_fp(stderr);
 	    }
+#endif
 
 	    /* OpenSSL 1.x.y: 0xMNNFFPPSL: major minor fix patch status
 	     * OpenSSL 3.0.z: 0xMNN00PPSL: synthesized */
