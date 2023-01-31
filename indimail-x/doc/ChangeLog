@@ -34,7 +34,7 @@ Release 3.4.2-1.1 Start 08/09/2022 End 31/01/2023
 18. renameuser.c: restore scram password while renaming user
 - 05/11/2022
 19. vchkpass.c:  use ENABLE_CRAM to allow use of pw_passwd field of indimail,
-    indibak for
+    indibak for plain text cram auth
 - 22/11/2022
 20. configure.ac: fixed typo
 - 23/11/2022
