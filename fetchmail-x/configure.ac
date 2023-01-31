@@ -30,11 +30,7 @@ dnl python is optional
 #
 # recent Python 3.x versions are supported.
 #
-try27=0
-AM_PATH_PYTHON([3.7],,[try27=1])
-if test try27 != 0 ; then
-  AM_PATH_PYTHON([2.7],,AC_MSG_WARN([[Disabling fetchmailconf: python 2.7 or 3.7 or greater not found]]) )
-fi
+AM_PATH_PYTHON(2.7,,AC_MSG_WARN([Disabling fetchmailconf: python 2.7 or greater not found]))
 AM_CONDITIONAL([HAVE_PYTHON], [test "$PYTHON" != :])
 
 AC_USE_SYSTEM_EXTENSIONS
