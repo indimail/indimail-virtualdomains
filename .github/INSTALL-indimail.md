@@ -100,8 +100,8 @@ IndiMail will install and run on most UNIX and UNIX-like systems, but there are 
     works well with IndiMail. IndiMail also provides On Demand Mail Relay Protocol (ODMR) for
     such systems. The installation and configuration for fetchmail is also discussed.
   * IndiMail supports the concept of staged installation. You need to specify
-    make DESTDIR=path_to_staging_directory when doing the build. Also svctool (see below) can
-    be passed an extra argument --destdir=path_to_staging_directory to create/modify all
+    make DESTDIR=path\_to\_staging\_directory when doing the build. Also svctool (see below) can
+    be passed an extra argument --destdir=path\_to\_staging\_directory to create/modify all
     configuration files in the staging area alone. Using staged installation, the administrator
     can install IndiMail on a live system without disturbing an existing running installation.
     To upgrade, all that is required is to move all files from the staged directories to the
@@ -1265,8 +1265,8 @@ As a first step, do
 
 % man indimail
 
+Next step would be send and receive mails.
 
-10. Good luck
 **Send / Receive Mails**
 
 ```
