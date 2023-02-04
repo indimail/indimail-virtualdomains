@@ -32,4 +32,5 @@ do
 		echo "$dir already present"
 	fi
 done
-
+echo "Please run training.sh to create an initial bogofilter database wordlist.db"
+echo "Copy wordlist.db to /etc/indimail owner:group as root:indimail permission as 0644"
