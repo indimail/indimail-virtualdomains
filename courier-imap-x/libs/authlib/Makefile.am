@@ -156,6 +156,7 @@ install-data-local: authlib.7
 	$(mkinstalldirs) $(DESTDIR)$(man7dir) ; \
 	for f in $(man_MANS) "" ; do \
 		test "$$f" = "" && continue ; \
+		rm -f $(DESTDIR)$(man7dir)/$$f; \
 		$(INSTALL) -C -m 644 $$f $(DESTDIR)$(man7dir) ; done
 
 uninstall-local:
