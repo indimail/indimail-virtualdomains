@@ -1,5 +1,8 @@
 /*
  * $Log: auth_admin.c,v $
+ * Revision 1.9  2023-02-14 01:08:37+05:30  Cprogrammer
+ * free ctx if tls_session fails
+ *
  * Revision 1.8  2023-01-03 21:08:36+05:30  Cprogrammer
  * renamed ADMIN_TIMEOUT to TIMEOUTDATA
  * replaced safewrite, saferead with tlswrite, tlsread from tls library in libqmail
@@ -53,7 +56,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: auth_admin.c,v 1.8 2023-01-03 21:08:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: auth_admin.c,v 1.9 2023-02-14 01:08:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -81,8 +84,10 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host,
 			ciphers = "PROFILE=SYSTEM";
 		if (!(ctx = tls_init(0, clientcert, cafile, crlfile, ciphers, client)))
 			return(-1);
-		if (!(ssl = tls_session(ctx, sfd)))
+		if (!(ssl = tls_session(ctx, sfd))) {
+			SSL_CTX_free(ctx);
 			return(-1);
+		}
 		SSL_CTX_free(ctx);
 		ctx = NULL;
 		if (tls_connect(timeoutconn, sfd, sfd, ssl, match_cn ? admin_host : 0) == -1)

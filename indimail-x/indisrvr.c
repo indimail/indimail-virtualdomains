@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.15  2023-02-14 01:09:55+05:30  Cprogrammer
+ * free ctx if tls_session fails
+ *
  * Revision 1.14  2023-01-22 10:35:30+05:30  Cprogrammer
  * fixed incorrectly passed stralloc * instead of char *
  *
@@ -51,7 +54,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.14 2023-01-22 10:35:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.15 2023-02-14 01:09:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -320,6 +323,7 @@ main(int argc, char **argv)
 				close(pi1[0]);
 				close(pi2[1]);
 				if (!(ssl = tls_session(ctx, 1))) {
+					SSL_CTX_free(ctx);
 					filewrt(3, "%d: unable to setup SSL session: %s\n", getpid(), myssl_error_str());
 					_exit(1);
 				}
