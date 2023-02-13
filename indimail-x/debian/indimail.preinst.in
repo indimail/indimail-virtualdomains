@@ -56,7 +56,7 @@ case "$1" in
 	/usr/bin/getent group indimail  > /dev/null || \
 		/usr/sbin/groupadd -r -g 555 indimail || /usr/sbin/groupadd indimail || true
 	# add for roundcube/php to access certs
-	/usr/bin/getent group apache    > /dev/null && /usr/sbin/usermod -aG qmail apache || true
+	/usr/bin/getent group apache    > /dev/null && /usr/sbin/usermod -aG qcerts apache || true
 	
 	/usr/bin/getent passwd indimail > /dev/null || \
 		/usr/sbin/useradd -r -g indimail -u 555 -d ${indimaildir} indimail || \

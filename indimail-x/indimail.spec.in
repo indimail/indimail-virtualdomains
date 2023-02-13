@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.121 2023-01-08 08:03:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.122 2023-02-14 01:01:53+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -996,7 +996,7 @@ if [ $? = 4 ] ; then
   /usr/sbin/groupadd %groupname
 fi
 # add for roundcube/php to access certs
-/usr/bin/getent group apache    > /dev/null && /usr/sbin/usermod -aG qmail apache || true
+/usr/bin/getent group apache    > /dev/null && /usr/sbin/usermod -aG qcerts apache || true
 
 /usr/bin/getent passwd %username > /dev/null || /usr/sbin/useradd -r -g %groupname -u %uid -d %{indimaildir} %username || true
 if [ $? = 4 ] ; then
