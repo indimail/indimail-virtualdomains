@@ -1,3 +1,11 @@
+* XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <@email@> @version@-@release@%{?dist}
+Release 3.4.3-1.1 Start 13/02/2023 End XX/XX/XXXX
+- 13/02/2023
+01. indimail.spec: added qcerts supplementary group for apache for roundcube
+    access to certs
+02. auth_admin.c, indisrvr.c: free ctx if tls_session fails
+03. inquery.c: use FIFOTMPDIR instead of TMPDIR for inquery fifo
+
 * Tue Jan 31 2023 03:32:40 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.2-1.1%{?dist}
 Release 3.4.2-1.1 Start 08/09/2022 End 31/01/2023
 - 08/09/2022
