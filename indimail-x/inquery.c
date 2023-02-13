@@ -1,5 +1,8 @@
 /*
  * $Log: inquery.c,v $
+ * Revision 1.9  2023-02-14 01:10:39+05:30  Cprogrammer
+ * use FIFOTMPDIR instead of TMPDIR for inquery fifo
+ *
  * Revision 1.8  2022-08-04 14:39:07+05:30  Cprogrammer
  * refactored code
  *
@@ -57,7 +60,7 @@
 #include "strToPw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 1.8 2022-08-04 14:39:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 1.9 2023-02-14 01:10:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -133,7 +136,7 @@ inquery(char query_type, char *email, char *ip)
 	if ((tcpclient = env_get("TCPCLIENT")))
 		tcpclient = env_get("TCPREMOTEIP");
 	if (!tcpclient) {
-		if (!(ptr = env_get("TMPDIR")))
+		if (!(ptr = env_get("FIFOTMPDIR")))
 			ptr = "/tmp/";
 		if (!stralloc_copys(&myfifo, ptr))
 			return ((void *) 0);
