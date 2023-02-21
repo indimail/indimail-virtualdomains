@@ -89,7 +89,7 @@ update_quota(char *Maildir, mdir_t new_size)
 			get_indimailuidgid(&indimailuid, &indimailgid);
 		uid = indimailuid;
 		gid = indimailgid;
-	} 
+	}
 	if ((fd = open(mdirsizefn.s, O_CREAT|O_WRONLY|O_APPEND, S_IWUSR | S_IRUSR)) == -1) {
 		strerr_warn3("update_quota: ", mdirsizefn.s, ": ", &strerr_sys);
 		return (-1);

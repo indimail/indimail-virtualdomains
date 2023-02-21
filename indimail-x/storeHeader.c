@@ -81,12 +81,12 @@ storeHeader(struct header ***Hptr, struct header_t *h)
 		hptr[1] = (struct header *) 0;
 		count = 1;
 		return(0);
-	} 
+	}
 	for (ptr = hptr,found = idx = 0;idx < count;idx++) {
 		if (!case_diffs(ptr[idx]->name, (char *) h->name)) {
 			found = 1;
 			break;
-		} 
+		}
 	}
 	if (found) {
 		if (!alloc_re((char *) &(ptr[idx]->data), sizeof(char *) * (ptr[idx]->data_items + 1), sizeof(char *) * (ptr[idx]->data_items + 2)))

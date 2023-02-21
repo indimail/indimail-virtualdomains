@@ -347,7 +347,7 @@ main(int argc, char **argv)
 {
 	static stralloc User = {0}, Domain = {0}, alias_line = {0}, old_alias = {0},
 					quotaVal = {0};
-	char           *group, *gecos, *member, *old_member, *passwd, *hostid, 
+	char           *group, *gecos, *member, *old_member, *passwd, *hostid,
 				   *mdahost, *Quota, *real_domain, *ptr;
 	char            strnum[FMT_ULONG];
 	mdir_t          q;
@@ -440,7 +440,7 @@ main(int argc, char **argv)
 				}
 				if (verbose)
 					strmsg_out5("Connected to MDAhost ", mdahost, " SqlServer ", ptr, "\n");
-			} 
+			}
 #endif
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1

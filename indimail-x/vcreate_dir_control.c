@@ -69,7 +69,7 @@ vcreate_dir_control(char *filename, char *domain)
 			!stralloc_catb(&SqlBuf, "0, ", 3) ||
 			!stralloc_catb(&SqlBuf, "0, ", 3) ||
 			!stralloc_catb(&SqlBuf, strnum, fmt_ulong(strnum, MAX_DIR_LEVELS)) ||
-			!stralloc_catb(&SqlBuf, ", ", 2) || 
+			!stralloc_catb(&SqlBuf, ", ", 2) ||
 			!stralloc_catb(&SqlBuf, "0, ", 3) ||
 			!stralloc_catb(&SqlBuf, "0, ", 3) ||
 			!stralloc_catb(&SqlBuf, "0, ", 3) ||

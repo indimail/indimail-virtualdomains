@@ -147,7 +147,7 @@ autoAddUser(char *email, char *pass, char *service, int encrypt_flag)
 	if (!(certfile = (char *) env_get("CERTFILE"))) {
 		strerr_warn1("proxylogin: client certificate not specified", 0);
 		return (-1);
-	} 
+	}
 	cafile = (char *) env_get("CAFILE");
 	crlfile = (char *) env_get("CRLFILE");
 	match_cn = env_get("MATCH_CN") ? 1 : 0;
@@ -177,7 +177,7 @@ autoAddUser(char *email, char *pass, char *service, int encrypt_flag)
 }
 
 static int
-LocalLogin(char **argv, char *email, char *TheUser, char *TheDomain, char *service, 
+LocalLogin(char **argv, char *email, char *TheUser, char *TheDomain, char *service,
 	char *imaptag, char *plaintext)
 {
 	char           *p, *crypt_pass;
@@ -201,7 +201,7 @@ LocalLogin(char **argv, char *email, char *TheUser, char *TheDomain, char *servi
 			strerr_warn1("proxylogin: inquery PWD_QUERY temporary failure", 0);
 		}
 		return (1);
-	} 
+	}
 	/*
 	 * Look at what type of connection we are trying to auth.
 	 * And then see if the user is permitted to make this type
@@ -253,7 +253,7 @@ LocalLogin(char **argv, char *email, char *TheUser, char *TheDomain, char *servi
 		}
 		ExecIMAPD(argv, email, TheUser, TheDomain, pw, service, imaptag);
 		strerr_warn9("proxylogin: email [", email, "] domain[", TheDomain, "] service [", service, "] imaptag [", imaptag, "]: ", &strerr_sys);
-	} 
+	}
 	if (!str_diffn(service, "imap", 4)) {
 		if (!env_put2("IMAPLOGINTAG", imaptag))
 			strerr_die3sys(111, "proxylogin: env_put2: IMAPLOGINTAG=", imaptag, ": ");
@@ -373,7 +373,7 @@ proxylogin(char **argv, char *service, char *userid, char *plaintext, char *remo
 				if (!stralloc_append(&loginbuf, ":") ||
 						!stralloc_cats(&loginbuf, remoteip))
 					die_nomem();
-			} 
+			}
 			if (!stralloc_catb(&loginbuf, "\nPASS ", 6) ||
 					!stralloc_cats(&loginbuf, plaintext) ||
 					!stralloc_append(&loginbuf, "\n") ||

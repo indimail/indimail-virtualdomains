@@ -111,7 +111,7 @@ monkey(char *host, char *servicename, char *startbuf, int skip_nl)
 		strerr_warn5("monkey: ", ptr, ":", servicename, ": ", &strerr_sys);
 		signal(SIGPIPE, pstat);
 		return (-1);
-	} 
+	}
 	retval = 1;
 #if defined(ASM_IOCTLS_H) && defined(linux)
 #include <asm/ioctls.h>

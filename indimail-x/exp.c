@@ -8,14 +8,14 @@
  *
  *
  * This is (osh) exp.c  Version 1.0
- * 
+ *
  * Description:
  * These are the routines which handle wildcard expansion.
- * 
+ *
  * ----
  * Copyright (c) 1993 The Regents of the University of California
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that: (1) source code distributions
  * retain the above copyright notice and this paragraph in its entirety, (2)
@@ -226,7 +226,7 @@ expand(char *argv[MAXARG + 1], int *argc, char *word)
 		strcpy(target, x + 1);
 	}
 	/*
-	 * Now we have separated the path and target from the incoming string 
+	 * Now we have separated the path and target from the incoming string
 	 */
 	if ((dirp = opendir(path)) == NULL)
 		return ("No such file or directory");
@@ -234,7 +234,7 @@ expand(char *argv[MAXARG + 1], int *argc, char *word)
 	{
 		stat(dp->d_name, &buf);
 		/*
-		 * if (!(buf.st_mode & S_IFDIR)) {   Allow directories 
+		 * if (!(buf.st_mode & S_IFDIR)) {   Allow directories
 		 */
 		if (reg_match(dp->d_name, target))
 		{

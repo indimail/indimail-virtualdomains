@@ -44,7 +44,7 @@ die_nomem()
 }
 
 /*-
- * Add a domain to all the control files 
+ * Add a domain to all the control files
  * And signal qmail
  */
 int

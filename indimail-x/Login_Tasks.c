@@ -292,7 +292,7 @@ Login_Tasks(struct passwd *pw, const char *User, char *ServiceType)
 		close(open(tmpbuf.s, O_CREAT | O_TRUNC , 0644));
 	}
 	RemoteBulkMail(fqemail.s, domain, pw->pw_dir);
-	/*- 
+	/*-
 	 * If the age of file QuotaWarn is more than a week send warning
 	 * to user if overquota
 	 */

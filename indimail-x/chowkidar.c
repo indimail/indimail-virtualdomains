@@ -226,15 +226,15 @@ main(int argc, char **argv)
 		for (Ptr = bmfptr;!silent && Ptr && *Ptr;Ptr++)
 			strerr_warn1(*Ptr, 0);
 		return(0);
-	} 
+	}
 #endif
 	/*- Update mode */
 	if (!readLogFile(filename, type, spamNumber)) {
 		/*
-		 * ignore list is our list of priviliged mail users 
-		 * firstly we read our ignore file  
+		 * ignore list is our list of priviliged mail users
+		 * firstly we read our ignore file 
 		 * ... and from qmail's badmailfrom, since we do not want
-		 * to have duplicate spammer addresses 
+		 * to have duplicate spammer addresses
 		 */
 		i = str_chr(outfile, '.');
 		j = str_chr(outfile, '/');

@@ -13,7 +13,7 @@
 /*
  * __USE_GNU exposes the GNU tdestroy() function, a
  * function that is not mentioned by the Single Unix
- * Specification. 
+ * Specification.
  */
 #define __USE_GNU 1
 #define _GNU_SOURCE

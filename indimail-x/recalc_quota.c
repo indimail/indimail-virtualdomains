@@ -150,9 +150,9 @@ mdir_t recalc_quota(char *Maildir, int force_flag)
 			get_indimailuidgid(&indimailuid, &indimailgid);
 		uid = indimailuid;
 		gid = indimailgid;
-	} 
+	}
 	/*- recursive function, can take time for a large Maildir */
-	mail_size = count_dir(maildir.s, &mail_count); 
+	mail_size = count_dir(maildir.s, &mail_count);
 	if ((fd = open(mdirsizefn.s, O_CREAT | O_TRUNC | O_WRONLY, S_IWUSR | S_IRUSR)) == -1) {
 		if (errno == 2) {
 			mail_size = 0;

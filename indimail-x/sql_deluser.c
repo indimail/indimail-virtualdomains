@@ -58,7 +58,7 @@ do_sql(char *user, char *domain, char *table)
 	if (mysql_query(&mysql[1], SqlBuf.s)) {
 		strerr_warn4("sql_deluser: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
 		return (-1);
-	} 
+	}
 	return (in_mysql_affected_rows(&mysql[1]));
 }
 

@@ -949,7 +949,7 @@ ProcessInFifo(int instNum)
 		if ((rfd = open(fifo_path, O_RDWR)) == -1) {
 			strerr_warn3("InLookup: open O_RDWR: ", fifo_path, ": ", &strerr_sys);
 			return (-1);
-		} else 
+		} else
 		if ((pipe_size = fpathconf(rfd, _PC_PIPE_BUF)) == -1) {
 			strerr_warn3("InLookup: fpathconf _PC_PIPE_BUF: ", fifo_path, ": ", &strerr_sys);
 			return (-1);

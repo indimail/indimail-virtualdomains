@@ -64,7 +64,7 @@ is_user_present(char *user, char *domain)
 	if (!user || !*user || !domain || !*domain)
 		return (-1);
 #ifdef QUERY_CACHE
-	if (_cacheSwitch && env_get("QUERY_CACHE") && is_present != -1 && 
+	if (_cacheSwitch && env_get("QUERY_CACHE") && is_present != -1 &&
 		!str_diffn(user, User.s, User.len + 1) && !str_diffn(domain, Domain.s, Domain.len + 1))
 		return (is_present);
 	if (!_cacheSwitch)

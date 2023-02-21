@@ -80,7 +80,7 @@ vpriv_insert(char *user, char *program, char *cmdargs)
 		return (0);
 	if (err)
 		strmsg_out7("Added Privilege for ", user, " [", program, " ", cmdargs, "]\n");
-	else 
+	else
 		strerr_warn2("No Privilege added for ", user, 0);
 	return (0);
 }

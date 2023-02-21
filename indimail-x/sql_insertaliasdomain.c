@@ -61,7 +61,7 @@ sql_insertaliasdomain(char *old_domain, char *new_domain)
 				return (-1);
 			if (!mysql_query(&mysql[0], SqlBuf.s))
 				return (0);
-		} 
+		}
 		strerr_warn4("sql_insertaliasdomain: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[0]), 0);
 		return (-1);
 	}

@@ -64,7 +64,7 @@ findmdahost(char *email, int *total)
 			return ((char *) 0);
 		else
 			return (ip);
-	} 
+	}
 	/*- reach here if non-distributed */
 	if (!total)
 		connect_all = 1;

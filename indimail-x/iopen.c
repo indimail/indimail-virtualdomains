@@ -70,7 +70,7 @@ die_nomem()
 	_exit(111);
 }
 
-/* 
+/*
  * connect to MySQL
  * dbhost = host:user:password:socket/port:ssl
  */
@@ -92,7 +92,7 @@ iopen(char *dbhost)
 	 * 1. set mysql_host from dbhost if dbhost is not null.
 	 * 2. Check Env Variable for MYSQL_HOST
 	 * 3. If MYSQL_HOST is not defined check host.mysql in /var/indimail/control
-	 * 4. If host.mysql not present then take the value of MYSQL_HOST 
+	 * 4. If host.mysql not present then take the value of MYSQL_HOST
 	 *    defined in indimail.h
 	 */
 	if (dbhost && *dbhost) {
@@ -146,7 +146,7 @@ iopen(char *dbhost)
 	}
 	mysql_Init(&mysql[1]);
 	atexit(iclose);
-	/*- 
+	/*-
 	 * localhost:indimail:ssh-1.5-:/var/run/mysqld/mysqld.sock:ssl
 	 * localhost:indimail:ssh-1.5-:/var/run/mysqld/mysqld.sock:nossl
 	 */
@@ -228,7 +228,7 @@ iopen(char *dbhost)
 					!mysql_socket && use_ssl ? ": use_ssl=1: " : ": use_ssl=0: ",
 					(char *) in_mysql_error(&mysql[1]), 0);
 				return (-1);
-			} 
+			}
 			if (!(in_mysql_real_connect(&mysql[1], server, mysql_user, mysql_passwd, NULL,
 				mysqlport, mysql_socket, flags))) {
 				strerr_warn10("iopen: mysql_real_connect: ", server, " user ", mysql_user,

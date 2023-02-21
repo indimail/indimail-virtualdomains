@@ -242,7 +242,7 @@ prepare_maildir(char *dir, uid_t uid, gid_t gid)
 				vdl_exit(111);
 			}
 			TheDir.len -= 3; /*- remove cur, new or tmp */
-			/*- 
+			/*-
 			 * figure out the parent Maildir
 			 * dir=Maildir means parent Maildir or INBOX
 			 * The parent Maildir shouldn't have maildirfolder file
@@ -278,12 +278,12 @@ quota_message(char *ptr, mdir_t msgsize, mdir_t MailQuotaCount, mdir_t MailQuota
 #ifdef VALIAS
 /*
  * Process any valiases for this user@domain
- * 
+ *
  * This will look up any valiases in indimail and
  * deliver the email to the entries
  *
  * Return 1 if aliases found
- * Return 0 if no aliases found 
+ * Return 0 if no aliases found
  */
 int
 process_valias(char *user, char *domain, mdir_t MsgSize)
@@ -342,12 +342,12 @@ process_valias(char *user, char *domain, mdir_t MsgSize)
 
 /*
  * Check if the indimail user has a .qmail file in their directory
- * and foward to each email address, Maildir or program 
+ * and foward to each email address, Maildir or program
  *  that is found there in that file
  *
  * Return:  1 if we found and delivered email
  *       :  0 if not found
- *       : -1 if no user .qmail file 
+ *       : -1 if no user .qmail file
  */
 int
 doAlias(char *dir, char *user, char *domain, mdir_t MsgSize)
@@ -474,7 +474,7 @@ processMail(struct passwd *pw, char *user, char *domain, mdir_t MsgSize)
 		cur_size = recalc_quota(tmpbuf.s, 0);
 #endif
 		/*-
-		 * Remove bounce flag if a message size of 1024000 can be delivered to the user 
+		 * Remove bounce flag if a message size of 1024000 can be delivered to the user
 		 */
 		if (str_diffn(pw->pw_shell, "NOQUOTA", 8) && ((cur_size + 1024000) < mail_size_limit))
 			vset_lastdeliver(user, domain, 0);
@@ -584,7 +584,7 @@ reject_mail(char *user, char *domain, int status, mdir_t MsgSize, char *bounce)
 	char           *ptr;
 
 	/*-
-	 * the indimail user does not exist. Follow the rest of 
+	 * the indimail user does not exist. Follow the rest of
 	 * the directions in the .qmail-default file
 	 *
 	 * If they want to delete email for non existent users
@@ -802,7 +802,7 @@ bhfcheck(char *addr)
  * The domain to deliver the email to is in the HOST environment variable
  *
  * Deliver Exit Codes
- *  exit(0)   - exit successfully and have qmail delete the email 
+ *  exit(0)   - exit successfully and have qmail delete the email
  *  exit(100) - Bounce Back the email
  *  exit(111) - email remains in the queue.
  */
@@ -930,8 +930,8 @@ main(int argc, char **argv)
 #endif
 #ifdef QMAIL_EXT
 		/*-
-		 * try and find user that matches the QmailEXT address if no user found, 
-		 * and the QmailEXT address is different, meaning there was an extension 
+		 * try and find user that matches the QmailEXT address if no user found,
+		 * and the QmailEXT address is different, meaning there was an extension
 		 */
 		if (env_get("QMAIL_EXT") && str_diff(TheUser, TheUserExt))
 			pw = sql_getpw(TheUserExt, TheDomain);
@@ -940,7 +940,7 @@ main(int argc, char **argv)
 	if (pw) {
 		/*-
 		 * Mail delivery has happened successfully
-		 * Do not check the return status of 
+		 * Do not check the return status of
 		 * vset_lastauth * as that will result
 		 * in duplicate mails in case
 		 * of vset_lastauth() error

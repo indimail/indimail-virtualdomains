@@ -101,7 +101,7 @@ hostcntrl_select_all()
 			if(in_mysql_errno(&mysql[0]) == ER_NO_SUCH_TABLE) {
 				create_table(ON_MASTER, cntrl_table, CNTRL_TABLE_LAYOUT);
 				return (0);
-			} 
+			}
 			strerr_warn4("hostcntrl_select: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[0]), 0);
 			return (0);
 		}

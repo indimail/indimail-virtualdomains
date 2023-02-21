@@ -47,7 +47,7 @@ die_nomem()
 }
 
 /*
- * copy_method 
+ * copy_method
  * 0 - Copy File
  * 1 - Link email to file in bulk_mail
  */

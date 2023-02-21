@@ -128,7 +128,7 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 
 	if (!username || !*username || !isalnum((int) *username))
 		strerr_die1x(100, "illegal username");
-	if ((ulen = str_len(username)) > MAX_PW_NAME || str_len(domain) > MAX_PW_DOMAIN || 
+	if ((ulen = str_len(username)) > MAX_PW_NAME || str_len(domain) > MAX_PW_DOMAIN ||
 			str_len(gecos) > MAX_PW_GECOS || str_len(password) > MAX_PW_PASS)
 		strerr_die1x(100, "Name too long");
 	if (*username == '.' || username[ulen - 1] == '.')
@@ -243,7 +243,7 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 			if (!(ptr = get_local_hostid()))
 				strerr_die1x(111, "iadduser-sql_gethostid: unable to get local hostid");
 			/*-
-			 * This can happen under a race condition where some other process 
+			 * This can happen under a race condition where some other process
 			 * adds the same user to hostcntrl. In this case the entries added
 			 * locally should be removed.
 			 */

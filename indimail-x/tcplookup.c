@@ -314,7 +314,7 @@ tcplookup(int argc, char **argv, char **envp)
 	}
 	if (!stralloc_ready(&querybuf, 2 + sizeof(int)))
 		die_nomem();
-	/*- 
+	/*-
 	 *  Format of Query Buffer
 	 *  (len of string: int|QueryType: 1|NULL: 1|EmailId: len1|NULL: 1|Fifo: len2|NULL: 1|IP: len3|NULL: 1)
 	 */

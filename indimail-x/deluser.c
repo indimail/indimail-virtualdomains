@@ -153,7 +153,7 @@ deluser(char *user, char *domain, int remove_db)
 				die_nomem();
 			if ((mailstore = findhost(tmp.s, 0)) != (char *) 0) {
 				i = str_rchr(mailstore, ':');
-				if (mailstore[i]) 
+				if (mailstore[i])
 					mailstore[i] = 0;
 				for (;*mailstore && *mailstore != ':';mailstore++);
 				mailstore++;
@@ -222,7 +222,7 @@ deluser(char *user, char *domain, int remove_db)
 				if (sql_active(passent, real_domain, FROM_ACTIVE_TO_INACTIVE)) {
 					strerr_warn5("deluser: failed to mark user ", user, "@", real_domain, " as inactive", 0);
 					return (-1);
-				} 
+				}
 #else
 				strerr_warn5("deluser: cannot mark user ", user, "@", real_domain,
 						" as inactive.\nIndiMail not configured with ENABLE_AUTH_LOGGING", 0);
@@ -303,7 +303,7 @@ deluser(char *user, char *domain, int remove_db)
 	if (remove_db == 1)
 		dec_dir_control(Dir.s, user, real_domain, -1, -1);
 	/*
-	 * remove the users directory from the file system 
+	 * remove the users directory from the file system
 	 * and check for error
 	 */
 	if (vdelfiles(Dir.s, user, real_domain)) {

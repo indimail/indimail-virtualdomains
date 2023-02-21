@@ -36,7 +36,7 @@ die_nomem()
 }
 
 /*
- * prompt the command line and get a password twice, that matches 
+ * prompt the command line and get a password twice, that matches
  */
 char           *
 vgetpasswd(char *user)

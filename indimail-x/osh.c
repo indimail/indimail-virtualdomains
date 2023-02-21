@@ -11,10 +11,10 @@
  *
  *
  * This is main.c (osh)
- * 
+ *
  * Copyright (c) 1993 The Regents of the University of California
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that: (1) source code distributions
  * retain the above copyright notice and this paragraph in its entirety, (2)
@@ -137,7 +137,7 @@ static struct hand Internal[] = {
    { "logout", i_exit   }, /* No handler, immediately exit */
    { "exit"  , i_exit   }, /* ditto */
    { NULL,     NULL     }
-}; 
+};
 
 void            getEnvConfigStr(char **, char *, char *);
 
@@ -297,8 +297,8 @@ pungetc(int value, FILE *fp)
 }
 
 /*
- * pgetc should eventually be made nicely buffered 
- * XXX 
+ * pgetc should eventually be made nicely buffered
+ * XXX
  */
 int
 pgetc()
@@ -410,7 +410,7 @@ redirect(int srcfd, char *srcfile, int dstfd, char *dstfile, int append, int bck
 		{
 #ifdef CHECK_ACCESS
 			/*
-			 * Setup dummy argv[] for check_access 
+			 * Setup dummy argv[] for check_access
 			 */
 			test[0] = (char *) malloc(strlen(srcfile) + 1);
 			strcpy(test[0], srcfile);
@@ -470,7 +470,7 @@ redirect(int srcfd, char *srcfile, int dstfd, char *dstfile, int append, int bck
 						if (!access(buf, W_OK))
 							/*
 							 * if we can write to the parent normally, do
-							 * the chown, otherwise, leave it as root 
+							 * the chown, otherwise, leave it as root
 							 */
 #ifdef HAVE_FCHOWN
 							if (fchown(dstfd, getuid(), getgid()) == -1)
@@ -825,9 +825,9 @@ do_prompt()
 		strncpy(cwd, "unknown", MAXPATHLEN);
 	printf("%s.%s:%s>", host, pw->pw_name, cwd);
 	fflush(stdout);
-	/*- 
+	/*-
 	 * Prints a prompt like:
-	 * beta,/u0/mcn #> 
+	 * beta,/u0/mcn #>
 	 */
 }
 
@@ -851,7 +851,7 @@ void
 grpcopy(struct group *from, struct group *to)
 {
 	/*
-	 * Only copy what we use 
+	 * Only copy what we use
 	 */
 	to->gr_name = (char *) malloc(strlen(from->gr_name));
 	memcpy(to->gr_name, from->gr_name, strlen(from->gr_name));
@@ -949,7 +949,7 @@ get_table(char *name, char *group)
 					while (FileList[temp] != NULL)
 						temp++;
 					/*
-					 * sscanf(dummy,"%s",prog); Get rid of the \n 
+					 * sscanf(dummy,"%s",prog); Get rid of the \n
 					 */
 					strncpy(prog, dummy, sizeof(prog) - 1);
 					prog[strlen(dummy) - 1] = '\0';
@@ -1110,7 +1110,7 @@ main(int argc, char **argv) /*- real shell */
 		if (term == TNL)
 			do_prompt();
 		/*-
-		 * for (fd=3;fd<20;fd++) (void)fclose(fd); 
+		 * for (fd=3;fd<20;fd++) (void)fclose(fd);
 		 */
 	}
 
@@ -1154,10 +1154,10 @@ statusprt(int pid, int status)
 	{
 		if ((code = highbyte(status)) != 0)
 		/*
-		 * printf("Exit code %d\n",code); 
+		 * printf("Exit code %d\n",code);
 		 */
 		/*
-		 * XXX - LOG THE EXIT CODE somehow? Pug suggests a new log entry 
+		 * XXX - LOG THE EXIT CODE somehow? Pug suggests a new log entry
 		 */
 			logit('-');
 		else

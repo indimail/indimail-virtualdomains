@@ -186,7 +186,7 @@ mgmtlist()
 		} else
 			strerr_warn4("mgmtpass: mysql_query[", SqlBuf.s, "]: ", (char *) in_mysql_error(&mysql[0]), 0);
 		return (1);
-	} 
+	}
 	if (!(res = in_mysql_store_result(&mysql[0]))) {
 		strerr_warn2("mgmtpass: MySQL Store Result: ", (char *) in_mysql_error(&mysql[0]), 0);
 		return (1);
@@ -194,7 +194,7 @@ mgmtlist()
 	if (!in_mysql_num_rows(res)) {
 		in_mysql_free_result(res);
 		return (0);
-	} 
+	}
 	for(;;) {
 		if (!(row = in_mysql_fetch_row(res)))
 			break;

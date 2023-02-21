@@ -65,7 +65,7 @@ static char     sccsid[] = "$Id: ismaildup.c,v 1.6 2022-12-18 19:26:39+05:30 Cpr
 
 static char     strnum[FMT_ULONG];
 
-#ifdef HAVE_SSL 
+#ifdef HAVE_SSL
 static void
 die_nomem()
 {
@@ -354,7 +354,7 @@ main(int argc, char **argv)
 		strerr_warn1("ismaildup: discarding 0 size message", 0);
 		_exit(0);
 	}
-#ifdef HAVE_SSL 
+#ifdef HAVE_SSL
 	if (env_get("ELIMINATE_DUPS") && ismaildup(argv[1])) {
 		strerr_warn1("ismaildup: discarding duplicate msg", 0);
 		_exit (0);

@@ -55,7 +55,7 @@ is_distributed_domain(char *Domain)
 	if (_cacheSwitch && (char *) env_get("QUERY_CACHE") && dist_flag != -1 && savedomain.len
 		&& !str_diffn(Domain, savedomain.s, savedomain.len + 1))
 		return (dist_flag);
-	else 
+	else
 	if (!stralloc_copys(&savedomain, Domain) || !stralloc_0(&savedomain))
 		die_nomem();
 	if (!_cacheSwitch)

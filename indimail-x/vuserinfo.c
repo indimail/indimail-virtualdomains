@@ -166,7 +166,7 @@ main(int argc, char **argv)
 	}
 	if (parse_email(Email.s, &User, &Domain))
 		die_nomem();
-	c = userinfo(Email.s, User.s, Domain.s, DisplayName, DisplayPasswd, DisplayUid, DisplayGid, DisplayComment, DisplayDir, 
+	c = userinfo(Email.s, User.s, Domain.s, DisplayName, DisplayPasswd, DisplayUid, DisplayGid, DisplayComment, DisplayDir,
 		DisplayQuota, DisplayLastAuth, DisplayFilter, DisplayAll);
 	iclose();
 	return (c);

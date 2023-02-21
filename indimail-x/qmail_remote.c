@@ -152,11 +152,11 @@ decode(int read_fd)
 	return (111);
 }
 
-/* 
+/*
  * Deliver an email to an address
  * Return 0 on success
  * Return less than zero on failure
- * 
+ *
  */
 int
 qmail_remote(char *user, char *domain)

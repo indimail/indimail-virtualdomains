@@ -17,11 +17,11 @@
  *
  *
  * This is handlers.c (osh)
- * 
+ *
  * ----
  * Copyright (c) 1993 The Regents of the University of California
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that: (1) source code distributions
  * retain the above copyright notice and this paragraph in its entirety, (2)
@@ -182,7 +182,7 @@ int
 acl(char *name, int mode)
 {
 	/*
-	 * Returns 1 on a +, -1 on a -, and 0 on a not found 
+	 * Returns 1 on a +, -1 on a -, and 0 on a not found
 	 */
 	struct stat     buf;
 	int             temp = 0;
@@ -254,7 +254,7 @@ acl(char *name, int mode)
 #endif
 
 /*
- * Return 1 on everything okay, 0 on something not accessible 
+ * Return 1 on everything okay, 0 on something not accessible
  */
 int
 check_access(int argc, char **argv)
@@ -317,13 +317,13 @@ check_access(int argc, char **argv)
 				continue;
 			/*
 			 * Even if the file owner doesn't approve, go ahead if
-			 * we could read the file/directory anyway 
+			 * we could read the file/directory anyway
 			 */
 			if (!strcmp(argv[0], "ls") && !strcmp(argv[1], "-d") && (buf.st_mode & S_IFDIR))
 			{
 				/*
 				 * We're doing an ls -d... Now check that the current
-				 * arguments parent is readable 
+				 * arguments parent is readable
 				 */
 				strcpy(x, argv[i]);
 				if ((p = strrchr(x, '/')) != NULL)
@@ -369,7 +369,7 @@ fatal(char *mes)
 }
 
 /*
- * writeable returns 1 if the file is writeable, 0 otherwise 
+ * writeable returns 1 if the file is writeable, 0 otherwise
  */
 int
 writeable(char *file)
@@ -416,16 +416,16 @@ writeable(char *file)
 		if (errno == ENOENT)
 		{
 			/*
-			 * If the file doesn't exist, check the path 
+			 * If the file doesn't exist, check the path
 			 */
 			accessible = access(temp, W_OK);
 			/*
-			 * fprintf(stderr,"Checking writability of %s.\n",temp); 
+			 * fprintf(stderr,"Checking writability of %s.\n",temp);
 			 */
 		} else
 		{
 			/*
-			 * If it does exist, and we own the directory, writing is fine 
+			 * If it does exist, and we own the directory, writing is fine
 			 */
 			stat(temp, &buf);
 			if (buf.st_uid == getuid())
@@ -738,7 +738,7 @@ i_more(int argc, char **argv)
 
 /*
  * Notes on execute:
- *  1) execute is called AFTER being forked off by the main shell, 
+ *  1) execute is called AFTER being forked off by the main shell,
  *     consequently, all setuid's will affect children ONLY and not parents.
  *  2) if effective uid == 0 (ie., we are superuser), we save our current
  *     REAL id (in case execv fails), make our real id 0, then exec.
@@ -889,7 +889,7 @@ i_mount(int argc, char **argv)
 	{
 		logit('+');
 		/*
-		 * Create a new arg vector with the flags we want to force 
+		 * Create a new arg vector with the flags we want to force
 		 */
 		nargv[0] = argv[0];
 		nargv[1] = "-t";
@@ -950,7 +950,7 @@ i_test(int argc, char **argv)
 			}
 		}
 		/*
-		 * If we're here, there's a problem 
+		 * If we're here, there's a problem
 		 */
 		fprintf(stderr, "test: invalid argument '%s'\n", argv[1]);
 		fprintf(stderr, "Usage: test [-w|-r] filename\n");

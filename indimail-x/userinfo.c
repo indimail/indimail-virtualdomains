@@ -105,10 +105,10 @@ die_nomem()
 }
 
 int
-userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid, DisplayComment, DisplayDir, 
+userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid, DisplayComment, DisplayDir,
 		  DisplayQuota, DisplayLastAuth, DisplayFilter, DisplayAll)
 	char           *Email, *User, *Domain;
-	int             DisplayName, DisplayPasswd, DisplayUid, DisplayGid, DisplayComment, DisplayDir, DisplayQuota, 
+	int             DisplayName, DisplayPasswd, DisplayUid, DisplayGid, DisplayComment, DisplayDir, DisplayQuota,
 	                DisplayLastAuth, DisplayFilter, DisplayAll;
 {
 	struct passwd  *mypw;
@@ -493,7 +493,7 @@ userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid
 		} else {
 			subprintfe(subfdout, "userinfo", "Relay Allowed : No\n");
 			if (add_time) {
-				subprintfe(subfdout, "userinfo", "Days inact    : %s\n", 
+				subprintfe(subfdout, "userinfo", "Days inact    : %s\n",
 						no_of_days((time(0) - (auth_time ? auth_time : add_time))));
 			} else
 				subprintfe(subfdout, "userinfo", "Days inact    : Unknown\n");

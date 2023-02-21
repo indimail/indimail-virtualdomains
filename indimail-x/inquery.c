@@ -81,7 +81,7 @@ cleanup(int rfd, int wfd, void (*sig_pipe_save)(), char *fifo)
 	return;
 }
 
-/*- 
+/*-
  *  Format of Query Buffer
  *  (len of string: int|QueryType: 1|NULL: 1|EmailId: len1|NULL: 1|Fifo: len2|NULL: 1|IP: len3|NULL: 1)
  */
@@ -249,7 +249,7 @@ inquery(char query_type, char *email, char *ip)
 	} else {
 		if ((wfd = open(InFifo.s, O_WRONLY | O_NDELAY, 0)) == -1)
 			return ((void *) 0);
-		else 
+		else
 		if (bytes > (pipe_size = fpathconf(wfd, _PC_PIPE_BUF))) {
 			errno = EMSGSIZE;
 			return ((void *) 0);

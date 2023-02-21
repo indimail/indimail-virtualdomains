@@ -226,7 +226,7 @@ qmail_inject_open(char *address, int *write_fd)
 		}
 		binqqargs[0] = bin0;
 		binqqargs[1] = "-f";
-		binqqargs[2] = sender; 
+		binqqargs[2] = sender;
 		binqqargs[3] = _address.s;
 		binqqargs[4] = 0;
 		execv(*binqqargs, binqqargs);
@@ -422,7 +422,7 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
 #endif
 			return (-2);
 		}
-	} else 
+	} else
 		size = count = 0;
 	if (dailyMsgCount)
 		*dailyMsgCount = count;
@@ -536,7 +536,7 @@ dateFolder(time_t tmval, stralloc *buffer, char *format)
  * This is done by checking for a matching line
  * in the email headers for Delivered-To: which
  * we put in each email
- * 
+ *
  * Return  1 if looping
  * Return  0 if not looping
  */
@@ -578,9 +578,9 @@ is_looping(char *address)
 		} else {
 			/*
 			 * check for the start of the body, we only need
-			 * to check the headers. 
+			 * to check the headers.
 			 *
-			 * walk through the charaters in the body 
+			 * walk through the charaters in the body
 			 */
 			for (i = 0, found = 0; line.s[i] && !found; ++i) {
 				switch (line.s[i])
@@ -595,7 +595,7 @@ is_looping(char *address)
 					/*
 					 * found a non blank, so we are still
 					 * in the headers
-					 * set the found non blank char flag 
+					 * set the found non blank char flag
 					 */
 					found = 1;
 					break;
@@ -607,23 +607,23 @@ is_looping(char *address)
 			 * body. We don't need to check the body for
 			 * the duplicate Delivered-To: line. Hence, we
 			 * are done with our search and can return the
-			 * looping not found value return not found looping 
-			 * message value 
+			 * looping not found value return not found looping
+			 * message value
 			 */
 			if (found == 0)
 				return (0);
 		}
 	}
 	/*
-	 * if we get here then the there is either no body 
+	 * if we get here then the there is either no body
 	 * or the logic above failed and we scanned
-	 * the whole email, headers and body. 
+	 * the whole email, headers and body.
 	 */
 	return (0);
 }
 
-/* 
- * open a pipe to a command 
+/*
+ * open a pipe to a command
  * return the pid or -1 if error
  */
 
@@ -636,7 +636,7 @@ open_command(char *command, int *write_fd)
 	static stralloc cmmd = {0}, ncmmd = {0};
 	char           *p, *r, *binqqargs[4];
 	char          **q;
-	char *special_programs[] = { 
+	char *special_programs[] = {
 		"autoresponder",
 		"condredirect",
 		"condtomaildir",
@@ -802,19 +802,19 @@ format_local_filename(stralloc *file, stralloc *file_new, char *address,
 	str_copyb(file_new->s + i - 4, "new", 3);
 }
 
-/* 
+/*
  * Deliver an email to an address
  * Return 0 on success
  * Return less than zero on failure
- * 
+ *
  * -1 user is over quota
  * -2 system errors
- * -3 mail is looping 
+ * -3 mail is looping
  * -4 mail is over quota due to limits (MAILSIZE_LIMIT or MAILCOUNT_LIMIT)
  * -5 defer over quota mail instead of bouncing
  */
 int
-deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid, 
+deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 	char *Domain, mdir_t *QuotaCount, mdir_t *QuotaSize)
 {
 	time_t          tm;
@@ -1068,11 +1068,11 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 #else
 					scan_ulong(maildirquota, MailQuotaSize);
 					if (*MailQuotaSize && CurBytes > *MailQuotaSize)
-						vset_lastdeliver(user.s, domain, CurBytes); 
+						vset_lastdeliver(user.s, domain, CurBytes);
 #endif
 				}
-				/*- 
-				 * Bounce if Message size is greater 
+				/*-
+				 * Bounce if Message size is greater
 				 * than quota_mailsize bytes
 				 */
 				if ((ptr = env_get("OVERQUOTA_MAILSIZE")) && *ptr)
@@ -1083,9 +1083,9 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 					MailQuotaWarn(user.s, domain, address, maildirquota);
 					return (-1);
 				}
-			} 
+			}
 			/*
-			 * If we are going to deliver it, then add in the size 
+			 * If we are going to deliver it, then add in the size
 			 */
 			update_quota(address, MsgSize);
 			if (email && *email) {
@@ -1112,7 +1112,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 			}
 		} else
 			CurBytes = CurCount = 0;
-#ifdef HAVE_SSL 
+#ifdef HAVE_SSL
 		if (env_get("ELIMINATE_DUPS") && ismaildup(address)) {
 			strerr_warn1("deliver_mail: discarding duplicate msg", 0);
 			return (0);
@@ -1354,7 +1354,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 	if (is_injected == 1) {
 		/*
 		 * If we were writing it to qmail-inject
-		 * then wait for qmail-inject to finish 
+		 * then wait for qmail-inject to finish
 		 */
 		close(write_fd);
 		for (;;) {
@@ -1395,9 +1395,9 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 			case 64:
 			case 65:
 			case 70:
-			case 76: 
-			case 77: 
-			case 78: 
+			case 76:
+			case 77:
+			case 78:
 			case 112:
 			case 100:
 				strnum1[fmt_uint(strnum1, i)] = 0;

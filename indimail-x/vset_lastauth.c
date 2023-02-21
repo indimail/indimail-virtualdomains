@@ -48,7 +48,7 @@ vset_lastauth(char *user, char *domain, char *service, char *remoteip, char *gec
 		return (err);
 	strnum1[i = quota > 0 ? fmt_ulong(strnum1, quota) : fmt_long(strnum1, quota)] = 0;
 	strnum2[j = fmt_ulong(strnum2, time(0))] = 0;
-	if (!stralloc_copyb(&SqlBuf, 
+	if (!stralloc_copyb(&SqlBuf,
 			delayed_insert ?  "replace delayed into lastauth set user=\"" : "replace into lastauth set user=\"",
 			delayed_insert ? 40 : 32))
 		die_nomem();

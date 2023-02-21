@@ -109,7 +109,7 @@ do_sql(struct passwd *inpw, char *domain, char *scram, char *table)
 			strerr_warn4("sql_setpw: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
 			return (-1);
 		}
-	} 
+	}
 	return (in_mysql_affected_rows(&mysql[1]));
 }
 
@@ -136,7 +136,7 @@ sql_setpw(struct passwd *inpw, char *domain, char *scram)
 	if (!get_assign(domain, 0, &uid, &gid)) {
 		uid = indimailuid;
 		gid = indimailgid;
-	} 
+	}
 	myuid = geteuid();
 	if (myuid != indimailuid && myuid != uid && myuid != 0) {
 		if (uid == indimailuid) {

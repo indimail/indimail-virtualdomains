@@ -87,7 +87,7 @@ error_mysql_options_str(unsigned int errnum)
 int
 set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 {
-	char           *default_file, *default_group, *c_timeout, 
+	char           *default_file, *default_group, *c_timeout,
 				   *r_timeout, *w_timeout, *init_cmd,
 				   *opt_reconnect, *opt_protocol;
 #ifdef MYSQL_SET_CLIENT_IP
@@ -99,7 +99,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 		|| defined(HAVE_MYSQL_OPT_SSL_ENFORCE) || defined(HAVE_MYSQL_OPT_SSL_MODE) \
 		|| defined(HAVE_MYSQL_OPT_SSL_VERIFY_SERVER_CERT) || defined(HAVE_MYSQL_OPT_SSL_KEY) \
 		|| defined(HAVE_MYSQL_OPT_TLS_VERSION)
-	char           *ptr; 
+	char           *ptr;
 #endif
 	char            temp[4];
 	char            o_reconnect, use_ssl = 0;
@@ -165,7 +165,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	if (int_mysql_options(mysql, MYSQL_OPT_WRITE_TIMEOUT, (char *) &write_timeout))
 		return (6);
 #ifdef MYSQL_SET_CLIENT_IP
-	if (env_get("MYSQL_SET_CLIENT_IP") && 
+	if (env_get("MYSQL_SET_CLIENT_IP") &&
 			int_mysql_options(mysql, MYSQL_SET_CLIENT_IP, set_client_ip))
 		return (7);
 #endif
@@ -173,7 +173,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 			int_mysql_options(mysql, MYSQL_OPT_RECONNECT, (char *) &o_reconnect))
 		return (8);
 	/*-
-	 * enum mysql_protocol_type 
+	 * enum mysql_protocol_type
 	 * MYSQL_PROTOCOL_DEFAULT, MYSQL_PROTOCOL_TCP, MYSQL_PROTOCOL_SOCKET,
 	 * MYSQL_PROTOCOL_PIPE, MYSQL_PROTOCOL_MEMORY
 	 */
@@ -262,7 +262,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	/*-
 	 * MYSQL_OPT_SSL_MODE (argument type: unsigned int *)
 	 *
-	 * The security state to use for the connection to the server: 
+	 * The security state to use for the connection to the server:
 	 * SSL_MODE_DISABLED, SSL_MODE_PREFERRED, SSL_MODE_REQUIRED, SSL_MODE_VERIFY_CA,
 	 * SSL_MODE_VERIFY_IDENTITY.
 	 * The default is SSL_MODE_PREFERRED. These modes are the permitted values of
@@ -310,7 +310,7 @@ set_mysql_options(MYSQL *mysql, char *file, char *group, unsigned int *flags)
 	 * The protocols permitted by the client for encrypted connections.
 	 * The value is a comma-separated list containing one or more protocol names.
 	 * The protocols that can be named for this option depend on the SSL library
-	 * used to compile MySQL. 
+	 * used to compile MySQL.
 	 *
 	 * When compiled using OpenSSL 1.0.1 or higher, MySQL supports the TLSv1, TLSv1.1, and TLSv1.2 protocols.
 	 * When compiled using the bundled version of yaSSL, MySQL supports the TLSv1 and TLSv1.1 protocols.

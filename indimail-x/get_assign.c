@@ -82,7 +82,7 @@ get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 	}
 #ifdef QUERY_CACHE
 	if (_cacheSwitch && env_get("QUERY_CACHE")) {
-		if (in_domain_size && in_domain && in_dir && 
+		if (in_domain_size && in_domain && in_dir &&
 			!str_diffn(in_domain, domain, in_domain_size + 1)) {
 			if (uid)
 				*uid = in_uid;
@@ -241,7 +241,7 @@ get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 		alloc_free(tmpbuf);
 		close(fd);
 		return (in_dir);
-	} 
+	}
 	close(fd);
 	alloc_free(tmpstr);
 	if (uid)

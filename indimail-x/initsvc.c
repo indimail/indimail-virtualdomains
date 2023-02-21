@@ -326,7 +326,7 @@ main(int argc, char **argv)
 				strerr_warn1("svscan: fappend svscan.plist Library/LaunchDaemons/org.indimail.svscan.plist: ", &strerr_sys);
 				return (1);
 			}
-		} 
+		}
 		switch(flag)
 		{
 			case SV_ON:
@@ -381,7 +381,7 @@ main(int argc, char **argv)
 				strerr_warn3("svscan: fappend upstart ", jobfile, ": ", &strerr_sys);
 				return (1);
 			}
-		} 
+		}
 		switch(flag)
 		{
 			case SV_ON:

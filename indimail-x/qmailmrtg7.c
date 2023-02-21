@@ -25,8 +25,8 @@
  *
  *
  * kbo@inter7.com
- * Wrote everything except what is listed below. 
- * 
+ * Wrote everything except what is listed below.
+ *
  * Richard A. Secor <rsecor@seqlogic.com>
  * Added support for rblsmtpd deny
  *

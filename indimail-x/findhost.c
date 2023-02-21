@@ -99,7 +99,7 @@ void
 iclose_cntrl()
 {
 	/*
-	 * disconnection from the database 
+	 * disconnection from the database
 	 */
 	if (isopen_cntrl == 1) {
 		isopen_cntrl = 0;
@@ -124,7 +124,7 @@ open_central_db(char *dbhost)
 	 * 1. Check Env Variable for CNTRL_HOST
 	 * 2. If CNTRL_HOST is not defined check host.cntrl in /var/indimail/control
 	 * 3. If host.cntrl is not present check host.mysql in /var/indimail/control
-	 * 4. If host.cntrl not present then take the value of CNTRL_HOST 
+	 * 4. If host.cntrl not present then take the value of CNTRL_HOST
 	 *    defined in indimail.h
 	 */
 	if (dbhost && *dbhost) {
@@ -239,7 +239,7 @@ open_central_db(char *dbhost)
 	 */
 	if (!is_open || str_diffn(cntrl_host.s, mysql_host.s, mysql_host.len) || str_diffn(cntrl_port, indi_port, FMT_ULONG)) {
 		flags = use_ssl;
-		/*- 
+		/*-
 		 * mysql_options bug
 		 * if MYSQL_READ_DEFAULT_FILE is used
 		 * mysql_real_connect fails by connecting with a null unix domain socket
@@ -280,7 +280,7 @@ open_central_db(char *dbhost)
 					(char *) in_mysql_error(&mysql[0]), 0);
 				return (-1);
 			}
-			if (!stralloc_copys(&SqlBuf, "create database ") || 
+			if (!stralloc_copys(&SqlBuf, "create database ") ||
 				!stralloc_cats(&SqlBuf, mysql_database) || !stralloc_0(&SqlBuf))
 				die_nomem();
 			if (mysql_query(&mysql[0], SqlBuf.s)) {

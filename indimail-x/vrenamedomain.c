@@ -122,7 +122,7 @@ main(int argc, char **argv)
 		if (!(real_domain = get_real_domain(argv[1]))) {
 			strerr_warn2(argv[1], ": domain does not exist", 0);
 			return (1);
-		} 
+		}
 		subprintfe(subfdout, "vrenamedomain", "Renaming alias domain %s (%s) to %s\n", argv[1], real_domain, argv[2]);
 		flush("vrenamedomain");
 		if (addaliasdomain(real_domain, argv[2]))

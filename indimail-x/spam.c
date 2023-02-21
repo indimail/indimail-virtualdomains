@@ -104,8 +104,8 @@ die_nomem()
 }
 
 /*
- * This function parses one line from log file, checks if any " from " 
- * is matched. If so, returns the mail address 
+ * This function parses one line from log file, checks if any " from "
+ * is matched. If so, returns the mail address
  * @400000003d97d57c07c6d64c info msg 181049: bytes 1872 from <inditac_escalation@indimail.org> qp 1176 uid 0
  * @400000003da2eb6637759be4 info msg 181997: bytes 50526 from <#@[]> qp 8753 uid 506
  * @400000003da2eb6637759be4 info msg 181997: bytes 50526 from <> qp 8753 uid 506
@@ -203,7 +203,7 @@ parseLine3(char *str)
 }
 
 /*
- * fills our ignore list. these addresses will not be treated as spammers 
+ * fills our ignore list. these addresses will not be treated as spammers
  */
 int
 loadIgnoreList(char *fn)
@@ -261,7 +261,7 @@ loadIgnoreList(char *fn)
 
 /*
  * traverse "from" linked list and decide whether the hit count per mail address
- * exceeds the "spammer threshold" 
+ * exceeds the "spammer threshold"
  */
 int
 spamReport(int spamNumber, char *outfile)
@@ -349,7 +349,7 @@ spamReport(int spamNumber, char *outfile)
 }
 
 /*
- * This function reads the logfile and fills the " from " linked list 
+ * This function reads the logfile and fills the " from " linked list
  */
 int
 readLogFile(char *fn, int type, int count)
@@ -439,7 +439,7 @@ readLogFile(char *fn, int type, int count)
 }
 
 /*
- * check if the supplied mail address exist in our "ignored" table 
+ * check if the supplied mail address exist in our "ignored" table
  */
 int
 isIgnored(char *email)
@@ -557,8 +557,8 @@ print_list(int list)
 
 /*
  * Check if the email address if already in table.
- * If so, increment its hit count; if not, 
- * add it to table 
+ * If so, increment its hit count; if not,
+ * add it to table
  */
 maddr          *
 insertAddr(int ht, char *email)
@@ -590,7 +590,7 @@ insertAddr(int ht, char *email)
 	}
 	/*
 	 * Calculate hash sum, locate and increment count
-	 * if email exists, otherwise place it in spammer_hash 
+	 * if email exists, otherwise place it in spammer_hash
 	 */
 	h = hash(email);
 	for (sym = hash_tab[h]; sym; sym = sym->next) {

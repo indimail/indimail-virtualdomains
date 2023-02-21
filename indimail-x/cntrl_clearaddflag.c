@@ -63,7 +63,7 @@ cntrl_clearaddflag(char *user, char *domain, char *passwd)
 	if (!user || !*user || !domain || !*domain || !passwd || !*passwd)
 		return (-1);
 #ifdef QUERY_CACHE
-	if (_cacheSwitch && env_get("QUERY_CACHE") && is_present != -1 && !str_diffn(user, User.s, User.len + 1) 
+	if (_cacheSwitch && env_get("QUERY_CACHE") && is_present != -1 && !str_diffn(user, User.s, User.len + 1)
 		&& !str_diffn(domain, Domain.s, Domain.len + 1))
 		return (is_present);
 	else {
@@ -129,7 +129,7 @@ cntrl_clearaddflag(char *user, char *domain, char *passwd)
 			}
 			if (!mysql_query(&mysql[0], SqlBuf.s))
 				return (is_present = (sql_updateflag(user, domain, 1) ? 0 : 1));
-		} 
+		}
 		strerr_warn4("cntrl_clearaddflag: mysql_query [", SqlBuf.s, "]: ", (char *) in_mysql_error(&mysql[0]), 0);
 		return (is_present = -1);
 	}

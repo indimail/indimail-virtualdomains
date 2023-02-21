@@ -88,7 +88,7 @@ die_nomem()
 }
 
 static int
-get_options(int argc, char **argv, int *use_vfilter, int *domain_limits, 
+get_options(int argc, char **argv, int *use_vfilter, int *domain_limits,
 	char **handler, char **domain)
 {
 	int             c;
@@ -163,7 +163,7 @@ main(int argc, char **argv)
 	umask(0077);
 	if (handler && set_handler(TheDir.s, handler, uid, gid, use_vfilter))
 		return (1);
-	if ((domain_limits == 0 || domain_limits == 1) && 
+	if ((domain_limits == 0 || domain_limits == 1) &&
 		set_domain_limits(TheDir.s, uid, gid, domain_limits))
 		return (1);
 	return (0);

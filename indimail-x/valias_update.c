@@ -84,7 +84,7 @@ valias_update(char *alias, char *domain, char *old_alias_line, char *alias_line)
 	if (err) {
 		subprintfe(subfdout, "valias_update", "Updated alias line %s for alias %s@%s (%d entries)", alias_line, alias, real_domain, err);
 		flush("valias_update");
-	} else 
+	} else
 		strerr_warn6("No alias line ", alias_line, " for alias ", alias, "@", real_domain, 0);
 	return (0);
 }

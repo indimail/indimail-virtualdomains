@@ -74,7 +74,7 @@ valias_insert(char *alias, char *domain, char *alias_line, int ignore)
 			die_nomem();
 		if (!(mailstore = findhost(emailid.s, 1))) {
 			/*
-			 * Get IP-Address of the Local machine 
+			 * Get IP-Address of the Local machine
 			 */
 			if (!(ptr = get_local_hostid())) {
 				strerr_warn3("valias_insert: could not get local hostid: ", emailid.s, ": ", &strerr_sys);

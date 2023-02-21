@@ -120,7 +120,7 @@ add_user_assign(char *user, char *dir)
 	int             fd;
 
 	/*
-	 * stat assign file, if it's not there create one 
+	 * stat assign file, if it's not there create one
 	 */
 	getEnvConfigStr(&assigndir, "ASSIGNDIR", ASSIGNDIR);
 	if (!stralloc_copys(&filename, assigndir) ||

@@ -82,7 +82,7 @@ main(int argc, char **argv)
 	if (!(destport = env_get("DESTPORT"))) {
 		strerr_warn1("ERR: DESTPORT not set", 0);
 		_exit(1);
-	} 
+	}
 	signal(SIGALRM, bye);
 	if (AuthModuser(argc, argv, 60, 5)) {
 		if (!env_get("SSLERATOR")) {
@@ -206,7 +206,7 @@ main(int argc, char **argv)
 				if (str_diff(p, "couriertls")) {
 					binqqargs[0] = ptr;
 					binqqargs[1] = argv[0];
-					binqqargs[2] = argv[1]; 
+					binqqargs[2] = argv[1];
 					binqqargs[3] = argv[2];
 					binqqargs[4] = 0;
 					if (!stralloc_copy(&tmpbuf, &imaptag) ||
@@ -222,7 +222,7 @@ main(int argc, char **argv)
 					binqqargs[1] = "-remotefd=0";
 					binqqargs[2] = "-server";
 					binqqargs[3] = argv[0];
-					binqqargs[4] = argv[1]; 
+					binqqargs[4] = argv[1];
 					binqqargs[5] = argv[2];
 					binqqargs[6] = 0;
 					strmsg_out2(imaptag.s, " Begin SSL/TLS negotiation now.\r\n");

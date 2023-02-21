@@ -72,7 +72,7 @@ relay_select(char *email, char *remoteip)
 		else
 			strerr_warn4("relay_select: mysql_query [", SqlBuf.s, "]: ", (char *) in_mysql_error(&mysql[1]), 0);
 		return (0);
-	} 
+	}
 	res = in_mysql_store_result(&mysql[1]);
 	for (len = str_len(email);(row = in_mysql_fetch_row(res));) {
 		if (!case_diffb(row[0], len, email)) {

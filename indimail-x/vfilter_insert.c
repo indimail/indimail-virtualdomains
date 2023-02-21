@@ -42,7 +42,7 @@ die_nomem()
 }
 
 int
-vfilter_insert(char *emailid, char *filter_name, int header_name, int comparision, char *keyword, char *folder, int bounce_action, 
+vfilter_insert(char *emailid, char *filter_name, int header_name, int comparision, char *keyword, char *folder, int bounce_action,
 	char *faddr)
 {
 	int             err, filter_no;

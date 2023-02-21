@@ -399,7 +399,7 @@ trash_clean:
 				 * the user to logon. Hence for such folders include inactive
 				 * users too.
 				 */
-				do_lastauth = 0; 
+				do_lastauth = 0;
 				break;
 			}
 		}

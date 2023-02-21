@@ -74,7 +74,7 @@ remove_line(char *template, char *filename, int once_only, mode_t mode)
 	if ((lockfd = getDbLock(filename, 1)) == -1) {
 		strerr_warn3("remove_line: getDbLock: ", filename, ": ", &strerr_sys);
 		return (-1);
-	} 
+	}
 #endif
 	/*- format a new string */
 	if (!stralloc_copys(&fname, filename)

@@ -79,7 +79,7 @@ vquota_select(stralloc *user, stralloc *domain, mdir_t *quota, time_t *timestamp
 		}
 		if (!(quota_res = in_mysql_store_result(&mysql[1])))
 			return (0);
-	} 
+	}
 	if ((row = in_mysql_fetch_row(quota_res))) {
 		if (!stralloc_copys(user, row[0]) || !stralloc_0(user))
 			die_nomem();

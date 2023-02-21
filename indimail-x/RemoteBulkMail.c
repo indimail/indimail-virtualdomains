@@ -109,7 +109,7 @@ bulk_host_connect()
 			port = "0";
 		mysql_Init(&bulkMySql);
 		flags = use_ssl;
-		/*- 
+		/*-
 		 * mysql_options bug
 		 * if MYSQL_READ_DEFAULT_FILE is used
 		 * mysql_real_connect fails by connecting with a null unix domain socket

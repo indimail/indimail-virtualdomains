@@ -31,38 +31,38 @@
 /*-
  * Functions for Host Access. Manvendra
  * This progam will compare two crc lists and report the differences.
- * 
+ *
  * By Jon Zeeff (zeeff@b-tech.ann-arbor.mi.us)
- * 
- * Permission is granted to use this in any manner provided that    
+ *
+ * Permission is granted to use this in any manner provided that   
  * 1) the copyright notice is left intact,
- * 2) you don't hold me responsible for any bugs and 
+ * 2) you don't hold me responsible for any bugs and
  * 3) you mail me any improvements that you make.
- * 
- * 
+ *
+ *
  * report:
- *     corrupt  - crc changed w/o date change 
+ *     corrupt  - crc changed w/o date change
  *     replaced - crc + date changed
  *     perm     - permissions changed
  *     own/grp  - owner or group changed
- *     removed  - 
+ *     removed  -
  *     added    -
  *  Print the info for the new file except for deleted.
- * 
+ *
  * Use:
- * 
+ *
  * find / -print | sort | xargs crc -v > crc_file
- * 
+ *
  * to generate a crc list (crc.c should accompany this source).
- * 
+ *
  * Assume that no files have tabs or spaces in the name.
- * 
+ *
  -*/
 
 /*
  * sequent stuff -- may or may not need it?  Worked fine without it on a
  * sequent I had, but others claim they need it.  Go figure.
- * 
+ *
  */
 #ifdef sequent
 #define strrchr(s, c)  rindex(s,c)

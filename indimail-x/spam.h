@@ -8,7 +8,7 @@
 #define SPAM_H
 
 /*
- * What character marks an inverted character class? 
+ * What character marks an inverted character class?
  */
 #define NEGATE_CLASS		'^'
 #define MAXADDR             "5000"
@@ -22,7 +22,7 @@ enum
 /*
  * There are two hash tables:
  * 1. Hash table with addresses from log file
- * 2. The addresses that are to be ignored 
+ * 2. The addresses that are to be ignored
  */
 typedef struct maddr maddr;
 struct maddr

@@ -219,7 +219,7 @@ vset_limits(char *domain, struct vlimits *limits)
 
 	if ((err = iopen((char *) 0)) != 0)
 		return (err);
-	if (!stralloc_copyb(&SqlBuf, 
+	if (!stralloc_copyb(&SqlBuf,
 		"REPLACE INTO vlimits (domain, domain_expiry, passwd_expiry, maxpopaccounts, maxaliases, "
 		"maxforwards, maxautoresponders, maxmailinglists, diskquota, maxmsgcount, defaultquota, "
 		"defaultmaxmsgcount, disable_pop, disable_imap, disable_dialup, "
@@ -327,7 +327,7 @@ vlimits_get_flag_mask(struct vlimits *limits)
 		mask |= NO_PASSWD_CHNG;
 	if (limits->disable_dialup != 0)
 		mask |= NO_POP;
-	 return mask; 
+	 return mask;
 }
 
 static void

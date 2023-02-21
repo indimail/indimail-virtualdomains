@@ -48,7 +48,7 @@ die_nomem()
 	_exit(111);
 }
 
-/* 
+/*
  * Check if the user is over quota
  * Do all quota recalculation needed
  * Return 1 if user is over quota
@@ -113,7 +113,7 @@ user_over_quota(char *Maildir, char *quota, int cur_msgsize)
 	if (!quota || !*quota)
 		return (0);
 	/*
-	 * translate the quota to a number 
+	 * translate the quota to a number
 	 */
 	scan_ulong(quota, (unsigned long *) &mail_size_limit);
 	for (i = 0; quota[i] != 0; ++i) {
@@ -135,7 +135,7 @@ user_over_quota(char *Maildir, char *quota, int cur_msgsize)
 	 * Get their current total from maildirsize
 	 */
 #ifdef USE_MAILDIRQUOTA
-	if ((CurBytes = cur_mailbox_size = recalc_quota(maildir.s, &cur_mailbox_count, 
+	if ((CurBytes = cur_mailbox_size = recalc_quota(maildir.s, &cur_mailbox_count,
 		mail_size_limit, mail_count_limit, 0)) == -1)
 		return (-1);
 	CurCount = cur_mailbox_count;
@@ -158,7 +158,7 @@ user_over_quota(char *Maildir, char *quota, int cur_msgsize)
 	if (cur_mailbox_size + cur_msgsize > mail_size_limit) {
 		/*-
 		 * recalculate their quota since they might have
-		 * deleted email 
+		 * deleted email
 		 */
 		if ((CurBytes = cur_mailbox_size = recalc_quota(maildir.s, 2)) == -1)
 			return (-1);

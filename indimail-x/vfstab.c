@@ -144,7 +144,7 @@ get_options(int argc, char **argv, int *fstabAction, int *FStabstatus, char **md
 		strerr_warn1("vfstab: Must specify Max Size or Max Users", 0);
 		strerr_warn2(WARN, usage, 0);
 		return (1);
-	} 
+	}
 	return (0);
 }
 

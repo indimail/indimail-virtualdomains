@@ -149,7 +149,7 @@ writemcdinfo(DBINFO **rhostsptr, time_t mtime)
 		if (!stralloc_copys(&mcdFile, mcdfile) ||
 			!stralloc_0(&mcdFile))
 			die_nomem();
-	} else 
+	} else
 	if (*controldir == '/') {
 		if (!stralloc_copys(&mcdFile, controldir) ||
 			!stralloc_append(&mcdFile, "/") ||
@@ -242,7 +242,7 @@ LoadDbInfo_TXT(int *total)
 			!stralloc_append(&filename, "/") ||
 			!stralloc_cats(&filename, controldir))
 			die_nomem();
-	} else 
+	} else
 	if (!stralloc_copys(&filename, controldir) ||
 		!stralloc_catb(&filename, "/host.master", 12) ||
 		!stralloc_0(&filename))
@@ -354,7 +354,7 @@ LoadDbInfo_TXT(int *total)
 		}
 	}
 	if (sync_mcd) {  /*- sync dbinfo table */
-		/* 
+		/*
 		 * update dbinfo table with latest modification in mcdfile
 		 * and time = file modification time of mcdinfo
 		 */
@@ -515,7 +515,7 @@ static DBINFO **
 loadMCDInfo(int *total)
 {
 	char            dombuf[DBINFO_BUFF];
-	char           *sysconfdir, *mcdfile, *controldir, *ptr; 
+	char           *sysconfdir, *mcdfile, *controldir, *ptr;
 	int             t, count, items, distributed, fd, match;
 	DBINFO        **relayhosts, **rhostsptr;
 	static stralloc dummy1 = {0}, dummy2 = {0};
@@ -526,17 +526,17 @@ loadMCDInfo(int *total)
 	if (*mcdfile == '/' || *mcdfile == '.') {
 		if (!stralloc_copys(&mcdFile, mcdfile) || !stralloc_0(&mcdFile))
 			die_nomem();
-	} else 
+	} else
 	if (*controldir == '/')
 	{
-		if (!stralloc_copys(&mcdFile, controldir) || 
+		if (!stralloc_copys(&mcdFile, controldir) ||
 			!stralloc_append(&mcdFile, "/") ||
 			!stralloc_cats(&mcdFile, mcdfile) ||
 			!stralloc_0(&mcdFile))
 			die_nomem();
 	} else {
 		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
-		if (!stralloc_copys(&mcdFile, sysconfdir) || 
+		if (!stralloc_copys(&mcdFile, sysconfdir) ||
 			!stralloc_append(&mcdFile, "/") ||
 			!stralloc_cats(&mcdFile, controldir) ||
 			!stralloc_append(&mcdFile, "/") ||
@@ -550,11 +550,11 @@ loadMCDInfo(int *total)
 	if ((fd = open_read(mcdFile.s)) == -1) {
 		if (errno != error_noent)
 			strerr_die3sys(111, "LoadDbInfo: open-read: ", mcdFile.s, ": ");
-		else 
+		else
 			return (localDbInfo(total, &relayhosts));
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-	/*- 
+	/*-
 	 * get count of dbinfo records each
 	 * dbinfo record has a 'server line
 	 */
@@ -737,7 +737,7 @@ loadMCDInfo(int *total)
 static DBINFO **
 localDbInfo(int *total, DBINFO ***rhosts)
 {
-	char           *mysqlhost, *mysql_user = 0, *mysql_passwd = 0; 
+	char           *mysqlhost, *mysql_user = 0, *mysql_passwd = 0;
 	char           *mysql_database = 0, *sysconfdir, *assigndir, *controldir, *ptr, *domain;
 	char           *localhost, *mysql_socket = 0, *mysql_port = 0;
 	int             t, count, field_count, found, use_ssl = 0, fd, mfd, match;
@@ -747,7 +747,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 
 	relayhosts = *rhosts;
 	getEnvConfigStr(&assigndir, "ASSIGNDIR", ASSIGNDIR);
-	if (!stralloc_copys(&filename, assigndir) || 
+	if (!stralloc_copys(&filename, assigndir) ||
 		!stralloc_catb(&filename, "/assign", 7) || !stralloc_0(&filename))
 		die_nomem();
 	if ((fd = open_read(filename.s)) == -1) {
@@ -885,7 +885,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 	if (!count) { /*- no extra domains found in assign file */
 		close(fd);
 		if (total && *total) {
-			/*- 
+			/*-
 			 * remember that total is one less than the actual number of records allocated
 			 * in loadMCDInfo(). So for one more record we have to allocate total + 1 + 1
 			 * The new allocated becomes total + 1 plus 1 for the last NULL dbinfo structure

@@ -65,7 +65,7 @@ vsmtp_delete(char *host, char *src_host, char *domain, int port)
 			create_table(ON_MASTER, "smtp_port", SMTP_TABLE_LAYOUT);
 			strerr_warn1("vsmtp_delete: No rows selected", 0);
 			return (1);
-		} 
+		}
 		strerr_warn4("vsmtp_delete: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[0]), 0);
 		return (-1);
 	}

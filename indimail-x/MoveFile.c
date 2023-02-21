@@ -60,10 +60,10 @@ MoveFile(char *src_dir, char *dest_dir)
 	if (!(entry = opendir(src_dir))) {
 		strerr_warn3("MoveFile: opendir: ", src_dir, ": ", &strerr_sys);
 		return (-1);
-	} 
+	}
 	ubuf1[0].tv_sec = statbuf.st_atime;
 	ubuf1[1].tv_sec = statbuf.st_mtime;
-	if (access(dest_dir, F_OK) && r_mkdir((char *) dest_dir, statbuf.st_mode, 
+	if (access(dest_dir, F_OK) && r_mkdir((char *) dest_dir, statbuf.st_mode,
 		statbuf.st_uid, statbuf.st_gid)) {
 		strerr_warn3("MoveFile: r_mkdir: ", dest_dir, ": ", &strerr_sys);
 		closedir(entry);
@@ -103,7 +103,7 @@ MoveFile(char *src_dir, char *dest_dir)
 			status = MoveFile(nsrc_dir.s, ndest_dir.s);
 		else
 		if (S_ISREG(statbuf.st_mode))
-			status = fappend(nsrc_dir.s, ndest_dir.s, "w", statbuf.st_mode, 
+			status = fappend(nsrc_dir.s, ndest_dir.s, "w", statbuf.st_mode,
 				statbuf.st_uid, statbuf.st_gid);
 		if (S_ISCHR(statbuf.st_mode))
 			status = mknod(ndest_dir.s, statbuf.st_mode|S_IFCHR, statbuf.st_dev);

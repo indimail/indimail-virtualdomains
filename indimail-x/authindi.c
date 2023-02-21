@@ -126,7 +126,7 @@ close_connection()
 #endif
 }
 
-static unsigned char encoding_table[] = { 
+static unsigned char encoding_table[] = {
 	'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
 	'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
 	'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
@@ -691,7 +691,7 @@ main(int argc, char **argv)
 		if (lmt->passwd_expiry > -1 && curtime > lmt->passwd_expiry) {
 			strerr_warn2(FATAL, "Sorry, your password has expired", 0);
 			failure1(argv, auth_method, service, imapargs, pop3args, authstr, 0);
-		} 
+		}
 	}
 #endif
 	alloc_free(authstr);

@@ -57,7 +57,7 @@ vfilter_filterNo(char *emailid)
 		}
 		strerr_warn4("vfilter_filterNo: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
 		return (-1);
-	} 
+	}
 	if (!(res = in_mysql_store_result(&mysql[1])))
 		return (-1);
 	if (!in_mysql_num_rows(res)) {
@@ -70,7 +70,7 @@ vfilter_filterNo(char *emailid)
 			in_mysql_free_result(res);
 			return (i);
 		}
-	} 
+	}
 	in_mysql_free_result(res);
 	return (i);
 }

@@ -19,7 +19,7 @@ void
 iclose()
 {
 	/*
-	 * disconnection from the database 
+	 * disconnection from the database
 	 */
 #ifdef CLUSTERED_SITE
 	if (isopen_vauthinit[0] || isopen_vauthinit[1])
@@ -43,7 +43,7 @@ iclose()
 	if (is_open == 1) {
 		is_open = 0;
 		in_mysql_close(&mysql[1]);
-	} 
+	}
 #ifdef CLUSTERED_SITE
 	else
 	if (is_open == 2)

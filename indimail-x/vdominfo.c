@@ -109,7 +109,7 @@ get_options(int argc, char **argv, int *DisplayName, int *DisplayUid, int *Displ
 	int             c;
 	extern int      optind;
 
-	*DisplayName =  *DisplayUid = *DisplayGid = *DisplayDir = *DisplayBaseDir = 
+	*DisplayName =  *DisplayUid = *DisplayGid = *DisplayDir = *DisplayBaseDir =
 		*DisplayTotalUsers = *DisplayAliasDomains = 0;
 	*DisplayAll = 1;
 #ifdef CLUSTERED_SITE
@@ -222,7 +222,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 		if ((host_cntrl = !access(host_path.s, F_OK))) {
 			if ((hostid = get_local_hostid()))
 				subprintfe(subfdout, "vdominfo", "   host ID: %s\n", hostid);
-			else 
+			else
 				subprintfe(subfdout, "vdominfo", "   host ID: ???\n");
 			if ((ptr = get_local_ip(PF_INET)))
 				subprintfe(subfdout, "vdominfo", "   IP Addr: %s\n", ptr);
@@ -364,7 +364,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 			if ((host_cntrl = !access(host_path.s, F_OK))) {
 				if ((hostid = get_local_hostid()))
 					subprintfe(subfdout, "vdominfo", "   host ID: %s\n", hostid);
-				else 
+				else
 					subprintfe(subfdout, "vdominfo", "   host ID: ???\n");
 				if ((ptr = get_local_ip(PF_INET)))
 					subprintfe(subfdout, "vdominfo", "   IP Addr: %s\n", ptr);

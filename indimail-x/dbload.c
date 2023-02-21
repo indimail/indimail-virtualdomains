@@ -107,7 +107,7 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 	if (!mysql_Init(*mysqlptr))
 		strerr_die4x(111, "MySQL Init Error: ", (*ptr)->database, "@", (*ptr)->server);
 	flags = (*ptr)->use_ssl;
-	/*- 
+	/*-
 	 * mysql_options bug
 	 * if MYSQL_READ_DEFAULT_FILE is used
 	 * mysql_real_connect fails by connecting with a null unix domain socket
@@ -151,7 +151,7 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 			strnum1[fmt_uint(strnum1, (*ptr)->port)] = 0;
 			strerr_warn14("dbload: MySQLConnect: ", (*ptr)->database, "@", server,
 					", domain ", (*ptr)->domain, ", user ", (*ptr)->user, ", port ", strnum1,
-					", socket ", (*ptr)->socket ? (*ptr)->socket : "TCP/IP", 
+					", socket ", (*ptr)->socket ? (*ptr)->socket : "TCP/IP",
 					!(*ptr)->socket && (*ptr)->use_ssl ?  ": use_ssl=1: " : ": use_ssl=0: ",
 					(char *) in_mysql_error(*mysqlptr), 0);
 		}
@@ -284,7 +284,7 @@ OpenDatabases()
 				flush("dbload");
 			}
 		}
-	} 
+	}
 	return (0);
 }
 

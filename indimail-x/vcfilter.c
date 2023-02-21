@@ -432,7 +432,7 @@ main(int argc, char **argv)
 		/*
 		 * int
 		 * vfilter_select(char *emailid, int *filter_no, stralloc *filter_name,
-		 *		int *header_name, int *comparision, stralloc *keyword, 
+		 *		int *header_name, int *comparision, stralloc *keyword,
 		 *		stralloc *destination, int *bounce_action, stralloc *forward)
 		 */
 		if (!(status = vfilter_delete(emailid, filter_no))) {

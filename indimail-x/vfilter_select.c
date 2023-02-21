@@ -35,7 +35,7 @@ die_nomem()
 }
 
 int
-vfilter_select(char *emailid, int *filter_no, stralloc *filter_name, int *header_name, int *comparision, stralloc *keyword, 
+vfilter_select(char *emailid, int *filter_no, stralloc *filter_name, int *header_name, int *comparision, stralloc *keyword,
 	stralloc *destination, int *bounce_action, stralloc *forward)
 {
 	static stralloc SqlBuf = {0};

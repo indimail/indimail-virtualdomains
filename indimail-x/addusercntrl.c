@@ -37,7 +37,7 @@ die_nomem()
 	_exit(111);
 }
 
-/* 
+/*
  * To add an entry into the Location DB.
  *  2 - User Exists
  *  1 - Mysql Error (or) Assignment Error

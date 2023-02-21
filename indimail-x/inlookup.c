@@ -325,7 +325,7 @@ main(int argc, char **argv)
 						strnum2[fmt_ulong(strnum2, pid)] = 0;
 						strnum3[fmt_int(strnum3, WIFSTOPPED(wStat) ? WSTOPSIG(wStat) : SIGCONT)] = 0;
 						strerr_warn6("inlookup[", strnum1, "]: child [", strnum2,
-								WIFSTOPPED(wStat) ? "] stopped by singal " : "] started by signal ", 
+								WIFSTOPPED(wStat) ? "] stopped by singal " : "] started by signal ",
 								strnum3, 0);
 					}
 				}

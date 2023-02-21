@@ -23,8 +23,8 @@
 
 
 /*-
- * Get the size of the email message 
- * return the size 
+ * Get the size of the email message
+ * return the size
  */
 mdir_t
 get_message_size()

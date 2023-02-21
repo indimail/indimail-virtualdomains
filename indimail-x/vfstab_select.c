@@ -75,7 +75,7 @@ vfstab_select(stralloc *host, int *status, long *max_users, long *cur_users, lon
 		}
 		if (!(res = in_mysql_store_result(&mysql[i])))
 			return ((char *) 0);
-	} 
+	}
 	if ((row = in_mysql_fetch_row(res))) {
 		if (!stralloc_copys(&FileSystem, row[0]) ||
 				!stralloc_0(&FileSystem))

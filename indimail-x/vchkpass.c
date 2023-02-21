@@ -127,7 +127,7 @@ die_nomem()
 int
 main(int argc, char **argv)
 {
-	char           *authstr, *login, *ologin, *response, *challenge, *cleartxt, 
+	char           *authstr, *login, *ologin, *response, *challenge, *cleartxt,
 				   *crypt_pass, *ptr, *cptr, *pass;
 	char            strnum[FMT_ULONG], module_pid[FMT_ULONG];
 	static stralloc user = {0}, fquser = {0}, domain = {0}, buf = {0};
@@ -418,7 +418,7 @@ main(int argc, char **argv)
 			out("vchkpass", "553-Sorry, your password has expired (#5.7.1)\r\n");
 			flush("vchkpass");
 			_exit (1);
-		} 
+		}
 	}
 #endif
 	status = 0;

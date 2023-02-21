@@ -183,7 +183,7 @@ sql_getflags(char *domain, int first)
 		SqlPtr[more] = (struct passwd *) 0;
 		more = 1;
 		return (SqlPtr[0]);
-	} 
+	}
 	if (SqlPtr[more])
 		return (SqlPtr[more++]);
 	for (more = 0;SqlPtr[more];more++)

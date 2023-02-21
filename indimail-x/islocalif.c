@@ -96,7 +96,7 @@ die_nomem()
  *
  *  - replace salocal references with u.ss
  *  - in the IPv4 branch, use u.s4 instead of the local sa variable
- *  - in the IPv6 branch, use u.s6 instead of the local sa variable  
+ *  - in the IPv6 branch, use u.s6 instead of the local sa variable 
  */
 
 int
@@ -153,7 +153,7 @@ islocalif(char *hostptr)
 		}
 		if (line.len == 0)
 			strerr_warn3("islocalif: ", filename.s, ": incomplete line", 0);
-		else 
+		else
 		if (match) {
 			line.len--;
 			line.s[line.len] = 0; /*- remove newline */

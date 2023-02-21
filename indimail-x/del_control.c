@@ -97,7 +97,7 @@ del_control(char *domain)
 		}
 		if (i == -1)
 			status = i;
-	} 
+	}
 	if (relative) {
 		if (!stralloc_copys(&filename, sysconfdir) ||
 				!stralloc_append(&filename, "/") ||

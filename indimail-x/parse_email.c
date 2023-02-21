@@ -27,7 +27,7 @@ static char     sccsid[] = "$Id: parse_email.c,v 1.3 2021-07-27 18:06:44+05:30 C
 
 /*
  * parse out user and domain from an email address utility function
- * 
+ *
  * email  = input email address
  * user   = parsed user
  * domain = parsed domain

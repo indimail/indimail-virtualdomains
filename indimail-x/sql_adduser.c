@@ -125,7 +125,7 @@ sql_adduser(char *user, char *domain, char *pass, char *gecos, char *dir,
 			domstr = MYSQL_LARGE_USERS_TABLE;
 		if (!stralloc_copyb(&SqlBuf, "insert low_priority into  ", 26) ||
 				!stralloc_cats(&SqlBuf, domstr) ||
-				!stralloc_catb(&SqlBuf, scram ? 
+				!stralloc_catb(&SqlBuf, scram ?
 					" (pw_name, pw_passwd, scram, pw_uid, pw_gid, pw_gecos, pw_dir, pw_shell)" :
 					" (pw_name, pw_passwd, pw_uid, pw_gid, pw_gecos, pw_dir, pw_shell)", scram ? 72 : 65) ||
 				!stralloc_catb(&SqlBuf, " values (\"", 10) ||
@@ -157,7 +157,7 @@ sql_adduser(char *user, char *domain, char *pass, char *gecos, char *dir,
 		}
 		if (!stralloc_copyb(&SqlBuf, "insert low_priority into  ", 26) ||
 				!stralloc_cats(&SqlBuf, rfc_ids[i] || actFlag ? default_table : inactive_table) ||
-				!stralloc_catb(&SqlBuf, scram ? 
+				!stralloc_catb(&SqlBuf, scram ?
 					" (pw_name, pw_domain, pw_passwd, scram, pw_uid, pw_gid, pw_gecos, pw_dir, pw_shell)" :
 					" (pw_name, pw_domain, pw_passwd, pw_uid, pw_gid, pw_gecos, pw_dir, pw_shell)",
 					scram ? 83 : 76) ||

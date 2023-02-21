@@ -38,7 +38,7 @@
  * if you have "table.hosta" and "table.hostb", and your TABLE_NAME is
  * "table.{}", Osh will use "table.hosta" if it is being run from the machine
  * 'hosta'. *NOTE* if you decide to use this, and a machine does NOT have
- * an associated table, Osh will bomb. 
+ * an associated table, Osh will bomb.
  */
 
 #define LOGGING
@@ -47,7 +47,7 @@
 
 #undef SYSLOG
 /*-
- * If logging is defined, and this is defined, log to the syslog rather than 
+ * If logging is defined, and this is defined, log to the syslog rather than
  * to a file.
  */
 
@@ -85,8 +85,8 @@
 
 /* Handler prototypes */
 int i_alias();
-int i_more(); 
-int i_cd();  
+int i_more();
+int i_cd(); 
 int i_pwd();
 void i_done();
 int i_cp();

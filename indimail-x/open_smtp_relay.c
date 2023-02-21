@@ -97,7 +97,7 @@ open_smtp_relay(char *user, char *domain)
 				return(0);
 			if (!mysql_query(&mysql[1], SqlBuf.s))
 				return(1);
-		} 
+		}
 		strerr_warn4("open_smtp_relay: mysql_query: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
 		return(0);
 	}

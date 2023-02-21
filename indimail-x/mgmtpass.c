@@ -73,7 +73,7 @@ main(int argc, char **argv)
 			if (*(argv + idx + 1)) {
 				tmval = time(0);
 				return (mgmtsetpass(user, *(argv + idx + 1), getuid(), getgid(), tmval, tmval, 1));
-			} 
+			}
 			break;
 		case 'i':
 			if (!user || !*user) {

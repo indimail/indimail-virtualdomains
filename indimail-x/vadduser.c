@@ -293,7 +293,7 @@ main(int argc, char **argv)
 			subprintfe(subfdout, "vadduser", "Adding to MDAhost %s SqlServer %s\n", mdahost.s, ptr);
 			flush("vadduser");
 		}
-	} 
+	}
 #endif
 	envbuf.len = 0;
 	if (base_path) {

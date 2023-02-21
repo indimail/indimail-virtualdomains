@@ -64,7 +64,7 @@ vsmtp_select(char *domain, int *Port)
 		}
 		if (!(res = in_mysql_store_result(&mysql[0])))
 			return ((char *) 0);
-	} 
+	}
 	if ((row = in_mysql_fetch_row(res))) {
 		scan_int(row[2], Port);
 		if (!stralloc_copys(&TmpBuf, row[1]) ||

@@ -100,11 +100,11 @@ static char     strnum[FMT_ULONG];
 
 /*
  * The generating polynomial is
- * 
+ *
  * 32   26   23   22   16   12   11   10   8   7   5   4   2   1
  * G(X)=X  + X  + X  + X  + X  + X  + X  + X  + X + X + X + X + X + X + 1
- * 
- * The i bit in GEN is set if X^i is a summand of G(X) except X^32.  
+ *
+ * The i bit in GEN is set if X^i is a summand of G(X) except X^32. 
  */
 
 #define GEN     (BIT(26)|BIT(23)|BIT(22)|BIT(16)|BIT(12)|BIT(11)|BIT(10)\
@@ -392,7 +392,7 @@ stats(const char *file, struct stat *statptr)
  * of file FILE, or of the standard input if FILE is "-".
  * If PRINT_NAME is nonzero, print FILE next to the checksum and size.
  * TEXT indicates whether file is text or binary.
- * Return 0 if successful, -1 if an error occurs. 
+ * Return 0 if successful, -1 if an error occurs.
  */
 int
 printcrc(const char *file, unsigned long *lcount, int statflag, int displayhex)

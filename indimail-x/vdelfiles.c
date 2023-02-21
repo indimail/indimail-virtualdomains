@@ -42,7 +42,7 @@ static char     sccsid[] = "$Id: vdelfiles.c,v 1.3 2023-01-22 10:40:03+05:30 Cpr
  * vdelfiles : delete a directory tree
  *
  * input: directory to start the deletion
- * output: 
+ * output:
  *         0 on success
  *        -1 on failer
  */
@@ -121,7 +121,7 @@ vdelfiles(char *dir, char *user, char *domain)
 			if (unlink(file_name) == -1)
 				strerr_warn3("vdelfiles: unlink: ", file_name, ": ", &strerr_sys);
 			continue;
-		} 
+		}
 		if (vdelfiles(file_name, user, domain) == -1) {
 			alloc_free(file_name);
 			closedir(entry);

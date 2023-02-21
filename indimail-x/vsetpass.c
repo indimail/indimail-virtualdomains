@@ -218,7 +218,7 @@ main(int argc, char **argv)
 			strerr_warn3("vsetpass: ", ptr, ": ", &strerr_sys);
 		print_error(ptr);
 		_exit (111);
-	} 
+	}
 	if (pw->pw_gid & NO_PASSWD_CHNG) {
 		out("vsetpass", "553 Sorry, this account cannot change password (#5.7.1)\r\n");
 		flush("vsetpass");
@@ -262,7 +262,7 @@ main(int argc, char **argv)
 		_exit (111);
 	}
 	mkpasswd(new_pass, &Crypted, 1);
-	if (env_get("DEBUG_LOGIN")) 
+	if (env_get("DEBUG_LOGIN"))
 		strerr_warn11("vsetpass: login [", login, "] old_pass [",
 				old_pass, "] new_pass [", new_pass, "] response [", response, "] pw_passwd [", Crypted.s, "]", 0);
 	if ((i = sql_passwd(user.s, domain.s, Crypted.s, 0)) == 1) {

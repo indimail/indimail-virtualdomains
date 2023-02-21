@@ -141,11 +141,11 @@ sql_active(struct passwd *pw, char *domain, int type)
 		strerr_warn3("sql_active: parse_quota: ", pw->pw_shell, ": ", &strerr_sys);
 		return (-1);
 	}
-	vset_lastauth(pw->pw_name, domain, ((type == FROM_ACTIVE_TO_INACTIVE) ? "INAC" : "ACTI"), GetPeerIPaddr(), 
+	vset_lastauth(pw->pw_name, domain, ((type == FROM_ACTIVE_TO_INACTIVE) ? "INAC" : "ACTI"), GetPeerIPaddr(),
 			pw->pw_gecos, (type == FROM_ACTIVE_TO_INACTIVE) ? 0 : check_quota(Dir.s, 0));
 #else
 	scan_ulong(pw->pw_shell, (unsigned int *) &quota);
-	vset_lastauth(pw->pw_name, domain, ((type == FROM_ACTIVE_TO_INACTIVE) ? "INAC" : "ACTI"), GetPeerIPaddr(), 
+	vset_lastauth(pw->pw_name, domain, ((type == FROM_ACTIVE_TO_INACTIVE) ? "INAC" : "ACTI"), GetPeerIPaddr(),
 			pw->pw_gecos, (type == FROM_ACTIVE_TO_INACTIVE) ? 0 : check_quota(Dir.s));
 #endif
 	if(type == FROM_ACTIVE_TO_INACTIVE)

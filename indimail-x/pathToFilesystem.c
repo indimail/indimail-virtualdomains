@@ -73,7 +73,7 @@ pathToFilesystem(char *path)
 		return ((char *) 0);
 	if (_path.len && !str_diffn(path, _path.s, _path.len + 1))
 		return (tmpbuf.s);
-	/* 
+	/*
 	 * if directory does not exists, find parent
 	 * directory recursively
 	 */

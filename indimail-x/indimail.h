@@ -234,7 +234,7 @@ timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NU
 primary key (email)"
 #endif /*- #ifdef CLUSTERED_SITE */
 
-typedef struct 
+typedef struct
 {
 	char           *name; /*- User printable name of the function.  */
 	char           *doc;  /*- Documentation for this function.  */

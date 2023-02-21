@@ -56,11 +56,11 @@ getlastauth(char *Domain, int Age, int sortit, int Type, unsigned long *count)
 		return ((char **) 0);
 	}
 	/*
-	 * get the time 
+	 * get the time
 	 */
 	tmval = time(NULL);
 	/*
-	 * subtract the age 
+	 * subtract the age
 	 */
 	tmval = tmval - (86400 * Age);
 	strnum[i = fmt_ulong(strnum, (unsigned long) tmval)] = 0;

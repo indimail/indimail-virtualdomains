@@ -47,7 +47,7 @@ sql_get_realdomain(char *aliasdomain)
 	MYSQL_ROW       row;
 
 #ifdef QUERY_CACHE
-	if (_cacheSwitch && env_get("QUERY_CACHE") && prevDomainVal.len && 
+	if (_cacheSwitch && env_get("QUERY_CACHE") && prevDomainVal.len &&
 		!str_diffn(prevDomainVal.s, aliasdomain, prevDomainVal.len + 1)) {
 		if (buf.len)
 			return (buf.s);
