@@ -1,16 +1,15 @@
 dnl
-dnl Copyright 1998 - 2021 Double Precision, Inc.  See COPYING for
+dnl Copyright 1998 - 2022 Double Precision, Inc.  See COPYING for
 dnl distribution information.
 
-AC_INIT([maildrop],[3.1.0],[courier-users@lists.sourceforge.net])
-AC_CONFIG_MACRO_DIR([m4])
+AC_INIT([maildrop],[3.1.1],[courier-users@lists.sourceforge.net])
 
 >confdefs.h  # Kill PACKAGE_ macros
 
 AC_CONFIG_SRCDIR(alarm.C)
+AC_CONFIG_AUX_DIR(../..)
 LPATH="$PATH:/usr/local/bin"
 AM_INIT_AUTOMAKE([foreign no-define])
-AC_CONFIG_MACRO_DIRS([m4])
 
 AC_PROG_MAKE_SET
 AC_CONFIG_HEADERS(config.h)
@@ -155,8 +154,14 @@ fi
 AC_SUBST(dblibrary)
 
 dnl Checks for header files.
+
+AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS_ONCE([sys/time.h])
+
+# End of obsolete code.
+
 AC_HEADER_DIRENT
-AC_CHECK_HEADERS(fcntl.h memory.h sys/file.h sys/time.h sys/stat.h unistd.h strings.h locale.h sys/wait.h)
+AC_CHECK_HEADERS(fcntl.h memory.h sys/file.h sys/time.h sys/stat.h unistd.h strings.h locale.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_TYPE_MODE_T
@@ -199,6 +204,7 @@ AC_DEFINE_UNQUOTED(MAXLONGSIZE, $MAXLONGSIZE,
 dnl Checks for library functions.
 
 AC_FUNC_CLOSEDIR_VOID
+
 AC_CHECK_FUNCS(setgroups setlocale)
 
 AC_CHECK_FUNC(getpgrp, HAS_GETPGRP=1, HAS_GETPGRP=0)
@@ -287,14 +293,6 @@ fi
 
 AC_DEFINE_UNQUOTED(DEFAULT_PATH,"$maildrop_cv_SYS_DEFAULT_PATH",
 	[ Default value of the PATH variable ])
-
-###	use option --enable-indimail to compile in the INDIMAIL support
-AC_ARG_ENABLE(indimail,
-	[  --enable-indimail            compile in INDIMAIL protocol support],
-	[with_INDIMAIL=$enableval],
-	[with_INDIMAIL=no])
-test "$with_INDIMAIL" = "yes" && AC_DEFINE(INDIMAIL,1,Define if you want INDIMAIL support compiled in)
-AM_CONDITIONAL(INDIMAIL, test "$with_INDIMAIL" = yes)
 
 if test -x /var/qmail/bin/qmail-inject
 then
@@ -464,9 +462,9 @@ done
 
 # Not found, possibly qmail $HOME/Mailbox
 
-if test "$QMAIL" != "" -o "$with_INDIMAIL" != ""
+if test "$QMAIL" != ""
 then
-	SPOOLDIR="./Maildir/"
+	SPOOLDIR="./Mailbox"
 else
 	AC_MSG_ERROR(Cannot determine default mailbox)
 fi
@@ -481,10 +479,10 @@ check_spooldir() {
   fi
 }
 
-if test "$with_INDIMAIL" != "yes"
-then
-	AC_CACHE_CHECK(location of system mailboxes,maildrop_cv_SYS_INSTALL_MBOXDIR, check_spooldir maildrop_cv_SYS_INSTALL_MBOXDIR="$MBOX_DIR")
-fi
+AC_CACHE_CHECK(location of system mailboxes,maildrop_cv_SYS_INSTALL_MBOXDIR,
+check_spooldir
+maildrop_cv_SYS_INSTALL_MBOXDIR="$MBOX_DIR"
+)
 
 AC_CACHE_CHECK(whether maildrop should reset its group ID,maildrop_cv_SYS_INSTALL_RESET_GID,
 check_spooldir
@@ -696,9 +694,11 @@ y*|Y*|1*)
 	;;
 esac
 
+
+
 AC_SUBST(VERSION)
 
-CFLAGS="$CFLAGS -std=c99 -I$srcdir/../rfc822 -I$srcdir/../rfc2045 -I.. -I$srcdir/.. -I ../.. -I$srcdir/../.."
+CFLAGS="$CFLAGS -I$srcdir/../rfc822 -I$srcdir/../rfc2045 -I.. -I$srcdir/.. -I ../.. -I$srcdir/../.."
 CXXFLAGS="$CXXFLAGS -I$srcdir/../rfc822 -I$srcdir/../rfc2045 -I.. -I$srcdir/.. -I../.. -I$srcdir/../.."
 
 AC_ARG_WITH(etcdir,    [  --with-etcdir=dir            Instead of /etc, use this. ],

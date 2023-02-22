@@ -37,7 +37,7 @@ libmdcommon_la_LDFLAGS=-static
 
 maildrop_SOURCES=deliver.C deliverdotlock.C deliverdotlock.h \
 	dotlockmaildrop.C filelock.C filelock.h filter.C formatmbox.C \
-	formatmbox.h globaltimer.C globaltimer.h lexer.C lexer.h log.C log.h \
+	formatmbox.h lexer.C lexer.h log.C log.h \
 	maildir.C maildir.h main.C message.C message.h messageinfo.C \
 	messageinfo.h mytime.h mywait.h pipefds.C pipefds.h \
 	recipe.C recipe.h recipenode.C recipenode.h recipeparse.C reeval.C \
@@ -65,13 +65,15 @@ mailbot_LDADD=../rfc2045/librfc2045.la ../maildir/libmaildir.la \
 	../numlib/libnumlib.la ../unicode/libcourier-unicode.la $(DBLIB)
 mailbot_LDFLAGS = -static
 
+testtimer_SOURCES=testtimer.C
+testtimer_LDADD=libmdcommon.la
+
 EXTRA_DIST = maildroptips.html $(BUILT_SOURCES)\
 	maildrop.lsm testsuite.txt.idn testsuite2
 
-check-am:
-	@chmod +x testsuite
-	./testsuite | cmp -s - $(srcdir)/testsuite.txt.idn
-	@SHELL@ $(srcdir)/testsuite2
+check-am: testsuite
+	VALGRIND="`which valgrind 2>/dev/null`"; export VALGRIND; @SHELL@ ./testsuite >testsuite.diff || exit 1; diff -U 3 testsuite.diff $(srcdir)/testsuite.txt.idn || exit 1; rm -f testsuite.diff
+	VALGRIND="`which valgrind 2>/dev/null`"; export VALGRIND; @SHELL@ $(srcdir)/testsuite2
 
 noinst_DATA=maildrop.html maildropfilter.html maildropgdbm.html \
 			maildropex.html mailbot.html reformail.html makedat.html
