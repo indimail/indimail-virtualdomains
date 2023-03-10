@@ -128,7 +128,7 @@ struct CACHE *tls_cache_open(const char *filename, off_t req_size)
 
 	if (!p) return NULL;
 
-	if ((p->fd=open(filename, O_RDWR|O_CREAT, 0600)) < 0)
+	if ((p->fd=open(filename, O_RDWR|O_CREAT, 0640)) < 0)
 	{
 		free(p);
 		return NULL;
