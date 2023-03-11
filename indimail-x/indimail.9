@@ -477,6 +477,7 @@ smtpd.465       | Log for qmail-smtpd on SMTPS port
 qmtpd.209       | Log for qmail-qmtpd on QMTP port
 qmqpd.628       | Log for qmail-qmqpd on QMQP port
 deliver.25      | qmail-send deliver log
+slowq           | slowq-send deliver log
 fetchmail       | fetchmail log
 greylist.1999   | greylist daemon log
 imapd.143       | Log for imapd running on port 143
@@ -494,8 +495,8 @@ poppass.106     | Log for poppassd protocol daemon
 mysql.3306      | Log for MySQL service
 qmail-logfifo   | Log for clients using fifologger
 svscan          | Log for svscan service
-qmail-daned     | service for getting TLSA records
-udplogger       | Log for udplogger service
+daned.1998      | service for getting TLSA records
+udplogger.3000  | Log for udplogger service
 mrtg            | MRTG service
 \.svscan         | svscan service and local /etc/resolv.conf namespace
 resolvconf      | Provide private local namespace for /etc/resolv.conf
@@ -2576,6 +2577,7 @@ importing the RPM key. e.g. for Fedora 17 one could do the following
 
 .SH "SEE ALSO"
 indimail-env(5),
+indimail-services(7),
 dbinfo(8),
 inlookup(8),
 pam-multi(8),
