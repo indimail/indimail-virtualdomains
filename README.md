@@ -541,7 +541,7 @@ $ sudo make install-strip
 
 ### Build flash
 
-Optional. Required only if you want a configurable ncurses based menu system to configure a system for administering emails using a dumb terminal
+Optional. Required only if you want a configurable ncurses based menu system to configure a system for administering indimail using a dumb terminal
 
 ```
 $ cd /usr/local/src/indimail-virtualdomans/flash-x
