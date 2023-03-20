@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.15  2023-03-20 10:16:03+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.14  2022-08-04 14:41:01+05:30  Cprogrammer
  * fetch scram password
  *
@@ -119,7 +122,7 @@
 #include "FifoCreate.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.14 2022-08-04 14:41:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.15 2023-03-20 10:16:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -319,9 +322,14 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *sysconfdir, char *co
 		else {
 			if (match) {
 				line.len--;
+				if (!line.len)
+					*readTimeout = 4;
 				line.s[line.len] = 0; /*- remove newline */
 			}
-			scan_uint(line.s, (unsigned int *) readTimeout);
+			if (line.len)
+				scan_uint(line.s, (unsigned int *) readTimeout);
+			else
+				*readTimeout = 4;
 		}
 		close(fd);
 	}
@@ -347,9 +355,14 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *sysconfdir, char *co
 		else {
 			if (match) {
 				line.len--;
+				if (!line.len)
+					*writeTimeout = 4;
 				line.s[line.len] = 0; /*- null terminate */
 			}
-			scan_uint(line.s, (unsigned int *) writeTimeout);
+			if (line.len)
+				scan_uint(line.s, (unsigned int *) writeTimeout);
+			else
+				*writeTimeout = 4;
 		}
 		close(fd);
 	}

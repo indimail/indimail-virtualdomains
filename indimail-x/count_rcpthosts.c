@@ -1,5 +1,8 @@
 /*
  * $Log: count_rcpthosts.c,v $
+ * Revision 1.3  2023-03-20 09:51:06+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.2  2020-04-01 18:53:40+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -28,7 +31,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: count_rcpthosts.c,v 1.2 2020-04-01 18:53:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: count_rcpthosts.c,v 1.3 2023-03-20 09:51:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -79,10 +82,12 @@ count_rcpthosts()
 			close(fd);
 			return (-1);
 		}
-		if (line.len == 0)
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (line.len == 0)
+				continue;
 			line.s[line.len] = 0;
 		} else {
 			if (!stralloc_0(&line))

@@ -1,5 +1,8 @@
 /*
  * $Log: open_master.c,v $
+ * Revision 1.3  2023-03-20 10:15:21+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.2  2020-04-01 18:57:22+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: open_master.c,v 1.2 2020-04-01 18:57:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: open_master.c,v 1.3 2023-03-20 10:15:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -51,7 +54,7 @@ open_master()
 {
 	char           *ptr, *sysconfdir, *controldir;
 	static stralloc host_path = {0};
-	int             fd, match, t;
+	int             fd, match;
 
 	if ((ptr = (char *) env_get("MASTER_HOST")) != (char *) 0)
 		return (open_central_db(ptr));
@@ -77,18 +80,21 @@ open_master()
 			strerr_die3sys(111, "open_master: open: ", host_path.s, ": ");
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-	if (getln(&ssin, &line, &match, '\n') == -1) {
-		t = errno;
-		close(fd);
-		errno = t;
+	if (getln(&ssin, &line, &match, '\n') == -1)
 		strerr_die3sys(111, "read: ", host_path.s, ": ");
-	}
 	close(fd);
-	if (line.len == 0) {
-		strerr_die3sys(111, "open_master: ", host_path.s, "incomplete line: ");
+	if (!line.len)
+		strerr_die3sys(111, "open_master: ", host_path.s, ": incomplete line: ");
+	if (match) {
+		line.len--;
+		if (!line.len)
+			strerr_die3sys(111, "open_master: ", host_path.s, ": incomplete line: ");
+		line.s[line.len] = 0; /*- remove newline */
+	} else {
+		if (!stralloc_0(&line))
+			die_nomem();
+		line.len--;
 	}
-	if (match)
-		line.s[line.len - 1] = 0; /*- remove newline */
 	return (open_central_db(line.s));
 }
 #endif

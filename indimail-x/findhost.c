@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 1.11  2023-03-20 09:59:14+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.10  2021-07-27 18:05:27+05:30  Cprogrammer
  * set default domain using vset_default_domain
  *
@@ -52,7 +55,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 1.10 2021-07-27 18:05:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 1.11 2023-03-20 09:59:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -115,7 +118,7 @@ open_central_db(char *dbhost)
 	static char     atexit_registered = 0;
 	char           *ptr, *mysql_user = 0, *mysql_passwd = 0, *mysql_database = 0,
 				   *cntrl_socket = 0, *sysconfdir, *controldir;
-	int             mysqlport = -1, count, protocol, fd, match, t;
+	int             mysqlport = -1, count, protocol, fd, match;
 	unsigned int    flags, use_ssl = 0;
 
 	if (isopen_cntrl == 1)
@@ -141,43 +144,44 @@ open_central_db(char *dbhost)
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/') {
 		if (!stralloc_copys(&host_path, controldir) ||
-			!stralloc_catb(&host_path, "/host.cntrl", 11) ||
-			!stralloc_0(&host_path))
+				!stralloc_catb(&host_path, "/host.cntrl", 11) ||
+				!stralloc_0(&host_path))
 			die_nomem();
 		if (access(host_path.s, F_OK) && (!stralloc_copys(&host_path, controldir) ||
-			!stralloc_catb(&host_path, "/host.cntrl", 11) ||
-			!stralloc_0(&host_path)))
+				!stralloc_catb(&host_path, "/host.cntrl", 11) ||
+				!stralloc_0(&host_path)))
 			die_nomem();
 	} else {
 		if (!stralloc_copys(&host_path, sysconfdir) ||
-			!stralloc_append(&host_path, "/") ||
-			!stralloc_cats(&host_path, controldir) ||
-			!stralloc_catb(&host_path, "/host.cntrl", 11) ||
-			!stralloc_0(&host_path))
+				!stralloc_append(&host_path, "/") ||
+				!stralloc_cats(&host_path, controldir) ||
+				!stralloc_catb(&host_path, "/host.cntrl", 11) ||
+				!stralloc_0(&host_path))
 			die_nomem();
 		if (access(host_path.s, F_OK) && (!stralloc_copys(&host_path, controldir) ||
-			!stralloc_catb(&host_path, "/host.cntrl", 11) ||
-			!stralloc_0(&host_path)))
+				!stralloc_catb(&host_path, "/host.cntrl", 11) ||
+				!stralloc_0(&host_path)))
 			die_nomem();
 	}
 	if (!cntrl_host.len && !access(host_path.s, F_OK)) {
 		if ((fd = open_read(host_path.s)) == -1)
 			strerr_die3sys(111, "open_central_db: open: ", host_path.s, ": ");
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-		if (getln(&ssin, &cntrl_host, &match, '\n') == -1) {
-			t = errno;
-			close(fd);
-			errno = t;
+		if (getln(&ssin, &cntrl_host, &match, '\n') == -1)
 			strerr_die3sys(111, "open_central_db: read: ", host_path.s, ": ");
-		}
-		if (cntrl_host.len == 0)
-			strerr_warn3("open_central_db: ", host_path.s, "incomplete line", 0);
-		else
+		close(fd);
+		if (!cntrl_host.len)
+			strerr_die3x(100, "open_central_db: ", host_path.s, ": incomplete line");
 		if (match) {
 			cntrl_host.len--;
+			if (!cntrl_host.len)
+				strerr_die3x(100, "open_central_db: ", host_path.s, ": incomplete line");
 			cntrl_host.s[cntrl_host.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&cntrl_host))
+				die_nomem();
+			cntrl_host.len--;
 		}
-		close(fd);
 	} else
 	if (!cntrl_host.len) {
 		if (!stralloc_copys(&cntrl_host, CNTRL_HOST) || !stralloc_0(&cntrl_host))
@@ -187,10 +191,8 @@ open_central_db(char *dbhost)
 	if (!atexit_registered++)
 		atexit(iclose_cntrl);
 #ifdef HAVE_LOCAL_INFILE
-	if (in_mysql_options(&mysql[0], MYSQL_OPT_LOCAL_INFILE, 0)) {
+	if (in_mysql_options(&mysql[0], MYSQL_OPT_LOCAL_INFILE, 0))
 		strerr_warn1("open_central_db: mysql_options: MYSQL_OPT_LOCAL_INFILE: unknown option", 0);
-		return (-1);
-	}
 #endif
 	for (count = 0, ptr = cntrl_host.s;*ptr;ptr++) {
 		if (*ptr == ':') {

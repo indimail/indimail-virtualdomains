@@ -271,7 +271,7 @@ OpenDatabases()
 					strnum2[fmt_uint(strnum2, (*ptr)->port)] = 0;
 					strerr_warn12("dbload: ", strnum1, ": ", (*ptr)->domain,
 							" failed db ", (*ptr)->database, "@", (*ptr)->server,
-							" for user", (*ptr)->user, " port ", strnum2, 0);
+							" for user ", (*ptr)->user, " port ", strnum2, 0);
 					(*ptr)->fd = -1;
 					continue;
 				} else

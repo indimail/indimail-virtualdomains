@@ -1,5 +1,9 @@
 /*
  * $Log: vadduser.c,v $
+ * Revision 1.12  2023-03-20 10:32:26+05:30  Cprogrammer
+ * standardize getln handling
+ * use SYSONFDIR env variable if set for lastfstab
+ *
  * Revision 1.11  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -71,6 +75,7 @@
 #include <makesalt.h>
 #include <hashmethods.h>
 #include <subfd.h>
+#include <getEnvConfig.h>
 #endif
 #ifdef HAVE_GSASL_H
 #include <gsasl.h>
@@ -93,7 +98,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadduser.c,v 1.11 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadduser.c,v 1.12 2023-03-20 10:32:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -317,33 +322,42 @@ main(int argc, char **argv)
 				close(fd);
 				return (-1);
 			}
-			if (line.len == 0 || !match)
-				strerr_warn3("vadduser", tmpbuf.s, "incomplete line", 0);
-			else
+			close(fd);
+			if (line.len < 3) {
+				strerr_warn3("vadduser", tmpbuf.s, ": incomplete line", 0);
+				return (-1);
+			}
 			if (match)
 				line.len--;
-			close(fd);
 			if (!stralloc_copy(&envbuf, &line) || !stralloc_0(&envbuf))
 				die_nomem();
-			}
+		}
 	}
 	if (balance_flag) {
-		if ((fd = open_read(SYSCONFDIR"/lastfstab")) == -1) {
-			strerr_warn3("vadduser: ", SYSCONFDIR"/lastfstab", ": ", &strerr_sys);
+		char           *sysconfdir;
+
+		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+		if (!stralloc_copys(&tmpbuf, sysconfdir) ||
+				!stralloc_catb(&tmpbuf, "/lastfstab", 10) ||
+				!stralloc_0(&tmpbuf))
+			die_nomem();
+		if ((fd = open_read(tmpbuf.s)) == -1) {
+			strerr_warn3("vadduser: ", tmpbuf.s, ": ", &strerr_sys);
 			return (1);
 		}
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1) {
-			strerr_warn3("vadduser: read: ", SYSCONFDIR"/lastfstab", ": ", &strerr_sys);
+			strerr_warn3("vadduser: read: ", tmpbuf.s, ": ", &strerr_sys);
 			close(fd);
 			return (-1);
 		}
-		if (line.len == 0)
-			strerr_warn3("vadduser", SYSCONFDIR"/lastfstab", "incomplete line", 0);
-		else
+		close(fd);
+		if (line.len < 3) {
+			strerr_warn3("vadduser: ", tmpbuf.s, ": incomplete line", 0);
+			return (-1);
+		}
 		if (match)
 			line.len--;
-		close(fd);
 		if (!stralloc_copy(&envbuf, &line) || !stralloc_0(&envbuf))
 			die_nomem();
 	}

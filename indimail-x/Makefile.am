@@ -534,6 +534,7 @@ edit = sed \
 	-e 's}@prefix\@}$(prefix)}g'
 editman = sed \
 	-e 's}INDIMAILDIR}$(indimaildir)}g' \
+	-e 's}@indimaildir\@}$(indimaildir)}g' \
 	-e 's}@sysconfdir\@}$(sysconfdir)}g' \
 	-e 's}@qmaildir\@}$(qmaildir)}g' \
 	-e 's}@controldir\@}$(controldir)}g' \
@@ -626,8 +627,7 @@ tcplookup.8: tcplookup.9
 vcfilter.1: vcfilter.9
 	cat vcfilter.9 | sed s}SYSCONFDIR}$(sysconfdir)}g > $@
 vadddomain.1: vadddomain.9
-	cat vadddomain.9 | sed s}LIBEXECDIR}$(libexecdir)}g \
-		| sed s}INDIMAILDIR}$(indimaildir)}g > $@
+	$(editman) vadddomain.9 > $@
 vdeldomain.1: vdeldomain.9
 	cat vdeldomain.9 | sed s}LIBEXECDIR}$(libexecdir)}g > $@
 vadduser.1: vadduser.9

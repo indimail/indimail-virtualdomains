@@ -1,5 +1,8 @@
 /*
  * $Log: get_local_ip.c,v $
+ * Revision 1.5  2023-03-20 10:01:48+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.4  2023-01-03 21:11:09+05:30  Cprogrammer
  * replaced hints.ai_socktype from SOCK_DGRAM to SOCK_STREAM
  *
@@ -47,7 +50,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_local_ip.c,v 1.4 2023-01-03 21:11:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_local_ip.c,v 1.5 2023-03-20 10:01:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc hostbuf = { 0 };
@@ -66,7 +69,7 @@ char           *
 get_local_ip(int family)
 {
 	char           *sysconfdir, *controldir;
-	int             t, fd, match;
+	int             fd, match;
 	struct substdio ssin;
 #ifdef HAVE_STRUCT_SOCKADDR_STORAGE
 	struct sockaddr *sa;
@@ -95,22 +98,21 @@ get_local_ip(int family)
 	} else
 	if (fd > -1) {
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-		if (getln(&ssin, &line, &match, '\n') == -1) {
-			t = errno;
-			close(fd);
-			errno = t;
+		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "get_local_ip: read: ", TmpBuf.s, ": ");
-		}
-		if (line.len == 0)
-			strerr_warn3("get_local_ip", TmpBuf.s, "incomplete line", 0);
-		else
+		close(fd);
+		if (!line.len)
+			strerr_die3x(100, "get_local_ip: ", TmpBuf.s, ": incomplete line");
 		if (match) {
 			line.len--;
-			if (line.len == 0)
-				strerr_warn3("get_local_ip", TmpBuf.s, "incomplete line", 0);
+			if (!line.len)
+				strerr_die3x(100, "get_local_ip: ", TmpBuf.s, ": incomplete line");
 			line.s[line.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
 		}
-		close(fd);
 		return (line.s);
 	}
 	if (!stralloc_ready(&TmpBuf, 64))

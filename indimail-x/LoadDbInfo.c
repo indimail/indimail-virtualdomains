@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbInfo.c,v $
+ * Revision 1.14  2023-03-20 10:12:22+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.13  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -100,7 +103,7 @@
 #include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.13 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.14 2023-03-20 10:12:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static DBINFO **loadMCDInfo(int *);
@@ -530,18 +533,18 @@ loadMCDInfo(int *total)
 	if (*controldir == '/')
 	{
 		if (!stralloc_copys(&mcdFile, controldir) ||
-			!stralloc_append(&mcdFile, "/") ||
-			!stralloc_cats(&mcdFile, mcdfile) ||
-			!stralloc_0(&mcdFile))
+				!stralloc_append(&mcdFile, "/") ||
+				!stralloc_cats(&mcdFile, mcdfile) ||
+				!stralloc_0(&mcdFile))
 			die_nomem();
 	} else {
 		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 		if (!stralloc_copys(&mcdFile, sysconfdir) ||
-			!stralloc_append(&mcdFile, "/") ||
-			!stralloc_cats(&mcdFile, controldir) ||
-			!stralloc_append(&mcdFile, "/") ||
-			!stralloc_cats(&mcdFile, mcdfile) ||
-			!stralloc_0(&mcdFile))
+				!stralloc_append(&mcdFile, "/") ||
+				!stralloc_cats(&mcdFile, controldir) ||
+				!stralloc_append(&mcdFile, "/") ||
+				!stralloc_cats(&mcdFile, mcdfile) ||
+				!stralloc_0(&mcdFile))
 			die_nomem();
 	}
 	mcdFile.len--;
@@ -559,17 +562,19 @@ loadMCDInfo(int *total)
 	 * dbinfo record has a 'server line
 	 */
 	for (;;) {
-		if (getln(&ssin, &line, &match, '\n') == -1) {
-			t = errno;
-			close(fd);
-			errno = t;
+		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "LoadDbInfo: read: ", mcdFile.s, ": ");
-		}
-		if (!match && line.len == 0)
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
 		}
 		match = str_chr(line.s, '#');
 		if (line.s[match])
@@ -593,17 +598,19 @@ loadMCDInfo(int *total)
 	ssin.p = 0; /*- reset position to beginning of file */
 	ssin.n = sizeof(inbuf);
 	for (*dombuf = 0, items = 0, count = 1, rhostsptr = relayhosts;; count++) {
-		if (getln(&ssin, &line, &match, '\n') == -1) {
-			t = errno;
-			close(fd);
-			errno = t;
+		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "LoadDbInfo: read: ", mcdFile.s, ": ");
-		}
-		if (!match && line.len == 0)
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
 		}
 		match = str_chr(line.s, '#');
 		if (line.s[match])
@@ -740,7 +747,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 	char           *mysqlhost, *mysql_user = 0, *mysql_passwd = 0;
 	char           *mysql_database = 0, *sysconfdir, *assigndir, *controldir, *ptr, *domain;
 	char           *localhost, *mysql_socket = 0, *mysql_port = 0;
-	int             t, count, field_count, found, use_ssl = 0, fd, mfd, match;
+	int             count, field_count, found, use_ssl = 0, fd, mfd, match;
 	static stralloc host_path = {0}, mysqlhost_buf = {0};
 	DBINFO        **relayhosts, **rhostsptr, **tmpPtr;
 	struct substdio ssin;
@@ -759,17 +766,19 @@ localDbInfo(int *total, DBINFO ***rhosts)
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	/*- +indimail.org-:indimail.org:508:508:/var/indimail/domains/indimail.org:-:: -*/
 	for (count = 0;;) {
-		if (getln(&ssin, &line, &match, '\n') == -1) {
-			t = errno;
-			close(fd);
-			errno = t;
-			strerr_die3sys(111, "LoadDbInfo: read: ", line.s, ": ");
-		}
-		if (!match && line.len == 0)
+		if (getln(&ssin, &line, &match, '\n') == -1)
+			strerr_die3sys(111, "LoadDbInfo: read: ", filename.s, ": ");
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
 		}
 		match = str_chr(line.s, ':');
 		if (!line.s[match])
@@ -805,16 +814,16 @@ localDbInfo(int *total, DBINFO ***rhosts)
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/') {
 		if (!stralloc_copys(&host_path, controldir) ||
-			!stralloc_catb(&host_path, "/host.mysql", 11) ||
-			!stralloc_0(&host_path))
+				!stralloc_catb(&host_path, "/host.mysql", 11) ||
+				!stralloc_0(&host_path))
 			die_nomem();
 	} else {
 		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 		if (!stralloc_copys(&host_path, sysconfdir) ||
-			!stralloc_append(&host_path, "/") ||
-			!stralloc_cats(&host_path, controldir) ||
-			!stralloc_catb(&host_path, "/host.mysql", 11) ||
-			!stralloc_0(&host_path))
+				!stralloc_append(&host_path, "/") ||
+				!stralloc_cats(&host_path, controldir) ||
+				!stralloc_catb(&host_path, "/host.mysql", 11) ||
+				!stralloc_0(&host_path))
 			die_nomem();
 	}
 	if (!mysqlhost_buf.len && !access(host_path.s, F_OK)) {
@@ -822,21 +831,18 @@ localDbInfo(int *total, DBINFO ***rhosts)
 			strerr_die2sys(111, host_path.s, ": ");
 		else {
 			substdio_fdbuf(&ssin, read, mfd, inbuf, sizeof(inbuf));
-			if (getln(&ssin, &line, &match, '\n') == -1) {
-				t = errno;
-				close(mfd);
-				errno = t;
+			if (getln(&ssin, &line, &match, '\n') == -1)
 				strerr_die3sys(111, "read: ", host_path.s, ": ");
-			}
-			if (!match && line.len == 0) {
-				close(mfd);
-				strerr_warn3("LoadDbInfo: ", host_path.s, ": incomplete line", 0);
-				_exit (100);
-			}
 			close(mfd);
+			if (!line.len)
+				strerr_die2x(100, host_path.s, ": incomplete line");
 			if (match) {
+				if (!(line.len - 1))
+					strerr_die2x(100, host_path.s, ": incomplete line");
 				line.s[line.len - 1] = 0; /*- remove newline */
-			}
+			} else
+			if (!stralloc_0(&line))
+				die_nomem();
 			if (!stralloc_copy(&mysqlhost_buf, &line)) /*- copy & null terminate */
 				die_nomem();
 			mysqlhost_buf.len--; /*- exclude null in string length */
@@ -947,17 +953,19 @@ localDbInfo(int *total, DBINFO ***rhosts)
 	ssin.p = 0; /*- reset position to beginning of file */
 	ssin.n = sizeof(inbuf);
 	for (;;) {
-		if (getln(&ssin, &line, &match, '\n') == -1) {
-			t = errno;
-			close(fd);
-			errno = t;
+		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "LoadDbInfo: read: ", filename.s, ": ");
-		}
-		if (!match && line.len == 0)
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0; /*- null terminate */
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
 		}
 		match = str_chr(line.s, ':');
 		if (!line.s[match])

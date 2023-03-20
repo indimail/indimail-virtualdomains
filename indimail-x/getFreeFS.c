@@ -1,5 +1,8 @@
 /*
  * $Log: getFreeFS.c,v $
+ * Revision 1.3  2023-03-20 10:00:12+05:30  Cprogrammer
+ * use SYSONFDIR env variable if set for lastfstab
+ *
  * Revision 1.2  2020-04-01 18:59:42+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -33,8 +36,11 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: getFreeFS.c,v 1.2 2020-04-01 18:59:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: getFreeFS.c,v 1.3 2023-03-20 10:00:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
+
+static stralloc tmpbuf = {0};
+static char    *sysconfdir;
 
 static void
 die_nomem()
@@ -49,41 +55,48 @@ getLastFstab()
 #ifdef FILE_LOCKING
 	int             lockfd;
 #endif
-	char           *ptr, *LockFile = SYSCONFDIR"/lastfstab";
+	char           *ptr;
 	int             fd, match;
 	static stralloc line = {0};
 	char            inbuf[4096];
 	struct substdio ssin;
 
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+	if (!stralloc_copys(&tmpbuf, sysconfdir) ||
+			!stralloc_catb(&tmpbuf, "/lastfstab", 10) ||
+			!stralloc_0(&tmpbuf))
+		die_nomem();
 #ifdef FILE_LOCKING
-	if ((lockfd = getDbLock(LockFile, 1)) == -1)
+	if ((lockfd = getDbLock(tmpbuf.s, 1)) == -1)
 		return ((char *) 0);
 #endif
-	if ((fd = open_read(LockFile)) == -1) {
+	if ((fd = open_read(tmpbuf.s)) == -1) {
 		if (errno != error_noent)
-			strerr_warn3("getFreeFS: open: ", LockFile, ": ", &strerr_sys);
+			strerr_warn3("getFreeFS: open: ", tmpbuf.s, ": ", &strerr_sys);
 #ifdef FILE_LOCKING
-		delDbLock(lockfd, LockFile, 1);
+		delDbLock(lockfd, tmpbuf.s, 1);
 #endif
 		return ((char *) 0);
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
-		strerr_warn3("getFreeFS: read: ", LockFile, ": ", &strerr_sys);
+		strerr_warn3("getFreeFS: read: ", tmpbuf.s, ": ", &strerr_sys);
 #ifdef FILE_LOCKING
-		delDbLock(lockfd, LockFile, 1);
+		delDbLock(lockfd, tmpbuf.s, 1);
 #endif
 		close(fd);
 		return ((char *) 0);
 	}
 	close(fd);
 #ifdef FILE_LOCKING
-	delDbLock(lockfd, LockFile, 1);
+	delDbLock(lockfd, tmpbuf.s, 1);
 #endif
-	if (line.len == 0)
+	if (!line.len)
 		return ((char *) 0);
 	if (match) {
 		line.len--;
+		if (!line.len)
+			return ((char *) 0);
 		line.s[line.len] = 0;
 	} else {
 		if (!stralloc_0(&line))
@@ -102,7 +115,6 @@ getLastFstab()
 static int
 putLastFstab(char *filesystem)
 {
-	char           *LockFile = SYSCONFDIR"/lastfstab";
 	int             fd;
 	char            outbuf[4096];
 	struct substdio ssout;
@@ -110,14 +122,19 @@ putLastFstab(char *filesystem)
 	int             lockfd;
 #endif
 
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+	if (!stralloc_copys(&tmpbuf, sysconfdir) ||
+			!stralloc_catb(&tmpbuf, "/lastfstab", 10) ||
+			!stralloc_0(&tmpbuf))
+		die_nomem();
 #ifdef FILE_LOCKING
-	if ((lockfd = getDbLock(LockFile, 1)) == -1)
+	if ((lockfd = getDbLock(tmpbuf.s, 1)) == -1)
 		return (-1);
 #endif
-	if ((fd = open_trunc(LockFile)) == -1) {
-		strerr_warn3("getFreeFS: open: ", LockFile, ": ", &strerr_sys);
+	if ((fd = open_trunc(tmpbuf.s)) == -1) {
+		strerr_warn3("getFreeFS: open: ", tmpbuf.s, ": ", &strerr_sys);
 #ifdef FILE_LOCKING
-		delDbLock(lockfd, LockFile, 1);
+		delDbLock(lockfd, tmpbuf.s, 1);
 #endif
 		return (-1);
 	}
@@ -126,16 +143,16 @@ putLastFstab(char *filesystem)
 			substdio_put(&ssout, "\n", 1) ||
 			substdio_flush(&ssout))
 	{
-		strerr_warn3("getFreeFS: write: ", LockFile, ": ", &strerr_sys);
+		strerr_warn3("getFreeFS: write: ", tmpbuf.s, ": ", &strerr_sys);
 		close(fd);
 #ifdef FILE_LOCKING
-		delDbLock(lockfd, LockFile, 1);
+		delDbLock(lockfd, tmpbuf.s, 1);
 #endif
 		return (-1);
 	}
 	close(fd);
 #ifdef FILE_LOCKING
-	delDbLock(lockfd, LockFile, 1);
+	delDbLock(lockfd, tmpbuf.s, 1);
 #endif
 	return (0);
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: userinfo.c,v $
+ * Revision 1.11  2023-03-20 10:20:32+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -92,7 +95,7 @@
 #include "userinfo.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 1.10 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 1.11 2023-03-20 10:20:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -164,11 +167,24 @@ userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid
 				strerr_warn3("userinfo: read: ", tmpbuf.s, ": ", &strerr_sys);
 				break;
 			}
-			if (!match && line.len == 0)
+			if (!line.len)
 				break;
-			if (!stralloc_0(&line))
-				die_nomem();
-			line.len--;
+			if (!line.len) {
+				strerr_warn2("userinfo: incomplete line: ", tmpbuf.s, 0);
+				continue;
+			}
+			if (match) {
+				line.len--;
+				if (!line.len) {
+					strerr_warn2("userinfo: incomplete line: ", tmpbuf.s, 0);
+					continue;
+				}
+				line.s[line.len] = 0;
+			} else {
+				if (!stralloc_0(&line))
+					die_nomem();
+				line.len--;
+			}
 			match = str_chr(line.s, '#');
 			if (line.s[match])
 				line.s[match] = 0;
@@ -459,10 +475,14 @@ userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid
 					strerr_warn3("userinfo: read: ", tmpbuf.s, ": ", &strerr_sys);
 					break;
 				}
-				if (!match && line.len == 0)
+				if (!line.len)
 					break;
-				line.len--;
-				line.s[line.len] = 0; /*- remove newline */
+				if (match) {
+					line.len--;
+					if (!line.len)
+						continue;
+					line.s[line.len] = 0; /*- remove newline */
+				}
 				for (ptr = line.s, i = 0; i < line.len; i++, ptr++) {
 					if (isspace(*ptr))
 						break;

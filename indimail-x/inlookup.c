@@ -1,5 +1,8 @@
 /*
  * $Log: inlookup.c,v $
+ * Revision 1.11  2023-03-20 10:07:28+05:30  Cprogrammer
+ * fixed command line argument handling
+ *
  * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -33,7 +36,7 @@
  *
  */
 #ifndef	lint
-static char     sccsid[] = "$Id: inlookup.c,v 1.10 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inlookup.c,v 1.11 2023-03-20 10:07:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -244,6 +247,10 @@ main(int argc, char **argv)
 	for (idx = 1; idx < argc; idx++) {
 		if (argv[idx][0] != '-')
 			continue;
+		if (argv[idx][1] != 'v' && (idx + 1) == argc) {
+			strerr_warn3("USAGE: ", ptr, " [-f infifo] [-i instance] [-c activeSecs] [-v]", 0);
+			return (1);
+		}
 		switch (argv[idx][1])
 		{
 		case 'f':

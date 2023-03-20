@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH vadduser 1
 .SH NAME
 vadduser \- Add a new user to a virtual domain
@@ -139,7 +140,7 @@ SCRAM-SHA-256	SHA256 encryption suitable for SCRAM-SHA-256.
 Sets up authentication suitable for CRAM-MD5, CRAM-SHA1, CRAM-SHA224,
 CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD and DIGEST-MD5 methods.
 This works by storing the clear text credentials in the database. if the
-\-\fIm\fR option is select, this will additionally store a hex-encoded
+\-\fIm\fR option is selected, this will additionally store a hex-encoded
 salted password for SCRAM methods, which can be used instead of clear text
 passwords by clients (for SCRAM authentication).
 .TP 3

@@ -1,5 +1,8 @@
 /*
  * $Log: sql_renamedomain.c,v $
+ * Revision 1.2  2023-03-20 10:18:27+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.1  2019-04-15 12:39:38+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_renamedomain.c,v 1.1 2019-04-15 12:39:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_renamedomain.c,v 1.2 2023-03-20 10:18:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -149,10 +152,14 @@ sql_renamedomain(char *OldDomain, char *NewDomain, char *domdir)
 			close(fd);
 			return (1);
 		}
-		if (line.len == 0)
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len) {
+				strerr_warn2("vrenamedomain: incomplete line: ", tmp1.s, 0);
+				continue;
+			}
 			line.s[line.len] = 0;
 		} else {
 			if (!stralloc_0(&line))

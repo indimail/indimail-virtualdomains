@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.122 2023-02-14 01:01:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.123 2023-03-20 10:05:16+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -327,7 +327,7 @@ do
 done
 
 for i in indimail.cnf procmailrc indimail.pp indimail.mod \
-users/cdb users/assign
+users/cdb users/assign logrotate.mysql
 do
   if [ ! -f %{buildroot}%{sysconfdir}/$i ] ; then
     touch %{buildroot}%{sysconfdir}/$i
@@ -421,6 +421,7 @@ done
 %ghost %attr(0644,root,root) %config(noreplace,missingok) %{sysconfdir}/users/cdb
 %ghost %config(noreplace,missingok)               %{sysconfdir}/procmailrc
 %ghost %config(noreplace,missingok)               %{sysconfdir}/indimail.cnf
+%ghost %config(noreplace,missingok)               %{sysconfdir}/logrotate.mysql
 %ghost %config(noreplace,missingok)               %{sysconfdir}/tcp/tcp.poppass
 #
 # These files will get removed during uninstallation

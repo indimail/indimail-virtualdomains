@@ -1,5 +1,8 @@
 /*
  * $Log: vrenamedomain.c,v $
+ * Revision 1.5  2023-03-20 10:39:05+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -62,7 +65,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenamedomain.c,v 1.4 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vrenamedomain.c,v 1.5 2023-03-20 10:39:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vrenamedomain: warning: "
@@ -181,44 +184,46 @@ main(int argc, char **argv)
 				close(fd);
 				return (1);
 			}
-			if (line.len == 0)
+			if (!line.len)
 				break;
 			if (match) {
 				line.len--;
+				if (!line.len)
+					continue;
 				line.s[line.len] = 0;
 			} else {
 				if (!stralloc_0(&line))
 					die_nomem();
 				line.len--;
-				if (!is_alias_domain(line.s)) {
-					strerr_warn2(line.s, ": Not an alias domain", 0);
-					continue;
-				} else
-				if (!get_assign(line.s, &OldDir, &uid, &gid)) {
-					strerr_warn3("Domain ", line.s, " does not exist", 0);
-					continue;
-				} else
-				if (lstat(OldDir.s, &statbuf)) {
-					strerr_warn2(OldDir.s, ": lstat: ", &strerr_sys);
-					continue;
-				} else
-				if (!S_ISLNK(statbuf.st_mode)) {
-					strerr_warn4(OldDir.s, " (", line.s, "): Not an alias domain", 0);
-					continue;
-				} else
-				if (unlink(OldDir.s)) {
-					strerr_warn2(OldDir.s, ": unlink: ", &strerr_sys);
-					continue;
-				}
-				if (symlink(NewDir.s, OldDir.s)) {
-					char            ch[1];
-					strerr_warn5("vrenamedomain: symlink: ", OldDir.s, " -> ", NewDir.s, ": ", &strerr_sys);
-					getch(ch);
-					continue;
-				}
-				subprintfe(subfdout, "vrenamedomain", "Linked Domain %s to %s [%s->%s]\n", line.s, argv[2], OldDir.s, NewDir.s);
-				flush("vrenamedomain");
 			}
+			if (!is_alias_domain(line.s)) {
+				strerr_warn2(line.s, ": Not an alias domain", 0);
+				continue;
+			} else
+			if (!get_assign(line.s, &OldDir, &uid, &gid)) {
+				strerr_warn3("Domain ", line.s, " does not exist", 0);
+				continue;
+			} else
+			if (lstat(OldDir.s, &statbuf)) {
+				strerr_warn2(OldDir.s, ": lstat: ", &strerr_sys);
+				continue;
+			} else
+			if (!S_ISLNK(statbuf.st_mode)) {
+				strerr_warn4(OldDir.s, " (", line.s, "): Not an alias domain", 0);
+				continue;
+			} else
+			if (unlink(OldDir.s)) {
+				strerr_warn2(OldDir.s, ": unlink: ", &strerr_sys);
+				continue;
+			}
+			if (symlink(NewDir.s, OldDir.s)) {
+				char            ch[1];
+				strerr_warn5("vrenamedomain: symlink: ", OldDir.s, " -> ", NewDir.s, ": ", &strerr_sys);
+				getch(ch);
+				continue;
+			}
+			subprintfe(subfdout, "vrenamedomain", "Linked Domain %s to %s [%s->%s]\n", line.s, argv[2], OldDir.s, NewDir.s);
+			flush("vrenamedomain");
 		}
 	}
 	tmpbuf.len -= 14;

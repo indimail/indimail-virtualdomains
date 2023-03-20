@@ -1,5 +1,8 @@
 /*
  * $Log: vcalias.c,v $
+ * Revision 1.6  2023-03-20 10:33:27+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.5  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -21,7 +24,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcalias.c,v 1.5 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcalias.c,v 1.6 2023-03-20 10:33:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #if defined(VALIAS)
@@ -131,10 +134,20 @@ main(int argc, char **argv)
 				iclose();
 				return (-1);
 			}
-			if (!match && line.len == 0)
+			if (!line.len)
 				break;
-			line.len--;
-			line.s[line.len] = 0;
+			if (match) {
+				line.len--;
+				if (!line.len) {
+					strerr_warn3("vcalias", dp->d_name, ": incomplete line", 0);
+					continue;
+				}
+				line.s[line.len] = 0;
+			} else {
+				if (!stralloc_0(&line))
+					die_nomem();
+				line.len--;
+			}
 			match = str_chr(line.s, '#');
 			if (line.s[match])
 				line.s[match] = 0;

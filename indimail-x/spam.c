@@ -1,5 +1,8 @@
 /*
  * $Log: spam.c,v $
+ * Revision 1.5  2023-03-20 10:18:16+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -50,7 +53,7 @@
 #include "lowerit.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: spam.c,v 1.4 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: spam.c,v 1.5 2023-03-20 10:18:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define BADMAIL 1
@@ -226,10 +229,14 @@ loadIgnoreList(char *fn)
 			close(fd);
 			return (-1);
 		}
-		if (line.len == 0)
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len) {
+				strerr_warn2("spam: incomplete line: ", fn, 0);
+				continue;
+			}
 			line.s[line.len] = 0;
 		} else {
 			if (!stralloc_0(&line))
@@ -389,9 +396,31 @@ readLogFile(char *fn, int type, int count)
 				close(keyfd);
 				return (-1);
 			}
-			if (line.len)
-				scan_ulong(line.s, &pos);
 			close(keyfd);
+			if (!line.len) {
+				strerr_warn2("readLogFile: incomplete line: ", keyfile.s, 0);
+				close(fd);
+				close(keyfd);
+				return (-1);
+			}
+			if (match) {
+				line.len--;
+				if (!line.len) {
+					strerr_warn2("readLogFile: incomplete line: ", keyfile.s, 0);
+					close(fd);
+					close(keyfd);
+					return (-1);
+				}
+				line.s[line.len] = 0;
+			} else {
+				if (!stralloc_0(&line)) {
+					close(fd);
+					close(keyfd);
+					die_nomem();
+				}
+				line.len--;
+			}
+			scan_ulong(line.s, &pos);
 		}
 	}
 	if (lseek(fd, pos, SEEK_SET) == -1) {

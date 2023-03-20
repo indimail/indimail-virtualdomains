@@ -1,5 +1,8 @@
 /*
  * $Log: tcplookup.c,v $
+ * Revision 1.5  2023-03-20 10:18:43+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.4  2021-09-12 11:53:07+05:30  Cprogrammer
  * removed redundant multiple initialization of InFifo.len
  *
@@ -52,7 +55,7 @@
 #include "variables.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: tcplookup.c,v 1.4 2021-09-12 11:53:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcplookup.c,v 1.5 2023-03-20 10:18:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            strnum[FMT_ULONG];
@@ -94,9 +97,14 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *sysconfdir, char *co
 		else {
 			if (match) {
 				line.len--;
+				if (!line.len)
+					*readTimeout = 4;
 				line.s[line.len] = 0; /*- remove newline */
 			}
-			scan_uint(line.s, (unsigned int *) readTimeout);
+			if (line.len)
+				scan_uint(line.s, (unsigned int *) readTimeout);
+			else
+				*readTimeout = 4;
 		}
 		close(fd);
 	}
@@ -122,9 +130,14 @@ getTimeoutValues(int *readTimeout, int *writeTimeout, char *sysconfdir, char *co
 		else {
 			if (match) {
 				line.len--;
+				if (!line.len)
+					*writeTimeout = 4;
 				line.s[line.len] = 0; /*- null terminate */
 			}
-			scan_uint(line.s, (unsigned int *) writeTimeout);
+			if (line.len)
+				scan_uint(line.s, (unsigned int *) writeTimeout);
+			else
+				*writeTimeout = 4;
 		}
 		close(fd);
 	}

@@ -1,5 +1,8 @@
 /*
  * $Log: backfill.c,v $
+ * Revision 1.3  2023-03-20 09:48:42+05:30  Cprogrammer
+ * documented backfill code
+ *
  * Revision 1.2  2019-07-04 09:19:02+05:30  Cprogrammer
  * initialize filename by using stralloc_copys insteadd of stralloc_cats
  *
@@ -37,7 +40,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: backfill.c,v 1.2 2019-07-04 09:19:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: backfill.c,v 1.3 2023-03-20 09:48:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -66,12 +69,20 @@ backfill(char *username, char *domain, char *path, int operation)
 	}
 	if (!(filesys_prefix = GetPrefix(username, path)))
 		return ((char *) 0);
+	/*
+	 * open
+	 * /var/indimail/domains/example.com/._home_A2E
+	 * /var/indimail/domains/example.com/._home_F2K
+	 * /var/indimail/domains/example.com/._home_L2P
+	 * /var/indimail/domains/example.com/._home_Q2S
+	 * /var/indimail/domains/example.com/._home_T2Z
+	 */
 	if (!stralloc_copys(&filename, ptr) ||
 			!stralloc_catb(&filename, "/.", 2) ||
 			!stralloc_cats(&filename, filesys_prefix) ||
 			!stralloc_0(&filename))
 		die_nomem();
-	if (operation == 1) {/*- Delete */
+	if (operation == 1) {/*- add */
 		if ((fd = open_read(filename.s)) == -1) {
 			if (errno != error_noent)
 				strerr_warn3("backfill: ", filename.s, ": ", &strerr_sys);
@@ -84,18 +95,29 @@ backfill(char *username, char *domain, char *path, int operation)
 				close(fd);
 				return ((char *) 0);
 			}
-			if (!match && line.len == 0) {
+			if (!line.len) {
 				close(fd);
+				strerr_warn3("backfill: ", filename.s, "incomplete line", 0);
 				return ((char *) 0);
 			}
 			if (match) {
 				line.len--;
+				if (!line.len) {
+					close(fd);
+					strerr_warn3("backfill: ", filename.s, "incomplete line", 0);
+					return ((char *) 0);
+				}
 				line.s[line.len] = 0;
+			} else {
+				if (!stralloc_0(&line))
+					die_nomem();
+				line.len--;
 			}
 			break;
 		}
 		close(fd);
 		if (remove_line(line.s, filename.s, 1, INDIMAIL_QMAIL_MODE) == 1) {
+			/*- backfill an existing entry and return original directory */
 			vread_dir_control(filesys_prefix, &vdir, domain);
 			if (vdir.cur_users)
 				++vdir.cur_users;
@@ -103,7 +125,8 @@ backfill(char *username, char *domain, char *path, int operation)
 			return (line.s);
 		}
 	} else
-	if (operation == 2) {/*- add */
+	if (operation == 2) {/*- delete */
+		/* /home/mail/A2E/example.com */
 		if (!stralloc_copys(&line, path) || !stralloc_0(&line))
 			die_nomem();
 		if ((ptr = str_str(line.s, username))) {
@@ -116,14 +139,18 @@ backfill(char *username, char *domain, char *path, int operation)
 			ptr += str_len(domain);
 			if (*ptr == '/')
 				ptr++;
-			if (ptr && *ptr) {
+			if (ptr && *ptr) { /* open _home_A2E */
+				/*-
+				 * append entry to existing list
+				 * to be backfilled later
+				 */
 #ifdef FILE_LOCKING
 				if ((fd = getDbLock(filename.s, 1)) == -1) {
 					strerr_warn3("backfill: getDbLock: ", filename.s, ": ", &strerr_sys);
 					return ((char *) 0);
 				}
 #endif
-				if ((fd = open_read(filename.s)) == -1) {
+				if ((fd = open_append(filename.s)) == -1) {
 					if (errno != error_noent)
 						strerr_warn3("backfill: ", filename.s, ": ", &strerr_sys);
 #ifdef FILE_LOCKING
@@ -152,6 +179,6 @@ backfill(char *username, char *domain, char *path, int operation)
 				return (ptr);
 			}
 		}
-	}
+	} /*- if (operation == 2) */
 	return ((char *) 0);
 }

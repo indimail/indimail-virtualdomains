@@ -1,5 +1,8 @@
 /*
  * $Log: proxyimap.c,v $
+ * Revision 1.5  2023-03-20 10:16:38+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.4  2023-01-03 21:16:40+05:30  Cprogrammer
  * added 'proxyimap' identifier in connection log message
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxyimap.c,v 1.4 2023-01-03 21:16:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxyimap.c,v 1.5 2023-03-20 10:16:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -115,15 +118,15 @@ main(int argc, char **argv)
 			strerr_warn1("proxyimap: read-stdin: ", &strerr_sys);
 			return (-1);
 		}
-		if (!match || !line.len)
+		if (!line.len)
 			break;
+		if (line.len < 4 || !match) {
+			strmsg_out1("* NO Error in IMAP command received by server.\n");
+			continue;
+		}
 		if (match) {
 			line.len--;
 			line.s[line.len] = 0;
-		} else {
-			if (!stralloc_0(&line))
-				die_nomem();
-			line.len--;
 		}
 		alarm(0);
 		ret = 0;
@@ -170,80 +173,81 @@ main(int argc, char **argv)
 			password.len--;
 			ret++;
 		}
-
-		if (ret >= 2) {
-			for (ptr = dummy2.s;*ptr;ptr++) {
-				if (islower((int) *ptr))
-					*ptr = toupper((int) *ptr);
-			}
-			if (!str_diff(dummy2.s, "LOGIN")) /*- proxylogin should normally never return */
-				return(proxylogin(argv, destport, username.s, password.s, remoteip, imaptag.s, 1));
-			else
-			if (!str_diff(dummy2.s, "NOOP")) {
-				strmsg_out2(imaptag.s, " OK NOOP completed\r\n");
-				continue;
-			} else
-			if (!str_diff(dummy2.s, "STARTTLS")) {
-				char           *p;
-
-				if (!env_put2("AUTHARGC", "0"))
-					die_nomem();
-				for (c = 0; c < argc; c++) {
-					p = strnum;
-					p += fmt_strn(p, "AUTHARGV", 8);
-					p += fmt_uint(p, (unsigned int) c);
-					*p++ = 0;
-					if (!env_unset(strnum))
-						die_nomem();
-				}
-				if (!env_unset("BADLOGINS") || !env_unset("IMAP_STARTTLS"))
-					die_nomem();
-				alarm(0);
-				if (!(ptr = env_get("COURIERTLS")))
-					ptr = PREFIX"/bin/sslerator";
-				c = str_rchr(ptr, '/');
-				p = ptr[c] ? ptr + c + 1 : ptr;
-				if (str_diff(p, "couriertls")) {
-					binqqargs[0] = ptr;
-					binqqargs[1] = argv[0];
-					binqqargs[2] = argv[1];
-					binqqargs[3] = argv[2];
-					binqqargs[4] = 0;
-					if (!stralloc_copy(&tmpbuf, &imaptag) ||
-							!stralloc_catb(&tmpbuf, " Begin SSL/TLS negotiation now.\r\n", 33) ||
-							!stralloc_0(&tmpbuf))
-						die_nomem();
-					if (!env_put2("BANNER", tmpbuf.s))
-						die_nomem();
-				} else {
-					if (!env_unset("COURIERTLS"))
-						die_nomem();
-					binqqargs[0] = ptr;
-					binqqargs[1] = "-remotefd=0";
-					binqqargs[2] = "-server";
-					binqqargs[3] = argv[0];
-					binqqargs[4] = argv[1];
-					binqqargs[5] = argv[2];
-					binqqargs[6] = 0;
-					strmsg_out2(imaptag.s, " Begin SSL/TLS negotiation now.\r\n");
-				}
-				execv(*binqqargs, binqqargs);
-				strerr_warn3("proxyimap: execv: ", *binqqargs, ": ", &strerr_sys);
-				continue;
-			} else
-			if (!str_diff(dummy2.s, "CAPABILITY")) {
-				imapd_capability();
-				strmsg_out2(imaptag.s, " OK CAPABILITY completed\r\n");
-				continue;
-			} else
-			if (!str_diff(dummy2.s, "LOGOUT")) {
-				strmsg_out1("* BYE IMAP4rev1 server shutting down\r\n");
-				strmsg_out1(" OK LOGOUT completed\r\n");
-				break;
-			}
+		if (ret < 2) {
+			strmsg_out1("* NO Error in IMAP command received by server.\n");
+			continue;
 		}
-		strmsg_out1("* NO Error in IMAP command received by server.\n");
-	}
+
+		for (ptr = dummy2.s;*ptr;ptr++) {
+			if (islower((int) *ptr))
+				*ptr = toupper((int) *ptr);
+		}
+		if (!str_diff(dummy2.s, "LOGIN")) /*- proxylogin should normally never return */
+			return(proxylogin(argv, destport, username.s, password.s, remoteip, imaptag.s, 1));
+		else
+		if (!str_diff(dummy2.s, "NOOP")) {
+			strmsg_out2(imaptag.s, " OK NOOP completed\r\n");
+			continue;
+		} else
+		if (!str_diff(dummy2.s, "STARTTLS")) {
+			char           *p;
+
+			if (!env_put2("AUTHARGC", "0"))
+				die_nomem();
+			for (c = 0; c < argc; c++) {
+				p = strnum;
+				p += fmt_strn(p, "AUTHARGV", 8);
+				p += fmt_uint(p, (unsigned int) c);
+				*p++ = 0;
+				if (!env_unset(strnum))
+					die_nomem();
+			}
+			if (!env_unset("BADLOGINS") || !env_unset("IMAP_STARTTLS"))
+				die_nomem();
+			alarm(0);
+			if (!(ptr = env_get("COURIERTLS")))
+				ptr = PREFIX"/bin/sslerator";
+			c = str_rchr(ptr, '/');
+			p = ptr[c] ? ptr + c + 1 : ptr;
+			if (str_diff(p, "couriertls")) {
+				binqqargs[0] = ptr;
+				binqqargs[1] = argv[0];
+				binqqargs[2] = argv[1];
+				binqqargs[3] = argv[2];
+				binqqargs[4] = 0;
+				if (!stralloc_copy(&tmpbuf, &imaptag) ||
+						!stralloc_catb(&tmpbuf, " Begin SSL/TLS negotiation now.\r\n", 33) ||
+						!stralloc_0(&tmpbuf))
+					die_nomem();
+				if (!env_put2("BANNER", tmpbuf.s))
+					die_nomem();
+			} else {
+				if (!env_unset("COURIERTLS"))
+					die_nomem();
+				binqqargs[0] = ptr;
+				binqqargs[1] = "-remotefd=0";
+				binqqargs[2] = "-server";
+				binqqargs[3] = argv[0];
+				binqqargs[4] = argv[1];
+				binqqargs[5] = argv[2];
+				binqqargs[6] = 0;
+				strmsg_out2(imaptag.s, " Begin SSL/TLS negotiation now.\r\n");
+			}
+			execv(*binqqargs, binqqargs);
+			strerr_warn3("proxyimap: execv: ", *binqqargs, ": ", &strerr_sys);
+			continue;
+		} else
+		if (!str_diff(dummy2.s, "CAPABILITY")) {
+			imapd_capability();
+			strmsg_out2(imaptag.s, " OK CAPABILITY completed\r\n");
+			continue;
+		} else
+		if (!str_diff(dummy2.s, "LOGOUT")) {
+			strmsg_out1("* BYE IMAP4rev1 server shutting down\r\n");
+			strmsg_out1(" OK LOGOUT completed\r\n");
+			break;
+		}
+	} /*- for (;;) */
 	return(0);
 }
 

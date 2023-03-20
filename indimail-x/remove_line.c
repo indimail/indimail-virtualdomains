@@ -118,7 +118,7 @@ remove_line(char *template, char *filename, int once_only, mode_t mode)
 			unlink(fname.s);
 			return (-1);
 		}
-		if (!match && line.len == 0)
+		if (!line.len)
 			break;
 		if (found && once_only) {
 			if (substdio_put(&ssout, line.s, line.len)) {

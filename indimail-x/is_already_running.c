@@ -1,5 +1,8 @@
 /*
  * $Log: is_already_running.c,v $
+ * Revision 1.2  2023-03-20 10:08:20+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.1  2019-04-18 08:21:41+05:30  Cprogrammer
  * Initial revision
  *
@@ -31,7 +34,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: is_already_running.c,v 1.1 2019-04-18 08:21:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: is_already_running.c,v 1.2 2023-03-20 10:08:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -64,21 +67,21 @@ is_already_running(char *pgname)
 		return (0);
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-	if (getln(&ssin, &line, &match, '\n') == -1) {
-		i = errno;
-		close(fd);
-		errno = i;
+	if (getln(&ssin, &line, &match, '\n') == -1)
 		strerr_die3sys(111, "is_already_running: read: ", filename.s, ": ");
-	}
 	close(fd);
 	if (!line.len)
 		strerr_die3x(111, "is_already_running: ", filename.s, ": incomplete line");
 	if (match) {
 		line.len--;
+		if (!line.len)
+			strerr_die3x(111, "is_already_running: ", filename.s, ": incomplete line");
 		line.s[line.len] = 0;
-	} else
-	if (!stralloc_0(&line))
-		die_nomem();
+	} else {
+		if (!stralloc_0(&line))
+			die_nomem();
+		line.len--;
+	}
 	scan_ulong(line.s, (unsigned long *) &pid);
 	if (pid && !kill(pid, 0))
 		return (pid);

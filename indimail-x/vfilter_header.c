@@ -1,5 +1,8 @@
 /*
  * $Log: vfilter_header.c,v $
+ * Revision 1.3  2023-03-20 10:36:29+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.2  2020-04-01 18:58:46+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter_header.c,v 1.2 2020-04-01 18:58:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter_header.c,v 1.3 2023-03-20 10:36:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -71,10 +74,18 @@ headerList()
 			close(fd);
 			return ((char **) 0);
 		}
-		if (!match && line.len == 0)
+		if (!line.len)
 			break;
-		line.len--;
-		line.s[line.len] = 0; /*- remove newline */
+		if (match) {
+			line.len--;
+			if (!line.len)
+				continue;
+			line.s[line.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
+		}
 		match = str_chr(line.s, '#');
 		if (line.s[match])
 			line.s[match] = 0;
@@ -102,10 +113,12 @@ headerList()
 			close(fd);
 			return ((char **) 0);
 		}
-		if (!match && line.len == 0)
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0; /*- remove newline */
 		}
 		match = str_chr(line.s, '#');

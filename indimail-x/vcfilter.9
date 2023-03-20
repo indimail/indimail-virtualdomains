@@ -4,20 +4,11 @@ vcfilter \- create, modify, delete vfilters
 
 .SH SYNOPSYS
 .PP
-\fBvcfilter\fR [\fIoptions\fR] \fIemailid\fR [\fImailing_list1\fR..\fImailing_listn\fR]
-
-\fBvcfilter\fR \fB\-m\fR \fIemailid\fR [\fIoptions\fR] [\fImailing_list1\fR..\fImailing_listn\fR]
+\fBvcfilter\fR [\fIoptions\fR] \fIemailid\fR
 
 .SH DESCRIPTION
 \fBvcfilter\fR is a utility for creating, modifying, deleting IndiMail's powerful filter
-called as vfilter. There are two options; one for administration of filters and another for
-administration of mailing lists subscribed by the user. For mailing lists special action
-needs to be performed by \fBvfilter\fR, so that valid mails do not get rejected. Currently, 
-\fBvcfilter\fR
-allows maximum of 255 filters to be created.
-
-The first form of usage is primarily for creating filters (though some amount of mailing
-list updation is also possible). The second form of usage is for mailing list updation only.
+called as vfilter. Currently, \fBvcfilter\fR allows maximum of 255 filters to be created.
 
 \fBvcfilter\fR has the setuid bit set to root and must be run as root or domain user
 
@@ -121,42 +112,6 @@ needs to be discarded completely.
      to the mailbox editor@indimail.org (replace '&' with '|'
      to feed the message through a program)
  3 - Same as above but bounce as well.
-
-.TP
-\fImailing_list1\fR...\fImailing_listn\fR
-List of mailing lists which should be recognized by vfilter (if the filter comparison
-(-c option) is 5 or 6. This could also be a NULL "" string in which case, vfilter will
-intelligently try to figure out mails from mailing lists.
-
-.SH OPTIONS  (for mailing lists)
-.TP
-\fB\-v\fR
-Sets verbose option
-.TP
-\fB\-m\fR
-Show Mailing list which should be allowed in case filter rule rejects the mail.
-.TP
-\fB\-i\fR
-add mailing lists
-.TP
-\fB\-D\fR
-delete mailing lists
-.TP
-\fB\-U\fR \fIold_mailing_list_name\fR \fInew_mailing_list_name\fR
-Change name of an existing mailing list to another name.
-.TP
-\fB\-o\fR \fIoption\fR (used only for comparison 5 or 6)
-Change behavior when figuring out mailing lists for comparison 5 or 6. Following are the
-valid options
-
- 0 - Do not consider mailing lists in filtering
- 1 - Consider mailing lists while filtering intelligently
- 2 - Consider only mailing lists specified in the filter
-     when filtering.
-
-.TP
-\fImailing_list1\fR...\fImailing_listn\fR
-List of mailing lists to be added or deleted.
 
 .SH RETURN VALUE
 Returns 0 for success, 1 for any failure.

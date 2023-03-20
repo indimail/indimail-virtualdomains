@@ -1,5 +1,8 @@
 /*
  * $Log: ismaildup.c,v $
+ * Revision 1.7  2023-03-20 10:10:50+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.6  2022-12-18 19:26:39+05:30  Cprogrammer
  * recoded wait logic
  *
@@ -60,7 +63,7 @@
 #include "dblock.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ismaildup.c,v 1.6 2022-12-18 19:26:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ismaildup.c,v 1.7 2023-03-20 10:10:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char     strnum[FMT_ULONG];
@@ -73,6 +76,13 @@ die_nomem()
 	_exit(111);
 }
 
+/*-
+ * opens Maildir/dupmd5
+ * returns
+ *  1 for duplicate message
+ *  0 for new message
+ * -1 for error
+ */
 static int
 duplicateMD5(char *fileName, char *md5buffer)
 {
@@ -120,15 +130,19 @@ duplicateMD5(char *fileName, char *md5buffer)
 		}
 		if (!line.len)
 			break;
-		if (!match)
+		if (match) 
+			line.len--;
+		else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
+		}
+		if (!line.len)
 			continue;
-		if (!stralloc_0(&line))
-			die_nomem();
-		line.len--;
 		scan_long(line.s, &recTime);
 		if (curTime > recTime + interval) {
 			for (ptr = line.s; *ptr && !isspace(*ptr); ptr++);
-			if (!isspace(*ptr))
+			if (!*ptr || !isspace(*ptr))
 				continue;
 			for (; *ptr && isspace(*ptr); ptr++);
 			if (!*ptr)
@@ -138,10 +152,10 @@ duplicateMD5(char *fileName, char *md5buffer)
 #ifdef FILE_LOCKING
 				delDbLock(lockfd, fileName, 1);
 #endif
-				return (1);
+				return (1); /*- duplicate md5 sum */
 			}
 		} else
-			continue; /*- expired records */
+			continue; /*- expired records in Maildir/dupmd5 */
 	}
 	if (lseek(fd, 0 - line.len, SEEK_END) == -1) {
 		strerr_warn3("ismaildup: lseek: ", fileName, ": ", &strerr_sys);
@@ -159,7 +173,7 @@ duplicateMD5(char *fileName, char *md5buffer)
 #ifdef FILE_LOCKING
 	delDbLock(lockfd, fileName, 1);
 #endif
-	return (0);
+	return (0); /*- new message */
 }
 
 int

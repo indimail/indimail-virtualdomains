@@ -1,5 +1,8 @@
 /*
  * $Log: deldomain.c,v $
+ * Revision 1.4  2023-03-20 09:57:24+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.3  2020-04-01 18:54:26+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -52,7 +55,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deldomain.c,v 1.3 2020-04-01 18:54:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deldomain.c,v 1.4 2023-03-20 09:57:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -143,20 +146,21 @@ deldomain(char *domain)
 			close(fd);
 			return (-1);
 		}
-		if (line.len == 0)
-			strerr_warn3("deldomain", tmpbuf.s, "incomplete line", 0);
-		else
-		if (match) {
-			line.len--; /*- remove newline */
-			if (line.len == 0)
-				strerr_warn3("deldomain", tmpbuf.s, "incomplete line", 0);
-			else {
-				if (!stralloc_copy(&BasePath, &line) || !stralloc_0(&BasePath))
-					die_nomem();
-				BasePath.len--;
-			}
-		}
 		close(fd);
+		if (!line.len) {
+			strerr_warn3("deldomain: ", tmpbuf.s, ": incomplete line", 0);
+			return (-1);
+		}
+		if (match)
+			line.len--; /*- remove newline */
+		if (!line.len) {
+			strerr_warn3("deldomain: ", tmpbuf.s, ": incomplete line", 0);
+			return (-1);
+		} else {
+			if (!stralloc_copy(&BasePath, &line) || !stralloc_0(&BasePath))
+				die_nomem();
+			BasePath.len--;
+		}
 	}
 	if (!stralloc_copy(&tmpbuf, &Dir) ||
 			!stralloc_catb(&tmpbuf, "/.aliasdomains", 14) || !stralloc_0(&tmpbuf))
@@ -195,11 +199,17 @@ deldomain(char *domain)
 					strerr_warn3("deldomain: read: ", tmpbuf.s, ": ", &strerr_sys);
 					break;
 				}
-				if (!match && line.len == 0)
+				if (!line.len)
 					break;
 				if (match) {
 					line.len--;
+					if (!line.len)
+						continue;
 					line.s[line.len] = 0; /*- remove newline */
+				} else {
+					if (!stralloc_0(&line))
+						die_nomem();
+					line.len--;
 				}
 				match = str_chr(line.s, '#');
 				if (line.s[match])

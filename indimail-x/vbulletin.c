@@ -1,5 +1,8 @@
 /*
  * $Log: vbulletin.c,v $
+ * Revision 1.7  2023-03-20 10:33:13+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.6  2022-10-20 11:58:36+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -71,7 +74,7 @@
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vbulletin.c,v 1.6 2022-10-20 11:58:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vbulletin.c,v 1.7 2023-03-20 10:33:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL            "vbulletin: fatal: "
@@ -230,10 +233,12 @@ in_exclude_list(char *excludeFile, int fdx, char *user, char *domain)
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "vbulletin: read: ", excludeFile, ": ");
-		if (line.len == 0)
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0;
 		} else {
 			if (!stralloc_0(&line))

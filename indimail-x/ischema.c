@@ -1,5 +1,9 @@
 /*
  * $Log: ischema.c,v $
+ * Revision 1.3  2023-03-20 10:08:51+05:30  Cprogrammer
+ * use SYSCONFDIR env variable for indimail.schema
+ * standardize getln handling
+ *
  * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -29,6 +33,7 @@
 #include <substdio.h>
 #include <subfd.h>
 #include <getln.h>
+#include <getEnvConfig.h>
 #endif
 #include "iopen.h"
 #include "common.h"
@@ -37,7 +42,7 @@
 #include "create_table.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: ischema.c,v 1.2 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: ischema.c,v 1.3 2023-03-20 10:08:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "ischema: fatal: "
@@ -79,11 +84,13 @@ main(int argc, char **argv)
 {
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;
-	int             err, ign, id, l_id, fd, c, update_mode = 0, match, u_count;
+	int             err, ign, id, l_id, fd, c, update_mode = 0, match,
+					u_count;
 	char            inbuf[4096];
-	char           *p1, *p2, *lid_str, *command, *comment, *ignore, *sql_stmt;
+	char           *p1, *p2, *lid_str, *command, *comment, *ignore,
+				   *sql_stmt, *sysconfdir;
 	struct substdio ssin;
-	static stralloc line = {0}, SqlBuf = {0};
+	static stralloc line = {0}, SqlBuf = {0}, tmpbuf = {0};
 
 	while ((c = getopt(argc, argv, "vdu")) != opteof) {
 		switch (c)
@@ -133,21 +140,34 @@ main(int argc, char **argv)
 		strerr_die1sys(111, "write: unable to write output: ");
 	if (!update_mode)
 		_exit(0);
-	if ((fd = open_read(SYSCONFDIR"/indimail.schema")) == -1)
-		strerr_die4sys(111, FATAL, "open: ", SYSCONFDIR, "/indimail.schema: ");
+	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
+	if (!stralloc_copys(&tmpbuf, sysconfdir) ||
+			!stralloc_catb(&tmpbuf, "/indimail.schema", 17) ||
+			!stralloc_0(&tmpbuf))
+		die_nomem();
+	if ((fd = open_read(tmpbuf.s)) == -1)
+		strerr_die4sys(111, FATAL, "open: ", tmpbuf.s, ": ");
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	/* id:sql|cmd:IGNORE Yes|NO:comment:sql_stmt */
 	for (u_count = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
-			strerr_warn4(FATAL, "read: ", SYSCONFDIR, "/indimail.schema: ", &strerr_sys);
+			strerr_warn4(FATAL, "read: ", tmpbuf.s, ": ", &strerr_sys);
 			close(fd);
 			iclose();
 			_exit(111);
 		}
-		if (!match && line.len == 0)
+		if (!line.len)
 			break;
-		line.len--;
-		line.s[line.len] = 0;
+		if (match) {
+			line.len--;
+			if (!line.len)
+				continue;
+			line.s[line.len] = 0;
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
+		}
 		match = str_chr(line.s, '#');
 		if (line.s[match])
 			line.s[match] = 0;

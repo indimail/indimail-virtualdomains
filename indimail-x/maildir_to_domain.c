@@ -1,5 +1,8 @@
 /*
  * $Log: maildir_to_domain.c,v $
+ * Revision 1.3  2023-03-20 10:12:40+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.2  2019-04-21 16:15:54+05:30  Cprogrammer
  * remove '/' from the end
  *
@@ -24,7 +27,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: maildir_to_domain.c,v 1.2 2019-04-21 16:15:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: maildir_to_domain.c,v 1.3 2023-03-20 10:12:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -60,14 +63,22 @@ maildir_to_domain(char *maildir)
 		close(fd);
 		return ((char *) 0);
 	}
-	if (!match && line.len == 0) {
-		close(fd);
+	close(fd);
+	if (!line.len) {
+		strerr_warn2("maildir_to_domain: incomplete line: ", filename.s, 0);
 		return ((char *) 0);
 	}
 	if (match) {
 		line.len--;
+		if (!line.len) {
+			strerr_warn2("maildir_to_domain: incomplete line: ", filename.s, 0);
+			return ((char *) 0);
+		}
 		line.s[line.len] = 0;
+	} else {
+		if (!stralloc_0(&line))
+			die_nomem();
+		line.len--;
 	}
-	close(fd);
 	return (line.s);
 }

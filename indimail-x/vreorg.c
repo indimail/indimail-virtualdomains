@@ -1,5 +1,8 @@
 /*
  * $Log: vreorg.c,v $
+ * Revision 1.9  2023-03-20 10:39:58+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.8  2022-08-07 13:10:17+05:30  Cprogrammer
  * updated for scram argument to sql_getpw()
  *
@@ -62,7 +65,7 @@
 #include "next_big_dir.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vreorg.c,v 1.8 2022-08-07 13:10:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vreorg.c,v 1.9 2023-03-20 10:39:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vreorg: fatal: "
@@ -172,12 +175,18 @@ main(int argc, char **argv)
 			close(fd);
 			return (-1);
 		}
-		if (line.len == 0)
+		if (!line.len)
 			break;
-		if (!match)
-			strerr_warn3("vadduser: ", listfile, ": incomplete line", 0);
-		line.len--;
-		line.s[line.len] = 0;
+		if (match) {
+			line.len--;
+			if(!line.len)
+				continue;
+			line.s[line.len] = 0;
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
+		}
 		/*- get old pw struct */
 		if (!(pw = sql_getpw(line.s, domain))) {
 			strerr_warn5("vreorg: ", line.s, "@", domain, ": sql_getpw failed", 0);

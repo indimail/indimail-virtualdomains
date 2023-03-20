@@ -1,5 +1,8 @@
 /*
  * $Log: maildir_to_email.c,v $
+ * Revision 1.4  2023-03-20 10:13:16+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.3  2020-04-01 18:56:55+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -28,7 +31,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: maildir_to_email.c,v 1.3 2020-04-01 18:56:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: maildir_to_email.c,v 1.4 2023-03-20 10:13:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -65,14 +68,23 @@ maildir_to_email(char *maildir, char *domain)
 			close(fd);
 			return ((char *) 0);
 		}
-		if (!match || !email.len) {
-			strerr_warn3("maildir_to_email: incomplete line: ", tmpbuf.s, ": ", &strerr_sys);
-			close(fd);
+		close(fd);
+		if (!email.len) {
+			strerr_warn2("maildir_to_email: incomplete line: ", tmpbuf.s, 0);
 			return ((char *) 0);
 		}
-		email.len--;
-		email.s[email.len] = 0; /*- remove newline */
-		close(fd);
+		if (match) {
+			email.len--;
+			if (!email.len) {
+				strerr_warn2("maildir_to_email: incomplete line: ", tmpbuf.s, 0);
+				return ((char *) 0);
+			}
+			email.s[email.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
+		}
 		return (email.s);
 	}
 
@@ -108,14 +120,23 @@ maildir_to_email(char *maildir, char *domain)
 				close(fd);
 				return ((char *) 0);
 			}
-			if (!match || !line.len) {
-				strerr_warn3("maildir_to_email: incomplete line: ", tmpbuf.s, ": ", &strerr_sys);
-				close(fd);
+			close(fd);
+			if (!line.len) {
+				strerr_warn2("maildir_to_email: incomplete line: ", tmpbuf.s, 0);
 				return ((char *) 0);
 			}
-			line.len--;
-			line.s[line.len] = 0; /*- remove newline */
-			close(fd);
+			if (match) {
+				line.len--;
+				if (!line.len) {
+					strerr_warn2("maildir_to_email: incomplete line: ", tmpbuf.s, 0);
+					return ((char *) 0);
+				}
+				line.s[line.len] = 0; /*- remove newline */
+			} else {
+				if (!stralloc_0(&line))
+					die_nomem();
+				line.len--;
+			}
 			if (!stralloc_append(&email, "@") ||
 					!stralloc_cat(&email, &line) ||
 					!stralloc_0(&email))

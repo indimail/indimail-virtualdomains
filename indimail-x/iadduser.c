@@ -1,5 +1,8 @@
 /*
  * $Log: iadduser.c,v $
+ * Revision 1.7  2023-03-20 10:03:03+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.6  2022-11-02 12:43:44+05:30  Cprogrammer
  * added feature to add scram password during user addition
  *
@@ -65,7 +68,7 @@
 #define ALLOWCHARS              " .!#$%&'*+-/=?^_`{|}~\""
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iadduser.c,v 1.6 2022-11-02 12:43:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iadduser.c,v 1.7 2023-03-20 10:03:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -119,7 +122,7 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 	char           *tmpstr, *dir, *ptr, *allow_chars;
 	uid_t           uid;
 	gid_t           gid;
-	int             uid_flag = 0, t, fd, match, ulen, u_level = 0, i;
+	int             uid_flag = 0, fd, match, ulen, u_level = 0, i;
 	struct substdio ssin;
 #ifdef CLUSTERED_SITE
 	static stralloc SqlBuf = {0};
@@ -197,22 +200,21 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 		u_level = 0;
 	else {
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-		if (getln(&ssin, &line, &match, '\n') == -1) {
-			t = errno;
-			close(fd);
-			errno = t;
+		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "iadduser: read: ", tmpbuf.s, ": ");
-		}
-		if (line.len == 0)
-			strerr_warn3("iadduser", tmpbuf.s, "incomplete line", 0);
-		else
+		close(fd);
+		if (!line.len)
+			strerr_die3x(100, "iadduser: ", tmpbuf.s, ": incomplete line");
 		if (match) {
 			line.len--;
-			if (line.len == 0)
-				strerr_warn3("iadduser", tmpbuf.s, "incomplete line", 0);
+			if (!line.len)
+				strerr_die3x(111, "iadduser: ", tmpbuf.s, ": incomplete line");
 			line.s[line.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
 		}
-		close(fd);
 		scan_int(line.s, &u_level);
 	}
 	/*- check gecos for : characters - bad */

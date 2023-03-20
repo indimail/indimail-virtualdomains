@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: vmoduser_handle.in,v 2.5 2022-09-14 08:48:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: vmoduser_handle.in,v 2.6 2023-03-20 10:37:40+05:30 Cprogrammer Exp mbhangui $
 #
 verbose=0
 toggle=0
@@ -8,7 +8,7 @@ args=$*
 while getopts vVnq:c:P:e:h:Cm:S:I:D:l:H0123456789 opt
 do
 	case $opt in
-		V) echo $Id: vmoduser_handle.in,v 2.5 2022-09-14 08:48:00+05:30 Cprogrammer Exp mbhangui $;;
+		V) echo $Id: vmoduser_handle.in,v 2.6 2023-03-20 10:37:40+05:30 Cprogrammer Exp mbhangui $;;
 		v) verbose=1;;
 		n) toggle=1;;
 		q) quota="$OPTARG";;
@@ -28,7 +28,12 @@ do
 	esac
 done
 if [ -n "$passwd" -o -n "$epasswd" ] ; then
-	@prefix@/bin/svc -h @servicedir@/inlookup.infifo
+	if [ -n $SERVICEDIR ] ; then
+		servicedir=$SERVICEDIR
+	else
+		servicedir=@servicedir@*
+	fi
+	@prefix@/bin/svc -h $servicedir/inlookup.infifo
 fi
 shift $((OPTIND-1))
 # now do something with $@
@@ -37,6 +42,9 @@ if [ $verbose -ne 0 ] ; then
 fi
 #
 # $Log: vmoduser_handle.in,v $
+# Revision 2.6  2023-03-20 10:37:40+05:30  Cprogrammer
+# use SERVICEDIR env variable if set for service directory
+#
 # Revision 2.5  2022-09-14 08:48:00+05:30  Cprogrammer
 # added all vmoduser getopt options
 #

@@ -250,7 +250,7 @@ main(int argc, char **argv)
 			strerr_warn1("vacation: read-email: ", &strerr_sys);
 			return (-1);
 		}
-		if (!match || !line.len)
+		if (!line.len)
 			break;
 		if (line.s[0] == '\n')
 			break;

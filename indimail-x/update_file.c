@@ -158,7 +158,7 @@ update_file(char *filename, char *update_line, mode_t mode)
 				unlink(fname.s);
 				return (-1);
 			}
-			if (!match && line.len == 0)
+			if (!line.len)
 				break;
 			if (!stralloc_0(&line))
 				die_nomem();
