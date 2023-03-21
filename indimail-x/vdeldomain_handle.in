@@ -56,7 +56,7 @@ do
 		fi
 	fi
 done
-if [ -n $SERVICEDIR ] ; then
+if [ -n "$SERVICEDIR" ] ; then
 	servicedir=$SERVICEDIR
 else
 	servicedir=@servicedir@*

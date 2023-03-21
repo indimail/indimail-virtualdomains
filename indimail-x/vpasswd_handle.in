@@ -12,7 +12,7 @@
 #
 #
 # $Id: vpasswd_handle.in,v 2.3 2023-03-20 10:38:25+05:30 Cprogrammer Exp mbhangui $
-if [ -n $SERVICEDIR ] ; then
+if [ -n "$SERVICEDIR" ] ; then
 	servicedir=$SERVICEDIR
 else
 	servicedir=@servicedir@*

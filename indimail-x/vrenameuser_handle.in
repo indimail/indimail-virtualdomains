@@ -11,7 +11,7 @@
 #
 # vrenameuser old_email new_email
 # send sighup to inlookup
-if [ -n $SERVICEDIR ] ; then
+if [ -n "$SERVICEDIR" ] ; then
 	servicedir=$SERVICEDIR
 else
 	servicedir=@servicedir@*
