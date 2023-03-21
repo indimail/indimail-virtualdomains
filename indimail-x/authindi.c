@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 1.16  2023-03-21 09:32:51+05:30  Cprogrammer
+ * replaced strerr_warn with subprintfe
+ *
  * Revision 1.15  2022-09-10 21:41:56+05:30  Cprogrammer
  * use authmethods.h for AUTH type definitions
  * execute next module if domain not in qmail assign file
@@ -90,6 +93,7 @@
 #include "parse_quota.h"
 #include "pipe_exec.h"
 #include "sql_getpw.h"
+#include "common.h"
 
 #ifdef AUTH_SIZE
 #undef AUTH_SIZE
@@ -102,12 +106,12 @@
 #define WARN  "authindi: warn: "
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.15 2022-09-10 21:41:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.16 2023-03-21 09:32:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
 static int      authlen = AUTH_SIZE;
-static char     strnum[FMT_ULONG], module_pid[FMT_ULONG], euidstr[FMT_ULONG];
+static char     strnum[FMT_ULONG];
 
 static void
 die_nomem()
@@ -376,9 +380,9 @@ main(int argc, char **argv)
 	if (argc < 3)
 		strerr_die2x(100, FATAL, "no more modules will be tried");
 	if (debug) {
-		strnum[fmt_uint(strnum, (unsigned int) getuid())] = 0;
-		euidstr[fmt_uint(euidstr, (unsigned int) geteuid())] = 0;
-		strerr_warn8(WARN, " uid [", strnum, "] euid [", euidstr, "] next_module [", argv[1], "]", 0);
+		subprintfe(subfderr, "authindi", "debug: authindi: uid[%u] euid[%u] %s %s\n",
+				getuid(), geteuid(), argc > 3 ? "program" : "module", argv[1]);
+		substdio_flush(subfderr);
 	}
 	if (!(authstr = alloc((authlen + 1) * sizeof(char)))) {
 		if (write(2, "AUTHFAILURE\n", 12) == -1)
@@ -638,17 +642,22 @@ main(int argc, char **argv)
 		i = 0;
 		pass = crypt_pass = pw->pw_passwd;
 	}
-	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	if ((ptr = env_get("DEBUG_LOGIN")) && *ptr > '0') {
-		substdio_puts(subfderr, "debug_login: pid [");
-		strerr_warn16( module_pid, "] service[", service, "]: login [",
-				login, "] challenge [", challenge, "] response [", response,
-				"] password [", pass, "] crypted [", crypt_pass, "] authmethod [",
-				auth_type, "]", 0);
+		subprintfe(subfderr, "authindi",
+				"debug_login: pid[%d] service[%s] login[%s] password[%s] crypted[%s] authmethod[%s]",
+				getpid(), service, login, pass, crypt_pass, auth_type);
+		if (challenge)
+			subprintfe(subfderr, "authindi", " challenge[%s]", challenge);
+		if (response)
+			subprintfe(subfderr, "authindi", " response[%s]", response);
+		subprintfe(subfderr, "authindi", " authmethod[%s]\n", auth_type);
+		substdio_flush(subfderr);
 	} else
-	if (debug)
-		strerr_warn9("debug: pid [", module_pid, "] service[", service,
-				"]: login [", login, "] authmethod [", ptr, "]", 0);
+	if (debug) {
+		subprintfe(subfderr, "authindi", "debug: authindi: pid [%d] service[%s]: login[%s] authmethod [%s]\n",
+			getpid(), service, login, auth_type);
+		substdio_flush(subfderr);
+	}
 	if (pw_comp((unsigned char *) login, (unsigned char *) pass,
 		(unsigned char *) (auth_method > AUTH_PLAIN ? challenge : 0),
 		(unsigned char *) (auth_method > AUTH_PLAIN ? response : auth_data), auth_method)) {
