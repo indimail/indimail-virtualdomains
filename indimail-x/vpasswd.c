@@ -98,14 +98,14 @@ static char     sccsid[] = "$Id: vpasswd.c,v 1.17 2023-01-22 10:30:38+05:30 Cpro
 static char    *usage =
 	"usage: vpasswd [options] email_address [password]\n"
 	"options\n"
-	"  -r              - generate a random password of specfied length\n"
+	"  -r len          - generate a random password of specfied length\n"
 	"  -e password     - set the encrypted password field\n"
 	"  -h hash         - use one of DES, MD5, SHA256, SHA512, hash method\n"
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	"  -C              - store clear txt and scram hex salted password in database\n"
-	"                    This allows CRAM methods to be used\n"
 	"  -m SCRAM method - use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method\n"
+	"  -C              - store clear txt and SCRAM hex salted password in database\n"
+	"                    This allows CRAM methods to be used\n"
 	"  -S salt         - use a fixed base64 encoded salt for generating SCRAM password\n"
 	"                  - if salt is not specified, it will be generated\n"
 	"  -I iter_count   - use iter_count instead of 4096 for generating SCRAM password\n"

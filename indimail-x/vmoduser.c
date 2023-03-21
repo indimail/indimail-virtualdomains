@@ -126,8 +126,8 @@ static char    *usage =
 	"         -h hash                  (use one of DES, MD5, SHA256, SHA512 hash)\n"
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	"         -C                       (Store clear txt and scram hex salted passowrd in database\n"
 	"         -m SCRAM method          (use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method)\n"
+	"         -C                       (Store clear txt and SCRAM hex salted passowrd in database\n"
 	"         -S salt                  (Use a fixed base64 encoded salt)\n"
 	"         -I iter_count            (Use iter_count instead of default 4096 for generationg SCRAM password\n"
 #endif
