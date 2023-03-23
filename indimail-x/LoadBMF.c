@@ -1,5 +1,8 @@
 /*
  * $Log: LoadBMF.c,v $
+ * Revision 1.6  2023-03-23 23:10:01+05:30  Cprogrammer
+ * fix wrong counts when badmailfrom has comments
+ *
  * Revision 1.5  2023-03-20 10:11:13+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -21,7 +24,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadBMF.c,v 1.5 2023-03-20 10:11:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadBMF.c,v 1.6 2023-03-23 23:10:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -446,8 +449,6 @@ LoadBMF_internal(int *total, char *bmf)
 			line.len--;
 			if (!line.len)
 				continue;
-			count++;
-			continue;
 		} else {
 			if (!stralloc_0(&line))
 				die_nomem();
