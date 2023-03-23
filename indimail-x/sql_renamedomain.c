@@ -1,5 +1,8 @@
 /*
  * $Log: sql_renamedomain.c,v $
+ * Revision 1.3  2023-03-23 22:15:24+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.2  2023-03-20 10:18:27+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_renamedomain.c,v 1.2 2023-03-20 10:18:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_renamedomain.c,v 1.3 2023-03-23 22:15:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -118,24 +121,27 @@ sql_renamedomain(char *OldDomain, char *NewDomain, char *domdir)
 		strerr_warn2(OldDomain, ": is_distributed_domain failed", 0);
 		return (-1);
 	}
-	if (is_dist && rename_data(ON_MASTER, cntrl_table, "pw_domain", NewDomain, OldDomain))
-		err = 1;
-	else
-	if (rename_data(ON_MASTER, "smtp_port", "domain", NewDomain, OldDomain))
-		err = 1;
-	else
-	if (rename_data(ON_MASTER, "dbinfo", "domain", NewDomain, OldDomain))
-		err = 1;
-	else
+	if (is_dist) {
+		if (rename_data(ON_MASTER, cntrl_table, "pw_domain", NewDomain, OldDomain))
+			err = 1;
+		else
+		if (rename_data(ON_MASTER, "smtp_port", "domain", NewDomain, OldDomain))
+			err = 1;
+		else
+		if (rename_data(ON_MASTER, "dbinfo", "domain", NewDomain, OldDomain))
+			err = 1;
+	}
 #endif
-	if (rename_data(ON_LOCAL, inactive_table, "pw_domain", NewDomain, OldDomain))
-		err = 1;
-	else
-	if (rename_data(ON_LOCAL, "valias", "domain", NewDomain, OldDomain))
-		err = 1;
-	else
-	if (rename_data(ON_LOCAL, "dir_control", "domain", NewDomain, OldDomain))
-		err = 1;
+	if (!err) {
+		if (rename_data(ON_LOCAL, inactive_table, "pw_domain", NewDomain, OldDomain))
+			err = 1;
+		else
+		if (rename_data(ON_LOCAL, "valias", "domain", NewDomain, OldDomain))
+			err = 1;
+		else
+		if (rename_data(ON_LOCAL, "dir_control", "domain", NewDomain, OldDomain))
+			err = 1;
+	}
 	if (!stralloc_copys(&tmp1, domdir) ||
 			!stralloc_catb(&tmp1, "/.filesystems", 13) ||
 			!stralloc_0(&tmp1))

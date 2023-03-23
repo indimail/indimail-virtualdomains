@@ -1,5 +1,11 @@
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.17  2023-03-23 22:20:51+05:30  Cprogrammer
+ * removed incorrect call to vdeldomain
+ *
+ * Revision 1.16  2023-03-22 10:43:02+05:30  Cprogrammer
+ * run POST_HANDLE program (if set) with domain user uid/gid
+ *
  * Revision 1.15  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -73,13 +79,13 @@
 #include <hashmethods.h>
 #include <get_scram_secrets.h>
 #include <subfd.h>
+#include <setuserid.h>
 #endif
 #ifdef HAVE_GSASL_H
 #include <gsasl.h>
 #include "gsasl_mkpasswd.h"
 #endif
 #include "getpeer.h"
-#include "get_indimailuidgid.h"
 #include "check_group.h"
 #include "add_vacation.h"
 #include "parse_email.h"
@@ -97,14 +103,13 @@
 #include "vset_lastauth.h"
 #include "vmake_maildir.h"
 #include "deluser.h"
-#include "deldomain.h"
 #include "iclose.h"
 #include "variables.h"
 #include "post_handle.h"
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.15 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.17 2023-03-23 22:20:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -159,12 +164,11 @@ static char    *usage =
 static void
 die_nomem()
 {
-	strerr_warn1("vmoduser: out of memory", 0);
-	_exit(111);
+	strerr_die2x(111, FATAL, "out of memory");
 }
 
 int
-get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Domain, stralloc *Gecos,
+get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Gecos,
 		stralloc *enc_pass, stralloc *DateFormat, stralloc *Quota,
 		stralloc *vacation_file, int *toggle, int *GidFlag, int *ClearFlags,
 		int *QuotaFlag, int *set_vacation, int *docram, char **clear_text,
@@ -240,7 +244,7 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 			if (!str_diffn(optarg, "SHA-512", 7))
 				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
 			else
-				strerr_die5x(100, FATAL, "wrong hash method ", optarg, ". Supported HASH Methods: DES MD5 SHA-256 SHA-512\n", usage);
+				strerr_die5x(100, WARN, "wrong hash method ", optarg, ". Supported HASH Methods: DES MD5 SHA-256 SHA-512\n", usage);
 			if (!env_put2("PASSWORD_HASH", strnum))
 				strerr_die1x(111, "out of memory");
 			encrypt_flag = 1;
@@ -260,7 +264,7 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Do
 			if (!str_diffn(optarg, "SCRAM-SHA-256", 13))
 				*scram = 2;
 			else
-				strerr_die5x(100, FATAL, "wrong SCRAM method ", optarg, ". Supported SCRAM Methods: SCRAM-SHA1 SCRAM-SHA-256\n", usage);
+				strerr_die5x(100, WARN, "wrong SCRAM method ", optarg, ". Supported SCRAM Methods: SCRAM-SHA1 SCRAM-SHA-256\n", usage);
 			break;
 		case 'S':
 			if (!salt)
@@ -371,8 +375,8 @@ main(int argc, char **argv)
 					tmpbuf = {0}, tmpQuota = {0};
 	int             GidFlag = 0, QuotaFlag = 0, toggle = 0, ClearFlags,
 					set_vacation = 0, err, fd, i;
-	uid_t           uid;
-	gid_t           gid;
+	uid_t           uid, domainuid;
+	gid_t           gid, domaingid;
 	struct passwd   PwTmp;
 	struct passwd  *pw;
 	char           *real_domain, *ptr;
@@ -396,30 +400,35 @@ main(int argc, char **argv)
 
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	if (get_options(argc, argv, &User, &Email, &Domain, &Gecos, &enc_pass,
+	if (get_options(argc, argv, &User, &Email, &Gecos, &enc_pass,
 			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
 			&QuotaFlag, &set_vacation, &docram, &clear_text, &b64salt, &iter, &scram))
 		return (1);
 #else
-	if (get_options(argc, argv, &User, &Email, &Domain, &Gecos, &enc_pass,
+	if (get_options(argc, argv, &User, &Email, &Gecos, &enc_pass,
 			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
 			&QuotaFlag, &set_vacation, 0, 0, 0, 0, 0))
 		return (1);
 #endif
 #else
-	if (get_options(argc, argv, &User, &Email, &Domain, &Gecos, &enc_pass,
+	if (get_options(argc, argv, &User, &Email, &Gecos, &enc_pass,
 			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
 			&QuotaFlag, &set_vacation, 0, 0, 0, 0, 0))
 		return (1);
 #endif
-	if (indimailuid == -1 || indimailgid == -1)
-		get_indimailuidgid(&indimailuid, &indimailgid);
+	parse_email(Email.s, &User, &Domain);
+	if (!(real_domain = get_real_domain(Domain.s)))
+		strerr_die3x(1, WARN, Domain.s, ": No such domain");
+	if (!get_assign(real_domain, &TheDir, &domainuid, &domaingid))
+		strerr_die3x(1, WARN, real_domain, ": domain does not exist");
+	if (!domainuid)
+		strerr_die4x(100, WARN, "domain ", real_domain, " with uid 0");
 	uid = getuid();
 	gid = getgid();
-	if (uid != 0 && uid != indimailuid && gid != indimailgid && check_group(indimailgid, FATAL) != 1) {
-		strnum1[fmt_ulong(strnum1, indimailuid)] = 0;
-		strnum2[fmt_ulong(strnum2, indimailgid)] = 0;
-		strerr_die5x(100, "vmoduser: you must be root or domain user (uid=", strnum1, "/gid=", strnum2, ") to run this program");
+	if (uid != 0 && uid != domainuid && gid != domaingid && check_group(domaingid, FATAL) != 1) {
+		strnum1[fmt_ulong(strnum1, domainuid)] = 0;
+		strnum2[fmt_ulong(strnum2, domaingid)] = 0;
+		strerr_die6x(100, WARN, "you must be root or domain user (uid=", strnum1, ", gid=", strnum2, ") to run this program");
 	}
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
@@ -439,64 +448,43 @@ main(int argc, char **argv)
 #endif
 #endif
 	if (QuotaFlag == 1 || set_vacation) {
-		if (uid && setuid(0)) {
-			strerr_warn1("vmoduser: setuid-root: ", &strerr_sys);
-			return (1);
-		}
+		if (uid && setuid(0))
+			strerr_die2sys(111, FATAL, "setuid-root: ");
 	} else
-	if (setuid(uid)) {
+	if (uid && setuid(uid)) {
 		strnum1[fmt_ulong(strnum1, uid)] = 0;
-		strerr_warn3("vmoduser: setuid-", strnum1, ": ", &strerr_sys);
-		return (1);
+		strerr_die4sys(111, FATAL, "setuid-", strnum1, ": ");
 	}
 	if (set_vacation)
 		return (add_vacation(Email.s, vacation_file.s));
-	parse_email(Email.s, &User, &Domain);
-	if (!(real_domain = get_real_domain(Domain.s))) {
-		strerr_warn3("vmoduser: ", Domain.s, ": No such domain", 0);
-		return (1);
-	}
 #ifdef ENABLE_DOMAIN_LIMITS
-	if (!get_assign(real_domain, &TheDir, 0, 0)) {
-		strerr_warn3("vmoduser: ", real_domain, ": domain does not exist", 0);
-		return (1);
-	}
 	if (!stralloc_copy(&tmpbuf, &TheDir) ||
 			!stralloc_0(&tmpbuf))
 		die_nomem();
 	domain_limits = ((access(tmpbuf.s, F_OK) && !env_get("DOMAIN_LIMITS")) ? 0 : 1);
 #endif
 #ifdef CLUSTERED_SITE
-	if ((err = is_distributed_domain(real_domain)) == -1) {
-		strerr_warn4(WARN, "vmoduserr: Unable to verify ", real_domain, " as a distributed domain", 0);
-		return (1);
-	} else
+	if ((err = is_distributed_domain(real_domain)) == -1)
+		strerr_die4x(1, WARN, "Unable to verify ", real_domain, " as a distributed domain");
+	else
 	if (err == 1) {
 		if (!stralloc_copy(&tmpbuf, &User) ||
 				!stralloc_append(&tmpbuf, "@") ||
 				!stralloc_cats(&tmpbuf, real_domain) ||
 				!stralloc_0(&tmpbuf))
 			die_nomem();
-		if (!findhost(tmpbuf.s, 1)) {
-			strerr_warn4("vmoduser: no such user ", User.s, "@", real_domain, 0);
-			return (1);
-		}
+		if (!findhost(tmpbuf.s, 1))
+			strerr_die5x(1, WARN, "no such user ", User.s, "@", real_domain);
 	}
 #endif
-	if (!(pw = sql_getpw(User.s, real_domain))) {
-		strerr_warn4("vmoduser: no such user ", User.s, "@", real_domain, 0);
-		return (1);
-	}
+	if (!(pw = sql_getpw(User.s, real_domain)))
+		strerr_die5x(1, WARN, "no such user ", User.s, "@", real_domain);
 #ifdef ENABLE_DOMAIN_LIMITS
 	if (!(pw->pw_gid & V_OVERRIDE) && domain_limits) {
-		if (vget_limits(real_domain, &limits)) {
-			strerr_warn2("vmoduser: Unable to get domain limits for ", real_domain, 0);
-			return (1);
-		}
-		if (QuotaFlag && (limits.perm_defaultquota & VLIMIT_DISABLE_MODIFY)) {
-			strerr_warn2("vmoduser: quota modification not allowed for ", Email.s, 0);
-			return (1);
-		}
+		if (vget_limits(real_domain, &limits))
+			strerr_die3x(1, WARN, "Unable to get domain limits for ", real_domain);
+		if (QuotaFlag && (limits.perm_defaultquota & VLIMIT_DISABLE_MODIFY))
+			strerr_die3x(1, WARN, "quota modification not allowed for ", Email.s);
 	}
 #endif
 	PwTmp = *pw; /*- structure copy */
@@ -510,7 +498,7 @@ main(int argc, char **argv)
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
 		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &ptr);
 		if (i != 6 && i != 8)
-			strerr_die1x(1, "vmoduser: unable to get secrets");
+			strerr_die2x(1, WARN, "unable to get secrets");
 		pw->pw_passwd = ptr;
 	}
 #endif
@@ -529,24 +517,18 @@ main(int argc, char **argv)
 			pw->pw_shell = "NOQUOTA";
 		else {
 			if ((*Quota.s == '+') || (*Quota.s == '-')) {
-				if ((ul = parse_quota(pw->pw_shell, 0)) == -1) {
-					strerr_warn3("vmoduser: invalid quota specification [", pw->pw_shell, "]", 0);
-					return (1);
-				}
+				if ((ul = parse_quota(pw->pw_shell, 0)) == -1)
+					strerr_die4x(1, WARN, "invalid quota specification [", pw->pw_shell, "]");
 				quota += ul;
-				if ((ul = parse_quota(Quota.s, 0)) == -1) {
-					strerr_warn3("vmoduser: invalid quota specification [", pw->pw_shell, "]", 0);
-					return (1);
-				}
+				if ((ul = parse_quota(Quota.s, 0)) == -1)
+					strerr_die4x(1, WARN, "invalid quota specification [", pw->pw_shell, "]");
 				quota += ul;
 				strnum1[i = fmt_ulong(strnum1, quota)] = 0;
 				if (!stralloc_copyb(&tmpQuota, strnum1, i))
 					die_nomem();
 			} else {
-				if ((ul = parse_quota(Quota.s, 0)) == -1) {
-					strerr_warn3("vmoduser: invalid quota specification [", pw->pw_shell, "]", 0);
-					return (1);
-				}
+				if ((ul = parse_quota(Quota.s, 0)) == -1)
+					strerr_die4x(1, WARN, "invalid quota specification [", pw->pw_shell, "]");
 				strnum1[i = fmt_ulong(strnum1, ul)] = 0;
 				if (!stralloc_copyb(&tmpQuota, strnum1, i))
 					die_nomem();
@@ -566,12 +548,6 @@ main(int argc, char **argv)
 	if (active_inactive == 1) {
 		if (is_inactive) {
 			err = sql_active(pw, real_domain, FROM_INACTIVE_TO_ACTIVE);
-			if (!get_assign(real_domain, 0, &uid, &gid)) {
-				if (indimailuid == -1 || indimailgid == -1)
-					get_indimailuidgid(&indimailuid, &indimailgid);
-				uid = indimailuid;
-				gid = indimailgid;
-			}
 			vmake_maildir(pw->pw_dir, uid, gid, real_domain);
 		} else
 			err = deluser(User.s, real_domain, 2);
@@ -587,20 +563,16 @@ main(int argc, char **argv)
 	ptr = (char *) NULL;
 #endif
 	if ((Gecos.len || enc_pass.len || ClearFlags || GidFlag || QuotaFlag) &&
-			(err = sql_setpw(pw, real_domain, ptr))) {
-		strerr_warn1("vmoduser: sql_setpw failed", 0);
-		return (1);
-	}
+			(err = sql_setpw(pw, real_domain, ptr)))
+		strerr_die2x(1, FATAL, "sql_setpw failed");
 	if (!err && QuotaFlag == 1) {
 		if (!stralloc_copys(&tmpbuf, pw->pw_dir) ||
 				!stralloc_catb(&tmpbuf, "/Maildir", 8) ||
 				!stralloc_0(&tmpbuf))
 			die_nomem();
 #ifdef USE_MAILDIRQUOTA
-		if ((size_limit = parse_quota(pw->pw_shell, &count_limit)) == -1) {
-			strerr_warn3("vmoduser: parse_quota: ", pw->pw_shell, ": ", &strerr_sys);
-			return (1);
-		}
+		if ((size_limit = parse_quota(pw->pw_shell, &count_limit)) == -1)
+			strerr_die4sys(111, WARN, "parse_quota: ", pw->pw_shell, ": ");
 		quota = recalc_quota(tmpbuf.s, &mailcount, size_limit, count_limit, 2);
 #else
 		quota = recalc_quota(tmpbuf.s, 2);
@@ -627,28 +599,20 @@ main(int argc, char **argv)
 				!stralloc_catb(&tmpbuf, "/Maildir/folder.dateformat", 26) ||
 				!stralloc_0(&tmpbuf))
 			die_nomem();
-		if ((fd = open(tmpbuf.s, O_CREAT|O_TRUNC|O_WRONLY, INDIMAIL_QMAIL_MODE)) == -1) {
-			strerr_warn3("vmoduser: open", tmpbuf.s, ": ", &strerr_sys);
-			return (1);
-		}
-		if (!get_assign(real_domain, 0, &uid, &gid)) {
-			if (indimailuid == -1 || indimailgid == -1)
-				get_indimailuidgid(&indimailuid, &indimailgid);
-			uid = indimailuid;
-			gid = indimailgid;
-		}
+		if ((fd = open(tmpbuf.s, O_CREAT|O_TRUNC|O_WRONLY, INDIMAIL_QMAIL_MODE)) == -1)
+			strerr_die4sys(111, FATAL, "open", tmpbuf.s, ": ");
 		if (fchown(fd, uid, gid)) {
 			strnum1[fmt_ulong(strnum1, uid)] = 0;
 			strnum2[fmt_ulong(strnum2, gid)] = 0;
-			strerr_warn7("vmoduser: fchown: ", tmpbuf.s, ": (uid ", strnum1, ", gid ", strnum2, "): ", &strerr_sys);
-			deldomain(Domain.s);
-			iclose();
+			strerr_warn8(FATAL, "fchown: ", tmpbuf.s, ": (uid ", strnum1, ", gid ", strnum2, "): ", &strerr_sys);
 			close(fd);
+			iclose();
 			return (1);
 		}
 		if (write(fd, DateFormat.s, DateFormat.len) == -1) {
-			strerr_warn3("vmoduser: write: ", tmpbuf.s, ": ", &strerr_sys);
+			strerr_warn4(FATAL, "write: ", tmpbuf.s, ": ", &strerr_sys);
 			close(fd);
+			iclose();
 			return (1);
 		}
 		close(fd);
@@ -672,6 +636,11 @@ main(int argc, char **argv)
 				base_argv0++;
 			return (post_handle("%s/%s%s", LIBEXECDIR, base_argv0, tmpbuf.s));
 		} else {
+			if (setuser_privileges(domainuid, domaingid, "indimail")) {
+				strnum1[fmt_ulong(strnum1, domainuid)] = 0;
+				strnum2[fmt_ulong(strnum2, domaingid)] = 0;
+				strerr_die6sys(111, FATAL, "setuser_privilege: (", strnum1, "/", strnum2, "): ");
+			}
 			return (post_handle("%s%s", ptr, tmpbuf.s));
 		}
 	}

@@ -1,5 +1,8 @@
 /*
  * $Log: limits.c,v $
+ * Revision 1.5  2023-03-23 22:08:24+05:30  Cprogrammer
+ * removed spurious warning message when limits doesn't exist
+ *
  * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -19,7 +22,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: limits.c,v 1.4 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: limits.c,v 1.5 2023-03-23 22:08:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -86,7 +89,6 @@ vget_limits(char *domain, struct vlimits *limits)
 		die_nomem("vget_limits");
 	if (mysql_query(&mysql[1], SqlBuf.s)) {
 		if (in_mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
-			strerr_warn2("vget_limits: No rows selected for domain ", domain, 0);
 			create_table(ON_LOCAL, "vlimits", LIMITS_TABLE_LAYOUT);
 			return (0);
 		}

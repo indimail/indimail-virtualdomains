@@ -1,5 +1,8 @@
 /*
  * $Log: sql_setpw.c,v $
+ * Revision 1.7  2023-03-23 22:17:53+05:30  Cprogrammer
+ * bug fix - record not getting updated
+ *
  * Revision 1.6  2022-10-27 17:21:01+05:30  Cprogrammer
  * refactored sql code into do_sql()
  *
@@ -52,7 +55,7 @@
 #include "create_table.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_setpw.c,v 1.6 2022-10-27 17:21:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_setpw.c,v 1.7 2023-03-23 22:17:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -117,7 +120,7 @@ int
 sql_setpw(struct passwd *inpw, char *domain, char *scram)
 {
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
-	struct passwd  *pw;
+	struct passwd  *pw, *t;
 	struct passwd   PwTmp;
 	char           *tmpstr;
 	uid_t           myuid;
@@ -161,23 +164,36 @@ sql_setpw(struct passwd *inpw, char *domain, char *scram)
 		return (-1);
 	}
 
+	if (scram) {
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
-		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &tmpstr);
-		if (i != 6 && i != 8)
-			strerr_die1x(1, "sql_getpw: unable to get secrets");
-		pw->pw_passwd = tmpstr;
-	}
-	if (!pwcomp(pw, copyPwdStruct(inpw)) && !str_diffn(scram, result.s, result.len))
-		return (0);
+		if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
+			i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &tmpstr);
+			if (i != 6 && i != 8)
+				strerr_die1x(1, "sql_getpw: unable to get secrets");
+			pw->pw_passwd = tmpstr;
+			i = str_rchr(pw->pw_passwd, ',');
+			if (pw->pw_passwd[i]) {
+				if (!stralloc_copyb(&result, pw->pw_passwd, i) ||
+						!stralloc_0(&result))
+					die_nomem();
+				result.len--;
+			}
+			if (!pwcomp(pw, copyPwdStruct(inpw)) && !str_diffn(scram, result.s, result.len))
+				return (0);
+		} else
+		if (!pwcomp(pw, copyPwdStruct(inpw)))
+			return (0);
 #else
-	if (!pwcomp(pw, copyPwdStruct(inpw)))
-		return (0);
+		if (!pwcomp(pw, copyPwdStruct(inpw)))
+			return (0);
 #endif
-	if (!pwcomp(pw, copyPwdStruct(inpw)))
-		return (0);
+		if (!pwcomp(pw, copyPwdStruct(inpw)))
+			return (0);
 #endif
+	} else
+	if (!pwcomp(pw, (t = copyPwdStruct(inpw))))
+		return (0);
 
 	if (site_size == LARGE_SITE) {
 		if (!domain || *domain)

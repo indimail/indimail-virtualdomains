@@ -1,5 +1,8 @@
 /*
  * $Log: renameuser.c,v $
+ * Revision 1.7  2023-03-23 22:35:13+05:30  Cprogrammer
+ * ignore duplicate error when updating lastauth table
+ *
  * Revision 1.6  2022-11-02 14:56:35+05:30  Cprogrammer
  * restore scram password while renaming user
  *
@@ -60,7 +63,7 @@
 #include "deluser.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: renameuser.c,v 1.6 2022-11-02 14:56:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: renameuser.c,v 1.7 2023-03-23 22:35:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -216,9 +219,13 @@ renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *
 		strerr_warn5("renameuser: MoveFile: ", oldDir.s, " --> ", pw->pw_dir, ": ", &strerr_sys);
 		return (-1);
 	}
+	/*
+	 * TODO
+	 * rename dot qmail files
+	 */
 
 #ifdef ENABLE_AUTH_LOGGING
-	if (!stralloc_copyb(&SqlBuf, "update low_priority lastauth set user=\"", 39) ||
+	if (!stralloc_copyb(&SqlBuf, "update low_priority ignore lastauth set user=\"", 46) ||
 			!stralloc_cat(&SqlBuf, newUser) ||
 			!stralloc_catb(&SqlBuf, "\", domain=\"", 11) ||
 			!stralloc_cat(&SqlBuf, newDomain) ||

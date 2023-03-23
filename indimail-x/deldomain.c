@@ -1,5 +1,8 @@
 /*
  * $Log: deldomain.c,v $
+ * Revision 1.5  2023-03-23 22:04:58+05:30  Cprogrammer
+ * multiple bug fixes
+ *
  * Revision 1.4  2023-03-20 09:57:24+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -55,7 +58,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deldomain.c,v 1.4 2023-03-20 09:57:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deldomain.c,v 1.5 2023-03-23 22:04:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -63,6 +66,45 @@ die_nomem()
 {
 	strerr_warn1("deldomain: out of memory", 0);
 	_exit(111);
+}
+
+int
+remove_alias_domain(char *domain, char *alias_domain_file)
+{
+	int             i;
+	uid_t           uid;
+	gid_t           gid;
+	static stralloc Dir = {0};
+
+	if (verbose) {
+		out("deldomain", "Removing alias domain ");
+		out("deldomain", domain);
+		out("deldomain", "\n");
+		flush("deldomain");
+	}
+#ifdef CLUSTERED_SITE
+	i = open_master();
+	if (i && i != 2) {
+		strerr_warn1("deldomain: Failed to open master db", 0);
+		return (-1);
+	}
+	if (!i && get_real_domain(domain) && sql_delaliasdomain(domain)) {
+		strerr_warn3("deldomain: Failed to remove alias domain ", domain, " from aliasdomain table", 0);
+		return (-1);
+	}
+#endif
+	if (remove_line(domain, alias_domain_file, 0, 0640) == -1) {
+		strerr_warn4("deldomain: Failed to remove alias domain ", domain, " from ", alias_domain_file, 0);
+		return (-1);
+	}
+	if (!get_assign(domain, &Dir, &uid, &gid)) {
+		strerr_warn3("deldomain: alias domain ", domain, " does not exist", 0);
+		return (0);
+	}
+	if (del_domain_assign(domain, Dir.s, uid, gid))
+		return (-1);
+	del_control(domain);
+	return 0;
 }
 
 int
@@ -166,41 +208,29 @@ deldomain(char *domain)
 			!stralloc_catb(&tmpbuf, "/.aliasdomains", 14) || !stralloc_0(&tmpbuf))
 		die_nomem();
 	if ((is_alias = is_alias_domain(domain)) == 1) {
-		if (verbose) {
-			out("deldomain", "Removing alias domain ");
-			out("deldomain", domain);
-			out("deldomain", "\n");
-			flush("deldomain");
-		}
-#ifdef CLUSTERED_SITE
-		i = open_master();
-		if (i && i != 2) {
-			strerr_warn1("deldomain: Failed to open master db", 0);
-			return (-1);
-		}
-		if (!i && get_real_domain(domain) && sql_delaliasdomain(domain)) {
-			strerr_warn3("deldomain: Failed to remove alias domain ", domain, " from aliasdomain table", 0);
-			return (-1);
-		}
-#endif
-		if (remove_line(domain, tmpbuf.s, 0, 0640) == -1) {
-			strerr_warn4("deldomain: Failed to remove alias domain ", domain, " from ", tmpbuf.s, 0);
-			return (-1);
-		}
+		if (remove_alias_domain(domain, tmpbuf.s))
+			return -1;
 	} else {
 		if ((fd = open_read(tmpbuf.s)) == -1 && errno != error_noent)
 			strerr_die3sys(111, "deldomain: ", tmpbuf.s, ": ");
 		if (fd > -1) {
-			if (verbose)
-				strerr_warn2("deldomain: Removing domains aliased to ", domain, 0);
+			if (verbose) {
+				out("deldomain", "Removing domains aliased to ");
+				out("deldomain", domain);
+				out("deldomain", "\n");
+				flush("deldomain");
+			}
 			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 			for(;;) {
 				if (getln(&ssin, &line, &match, '\n') == -1) {
 					strerr_warn3("deldomain: read: ", tmpbuf.s, ": ", &strerr_sys);
+					close(fd);
 					break;
 				}
-				if (!line.len)
+				if (!line.len) {
+					close(fd);
 					break;
+				}
 				if (match) {
 					line.len--;
 					if (!line.len)
@@ -217,12 +247,12 @@ deldomain(char *domain)
 				for (ptr = line.s; *ptr && isspace((int) *ptr); ptr++);
 				if (!*ptr)
 					continue;
-				strerr_warn2("deldomain: removing alias domain ", ptr, 0);
-				if (deldomain(ptr)) {
-					strerr_warn2("deldomain: error removing alias domain ", ptr, 0);
-					close(fd);
-					return (-1);
-				}
+				if (!str_diff(domain, line.s)) /*- invalid entry */
+					continue;
+				if (verbose)
+					strerr_warn2("deldomain: removing alias domain ", ptr, 0);
+				if (remove_alias_domain(ptr, tmpbuf.s))
+					return -1;
 			}
 			close(fd);
 		}
@@ -260,6 +290,8 @@ deldomain(char *domain)
 					!stralloc_append(&tmpbuf, "/") ||
 					!stralloc_cats(&tmpbuf, domain) || !stralloc_0(&tmpbuf))
 				die_nomem();
+			if (access(tmpbuf.s, F_OK) && errno == error_noent)
+				continue;
 			if (verbose) {
 				out("deldomain", "Removing ");
 				out("deldomain", tmpbuf.s);
@@ -273,9 +305,17 @@ deldomain(char *domain)
 		}
 	}
 	/*- Delete /var/indimail/domains/domain_name */
-	if (vdelfiles(Dir.s, "", domain) != 0) {
-		strerr_warn3("deldomain: Failed to remove dir ", Dir.s, ": ", &strerr_sys);
-		return (-1);
+	if (!access(Dir.s, F_OK)) {
+		if (verbose) {
+			out("deldomain", "Removing ");
+			out("deldomain", Dir.s);
+			out("deldomain", "\n");
+			flush("deldomain");
+		}
+		if (vdelfiles(Dir.s, "", domain) != 0) {
+			strerr_warn3("deldomain: Failed to remove dir ", Dir.s, ": ", &strerr_sys);
+			return (-1);
+		}
 	}
 
 	/*-

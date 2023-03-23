@@ -36,6 +36,25 @@ Release 3.4.3-1.1 Start 13/02/2023 End XX/XX/XXXX
 15. vadddomain: call post handle script with the same arguments passed to
     vadddomain
 16. vadddomain_handle: handle all arguments passed to vaddomain
+- 22/03/2023
+17. add_domain_assign.c: BUG - set uid, gid variables before creating assign
+    file
+18. vaddaliasdomain.c, vadddomain.c, vdeldomain.c, vmoduser.c, vmoveuser.c,
+    vrenamedomain.c, vrenameuser.c
+    run POST_HANDLE program (if set) with domain user uid/gid
+19. check_group.c: memory leak: free allocated variable list before returning
+20. vmoddomain.c, vdeluser.c: updated error strings
+- 23/03/2023
+21. deldomain.c: multiple bug fixes
+22. deluser.c: skip vdelfiles when directory doesn't exist
+23. limits.c: removed spurious warning message when limits doesn't exist
+24. sql_renamedomain.c: refactored code
+25. sql_setpw.c: bug fix - record not getting updated
+26. vmoduser.c: removed incorrect call to vdeldomain
+27. vmoveuser.c: bug fix - remove domain component from User  
+28. vrenamedomain.c: multiple bug fixes
+29. vrenameuser.c: set BASE PATH of original domain for the new user
+30. renameuser.c: ignore duplicate error when updating lastauth table
 
 * Tue Jan 31 2023 03:32:40 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.2-1.1%{?dist}
 Release 3.4.2-1.1 Start 08/09/2022 End 31/01/2023

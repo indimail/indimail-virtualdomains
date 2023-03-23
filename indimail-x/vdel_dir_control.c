@@ -81,7 +81,7 @@ vdel_dir_control(char *domain)
 		}
 		if (match)
 			line.len--;
-		if (!stralloc_catb(&SqlBuf, "delete low_priority from dir_control", 36) ||
+		if (!stralloc_copyb(&SqlBuf, "delete low_priority from dir_control", 36) ||
 				!stralloc_cat(&SqlBuf, &line) ||
 				!stralloc_catb(&SqlBuf, " where domain = \"", 17) ||
 				!stralloc_cats(&SqlBuf, domain) ||
