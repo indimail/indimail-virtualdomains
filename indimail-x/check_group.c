@@ -1,5 +1,8 @@
 /*
  * $Log: check_group.c,v $
+ * Revision 1.3  2023-03-22 08:23:24+05:30  Cprogrammer
+ * free allocated variable list before returning
+ *
  * Revision 1.2  2019-04-22 22:24:44+05:30  Cprogrammer
  * added condition including of qmail header files
  *
@@ -25,9 +28,13 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: check_group.c,v 1.2 2019-04-22 22:24:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: check_group.c,v 1.3 2023-03-22 08:23:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
+/*
+ * check_group
+ * returns 1 if caller has gid as a supplementary group
+ */
 int
 check_group(gid_t gid, char *str)
 {
@@ -56,5 +63,6 @@ check_group(gid_t gid, char *str)
 		if (list[i] == gid)
 			return (1);
 	}
+	alloc_free((char *) list);
 	return (0);
 }

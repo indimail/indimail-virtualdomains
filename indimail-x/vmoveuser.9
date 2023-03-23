@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH vmoveuser 1
 .SH NAME
 vmoveuser \- move homedir of a virtual user to a new path
@@ -6,15 +7,19 @@ vmoveuser \- move homedir of a virtual user to a new path
 \fBvmoveuser\fR \fIemail_addr\fR \fInew_homedir\fR
 
 .SH DESCRIPTION
-\fBvmoveuser\fR changes the current homedir path to \fInew_homedir\fR, moving all existing
-files to the new path. \fBvmoveuser\fR has setuid bit to root and can be run by the
-root or indimail user.
+\fBvmoveuser\fR changes the current homedir path to \fInew_homedir\fR,
+moving all existing files to the new path. \fBvmoveuser\fR has setuid bit
+to root and can be run by the root or the domain user.
 
 .SH POST HANDLE
-If the environment variable POST_HANDLE is set, \fBvmoveuser\fR executes the program defined by
-the POST_HANDLE environment variable, passing \fIemail_addr\fR, \fIold_homedir\fR and \fInew_homedir\fR
-as parameters. If POST_HANDLE is not defined, the program/script LIBEXECDIR/vmoveuser will
-be executed with \fIemail_addr\fR, \fIold_homedir\fR and \fInew_homedir\fR as parameters.
+If the environment variable \fBPOST_HANDLE\fR is set, \fBvmoveuser\fR
+executes the program defined by the \fBPOST_HANDLE\fR environment variable
+with the uid/gid of the domain in \fI@sysconfdir@/users/assign\fR.
+If \fBPOST_HANDLE\fR is not defined, the program @libexecdir@/vmoveuser
+will be executed with root privileges. The \fBPOST_HANDLE\fR progam is run
+with \fIemail_addr\fR, \fIold_homedir\fR and \fInew_homedir\fR as command
+line arguments. The \fBPOST_HANDLE\fR program is executed as the last step
+after all earlier steps have been successful.
 
 .SH OPTIONS
 .TP

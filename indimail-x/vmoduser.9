@@ -11,13 +11,18 @@ vmoduser \- Modify virtual user attributes
 .B vmoduser
 modifies attributes of an email account by modifying fields in the
 authentication tables indimail or indibak. \fBvmoduser\fR has the setuid
-bit set to root and must be run as root or indimail user.
+bit set to root and must be run as root or indimail user. For the -q and -l
+options, \fBvmoduser\fR is executed with root privileges.
 
 .SH POST HANDLE
 If the environment variable POST_HANDLE is set, \fBvmoduser\fR executes the
-program defined by the POST_HANDLE environment variable, passing all
-arguments passed to vmoduser. If POST_HANDLE is not defined, the
-program/script LIBEXECDIR/vmoduser will be executed.
+program defined by the \fBPOST_HANDLE\fR environment variable with the
+uid/gid of the domain in \fI@sysconfdir@/users/assign\fR. If
+\fBPOST_HANDLE\fR is not defined, the program @libexecdir@/vmoduser will be
+executed. For the -l option, \fBPOST_HANDLE\fR is not executed at all. The
+\fBPOST_HANDLE\fR program is passed the same command line arguments as
+passed to \fBvmoduser\fR. The \fBPOST_HANDLE\fR program is executed as the
+last step after all earlier steps have been successful.
 
 .SH OPTIONS
 .PP

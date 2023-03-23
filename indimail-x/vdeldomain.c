@@ -1,5 +1,8 @@
 /*
  * $Log: vdeldomain.c,v $
+ * Revision 1.6  2023-03-22 10:42:23+05:30  Cprogrammer
+ * run POST_HANDLE program (if set) with domain user uid/gid
+ *
  * Revision 1.5  2023-01-22 10:32:24+05:30  Cprogrammer
  * fixed incorrectly passed stralloc * instead of char *
  *
@@ -39,11 +42,12 @@
 #include <sgetopt.h>
 #include <strerr.h>
 #include <str.h>
+#include <fmt.h>
 #include <env.h>
 #include <error.h>
 #include <getEnvConfig.h>
+#include <setuserid.h>
 #endif
-#include "get_indimailuidgid.h"
 #include "variables.h"
 #include "iclose.h"
 #include "check_group.h"
@@ -55,9 +59,10 @@
 #include "dbinfoDel.h"
 #include "LoadDbInfo.h"
 #include "post_handle.h"
+#include "get_assign.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeldomain.c,v 1.5 2023-01-22 10:32:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeldomain.c,v 1.6 2023-03-22 10:42:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char    *usage =
@@ -73,7 +78,7 @@ static char    *usage =
 static void
 die_nomem()
 {
-	strerr_warn1("vdeldomain: out of memory", 0);
+	strerr_warn2(FATAL, "out of memory", 0);
 	_exit(111);
 }
 
@@ -114,9 +119,10 @@ int
 main(int argc, char **argv)
 {
 	int             i, err, mcd_remove = 0;
-	uid_t           uid;
-	gid_t           gid;
+	uid_t           uid, domainuid;
+	gid_t           gid, domaingid;
 	char           *ptr, *base_argv0;
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	static stralloc Domain = {0};
 #ifdef CLUSTERED_SITE
 	static stralloc mcdFile = {0};
@@ -126,12 +132,17 @@ main(int argc, char **argv)
 
 	if (get_options(argc, argv, &Domain, &mcd_remove))
 		return (0);
-	if (indimailuid == -1 || indimailgid == -1)
-		get_indimailuidgid(&indimailuid, &indimailgid);
+	if (!(ptr = get_assign(Domain.s, 0, &domainuid, &domaingid)))
+		strerr_die4x(1, WARN, "domain ", Domain.s, " does not exist");
+	if (!domainuid)
+		strerr_die4x(100, WARN, "domain ", Domain.s, " with uid 0");
 	uid = getuid();
 	gid = getgid();
-	if (uid != 0 && uid != indimailuid && gid != indimailgid && check_group(indimailgid, FATAL) != 1)
-		strerr_die1x(100, "you must be root or indimail to run this program");
+	if (uid != 0 && uid != domainuid && gid != domaingid && check_group(domaingid, FATAL) != 1) {
+		strnum1[fmt_ulong(strnum1, domainuid)] = 0;
+		strnum2[fmt_ulong(strnum2, domaingid)] = 0;
+		strerr_die6x(100, WARN, "you must be root or domain user (uid=", strnum1, "/gid=", strnum2, ") to run this program");
+	}
 	if (uid && setuid(0))
 		strerr_die2sys(111, FATAL, "setuid: ");
 	if ((err = deldomain(Domain.s)))
@@ -148,12 +159,12 @@ main(int argc, char **argv)
 	} else
 	if (is_dist || mcd_remove) {
 		if (!(ipaddr = get_local_ip(PF_INET))) {
-			strerr_warn1("vdeldomain: failed to get local ipaddr: ", 0);
+			strerr_warn2(FATAL, "failed to get local ipaddr: ", 0);
 			iclose();
 			return (1);
 		}
 		if (dbinfoDel(Domain.s, ipaddr)) {
-			strerr_warn4("vdeldomain: failed to get remove dbinfo entry for ", Domain.s, "@", ipaddr, 0);
+			strerr_warn5(FATAL, "failed to get remove dbinfo entry for ", Domain.s, "@", ipaddr, 0);
 			iclose();
 			return (1);
 		}
@@ -182,7 +193,7 @@ main(int argc, char **argv)
 			}
 		}
 		if (!access(mcdFile.s, F_OK) && unlink(mcdFile.s)) {
-			strerr_warn3("vdeldomain: unlink: ", mcdFile.s, ": ", &strerr_sys);
+			strerr_warn4(FATAL, "unlink: ", mcdFile.s, ": ", &strerr_sys);
 			iclose();
 		}
 		LoadDbInfo_TXT(&total);
@@ -196,6 +207,12 @@ main(int argc, char **argv)
 		else
 			base_argv0++;
 		return (post_handle("%s/%s %s", LIBEXECDIR, base_argv0, Domain.s));
-	} else
+	} else {
+		if (setuser_privileges(domainuid, domaingid, "indimail")) {
+			strnum1[fmt_ulong(strnum1, domainuid)] = 0;
+			strnum2[fmt_ulong(strnum2, domaingid)] = 0;
+			strerr_die6sys(111, FATAL, "setuser_privilege: (", strnum1, "/", strnum2, "): ");
+		}
 		return (post_handle("%s %s", ptr, Domain.s));
+	}
 }

@@ -44,16 +44,18 @@ Add entry to table dbinfo and mcdfile for a clustered domain ('-D' option).
 Create the postmaster account for a non-clustered domain. For a clustered
 domain, the \fIpostmaster\fR account is created on the first host on which
 the domain is created. Post adding the \fIpostmaster\fR user,
-	\fBvadddomain\fR adds \fIabuse\fR and \fImailer-daemon\fR, as aliases
-	to the \fIpostmaster\fR account.
+\fBvadddomain\fR adds \fIabuse\fR and \fImailer-daemon\fR, as aliases
+to the \fIpostmaster\fR account.
 
 .SH POST HANDLE
-If the environment variable POST_HANDLE is set, \fBvadddomain\fR executes
-the program defined by the POST_HANDLE environment variable, passing
-\fIvirtual_domain\fR as a parameter. If POST_HANDLE is not defined, the
-program/script @libexecdir@/vadddomain will be executed with
-\fIvirtual_domain\fR
-as a parameter.
+If the environment variable \fBPOST_HANDLE\fR is set, \fBvadddomain\fR
+executes the program defined by the \fBPOST_HANDLE\fR environment variable
+with the same with uid/gid of the \fIindimail\fR user in /etc/passwd. If
+\fBPOST_HANDLE\fR is not defined, the program @libexecdir@/vadddomain will
+be executed with root privileges. The \fBPOST_HANDLE\fR program/script is
+passed the same command line arguments as passed to \fBvadddomain\fR. The
+\fBPOST_HANDLE\fR program is executed as the last step after all earlier
+steps have been successful.
 
 .SH OPTIONS
 .PP

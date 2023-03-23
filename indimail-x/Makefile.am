@@ -212,7 +212,7 @@ doc_list= ChangeLog FAQ.pdf README-indimail.md README-ldap.md  \
 
 MOSTLYCLEANFILES=vcaliasrev myslave controlsync bogofilter-qfe \
 	cronlist.i incrypt vdeluser_handle vrenameuser_handle \
-	cscope.* *.dSYM mailzipper mytcplookup.c tcplookup.8 \
+	cscope.* *.dSYM mailzipper mytcplookup.c tcplookup.8 vaddaliasdomain.1 \
 	indimail.perms dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
 	vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
 	vcfilter.1 indimail.7 indimail.mrtg.cfg overquota.sh \
@@ -538,6 +538,7 @@ editman = sed \
 	-e 's}@sysconfdir\@}$(sysconfdir)}g' \
 	-e 's}@qmaildir\@}$(qmaildir)}g' \
 	-e 's}@controldir\@}$(controldir)}g' \
+	-e 's}@libexecdir\@}$(libexecdir)}g' \
 	-e 's}@servicedir\@}$(servicedir)}g' \
 	-e 's}@prefix\@}$(prefix)}g'
 
@@ -625,31 +626,31 @@ inlookup.8: inlookup.9
 tcplookup.8: tcplookup.9
 	$(editman) tcplookup.9 > $@
 vcfilter.1: vcfilter.9
-	cat vcfilter.9 | sed s}SYSCONFDIR}$(sysconfdir)}g > $@
+	$(editman) vcfilter.9 > $@
+vaddaliasdomain.1: vaddaliasdomain.9
+	$(editman) vaddaliasdomain.9 > $@
 vadddomain.1: vadddomain.9
 	$(editman) vadddomain.9 > $@
 vdeldomain.1: vdeldomain.9
-	cat vdeldomain.9 | sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vdeldomain.9 > $@
 vadduser.1: vadduser.9
-	cat vadduser.9 | sed s}INDIMAIL}$(indimaildir)}g \
-		| sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vadduser.9 > $@
 vdeluser.1: vdeluser.9
-	cat vdeluser.9 | sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vdeluser.9 > $@
 vrenamedomain.1: vrenamedomain.9
-	cat vrenamedomain.9 | sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vrenamedomain.9 > $@
 vrenameuser.1: vrenameuser.9
-	cat vrenameuser.9 | sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vrenameuser.9 > $@
 vpasswd.1: vpasswd.9
-	cat vpasswd.9 | sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vpasswd.9 > $@
 vmoduser.1: vmoduser.9
-	cat vmoduser.9 | sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vmoduser.9 > $@
 vmoveuser.1: vmoveuser.9
-	cat vmoveuser.9 | sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vmoveuser.9 > $@
 vdelivermail.8: vdelivermail.9
-	cat vdelivermail.9 | sed s}INDIMAIL}$(indimaildir)}g \
-		| sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vdelivermail.9 > $@
 ischema.1: ischema.9
-	cat ischema.9 | sed s}SYSCONFDIR}$(sysconfdir)}g>$@
+	$(editman) ischema.9 > $@
 indimail.7: indimail.9
 	$(editman) indimail.9 > $@
 

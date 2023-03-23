@@ -9,7 +9,7 @@ vdelivermail \- deliver mails to users in a virtual domain
 .PP
 \fBvdelivermail\fR delivers mails to users created (by \fBvadddomain(1)\fR) in a virtual domain.
 \fBvdelivermail\fR is called by \fBqmail-local\fR through an instruction in the
-file .\fIqmail\fR-\fIdefault\fR present in INDIMAIL/domains directory.
+file .\fIqmail\fR-\fIdefault\fR present in @indimaildir@/domains directory.
 \fBvdelivermail\fR is the MDA for IndiMail. Along with a wrapper postdel, \fBvdelivermail\fR
 can also be used as the MDA for postfix. \fBqmail-local\fR sets the environment variables
 \fBEXT\fR and \fBHOST\fR. This is used by \fBvdelivermail\fR to set the
@@ -85,7 +85,7 @@ and the current quota status. It contains a header in format:
 If the size of the mail is within the quota, or if the size of the mail is less than
 OVERQUOTA_MAILSIZE (1000 bytes as defined in indimail.h), but would bring the user
 overquota, the mail is delivered and the user's current quota usage updated. Else the mail is
-bounced back with Over Quota message. Also if LIBEXECDIR/overquota.sh exists, the
+bounced back with Over Quota message. Also if @libexecdir@/overquota.sh exists, the
 command is executed with the following arguments
 
  maildir_path Message_size Current_disk_usage Current_mailcount quota
@@ -129,7 +129,7 @@ the date format for the folder.
 .SH dot-qmail processing
 
 .PP
-Every virtualdomain get's it's own directory under INDIMAIL/domains. qmail's user/assign file
+Every virtualdomain get's it's own directory under @indimaildir@/domains. qmail's user/assign file
 gets an entry for each domain that points qmail-local deliveries into this directory.
 Therefore, all normal .qmail file processing works in each virtual domain. .qmail files
 just need the user name extension to work, i.e. .qmail-joe for user joe. ezmlm uses .qmail

@@ -1,5 +1,8 @@
 /*
  * $Log: vaddaliasdomain.c,v $
+ * Revision 1.5  2023-03-22 08:16:59+05:30  Cprogrammer
+ * run POST_HANDLE program (if set) with domain user uid/gid
+ *
  * Revision 1.4  2022-10-20 11:58:22+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -27,18 +30,19 @@
 #include <fmt.h>
 #include <env.h>
 #include <str.h>
+#include <stralloc.h>
 #include <sgetopt.h>
 #include <setuserid.h>
 #endif
-#include "get_indimailuidgid.h"
 #include "check_group.h"
 #include "iclose.h"
 #include "addaliasdomain.h"
 #include "post_handle.h"
+#include "get_assign.h"
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vaddaliasdomain.c,v 1.4 2022-10-20 11:58:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vaddaliasdomain.c,v 1.5 2023-03-22 08:16:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vaddaliasdomain: fatal: "
@@ -85,29 +89,26 @@ main(int argc, char **argv)
 	char           *ptr, *domain_old, *domain_new, *base_argv0;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	int             i, err;
-	uid_t           uid;
-	gid_t           gid;
+	uid_t           uid, domainuid;
+	gid_t           gid, domaingid;
 
 	if(get_options(argc, argv, &domain_new, &domain_old))
 		return (1);
-	if (indimailuid == -1 || indimailgid == -1)
-		get_indimailuidgid(&indimailuid, &indimailgid);
+	if (!get_assign(domain_old, 0, &domainuid, &domaingid)) {
+		strerr_warn3(WARN, domain_old, ": domain does not exist", 0);
+		return (-1);
+	}
+	if (!domainuid)
+		strerr_die4x(100, WARN, "domain ", domain_old, " with uid 0");
 	uid = getuid();
 	gid = getgid();
-	if (uid != 0 && uid != indimailuid && gid != indimailgid && check_group(indimailgid, FATAL) != 1) {
-		strnum1[fmt_ulong(strnum1, indimailuid)] = 0;
-		strnum2[fmt_ulong(strnum2, indimailgid)] = 0;
-		strerr_warn5("vaddaliasdomain: you must be root or domain user (uid=", strnum1, "/gid=", strnum2, ") to run this program", 0);
-		return (1);
-	}
-	if (setuser_privileges(uid, gid, "indimail")) {
-		strnum1[fmt_ulong(strnum1, uid)] = 0;
-		strnum2[fmt_ulong(strnum2, gid)] = 0;
-		strerr_warn5("vaddaliasdomain: setuser_privilege: (", strnum1, "/", strnum2, "): ", &strerr_sys);
-		return (1);
+	if (uid != 0 && uid != domainuid && gid != domaingid && check_group(domaingid, FATAL) != 1) {
+		strnum1[fmt_ulong(strnum1, domainuid)] = 0;
+		strnum2[fmt_ulong(strnum2, domaingid)] = 0;
+		strerr_die6x(100, WARN, "you must be root or domain user (uid=", strnum1, ", gid=", strnum2, ") to run this program");
 	}
 	if((err = addaliasdomain(domain_old, domain_new))) {
-		strerr_warn4("vaddaliasdomain: failed to create alias domain ", domain_new, " for domain ", domain_old, 0);
+		strerr_warn5(FATAL, "failed to create alias domain ", domain_new, " for domain ", domain_old, 0);
 		return (1);
 	}
 	iclose();
@@ -118,7 +119,13 @@ main(int argc, char **argv)
 		else
 			base_argv0++;
 		return (post_handle("%s/%s %s %s", LIBEXECDIR, base_argv0, domain_new, domain_old));
-	} else
+	} else {
+		if (setuser_privileges(uid, gid, "indimail")) {
+			strnum1[fmt_ulong(strnum1, uid)] = 0;
+			strnum2[fmt_ulong(strnum2, gid)] = 0;
+			strerr_die6sys(111, FATAL, "setuser_privilege: (", strnum1, "/", strnum2, "): ");
+		}
 		return (post_handle("%s %s %s", ptr, domain_new, domain_old));
+	}
 	return (err);
 }

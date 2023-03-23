@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH vdeluser 1
 .SH NAME
 vdeluser \- remove a user from a virtual domain
@@ -7,23 +8,30 @@ vdeluser \- remove a user from a virtual domain
 [
 .I options
 ]
-.I email address
+.I email_address
 
 .SH DESCRIPTION
 .PP
-\fBvdeluser\fR removes a virtual domain email account from the system.
-All files and directories for the user are removed from disk. All forwarding, aliases,
-entries in database are also removed. The Directory Structure Layout's Hashed Component is
-decremented by one. For a clustered domain, the user will be deleted only if the user lies on
-the host where \fBvdeluser\fR is being run. \fBvdeluser\fR has the setuid bit set and must be
-run as root or as indimail user. When run \fBvdeluser\fR changes its uid to the uid defined for the domain defined
-in the assign file (See qmail-users(5)).
+\fBvdeluser\fR removes a virtual domain email account from the system. All
+files and directories for the user are removed from disk. All forwarding,
+aliases, entries in database are also removed. The Directory Structure
+Layout's Hashed Component is decremented by one. For a clustered domain,
+the user will be deleted only if the user lies on the host where
+\fBvdeluser\fR is being run. \fBvdeluser\fR has the setuid bit set and must
+be run as root or as indimail user. When run \fBvdeluser\fR changes its uid
+to the uid defined for the domain defined in the assign file (See
+qmail-users(5)).
 
 .SH POST HANDLE
-If the environment variable POST_HANDLE is set, \fBvdeluser\fR executes the program defined by
-the POST_HANDLE environment variable, passing \fIemail_address\fR as a parameter. If POST_HANDLE
-is not defined, the program/script LIBEXECDIR/vdeluser will be executed with \fIemail_address\fR
-as a parameter.
+If the environment variable \fBPOST_HANDLE\fR is set, \fBvdeluser\fR
+executes the program defined by the \fBPOST_HANDLE\fR environment variable.
+If \fBPOST_HANDLE\fR is not defined, \fBvdeluser\fR runs the program
+@libexecdir@/vdeluser. The \fBPOST_HANDLE\fR program is always executed
+with uid/gid of the domain of \fI@email_address\fR in
+\fI@sysconfdir@/users/assign\fR. For both cases \fIemail_address\fR is
+passed as a command line argument to the \fBPOST_HANDLE\fR program. The
+\fBPOST_HANDLE\fR program is executed as the last step after all earlier
+steps have been successful.
 
 .SH OPTIONS
 .TP
@@ -31,11 +39,12 @@ as a parameter.
 Set verbose mode.
 .TP
 \fIemail address\fR
-Fully qualified email account. For example: user@domain.com. If no domain is specified then the account is removed
-from the default virtual domain. 
+Fully qualified email account. For example: user@domain.com. If no domain
+is specified then the account is removed from the default virtual domain.
 
 .SH RETURN VALUE
-0 if all steps were successful, non-zero otherwise. If any of the steps fail, a diagnostic message is printed.
+0 if all steps were successful, non-zero otherwise. If any of the steps
+fail, a diagnostic message is printed.
 
 .SH "SEE ALSO"
 vadduser(1), qmail-users(5)

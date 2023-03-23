@@ -1,5 +1,8 @@
 /*
  * $Log: vdeluser.c,v $
+ * Revision 1.6  2023-03-22 14:48:12+05:30  Cprogrammer
+ * updated error strings
+ *
  * Revision 1.5  2022-10-20 11:58:44+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -46,7 +49,7 @@
 #include "check_group.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeluser.c,v 1.5 2022-10-20 11:58:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeluser.c,v 1.6 2023-03-22 14:48:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vdeluser: warning: "
@@ -61,8 +64,7 @@ char           *usage =
 static void
 die_nomem()
 {
-	strerr_warn1("vdeluser: out of memory", 0);
-	_exit(111);
+	strerr_die2x(111, FATAL, "out of memory");
 }
 
 int
@@ -108,25 +110,21 @@ main(int argc, char **argv)
 	if (get_options(argc, argv, &email))
 		return (1);
 	parse_email(email.s, &user, &domain);
-	if (!get_assign(domain.s, 0, &uid, &gid)) {
-		strerr_warn2(domain.s, ": domain does not exist", 0);
-		return (-1);
-	}
+	if (!get_assign(domain.s, 0, &uid, &gid))
+		strerr_die3x(1, WARN, domain.s, ": domain does not exist");
 	if (!uid)
-		strerr_die3x(100, "vdeluser: domain ", domain.s, " with uid 0");
+		strerr_die4x(100, WARN, "domain ", domain.s, " with uid 0");
 	uidtmp = getuid();
 	gidtmp = getgid();
 	if (uidtmp != 0 && uidtmp != uid && gidtmp != gid && check_group(gid, FATAL) != 1) {
 		strnum1[fmt_ulong(strnum1, uid)] = 0;
 		strnum2[fmt_ulong(strnum2, gid)] = 0;
-		strerr_warn5("vdeluser: you must be root or domain user (uid=", strnum1, "/gid=", strnum2, ") to run this program", 0);
-		return (1);
+		strerr_die6x(100, WARN, "you must be root or domain user (uid=", strnum1, ", gid=", strnum2, ") to run this program");
 	}
 	if (setuser_privileges(uid, gid, "indimail")) {
 		strnum1[fmt_ulong(strnum1, uid)] = 0;
 		strnum2[fmt_ulong(strnum2, gid)] = 0;
-		strerr_warn5("vdeluser: setuser_privilege: (", strnum1, "/", strnum2, "): ", &strerr_sys);
-		return (1);
+		strerr_die6sys(111, FATAL, "setuser_privilege: (", strnum1, "/", strnum2, "): ");
 	}
 	if ((i = deluser(user.s, domain.s, 1))) {
 		iclose();
