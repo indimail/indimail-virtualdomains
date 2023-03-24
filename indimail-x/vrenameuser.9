@@ -14,21 +14,20 @@ user to a new email address. This can be used to either change the username
 or to move the user to a new virtual domain lying on the same host.
 vrenameuser changes only the pw_name and pw_domain component, and doesn't
 change attributes like pw_gecos, pw_dir, etc. But can be used in
-conjunction with vmoveuser, vmoduser it can be used to change the homedir,
-gecos also. \fBvrenameuser\fR has setuid bit set and can be run by the root
-user, by user having uid/gid of the domain in @sysconfdir@/users/assign or
-if the user has the gid of the domain as a supplementary group. If the uid
-of domain in \fIold_email_address\fR is different from the domain in
-\fInew_email_address\fR in \fI@sysconfdir@/users/assign\fR,
-\fBvrenameuser\fR will run with root privileges. If the uid of both the
-domains is same, then \fBvrenamedomain\fR runs with the uid of the caller.
-
-.SH POST HANDLE
-If the environment variable \fBPOST_HANDLE\fR is set, \fBvrenameuser\fR
-executes the program defined by the \fBPOST_HANDLE\fR environment variable.
-If POST_HANDLE is not defined, the program @libdexecdir@/vrenameuser will
-be executed. Additionally if the uid of domain in \fIold_email_address\fR
-is different from the domain in \fInew_email_address\fR in
+conjunction with \fBvmoveuserdir\fR(1), vmoduser it can be used to change
+the homedir, gecos also. \fBvrenameuser\fR has setuid bit set and can be
+run by the root user, by user having uid/gid of the domain in
+@sysconfdir@/users/assign or if the user has the gid of the domain as a
+supplementary group. If the uid of domain in \fIold_email_address\fR is
+different from the domain in \fInew_email_address\fR in
+\fI@sysconfdir@/users/assign\fR, \fBvrenameuser\fR will run with root
+privileges. If the uid of both the domains is same, then
+\fBvrenamedomain\fR runs with the uid of the caller. .SH POST HANDLE If the
+environment variable \fBPOST_HANDLE\fR is set, \fBvrenameuser\fR executes
+the program defined by the \fBPOST_HANDLE\fR environment variable.  If
+POST_HANDLE is not defined, the program @libdexecdir@/vrenameuser will be
+executed. Additionally if the uid of domain in \fIold_email_address\fR is
+different from the domain in \fInew_email_address\fR in
 \fI@sysconfdir@/users/assign\fR, the \fBPOST_HANDLE\fR program root
 privileges will be dropped and the program will run with the original uid
 of the caller. If \fBPOST_HANDLE\fR is not defined and if the uid of domain
@@ -60,4 +59,4 @@ Desired new email address for the user.
 0 if successful, 1 in case of any failure.
 
 .SH "SEE ALSO"
-vmoveuser(1)
+vmoveuserdir(1)

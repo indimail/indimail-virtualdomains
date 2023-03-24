@@ -1,5 +1,8 @@
 /*
  * $Log: variables.c,v $
+ * Revision 1.4  2023-03-24 19:05:16+05:30  Cprogrammer
+ * vmoveuser renamed to vmoveuserdir
+ *
  * Revision 1.3  2022-08-05 21:19:04+05:30  Cprogrammer
  * added ischema table
  * removed encrypt_flag
@@ -21,7 +24,7 @@
 #include "dir_control.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: variables.c,v 1.3 2022-08-05 21:19:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: variables.c,v 1.4 2023-03-24 19:05:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 vdir_type       vdir;
@@ -165,7 +168,7 @@ ADMINCOMMAND adminCommands[] = {
 	{PREFIX"/bin/vuserinfo", "Mail User Information"},
 	{PREFIX"/bin/vipmap", "Add/Modify/Delete IP Maps"},
 	{PREFIX"/bin/vacation", "Add Mail Vacation Autoresponder"},
-	{PREFIX"/bin/vmoveuser", "Move a user between different file systems"},
+	{PREFIX"/bin/vmoveuserdir", "Move a user between different file systems"},
 	{PREFIX"/bin/vrenameuser", "Rename a user"},
 	{PREFIX"/bin/crc", "Calculate Checksums of files/directories"},
 	{PREFIX"/bin/vcfilter", "Create Filters"},
