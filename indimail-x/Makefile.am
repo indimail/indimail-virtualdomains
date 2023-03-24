@@ -49,7 +49,7 @@ man_MANS=adminclient.8 chowkidar.8 clearopensmtp.8 crc.1 crcdiff.1 \
 	vbulletin.1 vcalias.8 vcaliasrev.8 vcfilter.1 vchkpass.8 vdeldomain.1 \
 	vdelivermail.8 vdeloldusers.8 vdeluser.1 vdominfo.1 vfilter.8 \
 	vfstab.8 vgroup.1 vhostid.8 vipmap.1 vlimit.1 vmoddomain.1 vmoduser.1 \
-	vmoveuser.1 vpasswd.1 vpriv.8 vproxy.8 vrenamedomain.1 vrenameuser.1 \
+	vmoveuserdir.1 vpasswd.1 vpriv.8 vproxy.8 vrenamedomain.1 vrenameuser.1 \
 	vreorg.8 vserverinfo.1 vsetpass.8 vsetuserquota.1 vsmtp.8 vtable.1 \
 	vuserinfo.1
 
@@ -171,7 +171,7 @@ indimailbin_PROGRAMS = vadddomain vdeldomain vadduser vdeluser vuserinfo \
 	vaddaliasdomain vrenamedomain dbinfo vdominfo \
 	vmoduser printdir ismaildup valias vcalias hostcntrl \
 	vhostid vpasswd vcfilter vsmtp vsetuserquota \
-	vacation vatrn vmoveuser vrenameuser vipmap vlimit \
+	vacation vatrn vmoveuserdir vrenameuser vipmap vlimit \
 	vpriv crc crcdiff incrypt vgroup proxyimap proxypop3 \
 	vproxy vbulletin
 
@@ -197,7 +197,7 @@ noinst_SCRIPTS = vadddomain_handle vadduser_handle vdeldomain_handle \
 	vdeluser_handle vrenameuser_handle
 
 setuid_list = bin/printdir bin/vaddaliasdomain bin/vadddomain bin/vadduser bin/vbulletin \
-	bin/vcfilter bin/vdeldomain bin/vdeluser bin/vmoduser bin/vmoveuser bin/vrenamedomain \
+	bin/vcfilter bin/vdeldomain bin/vdeluser bin/vmoduser bin/vmoveuserdir bin/vrenamedomain \
 	bin/vrenameuser bin/vsetuserquota bin/vdominfo bin/vuserinfo sbin/vreorg
 
 noinst_DATA = indimail-permissions.easy indimail-permissions.paranoid \
@@ -212,9 +212,9 @@ doc_list= ChangeLog FAQ.pdf README-indimail.md README-ldap.md  \
 
 MOSTLYCLEANFILES=vcaliasrev myslave controlsync bogofilter-qfe \
 	cronlist.i incrypt vdeluser_handle vrenameuser_handle \
-	cscope.* *.dSYM mailzipper mytcplookup.c tcplookup.8 \
+	cscope.* *.dSYM mailzipper mytcplookup.c tcplookup.8 vaddaliasdomain.1 \
 	indimail.perms dbinfo.8 inlookup.8 vadddomain.1 vdeldomain.1 vadduser.1 \
-	vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuser.1 \
+	vdeluser.1 vdelivermail.8 vrenamedomain.1 vrenameuser.1 vpasswd.1 vmoveuserdir.1 \
 	vcfilter.1 indimail.7 indimail.mrtg.cfg overquota.sh \
 	vadddomain_handle vadduser_handle vpasswd_handle vdeldomain_handle vaddaliasdomain_handle \
 	vrenamedomain_handle login_tasks.3 authgeneric usr.sbin.mysqld usr.sbin.clamd \
@@ -405,9 +405,9 @@ vatrn_SOURCES = vatrn.c
 vatrn_LDADD = libindimail.la $(LIB_QMAIL)
 vatrn_DEPENDENCIES = libindimail.la
 
-vmoveuser_SOURCES = vmoveuser.c
-vmoveuser_LDADD = libindimail.la $(LIB_QMAIL)
-vmoveuser_DEPENDENCIES = libindimail.la
+vmoveuserdir_SOURCES = vmoveuserdir.c
+vmoveuserdir_LDADD = libindimail.la $(LIB_QMAIL)
+vmoveuserdir_DEPENDENCIES = libindimail.la
 
 vrenameuser_SOURCES = vrenameuser.c
 vrenameuser_LDADD = libindimail.la $(LIB_QMAIL)
@@ -534,10 +534,13 @@ edit = sed \
 	-e 's}@prefix\@}$(prefix)}g'
 editman = sed \
 	-e 's}INDIMAILDIR}$(indimaildir)}g' \
+	-e 's}@indimaildir\@}$(indimaildir)}g' \
 	-e 's}@sysconfdir\@}$(sysconfdir)}g' \
 	-e 's}@qmaildir\@}$(qmaildir)}g' \
 	-e 's}@controldir\@}$(controldir)}g' \
+	-e 's}@libexecdir\@}$(libexecdir)}g' \
 	-e 's}@servicedir\@}$(servicedir)}g' \
+	-e 's}@logdir\@}$(logdir)}g' \
 	-e 's}@prefix\@}$(prefix)}g'
 
 indimail.fc: indimail.fc.in
@@ -624,32 +627,31 @@ inlookup.8: inlookup.9
 tcplookup.8: tcplookup.9
 	$(editman) tcplookup.9 > $@
 vcfilter.1: vcfilter.9
-	cat vcfilter.9 | sed s}SYSCONFDIR}$(sysconfdir)}g > $@
+	$(editman) vcfilter.9 > $@
+vaddaliasdomain.1: vaddaliasdomain.9
+	$(editman) vaddaliasdomain.9 > $@
 vadddomain.1: vadddomain.9
-	cat vadddomain.9 | sed s}LIBEXECDIR}$(libexecdir)}g \
-		| sed s}INDIMAILDIR}$(indimaildir)}g > $@
+	$(editman) vadddomain.9 > $@
 vdeldomain.1: vdeldomain.9
-	cat vdeldomain.9 | sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vdeldomain.9 > $@
 vadduser.1: vadduser.9
-	cat vadduser.9 | sed s}INDIMAIL}$(indimaildir)}g \
-		| sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vadduser.9 > $@
 vdeluser.1: vdeluser.9
-	cat vdeluser.9 | sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vdeluser.9 > $@
 vrenamedomain.1: vrenamedomain.9
-	cat vrenamedomain.9 | sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vrenamedomain.9 > $@
 vrenameuser.1: vrenameuser.9
-	cat vrenameuser.9 | sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vrenameuser.9 > $@
 vpasswd.1: vpasswd.9
-	cat vpasswd.9 | sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vpasswd.9 > $@
 vmoduser.1: vmoduser.9
-	cat vmoduser.9 | sed s}LIBEXECDIR}$(libexecdir)}g > $@
-vmoveuser.1: vmoveuser.9
-	cat vmoveuser.9 | sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vmoduser.9 > $@
+vmoveuserdir.1: vmoveuserdir.9
+	$(editman) vmoveuserdir.9 > $@
 vdelivermail.8: vdelivermail.9
-	cat vdelivermail.9 | sed s}INDIMAIL}$(indimaildir)}g \
-		| sed s}LIBEXECDIR}$(libexecdir)}g > $@
+	$(editman) vdelivermail.9 > $@
 ischema.1: ischema.9
-	cat ischema.9 | sed s}SYSCONFDIR}$(sysconfdir)}g>$@
+	$(editman) ischema.9 > $@
 indimail.7: indimail.9
 	$(editman) indimail.9 > $@
 

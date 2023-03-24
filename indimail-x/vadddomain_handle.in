@@ -1,6 +1,132 @@
 #!/bin/sh
 #
+# $Id: vadddomain_handle.in,v 2.22 2023-03-20 10:29:40+05:30 Cprogrammer Exp mbhangui $
+
+domaindir=@domaindir@
+OPTS=$(getopt -o vVRftOCcq:l:E:u:B:d:i:g:T:r:e:h:m:S:I:D:H:U:P:p: -- "$@")
+eval set -- "$OPTS"
+while true; do
+	case "$1" in
+		-v|-V|-R|-f|-t|-O|-C|-c)
+		shift 1
+		;;
+		-d)
+		domaindir=$2
+		shift 2
+		;;
+		-q|-l|-E|-u|-B|-i|-g|-T|-r|-e|-h|-m|-S|-I|-D|-H|-U|-P|-p)
+		shift 2
+		;;
+		--)
+		shift
+		break
+		;;
+		*)
+		echo "$0: invalid option [$1]" 1>&2
+		break
+		;;
+	esac
+done
+set $@
+domain=$1
+
+if [ -n "$CONTROLDIR" ] ; then
+	controldir=$CONTROLDIR
+else
+	controldir=@controldir@
+fi
+echo "domain=$domain domaindir=$domaindir, controldir=$controldir"
+
+# send sighup to inlookup service to reload domains
+(
+if [ -n "$SERVICEDIR" ] ; then
+	servicedir=$SERVICEDIR
+else
+	servicedir=@servicedir@*
+fi
+/bin/ls $servicedir/qmail-smtpd.*/variables/PLUGIN*init 2>/dev/null | sed s'{/variables/.*{{'g 
+/bin/ls -d $servicedir/inlookup.* $servicedir/*-send.*
+) | while read line
+do
+	echo "Sending SIGHUP to $line"
+	@prefix@/bin/svc -h $line
+done
+# print domain information
+@prefix@/bin/vdominfo $domain
+
+# create user for bogofilter
+echo "Creating standard users for spam filter (bogofilter)"
+for i in ham spam register-ham register-spam
+do
+	@prefix@/bin/valias -i '&'"B"$i $i@$domain
+	if [ $? -eq 0 ] ; then
+		printf "Created alias %30s --> &B%s\n" $i@$domain $i
+	fi
+done
+echo
+echo "Creating pre and post filters prefilt@$domain, postfilt@$domain"
+for i in prefilt postfilt
+do
+	@prefix@/bin/vadduser -d -e $i@$domain  xxxxxxxx
+	echo
+done
+
+# create rule for moving spam, virus emails to folders
+echo "creating rules for spam, virus detected emails"
+@prefix@/bin/vcfilter -i -t  spamFilter -c 3 -k "Yes, spamicity=" -f Spam   -b 0 -h 32 \
+	prefilt@$domain
+if [ $? -eq 0 ] ; then
+	echo "Created prefilter to filter SPAM"
+fi
+@prefix@/bin/vcfilter -i -t virusFilter -c 0 -k "virus found" -f Quarantine -b 0 -h 28 \
+	prefilt@$domain
+if [ $? -eq 0 ] ; then
+	echo "Created prefilter to filter virus"
+fi
+echo
+
+echo "Domain Directory content"
+# display domain directory
+/bin/ls -dl $domaindir/domains/$domain
+/bin/ls -al $domaindir/domains/$domain
+echo
+
+# get securely chown, chmod path
+PATH=/usr/bin:/usr/sbin:/bin
+chown=$(which chown)
+chmod=$(which chmod)
+sort=$(which sort)
+grep=$(which grep)
+# add the domain to spamignore, nodnscheck
+for i in spamignore nodnscheck
+do
+	echo "adding $domain to $controldir/$i control file"
+	if [ -f $controldir/$i ] ; then
+		$grep -w @"$domain" $controldir/$i > /dev/null
+		if [ $? -ne 0 ] ; then
+			echo @"$domain" >> $controldir/$i
+			$sort -u $controldir/$i -o $controldir/$i
+		fi
+	else
+		echo @"$domain" > $controldir/$i
+	fi
+	$chown root:qmail $controldir/$i
+	if [ "$i" = "spamignore" ] ; then
+		# 664 for roundcube plugin to modify
+		$chmod 664 $controldir/$i
+	else
+		$chmod 644 $controldir/$i
+	fi
+done
+echo
+vuserinfo postmaster@$domain
+exit 0
+#
 # $Log: vadddomain_handle.in,v $
+# Revision 2.22  2023-03-20 10:29:40+05:30  Cprogrammer
+# handle all command line arguments passed to vadddomain
+# use SERVICEDIR env variable if set for service directory
+#
 # Revision 2.21  2022-11-05 21:12:54+05:30  Cprogrammer
 # added vuserinfo of postmaster account
 #
@@ -65,69 +191,3 @@
 # Revision 2.1  2010-04-23 09:21:51+05:30  Cprogrammer
 # post handle for vadddomain
 #
-#
-# $Id: vadddomain_handle.in,v 2.21 2022-11-05 21:12:54+05:30 Cprogrammer Exp mbhangui $
-
-# send sighup to inlookup service to reload domains
-(
-/bin/ls /service*/qmail-smtpd.*/variables/PLUGIN*init | sed s'{/variables/.*{{'g 
-/bin/ls -d /service*/inlookup.* /service*/qmail-send.*
-) | while read line
-do
-	echo "Sending SIGHUP to $line"
-	@prefix@/bin/svc -h $line
-done
-# print domain information
-@prefix@/bin/vdominfo $1
-
-# create user for bogofilter
-echo "Creating standard users for spam filter (bogofilter)"
-for i in ham spam register-ham register-spam
-do
-	@prefix@/bin/valias -i '&'"B"$i $i@$1
-done
-for i in prefilt postfilt
-do
-	@prefix@/bin/vadduser -d -e $i@$1  xxxxxxxx
-done
-
-# create rule for moving spam, virus emails to folders
-echo "creating rules for spam, virus detected emails"
-@prefix@/bin/vcfilter -i -t  spamFilter -c 3 -k "Yes, spamicity=" -f Spam   -b 0 -h 32 \
-	prefilt@$1 > /dev/null 2>&1
-@prefix@/bin/vcfilter -i -t virusFilter -c 0 -k "virus found" -f Quarantine -b 0 -h 28 \
-	prefilt@$1 > /dev/null 2>&1
-
-# display domain directory
-/bin/ls -dl @domaindir@/domains/$1
-/bin/ls -al @domaindir@/domains/$1
-
-# get securely chown, chmod path
-PATH=/usr/bin:/usr/sbin:/bin
-chown=$(which chown)
-chmod=$(which chmod)
-sort=$(which sort)
-grep=$(which grep)
-# add the domain to spamignore, nodnscheck
-for i in spamignore nodnscheck
-do
-	echo "adding $1 to $i control file"
-	if [ -f @controldir@/$i ] ; then
-		$grep -w @"$1" @controldir@/$i > /dev/null
-		if [ $? -ne 0 ] ; then
-			echo @"$1" >> @controldir@/$i
-			$sort -u @controldir@/$i -o @controldir@/$i
-		fi
-	else
-		echo @"$1" > @controldir@/$i
-	fi
-	$chown root:qmail @controldir@/$i
-	if [ "$i" = "spamignore" ] ; then
-		# 664 for roundcube plugin to modify
-		$chmod 664 @controldir@/$i
-	else
-		$chmod 644 @controldir@/$i
-	fi
-done
-vuserinfo postmaster@$1
-exit 0

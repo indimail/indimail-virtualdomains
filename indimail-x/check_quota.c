@@ -1,5 +1,8 @@
 /*
  * $Log: check_quota.c,v $
+ * Revision 1.5  2023-03-20 09:50:46+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.4  2020-10-01 18:22:00+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -37,7 +40,7 @@
 #include "count_dir.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: check_quota.c,v 1.4 2020-10-01 18:22:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: check_quota.c,v 1.5 2023-03-20 09:50:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -126,11 +129,17 @@ mdir_t check_quota(char *Maildir)
 				strerr_warn3("check_quota: fcntl(F_SETLK)", tmpbuf.s, ": ", &strerr_sys);
 			break;
 		}
-		if (!match && line.len == 0)
+		if (!line.len)
 			break;
 		if (match) { /*- remove newline */
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0;
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
 		}
 		i = str_chr(line.s, ' ');
 		if (line.s[i]) {
@@ -141,7 +150,7 @@ mdir_t check_quota(char *Maildir)
 			scan_ulong(line.s, (unsigned long *) &size);
 			mail_size += size;
 		}
-	}
+	} /*- for (mail_size = 0;;) */
 	fl.l_type   = F_UNLCK;  /* F_RDLCK, F_WRLCK, F_UNLCK    */
 	if (fcntl(fd, F_SETLK, &fl) == -1)
 		strerr_warn3("check_quota: fcntl(F_SETLK)", tmpbuf.s, ": ", &strerr_sys);

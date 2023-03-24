@@ -1,5 +1,8 @@
 /*
  * $Log: vtable.c,v $
+ * Revision 1.5  2023-03-20 10:40:19+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -40,7 +43,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vtable.c,v 1.4 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vtable.c,v 1.5 2023-03-20 10:40:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vtable: fatal: "
@@ -157,17 +160,17 @@ main(int argc, char **argv)
 				close(fd);
 				return (1);
 			}
-			if (line.len == 0)
+			if (!line.len)
 				break;
-			if (!match) {
-				strerr_warn3("vtable", *fptr, "incomplete line", 0);
+			if (match) {
+				line.len--;
+				if (!line.len)
+					continue;
+				line.s[line.len] = 0; /*- remove newline */
+			} else {
 				if (!stralloc_0(&line))
 					die_nomem();
 				line.len--;
-			} else
-			if (match) {
-				line.len--;
-				line.s[line.len] = 0; /*- remove newline */
 			}
 			match = str_chr(line.s, '#');
 			if (line.s[match])

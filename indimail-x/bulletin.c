@@ -1,5 +1,8 @@
 /*
  * $Log: bulletin.c,v $
+ * Revision 1.6  2023-03-20 09:50:06+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.5  2021-01-26 00:27:45+05:30  Cprogrammer
  * renamed sql_init() to in_sql_init() to avoid clash with dovecot sql authentication driver
  *
@@ -65,7 +68,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: bulletin.c,v 1.5 2021-01-26 00:27:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: bulletin.c,v 1.6 2023-03-20 09:50:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -149,10 +152,12 @@ insert_bulletin(char *domain, char *emailFile, char *list_file)
 			unlink(tmpbuf.s);
 			return (-1);
 		}
-		if (line.len == 0)
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0;
 		} else {
 			if (!stralloc_0(&line))
@@ -334,10 +339,12 @@ bulletin(char *emailFile, char *subscriber_list)
 			close(fd);
 			return (-1);
 		}
-		if (line.len == 0)
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0;
 		} else {
 			if (!stralloc_0(&line))
@@ -459,10 +466,12 @@ bulletin(char *emailFile, char *subscriber_list)
 			close(fd);
 			return (-1);
 		}
-		if (line.len == 0)
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0;
 		} else {
 			if (!stralloc_0(&line))

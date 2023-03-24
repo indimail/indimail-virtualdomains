@@ -1,5 +1,8 @@
 /*
  * $Log: autoturn_dir.c,v $
+ * Revision 1.3  2023-03-20 09:41:36+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.2  2020-04-01 18:53:10+05:30  Cprogrammer
  * moved getEnvConfig to libqmail
  *
@@ -30,7 +33,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: autoturn_dir.c,v 1.2 2020-04-01 18:53:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: autoturn_dir.c,v 1.3 2023-03-20 09:41:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -46,7 +49,7 @@ autoturn_dir(char *domain)
 	static stralloc filename = {0}, template = {0}, line = {0};
 	char            inbuf[512];
 	char           *ptr, *sysconfdir, *controldir;
-	int             fd, match, t, i;
+	int             fd, match, i;
 	substdio        ssin;
 
 	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
@@ -70,17 +73,19 @@ autoturn_dir(char *domain)
 		return ((char *) 0);
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
-		if (getln(&ssin, &line, &match, '\n') == -1) {
-			t = errno;
-			close(fd);
-			errno = t;
+		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "autoturn_dir: read: ", filename.s, ": ");
-		}
-		if (!match)
+		if (!line.len)
 			break;
-		else {
+		if (match) {
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0;
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
 		}
 		i = str_chr(line.s, '#');
 		line.s[i] = 0;

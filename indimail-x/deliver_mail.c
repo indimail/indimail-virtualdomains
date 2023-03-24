@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 1.12  2023-03-20 09:58:31+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.11  2022-12-18 19:23:05+05:30  Cprogrammer
  * recoded wait logic
  *
@@ -94,7 +97,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 1.11 2022-12-18 19:23:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 1.12 2023-03-20 09:58:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -155,6 +158,10 @@ getAlertConfig(char **mailalert_host, char **mailalert_port)
 		if (match) {
 			line.len--;
 			line.s[line.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
 		}
 		if (!str_diffn(line.s, "host ", 5)) {
 			ptr = line.s + 5;
@@ -385,11 +392,17 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
 #endif
 			return (-2);
 		}
-		if (!line.len || !match)
+		if (!line.len)
 			break;
-		if (!stralloc_0(&line))
-			die_nomem();
-		line.len--;
+		if (match) {
+			line.len--;
+			if (!line.len)
+				continue;
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
+		}
 		for (len = 0, ptr = line.s;*ptr && !isspace(*ptr); len++, ptr++);
 		if (!*ptr) /*- invalid line */
 			continue;
@@ -567,7 +580,7 @@ is_looping(char *address)
 			strerr_warn1("deliver_mail: read-email: ", &strerr_sys);
 			return (-1);
 		}
-		if (!match || !line.len)
+		if (!line.len)
 			break;
 		if (!stralloc_0(&line))
 			die_nomem();
@@ -1138,14 +1151,23 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 				close(fd);
 				return (-2);
 			}
-			if (!match || !date_dir.len) {
+			close(fd);
+			if (!date_dir.len) {
 				strerr_warn2(local_file.s, ": bad line. indimail (#5.1.2): ", &strerr_sys);
-				close(fd);
 				return (-2);
 			}
-			date_dir.len--;
-			date_dir.s[date_dir.len] = 0; /*- remove newline */
-			close(fd);
+			if (match) {
+				date_dir.len--;
+				if (!date_dir.len) {
+					strerr_warn2(local_file.s, ": bad line. indimail (#5.1.2): ", &strerr_sys);
+					return (-2);
+				}
+				date_dir.s[date_dir.len] = 0; /*- remove newline */
+			} else {
+				if (!stralloc_0(&date_dir))
+					die_nomem();
+				date_dir.len--;
+			}
 			if (!(ret = dateFolder(tm, &tmpbuf, date_dir.s))) {
 				if (!stralloc_copys(&local_file, address) ||
 						!stralloc_cat(&local_file, &tmpbuf) ||

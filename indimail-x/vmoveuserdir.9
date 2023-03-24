@@ -1,0 +1,38 @@
+.\" vim: tw=75
+.TH vmoveuserdir 1
+.SH NAME
+vmoveuserdir \- move homedir of a virtual user to a new path
+
+.SH SYNOPSYS
+\fBvmoveuserdir\fR \fIemail_addr\fR \fInew_homedir\fR
+
+.SH DESCRIPTION
+\fBvmoveuserdir\fR changes the current homedir path to \fInew_homedir\fR,
+moving all existing files to the new path. \fBvmoveuserdir\fR has setuid
+bit set and can be run by the root user, by user having uid/gid of the
+domain in @sysconfdir@/users/assign or if the user has the gid of the
+domain as a supplementary group.
+
+.SH POST HANDLE
+If the environment variable \fBPOST_HANDLE\fR is set, \fBvmoveuserdir\fR
+executes the program defined by the \fBPOST_HANDLE\fR environment variable
+with the uid/gid of the domain in \fI@sysconfdir@/users/assign\fR.
+If \fBPOST_HANDLE\fR is not defined, the program @libexecdir@/vmoveuserdir
+will be executed with root privileges. The \fBPOST_HANDLE\fR progam is run
+with \fIemail_addr\fR, \fIold_homedir\fR and \fInew_homedir\fR as command
+line arguments. The \fBPOST_HANDLE\fR program is executed as the last step
+after all earlier steps have been successful.
+
+.SH OPTIONS
+.TP
+\fIemail_addr\fR
+Fully qualified email address (username + virtual domain component).
+.TP
+\fInew_homedir\fR
+Path to which the homedir of the user needs to be assigned to
+
+.SH RETURN VALUES
+0 for success, 1 for any failure.
+
+.SH "SEE ALSO"
+vrenameuser(1)

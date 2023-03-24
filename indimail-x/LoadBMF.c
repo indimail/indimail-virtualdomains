@@ -1,5 +1,11 @@
 /*
  * $Log: LoadBMF.c,v $
+ * Revision 1.6  2023-03-23 23:10:01+05:30  Cprogrammer
+ * fix wrong counts when badmailfrom has comments
+ *
+ * Revision 1.5  2023-03-20 10:11:13+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.4  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -18,7 +24,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadBMF.c,v 1.4 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadBMF.c,v 1.6 2023-03-23 23:10:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -437,10 +443,24 @@ LoadBMF_internal(int *total, char *bmf)
 			close(fd);
 			return ((char **) 0);
 		}
-		if (line.len == 0)
+		if (!line.len)
 			break;
-		if (match)
-			count++;
+		if (match) {
+			line.len--;
+			if (!line.len)
+				continue;
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
+		}
+		match = str_chr(line.s, '#');
+		if (line.s[match])
+			line.s[match] = 0;
+		for (ptr = line.s; *ptr && isspace((int) *ptr); ptr++);
+		if (!*ptr)
+			continue;
+		count++;
 	}
 	if (total)
 		*total = -1;
@@ -464,10 +484,12 @@ LoadBMF_internal(int *total, char *bmf)
 			close(fd);
 			return ((char **) 0);
 		}
-		if (line.len == 0)
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0;
 		} else {
 			if (!stralloc_0(&line))

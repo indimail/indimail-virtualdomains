@@ -1,5 +1,11 @@
 /*
  * $Log: vbulletin.c,v $
+ * Revision 1.8  2023-03-24 12:59:25+05:30  Cprogrammer
+ * fork and run bulletin for all domains with domain uid
+ *
+ * Revision 1.7  2023-03-20 10:33:13+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.6  2022-10-20 11:58:36+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -56,6 +62,7 @@
 #include <fmt.h>
 #include <env.h>
 #include <setuserid.h>
+#include <wait.h>
 #endif
 #include "iopen.h"
 #include "iclose.h"
@@ -71,7 +78,7 @@
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vbulletin.c,v 1.6 2022-10-20 11:58:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vbulletin.c,v 1.8 2023-03-24 12:59:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL            "vbulletin: fatal: "
@@ -230,10 +237,12 @@ in_exclude_list(char *excludeFile, int fdx, char *user, char *domain)
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die3sys(111, "vbulletin: read: ", excludeFile, ": ");
-		if (line.len == 0)
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0;
 		} else {
 			if (!stralloc_0(&line))
@@ -344,7 +353,7 @@ process_domain(char *emailFile, char *excludeFile, char *domain)
 		return (1);
 	}
 	if (!uid)
-		strerr_die3x(100, "vdeluser: domain ", domain, " with uid 0");
+		strerr_die3x(100, "vbulletin: domain ", domain, " with uid 0");
 	myuid = getuid();
 	mygid = getgid();
 	if (myuid != 0 && myuid != uid && mygid != gid && check_group(gid, FATAL) != 1) {
@@ -506,7 +515,8 @@ main(int argc, char **argv)
 {
 	DIR            *entry;
 	struct dirent  *dp;
-	int             fdsourcedir;
+	pid_t           pid;
+	int             fdsourcedir, wait_status, status, werr, i;
 	char           *email, *domain, *emailFile, *excludeFile, *subscriberList;
 
 	if (get_options(argc, argv, &email, &domain, &emailFile, &excludeFile, &subscriberList))
@@ -526,7 +536,7 @@ main(int argc, char **argv)
 			return (spost(email, DeliveryMethod, emailFile, 0));
 	}
 	if (*domain)
-		return (process_domain(emailFile, excludeFile, domain));
+		status = process_domain(emailFile, excludeFile, domain);
 	else {
 		if (chdir(INDIMAILDIR) != 0) {
 			strerr_warn3("vbulletin: chdir: ", INDIMAILDIR, ": ", &strerr_sys);
@@ -543,13 +553,54 @@ main(int argc, char **argv)
 		while ((dp = readdir(entry)) != NULL) {
 			if (str_diffn(dp->d_name, ".", 1) == 0)
 				continue;
-			if (process_domain(emailFile, excludeFile, dp->d_name))
-				strerr_warn2(dp->d_name, ": Bulletin failed", 0);
-		}
+			switch (pid = fork())
+			{
+			case -1:
+				break;
+			case 0:
+				if (process_domain(emailFile, excludeFile, dp->d_name))
+					strerr_warn2(dp->d_name, ": Bulletin failed", 0);
+				break;
+			default:
+				for (;;) {
+					if (!(i = wait_pid(&wait_status, pid)))
+						break;
+					else
+					if (i == -1) {
+#ifdef ERESTART
+						if (errno == error_intr || errno == error_restart)
+#else
+						if (errno == error_intr)
+#endif
+							continue;
+						strnum1[fmt_ulong(strnum1, pid)] = 0;
+						strerr_warn3("vbulletin: waitpid: ", strnum1, ": ", &strerr_sys);
+						status = -1;
+					}
+					if (!(i = wait_handler(wait_status, &werr)))
+						continue;
+					else
+					if (werr == -1) {
+						strnum1[fmt_ulong(strnum1, pid)] = 0;
+						strerr_warn3("vbulletin: ", strnum1, ": internal wait handler error", 0);
+						status = -1;
+					} else
+					if (werr) {
+						strnum1[fmt_ulong(strnum1, pid)] = 0;
+						strnum2[fmt_uint(strnum2, werr)] = 0;
+						strerr_warn4("vbulletin: ", strnum1, ": killed by signal ", strnum2, 0);
+						status = -1;
+					}
+					if (i)
+						status = -1;
+					break;
+				}
+			} /* switch (pid = fork()) */
+		} /*- while ((dp = readdir(entry)) != NULL) */
 		closedir(entry);
 		if (fchdir(fdsourcedir) == -1)
 			strerr_die1sys(111, "vbulletin: unable to switch back to old working directory: ");
 	}
 	iclose();
-	return (0);
+	return (status);
 }

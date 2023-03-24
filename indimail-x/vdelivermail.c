@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 1.11  2023-03-20 10:35:05+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -98,7 +101,7 @@
 #include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 1.10 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 1.11 2023-03-20 10:35:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vdelivermail: fatal: "
@@ -394,7 +397,13 @@ doAlias(char *dir, char *user, char *domain, mdir_t MsgSize)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
 		}
 		/*-
 		 * simple loop check, if they are sending it to themselves

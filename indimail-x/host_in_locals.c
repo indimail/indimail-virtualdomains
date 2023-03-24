@@ -1,5 +1,8 @@
 /*
  * $Log: host_in_locals.c,v $
+ * Revision 1.3  2023-03-20 10:02:35+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.2  2020-04-01 18:55:05+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: host_in_locals.c,v 1.2 2020-04-01 18:55:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: host_in_locals.c,v 1.3 2023-03-20 10:02:35+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IP_ALIAS_DOMAINS
@@ -81,10 +84,12 @@ host_in_locals(char *domain)
 			close(fd);
 			return (-1);
 		}
-		if (line.len == 0)
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0;
 		} else {
 			if (!stralloc_0(&line))

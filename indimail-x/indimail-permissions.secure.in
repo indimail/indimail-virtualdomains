@@ -58,7 +58,7 @@
 @prefix@/bin/vaddaliasdomain        root:root 4555
 @prefix@/bin/vrenamedomain          root:root 4555
 @prefix@/bin/vsetuserquota          root:root 4555
-@prefix@/bin/vmoveuser              root:root 4555
+@prefix@/bin/vmoveuserdir           root:root 4555
 @prefix@/bin/vdeldomain             root:root 4555
 @prefix@/bin/vadddomain             root:root 4555
 @prefix@/bin/vdominfo               root:root 4555

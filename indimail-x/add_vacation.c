@@ -203,7 +203,7 @@ add_vacation(char *email, char *fname)
 				unlink(tmpbuf.s);
 				return (1);
 			}
-			if (!match && line.len == 0)
+			if (!line.len)
 				break;
 			if (substdio_put(&ssout, line.s, line.len)) {
 				strerr_warn3("add_vacation: write error: ", tmpbuf.s, ": ", &strerr_sys);

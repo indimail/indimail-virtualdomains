@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 1.10  2023-03-20 10:04:56+05:30  Cprogrammer
+ * removed mailing_list table
+ *
  * Revision 1.9  2022-08-05 21:05:03+05:30  Cprogrammer
  * added ischema table
  *
@@ -32,7 +35,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 1.9 2022-08-05 21:05:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 1.10 2023-03-20 10:04:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -420,17 +423,9 @@ comparision tinyint not null, \
 keyword char(64) not null, \
 destination char(156) not null, \
 bounce_action char(64) not null, \
-mailing_list tinyint not null, \
 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 primary key(emailid, filter_no), unique index (emailid, header_name, comparision, keyword, destination)"
 #endif
-
-#define MAILING_LIST_TABLE_LAYOUT "\
-emailid char(107) not null, \
-filter_no smallint not null, \
-mailing_list char(64) not null, \
-timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
-primary key(emailid, mailing_list), index emailid (emailid, filter_no)"
 
 #ifdef ENABLE_DOMAIN_LIMITS
 #define LIMITS_TABLE_LAYOUT " \

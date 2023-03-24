@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vdeldomain_handle.in,v $
+# Revision 2.7  2023-03-20 10:35:01+05:30  Cprogrammer
+# use SERVICEDIR, CONTROLDIR env variable if set for service and control directory
+#
 # Revision 2.6  2020-09-21 07:57:40+05:30  Cprogrammer
 # added /usr/sbin for FreeBSD for chown command
 #
@@ -21,7 +24,7 @@
 #
 #
 #
-# $Id: vdeldomain_handle.in,v 2.6 2020-09-21 07:57:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: vdeldomain_handle.in,v 2.7 2023-03-20 10:35:01+05:30 Cprogrammer Exp mbhangui $
 
 # get securely chown, chmod path
 PATH=/usr/bin:/usr/sbin:/bin
@@ -31,22 +34,32 @@ grep=$(which grep)
 mv=$(which mv)
 # send sighup to qmail-send, inlookup
 # remove domain from spamignore nodnscheck
+if [ -n "$CONTROLDIR" ] ; then
+	controldir=$CONTROLDIR
+else
+	controldir=@controldir@
+fi
 for i in spamignore nodnscheck
 do
-	if [ -f @controldir@/$i ] ; then
-		$grep -w @"$1" @controldir@/$i > /dev/null
+	if [ -f $controldir/$i ] ; then
+		$grep -w @"$1" $controldir/$i > /dev/null
 		if [ $? -eq 0 ] ; then
-			$grep -v -w  @"$1" @controldir@/$i > /tmp/$i.$$
+			$grep -v -w  @"$1" $controldir/$i > /tmp/$i.$$
 			if [ -s /tmp/$i.$$ ] ; then
-				echo "removing $1 from $i control file"
-				$mv /tmp/$i.$$ @controldir@/$i
-				$chown root:qmail @controldir@/$i
-				$chmod 644 @controldir@/$i
+				echo "removing $1 from $controldir/$i control file"
+				$mv /tmp/$i.$$ $controldir/$i
+				$chown root:qmail $controldir/$i
+				$chmod 644 $controldir/$i
 			else
 				/bin/rm -f /tmp/$i.$$
 			fi
 		fi
 	fi
 done
-@prefix@/bin/svc -h /service/inlookup.* /service*/qmail-send.* 2>/dev/null
+if [ -n "$SERVICEDIR" ] ; then
+	servicedir=$SERVICEDIR
+else
+	servicedir=@servicedir@*
+fi
+@prefix@/bin/svc -h $servicedir/inlookup.* $servicedir/*-send.* 2>/dev/null
 exit 0

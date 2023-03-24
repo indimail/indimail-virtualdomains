@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.16  2023-03-20 10:06:02+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.15  2023-02-14 01:09:55+05:30  Cprogrammer
  * free ctx if tls_session fails
  *
@@ -54,7 +57,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.15 2023-02-14 01:09:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.16 2023-03-20 10:06:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -159,13 +162,6 @@ static char    *certfile, *cafile, *crlfile, *certdir;
 #endif
 
 char            tbuf[2048];
-
-static void
-die_nomem()
-{
-	strerr_warn1("indisrvr: out of memory", 0);
-	_exit(111);
-}
 
 int
 main(int argc, char **argv)
@@ -414,9 +410,23 @@ call_prg()
 		strerr_warn1("indisrvr: read stdin: ", &strerr_sys);
 		return (-1);
 	}
+	if (!line.len) {
+		strerr_warn1("indisrvr: read stdin: ", &strerr_sys);
+		return (-1);
+	}
 	if (match) {
 		line.len--;
+		if (!line.len) {
+			strerr_warn1("indisrvr: incomplete line", 0);
+			return (-1);
+		}
 		line.s[line.len] = 0;
+	} else {
+		if (!stralloc_0(&line)) {
+			strerr_warn1("indisrvr: out of memory", 0);
+			return (-1);
+		}
+		line.len--;
 	}
 	scan_int(line.s, &i);
 	for (cmdcount = 0; adminCommands[cmdcount].name; cmdcount++);
@@ -526,9 +536,8 @@ Login_User(stralloc *username, stralloc *password)
 		username->len--;
 		username->s[username->len] = 0;
 	} else {
-		if (!stralloc_0(username))
-			die_nomem();
-		username->len--;
+		strerr_warn1("indisrvr: read stdin: ", &strerr_sys);
+		return (-1);
 	}
 	if (substdio_put(subfdoutsmall, "Password: ", 10) ||
 			substdio_flush(subfdoutsmall)) {
@@ -543,12 +552,10 @@ Login_User(stralloc *username, stralloc *password)
 		password->len--;
 		password->s[password->len] = 0;
 	} else {
-		if (!stralloc_0(password))
-			die_nomem();
-		password->len--;
+		strerr_warn1("indisrvr: read stdin: ", &strerr_sys);
+		return (-1);
 	}
-	if (isDisabled(username->s))
-	{
+	if (isDisabled(username->s)) {
 		filewrt(3, "%d: user %s disabled\n", getpid(), username->s);
 		strerr_warn1("You are disabled", 0);
 		return (1);
@@ -634,8 +641,7 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 			break;
 		}
 	}
-	if (!*ipaddr || !*port || *backlog == -1)
-	{
+	if (!*ipaddr || !*port || *backlog == -1) {
 #ifdef HAVE_SSL
 		strerr_warn1("usage: indisrvr -i ipaddr -p port [-d certdir] -n certfile [-c cafile -r crlfile] -t timeoutdata -T timeoutconn -b backlog", 0);
 #else
@@ -659,8 +665,7 @@ SigChild(void)
 	int             status;
 	pid_t           pid;
 
-	for (;(pid = waitpid(-1, &status, WNOHANG | WUNTRACED));)
-	{
+	for (;(pid = waitpid(-1, &status, WNOHANG | WUNTRACED));) {
 #ifdef ERESTART
 		if (pid == -1 && (errno == EINTR || errno == ERESTART))
 #else

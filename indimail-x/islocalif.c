@@ -1,5 +1,8 @@
 /*
  * $Log: islocalif.c,v $
+ * Revision 1.6  2023-03-20 10:10:38+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.5  2020-10-18 07:51:29+05:30  Cprogrammer
  * use alloc() instead of alloc_re()
  *
@@ -76,7 +79,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: islocalif.c,v 1.5 2020-10-18 07:51:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: islocalif.c,v 1.6 2023-03-20 10:10:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -145,20 +148,21 @@ islocalif(char *hostptr)
 	else
 	if (fd > -1) {
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-		if (getln(&ssin, &line, &match, '\n') == -1) {
-			t = errno;
-			close(fd);
-			errno = t;
-			strerr_die3sys(111, "read: ", filename.s, ": ");
-		}
-		if (line.len == 0)
-			strerr_warn3("islocalif: ", filename.s, ": incomplete line", 0);
-		else
+		if (getln(&ssin, &line, &match, '\n') == -1)
+			strerr_die3sys(111, "islocalif: read: ", filename.s, ": ");
+		close(fd);
+		if (!line.len)
+			strerr_die3x(100, "islocalif: ", filename.s, ": incomplete line");
 		if (match) {
 			line.len--;
+			if (!line.len)
+				strerr_die3x(100, "islocalif: ", filename.s, ": incomplete line");
 			line.s[line.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
 		}
-		close(fd);
 		if (!str_diff(hostptr, line.s))
 			return (1);
 	}

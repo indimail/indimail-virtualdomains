@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH vpasswd 1
 .SH NAME
 vpasswd \- change passwd for virtual domain user
@@ -38,8 +39,9 @@ PASSWORD_HASH Value	Description
 If the environment variable POST_HANDLE is set, \fBvpasswd\fR executes the
 program defined by the POST_HANDLE environment variable, passing
 \fIemail_address\fR as a parameter. If POST_HANDLE is not defined, the
-program/script LIBEXECDIR/vpasswd will be executed with
-\fIemail_address\fR as a parameter.
+program/script @libexecdir@/vpasswd will be executed with
+\fIemail_address\fR as a parameter. The \fBPOST_HANDLE\fR program is
+executed as the last step after all earlier steps have been successful.
 
 .SH OPTIONS
 .TP 3
@@ -85,7 +87,7 @@ SCRAM-SHA-256	SHA256 encryption suitable for SCRAM-SHA-256.
 Sets up authentication suitable for CRAM-MD5, CRAM-SHA1, CRAM-SHA224,
 CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD and DIGEST-MD5 methods.
 This works by storing the clear text credentials in the database. if the
-\-\fIm\fR option is select, this will additionally store a hex-encoded
+\-\fIm\fR option is selected, this will additionally store a hex-encoded
 salted password for SCRAM methods, which can be used instead of clear text
 passwords by clients (for SCRAM authentication).
 

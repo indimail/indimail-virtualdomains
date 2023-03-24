@@ -1,5 +1,8 @@
 /*
  * $Log: printdir.c,v $
+ * Revision 1.4  2023-03-20 10:15:51+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.3  2021-07-08 11:44:23+05:30  Cprogrammer
  * add check for misconfigured assign file
  *
@@ -34,7 +37,7 @@
 #include "print_control.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: printdir.c,v 1.3 2021-07-08 11:44:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: printdir.c,v 1.4 2023-03-20 10:15:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -92,15 +95,26 @@ main(int argc, char **argv)
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("printdir: read: ", tmpbuf.s, ": ", &strerr_sys);
-		} else
-		if (match) {
-			line.len--;
-			line.s[line.len] = 0; /*- remove newline */
-		}
-		if (line.len) {
-			scan_int(line.s, &users_per_level);
+			return (1);
 		}
 		close(fd);
+		if (!line.len) {
+			strerr_warn2("print_control: incomplete line: ", tmpbuf.s, 0);
+			return (1);
+		}
+		if (match) {
+			line.len--;
+			if (!line.len) {
+				strerr_warn2("print_control: incomplete line: ", tmpbuf.s, 0);
+				return (1);
+			}
+			line.s[line.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
+		}
+		scan_int(line.s, &users_per_level);
 	}
 	if (!stralloc_copys(&tmpbuf, ptr) ||
 			!stralloc_catb(&tmpbuf, "/.filesystems", 13) ||

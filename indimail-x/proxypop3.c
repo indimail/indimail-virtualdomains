@@ -1,5 +1,8 @@
 /*
  * $Log: proxypop3.c,v $
+ * Revision 1.6  2023-03-20 10:16:55+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.5  2023-01-03 21:15:39+05:30  Cprogrammer
  * added 'proxypop3' identifier in connection log message
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxypop3.c,v 1.5 2023-01-03 21:15:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxypop3.c,v 1.6 2023-03-20 10:16:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -109,10 +112,10 @@ main(int argc, char **argv)
 	for (;;) {
 		alarm(60);
 		if (getln(subfdinsmall, &line, &match, '\n') == -1) {
-			strerr_warn1("proxyimap: read-stdin: ", &strerr_sys);
+			strerr_warn1("proxypop3: read-stdin: ", &strerr_sys);
 			return (-1);
 		}
-		if (!match || !line.len)
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
@@ -120,9 +123,8 @@ main(int argc, char **argv)
 				line.len--;
 			line.s[line.len] = 0;
 		} else {
-			if (!stralloc_0(&line))
-				die_nomem();
-			line.len--;
+			strmsg_out1("-ERR Invalid command.\r\n");
+			continue;
 		}
 		alarm(0);
 		for (p = line.s; *p && isspace(*p); p++);
@@ -193,7 +195,7 @@ main(int argc, char **argv)
 				strmsg_out1("+OK Begin SSL/TLS negotiation now.\r\n");
 			}
 			execv(*binqqargs, binqqargs);
-			strerr_warn3("proxyimap: execv: ", *binqqargs, ": ", &strerr_sys);
+			strerr_warn3("proxypop3: execv: ", *binqqargs, ": ", &strerr_sys);
 			continue;
 		} else
 		if (!str_diff(p, "USER")) {
@@ -222,7 +224,7 @@ main(int argc, char **argv)
 			continue;
 		} /*- proxylogin should normally never return */
 		return (proxylogin(argv, destport, user.s, pass.s, remoteip, 0, 2));
-	} /* while (alarm(300), fgets(buf, sizeof(buf), stdin)) */
+	} /*- for (;;) */
 	return (0);
 }
 

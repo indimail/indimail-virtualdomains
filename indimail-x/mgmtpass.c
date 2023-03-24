@@ -1,5 +1,8 @@
 /*
  * $Log: mgmtpass.c,v $
+ * Revision 1.4  2023-03-20 10:14:24+05:30  Cprogrammer
+ * fixed command line argument handling
+ *
  * Revision 1.3  2022-08-05 21:10:45+05:30  Cprogrammer
  * added encrypt_flag argument to mgmtsetpass()
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: mgmtpass.c,v 1.3 2022-08-05 21:10:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mgmtpass.c,v 1.4 2023-03-20 10:14:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "mgmtpass: fatal: "
@@ -54,6 +57,13 @@ main(int argc, char **argv)
 	for (user = pass = 0, idx = 1; idx < argc; idx++) {
 		if (argv[idx][0] != '-')
 			continue;
+		if (argv[idx][1] != 'l' && (idx + 1) == argc) {
+			strerr_warn1("usage: mgmtpass -u user [-a passwd | -p passwd] [-i]", 0);
+			strerr_warn1("usage: mgmtpass -l (list users)]", 0);
+			strerr_warn2(WARN, usage, 0);
+			return (1);
+			return (1);
+		}
 		switch (argv[idx][1])
 		{
 		case 'u':

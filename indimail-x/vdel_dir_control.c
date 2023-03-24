@@ -1,5 +1,8 @@
 /*
  * $Log: vdel_dir_control.c,v $
+ * Revision 1.2  2023-03-20 10:33:37+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.1  2019-04-15 12:40:49+05:30  Cprogrammer
  * Initial revision
  *
@@ -26,7 +29,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdel_dir_control.c,v 1.1 2019-04-15 12:40:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdel_dir_control.c,v 1.2 2023-03-20 10:33:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -69,11 +72,16 @@ vdel_dir_control(char *domain)
 			close(fd);
 			return (-1);
 		}
-		if (!match && line.len == 0)
+		if (!line.len)
 			break;
+		if (line.len < 4) {
+			strerr_warn3("vdel_dir_control: ", tmpbuf.s, ": incomplete line", 0);
+			close(fd);
+			return (-1);
+		}
 		if (match)
 			line.len--;
-		if (!stralloc_catb(&SqlBuf, "delete low_priority from dir_control", 36) ||
+		if (!stralloc_copyb(&SqlBuf, "delete low_priority from dir_control", 36) ||
 				!stralloc_cat(&SqlBuf, &line) ||
 				!stralloc_catb(&SqlBuf, " where domain = \"", 17) ||
 				!stralloc_cats(&SqlBuf, domain) ||

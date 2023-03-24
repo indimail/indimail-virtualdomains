@@ -1,5 +1,8 @@
 /*
  * $Log: GetSMTProute.c,v $
+ * Revision 1.4  2023-03-20 10:02:16+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.3  2020-10-14 00:17:52+05:30  Cprogrammer
  * BUG: Fixed infinite loop
  *
@@ -37,7 +40,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: GetSMTProute.c,v 1.3 2020-10-14 00:17:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: GetSMTProute.c,v 1.4 2023-03-20 10:02:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -66,13 +69,21 @@ get_smtp_qmtp_port(char *file, char *domain, int default_port)
 			close(fd);
 			return (-1);
 		}
-		if (!match && line.len == 0)
+		if (!line.len)
 			break;
-		else
-		if (!match)
-			strerr_warn3("GetSMTProute: ", file, ": incomplete line", 0);
-		line.len--;
-		line.s[line.len] = 0; /*- remove newline */
+		if (match) {
+			line.len--;
+			if (!line.len) /*- blank line */
+				continue;
+			line.s[line.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&line)) {
+				strerr_warn1("GetSMTProute: out of memory", 0);
+				close(fd);
+				return (-1);
+			}
+			line.len--;
+		}
 		i = str_chr(line.s, '#');
 		line.s[i] = 0;
 		for (ptr = line.s; *ptr && isspace((int) *ptr); ptr++);

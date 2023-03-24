@@ -1,5 +1,8 @@
 /*
  * $Log: is_alias_domain.c,v $
+ * Revision 1.3  2023-03-20 10:08:07+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.2  2021-09-11 13:26:14+05:30  Cprogrammer
  * use getEnvConfig for domain directory
  * on system error, return -1 instead of exit
@@ -34,7 +37,7 @@
 #include "get_assign.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: is_alias_domain.c,v 1.2 2021-09-11 13:26:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: is_alias_domain.c,v 1.3 2023-03-20 10:08:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -94,18 +97,19 @@ is_alias_domain(char *domain)
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
-		if (getln(&ssin, &line, &match, '\n') == -1) {
-			t = errno;
-			close(fd);
-			errno = t;
-			strerr_warn3("is_alias_domain: read: ", tmp.s, ": ", &strerr_sys);
-			return -1;
-		}
-		if (!match && line.len == 0)
+		if (getln(&ssin, &line, &match, '\n') == -1)
+			strerr_die3sys(111, "is_alias_domain: read: ", tmp.s, ": ");
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
 		}
 		match = str_chr(line.s, '#');
 		if (line.s[match])

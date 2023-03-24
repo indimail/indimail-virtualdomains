@@ -1,5 +1,8 @@
 /*
  * $Log: add_domain_assign.c,v $
+ * Revision 1.4  2023-03-22 07:59:53+05:30  Cprogrammer
+ * BUG - set uid, gid variables before creating assign file
+ *
  * Revision 1.3  2021-07-08 11:30:50+05:30  Cprogrammer
  * removed QMAILDIR setting through env variable
  *
@@ -33,7 +36,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_domain_assign.c,v 1.3 2021-07-08 11:30:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: add_domain_assign.c,v 1.4 2023-03-22 07:59:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -96,8 +99,8 @@ add_domain_assign(char *domain, char *domain_base_dir, uid_t uid, gid_t gid)
 		if (!OptimizeAddDomain)
 			update_newu();
 	} else {
-		strnum1[i = fmt_ulong(strnum1, indimailuid)] = 0;
-		strnum2[j = fmt_ulong(strnum2, indimailgid)] = 0;
+		strnum1[i = fmt_ulong(strnum1, uid)] = 0;
+		strnum2[j = fmt_ulong(strnum2, gid)] = 0;
 		if (!stralloc_copyb(&tmpstr, "+", 1) ||
 				!stralloc_cats(&tmpstr, domain) ||
 				!stralloc_catb(&tmpstr, "-:", 2) ||

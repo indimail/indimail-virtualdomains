@@ -1,5 +1,8 @@
 /*
  * $Log: vmoddomain.c,v $
+ * Revision 1.4  2023-03-22 09:46:49+05:30  Cprogrammer
+ * updated error messages
+ *
  * Revision 1.3  2023-01-22 10:32:00+05:30  Cprogrammer
  * reformatted error message strings
  *
@@ -45,7 +48,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomain.c,v 1.3 2023-01-22 10:32:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoddomain.c,v 1.4 2023-03-22 09:46:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vmoddomain: warning: "
@@ -83,8 +86,7 @@ usage()
 static void
 die_nomem()
 {
-	strerr_warn1("vmoddomain: out of memory", 0);
-	_exit (111);
+	strerr_die2x(111, FATAL, "out of memory");
 }
 
 static int
@@ -154,8 +156,6 @@ main(int argc, char **argv)
 		strerr_die1x(100, "you must be root or indimail to run this program");
 		return (1);
 	}
-	if (myuid & setuid(0))
-		strerr_die2sys(111, FATAL, "setuid: ");
 	if (access(TheDir.s, F_OK) && r_mkdir(TheDir.s, INDIMAIL_DIR_MODE, uid, gid))
 		strerr_die4sys(111, FATAL, "r_mkdir: ", TheDir.s, ": ");
 	if (chdir(TheDir.s))
@@ -185,12 +185,10 @@ set_handler(char *dir, char *handler, uid_t uid, gid_t gid, int use_vfilter)
 	/* Last case: the last parameter is a Maildir, an email address, ipaddress or hostname */
 	if (str_diff(handler, BOUNCE_ALL) && str_diff(handler, DELETE_ALL)) {
 		if (*handler == '/') {
-			if (chdir (handler)) {
-				strerr_warn3("vmoddomain: chdir: ", handler, ": ", &strerr_sys);
-				return (1);
-			}
+			if (chdir (handler))
+				strerr_die4sys(111, FATAL, ": chdir: ", handler, ": ");
 			if (access("new", F_OK) || access("cur", F_OK) || access("tmp", F_OK)) {
-				strerr_warn3("vmoddomain: ", handler, ": not a Maildir", 0);
+				strerr_warn3(WARN, handler, ": not a Maildir", 0);
 				return (1);
 			}
 		} else {
@@ -215,13 +213,11 @@ set_handler(char *dir, char *handler, uid_t uid, gid_t gid, int use_vfilter)
 			!stralloc_0(&tmpbuf))
 		die_nomem();
 #ifdef FILE_LOCKING
-	if ((lockfd = getDbLock(tmpbuf.s, 1)) == -1) {
-		strerr_warn3("vmoddomain: get_write_lock: ", tmpbuf.s, ": ", &strerr_sys);
-		return (1);
-	}
+	if ((lockfd = getDbLock(tmpbuf.s, 1)) == -1)
+		strerr_die4sys(111, FATAL, "get_write_lock: ", tmpbuf.s, ": ");
 #endif
 	if ((fd = open(tmpbuf.s, O_CREAT|O_TRUNC|O_WRONLY, 0400)) == -1) {
-		strerr_warn3("vmoddomain: open: ", tmpbuf.s, ": ", &strerr_sys);
+		strerr_warn4(FATAL, "open: ", tmpbuf.s, ": ", &strerr_sys);
 #ifdef FILE_LOCKING
 		delDbLock(lockfd, tmpbuf.s, 1);
 #endif
@@ -235,7 +231,7 @@ set_handler(char *dir, char *handler, uid_t uid, gid_t gid, int use_vfilter)
 			s += fmt_uint(s, gid);
 			s += fmt_strn(s, "): ", 3);
 			*s++ = 0;
-		strerr_warn3("vmoddomain: chown: ", tmpbuf.s, dbuf, &strerr_sys);
+		strerr_warn4(FATAL, "chown: ", tmpbuf.s, dbuf, &strerr_sys);
 		close(fd);
 		unlink(tmpbuf.s);
 #ifdef FILE_LOCKING
@@ -251,7 +247,7 @@ set_handler(char *dir, char *handler, uid_t uid, gid_t gid, int use_vfilter)
 				substdio_put(&ssout, "/sbin/vfilter '' ", 17) ||
 				substdio_puts(&ssout, handler) ||
 				substdio_flush(&ssout)) {
-			strerr_warn3("vmoddomain: write error: ", tmpbuf.s, ": ", &strerr_sys);
+			strerr_warn4(FATAL, "write error: ", tmpbuf.s, ": ", &strerr_sys);
 			close(fd);
 			unlink(tmpbuf.s);
 #ifdef FILE_LOCKING
@@ -266,7 +262,7 @@ set_handler(char *dir, char *handler, uid_t uid, gid_t gid, int use_vfilter)
 			substdio_put(&ssout, "/sbin/vdelivermail '' ", 22) ||
 			substdio_puts(&ssout, handler) ||
 			substdio_flush(&ssout)) {
-		strerr_warn3("vmoddomain: write error: ", tmpbuf.s, ": ", &strerr_sys);
+		strerr_warn4(FATAL, "write error: ", tmpbuf.s, ": ", &strerr_sys);
 		close(fd);
 		unlink(tmpbuf.s);
 #ifdef FILE_LOCKING
@@ -276,7 +272,7 @@ set_handler(char *dir, char *handler, uid_t uid, gid_t gid, int use_vfilter)
 	}
 	close(fd);
 	if (rename(tmpbuf.s, ".qmail-default")) {
-		strerr_warn3("update_file: rename: ", tmpbuf.s, " --> .qmail-default: ", &strerr_sys);
+		strerr_warn4(FATAL, "update_file: rename: ", tmpbuf.s, " --> .qmail-default: ", &strerr_sys);
 		unlink(tmpbuf.s);
 #ifdef FILE_LOCKING
 		delDbLock(lockfd, tmpbuf.s, 1);
@@ -302,14 +298,14 @@ set_domain_limits(char *dir, uid_t uid, gid_t gid, int domain_limits)
 		die_nomem();
 	if (!domain_limits) {
 		if (unlink(tmpbuf.s)) {
-			strerr_warn3("vmoddomain: unlink: ", tmpbuf.s, ": ", &strerr_sys);
+			strerr_warn4(FATAL, "unlink: ", tmpbuf.s, ": ", &strerr_sys);
 			return (1);
 		}
 		return (0);
 	}
 	if ((fd = open(tmpbuf.s, O_CREAT|O_TRUNC|O_WRONLY, 0400)) == -1)
 	{
-		strerr_warn3("vmoddomain: open: ", tmpbuf.s, ": ", &strerr_sys);
+		strerr_warn4(FATAL, "open: ", tmpbuf.s, ": ", &strerr_sys);
 		return (1);
 	}
 	if (fchown(fd, uid, gid)) {
@@ -320,7 +316,7 @@ set_domain_limits(char *dir, uid_t uid, gid_t gid, int domain_limits)
 		s += fmt_uint(s, gid);
 		s += fmt_strn(s, "): ", 3);
 		*s++ = 0;
-		strerr_warn3("vmoddomain: chown: ", tmpbuf.s, dbuf, &strerr_sys);
+		strerr_warn4(FATAL, "chown: ", tmpbuf.s, dbuf, &strerr_sys);
 		close(fd);
 		unlink(tmpbuf.s);
 		return (1);

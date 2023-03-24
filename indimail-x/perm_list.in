@@ -22,7 +22,7 @@
 # Setuid
 #
 %attr(4555,root,root)                   @prefix@/bin/vrenameuser
-%attr(4555,root,root)                   @prefix@/bin/vmoveuser
+%attr(4555,root,root)                   @prefix@/bin/vmoveuserdir
 %attr(4555,root,root)                   @prefix@/bin/vrenamedomain
 %attr(4555,root,root)                   @prefix@/bin/vmoduser
 %attr(4555,root,root)                   @prefix@/bin/vcfilter

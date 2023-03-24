@@ -1,5 +1,11 @@
 /*
- * $Log: vmoveuser.c,v $
+ * $Log: vmoveuserdir.c,v $
+ * Revision 1.7  2023-03-23 22:23:13+05:30  Cprogrammer
+ * remove domain component from User
+ *
+ * Revision 1.6  2023-03-22 11:25:32+05:30  Cprogrammer
+ * run POST_HANDLE program (if set) with domain user uid/gid
+ *
  * Revision 1.5  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -33,9 +39,9 @@
 #include <env.h>
 #include <replacestr.h>
 #include <subfd.h>
+#include <setuserid.h>
 #endif
 #include "post_handle.h"
-#include "get_indimailuidgid.h"
 #include "variables.h"
 #include "check_group.h"
 #include "get_assign.h"
@@ -52,17 +58,16 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoveuser.c,v 1.5 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoveuserdir.c,v 1.7 2023-03-23 22:23:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
-#define FATAL   "vmoveuser: fatal: "
-#define WARN    "vmoveuser: warning: "
+#define FATAL   "vmoveuserdir: fatal: "
+#define WARN    "vmoveuserdir: warning: "
 
 static void
 die_nomem()
 {
-	strerr_warn1("vmoveuser: out of memory", 0);
-	_exit(111);
+	strerr_die2x(111, FATAL, "out of memory");
 }
 
 int
@@ -79,8 +84,8 @@ main(int argc, char **argv)
 #ifdef VALIAS
 	static stralloc tmp_domain = {0};
 #endif
-	uid_t           uid;
-	gid_t           gid;
+	uid_t           uid, domainuid;
+	gid_t           gid, domaingid;
 	int             i;
 #ifdef CLUSTERED_SITE
 	int             err;
@@ -89,48 +94,38 @@ main(int argc, char **argv)
 #endif
 
 	if (argc != 3) {
-		strerr_warn1("usage: vmoveuser user new_dir", 0);
-		return (1);
-	}
-	if (indimailuid == -1 || indimailgid == -1)
-		get_indimailuidgid(&indimailuid, &indimailgid);
-	uid = getuid();
-	gid = getgid();
-	if (uid != 0 && uid != indimailuid && gid != indimailgid && check_group(indimailgid, FATAL) != 1) {
-		strnum1[fmt_ulong(strnum1, indimailuid)] = 0;
-		strnum2[fmt_ulong(strnum2, indimailgid)] = 0;
-		strerr_warn5("vadduser: you must be root or domain user (uid=", strnum1, "/gid=", strnum2, ") to run this program", 0);
+		strerr_warn1("usage: vmoveuserdir user new_dir", 0);
 		return (1);
 	}
 	User = argv[1];
 	NewDir = argv[2];
 	i = str_chr(User, '@');
-	if (User[i])
+	if (User[i]) {
+		User[i] = 0;
 		Domain = User + i + 1;
-	else {
-		strerr_warn3("vmoveuser: ", User, ": Not a fully qualified email", 0);
-		return (1);
-	}
-	if (!(real_domain = get_real_domain(Domain))) {
-		strerr_warn3("vmoveuser: domain ", Domain, " does not exist", 0);
-		return (1);
 	} else
-	if (!get_assign(real_domain, &Dir, &uid, &gid)) {
-		strerr_warn3("vmoveuser: domain ", real_domain, " does not exist", 0);
-		return (1);
+		strerr_die3x(1, WARN, User, ": Not a fully qualified email");
+	if (!(real_domain = get_real_domain(Domain)))
+		strerr_die3x(1, WARN, Domain, ": No such domain");
+	else
+	if (!get_assign(real_domain, &Dir, &domainuid, &domaingid))
+		strerr_die4x(1, WARN, "domain ", Domain, " does not exist");
+	if (!domainuid)
+		strerr_die4x(100, WARN, "domain ", real_domain, " with uid 0");
+	uid = getuid();
+	gid = getgid();
+	if (uid != 0 && uid != domainuid && gid != domaingid && check_group(domaingid, FATAL) != 1) {
+		strnum1[fmt_ulong(strnum1, domainuid)] = 0;
+		strnum2[fmt_ulong(strnum2, domaingid)] = 0;
+		strerr_die5x(100, "vmoduser: you must be root or domain user (uid=", strnum1, "/gid=", strnum2, ") to run this program");
 	}
-	if (!uid)
-		strerr_die3x(100, "vmovuser: domain ", real_domain, " with uid 0");
 #ifdef CLUSTERED_SITE
-	if ((err = is_distributed_domain(real_domain)) == -1) {
-		strerr_warn3("vmoveuser: unable to verify ", real_domain, " as a distributed domain", 0);
-		return (1);
-	} else
+	if ((err = is_distributed_domain(real_domain)) == -1)
+		strerr_die4x(1, WARN, "Unable to verify ", real_domain, " as a distributed domain");
+	else
 	if (err == 1) {
-		if (open_master()) {
-			strerr_warn1("vmoveuser: failed to open master db", 0);
-			return (1);
-		}
+		if (open_master())
+			strerr_die2x(1, FATAL, "failed to open master db");
 		if (!stralloc_copys(&tmp, User) ||
 				!stralloc_append(&tmp, "@") ||
 				!stralloc_cats(&tmp, real_domain))
@@ -139,33 +134,24 @@ main(int argc, char **argv)
 			i = str_rchr(mailstore, ':');
 			if (mailstore[i])
 				mailstore[i] = 0;
-			else {
-				strerr_warn6("vmoveuser: invalid mailstore [", mailstore, "] for ", User, "@", real_domain, 0);
-				return (1);
-			}
+			else
+				strerr_die7x(1, WARN, "invalid mailstore [", mailstore, "] for ", User, "@", real_domain);
 			for(; *mailstore && *mailstore != ':'; mailstore++);
-			if  (*mailstore != ':') {
-				strerr_warn6("vmoveuser: invalid mailstore [", mailstore, "] for ", User, "@", real_domain, 0);
-				return (1);
-			}
+			if  (*mailstore != ':')
+				strerr_die7x(1, WARN, "invalid mailstore [", mailstore, "] for ", User, "@", real_domain);
 			mailstore++;
 		} else {
 			if (userNotFound)
-				strerr_warn4(User, "@", real_domain, ": No such user", 0);
+				strerr_die5x(1, WARN, User, "@", real_domain, ": No such user");
 			else
-				strerr_warn1("vmoveuser: error connecting to db", 0);
-			return (1);
+				strerr_die2x(1, FATAL, "error connecting to db");
 		}
-		if (!islocalif(mailstore)) {
-			strerr_warn6(User, "@", real_domain, " not local (mailstore ", mailstore, ")", 0);
-			return (1);
-		}
+		if (!islocalif(mailstore))
+			strerr_die7x(1, WARN, User, "@", real_domain, " not local (mailstore ", mailstore, ")");
 	}
 #endif
-	if (!(pw = sql_getpw(User, real_domain))) {
-		strerr_warn4(User, "@", real_domain, ": No such user", 0);
-		return (1);
-	}
+	if (!(pw = sql_getpw(User, real_domain)))
+		strerr_die5x(1, WARN, "sql_getpw: No such user ", User, "@", real_domain);
 	PwTmp = *pw;
 	pw = &PwTmp;
 	if (!stralloc_copys(&OldDir, pw->pw_dir) ||
@@ -188,23 +174,19 @@ main(int argc, char **argv)
 	}
 #endif
 	/*- move directory */
-	if (setuid(0)) {
-		strerr_warn1("vmoveuser: setuid-root: ", &strerr_sys);
-		return (1);
-	}
-	if (!access(OldDir.s, F_OK) && MoveFile(OldDir.s, NewDir)) {
-		strerr_warn5("vmoveuser: MoveFile: ", OldDir.s, " --> ", pw->pw_dir, ": ", &strerr_sys);
-		return (1);
-	}
+	if (uid && setuid(0))
+		strerr_die2sys(111, FATAL, "setuid-root: ");
+	if (!access(OldDir.s, F_OK) && MoveFile(OldDir.s, NewDir))
+		strerr_die6x(111, FATAL, "MoveFile: ", OldDir.s, " --> ", pw->pw_dir, ": ");
 	/*- update database */
 	if ((i = sql_setpw(pw, Domain, NULL))) {
-		strerr_warn1("vmoveuser: sql_setpw failed", 0);
+		strerr_warn2(WARN, "sql_setpw failed", 0);
 		if (!access(NewDir, F_OK) && MoveFile(NewDir, OldDir.s))
-			strerr_warn5("vmoveuser: MoveFile: ", NewDir, " --> ", OldDir.s, ": ", &strerr_sys);
+			strerr_die6x(111, FATAL, "MoveFile: ", NewDir, " --> ", OldDir.s, ": ");
 		return (1);
 	}
-	subprintfe(subfdout, "vmoveuser", "%s@%s old %s new %s done", User, Domain, OldDir.s, NewDir);
-	flush("vmoveuser");
+	subprintfe(subfdout, "vmoveuserdir", "%s@%s old %s new %s done\n", User, Domain, OldDir.s, NewDir);
+	flush("vmoveuserdir");
 	if (!(tmpstr = env_get("POST_HANDLE"))) {
 		i = str_rchr(argv[0], '/');
 		if (!*(base_argv0 = (argv[0] + i)))
@@ -212,6 +194,12 @@ main(int argc, char **argv)
 		else
 			base_argv0++;
 		return (post_handle("%s/%s %s@%s %s %s", LIBEXECDIR, base_argv0, User, real_domain, OldDir.s, NewDir));
-	} else
+	} else {
+		if (setuser_privileges(uid, gid, "indimail")) {
+			strnum1[fmt_ulong(strnum1, domainuid)] = 0;
+			strnum2[fmt_ulong(strnum2, domaingid)] = 0;
+			strerr_die6sys(111, FATAL, "setuser_privilege: (", strnum1, "/", strnum2, "): ");
+		}
 		return (post_handle("%s %s@%s %s %s", tmpstr, User, real_domain, OldDir.s, NewDir));
+	}
 }

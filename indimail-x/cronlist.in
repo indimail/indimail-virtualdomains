@@ -1,5 +1,5 @@
 #
-# $Id: cronlist.in,v 1.1 2019-05-29 01:01:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: cronlist.in,v 1.2 2023-03-20 09:51:24+05:30 Cprogrammer Exp mbhangui $
 #
 #2,32 * * * * indimail @prefix@/sbin/hostsync -d `uname -n`
 5,35 * * * * root @prefix@/sbin/clearopensmtp
@@ -19,4 +19,5 @@
 #0 0 * * * indimail @prefix@/sbin/chowkidar -r -S -q > /dev/null 2>&1
 #
 #
-10 0 * * * root @prefix@/sbin/svctool --backup=@basepath@/backup --mysqlPrefix=@mysql_prefix@ --servicedir=@servicedir@
+10 9 * * * root @prefix@/sbin/svctool --backup=@basepath@/backup --mysqlPrefix=@mysql_prefix@ --servicedir=@servicedir@
+5 01 * * * root /usr/bin/logrotate --force @sysconfdir@/logrotate.mysql

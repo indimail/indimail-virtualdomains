@@ -1,5 +1,8 @@
 /*
  * $Log: valiasinfo.c,v $
+ * Revision 1.6  2023-03-20 10:32:54+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.5  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -49,7 +52,7 @@
 #include "valias_select.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valiasinfo.c,v 1.5 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valiasinfo.c,v 1.6 2023-03-20 10:32:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -108,10 +111,20 @@ valiasinfo(char *user, char *domain)
 					strerr_warn3("valiasinfo: read: ", tmpbuf.s, ": ", &strerr_sys);
 					break;
 				}
-				if (!match && line.len == 0)
+				if (!line.len)
 					break;
-				line.len--;
-				line.s[line.len] = 0;
+				if (match) {
+					line.len--;
+					if (!line.len) {
+						strerr_warn3("valiasinfo", tmpbuf.s, ": incomplete line", 0);
+						continue;
+					}
+					line.s[line.len] = 0;
+				} else {
+					if (!stralloc_0(&line))
+						die_nomem();
+					line.len--;
+				}
 				match = str_chr(line.s, '#');
 				if (line.s[match])
 					line.s[match] = 0;
@@ -144,10 +157,20 @@ valiasinfo(char *user, char *domain)
 						strerr_warn3("valiasinfo: read: ", tmpbuf.s, ": ", &strerr_sys);
 						break;
 					}
-					if (!match && line.len == 0)
+					if (!line.len)
 						break;
-					line.len--;
-					line.s[line.len] = 0;
+					if (match) {
+						line.len--;
+						if (!line.len) {
+							strerr_warn3("valiasinfo", tmpbuf.s, ": incomplete line", 0);
+							continue;
+						}
+						line.s[line.len] = 0;
+					} else {
+						if (!stralloc_0(&line))
+							die_nomem();
+						line.len--;
+					}
 					match = str_chr(line.s, '#');
 					if (line.s[match])
 						line.s[match] = 0;

@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 1.8  2023-03-20 10:36:03+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.7  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -63,7 +66,7 @@
 #include "vsmtp_select.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 1.7 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 1.8 2023-03-20 10:36:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define VDOMTOKENS ":\n"
@@ -177,6 +180,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 		int DisplayUid, int DisplayGid, int DisplayDir, int DisplayBaseDir, int DisplayAll,
 		int DisplayTotalUsers, int DisplayAliasDomains, int DisplayPort)
 #else
+void
 display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 		int DisplayUid, int DisplayGid, int DisplayDir, int DisplayBaseDir, int DisplayAll,
 		int DisplayTotalUsers, int DisplayAliasDomains)
@@ -259,21 +263,20 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 				subprintfe(subfdout, "vdominfo", "  Base Dir: %s\n", base_path);
 			} else {
 				substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-				for (;;) {
-					if (getln(&ssin, &line, &match, '\n') == -1) {
-						strerr_warn3("vdominfo: read: ", tmpbuf.s, ": ", &strerr_sys);
-						break;
-					}
-					if (!match && line.len == 0)
-						break;
-					else {
-						line.len--;
-						line.s[line.len] = 0; /*- remove newline */
-					}
+				if (getln(&ssin, &line, &match, '\n') == -1) {
+					strerr_warn3("vdominfo: read: ", tmpbuf.s, ": ", &strerr_sys);
+					return;
 				}
 				close(fd);
-				if (line.len)
-					subprintfe(subfdout, "vdominfo", "  Base Dir: %s\n", line.s);
+				if (line.len < 2) {
+					strerr_warn2("vdominfo: incomplete line: ", tmpbuf.s, 0);
+					return;
+				}
+				if (match) {
+					line.len--;
+					line.s[line.len] = 0; /*- remove newline */
+				}
+				subprintfe(subfdout, "vdominfo", "  Base Dir: %s\n", line.s);
 			}
 			if (!stralloc_copys(&tmpbuf, dir) ||
 					!stralloc_catb(&tmpbuf, "/.users_per_level", 17) ||
@@ -284,21 +287,24 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 					strerr_die3sys(111, "vdominfo: open: ", tmpbuf.s, ": ");
 			} else {
 				substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-				for (;;) {
-					if (getln(&ssin, &line, &match, '\n') == -1) {
-						strerr_warn3("vdominfo: read: ", tmpbuf.s, ": ", &strerr_sys);
-						break;
-					}
-					if (!match && line.len == 0)
-						break;
-					else {
-						line.len--;
-						line.s[line.len] = 0; /*- remove newline */
-					}
+				if (getln(&ssin, &line, &match, '\n') == -1) {
+					strerr_warn3("vdominfo: read: ", tmpbuf.s, ": ", &strerr_sys);
+					return;
 				}
 				close(fd);
-				if (line.len)
-					scan_int(line.s, &users_per_level);
+				if (line.len < 2) {
+					strerr_warn2("vdominfo: incomplete line: ", tmpbuf.s, 0);
+					return;
+				}
+				if (match) {
+					line.len--;
+					line.s[line.len] = 0; /*- remove newline */
+				} else {
+					if (!stralloc_0(&line))
+						die_nomem();
+					line.len--;
+				}
+				scan_int(line.s, &users_per_level);
 			}
 			if (!stralloc_copys(&tmpbuf, dir) ||
 					!stralloc_catb(&tmpbuf, "/.filesystems", 13) ||
@@ -325,15 +331,17 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 						strerr_warn3("vdominfo: read: ", tmpbuf.s, ": ", &strerr_sys);
 						break;
 					}
-					if (!match && line.len == 0)
+					if (!line.len)
 						break;
-					else {
+					if (match) {
 						line.len--;
+						if (!line.len)
+							continue;
 						line.s[line.len] = 0; /*- remove newline */
-						if (!i++)
-							subprintfe(subfdout, "vdominfo", "AliasDomains:\n");
-						subprintfe(subfdout, "vdominfo", "%s\n", line.s);
 					}
+					if (!i++)
+						subprintfe(subfdout, "vdominfo", "AliasDomains:\n");
+					subprintfe(subfdout, "vdominfo", "%s\n", line.s);
 				}
 				close(fd);
 			}
@@ -407,21 +415,20 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 					subprintfe(subfdout, "vdominfo", "  Base Dir: %s\n", base_path);
 				} else {
 					substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-					for (;;) {
-						if (getln(&ssin, &line, &match, '\n') == -1) {
-							strerr_warn3("vdominfo: read: ", tmpbuf.s, ": ", &strerr_sys);
-							break;
-						}
-						if (!match && line.len == 0)
-							break;
-						else {
-							line.len--;
-							line.s[line.len] = 0; /*- remove newline */
-						}
+					if (getln(&ssin, &line, &match, '\n') == -1) {
+						strerr_warn3("vdominfo: read: ", tmpbuf.s, ": ", &strerr_sys);
+						return;
 					}
 					close(fd);
-					if (line.len)
-						 subprintfe(subfdout, "vdominfo", "  Base Dir: %s\n", line.s);
+					if (line.len < 2) {
+						strerr_warn2("vdominfo: incomplete line: ", tmpbuf.s, 0);
+						return;
+					}
+					if (match) {
+						line.len--;
+						line.s[line.len] = 0; /*- remove newline */
+					}
+					subprintfe(subfdout, "vdominfo", "  Base Dir: %s\n", line.s);
 				}
 			}
 			if (DisplayTotalUsers) {
@@ -434,21 +441,20 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 						strerr_die3sys(111, "vdominfo: open: ", tmpbuf.s, ": ");
 				} else {
 					substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-					for (;;) {
-						if (getln(&ssin, &line, &match, '\n') == -1) {
-							strerr_warn3("vdominfo: read: ", tmpbuf.s, ": ", &strerr_sys);
-							break;
-						}
-						if (!match && line.len == 0)
-							break;
-						else {
-							line.len--;
-							line.s[line.len] = 0; /*- remove newline */
-						}
+					if (getln(&ssin, &line, &match, '\n') == -1) {
+						strerr_warn3("vdominfo: read: ", tmpbuf.s, ": ", &strerr_sys);
+						return;
 					}
 					close(fd);
-					if (line.len)
-						scan_int(line.s, &users_per_level);
+					if (line.len < 2) {
+						strerr_warn2("vdominfo: incomplete line: ", tmpbuf.s, 0);
+						return;
+					}
+					if (match) {
+						line.len--;
+						line.s[line.len] = 0; /*- remove newline */
+					}
+					scan_int(line.s, &users_per_level);
 				}
 				if (!stralloc_copys(&tmpbuf, dir) ||
 						!stralloc_catb(&tmpbuf, "/.filesystems", 13) ||
@@ -477,15 +483,17 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 							strerr_warn3("vdominfo: read: ", tmpbuf.s, ": ", &strerr_sys);
 							break;
 						}
-						if (!match && line.len == 0)
+						if (!line.len)
 							break;
-						else {
+						if (match) {
 							line.len--;
+							if (!line.len)
+								continue;
 							line.s[line.len] = 0; /*- remove newline */
-							if (!i++)
-								subprintfe(subfdout, "vdominfo", "AliasDomains:\n");
-							subprintfe(subfdout, "vdominfo", "%s\n", line.s);
 						}
+						if (!i++)
+							subprintfe(subfdout, "vdominfo", "AliasDomains:\n");
+						subprintfe(subfdout, "vdominfo", "%s\n", line.s);
 					}
 					close(fd);
 				}
@@ -532,10 +540,12 @@ display_all_domains(stralloc *Domain, stralloc *Dir, int DisplayName, int Displa
 			strerr_warn3("vdominfo5: read: ", tmpbuf.s, ": ", &strerr_sys);
 			break;
 		}
-		if (!match && line.len == 0)
+		if (!line.len)
 			break;
-		else {
+		if (match) {
 			line.len--;
+			if (!line.len)
+				continue;
 			line.s[line.len] = 0; /*- remove newline */
 		}
 		match = str_chr(line.s, '#');

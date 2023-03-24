@@ -1,5 +1,11 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.13  2023-03-22 08:50:29+05:30  Cprogrammer
+ * run POST_HANDLE program (if set) with indimail uid/gid
+ *
+ * Revision 1.12  2023-03-20 10:28:35+05:30  Cprogrammer
+ * call post handle script with the same arguments passed to vadddomain
+ *
  * Revision 1.11  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -73,6 +79,7 @@
 #include <makesalt.h>
 #include <hashmethods.h>
 #include <subfd.h>
+#include <setuserid.h>
 #endif
 #ifdef HAVE_GSASL_H
 #include <gsasl.h>
@@ -106,7 +113,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.11 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.13 2023-03-22 08:50:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -121,6 +128,7 @@ static stralloc dirbuf = { 0 };
 static stralloc AliasLine = { 0 };
 static stralloc tmpbuf = { 0 };
 static int      chk_rcpt, users_per_level = 0;
+static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
 static char    *usage =
 	"usage: vaddomain [options] virtual_domain [postmaster password]\n"
@@ -146,9 +154,9 @@ static char    *usage =
 	"  -h hash                    - use one of DES, MD5, SHA256, SHA512, hash method\n"
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	"  -C                         - store clear txt and scram hex salted password in database\n"
-	"                               This allows CRAM methods to be used\n"
 	"  -m SCRAM method            - use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method\n"
+	"  -C                         - store clear txt and SCRAM hex salted password in database\n"
+	"                               This allows CRAM methods to be used\n"
 	"  -S salt                    - use a fixed base64 encoded salt for generating SCRAM password\n"
 	"                             - if salt is not specified, it will be generated\n"
 	"  -I iter_count              - use iter_count instead of 4096 for generating SCRAM password\n"
@@ -166,10 +174,9 @@ static char    *usage =
 	;
 
 static void
-die_nomem(char *prefix)
+die_nomem()
 {
-	strerr_warn2(prefix, ": out of memory", 0);
-	_exit (111);
+	strerr_die2x(111, FATAL, "out of memory");
 }
 
 void
@@ -180,10 +187,8 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 {
 	int             c, i;
 	struct passwd  *mypw;
-	char            optstr[51], strnum[FMT_ULONG];
+	char            optstr[51];
 
-	if (indimailuid == -1 || indimailgid == -1)
-		get_indimailuidgid(&indimailuid, &indimailgid);
 	Uid = indimailuid;
 	Gid = indimailgid;
 	*encrypt_flag = -1;
@@ -236,19 +241,19 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 			break;
 		case 'h':
 			if (!str_diffn(optarg, "DES", 3))
-				strnum[fmt_int(strnum, DES_HASH)] = 0;
+				strnum1[fmt_int(strnum1, DES_HASH)] = 0;
 			else
 			if (!str_diffn(optarg, "MD5", 3))
-				strnum[fmt_int(strnum, MD5_HASH)] = 0;
+				strnum1[fmt_int(strnum1, MD5_HASH)] = 0;
 			else
 			if (!str_diffn(optarg, "SHA-256", 7))
-				strnum[fmt_int(strnum, SHA256_HASH)] = 0;
+				strnum1[fmt_int(strnum1, SHA256_HASH)] = 0;
 			else
 			if (!str_diffn(optarg, "SHA-512", 7))
-				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
+				strnum1[fmt_int(strnum1, SHA512_HASH)] = 0;
 			else
-				strerr_die5x(100, FATAL, "wrong hash method ", optarg, ". Supported HASH Methods: DES MD5 SHA-256 SHA-512\n", usage);
-			if (!env_put2("PASSWORD_HASH", strnum))
+				strerr_die5x(100, WARN, "wrong hash method ", optarg, ". Supported HASH Methods: DES MD5 SHA-256 SHA-512\n", usage);
+			if (!env_put2("PASSWORD_HASH", strnum1))
 				strerr_die1x(111, "out of memory");
 			*encrypt_flag = 1;
 			break;
@@ -272,7 +277,7 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 			if (!str_diffn(optarg, "SCRAM-SHA-256", 13))
 				*scram = 2;
 			else
-				strerr_die5x(100, FATAL, "wrong SCRAM method ", optarg, ". Supported SCRAM Methods: SCRAM-SHA1 SCRAM-SHA-256\n", usage);
+				strerr_die5x(100, WARN, "wrong SCRAM method ", optarg, ". Supported SCRAM Methods: SCRAM-SHA1 SCRAM-SHA-256\n", usage);
 			break;
 		case 'S':
 			if (!salt)
@@ -320,12 +325,14 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 			if (*user) {
 				if ((mypw = getpwnam(*user)) != NULL) {
 					if (!stralloc_copys(&dirbuf, mypw->pw_dir))
-						die_nomem(FATAL);
+						die_nomem();
 					else
 					if (!stralloc_0(&dirbuf))
-						die_nomem(FATAL);
+						die_nomem();
 					Uid = mypw->pw_uid;
 					Gid = mypw->pw_gid;
+					if (!Uid)
+						strerr_die3x(100, "user ", *user, " has uid=0");
 				} else
 					strerr_die3x(100, "user ", *user, " not found in /etc/passwd");
 			}
@@ -416,6 +423,8 @@ main(int argc, char **argv)
 	dbport = -1;
 	distributed = -1;
 #endif
+	if (indimailuid == -1 || indimailgid == -1)
+		get_indimailuidgid(&indimailuid, &indimailgid);
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	get_options(argc, argv, &base_path, &dir_t, &passwd, &domain, &user,
@@ -439,12 +448,13 @@ main(int argc, char **argv)
 		else
 			passwd = vgetpasswd("postmaster");
 	}
-	if (indimailuid == -1 || indimailgid == -1)
-		get_indimailuidgid(&indimailuid, &indimailgid);
 	uid = getuid();
 	gid = getgid();
-	if (uid != 0 && uid != indimailuid && gid != indimailgid && check_group(indimailgid, FATAL) != 1)
-		strerr_die1x(100, "you must be root or indimail to run this program");
+	if (uid != 0 && uid != indimailuid && gid != indimailgid && check_group(indimailgid, FATAL) != 1) {
+		strnum1[fmt_ulong(strnum1, indimailuid)] = 0;
+		strnum2[fmt_ulong(strnum2, indimailgid)] = 0;
+		strerr_die6x(100, WARN, "you must be root or domain user (uid=", strnum1, ", gid=", strnum2, ") to run this program");
+	}
 	if (uid & setuid(0))
 		strerr_die2sys(111, FATAL, "setuid: ");
 	if (!dir_t) {
@@ -454,18 +464,20 @@ main(int argc, char **argv)
 				if (!stralloc_copys(&dirbuf, domaindir) ||
 						!stralloc_catb(&dirbuf, "/autoturn", 9) ||
 						!stralloc_0(&dirbuf))
-					die_nomem(FATAL);
+					die_nomem();
 			} else {
 				Uid = uid; /*- autoturn uid */
 				Gid = gid; /*- autoturn gid */
 				if (!stralloc_copys(&dirbuf, ptr) || !stralloc_0(&dirbuf))
-					die_nomem(FATAL);
+					die_nomem();
 			}
 		} else {
 			if (!stralloc_copys(&dirbuf, domaindir) || !stralloc_0(&dirbuf))
-				die_nomem(FATAL);
+				die_nomem();
 		}
-	}
+	} else
+	if (!stralloc_copys(&dirbuf, dir_t) || !stralloc_0(&dirbuf))
+		die_nomem();
 	/*
 	 * add domain to virtualdomains and optionally to chkrcptdomains
 	 * add domain to users/assign, users/cdb
@@ -483,7 +495,7 @@ main(int argc, char **argv)
 	}
 	if (users_per_level) {
 		if (!get_assign(domain, &dirbuf, &uid, &gid)) {
-			strerr_warn4(FATAL, "domain ", domain, " does not exist", 0);
+			strerr_warn4(WARN, "domain ", domain, " does not exist", 0);
 			deldomain(domain);
 			iclose();
 			_exit(100);
@@ -493,7 +505,7 @@ main(int argc, char **argv)
 				!stralloc_0(&tmpbuf)) {
 			deldomain(domain);
 			iclose();
-			die_nomem(FATAL);
+			die_nomem();
 		}
 		if ((fd = open(tmpbuf.s, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR)) == -1) {
 			strerr_warn4(FATAL, "open: ", tmpbuf.s, ": ", &strerr_sys);
@@ -526,7 +538,7 @@ main(int argc, char **argv)
 	}
 	if (base_path && !use_etrn) {
 		if (!get_assign(domain, &dirbuf, &uid, &gid)) {
-			strerr_warn4(FATAL, "domain ", domain, " does not exist", 0);
+			strerr_warn4(WARN, "domain ", domain, " does not exist", 0);
 			deldomain(domain);
 			iclose();
 			_exit(100);
@@ -534,14 +546,18 @@ main(int argc, char **argv)
 		if (!stralloc_copy(&tmpbuf, &dirbuf) ||
 				!stralloc_catb(&tmpbuf, "/.base_path", 11) ||
 				!stralloc_0(&tmpbuf))
-			die_nomem(FATAL);
+			die_nomem();
 		if ((fd = open(tmpbuf.s, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR)) == -1) {
 			strerr_warn4(FATAL, "open: ", tmpbuf.s, ": ", &strerr_sys);
 			deldomain(domain);
 			iclose();
 			_exit(111);
 		}
-		if (write(fd, base_path, str_len(base_path)) == -1) {
+		if (!stralloc_copys(&tmpbuf, base_path) ||
+				!stralloc_append(&tmpbuf, "\n") ||
+				!stralloc_0(&tmpbuf))
+			die_nomem();
+		if (write(fd, tmpbuf.s, tmpbuf.len - 1) == -1) {
 			strerr_warn4(FATAL, "write: ", tmpbuf.s, ": ", &strerr_sys);
 			deldomain(domain);
 			iclose();
@@ -601,7 +617,7 @@ main(int argc, char **argv)
 					!stralloc_0(&tmpbuf)) {
 				deldomain(domain);
 				iclose();
-				die_nomem(FATAL);
+				die_nomem();
 			}
 			if ((fd = open(tmpbuf.s, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR)) == -1) {
 				strerr_warn4(FATAL, "open: ", tmpbuf.s, ": ", &strerr_sys);
@@ -615,7 +631,7 @@ main(int argc, char **argv)
 					!stralloc_append(&tmpbuf, "\n")) {
 				deldomain(domain);
 				iclose();
-				die_nomem(FATAL);
+				die_nomem();
 			}
 			if (write(fd, tmpbuf.s, tmpbuf.len) == -1) {
 				strerr_warn4(FATAL, "write: ", tmpbuf.s, ": ", &strerr_sys);
@@ -640,7 +656,7 @@ main(int argc, char **argv)
 		} else {
 			deldomain(domain);
 			iclose();
-			strerr_die3x(100, FATAL, "Invalid bounce email address ",  bounceEmail);
+			strerr_die3x(100, WARN, "Invalid bounce email address ",  bounceEmail);
 		}
 	}
 	create_flag = 1;
@@ -649,13 +665,13 @@ main(int argc, char **argv)
 	if ((is_dist = is_distributed_domain(domain)) == -1) {
 		deldomain(domain);
 		iclose();
-		strerr_warn4(WARN, "Unable to verify ", domain, " as a distributed domain", 0);
+		strerr_warn4(FATAL, "Unable to verify ", domain, " as a distributed domain", 0);
 		_exit(100);
 	} else
 	if (is_dist) {
 		if ((user_present = is_user_present("postmaster", domain)) == -1) {
 			iclose();
-			strerr_warn2(WARN, "auth db error", 0);
+			strerr_warn2(FATAL, "auth db error", 0);
 			_exit(100);
 		} else
 		if (user_present) {
@@ -714,7 +730,7 @@ main(int argc, char **argv)
 				!stralloc_0(&AliasLine)) {
 			deldomain(domain);
 			iclose();
-			die_nomem(FATAL);
+			die_nomem();
 		}
 		if (valias_insert(auto_ids[i], domain, AliasLine.s, 0)) {
 			deldomain(domain);
@@ -723,13 +739,24 @@ main(int argc, char **argv)
 		}
 	}
 	iclose();
+	for (i = 1, tmpbuf.len = 0; i < argc; i++) {
+		if (!stralloc_append(&tmpbuf, " ") ||
+				!stralloc_cats(&tmpbuf, argv[i]))
+			die_nomem();
+	}
 	if (!(ptr = env_get("POST_HANDLE"))) {
 		i = str_rchr(argv[0], '/');
 		if (!*(base_argv0 = (argv[0] + i)))
 			base_argv0 = argv[0];
 		else
 			base_argv0++;
-		return (post_handle("%s/%s %s", LIBEXECDIR, base_argv0, domain));
-	} else
-		return (post_handle("%s %s", ptr, domain));
+		return (post_handle("%s/%s%s", LIBEXECDIR, base_argv0, tmpbuf.s));
+	} else {
+		if (setuser_privileges(Uid, Gid, "indimail")) {
+			strnum1[fmt_ulong(strnum1, Uid)] = 0;
+			strnum2[fmt_ulong(strnum2, Gid)] = 0;
+			strerr_die5sys(111, "vadddomain: setuser_privilege: (", strnum1, "/", strnum2, "): ");
+		}
+		return (post_handle("%s%s", ptr, tmpbuf.s));
+	}
 }

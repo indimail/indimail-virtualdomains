@@ -124,7 +124,7 @@ update_rules(int lock)
 			close(tcpfd);
 			return (-1);
 		}
-		if (line.len == 0)
+		if (!line.len)
 			break;
 		if (!stralloc_0(&line))
 			die_nomem();

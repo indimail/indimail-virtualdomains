@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.122 2023-02-14 01:01:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.124 2023-03-24 19:04:51+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -327,7 +327,7 @@ do
 done
 
 for i in indimail.cnf procmailrc indimail.pp indimail.mod \
-users/cdb users/assign
+users/cdb users/assign logrotate.mysql
 do
   if [ ! -f %{buildroot}%{sysconfdir}/$i ] ; then
     touch %{buildroot}%{sysconfdir}/$i
@@ -421,6 +421,7 @@ done
 %ghost %attr(0644,root,root) %config(noreplace,missingok) %{sysconfdir}/users/cdb
 %ghost %config(noreplace,missingok)               %{sysconfdir}/procmailrc
 %ghost %config(noreplace,missingok)               %{sysconfdir}/indimail.cnf
+%ghost %config(noreplace,missingok)               %{sysconfdir}/logrotate.mysql
 %ghost %config(noreplace,missingok)               %{sysconfdir}/tcp/tcp.poppass
 #
 # These files will get removed during uninstallation
@@ -452,7 +453,7 @@ done
 #
 %if 0%{?suse_version} >= 1120
 %verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vrenameuser
-%verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vmoveuser
+%verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vmoveuserdir
 %verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vrenamedomain
 %verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vmoduser
 %verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vcfilter
@@ -467,7 +468,7 @@ done
 %verify (not user group mode caps) %attr(4555,root,root) %{_prefix}/bin/vdeldomain
 %else
 %attr(4555,root,root)                   %{_prefix}/bin/vrenameuser
-%attr(4555,root,root)                   %{_prefix}/bin/vmoveuser
+%attr(4555,root,root)                   %{_prefix}/bin/vmoveuserdir
 %attr(4555,root,root)                   %{_prefix}/bin/vrenamedomain
 %attr(4555,root,root)                   %{_prefix}/bin/vmoduser
 %attr(4555,root,root)                   %{_prefix}/bin/vcfilter
@@ -877,7 +878,7 @@ fi
   %verify_permissions -e %{_prefix}/bin/vaddaliasdomain
   %verify_permissions -e %{_prefix}/bin/vrenamedomain
   %verify_permissions -e %{_prefix}/bin/vsetuserquota
-  %verify_permissions -e %{_prefix}/bin/vmoveuser
+  %verify_permissions -e %{_prefix}/bin/vmoveuserdir
   %verify_permissions -e %{_prefix}/bin/vdeldomain
   %verify_permissions -e %{_prefix}/bin/vadddomain
   %verify_permissions -e %{_prefix}/bin/vdominfo
@@ -1274,7 +1275,7 @@ fi
   %set_permissions %{_prefix}/bin/vdeluser
   %set_permissions %{_prefix}/bin/vdominfo
   %set_permissions %{_prefix}/bin/vmoduser
-  %set_permissions %{_prefix}/bin/vmoveuser
+  %set_permissions %{_prefix}/bin/vmoveuserdir
   %set_permissions %{_prefix}/bin/vrenamedomain
   %set_permissions %{_prefix}/bin/vrenameuser
   %set_permissions %{_prefix}/bin/vsetuserquota

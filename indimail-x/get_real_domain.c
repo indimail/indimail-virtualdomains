@@ -1,5 +1,8 @@
 /*
  * $Log: get_real_domain.c,v $
+ * Revision 1.4  2023-03-20 10:02:10+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.3  2021-09-11 13:36:34+05:30  Cprogrammer
  * corrected wrong variable used for domain directory
  *
@@ -42,7 +45,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_real_domain.c,v 1.3 2021-09-11 13:36:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_real_domain.c,v 1.4 2023-03-20 10:02:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef QUERY_CACHE
@@ -65,7 +68,7 @@ get_real_domain(char *domain)
 	char            Dir[1024], inbuf[512];
 	char           *ptr, *cptr;
 	struct stat     statbuf;
-	int             len, t, match;
+	int             len, match;
 	uid_t           uid;
 	gid_t           gid;
 #ifdef CLUSTERED_SITE
@@ -199,20 +202,21 @@ get_real_domain(char *domain)
 				strerr_die3sys(111, "get_real_domain: ", filename.s, ": ");
 			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 			for (;;) {
-				if (getln(&ssin, &line, &match, '\n') == -1) {
-					t = errno;
-					close(fd);
-					errno = t;
+				if (getln(&ssin, &line, &match, '\n') == -1)
 					strerr_die3sys(111, "get_real_domain: read: ", filename.s, ": ");
-				}
-				if (!match && line.len == 0)
+				if (!line.len)
 					break;
-				else
-				if (!match)
-					strerr_warn3("get_real_domain", filename.s, "incomplete line", 0);
-				else {
+				if (match) {
 					line.len--;
+					if (!line.len) {
+						strerr_warn3("get_real_domain: ", filename.s, ": incomplete line", 0);
+						continue;
+					}
 					line.s[line.len] = 0; /*- remove newline */
+				} else {
+					if (!stralloc_0(&line))
+						die_nomem();
+					line.len--;
 				}
 				match = str_chr(line.s, '#');
 				if (line.s[match])
@@ -251,20 +255,21 @@ get_real_domain(char *domain)
 			}
 			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 			for (;;) {
-				if (getln(&ssin, &line, &match, '\n') == -1) {
-					t = errno;
-					close(fd);
-					errno = t;
+				if (getln(&ssin, &line, &match, '\n') == -1)
 					strerr_die3sys(111, "get_real_domain: read: ", filename.s, ": ");
-				}
-				if (!match && line.len == 0)
+				if (!line.len)
 					break;
-				else
-				if (!match)
-					strerr_warn3("get_real_domain", filename.s, "incomplete line", 0);
-				else {
+				if (match) {
 					line.len--;
+					if (!line.len) {
+						strerr_warn3("get_real_domain", filename.s, "incomplete line", 0);
+						continue;
+					}
 					line.s[line.len] = 0; /*- remove newline */
+				} else {
+					if (!stralloc_0(&line))
+						die_nomem();
+					line.len--;
 				}
 				match = str_chr(line.s, '#');
 				if (line.s[match])

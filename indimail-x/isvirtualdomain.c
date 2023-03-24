@@ -1,5 +1,8 @@
 /*
  * $Log: isvirtualdomain.c,v $
+ * Revision 1.5  2023-03-20 10:11:01+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.4  2021-09-11 13:38:48+05:30  Cprogrammer
  * on system error return -1 instead of exit
  *
@@ -34,7 +37,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: isvirtualdomain.c,v 1.4 2021-09-11 13:38:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: isvirtualdomain.c,v 1.5 2023-03-20 10:11:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -49,7 +52,7 @@ isvirtualdomain(char *domain)
 {
 	char           *sysconfdir, *controldir, *ptr;
 	char            inbuf[512];
-	int             fd, match, t;
+	int             fd, match;
 	static stralloc tmp = {0}, line = {0};
 	struct substdio ssin;
 
@@ -76,18 +79,19 @@ isvirtualdomain(char *domain)
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
-		if (getln(&ssin, &line, &match, '\n') == -1) {
-			t = errno;
-			close(fd);
-			errno = t;
-			strerr_warn3("isvirtualdomain: read: ", tmp.s, ": ", &strerr_sys);
-			return -1;
-		}
-		if (!match && line.len == 0)
+		if (getln(&ssin, &line, &match, '\n') == -1)
+			strerr_die3sys(111, "isvirtualdomain: read: ", tmp.s, ": ");
+		if (!line.len)
 			break;
 		if (match) {
 			line.len--;
+			if (!line.len)
+				strerr_die3x(100, "isvirtualdomain: ", tmp.s, ": incomplete line");
 			line.s[line.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
 		}
 		match = str_chr(line.s, '#');
 		if (line.s[match])

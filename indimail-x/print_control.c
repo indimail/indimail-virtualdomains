@@ -1,5 +1,8 @@
 /*
  * $Log: print_control.c,v $
+ * Revision 1.3  2023-03-20 10:15:39+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -26,7 +29,7 @@
 #include "dir_control.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: print_control.c,v 1.2 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: print_control.c,v 1.3 2023-03-20 10:15:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 unsigned long
@@ -51,11 +54,19 @@ print_control(char *filename, char *domain, int max_users_per_level, int silent)
 			strerr_warn3("print_control: read: ", filename, ": ", &strerr_sys);
 			break;
 		}
-		if (!match && line.len == 0)
+		if (!line.len)
 			break;
-		else {
+		if (!line.len)
+			strerr_warn2("print_control: incomplete line: ", filename, 0);
+		if (match) {
 			line.len--;
+			if (!line.len)
+				strerr_warn2("print_control: incomplete line: ", filename, 0);
 			line.s[line.len] = 0; /*- null terminate */
+		} else {
+			if (!stralloc_0(&line))
+				strerr_die1sys(111, "print_control: out of memory");
+			line.len--;
 		}
 		vread_dir_control(line.s, &vdir, domain);
 		for (ptr = line.s; *ptr; ptr++)

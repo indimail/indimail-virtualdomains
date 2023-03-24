@@ -1,5 +1,8 @@
 /*
  * $Log: user_over_quota.c,v $
+ * Revision 1.5  2023-03-20 10:20:48+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.4  2019-07-26 09:41:45+05:30  Cprogrammer
  * added FAST_QUOTA env variable to avoid costly disk read for quota calculations
  *
@@ -38,7 +41,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: user_over_quota.c,v 1.4 2019-07-26 09:41:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: user_over_quota.c,v 1.5 2023-03-20 10:20:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -97,11 +100,25 @@ user_over_quota(char *Maildir, char *quota, int cur_msgsize)
 			close(fd);
 			return (-1);
 		}
-		if (match && line.len) {
-			line.len--;
-			line.s[line.len] = 0; /*- remove newline */
-		}
 		close(fd);
+		if (!line.len) {
+			strerr_warn3("user_over_quota: ", tmpbuf.s, ": incomplete line", 0);
+			close(fd);
+			return (-1);
+		}
+		if (match) {
+			line.len--;
+			if (!line.len) {
+				strerr_warn3("user_over_quota: ", tmpbuf.s, ": incomplete line", 0);
+				close(fd);
+				return (-1);
+			}
+			line.s[line.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&line))
+				die_nomem();
+			line.len--;
+		}
 		tmpQuota = line.s;
 	} else
 		tmpQuota = quota;

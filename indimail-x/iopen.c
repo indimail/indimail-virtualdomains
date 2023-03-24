@@ -1,5 +1,8 @@
 /*
  * $Log: iopen.c,v $
+ * Revision 1.10  2023-03-20 10:07:51+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.9  2020-04-01 18:56:00+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -60,7 +63,7 @@
 #include "set_mysql_options.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iopen.c,v 1.9 2020-04-01 18:56:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iopen.c,v 1.10 2023-03-20 10:07:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -81,7 +84,7 @@ iopen(char *dbhost)
 	char            inbuf[512], strnum[FMT_ULONG];
 	char           *ptr, *mysql_user = 0, *mysql_passwd = 0, *mysql_database = 0,
 		           *mysql_socket = 0, *sysconfdir, *controldir, *server;
-	int             t, mysqlport = -1, count, protocol, match;
+	int             mysqlport = -1, count, protocol, match;
 	unsigned int    flags = 0, use_ssl = 0;
 	struct substdio ssin;
 	int             fd;
@@ -109,35 +112,35 @@ iopen(char *dbhost)
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/') {
 		if (!stralloc_copys(&host_path, controldir) ||
-			!stralloc_catb(&host_path, "/host.mysql", 11) ||
-			!stralloc_0(&host_path))
+				!stralloc_catb(&host_path, "/host.mysql", 11) ||
+				!stralloc_0(&host_path))
 			die_nomem();
-	} else {
-		if (!stralloc_copys(&host_path, sysconfdir) ||
+	} else
+	if (!stralloc_copys(&host_path, sysconfdir) ||
 			!stralloc_append(&host_path, "/") ||
 			!stralloc_cats(&host_path, controldir) ||
 			!stralloc_catb(&host_path, "/host.mysql", 11) ||
 			!stralloc_0(&host_path))
-			die_nomem();
-	}
+		die_nomem();
 	if (!mysql_host.len && !access(host_path.s, F_OK)) {
 		if ((fd = open_read(host_path.s)) == -1)
 			strerr_die3sys(111, "iopen: ", host_path.s, ": ");
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-		if (getln(&ssin, &mysql_host, &match, '\n') == -1) {
-			t = errno;
-			close(fd);
-			errno = t;
+		if (getln(&ssin, &mysql_host, &match, '\n') == -1)
 			strerr_die3sys(111, "iopen: read: ", host_path.s, ": ");
-		}
-		if (mysql_host.len == 0)
-			strerr_warn3("iopen: ", host_path.s, "incomplete line", 0);
-		else
+		close(fd);
+		if (!mysql_host.len)
+			strerr_die3x(100, "iopen: ", host_path.s, ": incomplete line");
 		if (match) {
 			mysql_host.len--;
+			if (!mysql_host.len)
+				strerr_die3x(100, "iopen: ", host_path.s, ": incomplete line");
 			mysql_host.s[mysql_host.len] = 0; /*- remove newline */
+		} else {
+			if (!stralloc_0(&mysql_host))
+				die_nomem();
+			mysql_host.len--;
 		}
-		close(fd);
 	} else
 	if (!mysql_host.len) {
 		if (!stralloc_copys(&mysql_host, MYSQL_HOST) ||
@@ -147,8 +150,11 @@ iopen(char *dbhost)
 	mysql_Init(&mysql[1]);
 	atexit(iclose);
 	/*-
-	 * localhost:indimail:ssh-1.5-:/var/run/mysqld/mysqld.sock:ssl
-	 * localhost:indimail:ssh-1.5-:/var/run/mysqld/mysqld.sock:nossl
+	 * host:user:pass:mysql_socket_path:ssl
+	 * host:user:pass:mysql_socket_path:nossl
+	 * or
+	 * host:user:pass:port:ssl
+	 * host:user:pass:port:nossl
 	 */
 	for (count = 0,ptr = mysql_host.s;*ptr;ptr++) {
 		if (*ptr == ':') {

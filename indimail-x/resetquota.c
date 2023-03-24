@@ -1,5 +1,8 @@
 /*
  * $Log: resetquota.c,v $
+ * Revision 1.3  2023-03-20 10:17:49+05:30  Cprogrammer
+ * standardize getln handling
+ *
  * Revision 1.2  2019-06-07 16:01:45+05:30  mbhangui
  * use sgetopt library for getopt()
  *
@@ -38,7 +41,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: resetquota.c,v 1.2 2019-06-07 16:01:45+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: resetquota.c,v 1.3 2023-03-20 10:17:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL         "resetquota: fatal: "
@@ -163,8 +166,18 @@ main(int argc, char **argv)
 				continue;
 			}
 			close(fd);
+			if (!line.len) {
+				strerr_warn2("resetquota: incomplete line: ", filename.s, 0);
+				status = -1;
+				continue;
+			}
 			if (match) {
 				line.len--;
+				if (!line.len) {
+					strerr_warn2("resetquota: incomplete line: ", filename.s, 0);
+					status = -1;
+					continue;
+				}
 				line.s[line.len] = 0;
 			} else {
 				if (!stralloc_0(&line))

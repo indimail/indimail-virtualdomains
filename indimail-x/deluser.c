@@ -1,5 +1,8 @@
 /*
  * $Log: deluser.c,v $
+ * Revision 1.2  2023-03-23 22:06:55+05:30  Cprogrammer
+ * skip vdelfiles when directory doesn't exist
+ *
  * Revision 1.1  2019-04-14 21:49:41+05:30  Cprogrammer
  * Initial revision
  *
@@ -52,7 +55,7 @@
 #include "valias_delete.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deluser.c,v 1.1 2019-04-14 21:49:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deluser.c,v 1.2 2023-03-23 22:06:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -84,7 +87,7 @@ int
 deluser(char *user, char *domain, int remove_db)
 {
 	struct passwd  *passent;
-	static stralloc Dir = {0}, tmp = {0}, SqlBuf = {0};
+	static stralloc user_dir = {0}, domain_dir = {0}, tmp = {0}, SqlBuf = {0};
 	char           *real_domain, *ptr;
 	char            ch;
 	char            buf[1];
@@ -132,7 +135,7 @@ deluser(char *user, char *domain, int remove_db)
 			strerr_warn3("deluser: ", domain, " does not exist", 0);
 			return (-1);
 		} else
-		if (!get_assign(real_domain, &Dir, &uid, &gid)) {
+		if (!get_assign(real_domain, &domain_dir, &uid, &gid)) {
 			strerr_warn3("deluser: real domain ", real_domain, " does not exist", 0);
 			return (-1);
 		}
@@ -177,9 +180,9 @@ deluser(char *user, char *domain, int remove_db)
 				strerr_warn1("deluser: error connecting to db", 0);
 			return (-1);
 		}
-		if (!stralloc_copys(&Dir, passent->pw_dir) || !stralloc_0(&Dir))
+		if (!stralloc_copys(&user_dir, passent->pw_dir) || !stralloc_0(&user_dir))
 			die_nomem();
-		Dir.len--;
+		user_dir.len--;
 		switch(remove_db)
 		{
 			case 1: /*- Delete User */
@@ -292,32 +295,34 @@ deluser(char *user, char *domain, int remove_db)
 #endif
 		}
 	} else {
-		if (!get_assign(user, &Dir, &uid, &gid)) {
+		if (!get_assign(user, &user_dir, &uid, &gid)) {
 			strerr_warn2(user, ": no such user", 0);
 			return (-1);
 		}
-		if (remove_db && del_user_assign(user, Dir.s))
+		if (remove_db && del_user_assign(user, user_dir.s))
 			return (-1);
 		real_domain = NULL;
 	}
 	if (remove_db == 1)
-		dec_dir_control(Dir.s, user, real_domain, -1, -1);
-	/*
-	 * remove the users directory from the file system
-	 * and check for error
-	 */
-	if (vdelfiles(Dir.s, user, real_domain)) {
-		strerr_warn3("failed to remove dir ", Dir.s, ": ", &strerr_sys);
-		return (-1);
+		dec_dir_control(user_dir.s, user, real_domain, -1, -1);
+	if (!access(user_dir.s, F_OK)) {
+		/*
+		 * remove the users directory from the file system
+		 * and check for error
+		 */
+		if (vdelfiles(user_dir.s, user, real_domain)) {
+			strerr_warn3("failed to remove dir ", user_dir.s, ": ", &strerr_sys);
+			return (-1);
+		}
 	}
-	if (!stralloc_copy(&tmp, &Dir) ||
+	if (!stralloc_copy(&tmp, &domain_dir) ||
 			!stralloc_catb(&tmp, "/.qmail-", 8) ||
 			!stralloc_cats(&tmp, user) ||
 			!stralloc_0(&tmp))
 		die_nomem();
-	Dir.len--;
+	user_dir.len--;
 	/* replace all dots with ':' */
-	for (ptr = tmp.s + Dir.len + 8; *ptr; ptr++) {
+	for (ptr = tmp.s + domain_dir.len + 8; *ptr; ptr++) {
 		if (*ptr == '.')
 			*ptr = ':';
 	}
