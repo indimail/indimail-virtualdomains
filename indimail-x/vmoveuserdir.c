@@ -1,5 +1,5 @@
 /*
- * $Log: vmoveuser.c,v $
+ * $Log: vmoveuserdir.c,v $
  * Revision 1.7  2023-03-23 22:23:13+05:30  Cprogrammer
  * remove domain component from User
  *
@@ -58,11 +58,11 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoveuser.c,v 1.7 2023-03-23 22:23:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoveuserdir.c,v 1.7 2023-03-23 22:23:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
-#define FATAL   "vmoveuser: fatal: "
-#define WARN    "vmoveuser: warning: "
+#define FATAL   "vmoveuserdir: fatal: "
+#define WARN    "vmoveuserdir: warning: "
 
 static void
 die_nomem()
@@ -94,7 +94,7 @@ main(int argc, char **argv)
 #endif
 
 	if (argc != 3) {
-		strerr_warn1("usage: vmoveuser user new_dir", 0);
+		strerr_warn1("usage: vmoveuserdir user new_dir", 0);
 		return (1);
 	}
 	User = argv[1];
@@ -185,8 +185,8 @@ main(int argc, char **argv)
 			strerr_die6x(111, FATAL, "MoveFile: ", NewDir, " --> ", OldDir.s, ": ");
 		return (1);
 	}
-	subprintfe(subfdout, "vmoveuser", "%s@%s old %s new %s done\n", User, Domain, OldDir.s, NewDir);
-	flush("vmoveuser");
+	subprintfe(subfdout, "vmoveuserdir", "%s@%s old %s new %s done\n", User, Domain, OldDir.s, NewDir);
+	flush("vmoveuserdir");
 	if (!(tmpstr = env_get("POST_HANDLE"))) {
 		i = str_rchr(argv[0], '/');
 		if (!*(base_argv0 = (argv[0] + i)))

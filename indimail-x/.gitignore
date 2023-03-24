@@ -157,8 +157,8 @@ vlimit
 vmoddomain
 vmoduser
 vmoduser.1
-vmoveuser
-vmoveuser.1
+vmoveuserdir
+vmoveuserdir.1
 vpasswd
 vpasswd.1
 vpriv

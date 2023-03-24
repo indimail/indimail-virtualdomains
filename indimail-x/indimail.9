@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH "IndiMail" "7" "07 Mar 2010" "Manvendra Bhangui" ""
 .SH NAME
 IndiMail -\ A Multi-host distributed Mail Server
@@ -454,8 +455,9 @@ _
 .TE
 
 .PP
-Apart from the above, IndiMail has all logs in the directory /var/log/svc.
-These contain both informational and error logs.
+Apart from the above, IndiMail has all logs in the directory @logdir@.
+These contain both informational and error logs for services configured in
+@servicedir@. See the SECTION \fBSTARTUP\fR for more details.
 
 .TS
 l l.
@@ -525,7 +527,7 @@ table lists these variables and describes their use.
 .TS
 box;
 l l l l.
-EnvironmentVariable|Program      |Set/Used|Purpose
+EnvironmentVariable Program       Set/Used Purpose
 _
 QMAILQUEUE          qmail-smtpd   used     Program to be called instead
                     qmail-inject           qmail-queue
@@ -1315,7 +1317,7 @@ DOMAIN_LIMITS       authindi      used     The vlimit structure is checked and t
                     vchkpass                     
                     vgroup                       
                     vrenameuser                  
-                    vmoveuser                    
+                    vmoveuserdir                 
                     vreorg                       
                     vpurge                       
                     inlookup                     
@@ -1430,7 +1432,7 @@ POST_HANDLE         vadddomain    used     Used to set the path to program that
                     vadduser               the same name as that of the calling
                     vdeluser               program will be executed in the directory
                     vrenameuser            INDIMAILDIR/libexec. If the program exists,
-                    vmoveuser              then return status of the handle will be
+                    vmoveuserdir           then return status of the handle will be
                     vpasswd                returned
                     vmoduser               
                     vaddaliasdoman         
@@ -1461,7 +1463,7 @@ DELAYED_INSERT      authvchkpw    used     used delayed insert during inserts,
                     vadduser               
                     vdeluser               
                     vmoduser               
-                    vmoveuser              
+                    vmoveuserdir           
                     vpasswd                
                     vrenamedomain          
                     vrenameuser            
@@ -1483,117 +1485,130 @@ MAX_BTREE_COUNT                            limit the number of search nodes
 
 .TS
 l l.
-Environ  Variable         |Program       |Purpose
+Environment Variable       Program        Purpose
 _
-MYSQL_LIB                 |All           |Path to indimail shared library
-                          |              |Almost all of indimail's code resides
-                          |              |in this shared library
+MYSQL_LIB                  All            Path to indimail shared library
+                                          Almost all of indimail's code resides
+                                          in this shared library
 _
-MYSQL_TABLE               |              |Name of the default indimail
-                          |              |authentication table containing active
-                          |              |users. If not set, this defaults to
-                          |              |'indimail'
-MYSQL_INACTIVE_TABLE      |              |Name of the default indimail
-                          |              |authentication table containing inactive
-                          |              |users. If not set, this defaults to
-                          |              |'indibak'
-ENABLE_MYSQL_ESCAPE       |              |If set, all queries to MySQL will be
-                          |              |escaped before sending to mysqld.
-MYSQL_INIT_COMMAND        |              |
-MYSQL_READ_DEFAULT_FILE   |              |
-MYSQL_READ_DEFAULT_GROUP  |              |
-MYSQL_OPT_RECONNECT       |any indimail  |Reconnect automatically after failure
-MYSQL_OPT_READ_TIMEOUT    |program that  |Read timeout from MySQL
-MYSQL_OPT_WRITE_TIMEOUT   |connects to   |Write timeout writing to MySQL
-MYSQL_OPT_CONNECT_TIMEOUT |MySQL         |Connect timeout for MySQL
-MYSQL_OPT_PROTOCOL        |              |Set unix domain or tcp/ip sockets
-MYSQL_SET_CLIENT_IP       |              |Set the client ip when connecting 
-CLIENT_COMPRESS           |              |Set client compress flag
-CLIENT_INTERACTIVE        |              |Set client interactive flag
-MYSQL_OPT_SSL_CA          |              |Certificate Authority (CA) file path
-MYSQL_OPT_SSL_CAPATH      |              |directory that contains trusted SSL CA
-MYSQL_OPT_SSL_CERT        |              |client public key certificate file
-MYSQL_OPT_SSL_CIPHER      |              |permitted cipher list for SSL encryption
-MYSQL_OPT_SSL_CRL         |              |certificate revocation lists file
-MYSQL_OPT_SSL_CRLPATH     |              |certificate revocation lists directory
-MYSQL_OPT_SSL_ENFORCE     |              |Enforce SSL connection
-MYSQL_OPT_SSL_VERIFY_CERT |              |Enable verification of the server's CN 
-MYSQL_OPT_SSL_MODE        |              |security state to use for the connection 
-                          |              |SSL_MODE_DISABLED, SSL_MODE_PREFERRED,
-                          |              |SSL_MODE_REQUIRED, SSL_MODE_VERIFY_CA,
-                          |              |SSL_MODE_VERIFY_IDENTITY.
-MYSQL_OPT_SSL_KEY         |              |client private key file
-MYSQL_OPT_TLS_VERSION     |              |for opessl TLSv1, TLSv1.1, TLSv1.2
-                          |              |for yaSSL TLSv1, TLSv1.1 protocols
+MYSQL_TABLE                               Name of the default indimail
+                                          authentication table containing active
+                                          users. If not set, this defaults to
+                                          'indimail'
+MYSQL_INACTIVE_TABLE                      Name of the default indimail
+                                          authentication table containing inactive
+                                          users. If not set, this defaults to
+                                          'indibak'
+ENABLE_MYSQL_ESCAPE                       If set, all queries to MySQL will be
+                                          escaped before sending to mysqld.
+MYSQL_INIT_COMMAND                        
+MYSQL_READ_DEFAULT_FILE                   
+MYSQL_READ_DEFAULT_GROUP                  
+MYSQL_OPT_RECONNECT        any indimail   Reconnect automatically after failure
+MYSQL_OPT_READ_TIMEOUT     program that   Read timeout from MySQL
+MYSQL_OPT_WRITE_TIMEOUT    connects to    Write timeout writing to MySQL
+MYSQL_OPT_CONNECT_TIMEOUT  MySQL          Connect timeout for MySQL
+MYSQL_OPT_PROTOCOL                        Set unix domain or tcp/ip sockets
+MYSQL_SET_CLIENT_IP                       Set the client ip when connecting 
+CLIENT_COMPRESS                           Set client compress flag
+CLIENT_INTERACTIVE                        Set client interactive flag
+MYSQL_OPT_SSL_CA                          Certificate Authority (CA) file path
+MYSQL_OPT_SSL_CAPATH                      directory that contains trusted SSL CA
+MYSQL_OPT_SSL_CERT                        client public key certificate file
+MYSQL_OPT_SSL_CIPHER                      permitted cipher list for SSL encryption
+MYSQL_OPT_SSL_CRL                         certificate revocation lists file
+MYSQL_OPT_SSL_CRLPATH                     certificate revocation lists directory
+MYSQL_OPT_SSL_ENFORCE                     Enforce SSL connection
+MYSQL_OPT_SSL_VERIFY_CERT                 Enable verification of the server's CN 
+MYSQL_OPT_SSL_MODE                        security state to use for the connection 
+                                          SSL_MODE_DISABLED, SSL_MODE_PREFERRED,
+                                          SSL_MODE_REQUIRED, SSL_MODE_VERIFY_CA,
+                                          SSL_MODE_VERIFY_IDENTITY.
+MYSQL_OPT_SSL_KEY                         client private key file
+MYSQL_OPT_TLS_VERSION                     for opessl TLSv1, TLSv1.1, TLSv1.2
+                                          for yaSSL TLSv1, TLSv1.1 protocols
 .TE
 
 Some of these environment variables have default values. The table below lists some of these.
 .TS
 l l.
-Environ  Variable  | default value
+Environment Variable  default value
 _
-BULK_MAILDIR       | bulk_mail
-DEFAULT_DOMAIN     | set by ./configure
-BASE_PATH          | /home/mail
-MYSQL_HOST         | localhost
-MYSQL_VPORT        | 3306
-MYSQL_SOCKET       | /tmp/mysql.sock
-MYSQL_DATABASE     | indimail
-MYSQL_TABLE        | indimail
-MYSQL_INACTIVETABLE| indibak
-MYSQL_PASSWD       |
-MYSQL_USER         | indimail
-QMAILDIR           | /var/indimail
-TCP_FILE           | /var/indimail/etc/tcp.smtp
-OPEN_SMTP_CUR_FILE | /var/indimail/etc/open-smtp
-RELAY_TABLE        | relay
-MCDFILE            | "mcdinfo" or @controldir@/mcdinfo
-INFIFO             | infifo or @qmaildir@/inquery/infifo
+BULK_MAILDIR          bulk_mail
+DEFAULT_DOMAIN        set by ./configure
+BASE_PATH             /home/mail
+MYSQL_HOST            localhost
+MYSQL_VPORT           3306
+MYSQL_SOCKET          /tmp/mysql.sock
+MYSQL_DATABASE        indimail
+MYSQL_TABLE           indimail
+MYSQL_INACTIVETABLE   indibak
+MYSQL_PASSWD         
+MYSQL_USER            indimail
+QMAILDIR              /var/indimail
+TCP_FILE              /var/indimail/etc/tcp.smtp
+OPEN_SMTP_CUR_FILE    /var/indimail/etc/open-smtp
+RELAY_TABLE           relay
+MCDFILE               "mcdinfo" or @controldir@/mcdinfo
+INFIFO                infifo or @qmaildir@/inquery/infifo
 .TE
 
 .SH STARTUP
-IndiMail uses svscan(8) to start, monitor and restart (if neccessary) all services needed
-for proper functioning of email server. svscan is installed as an entry in /etc/inittab on
-systems which use \fBinit(8)\fR. Some of the newer systems come with \fBupstart(8)\fR, in whih case,
-svscan is installed in /etc/event.d. On MacOS the file indimail.plist in the directory
-/System/Library/LaunchDaemons is used by launchctl to start IndiMail.
+IndiMail uses svscan(8) to start, monitor and restart (if neccessary) all
+services needed for proper functioning of email server. On most Linux
+systems, svscan is installed as a systemd(1) service. On systems that uses
+the traditional \fBinit\fR(1), svscan is installed as an entry in
+/etc/inittab. Some of the later systems come with \fBupstart(8)\fR, in
+which case, svscan is installed in /etc/event.d. On MacOS the file
+indimail.plist in the directory /System/Library/LaunchDaemons is used by
+launchctl to start IndiMail.
 
 .PP
-The program \fBinitsvc(1)\fR can be used to enable svscan to get automatically started on
-system boot. All services are installed in /service which each directory representing a
-service. These services are started and monitored by \fBsupervise(8)\fR. The table below
-gives all the service directories in /service.
+The program \fBinitsvc(1)\fR can be used to enable svscan to get
+automatically started on system boot. All services are installed in
+@servicedir@ which each directory representing a service. These services
+are started and monitored by \fBsupervise(8)\fR. The table below gives all
+the service directories in @servicedir@. You can use the \fBsvps\fR(1)
+program to list the status of all services.
 
 .TS
 l l.
-Directory            | Service Description
+Directory              Service Description
 _
-clamd                | clam(8) antivirus
-freshclam            | freshclam(1) clam signature update service
-qscanq               | qscanq(8) virus scanner
-qmail-smtpd.25       | qmail-smtpd(8) ESMTP service on port 25
-qmail-smtpd.587      | qmail-smtpd(8) ESMTP Mssage Submission Port \fBrfc-2476(5)\fR
-qmail-smtpd.366      | qmail-smtpd(8) ESMTP ODMR service on port 366
-qmail-smtpd.465      | qmail-smtpd(8) ESMTPS service on port 465 (SSL)
-qmail-qmtpd.209      | qmail-qmtpd(8) QMTP service on port 209
-qmail-qmqpd.628      | qmail-qmqpd(8) QMTP service on port 628
-qmail-send.25        | qmail-send(8) delivery service
-fetchmail            | fetchmail(1) service
-greylist.1999        | qmail-greyd(8) greylisting daemon
-qmail-imapd.143      | imapd(8) IMAP service on port 143
-qmail-imapd-ssl.993  | imapd(8) IMAPS service on port 993
-proxy-imapd.4143     | imapd(8) IMAP proxy on port 4143
-proxy-imapd-ssl.9143 | imapd(8) SSL enabled IMAP proxy on port 9143
-qmail-pop3d.110      | pop3d(8) POP3 service on port 110
-qmail-pop3d-ssl.995  | pop3d(8) POP3S service on port 995
-proxy-pop3d.4110     | pop3d(8) POP3 proxy on port 4110
-proxy-pop3d-ssl.9110 | pop3d(8) SSL enabled POP3 proxy on port 9110
-indisrvr.4000        | indisrvr(8) IndiMail administration daemon
-inlookup.infifo      | InLookup(8) Service
-pwdlookup            | nssd(8) Name Service Switch Daemon
-mysql.3306           | mysqld(8) MySQL daemon
-qmail-poppass.106    | qmail-poppass(8) Poppassd protocol service
-qmail-spamlog        | Spam logger service
+clamd                  clam(8) antivirus
+freshclam              freshclam(1) clam signature update service
+qscanq                 qscanq(8) virus scanner
+qmail-smtpd.25         qmail-smtpd(8) ESMTP service on port 25
+qmail-smtpd.587        qmail-smtpd(8) ESMTP Mssage Submission Port \fBrfc-2476(5)\fR
+qmail-smtpd.366        qmail-smtpd(8) ESMTP ODMR service on port 366
+qmail-smtpd.465        qmail-smtpd(8) ESMTPS service on port 465 (SSL)
+qmail-qmtpd.209        qmail-qmtpd(8) QMTP service on port 209
+qmail-qmqpd.628        qmail-qmqpd(8) QMTP service on port 628
+qmail-send.25          qmail-send(8) delivery service
+slowq                  slowq-send(8) rate controlled delivery service
+fetchmail              fetchmail(1) service
+greylist.1999          qmail-greyd(8) greylisting daemon
+qmail-imapd.143        imapd(8) IMAP service on port 143
+qmail-imapd-ssl.993    imapd(8) IMAPS service on port 993
+proxy-imapd.4143       imapd(8) IMAP proxy on port 4143
+proxy-imapd-ssl.9143   imapd(8) SSL enabled IMAP proxy on port 9143
+qmail-pop3d.110        pop3d(8) POP3 service on port 110
+qmail-pop3d-ssl.995    pop3d(8) POP3S service on port 995
+proxy-pop3d.4110       pop3d(8) POP3 proxy on port 4110
+proxy-pop3d-ssl.9110   pop3d(8) SSL enabled POP3 proxy on port 9110
+indisrvr.4000          indisrvr(8) IndiMail administration daemon
+inlookup.infifo        InLookup(8) Service
+pwdlookup              nssd(8) Name Service Switch Daemon
+poppass.106            password change service through poppassd protocol daemon
+mysql.3306             mysqld(8) MySQL daemon
+qmail-poppass.106      qmail-poppass(8) Poppassd protocol service
+qmail-logfifo          Logger service using fifologger
+daned.1998             service for getting TLSA records
+\.svscan                svscan service for logging svscan output to @logdir@/svscan
+resolvconf             Provide private local namespace for /etc/resolv.conf
+dnscache               DNS cache service
+udplogger.3000         udplogger service through UDP protocol
+mrtg                   MRTG service
 .TE
 
 The services on port 25, 587, 110, 4110, 143, 4143 support STARTTLS
@@ -1626,7 +1641,7 @@ on the arguments passed to the original program. See the section on \fBPOST HAND
 man page for the programs mentioned below having post execution handle.
 
 Programs that support this post execution handle are vadddomain(1), vdeldomain(1), vrenamedomain(1),
-vadduser(1), vdeluser(1), vrenameuser(1), vmoveuser(1), vpasswd(1).
+vadduser(1), vdeluser(1), vrenameuser(1), vmoveuserdir(1), vpasswd(1).
 
 The distribution includes two post execution handles \fBvadddomain\fR and \fBvadduser\fR.
 
@@ -1687,7 +1702,7 @@ vmoduser(1)        - Modify user attributes
 vsetuserquota(1)   - Set user disk quota
 .sp -1
 .IP \n+[step]
-vmoveuser(1)       - Move user's homedir
+vmoveuserdir(1)       - Move user's homedir
 .sp -1
 .IP \n+[step]
 vrenameuser(1)     - Rename a user
@@ -2459,9 +2474,10 @@ strfile - create a random access file for storing strings
 randstr - fetch a random text string from a specified file
 
 .PP
-Apart from the above, IndiMail provides many more programs which can work with qmail without
-needing IndiMail to be installed. The list of such programs not listed here are being compiled
-and will be available in the near future.
+Apart from the above, IndiMail provides many more programs which can work
+with qmail without needing IndiMail to be installed. The list of such
+programs not listed here are being compiled and will be available in the
+near future.
 
 .SH Mailing lists
 There are four Mailing Lists for IndiMail
@@ -2488,7 +2504,8 @@ Subscribe at http://groups.google.com/group/indimail
 This groups acts as a remote archive for indimail-support and indimail-devel.
 
 .PP
-There is also a Project Tracker for IndiMail (Bugs, Feature Requests, Patches, Support Requests) at
+There is also a Project Tracker for IndiMail (Bugs, Feature Requests,
+Patches, Support Requests) at
 http://sourceforge.net/tracker/?group_id=230686
 
 You can also get titbits about IndiMail at
@@ -2502,13 +2519,14 @@ facebook    - http://www.facebook.com/pages/indimail/88063516703?_fb_noscript=1
 sourceforge - https://sourceforge.net/apps/laconica/indimail/
 
 .SH Download/Repository
-IndiMail provides the package in both source and binary forms. Installation from the source
-requires you to download other packages from the respective websites apart from the indimail
-core package. The indimail package contains a patch directory which allows you to add features
-to qmail, ucspi-tcp, courier-imap, etc. Details for building IndiMail from source can be read
-in the INSTALL document provided with the source package. Many users may find this complicated
-and hence binary packages are also provided which can be downloaded from the RPM repo mentioned
-below.
+IndiMail provides the package in both source and binary forms. Installation
+from the source requires you to download other packages from the respective
+websites apart from the indimail core package. The indimail package
+contains a patch directory which allows you to add features to qmail,
+ucspi-tcp, courier-imap, etc. Details for building IndiMail from source can
+be read in the INSTALL document provided with the source package. Many
+users may find this complicated and hence binary packages are also provided
+which can be downloaded from the RPM repo mentioned below.
 
 .TP 5
 Source Download - http://sourceforge.net/projects/indimail/
@@ -2519,41 +2537,48 @@ Stable RPM Repo - http://download.opensuse.org/repositories/home:/indimail/
 .TP 5
 Raw RPM Repo    - http://download.opensuse.org/repositories/home:/mbhangui/
 .PP
-IndiMail uses openSUSE Build service to build the RPM whenever there is a new release.
-Currently, the list of supported distributions for IndiMail RPM (for both 32 and 64 bit) are
+IndiMail uses openSUSE Build service to build the RPM whenever there is a
+new release. Currently, the list of supported distributions for IndiMail
+RPM (for both 32 and 64 bit) are
+
+    * Arch Linux
 
     * SUSE
-          o openSUSE 12.3
-          o openSUSE 12.2
-          o openSUSE 12.1
-          o openSUSE 11.4
-          o openSUSE Tumbleweed
-          o SUSE Linux Enterprise 11 SP2
-          o SUSE Linux Enterprise 11 SP1
-          o SUSE Linux Enterprise 11
-          o SUSE Linux Enterprise 10
-          o openSUSE Factory
+          o openSUSE_Leap_15.3
+          o openSUSE_Leap_15.4
+          o openSUSE_Tumbleweed
+          o SUSE Linux Enterprise 12
+          o SUSE Linux Enterprise 12 SP1
+          o SUSE Linux Enterprise 12 SP2
+          o SUSE Linux Enterprise 12 SP3
+          o SUSE Linux Enterprise 12 SP4
+          o SUSE Linux Enterprise 12 SP5
+          o SUSE Linux Enterprise 15
+          o SUSE Linux Enterprise 15 SP1
+          o SUSE Linux Enterprise 15 SP2
+          o SUSE Linux Enterprise 15 SP3
+          o SUSE Linux Enterprise 15 SP4
 
     * Red Hat
-          o Fedora 18
-          o Fedora 17
-          o Red Hat Enterprise Linux 6
-          o Red Hat Enterprise Linux 5
-          o CentOS 6
-          o CentOS 5
-
-    * Mandriva Linux
-          o Mandriva_2011
+          o Fedora 36
+          o Fedora 37
+          o Red Hat Enterprise Linux 7
+          o Scientific Linux 7
+          o CentOS 7
+          o CentOS 8
+          o CentOS 8 Stream
+          o CentOS 9 Stream
+          o AlmaLinux 8
+          o AlmaLinux 9
 
     * Debian
-          o Debian 7.0
-          o Debian 6.0
-          o Debian 5.0
-          o Ubuntu 13.04
-          o Ubuntu 12.10
-          o Ubuntu 12.04
-          o Ubuntu 11.10
-          o Ubuntu 11.04
+          o Debian 10.0
+          o Debian 11.0
+
+    * Ubuntu
+          o Ubuntu 18.04
+          o Ubuntu 20.04
+          o Ubuntu 22.04
 
 You can also use \fByum(8)\fR to install IndiMail by downloading the repo file and
 importing the RPM key. e.g. for Fedora 17 one could do the following
@@ -2588,6 +2613,8 @@ svscan(8),
 supervise(8),
 qmailctl(8),
 svctool(8),
+svps(1),
+systemd(1),
 autoresponder(1),
 rpm(8),
 yum(8),
