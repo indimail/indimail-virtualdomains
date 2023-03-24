@@ -9,7 +9,9 @@ vmoveuser \- move homedir of a virtual user to a new path
 .SH DESCRIPTION
 \fBvmoveuser\fR changes the current homedir path to \fInew_homedir\fR,
 moving all existing files to the new path. \fBvmoveuser\fR has setuid bit
-to root and can be run by the root or the domain user.
+set and can be run by the root user, by user having uid/gid of the domain
+in @sysconfdir@/users/assign or if the user has the gid of the domain as a
+supplementary group.
 
 .SH POST HANDLE
 If the environment variable \fBPOST_HANDLE\fR is set, \fBvmoveuser\fR

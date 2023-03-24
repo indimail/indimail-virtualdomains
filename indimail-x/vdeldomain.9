@@ -16,7 +16,10 @@ vdeldomain \- Delete a virtual domain
 Completely removes a virtual domain from the system. It deletes all qmail
 files for the domain and removes all email users and their directories. For
 a clustered domain, \fBvdeldomain\fR should be run on the host having the
-postmaster account. \fBvdeldomain\fR has setuid bit set and runs as root.
+postmaster account. \fBvdeldomain\fR has setuid bit set and can be run by
+the root user, by user having uid/gid of the domain in
+@sysconfdir@/users/assign or if the user has the gid of the domain as a
+supplementary group.
 
 .PP
 For real domain, it does the following

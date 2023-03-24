@@ -12,10 +12,11 @@ vaddaliasdomain - Create an domain aliased to an existing virtual domain
 .PP
 .B vaddaliasdomain
 takes an existing virtual domain and links a new domain to all the accounts
-on the existing virtual domain.
-.B vaddaliasdomain
-Has setuid bit set and runs with domain's uid. Carries out the following
-steps to create an alias domain.
+on the existing virtual domain. \fBvaddaliasdomain\fR has setuid bit set
+and can be run by the root user, by user having uid/gid of the domain in
+@sysconfdir@/users/assign or if the user has the gid of the domain as a
+supplementary group. Carries out the following steps to create an alias
+domain.
 
 .nr step 1 1
 .IP \n[step] 3
@@ -36,11 +37,12 @@ Add entry to .aliasdomains in the domains directory for the domain old_domain.
 .SH POST HANDLE
 If the environment variable \fBPOST_HANDLE\fR is set, \fBvaddaliasdomain\fR
 executes the program defined by the \fBPOST_HANDLE\fR environment variable
-with uid/gid of the caller. If \fBPOST_HANDLE\fR is not defined, the
-program @libexecdir@/vaddaliasdomain will be executed with the effective
-uid 0. The \fBPOST_HANDLE\fR program is passed the same command line
-arguments as passed to \fBvaddaliasdomain\fR. The \fBPOST_HANDLE\fR program
-is executed as the last step after all earlier steps have been successful.
+with uid/gid of the domain in \fI@sysconfdir@/users/assign\fR. If
+\fBPOST_HANDLE\fR is not defined, the program @libexecdir@/vaddaliasdomain
+will be executed with the effective uid 0. The \fBPOST_HANDLE\fR program is
+passed the same command line arguments as passed to \fBvaddaliasdomain\fR.
+The \fBPOST_HANDLE\fR program is executed as the last step after all
+earlier steps have been successful.
 
 .SH OPTIONS
 .PP

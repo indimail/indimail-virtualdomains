@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH vdominfo 1
 .SH NAME
 vdominfo \- Display domain information for virtual domains
@@ -9,8 +10,11 @@ vdominfo \- Display domain information for virtual domains
 ]
 
 .SH DESCRIPTION
-\fBvdominfo\fR displays domain information for all domains (or for a particular domain given
-on the command line). The information is given as below
+\fBvdominfo\fR displays domain information for all domains (or for a
+particular domain given on the command line). \fBvdominfo\fR has setuid bit
+set and can be run by root user, or by user having uid/gid of the domain
+in @sysconfdir@/users/assign or if the user has the gid of the domain as a
+supplementary group. The information is given as below
 
 .TP
 \fBDomain\fI
@@ -79,5 +83,5 @@ The name of the virtual domain.
 0 for success, 1 for any failure.
 
 .SH "SEE ALSO"
-printdir(1), vadddomain(1), vaddaliasdomain(1), vmoddomain(1), vdeldomain(1),
-vlimit(1), dbinfo(8)
+printdir(1), vadddomain(1), vaddaliasdomain(1), vmoddomain(1),
+vdeldomain(1), vlimit(1), dbinfo(8)

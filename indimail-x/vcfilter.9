@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH vcfilter 1
 .SH NAME
 vcfilter \- create, modify, delete vfilters
@@ -7,10 +8,13 @@ vcfilter \- create, modify, delete vfilters
 \fBvcfilter\fR [\fIoptions\fR] \fIemailid\fR
 
 .SH DESCRIPTION
-\fBvcfilter\fR is a utility for creating, modifying, deleting IndiMail's powerful filter
-called as vfilter. Currently, \fBvcfilter\fR allows maximum of 255 filters to be created.
+\fBvcfilter\fR is a utility for creating, modifying, deleting IndiMail's
+powerful filter called as vfilter. Currently, \fBvcfilter\fR allows maximum
+of 255 filters to be created.
 
-\fBvcfilter\fR has the setuid bit set to root and must be run as root or domain user
+\fBvcfilter\fR has setuid bit set and can be run by the root user, by user
+having uid/gid of the domain in @sysconfdir@/users/assign or if the user
+has the gid of the domain as a supplementary group.
 
 .SH OPTIONS  (for filters)
 .TP
@@ -18,8 +22,8 @@ called as vfilter. Currently, \fBvcfilter\fR allows maximum of 255 filters to be
 Sets verbose option
 .TP
 \fB\-C\fR
-Connect to cluster. Allows vcfilter to operate on users belonging to any cluster
-rather than just the local users.
+Connect to cluster. Allows vcfilter to operate on users belonging to any
+cluster rather than just the local users.
 .TP
 \fB\-s\fR
 Show Filters
@@ -67,10 +71,12 @@ header value. A number denoting the following
   42 - Return-Receipt-To                43 - Dispostion-Notification-To
   44 - Disposition-Notification-Options 45 - Original-Recipient
 
-You can add your own headers by appending headers to @sysconfdir@/headerlist.
+You can add your own headers by appending headers to
+@sysconfdir@/headerlist.
 .TP 
 \fB\-c\fR
-Comparison with the headers to make. This could be one of the following number.
+Comparison with the headers to make. This could be one of the following
+number.
 
  0 - Equals
  1 - Contains
@@ -87,15 +93,16 @@ Comparison with the headers to make. This could be one of the following number.
 .TP
 \fB\-k\fR \fIkeyword\fR
 A keyword or string which will be used in comparison with the header value
-(depending on -c option). The string should be a NULL "" string if -c option is either
-5 or 6. The keyword can also be any Regular Expression (i.e. *, ? [], etc) if comparison
-equals 7.
+(depending on -c option). The string should be a NULL "" string if -c
+option is either 5 or 6. The keyword can also be any Regular Expression
+(i.e. *, ? [], etc) if comparison equals 7..
 .TP
 \fB\-f\fR \fIFolder\fR
-Folder to which the mail should be delivered if a filter match occurs. This can be the
-keyword Inbox to have the email delivered to the inbox (as it was originally). This can be
-the Trash folder in case the mail needs to be rejected. It can be /NoDeliver if the mail
-needs to be discarded completely.
+Folder to which the mail should be delivered if a filter match occurs. This
+can be the keyword Inbox to have the email delivered to the inbox (as it
+was originally). This can be the Trash folder in case the mail needs to be
+rejected. It can be /NoDeliver if the mail needs to be discarded
+completely.
 
 .TP
 \fB\-b\fR \fIbounce_action\fR

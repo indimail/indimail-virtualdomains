@@ -13,8 +13,10 @@ vrenamedomain \- rename a virtual domain or an alias_domain to a new name
 renames a virtual_domain or an alias domain to a new name. In case of an
 alias domain it adds \fInew_domain_name\fR as a new alias domain and
 deletes the old alias domain \fIold_domain_name\fR. \fBvrenamedomain\fR has
-setuid bit set and runs as root. In case of a real domain, it does the
-following
+setuid bit set and can be run by the root user, by user having uid/gid of
+the domain in @sysconfdir@/users/assign or if the user has the gid of the
+domain as a supplementary group.  In case of a real domain, it does the
+following.
 
 .nr step 1 1
 .IP \n[step] 3

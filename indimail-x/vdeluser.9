@@ -18,9 +18,10 @@ aliases, entries in database are also removed. The Directory Structure
 Layout's Hashed Component is decremented by one. For a clustered domain,
 the user will be deleted only if the user lies on the host where
 \fBvdeluser\fR is being run. \fBvdeluser\fR has the setuid bit set and must
-be run as root or as indimail user. When run \fBvdeluser\fR changes its uid
-to the uid defined for the domain defined in the assign file (See
-qmail-users(5)).
+be run as root or as uid for the domain in \fI@sysconfdir@/users/assign, or
+if the user as the gid of the domain as a supplementary group. When run
+\fBvdeluser\fR changes its uid to the uid defined for the domain in the
+assign file (See qmail-users(5)).
 
 .SH POST HANDLE
 If the environment variable \fBPOST_HANDLE\fR is set, \fBvdeluser\fR

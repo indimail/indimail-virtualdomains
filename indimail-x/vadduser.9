@@ -22,10 +22,12 @@ have the characters '.', '-', '_'. The username, gecos and domain component
 cannot have the ':' character. The case is changed to lower case before
 adding to the database. For a clustered domain, the user is also added to
 the table \fBhostcntrl\fR on the \fBcontrol host\fR. \fBvadduser\fR has
-setuid bit as root and must be run as root or indimail user.  Password is
-encrypted using \fBcrypt(3)\fR and supports all encryption methods
-supported by \fBcrypt(3)\fR. The Directory Structure Layout's hashed
-component (See Below) is incremented by one.
+setuid bit set and can be run by the root user, by user having uid/gid of
+the domain in @sysconfdir@/users/assign or if the user has the gid of the
+domain as a supplementary group. Password is encrypted using \fBcrypt(3)\fR
+and supports all encryption methods supported by \fBcrypt(3)\fR. The
+Directory Structure Layout's hashed component (See Below) is incremented by
+one.
 
 The user's home dirctory has four components
 .nr step 1 1

@@ -10,9 +10,11 @@ vmoduser \- Modify virtual user attributes
 .PP
 .B vmoduser
 modifies attributes of an email account by modifying fields in the
-authentication tables indimail or indibak. \fBvmoduser\fR has the setuid
-bit set to root and must be run as root or indimail user. For the -q and -l
-options, \fBvmoduser\fR is executed with root privileges.
+authentication tables indimail or indibak. \fBvmoduser\fR has setuid bit
+set and can be run by the root user, by user having uid/gid of the domain
+in @sysconfdir@/users/assign or if the user has the gid of the domain as a
+supplementary group. For the -q and -l options, \fBvmoduser\fR is executed
+with root privileges.
 
 .SH POST HANDLE
 If the environment variable POST_HANDLE is set, \fBvmoduser\fR executes the

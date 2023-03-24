@@ -17,10 +17,12 @@ vadddomain \- Create a virtual domain
 
 .PP
 .B vadddomain
-adds a new virtual domain. It creates the necessary \fBqmail\fR control files and
-a \fB.qmail-default\fR containing delivery instructions.
-It also adds the RFC821 required postmaster account. Carries out the following steps
-to create the domain.
+adds a new virtual domain. It creates the necessary \fBqmail\fR control
+files and a \fB.qmail-default\fR containing delivery instructions.
+\fBvadddomain\fR has setuid bit set and can be run by the root user, by the
+indimail user or if the user has the indimail group as a supplementary
+group. It also adds the RFC821 required postmaster account. Carries out the
+following steps to create the domain.
 
 .nr step 1 1
 .IP \n[step] 3
