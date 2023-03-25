@@ -1,5 +1,8 @@
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 1.13  2023-03-26 00:32:04+05:30  Cprogrammer
+ * fixed code using wait_handler
+ *
  * Revision 1.12  2023-03-20 09:58:31+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -97,7 +100,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 1.12 2023-03-20 09:58:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 1.13 2023-03-26 00:32:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -1394,7 +1397,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 				strerr_warn3("deliver_mail: waitpid: ", strnum1, ": ", &strerr_sys);
 				return (-2);
 			}
-			if (!(i = wait_handler(wait_status, &werr)))
+			if (!(i = wait_handler(wait_status, &werr)) && werr)
 				continue;
 			else
 			if (werr == -1) {

@@ -1,5 +1,8 @@
 /*
  * $Log: postdel.c,v $
+ * Revision 1.3  2023-03-26 00:36:48+05:30  Cprogrammer
+ * fixed code using wait_handler
+ *
  * Revision 1.2  2022-12-18 19:27:02+05:30  Cprogrammer
  * recoded wait logic
  *
@@ -7,7 +10,7 @@
  * Initial revision
  *
  *
- * $Id: postdel.c,v 1.2 2022-12-18 19:27:02+05:30 Cprogrammer Exp mbhangui $
+ * $Id: postdel.c,v 1.3 2023-03-26 00:36:48+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -28,7 +31,7 @@
 #include <noreturn.h>
 
 #ifndef	lint
-static char     rcsid[] = "$Id: postdel.c,v 1.2 2022-12-18 19:27:02+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: postdel.c,v 1.3 2023-03-26 00:36:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -169,6 +172,15 @@ main(int argc, char **argv)
 				if (i) {
 					strnum1[fmt_uint(strnum1, i)] = 0;
 					strerr_die3x(EX_TEMPFAIL, "postdel: fatal: vdelivermail exited with ", strnum1, " return code");
+				}
+				switch (i)
+				{
+				case 0:
+					_exit(0);
+				case 100:
+					_exit(EX_NOUSER);
+				default:
+					_exit(EX_TEMPFAIL);
 				}
 			} /*- for(;;) */
 			break;

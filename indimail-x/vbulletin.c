@@ -1,5 +1,8 @@
 /*
  * $Log: vbulletin.c,v $
+ * Revision 1.9  2023-03-26 00:33:27+05:30  Cprogrammer
+ * fixed code using wait_handler
+ *
  * Revision 1.8  2023-03-24 12:59:25+05:30  Cprogrammer
  * fork and run bulletin for all domains with domain uid
  *
@@ -78,7 +81,7 @@
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vbulletin.c,v 1.8 2023-03-24 12:59:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vbulletin.c,v 1.9 2023-03-26 00:33:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL            "vbulletin: fatal: "
@@ -577,7 +580,7 @@ main(int argc, char **argv)
 						strerr_warn3("vbulletin: waitpid: ", strnum1, ": ", &strerr_sys);
 						status = -1;
 					}
-					if (!(i = wait_handler(wait_status, &werr)))
+					if (!(i = wait_handler(wait_status, &werr)) && werr)
 						continue;
 					else
 					if (werr == -1) {

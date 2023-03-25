@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 1.11  2023-03-26 00:33:30+05:30  Cprogrammer
+ * fixed code using wait_handler
+ *
  * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -36,7 +39,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 1.10 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 1.11 2023-03-26 00:33:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -172,7 +175,7 @@ static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 1.10 $", *mda;
+	char           *revision = "$Revision: 1.11 $", *mda;
 	static stralloc XFilter = {0};
 	pid_t           pid;
 	int             i, werr, wait_status, _status;
@@ -222,7 +225,7 @@ myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *fo
 						strerr_warn3("vfilter: waitpid: ", strnum1, ": ", &strerr_sys);
 						_status = -1;
 					}
-					if (!(i = wait_handler(wait_status, &werr)))
+					if (!(i = wait_handler(wait_status, &werr)) && werr)
 						continue;
 					else
 					if (werr == -1) {

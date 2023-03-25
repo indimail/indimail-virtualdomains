@@ -1,5 +1,8 @@
 /*
  * $Log: ismaildup.c,v $
+ * Revision 1.8  2023-03-26 00:32:38+05:30  Cprogrammer
+ * fixed code using wait_handler
+ *
  * Revision 1.7  2023-03-20 10:10:50+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -63,7 +66,7 @@
 #include "dblock.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ismaildup.c,v 1.7 2023-03-20 10:10:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ismaildup.c,v 1.8 2023-03-26 00:32:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char     strnum[FMT_ULONG];
@@ -292,7 +295,7 @@ ismaildup(char *maildir)
 			error = 1;
 			break;
 		}
-		if (!(i = wait_handler(wait_status, &werr)))
+		if (!(i = wait_handler(wait_status, &werr)) && werr)
 			continue;
 		else
 		if (werr == -1) {
