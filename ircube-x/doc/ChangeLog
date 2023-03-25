@@ -12,6 +12,8 @@ Release 1.0.0-1.1 Start 13/09/2022 End 31/01/2023
 - 07/12/2022
 06. roundcube_config: fixed /etc/httpd/conf.d/php.conf for almalinux,
     rockylinux, fedora
+- 31/01/2023 - indimail-3.4.2
+- 25/03/2023 - indimail-3.4.3
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <ircube@indimail.org> 1.0.0-1.1%{?dist}
 Release @version@-@release@ Start 13/03/2017 End 08/09/2022

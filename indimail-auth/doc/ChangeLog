@@ -82,3 +82,4 @@ o suport dovecot authentication
 - 08/09/2022 - indimail-3.4.1
 47. nssd/load_mysql.c, pam-multi/load_mysql.c: renamed mysql_lib to libmysql
 - 31/01/2023 - indimail-3.4.2
+- 25/03/2023 - indimail-3.4.3

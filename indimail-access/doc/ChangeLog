@@ -12,10 +12,11 @@ Release 1.1.1-1.1 Start 01/03/2021 End 08/09/2022
 44. courier-imap/authlib/Makefile.am: removed crud
 - 30/01/2023
 45. fetchmail version upgraded to 6.4.36
-- 31/01/2023 - indimail-3.4.1
+- 31/01/2023 - indimail-3.4.2
 - 22/02/2023
 46. upgraded courier-imap to 5.2.2
 47. upgraded maildrop to 3.1.1
+- 25/03/2023 - indimail-3.4.3
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail-access@indimail.org> 1.1.0-1.1%{?dist}
 Release 1.1.0-1.1 Start 01/03/2021 End 08/09/2022
