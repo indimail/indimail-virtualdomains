@@ -24,6 +24,7 @@ Release 0.3.0-1.1 Start 25/02/2010
 10. logalert.spec: added rockylinux, almalinux
 11. logclient.c, logsrv.c: removed dependency on libindimail
 - 31/01/2023 - indimail-3.4.2
+- 25/03/2023 - indimail-3.4.3
 
 *
 2005-10-04      <gabriel@icaro.com.br>
