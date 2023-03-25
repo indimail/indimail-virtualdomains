@@ -1,5 +1,8 @@
 /*
  * $Log: is_alias_domain.c,v $
+ * Revision 1.4  2023-03-25 17:49:16+05:30  Cprogrammer
+ * bug fix - fixed using resolved link
+ *
  * Revision 1.3  2023-03-20 10:08:07+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -37,7 +40,7 @@
 #include "get_assign.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: is_alias_domain.c,v 1.3 2023-03-20 10:08:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: is_alias_domain.c,v 1.4 2023-03-25 17:49:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -77,13 +80,7 @@ is_alias_domain(char *domain)
 			return -1;
 		}
 		inbuf[t] = 0;
-		getEnvConfigStr(&ptr, "DOMAINDIR", DOMAINDIR);
-		if (!stralloc_copys(&line, ptr) ||
-				!stralloc_catb(&line, "/domains/", 9) ||
-				!stralloc_catb(&line, inbuf, t) ||
-				!stralloc_0(&line))
-			die_nomem();
-		return (access(line.s, F_OK) ? 0 : 1);
+		return (access(inbuf, F_OK) ? 0 : 1);
 	}
 	if (!stralloc_copy(&tmp, &dir) || !stralloc_catb(&tmp, "/.aliasdomains", 14) ||
 			!stralloc_0(&tmp))

@@ -1,5 +1,8 @@
 /*
  * $Log: del_control.c,v $
+ * Revision 1.3  2023-03-25 14:15:26+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.2  2020-04-01 18:54:20+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -21,13 +24,15 @@
 #include <stralloc.h>
 #include <strerr.h>
 #include <getEnvConfig.h>
+#include <error.h>
+#include <str.h>
 #endif
 #include "variables.h"
 #include "remove_line.h"
 #include "compile_morercpthosts.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: del_control.c,v 1.2 2020-04-01 18:54:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: del_control.c,v 1.3 2023-03-25 14:15:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -45,7 +50,9 @@ del_control(char *domain)
 {
 	static stralloc filename = {0}, tmp = {0};
 	char           *sysconfdir, *controldir;
-	int             i, status = 0, relative;
+	int             i, status = 0, relative, len;
+	char          **ptr;
+	char           *fn[] = {"rcpthosts", "etrnhosts", "chkrcptdomains", "virtualdomains", 0};
 
 	getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
@@ -54,93 +61,56 @@ del_control(char *domain)
 		if (!stralloc_copys(&filename, sysconfdir) ||
 				!stralloc_append(&filename, "/") ||
 				!stralloc_cats(&filename, controldir) ||
-				!stralloc_catb(&filename, "/rcpthosts", 10) ||
-				!stralloc_0(&filename))
+				!stralloc_append(&filename, "/"))
 			die_nomem();
 	} else {
 		if (!stralloc_copys(&filename, controldir) ||
-				!stralloc_catb(&filename, "/rcpthosts", 10) ||
-				!stralloc_0(&filename))
+				!stralloc_append(&filename, "/"))
 			die_nomem();
 	}
-	status = remove_line(domain, filename.s, 0, INDIMAIL_QMAIL_MODE);
-	if (status < 1) { /*- if no lines found or if remove_line returned error */
-		if (relative) {
-			if (!stralloc_copys(&filename, sysconfdir) ||
-					!stralloc_append(&filename, "/") ||
-					!stralloc_cats(&filename, controldir) ||
-					!stralloc_catb(&filename, "/morercpthosts", 14) ||
-					!stralloc_0(&filename))
-				die_nomem();
-		} else {
-			if (!stralloc_copys(&filename, controldir) ||
-					!stralloc_catb(&filename, "/morercpthosts", 14) ||
-					!stralloc_0(&filename))
-				die_nomem();
+	len = filename.len;
+	for (ptr = fn; *ptr; ptr++) {
+		if (!stralloc_cats(&filename, *ptr) ||
+				!stralloc_0(&filename))
+			die_nomem();
+		if (access(filename.s, F_OK)) {
+			if (errno != error_noent)
+				strerr_warn3("del_control: ", filename.s, ": ", &strerr_sys);
+			filename.len = len; /*- restore original length */
+			continue;
 		}
-		/* at least one matching line found */
-		if ((i = remove_line(domain, filename.s, 0, INDIMAIL_QMAIL_MODE)) > 0) {
-			struct stat     statbuf;
-			if (!stat(filename.s, &statbuf)) {
-				if (statbuf.st_size == 0) {
-					unlink(filename.s);
-					filename.len--;
-					if (!stralloc_catb(&filename, ".cdb", 4))
-						die_nomem();
-					else
-					if (!stralloc_0(&filename))
-						die_nomem();
-					unlink(filename.s);
-				} else
-					compile_morercpthosts();
+		status = remove_line(domain, filename.s, 1, INDIMAIL_QMAIL_MODE);
+		if (!str_diffn(*ptr, "rcpthosts", 10) && status < 1) { /*- remove from morercpthosts */
+			/*- if no lines found or if remove_line returned error */
+			if (!stralloc_catb(&filename, "morercpthosts\0", 14) )
+				die_nomem();
+			if (access(filename.s, F_OK)) {
+				if (errno != error_noent)
+					strerr_warn3("del_control: ", filename.s, ": ", &strerr_sys);
+			} else {
+				if ((i = remove_line(domain, filename.s, 0, INDIMAIL_QMAIL_MODE)) > 0) {
+					/* at least one matching line found */
+					struct stat     statbuf;
+					if (!stat(filename.s, &statbuf)) {
+						if (statbuf.st_size == 0) {
+							unlink(filename.s);
+							filename.len--;
+							if (!stralloc_catb(&filename, ".cdb\0", 5))
+								die_nomem();
+							unlink(filename.s);
+						} else
+							compile_morercpthosts();
+					}
+				}
+				if (i == -1)
+					status = i;
 			}
 		}
-		if (i == -1)
-			status = i;
+		filename.len = len; /*- restore original length */
 	}
-	if (relative) {
-		if (!stralloc_copys(&filename, sysconfdir) ||
-				!stralloc_append(&filename, "/") ||
-				!stralloc_cats(&filename, controldir) ||
-				!stralloc_catb(&filename, "/etrnhosts", 10) ||
-				!stralloc_0(&filename))
-			die_nomem();
-	} else {
-		if (!stralloc_copys(&filename, controldir) ||
-				!stralloc_catb(&filename, "/etrnhosts", 10) ||
-				!stralloc_0(&filename))
-			die_nomem();
-	}
-	if (!access(filename.s, F_OK) && remove_line(domain, filename.s, 0, INDIMAIL_QMAIL_MODE) == -1)
-		status = -1;
-	if (relative) {
-		if (!stralloc_copys(&filename, sysconfdir) ||
-				!stralloc_append(&filename, "/") ||
-				!stralloc_cats(&filename, controldir) ||
-				!stralloc_catb(&filename, "/chkrcptdomains", 15) ||
-				!stralloc_0(&filename))
-			die_nomem();
-	} else {
-		if (!stralloc_copys(&filename, controldir) ||
-				!stralloc_catb(&filename, "/chkrcptdomains", 15) ||
-				!stralloc_0(&filename))
-			die_nomem();
-	}
-	if (!access(filename.s, F_OK) && remove_line(domain, filename.s, 0, INDIMAIL_QMAIL_MODE) == -1)
-		status = -1;
-	if (relative) {
-		if (!stralloc_copys(&filename, sysconfdir) ||
-				!stralloc_append(&filename, "/") ||
-				!stralloc_cats(&filename, controldir) ||
-				!stralloc_catb(&filename, "/virtualdomains", 15) ||
-				!stralloc_0(&filename))
-			die_nomem();
-	} else {
-		if (!stralloc_copys(&filename, controldir) ||
-				!stralloc_catb(&filename, "/virtualdomains", 15) ||
-				!stralloc_0(&filename))
-			die_nomem();
-	}
+
+	if (!stralloc_catb(&filename, "virtualdomains\0", 15) )
+		die_nomem();
 	if (use_etrn == 2) {
 		if (!stralloc_copys(&tmp, domain) ||
 				!stralloc_catb(&tmp, ":autoturn-", 10) ||
@@ -153,6 +123,10 @@ del_control(char *domain)
 				!stralloc_0(&tmp))
 			die_nomem();
 	}
+	if (access(filename.s, F_OK)) {
+		if (errno != error_noent)
+			status = -1;
+	} else
 	if (remove_line(tmp.s, filename.s, 0, INDIMAIL_QMAIL_MODE) == -1)
 		status = -1;
 	return (status);

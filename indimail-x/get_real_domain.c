@@ -1,5 +1,8 @@
 /*
  * $Log: get_real_domain.c,v $
+ * Revision 1.5  2023-03-25 16:33:11+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.4  2023-03-20 10:02:10+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -45,9 +48,14 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_real_domain.c,v 1.4 2023-03-20 10:02:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_real_domain.c,v 1.5 2023-03-25 16:33:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
+#ifdef CLUSTERED_SITE
+static char    *sysconfdir, *controldir;
+static stralloc filename = {0}, line = {0}, prevDomainVal = {0},
+				domval = {0};
+#endif
 #ifdef QUERY_CACHE
 static char     _cacheSwitch = 1;
 #endif
@@ -59,38 +67,131 @@ die_nomem()
 	_exit(111);
 }
 
-char *
-get_real_domain(char *domain)
-{
-	static stralloc dir = {0}, prevDomainVal = {0},
-					domval = {0}, filename = {0}, line = {0};
-	struct substdio ssin;
-	char            Dir[1024], inbuf[512];
-	char           *ptr, *cptr;
-	struct stat     statbuf;
-	int             len, match;
-	uid_t           uid;
-	gid_t           gid;
 #ifdef CLUSTERED_SITE
-	int             fd;
-	char           *sysconfdir, *controldir;
-	int             ret;
+static char *
+is_in_rcpthosts(char *domain)
+{
+	int             fd, match;
+	char            inbuf[512];
+	char           *ptr;
+	struct substdio ssin;
+
+	if (*controldir == '/') {
+		if (!stralloc_copys(&filename, controldir) ||
+				!stralloc_catb(&filename, "/rcpthosts", 10) ||
+				!stralloc_0(&filename))
+			die_nomem();
+	} else 
+	if (!stralloc_copys(&filename, sysconfdir) ||
+			!stralloc_append(&filename, "/") ||
+			!stralloc_cats(&filename, controldir) ||
+			!stralloc_catb(&filename, "/rcpthosts", 10) ||
+			!stralloc_0(&filename))
+		die_nomem();
+	if ((fd = open_read(filename.s)) == -1) {
+		if (errno != error_noent)
+			strerr_die3sys(111, "get_real_domain: ", filename.s, ": ");
+	} else {
+		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		for (;;) {
+			if (getln(&ssin, &line, &match, '\n') == -1)
+				strerr_die3sys(111, "get_real_domain: read: ", filename.s, ": ");
+			if (!line.len)
+				break;
+			if (match) {
+				line.len--;
+				if (!line.len) {
+					strerr_warn3("get_real_domain: ", filename.s, ": incomplete line", 0);
+					continue;
+				}
+				line.s[line.len] = 0; /*- remove newline */
+			} else {
+				if (!stralloc_0(&line))
+					die_nomem();
+				line.len--;
+			}
+			match = str_chr(line.s, '#');
+			if (line.s[match])
+				line.s[match] = 0;
+			for (ptr = line.s; *ptr && isspace((int) *ptr); ptr++);
+			if (!*ptr)
+				continue;
+			if (!str_diff(domain, ptr)) {
+				if (!stralloc_copys(&prevDomainVal, domain) || !stralloc_0(&prevDomainVal))
+					die_nomem();
+				prevDomainVal.len--;
+				if (!stralloc_copys(&domval, domain) || !stralloc_0(&domval))
+					die_nomem();
+				domval.len--;
+				return (domval.s);
+			}
+		}
+		close(fd);
+	}
+	if (*controldir == '/') {
+		if (!stralloc_copys(&filename, controldir) ||
+				!stralloc_catb(&filename, "/morercpthosts", 14) ||
+				!stralloc_0(&filename))
+			die_nomem();
+	} else
+	if (!stralloc_copys(&filename, sysconfdir) ||
+			!stralloc_append(&filename, "/") ||
+			!stralloc_cats(&filename, controldir) ||
+			!stralloc_catb(&filename, "/morercpthosts", 14) ||
+			!stralloc_0(&filename))
+		die_nomem();
+	if ((fd = open_read(filename.s)) == -1) {
+		if (errno != error_noent)
+			strerr_die3sys(111, "get_real_domain: ", filename.s, ": ");
+		return ((char *) 0);
+	} else {
+		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		for (;;) {
+			if (getln(&ssin, &line, &match, '\n') == -1)
+				strerr_die3sys(111, "get_real_domain: read: ", filename.s, ": ");
+			if (!line.len)
+				break;
+			if (match) {
+				line.len--;
+				if (!line.len) {
+					strerr_warn3("get_real_domain", filename.s, "incomplete line", 0);
+					continue;
+				}
+				line.s[line.len] = 0; /*- remove newline */
+			} else {
+				if (!stralloc_0(&line))
+					die_nomem();
+				line.len--;
+			}
+			match = str_chr(line.s, '#');
+			if (line.s[match])
+				line.s[match] = 0;
+			for (ptr = line.s; *ptr && isspace((int) *ptr); ptr++);
+			if (!*ptr)
+				continue;
+			if (!str_diff(domain, ptr)) {
+				if (!stralloc_copys(&prevDomainVal, domain) || !stralloc_0(&prevDomainVal))
+					die_nomem();
+				prevDomainVal.len--;
+				if (!stralloc_copys(&domval, domain) || !stralloc_0(&domval))
+					die_nomem();
+				domval.len--;
+				return (domval.s);
+			}
+		}
+		close(fd);
+	}
+	return ((char *) 0);
+}
 #endif
 
-	if (!domain || !*domain)
-		return ((char *) 0);
-#ifdef QUERY_CACHE
-	if (_cacheSwitch && env_get("QUERY_CACHE")) {
-		if (prevDomainVal.len && domval.len && !str_diffn(domain, prevDomainVal.s, prevDomainVal.len + 1))
-			return (domval.s);
-	}
-	if (!_cacheSwitch)
-		_cacheSwitch = 1;
-#endif
-	/*
-	 * e.g. indimail.org:yahoo.com:hotmail.com
-	 */
-	if ((ptr = env_get("REAL_DOMAINS"))) {
+static char *
+is_in_env(char *domain, char *envstr)
+{
+	char           *ptr, *cptr;
+	int             len;
+
+	if ((ptr = env_get(envstr))) {
 		len = str_len(domain);
 		for (cptr = ptr; *cptr; cptr++) {
 			if (*cptr == ':') {
@@ -118,189 +219,73 @@ get_real_domain(char *domain)
 			}
 		}
 	}
-	/*
-	 * e.g. satyam.net.in,indimail.org:yahoo.co.in,yahoo.com:msn.com,hotmail.com
-	 */
-	if ((ptr = env_get("ALIAS_DOMAINS"))) {
-		len = str_len(domain);
-		for (cptr = ptr;*cptr;cptr++) {
-			if (*cptr == ':') {
-				*cptr = 0;
-				if (!str_diffn(domain, ptr, len + 1) && *(ptr + len) == ',') {
-					if (!stralloc_copys(&prevDomainVal, domain) || !stralloc_0(&prevDomainVal))
-						die_nomem();
-					prevDomainVal.len--;
-					for (domval.len = 0, ptr += len + 1; *ptr && *ptr != ':';)
-						if (!stralloc_append(&domval, ptr))
-							die_nomem();
-					if (!stralloc_0(&domval))
-						die_nomem();
-					domval.len--;
-					return (domval.s);
-				}
-				ptr = cptr + 1;
-			}
-			if (*ptr && !str_diffn(domain, ptr, len + 1) && *(ptr + len) == ',') {
-				if (!stralloc_copys(&prevDomainVal, domain) || !stralloc_0(&prevDomainVal))
-					die_nomem();
-				prevDomainVal.len--;
-				for (domval.len = 0, ptr += len + 1; *ptr && *ptr != ':';)
-					if (!stralloc_append(&domval, ptr))
-						die_nomem();
-				if (!stralloc_0(&domval))
-					die_nomem();
-				domval.len--;
-				return (domval.s);
-			}
-		}
+	return ((char *) 0);
+}
+
+char *
+get_real_domain(char *domain)
+{
+	static stralloc dir = {0};
+	char            Dir[1024];
+	char           *ptr;
+	struct stat     statbuf;
+	int             len, match;
+	uid_t           uid;
+	gid_t           gid;
+#ifdef CLUSTERED_SITE
+	int             ret;
+#endif
+
+	if (!domain || !*domain)
+		return ((char *) 0);
+#ifdef QUERY_CACHE
+	if (_cacheSwitch && env_get("QUERY_CACHE")) {
+		if (prevDomainVal.len && domval.len && !str_diffn(domain, prevDomainVal.s, prevDomainVal.len + 1))
+			return (domval.s);
 	}
+	if (!_cacheSwitch)
+		_cacheSwitch = 1;
+#endif
+	/*
+	 * e.g. indimail.org:yahoo.com:hotmail.com
+	 */
+	if ((ptr = is_in_env(domain, "REAL_DOMAINS")))
+		return ptr;
+	if ((ptr = is_in_env(domain, "ALIAS_DOMAINS")))
+		return ptr;
 	if (!get_assign(domain, &dir, &uid, &gid))
 #ifdef CLUSTERED_SITE
 	{
-		if ((ret = is_distributed_domain(domain)) == -1)
-			return ((char *) 0);
-		else
-		if (ret == 1) {
-			if (!stralloc_copys(&prevDomainVal, domain) || !stralloc_0(&prevDomainVal))
-				die_nomem();
-			prevDomainVal.len--;
-			if (!stralloc_copys(&domval, domain) || !stralloc_0(&domval))
-				die_nomem();
-			domval.len--;
-			return (domval.s);
-		}
 		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 		getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 		if (*controldir == '/') {
 			if (!stralloc_copys(&filename, controldir) ||
-				!stralloc_catb(&filename, "/host.cntrl", 11) ||
-				!stralloc_0(&filename))
+					!stralloc_catb(&filename, "/host.cntrl", 11) ||
+					!stralloc_0(&filename))
 				die_nomem();
-		} else {
-			if (!stralloc_copys(&filename, sysconfdir) ||
+		} else
+		if (!stralloc_copys(&filename, sysconfdir) ||
 				!stralloc_append(&filename, "/") ||
 				!stralloc_cats(&filename, controldir) ||
 				!stralloc_catb(&filename, "/host.cntrl", 11) ||
 				!stralloc_0(&filename))
-				die_nomem();
-		}
-		if (access(filename.s, F_OK)) {
-			if (*controldir == '/') {
-				if (!stralloc_copys(&filename, controldir) ||
-					!stralloc_catb(&filename, "/rcpthosts", 10) ||
-					!stralloc_0(&filename))
-					die_nomem();
-			} else {
-				if (!stralloc_copys(&filename, sysconfdir) ||
-					!stralloc_append(&filename, "/") ||
-					!stralloc_cats(&filename, controldir) ||
-					!stralloc_catb(&filename, "/rcpthosts", 10) ||
-					!stralloc_0(&filename))
-					die_nomem();
-			}
-			if ((fd = open_read(filename.s)) == -1)
-				strerr_die3sys(111, "get_real_domain: ", filename.s, ": ");
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-			for (;;) {
-				if (getln(&ssin, &line, &match, '\n') == -1)
-					strerr_die3sys(111, "get_real_domain: read: ", filename.s, ": ");
-				if (!line.len)
-					break;
-				if (match) {
-					line.len--;
-					if (!line.len) {
-						strerr_warn3("get_real_domain: ", filename.s, ": incomplete line", 0);
-						continue;
-					}
-					line.s[line.len] = 0; /*- remove newline */
-				} else {
-					if (!stralloc_0(&line))
-						die_nomem();
-					line.len--;
-				}
-				match = str_chr(line.s, '#');
-				if (line.s[match])
-					line.s[match] = 0;
-				for (ptr = line.s; *ptr && isspace((int) *ptr); ptr++);
-				if (!*ptr)
-					continue;
-				if (!str_diff(domain, ptr)) {
-					if (!stralloc_copys(&prevDomainVal, domain) || !stralloc_0(&prevDomainVal))
-						die_nomem();
-					prevDomainVal.len--;
-					if (!stralloc_copys(&domval, domain) || !stralloc_0(&domval))
-						die_nomem();
-					domval.len--;
-					return (domval.s);
-				}
-			}
-			close(fd);
-			if (*controldir == '/') {
-				if (!stralloc_copys(&filename, controldir) ||
-					!stralloc_catb(&filename, "/morercpthosts", 14) ||
-					!stralloc_0(&filename))
-					die_nomem();
-			} else {
-				if (!stralloc_copys(&filename, sysconfdir) ||
-					!stralloc_append(&filename, "/") ||
-					!stralloc_cats(&filename, controldir) ||
-					!stralloc_catb(&filename, "/morercpthosts", 14) ||
-					!stralloc_0(&filename))
-					die_nomem();
-			}
-			if ((fd = open_read(filename.s)) == -1) {
-				if (errno != error_noent)
-					strerr_die3sys(111, "get_real_domain: ", filename.s, ": ");
+			die_nomem();
+		if (!access(filename.s, F_OK)) {
+			if ((ret = is_distributed_domain(domain)) == -1 || ret == 1)
 				return ((char *) 0);
+			if (!(ptr = sql_get_realdomain(domain))) /*- check aliasdomain table on central db */
+				return ((char *) 0);
+			else {
+				if (!stralloc_copys(&prevDomainVal, domain) || !stralloc_0(&prevDomainVal))
+					die_nomem();
+				prevDomainVal.len--;
+				if (!stralloc_copys(&domval, ptr) || !stralloc_0(&domval))
+					die_nomem();
+				domval.len--;
+				return (domval.s);
 			}
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
-			for (;;) {
-				if (getln(&ssin, &line, &match, '\n') == -1)
-					strerr_die3sys(111, "get_real_domain: read: ", filename.s, ": ");
-				if (!line.len)
-					break;
-				if (match) {
-					line.len--;
-					if (!line.len) {
-						strerr_warn3("get_real_domain", filename.s, "incomplete line", 0);
-						continue;
-					}
-					line.s[line.len] = 0; /*- remove newline */
-				} else {
-					if (!stralloc_0(&line))
-						die_nomem();
-					line.len--;
-				}
-				match = str_chr(line.s, '#');
-				if (line.s[match])
-					line.s[match] = 0;
-				for (ptr = line.s; *ptr && isspace((int) *ptr); ptr++);
-				if (!*ptr)
-					continue;
-				if (!str_diff(domain, ptr)) {
-					if (!stralloc_copys(&prevDomainVal, domain) || !stralloc_0(&prevDomainVal))
-						die_nomem();
-					prevDomainVal.len--;
-					if (!stralloc_copys(&domval, domain) || !stralloc_0(&domval))
-						die_nomem();
-					domval.len--;
-					return (domval.s);
-				}
-			}
-			close(fd);
-			return ((char *) 0);
 		} else
-		if (!(ptr = sql_get_realdomain(domain))) /*- check aliasdomain table on central db */
-			return ((char *) 0);
-		else {
-			if (!stralloc_copys(&prevDomainVal, domain) || !stralloc_0(&prevDomainVal))
-				die_nomem();
-			prevDomainVal.len--;
-			if (!stralloc_copys(&domval, ptr) || !stralloc_0(&domval))
-				die_nomem();
-			domval.len--;
-			return (domval.s);
-		}
+			return (is_in_rcpthosts(domain)); /*- a domain in rcpthosts not under control of indimail */
 	}
 #else
 		return ((char *) 0);

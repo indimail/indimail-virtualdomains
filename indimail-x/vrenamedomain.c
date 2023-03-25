@@ -124,8 +124,8 @@ main(int argc, char **argv)
 	}
 	if (uid && setuid(0))
 		strerr_die2sys(111, FATAL, "setuid-root: ");
-	if ((real_domain = get_real_domain(argv[2])) != (char *) 0)
-		strerr_die3x(1, WARN, argv[2], ": No such domain");
+	if ((real_domain = get_real_domain(argv[2])) != (char *) 0) /*- don't rename if domain exists in rcpthosts */
+		strerr_die3x(1, WARN, argv[2], ": domain exists");
 	else
 	if (get_assign(argv[2], &tmpbuf, 0, 0))
 		strerr_die3x(1, WARN, argv[2], ": domain exists");

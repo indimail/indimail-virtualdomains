@@ -1,0 +1,1361 @@
+#!/bin/sh
+#
+# $Id: $
+#
+user=mbhangui
+domain1=example.com
+domain2=newexample.com
+domain3=example2.com
+#
+#
+testuser1=testuser01@$domain1
+testuser2=testuser02@$domain1
+testuser3=testuser03@$domain1
+testuser4=testuser04@$domain1
+password1="abcdefgh1234"
+password2="abcdefgh2345"
+domain=indimail.org
+testdir=/tmp/qmail-test
+servicedir=$testdir/service
+maildir=$testdir/$user/Maildir
+qmaildir=$testdir/indimail
+indimaildir=$testdir/indimail
+sysconfdir=$testdir/etc/indimail
+cntrldir=$sysconfdir/control
+certdir=$sysconfdir/certs
+tmpfifodir=$testdir/inquery
+logdir=$testdir/logs
+bindir=/usr/bin
+sbindir=/usr/sbin
+SOFT_MEM=104857600
+HOSTNAME=$(uname -n)
+LOCALIP=0
+qmail_newu=$sbindir/qmail-newu
+qmail_start=$sbindir/qmail-start
+qmail_smtpd=$sbindir/qmail-smtpd
+multilog=$sbindir/multilog
+svscan=$sbindir/svscan
+svctool=$sbindir/svctool
+qmail_inject=$bindir/qmail-inject
+setuidgid=$bindir/setuidgid
+tcpserver=$bindir/tcpserver
+qmail_queue=$sbindir/qmail-queue
+in_cnf=$sysconfdir/indimail.cnf
+MYSQL_SOCKET=$testdir/run/mysqld/mysqld.sock
+MYSQL_PORT=3307
+MYUID=$(id -u)
+MYGID=$(id -g)
+INUID=$(id -u indimail)
+INGID=$(id -g indimail)
+sleep_int=1
+
+trap do_cleanup_failed EXIT
+function setup_maildir()
+{
+	if [ -d $maildir/new ] ; then
+		find $maildir/new -type f -exec /bin/rm -f {} \;
+	fi
+	echo "Creating $maildir"
+	status=0
+	for i in cur new tmp
+	do
+		mkdir -p $maildir/$i
+		if [ $? -ne 0 ] ; then
+			status=1
+		fi
+	done
+	if [ $status -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing create maildir succeeded"
+	else
+		echo "  testing create maildir failed"
+		exit 1
+	fi
+}
+
+function setup_assign()
+{
+	if [ ! -f $sysconfdir/users/assign ] ; then
+		mkdir -p $sysconfdir/users
+		(
+		echo "=$user:$user:1000:1000:$testdir/$user:::"
+		echo "+$user-:$user:1000:1000:$testdir/$user:-::"
+		echo "+$domain-:$domain:555:555:$qmaildir/domains/$domain:-::"
+		echo "."
+		) > $sysconfdir/users/assign
+	fi
+	echo "Creating $sysconfdir/users/cdb"
+	$qmail_newu $sysconfdir/users
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing $qmail_newu succeeded"
+	else
+		echo "  testing $qmail_newu failed"
+		exit 1
+	fi
+}
+
+function setup_queue()
+{
+	echo "Creating queue in $qmaildir/queue"
+	mkdir -p $qmaildir
+	sudo queue-fix $qmaildir/queue
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing queue-fix succeeded"
+	else
+		echo "  testing queue-fix failed"
+		exit 1
+	fi
+}
+
+function setup_config()
+{
+	mkdir -p $cntrldir
+	mkdir -p $testdir/run/mysqld
+	sudo chown mysql:mysql $testdir/run/mysqld
+	mkdir -p $qmaildir/mysqldb
+
+	echo "Creating default config files in $cntrldir"
+	env CONTROLDIR=$cntrldir config-fast $HOSTNAME 1>&3
+	t1=$?
+	echo "./Maildir/" > $cntrldir/defaultdelivery
+	echo TLSv1_3      > $cntrldir/tlsclientmethod
+	echo TLSv1_3      > $cntrldir/tlsservermethod
+	sudo $svctool --cntrldir=$cntrldir --config=qmail 1>&3
+	if [ $t1 -eq 0 -a $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing svctool create indimail-mta config succeeded"
+	else
+		echo "  testing svctool create indimail-mta config failed"
+		exit 1
+	fi
+
+	if [ ! -f $certdir/servercert.pem ] ; then
+		echo "Creating certificates"
+		sudo $svctool --certdir=$certdir --config=cert \
+			--postmaster=postmaster@$HOSTNAME --common_name=$HOSTNAME 1>&3 2>&1
+		if [ $? -eq 0 ] ; then
+			tcount=$(expr $tcount + 1)
+			echo "  testing svctool create certificate succeeded"
+		else
+			echo "  testing svctool create certificate failed"
+			exit 1
+		fi
+	fi
+
+	# indimail config
+	echo "Creating indimail config"
+	mkdir -p $qmaildir/alias
+	sudo $svctool --cntrldir=$cntrldir --qmaildir=$qmaildir \
+		--indimaildir=$qmaildir --sysconfdir=$sysconfdir --config=indimail \
+		--mysqlhost=localhost --mysqluser=indimail  \
+		--mysqlpass=ssh-1.5- --mysqlsocket=$MYSQL_SOCKET --mysqlport=$MYSQL_PORT 1>&3
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing svctool create indimail config succeeded"
+	else
+		echo "  testing svctool create indimail config failed"
+		exit 1
+	fi
+
+	# mysql cnf file
+	if [ ! -f $in_cnf ] ; then
+		echo "Creating mysql config $in_cnf"
+  		sudo $svctool --cntrldir=$cntrldir --config=mysql --mysqlPrefix=/usr \
+			--sysconfdir=$sysconfdir --mysqlsocket=$MYSQL_SOCKET --mysqlport=$MYSQL_PORT \
+			--databasedir=$qmaildir/mysqldb 1>&3 2>&1
+		if [ $? -eq 0 -a -f $in_cnf ] ; then
+			tcount=$(expr $tcount + 1)
+			echo "  testing svctool create MySQL config $in_cnf succeeded"
+		else
+			echo "  testing svctool create MySQL config $in_cnf failed"
+			exit 1
+		fi
+	fi
+	#unshare mount --bind $in_cnf /etc/mysql/indimail.cnf
+
+  	# MySQL Database Creation
+	if [ ! -d $qmaildir/mysqldb/data/mysql ] ; then
+		echo "Creating mysql db"
+  		sudo $svctool --cntrldir=$cntrldir --config=mysqldb --mysqlPrefix=/usr \
+			--databasedir=$qmaildir/mysqldb --base_path=$testdir/mail \
+			--mysqlsocket="$MYSQL_SOCKET".tmp 1>&3 2>&1
+		if [ $? -eq 0 ] ; then
+			tcount=$(expr $tcount + 1)
+			echo "  testing svctool create MySQL Database succeeded"
+		else
+			echo "  testing svctool create MySQL Database failed"
+			exit 1
+		fi
+		t=$(sudo ls $qmaildir/mysqldb/data/indimail/indimail.frm -a $qmaildir/mysqldb/data/indimail/indimail.ibd 2>/dev/null)
+		if [ -n "$t" ] ; then
+			tcount=$(expr $tcount + 1)
+			echo "  testing for indimail MySQL database succeeded"
+		else
+			echo "  testing for indimail MySQL database failed"
+			echo "Disabling mysqld service"
+			touch $servicedir/mysql.3307/down
+		fi
+	fi
+
+  	# MySQL service Creation
+	mkdir -p $servicedir
+	echo "Creating mysqld service"
+  	sudo $svctool --mysql=3307 --servicedir=$servicedir --mysqlPrefix=/usr \
+		--databasedir=$qmaildir/mysqldb --config=$in_cnf 1>&3
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing svctool create MySQL service succeeded"
+	else
+		echo "  testing svctool create MySQL service failed"
+		exit 1
+	fi
+	sudo chown -R $user $servicedir/mysql.3307
+	printf "#!/bin/sh\nexec $setuidgid $user $multilog t $logdir/mysqld\n" > $servicedir/mysql.3307/log/run
+	if [ ! -f $sysconfdir/headerlist ] ; then
+		cp /etc/indimail/headerlist $sysconfdir
+	fi
+}
+
+function create_authimap()
+{
+	if [ -f /tmp/authimap ] ; then
+		return 0
+	fi
+	(
+	echo "#!/bin/sh"
+	echo "if [ \$# -lt 1 ] ; then"
+	echo "	exit 2"
+	echo "fi"
+	echo "var=\`tr [\"\\0\"] [\"\\n\"] 0<&3\`"
+	echo "user=\`echo \$var | cut -d ' ' -f1\`"
+	echo "pass=\`echo \$var | cut -d ' ' -f2\`"
+	echo "echo user=\$user 1>&2"
+	echo "echo pass=\$pass 1>&2"
+	echo "exec 4>/tmp/authimap.\$\$ 3</tmp/authimap.\$\$"
+	echo "/bin/rm -f /tmp/authimap.\$\$"
+	echo "echo \$var | tr [\" \"] [\"\\0\"] 1>&4"
+	echo "if [ \"\$user\" = \"$user@$HOSTNAME\" -a \"\$pass\" = \"abcd12345678\" ] ; then"
+	echo "	exit 0"
+	echo "fi"
+	echo "exec \$*"
+	) >/tmp/authimap
+	chmod +x /tmp/authimap
+}
+
+function setup_svscan()
+{
+	mkdir -p $servicedir/.svscan/log
+	mkdir -p $servicedir/.svscan/variables
+	mkdir -p $servicedir/qmail-send.2025/log
+	mkdir -p $servicedir/qmail-send.2025/variables
+
+	# svscan
+	printf "#!/bin/sh\nexec echo hello world   > $testdir/svscan1.out\n" > $servicedir/.svscan/run
+	printf "#!/bin/sh\nexec echo goodbye world > $testdir/svscan2.out\n" > $servicedir/.svscan/shutdown
+	printf "#!/bin/sh\nexec $multilog t $logdir/svscan\n" > $servicedir/.svscan/log/run
+	chmod +x $servicedir/.svscan/run
+	chmod +x $servicedir/.svscan/shutdown
+	chmod +x $servicedir/.svscan/log/run
+	echo 1 > $servicedir/.svscan/variables/DISABLE_RUN
+	echo 1 > $servicedir/.svscan/variables/SCANLOG
+	echo 1 > $servicedir/.svscan/variables/SILENT
+	echo   > $servicedir/.svscan/variables/INITCMD
+	echo "/bin:/usr/sbin" > $servicedir/.svscan/variables/PATH
+
+	# imapd, pop3d, imapd-ssl, pop3d-ssl
+	for j in authindi
+	do
+		IMAPMODULES="/usr/libexec/indimail/imapmodules/$j $IMAPMODULES"
+	done
+	for i in imap pop3
+	do
+		if [ "$i" = "imap" ] ; then
+			port1=1430
+			port2=9930
+		else
+			port1=1100
+			port2=9950
+		fi
+		mkdir -p $servicedir/"$i"d/log
+		mkdir -p $servicedir/"$i"d/variables
+		mkdir -p $servicedir/"$i"d-ssl/log
+		mkdir -p $servicedir/"$i"d-ssl/variables
+		for j in d d-ssl
+		do
+			echo $indimaildir/inquery > $servicedir/"$i"$j/variables/FIFODIR
+			echo $tmpfifodir          > $servicedir/"$i"$j/variables/FIFOTMPDIR
+			echo 660                  > $servicedir/"$i"$j/variables/FIFO_MODE
+			echo 1                    > $servicedir/"$i"$j/variables/USE_QPWGR
+			echo 0                    > $servicedir/"$i"$j/variables/BIGTODO
+			echo 23                   > $servicedir/"$i"$j/variables/CONFSPLIT
+			echo $qmaildir/queue      > $servicedir/"$i"$j/variables/QUEUEDIR
+			echo $cntrldir            > $servicedir/"$i"$j/variables/CONTROLDIR
+			echo $sysconfdir          > $servicedir/"$i"$j/variables/SYSCONFDIR
+			echo $sysconfdir/users    > $servicedir/"$i"$j/variables/ASSIGNDIR
+			echo $certdir             > $servicedir/"$i"$j/variables/CERTDIR
+			echo $qmaildir            > $servicedir/"$i"$j/variables/DOMAINDIR
+			echo 1                    > $servicedir/"$i"$j/variables/DEBUG
+			echo 1                    > $servicedir/"$i"$j/variables/DEBUG_LOGIN
+			echo NONE                 > $servicedir/"$i"$j/variables/TLS_VERIFYPEER
+			echo $certdir/servercert.pem > $servicedir/"$i"$j/variables/TLS_CERTFILE
+		done
+		(
+		echo "#!/bin/sh"
+		echo "prefix=/usr"
+		echo "bindir=${prefix}/bin"
+		echo "libexecdir=/usr/libexec/indimail"
+		echo "mkdir -p $indimaildir/inquery"
+		echo "chmod 2770 $indimaildir/inquery"
+		echo "chown qmaild:indimail $indimaildir/inquery"
+		echo "exec 2>&1"
+		echo "exec /usr/bin/envdir -c variables \\"
+		echo " /usr/bin/softlimit -m $SOFT_MEM -o 1024 \\"
+		) > $servicedir/"$i"d/run
+		cp $servicedir/"$i"d/run $servicedir/"$i"d-ssl/run
+		(
+		echo "$tcpserver -v -o -H -l $HOSTNAME -R -u $INUID -g $INGID $LOCALIP $port1 \\"
+		echo "$prefix/sbin/"$i"login $IMAPMODULES $bindir/"$i"d Maildir"
+		) >> $servicedir/"$i"d/run
+		(
+		echo "$tcpserver -v -o -H -l $HOSTNAME -R -u $INUID -g $INGID,qcerts $LOCALIP $port2 \\"
+		echo "$prefix/bin/couriertls -server -tcpd \\"
+		echo "$prefix/sbin/"$i"login $IMAPMODULES $bindir/"$i"d Maildir"
+		) >> $servicedir/"$i"d-ssl/run
+		chmod +x $servicedir/"$i"d/run
+		chmod +x $servicedir/"$i"d-ssl/run
+		printf "#!/bin/sh\nexec $setuidgid $user $multilog t $logdir/"$i"d\n"     > $servicedir/"$i"d/log/run
+		printf "#!/bin/sh\nexec $setuidgid $user $multilog t $logdir/"$i"d-ssl\n" > $servicedir/"$i"d-ssl/log/run
+		chmod +x $servicedir/"$i"d/log/run
+		chmod +x $servicedir/"$i"d-ssl/log/run
+	done
+
+	# qmail-send
+	mkdir -p $servicedir/qmail-send.2025/variables
+	mkdir -p $servicedir/qmail-send.2025/log
+	echo /bin:/usr/sbin    > $servicedir/qmail-send.2025/variables/PATH
+	echo 0                 > $servicedir/qmail-send.2025/variables/BIGTODO
+	echo 1                 > $servicedir/qmail-send.2025/variables/QPWGR
+	echo 23                > $servicedir/qmail-send.2025/variables/CONFSPLIT
+	echo $qmaildir/queue   > $servicedir/qmail-send.2025/variables/QUEUEDIR
+	echo $cntrldir         > $servicedir/qmail-send.2025/variables/CONTROLDIR
+	echo $sysconfdir/users > $servicedir/qmail-send.2025/variables/ASSIGNDIR
+	printf "#!/bin/sh\nexec envdir ./variables $qmail_start -s ./Maildir/ 2>&1\n"    > $servicedir/qmail-send.2025/run
+	printf "#!/bin/sh\nexec  $setuidgid $user $multilog t $logdir/qmail-send\n" > $servicedir/qmail-send.2025/log/run
+	chmod +x $servicedir/qmail-send.2025/run
+	chmod +x $servicedir/qmail-send.2025/log/run
+
+	# qmail-smtpd
+	mkdir -p $servicedir/smtpd/variables
+	mkdir -p $servicedir/smtpd/log
+	echo 1                 > $servicedir/smtpd/variables/USE_QPWGR
+	echo 1                 > $servicedir/smtpd/variables/STARTTLS
+	echo 0                 > $servicedir/smtpd/variables/BIGTODO
+	echo 23                > $servicedir/smtpd/variables/CONFSPLIT
+	echo 1                 > $servicedir/smtpd/variables/ENABLE_CRAM
+	echo $qmaildir/queue   > $servicedir/smtpd/variables/QUEUEDIR
+	echo $cntrldir         > $servicedir/smtpd/variables/CONTROLDIR
+	echo $sysconfdir       > $servicedir/smtpd/variables/SYSCONFDIR
+	echo $sysconfdir/users > $servicedir/smtpd/variables/ASSIGNDIR
+	echo $certdir          > $servicedir/smtpd/variables/CERTDIR
+	echo $qmaildir/inquery > $servicedir/smtpd/variables/FIFODIR
+	echo $qmaildir         > $servicedir/smtpd/variables/DOMAINDIR
+	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail,indimail -v -HR 0 2025 $qmail_smtpd $HOSTNAME /usr/sbin/vchkpass /bin/false 2>&1\n" > $servicedir/smtpd/run
+	printf "#!/bin/sh\nexec $setuidgid $user $multilog t $logdir/smtpd\n" > $servicedir/smtpd/log/run
+	chmod +x $servicedir/smtpd/run
+	chmod +x $servicedir/smtpd/log/run
+
+	# inlookup
+	mkdir -p $tmpfifodir
+	sudo /bin/chown indimail:qmail $tmpfifodir
+	sudo chmod 770 $tmpfifodir
+	mkdir -p $servicedir/inlookup.infifo/variables
+	mkdir -p $servicedir/inlookup.infifo/log
+	echo $cntrldir          > $servicedir/inlookup.infifo/variables/CONTROLDIR
+	echo $sysconfdir/users  > $servicedir/inlookup.infifo/variables/ASSIGNDIR
+	echo $qmaildir/inquery  > $servicedir/inlookup.infifo/variables/FIFODIR
+	echo 660                > $servicedir/inlookup.infifo/variables/FIFO_MODE
+	echo infifo             > $servicedir/inlookup.infifo/variables/INFIFO
+	echo 5                  > $servicedir/inlookup.infifo/variables/THREAD_COUNT
+	echo 5184000            > $servicedir/inlookup.infifo/variables/CACHE_COUNT
+	echo 1                  > $servicedir/inlookup.infifo/variables/MYSQL_OPT_RECONNECT
+	echo $in_cnf            > $servicedir/inlookup.infifo/variables/MYSQL_READ_DEFAULT_FILE
+	echo inlookup           > $servicedir/inlookup.infifo/variables/MYSQL_READ_GROUP
+	echo                    > $servicedir/inlookup.infifo/variables/PASSWD_CACHE
+	echo                    > $servicedir/inlookup.infifo/variables/QUERY_CACHE
+	(
+	echo "#!/bin/sh"
+	echo "count=5"
+	echo "echo \"initializing fifo count=\$count ...\""
+	echo "/bin/rm -f $qmaildir/inquery/infifo.*"
+	echo "for i in \$(seq 1 \$count); do f=$qmaildir/inquery/infifo.\$i; mkfifo \$f && /bin/chmod 660 \$f && /bin/chown qmaild:indimail \$f; done"
+	echo "exec /usr/bin/envdir -c variables sh -c \""
+	echo "exec /usr/bin/setuidgid -g qmail,indimail qmaild /usr/sbin/inlookup \\"
+  	echo "-i \\\$THREAD_COUNT -c \\\$CACHE_COUNT\""
+	) > $servicedir/inlookup.infifo/run
+	printf "#!/bin/sh\nexec $setuidgid $user $multilog t $logdir/inlookup\n" > $servicedir/inlookup.infifo/log/run
+	chmod +x $servicedir/inlookup.infifo/run
+	chmod +x $servicedir/inlookup.infifo/log/run
+}
+
+function do_svscan_start()
+{
+	echo "Starting svscan"
+	(
+	cd $servicedir/.svscan
+	exec sudo envdir -c variables $svscan $servicedir
+	) &
+	sleep $sleep_int
+	svpid=$(sed -n '$p' $servicedir/.svscan.pid)
+	if [ -n "$svpid" ] ; then
+		sudo kill -0 $svpid
+		if [ $? -eq 0 ] ; then
+			tcount=$(expr $tcount + 1)
+			echo "  testing command svscan (with svscanlog) startup succeeded with pid $svpid"
+		else
+			echo "  testing command svscan (with svscanlog) startup failed"
+			exit 1
+		fi
+	else
+			echo "  testing command svscan (with svscanlog) startup failed"
+			exit 1
+	fi
+	sudo chown -R $user $servicedir/*/supervise
+}
+
+function test_svscan_log()
+{
+	grep "@.* svscan: info: pid: .*: starting..." $logdir/svscan/current >/dev/null
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command svscan log succeeded"
+	else
+		echo "  testing command svscan log failed"
+		exit 1
+	fi
+}
+
+function test_svscan_run()
+{
+	if [ "$(cat $testdir/svscan1.out 2>/dev/null)" = "hello world" ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command svscan run script execution succeeded"
+	else
+		echo "  testing command svscan run script execution failed"
+		exit 1
+	fi
+}
+
+function do_svscan_stop()
+{
+	if [ $# -eq 0 ] ; then
+		svpid=$(sed -n '$p' $servicedir/.svscan.pid 2>/dev/null)
+		if [ -n "$svpid" ] ; then
+			sudo kill -0 $svpid
+			if [ $? -ne 0 ] ; then
+				return 0
+			fi
+		fi
+	else
+		svpid=$1
+	fi
+	if [ -d $servicedir/.svscan/log ] ; then
+		if [ -n "$svpid" ] ; then
+			sudo kill $svpid
+			sleep $sleep_int
+		fi
+		sudo svc -dx $servicedir/* $servicedir/*/log $servicedir/.svscan/log >/dev/null 2>&1
+	else
+		if [ -n "$svpid" ] ; then
+			sudo kill $svpid
+			sleep $sleep_int
+		fi
+		sleep $sleep_int
+		sudo svc -dx $servicedir/* $servicedir/*/log >/dev/null 2>&1
+	fi
+}
+
+function do_setup()
+{
+	# basic setup for maildir, assign config and queue
+	sudo /bin/rm -rf $logdir
+	mkdir -p $logdir/setup
+	mkdir -p $logdir/qremote
+	mkdir -p $logdir/gsasl
+	mkdir -p $logdir/mysqld
+	mkdir -p $logdir/inlookup
+	mkdir -p $logdir/mail
+	mkdir -p $logdir/qmail-send
+	mkdir -p $logdir/svscan
+	mkdir -p $logdir/imapd
+	mkdir -p $logdir/pop3d
+	mkdir -p $logdir/imapd-ssl
+	mkdir -p $logdir/pop3d-ssl
+	setup_maildir
+	setup_assign
+	setup_queue
+	setup_svscan
+	setup_config 3>>$logdir/setup/setup.log
+}
+
+function create_domain()
+{
+	mkdir -p $sysconfdir/users
+	mkdir -p $testdir/mail
+	sudo env - \
+		PATH=/bin:/usr/bin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		DOMAINDIR=$qmaildir \
+		SERVICEDIR=$servicedir \
+		vadddomain -B $testdir/mail -d $qmaildir $1 $2 > $logdir/setup/vadddomain.log
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command vadddomain succeeded"
+	else
+		echo "  testing command vadddomain failed"
+		exit 1
+	fi
+}
+
+function delete_domain()
+{
+	sudo env - \
+		PATH=/bin:/usr/bin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		DOMAINDIR=$qmaildir \
+		SERVICEDIR=$servicedir \
+		vdeldomain $1 > $logdir/setup/vdeldomain.log
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command vdeldomain succeeded"
+	else
+		echo "  testing command vdeldomain failed"
+		exit 1
+	fi
+}
+
+function create_user_plain()
+{
+	sudo env - \
+		PATH=/bin:/usr/bin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		DOMAINDIR=$qmaildir \
+		SERVICEDIR=$servicedir \
+		vadduser -d $1 $2 >> $logdir/setup/vadduser.log
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command vadduser (plain) succeeded"
+	else
+		echo "  testing command vadduser (plain) failed"
+		exit 1
+	fi
+}
+
+function create_user_scram()
+{
+	sudo env - \
+		PATH=/bin:/usr/bin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		DOMAINDIR=$qmaildir \
+		SERVICEDIR=$servicedir \
+		vadduser -C -m $1 -d $2 $3 >> $logdir/setup/vadduser.log
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command vadduser (scram) succeeded"
+	else
+		echo "  testing command vadduser (scram) failed"
+		exit 1
+	fi
+}
+
+function delete_user()
+{
+	sudo chown -R indimail $servicedir/inlookup.infifo
+	sudo env - \
+		PATH=/bin:/usr/bin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		DOMAINDIR=$qmaildir \
+		SERVICEDIR=$servicedir \
+		vdeluser $1 > $logdir/setup/vdeluser.log 2>&1
+	status=$?
+	sudo chown -R $user $servicedir/inlookup.infifo
+	if [ $# -gt 1 ] ; then
+		return $status
+	fi
+	if [ $status -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command vdeluser succeeded"
+	else
+		echo "  testing command vdeluser failed"
+		exit 1
+	fi
+}
+
+function delete_domain()
+{
+	sudo env - \
+		PATH=/bin:/usr/bin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		DOMAINDIR=$qmaildir \
+		SERVICEDIR=$servicedir \
+	vdeldomain $1 > $logdir/setup/vdeldomain.log
+	status=$?
+	if [ $# -gt 1 ] ; then
+		return $status
+	fi
+	if [ $status -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command vdeldomain succeeded"
+	else
+		echo "  testing command vdeldomain failed"
+		exit 1
+	fi
+}
+
+function password_change()
+{
+	sudo env - \
+		PATH=/bin:/usr/bin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		SERVICEDIR=$servicedir \
+	vpasswd $1 $2 > $logdir/setup/vpasswd.log
+	if [ $status -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command vpasswd succeeded"
+	else
+		echo "  testing command vpasswd failed"
+		exit 1
+	fi
+
+}
+
+function do_vmoduser()
+{
+	quota=$(sudo env - \
+		PATH=/bin:/usr/bin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		vuserinfo -q $1 | grep MiB | awk '{print $3}')
+	if [ $quota -eq 524288000 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command vuserinfo get quota ($quota) succeeded"
+	else
+		echo "  testing command vuserinfo get quota ($quota) failed"
+	fi
+	sudo env - \
+		PATH=/bin:/usr/bin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		SERVICEDIR=$servicedir \
+	vmoduser -q +100m $1 > $logdir/setup/vmoduser.log
+	if [ $status -ne 0 ] ; then
+		echo "  testing command vmoduser failed"
+	fi
+	quota=$(sudo env - \
+		PATH=/bin:/usr/bin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		vuserinfo -q $1 | grep MiB | awk '{print $3}')
+	if [ $quota -eq 629145600 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command vmoduser update quota to $quota) succeeded"
+	else
+		echo "  testing command vmoduser update quota to $quota) failed"
+	fi
+
+}
+
+function do_inquerytest()
+{
+	env - \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		FIFODIR=$indimaildir/inquery \
+		FIFOTMPDIR=$tmpfifodir \
+		FIFO_MODE=0666 \
+		/usr/sbin/inquerytest -v -q 3 -i "" $1 > $logdir/setup/inquerytest.log
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command inquerytest succeeded"
+	else
+		echo "  testing command inquerytest failed"
+		exit 1
+	fi
+}
+
+function do_vdominfo()
+{
+	env - \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		ASSIGNDIR=$sysconfdir/users \
+		/usr/bin/vdominfo > $logdir/setup/vdomino.log
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command vdominfo succeeded"
+	else
+		echo "  testing command vdominfo failed"
+		exit 1
+	fi
+}
+
+function do_dbinfo()
+{
+	env - \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		ASSIGNDIR=$sysconfdir/users \
+		/usr/bin/dbinfo -s 	> $logdir/setup/dbinfo.log
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command dbinfo succeeded"
+	else
+		echo "  testing command dbinfo failed"
+		exit 1
+	fi
+}
+
+function test_services()
+{
+	sudo svstat $servicedir/* > $logdir/setup/services.log
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command svscan service startup succeeded"
+	else
+		echo "  testing command svscan service startup failed"
+		exit 1
+	fi
+}
+
+function check_mail()
+{
+	count=0
+	ret=1
+	(
+	while true
+	do
+		mcount=$(ls $maildir/new | wc -l)
+		if [ $mcount -gt 0 ] ; then
+			mail_file=$(ls -lt $maildir/new|head -2|tail -1|awk '{print $9}')
+			echo "Got Mail $mail_file"
+			/bin/rm -f $maildir/new/$mail_file
+			return 0
+		fi
+		sleep 1
+		count=$(expr "$count" + 1)
+		echo count=$count
+		if [ $count -gt 5 ] ; then
+			echo "Failed to receive Mail" 1>&2
+			break
+		fi
+	done
+	return 1
+	) >> $logdir/mail/mail.log 2>&1
+}
+
+function do_smtp_auth_login_swaks()
+{
+	methods="LOGIN PLAIN CRAM-MD5 DIGEST-MD5"
+	for j in 1 2
+	do
+		case $j in
+			1)
+			str="inlookup cache=0"
+			> $servicedir/smtpd/variables/PASSWD_CACHE
+			> $servicedir/smtpd/variables/QUERY_CACHE
+			;;
+			2)
+			str="inlookup cache=1"
+			echo 1 > $servicedir/smtpd/variables/PASSWD_CACHE
+			echo 1 > $servicedir/smtpd/variables/QUERY_CACHE
+			;;
+		esac
+		sudo svc -r $servicedir/smtpd
+		sleep $sleep_int
+		for i in $methods
+		do
+			case $i in
+				LOGIN|PLAIN)
+				pass=$2
+				;;
+				*)
+				pass=$(envdir $servicedir/smtpd/variables vuserinfo -p $1 | awk '{print $3}')
+				;;
+			esac
+			swaks -S --tls --to $user@$HOSTNAME --from $1 --server localhost --port 2025 -a $i -au $1 -ap "$pass"
+			check_mail
+			if [ $? -eq 0 ] ; then
+				last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $i:")
+				if [ $? -eq 0 ] ; then
+					tcount=$(expr $tcount + 1)
+					printf "  testing mail    AUTH %-18s SMTP authentication (%s) using %-12s succeeded\n" "$i" "$str" "swaks"
+				else
+					printf "  testing mail    AUTH %-18s SMTP authentication (%s) using %-12s failed\n"    "$i" "$str" "swaks"
+					exit 1
+				fi
+			else
+				echo "  testing mail    delivery in do_smtp_auth_login_swaks failed"
+				exit 1
+			fi
+		done
+		if [ $j -eq 2 ] ; then
+			t=$(tail -2 $logdir/inlookup/current |head -1|awk '{print $6" "$7}')
+			if [ "$t" = "['Password Query']," ] ; then
+				echo "  testing command inquery password cache succeeded"
+			else
+				echo "  testing command inquery password cache failed"
+				exit 1
+			fi
+		fi
+	done
+}
+
+function do_smtp_auth_qmail_remote()
+{
+	for j in 1 2
+	do
+		case $j in
+			1)
+			str="inlookup cache=0"
+			> $servicedir/smtpd/variables/PASSWD_CACHE
+			> $servicedir/smtpd/variables/QUERY_CACHE
+			;;
+			2)
+			str="inlookup cache=1"
+			echo 1 > $servicedir/smtpd/variables/PASSWD_CACHE
+			echo 1 > $servicedir/smtpd/variables/QUERY_CACHE
+			;;
+		esac
+		sudo svc -r $servicedir/smtpd
+		sleep $sleep_int
+		methods="LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5"
+		for i in $methods
+		do
+			case $i in
+				LOGIN|PLAIN)
+				pass=$3
+				;;
+				*)
+				pass=$(envdir $servicedir/smtpd/variables vuserinfo -p $2 | awk '{print $3}')
+				;;
+			esac
+			(
+			echo "From: $2"
+			echo "To: $user@$HOSTNAME"
+			echo "Subject: Test"
+			echo "Date: $(date -R)"
+			echo
+			echo "Test message"
+			) | env - \
+				SMTPROUTE="$1:127.0.0.1:2025 $2 $pass" \
+				AUTH_SMTP="$i" \
+				CONTROLDIR=$cntrldir \
+			/usr/sbin/qmail-remote $1 $2 "" 10 $user@$HOSTNAME > $logdir/qremote/qmail-remote.log
+			check_mail
+			if [ $? -eq 0 ] ; then
+				last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $i:")
+				if [ $? -eq 0 ] ; then
+					tcount=$(expr $tcount + 1)
+					printf "  testing mail    AUTH %-18s SMTP authentication (%s) using %-12s succeeded\n" "$i" "$str" "qmail-remote"
+				else
+					printf "  testing mail    AUTH %-18s SMTP authentication (%s) using %-12s failed\n"    "$i" "$str" "qmail-remote"
+					exit 1
+				fi
+			else
+				echo "  testing mail    delivery in do_smtp_auth_qmail_remote failed"
+				exit 1
+			fi
+		done
+	done
+}
+
+function do_smtp_auth_qmail_remote_scram()
+{
+	(
+	echo "From: $3"
+	echo "To: $user@$HOSTNAME"
+	echo "Subject: Test"
+	echo "Date: $(date -R)"
+	echo
+	echo "Test message"
+	) | env - \
+		SMTPROUTE="$2:127.0.0.1:2025 $3 $4" \
+		AUTH_SMTP="$1" \
+		CONTROLDIR=$cntrldir \
+	/usr/sbin/qmail-remote $2 $3 "" 10 $user@$HOSTNAME >> $logdir/qremote/qmail-remote.log
+	check_mail
+	if [ $? -eq 0 ] ; then
+		last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $1:")
+		if [ $? -eq 0 ] ; then
+			tcount=$(expr $tcount + 1)
+			printf "  testing mail    AUTH %-18s SMTP authentication (%s) using %-12s (plaintext) succeeded\n" "$1" "$str" "qmail-remote"
+		else
+			printf "  testing mail    AUTH %-18s SMTP authentication (%s) using %-12s (plaintext) failed\n" "$1" "$str" "qmail-remote"
+			exit 1
+		fi
+	else
+		echo "  testing mail    delivery in do_smtp_auth_qmail_remote_scram failed"
+		exit 1
+	fi
+	hexsalted=$(envdir $servicedir/smtpd/variables vuserinfo -p $3 | cut -d: -f3)
+	(
+	echo "From: $3"
+	echo "To: $user@$HOSTNAME"
+	echo "Subject: Test"
+	echo "Date: $(date -R)"
+	echo
+	echo "Test message"
+	) | env - \
+		SALTED_PASSWORD=1 \
+		SMTPROUTE="$2:127.0.0.1:2025 $3 $hexsalted" \
+		AUTH_SMTP="$1" \
+		CONTROLDIR=$cntrldir \
+	/usr/sbin/qmail-remote $2 $3 "" 10 $user@$HOSTNAME >> $logdir/qremote/qmail-remote.log
+	check_mail
+	if [ $? -eq 0 ] ; then
+		last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $1:")
+		if [ $? -eq 0 ] ; then
+			tcount=$(expr $tcount + 1)
+			printf "  testing mail    AUTH %-18s SMTP authentication (%s) using %-12s (hexsalted) succeeded\n" "$1" "$str" "qmail-remote"
+		else
+			printf "  testing mail    AUTH %-18s SMTP authentication (%s) using %-12s (hexsalted) failed\n" "$1" "$str" "qmail-remote"
+			exit 1
+		fi
+	else
+		echo "  testing mail    delivery in do_smtp_auth_qmail_remote_scram failed"
+		exit 1
+	fi
+}
+
+function do_gsasl_test()
+{
+	case $1 in
+		SCRAM-SHA-1-PLUS|SCRAM-SHA-256-PLUS)
+		opt=""
+		;;
+		SCRAM-SHA-1|SCRAM-SHA-256)
+		opt="--no-cb"
+		;;
+	esac
+	gsasl -d $opt --hostname=$HOSTNAME --x509-ca-file="" -a $2 --password "$3" \
+		--mechanism "$1" --smtp --connect localhost:2025 >> $logdir/gsasl/gsasl.log 2>&1
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		printf "  testing mail    AUTH %-18s SMTP authentication (%s) using %-12s succeeded\n" "$1" "$str" "gsasl"
+	else
+		printf "  testing mail    AUTH %-18s SMTP authentication (%s) using %-12s failed\n" "$1" "$str" "gsasl"
+		exit 1
+	fi
+}
+
+function test_pop3()
+{
+	swaks -S --tls --to $1 --from $1 --server localhost --port 2025 -a LOGIN -au $1 -ap "$2"
+	(
+	echo "#!/bin/sh"
+	echo "exec 0<&6"
+	echo "exec 1>&7"
+	echo "read line"
+	echo "printf \"%s\n\" \"\$line\" 1>&2"
+	echo "printf \"user $1\r\n\" 1>&2"
+	echo "printf \"user $1\r\n\""
+	echo "read line"
+	echo "printf \"%s\n\" \"\$line\" 1>&2"
+	echo "printf \"%s\" \"\$line\" |grep \"+OK Password required.\" >/dev/null"
+	echo "if [ \$? -ne 0 ] ; then"
+	echo "	printf \"%s\n\" \"\$line\" 1>&2"
+	echo "	echo \"Failed to get password prompt\" 1>&2"
+	echo "	exit 1"
+	echo "else"
+	echo "	printf \"pass %s\n\" \"$2\" 1>&2"
+	echo "	printf \"pass %s\n\" \"$2\""
+	echo "fi"
+	echo "read line"
+	echo "printf \"%s\n\" \"\$line\" 1>&2"
+	echo "printf \"%s\" \"\$line\" | grep \"+OK logged in.\" > /dev/null"
+	echo "if [ \$? -ne 0 ] ; then"
+	echo "	echo \"Failed to login\" 1>&2"
+	echo "	exit 1"
+	echo "fi"
+	echo "printf \"LIST\r\n\" 1>&2"
+	echo "printf \"LIST\r\n\""
+	echo "read line"
+	echo "printf \"%s\" \"\$line\" |grep \"+OK POP3 clients that break here, they violate STD53.\" > /dev/null"
+	echo "if [ \$? -ne 0 ] ; then"
+	echo "	echo \"LIST command failed\" 1>&2"
+	echo "	exit 1"
+	echo "fi"
+	echo "read line"
+	echo "printf \"%s\n\" \"\$line\" 1>&2"
+	echo "octets=\$(printf \"%s\n\" \"\$line\"|awk '{print \$2}')"
+	echo "while true"
+	echo "do"
+	echo "	read line"
+	echo "	line=\$(echo \"\$line\"|tr -d '\r')"
+	echo "	printf \"%s\n\" \"\$line\" 1>&2"
+	echo "	if [ \"\$line\" = \".\" ] ; then"
+	echo "		break"
+	echo "	fi"
+	echo "done"
+	echo "printf \"RETR 1\r\n\" 1>&2"
+	echo "printf \"RETR 1\r\n\""
+	echo "read line"
+	echo "printf \"%s\n\" \"\$line\" 1>&2"
+	echo "printf \"%s\" \"\$line\" | grep -E \"+OK .* octets follow.\" > /dev/null"
+	echo "if [ \$? -ne 0 ] ; then"
+	echo "	echo \"RETR command failed\" 1>&2"
+	echo "	exit 1"
+	echo "fi"
+	echo "found=0"
+	echo "while true"
+	echo "do"
+	echo "	read line"
+	echo "	line=\$(echo \"\$line\"|tr -d '\r')"
+	echo "	printf \"%s\n\" \"\$line\" 1>&2"
+	echo "	if [ \"\$line\" = \".\" ] ; then"
+	echo "		break"
+	echo "	fi"
+	echo "	echo \"\$line\" | grep \"This is a test mailing\" > /dev/null"
+	echo "	if [ \$? -eq 0 ] ; then"
+	echo "		found=1"
+	echo "	fi"
+	echo "done"
+	echo "printf \"QUIT\r\n\""
+	echo "read line"
+	echo "printf \"%s\n\" \"\$line\" 1>&2"
+	echo "if [ \$found -eq 1 ] ; then"
+	echo "	exit 0"
+	echo "else"
+	echo "	exit 1"
+	echo "fi"
+	) > $testdir/tcpclient.pop3
+	chmod +x $testdir/tcpclient.pop3
+	tcpclient  -vDHR 0 1100 /tmp/qmail-test/tcpclient.pop3 2> $logdir/pop3d/pop3d.log
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		printf "  testing mail    POP3  login and mail retrieval (%s) succeeded\n" "$str"
+	else
+		printf "  testing mail    POP3  login and mail retrieval (%s) failed\n" "$str"
+		exit 1
+	fi
+	tcpclient -n "" -vDHR 0 9950 /tmp/qmail-test/tcpclient.pop3 2> $logdir/pop3d-ssl/pop3d-ssl.log
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		printf "  testing mail    POP3S login and mail retrieval (%s) succeeded\n" "$str"
+	else
+		printf "  testing mail    POP3S login and mail retrieval (%s) failed\n" "$str"
+		exit 1
+	fi
+}
+
+function test_imap()
+{
+	swaks -S --tls --to $1 --from $1 --server localhost --port 2025 -a LOGIN -au $1 -ap "$2"
+	(
+	echo "#!/bin/sh"
+	echo "exec 0<&6"
+	echo "exec 1>&7"
+	echo "read key"
+	echo "printf \"%s\n\" \"\$key\" 1>&2"
+	echo "printf \"a1 login $1 $2\r\n\""
+	echo "read key"
+	echo "printf \"%s\" \"\$key\" |grep \"a1 OK LOGIN Ok.\" >/dev/null"
+	echo "if [ \$? -ne 0 ] ; then"
+	echo "	printf \"%s\n\" \"\$key\" 1>&2"
+	echo "	echo \"LOGIN Failed\" 1>&2"
+	echo "	exit 1"
+	echo "else"
+	echo "	printf \"%s\n\" \"\$key\" 1>&2"
+	echo "fi"
+	echo "printf \"a1 select inbox\r\n\""
+	echo "while true"
+	echo "do"
+	echo "	read line"
+	echo "	t=\$(echo \"\$line\" | cut -d' ' -f1)"
+	echo "	if [ \"\$t\" = \"*\" ] ; then"
+	echo "		echo \"\$line\" 1>&2"
+	echo "		continue"
+	echo "	elif [ \"\$t\" = \"a1\" ] ; then"
+	echo "		break"
+	echo "	else"
+	echo "		echo \"\$line\" 1>&2"
+	echo "	fi"
+	echo "done"
+	echo ""
+	echo "printf \"a1 fetch 1 RFC822\r\n\""
+	echo "found=0"
+	echo "while true"
+	echo "do"
+	echo "	read line"
+	echo "	echo \"\$line\" | grep \"a1 OK FETCH completed.\" > /dev/null"
+	echo "	if [ \$? -eq 0 ] ; then"
+	echo "		break"
+	echo "	fi"
+	echo "	echo \"\$line\" | grep \"This is a test mailing\" > /dev/null"
+	echo "	if [ \$? -eq 0 ] ; then"
+	echo "		found=1"
+	echo "	fi"
+	echo "	echo \"\$line\" 1>&2"
+	echo "done"
+	echo "printf \"a1 logout\r\n\""
+	echo "read line"
+	echo "printf \"%s\n\" \"\$line\""
+	echo "if [ \$found -eq 1 ] ; then"
+	echo "	exit 0"
+	echo "else"
+	echo "	exit 1"
+	echo "fi"
+	) > $testdir/tcpclient.imap
+	chmod +x $testdir/tcpclient.imap
+	tcpclient  -vDHR 0 1430 /tmp/qmail-test/tcpclient.imap 2> $logdir/imapd/imapd.log
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		printf "  testing mail    IMAP  login and mail retrieval (%s) succeeded\n" "$str"
+	else
+		printf "  testing mail    IMAP  login and mail retrieval (%s) failed\n" "$str"
+		exit 1
+	fi
+	tcpclient -n "" -vDHR 0 9930 /tmp/qmail-test/tcpclient.imap 2> $logdir/imapd-ssl/imapd-ssl.log
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		printf "  testing mail    IMAPS login and mail retrieval (%s) succeeded\n" "$str"
+	else
+		printf "  testing mail    IMAPS login and mail retrieval (%s) failed\n" "$str"
+		exit 1
+	fi
+}
+
+function do_post_handle()
+{
+	(
+	echo "#!/bin/sh"
+	echo "echo MYUID=\$(id -u)"
+	echo "exit 0"
+	) > $testdir/post_handle
+	chmod +x $testdir/post_handle
+	arg1=$1 # $domain1
+	arg2=$2 # pass
+	arg3=$3 # $domain2
+	arg4=$4 # $testuser3
+	arg5=$5 # $testuser4
+	arg6=$6 # $domain3
+	for i in vadddomain vaddaliasdomain vadduser vmoduser vmoveuserdir vrenameuser vrenamedomain vdeldomain1 vdeldomain2
+	do
+		prog=$i
+		case $i in
+			vadddomain)
+			set -- -B $testdir/qmail -d $qmaildir $arg1 $arg2
+			uid=$INUID
+			;;
+			vaddaliasdomain)
+			set "$arg3 $arg1"
+			uid=$MYUID
+			;;
+			vadduser)
+			set "$arg4 $arg2"
+			uid=$INUID
+			;;
+			vmoduser)
+			set -- -q +100m $arg4
+			uid=$INUID
+			;;
+			vmoveuserdir)
+			set "$arg4 $testdir/mail/T2Zsym/$domain1/testuser"
+			uid=$MYUID
+			;;
+			vrenameuser)
+			set "$arg4 $arg5"
+			uid=$INUID
+			;;
+			vrenamedomain)
+			set "$arg1 $arg6"
+			uid=$INUID
+			;;
+			vdeldomain1)
+			prog=vdeldomain
+			set "$arg3"
+			uid=$INUID
+			;;
+			vdeldomain2)
+			set "$arg6"
+			prog=vdeldomain
+			;;
+			*)
+			set "notset"
+			;;
+		esac
+		if [ "$1" = "notset" ] ; then
+			continue
+		fi
+		echo "Executing $prog $*"
+		env - \
+			PATH=/usr/bin:/usr/sbin \
+			POST_HANDLE=$testdir/post_handle \
+			ASSIGNDIR=$sysconfdir/users \
+			SYSCONFDIR=$sysconfdir \
+			CONTROLDIR=$cntrldir \
+			DOMAINDIR=$qmaildir \
+		$prog $* > $logdir/setup/test"$i".log
+		if [ $? -eq 0 ] ; then
+			tcount=$(expr $tcount + 1)
+			printf "  testing command $prog succeeded\n"
+			id=$(grep MYUID $logdir/setup/test"$i".log | grep MYUID | cut -d= -f2)
+			if [ $id -eq $uid ] ; then
+				tcount=$(expr $tcount + 1)
+				printf "  testing POST HANDLE for $prog succeeded\n"
+			else
+				printf "  testing POST HANDLE for $prog failed\n"
+				#cat $logdir/setup/test"$i".log
+			fi
+		else
+			printf "  testing command $prog failed\n"
+			#cat $logdir/setup/test"$i".log
+			exit 1
+		fi
+	done
+}
+
+function do_cleanup_failed()
+{
+	if [ -f $testdir/cleanup.done ] ; then
+		rm -f $testdir/cleanup.done
+	else
+		do_cleanup 1
+	fi
+}
+
+function do_cleanup()
+{
+	touch $testdir/cleanup.done
+	#sudo umount /etc/mysql/indimail.cnf
+	delete_domain $domain1 1 >/dev/null 2>&1
+	do_svscan_stop
+	# Cleanup
+	sudo /bin/rm -rf $servicedir
+	sudo /bin/rm -rf $qmaildir/queue
+	sudo /bin/rm -rf $testdir/svscan1.out $testdir/svscan2.out
+	if [ $# -eq 0 ] ; then
+		sudo /bin/rm -rf $logdir
+		sudo /bin/rm -rf $cntrldir
+		sudo /bin/rm -rf $qmaildir/alias
+	fi
+	sudo /bin/rm -rf $qmaildir/inquery
+	sudo /bin/rm -rf $testdir/run
+	sudo /bin/rm -rf $testdir/mail
+	sudo /bin/rm -rf $testdir/$user
+	sudo /bin/rm -rf $testdir/inquery
+	sudo /bin/rm  -f $testdir/tcpclient.imap $testdir/tcpclient.pop3 $testdir/post_handle
+	sudo /bin/rm -rf $sysconfdir/users
+	sudo /bin/rm -rf $qmaildir/domains
+	sudo /bin/rm -rf $testdir/mail
+	#sudo /bin/rm -rf $qmaildir/mysqldb
+	#sudo /bin/rm -f $in_cnf
+}
+
+do_setup
+do_svscan_start
+svpid=$(sed -n '$p' $servicedir/.svscan.pid)
+test_svscan_log
+test_svscan_run
+test_services
+create_domain $domain1 pass
+do_vdominfo
+do_dbinfo
+create_user_plain $testuser1 $password2
+sudo svc -2 $servicedir/inlookup.infifo
+
+do_inquerytest $testuser1
+
+do_smtp_auth_login_swaks $testuser1 $password2
+
+do_smtp_auth_qmail_remote $domain1 $testuser1 $password2
+
+password_change $testuser1 $password1
+do_vmoduser $testuser1
+delete_user $testuser1
+
+create_user_scram SCRAM-SHA-1   $testuser1 $password1
+create_user_scram SCRAM-SHA-256 $testuser2 $password2
+sudo svc -h $servicedir/inlookup.infifo
+sleep $sleep_int
+
+for j in 1 2
+do
+	case $j in
+		1)
+		str="inlookup cache=0"
+		> $servicedir/smtpd/variables/PASSWD_CACHE
+		> $servicedir/smtpd/variables/QUERY_CACHE
+		for i in imap pop3
+		do
+			for k in d d-ssl
+			do
+				> $servicedir/"$i"$k/variables/PASSWD_CACHE
+				> $servicedir/"$i"$k/variables/QUERY_CACHE
+			done
+		done
+		;;
+		2)
+		str="inlookup cache=1"
+		echo 1 > $servicedir/smtpd/variables/PASSWD_CACHE
+		echo 1 > $servicedir/smtpd/variables/QUERY_CACHE
+		for i in imap pop3
+		do
+			for k in d d-ssl
+			do
+				echo 1 > $servicedir/"$i"$k/variables/PASSWD_CACHE
+				echo 1 > $servicedir/"$i"$k/variables/QUERY_CACHE
+			done
+		done
+		;;
+	esac
+	sudo svc -r $servicedir/smtpd
+	sleep $sleep_int
+	test_imap $testuser1 $password1
+	test_pop3 $testuser1 $password1
+	do_gsasl_test                   "SCRAM-SHA-1"        $testuser1 $password1
+	do_gsasl_test                   "SCRAM-SHA-1-PLUS"   $testuser1 $password1
+	do_gsasl_test                   "SCRAM-SHA-256"      $testuser2 $password2
+	do_gsasl_test                   "SCRAM-SHA-256-PLUS" $testuser2 $password2
+	do_smtp_auth_qmail_remote_scram "SCRAM-SHA-1"        $domain1 $testuser1 $password1
+	do_smtp_auth_qmail_remote_scram "SCRAM-SHA-1-PLUS"   $domain1 $testuser1 $password1
+	do_smtp_auth_qmail_remote_scram "SCRAM-SHA-256"      $domain1 $testuser2 $password2
+	do_smtp_auth_qmail_remote_scram "SCRAM-SHA-256-PLUS" $domain1 $testuser2 $password2
+done
+tcount=$(expr $tcount + 3)
+printf "  testing command tcpserver non-encrypted succeeded\n"
+printf "  testing command tcpclient non-encrypted succeeded\n"
+printf "  testing command tcpclient encrypted     succeeded\n"
+
+delete_domain $domain1
+do_post_handle $domain1 pass $domain2 $testuser3 $testuser4 $domain3
+
+do_svscan_stop $svpid
+
+wait
+echo
+do_cleanup
+echo "All $tcount tests succeeded"
+exit 0
+
+#
+# $Log: $
+#

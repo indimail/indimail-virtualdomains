@@ -1,6 +1,6 @@
 /*
  * $Log: deldomain.c,v $
- * Revision 1.5  2023-03-23 22:04:58+05:30  Cprogrammer
+ * Revision 1.5  2023-03-25 14:32:08+05:30  Cprogrammer
  * multiple bug fixes
  *
  * Revision 1.4  2023-03-20 09:57:24+05:30  Cprogrammer
@@ -58,7 +58,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deldomain.c,v 1.5 2023-03-23 22:04:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deldomain.c,v 1.5 2023-03-25 14:32:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -176,12 +176,13 @@ deldomain(char *domain)
 	if (!stralloc_copy(&tmpbuf, &Dir) ||
 			!stralloc_catb(&tmpbuf, "/.base_path", 11) || !stralloc_0(&tmpbuf))
 		die_nomem();
-	if ((fd = open_read(tmpbuf.s)) == -1 && errno != error_noent) {
-		strerr_warn3("deldomain: read: ", tmpbuf.s, ": ", &strerr_sys);
-		return (-1);
-	}
-	BasePath.len = 0;
-	if (fd > -1) {
+	if ((fd = open_read(tmpbuf.s)) == -1) {
+		if (errno != error_noent) {
+			strerr_warn3("deldomain: read: ", tmpbuf.s, ": ", &strerr_sys);
+			return (-1);
+		}
+	} else {
+		BasePath.len = 0;
 		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("deldomain: read: ", tmpbuf.s, ": ", &strerr_sys);
@@ -211,9 +212,10 @@ deldomain(char *domain)
 		if (remove_alias_domain(domain, tmpbuf.s))
 			return -1;
 	} else {
-		if ((fd = open_read(tmpbuf.s)) == -1 && errno != error_noent)
-			strerr_die3sys(111, "deldomain: ", tmpbuf.s, ": ");
-		if (fd > -1) {
+		if ((fd = open_read(tmpbuf.s)) == -1) {
+			if (errno != error_noent)
+				strerr_die3sys(111, "deldomain: ", tmpbuf.s, ": ");
+		} else {
 			if (verbose) {
 				out("deldomain", "Removing domains aliased to ");
 				out("deldomain", domain);

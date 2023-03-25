@@ -1,5 +1,8 @@
-* XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <@email@> @version@-@release@%{?dist}
-Release 3.4.3-1.1 Start 13/02/2023 End XX/XX/XXXX
+* Sat Mar 25 2024 08:40:00 +0000 Manvendra Bhangui <indimail-virtualdomains@indimailorg> 3.4.3-1.1%{?dist}
+Release 3.4.3-1.1 Start 13/02/2023 End 25/03/2023
+======= Release Highlights ================================================
+o Test script testindimail-virtual tests essential indimail commands
+===========================================================================
 - 13/02/2023
 01. indimail.spec: added qcerts supplementary group for apache for roundcube
     access to certs
@@ -61,6 +64,10 @@ Release 3.4.3-1.1 Start 13/02/2023 End XX/XX/XXXX
     child.
 32. vmoveuser.c, indimail.spec, variables.c, perm_list.in,
     indimail-permissions.*: vmoveuser command renamed to vmoveuserdir
+- 25/03/2023
+33. del_control.c, get_real_domain.c: refactored code
+34. is_alias_domain: fixed soft link resolved name
+35. add testindimail-virtual test script
 
 * Tue Jan 31 2023 03:32:40 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.2-1.1%{?dist}
 Release 3.4.2-1.1 Start 08/09/2022 End 31/01/2023

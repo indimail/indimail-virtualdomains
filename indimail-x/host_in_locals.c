@@ -80,7 +80,7 @@ host_in_locals(char *domain)
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	for(;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
-			strerr_warn3("count_rcpthosts: read: ", tmpbuf.s, ": ", &strerr_sys);
+			strerr_warn3("host_in_locals: read: ", tmpbuf.s, ": ", &strerr_sys);
 			close(fd);
 			return (-1);
 		}
