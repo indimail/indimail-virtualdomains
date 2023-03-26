@@ -1,5 +1,8 @@
 /*
  * $Log: valias_update.c,v $
+ * Revision 1.3  2023-03-26 22:39:04+05:30  Cprogrammer
+ * return 0 if rows updated
+ *
  * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias_update.c,v 1.2 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valias_update.c,v 1.3 2023-03-26 22:39:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -80,12 +83,12 @@ valias_update(char *alias, char *domain, char *old_alias_line, char *alias_line)
 		return (-1);
 	}
 	if (!verbose)
-		return (0);
+		return (err ? 0 : 1);
 	if (err) {
 		subprintfe(subfdout, "valias_update", "Updated alias line %s for alias %s@%s (%d entries)", alias_line, alias, real_domain, err);
 		flush("valias_update");
 	} else
 		strerr_warn6("No alias line ", alias_line, " for alias ", alias, "@", real_domain, 0);
-	return (0);
+	return (err ? 0 : 1);
 }
 #endif

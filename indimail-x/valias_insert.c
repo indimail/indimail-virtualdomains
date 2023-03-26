@@ -1,5 +1,8 @@
 /*
  * $Log: valias_insert.c,v $
+ * Revision 1.2  2023-03-26 22:37:44+05:30  Cprogrammer
+ * return 0 if rows updated
+ *
  * Revision 1.1  2019-04-15 12:01:14+05:30  Cprogrammer
  * Initial revision
  *
@@ -35,7 +38,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias_insert.c,v 1.1 2019-04-15 12:01:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valias_insert.c,v 1.2 2023-03-26 22:37:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -141,7 +144,7 @@ valias_insert(char *alias, char *domain, char *alias_line, int ignore)
 		return (-1);
 	}
 	if (!verbose)
-		return (0);
+		return (err ? 0 : 1);
 	if (err) {
 		out("valias_insert", "Added alias ");
 		out("valias_insert", alias);

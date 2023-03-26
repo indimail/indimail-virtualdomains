@@ -752,11 +752,11 @@ function check_mail()
 	(
 	while true
 	do
-		mcount=$(ls $maildir/new | wc -l)
+		mcount=$(ls $1/new | wc -l)
 		if [ $mcount -gt 0 ] ; then
-			mail_file=$(ls -lt $maildir/new|head -2|tail -1|awk '{print $9}')
+			mail_file=$(ls -lt $1/new|head -2|tail -1|awk '{print $9}')
 			echo "Got Mail $mail_file"
-			/bin/rm -f $maildir/new/$mail_file
+			/bin/rm -f $1/new/$mail_file
 			return 0
 		fi
 		sleep 1
@@ -801,7 +801,7 @@ function do_smtp_auth_login_swaks()
 				;;
 			esac
 			swaks -S --tls --to $user@$HOSTNAME --from $1 --server localhost --port 2025 -a $i -au $1 -ap "$pass"
-			check_mail
+			check_mail $maildir
 			if [ $? -eq 0 ] ; then
 				last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $i:")
 				if [ $? -eq 0 ] ; then
@@ -869,7 +869,7 @@ function do_smtp_auth_qmail_remote()
 				AUTH_SMTP="$i" \
 				CONTROLDIR=$cntrldir \
 			/usr/sbin/qmail-remote $1 $2 "" 10 $user@$HOSTNAME > $logdir/qremote/qmail-remote.log
-			check_mail
+			check_mail $maildir
 			if [ $? -eq 0 ] ; then
 				last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $i:")
 				if [ $? -eq 0 ] ; then
@@ -901,7 +901,7 @@ function do_smtp_auth_qmail_remote_scram()
 		AUTH_SMTP="$1" \
 		CONTROLDIR=$cntrldir \
 	/usr/sbin/qmail-remote $2 $3 "" 10 $user@$HOSTNAME >> $logdir/qremote/qmail-remote.log
-	check_mail
+	check_mail $maildir
 	if [ $? -eq 0 ] ; then
 		last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $1:")
 		if [ $? -eq 0 ] ; then
@@ -929,7 +929,7 @@ function do_smtp_auth_qmail_remote_scram()
 		AUTH_SMTP="$1" \
 		CONTROLDIR=$cntrldir \
 	/usr/sbin/qmail-remote $2 $3 "" 10 $user@$HOSTNAME >> $logdir/qremote/qmail-remote.log
-	check_mail
+	check_mail $maildir
 	if [ $? -eq 0 ] ; then
 		last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $1:")
 		if [ $? -eq 0 ] ; then
@@ -1233,13 +1233,109 @@ function do_post_handle()
 	done
 }
 
+function do_qmail_inject()
+{
+	# $1 - user
+	# $2 - From
+	# $3 - To
+	(
+	echo "From: $2"
+	echo "To: $3"
+	echo "Subject: Test"
+	echo "Date: $(date -R)"
+	echo
+	echo "Test message"
+	) | sudo $setuidgid -g qcerts $1 env - \
+		CONTROLDIR=$cntrldir \
+		QUEUEDIR=$qmaildir/queue \
+		QMAILQUEUE=$qmail_queue \
+		BIGTODO=0 \
+		CONFSPLIT=23 \
+		$qmail_inject -f$2 $3
+	if [ $? -eq 0 ] ; then
+		return 0
+	else
+		exit 1
+	fi
+}
+
+function do_valias()
+{
+	echo "Starting valias tests"
+	destdir1=$(envdir $servicedir/smtpd/variables vuserinfo -d $1 | awk '{print $3}')
+	destdir2=$(envdir $servicedir/smtpd/variables vuserinfo -d $2 | awk '{print $3}')
+	env - \
+		PATH=/usr/bin:/usr/sbin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		DOMAINDIR=$qmaildir \
+	valias -i "&$2" $1
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		printf "  testing command valias insert succeeded\n"
+	else
+		printf "  testing command valias insert failed\n"
+		exit 1
+	fi
+	do_qmail_inject $user $user@$HOSTNAME $1
+	check_mail $destdir2/Maildir
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing valias forwarding succeeded"
+	else
+		echo "  testing valias forwarding failed"
+		exit 1
+	fi
+	env - \
+		PATH=/usr/bin:/usr/sbin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		DOMAINDIR=$qmaildir \
+	valias -u "&$2" -i "$maildir/" $1
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		printf "  testing command valias update succeeded\n"
+	else
+		printf "  testing command valias update failed\n"
+		exit 1
+	fi
+	sudo chown -R $INUID:$INGID $maildir
+	do_qmail_inject $user $user@$HOSTNAME $1
+	sleep $sleep_int
+	sudo chown -R $MYUID:$MYUID $maildir
+	check_mail $maildir
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing valias maildir delivery succeeded"
+	else
+		echo "  testing valias maildir delivery failed"
+		exit 1
+	fi
+
+	env - \
+		PATH=/usr/bin:/usr/sbin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		DOMAINDIR=$qmaildir \
+	valias -d "&$2" $1
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		printf "  testing command valias delete succeeded\n"
+	else
+		printf "  testing command valias delete failed\n"
+		exit 1
+	fi
+}
+
 function do_cleanup_failed()
 {
 	if [ -f $testdir/cleanup.done ] ; then
 		rm -f $testdir/cleanup.done
-	else
-		do_cleanup 1
 	fi
+	do_cleanup 1
 }
 
 function do_cleanup()
@@ -1259,7 +1355,9 @@ function do_cleanup()
 	fi
 	sudo /bin/rm -rf $qmaildir/inquery
 	sudo /bin/rm -rf $testdir/run
-	sudo /bin/rm -rf $testdir/mail
+	if [ $# -eq 0 ] ; then
+		sudo /bin/rm -rf $testdir/mail
+	fi
 	sudo /bin/rm -rf $testdir/$user
 	sudo /bin/rm -rf $testdir/inquery
 	sudo /bin/rm  -f $testdir/tcpclient.imap $testdir/tcpclient.pop3 $testdir/post_handle
@@ -1344,7 +1442,7 @@ tcount=$(expr $tcount + 3)
 printf "  testing command tcpserver non-encrypted succeeded\n"
 printf "  testing command tcpclient non-encrypted succeeded\n"
 printf "  testing command tcpclient encrypted     succeeded\n"
-
+do_valias $testuser1 $testuser2
 delete_domain $domain1
 do_post_handle $domain1 pass $domain2 $testuser3 $testuser4 $domain3
 

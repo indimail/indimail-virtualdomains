@@ -1,5 +1,8 @@
 /*
  * $Log: valias.c,v $
+ * Revision 1.6  2023-03-26 22:37:08+05:30  Cprogrammer
+ * exit with return value valias function
+ *
  * Revision 1.5  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -21,7 +24,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias.c,v 1.5 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valias.c,v 1.6 2023-03-26 22:37:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -63,7 +66,7 @@ static char    *usage =
 	"options: -v ( print version number )\n"
 	"         -v ( verbose )\n"
 	"         -s ( show aliases )\n"
-	"         -s ( track aliases )\n"
+	"         -S ( track aliases )\n"
 	"         -d alias_line (delete alias line)\n"
 	"         -i alias_line (insert alias line)\n"
 	"         -u old_alias_line -i new_alias_line (update alias line)"
@@ -143,8 +146,7 @@ main(int argc, char **argv)
 	char           *email, *aliasline, *oaliasline, *tmpalias_line;
 	char            strnum[FMT_ULONG];
 	static stralloc alias = {0}, domain = {0};
-	int             aliasaction, ignore_mailstore;
-
+	int             aliasaction, ignore_mailstore, ret;
 
 	if (get_options(argc, argv, &email, &alias, &domain, &aliasline, &oaliasline, &aliasaction, &ignore_mailstore))
 		return (1);
@@ -170,13 +172,13 @@ main(int argc, char **argv)
 		}
 		break;
 	case VALIAS_INSERT:
-			valias_insert(alias.s, domain.s, aliasline, ignore_mailstore);
+			ret = valias_insert(alias.s, domain.s, aliasline, ignore_mailstore);
 		break;
 	case VALIAS_DELETE:
-			valias_delete(alias.s, domain.s, aliasline);
+			ret = valias_delete(alias.s, domain.s, aliasline);
 		break;
 	case VALIAS_UPDATE:
-			valias_update(alias.s, domain.s, oaliasline, aliasline);
+			ret = valias_update(alias.s, domain.s, oaliasline, aliasline);
 		break;
 	case VALIAS_TRACK:
 			for(;;) {
