@@ -20,4 +20,4 @@
 #
 #
 10 9 * * * root @prefix@/sbin/svctool --backup=@basepath@/backup --mysqlPrefix=@mysql_prefix@ --servicedir=@servicedir@
-5 01 * * * root /usr/bin/logrotate --force @sysconfdir@/logrotate.mysql
+5 01 * * * root /usr/sbin/logrotate --force @sysconfdir@/logrotate.mysql
