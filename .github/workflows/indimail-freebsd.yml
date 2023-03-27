@@ -8,6 +8,7 @@ on:
       - '**/catChangeLog'
       - .github/workflows/indimail-freebsd.yml
       - '!**/indimail-x/debian/*'
+      - '!**/indimail-x/tests/*'
       - '!**/*.9'
       - '!**/*.8'
       - '!**/*.5'
