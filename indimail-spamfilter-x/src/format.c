@@ -379,7 +379,10 @@ char *convert_format_to_string(char *buff, size_t size, const char *format)
 		break;
 #endif
 	    case 'r':		/* r - run type (s, n, S, or N) - two parts (reg/unreg)*/
-		snprintf( temp, sizeof(temp), "%s%s", reg, unreg );
+		if (*reg || *unreg)
+		    snprintf( temp, sizeof(temp), "%s%s", reg, unreg );
+		else
+		    strcpy(temp, "No");
 		buff += format_string(buff, temp, 0, 0, 0, end);
 		break;
 	    case 'u':		/* u - user name */
