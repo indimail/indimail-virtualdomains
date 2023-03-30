@@ -1,6 +1,6 @@
 /*
  * $Log: valias.c,v $
- * Revision 1.6  2023-03-26 22:37:08+05:30  Cprogrammer
+ * Revision 1.6  2023-03-30 18:43:24+05:30  Cprogrammer
  * exit with return value valias function
  *
  * Revision 1.5  2023-01-22 10:40:03+05:30  Cprogrammer
@@ -24,7 +24,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias.c,v 1.6 2023-03-26 22:37:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valias.c,v 1.6 2023-03-30 18:43:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -170,30 +170,33 @@ main(int argc, char **argv)
 			}
 			flush("valias");
 		}
+		ret = 0;
 		break;
 	case VALIAS_INSERT:
-			ret = valias_insert(alias.s, domain.s, aliasline, ignore_mailstore);
+		ret = valias_insert(alias.s, domain.s, aliasline, ignore_mailstore);
 		break;
 	case VALIAS_DELETE:
-			ret = valias_delete(alias.s, domain.s, aliasline);
+		ret = valias_delete(alias.s, domain.s, aliasline);
 		break;
 	case VALIAS_UPDATE:
-			ret = valias_update(alias.s, domain.s, oaliasline, aliasline);
+		ret = valias_update(alias.s, domain.s, oaliasline, aliasline);
 		break;
 	case VALIAS_TRACK:
-			for(;;) {
-				if (valias_track(email, &alias, &domain))
-					break;
-				subprintfe(subfdout, "valias", "%s@%s -> %s\n", alias.s, domain.s, email);
-				flush("valias");
-			}
+		for(;;) {
+			if (valias_track(email, &alias, &domain))
+				break;
+			subprintfe(subfdout, "valias", "%s@%s -> %s\n", alias.s, domain.s, email);
+			flush("valias");
+		}
+		ret = 0;
 		break;
 	default:
+		ret = 1;
 		strnum[fmt_uint(strnum, (unsigned int) aliasaction)] = 0;
 		strerr_warn3("valias: error, Alias Action [", strnum, "is invalid", 0);
 		break;
 	}
-	return (0);
+	return (ret);
 }
 #else
 #include <strerr.h>
