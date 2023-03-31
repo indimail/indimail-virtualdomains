@@ -172,7 +172,7 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 	fi
 	set +e
 	for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
-		qmail-poppass.106 proxy-imapd.4143 \
+		qmail-poppass.106 qmail-logfifo proxy-imapd.4143 \
 		proxy-imapd-ssl.9143 proxy-pop3d.4110 proxy-pop3d-ssl.9110
 	do
 		if [ ! -d ${servicedir}/$i ] ; then

@@ -1,112 +1,6 @@
 #!/bin/sh
-# $Log: ilocal_upgrade.sh,v $
-# Revision 2.35  2022-08-05 21:03:55+05:30  Cprogrammer
-# run schema update
 #
-# Revision 2.34  2021-08-20 23:17:48+05:30  Cprogrammer
-# fixes for non-existend dir/files
-#
-# Revision 2.33  2020-06-24 22:23:19+05:30  Cprogrammer
-# fixed setting supplementary groups
-#
-# Revision 2.32  2020-06-17 11:14:54+05:30  Cprogrammer
-# removed posttrans to avoid duplicate run of ilocal_upgrade.sh
-#
-# Revision 2.31  2020-06-09 11:32:46+05:30  Cprogrammer
-# fixed typo
-#
-# Revision 2.30  2020-05-26 11:22:18+05:30  Cprogrammer
-# fixed permission of spamignore
-#
-# Revision 2.29  2020-05-25 23:05:25+05:30  Cprogrammer
-# upgrade pwdlookup, qmail-logifo services and nssd config file
-#
-# Revision 2.28  2020-04-28 10:57:21+05:30  Cprogrammer
-# disable mysqld service if indimail database gets created successfully
-#
-# Revision 2.27  2020-04-27 21:59:16+05:30  Cprogrammer
-# added install routine
-#
-# Revision 2.26  2019-10-01 14:08:25+05:30  Cprogrammer
-# use svctool to update libindimail, mysql_lib control files
-#
-# Revision 2.25  2019-06-17 18:15:33+05:30  Cprogrammer
-# update with mysql_lib control file with either libmsyqlclient or libmariadbclient
-#
-# Revision 2.24  2019-06-07 19:21:49+05:30  Cprogrammer
-# set mysql_lib control file
-#
-# Revision 2.23  2018-03-25 22:19:07+05:30  Cprogrammer
-# removed chmod of variables directory as it is redundant now with read perm for indimail group
-#
-# Revision 2.22  2018-02-18 22:17:58+05:30  Cprogrammer
-# pass argument to do_post_upgrade()
-#
-# Revision 2.21  2018-02-18 21:42:17+05:30  Cprogrammer
-# update cron entries
-#
-# Revision 2.20  2018-01-09 12:11:40+05:30  Cprogrammer
-# removed indimail-mta specific code
-#
-# Revision 2.19  2018-01-08 10:52:23+05:30  Cprogrammer
-# fixed typo
-#
-# Revision 2.18  2017-12-30 21:50:01+05:30  Cprogrammer
-# create environment variable DISABLE_PLUGIN
-#
-# Revision 2.17  2017-12-26 23:34:03+05:30  Cprogrammer
-# update control files only if changed
-#
-# Revision 2.16  2017-11-22 22:37:32+05:30  Cprogrammer
-# logdir changed to /var/log/svc
-#
-# Revision 2.15  2017-11-06 21:45:42+05:30  Cprogrammer
-# fixed upgrade script for posttrans
-#
-# Revision 2.14  2017-10-22 19:03:41+05:30  Cprogrammer
-# overwrite LOGFILTER only if it is already set
-#
-# Revision 2.13  2017-10-22 18:57:27+05:30  Cprogrammer
-# fixed rcs id
-#
-# Revision 2.12  2017-10-22 15:27:23+05:30  Cprogrammer
-# remove redundant indimail.service during upgrade
-#
-# Revision 2.11  2017-04-21 10:24:04+05:30  Cprogrammer
-# run upgrade script only on post
-#
-# Revision 2.10  2017-04-16 19:55:04+05:30  Cprogrammer
-# changed qmail-greyd path to /usr/sbin
-#
-# Revision 2.9  2017-04-14 00:16:35+05:30  Cprogrammer
-# added permissions for roundcube to accces certs, spamignore
-#
-# Revision 2.8  2017-04-11 03:44:57+05:30  Cprogrammer
-# documented steps involved in upgrade
-#
-# Revision 2.7  2017-04-05 14:11:14+05:30  Cprogrammer
-# upgraded soft mem to 536870912
-#
-# Revision 2.6  2017-04-03 15:56:50+05:30  Cprogrammer
-# create FIFODIR
-#
-# Revision 2.5  2017-03-31 21:17:37+05:30  Cprogrammer
-# fix DEFAULT_HOST, QMAILDEFAULTHOST, envnoathost, defaulthost settings
-#
-# Revision 2.4  2017-03-30 23:29:04+05:30  Cprogrammer
-# added chgrp
-#
-# Revision 2.3  2017-03-29 19:31:59+05:30  Cprogrammer
-# added rsa2048.pem, dh2048.pem
-#
-# Revision 2.2  2017-03-29 14:45:42+05:30  Cprogrammer
-# fixed upgrade for v2.1
-#
-# Revision 2.1  2017-03-28 19:21:18+05:30  Cprogrammer
-# upgrade script for indimail 2.1
-#
-#
-# $Id: ilocal_upgrade.sh,v 2.35 2022-08-05 21:03:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.sh,v 2.36 2023-03-31 08:12:20+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -126,7 +20,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.35 2022-08-05 21:03:55+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.36 2023-03-31 08:12:20+05:30 Cprogrammer Exp mbhangui $"
 if [ -d /var/indimail/mysqldb/data/indimail ] ; then
 	if [ ! -f /service/mysql.3306/down ] ; then
 		for i in mysqld mariadb mysql
@@ -145,7 +39,7 @@ fi
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.sh,v 2.35 2022-08-05 21:03:55+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.sh,v 2.36 2023-03-31 08:12:20+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in /service/qmail-imapd* /service/qmail-pop3d* /service/proxy-imapd* /service/proxy-pop3d*
 do
@@ -256,6 +150,16 @@ if [ -f /etc/indimail/cronlist.i -a -d /etc/cron.d ] ; then
 	fi
 fi
 
+if [ -d /var/indimail/mysqld/ssl ] ; then
+	cd /var/indimail/mysqld/ssl
+	chown mysql:indimail /var/indimail/mysqld/ssl
+	chown mysql:indimail ca-key.pem ca.pem server-key.pem server-cert.pem \
+		client-key.pem client-cert.pem private_key.pem public_key.pem
+	$chmod 600 ca-key.pem server-key.pem private_key.pem server-key.pem
+	$chmod 640 client-cert.pem server-cert.pem ca.pem client-key.pem
+	$chmod 644 public_key.pem server_cert.pem
+fi
+
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
 /usr/sbin/svctool --fixsharedlibs
@@ -271,3 +175,113 @@ case $1 in
 	do_install $1
 	;;
 esac
+#
+# $Log: ilocal_upgrade.sh,v $
+# Revision 2.36  2023-03-31 08:12:20+05:30  Cprogrammer
+# fix permissions for mariadb certs
+#
+# Revision 2.35  2022-08-05 21:03:55+05:30  Cprogrammer
+# run schema update
+#
+# Revision 2.34  2021-08-20 23:17:48+05:30  Cprogrammer
+# fixes for non-existend dir/files
+#
+# Revision 2.33  2020-06-24 22:23:19+05:30  Cprogrammer
+# fixed setting supplementary groups
+#
+# Revision 2.32  2020-06-17 11:14:54+05:30  Cprogrammer
+# removed posttrans to avoid duplicate run of ilocal_upgrade.sh
+#
+# Revision 2.31  2020-06-09 11:32:46+05:30  Cprogrammer
+# fixed typo
+#
+# Revision 2.30  2020-05-26 11:22:18+05:30  Cprogrammer
+# fixed permission of spamignore
+#
+# Revision 2.29  2020-05-25 23:05:25+05:30  Cprogrammer
+# upgrade pwdlookup, qmail-logifo services and nssd config file
+#
+# Revision 2.28  2020-04-28 10:57:21+05:30  Cprogrammer
+# disable mysqld service if indimail database gets created successfully
+#
+# Revision 2.27  2020-04-27 21:59:16+05:30  Cprogrammer
+# added install routine
+#
+# Revision 2.26  2019-10-01 14:08:25+05:30  Cprogrammer
+# use svctool to update libindimail, mysql_lib control files
+#
+# Revision 2.25  2019-06-17 18:15:33+05:30  Cprogrammer
+# update with mysql_lib control file with either libmsyqlclient or libmariadbclient
+#
+# Revision 2.24  2019-06-07 19:21:49+05:30  Cprogrammer
+# set mysql_lib control file
+#
+# Revision 2.23  2018-03-25 22:19:07+05:30  Cprogrammer
+# removed chmod of variables directory as it is redundant now with read perm for indimail group
+#
+# Revision 2.22  2018-02-18 22:17:58+05:30  Cprogrammer
+# pass argument to do_post_upgrade()
+#
+# Revision 2.21  2018-02-18 21:42:17+05:30  Cprogrammer
+# update cron entries
+#
+# Revision 2.20  2018-01-09 12:11:40+05:30  Cprogrammer
+# removed indimail-mta specific code
+#
+# Revision 2.19  2018-01-08 10:52:23+05:30  Cprogrammer
+# fixed typo
+#
+# Revision 2.18  2017-12-30 21:50:01+05:30  Cprogrammer
+# create environment variable DISABLE_PLUGIN
+#
+# Revision 2.17  2017-12-26 23:34:03+05:30  Cprogrammer
+# update control files only if changed
+#
+# Revision 2.16  2017-11-22 22:37:32+05:30  Cprogrammer
+# logdir changed to /var/log/svc
+#
+# Revision 2.15  2017-11-06 21:45:42+05:30  Cprogrammer
+# fixed upgrade script for posttrans
+#
+# Revision 2.14  2017-10-22 19:03:41+05:30  Cprogrammer
+# overwrite LOGFILTER only if it is already set
+#
+# Revision 2.13  2017-10-22 18:57:27+05:30  Cprogrammer
+# fixed rcs id
+#
+# Revision 2.12  2017-10-22 15:27:23+05:30  Cprogrammer
+# remove redundant indimail.service during upgrade
+#
+# Revision 2.11  2017-04-21 10:24:04+05:30  Cprogrammer
+# run upgrade script only on post
+#
+# Revision 2.10  2017-04-16 19:55:04+05:30  Cprogrammer
+# changed qmail-greyd path to /usr/sbin
+#
+# Revision 2.9  2017-04-14 00:16:35+05:30  Cprogrammer
+# added permissions for roundcube to accces certs, spamignore
+#
+# Revision 2.8  2017-04-11 03:44:57+05:30  Cprogrammer
+# documented steps involved in upgrade
+#
+# Revision 2.7  2017-04-05 14:11:14+05:30  Cprogrammer
+# upgraded soft mem to 536870912
+#
+# Revision 2.6  2017-04-03 15:56:50+05:30  Cprogrammer
+# create FIFODIR
+#
+# Revision 2.5  2017-03-31 21:17:37+05:30  Cprogrammer
+# fix DEFAULT_HOST, QMAILDEFAULTHOST, envnoathost, defaulthost settings
+#
+# Revision 2.4  2017-03-30 23:29:04+05:30  Cprogrammer
+# added chgrp
+#
+# Revision 2.3  2017-03-29 19:31:59+05:30  Cprogrammer
+# added rsa2048.pem, dh2048.pem
+#
+# Revision 2.2  2017-03-29 14:45:42+05:30  Cprogrammer
+# fixed upgrade for v2.1
+#
+# Revision 2.1  2017-03-28 19:21:18+05:30  Cprogrammer
+# upgrade script for indimail 2.1
+#
