@@ -104,7 +104,7 @@ Universal
 cdbs debhelper gcc g++ automake autoconf libtool
 libldap2-dev libssl-dev libtirpc-dev
 mime-support m4 gawk openssl procps file sed bison
-findutils diffutils readline libreadline-dev xz gzip
+findutils diffutils readline-common libreadline-dev xz gzip
 binutils coreutils grep flex libncurses5-dev libncurses5
 libpam0g-dev libpcre2-dev libpcre3-dev libgdbm-dev libdb-dev libgcrypt20-dev
 python libidn2-0-dev libgsasl7-dev
