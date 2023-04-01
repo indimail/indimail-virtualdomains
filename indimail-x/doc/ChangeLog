@@ -4,7 +4,10 @@ Release 3.4.3-1.1 Start 26/03/2023 End --/--/----
 01. deliver_mail.c, ismaildup.c, postdel.c, vbulletin.c, vfilter.c: fixed code
     using wait_handler
 02. valias.c: exit with return value valias function
-03. vaiias_insert.c, valias_update: return 0 if rows updated
+03. valias_insert.c, valias_update: return 0 if rows updated
+- 01/04/2023
+04. RemoteBulkMail.c, dbload.c, findhost.c, iopen.c: display mysql error for
+    mysql_options()
 
 * Sat Mar 25 2024 08:40:00 +0000 Manvendra Bhangui <indimail-virtualdomains@indimailorg> 3.4.3-1.1%{?dist}
 Release 3.4.3-1.1 Start 13/02/2023 End 25/03/2023
