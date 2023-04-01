@@ -49,9 +49,15 @@ build-stamp:
 	#
 	$(MAKE) -s
 	${rm} -f $(DESTDIR)$(prefix)/$(libd)/*.la
-	if [ -f indimail.postinst -a -d /usr/src/packages/SOURCES.DEB ] ; then \
-		echo setting "build_on_obs=1"; \
-		sed -i 's{build_on_obs=.*{build_on_obs=1{' indimail.postinst; \
+	if [ -d /usr/src/packages/SOURCES.DEB ] ; then \
+		if [ -f indimail.postinst ] ; then
+			echo setting "build_on_obs=1 for indimail.postinst"; \
+			sed -i 's{build_on_obs=.*{build_on_obs=1{' indimail.postinst; \
+		fi
+		if [ -f indimail.postrm ] ; then
+			echo setting "build_on_obs=1 for indimail.postrm"; \
+			sed -i 's{build_on_obs=.*{build_on_obs=1{' indimail.postrm; \
+		fi
 	fi
 	touch build-stamp
 

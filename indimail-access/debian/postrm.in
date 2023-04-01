@@ -79,7 +79,8 @@ if [ $nocourierimap -eq 0 ] ; then
 	echo "removing startup services"
 	for i in qmail-imapd.143 qmail-imapd-ssl.993 \
 		qmail-pop3d.110 qmail-pop3d-ssl.995 \
-		qmail-imapd.4143 qmail-pop3d.4110
+		proxy-imapd.4143 proxy-imapd-ssl.9143 \
+		proxy-pop3d.4110 proxy-pop3d-ssl.9110
 	do
 		if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
 			touch ${servicedir}/$i/down
@@ -90,7 +91,7 @@ if [ $nocourierimap -eq 0 ] ; then
 			svc -dx ${servicedir}/$i/log >/dev/null 2>&1 || true
 		fi
 		if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
-			${rm} -f ${servicedir}/$i || true
+			${rm} -rf ${servicedir}/$i || true
 		fi
 	done
 
@@ -140,7 +141,9 @@ fi
 
 if [ $nocourierimap -eq 0 ] ; then
 	for i in fetchmail imapd.143 imapd-ssl.993 \
-		pop3d.110 pop3d-ssl.995
+		pop3d.110 pop3d-ssl.995 \
+		proxyIMAP.4143 proxyIMAP.9143 \
+		proxyPOP3.4110 proxyPOP3.9110
 	do
 		${rm} -rf $log_dir/$i
 	done

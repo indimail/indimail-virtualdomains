@@ -30,6 +30,7 @@ logdir=@logdir@
 rm=/bin/rm
 rmdir=/bin/rmdir
 mv=/bin/mv
+build_on_obs=0
 ####################################
 noproxy=0
 
