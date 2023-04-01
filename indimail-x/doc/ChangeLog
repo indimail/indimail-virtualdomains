@@ -8,6 +8,7 @@ Release 3.4.3-1.1 Start 26/03/2023 End --/--/----
 - 01/04/2023
 04. RemoteBulkMail.c, dbload.c, findhost.c, iopen.c: display mysql error for
     mysql_options()
+05. load_mysql.c: refactored getlibObject function
 
 * Sat Mar 25 2024 08:40:00 +0000 Manvendra Bhangui <indimail-virtualdomains@indimailorg> 3.4.3-1.1%{?dist}
 Release 3.4.3-1.1 Start 13/02/2023 End 25/03/2023

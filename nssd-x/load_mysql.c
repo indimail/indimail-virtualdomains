@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.3  2023-04-01 19:49:39+05:30  Cprogrammer
+ * refactored getlibObject function
+ *
  * Revision 1.2  2022-11-23 15:49:21+05:30  Cprogrammer
  * renamed mysql_lib to libmysql
  *
@@ -17,7 +20,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: load_mysql.c,v 1.2 2022-11-23 15:49:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: load_mysql.c,v 1.3 2023-04-01 19:49:39+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef DLOPEN_LIBMYSQLCLIENT
@@ -239,26 +242,19 @@ getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 		*handle = loadLibrary(handle, libenv, 0, errstr);
 	if (!*handle)
 		return ((void *) 0);
-	i = dlsym(*handle, plugin_symb);
-	if (!i && (!stralloc_copyb(&errbuf, "getlibObject: ", 14) ||
-			!stralloc_cats(&errbuf, plugin_symb) ||
-			!stralloc_catb(&errbuf, ": ", 2)))
-	{
-		if (errstr)
+	if (!(i = dlsym(*handle, plugin_symb)) && errstr) {
+		if (!stralloc_copyb(&errbuf, "getlibObject: ", 14) ||
+				!stralloc_cats(&errbuf, plugin_symb))
 			*errstr = memerr;
-	}
-	if (!i && (ptr = dlerror()) && !stralloc_cats(&errbuf, ptr)) {
-		if (errstr)
+		if ((ptr = dlerror())) {
+			if (!stralloc_catb(&errbuf, ": ", 2) ||
+					!stralloc_cats(&errbuf, ptr))
+				*errstr = memerr;
+		}
+		if (!stralloc_0(&errbuf))
 			*errstr = memerr;
-	} else
-	if (!i)
-		errbuf.len--; /*- remove trailing colon */
-	if (!i && !stralloc_0(&errbuf)) {
-		if (errstr)
-			*errstr = memerr;
-	}
-	if (!i && errstr)
 		*errstr = errbuf.s;
+	}
 	return (i);
 }
 
