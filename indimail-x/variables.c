@@ -61,7 +61,7 @@ char           *rfc_ids[] = {
 
 /*
  * 0 Hostcntrl Slave/Master
- * 1 Vpopmail
+ * 1 indimail, indibak
  */
 MYSQL           mysql[2];
 MYSQL         **MdaMysql;
