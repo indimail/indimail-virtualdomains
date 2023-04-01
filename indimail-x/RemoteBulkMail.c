@@ -1,5 +1,8 @@
 /*
  * $Log: RemoteBulkMail.c,v $
+ * Revision 1.8  2023-04-01 13:29:27+05:30  Cprogrammer
+ * display mysql error for mysql_options()
+ *
  * Revision 1.7  2021-05-03 12:47:26+05:30  Cprogrammer
  * added missing guarding braces
  *
@@ -49,7 +52,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: RemoteBulkMail.c,v 1.7 2021-05-03 12:47:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: RemoteBulkMail.c,v 1.8 2023-04-01 13:29:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -117,8 +120,8 @@ bulk_host_connect()
 		scan_uint(port, (unsigned int *) &bulk_port);
 		if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags))) {
 			strnum[fmt_uint(strnum, count)] = 0;
-			strerr_warn4("mysql_options(", strnum, "): ",
-				(ptr = error_mysql_options_str(count)) ? ptr : "unknown error", 0);
+			strerr_warn6("mysql_options(", strnum, "): ",
+				(ptr = error_mysql_options_str(count)) ? ptr : "unknown error", ":", in_mysql_error(&mysql[1]), 0);
 			return ((MYSQL *) 0);
 		}
 		/*-

@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 1.14  2023-04-01 13:28:55+05:30  Cprogrammer
+ * display mysql error for mysql_options()
+ *
  * Revision 1.13  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -70,7 +73,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 1.13 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 1.14 2023-04-01 13:28:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static MYSQL   *is_duplicate_conn(MYSQL **, DBINFO **);
@@ -114,7 +117,8 @@ connect_db(DBINFO **ptr, MYSQL **mysqlptr)
 	 */
 	if ((count = set_mysql_options(*mysqlptr, "indimail.cnf", "indimail", &flags))) {
 		strnum1[fmt_uint(strnum1, count)] = 0;
-		strerr_die4x(111, "mysql_options(", strnum1, "): ", (str = error_mysql_options_str(count)) ? str : "unknown error");
+		strerr_die6x(111, "mysql_options(", strnum1, "): ",
+				(str = error_mysql_options_str(count)) ? str : "unknown error", ": ", in_mysql_error(*mysqlptr));
 	}
 	server = ((*ptr)->socket && islocalif((*ptr)->server) ? "localhost" : (*ptr)->server);
 	/*

@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 1.12  2023-04-01 13:29:19+05:30  Cprogrammer
+ * display mysql error for mysql_options()
+ *
  * Revision 1.11  2023-03-20 09:59:14+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -55,7 +58,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 1.11 2023-03-20 09:59:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 1.12 2023-04-01 13:29:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -248,8 +251,8 @@ open_central_db(char *dbhost)
 		 */
 		if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags))) {
 			strnum[fmt_uint(strnum, count)] = 0;
-			strerr_warn4("open_central_db: mysql_options(", strnum, "): ",
-				(ptr = error_mysql_options_str(count)) ? ptr : "unknown error", 0);
+			strerr_warn6("open_central_db: mysql_options(", strnum, "): ",
+				(ptr = error_mysql_options_str(count)) ? ptr : "unknown error", ": ", in_mysql_error(&mysql[0]), 0);
 			return (-1);
 		}
 		/*
@@ -270,8 +273,8 @@ open_central_db(char *dbhost)
 			flags = use_ssl;
 			if ((count = set_mysql_options(&mysql[0], "indimail.cnf", "indimail", &flags))) {
 				strnum[fmt_uint(strnum, count)] = 0;
-				strerr_warn3("open_central_db: mysql_options(", strnum,
-					(ptr = error_mysql_options_str(count)) ? ptr : "unknown error", 0);
+				strerr_warn5("open_central_db: mysql_options(", strnum,
+					(ptr = error_mysql_options_str(count)) ? ptr : "unknown error", ": ", in_mysql_error(&mysql[0]), 0);
 				return (-1);
 			}
 			if (!(in_mysql_real_connect(&mysql[0], cntrl_host.s, mysql_user, mysql_passwd,

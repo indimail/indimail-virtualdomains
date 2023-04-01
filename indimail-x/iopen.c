@@ -1,5 +1,8 @@
 /*
  * $Log: iopen.c,v $
+ * Revision 1.11  2023-04-01 13:29:23+05:30  Cprogrammer
+ * display mysql error for mysql_options()
+ *
  * Revision 1.10  2023-03-20 10:07:51+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -63,7 +66,7 @@
 #include "set_mysql_options.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iopen.c,v 1.10 2023-03-20 10:07:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iopen.c,v 1.11 2023-04-01 13:29:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -200,8 +203,8 @@ iopen(char *dbhost)
 		flags = use_ssl;
 		if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags))) {
 			strnum[fmt_uint(strnum, count)] = 0;
-			strerr_warn4("iopen: mysql_options(", strnum, "): error setting ",
-				(ptr = error_mysql_options_str(count)) ? ptr : "mysql options", 0);
+			strerr_warn6("iopen: mysql_options(", strnum, "): error setting ",
+				(ptr = error_mysql_options_str(count)) ? ptr : "mysql options", ": ", in_mysql_error(&mysql[1]), 0);
 			return (-1);
 		}
 		server = (mysql_socket && islocalif(mysql_host.s) ? "localhost" : mysql_host.s);
@@ -223,8 +226,8 @@ iopen(char *dbhost)
 			flags = use_ssl;
 			if ((count = set_mysql_options(&mysql[1], "indimail.cnf", "indimail", &flags))) {
 				strnum[fmt_uint(strnum, count)] = 0;
-				strerr_warn4("iopen: mysql_options(", strnum, "): error setting ",
-					(ptr = error_mysql_options_str(count)) ? ptr : "mysql options", 0);
+				strerr_warn6("iopen: mysql_options(", strnum, "): error setting ",
+					(ptr = error_mysql_options_str(count)) ? ptr : "mysql options", ": ", in_mysql_error(&mysql[1]), 0);
 				return (-1);
 			}
 			if ((count = in_mysql_errno(&mysql[1])) != ER_DATABASE_NAME) {
