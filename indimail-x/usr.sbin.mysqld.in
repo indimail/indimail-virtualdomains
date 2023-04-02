@@ -7,4 +7,6 @@
   @indimaildir@/mysqldb/logs r,
   @indimaildir@/mysqldb/logs/* rw,
   /tmp/mysqld.3306.pid rw,
+  /run/mysqld/mysqld.3306.pid rw,
+  /var/run/mysqld/mysqld.3306.pid rw,
   /var/run/mysqld/mysqld.sock w,
