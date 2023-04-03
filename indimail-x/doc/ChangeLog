@@ -9,6 +9,7 @@ Release 3.4.4-1.1 Start 26/03/2023 End --/--/----
 04. RemoteBulkMail.c, dbload.c, findhost.c, iopen.c: display mysql error for
     mysql_options()
 05. load_mysql.c: refactored getlibObject function
+- 01/02/2023 - indimail-3.4.3 hotfix
 - 02/04/2023
 06. usr.sbin.mysqld: added /run/mysqld, /var/run/mysqld for apparmor
 
