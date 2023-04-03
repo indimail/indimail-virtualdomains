@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.124 2023-03-24 19:04:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.125 2023-04-03 08:35:30+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1059,17 +1059,17 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   for port in 25 465 587
   do
     if [ -n "$indlib" -a -f "$indlib" ] ; then
-	  t=$(cat %{servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB 2>/dev/null)
-	  if [ ! "$t" = "$indlib" ] ; then
+      t=$(cat %{servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB 2>/dev/null)
+      if [ ! "$t" = "$indlib" ] ; then
         echo $indlib > %{servicedir}/qmail-smtpd.$port/variables/VIRTUAL_PKG_LIB
-	  fi
+      fi
     fi
   done
   if [ -n "$indlib" -a -f "$indlib" ] ; then
-	t=$(cat %{servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB 2>/dev/null)
-	if [ ! "$t" = "$indlib" ] ; then
+    t=$(cat %{servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB 2>/dev/null)
+    if [ ! "$t" = "$indlib" ] ; then
       echo $indlib > %{servicedir}/qmail-send.25/variables/VIRTUAL_PKG_LIB
-	fi
+    fi
   fi
 
   # start indimail services after upgrade
@@ -1081,7 +1081,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     rundir=%{servicedir}
   fi
   for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
-  qmail-poppass.106
+  qmail-poppass.106 qmail-logfifo
   do
     if [ ! -d %{servicedir}/$i ] ; then
       continue
@@ -1496,7 +1496,7 @@ done
 %{__rm} -f %{sysconfdir}/indimail.mrtg.ok %{sysconfdir}/system.mrtg.ok
 echo "removing startup services"
 for i in indisrvr.4000 inlookup.infifo mysql.3306 \
-qmail-poppass.106 mrtg
+qmail-poppass.106 mrtg qmail-logfifo
 do
   if [ -d %{servicedir}/$i -o -L %{servicedir}/$i ] ; then
     touch %{servicedir}/$i/down
