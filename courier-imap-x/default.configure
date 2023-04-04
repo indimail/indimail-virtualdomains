@@ -99,7 +99,7 @@ if [ ! -f conf-release ] ; then
   echo "1.1" > conf-release
 fi
 if [ ! -d m4 -a -f configure.ac -a -f Makefile.am ] ; then
-	mkdir -p m4
+  mkdir -p m4
 fi
 for i in imap authlib maildrop unicode rfc2045 maildir
 do

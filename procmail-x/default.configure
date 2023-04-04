@@ -32,7 +32,7 @@ case "$SYSTEM" in
 esac
 
 if [ ! -d m4 -a -f configure.ac -a -f Makefile.am ] ; then
-	mkdir -p m4
+  mkdir -p m4
 fi
 if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
   autoreconf -fiv
@@ -41,10 +41,21 @@ if [ ! -f conf-release ] ; then
   echo 1.1 > conf-release
 fi
 if [ -f Makefile ] ; then
-	if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
-		echo "Already configured"
-		exit 0
-	fi
+  case "$SYSTEM" in
+    Darwin|FreeBSD)
+    if [ $(stat -f %m configure.ac) -le $(stat -f %m Makefile) ] ; then
+      echo "Already configured"
+      exit 0
+    fi
+    ;;
+
+    *)
+    if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
+      echo "Already configured"
+      exit 0
+    fi
+    ;;
+  esac
 fi
 ./configure --prefix=$prefix --sbindir=$sbindir \
   --mandir=$mandir \

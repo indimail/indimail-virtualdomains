@@ -99,7 +99,7 @@ elif [ -d /usr/local/mysql/include ] ; then
 fi
 
 if [ ! -d m4 -a -f configure.ac -a -f Makefile.am ] ; then
-	mkdir -p m4
+  mkdir -p m4
 fi
 
 if [ $force -eq 1 -o ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in -o ! -f depcomp ] ; then
