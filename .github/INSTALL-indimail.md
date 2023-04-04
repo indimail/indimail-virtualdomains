@@ -193,19 +193,20 @@ For Linux (I presume this should hold good for OS like Solaris too). You will ha
 ```
 % su
 # groupadd -g 555 indimail
-# groupadd -g 556 nofiles
-# groupadd -g 557 qmail
-# groupadd -g 558 qscand
+# groupadd nofiles
+# groupadd qmail
+# groupadd qscand
+# groupadd qcerts
 
 # useradd -M -g indimail -u 555 -d /var/indimail indimail
-# useradd -M -g nofiles  -u 556 -d /var/indimail/alias  -s /bin/false alias
-# useradd -M -g nofiles  -u 557 -d /var/indimail        -s /bin/false qmaild
-# useradd -M -g nofiles  -u 558 -d /var/indimail        -s /bin/false qmaill
-# useradd -M -g nofiles  -u 559 -d /var/indimail        -s /bin/false qmailp
-# useradd -M -g qmail    -u 560 -d /var/indimail        -s /bin/false qmailq
-# useradd -M -g qmail    -u 561 -d /var/indimail        -s /bin/false qmailr
-# useradd -M -g qmail    -u 562 -d /var/indimail        -s /bin/false qmails
-# useradd -M -g qscand   -u 563 -d /var/indimail/qscanq -G qmail,qscand -s /bin/false qscand
+# useradd -M -g nofiles  -d /var/indimail/alias  -s /bin/false alias
+# useradd -M -g nofiles  -d /var/indimail        -s /bin/false -G qcerts,nofiles qmaild
+# useradd -M -g nofiles  -d /var/indimail        -s /bin/false                   qmaill
+# useradd -M -g nofiles  -d /var/indimail        -s /bin/false                   qmailp
+# useradd -M -g qmail    -d /var/indimail        -s /bin/false                   qmailq
+# useradd -M -g qmail    -d /var/indimail        -s /bin/false -G qcerts,qmail   qmailr
+# useradd -M -g qmail    -d /var/indimail        -s /bin/false                   qmails
+# useradd -M -g qscand   -d /var/indimail/qscanq -s /bin/false -G qmail,qscand   qscand
 
 on a debian system omit the -M option above
 ```
@@ -235,6 +236,7 @@ For Mac OS X 10.5.4 or greater
 # dscl . -create /Users/qmaild   PrimaryGroupID 556
 # dscl . -create /Users/qmaild   UserShell /bin/bash
 # dscl . -create /Users/qmaild   RealName qmaild
+# dscl . -append /Groups/qcerts GroupMembership qmaild
 
 # dscl . -create /Users/qmaill   UniqueID 558
 # dscl . -create /Users/qmaill   home /var/indimail
@@ -259,6 +261,7 @@ For Mac OS X 10.5.4 or greater
 # dscl . -create /Users/qmailr   PrimaryGroupID 557
 # dscl . -create /Users/qmailr   UserShell /bin/bash
 # dscl . -create /Users/qmailr   RealName qmailr
+# dscl . -append /Groups/qcerts GroupMembership qmailr
 
 # dscl . -create /Users/qmails   UniqueID 562
 # dscl . -create /Users/qmails   home /var/indimail
@@ -292,16 +295,17 @@ for FreeBSD the following would work
 # pw groupadd -n nofiles
 # pw groupadd -n qmail
 # pw groupadd -n qscand
+# pw groupadd -n qcerts
 
-# useradd -m -u 555 -g indimail -d /var/indimail -n indimail
-# useradd -m -g nofiles  -d /var/indimail/alias  -s /bin/false -n alias
-# useradd -m -g nofiles  -d /var/indimail        -s /bin/false -n qmaild
-# useradd -m -g nofiles  -d /var/indimail        -s /bin/false -n qmaill
-# useradd -m -g nofiles  -d /var/indimail        -s /bin/false -n qmailp
-# useradd -m -g qmail    -d /var/indimail        -s /bin/false -n qmailq
-# useradd -m -g qmail    -d /var/indimail        -s /bin/false -n qmailr
-# useradd -m -g qmail    -d /var/indimail        -s /bin/false -n qmails
-# useradd -m -g qscand   -d /var/indimail/qscanq -g qmail,qscand -s /bin/false -n qscand
+# pw useradd -m -u 555 -g indimail -d /var/indimail -n indimail
+# pw useradd -m -g nofiles -G qcerts,nofiles -d /var/indimail        -s /bin/false -n qmaild
+# pw useradd -m -g nofiles                   -d /var/indimail/alias  -s /bin/false -n alias
+# pw useradd -m -g nofiles                   -d /var/indimail        -s /bin/false -n qmaill
+# pw useradd -m -g nofiles                   -d /var/indimail        -s /bin/false -n qmailp
+# pw useradd -m -g qmail                     -d /var/indimail        -s /bin/false -n qmailq
+# pw useradd -m -g qmail   -G qcerts,qmail   -d /var/indimail        -s /bin/false -n qmailr
+# pw useradd -m -g qmail                     -d /var/indimail        -s /bin/false -n qmails
+# pw useradd -m -g qmail   -G qmail,qscand   -d /var/indimail/qscanq -s /bin/false -n qscand
 ```
 
 NOTE: the home directory of indimail must exist before you continue with the installation. You can also create all the users using `svctool --config=users` command
@@ -586,6 +590,9 @@ current working directory /home/local/src/indimail-virtualdomains
 % sudo make -s install-strip [DESTDIR=staging_directory]
 % cd ..
 ```
+
+NOTE: For FreeBSD you will be better off installing bison instead
+of byacc
 
 ```
 ##### STEP 12 ## Optional STEP ## Install nssd ############
