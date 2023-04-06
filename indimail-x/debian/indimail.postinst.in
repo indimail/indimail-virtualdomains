@@ -342,6 +342,7 @@ ${prefix}/sbin/svctool --fifologger=$logfifo --servicedir=${servicedir}
 
 # mrtg service
 if [ -x /usr/bin/mrtg ] ; then
+	${prefix}/sbin/svctool --config=snmpdconf
 	${prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=${servicedir}
 fi
 

@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.125 2023-04-03 08:35:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.126 2023-04-06 22:53:20+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1232,6 +1232,7 @@ fi
 
 # mrtg service
 if [ -x /usr/bin/mrtg ] ; then
+  %{_prefix}/sbin/svctool --config=snmpdconf
   %{_prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=%{servicedir}
 fi
 
