@@ -107,7 +107,7 @@ postdel
 printdir
 proxyimap
 proxypop3
-qmailmrtg7
+qmailmrtg
 resetquota
 socket.lib
 sq_vacation
@@ -226,3 +226,5 @@ inquerytest.8
 ischema
 ischema.1
 depcomp
+ilocal_upgrade.sh
+qmailmrtg.1

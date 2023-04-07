@@ -1,0 +1,88 @@
+.\" vim: tw=75
+.TH qmailmrtg 1
+.SH NAME
+qmailmrtg \- log indimail statistics to MRTG 
+
+.SH SYNOPSYS
+\fBqmailmrtg\fR \fIoptions\fR \fIdir\fR
+
+.SH DESCRIPTION
+\fBqmailmrtg\fR(1) reads multilog output file \fIdir\fR/current and prints
+output suitable for Multi Router Traffic Gropher \fBMRTG\fR(1).
+\fBqmailmrtg\fR was written by Inter7 using the standard C library. This
+version of \fBqmailmrtg\fR has been re-written using libqmail, a library of
+general purpose APIs extracted from Dan Bernstein's qmail, reimplemented
+and covered by the GNU General Public License Version.
+
+Take a look at @sysconfdir@/indimail.mrtg.cfg for usage examples.
+indimail.mrtg.cfg expects \fBqmailmrtg\fR to be in @libexecdir@ directory.
+
+.SH OPTIONS
+.TP 3
+\fBt\fR
+print current and configured concurrency for \fBtcpserver\fR(1)
+
+.TP 3
+\fBa\fR
+print allowed and denied connections by \fBtcpserver\fR(1)
+
+.TP 3
+\fBs\fR
+print success and failure rate per hour from \fBqmail-send\fR(8) mail
+delivery log.
+
+.TP 3
+\fBm\fR
+print success and attempt rate per hour from \fBqmail-send\fR(8) mail
+delivery log. An attempt is calculated as the sum of successful attempt and
+a deferred attempt.
+
+.TP 3
+\fBc\fR
+print remote and local delivery concurrency from \fBqmail-send\fR(8) mail
+delivery log.
+
+.TP 3
+\fBb\fR
+print bits transferred from \fBqmail-send\fR(8) mail delivery log.
+
+.TP 3
+\fBq\fR
+print total messages in queue and total unprocessed messages in queue.
+
+.TP 3
+\fBQ\fR
+print total local messages in queue and total remote messages in queue.
+
+.TP 3
+\fBl\fR
+
+.TP 3
+\fBu\fR
+print total unsubscriptions per hour.
+
+.TP 3
+\fBv\fR
+print total pages viewed and total pages clicked.
+
+.TP 3
+\fBS\fR
+print total ham and total spam messages delivered.
+
+.TP 3
+\fBC\fR
+print  messages found to have virus and messages that failed to be scanned.
+
+.TP 3
+\fBd\fR
+print cached and total requests.
+
+.SH SEE ALSO
+mrtg(1),
+snmpd(8),
+multilog(8),
+tcpserver(8),
+qmail-send(8),
+slowq-send(8),
+qmta-send(8),
+inlookup(8)

@@ -44,7 +44,7 @@ man_MANS=adminclient.8 chowkidar.8 clearopensmtp.8 crc.1 crcdiff.1 \
 	IndiMail.7 indisrvr.8 initsvc.1 inlookup.8 InLookup.8 inquerytest.8 \
 	install_tables.8 ipchange.8 ismaildup.1 login_tasks.3 \
 	mgmtpass.8 osh.8 postdel.8 printdir.1 proxyimap.8 proxypop3.8 \
-	resetquota.8 updaterules.8 vacation.8 tcplookup.8 \
+	resetquota.8 updaterules.8 vacation.8 tcplookup.8 qmailmrtg.1 \
 	vaddaliasdomain.1 vadddomain.1 vadduser.1 valias.1 vatrn.1 \
 	vbulletin.1 vcalias.8 vcaliasrev.8 vcfilter.1 vchkpass.8 vdeldomain.1 \
 	vdelivermail.8 vdeloldusers.8 vdeluser.1 vdominfo.1 vfilter.8 \
@@ -182,7 +182,7 @@ indimailsbin_PROGRAMS = inlookup ischema tcplookup vdelivermail clearopensmtp \
 	ipchange adminclient indisrvr vdeloldusers vfstab \
 	osh chowkidar vpurge
 
-indimaillibexec_PROGRAMS = qmailmrtg7 updatefile
+indimaillibexec_PROGRAMS = qmailmrtg updatefile
 indimaillibexec_SCRIPTS = mailzipper overquota.sh controlsync cputime \
 	myslave bogofilter-qfe iupgrade.sh ilocal_upgrade.sh
 
@@ -220,6 +220,10 @@ MOSTLYCLEANFILES=vcaliasrev myslave controlsync bogofilter-qfe \
 	vrenamedomain_handle login_tasks.3 authgeneric usr.sbin.mysqld usr.sbin.clamd \
 	vmoduser_handle vmoduser.1 usr.bin.freshclam indimail.mod indimail.pp \
 	indimail_config.h debian/Makefile archpkg*.install
+
+qmailmrtg_SOURCES = qmailmrtg.c
+qmailmrtg_LDADD = libindimail.la $(LIB_QMAIL)
+qmailmrtg_DEPENDENCIES = libindimail.la
 
 vadddomain_SOURCES = vadddomain.c
 vadddomain_LDADD = isvalid_domain.lo libindimail.la $(LIB_QMAIL)
@@ -557,6 +561,8 @@ indimail.mrtg.cfg: indimail.mrtg.cfg.in
 	$(edit) $@.in > $@
 overquota.sh: overquota.sh.in
 	$(edit) $@.in > $@
+ilocal_upgrade.sh: ilocal_upgrade.in
+	$(edit) ilocal_upgrade.in > $@
 authgeneric: authgeneric.in
 	$(edit) $@.in > $@
 bogofilter-qfe: bogofilter-qfe.in
@@ -654,9 +660,10 @@ ischema.1: ischema.9
 	$(editman) ischema.9 > $@
 indimail.7: indimail.9
 	$(editman) indimail.9 > $@
-
 inquerytest.8: inquerytest.9
 	$(editman) inquerytest.9 > $@
+qmailmrtg.1: qmailmrtg.9
+	$(editman) qmailmrtg.9 > $@
 
 mytcplookup.c: tcplookup.c
 	cp tcplookup.c mytcplookup.c

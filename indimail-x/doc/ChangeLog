@@ -12,6 +12,9 @@ Release 3.4.4-1.1 Start 26/03/2023 End --/--/----
 - 01/02/2023 - indimail-3.4.3 hotfix
 - 02/04/2023
 06. usr.sbin.mysqld: added /run/mysqld, /var/run/mysqld for apparmor
+- 07/04/2023
+07. qmailmrtg.c: refactored to use libqmail
+08. renamed qmailmrtg7 to qmailmrtg
 
 * Sat Mar 25 2024 08:40:00 +0000 Manvendra Bhangui <indimail-virtualdomains@indimailorg> 3.4.3-1.1%{?dist}
 Release 3.4.3-1.1 Start 13/02/2023 End 25/03/2023
