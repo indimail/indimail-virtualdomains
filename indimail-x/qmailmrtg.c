@@ -1,5 +1,8 @@
 /*
  * $Log: qmailmrtg.c,v $
+ * Revision 1.3  2023-04-07 22:32:47+05:30  Cprogrammer
+ * converted queue messages to messages/hour
+ *
  * Revision 1.2  2023-04-07 22:24:37+05:30  Cprogrammer
  * refactored to use libqmail
  *
@@ -49,7 +52,7 @@
 #include <scan.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg.c,v 1.2 2023-04-07 22:24:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg.c,v 1.3 2023-04-07 22:32:47+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "qmailmrtg: fatal: "
@@ -382,7 +385,7 @@ main(int argc, char **argv)
 		qsprintf(&tmp, "%s/nqueue/%s", thedir.s, TheType == 'Q' ? "local" : "todo");
 		max_files = 0;
 		todo_count += get_counts(tmp.s);
-		subprintf(subfdoutsmall, "%d\n%d\n\n\n", mess_count, todo_count);
+		subprintf(subfdoutsmall, "%d\n%d\n\n\n", mess_count * 12, todo_count * 12);
 		substdio_flush(subfdoutsmall);
 		return (0);
 	}
