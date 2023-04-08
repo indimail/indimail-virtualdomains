@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: ilocal_upgrade.in,v 2.37 2023-04-07 20:39:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.in,v 2.38 2023-04-09 00:00:23+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -21,7 +21,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.in,v 2.37 2023-04-07 20:39:48+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.in,v 2.38 2023-04-09 00:00:23+05:30 Cprogrammer Exp mbhangui $"
 if [ -d @indimaildir@/mysqldb/data/indimail ] ; then
 	if [ ! -f @servicedir@/mysql.3306/down ] ; then
 		for i in mysqld mariadb mysql
@@ -40,7 +40,7 @@ fi
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.in,v 2.37 2023-04-07 20:39:48+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.in,v 2.38 2023-04-09 00:00:23+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in @servicedir@/qmail-imapd* @servicedir@/qmail-pop3d* @servicedir@/proxy-imapd* @servicedir@/proxy-pop3d*
 do
@@ -167,7 +167,7 @@ fi
 if [ -f @servicedir@/mrtg@sysconfdir@.mrtg.cfg ] ; then
 	grep qmailmrtg7 @servicedir@/mrtg@sysconfdir@.mrtg.cfg >/dev/null 2>&1
 	if [ $? -eq 0 ] ; then
-		sed -i 's}qmailmrtg7}qmailmrtg}g' @servicedir@/mrtg@sysconfdir@.mrtg.cfg
+		svctool --refreshsvc=/service/mrtg --force
 	fi
 fi
 
@@ -188,6 +188,9 @@ case $1 in
 esac
 #
 # $Log: ilocal_upgrade.in,v $
+# Revision 2.38  2023-04-09 00:00:23+05:30  Cprogrammer
+# refresh mrtg service during upgrade if using old qmailmrtg
+#
 # Revision 2.37  2023-04-07 20:39:48+05:30  Cprogrammer
 # fix indimail.mrtg.cfg
 #

@@ -1,5 +1,8 @@
 /*
  * $Log: qmailmrtg.c,v $
+ * Revision 1.4  2023-04-08 23:55:32+05:30  Cprogrammer
+ * refactored code to print service uptime and status
+ *
  * Revision 1.3  2023-04-07 22:32:47+05:30  Cprogrammer
  * converted queue messages to messages/hour
  *
@@ -40,6 +43,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <libgen.h>
 #include <substdio.h>
 #include <subfd.h>
 #include <qprintf.h>
@@ -48,31 +52,30 @@
 #include <open.h>
 #include <getln.h>
 #include <str.h>
-#include <env.h>
+#include <error.h>
 #include <scan.h>
+#include <sgetopt.h>
+#include <fmt.h>
+#include <tai.h>
+#include <no_of_days.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg.c,v 1.3 2023-04-07 22:32:47+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg.c,v 1.4 2023-04-08 23:55:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "qmailmrtg: fatal: "
 #define WARN  "qmailmrtg: warn: "
 
-int             BigTodo=1, ConfSplit=151, cconcurrency, tconcurrency,
-				tallow, tdeny, ttotal, success, failure, deferral, unsub,
-				local, remote, max_files, clicked, viewed, cfound, cerror,
-				tspam, tclean, tcached, tquery, mess_count, todo_count;
+int             BigTodo=1, ConfSplit=151, debug;
+unsigned long   cconcurrency, tconcurrency, tallow, tdeny, ttotal, success,
+				failure, deferral, unsub, local, remote, clicked, viewed,
+				cfound, cerror, tspam, tclean, tcached, tquery, tuser,
+				trelay, tpass, tlimit, talias, thost, tdomain, tcached;
 time_t          end_time, start_time;
-static stralloc tmp, thedir, thefile;
-unsigned long   bytes, tmpulong;
-int             debug;
-char            TheType;
-static char    *usage =
-	"usage: qmailmrtg type dir\n"
-	"where type is one of t, a, m, c, s, b, q, Q, l, u, v, S, C, d\n"
-	"and dir is a directory containing multilog files\n"
-	"for q and Q option dir is the qmail queue base dir"
-	;
+static stralloc tmp, thefile;
+unsigned long   bytes;
+int             normallyup = 0;
+static char    *usage = "usage: qmailmrtg [options] logdir [servicedir]";
 
 int
 count_files(char *diri)
@@ -91,10 +94,11 @@ count_files(char *diri)
 	return (count);
 }
 
-int
+unsigned long
 get_counts(char *diri)
 {
-	int             i, count;
+	int             i;
+	unsigned long   count;
 
 	for (i = 0, count = 0; i < ConfSplit; ++i) {
 		qsprintf(&tmp, "%s/%d", diri, i);
@@ -133,11 +137,11 @@ get_tai(char *tmpstr)
 }
 
 void
-process_file(char *file_name)
+process_file(char *file_name, char type)
 {
-	unsigned long   secs;
-	int             fd, match, tmpint;
-	char           *t1, *t2;
+	unsigned long   secs, tmpulong, t1, t2, t3, t4, t5, t6, t7, t8;
+	int             fd, match, i;
+	char           *p1, *p2;
 	static stralloc line = {0};
 	char            inbuf[4096];
 	struct substdio ssin;
@@ -157,6 +161,7 @@ process_file(char *file_name)
 			break;
 		if (match) {
 			line.len--;
+			line.s[line.len] = 0;
 			if (!line.len)
 				continue;
 		} else {
@@ -172,91 +177,97 @@ process_file(char *file_name)
 		secs = get_tai(line.s + 1);
 		if (secs < start_time || secs > end_time)
 			continue;
-		switch (TheType)
+		switch (type)
 		{
 		case 'S':
-			if ((t1 = str_str(line.s, "X-Bogosity: Yes")) != NULL)
+			if ((p1 = str_str(line.s, "X-Bogosity: Yes")) != NULL)
 				++tspam;
 			else
-			if ((t1 = str_str(line.s, "X-Bogosity: No")) != NULL)
+			if ((p1 = str_str(line.s, "X-Bogosity: No")) != NULL)
 				++tclean;
+			else
+				break;
 			if (debug) {
-				subprintf(subfderr, "tspam %d tclean %d\n", tspam, tclean);
+				subprintf(subfderr, "tspam %lu tclean %lu\n", tspam, tclean);
 				substdio_flush(subfderr);
 			}
 			break;
 		case 'C':
-			if ((t1 = str_str(line.s, "FOUND")) != NULL)
+			if ((p1 = str_str(line.s, "FOUND")) != NULL)
 				++cfound;
 			else
-			if ((t1 = str_str(line.s, "ERROR")) != NULL)
+			if ((p1 = str_str(line.s, "ERROR")) != NULL)
 				++cerror;
+			else
+				break;
 			if (debug) {
-				subprintf(subfderr, "cfound %d cerror %d\n", cfound, cerror);
+				subprintf(subfderr, "cfound %lu cerror %lu\n", cfound, cerror);
 				substdio_flush(subfderr);
 			}
 			break;
 		case 't':
-			if ((t1 = str_str(line.s, "status:")) != NULL) {
-				while (*t1 != ':')
-					++t1;
-				++t1;
+			if (!(p1 = str_str(line.s, "status:")))
+				break;
+			while (*p1 != ':')
+				++p1;
+			++p1;
 
-				for (t2 = t1 + 1; *t2 != '/'; ++t2);
-				*t2 = 0;
-				scan_int(t1, &tmpint);
-				if (tmpint > cconcurrency)
-					cconcurrency = tmpint;
-				scan_int(t2 + 1, &tmpint);
-				if (tmpint > tconcurrency)
-					tconcurrency = tmpint;
-			}
+			for (p2 = p1 + 1; *p2 != '/'; ++p2);
+			*p2 = 0;
+			scan_ulong(p1, &tmpulong);
+			if (tmpulong > cconcurrency)
+				cconcurrency = tmpulong;
+			scan_ulong(p2 + 1, &tmpulong);
+			if (tmpulong > tconcurrency)
+				tconcurrency = tmpulong;
 			if (debug) {
-				subprintf(subfderr, "cconcurrency %d toncurrency %d\n", cconcurrency, tconcurrency);
+				subprintf(subfderr, "cconcurrency %lu tconcurrency %lu\n", cconcurrency, tconcurrency);
 				substdio_flush(subfderr);
 			}
 			break;
 		case 'a':
-			if ((t1 = str_str(line.s, " ok ")) != NULL)
+			if ((p1 = str_str(line.s, " ok ")) != NULL)
 				++tallow;
 			else
-			if ((t1 = str_str(line.s, " deny ")) != NULL)
+			if ((p1 = str_str(line.s, " deny ")) != NULL)
 				++tdeny;
 			else
-			if ((t1 = str_str(line.s, " rblsmtpd:")) != NULL)
+			if ((p1 = str_str(line.s, " rblsmtpd:")) != NULL)
 				++tdeny;
+			else
+				break;
 			if (debug) {
-				subprintf(subfderr, "tallow %d tdeny %d\n", tallow, tdeny);
+				subprintf(subfderr, "tallow %lu tdeny %lu\n", tallow, tdeny);
 				substdio_flush(subfderr);
 			}
 			break;
 		case 'c': /*- @40000000642a387d2dede194 status: local 0/10 remote 0/20 queue2 */
-			if ((t1 = str_str(line.s, " status: ")) != NULL) {
-				while (*t1 != '/' && *t1 != 0)
-					++t1;
-				*t1 = 0;
-				t2 = t1 + 1;
-				--t1;
-				while (*t1 != ' ')
-					--t1;
-				++t1;
-				scan_int(t1, &tmpint); /*- local concurrency */
-				if (tmpint > local)
-					local = tmpint;
+			if (!(p1 = str_str(line.s, " status: ")))
+				break;
+			while (*p1 != '/' && *p1 != 0)
+				++p1;
+			*p1 = 0;
+			p2 = p1 + 1;
+			--p1;
+			while (*p1 != ' ')
+				--p1;
+			++p1;
+			scan_ulong(p1, &tmpulong); /*- local concurrency */
+			if (tmpulong > local)
+				local = tmpulong;
 
-				while (*t2 != '/' && *t2 != 0)
-					++t2;
-				*t2 = 0;
-				--t2;
-				while (*t2 != ' ')
-					--t2;
-				++t2;
-				scan_int(t2, &tmpint); /*- remote concurrency */
-				if (tmpint > remote)
-					remote = tmpint;
-			}
+			while (*p2 != '/' && *p2 != 0)
+				++p2;
+			*p2 = 0;
+			--p2;
+			while (*p2 != ' ')
+				--p2;
+			++p2;
+			scan_ulong(p2, &tmpulong); /*- remote concurrency */
+			if (tmpulong > remote)
+				remote = tmpulong;
 			if (debug) {
-				subprintf(subfderr, "local %d remote %d\n", local, remote);
+				subprintf(subfderr, "local %lu remote %lu\n", local, remote);
 				substdio_flush(subfderr);
 			}
 			break;
@@ -264,65 +275,375 @@ process_file(char *file_name)
 		case 'm':
 			if (str_str(line.s, "success:"))
 				success++;
+			else
 			if (str_str(line.s, "failure:"))
 				failure++;
+			else
 			if (str_str(line.s, "deferral:"))
 				deferral++;
+			else
+				break;
 			if (debug) {
-				subprintf(subfderr, "success %d failure %d deferral %d\n", success, failure, deferral);
+				subprintf(subfderr, "success %lu failure %lu deferral %lu\n", success, failure, deferral);
 				substdio_flush(subfderr);
 			}
 			break;
 		case 'v':
 			if (str_str(line.s, "viewed:"))
 				viewed++;
+			else
 			if (str_str(line.s, "clicked:"))
 				clicked++;
+			else
+				break;
 			if (debug) {
-				subprintf(subfderr, "viewed %d clicked %d\n", viewed, clicked);
+				subprintf(subfderr, "viewed %lu clicked %lu\n", viewed, clicked);
 				substdio_flush(subfderr);
 			}
 			break;
 		case 'u':
 			if (str_str(line.s, "unsub:"))
 				unsub++;
+			else
+				break;
 			if (debug) {
-				subprintf(subfderr, "unsub %d\n", unsub);
+				subprintf(subfderr, "unsub %lu\n", unsub);
 				substdio_flush(subfderr);
 			}
 			break;
 		case 'l':
 			++ttotal;
 			if (debug) {
-				subprintf(subfderr, "ttotal %d\n", ttotal);
+				subprintf(subfderr, "ttotal %lu\n", ttotal);
 				substdio_flush(subfderr);
 			}
 			break;
 		case 'd':
 			if (str_str(line.s, "cached"))
 				tcached++;
+			else
 			if (str_str(line.s, "query"))
 				tquery++;
+			else
+				break;
 			if (debug) {
-				subprintf(subfderr, "cached %d query %d\n", tcached, tquery);
+				subprintf(subfderr, "cached %lu query %lu\n", tcached, tquery);
 				substdio_flush(subfderr);
 			}
 			break;
 		case 'b':
-			if ((t1 = str_str(line.s, ": bytes ")) != NULL) {
-				t1 += 8;
-				scan_ulong(t1, &tmpulong);
-				bytes += tmpulong;
-			}
+			if (!(p1 = str_str(line.s, ": bytes ")))
+				break;
+			p1 += 8;
+			scan_ulong(p1, &tmpulong);
+			bytes += tmpulong;
 			if (debug) {
 				subprintf(subfderr, "bytes %f\n", (float) bytes);
 				substdio_flush(subfderr);
 			}
 			break;
-		} /* switch (TheType) */
+		case 'i': /*- User:Relay:Password:Limit:Alias:Host:Domain 0 0 0 0 0 1 1 Cached Nodes 1 */
+			if (!(p1 = str_str(line.s, "User:Relay:Password:Limit:Alias:Host:Domain")))
+				break;
+			p1 += 44;
+			i = scan_ulong(p1, &tmpulong);
+			tuser += (t1 = tmpulong);
+			p1 += (i + 1);
+			i = scan_ulong(p1, &tmpulong);
+			trelay += (t2 = tmpulong);
+			p1 += (i + 1);
+			i = scan_ulong(p1, &tmpulong);
+			tpass += (t3 = tmpulong);
+			p1 += (i + 1);
+			i = scan_ulong(p1, &tmpulong);
+			tlimit += (t4 = tmpulong);
+			p1 += (i + 1);
+			i = scan_ulong(p1, &tmpulong);
+			talias += (t5 = tmpulong);
+			p1 += (i + 1);
+			i = scan_ulong(p1, &tmpulong);
+			thost += (t6 = tmpulong);
+			p1 += (i + 1);
+			i = scan_ulong(p1, &tmpulong);
+			tdomain += (t7 = tmpulong);
+			p1 += (i + 14);
+			i = scan_ulong(p1, &tmpulong);
+			tcached += (t8 = tmpulong);
+			if (debug) {
+				subprintf(subfderr, "%lu %lu %lu %lu %lu %lu %lu %lu\n", t1, t2, t3, t4, t5, t6, t7, t8);
+				substdio_flush(subfderr);
+			}
+			break;
+		} /* switch (type) */
 	} /* for(;;) */
 	close(fd);
 	return;
+}
+
+/* 
+ * Taken from daemontools/run_init.c
+ *
+ * adapt /run filesystem for supervise
+ * returns
+ *  0 - chdir to /run/svscan/service_name
+ *  1 - no run filesystem
+ * -1 - unable to get cwd
+ * -2 - unable to chdir to service_name
+ * -3 - name too long
+ */
+int
+run_init(char *service_dir)
+{
+	char           *run_dir, *p, *s;
+	char            buf[256], dirbuf[256];
+	int             i;
+
+	if (!access("/run/svscan", F_OK))
+		run_dir = "/run";
+	else
+	if (!access("/private/var/run/svscan", F_OK))
+		run_dir = "/private/var/run";
+	else
+	if (!access("/var/run/svscan", F_OK))
+		run_dir = "/var/run";
+	else
+		return 1;
+	/*- e.g. /service/qmail-smtpd.25 */
+	if ((i = str_len(service_dir)) > 255)
+		return -3;
+	s = buf;
+	s += fmt_str(s, service_dir);
+	*s++ = 0;
+	p = basename(buf);
+	if (!str_diff(p, ".")) {
+		if (!getcwd(buf, 255))
+			return -1;
+		i = str_rchr(buf, '/');
+		if (buf[i])
+			p = buf + i + 1;
+		else
+			return -2;
+		/*- e.g. doing svstat . in
+		 * 1. /run/svscan/qmail-smtpd.25
+		 * 2. /run/svscan/qmail-smtpd.25/log
+		 */
+		i = fmt_str(0, run_dir) + 9 + fmt_str(0, p);
+		if (i > 255)
+			return 1;
+		s = dirbuf;
+		s += fmt_str(s, run_dir);
+		s += fmt_strn(s, "/svscan/", 8);
+		s += fmt_str(s, p);	
+		*s++ = 0;
+		if (access(dirbuf, F_OK)) {
+			for (p -= 2;*p && *p != '/';p--);
+			if (*p != '/')
+				return -2;
+			i = fmt_str(0, run_dir) + 9 + fmt_str(0, p + 1);
+			if (i > 255)
+				return -3;
+			s = dirbuf;
+			s += fmt_str(s, run_dir);
+			s += fmt_strn(s, "/svscan/", 8);
+			s += fmt_str(s, p + 1);	
+			*s++ = 0;
+		}
+	} else
+	if (!str_diff(p, "log")) {
+		if (!getcwd(buf, 255)) /*- /service/name/log */
+			return -1;
+		i = str_rchr(buf, '/'); /*- /log */
+		if (!buf[i])
+			return -2;
+		buf[i] = 0;
+		i = str_rchr(buf, '/'); /*- /name/log */
+		if (!buf[i])
+			return -2;
+		p = buf + i + 1; /*- name/log */
+		i = fmt_str(0, run_dir) + 13 + fmt_str(0, p);
+		if (i > 255)
+			return -3;
+		s = dirbuf;
+		s += fmt_str(s, run_dir);
+		s += fmt_strn(s, "/svscan/", 8);
+		s += fmt_str(s, p);	
+		s += fmt_strn(s, "/log", 4);
+		*s++ = 0;
+	} else {
+		/*- e.g. /run/svscan/qmail-smtpd.25 */
+		i = fmt_str(0, run_dir) + 9 + fmt_str(0, p);
+		if (i > 255)
+			return -3;
+		s = dirbuf;
+		s += fmt_str(s, run_dir);
+		s += fmt_strn(s, "/svscan/", 8);
+		s += fmt_str(s, p);	
+		*s++ = 0;
+	}
+	/*-
+	 * we do chdir to /run/svscan/qmail-smtpd.25
+	 * instead of
+	 * /service/qmail-stmpd.25
+	 */
+	if (chdir(dirbuf) == -1)
+		return -2;
+	return 0;
+}
+
+void
+print_status(char *dir, char status[])
+{
+	unsigned long   pid;
+	unsigned char   want, paused;
+	struct tai      when, now;
+	static short    waiting;
+	short          *s;
+	int             retval = 0;
+	char            strnum[FMT_LONG];
+
+	pid = (unsigned char) status[15];
+	pid <<= 8;
+	pid += (unsigned char) status[14];
+	pid <<= 8;
+	pid += (unsigned char) status[13];
+	pid <<= 8;
+	pid += (unsigned char) status[12];
+
+	if ((paused = status[16]))
+		retval = 3;
+	want = status[17];
+	s = (short *) (status + 18);
+	waiting = *s;
+	tai_unpack(status, &when);
+	tai_now(&now);
+	if (tai_less(&now, &when))
+		when = now;
+	tai_sub(&when, &now, &when);
+	substdio_puts(subfdoutsmall, no_of_days(tai_approx(&when)));
+	substdio_put(subfdoutsmall, "\n", 1);
+
+	substdio_puts(subfdoutsmall, dir);
+	substdio_puts(subfdoutsmall, ": ");
+	if (waiting)
+		substdio_puts(subfdoutsmall, "wait ");
+	else
+	if (status[20])
+		substdio_puts(subfdoutsmall, "up ");
+	else
+		substdio_puts(subfdoutsmall, "down ");
+	substdio_put(subfdoutsmall, strnum, fmt_long(strnum, tai_approx(&when)));
+	substdio_puts(subfdoutsmall, " seconds");
+
+	if (status[20] && !normallyup)
+		substdio_puts(subfdoutsmall, ", normally down");
+	if (!pid && normallyup)
+		substdio_puts(subfdoutsmall, ", normally up");
+	if (status[20] && paused)
+		substdio_puts(subfdoutsmall, ", paused");
+	if (!pid && (want == 'u')) {
+		retval = 4;
+		substdio_puts(subfdoutsmall, ", want up");
+	}
+	if (status[20] && (want == 'd')) {
+		retval = 5;
+		substdio_puts(subfdoutsmall, ", want down");
+	}
+
+	if (pid && status[20]) {
+		if (retval != 3 && retval != 5)
+			retval = 0;
+		substdio_puts(subfdoutsmall, " pid ");
+		substdio_put(subfdoutsmall, strnum, fmt_ulong(strnum, pid));
+		substdio_puts(subfdoutsmall, " ");
+	} else
+	if (pid) {
+		retval = 1;
+		substdio_puts(subfdoutsmall, " spid ");
+		substdio_put(subfdoutsmall, strnum, fmt_ulong(strnum, pid));
+		substdio_puts(subfdoutsmall, " ");
+	} else
+		retval = 1;
+	if (waiting > 0 && (waiting - when.x) > 0) {
+		substdio_puts(subfdoutsmall, "remaining ");
+		when.x = waiting - when.x;
+		substdio_put(subfdoutsmall, strnum, fmt_ulong(strnum, tai_approx(&when)));
+		substdio_puts(subfdoutsmall, " seconds");
+	}
+	substdio_puts(subfdoutsmall, "\n");
+}
+
+void
+print_uptime(char *sdir, char status[], int len)
+{
+	char           *x;
+	int             fd, r;
+
+	if (!sdir) {
+		subprintf(subfdoutsmall, "\n\n");
+		return;
+	}
+	if (chdir(sdir) == -1) {
+		strerr_warn4(WARN, "unable to to chdir to ", sdir, ": ", &strerr_sys);
+		return;
+	}
+	normallyup = 0;
+	if (access("down", F_OK)) {
+		if (errno != error_noent) {
+			strerr_warn4(WARN, "unable to stat ", sdir, "/down: ", &strerr_sys);
+			return;
+		}
+		normallyup = 1;
+	}
+	if ((fd = open_write("supervise/ok")) == -1) {
+		if (errno == error_nodevice) {
+			strerr_warn4(WARN, "unable to open ", sdir, "/supervise/ok: supervise not running: ", &strerr_sys);
+			return;
+		} else
+		if (errno != error_noent) {
+			strerr_warn4(WARN, "unable to open ", sdir, "/supervise/ok: ", &strerr_sys);
+			return;
+		}
+		switch (run_init(sdir))
+		{
+		case 0: /*- cwd changed to /run/svscan/service_name */
+			break;
+		case 1: /*- /run, /var/run doesn't exist */
+			strerr_warn4(WARN, "unable to open ", sdir, "/supervise/ok: supervise not running: ", &strerr_sys);
+		case -1:
+			strerr_warn2(WARN, "unable to get current working directory: ", &strerr_sys);
+			return;
+		case -2:
+			strerr_warn4(WARN, "No run state information for ", sdir, ": ", &strerr_sys);
+			return;
+		case -3:
+			strerr_warn3(WARN, sdir, ": name too long", 0);
+			return;
+		}
+	}
+	if (fd == -1 && (fd = open_write("supervise/ok")) == -1) {
+		if (errno == error_nodevice || errno == error_noent) {
+			strerr_warn4(WARN, "unable to open ", sdir, "/supervise/ok: supervise not running: ", &strerr_sys);
+			return;
+		}
+		strerr_warn4(WARN, "unable to open ", sdir, "/supervise/ok: ", &strerr_sys);
+		return;
+	}
+	close(fd);
+	if ((fd = open_read("supervise/status")) == -1) {
+		strerr_warn4(WARN, "unable to open ", sdir, "/supervise/status: ", &strerr_sys);
+		return;
+	}
+	r = read(fd, status, len);
+	close(fd);
+	if (r < len) {
+		if (r == -1)
+			x = error_str(errno);
+		else
+			x = "bad format";
+		strerr_warn5(WARN, "unable to read ", sdir, "/supervise/status: ", x, 0);
+		return;
+	}
+	print_status(sdir, status);
 }
 
 int
@@ -330,90 +651,93 @@ main(int argc, char **argv)
 {
 	DIR            *mydir;
 	struct dirent  *mydirent;
-	unsigned long   secs;
-	int             i;
+	unsigned long   secs, mess_count, todo_count;
+	char           *logdir = NULL, *servicedir = NULL;
+	char            status[21];
+	int             i, TheType = 0, inquery_type = 0;
 
-	if (argc != 3)
-		strerr_die2x(100, WARN, usage);
-	if (env_get("DEBUG"))
-		debug = 1;
-	qsprintf(&thedir, "%s", argv[2]);
-	TheType = *argv[1];
-	switch (TheType)
-	{
-	case 'C':
-	case 't':
-	case 'a':
-	case 'm':
-	case 'c':
-	case 's':
-	case 'S':
-	case 'b':
-	case 'q':
-	case 'Q':
-	case 'l':
-	case 'v':
-	case 'u':
-	case 'd':
-		break;
-	default:
-		strerr_die2x(100, WARN, usage);
-	}
+	while ((i = getopt(argc, argv, "abcCdDlmqQsStuvi:")) != opteof) {
+		switch (i)
+		{
+		case 'a':
+		case 'b':
+		case 'c':
+		case 'C':
+		case 'd':
+		case 'l':
+		case 'm':
+		case 'q':
+		case 'Q':
+		case 's':
+		case 'S':
+		case 't':
+		case 'u':
+		case 'v':
+			TheType = i;
+			break;
+		case 'i':
+			TheType = i;
+			inquery_type = *optarg;
+			break;
+		case 'D':
+			debug = 1;
+			break;
+		} /*- switch (TheType) */
+	} /*- while ((TheType = getopt(argc, argv, "abcCdlmqQsStuvi:")) != opteof) */
+
+	if (argc < optind + 1)
+		strerr_die1x(100, usage);
+	if (optind < argc)
+		logdir = argv[optind++];
+	if (optind < argc)
+		servicedir = argv[optind++];
+
 	end_time = time(0);
 	start_time = end_time - 300;
-#if 0
-	cconcurrency = tconcurrency = tallow = tdeny = ttotal = unsub =
-		success = failure = deferral = bytes = local = remote =
-		max_files = clicked = viewed = cfound = cerror = tspam =
-		tclean = tquery = tcached = 0;
-#endif
 
 	if (TheType == 'q' || TheType == 'Q') {
 		for (i = 1, mess_count = todo_count = 0;;i++) {
-			qsprintf(&tmp, "%s/queue%d/%s", thedir.s, i, TheType == 'Q' ? "local" : "mess");
+			qsprintf(&tmp, "%s/queue%d/%s", logdir, i, TheType == 'Q' ? "local" : "mess");
 			if (access(tmp.s, F_OK))
 				break;
-			max_files = 0;
 			mess_count += get_counts(tmp.s);
-			qsprintf(&tmp, "%s/queue%d/%s", thedir.s, i, TheType == 'Q' ? "remote" : "todo");
-			max_files = 0;
+			qsprintf(&tmp, "%s/queue%d/%s", logdir, i, TheType == 'Q' ? "remote" : "todo");
 			todo_count += get_counts(tmp.s);
 		}
-		qsprintf(&tmp, "%s/nqueue/%s", thedir.s, TheType == 'Q' ? "local" : "mess");
-		max_files = 0;
+		qsprintf(&tmp, "%s/nqueue/%s", logdir, TheType == 'Q' ? "local" : "mess");
 		mess_count += get_counts(tmp.s);
-		qsprintf(&tmp, "%s/nqueue/%s", thedir.s, TheType == 'Q' ? "local" : "todo");
-		max_files = 0;
+		qsprintf(&tmp, "%s/nqueue/%s", logdir, TheType == 'Q' ? "local" : "todo");
 		todo_count += get_counts(tmp.s);
-		subprintf(subfdoutsmall, "%d\n%d\n\n\n", mess_count * 12, todo_count * 12);
+		subprintf(subfdoutsmall, "%lu\n%lu\n", mess_count * 12, todo_count * 12);
+		print_uptime(servicedir, status, sizeof status);
 		substdio_flush(subfdoutsmall);
 		return (0);
 	}
 	if (debug) {
-		subprintf(subfderr, "opening dir %s\n", thedir.s);
+		subprintf(subfderr, "opening dir %s\n", logdir);
 		substdio_flush(subfderr);
 	}
-	if (!(mydir = opendir(thedir.s)))
-		strerr_die4sys(111, FATAL, "failed to open dir ", thedir.s, ": ");
+	if (!(mydir = opendir(logdir)))
+		strerr_die4sys(111, FATAL, "failed to open dir ", logdir, ": ");
 	while ((mydirent = readdir(mydir)) != NULL) {
 		if (mydirent->d_name[0] == '@') {
 			secs = get_tai(&mydirent->d_name[1]);
 			if (secs > start_time) {
-				qsprintf(&thefile, "%s/%s", thedir.s, mydirent->d_name);
+				qsprintf(&thefile, "%s/%s", logdir, mydirent->d_name);
 				if (debug) {
-					subprintf(subfderr, "processing file %s/%s\n", thedir.s, mydirent->d_name);
+					subprintf(subfderr, "processing file %s/%s\n", logdir, mydirent->d_name);
 					substdio_flush(subfderr);
 				}
-				process_file(thefile.s);
+				process_file(thefile.s, TheType);
 			}
 		} else
 		if (!str_diffn(mydirent->d_name, "current", 8)) {
-			qsprintf(&thefile, "%s/%s", thedir.s, mydirent->d_name);
+			qsprintf(&thefile, "%s/%s", logdir, mydirent->d_name);
 			if (debug) {
-				subprintf(subfderr, "processing file %s/%s\n", thedir.s, mydirent->d_name);
+				subprintf(subfderr, "processing file %s/%s\n", logdir, mydirent->d_name);
 				substdio_flush(subfderr);
 			}
-			process_file(thefile.s);
+			process_file(thefile.s, TheType);
 		}
 	}
 	closedir(mydir);
@@ -424,40 +748,91 @@ main(int argc, char **argv)
 	switch (TheType)
 	{
 	case 'S': /*- bogofilter per/hr */
-		subprintf(subfdoutsmall, "%i\n%i\n\n\n", tclean * 12, tspam * 12);
+		subprintf(subfdoutsmall, "%lu\n%lu\n", tclean * 12, tspam * 12);
+		print_uptime(servicedir, status, sizeof status);
 		break;
 	case 'C': /*- clamav per/hr */
-		subprintf(subfdoutsmall,"%i\n%i\n\n\n", cfound * 12, cerror * 12);
+		subprintf(subfdoutsmall,"%lu\n%lu\n", cfound * 12, cerror * 12);
+		print_uptime(servicedir, status, sizeof status);
 		break;
 	case 't': /*- tcpserver concurrency */
-		subprintf(subfdoutsmall, "%d\n%d\n\n\n", cconcurrency, tconcurrency);
+		subprintf(subfdoutsmall, "%lu\n%lu\n", cconcurrency, tconcurrency);
+		print_uptime(servicedir, status, sizeof status);
 		break;
 	case 'a': /*- tcpserver allow/deny per/hr */
-		subprintf(subfdoutsmall, "%d\n%d\n\n\n", tallow * 12, tdeny * 12);
+		subprintf(subfdoutsmall, "%lu\n%lu\n", tallow * 12, tdeny * 12);
+		print_uptime(servicedir, status, sizeof status);
 		break;
 	case 's': /*- success/failures per/hr */
-		subprintf(subfdoutsmall, "%i\n%i\n\n\n", success * 12, failure * 12);
+		subprintf(subfdoutsmall, "%lu\n%lu\n", success * 12, failure * 12);
+		print_uptime(servicedir, status, sizeof status);
 		break;
 	case 'm': /*- messages per/hr */
-		subprintf(subfdoutsmall, "%d\n%d\n\n\n", success * 12, (success + deferral) * 12);
+		subprintf(subfdoutsmall, "%lu\n%lu\n", success * 12, (success + deferral) * 12);
+		print_uptime(servicedir, status, sizeof status);
 		break;
 	case 'c': /*- remote/local concurrency */
-		subprintf(subfdoutsmall, "%d\n%d\n\n\n", local, remote);
+		subprintf(subfdoutsmall, "%lu\n%lu\n", local, remote);
+		print_uptime(servicedir, status, sizeof status);
 		break;
 	case 'v': /*- clicked/viewed per/hr */
-		subprintf(subfdoutsmall, "%i\n%i\n\n\n", viewed * 12, clicked * 12);
+		subprintf(subfdoutsmall, "%lu\n%lu\n", viewed * 12, clicked * 12);
+		print_uptime(servicedir, status, sizeof status);
 		break;
 	case 'l': /*- lines per/hr */
-		subprintf(subfdoutsmall, "%i\n%i\n\n\n", ttotal * 12, ttotal * 12);
+		subprintf(subfdoutsmall, "%lu\n%lu\n", ttotal * 12, ttotal * 12);
+		print_uptime(servicedir, status, sizeof status);
 		break;
 	case 'u': /*- lines per/hr */
-		subprintf(subfdoutsmall, "%i\n%i\n\n\n", unsub * 12, unsub * 12);
+		subprintf(subfdoutsmall, "%lu\n%lu\n", unsub * 12, unsub * 12);
+		print_uptime(servicedir, status, sizeof status);
 		break;
 	case 'b': /*- bits per/sec */
-		subprintf(subfdoutsmall, "%.0f\n%.0f\n\n\n", ((float) bytes * 8.0) / 300.0, ((float) bytes * 8.0) / 300.0);
+		subprintf(subfdoutsmall, "%.0f\n%.0f\n", ((float) bytes * 8.0) / 300.0, ((float) bytes * 8.0) / 300.0);
+		print_uptime(servicedir, status, sizeof status);
 		break;
 	case 'd': /*- dnscache per/hr */
-		subprintf(subfdoutsmall, "%i\n%i\n\n\n", tcached * 12, tquery * 12);
+		subprintf(subfdoutsmall, "%lu\n%lu\n", tcached * 12, tquery * 12);
+		print_uptime(servicedir, status, sizeof status);
+		break;
+	case 'i':
+		/* User:Relay:Password:Limit:Alias:Host:Domain */
+		ttotal = tuser + trelay + tpass + tlimit + talias + thost + tdomain;
+		switch (inquery_type)
+		{
+		case 'u':
+			subprintf(subfdoutsmall, "%lu\n%lu\n", tuser, ttotal);
+			print_uptime(servicedir, status, sizeof status);
+			break;
+		case 'r':
+			subprintf(subfdoutsmall, "%lu\n%lu\n", trelay, ttotal);
+			print_uptime(servicedir, status, sizeof status);
+			break;
+		case 'p':
+			subprintf(subfdoutsmall, "%lu\n%lu\n", tpass, ttotal);
+			print_uptime(servicedir, status, sizeof status);
+			break;
+		case 'l':
+			subprintf(subfdoutsmall, "%lu\n%lu\n", tlimit, ttotal);
+			print_uptime(servicedir, status, sizeof status);
+			break;
+		case 'a':
+			subprintf(subfdoutsmall, "%lu\n%lu\n", talias, ttotal);
+			print_uptime(servicedir, status, sizeof status);
+			break;
+		case 'h':
+			subprintf(subfdoutsmall, "%lu\n%lu\n", thost, ttotal);
+			print_uptime(servicedir, status, sizeof status);
+			break;
+		case 'd':
+			subprintf(subfdoutsmall, "%lu\n%lu\n", tdomain, ttotal);
+			print_uptime(servicedir, status, sizeof status);
+			break;
+		case 'c':
+			subprintf(subfdoutsmall, "%lu\n%lu\n", tcached, ttotal);
+			print_uptime(servicedir, status, sizeof status);
+			break;
+		}
 		break;
 	}
 	substdio_flush(subfdoutsmall);

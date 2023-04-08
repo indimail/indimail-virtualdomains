@@ -16,6 +16,12 @@ Release 3.4.4-1.1 Start 26/03/2023 End --/--/----
 07. qmailmrtg.c: refactored to use libqmail
 08. renamed qmailmrtg7 to qmailmrtg
 09. qmailmrtg.c: converted queue messages to messages/hour
+- 08/04/2023
+10. ProcessInFifo.c: modified for qmailmrtg inlookup stats
+11. qmailmrtg.c: refactored code to print service uptime and status
+12. indimail.mrtg.cfg: updated to include service uptime in graphs
+13. ilocal_ugprade.in: refresh mrtg service during upgrade if using old
+    qmailmrtg
 
 * Sat Mar 25 2024 08:40:00 +0000 Manvendra Bhangui <indimail-virtualdomains@indimailorg> 3.4.3-1.1%{?dist}
 Release 3.4.3-1.1 Start 13/02/2023 End 25/03/2023

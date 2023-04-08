@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.16  2023-04-08 23:46:28+05:30  Cprogrammer
+ * modified for qmailmrtg inlookup stats
+ *
  * Revision 1.15  2023-03-20 10:16:03+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -122,7 +125,7 @@
 #include "FifoCreate.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.15 2023-03-20 10:16:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.16 2023-04-08 23:46:28+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -537,29 +540,29 @@ isig_usr1()
 	logfunc("ProcessInFifo", fifo_path ? fifo_path : "socket");
 	logfunc("ProcessInFifo", ", Got SIGUSR Dumping Stats\n");
 
-	logfunc("ProcessInFifo", "User Query ");
+	logfunc("ProcessInFifo", "User:Relay:Password:Limit:Alias:Host:Domain ");
 	strnum[fmt_uint(strnum, user_query_count)] = 0;
 	logfunc("ProcessInFifo", strnum);
-	logfunc("ProcessInFifo", ", Relay Query ");
+	logfunc("ProcessInFifo", " ");
 	strnum[fmt_uint(strnum, relay_query_count)] = 0;
 	logfunc("ProcessInFifo", strnum);
-	logfunc("ProcessInFifo", ", Password Query ");
+	logfunc("ProcessInFifo", " ");
 	strnum[fmt_uint(strnum, pwd_query_count)] = 0;
 	logfunc("ProcessInFifo", strnum);
-	logfunc("ProcessInFifo", ":");
+	logfunc("ProcessInFifo", " ");
 	strnum[fmt_uint(strnum, limit_query_count)] = 0;
 	logfunc("ProcessInFifo", strnum);
-	logfunc("ProcessInFifo", ", Alias Query ");
+	logfunc("ProcessInFifo", " ");
 	strnum[fmt_uint(strnum, alias_query_count)] = 0;
 	logfunc("ProcessInFifo", strnum);
 	total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + dom_query_count;
 #ifdef CLUSTERED_SITE
-	logfunc("ProcessInFifo", ", Host Query ");
+	logfunc("ProcessInFifo", " ");
 	strnum[fmt_uint(strnum, host_query_count)] = 0;
 	logfunc("ProcessInFifo", strnum);
 	total_count += host_query_count;
 #endif
-	logfunc("ProcessInFifo", ", Domain Query ");
+	logfunc("ProcessInFifo", " ");
 	strnum[fmt_uint(strnum, dom_query_count)] = 0;
 	logfunc("ProcessInFifo", strnum);
 
@@ -788,29 +791,29 @@ sig_hand(sig, code, scp, addr)
 			/*- flow through */
 		case SIGTERM:
 			cur_time = time(0);
-			logfunc("ProcessInFifo", "User Query ");
+			logfunc("ProcessInFifo", "User:Relay:Password:Limit:Alias:Host:Domain ");
 			strnum[fmt_uint(strnum, user_query_count)] = 0;
 			logfunc("ProcessInFifo", strnum);
-			logfunc("ProcessInFifo", ", Relay Query ");
+			logfunc("ProcessInFifo", " ");
 			strnum[fmt_uint(strnum, relay_query_count)] = 0;
 			logfunc("ProcessInFifo", strnum);
-			logfunc("ProcessInFifo", ", Password Query ");
+			logfunc("ProcessInFifo", " ");
 			strnum[fmt_uint(strnum, pwd_query_count)] = 0;
 			logfunc("ProcessInFifo", strnum);
-			logfunc("ProcessInFifo", ":");
+			logfunc("ProcessInFifo", " ");
 			strnum[fmt_uint(strnum, limit_query_count)] = 0;
 			logfunc("ProcessInFifo", strnum);
-			logfunc("ProcessInFifo", ", Alias Query ");
+			logfunc("ProcessInFifo", " ");
 			strnum[fmt_uint(strnum, alias_query_count)] = 0;
 			logfunc("ProcessInFifo", strnum);
 			total_count = user_query_count + relay_query_count + pwd_query_count + limit_query_count + alias_query_count + dom_query_count;
 #ifdef CLUSTERED_SITE
-			logfunc("ProcessInFifo", ", Host Query ");
+			logfunc("ProcessInFifo", " ");
 			strnum[fmt_uint(strnum, host_query_count)] = 0;
 			logfunc("ProcessInFifo", strnum);
 			total_count += host_query_count;
 #endif
-			logfunc("ProcessInFifo", ", Domain Query ");
+			logfunc("ProcessInFifo", " ");
 			strnum[fmt_uint(strnum, dom_query_count)] = 0;
 			logfunc("ProcessInFifo", strnum);
 			logfunc("ProcessInFifo", " Cached Nodes ");
