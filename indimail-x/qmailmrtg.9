@@ -11,6 +11,7 @@ qmailmrtg \- log indimail statistics to MRTG
 output suitable for Multi Router Traffic Gropher \fBMRTG\fR(1). If the
 optional \fIservicedir\fR is given, \fBqmailmrtg\fR prints the uptime for
 the \fBsupervise\fR(1) service configured in that directory.
+\fBqmailmrtg\fR reads from stdin if \fIlogdir\fR is \fB-\fR.
 
 qmailmrtg processes entries which aren't more than 5 minutes older than
 the start time and not newer than the start time. The default interval of 5
