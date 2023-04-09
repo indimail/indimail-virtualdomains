@@ -22,6 +22,10 @@ Release 3.4.4-1.1 Start 26/03/2023 End --/--/----
 12. indimail.mrtg.cfg: updated to include service uptime in graphs
 13. ilocal_ugprade.in: refresh mrtg service during upgrade if using old
     qmailmrtg
+- 09/04/2023
+14. ProcessInFifo.c: skip logging of binary search walk on SIGUSR1 (log only
+    when debug is set)
+15. qmailmrtg.c: added case for generating status for inlookup Cache Hits
 
 * Sat Mar 25 2024 08:40:00 +0000 Manvendra Bhangui <indimail-virtualdomains@indimailorg> 3.4.3-1.1%{?dist}
 Release 3.4.3-1.1 Start 13/02/2023 End 25/03/2023

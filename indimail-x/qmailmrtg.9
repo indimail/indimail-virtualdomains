@@ -12,10 +12,19 @@ output suitable for Multi Router Traffic Gropher \fBMRTG\fR(1). If the
 optional \fIservicedir\fR is given, \fBqmailmrtg\fR prints the uptime for
 the \fBsupervise\fR(1) service configured in that directory.
 
-\fBqmailmrtg\fR was written by Inter7 using the standard C library. This
-version of \fBqmailmrtg\fR has been re-written using libqmail, a library of
-general purpose APIs extracted from Dan Bernstein's qmail, reimplemented
-and covered by the GNU General Public License Version.
+qmailmrtg processes only entries which are not older than 5 minutes than
+the start time and not newer than the start time. The default interval of 5
+minutes can be changed by using the \fB\-I\fR option, the end time can be
+changed by specifying the \fB\-E\fR option. You can process the full log by
+specifying the \fB\-f\fR option. \fBqmailmrtg\fR is called every 5 minutes
+to process 5 minutes of data in \fI@sysconfdir@/indimail.mrtg.cfg\fR. If
+you desire a different frequency you need to also change the time interval
+of records to be processed.
+
+\fBqmailmrtg\fR originates from \fBqmailmrtg7\fR written by Inter7 using
+the standard C library. \fBqmailmrtg\fR has been re-written using libqmail,
+a library of general purpose APIs extracted from Dan Bernstein's qmail,
+reimplemented and covered by the GNU General Public License Version 2.
 
 Take a look at @sysconfdir@/indimail.mrtg.cfg for usage examples.
 indimail.mrtg.cfg expects \fBqmailmrtg\fR to be in @libexecdir@ directory.
@@ -24,6 +33,20 @@ indimail.mrtg.cfg expects \fBqmailmrtg\fR to be in @libexecdir@ directory.
 .TP 3
 \fB\-D\fR
 Turn on debugging
+
+.TP 3
+\fB\-E\fR \fIend_time\fR
+Use \fIend_time\fR as the timestamp of the last record to be processed.
+
+.TP 3
+\fB\-I\fR \fIinterval\fR
+Change the time interval of records to process from the current time. As a
+default \fBqmailmrtg\fR processes only those records which are not older
+than 5 minutes than \fIend_time\fR.
+
+.TP 3
+\fB\-f\fR
+Process all records found in the logs in \fIlogdir\fR.
 
 .TP 3
 \fB\-t\fR
@@ -86,7 +109,21 @@ print  messages found to have virus and messages that failed to be scanned.
 
 .TP 3
 \fB\-d\fR
-print cached and total requests.
+print dnscache cached and total requests.
+
+.TP 3
+\fB\-i\fR \fIsubopt\fR
+print stats for inlookup queries where \fIsubopt\fR specfies stats for
+user, relay, password, limit, alias, host domain, cached requests
+respectiviely.
+
+.TP 3
+\fB\-p\fR \fIsplit\fR
+Use confsplit for indimail queue as \fIsplit\fR. Default 23
+
+.TP 3
+\fB\-B\fR
+Use bigtodo configuration for indimail queue. Default is not to use.
 
 .SH SEE ALSO
 mrtg(1),

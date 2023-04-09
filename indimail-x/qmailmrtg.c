@@ -1,5 +1,8 @@
 /*
  * $Log: qmailmrtg.c,v $
+ * Revision 1.5  2023-04-09 12:00:46+05:30  Cprogrammer
+ * added case for generating status for inlookup Cache Hits
+ *
  * Revision 1.4  2023-04-08 23:55:32+05:30  Cprogrammer
  * refactored code to print service uptime and status
  *
@@ -60,17 +63,17 @@
 #include <no_of_days.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg.c,v 1.4 2023-04-08 23:55:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg.c,v 1.5 2023-04-09 12:00:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "qmailmrtg: fatal: "
 #define WARN  "qmailmrtg: warn: "
 
-int             BigTodo=1, ConfSplit=151, debug;
+int             BigTodo=0, ConfSplit=23, debug, process_full;
 unsigned long   cconcurrency, tconcurrency, tallow, tdeny, ttotal, success,
 				failure, deferral, unsub, local, remote, clicked, viewed,
 				cfound, cerror, tspam, tclean, tcached, tquery, tuser,
-				trelay, tpass, tlimit, talias, thost, tdomain, tcached;
+				trelay, tpass, tlimit, talias, thost, tdomain, tcache_hits;
 time_t          end_time, start_time;
 static stralloc tmp, thefile;
 unsigned long   bytes;
@@ -137,7 +140,7 @@ get_tai(char *tmpstr)
 }
 
 void
-process_file(char *file_name, char type)
+process_file(char *file_name, char type, char inquery_type)
 {
 	unsigned long   secs, tmpulong, t1, t2, t3, t4, t5, t6, t7, t8;
 	int             fd, match, i;
@@ -146,6 +149,7 @@ process_file(char *file_name, char type)
 	char            inbuf[4096];
 	struct substdio ssin;
 
+	t1 = t2 = t3 = t4 = t5 = t6 = t7 = t8 = 0;
 	if ((fd = open_read(file_name)) == -1) {
 		strerr_warn4(WARN, "error opening file ", file_name, "for reading: ", &strerr_sys);
 		return;
@@ -175,7 +179,7 @@ process_file(char *file_name, char type)
 		if (line.s[0] != '@')
 			continue;
 		secs = get_tai(line.s + 1);
-		if (secs < start_time || secs > end_time)
+		if (!process_full && (secs < start_time || secs > end_time))
 			continue;
 		switch (type)
 		{
@@ -319,14 +323,14 @@ process_file(char *file_name, char type)
 			}
 			break;
 		case 'd':
+			if (!str_str(line.s, "cached") && !str_str(line.s, "query"))
+				continue;
 			if (str_str(line.s, "cached"))
 				tcached++;
-			else
 			if (str_str(line.s, "query"))
 				tquery++;
-			else
-				break;
 			if (debug) {
+				subprintf(subfderr, "%s\n", line.s);
 				subprintf(subfderr, "cached %lu query %lu\n", tcached, tquery);
 				substdio_flush(subfderr);
 			}
@@ -343,34 +347,57 @@ process_file(char *file_name, char type)
 			}
 			break;
 		case 'i': /*- User:Relay:Password:Limit:Alias:Host:Domain 0 0 0 0 0 1 1 Cached Nodes 1 */
-			if (!(p1 = str_str(line.s, "User:Relay:Password:Limit:Alias:Host:Domain")))
+			if (inquery_type == 'C') {
+				if (str_str(line.s, "Query ['User Query']") ||
+						str_str(line.s, "Query ['Relay Query']") ||
+						str_str(line.s, "Query ['Password Query']") ||
+						str_str(line.s, "Query ['Host Query']") ||
+						str_str(line.s, "Query ['Alias Query']") ||
+						str_str(line.s, "Query ['Domain Query']") ||
+						str_str(line.s, "Query ['Domain Limits Query']"))
+					ttotal++;
+				else
+				if ((p1 = str_str(line.s, "cache hit")))
+					tcache_hits++;
+				else
+					break;
+				if (debug) {
+					subprintf(subfderr, "%lu %lu %lu %lu %lu %lu %lu %lu %lu\n", t1, t2, t3, t4, t5, t6, t7, t8, tcache_hits);
+					substdio_flush(subfderr);
+				}
+			}
+			if ((p1 = str_str(line.s, "User:Relay:Password:Limit:Alias:Host:Domain")) ) {
+				p1 += 44;
+				i = scan_ulong(p1, &tmpulong);
+				tuser += (t1 = tmpulong);
+				p1 += (i + 1);
+				i = scan_ulong(p1, &tmpulong);
+				trelay += (t2 = tmpulong);
+				p1 += (i + 1);
+				i = scan_ulong(p1, &tmpulong);
+				tpass += (t3 = tmpulong);
+				p1 += (i + 1);
+				i = scan_ulong(p1, &tmpulong);
+				tlimit += (t4 = tmpulong);
+				p1 += (i + 1);
+				i = scan_ulong(p1, &tmpulong);
+				talias += (t5 = tmpulong);
+				p1 += (i + 1);
+				i = scan_ulong(p1, &tmpulong);
+				thost += (t6 = tmpulong);
+				p1 += (i + 1);
+				i = scan_ulong(p1, &tmpulong);
+				tdomain += (t7 = tmpulong);
+				p1 += (i + 14);
+				i = scan_ulong(p1, &tmpulong);
+				tcached += (t8 = tmpulong);
+			} else
+			if ((p1 = str_str(line.s, "cache hit")))
+				tcache_hits++;
+			else
 				break;
-			p1 += 44;
-			i = scan_ulong(p1, &tmpulong);
-			tuser += (t1 = tmpulong);
-			p1 += (i + 1);
-			i = scan_ulong(p1, &tmpulong);
-			trelay += (t2 = tmpulong);
-			p1 += (i + 1);
-			i = scan_ulong(p1, &tmpulong);
-			tpass += (t3 = tmpulong);
-			p1 += (i + 1);
-			i = scan_ulong(p1, &tmpulong);
-			tlimit += (t4 = tmpulong);
-			p1 += (i + 1);
-			i = scan_ulong(p1, &tmpulong);
-			talias += (t5 = tmpulong);
-			p1 += (i + 1);
-			i = scan_ulong(p1, &tmpulong);
-			thost += (t6 = tmpulong);
-			p1 += (i + 1);
-			i = scan_ulong(p1, &tmpulong);
-			tdomain += (t7 = tmpulong);
-			p1 += (i + 14);
-			i = scan_ulong(p1, &tmpulong);
-			tcached += (t8 = tmpulong);
 			if (debug) {
-				subprintf(subfderr, "%lu %lu %lu %lu %lu %lu %lu %lu\n", t1, t2, t3, t4, t5, t6, t7, t8);
+				subprintf(subfderr, "%lu %lu %lu %lu %lu %lu %lu %lu %lu\n", t1, t2, t3, t4, t5, t6, t7, t8, tcache_hits);
 				substdio_flush(subfderr);
 			}
 			break;
@@ -651,12 +678,12 @@ main(int argc, char **argv)
 {
 	DIR            *mydir;
 	struct dirent  *mydirent;
-	unsigned long   secs, mess_count, todo_count;
+	unsigned long   secs, mess_count, todo_count, interval = 300;
 	char           *logdir = NULL, *servicedir = NULL;
 	char            status[21];
 	int             i, TheType = 0, inquery_type = 0;
 
-	while ((i = getopt(argc, argv, "abcCdDlmqQsStuvi:")) != opteof) {
+	while ((i = getopt(argc, argv, "abBcCdDE:flmp:qQsStuvi:I:")) != opteof) {
 		switch (i)
 		{
 		case 'a':
@@ -675,12 +702,26 @@ main(int argc, char **argv)
 		case 'v':
 			TheType = i;
 			break;
+		case 'B':
+			BigTodo = 1;
+		case 'D':
+			debug = 1;
+			break;
+		case 'E':
+			scan_long(optarg, &end_time);
+			break;
+		case 'f':
+			process_full = 1;
+			break;
+		case 'I':
+			scan_ulong(optarg, &interval);
+			break;
 		case 'i':
 			TheType = i;
 			inquery_type = *optarg;
 			break;
-		case 'D':
-			debug = 1;
+		case 'p':
+			scan_int(optarg, &ConfSplit);
 			break;
 		} /*- switch (TheType) */
 	} /*- while ((TheType = getopt(argc, argv, "abcCdlmqQsStuvi:")) != opteof) */
@@ -692,9 +733,11 @@ main(int argc, char **argv)
 	if (optind < argc)
 		servicedir = argv[optind++];
 
-	end_time = time(0);
-	start_time = end_time - 300;
-
+	if (!process_full) {
+		if (!end_time)
+			end_time = time(0);
+		start_time = end_time - interval;
+	}
 	if (TheType == 'q' || TheType == 'Q') {
 		for (i = 1, mess_count = todo_count = 0;;i++) {
 			qsprintf(&tmp, "%s/queue%d/%s", logdir, i, TheType == 'Q' ? "local" : "mess");
@@ -728,7 +771,7 @@ main(int argc, char **argv)
 					subprintf(subfderr, "processing file %s/%s\n", logdir, mydirent->d_name);
 					substdio_flush(subfderr);
 				}
-				process_file(thefile.s, TheType);
+				process_file(thefile.s, TheType, inquery_type);
 			}
 		} else
 		if (!str_diffn(mydirent->d_name, "current", 8)) {
@@ -737,7 +780,7 @@ main(int argc, char **argv)
 				subprintf(subfderr, "processing file %s/%s\n", logdir, mydirent->d_name);
 				substdio_flush(subfderr);
 			}
-			process_file(thefile.s, TheType);
+			process_file(thefile.s, TheType, inquery_type);
 		}
 	}
 	closedir(mydir);
@@ -797,7 +840,8 @@ main(int argc, char **argv)
 		break;
 	case 'i':
 		/* User:Relay:Password:Limit:Alias:Host:Domain */
-		ttotal = tuser + trelay + tpass + tlimit + talias + thost + tdomain;
+		if (inquery_type != 'C')
+			ttotal = tuser + trelay + tpass + tlimit + talias + thost + tdomain;
 		switch (inquery_type)
 		{
 		case 'u':
@@ -830,6 +874,10 @@ main(int argc, char **argv)
 			break;
 		case 'c':
 			subprintf(subfdoutsmall, "%lu\n%lu\n", tcached, ttotal);
+			print_uptime(servicedir, status, sizeof status);
+			break;
+		case 'C':
+			subprintf(subfdoutsmall, "%lu\n%lu\n", tcache_hits * 12, ttotal * 12);
 			print_uptime(servicedir, status, sizeof status);
 			break;
 		}

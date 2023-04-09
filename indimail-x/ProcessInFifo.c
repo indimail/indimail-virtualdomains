@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.17  2023-04-09 11:57:57+05:30  Cprogrammer
+ * skip logging of binary search walk on SIGUSR1 (log only when debug is set)
+ *
  * Revision 1.16  2023-04-08 23:46:28+05:30  Cprogrammer
  * modified for qmailmrtg inlookup stats
  *
@@ -125,7 +128,7 @@
 #include "FifoCreate.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.16 2023-04-08 23:46:28+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.17 2023-04-09 11:57:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -222,6 +225,8 @@ walk_entry(const void *in_data, VISIT x, int level)
 {
 	INENTRY        *m = *(INENTRY **) in_data;
 
+	if (!_debug)
+		return;
 	strnum[fmt_uint(strnum, level)] = 0;
 	logfunc("ProcessInFifo", "<");
 	logfunc("ProcessInFifo", strnum);
