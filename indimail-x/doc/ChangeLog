@@ -26,6 +26,9 @@ Release 3.4.4-1.1 Start 26/03/2023 End --/--/----
 14. ProcessInFifo.c: skip logging of binary search walk on SIGUSR1 (log only
     when debug is set)
 15. qmailmrtg.c: added case for generating status for inlookup Cache Hits
+16. journal2mrtg: convert journalctl logs to qmailmrtg format
+17. qmailmrtg.c: read from stdin if logdir is -
+18. indimailmrtg.cfg.in: rearranged graphs
 
 * Sat Mar 25 2024 08:40:00 +0000 Manvendra Bhangui <indimail-virtualdomains@indimailorg> 3.4.3-1.1%{?dist}
 Release 3.4.3-1.1 Start 13/02/2023 End 25/03/2023

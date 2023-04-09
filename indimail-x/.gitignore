@@ -228,3 +228,4 @@ ischema.1
 depcomp
 ilocal_upgrade.sh
 qmailmrtg.1
+journal2mrtg

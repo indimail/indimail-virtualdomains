@@ -1,5 +1,5 @@
 #
-# $Id: indimail.mrtg.cfg.in,v 1.4 2023-04-08 23:46:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.mrtg.cfg.in,v 1.5 2023-04-09 22:24:34+05:30 Cprogrammer Exp mbhangui $
 #
 # Generate index.html using below command
 #
@@ -15,7 +15,8 @@ Options[_]: growright,nomib2
 NoMib2: Yes
 #############################################################
 
-Title[msg1]: Messages (Success, Attempts) - MRTGHOSTNAME
+#-------------------------------------------------------------------
+Title[msg1]: qmail-send Messages (Success, Attempts) - MRTGHOSTNAME
 MaxBytes[msg1]: 10000
 AbsMax[msg1]: 20000
 Options[msg1]: growright,unknaszero,nopercent,gauge,pngdate
@@ -32,7 +33,7 @@ XSize[msg1]: 350
 YSize[msg1]: 150
 
 #-------------------------------------------------------------------
-Title[msg2]: Message Status (Success, Failure) - MRTGHOSTNAME
+Title[msg2]: qmail-send Message Status (Success, Failure) - MRTGHOSTNAME
 MaxBytes[msg2]: 10000
 AbsMax[msg2]: 100000
 Options[msg2]: growright,unknaszero,nopercent,gauge,pngdate
@@ -46,6 +47,40 @@ LegendO[msg2]: failures&nbsp;
 WithPeak[msg2]: ymwd
 XSize[msg2]: 350
 YSize[msg2]: 150
+
+#-------------------------------------------------------------------
+Title[concurrency]: qmail-send Local/Remote Concurrency - MRTGHOSTNAME
+MaxBytes[concurrency]: 500
+AbsMax[concurrency]: 10000
+Options[concurrency]: growright,unknaszero,nopercent,gauge,pngdate
+Target[concurrency]: `@libexecdir@/qmailmrtg -c @logdir@/deliver.25 @servicedir@/qmail-send.25`
+PageTop[concurrency]: <B>Local/Remote Concurrency</B><br>
+ShortLegend[concurrency]: concurrency
+YLegend[concurrency]: max concurrency
+Legend1[concurrency]: Local Concurrency&nbsp;
+Legend2[concurrency]: Remote Concurrency&nbsp;
+LegendI[concurrency]: local&nbsp;
+LegendO[concurrency]: remote&nbsp;
+WithPeak[concurrency]: ymwd
+XSize[concurrency]: 350
+YSize[concurrency]: 150
+
+#-------------------------------------------------------------------
+Title[ibits]: qmail-send Bits Transfered - MRTGHOSTNAME
+MaxBytes[ibits]: 1540000
+AbsMax[ibits]: 100000000
+Options[ibits]: growright,unknaszero,nopercent,gauge,pngdate
+Target[ibits]: `@libexecdir@/qmailmrtg -b @logdir@/deliver.25 @servicedir@/qmail-send.25`
+PageTop[ibits]: <B>Bits Transfered</B><br>
+ShortLegend[ibits]: bits
+YLegend[ibits]: bits/sec
+Legend1[ibits]: bits&nbsp;
+Legend2[ibits]: bits&nbsp;
+LegendI[ibits]: bits&nbsp;
+LegendO[ibits]: bits&nbsp;
+WithPeak[ibits]: ymwd
+XSize[ibits]: 350
+YSize[ibits]: 150
 
 #-------------------------------------------------------------------
 Title[queue1-size]: Queue Size (Messages/Todo) - MRTGHOSTNAME
@@ -80,40 +115,6 @@ LegendO[queue2-size]: remote&nbsp;
 WithPeak[queue2-size]: ymwd
 XSize[queue2-size]: 350
 YSize[queue2-size]: 150
-
-#-------------------------------------------------------------------
-Title[ibits]: Bits Transfered - MRTGHOSTNAME
-MaxBytes[ibits]: 1540000
-AbsMax[ibits]: 100000000
-Options[ibits]: growright,unknaszero,nopercent,gauge,pngdate
-Target[ibits]: `@libexecdir@/qmailmrtg -b @logdir@/deliver.25 @servicedir@/qmail-send.25`
-PageTop[ibits]: <B>Bits Transfered</B><br>
-ShortLegend[ibits]: bits
-YLegend[ibits]: bits/sec
-Legend1[ibits]: bits&nbsp;
-Legend2[ibits]: bits&nbsp;
-LegendI[ibits]: bits&nbsp;
-LegendO[ibits]: bits&nbsp;
-WithPeak[ibits]: ymwd
-XSize[ibits]: 350
-YSize[ibits]: 150
-
-#-------------------------------------------------------------------
-Title[concurrency]: Local/Remote Concurrency - MRTGHOSTNAME
-MaxBytes[concurrency]: 500
-AbsMax[concurrency]: 10000
-Options[concurrency]: growright,unknaszero,nopercent,gauge,pngdate
-Target[concurrency]: `@libexecdir@/qmailmrtg -c @logdir@/deliver.25 @servicedir@/qmail-send.25`
-PageTop[concurrency]: <B>Local/Remote Concurrency</B><br>
-ShortLegend[concurrency]: concurrency
-YLegend[concurrency]: max concurrency
-Legend1[concurrency]: Local Concurrency&nbsp;
-Legend2[concurrency]: Remote Concurrency&nbsp;
-LegendI[concurrency]: local&nbsp;
-LegendO[concurrency]: remote&nbsp;
-WithPeak[concurrency]: ymwd
-XSize[concurrency]: 350
-YSize[concurrency]: 150
 
 #-------------------------------------------------------------------
 Title[smtp]: SMTP Concurrency (Port 25) - MRTGHOSTNAME
@@ -424,6 +425,9 @@ LegendO[swap]: free&nbsp;
 WithPeak[swap]: ymwd
 #
 # $Log: indimail.mrtg.cfg.in,v $
+# Revision 1.5  2023-04-09 22:24:34+05:30  Cprogrammer
+# rearranged graphs
+#
 # Revision 1.4  2023-04-08 23:46:07+05:30  Cprogrammer
 # updated to print uptimes
 #

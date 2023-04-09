@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# $Id: journal2mrtg.in,v 1.1 2023-04-09 22:25:28+05:30 Cprogrammer Exp mbhangui $
+#
+host=$(uname -n)
+name=$(systemctl status $1 | sed -n 1p)
+uptime=$(systemctl status $1 | sed -n 3p | cut -d: -f2-)
+journalctl -o short-unix -u $1 | @prefix@/bin/tai2tai64n | sed -e "s{ $host $1.*]:{{g"| @libexecdir@/qmailmrtg $2 - | sed -n 1,2p
+printf "%s\n" "$uptime"
+printf "%s\n" "$name"
+
+#
+# $Log: journal2mrtg.in,v $
+# Revision 1.1  2023-04-09 22:25:28+05:30  Cprogrammer
+# Initial revision
+#
+#

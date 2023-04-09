@@ -184,7 +184,7 @@ indimailsbin_PROGRAMS = inlookup ischema tcplookup vdelivermail clearopensmtp \
 
 indimaillibexec_PROGRAMS = qmailmrtg updatefile
 indimaillibexec_SCRIPTS = mailzipper overquota.sh controlsync cputime \
-	myslave bogofilter-qfe iupgrade.sh ilocal_upgrade.sh
+	myslave bogofilter-qfe iupgrade.sh ilocal_upgrade.sh journal2mrtg
 
 indimailauthlib_PROGRAMS = authindi
 
@@ -563,6 +563,8 @@ overquota.sh: overquota.sh.in
 	$(edit) $@.in > $@
 ilocal_upgrade.sh: ilocal_upgrade.in
 	$(edit) ilocal_upgrade.in > $@
+journal2mrtg: journal2mrtg.in
+	$(edit) journal2mrtg.in > $@
 authgeneric: authgeneric.in
 	$(edit) $@.in > $@
 bogofilter-qfe: bogofilter-qfe.in

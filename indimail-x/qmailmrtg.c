@@ -1,5 +1,8 @@
 /*
  * $Log: qmailmrtg.c,v $
+ * Revision 1.6  2023-04-09 22:26:02+05:30  Cprogrammer
+ * read from stdin if logdir is -
+ *
  * Revision 1.5  2023-04-09 12:00:46+05:30  Cprogrammer
  * added case for generating status for inlookup Cache Hits
  *
@@ -63,7 +66,7 @@
 #include <no_of_days.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg.c,v 1.5 2023-04-09 12:00:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg.c,v 1.6 2023-04-09 22:26:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "qmailmrtg: fatal: "
@@ -150,6 +153,9 @@ process_file(char *file_name, char type, char inquery_type)
 	struct substdio ssin;
 
 	t1 = t2 = t3 = t4 = t5 = t6 = t7 = t8 = 0;
+	if (!file_name)
+		fd = 0;
+	else
 	if ((fd = open_read(file_name)) == -1) {
 		strerr_warn4(WARN, "error opening file ", file_name, "for reading: ", &strerr_sys);
 		return;
@@ -756,16 +762,26 @@ main(int argc, char **argv)
 		substdio_flush(subfdoutsmall);
 		return (0);
 	}
-	if (debug) {
-		subprintf(subfderr, "opening dir %s\n", logdir);
-		substdio_flush(subfderr);
-	}
-	if (!(mydir = opendir(logdir)))
-		strerr_die4sys(111, FATAL, "failed to open dir ", logdir, ": ");
-	while ((mydirent = readdir(mydir)) != NULL) {
-		if (mydirent->d_name[0] == '@') {
-			secs = get_tai(&mydirent->d_name[1]);
-			if (secs > start_time) {
+	if (str_diff(logdir, "-")) {
+		if (debug) {
+			subprintf(subfderr, "opening dir %s\n", logdir);
+			substdio_flush(subfderr);
+		}
+		if (!(mydir = opendir(logdir)))
+			strerr_die4sys(111, FATAL, "failed to open dir ", logdir, ": ");
+		while ((mydirent = readdir(mydir)) != NULL) {
+			if (mydirent->d_name[0] == '@') {
+				secs = get_tai(&mydirent->d_name[1]);
+				if (secs > start_time) {
+					qsprintf(&thefile, "%s/%s", logdir, mydirent->d_name);
+					if (debug) {
+						subprintf(subfderr, "processing file %s/%s\n", logdir, mydirent->d_name);
+						substdio_flush(subfderr);
+					}
+					process_file(thefile.s, TheType, inquery_type);
+				}
+			} else
+			if (!str_diffn(mydirent->d_name, "current", 8)) {
 				qsprintf(&thefile, "%s/%s", logdir, mydirent->d_name);
 				if (debug) {
 					subprintf(subfderr, "processing file %s/%s\n", logdir, mydirent->d_name);
@@ -773,17 +789,10 @@ main(int argc, char **argv)
 				}
 				process_file(thefile.s, TheType, inquery_type);
 			}
-		} else
-		if (!str_diffn(mydirent->d_name, "current", 8)) {
-			qsprintf(&thefile, "%s/%s", logdir, mydirent->d_name);
-			if (debug) {
-				subprintf(subfderr, "processing file %s/%s\n", logdir, mydirent->d_name);
-				substdio_flush(subfderr);
-			}
-			process_file(thefile.s, TheType, inquery_type);
 		}
-	}
-	closedir(mydir);
+		closedir(mydir);
+	} else
+		process_file(0, TheType, inquery_type);
 	/*
 	 * remember that mrtg gets called by cron every 5 minutes
 	 * To get per hour we multply the number by 12
