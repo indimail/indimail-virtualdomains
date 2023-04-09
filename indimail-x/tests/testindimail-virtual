@@ -315,11 +315,11 @@ function setup_svscan()
 		) > $servicedir/"$i"d/run
 		cp $servicedir/"$i"d/run $servicedir/"$i"d-ssl/run
 		(
-		echo "$tcpserver -v -o -H -l $HOSTNAME -R -u $INUID -g $INGID $LOCALIP $port1 \\"
+		echo "$tcpserver -o -H -l $HOSTNAME -R -u $INUID -g $INGID $LOCALIP $port1 \\"
 		echo "$prefix/sbin/"$i"login $IMAPMODULES $bindir/"$i"d Maildir"
 		) >> $servicedir/"$i"d/run
 		(
-		echo "$tcpserver -v -o -H -l $HOSTNAME -R -u $INUID -g $INGID,qcerts $LOCALIP $port2 \\"
+		echo "$tcpserver -o -H -l $HOSTNAME -R -u $INUID -g $INGID,qcerts $LOCALIP $port2 \\"
 		echo "$prefix/bin/couriertls -server -tcpd \\"
 		echo "$prefix/sbin/"$i"login $IMAPMODULES $bindir/"$i"d Maildir"
 		) >> $servicedir/"$i"d-ssl/run
@@ -361,7 +361,7 @@ function setup_svscan()
 	echo $certdir          > $servicedir/smtpd/variables/CERTDIR
 	echo $qmaildir/inquery > $servicedir/smtpd/variables/FIFODIR
 	echo $qmaildir         > $servicedir/smtpd/variables/DOMAINDIR
-	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail,indimail -v -HR 0 2025 $qmail_smtpd $HOSTNAME /usr/sbin/vchkpass /bin/false 2>&1\n" > $servicedir/smtpd/run
+	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail,indimail -HR 0 2025 $qmail_smtpd $HOSTNAME /usr/sbin/vchkpass /bin/false 2>&1\n" > $servicedir/smtpd/run
 	printf "#!/bin/sh\nexec $setuidgid $user $multilog t $logdir/smtpd\n" > $servicedir/smtpd/log/run
 	chmod +x $servicedir/smtpd/run
 	chmod +x $servicedir/smtpd/log/run
