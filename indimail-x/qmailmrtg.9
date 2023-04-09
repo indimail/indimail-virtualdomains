@@ -12,7 +12,7 @@ output suitable for Multi Router Traffic Gropher \fBMRTG\fR(1). If the
 optional \fIservicedir\fR is given, \fBqmailmrtg\fR prints the uptime for
 the \fBsupervise\fR(1) service configured in that directory.
 
-qmailmrtg processes only entries which are not older than 5 minutes than
+qmailmrtg processes entries which aren't more than 5 minutes older than
 the start time and not newer than the start time. The default interval of 5
 minutes can be changed by using the \fB\-I\fR option, the end time can be
 changed by specifying the \fB\-E\fR option. You can process the full log by
@@ -36,17 +36,18 @@ Turn on debugging
 
 .TP 3
 \fB\-E\fR \fIend_time\fR
-Use \fIend_time\fR as the timestamp of the last record to be processed.
+Use \fIend_time\fR as the maximum timestamp of records to be processed in
+logs in \fIlogdir\fR.
 
 .TP 3
 \fB\-I\fR \fIinterval\fR
 Change the time interval of records to process from the current time. As a
-default \fBqmailmrtg\fR processes only those records which are not older
-than 5 minutes than \fIend_time\fR.
+default \fBqmailmrtg\fR processes only records which are less than 5
+minutes older from \fIend_time\fR.
 
 .TP 3
 \fB\-f\fR
-Process all records found in the logs in \fIlogdir\fR.
+Process all records in logs present in \fIlogdir\fR.
 
 .TP 3
 \fB\-t\fR
