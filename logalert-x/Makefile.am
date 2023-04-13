@@ -41,22 +41,23 @@ edit = sed \
 logalert_SOURCES = lex.c utils.c log.c parser.y process.c monitor.c action.c sig.c user.c main.c 
 logalert_LDADD = @LEXLIB@ @LIBPCRE_LIBS@
 
-logclient_SOURCES=logclient.c tls.c
-logclient_CPPFLAGS=-Wno-empty-body
-logclient_LDADD = $(LIB_INDIMAIL) $(LIB_SSL) $(LIB_QMAIL)
+logclient_SOURCES=logclient.c
+logclient_CPPFLAGS=-DSERVER -Wno-empty-body -I/usr/include/qmail
+logclient_LDADD = $(LIB_SSL) $(LIB_QMAIL)
 
-logsrv_SOURCES=logsrv.c tls.c
-logsrv_CPPFLAGS=-Wno-empty-body
-logsrv_LDADD = $(LIB_INDIMAIL) $(LIB_SSL) $(LIB_QMAIL) $(LIB_RPC)
+logsrv_SOURCES=logsrv.c
+logsrv_CPPFLAGS=-Wno-empty-body -I/usr/include/qmail
+logsrv_LDADD = $(LIB_SSL) $(LIB_QMAIL) $(LIB_RPC)
 
 rpclog_LDADD=$(LIB_RPC)
 
 incrmesg_SOURCES=incrmesg.c
-incrmesg_CPPFLAGS=-Wno-empty-body
-incrmesg_LDADD = $(LIB_INDIMAIL) $(LIB_QMAIL)
+incrmesg_CPPFLAGS=-Wno-empty-body -I/usr/include/qmail
+incrmesg_LDADD = $(LIB_QMAIL)
 
 showbytes_SOURCES=showbytes.c
-showbytes_CPPFLAGS=-Wno-empty-body
+showbytes_CPPFLAGS=-Wno-empty-body -I/usr/include/qmail
+showbytes_LDADD = $(LIB_QMAIL)
 
 #$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).c $@ -- flex
 lex.c: lex.l parser.h

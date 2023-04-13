@@ -13,49 +13,48 @@
  * Initial revision
  *
  */
-#include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/types.h>
-#include "common.h"
+#include <substdio.h>
+#include <subfd.h>
+#include <strerr.h>
+#include <open.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: showbytes.c,v 1.4 2021-04-05 21:58:15+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: showbytes.c,v 1.4 2021-04-05 21:58:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
+
+#define FATAL "showbytes: fatal: "
+#define WARN  "showbytes: warn: "
 
 int
 main(int argc, char **argv)
 {
-	umdir_t bytes;
-	int fd;
+	size_t          bytes;
+	int             fd;
 
-	if (argc != 2) {
-		if (write(2, "usage: showbytes statusfile\n", 28) == -1) ;
-		_exit (1);
-	}
-	if ((fd = open(argv[1], O_RDONLY)) == -1) {
-		perror(argv[1]);
-		_exit (1);
-	}
-	if (lseek(fd, sizeof(pid_t), SEEK_SET) == -1) {
-		perror("lseek");
-		_exit (1);
-	}
-	if (read(fd, &bytes, sizeof(umdir_t)) == -1) {
-		perror("read");
-		_exit (1);
-	}
+	if (argc != 2)
+		strerr_die1x(100, "usage: showbytes statusfile");
+	if ((fd = open_read(argv[1])) == -1)
+		strerr_die3sys(111, FATAL, argv[1], ": ");
+	if (lseek(fd, sizeof(pid_t), SEEK_SET) == -1)
+		strerr_die4sys(111, FATAL, "unable to rewind ", argv[1], ": ");
+	if (read(fd, &bytes, sizeof(bytes)) == -1)
+		strerr_die4sys(111, FATAL, "read: ", argv[1], ": ");
 	close(fd);
-	printf("%d\n", (int) bytes);
-	fflush(stdout);
-	_exit (0);
+	subprintf(subfdout, "%d\n", (int) bytes);
+	_exit(substdio_flush(subfdout));
 }
 
 #ifndef	lint
 void
 getversion_showbytes_c()
 {
-	printf("%s\n", sccsid);
+	char           *x;
+
+	x = rcsid;
+	x++;
 }
 #endif

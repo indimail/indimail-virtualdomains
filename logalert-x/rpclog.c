@@ -123,14 +123,7 @@ get_options(int argc, char **argv, int *foreground)
 static void
 _msgout(char *msg)
 {
-#ifdef RPC_SVC_FG
-	if (_rpcpmstart)
-		(void) fprintf(stderr, "rpclog: %s\n", msg);
-	else
-		(void) fprintf(stderr, "rpclog: %s\n", msg); /*- could be syslog */
-#else
 	(void) fprintf(stderr, "rpclog: %s\n", msg);
-#endif
 }
 
 static void
@@ -156,13 +149,11 @@ closedown()
 }
 
 static void
-rpclog_1(rqstp, transp)
-	struct svc_req *rqstp;
-	register SVCXPRT *transp;
+rpclog_1(struct svc_req *rqstp, register SVCXPRT *transp)
 {
 	union
 	{
-		char           *send_message_1_arg;
+	char           *send_message_1_arg;
 	}               argument;
 	char           *result;
 	bool_t(*xdr_argument) (), (*xdr_result) ();
@@ -205,26 +196,15 @@ rpclog_1(rqstp, transp)
 }
 
 static int     *
-send_message_1(msg)
-	char          **msg;
+send_message_1(char **msg)
 {
 	static int      retval;
-	static char    *tmp;
-	int             len;
 
 	retval = 1;
 	if(*msg) {
-		len = strlen(*msg);
-		if (!(tmp = (char *) realloc(tmp, len + 1))) {
-			fprintf(stderr, "rpclog: realloc: %s/n", strerror(errno));
+		if (write(1, *msg, strlen(*msg)) == -1) {
+			fprintf(stderr, "write: /dev/console: %s/n", strerror(errno));
 			retval = 0;
-		} else {
-			strncpy(tmp, *msg, len);
-			tmp[len] = 0;
-			if (write(1, tmp, len) == -1) {
-				fprintf(stderr, "write: /dev/console: %s/n", strerror(errno));
-				retval = 0;
-			}
 		}
 	}
 	return &retval;
@@ -263,8 +243,6 @@ main(int argc, char **argv)
 			if (pid)
 				exit(0);
 			setsid();
-		}
-		if (!foreground) {
 			if ((fcount = (int) sysconf(_SC_OPEN_MAX)) == -1) {
 				fprintf(stderr, "rpclog: sysconf: %s\n", strerror(errno));
 				_exit(1);

@@ -37,13 +37,8 @@
  * Initial revision
  *
  */
-#include <stdio.h>
-#include <getopt.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
-#ifdef HAVE_STRING_H
-#include <string.h>
 #endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
@@ -61,92 +56,166 @@
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 #ifdef SOLARIS
 #include <sys/systeminfo.h>
 #endif
-#ifdef HAVE_QMAIL
-#include <qmail/tcpopen.h>
-#include <qmail/getEnvConfig.h>
+#ifdef HAVE_SSL
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <tls.h>
 #endif
-#include "tls.h"
+#ifdef HAVE_QMAIL
+#include <substdio.h>
+#include <subfd.h>
+#include <sgetopt.h>
+#include <getln.h>
+#include <alloc.h>
+#include <strerr.h>
+#include <tcpopen.h>
+#include <scan.h>
+#include <error.h>
+#include <env.h>
+#include <getEnvConfig.h>
+#endif
 
-#define MAXBUF 8192
 #define SEEKDIR PREFIX"/tmp/"
+#define WARN    "logclient: warn: " 
+#define FATAL   "logclient: fatal: " 
 
 #ifndef	lint
 static char     sccsid[] = "$Id: logclient.c,v 1.12 2022-12-06 12:05:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
-struct msgtable
+struct msgtab
 {
-	char            fname[MAXBUF];
+	char           *fn;
+	ino_t           inum;
 	int             fd;
-	FILE           *fp;
 	int             seekfd;
-	long            machcnt;
+	off_t           seek;
+	long            count;
 };
-
-struct msgtable *msghd;
-int             log_timeout;
-
-#ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN 64
-#endif
-
-#ifdef __STDC__
-int             main(int, char **);
-int             consclnt(char *, char **, char *);
-static int      IOplex(char *, int);
-static int      checkfiles(char *, FILE *, long *, int);
-#else
-int             main();
-int             consclnt();
-static int      IOplex();
-static int      checkfiles();
-#endif
-
-void
-usage(char *pname)
-{
+stralloc        seekfile = {0};
+struct msgtab  *msghd;
+char           *lhost, *seekdir = SEEKDIR;
+int             sleepinterval = 5;
 #ifdef HAVE_SSL
-	fprintf(stderr, "USAGE: %s [-n certfile] [-f] hostname logfile(s)\n", pname);
-#else
-	fprintf(stderr, "USAGE: %s [-f] hostname logfile(s)\n", pname);
+unsigned long   ctimeout;
 #endif
-	return;
-}
-
-int
-get_options(int argc, char **argv, char **hostname, char **certfile, int *foreground)
-{
-	int             c, errflag = 0;
-
-	while (!errflag && (c = getopt(argc, argv, "fn:")) != -1)
-	{
-		switch (c)
-		{
-		case 'f':
-			*foreground = 1;
-			break;
+unsigned long   dtimeout;
+#ifdef SERVER
+int             server_mode = 1;
+#endif
+static char    *usage =
+	"usage: logclient [options] logfile1 logfile2 ...\n"
+	"options\n"
+	"  -l localhost      - local hostname\n"
+	"  -d dtimeout       - data timeout\n"
 #ifdef HAVE_SSL
-		case 'n':
-			*certfile = optarg;
-			break;
+	"  -c ctimeout       - connect timeout\n"
+	"  -n certfile       - openssl certificate\n"
+	"  -c cafile         - openssl ca certificate\n"
+	"  -r crlfile        - openssl revocation list\n"
 #endif
-		default:
-			fprintf(stderr, "[%c] %d\n", c, __LINE__);
-			errflag = 1;
+	"  -v                - verbose output";
+
+static int
+checkfiles(struct msgtab *msgptr)
+{
+	int             fd, count;
+	long            seekval[1];
+	struct stat     st;
+
+	for (count = 0;; count++) {
+		if (access(msgptr->fn, F_OK)) {
+			if (errno == error_noent) {
+				sleep(5);
+				continue;
+			}
+			strerr_warn3(WARN, msgptr->fn, ": ", &strerr_sys);
+			return -1;
+		} else
+		if (count) { /* new file has been created */
+			close(msgptr->fd);
+			if ((fd = open_read(msgptr->fn)) == -1) {
+				strerr_warn3(WARN, msgptr->fn, ": ", &strerr_sys);
+				return -1;
+			}
+			if (dup2(fd, msgptr->fd) == -1) {
+				strerr_warn3(WARN, msgptr->fn, ": dup2: ", &strerr_sys);
+				return -1;
+			}
+			if (fd != msgptr->fd)
+				close(fd);
+			if (lseek(msgptr->seekfd, 0l, SEEK_SET) == -1) {
+				strerr_warn4(WARN, "unable to rewind ", msgptr->fn, ".seek: ", &strerr_sys);
+				return -1;
+			}
+			seekval[0] = 0l;
+			if (write(msgptr->seekfd, (char *) seekval, sizeof(long)) == -1) {
+				strerr_warn4(WARN, "unable to write to ", msgptr->fn, ".seek: ", &strerr_sys);
+				return -1;
+			}
+			return 1; /*- new file got created */
+		} else
 			break;
-		}
 	}
-	if (optind < argc)
-		*hostname = argv[optind++];
-	if (errflag)
-		return (1);
-	if (optind < argc)
-		return (0);
-	return (1);
+	if ((fd = open_read(msgptr->fn)) == -1) {
+		strerr_warn4(WARN, "open: ", msgptr->fn, ": ", &strerr_sys);
+		return -1;
+	}
+	if (fstat(fd, &st) == -1) {
+		strerr_warn4(WARN, "fstat: ", msgptr->fn, ": ", &strerr_sys);
+		return -1;
+	}
+	if (st.st_ino == msgptr->inum) {
+		if (st.st_size == msgptr->seek)/* Just an EOF on file */ {
+			close(fd);
+			return 0;
+		} else
+		if (st.st_size > msgptr->seek) { /* update happened after EOF */
+			close(fd);
+			return 2; /*- original file got updated */
+		} else { /*- file got truncated */
+			if (lseek(msgptr->fd, 0l, SEEK_SET) == -1) {
+				strerr_warn4(WARN, "unable to rewind ", msgptr->fn, ": ", &strerr_sys);
+				return -1;
+			}
+			if (lseek(msgptr->seekfd, 0l, SEEK_SET) == -1) {
+				strerr_warn4(WARN, "unable to rewind ", msgptr->fn, ".seek: ", &strerr_sys);
+				return -1;
+			}
+			seekval[0] = 0l;
+			if (write(msgptr->seekfd, (char *) seekval, sizeof(long)) == -1) {
+				strerr_warn4(WARN, "unable to write to ", msgptr->fn, ".seek: ", &strerr_sys);
+				return -1;
+			}
+			return 1;
+		}
+	} else { /* new file has been created */
+		msgptr->inum = st.st_ino;
+		close(msgptr->fd);
+		if (dup2(fd, msgptr->fd) == -1) {
+			strerr_warn3(WARN, msgptr->fn, ": dup2: ", &strerr_sys);
+			return -1;
+		}
+		if (fd != msgptr->fd)
+			close(fd);
+		if (lseek(msgptr->seekfd, 0l, SEEK_SET) == -1) {
+			strerr_warn4(WARN, "unable to rewind ", msgptr->fn, ".seek: ", &strerr_sys);
+			return -1;
+		}
+		seekval[0] = 0l;
+		if (write(msgptr->seekfd, (char *) seekval, sizeof(long)) == -1) {
+			strerr_warn4(WARN, "unable to write to ", msgptr->fn, ".seek: ", &strerr_sys);
+			return -1;
+		}
+		return 1;
+	}
 }
 
 int
@@ -155,302 +224,325 @@ main(int argc, char **argv)
 #ifdef HOSTVALIDATE	
 	struct hostent *hostptr;
 #endif
-	int             foreground;
-	char           *ptr, *hostname, *certfile = (char *) 0;
+	int             c, match_cn = 0;
+	char           *remote, *certfile = NULL, *cafile = NULL,
+				   *crlfile = NULL;
+	char            optstr[18];
 
-	if ((ptr = strrchr(argv[0], '/')))
-		ptr++;
-	else
-		ptr = argv[0];
-	if (get_options(argc, argv, &hostname, &certfile, &foreground)) {
-		usage(ptr);
-		return (1);
-	}
-#ifdef HOSTVALIDATE	
-	if (!(hostptr = gethostbyname(argv[1])))
-	{
-		fprintf(stderr, "%s: Invalid hostname\n", argv[1]);
-		return (1);
-	}
-	endhostent();
-#endif	
-	if (!(msghd = (struct msgtable *) malloc(sizeof(struct msgtable) * (argc - 1))))
-	{
-		perror("malloc");
-		return(1);
-	}
-	return(consclnt(hostname, argv + optind, certfile));
-}
-
-int
-consclnt(char *hostname, char **fname, char *clientcert)
-{
-	char            lhost[MAXHOSTNAMELEN], seekfile[MAXBUF];
-	int             sockfd, idx, fcount;
-	long            seekval[2];
-	struct msgtable *msgptr;
-	char           *ptr, *seekdir;
-	char          **fptr;
-
-#ifdef SOLARIS
-	(void) sysinfo(SI_HOSTNAME, lhost, MAXHOSTNAMELEN);
-#else
-	(void) gethostname(lhost, MAXHOSTNAMELEN);
-#endif
-	if ((fcount = (int) sysconf(_SC_OPEN_MAX)) == -1)
-	{
-		fprintf(stderr, "sysconf: %s\n", strerror(errno));
-		return(1);
-	}
+	c = 0;
+	c += fmt_strn(optstr + c, "ld:i:s:", 7);
 #ifdef SERVER
-	switch (fork())
-	{
-	case -1:
-		perror("fork");
-		return (1);
-	case 0:
-		for(idx = 0;idx < fcount;idx++)
-			close(idx);
-		setsid();
-		break;
-	default:
-		return (0);
-	}
+	c += fmt_strn(optstr + c, "f", 1);
 #endif
-	for(fcount = 0, fptr = fname, msgptr = msghd;*fptr;fptr++)
-	{
-		if ((msgptr->fd = open(*fptr, O_RDONLY)) == -1)
-		{
-			perror(*fptr);
-			continue;
-		} else
-		if (!(msgptr->fp = fdopen(msgptr->fd, "r")))
-		{
-			perror(*fptr);
-			close(msgptr->fd);
-			continue;
-		}
-		fcount++;
-		(void) strcpy(msgptr->fname, *fptr);
-		if ((ptr = strrchr(*fptr, '/')))
-			ptr++;
-		else
-			ptr = *fptr;
-		if (!(seekdir = getenv("SEEKDIR")))
-			seekdir = SEEKDIR;
-		(void) sprintf(seekfile, "%s/%s.seek", seekdir, ptr);
-		if (!access(seekfile, R_OK))
-		{
-			if ((msgptr->seekfd = open(seekfile, O_RDWR)) == -1)
-			{
-				perror(seekfile);
-				return (1);
-			}
-			if (read(msgptr->seekfd, seekval, sizeof(seekval)) == -1)
-				return (1);
-			fseek(msgptr->fp, seekval[0], SEEK_SET);
-			msgptr->machcnt = seekval[1];
-		} else
-		if ((msgptr->seekfd = open(seekfile, O_CREAT | O_RDWR, 0644)) == -1)
-		{
-			perror(seekfile);
-			return (1);
-		} else
-		{
-			seekval[0] = 0l;
-			seekval[1] = msgptr->machcnt = 0l;
-		}
-		msgptr++;
-	}
-	*(msgptr->fname) = 0;
-	msgptr->fd = -1;
-	msgptr->seekfd = -1;
-	if (!fcount) {
-		fprintf(stderr, "No log files opened\n");
-		return (1);
-	}
-#ifdef DEBUG
-	for(msgptr = msghd;msgptr->fd != -1;msgptr++)
-	{
-		printf("%s\n", msgptr->fname);
-		printf("%d\n", msgptr->fd);
-		printf("%d\n", msgptr->seekfd);
-	}
+#ifdef HAVE_SSL
+	c += fmt_strn(optstr + c, "c:n:C:r:m", 9);
 #endif
-	for (;;sleep(5))
-	{
-		for (;;)
+	if ((c + 1) > sizeof(optstr))
+		strerr_die2x(100, FATAL, "allocated space for getopt string not enough");
+	optstr[c] = 0;
+	while ((c = getopt(argc, argv, optstr)) != opteof) {
+		switch (c)
 		{
-			if ((sockfd = tcpopen(hostname, "logsrv", 6340)) == -1)
-			{
-				if (errno == EINVAL)
-					return(1);
-				(void) sleep(5);
-				continue;
-			}
+		case 'l':
+			lhost = optarg;
+			break;
+		case 's':
+			seekdir = optarg;
+			break;
+		case 'i':
+			scan_int(optarg, &sleepinterval);
+			break;
+		case 'd':
+			scan_ulong(optarg, &dtimeout);
+			break;
+#ifdef SERVER
+		case 'f':
+			server_mode = 0;
+			break;
+#endif
+#ifdef HAVE_SSL
+		case 'c':
+			scan_ulong(optarg, &ctimeout);
+			break;
+		case 'n':
+			certfile = optarg;
+			break;
+		case 'C':
+			cafile = optarg;
+			break;
+		case 'r':
+			crlfile = optarg;
+			break;
+		case 'm':
+			match_cn = 1;
+			break;
+#endif
+		default:
+			strerr_die1x(100, usage);
 			break;
 		}
-#ifdef HAVE_SSL
-	if (clientcert && tls_init(sockfd, clientcert))
-		return (-1);
-#endif
-		/*- send my hostname */
-		idx = strlen(lhost) + 1;
-		getEnvConfigInt(&log_timeout, "LOGSRV_TIMEOUT", 120);
-		if (safewrite(sockfd, lhost, idx, log_timeout) != idx)
-		{
-			fprintf(stderr, "unable to send hostname to %s\n", lhost);
-#ifdef HAVE_SSL
-			ssl_free();
-#endif
-			exit (1);
-		}
-		IOplex(lhost, sockfd);
-		(void) close(sockfd);
-	} /* for(;;) */
+	}
+	if (!lhost || (argc - optind) < 2)
+		strerr_die1x(100, usage);
+	remote = argv[optind++];
+#ifdef HOSTVALIDATE	
+	if (!(hostptr = gethostbyname(remote)))
+		strerr_die2x(100, remote, " not found in /etc/hosts");
+	endhostent();
+#endif	
+	if (!(msghd = (struct msgtab *) alloc(sizeof(struct msgtab) * (argc - optind + 1)))) {
+		strerr_warn2(WARN, "out of memory", 0);
+		return 1;
+	}
+	return (consclnt(remote, argv + optind, certfile, cafile, crlfile, match_cn));
 }
 
 /* function for I/O multiplexing */
 static int
-IOplex(char *lhost, int sockfd)
+transmit_logs(char *lhost, int sfd)
 {
-	register int    Bytes;
-	int             sleepinterval;
-	char            Buffer[MAXBUF];
+	int             n, i, match, flag;
 	fd_set          FdSet;
+	struct stat     st;
 	long            seekval[2];
-	struct msgtable *msgptr;
-	register char  *Ptr;
+	struct msgtab  *msgptr;
+	substdio        ssin;
+	char            inbuf[512], ack[1];
+	static stralloc line = {0}, buf = {0};
+	struct timeval  tm;
 
-	if (!(Ptr = getenv("SLEEPINTERVAL")))
-		sleepinterval = 5;
-	else
-		sleepinterval = atoi(Ptr);
-	for (;;)
-	{
-		/* include message files and sockfd in file descriptor set */
+	for (;;) {
+		/* include message files and sfd in file descriptor set */
 		FD_ZERO(&FdSet);
-		for(msgptr = msghd;msgptr->fd != -1;msgptr++)
-			FD_SET(msgptr->fd, &FdSet);
-		FD_SET(sockfd, &FdSet);
-		if ((Bytes = select(sockfd + 1, &FdSet, (fd_set *) 0, (fd_set *) 0, 
-			(struct timeval *) 0)) == -1)
-		{
+		for (msgptr = msghd; msgptr->fd != -1; msgptr++) {
+			if (fstat(msgptr->fd, &st) == -1) {
+				strerr_warn4(WARN, "fstat: ", msgptr->fn, ": ", &strerr_sys);
+				break;
+			}
+			if (st.st_size != msgptr->seek)
+				FD_SET(msgptr->fd, &FdSet);
+		}
+		FD_SET(sfd, &FdSet);
+		tm.tv_sec = sleepinterval;
+		tm.tv_usec = 0;
+		if ((n = select(sfd + 1, &FdSet, (fd_set *) 0, (fd_set *) 0, &tm)) == -1) {
 			if (errno == EINTR)
 				continue;
-			fprintf(stderr, "select: %s\n", strerror(errno));
-			(void) sslwrt(sockfd, log_timeout, "select: %s\n", strerror(errno));
-			return (-1);
+			strerr_warn2(WARN, "select: ", &strerr_sys);
+#ifdef HAVE_SSL
+			ssl_free();
+#endif
+			break;
 		}
-		if (!Bytes)
+		if (!n) /*- timeout */
 			continue;
-		if (FD_ISSET(sockfd, &FdSet))
-		{
-			for (;;)
-			{
+		if (FD_ISSET(sfd, &FdSet)) {
+			for (;;) {
 				errno = 0;
-				if ((Bytes = saferead(sockfd, Buffer, MAXBUF, log_timeout)) == -1)
-				{
+				if ((n = tlsread(sfd, inbuf, sizeof(inbuf), dtimeout)) == -1) {
 					if (errno == EINTR)
 						continue;
-					return (-1);
+					return -1;
 				}
 				break;
 			}
-			if (!Bytes)
-				return (0);
+			if (!n)
+				return 0;
 		}
-		for(msgptr = msghd;msgptr->fd != -1;msgptr++)
-		{
+		for (msgptr = msghd; msgptr->fd != -1; msgptr++) {
 			if (FD_ISSET(msgptr->fd, &FdSet))
-			{
-#ifdef DEBUG
-				printf("Selecting file[%s] fd[%d] seekfd[%d]\n", msgptr->fname, msgptr->fd, msgptr->seekfd);
-#endif
-				for (;;)
-				{
-					errno = 0;
-					if (!fgets(Buffer, MAXBUF - 2, msgptr->fp) || feof(msgptr->fp))
+				break;
+		}
+		for (msgptr = msghd;msgptr->fd != -1;msgptr++) {
+			if (!FD_ISSET(msgptr->fd, &FdSet))
+				continue;
+			substdio_fdbuf(&ssin, read, msgptr->fd, inbuf, sizeof(inbuf));
+			if (msgptr->seek) {
+				if (lseek(msgptr->fd, msgptr->seek, SEEK_SET) == -1) {
+					strerr_warn4(WARN, "unable to seek ", msgptr->fn, ": ", &strerr_sys);
+					return -1;
+				}
+			}
+			for (flag = 0;;) {
+				if (getln(&ssin, &line, &match, '\n') == -1) {
+					strerr_warn4(WARN, "read: ", msgptr->fn, ": ", &strerr_sys);
+					return -1;
+				}
+				if (!line.len) {
+					i = checkfiles(msgptr);
+					switch (i)
 					{
-						/*
-						 * If message file has been moved than update
-						 * seekfile
-						 */
-						(void) clearerr(msgptr->fp);
-						if (checkfiles(msgptr->fname, msgptr->fp, seekval, msgptr->seekfd))
-						{
-							if (sslwrt(sockfd, log_timeout, "%s %d Update after EOF or File changed\n", lhost, (msgptr->machcnt)++) == -1)
-								return(-1);
-							continue;
-						}
-						else
-							break;
-					} else
-					{
-						seekval[0] = ftell(msgptr->fp);
-						if (sslwrt(sockfd, log_timeout, "%s %ld %s", lhost, (msgptr->machcnt)++, Buffer) == -1)
-							return (-1);
-						seekval[1] = msgptr->machcnt;
-						if (lseek(msgptr->seekfd, 0, SEEK_SET)) ;
-						if (write(msgptr->seekfd, seekval, sizeof(seekval)) == -1) ;
+					case 0:
+						FD_CLR(msgptr->fd, &FdSet);
+						break;
+					case 1: /*- new file got created, truncated */
+						msgptr->seek = 0;
+						continue;
+					case 2: /*- original file got updated */
+						ssin.p = 0;
+						continue;
 					}
-				} /* end of for(;;) */
-			}	/* End of FD_ISSET(masterfd) */
-		} /* end of for(msgptr = msghd;;) */
-		sleep(sleepinterval);
-	}	/* end of for(;;) */
+					break;
+				}
+				if (!stralloc_0(&line)) {
+					strerr_warn2(WARN, "out of memory", 0);
+					break;
+				}
+				line.len--;
+				qsprintf(&buf, "%s %ld %s", msgptr->fn, (msgptr->count)++, line.s);
+				if (tlswrite(sfd, buf.s, buf.len - 1, dtimeout) == -1) {
+					strerr_warn2(WARN, "unable to transmit log to loghost: ", &strerr_sys);
+					break;
+				}
+				if (FD_ISSET(sfd, &FdSet)) {
+					for (;;) {
+						if ((n = tlsread(sfd, ack, sizeof(ack), dtimeout)) == -1) {
+							if (errno == EINTR)
+								continue;
+							strerr_warn2(WARN, "unable to read ack from loghost: ", &strerr_sys);
+							ack[0] = '0';
+						} else
+						if (!n) {
+							strerr_warn2(WARN, "loghost closed connection: ", &strerr_sys);
+							ack[0] = '0';
+						}
+						break;
+					}
+					if (ack[0] != '1') {
+						strerr_warn2(WARN, "loghost acknowledged error", 0);
+						break;
+					}
+				}
+				flag = 1;
+				if ((msgptr->seek = lseek(msgptr->fd, (off_t) 0, SEEK_CUR)) == -1) {
+					strerr_warn4(WARN, "unable to get current position ", msgptr->fn, ": ", &strerr_sys);
+					return -1;
+				}
+			} /* end of for (flag = 0;;) */
+			if (flag) { /*- some data was transmitted to loghost */
+				if (lseek(msgptr->seekfd, 0, SEEK_SET) == -1) {
+					strerr_warn4(WARN, "unable to rewind ", msgptr->fn, ".seek: ", &strerr_sys);
+					return -1;
+				}
+				seekval[0] = msgptr->seek;
+				seekval[1] = msgptr->count;
+				if (write(msgptr->seekfd, (char *) seekval, 2 * sizeof(long)) == -1)
+					strerr_warn4(WARN, "unable to write to ", msgptr->fn, ".seek:", &strerr_sys);
+			}
+		} /* end of for (msgptr = msghd;;) */
+	} /* end of for (;;) */
 }
 
-static int
-checkfiles(char *fname, FILE *msgfp, long *seekval, int seekfd)
+int
+consclnt(char *remote, char **argv, char *clientcert, char *cafile, char *crlfile, int match_cn)
 {
-	int             fd, msgfd, count;
-	long            tmpseekval;
+	int             sfd, idx;
+	long            seekval[2];
+	struct msgtab  *msgptr;
+	struct stat     st;
+	char          **fptr;
+#ifdef HAVE_SSL
+	SSL            *ssl;
+	SSL_CTX        *ctx;
+	char           *ciphers;
+#endif
 
-	msgfd = fileno(msgfp);
-	for (count = 0;; count++)
-	{
-		if ((fd = open(fname, O_RDONLY)) == -1)
+#ifdef SERVER
+	if (server_mode) {
+		switch (fork())
 		{
-			sleep(5);
-			continue;
-		} else
-		if (count)	/* new message file has been created */
-		{
-			(void) close(msgfd);
-			(void) dup2(fd, msgfd);
-			if (fd != msgfd)
-				(void) close(fd);
-			rewind(msgfp);
-			if (lseek(seekfd, 0l, SEEK_SET)) ;
-			seekval[0] = 0l;
-			if (write(seekfd, seekval, sizeof(seekval)) == -1) ;
-			return (1);
-		} else
+		case -1:
+			perror("fork");
+			return 1;
+		case 0:
+			close(0);
+			close(1);
+			close(2);
+			setsid();
 			break;
+		default:
+			return 0;
+		}
 	}
-	tmpseekval = lseek(fd, 0l, SEEK_END);
-	if (tmpseekval == seekval[0])/* Just an EOF on message file */
-	{
-		(void) close(fd);
-		return (0);
-	} else
-	if (tmpseekval > seekval[0]) /* update happened after EOF */
-	{
-		close(fd);
-		return(1);
-	} else	/* new message file has been created */
-	{
-		(void) close(msgfd);
-		(void) dup2(fd, msgfd);
-		if (fd != msgfd)
-			(void) close(fd);
-		rewind(msgfp);
-		(void) lseek(seekfd, 0l, SEEK_SET);
-		seekval[0] = 0l;
-		if (write(seekfd, &seekval, sizeof(seekval)) == -1) ;
-		return (1);
+#endif
+	for (fptr = argv, msgptr = msghd; *fptr; msgptr++, fptr++) {
+		msgptr->fn = *fptr;
+		if (stat(msgptr->fn, &st) == -1)
+			strerr_die4sys(111, FATAL, "stat: ", msgptr->fn, ": ");
+		msgptr->inum = st.st_ino;
+		if (qsprintf(&seekfile, "%s/%ld.seek", seekdir, msgptr->inum) == -1)
+			strerr_die2x(111, FATAL, "out of memory");
+		if ((msgptr->fd = open_read(msgptr->fn)) == -1)
+			strerr_die4sys(111, FATAL, "open: ", msgptr->fn, ": ");
+		if (!access(seekfile.s, R_OK)) {
+			if ((msgptr->seekfd = open_readwrite(seekfile.s)) == -1)
+				strerr_die4sys(111, FATAL, "open: ", seekfile.s, ": ");
+			if (read(msgptr->seekfd, (char *) seekval, 2 * sizeof(long)) == -1)
+				strerr_die4sys(111, FATAL, "read: ", seekfile.s, ": ");
+			msgptr->seek = seekval[0];
+			msgptr->count = seekval[1];
+		} else
+		if ((msgptr->seekfd = open(seekfile.s, O_CREAT | O_RDWR, 0644)) == -1)
+			strerr_die4sys(111, FATAL, "open read+write: ", seekfile.s, ": ");
+		else {
+			msgptr->seek = 0l;
+			msgptr->count = 0l;
+		}
+	} /* for (fptr = argv, msgptr = msghd; *fptr; msgptr++, fptr++) */
+	msgptr->fn = NULL;
+	msgptr->fd = -1;
+	msgptr->seekfd = -1;
+#ifdef DEBUG
+	for (msgptr = msghd;msgptr->fd != -1;msgptr++) {
+		subprintf(subfderr, "filename: %s\n", msgptr->fn);
+		subprintf(subfderr, "file  fd: %d\n", msgptr->fd);
+		subprintf(subfderr, "seek  fd: %d\n", msgptr->seekfd);
+		subprintf(subfderr, "seek val: %ld\n", msgptr->seek);
+		subprintf(subfderr, "count   : %ld\n", msgptr->count);
+		substdio_flush(subfderr);
 	}
+#endif
+	for (;;sleep(5)) {
+		for (;;) {
+			if ((sfd = tcpopen(remote, "logsrv", 6340)) == -1) {
+				if (errno == EINVAL)
+					return 1;
+				sleep(5);
+				continue;
+			}
+			break;
+		}
+#ifdef HAVE_SSL
+		if (clientcert) {
+			if (!(ciphers = env_get("TLS_CIPHER_LIST")))
+				ciphers = "PROFILE=SYSTEM";
+			if (!(ctx = tls_init(0, clientcert, cafile, crlfile, ciphers, client)))
+				return -1;
+			if (!(ssl = tls_session(ctx, sfd))) {
+				SSL_CTX_free(ctx);
+				return -1;
+			}
+			SSL_CTX_free(ctx);
+			ctx = NULL;
+			if (tls_connect(ctimeout, sfd, sfd, ssl, match_cn ? remote : 0) == -1)
+				return -1;
+		}
+#endif
+		/*- send my hostname and a null byte */
+		idx = str_len(lhost) + 1;
+		if (tlswrite(sfd, lhost, idx, dtimeout) != idx) {
+			close(sfd);
+			strerr_warn4(WARN, "unable to send hostname to ", remote, ": ", &strerr_sys);
+#ifdef HAVE_SSL
+			ssl_free();
+#endif
+		}
+		transmit_logs(lhost, sfd);
+		close(sfd);
+#ifdef HAVE_SSL
+		ssl_free();
+#endif
+	} /* for (;;) */
 }
 
 #ifndef	lint
