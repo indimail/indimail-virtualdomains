@@ -59,7 +59,7 @@ case "$host" in
     ;;
 
 *-*-freebsd*)
-	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/includ/qmail"
+	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/include/qmail"
 	CFLAGS="$CFLAGS -O3 -Wall -fPIC"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
     ;;
@@ -105,8 +105,8 @@ then
     AC_CHECK_HEADERS([rpc/types.h])
 elif test " $have_tirpc" = " yes"
 then
-    CPPFLAGS="-I/usr/include/tirpc $CXXFLAGS"
-    CXXFLAGS="-I/usr/include/tirpc $CXXFLAGS"
+    CPPFLAGS="$CPPFLAGS -I/usr/include/tirpc $CXXFLAGS"
+    CXXFLAGS="$CXXFLAGS -I/usr/include/tirpc $CXXFLAGS"
     AC_CHECK_HEADERS([tirpc/rpc/rpc.h tirpc/rpc/types.h])
 else
   AC_MSG_ERROR(Could not find any usable rpc library.)
@@ -126,8 +126,8 @@ AC_ARG_WITH(libpcre,
        yes)
        ;;
        *)
-    CXXFLAGS="-I$with_libpcre/include $CXXFLAGS"
-    LDFLAGS="-L$with_libpcre/lib $LDFLAGS"
+    CXXFLAGS="$CXXFLAGS -I$with_libpcre/include $CXXFLAGS"
+    LDFLAGS="$LDFLAGS -L$with_libpcre/lib $LDFLAGS"
     have_pcre=yes
         ;;
   esac]
