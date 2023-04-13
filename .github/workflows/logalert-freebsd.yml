@@ -35,5 +35,4 @@ jobs:
         prepare: pkg install -y curl automake autoconf libtool pkgconf mysql80-server mysql80-client
         run: |
           cd libqmail; ./default.configure; make; make install-strip
-          cd ../main/indimail-x; ./default.configure; make install-strip
           cd ../logalert-x; ./default.configure; make
