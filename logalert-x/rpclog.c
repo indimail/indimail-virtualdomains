@@ -1,5 +1,8 @@
 /*
  * $Log: rpclog.c,v $
+ * Revision 1.8  2023-04-14 09:43:44+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.7  2021-04-05 21:58:09+05:30  Cprogrammer
  * fixed compilation errors
  *
@@ -22,7 +25,6 @@
  * Initial revision
  *
  */
-#include <stdio.h>
 #include <time.h>
 #include <errno.h>
 #ifdef HAVE_CONFIG_H
@@ -63,6 +65,10 @@
 #include <tirpc/rpc/types.h>
 #endif
 #endif
+#include <strerr.h>
+
+#define FATAL "rpclog: fatal: "
+#define WARN  "rpclog: warn: "
 
 #ifdef DEBUG
 #define RPC_SVC_FG
@@ -75,7 +81,7 @@
 #define SEND_MESSAGE ((u_long)1)
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rpclog.c,v 1.7 2021-04-05 21:58:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rpclog.c,v 1.8 2023-04-14 09:43:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct CONSOLE_MSG
@@ -118,12 +124,6 @@ get_options(int argc, char **argv, int *foreground)
 	if (errflag)
 		return (1);
 	return (0);
-}
-
-static void
-_msgout(char *msg)
-{
-	(void) fprintf(stderr, "rpclog: %s\n", msg);
 }
 
 static void
@@ -187,10 +187,8 @@ rpclog_1(struct svc_req *rqstp, register SVCXPRT *transp)
 	result = (*local) (&argument, rqstp);
 	if (result != NULL && !svc_sendreply(transp, (xdrproc_t) xdr_result, result))
 		svcerr_systemerr(transp);
-	if (!svc_freeargs(transp, (xdrproc_t) xdr_argument, (caddr_t) &argument)) {
-		_msgout("unable to free arguments");
-		exit(1);
-	}
+	if (!svc_freeargs(transp, (xdrproc_t) xdr_argument, (caddr_t) &argument))
+		strerr_die2x(111, FATAL, "svc_freeargs: unable to free arguments");
 	_rpcsvcdirty = 0;
 	return;
 }
@@ -201,11 +199,9 @@ send_message_1(char **msg)
 	static int      retval;
 
 	retval = 1;
-	if(*msg) {
-		if (write(1, *msg, strlen(*msg)) == -1) {
-			fprintf(stderr, "write: /dev/console: %s/n", strerror(errno));
-			retval = 0;
-		}
+	if(*msg && write(1, *msg, strlen(*msg)) == -1) {
+		strerr_warn2(FATAL, "write: /dev/console: ", &strerr_sys);
+		retval = 0;
 	}
 	return &retval;
 }
@@ -215,7 +211,7 @@ main(int argc, char **argv)
 {
 	register SVCXPRT *transp = (SVCXPRT *) 0;
 	struct sockaddr_in saddr;
-	int             sock, fcount, proto, foreground, asize = sizeof(saddr);
+	int             sock, proto, foreground, asize = sizeof(saddr);
 
 	if (getsockname(0, (struct sockaddr *) & saddr, (socklen_t *) &asize) == 0) {
 		int             ssize = sizeof(int);
@@ -231,34 +227,22 @@ main(int argc, char **argv)
 #ifndef RPC_SVC_FG
 		int             i, pid;
 
-		if (get_options(argc, argv, &foreground)) {
-			fprintf(stderr, "Usage: rpclog [-s]\n");
-			return (1);
-		}
+		if (get_options(argc, argv, &foreground))
+			strerr_die2x(100, FATAL, "Usage: rpclog [-s]");
 		if (!foreground) {
-			if ((pid = fork()) < 0) {
-				perror("cannot fork");
-				exit(1);
-			}
+			if ((pid = fork()) < 0)
+				strerr_die2sys(111, FATAL, "unable to fork");
 			if (pid)
 				exit(0);
 			setsid();
-			if ((fcount = (int) sysconf(_SC_OPEN_MAX)) == -1) {
-				fprintf(stderr, "rpclog: sysconf: %s\n", strerror(errno));
-				_exit(1);
-			}
-			for (i = 0; i < fcount; i++)
-				(void) close(i);
-			if ((i = open("/dev/console", O_WRONLY)) == -1) {
-				fprintf(stderr, "rpclog: /dev/console: %s\n", strerror(errno));
-				_exit(1);
-			}
-			if (dup2(i, 1) == -1 || dup2(i, 2) == -1) {
-				fprintf(stderr, "rpclog: dup2: %s\n", strerror(errno));
-				_exit(1);
-			}
-			if (!i)
-				close(i);
+			close(0);
+			close(1);
+			close(2);
+			if ((i = open("/dev/console", O_WRONLY)) == -1)
+				strerr_die2sys(111, FATAL, "/dev/console: ");
+			if (dup2(i, 1) == -1 || dup2(i, 2) == -1)
+				strerr_die2sys(111, FATAL, "dup2: ");
+			close(i);
 		}
 #endif
 		sock = RPC_ANYSOCK;
@@ -266,42 +250,29 @@ main(int argc, char **argv)
 	}
 
 	if ((_rpcfdtype == 0) || (_rpcfdtype == SOCK_DGRAM)) {
-		transp = (SVCXPRT *) svcudp_create(sock);
-		if (transp == (SVCXPRT *) NULL) {
-			_msgout("cannot create udp service.");
-			exit(1);
-		}
+		if ((transp = (SVCXPRT *) svcudp_create(sock)) == (SVCXPRT *) NULL) 
+			strerr_die2sys(111, FATAL, "cannot create RPC udp service transport: ");
 		if (!_rpcpmstart)
 			proto = IPPROTO_UDP;
-		if (!svc_register(transp, RPCLOG, LOGVERS, rpclog_1, proto)) {
-			_msgout("unable to register (RPCLOG, LOGVERS, udp).");
-			exit(1);
-		}
+		if (!svc_register(transp, RPCLOG, LOGVERS, rpclog_1, proto))
+			strerr_die2sys(111, FATAL, "unable to register (RPCLOG, LOGVERS, udp).");
 	}
 	if ((_rpcfdtype == 0) || (_rpcfdtype == SOCK_STREAM)) {
-		transp = (SVCXPRT *) svctcp_create(sock, 0, 0);
-		if (transp == (SVCXPRT *) NULL) {
-			_msgout("cannot create tcp service.");
-			exit(1);
-		}
+		if ((transp = (SVCXPRT *) svctcp_create(sock, 0, 0)) == (SVCXPRT *) NULL)
+			strerr_die2sys(111, FATAL, "cannot create RPC tcp service transport: ");
 		if (!_rpcpmstart)
 			proto = IPPROTO_TCP;
-		if (!svc_register(transp, RPCLOG, LOGVERS, rpclog_1, proto)) {
-			_msgout("unable to register (RPCLOG, LOGVERS, tcp).");
-			exit(1);
-		}
+		if (!svc_register(transp, RPCLOG, LOGVERS, rpclog_1, proto))
+			strerr_die2sys(111, FATAL, "unable to register (RPCLOG, LOGVERS, tcp).");
 	}
-	if (transp == (SVCXPRT *) NULL) {
-		_msgout("could not create a handle");
-		exit(1);
-	}
-	if (_rpcpmstart) {
-		(void) signal(SIGALRM, closedown);
-		(void) alarm(_RPCSVC_CLOSEDOWN);
+	if (transp == (SVCXPRT *) NULL)
+		strerr_die2sys(111, FATAL, "cannot create RPC service transport: ");
+	if (_rpcpmstart) { /*- started by portmapper */
+		signal(SIGALRM, closedown);
+		alarm(_RPCSVC_CLOSEDOWN);
 	}
 	svc_run();
-	_msgout("svc_run returned");
-	exit(1);
+	strerr_die2x(1, FATAL, "svc_run returned");
 	/* NOTREACHED */
 }
 

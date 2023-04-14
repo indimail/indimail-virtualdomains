@@ -59,10 +59,15 @@
 #include <stralloc.h>
 #include <fmt.h>
 #include <strerr.h>
+#include <getln.h>
+#include <qprintf.h>
+#include <timeoutwrite.h>
+#include <scan.h>
+#include <open.h>
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.21 2022-12-06 12:24:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.22 2023-04-14 09:43:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*-
@@ -103,25 +108,6 @@ SigTerm()
 	strerr_die2x(0, FATAL, "ARGH!! Committing suicide on SIGTERM");
 }
 
-static void
-SigChild(void)
-{
-	int             status;
-	pid_t           pid;
-
-	for (;(pid = waitpid(-1, &status, WNOHANG | WUNTRACED));) {
-#ifdef ERESTART
-		if (pid == -1 && (errno == EINTR || errno == ERESTART))
-#else
-		if (pid == -1 && errno == EINTR)
-#endif
-			continue;
-		break;
-	} /*- for (; pid = waitpid(-1, &status, WNOHANG | WUNTRACED);) -*/
-	signal(SIGCHLD, (void (*)()) SigChild);
-	return;
-}
-
 void
 write_bytes(int fd, size_t *bytes)
 {
@@ -130,6 +116,43 @@ write_bytes(int fd, size_t *bytes)
 	if (write(fd, (char *) bytes, sizeof(size_t)) == -1)
 		strerr_die2sys(111, FATAL, "unable to write to status file");
 	return;
+}
+
+int            *
+send_message_1(char **argp, CLIENT *clnt)
+{
+	static int      res;
+	struct timeval  TIMEOUT = {25, 0};
+
+	(void) memset((char *) &res, 0, sizeof(res));
+	if (clnt_call(clnt, SEND_MESSAGE, (xdrproc_t) xdr_wrapstring, (char *) argp,
+			(xdrproc_t) xdr_int, (char *) &res, TIMEOUT) != RPC_SUCCESS) {
+		fprintf(stderr, "clnt_call: %s\n", clnt_sperror(clnt, loghost));
+		return (NULL);
+	}
+	return (&res);
+}
+
+int
+log_msg(char **str)
+{
+	int            *ret;
+	static int      flag;
+
+	if (!flag) {
+		if (!(cl = clnt_create(loghost, RPCLOG, CLOGVERS, "tcp"))) {
+			fprintf(stderr, "clnt_create: %s\n", clnt_spcreateerror(loghost));
+			return (-1);
+		}
+		flag++;
+	}
+	if (!(ret = send_message_1(str, cl))) {
+		clnt_perror(cl, "send_message_1");
+		clnt_destroy(cl);
+		flag = 0;
+		return (-1);
+	} else
+		return (0);
 }
 
 void
@@ -186,7 +209,7 @@ do_server(int verbose, char *statusdir)
 			*logline = tmp.s;
 			if (log_msg(logline) == -1) {
 				shutdown(0, 0);
-				return(1);
+				return;
 			}
 		}
 
@@ -213,43 +236,6 @@ do_server(int verbose, char *statusdir)
 		write_bytes(fd, &bytes);
 	} /* for (;;) */
 	_exit(1);
-}
-
-int            *
-send_message_1(char **argp, CLIENT *clnt)
-{
-	static int      res;
-	struct timeval  TIMEOUT = {25, 0};
-
-	(void) memset((char *) &res, 0, sizeof(res));
-	if (clnt_call(clnt, SEND_MESSAGE, (xdrproc_t) xdr_wrapstring, (char *) argp,
-			(xdrproc_t) xdr_int, (char *) &res, TIMEOUT) != RPC_SUCCESS) {
-		fprintf(stderr, "clnt_call: %s\n", clnt_sperror(clnt, loghost));
-		return (NULL);
-	}
-	return (&res);
-}
-
-int
-log_msg(char **str)
-{
-	int            *ret;
-	static int      flag;
-
-	if (!flag) {
-		if (!(cl = clnt_create(loghost, RPCLOG, CLOGVERS, "tcp"))) {
-			fprintf(stderr, "clnt_create: %s\n", clnt_spcreateerror(loghost));
-			return (-1);
-		}
-		flag++;
-	}
-	if (!(ret = send_message_1(str, cl))) {
-		clnt_perror(cl, "send_message_1");
-		clnt_destroy(cl);
-		flag = 0;
-		return (-1);
-	} else
-		return (0);
 }
 
 int
@@ -293,6 +279,9 @@ getversion_logsrv_c()
 
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.22  2023-04-14 09:43:27+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.21  2022-12-06 12:24:59+05:30  Cprogrammer
  * removed filewrt to remove dependency on libindimail
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: logclient.c,v $
+ * Revision 1.13  2023-04-14 09:42:08+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.12  2022-12-06 12:05:21+05:30  Cprogrammer
  * removed filewrt
  *
@@ -72,9 +75,14 @@
 #include <subfd.h>
 #include <sgetopt.h>
 #include <getln.h>
+#include <sig.h>
 #include <alloc.h>
 #include <strerr.h>
 #include <tcpopen.h>
+#include <open.h>
+#include <qprintf.h>
+#include <str.h>
+#include <fmt.h>
 #include <scan.h>
 #include <error.h>
 #include <env.h>
@@ -86,7 +94,7 @@
 #define FATAL   "logclient: fatal: " 
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logclient.c,v 1.12 2022-12-06 12:05:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logclient.c,v 1.13 2023-04-14 09:42:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -102,7 +110,7 @@ struct msgtab
 stralloc        seekfile = {0};
 struct msgtab  *msghd;
 char           *lhost, *seekdir = SEEKDIR;
-int             sleepinterval = 5;
+int             exitasap = 0, sleepinterval = 5;
 #ifdef HAVE_SSL
 unsigned long   ctimeout;
 #endif
@@ -122,6 +130,12 @@ static char    *usage =
 	"  -r crlfile        - openssl revocation list\n"
 #endif
 	"  -v                - verbose output";
+
+static void
+sigterm()
+{
+	exitasap = 1;
+}
 
 static int
 checkfiles(struct msgtab *msgptr)
@@ -218,85 +232,6 @@ checkfiles(struct msgtab *msgptr)
 	}
 }
 
-int
-main(int argc, char **argv)
-{
-#ifdef HOSTVALIDATE	
-	struct hostent *hostptr;
-#endif
-	int             c, match_cn = 0;
-	char           *remote, *certfile = NULL, *cafile = NULL,
-				   *crlfile = NULL;
-	char            optstr[18];
-
-	c = 0;
-	c += fmt_strn(optstr + c, "ld:i:s:", 7);
-#ifdef SERVER
-	c += fmt_strn(optstr + c, "f", 1);
-#endif
-#ifdef HAVE_SSL
-	c += fmt_strn(optstr + c, "c:n:C:r:m", 9);
-#endif
-	if ((c + 1) > sizeof(optstr))
-		strerr_die2x(100, FATAL, "allocated space for getopt string not enough");
-	optstr[c] = 0;
-	while ((c = getopt(argc, argv, optstr)) != opteof) {
-		switch (c)
-		{
-		case 'l':
-			lhost = optarg;
-			break;
-		case 's':
-			seekdir = optarg;
-			break;
-		case 'i':
-			scan_int(optarg, &sleepinterval);
-			break;
-		case 'd':
-			scan_ulong(optarg, &dtimeout);
-			break;
-#ifdef SERVER
-		case 'f':
-			server_mode = 0;
-			break;
-#endif
-#ifdef HAVE_SSL
-		case 'c':
-			scan_ulong(optarg, &ctimeout);
-			break;
-		case 'n':
-			certfile = optarg;
-			break;
-		case 'C':
-			cafile = optarg;
-			break;
-		case 'r':
-			crlfile = optarg;
-			break;
-		case 'm':
-			match_cn = 1;
-			break;
-#endif
-		default:
-			strerr_die1x(100, usage);
-			break;
-		}
-	}
-	if (!lhost || (argc - optind) < 2)
-		strerr_die1x(100, usage);
-	remote = argv[optind++];
-#ifdef HOSTVALIDATE	
-	if (!(hostptr = gethostbyname(remote)))
-		strerr_die2x(100, remote, " not found in /etc/hosts");
-	endhostent();
-#endif	
-	if (!(msghd = (struct msgtab *) alloc(sizeof(struct msgtab) * (argc - optind + 1)))) {
-		strerr_warn2(WARN, "out of memory", 0);
-		return 1;
-	}
-	return (consclnt(remote, argv + optind, certfile, cafile, crlfile, match_cn));
-}
-
 /* function for I/O multiplexing */
 static int
 transmit_logs(char *lhost, int sfd)
@@ -311,10 +246,10 @@ transmit_logs(char *lhost, int sfd)
 	static stralloc line = {0}, buf = {0};
 	struct timeval  tm;
 
-	for (;;) {
+	for (;!exitasap;) {
 		/* include message files and sfd in file descriptor set */
 		FD_ZERO(&FdSet);
-		for (msgptr = msghd; msgptr->fd != -1; msgptr++) {
+		for (msgptr = msghd; !exitasap && msgptr->fd != -1; msgptr++) {
 			if (fstat(msgptr->fd, &st) == -1) {
 				strerr_warn4(WARN, "fstat: ", msgptr->fn, ": ", &strerr_sys);
 				break;
@@ -337,7 +272,7 @@ transmit_logs(char *lhost, int sfd)
 		if (!n) /*- timeout */
 			continue;
 		if (FD_ISSET(sfd, &FdSet)) {
-			for (;;) {
+			for (;!exitasap;) {
 				errno = 0;
 				if ((n = tlsread(sfd, inbuf, sizeof(inbuf), dtimeout)) == -1) {
 					if (errno == EINTR)
@@ -349,11 +284,11 @@ transmit_logs(char *lhost, int sfd)
 			if (!n)
 				return 0;
 		}
-		for (msgptr = msghd; msgptr->fd != -1; msgptr++) {
+		for (msgptr = msghd; !exitasap && msgptr->fd != -1; msgptr++) {
 			if (FD_ISSET(msgptr->fd, &FdSet))
 				break;
 		}
-		for (msgptr = msghd;msgptr->fd != -1;msgptr++) {
+		for (msgptr = msghd; !exitasap && msgptr->fd != -1; msgptr++) {
 			if (!FD_ISSET(msgptr->fd, &FdSet))
 				continue;
 			substdio_fdbuf(&ssin, read, msgptr->fd, inbuf, sizeof(inbuf));
@@ -363,7 +298,7 @@ transmit_logs(char *lhost, int sfd)
 					return -1;
 				}
 			}
-			for (flag = 0;;) {
+			for (flag = 0; !exitasap;) {
 				if (getln(&ssin, &line, &match, '\n') == -1) {
 					strerr_warn4(WARN, "read: ", msgptr->fn, ": ", &strerr_sys);
 					return -1;
@@ -395,7 +330,7 @@ transmit_logs(char *lhost, int sfd)
 					break;
 				}
 				if (FD_ISSET(sfd, &FdSet)) {
-					for (;;) {
+					for (;!exitasap;) {
 						if ((n = tlsread(sfd, ack, sizeof(ack), dtimeout)) == -1) {
 							if (errno == EINTR)
 								continue;
@@ -431,6 +366,7 @@ transmit_logs(char *lhost, int sfd)
 			}
 		} /* end of for (msgptr = msghd;;) */
 	} /* end of for (;;) */
+	_exit (0);
 }
 
 int
@@ -543,6 +479,88 @@ consclnt(char *remote, char **argv, char *clientcert, char *cafile, char *crlfil
 		ssl_free();
 #endif
 	} /* for (;;) */
+}
+
+int
+main(int argc, char **argv)
+{
+#ifdef HOSTVALIDATE	
+	struct hostent *hostptr;
+#endif
+	int             c, match_cn = 0;
+	char           *remote, *certfile = NULL, *cafile = NULL,
+				   *crlfile = NULL;
+	char            optstr[18];
+
+	c = 0;
+	c += fmt_strn(optstr + c, "ld:i:s:", 7);
+#ifdef SERVER
+	c += fmt_strn(optstr + c, "f", 1);
+#endif
+#ifdef HAVE_SSL
+	c += fmt_strn(optstr + c, "c:n:C:r:m", 9);
+#endif
+	if ((c + 1) > sizeof(optstr))
+		strerr_die2x(100, FATAL, "allocated space for getopt string not enough");
+	sig_pipeignore();
+	sig_childdefault();
+	sig_termcatch(sigterm);
+	optstr[c] = 0;
+	while ((c = getopt(argc, argv, optstr)) != opteof) {
+		switch (c)
+		{
+		case 'l':
+			lhost = optarg;
+			break;
+		case 's':
+			seekdir = optarg;
+			break;
+		case 'i':
+			scan_int(optarg, &sleepinterval);
+			break;
+		case 'd':
+			scan_ulong(optarg, &dtimeout);
+			break;
+#ifdef SERVER
+		case 'f':
+			server_mode = 0;
+			break;
+#endif
+#ifdef HAVE_SSL
+		case 'c':
+			scan_ulong(optarg, &ctimeout);
+			break;
+		case 'n':
+			certfile = optarg;
+			break;
+		case 'C':
+			cafile = optarg;
+			break;
+		case 'r':
+			crlfile = optarg;
+			break;
+		case 'm':
+			match_cn = 1;
+			break;
+#endif
+		default:
+			strerr_die1x(100, usage);
+			break;
+		}
+	}
+	if (!lhost || (argc - optind) < 2)
+		strerr_die1x(100, usage);
+	remote = argv[optind++];
+#ifdef HOSTVALIDATE	
+	if (!(hostptr = gethostbyname(remote)))
+		strerr_die2x(100, remote, " not found in /etc/hosts");
+	endhostent();
+#endif	
+	if (!(msghd = (struct msgtab *) alloc(sizeof(struct msgtab) * (argc - optind + 1)))) {
+		strerr_warn2(WARN, "out of memory", 0);
+		return 1;
+	}
+	return (consclnt(remote, argv + optind, certfile, cafile, crlfile, match_cn));
 }
 
 #ifndef	lint

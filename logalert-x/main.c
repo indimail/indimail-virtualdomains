@@ -41,7 +41,7 @@
 #include "parser.h"
 #include "process.h"
 #include "user.h"
-#include "sig.h"
+#include "log_sig.h"
 
 #define READ_STDIN "-"
 

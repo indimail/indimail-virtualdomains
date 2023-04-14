@@ -2,7 +2,6 @@
 ACLOCAL_AMFLAGS = -I m4
 version=@VERSION@
 COFLAGS=-z+05:30
-DEFS = @DEFS@ -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-unused-function -Wno-return-type
 INSTALL_PROGRAM = ${INSTALL}          -c
 install_sh_PROGRAM = $(install_sh)    -c
 INSTALL_SCRIPT = ${INSTALL}           -c
@@ -38,26 +37,29 @@ edit = sed \
 	-e 's,@DATE\@,$(DATE),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
-logalert_SOURCES = lex.c utils.c log.c parser.y process.c monitor.c action.c sig.c user.c main.c 
+logalert_SOURCES = lex.c utils.c log.c parser.y process.c monitor.c action.c log_sig.c user.c main.c 
 logalert_LDADD = @LEXLIB@ @LIBPCRE_LIBS@
 
 logclient_SOURCES=logclient.c
-logclient_CPPFLAGS=-DSERVER -Wno-empty-body -I/usr/include/qmail
+logclient_CPPFLAGS=-DSERVER
 logclient_LDADD = $(LIB_SSL) $(LIB_QMAIL)
 
 logsrv_SOURCES=logsrv.c
-logsrv_CPPFLAGS=-Wno-empty-body -I/usr/include/qmail
 logsrv_LDADD = $(LIB_SSL) $(LIB_QMAIL) $(LIB_RPC)
 
-rpclog_LDADD=$(LIB_RPC)
+rpclog_CPPFLAGS=$(CPPFLAGS) $(CFLAGS)
+rpclog_LDADD=$(LIB_RPC) $(LIB_QMAIL)
 
 incrmesg_SOURCES=incrmesg.c
-incrmesg_CPPFLAGS=-Wno-empty-body -I/usr/include/qmail
 incrmesg_LDADD = $(LIB_QMAIL)
 
 showbytes_SOURCES=showbytes.c
-showbytes_CPPFLAGS=-Wno-empty-body -I/usr/include/qmail
 showbytes_LDADD = $(LIB_QMAIL)
+
+lex.o: lex.c
+	$(COMPILE) -Wno-implicit-function-declaration -Wno-unused-function -c lex.c -o lex.o
+parser.o: parser.c
+	$(COMPILE) -Wno-implicit-function-declaration -Wno-unused-function -c parser.c -o parser.o
 
 #$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).c $@ -- flex
 lex.c: lex.l parser.h

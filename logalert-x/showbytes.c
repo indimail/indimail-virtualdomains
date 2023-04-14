@@ -1,18 +1,3 @@
-/*
- * $Log: showbytes.c,v $
- * Revision 1.4  2021-04-05 21:58:15+05:30  Cprogrammer
- * fixed compilation errors
- *
- * Revision 1.3  2020-06-21 12:49:33+05:30  Cprogrammer
- * quench rpmlint
- *
- * Revision 1.2  2013-05-15 00:16:21+05:30  Cprogrammer
- * fixed warnings
- *
- * Revision 1.1  2013-03-15 09:30:20+05:30  Cprogrammer
- * Initial revision
- *
- */
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -21,9 +6,10 @@
 #include <subfd.h>
 #include <strerr.h>
 #include <open.h>
+#include <qprintf.h>
 
 #ifndef	lint
-static char     rcsid[] = "$Id: showbytes.c,v 1.4 2021-04-05 21:58:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: showbytes.c,v 1.5 2023-04-14 09:46:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "showbytes: fatal: "
@@ -44,8 +30,9 @@ main(int argc, char **argv)
 	if (read(fd, &bytes, sizeof(bytes)) == -1)
 		strerr_die4sys(111, FATAL, "read: ", argv[1], ": ");
 	close(fd);
-	subprintf(subfdout, "%d\n", (int) bytes);
-	_exit(substdio_flush(subfdout));
+	if (subprintf(subfdout, "%d\n", (int) bytes) == -1 || substdio_flush(subfdout) == -1)
+		_exit(111);
+	_exit(0);
 }
 
 #ifndef	lint
@@ -54,7 +41,26 @@ getversion_showbytes_c()
 {
 	char           *x;
 
-	x = rcsid;
+	x = sccsid;
 	x++;
 }
 #endif
+
+/*
+ * $Log: showbytes.c,v $
+ * Revision 1.5  2023-04-14 09:46:55+05:30  Cprogrammer
+ * refactored code
+ *
+ * Revision 1.4  2021-04-05 21:58:15+05:30  Cprogrammer
+ * fixed compilation errors
+ *
+ * Revision 1.3  2020-06-21 12:49:33+05:30  Cprogrammer
+ * quench rpmlint
+ *
+ * Revision 1.2  2013-05-15 00:16:21+05:30  Cprogrammer
+ * fixed warnings
+ *
+ * Revision 1.1  2013-03-15 09:30:20+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

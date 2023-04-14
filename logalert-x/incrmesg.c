@@ -1,5 +1,8 @@
 /*
  * $Log: incrmesg.c,v $
+ * Revision 1.11  2023-04-14 00:08:17+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.10  2022-05-10 20:09:47+05:30  Cprogrammer
  * use tcpopen from libqmail
  *
@@ -31,7 +34,6 @@
  * Initial revision
  *
  */
-#include <stdio.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -68,7 +70,7 @@
 #define FATAL   "incrmesg: fatal: " 
 
 #ifndef	lint
-static char     rcsid[] = "$Id: incrmesg.c,v 1.10 2022-05-10 20:09:47+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: incrmesg.c,v 1.11 2023-04-14 00:08:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 struct msgtab
@@ -313,6 +315,7 @@ main(int argc, char **argv)
 	return (incrmesg(argv + optind));
 }
 
+#ifndef	lint
 void
 getversion_incrmesg_c()
 {
@@ -320,3 +323,4 @@ getversion_incrmesg_c()
 	x = rcsid;
 	x++;
 }
+#endif

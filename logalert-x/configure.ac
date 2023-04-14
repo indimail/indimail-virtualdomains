@@ -44,23 +44,23 @@ AC_TYPE_UID_T
 case "$host" in
 
 *-*-solaris*)
-	CPPFLAGS="$CPPFLAGS -DSOLARIS"
-	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	CPPFLAGS="$CPPFLAGS -DSOLARIS -I/usr/include/qmail"
+	CFLAGS="$CFLAGS -O4 -Wall"
     ;;
 
 *-*-sunos4.1.1*)
-	CPPFLAGS="$CPPFLAGS -DSUNOS4"
-	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	CPPFLAGS="$CPPFLAGS -DSUNOS4 -I/usr/include/qmail"
+	CFLAGS="$CFLAGS -O4 -Wall"
     ;;
 
 *-*-linux*)
-	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -Wall"
-	CFLAGS="$CFLAGS -O4 -fPIC -fpie -Wall -fno-strict-aliasing"
+	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -Wall -I/usr/include/qmail"
+	CFLAGS="$CFLAGS -O4 -Wall"
     ;;
 
 *-*-freebsd*)
 	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/include/qmail"
-	CFLAGS="$CFLAGS -O3 -Wall -fPIC"
+	CFLAGS="$CFLAGS -O3 -Wall"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
     ;;
 *-*-darwin*)
