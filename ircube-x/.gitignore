@@ -21,3 +21,4 @@ debian/control
 ircube.spec
 ircube.changes
 PKGBUILD
+Makefile

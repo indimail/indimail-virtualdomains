@@ -108,3 +108,4 @@ doc/bogotune.htmlin
 ar-lib
 config.in
 PKGBUILD
+Makefile.in
