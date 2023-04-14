@@ -1,45 +1,3 @@
-/*
- * $Log: logclient.c,v $
- * Revision 1.13  2023-04-14 09:42:08+05:30  Cprogrammer
- * refactored code
- *
- * Revision 1.12  2022-12-06 12:05:21+05:30  Cprogrammer
- * removed filewrt
- *
- * Revision 1.11  2022-05-10 20:09:57+05:30  Cprogrammer
- * use tcpopen from libqmail
- *
- * Revision 1.10  2021-04-05 21:57:58+05:30  Cprogrammer
- * fixed compilation errors
- *
- * Revision 1.9  2021-03-15 11:32:07+05:30  Cprogrammer
- * removed common.h
- *
- * Revision 1.8  2020-06-21 12:49:01+05:30  Cprogrammer
- * quench rpmlint
- *
- * Revision 1.7  2013-05-15 00:38:47+05:30  Cprogrammer
- * added SSL encryption
- *
- * Revision 1.6  2013-02-21 22:45:39+05:30  Cprogrammer
- * fold long line for readability
- *
- * Revision 1.5  2012-09-19 11:06:49+05:30  Cprogrammer
- * use environment variable SEEKDIR for the checkpoint files
- *
- * Revision 1.4  2012-09-18 17:39:43+05:30  Cprogrammer
- * fixed usage
- *
- * Revision 1.3  2012-09-18 17:29:34+05:30  Cprogrammer
- * use sockfd instead of sockfp
- *
- * Revision 1.2  2012-09-18 17:08:34+05:30  Cprogrammer
- * removed extra white space
- *
- * Revision 1.1  2012-09-18 13:23:43+05:30  Cprogrammer
- * Initial revision
- *
- */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -94,7 +52,7 @@
 #define FATAL   "logclient: fatal: " 
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logclient.c,v 1.13 2023-04-14 09:42:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logclient.c,v 1.14 2023-04-14 22:30:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -110,11 +68,12 @@ struct msgtab
 stralloc        seekfile = {0};
 struct msgtab  *msghd;
 char           *lhost, *seekdir = SEEKDIR;
-int             exitasap = 0, sleepinterval = 5;
+unsigned int    port = 6340;
+int             exitasap = 0, sleepinterval = 5, verbose;
 #ifdef HAVE_SSL
-unsigned long   ctimeout;
+unsigned long   ctimeout = 60;
 #endif
-unsigned long   dtimeout;
+unsigned long   dtimeout = 300;
 #ifdef SERVER
 int             server_mode = 1;
 #endif
@@ -234,7 +193,7 @@ checkfiles(struct msgtab *msgptr)
 
 /* function for I/O multiplexing */
 static int
-transmit_logs(char *lhost, int sfd)
+transmit_logs(char *lhost, char *remote, int sfd)
 {
 	int             n, i, match, flag;
 	fd_set          FdSet;
@@ -324,31 +283,39 @@ transmit_logs(char *lhost, int sfd)
 					break;
 				}
 				line.len--;
-				qsprintf(&buf, "%s %ld %s", msgptr->fn, (msgptr->count)++, line.s);
+				qsprintf(&buf, "%s %ld %s", msgptr->fn, msgptr->count, line.s);
 				if (tlswrite(sfd, buf.s, buf.len - 1, dtimeout) == -1) {
-					strerr_warn2(WARN, "unable to transmit log to loghost: ", &strerr_sys);
+					strerr_warn4(WARN, "unable to transmit log to host ", remote, ": ", &strerr_sys);
 					break;
 				}
+				if (verbose) {
+					subprintf(subfdout, "%s", buf.s);
+					substdio_flush(subfdout);
+				}
 				if (FD_ISSET(sfd, &FdSet)) {
-					for (;!exitasap;) {
-						if ((n = tlsread(sfd, ack, sizeof(ack), dtimeout)) == -1) {
-							if (errno == EINTR)
-								continue;
-							strerr_warn2(WARN, "unable to read ack from loghost: ", &strerr_sys);
-							ack[0] = '0';
-						} else
-						if (!n) {
-							strerr_warn2(WARN, "loghost closed connection: ", &strerr_sys);
-							ack[0] = '0';
-						}
-						break;
+					subprintf(subfdout, "sfd is available for read\n");
+					substdio_flush(subfdout);
+				}
+				for (;!exitasap;) {
+					if ((n = tlsread(sfd, ack, sizeof(ack), dtimeout)) == -1) {
+						if (errno == EINTR)
+							continue;
+						strerr_warn4(WARN, "unable to read ack from host ", remote, ": ", &strerr_sys);
+						ack[0] = '0';
+					} else
+					if (!n) {
+						strerr_warn4(WARN, "host ", remote, " closed connection: ", &strerr_sys);
+						ack[0] = '0';
 					}
-					if (ack[0] != '1') {
-						strerr_warn2(WARN, "loghost acknowledged error", 0);
-						break;
-					}
+					break;
+				}
+				if (ack[0] != '1') {
+					strerr_warn4(WARN, "host ", remote, " acknowledged error writing log", 0);
+					flag = 0;
+					break;
 				}
 				flag = 1;
+				msgptr->count++;
 				if ((msgptr->seek = lseek(msgptr->fd, (off_t) 0, SEEK_CUR)) == -1) {
 					strerr_warn4(WARN, "unable to get current position ", msgptr->fn, ": ", &strerr_sys);
 					return -1;
@@ -440,7 +407,7 @@ consclnt(char *remote, char **argv, char *clientcert, char *cafile, char *crlfil
 #endif
 	for (;;sleep(5)) {
 		for (;;) {
-			if ((sfd = tcpopen(remote, "logsrv", 6340)) == -1) {
+			if ((sfd = tcpopen(remote, "logsrv", port)) == -1) {
 				if (errno == EINVAL)
 					return 1;
 				sleep(5);
@@ -473,7 +440,7 @@ consclnt(char *remote, char **argv, char *clientcert, char *cafile, char *crlfil
 			ssl_free();
 #endif
 		}
-		transmit_logs(lhost, sfd);
+		transmit_logs(lhost, remote, sfd);
 		close(sfd);
 #ifdef HAVE_SSL
 		ssl_free();
@@ -490,10 +457,10 @@ main(int argc, char **argv)
 	int             c, match_cn = 0;
 	char           *remote, *certfile = NULL, *cafile = NULL,
 				   *crlfile = NULL;
-	char            optstr[19];
+	char            optstr[22];
 
 	c = 0;
-	c += fmt_strn(optstr + c, "l:s:i:d:", 8);
+	c += fmt_strn(optstr + c, "vl:s:i:d:p:", 11);
 #ifdef SERVER
 	c += fmt_strn(optstr + c, "f", 1);
 #endif
@@ -505,10 +472,14 @@ main(int argc, char **argv)
 	sig_pipeignore();
 	sig_childdefault();
 	sig_termcatch(sigterm);
+	sig_intcatch(sigterm);
 	optstr[c] = 0;
 	while ((c = getopt(argc, argv, optstr)) != opteof) {
 		switch (c)
 		{
+		case 'v':
+			verbose = 1;
+			break;
 		case 'l':
 			lhost = optarg;
 			break;
@@ -520,6 +491,9 @@ main(int argc, char **argv)
 			break;
 		case 'd':
 			scan_ulong(optarg, &dtimeout);
+			break;
+		case 'p':
+			scan_uint(optarg, &port);
 			break;
 #ifdef SERVER
 		case 'f':
@@ -548,6 +522,8 @@ main(int argc, char **argv)
 			break;
 		}
 	}
+	if (!server_mode)
+		sig_intcatch(sigterm);
 	if (!lhost || (argc - optind) < 2)
 		strerr_die1x(100, usage);
 	remote = argv[optind++];
@@ -570,3 +546,49 @@ getversion_logclient_c()
 	printf("%s\n", sccsid);
 }
 #endif
+
+/*
+ * $Log: logclient.c,v $
+ * Revision 1.14  2023-04-14 22:30:27+05:30  Cprogrammer
+ * added -v, -p option
+ *
+ * Revision 1.13  2023-04-14 09:42:08+05:30  Cprogrammer
+ * refactored code
+ *
+ * Revision 1.12  2022-12-06 12:05:21+05:30  Cprogrammer
+ * removed filewrt
+ *
+ * Revision 1.11  2022-05-10 20:09:57+05:30  Cprogrammer
+ * use tcpopen from libqmail
+ *
+ * Revision 1.10  2021-04-05 21:57:58+05:30  Cprogrammer
+ * fixed compilation errors
+ *
+ * Revision 1.9  2021-03-15 11:32:07+05:30  Cprogrammer
+ * removed common.h
+ *
+ * Revision 1.8  2020-06-21 12:49:01+05:30  Cprogrammer
+ * quench rpmlint
+ *
+ * Revision 1.7  2013-05-15 00:38:47+05:30  Cprogrammer
+ * added SSL encryption
+ *
+ * Revision 1.6  2013-02-21 22:45:39+05:30  Cprogrammer
+ * fold long line for readability
+ *
+ * Revision 1.5  2012-09-19 11:06:49+05:30  Cprogrammer
+ * use environment variable SEEKDIR for the checkpoint files
+ *
+ * Revision 1.4  2012-09-18 17:39:43+05:30  Cprogrammer
+ * fixed usage
+ *
+ * Revision 1.3  2012-09-18 17:29:34+05:30  Cprogrammer
+ * use sockfd instead of sockfp
+ *
+ * Revision 1.2  2012-09-18 17:08:34+05:30  Cprogrammer
+ * removed extra white space
+ *
+ * Revision 1.1  2012-09-18 13:23:43+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -25,6 +25,12 @@ Release 0.3.0-1.1 Start 25/02/2010
 11. logclient.c, logsrv.c: removed dependency on libindimail
 - 31/01/2023 - indimail-3.4.2
 - 25/03/2023 - indimail-3.4.3
+- 13/04/2023
+12. Refactored logsrv.c, logclient.c incrmesg.c, rpclog.c, showbytes.c -
+    https://github.com/mbhangui/indimail-virtualdomains/pull/29
+13. logclient.c: added -v, -p option
+14. logsrv.c: removed -c option
+15. rpclog.c: print RPC program number, version during startup.
 
 *
 2005-10-04      <gabriel@icaro.com.br>

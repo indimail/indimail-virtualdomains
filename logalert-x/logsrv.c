@@ -67,7 +67,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.23 2023-04-14 12:18:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.24 2023-04-14 22:30:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*-
@@ -100,7 +100,7 @@ char           *loghost;
 CLIENT         *cl;
 static char    *usage = "usage: logsrv [-v] [-c connect_timeout] [-d data_timeout] [-r host] dir";
 static stralloc line = {0}, rhost = {0}, statusfn = {0}, tmp = {0};
-unsigned long   ctimeout = 60, dtimeout = 300;
+unsigned long   dtimeout = 300;
 
 void
 SigTerm()
@@ -147,7 +147,7 @@ log_msg(char **str)
 		flag++;
 	}
 	if (!(ret = send_message_1(str, cl))) {
-		strerr_warn3(WARN, "send_message_1: ", clnt_sperror(loghost), 0);
+		strerr_warn3(WARN, "send_message_1: ", clnt_sperror(cl, loghost), 0);
 		clnt_destroy(cl);
 		flag = 0;
 		return (-1);
@@ -208,6 +208,7 @@ do_server(int verbose, char *statusdir)
 			qsprintf(&tmp, "%s %s", rhost.s, line.s);
 			*logline = tmp.s;
 			if (log_msg(logline) == -1) {
+				timeoutwrite(dtimeout, 1, "0", 1);
 				shutdown(0, 0);
 				strerr_die3x(111, FATAL, "failed to write to ", loghost);
 			}
@@ -243,14 +244,11 @@ main(int argc, char **argv)
 {
 	int             c, verbose = 0;
 
-	while ((c = getopt(argc, argv, "vc:d:r:")) != opteof) {
+	while ((c = getopt(argc, argv, "vd:r:")) != opteof) {
 		switch (c)
 		{
 		case 'v':
 			verbose = 1;
-			break;
-		case 'c':
-			scan_ulong(optarg, &ctimeout);
 			break;
 		case 'd':
 			scan_ulong(optarg, &dtimeout);
@@ -279,6 +277,9 @@ getversion_logsrv_c()
 
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.24  2023-04-14 22:30:46+05:30  Cprogrammer
+ * removed -c option
+ *
  * Revision 1.23  2023-04-14 12:18:03+05:30  Cprogrammer
  * replaced fprintf with strerr_warn
  *

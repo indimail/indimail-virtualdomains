@@ -47,6 +47,7 @@ logclient_LDADD = $(LIB_SSL) $(LIB_QMAIL)
 logsrv_SOURCES=logsrv.c
 logsrv_LDADD = $(LIB_SSL) $(LIB_QMAIL) $(LIB_RPC)
 
+rpclog_SOURCES=rpclog.c
 rpclog_CPPFLAGS=$(CPPFLAGS) $(CFLAGS)
 rpclog_LDADD=$(LIB_RPC) $(LIB_QMAIL)
 
