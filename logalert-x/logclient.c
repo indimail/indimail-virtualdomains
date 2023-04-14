@@ -119,7 +119,7 @@ unsigned long   dtimeout;
 int             server_mode = 1;
 #endif
 static char    *usage =
-	"usage: logclient [options] logfile1 logfile2 ...\n"
+	"usage: logclient [options] loghost logfile1 [logfile2 ...]\n"
 	"options\n"
 	"  -l localhost      - local hostname\n"
 	"  -d dtimeout       - data timeout\n"
@@ -490,10 +490,10 @@ main(int argc, char **argv)
 	int             c, match_cn = 0;
 	char           *remote, *certfile = NULL, *cafile = NULL,
 				   *crlfile = NULL;
-	char            optstr[18];
+	char            optstr[19];
 
 	c = 0;
-	c += fmt_strn(optstr + c, "ld:i:s:", 7);
+	c += fmt_strn(optstr + c, "l:s:i:d:", 8);
 #ifdef SERVER
 	c += fmt_strn(optstr + c, "f", 1);
 #endif
