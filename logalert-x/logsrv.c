@@ -67,7 +67,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.22 2023-04-14 09:43:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logsrv.c,v 1.23 2023-04-14 12:18:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*-
@@ -127,7 +127,7 @@ send_message_1(char **argp, CLIENT *clnt)
 	(void) memset((char *) &res, 0, sizeof(res));
 	if (clnt_call(clnt, SEND_MESSAGE, (xdrproc_t) xdr_wrapstring, (char *) argp,
 			(xdrproc_t) xdr_int, (char *) &res, TIMEOUT) != RPC_SUCCESS) {
-		fprintf(stderr, "clnt_call: %s\n", clnt_sperror(clnt, loghost));
+		strerr_warn3(WARN, "clnt_call: ", clnt_sperror(clnt, loghost), 0);
 		return (NULL);
 	}
 	return (&res);
@@ -141,13 +141,13 @@ log_msg(char **str)
 
 	if (!flag) {
 		if (!(cl = clnt_create(loghost, RPCLOG, CLOGVERS, "tcp"))) {
-			fprintf(stderr, "clnt_create: %s\n", clnt_spcreateerror(loghost));
+			strerr_warn3(WARN, "clnt_create: ", clnt_spcreateerror(loghost), 0);
 			return (-1);
 		}
 		flag++;
 	}
 	if (!(ret = send_message_1(str, cl))) {
-		clnt_perror(cl, "send_message_1");
+		strerr_warn3(WARN, "send_message_1: ", clnt_sperror(loghost), 0);
 		clnt_destroy(cl);
 		flag = 0;
 		return (-1);
@@ -169,7 +169,7 @@ do_server(int verbose, char *statusdir)
 	if (getln(&ssin, &rhost, &match, '\0') == -1)
 		strerr_die2sys(111, FATAL, "read: socket: ");
 	if (!match)
-		strerr_die2sys(111, FATAL, "read2: socket: ");
+		strerr_die2sys(111, FATAL, "read: socket: ");
 	if (!stralloc_0(&rhost))
 		strerr_die2x(111, FATAL, "out of memory");
 	rhost.len -= 2;
@@ -209,7 +209,7 @@ do_server(int verbose, char *statusdir)
 			*logline = tmp.s;
 			if (log_msg(logline) == -1) {
 				shutdown(0, 0);
-				return;
+				strerr_die3x(111, FATAL, "failed to write to ", loghost);
 			}
 		}
 
@@ -279,6 +279,9 @@ getversion_logsrv_c()
 
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.23  2023-04-14 12:18:03+05:30  Cprogrammer
+ * replaced fprintf with strerr_warn
+ *
  * Revision 1.22  2023-04-14 09:43:27+05:30  Cprogrammer
  * refactored code
  *
