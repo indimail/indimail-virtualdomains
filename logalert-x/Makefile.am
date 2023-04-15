@@ -79,8 +79,6 @@ logalert.changes
 	cat $@.in | $(edit) > $@
 logsrv.8: logsrv.man
 	$(edit) logsrv.man > $@
-logclient.1: logclient.man
-	$(edit) logclient.man > $@
 debian/Makefile: debian/Makefile.in conf-version conf-release
 	$(edit) $@.in > $@
 logalert.perms: perm_list.in

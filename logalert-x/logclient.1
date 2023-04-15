@@ -1,0 +1,92 @@
+.\" vim: tw=75
+.LL 8i
+.TH logclient 1
+.SH NAME
+logclient \- Send incremental messages in local logfiles to a remote log
+server.
+
+.SH SYNOPSYS
+\fBlogclient\fR [ \fIoptions\fR ] \fIremote\fR
+\fIlogfile1\fR [\fIlogfile2\fR] ...
+
+.SH DESCRIPTION
+.PP
+\fBlogclient\fR takes name of logs as command line arguments, and for
+each log, tranmits the contents of log to host \fIremote\fR running
+\fBlogsrv\fR(8). What is sent are lines that have got incrementally added
+into the logfile, since the last time \fBlogclient\fR(1) was run on the
+logfile(s). It checks every 5 seconds for any new lines that may have got
+incrementally added. This interval can be changed by passing the -i
+argument.
+
+\fBlogclient\fR(1) maintains the check point against the position last read
+and the message count for each logfile. All these numbers are maintained in
+the file \fIlogfile\fR.seek in /usr/tmp. This directory where the
+checkpoint is maintained can be changed by passing the -s argument.
+
+.SH OPTIONS
+.TP 3
+\fB\-v\fR
+Verbose output. Prints the data being sent to remote log server on
+descriptor 1.
+
+.TP
+\fB\-l\fR \fIlhost\fR
+Use \fIlhost\fR as the local hostname to \fBlogsrv\fR(8). \fBlogsrv\fR(8)
+will prefix all lines with \fIlhost\fR
+
+.TP
+\fB\-s\fR \fIseekdir\fR
+Directory where checkpoint files are stored. Default /usr/tmp
+
+.TP
+\fB\-f\fR
+Run in foreground. Default is to run in the background.
+
+.TP
+\fB\-p\fR \fIport\fR
+Use \fIport\fR as the port instead of the default 6340 to connect to
+\fBlogsrv\fR.
+
+.TP
+\fB\-i\fR
+Time Interval in seconds between checks for new entries in logfiles after
+EOF has been reached.
+
+.TP
+\fB\-c\fR \fIctimeout\fR
+Use \fIctimeout\fR as timeout when making a tls connection
+
+.TP
+\fB\-d\fR \fIdtimeout\fR
+Use \fIdtimeout\fR as timeout for read and writes to \fIloghost\fR
+
+.TP
+\fB\-n\fR \fIcertificate\fR
+A client certificate which should be provided in  case  TLS  encryption  is
+needed.
+
+\fB\-C\fR \fIcafile\fR
+Specify \fIcafile\fR as the file containing CA certificates. Sometimes,
+special CA certificates are needed if an intermediate certificate used by
+your issuing CA expires. Note that the file given with -c is passed to
+SSL_CTX_load_verify_locations and thus may contain several CA certificates,
+which will be used during SSL connection negotiation to close any gap in
+the certificate chain.
+
+.TP
+\fB\-r\fR \fIcrlfile\fR
+A list of Certificate Revocation Lists (CRLs). If present it
+should contain the CRLs of the CAs in \fIcafile\fR and client certs that
+will be checked for revocation.
+
+.TP
+\fB\-m\fR
+Match \fIhost\fR with common name in certificate (CN)
+
+.SH RETURN VALUE
+0 if all steps were successful, non-zero otherwise. If any of the steps
+fail, a diagnostic message is printed.
+
+.SH "SEE ALSO"
+logsrv(8), incrmesg(8)

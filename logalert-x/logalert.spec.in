@@ -127,4 +127,19 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %doc %attr(0644,root,root)                     %{_mandir}/man8/showbytes.8.gz
 %doc %attr(0644,root,root)                     %{_mandir}/man8/rpclog.8.gz
 
+%post
+argv1=$1
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
+if [ $argv1 -eq 2 ] ; then # upgrade
+  # we are doing upgrade
+  exit 0
+fi
+if [ -f /etc/rpc ] ; then
+  grep 536870913 /etc/rpc > /dev/null 2>&1
+  if [ $? -ne 0 ] ; then
+    echo "rpclog      536870913 rpclog" >> /etc/rpc
+  fi
+fi
 %changelog
