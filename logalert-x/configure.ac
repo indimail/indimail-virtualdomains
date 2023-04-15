@@ -44,23 +44,23 @@ AC_TYPE_UID_T
 case "$host" in
 
 *-*-solaris*)
-	CPPFLAGS="$CPPFLAGS -DSOLARIS"
-	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	CPPFLAGS="$CPPFLAGS -DSOLARIS -I/usr/include/qmail"
+	CFLAGS="$CFLAGS -O4 -Wall"
     ;;
 
 *-*-sunos4.1.1*)
-	CPPFLAGS="$CPPFLAGS -DSUNOS4"
-	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
+	CPPFLAGS="$CPPFLAGS -DSUNOS4 -I/usr/include/qmail"
+	CFLAGS="$CFLAGS -O4 -Wall"
     ;;
 
 *-*-linux*)
-	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -Wall"
-	CFLAGS="$CFLAGS -O4 -fPIC -fpie -Wall -fno-strict-aliasing"
+	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -Wall -I/usr/include/qmail"
+	CFLAGS="$CFLAGS -O4 -Wall"
     ;;
 
 *-*-freebsd*)
-	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/includ/qmail"
-	CFLAGS="$CFLAGS -O3 -Wall -fPIC"
+	CPPFLAGS="$CPPFLAGS -DFREEBSD -I/usr/local/include -I/usr/local/include/qmail"
+	CFLAGS="$CFLAGS -O3 -Wall"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
     ;;
 *-*-darwin*)
@@ -105,8 +105,8 @@ then
     AC_CHECK_HEADERS([rpc/types.h])
 elif test " $have_tirpc" = " yes"
 then
-    CPPFLAGS="-I/usr/include/tirpc $CXXFLAGS"
-    CXXFLAGS="-I/usr/include/tirpc $CXXFLAGS"
+    CPPFLAGS="$CPPFLAGS -I/usr/include/tirpc $CXXFLAGS"
+    CXXFLAGS="$CXXFLAGS -I/usr/include/tirpc $CXXFLAGS"
     AC_CHECK_HEADERS([tirpc/rpc/rpc.h tirpc/rpc/types.h])
 else
   AC_MSG_ERROR(Could not find any usable rpc library.)
@@ -126,8 +126,8 @@ AC_ARG_WITH(libpcre,
        yes)
        ;;
        *)
-    CXXFLAGS="-I$with_libpcre/include $CXXFLAGS"
-    LDFLAGS="-L$with_libpcre/lib $LDFLAGS"
+    CXXFLAGS="$CXXFLAGS -I$with_libpcre/include $CXXFLAGS"
+    LDFLAGS="$LDFLAGS -L$with_libpcre/lib $LDFLAGS"
     have_pcre=yes
         ;;
   esac]

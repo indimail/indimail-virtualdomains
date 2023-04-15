@@ -1,5 +1,291 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_RPC_RPC_H
+#include <rpc/rpc.h>
+#endif
+#ifdef HAVE_RPC_TYPES_H
+#include <rpc/types.h>
+#endif
+
+/*- tirpc */
+#ifdef HAVE_TIRPC
+#ifndef HAVE_RPC_RPC_H
+#ifdef HAVE_TIRPC_RPC_RPC_H
+#include <tirpc/rpc/rpc.h>
+#endif /*- #ifdef HAVE_TIRPC_RPC_RPC_H */
+#endif /*- #ifdef HAVE_RPC_RPC_H */
+#ifndef HAVE_RPC_TYPES_H
+#ifdef HAVE_TIRPC_RPC_TYPES_H
+#include <tirpc/rpc/types.h>
+#endif /*- #ifdef HAVE_TIRPC_RPC_TYPES_H */
+#endif /*- #ifndef HAVE_RPC_TYPES_H */
+#endif /*- #ifdef HAVE_TIRPC */
+
+#include <signal.h>
+#include <errno.h>
+#ifdef HAVE_SSL
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <tls.h>
+#endif
+#ifdef HAVE_QMAIL
+#include <substdio.h>
+#include <subfd.h>
+#include <getEnvConfig.h>
+#include <tcpbind.h>
+#include <sgetopt.h>
+#include <stralloc.h>
+#include <fmt.h>
+#include <strerr.h>
+#include <getln.h>
+#include <qprintf.h>
+#include <timeoutwrite.h>
+#include <scan.h>
+#include <open.h>
+#endif
+
+#ifndef	lint
+static char     sccsid[] = "$Id: logsrv.c,v 1.24 2023-04-14 22:30:46+05:30 Cprogrammer Exp mbhangui $";
+#endif
+
+/*-
+program RPCLOG
+{
+	version CLOGVERS
+	{
+		int	SEND_MESSAGE( string ) = 1;
+	} = 1;
+} = 0x20000001;
+-*/
+
+
+#define RPCLOG ((u_long)0x20000001)
+#define CLOGVERS ((u_long)1)
+#define SEND_MESSAGE ((u_long)1)
+
+#define WARN      "logsrv: warn: "
+#define FATAL     "logsrv: fatal: "
+
+#if !defined(HAVE_TIRPC) && !defined(HAVE_RPC_RPC_H)
+int
+main(int argc, char **argv)
+{
+	strerr_die2x(111, FATAL, "no usage rpc/svc library found");
+}
+#else
+char            strnum[FMT_ULONG];
+char           *loghost;
+CLIENT         *cl;
+static char    *usage = "usage: logsrv [-v] [-c connect_timeout] [-d data_timeout] [-r host] dir";
+static stralloc line = {0}, rhost = {0}, statusfn = {0}, tmp = {0};
+unsigned long   dtimeout = 300;
+
+void
+SigTerm()
+{
+	strerr_die2x(0, FATAL, "ARGH!! Committing suicide on SIGTERM");
+}
+
+void
+write_bytes(int fd, size_t *bytes)
+{
+	if (lseek(fd, sizeof(pid_t), SEEK_SET) == -1)
+		strerr_die2sys(111, FATAL, "unable to seek status file");
+	if (write(fd, (char *) bytes, sizeof(size_t)) == -1)
+		strerr_die2sys(111, FATAL, "unable to write to status file");
+	return;
+}
+
+int            *
+send_message_1(char **argp, CLIENT *clnt)
+{
+	static int      res;
+	struct timeval  TIMEOUT = {25, 0};
+
+	(void) memset((char *) &res, 0, sizeof(res));
+	if (clnt_call(clnt, SEND_MESSAGE, (xdrproc_t) xdr_wrapstring, (char *) argp,
+			(xdrproc_t) xdr_int, (char *) &res, TIMEOUT) != RPC_SUCCESS) {
+		strerr_warn3(WARN, "clnt_call: ", clnt_sperror(clnt, loghost), 0);
+		return (NULL);
+	}
+	return (&res);
+}
+
+int
+log_msg(char **str)
+{
+	int            *ret;
+	static int      flag;
+
+	if (!flag) {
+		if (!(cl = clnt_create(loghost, RPCLOG, CLOGVERS, "tcp"))) {
+			strerr_warn3(WARN, "clnt_create: ", clnt_spcreateerror(loghost), 0);
+			return (-1);
+		}
+		flag++;
+	}
+	if (!(ret = send_message_1(str, cl))) {
+		strerr_warn3(WARN, "send_message_1: ", clnt_sperror(cl, loghost), 0);
+		clnt_destroy(cl);
+		flag = 0;
+		return (-1);
+	} else
+		return (0);
+}
+
+void
+do_server(int verbose, char *statusdir)
+{
+	int             match, fd, n;
+	size_t          bytes;
+	pid_t           pid;
+	char           *(logline[1]), *ptr;
+	char            inbuf[512];
+	substdio        ssin;
+
+	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
+	if (getln(&ssin, &rhost, &match, '\0') == -1)
+		strerr_die2sys(111, FATAL, "read: socket: ");
+	if (!match)
+		strerr_die2sys(111, FATAL, "read: socket: ");
+	if (!stralloc_0(&rhost))
+		strerr_die2x(111, FATAL, "out of memory");
+	rhost.len -= 2;
+	if (timeoutwrite(dtimeout, 1, "1", 1) == -1)
+		strerr_die2sys(111, FATAL, "write: ");
+	qsprintf(&statusfn, "%s/%s.status", statusdir, rhost.s);
+	if (!access(statusfn.s, R_OK)) {
+		if ((fd = open_readwrite(statusfn.s)) == -1)
+			strerr_die4sys(111, FATAL, "unable to open for read+write: ", statusfn.s, ": ");
+		if ((n = read(fd, (char *) &pid, sizeof(pid_t))) == -1)
+			strerr_die4sys(111, FATAL, "unable to read pid from ", statusfn.s, ": ");
+		if ((n = read(fd, (char *) &bytes, sizeof(bytes))) == -1)
+			strerr_die4sys(111, FATAL, "unable to read offset from ", statusfn.s, ": ");
+	} else {
+		if ((fd = open(statusfn.s, O_CREAT|O_RDWR, 0644)) == -1)
+			strerr_die4sys(111, FATAL, "unable to create: ", statusfn.s, ": ");
+		bytes = 0;
+	}
+	if (lseek(fd, 0, SEEK_SET) == -1)
+		strerr_die4sys(111, FATAL, "unable to seek ", statusfn.s, ": ");
+	pid = getpid();
+	if (write(fd, (char *) &pid, sizeof(pid_t)) != sizeof(pid_t))
+		strerr_die4sys(111, FATAL, "unable to write pid to ", statusfn.s, ": ");
+	subprintf(subfderr, "Connection request from %s\n", rhost.s);
+	substdio_flush(subfderr);
+	for (;;) {
+		n = 0;
+		if (getln(&ssin, &line, &match, '\n') == -1)
+			strerr_die2sys(111, FATAL, "read3: socket: ");
+		if (!line.len)
+			break;
+		if (!stralloc_0(&line))
+			strerr_die2x(111, FATAL, "out of memory");
+		line.len--;
+		if (loghost) {
+			qsprintf(&tmp, "%s %s", rhost.s, line.s);
+			*logline = tmp.s;
+			if (log_msg(logline) == -1) {
+				timeoutwrite(dtimeout, 1, "0", 1);
+				shutdown(0, 0);
+				strerr_die3x(111, FATAL, "failed to write to ", loghost);
+			}
+		}
+
+		if (verbose) {
+			if (subprintf(subfderr, "%s %s", rhost.s, line.s) == -1)
+				strerr_die2sys(111, FATAL, "unable to write to stdout: ");
+			if (substdio_flush(subfderr) == -1)
+				strerr_die2sys(111, FATAL, "unable to write to stdout: ");
+		}
+		if (timeoutwrite(dtimeout, 1, "1", 1) == -1)
+			strerr_die2sys(111, FATAL, "write: ");
+		for (n = 0,ptr = line.s; *ptr; ptr++) {
+			if (*ptr == ' ')
+				n++;
+			if (n == 2)
+				break;
+		}
+		if (*ptr) {
+			bytes += (line.len - (ptr - line.s) - 1);
+		} else {
+			bytes += line.len;
+			strerr_warn2(WARN, "error-%s", line.s);
+		}
+		write_bytes(fd, &bytes);
+	} /* for (;;) */
+	_exit(1);
+}
+
+int
+main(int argc, char **argv)
+{
+	int             c, verbose = 0;
+
+	while ((c = getopt(argc, argv, "vd:r:")) != opteof) {
+		switch (c)
+		{
+		case 'v':
+			verbose = 1;
+			break;
+		case 'd':
+			scan_ulong(optarg, &dtimeout);
+			break;
+		case 'r':
+			loghost = optarg;
+			break;
+		default:
+			strerr_die1x(100, usage);
+		}
+	}
+	if (argc == optind)
+		strerr_die1x(100, usage);
+	signal(SIGTERM, SigTerm);
+	do_server(verbose, argv[optind]);
+}
+
+#ifndef	lint
+void
+getversion_logsrv_c()
+{
+	printf("%s\n", sccsid);
+}
+#endif
+#endif /*- #if !defined(HAVE_TIRPC) && !defined(HAVE_RPC_RPC_H) */
+
 /*
  * $Log: logsrv.c,v $
+ * Revision 1.24  2023-04-14 22:30:46+05:30  Cprogrammer
+ * removed -c option
+ *
+ * Revision 1.23  2023-04-14 12:18:03+05:30  Cprogrammer
+ * replaced fprintf with strerr_warn
+ *
+ * Revision 1.22  2023-04-14 09:43:27+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.21  2022-12-06 12:24:59+05:30  Cprogrammer
  * removed filewrt to remove dependency on libindimail
  *
@@ -64,856 +350,3 @@
  * Initial revision
  *
  */
-#include <getopt.h>
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-
-#ifdef HAVE_RPC_RPC_H
-#include <rpc/rpc.h>
-#endif
-#ifdef HAVE_RPC_TYPES_H
-#include <rpc/types.h>
-#endif
-
-/*- tirpc */
-#ifdef HAVE_TIRPC
-#ifndef HAVE_RPC_RPC_H
-#ifdef HAVE_TIRPC_RPC_RPC_H
-#include <tirpc/rpc/rpc.h>
-#endif /*- #ifdef HAVE_TIRPC_RPC_RPC_H */
-#endif /*- #ifdef HAVE_RPC_RPC_H */
-#ifndef HAVE_RPC_TYPES_H
-#ifdef HAVE_TIRPC_RPC_TYPES_H
-#include <tirpc/rpc/types.h>
-#endif /*- #ifdef HAVE_TIRPC_RPC_TYPES_H */
-#endif /*- #ifndef HAVE_RPC_TYPES_H */
-#endif /*- #ifdef HAVE_TIRPC */
-
-#include <signal.h>
-#include <errno.h>
-#ifdef HAVE_SSL
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-#endif
-#ifdef HAVE_QMAIL
-#include <qmail/getEnvConfig.h>
-#include <qmail/tcpbind.h>
-#endif
-#include "tls.h"
-#include "common.h"
-
-/*-
-program RPCLOG
-{
-	version CLOGVERS
-	{
-		int	SEND_MESSAGE( string ) = 1;
-	} = 1;
-} = 0x20000001;
--*/
-
-
-#define RPCLOG ((u_long)0x20000001)
-#define CLOGVERS ((u_long)1)
-#define SEND_MESSAGE ((u_long)1)
-
-#define MAXBUF    8192
-#define PIDFILE   "/tmp/logsrv.pid"
-#define PORT      "logsrv" /*- 6340 */
-#define STATUSDIR PREFIX"/tmp/"
-
-#ifndef	lint
-static char     sccsid[] = "$Id: logsrv.c,v 1.21 2022-12-06 12:24:59+05:30 Cprogrammer Exp mbhangui $";
-#endif
-
-#if !defined(HAVE_TIRPC) && !defined(HAVE_RPC_RPC_H)
-int
-main(int argc, char **argv)
-{
-	fprintf(stderr, "no usage rpc/svc library found\n");
-	exit (111);
-}
-#else
-#ifdef __STDC__
-int             main(int, char **);
-int             server(int);
-int             log_msg(char **);
-int            *send_message_1(char **, CLIENT *);
-#else
-int             main();
-int             server();
-int             log_msg();
-int            *send_message_1();
-#endif
-void            SigTerm();
-static void     SigChild();
-#ifdef HAVE_SSL
-static void     SigHup();
-int             translate(SSL *, int, int, int, unsigned int);
-#endif
-
-char           *progname, *statusdir, *loghost;
-int             sighupflag, logsrvpid, rpcflag;
-char            statusfile[MAXBUF];
-CLIENT         *cl;
-#ifdef HAVE_SSL
-static int      usessl = 0;
-static char    *certfile;
-SSL_CTX        *ctx = (SSL_CTX *) 0;
-#endif
-
-#ifdef HAVE_SSL
-char            tbuf[2048];
-
-static int
-ssl_write(SSL *ssl, char *buf, int len)
-{
-	int             w;
-
-	while (len) {
-		if ((w = SSL_write(ssl, buf, len)) == -1) {
-			if (errno == EINTR)
-				continue;
-			return -1;	/*- note that some data may have been written */
-		}
-		if (w == 0);	/*- luser's fault */
-		buf += w;
-		len -= w;
-	}
-	return 0;
-}
-
-int
-sockwrite(int fd, char *wbuf, int len)
-{
-	char           *ptr;
-	int             rembytes, wbytes;
-
-	for (ptr = wbuf, rembytes = len; rembytes;) {
-		for (;;) {
-			errno = 0;
-			if ((wbytes = write(fd, ptr, rembytes)) == -1) {
-#ifdef ERESTART
-				if (errno == EINTR || errno == ERESTART)
-#else
-				if (errno == EINTR)
-#endif
-					continue;
-				return (-1);
-			} else
-			if (!wbytes)
-				return(0);
-			break;
-		}
-		ptr += wbytes;
-		rembytes -= wbytes;
-	}
-	return (len);
-}
-
-int
-translate(SSL *ssl, int out, int clearout, int clearerr, unsigned int iotimeout)
-{
-	fd_set          rfds;	/*- File descriptor mask for select -*/
-	struct timeval  timeout;
-	int             flagexitasap;
-	int             sslin;
-	int             retval, n, r;
-
-	timeout.tv_sec = iotimeout;
-	timeout.tv_usec = 0;
-	flagexitasap = 0;
-	if ((sslin = SSL_get_rfd(ssl)) == -1) {
-		fprintf(stderr, "translate: unable to set up SSL connection\n");
-		while ((n = ERR_get_error()))
-			fprintf(stderr, "translate: %s\n", ERR_error_string(n, 0));
-		return (-1);
-	}
-	if (SSL_accept(ssl) <= 0) {
-		fprintf(stderr, "translate: unable to accept SSL connection\n");
-		while ((n = ERR_get_error()))
-			fprintf(stderr, "translate: %s\n", ERR_error_string(n, 0));
-		return (-1);
-	}
-	while (!flagexitasap) {
-		FD_ZERO(&rfds);
-		FD_SET(sslin, &rfds);
-		FD_SET(clearout, &rfds);
-		FD_SET(clearerr, &rfds);
-		if ((retval = select(clearerr > sslin ? clearerr + 1 : sslin + 1, &rfds, (fd_set *) NULL, (fd_set *) NULL, &timeout)) < 0) {
-#ifdef ERESTART
-			if (errno == EINTR || errno == ERESTART)
-#else
-			if (errno == EINTR)
-#endif
-				continue;
-			fprintf(stderr, "translate: %s\n", strerror(errno));
-			return (-1);
-		} else
-		if (!retval) {
-			fprintf(stderr, "translate: timeout reached without input [%ld sec]\n", timeout.tv_sec);
-			return (-1);
-		}
-		if (FD_ISSET(sslin, &rfds)) {
-			/*- data on sslin */
-			if ((n = SSL_read(ssl, tbuf, sizeof(tbuf))) < 0) {
-				fprintf(stderr, "translate: unable to read from network: %s\n", strerror(errno));
-				flagexitasap = 1;
-			} else
-			if (n == 0)
-				flagexitasap = 1;
-			else
-			if ((r = sockwrite(out, tbuf, n)) < 0) {
-				fprintf(stderr, "translate: unable to write to client: %s\n", strerror(errno));
-				return (-1);
-			}
-		}
-		if (FD_ISSET(clearout, &rfds)) {
-			/*- data on clearout */
-			if ((n = read(clearout, tbuf, sizeof(tbuf))) < 0) {
-				fprintf(stderr, "translate: unable to read from client: %s\n", strerror(errno));
-				return (-1);
-			} else
-			if (n == 0)
-				flagexitasap = 1;
-			if ((r = ssl_write(ssl, tbuf, n)) < 0) {
-				fprintf(stderr, "translate: unable to write to network: %s\n", strerror(errno));
-				return (-1);
-			}
-		}
-		if (FD_ISSET(clearerr, &rfds)) {
-			/*- data on clearerr */
-			if ((n = read(clearerr, tbuf, sizeof(tbuf))) < 0) {
-				fprintf(stderr, "translate: unable to read from client: %s\n", strerror(errno));
-				return (-1);
-			} else
-			if (n == 0)
-				flagexitasap = 1;
-			if ((r = ssl_write(ssl, tbuf, n)) < 0) {
-				fprintf(stderr, "translate: unable to write to network: %s\n", strerror(errno));
-				return (-1);
-			}
-		}
-	} /*- while (!flagexitasap) */
-	return (0);
-}
-
-SSL_CTX *
-load_certificate(char *certfile)
-{
-	SSL_CTX        *myctx = (SSL_CTX *) 0;
-#ifdef CRYPTO_POLICY_NON_COMPLIANCE
-	char           *cipher;
-#endif
-
-    /* setup SSL context (load key and cert into ctx) */
-	if (!(myctx = SSL_CTX_new(SSLv23_server_method()))) {
-		fprintf(stderr, "SSL_CTX_new: unable to create SSL context: %s\n",
-			ERR_error_string(ERR_get_error(), 0));
-		return ((SSL_CTX *) 0);
-	}
-	/* set prefered ciphers */
-#ifdef CRYPTO_POLICY_NON_COMPLIANCE
-	cipher = getenv("SSL_CIPHER");
-	if (cipher && !SSL_CTX_set_cipher_list(myctx, cipher)) {
-		fprintf(stderr, "SSL_CTX_set_cipher_list: unable to set cipher list: %s\n",
-			ERR_error_string(ERR_get_error(), 0));
-		SSL_CTX_free(myctx);
-		return ((SSL_CTX *) 0);
-	}
-#endif
-	if (SSL_CTX_use_certificate_chain_file(myctx, certfile)) {
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-		if (SSL_CTX_use_PrivateKey_file(myctx, certfile, SSL_FILETYPE_PEM) != 1) {
-			fprintf(stderr, "SSL_CTX_use_PrivateKey: unable to load private key: %s\n",
-				ERR_error_string(ERR_get_error(), 0));
-			SSL_CTX_free(myctx);
-			return ((SSL_CTX *) 0);
-		}
-#else
-		if (SSL_CTX_use_RSAPrivateKey_file(myctx, certfile, SSL_FILETYPE_PEM) != 1) {
-			fprintf(stderr, "SSL_CTX_use_RSAPrivateKey: unable to load RSA private key: %s\n",
-				ERR_error_string(ERR_get_error(), 0));
-			SSL_CTX_free(myctx);
-			return ((SSL_CTX *) 0);
-		}
-#endif
-		if (SSL_CTX_use_certificate_file(myctx, certfile, SSL_FILETYPE_PEM) != 1) {
-			fprintf(stderr, "SSL_CTX_use_certificate_file: unable to load certificate: %s\n",
-			ERR_error_string(ERR_get_error(), 0));
-			SSL_CTX_free(myctx);
-			return ((SSL_CTX *) 0);
-		}
-	}
-	return (myctx);
-}
-
-static void
-SigHup(void)
-{
-	fprintf(stderr, "%d: logsrv received SIGHUP\n", getpid());
-	ctx = load_certificate(certfile);
-	signal(SIGHUP, (void(*)()) SigHup);
-	errno = EINTR;
-	return;
-}
-#endif
-
-int
-get_options(int argc, char **argv, int *background, int *silent)
-{
-	int             c, errflag = 0;
-
-#ifdef HAVE_SSL
-	certfile = 0;
-#endif
-#ifdef HAVE_SSL
-	while (!errflag && (c = getopt(argc, argv, "fsr:n:")) != -1) {
-#else
-	while (!errflag && (c = getopt(argc, argv, "fsr:")) != -1) {
-#endif
-		switch (c)
-		{
-		case 's':
-			*silent = 1;
-			break;
-		case 'b':
-			*background = 1;
-			break;
-		case 'r':
-			rpcflag = 1;
-			loghost = optarg;
-			break;
-#ifdef HAVE_SSL
-		case 'n':
-			usessl = 1;
-			certfile = optarg;
-			break;
-#endif
-		default:
-			errflag = 1;
-			break;
-		}
-	}
-	if (errflag)
-		return (1);
-	return (0);
-}
-
-static void
-SigChild(void)
-{
-	int             status;
-	pid_t           pid;
-
-	for (;(pid = waitpid(-1, &status, WNOHANG | WUNTRACED));) {
-#ifdef ERESTART
-		if (pid == -1 && (errno == EINTR || errno == ERESTART))
-#else
-		if (pid == -1 && errno == EINTR)
-#endif
-			continue;
-		break;
-	} /*- for (; pid = waitpid(-1, &status, WNOHANG | WUNTRACED);) -*/
-	(void) signal(SIGCHLD, (void (*)()) SigChild);
-	return;
-}
-
-void
-usage(char *pname)
-{
-#ifdef HAVE_SSL
-	fprintf(stderr, "Usage: %s [-s] [-b] [-n certfile] [-r rpchost]\n", pname);
-#else
-	fprintf(stderr, "Usage: %s [-s] [-b] [-r rpchost]\n", pname);
-#endif
-	return;
-}
-
-int             log_timeout;
-
-int
-main(int argc, char **argv)
-{
-	FILE           *pidfp;
-	char           *ptr;
-	int             pid, bindfd, sfd, background = 0, silent = 0, len;
-	struct sockaddr_in remotaddr;	/* for peer socket address */
-	int             inaddrlen = sizeof(struct sockaddr_in);
-	struct linger   linger;
-#ifdef HAVE_SSL
-	BIO            *sbio;
-	SSL            *ssl;
-	int             r, status, retval, pi1[2], pi2[2], pi3[2];
-#endif
-
-	if ((progname = strrchr(argv[0], '/')))
-		progname++;
-	else
-		progname = argv[0];
-	if (get_options(argc, argv, &background, &silent)) {
-		usage(progname);
-		return (1);
-	}
-#ifdef HAVE_SSL
-	if (usessl == 1) {
-		if (access(certfile, F_OK)) {
-			fprintf(stderr, "missing certficate: %s: %s\n", certfile, strerror(errno));
-			return (1);
-		}
-		signal(SIGHUP, (void (*)()) SigHup);
-		SSL_library_init();
-		if (!(ctx = load_certificate(certfile)))
-			return (1);
-	}
-#endif
-	getEnvConfigInt(&log_timeout, "LOGSRV_TIMEOUT", 120);
-	if (!(statusdir = getenv("STATUSDIR")))
-		statusdir = STATUSDIR;
-	if (background) {
-		if ((pidfp = fopen(PIDFILE, "r"))) {
-			if (fscanf(pidfp, "%d", &logsrvpid) != 1) ;
-			(void) fclose(pidfp);
-			if (logsrvpid && !kill(logsrvpid, 0)) {
-				fprintf(stderr, "%s is already running\n", progname);
-				return (0);
-			} else
-			if (logsrvpid && errno == EACCES) {
-				fprintf(stderr, "%s is already running\n", progname);
-				return (1);
-			}
-		}
-		switch (logsrvpid = fork())
-		{
-		case -1:
-			fprintf(stderr, "fork: %s\n", strerror(errno));
-			return (1);
-		case 0:
-			(void) setsid();
-			(void) close(0);
-			logsrvpid = getpid();
-			break;
-		default:
-			if ((pidfp = fopen(PIDFILE, "w"))) {
-				fprintf(pidfp, "%d", logsrvpid);
-				(void) fclose(pidfp);
-				return(0);
-			} else {
-				fprintf(stderr, "%s: %s\n", PIDFILE, strerror(errno));
-				exit(1);
-			}
-		}
-	} else
-		logsrvpid = getpid();
-	(void) signal(SIGTERM, SigTerm);
-	(void) signal(SIGCHLD, (void (*)()) SigChild);
-	if (!(ptr = getenv("PORT")))
-		ptr = PORT;
-	if ((bindfd = tcpbind("0", ptr, 5)) == -1) {
-		fprintf(stderr, "tcpsockbind failed for port %s\n", ptr);
-		exit (1);
-	}
-	signal(SIGTERM, SigTerm);
-	for (;;) {
-		if ((sfd = accept(bindfd, (struct sockaddr *) &remotaddr, (socklen_t *) &inaddrlen)) == -1) {
-			/* Got signal. */
-			switch (errno)
-			{
-			case EINTR:
-				continue;
-				/*
-				 * have to add more cases here
-				 */
-			default:
-				fprintf(stderr, "accept: %s\n", strerror(errno));
-				if (background)
-					(void) unlink(PIDFILE);
-				exit(1);
-			}
-		}
-		switch (pid = fork())
-		{
-		case -1:
-			fprintf(stderr, "fork: %s\n", strerror(errno));
-			(void) close(sfd);
-		case 0:
-			(void) signal(SIGTERM, SIG_DFL);
-			(void) signal(SIGCHLD, SIG_IGN);
-			(void) signal(SIGHUP, SIG_IGN);
-			(void) close(bindfd);
-			if (setsockopt(sfd, SOL_SOCKET, SO_LINGER, (char *) &linger, sizeof(linger)) == -1) {
-				close(sfd);
-				exit(1);
-			}
-			for (;;) {
-				if (setsockopt(sfd, SOL_SOCKET, SO_SNDBUF, (void *) &len, sizeof(int)) == -1) {
-					if (errno == ENOBUFS) {
-						usleep(1000);
-						continue;
-					}
-					close(sfd);
-					exit(1);
-				}
-				break;
-			}
-			for (;;) {
-				if (setsockopt(sfd, SOL_SOCKET, SO_RCVBUF, (void *) &len, sizeof(int)) == -1) {
-					if (errno == ENOBUFS) {
-						usleep(1000);
-						continue;
-					}
-					close(sfd);
-					exit(1);
-				}
-				break;
-			}
-			dup2(sfd, 0);
-			dup2(sfd, 3);
-			dup2(sfd, 4);
-			if (sfd != 0 && sfd != 3 && sfd != 4)
-				close(sfd);
-#ifdef HAVE_SSL
-			if (usessl == 1) {
-				int             n;
-
-				if (pipe(pi1) != 0 || pipe(pi2) != 0 || pipe(pi3) != 0) {
-					fprintf(stderr, "unable to create pipe: %s\n", strerror(errno));
-					exit(1);
-				}
-				switch (fork())
-				{
-				case 0:
-					close(pi1[1]);
-					close(pi2[0]);
-					close(pi3[0]);
-					if (dup2(pi1[0], 0) == -1 || dup2(pi2[1], 3) == -1 || dup2(pi3[1], 4) == -1) {
-						fprintf(stderr, "unable to set up descriptors: %s\n", strerror(errno));
-						exit(1);
-					}
-					if (pi1[0] != 0)
-						close(pi1[0]);
-					if (pi2[1] != 3)
-						close(pi2[1]);
-					if (pi3[1] != 4)
-						close(pi1[1]);
-					/*
-				 	* signals are allready set in the parent 
-				 	*/
-					(void) server(silent);
-					close(0);
-					close(3);
-					close(4);
-					exit(1);
-				case -1:
-					fprintf(stderr, "%d: unable to fork: %s\n", getpid(), strerror(errno));
-					break;
-				default:
-					break;
-				}
-				close(pi1[0]);
-				close(pi2[1]);
-				close(pi3[1]);
-				if (!(ssl = SSL_new(ctx))) {
-					long e;
-					while ((e = ERR_get_error()))
-						fprintf(stderr, "%d: %s\n", getpid(), ERR_error_string(e, 0));
-					fprintf(stderr, "%d: unable to set up SSL session\n", getpid());
-					SSL_CTX_free(ctx);
-					exit(1);
-				}
-				SSL_CTX_free(ctx);
-#ifndef CRYPTO_POLICY_NON_COMPLIANCE
-				if (!ptr)
-					ptr = "PROFILE=SYSTEM";
-				if (!SSL_set_cipher_list(ssl, ptr)) {
-					fprintf(stderr, "unable to set ciphers: %s: %s\n", ptr,
-						ERR_error_string(ERR_get_error(), 0));
-					SSL_free(ssl);
-					return (1);
-				}
-#endif
-				if (!(sbio = BIO_new_socket(0, BIO_NOCLOSE))) {
-					fprintf(stderr, "%d: unable to set up BIO socket\n", getpid());
-					SSL_free(ssl);
-					exit(1);
-				}
-				SSL_set_bio(ssl, sbio, sbio); /*- cannot fail */
-				n = translate(ssl, pi1[1], pi2[0], pi3[0], 3600);
-				SSL_shutdown(ssl);
-				SSL_free(ssl);
-				for (retval = -1;(r = waitpid(pid, &status, WNOHANG | WUNTRACED));) {
-#ifdef ERESTART
-					if (r == -1 && (errno == EINTR || errno == ERESTART))
-#else
-					if (r == -1 && errno == EINTR)
-#endif
-						continue;
-					if (WIFSTOPPED(status) || WIFSIGNALED(status)) {
-						fprintf(stderr, "%d: killed by signal %d\n", pid, WIFSTOPPED(status) ? WSTOPSIG(status) : WTERMSIG(status));
-						retval = -1;
-					} else
-					if (WIFEXITED(status)) {
-						retval = WEXITSTATUS(status);
-						fprintf(stderr, "%d: normal exit return status %d\n", pid, retval);
-					}
-					break;
-				} /*- for (; pid = waitpid(-1, &status, WNOHANG | WUNTRACED);) -*/
-				if (n)
-					exit(n);
-				if (retval)
-					exit(retval);
-				exit (0);
-			} else { /*- if (usessl == 1) */
-				(void) server(silent);
-				exit(1);
-			}
-#else
-		(void) server(silent);
-		exit(1);
-#endif
-		default:
-			(void) close(sfd);
-		}
-	}	/* for (;;) */
-}
-
-int
-write_bytes(int fd, umdir_t *Bytes)
-{
-	if (lseek(fd, sizeof(pid_t), SEEK_SET) == -1) {
-		fprintf(stderr, "lseek: %s\n", strerror(errno));
-		return (-1);
-	}
-	if (write(fd, (char *) Bytes, sizeof(umdir_t)) == -1) {
-		fprintf(stderr, "write_bytes: %s\n", strerror(errno));
-		return (-1);
-	}
-	return (0);
-}
-
-#define MAXNOBUFRETRY           60 /*- Defines maximum number of ENOBUF retries -*/
-#define SELECTTIMEOUT           30 /*- secs after which select will timeout -*/
-
-int
-sockread(int fd, char *buffer, int len)
-{
-	char           *ptr;
-	int             rembytes, rbytes, retrycount;
-
-	for (retrycount = 0, rembytes = len, ptr = buffer; rembytes;) {
-		errno = 0;
-		if ((rbytes = read(fd, ptr, rembytes)) == -1) {
-#ifdef ERESTART
-			if (errno == EINTR || errno == ERESTART)
-#else
-			if (errno == EINTR)
-#endif
-				continue;
-			if (errno == ENOBUFS && retrycount++ < MAXNOBUFRETRY) {
-				usleep(1000);
-				continue;
-			}
-#if defined(HPUX_SOURCE)
-			if (errno == EREMOTERELEASE) {
-				rbytes = 0;
-				break;
-			}
-#endif
-			return (-1);
-		} else
-		if (!rbytes)	/* EOF */
-			break;;
-		rembytes -= rbytes;
-		if (!rembytes)
-			break;
-		ptr += rbytes;
-	}
-	return (len - rembytes);
-}
-
-int
-server(int silent)
-{
-	int             fd, retval, count;
-	umdir_t         bytes;
-	ssize_t         n;
-	pid_t           pid;
-	FILE           *socketfp;
-	char            buffer[MAXBUF], hostname[56];
-	char           *ptr, *(parm[1]);
-
-	if ((retval = sockread(0, hostname, MAXHOSTNAMELEN)) == -1) {
-		fprintf(stderr, "read: %s\n", strerror(errno));
-		if (write(3, "1", 1) == -1) ;
-		return (1);
-	} else
-	if (!retval)
-		return(1);
-	hostname[retval] = 0;
-	if (!(socketfp = fdopen(0, "r"))) {
-		fprintf(stderr, "fdopen: %s\n", strerror(errno));
-		if (write(3, "1", 1) == -1) ;
-		return (1);
-	}
-	if (write(3, "1", 1) == -1) ;
-	(void) sprintf(statusfile, "%s/%s.status", statusdir, hostname);
-	if (!access(statusfile, R_OK)) {
-		if ((fd = open(statusfile, O_RDWR, 0644)) == -1) {
-			fprintf(stderr, "creat: %s %s\n", statusfile, strerror(errno));
-			return(1);
-		}
-		if ((n = read(fd, (char *) &pid, sizeof(pid_t))) == -1) {
-			fprintf(stderr, "readpid: %s: %s\n", statusfile, strerror(errno));
-			return(1);
-		}
-		if (n == sizeof(pid_t)) {
-			if ((n = read(fd, (char *) &bytes, sizeof(umdir_t))) == -1) {
-				fprintf(stderr, "readbytes: %s: %s\n", statusfile, strerror(errno));
-				return(1);
-			}
-		}
-	} else {
-		if ((fd = open(statusfile, O_CREAT|O_RDWR, 0644)) == -1) {
-			fprintf(stderr, "creat: %s %s\n", statusfile, strerror(errno));
-			return(1);
-		}
-		bytes = 0;
-	}
-	if (lseek(fd, 0, SEEK_SET) == -1) {
-		fprintf(stderr, "lseek: %s\n", strerror(errno));
-		return (-1);
-	}
-	pid = getpid();
-	if (write(fd, (char *) &pid, sizeof(pid_t)) != sizeof(pid_t)) {
-		fprintf(stderr, "write: %s: %s\n", statusfile, strerror(errno));
-		return(1);
-	}
-	printf("Connection request from %s\n", hostname);
-	(void) signal(SIGTERM, SigTerm);
-	for (;; sleep(5)) {
-		for (;;) {
-			if (!fgets(buffer, MAXBUF - 1, socketfp) || feof(socketfp)) {
-				fprintf(stderr, "client terminated on %s\n", hostname);
-				shutdown(0, 0);
-				return (1);
-			}
-			if (rpcflag) {
-				*parm = buffer;
-				if (log_msg(parm) == -1) {
-					shutdown(0, 0);
-					return(1);
-				}
-			} 
-			if (!silent && write(1, buffer, str_len(buffer)) == -1) {
-				fprintf(stderr, "write: out: %s\n", strerror(errno));
-				shutdown(0, 0);
-				return(1);
-			}
-			for (count = 0,ptr = buffer;*ptr;ptr++) {
-				if (*ptr == ' ')
-					count++;
-				if (count == 2)
-					break;
-			}
-			if (*ptr)
-				bytes += strlen(ptr + 1);
-			else {
-				bytes += strlen(buffer);
-				fprintf(stderr, "error-%s", ptr+1);
-			}
-			if (write_bytes(fd, &bytes) == -1) {
-				fprintf(stderr, "write_bytes: %s\n", strerror(errno));
-				shutdown(0, 0);
-				return(1);
-			}
-		} /* for (;;) */
-	} /* for (;; sleep(5))*/
-}
-
-int
-log_msg(char **str)
-{
-	int            *ret;
-	static int      flag;
-
-	if (!flag) {
-		if (!(cl = clnt_create(loghost, RPCLOG, CLOGVERS, "tcp"))) {
-			fprintf(stderr, "clnt_create: %s\n", clnt_spcreateerror(loghost));
-			return (-1);
-		}
-		flag++;
-	}
-	if (!(ret = send_message_1(str, cl))) {
-		clnt_perror(cl, "send_message_1");
-		clnt_destroy(cl);
-		flag = 0;
-		return (-1);
-	} else
-		return (0);
-}
-
-int            *
-send_message_1(char **argp, CLIENT *clnt)
-{
-	static int      res;
-	struct timeval  TIMEOUT = {25, 0};
-
-	(void) memset((char *) &res, 0, sizeof(res));
-	if (clnt_call(clnt, SEND_MESSAGE, (xdrproc_t) xdr_wrapstring, (char *) argp,
-			(xdrproc_t) xdr_int, (char *) &res, TIMEOUT) != RPC_SUCCESS) {
-		fprintf(stderr, "clnt_call: %s\n", clnt_sperror(clnt, loghost));
-		return (NULL);
-	}
-	return (&res);
-}
-
-void
-SigTerm()
-{
-	if (logsrvpid == getpid()) {
-		fprintf(stderr, "Sending SIGTERM to PROCESS GROUP %d\n", logsrvpid);
-		(void) signal(SIGTERM, SIG_IGN);
-		kill(-logsrvpid, SIGTERM);
-	}
-	/*-
-	else
-	if (!access(statusfile, F_OK))
-		(void) unlink(statusfile);
-	*/
-	exit(0);
-}
-
-#ifndef	lint
-void
-getversion_logsrv_c()
-{
-	printf("%s\n", sccsid);
-}
-#endif
-
-#endif

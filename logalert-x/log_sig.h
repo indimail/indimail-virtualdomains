@@ -1,5 +1,5 @@
 /*
- * $Log: sig.h,v $
+ * $Log: log_sig.h,v $
  * Revision 1.1  2013-05-15 00:14:57+05:30  Cprogrammer
  * Initial revision
  *

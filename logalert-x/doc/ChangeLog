@@ -1,3 +1,12 @@
+* Sat Apr 15 2024 22:03:00 +0000 Manvendra Bhangui <@email@> @version@-@release@%{?dist}
+Release @version@-@release@ Start 13/04/2023 End 15/04/2023
+- 13/04/2023
+1. Refactored logsrv.c, logclient.c incrmesg.c, rpclog.c, showbytes.c -
+    https://github.com/mbhangui/indimail-virtualdomains/pull/29
+2. logclient.c: added -v, -p option
+3. logsrv.c: removed -c option
+4. rpclog.c: print RPC program number, version during startup.
+
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <logalert@indimail.org> 0.3.0-1.1%{?dist}
 Release 0.3.0-1.1 Start 25/02/2010
 - 25/02/2010

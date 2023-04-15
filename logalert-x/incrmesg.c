@@ -1,5 +1,8 @@
 /*
  * $Log: incrmesg.c,v $
+ * Revision 1.11  2023-04-14 00:08:17+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.10  2022-05-10 20:09:47+05:30  Cprogrammer
  * use tcpopen from libqmail
  *
@@ -34,292 +37,290 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-#include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
 #endif
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#ifdef SOLARIS
-#include <sys/systeminfo.h>
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
 #endif
 #ifdef HAVE_QMAIL
-#include <qmail/r_mkdir.h>
-#include <qmail/tcpopen.h>
+#include <substdio.h>
+#include <getln.h>
+#include <subfd.h>
+#include <qprintf.h>
+#include <sgetopt.h>
+#include <stralloc.h>
+#include <env.h>
+#include <str.h>
+#include <error.h>
+#include <strerr.h>
+#include <open.h>
+#include <r_mkdir.h>
+#include <alloc.h>
 #endif
 
-#define MAXBUF  8192
 #define SEEKDIR "/var/tmp/incrmesg"
+#define WARN    "incrmesg: warn: " 
+#define FATAL   "incrmesg: fatal: " 
 
 #ifndef	lint
-static char     sccsid[] = "$Id: incrmesg.c,v 1.10 2022-05-10 20:09:47+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: incrmesg.c,v 1.11 2023-04-14 00:08:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
-struct msgtable
+struct msgtab
 {
-	char            fname[MAXBUF];
+	char           *fname;
+	ino_t           inum; 
 	int             fd;
-	FILE           *fp;
 	int             seekfd;
-	long            machcnt;
+	long            seek;
+	long            count;
 };
 
-struct msgtable *msghd;
+char           *lhost;
+struct msgtab  *msghd;
+stralloc        seekfile = {0};
 
-#ifdef __STDC__
-int             main(int, char **);
-int             incrmesg(char **);
-static int      IOplex();
-static int      checkfiles(char *, FILE *, long *, int);
-#else
-int             main();
-int             incrmesg();
-static int      IOplex();
-static int      checkfiles();
-#endif
-
-int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+static int
+checkfiles(struct msgtab *msgptr)
 {
-	char           *ptr;
+	int             fd, count;
+	long            seekval[1];
+	struct stat     st;
 
-	if ((ptr = strrchr(argv[0], '/')))
-		ptr++;
-	else
-		ptr = argv[0];
-	if (argc < 2)
-	{
-		fprintf(stderr, "USAGE: %s logfile(s)\n", ptr);
+	for (count = 0;; count++) {
+		if (access(msgptr->fname, F_OK)) {
+			if (errno == error_noent) {
+				sleep(5);
+				continue;
+			}
+			strerr_die3sys(111, FATAL, msgptr->fname, ": ");
+		} else
+		if (count) { /* new file has been created */
+			close(msgptr->fd);
+			if ((fd = open_read(msgptr->fname)) == -1)
+				strerr_die3sys(111, FATAL, msgptr->fname, ": ");
+			if (dup2(fd, msgptr->fd) == -1)
+				strerr_die3sys(111, FATAL, msgptr->fname, ": dup2: ");
+			if (fd != msgptr->fd)
+				close(fd);
+			if (lseek(msgptr->seekfd, 0l, SEEK_SET) == -1)
+				strerr_die4sys(111, FATAL, "unable to rewind ", msgptr->fname, ".seek: ");
+			seekval[0] = 0l;
+			if (write(msgptr->seekfd, (char *) seekval, sizeof(long)) == -1)
+				strerr_die4sys(111, FATAL, "unable to write to ", msgptr->fname, ".seek: ");
+			return (1); /*- new file got created */
+		} else
+			break;
+	}
+	if ((fd = open_read(msgptr->fname)) == -1)
+		strerr_die4sys(111, FATAL, "open: ", msgptr->fname, ": ");
+	if (fstat(fd, &st) == -1)
+		strerr_die4sys(111, FATAL, "fstat: ", msgptr->fname, ": ");
+	if (st.st_ino == msgptr->inum) {
+		if (st.st_size == msgptr->seek)/* Just an EOF on file */ {
+			close(fd);
+			return (0);
+		} else
+		if (st.st_size > msgptr->seek) { /* update happened after EOF */
+			close(fd);
+			return (2); /*- original file got updated */
+		} else { /*- file got truncated */
+			if (lseek(msgptr->fd, 0l, SEEK_SET) == -1)
+				strerr_die4sys(111, FATAL, "unable to rewind ", msgptr->fname, ": ");
+			if (lseek(msgptr->seekfd, 0l, SEEK_SET) == -1)
+				strerr_die4sys(111, FATAL, "unable to rewind ", msgptr->fname, ".seek: ");
+			seekval[0] = 0l;
+			if (write(msgptr->seekfd, (char *) seekval, sizeof(long)) == -1)
+				strerr_die4sys(111, FATAL, "unable to write to ", msgptr->fname, ".seek: ");
+			return (1);
+		}
+	} else { /* new file has been created */
+		msgptr->inum = st.st_ino;
+		close(msgptr->fd);
+		if (dup2(fd, msgptr->fd) == -1)
+			strerr_die3sys(111, FATAL, msgptr->fname, ": dup2: ");
+		if (fd != msgptr->fd)
+			close(fd);
+		if (lseek(msgptr->seekfd, 0l, SEEK_SET) == -1)
+			strerr_die4sys(111, FATAL, "unable to rewind ", msgptr->fname, ".seek: ");
+		seekval[0] = 0l;
+		if (write(msgptr->seekfd, (char *) seekval, sizeof(long)) == -1)
+			strerr_die4sys(111, FATAL, "unable to write to ", msgptr->fname, ".seek: ");
 		return (1);
 	}
-	if (!(msghd = (struct msgtable *) malloc(sizeof(struct msgtable) * argc)))
-	{
-		perror("malloc");
-		return (1);
-	}
-	return (incrmesg(argv + 1));
+}
+
+static int
+IOplex()
+{
+	long            seekval[2], startsrno;
+	int             dflag, match, i;
+	struct msgtab  *msgptr;
+	substdio        ssin;
+	char            inbuf[512];
+	static stralloc line = {0};
+
+	for (msgptr = msghd; msgptr->fd != -1; msgptr++) {
+		substdio_fdbuf(&ssin, read, msgptr->fd, inbuf, sizeof(inbuf));
+		if (msgptr->seek) {
+			if (lseek(msgptr->fd, msgptr->seek, SEEK_SET) == -1)
+				strerr_die4sys(111, FATAL, "unable to seek ", msgptr->fname, ": ");
+		}
+		for (dflag = 0, startsrno = msgptr->count;;) {
+			if (getln(&ssin, &line, &match, '\n') == -1)
+				strerr_die4sys(111, FATAL, "read: ", msgptr->fname, ": ");
+			if (!line.len) {
+				i = checkfiles(msgptr);
+				switch (i)
+				{
+				case 1:
+					continue;
+				case 2:
+					ssin.p = 0;
+					continue;
+				}
+				if (dflag) {
+					if (subprintf(subfdout, "=======================================\n") == -1 ||
+							subprintf(subfdout, "Message        File : %s@%s\n", msgptr->fname, lhost) == -1 ||
+							subprintf(subfdout, "Message       Count : %ld\n", msgptr->count - startsrno) == -1 ||
+							subprintf(subfdout, "Start Serial Number : %ld\n", startsrno) == -1 ||
+							subprintf(subfdout, "End   Serial Number : %ld\n", msgptr->count - 1) == -1 ||
+							subprintf(subfdout, "=======================================\n")) {
+						strerr_warn2(WARN, "unable to write to descriptor 1: ", &strerr_sys);
+					}
+				}
+				break;
+			}
+			if (!stralloc_0(&line))
+				strerr_die2x(111, FATAL, "out of memory");
+			if (!dflag++) {
+				if (subprintf(subfdout, "Filename %-25s\n", msgptr->fname) == -1 ||
+						subprintf(subfdout, "=======================================================\n") == -1) {
+					strerr_warn2(WARN, "unable to write to descriptor 1: ", &strerr_sys);
+				}
+			}
+			if (lhost) {
+				if (subprintf(subfdout, "%s %ld %s", lhost, (msgptr->count)++, line.s) == -1) {
+					strerr_warn2(WARN, "unable to write to descriptor 1: ", &strerr_sys);
+					break;
+				}
+			} else {
+				if (subprintf(subfdout, "%ld %s", (msgptr->count)++, line.s) == -1) {
+					strerr_warn2(WARN, "unable to write to descriptor 1: ", &strerr_sys);
+					break;
+				}
+			}
+			if ((msgptr->seek = lseek(msgptr->fd, (off_t) 0, SEEK_CUR)) == -1)
+				strerr_die4sys(111, FATAL, "unable to get current position ", msgptr->fname, ": ");
+		} /* end of for (dflag = 0;;) */
+		if (dflag) {
+			if (substdio_flush(subfdout) == -1) {
+				strerr_warn2(WARN, "unable to write to descriptor 1: ", &strerr_sys);
+				continue;
+			}
+			if (lseek(msgptr->seekfd, 0, SEEK_SET) == -1)
+				strerr_die4sys(111, FATAL, "unable to rewind ", msgptr->fname, ".seek: ");
+			seekval[0] = msgptr->seek;
+			seekval[1] = msgptr->count;
+			if (write(msgptr->seekfd, (char *) seekval, 2 * sizeof(long)) == -1)
+				strerr_warn4(WARN, "unable to write to ", msgptr->fname, ".seek:", &strerr_sys);
+			msgptr->seek = seekval[0];
+		}
+		close(msgptr->seekfd);
+		close(msgptr->fd);
+	} /* end of for (msgptr = msghd;;) */
+	return (0);
 }
 
 int
-incrmesg(fname)
-	char         **fname;
+incrmesg(char **argv)
 {
-	char            seekfile[MAXBUF];
 	long            seekval[2];
-	struct msgtable *msgptr;
-	char           *ptr, *seekdir;
+	struct msgtab  *msgptr;
+	char           *seekdir;
 	char          **fptr;
+	struct stat     st;
 
-	if (!(seekdir = getenv("SEEKDIR")))
+	if (!(seekdir = env_get("SEEKDIR")))
 		seekdir = SEEKDIR;
 	if (access(seekdir, F_OK) && r_mkdir(seekdir, 0700, getuid(), getgid()))
-	{
-		perror(seekdir);
-		return (1);
-	}
-	for(fptr = fname, msgptr = msghd;*fptr;msgptr++, fptr++)
-	{
-		if ((ptr = strrchr(*fptr, '/')))
-			ptr++;
-		else
-			ptr = *fptr;
-		(void) snprintf(seekfile, MAXBUF, "%s/%s.seek", seekdir, ptr);
-		(void) strncpy(msgptr->fname, *fptr, MAXBUF);
-		if ((msgptr->fd = open(msgptr->fname, O_RDONLY)) == -1)
-		{
-			perror(msgptr->fname);
-			return (1);
+		strerr_die4sys(111, FATAL, "r_mkdir: ", seekdir, ": ");
+	for (fptr = argv, msgptr = msghd; *fptr; msgptr++, fptr++) {
+		msgptr->fname = *fptr;
+		if (stat(msgptr->fname, &st) == -1)
+			strerr_die4sys(111, FATAL, "stat: ", msgptr->fname, ": ");
+		msgptr->inum = st.st_ino;
+
+		if (qsprintf(&seekfile, "%s/%ld.seek", seekdir, msgptr->inum) == -1)
+			strerr_die2x(111, FATAL, "out of memory");
+		if ((msgptr->fd = open_read(msgptr->fname)) == -1)
+			strerr_die4sys(111, FATAL, "open: ", msgptr->fname, ": ");
+		if (!access(seekfile.s, R_OK)) {
+			if ((msgptr->seekfd = open_readwrite(seekfile.s)) == -1)
+				strerr_die4sys(111, FATAL, "open: ", seekfile.s, ": ");
+			if (read(msgptr->seekfd, (char *) seekval, 2 * sizeof(long)) == -1)
+				strerr_die4sys(111, FATAL, "read1: ", seekfile.s, ": ");
+			msgptr->seek = seekval[0];
+			msgptr->count = seekval[1];
 		} else
-		if (!(msgptr->fp = fdopen(msgptr->fd, "r")))
-		{
-			perror(msgptr->fname);
-			return (1);
-		}
-		if (!access(seekfile, R_OK))
-		{
-			if ((msgptr->seekfd = open(seekfile, O_RDWR)) == -1)
-			{
-				perror(seekfile);
-				return (1);
-			}
-			if (read(msgptr->seekfd, seekval, sizeof(seekval)) == -1)
-				return (1);
-			fseek(msgptr->fp, seekval[0], SEEK_SET);
-			msgptr->machcnt = seekval[1];
-		} else
-		if ((msgptr->seekfd = open(seekfile, O_CREAT | O_RDWR, 0644)) == -1)
-		{
-			perror(seekfile);
-			return (1);
-		} else
-		{
-			seekval[0] = 0l;
-			seekval[1] = msgptr->machcnt = 0l;
+		if ((msgptr->seekfd = open(seekfile.s, O_CREAT | O_RDWR, 0644)) == -1)
+			strerr_die4sys(111, FATAL, "open read+write: ", seekfile.s, ": ");
+		else {
+			msgptr->seek = 0l;
+			msgptr->count = 0l;
 		}
 	}
-	*(msgptr->fname) = 0;
+	msgptr->fname = NULL;
 	msgptr->fd = -1;
 	msgptr->seekfd = -1;
 #ifdef DEBUG
-	for(msgptr = msghd;msgptr->fd != -1;msgptr++)
-	{
-		printf("%s\n", msgptr->fname);
-		printf("%d\n", msgptr->fd);
-		printf("%d\n", msgptr->seekfd);
+	for (msgptr = msghd;msgptr->fd != -1;msgptr++) {
+		subprintf(subfderr, "filename: %s\n", msgptr->fname);
+		subprintf(subfderr, "file  fd: %d\n", msgptr->fd);
+		subprintf(subfderr, "seek  fd: %d\n", msgptr->seekfd);
+		subprintf(subfderr, "seek val: %ld\n", msgptr->seek);
+		subprintf(subfderr, "count   : %ld\n", msgptr->count);
+		substdio_flush(subfderr);
 	}
 #endif
 	return (IOplex());
 }
 
-/* function for I/O multiplexing */
-static int
-IOplex()
+int
+main(int argc, char **argv)
 {
-	char            lhost[MAXHOSTNAMELEN];
-	char            Buffer[MAXBUF];
-	long            seekval[2], startsrno;
-	int             dflag;
-	struct msgtable *msgptr;
+	int             c;
 
-#ifdef SOLARIS
-	(void) sysinfo(SI_HOSTNAME, lhost, MAXHOSTNAMELEN);
-#else
-	(void) gethostname(lhost, MAXHOSTNAMELEN);
-#endif
-	for(msgptr = msghd;msgptr->fd != -1;msgptr++)
-	{
-#ifdef DEBUG
-		printf("Selecting file[%s] fd[%d] seekfd[%d]\n", msgptr->fname, msgptr->fd, msgptr->seekfd);
-#endif
-		for (dflag = 0, startsrno = msgptr->machcnt;;)
+	while ((c = getopt(argc, argv, "l:")) != opteof) {
+		switch (c)
 		{
-			if (!fgets(Buffer, MAXBUF - 2, msgptr->fp) || feof(msgptr->fp))
-			{
-				/*
-				 * If message file has been moved than update
-				 * seekfile
-				 */
-				if (checkfiles(msgptr->fname, msgptr->fp, seekval, msgptr->seekfd))
-				{
-					(void) clearerr(msgptr->fp);
-					(void) fflush(stdout);
-					continue;
-				}
-				if (dflag)
-				{
-					printf("=======================================\n");
-					printf("Message        File : %s@%s\n", msgptr->fname, lhost);
-					printf("Message       Count : %ld\n", msgptr->machcnt - startsrno);
-					printf("Start Serial Number : %ld\n", startsrno);
-					printf("End   Serial Number : %ld\n", msgptr->machcnt - 1);
-					printf("=======================================\n");
-					fflush(stdout);
-				}
-				break;
-			}
-			else
-			{
-				seekval[0] = ftell(msgptr->fp);
-				if (!dflag++)
-				{
-					printf("=======================================================\n");
-					printf("Filename %-25s\n", msgptr->fname);
-					printf("=======================================================\n");
-				}
-				if (printf("%s %ld %s", lhost, (msgptr->machcnt)++, Buffer) == -1)
-				{
-						perror("printf");
-						return (-1);
-				}
-				if (fflush(stdout) == EOF)
-				{
-					perror("fflush");
-					return (-1);
-				}
-				seekval[1] = msgptr->machcnt;
-				(void) lseek(msgptr->seekfd, 0, SEEK_SET);
-				if (write(msgptr->seekfd, seekval, sizeof(seekval)) == -1) ;
-			}
-		} /* end of for(dflag = 0;;) */
-	} /* end of for(msgptr = msghd;;) */
-	return (0);
-}
-
-static int
-checkfiles(fname, msgfp, seekval, seekfd)
-    char           *fname;
-    FILE           *msgfp;
-	long            *seekval;
-	int             seekfd;
-{
-	int             fd, msgfd, count;
-	long            tmpseekval;
-
-	msgfd = fileno(msgfp);
-	for (count = 0;; count++)
-	{
-		if ((fd = open(fname, O_RDONLY)) == -1)
-		{
-			sleep(5);
-			continue;
-		} else
-		if (count)	/* new message file has been created */
-		{
-			(void) close(msgfd);
-			(void) dup2(fd, msgfd);
-			if (fd != msgfd)
-				(void) close(fd);
-			rewind(msgfp);
-			(void) lseek(seekfd, 0l, SEEK_SET);
-			seekval[0] = 0l;
-			if (write(seekfd, seekval, sizeof(seekval)) == -1) ;
-			return (1);
-		} else
+		case 'l':
+			lhost = optarg;
 			break;
+		default:
+			strerr_die2x(100, WARN, "USAGE: incrmesg logfile(s)");
+		}
 	}
-	tmpseekval = lseek(fd, 0l, SEEK_END);
-	if (tmpseekval == seekval[0])/* Just an EOF on message file */
-	{
-		(void) close(fd);
-		return (0);
-	} else
-	if (tmpseekval > seekval[0]) /* update happened after EOF */
-	{
-		close(fd);
-		return (1);
-	} else	/* new message file has been created */
-	{
-		(void) close(msgfd);
-		(void) dup2(fd, msgfd);
-		if (fd != msgfd)
-			(void) close(fd);
-		rewind(msgfp);
-		(void) lseek(seekfd, 0l, SEEK_SET);
-		seekval[0] = 0l;
-		if (write(seekfd, &seekval, sizeof(seekval)) == -1);
-		return (1);
-	}
+	if (argc == optind)
+		strerr_die2x(100, WARN, "USAGE: incrmesg logfile(s)");
+	if (!(msghd = (struct msgtab *) alloc(sizeof(struct msgtab) * argc)))
+		strerr_die2x(111, FATAL, "out of memory");
+	return (incrmesg(argv + optind));
 }
 
 #ifndef	lint
 void
 getversion_incrmesg_c()
 {
-	printf("%s\n", sccsid);
+	char *x;
+	x = rcsid;
+	x++;
 }
 #endif

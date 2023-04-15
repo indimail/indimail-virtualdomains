@@ -2,7 +2,6 @@
 ACLOCAL_AMFLAGS = -I m4
 version=@VERSION@
 COFLAGS=-z+05:30
-DEFS = @DEFS@ -fno-strict-aliasing -Wno-implicit-function-declaration -Wno-unused-function -Wno-return-type
 INSTALL_PROGRAM = ${INSTALL}          -c
 install_sh_PROGRAM = $(install_sh)    -c
 INSTALL_SCRIPT = ${INSTALL}           -c
@@ -38,25 +37,30 @@ edit = sed \
 	-e 's,@DATE\@,$(DATE),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
-logalert_SOURCES = lex.c utils.c log.c parser.y process.c monitor.c action.c sig.c user.c main.c 
+logalert_SOURCES = lex.c utils.c log.c parser.y process.c monitor.c action.c log_sig.c user.c main.c 
 logalert_LDADD = @LEXLIB@ @LIBPCRE_LIBS@
 
-logclient_SOURCES=logclient.c tls.c
-logclient_CPPFLAGS=-Wno-empty-body
-logclient_LDADD = $(LIB_INDIMAIL) $(LIB_SSL) $(LIB_QMAIL)
+logclient_SOURCES=logclient.c
+logclient_CPPFLAGS=-DSERVER
+logclient_LDADD = $(LIB_SSL) $(LIB_QMAIL)
 
-logsrv_SOURCES=logsrv.c tls.c
-logsrv_CPPFLAGS=-Wno-empty-body
-logsrv_LDADD = $(LIB_INDIMAIL) $(LIB_SSL) $(LIB_QMAIL) $(LIB_RPC)
+logsrv_SOURCES=logsrv.c
+logsrv_LDADD = $(LIB_SSL) $(LIB_QMAIL) $(LIB_RPC)
 
-rpclog_LDADD=$(LIB_RPC)
+rpclog_SOURCES=rpclog.c
+rpclog_CPPFLAGS=$(CPPFLAGS) $(CFLAGS)
+rpclog_LDADD=$(LIB_RPC) $(LIB_QMAIL)
 
 incrmesg_SOURCES=incrmesg.c
-incrmesg_CPPFLAGS=-Wno-empty-body
-incrmesg_LDADD = $(LIB_INDIMAIL) $(LIB_QMAIL)
+incrmesg_LDADD = $(LIB_QMAIL)
 
 showbytes_SOURCES=showbytes.c
-showbytes_CPPFLAGS=-Wno-empty-body
+showbytes_LDADD = $(LIB_QMAIL)
+
+lex.o: lex.c
+	$(COMPILE) -Wno-implicit-function-declaration -Wno-unused-function -c lex.c -o lex.o
+parser.o: parser.c
+	$(COMPILE) -Wno-implicit-function-declaration -Wno-unused-function -c parser.c -o parser.o
 
 #$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).c $@ -- flex
 lex.c: lex.l parser.h
@@ -75,8 +79,6 @@ logalert.changes
 	cat $@.in | $(edit) > $@
 logsrv.8: logsrv.man
 	$(edit) logsrv.man > $@
-logclient.1: logclient.man
-	$(edit) logclient.man > $@
 debian/Makefile: debian/Makefile.in conf-version conf-release
 	$(edit) $@.in > $@
 logalert.perms: perm_list.in
