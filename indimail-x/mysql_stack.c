@@ -1,5 +1,8 @@
 /*
  * $Log: mysql_stack.c,v $
+ * Revision 1.3  2023-04-19 23:18:37+05:30  Cprogrammer
+ * include stdlib.h to fix compiler warning
+ *
  * Revision 1.2  2023-01-22 10:34:48+05:30  Cprogrammer
  * free allocated string
  *
@@ -12,6 +15,9 @@
 #endif
 #define _GNU_SOURCE
 #include <stdio.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
