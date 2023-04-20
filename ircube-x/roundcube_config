@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 chown=$(which chown)
 chmod=$(which chmod)
 cp=$(which cp)
