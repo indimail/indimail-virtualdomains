@@ -35,14 +35,16 @@ case "$1" in
 		rundir=${servicedir}
 	fi
 	if [ -f ${prefix}/bin/svstat ] ; then
-		set +e
-		${prefix}/bin/svstat ${servicedir}/pwdlookup >/dev/null 2>&1 || true
-		if [ $? -eq 0 ] ; then
-			mkdir -p ${rundir}/pwdlookup
-			touch ${rundir}/pwdlookup/.down
-			${prefix}/bin/svc -d ${servicedir}/pwdlookup >/dev/null 2>&1 || true
+		if [ ! -f ${servicedir}/pwdlookup/down ] ; then
+			set +e
+			${prefix}/bin/svstat ${servicedir}/pwdlookup >/dev/null 2>&1
+			if [ $? -eq 0 ] ; then
+				mkdir -p ${rundir}/pwdlookup
+				touch ${rundir}/pwdlookup/.down
+				${prefix}/bin/svc -d ${servicedir}/pwdlookup >/dev/null 2>&1 || true
+			fi
+			set -e
 		fi
-		set -e
 	fi
     ;;
 
