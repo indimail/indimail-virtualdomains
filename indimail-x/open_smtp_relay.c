@@ -1,5 +1,8 @@
 /*
  * $Log: open_smtp_relay.c,v $
+ * Revision 1.3  2023-04-23 00:47:58+05:30  Cprogrammer
+ * record IPv6 address if present in relay table
+ *
  * Revision 1.2  2020-04-01 18:57:24+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: open_smtp_relay.c,v 1.2 2020-04-01 18:57:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: open_smtp_relay.c,v 1.3 2023-04-23 00:47:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY
@@ -57,15 +60,12 @@ open_smtp_relay(char *user, char *domain)
 	char            strnum[FMT_ULONG];
 	char           *ipaddr, *relay_table, *real_domain;
 
-	if (!(ipaddr = (char *) env_get("TCPREMOTEIP")))
+#ifdef ENABLE_IPV6
+	if (!(ipaddr = env_get("TCP6REMOTEIP")) && !(ipaddr = env_get("TCPREMOTEIP")))
+#else
+	if (!(ipaddr = env_get("TCPREMOTEIP")))
+#endif
 		return(0);
-	/*- courier-imap mangles TCPREMOTEIP */
-	if (ipaddr[0] == ':') {
-		ipaddr += 2;
-		while (*ipaddr != ':')
-			++ipaddr;
-		++ipaddr;
-	}
 	if (skip_relay(ipaddr))
 		return(0);
 	if (iopen((char *)0))

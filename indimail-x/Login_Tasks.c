@@ -1,5 +1,8 @@
 /*
  * $Log: Login_Tasks.c,v $
+ * Revision 1.6  2023-04-23 00:29:27+05:30  Cprogrammer
+ * record IPv6 address if present in lastauth table
+ *
  * Revision 1.5  2022-10-20 11:57:52+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -70,7 +73,7 @@
 #include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: Login_Tasks.c,v 1.5 2022-10-20 11:57:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: Login_Tasks.c,v 1.6 2023-04-23 00:29:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -187,16 +190,22 @@ Login_Tasks(struct passwd *pw, const char *User, char *ServiceType)
 	if ((quota = check_quota(Maildir.s, 0)) == -1) {
 		strerr_warn1("Login_Tasks: check_quota: unable to get quota usage: ", &strerr_sys);
 	}
-	if ((ptr = (char *) env_get("TCPREMOTEIP")) || (ptr = GetPeerIPaddr()))
-		vset_lastauth(pw->pw_name, domain, (char *) ServiceType, ptr, pw->pw_gecos, quota);
-	else
-		vset_lastauth(pw->pw_name, domain, (char *) ServiceType, "unknown", pw->pw_gecos, quota);
+#ifdef ENABLE_IPV6
+	if (!(ptr = env_get("TCP6REMOTEIP")) && !(ptr = env_get("TCPREMOTEIP")) && !(ptr = GetPeerIPaddr()))
+#else
+	if (!(ptr = env_get("TCPREMOTEIP")) && !(ptr = GetPeerIPaddr()))
+#endif
+		ptr = "unknown";
+	vset_lastauth(pw->pw_name, domain, (char *) ServiceType, ptr, pw->pw_gecos, quota);
 #else
 	quota = check_quota(Maildir.s);
-	if ((ptr = (char *) env_get("TCPREMOTEIP")) || (ptr = GetPeerIPaddr()))
-		vset_lastauth(pw->pw_name, domain, (char *) ServiceType, ptr, pw->pw_gecos, quota);
-	else
-		vset_lastauth(pw->pw_name, domain, (char *) ServiceType, "unknown", pw->pw_gecos, quota);
+#ifdef ENABLE_IPV6
+	if (!(ptr = env_get("TCP6REMOTEIP")) && !(ptr = env_get("TCPREMOTEIP")) && !(ptr = GetPeerIPaddr()))
+#else
+	if (!(ptr = env_get("TCPREMOTEIP")) && !(ptr = GetPeerIPaddr()))
+#endif
+		ptr = "unknown";
+	vset_lastauth(pw->pw_name, domain, (char *) ServiceType, ptr, pw->pw_gecos, quota);
 #endif /*- USE_MAILDIRQUOTA */
 #endif /*- ENABLE_AUTH_LOGGING */
 	if ((postauth = (char *) env_get("POSTAUTH")) && !access(postauth, X_OK)) {
