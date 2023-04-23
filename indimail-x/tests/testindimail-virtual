@@ -41,7 +41,10 @@ setuidgid=$bindir/setuidgid
 tcpserver=$bindir/tcpserver
 qmail_queue=$sbindir/qmail-queue
 in_cnf=$sysconfdir/indimail.cnf
-MYSQL_SOCKET=$testdir/run/mysqld/mysqld.sock
+MYSQL_USER=indimail
+MYSQL_PASS="abcdefgh-"
+MYSQL_DB="indimail"
+MYSQL_SOCK=$testdir/run/mysqld/mysqld.sock
 MYSQL_PORT=3307
 MYUID=$(id -u)
 MYGID=$(id -g)
@@ -149,8 +152,8 @@ function setup_config()
 	mkdir -p $qmaildir/alias
 	sudo $svctool --cntrldir=$cntrldir --qmaildir=$qmaildir \
 		--indimaildir=$qmaildir --sysconfdir=$sysconfdir --config=indimail \
-		--mysqlhost=localhost --mysqluser=indimail  \
-		--mysqlpass=ssh-1.5- --mysqlsocket=$MYSQL_SOCKET --mysqlport=$MYSQL_PORT 1>&3
+		--mysqluser="$MYSQL_USER" --mysqlpass="$MYSQL_PASS" \
+		--mysqlhost=localhost --mysqlsocket=$MYSQL_SOCK --mysqlport=$MYSQL_PORT 1>&3
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
 		echo "  testing svctool create indimail config succeeded"
@@ -163,7 +166,7 @@ function setup_config()
 	if [ ! -f $in_cnf ] ; then
 		echo "Creating mysql config $in_cnf"
   		sudo $svctool --cntrldir=$cntrldir --config=mysql --mysqlPrefix=/usr \
-			--sysconfdir=$sysconfdir --mysqlsocket=$MYSQL_SOCKET --mysqlport=$MYSQL_PORT \
+			--sysconfdir=$sysconfdir --mysqlsocket=$MYSQL_SOCK --mysqlport=$MYSQL_PORT \
 			--databasedir=$qmaildir/mysqldb 1>&3 2>&1
 		if [ $? -eq 0 -a -f $in_cnf ] ; then
 			tcount=$(expr $tcount + 1)
@@ -179,8 +182,9 @@ function setup_config()
 	if [ ! -d $qmaildir/mysqldb/data/mysql ] ; then
 		echo "Creating mysql db"
   		sudo $svctool --cntrldir=$cntrldir --config=mysqldb --mysqlPrefix=/usr \
+			--mysqluser="$MYSQL_USER" --mysqlpass="$MYSQL_PASS" \
 			--databasedir=$qmaildir/mysqldb --base_path=$testdir/mail \
-			--mysqlsocket="$MYSQL_SOCKET".tmp 1>&3 2>&1
+			--mysqlsocket="$MYSQL_SOCK".tmp 1>&3 2>&1
 		if [ $? -eq 0 ] ; then
 			tcount=$(expr $tcount + 1)
 			echo "  testing svctool create MySQL Database succeeded"
@@ -284,21 +288,22 @@ function setup_svscan()
 		mkdir -p $servicedir/"$i"d-ssl/variables
 		for j in d d-ssl
 		do
-			echo $indimaildir/inquery > $servicedir/"$i"$j/variables/FIFODIR
-			echo $tmpfifodir          > $servicedir/"$i"$j/variables/FIFOTMPDIR
-			echo 660                  > $servicedir/"$i"$j/variables/FIFO_MODE
-			echo 1                    > $servicedir/"$i"$j/variables/USE_QPWGR
-			echo 0                    > $servicedir/"$i"$j/variables/BIGTODO
-			echo 23                   > $servicedir/"$i"$j/variables/CONFSPLIT
-			echo $qmaildir/queue      > $servicedir/"$i"$j/variables/QUEUEDIR
-			echo $cntrldir            > $servicedir/"$i"$j/variables/CONTROLDIR
-			echo $sysconfdir          > $servicedir/"$i"$j/variables/SYSCONFDIR
-			echo $sysconfdir/users    > $servicedir/"$i"$j/variables/ASSIGNDIR
-			echo $certdir             > $servicedir/"$i"$j/variables/CERTDIR
-			echo $qmaildir            > $servicedir/"$i"$j/variables/DOMAINDIR
-			echo 1                    > $servicedir/"$i"$j/variables/DEBUG
-			echo 1                    > $servicedir/"$i"$j/variables/DEBUG_LOGIN
-			echo NONE                 > $servicedir/"$i"$j/variables/TLS_VERIFYPEER
+			echo $indimaildir/inquery    > $servicedir/"$i"$j/variables/FIFODIR
+			echo $tmpfifodir             > $servicedir/"$i"$j/variables/FIFOTMPDIR
+			echo 660                     > $servicedir/"$i"$j/variables/FIFO_MODE
+			echo 1                       > $servicedir/"$i"$j/variables/USE_QPWGR
+			echo 0                       > $servicedir/"$i"$j/variables/BIGTODO
+			echo 23                      > $servicedir/"$i"$j/variables/CONFSPLIT
+			echo $qmaildir/queue         > $servicedir/"$i"$j/variables/QUEUEDIR
+			echo $cntrldir               > $servicedir/"$i"$j/variables/CONTROLDIR
+			echo $sysconfdir             > $servicedir/"$i"$j/variables/SYSCONFDIR
+			echo $sysconfdir/users       > $servicedir/"$i"$j/variables/ASSIGNDIR
+			echo $certdir                > $servicedir/"$i"$j/variables/CERTDIR
+			echo $qmaildir               > $servicedir/"$i"$j/variables/DOMAINDIR
+			echo 1                       > $servicedir/"$i"$j/variables/DEBUG
+			echo 1                       > $servicedir/"$i"$j/variables/DEBUG_LOGIN
+			echo NONE                    > $servicedir/"$i"$j/variables/TLS_VERIFYPEER
+			echo 1                       > $servicedir/"$i"$j/variables/OPEN_SMTP
 			echo $certdir/servercert.pem > $servicedir/"$i"$j/variables/TLS_CERTFILE
 		done
 		(
@@ -354,6 +359,7 @@ function setup_svscan()
 	echo 0                 > $servicedir/smtpd/variables/BIGTODO
 	echo 23                > $servicedir/smtpd/variables/CONFSPLIT
 	echo 1                 > $servicedir/smtpd/variables/ENABLE_CRAM
+	echo 1                 > $servicedir/smtpd/variables/CHECKRELAY
 	echo $qmaildir/queue   > $servicedir/smtpd/variables/QUEUEDIR
 	echo $cntrldir         > $servicedir/smtpd/variables/CONTROLDIR
 	echo $sysconfdir       > $servicedir/smtpd/variables/SYSCONFDIR
@@ -966,6 +972,21 @@ function do_gsasl_test()
 	fi
 }
 
+function check_relay()
+{
+	TM=$(expr $(date +%s) - 1800)
+	echo "SELECT email,ipaddr from relay where timestamp > $TM" | \
+		mysql -s -u $MYSQL_USER -p$MYSQL_PASS -S $MYSQL_SOCK $MYSQL_DB 2>/dev/null
+	return $?
+}
+
+function delete_relay()
+{
+	echo "DELETE from relay where 1=1" | \
+		mysql -s -u $MYSQL_USER -p$MYSQL_PASS -S $MYSQL_SOCK $MYSQL_DB 2>/dev/null
+	return $?
+}
+
 function test_pop3()
 {
 	swaks -S --tls --to $1 --from $1 --server localhost --port 2025 -a LOGIN -au $1 -ap "$2"
@@ -1056,12 +1077,37 @@ function test_pop3()
 		printf "  testing mail    POP3  login and mail retrieval (%s) failed\n" "$str"
 		exit 1
 	fi
+	swaks -S --to testuser01@$domain3 --from $testuser1 --server ::1 --port 2025 >/dev/null 2>&1
+	ret1=$?
+	swaks -S --to testuser01@$domain3 --from $testuser2 --server ::1 --port 2025 >/dev/null 2>&1
+	ret2=$?
+	delete_relay
+	if [ $ret1 -eq 0 -a $ret2 -ne 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		printf "  testing Open RELAY using POP3S login succeeded\n"
+	else
+		printf "  testing Open RELAY using POP3S login failed\n"
+		exit 1
+	fi
+
 	tcpclient -n "" -vDHR 0 9950 /tmp/qmail-test/tcpclient.pop3 2> $logdir/pop3d-ssl/pop3d-ssl.log
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
 		printf "  testing mail    POP3S login and mail retrieval (%s) succeeded\n" "$str"
 	else
 		printf "  testing mail    POP3S login and mail retrieval (%s) failed\n" "$str"
+		exit 1
+	fi
+	swaks -S --to testuser01@$domain3 --from $testuser1 --server ::1 --port 2025 >/dev/null 2>&1
+	ret1=$?
+	swaks -S --to testuser01@$domain3 --from $testuser2 --server ::1 --port 2025 >/dev/null 2>&1
+	ret2=$?
+	delete_relay
+	if [ $ret1 -eq 0 -a $ret2 -ne 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		printf "  testing Open RELAY using POP3S login succeeded\n"
+	else
+		printf "  testing Open RELAY using POP3S login failed\n"
 		exit 1
 	fi
 }
@@ -1133,12 +1179,45 @@ function test_imap()
 		printf "  testing mail    IMAP  login and mail retrieval (%s) failed\n" "$str"
 		exit 1
 	fi
+	check_relay > /dev/null
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		printf "  testing record in relay table succeeded\n"
+	else
+		printf "  testing record in relay table failed\n"
+		exit 1
+	fi
+	swaks -S --to testuser01@$domain3 --from $testuser1 --server ::1 --port 2025 >/dev/null 2>&1
+	ret1=$?
+	swaks -S --to testuser01@$domain3 --from $testuser2 --server ::1 --port 2025 >/dev/null 2>&1
+	ret2=$?
+	delete_relay
+	if [ $ret1 -eq 0 -a $ret2 -ne 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		printf "  testing Open RELAY using IMAP login succeeded\n"
+	else
+		printf "  testing Open RELAY using IMAP login failed\n"
+		exit 1
+	fi
+
 	tcpclient -n "" -vDHR 0 9930 /tmp/qmail-test/tcpclient.imap 2> $logdir/imapd-ssl/imapd-ssl.log
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
 		printf "  testing mail    IMAPS login and mail retrieval (%s) succeeded\n" "$str"
 	else
 		printf "  testing mail    IMAPS login and mail retrieval (%s) failed\n" "$str"
+		exit 1
+	fi
+	swaks -S --to testuser01@$domain3 --from $testuser1 --server ::1 --port 2025 >/dev/null 2>&1
+	ret1=$?
+	swaks -S --to testuser01@$domain3 --from $testuser2 --server ::1 --port 2025 >/dev/null 2>&1
+	ret2=$?
+	delete_relay
+	if [ $ret1 -eq 0 -a $ret2 -ne 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		printf "  testing Open RELAY using IMAPS login succeeded\n"
+	else
+		printf "  testing Open RELAY using IMAPS login failed\n"
 		exit 1
 	fi
 }
