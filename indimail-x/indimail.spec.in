@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.128 2023-04-09 22:28:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.129 2023-04-23 16:25:19+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1238,8 +1238,8 @@ if [ -x /usr/bin/mrtg ] ; then
 fi
 
 echo "Creating default mysql.host, tcprules, bogofilter-qfe, default domain dir"
-%{_prefix}/sbin/svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
-  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
+%{_prefix}/sbin/svctool --config=indimail --mysqlhost=localhost \
+  --mysqluser=indimail  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
 
 # MySQL
 if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld -o -x %{mysqlPrefix}/bin/mysqld ] ; then
@@ -1247,10 +1247,11 @@ if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld -o -x %{m
   echo "Creating Database/Service for MySQL"
   # MySQL Config Creation
   %{_prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix} --mysqlsocket=%{mysqlSocket} \
-      --databasedir=%{indimaildir}/mysqldb
+    --databasedir=%{indimaildir}/mysqldb
   # MySQL Database Creation
   %{_prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=%{mysqlPrefix} \
-      --databasedir=%{indimaildir}/mysqldb --base_path=%{mbase} --mysqlsocket="%{mysqlSocket}".tmp
+    --mysqluser=indimail --mysqlpass=ssh-1.5- --databasedir=%{indimaildir}/mysqldb \
+    --base_path=%{mbase} --mysqlsocket="%{mysqlSocket}".tmp
   # MySQL Supervise creation
   %{_prefix}/sbin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
     --databasedir=%{indimaildir}/mysqldb --config=%{sysconfdir}/indimail.cnf
