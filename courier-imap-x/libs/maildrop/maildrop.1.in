@@ -382,8 +382,18 @@ option is
 \fImailfilter\-lists\-maildrop\fR,
 \fBmaildrop\fR
 will try to open the following files, in order:
-.sp .if n \{\ .RS 4 .\} .nf $HOME/\&.mailfilters/mailfilter\-lists\-maildrop $HOME/\&.mailfilters/mailfilter\-lists\-maildrop\-default $HOME/\&.mailfilters/mailfilter\-lists\-default $HOME/\&.mailfilters/mailfilter\-default $HOME/\&.mailfilters/default .fi .if n \{\ .RE .\}
+.IP \[bu] 2
+$HOME/\&.mailfilters/mailfilter\-lists\-maildrop
+.IP \[bu]
+$HOME/\&.mailfilters/mailfilter\-lists\-maildrop\-default
+.IP \[bu]
+$HOME/\&.mailfilters/mailfilter\-lists\-default
+.IP \[bu]
+$HOME/\&.mailfilters/mailfilter\-default
+.IP \[bu]
+$HOME/\&.mailfilters/default
 .sp
+.RS 0
 Note that
 \fBmaildrop\fR
 looks for \-default files ONLY if
