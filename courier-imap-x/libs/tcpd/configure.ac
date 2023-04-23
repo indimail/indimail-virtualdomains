@@ -60,7 +60,7 @@ saveLIBS="$LIBS"
 AC_CHECK_LIB(dl, dlopen, [ LIBDL="-ldl" ])
 LIBS="$saveLIBS"
 
-PKG_CHECK_MODULES(LIBIDN2, libidn2 >= 2.0.5, [libidn=yes], [libidn=no])
+PKG_CHECK_MODULES(LIBIDN2, libidn2 >= 2.0.4, [libidn=yes], [libidn=no])
 if test "$libidn" != "yes"
 then
 	PKG_CHECK_MODULES(LIBIDN1, libidn >= 0.0.0, [libidn=yes], [libidn=no])

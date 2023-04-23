@@ -37,7 +37,7 @@ AC_SYS_LARGEFILE
 
 dnl Checks for library functions.
 
-PKG_CHECK_MODULES(LIBIDN, libidn2 >= 2.0.5, [libidn=yes], [libidn=no])
+PKG_CHECK_MODULES(LIBIDN, libidn2 >= 2.0.4, [libidn=yes], [libidn=no])
 
 if test "$libidn" = "no"
 then
