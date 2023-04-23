@@ -1,5 +1,8 @@
 /*
  * $Log: inquery.c,v $
+ * Revision 1.10  2023-04-23 19:19:32+05:30  Cprogrammer
+ * write error messages for all errors
+ *
  * Revision 1.9  2023-02-14 01:10:39+05:30  Cprogrammer
  * use FIFOTMPDIR instead of TMPDIR for inquery fifo
  *
@@ -50,6 +53,7 @@
 #include <env.h>
 #include <fmt.h>
 #include <scan.h>
+#include <strerr.h>
 #include <timeoutread.h>
 #include <timeoutwrite.h>
 #include <getEnvConfig.h>
@@ -60,8 +64,10 @@
 #include "strToPw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 1.9 2023-02-14 01:10:39+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 1.10 2023-04-23 19:19:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
+
+#define FATAL "inquery: fatal: "
 
 static void
 cleanup(int rfd, int wfd, void (*sig_pipe_save)(), char *fifo)
@@ -106,6 +112,7 @@ inquery(char query_type, char *email, char *ip)
 		case RELAY_QUERY:
 			if (!ip || !*ip) {
 				errno = EINVAL;
+				strerr_warn2(FATAL, "ip address required for relay query", 0);
 				return ((void *) 0);
 			}
 		case USER_QUERY:
@@ -121,6 +128,8 @@ inquery(char query_type, char *email, char *ip)
 			break;
 		default:
 			errno = EINVAL;
+			strnum[fmt_ulong(strnum, query_type)] = 0;
+			strerr_warn4(FATAL, "Invalid query type [", strnum, "]", 0);
 			return ((void *) 0);
 	}
 	/* - Prepare the Query Buffer for the Daemon */
@@ -131,26 +140,38 @@ inquery(char query_type, char *email, char *ip)
 	ptr[1 + sizeof(int)] = 0;
 	querybuf.len = sizeof(int) + 2;
 	/*- email */
-	if (!stralloc_cats(&querybuf, email) || !stralloc_0(&querybuf))
+	if (!stralloc_cats(&querybuf, email) || !stralloc_0(&querybuf)) {
+		strerr_warn2(FATAL, "out of memory", 0);
 		return ((void *) 0);
+	}
 	if ((tcpclient = env_get("TCPCLIENT")))
 		tcpclient = env_get("TCPREMOTEIP");
 	if (!tcpclient) {
 		if (!(ptr = env_get("FIFOTMPDIR")))
 			ptr = "/tmp/";
-		if (!stralloc_copys(&myfifo, ptr))
+		if (!stralloc_copys(&myfifo, ptr)) {
+			strerr_warn2(FATAL, "out of memory", 0);
 			return ((void *) 0);
-		if (myfifo.s[myfifo.len -1] != '/' && !stralloc_append(&myfifo, "/"))
+		}
+		if (myfifo.s[myfifo.len -1] != '/' && !stralloc_append(&myfifo, "/")) {
+			strerr_warn2(FATAL, "out of memory", 0);
 			return ((void *) 0);
+		}
 		strnum[fmt_ulong(strnum, getpid())] = 0;
-		if (!stralloc_cats(&myfifo, strnum))
+		if (!stralloc_cats(&myfifo, strnum)) {
+			strerr_warn2(FATAL, "out of memory", 0);
 			return ((void *) 0);
+		}
 		strnum[fmt_ulong(strnum, time(0))] = 0;
-		if (!stralloc_cats(&myfifo, strnum) || !stralloc_0(&myfifo))
+		if (!stralloc_cats(&myfifo, strnum) || !stralloc_0(&myfifo)) {
+			strerr_warn2(FATAL, "out of memory", 0);
 			return ((void *) 0);
+		}
 	} else
-	if (!stralloc_copyb(&myfifo, "socket", 6) || !stralloc_0(&myfifo))
+	if (!stralloc_copyb(&myfifo, "socket", 6) || !stralloc_0(&myfifo)) {
+		strerr_warn2(FATAL, "out of memory", 0);
 		return ((void *) 0);
+	}
 	if (verbose) {
 		out("inquery", "Using MYFIFO=");
 		out("inquery", myfifo.s);
@@ -159,8 +180,10 @@ inquery(char query_type, char *email, char *ip)
 	}
 	if (!stralloc_cat(&querybuf, &myfifo) /*- fifo */ ||
 			(ip && *ip && !stralloc_cats(&querybuf, ip)) /*- ip */ ||
-			!stralloc_0(&querybuf))
+			!stralloc_0(&querybuf)) {
+		strerr_warn2(FATAL, "out of memory", 0);
 		return ((void *) 0);
+	}
 	ptr = querybuf.s;
 	*((int *) ptr) = querybuf.len - sizeof(int); /*- datasize */
 	/*-
@@ -174,28 +197,36 @@ inquery(char query_type, char *email, char *ip)
 			infifo = INFIFO; /*- the string "infifo" */
 		/*- Open the Fifos */
 		if (*infifo == '/' || *infifo == '.') {
-			if (!stralloc_copys(&InFifo, infifo) || !stralloc_0(&InFifo))
+			if (!stralloc_copys(&InFifo, infifo) || !stralloc_0(&InFifo)) {
+				strerr_warn2(FATAL, "out of memory", 0);
 				return ((void *) 0);
+			}
 		} else {
 			getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
 			if (*infifo_dir == '/') {
 				if (!stralloc_copys(&InFifo, infifo_dir) ||
 						!stralloc_catb(&InFifo, "/", 1) ||
-						!stralloc_cats(&InFifo, infifo))
+						!stralloc_cats(&InFifo, infifo)) {
+					strerr_warn2(FATAL, "out of memory", 0);
 					return ((void *) 0);
+				}
 			} else {
 				if (!stralloc_copys(&InFifo, INDIMAILDIR) ||
 						!stralloc_cats(&InFifo, infifo_dir) ||
 						!stralloc_catb(&InFifo, "/", 1) ||
-						!stralloc_cats(&InFifo, infifo))
+						!stralloc_cats(&InFifo, infifo)) {
+					strerr_warn2(FATAL, "out of memory", 0);
 					return ((void *) 0);
+				}
 			}
 			for (idx = 1, len = InFifo.len;;idx++) {
 				strnum[fmt_ulong(strnum, (unsigned long) idx)] = 0;
 				if (!stralloc_catb(&InFifo, ".", 1) ||
 						!stralloc_cats(&InFifo, strnum) ||
-						!stralloc_0(&InFifo))
+						!stralloc_0(&InFifo)) {
+					strerr_warn2(FATAL, "out of memory", 0);
 					return ((void *) 0);
+				}
 				InFifo.len = len;
 				if (access(InFifo.s, F_OK))
 					break;
@@ -207,8 +238,10 @@ inquery(char query_type, char *email, char *ip)
 			strnum[fmt_ulong(strnum, 1 + (time(0) % (idx - 1)))] = 0;
 #endif
 			if (!stralloc_catb(&InFifo, ".", 1) ||
-					!stralloc_cats(&InFifo, strnum) || !stralloc_0(&InFifo))
+					!stralloc_cats(&InFifo, strnum) || !stralloc_0(&InFifo)) {
+				strerr_warn2(FATAL, "out of memory", 0);
 				return ((void *) 0);
+			}
 		}
 	} /*- if (!tcpclient) { */
 	if (verbose) {
@@ -222,6 +255,7 @@ inquery(char query_type, char *email, char *ip)
 	if (*controldir == '/') {
 		if (!stralloc_copys(&tmp, controldir) ||
 				!stralloc_catb(&tmp, "/timeoutwrite", 13)) {
+			strerr_warn2(FATAL, "out of memory", 0);
 			return ((void *) 0);
 		}
 	} else {
@@ -229,11 +263,14 @@ inquery(char query_type, char *email, char *ip)
 				!stralloc_catb(&tmp, "/", 1) ||
 				!stralloc_cats(&tmp, controldir) ||
 				!stralloc_catb(&tmp, "/timeoutwrite", 13)) {
+			strerr_warn2(FATAL, "out of memory", 0);
 			return ((void *) 0);
 		}
 	}
-	if (!stralloc_0(&tmp))
+	if (!stralloc_0(&tmp)) {
+		strerr_warn2(FATAL, "out of memory", 0);
 		return ((void *) 0);
+	}
 	if ((fd = open(tmp.s, O_RDONLY)) == -1)
 		writeTimeout = 4;
 	else {
@@ -247,23 +284,29 @@ inquery(char query_type, char *email, char *ip)
 		wfd = 7;
 		pipe_size = 8192;
 	} else {
-		if ((wfd = open(InFifo.s, O_WRONLY | O_NDELAY, 0)) == -1)
+		if ((wfd = open(InFifo.s, O_WRONLY | O_NDELAY, 0)) == -1) {
+			strerr_warn4(FATAL, "Unable to write to ", InFifo.s, ": ", &strerr_sys);
 			return ((void *) 0);
+		}
 		else
 		if (bytes > (pipe_size = fpathconf(wfd, _PC_PIPE_BUF))) {
 			errno = EMSGSIZE;
+			strerr_warn4(FATAL, "Unable to write to ", InFifo.s, ": ", &strerr_sys);
 			return ((void *) 0);
 		} else
 		if (FifoCreate(myfifo.s) == -1) {
 			cleanup(-1, wfd, 0, 0);
+			strerr_warn4(FATAL, "Unable to create fifo ", myfifo.s, ": ", &strerr_sys);
 			return ((void *) 0);
 		} else
 		if ((rfd = open(myfifo.s, O_RDONLY | O_NDELAY, 0)) == -1) {
 			cleanup(-1, wfd, 0, myfifo.s);
+			strerr_warn4(FATAL, "Unable to open fifo ", myfifo.s, ": ", &strerr_sys);
 			return ((void *) 0);
 		} else
 		if ((sig_pipe_save = signal(SIGPIPE, SIG_IGN)) == SIG_ERR) {
 			cleanup(rfd, wfd, 0, myfifo.s);
+			strerr_warn2(FATAL, "Unable to save signal: ", &strerr_sys);
 			return ((void *) 0);
 		}
 	}
@@ -271,6 +314,7 @@ inquery(char query_type, char *email, char *ip)
 	if (timeoutwrite(writeTimeout, wfd, ptr, bytes) != bytes) {
 		if (!tcpclient)
 			cleanup(rfd, wfd, sig_pipe_save, myfifo.s);
+		strerr_warn4(FATAL, "timed out writing to ", myfifo.s, ": ", &strerr_sys);
 		return ((void *) 0);
 	}
 	if (!tcpclient) {
@@ -294,6 +338,7 @@ inquery(char query_type, char *email, char *ip)
 			if (!stralloc_catb(&tmp, "read", 4) || !stralloc_0(&tmp)) {
 				if (!tcpclient)
 					cleanup(rfd, -1, 0, myfifo.s);
+				strerr_warn2(FATAL, "out of memory", 0);
 				return ((void *) 0);
 			}
 			if ((fd = open(tmp.s, O_RDONLY)) == -1)
@@ -308,18 +353,21 @@ inquery(char query_type, char *email, char *ip)
 			if ((idx = timeoutread(readTimeout, rfd, (char *) &intBuf, sizeof(int))) == -1 || !idx) {
 				if (!tcpclient)
 					cleanup(rfd, -1, 0, myfifo.s);
+				strerr_warn4(FATAL, "timed out reading from ", myfifo.s, ": ", &strerr_sys);
 				return ((void *) 0);
 			} else
 			if (intBuf == -1) { /*- system error on remote inlookup service */
 				if (!tcpclient)
 					cleanup(rfd, -1, 0, myfifo.s);
 				errno = 0;
+				strerr_warn2(FATAL, "inlookup service returned error", 0);
 				return ((void *) 0);
 			} else
 			if (intBuf > pipe_size) {
 				if (!tcpclient)
 					cleanup(rfd, -1, 0, myfifo.s);
 				errno = EMSGSIZE;
+				strerr_warn4(FATAL, "Unable to read from ", myfifo.s, ": ", &strerr_sys);
 				return ((void *) 0);
 			}
 			switch(query_type)
@@ -341,6 +389,7 @@ inquery(char query_type, char *email, char *ip)
 							unlink(myfifo.s);
 						}
 						errno = 0;
+						strerr_warn2(FATAL, "inlookup service returned error", 0);
 						return ((void *) 0);
 					}
 					if (intBuf + 1 > old_size && old_size)
@@ -348,6 +397,7 @@ inquery(char query_type, char *email, char *ip)
 					if (intBuf + 1 > old_size && !(pwbuf = alloc(intBuf + 1))) {
 						if (!tcpclient)
 							cleanup(rfd, -1, 0, myfifo.s);
+						strerr_warn2(FATAL, "out of memory", 0);
 						return ((void *) 0);
 					}
 					if (intBuf + 1 > old_size)
@@ -355,6 +405,7 @@ inquery(char query_type, char *email, char *ip)
 					if ((idx = timeoutread(readTimeout, rfd, pwbuf, intBuf)) == -1 || !idx) {
 						if (!tcpclient)
 							cleanup(rfd, -1, 0, myfifo.s);
+						strerr_warn4(FATAL, "timed out reading from ", myfifo.s, ": ", &strerr_sys);
 						return ((void *) 0);
 					}
 					if (!tcpclient) {
@@ -388,6 +439,7 @@ inquery(char query_type, char *email, char *ip)
 					if (intBuf + 1 > old_size && !(pwbuf = alloc(intBuf + 1))) {
 						if (!tcpclient)
 							cleanup(rfd, -1, 0, myfifo.s);
+						strerr_warn2(FATAL, "out of memory", 0);
 						return ((void *) 0);
 					}
 					if (intBuf + 1 > old_size)
@@ -395,6 +447,7 @@ inquery(char query_type, char *email, char *ip)
 					if ((idx = timeoutread(readTimeout, rfd, pwbuf, intBuf)) == -1 || !idx) {
 						if (!tcpclient)
 							cleanup(rfd, -1, 0, myfifo.s);
+						strerr_warn4(FATAL, "timed out reading from ", myfifo.s, ": ", &strerr_sys);
 						return ((void *) 0);
 					}
 					if (!tcpclient) {

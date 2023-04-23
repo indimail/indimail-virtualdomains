@@ -1,5 +1,5 @@
-* Sat Mar 25 2024 08:40:00 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.4-1.1%{?dist}
-Release 3.4.4-1.1 Start 26/03/2023 End --/--/----
+* Sun Apr 23 2023 19:21:03 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.4-1.1%{?dist}
+Release 3.4.4-1.1 Start 26/03/2023 End 23/04/2023
 - 26/03/2023
 01. deliver_mail.c, ismaildup.c, postdel.c, vbulletin.c, vfilter.c: fixed code
     using wait_handler
@@ -34,9 +34,10 @@ Release 3.4.4-1.1 Start 26/03/2023 End --/--/----
 19. mysql_stack.c: include stdlib.h to fix compiler warning
 - 22/04/2023
 20. Login_Tasks.c: record IPv6 address if present in lastauth
-20. open_smtp_relay.c: record IPv6 address if present in relay
+21. open_smtp_relay.c: record IPv6 address if present in relay
+22. inquery.c: write error messages for all errors
 
-* Sat Mar 25 2024 08:40:00 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.3-1.1%{?dist}
+* Sat Mar 25 2023 08:40:00 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.3-1.1%{?dist}
 Release 3.4.3-1.1 Start 13/02/2023 End 25/03/2023
 ======= Release Highlights ================================================
 o Test script testindimail-virtual tests essential indimail commands
