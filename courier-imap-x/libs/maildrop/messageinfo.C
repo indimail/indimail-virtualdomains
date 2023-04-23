@@ -5,29 +5,29 @@
 
 void MessageInfo::info(Message &msg)
 {
-Buffer	buf;
+std::string	buf;
 
 	msg.Rewind();
-	fromname.set("MAILER-DAEMON");
+	fromname="MAILER-DAEMON";
 
 	for (;;)
 	{
-		buf.reset();
+		buf.clear();
 		if (msg.appendline(buf) < 0)	return;
 
-		int	l=buf.Length();
+		auto	l=buf.size();
 
-		const char *p=buf;
+		const char *p=buf.c_str();
 
 		if (l && p[l-1] == '\n')
 		{
 			--l;
-			buf.Length(l);
+			buf.resize(l);
 		}
 
 		if (l == 0)	break;
 
-		p=buf;
+		p=buf.c_str();
 		if (strncasecmp(p, "Return-Path:", 12))
 			continue;
 
@@ -46,7 +46,7 @@ Buffer	buf;
 			--l;
 		}
 
-		int i;
+		size_t i;
 
 		for (i=0; i<l; i++)
 		{
@@ -57,8 +57,8 @@ Buffer	buf;
 			if (isspace(p[i]))
 				break;
 		}
-		fromname.reset();
-		fromname.append(p, i);
+		fromname.clear();
+		fromname.append(p, p+i);
 		break;
 	}
 }

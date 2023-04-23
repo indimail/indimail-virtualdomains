@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2006 Double Precision, Inc.
+** Copyright 1998 - 2023 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -37,22 +37,21 @@ void	DotLock::Unlock()
 int DotLock::attemptlock(const char *templock, const char *finallock)
 {
 Mio	mio;
-Buffer	b;
-static Buffer   errbuf;
+std::string	b;
+static std::string   errbuf;
 
 	if (mio.Open(templock, O_CREAT | O_WRONLY, 0644) < 0)
 	{
                 errbuf="Unable to create a dot-lock at ";
-                errbuf += (const char *)templock;
+                errbuf += templock;
                 errbuf += ".\n";
-                errbuf += '\0';
-                throw (const char *)errbuf;
+                throw errbuf.c_str();
 	}
 
 
-	b.append( (unsigned long)getpid() );
-	b += '\n';
-	if (mio.write((const char *)b, b.Length()) < 0 || mio.flush() < 0)
+	add_integer(b, getpid() );
+	b += "\n";
+	if (mio.write(b.c_str(), b.size()) < 0 || mio.flush() < 0)
 	{
 		mio.Close();
 		unlink(templock);
@@ -138,20 +137,19 @@ AlarmTimer	stat_timer;
 void	DotLock::LockMailbox(const char *mailbox)
 {
 struct stat stat_buf;
-Buffer	dotlock_name;
+std::string	dotlock_name;
 
 	if (stat(mailbox, &stat_buf) < 0 ||
 		( !S_ISCHR(stat_buf.st_mode) && !S_ISBLK(stat_buf.st_mode)))
 	{
 		dotlock_name=mailbox;
 
-	const	char *p=GetLockExt();
+		std::string p=GetLockExt();
 
-		if (!p || !*p)	dotlock_name += LOCKEXT_DEF;
+		if (p.empty())	dotlock_name += LOCKEXT_DEF;
 		else	dotlock_name += p;
 
-		dotlock_name += '\0';
-		Lock( dotlock_name );
+		Lock( dotlock_name.c_str() );
 	}
 }
 

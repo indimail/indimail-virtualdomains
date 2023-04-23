@@ -359,6 +359,7 @@ libs/maildrop/maildrop
 libs/maildrop/maildrop.1
 libs/maildrop/maildropfilter.7
 libs/maildrop/reformail
+libs/maildrop/testtimer
 libtool
 maildiracl
 maildiracl.1

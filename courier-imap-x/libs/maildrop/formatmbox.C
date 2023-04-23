@@ -15,7 +15,7 @@
 int	FormatMbox::HasMsg()
 {
 	maildrop.msgptr->Rewind();
-	msglinebuf.reset();
+	msglinebuf.clear();
 	if (maildrop.msgptr->appendline(msglinebuf,0) < 0)	return (-1);
 					// Empty message, do not deliver.
 
@@ -35,7 +35,7 @@ void	FormatMbox::Init(int flag)
 		next_func= &FormatMbox::GetFromLine;
 }
 
-Buffer	*FormatMbox::GetFromLine(void)
+std::string	*FormatMbox::GetFromLine(void)
 {
 time_t	tm;
 
@@ -43,30 +43,30 @@ time_t	tm;
 
 	tempbuf="From ";
 	tempbuf += maildrop.msginfo.fromname;
-	tempbuf += ' ';
+	tempbuf += " ";
 
 const char *p=ctime(&tm);
 	while (*p && *p != '\n')
 	{
-		tempbuf.push(*p);
+		tempbuf.push_back(*p);
 		++p;
 	}
 #if	CRLF_TERM
 	tempbuf.push('\r');
 #endif
-	tempbuf.push('\n');
+	tempbuf += "\n";
 	next_func= &FormatMbox::GetLineBuffer;
 	return (&tempbuf);
 }
 
-Buffer	*FormatMbox::GetLineBuffer(void)
+std::string	*FormatMbox::GetLineBuffer(void)
 {
-	if (!(const char *)msglinebuf)	return (0);
+	if (!msglinebuf.c_str())	return (0);
 
 	if (do_escape)
 	{
-	const char *p=msglinebuf;
-	int	l=msglinebuf.Length();
+	const char *p=msglinebuf.c_str();
+	auto	l=msglinebuf.size();
 
 		while (l && *p == '>')	p++, l--;
 		if (l >= 5 &&
@@ -78,12 +78,12 @@ Buffer	*FormatMbox::GetLineBuffer(void)
 			msglinebuf=tempbuf;
 		}
 	}
-	if (inheader && *(const char *)msglinebuf == '\n')
+	if (inheader && *msglinebuf.c_str() == '\n')
 		inheader=0;
 	if (inheader)
 	{
-	const char *p=msglinebuf;
-	Buffer	*bufp=0;
+	const char *p=msglinebuf.c_str();
+	std::string	*bufp=0;
 
 		if ( tolower(*p) == 'f' && tolower(p[1]) == 'r' &&
 			tolower(p[2]) == 'o' && tolower(p[3]) == 'm' &&
@@ -107,23 +107,23 @@ Buffer	*FormatMbox::GetLineBuffer(void)
 			while (*p != '\n' && isspace(*p))	p++;
 			for (l=0; p[l] != '\n'; l++)
 				;
-			bufp->append(p, l);
+			bufp->append(p, p+l);
 		}
 	}
 
 #if	CRLF_TERM
 	msglinebuf.pop();	// Drop terminating \n
 	msglinebuf.push('\r');
-	msglinebuf.push('\n');
+	msglinebuf += "\n";
 #endif
 	next_func= &FormatMbox::GetNextLineBuffer;
-	msgsize += msglinebuf.Length();
+	msgsize += msglinebuf.size();
 	return (&msglinebuf);
 }
 
-Buffer	*FormatMbox::GetNextLineBuffer(void)
+std::string	*FormatMbox::GetNextLineBuffer(void)
 {
-	msglinebuf.reset();
+	msglinebuf.clear();
 	if (maildrop.msgptr->appendline(msglinebuf,0) == 0)
 		return (GetLineBuffer());
 	return (0);	// END OF FILE
@@ -131,11 +131,11 @@ Buffer	*FormatMbox::GetNextLineBuffer(void)
 
 int	FormatMbox::DeliverTo(class Mio &mio)
 {
-Buffer	*bufptr;
+std::string	*bufptr;
 
 	while ((bufptr=NextLine()) != NULL)
 	{
-		if (mio.write((const char *)*bufptr, bufptr->Length()) < 0)
+		if (mio.write(bufptr->c_str(), bufptr->size()) < 0)
 		{
 write_error:
 			merr << "maildrop: error writing to mailbox.\n";

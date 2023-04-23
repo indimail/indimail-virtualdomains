@@ -73,7 +73,7 @@ void Message::Init()
 	rfc2045p=rfc2045_alloc();
 }
 
-void Message::Init(int fd, const Buffer &extra_headers)
+void Message::Init(int fd, const std::string &extra_headers)
 {
 	Init();
 	ExtraHeaders(extra_headers);
@@ -192,9 +192,9 @@ void Message::Init(const void *data, unsigned cnt)
 	msgsize += cnt;
 }
 
-void Message::ExtraHeaders(const Buffer &buf)
+void Message::ExtraHeaders(const std::string &buf)
 {
-	rfc2045_parse(rfc2045p, (const char *)buf, buf.Length());
+	rfc2045_parse(rfc2045p, buf.c_str(), buf.size());
 
 	if ( extra_headers )
 	{
@@ -202,12 +202,12 @@ void Message::ExtraHeaders(const Buffer &buf)
 		extra_headers=0;
 	}
 	extra_headersptr=0;
-	if (!buf.Length())	return;
+	if (!buf.size())	return;
 
-	extra_headers=new char[buf.Length()+1];
+	extra_headers=new char[buf.size()+1];
 	if (!extra_headers)	outofmem();
-	memcpy(extra_headers, (const char *)buf, buf.Length());
-	extra_headers[buf.Length()]=0;
+	memcpy(extra_headers, buf.c_str(), buf.size());
+	extra_headers[buf.size()]=0;
 	extra_headersptr=extra_headers;
 	if (!*extra_headersptr)	extra_headersptr=0;
 }
@@ -242,7 +242,7 @@ void Message::seekerr()
 	throw "Seek error.";
 }
 
-int Message::appendline(Buffer &buf, int stripcr)
+int Message::appendline(std::string &buf, int stripcr)
 {
 	if (mio.fd() >= 0 || extra_headersptr)
 	{
@@ -253,13 +253,13 @@ int Message::appendline(Buffer &buf, int stripcr)
 		while ((c=get_c()) > 0 && c != '\n')
 		{
 			eof=0;
-			buf.push(c);
+			buf.push_back(c);
 			lastc=c;
 		}
 		if (c < 0 && eof)	return (-1);
-		if (stripcr && lastc == '\r')	buf.pop();
+		if (stripcr && lastc == '\r')	buf.pop_back();
 						// Drop trailing CRs
-		buf.push('\n');
+		buf += "\n";
 		return (0);
 	}
 
@@ -275,34 +275,34 @@ unsigned i;
 		if (bufptr[i] == '\n')
 		{
 			if (i > 0 && stripcr && bufptr[i-1] == '\r')
-				buf.append(bufptr, i-1);
+				buf.append(bufptr, bufptr+i-1);
 				// Drop trailing CRs
 			else
-				buf.append(bufptr, i);
-			buf += '\n';
+				buf.append(bufptr, bufptr+i);
+			buf += "\n";
 			bufptr += ++i;
 			return (0);
 		}
 
 	if (stripcr && bufptr[i-1] == '\r')
-		buf.append(bufptr, cnt-1);
+		buf.append(bufptr, bufptr+cnt-1);
 				// Drop trailing CRs
 	else
-		buf.append(bufptr, cnt);
+		buf.append(bufptr, bufptr+cnt);
 	bufptr += cnt;
-	buf += '\n';
+	buf += "\n";
 	return (0);
 }
 
 void Message::setmsgsize()
 {
-Buffer	n,v;
+std::string	n,v;
 
 	n="SIZE";
-	v.append((unsigned long)MessageSize());
+	add_integer(v, MessageSize());
 	SetVar(n,v);
 	n="LINES";
-	v.reset();
-	v.append((unsigned long)MessageLines());
+	v.clear();
+	add_integer(v, MessageLines());
 	SetVar(n,v);
 }

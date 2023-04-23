@@ -217,27 +217,7 @@ MAILBOX="${HOME-WORD}/Mailbox"
 	</p></dd><dt><span class="term"><code class="varname">LOGNAME</code></span></dt><dd><p>Name of the user to who the message is being
 	      delivered.
 
-	</p></dd><dt><span class="term"><code class="varname">MAILDROP_OLD_REGEXP</code></span></dt><dd><p>
-	      Revert to using the old legacy pattern matching engine.
-	      Versions of <span class="command"><strong>maildrop</strong></span> prior to version 2.0
-	      (included in the <span class="application">Courier</span> mail server 0.51,
-	      and earlier), used a built-in pattern matching engine, instead of using the
-	      <acronym class="acronym">PCRE</acronym>
-	      library (see
-	      <a class="xref" href="#patterns" shape="rect">the section called “Patterns”</a>).
-	      <span class="command"><strong>maildrop</strong></span> 1.x used a different syntax for patterns, which
-	      is no longer described in this manual page.
-	      The old pattern matching engine is still available, by
-	      setting <code class="varname">MAILDROP_OLD_REGEXP</code> to <span class="quote">“<span class="quote">1</span>”</span>.
-	      Setting this variable will use the legacy pattern matching engine for the
-	      rest of the <span class="command"><strong>maildrop</strong></span> recipe file.</p><p>
-	      The pattern matching engine will be removed completely in a future version
-	      of maildrop.
-	      This setting provides for a transitional period of converting old recipes.
-	      <code class="varname">MAILDROP_OLD_REGEXP</code> can be set to <span class="quote">“<span class="quote">1</span>”</span> in
-	      the global <code class="filename">maildroprc</code> file, then reset to <span class="quote">“<span class="quote">0</span>”</span>
-	      in each individual <span class="command"><strong>maildrop</strong></span> recipe file, after it gets
-	      converted to the new syntax.</p></dd><dt><span class="term"><code class="varname">MAILFILTER</code></span></dt><dd><p>This is the name of the original <code class="systemitem">filter file</code>
+	</p></dd><dt><span class="term"><code class="varname">MAILFILTER</code></span></dt><dd><p>This is the name of the original <code class="systemitem">filter file</code>
 	      that was given to <span class="command"><strong>maildrop</strong></span> on the command line. This is mostly
 	      useful to <code class="literal">-default</code> <code class="systemitem">filter file</code>s, it allows them to
 	      obtain the <a class="ulink" href="maildrop.html#moption" target="_top" shape="rect">value of the -M option</a>
@@ -513,8 +493,6 @@ From: postmaster@localhost
 	Of course, in real world the <span class="quote">“<span class="quote">From:</span>”</span> header is usually much
 	more complicated, and can't be handled that easily.
 	This is just an illustrative example.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
-	  Subpatterns are not processed in the <code class="literal">foreach</code>
-	  statement.</p></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>
 	  The contents of all <code class="varname">MATCH</code> variables use UTF-8
 	  encoding. As explained in <a class="xref" href="#maildropfilter_patterns" title="Patterns" shape="rect">the section called “Patterns”</a>
 	  the message gets transcoded into a canonical UTF-8 format,
@@ -692,15 +670,18 @@ foreach (expression) =~ /pattern/:options
 	    </pre></div></blockquote></div><p>
 	  The <span class="command"><strong>foreach</strong></span> statement executes a block of statements for
 	  each
-	  occurrence of the given pattern in the given message, or expression. On every
-	  iteration <code class="varname">MATCH</code> variable will be set to the matched string.
+	  occurrence of the given pattern in the given message, or expression.
+	  On every
+	  iteration <code class="varname">MATCH</code> variable will be set to the
+	  matched string.
+	  Subpatterns set <code class="varname">MATCH1</code>,
+	  <code class="varname">MATCH2</code>, and so on, before
+	  beginning each iteration.
+	</p><p>
 	  All the usual options may be applied to the pattern match,
 	  EXCEPT the following:
 	  </p><div class="variablelist"><dl class="variablelist"><dt><span class="term">,xxx,yyy</span></dt><dd><p>
-		  Weighted scoring is meaningless, in this context.</p></dd><dt><span class="term">( ... )</span></dt><dd><p>
-		  Subpatterns are not processed.
-		  Only the <code class="varname">MATCH</code> variable will be set for each found
-		  pattern.</p></dd></dl></div><p>
+		  Weighted scoring is meaningless, in this context.</p></dd></dl></div><p>
 	</p></div><div class="refsect3"><a id="maildropfilter_if___conditional_execution" shape="rect"> </a><h4>if - conditional execution</h4><a id="if" shape="rect"> </a><div class="blockquote"><blockquote class="blockquote"><div class="informalexample"><pre class="programlisting" xml:space="preserve">
 if (<em class="replaceable"><code>expression</code></em>)
 {
