@@ -37,30 +37,12 @@ AC_SYS_LARGEFILE
 
 dnl Checks for library functions.
 
-AC_ARG_WITH(libidn, AS_HELP_STRING([--with-libidn=[DIR]],[Support IDN (needs GNU libidn)]),
-	libidn=$withval, libidn=yes)
+PKG_CHECK_MODULES(LIBIDN, libidn2 >= 2.0.5, [libidn=yes], [libidn=no])
 
-if test "$libidn" = "yes"
+if test "$libidn" = "no"
 then
-	PKG_CHECK_MODULES(LIBIDN2, libidn2 >= 0.0.0, [libidn=yes], [libidn=no])
-	if test "$libidn" != "yes"
-	then
-		PKG_CHECK_MODULES(LIBIDN1, libidn >= 0.0.0, [libidn=yes], [libidn=no])
-		if test "$libidn" != "yes"
-		then
-			libidn=no
-			AC_MSG_WARN([libidn not found])
-		else
-			libidn=yes
-			AC_DEFINE(LIBIDN1, 1, [Define to 1 if you want libidn.])
-		fi
-	else
-		libidn=yes
-		AC_DEFINE(LIBIDN2, 1, [Define to 1 if you want libidn.])
-	fi
+	AC_MSG_ERROR(libidn2 not found)
 fi
-AC_MSG_CHECKING([if libidn should be used])
-AC_MSG_RESULT($libidn)
 
 AC_CHECK_FUNCS(setlocale)
 

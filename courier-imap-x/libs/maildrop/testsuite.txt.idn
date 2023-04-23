@@ -713,3 +713,497 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-1
 
 --
+Message envelope sender=MAILER-DAEMON
+maildrop: Attempting ./testsuite.recipe
+Tokenized echo
+Tokenized string: "VERBOSE=$VERBOSE"
+Tokenized ;
+Tokenized string: "f"
+Tokenized =
+Tokenized string: "x"
+Tokenized ;
+Tokenized string: "f"
+Tokenized =
+Tokenized string: `echo ' '; echo Yes; echo ' '`
+Tokenized ;
+Tokenized string: "g"
+Tokenized =
+Tokenized string: "y${f}z$f"
+Tokenized ;
+Tokenized string: "g"
+Tokenized =
+Tokenized escape
+Tokenized (
+Tokenized string: '+'
+Tokenized )
+Tokenized ;
+Tokenized echo
+Tokenized string: "$g"
+Tokenized ;
+Tokenized if
+Tokenized (
+Tokenized string: "1"
+Tokenized )
+Tokenized ;
+Tokenized {
+Tokenized ;
+Tokenized string: "g"
+Tokenized =
+Tokenized string: "1"
+Tokenized ;
+Tokenized }
+Tokenized ;
+Tokenized exception
+Tokenized {
+Tokenized ;
+Tokenized include
+Tokenized string: "./testsuite.msg"
+Tokenized ;
+Tokenized }
+Tokenized ;
+Tokenized import
+Tokenized string: "PATH"
+Tokenized ;
+Tokenized dotlock
+Tokenized string: "testsuite.lock"
+Tokenized {
+Tokenized ;
+Tokenized logfile
+Tokenized string: "/dev/null"
+Tokenized ;
+Tokenized log
+Tokenized string: "Logging"
+Tokenized ;
+Tokenized }
+Tokenized ;
+Tokenized flock
+Tokenized string: "testsuite.lock"
+Tokenized {
+Tokenized ;
+Tokenized }
+Tokenized ;
+Tokenized exit
+Tokenized ;
+Tokenized eof
+VERBOSE=9
+./testsuite.recipe(1): f="x"
+maildrop: Filtering through `echo ' '; echo Yes; echo ' '`
+./testsuite.recipe(2): f="Yes"
+./testsuite.recipe(3): g="yYeszYes"
+./testsuite.recipe(4): g="\+"
++
+./testsuite.recipe(6): Evaluating IF condition.
+./testsuite.recipe(6): IF evaluated, result=1
+./testsuite.recipe(8): g="1"
+./testsuite.recipe(10): Trapping exceptions.
+./testsuite.recipe(11): Opening include file ./testsuite.msg
+Tokenized logfile
+Tokenized string: "./nonexistent/logfile"
+Tokenized ;
+Tokenized eof
+./testsuite.msg(1): Opening logfile ./nonexistent/logfile
+./testsuite.recipe(10): Trapped exception.
+./testsuite.recipe(13): import  "PATH"
+./testsuite.recipe(14): Creating dotlock testsuite.lock
+./testsuite.recipe(15): Opening logfile /dev/null
+./testsuite.recipe(18): Creating flock testsuite.lock
+Message envelope sender=MAILER-DAEMON
+maildrop: Attempting ./testsuite.recipe
+Tokenized foreach
+Tokenized regexp: /Header: (.*)/
+Tokenized ;
+Tokenized {
+Tokenized ;
+Tokenized echo
+Tokenized string: "Matched: $MATCH ($MATCH1)"
+Tokenized ;
+Tokenized }
+Tokenized ;
+Tokenized ;
+Tokenized if
+Tokenized (
+Tokenized lookup
+Tokenized (
+Tokenized string: "one"
+Tokenized ,
+Tokenized string: "testsuite.chk"
+Tokenized ,
+Tokenized string: ""
+Tokenized )
+Tokenized )
+Tokenized ;
+Tokenized {
+Tokenized ;
+Tokenized echo
+Tokenized string: "One found"
+Tokenized ;
+Tokenized }
+Tokenized ;
+Tokenized ;
+Tokenized if
+Tokenized (
+Tokenized lookup
+Tokenized (
+Tokenized string: "two"
+Tokenized ,
+Tokenized string: "testsuite.chk"
+Tokenized ,
+Tokenized string: ""
+Tokenized )
+Tokenized )
+Tokenized ;
+Tokenized {
+Tokenized ;
+Tokenized echo
+Tokenized string: "Two found"
+Tokenized ;
+Tokenized }
+Tokenized ;
+Tokenized ;
+Tokenized if
+Tokenized (
+Tokenized lookup
+Tokenized (
+Tokenized string: "three"
+Tokenized ,
+Tokenized string: "testsuite.chk"
+Tokenized ,
+Tokenized string: ""
+Tokenized )
+Tokenized )
+Tokenized ;
+Tokenized {
+Tokenized ;
+Tokenized echo
+Tokenized string: "Two found"
+Tokenized ;
+Tokenized }
+Tokenized ;
+Tokenized echo
+Tokenized substr
+Tokenized (
+Tokenized string: "abc"
+Tokenized ,
+Tokenized string: "1"
+Tokenized )
+Tokenized ;
+Tokenized echo
+Tokenized substr
+Tokenized (
+Tokenized string: "abc"
+Tokenized ,
+Tokenized string: "1"
+Tokenized ,
+Tokenized string: "2"
+Tokenized )
+Tokenized ;
+Tokenized ;
+Tokenized echo
+Tokenized string: "a"
+Tokenized =~
+Tokenized regexp: /a/
+Tokenized ;
+Tokenized ;
+Tokenized echo
+Tokenized string: "a"
+Tokenized =~
+Tokenized regexp: /b/
+Tokenized ;
+Tokenized ;
+Tokenized ;
+Tokenized string: "i"
+Tokenized =
+Tokenized string: "0"
+Tokenized ;
+Tokenized while
+Tokenized (
+Tokenized string: "$i"
+Tokenized <
+Tokenized string: "5"
+Tokenized )
+Tokenized ;
+Tokenized {
+Tokenized ;
+Tokenized echo
+Tokenized string: "$i"
+Tokenized ;
+Tokenized string: "i"
+Tokenized =
+Tokenized string: "$i"
+Tokenized +
+Tokenized string: "1"
+Tokenized ;
+Tokenized }
+Tokenized ;
+Tokenized system
+Tokenized string: "exit 0"
+Tokenized ;
+Tokenized echo
+Tokenized tolower
+Tokenized (
+Tokenized string: "Alpha"
+Tokenized )
+Tokenized ;
+Tokenized echo
+Tokenized toupper
+Tokenized (
+Tokenized string: "BETA"
+Tokenized )
+Tokenized ;
+Tokenized ;
+Tokenized unset
+Tokenized string: "i"
+Tokenized ;
+Tokenized exit
+Tokenized ;
+Tokenized eof
+Matching /Header: (.*)/ against Header: one
+Matching /Header: (.*)/ against Header: two
+./testsuite.recipe(1): Search of Header: (.*) = 2
+Matched: Header: one (one)
+Matched: Header: two (two)
+./testsuite.recipe(6): Evaluating IF condition.
+Matching /one/ against one
+./testsuite.recipe(6): IF evaluated, result=1
+One found
+./testsuite.recipe(11): Evaluating IF condition.
+Matching /one/ against two
+Matching /two/ against two
+./testsuite.recipe(11): IF evaluated, result=1
+Two found
+./testsuite.recipe(16): Evaluating IF condition.
+Matching /one/ against three
+Matching /two/ against three
+./testsuite.recipe(16): IF evaluated, result=0
+./testsuite.recipe(20): Operation on: abc - strsubstr 1
+./testsuite.recipe(20): Operation:  strsubstr=bc
+bc
+./testsuite.recipe(21): Operation on: abc - strsubstr 1
+./testsuite.recipe(21): Operation on: abc - strsubstr chop 2
+./testsuite.recipe(21): Operation:  strsubstr=bc
+bc
+Matching /a/ against a
+./testsuite.recipe(23): Search of a = 1
+1
+Matching /b/ against a
+./testsuite.recipe(24): Search of b = 0
+0
+./testsuite.recipe(26): i="0"
+./testsuite.recipe(27): Evaluating WHILE condition.
+./testsuite.recipe(27): Operation on: 0 and 5 - less than, result is 1
+./testsuite.recipe(27): While condition evaluated, result=1
+0
+./testsuite.recipe(30): Operation on: 0 and 1 - add, result is 1
+./testsuite.recipe(30): i="1"
+./testsuite.recipe(27): Evaluating WHILE condition.
+./testsuite.recipe(27): Operation on: 1 and 5 - less than, result is 1
+./testsuite.recipe(27): While condition evaluated, result=1
+1
+./testsuite.recipe(30): Operation on: 1 and 1 - add, result is 2
+./testsuite.recipe(30): i="2"
+./testsuite.recipe(27): Evaluating WHILE condition.
+./testsuite.recipe(27): Operation on: 2 and 5 - less than, result is 1
+./testsuite.recipe(27): While condition evaluated, result=1
+2
+./testsuite.recipe(30): Operation on: 2 and 1 - add, result is 3
+./testsuite.recipe(30): i="3"
+./testsuite.recipe(27): Evaluating WHILE condition.
+./testsuite.recipe(27): Operation on: 3 and 5 - less than, result is 1
+./testsuite.recipe(27): While condition evaluated, result=1
+3
+./testsuite.recipe(30): Operation on: 3 and 1 - add, result is 4
+./testsuite.recipe(30): i="4"
+./testsuite.recipe(27): Evaluating WHILE condition.
+./testsuite.recipe(27): Operation on: 4 and 5 - less than, result is 1
+./testsuite.recipe(27): While condition evaluated, result=1
+4
+./testsuite.recipe(30): Operation on: 4 and 1 - add, result is 5
+./testsuite.recipe(30): i="5"
+./testsuite.recipe(27): Evaluating WHILE condition.
+./testsuite.recipe(27): Operation on: 5 and 5 - less than, result is 0
+./testsuite.recipe(27): While condition evaluated, result=0
+maildrop: Executing system command exit 0
+alpha
+BETA
+./testsuite.recipe(35): unset i
+Message envelope sender=MAILER-DAEMON
+maildrop: Attempting ./testsuite.recipe
+Tokenized string: "KEYWORDS"
+Tokenized =
+Tokenized string: "alpha,beta"
+Tokenized ;
+Tokenized to
+Tokenized string: "./testsuite.maildir"
+Tokenized ;
+Tokenized eof
+./testsuite.recipe(1): KEYWORDS="alpha,beta"
+maildrop: Delivery complete.
+alpha
+beta
+Message envelope sender=MAILER-DAEMON
+maildrop: Attempting ./testsuite.recipe
+Tokenized if
+Tokenized (
+Tokenized string: "0"
+Tokenized <
+Tokenized string: "1"
+Tokenized ||
+Tokenized string: "1"
+Tokenized <
+Tokenized string: "2"
+Tokenized )
+Tokenized ;
+Tokenized {
+Tokenized ;
+Tokenized }
+Tokenized ;
+Tokenized ;
+Tokenized if
+Tokenized (
+Tokenized string: "1"
+Tokenized >
+Tokenized string: "2"
+Tokenized &&
+Tokenized string: "2"
+Tokenized >
+Tokenized string: "3"
+Tokenized )
+Tokenized ;
+Tokenized {
+Tokenized ;
+Tokenized }
+Tokenized ;
+Tokenized ;
+Tokenized if
+Tokenized (
+Tokenized string: "1"
+Tokenized <=
+Tokenized string: "2"
+Tokenized &&
+Tokenized string: "2"
+Tokenized >=
+Tokenized string: "1"
+Tokenized &&
+Tokenized string: "1"
+Tokenized ==
+Tokenized string: "1"
+Tokenized &&
+Tokenized string: "1"
+Tokenized !=
+Tokenized string: "2"
+Tokenized &&
+Tokenized string: "a"
+Tokenized lt
+Tokenized string: "b"
+Tokenized &&
+Tokenized string: "a"
+Tokenized le
+Tokenized string: "a"
+Tokenized &&
+Tokenized string: "b"
+Tokenized gt
+Tokenized string: "a"
+Tokenized &&
+Tokenized string: "b"
+Tokenized ge
+Tokenized string: "b"
+Tokenized &&
+Tokenized string: "a"
+Tokenized eq
+Tokenized string: "a"
+Tokenized &&
+Tokenized string: "a"
+Tokenized ne
+Tokenized string: "b"
+Tokenized )
+Tokenized ;
+Tokenized {
+Tokenized ;
+Tokenized }
+Tokenized ;
+Tokenized ;
+Tokenized string: "1"
+Tokenized |
+Tokenized string: "2"
+Tokenized ;
+Tokenized ;
+Tokenized string: "3"
+Tokenized &
+Tokenized string: "1"
+Tokenized ;
+Tokenized ;
+Tokenized string: "1"
+Tokenized +
+Tokenized string: "2"
+Tokenized *
+Tokenized string: "3"
+Tokenized -
+Tokenized string: "4"
+Tokenized /
+Tokenized string: "4"
+Tokenized ;
+Tokenized length
+Tokenized (
+Tokenized string: "abc"
+Tokenized )
+Tokenized ;
+Tokenized exit
+Tokenized ;
+Tokenized eof
+./testsuite.recipe(1): Evaluating IF condition.
+./testsuite.recipe(1): Operation on: 0 and 1 - less than, result is 1
+./testsuite.recipe(1): Operation: logical or, left hand side=1
+./testsuite.recipe(1): Operation: logical or, result=1
+./testsuite.recipe(1): IF evaluated, result=1
+./testsuite.recipe(5): Evaluating IF condition.
+./testsuite.recipe(5): Operation on: 1 and 2 - greater than, result is 0
+./testsuite.recipe(5): Operation: logical and, left hand side=0
+./testsuite.recipe(5): Operation: logical and, result=0
+./testsuite.recipe(5): IF evaluated, result=0
+./testsuite.recipe(9): Evaluating IF condition.
+./testsuite.recipe(9): Operation on: 1 and 2 - less than or equal, result is 1
+./testsuite.recipe(9): Operation: logical and, left hand side=1
+./testsuite.recipe(9): Operation: logical and, evaluating right hand size.
+./testsuite.recipe(9): Operation on: 2 and 1 - greater than or equal, result is 1
+./testsuite.recipe(9): Operation: logical and, result=1
+./testsuite.recipe(9): Operation: logical and, left hand side=1
+./testsuite.recipe(9): Operation: logical and, evaluating right hand size.
+./testsuite.recipe(9): Operation on: 1 and 1 - equal, result is 1
+./testsuite.recipe(9): Operation: logical and, result=1
+./testsuite.recipe(9): Operation: logical and, left hand side=1
+./testsuite.recipe(9): Operation: logical and, evaluating right hand size.
+./testsuite.recipe(9): Operation on: 1 and 2 - not equal, result is 1
+./testsuite.recipe(9): Operation: logical and, result=1
+./testsuite.recipe(9): Operation: logical and, left hand side=1
+./testsuite.recipe(9): Operation: logical and, evaluating right hand size.
+./testsuite.recipe(9): Operation on: a and b - string less than, result is 1
+./testsuite.recipe(9): Operation: logical and, result=1
+./testsuite.recipe(9): Operation: logical and, left hand side=1
+./testsuite.recipe(9): Operation: logical and, evaluating right hand size.
+./testsuite.recipe(9): Operation on: a and a - string less than or equal, result is 1
+./testsuite.recipe(9): Operation: logical and, result=1
+./testsuite.recipe(9): Operation: logical and, left hand side=1
+./testsuite.recipe(9): Operation: logical and, evaluating right hand size.
+./testsuite.recipe(9): Operation on: b and a - string greater than, result is 1
+./testsuite.recipe(9): Operation: logical and, result=1
+./testsuite.recipe(9): Operation: logical and, left hand side=1
+./testsuite.recipe(9): Operation: logical and, evaluating right hand size.
+./testsuite.recipe(9): Operation on: b and b - string grater than or equal, result is 1
+./testsuite.recipe(9): Operation: logical and, result=1
+./testsuite.recipe(9): Operation: logical and, left hand side=1
+./testsuite.recipe(9): Operation: logical and, evaluating right hand size.
+./testsuite.recipe(9): Operation on: a and a - string equal, result is 1
+./testsuite.recipe(9): Operation: logical and, result=1
+./testsuite.recipe(9): Operation: logical and, left hand side=1
+./testsuite.recipe(9): Operation: logical and, evaluating right hand size.
+./testsuite.recipe(9): Operation on: a and b - string not equal, result is 1
+./testsuite.recipe(9): Operation: logical and, result=1
+./testsuite.recipe(9): IF evaluated, result=1
+./testsuite.recipe(13): Operation on: 1 and 2 - bitwise or, result is 3
+./testsuite.recipe(14): Operation on: 3 and 1 - bitwise and, result is 1
+./testsuite.recipe(15): Operation on: 2 and 3 - multiply, result is 6
+./testsuite.recipe(15): Operation on: 1 and 6 - add, result is 7
+./testsuite.recipe(15): Operation on: 4 and 4 - divide, result is 1
+./testsuite.recipe(15): Operation on: 7 and 1 - subtract, result is 6
+./testsuite.recipe(16): Operation on: abc - strlength.
+./testsuite.recipe(16): Operation: strlength=3

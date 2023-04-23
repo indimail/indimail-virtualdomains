@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2009 Double Precision, Inc.
+** Copyright 1998 - 2023 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -168,7 +168,7 @@ static int trusted_uidgid(uid_t uid, gid_t gid, gid_t gid2)
 	return (0);
 }
 
-static void sethostname(Buffer &buf)
+static void sethostname(std::string &buf)
 {
 char    hostname[256];
 
@@ -182,7 +182,7 @@ char    hostname[256];
 
 static void copyright()
 {
-static const char msg[]="maildrop " VERSION " Copyright 1998-2018 Double Precision, Inc."
+static const char msg[]="maildrop " VERSION " Copyright 1998-2023 Double Precision, Inc."
 
 #if CRLF_TERM
 	"\r\n"
@@ -255,7 +255,7 @@ static const char msg[]="maildrop " VERSION " Copyright 1998-2018 Double Precisi
 void Maildrop::reset_vars()
 {
 int	i;
-Buffer	name, value;
+std::string	name, value;
 
 	for (i=0; i<(int)(sizeof(defaults_vars)/sizeof(defaults_vars[0])); i++)
 	{
@@ -276,7 +276,7 @@ Buffer	name, value;
 	value="077";
 	SetVar(name, value);
 
-	if (maildrop.init_quota.Length() > 0)
+	if (maildrop.init_quota.size() > 0)
 	{
 		name="MAILDIRQUOTA";
 		SetVar(name, maildrop.init_quota);
@@ -299,10 +299,9 @@ static int callback_authlib(struct authinfo *auth,
 
 	if (VerboseLevel() > 1)
 	{
-		Buffer b;
+		std::string b;
 
-		b.set(auth->sysgroupid);
-		b.push(0);
+		add_integer(b, auth->sysgroupid);
 
 		merr << "maildrop: authlib: groupid="
 		     << b << "\n";
@@ -335,10 +334,9 @@ static int callback_authlib(struct authinfo *auth,
 
 	if (VerboseLevel() > 1)
 	{
-		Buffer b;
+		std::string b;
 
-		b.set(u);
-		b.push(0);
+		add_integer(b, u);
 
 		merr << "maildrop: authlib: userid="
 		     << b << "\n";
@@ -406,10 +404,7 @@ static int callback_dovecotauth(struct dovecotauthinfo *auth,
 
 	if (VerboseLevel() > 1)
 	{
-		Buffer b;
-
-		b.set(auth->sysgroupid);
-		b.push(0);
+		std::string b = std::to_string(auth->sysgroupid);
 
 		merr << "maildrop: dovecotauth: groupid="
 		     << b << "\n";
@@ -438,10 +433,7 @@ static int callback_dovecotauth(struct dovecotauthinfo *auth,
 
 	if (VerboseLevel() > 1)
 	{
-		Buffer b;
-
-		b.set(u);
-		b.push(0);
+		std::string b = std::to_string(u);
 
 		merr << "maildrop: dovecotauth: userid="
 		     << b << "\n";
@@ -503,10 +495,10 @@ const	char *deliverymode=0;
 char *embedded_filter=0;
 const	char *from=0;
 int     explicit_from=0;
-Buffer	recipe;
+std::string	recipe;
 uid_t	orig_uid;
 gid_t	orig_gid, orig_gid2;
-Buffer	extra_headers;
+std::string	extra_headers;
 struct passwd *my_pw;
 int	found;
 #if	HAVE_COURIER
@@ -545,7 +537,7 @@ const	char *dovecotauth_addr=0;
 			break;
 		case 'V':
 			if (!*optarg && argn < argc)	optarg=argv[argn++];
-			maildrop.verbose_level=atoi(optarg);
+			SetVar("VERBOSE", optarg);
 			break;
 		case 'v':
 			copyright();
@@ -578,7 +570,7 @@ const	char *dovecotauth_addr=0;
 			if (*optarg)
 			{
 				extra_headers += optarg;
-				extra_headers += '\n';
+				extra_headers += "\n";
 			}
 			break;
 		case 'f':
@@ -802,8 +794,8 @@ uid_t	my_u=getuid();
 	}
 
 int	i;
-Buffer	name;
-Buffer	value;
+std::string	name;
+std::string	value;
 
 	for (i=0; environ[i]; i++)
 	{
@@ -811,13 +803,13 @@ Buffer	value;
 
 		char	*p=strchr(environ[i], '=');
 
-		value= p ? (name.Length(p - environ[i]), p+1):"";
+		value= p ? (name.resize(p - environ[i]), p+1):"";
 
 		if (maildrop.isdelivery)
 		{
 			if (name == "LANG" ||
 			    name == "LANGUAGE" ||
-			    strncmp(name, "LC_", 3) == 0)
+			    strncmp(name.c_str(), "LC_", 3) == 0)
 				;
 			else
 				continue;
@@ -830,7 +822,7 @@ Buffer	value;
 	while (argn < argc)
 	{
 		name="";
-		name.append( (unsigned long)i);
+		add_integer(name, i);
 		value=argv[argn++];
 		SetVar(name, value);
 		++i;
@@ -871,12 +863,11 @@ Buffer	value;
 	if (deliverymode)
 	{
 	struct	stat	buf;
-	Buffer	b;
+	std::string	b;
 
 		b=maildrop.init_home;
-		b += '\0';
 
-	const char *h=b;
+		const char *h=b.c_str();
 
 		if (VerboseLevel() > 1)
 			merr << "maildrop: Changing to " << h << "\n";
@@ -925,12 +916,11 @@ Buffer	value;
 #else
 	maildrop.tempdir=maildrop.init_home;
 	maildrop.tempdir += "/" TEMPDIR;
-	maildrop.tempdir += '\0';
-	mkdir( (const char *)maildrop.tempdir, 0700 );
+	mkdir( maildrop.tempdir.c_str(), 0700 );
 #endif
 	maildrop.reset_vars();
 
-Buffer	msg;
+std::string	msg;
 
 	signal(SIGALRM, alarm_handler);
 	alarm(GLOBAL_TIMEOUT);
@@ -958,7 +948,7 @@ Buffer	msg;
 		!trusted_uidgid(orig_uid, orig_gid, orig_gid2) ||
 #endif
 
-		maildrop.msginfo.fromname.Length() == 0)
+		maildrop.msginfo.fromname.size() == 0)
 	{
 		maildrop.msginfo.fromname=maildrop.init_logname;
 	}
@@ -972,13 +962,12 @@ Buffer	msg;
 
 	if (VerboseLevel() > 1)
 	{
-		msg.reset();
-		msg.append("Message envelope sender=");
-		if (maildrop.msginfo.fromname.Length() > 0)
+		msg.clear();
+		msg += "Message envelope sender=";
+		if (maildrop.msginfo.fromname.size() > 0)
 			msg += maildrop.msginfo.fromname;
-		msg.append("\n");
-		msg += '\0';
-		merr.write(msg);
+		msg += "\n";
+		merr.write(msg.c_str());
 	}
 
 	name="HOSTNAME";
@@ -1036,16 +1025,14 @@ int	firstdefault=1;
 			msg += recipe;
 			if (VerboseLevel() > 1)
 				merr << "maildrop: Attempting " << msg << "\n";
-			msg += '\0';
-			fd=in.Open((const char *)msg);
+			fd=in.Open(msg.c_str());
 		}
 		else
 		{
 			msg=recipe;
 			if (VerboseLevel() > 1)
 				merr << "maildrop: Attempting " << msg << "\n";
-			msg += '\0';
-			fd=in.Open((const char *)msg);
+			fd=in.Open(msg.c_str());
 			break;
 		}
 #ifndef	DEFAULTEXT
@@ -1064,24 +1051,25 @@ int	firstdefault=1;
 		// Pop DEFAULTEXT bytes from end of recipe name
 
 		for (fd=sizeof(DEFAULTEXT)-1; fd; --fd)
-			recipe.pop();
+			recipe.pop_back();
 
-		while (recipe.Length())
+		while (recipe.size())
 		{
-			if (recipe.pop() == '-')
+			auto dash=recipe.back();
+			recipe.pop_back();
+			if (dash == '-')
 			{
 				recipe += DEFAULTEXT;
 				break;
 			}
 		}
-		if (recipe.Length() == 0)
+		if (recipe.size() == 0)
 		{
 			msg=".mailfilters/";
 			msg += DEFAULTEXT+1;
 			if (VerboseLevel() > 1)
 				merr << "maildrop: Attempting " << msg << "\n";
-			msg += '\0';
-			fd=in.Open((const char *)msg);
+			fd=in.Open(msg.c_str());
 			break;
 		}
 #endif
@@ -1132,24 +1120,19 @@ int	firstdefault=1;
 
 	if (!maildrop.embedded_mode)
 	{
-		name="DEFAULT";
+		value=GetVar("DEFAULT");
 
-	const char *v=GetVarStr(name);
-
-		if (!v)
+		if (value.empty())
 		{
 			errexit=EX_TEMPFAIL;
 			throw "DEFAULT mailbox not defined.";
 		}
 
-		value=v;
-		value += '\0';
-		if (delivery((const char *)value) < 0)
+		if (delivery(value.c_str()) < 0)
 			return (EX_TEMPFAIL);
 	}
 
-	value="EXITCODE";
-	return ( GetVar(value)->Int("0") );
+	return extract_int( GetVar("EXITCODE"), "0");
 }
 
 int main(int argc, char **argv)
@@ -1164,7 +1147,7 @@ int main(int argc, char **argv)
 
 const char *GetDefaultMailbox(const char *username)
 {
-static Buffer buf;
+static std::string buf;
 int	isfile=0;
 
 	buf="";
@@ -1174,7 +1157,7 @@ const	char *p=DEFAULT_DEF;
 	if (*p != SLASH_CHAR)	// Relative to home directory
 	{
 		buf=maildrop.init_home;
-		buf.push(SLASH_CHAR);
+		buf.push_back(SLASH_CHAR);
 		isfile=1;
 	}
 
@@ -1182,7 +1165,7 @@ const	char *p=DEFAULT_DEF;
 	{
 		if (*p != '=')
 		{
-			buf.push(*p);
+			buf.push_back(*p);
 			++p;
 		}
 
@@ -1190,7 +1173,7 @@ const	char *p=DEFAULT_DEF;
 
 		while (*p == '=')
 		{
-			buf.push (*q ? *q:'.');
+			buf.push_back(*q ? *q:'.');
 			if (*q)	q++;
 			p++;
 		}
@@ -1198,11 +1181,10 @@ const	char *p=DEFAULT_DEF;
 
 	if (!isfile)
 	{
-		buf.push(SLASH_CHAR);
+		buf.push_back(SLASH_CHAR);
 		buf += username;
 	}
-	buf += '\0';
-	return (buf);
+	return (buf.c_str());
 }
 
 #if	SHARED_TEMPDIR
@@ -1210,11 +1192,10 @@ const	char *p=DEFAULT_DEF;
 #else
 const char *TempName()
 {
-Buffer	t;
+std::string	t;
 
-	t=(const char *)maildrop.tempdir;
+	t=maildrop.tempdir.c_str();
 	t += "/tmp.";
-	t += '\0';
-	return (TempName((const char *)t, 0));
+	return (TempName(t.c_str(), 0));
 }
 #endif

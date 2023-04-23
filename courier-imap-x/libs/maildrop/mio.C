@@ -216,9 +216,9 @@ off_t	p=mseek(fd_, 0L, SEEK_CUR);
 	return (p + (writeptr - buf) - readcnt);
 }
 
-Mio &Mio::operator<<(const class Buffer &b)
+Mio &Mio::operator<<(const std::string &b)
 {
-	write( (const char *)b, b.Length() );
+	write( b.c_str(), b.size() );
 	return (*this);
 }
 

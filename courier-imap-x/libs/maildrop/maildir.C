@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2009 Double Precision, Inc.
+** Copyright 1998 - 2023 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -49,48 +49,42 @@ Maildir::~Maildir()
 
 int Maildir::IsMaildir(const char *name)
 {
-Buffer	dirname;
-Buffer	subdirname;
+std::string	dirname;
+std::string	subdirname;
 struct	stat stat_buf;
-
-int	c;
 
 	if (!name || !*name)	return (0);	// Nope, not a Maildir
 	dirname=name;
-	c=dirname.pop();
-	if (c != SLASH_CHAR)	dirname.push(c);	// Strip trailing /
+
+	if (dirname.back() == SLASH_CHAR)
+		dirname.pop_back();	// Strip trailing /
 	subdirname=dirname;
 	subdirname += "/tmp";
-	subdirname += '\0';
-	if ( stat( (const char *)subdirname, &stat_buf ) ||
+	if ( stat( subdirname.c_str(), &stat_buf ) ||
 		! S_ISDIR(stat_buf.st_mode) )	return (0);
 	subdirname=dirname;
 	subdirname += "/new";
-	subdirname += '\0';
-	if ( stat( (const char *)subdirname, &stat_buf ) ||
+	if ( stat( subdirname.c_str(), &stat_buf ) ||
 		! S_ISDIR(stat_buf.st_mode) )	return (0);
 	subdirname=dirname;
 	subdirname += "/cur";
-	subdirname += '\0';
-	if ( stat( (const char *)subdirname, &stat_buf ) ||
+	if ( stat( subdirname.c_str(), &stat_buf ) ||
 		! S_ISDIR(stat_buf.st_mode) )	return (0);
 	return (1);	// If it looks like a duck, walks like a duck...
 }
 
 int	Maildir::MaildirOpen(const char *dir, Mio &file, off_t s)
 {
-	Buffer	buf;
+	std::string	buf;
 	struct maildirsize quotainfo;
 
 	const char *quotap;
 
-	Buffer quotabuf;
+	std::string quotabuf;
 
-	quotabuf="MAILDIRQUOTA";	/* Reuse a convenient buffer */
-	quotabuf= *GetVar(quotabuf);
-	quotabuf += '\0';
+	quotabuf= GetVar("MAILDIRQUOTA");
 
-	quotap=quotabuf;
+	quotap=quotabuf.c_str();
 
 	if (!*quotap)
 		quotap=NULL;
@@ -100,28 +94,26 @@ int	Maildir::MaildirOpen(const char *dir, Mio &file, off_t s)
 AlarmTimer	abort_timer;
 static long	counter=0;
 
-	buf.set(counter++);
-	buf += '\0';
+	set_integer(buf, counter++);
 
 	struct maildir_tmpcreate_info createInfo;
 
 	maildir_tmpcreate_init(&createInfo);
 
 	createInfo.maildir=dir;
-	createInfo.uniq=(const char *)buf;
+	createInfo.uniq=buf.c_str();
 	createInfo.msgsize=s;
 	createInfo.openmode=0666;
 
 	abort_timer.Set( 24 * 60 * 60 );
 	while (!abort_timer.Expired())
 	{
-		Buffer name_buf;
+		std::string name_buf;
 
-		name_buf="UMASK";
-		const char *um=GetVarStr(name_buf);
+		std::string um=GetVar("UMASK");
 		unsigned int umask_val=077;
 
-		sscanf(um, "%o", &umask_val);
+		sscanf(um.c_str(), "%o", &umask_val);
 
 		umask_val=umask(umask_val);
 
@@ -130,18 +122,15 @@ static long	counter=0;
 
 		if (f >= 0)
 		{
-			Buffer b;
+			std::string b;
 
-			b="FLAGS";
-
-			const char *flags=GetVarStr(b);
+			std::string flags=GetVar("FLAGS");
 
 			tmpname=createInfo.tmpname;
-			tmpname += '\0';
 
-			if (flags)
+			if (!flags.empty())
 			{
-				const char *p=flags;
+				const char *p=flags.c_str();
 
 				while (*p)
 				{
@@ -154,12 +143,10 @@ static long	counter=0;
 				}
 			}
 
-			if (flags && *flags)
+			if (!flags.empty())
 			{
 				newname=createInfo.curname;
-				newname += ':';
-				newname += '2';
-				newname += ',';
+				newname += ":2,";
 				newname += flags;
 			}
 			else
@@ -167,19 +154,17 @@ static long	counter=0;
 				newname=createInfo.newname;
 			}
 
-			newname += '\0';
 			maildir_tmpcreate_free(&createInfo);
 
 			file.fd(f);
 			is_open=1;
 			maildirRoot=dir;
-			maildirRoot += '\0';
 
 			if (maildir_quota_add_start(dir, &quotainfo, s,
 						    1, quotap))
 			{
 				file.fd(-1);
-				unlink( (const char *)tmpname );
+				unlink( tmpname.c_str() );
 				is_open=0;
 				maildir_deliver_quota_warning(dir,
 							      quota_warn_percent,
@@ -210,13 +195,9 @@ void	Maildir::MaildirSave()
 {
 	if (is_open)
 	{
-		Buffer keywords;
+		std::string keywords=GetVar("KEYWORDS");
 
-		keywords="KEYWORDS";
-		keywords=*GetVar(keywords);
-		keywords += '\0';
-
-		const char *keywords_s=keywords;
+		const char *keywords_s=keywords.c_str();
 
 		while (*keywords_s && *keywords_s == ',')
 			++keywords_s;
@@ -263,8 +244,8 @@ void	Maildir::MaildirSave()
 
 			char *tmpkname, *newkname;
 
-			if (maildir_kwSave( (const char *)maildirRoot,
-					    strrchr(newname, '/')+1, kwm,
+			if (maildir_kwSave( maildirRoot.c_str(),
+					    strrchr(newname.c_str(), '/')+1, kwm,
 					    &tmpkname, &newkname, 0) < 0)
 			{
 				libmail_kwmDestroy(kwm);
@@ -279,7 +260,7 @@ void	Maildir::MaildirSave()
 
 				struct stat stat_buf;
 
-				if (stat(maildirRoot, &stat_buf) < 0)
+				if (stat(maildirRoot.c_str(), &stat_buf) < 0)
 				{
 					free(tmpkname);
 					free(newkname);
@@ -304,12 +285,12 @@ void	Maildir::MaildirSave()
 			free(newkname);
 		}
 
-		Buffer dir;
+		std::string dir;
 
-		if (link( (const char *)tmpname, (const char *)newname) < 0)
+		if (link( tmpname.c_str(), newname.c_str()) < 0)
 		{
 			if (errno == EXDEV){
-				if(rename((const char *)tmpname, (const char *)newname) < 0)
+				if(rename(tmpname.c_str(), newname.c_str()) < 0)
 					throw "rename() failed.";
 				is_afs = 1;
 			}
@@ -319,13 +300,12 @@ void	Maildir::MaildirSave()
 			}
 		}
 		dir=newname;
-		const char *p=dir;
+		const char *p=dir.c_str();
 		const char *q=strrchr(p, '/');
 
 		if (q)
 		{
-			dir.Length(q-p);
-			dir.push((char)0);
+			dir.resize(q-p);
 
 #if EXPLICITDIRSYNC
 			int syncfd=open(dir, O_RDONLY);
@@ -337,11 +317,11 @@ void	Maildir::MaildirSave()
 			}
 #endif
 
-			dir.Length(q-p);
+			dir.resize(q-p);
 			dir += "/../";
-			dir.push((char)0);
 
-			maildir_deliver_quota_warning(dir, quota_warn_percent,
+			maildir_deliver_quota_warning(dir.c_str(),
+						      quota_warn_percent,
 						      quota_warn_message);
 		}
 	}
@@ -349,5 +329,5 @@ void	Maildir::MaildirSave()
 
 void	Maildir::MaildirAbort()
 {
-	if (is_open && !is_afs)	unlink( (const char *)tmpname );
+	if (is_open && !is_afs)	unlink( tmpname.c_str() );
 }

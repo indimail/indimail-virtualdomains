@@ -4,12 +4,12 @@
 .\"     Title: maildropfilter
 .\"    Author: Sam Varshavchik
 .\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 11/12/2022
+.\"      Date: 04/02/2023
 .\"    Manual: Double Precision, Inc.
 .\"    Source: Courier Mail Server
 .\"  Language: English
 .\"
-.TH "MAILDROPFILTER" "7" "11/12/2022" "Courier Mail Server" "Double Precision, Inc\&."
+.TH "MAILDROPFILTER" "7" "04/02/2023" "Courier Mail Server" "Double Precision, Inc\&."
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -381,37 +381,6 @@ seconds before trying to create its own dot\-lock file, in order to avoid a race
 \fILOGNAME\fR
 .RS 4
 Name of the user to who the message is being delivered\&.
-.RE
-.PP
-\fIMAILDROP_OLD_REGEXP\fR
-.RS 4
-Revert to using the old legacy pattern matching engine\&. Versions of
-\fBmaildrop\fR
-prior to version 2\&.0 (included in the
-Courier
-mail server 0\&.51, and earlier), used a built\-in pattern matching engine, instead of using the
-PCRE
-library (see
-the section called \(lqPatterns\(rq)\&.
-\fBmaildrop\fR
-1\&.x used a different syntax for patterns, which is no longer described in this manual page\&. The old pattern matching engine is still available, by setting
-\fIMAILDROP_OLD_REGEXP\fR
-to
-\(lq1\(rq\&. Setting this variable will use the legacy pattern matching engine for the rest of the
-\fBmaildrop\fR
-recipe file\&.
-.sp
-The pattern matching engine will be removed completely in a future version of maildrop\&. This setting provides for a transitional period of converting old recipes\&.
-\fIMAILDROP_OLD_REGEXP\fR
-can be set to
-\(lq1\(rq
-in the global
-maildroprc
-file, then reset to
-\(lq0\(rq
-in each individual
-\fBmaildrop\fR
-recipe file, after it gets converted to the new syntax\&.
 .RE
 .PP
 \fIMAILFILTER\fR
@@ -885,24 +854,6 @@ header is usually much more complicated, and can\*(Aqt be handled that easily\&.
 .ps -1
 .br
 .PP
-Subpatterns are not processed in the
-foreach
-statement\&.
-.sp .5v
-.RE
-.if n \{\
-.sp
-.\}
-.RS 4
-.it 1 an-trap
-.nr an-no-space-flag 1
-.nr an-break-flag 1
-.br
-.ps +1
-\fBNote\fR
-.ps -1
-.br
-.PP
 The contents of all
 \fIMATCH\fR
 variables use UTF\-8 encoding\&. As explained in
@@ -1362,18 +1313,15 @@ The
 \fBforeach\fR
 statement executes a block of statements for each occurrence of the given pattern in the given message, or expression\&. On every iteration
 \fIMATCH\fR
-variable will be set to the matched string\&. All the usual options may be applied to the pattern match, EXCEPT the following:
+variable will be set to the matched string\&. Subpatterns set
+\fIMATCH1\fR,
+\fIMATCH2\fR, and so on, before beginning each iteration\&.
+.PP
+All the usual options may be applied to the pattern match, EXCEPT the following:
 .PP
 ,xxx,yyy
 .RS 4
 Weighted scoring is meaningless, in this context\&.
-.RE
-.PP
-( \&.\&.\&. )
-.RS 4
-Subpatterns are not processed\&. Only the
-\fIMATCH\fR
-variable will be set for each found pattern\&.
 .RE
 .RE
 .sp

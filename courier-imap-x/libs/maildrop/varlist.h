@@ -1,16 +1,16 @@
 #ifndef	varlist_h
 #define	varlist_h
 
+#include <string>
+#include <vector>
 
 //
 // Quick hack to implement variables - get them and set them.
 //
 
-class Buffer;
-
-void UnsetVar(const Buffer &);
-void SetVar(const Buffer &, const Buffer &);
-const Buffer *GetVar(const Buffer &);
-const char *GetVarStr(const Buffer &);
-char **ExportEnv();
+void UnsetVar(const std::string &);
+void SetVar(const std::string &, const std::string &);
+std::string GetVar(const std::string &);
+void ExportEnv(std::vector<std::vector<char>> &strings,
+	       std::vector<char *> &pts);
 #endif

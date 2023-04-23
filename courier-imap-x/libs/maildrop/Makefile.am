@@ -55,6 +55,7 @@ reformail_LDADD = libmdcommon.la
 reformail_DEPENDENCIES = $(reformail_LDADD)
 
 bin_PROGRAMS=maildrop reformail mailbot
+noinst_PROGRAMS=testtimer
 
 mailbot_SOURCES=mailbot.c
 mailbot_DEPENDENCIES=../rfc2045/librfc2045.la ../maildir/libmaildir.la \

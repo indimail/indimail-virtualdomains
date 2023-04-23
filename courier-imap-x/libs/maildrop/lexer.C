@@ -47,13 +47,12 @@ void	Lexer::token(Token &t)
 		case Token::logfile:
 		case Token::log:
 			{
-			Buffer	errmsg;
+			std::string	errmsg;
 
 				errmsg="maildrop: '";
 				errmsg += t.Name();
 				errmsg += "' disabled in embedded mode.\n";
-				errmsg += '\0';
-				error((const char *)errmsg);
+				error(errmsg.c_str());
 				t.Type( Token::error );
 				break;
 			}
@@ -63,13 +62,12 @@ void	Lexer::token(Token &t)
 
 	if (VerboseLevel() > 8)
 	{
-	Buffer	debug;
+	std::string	debug;
 
 		debug="Tokenized ";
 		debug += t.Name();
-		debug += '\n';
-		debug += '\0';
-		error((const char *)debug);
+		debug += "\n";
+		error(debug.c_str());
 	}
 }
 
@@ -129,8 +127,8 @@ int	c;
 	// String, quoted by ", ', or `
 
 
-Buffer	&pattern=t.String();
-	pattern.reset();
+std::string	&pattern=t.String();
+	pattern.clear();
 
 	if (c == '\'' || c == '"' || c == '`')
 	{
@@ -160,7 +158,7 @@ missquote:
 			if (q != '\\')
 			{
 				nextchar();
-				pattern.push(q);
+				pattern.push_back(q);
 				continue;
 			}
 			nextchar();
@@ -175,8 +173,8 @@ missquote:
 			if (!isspace(qq) && qq != '\r' && qq != '\n')
 			{
 				if (qq != quote_char && qq != '\\')
-					pattern.push('\\');
-				pattern.push(qq);
+					pattern.push_back('\\');
+				pattern.push_back(qq);
 				nextchar();
 				continue;
 			}
@@ -186,8 +184,8 @@ missquote:
 			// current length of the string, and backtrack if
 			// necessary.
 
-		int	l=pattern.Length();
-			pattern.push('\\');
+		auto	l=pattern.size();
+			pattern.push_back('\\');
 
 			// Collect all whitespace after the backslash,
 			// not including newline characters.
@@ -195,7 +193,7 @@ missquote:
 			while ((q=curchar()) >= 0 && isspace(q) &&
 				q != '\r' && q != '\n')
 			{
-				pattern.push(q);
+				pattern.push_back(q);
 				nextchar();
 			}
 			if (q < 0)	goto missquote;
@@ -204,7 +202,7 @@ missquote:
 			// a comment, we have a continuation.
 
 			if (q != '#' && q != '\r' && q != '\n')	continue;
-			pattern.Length(l);	// Discard padding
+			pattern.resize(l);	// Discard padding
 			while (q != '\n')
 			{
 				if (q < 0)	goto missquote;
@@ -229,7 +227,7 @@ missquote:
 		lasttokentype != Token::tokento &&
 		lasttokentype != Token::tokencc)
 	{
-		pattern.push(c);
+		pattern.push_back(c);
 		nextchar();
 		c=curchar();
 		if (c == '\r' || c == '\n' || c < 0 || isspace(c))
@@ -245,26 +243,26 @@ missquote:
 					// an error
 			if (c == '\\')
 			{
-				pattern.push(c);
+				pattern.push_back(c);
 				nextchar();
 				c=curchar();
 				if (c < 0 || c == '\r' || c == '\n')
 					return;
 			}
 
-			pattern.push(c);
+			pattern.push_back(c);
 			nextchar();
 		}
-		pattern.push(c);
+		pattern.push_back(c);
 		nextchar();
 		if ((c=curchar()) == ':')
 		{
-			pattern.push(c);
+			pattern.push_back(c);
 			nextchar();
 			while ( (c=curchar()) >= 0 && (isalnum(c) ||
 				c == '-' || c == '+' || c == '.' || c == ','))
 			{
-				pattern.push(c);
+				pattern.push_back(c);
 				nextchar();
 			}
 		}
@@ -288,7 +286,7 @@ missquote:
 		do
 		{
 			nextchar();
-			pattern.push(c);
+			pattern.push_back(c);
 			c=curchar();
 		} while ( ISUNQSTRING(c) );
 
@@ -297,10 +295,10 @@ missquote:
 			nextchar();
 			c=curchar();
 		}
-		if (pattern.Length() == 2)
+		if (pattern.size() == 2)
 		{
-		int	n= ((int)(unsigned char)*(const char *)pattern) << 8
-				| (unsigned char)((const char *)pattern)[1];
+		int	n= ((int)(unsigned char)*pattern.c_str()) << 8
+				| (unsigned char)(pattern.c_str())[1];
 
 			switch (n)	{
 			case (('l' << 8) | 't'):
@@ -510,11 +508,11 @@ void	Lexer::errmsg(const char *emsg)
 
 void	Lexer::errmsg(unsigned long lnum, const char *emsg)
 {
-Buffer	errbuf;
+std::string	errbuf;
 
 	errbuf=filename;
 	errbuf += "(";
-	errbuf.append(lnum);
+	add_integer(errbuf, lnum);
 	errbuf += "): ";
 	errbuf += emsg;
 	errbuf += "\n";

@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2008 Double Precision, Inc.
+** Copyright 1998 - 2023 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -53,19 +53,15 @@ FormatMbox	format_mbox;
 
 	if (format_mbox.HasMsg())	return (0);
 
-Buffer	b;
+	std::string	b;
 
 	if ( *mailbox == '!' || *mailbox == '|' )
 	{
-	Buffer	cmdbuf;
+	std::string	cmdbuf;
 
 		if (*mailbox == '!')
 		{
-			b="SENDMAIL";
-
-		const char *sendmail=GetVarStr(b);
-
-			cmdbuf=sendmail;
+			cmdbuf=GetVar("SENDMAIL");
 
 			cmdbuf += " -f '' ";
 			cmdbuf += mailbox+1;
@@ -73,11 +69,10 @@ Buffer	b;
 		else
 			cmdbuf= mailbox+1;
 
-		cmdbuf += '\0';
 
 		if (VerboseLevel() > 0)
 			merr << "maildrop: Delivering to |" <<
-				(const char *)cmdbuf << "\n";
+				cmdbuf.c_str() << "\n";
 
 	PipeFds	pipe;
 
@@ -97,7 +92,7 @@ Buffer	b;
 
 			try
 			{
-				subshell(cmdbuf);
+				subshell(cmdbuf.c_str());
 			}
 			catch (const char *p)
 			{
@@ -140,13 +135,13 @@ Buffer	b;
 		log(mailbox, rc || wait_stat, format_mbox);
 
 		{
-		Buffer	name, val;
+		std::string	name, val;
 
 			if (rc)	wait_stat= -1;
 			else wait_stat= WIFEXITED(wait_stat)
 				? WEXITSTATUS(wait_stat):-1;
 
-			val.append( (unsigned long)wait_stat);
+			add_integer(val, wait_stat);
 			name="EXITCODE";
 			SetVar(name, val);
 		}
@@ -188,13 +183,12 @@ Buffer	b;
 
 		struct	stat	stat_buf;
 		Mio	mio;
-		Buffer name_buf;
+		std::string name_buf;
 
-		name_buf="UMASK";
-		const char *um=GetVarStr(name_buf);
+		std::string um=GetVar("UMASK");
 		unsigned int umask_val=077;
 
-		sscanf(um, "%o", &umask_val);
+		sscanf(um.c_str(), "%o", &umask_val);
 
 		umask_val=umask(umask_val);
 
@@ -261,18 +255,19 @@ Buffer	b;
 
 void	subshell(const char *cmd)
 {
-Buffer	b;
+	std::string	b;
 
-	b="SHELL";
+	std::string shell=GetVar("SHELL");
 
-const char *shell=GetVarStr(b);
+	const char *p, *q;
 
-const char *p, *q;
-
-	for (p=q=shell; *p; p++)
+	for (p=q=shell.c_str(); *p; p++)
 		if (*p == SLASH_CHAR)	q=p+1;
 
-char	**env=ExportEnv();
+	std::vector<std::vector<char>> strings;
+	std::vector<char *> env;
+
+	ExportEnv(strings, env);
 
 int	n;
 
@@ -286,9 +281,9 @@ int	n;
 		_exit(100);
 	}
 	ExitTrap::onfork();
-	execle(shell, q, "-c", cmd, (const char *)0, env);
+	execle(shell.c_str(), q, "-c", cmd, (const char *)NULL, env.data());
 	if (write (2, "Unable to execute ", 18) < 0 ||
-	    write (2, shell, strlen(shell)) < 0 ||
+	    write (2, shell.c_str(), shell.size()) < 0 ||
 	    write (2, "\n", 1) < 0)
 		; /* ignored */
 	_exit(100);

@@ -22,7 +22,7 @@ LT_INIT
 
 dnl Checks for libraries.
 
-PKG_CHECK_MODULES(LIBIDN2, libidn2 >= 0.0.0, [libidn=yes], [libidn=no])
+PKG_CHECK_MODULES(LIBIDN2, libidn2 >= 2.0.5, [libidn=yes], [libidn=no])
 if test "$libidn" = "no"
 then
 	PKG_CHECK_MODULES(LIBIDN1, libidn >= 0.0.0, [libidn=yes], [libidn=no])

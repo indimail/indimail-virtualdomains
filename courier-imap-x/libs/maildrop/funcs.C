@@ -43,7 +43,7 @@ void	seekerr()
 
 const char *TempName(const char *dir, unsigned l)
 {
-static Buffer buf;
+static std::string buf;
 static unsigned counter=0;
 char	hostname[256];
 
@@ -52,15 +52,14 @@ char	hostname[256];
 	hostname[sizeof(hostname)-1]=0;
 
 	buf=dir;
-	if (l > 0)	buf.Length(l);
-	buf.append( (unsigned long)getpid() );
-	buf += '.';
-	buf.append( (unsigned long)counter++ );
-	buf += '.';
+	if (l > 0 && l < buf.size())	buf.resize(l);
+	add_integer(buf, getpid() );
+	buf += ".";
+	add_integer(buf, counter++ );
+	buf += ".";
 	buf += hostname;
-	buf += '\0';
 
-	return (buf);
+	return (buf.c_str());
 }
 
 int backslash_char(int c)
@@ -141,4 +140,3 @@ void killprocgroup()
 #endif
 #endif
 }
-

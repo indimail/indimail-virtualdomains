@@ -1,5 +1,5 @@
 /*
-** Copyright 1998 - 2009 Double Precision, Inc.
+** Copyright 1998 - 2023 Double Precision, Inc.
 ** See COPYING for distribution information.
 */
 
@@ -34,6 +34,9 @@
 #include	"buffer.h"
 #include	"liblock/config.h"
 #include	"liblock/liblock.h"
+#include <string>
+#include <vector>
+#include <algorithm>
 
 #if	HAS_GETHOSTNAME
 #else
@@ -43,14 +46,19 @@ extern "C" int gethostname(const char *, size_t);
 
 static int inbody=0, addcrs=0, catenate=0;
 static const char *(*append_more_headers)();
-static Buffer	optx, optX, opta, optA, opti, optI, optu, optU, optubuf, optUbuf, optR;
 
-static Buffer add_from_filter_buf;
+typedef std::vector<std::string> multibuf;
+static multibuf	optx, optX, opta, optA, opti, optI, optu, optU, optubuf, optUbuf, optR;
+
+typedef multibuf::iterator multibuf_iterator;
+
+
+static std::string add_from_filter_buf;
 static const char *add_from_filter_buf_ptr;
 static const char *cache_maxlen="", *cache_name="";
 
 static const char *( *from_filter)();
-static Buffer	current_line;
+static std::string	current_line;
 
 void outofmem()
 {
@@ -68,21 +76,22 @@ void help()
 
 const char *NextLine()
 {
-static Buffer buf;
+static std::string buf;
 int	c;
 
-	buf.reset();
+	buf.clear();
 	while ((c=std::cin.get()) >= 0 && c != '\n')
-		buf.push(c);
-	if (c < 0 && buf.Length() == 0)	return (0);
-	if (buf.Length())	// Strip CRs
+		buf.push_back(c);
+	if (c < 0 && buf.size() == 0)	return (0);
+	if (buf.size())	// Strip CRs
 	{
-		c=buf.pop();
-		if (c != '\r')	buf.push(c);
+		c=buf.back();
+
+		if (c == '\r')
+			buf.pop_back();
 	}
-	buf.push('\n');
-	buf.push('\0');
-	return (buf);
+	buf.push_back('\n');
+	return (buf.c_str());
 }
 
 // from_filter is the initial filtering done on the message.
@@ -122,7 +131,7 @@ const char *no_from_filter_header()
 {
 const	char *p;
 
-static Buffer buf;
+static std::string buf;
 
 	from_filter= &no_from_filter_header;
 
@@ -130,14 +139,13 @@ static Buffer buf;
 		current_line += p;
 
 	buf=current_line;
-	buf+='\0';
 	if (!p || *p == '\n')
 	{
 		from_filter= &read_blank;
-		return (buf);
+		return (buf.c_str());
 	}
 	current_line=p;
-	return (buf);
+	return (buf.c_str());
 }
 
 const char *read_blank()
@@ -168,64 +176,61 @@ int n;
 	current_line=p;
 	if (strncmp(p, "From ", 5) == 0)
 		return ( no_from_filter_header() );
-	add_from_filter_buf.reset();
+	add_from_filter_buf.clear();
 	while (p && *p != '\n')
 	{
 		add_from_filter_buf += p;
 		p=NextLine();
 	}
 
-	add_from_filter_buf += '\0';
 
-static Buffer	return_path;
-static Buffer	from_header;
+static std::string	return_path;
+static std::string	from_header;
 
-	return_path.reset();
-	from_header.reset();
+	return_path.clear();
+	from_header.clear();
 
-	for (p=add_from_filter_buf; *p; )
+	for (p=add_from_filter_buf.c_str(); *p; )
 	{
-	Buffer	header;
+	std::string	header;
 
 		while (*p && *p != ':' && *p != '\n')
 		{
 		int	c= (unsigned char)*p++;
 
 			c=tolower(c);
-			header.push(c);
+			header.push_back(c);
 		}
 		for (;;)
 		{
 			while (*p && *p != '\n')
 			{
-				header.push(*p);
+				header.push_back(*p);
 				p++;
 			}
 			if (!*p)	break;
 			++p;
-			header.push('\n');
+			header.push_back('\n');
 			if (!*p || !isspace((unsigned char)*p))	break;
 		}
-		header.push('\0');
-		if (strncmp(header, "return-path:", 12) == 0 ||
-			strncmp(header, ">return-path:", 13) == 0 ||
-			strncmp(header, "errors-to:", 10) == 0 ||
-			strncmp(header, ">errors-to:", 11) == 0)
+		if (strncmp(header.c_str(), "return-path:", 12) == 0 ||
+		    strncmp(header.c_str(), ">return-path:", 13) == 0 ||
+		    strncmp(header.c_str(), "errors-to:", 10) == 0 ||
+		    strncmp(header.c_str(), ">errors-to:", 11) == 0)
 		{
 			const char *p;
 
-			for (p=header; *p != ':'; p++)
+			for (p=header.c_str(); *p != ':'; p++)
 				;
 			return_path=p;
 		}
 
-		if (strncmp(header, "from:", 5) == 0)
-			from_header=(const char *)header + 5;
+		if (strncmp(header.c_str(), "from:", 5) == 0)
+			from_header=header.c_str() + 5;
 	}
-	if (return_path.Length() == 0)	return_path=from_header;
-	return_path += '\0';
+	if (return_path.size() == 0)	return_path=from_header;
 
-	struct rfc822t *rfc=rfc822t_alloc_new( (const char *)return_path,
+	struct rfc822t *rfc=rfc822t_alloc_new( return_path.c_str(),
 					       NULL, NULL);
 
 	if (!rfc)	outofmem();
@@ -234,7 +239,7 @@ static Buffer	from_header;
 
 	if (!rfca)	outofmem();
 
-	from_header.reset();
+	from_header.clear();
 
 	for (n=0; n<rfca->naddrs; ++n)
 	{
@@ -260,33 +265,32 @@ static Buffer	from_header;
 	rfc822a_free(rfca);
 	rfc822t_free(rfc);
 
-	if (from_header.Length() == 0)	from_header="root";
+	if (from_header.size() == 0)	from_header="root";
 	return_path="From ";
 	return_path += from_header;
-	return_path.push(' ');
+	return_path.push_back(' ');
 time_t	t;
 
 	time(&t);
 	p=ctime(&t);
 	while (*p && *p != '\n')
 	{
-		return_path.push(*p);
+		return_path.push_back(*p);
 		p++;
 	}
-	return_path += '\n';
-	return_path += '\0';
+	return_path += "\n";
 	from_filter=add_from_filter_header;
-	add_from_filter_buf_ptr=add_from_filter_buf;
-	return (return_path);
+	add_from_filter_buf_ptr=add_from_filter_buf.c_str();
+	return (return_path.c_str());
 }
 
 const char *add_from_filter_body();
 
 const char *add_from_filter_header()
 {
-static Buffer buf;
+static std::string buf;
 
-	buf.reset();
+	buf.clear();
 
 	if (*add_from_filter_buf_ptr == '\0')
 	{
@@ -298,13 +302,12 @@ static Buffer buf;
 	{
 		while (*add_from_filter_buf_ptr)
 		{
-			buf.push ( (unsigned char)*add_from_filter_buf_ptr );
+			buf.push_back( (unsigned char)*add_from_filter_buf_ptr );
 			if ( *add_from_filter_buf_ptr++ == '\n')	break;
 		}
 	} while ( *add_from_filter_buf_ptr && *add_from_filter_buf_ptr != '\n'
 		&& isspace( (unsigned char)*add_from_filter_buf_ptr ));
-	buf += '\0';
-	return (buf);
+	return (buf.c_str());
 }
 
 const char *add_from_filter_body()
@@ -319,12 +322,11 @@ const char *q;
 		;
 	if (strncmp(q, "From ", 5))	return (p);
 
-static Buffer add_from_buf;
+static std::string add_from_buf;
 
 	add_from_buf=">";
 	add_from_buf += p;
-	add_from_buf += '\0';
-	return (add_from_buf);
+	return (add_from_buf.c_str());
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -351,10 +353,8 @@ const	char *p;
 		return ( no_from_filter_header() );
 	}
 
-	for (const char *q="Return-Path: <"; *q; ++q)
-	{
-		optI.push(*q);
-	}
+	std::string new_opti="Return-Path: <";
+
 	for (p += 5; *p && *p != '\n' && isspace(*p); ++p)
 		;
 	if (*p == '<')
@@ -362,11 +362,11 @@ const	char *p;
 
 	while (*p && *p != '\n' && *p != '>' && !isspace(*p))
 	{
-		optI.push(*p);
+		new_opti.push_back(*p);
 		++p;
 	}
-	optI.push('>');
-	optI.push(0);
+	new_opti.push_back('>');
+	optI.push_back(new_opti);
 
 	p=NextLine();
 	if (!p)	return (p);
@@ -421,104 +421,78 @@ static char hostname_buf[256];
 //
 // Return TRUE if header is already in a list of headers.
 //
-// hdrs: null separated list of headers (and header contents)
+// hdrs: list of headers
 // hdr - header to check (must be lowercase and terminated by a colon)
-// pos - offset into hdrs where it's found.
-//
+// pos - if found, the specific header, and the iterator to one past the
+//       colon.
 
-static int has_hdr(const Buffer &hdrs, const char *hdr, unsigned &pos)
+static bool has_hdr(multibuf &hdrs, const std::string &hdr,
+		    multibuf_iterator &ret)
 {
-const char *r=hdrs;
-int l=hdrs.Length();
-Buffer	buf2;
-unsigned pos2=0;
-
-	while (l)
+	for (auto b=hdrs.begin(), e=hdrs.end(); b != e; ++b)
 	{
-		buf2.reset();
-		pos=pos2;
-		while (l)
+		if (b->size() < hdr.size())
+			continue;
+
+		auto p=b->begin();
+
+		auto hb=hdr.begin(), he=hdr.end();
+
+		for (; hb != he; ++hb, ++p)
 		{
-			--l;
-			++pos2;
-			buf2.push( tolower(*r));
-			if (*r++ == 0)	break;
+			if (*hb != tolower(*p))
+				break;
 		}
-		buf2.push('\0');
-		if (strncmp(hdr, buf2, strlen(hdr)) == 0)	return (1);
+
+		if (hb == he)
+		{
+			ret=b;
+			return true;
+		}
 	}
-	return (0);
+	return false;
 }
 
-static int has_hdr(const Buffer &hdrs, const char *hdr)
+static bool has_hdr(multibuf &hdrs, const std::string &hdr)
 {
-unsigned dummy;
+	multibuf_iterator dummy;
 
 	return (has_hdr(hdrs, hdr, dummy));
 }
 
-static void strip_empty_header(Buffer &buf)
+static void strip_empty_header(multibuf &buf)
 {
-Buffer	newbuf;
-int l;
-const char *p;
+	auto b=buf.begin(), e=buf.end(), p=b;
 
-	for (p=buf, l=buf.Length(); l; )
+	while (b != e)
 	{
-		if (p[strlen(p)-1] == ':')
+		auto ce=b->end();
+
+		auto ptr=std::find(b->begin(), ce, ':');
+
+		if (ptr != ce && ++ptr == ce)
 		{
-			while (l)
-			{
-				--l;
-				if (*p++ == '\0')	break;
-			}
+			++b;
 			continue;
 		}
-		while (l)
-		{
-			--l;
-			newbuf.push( *p );
-			if (*p++ == '\0')	break;
-		}
-	}
-	buf=newbuf;
-}
 
-static void strip_header(Buffer &header, unsigned offset)
-{
-Buffer	buf1;
-const char *p=header;
-int l=header.Length();
-
-	while (l)
-	{
-		if (!offset)
-		{
-			while (l)
-			{
-				--l;
-				if (*p++ == '\0')	break;
-			}
-			break;
-		}
-		buf1.push( *p++ );
-		--l;
-		--offset;
+		if (b != p)
+			*p=*b;
+		++p;
+		++b;
 	}
-	while (l--)
-		buf1.push( *p++ );
-	header=buf1;
+	buf.erase(p, e);
 }
 
 const char *ReadLineAddNewHeader();
 
 const char *ReadLineAddHeader()
 {
-Buffer	buf1;
-const char *q;
-const char *p;
-unsigned pos;
-static Buffer oldbuf;
+	std::string buf1;
+	const char *q;
+	const char *p;
+	multibuf_iterator pos;
+	static std::string oldbuf;
 
 	for (;;)
 	{
@@ -531,13 +505,12 @@ static Buffer oldbuf;
 			strip_empty_header(optI);
 			return ( ReadLineAddNewHeader());
 		}
-		buf1.reset();
+		buf1.clear();
 		for (q=p; *q && *q != '\n'; q++)
 		{
-			buf1.push( tolower(*q) );
+			buf1.push_back( tolower(*q) );
 			if (*q == ':')	break;
 		}
-		buf1 += '\0';
 
 		if (has_hdr(opti, buf1))
 		{
@@ -545,27 +518,22 @@ static Buffer oldbuf;
 			oldbuf += buf1;
 			buf1=oldbuf;
 
-		Buffer	tbuf;
+			std::string	tbuf;
 
 			tbuf="Old-";
 			tbuf += p;
 			oldbuf=tbuf;
-			oldbuf += '\0';
-			p=oldbuf;
+			p=oldbuf.c_str();
 		}
 		if (has_hdr(optR, buf1, pos))
 		{
-		Buffer	tbuf;
+			std::string tbuf=pos->substr(buf1.size());
 
-			q=optR;
-			q += pos + strlen(buf1);
-			tbuf=q;
+			p += buf1.size();
 
-			p += strlen(buf1);
 			tbuf += p;
 			oldbuf=tbuf;
-			oldbuf += '\0';
-			p=oldbuf;
+			p=oldbuf.c_str();
 		}
 
 		if (has_hdr(optI, buf1))
@@ -574,11 +542,7 @@ static Buffer oldbuf;
 		{
 			if (!has_hdr(optubuf, buf1))
 			{
-				q=p;
-				do
-				{
-					optubuf.push( *q );
-				} while (*q++);
+				optubuf.push_back(p);
 				break;
 			}
 			continue;
@@ -587,23 +551,20 @@ static Buffer oldbuf;
 		if (has_hdr(optU, buf1))
 		{
 			if (has_hdr(optUbuf, buf1, pos))
-				strip_header(optUbuf, pos);
-			while (*p)
-			{
-				optUbuf.push( *p );
-				p++;
-			}
-			optUbuf.pop();
-			optUbuf.push('\0');
+				optUbuf.erase(pos);
+
+			std::string s{p};
+
+			s.pop_back();
+
+			optUbuf.push_back(std::move(s));
 			continue;
 		}
 		break;
 	}
 
-unsigned offset;
-
-	if (has_hdr(opta, buf1, offset))
-		strip_header(opta, offset);
+	if (has_hdr(opta, buf1, pos))
+		opta.erase(pos);
 	return (p);
 }
 
@@ -613,46 +574,28 @@ const char *ReadLineAddNewHeader()
 {
 	append_more_headers= &ReadLineAddNewHeader;
 
-Buffer	*bufptr;
+	multibuf *bufptr;
 
-	if (opta.Length())	bufptr= &opta;
-	else if (optA.Length())	bufptr= &optA;
-	else if (opti.Length())	bufptr= &opti;
-	else if (optI.Length())	bufptr= &optI;
-	else if (optUbuf.Length())	bufptr= &optUbuf;
+	if (opta.size())	bufptr= &opta;
+	else if (optA.size())	bufptr= &optA;
+	else if (opti.size())	bufptr= &opti;
+	else if (optI.size())	bufptr= &optI;
+	else if (optUbuf.size())	bufptr= &optUbuf;
 	else
 	{
 		append_more_headers=&ReadLineAddNewHeaderDone;
 		return ("\n");
 	}
 
-static Buffer buf1;
-Buffer	buf2;
+	static std::string buf1;
 
-	buf1.reset();
+	buf1= (*bufptr)[0];
 
-const char *p= *bufptr;
-int l= bufptr->Length();
+	buf1.push_back('\n');
 
-	while (l)
-	{
-		if ( !*p )
-		{
-			p++;
-			l--;
-			break;
-		}
-		buf1.push( *p );
-		p++;
-		l--;
-	}
-	buf1.push('\n');
-	buf1.push('\0');
+	(*bufptr).erase((*bufptr).begin());
 
-	while (l--)
-		buf2.push (*p++);
-	*bufptr=buf2;
-	return (buf1);
+	return (buf1.c_str());
 }
 
 const char *ReadLineAddNewHeaderDone()
@@ -667,7 +610,7 @@ const char *p=(*append_more_headers)();
 
 	if (!p)	return (p);
 
-static Buffer	buf;
+static std::string	buf;
 
 	if (*p == '\n')
 		inbody=1;
@@ -676,12 +619,12 @@ static Buffer	buf;
 	{
 	const char *q;
 
-		buf.reset();
+		buf.clear();
 		for (q=p; *q; q++)
 		{
 			if (*q != '\n')
 			{
-				buf.push(*q);
+				buf.push_back(*q);
 				continue;
 			}
 			do
@@ -689,22 +632,20 @@ static Buffer	buf;
 				++q;
 			} while (*q && isspace(*q));
 			if (*q)
-				buf.push(' ');
+				buf.push_back(' ');
 			--q;
 		}
-		if (addcrs)	buf.push('\r');
-		buf.push('\n');
-		buf.push('\0');
-		return (buf);
+		if (addcrs)	buf.push_back('\r');
+		buf.push_back('\n');
+		return (buf.c_str());
 	}
 
 	if (addcrs)
 	{
 		buf=p;
-		buf.pop();
+		buf.pop_back();
 		buf += "\r\n";
-		buf += '\0';
-		return (buf);
+		return (buf.c_str());
 	}
 	return (p);
 }
@@ -727,7 +668,7 @@ const char *p;
 void cache(int, char *[], int)
 {
 const char *p;
-Buffer	buf;
+std::string	buf;
 int found=0;
 
 	addcrs=0;
@@ -736,29 +677,33 @@ int found=0;
 	int	c;
 
 		if (inbody)	break;
-		buf.reset();
+		buf.clear();
 		while (*p && *p != '\n')
 		{
 			c= (unsigned char)*p;
 			c=tolower(c);
-			buf.push(c);
+			buf.push_back(c);
 			if (*p++ == ':')	break;
 		}
 		if (!(buf == "message-id:"))	continue;
-		buf += '\0';
 		while (*p && isspace( (unsigned char)*p))	p++;
-		buf.reset();
+		buf.clear();
 		while (*p)
 		{
-			buf.push(*p);
+			buf.push_back(*p);
 			++p;
 		}
 
-		while ( (c=(unsigned char)buf.pop()) != 0 && isspace(c))
-			;
-		if (c)	buf.push(c);
-		if (buf.Length() == 0)	break;
-		buf.push('\0');
+		while (buf.size())
+		{
+			auto c=buf.back();
+
+			if (!isspace(c))
+				break;
+			buf.pop_back();
+		}
+
+		if (buf.size() == 0)	break;
 
 	int	fd=open(cache_name, O_RDWR | O_CREAT, 0600);
 
@@ -790,7 +735,7 @@ int found=0;
 
 		if (newpos < pos)	newpos=pos;
 
-		if ((charbuf=new char[newpos+buf.Length()+1]) == NULL)
+		if ((charbuf=new char[newpos+buf.size()+1]) == NULL)
 			outofmem();
 
 	off_t	readcnt=read(fd, charbuf, newpos);
@@ -802,7 +747,7 @@ int found=0;
 		for (q=r=charbuf; q<charbuf+readcnt; )
 		{
 			if (*q == '\0')	break;	// Double null terminator
-			if (strcmp( (const char *)buf, q) == 0)
+			if (strcmp( buf.c_str(), q) == 0)
 			{
 				found=1;
 				while (q < charbuf+readcnt)
@@ -811,8 +756,8 @@ int found=0;
 			else while (q < charbuf+readcnt)
 				if ( (*r++=*q++) == '\0') break;
 		}
-		memcpy(r, (const char *)buf, buf.Length());
-		r += buf.Length();
+		memcpy(r, buf.c_str(), buf.size());
+		r += buf.size();
 		for (q=charbuf; q<r; )
 		{
 			if (r - q < maxlen_n)
@@ -853,22 +798,21 @@ int found=0;
 void extract_headers(int, char *[], int)
 {
 const char *p, *q;
-Buffer	b;
+std::string	b;
 
 	catenate=1;
 	while ((p=ReadLine()) && !inbody)
 	{
-		b.reset();
+		b.clear();
 		for (q=p; *q && *q != '\n'; )
 		{
 		int	c= (unsigned char)*q;
 
-			b.push( tolower(c) );
+			b.push_back( tolower(c) );
 			if ( *q++ == ':')	break;
 		}
-		b.push(0);
 
-		if (has_hdr(optx, b))
+		if (has_hdr(optx, b.c_str()))
 		{
 			while (*q && *q != '\n' && isspace(*q))
 				q++;
@@ -876,7 +820,7 @@ Buffer	b;
 			continue;
 		}
 
-		if (has_hdr(optX, b))
+		if (has_hdr(optX, b.c_str()))
 		{
 			std::cout << p;
 			continue;
@@ -896,7 +840,7 @@ Buffer	b;
 void split(int argc, char *argv[], int argn)
 {
 const char *p;
-Buffer	buf;
+std::string	buf;
 int	l;
 int	do_environ=1;
 unsigned long	environ=0;
@@ -949,7 +893,7 @@ const	char *env;
 			close(fds[0]);
 			close(fds[1]);
 
-		Buffer	buf, buf2;
+		std::string	buf, buf2;
 
 			if (do_environ)
 			{
@@ -957,16 +901,18 @@ const	char *env;
 
 				while (environ || environ_len)
 				{
-					buf.push( "0123456789"[environ % 10]);
+					buf.push_back( "0123456789"[environ % 10]);
 					environ /= 10;
 					if (environ_len)	--environ_len;
 				}
 
 				buf2="FILENO=";
-				while (buf.Length())
-					buf2.push(buf.pop());
-				buf2 += '\0';
-				s=strdup(buf2);
+				while (buf.size())
+				{
+					buf2.push_back(buf.back());
+					buf.pop_back();
+				}
+				s=strdup(buf2.c_str());
 				if (!s)
 				{
 					perror("strdup");
@@ -987,20 +933,20 @@ const	char *env;
 			buf=p;
 			p=ReadLine();
 			if (!p || strncmp(p, "From ", 5) == 0)
-				buf.pop();	// Drop trailing newline
+				buf.pop_back();	// Drop trailing newline
 			else
 			{
 				if (addcrs)
 				{
-					buf.pop();
-					buf.push('\r');
-					buf.push('\n');
+					buf.pop_back();
+					buf.push_back('\r');
+					buf.push_back('\n');
 				}
 			}
 
-		const char *q=buf;
+			const char *q=buf.c_str();
 
-			l=buf.Length();
+			l=buf.size();
 			while (l)
 			{
 			int	n= ::write( fds[1], q, l);
@@ -1028,51 +974,49 @@ const	char *env;
 
 //////////////////////////////////////////////////////////////////////////////
 
-static void add_bin64(Buffer &buf, unsigned long n)
+static void add_bin64(std::string &buf, unsigned long n)
 {
 int	i;
 
 	for (i=0; i<16; i++)
 	{
-		buf.push ( "0123456789ABCDEF"[n % 16] );
+		buf.push_back( "0123456789ABCDEF"[n % 16] );
 		n /= 16;
 	}
 }
 
-static void add_messageid(Buffer &buf)
+static void add_messageid(std::string &buf)
 {
-time_t	t;
+	time_t	t;
 
-	buf.push('<');
+	buf.push_back('<');
 	time(&t);
 	add_bin64(buf,t);
-	buf.push('.');
+	buf.push_back('.');
 	add_bin64(buf, getpid() );
 	buf += ".reformail@";
 	buf += HostName();
-	buf.push('>');
+	buf.push_back('>');
 }
 
-static void add_opta(Buffer &buf, const char *optarg)
+static void add_opta(multibuf &buf, const char *optarg)
 {
-Buffer	chk_buf;
-const char *c;
+	std::string chk_buf;
+	const char *c;
+
+	chk_buf.reserve(strlen(optarg));
 
 	for (c=optarg; *c; c++)
-		chk_buf.push ( tolower( (unsigned char)*c ));
+		chk_buf.push_back( tolower( (unsigned char)*c ));
 	if (chk_buf == "message-id:" || chk_buf == "resent_message_id:")
 	{
 		chk_buf=optarg;
-		chk_buf += ' ';
+		chk_buf += " ";
 		add_messageid(chk_buf);
-		chk_buf += '\0';
-		optarg=chk_buf;
+		optarg=chk_buf.c_str();
 	}
 
-	do
-	{
-		buf.push( *optarg );
-	} while (*optarg++);
+	buf.push_back(optarg);
 }
 
 int main(int argc, char *argv[])
@@ -1137,63 +1081,52 @@ void	(*function)(int, char *[], int)=0;
 			if (!optarg && argn+1 < argc)	optarg=argv[++argn];
 			if (!optarg || !*optarg)	help();
 			if (function)	help();
-			do
-			{
-				opti.push( *optarg );
-			} while (*optarg++);
+
+			opti.push_back(optarg);
 			break;
 		case 'I':
 			if (!optarg && argn+1 < argc)	optarg=argv[++argn];
 			if (!optarg || !*optarg)	help();
 			if (function)	help();
-			do
-			{
-				optI.push( *optarg );
-			} while (*optarg++);
+			optI.push_back(optarg);
 			break;
 		case 'R':
 			if (!optarg && argn+1 < argc)	optarg=argv[++argn];
 			if (!optarg || !*optarg)	help();
 			if (function)	help();
-			while (*optarg)
-				optR.push(*optarg++);
+
+			optR.push_back(optarg);
 			if (argn+1 >= argc)	help();
 			optarg=argv[++argn];
-			while (*optarg)
-				optR.push(*optarg++);
-			optR.push(0);
+
+			(*--optR.end()) += optarg;
 			break;
 		case 'u':
 			if (!optarg && argn+1 < argc)	optarg=argv[++argn];
 			if (!optarg || !*optarg)	help();
 			if (function)	help();
-			while (*optarg)
-				optu.push(*optarg++);
-			optu.push(0);
+
+			optu.push_back(optarg);
 			break;
 		case 'U':
 			if (!optarg && argn+1 < argc)	optarg=argv[++argn];
 			if (!optarg || !*optarg)	help();
 			if (function)	help();
-			while (*optarg)
-				optU.push(*optarg++);
-			optU.push(0);
+
+			optU.push_back(optarg);
 			break;
 		case 'x':
 			if (!optarg && argn+1 < argc)	optarg=argv[++argn];
 			if (!optarg || !*optarg)	help();
 			if (function)	help();
-			while (*optarg)
-				optx.push(*optarg++);
-			optx.push(0);
+
+			optx.push_back(optarg);
 			break;
 		case 'X':
 			if (!optarg && argn+1 < argc)	optarg=argv[++argn];
 			if (!optarg || !*optarg)	help();
 			if (function)	help();
-			while (*optarg)
-				optX.push(*optarg++);
-			optX.push(0);
+			optX.push_back(optarg);
 			break;
 		case 's':
 			if (function)	help();
@@ -1206,7 +1139,7 @@ void	(*function)(int, char *[], int)=0;
 		}
 		if (done)	break;
 	}
-	if (optx.Length() || optX.Length())
+	if (optx.size() || optX.size())
 	{
 		if (function)	help();
 		function=extract_headers;

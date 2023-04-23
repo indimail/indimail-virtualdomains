@@ -73,7 +73,7 @@ static const char *names[]={
 		"unset"
 		} ;
 
-static Buffer namebuf;
+static std::string namebuf;
 
 const char *Token::Name()
 {
@@ -82,8 +82,7 @@ const char *Token::Name()
 		namebuf="string: \"";
 		namebuf += buf;
 		namebuf += "\"";
-		namebuf.push(0);
-		return (namebuf);
+		return (namebuf.c_str());
 	}
 
 	if (type == sqstring)
@@ -91,8 +90,7 @@ const char *Token::Name()
 		namebuf="string: '";
 		namebuf += buf;
 		namebuf += "'";
-		namebuf.push(0);
-		return (namebuf);
+		return (namebuf.c_str());
 	}
 
 	if (type == btstring)
@@ -100,16 +98,14 @@ const char *Token::Name()
 		namebuf="string: `";
 		namebuf += buf;
 		namebuf += "`";
-		namebuf.push(0);
-		return (namebuf);
+		return (namebuf.c_str());
 	}
 
 	if (type == regexpr)
 	{
 		namebuf="regexp: ";
 		namebuf += buf;
-		namebuf.push(0);
-		return (namebuf);
+		return (namebuf.c_str());
 	}
 
 unsigned	t=(unsigned)type;
