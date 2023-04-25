@@ -1,5 +1,8 @@
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.14  2023-04-25 23:35:54+05:30  Cprogrammer
+ * null terminate argument passed to post_handle
+ *
  * Revision 1.13  2023-03-22 08:50:29+05:30  Cprogrammer
  * run POST_HANDLE program (if set) with indimail uid/gid
  *
@@ -113,7 +116,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.13 2023-03-22 08:50:29+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.14 2023-04-25 23:35:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -744,6 +747,8 @@ main(int argc, char **argv)
 				!stralloc_cats(&tmpbuf, argv[i]))
 			die_nomem();
 	}
+	if (!stralloc_0(&tmpbuf))
+		die_nomem();
 	if (!(ptr = env_get("POST_HANDLE"))) {
 		i = str_rchr(argv[0], '/');
 		if (!*(base_argv0 = (argv[0] + i)))
