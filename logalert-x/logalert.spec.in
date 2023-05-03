@@ -50,7 +50,7 @@ BuildRequires: libtirpc libtirpc-devel
 %if 0%{?suse_version} >= 1550 || 0%{?sle_version} >= 150300
 BuildRequires: libtirpc3 libtirpc-devel
 %endif
-BuildRequires: pcre-devel libqmail-devel indimail-devel
+BuildRequires: pcre-devel libqmail-devel
 BuildRequires: flex coreutils bison
 
 %if %build_on_obs == 1
