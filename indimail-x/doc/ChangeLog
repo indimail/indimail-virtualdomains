@@ -2,6 +2,7 @@
 Release 3.4.5-1.1 Start 25/04/2023 End XX/XX/XXXX
 - 25/04/2023
 01. vadddomain: null terminate argument passed to post_handle
+02. indimail.te: updated selinux rules for roundcubemail
 
 * Sun Apr 23 2023 19:21:03 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.4-1.1%{?dist}
 Release 3.4.4-1.1 Start 26/03/2023 End 23/04/2023
