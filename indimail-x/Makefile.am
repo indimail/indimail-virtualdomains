@@ -586,7 +586,7 @@ usr.sbin.clamd: usr.sbin.clamd.in
 usr.bin.freshclam: usr.bin.freshclam.in
 	$(edit) $@.in > $@
 indimail_config.h: config.h
-	egrep -v "#define PACKAGE|#define VERSION" config.h > indimail_config.h
+	grep -E -v "#define PACKAGE|#define VERSION" config.h > indimail_config.h
 
 debian/Makefile: debian/Makefile.in configure.ac conf-version
 	$(edit) $@.in > $@;
