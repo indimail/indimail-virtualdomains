@@ -291,7 +291,11 @@ fi
 if [ -n "$MYSQL_SOCKET" ] ; then
 	mysql_sock=$MYSQL_SOCKET
 else
-	mysql_sock=/var/run/mysqld/mysqld.sock
+	if [ -d /run/mysqld ] ; then
+		mysql_sock=/run/mysqld/mysqld.sock
+	else
+		mysql_sock=/var/run/mysqld/mysqld.sock
+	fi
 fi
 if [ -S $mysqld_sock ] ; then
 	echo "adding roundcube user"
@@ -358,6 +362,18 @@ if [ $? -eq 0 ] ; then
 else
 	is_suse=0
 fi
+if [ -d /run ] ; then
+	rundir=/run
+elif [ -d /var/run ] ; then
+	rundir=/var/run
+else
+	rundir=/run
+fi
+if [ -n "$MYSQL_SOCKET" ] ; then
+	mysql_sock=$MYSQL_SOCKET
+else
+	mysql_sock=$rundir/mysqld/mysqld.sock
+fi
 
 # RoundCube DB setup
 if [ $is_suse -eq 1 ] ; then
@@ -387,20 +403,21 @@ else
 	php_ini="/etc/php.ini"
 fi
 
-# same for all distros
 # RoundCube config
 if [ $is_suse -eq 1 -a -f /etc/roundcubemail/config.inc.php ] ; then
 	if [ ! -f /etc/roundcubemail/config.inc.php.orig ] ; then
 		$mv /etc/roundcubemail/config.inc.php /etc/roundcubemail/config.inc.php.orig
 	fi
 fi
+# same for all distros
 if [ -d /etc/roundcubemail -a ! -f /etc/roundcubemail/config.inc.php ] ; then
 	echo "creating /etc/roundcubemail/config.inc.php"
 	create_roundcube_php_config > /tmp/config.cnf.$$
 	conf_file="/etc/roundcubemail/config.inc.php"
 	if [ -f $conf_file ] ; then
-		$mv $conf_file $conf_file".BAK"
-		$cp $conf_file".BAK" $conf_file
+		if [ ! -f $conf_file.".BAK" ] ; then
+			$mv $conf_file $conf_file".BAK"
+		fi
 	fi
 	change_config $conf_file /tmp/config.cnf.$$
 	$chown root:$httpd_group $conf_file
@@ -413,34 +430,38 @@ fi
 
 # same for all distros
 # Plugins
-if [ -f /usr/share/roundcubemail/plugins/iwebadmin/config.inc.php ] ; then
-	echo "configuring /usr/share/roundcubemail/plugins/iwebadmin/config.inc.php"
-	$mv /usr/share/roundcubemail/plugins/iwebadmin/config.inc.php \
-		/usr/share/roundcubemail/plugins/iwebadmin/config.inc.php.BAK
-	$cp /usr/share/roundcubemail/plugins/iwebadmin/config.inc.php.BAK \
-		/usr/share/roundcubemail/plugins/iwebadmin/config.inc.php
+fn="/usr/share/roundcubemail/plugins/iwebadmin/config.inc.php"
+if [ -f $fn ] ; then
+	echo "configuring $fn"
+	if [ ! -f "$fn".BAK ] ; then
+		$mv $fn "$fn.".BAK
+	fi
+	$cp "$fn.".BAK $fn
 	$sed -i \
-		-e "s}$rcmail_config\['iwebadmin_path'\].*}$rcmail_config\['iwebadmin_path'\] = 'https://indimail.org/cgi-bin/iwebadmin/';}g" \
-	/usr/share/roundcubemail/plugins/iwebadmin/config.inc.php
+		-e "s}$rcmail_config\['iwebadmin_path'\].*}$rcmail_config\['iwebadmin_path'\] = 'https://localhost/cgi-bin/iwebadmin/';}g" \
+	$fn
 fi
 		
-if [ -f /usr/share/roundcubemail/plugins/sauserprefs/config.inc.php ]; then
-	echo "configuring /usr/share/roundcubemail/plugins/sauserprefs/config.inc.php"
-	$mv /usr/share/roundcubemail/plugins/sauserprefs/config.inc.php \
-		/usr/share/roundcubemail/plugins/sauserprefs/config.inc.php.BAK
-	$cp /usr/share/roundcubemail/plugins/sauserprefs/config.inc.php.BAK \
-		/usr/share/roundcubemail/plugins/sauserprefs/config.inc.php
+fn="/usr/share/roundcubemail/plugins/sauserprefs/config.inc.php"
+if [ -f $fn ] ; then
+	echo "configuring $fn"
+	if [ ! -f "$fn".BAK ] ; then
+		$mv $fn "$fn.".BAK
+	fi
+	$cp "$fn.".BAK $fn
 	$sed -i \
 		-e "s}$rcmail_config\['sauserprefs_db_dsnw'\].*}$rcmail_config\['sauserprefs_db_dsnw'\] = 'mysql://roundcube:subscribed@localhost/RoundCube_db';}g" \
-	/usr/share/roundcubemail/plugins/sauserprefs/config.inc.php
+	$fn
 fi
 
-if [ -n "$php_ini" -a -f $php_ini ] ; then
+if [ -n "$php" -a -n "$php_ini" -a -f $php_ini ] ; then
 	echo "configuring $php_ini"
-	$mv $php_ini "$php_ini".BAK
+	if [ ! -f "$php_ini".BAK ] ; then
+		$mv $php_ini "$php_ini".BAK
+	fi
 	$cp "$php_ini".BAK $php_ini
 	$sed -i \
-		-e "s}pdo_mysql.default_socket=.*}pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock}g" \
+		-e "s}pdo_mysql.default_socket=.*}pdo_mysql.default_socket=$mysql_sock}g" \
 		-e "s}; short_open_tag}short_open_tag = On}g" \
 		-e "s}max_execution_time.*}max_execution_time = 60}g" \
 		-e "s}session.gc_probability =.*}session.gc_probability = 1}g" \
@@ -459,16 +480,17 @@ else
 	rcube_httpd_conf=""
 fi
 if [ -n "$rcube_httpd_conf" -a $is_suse -eq 1 ] ; then
-	if [ -f "$rcube_httpd_conf" ] ; then
-		$mv $rcube_httpd_conf $rcube_httpd_conf.orig
+	if [ -f $rcube_httpd_conf -a ! -f "$rcube_httpd_conf".BAK ] ; then
+		$mv $rcube_httpd_conf "$rcube_httpd_conf".BAK
 	fi
 	echo "Creating $rcube_httpd_conf for openSUSE"
 	create_roundcube_suse_httpd_conf > $rcube_httpd_conf
-fi
-if [ -n "$rcube_httpd_conf" -a -f "$rcube_httpd_conf" ] ; then
+elif [ -n "$rcube_httpd_conf" -a -f "$rcube_httpd_conf" ] ; then
 	echo "configuring $rcube_httpd_conf"
-	$mv $rcube_httpd_conf $rcube_httpd_conf.BAK
-	$cp $rcube_httpd_conf.BAK $rcube_httpd_conf
+	if [ ! -f "$rcube_httpd_conf".BAK ] ; then
+		$mv $rcube_httpd_conf "$rcube_httpd_conf".BAK
+	fi
+	$cp "$rcube_httpd_conf".BAK $rcube_httpd_conf
 	$sed -i \
 		-e "s}Alias /roundcubemail }Alias /indimail }g" \
 		-e "/Require local/ i \        Require ip 127.0.0.1" \
@@ -488,8 +510,10 @@ fi
 
 if [ -n "$ssl_cnf" -a -f $ssl_cnf ] ; then
 	echo "configuring $ssl_cnf"
-	$mv $ssl_cnf $ssl_cnf.BAK
-	$cp $ssl_cnf.BAK $ssl_cnf
+	if [ ! -f "$ssl_cnf".BAK ] ; then
+		$mv $ssl_cnf "$ssl_cnf".BAK
+	fi
+	$cp "$ssl_cnf".BAK $ssl_cnf
 	if [ $is_suse -eq 1 ] ; then
 		$sed -i \
 			-e "s{.*#SSLCertificateFile /etc/apache2/ssl.crt/server.crt{SSLCertificateFile /etc/indimail/certs/servercert.pem{g" \
@@ -520,23 +544,22 @@ if [ -f /etc/centos-release -o -f /etc/almalinux-release -o -f /etc/rockylinux-r
 	case "$os_release" in
 		7|8|9)
 		echo "configuring /etc/httpd/conf.d/roundcubemail.conf for $t $os_release"
-		if [ -f /etc/httpd/conf.d/roundcubemail.conf -a ! -f /etc/httpd/conf.d/roundcubemail.conf.BAK ] ; then
-			$mv /etc/httpd/conf.d/roundcubemail.conf \
-				/etc/httpd/conf.d/roundcubemail.conf.BAK
+		fn="/etc/httpd/conf.d/roundcubemail.conf"
+		if [ -f $fn -a ! -f "$fn".BAK ] ; then
+			$mv $fn "$fn".BAK
 		fi
-		create_roundcube_centos_httpd_conf > /etc/httpd/conf.d/roundcubemail.conf
-		if [ -f /etc/httpd/conf.modules.d/00-mpm.conf ] ; then
-			echo "configuring /etc/httpd/conf.modules.d/00-mpm.conf"
-			if [ ! -f /etc/httpd/conf.modules.d/00-mpm.conf.BAK ] ; then
-				$mv /etc/httpd/conf.modules.d/00-mpm.conf \
-					/etc/httpd/conf.modules.d/00-mpm.conf.BAK
+		create_roundcube_centos_httpd_conf > $fn
+		fn="/etc/httpd/conf.modules.d/00-mpm.conf"
+		if [ -f $fn ] ; then
+			echo "configuring $fn"
+			if [ ! -f "$fn".BAK ] ; then
+				$mv $fn "$fn".BAK
 			fi
-			$cp /etc/httpd/conf.modules.d/00-mpm.conf.BAK \
-				/etc/httpd/conf.modules.d/00-mpm.conf
+			$cp "$fn".BAK $fn
 			sed -i \
 				-e 's{LoadModule mpm_prefork_module.*{#&{g' \
 				-e 's{#LoadModule mpm_event_module{LoadModule mpm_event_module{g' \
-					/etc/httpd/conf.modules.d/00-mpm.conf
+					$fn
 		fi
 		;;
 		*)
@@ -548,12 +571,13 @@ elif [ -f /etc/debian_version ] ; then
 		create_roundcube_httpd_conf > /etc/apache2/sites-available/roundcubemail.conf
 		a2ensite roundcubemail.conf
 	fi
-	if [ -f /etc/apache2/sites-available/000-default.conf ] ; then
-		$mv /etc/apache2/sites-available/000-default.conf \
-			/etc/apache2/sites-available/000-default.conf.BAK
-		$cp /etc/apache2/sites-available/000-default.conf.BAK \
-			/etc/apache2/sites-available/000-default.conf
-		echo "configuring /etc/apache2/sites-available/000-default.conf"
+	fn="/etc/apache2/sites-available/000-default.conf"
+	if [ -f $fn ] ; then
+		if [ ! -f "$fn".BAK ] ; then
+			$mv $fn "$fn".BAK
+		fi
+		$cp "$fn".BAK $fn
+		echo "configuring $fn"
 		# apache2 on debian by default uses mod_php. You have to do this
 		# in order for apache2 to use php-fpm
 		tmp=$(mktemp -t apache2.tmp.XXXXXXXXXX)
@@ -576,21 +600,22 @@ elif [ -f /etc/debian_version ] ; then
 			-e "/DocumentRoot/ r $tmp" \
 			-e "s}#ServerName www.example.com}ServerName mail.indimail.org}g" \
 			-e "s}ServerAdmin webmaster@localhost}ServerAdmin root@localhost}g" \
-		/etc/apache2/sites-available/000-default.conf
+		$fn
 		$rm -f $tmp
 		unset tmp
 	fi
-	if [ -f /etc/apache2/sites-available/default-ssl.conf ] ; then
-		$mv /etc/apache2/sites-available/default-ssl.conf \
-			/etc/apache2/sites-available/default-ssl.conf.BAK
-		$cp /etc/apache2/sites-available/default-ssl.conf.BAK \
-			/etc/apache2/sites-available/default-ssl.conf
+	fn="/etc/apache2/sites-available/default-ssl.conf"
+	if [ -f $fn ] ; then
+		if [ ! -f "$fn".BAK ] ; then
+			$mv $fn "$fn".BAK
+		fi
+		$cp "$fn".BAK $fn
 		echo "configuring /etc/apache2/sites-available/default-ssl.conf"
 		$sed -i \
 			-e "s}ServerAdmin.*@.*}ServerAdmin root@localhost}g" \
 			-e "s}SSLCertificateFile.*/etc.*}SSLCertificateFile	/etc/indimail/certs/servercert.pem}g" \
 			-e 's/SSLCertificateKeyFile./#&/' \
-		/etc/apache2/sites-available/default-ssl.conf
+		$fn
 		a2ensite default-ssl.conf
 	fi
 fi
@@ -623,8 +648,8 @@ if [ -z "$php_fpm_conf" -a -f /etc/php-fpm.conf ] ; then
 	php_fpm_conf=/etc/php-fpm.conf
 	echo "fixing pid in $php_fpm_conf"
 	$sed -i \
-		-e "s{^;pid =.*{pid = /run/php/php-fpm.pid{g" \
-		-e "s{^pid =.*{pid = /run/php/php-fpm.pid{g" \
+		-e "s{^;pid =.*{pid = $rundir/php-fpm/php-fpm.pid{g" \
+		-e "s{^pid =.*{pid = $rundir/php-fpm/php-fpm.pid{g" \
 		$php_fpm_conf
 fi
 if [ $is_suse -eq 1 ] ; then
@@ -633,7 +658,7 @@ if [ $is_suse -eq 1 ] ; then
 	fi
 	if [ -f /etc/php7/fpm/php-fpm.conf ] ; then
 		echo "fixing pid in /etc/php7/fpm/php-fpm.conf"
-		$sed -i -e "s{^;pid =.*{pid = /run/php/php-fpm.pid{g" \
+		$sed -i -e "s{^;pid =.*{pid = $rundir/php-fpm/php-fpm.pid{g" \
 			/etc/php7/fpm/php-fpm.conf
 	fi
 	if [ -f "$php_fpm_www_conf".default ] ; then
@@ -664,7 +689,7 @@ if [ -n "$php_fpm_www_conf" -a -f $php_fpm_www_conf ] ; then
 fi
 if [ -n "$php_fpm_conf" -a -f "$php_fpm_conf" ] ; then
 	echo "fixing $php_fpm_conf"
-	$sed -i -e "s{^pid =.*{pid = /run/php/php-fpm.pid{g" \
+	$sed -i -e "s{^pid =.*{pid = $rundir/php-fpm/php-fpm.pid{g" \
 		$php_fpm_conf
 fi
 #
@@ -706,13 +731,6 @@ if [ ! -d /service/httpd ] ; then
 	if [ -x /usr/sbin/httpd ] ; then
 		echo "Creating supervised service for apache2"
 		mkdir -p /service/httpd
-		if [ -d /run ] ; then
-			rundir=/run
-		elif [ -d /var/run ] ; then
-			rundir=/var/run
-		else
-			rundir=/run
-		fi
 		touch /service/httpd/down
 		(
 		echo "#!/bin/sh"
