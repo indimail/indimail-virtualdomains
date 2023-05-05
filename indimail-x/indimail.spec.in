@@ -895,7 +895,9 @@ fi
 %pretrans
 argv1=$1
 
-# stop indimail services before upgrade
+(
+echo "===== Start %{name} installation ====="
+date
 if [ -d /run ] ; then
   rundir=/run/svscan
 elif [ -d /var/run ] ; then
@@ -903,6 +905,8 @@ elif [ -d /var/run ] ; then
 else
   rundir=%{servicedir}
 fi
+# stop indimail services before upgrade
+echo "shutting down %{name} services"
 for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
 qmail-poppass.106
 do
@@ -935,11 +939,10 @@ fi
 
 # initialize setup log file
 if [ -f %{libexecdir}/iupgrade.sh ] ; then
-(
   echo "Running Custom Installation Script for pretrans"
   /bin/sh %{libexecdir}/iupgrade.sh pretrans noargs %{version} $*
-) > /var/log/indimail-setup.log 2>&1
 fi
+) >> /var/log/indimail-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %pre
@@ -1259,7 +1262,7 @@ if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld -o -x %{m
     error=1
   fi
   if [ $error -gt 0 ] ; then
-    echo "Disabling mysqld service"
+    echo "WARNING!!! error encountered creating MySQL db. Disabling mysqld service"
     touch %{servicedir}/mysql.3306/down
   fi
 else
