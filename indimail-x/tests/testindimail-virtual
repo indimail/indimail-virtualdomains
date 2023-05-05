@@ -691,7 +691,7 @@ function do_vmoduser()
 
 function do_inquerytest()
 {
-	env - \
+	sudo setuidgid indimail env - \
 		SYSCONFDIR=$sysconfdir \
 		CONTROLDIR=$cntrldir \
 		FIFODIR=$indimaildir/inquery \
@@ -725,7 +725,7 @@ function do_vdominfo()
 
 function do_dbinfo()
 {
-	env - \
+	sudo setuidgid indimail env - \
 		SYSCONFDIR=$sysconfdir \
 		CONTROLDIR=$cntrldir \
 		ASSIGNDIR=$sysconfdir/users \
@@ -758,11 +758,11 @@ function check_mail()
 	(
 	while true
 	do
-		mcount=$(ls $1/new | wc -l)
+		mcount=$(sudo setuidgid $1 ls $2/new | wc -l)
 		if [ $mcount -gt 0 ] ; then
-			mail_file=$(ls -lt $1/new|head -2|tail -1|awk '{print $9}')
+			mail_file=$(sudo setuidgid $1 ls -lt $2/new|head -2|tail -1|awk '{print $9}')
 			echo "Got Mail $mail_file"
-			/bin/rm -f $1/new/$mail_file
+			sudo setuidgid $1 /bin/rm -f $2/new/$mail_file
 			return 0
 		fi
 		sleep 1
@@ -803,11 +803,11 @@ function do_smtp_auth_login_swaks()
 				pass=$2
 				;;
 				*)
-				pass=$(envdir $servicedir/smtpd/variables vuserinfo -p $1 | awk '{print $3}')
+				pass=$(sudo setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -p $1 | awk '{print $3}')
 				;;
 			esac
 			swaks -S --tls --to $user@$HOSTNAME --from $1 --server localhost --port 2025 -a $i -au $1 -ap "$pass"
-			check_mail $maildir
+			check_mail $user $maildir
 			if [ $? -eq 0 ] ; then
 				last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $i:")
 				if [ $? -eq 0 ] ; then
@@ -860,7 +860,7 @@ function do_smtp_auth_qmail_remote()
 				pass=$3
 				;;
 				*)
-				pass=$(envdir $servicedir/smtpd/variables vuserinfo -p $2 | awk '{print $3}')
+				pass=$(sudo setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -p $2 | awk '{print $3}')
 				;;
 			esac
 			(
@@ -875,7 +875,7 @@ function do_smtp_auth_qmail_remote()
 				AUTH_SMTP="$i" \
 				CONTROLDIR=$cntrldir \
 			/usr/sbin/qmail-remote $1 $2 "" 10 $user@$HOSTNAME > $logdir/qremote/qmail-remote.log
-			check_mail $maildir
+			check_mail $user $maildir
 			if [ $? -eq 0 ] ; then
 				last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $i:")
 				if [ $? -eq 0 ] ; then
@@ -907,7 +907,7 @@ function do_smtp_auth_qmail_remote_scram()
 		AUTH_SMTP="$1" \
 		CONTROLDIR=$cntrldir \
 	/usr/sbin/qmail-remote $2 $3 "" 10 $user@$HOSTNAME >> $logdir/qremote/qmail-remote.log
-	check_mail $maildir
+	check_mail $user $maildir
 	if [ $? -eq 0 ] ; then
 		last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $1:")
 		if [ $? -eq 0 ] ; then
@@ -921,7 +921,7 @@ function do_smtp_auth_qmail_remote_scram()
 		echo "  testing mail    delivery in do_smtp_auth_qmail_remote_scram failed"
 		exit 1
 	fi
-	hexsalted=$(envdir $servicedir/smtpd/variables vuserinfo -p $3 | cut -d: -f3)
+	hexsalted=$(sudo setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -p $3 | cut -d: -f3)
 	(
 	echo "From: $3"
 	echo "To: $user@$HOSTNAME"
@@ -935,7 +935,7 @@ function do_smtp_auth_qmail_remote_scram()
 		AUTH_SMTP="$1" \
 		CONTROLDIR=$cntrldir \
 	/usr/sbin/qmail-remote $2 $3 "" 10 $user@$HOSTNAME >> $logdir/qremote/qmail-remote.log
-	check_mail $maildir
+	check_mail $user $maildir
 	if [ $? -eq 0 ] ; then
 		last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $1:")
 		if [ $? -eq 0 ] ; then
@@ -961,7 +961,7 @@ function do_gsasl_test()
 		opt="--no-cb"
 		;;
 	esac
-	gsasl -d $opt --hostname=$HOSTNAME --x509-ca-file="" -a $2 --password "$3" \
+	gsasl.new -d $opt --hostname=$HOSTNAME --x509-ca-file="" -a $2 --password "$3" \
 		--mechanism "$1" --smtp --connect localhost:2025 >> $logdir/gsasl/gsasl.log 2>&1
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -1246,7 +1246,7 @@ function do_post_handle()
 			;;
 			vaddaliasdomain)
 			set "$arg3 $arg1"
-			uid=$MYUID
+			uid=$INUID
 			;;
 			vadduser)
 			set "$arg4 $arg2"
@@ -1258,7 +1258,7 @@ function do_post_handle()
 			;;
 			vmoveuserdir)
 			set "$arg4 $testdir/mail/T2Zsym/$domain1/testuser"
-			uid=$MYUID
+			uid=$INUID
 			;;
 			vrenameuser)
 			set "$arg4 $arg5"
@@ -1285,7 +1285,7 @@ function do_post_handle()
 			continue
 		fi
 		echo "Executing $prog $*"
-		env - \
+		sudo setuidgid indimail env - \
 			PATH=/usr/bin:/usr/sbin \
 			POST_HANDLE=$testdir/post_handle \
 			ASSIGNDIR=$sysconfdir/users \
@@ -1302,11 +1302,12 @@ function do_post_handle()
 				printf "  testing POST HANDLE for $prog succeeded\n"
 			else
 				printf "  testing POST HANDLE for $prog failed\n"
-				#cat $logdir/setup/test"$i".log
+				less $logdir/setup/test"$i".log
+				exit 1
 			fi
 		else
 			printf "  testing command $prog failed\n"
-			#cat $logdir/setup/test"$i".log
+			less $logdir/setup/test"$i".log
 			exit 1
 		fi
 	done
@@ -1340,16 +1341,18 @@ function do_qmail_inject()
 
 function do_valias()
 {
+	# $1 is testuser1
+	# $2 is testuser2
 	echo "Starting valias tests"
-	destdir1=$(envdir $servicedir/smtpd/variables vuserinfo -d $1 | awk '{print $3}')
-	destdir2=$(envdir $servicedir/smtpd/variables vuserinfo -d $2 | awk '{print $3}')
-	env - \
+	destdir1=$(sudo setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $1 | awk '{print $3}')
+	destdir2=$(sudo setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $2 | awk '{print $3}')
+	sudo setuidgid indimail env - \
 		PATH=/usr/bin:/usr/sbin \
 		ASSIGNDIR=$sysconfdir/users \
 		SYSCONFDIR=$sysconfdir \
 		CONTROLDIR=$cntrldir \
 		DOMAINDIR=$qmaildir \
-	valias -i "&$2" $1
+	valias -i "&$2" $1 # forward mails to testuser1 to testuser2
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
 		printf "  testing command valias insert succeeded\n"
@@ -1357,8 +1360,8 @@ function do_valias()
 		printf "  testing command valias insert failed\n"
 		exit 1
 	fi
-	do_qmail_inject $user $user@$HOSTNAME $1
-	check_mail $destdir2/Maildir
+	do_qmail_inject $user $user@$HOSTNAME $1 # send email to testuser1 from $user@$HOSTNAME
+	check_mail indimail $destdir2/Maildir
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
 		echo "  testing valias forwarding succeeded"
@@ -1366,7 +1369,7 @@ function do_valias()
 		echo "  testing valias forwarding failed"
 		exit 1
 	fi
-	env - \
+	sudo setuidgid indimail env - \
 		PATH=/usr/bin:/usr/sbin \
 		ASSIGNDIR=$sysconfdir/users \
 		SYSCONFDIR=$sysconfdir \
@@ -1384,7 +1387,7 @@ function do_valias()
 	do_qmail_inject $user $user@$HOSTNAME $1
 	sleep $sleep_int
 	sudo chown -R $MYUID:$MYUID $maildir
-	check_mail $maildir
+	check_mail $user $maildir
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
 		echo "  testing valias maildir delivery succeeded"
@@ -1393,7 +1396,7 @@ function do_valias()
 		exit 1
 	fi
 
-	env - \
+	sudo setuidgid indimail env - \
 		PATH=/usr/bin:/usr/sbin \
 		ASSIGNDIR=$sysconfdir/users \
 		SYSCONFDIR=$sysconfdir \
@@ -1447,6 +1450,11 @@ function do_cleanup()
 	#sudo /bin/rm -f $in_cnf
 }
 
+sudo ls /tmp >/dev/null
+if [ $? -ne 0 ] ; then
+	echo "This script requires sudo privileges" 1>&2
+	exit 1
+fi
 do_setup
 do_svscan_start
 svpid=$(sed -n '$p' $servicedir/.svscan.pid)
