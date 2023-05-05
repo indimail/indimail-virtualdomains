@@ -620,8 +620,8 @@ elif [ -f /etc/debian_version ] ; then
 	fi
 fi
 
-echo "Adding qmail as supplementary group to $httpd_group"
-/usr/bin/getent passwd $httpd_user >/dev/null && /usr/sbin/usermod -aG qmail $httpd_user
+echo "Adding qcerts as supplementary group to $httpd_group"
+/usr/bin/getent passwd $httpd_user >/dev/null && /usr/sbin/usermod -aG qcerts $httpd_user
 
 # setting up php-fpm on openSUSE distributions is crazy
 # the standard directories are too different. /srv/www instead

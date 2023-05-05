@@ -17,6 +17,9 @@ Release 1.0.0-1.1 Start 13/09/2022 End 20/04/2023
 - 20/04/2023
 07. roundcube_config: use /bin/sh as interpreter
 - 23/04/2023 - indimail-3.4.4
+05/05/2023
+08. roundcube_config: refactored code
+09. Add qcerts supplementary group for apache to read indimail certs.
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <ircube@indimail.org> 1.0.0-1.1%{?dist}
 Release @version@-@release@ Start 13/03/2017 End 08/09/2022
