@@ -792,4 +792,6 @@ if [ -x /usr/bin/crontab ] ; then
 	unset tmp
 	$chmod +x $rcube_base/bin/cleandb.sh
 fi
+echo "added selinux module for roundcubemail"
+/usr/sbin/svctool --config=selinux --module=roundcubemail
 exit 0
