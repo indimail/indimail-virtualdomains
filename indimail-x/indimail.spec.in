@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.129 2023-04-23 16:25:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.130 2023-05-06 21:24:45+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -442,6 +442,7 @@ done
 %attr(444,root,root) %config(noreplace)           %{sysconfdir}/indimail.schema
 
 %attr(644,root,root)  %config(noreplace)          %{sysconfdir}/indimail.te
+%attr(644,root,root)  %config(noreplace)          %{sysconfdir}/roundcubemail.te
 %attr(644,root,root)  %config(noreplace)          %{sysconfdir}/indimail.fc
 
 %if 0%{?suse_version} >= 1120

@@ -686,7 +686,7 @@ install-data-local: initsvc
 	fi;
 
 # This is the last step in indimail installation.
-install-data-hook: iauth.la indimail.te indimail.fc usr.sbin.mysqld usr.sbin.clamd usr.bin.freshclam
+install-data-hook: iauth.la indimail.te roundcubemail.te indimail.fc usr.sbin.mysqld usr.sbin.clamd usr.bin.freshclam
 	$(mkinstalldirs) $(DESTDIR)@domaindir@ || exit 1
 	$(mkinstalldirs) $(DESTDIR)@prefix@/lib/indimail/modules || exit 1
 	$(INSTALL_DATA) $(DESTDIR)@libdir@/iauth.so  $(DESTDIR)@prefix@/lib/indimail/modules || exit 1
@@ -728,10 +728,12 @@ install-data-hook: iauth.la indimail.te indimail.fc usr.sbin.mysqld usr.sbin.cla
 		fi; \
 		if test " $(DISTRIB_ID)" != " Ubuntu" -a " $(DISTRIB_ID)" != " Debian" ; then \
 			$(INSTALL_DATA) indimail.te $(DESTDIR)@sysconfdir@/indimail.te  || exit 1; \
+			$(INSTALL_DATA) roundcubemail.te $(DESTDIR)@sysconfdir@/roundcubemail.te  || exit 1; \
 			$(INSTALL_DATA) indimail.fc $(DESTDIR)@sysconfdir@/indimail.fc  || exit 1; \
 		fi; \
 	else \
 		$(INSTALL_DATA) indimail.te $(DESTDIR)@sysconfdir@/indimail.te  || exit 1; \
+		$(INSTALL_DATA) roundcubemail.te $(DESTDIR)@sysconfdir@/roundcubemail.te  || exit 1; \
 		$(INSTALL_DATA) indimail.fc $(DESTDIR)@sysconfdir@/indimail.fc  || exit 1; \
 	fi
 

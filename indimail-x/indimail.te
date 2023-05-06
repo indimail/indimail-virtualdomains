@@ -1,8 +1,6 @@
 #
-# $Id: indimail.te,v 2.30 2023-05-04 08:54:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.31 2023-05-06 21:25:11+05:30 Cprogrammer Exp mbhangui $
 #
-# semanage permissive -a svc_start_t
-# semanage permissive -d svc_start_t
 # disable dontaudit statments
 # semodule -DB
 # enable dontaudit statements
@@ -29,8 +27,7 @@ require {
 	type var_t;
 	type var_lib_t;
 	type var_run_t;
-	type svc_start_t;
-	type svc_svc_t;
+	type logrotate_t;
 	class capability { chown net_bind_service dac_override dac_read_search fowner fsetid setuid setgid sys_ptrace };
 	class dir { search getattr setattr read create write rmdir remove_name open add_name };
 	class fifo_file { create read write open unlink getattr setattr };
@@ -56,6 +53,7 @@ allow httpd_t var_t:dir { write remove_name add_name };
 allow httpd_t var_t:file { execute setattr read create execute_no_trans write getattr unlink open };
 allow httpd_t var_t:lnk_file read;
 allow httpd_t var_t:fifo_file write;
+allow httpd_t var_run_t:sock_file write;
 
 #============= httpd_sys_script_t ==============
 
@@ -89,13 +87,14 @@ allow nscd_t tmp_t:sock_file write;
 allow semanage_t initrc_t:unix_stream_socket connectto;
 allow semanage_t tmp_t:sock_file write;
 
-#============= svc_start_t ==============
-allow svc_start_t var_run_t:fifo_file write;
+#============= logrotate_t ==============
+allow logrotate_t var_t:dir read;
 
-#============= init_t ==============
-allow init_t svc_svc_t:lnk_file read;
 #
 # $Log: indimail.te,v $
+# Revision 2.31  2023-05-06 21:25:11+05:30  Cprogrammer
+# updated selinux rules
+#
 # Revision 2.30  2023-05-04 08:54:13+05:30  Cprogrammer
 # updated selinux rules for roundcubemail
 #

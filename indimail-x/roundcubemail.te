@@ -1,0 +1,35 @@
+#
+# $Id: roundcubemail.te,v 1.1 2023-05-06 21:16:20+05:30 Cprogrammer Exp mbhangui $
+#
+module roundcubemail 1.1;
+
+require {
+	type httpd_t;
+	type init_t;
+	type rpcbind_t;
+	type sssd_t;
+	type svc_svc_t;
+	type unconfined_service_t;
+	type accountsd_t;
+	type unreserved_port_t;
+	type var_run_t;
+	class unix_stream_socket {read write connectto };
+	class udp_socket { name_bind };
+	class fifo_file { create read write open unlink getattr setattr };
+}
+#============= httpd_t ==============
+allow httpd_t unconfined_service_t:unix_stream_socket connectto;
+allow httpd_t var_run_t:sock_file write;
+
+#============= rpcbind_t ==============
+allow rpcbind_t unreserved_port_t:udp_socket name_bind;
+
+#============= sssd_t ==============
+allow sssd_t accountsd_t:fifo_file read;
+
+#
+# $Log: roundcubemail.te,v $
+# Revision 1.1  2023-05-06 21:16:20+05:30  Cprogrammer
+# Initial revision
+#
+#
