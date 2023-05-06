@@ -40,6 +40,7 @@ qmail_inject=$bindir/qmail-inject
 setuidgid=$bindir/setuidgid
 tcpserver=$bindir/tcpserver
 qmail_queue=$sbindir/qmail-queue
+gsasl=$bindir/gsasl
 in_cnf=$sysconfdir/indimail.cnf
 MYSQL_USER=indimail
 MYSQL_PASS="abcdefgh-"
@@ -961,7 +962,7 @@ function do_gsasl_test()
 		opt="--no-cb"
 		;;
 	esac
-	gsasl.new -d $opt --hostname=$HOSTNAME --x509-ca-file="" -a $2 --password "$3" \
+	$gsasl -d $opt --hostname=$HOSTNAME --x509-ca-file="" -a $2 --password "$3" \
 		--mechanism "$1" --smtp --connect localhost:2025 >> $logdir/gsasl/gsasl.log 2>&1
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
