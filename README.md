@@ -1007,11 +1007,10 @@ Currently, the list of supported binary distributions for IndiMail is
           o AlmaLinux 8
           o AlmaLinux 9
 
-    Some of the above distributions are available on [copr](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/). You can install indimail packages on a redhat/fedora system by doing
+    Some of the above distributions are available on copr - https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/).
+    You can install indimail packages on a redhat/fedora system by doing
 
-    ```
     $ sudo dnf copr enable cprogrammer/indimail
-    ```
 
     * Debian
           o Debian 10.0
