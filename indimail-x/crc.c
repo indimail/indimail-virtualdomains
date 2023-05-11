@@ -1,5 +1,8 @@
 /*
  * $Log: crc.c,v $
+ * Revision 1.4  2023-05-11 22:43:45+05:30  Cprogrammer
+ * crc.c: define SYS_OPEN on the basis of openat is present or not
+ *
  * Revision 1.3  2020-10-01 18:23:01+05:30  Cprogrammer
  * Darwin Port
  *
@@ -77,7 +80,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crc.c,v 1.3 2020-10-01 18:23:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crc.c,v 1.4 2023-05-11 22:43:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define MAXBUF 4096
@@ -455,7 +458,12 @@ printcrc(const char *file, unsigned long *lcount, int statflag, int displayhex)
 	/*- open the file and do a silent crc on it */
 #if defined(LINUX) || defined(FREEBSD)
 	/*- prevent hooking the open system call */
-    if ((fd = syscall(SYS_open, file, O_RDONLY)) == -1)
+#if defined(SYS_openat) && defined(AT_FDCWD)
+#define SYS_OPEN(FILE,FLAG,MODE) syscall(SYS_openat,AT_FDCWD,FILE,FLAG,MODE)
+#else
+#define SYS_OPEN(FILE,FLAG,MODE) syscall(SYS_open,FILE,FLAG,MODE)
+#endif
+    if ((fd = SYS_OPEN(file, O_RDONLY, 0)) == -1)
 #else
     if ((fd = open(file, O_RDONLY)) == -1)
 #endif
