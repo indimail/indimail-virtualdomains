@@ -6,6 +6,8 @@ Release 3.4.5-1.1 Start 25/04/2023 End XX/XX/XXXX
 03. roundcubemail.te: selinux module for roundcubemail
 - 11/05/2023
 04. crc.c: define SYS_OPEN on the basis of openat is present or not
+- 12/05/2023
+05. indimail.spec: updated for copr builds
 
 * Sun Apr 23 2023 19:21:03 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.4-1.1%{?dist}
 Release 3.4.4-1.1 Start 26/03/2023 End 23/04/2023

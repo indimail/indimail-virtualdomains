@@ -26,3 +26,5 @@ Release 1.0.0-1.1 Start 06/06/2020 End 28/03/2023
 - 28/03/2023
 10. format.c: fix format for '%'
 - 23/04/2023 - indimail-3.4.4
+- 12/05/2023
+11. indimail-spamfilter.spec: updated for copr builds
