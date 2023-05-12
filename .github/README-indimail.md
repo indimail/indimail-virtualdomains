@@ -190,13 +190,14 @@ IndiMail is a messaging Platform comprising of multiple software packages includ
 [**indimail-mta**](https://github.com/mbhangui/indimail-mta "indimail-mta")
 
 * [qmail](http://cr.yp.to/qmail.html "qmail")
+* [daemontools](https://cr.yp.to/daemontools.html "daemontools")
 * [ucspi-tcp](https://cr.yp.to/ucspi-tcp.html "ucspi-tcp")
 * [serialmail](https://cr.yp.to/serialmail.html "serialmail")
 * [qmailanalog](http://cr.yp.to/qmailanalog.html "qmailanalog")
-* [dotforward](https://cr.yp.to/dot-forward.html "dot-foward")
+* [dot-forward](https://cr.yp.to/dot-forward.html "dot-foward")
 * [fastforward](https://cr.yp.to/fastforward.html "fastforward")
 * [mess822](https://cr.yp.to/mess822.html "mess822")
-* [daemontools](https://cr.yp.to/daemontools.html "daemontools")
+* [libtai](http://cr.yp.to/libtai.html "libtai")
 * [dkim](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail "DKIM")
 * [SRS2](https://en.wikipedia.org/wiki/Sender_Rewriting_Scheme "SRS2")
 
