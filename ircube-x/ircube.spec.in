@@ -59,6 +59,7 @@ BuildRequires: -post-build-checks
 %endif
 ##############################################################################
 
+BuildRequires: gcc gcc-c++ make autoconf automake libtool pkgconfig
 BuildRequires: coreutils
 Requires: iwebadmin coreutils sed
 Requires: indimail >= 2.0 indimail-mta >= 2.0

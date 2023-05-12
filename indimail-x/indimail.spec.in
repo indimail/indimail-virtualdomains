@@ -100,7 +100,8 @@ Requires: indimail-mta > 2.6
 Conflicts: %{name} < 2.0
 Obsoletes: %{name} < 2.0
 
-BuildRequires: openssl-devel rpm gcc gcc-c++ make coreutils grep
+BuildRequires: gcc gcc-c++ make autoconf automake libtool pkgconfig
+BuildRequires: openssl-devel rpm coreutils grep
 BuildRequires: glibc glibc-devel openssl procps ncurses-devel
 BuildRequires: gzip autoconf automake libtool pkgconfig
 BuildRequires: sed findutils binutils

@@ -41,10 +41,11 @@ Source1: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 BuildRequires: -post-build-checks  
 %endif
 
+BuildRequires: gcc gcc-c++ make autoconf automake
 %if %{defined suse_version} || %{defined sles_version}
 BuildRequires: bison
 %endif
-%if 0%{?fedora_version} > 27 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700
+%if 0%{?fedora_version} > 27 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7
 BuildRequires: libtirpc libtirpc-devel
 %endif
 %if 0%{?suse_version} >= 1550 || 0%{?sle_version} >= 150300

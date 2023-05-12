@@ -69,7 +69,7 @@ BuildRequires: sed gettext-devel
 BuildRequires: findutils
 BuildRequires: gzip autoconf mysql-devel
 
-%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}
+%if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version} && %{undefined fedora} && %{undefined rhel}
 BuildRequires: chrpath
 %endif
 %if 0%{?suse_version}
