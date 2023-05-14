@@ -1,5 +1,5 @@
-* Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail-auth@indimail.org> 1.0.0-1.1%{?dist}
-Release 1.0.0-1.1 Start 21/05/2020 End 23/04/2023
+* Sun 14 May 2023 11:24:48 +0000 Manvendra Bhangui <indimail-auth@indimail.org> 1.0.0-1.1%{?dist}
+Release 1.0.0-1.1 Start 21/05/2020 End 14/05/2023
 ======= Release Highlights ================================================
 o use /run/indimail for nssd socket path
 o FreeBSD port
@@ -86,3 +86,5 @@ o suport dovecot authentication
 - 01/04/2023
 48. nssd/load_mysql.c: refactored getlibObject function
 - 23/04/2023 - indimail-3.4.4
+- 14/05/2023
+49. pam-multi,nssd/configure.ac: Fixed multiple bugs

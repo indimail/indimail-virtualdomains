@@ -116,109 +116,109 @@ AC_CHECK_HEADERS([mysql.h])
 AC_CHECK_TYPE([bool],AC_DEFINE(HAVE_BOOL, 1, have bool typedef),,[#include <mysql.h>])
 CPPFLAGS=$saveCPPFLAGS
 
-AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directory.],[mysql_prefix=$enableval],[mysql_prefix=""])
-if test "$mysql_prefix" = ""
-then
-mysql_incdir=""
-for f in /usr/local/mysql/include /usr/include/mysql
-do
-	if test -d $f
-	then
-		mysql_incdir=$f
-		break
-	fi
-done
-AC_ARG_ENABLE(mysqlincdir, [  --enable-mysqlincdir=""       directory where auth include files are.],
-mysql_incdir="$enableval",
-[
-	if test "$mysql_incdir" = ""
-	then
-		AC_MSG_ERROR([Unable to find your inc dir, specify --enable-mysqlincdir.])
-	fi
-])
-
-if test "$dlload_mysql" = "no"
-then
-mysql_libdir=""
-for f in /usr/local/mysql/lib64/mysql /usr/local/mysql/lib64 /usr/local/mysql/lib/mysql /usr/local/mysql/lib /usr/lib/mysql
-do
-	if test -d $f
-	then
-		mysql_libdir=$f
-		break
-	fi
-done
-AC_ARG_ENABLE(mysqllibdir, [  --enable-mysqllibdir=path-to-auth-libs directory where auth libs are.],
-mysql_libdir="$enableval",
-[
-	if test "$mysql_libdir" = ""
-	then
-		AC_MSG_ERROR([Unable to find your sql libraries dir, specify --enable-mysqllibdir.])
-	fi
-])
-fi
-
-mysqlbindir=""
-for f in /usr/local/mysql/bin/mysql /usr/bin/mysql
-do
-if test -f $f
-then
-	mysqlbindir="`dirname $f`"
-	break
-	fi
-done
-AC_ARG_ENABLE(mysqlbindir, [  --enable-mysqlbindir=""       directory where mysql binary are.],
-mysqlbindir="$enableval",
-[
-	if test "$mysqlbindir" = ""
-	then
-		AC_MSG_ERROR([Unable to find your sql bin dir, specify --enable-mysqlbindir.])
-	fi
-])
-mysql_prefix=`dirname $mysqlbindir`
-else
-	for f in $mysql_prefix/include/mysql.h $mysql_prefix/include/mysql/mysql.h
-	do
-		if test -f $f
-		then
-			mysql_incdir=`dirname $f`
-			break
-		fi
-	done
-
-	if test "$dlload_mysql" = "no"
-	then
-		if test -d $mysql_prefix/lib64/mysql
-		then
-			mysql_libdir=$mysql_prefix/lib64/mysql
-		elif test -d $mysql_prefix/lib64
-		then
-			mysql_libdir=$mysql_prefix/lib64
-		elif test -d $mysql_prefix/lib/mysql
-		then
-			mysql_libdir=$mysql_prefix/lib/mysql
-		elif test -d $mysql_prefix/lib
-		then
-			mysql_libdir=$mysql_prefix/lib
-		else
-			mysql_libdir=$mysql_prefix/lib/mysql
-		fi
-		mysqlbindir=$mysql_prefix/bin
-	fi
-fi
-
 AC_ARG_ENABLE(dlload-mysql,   [  --enable-dlload-mysql=yes|no Turn off (n, default) or on (y) use dlopen to load libmysqlclient],
 dlload_mysql="$enableval", 
 [
-case $dlload_mysql in
-	1*|y*|Y*)
-	dlload_mysql="yes"
-	;;
-	*)
-	dlload_mysql="no"
-	;;
-esac
+  case $dlload_mysql in
+    1*|y*|Y*)
+    dlload_mysql="yes"
+    ;;
+    *)
+    dlload_mysql="no"
+    ;;
+  esac
 ])
+
+AC_ARG_ENABLE(mysqlprefix, [  --enable-mysqlprefix=""       MySQL Prefix Directory.],[mysql_prefix=$enableval],[mysql_prefix=""])
+if test "$mysql_prefix" = ""
+then
+  mysql_incdir=""
+  for f in /usr/local/mysql/include /usr/include/mysql
+  do
+    if test -d $f
+    then
+      mysql_incdir=$f
+      break
+    fi
+  done
+  AC_ARG_ENABLE(mysqlincdir, [  --enable-mysqlincdir=""       directory where auth include files are.],
+  mysql_incdir="$enableval",
+  [
+  if test "$mysql_incdir" = ""
+  then
+    AC_MSG_ERROR([Unable to find your inc dir, specify --enable-mysqlincdir.])
+  fi
+  ])
+
+  if test "$dlload_mysql" = "no"
+  then
+    mysql_libdir=""
+    for f in /usr/local/mysql/lib64/mysql /usr/local/mysql/lib64 /usr/local/mysql/lib/mysql /usr/local/mysql/lib /usr/lib/mysql
+    do
+      if test -d $f
+      then
+        mysql_libdir=$f
+        break
+      fi
+    done
+    AC_ARG_ENABLE(mysqllibdir, [  --enable-mysqllibdir=path-to-auth-libs directory where auth libs are.],
+    mysql_libdir="$enableval",
+    [
+    if test "$mysql_libdir" = ""
+    then
+      AC_MSG_ERROR([Unable to find your sql libraries dir, specify --enable-mysqllibdir.])
+    fi
+    ])
+  fi
+
+  mysqlbindir=""
+  for f in /usr/local/mysql/bin/mysql /usr/bin/mysql
+  do
+    if test -f $f
+    then
+      mysqlbindir="`dirname $f`"
+      break
+    fi
+  done
+  AC_ARG_ENABLE(mysqlbindir, [  --enable-mysqlbindir=""       directory where mysql binary are.],
+  mysqlbindir="$enableval",
+  [
+  if test "$mysqlbindir" = ""
+  then
+    AC_MSG_ERROR([Unable to find your sql bin dir, specify --enable-mysqlbindir.])
+  fi
+  ])
+  mysql_prefix=`dirname $mysqlbindir`
+else
+  for f in $mysql_prefix/include/mysql.h $mysql_prefix/include/mysql/mysql.h
+  do
+  if test -f $f
+  then
+    mysql_incdir=`dirname $f`
+    break
+  fi
+  done
+
+  if test "$dlload_mysql" = "no"
+  then
+    if test -d $mysql_prefix/lib64/mysql
+    then
+      mysql_libdir=$mysql_prefix/lib64/mysql
+    elif test -d $mysql_prefix/lib64
+    then
+      mysql_libdir=$mysql_prefix/lib64
+    elif test -d $mysql_prefix/lib/mysql
+    then
+      mysql_libdir=$mysql_prefix/lib/mysql
+    elif test -d $mysql_prefix/lib
+    then
+      mysql_libdir=$mysql_prefix/lib
+    else
+      mysql_libdir=$mysql_prefix/lib/mysql
+    fi
+  fi
+  mysqlbindir=$mysql_prefix/bin
+fi
 
 if test "$dlload_mysql" = "no"
 then
