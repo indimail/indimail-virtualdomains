@@ -55,9 +55,6 @@ case "$SYSTEM" in
   ;;
 esac
 
-if [ $# -ne 0 ] ; then
-    extra=$*
-fi
 if [ ! -d m4 -a -f configure.ac -a -f Makefile.am ] ; then
   mkdir -p m4
 fi
@@ -81,13 +78,16 @@ while test $# -gt 0; do
   force=1
   ;;
   *)
-  echo "invalid option [$1]"
-  read key
-  exit 1
+  if [ -n "$extra" ] ; then
+    extra="$extra $1=$optarg"
+  else
+    extra="$1=$optarg"
+  fi
   ;;
   esac
   shift
 done
+
 if [ $force -eq 1 -o ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in -o ! -f depcomp ] ; then
   autoreconf -fiv
 fi
