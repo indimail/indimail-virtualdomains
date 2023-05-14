@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.131 2023-05-12 00:50:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.132 2023-05-15 00:17:46+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -286,6 +286,10 @@ fi
 %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install
 %endif
 %{__mkdir_p} %{buildroot}%{sysconfdir}
+%{__mkdir_p} %{buildroot}%{_prefix}/share/doc/indimail-devel
+%{__mkdir_p} %{buildroot}%{_prefix}/share/doc/libindimail
+install -p -m 0644 doc/COPYING-indimail %{buildroot}%{_prefix}/share/doc/indimail-devel/COPYING
+install -p -m 0644 doc/COPYING-indimail %{buildroot}%{_prefix}/share/doc/libindimail/COPYING
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
 /bin/rm -f %{name}-rpm.info
 for i in eps cdb indimail
@@ -832,6 +836,8 @@ done
 %{_libdir}/libeps.so
 %{_libdir}/libindimail.so
 
+%attr(644,root,root)                    %{_prefix}/share/doc/indimail-devel/COPYING
+
 %{_pkg_config_path}/libindimail.pc
 
 %files -n libindimail
@@ -841,6 +847,7 @@ done
 %{_libdir}/libeps.so.1.0.0
 %{_libdir}/libindimail.so.3
 %{_libdir}/libindimail.so.3.0.0
+%attr(644,root,root)                    %{_prefix}/share/doc/libindimail/COPYING
 
 #            install   erase   upgrade  reinstall
 # pretrans      0        -         0
