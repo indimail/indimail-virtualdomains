@@ -65,6 +65,14 @@ case "$SYSTEM" in
   base_path=/mail
   ;;
 esac
+
+if [ ! -d m4 -a -f configure.ac -a -f Makefile.am ] ; then
+  mkdir -p m4
+fi
+if [ ! -f conf-release ] ; then
+  echo 1.1 > conf-release
+fi
+
 force=0
 while test $# -gt 0; do
   case "$1" in
@@ -86,9 +94,6 @@ while test $# -gt 0; do
   esac
   shift
 done
-if [ ! -f conf-release ] ; then
-  echo 1.1 > conf-release
-fi
 
 if [ -d $prefix/include/mysql ] ; then
   mysqlPrefix=$prefix
@@ -96,10 +101,6 @@ elif [ -d /usr/local/include/mysql ] ; then
   mysqlPrefix=/usr/local
 elif [ -d /usr/local/mysql/include ] ; then
   mysqlPrefix=/usr/local/mysql
-fi
-
-if [ ! -d m4 -a -f configure.ac -a -f Makefile.am ] ; then
-  mkdir -p m4
 fi
 
 if [ $force -eq 1 -o ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in -o ! -f depcomp ] ; then

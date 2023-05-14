@@ -73,6 +73,20 @@ case "$SYSTEM" in
   extra="--with-authpam"
   ;;
 esac
+
+if [ ! -f conf-release ] ; then
+  echo "1.1" > conf-release
+fi
+if [ ! -d m4 -a -f configure.ac -a -f Makefile.am ] ; then
+  mkdir -p m4
+fi
+for i in imap authlib maildrop unicode rfc2045 maildir
+do
+  if [ ! -d libs/$i/m4 ] ; then
+    mkdir -p libs/$i/m4
+  fi
+done
+
 force=0
 while test $# -gt 0; do
   case "$1" in
@@ -95,18 +109,6 @@ while test $# -gt 0; do
   shift
 done
 
-if [ ! -f conf-release ] ; then
-  echo "1.1" > conf-release
-fi
-if [ ! -d m4 -a -f configure.ac -a -f Makefile.am ] ; then
-  mkdir -p m4
-fi
-for i in imap authlib maildrop unicode rfc2045 maildir
-do
-  if [ ! -d libs/$i/m4 ] ; then
-    mkdir -p libs/$i/m4
-  fi
-done
 if [ $force -eq 1 -o ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in -o ! -f depcomp ] ; then
   autoreconf -fiv
 fi

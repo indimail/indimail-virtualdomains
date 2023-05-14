@@ -1,10 +1,4 @@
 #!/bin/sh
-if [ ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in ] ; then
-autoreconf -fiv
-fi
-if [ ! -f conf-release ] ; then
-  echo 1.1 > conf-release
-fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
   FreeBSD)
@@ -50,18 +44,39 @@ case "$SYSTEM" in
   libdir=/usr/lib
   ;;
 esac
-if [ -d $prefix/include/mysql ] ; then
-  mysqlPrefix=$prefix
-elif [ -d /usr/local/include/mysql ] ; then
-  mysqlPrefix=/usr/local
-elif [ -d /usr/local/mysql/include ] ; then
-  mysqlPrefix=/usr/local/mysql
-fi
 
 if [ ! -d m4 -a -f configure.ac -a -f Makefile.am ] ; then
   mkdir -p m4
 fi
-if [ -f Makefile ] ; then
+if [ ! -f conf-release ] ; then
+  echo 1.1 > conf-release
+fi
+
+force=0
+while test $# -gt 0; do
+  case "$1" in
+  -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
+  ;;
+  *) optarg=
+  ;;
+  esac
+
+  case "$1" in
+  --force)
+  force=1
+  ;;
+  *)
+  echo "invalid option [$1]"
+  read key
+  exit 1
+  ;;
+  esac
+  shift
+done
+if [ $force -eq 1 -o ! -f ./configure -o ! -f Makefile -o ! -f Makefile.in -o ! -f depcomp ] ; then
+  autoreconf -fiv
+fi
+if [ $force -eq 0 -a -f Makefile ] ; then
   case "$SYSTEM" in
     Darwin|FreeBSD)
     if [ $(stat -f %m configure.ac) -le $(stat -f %m Makefile) ] ; then
@@ -77,6 +92,14 @@ if [ -f Makefile ] ; then
     fi
     ;;
   esac
+fi
+
+if [ -d $prefix/include/mysql ] ; then
+  mysqlPrefix=$prefix
+elif [ -d /usr/local/include/mysql ] ; then
+  mysqlPrefix=/usr/local
+elif [ -d /usr/local/mysql/include ] ; then
+  mysqlPrefix=/usr/local/mysql
 fi
 ./configure --prefix=$prefix \
   --libexecdir=$prefix/libexec/indimail \
