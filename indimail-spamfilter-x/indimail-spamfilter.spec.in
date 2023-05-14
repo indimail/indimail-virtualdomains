@@ -101,7 +101,7 @@ Requires: indimail-mta
 Conflicts: indimail < 3.2
 
 %if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-build
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %endif
 
 %description
@@ -123,7 +123,6 @@ the word lists.
 %setup -q
 
 %build
-ID=$(id -u)
 (
 echo "---------------- INFORMATION ------------------------"
 echo target         %_target
@@ -131,12 +130,6 @@ echo target_alias   %_target_alias
 echo target_cpu     %_target_cpu
 echo target_os      %_target_os
 echo target_vendor  %_target_vendor
-%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7
-echo pythondir      %{python3_sitelib}
-%else
-echo pythondir      %{pythondir}
-%endif
-echo Project        %{_project}
 echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os}
 echo "------------------------------------------------------"
 ) > %{name}-rpm.info
@@ -164,7 +157,7 @@ HOME='.';export HOME
 )
 
 %install
-ID=$(id -u)
+[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %{__make} -s %{?_smp_mflags}
 %if %{defined nodebug}
 %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
@@ -216,11 +209,11 @@ $TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
 %dir %attr(755,root,root)              %{mandir}
 %dir %attr(755,root,root)              %{mandir}/man1
 %endif
-%attr(644,root,root) %config(noreplace)           %{sysconfdir}/%{name}-release
-%attr(644,root,root) %config(noreplace)           %{sysconfdir}/%{name}-rpm.info
-%ghost %config(noreplace,missingok)               %{sysconfdir}/bogofilter.cf
-%attr(644,root,root) %config(noreplace)           %{sysconfdir}/bogofilter.cf.example
+%attr(644,root,root)                              %{sysconfdir}/%{name}-release
+%attr(644,root,root)                              %{sysconfdir}/%{name}-rpm.info
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/bogofilter.perms
+%ghost %config(noreplace,missingok)               %{sysconfdir}/bogofilter.cf
+%attr(644,root,root)                              %{sysconfdir}/bogofilter.cf.example
 
 %if 0%{?suse_version} >= 1120
 %attr(644,root,root) %config(noreplace)           %{_sysconfdir}/permissions.d/%{name}-permissions
@@ -264,11 +257,6 @@ $TOUCH %{buildroot}%{sysconfdir}/bogofilter.cf
 
 ### SCRIPTLET ###############################################################################
 %verifyscript
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 
 %if 0%{?suse_version} >= 1120
 %verify_permissions -e %{_prefix}/bin/bogofilter
@@ -277,11 +265,6 @@ fi
 ### SCRIPTLET ###############################################################################
 %post
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -x /bin/touch ] ; then
   TOUCH=/bin/touch
 elif [ -x /usr/bin/touch ] ; then
@@ -416,11 +399,6 @@ fi
 ### SCRIPTLET ###############################################################################
 %postun
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -z "$argv1" ] ; then
   argv1=0
 fi

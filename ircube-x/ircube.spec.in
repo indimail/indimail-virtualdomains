@@ -2,7 +2,9 @@
 #
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
+%if %{defined nodebug}
 %global debug_package %{nil}
+%endif
 
 %if %{defined _project}
 # define if building on openSUSE build service
@@ -59,10 +61,12 @@ BuildRequires: -post-build-checks
 %endif
 ##############################################################################
 
-BuildRequires: gcc gcc-c++ make autoconf automake libtool pkgconfig
+BuildRequires: gcc make autoconf automake
 BuildRequires: coreutils
 Requires: iwebadmin coreutils sed
 Requires: indimail >= 2.0 indimail-mta >= 2.0
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildArch: noarch
 
 %description
 A collection of plugins for RoundCube Mail
@@ -90,11 +94,39 @@ works if iwebadmin is in English.
 %setup -q
 
 %build
+(
+echo "---------------- INFORMATION ------------------------"
+echo target         %_target
+echo target_alias   %_target_alias
+echo target_cpu     %_target_cpu
+echo target_os      %_target_os
+echo target_vendor  %_target_vendor
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
+echo "------------------------------------------------------"
+) > %{name}-rpm.info
+(
+echo "NAME=%{name}"
+echo "Description=\"ircube Package\""
+echo "IRCUBE_version=%{version}-%{release}"
+echo "ID=%{name}"
+echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
+echo "PACKAGE_BUGREPORT=\"'@email@'\""
+) > %{name}-release
 %configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec/indimail --enable-plugindir=%{pluginbase}
-make
+%{__make} %{?_smp_mflags}
 
 %install
-%make_install
+[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
+%if %{defined nodebug}
+%{__make} -s DESTDIR=%{buildroot} install-strip
+%else
+%{__make} -s DESTDIR=%{buildroot} install
+%endif
+%{__mkdir_p} %{buildroot}%{pluginbase}/%{name}
+install -m 0644 %{name}-rpm.info %{buildroot}%{pluginbase}/%{name}/%{name}-rpm.info
+install -m 0644 %{name}-release %{buildroot}%{pluginbase}/%{name}/%{name}-release
+/bin/rm -f %{name}-rpm.info %{name}-release
+/bin/rm -f %{name}-rpm.info
 
 %files
 %attr(0755,root,root)      %{libexecdir}/bogo-learn
@@ -149,28 +181,28 @@ make
 %dir %attr(0755,root,root) %{pluginbase}/plugins/sauserprefs/lib/Roundcube
 %attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/lib/Roundcube/rcube_sauserprefs_storage_sql.php
 %attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/sauserprefs.php
-%dir %attr(0775,root,root) %{pluginbase}/plugins/iwebadmin
+%dir %attr(0755,root,root) %{pluginbase}/plugins/iwebadmin
 %attr(0664,root,root)      %{pluginbase}/plugins/iwebadmin/config.inc.php
 %attr(0664,root,root)      %{pluginbase}/plugins/iwebadmin/iwebadmin.php
 %attr(0664,root,root)      %{pluginbase}/plugins/iwebadmin/README.md
 %attr(0664,root,root)      %{pluginbase}/plugins/iwebadmin/onvacation.js
-%dir %attr(0775,root,root) %{pluginbase}/plugins/iwebadmin/localization
+%dir %attr(0755,root,root) %{pluginbase}/plugins/iwebadmin/localization
 %attr(0664,root,root)      %{pluginbase}/plugins/iwebadmin/localization/pt_BR.inc
 %attr(0664,root,root)      %{pluginbase}/plugins/iwebadmin/localization/en_US.inc
 %attr(0664,root,root)      %{pluginbase}/plugins/iwebadmin/config.inc.php.dist
 %attr(0664,root,root)      %{pluginbase}/plugins/iwebadmin/ChangeLog
 %dir %attr(0755,root,root) %{pluginbase}/plugins/markasjunk2
 %dir %attr(0755,root,root) %{pluginbase}/plugins/markasjunk2/drivers
-%attr(0755,root,root)      %{pluginbase}/plugins/markasjunk2/drivers/cmd_learn.php
-%attr(0755,root,root)      %{pluginbase}/plugins/markasjunk2/drivers/sa_blacklist.php
-%attr(0755,root,root)      %{pluginbase}/plugins/markasjunk2/drivers/sa_detach.php
-%attr(0755,root,root)      %{pluginbase}/plugins/markasjunk2/drivers/amavis_blacklist.php
-%attr(0755,root,root)      %{pluginbase}/plugins/markasjunk2/drivers/edit_headers.php
-%attr(0755,root,root)      %{pluginbase}/plugins/markasjunk2/drivers/dir_learn.php
-%attr(0755,root,root)      %{pluginbase}/plugins/markasjunk2/drivers/email_learn.php
+%attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/drivers/cmd_learn.php
+%attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/drivers/sa_blacklist.php
+%attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/drivers/sa_detach.php
+%attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/drivers/amavis_blacklist.php
+%attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/drivers/edit_headers.php
+%attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/drivers/dir_learn.php
+%attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/drivers/email_learn.php
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/composer.json
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/config.inc.php
-%attr(0755,root,root)      %{pluginbase}/plugins/markasjunk2/markasjunk2.php
+%attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/markasjunk2.php
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/README.md
 %dir %attr(0755,root,root) %{pluginbase}/plugins/markasjunk2/localization
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/localization/pl_PL.inc
@@ -211,6 +243,8 @@ make
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/config.inc.php.dist
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/markasjunk2.js
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/CHANGELOG
+%attr(644,root,root)       %{pluginbase}/%{name}/%{name}-release
+%attr(644,root,root)       %{pluginbase}/%{name}/%{name}-rpm.info
 
 %doc %{_prefix}/share/indimail/doc/README-ircube.md
 %doc %{_prefix}/share/indimail/doc/COPYING.ircube

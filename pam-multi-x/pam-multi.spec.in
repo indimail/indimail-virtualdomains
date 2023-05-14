@@ -3,14 +3,16 @@
 #
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
-%if 0%{?opensuse_bs}
-# define to 1 if building on openSUSE build service
-%define build_on_obs       1
+
+%if %{defined _project}
+# define if building on openSUSE build service
+%global build_on_obs       1
+%global build_cflags       "-DOBS_BUILD %{build_cflags}"
 %else
-%define build_on_obs       0
+%define _project           local
+%global build_on_obs       0
+%global _hardened_build    1
 %endif
-%define _prefix      @indimaildir@
-%define security_dir @moduledir@
 
 %if %{defined nodebug}
 %global debug_package %{nil}
@@ -26,6 +28,15 @@ Release: 1
 %endif
 License: GPLv3
 Group: System Environment/Base
+%global _prefix           @prefix@
+%global security_dir      @moduledir@
+%global mysqlPrefix       @mysql_prefix@
+%global controldir        @controldir@
+%global shareddir         @datarootdir@
+%global mandir            %{_prefix}/share/man
+%global pam_confdir       @pam_confdir@
+%global mysqlSocket       /var/run/mysqld/mysqld.sock
+%global defaultDomain     @defaultdomain@
 Source: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 
 URL: http://www.indimail.org
@@ -44,7 +55,9 @@ BuildRequires: -post-build-checks
 #!BuildIgnore: post-build-checks  
 %endif
 Requires: pam
-BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+%if %build_on_obs == 1
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+%endif
 
 %description
 A PAM-module for authentication against custom databases. It helps to to
@@ -63,31 +76,55 @@ echo "------------------------------------------------------"
 %setup -n %{name}-%{version}
 
 %build
-ID=$(id -u)
-%configure --prefix=%{_prefix} --enable-moduledir=%{security_dir}
+%if %build_on_obs == 0
+  if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
+    default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+  else
+    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./' || echo %{defaultDomain})
+  fi
+%else
+  default_domain=%{defaultDomain}
+%endif
+%configure --prefix=%{_prefix} --enable-moduledir=%{security_dir} \
+  --mandir=%{mandir} \
+  --enable-mysqlprefix=%{mysqlPrefix} \
+  --datarootdir=%{_prefix}/share/indimail \
+  --enable-controldir=%{controldir} \
+  --enable-pamconfdir=%{pam_confdir} \
+  --enable-dlload-mysql=yes \
+  --enable-default-domain=%{default_domain}
 %{__make}
 
 %install
-[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf "$RPM_BUILD_ROOT"
+[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %if %{defined nodebug}
-%{__make} DESTDIR="$RPM_BUILD_ROOT" install-strip
+%{__make} DESTDIR="%{buildroot}" install-strip
 %else
-%{__make} DESTDIR="$RPM_BUILD_ROOT" install
+%{__make} DESTDIR="%{buildroot}" install
 %endif
-/bin/rm -f "$RPM_BUILD_ROOT"%{security_dir}/*.la
-/bin/rm -f "$RPM_BUILD_ROOT"%{security_dir}/*a
+/bin/rm -f "%{buildroot}"%{security_dir}/*.la
+/bin/rm -f "%{buildroot}"%{security_dir}/*a
 if [ -x /usr/bin/chrpath ] ; then
   /usr/bin/chrpath -d %{buildroot}%{security_dir}/pam-multi.so
   /usr/bin/chrpath -d %{buildroot}%{_prefix}/sbin/pam-checkpwd
 fi
 
 %clean
-[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf "$RPM_BUILD_ROOT"
 %{__make} clean
 
 %files
 %defattr(-,root,root)
 %attr(555,root,root)              %{_prefix}/sbin/pam-checkpwd
+%attr(644,root,root)              %config(noreplace) %{pam_confdir}/pam-multi
+%attr(644,root,root)              %config(noreplace) %{pam_confdir}/pop3
+%attr(644,root,root)              %config(noreplace) %{pam_confdir}/imap
 %attr(755,root,root)              %{security_dir}/pam-multi.so
-%attr(644,root,root)              %{_prefix}/man/man?/*
-%docdir %{_prefix}/man
+%if %build_on_obs == 0
+%license %attr(644,root,root)     %{shareddir}/doc/COPYING-pam-multi
+%else
+%attr(644,root,root)              %{shareddir}/doc/COPYING-pam-multi
+%endif
+%attr(644,root,root)              %{shareddir}/doc/AUTHORS-pam-multi
+%attr(644,root,root)              %{shareddir}/doc/README-pam-multi.md
+%docdir %{mandir}
+%attr(644,root,root)              %{mandir}/man8/*

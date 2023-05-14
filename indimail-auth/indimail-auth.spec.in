@@ -101,12 +101,8 @@ Requires(postun): shadow-utils
 %endif
 
 %if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-build
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %endif
-#
-# IndiMail is choosy and runs on reliable OS only
-#
-Excludeos: windows
 
 %description
 indimail-auth provides nssd daemon to provide name service switch
@@ -147,7 +143,6 @@ echo target_cpu     %_target_cpu
 echo target_os      %_target_os
 echo target_vendor  %_target_vendor
 echo PAM Module dir %{pam_moduledir}
-echo Project        %{_project}
 echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
 echo "------------------------------------------------------"
 ) > %{name}-rpm.info
@@ -201,9 +196,8 @@ if [ pam-multi-%{pam_multi_version} ] ; then
 fi
 
 %install
+[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 cd %{name}-%{version}
-%{__mkdir_p} $RPM_BUILD_ROOT
-%{__mkdir_p} %{buildroot}%{shareddir}/doc
 for i in nssd-%{nssd_version} pam-multi-%{pam_multi_version}
 do
   if [ -d $i ] ; then
@@ -264,8 +258,8 @@ chmod -R 755 %{buildroot}/%{pam_moduledir}
 %endif
 
 %ghost %config(noreplace,missingok)     %{sysconfdir}/nssd.conf
-%attr(644,root,root) %config(noreplace) %{sysconfdir}/%{name}-rpm.info
-%attr(644,root,root) %config(noreplace) %{sysconfdir}/%{name}-release
+%attr(644,root,root)                    %{sysconfdir}/%{name}-rpm.info
+%attr(644,root,root)                    %{sysconfdir}/%{name}-release
 
 %attr(755,root,root)                    %{_prefix}/sbin/nssd
 %attr(755,root,root)                    %{libexecdir}/check_getpw
@@ -310,13 +304,6 @@ chmod -R 755 %{buildroot}/%{pam_moduledir}
   %{_builddir}/elfbins.list
 %endif
 
-%verifyscript
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
-
 ### SCRIPTLET ###############################################################################
 %pretrans
 if [ -d /run ] ; then
@@ -338,11 +325,6 @@ fi
 ### SCRIPTLET ###############################################################################
 %post
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -d /run ] ; then
   rundir=/run/svscan
 elif [ -d /var/run ] ; then
@@ -412,11 +394,6 @@ fi
 ### SCRIPTLET ###############################################################################
 %postun
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -z "$argv1" ] ; then
   argv1=0
 fi

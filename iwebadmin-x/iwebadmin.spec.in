@@ -76,9 +76,8 @@ Requires: coreutils grep /bin/sh glibc /usr/sbin/useradd /usr/sbin/groupadd
 Requires: procps /usr/bin/awk indimail > 1.6
 Requires: ezmlm-idx > 7.2
 %if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-build
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %endif
-Excludeos: windows 
 
 %description
 iwebadmin provides a Web front-end for administering IndiMail Users
@@ -117,10 +116,10 @@ echo "------------------------------------------------------"
   --enable-cgibindir=@cgibindir@ \
   --enable-imagedir=@imagedir@ \
   --enable-htmllibdir=@htmllibdir@
+%{__make} -s %{?_smp_mflags}
 
 %install
-[ "$RPM_BUILD_ROOT" != "/" ] && /bin/rm -fr $RPM_BUILD_ROOT
-%{__make} -s %{?_smp_mflags}
+[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %if %{defined nodebug}
 %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
 %else
@@ -136,6 +135,7 @@ install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissio
 %endif
 %{__mkdir_p} %{buildroot}%{sysconfdir}
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
+/bin/rm -f %{name}-rpm.info
 
 %if %{undefined nodebug}
   /bin/chmod -R 755 %{buildroot}@cgibindir@
@@ -148,11 +148,11 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %dir %attr(755,root,qmail)               %{_prefix}
 %endif
 
-%attr(644,root,root) %config(noreplace)  %{sysconfdir}/%{name}-release
-%attr(644,root,root) %config(noreplace)  %{sysconfdir}/%{name}-rpm.info
+%attr(644,root,root)                     %{sysconfdir}/%{name}-release
+%attr(644,root,root)                     %{sysconfdir}/%{name}-rpm.info
+%attr(644,root,root)                     %{sysconfdir}/%{name}.perms
 %attr(644,root,root) %config(noreplace)  %{sysconfdir}/%{name}-conf
 %attr(644,root,root) %config(noreplace)  %{sysconfdir}/%{name}-hooks
-%attr(644,root,root) %config(noreplace)  %{sysconfdir}/%{name}.perms
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120

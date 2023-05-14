@@ -77,7 +77,9 @@ URL: http://www.indimail.org
 BuildRequires: coreutils
 
 Requires: coreutils grep /bin/sh /usr/bin/id glibc openssl
-BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
+%if %build_on_obs == 1
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+%endif
 
 %description
 Most mail servers such as sendmail need to have a local delivery agent.
@@ -89,11 +91,29 @@ incoming mail automatically.  SmartList also needs procmail to operate.
 %setup -q
 
 %build
+(
+echo "---------------- INFORMATION ------------------------"
+echo target         %_target
+echo target_alias   %_target_alias
+echo target_cpu     %_target_cpu
+echo target_os      %_target_os
+echo target_vendor  %_target_vendor
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
+echo "------------------------------------------------------"
+) > %{name}-rpm.info
+(
+echo "NAME=%{name}"
+echo "Description=\"procmail Package\""
+echo "PROCMAIL_version=%{version}-%{release}"
+echo "ID=%{name}"
+echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
+echo "PACKAGE_BUGREPORT=\"'@email@'\""
+) > %{name}-release
 %configure --prefix=%{_prefix} --enable-sendmail-prog=%{_prefix}/bin/sendmail \
   --sysconfdir=/etc/indimail
 
 %install
-[ "$RPM_BUILD_ROOT" != "/" ] && %{__rm} -fr $RPM_BUILD_ROOT
+[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %{__make} -s %{?_smp_mflags}
 %if %{defined nodebug}
 %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
@@ -108,6 +128,11 @@ install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissio
 %endif
 %endif
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
+%{__mkdir_p} %{buildroot}%{sysconfdir}
+install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
+install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
+/bin/rm -f %{name}-rpm.info %{name}-release
+/bin/rm -f %{name}-rpm.info
 
 %files
 %defattr(-,root,root)
@@ -116,8 +141,9 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(755,root,root)                              %{_prefix}/bin/lockfile
 %attr(755,root,root)                              %{_prefix}/bin/formail
 %attr(755,root,root)                              %{_prefix}/bin/mailstat
-%attr(644,root,root) %config(noreplace)           %{sysconfdir}/procmail.perms
-%attr(644,root,root) %config(noreplace)           %{sysconfdir}/procmail-release
+%attr(644,root,root)                              %{sysconfdir}/procmail.perms
+%attr(644,root,root)                              %{sysconfdir}/procmail-release
+%attr(644,root,root)                              %{sysconfdir}/%{name}-rpm.info
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
@@ -140,11 +166,6 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 ### SCRIPTLET ###############################################################################
 %verifyscript
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %verify_permissions -e %{_prefix}/bin/procmail
@@ -152,11 +173,6 @@ fi
 %endif
 
 %post
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 %if 0%{?set_permissions:1} > 0

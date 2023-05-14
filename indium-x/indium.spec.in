@@ -1,6 +1,6 @@
 #
 #
-# $Id: indium.spec.in,v 1.28 2021-03-14 21:35:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: indium.spec.in,v 1.29 2023-05-14 09:49:08+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -37,12 +37,6 @@
 %endif
 %define nobwidget          1
 
-%if 0
-%if %{undefined nodebug}
-%global buildsubdir        ""
-%endif
-%endif
-
 %if %build_on_obs == 1
 %global packager @email@
 %endif
@@ -58,8 +52,8 @@ License: GPL-3.0+
 License: GPLv3
 %endif
 Group: System Environment/Base
-Source1:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
-Source2: %{name}-rpmlintrc
+Source0:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
+Source1: %{name}-rpmlintrc
 
 URL: https://github.com/mbhangui/indimail-virtualdomains
 AutoReq: Yes
@@ -79,8 +73,9 @@ BuildRequires: -post-build-checks
 
 Requires: coreutils grep /bin/sh glibc /usr/sbin/useradd /usr/sbin/groupadd
 Requires: bwidget tcl tk procps /usr/bin/awk indimail > 1.6
-BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
-Excludeos: windows 
+%if %build_on_obs == 1
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+%endif
 
 %description
 Indium provides a GUI for administering IndiMail and configuring
@@ -97,40 +92,19 @@ Fetchmail,
 Indium also provides Management of Virtual domains.
 
 %prep
-echo "---------------- INFORMATION ------------------------"
-echo target        %_target
-echo target_alias  %_target_alias
-echo target_cpu    %_target_cpu
-echo target_os     %_target_os
-echo target_vendor %_target_vendor
-echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist disttag %disttag libs %{_lib} %{_libdir}
-echo "------------------------------------------------------"
-
-for i in %{name}-%{version}
-do
-(
-if [ -d $i ] ; then
-  /bin/rm -rf $i
-fi
-if [ -f ../SOURCES/$i.tar.gz ] ; then
-  gunzip -c ../SOURCES/$i.tar.gz |tar xf -
-elif [ -f ../SOURCES/$i.tar.bz2 ] ; then
-  bzip2 -d -c ../SOURCES/$i.tar.bz2 |tar xf -
-else
-  echo "No Source Archive for $i"
-  exit 1
-fi
-if [ -d $i ] ; then
-  if [ -f %{name}-%{version}/patches/$i.patch ] ; then
-    # Copy for the SRPM
-    /bin/cp %{name}-%{version}/patches/$i.patch ../SOURCES
-  fi
-fi
-)
-done
+%setup -q
 
 %build
-ID=$(id -u)
+(
+echo "---------------- INFORMATION ------------------------"
+echo target         %_target
+echo target_alias   %_target_alias
+echo target_cpu     %_target_cpu
+echo target_os      %_target_os
+echo target_vendor  %_target_vendor
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
+echo "------------------------------------------------------"
+) > %{name}-rpm.info
 
 #### Stupid Mandriva ######################
 %if 0%{?mandriva_version} > 2009
@@ -143,28 +117,19 @@ ID=$(id -u)
 %endif
 %endif
 
-cd %{name}-%{version}
 %configure --prefix=%{_prefix} --libdir=%{_libdir} \
   --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
   --enable-shareddir=%{shareddir} \
   --mandir=%{mandir} --enable-mysqlprefix=/usr
+%{__make} %{?_smp_mflags}
 
 %install
-[ "$RPM_BUILD_ROOT" != "/" ] && /bin/rm -fr $RPM_BUILD_ROOT
-ID=$(id -u)
-for i in %{name}-%{version}
-do
-if [ -d $i ] ; then
-  cd $i
-  %{__make} -s %{?_smp_mflags}
+[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %if %{defined nodebug}
-  %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
+  %{__make} %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
 %else
-  %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install
+  %{__make} %{?_smp_mflags} DESTDIR=%{buildroot} install
 %endif
-  cd ..
-fi
-done
 for i in fbsql tai64
 do
   /bin/rm -f %{buildroot}%{_libdir}/lib"$i".la
@@ -177,7 +142,6 @@ if [ -f /usr/lib/tclConfig.sh ] ; then
 elif [ -f /usr/lib64/tclConfig.sh ] ; then
   . /usr/lib64/tclConfig.sh
 fi
-cd %{name}-%{version}
 if [ $TCL_VERSION -ne %{tcl_version} ] ; then
   echo "tcl version mismatch $TCL_VERSION != %{tcl_version}"
   exit 1
@@ -191,6 +155,10 @@ if [ -x /usr/bin/chrpath ] ; then
   /usr/bin/chrpath -d %{buildroot}%{libexecdir}/pwhelper
 fi
 %{__rm} -f %{buildroot}%{_libdir}/*.so
+%{__mkdir_p} %{buildroot}%{sysconfdir}
+install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
+install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
+/bin/rm -f %{name}-rpm.info %{name}-release
 
 %files
 %defattr(-, root, root,-)
@@ -452,7 +420,8 @@ fi
 %attr(644,root,root) %config(noreplace,missingok) %{sysconfdir}/default.profile
 %attr(644,root,root) %config(noreplace,missingok) %{sysconfdir}/filemanrc
 %attr(644,root,root) %config(noreplace,missingok) %{sysconfdir}/termdefs.txt
-%attr(644,root,root) %config(noreplace)           %{sysconfdir}/indium-release
+%attr(644,root,root)                              %{sysconfdir}/%{name}-release
+%attr(644,root,root)                              %{sysconfdir}/%{name}-rpm.info
 
 %clean
 %{__rm} -rf %{buildroot}

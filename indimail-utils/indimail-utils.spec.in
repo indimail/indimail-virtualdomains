@@ -94,12 +94,8 @@ Requires: coreutils grep /bin/sh glibc
 Conflicts: indimail < 3.2
 
 %if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-build
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %endif
-#
-# IndiMail is choosy and runs on reliable OS only
-#
-Excludeos: windows
 
 %description
 indimail-utils provides a package consisting of utilities like
@@ -139,7 +135,6 @@ echo target_alias   %_target_alias
 echo target_cpu     %_target_cpu
 echo target_os      %_target_os
 echo target_vendor  %_target_vendor
-echo Project        %{_project}
 echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
 echo "------------------------------------------------------"
 ) > %{name}-rpm.info
@@ -171,8 +166,9 @@ do
 done
 
 %install
+[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 cd %{name}-%{version}
-%{__mkdir_p} $RPM_BUILD_ROOT%{_prefix}
+%{__mkdir_p} %{buildroot}%{_prefix}
 for i in altermime-%{altermime_version} ripmime-%{ripmime_version} \
 fortune-%{fortune_version} mpack-%{mpack_version} flash-%{flash_version}
 do
@@ -242,8 +238,8 @@ fi
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/system.rc
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/system.menu
 %attr(644,root,root) %config(noreplace)           %{sysconfdir}/system.module
-%attr(644,root,root) %config(noreplace)           %{sysconfdir}/%{name}-release
-%attr(644,root,root) %config(noreplace)           %{sysconfdir}/%{name}-rpm.info
+%attr(644,root,root)                              %{sysconfdir}/%{name}-release
+%attr(644,root,root)                              %{sysconfdir}/%{name}-rpm.info
 
 # indimail binaries
 %attr(755,root,root)                    %{_prefix}/bin/altermime
@@ -413,11 +409,6 @@ fi
 
 ### SCRIPTLET ###############################################################################
 %verifyscript
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 
 # fix changelog for openSUSE buildservice
 %changelog

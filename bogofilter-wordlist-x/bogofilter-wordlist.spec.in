@@ -29,6 +29,7 @@ URL: http://www.indimail.org
 Source0:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 
 %if %build_on_obs == 1
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %if 0%{?suse_version}
 BuildRequires: -post-build-checks
 #!BuildIgnore: post-build-checks
@@ -47,16 +48,40 @@ bogofilter-wordlist provides SPAM database for bogofilter in Berkeley DB format
 %setup -q
 
 %build
+(
+echo "---------------- INFORMATION ------------------------"
+echo target         %_target
+echo target_alias   %_target_alias
+echo target_cpu     %_target_cpu
+echo target_os      %_target_os
+echo target_vendor  %_target_vendor
+echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
+echo "------------------------------------------------------"
+) > %{name}-rpm.info
+(
+echo "NAME=%{name}"
+echo "Description=\"bogofilter-wordlist Package\""
+echo "BOGOFILTER_WORDLIST_version=%{version}-%{release}"
+echo "ID=%{name}"
+echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
+echo "PACKAGE_BUGREPORT=\"'@email@'\""
+) > %{name}-release
 %configure --sysconfdir=%{sysconfdir}
-make %{?_smp_mflags}
+%{__make} %{?_smp_mflags}
 
 %install
-[ "$RPM_BUILD_ROOT" != "/" ] && /bin/rm -fr $RPM_BUILD_ROOT
-ID=$(id -u)
+[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %make_install
+%{__mkdir_p} %{buildroot}%{sysconfdir}
+install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
+install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
+/bin/rm -f %{name}-rpm.info %{name}-release
+/bin/rm -f %{name}-rpm.info
 
 %files
 %attr(0644,-,-) %config(noreplace)  %{sysconfdir}/wordlist.db
+%attr(644,root,root)                %{sysconfdir}/%{name}-release
+%attr(644,root,root)                %{sysconfdir}/%{name}-rpm.info
 
 %doc
 
