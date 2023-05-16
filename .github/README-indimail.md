@@ -150,6 +150,7 @@ Table of Contents
    * [Using Docker Engine to Run IndiMail / IndiMail-MTA](#using-docker-engine-to-run-indimail--indimail-mta)
    * [Installation &amp; Repositories](#installation--repositories)
       * [Installing Indimail using DNF/YUM/APT Repository](#installing-indimail-using-dnfyumapt-repository)
+      * [Binary Builds on openSUSE Build Service and Copr](#binary-builds-on-opensuse-build-service-and-copr)
       * [Docker / Podman Repository](#docker--podman-repository)
       * [GIT Repository](#git-repository)
    * [Support Information](#support-information)
@@ -5719,11 +5720,14 @@ You can get binary RPM / Debian packages at
 
 * [Stable](http://download.opensuse.org/repositories/home:/indimail/ "Stable Build Repository")
 * [Experimental](http://download.opensuse.org/repositories/home:/mbhangui/ "Experimental Build Repository")
+* [copr Releases](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail)
 
 If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories, depending on whether you want to install a stable or an experimental release, are
 
 * [Stable](https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail "Stable Build Repository")
 * [Experimental](https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail "Experimental Build Repository")
+* [copr Releases](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail). The copr repository can be enabled by running the command 
+  `$ sudo dnf copr enable cprogrammer/indimail`
 
 ```
 Currently, the list of supported distributions for IndiMail is
@@ -5750,10 +5754,10 @@ Currently, the list of supported distributions for IndiMail is
           o Fedora 37
           o Fedora 38
           o Red Hat Enterprise Linux 7
-          o Red Hat Enterprise Linux 8
-          o Red Hat Enterprise Linux 9
-          o EPEL 8
-          o EPEL 9
+          o Red Hat Enterprise Linux 8 +
+          o Red Hat Enterprise Linux 9 +
+          o EPEL 8 +
+          o EPEL 9 +
           o Scientific Linux 7
           o CentOS 7
           o CentOS 8
@@ -5766,10 +5770,8 @@ Currently, the list of supported distributions for IndiMail is
           o AlmaLinux 8
           o AlmaLinux 9
 
-    Some of the above distributions are available on copr - https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/).
-    You can install indimail packages on a redhat/fedora system by doing
-
-    $ sudo dnf copr enable cprogrammer/indimail
+          +: Some of the above Red Hat flavoured distributions are available
+             only on copr (RHEL 8, RHEL9, EPEL9, EPEL9)
 
     * Debian
           o Debian 10.0
@@ -5780,6 +5782,51 @@ Currently, the list of supported distributions for IndiMail is
           o Ubuntu 20.04
           o Ubuntu 22.04
 ```
+
+## Binary Builds on openSUSE Build Service and Copr
+
+**[Build Status on](https://build.opensuse.org/project/monitor/home:mbhangui) [Open Build Service](https://build.opensuse.org/project/show/home:mbhangui)**
+
+[![indimail-mta](https://build.opensuse.org/projects/home:mbhangui/packages/indimail-mta/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indimail-mta)
+[![daemontools](https://build.opensuse.org/projects/home:mbhangui/packages/daemontools/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/daemontools)
+[![ucspi-tcp](https://build.opensuse.org/projects/home:mbhangui/packages/ucspi-tcp/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/ucspi-tcp)
+[![ezmlm-idx](https://build.opensuse.org/projects/home:mbhangui/packages/ezmlm-idx/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/ezmlm-idx)
+[![tinydnssec](https://build.opensuse.org/projects/home:mbhangui/packages/tinydnssec/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/tinydnssec)
+[![indimail](https://build.opensuse.org/projects/home:mbhangui/packages/indimail/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indimail)
+[![indimail-access](https://build.opensuse.org/projects/home:mbhangui/packages/indimail-access/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indimail-access)
+[![indimail-auth](https://build.opensuse.org/projects/home:mbhangui/packages/indimail-auth/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indimail-auth)
+[![indimail-spamfilter](https://build.opensuse.org/projects/home:mbhangui/packages/indimail-spamfilter/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indimail-spamfilter)
+[![bogofilter-wordlist](https://build.opensuse.org/projects/home:mbhangui/packages/bogofilter-wordlist/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/bogofilter-wordlist)
+[![indimail-utils](https://build.opensuse.org/projects/home:mbhangui/packages/indimail-utils/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indimail-utils)
+[![iwebadmin](https://build.opensuse.org/projects/home:mbhangui/packages/iwebadmin/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/iwebadmin)
+[![ircube](https://build.opensuse.org/projects/home:mbhangui/packages/ircube/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/ircube)
+[![logalert](https://build.opensuse.org/projects/home:mbhangui/packages/logalert/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/logalert)
+[![procmail](https://build.opensuse.org/projects/home:mbhangui/packages/procmail/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/procmail)
+[![indium](https://build.opensuse.org/projects/home:mbhangui/packages/indium/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indium)
+[![libqmail](https://build.opensuse.org/projects/home:mbhangui/packages/libqmail/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/libqmail)
+[![libdkim](https://build.opensuse.org/projects/home:mbhangui/packages/libdkim/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/libdkim)
+[![libsrs2](https://build.opensuse.org/projects/home:mbhangui/packages/libsrs2/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/libsrs2)
+
+**[Build Status on](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/monitor/) [copr](https://copr.fedorainfracloud.org/coprs/)**
+
+[![indimail-mta](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-mta/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-mta/)
+[![daemontools](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/daemontools/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/daemontools/)
+[![ucspi-tcp](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/ucspi-tcp/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/ucspi-tcp/)
+[![ezmlm-idx](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/ezmlm-idx/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/ezmlm-idx/)
+[![tinydnssec](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/tinydnssec/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/tinydnssec/)
+[![indimail](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail/)
+[![indimail-access](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-access/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-access/)
+[![indimail-auth](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-auth/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-auth/)
+[![indimail-spamfilter](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-spamfilter/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-spamfilter/)
+[![bogofilter-wordlist](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/bogofilter-wordlist/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/bogofilter-wordlist/)
+[![indimail-utils](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-utils/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-utils/)
+[![indium](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indium/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indium/)
+[![ircube](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/ircube/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/ircube/)
+[![iwebadmin](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/iwebadmin/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/iwebadmin/)
+[![logalert](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/logalert/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/logalert/)
+[![libqmail](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libqmail/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libqmail/)
+[![libdkim](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libdkim/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libdkim/)
+[![libsrs2](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libsrs2/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libsrs2/)
 
 ## Docker / Podman Repository
 
