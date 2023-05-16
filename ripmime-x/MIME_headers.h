@@ -65,7 +65,7 @@
 #define _MIMEH_FOUND_FROM 100
 
 #define _MIMEH_STRLEN_MAX 1023
-#define _MIMEH_FILENAMELEN_MAX 128
+#define _MIMEH_FILENAMELEN_MAX 1034
 #define _MIMEH_CONTENT_TYPE_MAX 128
 #define _MIMEH_SUBJECTLEN_MAX 128
 #define _MIMEH_CONTENT_DESCRIPTION_MAX 128
@@ -93,14 +93,14 @@
 
 struct MIMEH_header_info
 {
-	char scratch[_MIMEH_STRLEN_MAX +1];
+	char scratch[_MIMEH_FILENAMELEN_MAX +1];
 	int content_type;
 	char content_type_string[ _MIMEH_CONTENT_TYPE_MAX +1 ];
 	char content_description_string[ _MIMEH_CONTENT_DESCRIPTION_MAX +1 ];
 	char boundary[_MIMEH_STRLEN_MAX +1];
 	int boundary_located;
 	char subject[_MIMEH_SUBJECTLEN_MAX +1];
-	char filename[_MIMEH_FILENAMELEN_MAX +1];
+	char filename[_MIMEH_FILENAMELEN_MAX];
 	char name[_MIMEH_STRLEN_MAX +1];
 
 /** 20041217-1601:PLD: New header fields to keep **/
@@ -123,7 +123,7 @@ struct MIMEH_header_info
 	char charset[_MIMEH_STRLEN_MAX +1];
 	int format;
 	int file_has_uuencode;
-	char uudec_name[_MIMEH_FILENAMELEN_MAX +1];	// UUDecode name. This is a post-decode information field.
+	char uudec_name[_MIMEH_FILENAMELEN_MAX];	// UUDecode name. This is a post-decode information field.
 	int current_recursion_level;
 
 	// Malformed email reporting

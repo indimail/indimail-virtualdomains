@@ -4,7 +4,7 @@ AC_INIT([ripmime],m4_normalize(m4_include([conf-version])),[Manvendra Bhangui in
 AC_PREREQ([2.69])
 AC_CONFIG_SRCDIR([uuencode.c])
 AC_CONFIG_HEADERS([config.h])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
 AC_CANONICAL_HOST
 
 # Checks for programs.

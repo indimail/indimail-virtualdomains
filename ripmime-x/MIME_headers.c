@@ -59,10 +59,9 @@ struct MIMEH_globals {
 
 	int doubleCR;
 	int doubleCR_save;
-	char doubleCRname[_MIMEH_STRLEN_MAX +1];
+	char doubleCRname[_MIMEH_STRLEN_MAX];
 
-	char appledouble_filename[_MIMEH_STRLEN_MAX +1];
-
+	char appledouble_filename[_MIMEH_FILENAMELEN_MAX - 10];
 	char subject[_MIMEH_STRLEN_MAX +1];
 
 	char *headerline;
@@ -785,7 +784,7 @@ int MIMEH_save_doubleCR( FFGET_FILE *f )
 
 	do {
 		glb.doubleCR_count++;
-		snprintf(glb.doubleCRname,_MIMEH_STRLEN_MAX,"%s/doubleCR.%d",glb.output_dir,glb.doubleCR_count);
+		snprintf(glb.doubleCRname,_MIMEH_STRLEN_MAX+30,"%s/doubleCR.%d",glb.output_dir,glb.doubleCR_count);
 	}
 	while (stat(glb.doubleCRname, &st) == 0);
 
@@ -2515,7 +2514,7 @@ int MIMEH_parse_contentdisposition( char *header_name, char *header_value, struc
 			// Handle situations where we'll need the filename for the future.
 			if ( hinfo->content_type == _CTYPE_MULTIPART_APPLEDOUBLE )
 			{
-				snprintf( glb.appledouble_filename, sizeof(glb.appledouble_filename), "%s", hinfo->filename );	
+				snprintf( glb.appledouble_filename, sizeof(glb.appledouble_filename) + 10, "%s", hinfo->filename );	
 				if (MIMEH_DNORMAL) LOGGER_log("%s:%d:MIMEH_parse_contentdisposition:DEBUG: Setting appledouble filename to: '%s'",FL,glb.appledouble_filename);
 			}
 
@@ -2887,8 +2886,8 @@ int MIMEH_headers_process( struct MIMEH_header_info *hinfo, char *headers )
 	// Final analysis on our headers:
 	if ( hinfo->content_type == _CTYPE_MULTIPART_APPLEDOUBLE )
 	{
-		char tmp[128];
-		snprintf( tmp, sizeof(tmp), "mac-%s", hinfo->filename );
+		char tmp[1040];
+		snprintf( tmp, 1038, "mac-%s", hinfo->filename );
 		snprintf( hinfo->filename, sizeof(hinfo->filename), "%s", tmp );
 		snprintf( hinfo->name, sizeof(hinfo->name), "%s", tmp );
 	}
@@ -2957,7 +2956,7 @@ int MIMEH_headers_get( struct MIMEH_header_info *hinfo, FFGET_FILE *f )
 
 	// Initialise header defects array.
 	hinfo->header_defect_count = 0;
-	memset(hinfo->defects, 0, _MIMEH_DEFECT_ARRAY_SIZE);
+	memset(hinfo->defects, 0, sizeof(int) * _MIMEH_DEFECT_ARRAY_SIZE);
 
 	snprintf( hinfo->content_type_string, _MIMEH_CONTENT_TYPE_MAX , "text/plain" ); 
 

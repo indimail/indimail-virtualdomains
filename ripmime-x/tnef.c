@@ -329,7 +329,7 @@ Errors:
 int save_attach_data(char *title, uint8 *tsp, uint32 size)
 {
 	FILE *out;
-	char filename[1024];
+	char filename[1026];
 	size_t bc;
 
 	snprintf(filename, sizeof(filename),"%s/%s", TNEF_glb.path, title );

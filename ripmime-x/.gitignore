@@ -19,3 +19,4 @@ stamp-h1
 conf-release
 config.guess
 config.sub
+.deps

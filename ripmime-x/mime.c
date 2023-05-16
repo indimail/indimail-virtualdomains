@@ -190,7 +190,7 @@ static struct MIME_globals glb;
 
 //char OK[]="OKAY";
 
-static char scratch[1024];
+static char scratch[1035];
 
 
 
@@ -1043,12 +1043,12 @@ int MIME_test_uniquename( char *path, char *fname, int method )
 
 	struct stat buf;
 
-	char newname[_MIME_STRLEN_MAX +1];
+	char newname[_MIMEH_FILENAMELEN_MAX +4];
 	char scr[_MIME_STRLEN_MAX +1]; /** Scratch var **/
 	char *frontname, *extention;
 
 	int cleared = 0;
-	int count = 1;
+	short count = 1;
 
 	if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_test_uniquename:DEBUG: Start (%s)",FL,fname);
 
@@ -1088,7 +1088,7 @@ int MIME_test_uniquename( char *path, char *fname, int method )
 			else
 				if (method == _MIME_RENAME_METHOD_INFIX)
 				{
-					snprintf(newname,_MIME_STRLEN_MAX,"%s/%s_%d.%s",path,frontname,count,extention);
+					snprintf(newname,_MIMEH_FILENAMELEN_MAX,"%s/%s_%d.%s",path,frontname,count,extention);
 				}
 				else
 					if (method == _MIME_RENAME_METHOD_POSTFIX)
@@ -1237,7 +1237,7 @@ Errors:
 int MIME_decode_TNEF( char *unpackdir, struct MIMEH_header_info *hinfo, int keep )
 {
 	int result=0;
-	char fullpath[1024];
+	char fullpath[1035];
 
 	snprintf(fullpath,sizeof(fullpath),"%s/%s",unpackdir,hinfo->filename);
 
@@ -1322,7 +1322,7 @@ Errors:
 int MIME_decode_raw( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *hinfo, int keep )
 {
 	int result = 0;
-	char fullpath[1024];
+	char fullpath[1035];
 	int bufsize=1024;
 	char *buffer = malloc((bufsize +1)*sizeof(char));
 	size_t readcount;
@@ -1389,7 +1389,7 @@ int MIME_decode_raw( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *h
 
 	if (file_has_uuencode)
 	{
-		char full_decode_path[512];
+		char full_decode_path[1035];
 
 		snprintf(full_decode_path,sizeof(full_decode_path),"%s/%s",unpackdir,hinfo->filename);
 		if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_decode_raw:DEBUG: Decoding UUencoded data\n",FL);
@@ -1429,7 +1429,7 @@ int MIME_decode_raw( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *h
 			if (strcasecmp(hinfo->uudec_name,"winmail.dat")==0)
 			{
 				if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_decode_raw:DEBUG: Decoding TNEF format\n",FL);
-				snprintf(hinfo->filename, 128, "%s", hinfo->uudec_name);
+				snprintf(hinfo->filename, sizeof(hinfo->filename), "%s", hinfo->uudec_name);
 				MIME_decode_TNEF( unpackdir, hinfo, keep);
 			}
 			else LOGGER_log("%s:%d:MIME_decode_raw:WARNING: hinfo has been clobbered.\n",FL);
@@ -1458,7 +1458,7 @@ int MIME_decode_text( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *
 	FILE *of; 							// output file
 	int linecount = 0;  				// The number of lines
 	int file_has_uuencode = 0;			// Flag to indicate this text has UUENCODE in it
-	char fullfilename[1024]=""; 	// Filename of the output file
+	char fullfilename[1035]=""; 	// Filename of the output file
 	char line[1024]; 					// The input lines from the file we're decoding
 	char *get_result = &line[0];
 	int lastlinewasboundary = 0;
@@ -1571,9 +1571,9 @@ int MIME_decode_text( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *
 	//
 	if (file_has_uuencode)
 	{
-		char ffname[256];
+		char ffname[1035];
 
-		snprintf(ffname,256,"%s/%s", unpackdir, hinfo->filename);
+		snprintf(ffname,sizeof(ffname),"%s/%s", unpackdir, hinfo->filename);
 
 		// PLD-20040627-1212
 		// Make sure uudec_name is blank too
@@ -1623,7 +1623,7 @@ int MIME_decode_text( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *
 		if (strncasecmp(hinfo->uudec_name,"winmail.dat",11)==0)
 		{
 			if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_decode_text:DEBUG: Decoding TNEF format\n",FL);
-			snprintf(hinfo->filename, 128, "%s", hinfo->uudec_name);
+			snprintf(hinfo->filename, sizeof(hinfo->filename), "%s", hinfo->uudec_name);
 			MIME_decode_TNEF( unpackdir, hinfo, keep );
 		}
 
@@ -1670,7 +1670,7 @@ int MIME_decode_64( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *hi
 	long int bytecount=0; /* The total file decoded size */
 	char output[3]; /* The 4->3 byte output array */
 	char input[4]; /* The 4->3 byte input array */
-	char fullMIME_filename[_MIME_STRLEN_MAX]=""; /* Full Filename of output file */
+	char fullMIME_filename[_MIMEH_FILENAMELEN_MAX + 1]=""; /* Full Filename of output file */
 
 	// Write Buffer routine
 
@@ -1685,7 +1685,7 @@ int MIME_decode_64( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info *hi
 
 	/* generate the MIME_filename, and open it up... */
 	if (glb.unique_names) MIME_test_uniquename( unpackdir, hinfo->filename, glb.rename_method );
-	snprintf(fullMIME_filename,_MIME_STRLEN_MAX,"%s/%s",unpackdir,hinfo->filename);
+	snprintf(fullMIME_filename,sizeof(fullMIME_filename),"%s/%s",unpackdir,hinfo->filename);
 
 
 	//of = fopen(fullMIME_filename,"wb");
@@ -2385,7 +2385,7 @@ Changes:
 int MIME_generate_multiple_hardlink_filenames(struct MIMEH_header_info *hinfo, char *unpackdir)
 {
 	char *name;
-	char oldname[1024];
+	char oldname[1035];
 
 	if (glb.multiple_filenames == 0) return 0;
 
@@ -2898,7 +2898,7 @@ int MIME_handle_multipart( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_i
 			// with the directory we unpacked to.
 
 			snprintf(scratch,sizeof(scratch),"%s/%s",unpackdir, h->filename);
-			snprintf(h->filename,sizeof(h->filename),"%s",scratch);
+			snprintf(h->filename,sizeof(h->filename) + 1,"%s",scratch);
 
 			//result = MIME_unpack_single( unpackdir, h->filename, current_recursion_level +1, ss);
 			result = MIME_unpack_single( unpackdir, h->filename, current_recursion_level, ss );
@@ -2983,7 +2983,7 @@ int MIME_handle_rfc822( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info
 
 			if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_handle_rfc822:DEBUG: Now attempting to extract contents of '%s'",FL,h->filename);
 			snprintf(scratch,sizeof(scratch),"%s/%s",unpackdir, h->filename);
-			snprintf(h->filename,sizeof(h->filename),"%s",scratch);
+			snprintf(h->filename,sizeof(h->filename)+1,"%s",scratch);
 
 			if (MIME_DNORMAL) LOGGER_log("%s:%d:MIME_handle_rfc822:DEBUG: Now attempting to extract contents of '%s'",FL,scratch);
 			result = MIME_unpack_single( unpackdir, scratch, current_recursion_level, ss );
@@ -3059,8 +3059,8 @@ int MIME_convert_charset(char *unpackdir, struct MIMEH_header_info *hinfo)
 
 	FILE *ifile;                  // Output file
 	FILE *ofile;                  // Output file
-  char ifullfilename[1024]="";  // Filename of the input file
-  char ofullfilename[1024]="";  // Filename of the output file
+  char ifullfilename[1040]="";  // Filename of the input file
+  char ofullfilename[1040]="";  // Filename of the output file
 	char line[1024];              // The input lines from the file we're decoding
 	int result = 0;
   char *get_result = &line[0];
@@ -3221,7 +3221,7 @@ int MIME_unpack_stage2( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info
 	//		this will give us the 'main' subject of the entire email and prevent
 	//		and subsequent subjects from clobbering it.
 	//if (glb.subject[0] == '\0') snprintf(glb.subject, _MIME_STRLEN_MAX, "%s", h->subject );
-	if ((strlen(glb.subject) < 1)&&(h->subject != NULL)&&(strlen(h->subject) > 0))
+	if ((strlen(glb.subject) < 1)&&(strlen(h->subject) > 0))
 	{
 		snprintf(glb.subject, sizeof(glb.subject), "%s", h->subject );
 	}
@@ -3460,7 +3460,7 @@ int MIME_unpack_stage2( FFGET_FILE *f, char *unpackdir, struct MIMEH_header_info
 								// with the directory we unpacked to.
 
 								snprintf(scratch,sizeof(scratch),"%s/%s",unpackdir, h->filename);
-								snprintf(h->filename,sizeof(h->filename),"%s",scratch);
+								snprintf(h->filename,sizeof(h->filename) + 1,"%s",scratch);
 								//result = MIME_unpack_single( unpackdir, h->filename, current_recursion_level +1, ss);
 								result = MIME_unpack_single( unpackdir, h->filename, current_recursion_level,ss );
 							}

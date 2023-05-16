@@ -33,4 +33,3 @@ install-data-hook:
 	for f in $(doc_list); do \
 		$(INSTALL_DATA) $$f $(DESTDIR)@datarootdir@/doc/$$f || exit 1 ;\
 	done
-AUTOMAKE_OPTIONS = foreign no-dependencies
