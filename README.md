@@ -919,9 +919,9 @@ If you need to have indimail on multiple machines, you can build binary packages
 
 You can also download pre-built binary packages from [openSUSE Build Service](https://build.opensuse.org/), described in the chapter [Binary Builds on OBS](#binary-builds-on-opensuse-build-service).
 
-NOTE: binary package for FreeBSD and OSX is in my TODO list.
+NOTE: binary package for FreeBSD and OSX is in my TODO list and I need help to figure this out.
 
-# Binary Builds on openSUSE Build Service
+# Binary Builds on openSUSE Build Service and Copr
 
 **[Build Status on](https://build.opensuse.org/project/monitor/home:mbhangui) [Open Build Service](https://build.opensuse.org/project/show/home:mbhangui)**
 
@@ -949,15 +949,30 @@ NOTE: binary package for FreeBSD and OSX is in my TODO list.
 [![procmail](https://build.opensuse.org/projects/home:mbhangui/packages/procmail/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/procmail)
 [![indium](https://build.opensuse.org/projects/home:mbhangui/packages/indium/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indium)
 
+**[Build Status on](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/monitor/) [copr](https://copr.fedorainfracloud.org/coprs/)**
+
+[![indimail](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail/)
+[![indimail-access](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-access/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-access/)
+[![indimail-auth](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-auth/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-auth/)
+[![indimail-spamfilter](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-spamfilter/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-spamfilter/)
+[![indimail-utils](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-utils/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-utils/)
+[![indium](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indium/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indium/)
+[![ircube](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/ircube/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/ircube/)
+[![iwebadmin](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/iwebadmin/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/iwebadmin/)
+[![logalert](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/logalert/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/logalert/)
+
 You can get binary RPM / Debian packages at
 
 * [Stable Releases](http://download.opensuse.org/repositories/home:/indimail/)
 * [Experimental Releases](http://download.opensuse.org/repositories/home:/mbhangui/)
+* [copr Releases](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail)
 
-If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories, depending on whether you want to install a stable or an experimental release, are
+If you want to use DNF / YUM / apt-get, the corresponding install instructions for the three repositories, depending on whether you want to install a stable, an experimental or copr release, are
 
 * [Stable](https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail)
 * [Experimental](https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail)
+* [copr Releases](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail). The copr repository can be enabled by running the command 
+  `$ sudo dnf copr enable cprogrammer/indimail`
 
 NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to install the additional software
 
@@ -991,10 +1006,10 @@ Currently, the list of supported binary distributions for IndiMail is
           o Fedora 37
           o Fedora 38
           o Red Hat Enterprise Linux 7
-          o Red Hat Enterprise Linux 8
-          o Red Hat Enterprise Linux 9
-          o EPEL 8
-          o EPEL 9
+          o Red Hat Enterprise Linux 8 +
+          o Red Hat Enterprise Linux 9 +
+          o EPEL 8 +
+          o EPEL 9 +
           o Scientific Linux 7
           o CentOS 7
           o CentOS 8
@@ -1007,10 +1022,8 @@ Currently, the list of supported binary distributions for IndiMail is
           o AlmaLinux 8
           o AlmaLinux 9
 
-    Some of the above distributions are available on copr - https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/).
-    You can install indimail packages on a redhat/fedora system by doing
-
-    $ sudo dnf copr enable cprogrammer/indimail
+          +: Some of the above Red Hat flavoured distributions are available
+             only on copr (RHEL 8, RHEL9, EPEL9, EPEL9)
 
     * Debian
           o Debian 10.0
