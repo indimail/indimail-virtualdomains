@@ -297,16 +297,14 @@ char *PLD_strtok( struct PLD_strtok *st, char *line, char *delimeters )
 
 	result = st->start;
 
-	if ((st->start)&&(st->start != '\0'))
-	{
-		stop = strpbrk( st->start, delimeters ); /* locate our next delimeter */
+	if (st->start) {
+		stop = strpbrk(st->start, delimeters); /* locate our next delimeter */
 
 		// If we found a delimeter, then that is good.  We must now break the string here
 		// and don't forget to store the character which we stopped on.  Very useful bit
 		// of information for programs which process expressions.
 
-		if (stop)
-		{
+		if (stop) {
 
 			// Store our delimeter.
 
@@ -334,20 +332,19 @@ char *PLD_strtok( struct PLD_strtok *st, char *line, char *delimeters )
 				else dc++;
 			} // While
 
-			if (*stop == '\0') st->start = NULL;
-			else st->start = stop;
+			if (*stop == '\0')
+				st->start = NULL;
+			else
+				st->start = stop;
 
-		}
-		else {
+		} else {
 			st->start = NULL;
 			st->delimeter = '\0';
 		}
-	}
-	else  {
+	} else  {
 		st->start = NULL;
 		result = NULL;
 	}
-
 
 	return result;
 }

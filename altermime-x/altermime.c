@@ -31,7 +31,7 @@ char ALTERMIMEAPP_USAGE[]="altermime --input=<input mime pack>   ( --input=- for
 "	[--pretext=<pretext file>]\n"
 "	[--pretext-html=<pretext HTML file>]\n"
 #endif
-"  [--force-into-b64]\n"
+"	[--force-into-b64]\n"
 "	[--force-for-bad-html]\n"
 "	[--multipart-insert]\n"
 "	[--remove=<remove file name (regex)>] (if filename contains a /, matches on mime-type )\n"

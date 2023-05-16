@@ -46,15 +46,13 @@ int qp_encode( char *out, size_t out_size, char *in, size_t in_size )
 		char charout[4];
 		int charout_size=0;
 
-		if (lineend != '\0') {
-			if (linestart == NULL) {
+		if (lineend != NULL) {
+			if (linestart == NULL)
 				linestart = in;
-			} else {
+			else
 				linestart = lineend;
-			}
 
-			lineend = strstr(linestart, CRLF);
-			if (lineend == NULL) {
+			if ((lineend = strstr(linestart, CRLF)) == NULL) {
 				QPD fprintf(stdout,"No CRLF found, setting line-end to end of the input\n");
 			  	lineend = in +in_size;
 			} else {

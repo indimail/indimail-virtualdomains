@@ -59,10 +59,9 @@ struct MIMEH_globals {
 
 	int doubleCR;
 	int doubleCR_save;
-	char doubleCRname[_MIMEH_STRLEN_MAX +1];
+	char doubleCRname[_MIMEH_STRLEN_MAX];
 
-	char appledouble_filename[_MIMEH_STRLEN_MAX +1];
-
+	char appledouble_filename[_MIMEH_FILENAMELEN_MAX - 10];
 	char subject[_MIMEH_STRLEN_MAX +1];
 
 	char *headerline;
@@ -72,7 +71,7 @@ struct MIMEH_globals {
 	int test_mailbox;
 	int debug;
 	int webform;
-	int doubleCR_count;
+	short doubleCR_count;
 	int header_fix;
 	int verbose;
 	int verbose_contenttype;
@@ -151,7 +150,7 @@ int MIMEH_init( void )
 	glb.verbose_contenttype = 0;
 	glb.output_dir[0]='\0';
 	glb.doubleCRname[0]='\0';
-	glb.appledouble_filename[0]='\0';
+	glb.appledouble_filename[0] = '\0';
 	glb.header_longsearch=0;
 	glb.longsearch_limit=1;
 
@@ -785,7 +784,7 @@ int MIMEH_save_doubleCR( FFGET_FILE *f )
 
 	do {
 		glb.doubleCR_count++;
-		snprintf(glb.doubleCRname,_MIMEH_STRLEN_MAX,"%s/doubleCR.%d",glb.output_dir,glb.doubleCR_count);
+		snprintf(glb.doubleCRname,_MIMEH_STRLEN_MAX + 30,"%s/doubleCR.%d",glb.output_dir,glb.doubleCR_count);
 	}
 	while (stat(glb.doubleCRname, &st) == 0);
 
@@ -2005,12 +2004,10 @@ int MIMEH_parse_contenttype( char *header_name, char *header_value, struct MIMEH
 			hinfo->content_type = _CTYPE_APPLICATION_APPLEFILE;
 			if ( hinfo->filename[0] == '\0' ) 
 			{
-				if (strlen(glb.appledouble_filename)>0)
-				{
-					snprintf(hinfo->filename, sizeof(hinfo->filename), "%s.applemeta", glb.appledouble_filename );
-				} else {
-					snprintf(hinfo->filename, sizeof(hinfo->filename), "applefile");
-				}
+				if (glb.appledouble_filename[0] == '\0')
+					snprintf(hinfo->filename, sizeof(hinfo->filename), "%s.applemeta", glb.appledouble_filename);
+				else
+					snprintf(hinfo->filename, sizeof(hinfo->filename), "%s", "applefile");
 			}
 		}
 		else hinfo->content_type = _CTYPE_UNKNOWN;
@@ -2125,7 +2122,7 @@ int MIMEH_parse_contenttype( char *header_name, char *header_value, struct MIMEH
 						}
 
 						if ( hinfo->filename[0] == '\0' ) {
-							snprintf( hinfo->filename, sizeof(hinfo->filename), "%s", hinfo->name );
+							snprintf(hinfo->filename, sizeof(hinfo->filename), "%s", hinfo->name );
 						}
 					} /* If the file name doesn't already exist in the stack */
 
@@ -2239,7 +2236,7 @@ int MIMEH_parse_contentlocation( char *header_name, char *header_value, struct M
 		{
 			if (MIMEH_DNORMAL) LOGGER_log("%s:%d:MIME_parse_contentlocation:DEBUG: filename = %s\n", FL, p);
 			snprintf(hinfo->name, sizeof(hinfo->name),"%s",p);
-			snprintf(hinfo->filename, sizeof(hinfo->name),"%s",p);
+			snprintf(hinfo->filename, sizeof(hinfo->filename), "%s",p);
 			FNFILTER_filter(hinfo->filename, _MIMEH_FILENAMELEN_MAX);
 			SS_push(&(hinfo->ss_filenames), hinfo->filename, strlen(hinfo->filename));
 
@@ -2491,14 +2488,16 @@ int MIMEH_parse_contentdisposition( char *header_name, char *header_value, struc
 
 			if ( hinfo->filename[0] == '\0' ) 
 			{
-				snprintf( hinfo->filename, sizeof(hinfo->filename), "%s", hinfo->name );
+				snprintf(hinfo->filename, sizeof(hinfo->filename), "%s", hinfo->name );
 			}
 
 			// Handle situations where we'll need the filename for the future.
 			if ( hinfo->content_type == _CTYPE_MULTIPART_APPLEDOUBLE )
 			{
-				snprintf( glb.appledouble_filename, sizeof(glb.appledouble_filename), "%s", hinfo->filename );	
-				if (MIMEH_DNORMAL) LOGGER_log("%s:%d:MIMEH_parse_contentdisposition:DEBUG: Setting appledouble filename to: '%s'",FL,glb.appledouble_filename);
+				snprintf( glb.appledouble_filename, sizeof(glb.appledouble_filename), "%s", hinfo->filename );
+				if (MIMEH_DNORMAL)
+					LOGGER_log("%s:%d:MIMEH_parse_contentdisposition:DEBUG: Setting appledouble filename to: '%s'",
+							FL,glb.appledouble_filename);
 			}
 
 		} // If the header-value contained ;'s ( indicating parameters )
@@ -2867,10 +2866,10 @@ int MIMEH_headers_process( struct MIMEH_header_info *hinfo, char *headers )
 	// Final analysis on our headers:
 	if ( hinfo->content_type == _CTYPE_MULTIPART_APPLEDOUBLE )
 	{
-		char tmp[128];
-		snprintf( tmp, sizeof(tmp), "mac-%s", hinfo->filename );
-		snprintf( hinfo->filename, sizeof(hinfo->filename), "%s", tmp );
-		snprintf( hinfo->name, sizeof(hinfo->name), "%s", tmp );
+		char tmp[1041];
+		snprintf(tmp, sizeof(tmp), "mac-%s", hinfo->filename );
+		snprintf(hinfo->filename, sizeof(hinfo->filename), "%s", tmp);
+		snprintf(hinfo->name, sizeof(hinfo->name), "%s", tmp);
 	}
 
 	// PLD:20031205
@@ -2923,13 +2922,13 @@ int MIMEH_headers_get( struct MIMEH_header_info *hinfo, FFGET_FILE *f )
 {
 	int result = 0;
 
-	// Setup some basic defaults 
+	/* Setup some basic defaults */
 	hinfo->filename[0] = '\0';
 	hinfo->name[0] = '\0';
 	hinfo->content_type = _CTYPE_UNKNOWN;
 	hinfo->subject[0] = '\0';
 
-	// 20040116-1234:PLD - added to appease valgrind
+	/* 20040116-1234:PLD - added to appease valgrind */
 	hinfo->content_disposition = 0;
 	hinfo->content_transfer_encoding = 0;
 	hinfo->boundary_located = 0;
@@ -2937,16 +2936,13 @@ int MIMEH_headers_get( struct MIMEH_header_info *hinfo, FFGET_FILE *f )
 	hinfo->crlf_count=0;
 	hinfo->crcr_count=0;
 	hinfo->lf_count=0;
-	snprintf(hinfo->delimeter,sizeof(hinfo->delimeter),"\r\n");
-
-	// Initialise header defects array.
+	/* Initialise header defects array. */
 	hinfo->header_defect_count = 0;
-	memset(hinfo->defects, 0, _MIMEH_DEFECT_ARRAY_SIZE);
-
+	memset(hinfo->defects, 0, sizeof(int) * _MIMEH_DEFECT_ARRAY_SIZE);
+	snprintf(hinfo->delimeter,sizeof(hinfo->delimeter),"\r\n");
 	snprintf( hinfo->content_type_string, _MIMEH_CONTENT_TYPE_MAX , "text/plain" ); 
 
-
-	// Read from the file, the headers we need
+	/* Read from the file, the headers we need */
 	FFGET_set_watch_SDL(1);
 	result = MIMEH_read_headers(hinfo, f);
 	FFGET_set_watch_SDL(0);
