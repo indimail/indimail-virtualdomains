@@ -28,9 +28,11 @@ License: GPLv3
 URL: http://www.indimail.org
 Source0:  http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 
+BuildRequires: rpm wget bzip2 make coreutils grep
 %if %build_on_obs == 1
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %if 0%{?suse_version}
+BuildArch: noarch
 BuildRequires: -post-build-checks
 #!BuildIgnore: post-build-checks
 #!BuildIgnore: brp-check-suse
