@@ -213,7 +213,7 @@ if [ -d courier-imap-%{courier_version} ] ; then
     --datarootdir=%{shareddir} --with-certsdir=%{sysconfdir}/certs \
     --with-mailer=%{_prefix}/bin/sendmail --disable-root-check --with-redhat \
     --without-userdb --without-authcustom --without-authchangepwdir \
-    --without-authgeneric --with-authshadow --with-authpam --with-authpwd
+    --without-authgeneric --with-authshadow --with-authpam --without-authpwd
   cd ..
 fi
 
@@ -359,7 +359,9 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/pop3login
 %attr(755,root,root)                    %{_prefix}/sbin/sharedindexinstall
 %attr(755,root,root)                    %{_prefix}/sbin/sharedindexsplit
+%if 0
 %attr(755,root,root)                    %{libexecdir}/imapmodules/authpwd
+%endif
 
 # setuid binary
 %if 0%{?suse_version} >= 1120
@@ -431,7 +433,9 @@ done
 %attr(0644,root,root) %{mandir}/man7/maildropex.7.gz
 %attr(0644,root,root) %{mandir}/man7/authlib.7.gz
 %attr(0644,root,root) %{mandir}/man7/authshadow.7.gz
+%if 0
 %attr(0644,root,root) %{mandir}/man7/authpwd.7.gz
+%endif
 %attr(0644,root,root) %{mandir}/man7/authindi.7.gz
 %attr(0644,root,root) %{mandir}/man7/authpam.7.gz
 %attr(0644,root,root) %{mandir}/man7/maildirquota.7.gz
