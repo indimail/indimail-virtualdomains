@@ -13,7 +13,8 @@ SUBDIRS=libs/numlib libs/bdbobj libs/gdbmobj libs/soxwrap \
 DISTCLEANFILES=stamp-h1 config.h config.log packaging/systemd/courier-imap.sysvinit packaging/systemd/courier-imap.service \
 	packaging/suse/courier-imap.init pop3d.rc dbobj.h imapd-ssl.rc pop3d-ssl.rc imapd.rc dbobj.config $(MAILDROPHTML)
 
-CLEANFILES=$(databin_SCRIPTS) $(man_MANS) $(sysconf_DATA) $(sbin_SCRIPTS)
+#CLEANFILES=$(databin_SCRIPTS) $(man_MANS) $(sysconf_DATA) $(sbin_SCRIPTS)
+CLEANFILES=$(sysconf_DATA)
 
 doc_list= libs/maildir/README.sharedfolders.txt libs/maildir/README.maildirquota.txt \
 	libs/unicode/README.unicode libs/imap/README.imap libs/tcpd/README.couriertls \
@@ -83,11 +84,10 @@ install-exec-hook:
 	mkdir -p $(DESTDIR)$(sysconfdir)/imapaccess
 	chmod 755 $(DESTDIR)$(sysconfdir)/imapaccess
 
-install-data-local: install-man
+install-data-local:
 	$(mkinstalldirs) $(DESTDIR)$(sysconfdir)
 	$(mkinstalldirs) $(DESTDIR)$(mandir)
 	$(INSTALL_DATA) libs/authlib/modulelist $(DESTDIR)$(sysconfdir)/authmodulelist
-	for f in $(man_MANS); do chmod a+r $(DESTDIR)$(mandir)/*/$$f; done
 	@echo "Do not forget to run make install-configure"
 	$(mkinstalldirs) $(DESTDIR)$(datarootdir)/doc/courier-imap || exit 1
 	for f in $(doc_list); do \
