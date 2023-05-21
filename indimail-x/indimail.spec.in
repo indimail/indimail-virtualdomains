@@ -46,7 +46,7 @@
 %global mysqlPrefix        @mysql_prefix@
 
 %if %build_on_obs == 1
-%global packager @email@
+%global packager           Manvendra Bhangui <@email@>
 %endif
 
 Summary: A Flexible Messaging Platform with Multi-Host/Multi-Protocol support
@@ -61,8 +61,7 @@ Release: @release@%{?dist}
 %global gid                555
 %global username           indimail
 %global groupname          indimail
-# Note: 999 indimail-mta does not require any specific values for uids/gids. 999 is just
-# for rpmlint to shut up and stop complaining
+# Note: indimail-mta does not require any specific values for uids/gids.
 Requires: user(alias)
 Requires: user(qmaill)
 Requires: user(indimail)
@@ -140,7 +139,7 @@ BuildRequires: openSUSE-release
 %endif
 
 %if 0%{?suse_version}
-PreReq: permissions
+Requires: permissions
 %endif
 
 ################################# OBS ###############################
@@ -182,10 +181,6 @@ Requires: policycoreutils-python
 %endif
 %endif
 Requires: indimail-access
-
-%if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%endif
 
 %description
 IndiMail is a messaging platform providing multi-cluster domain support.
@@ -264,7 +259,6 @@ fi
   --enable-default-domain=${default_domain} `%{__cat} config/indimail.opts`
 
 %install
-[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %if 0%{?suse_version} >= 1120
 %if 0%{?build_cflags:1}
   CFLAGS="%{build_cflags} -fPIC -fno-lto"

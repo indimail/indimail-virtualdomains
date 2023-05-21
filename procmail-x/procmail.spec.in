@@ -22,7 +22,7 @@
 %endif
 
 %if %build_on_obs == 1
-%global packager @email@
+%global packager           Manvendra Bhangui <@email@>
 %global dist redhat
 %global disttag rh
 %endif
@@ -65,7 +65,7 @@ Source4: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
 
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
-PreReq: permissions
+Requires: permissions
 %endif
 %endif
 
@@ -73,13 +73,8 @@ PreReq: permissions
 BuildRequires: -post-build-checks  
 %endif
 URL: http://www.indimail.org
-
 BuildRequires: coreutils
-
 Requires: coreutils grep /bin/sh /usr/bin/id glibc openssl
-%if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%endif
 
 %description
 Most mail servers such as sendmail need to have a local delivery agent.
@@ -113,7 +108,6 @@ echo "PACKAGE_BUGREPORT=\"'@email@'\""
   --sysconfdir=/etc/indimail
 
 %install
-[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %{__make} -s %{?_smp_mflags}
 %if %{defined nodebug}
 %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install-strip

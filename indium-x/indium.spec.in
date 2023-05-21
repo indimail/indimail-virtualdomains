@@ -38,7 +38,7 @@
 %define nobwidget          1
 
 %if %build_on_obs == 1
-%global packager @email@
+%global packager           Manvendra Bhangui <@email@>
 %endif
 
 Summary: TCL/TK based Administration GUI for IndiMail VirtualDomains
@@ -73,9 +73,6 @@ BuildRequires: -post-build-checks
 
 Requires: coreutils grep /bin/sh glibc /usr/sbin/useradd /usr/sbin/groupadd
 Requires: bwidget tcl tk procps /usr/bin/awk indimail > 1.6
-%if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%endif
 
 %description
 Indium provides a GUI for administering IndiMail and configuring
@@ -124,7 +121,6 @@ echo "------------------------------------------------------"
 %{__make} %{?_smp_mflags}
 
 %install
-[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %if %{defined nodebug}
   %{__make} %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
 %else
@@ -422,9 +418,6 @@ install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
 %attr(644,root,root) %config(noreplace,missingok) %{sysconfdir}/termdefs.txt
 %attr(644,root,root)                              %{sysconfdir}/%{name}-release
 %attr(644,root,root)                              %{sysconfdir}/%{name}-rpm.info
-
-%clean
-%{__rm} -rf %{buildroot}
 
 %post
 /sbin/ldconfig

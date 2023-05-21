@@ -44,10 +44,10 @@
 %endif
 
 %if %build_on_obs == 1
-%global packager @email@
+%global packager           Manvendra Bhangui <@email@>
 %endif
 
-Summary: Name Service Sw
+Summary: PAM and Name Service Switch for IndiMail
 Name: indimail-auth
 Version: @version@
 Release: @release@%{?dist}
@@ -98,10 +98,6 @@ Requires: group(nofiles)
 %if %build_on_obs == 0
 Requires(pre): shadow-utils
 Requires(postun): shadow-utils
-%endif
-
-%if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %endif
 
 %description
@@ -196,7 +192,6 @@ if [ pam-multi-%{pam_multi_version} ] ; then
 fi
 
 %install
-[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 cd %{name}-%{version}
 for i in nssd-%{nssd_version} pam-multi-%{pam_multi_version}
 do
@@ -296,8 +291,6 @@ chmod -R 755 %{buildroot}/%{pam_moduledir}
                                         %{_libdir}/libnss_nssd.so.2
 
 %clean
-[ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
-%{__rm} -fr %{_builddir}/%{name}-%{version}
 %if %{undefined nodebug}
 %{__rm} -f %{_builddir}/debugfiles.list %{_builddir}/debuglinks.list \
   %{_builddir}/debugsourcefiles.list %{_builddir}/debugsources.list \

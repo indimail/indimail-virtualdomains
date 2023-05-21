@@ -17,7 +17,7 @@
 %global _hardened_build    1
 %endif
 %if %build_on_obs == 1
-%global packager @email@
+%global packager           Manvendra Bhangui <@email@>
 %endif
 %global fedorareview       0
 
@@ -65,7 +65,6 @@ BuildRequires: gcc make autoconf automake
 BuildRequires: coreutils
 Requires: iwebadmin coreutils sed
 Requires: indimail >= 2.0 indimail-mta >= 2.0
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch: noarch
 
 %description
@@ -116,7 +115,6 @@ echo "PACKAGE_BUGREPORT=\"'@email@'\""
 %{__make} %{?_smp_mflags}
 
 %install
-[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %if %{defined nodebug}
 %{__make} -s DESTDIR=%{buildroot} install-strip
 %else

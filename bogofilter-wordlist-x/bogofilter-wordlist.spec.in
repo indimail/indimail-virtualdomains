@@ -12,6 +12,10 @@
 %global _hardened_build    1
 %endif
 
+%if %build_on_obs == 1
+%global packager           Manvendra Bhangui <@email@>
+%endif
+
 %define sysconfdir         @sysconfdir@
 
 Name: bogofilter-wordlist
@@ -37,10 +41,6 @@ BuildRequires: -post-build-checks
 #!BuildIgnore: post-build-checks
 #!BuildIgnore: brp-check-suse
 %endif
-%endif
-
-%if %build_on_obs == 1
-%define packager @email@
 %endif
 
 %description
@@ -72,7 +72,6 @@ echo "PACKAGE_BUGREPORT=\"'@email@'\""
 %{__make} %{?_smp_mflags}
 
 %install
-[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %make_install
 %{__mkdir_p} %{buildroot}%{sysconfdir}
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info

@@ -21,6 +21,10 @@
 %global debug_package %{nil}
 %endif
 
+%if %build_on_obs == 1
+%global packager           Manvendra Bhangui <@email@>
+%endif
+
 Summary: Logfile monitoring, alert and analysis tool
 Name: logalert
 Version: @version@
@@ -53,12 +57,6 @@ BuildRequires: libtirpc3 libtirpc-devel
 %endif
 BuildRequires: pcre-devel libqmail-devel
 BuildRequires: flex coreutils bison
-
-%if %build_on_obs == 1
-%define packager @email@
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%endif
-
 Requires: coreutils grep /bin/sh glibc
 
 %description
@@ -94,7 +92,6 @@ echo "------------------------------------------------------"
 %{__make} %{?_smp_mflags}
 
 %install
-[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %if %{defined nodebug}
 %{__make} DESTDIR=%{buildroot} install-strip
 %else

@@ -55,7 +55,7 @@
 %endif
 
 %if %build_on_obs == 1
-%global packager @email@
+%global packager           Manvendra Bhangui <@email@>
 %endif
 
 Summary: POP3, IMAP Fetchmail Services for IndiMail
@@ -114,7 +114,7 @@ Requires(postun): shadow-utils
 %endif
 
 %if 0%{?suse_version} >= 1120
-PreReq: permissions
+Requires: permissions
 %endif
 ################################# OBS ###############################
 %if %build_on_obs == 1
@@ -131,10 +131,6 @@ Requires: sed findutils pkgconfig
 Requires: coreutils grep /bin/sh glibc openssl
 Requires: /usr/bin/hostname
 Conflicts: indimail < 3.2
-
-%if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-build
-%endif
 
 %description
 indimail-access package provides IMAP, POP3 and fetchmail
@@ -233,7 +229,6 @@ if [ -d fetchmail-%{fetchmail_version} ] ; then
 fi
 
 %install
-[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 cd %{name}-%{version}
 for i in fetchmail-%{fetchmail_version} courier-imap-%{courier_version}
 do
@@ -492,8 +487,6 @@ done
 %{_libdir}/libcourier-unicode.so.7.0.0
 
 %clean
-[ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
-%{__rm} -fr %{_builddir}/%{name}-%{version}
 %if %{undefined nodebug}
 %{__rm} -f %{_builddir}/debugfiles.list %{_builddir}/debuglinks.list \
   %{_builddir}/debugsourcefiles.list %{_builddir}/debugsources.list \

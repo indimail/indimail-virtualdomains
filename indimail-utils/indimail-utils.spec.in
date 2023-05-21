@@ -40,7 +40,7 @@
 %endif
 
 %if %build_on_obs == 1
-%global packager @email@
+%global packager           Manvendra Bhangui <@email@>
 %endif
 
 Summary: Mail Utility Package for indimail MTA
@@ -92,10 +92,6 @@ Requires: /usr/bin/awk /usr/bin/which
 Requires: sed findutils
 Requires: coreutils grep /bin/sh glibc
 Conflicts: indimail < 3.2
-
-%if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%endif
 
 %description
 indimail-utils provides a package consisting of utilities like
@@ -166,7 +162,6 @@ do
 done
 
 %install
-[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 cd %{name}-%{version}
 %{__mkdir_p} %{buildroot}%{_prefix}
 for i in altermime-%{altermime_version} ripmime-%{ripmime_version} \
@@ -397,10 +392,7 @@ fi
 %{_libdir}/libflash.so.1
 %{_libdir}/libflash.so.1.0.0
 
-
 %clean
-[ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
-%{__rm} -fr %{_builddir}/%{name}-%{version}
 %if %{undefined nodebug}
 %{__rm} -f %{_builddir}/debugfiles.list %{_builddir}/debuglinks.list \
   %{_builddir}/debugsourcefiles.list %{_builddir}/debugsources.list \

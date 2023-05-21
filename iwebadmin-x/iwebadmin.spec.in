@@ -23,7 +23,7 @@
 %global debug_package %{nil}
 %endif
 %if %build_on_obs == 1
-%global packager @email@
+%global packager           Manvendra Bhangui <@email@>
 %endif
 
 %define _prefix            @prefix@
@@ -61,7 +61,7 @@ BuildRequires: findutils libqmail-devel libqmail
 BuildRequires: gzip autoconf automake libtool indimail-devel libgsasl-devel
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
-PreReq: permissions
+Requires: permissions
 %endif
 %endif
 
@@ -75,9 +75,6 @@ BuildRequires: -post-build-checks
 Requires: coreutils grep /bin/sh glibc /usr/sbin/useradd /usr/sbin/groupadd
 Requires: procps /usr/bin/awk indimail > 1.6
 Requires: ezmlm-idx > 7.2
-%if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%endif
 
 %description
 iwebadmin provides a Web front-end for administering IndiMail Users
@@ -119,7 +116,6 @@ echo "------------------------------------------------------"
 %{__make} -s %{?_smp_mflags}
 
 %install
-[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %if %{defined nodebug}
 %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install-strip
 %else
