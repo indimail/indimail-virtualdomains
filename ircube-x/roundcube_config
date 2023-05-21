@@ -702,8 +702,7 @@ if [ ! -d /service/php-fpm ] ; then
 	if [ -n "$php_fpm_www_conf" -a -f "$php_fpm_www_conf" ] ; then
 		sockname=$(grep "listen =" $php_fpm_www_conf |cut -d= -f2)
 		sockdir=$(dirname $sockname)
-		echo "socket directory for php-fpm is $sockdir"
-		echo "Creating supervised service for php-fpm"
+		echo "Creating supervised service for php-fpm using socket dir $sockdir"
 		mkdir -p /service/php-fpm/log
 		touch /service/php-fpm/down
 		(
