@@ -45,7 +45,9 @@ Source: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 
 URL: http://www.indimail.org
 BuildRequires: pam-devel
-%if %build_on_obs == 1
+%if %{defined amzn}
+BuildRequires: mariadb-connector-c-devel
+%else
 BuildRequires: mysql-devel
 %endif
 %if %{undefined centos_version} && %{undefined rhel_version} && %{undefined sles_version}

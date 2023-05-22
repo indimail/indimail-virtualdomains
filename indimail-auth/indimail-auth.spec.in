@@ -74,7 +74,12 @@ AutoReqProv: Yes
 BuildRequires: gcc gcc-c++ make autoconf automake libtool
 BuildRequires: glibc glibc-devel procps binutils
 BuildRequires: sed findutils gzip coreutils grep
-BuildRequires: mysql-devel pam-devel libqmail-devel libqmail
+BuildRequires: pam-devel libqmail-devel libqmail
+%if %{defined amzn}
+BuildRequires: mariadb-connector-c-devel
+%else
+BuildRequires: mysql-devel
+%endif
 
 ################################# OBS ###############################
 %if %build_on_obs == 1
