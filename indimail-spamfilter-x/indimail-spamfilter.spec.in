@@ -181,9 +181,6 @@ install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
   done
 %endif
 
-# Compress the man pages
-find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
-
 if [ -x /bin/touch ] ; then
   TOUCH=/bin/touch
 elif [ -x /usr/bin/touch ] ; then
