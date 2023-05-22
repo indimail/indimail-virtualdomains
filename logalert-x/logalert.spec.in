@@ -49,7 +49,7 @@ BuildRequires: gcc gcc-c++ make autoconf automake
 %if %{defined suse_version} || %{defined sles_version}
 BuildRequires: bison
 %endif
-%if 0%{?fedora_version} > 27 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7
+%if 0%{?fedora_version} > 27 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7 || %{defined mgaversion}
 BuildRequires: libtirpc libtirpc-devel
 %endif
 %if 0%{?suse_version} >= 1550 || 0%{?sle_version} >= 150300
@@ -99,7 +99,6 @@ echo "------------------------------------------------------"
 %endif
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
 /bin/rm -f %{name}-rpm.info
-find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 %files
 %defattr(-,root,root)
@@ -117,12 +116,12 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %doc %attr(0644,root,root)                     %{_prefix}/share/indimail/doc/logalert/LICENSE
 %doc %attr(0644,root,root)                     %{_prefix}/share/indimail/doc/logalert/README.md
 
-%doc %attr(0644,root,root)                     %{_mandir}/man1/incrmesg.1.gz
-%doc %attr(0644,root,root)                     %{_mandir}/man1/logclient.1.gz
-%doc %attr(0644,root,root)                     %{_mandir}/man8/logalert.8.gz
-%doc %attr(0644,root,root)                     %{_mandir}/man8/logsrv.8.gz
-%doc %attr(0644,root,root)                     %{_mandir}/man8/showbytes.8.gz
-%doc %attr(0644,root,root)                     %{_mandir}/man8/rpclog.8.gz
+%doc %attr(0644,root,root)                     %{_mandir}/man1/incrmesg.1.*
+%doc %attr(0644,root,root)                     %{_mandir}/man1/logclient.1.*
+%doc %attr(0644,root,root)                     %{_mandir}/man8/logalert.8.*
+%doc %attr(0644,root,root)                     %{_mandir}/man8/logsrv.8.*
+%doc %attr(0644,root,root)                     %{_mandir}/man8/showbytes.8.*
+%doc %attr(0644,root,root)                     %{_mandir}/man8/rpclog.8.*
 
 %post
 argv1=$1

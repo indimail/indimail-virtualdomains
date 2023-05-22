@@ -263,7 +263,6 @@ install -m 644 %{S:5} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissio
 %{__rm} -rf %{buildroot}%{_prefix}/include
 %{__rm} -rf %{buildroot}%{mandir}/man3
 # Compress the man pages
-find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 # Create these files so that %%ghost does not complain
 %{__mkdir_p} %{buildroot}%{sysconfdir}/tcp
@@ -409,41 +408,41 @@ done
 %docdir %{shareddir}/doc
 %docdir %{mandir}
 
-%attr(0644,root,root) %{mandir}/man1/fetchmailconf.1.gz
-%attr(0644,root,root) %{mandir}/man1/fetchmail.1.gz
-%attr(0644,root,root) %{mandir}/man1/reformail.1.gz
-%attr(0644,root,root) %{mandir}/man1/makedat.1.gz
-%attr(0644,root,root) %{mandir}/man1/maildrop.1.gz
-%attr(0644,root,root) %{mandir}/man1/mailbot.1.gz
-%attr(0644,root,root) %{mandir}/man1/couriertls.1.gz
-%attr(0644,root,root) %{mandir}/man1/couriertcpd.1.gz
-%attr(0644,root,root) %{mandir}/man1/maildirkw.1.gz
-%attr(0644,root,root) %{mandir}/man1/sharedindexsplit.1.gz
-%attr(0644,root,root) %{mandir}/man1/sharedindexinstall.1.gz
-%attr(0644,root,root) %{mandir}/man1/maildiracl.1.gz
-%attr(0644,root,root) %{mandir}/man1/maildirmake.1.gz
-%attr(0644,root,root) %{mandir}/man1/maildirwatch.1.gz
-%attr(0644,root,root) %{mandir}/man7/maildropgdbm.7.gz
-%attr(0644,root,root) %{mandir}/man7/maildropfilter.7.gz
-%attr(0644,root,root) %{mandir}/man7/maildropex.7.gz
-%attr(0644,root,root) %{mandir}/man7/authlib.7.gz
-%attr(0644,root,root) %{mandir}/man7/authshadow.7.gz
+%attr(0644,root,root) %{mandir}/man1/fetchmailconf.1.*
+%attr(0644,root,root) %{mandir}/man1/fetchmail.1.*
+%attr(0644,root,root) %{mandir}/man1/reformail.1.*
+%attr(0644,root,root) %{mandir}/man1/makedat.1.*
+%attr(0644,root,root) %{mandir}/man1/maildrop.1.*
+%attr(0644,root,root) %{mandir}/man1/mailbot.1.*
+%attr(0644,root,root) %{mandir}/man1/couriertls.1.*
+%attr(0644,root,root) %{mandir}/man1/couriertcpd.1.*
+%attr(0644,root,root) %{mandir}/man1/maildirkw.1.*
+%attr(0644,root,root) %{mandir}/man1/sharedindexsplit.1.*
+%attr(0644,root,root) %{mandir}/man1/sharedindexinstall.1.*
+%attr(0644,root,root) %{mandir}/man1/maildiracl.1.*
+%attr(0644,root,root) %{mandir}/man1/maildirmake.1.*
+%attr(0644,root,root) %{mandir}/man1/maildirwatch.1.*
+%attr(0644,root,root) %{mandir}/man7/maildropgdbm.7.*
+%attr(0644,root,root) %{mandir}/man7/maildropfilter.7.*
+%attr(0644,root,root) %{mandir}/man7/maildropex.7.*
+%attr(0644,root,root) %{mandir}/man7/authlib.7.*
+%attr(0644,root,root) %{mandir}/man7/authshadow.7.*
 %if 0
-%attr(0644,root,root) %{mandir}/man7/authpwd.7.gz
+%attr(0644,root,root) %{mandir}/man7/authpwd.7.*
 %endif
-%attr(0644,root,root) %{mandir}/man7/authindi.7.gz
-%attr(0644,root,root) %{mandir}/man7/authpam.7.gz
-%attr(0644,root,root) %{mandir}/man7/maildirquota.7.gz
-%attr(0644,root,root) %{mandir}/man7/courier-unicode.7.gz
-%attr(0644,root,root) %{mandir}/man8/makeimapaccess.8.gz
-%attr(0644,root,root) %{mandir}/man8/pop3login.8.gz
-%attr(0644,root,root) %{mandir}/man8/imaplogin.8.gz
-%attr(0644,root,root) %{mandir}/man8/pop3d.8.gz
-%attr(0644,root,root) %{mandir}/man8/imapd.8.gz
-%attr(0644,root,root) %{mandir}/man8/mkpop3dcert.8.gz
-%attr(0644,root,root) %{mandir}/man8/mkimapdcert.8.gz
-%attr(0644,root,root) %{mandir}/man8/mkdhparams.8.gz
-%attr(0644,root,root) %{mandir}/man8/deliverquota.8.gz
+%attr(0644,root,root) %{mandir}/man7/authindi.7.*
+%attr(0644,root,root) %{mandir}/man7/authpam.7.*
+%attr(0644,root,root) %{mandir}/man7/maildirquota.7.*
+%attr(0644,root,root) %{mandir}/man7/courier-unicode.7.*
+%attr(0644,root,root) %{mandir}/man8/makeimapaccess.8.*
+%attr(0644,root,root) %{mandir}/man8/pop3login.8.*
+%attr(0644,root,root) %{mandir}/man8/imaplogin.8.*
+%attr(0644,root,root) %{mandir}/man8/pop3d.8.*
+%attr(0644,root,root) %{mandir}/man8/imapd.8.*
+%attr(0644,root,root) %{mandir}/man8/mkpop3dcert.8.*
+%attr(0644,root,root) %{mandir}/man8/mkimapdcert.8.*
+%attr(0644,root,root) %{mandir}/man8/mkdhparams.8.*
+%attr(0644,root,root) %{mandir}/man8/deliverquota.8.*
 
 %if %build_on_obs == 0
 %license %attr(644,root,root)           %{shareddir}/doc/courier-imap/COPYING

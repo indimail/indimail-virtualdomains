@@ -21,7 +21,7 @@ tcplookupdir=@libdir@
 
 libindimail_LTLIBRARIES = libindimail.la
 libindimail_la_SOURCES = $(COMMONSOURCES)
-libindimail_la_LIBADD = @LIB_MYSQL@ @LIB_QMAIL@ @LIB_SSL@ @LIB_GSASL@ -lm
+libindimail_la_LIBADD = @LIB_MYSQL@ @LIB_QMAIL@ @LIB_SSL@ @LIB_GSASL@ -lm -ldl
 libindimail_la_LDFLAGS = -version-info @LIBVER@ $(LDFLAGS)
 libindimail_la_CFLAGS = -fPIC
 libindimaildir=@libdir@

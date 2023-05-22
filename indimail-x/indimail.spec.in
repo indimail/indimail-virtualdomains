@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.132 2023-05-15 00:17:46+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.133 2023-05-22 20:58:23+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -301,13 +301,16 @@ install -m 644 %{S:2} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissio
 install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
 
-# Compress the man pages
-find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
-if [ -f %{buildroot}%{mandir}/man7/authlib.7.gz ] ; then
+if [ -f %{buildroot}%{mandir}/man7/authlib.7.xz ] ; then
+  ext="xz"
+else
+  ext="gz"
+fi
+if [ -f %{buildroot}%{mandir}/man7/authlib.7."$ext" ] ; then
   for i in authshadow.7 authpwd.7 authpam.7 authcustom.7
   do
     %{__rm} -f %{buildroot}%{mandir}/man7/$i
-    echo ".so man7/authlib.7" |gzip -c > %{buildroot}%{mandir}/man7/$i.gz
+    echo ".so man7/authlib.7" |gzip -c > %{buildroot}%{mandir}/man7/$i."$ext"
   done
 fi
 
