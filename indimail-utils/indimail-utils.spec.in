@@ -184,11 +184,12 @@ install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
 install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
 %{__rm} -f %{name}-rpm.info %{name}-release
 #
-# remove fetchmail docs installed by IndiMail Makefile
+# remove devel 
 #
 %{__rm} -f %{buildroot}%{_libdir}/libflash.la
 %{__rm} -f %{buildroot}%{_libdir}/libflash.a
 %{__rm} -f %{buildroot}%{_libdir}/libflash.so
+%{__rm} -rf %{buildroot}%{_includedir}
 
 if [ -x /usr/bin/chrpath ] ; then
   if [ -f %{buildroot}%{_prefix}/bin/flash ] ; then
