@@ -37,9 +37,9 @@
 # in the prep section have a problem in enabling debuginfo.
 # This isn't documented clearly anywhere. A workaround is
 # to define buildsubdir
-%if 0
+%if 1
 %if %{undefined nodebug}
-%global buildsubdir        ""
+%global buildsubdir        %{name}-%{version}
 %endif
 %endif
 
@@ -114,7 +114,7 @@ For more details visit %{url}
 
 %prep
 %{__mkdir_p} %{_builddir}/%{name}-%{version}
-cd %{name}-%{version}
+cd %{_builddir}/%{name}-%{version}
 for i in nssd-%{nssd_version} pam-multi-%{pam_multi_version}
 do
   (
@@ -135,7 +135,6 @@ do
 done
 
 %build
-cd %{name}-%{version}
 (
 echo "---------------- INFORMATION ------------------------"
 echo target         %_target
@@ -197,7 +196,6 @@ if [ pam-multi-%{pam_multi_version} ] ; then
 fi
 
 %install
-cd %{name}-%{version}
 for i in nssd-%{nssd_version} pam-multi-%{pam_multi_version}
 do
   if [ -d $i ] ; then
