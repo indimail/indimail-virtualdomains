@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.135 2023-05-22 23:49:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.136 2023-05-23 09:16:41+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -105,10 +105,16 @@ BuildRequires: glibc glibc-devel openssl procps ncurses-devel
 BuildRequires: gzip autoconf automake libtool pkgconfig
 BuildRequires: sed findutils binutils
 BuildRequires: libgsasl-devel
+
+# learn from amazon and mageia on how to create bad distributions
 %if %{defined amzn}
 BuildRequires: mariadb-connector-c-devel
 %else
+%if %{defined mgaversion}
+BuildRequires: lib64mariadb-devel
+%else
 BuildRequires: mysql-devel
+%endif
 %endif
 
 BuildRequires: libqmail-devel > 1.1
@@ -167,8 +173,12 @@ Requires: sed findutils pkgconfig
 Requires: coreutils grep /bin/sh glibc openssl
 Requires: /usr/bin/hostname mrtg
 
+# learn from amazon and mageia on how to create bad distributions
 %if %{defined amzn}
 Requires: mariadb105-server
+%else
+%if %{defined mgaversion}
+Requires: mariadb-core
 %else
 %if 0%{?sles_version}
 Requires: mysql-community-server mysql-community-libs
@@ -178,6 +188,7 @@ Requires: mysql-server
 Requires: libmariadb3
 %else
 Requires: mysql-libs
+%endif
 %endif
 %endif
 %endif
