@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.136 2023-05-23 09:16:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.137 2023-05-23 14:10:23+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -171,7 +171,10 @@ Requires: /usr/sbin/useradd /usr/sbin/groupadd /usr/sbin/groupdel
 Requires: procps /usr/bin/awk /usr/bin/which
 Requires: sed findutils pkgconfig
 Requires: coreutils grep /bin/sh glibc openssl
-Requires: /usr/bin/hostname mrtg
+Requires: /usr/bin/hostname
+%if %{undefined amzn} && %{undefined mgaversion}
+Requires: mrtg
+%endif
 
 # learn from amazon and mageia on how to create bad distributions
 %if %{defined amzn}
