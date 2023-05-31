@@ -129,10 +129,10 @@ Table of Contents
    * [Configuring DKIM](#configuring-dkim)
       * [Create your DKIM signature](#create-your-dkim-signature)
       * [Create your DNS records](#create-your-dns-records)
-      * [Set SMTP to sign with DKIM signatures](#set-smtp-to-sign-with-dkim-signatures)
-      * [Set SMTP to verify DKIM signatures](#set-smtp-to-verify-dkim-signatures)
+      * [DKIM verification during SMTP](#dkim-verification-during-smtp)
+      * [DKIM verification during local delivery](#dkim-verification-during-local-delivery)
+      * [DKIM signing during SMTP](#dkim-signing-during-smtp)
       * [DKIM signing during remote delivery](#dkim-signing-during-remote-delivery)
-      * [DKIM signing during local delivery](#dkim-signing-during-local-delivery)
       * [DKIM signing during mail injection](#dkim-signing-during-mail-injection)
       * [DKIM Author Domain Signing Practices](#dkim-author-domain-signing-practices)
       * [Testing outbound signatures](#testing-outbound-signatures)
@@ -4600,7 +4600,11 @@ DKIM uses public-key cryptography to allow the sender to electronically sign leg
 
 IndiMail from version 1.5 onwards, comes with a drop-in replacement for <b>qmail-queue</b> for DKIM signature signing and verification (see <b>qmail-dkim</b>(8) for more details). You need the following steps to enable DKIM. IndiMail from version 1.5.1 onwards comes with a filter dk-filter, which can be enabled before mail is handed over to <b>qmail-local</b> or <b>qmail-remote</b> (see <b>spawn-filter</b>(8) for more details).
 
-You may want to look at an excellent [setup instructions](http://notes.sagredo.eu/node/92 "Roberto's Notes") by Roberto Puzzanghera for configuring dkim for qmail
+You may want to look at an excellent [setup instructions](http://notes.sagredo.eu/node/92 "Roberto's Notes") by Roberto Puzzanghera for configuring dkim for qmail.
+
+For DKIM verification two methods have been described - one during SMTP and one during local delivery. You need to select just one of the methods
+
+For DKIM signing, three methods have been described - one during SMTP, one during remote delivery and one during mail injection. You need to select just one of the methods, else you will send out emails with multiple DKIM signatures.
 
 ## Create your DKIM signature
 
@@ -4632,19 +4636,7 @@ choose the selector (some\_name) and publish this into DNS TXT record for:
 
 Wait until it's on all DNS servers and that's it.
 
-## Set SMTP to sign with DKIM signatures
-
-<b>qmail-dkim</b> uses openssl libraries and there is some amount of memory allocation that happens. You may want to increase your softlimit (if any) in your <b>qmail-smtpd</b> run script.
-
-```
-$ sudo /bin/bash
-# cd /service/qmail-smtpd.25/variables
-# echo "/usr/bin/qmail-dkim" > QMAILQUEUE
-# echo "/etc/indimail/control/domainkeys/default" > DKIMSIGN
-# svc -r /service/qmail-smtpd.25
-```
-
-## Set SMTP to verify DKIM signatures
+## DKIM verification during SMTP
 
 You can setup <b>qmail-smtpd</b> for verification by setting DKIMIVERIFY environment variable instead of DKIMSIGN environment variable.
 
@@ -4653,6 +4645,31 @@ $ sudo /bin/bash
 # cd /service/qmail-smtpd.25/variables
 # echo "/usr/bin/qmail-dkim" > QMAILQUEUE
 # echo FGHIKLMNOQRTUVWjp > DKIMVERIFY
+# svc -r /service/qmail-smtpd.25
+```
+
+## DKIM verification during local delivery
+
+On your host which serves as your incoming gateway for your local domains, it only makes sense to do DKIM verification with <b>qmail-local</b>
+
+```
+$ sudo /bin/bash
+# cd /service/qmail-send.25/variables
+# echo "/usr/bin/spawn-filter" > QMAILLOCAL
+# echo "/usr/bin/dk-filter" > FILTERARGS
+# echo FGHIKLMNOQRTUVWjp > DKIMVERIFY
+# svc -r /service/qmail-send.25
+```
+
+## DKIM signing during SMTP
+
+<b>qmail-dkim</b> uses openssl libraries and there is some amount of memory allocation that happens. You may want to increase your softlimit (if any) in your <b>qmail-smtpd</b> run script.
+
+```
+$ sudo /bin/bash
+# cd /service/qmail-smtpd.25/variables
+# echo "/usr/bin/qmail-dkim" > QMAILQUEUE
+# echo "/etc/indimail/control/domainkeys/default" > DKIMSIGN
 # svc -r /service/qmail-smtpd.25
 ```
 
@@ -4665,19 +4682,6 @@ $ sudo /bin/bash
 # echo "/usr/bin/dk-filter" > FILTERARGS
 # echo "/etc/indimail/control/domainkeys/default" > DKIMSIGN
 # echo "-h" > DKSIGNOPTIONS
-# svc -r /service/qmail-send.25
-```
-
-## DKIM signing during local delivery
-
-On your host which serves as your incoming gateway for your local domains, it only makes sense to do DKIM verification with <b>qmail-local</b>
-
-```
-$ sudo /bin/bash
-# cd /service/qmail-send.25/variables
-# echo "/usr/bin/spawn-filter" > QMAILLOCAL
-# echo "/usr/bin/dk-filter" > FILTERARGS
-# echo FGHIKLMNOQRTUVWjp > DKIMVERIFY
 # svc -r /service/qmail-send.25
 ```
 
@@ -4702,11 +4706,6 @@ $ sudo /bin/bash
 # mkdir ~/domainkeys
 # chmod 700 ~/domainkeys
 # dknewkey -b 2048 ~/domainkeys/default
-# cd ~/domainkeys
-# chown user1:group1 default (name of our selector)
-# chown user1:group1 default.pub
-# chmod 640 default
-# chmod 640 default.pub
 ```
 
 Now to use the above DKIM key, we need to set few environment variables specific to <b>user1</b>. To do that we just use the envdir property of indimail-mta where any file in ~/.defaultqueue becomes an environment variable set by programs like <b>qmail-inject</b>. Refer to point 3 in [Setting Environment Variables](#setting-environment-variables) for reference. Assuming <u>/home/user1</u> is the home directory for <b>user1</b>, we can create DKIMSIGN environment variable as below.
@@ -5704,7 +5703,7 @@ TMPDIR="/tmp/indimail"
 
 # Using Docker Engine to Run IndiMail / IndiMail-MTA
 
-IndiMail now has docker images. You can read about installing Docker [here](https://docs.docker.com/engine/install/ "Docker Installatoin"). Once you have installed docker-engine, you need to start it. Typically it would be
+IndiMail now has docker images. You can read about installing Docker [here](https://docs.docker.com/engine/install/ "Docker Installation"). Once you have installed docker-engine, you need to start it. Typically it would be
 
 `$ sudo service docker start`
 
@@ -5870,35 +5869,7 @@ Currently, the list of supported distributions for IndiMail is
 
 ## Installing packages from the repostory
 
-The commands below will setup indimail-mta or indimail with a basic working installation needed to send and receive mails. By default installation sets up DKIM keys in /etc/indimail/control/domainkeys/default. You need permission to access the private key for the user who needs to send out emails. If this is a system user, it can be done by adding those users to have <b>qcerts</b> as a supplementary group. To do this you can execute the command
-
-```
-$ sudo /usr/sbin/usermod -aG qcerts $(whoami)
-```
-
-For non-system users with shell accounts, the users can create DKIM keys in their own home directory and set the <b>DKIMSIGN</b> environment variable to the path of the DKIM private key. You can refer to [dkim signing during mail injection](#dkim-signing-during-mail-injection) for reference.
-
-You may have a case where you don't require DKIM signing for verification.
-
-To disable DKIM globally you can do
-
-```
-$ sudo sh -c "> /etc/indimail/control/defaultqueue/DKIMSIGN"
-$ sudo sh -c "/bin/rm -f /service/*/variables/DKIMSIGN"
-$ sudo sh -c "echo "/usr/sbin/qmail-multi" > /etc/indimail/control/defaultqueue/QMAILQUEUE"
-```
-
-To disable DKIM for a specific user with home directory /home/localuser
-
-```
-$ mkdir /home/localuser/.defaultqueue
-$ > /home/localuser/.defaultqueue/DKIMSIGN
-$ echo /usr/sbin/qmail-queue > /home/localuser/.defaultqueue/QMAILQUEUE
-$ echo /var/indimail/queue   > /home/localuser/.defaultqueue/QUEUE_BASE
-$ echo 5 > /home/localuser/.defaultqueue/QUEUE_COUNT
-```
-
-Once you have done the above, you can proceed to install indimail-mta or indimail. The installation is briefly explained below
+The commands below will setup indimail-mta or indimail with a basic configuration needed to send and receive mails. The installation is briefly explained below
 
 <b>For RPM builds</b>
 
@@ -5939,7 +5910,7 @@ Installing indimail will pull indimail-mta as a dependency.
 $ sudo pacman -S --needed indimail
 ```
 
-After the installation is complete you can start indimail-mta or indimail by executing
+After the installation is complete the first thing you need to do is to check the control file /etc/indimail/control/me and ensure that it is your fully qualified domain name. Once you do that, you can start indimail-mta or indimail by executing
 
 ```
 $ sudo systemctl start svscan
