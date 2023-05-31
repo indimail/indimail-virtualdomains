@@ -673,7 +673,6 @@ It is trivial to display the environment variable that would be set for your ser
 
 Display environment variables set for defaultqueue
 
-	```
 	$ envdir -c /etc/indimail/control/defaultqueue env
 	USE_FSYNC=
 	QUEUE_START=1
@@ -686,11 +685,9 @@ Display environment variables set for defaultqueue
 	USE_SYNCDIR=
 	QUEUE_BASE=/var/indimail/queue
 	MIN_FREE=52428800
-	```
 
 Display environment variables set for SMTPS service
 
-	```
 	$ sudo minisvc --print-variables=qmail-smtpd.465
 	or
 	$ sudo envdir -c /service/qmail-smtpd.465/variables env
@@ -739,11 +736,9 @@ Display environment variables set for SMTPS service
 	PATH=/bin:/usr/bin:/usr/sbin:/sbin
 	LOCALIP=0
 	CERTDIR=/etc/indimail/certs
-	```
 
 Display environment variables set for the user <u>localuser</u> by using qmail-showctl
 
-	```
 	$ qmail-showctl -E
 	------------------ begin show env ----------------------------
 	HOME=/home/localuser
@@ -770,7 +765,6 @@ Display environment variables set for the user <u>localuser</u> by using qmail-s
 	DKIMSIGNOPTIONSEXTRA=-z 4
 	QUEUE_COUNT=1
 	DKIMSIGN=/home/localuser/domainkeys/private
-	```
 
 NOTE: The program <b>envdir</b> that indimail-mta uses, is powerful because of it's recursive feature. It has the ability to hyperlink additional directories/files having environment variables using .<u>envdir</u> and .<u>envfile</u>.
 
