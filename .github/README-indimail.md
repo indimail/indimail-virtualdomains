@@ -673,106 +673,106 @@ It is trivial to display the environment variable that would be set for your ser
 
 Display environment variables set for defaultqueue
 
-    ```
-    $ envdir -c /etc/indimail/control/defaultqueue env
-    USE_FSYNC=
-    QUEUE_START=1
-    QMAILQUEUE=/usr/sbin/qmail-dkim
-    QUEUE_COUNT=5
-    DKIMSIGN=/etc/indimail/control/domainkeys/%/default
-    CONFSPLIT=151
-    VIRUSCHECK=1
-    QHPSI=/usr/bin/clamdscan %s --config=/etc/clamd.d/scan.conf --fdpass --quiet --no-summary
-    USE_SYNCDIR=
-    QUEUE_BASE=/var/indimail/queue
-    MIN_FREE=52428800
-    ```
+	```
+	$ envdir -c /etc/indimail/control/defaultqueue env
+	USE_FSYNC=
+	QUEUE_START=1
+	QMAILQUEUE=/usr/sbin/qmail-dkim
+	QUEUE_COUNT=5
+	DKIMSIGN=/etc/indimail/control/domainkeys/%/default
+	CONFSPLIT=151
+	VIRUSCHECK=1
+	QHPSI=/usr/bin/clamdscan %s --config=/etc/clamd.d/scan.conf --fdpass --quiet --no-summary
+	USE_SYNCDIR=
+	QUEUE_BASE=/var/indimail/queue
+	MIN_FREE=52428800
+	```
 
 Display environment variables set for SMTPS service
 
-```
-$ sudo minisvc --print-variables=qmail-smtpd.465
-or
-$ sudo envdir -c /service/qmail-smtpd.465/variables env
-LOGFILTER=/run/indimail/logfifo
-DISABLE_PLUGIN=
-CONTROLDIR=/etc/indimail/control
-INFIFO=infifo
-USE_FSYNC=
-PLUGIN1=/usr/lib/indimail/plugins/rblsmtpd.so
-CHECKRECIPIENT=1
-QUEUE_START=1
-CHECKRELAY=
-USE_DLMOPEN=1
-SMTPS=
-DEFAULT_DOMAIN=argos.indimail.org
-QMAILQUEUE=/usr/sbin/qmail-dkim
-FIFODIR=/var/indimail/inquery
-SPAMEXITCODE=0
-PLUGIN0_dir=/var/indimail
-AUTHMODULES=/usr/sbin/sys-checkpwd /usr/sbin/vchkpass
-QUEUE_COUNT=5
-PORT=465
-SPAMFILTER=/usr/bin/bogofilter -p -d /etc/indimail
-RBLEHLO=1
-PASSWD_CACHE=
-MAXPERIP=25
-SOFT_MEM=536870912
-QUERY_CACHE=
-PLUGIN0=/usr/lib/indimail/plugins/qmail_smtpd.so
-CONFSPLIT=151
-PLUGIN0_init=smtp_init
-BODYCHECK=
-DKIMVERIFY=
-VIRUSCHECK=1
-VIRTUAL_PKG_LIB=/usr/lib64/libindimail.so.3.0.0
-QHPSI=/usr/bin/clamdscan %s --config=/etc/clamd.d/scan.conf --fdpass --quiet --no-summary
-USE_SYNCDIR=
-RBLCOMMAND=/usr/lib/indimail/plugins/rblsmtpd.so -rdnsbl-1.uceprotect.net -rzen.spamhaus.org
-UNSIGNED_SUBJECT=
-REJECTSPAM=0
-MASQUERADE=
-MAXDAEMONS=75
-QUEUE_BASE=/var/indimail/queue
-MAKE_SEEKABLE=1
-MIN_FREE=52428800
-PATH=/bin:/usr/bin:/usr/sbin:/sbin
-LOCALIP=0
-CERTDIR=/etc/indimail/certs
-```
+	```
+	$ sudo minisvc --print-variables=qmail-smtpd.465
+	or
+	$ sudo envdir -c /service/qmail-smtpd.465/variables env
+	LOGFILTER=/run/indimail/logfifo
+	DISABLE_PLUGIN=
+	CONTROLDIR=/etc/indimail/control
+	INFIFO=infifo
+	USE_FSYNC=
+	PLUGIN1=/usr/lib/indimail/plugins/rblsmtpd.so
+	CHECKRECIPIENT=1
+	QUEUE_START=1
+	CHECKRELAY=
+	USE_DLMOPEN=1
+	SMTPS=
+	DEFAULT_DOMAIN=argos.indimail.org
+	QMAILQUEUE=/usr/sbin/qmail-dkim
+	FIFODIR=/var/indimail/inquery
+	SPAMEXITCODE=0
+	PLUGIN0_dir=/var/indimail
+	AUTHMODULES=/usr/sbin/sys-checkpwd /usr/sbin/vchkpass
+	QUEUE_COUNT=5
+	PORT=465
+	SPAMFILTER=/usr/bin/bogofilter -p -d /etc/indimail
+	RBLEHLO=1
+	PASSWD_CACHE=
+	MAXPERIP=25
+	SOFT_MEM=536870912
+	QUERY_CACHE=
+	PLUGIN0=/usr/lib/indimail/plugins/qmail_smtpd.so
+	CONFSPLIT=151
+	PLUGIN0_init=smtp_init
+	BODYCHECK=
+	DKIMVERIFY=
+	VIRUSCHECK=1
+	VIRTUAL_PKG_LIB=/usr/lib64/libindimail.so.3.0.0
+	QHPSI=/usr/bin/clamdscan %s --config=/etc/clamd.d/scan.conf --fdpass --quiet --no-summary
+	USE_SYNCDIR=
+	RBLCOMMAND=/usr/lib/indimail/plugins/rblsmtpd.so -rdnsbl-1.uceprotect.net -rzen.spamhaus.org
+	UNSIGNED_SUBJECT=
+	REJECTSPAM=0
+	MASQUERADE=
+	MAXDAEMONS=75
+	QUEUE_BASE=/var/indimail/queue
+	MAKE_SEEKABLE=1
+	MIN_FREE=52428800
+	PATH=/bin:/usr/bin:/usr/sbin:/sbin
+	LOCALIP=0
+	CERTDIR=/etc/indimail/certs
+	```
 
 Display environment variables set for the user <u>localuser</u> by using qmail-showctl
 
 ```
-$ qmail-showctl -E
------------------- begin show env ----------------------------
-HOME=/home/localuser
-QMAILDEFAULTHOST=argos.indimail.org
-TLS_CIPHER_LIST=ALL:!aNULL:!ADH:!eNULL:!LOW:!EXP:RC4+RSA:+HIGH:+MEDIUM:-EDH-RSA-DES-CBC3-SHA:-EDH-DSS-DES-CBC3-SHA:-DES-CBC3-SHA
-:-DES-CBC3-MD5:+SSLv3:+TLSv1:-SSLv2:!DES:!MD5:!PSK:!RC4:!3DES:!SHA1:!SHA256:!SHA384
-MAKE_SEEKABLE=1
-QUEUE_BASE=/var/indimail/queue
-QUEUE_START=1
-defaultdomain=indimail.org
-LOGFILTER=/run/indimail/logfifo
-BIGTODO=0
-VIRUSCHECK=1
-DKIMSIGNOPTIONS=-z 2
-SMTP_RATE=400
-SPAMFILTER=/usr/bin/bogofilter -p -d /etc/indimail
-CONFSPLIT=23
-REJECTSPAM=0
-QMAILQUEUE=/usr/sbin/qmail-dkim /usr/sbin/qmail-spamfilter
-USER=localuser
-DYNAMIC_QUEUE=1
-SPAMEXITCODE=0
-QMAILINJECT_FORCE_SRS=1
-DKIMSIGNOPTIONSEXTRA=-z 4
-QUEUE_COUNT=1
-DKIMSIGN=/home/localuser/domainkeys/private
+	$ qmail-showctl -E
+	------------------ begin show env ----------------------------
+	HOME=/home/localuser
+	QMAILDEFAULTHOST=argos.indimail.org
+	TLS_CIPHER_LIST=ALL:!aNULL:!ADH:!eNULL:!LOW:!EXP:RC4+RSA:+HIGH:+MEDIUM:-EDH-RSA-DES-CBC3-SHA:-EDH-DSS-DES-CBC3-SHA:-DES-CBC3-SHA
+	:-DES-CBC3-MD5:+SSLv3:+TLSv1:-SSLv2:!DES:!MD5:!PSK:!RC4:!3DES:!SHA1:!SHA256:!SHA384
+	MAKE_SEEKABLE=1
+	QUEUE_BASE=/var/indimail/queue
+	QUEUE_START=1
+	defaultdomain=indimail.org
+	LOGFILTER=/run/indimail/logfifo
+	BIGTODO=0
+	VIRUSCHECK=1
+	DKIMSIGNOPTIONS=-z 2
+	SMTP_RATE=400
+	SPAMFILTER=/usr/bin/bogofilter -p -d /etc/indimail
+	CONFSPLIT=23
+	REJECTSPAM=0
+	QMAILQUEUE=/usr/sbin/qmail-dkim /usr/sbin/qmail-spamfilter
+	USER=localuser
+	DYNAMIC_QUEUE=1
+	SPAMEXITCODE=0
+	QMAILINJECT_FORCE_SRS=1
+	DKIMSIGNOPTIONSEXTRA=-z 4
+	QUEUE_COUNT=1
+	DKIMSIGN=/home/localuser/domainkeys/private
 ```
 
-NOTE: The program <b>envdir</b> that indimail-mta uses, is very powerful. It has the ability to hyperlink additional directories/files having environment variables using .<u>envdir</u> and .<u>envfile</u>.
+NOTE: The program <b>envdir</b> that indimail-mta uses, is powerful because of it's recursive feature. It has the ability to hyperlink additional directories/files having environment variables using .<u>envdir</u> and .<u>envfile</u>.
 
 NOTE: The following clients use <u>defaultqueue</u> from <b>/etc/indimail/control</b> and .<u>defaultqueue</u> from $HOME - <b>condredirect</b>, <b>dot-forward</b>, <b>fastforward</b>, <b>filterto</b>, <b>forward</b>, <b>maildirserial</b>, <b>new-inject</b>, <b>qmail-inject</b>, <b>qmail-qread</b>, <b>qmail-showctl</b>, <b>qmta-send</b>, <b>qnotify</b>, <b>qreceipt</b>, <b>queue-fix</b>, <b>replier</b>, <b>rrforward</b>, <b>rrt</b>, <b>qmail-tcpto</b>, <b>qmail-tcpok</b>.
 
