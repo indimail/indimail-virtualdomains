@@ -657,7 +657,7 @@ indimail-mta can be fine tuned and configured using environment variables (> 250
 
 2. Using environment directory <u>defaultqueue</u> in <b>/etc/indimail/control</b> directory. This is just like the supervise <u>variables</u> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, <b>sendmail</b> and few other programs (See NOTE below). Read the man page for <b>qmail-inject</b>. Just like the <u>variables</u> directory mentioned above, you can have .<u>envdir</u> and .<u>envfile</u> in <u>defaultqueue</u> directory. The <u>defaultqueue</u> directory gets skipped if you have the <b>QUEUE_BASE</b> environment variable already set. <b>envdir</b> will exit 111 if it has trouble reading any directories when processing the <u>defaultqueue</u> directory or any extra directories because while processing. However, failure to read any environment variable file doesn't result in errors. This allows the administrator to set environment variables having access to specific users on the system. <b>envdir</b> will continue the processing skipping files for which it lacks permissions.
 
-3. Using environment directory .<u>defaultqueue</u> in $HOME. This too is just like the supervise <u>variables</u> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, <b>sendmail</b>. Here $HOME refers to the home directory of the user and is totally under the control of the user to set it. Read the man page for <b>qmail-inject</b>. This directory too can have .<u>envdir</u> or .<u>envfile</u> to set additional environment variables. But unlike <u>defaultqueue</u>, any error processing this directory, additional directories from processig .<u>envdir</u> are ignored and no change is made to the existing set of environment variables. If you set <b>QUEUE_BASE</b> in this directory, then <u>/etc/indimail/control/defaultqueue</u> gets skipped, allowing you to override system configured environment variables. Programs that set environment variables from $HOME/.defaultqueue directory are condredirect, dot-forward, fastforward, filterto, forward, maildirserial, new-inject, qmail-inject, qmail-qread, qmail-showctl, qmonitor, qmta-send, qnotify, qreceipt, queue-fix, replier, rrforward and rrt. Out of these programs, qmail-inject, new-inject, qmail-qread and maildirserial will always process .<u>defaultqueue</u>. The remaining programs process .<u>defaultqueue</u> when running with non-zero uid. You can however skip .<u>defaultqueue</u> by setting <b>SKIP_LOCAL_ENVIRONMENT</b> environment variable.
+3. Using environment directory .<u>defaultqueue</u> in $HOME. This too is just like the supervise <u>variables</u> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, <b>sendmail</b>. Here $HOME refers to the home directory of the user and is totally under the control of the user to set it. Read the man page for <b>qmail-inject</b>. This directory too can have .<u>envdir</u> or .<u>envfile</u> to set additional environment variables. But unlike <u>defaultqueue</u>, any error processing this directory, additional directories from processig .<u>envdir</u> are ignored and no change is made to the existing set of environment variables. If you set <b>QUEUE_BASE</b> in this directory, then <u>/etc/indimail/control/defaultqueue</u> gets skipped, allowing you to override system configured environment variables. Programs that set environment variables from $HOME/.defaultqueue directory are condredirect, dot-forward, fastforward, filterto, forward, maildirserial, new-inject, qmail-inject, qmail-qread, qmail-showctl, qmonitor, qmta-send, qnotify, qreceipt, queue-fix, replier, rrforward and rrt. Out of these programs, qmail-inject, new-inject, qmail-qread and maildirserial will process .<u>defaultqueue</u> regardless of the uid with they run, whereas the remaining programs process .<u>defaultqueue</u> when running with non-zero uid. You can however skip .<u>defaultqueue</u> processing by setting <b>SKIP_LOCAL_ENVIRONMENT</b> environment variable.
 
 4. Using control files <b>from.envrules</b>, <b>fromd.envrules</b>, <b>rcpt.envrules</b>, <b>auth.envrules</b> - These are control files used by programs like <b>qmail-smtpd</b>, <b>qmail-inject</b>. They match on the sender or recipient address. Here you can set or unset environment variables for a sender, recipient. You can also use any regular expression to match multipler sender or recipients. To know these environment variables, read the man pages for <b>qmail-smtpd</b>, <b>qmail-inject</b>, <b>spawn-filter</b>.
 
@@ -669,7 +669,7 @@ indimail-mta can be fine tuned and configured using environment variables (> 250
 
 8. Nothing prevents a user from writing a shell script to set environment variables before calling any of indimail-mta programs. If you are familiar with UNIX, you will know how to set them. The mechanism for setting environment variables in a shell depends on the shell you are using and is beyond the scope of this document. You can read the man pages for the shell that your script uses.
 
-It is trivial to display the environment variable that would be set for your service by using the envdir command along with the env command. In fact this is what the `svctool --print-variables --service-name=xxxx` or `minisvc --print-variables --service-name=xxx` does internally.
+It is trivial to display the environment variable that would be set for your service by using the envdir command along with the env command. In fact this is what the `svctool --print-variables --service-name=xxxx` or `minisvc --print-variables --service-name=xxx` does internally. You can show environment variable set for a user (point 3 above) using the command `qmail-showctl -E`
 
 ```
 Display environment variables set for defaultqueue
@@ -737,6 +737,35 @@ MIN_FREE=52428800
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 LOCALIP=0
 CERTDIR=/etc/indimail/certs
+
+Display environment variables set for the user localuser by using qmail-showctl
+
+$ qmail-showctl -E
+------------------ begin show env ----------------------------
+HOME=/home/localuser
+QMAILDEFAULTHOST=argos.indimail.org
+TLS_CIPHER_LIST=ALL:!aNULL:!ADH:!eNULL:!LOW:!EXP:RC4+RSA:+HIGH:+MEDIUM:-EDH-RSA-DES-CBC3-SHA:-EDH-DSS-DES-CBC3-SHA:-DES-CBC3-SHA
+:-DES-CBC3-MD5:+SSLv3:+TLSv1:-SSLv2:!DES:!MD5:!PSK:!RC4:!3DES:!SHA1:!SHA256:!SHA384
+MAKE_SEEKABLE=1
+QUEUE_BASE=/var/indimail/queue
+QUEUE_START=1
+defaultdomain=indimail.org
+LOGFILTER=/run/indimail/logfifo
+BIGTODO=0
+VIRUSCHECK=1
+DKIMSIGNOPTIONS=-z 2
+SMTP_RATE=400
+SPAMFILTER=/usr/bin/bogofilter -p -d /etc/indimail
+CONFSPLIT=23
+REJECTSPAM=0
+QMAILQUEUE=/usr/sbin/qmail-dkim /usr/sbin/qmail-spamfilter
+USER=localuser
+DYNAMIC_QUEUE=1
+SPAMEXITCODE=0
+QMAILINJECT_FORCE_SRS=1
+DKIMSIGNOPTIONSEXTRA=-z 4
+QUEUE_COUNT=1
+DKIMSIGN=/home/localuser/domainkeys/private
 ```
 
 NOTE: The program <b>envdir</b> that indimail-mta uses, is very powerful. It has the ability to hyperlink additional directories/files having environment variables using .<u>envdir</u> and .<u>envfile</u>.
