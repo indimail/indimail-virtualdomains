@@ -737,7 +737,7 @@ It is trivial to display the environment variable that would be set for your ser
 	LOCALIP=0
 	CERTDIR=/etc/indimail/certs
 
-<b>Display environment variables set for the user <u>localuser</u> by using qmail-showctl</b>
+<b>Display environment variables for a user logged in as <u>localuser</u> by using qmail-showctl</b>
 
 	$ qmail-showctl -E
 	------------------ begin show env ----------------------------
@@ -765,6 +765,27 @@ It is trivial to display the environment variable that would be set for your ser
 	DKIMSIGNOPTIONSEXTRA=-z 4
 	QUEUE_COUNT=1
 	DKIMSIGN=/home/localuser/domainkeys/private
+
+<b>Display environment variables for any user by using qmail-showctl</b>
+
+You just need to set the HOME environment variable to the home directory of the user. e.g.
+
+	$ sudo env HOME=/root qmail-showctl -E
+	------------------ begin show env ----------------------------
+	HOME=/root
+	QMAILDEFAULTHOST=argos.indimail.org
+	TLS_CIPHER_LIST=ALL:!aNULL:!ADH:!eNULL:!LOW:!EXP:RC4+RSA:+HIGH:+MEDIUM:-EDH-RSA-DES-CBC3-SHA:-EDH-DSS-DES-CBC3-SHA:-DES-CBC3-SHA
+	:-DES-CBC3-MD5:+SSLv3:+TLSv1:-SSLv2:!DES:!MD5:!PSK:!RC4:!3DES:!SHA1:!SHA256:!SHA384
+	QUEUEDIR=/var/indimail/queue/qmta
+	QUEUE_COUNT=5
+	QUEUE_START=1
+	defaultdomain=indimail.org
+	BIGTODO=0
+	CONFSPLIT=23
+	DYNAMIC_QUEUE=1
+	QMAILQUEUE=/usr/sbin/qmail-queue
+	QUEUE_BASE=/var/indimail/queue
+
 
 NOTE: The program <b>envdir</b> that indimail-mta uses, is powerful because of it's recursive feature. It has the ability to hyperlink additional directories/files having environment variables using .<u>envdir</u> and .<u>envfile</u>.
 
