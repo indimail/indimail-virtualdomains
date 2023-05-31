@@ -671,24 +671,26 @@ indimail-mta can be fine tuned and configured using environment variables (> 250
 
 It is trivial to display the environment variable that would be set for your service by using the envdir command along with the env command. In fact this is what the `svctool --print-variables --service-name=xxxx` or `minisvc --print-variables --service-name=xxx` does internally. You can show environment variable set for a user (point 3 above) using the command `qmail-showctl -E`
 
-```
 Display environment variables set for defaultqueue
 
-$ envdir -c /etc/indimail/control/defaultqueue env
-USE_FSYNC=
-QUEUE_START=1
-QMAILQUEUE=/usr/sbin/qmail-dkim
-QUEUE_COUNT=5
-DKIMSIGN=/etc/indimail/control/domainkeys/%/default
-CONFSPLIT=151
-VIRUSCHECK=1
-QHPSI=/usr/bin/clamdscan %s --config=/etc/clamd.d/scan.conf --fdpass --quiet --no-summary
-USE_SYNCDIR=
-QUEUE_BASE=/var/indimail/queue
-MIN_FREE=52428800
+    ```
+    $ envdir -c /etc/indimail/control/defaultqueue env
+    USE_FSYNC=
+    QUEUE_START=1
+    QMAILQUEUE=/usr/sbin/qmail-dkim
+    QUEUE_COUNT=5
+    DKIMSIGN=/etc/indimail/control/domainkeys/%/default
+    CONFSPLIT=151
+    VIRUSCHECK=1
+    QHPSI=/usr/bin/clamdscan %s --config=/etc/clamd.d/scan.conf --fdpass --quiet --no-summary
+    USE_SYNCDIR=
+    QUEUE_BASE=/var/indimail/queue
+    MIN_FREE=52428800
+    ```
 
 Display environment variables set for SMTPS service
 
+```
 $ sudo minisvc --print-variables=qmail-smtpd.465
 or
 $ sudo envdir -c /service/qmail-smtpd.465/variables env
@@ -737,9 +739,11 @@ MIN_FREE=52428800
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 LOCALIP=0
 CERTDIR=/etc/indimail/certs
+```
 
-Display environment variables set for the user localuser by using qmail-showctl
+Display environment variables set for the user <u>localuser</u> by using qmail-showctl
 
+```
 $ qmail-showctl -E
 ------------------ begin show env ----------------------------
 HOME=/home/localuser
