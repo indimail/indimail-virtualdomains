@@ -131,9 +131,10 @@ Table of Contents
       * [Create your DNS records](#create-your-dns-records)
       * [Set SMTP to sign with DKIM signatures](#set-smtp-to-sign-with-dkim-signatures)
       * [Set SMTP to verify DKIM signatures](#set-smtp-to-verify-dkim-signatures)
-      * [DKIM Author Domain Signing Practices](#dkim-author-domain-signing-practices)
       * [DKIM sign during remote delivery](#dkim-sign-during-remote-delivery)
       * [DKIM sign during local delivery](#dkim-sign-during-local-delivery)
+      * [DKIM sign during mail injection](#dkim-sign-during-mail-injection)
+      * [DKIM Author Domain Signing Practices](#dkim-author-domain-signing-practices)
       * [Testing outbound signatures](#testing-outbound-signatures)
    * [iwebadmin – Web Administration of IndiMail](#iwebadmin--web-administration-of-indimail)
    * [Publishing statistics for IndiMail Server](#publishing-statistics-for-indimail-server)
@@ -656,7 +657,7 @@ indimail-mta can be fine tuned and configured using environment variables (> 250
 
 2. Using environment directory <u>defaultqueue</u> in <b>/etc/indimail/control</b> directory. This is just like the supervise <u>variables</u> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, <b>sendmail</b> and few other programs (See NOTE below). Read the man page for <b>qmail-inject</b>. Just like the <u>variables</u> directory mentioned above, you can have .<u>envdir</u> and .<u>envfile</u> in <u>defaultqueue</u> directory. The <u>defaultqueue</u> directory gets skipped if you have the <b>QUEUE_BASE</b> environment variable already set. <b>envdir</b> will exit 111 if it has trouble reading any directories when processing the <u>defaultqueue</u> directory or any extra directories because while processing. However, failure to read any environment variable file doesn't result in errors. This allows the administrator to set environment variables having access to specific users on the system. <b>envdir</b> will continue the processing skipping files for which it lacks permissions.
 
-3. Using environment directory .<u>defaultqueue</u> in $HOME. This too is just like the supervise <u>variables</u> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, <b>sendmail</b>. Here $HOME refers to the home directory of the user and is totally under the control of the user to set it. Read the man page for <b>qmail-inject</b>. This directory too can have .<u>envdir</u> or .<u>envfile</u> to set additional environment variables. But unlike <u>defaultqueue</u>, any error processing this directory, additional directories from processig .<u>envdir</u> are ignored and no change is made to the existing set of environment variables. If you set <b>QUEUE_BASE</b> in this directory, then <u>/etc/indimail/control/defaultqueue</u> gets skipped, allowing you to override system configured environment variables.
+3. Using environment directory .<u>defaultqueue</u> in $HOME. This too is just like the supervise <u>variables</u> directory. The environment variables configured in this directory get used when calling <b>qmail-inject</b>, <b>sendmail</b>. Here $HOME refers to the home directory of the user and is totally under the control of the user to set it. Read the man page for <b>qmail-inject</b>. This directory too can have .<u>envdir</u> or .<u>envfile</u> to set additional environment variables. But unlike <u>defaultqueue</u>, any error processing this directory, additional directories from processig .<u>envdir</u> are ignored and no change is made to the existing set of environment variables. If you set <b>QUEUE_BASE</b> in this directory, then <u>/etc/indimail/control/defaultqueue</u> gets skipped, allowing you to override system configured environment variables. Programs that set environment variables from $HOME/.defaultqueue directory are condredirect, dot-forward, fastforward, filterto, forward, maildirserial, new-inject, qmail-inject, qmail-qread, qmail-showctl, qmonitor, qmta-send, qnotify, qreceipt, queue-fix, replier, rrforward and rrt. Out of these programs, qmail-inject, new-inject, qmail-qread and maildirserial will always process .<u>defaultqueue</u>. The remaining programs process .<u>defaultqueue</u> when running with non-zero uid. You can however skip .<u>defaultqueue</u> by setting <b>SKIP_LOCAL_ENVIRONMENT</b> environment variable.
 
 4. Using control files <b>from.envrules</b>, <b>fromd.envrules</b>, <b>rcpt.envrules</b>, <b>auth.envrules</b> - These are control files used by programs like <b>qmail-smtpd</b>, <b>qmail-inject</b>. They match on the sender or recipient address. Here you can set or unset environment variables for a sender, recipient. You can also use any regular expression to match multipler sender or recipients. To know these environment variables, read the man pages for <b>qmail-smtpd</b>, <b>qmail-inject</b>, <b>spawn-filter</b>.
 
@@ -2602,7 +2603,7 @@ A indimail-mini installation is just like a indimail installation, except that i
 * You don't need indimail entries in /etc/group or /etc/passwd. indimail-mini runs with the same privileges as the user sending mail; it doesn't have any of its own files.
 * You don't need to start anything from your boot scripts. indimail-mini doesn't have a queue, so it doesn't need a long-running queue manager.
 
-Installation and setup is trivial if you use the RPM package (See the chapter [Installing Indimail using DNF/YUM/APT Repository](## Installing Indimail using DNF/YUM/APT Repository)).
+Installation and setup is trivial if you use the RPM package (See the chapter [Installing Indimail using DNF/YUM/APT Repository](#installing-indimail-using-dnfyumapt-repository)).
 
 ```
 $ sudo dnf install indimail-mini
@@ -2662,7 +2663,7 @@ A qmta installation using qmta-send is just like an indimail-mini installation, 
 * You don't require MySQL
 * You don't require daemontools, ucspi-tcp. You don't need to add anything to inetd.conf. A null client doesn't receive incoming mail.
 
-Installation and setup is trivial if you use the RPM package (See the chapter [Installing Indimail using DNF/YUM/APT Repository](## Installing Indimail using DNF/YUM/APT Repository)).
+Installation and setup is trivial if you use the RPM package (See the chapter [Installing Indimail using DNF/YUM/APT Repository](#installing-indimail-using-dnfyumapt-repository)).
 
 ```
 Install qmta (you can use yum / dnf / apt-get depending on your distribution)
@@ -4557,12 +4558,12 @@ You may want to look at an excellent [setup instructions](http://notes.sagredo.e
 ```
 $ sudo /bin/bash
 # mkdir -p /etcindimail/control/domainkeys
+# chown root:qcerts /etc/indimail/control/domainkeys
 # cd /etc/indimail/control/domainkeys
-# dknewkey /etc/indimail/control/default 1024
-# chown indimail:qmail default (name of our selector)
-# chmod 640 default
-# chmod 644 default.pub
+# dknewkey -b 2048 /etc/indimail/control/default
 ```
+
+If you see above, the private key <b>default</b> has can be read only by the <b>root</b> UNIX user or a user who is part of the <b>qcerts</b> UNIX group. This means that only the <b>root</b> user or users who are part of the <b>qcerts</b> group can sign messages to have a DKIM signature.
 
 ## Create your DNS records
 
@@ -4606,23 +4607,6 @@ $ sudo /bin/bash
 # svc -r /service/qmail-smtpd.25
 ```
 
-## DKIM Author Domain Signing Practices
-
-IndiMail supports ADSP. A DKIM Author Signing Practice lookup is done by the verifier to determine whether it should expect email with the From: address to be signed.
-
-The Sender Signing Practice is published with a DNS TXT record as follows:
-
-`_adsp._domainkey.indimail.org. IN TXT "dkim=unknown"`
-
-The dkim tag denotes the outbound signing Practice. unknown means that the indimail.org domain may sign some emails. You can have the values "discardable" or "all" as other values for dkim tag. discardable means that any unsigned email from indimail.org is recommended for rejection. all means that indimail.org signs all emails with dkim.
-
-You may decide to consider ADSP as optional until the specifications are formalised. To set ADSP you need to set the environment variable SIGNPRACTICE=adsp. i.e
-
-`# echo adsp > /service/smtpd.25/variables/SIGN_PRACTICE`
-
-You may not want to do DKIM signing/verificaton by SMTP. In that case, you have the choice of using the QMAILREMOTE, QMAILLOCAL environment variables which allows IndiMail to run any script before it gets passed to <b>qmail-remote</b>, <b>qmail-local</b> respectively.
-Setting <b>qmail-remote</b> to sign with DKIM signatures On your host which sends out outgoing mails, it only make sense to do DKIM signing and not verification.
-
 ## DKIM sign during remote delivery
 
 ```
@@ -4648,6 +4632,58 @@ $ sudo /bin/bash
 # svc -r /service/qmail-send.25
 ```
 
+## DKIM sign during mail injection
+
+Any UNIX user on the system can sign their outbound emails with DKIM signature during mail injection itself. All that is required is to have a DKIM public/private key created using dknewkey as given in [Create your DKIM signature](#create-your-dkim-signature). Once you have done that, the user injecting the mail, will require read access to the private key. We have two unique cases. One for system users and another for users having shell accounts.
+
+<b>System Users</b>
+
+If this is a system user (users without shell access) that will be sending out the email then you just need to add this user to the <b>qcerts</b> group. e.g. for php scripts sending out emails, the following command will add the user <b>apache</b> to have <b>qcerts</b> as a supplementary group.
+
+```
+/usr/sbin/usermod -aG qcerts apache
+```
+
+<b>Non-System users</b>
+
+If you want actual UNIX users who have shell access to the system, have the DKIM private key have the read permission for the primary group of the user. e.g. A UNIX user with <b>user1</b> as the username and <b>group1</b> as the primary group, do the following
+
+```
+$ sudo /bin/bash
+# mkdir ~/domainkeys
+# chmod 700 ~/domainkeys
+# dknewkey -b 2048 ~/domainkeys/default
+# cd ~/domainkeys
+# chown user1:group1 default (name of our selector)
+# chown user1:group1 default.pub
+# chmod 640 default
+# chmod 640 default.pub
+```
+
+Now to use the above DKIM key, we need to set few environment variables specific to <b>user1</b>. To do that we just use the envdir property of indimail-mta where any file in ~/.defaultqueue becomes an environment variable set by programs like <b>qmail-inject</b>. Refer to point 3 in [Setting Environment Variables](#setting-environment-variables) for reference. Assuming <u>/home/user1</u> is the home directory for <b>user1</b>, we can create DKIMSIGN environment variable as below.
+
+```
+$ mkdir ~/.defaultqueue
+$ cd ~/.defaultqueue
+$ echo "/home/user1/domainkeys/default" > DKIMSIGN
+```
+
+## DKIM Author Domain Signing Practices
+
+IndiMail supports ADSP. A DKIM Author Signing Practice lookup is done by the verifier to determine whether it should expect email with the From: address to be signed.
+
+The Sender Signing Practice is published with a DNS TXT record as follows:
+
+`_adsp._domainkey.indimail.org. IN TXT "dkim=unknown"`
+
+The dkim tag denotes the outbound signing Practice. unknown means that the indimail.org domain may sign some emails. You can have the values "discardable" or "all" as other values for dkim tag. discardable means that any unsigned email from indimail.org is recommended for rejection. all means that indimail.org signs all emails with dkim.
+
+You may decide to consider ADSP as optional until the specifications are formalised. To set ADSP you need to set the environment variable SIGNPRACTICE=adsp. i.e
+
+`# echo adsp > /service/smtpd.25/variables/SIGN_PRACTICE`
+
+You may not want to do DKIM signing/verificaton by SMTP. In that case, you have the choice of using the QMAILREMOTE, QMAILLOCAL environment variables which allows IndiMail to run any script before it gets passed to <b>qmail-remote</b>, <b>qmail-local</b> respectively.
+Setting <b>qmail-remote</b> to sign with DKIM signatures On your host which sends out outgoing mails, it only make sense to do DKIM signing and not verification.
 
 ## Testing outbound signatures
 
