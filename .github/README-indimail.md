@@ -5891,11 +5891,11 @@ $ sudo sh -c "echo "/usr/sbin/qmail-multi" > /etc/indimail/control/defaultqueue/
 To disable DKIM for a specific user with home directory /home/localuser
 
 ```
-$ mkdir ~/.defaultqueue
-$ > ~/.defaultqueue/DKIMSIGN
-$ echo /usr/sbin/qmail-queue > ~/.defaultqueue/QMAILQUEUE
-$ echo /var/indimail/queue > ~/.defaultqueue/QUEUE_BASE
-$ echo 5 > ~/.defaultqueue/QUEUE_COUNT
+$ mkdir /home/localuser/.defaultqueue
+$ > /home/localuser/.defaultqueue/DKIMSIGN
+$ echo /usr/sbin/qmail-queue > /home/localuser/.defaultqueue/QMAILQUEUE
+$ echo /var/indimail/queue   > /home/localuser/.defaultqueue/QUEUE_BASE
+$ echo 5 > /home/localuser/.defaultqueue/QUEUE_COUNT
 ```
 
 Once you have done the above, you can proceed to install indimail-mta or indimail. The installation is briefly explained below
