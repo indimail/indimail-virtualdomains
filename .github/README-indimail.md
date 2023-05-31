@@ -671,7 +671,7 @@ indimail-mta can be fine tuned and configured using environment variables (> 250
 
 It is trivial to display the environment variable that would be set for your service by using the envdir command along with the env command. In fact this is what the `svctool --print-variables --service-name=xxxx` or `minisvc --print-variables --service-name=xxx` does internally. You can show environment variable set for a user (point 3 above) using the command `qmail-showctl -E`
 
-Display environment variables set for defaultqueue
+<b>Display environment variables set for defaultqueue</b>
 
 	$ envdir -c /etc/indimail/control/defaultqueue env
 	USE_FSYNC=
@@ -686,7 +686,7 @@ Display environment variables set for defaultqueue
 	QUEUE_BASE=/var/indimail/queue
 	MIN_FREE=52428800
 
-Display environment variables set for SMTPS service
+<b>Display environment variables set for SMTPS service</b>
 
 	$ sudo minisvc --print-variables=qmail-smtpd.465
 	or
@@ -737,7 +737,7 @@ Display environment variables set for SMTPS service
 	LOCALIP=0
 	CERTDIR=/etc/indimail/certs
 
-Display environment variables set for the user <u>localuser</u> by using qmail-showctl
+<b>Display environment variables set for the user <u>localuser</u> by using qmail-showctl</b>
 
 	$ qmail-showctl -E
 	------------------ begin show env ----------------------------
