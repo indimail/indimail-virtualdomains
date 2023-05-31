@@ -131,9 +131,9 @@ Table of Contents
       * [Create your DNS records](#create-your-dns-records)
       * [Set SMTP to sign with DKIM signatures](#set-smtp-to-sign-with-dkim-signatures)
       * [Set SMTP to verify DKIM signatures](#set-smtp-to-verify-dkim-signatures)
-      * [DKIM sign during remote delivery](#dkim-sign-during-remote-delivery)
-      * [DKIM sign during local delivery](#dkim-sign-during-local-delivery)
-      * [DKIM sign during mail injection](#dkim-sign-during-mail-injection)
+      * [DKIM signing during remote delivery](#dkim-signing-during-remote-delivery)
+      * [DKIM signing during local delivery](#dkim-signing-during-local-delivery)
+      * [DKIM signing during mail injection](#dkim-signing-during-mail-injection)
       * [DKIM Author Domain Signing Practices](#dkim-author-domain-signing-practices)
       * [Testing outbound signatures](#testing-outbound-signatures)
    * [iwebadmin – Web Administration of IndiMail](#iwebadmin--web-administration-of-indimail)
@@ -4656,7 +4656,7 @@ $ sudo /bin/bash
 # svc -r /service/qmail-smtpd.25
 ```
 
-## DKIM sign during remote delivery
+## DKIM signing during remote delivery
 
 ```
 $ sudo /bin/bash
@@ -4668,7 +4668,7 @@ $ sudo /bin/bash
 # svc -r /service/qmail-send.25
 ```
 
-## DKIM sign during local delivery
+## DKIM signing during local delivery
 
 On your host which serves as your incoming gateway for your local domains, it only makes sense to do DKIM verification with <b>qmail-local</b>
 
@@ -4681,7 +4681,7 @@ $ sudo /bin/bash
 # svc -r /service/qmail-send.25
 ```
 
-## DKIM sign during mail injection
+## DKIM signing during mail injection
 
 Any UNIX user on the system can sign their outbound emails with DKIM signature during mail injection itself. All that is required is to have a DKIM public/private key created using dknewkey as given in [Create your DKIM signature](#create-your-dkim-signature). Once you have done that, the user injecting the mail, will require read access to the private key. We have two unique cases. One for system users and another for users having shell accounts.
 
@@ -5876,7 +5876,7 @@ The commands below will setup indimail-mta or indimail with a basic working inst
 $ sudo /usr/sbin/usermod -aG qcerts $(whoami)
 ```
 
-For non-system users with shell accounts, the users can create DKIM keys in their own home directory and set the <b>DKIMSIGN</b> environment variable to the path of the DKIM private key. You can refer to [this](#dkim-sign-during-mail-injection) for reference.
+For non-system users with shell accounts, the users can create DKIM keys in their own home directory and set the <b>DKIMSIGN</b> environment variable to the path of the DKIM private key. You can refer to [dkim signing during mail injection](#dkim-signing-during-mail-injection) for reference.
 
 You may have a case where you don't require DKIM signing for verification.
 
@@ -5884,6 +5884,7 @@ To disable DKIM globally you can do
 
 ```
 $ sudo sh -c "> /etc/indimail/control/defaultqueue/DKIMSIGN"
+$ sudo sh -c "/bin/rm -f /service/*/variables/DKIMSIGN"
 $ sudo sh -c "echo "/usr/sbin/qmail-multi" > /etc/indimail/control/defaultqueue/QMAILQUEUE"
 ```
 
