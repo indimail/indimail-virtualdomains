@@ -4606,26 +4606,29 @@ For DKIM signing, three methods have been described - one during SMTP, one durin
 
 You may want to look at an excellent [setup instructions](http://notes.sagredo.eu/node/92 "Roberto's Notes") by Roberto Puzzanghera for configuring dkim for qmail.
 
-## Create your DKIM signature
+## Create your DKIM private/public keys
+
+To able to sign emails with a DKIM signature, you need to create a private/public key pair using openssl. indimail-mta provides a script <b>dknewkey</b> to help you create this private/public key pair.
 
 ```
 $ sudo /bin/bash
 # mkdir -p /etcindimail/control/domainkeys
 # chown root:qcerts /etc/indimail/control/domainkeys
-# cd /etc/indimail/control/domainkeys
-# dknewkey -b 2048 /etc/indimail/control/default
+# dknewkey -b 2048 /etc/indimail/control/domainkeys/default
 ```
 
-If you see above, the private key <b>default</b> has can be read only by the <b>root</b> UNIX user or a user who is part of the <b>qcerts</b> UNIX group. This means that only the <b>root</b> user or users who are part of the <b>qcerts</b> group can sign messages to have a DKIM signature.
+The private key <b>default</b> created by <b>dknewkey</b> can be read only by the <b>root</b> UNIX user or a user who is part of the <b>qcerts</b> UNIX group. This means that only the <b>root</b> user or users who are part of the <b>qcerts</b> group can sign messages to have a DKIM signature. This is required because you don't want someone else to send out emails with your signature.
 
 ## Create your DNS records
 
 ```
 $ cd /etc/indimail/control/domainkeys
 $ pubkey=$(openssl rsa -in default -pubout -outform PEM | grep -v '^--' | tr -d '\n')
+```
 
-The next command will print the text that you need to put in your txt record for
-default._domainkey.indimail.org
+The next command will print the text that you need to put in your txt record for default._domainkey.indimail.org. Replace indimail.org with our FQDN.
+
+```
 $ printf "default._domainkey.indimail.org\tIN\tTXT\t\"v=DKIM1; k=rsa; p=%s\"\n" "$pubkey"
 default._domainkey.indimail.org IN      TXT     "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC2dvktnCXRavyuuoy2NUcHWpMp/Ia7Y5Y9tTwjjby7hS9wIvgecBz6UEMunOJdAZ2RVvSXKxPlxO4/rUgW6ow7vlEPY3IKagy+VFW1oHmvj4WU+BxZTJA2d8VrW9S9O1JMuPGGwdeYOC/Gcle/EviQtGYsz3jL/HrJb9rXXl4/gwIDAQAB"
 ```
