@@ -743,7 +743,7 @@ Display environment variables set for SMTPS service
 
 Display environment variables set for the user <u>localuser</u> by using qmail-showctl
 
-```
+	```
 	$ qmail-showctl -E
 	------------------ begin show env ----------------------------
 	HOME=/home/localuser
@@ -770,7 +770,7 @@ Display environment variables set for the user <u>localuser</u> by using qmail-s
 	DKIMSIGNOPTIONSEXTRA=-z 4
 	QUEUE_COUNT=1
 	DKIMSIGN=/home/localuser/domainkeys/private
-```
+	```
 
 NOTE: The program <b>envdir</b> that indimail-mta uses, is powerful because of it's recursive feature. It has the ability to hyperlink additional directories/files having environment variables using .<u>envdir</u> and .<u>envfile</u>.
 
