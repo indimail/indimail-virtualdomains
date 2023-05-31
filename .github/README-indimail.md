@@ -4689,7 +4689,7 @@ Any UNIX user on the system can sign their outbound emails with DKIM signature d
 If this is a system user (users without shell access) that will be sending out the email then you just need to add this user to the <b>qcerts</b> group. e.g. for php scripts sending out emails, the following command will add the user <b>apache</b> to have <b>qcerts</b> as a supplementary group.
 
 ```
-/usr/sbin/usermod -aG qcerts apache
+$ sudo /usr/sbin/usermod -aG qcerts apache
 ```
 
 <b>Non-System users</b>
@@ -5798,7 +5798,7 @@ Currently IndiMail supports both docker and podman. Both commands are interchang
 
 # Installation & Repositories
 
-## Installing Indimail using DNF/YUM/APT Repository
+## Setting up DNF/YUM/APT Repository for installation
 
 You can get binary RPM / Debian packages at
 
@@ -5867,7 +5867,89 @@ Currently, the list of supported distributions for IndiMail is
           o Ubuntu 22.04
 ```
 
-## Binary Builds on openSUSE Build Service and Copr
+## Installing packages from the repostory
+
+The commands below will setup indimail-mta or indimail with a basic working installation needed to send and receive mails. By default installation sets up DKIM keys in /etc/indimail/control/domainkeys/default. You need permission to access the private key for the user who needs to send out emails. If this is a system user, it can be done by adding those users to have <b>qcerts</b> as a supplementary group. To do this you can execute the command
+
+```
+$ sudo /usr/sbin/usermod -aG qcerts $(whoami)
+```
+
+For non-system users with shell accounts, the users can create DKIM keys in their own home directory and set the <b>DKIMSIGN</b> environment variable to the path of the DKIM private key. You can refer to [this](#dkim-sign-during-mail-injection) for reference.
+
+You may have a case where you don't require DKIM signing for verification.
+
+To disable DKIM globally you can do
+
+```
+$ sudo sh -c "> /etc/indimail/control/defaultqueue/DKIMSIGN"
+$ sudo sh -c "echo "/usr/sbin/qmail-multi" > /etc/indimail/control/defaultqueue/QMAILQUEUE"
+```
+
+To disable DKIM for a specific user with home directory /home/localuser
+
+```
+$ mkdir ~/.defaultqueue
+$ > ~/.defaultqueue/DKIMSIGN
+$ echo /usr/sbin/qmail-queue > ~/.defaultqueue/QMAILQUEUE
+$ echo /var/indimail/queue > ~/.defaultqueue/QUEUE_BASE
+$ echo 5 > ~/.defaultqueue/QUEUE_COUNT
+```
+
+Once you have done the above, you can proceed to install indimail-mta or indimail. The installation is briefly explained below
+
+<b>For RPM builds</b>
+
+```
+For installing indimail-mta
+
+$ sudo dnf -y install indimail-mta
+
+For installing indimail use the below command.
+Installing indimail will pull indimail-mta as a dependency.
+
+$ sudo dnf -y install indimail
+```
+
+<b>For debian builds</b>
+
+```
+For installing indimail-mta
+
+$ sudo apt -y install indimail-mta
+
+For installing indimail use the below command.
+Installing indimail will pull indimail-mta as a dependency.
+
+$ sudo apt -y install indimail
+```
+
+<b>For Arch Linux builds</b>
+
+```
+For installing indimail-mta
+
+$ sudo pacman -S --needed indimail-mta
+
+For installing indimail use the below command.
+Installing indimail will pull indimail-mta as a dependency.
+
+$ sudo pacman -S --needed indimail
+```
+
+After the installation is complete you can start indimail-mta or indimail by executing
+
+```
+$ sudo systemctl start svscan
+```
+
+After you have started the svscan service, you can look at the status of all services by executing the folowing command
+
+```
+$ sudo svps -a
+```
+
+## Binary Build status on openSUSE Build Service and Copr
 
 **[Build Status on](https://build.opensuse.org/project/monitor/home:mbhangui) [Open Build Service](https://build.opensuse.org/project/show/home:mbhangui)**
 
