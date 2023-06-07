@@ -1,6 +1,6 @@
 .TH nssd.conf 5
 .SH NAME
-INDIMAIL/etc/nssd.conf - NSS database configuration for nssd
+INDIMAIL/nssd.conf - NSS database configuration for nssd
 .SH DESCRIPTION
 nscd.conf specifies the query to be executed against a MySQL database for the functions
 getpwnam(3), getpwuid(3), getpwent(3), getspnam(3), getspent(3), getgrnam(3), getgrgid(3),
@@ -85,7 +85,7 @@ LOG_DEBUG	| debug-level message
 .RE
 
 .PP
-The example below shows a configuration file INDIMAIL/etc/nssd.conf
+The example below shows a configuration file INDIMAIL/nssd.conf
 .PP
 .EX
  getpwnam   SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell \\
@@ -123,7 +123,7 @@ The example below shows a configuration file INDIMAIL/etc/nssd.conf
  password    xxxxxxxx
  socket      /run/mysqld/mysqld.sock
  #port       3306
- pidfile     /run/indimail/nssd.pid
+ pidfile     /run/indimail/pwdlookup/nssd.pid
  threads     5
  timeout     -1
  facility    daemon

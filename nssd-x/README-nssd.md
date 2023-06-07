@@ -84,7 +84,7 @@ the --with-mysql=DIR option of ./configure to specify.  For example,
   For IndiMail, to install a supervise service, run the svctool command
 
   ```
-  # /usr/sbin/svctool --pwdlookup="/run/indimail/nssd.sock"
+  # /usr/sbin/svctool --pwdlookup="/run/indimail/pwdlookup/nssd.sock"
       --threads="5" --timeout="-1" --mysqlhost="localhost"
       --mysqluser="indimail" --mysqlpass="ssh-1.5-"
       --mysqlsocket="/var/run/mysqld/mysqld.sock"
@@ -97,16 +97,16 @@ the --with-mysql=DIR option of ./configure to specify.  For example,
   #!/bin/sh
   # $Id: svctool.in,v 2.478 2020-05-24 23:55:49+05:30 Cprogrammer Exp mbhangui $
   # generated on x86_64-pc-linux-gnu on Monday 25 May 2020 06:35:11 PM IST
-  # /usr/sbin/svctool --pwdlookup="/run/indimail/nssd.sock" --threads="5" --timeout="-1" --mysqlhost="localhost" --mysqluser="indimail" --mysqlpass="ssh-1.5-" --mysqlsocket="/var/run/mysqld/mysqld.sock" --servicedir="/service"
+  # /usr/sbin/svctool --pwdlookup="/run/indimail/pwdlookup/nssd.sock" --threads="5" --timeout="-1" --mysqlhost="localhost" --mysqluser="indimail" --mysqlpass="ssh-1.5-" --mysqlsocket="/var/run/mysqld/mysqld.sock" --servicedir="/service"
 
   if [ -d /run ] ; then
-    mkdir -p /run/indimail
-    chown indimail:indimail /run/indimail
+    mkdir -p /run/indimail/pwdlookup
+    chown indimail:indimail /run/indimail/pwdlookup
     chmod 775 /run/indimail
   elif [ -d /var/run ] ; then
-    mkdir -p /var/run/indimail
-    chown indimail:indimail /var/run/indimail
-    chmod 775 /var/run/indimail
+    mkdir -p /var/run/indimail/pwdlookup
+    chown indimail:indimail /var/run/indimail/pwdlookup
+    chmod 775 /var/run/indimail/pwdlookup
   fi
   exec 2>&1
   exec /usr/bin/envdir /service/pwdlookup/variables \

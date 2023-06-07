@@ -67,10 +67,21 @@ if [ $upgrade -eq 1 ] ; then # upgrade
   set +e
   if [ -d /run ] ; then
     rundir=/run
+    nssd_sock="/run/indimail/pwdlookup/nssd.sock"
+    mkdir -p /run/indimail
   elif [ -d /var/run ] ; then
     rundir=/var/run
+    nssd_sock="/var/run/indimail/pwdlookup/nssd.sock"
+    mkdir -p /var/run/indimail
   else
     rundir=${servicedir}
+    nssd_sock="/tmp/pwdlookup/nssd.sock"
+	mkdir -p /tmp/pwdlookup
+  fi
+
+  grep "pwdlookup/nssd.sock" ${servicedir}/pwdlookup/variables/.options >/dev/null
+  if [ $? -ne 0 ] ; then
+    sed -i 's{indimail/nssd.sock{indimail/pwdlookup/nssd.sock{g' ${servicedir}/pwdlookup/variables/.options
   fi
   ${prefix}/bin/svok ${servicedir}/pwdlookup >/dev/null 2>&1
   if [ $? -eq 0 -a -f ${rundir}/pwdlookup/.down ] ; then
@@ -102,16 +113,6 @@ if [ ! -d ${logdir}/pwdlookup ] ; then
   /bin/mkdir -p ${logdir}/pwdlookup
   /bin/chown -R qmaill:nofiles ${logdir}/pwdlookup
 fi
-if [ -d /run ] ; then
-  nssd_sock="/run/indimail/nssd.sock"
-  mkdir -p /run/indimail
-elif [ -d /var/run ] ; then
-  nssd_sock="/var/run/indimail/nssd.sock"
-  mkdir -p /var/run/indimail
-else
-  nssd_sock="/tmp/nssd.sock"
-fi
-
 ${prefix}/sbin/svctool --pwdlookup=$nssd_sock --threads=5 --timeout=-1 \
   --mysqlhost=localhost --mysqluser=indimail \
   --mysqlpass=ssh-1.5- --mysqlsocket=${mysqlSocket} --servicedir=${servicedir}

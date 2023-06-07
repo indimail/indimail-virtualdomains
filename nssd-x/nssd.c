@@ -19,8 +19,9 @@
 /*- A SIGNIFICANT PORTION OF THIS CODE IS BASED ON GNU NSCD */
 
 /*
- * $Id: nssd.c,v 1.6 2021-07-21 11:06:26+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: nssd.c,v 1.7 2023-06-07 19:41:19+05:30 Cprogrammer Exp mbhangui $ 
  */
+#define _GNU_SOURCE 
 #include "common.h"
 #include <errno.h>
 #include <pwd.h>
@@ -127,36 +128,79 @@ init_connection(int th_num)
 	return 1;
 }
 
+char *
+print_request_type(int32_t type)
+{
+	switch (type)
+	{
+	case GETPWBYNAME:
+		return ("getpwbyname");
+	case GETPWBYUID:
+		return ("getpwbyuid");
+	case GETPW:
+		return ("getpw");
+	case GETGRBYNAME:break;
+		return ("getgrbyname");
+	case GETGRBYGID:
+		return ("getgrbyid");
+	case GETGR:
+		return ("getgr");
+	case GETGRMEMSBYGID:
+		return ("getgrmemsbygid");
+	case GETGRGIDSBYMEM:
+		return ("getgrgidbymem");
+	case GETSPBYNAME:
+		return ("getspbyname");
+	case GETSP:
+		return ("getsp");
+	}
+	return ("unknown type");
+}
+
 /*- Run the appropriate query (based on TYPE and the struct above) */
 static int
 run_query(int32_t type, char *key, int th_num)
 {
-	char            query[MAX_QUERY_SIZE], ekey[MAX_USERNAME_SIZE * 2 + 1];
+	char           *query, ekey[MAX_USERNAME_SIZE * 2 + 1];
 	char           *p;
 
 	if (!init_connection(th_num))
 		return 0;
-	/*- If we have a key, then use snprintf () */
+	/*- If we have a key, then use asprintf () */
 	if (key && *key) {
 		in_mysql_real_escape_string(&connections[th_num].mysql, ekey, key, strlen(key));
 		if ((p = strchr(ekey, '@'))) {
 			*p = 0;
 			p++;
-			snprintf(query, sizeof (query), query_conf[type].query, ekey, p);
+			if (!asprintf(&query, query_conf[type].query, ekey, p)) {
+				nssd_log(LOG_DEBUG, "asprintf: out of memory");
+				return 0;
+			}
 			*(p - 1) = '@';
-		} else
-		{
+		} else {
 			p = (p = getenv("DEFAULT_DOMAIN")) ? p : DEFAULT_DOMAIN;
-			snprintf(query, sizeof (query), query_conf[type].query, ekey, p);
+			if (!asprintf(&query, query_conf[type].query, ekey, p)) {
+				nssd_log(LOG_DEBUG, "asprintf: out of memory");
+				return 0;
+			}
 		}
-	} else /*- Otherwise just strncpy () */
-		strncpy(query, query_conf[type].query, sizeof (query) - 1);
-	nssd_log(LOG_DEBUG, "%s: query: %s", __FUNCTION__, query);
-	/*- Run the query */
-	if (in_mysql_query(&connections[th_num].mysql, query)) {
-		nssd_log(LOG_ALERT, "%s: mysql_query: %s", __FUNCTION__, in_mysql_error(&connections[th_num].mysql));
+	} else
+		query = query_conf[type].query;
+	if (!query || (query && !*query)) {
+		if (query)
+			free(query);
 		return 0;
 	}
+	nssd_log(LOG_DEBUG, "%s: query: [%s] key [%s] type %s query_conf[%s] ekey[%s]",
+			__FUNCTION__, query, key, print_request_type(type), query_conf[type].query, ekey);
+	/*- Run the query */
+	if (in_mysql_query(&connections[th_num].mysql, query)) {
+		nssd_log(LOG_ALERT, "%s: mysql_query: [%s] key [%s] type %s: %s", __FUNCTION__, query, key,
+				print_request_type(type), in_mysql_error(&connections[th_num].mysql));
+		free(query);
+		return 0;
+	}
+	free(query);
 	return 1;
 }
 
@@ -315,13 +359,15 @@ main_loop(void *p)
 			char            buf[256];
 
 			if (fd < 0) {
-				strerror_r(errno, buf, sizeof(buf));
+				if (strerror_r(errno, buf, sizeof(buf)))
+					;
 				nssd_log(LOG_ALERT, "%d: %s: accept: %s", th_num, __FUNCTION__, buf);
 				continue;
 			}
 			/*- Let's not block and hang a thread on a read/write!  */
 			if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) {
-				strerror_r(errno, buf, sizeof(buf));
+				if (strerror_r(errno, buf, sizeof(buf)))
+					;
 				nssd_log(LOG_ALERT, "%d: %s: fcntl: %s", th_num, __FUNCTION__, buf);
 				close(fd);
 				continue;
@@ -333,7 +379,8 @@ main_loop(void *p)
 #ifdef HAVE_STRUCT_UCRED
 			/*- Detect calling uid */
 			if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, &caller, &optlen) < 0) {
-				strerror_r(errno, buf, sizeof(buf));
+				if (strerror_r(errno, buf, sizeof(buf)))
+					;
 				nssd_log(LOG_ALERT, "%d: %s: getsockopt: %s", th_num, __FUNCTION__, buf);
 				close(fd);
 				continue;
@@ -442,12 +489,14 @@ termination_handler(int signum)
 		char            buf[256];
 		if (pthread_cancel(th[i]) != 0)
 		{
-			strerror_r(errno, buf, sizeof(buf));
+			if (strerror_r(errno, buf, sizeof(buf)))
+				;
 			nssd_log(LOG_ERR, "%s: pthread_cancel: %s", __FUNCTION__, buf);
 		}
 		if (pthread_join(th[i], &result) != 0)
 		{
-			strerror_r(errno, buf, sizeof(buf));
+			if (strerror_r(errno, buf, sizeof(buf)))
+				;
 			nssd_log(LOG_ERR, "%s: pthread_join: %s", __FUNCTION__, buf);
 		}
 		if (result == PTHREAD_CANCELED)
@@ -478,7 +527,8 @@ setup_socket(void)
 	getEnvConfigStr(&socket_file, "NSSD_SOCKET", _PATH_NSSD_SOCKET);
 	nssd_log(LOG_DEBUG, "%s: Initializing socket ...", __FUNCTION__);
 	if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
-		strerror_r(errno, buf, sizeof(buf));
+		if (strerror_r(errno, buf, sizeof(buf)))
+			;
 		nssd_log(LOG_ALERT, "%s: socket: %s", __FUNCTION__, buf);
 		exit(EXIT_FAILURE);
 	}
@@ -486,22 +536,26 @@ setup_socket(void)
 	strncpy(sock_addr.sun_path, socket_file, sizeof(sock_addr.sun_path) - 1);
 	if (!access(socket_file, F_OK) && unlink(socket_file))
 	{
-		strerror_r(errno, buf, sizeof(buf));
-		nssd_log(LOG_ALERT, "%s: unlink: %s", __FUNCTION__, buf);
+		if (strerror_r(errno, buf, sizeof(buf)))
+			;
+		nssd_log(LOG_ALERT, "%s: unlink: %s: %s", __FUNCTION__, socket_file, buf);
 		exit(EXIT_FAILURE);
 	}
 	if (bind(sock, (struct sockaddr *) &sock_addr, sizeof (sock_addr)) < 0) {
-		strerror_r(errno, buf, sizeof(buf));
-		nssd_log(LOG_ALERT, "%s: bind: %s", __FUNCTION__, buf);
+		if (strerror_r(errno, buf, sizeof(buf)))
+			;
+		nssd_log(LOG_ALERT, "%s: bind: %s: %s", __FUNCTION__, socket_file, buf);
 		exit(EXIT_FAILURE);
 	}
 	if (chmod(socket_file, 0666)) {
-		strerror_r(errno, buf, sizeof(buf));
-		nssd_log(LOG_ALERT, "%s: chmod: %s", __FUNCTION__, buf);
+		if (strerror_r(errno, buf, sizeof(buf)))
+			;
+		nssd_log(LOG_ALERT, "%s: chmod: %s: %s", __FUNCTION__, socket_file, buf);
 		exit(EXIT_FAILURE);
 	}
 	if (listen(sock, SOMAXCONN) < 0) {
-		strerror_r(errno, buf, sizeof(buf));
+		if (strerror_r(errno, buf, sizeof(buf)))
+			;
 		nssd_log(LOG_ALERT, "%s: listen: %s", __FUNCTION__, buf);
 		exit(EXIT_FAILURE);
 	}

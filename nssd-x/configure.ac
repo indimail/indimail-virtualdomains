@@ -29,17 +29,17 @@ AC_TYPE_SIZE_T
 case "$host" in
 *-*-sunos4.1.1*)
 	CPPFLAGS="$CPPFLAGS -DSUNOS4"
-	CFLAGS="$CFLAGS -s -O4 -Wall -fPIC"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	OS=sunos
 	;;
 *-*-solaris*)
 	CPPFLAGS="$CPPFLAGS -DSOLARIS"
-	CFLAGS="$CFLAGS -s -O4 -Wall -fPIC"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	OS=solaris
 	;;
 *-*-linux*)
 	CPPFLAGS="$CPPFLAGS -DLINUX"
-	CFLAGS="$CFLAGS -Wno-enum-compare -s -O4 -Wall -fPIC"
+	CFLAGS="$CFLAGS -Wno-enum-compare -O4 -Wall -fPIC"
 	LDFLAGS="$LDFLAGS -pie"
 	OS=linux
 	;;
@@ -56,7 +56,7 @@ case "$host" in
 	OS=freebsd
     ;;
 *)
-	CFLAGS="$CFLAGS -s -O4 -Wall -fPIC"
+	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
 	;;
 esac
 

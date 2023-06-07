@@ -168,11 +168,11 @@ echo "PACKAGE_BUGREPORT=\"'@email@'\""
 if [ -d nssd-%{nssd_version} ] ; then
   cd nssd-%{nssd_version}
   if [ -d /run ] ; then
-    nssd_sock=/run/indimail/nssd.sock
+    nssd_sock=/run/indimail/pwdlookup/nssd.sock
   elif [ -d /var/run ] ; then
-    nssd_sock=/var/run/indimail/nssd.sock
+    nssd_sock=/var/run/indimail/pwdlookup/nssd.sock
   else
-    nssd_sock=/tmp/nssd.sock
+    nssd_sock=/tmp/pwdlookup/nssd.sock
   fi
   %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --sysconfdir=%{sysconfdir} \
   --mandir=%{mandir} --libdir=%{_libdir} --datarootdir=%{shareddir} \
@@ -255,7 +255,7 @@ chmod -R 755 %{buildroot}/%{pam_moduledir}
 %ghost      %attr(-,qmaill,nofiles)      %{logdir}/pwdlookup/*
 %endif
 
-%ghost %config(noreplace,missingok)     %{sysconfdir}/nssd.conf
+%ghost %attr(0640,root,qmail) %config(noreplace,missingok) %{sysconfdir}/nssd.conf
 %attr(644,root,root)                    %{sysconfdir}/%{name}-rpm.info
 %attr(644,root,root)                    %{sysconfdir}/%{name}-release
 
@@ -323,10 +323,16 @@ fi
 argv1=$1
 if [ -d /run ] ; then
   rundir=/run/svscan
+  nssd_sock="/run/indimail/pwdlookup/nssd.sock"
+  %{__mkdir_p} /run/indimail/pwdlookup
 elif [ -d /var/run ] ; then
   rundir=/var/run/svscan
+  nssd_sock="/var/run/indimail/pwdlookup/nssd.sock"
+  %{__mkdir_p} /var/run/indimail/pwdlookup
 else
   rundir=%{servicedir}
+  nssd_sock="/tmp/pwdlookup/nssd.sock"
+  %{__mkdir_p} /tmp/pwdlookup
 fi
 
 if [ -z "$argv1" ] ; then
@@ -335,6 +341,10 @@ fi
 if [ $argv1 -eq 2 ] ; then # upgrade
   if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
     /sbin/ldconfig
+  fi
+  grep "pwdlookup/nssd.sock" %{servicedir}/pwdlookup/variables/.options >/dev/null
+  if [ $? -ne 0 ] ; then
+    sed -i 's{indimail/nssd.sock{indimail/pwdlookup/nssd.sock{g' %{servicedir}/pwdlookup/variables/.options
   fi
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="%{servicedir}/pwdlookup"
   %{_prefix}/bin/svok %{servicedir}/pwdlookup
@@ -363,15 +373,6 @@ fi
 
 %{__mkdir_p} %{logdir}/pwdlookup
 %{__chown} -R qmaill:nofiles %{logdir}/pwdlookup
-if [ -d /run ] ; then
-  nssd_sock="/run/indimail/nssd.sock"
-  %{__mkdir_p} /run/indimail
-elif [ -d /var/run ] ; then
-  nssd_sock="/var/run/indimail/nssd.sock"
-  %{__mkdir_p} /var/run/indimail
-else
-  nssd_sock="/tmp/nssd.sock"
-fi
 
 #nssd
 %{_prefix}/sbin/svctool --pwdlookup=${nssd_sock} --threads=5 --timeout=-1 \
