@@ -17,10 +17,10 @@
  */
 
 /*
- * $Id: config.c,v 1.4 2020-09-21 22:12:23+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: config.c,v 1.5 2023-06-07 15:49:50+05:30 Cprogrammer Exp mbhangui $ 
  */
 #ifndef	lint
-static const char rcsid[] = "$Id: config.c,v 1.4 2020-09-21 22:12:23+05:30 Cprogrammer Exp mbhangui $";
+static const char rcsid[] = "$Id: config.c,v 1.5 2023-06-07 15:49:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include "common.h"
@@ -155,7 +155,6 @@ load_config(const char *file)
 		{"timeout", CV_INTEGER, &conf.timeout},
 		{"facility", CV_STRING, conf.facility},
 		{"priority", CV_STRING, conf.priority},
-
 		{NULL}
 	};
 
