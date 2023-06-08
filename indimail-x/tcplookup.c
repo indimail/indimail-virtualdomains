@@ -179,7 +179,7 @@ prepare_wfifo(int *wfd, int *fifo_len, int *pipe_size, int bytes)
 		if (!stralloc_copys(&InFifo, infifo) || !stralloc_0(&InFifo))
 			die_nomem();
 	} else {
-		getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/pwdlookup/inlookup");
+		getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/indimail/inlookup");
 		if (*infifo_dir == '/') {
 			if (!stralloc_copys(&InFifo, infifo_dir) ||
 					!stralloc_catb(&InFifo, "/", 1) ||

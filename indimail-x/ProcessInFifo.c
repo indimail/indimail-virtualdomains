@@ -201,7 +201,7 @@ getFifo_name()
 		if (!stralloc_copys(&inFifo, infifo) || !stralloc_0(&inFifo))
 			die_nomem();
 	} else {
-		getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/pwdlookup/inlookup");
+		getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/indimail/inlookup");
 		if (*infifo_dir == '/') {
 			if (indimailuid == -1 || indimailgid == -1)
 				get_indimailuidgid(&indimailuid, &indimailgid);

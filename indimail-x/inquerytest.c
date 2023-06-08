@@ -249,7 +249,7 @@ main(int argc, char **argv)
 				die_nomem();
 			InFifo.len--;
 		} else {
-			getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/pwdlookup/inlookup");
+			getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/indimail/inlookup");
 			if (*infifo_dir == '/') {
 				if (indimailuid == -1 || indimailgid == -1)
 					get_indimailuidgid(&indimailuid, &indimailgid);
@@ -304,7 +304,7 @@ main(int argc, char **argv)
 				die_nomem();
 			InFifo.len--;
 		} else {
-			getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/pwdlookup/inlookup");
+			getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/indimail/inlookup");
 			if (*infifo_dir == '/') {
 				if (!stralloc_copys(&InFifo, infifo_dir) ||
 						!stralloc_append(&InFifo, "/") ||
