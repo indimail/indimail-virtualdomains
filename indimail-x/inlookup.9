@@ -14,9 +14,9 @@ generated FIFO. The other FIFO is the randomly generated FIFO used for
 writing back to the client, the result of the query.
 .PP
 \fBinlookup\fR(8) creates a read FIFO determined by the environment variable INFIFO. If INFIFO is
-not defined, the default FIFO used is INDIMAILDIR/inquery/infifo. \fBinlookup\fR(8) then goes
+not defined, the default FIFO used is /run/indimail/inlookup/infifo. \fBinlookup\fR(8) then goes
 into an infinite loop reading this FIFO. If INFIFO is not an absolute path, \fBinlookup\fR(8) uses
-FIFODIR to look for INFIFO.
+INFIFODIR to look for INFIFO.
 
 For a non-distributed architecture, you need a local MySQL database. To connect to a MySQL
 database, you need to have a control file \fBhost\.mysql\fR. This control file contains the

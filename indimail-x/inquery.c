@@ -1,5 +1,8 @@
 /*
  * $Log: inquery.c,v $
+ * Revision 1.11  2023-06-08 17:46:57+05:30  Cprogrammer
+ * renamed fifo directory from FIFODIR to INFIFODIR
+ *
  * Revision 1.10  2023-04-23 19:19:32+05:30  Cprogrammer
  * write error messages for all errors
  *
@@ -64,7 +67,7 @@
 #include "strToPw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 1.10 2023-04-23 19:19:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 1.11 2023-06-08 17:46:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "inquery: fatal: "
@@ -202,7 +205,7 @@ inquery(char query_type, char *email, char *ip)
 				return ((void *) 0);
 			}
 		} else {
-			getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
+			getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/pwdlookup/inlookup");
 			if (*infifo_dir == '/') {
 				if (!stralloc_copys(&InFifo, infifo_dir) ||
 						!stralloc_catb(&InFifo, "/", 1) ||

@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.137 2023-05-23 14:10:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.138 2023-06-08 17:46:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -95,7 +95,9 @@ Source4: http://downloads.sourceforge.net/%{name}/%{name}-permissions.paranoid
 URL: https://github.com/mbhangui/indimail-virtualdomains
 AutoReq: Yes
 # few binaries were moved to sbin and indimail >= 2.5 depends on that
-Requires: indimail-mta > 2.6
+# Many auto-generated files now reside in /run, /var/run. upgrading
+# variables requires svctool from indimail-mta-3.0.4
+Requires: indimail-mta > 3.0.3
 Conflicts: %{name} < 2.0
 Obsoletes: %{name} < 2.0
 
@@ -337,7 +339,6 @@ if [ -f %{buildroot}%{mandir}/man7/authlib.7."$ext" ] ; then
   done
 fi
 
-%{__mkdir_p} %{buildroot}%{indimaildir}/inquery
 %{__mkdir_p} %{buildroot}%{sysconfdir}/users
 %{__mkdir_p} %{buildroot}%{sysconfdir}/control
 %{__mkdir_p} %{buildroot}%{sysconfdir}/tcp
@@ -398,10 +399,10 @@ done
 %ghost %dir %attr(0755,qmaill,nofiles) %{logdir}
 %ghost %dir %attr(0755,qmaill,nofiles) %{logdir}/*
 %ghost      %attr(-,qmaill,nofiles)    %{logdir}/*/*
+%ghost      %attr(0644,root,root)      %{_prefix}/lib/tmpfiles.d/indimail.conf
 %endif
 
 %dir %attr(775,root,indimail)          %{domaindir}/domains
-%dir %attr(770,indimail,qmail)         %{indimaildir}/inquery
 %dir %attr(755,root,root)              %{libexecdir}/imapmodules
 %dir %attr(755,root,root)              %{_prefix}/lib/indimail/modules
 %if "%{mandir}" != "/usr/share/man"
@@ -1044,6 +1045,32 @@ fi
 argv1=$1
 if [ -z "$argv1" ] ; then
   argv1=0
+fi
+if [ -d %{_prefix}/lib/tmpfiles.d -a -n "%{_rundir}" ] ; then
+  %{__mkdir_p} /tmp/indimail
+  chmod 700 /tmp/indimail
+  (
+  echo "d %{_rundir}/indimail 0755 root root"
+  echo "p %{_rundir}/indimail/logfifo 0666 root root"
+  echo "d %{_rundir}/indimail/pwdlookup 0775 root indimail"
+  echo "d %{_rundir}/indimail/inlookup 0770 indimail qmail"
+  echo "p %{_rundir}/indimail/inlookup/infifo.1 0660 qmaild indimail"
+  echo "p %{_rundir}/indimail/inlookup/infifo.2 0660 qmaild indimail"
+  echo "p %{_rundir}/indimail/inlookup/infifo.3 0660 qmaild indimail"
+  echo "p %{_rundir}/indimail/inlookup/infifo.4 0660 qmaild indimail"
+  echo "p %{_rundir}/indimail/inlookup/infifo.5 0660 qmaild indimail"
+  echo "d %{_rundir}/indimail/inquery 2770 qmaild indimail"
+  ) > /tmp/indimail/indimail.conf.$$
+  if [ ! -f %{_prefix}/lib/tmpfiles.d/indimail.conf ] ; then
+    mv /tmp/indimail/indimail.conf.$$ %{_prefix}/lib/tmpfiles.d/indimail.conf 
+  else
+    cmp -s /tmp/indimail/indimail.conf.$$ %{_prefix}/lib/tmpfiles.d/indimail.conf 2>/dev/null
+    if [ $? -eq 0 ] ; then
+      rm -f /tmp/indimail/indimail.conf.$$
+    else
+      mv /tmp/indimail/indimail.conf.$$ %{_prefix}/lib/tmpfiles.d/indimail.conf 
+    fi
+  fi
 fi
 if [ $argv1 -eq 2 ] ; then # upgrade
   (

@@ -1,12 +1,13 @@
 #!/bin/sh
 #
-# $Id: ilocal_upgrade.in,v 2.38 2023-04-09 00:00:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.in,v 2.39 2023-06-08 17:46:23+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
 chmod=$(which chmod)
 chown=$(which chown)
 rm=$(which rm)
+mv=$(which mv)
 cp=$(which cp)
 servicedir=@servicedir@
 
@@ -21,7 +22,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.in,v 2.38 2023-04-09 00:00:23+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.in,v 2.39 2023-06-08 17:46:23+05:30 Cprogrammer Exp mbhangui $"
 if [ -d @indimaildir@/mysqldb/data/indimail ] ; then
 	if [ ! -f @servicedir@/mysql.3306/down ] ; then
 		for i in mysqld mariadb mysql
@@ -34,13 +35,13 @@ if [ -d @indimaildir@/mysqldb/data/indimail ] ; then
 		done
 	fi
 fi
-/usr/sbin/svctool --fixsharedlibs
+@prefix@/sbin/svctool --fixsharedlibs
 }
 
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.in,v 2.38 2023-04-09 00:00:23+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.in,v 2.39 2023-06-08 17:46:23+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in @servicedir@/qmail-imapd* @servicedir@/qmail-pop3d* @servicedir@/proxy-imapd* @servicedir@/proxy-pop3d*
 do
@@ -61,32 +62,42 @@ done
 if [ -f @servicedir@/fetchmail/variables/QMAILDEFAULTHOST ] ; then
 	$rm -f @servicedir@/fetchmamil/variables/QMAILDEFAULTHOST
 fi
-# changed fifo location from @sysconfdir@/inquery to @indimaildir@/inquery
-for i in @servicedir@/inlookup.infifo @servicedir@/qmail-imapd* @servicedir@/qmail-pop3d* \
-	@servicedir@/qmail-smtpd.25 @servicedir@/qmail-smtpd.465 @servicedir@/qmail-smtpd.587
-do
-	if [ -d $i ] ; then
-		check_update_if_diff $i/variables/FIFODIR @indimaildir@/inquery
-	fi
-done
 
 # path for /tmp/nssd.sock, /tmp/logfifo have changed to /run/indimail
 if [ -d /run ] ; then
 	logfifo=/run/indimail/logfifo
-	nssd_sock=/run/indimail/nssd.sock
-	mkdir -p /run/indimail
-	chown indimail:indimail /run/indimail
+	nssd_sock=/run/indimail/pwdlookup/nssd.sock
+	inlookup_dir=/run/indimail/inlookup
+	fifo_tmpdir=/run/indimail/inquery
+	mkdir -p /run/indimail/pwdlookup
+	$chmod 775 /run/indimail/pwdlookup
+	$chown root:indimail /run/indimail/pwdlookup
 elif [ -d /var/run ] ; then
 	logfifo=/var/run/indimail/logfifo
-	nssd_sock=/var/run/indimail/nssd.sock
-	mkdir -p /var/run/indimail
-	chown indimail:indimail /var/run/indimail
+	nssd_sock=/var/run/indimail/pwdlookup/nssd.sock
+	inlookup_dir=/var/run/indimail/inlookup
+	fifo_tmpdir=/var/run/indimail/inquery
+	mkdir -p /var/run/indimail/pwdlookup
+	$chmod 775 /var/run/indimail/pwdlookup
+	$chown root:indimail /var/run/indimail/pwdlookup
 else
 	logfifo=/tmp/logfifo
-	nssd_sock=/tmp/nssd.sock
+	nssd_sock=/tmp/pwdlookup/nssd.sock
+	inlookup_dir=/tmp/indimail/inlookup
+	fifo_tmpdir=/tmp/indimail/inquery
+	$chmod 775 /tmp/pwdlookup
+	$chown root:indimail /tmp/pwdlookup
+fi
+if [ ! -d @servicedir@/qmail-logfifo ] ; then
+	@prefix@/sbin/svctool --servicedir=@servicedir@ --fifologger=$logfifo
+else
+	grep "/tmp/logfifo" @servicedir@/qmail-logfifo/variables/LOGFILTER > /dev/null
+	if [ $? -eq 0 ] ; then
+		echo "Refreshing qmail-logfifo service"
+		@prefix@/sbin/svctool --servicedir=@servicedir@ --refreshsvc=@servicedir@/qmail-logfifo --force
+	fi
 fi
 if [ " $logfifo" != " /tmp/logfifo" ] ; then
-	/usr/sbin/svctool --fifologger=$logfifo --servicedir=@servicedir@
 	for i in fetchmail qmail-smtpd.25 qmail-logfifo qmail-smtpd.366 \
 		qmail-qmqpd.628 qmail-smtpd.465 qmail-qmtpd.209 qmail-smtpd.587
 	do
@@ -111,30 +122,71 @@ do
 	grep "/tmp/nssd.sock" $j > /dev/null
 	if [ $? -eq 0 ] ; then
 		update_nssd=1
+		echo "Updating pwdlookup service to use $nssd_sock"
 		sed -i -e "s}/tmp/nssd.sock}$nssd_sock}" $j
+	fi
+	grep "/run/indimail/nssd.sock" $j > /dev/null
+	if [ $? -eq 0 ] ; then
+		update_nssd=1
+		echo "Updating pwdlookup service to use $nssd_sock"
+		sed -i -e "s}/run/indimail/nssd.sock}$nssd_sock}" $j
 	fi
 done
 
 if [ $update_nssd -eq 1 ] ; then
-	/usr/sbin/svctool --servicedir=@servicedir@ --norefreshsvc="1 @servicedir@/pwdlookup"
-	/usr/sbin/svctool --servicedir=@servicedir@ --refreshsvc="@servicedir@/pwdlookup"
-	/usr/sbin/svctool --servicedir=@servicedir@ --norefreshsvc="0 @servicedir@/pwdlookup"
+	echo "Refreshing pwdlookup service"
+	@prefix@/sbin/svctool --servicedir=@servicedir@ --refreshsvc="@servicedir@/pwdlookup" --force
 fi
 
-# update pid file to /run or /var/run
+# update pid file to be in /run or /var/run
 if [ -f @sysconfdir@/nssd.conf ] ; then
-	grep "/tmp/logfifo" @sysconfdir@/nssd.conf > /dev/null
+	grep "/tmp/nssd.conf" @sysconfdir@/nssd.conf > /dev/null || \
+		grep "indimail/nssd.conf" @sysconfdir@/nssd.conf > /dev/null
 	if [ $? -eq 0 ] ; then
 		if [ -d /run ] ; then
-			pidfile=/run/indimail/nssd.pid
+			pidfile=/run/indimail/pwdlookup/nssd.pid
 		elif [ -d /var/run ] ; then
-			pidfile=/var/run/indimail/nssd.pid
+			pidfile=/var/run/indimail/pwdlookup/nssd.pid
 		else
-			pidfile=/tmp/nssd.pid
+			pidfile=/tmp/pwdlookup/nssd.pid
 		fi
 		sed -i -e "s{^pidfile.*{pidfile     $pidfile{g" @sysconfdir@/nssd.conf
 	fi
 fi
+
+# update inlookup to use INFIFODIR instead of FIFODIR
+if [ ! -d $inlookup_dir ] ; then
+	mkdir -p $inlookup_dir
+	$chmod 770 $inlookup_dir
+	$chown indimail:qmail $inlookup_dir
+fi
+if [ ! -d $fifo_tmpdir ] ; then
+	mkdir -p $fifo_tmpdir
+	$chmod 2770 $fifo_tmpdir
+	$chown qmaild:indimail $fifo_tmpdir
+fi
+if [ -f @servicedir@/inlookup.infifo/variables/FIFODIR ] ; then
+	echo "Updating inlookup.infifo service to use INFIFODIR"
+	$mv @servicedir@/inlookup.infifo/variables/FIFODIR \
+		@servicedir@/inlookup.infifo/variables/INFIFODIR
+	check_update_if_diff @servicedir@/inlookup.infifo/variables/INFIFODIR $inlookup_dir
+	echo "Refreshing inlookup.infifo service"
+	@prefix@/sbin/svctool --servicedir=@servicedir@ --refreshsvc="@servicedir@/inlookup.infifo" --force
+fi
+# update all services using inlookup service to use INFIFODIR
+for i in $(echo @servicedir@/*/variables/FIFODIR)
+do
+	t1=$(dirname $i)
+	svc_name=$(dirname $t1)
+	echo "Updating $svc_name service to use INFIFODIR"
+	$mv $i $t1/INFIFODIR
+	check_update_if_diff $t1/INFIFODIR $inlookup_dir
+	if [ -f $t1/FIFOTMPDIR ] ; then
+		check_update_if_diff $t1/FIFOTMPDIR $fifo_tmpdir
+		echo "Refreshing $svc_name service"
+		@prefix@/sbin/svctool --servicedir=@servicedir@ --refreshsvc="$svc_name" --force
+	fi
+done
 
 # add for roundcube/php to access certs
 /usr/bin/getent passwd apache > /dev/null && /usr/sbin/usermod -aG qmail apache || true
@@ -167,13 +219,14 @@ fi
 if [ -f @servicedir@/mrtg@sysconfdir@.mrtg.cfg ] ; then
 	grep qmailmrtg7 @servicedir@/mrtg@sysconfdir@.mrtg.cfg >/dev/null 2>&1
 	if [ $? -eq 0 ] ; then
-		svctool --refreshsvc=/service/mrtg --force
+		echo "Refreshing mrtg service"
+		@prefix@/sbin/svctool --servicedir=@servicedir@ --refreshsvc=@servicedir@/mrtg --force
 	fi
 fi
 
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in @sysconfdir@/control/mysql_lib
-/usr/sbin/svctool --fixsharedlibs
+@prefix@/sbin/svctool --fixsharedlibs
 # upgrade indimail schema
 /usr/sbin/ischema -u
 }
@@ -188,6 +241,9 @@ case $1 in
 esac
 #
 # $Log: ilocal_upgrade.in,v $
+# Revision 2.39  2023-06-08 17:46:23+05:30  Cprogrammer
+# adjust to use nssd.sock, inlookup fifo in /run/indimail
+#
 # Revision 2.38  2023-04-09 00:00:23+05:30  Cprogrammer
 # refresh mrtg service during upgrade if using old qmailmrtg
 #

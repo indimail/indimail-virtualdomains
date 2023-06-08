@@ -1,5 +1,8 @@
 /*
  * $Log: tcplookup.c,v $
+ * Revision 1.6  2023-06-08 17:49:14+05:30  Cprogrammer
+ * renamed fifo directory from FIFODIR to INFIFODIR
+ *
  * Revision 1.5  2023-03-20 10:18:43+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -55,7 +58,7 @@
 #include "variables.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: tcplookup.c,v 1.5 2023-03-20 10:18:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcplookup.c,v 1.6 2023-06-08 17:49:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            strnum[FMT_ULONG];
@@ -176,7 +179,7 @@ prepare_wfifo(int *wfd, int *fifo_len, int *pipe_size, int bytes)
 		if (!stralloc_copys(&InFifo, infifo) || !stralloc_0(&InFifo))
 			die_nomem();
 	} else {
-		getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
+		getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/pwdlookup/inlookup");
 		if (*infifo_dir == '/') {
 			if (!stralloc_copys(&InFifo, infifo_dir) ||
 					!stralloc_catb(&InFifo, "/", 1) ||

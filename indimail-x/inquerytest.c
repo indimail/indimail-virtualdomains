@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 1.10  2023-06-08 17:48:31+05:30  Cprogrammer
+ * renamed fifo directory from FIFODIR to INFIFODIR
+ *
  * Revision 1.9  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -73,7 +76,7 @@
 #include "vlimits.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 1.9 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 1.10 2023-06-08 17:48:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "inquerytest: fatal: "
@@ -246,7 +249,7 @@ main(int argc, char **argv)
 				die_nomem();
 			InFifo.len--;
 		} else {
-			getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
+			getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/pwdlookup/inlookup");
 			if (*infifo_dir == '/') {
 				if (indimailuid == -1 || indimailgid == -1)
 					get_indimailuidgid(&indimailuid, &indimailgid);
@@ -267,7 +270,7 @@ main(int argc, char **argv)
 			}
 			InFifo.len--;
 		}
-		if (access(InFifo.s, F_OK) || (fd = open(InFifo.s, O_WRONLY|O_NONBLOCK)) == -1) {
+		if (access(InFifo.s, F_OK) && errno == ENOENT) {
 			strerr_warn2("Creating FIFO ", InFifo.s, 0);
 			if (FifoCreate(InFifo.s) == -1) {
 				strerr_warn3("inquerytest: ", InFifo.s, ": ", &strerr_sys);
@@ -301,7 +304,7 @@ main(int argc, char **argv)
 				die_nomem();
 			InFifo.len--;
 		} else {
-			getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
+			getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/pwdlookup/inlookup");
 			if (*infifo_dir == '/') {
 				if (!stralloc_copys(&InFifo, infifo_dir) ||
 						!stralloc_append(&InFifo, "/") ||

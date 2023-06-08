@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.18  2023-06-08 17:48:50+05:30  Cprogrammer
+ * renamed fifo directory from FIFODIR to INFIFODIR.
+ *
  * Revision 1.17  2023-04-09 11:57:57+05:30  Cprogrammer
  * skip logging of binary search walk on SIGUSR1 (log only when debug is set)
  *
@@ -128,7 +131,7 @@
 #include "FifoCreate.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.17 2023-04-09 11:57:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.18 2023-06-08 17:48:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -198,7 +201,7 @@ getFifo_name()
 		if (!stralloc_copys(&inFifo, infifo) || !stralloc_0(&inFifo))
 			die_nomem();
 	} else {
-		getEnvConfigStr(&infifo_dir, "FIFODIR", INDIMAILDIR"/inquery");
+		getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/pwdlookup/inlookup");
 		if (*infifo_dir == '/') {
 			if (indimailuid == -1 || indimailgid == -1)
 				get_indimailuidgid(&indimailuid, &indimailgid);

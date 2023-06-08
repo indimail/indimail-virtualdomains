@@ -84,11 +84,6 @@ fixperms()
 	fi
 }
 
-ID=`id -u`
-if [ $ID -ne 0 ] ; then
-	echo "You are not root" >&2
-	exit 1
-fi
 upgrade=0
 case "$1" in
 	configure)
@@ -131,6 +126,40 @@ if [ -f ${sysconfdir}/indimail.perms ] ; then
 		fixperms $line
 	done
 	) > ${sysconfdir}/indimail-stat.override
+fi
+
+if [ -d /run ] ; then
+	rundir=/run
+elif [ -d /var/run ] ; then
+	rundir=/var/run
+else
+	rundir=""
+fi
+if [ -d ${prefix}/lib/tmpfiles.d -a -n "${rundir}" ] ; then
+  mkdir -p /tmp/indimail
+  chmod 700 /tmp/indimail
+  (
+  echo "d ${rundir}/indimail 0755 root root"
+  echo "p ${rundir}/indimail/logfifo 0666 root root"
+  echo "d ${rundir}/indimail/pwdlookup 0775 root indimail"
+  echo "d ${rundir}/indimail/inlookup 0770 indimail qmail"
+  echo "p ${rundir}/indimail/inlookup/infifo.1 0660 qmaild indimail"
+  echo "p ${rundir}/indimail/inlookup/infifo.2 0660 qmaild indimail"
+  echo "p ${rundir}/indimail/inlookup/infifo.3 0660 qmaild indimail"
+  echo "p ${rundir}/indimail/inlookup/infifo.4 0660 qmaild indimail"
+  echo "p ${rundir}/indimail/inlookup/infifo.5 0660 qmaild indimail"
+  echo "d ${rundir}/indimail/inquery 2770 qmaild indimail"
+  ) > /tmp/indimail/indimail.conf.$$
+  if [ ! -f ${prefix}/lib/tmpfiles.d/indimail.conf ] ; then
+    mv /tmp/indimail/indimail.conf.$$ ${prefix}/lib/tmpfiles.d/indimail.conf 
+  else
+    cmp -s /tmp/indimail/indimail.conf.$$ ${prefix}/lib/tmpfiles.d/indimail.conf 2>/dev/null
+    if [ $? -eq 0 ] ; then
+      rm -f /tmp/indimail/indimail.conf.$$
+    else
+      mv /tmp/indimail/indimail.conf.$$ ${prefix}/lib/tmpfiles.d/indimail.conf 
+    fi
+  fi
 fi
 
 if [ $upgrade -eq 1 ] ; then # upgrade

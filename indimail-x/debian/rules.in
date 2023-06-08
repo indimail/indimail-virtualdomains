@@ -78,7 +78,6 @@ install: build
 	dh_installdirs
 	$(MAKE) -s DESTDIR=$(DESTDIR) install
 	mkdir -p $(DESTDIR)$(domaindir)/domains
-	mkdir -p $(DESTDIR)$(indimaildir)/inquery
 
 binary-indep: build install
 	dh_testdir

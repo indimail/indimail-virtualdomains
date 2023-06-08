@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH inquerytest 8
 .SH NAME
 inquerytest \- Test InLookup Queries
@@ -42,14 +43,17 @@ Type of query to be tested as given below
 
 .TP
 \fB\-i\fR \fIinfifo\fR
-Path of the fifo to be used for communication with InLookup. A null
-string (“”) makes inquerytest to use INFIFO environment variable if
-defined, or the default INFIFO file in INDIMAILDIR/inquery if not defined.
-\fIinquerytest\fR in these two cases will use an existing running InLookup.
-If a fifo path is given, inquerytest will invoke a new InLookup on the
-given fifo, run the test, terminate InLookup and delete the fifo after
-the test. Hence, do not give a path to a fifo on which an existing
-InLookup is running.
+Path of the fifo to be used for communication with InLookup. A null string
+(“”) makes inquerytest to use INFIFO environment variable if defined, or
+the default file named "infifo". INFIFO can be a full path in which case
+the value of INFIFO will be used. If INFIFO is not a full path, the file
+defined by INFIFO env variable will be looked in the diretory defined by
+the INFIFODIR environment variable. If INFIFODIR is not defined,
+/run/indimail/inlookup directory will be used as a default.
+
+\fIinquerytest\fR will directly use a fifo path if it exists. Else
+inquerytest will invoke a new InLookup on the given fifo, run the test,
+terminate InLookup and delete the fifo after the test.
 
 .TP
 \fIemail\fR
