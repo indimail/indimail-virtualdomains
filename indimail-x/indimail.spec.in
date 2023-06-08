@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.138 2023-06-08 17:46:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.139 2023-06-08 22:26:59+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -206,6 +206,11 @@ Requires: policycoreutils-python
 %endif
 %endif
 Requires: indimail-access
+
+%define log \
+log_it() { \
+  echo "$(echo  ""|tai64n|tai64nlocal)$*" \
+}
 
 %description
 IndiMail is a messaging platform providing multi-cluster domain support.
@@ -916,11 +921,10 @@ done
 
 ### SCRIPTLET ###############################################################################
 %pretrans
+%log
 argv1=$1
-
 (
-echo "===== Start %{name} installation ====="
-date
+log_it "===== Start %{name} installation ====="
 if [ -d /run ] ; then
   rundir=/run/svscan
 elif [ -d /var/run ] ; then
@@ -929,7 +933,7 @@ else
   rundir=%{servicedir}
 fi
 # stop indimail services before upgrade
-echo "shutting down %{name} services"
+log_it "shutting down %{name} services"
 for i in mrtg mysql.3306 indisrvr.4000 inlookup.infifo \
 qmail-poppass.106
 do
@@ -962,13 +966,14 @@ fi
 
 # initialize setup log file
 if [ -f %{libexecdir}/iupgrade.sh ] ; then
-  echo "Running Custom Installation Script for pretrans"
-  /bin/sh %{libexecdir}/iupgrade.sh pretrans noargs %{version} $*
+  log_it "Running Custom Installation Script for pretrans"
+  /bin/sh %{libexecdir}/iupgrade.sh pretrans noargs %{version} $* | tai64n | tai64nlocal
 fi
 ) >> /var/log/indimail-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %pre
+%log
 argv1=$1
 if [ -z "$argv1" ] ; then
   argv1=0
@@ -977,14 +982,14 @@ fi
 if [ $argv1 -eq 2 ] ; then
   (
   if [ -f %{libexecdir}/iupgrade.sh ] ; then
-    echo "Running Custom Upgrade Script for pre upgrade"
-    /bin/sh %{libexecdir}/iupgrade.sh pre upgrade %{version} $*
+    log_it "Running Custom Upgrade Script for pre upgrade"
+    /bin/sh %{libexecdir}/iupgrade.sh pre upgrade %{version} $* | tai64n | tai64nlocal
   fi
   ) >> /var/log/indimail-setup.log 2>&1
   exit 0
 fi
 (
-echo "Checking for mandatory user/group mysql.."
+log_it "Checking for mandatory user/group mysql.."
 case "%{_host}" in
   *-*-darwin*)
   /usr/bin/dscl . -list /Groups/mysql > /dev/null || (echo "group mysql does not exist. Aborting..." && false)
@@ -1018,7 +1023,7 @@ if [ $nscd_up -ge 1 ] ; then
     /bin/systemctl start nscd.service
   fi
 fi
-echo "Adding IndiMail users/groups"
+log_it "Adding IndiMail users/groups"
 /usr/bin/getent group %groupname  > /dev/null || /usr/sbin/groupadd -r -g %gid %groupname || true
 if [ $? = 4 ] ; then
   /usr/sbin/groupadd %groupname
@@ -1042,6 +1047,7 @@ fi
 
 ### SCRIPTLET ###############################################################################
 %post
+%log
 argv1=$1
 if [ -z "$argv1" ] ; then
   argv1=0
@@ -1074,17 +1080,17 @@ if [ -d %{_prefix}/lib/tmpfiles.d -a -n "%{_rundir}" ] ; then
 fi
 if [ $argv1 -eq 2 ] ; then # upgrade
   (
-  echo "doing post upgrade activities"
+  log_it "doing post upgrade activities"
   if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
     /sbin/ldconfig
   fi
   if [ -f %{libexecdir}/iupgrade.sh ] ; then
-    echo "Running Custom Upgrade Script for post upgrade"
-    /bin/sh %{libexecdir}/iupgrade.sh post upgrade %{version} $*
+    log_it "Running Custom Upgrade Script for post upgrade"
+    /bin/sh %{libexecdir}/iupgrade.sh post upgrade %{version} $* | tai64n | tai64nlocal
   fi
 
   #selinux
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
+  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux | tai64n | tai64nlocal
 
   # refresh indimail services
   svc_list=""
@@ -1106,7 +1112,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
       svc_list="$svc_list %{servicedir}/$i"
     done
   fi
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
+  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list" | tai64n | tai64nlocal
 
   indlib=`ls -d %{_libdir}/libindimail.so.*.*.* 2>/dev/null`
   for port in 25 465 587
@@ -1163,7 +1169,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   exit 0
 fi
 
-echo "Doing Post Install"
+log_it "Doing Post Install"
 echo ""
 echo "1. Configure %{logdir} for multilog"
 echo "2. Configure %{servicedir}"
@@ -1205,19 +1211,19 @@ if [ %noproxy -eq 0 ] ; then
 %endif
 %{_prefix}/sbin/svctool --imap=4143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --memory=%{imap_pop3_mem} \
-  --proxy=143 --starttls --tlsprog=%{_prefix}/bin/sslerator --infifo=infifo
+  --proxy=143 --starttls --tlsprog=%{_prefix}/bin/sslerator --infifo=infifo | tai64n | tai64nlocal
 %{_prefix}/sbin/svctool --imap=9143 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --memory=%{imapspop3_mem} \
-  --proxy=143 --ssl --infifo=infifo
+  --proxy=143 --ssl --infifo=infifo | tai64n | tai64nlocal
 %{_prefix}/sbin/svctool --pop3=4110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --memory=%{imap_pop3_mem} \
-  --proxy=110 --starttls --tlsprog=%{_prefix}/bin/sslerator --infifo=infifo
+  --proxy=110 --starttls --tlsprog=%{_prefix}/bin/sslerator --infifo=infifo | tai64n | tai64nlocal
 %{_prefix}/sbin/svctool --pop3=9110 --servicedir=%{servicedir} --localip=0 --maxdaemons=40 \
   --maxperip=25 --query-cache --memory=%{imapspop3_mem} \
-  --proxy=110 --ssl --infifo=infifo
+  --proxy=110 --ssl --infifo=infifo | tai64n | tai64nlocal
 
 # add courier-imap auth module authindi
-echo "adding authindi as Proxy IMAP/POP3 auth module"
+log_it "adding authindi as Proxy IMAP/POP3 auth module"
 for i in `ls -d %{servicedir}/proxy-pop3d* %{servicedir}/proxy-imapd*`
 do
   if [ -s $i/variables/IMAPMODULES ] ; then
@@ -1231,7 +1237,7 @@ done
 fi
 
 # add courier-imap auth module authindi
-echo "adding authindi as IMAP/POP3 auth module"
+log_it "adding authindi as IMAP/POP3 auth module"
 for i in `ls -d %{servicedir}/qmail-pop3d* %{servicedir}/qmail-imapd*`
 do
   if [ -s $i/variables/IMAPMODULES ] ; then
@@ -1244,7 +1250,7 @@ do
 done
 
 # add checkpassword auth module vchkpass
-echo "adding vchkpass as SMTP auth module"
+log_it "adding vchkpass as SMTP auth module"
 for i in 465 587
 do
   if [ -s %{servicedir}/qmail-smtpd.$i/variables/AUTHMODULES ] ; then
@@ -1281,41 +1287,41 @@ else
 fi
 
 # fifolog service
-%{_prefix}/sbin/svctool --fifologger=$logfifo --servicedir=%{servicedir}
+%{_prefix}/sbin/svctool --fifologger=$logfifo --servicedir=%{servicedir} | tai64n | tai64nlocal
 
 # mrtg service
 if [ -x /usr/bin/mrtg ] ; then
-  %{_prefix}/sbin/svctool --config=snmpdconf
-  %{_prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=%{servicedir}
+  %{_prefix}/sbin/svctool --config=snmpdconf | tai64n | tai64nlocal
+  %{_prefix}/sbin/svctool --mrtg=/var/www/html/mailmrtg --servicedir=%{servicedir} | tai64n | tai64nlocal
 fi
 
-echo "Creating default mysql.host, tcprules, bogofilter-qfe, default domain dir"
+log_it "Creating default mysql.host, tcprules, bogofilter-qfe, default domain dir"
 %{_prefix}/sbin/svctool --config=indimail --mysqlhost=localhost \
-  --mysqluser=indimail  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket}
+  --mysqluser=indimail  --mysqlpass=ssh-1.5- --mysqlsocket=%{mysqlSocket} | tai64n | tai64nlocal
 
 # MySQL
 if [ -x %{mysqlPrefix}/libexec/mysqld -o -x %{mysqlPrefix}/sbin/mysqld -o -x %{mysqlPrefix}/bin/mysqld ] ; then
   error=`ps -e|grep mysqld|grep -v grep|wc -l` # another mysqld instance running ?
-  echo "Creating Database/Service for MySQL"
+  log_it "Creating Database/Service for MySQL"
   # MySQL Config Creation
   %{_prefix}/sbin/svctool --config=mysql   --mysqlPrefix=%{mysqlPrefix} --mysqlsocket=%{mysqlSocket} \
-    --databasedir=%{indimaildir}/mysqldb
+    --databasedir=%{indimaildir}/mysqldb | tai64n | tai64nlocal
   # MySQL Database Creation
   %{_prefix}/sbin/svctool --config=mysqldb --mysqlPrefix=%{mysqlPrefix} \
     --mysqluser=indimail --mysqlpass=ssh-1.5- --databasedir=%{indimaildir}/mysqldb \
-    --base_path=%{mbase} --mysqlsocket="%{mysqlSocket}".tmp
+    --base_path=%{mbase} --mysqlsocket="%{mysqlSocket}".tmp | tai64n | tai64nlocal
   # MySQL Supervise creation
   %{_prefix}/sbin/svctool --mysql=3306 --servicedir=%{servicedir} --mysqlPrefix=%{mysqlPrefix} \
-    --databasedir=%{indimaildir}/mysqldb --config=%{sysconfdir}/indimail.cnf
+    --databasedir=%{indimaildir}/mysqldb --config=%{sysconfdir}/indimail.cnf | tai64n | tai64nlocal
   if [ ! -f %{indimaildir}/mysqldb/data/indimail/indimail.frm -a ! -f %{indimaildir}/mysqldb/data/indimail/indimail.ibd ] ; then
     error=1
   fi
   if [ $error -gt 0 ] ; then
-    echo "WARNING!!! error encountered creating MySQL db. Disabling mysqld service"
+    log_it "WARNING!!! error encountered creating MySQL db. Disabling mysqld service" 1>&2
     touch %{servicedir}/mysql.3306/down
   fi
 else
-  echo "WARNING!!! Did not find mysqld in %{mysqlPrefix}/{libexec,sbin}. Skipping MySQL configuration" 1>&2
+  log_it "WARNING!!! Did not find mysqld in %{mysqlPrefix}/{libexec,sbin}. Skipping MySQL configuration" 1>&2
 fi
 
 %if 0%{?suse_version} >= 1120
@@ -1344,11 +1350,11 @@ fi
 %{_prefix}/sbin/svctool --indisrvr=4000 --servicedir=%{servicedir} \
   --localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
   --certfile=%{sysconfdir}/certs/servercert.pem --ssl \
-  --hardquota=52428800 --base_path=%{mbase}
+  --hardquota=52428800 --base_path=%{mbase} | tai64n | tai64nlocal
 
 #inlookup
 %{_prefix}/sbin/svctool --inlookup=infifo --servicedir=%{servicedir} --cntrldir=control \
-  --threads=5 --activeDays=60 --query-cache --password-cache --use-btree
+  --threads=5 --activeDays=60 --query-cache --password-cache --use-btree | tai64n | tai64nlocal
 
 #poppass
 %ifarch x86_64
@@ -1359,9 +1365,9 @@ fi
 %{_prefix}/sbin/svctool --poppass=106 --localip=0 --maxdaemons=40 --maxperip=25 \
   --memory=%{poppass_mem} \
   --certfile=%{sysconfdir}/certs/servercert.pem --ssl \
-  --setpassword=%{_prefix}/sbin/vsetpass --servicedir=%{servicedir}
+  --setpassword=%{_prefix}/sbin/vsetpass --servicedir=%{servicedir} | tai64n | tai64nlocal
 
-echo "Creating default indimail tcp access control files"
+log_it "Creating default indimail tcp access control files"
 # rebuild cdb for poppass
 for j in `/bin/ls %{sysconfdir}/tcp/tcp*.poppass 2>/dev/null`
 do
@@ -1372,7 +1378,7 @@ do
     t2=0
   fi
   if [ $t1 -gt $t2 ] ; then
-    echo "Creating CDB $j.cdb"
+    log_it "Creating CDB $j.cdb"
     %{_prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
       && %{__chown} indimail:indimail $j.cdb
   fi
@@ -1400,7 +1406,7 @@ do
   svc_list="$svc_list %{servicedir}/$i"
   # save variables
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --service-name=$i \
-    --export-variables=%{servicedir}/$i/variables/.variables  --force
+    --export-variables=%{servicedir}/$i/variables/.variables  --force | tai64n | tai64nlocal
 done
 if [ %noproxy -eq 0 ] ; then
 for i in proxy-imapd.4143 proxy-imapd-ssl.9143 \
@@ -1411,23 +1417,23 @@ do
   fi
   svc_list="$svc_list %{servicedir}/$i"
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --service-name=$i \
-    --export-variables=%{servicedir}/$i/variables/.variables  --force
+    --export-variables=%{servicedir}/$i/variables/.variables  --force | tai64n | tai64nlocal
 done
 fi
 
-%{_prefix}/sbin/svctool --servicedir=%{servicedir} --autorefresh="0 $svc_list"
+%{_prefix}/sbin/svctool --servicedir=%{servicedir} --autorefresh="0 $svc_list" | tai64n | tai64nlocal
 
 # selinux
-%{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux
+%{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux | tai64n | tai64nlocal
 
 if [ -f %{sysconfdir}/cronlist.i -a -d %{_sysconfdir}/cron.d ] ; then
-  echo "adding cron entries"
+  log_it "adding cron entries"
   %{__cp} %{sysconfdir}/cronlist.i %{_sysconfdir}/cron.d
 fi
 
 if [ -f %{libexecdir}/iupgrade.sh ] ; then
-  echo "Running Custom Installation Script for post install"
-  /bin/sh %{libexecdir}/iupgrade.sh post install %{version} $*
+  log_it "Running Custom Installation Script for post install"
+  /bin/sh %{libexecdir}/iupgrade.sh post install %{version} $* | tai64n | tai64nlocal
 fi
 ) >> /var/log/indimail-setup.log 2>&1
 
@@ -1457,12 +1463,12 @@ echo "   %{_prefix}/sbin/svctool --config=cert --postmaster=postmaster@$default_
 fi
 
 echo
-echo "Check /var/log/indimail-setup.log for the detailed installation log!!!"
+log_it "Check /var/log/indimail-setup.log for the detailed installation log!!!"
 
 ### SCRIPTLET ###############################################################################
 %preun
+%log
 argv1=$1
-(
 if [ -z "$argv1" ] ; then
   argv1=0
 fi
@@ -1470,30 +1476,31 @@ fi
 if [ $argv1 -eq 1 ] ; then
   (
   if [ -f %{libexecdir}/iupgrade.sh ] ; then
-    echo "Running Custom Un-Installation Script for preun upgrade"
-    /bin/sh %{libexecdir}/iupgrade.sh preun upgrade %{version} "$argv1"
+    log_it "Running Custom Un-Installation Script for preun upgrade"
+    /bin/sh %{libexecdir}/iupgrade.sh preun upgrade %{version} "$argv1" | tai64n | tai64nlocal
   fi
   ) >> /var/log/indimail-setup.log 2>&1
   exit 0
 fi
+(
 if [ -f %{_prefix}/bin/svok ] ; then
   %{_prefix}/bin/svok %{servicedir}/.svscan/log 2>/dev/null
   if [ $? -eq 0 ] ; then
     if test -f %{_sysconfdir}/init/svscan.conf
     then
-      echo "Giving IndiMail exactly 5 seconds to exit nicely"
+      log_it "Giving IndiMail exactly 5 seconds to exit nicely"
       /sbin/initctl emit qmailstop > /dev/null 2>&1
     elif test -f %{_sysconfdir}/event.d/svscan
     then
-      echo "Giving IndiMail exactly 5 seconds to exit nicely"
+      log_it "Giving IndiMail exactly 5 seconds to exit nicely"
       /sbin/initctl emit qmailstop > /dev/null 2>&1
     elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service
     then
-      echo "Giving IndiMail exactly 5 seconds to exit nicely"
+      log_it "Giving IndiMail exactly 5 seconds to exit nicely"
       /bin/systemctl stop svscan > /dev/null 2>&1
     elif test -x %{_prefix}/sbin/initsvc
     then
-      echo "Giving IndiMail exactly 5 seconds to exit nicely"
+      log_it "Giving IndiMail exactly 5 seconds to exit nicely"
       %{_prefix}/sbin/initsvc -off
     fi
     sleep 5
@@ -1501,13 +1508,14 @@ if [ -f %{_prefix}/bin/svok ] ; then
 fi
 
 if [ -f %{libexecdir}/iupgrade.sh ] ; then
-  echo "Running Custom Un-Installation Script for preun pre-uninstall"
-  /bin/sh %{libexecdir}/iupgrade.sh preun uninstall %{version} "$argv1"
+  log_it "Running Custom Un-Installation Script for preun pre-uninstall"
+  /bin/sh %{libexecdir}/iupgrade.sh preun uninstall %{version} "$argv1" | tai64n | tai64nlocal
 fi
 ) >> /var/log/indimail-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %postun
+%log
 argv1=$1
 if [ -x /usr/bin/uname -o -x /bin/uname ] ; then
   default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
@@ -1521,12 +1529,12 @@ fi
 if [ $argv1 -eq 1 ] ; then
   (
   if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
-    echo "recreating ld.so cache"
+    log_it "recreating ld.so cache"
     /sbin/ldconfig
   fi
   if [ -f %{libexecdir}/iupgrade.sh ] ; then
-    echo "Running Custom Un-Installation Script for postun upgrade"
-    /bin/sh %{libexecdir}/iupgrade.sh postun upgrade %{version} $*
+    log_it "Running Custom Un-Installation Script for postun upgrade"
+    /bin/sh %{libexecdir}/iupgrade.sh postun upgrade %{version} $* | tai64n | tai64nlocal
   fi
   ) >> /var/log/indimail-setup.log 2>&1
   exit 0
@@ -1549,7 +1557,7 @@ do
 done
 
 %{__rm} -f %{sysconfdir}/indimail.mrtg.ok %{sysconfdir}/system.mrtg.ok
-echo "removing startup services"
+log_it "removing startup services"
 for i in indisrvr.4000 inlookup.infifo mysql.3306 \
 qmail-poppass.106 mrtg qmail-logfifo
 do
@@ -1590,11 +1598,11 @@ if [ $count -eq 0 ] ; then # ignore disabled services
 fi
 
 if [ -d %{_sysconfdir}/cron.d ] ; then
-  echo "removing cron entries"
+  log_it "removing cron entries"
   %{__rm} -f %{_sysconfdir}/cron.d/cronlist.i
 fi
 
-echo "removing logs"
+log_it "removing logs"
 %{__rm} -f %{indimaildir}/mysqldb/logs/logisam.log
 %{__rm} -f %{indimaildir}/mysqldb/logs/logquery
 %{__rm} -f %{indimaildir}/mysqldb/logs/logslow
@@ -1619,31 +1627,32 @@ if [ %noproxy -eq 0 ] ; then
 fi
 
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
-  echo "recreating ld.so cache"
+  log_it "recreating ld.so cache"
   /sbin/ldconfig
 fi
 
 if [ -x /usr/sbin/selinuxenabled ] ; then
   /usr/sbin/selinuxenabled
   if [ $? -eq 0 -a -x /usr/sbin/semodule ] ; then
-    echo "disabling selinux module"
-    /usr/sbin/semodule -r indimail
+    log_it "disabling selinux module"
+    /usr/sbin/semodule -r indimail | tai64n | tai64nlocal
   fi
 fi
 
 if [ -f %{libexecdir}/iupgrade.sh ] ; then
-  echo "Running Custom Un-Installation Script for postun uninstall"
-  /bin/sh %{libexecdir}/iupgrade.sh postun uninstall %{version} $*
+  log_it "Running Custom Un-Installation Script for postun uninstall"
+  /bin/sh %{libexecdir}/iupgrade.sh postun uninstall %{version} $* | tai64n | tai64nlocal
 fi
 ) >> /var/log/indimail-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %posttrans
+%log
 argv1=$1
 if [ -f %{libexecdir}/iupgrade.sh ] ; then
 (
-  echo "Running Custom Installation Script for posttrans"
-  /bin/sh %{libexecdir}/iupgrade.sh posttrans noargs %{version} $*
+  log_it "Running Custom Installation Script for posttrans"
+  /bin/sh %{libexecdir}/iupgrade.sh posttrans noargs %{version} $* | tai64n | tai64nlocal
 ) >> /var/log/indimail-setup.log 2>&1
 fi
 %{_prefix}/sbin/svctool --fixsharedlibs

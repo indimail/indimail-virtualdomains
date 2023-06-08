@@ -25,18 +25,17 @@ mandir=@mandir@
 rm=/bin/rm
 mv=/bin/mv
 
-ID=`id -u`
-if [ $ID -ne 0 ] ; then
-	echo "You are not root" >&2
-	exit 1
-fi
+log_it()
+{
+  echo "$(echo  ""|tai64n|tai64nlocal)$*"
+}
 
 case "$1" in
     remove|upgrade|deconfigure)
 	(
 	if [ -f ${libexecdir}/iupgrade.sh ] ; then
-		echo "Running Custom Upgrade Script for prerm $1"
-		/bin/sh ${libexecdir}/iupgrade.sh prerm $1 @version@ $* || true
+		log_it "Running Custom Upgrade Script for prerm $1"
+		/bin/sh ${libexecdir}/iupgrade.sh prerm $1 @version@ $* | tai64n | tai64nlocal
 	fi
 	# stop indimail services before upgrade
 	if [ -d /run ] ; then
@@ -82,11 +81,11 @@ if [ " $1" = " upgrade" -o " $1" = " deconfigure" ] ; then
 fi
 (
 if [ -s ${sysconfdir}/indimail-stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
-	echo "reverting permissions"
+	log_it "reverting permissions"
 	/bin/cat ${sysconfdir}/indimail-stat.override | while read line
 	do
 		if [ -f $line ] ; then
-			echo "reverting permission for $line"
+			log_it "reverting permission for $line"
 			/usr/sbin/dpkg-statoverride --remove $line || true
 		fi
 	done
@@ -119,8 +118,8 @@ do
 done
 
 if [ -f ${libexecdir}/iupgrade.sh ] ; then
-echo "Running Custom Upgrade Script for prerm $1"
-/bin/sh ${libexecdir}/iupgrade.sh prerm uninstall @version@ $* || true
+log_it "Running Custom Upgrade Script for prerm $1"
+/bin/sh ${libexecdir}/iupgrade.sh prerm uninstall @version@ $* | tai64n | tai64nlocal
 fi
 ) >> /var/log/indimail-setup.log 2>&1
 exit 0

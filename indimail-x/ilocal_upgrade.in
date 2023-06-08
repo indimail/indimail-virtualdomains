@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: ilocal_upgrade.in,v 2.39 2023-06-08 17:46:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.in,v 2.40 2023-06-08 22:26:21+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -22,7 +22,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.in,v 2.39 2023-06-08 17:46:23+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.in,v 2.40 2023-06-08 22:26:21+05:30 Cprogrammer Exp mbhangui $"
 if [ -d @indimaildir@/mysqldb/data/indimail ] ; then
 	if [ ! -f @servicedir@/mysql.3306/down ] ; then
 		for i in mysqld mariadb mysql
@@ -41,9 +41,9 @@ fi
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.in,v 2.39 2023-06-08 17:46:23+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.in,v 2.40 2023-06-08 22:26:21+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
-for i in @servicedir@/qmail-imapd* @servicedir@/qmail-pop3d* @servicedir@/proxy-imapd* @servicedir@/proxy-pop3d*
+for i in $(ls -d @servicedir@/qmail-imapd* @servicedir@/qmail-pop3d* @servicedir@/proxy-imapd* @servicedir@/proxy-pop3d* 2>/dev/null)
 do
 	if [ ! -d $i ] ; then
 		continue
@@ -51,7 +51,7 @@ do
 	check_update_if_diff $i/variables/TLS_CACHEFILE @sysconfdir@/certs/couriersslcache
 	check_update_if_diff $i/variables/TLS_CERTFILE @sysconfdir@/certs/servercert.pem
 done
-for i in @servicedir@/qmail-poppass* @servicedir@/indisrvr.*
+for i in $(ls -d @servicedir@/qmail-poppass* @servicedir@/indisrvr.* 2>/dev/null)
 do
 	if [ ! -d $i ] ; then
 		continue
@@ -174,7 +174,7 @@ if [ -f @servicedir@/inlookup.infifo/variables/FIFODIR ] ; then
 	@prefix@/sbin/svctool --servicedir=@servicedir@ --refreshsvc="@servicedir@/inlookup.infifo" --force
 fi
 # update all services using inlookup service to use INFIFODIR
-for i in $(echo @servicedir@/*/variables/FIFODIR)
+for i in $(ls @servicedir@/*/variables/FIFODIR 2>/dev/null)
 do
 	t1=$(dirname $i)
 	svc_name=$(dirname $t1)
@@ -241,6 +241,9 @@ case $1 in
 esac
 #
 # $Log: ilocal_upgrade.in,v $
+# Revision 2.40  2023-06-08 22:26:21+05:30  Cprogrammer
+# fixed errors
+#
 # Revision 2.39  2023-06-08 17:46:23+05:30  Cprogrammer
 # adjust to use nssd.sock, inlookup fifo in /run/indimail
 #

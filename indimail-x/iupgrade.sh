@@ -1,5 +1,186 @@
 #!/bin/sh
+#
+# $Id: iupgrade.sh,v 2.14 2023-06-08 22:27:18+05:30 Cprogrammer Exp mbhangui $
+#
+
+do_upgrade()
+{
+	if [ -f /usr/libexec/indimail/ilocal_upgrade.sh ] ; then
+		echo "Running upgrade script for $1 ----------"
+		sh /usr/libexec/indimail/ilocal_upgrade.sh $1
+	fi
+}
+
+do_pre()
+{
+	case $1 in
+		install)
+		echo "-- do_pre install -- $PKG_VER -------------"
+		do_upgrade preinstall
+		echo
+		;;
+		upgrade)
+		echo "-- do_pre upgrade -- $PKG_VER -------------"
+		do_upgrade pre
+		echo
+		;;
+	esac
+}
+
+do_post()
+{
+	case $1 in
+		install)
+		echo "-- do_post install -- $PKG_VER ------------"
+		do_upgrade install
+		echo
+		;;
+		upgrade)
+		echo "-- do_post upgrade -- $PKG_VER ------------"
+		do_upgrade post
+		echo
+		;;
+	esac
+}
+
+do_preun()
+{
+	if [ -f /etc/indimail/indimail-release ] ; then
+		echo $PKG_VER > /tmp/indimail-pkg.old
+		. /etc/indimail/indimail-release
+	else
+		/bin/rm -f /tmp/indimail-pkg.old
+	fi
+	case $1 in
+		upgrade)
+		echo "-- do_preun upgrade -- $PKG_VER -----------"
+		echo
+		;;
+		uninstall)
+		echo "-- do_preun uninstall -- $PKG_VER ---------"
+		echo
+		;;
+		## debian ###
+		remove)
+		echo "-- do_preun remove -- $PKG_VER ------------"
+		echo
+		;;
+		deconfigure)
+		echo "-- do_preun deconfigure -- $PKG_VER -------"
+		echo
+		;;
+	esac
+}
+
+do_postun()
+{
+	if [ -f /etc/indimail/indimail-release ] ; then
+		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
+			PKG_VER=`rpm -qf /etc/indimail/indimail-release`
+		else
+			PKG_VER=`dpkg -S /etc/indimail/indimail-release`
+		fi
+		. /etc/indimail/indimail-release
+	fi
+	case $1 in
+		upgrade)
+		echo "-- do_preun upgrade -- $PKG_VER -----------"
+		echo
+		;;
+		uninstall|remove)
+		echo "-- do_postun uninstall -- $PKG_VER --------"
+		echo
+		;;
+		## debian ##
+    	purge|failed-upgrade|abort-install|abort-upgrade|disappear)
+		echo "-- do_postun purge -- $PKG_VER ------------"
+		echo
+		;;
+	esac
+}
+
+do_prettrans()
+{
+	if [ -f /etc/indimail/indimail-release ] ; then
+		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
+			PKG_VER=`rpm -qf /etc/indimail/indimail-release`
+		else
+			PKG_VER=`dpkg -S /etc/indimail/indimail-release`
+		fi
+		. /etc/indimail/indimail-release
+	fi
+	case $1 in
+		noargs)
+		echo "-- do_prettrans noargs -- $PKG_VER --------"
+		echo
+		do_upgrade prettrans
+		;;
+	esac
+}
+
+do_posttrans()
+{
+	if [ -f /tmp/indimail-pkg.old ] ; then
+		OLD_PKG_VER=`cat /tmp/indimail-pkg.old`
+	fi
+	case $1 in
+		noargs)
+		echo "-- do_posttrans noargs -- $PKG_VER --------"
+		echo
+		do_upgrade posttrans
+		;;
+	esac
+}
+
+# iupgrade.sh pretrans  noargs    %{version} $*
+#   do_upgrade pretrans
+# iupgrade.sh pre       upgrade   %{version} $*
+#   do_upgrade pre
+# iupgrade.sh post      upgrade   %{version} $*
+#   do_upgrade post
+# iupgrade.sh post      install   %{version} $*
+# iupgrade.sh preun     upgrade   %{version} "$argv1"
+# iupgrade.sh preun     uninstall %{version} "$argv1"
+# iupgrade.sh postun    upgrade   %{version} $*
+# iupgrade.sh postun    uninstall %{version} $*
+# iupgrade.sh posttrans noargs    %{version} $*
+#   do_upgrade posttrans
+echo "Start indimail installation Script"
+version=$3
+if [ -f /etc/indimail/indimail-release ] ; then
+	if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
+		PKG_VER=`rpm -qf /etc/indimail/indimail-release`
+	else
+		PKG_VER=`dpkg -S /etc/indimail/indimail-release`
+	fi
+	. /etc/indimail/indimail-release
+fi
+case $1 in
+	pre)
+	do_pre $2
+	;;
+	post)
+	do_post $2
+	;;
+	preun|prerm)
+	do_preun $2
+	;;
+	postun)
+	do_postun $2
+	;;
+	prettrans)
+	do_prettrans $2
+	;;
+	posttrans)
+	do_posttrans $2
+	;;
+esac
+echo "End   indimail installation Script"
+#
 # $Log: iupgrade.sh,v $
+# Revision 2.14  2023-06-08 22:27:18+05:30  Cprogrammer
+# refactored iupgrade script
+#
 # Revision 2.13  2020-06-17 11:15:54+05:30  Cprogrammer
 # fixed ilocal_upgrade.sh not getting called
 #
@@ -39,203 +220,3 @@
 # Revision 2.1  2017-03-28 19:12:18+05:30  Cprogrammer
 # generic upgrade script for indimail
 #
-#
-# $Id: iupgrade.sh,v 2.13 2020-06-17 11:15:54+05:30 Cprogrammer Exp mbhangui $
-
-do_upgrade()
-{
-	if [ -f /usr/libexec/indimail/ilocal_upgrade.sh ] ; then
-		echo "-- $tm - Running upgrade script for $1 ----------"
-		sh /usr/libexec/indimail/ilocal_upgrade.sh $1
-	fi
-}
-
-do_pre()
-{
-	if [ -f /etc/indimail/indimail-release ] ; then
-		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
-			PKG_VER=`rpm -qf /etc/indimail/indimail-release`
-		else
-			PKG_VER=`dpkg -S /etc/indimail/indimail-release`
-		fi
-		. /etc/indimail/indimail-release
-	fi
-	case $1 in
-		install)
-		echo "-- $tm - do_pre install -------------------------"
-		echo "-- $tm RPM/DEB Version  $PKG_VER"
-		do_upgrade preinstall
-		echo "-------------------------------------------------"
-		;;
-		upgrade)
-		echo "-- $tm - do_pre upgrade -------------------------"
-		echo "-- $tm RPM/DEB Version  $PKG_VER"
-		do_upgrade pre
-		echo "-------------------------------------------------"
-		;;
-	esac
-}
-
-do_post()
-{
-	if [ -f /etc/indimail/indimail-release ] ; then
-		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
-			PKG_VER=`rpm -qf /etc/indimail/indimail-release`
-		else
-			PKG_VER=`dpkg -S /etc/indimail/indimail-release`
-		fi
-		. /etc/indimail/indimail-release
-	fi
-	case $1 in
-		install)
-		echo "-- $tm - do_post install ------------------------"
-		echo "-- $tm RPM/DEB Version  $PKG_VER"
-		do_upgrade install
-		echo "-------------------------------------------------"
-		;;
-		upgrade)
-		echo "-- $tm - do_post upgrade ------------------------"
-		echo "-- $tm RPM/DEB Version  $PKG_VER"
-		do_upgrade post
-		echo "-------------------------------------------------"
-		;;
-	esac
-}
-
-do_preun()
-{
-	if [ -f /etc/indimail/indimail-release ] ; then
-		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
-			PKG_VER=`rpm -qf /etc/indimail/indimail-release`
-		else
-			PKG_VER=`dpkg -S /etc/indimail/indimail-release`
-		fi
-		echo $PKG_VER > /tmp/indimail-pkg.old
-		. /etc/indimail/indimail-release
-	else
-		/bin/rm -f /tmp/indimail-pkg.old
-	fi
-	case $1 in
-		upgrade)
-		echo "-- $tm - do_preun upgrade -----------------------"
-		echo "-- $tm RPM/DEB Version  $PKG_VER"
-		;;
-		uninstall)
-		echo "-- $tm - do_preun uninstall ---------------------"
-		echo "-- $tm RPM/DEB Version  $PKG_VER"
-		;;
-		## debian ###
-		remove)
-		echo "-- $tm - do_preun remove ------------------------"
-		echo "-- $tm RPM/DEB Version  $PKG_VER"
-		;;
-		deconfigure)
-		echo "-- $tm - do_preun deconfigure -------------------"
-		echo "-- $tm RPM/DEB Version  $PKG_VER"
-		;;
-	esac
-}
-
-do_postun()
-{
-	if [ -f /etc/indimail/indimail-release ] ; then
-		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
-			PKG_VER=`rpm -qf /etc/indimail/indimail-release`
-		else
-			PKG_VER=`dpkg -S /etc/indimail/indimail-release`
-		fi
-		. /etc/indimail/indimail-release
-	fi
-	case $1 in
-		upgrade)
-		echo "-- $tm - do_preun upgrade -----------------------"
-		echo "-- $tm RPM/DEB Version  $PKG_VER"
-		;;
-		uninstall|remove)
-		echo "-- $tm - do_postun uninstall --------------------"
-		echo "-- $tm RPM/DEB Version  $PKG_VER"
-		;;
-		## debian ##
-    	purge|failed-upgrade|abort-install|abort-upgrade|disappear)
-		echo "-- $tm - do_postun purge ------------------------"
-		echo "-- $tm RPM/DEB Version  $PKG_VER"
-		;;
-	esac
-}
-
-do_prettrans()
-{
-	if [ -f /etc/indimail/indimail-release ] ; then
-		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
-			PKG_VER=`rpm -qf /etc/indimail/indimail-release`
-		else
-			PKG_VER=`dpkg -S /etc/indimail/indimail-release`
-		fi
-		. /etc/indimail/indimail-release
-	fi
-	case $1 in
-		noargs)
-		echo "-- $tm - do_prettrans noargs --------------------"
-		echo "-- $tm RPM/DEB Version  $PKG_VER"
-		do_upgrade prettrans
-		;;
-	esac
-}
-
-do_posttrans()
-{
-	if [ -f /tmp/indimail-pkg.old ] ; then
-		OLD_PKG_VER=`cat /tmp/indimail-pkg.old`
-	fi
-	if [ -f /etc/indimail/indimail-release ] ; then
-		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
-			PKG_VER=`rpm -qf /etc/indimail/indimail-release`
-		else
-			PKG_VER=`dpkg -S /etc/indimail/indimail-release`
-		fi
-		. /etc/indimail/indimail-release
-	fi
-	case $1 in
-		noargs)
-		echo "-- $tm - do_posttrans noargs --------------------"
-		echo "-- $tm RPM/DEB Version old [$OLD_PKG_VER] new [$PKG_VER]"
-		do_upgrade posttrans
-		;;
-	esac
-}
-
-# iupgrade.sh pretrans  noargs    %{version} $*
-#   do_upgrade pretrans
-# iupgrade.sh pre       upgrade   %{version} $*
-#   do_upgrade pre
-# iupgrade.sh post      upgrade   %{version} $*
-#   do_upgrade post
-# iupgrade.sh post      install   %{version} $*
-# iupgrade.sh preun     upgrade   %{version} "$argv1"
-# iupgrade.sh preun     uninstall %{version} "$argv1"
-# iupgrade.sh postun    upgrade   %{version} $*
-# iupgrade.sh postun    uninstall %{version} $*
-# iupgrade.sh posttrans noargs    %{version} $*
-#   do_upgrade posttrans
-tm=`date +'%F %T'`
-version=$3
-case $1 in
-	pre)
-	do_pre $2
-	;;
-	post)
-	do_post $2
-	;;
-	preun|prerm)
-	do_preun $2
-	;;
-	postun)
-	do_postun $2
-	;;
-	prettrans)
-	do_prettrans $2
-	;;
-	posttrans)
-	do_posttrans $2
-	;;
-esac
