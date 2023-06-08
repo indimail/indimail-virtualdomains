@@ -1,5 +1,8 @@
 /*
  * $Log: handlers.c,v $
+ * Revision 1.6  2023-06-08 17:43:59+05:30  Cprogrammer
+ * removed compiler warning
+ *
  * Revision 1.5  2022-10-22 12:54:04+05:30  Cprogrammer
  * BUG Fixed copying out of bounds
  *
@@ -40,7 +43,7 @@
  */
 
 #ifndef	lint
-static char    *rcsid = "@(#) $Id: handlers.c,v 1.5 2022-10-22 12:54:04+05:30 Cprogrammer Exp mbhangui $";
+static char    *rcsid = "@(#) $Id: handlers.c,v 1.6 2023-06-08 17:43:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -487,16 +490,17 @@ i_alias(int argc, char **argv)
 	strcpy(AliasList[AliasCounter].cmd, argv[1]);
 	for (i = 0; i < argc - 2; i++)
 		aspace += strlen(argv[i + 2]) + 1;
-	AliasList[AliasCounter].alias = (char *) malloc(aspace);
-	strcpy(AliasList[AliasCounter].alias, argv[2]);
-	for (i = 0; i < argc - 3; i++)
-	{
-		strcat(AliasList[AliasCounter].alias, " ");
-		strcat(AliasList[AliasCounter].alias, argv[i + 3]);
+	if (aspace) {
+		AliasList[AliasCounter].alias = (char *) malloc(aspace);
+		strcpy(AliasList[AliasCounter].alias, argv[2]);
+		for (i = 0; i < argc - 3; i++) {
+			strcat(AliasList[AliasCounter].alias, " ");
+			strcat(AliasList[AliasCounter].alias, argv[i + 3]);
+		}
+		printf("Alias[%d]: %s  ->  %s\n", AliasCounter, AliasList[AliasCounter].cmd, AliasList[AliasCounter].alias);
+		AliasCounter++;
+		logit('+');
 	}
-	printf("Alias[%d]: %s  ->  %s\n", AliasCounter, AliasList[AliasCounter].cmd, AliasList[AliasCounter].alias);
-	AliasCounter++;
-	logit('+');
 	return(0);
 }
 
