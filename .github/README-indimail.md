@@ -705,7 +705,7 @@ It is trivial to display the environment variable that would be set for your ser
 	SMTPS=
 	DEFAULT_DOMAIN=argos.indimail.org
 	QMAILQUEUE=/usr/sbin/qmail-dkim
-	FIFODIR=/var/indimail/inquery
+	INFIFODIR=/run/indimail/inlookup
 	SPAMEXITCODE=0
 	PLUGIN0_dir=/var/indimail
 	AUTHMODULES=/usr/sbin/sys-checkpwd /usr/sbin/vchkpass
@@ -3589,7 +3589,7 @@ Support for control files in MySQL support gets enabled by configuring the contr
 
 IndiMail uses MySQL for storing information of virtual domain users. The table 'indimail' stores important user information like password, access permissions, quota and the mailbox path. Most of user related queries have to lookup the 'indimail' table in MySQL.
 
-Rather than making individual connections to MySQL for extracting information from the 'indimail' table, IndiMail programs use the service of the inlookup(8) server. Programs use an API function inquery() to request service. InLookup is a connection pooling server to serve requests for inquery() function. It is implemented over two fifos. One fixed fifo for reading the query and reading the path of a randomly generated fifo. The randomly generated fifo is used for writing the result of the query back. inlookup(8) creates a read FIFO determined by the environment variable **INFIFO**. If **INFIFO** is not defined, the default FIFO used is /var/indimail/inquery/infifo. inlookup(8) then goes into an infinite loop reading this FIFO. If **INFIFO** is not an absolute path, inlookup(8) uses environment variable FIFODIR to look for fifo named by **INFIFO** variable. Inlookup(8) can be configured by setting environment variables in /service/inlookup.info/variables
+Rather than making individual connections to MySQL for extracting information from the 'indimail' table, IndiMail programs use the service of the inlookup(8) server. Programs use an API function inquery() to request service. InLookup is a connection pooling server to serve requests for inquery() function. It is implemented over two fifos. One fixed fifo for reading the query and reading the path of a randomly generated fifo. The randomly generated fifo is used for writing the result of the query back. inlookup(8) creates a read FIFO determined by the environment variable **INFIFO**. If **INFIFO** is not defined, the default FIFO used is /run/indimail/inlookup/infifo. inlookup(8) then goes into an infinite loop reading this FIFO. If **INFIFO** is not an absolute path, inlookup(8) uses environment variable INFIFODIR to look for fifo named by **INFIFO** variable. Inlookup(8) can be configured by setting environment variables in /service/inlookup.info/variables
 
 * inlookup helps in optimizing connection to MySQL(1), by keeping the connections persistent.
 * It also maintains the query result in a double link list.
@@ -4241,7 +4241,7 @@ Dovecot uses /etc/dovecot/dovecot.conf as the main configuration file.
 
 ```
 protocols = imap pop3
-import_environment = QUERY_CACHE=1 DOMAIN_LIMITS=1 FIFODIR=/var/indimail/inquery INFIFO=infifo
+import_environment = QUERY_CACHE=1 DOMAIN_LIMITS=1 INFIFODIR=/run/indimail/inlookup INFIFO=infifo
 ```
 
 NOTE: If you decide to use any of indimail's checkpassword authentication modules and if you need to enable QUERY\_CACHE above, make sure to comment out `#PrivateTmp=true` in the file `/usr/lib/systemd/system/dovecot.service. If you don't disable PrivateTmp and you are using any of the indimail's checkpassword modules for authentication, the modules will not be able to communicate with inlookup query daemon. This is because the /tmp that inlookup uses will be different from the /tmp directory that dovecot auth process will use. checkpassword modules create a fifo in the /tmp directory and exchange the name with inlookup through another fifo. If you do disable PrivateTmp, then do not forget to issue the command
