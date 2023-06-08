@@ -16,10 +16,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/*- A SIGNIFICANT PORTION OF THIS CODE IS BASED ON GNU NSCD */
-
-/*
- * $Id: nssd.c,v 1.7 2023-06-07 19:41:19+05:30 Cprogrammer Exp mbhangui $ 
+/*-
+ * A SIGNIFICANT PORTION OF THIS CODE IS BASED ON GNU NSCD
+ * The original nsvs code has been significantly modifed by
+ * manvendra bhangui <manvendra@indimail.org>
+ *
+ * $Id: nssd.c,v 1.6 2021-07-21 11:06:26+05:30 Cprogrammer Exp mbhangui $ 
  */
 #define _GNU_SOURCE 
 #include "common.h"
@@ -46,8 +48,8 @@
 do {                                                                         \
   if (n)                                                                     \
     {                                                                        \
-      in_mysql_free_result (n);                                                 \
-      (n) = '\0';                                                            \
+      in_mysql_free_result (n);                                              \
+      (n) = (MYSQL_RES *) NULL;                                              \
     }                                                                        \
   } while (0)
 
@@ -162,10 +164,12 @@ static int
 run_query(int32_t type, char *key, int th_num)
 {
 	char           *query, ekey[MAX_USERNAME_SIZE * 2 + 1];
+	int             free_query;
 	char           *p;
 
 	if (!init_connection(th_num))
 		return 0;
+	free_query = 0;
 	/*- If we have a key, then use asprintf () */
 	if (key && *key) {
 		in_mysql_real_escape_string(&connections[th_num].mysql, ekey, key, strlen(key));
@@ -176,6 +180,7 @@ run_query(int32_t type, char *key, int th_num)
 				nssd_log(LOG_DEBUG, "asprintf: out of memory");
 				return 0;
 			}
+			free_query = 1;
 			*(p - 1) = '@';
 		} else {
 			p = (p = getenv("DEFAULT_DOMAIN")) ? p : DEFAULT_DOMAIN;
@@ -183,11 +188,12 @@ run_query(int32_t type, char *key, int th_num)
 				nssd_log(LOG_DEBUG, "asprintf: out of memory");
 				return 0;
 			}
+			free_query = 1;
 		}
 	} else
 		query = query_conf[type].query;
 	if (!query || (query && !*query)) {
-		if (query)
+		if (free_query)
 			free(query);
 		return 0;
 	}
@@ -197,10 +203,12 @@ run_query(int32_t type, char *key, int th_num)
 	if (in_mysql_query(&connections[th_num].mysql, query)) {
 		nssd_log(LOG_ALERT, "%s: mysql_query: [%s] key [%s] type %s: %s", __FUNCTION__, query, key,
 				print_request_type(type), in_mysql_error(&connections[th_num].mysql));
-		free(query);
+		if (free_query)
+			free(query);
 		return 0;
 	}
-	free(query);
+	if (free_query)
+		free(query);
 	return 1;
 }
 
@@ -328,7 +336,7 @@ static void    *
 main_loop(void *p)
 {
 	struct pollfd   conn;
-	int             th_num = (int) p;
+	int             th_num = *((int *) p);
 #ifdef HAVE_STRUCT_UCRED
 	struct ucred    caller;
 	socklen_t       optlen = sizeof (caller);
@@ -487,14 +495,12 @@ termination_handler(int signum)
 	/*- "thread" 0 isn't really a thread, don't try to cancel it */
 	for (i = 1; i < conf.threads; ++i) {
 		char            buf[256];
-		if (pthread_cancel(th[i]) != 0)
-		{
+		if (pthread_cancel(th[i]) != 0) {
 			if (strerror_r(errno, buf, sizeof(buf)))
 				;
 			nssd_log(LOG_ERR, "%s: pthread_cancel: %s", __FUNCTION__, buf);
 		}
-		if (pthread_join(th[i], &result) != 0)
-		{
+		if (pthread_join(th[i], &result) != 0) {
 			if (strerror_r(errno, buf, sizeof(buf)))
 				;
 			nssd_log(LOG_ERR, "%s: pthread_join: %s", __FUNCTION__, buf);
@@ -529,13 +535,12 @@ setup_socket(void)
 	if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
 		if (strerror_r(errno, buf, sizeof(buf)))
 			;
-		nssd_log(LOG_ALERT, "%s: socket: %s", __FUNCTION__, buf);
+		nssd_log(LOG_ALERT, "%s: socket: %s: %s", __FUNCTION__, socket_file, buf);
 		exit(EXIT_FAILURE);
 	}
 	sock_addr.sun_family = AF_UNIX;
 	strncpy(sock_addr.sun_path, socket_file, sizeof(sock_addr.sun_path) - 1);
-	if (!access(socket_file, F_OK) && unlink(socket_file))
-	{
+	if (!access(socket_file, F_OK) && unlink(socket_file)) {
 		if (strerror_r(errno, buf, sizeof(buf)))
 			;
 		nssd_log(LOG_ALERT, "%s: unlink: %s: %s", __FUNCTION__, socket_file, buf);
@@ -556,7 +561,7 @@ setup_socket(void)
 	if (listen(sock, SOMAXCONN) < 0) {
 		if (strerror_r(errno, buf, sizeof(buf)))
 			;
-		nssd_log(LOG_ALERT, "%s: listen: %s", __FUNCTION__, buf);
+		nssd_log(LOG_ALERT, "%s: listen: %s: %s", __FUNCTION__, socket_file, buf);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -565,13 +570,18 @@ static void
 spawn_threads(void)
 {
 	int             i;
+	int            *j;
 
-	nssd_log(LOG_INFO, "%s: nssd starting up (%d threads) ...", __FUNCTION__, conf.threads);
+	j = (int *) malloc(conf.threads * sizeof(int));
+	nssd_log(LOG_NOTICE, "%s: nssd starting up (%d threads) ...", __FUNCTION__, conf.threads);
 	/*- Create conf.threads - 1 threads */
-	for (i = 1; i < conf.threads; ++i)
-		pthread_create(&th[i], NULL, main_loop, (void *) i);
+	j[0] = 0;
+	for (i = 1; i < conf.threads; ++i) {
+		j[i] = i;
+		pthread_create(&th[i], NULL, main_loop, (void *) &j[i]);
+	}
 	/*- And make this copy "thread" 0 */
-	main_loop((void *) 0);
+	main_loop((void *) &j[0]);
 }
 
 /*
@@ -607,15 +617,13 @@ write_pid(const char *file)
 {
 	FILE           *fp;
 
-	if (!(fp = fopen(file, "w")))
-	{
+	if (!(fp = fopen(file, "w"))) {
 		fprintf(stderr, "write_pid: %s: %s\n", file, strerror(errno));
 		return -1;
 	}
 	fprintf(fp, "%d\n", getpid());
-	if (fflush(fp) || ferror(fp))
-	{
-		fprintf(stderr, "fflush: %s: %s\n", file, strerror(errno));
+	if (fflush(fp) || ferror(fp)) {
+		fprintf(stderr, "fflush_pid: %s: %s\n", file, strerror(errno));
 		return -1;
 	}
 	fclose(fp);
@@ -694,3 +702,25 @@ main(int argc, char **argv)
 	spawn_threads();
 	return 0;
 }
+
+/*-
+ * $Log: nssd.c,v $
+ * Revision 1.6  2021-07-21 05:36:26+05:30  Cprogrammer
+ * replace sys/poll.h with poll.h
+ *
+ * Revision 1.5  2020-09-24 05:41:37+05:30  Cprogrammer
+ * renamed NSVSD to NSSD
+ *
+ * Revision 1.4  2019-06-13 15:53:19+05:30  Cprogrammer
+ * dynamically load MySQL functions
+ *
+ * Revision 1.3  2018-11-12 12:13:46+05:30  Cprogrammer
+ * use ns_bool to avoid conflict with mysql my_bool
+ *
+ * Revision 1.2  2018-11-06 05:56:50+05:30  Cprogrammer
+ * removed compiler warnings
+ *
+ * Revision 1.1  2011-06-18 06:08:37+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
