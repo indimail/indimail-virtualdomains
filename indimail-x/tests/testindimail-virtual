@@ -289,7 +289,7 @@ function setup_svscan()
 		mkdir -p $servicedir/"$i"d-ssl/variables
 		for j in d d-ssl
 		do
-			echo $indimaildir/inquery    > $servicedir/"$i"$j/variables/FIFODIR
+			echo $indimaildir/inquery    > $servicedir/"$i"$j/variables/INFIFODIR
 			echo $tmpfifodir             > $servicedir/"$i"$j/variables/FIFOTMPDIR
 			echo 660                     > $servicedir/"$i"$j/variables/FIFO_MODE
 			echo 1                       > $servicedir/"$i"$j/variables/USE_QPWGR
@@ -366,7 +366,7 @@ function setup_svscan()
 	echo $sysconfdir       > $servicedir/smtpd/variables/SYSCONFDIR
 	echo $sysconfdir/users > $servicedir/smtpd/variables/ASSIGNDIR
 	echo $certdir          > $servicedir/smtpd/variables/CERTDIR
-	echo $qmaildir/inquery > $servicedir/smtpd/variables/FIFODIR
+	echo $qmaildir/inquery > $servicedir/smtpd/variables/INFIFODIR
 	echo $qmaildir         > $servicedir/smtpd/variables/DOMAINDIR
 	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail,indimail -HR 0 2025 $qmail_smtpd $HOSTNAME /usr/sbin/vchkpass /bin/false 2>&1\n" > $servicedir/smtpd/run
 	printf "#!/bin/sh\nexec $setuidgid $user $multilog t $logdir/smtpd\n" > $servicedir/smtpd/log/run
@@ -381,7 +381,7 @@ function setup_svscan()
 	mkdir -p $servicedir/inlookup.infifo/log
 	echo $cntrldir          > $servicedir/inlookup.infifo/variables/CONTROLDIR
 	echo $sysconfdir/users  > $servicedir/inlookup.infifo/variables/ASSIGNDIR
-	echo $qmaildir/inquery  > $servicedir/inlookup.infifo/variables/FIFODIR
+	echo $qmaildir/inquery  > $servicedir/inlookup.infifo/variables/INFIFODIR
 	echo 660                > $servicedir/inlookup.infifo/variables/FIFO_MODE
 	echo infifo             > $servicedir/inlookup.infifo/variables/INFIFO
 	echo 5                  > $servicedir/inlookup.infifo/variables/THREAD_COUNT
@@ -695,7 +695,7 @@ function do_inquerytest()
 	sudo setuidgid indimail env - \
 		SYSCONFDIR=$sysconfdir \
 		CONTROLDIR=$cntrldir \
-		FIFODIR=$indimaildir/inquery \
+		INFIFODIR=$indimaildir/inquery \
 		FIFOTMPDIR=$tmpfifodir \
 		FIFO_MODE=0666 \
 		/usr/sbin/inquerytest -v -q 3 -i "" $1 > $logdir/setup/inquerytest.log
