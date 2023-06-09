@@ -92,8 +92,10 @@ Table of Contents
    * [CHECKRECIPIENT - Check Recipients during SMTP](#checkrecipient---check-recipients-during-smtp)
    * [SMTP Access List](#smtp-access-list)
    * [IndiMail Control Files Formats](#indimail-control-files-formats)
-   * [Inlookup database connection pooling service](#inlookup-database-connection-pooling-service)
-   * [Name Service Switch Daemon - nssd](#name-service-switch-daemon---nssd)
+   * [indimail-mta Authentication Mechanisms](indimail-mta-authentication-mechanisms)
+      * [Inlookup database connection pooling service](#inlookup-database-connection-pooling-service)
+      * [Name Service Switch Daemon - nssd](#name-service-switch-daemon---nssd)
+      * [PAM Authentication Modules](#pam-authentication-modules)
    * [Setting limits for your domain](#setting-limits-for-your-domain)
    * [SPAM and Virus Filtering](#spam-and-virus-filtering)
    * [SPAM Control using bogofilter](#spam-control-using-bogofilter)
@@ -3587,6 +3589,45 @@ qmail-sql -s localhost -u indimail -p ssh-1.5- -d indimail -t bmf badmailfrom
 
 Support for control files in MySQL support gets enabled by configuring the control file <u>mysql_lib</u> in <u>/etc/indimail/control</u> directory. This file should contain the full path to the MySQL shared library. e.g. `/usr/lib64/mysql/libmysqlclient.so.21.2.30`. The command `svctool --fixsharedlibs` updates this file. In case you are not using indimail-virtualdomains or do not have MySQL server installed or do not want MySQL to be installed, you can choose to not have the <u>mysql_lib</u> control file.
 
+# indimail-mta Authentication Mechanisms
+
+indimail-mta provides multiple ways to achieve authentication.
+
+1. Using authentication modules
+2. Using Name Service Switch Daemon - nssd
+3. Using Password Authentication Modules (PAM)
+4. Using a PAM module to use pam-multi
+
+** Authentication Modules **
+
+There are two categories of these modules. [checkpassword](http://cr.yp.to/checkpwd.html) based authentication modules and non-checkpassword modules.
+
+checkpassword based authentication modules are [vchkpass(8)](https://github.com/mbhangui/indimail-mta/wiki/vchkpass.8), [ldap-checkpwd(8)](https://github.com/mbhangui/indimail-mta/wiki/ldap-checkpwd.8), [pam-checkpwd(8)](https://github.com/mbhangui/indimail-mta/wiki/pam-checkpwd.8), [sys-checkpwd(8)](https://github.com/mbhangui/indimail-mta/wiki/sys-checkpwd.8). [qmail-smtpd](https://github.com/mbhangui/indimail-mta/wiki/qmail-smtpd.8) can use checkpassword authentication modules.
+
+non-checkpassword based modules are [authindi](https://github.com/mbhangui/indimail-mta/wiki/authlib.7), [authpam](https://github.com/mbhangui/indimail-mta/wiki/authlib.7), [authshadow](https://github.com/mbhangui/indimail-mta/wiki/authlib.7) used by [imapd](https://github.com/mbhangui/indimail-mta/wiki/imapd.8) and [pop3d](https://github.com/mbhangui/indimail-mta/wiki/pop3d.8).
+
+Of the above, authvchkpw(8) and authindi(8) help authenticating against IndiMail's MySQL database for virtual domain users. They can directly connnect to the MySQL database or can use a connection caching/pooling daemon [inlookup(8)](https://github.com/mbhangui/indimail-mta/wiki/inlookup.8) described in the [chapter](#inlookup-database-connection-pooling-service). For using inlookup daemon, the environment variable <b>QUERY_CACHE</b> needs to be set. Using inlookup can significantly boost performance and reduce time taken to perform authenticate requests.
+
+The ldap-checkpwd module can authenticate against a LDAP server. This module is limited by the options provided by the ldap-checkpwd module.
+
+The sys-checkpwd(8), authshadow(7) modules use libc/glibc functions getpwnam(3), getpwuid(3), getpwent(3), getspnam(3), getuserpw(3), getgrnam(3), getgrgid(3), getgrent(3) to fetch records from the passwd(5), shadow(5) and the group(5) databases. Apart from the configuration options provided by the modules itself, one can also exploit nsswitch.conf to redirect these calls to [Name Service Switch Daemon - nssd](#name-service-switch-Daemon---nssd) and use indimail's MySQL database as an alternate database to the local passwd(5), shadow(5) and the group(5) databases. The nssd(8) daemon is quite powerful, allowing any 3rd-party software that uses the standard libc/glibc functions for authentication to authenticate successfully against IndiMail's MySQL database without changing any code. This makes it trivial to replace indimail's IMAP/POP3 server with any IMAP/POP3 server of your choice.
+
+The pam-checkpwd(8), authpam(8) modules are PAM modules. PAM, or Pluggable Authentication Modules, is a modular approach to authentication. It allows (third party) services to provide an authentication module for their service which can then be used on PAM enabled systems. Services that use PAM for authentication can immediately use these modules without the need for a rebuild. pam-checkpwd(8) is highly configurable and can use any PAM(8) service like the linux /etc/pam.d/login and authenticate against system users configured by you or your system administrator. authpam(8) can authenticate using the pam service file /etc/pam.d/imap or /etc/pam.d/pop3. authpam(8) can be used by indimail's own imapd/pop3d to authenticate local users.
+
+To configure SMTP service to use these modules you need to setup <b>AUTHMODULE</b> environment variable. To configure IMAP/POP3 service to use these authentication modules you need to configure <b>IMAPMODULE</b> environment variable.
+
+** Name Service Switch **
+
+indimail-mta provides the nssd(8) daemon which implments a  Name Service Switch (NSS). This allows the libc/glibc functions getpwnam(3), getpwuid(3), getpwent(3), getspnam(3), getuserpw(3), getgrnam(3), getgrgid(3), getgrent(3) to fetch records from the passwd(5), shadow(5) and the group(5) databases to query the IndiMail's MySQL database. This also enables PAM modules which uses these functions to fetch records from IndiMail's MySQL database. nssd(8) is discussed in the the [chapter](#name-service-switch-Daemon---nssd) below. Apart from allowing auth modules like sys-checkpwd, pam-checkpwd, authpam, authshadow to access MySQL, nssd allows access to any third-party software to access the MySQL database transparently.
+
+** PAM Modules **
+
+indimail-mta provides pam-checkpwd(8), a checkpassword compliant module for authenticated SMTP service and authpam(7) for IMAP/POP3 authentication.
+
+** PAM Service **
+
+indimail-mta provides a configurable PAM service implmented using [pam-multi(8)](https://github.com/mbhangui/indimail-mta/wiki/pam-multi.8). pam-multi can be used by any of the PAM configuration files in /etc/pam.d to authenticate against any database on your local system. pam-multi is discussed in detail in the [chapter](#pam-multi).
+
 # Inlookup database connection pooling service
 
 IndiMail uses MySQL for storing information of virtual domain users. The table 'indimail' stores important user information like password, access permissions, quota and the mailbox path. Most of user related queries have to lookup the 'indimail' table in MySQL.
@@ -3605,7 +3646,7 @@ The program inquerytest simulates all the queries which inlookup supports and ca
 
 `sudo inquerytest -q 3 -i "" user@example.com`
 
-# Name Service Switch Daemon - nssd
+## Name Service Switch Daemon - nssd
 
 There are various functions to lookup users and groups in a local environment. Traditionally, this is done by using files (e.g., /etc/passwd, /etc/group, etc), but other name services (like the [Network Information Service (NIS)](https://en.wikipedia.org/wiki/Network_Information_Service) and the [Domain Name Service (DNS)](https://en.wikipedia.org/wiki/Domain_Name_System]) are popular, and have been hacked into the C library, usually with a fixed search order. The [Name Service Switch (NSS)](https://en.wikipedia.org/wiki/Name_Service_Switch) provides a cleaner solution to extend the lookup to other databases. In Unix-like operating systems, the Name Service Switch (NSS) allows Unix configuration databases to be provided by different sources, including local files (for example: /etc/passwd, /etc/shadow, /etc/group, /etc/hosts), LDAP, and other sources.
 
@@ -3693,7 +3734,7 @@ mysql> WHERE pw_name='testuser01'and pw_domain='example.com' LIMIT 1;
 +------------+-----------------------------------------------------------------+---+---+-------+---+---+----+---+
 ```
 
-With the information above and having the details on how to connect to the MySQL database we can configure nssd by creating /etc/indimail/nssd.conf configuration file. Note that nssd.conf uses `%1$s` and `%2$s` as placeholders for username and password respectively. getpwnam entry configures the getpwnam(3) libc call to fetch user details from the MySQL database using the correspoinding SELECT query. Read [nssd.conf(5)](https://github.com/mbhangui/indimail-mta/wiki/nssd.conf.conf) for more details.
+With the information above and having the details on how to connect to the MySQL database we can configure nssd by creating /etc/indimail/nssd.conf configuration file. Note that nssd.conf uses `%1$s` and `%2$s` as placeholders for username and password respectively. getpwnam entry configures the getpwnam(3) libc call to fetch user details from the MySQL database using the correspoinding SELECT query. Read [nssd.conf(5)](https://github.com/mbhangui/indimail-mta/wiki/nssd.conf.5) for more details.
 
 ```
 getpwnam    SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell \
@@ -3787,6 +3828,21 @@ testuser01:$5$Q6JwFGYxvqrm6Xzb$Lr.d1CMxy7j0Y0xFgRY.FgHKy/LDXpA5tFo22ziz6aA:555:5
 ```
 
 And that ends the fun we had making libc functions which have nothing to do with MySQL, fetching records from a MySQL database.
+
+## PAM Multi Framework
+
+pam-multi is a framework that allows multime configurable methods for authentication using PAM. pam-multi is a system to handle the authentication tasks of applications (services) on systems which use PAM, against any proprietary databases. The system provides a stable general interface, that privilege granting programs (such  as authpam(7), login(1) and su(1)) can defer to, to perform standard authentication tasks. The primary goal of pam-multi was to allow authentication of IMAP/POP3 servers like courier-imap, dovecot against IndiMail(5)'s MySQL database. However, tt can be used for any application which can authenticate using pam(8) to authenticate against any proprietary database that you have. pam-multi supports four methods for password hashing schemes. crypt (DES), MD5, SHA256, SHA512. To use pam-multi for any application (which currently uses PAM), you need to modify the PAM  configuration  file  for that application. Simply  put, pam-multi extends an existing pam module to authenticate against any database using any one of the three methods described below.
+
+1. Using a SQL statement. This is provided by using the -m option to pam-multi. Currently only MySQL database is supported. You also need to pass connection parameters using -u, -p, -D, -H and -P options to connect to the MySQL database. When pam-multi is used for authentication,  it is  expected  that  the  sql_statement will return a row containing the encrypted password for the user.
+
+2. Using a <u>command</u>. This is provided by using the -c option. pam-multi will use sh -c "<u>command</u>". It  is  expected  that the output of the command will be an encrypted password.
+
+3. Using a shared library. This is currently provided by the shared library iauth.so in /usr/lib/indimail/modules directory. It is expected that the shared library implements a function named iauth() which returns the encrypted password for the user.
+
+    char *iauth(char *email, char *service, 0|1, int *size, int *nitems, int debug)
+
+The function iauth() will be passed a username and a token service denoting the name of service. The service argument  will  be used only for identification purpose. It is expected for the function to return the data. The third argument is either 0 or 1 denoting authentication or account management respectively. size denotes the size of the result  returned. nitems denotes the number of items that will be returned. The function should return 0 for successful authentication.
+
 
 # Setting limits for your domain
 
