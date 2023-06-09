@@ -135,6 +135,7 @@ do
 done
 
 %build
+cd %{_builddir}/%{name}-%{version}
 (
 echo "---------------- INFORMATION ------------------------"
 echo target         %_target
@@ -196,6 +197,7 @@ if [ -d pam-multi-%{pam_multi_version} ] ; then
 fi
 
 %install
+cd %{_builddir}/%{name}-%{version}
 for i in nssd-%{nssd_version} pam-multi-%{pam_multi_version}
 do
   if [ -d $i ] ; then
