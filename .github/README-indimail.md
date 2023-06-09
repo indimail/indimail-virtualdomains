@@ -3606,7 +3606,7 @@ checkpassword based authentication modules are [vchkpass(8)](https://github.com/
 
 non-checkpassword based modules are [authindi](https://github.com/mbhangui/indimail-mta/wiki/authlib.7), [authpam](https://github.com/mbhangui/indimail-mta/wiki/authlib.7), [authshadow](https://github.com/mbhangui/indimail-mta/wiki/authlib.7) used by [imapd](https://github.com/mbhangui/indimail-mta/wiki/imapd.8) and [pop3d](https://github.com/mbhangui/indimail-mta/wiki/pop3d.8).
 
-Of the above, authvchkpw(8) and authindi(8) help authenticating against IndiMail's MySQL database for virtual domain users. They can directly connnect to the MySQL database or can use a connection caching/pooling daemon [inlookup(8)](https://github.com/mbhangui/indimail-mta/wiki/inlookup.8) described in the [chapter](#inlookup-database-connection-pooling-service). For using inlookup daemon, the environment variable <b>QUERY_CACHE</b> needs to be set. Using inlookup can significantly boost performance and reduce time taken to perform authenticate requests.
+Of the above, authvchkpw(8) and authindi(8) help authenticating against IndiMail's MySQL database for virtual domain users. They can directly connnect to the MySQL database or can use a connection caching/pooling daemon [inlookup(8)](https://github.com/mbhangui/indimail-mta/wiki/inlookup.8) described in this [chapter](#inlookup-database-connection-pooling-service). For using inlookup daemon, the environment variable <b>QUERY_CACHE</b> needs to be set. Using inlookup can significantly boost performance and reduce time taken to perform authenticate requests.
 
 The ldap-checkpwd module can authenticate against a LDAP server. This module is limited by the options provided by the ldap-checkpwd module.
 
