@@ -184,7 +184,7 @@ if [ -d nssd-%{nssd_version} ] ; then
 fi
 
 #### pam-multi ######################
-if [ pam-multi-%{pam_multi_version} ] ; then
+if [ -d pam-multi-%{pam_multi_version} ] ; then
   cd pam-multi-%{pam_multi_version}
   %configure --prefix=%{_prefix} --datarootdir=%{shareddir} \
   --mandir=%{mandir} --enable-moduledir=%{pam_moduledir} \
