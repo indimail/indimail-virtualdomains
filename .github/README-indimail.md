@@ -92,10 +92,10 @@ Table of Contents
    * [CHECKRECIPIENT - Check Recipients during SMTP](#checkrecipient---check-recipients-during-smtp)
    * [SMTP Access List](#smtp-access-list)
    * [IndiMail Control Files Formats](#indimail-control-files-formats)
-   * [indimail-mta Authentication Mechanisms](indimail-mta-authentication-mechanisms)
+   * [indimail-mta Authentication Mechanisms](#indimail-mta-authentication-mechanisms)
       * [Inlookup database connection pooling service](#inlookup-database-connection-pooling-service)
       * [Name Service Switch Daemon - nssd](#name-service-switch-daemon---nssd)
-      * [PAM Authentication Modules](#pam-authentication-modules)
+      * [PAM Multi Framework](#pam-multi-framework)
    * [Setting limits for your domain](#setting-limits-for-your-domain)
    * [SPAM and Virus Filtering](#spam-and-virus-filtering)
    * [SPAM Control using bogofilter](#spam-control-using-bogofilter)
@@ -1358,7 +1358,7 @@ NOTE: If the program myfilter returns 100, the message will be bounced. If it re
 
 ### Using QMAILQUEUE with qmail-qfilter
 
-You can use <b>qmail-qfilter</b>(1). <b>qmail-qfilter</b> allows you to run multiple filters passed as command line arguments to <b>qmail-qfilter</b>. Since QMAILQUEUE doesn't allow you to specify multiple arguments, you can write a shell script which calls <b>qmail-qfilter</b> and have the shell script defined as QMAILQUEUE environment variable. The way qmail-qfilter works is simple - The original content is avaible on fd 0. If your filter writes anything on the stdout, that becomes the new mail. If doesn't output anything on the stdout, the mail is passed unchanged. The envelope is available on fd 0. If your scripts writes on fd 3, that becomes the new envelope. A filter that exits 0, passes the mail unchanged. A filter that simply executes /bin/cat also passes the mail unchanged, except that qmail-qfilter does a bit more work to make the new content as fd 0 for the next filter in the chain. You can have multiple filters passed to qmail-qfilter each separated by `--` (two dashes).
+You can use <b>qmail-qfilter</b>(1). <b>qmail-qfilter</b> allows you to run multiple filters passed as command line arguments to <b>qmail-qfilter</b>. Since QMAILQUEUE doesn't allow you to specify multiple arguments, you can write a shell script which calls <b>qmail-qfilter</b> and have the shell script defined as QMAILQUEUE environment variable. The way qmail-qfilter works is simple - The original content is avaible on fd 0. If your filter writes anything on the stdout, that becomes the new mail. If doesn't output anything on the stdout, the mail is passed unchanged. The envelope is available on fd 0. If your scripts writes on fd 3, that becomes the new envelope. A filter that exits 0, passes the mail unchanged. A filter that simply executes /bin/cat also passes the mail unchanged, except that qmail-qfilter does a bit more work to make the new content as fd 0 for the next filter in the chain. You can have multiple filters passed to qmail-qfilter each separated by `--` (two dashes).
 
 ```
 $ sudo /bin/bash
@@ -1405,7 +1405,7 @@ e.g. the below script skips filtering for remote deliveries
 
 ```
 #!/bin/sh
-if [ -n “$QMAILREMOTE” ] ; then
+if [ -n “$QMAILREMOTE” ] ; then
     exec /bin/cat
 fi
 # rest of the script
@@ -1464,19 +1464,19 @@ e.g. the below filter looks for emails having "failure notice" in the subject li
 #!/bin/sh
 # create a temporary file
 tmp_file=`mktemp -p /var/tmp -t myfilter.XXXXXXXXXXXXXXX`
-if [ $? -ne 0 ] ; then
+if [ $? -ne 0 ] ; then
     /bin/rm -f $inp_file
     exit 111
 fi
 # Copy the stdin
 /bin/cat > $tmp_file
-if [ $? -ne 0 ] ; then
+if [ $? -ne 0 ] ; then
     /bin/rm -f $inp_file
     exit 111
 fi
 subject=`/usr/bin/822header -I Subject < $tmp_file`
 echo $subject | grep "failure notice" > /dev/null 2>&1
-if [ $? -eq 0 ] ; then
+if [ $? -eq 0 ] ; then
     (
     /usr/bin/822header < $tmp_file
     echo
@@ -1497,23 +1497,23 @@ exit 0
 #!/bin/sh
 # create a temporary file
 inp_file=`mktemp -p /var/tmp -t myfilteri.XXXXXXXXXXXXXXX`
-if [ $? -ne 0 ] ; then
+if [ $? -ne 0 ] ; then
     /bin/rm -f $inp_file
     exit 111
 fi
 out_file=`mktemp -p /var/tmp -t myfiltero.XXXXXXXXXXXXXXX`
-if [ $? -ne 0 ] ; then
+if [ $? -ne 0 ] ; then
     /bin/rm -f $inp_file $out_file
     exit 111
 fi
 /bin/cat > $inp_file
-if [ $? -ne 0 ] ; then
+if [ $? -ne 0 ] ; then
     /bin/rm -f $inp_file $out_file
     exit 111
 fi
 subject=`/usr/bin/822header -I Subject < $inp_file`
 echo $subject | grep "failure notice" > /dev/null 2>&1
-if [ $? -eq 0 ] ; then
+if [ $? -eq 0 ] ; then
     (
     /usr/bin/822header < $inp_file
     echo
@@ -1521,7 +1521,7 @@ if [ $? -eq 0 ] ; then
     /usr/bin/822body < $inp_file
     echo "sent by IndiMail Messaging platform"
     ) > $out_file
-    if [ $? -ne 0 ] ; then
+    if [ $? -ne 0 ] ; then
         /bin/rm -f $inp_file $out_file
         exit 111
     fi
@@ -1556,17 +1556,17 @@ shift 4
 #
 # if needed you can modify host, sender, qqeh, size args above
 #
-if [ -z "$QMAILREMOTE" ] ; then # execute qmail-local
+if [ -z "$QMAILREMOTE" ] ; then # execute qmail-local
     # call spawn-filter so that features like
     # FILTERARGS, SPAMFILTER are not lost
     exec -a qmail-local /usr/bin/spawn-filter "$@"
 fi
-if [ " $CONTROLDIR" = " " ] ; then
+if [ " $CONTROLDIR" = " " ] ; then
    FN=/etc/indimail/control/filterargs
 else
    FN=$CONTROLDIR/filterargs
 fi
-if [ -n "$SPAMFILTER" -o -n "$FILTERARGS" -o -f $FN ] ; then
+if [ -n "$SPAMFILTER" -o -n "$FILTERARGS" -o -f $FN ] ; then
    # execute spawn-filter if you have filters defined for remote/local deliveries
    PROG="bin/spawn-filter"
 else
@@ -1574,23 +1574,23 @@ else
 fi
 # create a temporary file
 inp_file=`mktemp -p /var/tmp -t myfilteri.XXXXXXXXXXXXXXX`
-if [ $? -ne 0 ] ; then
+if [ $? -ne 0 ] ; then
     /bin/rm -f $inp_file
     exit 111
 fi
 out_file=`mktemp -p /var/tmp -t myfiltero.XXXXXXXXXXXXXXX`
-if [ $? -ne 0 ] ; then
+if [ $? -ne 0 ] ; then
     /bin/rm -f $inp_file $out_file
     exit 111
 fi
 /bin/cat > $inp_file
-if [ $? -ne 0 ] ; then
+if [ $? -ne 0 ] ; then
     /bin/rm -f $inp_file $out_file
     exit 111
 fi
 subject=`/usr/bin/822header -I Subject < $inp_file`
 echo $subject | grep "failure notice" > /dev/null 2>&1
-if [ $? -eq 0 ] ; then
+if [ $? -eq 0 ] ; then
     (
     /usr/bin/822header < $inp_file
     echo
@@ -1598,7 +1598,7 @@ if [ $? -eq 0 ] ; then
     /usr/bin/822body < $inp_file
     echo "sent by IndiMail Messaging platform"
     ) > $out_file
-    if [ $? -ne 0 ] ; then
+    if [ $? -ne 0 ] ; then
         /bin/rm -f $inp_file $out_file
         exit 111
     fi
@@ -1639,30 +1639,30 @@ sender=$7
 defaultdel=$8
 qqeh=$9
 
-if [ -z "$QMAILLOCAL" ] ; then # execute qmail-remote
+if [ -z "$QMAILLOCAL" ] ; then # execute qmail-remote
     # call spawn-filter so that features like
     # FILTERARGS, SPAMFILTER are not lost
     exec -a qmail-remote /usr/bin/spawn-filter "$@"
 fi
 # create a temporary file
 inp_file=`mktemp -p /var/tmp -t myfilteri.XXXXXXXXXXXXXXX`
-if [ $? -ne 0 ] ; then
+if [ $? -ne 0 ] ; then
     /bin/rm -f $inp_file
     exit 111
 fi
 out_file=`mktemp -p /var/tmp -t myfiltero.XXXXXXXXXXXXXXX`
-if [ $? -ne 0 ] ; then
+if [ $? -ne 0 ] ; then
     /bin/rm -f $inp_file $out_file
     exit 111
 fi
 /bin/cat > $inp_file
-if [ $? -ne 0 ] ; then
+if [ $? -ne 0 ] ; then
     /bin/rm -f $inp_file $out_file
     exit 111
 fi
 subject=`/usr/bin/822header -I Subject < $inp_file`
 echo $subject | grep "failure notice" > /dev/null 2>&1
-if [ $? -eq 0 ] ; then
+if [ $? -eq 0 ] ; then
     (
     /usr/bin/822header < $inp_file
     echo
@@ -1670,7 +1670,7 @@ if [ $? -eq 0 ] ; then
     /usr/bin/822body < $inp_file
     echo "sent by IndiMail Messaging platform"
     ) > $out_file
-    if [ $? -ne 0 ] ; then
+    if [ $? -ne 0 ] ; then
         /bin/rm -f $inp_file $out_file
         exit 111
     fi
@@ -1689,23 +1689,23 @@ exit 111
 #!/bin/sh
 # create a temporary file
 inp_file=`mktemp -p /var/tmp -t myfilteri.XXXXXXXXXXXXXXX`
-if [ $? -ne 0 ] ; then
+if [ $? -ne 0 ] ; then
     /bin/rm -f $inp_file
     exit 111
 fi
 out_file=`mktemp -p /var/tmp -t myfiltero.XXXXXXXXXXXXXXX`
-if [ $? -ne 0 ] ; then
+if [ $? -ne 0 ] ; then
     /bin/rm -f $inp_file $out_file
     exit 111
 fi
 /bin/cat > $inp_file
-if [ $? -ne 0 ] ; then
+if [ $? -ne 0 ] ; then
     /bin/rm -f $inp_file $out_file
     exit 111
 fi
 subject=`/usr/bin/822header -I Subject < $inp_file`
 echo $subject | grep "failure notice" > /dev/null 2>&1
-if [ $? -eq 0 ] ; then
+if [ $? -eq 0 ] ; then
     (
     /usr/bin/822header < $inp_file
     echo
@@ -1713,7 +1713,7 @@ if [ $? -eq 0 ] ; then
     /usr/bin/822body < $inp_file
     echo "sent by IndiMail Messaging platform"
     ) > $out_file
-    if [ $? -ne 0 ] ; then
+    if [ $? -ne 0 ] ; then
         /bin/rm -f $inp_file $out_file
         exit 111
     fi
@@ -1730,7 +1730,7 @@ fi
 unset RPLINE PWSTRUCT
 dir=`/usr/bin/vuserinfo -d testuser01@example.com | cut -d: -f2 |cut -c2-`
 
-if [ $? -ne 0 -o " $dir" = " " ] ; then
+if [ $? -ne 0 -o " $dir" = " " ] ; then
     echo "unable to get user's homedir" 1>&1
     exit 111
 fi
@@ -1755,7 +1755,7 @@ e.g., to select the standard qmail Maildir delivery, do:
 ## Addresses
 Once you have decided the delivery mode above, one needs to have some mechanism to assign a local address for the delivery. qmail (which is what IndiMail uses) offers the following mechanism
 locals
-Any email addressed to user@domain listed in the file /etc/indimail/control/locals will be delivered to the local user user. If you have Maildir as the delivery mode and an email to user kanimoji@domain, with home directory /home/blackmoney, will be delivered to /home/blackmoney/Maildir/new
+Any email addressed to user@domain listed in the file /etc/indimail/control/locals will be delivered to the local user user. If you have Maildir as the delivery mode and an email to user kanimoji@domain, with home directory /home/blackmoney, will be delivered to /home/blackmoney/Maildir/new
 virtualdomains
 The control file /etc/indimail/control/virtualdomains allows you to have multiple domains configured on a single server. Entries in virtualdomains are of the form:
 
@@ -1793,7 +1793,7 @@ A wildcard assignment is a line of the form
 
 `+loc:user:uid:gid:homedir:dash:pre:`
 
-This assignment applies to any address beginning with loc, including loc itself.  
+This assignment applies to any address beginning with loc, including loc itself.  
 It means the same as
 
 `=locext:user:uid:gid:homedir:dash:preext:`
@@ -2284,13 +2284,13 @@ Applications may supply their own DH parameters instead of using the built-in va
 
 # Distributing your outgoing mails from Multiple IP addresses
 
-Some mail providers like hotmail, yahoo restrict the number of connections from a single IP and the number of mails that can be delivered in an hour from a single IP. To increase your ability to deliver large number of genuine emails from your users to such sites, you may want to send out mails from multiple IP addresses.
+Some mail providers like hotmail, yahoo restrict the number of connections from a single IP and the number of mails that can be delivered in an hour from a single IP. To increase your ability to deliver large number of genuine emails from your users to such sites, you may want to send out mails from multiple IP addresses.
 
-IndiMail has the ability to call a custom program instead of <b>qmail-local</b>(8) or <b>qmail-remote</b>(8). This is done by defining the environment variable QMAILLOCAL or QMAILREMOTE. <b>qmail-remote</b>(8) can use the environment variable OUTGOINGIP to set the IP address of the local interface when making outgoing connections. By writing a simple script and setting QMAILREMOTE environment variable pointing to this script, one can randomly chose an IP address from the control file
+IndiMail has the ability to call a custom program instead of <b>qmail-local</b>(8) or <b>qmail-remote</b>(8). This is done by defining the environment variable QMAILLOCAL or QMAILREMOTE. <b>qmail-remote</b>(8) can use the environment variable OUTGOINGIP to set the IP address of the local interface when making outgoing connections. By writing a simple script and setting QMAILREMOTE environment variable pointing to this script, one can randomly chose an IP address from the control file
 
 `/etc/indimail/control/outgoingip`
 
-The script below also allows you to define multiple outgoing IP addresses for a single host. e.g. you can create the control file to send out mails from multiple IPs only for the domain hotmail.com
+The script below also allows you to define multiple outgoing IP addresses for a single host. e.g. you can create the control file to send out mails from multiple IPs only for the domain hotmail.com
 
 `/etc/indimail/control/outgoingip.hotmail.com`
 
@@ -2400,7 +2400,7 @@ Using envrules, you can set specific environment variables only for bounced reci
 
 `pat:envar1=val,envar2=val,...]`
 
-where pat is a regular expression which matches a bounce recipient.  envar1, envar2 are list of environment variables to be set. If var is omitted, the environment variable is unset.
+where pat is a regular expression which matches a bounce recipient.  envar1, envar2 are list of environment variables to be set. If var is omitted, the environment variable is unset.
 
 e.g.
 
@@ -3323,7 +3323,7 @@ Remote host said: 250 ok 1667190974 qp 91502
 
 A SMTP server is responsible for accepting mails from a sender and processing it for delivery to one or more recipients. In most situations, for domains which are under your administrative control (native addresses), the SMTP server should accept mails without authentication. However, when a mail is submitted for delivery to domains which are not under your administrative control, you should accept mails only after it satisfies security considerations like having the sender authenticate itself. This is to prevent abuse of external domains using your SMTP server. A SMTP server which accepts mails for external domains without any authentication is called an open relay. The act of accepting mails for external domains for delivery is called relaying.
 
-The default configuration of IndiMail configures the SMTP as a closed system. Hence to be able to send mails to external domains, you need to setup mechanisms for relaying.
+The default configuration of IndiMail configures the SMTP as a closed system. Hence to be able to send mails to external domains, you need to setup mechanisms for relaying.
 
 There are many methods. Choose any of the below after studying them. I prefer 3 or 4 for security reasons.
 
@@ -3338,7 +3338,7 @@ NOTE: you should use 1 & 2 only if if the host having the sender's IP is under y
 
 ## Using tcp.smtp
 
-Your startup script for the qmail smtp server must use the tcpserver -x file option, similar to this startup line.
+Your startup script for the qmail smtp server must use the tcpserver -x file option, similar to this startup line.
 
 ```
 env - PATH="/usr/bin" tcpserver -H -R -x /etc/indimail/tcp/tcp.smtp.cdb \
@@ -3358,7 +3358,7 @@ If you add any IP to tcp.smtp, you have to rebuild a cdb database tcp.smtp.cdb. 
 
 `$ sudo /usr/bin/qmailctl cdb`
 
-NOTE: Remember that you are exposed to unrestricted relaying from any of the IP addresses listed in tcp.smtp
+NOTE: Remember that you are exposed to unrestricted relaying from any of the IP addresses listed in tcp.smtp
 
 ## Using control file relayclients
 
@@ -3376,14 +3376,14 @@ Run the command /usr/bin/clearopensmtp in the cron every 30 Minutes
 
 By default every time, if anyone uses IndiMail's POP3 or IMAP service and authenticates, the following happens:
 
-1. On successful authentication, IMAP/POP3 daemon inserts entry into relay table, inserting email, IP address and timestamp
+1. On successful authentication, IMAP/POP3 daemon inserts entry into relay table, inserting email, IP address and timestamp
 2. If **CHECKRELAY** environment variable is enabled, SMTP checks the relay table for a entry within minutes specified by the RELAY\_CLEAR\_MINUTES environment variable. If the entry is there, **RELAYCLIENT** environment variable is set, which allows relaying. At this point, the SMTP server will allow that IP to relay for 60 Mins (default)
 
 clearopensmtp will clear all IP which have not authenticated in the past RELAY\_CLEAR\_MINUTES. clearopensmtp should be enabled in cron to run every 30 minutes.
 
 ## Set up Authenticated SMTP
 
-Whenever a user successfully authenticates through SMTP, the **RELAYCLIENT** environment variable gets set. <b>qmail-smtpd</b> uses the **RELAYCLIENT** environment variable to allow relaying. Enabling authenticated smtp enables relaying when the user successfully authenticats.
+Whenever a user successfully authenticates through SMTP, the **RELAYCLIENT** environment variable gets set. <b>qmail-smtpd</b> uses the **RELAYCLIENT** environment variable to allow relaying. Enabling authenticated smtp enables relaying when the user successfully authenticats.
 
 Most of the email clients like thunderbird, evolution, outlook, outlook express have options to use authenticated SMTP.
 For a tutorial on authenticated SMTP, you can refer to this [tutorial](http://indimail.blogspot.com/2010/03/authenticated-smtp-tutorial.html "Authenticated SMTP tutorial")
@@ -3391,7 +3391,7 @@ For a tutorial on authenticated SMTP, you can refer to this [tutorial](http://in
 
 ## Using control file relaydomains
 
-Host and domain names allowed to relay mail through this host. Each address should be followed by a colon and an (optional) string that should be appended to each incoming recipient address, just as with the **RELAYCLIENT** environment variable. Nearly always, the optional string should be null. Addresses in relaydomains may be wildcarded:
+Host and domain names allowed to relay mail through this host. Each address should be followed by a colon and an (optional) string that should be appended to each incoming recipient address, just as with the **RELAYCLIENT** environment variable. Nearly always, the optional string should be null. Addresses in relaydomains may be wildcarded:
 
 ```
 heaven.af.mil:
@@ -3616,9 +3616,13 @@ The pam-checkpwd(8), authpam(8) modules are PAM modules. PAM, or Pluggable Authe
 
 To configure SMTP service to use these modules you need to setup <b>AUTHMODULE</b> environment variable. To configure IMAP/POP3 service to use these authentication modules you need to configure <b>IMAPMODULE</b> environment variable.
 
+See this [example](#using-checkpassword) to see how you can configure dovecot to use vchkpass(8) checkpassword module for authentication.
+
 ** Name Service Switch **
 
 indimail-mta provides the nssd(8) daemon which implments a  Name Service Switch (NSS). This allows the libc/glibc functions getpwnam(3), getpwuid(3), getpwent(3), getspnam(3), getuserpw(3), getgrnam(3), getgrgid(3), getgrent(3) to fetch records from the passwd(5), shadow(5) and the group(5) databases to query the IndiMail's MySQL database. This also enables PAM modules which uses these functions to fetch records from IndiMail's MySQL database. nssd(8) is discussed in the the [chapter](#name-service-switch-Daemon---nssd) below. Apart from allowing auth modules like sys-checkpwd, pam-checkpwd, authpam, authshadow to access MySQL, nssd allows access to any third-party software to access the MySQL database transparently.
+
+See this [example](#using-indimails-name-service-switch) to see how you can configure dovecot to use nssd(8) Name Service Switch daemon for authentication.
 
 ** PAM Modules **
 
@@ -3626,13 +3630,15 @@ indimail-mta provides pam-checkpwd(8), a checkpassword compliant module for auth
 
 ** PAM Service **
 
-indimail-mta provides a configurable PAM service implmented using [pam-multi(8)](https://github.com/mbhangui/indimail-mta/wiki/pam-multi.8). pam-multi can be used by any of the PAM configuration files in /etc/pam.d to authenticate against any database on your local system. pam-multi is discussed in detail in the [chapter](#pam-multi).
+indimail-mta provides a configurable PAM service implmented using [pam-multi(8)](https://github.com/mbhangui/indimail-mta/wiki/pam-multi.8). pam-multi can be used by any of the PAM configuration files in /etc/pam.d to authenticate against any database on your local system. pam-multi is discussed in detail in the [chapter](#pam-multi-framework).
+
+See this [example](#using-pam-multi) to see how you can configure dovecot to use pam-multi(8) service for authentication.
 
 # Inlookup database connection pooling service
 
 IndiMail uses MySQL for storing information of virtual domain users. The table 'indimail' stores important user information like password, access permissions, quota and the mailbox path. Most of user related queries have to lookup the 'indimail' table in MySQL.
 
-Rather than making individual connections to MySQL for extracting information from the 'indimail' table, IndiMail programs use the service of the inlookup(8) server. Programs use an API function inquery() to request service. InLookup is a connection pooling server to serve requests for inquery() function. It is implemented over two fifos. One fixed fifo for reading the query and reading the path of a randomly generated fifo. The randomly generated fifo is used for writing the result of the query back. inlookup(8) creates a read FIFO determined by the environment variable **INFIFO**. If **INFIFO** is not defined, the default FIFO used is /run/indimail/inlookup/infifo. inlookup(8) then goes into an infinite loop reading this FIFO. If **INFIFO** is not an absolute path, inlookup(8) uses environment variable INFIFODIR to look for fifo named by **INFIFO** variable. Inlookup(8) can be configured by setting environment variables in /service/inlookup.info/variables
+Rather than making individual connections to MySQL for extracting information from the 'indimail' table, IndiMail programs use the service of the inlookup(8) server. Programs use an API function inquery() to request service. InLookup is a connection pooling server to serve requests for inquery() function. It is implemented over two fifos. One fixed fifo for reading the query and reading the path of a randomly generated fifo. The randomly generated fifo is used for writing the result of the query back. inlookup(8) creates a read FIFO determined by the environment variable **INFIFO**. If **INFIFO** is not defined, the default FIFO used is /run/indimail/inlookup/infifo. inlookup(8) then goes into an infinite loop reading this FIFO. If **INFIFO** is not an absolute path, inlookup(8) uses environment variable INFIFODIR to look for fifo named by **INFIFO** variable. Inlookup(8) can be configured by setting environment variables in /service/inlookup.info/variables
 
 * inlookup helps in optimizing connection to MySQL(1), by keeping the connections persistent.
 * It also maintains the query result in a double link list.
@@ -3831,18 +3837,56 @@ And that ends the fun we had making libc functions which have nothing to do with
 
 ## PAM Multi Framework
 
-pam-multi is a framework that allows multime configurable methods for authentication using PAM. pam-multi is a system to handle the authentication tasks of applications (services) on systems which use PAM, against any proprietary databases. The system provides a stable general interface, that privilege granting programs (such  as authpam(7), login(1) and su(1)) can defer to, to perform standard authentication tasks. The primary goal of pam-multi was to allow authentication of IMAP/POP3 servers like courier-imap, dovecot against IndiMail(5)'s MySQL database. However, tt can be used for any application which can authenticate using pam(8) to authenticate against any proprietary database that you have. pam-multi supports four methods for password hashing schemes. crypt (DES), MD5, SHA256, SHA512. To use pam-multi for any application (which currently uses PAM), you need to modify the PAM  configuration  file  for that application. Simply  put, pam-multi extends an existing pam module to authenticate against any database using any one of the three methods described below.
+[pam-multi](#https://github.com/mbhangui/indimail-mta/wiki/pam-multi.8) is a framework that allows multiple configurable methods for authentication using PAM. pam-multi is a system to handle the authentication tasks of applications (services) on systems which use PAM, against any proprietary database. The system provides a stable general interface, that privilege granting programs (such  as pam-checkpwd(8), authpam(7), login(1) and su(1)) can defer to, to perform standard authentication tasks. The primary goal of pam-multi was to allow authentication of IMAP/POP3 servers like courier-imap, dovecot against IndiMail(5)'s MySQL database. However, tt can be used for any application which can authenticate using pam(8) to authenticate against any proprietary database that you have. pam-multi supports four methods for password hashing schemes. crypt (DES), MD5, SHA256, SHA512. To use pam-multi for any application (which currently uses PAM), you need to modify the PAM  configuration  file  for that application. Simply  put, pam-multi extends an existing pam module to authenticate against any database using any one of the three methods described below. Apart from supporting authentication, pam-multi supports account management like password expiry and account expiry.
 
-1. Using a SQL statement. This is provided by using the -m option to pam-multi. Currently only MySQL database is supported. You also need to pass connection parameters using -u, -p, -D, -H and -P options to connect to the MySQL database. When pam-multi is used for authentication,  it is  expected  that  the  sql_statement will return a row containing the encrypted password for the user.
+1. Using a SQL statement. This is provided by using the -m option to pam-multi. Currently only MySQL database is supported. You also need to pass connection parameters using -u, -p, -D, -H and -P options to connect to the MySQL database. When pam-multi is used for authentication,  it is  expected  that  the  sql\_statement will return a row containing the encrypted password for the user. When used for account management, it is expected that the sql\_statement will return the expiry date (as a long data  type)  for the account. The password expiry can be returned along with the account expiry separated by a ',' comma sign. If you are using this, make sure that your pam configuration file in /etc/pam.d is not world readable as it will expose your MySQL database password. In any case do not use a privileged MySQL user in the pam configuration.
 
-2. Using a <u>command</u>. This is provided by using the -c option. pam-multi will use sh -c "<u>command</u>". It  is  expected  that the output of the command will be an encrypted password.
+2. Using a <u>command</u>. This is provided by using the -c option. pam-multi will use sh -c "<u>command</u>". It  is  expected  that the output of the command will be an encrypted password. When pam-multi is used for account management, it is ex pected that the output of the command will be the expiry date for the account. The password expiry can be returned along with the account expiry separated by a ',' comma sign.
 
 3. Using a shared library. This is currently provided by the shared library iauth.so in /usr/lib/indimail/modules directory. It is expected that the shared library implements a function named iauth() which returns the encrypted password for the user.
 
-    char *iauth(char *email, char *service, 0|1, int *size, int *nitems, int debug)
+    `char *iauth(char *email, char *service, 0|1, int *size, int *nitems, int debug)`
 
-The function iauth() will be passed a username and a token service denoting the name of service. The service argument  will  be used only for identification purpose. It is expected for the function to return the data. The third argument is either 0 or 1 denoting authentication or account management respectively. size denotes the size of the result  returned. nitems denotes the number of items that will be returned. The function should return 0 for successful authentication.
+	The function iauth() will be passed a username and a token service denoting the name of service. The service argument  will  be used only for identification purpose. It is expected for the function to return the data. The third argument is either 0 or 1 denoting authentication or account management respectively. size denotes the size of the result  returned. nitems denotes the number of items that will be returned. The function should return 0 for successful authentication.
 
+Here are two examples of pam configuration that uses pam-multi. You can use them with pam-checkpwd by using the -s option. e.g. pam-checkpwd -s pam-multi will make pam-checkpwd use pam-multi configuration from /etc/pam.d
+
+file /etc/pam.d/pam-multi
+```
+#
+# $Id: pam-multi.in,v 1.2 2020-09-29 10:59:57+05:30 Cprogrammer Exp mbhangui $
+#
+# auth     required  pam-multi.so argv0 -m [select pw_passwd from indimail where pw_name='%u' and pw_domain='%d'] -u indimail -p ssh-1.5- -D indimail -H localhost -P 3306 -d
+# auth     required  pam-multi.so argv0 -s /usr/lib/indimail/modules/iauth.so
+# account  required  pam-multi.so argv0 -s /usr/lib/indimail/modules/iauth.so
+# add -d argument to debug pam-multi lines
+#
+auth     required  pam-multi.so pam-multi -s /usr/lib/indimail/modules/iauth.so
+account  required  pam-multi.so pam-multi -s /usr/lib/indimail/modules/iauth.so
+```
+
+file /etc/pam.d/imap. The file /etc/pam.d/pop3 is identical except that it passes -i pop3 to pam-multi in the auth and account section.
+
+```
+# auth     required  pam-multi.so argv0 -m [select pw_passwd from indimail where pw_name='%u' and pw_domain='%d'] -u indimail -p ssh-1.5- -D indimail -H localhost -P 3306 -d
+# auth     required  pam-multi.so argv0 -s /usr/lib/indimail/modules/iauth.so
+# account  required  pam-multi.so argv0 -i imap -s /usr/lib/indimail/modules/iauth.so
+# add -d argument to debug pam-multi lines
+#
+auth     required  pam-multi.so pam-multi -i imap -s /usr/lib/indimail/modules/iauth.so
+account  required  pam-multi.so pam-multi -i imap -s /usr/lib/indimail/modules/iauth.so
+#%PAM-1.0
+auth       include      postlogin
+account    required     pam_nologin.so
+# pam_selinux.so close should be the first session rule
+session    required     pam_selinux.so close
+session    optional     pam_console.so
+# pam_selinux.so open should only be followed by sessions to be executed in the user context
+session    required     pam_selinux.so open
+session    optional     pam_keyinit.so force revoke
+session    include      postlogin
+-session   optional     pam_ck_connector.so
+```
 
 # Setting limits for your domain
 
@@ -4167,7 +4211,7 @@ Just few days back a user asked me whether spamassassin can be used with IndiMai
 
 IndiMail uses environment variables **SPAMFILTER**, **SPAMEXITCODE** to configure any spam filter to be used. All that is required for the spam filter is to read a mail message on stdin, output the message back on stdout and exit with a number which indicates whether the message is ham or spam.
 
-The default installation of IndiMail creates a configuration where mails get scanned by bogofilter for spam filtering. bogofilter exits with value '0' in case the message is spam and with value '1' when message is ham. The settings for **SPAMFILTER**, **SPAMEXITCODE** is as below
+The default installation of IndiMail creates a configuration where mails get scanned by bogofilter for spam filtering. bogofilter exits with value '0' in case the message is spam and with value '1' when message is ham. The settings for **SPAMFILTER**, **SPAMEXITCODE** is as below
 
 ```
 SPAMFILTER="/usr/bin/bogofilter -p -u -d /etc/indimail"
@@ -4845,7 +4889,7 @@ For DKIM verification two methods have been described - one during SMTP and one 
 
 For DKIM signing, three methods have been described - one during SMTP, one during remote delivery and one during mail injection. You need to select just one of the methods, else you will send out emails with multiple DKIM signatures.
 
-You may want to look at an excellent [setup instructions](http://notes.sagredo.eu/node/92 "Roberto's Notes") by Roberto Puzzanghera for configuring dkim for qmail.
+You may want to look at an excellent [setup instructions](http://notes.sagredo.eu/node/92 "Roberto's Notes") by Roberto Puzzanghera for configuring dkim for qmail.
 
 ## Create your DKIM private/public keys
 
@@ -4874,7 +4918,7 @@ $ printf "default._domainkey.indimail.org\tIN\tTXT\t\"v=DKIM1; k=rsa; p=%s\"\n" 
 default._domainkey.indimail.org IN      TXT     "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC2dvktnCXRavyuuoy2NUcHWpMp/Ia7Y5Y9tTwjjby7hS9wIvgecBz6UEMunOJdAZ2RVvSXKxPlxO4/rUgW6ow7vlEPY3IKagy+VFW1oHmvj4WU+BxZTJA2d8VrW9S9O1JMuPGGwdeYOC/Gcle/EviQtGYsz3jL/HrJb9rXXl4/gwIDAQAB"
 ```
 
-choose the selector (some\_name) and publish this into DNS TXT record for:
+choose the selector (some\_name) and publish this into DNS TXT record for:
 
 `selector._domainkey.indimail.org` (e.g. selector can be named 'default')
 
@@ -5060,7 +5104,7 @@ The above command will also create a base configuration for snmpd in /etc/indima
 
 After the above command is run, you can edit /service/mrtg/etc/indimail.mrtg.cfg to add, modify or remove entries as per your requirements.
 
-After carrying out the above step using `svctool`, check the status of mrtg service.
+After carrying out the above step using `svctool`, check the status of mrtg service.
 
 ```
 $ sudo svstat /service/mrtg
@@ -5578,7 +5622,7 @@ Now using the password obtained from var/log/mysqld.log, we will connect to MySQ
 
 1. If the plugin directory (the directory named by the plugin\_dir system variable) is writable by the server, it may be possible for a user to write executable code to a file in the directory using SELECT ... INTO DUMPFILE. This can be prevented by making the plugin directory read only to the server or by setting the secure\_file\_priv system variable at server startup to a directory where SELECT writes can be performed safely. (For example, set it to the mysql-files directory created earlier.)
 2. To specify options that the MySQL server should use at startup, put them in a /etc/my.cnf or /etc/mysql/my.cnf file. You can use such a file to set, for example, the secure\_file\_priv system variable. See Server Configuration Defaults. If you do not do this, the server starts with its default settings. You should set the datadir variable to /var/indimail/mysqldb/data in my.cnf.
-3. If you want MySQL to start automatically when you boot your machine, see Section 9.5, “Starting and Stopping MySQL Automatically”.
+3. If you want MySQL to start automatically when you boot your machine, see Section 9.5, “Starting and Stopping MySQL Automatically”.
 
 Data directory initialization creates time zone tables in the mysql database but does not populate them. To do so, use the instructions in MySQL Server Time Zone Support.
 
