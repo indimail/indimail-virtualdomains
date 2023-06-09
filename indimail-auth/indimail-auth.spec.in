@@ -265,8 +265,8 @@ chmod -R 755 %{buildroot}/%{pam_moduledir}
 # pam-multi
 %attr(755,root,root)                    %{_prefix}/sbin/pam-checkpwd
 %attr(644,root,root) %config(noreplace) %{pam_confdir}/pam-multi
-%attr(644,root,root) %config(noreplace) %{pam_confdir}/pop3
-%attr(644,root,root) %config(noreplace) %{pam_confdir}/imap
+%attr(640,root,indimail) %config(noreplace) %{pam_confdir}/pop3
+%attr(640,root,indimail) %config(noreplace) %{pam_confdir}/imap
 
 %docdir %{shareddir}/doc
 %docdir %{mandir}

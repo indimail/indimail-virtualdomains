@@ -267,12 +267,22 @@ config_path="$enableval",
 ])
 AC_DEFINE_UNQUOTED(_PATH_NSSD_CONF, "$config_path", full path of the nssd configuration File)
 
+if test -d /run
+then
+	rundir=/run
+elif test -d /var/run
+then
+	rundir=/var/run
+else
+	rundir=/tmp
+fi
 AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST(LIBVER)
 AC_SUBST(OS)
 AC_SUBST(defaultdomain)
 AC_SUBST(mysql_incdir)
 AC_SUBST(mysql_libdir)
+AC_SUBST(rundir)
 (
 echo "---------- $PACKAGE $VERSION $target ----------"
 echo "Host               = $host"
@@ -280,6 +290,7 @@ echo "CPPFLAGS           = $CPPFLAGS"
 echo "CXXFLAGS           = $CXXFLAGS"
 echo "CFLAGS             = $CFLAGS"
 echo "LDFLAGS            = $LDFLAGS"
+echo "RUNDIR             = $rundir/indimail/pwdlokup"
 echo "            Current settings"
 echo "---------------------------------------"
 echo "                OS = $OS"

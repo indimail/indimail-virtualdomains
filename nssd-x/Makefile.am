@@ -46,9 +46,13 @@ nssd-nssd_misc.$(OBJEXT): nssd.h common.h config.h
 nssd-util.$(OBJEXT): common.h config.h
 
 nssd.8: nssd.9
-	cat nssd.9 | sed s}INDIMAIL}$(sysconfdir)}g > $@
+	cat nssd.9 | sed -e 's}INDIMAIL}$(sysconfdir)}g' \
+		-e 's}PREFIX}$(prefix)}g' \
+		-e 's}RUNDIR}$(rundir)}g' > $@
 nssd.conf.5: nssd.conf.9
-	cat nssd.conf.9 | sed s}INDIMAIL}$(sysconfdir)}g > $@
+	cat nssd.conf.9 | sed -e 's}INDIMAIL}$(sysconfdir)}g' \
+		-e 's}PREFIX}$(prefix)}g' \
+		-e 's}RUNDIR}$(rundir)}g' > $@
 
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)

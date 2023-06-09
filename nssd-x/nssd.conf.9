@@ -2,7 +2,7 @@
 .SH NAME
 INDIMAIL/nssd.conf - NSS database configuration for nssd
 .SH DESCRIPTION
-nscd.conf specifies the query to be executed against a MySQL database for the functions
+nssd.conf specifies the query to be executed against a MySQL database for the functions
 getpwnam(3), getpwuid(3), getpwent(3), getspnam(3), getspent(3), getgrnam(3), getgrgid(3),
 getgrent(3).
 .PP
@@ -35,8 +35,8 @@ Timeout to use for querying IndiMail's database. -1 for no timeout.
 facility
 syslog facility to use for log messages.
 The \fIfacility\fR argument is used to specify what type of program is
-logging the message.  This lets the configuration file specify that
-messages from different facilities will be handled differently.
+logging the message. This lets the configuration file specify that messages
+from different facilities will be handled differently.
 
 .RS
 .nf
@@ -121,9 +121,9 @@ The example below shows a configuration file INDIMAIL/nssd.conf
  database    indimail
  username    indimail
  password    xxxxxxxx
- socket      /run/mysqld/mysqld.sock
+ socket      RUNDIR/mysqld/mysqld.sock
  #port       3306
- pidfile     /run/indimail/pwdlookup/nssd.pid
+ pidfile     RUNDIR/indimail/pwdlookup/nssd.pid
  threads     5
  timeout     -1
  facility    daemon

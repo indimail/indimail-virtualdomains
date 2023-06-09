@@ -21,7 +21,7 @@
  * The original nsvs code has been significantly modifed by
  * manvendra bhangui <manvendra@indimail.org>
  *
- * $Id: nssd.c,v 1.6 2021-07-21 11:06:26+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: nssd.c,v 1.7 2023-06-09 15:33:13+05:30 Cprogrammer Exp mbhangui $ 
  */
 #define _GNU_SOURCE 
 #include "common.h"
@@ -705,6 +705,10 @@ main(int argc, char **argv)
 
 /*-
  * $Log: nssd.c,v $
+ * Revision 1.7  2023-06-09 15:33:13+05:30  Cprogrammer
+ * replaced snprintf with asprintf
+ * improved error logging
+ *
  * Revision 1.6  2021-07-21 05:36:26+05:30  Cprogrammer
  * replace sys/poll.h with poll.h
  *
