@@ -1,3 +1,4 @@
+[//]: # vim: wrap
 ![IndiMail](indimail_logo.png "IndiMail")
 
 Table of Contents
@@ -92,6 +93,7 @@ Table of Contents
    * [SMTP Access List](#smtp-access-list)
    * [IndiMail Control Files Formats](#indimail-control-files-formats)
    * [Inlookup database connection pooling service](#inlookup-database-connection-pooling-service)
+   * [Name Service Switch Daemon - nssd](#name-service-switch-daemon---nssd)
    * [Setting limits for your domain](#setting-limits-for-your-domain)
    * [SPAM and Virus Filtering](#spam-and-virus-filtering)
    * [SPAM Control using bogofilter](#spam-control-using-bogofilter)
@@ -3602,6 +3604,189 @@ Rather than making individual connections to MySQL for extracting information fr
 The program inquerytest simulates all the queries which inlookup supports and can be used as a test/diagnostic tool for submitting queries to inlookup. e.g
 
 `sudo inquerytest -q 3 -i "" user@example.com`
+
+# Name Service Switch Daemon - nssd
+
+There are various functions to lookup users and groups in a local environment. Traditionally, this is done by using files (e.g., /etc/passwd, /etc/group, etc), but other name services (like the [Network Information Service (NIS)](https://en.wikipedia.org/wiki/Network_Information_Service) and the [Domain Name Service (DNS)](https://en.wikipedia.org/wiki/Domain_Name_System]) are popular, and have been hacked into the C library, usually with a fixed search order. The [Name Service Switch (NSS)](https://en.wikipedia.org/wiki/Name_Service_Switch) provides a cleaner solution to extend the lookup to other databases. In Unix-like operating systems, the Name Service Switch (NSS) allows Unix configuration databases to be provided by different sources, including local files (for example: /etc/passwd, /etc/shadow, /etc/group, /etc/hosts), LDAP, and other sources.
+
+nssd(8) provides any MySQL database as an alternate Unix configuration database for the passwd(5), shadow(5) and the group(5) databases through standard libc interfaces, such as getpwnam(3), getpwuid(3), getpwent(3), getspnam(3), getspent(3), getgrnam(3), getgrgid(3) and getgrent(3). These functions are implemented as a shared library in libnss\_nssd.so placed in your system lib directory (/usr/lib64 or /usr/lib). The actual implementation of nssd is implemented by having nssd listen on a UNIX domain socket <u>/run/indimail/pwdlookup/nssd.sock</u> and the libnss\_nssd.so library which clients will load through a directive in <u>/etc/nsswitch.conf</u>. Once nsswitch.conf is configured, these functions will connect to the nssd daemon when called and nssd will provide the result back from IndiMail´s MySQL database. One can use any MySQL database by modifying the relevant SQL query string in the nssd configuration file <u>/etc/indimail/etc/nssd.conf</u>. Running nssd allows any program, which uses standard libc interface to access the passwd(5), shadow(5) or the group(5) database, to authenticate against IndiMail's MySQL database. One practical use of nssd(8) is to use [dovecot imap server](https://www.dovecot.org/) without modifying a single line of code anywhere.
+
+To configure nssd, you require to create a configuration <u>/etc/indimail/nssd.conf</u> and configure the nssd library. To enable the nssd library, you just need to have `nssd` as a provider in <u>/etc/nsswitch.conf</u>. e.g. This is from nsswitch.conf on a Fedora Core 38 workstation. The below will make getpwnam(3), getpwent(3) connect to nssd if the user is not found in /etc/passwd. It will also make getspnam(3) and getspent(3) connect to nssd when the /etc/shadow doesn't have any record for the user.
+
+```
+passwd: files nssd sss systemd
+shadow: files nssd
+```
+
+Along with nssd(8), you can use nscd(8) daemon which provides caching for access of the passwd(5), group(5), databases through standard libc interfaces, such as getpwnam(3), getpwuid(3), getgrnam(3), getgrgid(3).
+
+Now let's have some fun with the MySQL database that IndiMail uses. Let us create a user for this demonstration. I'm assumeing we have already created a domain named example.com using the [vadddomain](https://github.com/mbhangui/indimail-mta/wiki/vadddomain.1) program. We will use the [vadduser](https://github.com/mbhangui/indimail-mta/wiki/vadduser.1) program to add a user named testuser01@example.com
+
+```
+# Create a user named testuser01
+
+$ sudo vadduser testuser01@example.com abcdefgh
+name          : testuser01@example.com
+passwd        : $5$Q6JwFGYxvqrm6Xzb$Lr.d1CMxy7j0Y0xFgRY.FgHKy/LDXpA5tFo22ziz6aA (SHA256)
+uid           : 1
+gid           : 0
+                -all services available
+gecos         : testuser01
+dir           : /home/mail/T2Zsym/example.com/testuser01 
+quota         : 524288000 [500.00] MiB
+curr quota    : 0S,0C
+Mail Store IP : 192.168.2.127 (NonClustered - local)
+Mail Store ID : non-clustered domain
+Sql Database  : localhost
+Unix   Socket : /var/run/mysqld/mysqld.sock
+Table Name    : indimail
+Relay Allowed : NO
+Days inact    : 0 days 00 Hrs 00 Mins 00 Secs
+Added On      : (127.0.0.1) Fri Jun  9 11:08:27 2023
+last  auth    : Not yet logged in
+last  IMAP    : Not yet logged in
+last  POP3    : Not yet logged in
+PassChange    : Not yet Changed
+Inact Date    : Not yet Inactivated
+Activ Date    : (127.0.0.1) Fri Jun  9 11:08:27 2023
+Delivery Time : No Mails Delivered yet / Per Day Limit not configured
+
+# Get the MySQL table structure for IndiMail's user database
+
+$ mysql --login-path=indimail -s indimail
+mysql> desc indimail;
++-----------+-----------+------+-----+-------------------+-----------------------------------------------+
+| Field     | Type      | Null | Key | Default           | Extra                                         |
++-----------+-----------+------+-----+-------------------+-----------------------------------------------+
+| pw_name   | char(40)  | NO   | PRI | NULL              |                                               |
+| pw_domain | char(67)  | NO   | PRI | NULL              |                                               |
+| pw_passwd | char(128) | NO   |     | NULL              |                                               |
+| pw_uid    | int       | YES  | MUL | NULL              |                                               |
+| pw_gid    | int       | YES  |     | NULL              |                                               |
+| pw_gecos  | char(48)  | NO   | MUL | NULL              |                                               |
+| pw_dir    | char(156) | YES  |     | NULL              |                                               |
+| pw_shell  | char(30)  | YES  |     | NULL              |                                               |
+| scram     | char(255) | YES  |     | NULL              |                                               |
+| timestamp | timestamp | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
++-----------+-----------+------+-----+-------------------+-----------------------------------------------+
+10 rows in set (0.01 sec)
+```
+
+To fetch user details in a format similar to getpwnam(3) and getspnam(3) all we need are the following two `SELECT` queries
+
+```
+mysql> SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell FROM indimail \
+mysql> WHERE pw_name='testuser01' and pw_domain='example.com' LIMIT 1;
++------------+---+-----+-----+------------+------------------------------------------+-----------+
+| pw_name    | x | 555 | 555 | pw_gecos   | pw_dir                                   | pw_shell  |
++------------+---+-----+-----+------------+------------------------------------------+-----------+
+| testuser01 | x | 555 | 555 | testuser01 | /home/mail/T2Zsym/example.com/testuser01 | 524288000 |
++------------+---+-----+-----+------------+------------------------------------------+-----------+
+1 row in set (0.00 sec)
+
+mysql> SELECT pw_name,pw_passwd,'1','0','99999','0','0','-1','0' FROM indimail \
+mysql> WHERE pw_name='testuser01'and pw_domain='example.com' LIMIT 1;
++------------+-----------------------------------------------------------------+---+---+-------+---+---+----+---+
+| pw_name    | pw_passwd                                                       | 1 | 0 | 99999 | 0 | 0 | -1 | 0 |
++------------+-----------------------------------------------------------------+---+---+-------+---+---+----+---+
+| testuser01 | $5$Q6JwFGYxvqrm6Xzb$Lr.d1CMxy7j0Y0xFgRY.FgHKy/LDXpA5tFo22ziz6aA | 1 | 0 | 99999 | 0 | 0 | -1 | 0 |
++------------+-----------------------------------------------------------------+---+---+-------+---+---+----+---+
+```
+
+With the information above and having the details on how to connect to the MySQL database we can configure nssd by creating /etc/indimail/nssd.conf configuration file. Note that nssd.conf uses `%1$s` and `%2$s` as placeholders for username and password respectively. getpwnam entry configures the getpwnam(3) libc call to fetch user details from the MySQL database using the correspoinding SELECT query. Read [nssd.conf(5)](https://github.com/mbhangui/indimail-mta/wiki/nssd.conf.conf) for more details.
+
+```
+getpwnam    SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell \
+            FROM indimail \
+            WHERE pw_name='%1$s' and pw_domain='%2$s' \
+            LIMIT 1
+getspnam    SELECT pw_name,pw_passwd,'1','0','99999','0','0','-1','0' \
+            FROM indimail \
+            WHERE pw_name='%1$s'and pw_domain='%2$s' \
+            LIMIT 1
+getpwent    SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell \
+            FROM indimail LIMIT 100
+getspent    SELECT pw_name,pw_passwd,'1','0','99999','0','0','-1','0' \
+            FROM indimail
+
+host        localhost
+database    indimail
+username    indimail
+password    mysql_database_password
+socket      /run/mysqld/mysqld.sock
+pidfile     /run/indimail/pwdlookup/nssd.pid
+threads     5
+timeout     -1
+facility    daemon
+priority    err
+```
+
+Now that we have created the configuration file for nssd, let us configure /etc/nsswitch.conf to for your system to use nssd. This from a Fedora 38 system. Your nsswitch.conf maybe different, but all you need to do is add `nssd` after `files` as below.
+
+```
+passwd:     files nssd sss systemd
+shadow:     files nssd
+```
+
+Now let us demonstrate the beauty of nssd by using  a simple program which uses getpwent(3) to fetch user details from /etc/passwd database and getspnam(3) which fetches user password from /etc/shadow database.
+
+```
+# Program listing
+$ cat try.c
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <pwd.h>
+#include <errno.h>
+#ifdef HAVE_SHADOW_H
+#include <shadow.h>
+#endif
+
+int
+main(int argc, char **argv)
+{
+  struct passwd *pw;
+#ifdef HAVE_SHADOW_H
+  struct spwd   *spw;
+#endif
+
+  if (argc != 2) {
+    fprintf(stderr, "usage: getuser username\n");
+    _exit(1);
+  }
+  if (!(pw = getpwnam(argv[1]))) {
+    fprintf(stderr, "%s: No such user\n", argv[1]);
+    return(1);
+  }
+  printf("%s:", pw->pw_name);
+#ifdef HAVE_SHADOW_H
+  if (!(spw = getspnam(argv[1]))) {
+    fprintf(stderr, "getspnam: %s: %s\n", argv[1], errno ? strerror(errno) : "not found in shadow");
+    printf("%s:", pw->pw_passwd);
+  } else
+    printf("%s:", spw->sp_pwdp);
+#else
+  printf("%s:", pw->pw_passwd);
+#endif
+#if defined(__FreeBSD__)
+  printf("%d:%d:%ld:%s:%s:%s:%s:%ld\n", pw->pw_uid, pw->pw_gid, pw->pw_change, pw->pw_class, 
+  pw->pw_gecos, pw->pw_dir, pw->pw_shell, pw->pw_expire);
+#else
+  printf("%d:%d:%s:%s:%s\n", pw->pw_uid, pw->pw_gid, pw->pw_gecos, pw->pw_dir, pw->pw_shell);
+#endif
+}
+
+# Compile try.c assuming you have /usr/include/shadow.h
+
+$ gcc -DHAVE_SHADOW_H try.c -o try
+
+# Run the program
+
+$ ./try testuser01@example.com
+testuser01:$5$Q6JwFGYxvqrm6Xzb$Lr.d1CMxy7j0Y0xFgRY.FgHKy/LDXpA5tFo22ziz6aA:555:555:testuser01:/home/mail/T2Zsym/example.com/testuser01:524288000
+```
+
+And that ends the fun we had making libc functions which have nothing to do with MySQL, fetching records from a MySQL database.
 
 # Setting limits for your domain
 
