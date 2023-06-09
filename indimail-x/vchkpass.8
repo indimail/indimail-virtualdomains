@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH vchkpass 8
 .SH NAME
 vchkpass \- checkpassword program for IndiMail authentication
@@ -87,6 +88,12 @@ On successful authentication, \fBvchkpass\fR(8) can execute a script
 defined by environment variable \fBPOSTAUTH\fR. In that case, the return
 value of \fBvchkpass\fR(8) will be the return value of \fBPOSTAUTH\fR
 program/script.
+
+If the environment variable \fBQUERY_CACHE\fR is set, \fBvchkpass\fR(8)
+sends requests to \fBinlookup\fR(8) daemon. Using \fBinlookup\fR(8) aids
+performance as requests are cached and pooled. Without \fBQUERY_CACHE\fR
+defined, \fBvchkpass\fR(8) directly connects to the MySQL database for
+fulfilling authentication request from clients.
 
 MUAs and AUTH types tested with this software are:
 
