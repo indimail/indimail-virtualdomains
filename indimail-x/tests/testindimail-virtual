@@ -221,6 +221,13 @@ function setup_config()
 	if [ ! -f $sysconfdir/headerlist ] ; then
 		cp /etc/indimail/headerlist $sysconfdir
 	fi
+	# nssd config
+	sudo $svctool --sysconfdir=$sysconfdir --config=nssd \
+		--threads=5 --timeout=-1 \
+		--mysqluser="$MYSQL_USER" --mysqlpass="$MYSQL_PASS" \
+		--mysqlhost=localhost --mysqlsocket=$MYSQL_SOCK --mysqlport=$MYSQL_PORT 
+	sudo chown $user $sysconfdir/nssd.conf
+	sed -i "s{pidfile.*{pidfile     $testdir/pwdlookup/nssd.pid{g" $sysconfdir/nssd.conf
 }
 
 function create_authimap()
@@ -1413,6 +1420,27 @@ function do_valias()
 	fi
 }
 
+function do_pwdlookup()
+{
+	#echo "Starting pwdlookup test"
+	enc_pass1=$(sudo setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -p $1 | awk '{print $3}')
+	t=$(echo $1|cut -d@ -f1)
+	mkdir -p $testdir/pwdlookup
+	env NSSD_SOCKET=$testdir/pwdlookup/nssd.sock \
+		/usr/sbin/nssd -f $sysconfdir/nssd.conf -d debug >$logdir/nssd.log 2>&1 &
+	enc_pass2=$(env NSSD_SOCKET=$testdir/pwdlookup/nssd.sock /usr/libexec/indimail/check_getpw $1 | \
+		awk -F: '{print $1":"$2}')
+	if [ $? -eq 0 -a "$t:$enc_pass1" = "$enc_pass2" ] ; then
+		tcount=$(expr $tcount + 1)
+		printf "  testing pwdlookup succeeded\n"
+	else
+		echo "pass $t:$enc_pass1 $enc_pass2"
+		printf "  testing pwdlookup failed\n"
+		exit 1
+	fi
+	kill $(cat $testdir/pwdlookup/nssd.pid)
+}
+
 function do_cleanup_failed()
 {
 	if [ -f $testdir/cleanup.done ] ; then
@@ -1445,6 +1473,7 @@ function do_cleanup()
 	sudo /bin/rm -rf $testdir/inquery
 	sudo /bin/rm  -f $testdir/tcpclient.imap $testdir/tcpclient.pop3 $testdir/post_handle
 	sudo /bin/rm -rf $sysconfdir/users
+	/bin/rm -f $sysconfdir/nssd.conf
 	sudo /bin/rm -rf $qmaildir/domains
 	sudo /bin/rm -rf $testdir/mail
 	#sudo /bin/rm -rf $qmaildir/mysqldb
@@ -1476,6 +1505,7 @@ do_smtp_auth_qmail_remote $domain1 $testuser1 $password2
 
 password_change $testuser1 $password1
 do_vmoduser $testuser1
+do_pwdlookup $testuser1
 delete_user $testuser1
 
 create_user_scram SCRAM-SHA-1   $testuser1 $password1
