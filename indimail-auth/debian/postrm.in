@@ -70,6 +70,8 @@ esac
 # Debian silliness
 #
 # update config for pam-multi link
+(
+echo "removing indimail-auth package"
 ${prefix}/sbin/svctool --config=remove-alt
 if [ -d ${servicedir}/pwdlookup -o -L ${servicedir}/pwdlookup ] ; then
 	touch ${servicedir}/pwdlookup/down
@@ -92,4 +94,5 @@ ${rm} -rf $log_dir/pwdlookup || true
 if [ ! "${prefix}" = "/usr" ] ; then
 	/sbin/ldconfig
 fi
+) >> /var/log/indimail-auth-setup.log 2>&1
 exit 0

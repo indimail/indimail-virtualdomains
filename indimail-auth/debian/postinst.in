@@ -63,6 +63,8 @@ esac
 #DEBHELPER#
 
 if [ $upgrade -eq 1 ] ; then # upgrade
+  (
+  echo "upgrading indimail-auth package"
   ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="${servicedir}/pwdlookup"
   set +e
   if [ -d /run ] ; then
@@ -90,6 +92,7 @@ if [ $upgrade -eq 1 ] ; then # upgrade
   fi
   /sbin/ldconfig
   set -e
+  ) >> /var/log/indimail-auth-setup.log 2>&1
   exit 0
 fi
 
@@ -108,6 +111,8 @@ elif [ -x /usr/bin/touch ] ; then
 else
   TOUCH=/bin/touch
 fi
+(
+echo "installing indimail-auth package"
 echo "Creating ${logdir}"
 if [ ! -d ${logdir}/pwdlookup ] ; then
   /bin/mkdir -p ${logdir}/pwdlookup
@@ -125,5 +130,6 @@ ${prefix}/sbin/svctool --servicedir=${servicedir} --service-name=pwdlookup \
 
 # update config for pam-multi link
 ${prefix}/sbin/svctool --config=add-alt
+) >> /var/log/indimail-auth-setup.log 2>&1
 
 exit 0
