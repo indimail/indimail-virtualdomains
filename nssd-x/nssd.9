@@ -54,6 +54,9 @@ files nssd
 \fBnssd\fR uses \fBsyslog(3)\fR to log all messages. You can improve the
 NSS performance by starting \fBnscd(8)\fR name service cache daemon.
 
+\fBnssd\fR uses \fIRUNDIR\fR/indimail/pwdlookup/nssd.sock as a default.
+This can be changed by setting \fBNSSD_SOCKET\fR environment variable.
+
 .SH OPTIONS
 .PP
 .TP
