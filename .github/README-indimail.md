@@ -93,6 +93,7 @@ Table of Contents
    * [SMTP Access List](#smtp-access-list)
    * [IndiMail Control Files Formats](#indimail-control-files-formats)
    * [indimail-mta Authentication Mechanisms](#indimail-mta-authentication-mechanisms)
+      * [Authentication Modules](#authentication-modules)
       * [Inlookup database connection pooling service](#inlookup-database-connection-pooling-service)
       * [Name Service Switch Daemon - nssd](#name-service-switch-daemon---nssd)
       * [PAM Multi Framework](#pam-multi-framework)
@@ -237,11 +238,11 @@ Core **IndiMail** consists of three main packages - [indimail-mta](https://githu
 * **indimail-virtualdomains** provides you tools to create and manage multiple virtual domains with its own set of users, who can send and receive mails. <b>indimail-virtualdomains</b> is dependent on <b>indimail-mta</b> to function.
 * **indimail-access** provides you IMAP/POP3 protocols using [courier-imap](https://www.courier-mta.org/imap/) & mail retrieval using [fetchmail](https://www.fetchmail.info/) program. It allows the users to access their emails delivered by <b>indimail-mta</b> locally on a host to users in /etc/passwd or to <b>virtual users</b> on a host (or multiple hosts) on the network having <b>virtual domains</b> created by <b>indimail-virtualdomains</b>. It is not a **MUST** that you have to install the indimail-access package. Since indimail-mta provides multiple authentication methods, protocols, PAM, NSS modules/plugins, you should be able to use your favourite IMAP/POP3 servier with indimail.
 
-This document will refer to **IndiMail** as a combined package of indimail-virtualdomains, indimail-mta & other packages namely indimail-access, indimail-auth, indimail-utils, indimail-spamfilter.
+This document will refer to **IndiMail** as a combined package of indimail-virtualdomains, indimail-mta & other packages namely indimail-access, indimail-auth, indimail-utils, indimail-spamfilter. This is a reference document and mostly deals with the design of IndiMail. The setup and configuration examples, the usernames and passwords used are for demonstration purposes only. The setup and configuration is mostly automated when you install indimail using dnf, yum, apt-get, pkg etc or when you run the `create_services` script after you complete the build in each of the source directories (see [IndiMail Setup and Configuration](https://github.com/mbhangui/indimail-virtualdomains#setup--configuration)). Most of the setup is done using a super script named [svctool(8)](https://github.com/mbhangui/indimail-mta/wiki/svctool.8). The primary purpose of this document is to know indimail with intimate details while having fun trying out new commands. You will do well if you especially know how UNIX works. This is not a user guide and I suspect that the document will be incomprehensible for those who don't know UNIX and have been stuck their entire lives using GUIs surfing the web, creating documents, power point presentation for excel sheets. But if you are someone who knows what vt100, tvi955 means and not just the gnome-terminal, you will have some fun here.
 
-When you install indimail-virtualdomains, a shared library from the package is dynamically loaded by indimail-mta to provide virtual domain support in indimail-mta, along with the ability to work with IMAP/POP3 retrieval daemons. The shared library is a file named <u>indimail.so</u> and is placed in your system directory for shared libraries (<u>/lib</u>, <u>/lib64</u>, etc).
+When you install indimail-virtualdomains, a shared library from the package is dynamically loaded by indimail-mta to provide virtual domain support in indimail-mta, along with the ability to work with IMAP/POP3 retrieval daemons (provided by the indimail-access package). The shared library is a file named <u>indimail.so</u> and is placed in your system directory for shared libraries (<u>/lib</u>, <u>/lib64</u>, etc). Without indimail-virtualdomains packge you can still use the IMAP/POP3 retrieval daemons for accessing your local Maildirs.
 
-indimail-virtualdomains provides programs to manage multiple virtual domains on a single host. It allows extending any of the domains across multiple servers. With indimail-mta installed, two compoments - **qmail-rspawn**, **qmail-remote** can act as an SMTP router/interceptor. Both the components use a **MySQL** database to know the location of each and every user. Similarly, the Mail Delivery Agent (MDA) **vdelivermail** uses the same MySQL database, allowing it to re-route any email to any server where the user's mailbox is present. Additionally, indimail-virtualdomains provide **proxyimap** and **proxypop3** - proxies for IMAP and POP3 protocols, to retrieve the user's mailbox from any server. To deliver or retrieve any email, the user doesn't have to connect to any specific serer. This is a very powerful feature which allows IndiMail to provide native horizontal scalability. It knows the location of each and every user and can distribute or retrieve mails for any user residing on any server located anywhere on the network. If one uses IndiMail, one can simply add one more server and cater to more users without changing any configuration, software or hardware of existing servers. To add a server is so easy. You setup a new server, copy a file named <u>mcdinfo</u> from an existing server, add an entry to the <u>mcdinfo</u> file and run the <b>dbinfo</b> command and instantaly the new server becomes part of the existing cluster and all other hosts in the cluster become aware of the new server. To remove a server is also very easy. Just edit and remove entry for a host in the <u>mcdinfo</u> file on any host and run the <u>dbinfo</u> command.
+indimail-virtualdomains provides programs to manage multiple virtual domains on a single host. It allows extending any of the domains across multiple servers. With indimail-mta installed, two compoments - **qmail-rspawn**, **qmail-remote** can act as an SMTP router/interceptor. Both the components use a **MySQL** database to know the location of each and every user. Similarly, the Mail Delivery Agent (MDA) **vdelivermail** uses the same MySQL database, allowing it to re-route any email to any server where the user's mailbox is present. Additionally, indimail-virtualdomains provide **proxyimap** and **proxypop3** - proxies for IMAP and POP3 protocols, to retrieve the user's mailbox from any server. To deliver or retrieve any email, the user doesn't have to connect to any specific server. This is a very powerful feature which allows IndiMail to provide native horizontal scalability. It knows the location of each and every user and can distribute or retrieve mails for any user residing on any server located anywhere on the network. If one uses IndiMail, one can simply add one more server and cater to more users without changing any configuration, software or hardware of existing servers. To add a server is so easy. You setup a new server, copy a file named <u>mcdinfo</u> from an existing server, add an entry to the <u>mcdinfo</u> file and run the <b>dbinfo</b> command and instantaly the new server becomes part of the existing cluster and all other hosts in the cluster become aware of the new server. To remove a server is also very easy. Just edit and remove entry for a host in the <u>mcdinfo</u> file on any host and run the <u>dbinfo</u> command.
 
 Since the location of every user is known, the architecure does not force a filesystem architecture like NFS to be used for provisioning large number of users (typically in an ISP/MSP environment). In the architecture below, you can keep on increasing the number of servers (incoming relay, outgoing relay or mailstores) to cater to large number of users. This allows you to scale indimail easily to serve millions of users using commodity hardware. You can read the feature list to get an idea of the changes and new features that have been added over the original packages. You can see a pictorial representation of the architecture below
 
@@ -2974,7 +2975,7 @@ quota : 5242880 [5.00 Mb]
 curr quota : 0S,0C
 Mail Store IP : 192.168.1.100 (Clustered - local)
 Mail Store ID : 1000
-Sql Database : 192.168.1.100:indimail:ssh-1.5-
+Sql Database : 192.168.1.100:indimail:abcdefgh
 Table Name : indimail
 Relay Allowed : NO
 Days inact : 0 days 00 Hrs 00 Mins 00 Secs
@@ -3032,7 +3033,7 @@ quota         : 524288000 [500.00 MiB]
 curr quota    : 0S,0C
 Mail Store IP : 192.168.2.107 (Clustered - local
 Mail Store ID : 100
-Sql Database  : 192.168.2.107:indimail:ssh-1.5-:3306:ssl
+Sql Database  : 192.168.2.107:indimail:abcdefgh:3306:ssl
 TCP/IP Port   : 3306
 Use SSL       : Yes
 SSL Cipher    : TLS_AES_256_GCM_SHA384
@@ -3077,7 +3078,7 @@ quota         : 524288000 [500.00 MiB]
 curr quota    : 0S,0C
 Mail Store IP : 192.168.2.107 (Clustered - local
 Mail Store ID : 100
-Sql Database  : 192.168.2.107:indimail:ssh-1.5-:3306:ssl
+Sql Database  : 192.168.2.107:indimail:abcdefgh:3306:ssl
 TCP/IP Port   : 3306
 Use SSL       : Yes
 SSL Cipher    : TLS_AES_256_GCM_SHA384
@@ -3132,7 +3133,7 @@ quota         : 524288000 [500.00 MiB]
 curr quota    : 0S,0C
 Mail Store IP : 192.168.2.107 (Clustered - local
 Mail Store ID : 100
-Sql Database  : 192.168.2.107:indimail:ssh-1.5-:3306:ssl
+Sql Database  : 192.168.2.107:indimail:abcdefgh:3306:ssl
 TCP/IP Port   : 3306
 Use SSL       : Yes
 SSL Cipher    : TLS_AES_256_GCM_SHA384
@@ -3166,7 +3167,7 @@ quota         : 524288000 [500.00 MiB]
 curr quota    : 0S,0C
 Mail Store IP : 192.168.2.107 (Clustered - local
 Mail Store ID : 100
-Sql Database  : 192.168.2.107:indimail:ssh-1.5-:3306:ssl
+Sql Database  : 192.168.2.107:indimail:abcdefgh:3306:ssl
 TCP/IP Port   : 3306
 Use SSL       : Yes
 SSL Cipher    : TLS_AES_256_GCM_SHA384
@@ -3552,16 +3553,16 @@ $
 
 # IndiMail Control Files Formats
 
-A little known feature of IndiMail allows some of your control files to be in plain text, cdb or in MySQL. These control files include authdomains, badhelo, badext, badmailfrom, badrcptto, blackholedsender, blackholedrcpt, chkrcptdomains, goodrcptto, relaymailfrom and spamignore. If you have quite a large number of entries in any of the above control files, you can expect a significant performance gains by having these control files in cdb or MySQL.
+A little known feature of IndiMail allows some of your control files to be in plain text, cdb or in MySQL. These control files include authdomains, badhelo, badext, badmailfrom, badrcptto, blackholedsender, blackholedrcpt, chkrcptdomains, goodrcptto, relaymailfrom and spamignore. If you have quite a large number of entries in any of the above control files, you can expect significant performance gains by having these control files in cdb or MySQL.
 
 The mechanism is quite simple. For example, if you have the control file badmailfrom, <b>qmail-smtpd</b> will use badmailfrom. If you have the file badmailfrom.cdb, <b>qmail-smtpd</b> will first do cdb lookup in badmailfrom.cdb. To create badmailfrom.cdb, you need to run the command.
 
 `$ sudo /usr/bin/qmail-cdb badmailfrom`
 
-You can also have your entries in a MySQL table. Let say you have a MySQL server on the server localhost, a database named 'indimail' with user 'indimail' having password 'ssh-1.5-'. To enable the control file in MySQL you need to create the control file with a .sql extension. The following enables the badmailfrom in MySQL
+You can also have your entries in a MySQL table. Let say you have a MySQL server on the server localhost, a database named 'indimail' with user 'indimail' having password 'abcdefgh'. To enable the control file in MySQL you need to create the control file with a .sql extension. The following enables the badmailfrom in MySQL
 
 ```
-# echo "localhost:indimail:ssh-1.5-:indimail:badmailfrom" > badmailfrom.sql
+# echo "localhost:indimail:abcdefgh:indimail:badmailfrom" > badmailfrom.sql
 ```
 
 Once you have created a file badmailfrom.sql, <b>qmail-smtpd</b> will connect to the MySQL server on localhost and look for entry in the column 'email' in the table badmailfrom. If this table does not exist, <b>qmail-smtpd</b> will create an empty table using the following SQL create statement
@@ -3584,55 +3585,102 @@ If you have all the 3 versions of control files existing, IndiMail will first do
 Version 1.7.4 of indiMail and above comes with a utility named **qmail-sql** which allows you to create the MySQL table and also insert values from command line or convert an existing plain text version to MySQL. The below command will create a file <u>badmailfrom.sql</u> in <u>/etc/indimail/control</u> directory and table named <b>bmf</b> in MySQL
 
 ```
-qmail-sql -s localhost -u indimail -p ssh-1.5- -d indimail -t bmf badmailfrom
+qmail-sql -s localhost -u indimail -p abcdefgh -d indimail -t bmf badmailfrom
 ```
 
 Support for control files in MySQL support gets enabled by configuring the control file <u>mysql_lib</u> in <u>/etc/indimail/control</u> directory. This file should contain the full path to the MySQL shared library. e.g. `/usr/lib64/mysql/libmysqlclient.so.21.2.30`. The command `svctool --fixsharedlibs` updates this file. In case you are not using indimail-virtualdomains or do not have MySQL server installed or do not want MySQL to be installed, you can choose to not have the <u>mysql_lib</u> control file.
 
 # indimail-mta Authentication Mechanisms
 
-indimail-mta provides multiple ways to achieve authentication.
+indimail-mta provides multiple ways authentication methods.
 
 1. Using authentication modules
 2. Using Name Service Switch Daemon - nssd
 3. Using Password Authentication Modules (PAM)
 4. Using a PAM module to use pam-multi
 
-** Authentication Modules **
+**Authentication Modules**
 
-There are two categories of these modules. [checkpassword](http://cr.yp.to/checkpwd.html) based authentication modules and non-checkpassword modules.
+There are two categories of these modules. [checkpassword](http://cr.yp.to/checkpwd.html) based authentication modules and non-checkpassword modules. All of these modules are chain modules, where you can configure multiple modules to be called in a chain. Any application which uses these modules (qmail-smtpd, imapd, pop3d) call the modules in an order configured by the user. If a modules fails, it calls the next module in the chain and so on. Authentication is successful when at least one of the modules in the chain succeeds. This is discussed in detail [authentication modules](#authentication-modules) chapter.
 
-checkpassword based authentication modules are [vchkpass(8)](https://github.com/mbhangui/indimail-mta/wiki/vchkpass.8), [ldap-checkpwd(8)](https://github.com/mbhangui/indimail-mta/wiki/ldap-checkpwd.8), [pam-checkpwd(8)](https://github.com/mbhangui/indimail-mta/wiki/pam-checkpwd.8), [sys-checkpwd(8)](https://github.com/mbhangui/indimail-mta/wiki/sys-checkpwd.8). [qmail-smtpd](https://github.com/mbhangui/indimail-mta/wiki/qmail-smtpd.8) can use checkpassword authentication modules.
+**Name Service Switch**
 
-non-checkpassword based modules are [authindi](https://github.com/mbhangui/indimail-mta/wiki/authlib.7), [authpam](https://github.com/mbhangui/indimail-mta/wiki/authlib.7), [authshadow](https://github.com/mbhangui/indimail-mta/wiki/authlib.7) used by [imapd](https://github.com/mbhangui/indimail-mta/wiki/imapd.8) and [pop3d](https://github.com/mbhangui/indimail-mta/wiki/pop3d.8).
+indimail-mta provides the nssd(8) daemon which implements a  Name Service Switch (NSS). This allows the libc/glibc functions getpwnam(3), getpwuid(3), getpwent(3), getspnam(3), getuserpw(3), getgrnam(3), getgrgid(3), getgrent(3) to fetch records from the passwd(5), shadow(5) and the group(5) databases to query IndiMail's MySQL database. This also enables PAM modules which uses these functions to fetch records from IndiMail's MySQL database. nssd(8) is discussed in the the [Name Service Switch Daemon - nssd](#name-service-switch-Daemon---nssd) chapter. Apart from allowing auth modules like sys-checkpwd, pam-checkpwd, authpam, authshadow to access MySQL, nssd allows any third-party application to access a MySQL database transparently. See this [example](#using-indimails-name-service-switch) to see how you can configure dovecot to use nssd(8) Name Service Switch daemon for authentication.
 
-Of the above, authvchkpw(8) and authindi(8) help authenticating against IndiMail's MySQL database for virtual domain users. They can directly connnect to the MySQL database or can use a connection caching/pooling daemon [inlookup(8)](https://github.com/mbhangui/indimail-mta/wiki/inlookup.8) described in this [chapter](#inlookup-database-connection-pooling-service). For using inlookup daemon, the environment variable <b>QUERY_CACHE</b> needs to be set. Using inlookup can significantly boost performance and reduce time taken to perform authenticate requests.
-
-The ldap-checkpwd module can authenticate against a LDAP server. This module is limited by the options provided by the ldap-checkpwd module.
-
-The sys-checkpwd(8), authshadow(7) modules use libc/glibc functions getpwnam(3), getpwuid(3), getpwent(3), getspnam(3), getuserpw(3), getgrnam(3), getgrgid(3), getgrent(3) to fetch records from the passwd(5), shadow(5) and the group(5) databases. Apart from the configuration options provided by the modules itself, one can also exploit nsswitch.conf to redirect these calls to [Name Service Switch Daemon - nssd](#name-service-switch-Daemon---nssd) and use indimail's MySQL database as an alternate database to the local passwd(5), shadow(5) and the group(5) databases. The nssd(8) daemon is quite powerful, allowing any 3rd-party software that uses the standard libc/glibc functions for authentication to authenticate successfully against IndiMail's MySQL database without changing any code. This makes it trivial to replace indimail's IMAP/POP3 server with any IMAP/POP3 server of your choice.
-
-The pam-checkpwd(8), authpam(8) modules are PAM modules. PAM, or Pluggable Authentication Modules, is a modular approach to authentication. It allows (third party) services to provide an authentication module for their service which can then be used on PAM enabled systems. Services that use PAM for authentication can immediately use these modules without the need for a rebuild. pam-checkpwd(8) is highly configurable and can use any PAM(8) service like the linux /etc/pam.d/login and authenticate against system users configured by you or your system administrator. authpam(8) can authenticate using the pam service file /etc/pam.d/imap or /etc/pam.d/pop3. authpam(8) can be used by indimail's own imapd/pop3d to authenticate local users.
-
-To configure SMTP service to use these modules you need to setup <b>AUTHMODULE</b> environment variable. To configure IMAP/POP3 service to use these authentication modules you need to configure <b>IMAPMODULE</b> environment variable.
-
-See this [example](#using-checkpassword) to see how you can configure dovecot to use vchkpass(8) checkpassword module for authentication.
-
-** Name Service Switch **
-
-indimail-mta provides the nssd(8) daemon which implments a  Name Service Switch (NSS). This allows the libc/glibc functions getpwnam(3), getpwuid(3), getpwent(3), getspnam(3), getuserpw(3), getgrnam(3), getgrgid(3), getgrent(3) to fetch records from the passwd(5), shadow(5) and the group(5) databases to query the IndiMail's MySQL database. This also enables PAM modules which uses these functions to fetch records from IndiMail's MySQL database. nssd(8) is discussed in the the [chapter](#name-service-switch-Daemon---nssd) below. Apart from allowing auth modules like sys-checkpwd, pam-checkpwd, authpam, authshadow to access MySQL, nssd allows access to any third-party software to access the MySQL database transparently.
-
-See this [example](#using-indimails-name-service-switch) to see how you can configure dovecot to use nssd(8) Name Service Switch daemon for authentication.
-
-** PAM Modules **
+**PAM Modules**
 
 indimail-mta provides pam-checkpwd(8), a checkpassword compliant module for authenticated SMTP service and authpam(7) for IMAP/POP3 authentication.
 
-** PAM Service **
+**PAM Service**
 
-indimail-mta provides a configurable PAM service implmented using [pam-multi(8)](https://github.com/mbhangui/indimail-mta/wiki/pam-multi.8). pam-multi can be used by any of the PAM configuration files in /etc/pam.d to authenticate against any database on your local system. pam-multi is discussed in detail in the [chapter](#pam-multi-framework).
+indimail-mta provides a configurable PAM service implmented using [pam-multi(8)](https://github.com/mbhangui/indimail-mta/wiki/pam-multi.8). pam-multi can be used by any of the PAM configuration files in /etc/pam.d to authenticate against any database on your local system. pam-multi is discussed in detail in the [pam-multi framework](#pam-multi-framework) chapter. The default indimail setup doesn't use PAM and use authentication modules instead. However the default installation does provide PAM configuration using pam-multi in <u>/etc/pam.d/pam-multi</u>, <u>/etc/pam.d/imap</u>, <u>/etc/pam.d/pop3</u>. You can configure indimail to authenticate using PAM. See this [example](#using-pam-multi) to see how you can configure dovecot to use pam-multi(8) service for authentication.
 
-See this [example](#using-pam-multi) to see how you can configure dovecot to use pam-multi(8) service for authentication.
+# Authentication Modules
+
+indimail uses authentication modules as a default for authentication tasks. indimail-mta provides two categories of authentcation modules - checkpassword and non-checkpassword based modules. To configure authentication you will need to set few environment variables like AUTHMODULE, IMAPMODULE, QUERY\_CACHE, etc. Read [Setting Environment Variables](#setting-environment-variables) to learn how to set environment variables.
+
+* checkpassword based authentication modules are [vchkpass(8)](https://github.com/mbhangui/indimail-mta/wiki/vchkpass.8), [ldap-checkpwd(8)](https://github.com/mbhangui/indimail-mta/wiki/ldap-checkpwd.8), [pam-checkpwd(8)](https://github.com/mbhangui/indimail-mta/wiki/pam-checkpwd.8), [sys-checkpwd(8)](https://github.com/mbhangui/indimail-mta/wiki/sys-checkpwd.8). [qmail-smtpd](https://github.com/mbhangui/indimail-mta/wiki/qmail-smtpd.8) can use checkpassword authentication modules. These modules are all part of the indmail-mta package, except for pam-multi which is provided by the indimail-auth package.
+
+* non-checkpassword based modules are [authindi](https://github.com/mbhangui/indimail-mta/wiki/authlib.7), [authpam](https://github.com/mbhangui/indimail-mta/wiki/authlib.7), [authshadow](https://github.com/mbhangui/indimail-mta/wiki/authlib.7) used by [imapd](https://github.com/mbhangui/indimail-mta/wiki/imapd.8) and [pop3d](https://github.com/mbhangui/indimail-mta/wiki/pop3d.8). authindi is provided by the indimail package while the remaining are part of the indimail-access package.
+
+The vchkpass(8) helps qmail-smtpd and authindi(7) helps imapd,pop3d authenticate against IndiMail's MySQL database for virtual domain users. It can directly connnect to the MySQL database or can use a connection caching/pooling daemon [inlookup(8)](https://github.com/mbhangui/indimail-mta/wiki/inlookup.8) described in this [chapter](#inlookup-database-connection-pooling-service). For using inlookup daemon, the environment variable <b>QUERY_CACHE</b> needs to be set. Using inlookup can significantly boost performance and reduce time taken to perform authentication.
+
+The ldap-checkpwd(8) module can authenticate against a LDAP server. This module is limited by the options provided by the ldap-checkpwd module.
+
+The sys-checkpwd(8), authshadow(7) modules use libc/glibc functions getpwnam(3), getpwuid(3), getpwent(3), getspnam(3), getuserpw(3), getgrnam(3), getgrgid(3), getgrent(3) to fetch records from the passwd(5), shadow(5) and the group(5) databases. Apart from the configuration options provided by the modules itself, one can also exploit nsswitch.conf to redirect these calls to [Name Service Switch Daemon - nssd](#name-service-switch-Daemon---nssd) and use indimail's MySQL database as an alternate database to the local passwd(5), shadow(5) and the group(5) databases. The nssd(8) daemon is quite powerful, allowing any 3rd-party software that uses the standard libc/glibc functions for authentication to authenticate successfully against IndiMail's MySQL database without changing any code. This makes it trivial to replace indimail's IMAP/POP3 server with any IMAP/POP3 server of your choice.
+
+The pam-checkpwd(8), authpam(8) modules are PAM modules. PAM, or Pluggable Authentication Modules, is a modular approach to authentication. It allows (third party) services to provide an authentication module for their service which can then be used on PAM enabled systems. Services that use PAM for authentication can immediately use these modules without the need for a rebuild. pam-checkpwd(8) is highly configurable and can use any PAM(8) service like the linux PAM configuration in /etc/pam.d/login to authenticate against system users configured by you or your system administrator. authpam(8) can authenticate using the pam service file /etc/pam.d/imap or /etc/pam.d/pop3. authpam(8) can be used by indimail's own imapd/pop3d to authenticate local users.
+
+These authentication modules can be called as a chain of modules belonging to a particular category. For checkpassword based modules, you can have a chain consisting of vchkpass, ldap-checkpwd, sys-checkpwd to authenticate against indimail's MySQL database, ldap database and the system passwd(5) database. Similary, for non-checkpassword based modules you can have a chain consisting of authindi, authshadow, authpam to authenticate against indimail's MySQL database, /etc/shadow and PAM. The way the chain gets executed is different for checkpassword based module and non-checkpassword based module. For using these modules, the application just needs to call the first module in the chain. For the checkpassword based modules, the module which gets called is responsible for calling the next authentication module only when authentication fails. If authentication succeeds, it simply needs to exit with non-zero status.  For non-checkpassword based module each module calls the next module in succession, regardless of the authentication result (success or failure). When a module succeeds, it sets the environment variable AUTHENTICATED before calling the next module. When a module sees this environment variable, it simply calls the next module in the chain without performing any authentication task. The last module always needs to be [imapd](https://github.com/mbhangui/indimail-mta/wiki/imapd.8) for IMAP and [pop3d](https://github.com/mbhangui/indimail-mta/wiki/pop3d.8) for POP3. This is how the courier-imap authentication module works and is implemented by two programs [imaplogin](https://github.com/mbhangui/indimail-mta/wiki/imaplogin.8) and [pop3login](https://github.com/mbhangui/indimail-mta/wiki/pop3login.8). So the major difference is that the checkpassword based modules return when the first successful authentication happens, whereas all modules in the chain get called for non-checkpassword based modules used for courier-imap.
+
+To configure SMTP service to use these modules you need to setup <b>AUTHMODULE</b> environment variable. To configure IMAP/POP3 service to use these authentication modules you need to configure <b>IMAPMODULE</b> environment variable. This is how IndiMail uses these modules for authentication for qmail-smtpd on port 465, 587 and courier-imap on ports 110, 143, 993, 995, 4143, 9143, 4110, 9110. For both types of modules, the module gets called by the invocation scripts. Below are examples for SMTP on port 587 and IMAP on port 143.
+
+**qmail-smtpd**
+
+```
+# qmail-smtpd.587 run script snippet
+
+$ tail -7 /service/qmail-smtpd.587/run
+exec /usr/bin/envdir -c variables sh -c "
+exec /usr/bin/softlimit -m \$SOFT_MEM -o 1024 \
+/usr/bin/tcpserver -v -H -R -l $HOSTNAME \
+-x /etc/indimail/tcp/tcp.smtp.cdb \
+-c variables/MAXDAEMONS -o -b \$MAXDAEMONS \
+-u qmaild -g qmail,indimail \$LOCALIP \$PORT \$RBLCOMMAND \
+/usr/lib/indimail/plugins/qmail_smtpd.so $HOSTNAME \$AUTHMODULES /bin/false"
+
+# qmail-smtpd.587 AUTHMODULE environment variable
+
+$ sudo cat /service/qmail-smtpd.587/variables/AUTHMODULE
+/usr/sbin/sys-checkpwd /usr/sbin/vchkpass
+```
+The environment variable `AUTHMODULE=/usr/sbin/sys-checkpwd /usr/sbin/vchkpass` is essentially a chain consisting of sys-checkpwd and vchkpass. This makes qmail-smtpd to call the first module in the chain - sys-checkpwd. If sys-checkpwd fails to authenticate, it calls vchkpass. Effectively this means that qmail-smtpd first tries the system /etc/passwd, /etc/shadow for authentication. If this doesn't succeed, authentication is done against indimail's MySQL database. If bulk of your users are virtual users, it makes better sense to have `AUTHMODULE=/usr/sbin/vchkpass /usr/sbin/sys-checkpwd`. If you don't have local Maildirs you can just have `AUTHMODULE=/usr/sbin/vchkpass`.
+
+**imapd/pop3d**
+
+```
+# qmail-imapd.143 run script snippet
+
+$ tail -11 /service/qmail-imapd.143/run
+exec /usr/bin/envdir -c variables sh -c "
+IMAPAUTHMODULES=\"\"
+for f in \`echo \$IMAPMODULES\`
+do
+	IMAPAUTHMODULES=\"\$IMAPAUTHMODULES /usr/libexec/indimail/imapmodules/\$f\"
+done
+exec /usr/bin/softlimit -m \$SOFT_MEM -o 1024 \
+/usr/bin/tcpserver -v -c variables/MAXDAEMONS -C \$MAXPERIP \
+-x /etc/indimail/tcp/tcp.imap.cdb -X \
+-o -b \$MAXDAEMONS -H -l $HOSTNAME -R -u indimail -g indimail,qmail \$LOCALIP \$PORT \
+/usr/sbin/imaplogin \$IMAPAUTHMODULES /usr/bin/imapd Maildir"
+
+# qmail-imapd.147 AUTHMODULE environment variable
+
+$ sudo cat /service/qmail-imapd.143/variables/IMAPMODULES
+authindi authpwd authshadow authpam
+```
+
+Since indimail-mta makes good use of environment variables and authentication methods can be easily adapted to work for any SMTP, IMAP/POP3 service. See this [example](#using-checkpassword) to see how you can configure dovecot to use vchkpass(8) checkpassword module for authentication.
 
 # Inlookup database connection pooling service
 
@@ -3644,28 +3692,30 @@ Rather than making individual connections to MySQL for extracting information fr
 * It also maintains the query result in a double link list.
 * It uses binary tree algorithm to search the cache before actually sending the query to the database.
 * IndiMail clients send requests for MySQL(1) queries to inlookup through the function inquery() using a fifo.
-* The inquery() API uses the InLookup service only if the environment variable QUERY_CACHE is set. If this environment variable is not set, the inquery() function makes a direct connecton to MySQL.
-* Clients which are currently using inquery are <b>qmail-smtpd</b>(1), proxyimap(8), proxypop3(8), vchkpass(8) and authindi(8).
+* The inquery() API uses the InLookup service only if the environment variable <b>QUERY\_CACHE</b> is set. If this environment variable is not set, the inquery() function makes a direct connecton to MySQL.
+* Clients which are currently using inquery are <b>qmail-smtpd</b>(1), proxyimap(8), proxypop3(8) and the authentication modules vchkpass(8) and authindi(8). To use inlookup you just need to set the <b>QUERY\_CACHE</b> environment variable.
 * inlookup(8) service is one of the reasons why IndiMail is able to serve million+ users using commodity hardware.
 
 The program inquerytest simulates all the queries which inlookup supports and can be used as a test/diagnostic tool for submitting queries to inlookup. e.g
 
-`sudo inquerytest -q 3 -i "" user@example.com`
-
+```
+$ sudo setuidgid -g qmail qmaild mkdir -p /tmp/inquerytest
+$ sudo setuidgid -g qmail qmaild env TMPDIR=/tmp/inquerytest FIFO_MODE=0666 inquerytest -v -q 3 -i "" testuser01@example.com
+```
 ## Name Service Switch Daemon - nssd
 
-There are various functions to lookup users and groups in a local environment. Traditionally, this is done by using files (e.g., /etc/passwd, /etc/group, etc), but other name services (like the [Network Information Service (NIS)](https://en.wikipedia.org/wiki/Network_Information_Service) and the [Domain Name Service (DNS)](https://en.wikipedia.org/wiki/Domain_Name_System]) are popular, and have been hacked into the C library, usually with a fixed search order. The [Name Service Switch (NSS)](https://en.wikipedia.org/wiki/Name_Service_Switch) provides a cleaner solution to extend the lookup to other databases. In Unix-like operating systems, the Name Service Switch (NSS) allows Unix configuration databases to be provided by different sources, including local files (for example: /etc/passwd, /etc/shadow, /etc/group, /etc/hosts), LDAP, and other sources.
+There are various functions to lookup users and groups in a local environment. Traditionally, this is done by using files (e.g. /etc/passwd, /etc/group, etc), but other name services (like the [Network Information Service (NIS)](https://en.wikipedia.org/wiki/Network_Information_Service) and the [Domain Name Service (DNS)](https://en.wikipedia.org/wiki/Domain_Name_System]) are popular, and have been hacked into the C library, usually with a fixed search order. The [Name Service Switch (NSS)](https://en.wikipedia.org/wiki/Name_Service_Switch) provides a cleaner solution to extend the lookup to other databases. In Unix-like operating systems, the Name Service Switch (NSS) allows Unix configuration databases to be provided by different sources, including local files (e.g. /etc/passwd, /etc/shadow, /etc/group, /etc/hosts), LDAP, and other sources.
 
 nssd(8) provides any MySQL database as an alternate Unix configuration database for the passwd(5), shadow(5) and the group(5) databases through standard libc interfaces, such as getpwnam(3), getpwuid(3), getpwent(3), getspnam(3), getspent(3), getgrnam(3), getgrgid(3) and getgrent(3). These functions are implemented as a shared library in libnss\_nssd.so placed in your system lib directory (/usr/lib64 or /usr/lib). The actual implementation of nssd is implemented by having nssd listen on a UNIX domain socket <u>/run/indimail/pwdlookup/nssd.sock</u> and the libnss\_nssd.so library which clients will load through a directive in <u>/etc/nsswitch.conf</u>. Once nsswitch.conf is configured, these functions will connect to the nssd daemon when called and nssd will provide the result back from IndiMail´s MySQL database. One can use any MySQL database by modifying the relevant SQL query string in the nssd configuration file <u>/etc/indimail/etc/nssd.conf</u>. Running nssd allows any program, which uses standard libc interface to access the passwd(5), shadow(5) or the group(5) database, to authenticate against IndiMail's MySQL database. One practical use of nssd(8) is to use [dovecot imap server](https://www.dovecot.org/) without modifying a single line of code anywhere.
 
-To configure nssd, you require to create a configuration <u>/etc/indimail/nssd.conf</u> and configure the nssd library. To enable the nssd library, you just need to have `nssd` as a provider in <u>/etc/nsswitch.conf</u>. e.g. This is from nsswitch.conf on a Fedora Core 38 workstation. The below will make getpwnam(3), getpwent(3) connect to nssd if the user is not found in /etc/passwd. It will also make getspnam(3) and getspent(3) connect to nssd when the /etc/shadow doesn't have any record for the user.
+To configure nssd, you require to create a configuration file <u>/etc/indimail/nssd.conf</u>. To use the nssd library, you just need to have `nssd` as a provider in <u>/etc/nsswitch.conf</u>. e.g. The below example is from nsswitch.conf on a Fedora Core 38 workstation. The example below will make getpwnam(3), getpwent(3) connect to nssd if the user is not found in /etc/passwd. It will also make getspnam(3) and getspent(3) connect to nssd when the /etc/shadow doesn't have any record for the user.
 
 ```
 passwd: files nssd sss systemd
 shadow: files nssd
 ```
 
-Along with nssd(8), you can use nscd(8) daemon which provides caching for access of the passwd(5), group(5), databases through standard libc interfaces, such as getpwnam(3), getpwuid(3), getgrnam(3), getgrgid(3).
+nssd(8) doesn't provide caching of requests, but along with nssd(8), you can use nscd(8) daemon which provides caching for access of the passwd(5), group(5), databases through standard libc interfaces, such as getpwnam(3), getpwuid(3), getgrnam(3), getgrgid(3). Consult the man pages nscd(8) and nscd(5) to configure nscd(8).
 
 Now let's have some fun with the MySQL database that IndiMail uses. Let us create a user for this demonstration. I'm assumeing we have already created a domain named example.com using the [vadddomain](https://github.com/mbhangui/indimail-mta/wiki/vadddomain.1) program. We will use the [vadduser](https://github.com/mbhangui/indimail-mta/wiki/vadduser.1) program to add a user named testuser01@example.com
 
@@ -3775,7 +3825,7 @@ passwd:     files nssd sss systemd
 shadow:     files nssd
 ```
 
-Now let us demonstrate the beauty of nssd by using  a simple program which uses getpwent(3) to fetch user details from /etc/passwd database and getspnam(3) which fetches user password from /etc/shadow database.
+Now let us demonstrate the beauty of nssd by using a simple program which uses getpwent(3) to fetch user details from /etc/passwd database and getspnam(3) which fetches user password from /etc/shadow database.
 
 ```
 # Program listing
@@ -3839,7 +3889,7 @@ And that ends the fun we had making libc functions which have nothing to do with
 
 [pam-multi](#https://github.com/mbhangui/indimail-mta/wiki/pam-multi.8) is a framework that allows multiple configurable methods for authentication using PAM. pam-multi is a system to handle the authentication tasks of applications (services) on systems which use PAM, against any proprietary database. The system provides a stable general interface, that privilege granting programs (such  as pam-checkpwd(8), authpam(7), login(1) and su(1)) can defer to, to perform standard authentication tasks. The primary goal of pam-multi was to allow authentication of IMAP/POP3 servers like courier-imap, dovecot against IndiMail(5)'s MySQL database. However, tt can be used for any application which can authenticate using pam(8) to authenticate against any proprietary database that you have. pam-multi supports four methods for password hashing schemes. crypt (DES), MD5, SHA256, SHA512. To use pam-multi for any application (which currently uses PAM), you need to modify the PAM  configuration  file  for that application. Simply  put, pam-multi extends an existing pam module to authenticate against any database using any one of the three methods described below. Apart from supporting authentication, pam-multi supports account management like password expiry and account expiry.
 
-1. Using a SQL statement. This is provided by using the -m option to pam-multi. Currently only MySQL database is supported. You also need to pass connection parameters using -u, -p, -D, -H and -P options to connect to the MySQL database. When pam-multi is used for authentication,  it is  expected  that  the  sql\_statement will return a row containing the encrypted password for the user. When used for account management, it is expected that the sql\_statement will return the expiry date (as a long data  type)  for the account. The password expiry can be returned along with the account expiry separated by a ',' comma sign. If you are using this, make sure that your pam configuration file in /etc/pam.d is not world readable as it will expose your MySQL database password. In any case do not use a privileged MySQL user in the pam configuration.
+1. Using a SQL statement. This is provided by using the -m option to pam-multi. Currently only MySQL database is supported. You also need to pass connection parameters using -u, -p, -D, -H and -P options to connect to the MySQL database. When pam-multi is used for authentication,  it is  expected  that  the  sql\_statement will return a row containing the encrypted password for the user. When used for account management, it is expected that the sql\_statement will return the expiry date (as a long data  type)  for the account. The password expiry can be returned along with the account expiry separated by a ',' comma sign. If you are using this, make sure that your pam configuration file in /etc/pam.d is not world readable as it will expose your MySQL database password. In any case do not use a privileged MySQL user in the pam configuration. If is advised to use a MySQL user that has only SELECT privileges for your MySQL database.
 
 2. Using a <u>command</u>. This is provided by using the -c option. pam-multi will use sh -c "<u>command</u>". It  is  expected  that the output of the command will be an encrypted password. When pam-multi is used for account management, it is ex pected that the output of the command will be the expiry date for the account. The password expiry can be returned along with the account expiry separated by a ',' comma sign.
 
@@ -3847,7 +3897,7 @@ And that ends the fun we had making libc functions which have nothing to do with
 
     `char *iauth(char *email, char *service, 0|1, int *size, int *nitems, int debug)`
 
-	The function iauth() will be passed a username and a token service denoting the name of service. The service argument  will  be used only for identification purpose. It is expected for the function to return the data. The third argument is either 0 or 1 denoting authentication or account management respectively. size denotes the size of the result  returned. nitems denotes the number of items that will be returned. The function should return 0 for successful authentication.
+	The function iauth() will be passed a username and a token service denoting the name of service. The service argument  will  be used only for identification purpose. It is expected for the function to return the data. The third argument is either 0 or 1 denoting authentication or account management respectively. size denotes the size of the result returned. nitems denotes the number of items that will be returned. The function should return 0 for successful authentication.
 
 Here are two examples of pam configuration that uses pam-multi. You can use them with pam-checkpwd by using the -s option. e.g. pam-checkpwd -s pam-multi will make pam-checkpwd use pam-multi configuration from /etc/pam.d
 
@@ -3856,7 +3906,7 @@ file /etc/pam.d/pam-multi
 #
 # $Id: pam-multi.in,v 1.2 2020-09-29 10:59:57+05:30 Cprogrammer Exp mbhangui $
 #
-# auth     required  pam-multi.so argv0 -m [select pw_passwd from indimail where pw_name='%u' and pw_domain='%d'] -u indimail -p ssh-1.5- -D indimail -H localhost -P 3306 -d
+# auth     required  pam-multi.so argv0 -m [select pw_passwd from indimail where pw_name='%u' and pw_domain='%d'] -u indimail -p abcdefgh -D indimail -H localhost -P 3306 -d
 # auth     required  pam-multi.so argv0 -s /usr/lib/indimail/modules/iauth.so
 # account  required  pam-multi.so argv0 -s /usr/lib/indimail/modules/iauth.so
 # add -d argument to debug pam-multi lines
@@ -3868,7 +3918,7 @@ account  required  pam-multi.so pam-multi -s /usr/lib/indimail/modules/iauth.so
 file /etc/pam.d/imap. The file /etc/pam.d/pop3 is identical except that it passes -i pop3 to pam-multi in the auth and account section.
 
 ```
-# auth     required  pam-multi.so argv0 -m [select pw_passwd from indimail where pw_name='%u' and pw_domain='%d'] -u indimail -p ssh-1.5- -D indimail -H localhost -P 3306 -d
+# auth     required  pam-multi.so argv0 -m [select pw_passwd from indimail where pw_name='%u' and pw_domain='%d'] -u indimail -p abcdefgh -D indimail -H localhost -P 3306 -d
 # auth     required  pam-multi.so argv0 -s /usr/lib/indimail/modules/iauth.so
 # account  required  pam-multi.so argv0 -i imap -s /usr/lib/indimail/modules/iauth.so
 # add -d argument to debug pam-multi lines
@@ -4134,7 +4184,7 @@ $ sudo /bin/bash
 # echo "/usr/bin/clamdscan %s --quiet --no-summary" > /service/qmail-smtpd.25/variables/QHPSI
 ```
 
-If you have installed IndiMail using RPM available here or here, QHPSI is enabled by default by defining it in the qmail-smtpd.25 variables directory. If you have clamd, clamav already installed on your server, the rpm installation also installs two services under supervise.
+If you have installed IndiMail using RPM/Debian/Arch packages from [OBS](http://download.opensuse.org/repositories/home:/indimail/ "Stable Build Repository") or RPM packages from [COPR](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail), QHPSI is enabled by default by defining it in the qmail-smtpd.25 variables directory. If you have clamd, clamav already installed on your server, the binary installation of inidmail-mta also installs two services under supervise.
 
 * freshclam - service to update the clamd virus databases
 * clamd - service to run the clamd scanner
@@ -4474,9 +4524,9 @@ $ sudo /bin/bash
 # Configuring dovecot as the IMAP/POP3 server
 
 IndiMail stores it's virtual user information in MySQL. However, IndiMail can work with virtually any IMAP/POP3 server which has a mechanism to authenticate using [checkpassword](https://cr.yp.to/checkpwd/interface.html) interface or has PAM, which can use the system's password database for user's home directory. This is because IndiMail provides checkpassword, PAM module and a NSS service, all independent of each other. The beauty of providing checkpassword, PAM module and NSS mechansism, is that you do not have to modify a single line of code anywhere. In this respect, IndiMail is probably the most flexible messaging server available at the moment.
- * checkpassword module is vchkpass
- * PAM module is [pam-multi - PAM modules for flexible, configurable authentication methods](https://github.com/mbhangui/indimail-virtualdomains/tree/master/pam-multi-x "pam-multi")
- * NSS is through [nssd - providing Name Service Switch](https://github.com/mbhangui/indimail-virtualdomains/tree/master/nssd-xi "nssd")
+ * checkpassword module is [vchkpass](https://github.com/mbhangui/indimail-mta/wiki/vchkpass.8) which is a checkpassword based authentication module. Authentication modules are discussed [here](#authentication-modules).
+ * PAM module is [pam-multi - PAM modules for flexible, configurable authentication methods](https://github.com/mbhangui/indimail-virtualdomains/tree/master/pam-multi-x "pam-multi"). This is discussed in detail [here](#pam-multi-framework).
+ * NSS is through [nssd - providing Name Service Switch](https://github.com/mbhangui/indimail-virtualdomains/tree/master/nssd-xi "nssd"). This is discussed in detail [here](#name-service-switch-daemon---nssd).
 
 
 [Dovecot](https://www.dovecot.org/) is an open source IMAP and POP3 server for Linux/UNIX-like systems, written with security primarily in mind. Dovecot is an excellent choice for both small and large installations. It's fast, simple to set up, requires no special administration and it uses very little memory. Though I do not use dovecot, I have heard excellent reviews from users about dovecot. It took me less than 20 minutes to download dovecot today and have it working with IndiMail with all existing mails intact and accessible. So at the moment, my IndiMail installation is working with both courier-imap and dovecot simultaneously (with different IMAP/POP3 ports assigned to courier-imap and dovecot). dovecot isn't as modular and pluggable as courier-imap. Also it isn'textremely supervise friendly like courier-imap and you will need to install and configure it outside supervise.
@@ -4639,7 +4689,7 @@ userdb {
 file /etc/dovecot/dovecot-sql.conf
 driver = mysql
 default_pass_scheme = MD5
-connect = host=/run/mysqld/mysqld.sock user=indimail password=ssh-1.5- dbname=indimail
+connect = host=/run/mysqld/mysqld.sock user=indimail password=abcdefgh dbname=indimail
 
 #
 user_query = SELECT pw_name,555 as uid, 555 as gid, pw_dir as home FROM indimail WHERE pw_name = '%n' AND pw_domain = '%d'
@@ -4716,7 +4766,13 @@ Create the file /etc/dovecot/conf.d/auth-indimail-conf.ext
 # PAM authentication. Preferred nowadays by most systems.
 # PAM is typically used with either userdb passwd or userdb static.
 # REMEMBER: You'll need /etc/pam.d/dovecot file created for PAM
-# authentication to actually work. <doc/wiki/PasswordDatabase.PAM.txt>
+# authentication to actually work. See doc/wiki/PasswordDatabase.PAM.txt
+# using pam-multi below causes dovecot to use PAM configuration in
+# /etc/pam.d/pam-multi, which consist of
+#
+# auth     required  pam-multi.so pam-multi -s /usr/lib/indimail/modules/iauth.so
+# account  required  pam-multi.so pam-multi -s /usr/lib/indimail/modules/iauth.so
+#
 passdb {
   driver = pam
   # [session=yes] [setcred=yes] [failure_show_msg=yes] [max_requests=<n>]
@@ -4775,7 +4831,7 @@ getspent    SELECT pw_name,pw_passwd,'1','0','99999','0','0','-1','0' \
 host        localhost
 database    indimail
 username    indimail
-password    ssh-1.5-
+password    abcdefgh
 socket      /var/run/mysqld/mysqld.sock
 pidfile     /run/indimail/nssd.pid
 threads     5
@@ -5710,10 +5766,10 @@ owners.
 
 Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 
-mysql> CREATE USER indimail identified by 'ssh-1.5-';
-mysql> CREATE USER mysql    identified by '4-57343-';
-mysql> CREATE USER admin    identified by 'benhur20';
-mysql> CREATE USER repl     identified by 'slaveserver';
+mysql> CREATE USER indimail identified by 'abcdefgh';
+mysql> CREATE USER mysql    identified by 'jklmnopq';
+mysql> CREATE USER admin    identified by 'rstuvwxy';
+mysql> CREATE USER repl     identified by 'z1234567';
 mysql> GRANT ALL on *.* to 'mysql';
 mysql> GRANT SELECT,CREATE,ALTER,INDEX,INSERT,UPDATE,DELETE, \
         ->  CREATE TEMPORARY TABLES, \
@@ -5827,7 +5883,7 @@ mysql_host:mysql_user:mysql_pass:mysql_port
 You will use the first syntax when you have MySQL and IndiMail installed on the same host. You will use the second form when you have MySQL installed on a host different from the host on which you have installed IndiMail. The user mysql_user needs to have certain privileges, which we will discuss under the section MySQL Privileges.
 
 ```
-$ sudo /bin/sh -c “localhost:indimail:ssh-1.5-:/var/run/mysqld/mysqld.sock >
+$ sudo /bin/sh -c “localhost:indimail:abcdefgh:/var/run/mysqld/mysqld.sock >
     /etc/indimail/control/host.mysql
 ```
 
@@ -5983,9 +6039,9 @@ You can have these stored as /etc/indimail/svctool.cnf owned by root and with no
 $ ls -l /etc/indimail/svctool.cnf 
 -r-------- 1 root root 88 Nov  2  2018 /etc/indimail/svctool.cnf
 $ sudo cat /etc/indimail/svctool.cnf
-MYSQL_PASS="ssh-1.5-"
-PRIV_PASS="4-57343-"
-ADMIN_PASS="benhur20"
+MYSQL_PASS="abcdefgh"
+PRIV_PASS="jklmnopq"
+ADMIN_PASS="rstuvwxy"
 TMPDIR="/tmp/indimail"
 ```
 
