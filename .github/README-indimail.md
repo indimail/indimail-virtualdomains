@@ -156,7 +156,7 @@ Table of Contents
    * [Using Docker Engine to Run IndiMail / IndiMail-MTA](#using-docker-engine-to-run-indimail--indimail-mta)
    * [Installation &amp; Repositories](#installation--repositories)
       * [Setting up DNF/YUM/APT Repository for installation](#setting-up-dnfyumapt-repository-for-installation)
-      * [Installing packages from the repostory](#installing-packages-from-the-repostory)
+      * [Installing packages from the repository](#installing-packages-from-the-repository)
       * [Binary Build status on openSUSE Build Service and Copr](#binary-build-status-on-opensuse-build-service-and-copr)
       * [Docker / Podman Repository](#docker--podman-repository)
       * [GIT Repository](#git-repository)
@@ -6211,7 +6211,7 @@ Currently, the list of supported distributions for IndiMail is
           o Ubuntu 22.04
 ```
 
-## Installing packages from the repostory
+## Installing packages from the repository
 
 The commands below will setup indimail-mta or indimail with a basic configuration needed to send and receive mails. The installation is briefly explained below
 
