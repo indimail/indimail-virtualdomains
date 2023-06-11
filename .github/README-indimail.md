@@ -4832,8 +4832,8 @@ host        localhost
 database    indimail
 username    indimail
 password    abcdefgh
-socket      /var/run/mysqld/mysqld.sock
-pidfile     /run/indimail/nssd.pid
+socket      /run/mysqld/mysqld.sock
+pidfile     /run/indimail/pwdlookup/nssd.pid
 threads     5
 timeout     -1
 facility    daemon
