@@ -1,4 +1,4 @@
-[//]: # vim: wrap
+<!-- vim: wrap -->
 ![IndiMail](indimail_logo.png "IndiMail")
 
 Table of Contents
