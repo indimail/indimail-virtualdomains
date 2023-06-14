@@ -1,31 +1,34 @@
 .\" vim: tw=75
 .TH ischema 1
 .SH NAME
-ischema \- indimail schema updater
+ischema \- indimail database schema updater
 
 .SH SYNOPSYS
 \fBischema\fR [-\fIu\fR]
 
 .SH DESCRIPTION
-\fBischema\fR updates indimail schema definitions from
-@sysconfdir@/indimail.schema. Without the -u option it displays the current
-schema id.
+\fBischema\fR(1) updates indimail schema definitions from
+\fI@sysconfdir@/indimail.schema\fR. Without the -u option it displays the
+current \fBschema ID\fR.
 
-The file indimail.schema has 5 fields separated by the colon character.
+The file \fI@sysconfdir@/indimail.schema\fR has 5 fields separated by the
+colon character.
 
 .EX
 field1 - ID
 field2 - sql statement (sql) or command (cmd)
-field3 - Ignore errors when executing the sql statement or command
+field3 - Ignore or Not Ignore errors when executing the sql statement or
+         command. This has to be either YES or NO.
 field4 - Comment
 field4 - Sql statement or shell command to be executed
 .EE
 
-The IndiMail database has a schema ID which is the value of the ID column
-of therow having the largest id in the MySQL(1) table \fIischema\fR. Lines
-in the file indimail.schema, which have an ID greater than the schema ID
-gets updated. \fBischema\fR is run on every indimail upgrades. If there are
-updates, the schema gets along with the \fIischema\fR table.
+IndiMail database has a \fBschema ID\fR which is the value of the ID column
+of the row having the largest id in the MySQL(1) table \fIischema\fR. Lines
+in the file \fI@sysconfdir@/indimail.schema\fR, which have an ID greater
+than the \fBschema ID\fR gets updated. \fBischema\fR(1) is run on every
+indimail upgrade. If there are updates, the database schema gets updated
+along with the \fIischema\fR table.
 
 .SH RETURN VALUE
 0 on success. 100 for incorrect usage and 111 for temporary errors
