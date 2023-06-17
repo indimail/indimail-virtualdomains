@@ -52,7 +52,7 @@ conf_t          conf;
  * val_size = storage size of val
  */
 static int
-_next_key(FILE * fh, char *key, int key_size, char *val, int val_size)
+_next_key(FILE *fh, char *key, int key_size, char *val, int val_size)
 {
 	char            line[MAX_LINE_SIZE];
 	char           *ccil;		/* Current Character In Line */

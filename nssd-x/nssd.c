@@ -236,7 +236,7 @@ get_response_size(int th_num)
 }
 
 static struct response_data *
-build_response(int th_num, int32_t type, response_header_t * response_header, struct response_data *data)
+build_response(int th_num, int32_t type, response_header_t *response_header, struct response_data *data)
 {
 	struct response_data *dp;
 	unsigned int    num_fields;
@@ -302,7 +302,7 @@ build_response(int th_num, int32_t type, response_header_t * response_header, st
 }
 
 static struct response_data *
-process_result(int th_num, int32_t type, response_header_t * response_header, struct response_data *data)
+process_result(int th_num, int32_t type, response_header_t *response_header, struct response_data *data)
 {
 	connections[th_num].result = in_mysql_store_result(&connections[th_num].mysql);
 	if (connections[th_num].result == NULL)

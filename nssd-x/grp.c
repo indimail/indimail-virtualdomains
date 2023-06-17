@@ -95,7 +95,7 @@ _load_group_members(struct response_data *data, response_header_t response_heade
 }
 
 static          NSS_STATUS
-_load_gidsbymem(struct response_data *data, response_header_t response_header, group_info_t * gi, int *errnop)
+_load_gidsbymem(struct response_data *data, response_header_t response_header, group_info_t *gi, int *errnop)
 {
 	gid_t          *groups;
 	int             i;
@@ -145,9 +145,9 @@ _load_gidsbymem(struct response_data *data, response_header_t response_header, g
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_getgrnam_r(nss_backend_t * be, void *args)
+_nss_nssd_getgrnam_r(nss_backend_t *be, void *args)
 #else
-_nss_nssd_getgrnam_r(const char *key, struct group * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nssd_getgrnam_r(const char *key, struct group *result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	response_header_t response_header;
@@ -199,9 +199,9 @@ _nss_nssd_getgrnam_r(const char *key, struct group * result, char *buf_out, size
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_getgrgid_r(nss_backend_t * be, void *args)
+_nss_nssd_getgrgid_r(nss_backend_t *be, void *args)
 #else
-_nss_nssd_getgrgid_r(gid_t gid, struct group * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nssd_getgrgid_r(gid_t gid, struct group *result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	response_header_t response_header;
@@ -254,7 +254,7 @@ _nss_nssd_getgrgid_r(gid_t gid, struct group * result, char *buf_out, size_t buf
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_endgrent(nss_backend_t * be, void *args)
+_nss_nssd_endgrent(nss_backend_t *be, void *args)
 #else
 _nss_nssd_endgrent(void)
 #endif
@@ -266,7 +266,7 @@ _nss_nssd_endgrent(void)
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_setgrent(nss_backend_t * be, void *args)
+_nss_nssd_setgrent(nss_backend_t *be, void *args)
 #else
 _nss_nssd_setgrent(void)
 #endif
@@ -287,9 +287,9 @@ _nss_nssd_setgrent(void)
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_getgrent_r(nss_backend_t * be, void *args)
+_nss_nssd_getgrent_r(nss_backend_t *be, void *args)
 #else
-_nss_nssd_getgrent_r(struct group * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nssd_getgrent_r(struct group *result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	int             status;
@@ -345,9 +345,9 @@ _nss_nssd_getgrent_r(struct group * result, char *buf_out, size_t buflen, int *e
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_getgrmem(nss_backend_t * be, void *args)
+_nss_nssd_getgrmem(nss_backend_t *be, void *args)
 #else
-_nss_nssd_initgroups_dyn(const char *key, gid_t group, long int *start, long int *size, gid_t ** groupsp, long int limit,
+_nss_nssd_initgroups_dyn(const char *key, gid_t group, long int *start, long int *size, gid_t **groupsp, long int limit,
 						 int *errnop)
 #endif
 {

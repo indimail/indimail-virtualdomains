@@ -52,9 +52,9 @@ _load_shadow(struct response_data *data, struct spwd *result, char *buffer, size
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_getspnam_r(nss_backend_t * be, void *args)
+_nss_nssd_getspnam_r(nss_backend_t *be, void *args)
 #else
-_nss_nssd_getspnam_r(const char *key, struct spwd * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nssd_getspnam_r(const char *key, struct spwd *result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	response_header_t response_header;
@@ -85,7 +85,7 @@ _nss_nssd_getspnam_r(const char *key, struct spwd * result, char *buf_out, size_
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_endspent(nss_backend_t * be, void *args)
+_nss_nssd_endspent(nss_backend_t *be, void *args)
 #else
 _nss_nssd_endspent(void)
 #endif
@@ -97,7 +97,7 @@ _nss_nssd_endspent(void)
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_setspent(nss_backend_t * be, void *args)
+_nss_nssd_setspent(nss_backend_t *be, void *args)
 #else
 _nss_nssd_setspent(void)
 #endif
@@ -118,9 +118,9 @@ _nss_nssd_setspent(void)
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_getspent_r(nss_backend_t * be, void *args)
+_nss_nssd_getspent_r(nss_backend_t *be, void *args)
 #else
-_nss_nssd_getspent_r(struct spwd * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nssd_getspent_r(struct spwd *result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	int             status;

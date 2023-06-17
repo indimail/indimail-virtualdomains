@@ -59,9 +59,9 @@ _load_passwd(struct response_data *data, struct passwd *result, char *buffer, si
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_getpwnam_r(nss_backend_t * be, void *args)
+_nss_nssd_getpwnam_r(nss_backend_t *be, void *args)
 #else
-_nss_nssd_getpwnam_r(const char *key, struct passwd * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nssd_getpwnam_r(const char *key, struct passwd *result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	response_header_t response_header;
@@ -92,9 +92,9 @@ _nss_nssd_getpwnam_r(const char *key, struct passwd * result, char *buf_out, siz
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_getpwuid_r(nss_backend_t * be, void *args)
+_nss_nssd_getpwuid_r(nss_backend_t *be, void *args)
 #else
-_nss_nssd_getpwuid_r(uid_t uid, struct passwd * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nssd_getpwuid_r(uid_t uid, struct passwd *result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	response_header_t response_header;
@@ -127,7 +127,7 @@ _nss_nssd_getpwuid_r(uid_t uid, struct passwd * result, char *buf_out, size_t bu
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_endpwent(nss_backend_t * be, void *args)
+_nss_nssd_endpwent(nss_backend_t *be, void *args)
 #else
 _nss_nssd_endpwent(void)
 #endif
@@ -139,7 +139,7 @@ _nss_nssd_endpwent(void)
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_setpwent(nss_backend_t * be, void *args)
+_nss_nssd_setpwent(nss_backend_t *be, void *args)
 #else
 _nss_nssd_setpwent(void)
 #endif
@@ -160,9 +160,9 @@ _nss_nssd_setpwent(void)
 
 NSS_STATUS
 #if defined (sun)
-_nss_nssd_getpwent_r(nss_backend_t * be, void *args)
+_nss_nssd_getpwent_r(nss_backend_t *be, void *args)
 #else
-_nss_nssd_getpwent_r(struct passwd * result, char *buf_out, size_t buflen, int *errnop)
+_nss_nssd_getpwent_r(struct passwd *result, char *buf_out, size_t buflen, int *errnop)
 #endif
 {
 	int             status;

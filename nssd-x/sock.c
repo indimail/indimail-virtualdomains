@@ -96,7 +96,7 @@ _send_request(int sock, int32_t type, const char *request)
 }
 
 static int
-_read_response_header(int sock, response_header_t * response_header, int timeout)
+_read_response_header(int sock, response_header_t *response_header, int timeout)
 {
 	ssize_t         to_read = sizeof (response_header_t);
 	ssize_t         r;
@@ -138,7 +138,7 @@ _read_response(int sock, response_header_t response_header, struct response_data
 }
 
 NSS_STATUS
-_get_response_data(int32_t type, const char *key, response_header_t * response_header, struct response_data ** data, int timeout)
+_get_response_data(int32_t type, const char *key, response_header_t *response_header, struct response_data **data, int timeout)
 {
 	int             sock;
 

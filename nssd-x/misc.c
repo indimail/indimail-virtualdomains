@@ -96,7 +96,7 @@ static ns_mtab  methods[] = {
 };
 
 ns_mtab        *
-nss_module_register(const char *name, unsigned int *size, nss_module_unregister_fn * unregister)
+nss_module_register(const char *name, unsigned int *size, nss_module_unregister_fn *unregister)
 {
 	*size = sizeof (methods) / sizeof (methods[0]);
 	*unregister = NULL;
