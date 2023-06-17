@@ -375,6 +375,8 @@ function setup_svscan()
 	echo $certdir          > $servicedir/smtpd/variables/CERTDIR
 	echo $qmaildir/inquery > $servicedir/smtpd/variables/INFIFODIR
 	echo $qmaildir         > $servicedir/smtpd/variables/DOMAINDIR
+	echo 1                 > $servicedir/smtpd/variables/DEBUG
+	echo 1                 > $servicedir/smtpd/variables/DEBUG_LOGIN
 	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail,indimail -HR 0 2025 $qmail_smtpd $HOSTNAME /usr/sbin/vchkpass /bin/false 2>&1\n" > $servicedir/smtpd/run
 	printf "#!/bin/sh\nexec $setuidgid $user $multilog t $logdir/smtpd\n" > $servicedir/smtpd/log/run
 	chmod +x $servicedir/smtpd/run
@@ -415,6 +417,7 @@ function setup_svscan()
 
 function do_svscan_start()
 {
+	echo
 	echo "Starting svscan"
 	(
 	cd $servicedir/.svscan
@@ -534,26 +537,7 @@ function create_domain()
 	fi
 }
 
-function delete_domain()
-{
-	sudo env - \
-		PATH=/bin:/usr/bin \
-		ASSIGNDIR=$sysconfdir/users \
-		SYSCONFDIR=$sysconfdir \
-		CONTROLDIR=$cntrldir \
-		DOMAINDIR=$qmaildir \
-		SERVICEDIR=$servicedir \
-		vdeldomain $1 > $logdir/setup/vdeldomain.log
-	if [ $? -eq 0 ] ; then
-		tcount=$(expr $tcount + 1)
-		echo "  testing command vdeldomain succeeded"
-	else
-		echo "  testing command vdeldomain failed"
-		exit 1
-	fi
-}
-
-function create_user_plain()
+function create_plain_user()
 {
 	sudo env - \
 		PATH=/bin:/usr/bin \
@@ -572,7 +556,7 @@ function create_user_plain()
 	fi
 }
 
-function create_user_scram()
+function create_scram_user()
 {
 	sudo env - \
 		PATH=/bin:/usr/bin \
@@ -581,8 +565,13 @@ function create_user_scram()
 		CONTROLDIR=$cntrldir \
 		DOMAINDIR=$qmaildir \
 		SERVICEDIR=$servicedir \
-		vadduser -C -m $1 -d $2 $3 >> $logdir/setup/vadduser.log
-	if [ $? -eq 0 ] ; then
+		vadduser -C -m $1 -d -h $4 $2 $3 >> $logdir/setup/vadduser.log
+	status=$?
+
+	if [ $# -gt 4 ] ; then
+		return $status
+	fi
+	if [ $status -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vadduser (scram) succeeded"
 	else
@@ -639,7 +628,7 @@ function delete_domain()
 	fi
 }
 
-function password_change()
+function change_password()
 {
 	sudo env - \
 		PATH=/bin:/usr/bin \
@@ -1179,12 +1168,13 @@ function test_imap()
 	echo "fi"
 	) > $testdir/tcpclient.imap
 	chmod +x $testdir/tcpclient.imap
-	tcpclient  -vDHR 0 1430 /tmp/qmail-test/tcpclient.imap 2> $logdir/imapd/imapd.log
+	tcpclient  -vDHR 0 1430 /tmp/qmail-test/tcpclient.imap 2>$logdir/imapd/imapd.log
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
 		printf "  testing mail    IMAP  login and mail retrieval (%s) succeeded\n" "$str"
 	else
 		printf "  testing mail    IMAP  login and mail retrieval (%s) failed\n" "$str"
+		less $logdir/imapd/imapd.log
 		exit 1
 	fi
 	check_relay > /dev/null
@@ -1494,7 +1484,7 @@ test_services
 create_domain $domain1 pass
 do_vdominfo
 do_dbinfo
-create_user_plain $testuser1 $password2
+create_plain_user $testuser1 $password2
 sudo svc -2 $servicedir/inlookup.infifo
 
 do_inquerytest $testuser1
@@ -1503,65 +1493,90 @@ do_smtp_auth_login_swaks $testuser1 $password2
 
 do_smtp_auth_qmail_remote $domain1 $testuser1 $password2
 
-password_change $testuser1 $password1
+change_password $testuser1 $password1
 do_vmoduser $testuser1
 do_pwdlookup $testuser1
 delete_user $testuser1
 
-create_user_scram SCRAM-SHA-1   $testuser1 $password1
-create_user_scram SCRAM-SHA-256 $testuser2 $password2
-sudo svc -h $servicedir/inlookup.infifo
-sleep $sleep_int
-
-for j in 1 2
+for hash in DES MD5 SHA-256 SHA-512
 do
-	case $j in
-		1)
-		str="inlookup cache=0"
-		> $servicedir/smtpd/variables/PASSWD_CACHE
-		> $servicedir/smtpd/variables/QUERY_CACHE
-		for i in imap pop3
-		do
-			for k in d d-ssl
-			do
-				> $servicedir/"$i"$k/variables/PASSWD_CACHE
-				> $servicedir/"$i"$k/variables/QUERY_CACHE
-			done
-		done
-		;;
-		2)
-		str="inlookup cache=1"
-		echo 1 > $servicedir/smtpd/variables/PASSWD_CACHE
-		echo 1 > $servicedir/smtpd/variables/QUERY_CACHE
-		for i in imap pop3
-		do
-			for k in d d-ssl
-			do
-				echo 1 > $servicedir/"$i"$k/variables/PASSWD_CACHE
-				echo 1 > $servicedir/"$i"$k/variables/QUERY_CACHE
-			done
-		done
-		;;
-	esac
-	sudo svc -r $servicedir/smtpd
+	echo
+	echo "Starting SMTP AUTH, IMAP/POP3 login tests for hash $hash"
+	t1="$password1""$hash"
+	t2="$password2""$hash"
+	create_scram_user SCRAM-SHA-1   $testuser1 $t1 $hash
+	create_scram_user SCRAM-SHA-256 $testuser2 $t2 $hash
+	sudo svc -h $servicedir/inlookup.infifo
 	sleep $sleep_int
-	test_imap $testuser1 $password1
-	test_pop3 $testuser1 $password1
-	do_gsasl_test                   "SCRAM-SHA-1"        $testuser1 $password1
-	do_gsasl_test                   "SCRAM-SHA-1-PLUS"   $testuser1 $password1
-	do_gsasl_test                   "SCRAM-SHA-256"      $testuser2 $password2
-	do_gsasl_test                   "SCRAM-SHA-256-PLUS" $testuser2 $password2
-	do_smtp_auth_qmail_remote_scram "SCRAM-SHA-1"        $domain1 $testuser1 $password1
-	do_smtp_auth_qmail_remote_scram "SCRAM-SHA-1-PLUS"   $domain1 $testuser1 $password1
-	do_smtp_auth_qmail_remote_scram "SCRAM-SHA-256"      $domain1 $testuser2 $password2
-	do_smtp_auth_qmail_remote_scram "SCRAM-SHA-256-PLUS" $domain1 $testuser2 $password2
+
+	for j in 1 2
+	do
+		case $j in
+			1)
+			str="inlookup cache=0"
+			> $servicedir/smtpd/variables/PASSWD_CACHE
+			> $servicedir/smtpd/variables/QUERY_CACHE
+			for i in imap pop3
+			do
+				for k in d d-ssl
+				do
+					> $servicedir/"$i"$k/variables/PASSWD_CACHE
+					> $servicedir/"$i"$k/variables/QUERY_CACHE
+				done
+			done
+			;;
+			2)
+			str="inlookup cache=1"
+			echo 1 > $servicedir/smtpd/variables/PASSWD_CACHE
+			echo 1 > $servicedir/smtpd/variables/QUERY_CACHE
+			for i in imap pop3
+			do
+				for k in d d-ssl
+				do
+					echo 1 > $servicedir/"$i"$k/variables/PASSWD_CACHE
+					echo 1 > $servicedir/"$i"$k/variables/QUERY_CACHE
+				done
+			done
+			;;
+		esac
+		sudo svc -r $servicedir/smtpd
+		for i in imap pop3
+		do
+			for k in d d-ssl
+			do
+				sudo svc -r $servicedir/"$i"$k
+			done
+		done
+		sleep $sleep_int
+		test_imap $testuser1 $t1
+		test_pop3 $testuser1 $t1
+		do_gsasl_test                   "SCRAM-SHA-1"        $testuser1 $t1
+		do_gsasl_test                   "SCRAM-SHA-1-PLUS"   $testuser1 $t1
+		do_gsasl_test                   "SCRAM-SHA-256"      $testuser2 $t2
+		do_gsasl_test                   "SCRAM-SHA-256-PLUS" $testuser2 $t2
+		do_smtp_auth_qmail_remote_scram "SCRAM-SHA-1"        $domain1 $testuser1 $t1
+		do_smtp_auth_qmail_remote_scram "SCRAM-SHA-1-PLUS"   $domain1 $testuser1 $t1
+		do_smtp_auth_qmail_remote_scram "SCRAM-SHA-256"      $domain1 $testuser2 $t2
+		do_smtp_auth_qmail_remote_scram "SCRAM-SHA-256-PLUS" $domain1 $testuser2 $t2
+	done
+	echo "  testing SMTP AUTH, IMAP/POP3 login tests for hash $hash succeeded"
+	tcount=$(expr $tcount + 1)
+	delete_user $testuser1
+	delete_user $testuser2
 done
 tcount=$(expr $tcount + 3)
 printf "  testing command tcpserver non-encrypted succeeded\n"
 printf "  testing command tcpclient non-encrypted succeeded\n"
 printf "  testing command tcpclient encrypted     succeeded\n"
+create_scram_user SCRAM-SHA-1   $testuser1 $password1 MD5 1
+create_scram_user SCRAM-SHA-256 $testuser2 $password2 MD5 1
+echo
 do_valias $testuser1 $testuser2
+echo
+echo "Testing domain deletion"
 delete_domain $domain1
+echo
+echo "Starting POST Handle tests"
 do_post_handle $domain1 pass $domain2 $testuser3 $testuser4 $domain3
 
 do_svscan_stop $svpid
