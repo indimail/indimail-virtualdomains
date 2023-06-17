@@ -137,6 +137,23 @@ SHA-256 5  SHA256 encryption
 SHA-512 6  SHA512 encryption
 .TE
 
+You can also set the environment variable \fBPASSWORD_HASH\fR to set the
+encryption method. The -h argument overrides the environment variable
+\fBPASSWORD_HASH\fR. The value of \fBPASSWORD_HASH\fR environment variable
+identifies the encryption method used and this then determines how the rest
+of the password string is interpreted. The following values of
+\fBPASSWORD_HASH\fR are supported:
+
+.nf
+.ta 5c 10c
+PASSWORD_HASH Value	Description
+0	DES encryption (shouldn't be used)
+1	MD5 encryption (shouldn't be used)
+2	SHA256 encryption
+3	SHA512 encryption
+.fi
+.RE
+
 .TP
 \fB\-m\fR \fIscram\fR
 Specifiy scram method which is one of SCRAM-SHA-1, SCRAM-SHA-256
