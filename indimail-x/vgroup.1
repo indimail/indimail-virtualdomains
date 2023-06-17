@@ -53,18 +53,17 @@ Generates Random Password of length \fIlen\fR. Need not give password on
 command line.
 .TP
 \fB\-h\fR \fIhash\fR
-Specifiy hash which is one of DES, MD5, SHA-256, SHA-512,
-.RS
-.nf
-.ta 5c 10c
-HASH        	Value	Description
-DES	0	DES encryption (shouldn't be used)
-MD5	1	MD5 encryption (shouldn't be used)
-SHA-256	2	SHA256 encryption
-SHA-512	3	SHA512 encryption
-.fi
-.RE
-.TP
+Specifiy hash which is one of DES, MD5, SHA-256, SHA-512. Here \fIID\fR is
+the id in \fI/etc/shadow\fR. See \fBincrypt\fR(1).
+.TS
+l l.
+HASH    ID Description
+_
+DES     -  DES encryption (shouldn't be used)
+MD5     1  MD5 encryption (shouldn't be used)
+SHA-256 5  SHA256 encryption
+SHA-512 6  SHA512 encryption
+.TE
 \fB\-m\fR \fIscram\fR
 Specifiy scram method which is one of SCRAM-SHA-1, SCRAM-SHA-256
 .RS
