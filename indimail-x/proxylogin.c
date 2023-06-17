@@ -1,5 +1,8 @@
 /*
  * $Log: proxylogin.c,v $
+ * Revision 1.11  2023-06-17 23:47:44+05:30  Cprogrammer
+ * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
+ *
  * Revision 1.10  2023-01-03 21:48:21+05:30  Cprogrammer
  * added crlfile argument for auth_admin()
  *
@@ -36,7 +39,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 1.10 2023-01-03 21:48:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 1.11 2023-06-17 23:47:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -246,6 +249,8 @@ LocalLogin(char **argv, char *email, char *TheUser, char *TheDomain, char *servi
 #else
 	crypt_pass = pw->pw_passwd;
 #endif
+	if (!env_get("PASSWORD_HASH") && !env_put2("PASSWORD_HASH", "0"))
+		die_nomem();
 	if (pw->pw_passwd[0] && !pw_comp(0, (unsigned char *) crypt_pass, 0, (unsigned char *) p, 0)) {
 		if (!str_diffn(service, "imap", 4)) {
 			if (!env_put2("IMAPLOGINTAG", imaptag))

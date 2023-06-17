@@ -1,5 +1,8 @@
 /*
  * $Log: vsetpass.c,v $
+ * Revision 1.10  2023-06-17 23:48:02+05:30  Cprogrammer
+ * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
+ *
  * Revision 1.9  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -70,7 +73,7 @@
 #include "getpeer.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vsetpass.c,v 1.9 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetpass.c,v 1.10 2023-06-17 23:48:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -253,6 +256,8 @@ main(int argc, char **argv)
 	if (env_get("DEBUG_LOGIN"))
 		strerr_warn13("vsetpass: pid [", module_pid, "] login [", login, "] old_pass [",
 				old_pass, "] new_pass [", new_pass, "] response [", response, "] pw_passwd [", crypt_pass, "]", 0);
+	if (!env_get("PASSWORD_HASH") && !env_put2("PASSWORD_HASH", "0"))
+		die_nomem();
 	if (pw_comp((unsigned char *) login, (unsigned char *) crypt_pass,
 		(unsigned char *) (*response ? old_pass : 0),
 		(unsigned char *) (*response ? response : old_pass), 0))

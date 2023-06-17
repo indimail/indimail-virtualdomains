@@ -1,5 +1,8 @@
 /*
  * $Log: authindi.c,v $
+ * Revision 1.17  2023-06-17 23:46:55+05:30  Cprogrammer
+ * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
+ *
  * Revision 1.16  2023-03-21 09:32:51+05:30  Cprogrammer
  * replaced strerr_warn with subprintfe
  *
@@ -106,7 +109,7 @@
 #define WARN  "authindi: warn: "
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.16 2023-03-21 09:32:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.17 2023-06-17 23:46:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -645,12 +648,12 @@ main(int argc, char **argv)
 	if ((ptr = env_get("DEBUG_LOGIN")) && *ptr > '0') {
 		subprintfe(subfderr, "authindi",
 				"debug_login: pid[%d] service[%s] login[%s] password[%s] crypted[%s] authmethod[%s]",
-				getpid(), service, login, pass, crypt_pass, auth_type);
+				getpid(), service, login, auth_data, crypt_pass, auth_type);
 		if (challenge)
 			subprintfe(subfderr, "authindi", " challenge[%s]", challenge);
 		if (response)
 			subprintfe(subfderr, "authindi", " response[%s]", response);
-		subprintfe(subfderr, "authindi", " authmethod[%s]\n", auth_type);
+		subprintfe(subfderr, "authindi", "\n");
 		substdio_flush(subfderr);
 	} else
 	if (debug) {
@@ -658,6 +661,9 @@ main(int argc, char **argv)
 			getpid(), service, login, auth_type);
 		substdio_flush(subfderr);
 	}
+	/*- force pw_comp to use crypt instead of in_crypt */
+	if (!env_get("PASSWORD_HASH") && !env_put2("PASSWORD_HASH", "0"))
+		die_nomem();
 	if (pw_comp((unsigned char *) login, (unsigned char *) pass,
 		(unsigned char *) (auth_method > AUTH_PLAIN ? challenge : 0),
 		(unsigned char *) (auth_method > AUTH_PLAIN ? response : auth_data), auth_method)) {

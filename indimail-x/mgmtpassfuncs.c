@@ -1,5 +1,8 @@
 /*
  * $Log: mgmtpassfuncs.c,v $
+ * Revision 1.7  2023-06-18 00:00:16+05:30  Cprogrammer
+ * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
+ *
  * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -24,7 +27,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.6 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.7 2023-06-18 00:00:16+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -46,6 +49,7 @@ static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.6 2023-01-22 10:40:03+05:30
 #include <pw_comp.h>
 #include <getEnvConfig.h>
 #include <subfd.h>
+#include <env.h>
 #endif
 #include "mgmtpassfuncs.h"
 #include "passwd_policy.h"
@@ -92,6 +96,8 @@ getpassword(char *user)
 			continue;
 		}
 		if (passwd && *passwd && *pwdptr) {
+			if (!env_get("PASSWORD_HASH") && !env_put2("PASSWORD_HASH", "0"))
+				die_nomem();
 			if (!pw_comp(0, (unsigned char *) pwdptr, 0, (unsigned char *) passwd, 0))
 				return (0);
 		}

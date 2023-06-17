@@ -14,6 +14,10 @@ Release 3.4.5-1.1 Start 25/04/2023 End XX/XX/XXXX
 07. inquery.c, inquerytest.c, ProessInFifo.c, tcplookup.c: renamed fifo
     directory from FIFODIR to INFIFODIR
 08. indimail.spec.in, debian/*: added timestamps to installation logs
+- 17/06/2023
+09. vchkpass.c, authindi.c, vsetpass.c, proxylogin.c, mgmtpassfuncs.c,
+    indisrvr.c, authpgsql.c: set PASSWORD_HASH to make pw_comp use crypt()
+    instead of in_crypt()
 
 * Sun Apr 23 2023 19:21:03 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.4-1.1%{?dist}
 Release 3.4.4-1.1 Start 26/03/2023 End 23/04/2023

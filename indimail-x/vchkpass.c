@@ -1,5 +1,8 @@
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.19  2023-06-17 23:47:50+05:30  Cprogrammer
+ * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
+ *
  * Revision 1.18  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -98,7 +101,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.18 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.19 2023-06-17 23:47:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -378,6 +381,9 @@ main(int argc, char **argv)
 		print_error("exec");
 		_exit (111);
 	}
+	/*- force pw_comp to use crypt instead of in_crypt */
+	if (!env_get("PASSWORD_HASH") && !env_put2("PASSWORD_HASH", "0"))
+		die_nomem();
 	if (pw_comp((unsigned char *) ologin, (unsigned char *) pass,
 				(unsigned char *) (*response ? challenge : 0),
 				(unsigned char *) (*response ? response : challenge), auth_method)) {
