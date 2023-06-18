@@ -99,7 +99,7 @@ va_dcl
 	r = vsnprintf(sa.s, subprintf_bufsiz + 1, format, ap);
 	if (r > subprintf_bufsiz) {
 		va_end(ap);
-		if (!stralloc_ready(&sa, r  + 1))
+		if (!stralloc_ready(&sa, r + 1))
 			strerr_die1x(111, "out of memory");
 		va_start(ap, format);
 		r = vsnprintf(sa.s, r + 1, format, ap);
