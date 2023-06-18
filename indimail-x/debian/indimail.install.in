@@ -1,6 +1,5 @@
 etc/indimail           /etc
 var/indimail/domains   @indimaildir@
-var/indimail/inquery   @indimaildir@
 usr/bin                @prefix@
 usr/sbin               @prefix@
 usr/share/indimail/*   @prefix@/share/indimail
