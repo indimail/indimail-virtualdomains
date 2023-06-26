@@ -3671,7 +3671,7 @@ exec /usr/bin/envdir -c variables sh -c "
 IMAPAUTHMODULES=\"\"
 for f in \`echo \$IMAPMODULES\`
 do
-	IMAPAUTHMODULES=\"\$IMAPAUTHMODULES /usr/libexec/indimail/imapmodules/\$f\"
+  IMAPAUTHMODULES=\"\$IMAPAUTHMODULES /usr/libexec/indimail/imapmodules/\$f\"
 done
 exec /usr/bin/softlimit -m \$SOFT_MEM -o 1024 \
 /usr/bin/tcpserver -v -c variables/MAXDAEMONS -C \$MAXPERIP \
