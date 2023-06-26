@@ -450,7 +450,7 @@ done
 %ghost %attr(0644,root,root) %config(noreplace,missingok) %{sysconfdir}/users/cdb
 %ghost %config(noreplace,missingok)               %{sysconfdir}/procmailrc
 %ghost %config(noreplace,missingok)               %{sysconfdir}/indimail.cnf
-%ghost %config(noreplace,missingok)               %{sysconfdir}/logrotate.mysql
+%ghost %attr(0600,mysql,mysql) %config(noreplace,missingok) %{sysconfdir}/logrotate.mysql
 %ghost %config(noreplace,missingok)               %{sysconfdir}/tcp/tcp.poppass
 #
 # These files will get removed during uninstallation
