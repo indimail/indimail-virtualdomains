@@ -18,13 +18,13 @@ servicedir=@servicedir@
 case "$1" in
     upgrade)
 	if [ -d /run ] ; then
-		rundir=/run
+		rundir=/run/svscan
 	elif [ -d /var/run ] ; then
-		rundir=/var/run
+		rundir=/var/run/svscan
 	else
 		rundir=${servicedir}
 	fi
-	if [ -f ${prefix}/bin/svstat ] ; then
+	if [ ! -f ${servicedir}/pwdlookup/down ] ; then
 		set +e
 		${prefix}/bin/svstat ${servicedir}/pwdlookup >/dev/null 2>&1
 		if [ $? -eq 0 ] ; then

@@ -364,8 +364,9 @@ echo "Doing Post Install"
 echo ""
 echo " 1. Configure %{logdir} for multilog"
 echo " 2. Configure %{servicedir}"
-echo " 3. Configure nssd service"
-echo " 4. Configure pam-multi as alternative for SMTP auth"
+echo " 3. Configure ${sysconfdir}/nssd.conf for nssd"
+echo " 4. Configure nssd service"
+echo " 5. Configure pam-multi as alternative for SMTP auth"
 echo ""
 
 (

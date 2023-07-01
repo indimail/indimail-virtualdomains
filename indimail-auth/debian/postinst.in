@@ -68,17 +68,17 @@ if [ $upgrade -eq 1 ] ; then # upgrade
   ${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="${servicedir}/pwdlookup"
   set +e
   if [ -d /run ] ; then
-    rundir=/run
+    rundir=/run/svscan
     nssd_sock="/run/indimail/pwdlookup/nssd.sock"
-    mkdir -p /run/indimail
+    mkdir -p /run/indimail/pwdlookup
   elif [ -d /var/run ] ; then
-    rundir=/var/run
+    rundir=/var/run/svscan
     nssd_sock="/var/run/indimail/pwdlookup/nssd.sock"
-    mkdir -p /var/run/indimail
+    mkdir -p /var/run/indimail/pwdlookup
   else
     rundir=${servicedir}
     nssd_sock="/tmp/pwdlookup/nssd.sock"
-	mkdir -p /tmp/pwdlookup
+    mkdir -p /tmp/pwdlookup
   fi
 
   grep "pwdlookup/nssd.sock" ${servicedir}/pwdlookup/variables/.options >/dev/null
@@ -102,16 +102,20 @@ echo " 1. Configure ${logdir} for multilog"
 echo " 2. Configure ${servicedir}"
 echo " 3. Configure ${sysconfdir}/nssd.conf for nssd"
 echo " 4. Configure nssd service"
+echo " 5. Configure pam-multi as alternative for SMTP auth"
 echo ""
 
-if [ -x /bin/touch ] ; then
-  TOUCH=/bin/touch
-elif [ -x /usr/bin/touch ] ; then
-  TOUCH=/usr/bin/touch
-else
-  TOUCH=/bin/touch
-fi
 (
+if [ -d /run ] ; then
+  nssd_sock="/run/indimail/pwdlookup/nssd.sock"
+  mkdir -p /run/indimail/pwdlookup
+elif [ -d /var/run ] ; then
+  nssd_sock="/var/run/indimail/pwdlookup/nssd.sock"
+  mkdir -p /var/run/indimail/pwdlookup
+else
+  nssd_sock="/tmp/pwdlookup/nssd.sock"
+  mkdir -p /tmp/pwdlookup
+fi
 echo "installing indimail-auth package"
 echo "Creating ${logdir}"
 if [ ! -d ${logdir}/pwdlookup ] ; then
