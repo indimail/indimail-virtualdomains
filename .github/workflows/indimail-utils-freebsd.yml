@@ -25,7 +25,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: build indimail-utils
       id: FreeBSD
-      uses: vmactions/freebsd-vm@v0.3.0
+      uses: vmactions/freebsd-vm@v0.3.1
       with:
         envs: 'MYTOKEN'
         usesh: true
