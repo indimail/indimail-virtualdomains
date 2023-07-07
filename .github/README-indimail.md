@@ -6292,7 +6292,7 @@ $ sudo svps -a
 [![procmail](https://build.opensuse.org/projects/home:mbhangui/packages/procmail/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/procmail)
 [![indium](https://build.opensuse.org/projects/home:mbhangui/packages/indium/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indium)
 [![libqmail](https://build.opensuse.org/projects/home:mbhangui/packages/libqmail/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/libqmail)
-[![libdkim](https://build.opensuse.org/projects/home:mbhangui/packages/libdkim/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/libdkim)
+[![libdkim2](https://build.opensuse.org/projects/home:mbhangui/packages/libdkim2/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/libdkim2)
 [![libsrs2](https://build.opensuse.org/projects/home:mbhangui/packages/libsrs2/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/libsrs2)
 
 **[Build Status on](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/monitor/) [copr](https://copr.fedorainfracloud.org/coprs/)**
@@ -6706,8 +6706,8 @@ This is obtained from github actions defined in each of the indimail repository.
 
 [![libqmail Ubuntu, Mac OSX](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-c-cpp.yml)
 [![libqmail FreeBSD](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-freebsd.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-freebsd.yml)
-[![libdkim Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-c-cpp.yml)
-[![libdkim FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-freebsd.yml)
+[![libdkim2 Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim2-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim2-c-cpp.yml)
+[![libdkim2 FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim2-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim2-freebsd.yml)
 [![libsrs2 Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-c-cpp.yml)
 [![libsrs2 FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-freebsd.yml)
 [![indimail-mta Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml)

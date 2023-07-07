@@ -161,7 +161,7 @@ NOTE: nssd does not compile on Mac OS X
 
 +-/home/local/src/indimail-mta/.+
                            .
-                           . libdkim-x           (4.0  Mb)
+                           . libdkim2-x          (4.0  Mb)
                            . libsrs2-x           (4.0  Mb)
                            . indimail-mta-x      (18   Mb)
 
@@ -378,10 +378,10 @@ current working directory /home/local/src
 ```
 
 ```
-##### STEP 3  ##### Install libdkim-x ###################
+##### STEP 3  ##### Install libdkim2-x ###################
 current working directory /home/local/src/indimail-mta
 
-% cd libdkim-x
+% cd libdkim2-x
 % ./default.configure
 % make -s [DESTDIR=staging_directory]
 % sudo make -s install-strip [DESTDIR=staging_directory]

@@ -27,10 +27,10 @@ $ ./create_debian  # for deb
 $ ./create_archpkg # for zst (Arch Linux)
 ```
 
-## Build libdkim package
+## Build libdkim2 package
 
 ```
-$ cd /usr/local/src/indimail-mta/libdkim-x
+$ cd /usr/local/src/indimail-mta/libdkim2-x
 $ ./create_rpm     # for RPM
 $ ./create_debian  # for deb
 $ ./create_archpkg # for zst (Arch Linux)
