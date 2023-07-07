@@ -8,6 +8,7 @@
 module indimail 1.1;
 
 require {
+	type automount_t;
 	type initrc_t;
 	type httpd_t;
 	type httpd_sys_script_t;
@@ -40,6 +41,10 @@ require {
 	class udp_socket { bind connect read write getattr name_bind create node_bind };
 	class unix_stream_socket {read write connectto };
 }
+
+#============= automount_t ==============
+allow automount_t unconfined_service_t:unix_stream_socket connectto;
+allow automount_t var_run_t:sock_file write;
 
 #============= httpd_t ==============
 allow httpd_t initrc_t:unix_stream_socket connectto;
