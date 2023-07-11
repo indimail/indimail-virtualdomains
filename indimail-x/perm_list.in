@@ -38,5 +38,5 @@
 # Config files
 #
 %attr(0644,indimail,indimail)  @sysconfdir@/wordlist.db
-%attr(0600,mysql,mysql)        @sysconfdir@/logrotate.mysql
+%attr(0600,root,root)          @sysconfdir@/logrotate.mysql
 %attr(0644,root,root)          /etc/apparmor.d/local/usr.sbin.mysqld

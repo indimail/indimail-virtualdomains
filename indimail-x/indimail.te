@@ -1,5 +1,5 @@
 #
-# $Id: indimail.te,v 2.31 2023-05-06 21:25:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.te,v 2.32 2023-07-11 22:58:25+05:30 Cprogrammer Exp mbhangui $
 #
 # disable dontaudit statments
 # semodule -DB
@@ -97,6 +97,9 @@ allow logrotate_t var_t:dir read;
 
 #
 # $Log: indimail.te,v $
+# Revision 2.32  2023-07-11 22:58:25+05:30  Cprogrammer
+# added selinux rule for automount
+#
 # Revision 2.31  2023-05-06 21:25:11+05:30  Cprogrammer
 # updated selinux rules
 #
