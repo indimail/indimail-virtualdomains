@@ -2,6 +2,7 @@
 #include "alarmsleep.h"
 #include <unistd.h>
 #include <iostream>
+#include "config.h"
 
 extern "C" {
 
@@ -12,6 +13,10 @@ extern "C" {
 		exit(1);
 	}
 }
+
+#if SYSLOG_LOGGING
+int do_syslog = 1;
+#endif
 
 int main()
 {

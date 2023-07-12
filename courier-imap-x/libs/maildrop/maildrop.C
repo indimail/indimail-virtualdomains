@@ -14,6 +14,9 @@
 #endif
 
 extern void killprocgroup();
+#if SYSLOG_LOGGING
+extern int do_syslog;
+#endif
 
 int Maildrop::sigchildfd[2];
 int Maildrop::sigfpe;
@@ -66,7 +69,7 @@ int	n;
 	signal(SIGFPE,  sig_fpe);
 
 #if SYSLOG_LOGGING
-	openlog("maildrop", LOG_PID, LOG_MAIL);
+	if (do_syslog) openlog("maildrop", LOG_PID, LOG_MAIL);
 #endif
 
 	try
@@ -80,7 +83,7 @@ int	n;
 	{
 		merr << argv[0] << ": " << p << "\n";
 #if SYSLOG_LOGGING
-		syslog(LOG_INFO, "%s", p);
+		if (do_syslog) syslog(LOG_INFO, "%s", p);
 #endif
 		cleanup();
 		return (EX_TEMPFAIL);
@@ -90,7 +93,7 @@ int	n;
 	{
 		merr << argv[0] << ": " << p << "\n";
 #if SYSLOG_LOGGING
-		syslog(LOG_INFO, "%s", p);
+		if (do_syslog) syslog(LOG_INFO, "%s", p);
 #endif
 		cleanup();
 		return (EX_TEMPFAIL);
@@ -105,7 +108,7 @@ int	n;
 	{
 		merr << argv[0] << ": Internal error.\n";
 #if SYSLOG_LOGGING
-		syslog(LOG_INFO, "Internal error.");
+		if (do_syslog) syslog(LOG_INFO, "Internal error.");
 #endif
 		cleanup();
 		return (EX_TEMPFAIL);

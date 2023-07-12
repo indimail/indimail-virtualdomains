@@ -25,6 +25,9 @@ Release 1.1.1-1.1 Start 01/03/2021 End 23/04/2023
 50. upgraded courier-imap to 5.2.4
 - 12/05/2023
 51. indimail-access.spec: updated for copr builds
+- 11/07/2023
+52. courier-imap/maildrop.C: set DISABLE_SYSLOG env variable to disable
+    logging to syslog
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail-access@indimail.org> 1.1.0-1.1%{?dist}
 Release 1.1.0-1.1 Start 01/03/2021 End 08/09/2022

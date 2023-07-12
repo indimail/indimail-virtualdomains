@@ -142,6 +142,7 @@ fi
   --without-authchangepwdir \
   --without-authcustom \
   --without-authgeneric \
+  --enable-syslog=1 \
   $extra --disable-dependency-tracking
 if [ ! -f depcomp -a -f libs/unicode/depcomp ] ; then
   cp libs/unicode/depcomp .

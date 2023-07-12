@@ -51,6 +51,10 @@
 extern "C" int gethostname(const char *, size_t);
 #endif
 
+#if SYSLOG_LOGGING
+int do_syslog = 1;
+#endif
+
 void rfc2045_error(const char *p)
 {
 	fprintf(stderr, "%s\n", p);
@@ -1141,7 +1145,10 @@ int main(int argc, char **argv)
 #if HAVE_SETLOCALE
 	setlocale(LC_ALL, "C");
 #endif
-
+#if SYSLOG_LOGGING
+	if (getenv("DISABLE_SYSLOG"))
+		do_syslog = 0;
+#endif
 	_exit(Maildrop::trap(run, argc, argv));
 }
 
