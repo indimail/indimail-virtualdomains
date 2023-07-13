@@ -46,7 +46,8 @@ build-stamp:
 			--datarootdir=${shareddir} --with-certsdir=${sysconfdir}/certs \
 			--with-mailer=${prefix}/bin/sendmail --disable-root-check \
 			--without-userdb --without-authcustom --without-authchangepwdir \
-			--without-authgeneric --with-authshadow --with-authpwd; \
+			--without-authgeneric --with-authshadow --with-authpwd \
+			--enable-syslog=1; \
 		if [ ! -f depcomp -a -f libs/unicode/depcomp ] ; then \
 			cp libs/unicode/depcomp .; \
 		elif [ -f depcomp -a ! -f libs/unicode/depcomp ] ; then \

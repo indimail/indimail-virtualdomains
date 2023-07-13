@@ -209,7 +209,8 @@ if [ -d courier-imap-%{courier_version} ] ; then
     --datarootdir=%{shareddir} --with-certsdir=%{sysconfdir}/certs \
     --with-mailer=%{_prefix}/bin/sendmail --disable-root-check --with-redhat \
     --without-userdb --without-authcustom --without-authchangepwdir \
-    --without-authgeneric --with-authshadow --with-authpam --without-authpwd
+    --without-authgeneric --with-authshadow --with-authpam --without-authpwd \
+    --enable-syslog=1
   cd ..
 fi
 
