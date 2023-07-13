@@ -135,7 +135,11 @@ static char    *usage =
 	"         -C                       (Store clear txt and SCRAM hex salted passowrd in database\n"
 	"         -S salt                  (Use a fixed base64 encoded salt)\n"
 	"         -I iter_count            (Use iter_count instead of default 4096 for generationg SCRAM password\n"
+#else
+	"         -C                       (Store clear txt passowrd in database\n"
 #endif
+#else
+	"         -C                       (Store clear txt passowrd in database\n"
 #endif
 	"         -D date format           (Delivery to a Date Folder)\n"
 	"         -l vacation_message_file (sets up Auto Responder)\n"
@@ -192,11 +196,11 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Ge
 	i = 0;
 	i += fmt_strn(optstr + i, "avutxHD:c:q:dpwisobr0123h:e:l:P:0123456789", 42);
 #ifdef ENABLE_AUTH_LOGGING
-	i += fmt_strn(optstr + i, "n", 1);
+	i += fmt_strn(optstr + i, "nC", 2);
 #endif
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	i += fmt_strn(optstr + i, "Cm:S:I:", 7);
+	i += fmt_strn(optstr + i, "m:S:I:", 6);
 #endif
 #endif
 	if ((i + 1) > sizeof(optstr))
@@ -249,12 +253,12 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Ge
 				strerr_die1x(111, "out of memory");
 			encrypt_flag = 1;
 			break;
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'C':
 			if (docram)
 				*docram = 1;
 			break;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'm':
 			if (!scram)
 				break;
@@ -388,13 +392,13 @@ main(int argc, char **argv)
 #ifdef ENABLE_DOMAIN_LIMITS
 	static stralloc TheDir = {0};
 	struct vlimits  limits;
-	int             domain_limits;
+	int             domain_limits, docram;
 #endif
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	static stralloc result = {0};
 	char           *b64salt, *clear_text;
-	int             scram, iter, docram;
+	int             scram, iter;
 #endif
 #endif
 
@@ -407,13 +411,13 @@ main(int argc, char **argv)
 #else
 	if (get_options(argc, argv, &User, &Email, &Gecos, &enc_pass,
 			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
-			&QuotaFlag, &set_vacation, 0, 0, 0, 0, 0))
+			&QuotaFlag, &set_vacation, &docram, 0, 0, 0, 0))
 		return (1);
 #endif
 #else
 	if (get_options(argc, argv, &User, &Email, &Gecos, &enc_pass,
 			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
-			&QuotaFlag, &set_vacation, 0, 0, 0, 0, 0))
+			&QuotaFlag, &set_vacation, docram, 0, 0, 0, 0))
 		return (1);
 #endif
 	parse_email(Email.s, &User, &Domain);
@@ -493,16 +497,12 @@ main(int argc, char **argv)
 		pw->pw_gecos = Gecos.s;
 	if (enc_pass.len)
 		pw->pw_passwd = enc_pass.s;
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
 		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &ptr);
 		if (i != 6 && i != 8)
 			strerr_die2x(1, WARN, "unable to get secrets");
 		pw->pw_passwd = ptr;
 	}
-#endif
-#endif
 	if (ClearFlags == 1)
 		pw->pw_gid = 0;
 	else

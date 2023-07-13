@@ -1,57 +1,5 @@
 /*
- * $Log: authindi.c,v $
- * Revision 1.17  2023-06-17 23:46:55+05:30  Cprogrammer
- * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
- *
- * Revision 1.16  2023-03-21 09:32:51+05:30  Cprogrammer
- * replaced strerr_warn with subprintfe
- *
- * Revision 1.15  2022-09-10 21:41:56+05:30  Cprogrammer
- * use authmethods.h for AUTH type definitions
- * execute next module if domain not in qmail assign file
- *
- * Revision 1.14  2022-08-27 12:05:20+05:30  Cprogrammer
- * fixed logic for fetching clear txt password for cram methods
- *
- * Revision 1.13  2022-08-25 18:02:20+05:30  Cprogrammer
- * fetch clear text passwords for CRAM authentication
- *
- * Revision 1.12  2022-08-04 14:37:42+05:30  Cprogrammer
- * authenticate using SCRAM salted password
- *
- * Revision 1.11  2021-01-19 22:45:13+05:30  Cprogrammer
- * added uid, gid in debug
- *
- * Revision 1.10  2020-10-13 18:30:57+05:30  Cprogrammer
- * use _exit(2) as no buffers need to be flushed
- *
- * Revision 1.9  2020-10-04 09:27:08+05:30  Cprogrammer
- * use AUTHADDR to determine if we are already authenticated
- *
- * Revision 1.8  2020-10-01 18:19:57+05:30  Cprogrammer
- * fixed compiler warnings
- *
- * Revision 1.7  2020-09-29 20:51:27+05:30  Cprogrammer
- * execute next module when already authenticated by previous module
- *
- * Revision 1.6  2020-09-29 11:13:18+05:30  Cprogrammer
- * fixed module name to 'authindi'
- *
- * Revision 1.5  2020-09-28 13:28:00+05:30  Cprogrammer
- * added pid in debug statements
- *
- * Revision 1.4  2020-09-28 12:48:11+05:30  Cprogrammer
- * print authmodule name in error logs/debug statements
- *
- * Revision 1.3  2020-06-03 17:06:16+05:30  Cprogrammer
- * fixed compiler warnings
- *
- * Revision 1.2  2020-04-01 18:52:49+05:30  Cprogrammer
- * moved pw_comp.h to libqmail
- *
- * Revision 1.1  2019-04-17 02:31:12+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -641,14 +589,37 @@ main(int argc, char **argv)
 			}
 		} else
 			pass = crypt_pass;
-	} else {
-		i = 0;
+	} else
+	if (!str_diffn(pw->pw_passwd, "{CRAM}", 6)) {
+		pw->pw_passwd += 6;
+		cleartxt = pw->pw_passwd;
+		i = str_rchr(pw->pw_passwd, ':');
+		if (pw->pw_passwd[i]) {
+			pw->pw_passwd[i] = 0;
+			pw->pw_passwd += (i + 1);
+		} 
+		switch (auth_method)
+		{
+		case AUTH_CRAM_MD5:
+		case AUTH_CRAM_SHA1:
+		case AUTH_CRAM_SHA224:
+		case AUTH_CRAM_SHA256:
+		case AUTH_CRAM_SHA384:
+		case AUTH_CRAM_SHA512:
+		case AUTH_CRAM_RIPEMD:
+		case AUTH_DIGEST_MD5:
+			pass = cleartxt;
+			break;
+		default:
+			pass = crypt_pass = pw->pw_passwd;
+			break;
+		}
+	} else
 		pass = crypt_pass = pw->pw_passwd;
-	}
 	if ((ptr = env_get("DEBUG_LOGIN")) && *ptr > '0') {
 		subprintfe(subfderr, "authindi",
 				"debug_login: pid[%d] service[%s] login[%s] password[%s] crypted[%s] authmethod[%s]",
-				getpid(), service, login, auth_data, crypt_pass, auth_type);
+				getpid(), service, login, auth_data, crypt_pass ? crypt_pass : "null", auth_type);
 		if (challenge)
 			subprintfe(subfderr, "authindi", " challenge[%s]", challenge);
 		if (response)
@@ -664,7 +635,7 @@ main(int argc, char **argv)
 	/*- force pw_comp to use crypt instead of in_crypt */
 	if (!env_get("PASSWORD_HASH") && !env_put2("PASSWORD_HASH", "0"))
 		die_nomem();
-	if (pw_comp((unsigned char *) login, (unsigned char *) pass,
+	if (!pass || !*pass || pw_comp((unsigned char *) login, (unsigned char *) pass,
 		(unsigned char *) (auth_method > AUTH_PLAIN ? challenge : 0),
 		(unsigned char *) (auth_method > AUTH_PLAIN ? response : auth_data), auth_method)) {
 		if (argc == 3) {
@@ -712,3 +683,59 @@ main(int argc, char **argv)
 	alloc_free(authstr);
 	exec_local(argv + argc - 2, login, real_domain, pw, service);
 }
+
+/*
+ * $Log: authindi.c,v $
+ * Revision 1.17  2023-06-17 23:46:55+05:30  Cprogrammer
+ * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
+ *
+ * Revision 1.16  2023-03-21 09:32:51+05:30  Cprogrammer
+ * replaced strerr_warn with subprintfe
+ *
+ * Revision 1.15  2022-09-10 21:41:56+05:30  Cprogrammer
+ * use authmethods.h for AUTH type definitions
+ * execute next module if domain not in qmail assign file
+ *
+ * Revision 1.14  2022-08-27 12:05:20+05:30  Cprogrammer
+ * fixed logic for fetching clear txt password for cram methods
+ *
+ * Revision 1.13  2022-08-25 18:02:20+05:30  Cprogrammer
+ * fetch clear text passwords for CRAM authentication
+ *
+ * Revision 1.12  2022-08-04 14:37:42+05:30  Cprogrammer
+ * authenticate using SCRAM salted password
+ *
+ * Revision 1.11  2021-01-19 22:45:13+05:30  Cprogrammer
+ * added uid, gid in debug
+ *
+ * Revision 1.10  2020-10-13 18:30:57+05:30  Cprogrammer
+ * use _exit(2) as no buffers need to be flushed
+ *
+ * Revision 1.9  2020-10-04 09:27:08+05:30  Cprogrammer
+ * use AUTHADDR to determine if we are already authenticated
+ *
+ * Revision 1.8  2020-10-01 18:19:57+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
+ * Revision 1.7  2020-09-29 20:51:27+05:30  Cprogrammer
+ * execute next module when already authenticated by previous module
+ *
+ * Revision 1.6  2020-09-29 11:13:18+05:30  Cprogrammer
+ * fixed module name to 'authindi'
+ *
+ * Revision 1.5  2020-09-28 13:28:00+05:30  Cprogrammer
+ * added pid in debug statements
+ *
+ * Revision 1.4  2020-09-28 12:48:11+05:30  Cprogrammer
+ * print authmodule name in error logs/debug statements
+ *
+ * Revision 1.3  2020-06-03 17:06:16+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
+ * Revision 1.2  2020-04-01 18:52:49+05:30  Cprogrammer
+ * moved pw_comp.h to libqmail
+ *
+ * Revision 1.1  2019-04-17 02:31:12+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

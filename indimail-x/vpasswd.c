@@ -109,7 +109,11 @@ static char    *usage =
 	"  -S salt         - use a fixed base64 encoded salt for generating SCRAM password\n"
 	"                  - if salt is not specified, it will be generated\n"
 	"  -I iter_count   - use iter_count instead of 4096 for generating SCRAM password\n"
+#else
+	"  -C              - store clear txt password in database\n"
 #endif
+#else
+	"  -C              - store clear txt password in database\n"
 #endif
 	"  -v              - sets verbose output\n"
 	"  -H              - display this usage"
@@ -136,10 +140,10 @@ get_options(int argc, char **argv, char **email, char **clear_text,
 	Random = 0;
 	/*- make sure optstr has enough size to hold all options + 1 */
 	i = 0;
-	i += fmt_strn(optstr + i, "Hveh:r:", 7);
+	i += fmt_strn(optstr + i, "Hveh:r:C", 8);
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	i += fmt_strn(optstr + i, "Cm:S:I:", 7);
+	i += fmt_strn(optstr + i, "m:S:I:", 6);
 #endif
 #endif
 	if ((i + 1) > sizeof(optstr))
@@ -169,12 +173,12 @@ get_options(int argc, char **argv, char **email, char **clear_text,
 				strerr_die1x(111, "out of memory");
 			*encrypt_flag = 1;
 			break;
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'C':
 			if (docram)
 				*docram = 1;
 			break;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'm':
 			if (!scram)
 				break;
@@ -245,12 +249,12 @@ get_options(int argc, char **argv, char **email, char **clear_text,
 int
 main(int argc, char **argv)
 {
-	int             i, encrypt_flag;
+	int             i, encrypt_flag, docram;
 	char           *real_domain, *ptr, *email, *clear_text, *base_argv0;
 	static stralloc user = {0}, domain = {0};
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	int             scram, iter, docram;
+	int             scram, iter;
 	static stralloc result = {0};
 	char           *b64salt;
 #endif
@@ -260,11 +264,11 @@ main(int argc, char **argv)
 	if (get_options(argc, argv, &email, &clear_text, &encrypt_flag, &docram, &scram, &iter, &b64salt))
 		return (1);
 #else
-	if (get_options(argc, argv, &email, &clear_text, &encrypt_flag, 0, 0, 0, 0))
+	if (get_options(argc, argv, &email, &clear_text, &encrypt_flag, docram, 0, 0, 0))
 		return (1);
 #endif
 #else
-	if (get_options(argc, argv, &email, &clear_text, &encrypt_flag, 0, 0, 0, 0))
+	if (get_options(argc, argv, &email, &clear_text, &encrypt_flag, docram, 0, 0, 0))
 		return (1);
 #endif
 	parse_email(email, &user, &domain);

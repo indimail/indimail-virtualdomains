@@ -287,6 +287,9 @@ userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid
 	if (!str_diffn(mypw->pw_passwd, "{SCRAM-SHA-256}", 15))
 		passwd_hash = "SCRAM-SHA-256";
 	else
+	if (!str_diffn(mypw->pw_passwd, "{CRAM}", 6))
+		passwd_hash = "CRAM";
+	else
 	if (mypw->pw_passwd[0] == '$' && mypw->pw_passwd[2] == '$') {
 		switch(mypw->pw_passwd[1])
 		{

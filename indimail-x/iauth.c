@@ -1,32 +1,8 @@
 /*
- * $Log: iauth.c,v $
- * Revision 1.8  2022-10-29 21:36:14+05:30  Cprogrammer
- * removed compiler warning for unused variable
- *
- * Revision 1.7  2022-09-13 22:04:09+05:30  Cprogrammer
- * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
- *
- * Revision 1.6  2020-10-04 08:34:13+05:30  Cprogrammer
- * allow size paramter to be null
- *
- * Revision 1.5  2020-09-23 10:56:17+05:30  Cprogrammer
- * avoid potential SIGSEGV if nitiems is 0
- *
- * Revision 1.4  2020-04-01 18:55:14+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.3  2019-04-22 23:11:22+05:30  Cprogrammer
- * replaced atol() with scan_ulong()
- *
- * Revision 1.2  2019-04-15 10:23:30+05:30  Cprogrammer
- * removed strnum2 variable
- *
- * Revision 1.1  2019-04-15 10:08:29+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  *
  * authenticate.c - Generic PAM Authentication module for pam_multi
- * Copyright (C) <2008>  Manvendra Bhangui <manvendra@indimail.org>
+ * Copyright (C) <2008-2023>  Manvendra Bhangui <manvendra@indimail.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,9 +63,6 @@
 #include <getEnvConfig.h>
 #include <get_scram_secrets.h>
 #endif
-#ifdef HAVE_GSASL_H
-#include <gsasl.h>
-#endif
 #include "sqlOpen_user.h"
 #include "iopen.h"
 #include "iclose.h"
@@ -132,13 +105,9 @@ i_auth(char *email, char *service, int *size, int debug)
 	static stralloc User = {0}, Domain = {0};
 	char           *real_domain, *crypt_pass;
 	char            strnum[FMT_ULONG];
+	int             i;
 	uid_t           uid;
 	gid_t           gid;
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	int             i;
-#endif
-#endif
 	struct passwd  *pw;
 
 	_global_pw = (struct passwd *) 0;
@@ -205,8 +174,6 @@ i_auth(char *email, char *service, int *size, int debug)
 		close_connection();
 		return ((char *) 0);
 	}
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	crypt_pass = (char *) NULL;
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
 		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &crypt_pass);
@@ -214,16 +181,16 @@ i_auth(char *email, char *service, int *size, int debug)
 			close_connection();
 			strerr_warn1("i_auth: unable to get secrets", 0);
 		}
-	} else {
-		i = 0;
+	} else
+	if (!str_diffn(pw->pw_passwd, "{CRAM}", 6)) {
+		i = str_rchr(pw->pw_passwd, ':');
+		if (pw->pw_passwd[i])
+			pw->pw_passwd += (i + 1);
+		else
+			pw->pw_passwd += 6;
 		crypt_pass = pw->pw_passwd;
-	}
-#else
-	crypt_pass = pw->pw_passwd;
-#endif
-#else
-	crypt_pass = pw->pw_passwd;
-#endif
+	} else
+		crypt_pass = pw->pw_passwd;
 	if (env_get("DEBUG_LOGIN"))
 		strerr_warn7("i_auth: service[", service ? service : "null", "] email [", email, "] pw_passwd [", crypt_pass, "]", 0);
 	close_connection();
@@ -498,3 +465,30 @@ defaultTask(char *email, char *TheDomain, struct passwd *pw, char *service, int 
 		return (1);
 	return (0);
 }
+
+/*
+ * $Log: iauth.c,v $
+ * Revision 1.8  2022-10-29 21:36:14+05:30  Cprogrammer
+ * removed compiler warning for unused variable
+ *
+ * Revision 1.7  2022-09-13 22:04:09+05:30  Cprogrammer
+ * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
+ *
+ * Revision 1.6  2020-10-04 08:34:13+05:30  Cprogrammer
+ * allow size paramter to be null
+ *
+ * Revision 1.5  2020-09-23 10:56:17+05:30  Cprogrammer
+ * avoid potential SIGSEGV if nitiems is 0
+ *
+ * Revision 1.4  2020-04-01 18:55:14+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.3  2019-04-22 23:11:22+05:30  Cprogrammer
+ * replaced atol() with scan_ulong()
+ *
+ * Revision 1.2  2019-04-15 10:23:30+05:30  Cprogrammer
+ * removed strnum2 variable
+ *
+ * Revision 1.1  2019-04-15 10:08:29+05:30  Cprogrammer
+ * Initial revision
+ */

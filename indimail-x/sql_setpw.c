@@ -40,9 +40,6 @@
 #include <str.h>
 #include <get_scram_secrets.h>
 #endif
-#ifdef HAVE_GSASL_H
-#include <gsasl.h>
-#endif
 #include "iopen.h"
 #include "get_indimailuidgid.h"
 #include "get_assign.h"
@@ -126,13 +123,8 @@ sql_setpw(struct passwd *inpw, char *domain, char *scram)
 	uid_t           myuid;
 	uid_t           uid;
 	gid_t           gid;
-	int             err, rows_updated = 0;
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	int             i, err, rows_updated = 0;
 	static stralloc result = {0};
-	int             i;
-#endif
-#endif
 
 	if (indimailuid == -1 || indimailgid == -1)
 		get_indimailuidgid(&indimailuid, &indimailgid);
@@ -165,13 +157,10 @@ sql_setpw(struct passwd *inpw, char *domain, char *scram)
 	}
 
 	if (scram) {
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
 			i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &tmpstr);
 			if (i != 6 && i != 8)
 				strerr_die1x(1, "sql_getpw: unable to get secrets");
-			pw->pw_passwd = tmpstr;
 			i = str_rchr(pw->pw_passwd, ',');
 			if (pw->pw_passwd[i]) {
 				if (!stralloc_copyb(&result, pw->pw_passwd, i) ||
@@ -179,18 +168,25 @@ sql_setpw(struct passwd *inpw, char *domain, char *scram)
 					die_nomem();
 				result.len--;
 			}
+			pw->pw_passwd = tmpstr;
+			if (!pwcomp(pw, copyPwdStruct(inpw)) && !str_diffn(scram, result.s, result.len))
+				return (0);
+		} else
+		if (!str_diffn(pw->pw_passwd, "{CRAM}", 6)) {
+			i = str_rchr(pw->pw_passwd, ':');
+			if (pw->pw_passwd[i]) {
+				if (!stralloc_copyb(&result, pw->pw_passwd, i) ||
+						!stralloc_0(&result))
+					die_nomem();
+				result.len--;
+				pw->pw_passwd += (i + 1);
+			} else
+				pw->pw_passwd += 6;
 			if (!pwcomp(pw, copyPwdStruct(inpw)) && !str_diffn(scram, result.s, result.len))
 				return (0);
 		} else
 		if (!pwcomp(pw, copyPwdStruct(inpw)))
 			return (0);
-#else
-		if (!pwcomp(pw, copyPwdStruct(inpw)))
-			return (0);
-#endif
-		if (!pwcomp(pw, copyPwdStruct(inpw)))
-			return (0);
-#endif
 	} else
 	if (!pwcomp(pw, (t = copyPwdStruct(inpw))))
 		return (0);

@@ -1,14 +1,5 @@
 /*
- * $Log: sql_getpw.c,v $
- * Revision 1.3  2022-10-27 17:14:31+05:30  Cprogrammer
- * refactored sql code into do_sql()
- *
- * Revision 1.2  2022-08-04 14:41:49+05:30  Cprogrammer
- * fetch scram password
- *
- * Revision 1.1  2019-04-18 15:49:41+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -175,10 +166,10 @@ sql_getpw(char *user, char *domain)
 		if (!stralloc_copy(&IDomain, &_domain) || !stralloc_0(&IDomain))
 			die_nomem();
 		IDomain.len--;
-		if (row[2]) {
-			if (!stralloc_copys(&IPass, row[2]) ||
+		if (row[2]) { /* scram */
+			if (!stralloc_copys(&IPass, row[2]) || /*- scram field */
 					!stralloc_append(&IPass, ",") ||
-					!stralloc_cats(&IPass, row[1]) ||
+					!stralloc_cats(&IPass, row[1]) || /*- pw_passwd field */
 					!stralloc_0(&IPass))
 				die_nomem();
 		} else {
@@ -227,3 +218,16 @@ sql_getpw_cache(char cache_switch)
 	return;
 }
 #endif
+
+/*
+ * $Log: sql_getpw.c,v $
+ * Revision 1.3  2022-10-27 17:14:31+05:30  Cprogrammer
+ * refactored sql code into do_sql()
+ *
+ * Revision 1.2  2022-08-04 14:41:49+05:30  Cprogrammer
+ * fetch scram password
+ *
+ * Revision 1.1  2019-04-18 15:49:41+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

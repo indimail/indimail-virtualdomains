@@ -42,9 +42,6 @@
 #include <replacestr.h>
 #include <get_scram_secrets.h>
 #endif
-#ifdef HAVE_GSASL_H
-#include <gsasl.h>
-#endif
 #include "variables.h"
 #include "get_real_domain.h"
 #include "get_assign.h"
@@ -77,7 +74,7 @@ int
 renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *newDomain)
 {
 	static stralloc oldDir = {0}, SqlBuf = {0};
-	char           *real_domain, *ptr;
+	char           *real_domain, *ptr, *enc_pass;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 #ifdef VALIAS
 	static stralloc User = {0}, oldEmail = {0}, newEmail = {0}, tmp_domain = {0};
@@ -88,12 +85,7 @@ renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *
 #endif
 	struct passwd  *pw;
 	int             i, err, inactive_flag;
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	static stralloc scram = {0};
-	char           *enc_pass;
-#endif
-#endif
 
 	if (!oldUser->len || !newUser->len || !oldDomain->len || !newDomain->len || !isalpha((int) *newUser->s)) {
 		strerr_warn1("renameuser: Illegal Username/domain", 0);
@@ -185,13 +177,10 @@ renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *
 	}
 
 	ptr = (char *) NULL;
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
 		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &enc_pass);
 		if (i != 6 && i != 8)
 			strerr_die1x(1, "renameuser: unable to get secrets");
-		pw->pw_passwd = enc_pass;
 		i = str_rchr(pw->pw_passwd, ',');
 		if (pw->pw_passwd[i]) {
 			if (!stralloc_copyb(&scram, pw->pw_passwd, i) ||
@@ -200,9 +189,20 @@ renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *
 			scram.len--;
 			ptr = scram.s;
 		}
+		pw->pw_passwd = enc_pass;
+	} else
+	if (!str_diffn(pw->pw_passwd, "{CRAM}", 6)) {
+		i = str_rchr(pw->pw_passwd, ':');
+		if (pw->pw_passwd[i]) {
+			if (!stralloc_copyb(&scram, pw->pw_passwd, i) ||
+					!stralloc_0(&scram))
+				die_nomem();
+			scram.len--;
+			ptr = scram.s;
+			pw->pw_passwd += (i + 1);
+		} else
+			ptr = pw->pw_passwd;
 	}
-#endif
-#endif
 	if ((err = iadduser(newUser->s, newDomain->s, 0, pw->pw_passwd, pw->pw_gecos,
 		pw->pw_shell, 0, !inactive_flag, 0, ptr)) == -1)
 		return (-1);

@@ -1,20 +1,5 @@
 /*
- * $Log: strToPw.c,v $
- * Revision 1.5  2022-08-25 20:50:25+05:30  Cprogrammer
- * use colon_count to fix logic for cram/non-cram passwords
- *
- * Revision 1.4  2022-08-25 18:11:59+05:30  Cprogrammer
- * handle additional hex salted passwod and clear text password in pw_passwd field
- *
- * Revision 1.3  2022-08-04 14:42:08+05:30  Cprogrammer
- * added comments
- *
- * Revision 1.2  2019-04-16 15:14:19+05:30  Cprogrammer
- * fix for getting all fields
- *
- * Revision 1.1  2019-04-14 20:55:14+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -97,6 +82,13 @@ strToPw(char *pwbuf, int len)
 							break;
 					}
 				}
+			} else
+			if (colon_count > 7 && row_count == 1 && !str_diffn(cptr, "{CRAM}", 6)) {
+				for (ptr += 1; *ptr; ptr++) {
+					if (*ptr == ':') {
+						break;
+					}
+				}
 			}
 			*ptr = 0;
 		} else
@@ -158,3 +150,22 @@ strToPw(char *pwbuf, int len)
 	} /*- for (row_count = 0, cptr = ptr = _pwstruct.s; *ptr; ptr++) */
 	return ((struct passwd *) 0);
 }
+
+/*
+ * $Log: strToPw.c,v $
+ * Revision 1.5  2022-08-25 20:50:25+05:30  Cprogrammer
+ * use colon_count to fix logic for cram/non-cram passwords
+ *
+ * Revision 1.4  2022-08-25 18:11:59+05:30  Cprogrammer
+ * handle additional hex salted passwod and clear text password in pw_passwd field
+ *
+ * Revision 1.3  2022-08-04 14:42:08+05:30  Cprogrammer
+ * added comments
+ *
+ * Revision 1.2  2019-04-16 15:14:19+05:30  Cprogrammer
+ * fix for getting all fields
+ *
+ * Revision 1.1  2019-04-14 20:55:14+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

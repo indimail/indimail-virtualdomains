@@ -67,7 +67,8 @@ const char     *gsasl_mkpasswd_err(int err)
 }
 
 int
-gsasl_mkpasswd(int verbose, char *mechanism, int iteration_count, char *b64salt_arg, int docram, char *cleartxt, stralloc *result)
+gsasl_mkpasswd(int verbose, char *mechanism, int iteration_count,
+		char *b64salt_arg, int docram, char *cleartxt, stralloc *result)
 {
 	char            salt_buf[DEFAULT_SALT_SIZE];
 	char           *salt, *hexsaltedpassword, *b64salt;
