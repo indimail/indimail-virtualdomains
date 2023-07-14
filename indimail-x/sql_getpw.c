@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: sql_getpw.c,v 1.4 2023-07-15 00:21:26+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -27,7 +27,7 @@
 #include "strToPw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_getpw.c,v 1.3 2022-10-27 17:14:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_getpw.c,v 1.4 2023-07-15 00:21:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef QUERY_CACHE
@@ -221,6 +221,9 @@ sql_getpw_cache(char cache_switch)
 
 /*
  * $Log: sql_getpw.c,v $
+ * Revision 1.4  2023-07-15 00:21:26+05:30  Cprogrammer
+ * updated comments
+ *
  * Revision 1.3  2022-10-27 17:14:31+05:30  Cprogrammer
  * refactored sql code into do_sql()
  *

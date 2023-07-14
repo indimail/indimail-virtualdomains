@@ -1,26 +1,5 @@
 /*
- * $Log: renameuser.c,v $
- * Revision 1.7  2023-03-23 22:35:13+05:30  Cprogrammer
- * ignore duplicate error when updating lastauth table
- *
- * Revision 1.6  2022-11-02 14:56:35+05:30  Cprogrammer
- * restore scram password while renaming user
- *
- * Revision 1.5  2022-09-14 08:47:36+05:30  Cprogrammer
- * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
- *
- * Revision 1.4  2022-08-05 22:57:27+05:30  Cprogrammer
- * removed apop argument to iadduser()
- *
- * Revision 1.3  2022-08-05 21:14:38+05:30  Cprogrammer
- * added encrypt_flag argument to iadduser()
- *
- * Revision 1.2  2021-09-12 20:17:53+05:30  Cprogrammer
- * moved replacestr to libqmail
- *
- * Revision 1.1  2019-04-15 12:36:45+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: renameuser.c,v 1.8 2023-07-15 00:19:31+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -60,7 +39,7 @@
 #include "deluser.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: renameuser.c,v 1.7 2023-03-23 22:35:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: renameuser.c,v 1.8 2023-07-15 00:19:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -192,7 +171,7 @@ renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *
 		pw->pw_passwd = enc_pass;
 	} else
 	if (!str_diffn(pw->pw_passwd, "{CRAM}", 6)) {
-		i = str_rchr(pw->pw_passwd, ':');
+		i = str_rchr(pw->pw_passwd, ',');
 		if (pw->pw_passwd[i]) {
 			if (!stralloc_copyb(&scram, pw->pw_passwd, i) ||
 					!stralloc_0(&scram))
@@ -338,3 +317,31 @@ renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *
 		return (-1);
 	return (0);
 }
+
+/*
+ * $Log: renameuser.c,v $
+ * Revision 1.8  2023-07-15 00:19:31+05:30  Cprogrammer
+ * copy scram field from old user to new user when renaming user
+ *
+ * Revision 1.7  2023-03-23 22:35:13+05:30  Cprogrammer
+ * ignore duplicate error when updating lastauth table
+ *
+ * Revision 1.6  2022-11-02 14:56:35+05:30  Cprogrammer
+ * restore scram password while renaming user
+ *
+ * Revision 1.5  2022-09-14 08:47:36+05:30  Cprogrammer
+ * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
+ *
+ * Revision 1.4  2022-08-05 22:57:27+05:30  Cprogrammer
+ * removed apop argument to iadduser()
+ *
+ * Revision 1.3  2022-08-05 21:14:38+05:30  Cprogrammer
+ * added encrypt_flag argument to iadduser()
+ *
+ * Revision 1.2  2021-09-12 20:17:53+05:30  Cprogrammer
+ * moved replacestr to libqmail
+ *
+ * Revision 1.1  2019-04-15 12:36:45+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

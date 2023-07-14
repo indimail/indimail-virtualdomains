@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: user.c,v 1.33 2022-11-02 16:21:15+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.34 2023-07-14 21:52:39+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -408,9 +408,7 @@ addusernow()
 #endif
 	char            strnum[FMT_ULONG];
 	struct passwd  *mypw;
-#ifdef HAVE_GSASL_MKPASSWD
 	static stralloc box = {0};
-#endif
 
 	count_users();
 	load_limits();
@@ -544,9 +542,9 @@ addusernow()
 		die_nomem();
 	if (!access(tmp1.s, F_OK))
 		encrypt_flag = 0;
-#ifdef HAVE_GSASL_MKPASSWD
 	GetValue(TmpCGI, &box, "cram=");
 	cram = !str_diff(box.s, "on") ? 1 : 0;
+#ifdef HAVE_GSASL_MKPASSWD
 	GetValue(TmpCGI, &box, "scram=");
 	u_scram = !str_diff(box.s, "on") ? 1 : 0;
 	if (u_scram) {
@@ -559,11 +557,25 @@ addusernow()
 			gsasl_mkpasswd(0, "SCRAM-SHA-256", iter_count, b64salt.len ? b64salt.s : 0, cram, Password1.s, &result);
 			break;
 		}
-		ptr = scram ? result.s : 0;
+		ptr = scram > 0 ? result.s : 0;
+	} else
+	if (cram) {
+		if (!stralloc_copyb(&result, "{CRAM}", 6) ||
+				!stralloc_cats(&result, Password1.s) ||
+				!stralloc_0(&result))
+			die_nomem();
+		ptr = result.s;
 	} else
 		ptr = 0;
 #else
-	ptr = 0;
+	if (cram) {
+		if (!stralloc_copyb(&result, "{CRAM}", 6) ||
+				!stralloc_cats(&result, Password1.s) ||
+				!stralloc_0(&result))
+			die_nomem();
+		ptr = result.s;
+	} else
+		ptr = 0;
 #endif
 	/*-----------------------------------------------*/
 	if (iadduser(Newu.s, Domain.s, 0, Password1.s, Gecos.s, 0, 0, USE_POP, encrypt_flag, ptr) == 0 &&
@@ -1201,10 +1213,24 @@ modusergo()
 				gsasl_mkpasswd(0, "SCRAM-SHA-256", iter_count, b64salt.len ? b64salt.s : 0, cram, Password1.s, &result);
 				break;
 			}
+		} else
+		if (cram) {
+			if (!stralloc_copyb(&result, "{CRAM}", 6) ||
+					!stralloc_cats(&result, Password1.s) ||
+					!stralloc_0(&result))
+				die_nomem();
+			ptr = result.s;
 		}
-		ret_code = ipasswd(ActionUser.s, Domain.s, Password1.s, encrypt_flag, u_scram ? result.s : 0);
+		ret_code = ipasswd(ActionUser.s, Domain.s, Password1.s, encrypt_flag, u_scram || cram ? result.s : 0);
 #else
-		ret_code = ipasswd(ActionUser.s, Domain.s, Password1.s, encrypt_flag, 0);
+		if (cram) {
+			if (!stralloc_copyb(&result, "{CRAM}", 6) ||
+					!stralloc_cats(&result, Password1.s) ||
+					!stralloc_0(&result))
+				die_nomem();
+			ptr = result.s;
+		}
+		ret_code = ipasswd(ActionUser.s, Domain.s, Password1.s, encrypt_flag, cram ? result.s : 0);
 #endif
 		if (ret_code != 1) {
 			copy_status_mesg(html_text[140]);
@@ -1226,6 +1252,12 @@ modusergo()
 			_exit(0);
 		}
 		vpw->pw_passwd = ptr;
+	} else
+	if (!str_diffn(vpw->pw_passwd, "{CRAM}", 6)) {
+		vpw->pw_passwd += 6;
+		i = str_rchr(vpw->pw_passwd, ',');
+		if (vpw->pw_passwd[i])
+			vpw->pw_passwd += (i + 1);
 	}
 #ifdef MODIFY_QUOTA
 	/*
@@ -1762,6 +1794,9 @@ parse_users_dotqmail(char newchar)
 
 /*-
  * $Log: user.c,v $
+ * Revision 1.34  2023-07-14 21:52:39+05:30  Cprogrammer
+ * set password field to start with {CRAM} when adding/modifying clear text passwords for CRAM authentication
+ *
  * Revision 1.33  2022-11-02 16:21:15+05:30  Cprogrammer
  * add scram password if selected during user addition
  *

@@ -1,12 +1,12 @@
 /*
- * $Id: $
+ * $Id: proxylogin.c,v 1.12 2023-07-15 00:18:05+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 1.11 2023-06-17 23:47:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 1.12 2023-07-15 00:18:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -199,7 +199,7 @@ LocalLogin(char **argv, char *email, char *TheUser, char *TheDomain, char *servi
 		}
 	} else
 	if (!str_diffn(pw->pw_passwd, "{CRAM}", 6)) {
-		i = str_rchr(pw->pw_passwd, ':');
+		i = str_rchr(pw->pw_passwd, ',');
 		if (pw->pw_passwd[i])
 			pw->pw_passwd += (i + 1);
 		else
@@ -633,6 +633,9 @@ void pop3d_capability()
 
 /*
  * $Log: proxylogin.c,v $
+ * Revision 1.12  2023-07-15 00:18:05+05:30  Cprogrammer
+ * authenticate using CRAM when password field starts with {CRAM}
+ *
  * Revision 1.11  2023-06-17 23:47:44+05:30  Cprogrammer
  * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
  *

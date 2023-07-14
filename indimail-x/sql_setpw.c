@@ -1,26 +1,5 @@
 /*
- * $Log: sql_setpw.c,v $
- * Revision 1.7  2023-03-23 22:17:53+05:30  Cprogrammer
- * bug fix - record not getting updated
- *
- * Revision 1.6  2022-10-27 17:21:01+05:30  Cprogrammer
- * refactored sql code into do_sql()
- *
- * Revision 1.5  2022-09-19 21:15:25+05:30  Cprogrammer
- * fixed password struct getting overwritten with call to sql_getpw
- *
- * Revision 1.4  2022-09-14 08:47:41+05:30  Cprogrammer
- * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
- *
- * Revision 1.3  2022-08-07 13:02:02+05:30  Cprogrammer
- * added scram argument to set scram password
- *
- * Revision 1.2  2021-02-23 21:41:18+05:30  Cprogrammer
- * replaced CREATE TABLE statements with create_table() function
- *
- * Revision 1.1  2019-04-20 08:43:22+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: sql_setpw.c,v 1.8 2023-07-15 00:47:44+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -52,7 +31,7 @@
 #include "create_table.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_setpw.c,v 1.7 2023-03-23 22:17:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_setpw.c,v 1.8 2023-07-15 00:47:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -173,7 +152,7 @@ sql_setpw(struct passwd *inpw, char *domain, char *scram)
 				return (0);
 		} else
 		if (!str_diffn(pw->pw_passwd, "{CRAM}", 6)) {
-			i = str_rchr(pw->pw_passwd, ':');
+			i = str_rchr(pw->pw_passwd, ',');
 			if (pw->pw_passwd[i]) {
 				if (!stralloc_copyb(&result, pw->pw_passwd, i) ||
 						!stralloc_0(&result))
@@ -211,3 +190,31 @@ sql_setpw(struct passwd *inpw, char *domain, char *scram)
 	}
 	return (0);
 }
+
+/*
+ * $Log: sql_setpw.c,v $
+ * Revision 1.8  2023-07-15 00:47:44+05:30  Cprogrammer
+ * extract encrypted password from pw->pw_passwd starting with {CRAM}
+ *
+ * Revision 1.7  2023-03-23 22:17:53+05:30  Cprogrammer
+ * bug fix - record not getting updated
+ *
+ * Revision 1.6  2022-10-27 17:21:01+05:30  Cprogrammer
+ * refactored sql code into do_sql()
+ *
+ * Revision 1.5  2022-09-19 21:15:25+05:30  Cprogrammer
+ * fixed password struct getting overwritten with call to sql_getpw
+ *
+ * Revision 1.4  2022-09-14 08:47:41+05:30  Cprogrammer
+ * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
+ *
+ * Revision 1.3  2022-08-07 13:02:02+05:30  Cprogrammer
+ * added scram argument to set scram password
+ *
+ * Revision 1.2  2021-02-23 21:41:18+05:30  Cprogrammer
+ * replaced CREATE TABLE statements with create_table() function
+ *
+ * Revision 1.1  2019-04-20 08:43:22+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: strToPw.c,v 1.6 2023-07-15 00:22:57+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -19,7 +19,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: strToPw.c,v 1.5 2022-08-25 20:50:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: strToPw.c,v 1.6 2023-07-15 00:22:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -50,6 +50,10 @@ strToPw(char *pwbuf, int len)
 		if (!stralloc_copyb(&_pwstruct, pwbuf, pwstruct_len - 1))
 			die_nomem();
 	}
+	/*
+	 * This will append a ':', result of which
+	 * will be pwstruct will have 8 colons
+	 */
 	if (!stralloc_append(&_pwstruct, ":") ||
 			!stralloc_0(&_pwstruct))
 		die_nomem();
@@ -73,20 +77,19 @@ strToPw(char *pwbuf, int len)
 			colon_count++;
 	for (row_count = 0, cptr = ptr = _pwstruct.s; *ptr; ptr++) {
 		if (*ptr == ':') {
-			/* skip past hexsaltedpw and saltedpw */
+			/*-
+			 * The scram string may have two ':', causing a problem
+			 * of extracting password field tokens based on ':' as
+			 * the separator.
+			 * so we skip past hexsaltedpw and saltedpw
+			 * to get the uid in the next iteration instead of hexsaltedpw
+			 */
 			if (colon_count > 8 && row_count == 1 && !str_diffn(cptr, "{SCRAM-SHA-", 11)) {
-				for (ptr += 1; *ptr; ptr++) {
+				for (ptr += 12; *ptr; ptr++) {
 					if (*ptr == ':') {
 						is_scram++;
 						if (is_scram == 2)
 							break;
-					}
-				}
-			} else
-			if (colon_count > 7 && row_count == 1 && !str_diffn(cptr, "{CRAM}", 6)) {
-				for (ptr += 1; *ptr; ptr++) {
-					if (*ptr == ':') {
-						break;
 					}
 				}
 			}
@@ -153,6 +156,9 @@ strToPw(char *pwbuf, int len)
 
 /*
  * $Log: strToPw.c,v $
+ * Revision 1.6  2023-07-15 00:22:57+05:30  Cprogrammer
+ * updated comments
+ *
  * Revision 1.5  2022-08-25 20:50:25+05:30  Cprogrammer
  * use colon_count to fix logic for cram/non-cram passwords
  *

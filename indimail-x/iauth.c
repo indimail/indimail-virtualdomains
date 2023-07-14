@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: iauth.c,v 1.9 2023-07-15 00:17:48+05:30 Cprogrammer Exp mbhangui $
  *
  * authenticate.c - Generic PAM Authentication module for pam_multi
  * Copyright (C) <2008-2023>  Manvendra Bhangui <manvendra@indimail.org>
@@ -81,7 +81,7 @@
 #include "common.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: iauth.c,v 1.8 2022-10-29 21:36:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iauth.c,v 1.9 2023-07-15 00:17:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      defaultTask(char *, char *, struct passwd *, char *, int);
@@ -183,7 +183,7 @@ i_auth(char *email, char *service, int *size, int debug)
 		}
 	} else
 	if (!str_diffn(pw->pw_passwd, "{CRAM}", 6)) {
-		i = str_rchr(pw->pw_passwd, ':');
+		i = str_rchr(pw->pw_passwd, ',');
 		if (pw->pw_passwd[i])
 			pw->pw_passwd += (i + 1);
 		else
@@ -468,6 +468,9 @@ defaultTask(char *email, char *TheDomain, struct passwd *pw, char *service, int 
 
 /*
  * $Log: iauth.c,v $
+ * Revision 1.9  2023-07-15 00:17:48+05:30  Cprogrammer
+ * authenticate using CRAM when password field starts with {CRAM}
+ *
  * Revision 1.8  2022-10-29 21:36:14+05:30  Cprogrammer
  * removed compiler warning for unused variable
  *

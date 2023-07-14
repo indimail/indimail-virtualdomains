@@ -1,5 +1,8 @@
 /*
  * $Log: iwebadmin.c,v $
+ * Revision 1.33  2023-07-14 21:47:28+05:30  Cprogrammer
+ * set scram to 0 if passwd field starts with {CRAM}
+ *
  * Revision 1.32  2022-10-25 11:52:50+05:30  Cprogrammer
  * update b64salt from database
  *
@@ -55,7 +58,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: iwebadmin.c,v 1.32 2022-10-25 11:52:50+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.33 2023-07-14 21:47:28+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -124,7 +127,7 @@ stralloc        Username = {0}, Domain = {0}, Password = {0}, Gecos = {0},
 				b64salt = {0}, result = {0};
 int             CGIValues[256];
 int             ezmlm_idx = -1, ezmlm_make = -1, debug = 0, enable_fortune = 1,
-				scram = 0, u_scram = 0, cram = 0, iter_count = 4096;
+				scram = -1, u_scram = 0, cram = 0, iter_count = 4096;
 time_t          mytime;
 char           *TmpCGI = NULL;
 int             Compressed;
@@ -293,6 +296,9 @@ conf_iwebadmin()
 			else
 			if (!str_diffn(line.s, "debug", 5))
 				debug = 1;
+			if (!str_diffn(line.s, "cram", 5))
+				scram = 0;
+			else
 			if (!str_diffn(line.s, "scram-sha-1", 12))
 				scram = 1;
 			else

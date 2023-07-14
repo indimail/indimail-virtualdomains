@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: vsetpass.c,v 1.11 2023-07-15 00:52:25+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -24,9 +24,6 @@
 #include <get_scram_secrets.h>
 #include <subfd.h>
 #endif
-#ifdef HAVE_GSASL_H
-#include <gsasl.h>
-#endif
 #include "sqlOpen_user.h"
 #include "iopen.h"
 #include "pipe_exec.h"
@@ -42,7 +39,7 @@
 #include "getpeer.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vsetpass.c,v 1.10 2023-06-17 23:48:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetpass.c,v 1.11 2023-07-15 00:52:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -201,8 +198,6 @@ main(int argc, char **argv)
 		flush("vsetpass");
 		_exit (1);
 	}
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	crypt_pass = (char *) NULL;
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
 		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &crypt_pass);
@@ -214,7 +209,7 @@ main(int argc, char **argv)
 	} else
 	if (!str_diffn(pw->pw_passwd, "{CRAM}", 6)) {
 		pw->pw_passwd += 6;
-		i = str_rchr(pw->pw_passwd, ':');
+		i = str_rchr(pw->pw_passwd, ',');
 		if (pw->pw_passwd[i]) {
 			pw->pw_passwd[i] = 0;
 			pw->pw_passwd += (i + 1);
@@ -222,12 +217,6 @@ main(int argc, char **argv)
 		crypt_pass = pw->pw_passwd;
 	} else
 		crypt_pass = pw->pw_passwd;
-#else
-	crypt_pass = pw->pw_passwd;
-#endif
-#else
-	crypt_pass = pw->pw_passwd;
-#endif
 	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	if (env_get("DEBUG_LOGIN"))
 		strerr_warn13("vsetpass: pid [", module_pid, "] login [", login, "] old_pass [",
@@ -273,6 +262,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vsetpass.c,v $
+ * Revision 1.11  2023-07-15 00:52:25+05:30  Cprogrammer
+ * extract encrypted password from pw->pw_passwd starting with {CRAM}
+ *
  * Revision 1.10  2023-06-17 23:48:02+05:30  Cprogrammer
  * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
  *

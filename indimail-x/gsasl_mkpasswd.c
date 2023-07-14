@@ -1,5 +1,8 @@
 /*
  * $Log: gsasl_mkpasswd.c,v $
+ * Revision 1.7  2023-07-15 00:16:40+05:30  Cprogrammer
+ * formatted long line
+ *
  * Revision 1.6  2022-08-28 11:43:19+05:30  Cprogrammer
  * fixed null terminatin when docram was 0
  *
@@ -41,7 +44,7 @@
 #include "gsasl_mkpasswd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: gsasl_mkpasswd.c,v 1.6 2022-08-28 11:43:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: gsasl_mkpasswd.c,v 1.7 2023-07-15 00:16:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_GSASL

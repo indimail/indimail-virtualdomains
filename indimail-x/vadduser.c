@@ -1,42 +1,5 @@
 /*
- * $Log: vadduser.c,v $
- * Revision 1.12  2023-03-20 10:32:26+05:30  Cprogrammer
- * standardize getln handling
- * use SYSONFDIR env variable if set for lastfstab
- *
- * Revision 1.11  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.10  2022-12-07 16:50:04+05:30  Cprogrammer
- * fixed incorrect order of arguments in get_options
- *
- * Revision 1.9  2022-11-02 20:03:48+05:30  Cprogrammer
- * added feature to add scram password during user addition
- *
- * Revision 1.8  2022-10-20 11:58:27+05:30  Cprogrammer
- * converted function prototype to ansic
- *
- * Revision 1.7  2022-08-07 13:04:37+05:30  Cprogrammer
- * removed apop setting
- *
- * Revision 1.6  2022-08-05 21:18:08+05:30  Cprogrammer
- * added encrypt_flag argument to iadduser()
- *
- * Revision 1.5  2021-07-08 11:46:09+05:30  Cprogrammer
- * add check for misconfigured assign file
- *
- * Revision 1.4  2020-06-16 17:56:08+05:30  Cprogrammer
- * moved setuserid function to libqmail
- *
- * Revision 1.3  2020-04-01 18:58:26+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-06-07 15:55:38+05:30  mbhangui
- * use sgetopt library for getopt()
- *
- * Revision 1.1  2019-04-14 18:31:22+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: vadduser.c,v 1.13 2023-07-15 00:28:23+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -98,7 +61,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadduser.c,v 1.12 2023-03-20 10:32:26+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadduser.c,v 1.13 2023-07-15 00:28:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -133,12 +96,16 @@ static char    *usage =
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	"  -m SCRAM method - use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method\n"
-	"  -C              - store clear txt and SCRAM hex salted password in database\n"
+	"  -C              - Store clear txt / clear text and SCRAM hex salted passowrd in database\n"
 	"                    This allows CRAM methods to be used\n"
 	"  -S salt         - use a fixed base64 encoded salt for generating SCRAM password\n"
 	"                  - if salt is not specified, it will be generated\n"
 	"  -I iter_count   - use iter_count instead of 4096 for generating SCRAM password\n"
+#else
+	"  -C              - Store clear txt password in database\n"
 #endif
+#else
+	"  -C              - Store clear txt password in database\n"
 #endif
 #ifdef CLUSTERED_SITE
 	"  -M mdahost      - (host on which the account needs to be created - specify mdahost)\n"
@@ -158,10 +125,10 @@ int
 main(int argc, char **argv)
 {
 	int             i, j, random, users_per_level = 0, fd, match,
-					encrypt_flag;
+					encrypt_flag, docram;
 	mdir_t          q, c;
 	char           *real_domain, *ptr, *base_argv0, *base_path, *domain_dir;
-	static stralloc tmpbuf = {0}, quotaVal = {0}, line = {0};
+	static stralloc tmpbuf = {0}, quotaVal = {0}, line = {0}, result = {0};
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG], inbuf[512];
 	uid_t           uid, uidtmp;
 	gid_t           gid, gidtmp;
@@ -172,8 +139,7 @@ main(int argc, char **argv)
 	struct substdio ssin;
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	int             scram, iter, docram;
-	static stralloc result = {0};
+	int             scram, iter;
 	char           *b64salt;
 #endif
 #endif
@@ -185,12 +151,12 @@ main(int argc, char **argv)
 		return (1);
 #else
 	if (get_options(argc, argv, &base_path, &users_per_level,
-				&encrypt_flag, &random, 0, 0, 0, 0))
+				&encrypt_flag, &random, &docram, 0, 0, 0))
 		return (1);
 #endif
 #else
 	if (get_options(argc, argv, &base_path, &users_per_level,
-				&encrypt_flag, &random, 0, 0, 0, 0))
+				&encrypt_flag, &random, &docram, 0, 0, 0))
 		return (1);
 #endif
 	/*- parse the email address into user and domain */
@@ -377,13 +343,20 @@ main(int argc, char **argv)
 		break;
 	/*- more cases will get below when devils come up with a new RFC */
 	}
-	ptr = scram ? result.s : 0;
+	ptr = scram > 0 ? result.s : 0;
 #else
 	ptr = 0;
 #endif
 #else
 	ptr = 0;
 #endif
+	if (!ptr && docram) {
+		if (!stralloc_copyb(&result, "{CRAM}", 6) ||
+				!stralloc_cats(&result, Passwd.s) ||
+				!stralloc_0(&result))
+			die_nomem();
+		ptr = result.s;
+	}
 #ifdef CLUSTERED_SITE
 	if ((i = iadduser(User.s, real_domain, mdahost.s, Passwd.s, Gecos.s,
 		quotaVal.s, users_per_level, actFlag, encrypt_flag, ptr)) < 0)
@@ -426,23 +399,23 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 	*base_path = 0;
 	*random = 0;
 	*encrypt_flag = -1;
-	if (salt)
-		*salt = 0;
-	if (iter)
-		*iter = 4096;
-	if (scram)
-		*scram = 0;
 	if (docram)
 		*docram = 0;
+	if (scram)
+		*scram = -1;
+	if (iter)
+		*iter = 4096;
+	if (salt)
+		*salt = 0;
 	/*- make sure optstr has enough size to hold all options + 1 */
 	i = 0;
-	i += fmt_strn(optstr + i, "aidbB:vc:q:l:er:h:", 18);
+	i += fmt_strn(optstr + i, "aidbB:vc:q:l:er:h:C", 19);
 #ifdef CLUSTERED_SITE
 	i += fmt_strn(optstr + i, "H:M:", 4);
 #endif
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	i += fmt_strn(optstr + i, "Cm:S:I:", 7);
+	i += fmt_strn(optstr + i, "m:S:I:", 6);
 #endif
 #endif
 	if ((i + 1) > sizeof(optstr))
@@ -488,22 +461,26 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 			if (*encrypt_flag == -1)
 				*encrypt_flag = 0;
 			break;
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'C':
 			if (docram)
 				*docram = 1;
 			break;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'm':
 			if (!scram)
 				break;
+			if (!str_diffn(optarg, "CRAM", 5))
+				*scram = 0;
+			else
 			if (!str_diffn(optarg, "SCRAM-SHA-1", 11))
 				*scram = 1;
 			else
 			if (!str_diffn(optarg, "SCRAM-SHA-256", 13))
 				*scram = 2;
 			else
-				strerr_die5x(100, FATAL, "wrong SCRAM method ", optarg, ". Supported SCRAM Methods: SCRAM-SHA1 SCRAM-SHA-256\n", usage);
+				strerr_die5x(100, WARN, "wrong SCRAM method ", optarg,
+						". Supported CRAM Methods: CRAM, SCRAM-SHA1 SCRAM-SHA-256\n", usage);
 			break;
 		case 'S':
 			if (!salt)
@@ -592,3 +569,47 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 		*encrypt_flag = 1;
 	return (0);
 }
+
+/*
+ * $Log: vadduser.c,v $
+ * Revision 1.13  2023-07-15 00:28:23+05:30  Cprogrammer
+ * Set password for CRAM authentication with {CRAM} prefix
+ *
+ * Revision 1.12  2023-03-20 10:32:26+05:30  Cprogrammer
+ * standardize getln handling
+ * use SYSONFDIR env variable if set for lastfstab
+ *
+ * Revision 1.11  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.10  2022-12-07 16:50:04+05:30  Cprogrammer
+ * fixed incorrect order of arguments in get_options
+ *
+ * Revision 1.9  2022-11-02 20:03:48+05:30  Cprogrammer
+ * added feature to add scram password during user addition
+ *
+ * Revision 1.8  2022-10-20 11:58:27+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
+ * Revision 1.7  2022-08-07 13:04:37+05:30  Cprogrammer
+ * removed apop setting
+ *
+ * Revision 1.6  2022-08-05 21:18:08+05:30  Cprogrammer
+ * added encrypt_flag argument to iadduser()
+ *
+ * Revision 1.5  2021-07-08 11:46:09+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
+ * Revision 1.4  2020-06-16 17:56:08+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
+ * Revision 1.3  2020-04-01 18:58:26+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-06-07 15:55:38+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.1  2019-04-14 18:31:22+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

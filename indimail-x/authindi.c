@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: authindi.c,v 1.18 2023-07-15 00:16:08+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -57,7 +57,7 @@
 #define WARN  "authindi: warn: "
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.17 2023-06-17 23:46:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.18 2023-07-15 00:16:08+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -593,7 +593,7 @@ main(int argc, char **argv)
 	if (!str_diffn(pw->pw_passwd, "{CRAM}", 6)) {
 		pw->pw_passwd += 6;
 		cleartxt = pw->pw_passwd;
-		i = str_rchr(pw->pw_passwd, ':');
+		i = str_rchr(pw->pw_passwd, ',');
 		if (pw->pw_passwd[i]) {
 			pw->pw_passwd[i] = 0;
 			pw->pw_passwd += (i + 1);
@@ -686,6 +686,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: authindi.c,v $
+ * Revision 1.18  2023-07-15 00:16:08+05:30  Cprogrammer
+ * authenticate using CRAM when password field starts with {CRAM}
+ *
  * Revision 1.17  2023-06-17 23:46:55+05:30  Cprogrammer
  * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
  *

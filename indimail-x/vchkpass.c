@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: vchkpass.c,v 1.20 2023-07-15 00:30:17+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -44,7 +44,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.19 2023-06-17 23:47:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.20 2023-07-15 00:30:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -302,7 +302,7 @@ main(int argc, char **argv)
 	if (!str_diffn(pw->pw_passwd, "{CRAM}", 6)) {
 		pw->pw_passwd += 6;
 		cleartxt = pw->pw_passwd;
-		i = str_rchr(pw->pw_passwd, ':');
+		i = str_rchr(pw->pw_passwd, ',');
 		if (pw->pw_passwd[i]) {
 			pw->pw_passwd[i] = 0;
 			pw->pw_passwd += (i + 1);
@@ -431,6 +431,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.20  2023-07-15 00:30:17+05:30  Cprogrammer
+ * authenticate using CRAM when password field starts with {CRAM}
+ *
  * Revision 1.19  2023-06-17 23:47:50+05:30  Cprogrammer
  * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
  *
