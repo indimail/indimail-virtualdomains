@@ -3068,9 +3068,16 @@ In my opinion, using this scheme with TLS enabled connection is the most secure 
 
 ## Challenge Response Authentication Mechanisms
 
-<b>qmail-smtpd</b> and <b>qmail-remote</b> also support various challange response (also known as CRAM) authenticaiton mechanisms. These methods have one side (the server) issue a challenge and the other side (client) respond with an answer. What is exchanged between the client and the server are the challenge and response. Passwords are not exchanged on the network, thus safeguarding you against sniffing and eavesdropping attacks. Though this method makes authentication safe even in a un-encrypted channel, the downside is that the both server and client need to know the clear text passwords. So for the CRAM authentication to work, the server requires the clear text passwords to be stored in the database. The huge security risk of using CRAM is safeguarding your database containing user's passwords. If the database is stolen, the thief walks away with all the passwords. If you are still ok after reading this, the <b>vpasswd</b> program can be used to store passwords in clear text by passing the -e arguments.
+<b>qmail-smtpd</b> and <b>qmail-remote</b> also support various challange response (also known as CRAM) authenticaiton mechanisms. These methods have one side (the server) issue a challenge and the other side (client) respond with an answer. What is exchanged between the client and the server are the challenge and response. Passwords are not exchanged on the network, thus safeguarding you against sniffing and eavesdropping attacks. Though this method makes authentication safe even in a un-encrypted channel, the downside is that the both server and client need to know the clear text passwords. So for the CRAM authentication to work, the server requires the clear text passwords to be stored in the database. The huge security risk of using CRAM is safeguarding your database containing user's passwords. If the database is stolen, the thief walks away with all the passwords. If you are still ok after reading this, there are two ways you can setup CRAM authentication.
+
+    1. Use the -e argument to vpasswd, vmoduser when changing password, or use the -e argument to vadddomain, vadduser when adding the postmaster user or any user and setting the environment variable <b>ENABLE_CRAM</b>. If you store the clear text password in the pw_passwd field, LOGIN and PLAIN methods cannot be used.
+    2. Use the -C argument to vpasswd, vmoduser when changing password, or use the -e argument to vadddomain, vadduser when adding the postmaster user or any user. This method allows LOGIN, PLAIN methods to work along with the CRAM authentication methods.
 
 ```
+Method 1
+--------
+$ sudo sh -c "echo 1 > /service/qmail-smtpd.587/variables/ENABLE_CRAM"
+
 $ sudo vpasswd -e manny@example.com supersecret
 name          : manny@example.com
 passwd        : supersecret (DES)
@@ -3080,6 +3087,36 @@ gid           : 0
 gecos         : manny
 dir           : /home/mail/L2P/example.com/manny
 quota         : 524288000 [500.00 MiB]
+curr quota    : 0S,0C
+Mail Store IP : 192.168.2.107 (Clustered - local
+Mail Store ID : 100
+Sql Database  : 192.168.2.107:indimail:abcdefgh:3306:ssl
+TCP/IP Port   : 3306
+Use SSL       : Yes
+SSL Cipher    : TLS_AES_256_GCM_SHA384
+Table Name    : indimail
+Relay Allowed : NO
+Days inact    : 0 days 10 Hrs 35 Mins 46 Secs
+Added On      : (127.0.0.1) Tue Jul  2 09:33:55 2019
+last  auth    : (127.0.0.1) Sat Aug 27 11:07:24 2022
+last  POP3    : Not yet logged in
+last  IMAP    : (127.0.0.1) Sat Aug 27 11:07:24 2022
+PassChange    : (127.0.0.1) Sat Aug 27 21:43:10 2022
+Inact Date    : Not yet Inactivated
+Activ Date    : (127.0.0.1) Tue Jul  2 09:33:55 2019
+Delivery Time : No Mails Delivered yet / Per Day Limit not configured
+
+Method 2
+--------
+$ sudo vpasswd -C manny@example.com supersecret
+name          : manny@example.com
+passwd        : {CRAM}pass3,$5$fbazeA/UC3RmSK15$V/GiMhfTuhRz1aUJv8QQvFt1qmFZrKgfw/4lK7d5KW0 (un-encrypted)
+uid           : 1
+gid           : 0
+                -all services available
+gecos         : manny
+dir           : /home/mail/L2P/example.com/manny
+quota         : 524288000 [500.00] MiB
 curr quota    : 0S,0C
 Mail Store IP : 192.168.2.107 (Clustered - local
 Mail Store ID : 100
@@ -3198,12 +3235,12 @@ IndiMail allows you to DISABLE individual authentication mechanism. e.g. the fol
 
 ```
 $ sudo sh
-cd /service/qmail-smtpd.587/variables
-for i in MD5 SHA1 SHA224 SHA256 SHA384 SHA512
-do
-  echo 1 > DISABLE_AUTH_CRAM_$i
-done
-echo 1 > DISABLE_DIGEST_MD5
+# cd /service/qmail-smtpd.587/variables
+# for i in MD5 SHA1 SHA224 SHA256 SHA384 SHA512
+# do
+#   echo 1 > DISABLE_AUTH_CRAM_$i
+# done
+# echo 1 > DISABLE_DIGEST_MD5
 ```
 
 Once you have enabled authentication methods, you can use tools like swak(1), gsasl(1) to test the method. Few examples are given below.
@@ -4054,7 +4091,7 @@ $ sudo /bin/bash
 Move QMAILQUEUE to SPAMQUEUE only if QMAILQUEUE doesn't have
 /usr/sbin/qmail-spamfilter
 
-cd /service/qmail-smtpd.25/variables
+# cd /service/qmail-smtpd.25/variables
 # mv QMAILQUEUE SPAMQUEUE
 # echo /usr/sbin/qmail-spamfilter > QMAILQUEUE
 # echo "/usr/bin/bogofilter -p -d /etc/indimail" > SPAMFILTER
