@@ -1,45 +1,12 @@
 /*
- * $Log: proxylogin.c,v $
- * Revision 1.11  2023-06-17 23:47:44+05:30  Cprogrammer
- * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
- *
- * Revision 1.10  2023-01-03 21:48:21+05:30  Cprogrammer
- * added crlfile argument for auth_admin()
- *
- * Revision 1.9  2022-12-25 12:13:29+05:30  Cprogrammer
- * authenticate using SCRAM salted password
- *
- * Revision 1.8  2022-08-05 21:12:37+05:30  Cprogrammer
- * added encrypt_flag argument to autoAddUser()
- *
- * Revision 1.7  2021-07-22 15:17:27+05:30  Cprogrammer
- * conditional define of _XOPEN_SOURCE
- *
- * Revision 1.6  2021-03-04 12:45:18+05:30  Cprogrammer
- * added option to specify CAFILE and match host with common name
- *
- * Revision 1.5  2020-10-01 18:28:17+05:30  Cprogrammer
- * fixed compiler warnings
- *
- * Revision 1.4  2020-04-01 18:57:32+05:30  Cprogrammer
- * added encrypt flag to mkpasswd()
- *
- * Revision 1.3  2019-06-07 16:02:39+05:30  mbhangui
- * replaced getenv() with env_get()
- *
- * Revision 1.2  2019-04-22 23:14:42+05:30  Cprogrammer
- * replaced atoi() with scan_int()
- *
- * Revision 1.1  2019-04-18 15:48:27+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: proxylogin.c,v 1.12 2023-07-15 00:18:05+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 1.11 2023-06-17 23:47:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 1.12 2023-07-15 00:18:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -67,9 +34,6 @@ static char     sccsid[] = "$Id: proxylogin.c,v 1.11 2023-06-17 23:47:44+05:30 C
 #include <pw_comp.h>
 #include <getEnvConfig.h>
 #include <get_scram_secrets.h>
-#endif
-#ifdef HAVE_GSASL
-#include <gsasl.h>
 #endif
 #include "runcmmd.h"
 #include "auth_admin.h"
@@ -184,11 +148,7 @@ LocalLogin(char **argv, char *email, char *TheUser, char *TheDomain, char *servi
 	char *imaptag, char *plaintext)
 {
 	char           *p, *crypt_pass;
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	int             i;
-#endif
-#endif
 	struct passwd  *pw;
 
 	if (!(pw = inquery(PWD_QUERY, email, 0))) {
@@ -230,8 +190,6 @@ LocalLogin(char **argv, char *email, char *TheUser, char *TheDomain, char *servi
 	}
 	p = plaintext;
 	remove_quotes(&p);
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	crypt_pass = (char *) NULL;
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
 		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &crypt_pass);
@@ -239,16 +197,16 @@ LocalLogin(char **argv, char *email, char *TheUser, char *TheDomain, char *servi
 			strerr_warn1("proxylogin: unable to get secrets", 0);
 			return (-1);
 		}
-	} else {
-		i = 0;
+	} else
+	if (!str_diffn(pw->pw_passwd, "{CRAM}", 6)) {
+		i = str_rchr(pw->pw_passwd, ',');
+		if (pw->pw_passwd[i])
+			pw->pw_passwd += (i + 1);
+		else
+			pw->pw_passwd += 6;
 		crypt_pass = pw->pw_passwd;
-	}
-#else
-	crypt_pass = pw->pw_passwd;
-#endif
-#else
-	crypt_pass = pw->pw_passwd;
-#endif
+	} else
+		crypt_pass = pw->pw_passwd;
 	if (!env_get("PASSWORD_HASH") && !env_put2("PASSWORD_HASH", "0"))
 		die_nomem();
 	if (pw->pw_passwd[0] && !pw_comp(0, (unsigned char *) crypt_pass, 0, (unsigned char *) p, 0)) {
@@ -672,3 +630,43 @@ void pop3d_capability()
 	out("proxylogin", "TOP\r\nUSER\r\nLOGIN-DELAY 10\r\nPIPELINING\r\nUIDL\r\n.\r\n");
 	flush("proxylogin");
 }
+
+/*
+ * $Log: proxylogin.c,v $
+ * Revision 1.12  2023-07-15 00:18:05+05:30  Cprogrammer
+ * authenticate using CRAM when password field starts with {CRAM}
+ *
+ * Revision 1.11  2023-06-17 23:47:44+05:30  Cprogrammer
+ * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
+ *
+ * Revision 1.10  2023-01-03 21:48:21+05:30  Cprogrammer
+ * added crlfile argument for auth_admin()
+ *
+ * Revision 1.9  2022-12-25 12:13:29+05:30  Cprogrammer
+ * authenticate using SCRAM salted password
+ *
+ * Revision 1.8  2022-08-05 21:12:37+05:30  Cprogrammer
+ * added encrypt_flag argument to autoAddUser()
+ *
+ * Revision 1.7  2021-07-22 15:17:27+05:30  Cprogrammer
+ * conditional define of _XOPEN_SOURCE
+ *
+ * Revision 1.6  2021-03-04 12:45:18+05:30  Cprogrammer
+ * added option to specify CAFILE and match host with common name
+ *
+ * Revision 1.5  2020-10-01 18:28:17+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
+ * Revision 1.4  2020-04-01 18:57:32+05:30  Cprogrammer
+ * added encrypt flag to mkpasswd()
+ *
+ * Revision 1.3  2019-06-07 16:02:39+05:30  mbhangui
+ * replaced getenv() with env_get()
+ *
+ * Revision 1.2  2019-04-22 23:14:42+05:30  Cprogrammer
+ * replaced atoi() with scan_int()
+ *
+ * Revision 1.1  2019-04-18 15:48:27+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

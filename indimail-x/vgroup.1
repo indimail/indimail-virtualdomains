@@ -3,10 +3,11 @@
 vgroup \- create distribution groups for set of users in a virtual domain
 
 .SH SYNOPSYS
-.PP
+.nf
 \fBvgroup\fR \fB\-a\fR [\fB\-n\fR] [\fB\-c\fR][\fBq\fR] [\fB\-v\fR] \fIgroupAddress\fR [\fIpassword\fR]
-.PP
-\fBvgroup\fR [\fB\-i\fR \fIaliasLine\fR] [\fB\-d\fR \fIaliasLine\fR] [\fB\-u\fR \fInewaliasLine\fR \fB\-o\fR \fIoldaliasLine\fR] [\fB\-v\fR] \fIgroupAddress\fR
+\fBvgroup\fR [\fB\-i\fR \fIaliasLine\fR] [\fB\-d\fR \fIaliasLine\fR]
+  [\fB\-u\fR \fInewaliasLine\fR \fB\-o\fR \fIoldaliasLine\fR] [\fB\-v\fR] \fIgroupAddress\fR
+.fi
 
 .SH DESCRIPTION
 \fBvgroup\fR implements groups functionality in IndiMail. It is a utility to add groups.
@@ -33,6 +34,7 @@ Common Options
 .TP 3
 \fB\-v\fR
 Sets verbose mode while vgroup is operating
+
 .TP
 \fIgroupAddress\fR
 Email address for the group.
@@ -47,13 +49,15 @@ password provided on the command line. This option sets the encrypted
 password field exactly as given on the command line without any encryption.
 It expects you to give a standard encrypted password or you can use
 this to set plaintext/salted password for CRAM authentication.
+
 .TP
 \fB\-r\fR \fIlen\fR
 Generates Random Password of length \fIlen\fR. Need not give password on
 command line.
+
 .TP
 \fB\-h\fR \fIhash\fR
-Specifiy hash which is one of DES, MD5, SHA-256, SHA-512. Here \fIID\fR is
+Specify hash which is one of DES, MD5, SHA-256, SHA-512. Here \fIID\fR is
 the id in \fI/etc/shadow\fR. See \fBincrypt\fR(1).
 .TS
 l l.
@@ -64,18 +68,42 @@ MD5     1  MD5 encryption (shouldn't be used)
 SHA-256 5  SHA256 encryption
 SHA-512 6  SHA512 encryption
 .TE
+
+You can also set the environment variable \fBPASSWORD_HASH\fR to set the
+encryption method. The -h argument overrides the environment variable
+\fBPASSWORD_HASH\fR. The value of \fBPASSWORD_HASH\fR environment variable
+identifies the encryption method used and this then determines how the rest
+of the password string is interpreted. The following values of
+\fBPASSWORD_HASH\fR are supported:
+
+.nf
+.ta 5c 10c
+PASSWORD_HASH Value	Description
+0	DES encryption (shouldn't be used)
+1	MD5 encryption (shouldn't be used)
+2	SHA256 encryption
+3	SHA512 encryption
+.fi
+.RE
+
+.TP 3
 \fB\-m\fR \fIscram\fR
-Specifiy scram method which is one of SCRAM-SHA-1, SCRAM-SHA-256
+Sets the CRAM or SCRAM method for encryption. This will set SCRAM password in
+the \fIscram\fR field in indimail/indibak tables. For CRAM method, it will
+set clear text password when -C option is specified.
 .RS
 .nf
 .ta 5c 10c
-SCRAM method	Description
--------------	-----------
+CRAM/SCRAM method	Description
+-----------------	-----------
+CRAM	Sets clear text password suitable for any
+	CRAM method (CRAM-MD5, CRAM-SHA1, ...)
 SCRAM-SHA-1	SHA1 encryption suitable for SCRAM-SHA-1.
 SCRAM-SHA-256	SHA256 encryption suitable for SCRAM-SHA-256.
 .fi
 .tc
 .RE
+
 .TP
 \fB\-C\fR
 Sets up authentication suitable for CRAM-MD5, CRAM-SHA1, CRAM-SHA224,
@@ -84,29 +112,36 @@ This works by storing the clear text credentials in the database. if the
 \-\fIm\fR option is selected, this will additionally store a hex-encoded
 salted password for SCRAM methods, which can be used instead of clear text
 passwords by clients (for SCRAM authentication).
+
 .TP 3
 \fB\-S\fR \fIsalt\fR
 Specify a base64 encoded salt to be used when generating SCRAM password. If
 not specified, this will be generated using libsodium/gsasl. Here base64
 implies characters [0-9], [a-z], [A-Z] and the two characters [./].
+
 .TP
 \fB\-I\fR \fIiteration\fR
 Specify the iteration count to be used when generating SCRAM password. The
 default is 4096.
+
 .TP
 \fIpasswd\fR
 Passwd for the user. If not given, user will be prompted.
+
 .TP
 \fB\-a\fR
 Add a new group.
+
 .TP
 \fB\-H\fR \fIhostid\fR
 For a clustered domain, this option can be used to create the user on a specific host having
 \fIhostid\fR as the hostid.
+
 .TP
 \fB\-M\fR \fImdahost\fR
 For a clustered domain, this option can be used to create the user on a specific cluster
 having Mail Delivery Host as \fImdahost\fR.
+
 .TP
 \fB\-c\fR
 Comment field (gecos) for the group account. Internally the comment starts with the
@@ -114,10 +149,12 @@ word 'IndiGroup'. This will be shown if you use the command vuserinfo on the gro
 It is advisable not to change this by external programs such as vmoduser. IndiMail figures
 out difference between a normal email account and a group account by checking if gecos
 field starts with the word 'IndiGroup'.
+
 .TP
 \fB\-q\fR
 Sets the Quota for the group. This should be set in case the group will also function as a
 normal user and receive mails.
+
 .TP
 \fB\-n\fR
 Ignore requirement of groupAddress to be a local address on the node where vgroup is
@@ -135,9 +172,11 @@ See \fBdot-qmail(5)\fR for more details.
  2. Maildir      - copy mails to a Maildir with path \fIMaildir\fR
  3. | Command    - pipe the mail through command \fICommand\fR
 .EE
+
 .TP
 \fB\-d\fR \fIaliasLine\fR
 delete aliasLine from the group. See valias for more details
+
 .TP
 \fB\-u\fR \fInewaliasLine\fR \fB\-o\fR \fIoldaliasLine\fR
 Modify oldaliasLine to newaliasLine alias in the group. See valias for more details

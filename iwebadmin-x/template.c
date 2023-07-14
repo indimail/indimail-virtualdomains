@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.27 2022-10-25 11:53:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.28 2023-07-14 21:50:08+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -528,6 +528,9 @@ send_template_now(char *filename)
 						printh("%d", iter_count);
 						break;
 					case '2':
+						if (scram == 0)
+							printh("%H", "cram");
+						else
 						if (scram == 1)
 							printh("%H", "scram-sha-1");
 						else
@@ -917,6 +920,12 @@ check_mailbox_flags(char newchar)
 		vpw->pw_passwd = ptr;
 		if (salt && (!stralloc_copys(&b64salt, salt) || !stralloc_0(&b64salt)))
 			die_nomem();
+	} else
+	if (!str_diffn(vpw->pw_passwd, "{CRAM}", 6)) {
+		vpw->pw_passwd += 6;
+		i = str_rchr(vpw->pw_passwd, ',');
+		if (vpw->pw_passwd[i])
+			vpw->pw_passwd += (i + 1);
 	} else
 		i = 0;
 	switch (newchar)

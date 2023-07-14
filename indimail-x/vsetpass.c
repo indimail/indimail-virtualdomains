@@ -1,36 +1,5 @@
 /*
- * $Log: vsetpass.c,v $
- * Revision 1.10  2023-06-17 23:48:02+05:30  Cprogrammer
- * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
- *
- * Revision 1.9  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.8  2022-09-14 08:48:10+05:30  Cprogrammer
- * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
- *
- * Revision 1.7  2022-08-05 21:23:42+05:30  Cprogrammer
- * reversed encrypt_flag setting for mkpasswd() change in encrypt_flag
- *
- * Revision 1.6  2021-07-22 15:17:42+05:30  Cprogrammer
- * conditional define of _XOPEN_SOURCE
- *
- * Revision 1.5  2020-09-28 13:28:36+05:30  Cprogrammer
- * added pid in debug statements
- *
- * Revision 1.4  2020-09-28 12:50:12+05:30  Cprogrammer
- * removed extra newline
- *
- * Revision 1.3  2020-04-01 18:59:14+05:30  Cprogrammer
- * added encrypt flag argument to mkpasswd()
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-07-10 12:58:10+05:30  Cprogrammer
- * print more error information in print_error
- *
- * Revision 1.1  2019-04-18 08:37:39+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: vsetpass.c,v 1.11 2023-07-15 00:52:25+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -55,9 +24,6 @@
 #include <get_scram_secrets.h>
 #include <subfd.h>
 #endif
-#ifdef HAVE_GSASL_H
-#include <gsasl.h>
-#endif
 #include "sqlOpen_user.h"
 #include "iopen.h"
 #include "pipe_exec.h"
@@ -73,7 +39,7 @@
 #include "getpeer.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vsetpass.c,v 1.10 2023-06-17 23:48:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetpass.c,v 1.11 2023-07-15 00:52:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -232,8 +198,6 @@ main(int argc, char **argv)
 		flush("vsetpass");
 		_exit (1);
 	}
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	crypt_pass = (char *) NULL;
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
 		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &crypt_pass);
@@ -242,16 +206,17 @@ main(int argc, char **argv)
 			flush("vsetpass");
 			strerr_die1(1, "vsetpass: unable to get secrets", 0);
 		}
-	} else {
-		i = 0;
+	} else
+	if (!str_diffn(pw->pw_passwd, "{CRAM}", 6)) {
+		pw->pw_passwd += 6;
+		i = str_rchr(pw->pw_passwd, ',');
+		if (pw->pw_passwd[i]) {
+			pw->pw_passwd[i] = 0;
+			pw->pw_passwd += (i + 1);
+		} 
 		crypt_pass = pw->pw_passwd;
-	}
-#else
-	crypt_pass = pw->pw_passwd;
-#endif
-#else
-	crypt_pass = pw->pw_passwd;
-#endif
+	} else
+		crypt_pass = pw->pw_passwd;
 	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	if (env_get("DEBUG_LOGIN"))
 		strerr_warn13("vsetpass: pid [", module_pid, "] login [", login, "] old_pass [",
@@ -294,3 +259,41 @@ main(int argc, char **argv)
 	}
 	return(i == 1 ? 0 : 1);
 }
+
+/*
+ * $Log: vsetpass.c,v $
+ * Revision 1.11  2023-07-15 00:52:25+05:30  Cprogrammer
+ * extract encrypted password from pw->pw_passwd starting with {CRAM}
+ *
+ * Revision 1.10  2023-06-17 23:48:02+05:30  Cprogrammer
+ * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
+ *
+ * Revision 1.9  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.8  2022-09-14 08:48:10+05:30  Cprogrammer
+ * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
+ *
+ * Revision 1.7  2022-08-05 21:23:42+05:30  Cprogrammer
+ * reversed encrypt_flag setting for mkpasswd() change in encrypt_flag
+ *
+ * Revision 1.6  2021-07-22 15:17:42+05:30  Cprogrammer
+ * conditional define of _XOPEN_SOURCE
+ *
+ * Revision 1.5  2020-09-28 13:28:36+05:30  Cprogrammer
+ * added pid in debug statements
+ *
+ * Revision 1.4  2020-09-28 12:50:12+05:30  Cprogrammer
+ * removed extra newline
+ *
+ * Revision 1.3  2020-04-01 18:59:14+05:30  Cprogrammer
+ * added encrypt flag argument to mkpasswd()
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-07-10 12:58:10+05:30  Cprogrammer
+ * print more error information in print_error
+ *
+ * Revision 1.1  2019-04-18 08:37:39+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

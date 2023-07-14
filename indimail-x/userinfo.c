@@ -1,38 +1,5 @@
 /*
- * $Log: userinfo.c,v $
- * Revision 1.11  2023-03-20 10:20:32+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.9  2022-08-28 12:03:43+05:30  Cprogrammer
- * fixed display string for DES/un-encrypted password
- *
- * Revision 1.8  2022-08-04 14:42:22+05:30  Cprogrammer
- * display scram password if existing
- *
- * Revision 1.7  2021-08-21 12:52:33+05:30  Cprogrammer
- * moved no_of_days.h to libqmail
- *
- * Revision 1.6  2021-07-22 15:17:31+05:30  Cprogrammer
- * conditional define of _XOPEN_SOURCE
- *
- * Revision 1.5  2020-10-13 18:35:14+05:30  Cprogrammer
- * initialize struct tm for strptime() value too big error
- *
- * Revision 1.4  2020-04-01 18:58:19+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.3  2019-06-07 16:10:48+05:30  mbhangui
- * fix for missing mysql_get_option() in new versions of libmariadb
- *
- * Revision 1.2  2019-04-17 17:54:35+05:30  Cprogrammer
- * display db server info only for root
- *
- * Revision 1.1  2019-04-14 18:30:56+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: userinfo.c,v 1.12 2023-07-15 00:23:45+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -95,7 +62,7 @@
 #include "userinfo.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 1.11 2023-03-20 10:20:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 1.12 2023-07-15 00:23:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -286,6 +253,9 @@ userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid
 	else
 	if (!str_diffn(mypw->pw_passwd, "{SCRAM-SHA-256}", 15))
 		passwd_hash = "SCRAM-SHA-256";
+	else
+	if (!str_diffn(mypw->pw_passwd, "{CRAM}", 6))
+		passwd_hash = "CRAM";
 	else
 	if (mypw->pw_passwd[0] == '$' && mypw->pw_passwd[2] == '$') {
 		switch(mypw->pw_passwd[1])
@@ -611,3 +581,43 @@ userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid
 	flush("userinfo");
 	return (0);
 }
+
+/*
+ * $Log: userinfo.c,v $
+ * Revision 1.12  2023-07-15 00:23:45+05:30  Cprogrammer
+ * Display clear text passwords for CRAM with label CRAM
+ *
+ * Revision 1.11  2023-03-20 10:20:32+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.9  2022-08-28 12:03:43+05:30  Cprogrammer
+ * fixed display string for DES/un-encrypted password
+ *
+ * Revision 1.8  2022-08-04 14:42:22+05:30  Cprogrammer
+ * display scram password if existing
+ *
+ * Revision 1.7  2021-08-21 12:52:33+05:30  Cprogrammer
+ * moved no_of_days.h to libqmail
+ *
+ * Revision 1.6  2021-07-22 15:17:31+05:30  Cprogrammer
+ * conditional define of _XOPEN_SOURCE
+ *
+ * Revision 1.5  2020-10-13 18:35:14+05:30  Cprogrammer
+ * initialize struct tm for strptime() value too big error
+ *
+ * Revision 1.4  2020-04-01 18:58:19+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.3  2019-06-07 16:10:48+05:30  mbhangui
+ * fix for missing mysql_get_option() in new versions of libmariadb
+ *
+ * Revision 1.2  2019-04-17 17:54:35+05:30  Cprogrammer
+ * display db server info only for root
+ *
+ * Revision 1.1  2019-04-14 18:30:56+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

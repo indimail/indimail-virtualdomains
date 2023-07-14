@@ -1,62 +1,5 @@
 /*
- * $Log: vchkpass.c,v $
- * Revision 1.19  2023-06-17 23:47:50+05:30  Cprogrammer
- * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
- *
- * Revision 1.18  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.17  2022-11-05 21:13:57+05:30  Cprogrammer
- * use ENABLE_CRAM to allow use of pw_passwd field of indimail, indibak for authentication
- *
- * Revision 1.16  2022-10-29 23:10:52+05:30  Cprogrammer
- * fixed display of auth method in logs
- *
- * Revision 1.15  2022-08-27 12:04:41+05:30  Cprogrammer
- * fixed logic for fetching clear txt password for cram methods
- *
- * Revision 1.14  2022-08-25 18:03:04+05:30  Cprogrammer
- * fetch clear text passwords for CRAM authentication
- *
- * Revision 1.13  2022-08-23 08:21:44+05:30  Cprogrammer
- * display AUTH method as a string instead of a number
- *
- * Revision 1.12  2022-08-04 14:43:02+05:30  Cprogrammer
- * authenticate using SCRAM salted password
- *
- * Revision 1.11  2021-09-11 13:41:27+05:30  Cprogrammer
- * fixed typo in error statement
- *
- * Revision 1.10  2021-07-22 15:17:34+05:30  Cprogrammer
- * conditional define of _XOPEN_SOURCE
- *
- * Revision 1.9  2021-01-27 18:46:10+05:30  Cprogrammer
- * renamed use_dovecot to native_checkpassword
- *
- * Revision 1.8  2021-01-27 13:23:25+05:30  Cprogrammer
- * use use_dovecot variable instead of env_get() twice
- *
- * Revision 1.7  2021-01-26 14:17:22+05:30  Cprogrammer
- * set HOME, userdb_uid, userdb_gid, EXTRA env variables for dovecot
- *
- * Revision 1.6  2021-01-26 13:45:03+05:30  Cprogrammer
- * modified to support dovecot checkpassword authentication
- *
- * Revision 1.5  2020-09-28 13:28:28+05:30  Cprogrammer
- * added pid in debug statements
- *
- * Revision 1.4  2020-09-28 12:49:53+05:30  Cprogrammer
- * print authmodule name in error logs/debug statements
- *
- * Revision 1.3  2020-04-01 18:58:32+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-07-10 12:58:04+05:30  Cprogrammer
- * print more error information in print_error
- *
- * Revision 1.1  2019-04-18 08:14:23+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: vchkpass.c,v 1.20 2023-07-15 00:30:17+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -101,7 +44,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.19 2023-06-17 23:47:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.20 2023-07-15 00:30:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -306,7 +249,7 @@ main(int argc, char **argv)
 	if (pw->pw_gid & NO_RELAY)
 		norelay = 1;
 	crypt_pass = (char *) NULL;
-		/*- we have three situation
+		/*- we have three situations
 		 * 1. We have set SCRAM method in (-m option in vadddomain, vadduser, vpasswd,
 		 *    vmoduser, vgroup)
 		 *    a. For CRAM methods we use the clear text passwords in variable cleartxt
@@ -315,12 +258,12 @@ main(int argc, char **argv)
 		 * 2. We don't have SCRAM passwords
 		 *    a. we use crypted password in variable crypt_pass for LOGIN, PLAIN.
 		 *       we expect a crypted password using crypt(3) is stored in pw_password field
-		 *    b. we use crypted password in variable crypt_pass for CRAM methods (-e option in
+		 *    b. we use cleartxt password in variable crypt_pass for CRAM methods (-e option in
 		 *       vadddomain, vadduser, vpasswd, vmoduser, vgroup)
 		 *       but it is expected that the pw_passwd field has the clear text passwords stored for
 		 *       CRAM to succeed.
-		 *    c. b. implies that the crypted password can be supplied by the client for password
-		 *       when using CRAM
+		 * 3. 2b implies that the crypted password can be supplied by the client for password
+		 *       when using CRAM. We allow this if enable_cram is set by setting ENABLE_CRAM
 		 */
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
 		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, &cleartxt, &crypt_pass);
@@ -346,14 +289,39 @@ main(int argc, char **argv)
 				if (enable_cram)
 					pass = crypt_pass;
 				else
-					pass = (auth_method > 2 && auth_method < 11) ? NULL : crypt_pass;
+					pass = (auth_method >= AUTH_CRAM_MD5 && auth_method <= AUTH_DIGEST_MD5) ? NULL : crypt_pass;
 				break;
 			}
 		} else {
 			if (enable_cram)
 				pass = crypt_pass;
 			else
-				pass = (auth_method > 2 && auth_method < 11) ? NULL : crypt_pass;
+				pass = (auth_method >= AUTH_CRAM_MD5 && auth_method <= AUTH_DIGEST_MD5) ? NULL : crypt_pass;
+		}
+	} else
+	if (!str_diffn(pw->pw_passwd, "{CRAM}", 6)) {
+		pw->pw_passwd += 6;
+		cleartxt = pw->pw_passwd;
+		i = str_rchr(pw->pw_passwd, ',');
+		if (pw->pw_passwd[i]) {
+			pw->pw_passwd[i] = 0;
+			pw->pw_passwd += (i + 1);
+		}
+		switch (auth_method)
+		{
+		case AUTH_CRAM_MD5:
+		case AUTH_CRAM_SHA1:
+		case AUTH_CRAM_SHA224:
+		case AUTH_CRAM_SHA256:
+		case AUTH_CRAM_SHA384:
+		case AUTH_CRAM_SHA512:
+		case AUTH_CRAM_RIPEMD:
+		case AUTH_DIGEST_MD5:
+			pass = cleartxt;
+			break;
+		default:
+			pass = crypt_pass = pw->pw_passwd;
+			break;
 		}
 	} else {
 		i = 0;
@@ -361,7 +329,7 @@ main(int argc, char **argv)
 		if (enable_cram)
 			pass = crypt_pass;
 		else
-			pass = (auth_method > 2 && auth_method < 11) ? NULL : crypt_pass;
+			pass = (auth_method >= AUTH_CRAM_MD5 && auth_method <= AUTH_DIGEST_MD5) ? NULL : crypt_pass;
 	}
 	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	if ((ptr = env_get("DEBUG_LOGIN")) && *ptr > '0') {
@@ -384,7 +352,7 @@ main(int argc, char **argv)
 	/*- force pw_comp to use crypt instead of in_crypt */
 	if (!env_get("PASSWORD_HASH") && !env_put2("PASSWORD_HASH", "0"))
 		die_nomem();
-	if (pw_comp((unsigned char *) ologin, (unsigned char *) pass,
+	if (!pass || !*pass || pw_comp((unsigned char *) ologin, (unsigned char *) pass,
 				(unsigned char *) (*response ? challenge : 0),
 				(unsigned char *) (*response ? response : challenge), auth_method)) {
 		native_checkpassword ? _exit (1) : pipe_exec(argv, authstr, offset);
@@ -460,3 +428,67 @@ main(int argc, char **argv)
 	/*- Not reached */
 	return(0);
 }
+
+/*
+ * $Log: vchkpass.c,v $
+ * Revision 1.20  2023-07-15 00:30:17+05:30  Cprogrammer
+ * authenticate using CRAM when password field starts with {CRAM}
+ *
+ * Revision 1.19  2023-06-17 23:47:50+05:30  Cprogrammer
+ * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
+ *
+ * Revision 1.18  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.17  2022-11-05 21:13:57+05:30  Cprogrammer
+ * use ENABLE_CRAM to allow use of pw_passwd field of indimail, indibak for authentication
+ *
+ * Revision 1.16  2022-10-29 23:10:52+05:30  Cprogrammer
+ * fixed display of auth method in logs
+ *
+ * Revision 1.15  2022-08-27 12:04:41+05:30  Cprogrammer
+ * fixed logic for fetching clear txt password for cram methods
+ *
+ * Revision 1.14  2022-08-25 18:03:04+05:30  Cprogrammer
+ * fetch clear text passwords for CRAM authentication
+ *
+ * Revision 1.13  2022-08-23 08:21:44+05:30  Cprogrammer
+ * display AUTH method as a string instead of a number
+ *
+ * Revision 1.12  2022-08-04 14:43:02+05:30  Cprogrammer
+ * authenticate using SCRAM salted password
+ *
+ * Revision 1.11  2021-09-11 13:41:27+05:30  Cprogrammer
+ * fixed typo in error statement
+ *
+ * Revision 1.10  2021-07-22 15:17:34+05:30  Cprogrammer
+ * conditional define of _XOPEN_SOURCE
+ *
+ * Revision 1.9  2021-01-27 18:46:10+05:30  Cprogrammer
+ * renamed use_dovecot to native_checkpassword
+ *
+ * Revision 1.8  2021-01-27 13:23:25+05:30  Cprogrammer
+ * use use_dovecot variable instead of env_get() twice
+ *
+ * Revision 1.7  2021-01-26 14:17:22+05:30  Cprogrammer
+ * set HOME, userdb_uid, userdb_gid, EXTRA env variables for dovecot
+ *
+ * Revision 1.6  2021-01-26 13:45:03+05:30  Cprogrammer
+ * modified to support dovecot checkpassword authentication
+ *
+ * Revision 1.5  2020-09-28 13:28:28+05:30  Cprogrammer
+ * added pid in debug statements
+ *
+ * Revision 1.4  2020-09-28 12:49:53+05:30  Cprogrammer
+ * print authmodule name in error logs/debug statements
+ *
+ * Revision 1.3  2020-04-01 18:58:32+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-07-10 12:58:04+05:30  Cprogrammer
+ * print more error information in print_error
+ *
+ * Revision 1.1  2019-04-18 08:14:23+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

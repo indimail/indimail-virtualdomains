@@ -1,58 +1,5 @@
 /*
- * $Log: vpasswd.c,v $
- * Revision 1.17  2023-01-22 10:30:38+05:30  Cprogrammer
- * reformatted error message
- *
- * Revision 1.16  2022-11-02 12:45:58+05:30  Cprogrammer
- * set usage string depeding on gsasl availability
- *
- * Revision 1.15  2022-10-20 11:59:10+05:30  Cprogrammer
- * converted function prototype to ansic
- *
- * Revision 1.14  2022-09-13 22:10:17+05:30  Cprogrammer
- * formated usage
- *
- * Revision 1.13  2022-08-28 15:28:18+05:30  Cprogrammer
- * fix compilation error for non gsasl build
- *
- * Revision 1.12  2022-08-25 18:06:36+05:30  Cprogrammer
- * Make password compatible with CRAM and SCRAM
- * 1. store hex-encoded salted password for setting GSASL_SCRAM_SALTED_PASSWORD property in libgsasl
- * 2. store clear text password for CRAM authentication
- *
- * Revision 1.11  2022-08-24 18:35:53+05:30  Cprogrammer
- * made setting hash method and scram method independent
- *
- * Revision 1.10  2022-08-07 20:40:51+05:30  Cprogrammer
- * check return value of gsasl_mkpasswd() function
- *
- * Revision 1.9  2022-08-07 13:12:16+05:30  Cprogrammer
- * updated usage string
- *
- * Revision 1.8  2022-08-06 19:34:25+05:30  Cprogrammer
- * fix compilation when libgsasl is missing or of wrong version
- *
- * Revision 1.7  2022-08-06 11:19:07+05:30  Cprogrammer
- * include gsasl.h
- *
- * Revision 1.6  2022-08-05 23:39:53+05:30  Cprogrammer
- * compile gsasl code for libgsasl version >= 1.8.1
- *
- * Revision 1.5  2022-08-05 23:15:01+05:30  Cprogrammer
- * conditional compilation of gsasl code
- *
- * Revision 1.4  2022-08-05 21:21:57+05:30  Cprogrammer
- * added option to update scram passwords
- *
- * Revision 1.3  2020-04-01 18:59:07+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-06-07 15:44:30+05:30  Cprogrammer
- * use sgetopt library for getopt()
- *
- * Revision 1.1  2019-04-14 18:29:31+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: vpasswd.c,v 1.18 2023-07-15 00:31:13+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -89,7 +36,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.17 2023-01-22 10:30:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.18 2023-07-15 00:31:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -109,7 +56,11 @@ static char    *usage =
 	"  -S salt         - use a fixed base64 encoded salt for generating SCRAM password\n"
 	"                  - if salt is not specified, it will be generated\n"
 	"  -I iter_count   - use iter_count instead of 4096 for generating SCRAM password\n"
+#else
+	"  -C              - store clear txt password in database\n"
 #endif
+#else
+	"  -C              - store clear txt password in database\n"
 #endif
 	"  -v              - sets verbose output\n"
 	"  -H              - display this usage"
@@ -124,22 +75,22 @@ get_options(int argc, char **argv, char **email, char **clear_text,
 	char            optstr[15], strnum[FMT_ULONG];
 
 	*email = *clear_text = 0;
+	if (docram)
+		*docram = 0;
+	if (scram)
+		*scram = -1;
 	if (salt)
 		*salt = 0;
 	if (iter)
 		*iter = 4096;
-	if (scram)
-		*scram = 0;
-	if (docram)
-		*docram = 0;
 	*encrypt_flag = -1;
 	Random = 0;
 	/*- make sure optstr has enough size to hold all options + 1 */
 	i = 0;
-	i += fmt_strn(optstr + i, "Hveh:r:", 7);
+	i += fmt_strn(optstr + i, "Hveh:r:C", 8);
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	i += fmt_strn(optstr + i, "Cm:S:I:", 7);
+	i += fmt_strn(optstr + i, "m:S:I:", 6);
 #endif
 #endif
 	if ((i + 1) > sizeof(optstr))
@@ -169,15 +120,18 @@ get_options(int argc, char **argv, char **email, char **clear_text,
 				strerr_die1x(111, "out of memory");
 			*encrypt_flag = 1;
 			break;
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'C':
 			if (docram)
 				*docram = 1;
 			break;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'm':
 			if (!scram)
 				break;
+			if (!str_diffn(optarg, "CRAM", 5))
+				*scram = 0;
+			else
 			if (!str_diffn(optarg, "SCRAM-SHA-1", 11))
 				*scram = 1;
 			else
@@ -245,13 +199,12 @@ get_options(int argc, char **argv, char **email, char **clear_text,
 int
 main(int argc, char **argv)
 {
-	int             i, encrypt_flag;
+	int             i, encrypt_flag, docram;
 	char           *real_domain, *ptr, *email, *clear_text, *base_argv0;
-	static stralloc user = {0}, domain = {0};
+	static stralloc user = {0}, domain = {0}, result = {0};
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	int             scram, iter, docram;
-	static stralloc result = {0};
+	int             scram, iter;
 	char           *b64salt;
 #endif
 #endif
@@ -260,11 +213,11 @@ main(int argc, char **argv)
 	if (get_options(argc, argv, &email, &clear_text, &encrypt_flag, &docram, &scram, &iter, &b64salt))
 		return (1);
 #else
-	if (get_options(argc, argv, &email, &clear_text, &encrypt_flag, 0, 0, 0, 0))
+	if (get_options(argc, argv, &email, &clear_text, &encrypt_flag, docram, 0, 0, 0))
 		return (1);
 #endif
 #else
-	if (get_options(argc, argv, &email, &clear_text, &encrypt_flag, 0, 0, 0, 0))
+	if (get_options(argc, argv, &email, &clear_text, &encrypt_flag, docram, 0, 0, 0))
 		return (1);
 #endif
 	parse_email(email, &user, &domain);
@@ -291,13 +244,20 @@ main(int argc, char **argv)
 		break;
 	/*- more cases will get below when devils come up with a new RFC */
 	}
-	ptr = scram ? result.s : 0;
+	ptr = scram > 0 ? result.s : 0;
 #else
 	ptr = 0;
 #endif
 #else
 	ptr = 0;
 #endif
+	if (!ptr && docram) {
+		if (!stralloc_copyb(&result, "{CRAM}", 6) ||
+				!stralloc_cats(&result, clear_text) ||
+				!stralloc_0(&result))
+			strerr_die2x(111, FATAL, "out of memory");
+		ptr = result.s;
+	}
 	if ((i = ipasswd(user.s, real_domain, clear_text, encrypt_flag, ptr)) != 1) {
 		if (!i)
 			strerr_warn5("vpasswd: ", user.s, "@", real_domain, ": No such user", 0);
@@ -317,3 +277,63 @@ main(int argc, char **argv)
 	} else
 		return (post_handle("%s %s@%s", ptr, user.s, real_domain));
 }
+
+/*
+ * $Log: vpasswd.c,v $
+ * Revision 1.18  2023-07-15 00:31:13+05:30  Cprogrammer
+ * Set password for CRAM authentication with {CRAM} prefix
+ *
+ * Revision 1.17  2023-01-22 10:30:38+05:30  Cprogrammer
+ * reformatted error message
+ *
+ * Revision 1.16  2022-11-02 12:45:58+05:30  Cprogrammer
+ * set usage string depeding on gsasl availability
+ *
+ * Revision 1.15  2022-10-20 11:59:10+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
+ * Revision 1.14  2022-09-13 22:10:17+05:30  Cprogrammer
+ * formated usage
+ *
+ * Revision 1.13  2022-08-28 15:28:18+05:30  Cprogrammer
+ * fix compilation error for non gsasl build
+ *
+ * Revision 1.12  2022-08-25 18:06:36+05:30  Cprogrammer
+ * Make password compatible with CRAM and SCRAM
+ * 1. store hex-encoded salted password for setting GSASL_SCRAM_SALTED_PASSWORD property in libgsasl
+ * 2. store clear text password for CRAM authentication
+ *
+ * Revision 1.11  2022-08-24 18:35:53+05:30  Cprogrammer
+ * made setting hash method and scram method independent
+ *
+ * Revision 1.10  2022-08-07 20:40:51+05:30  Cprogrammer
+ * check return value of gsasl_mkpasswd() function
+ *
+ * Revision 1.9  2022-08-07 13:12:16+05:30  Cprogrammer
+ * updated usage string
+ *
+ * Revision 1.8  2022-08-06 19:34:25+05:30  Cprogrammer
+ * fix compilation when libgsasl is missing or of wrong version
+ *
+ * Revision 1.7  2022-08-06 11:19:07+05:30  Cprogrammer
+ * include gsasl.h
+ *
+ * Revision 1.6  2022-08-05 23:39:53+05:30  Cprogrammer
+ * compile gsasl code for libgsasl version >= 1.8.1
+ *
+ * Revision 1.5  2022-08-05 23:15:01+05:30  Cprogrammer
+ * conditional compilation of gsasl code
+ *
+ * Revision 1.4  2022-08-05 21:21:57+05:30  Cprogrammer
+ * added option to update scram passwords
+ *
+ * Revision 1.3  2020-04-01 18:59:07+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-06-07 15:44:30+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.1  2019-04-14 18:29:31+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

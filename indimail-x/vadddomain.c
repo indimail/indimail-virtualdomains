@@ -1,49 +1,5 @@
 /*
- * $Log: vadddomain.c,v $
- * Revision 1.14  2023-04-25 23:35:54+05:30  Cprogrammer
- * null terminate argument passed to post_handle
- *
- * Revision 1.13  2023-03-22 08:50:29+05:30  Cprogrammer
- * run POST_HANDLE program (if set) with indimail uid/gid
- *
- * Revision 1.12  2023-03-20 10:28:35+05:30  Cprogrammer
- * call post handle script with the same arguments passed to vadddomain
- *
- * Revision 1.11  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.10  2022-11-02 20:03:34+05:30  Cprogrammer
- * added feature to add scram password during user addition
- *
- * Revision 1.9  2022-08-07 13:04:26+05:30  Cprogrammer
- * removed apop setting
- *
- * Revision 1.8  2021-08-24 11:26:55+05:30  Cprogrammer
- * added check for domain name validity
- *
- * Revision 1.7  2020-09-17 14:48:23+05:30  Cprogrammer
- * FreeBSD fix
- *
- * Revision 1.6  2020-04-01 18:58:24+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.5  2019-06-07 15:55:52+05:30  mbhangui
- * use sgetopt library for getopt()
- *
- * Revision 1.4  2019-04-22 23:16:17+05:30  Cprogrammer
- * replaced atoi() with scan_int()
- *
- * Revision 1.3  2019-04-14 12:48:29+05:30  Cprogrammer
- * added use_ssl parameter to dbinfoAdd()
- *
- * Revision 1.2  2019-04-10 10:10:27+05:30  Cprogrammer
- * fixed base_argv0
- * replaced getuidgid() with get_indimailuidgid()
- * replaced adddomain with iadddomain
- *
- * Revision 1.1  2019-03-05 17:00:52+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: vadddomain.c,v 1.15 2023-07-15 00:25:20+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -116,7 +72,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.14 2023-04-25 23:35:54+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.15 2023-07-15 00:25:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -163,7 +119,11 @@ static char    *usage =
 	"  -S salt                    - use a fixed base64 encoded salt for generating SCRAM password\n"
 	"                             - if salt is not specified, it will be generated\n"
 	"  -I iter_count              - use iter_count instead of 4096 for generating SCRAM password\n"
+#else
+	"  -C                         - store clear txt password in database\n"
 #endif
+#else
+	"  -C                         - store clear txt password in database\n"
 #endif
 #ifdef CLUSTERED_SITE
 	"  -D database                - database name. adds a clustered domain, extra\n"
@@ -196,17 +156,17 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 	Gid = indimailgid;
 	*encrypt_flag = -1;
 	*random = 0;
-	if (salt)
-		*salt = 0;
-	if (iter)
-		*iter = 4096;
-	if (scram)
-		*scram = 0;
 	if (docram)
 		*docram = 0;
+	if (scram)
+		*scram = 0;
+	if (iter)
+		*iter = 4096;
+	if (salt)
+		*salt = 0;
 	/*- make sure optstr has enough size to hold all options + 1 */
 	i = 0;
-	i += fmt_strn(optstr + i, "ateh:T:q:l:bB:E:u:vRi:g:d:Or:", 29);
+	i += fmt_strn(optstr + i, "ateh:T:q:l:bB:E:u:vRi:g:d:Or:C", 30);
 #ifdef CLUSTERED_SITE
 	i += fmt_strn(optstr + i, "D:H:U:P:s:p:c", 13);
 #endif
@@ -215,7 +175,7 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 #endif
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	i += fmt_strn(optstr + i, "Cm:S:I:", 7);
+	i += fmt_strn(optstr + i, "m:S:I:", 6);
 #endif
 #endif
 	if ((i + 1) > sizeof(optstr))
@@ -265,22 +225,26 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 			if (*encrypt_flag == -1)
 				*encrypt_flag = 0;
 			break;
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'C':
 			if (docram)
 				*docram = 1;
 			break;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'm':
 			if (!scram)
 				break;
+			if (!str_diffn(optarg, "CRAM", 5))
+				*scram = 0;
+			else
 			if (!str_diffn(optarg, "SCRAM-SHA-1", 11))
 				*scram = 1;
 			else
 			if (!str_diffn(optarg, "SCRAM-SHA-256", 13))
 				*scram = 2;
 			else
-				strerr_die5x(100, WARN, "wrong SCRAM method ", optarg, ". Supported SCRAM Methods: SCRAM-SHA1 SCRAM-SHA-256\n", usage);
+				strerr_die5x(100, WARN, "wrong SCRAM method ", optarg,
+						". Supported CRAM Methods: CRAM, SCRAM-SHA1 SCRAM-SHA-256\n", usage);
 			break;
 		case 'S':
 			if (!salt)
@@ -394,7 +358,7 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 int
 main(int argc, char **argv)
 {
-	int             err, fd, i, encrypt_flag, random;
+	int             err, fd, i, encrypt_flag, random, docram;
 	uid_t           uid;
 	gid_t           gid;
 	extern int      create_flag;
@@ -406,6 +370,7 @@ main(int argc, char **argv)
 		"mailer-daemon",
 		0
 	};
+	static stralloc result = {0};
 #ifdef CLUSTERED_SITE
 	char           *database, *sqlserver, *dbuser, *dbpass;
 	char           *hostid, *localIP;
@@ -413,8 +378,7 @@ main(int argc, char **argv)
 #endif
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	int             scram, iter, docram;
-	static stralloc result = {0};
+	int             scram, iter;
 	char           *b64salt;
 #endif
 #endif
@@ -436,12 +400,12 @@ main(int argc, char **argv)
 #else
 	get_options(argc, argv, &base_path, &dir_t, &passwd, &domain, &user,
 		&quota, &bounceEmail, &ipaddr, &database, &sqlserver, &dbuser, &dbpass,
-		&encrypt_flag, &random, 0, 0, 0, 0);
+		&encrypt_flag, &random, &docram, 0, 0, 0);
 #endif
 #else
 	get_options(argc, argv, &base_path, &dir_t, &passwd, &domain, &user,
 		&quota, &bounceEmail, &ipaddr, &database, &sqlserver, &dbuser, &dbpass,
-		&encrypt_flag, &random, 0, 0, 0, 0);
+		&encrypt_flag, &random, &docram, 0, 0, 0);
 #endif
 	if (!isvalid_domain(domain))
 		strerr_die3x(100, WARN, "Invalid domain ", domain);
@@ -697,13 +661,20 @@ main(int argc, char **argv)
 		break;
 	/*- more cases will get below when devils come up with a new RFC */
 	}
-	ptr = scram ? result.s : 0;
+	ptr = scram > 0 ? result.s : 0;
 #else
 	ptr = 0;
 #endif
 #else
 	ptr = 0;
 #endif
+	if (!ptr && docram) {
+		if (!stralloc_copyb(&result, "{CRAM}", 6) ||
+				!stralloc_cats(&result, passwd) ||
+				!stralloc_0(&result))
+			die_nomem();
+		ptr = result.s;
+	}
 	if ((err = iadduser("postmaster", domain, 0, passwd, "Postmaster", 0, users_per_level,
 		1, encrypt_flag, ptr)) != VA_SUCCESS) {
 		if (errno != EEXIST) {
@@ -765,3 +736,54 @@ main(int argc, char **argv)
 		return (post_handle("%s%s", ptr, tmpbuf.s));
 	}
 }
+
+/*
+ * $Log: vadddomain.c,v $
+ * Revision 1.15  2023-07-15 00:25:20+05:30  Cprogrammer
+ * Set password for CRAM authentication with {CRAM} prefix
+ *
+ * Revision 1.14  2023-04-25 23:35:54+05:30  Cprogrammer
+ * null terminate argument passed to post_handle
+ *
+ * Revision 1.13  2023-03-22 08:50:29+05:30  Cprogrammer
+ * run POST_HANDLE program (if set) with indimail uid/gid
+ *
+ * Revision 1.12  2023-03-20 10:28:35+05:30  Cprogrammer
+ * call post handle script with the same arguments passed to vadddomain
+ *
+ * Revision 1.11  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.10  2022-11-02 20:03:34+05:30  Cprogrammer
+ * added feature to add scram password during user addition
+ *
+ * Revision 1.9  2022-08-07 13:04:26+05:30  Cprogrammer
+ * removed apop setting
+ *
+ * Revision 1.8  2021-08-24 11:26:55+05:30  Cprogrammer
+ * added check for domain name validity
+ *
+ * Revision 1.7  2020-09-17 14:48:23+05:30  Cprogrammer
+ * FreeBSD fix
+ *
+ * Revision 1.6  2020-04-01 18:58:24+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.5  2019-06-07 15:55:52+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.4  2019-04-22 23:16:17+05:30  Cprogrammer
+ * replaced atoi() with scan_int()
+ *
+ * Revision 1.3  2019-04-14 12:48:29+05:30  Cprogrammer
+ * added use_ssl parameter to dbinfoAdd()
+ *
+ * Revision 1.2  2019-04-10 10:10:27+05:30  Cprogrammer
+ * fixed base_argv0
+ * replaced getuidgid() with get_indimailuidgid()
+ * replaced adddomain with iadddomain
+ *
+ * Revision 1.1  2019-03-05 17:00:52+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

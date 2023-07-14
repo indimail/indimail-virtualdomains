@@ -107,10 +107,10 @@ Structure Layout for all users can be regenerated using the program
 \fBvreorg(8)\fR.
 
 .SH OPTIONS
-.PP
 .TP 3
 \fB\-v\fR
 Set verbose mode.
+
 .TP
 \fB\-e\fR
 Set the encrypted Password field
@@ -119,13 +119,15 @@ password provided on the command line. This option sets the encrypted
 password field exactly as given on the command line without any encryption.
 It expects you to give a standard encrypted password or you can use
 this to set plaintext/salted password for CRAM authentication.
+
 .TP
 \fB\-r\fR
 Generates Random Password of length \fIlen\fR. Need not give password on
 command line.
+
 .TP
 \fB\-h\fR \fIhash\fR
-Specifiy hash which is one of DES, MD5, SHA-256, SHA-512. Here \fIID\fR is
+Specify hash which is one of DES, MD5, SHA-256, SHA-512. Here \fIID\fR is
 the id in \fI/etc/shadow\fR. See \fBincrypt\fR(1).
 .TS
 l l.
@@ -154,19 +156,24 @@ PASSWORD_HASH Value	Description
 .fi
 .RE
 
-.TP
+.TP 3
 \fB\-m\fR \fIscram\fR
-Specifiy scram method which is one of SCRAM-SHA-1, SCRAM-SHA-256
+Sets the CRAM or SCRAM method for encryption. This will set SCRAM password in
+the \fIscram\fR field in indimail/indibak tables. For CRAM method, it will
+set clear text password when -C option is specified.
 .RS
 .nf
 .ta 5c 10c
-SCRAM method	Description
--------------	-----------
+CRAM/SCRAM method	Description
+-----------------	-----------
+CRAM	Sets clear text password suitable for any
+	CRAM method (CRAM-MD5, CRAM-SHA1, ...)
 SCRAM-SHA-1	SHA1 encryption suitable for SCRAM-SHA-1.
 SCRAM-SHA-256	SHA256 encryption suitable for SCRAM-SHA-256.
 .fi
 .tc
 .RE
+
 .TP
 \fB\-C\fR
 Sets up authentication suitable for CRAM-MD5, CRAM-SHA1, CRAM-SHA224,
@@ -175,34 +182,41 @@ This works by storing the clear text credentials in the database. if the
 \-\fIm\fR option is selected, this will additionally store a hex-encoded
 salted password for SCRAM methods, which can be used instead of clear text
 passwords by clients (for SCRAM authentication).
+
 .TP 3
 \fB\-S\fR \fIsalt\fR
 Specify a base64 encoded salt to be used when generating SCRAM password. If
 not specified, this will be generated using libsodium/gsasl. Here base64
 implies characters [0-9], [a-z], [A-Z] and the two characters [./].
+
 .TP
 \fB\-I\fR \fIiteration\fR
 Specify the iteration count to be used when generating SCRAM password. The
 default is 4096.
+
 .TP
 \fB\-c\fR \fIComment\fR
 Set Comment (Sets the gecos comment field)
+
 .TP
 \fB\-d\fR
 Create the directory for the user. If this option is not given, the home
 directory is not created. It gets created when the user logs in either
 through IMAP4 or POP3 protocol.
+
 .TP
 \fB\-B\fR \fIbase_path\fR
 Set the base path for the user's home directory. This overrides the base
 path defined in the domain's directory defined in
 \fI@indimaildir@/users/assign\fR file, the environment variable
 \fBBASE_PATH\fR and the default base path \fI/home/mail\fR.
+
 .TP
 \fB\-b\fR
 Balances users across filesystems listed in fstab table as they are
 created. This option should be used if vfstab (with -b option) is enabled
 in cron. This option overrides the \fB\-B\fR option.
+
 .TP
 \fB\-l\fR users_per_level
 By default, \fBvadduser\fR uses an adaptive directory structure based on a
@@ -211,6 +225,7 @@ table dir-control which is automatically managed by \fBvadduser(1)\fR,
 Maildir directories across multiple directories and sub directories so that
 there are never more than 100 user directories in a single directory. Use
 this option to change the default compile time value of 100 users per directory.
+
 .TP
 \fB\-q\fR [\fIquota in bytes\fR]
 Set the hard quota limit for the user. If not supplied then the default
@@ -223,19 +238,23 @@ limits apply. Also, this option will not be allowed if permission for
 creating quota is disabled in domain limits.
 
 You can use the suffix k/K, m/M, g/G to specify quota in Kb, Mb or Gb.
+
 .TP
 \fB\-H\fR \fIhostid\fR
 For a clustered domain, this option can be used to create the user on a
 specific host having \fIhostid\fR as the hostid.
+
 .TP
 \fB\-M\fR \fImdahost\fR
 For a clustered domain, this option can be used to create the user on a
 specific cluster having Mail Delivery Host as \fImdahost\fR.
+
 .TP
 \fIaddress\fR
 The new email address of the user. Requires the domain name as well as the
 user name. For example: user@domain.com. If the domain name is not
 specified the user is added to the default domain.
+
 .TP
 \fIpassword\fR
 Set the password for the user. If the password is not supplied on the

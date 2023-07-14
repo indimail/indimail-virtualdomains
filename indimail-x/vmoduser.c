@@ -1,58 +1,5 @@
 /*
- * $Log: vmoduser.c,v $
- * Revision 1.17  2023-03-23 22:20:51+05:30  Cprogrammer
- * removed incorrect call to vdeldomain
- *
- * Revision 1.16  2023-03-22 10:43:02+05:30  Cprogrammer
- * run POST_HANDLE program (if set) with domain user uid/gid
- *
- * Revision 1.15  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.14  2022-11-08 17:17:56+05:30  Cprogrammer
- * removed compiler warning for unused variable
- *
- * Revision 1.13  2022-11-02 12:45:15+05:30  Cprogrammer
- * set usage string depeding on gsasl availability
- *
- * Revision 1.12  2022-10-20 11:59:07+05:30  Cprogrammer
- * converted function prototype to ansic
- *
- * Revision 1.11  2022-09-14 13:41:26+05:30  Cprogrammer
- * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
- *
- * Revision 1.10  2022-08-28 15:11:23+05:30  Cprogrammer
- * fix compilation error for non gsasl build
- *
- * Revision 1.9  2022-08-25 18:07:49+05:30  Cprogrammer
- * Make password compatible with CRAM and SCRAM
- * 1. store hex-encoded salted password for setting GSASL_SCRAM_SALTED_PASSWORD property in libgsasl
- * 2. store clear text password for CRAM authentication methods
- *
- * Revision 1.8  2022-08-24 18:35:17+05:30  Cprogrammer
- * made setting hash method and scram method independent
- *
- * Revision 1.7  2022-08-07 20:41:18+05:30  Cprogrammer
- * check return value of gsasl_mkpasswd() function
- *
- * Revision 1.6  2022-08-07 13:06:42+05:30  Cprogrammer
- * added option to set scram password
- *
- * Revision 1.5  2022-08-05 21:20:58+05:30  Cprogrammer
- * reversed encrypt_flag setting for mkpasswd() change in encrypt_flag
- *
- * Revision 1.4  2022-01-31 17:36:17+05:30  Cprogrammer
- * fixed args passed to post handle script
- *
- * Revision 1.3  2020-04-01 18:58:53+05:30  Cprogrammer
- * added encrypt flag argument to mkpasswd()
- *
- * Revision 1.2  2019-06-07 15:44:54+05:30  Cprogrammer
- * use sgetopt library for getopt()
- *
- * Revision 1.1  2019-04-14 22:41:20+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: vmoduser.c,v 1.18 2023-07-15 00:48:45+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -109,7 +56,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.17 2023-03-23 22:20:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.18 2023-07-15 00:48:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -131,11 +78,15 @@ static char    *usage =
 	"         -h hash                  (use one of DES, MD5, SHA256, SHA512 hash)\n"
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	"         -m SCRAM method          (use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method)\n"
-	"         -C                       (Store clear txt and SCRAM hex salted passowrd in database\n"
+	"         -m SCRAM method          (use one of CRAM, SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method)\n"
+	"         -C                       (Store clear txt / clear text and SCRAM hex salted passowrd in database)\n"
 	"         -S salt                  (Use a fixed base64 encoded salt)\n"
 	"         -I iter_count            (Use iter_count instead of default 4096 for generationg SCRAM password\n"
+#else
+	"         -C                       (Store clear txt password in database)\n"
 #endif
+#else
+	"         -C                       (Store clear txt password in database)\n"
 #endif
 	"         -D date format           (Delivery to a Date Folder)\n"
 	"         -l vacation_message_file (sets up Auto Responder)\n"
@@ -179,24 +130,25 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Ge
 
 	*toggle = *ClearFlags = 0;
 	*QuotaFlag = 0;
-	*clear_text = 0;
+	if (clear_text)
+		*clear_text = 0;
 	if (salt)
 		*salt = 0;
 	if (docram)
 		*docram = 0;
 	if (scram)
-		*scram = 0;
+		*scram = -1;
 	if (iter)
-		*iter = 4096;
+		*iter = -1;
 	/*- make sure optstr has enough size to hold all options + 1 */
 	i = 0;
 	i += fmt_strn(optstr + i, "avutxHD:c:q:dpwisobr0123h:e:l:P:0123456789", 42);
 #ifdef ENABLE_AUTH_LOGGING
-	i += fmt_strn(optstr + i, "n", 1);
+	i += fmt_strn(optstr + i, "nC", 2);
 #endif
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	i += fmt_strn(optstr + i, "Cm:S:I:", 7);
+	i += fmt_strn(optstr + i, "m:S:I:", 6);
 #endif
 #endif
 	if ((i + 1) > sizeof(optstr))
@@ -225,7 +177,7 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Ge
 				encrypt_flag = 0;
 			/*- flow through */
 		case 'P':
-			mkpasswd(*clear_text = optarg, enc_pass, encrypt_flag);
+			mkpasswd(clear_text ? *clear_text = optarg : optarg, enc_pass, encrypt_flag);
 			if (verbose) {
 				subprintfe(subfderr, "vmoduser", "encrypted password set as %s\n", enc_pass->s);
 				errflush("vmoduser");
@@ -244,27 +196,32 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Ge
 			if (!str_diffn(optarg, "SHA-512", 7))
 				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
 			else
-				strerr_die5x(100, WARN, "wrong hash method ", optarg, ". Supported HASH Methods: DES MD5 SHA-256 SHA-512\n", usage);
+				strerr_die5x(100, WARN, "wrong hash method ", optarg,
+						". Supported HASH Methods: DES MD5 SHA-256 SHA-512\n", usage);
 			if (!env_put2("PASSWORD_HASH", strnum))
 				strerr_die1x(111, "out of memory");
 			encrypt_flag = 1;
 			break;
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'C':
 			if (docram)
 				*docram = 1;
 			break;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'm':
 			if (!scram)
 				break;
-			if (!str_diffn(optarg, "SCRAM-SHA-1", 11))
+			if (!str_diffn(optarg, "CRAM", 5))
+				*scram = 0;
+			else
+			if (!str_diffn(optarg, "SCRAM-SHA-1", 12))
 				*scram = 1;
 			else
-			if (!str_diffn(optarg, "SCRAM-SHA-256", 13))
+			if (!str_diffn(optarg, "SCRAM-SHA-256", 14))
 				*scram = 2;
 			else
-				strerr_die5x(100, WARN, "wrong SCRAM method ", optarg, ". Supported SCRAM Methods: SCRAM-SHA1 SCRAM-SHA-256\n", usage);
+				strerr_die5x(100, WARN, "wrong SCRAM method ", optarg,
+						". Supported CRAM Methods: CRAM, SCRAM-SHA1 SCRAM-SHA-256\n", usage);
 			break;
 		case 'S':
 			if (!salt)
@@ -364,6 +321,8 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Ge
 		strerr_die2x(100, WARN, usage);
 	if (encrypt_flag == -1)
 		encrypt_flag = 1;
+	if (docram && *docram && !*clear_text)
+		strerr_die3x(100, WARN, "Password not provided\n", usage);
 	return (0);
 }
 
@@ -372,14 +331,14 @@ main(int argc, char **argv)
 {
 	static stralloc Email = {0}, User = {0}, Domain = {0}, Gecos = {0},
 					enc_pass = {0}, DateFormat = {0}, Quota = {0}, vacation_file = {0},
-					tmpbuf = {0}, tmpQuota = {0};
+					tmpbuf = {0}, tmpQuota = {0}, result = {0};
 	int             GidFlag = 0, QuotaFlag = 0, toggle = 0, ClearFlags,
-					set_vacation = 0, err, fd, i;
+					set_vacation = 0, err, fd, i, docram;
 	uid_t           uid, domainuid;
 	gid_t           gid, domaingid;
 	struct passwd   PwTmp;
 	struct passwd  *pw;
-	char           *real_domain, *ptr;
+	char           *real_domain, *ptr, *clear_text;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	mdir_t          quota = 0, ul;
 #ifdef USE_MAILDIRQUOTA
@@ -392,9 +351,8 @@ main(int argc, char **argv)
 #endif
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	static stralloc result = {0};
-	char           *b64salt, *clear_text;
-	int             scram, iter, docram;
+	char           *b64salt = NULL, *b64salt_t = NULL;
+	int             scram, iter = -1, iter_t = -1;
 #endif
 #endif
 
@@ -407,13 +365,13 @@ main(int argc, char **argv)
 #else
 	if (get_options(argc, argv, &User, &Email, &Gecos, &enc_pass,
 			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
-			&QuotaFlag, &set_vacation, 0, 0, 0, 0, 0))
+			&QuotaFlag, &set_vacation, &docram, &clear_text, 0, 0, 0))
 		return (1);
 #endif
 #else
 	if (get_options(argc, argv, &User, &Email, &Gecos, &enc_pass,
 			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
-			&QuotaFlag, &set_vacation, 0, 0, 0, 0, 0))
+			&QuotaFlag, &set_vacation, docram, &clear_text, 0, 0, 0))
 		return (1);
 #endif
 	parse_email(Email.s, &User, &Domain);
@@ -430,23 +388,6 @@ main(int argc, char **argv)
 		strnum2[fmt_ulong(strnum2, domaingid)] = 0;
 		strerr_die6x(100, WARN, "you must be root or domain user (uid=", strnum1, ", gid=", strnum2, ") to run this program");
 	}
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	if (clear_text) {
-		switch (scram)
-		{
-		case 1: /*- SCRAM-SHA-1 */
-			if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-1", iter, b64salt, docram, clear_text, &result)) != NO_ERR)
-				strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
-			break;
-		case 2: /*- SCRAM-SHA-256 */
-			if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-256", iter, b64salt, docram, clear_text, &result)) != NO_ERR)
-				strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
-			break;
-		}
-	}
-#endif
-#endif
 	if (QuotaFlag == 1 || set_vacation) {
 		if (uid && setuid(0))
 			strerr_die2sys(111, FATAL, "setuid-root: ");
@@ -487,22 +428,59 @@ main(int argc, char **argv)
 			strerr_die3x(1, WARN, "quota modification not allowed for ", Email.s);
 	}
 #endif
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15))
+		i = get_scram_secrets(pw->pw_passwd, 0, &iter_t, &b64salt_t, 0, 0, 0, 0, &ptr);
+	else
+		i = 0;
+	if (i == 8)
+		docram = 1;
+	if (scram == -1) {
+		if (!str_diffn(pw->pw_passwd, "{CRAM}", 6))
+			scram = 0;
+		else
+		if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13))
+			scram = 1;
+		else
+		if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15))
+			scram = 2;
+	}
+	if (clear_text) {
+		if (!b64salt && b64salt_t)
+			b64salt = b64salt_t;
+		if (iter == -1 && iter_t > 0)
+			iter = iter_t;
+		else
+		if (iter == -1)
+			iter = 4096;
+		switch (scram)
+		{
+		case 1: /*- SCRAM-SHA-1 */
+			if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-1", iter, b64salt, docram, clear_text, &result)) != NO_ERR)
+				strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
+			break;
+		case 2: /*- SCRAM-SHA-256 */
+			if ((i = gsasl_mkpasswd(verbose, "SCRAM-SHA-256", iter, b64salt, docram, clear_text, &result)) != NO_ERR)
+				strerr_die2x(111, "gsasl error: ", gsasl_mkpasswd_err(i));
+			break;
+		}
+	}
+#endif
+#endif
 	PwTmp = *pw; /*- structure copy */
 	pw = &PwTmp;
 	if (Gecos.len)
 		pw->pw_gecos = Gecos.s;
 	if (enc_pass.len)
 		pw->pw_passwd = enc_pass.s;
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	else
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
 		i = get_scram_secrets(pw->pw_passwd, 0, 0, 0, 0, 0, 0, 0, &ptr);
 		if (i != 6 && i != 8)
 			strerr_die2x(1, WARN, "unable to get secrets");
 		pw->pw_passwd = ptr;
 	}
-#endif
-#endif
 	if (ClearFlags == 1)
 		pw->pw_gid = 0;
 	else
@@ -555,13 +533,20 @@ main(int argc, char **argv)
 #endif
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	ptr = scram ? result.s : 0;
+	ptr = scram > 0 ? result.s : 0;
 #else
 	ptr = (char *) NULL;
 #endif
 #else
 	ptr = (char *) NULL;
 #endif
+	if (!ptr && docram) {
+		if (!stralloc_copyb(&result, "{CRAM}", 6) ||
+				!stralloc_cats(&result, clear_text) ||
+				!stralloc_0(&result))
+			die_nomem();
+		ptr = result.s;
+	}
 	if ((Gecos.len || enc_pass.len || ClearFlags || GidFlag || QuotaFlag) &&
 			(err = sql_setpw(pw, real_domain, ptr)))
 		strerr_die2x(1, FATAL, "sql_setpw failed");
@@ -646,3 +631,63 @@ main(int argc, char **argv)
 	}
 	return (err);
 }
+
+/*
+ * $Log: vmoduser.c,v $
+ * Revision 1.18  2023-07-15 00:48:45+05:30  Cprogrammer
+ * Set password for CRAM authentication with {CRAM} prefix
+ *
+ * Revision 1.17  2023-03-23 22:20:51+05:30  Cprogrammer
+ * removed incorrect call to vdeldomain
+ *
+ * Revision 1.16  2023-03-22 10:43:02+05:30  Cprogrammer
+ * run POST_HANDLE program (if set) with domain user uid/gid
+ *
+ * Revision 1.15  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.14  2022-11-08 17:17:56+05:30  Cprogrammer
+ * removed compiler warning for unused variable
+ *
+ * Revision 1.13  2022-11-02 12:45:15+05:30  Cprogrammer
+ * set usage string depeding on gsasl availability
+ *
+ * Revision 1.12  2022-10-20 11:59:07+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
+ * Revision 1.11  2022-09-14 13:41:26+05:30  Cprogrammer
+ * extract encrypted password from pw->pw_passwd starting with {SCRAM-SHA.*}
+ *
+ * Revision 1.10  2022-08-28 15:11:23+05:30  Cprogrammer
+ * fix compilation error for non gsasl build
+ *
+ * Revision 1.9  2022-08-25 18:07:49+05:30  Cprogrammer
+ * Make password compatible with CRAM and SCRAM
+ * 1. store hex-encoded salted password for setting GSASL_SCRAM_SALTED_PASSWORD property in libgsasl
+ * 2. store clear text password for CRAM authentication methods
+ *
+ * Revision 1.8  2022-08-24 18:35:17+05:30  Cprogrammer
+ * made setting hash method and scram method independent
+ *
+ * Revision 1.7  2022-08-07 20:41:18+05:30  Cprogrammer
+ * check return value of gsasl_mkpasswd() function
+ *
+ * Revision 1.6  2022-08-07 13:06:42+05:30  Cprogrammer
+ * added option to set scram password
+ *
+ * Revision 1.5  2022-08-05 21:20:58+05:30  Cprogrammer
+ * reversed encrypt_flag setting for mkpasswd() change in encrypt_flag
+ *
+ * Revision 1.4  2022-01-31 17:36:17+05:30  Cprogrammer
+ * fixed args passed to post handle script
+ *
+ * Revision 1.3  2020-04-01 18:58:53+05:30  Cprogrammer
+ * added encrypt flag argument to mkpasswd()
+ *
+ * Revision 1.2  2019-06-07 15:44:54+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.1  2019-04-14 22:41:20+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

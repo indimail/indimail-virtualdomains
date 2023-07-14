@@ -1,31 +1,12 @@
 /*
- * $Log: vgroup.c,v $
- * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.5  2022-11-02 20:15:00+05:30  Cprogrammer
- * added feature to add scram password during user addition
- *
- * Revision 1.4  2022-08-05 22:44:59+05:30  Cprogrammer
- * removed apop argument to iadduser()
- * added encrypt flag to iadduser()
- *
- * Revision 1.3  2019-06-07 15:51:55+05:30  mbhangui
- * use sgetopt library for getopt()
- *
- * Revision 1.2  2019-04-22 23:19:29+05:30  Cprogrammer
- * added missing strerr.h
- *
- * Revision 1.1  2019-04-18 08:34:02+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: vgroup.c,v 1.7 2023-07-15 00:26:13+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 1.6 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 1.7 2023-07-15 00:26:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -92,7 +73,11 @@ static char    *usage =
 	"  -S salt           - use a fixed base64 encoded salt for generating SCRAM password\n"
 	"                    - if salt is not specified, it will be generated\n"
 	"  -I iter_count     - use iter_count instead of 4096 for generating SCRAM password\n"
+#else
+	"  -C                - store clear txt password in database\n"
 #endif
+#else
+	"  -C                - store clear txt password in database\n"
 #endif
 #ifdef CLUSTERED_SITE
 	"  -H hostid         - host on which the group needs to be created - specify hostid\n"
@@ -120,23 +105,23 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos,
 	*ignore = 0;
 	*random = 0;
 	*encrypt_flag = -1;
+	if (docram)
+		*docram = 0;
+	if (scram)
+		*scram = -1;
 	if (salt)
 		*salt = 0;
 	if (iter)
 		*iter = 4096;
-	if (scram)
-		*scram = 0;
-	if (docram)
-		*docram = 0;
 	/*- make sure optstr has enough size to hold all options + 1 */
 	i = 0;
-	i += fmt_strn(optstr + i, "vanc:i:d:o:u:q:", 15);
+	i += fmt_strn(optstr + i, "vanc:i:d:o:u:q:C", 16);
 #ifdef CLUSTERED_SITE
 	i += fmt_strn(optstr + i, "H:M:", 4);
 #endif
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	i += fmt_strn(optstr + i, "Cm:S:I:", 7);
+	i += fmt_strn(optstr + i, "m:S:I:", 6);
 #endif
 #endif
 	if ((i + 1) > sizeof(optstr))
@@ -242,22 +227,26 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos,
 			if (*encrypt_flag == -1)
 				*encrypt_flag = 0;
 			break;
-#ifdef HAVE_GSASL
-#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'C':
 			if (docram)
 				*docram = 1;
 			break;
+#ifdef HAVE_GSASL
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 		case 'm':
 			if (!scram)
 				break;
+			if (!str_diffn(optarg, "CRAM", 5))
+				*scram = 0;
+			else
 			if (!str_diffn(optarg, "SCRAM-SHA-1", 11))
 				*scram = 1;
 			else
 			if (!str_diffn(optarg, "SCRAM-SHA-256", 13))
 				*scram = 2;
 			else
-				strerr_die5x(100, FATAL, "wrong SCRAM method ", optarg, ". Supported SCRAM Methods: SCRAM-SHA1 SCRAM-SHA-256\n", usage);
+				strerr_die5x(100, WARN, "wrong SCRAM method ", optarg,
+						". Supported CRAM Methods: CRAM, SCRAM-SHA1 SCRAM-SHA-256\n", usage);
 			break;
 		case 'S':
 			if (!salt)
@@ -346,16 +335,15 @@ int
 main(int argc, char **argv)
 {
 	static stralloc User = {0}, Domain = {0}, alias_line = {0}, old_alias = {0},
-					quotaVal = {0};
+					quotaVal = {0}, result = {0};
 	char           *group, *gecos, *member, *old_member, *passwd, *hostid,
 				   *mdahost, *Quota, *real_domain, *ptr;
 	char            strnum[FMT_ULONG];
 	mdir_t          q;
-	int             i, option, ignore = 0, ret = -1, encrypt_flag, random;
+	int             i, option, ignore = 0, ret = -1, encrypt_flag, random, docram;
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	int             scram, iter, docram;
-	static stralloc result = {0};
+	int             scram, iter;
 	char           *b64salt;
 #endif
 #endif
@@ -456,13 +444,20 @@ main(int argc, char **argv)
 				break;
 			/*- more cases will get below when devils come up with a new RFC */
 			}
-			ptr = scram ? result.s : 0;
+			ptr = scram > 0 ? result.s : 0;
 #else
 			ptr = 0;
 #endif
 #else
 			ptr = 0;
 #endif
+			if (!ptr && docram) {
+				if (!stralloc_copyb(&result, "{CRAM}", 6) ||
+						!stralloc_cats(&result, passwd) ||
+						!stralloc_0(&result))
+					die_nomem();
+				ptr = result.s;
+			}
 			ret = addGroup(User.s, real_domain, mdahost, gecos, passwd, quotaVal.s, encrypt_flag, ptr);
 			if (!ret && random) {
 				subprintfe(subfdout, "vgroup", "Password is %s\n", passwd);
@@ -555,3 +550,29 @@ main()
 	return (0);
 }
 #endif
+
+/*
+ * $Log: vgroup.c,v $
+ * Revision 1.7  2023-07-15 00:26:13+05:30  Cprogrammer
+ * Set password for CRAM authentication with {CRAM} prefix.
+ *
+ * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.5  2022-11-02 20:15:00+05:30  Cprogrammer
+ * added feature to add scram password during user addition
+ *
+ * Revision 1.4  2022-08-05 22:44:59+05:30  Cprogrammer
+ * removed apop argument to iadduser()
+ * added encrypt flag to iadduser()
+ *
+ * Revision 1.3  2019-06-07 15:51:55+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.2  2019-04-22 23:19:29+05:30  Cprogrammer
+ * added missing strerr.h
+ *
+ * Revision 1.1  2019-04-18 08:34:02+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
