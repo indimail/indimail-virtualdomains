@@ -1,5 +1,5 @@
 /*
- * $Id: authindi.c,v 1.18 2023-07-15 00:16:08+05:30 Cprogrammer Exp mbhangui $
+ * $Id: authindi.c,v 1.17 2023-07-15 12:44:29+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -57,7 +57,7 @@
 #define WARN  "authindi: warn: "
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.18 2023-07-15 00:16:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.17 2023-07-15 12:44:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -632,9 +632,6 @@ main(int argc, char **argv)
 			getpid(), service, login, auth_type);
 		substdio_flush(subfderr);
 	}
-	/*- force pw_comp to use crypt instead of in_crypt */
-	if (!env_get("PASSWORD_HASH") && !env_put2("PASSWORD_HASH", "0"))
-		die_nomem();
 	if (!pass || !*pass || pw_comp((unsigned char *) login, (unsigned char *) pass,
 		(unsigned char *) (auth_method > AUTH_PLAIN ? challenge : 0),
 		(unsigned char *) (auth_method > AUTH_PLAIN ? response : auth_data), auth_method)) {
@@ -686,11 +683,8 @@ main(int argc, char **argv)
 
 /*
  * $Log: authindi.c,v $
- * Revision 1.18  2023-07-15 00:16:08+05:30  Cprogrammer
+ * Revision 1.17  2023-07-15 12:44:29+05:30  Cprogrammer
  * authenticate using CRAM when password field starts with {CRAM}
- *
- * Revision 1.17  2023-06-17 23:46:55+05:30  Cprogrammer
- * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
  *
  * Revision 1.16  2023-03-21 09:32:51+05:30  Cprogrammer
  * replaced strerr_warn with subprintfe

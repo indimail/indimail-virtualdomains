@@ -40,7 +40,7 @@ char           *crypt(const char *, const char *);
 #define FATAL   "incrypt: fatal: "
 #define WARN    "incrypt: warning: "
 
-static char    *usage = "usage: incrypt [-h hash] -s salt passphrase";
+static char    *usage = "usage: incrypt [-h hash] -S salt passphrase";
 
 int
 main(int argc, char **argv)

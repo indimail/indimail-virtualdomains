@@ -1,8 +1,5 @@
 /*
  * $Log: authpgsql.c,v $
- * Revision 1.10  2023-06-17 23:47:30+05:30  Cprogrammer
- * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
- *
  * Revision 1.9  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -68,7 +65,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authpgsql.c,v 1.10 2023-06-17 23:47:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authpgsql.c,v 1.9 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_PGSQL
@@ -316,8 +313,6 @@ main(int argc, char **argv)
 	else
 	if (env_get("DEBUG"))
 		strerr_warn7("authpgsql: pid [", module_pid, "] login [", login, "] method [", strnum, "]", 0);
-	if (!env_get("PASSWORD_HASH") && !env_put2("PASSWORD_HASH", "0"))
-		die_nomem();
 	if (pw_comp((unsigned char *) ologin, (unsigned char *) crypt_pass, (unsigned char *) (*response ? challenge : 0),
 		 (unsigned char *) (*response ? response : challenge), auth_method)) {
 		pipe_exec(argv, authstr, offset);

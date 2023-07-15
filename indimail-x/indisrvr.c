@@ -1,8 +1,5 @@
 /*
  * $Log: indisrvr.c,v $
- * Revision 1.17  2023-06-17 23:47:36+05:30  Cprogrammer
- * set PASSWORD_HASH to make pw_comp use crypt() instead of in_crypt()
- *
  * Revision 1.16  2023-03-20 10:06:02+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -60,7 +57,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.17 2023-06-17 23:47:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.16 2023-03-20 10:06:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -565,10 +562,6 @@ Login_User(stralloc *username, stralloc *password)
 	}
 	if (!(admin_pass = mgmtgetpass(username->s, 0)))
 		return (1);
-	if (!env_get("PASSWORD_HASH") && !env_put2("PASSWORD_HASH", "0")) {
-		strerr_warn1("indisrvr: out of memory", 0);
-		return (-1);
-	}
 	if (*admin_pass && !pw_comp(0, (unsigned char *) admin_pass, 0,
 		(unsigned char *) password->s, 0)) {
 		if (substdio_put(subfdoutsmall, "OK\n", 3) ||

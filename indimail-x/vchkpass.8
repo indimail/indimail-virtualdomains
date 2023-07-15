@@ -25,10 +25,10 @@ work for LOGIN, PLAIN and the CRAM methods, one can store the passwords
 encrypted, set the environment variable \fBENABLE_CRAM\fR and have clients
 supply encrypted passwords as the password. If you set the passwords for
 SCRAM authentication, then one can store both encrypted and un-encrypted
-passwords in the database (-m and -C option when using \fBvadduser\fR(1),
+passwords in the database (-C, -m option when using \fBvadduser\fR(1),
 \fBvmoduser\fR(1), \fBvpasswd\fR(1)). In such a case all authentication
-methods will work. Additionally, if you set the passwords for SCRAM, then
-you need not set \fBENABLE_CRAM\fR environment variable.
+methods will work. Additionally, if you set the passwords for CRAM, SCRAM,
+then you need not set \fBENABLE_CRAM\fR environment variable.
 
 As reflected in the \fBqmail-smtpd\fR(8) man page, \fBqmail-smtpd\fR(8)
 must be invoked with three arguments: hostname, path of the checkpassword
