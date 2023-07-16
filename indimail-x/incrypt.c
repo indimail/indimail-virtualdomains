@@ -1,5 +1,8 @@
 /*
  * $Log: incrypt.c,v $
+ * Revision 1.4  2023-07-16 22:40:14+05:30  Cprogrammer
+ * added YESCRYPT hash
+ *
  * Revision 1.3  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -66,9 +69,12 @@ main(int argc, char **argv)
 			else
 			if (!str_diffn(optarg, "SHA-512", 7))
 				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
+			else
+			if (!str_diffn(optarg, "YESCRYPT", 8))
+				strnum[fmt_int(strnum, YESCRYPT_HASH)] = 0;
 			else {
-				strerr_warn3(WARN, optarg, ": wrong hash method. Supported [DES MD5 SHA-256 SHA-512]", 0);
-				strerr_die2x(100, WARN, usage);
+				strerr_die5x(100, FATAL, "wrong hash method ", optarg,
+						". Supported HASH Methods: DES MD5 SHA-256 SHA-512 YESCRYPT\n", usage);
 			}
 			if (!env_put2("PASSWORD_HASH", strnum))
 				strerr_die1x(111, "out of memory");

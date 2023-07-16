@@ -1,12 +1,12 @@
 /*
- * $Id: vgroup.c,v 1.7 2023-07-15 00:26:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vgroup.c,v 1.8 2023-07-16 22:41:42+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 1.7 2023-07-15 00:26:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 1.8 2023-07-16 22:41:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -217,7 +217,11 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos,
 			if (!str_diffn(optarg, "SHA-512", 7))
 				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
 			else
-				strerr_die5x(100, FATAL, "wrong hash method ", optarg, ". Supported HASH Methods: DES MD5 SHA-256 SHA-512\n", usage);
+			if (!str_diffn(optarg, "YESCRYPT", 8))
+				strnum[fmt_int(strnum, YESCRYPT_HASH)] = 0;
+			else
+				strerr_die5x(100, FATAL, "wrong hash method ",
+						optarg, ". Supported HASH Methods: DES MD5 SHA-256 SHA-512 YESCRYPT\n", usage);
 			if (!env_put2("PASSWORD_HASH", strnum))
 				strerr_die1x(111, "out of memory");
 			*encrypt_flag = 1;
@@ -553,6 +557,9 @@ main()
 
 /*
  * $Log: vgroup.c,v $
+ * Revision 1.8  2023-07-16 22:41:42+05:30  Cprogrammer
+ * added YESCRYPT hash
+ *
  * Revision 1.7  2023-07-15 00:26:13+05:30  Cprogrammer
  * Set password for CRAM authentication with {CRAM} prefix.
  *

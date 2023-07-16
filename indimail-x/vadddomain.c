@@ -1,5 +1,5 @@
 /*
- * $Id: vadddomain.c,v 1.15 2023-07-15 00:25:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vadddomain.c,v 1.16 2023-07-16 22:41:02+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -72,7 +72,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.15 2023-07-15 00:25:20+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.16 2023-07-16 22:41:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -215,7 +215,11 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 			if (!str_diffn(optarg, "SHA-512", 7))
 				strnum1[fmt_int(strnum1, SHA512_HASH)] = 0;
 			else
-				strerr_die5x(100, WARN, "wrong hash method ", optarg, ". Supported HASH Methods: DES MD5 SHA-256 SHA-512\n", usage);
+			if (!str_diffn(optarg, "YESCRYPT", 8))
+				strnum1[fmt_int(strnum1, YESCRYPT_HASH)] = 0;
+			else
+				strerr_die5x(100, WARN, "wrong hash method ", optarg,
+						". Supported HASH Methods: DES MD5 SHA-256 SHA-512 YESCRYPT\n", usage);
 			if (!env_put2("PASSWORD_HASH", strnum1))
 				strerr_die1x(111, "out of memory");
 			*encrypt_flag = 1;
@@ -739,6 +743,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.16  2023-07-16 22:41:02+05:30  Cprogrammer
+ * added YESCRYPT hash
+ *
  * Revision 1.15  2023-07-15 00:25:20+05:30  Cprogrammer
  * Set password for CRAM authentication with {CRAM} prefix
  *

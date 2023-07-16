@@ -1,5 +1,5 @@
 /*
- * $Id: vmoduser.c,v 1.19 2023-07-16 14:00:46+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vmoduser.c,v 1.20 2023-07-16 22:42:03+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -56,7 +56,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.19 2023-07-16 14:00:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.20 2023-07-16 22:42:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -197,8 +197,11 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Ge
 			if (!str_diffn(optarg, "SHA-512", 7))
 				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
 			else
+			if (!str_diffn(optarg, "YESCRYPT", 8))
+				strnum[fmt_int(strnum, YESCRYPT_HASH)] = 0;
+			else
 				strerr_die5x(100, WARN, "wrong hash method ", optarg,
-						". Supported HASH Methods: DES MD5 SHA-256 SHA-512\n", usage);
+						". Supported HASH Methods: DES MD5 SHA-256 SHA-512 YESCRYPT\n", usage);
 			if (!env_put2("PASSWORD_HASH", strnum))
 				strerr_die1x(111, "out of memory");
 			encrypt_flag = 1;
@@ -635,6 +638,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.20  2023-07-16 22:42:03+05:30  Cprogrammer
+ * added YESCRYPT hash
+ *
  * Revision 1.19  2023-07-16 14:00:46+05:30  Cprogrammer
  * check mkpasswd for error
  *

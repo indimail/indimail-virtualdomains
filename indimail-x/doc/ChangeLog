@@ -18,6 +18,8 @@ Release 3.4.5-1.1 Start 25/04/2023 End XX/XX/XXXX
 09. iadduser.c, ipasswd.c, proxylogin.c, vmoduser.c, vsetpass.c: check
     mkpasswd for error
 10. userinfo.c: display more encryption methods
+11. incrypt.c, vadddomain.c, vadduser.c, vgroup.c, vmoduser.c, vpasswd.c:
+    added YESCRYPT hash
 
 * Sun Apr 23 2023 19:21:03 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.4-1.1%{?dist}
 Release 3.4.4-1.1 Start 26/03/2023 End 23/04/2023

@@ -1,5 +1,5 @@
 /*
- * $Id: vadduser.c,v 1.13 2023-07-15 00:28:23+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vadduser.c,v 1.14 2023-07-16 22:41:25+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -61,7 +61,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadduser.c,v 1.13 2023-07-15 00:28:23+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadduser.c,v 1.14 2023-07-16 22:41:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -451,7 +451,11 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 			if (!str_diffn(optarg, "SHA-512", 7))
 				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
 			else
-				strerr_die5x(100, FATAL, "wrong hash method ", optarg, ". Supported HASH Methods: DES MD5 SHA-256 SHA-512\n", usage);
+			if (!str_diffn(optarg, "YESCRYPT", 8))
+				strnum[fmt_int(strnum, YESCRYPT_HASH)] = 0;
+			else
+				strerr_die5x(100, FATAL, "wrong hash method ", optarg,
+						". Supported HASH Methods: DES MD5 SHA-256 SHA-512 YESCRYPT\n", usage);
 			if (!env_put2("PASSWORD_HASH", strnum))
 				strerr_die1x(111, "out of memory");
 			*encrypt_flag = 1;
@@ -572,6 +576,9 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 
 /*
  * $Log: vadduser.c,v $
+ * Revision 1.14  2023-07-16 22:41:25+05:30  Cprogrammer
+ * added YESCRYPT hash
+ *
  * Revision 1.13  2023-07-15 00:28:23+05:30  Cprogrammer
  * Set password for CRAM authentication with {CRAM} prefix
  *
