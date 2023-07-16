@@ -433,10 +433,12 @@ function do_svscan_start()
 			echo "  testing command svscan (with svscanlog) startup succeeded with pid $svpid"
 		else
 			echo "  testing command svscan (with svscanlog) startup failed"
+			less $logdir/svscan/current
 			exit 1
 		fi
 	else
 			echo "  testing command svscan (with svscanlog) startup failed"
+			less $logdir/svscan/current
 			exit 1
 	fi
 	sudo chown -R $user $servicedir/*/supervise
@@ -450,6 +452,7 @@ function test_svscan_log()
 		echo "  testing command svscan log succeeded"
 	else
 		echo "  testing command svscan log failed"
+		less $logdir/svscan/current
 		exit 1
 	fi
 }
@@ -461,6 +464,7 @@ function test_svscan_run()
 		echo "  testing command svscan run script execution succeeded"
 	else
 		echo "  testing command svscan run script execution failed"
+		less $logdir/svscan/current
 		exit 1
 	fi
 }
@@ -534,6 +538,7 @@ function create_domain()
 		echo "  testing command vadddomain succeeded"
 	else
 		echo "  testing command vadddomain failed"
+		less $logdir/setup/vadddomain.log
 		exit 1
 	fi
 }
@@ -553,6 +558,7 @@ function create_plain_user()
 		echo "  testing command vadduser (plain) succeeded"
 	else
 		echo "  testing command vadduser (plain) failed"
+		less $logdir/setup/vadduser.log
 		exit 1
 	fi
 }
@@ -574,6 +580,7 @@ function create_cram_user()
 		echo "  testing command vadduser (cram) succeeded"
 	else
 		echo "  testing command vadduser (cram) failed"
+		less $logdir/setup/vadduser.log
 		exit 1
 	fi
 	pass=$(sudo env - \
@@ -587,6 +594,8 @@ function create_cram_user()
 		echo "  testing command vadduser (cram format) succeeded"
 	else
 		echo "  testing command vadduser (cram format) failed"
+		less $logdir/setup/vadduser.log
+		exit 1
 	fi
 }
 
@@ -610,6 +619,7 @@ function create_scram_user()
 		echo "  testing command vadduser (scram) succeeded"
 	else
 		echo "  testing command vadduser (scram) failed"
+		less $logdir/setup/vadduser.log
 		exit 1
 	fi
 }
@@ -635,6 +645,7 @@ function delete_user()
 		echo "  testing command vdeluser succeeded"
 	else
 		echo "  testing command vdeluser failed"
+		less $logdir/setup/vdeluser.log
 		exit 1
 	fi
 }
@@ -658,6 +669,7 @@ function delete_domain()
 		echo "  testing command vdeldomain succeeded"
 	else
 		echo "  testing command vdeldomain failed"
+		less $logdir/setup/vdeldomain.log
 		exit 1
 	fi
 }
@@ -676,6 +688,7 @@ function change_password()
 		echo "  testing command vpasswd succeeded"
 	else
 		echo "  testing command vpasswd failed"
+		less $logdir/setup/vpasswd.log
 		exit 1
 	fi
 
@@ -734,6 +747,7 @@ function do_inquerytest()
 		echo "  testing command inquerytest succeeded"
 	else
 		echo "  testing command inquerytest failed"
+		less $logdir/setup/inquerytest.log
 		exit 1
 	fi
 }
@@ -744,12 +758,13 @@ function do_vdominfo()
 		SYSCONFDIR=$sysconfdir \
 		CONTROLDIR=$cntrldir \
 		ASSIGNDIR=$sysconfdir/users \
-		/usr/bin/vdominfo > $logdir/setup/vdomino.log
+		/usr/bin/vdominfo > $logdir/setup/vdominfo.log
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vdominfo succeeded"
 	else
 		echo "  testing command vdominfo failed"
+		less $logdir/setup/vdominfo.log
 		exit 1
 	fi
 }
@@ -766,6 +781,7 @@ function do_dbinfo()
 		echo "  testing command dbinfo succeeded"
 	else
 		echo "  testing command dbinfo failed"
+		less $logdir/setup/dbinfo.log
 		exit 1
 	fi
 }
@@ -778,6 +794,7 @@ function test_services()
 		echo "  testing command svscan service startup succeeded"
 	else
 		echo "  testing command svscan service startup failed"
+		less $logdir/setup/services.log
 		exit 1
 	fi
 }
@@ -843,13 +860,15 @@ function do_smtp_auth_login_swaks()
 				last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $i:")
 				if [ $? -eq 0 ] ; then
 					tcount=$(expr $tcount + 1)
-					printf "  testing mail  AUTH %-12s SMTP auth (%s) using swaks succeeded\n" "$i" "$str"
+					printf "  testing mail AUTH %-12s SMTP auth (%s) using swaks succeeded\n" "$i" "$str"
 				else
-					printf "  testing mail  AUTH %-12s SMTP auth (%s) using swaks failed\n"    "$i" "$str"
+					printf "  testing mail AUTH %-12s SMTP auth (%s) using swaks failed\n"    "$i" "$str"
+					less $logdir/smtpd/current
 					exit 1
 				fi
 			else
-				echo "  testing mail  delivery in do_smtp_auth_login_swaks failed"
+				echo "  testing mail delivery in do_smtp_auth_login_swaks failed"
+				less $logdir/qmail-send/current
 				exit 1
 			fi
 		done
@@ -859,6 +878,7 @@ function do_smtp_auth_login_swaks()
 				echo "  testing command inquery password cache succeeded"
 			else
 				echo "  testing command inquery password cache failed"
+				less $logdir/inlookup/current
 				exit 1
 			fi
 		fi
@@ -919,13 +939,14 @@ function do_smtp_auth_qmail_remote()
 				last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $i:")
 				if [ $? -eq 0 ] ; then
 					tcount=$(expr $tcount + 1)
-					printf "  testing mail  AUTH %-12s SMTP auth (%s) using qmail-remote for %s succeeded\n" "$i" "$str" "$2"
+					printf "  testing mail AUTH %-12s SMTP auth (%s) using qmail-remote for %s succeeded\n" "$i" "$str" "$2"
 				else
-					printf "  testing mail  AUTH %-12s SMTP auth (%s) using qmail-remote for %s failed\n"    "$i" "$str" "$2"
+					printf "  testing mail AUTH %-12s SMTP auth (%s) using qmail-remote for %s failed\n"    "$i" "$str" "$2"
+					less $logdir/smtpd/current
 					exit 1
 				fi
 			else
-				echo "  testing mail  delivery in do_smtp_auth_qmail_remote failed"
+				echo "  testing mail delivery in do_smtp_auth_qmail_remote failed"
 				less $logdir/qremote/qmail-remote.log
 				exit 1
 			fi
@@ -952,13 +973,15 @@ function do_smtp_auth_qmail_remote_scram()
 		last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $1:")
 		if [ $? -eq 0 ] ; then
 			tcount=$(expr $tcount + 1)
-			printf "  testing mail  AUTH %-18s SMTP auth (%s) using qmail-remote (plaintext) succeeded\n" "$1" "$str"
+			printf "  testing mail AUTH %-18s SMTP auth (%s) using qmail-remote (plaintext) succeeded\n" "$1" "$str"
 		else
-			printf "  testing mail  AUTH %-18s SMTP auth (%s) using qmail-remote (plaintext) failed\n" "$1" "$str"
+			printf "  testing mail AUTH %-18s SMTP auth (%s) using qmail-remote (plaintext) failed\n" "$1" "$str"
+			less $logdir/smtpd/current
 			exit 1
 		fi
 	else
-		echo "  testing mail  delivery in do_smtp_auth_qmail_remote_scram failed"
+		echo "  testing mail delivery in do_smtp_auth_qmail_remote_scram failed"
+		less $logdir/qremote/qmail-remote.log
 		exit 1
 	fi
 	hexsalted=$(sudo setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -p $3 | cut -d: -f3)
@@ -980,13 +1003,15 @@ function do_smtp_auth_qmail_remote_scram()
 		last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $1:")
 		if [ $? -eq 0 ] ; then
 			tcount=$(expr $tcount + 1)
-			printf "  testing mail  AUTH %-18s SMTP auth (%s) using qmail-remote (hexsalted) succeeded\n" "$1" "$str"
+			printf "  testing mail AUTH %-18s SMTP auth (%s) using qmail-remote (hexsalted) succeeded\n" "$1" "$str"
 		else
-			printf "  testing mail  AUTH %-18s SMTP auth (%s) using qmail-remote (hexsalted) failed\n" "$1" "$str"
+			printf "  testing mail AUTH %-18s SMTP auth (%s) using qmail-remote (hexsalted) failed\n" "$1" "$str"
+			less $logdir/smtpd/current
 			exit 1
 		fi
 	else
-		echo "  testing mail  delivery in do_smtp_auth_qmail_remote_scram failed"
+		echo "  testing mail delivery in do_smtp_auth_qmail_remote_scram failed"
+		less $logdir/qremote/qmail-remote.log
 		exit 1
 	fi
 }
@@ -1005,9 +1030,10 @@ function do_gsasl_test()
 		--mechanism "$1" --smtp --connect localhost:2025 >> $logdir/gsasl/gsasl.log 2>&1
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
-		printf "  testing mail  AUTH %-18s SMTP auth (%s) using gsasl succeeded\n" "$1" "$str"
+		printf "  testing mail AUTH %-18s SMTP auth (%s) using gsasl succeeded\n" "$1" "$str"
 	else
-		printf "  testing mail  AUTH %-18s SMTP auth (%s) using gsasl failed\n" "$1" "$str"
+		printf "  testing mail AUTH %-18s SMTP auth (%s) using gsasl failed\n" "$1" "$str"
+		less $logdir/gsasl/gsasl.log
 		exit 1
 	fi
 }
@@ -1112,9 +1138,10 @@ function test_pop3()
 	tcpclient  -vDHR 0 1100 /tmp/qmail-test/tcpclient.pop3 2> $logdir/pop3d/pop3d.log
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
-		printf "  testing mail  POP3  login and mail retrieval (%s) succeeded\n" "$str"
+		printf "  testing mail POP3  login and mail retrieval (%s) succeeded\n" "$str"
 	else
-		printf "  testing mail  POP3  login and mail retrieval (%s) failed\n" "$str"
+		printf "  testing mail POP3  login and mail retrieval (%s) failed\n" "$str"
+		less $logdir/pop3d/pop3d.log
 		exit 1
 	fi
 	swaks -S --to testuser01@$domain3 --from $testuser1 --server ::1 --port 2025 >/dev/null 2>&1
@@ -1133,9 +1160,10 @@ function test_pop3()
 	tcpclient -n "" -vDHR 0 9950 /tmp/qmail-test/tcpclient.pop3 2> $logdir/pop3d-ssl/pop3d-ssl.log
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
-		printf "  testing mail  POP3S login and mail retrieval (%s) succeeded\n" "$str"
+		printf "  testing mail POP3S login and mail retrieval (%s) succeeded\n" "$str"
 	else
-		printf "  testing mail  POP3S login and mail retrieval (%s) failed\n" "$str"
+		printf "  testing mail POP3S login and mail retrieval (%s) failed\n" "$str"
+		less $logdir/pop3d-ssl/pop3d-ssl.log
 		exit 1
 	fi
 	swaks -S --to testuser01@$domain3 --from $testuser1 --server ::1 --port 2025 >/dev/null 2>&1
@@ -1214,9 +1242,9 @@ function test_imap()
 	tcpclient  -vDHR 0 1430 /tmp/qmail-test/tcpclient.imap 2>$logdir/imapd/imapd.log
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
-		printf "  testing mail  IMAP  login and mail retrieval (%s) succeeded\n" "$str"
+		printf "  testing mail IMAP  login and mail retrieval (%s) succeeded\n" "$str"
 	else
-		printf "  testing mail  IMAP  login and mail retrieval (%s) failed\n" "$str"
+		printf "  testing mail IMAP  login and mail retrieval (%s) failed\n" "$str"
 		less $logdir/imapd/imapd.log
 		exit 1
 	fi
@@ -1244,9 +1272,10 @@ function test_imap()
 	tcpclient -n "" -vDHR 0 9930 /tmp/qmail-test/tcpclient.imap 2> $logdir/imapd-ssl/imapd-ssl.log
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
-		printf "  testing mail  IMAPS login and mail retrieval (%s) succeeded\n" "$str"
+		printf "  testing mail IMAPS login and mail retrieval (%s) succeeded\n" "$str"
 	else
-		printf "  testing mail  IMAPS login and mail retrieval (%s) failed\n" "$str"
+		printf "  testing mail IMAPS login and mail retrieval (%s) failed\n" "$str"
+		less $logdir/imapd-ssl/imapd-ssl.log
 		exit 1
 	fi
 	swaks -S --to testuser01@$domain3 --from $testuser1 --server ::1 --port 2025 >/dev/null 2>&1
@@ -1563,12 +1592,22 @@ do
 			str="inlookup cache=0"
 			> $servicedir/smtpd/variables/PASSWD_CACHE
 			> $servicedir/smtpd/variables/QUERY_CACHE
+			if [ "$hash" = "DES" ] ; then
+				echo -1 > $servicedir/smtpd/variables/PASSWORD_HASH
+			else
+				> $servicedir/smtpd/variables/PASSWORD_HASH
+			fi
 			for i in imap pop3
 			do
 				for k in d d-ssl
 				do
 					> $servicedir/"$i"$k/variables/PASSWD_CACHE
 					> $servicedir/"$i"$k/variables/QUERY_CACHE
+					if [ "$hash" = "DES" ] ; then
+						echo -1 > $servicedir/"$i"$k/variables/PASSWORD_HASH
+					else
+						> $servicedir/"$i"$k/variables/PASSWORD_HASH
+					fi
 				done
 			done
 			;;
@@ -1576,12 +1615,22 @@ do
 			str="inlookup cache=1"
 			echo 1 > $servicedir/smtpd/variables/PASSWD_CACHE
 			echo 1 > $servicedir/smtpd/variables/QUERY_CACHE
+			if [ "$hash" = "DES" ] ; then
+				echo -1 > $servicedir/smtpd/variables/PASSWORD_HASH
+			else
+				> $servicedir/smtpd/variables/PASSWORD_HASH
+			fi
 			for i in imap pop3
 			do
 				for k in d d-ssl
 				do
 					echo 1 > $servicedir/"$i"$k/variables/PASSWD_CACHE
 					echo 1 > $servicedir/"$i"$k/variables/QUERY_CACHE
+					if [ "$hash" = "DES" ] ; then
+						echo -1 > $servicedir/"$i"$k/variables/PASSWORD_HASH
+					else
+						> $servicedir/"$i"$k/variables/PASSWORD_HASH
+					fi
 				done
 			done
 			;;

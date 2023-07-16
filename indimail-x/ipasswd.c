@@ -1,5 +1,8 @@
 /*
  * $Log: ipasswd.c,v $
+ * Revision 1.4  2023-07-16 13:58:45+05:30  Cprogrammer
+ * check mkpasswd for error
+ *
  * Revision 1.3  2022-08-05 21:08:50+05:30  Cprogrammer
  * update scram password
  *
@@ -36,7 +39,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ipasswd.c,v 1.3 2022-08-05 21:08:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ipasswd.c,v 1.4 2023-07-16 13:58:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -82,7 +85,8 @@ ipasswd(char *username, char *domain, char *password, int encrypt_flag, char *sc
 		strerr_warn1("User not allowed to change passwd", 0);
 		return (-1);
 	}
-	mkpasswd(password, &Crypted, encrypt_flag);
+	if (mkpasswd(password, &Crypted, encrypt_flag) == -1)
+		strerr_die1sys(111, "crypt: ");
 	if ((i = sql_passwd(username, domain, Crypted.s, scram_passwd)) == 1) {
 			if (!stralloc_copys(&Dir, pw->pw_dir) ||
 				!stralloc_catb(&Dir, "/Maildir", 8) ||

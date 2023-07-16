@@ -1,5 +1,5 @@
 /*
- * $Id: userinfo.c,v 1.12 2023-07-15 00:23:45+05:30 Cprogrammer Exp mbhangui $
+ * $Id: userinfo.c,v 1.13 2023-07-16 13:59:26+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -62,7 +62,7 @@
 #include "userinfo.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: userinfo.c,v 1.12 2023-07-15 00:23:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: userinfo.c,v 1.13 2023-07-16 13:59:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern char *strptime(const char *, const char *, struct tm *);
@@ -75,14 +75,17 @@ die_nomem()
 }
 
 int
-userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid, DisplayComment, DisplayDir,
-		  DisplayQuota, DisplayLastAuth, DisplayFilter, DisplayAll)
+userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid,
+		DisplayGid, DisplayComment, DisplayDir, DisplayQuota,
+		DisplayLastAuth, DisplayFilter, DisplayAll)
 	char           *Email, *User, *Domain;
-	int             DisplayName, DisplayPasswd, DisplayUid, DisplayGid, DisplayComment, DisplayDir, DisplayQuota,
-	                DisplayLastAuth, DisplayFilter, DisplayAll;
+	int             DisplayName, DisplayPasswd, DisplayUid, DisplayGid,
+					DisplayComment, DisplayDir, DisplayQuota,
+					DisplayLastAuth, DisplayFilter, DisplayAll;
 {
 	struct passwd  *mypw;
-	char           *ptr, *real_domain, *mailstore, *sysconfdir, *controldir, *passwd_hash;
+	char           *ptr, *real_domain, *mailstore, *sysconfdir, *controldir,
+				   *passwd_hash = "unknown";
 	MYSQL          *mptr;
 #ifdef CLUSTERED_SITE
 	int             is_dist = 0;
@@ -98,7 +101,8 @@ userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid
 	static stralloc timeBuf = {0};
 	mdir_t          delivery_count, delivery_size;
 	char            ipaddr[7][18];
-	time_t          add_time, auth_time, pwdchg_time, inact_time, act_time, pop3_time, imap_time, delivery_time;
+	time_t          add_time, auth_time, pwdchg_time, inact_time, act_time,
+					pop3_time, imap_time, delivery_time;
 	struct tm       tm = {0};
 #endif
 
@@ -249,25 +253,54 @@ userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid
 		return (1);
 	}
 	if (!str_diffn(mypw->pw_passwd, "{SCRAM-SHA-1}", 13))
-		passwd_hash = "SCRAM-SHA-1";
+		passwd_hash = "scram-sha-1";
 	else
 	if (!str_diffn(mypw->pw_passwd, "{SCRAM-SHA-256}", 15))
-		passwd_hash = "SCRAM-SHA-256";
+		passwd_hash = "scram-sha-256";
 	else
 	if (!str_diffn(mypw->pw_passwd, "{CRAM}", 6))
-		passwd_hash = "CRAM";
+		passwd_hash = "cram";
 	else
-	if (mypw->pw_passwd[0] == '$' && mypw->pw_passwd[2] == '$') {
+	if (mypw->pw_passwd[0] == '_')
+		passwd_hash = "bsdicrypt";
+	else
+	if (mypw->pw_passwd[0] == '$') {
 		switch(mypw->pw_passwd[1])
 		{
 			case '1':
 				passwd_hash = "MD5";
 				break;
+			case '2':
+				if (mypw->pw_passwd[2] == 'b' && mypw->pw_passwd[3] == '$')
+					passwd_hash = "bcrypt";
+				else
+				if (mypw->pw_passwd[2] == '$')
+					passwd_hash = "nt";
+				break;
 			case '5':
-				passwd_hash = "SHA256";
+				passwd_hash = "sha256";
 				break;
 			case '6':
-				passwd_hash = "SHA512";
+				passwd_hash = "sha512";
+				break;
+			case '7':
+				passwd_hash = "scrypt";
+				break;
+			case 'g':
+				if (mypw->pw_passwd[2] == 'y' && mypw->pw_passwd[3] == '$')
+					passwd_hash = "gostYesCrypt";
+				break;
+			case 'm':
+				if (!str_diffn(mypw->pw_passwd, "$md5", 4))
+					passwd_hash = "SunMD5";
+				break;
+				break;
+			case 's':
+				if (!str_diffn(mypw->pw_passwd, "$sha1", 5))
+					passwd_hash = "sha1Crypt";
+				break;
+			case 'y':
+				passwd_hash = "YesCrypt";
 				break;
 			default:
 				passwd_hash = "$?$";
@@ -584,6 +617,9 @@ userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid, DisplayGid
 
 /*
  * $Log: userinfo.c,v $
+ * Revision 1.13  2023-07-16 13:59:26+05:30  Cprogrammer
+ * display more encryption methods
+ *
  * Revision 1.12  2023-07-15 00:23:45+05:30  Cprogrammer
  * Display clear text passwords for CRAM with label CRAM
  *

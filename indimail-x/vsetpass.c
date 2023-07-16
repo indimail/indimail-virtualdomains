@@ -1,5 +1,5 @@
 /*
- * $Id: vsetpass.c,v 1.10 2023-07-15 12:46:29+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vsetpass.c,v 1.11 2023-07-16 14:00:58+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -39,7 +39,7 @@
 #include "getpeer.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vsetpass.c,v 1.10 2023-07-15 12:46:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetpass.c,v 1.11 2023-07-16 14:00:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -229,7 +229,8 @@ main(int argc, char **argv)
 		print_error("exec");
 		_exit (111);
 	}
-	mkpasswd(new_pass, &Crypted, 1);
+	if (mkpasswd(new_pass, &Crypted, 1) == -1)
+		strerr_die1sys(111, "vsetpass: crypt: ");
 	if (env_get("DEBUG_LOGIN"))
 		strerr_warn11("vsetpass: login [", login, "] old_pass [",
 				old_pass, "] new_pass [", new_pass, "] response [", response, "] pw_passwd [", Crypted.s, "]", 0);
@@ -260,6 +261,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vsetpass.c,v $
+ * Revision 1.11  2023-07-16 14:00:58+05:30  Cprogrammer
+ * check mkpasswd for error
+ *
  * Revision 1.10  2023-07-15 12:46:29+05:30  Cprogrammer
  * extract encrypted password from pw->pw_passwd starting with {CRAM}
  *

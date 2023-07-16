@@ -1,5 +1,5 @@
 /*
- * $Id: vmoduser.c,v 1.18 2023-07-15 00:48:45+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vmoduser.c,v 1.19 2023-07-16 14:00:46+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -56,7 +56,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.18 2023-07-15 00:48:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.19 2023-07-16 14:00:46+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -177,7 +177,8 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Ge
 				encrypt_flag = 0;
 			/*- flow through */
 		case 'P':
-			mkpasswd(clear_text ? *clear_text = optarg : optarg, enc_pass, encrypt_flag);
+			if (mkpasswd(clear_text ? *clear_text = optarg : optarg, enc_pass, encrypt_flag) == -1)
+				strerr_warn2(FATAL, "crypt: ", &strerr_sys);
 			if (verbose) {
 				subprintfe(subfderr, "vmoduser", "encrypted password set as %s\n", enc_pass->s);
 				errflush("vmoduser");
@@ -634,6 +635,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.19  2023-07-16 14:00:46+05:30  Cprogrammer
+ * check mkpasswd for error
+ *
  * Revision 1.18  2023-07-15 00:48:45+05:30  Cprogrammer
  * Set password for CRAM authentication with {CRAM} prefix
  *

@@ -1,12 +1,12 @@
 /*
- * $Id: proxylogin.c,v 1.11 2023-07-15 12:52:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: proxylogin.c,v 1.12 2023-07-16 13:59:07+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: proxylogin.c,v 1.11 2023-07-15 12:52:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: proxylogin.c,v 1.12 2023-07-16 13:59:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -76,9 +76,10 @@ autoAddUser(char *email, char *pass, char *service, int encrypt_flag)
 
 	if (!env_get("AUTOADDUSERS"))
 		return (1);
-	if (encrypt_flag)
-		mkpasswd(pass, &encrypted, encrypt_flag);
-	else {
+	if (encrypt_flag) {
+		if (mkpasswd(pass, &encrypted, encrypt_flag) == -1)
+			strerr_die1sys(111, "crypt: ");
+	} else {
 		if (!stralloc_copys(&encrypted, pass) ||
 				!stralloc_0(&encrypted))
 			die_nomem();
@@ -631,6 +632,9 @@ void pop3d_capability()
 
 /*
  * $Log: proxylogin.c,v $
+ * Revision 1.12  2023-07-16 13:59:07+05:30  Cprogrammer
+ * check mkpasswd for error
+ *
  * Revision 1.11  2023-07-15 12:52:17+05:30  Cprogrammer
  * authenticate using CRAM when password field starts with {CRAM}
  *

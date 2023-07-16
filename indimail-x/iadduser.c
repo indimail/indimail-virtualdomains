@@ -1,5 +1,8 @@
 /*
  * $Log: iadduser.c,v $
+ * Revision 1.8  2023-07-16 13:56:59+05:30  Cprogrammer
+ * check mkpasswd for error
+ *
  * Revision 1.7  2023-03-20 10:03:03+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -68,7 +71,7 @@
 #define ALLOWCHARS              " .!#$%&'*+-/=?^_`{|}~\""
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iadduser.c,v 1.7 2023-03-20 10:03:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iadduser.c,v 1.8 2023-07-16 13:56:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -230,7 +233,8 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 	if (!*dir)
 		dir = (char *) 0;
 	if (domain && *domain) {
-		mkpasswd(password, &Crypted, encrypt_flag);
+		if (mkpasswd(password, &Crypted, encrypt_flag) == -1)
+			strerr_die1sys(111, "crypt: ");
 		ptr = sql_adduser(username, domain, Crypted.s, gecos, dir, quota,
 				uid_flag, actFlag, scram_passwd);
 		if (!ptr || !*ptr)

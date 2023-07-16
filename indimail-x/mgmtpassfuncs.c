@@ -1,5 +1,8 @@
 /*
  * $Log: mgmtpassfuncs.c,v $
+ * Revision 1.7  2023-07-16 13:59:00+05:30  Cprogrammer
+ * check mkpasswd for error
+ *
  * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -24,7 +27,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.6 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.7 2023-07-16 13:59:00+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -492,9 +495,10 @@ mgmtsetpass(char *username, char *pass, uid_t uid, gid_t gid, time_t lastaccess,
 		strerr_warn1("mgmtsetpass: failed to open master db", 0);
 		return (-1);
 	}
-	if (encrypt_flag)
-		mkpasswd(pass, &crypted, 1);
-	else {
+	if (encrypt_flag) {
+		if (mkpasswd(pass, &crypted, 1) == -1)
+			strerr_die1sys(111, "crypt: ");
+	} else {
 		if (!stralloc_copys(&crypted, pass) || !stralloc_0(&crypted))
 			die_nomem();
 		crypted.len--;
