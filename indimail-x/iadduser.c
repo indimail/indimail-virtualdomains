@@ -1,5 +1,8 @@
 /*
  * $Log: iadduser.c,v $
+ * Revision 1.9  2023-07-17 11:44:10+05:30  Cprogrammer
+ * set hash method from hash_method control file in controldir, domaindir
+ *
  * Revision 1.8  2023-07-16 13:56:59+05:30  Cprogrammer
  * check mkpasswd for error
  *
@@ -49,8 +52,10 @@
 #include <getln.h>
 #include <error.h>
 #include <scan.h>
+#include <fmt.h>
 #include <mkpasswd.h>
 #include <getEnvConfig.h>
+#include <env.h>
 #endif
 #include "indimail.h"
 #include "addusercntrl.h"
@@ -67,11 +72,12 @@
 #include "sql_updateflag.h"
 #include "sql_getpw.h"
 #include "variables.h"
+#include "get_hashmethod.h"
 
 #define ALLOWCHARS              " .!#$%&'*+-/=?^_`{|}~\""
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iadduser.c,v 1.8 2023-07-16 13:56:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iadduser.c,v 1.9 2023-07-17 11:44:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -121,7 +127,7 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 		 int encrypt_flag, char *scram_passwd)
 {
 	static stralloc Dir = {0}, Crypted = {0}, tmpbuf = {0}, line = {0};
-	char            estr[2], inbuf[512];
+	char            estr[2], inbuf[512], strnum[FMT_ULONG];
 	char           *tmpstr, *dir, *ptr, *allow_chars;
 	uid_t           uid;
 	gid_t           gid;
@@ -133,25 +139,25 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 #endif
 
 	if (!username || !*username || !isalnum((int) *username))
-		strerr_die1x(100, "illegal username");
+		strerr_die1x(100, "iadduser: illegal username");
 	if ((ulen = str_len(username)) > MAX_PW_NAME || str_len(domain) > MAX_PW_DOMAIN ||
 			str_len(gecos) > MAX_PW_GECOS || str_len(password) > MAX_PW_PASS)
-		strerr_die1x(100, "Name too long");
+		strerr_die1x(100, "iadduser: Name too long");
 	if (*username == '.' || username[ulen - 1] == '.')
-		strerr_die1x(100, "Trailing/Leading periods not allowed");
+		strerr_die1x(100, "iadduser: Trailing/Leading periods not allowed");
 	getEnvConfigStr(&allow_chars, "ALLOWCHARS", ALLOWCHARS);
 	for (ptr = username;*ptr;ptr++) {
 		if (*ptr == ':')
-			strerr_die1x(100, "':' not allowed in names");
+			strerr_die1x(100, "iadduser: ':' not allowed in names");
 		if (*ptr == '.' && *(ptr + 1) == '.')
-			strerr_die1x(100, "successive periods not allowed in local-part See RFC-5322");
+			strerr_die1x(100, "iadduser: successive periods not allowed in local-part See RFC-5322");
 		i = str_chr(allow_chars, *ptr);
 		if (allow_chars[i])
 			continue;
 		if (!isalnum((int) *ptr)) {
 			estr[0] = *ptr;
 			estr[1] = 0;
-			strerr_die3x(100, "[", estr, "] not allowed in local-part See RFC-5322");
+			strerr_die3x(100, "iadduser: [", estr, "] not allowed in local-part See RFC-5322");
 		}
 		if (isupper((int) *ptr))
 			*ptr = tolower((int) *ptr);
@@ -159,7 +165,7 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 	if (domain && *domain) {
 		for (ptr = domain;*ptr;ptr++) {
 			if (*ptr == ':') {
-				strerr_die1x(100, "':' not allowed in names");
+				strerr_die1x(100, "iadduser: ':' not allowed in names");
 				return (-1);
 			} else
 			if (isupper((int) *ptr))
@@ -174,31 +180,31 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 				strerr_die1x(111, "iadduser: Failed to open Master Db");
 			uid_flag = ADD_FLAG;
 			if ((err = is_user_present(username, domain)) == 1)
-				strerr_die5x(100, "username ", username, "@", domain, " exists");
+				strerr_die5x(100, "iadduser: username ", username, "@", domain, " exists");
 			else
 			if (err == -1) {
-				strerr_die1x(111, "auth db Error");
+				strerr_die1x(111, "iadduser: auth db Error");
 				return (-1);
 			}
 		} else
 		if (sql_getpw(username, domain))
-			strerr_die5x(100, "username ", username, "@", domain, " exists");
+			strerr_die5x(100, "iadduser: username ", username, "@", domain, " exists");
 #else
 		if (sql_getpw(username, domain))
-			strerr_die5x(100, "username ", username, "@", domain, " exists");
+			strerr_die5x(100, "iadduser: username ", username, "@", domain, " exists");
 #endif
 		if (!(tmpstr = get_assign(domain, &Dir, &uid, &gid)))
-			strerr_die3x(100, "Domain ", domain, " does not exist");
+			strerr_die3x(100, "iadduser: Domain ", domain, " does not exist");
 	} else { /*- if domain is null */
 		if (get_assign(username, &Dir, &uid, &gid))
-			strerr_die3x(100, "username ", username, "  exists");
+			strerr_die3x(100, "iadduser: username ", username, "  exists");
 		get_indimailuidgid(&uid, &gid);
 	}
 	if (!stralloc_copy(&tmpbuf, &Dir) ||
 		!stralloc_catb(&tmpbuf, "/.users_per_level", 17) || !stralloc_0(&tmpbuf))
 		die_nomem();
 	if ((fd = open_read(tmpbuf.s)) == -1 && errno != error_noent)
-		strerr_die3sys(111, "iadduser", tmpbuf.s, ": ");
+		strerr_die3sys(111, "iadduser: ", tmpbuf.s, ": ");
 	if (fd == -1)
 		u_level = 0;
 	else {
@@ -224,17 +230,24 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 	if (gecos && *gecos) {
 		i = str_chr(gecos, ':');
 		if (gecos[i])
-			strerr_die1x(100, "':' not allowed in names");
+			strerr_die1x(100, "iadduser: ':' not allowed in names");
 	}
 	if (!(dir = make_user_dir(username, domain, uid, gid,
 			!max_users_per_level ? u_level : max_users_per_level))) {
-		strerr_die1x(111, "make user dir failed");
+		strerr_die1x(111, "iadduser: make user dir failed");
 	}
 	if (!*dir)
 		dir = (char *) 0;
 	if (domain && *domain) {
+		if (!(ptr = env_get("PASSWORD_HASH"))) {
+			if ((i = get_hashmethod(domain)) == -1)
+				strerr_die1sys(111, "iadduser: get_hashmethod: ");
+			strnum[fmt_int(strnum, i)] = 0;
+			if (!env_put2("PASSWORD_HASH", strnum))
+				strerr_die1x(111, "iadduser: out of memory");
+		}
 		if (mkpasswd(password, &Crypted, encrypt_flag) == -1)
-			strerr_die1sys(111, "crypt: ");
+			strerr_die1sys(111, "iadduser: crypt: ");
 		ptr = sql_adduser(username, domain, Crypted.s, gecos, dir, quota,
 				uid_flag, actFlag, scram_passwd);
 		if (!ptr || !*ptr)
@@ -263,7 +276,7 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 					!stralloc_append(&SqlBuf, "\"") || !stralloc_0(&SqlBuf))
 					die_nomem();
 				if (mysql_query(&mysql[1], SqlBuf.s))
-					strerr_die2x(111, "adduser-delindimail: ", (char *) in_mysql_error(&mysql[1]));
+					strerr_die2x(111, "iadduser-addusercntrl: ", (char *) in_mysql_error(&mysql[1]));
 #ifdef ENABLE_AUTH_LOGGING
 				if (!stralloc_catb(&SqlBuf, "delete low_priority from lastauth where user=\"", 46) ||
 					!stralloc_cats(&SqlBuf, username) ||
@@ -272,9 +285,9 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 					!stralloc_append(&SqlBuf, "\"") || !stralloc_0(&SqlBuf))
 					die_nomem();
 				if (mysql_query(&mysql[1], SqlBuf.s))
-					strerr_die2x(111, "adduser-lastauth: ", (char *) in_mysql_error(&mysql[1]));
+					strerr_die2x(111, "iadduser-lastauth: ", (char *) in_mysql_error(&mysql[1]));
 #endif
-				strerr_die5x(111, "username ", username, "@", domain, " exists");
+				strerr_die5x(111, "iadduser: username ", username, "@", domain, " exists");
 			} else
 			if (!err)
 				sql_updateflag(username, domain, 1); /*- Reset the pw_uid flag to 1 */

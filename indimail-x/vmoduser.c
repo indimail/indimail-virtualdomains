@@ -1,5 +1,5 @@
 /*
- * $Id: vmoduser.c,v 1.20 2023-07-16 22:42:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vmoduser.c,v 1.21 2023-07-17 11:48:51+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -54,9 +54,10 @@
 #include "variables.h"
 #include "post_handle.h"
 #include "common.h"
+#include "get_hashmethod.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.20 2023-07-16 22:42:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.21 2023-07-17 11:48:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -75,7 +76,7 @@ static char    *usage =
 	"         -c comment               (set the comment/gecos field)\n"
 	"         -P passwd                (set the password field)\n"
 	"         -e                       (set the encrypted password field as given by -P option)\n"
-	"         -h hash                  (use one of DES, MD5, SHA256, SHA512 hash)\n"
+	"         -h hash                  (use one of DES, MD5, SHA256, SHA512, YESCRYPT hash)\n"
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	"         -m SCRAM method          (use one of CRAM, SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method)\n"
@@ -119,13 +120,13 @@ die_nomem()
 }
 
 int
-get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Gecos,
-		stralloc *enc_pass, stralloc *DateFormat, stralloc *Quota,
+get_options(int argc, char **argv, stralloc *User, stralloc *Email,
+		stralloc *Gecos, stralloc *DateFormat, stralloc *Quota,
 		stralloc *vacation_file, int *toggle, int *GidFlag, int *ClearFlags,
 		int *QuotaFlag, int *set_vacation, int *docram, char **clear_text,
-		char **salt, int *iter, int *scram)
+		char **salt, int *iter, int *scram, char **hash, int *eflag)
 {
-	int             c, i, encrypt_flag = -1;
+	int             c, i, r;
 	char            optstr[56], strnum[FMT_ULONG];
 
 	*toggle = *ClearFlags = 0;
@@ -140,6 +141,9 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Ge
 		*scram = -1;
 	if (iter)
 		*iter = -1;
+	if (hash)
+		*hash = 0;
+	*eflag = -1;
 	/*- make sure optstr has enough size to hold all options + 1 */
 	i = 0;
 	i += fmt_strn(optstr + i, "avutxHD:c:q:dpwisobr0123h:e:l:P:0123456789", 42);
@@ -173,38 +177,37 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Ge
 			break;
 		case 'e':
 			/*- ignore encrypt flag option if -h option is provided */
-			if (encrypt_flag == -1)
-				encrypt_flag = 0;
+			if (*eflag == -1)
+				*eflag = 0;
 			/*- flow through */
 		case 'P':
-			if (mkpasswd(clear_text ? *clear_text = optarg : optarg, enc_pass, encrypt_flag) == -1)
-				strerr_warn2(FATAL, "crypt: ", &strerr_sys);
-			if (verbose) {
-				subprintfe(subfderr, "vmoduser", "encrypted password set as %s\n", enc_pass->s);
-				errflush("vmoduser");
-			}
+			if (clear_text)
+				*clear_text = optarg;
 			break;
 		case 'h':
-			if (!str_diffn(optarg, "DES", 3))
+			if ((r = scan_int(optarg, &i)) != str_len(optarg))
+				i = -1;
+			if (!str_diffn(optarg, "DES", 3) || i == DES_HASH)
 				strnum[fmt_int(strnum, DES_HASH)] = 0;
 			else
-			if (!str_diffn(optarg, "MD5", 3))
+			if (!str_diffn(optarg, "MD5", 3) || i == MD5_HASH)
 				strnum[fmt_int(strnum, MD5_HASH)] = 0;
 			else
-			if (!str_diffn(optarg, "SHA-256", 7))
+			if (!str_diffn(optarg, "SHA-256", 7) || i == SHA256_HASH)
 				strnum[fmt_int(strnum, SHA256_HASH)] = 0;
 			else
-			if (!str_diffn(optarg, "SHA-512", 7))
+			if (!str_diffn(optarg, "SHA-512", 7) || i == SHA512_HASH)
 				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
 			else
-			if (!str_diffn(optarg, "YESCRYPT", 8))
+			if (!str_diffn(optarg, "YESCRYPT", 8) || i == YESCRYPT_HASH)
 				strnum[fmt_int(strnum, YESCRYPT_HASH)] = 0;
-			else
-				strerr_die5x(100, WARN, "wrong hash method ", optarg,
+			else {
+				strerr_die5x(100, FATAL, "wrong hash method ", optarg,
 						". Supported HASH Methods: DES MD5 SHA-256 SHA-512 YESCRYPT\n", usage);
+			}
 			if (!env_put2("PASSWORD_HASH", strnum))
-				strerr_die1x(111, "out of memory");
-			encrypt_flag = 1;
+				die_nomem();
+			*eflag = 1;
 			break;
 		case 'C':
 			if (docram)
@@ -323,8 +326,8 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email, stralloc *Ge
 	}
 	if (!Email->len)
 		strerr_die2x(100, WARN, usage);
-	if (encrypt_flag == -1)
-		encrypt_flag = 1;
+	if (*eflag == -1)
+		*eflag = 1;
 	if (docram && *docram && !*clear_text)
 		strerr_die3x(100, WARN, "Password not provided\n", usage);
 	return (0);
@@ -337,12 +340,12 @@ main(int argc, char **argv)
 					enc_pass = {0}, DateFormat = {0}, Quota = {0}, vacation_file = {0},
 					tmpbuf = {0}, tmpQuota = {0}, result = {0};
 	int             GidFlag = 0, QuotaFlag = 0, toggle = 0, ClearFlags,
-					set_vacation = 0, err, fd, i, docram;
+					set_vacation = 0, err, fd, i, docram, eflag;
 	uid_t           uid, domainuid;
 	gid_t           gid, domaingid;
 	struct passwd   PwTmp;
 	struct passwd  *pw;
-	char           *real_domain, *ptr, *clear_text;
+	char           *real_domain, *ptr, *clear_text, *hash;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	mdir_t          quota = 0, ul;
 #ifdef USE_MAILDIRQUOTA
@@ -362,20 +365,20 @@ main(int argc, char **argv)
 
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
-	if (get_options(argc, argv, &User, &Email, &Gecos, &enc_pass,
-			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
-			&QuotaFlag, &set_vacation, &docram, &clear_text, &b64salt, &iter, &scram))
+	if (get_options(argc, argv, &User, &Email, &Gecos, &DateFormat, &Quota,
+			&vacation_file, &toggle, &GidFlag, &ClearFlags, &QuotaFlag,
+			&set_vacation, &docram, &clear_text, &b64salt, &iter, &scram, &hash, &eflag))
 		return (1);
 #else
-	if (get_options(argc, argv, &User, &Email, &Gecos, &enc_pass,
-			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
-			&QuotaFlag, &set_vacation, &docram, &clear_text, 0, 0, 0))
+	if (get_options(argc, argv, &User, &Email, &Gecos, &DateFormat, &Quota,
+			&vacation_file, &toggle, &GidFlag, &ClearFlags, &QuotaFlag,
+			&set_vacation, &docram, &clear_text, 0, 0, 0, &hash, &eflag))
 		return (1);
 #endif
 #else
-	if (get_options(argc, argv, &User, &Email, &Gecos, &enc_pass,
-			&DateFormat, &Quota, &vacation_file, &toggle, &GidFlag, &ClearFlags,
-			&QuotaFlag, &set_vacation, docram, &clear_text, 0, 0, 0))
+	if (get_options(argc, argv, &User, &Email, &Gecos, &DateFormat, &Quota,
+			&vacation_file, &toggle, &GidFlag, &ClearFlags, &QuotaFlag,
+			&set_vacation, docram, &clear_text, 0, 0, 0, &&hash, eflag))
 		return (1);
 #endif
 	parse_email(Email.s, &User, &Domain);
@@ -432,6 +435,21 @@ main(int argc, char **argv)
 			strerr_die3x(1, WARN, "quota modification not allowed for ", Email.s);
 	}
 #endif
+	if (clear_text) {
+		if (!hash && !env_get("PASSWORD_HASH")) {
+			if ((i = get_hashmethod(real_domain)) == -1)
+				strerr_die2sys(111, FATAL, "get_hashmethod: ");
+			strnum1[fmt_int(strnum1, i)] = 0;
+			if (!env_put2("PASSWORD_HASH", strnum1))
+				die_nomem();
+		}
+		if (mkpasswd(clear_text, &enc_pass, eflag) == -1)
+			strerr_die2sys(111, FATAL, "crypt: ");
+		if (verbose) {
+			subprintfe(subfderr, "vmoduser", "encrypted password set as %s\n", enc_pass.s);
+			errflush("vmoduser");
+		}
+	}
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	if (!str_diffn(pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(pw->pw_passwd, "{SCRAM-SHA-256}", 15))
@@ -638,6 +656,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.21  2023-07-17 11:48:51+05:30  Cprogrammer
+ * set hash method from hash_method control file in controldir, domaindir
+ *
  * Revision 1.20  2023-07-16 22:42:03+05:30  Cprogrammer
  * added YESCRYPT hash
  *

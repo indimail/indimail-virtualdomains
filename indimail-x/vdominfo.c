@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 1.9  2023-07-17 11:48:22+05:30  Cprogrammer
+ * display hash method for domain
+ *
  * Revision 1.8  2023-03-20 10:36:03+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -64,9 +67,10 @@
 #include "get_local_hostid.h"
 #include "get_local_ip.h"
 #include "vsmtp_select.h"
+#include "get_hashmethod.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 1.8 2023-03-20 10:36:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 1.9 2023-07-17 11:48:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define VDOMTOKENS ":\n"
@@ -278,6 +282,8 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 				}
 				subprintfe(subfdout, "vdominfo", "  Base Dir: %s\n", line.s);
 			}
+			i = get_hashmethod(real_domain);
+			subprintfe(subfdout, "vdominfo", "crypt Hash: %s\n", print_hashmethod(i));
 			if (!stralloc_copys(&tmpbuf, dir) ||
 					!stralloc_catb(&tmpbuf, "/.users_per_level", 17) ||
 					!stralloc_0(&tmpbuf))
@@ -345,7 +351,7 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 				}
 				close(fd);
 			}
-		}
+		} /*- if (!str_diff(real_domain, domain)) */
 	} else {
 		subprintfe(subfdout, "vdominfo", "---- Domain %s ----------------\n", domain);
 		if (DisplayName) {

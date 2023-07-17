@@ -1,5 +1,8 @@
 /*
  * $Log: ipasswd.c,v $
+ * Revision 1.5  2023-07-17 11:46:13+05:30  Cprogrammer
+ * set hash method from hash_method control file in controldir, domaindir
+ *
  * Revision 1.4  2023-07-16 13:58:45+05:30  Cprogrammer
  * check mkpasswd for error
  *
@@ -26,6 +29,8 @@
 #include <stralloc.h>
 #include <strerr.h>
 #include <mkpasswd.h>
+#include <fmt.h>
+#include <env.h>
 #endif
 #include "lowerit.h"
 #include "iopen.h"
@@ -37,9 +42,10 @@
 #include "getpeer.h"
 #include "sql_passwd.h"
 #include "variables.h"
+#include "get_hashmethod.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ipasswd.c,v 1.4 2023-07-16 13:58:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ipasswd.c,v 1.5 2023-07-17 11:46:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -57,6 +63,7 @@ ipasswd(char *username, char *domain, char *password, int encrypt_flag, char *sc
 {
 	struct passwd  *pw;
 	char           *ptr;
+	char            strnum[FMT_ULONG];
 	int             i;
 	static stralloc Dir = {0}, Crypted = {0}, email = {0};
 	mdir_t          quota;
@@ -82,11 +89,18 @@ ipasswd(char *username, char *domain, char *password, int encrypt_flag, char *sc
 	if (!(pw = sql_getpw(username, domain)))
 		return (0);
 	if (pw->pw_gid & NO_PASSWD_CHNG) {
-		strerr_warn1("User not allowed to change passwd", 0);
+		strerr_warn1("ipasswd: User not allowed to change passwd", 0);
 		return (-1);
 	}
+	if (!(ptr = env_get("PASSWORD_HASH"))) {
+		if ((i = get_hashmethod(domain)) == -1)
+			strerr_die1sys(111, "ipasswd: get_hashmethod: ");
+		strnum[fmt_int(strnum, i)] = 0;
+		if (!env_put2("PASSWORD_HASH", strnum))
+			die_nomem();
+	}
 	if (mkpasswd(password, &Crypted, encrypt_flag) == -1)
-		strerr_die1sys(111, "crypt: ");
+		strerr_die1sys(111, "ipasswd: crypt: ");
 	if ((i = sql_passwd(username, domain, Crypted.s, scram_passwd)) == 1) {
 			if (!stralloc_copys(&Dir, pw->pw_dir) ||
 				!stralloc_catb(&Dir, "/Maildir", 8) ||

@@ -1,5 +1,5 @@
 /*
- * $Id: vadduser.c,v 1.14 2023-07-16 22:41:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vadduser.c,v 1.14 2023-07-17 12:25:48+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -61,7 +61,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadduser.c,v 1.14 2023-07-16 22:41:25+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadduser.c,v 1.14 2023-07-17 12:25:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -92,7 +92,7 @@ static char    *usage =
 	"  -d              - Create the homedir (ignored if -h option is given)\n"
 	"  -r len          - generate a random password of length=len\n"
 	"  -e password     - set the encrypted password field\n"
-	"  -h hash         - use one of DES, MD5, SHA256, SHA512, hash method\n"
+	"  -h hash         - use one of DES, MD5, SHA256, SHA512, YESCRYPT, hash method\n"
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	"  -m SCRAM method - use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method\n"
@@ -391,7 +391,7 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 		int *encrypt_flag, int *random, int *docram, int *scram, int *iter,
 		char **salt)
 {
-	int             c, i;
+	int             c, i, r;
 	char            strnum[FMT_ULONG], optstr[30];
 
 	Email.len = Passwd.len = Domain.len = Quota.len = 0;
@@ -439,23 +439,26 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 				die_nomem();
 			break;
 		case 'h':
-			if (!str_diffn(optarg, "DES", 3))
+			if ((r = scan_int(optarg, &i)) != str_len(optarg))
+				i = -1;
+			if (!str_diffn(optarg, "DES", 3) || i == DES_HASH)
 				strnum[fmt_int(strnum, DES_HASH)] = 0;
 			else
-			if (!str_diffn(optarg, "MD5", 3))
+			if (!str_diffn(optarg, "MD5", 3) || i == MD5_HASH)
 				strnum[fmt_int(strnum, MD5_HASH)] = 0;
 			else
-			if (!str_diffn(optarg, "SHA-256", 7))
+			if (!str_diffn(optarg, "SHA-256", 7) || i == SHA256_HASH)
 				strnum[fmt_int(strnum, SHA256_HASH)] = 0;
 			else
-			if (!str_diffn(optarg, "SHA-512", 7))
+			if (!str_diffn(optarg, "SHA-512", 7) || i == SHA512_HASH)
 				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
 			else
-			if (!str_diffn(optarg, "YESCRYPT", 8))
+			if (!str_diffn(optarg, "YESCRYPT", 8) || i == YESCRYPT_HASH)
 				strnum[fmt_int(strnum, YESCRYPT_HASH)] = 0;
-			else
+			else {
 				strerr_die5x(100, FATAL, "wrong hash method ", optarg,
 						". Supported HASH Methods: DES MD5 SHA-256 SHA-512 YESCRYPT\n", usage);
+			}
 			if (!env_put2("PASSWORD_HASH", strnum))
 				strerr_die1x(111, "out of memory");
 			*encrypt_flag = 1;
@@ -576,7 +579,7 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 
 /*
  * $Log: vadduser.c,v $
- * Revision 1.14  2023-07-16 22:41:25+05:30  Cprogrammer
+ * Revision 1.14  2023-07-17 12:25:48+05:30  Cprogrammer
  * added YESCRYPT hash
  *
  * Revision 1.13  2023-07-15 00:28:23+05:30  Cprogrammer

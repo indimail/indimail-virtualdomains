@@ -1,5 +1,5 @@
 /*
- * $Id: vadddomain.c,v 1.16 2023-07-16 22:41:02+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vadddomain.c,v 1.17 2023-07-17 11:46:59+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -70,9 +70,10 @@
 #include "dbinfoAdd.h"
 #include "get_indimailuidgid.h"
 #include "common.h"
+#include "get_hashmethod.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.16 2023-07-16 22:41:02+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.17 2023-07-17 11:46:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -85,7 +86,7 @@ static uid_t    Uid;
 static gid_t    Gid;
 static stralloc dirbuf = { 0 };
 static stralloc AliasLine = { 0 };
-static stralloc tmpbuf = { 0 };
+static stralloc tmp1 = { 0 }, tmp2 = { 0 };
 static int      chk_rcpt, users_per_level = 0;
 static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
@@ -110,7 +111,7 @@ static char    *usage =
 	"                               except the last one\n"
 	"  -r len                     - generate a random password of length=len\n"
 	"  -e password                - set the encrypted password field\n"
-	"  -h hash                    - use one of DES, MD5, SHA256, SHA512, hash method\n"
+	"  -h hash                    - use one of DES, MD5, SHA256, SHA512, YESCRYPT, hash method\n"
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	"  -m SCRAM method            - use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method\n"
@@ -146,9 +147,10 @@ void
 get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd,
 	char **domain, char **user, char **quota, char **bounceEmail, char **ipaddr,
 	char **database, char **sqlserver, char **dbuser, char **dbpass,
-	int *encrypt_flag, int *random, int *docram, int *scram, int *iter, char **salt)
+	int *encrypt_flag, int *random, int *docram, int *scram, int *iter,
+	char **salt, char **hash)
 {
-	int             c, i;
+	int             c, i, r;
 	struct passwd  *mypw;
 	char            optstr[51];
 
@@ -203,25 +205,29 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 			scan_uint(optarg, (unsigned int *) random);
 			break;
 		case 'h':
-			if (!str_diffn(optarg, "DES", 3))
+			if ((r = scan_int(optarg, &i)) != str_len(optarg))
+				i = -1;
+			if (!str_diffn(optarg, "DES", 3) || i == DES_HASH)
 				strnum1[fmt_int(strnum1, DES_HASH)] = 0;
 			else
-			if (!str_diffn(optarg, "MD5", 3))
+			if (!str_diffn(optarg, "MD5", 3) || i == MD5_HASH)
 				strnum1[fmt_int(strnum1, MD5_HASH)] = 0;
 			else
-			if (!str_diffn(optarg, "SHA-256", 7))
+			if (!str_diffn(optarg, "SHA-256", 7) || i == SHA256_HASH)
 				strnum1[fmt_int(strnum1, SHA256_HASH)] = 0;
 			else
-			if (!str_diffn(optarg, "SHA-512", 7))
+			if (!str_diffn(optarg, "SHA-512", 7) || i == SHA512_HASH)
 				strnum1[fmt_int(strnum1, SHA512_HASH)] = 0;
 			else
-			if (!str_diffn(optarg, "YESCRYPT", 8))
+			if (!str_diffn(optarg, "YESCRYPT", 8) || i == YESCRYPT_HASH)
 				strnum1[fmt_int(strnum1, YESCRYPT_HASH)] = 0;
-			else
-				strerr_die5x(100, WARN, "wrong hash method ", optarg,
+			else {
+				strerr_die5x(100, FATAL, "wrong hash method ", optarg,
 						". Supported HASH Methods: DES MD5 SHA-256 SHA-512 YESCRYPT\n", usage);
+			}
 			if (!env_put2("PASSWORD_HASH", strnum1))
 				strerr_die1x(111, "out of memory");
+			*hash = optarg;
 			*encrypt_flag = 1;
 			break;
 		case 'e':
@@ -359,15 +365,67 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 	return;
 }
 
+void
+write_file(char *domain, char *fn, int fnlen, char *str, int len)
+{
+	int             fd;
+	uid_t           uid;
+	gid_t           gid;
+	char           *s;
+	char            dbuf[FMT_ULONG + FMT_ULONG + 21];
+
+	if (!get_assign(domain, &dirbuf, &uid, &gid)) {
+		strerr_warn4(WARN, "domain ", domain, " does not exist", 0);
+		deldomain(domain);
+		iclose();
+		_exit(100);
+	}
+	if (!stralloc_copy(&tmp1, &dirbuf) ||
+			!stralloc_append(&tmp1, "/") ||
+			!stralloc_catb(&tmp1, fn, fnlen) ||
+			!stralloc_0(&tmp1)) {
+		deldomain(domain);
+		iclose();
+		die_nomem();
+	}
+	if ((fd = open(tmp1.s, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR)) == -1) {
+		strerr_warn4(FATAL, "open: ", tmp1.s, ": ", &strerr_sys);
+		deldomain(domain);
+		iclose();
+		_exit(111);
+	}
+	if (write(fd, str, len) == -1) {
+		strerr_warn4(FATAL, "write: ", tmp1.s, ": ", &strerr_sys);
+		deldomain(domain);
+		iclose();
+		_exit(111);
+	}
+	if (fchown(fd, uid, gid)) {
+		s = dbuf;
+		s += fmt_strn(s, ": (uid = ", 9);
+		s += fmt_uint(s, uid);
+		s += fmt_strn(s, ", gid = ", 8);
+		s += fmt_uint(s, gid);
+		s += fmt_strn(s, "): ", 3);
+		*s++ = 0;
+		strerr_warn4(FATAL, "fchown: ", tmp1.s, dbuf, &strerr_sys);
+		deldomain(domain);
+		iclose();
+		_exit(111);
+	}
+	close(fd);
+	return;
+}
+
 int
 main(int argc, char **argv)
 {
-	int             err, fd, i, encrypt_flag, random, docram;
+	int             err, i, encrypt_flag, random, docram;
 	uid_t           uid;
 	gid_t           gid;
 	extern int      create_flag;
 	char           *domaindir, *ptr, *base_argv0, *base_path, *dir_t, *passwd, *domain, *user,
-				   *bounceEmail, *quota, *ipaddr, *s;
+				   *bounceEmail, *quota, *ipaddr, *s, *hash;
 	char            dbuf[FMT_ULONG + FMT_ULONG + 21];
 	char           *auto_ids[] = {
 		"abuse",
@@ -387,7 +445,7 @@ main(int argc, char **argv)
 #endif
 #endif
 
-	base_path = dir_t = passwd = domain = user = quota = bounceEmail = ipaddr = (char *) 0;
+	base_path = dir_t = passwd = domain = user = quota = bounceEmail = ipaddr = hash = (char *) 0;
 #ifdef CLUSTERED_SITE
 	sqlserver = database = dbuser = dbpass = (char *) 0;
 	use_ssl = 1;
@@ -400,16 +458,16 @@ main(int argc, char **argv)
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	get_options(argc, argv, &base_path, &dir_t, &passwd, &domain, &user,
 		&quota, &bounceEmail, &ipaddr, &database, &sqlserver, &dbuser, &dbpass,
-		&encrypt_flag, &random, &docram, &scram, &iter, &b64salt);
+		&encrypt_flag, &random, &docram, &scram, &iter, &b64salt, &hash);
 #else
 	get_options(argc, argv, &base_path, &dir_t, &passwd, &domain, &user,
 		&quota, &bounceEmail, &ipaddr, &database, &sqlserver, &dbuser, &dbpass,
-		&encrypt_flag, &random, &docram, 0, 0, 0);
+		&encrypt_flag, &random, &docram, 0, 0, 0, &hash);
 #endif
 #else
 	get_options(argc, argv, &base_path, &dir_t, &passwd, &domain, &user,
 		&quota, &bounceEmail, &ipaddr, &database, &sqlserver, &dbuser, &dbpass,
-		&encrypt_flag, &random, &docram, 0, 0, 0);
+		&encrypt_flag, &random, &docram, 0, 0, 0, &hash);
 #endif
 	if (!isvalid_domain(domain))
 		strerr_die3x(100, WARN, "Invalid domain ", domain);
@@ -449,105 +507,44 @@ main(int argc, char **argv)
 	} else
 	if (!stralloc_copys(&dirbuf, dir_t) || !stralloc_0(&dirbuf))
 		die_nomem();
-	/*
-	 * add domain to virtualdomains and optionally to chkrcptdomains
-	 * add domain to users/assign, users/cdb
-	 * create .qmail-default file
-	 */
 	if (base_path && !use_etrn) {
 		if (access(base_path, F_OK) && r_mkdir(base_path, INDIMAIL_DIR_MODE, Uid, Gid))
 			strerr_die3sys(111, FATAL, base_path, ": ");
 		if (!env_put2("BASE_PATH", base_path))
 			strerr_die4sys(111, FATAL, "env_put2: BASE_PATH=", base_path, ": ");
 	}
+	/*
+	 * add domain to virtualdomains and optionally to chkrcptdomains
+	 * add domain to users/assign, users/cdb
+	 * create .qmail-default file
+	 */
 	if ((err = iadddomain(domain, ipaddr, dirbuf.s, Uid, Gid, chk_rcpt)) != VA_SUCCESS) {
 		iclose();
 		return (err);
 	}
 	if (users_per_level) {
-		if (!get_assign(domain, &dirbuf, &uid, &gid)) {
-			strerr_warn4(WARN, "domain ", domain, " does not exist", 0);
-			deldomain(domain);
-			iclose();
-			_exit(100);
-		}
-		if (!stralloc_copy(&tmpbuf, &dirbuf) ||
-				!stralloc_catb(&tmpbuf, "/.users_per_level", 17) ||
-				!stralloc_0(&tmpbuf)) {
-			deldomain(domain);
-			iclose();
-			die_nomem();
-		}
-		if ((fd = open(tmpbuf.s, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR)) == -1) {
-			strerr_warn4(FATAL, "open: ", tmpbuf.s, ": ", &strerr_sys);
-			deldomain(domain);
-			iclose();
-			_exit(111);
-		}
 		s = dbuf;
 		s += (i = fmt_uint(s, (unsigned int) users_per_level));
-		if (write(fd, dbuf, i) == -1) {
-			strerr_warn4(FATAL, "write: ", tmpbuf.s, ": ", &strerr_sys);
-			deldomain(domain);
-			iclose();
-			_exit(111);
-		}
-		if (fchown(fd, uid, gid)) {
-			s = dbuf;
-			s += fmt_strn(s, ": (uid = ", 9);
-			s += fmt_uint(s, uid);
-			s += fmt_strn(s, ", gid = ", 8);
-			s += fmt_uint(s, gid);
-			s += fmt_strn(s, "): ", 3);
-			*s++ = 0;
-			strerr_warn4(FATAL, "fchown: ", tmpbuf.s, dbuf, &strerr_sys);
-			deldomain(domain);
-			iclose();
-			_exit(111);
-		}
-		close(fd);
+		write_file(domain, ".users_per_level", 16, s, i);
+	}
+	if (hash) {
+		if (!stralloc_copys(&tmp2, hash) ||
+				!stralloc_append(&tmp2, "\n"))
+			die_nomem();
+		write_file(domain, "hash_method", 11, tmp2.s, tmp2.len);
+	} else
+	if (!env_get("PASSWORD_HASH")) {
+		if ((i = get_hashmethod(domain)) == -1)
+			strerr_die2sys(111, FATAL, "get_hashmethod: ");
+		strnum1[fmt_int(strnum1, i)] = 0;
+		if (!env_put2("PASSWORD_HASH", strnum1))
+			strerr_die1x(111, "out of memory");
 	}
 	if (base_path && !use_etrn) {
-		if (!get_assign(domain, &dirbuf, &uid, &gid)) {
-			strerr_warn4(WARN, "domain ", domain, " does not exist", 0);
-			deldomain(domain);
-			iclose();
-			_exit(100);
-		}
-		if (!stralloc_copy(&tmpbuf, &dirbuf) ||
-				!stralloc_catb(&tmpbuf, "/.base_path", 11) ||
-				!stralloc_0(&tmpbuf))
+		if (!stralloc_copys(&tmp2, base_path) ||
+				!stralloc_append(&tmp2, "\n"))
 			die_nomem();
-		if ((fd = open(tmpbuf.s, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR)) == -1) {
-			strerr_warn4(FATAL, "open: ", tmpbuf.s, ": ", &strerr_sys);
-			deldomain(domain);
-			iclose();
-			_exit(111);
-		}
-		if (!stralloc_copys(&tmpbuf, base_path) ||
-				!stralloc_append(&tmpbuf, "\n") ||
-				!stralloc_0(&tmpbuf))
-			die_nomem();
-		if (write(fd, tmpbuf.s, tmpbuf.len - 1) == -1) {
-			strerr_warn4(FATAL, "write: ", tmpbuf.s, ": ", &strerr_sys);
-			deldomain(domain);
-			iclose();
-			_exit(111);
-		}
-		if (fchown(fd, uid, gid)) {
-			s = dbuf;
-			s += fmt_strn(s, "(uid = ", 7);
-			s += fmt_uint(s, uid);
-			s += fmt_strn(s, ", gid = ", 8);
-			s += fmt_uint(s, gid);
-			s += fmt_strn(s, "): ", 3);
-			*s = 0;
-			strerr_warn4(FATAL, "fchown: ", tmpbuf.s, s, &strerr_sys);
-			deldomain(domain);
-			iclose();
-			return (1);
-		}
-		close(fd);
+		write_file(domain, ".base_path", 10, tmp2.s, tmp2.len);
 	}
 #ifdef CLUSTERED_SITE
 	/*
@@ -583,47 +580,15 @@ main(int argc, char **argv)
 		return (0);
 	if (bounceEmail) {
 		if (bounceEmail[i = str_chr(bounceEmail, '@')] || *bounceEmail == '/') {
-			if (!stralloc_copy(&tmpbuf, &dirbuf) ||
-					!stralloc_catb(&tmpbuf, "/.qmail-default", 15) ||
-					!stralloc_0(&tmpbuf)) {
+			if (!stralloc_copyb(&tmp2, "| ", 2) || !stralloc_cats(&tmp2, PREFIX) ||
+					!stralloc_catb(&tmp2, "/sbin/vdelivermail '' ", 22) ||
+					!stralloc_cats(&tmp2, bounceEmail) ||
+					!stralloc_append(&tmp2, "\n")) {
 				deldomain(domain);
 				iclose();
 				die_nomem();
 			}
-			if ((fd = open(tmpbuf.s, O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR)) == -1) {
-				strerr_warn4(FATAL, "open: ", tmpbuf.s, ": ", &strerr_sys);
-				deldomain(domain);
-				iclose();
-				_exit(111);
-			}
-			if (!stralloc_copyb(&tmpbuf, "| ", 2) || !stralloc_cats(&tmpbuf, PREFIX) ||
-					!stralloc_catb(&tmpbuf, "/sbin/vdelivermail '' ", 22) ||
-					!stralloc_cats(&tmpbuf, bounceEmail) ||
-					!stralloc_append(&tmpbuf, "\n")) {
-				deldomain(domain);
-				iclose();
-				die_nomem();
-			}
-			if (write(fd, tmpbuf.s, tmpbuf.len) == -1) {
-				strerr_warn4(FATAL, "write: ", tmpbuf.s, ": ", &strerr_sys);
-				deldomain(domain);
-				iclose();
-				_exit(111);
-			}
-			if (fchown(fd, uid, gid)) {
-				s = dbuf;
-				s += fmt_strn(s, "(uid = ", 7);
-				s += fmt_uint(s, uid);
-				s += fmt_strn(s, ", gid = ", 8);
-				s += fmt_uint(s, gid);
-				s += fmt_strn(s, "): \n", 4);
-				*s = 0;
-				strerr_warn4(FATAL, "fchown: ", tmpbuf.s, s, &strerr_sys);
-				deldomain(domain);
-				iclose();
-				return (1);
-			}
-			close(fd);
+			write_file(domain, ".qmail_default", 14, tmp2.s, tmp2.len);
 		} else {
 			deldomain(domain);
 			iclose();
@@ -717,12 +682,12 @@ main(int argc, char **argv)
 		}
 	}
 	iclose();
-	for (i = 1, tmpbuf.len = 0; i < argc; i++) {
-		if (!stralloc_append(&tmpbuf, " ") ||
-				!stralloc_cats(&tmpbuf, argv[i]))
+	for (i = 1, tmp1.len = 0; i < argc; i++) {
+		if (!stralloc_append(&tmp1, " ") ||
+				!stralloc_cats(&tmp1, argv[i]))
 			die_nomem();
 	}
-	if (!stralloc_0(&tmpbuf))
+	if (!stralloc_0(&tmp1))
 		die_nomem();
 	if (!(ptr = env_get("POST_HANDLE"))) {
 		i = str_rchr(argv[0], '/');
@@ -730,19 +695,22 @@ main(int argc, char **argv)
 			base_argv0 = argv[0];
 		else
 			base_argv0++;
-		return (post_handle("%s/%s%s", LIBEXECDIR, base_argv0, tmpbuf.s));
+		return (post_handle("%s/%s%s", LIBEXECDIR, base_argv0, tmp1.s));
 	} else {
 		if (setuser_privileges(Uid, Gid, "indimail")) {
 			strnum1[fmt_ulong(strnum1, Uid)] = 0;
 			strnum2[fmt_ulong(strnum2, Gid)] = 0;
 			strerr_die5sys(111, "vadddomain: setuser_privilege: (", strnum1, "/", strnum2, "): ");
 		}
-		return (post_handle("%s%s", ptr, tmpbuf.s));
+		return (post_handle("%s%s", ptr, tmp1.s));
 	}
 }
 
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.17  2023-07-17 11:46:59+05:30  Cprogrammer
+ * set hash method from hash_method control file in controldir, domaindir
+ *
  * Revision 1.16  2023-07-16 22:41:02+05:30  Cprogrammer
  * added YESCRYPT hash
  *

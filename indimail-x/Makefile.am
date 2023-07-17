@@ -76,7 +76,7 @@ include_HEADERS = addaliasdomain.h add_control.h add_domain_assign.h addressToke
 	islocalif.h ismaildup.h is_user_present.h isvalid_domain.h \
 	isvirtualdomain.h layout.h LoadBMF.h LoadDbInfo.h lockfile.h Login_Tasks.h \
 	load_mysql.h lowerit.h maildir_to_domain.h maildir_to_email.h MailQuotaWarn.h \
-	make_user_dir.h mdaMySQLConnect.h \
+	make_user_dir.h mdaMySQLConnect.h get_hashmethod.h \
 	mgmtpassfuncs.h monkey.h MoveFile.h munch_domain.h mysql_stack.h \
 	next_big_dir.h open_big_dir.h open_master.h open_smtp_relay.h \
 	parseAddress.h parse_email.h parse_quota.h passwd_policy.h pathToFilesystem.h \
@@ -128,7 +128,7 @@ COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.
 	open_master.c open_smtp_relay.c parse_email.c parse_quota.c passwd_policy.c \
 	pathToFilesystem.c pipe_exec.c post_handle.c print_control.c \
 	pwcomp.c recalc_quota.c relay_select.c RemoteBulkMail.c remove_line.c \
-	remove_quotes.c renameuser.c runcmmd.c \
+	remove_quotes.c renameuser.c runcmmd.c get_hashmethod.c \
 	SendWelcomeMail.c set_mysql_options.c setuserquota.c \
 	show_atrn_map.c show_ip_map.c skip_relay.c \
 	skip_system_files.c smtp_port.c sql_active.c sql_adddomain.c sql_adduser.c \
@@ -271,15 +271,10 @@ vuserinfo_DEPENDENCIES = libindimail.la
 
 dbinfo_SOURCES = dbinfo.c
 dbinfo_LDADD = libindimail.la $(LIB_QMAIL)
-dbinfo.lo = LoadDbInfo.h iclose.h variables.h common.h \
-	get_indimailuidgid.h writemcdinfo.h LoadDbInfo.h runcmmd.h
 dbinfo_DEPENDENCIES = libindimail.la
 
 vdominfo_SOURCES = vdominfo.c
 vdominfo_LDADD = libindimail.la $(LIB_QMAIL)
-vdominfo.lo = get_assign.h common.h check_group.h iclose.h \
-	variables.h get_indimailuidgid.h get_real_domain.h print_control.h \
-	isvirtualdomain.h get_local_hostid.h get_local_ip.h
 vdominfo_DEPENDENCIES = libindimail.la
 
 hostcntrl_SOURCES = hostcntrl.c

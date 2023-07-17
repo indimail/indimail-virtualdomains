@@ -1,5 +1,5 @@
 /*
- * $Id: vsetpass.c,v 1.11 2023-07-16 14:00:58+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vsetpass.c,v 1.12 2023-07-17 11:49:13+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -37,9 +37,10 @@
 #include "common.h"
 #include "parse_email.h"
 #include "getpeer.h"
+#include "get_hashmethod.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vsetpass.c,v 1.11 2023-07-16 14:00:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetpass.c,v 1.12 2023-07-17 11:49:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -229,6 +230,13 @@ main(int argc, char **argv)
 		print_error("exec");
 		_exit (111);
 	}
+	if (!(ptr = env_get("PASSWORD_HASH"))) {
+		if ((i = get_hashmethod(domain.s)) == -1)
+			strerr_die1sys(111, "vsetpass: get_hashmethod: ");
+		strnum[fmt_int(strnum, i)] = 0;
+		if (!env_put2("PASSWORD_HASH", strnum))
+			die_nomem();
+	}
 	if (mkpasswd(new_pass, &Crypted, 1) == -1)
 		strerr_die1sys(111, "vsetpass: crypt: ");
 	if (env_get("DEBUG_LOGIN"))
@@ -261,6 +269,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vsetpass.c,v $
+ * Revision 1.12  2023-07-17 11:49:13+05:30  Cprogrammer
+ * set hash method from hash_method control file in controldir
+ *
  * Revision 1.11  2023-07-16 14:00:58+05:30  Cprogrammer
  * check mkpasswd for error
  *

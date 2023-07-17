@@ -1,5 +1,5 @@
 /*
- * $Id: vpasswd.c,v 1.19 2023-07-16 22:42:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vpasswd.c,v 1.19 2023-07-17 12:27:25+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -36,7 +36,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.19 2023-07-16 22:42:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.19 2023-07-17 12:27:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -47,7 +47,7 @@ static char    *usage =
 	"options\n"
 	"  -r len          - generate a random password of specfied length\n"
 	"  -e password     - set the encrypted password field\n"
-	"  -h hash         - use one of DES, MD5, SHA256, SHA512, hash method\n"
+	"  -h hash         - use one of DES, MD5, SHA256, SHA512, YESCRYPT, hash method\n"
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	"  -m SCRAM method - use one of SCRAM-SHA-1, SCRAM-SHA-256 SCRAM method\n"
@@ -70,7 +70,7 @@ int
 get_options(int argc, char **argv, char **email, char **clear_text,
 		int *encrypt_flag, int *docram, int *scram, int *iter, char **salt)
 {
-	int             c, i, Random, passwd_len = 8;
+	int             c, i, Random, passwd_len = 8, r;
 	char           *ptr;
 	char            optstr[15], strnum[FMT_ULONG];
 
@@ -103,23 +103,26 @@ get_options(int argc, char **argv, char **email, char **clear_text,
 			verbose = 1;
 			break;
 		case 'h':
-			if (!str_diffn(optarg, "DES", 3))
+			if ((r = scan_int(optarg, &i)) != str_len(optarg))
+				i = -1;
+			if (!str_diffn(optarg, "DES", 3) || i == DES_HASH)
 				strnum[fmt_int(strnum, DES_HASH)] = 0;
 			else
-			if (!str_diffn(optarg, "MD5", 3))
+			if (!str_diffn(optarg, "MD5", 3) || i == MD5_HASH)
 				strnum[fmt_int(strnum, MD5_HASH)] = 0;
 			else
-			if (!str_diffn(optarg, "SHA-256", 7))
+			if (!str_diffn(optarg, "SHA-256", 7) || i == SHA256_HASH)
 				strnum[fmt_int(strnum, SHA256_HASH)] = 0;
 			else
-			if (!str_diffn(optarg, "SHA-512", 7))
+			if (!str_diffn(optarg, "SHA-512", 7) || i == SHA512_HASH)
 				strnum[fmt_int(strnum, SHA512_HASH)] = 0;
 			else
-			if (!str_diffn(optarg, "YESCRYPT", 8))
+			if (!str_diffn(optarg, "YESCRYPT", 8) || i == YESCRYPT_HASH)
 				strnum[fmt_int(strnum, YESCRYPT_HASH)] = 0;
-			else
+			else {
 				strerr_die5x(100, FATAL, "wrong hash method ", optarg,
 						". Supported HASH Methods: DES MD5 SHA-256 SHA-512 YESCRYPT\n", usage);
+			}
 			if (!env_put2("PASSWORD_HASH", strnum))
 				strerr_die1x(111, "out of memory");
 			*encrypt_flag = 1;
@@ -284,7 +287,7 @@ main(int argc, char **argv)
 
 /*
  * $Log: vpasswd.c,v $
- * Revision 1.19  2023-07-16 22:42:13+05:30  Cprogrammer
+ * Revision 1.19  2023-07-17 12:27:25+05:30  Cprogrammer
  * added YESCRYPT hash
  *
  * Revision 1.18  2023-07-15 00:31:13+05:30  Cprogrammer

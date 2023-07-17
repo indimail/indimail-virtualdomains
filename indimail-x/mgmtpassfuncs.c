@@ -1,5 +1,8 @@
 /*
  * $Log: mgmtpassfuncs.c,v $
+ * Revision 1.8  2023-07-17 11:46:36+05:30  Cprogrammer
+ * set hash method from hash_method control file in controldir
+ *
  * Revision 1.7  2023-07-16 13:59:00+05:30  Cprogrammer
  * check mkpasswd for error
  *
@@ -27,7 +30,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.7 2023-07-16 13:59:00+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.8 2023-07-17 11:46:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -48,6 +51,7 @@ static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.7 2023-07-16 13:59:00+05:30
 #include <in_crypt.h>
 #include <pw_comp.h>
 #include <getEnvConfig.h>
+#include <env.h>
 #include <subfd.h>
 #endif
 #include "mgmtpassfuncs.h"
@@ -58,6 +62,7 @@ static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.7 2023-07-16 13:59:00+05:30
 #include "open_master.h"
 #include "variables.h"
 #include "indimail.h"
+#include "get_hashmethod.h"
 
 #define SETPAS_MAX_ATTEMPTS 6
 #define LOGIN_MAX_ATTEMPTS 3
@@ -486,18 +491,26 @@ mgmtsetpass(char *username, char *pass, uid_t uid, gid_t gid, time_t lastaccess,
 {
 	static stralloc crypted = {0};
 	char            strnum[FMT_ULONG];
+	char           *ptr;
 	int             i;
 	time_t          cur_time;
 	struct tm      *tmptr;
 	int             err;
 
 	if (open_master()) {
-		strerr_warn1("mgmtsetpass: failed to open master db", 0);
+		strerr_warn1("mgmtpass: failed to open master db", 0);
 		return (-1);
 	}
 	if (encrypt_flag) {
+		if (!(ptr = env_get("PASSWORD_HASH"))) {
+			if ((i = get_hashmethod((char *) NULL)) == -1)
+				strerr_die1sys(111, "mgmtpass: get_hashmethod: ");
+			strnum[fmt_int(strnum, i)] = 0;
+			if (!env_put2("PASSWORD_HASH", strnum))
+				die_nomem();
+		}
 		if (mkpasswd(pass, &crypted, 1) == -1)
-			strerr_die1sys(111, "crypt: ");
+			strerr_die1sys(111, "mgmtpass: crypt: ");
 	} else {
 		if (!stralloc_copys(&crypted, pass) || !stralloc_0(&crypted))
 			die_nomem();
@@ -544,7 +557,7 @@ int
 mgmtadduser(char *username, char *pass, uid_t uid, gid_t gid, time_t lastaccess, time_t lastupdate)
 {
 	if (open_master()) {
-		strerr_warn1("mgmtsetpass: failed to open master db", 0);
+		strerr_warn1("mgmtadduser: failed to open master db", 0);
 		return (-1);
 	}
 	if (!stralloc_copyb(&SqlBuf, "insert low_priority into mgmtaccess (user, pass) values (\"", 58) ||
@@ -559,11 +572,11 @@ mgmtadduser(char *username, char *pass, uid_t uid, gid_t gid, time_t lastaccess,
 			if (create_table(ON_MASTER, "mgmtaccess", MGMT_TABLE_LAYOUT))
 				return (-1);
 			if (mysql_query(&mysql[0], SqlBuf.s)) {
-				strerr_warn4("mgmtpass: mysql_query[", SqlBuf.s, "]: ", (char *) in_mysql_error(&mysql[0]), 0);
+				strerr_warn4("mgmtadduser: mysql_query[", SqlBuf.s, "]: ", (char *) in_mysql_error(&mysql[0]), 0);
 				return (-1);
 			}
 		}  else {
-			strerr_warn4("mgmtpass: mysql_query[", SqlBuf.s, "]: ", (char *) in_mysql_error(&mysql[0]), 0);
+			strerr_warn4("mgmtadduser: mysql_query[", SqlBuf.s, "]: ", (char *) in_mysql_error(&mysql[0]), 0);
 			return (-1);
 		}
 	}
