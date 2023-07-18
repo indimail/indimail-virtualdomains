@@ -2,7 +2,7 @@
 #
 # $Id: testindimail-virtual,v 1.2 2023-07-16 22:42:59+05:30 Cprogrammer Exp mbhangui $
 #
-user=mbhangui
+user=$(whoami)
 domain1=example.com
 domain2=newexample.com
 domain3=example2.com
@@ -797,7 +797,7 @@ function do_vdominfo()
 		SYSCONFDIR=$sysconfdir \
 		CONTROLDIR=$cntrldir \
 		ASSIGNDIR=$sysconfdir/users \
-		/usr/bin/vdominfo > $logdir/setup/vdominfo.log
+		/usr/bin/vdominfo > $logdir/setup/vdominfo.log 2>&1
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vdominfo succeeded"
@@ -882,12 +882,12 @@ function do_smtp_auth_swaks()
 	do
 		case $j in
 			1)
-			str="inlookup cache=0"
+			str="incache=0"
 			> $servicedir/smtpd/variables/PASSWD_CACHE
 			> $servicedir/smtpd/variables/QUERY_CACHE
 			;;
 			2)
-			str="inlookup cache=1"
+			str="incache=1"
 			echo 1 > $servicedir/smtpd/variables/PASSWD_CACHE
 			echo 1 > $servicedir/smtpd/variables/QUERY_CACHE
 			;;
@@ -914,10 +914,10 @@ function do_smtp_auth_swaks()
 				last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $i:")
 				if [ $? -eq 0 ] ; then
 					tcount=$(expr $tcount + 1)
-					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s type=%-7s using swaks for %s succeeded\n" "$i" "$str" "$hash" "$type" "$1"
+					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using swk for %s succeeded\n" "$i" "$str" "$hash" "$type" "$1"
 				else
 					(
-					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s type=%-7s using swaks for %s failed\n"    "$i" "$str" "$hash" "$type" "$1"
+					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using swk for %s failed\n"    "$i" "$str" "$hash" "$type" "$1"
 					cat $logdir/smtpd/current
 					)|less
 					exit 1
@@ -961,12 +961,12 @@ function do_smtp_auth_qmr()
 	do
 		case $j in
 			1)
-			str="inlookup cache=0"
+			str="incache=0"
 			> $servicedir/smtpd/variables/PASSWD_CACHE
 			> $servicedir/smtpd/variables/QUERY_CACHE
 			;;
 			2)
-			str="inlookup cache=1"
+			str="incache=1"
 			echo 1 > $servicedir/smtpd/variables/PASSWD_CACHE
 			echo 1 > $servicedir/smtpd/variables/QUERY_CACHE
 			;;
@@ -1005,10 +1005,10 @@ function do_smtp_auth_qmr()
 				last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $i:")
 				if [ $? -eq 0 ] ; then
 					tcount=$(expr $tcount + 1)
-					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s type=%-7s using qmr for %s succeeded\n" "$i" "$str" "$hash" "$type" "$2"
+					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using qmr for %s succeeded\n" "$i" "$str" "$hash" "$type" "$2"
 				else
 					(
-					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s type=%-7s using qmr for %s failed\n"    "$i" "$str" "$hash" "$type" "$2"
+					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using qmr for %s failed\n"    "$i" "$str" "$hash" "$type" "$2"
 					cat $logdir/smtpd/current
 					)|less
 					exit 1
@@ -1736,7 +1736,7 @@ do
 	do
 		case $j in
 			1)
-			str="inlookup cache=0"
+			str="incache=0"
 			for i in imap pop3
 			do
 				for k in d d-ssl
@@ -1752,7 +1752,7 @@ do
 			done
 			;;
 			2)
-			str="inlookup cache=1"
+			str="incache=1"
 			for i in imap pop3
 			do
 				for k in d d-ssl
@@ -1812,7 +1812,7 @@ do
 	do
 		case $j in
 			1)
-			str="inlookup cache=0"
+			str="incache=0"
 			> $servicedir/smtpd/variables/PASSWD_CACHE
 			> $servicedir/smtpd/variables/QUERY_CACHE
 			if [ "$hash" = "DES" ] ; then
@@ -1835,7 +1835,7 @@ do
 			done
 			;;
 			2)
-			str="inlookup cache=1"
+			str="incache=1"
 			echo 1 > $servicedir/smtpd/variables/PASSWD_CACHE
 			echo 1 > $servicedir/smtpd/variables/QUERY_CACHE
 			if [ "$hash" = "DES" ] ; then
