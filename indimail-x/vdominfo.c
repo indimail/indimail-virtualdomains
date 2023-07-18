@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 1.10  2023-07-18 17:05:51+05:30  Cprogrammer
+ * fixed using a static location that was being overwritten
+ *
  * Revision 1.9  2023-07-17 11:48:22+05:30  Cprogrammer
  * display hash method for domain
  *
@@ -70,7 +73,7 @@
 #include "get_hashmethod.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 1.9 2023-07-17 11:48:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 1.10 2023-07-18 17:05:51+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define VDOMTOKENS ":\n"
@@ -280,7 +283,6 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 					line.len--;
 					line.s[line.len] = 0; /*- remove newline */
 				}
-				subprintfe(subfdout, "vdominfo", "  Base Dir: %s\n", line.s);
 			}
 			i = get_hashmethod(real_domain);
 			subprintfe(subfdout, "vdominfo", "crypt Hash: %s\n", print_hashmethod(i));
@@ -523,6 +525,7 @@ display_all_domains(stralloc *Domain, stralloc *Dir, int DisplayName, int Displa
 {
 	char           *ptr, *assigndir, *domain, *uid, *gid, *dir;
 	char            inbuf[512];
+	static stralloc _domline = {0};
 	struct substdio ssin;
 	uid_t           Uid;
 	gid_t           Gid;
@@ -542,22 +545,22 @@ display_all_domains(stralloc *Domain, stralloc *Dir, int DisplayName, int Displa
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	/*- +example.com-:example.com:555:555:/var/indimail/domains/example.com:-:: */
 	for (;;) {
-		if (getln(&ssin, &line, &match, '\n') == -1) {
+		if (getln(&ssin, &_domline, &match, '\n') == -1) {
 			strerr_warn3("vdominfo5: read: ", tmpbuf.s, ": ", &strerr_sys);
 			break;
 		}
-		if (!line.len)
+		if (!_domline.len)
 			break;
 		if (match) {
-			line.len--;
-			if (!line.len)
+			_domline.len--;
+			if (!_domline.len)
 				continue;
-			line.s[line.len] = 0; /*- remove newline */
+			_domline.s[_domline.len] = 0; /*- remove newline */
 		}
-		match = str_chr(line.s, '#');
-		if (line.s[match])
-			line.s[match] = 0;
-		for (ptr = line.s; *ptr && isspace((int) *ptr); ptr++);
+		match = str_chr(_domline.s, '#');
+		if (_domline.s[match])
+			_domline.s[match] = 0;
+		for (ptr = _domline.s; *ptr && isspace((int) *ptr); ptr++);
 		if (!*ptr)
 			continue;
 		if (*ptr != '+') /*- ignore lines that do not start with '+' */
