@@ -117,7 +117,12 @@ class markasjunk2 extends rcube_plugin
 			$this->ham_flag => $rcmail->config->get('markasjunk2_ham_flag')
 		);
 
-		$p['message_flags'] = array_merge((array)$p['message_flags'], $flags);
+		// $p['message_flags'] = array_merge((array)$p['message_flags'], $flags);
+        if (!empty($p['message_flags'])) {
+			$p['message_flags'] = array_merge((array)$p['message_flags'], $flags);
+        } else {
+            $p['message_flags'] = $flags;
+        }
 
 		return $p;
 	}
@@ -260,7 +265,11 @@ class markasjunk2 extends rcube_plugin
 		elseif ($action == 'init' && method_exists($object, 'init')) // method_exists check here for backwards compatibility, init method added 20161127
 			$object->init();
 
-		return $object->is_error ? false : true;
+		//return $object->is_error ? false : true;
+		if (!empty($object->is_error))
+			return false;
+		else
+			return true;
 	}
 
 	private function _messageset_to_uids($messageset, $multi_folder)

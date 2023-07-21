@@ -331,26 +331,22 @@ configure_php_conf()
 		tmp=$(mktemp -t httpd.tmp.XXXXXXXXXX)
 		(
 		echo ""
-		echo "# Tell the PHP interpreter to handle files with a .php extension."
+		echo "<Directory /var/www/html>"
+		echo "    Options -Indexes +FollowSymLinks +MultiViews"
+		echo "    AllowOverride All"
+		echo "    Require all granted"
+		echo "</Directory>"
 		echo ""
-		echo "# Proxy declaration"
-		echo "<Proxy \"unix:/run/php/php-fpm.sock|fcgi://php-fpm\">"
-		echo "    # we must declare a parameter in here (doesn't matter which) or it'll not register the proxy ahead of time"
-		echo "    ProxySet disablereuse=off"
-		echo "</Proxy>"
+		echo "ProxyPassMatch \"^/(.*\.php(/.*)?)$\" \"unix:$rundir/php-fpm/php-fpm.sock|fcgi://localhost:9000\""
 		echo ""
-		echo "# Redirect to the proxy"
 		echo "<FilesMatch \.php$>"
-		echo "    SetHandler proxy:fcgi://php-fpm"
+		echo "    # 2.4.10+ can proxy to unix socket"
+		echo "    SetHandler \"proxy:unix:/run/php-fpm/php-fpm.sock|fcgi://localhost:9000\""
 		echo "</FilesMatch>"
 		) > $tmp
 		$sed -i \
 			-e "/<\/Files>/ r $tmp" \
-			-e "s{^    <FilesMatch \\\.(php|phar)$>{#&{g" \
-			-e "s{^        SetHandler application/x-httpd-php{#&{g" \
-			-e "s{^        SetHandler \"proxy:unix:.*\"{#&{g" \
-			-e "s{^.*SetHandler \"proxy:unix:/run/php-fpm/www.sock|fcgi://localhost\"{        SetHandler \"proxy:unix:/run/php/php-fpm.sock|fcgi://localhost\"{g" \
-			-e "s{^    </FilesMatch>{#&{g" \
+			-e "s{^.*SetHandler \"proxy:unix:$rundir/php-fpm/www.sock|fcgi://localhost\"{        SetHandler \"proxy:unix:$rundir/php-fpm/php-fpm.sock|fcgi://localhost:9000\"{g" \
 			/etc/httpd/conf.d/php.conf
 		/bin/rm -f $tmp
 	fi
@@ -461,11 +457,15 @@ if [ -n "$php" -a -n "$php_ini" -a -f $php_ini ] ; then
 	fi
 	$cp "$php_ini".BAK $php_ini
 	$sed -i \
-		-e "s}pdo_mysql.default_socket=.*}pdo_mysql.default_socket=$mysql_sock}g" \
-		-e "s}; short_open_tag}short_open_tag = On}g" \
+		-e "s}upload_max_filesize.*}upload_max_filesize = 5M}g" \
+		-e "s}session.auto_start.*}session.auto_start = Off}g" \
+		-e "s}^session.gc_maxlifetime.*}session.gc_maxlifetime = 21600}g" \
+		-e "s};.*session.gc_divisor.*}session.gc_divisor = 500}g" \
+		-e "s}session.gc_probability.*}session.gc_probability = 1}g" \
+		-e "s};.*short_open_tag}short_open_tag = On}g" \
 		-e "s}max_execution_time.*}max_execution_time = 60}g" \
-		-e "s}session.gc_probability =.*}session.gc_probability = 1}g" \
-		-e "s};sendmail_path =.*}sendmail_path = /usr/sbin/sendmail -t -i}g" \
+		-e "s}pdo_mysql.default_socket=.*}pdo_mysql.default_socket=$mysql_sock}g" \
+		-e "s};sendmail_path.*=.*}sendmail_path=/usr/sbin/sendmail -t -i}g" \
 		-e "s};openssl.cafile=.*}openssl.cafile=/etc/indimail/certs/servercert.pem}g" \
       	-e "s};openssl.capath=.*}openssl.capath=/etc/indimail/certs}g" \
 	$php_ini
@@ -591,7 +591,7 @@ elif [ -f /etc/debian_version ] ; then
 		echo ""
 		echo "    <FilesMatch \.php$>"
 		echo "        # 2.4.10+ can proxy to unix socket"
-		echo "        SetHandler \"proxy:unix:/run/php/php-fpm.sock|fcgi://localhost/\""
+		echo "        SetHandler \"proxy:unix:/run/php-fpm/php-fpm.sock|fcgi://localhost/\""
 		echo "        # Else we can just use a tcp socket:"
 		echo "        #SetHandler \"proxy:fcgi://127.0.0.1:9000\""
 		echo "    </FilesMatch>"
@@ -680,11 +680,10 @@ if [ -n "$php_fpm_www_conf" -a -f $php_fpm_www_conf ] ; then
 	$sed -i \
 		-e "s}^user = nobody}user = $httpd_user}" \
 		-e "s}^group = nobody}group = $httpd_group}" \
-		-e 's}listen = .*}listen = /run/php/php-fpm.sock}' \
+		-e 's}listen = .*}listen = /run/php-fpm/php-fpm.sock}' \
 		-e "s};listen.owner = nobody}listen.owner = $httpd_user}g" \
 		-e "s};listen.group = nobody}listen.group = $httpd_group}g" \
 		-e 's};listen.mode = 0660}listen.mode = 0660}g' \
-		-e 's}^listen.acl_users.};&}' \
 	$php_fpm_www_conf
 fi
 if [ -n "$php_fpm_conf" -a -f "$php_fpm_conf" ] ; then
