@@ -2,6 +2,7 @@
 #
 # $Id: testindimail-virtual,v 1.2 2023-07-16 22:42:59+05:30 Cprogrammer Exp mbhangui $
 #
+start=$(date +'%s')
 user=$(whoami)
 domain1=example.com
 domain2=newexample.com
@@ -874,7 +875,7 @@ function do_smtp_auth_swaks()
 {
 	methods="LOGIN PLAIN CRAM-MD5 DIGEST-MD5"
 	if [ $3 -eq 1 ] ; then
-		type="cram=no"
+		type="cram=no "
 	else
 		type="cram=yes"
 	fi
@@ -914,10 +915,10 @@ function do_smtp_auth_swaks()
 				last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $i:")
 				if [ $? -eq 0 ] ; then
 					tcount=$(expr $tcount + 1)
-					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using swk for %s succeeded\n" "$i" "$str" "$hash" "$type" "$1"
+					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using swk %s succeeded\n" "$i" "$str" "$hash" "$type" "$1"
 				else
 					(
-					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using swk for %s failed\n"    "$i" "$str" "$hash" "$type" "$1"
+					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using swk %s failed\n"    "$i" "$str" "$hash" "$type" "$1"
 					cat $logdir/smtpd/current
 					)|less
 					exit 1
@@ -953,7 +954,7 @@ function do_smtp_auth_qmr()
 	# password = $3
 	# type     = $4
 	if [ $4 -eq 1 ] ; then
-		type="cram=no"
+		type="cram=no "
 	else
 		type="cram=yes"
 	fi
@@ -1005,10 +1006,10 @@ function do_smtp_auth_qmr()
 				last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $i:")
 				if [ $? -eq 0 ] ; then
 					tcount=$(expr $tcount + 1)
-					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using qmr for %s succeeded\n" "$i" "$str" "$hash" "$type" "$2"
+					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using qmr %s succeeded\n" "$i" "$str" "$hash" "$type" "$2"
 				else
 					(
-					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using qmr for %s failed\n"    "$i" "$str" "$hash" "$type" "$2"
+					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using qmr %s failed\n"    "$i" "$str" "$hash" "$type" "$2"
 					cat $logdir/smtpd/current
 					)|less
 					exit 1
@@ -1909,6 +1910,10 @@ wait
 echo
 do_cleanup
 echo "All $tcount tests succeeded"
+end=$(date +'%s')
+secs=$(($end-$start))
+printf '%d days, %d hours, %d minutes, %d seconds\n' $((secs/86400)) $((secs%86400/3600)) $((secs%3600/60)) \
+	  $((secs%60))
 exit 0
 
 #
