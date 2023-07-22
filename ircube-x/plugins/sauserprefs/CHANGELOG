@@ -1,6 +1,93 @@
 Roundcube Webmail SAUserPrefs
 =============================
 
+* Fix PHP8 warnings (#74)
+* Fix warning on contact edit
+
+Version 1.20.1 (2022-10-29, rc-1.5)
+=================================================
+* Fix saving/restoring table sort settings (#72)
+* Fix assignment of SAv4 mode when no host_config present (#73)
+
+Version 1.20 (2022-06-18, rc-1.5)
+=================================================
+ * Drop support for PHP < 7.0
+ * Fix miss-matched score_allow/blocklist labels (#68)
+ * Add backwards compatibility for _score_user_black/whitelist (#68)
+ * Add support for SA v4 (#57)
+
+Version 1.19.3 (2021-12-19, rc-1.5)
+=================================================
+ * Fix inheritance of scroll bar style in Elastic skin
+
+Version 1.19.2 (2021-11-07, rc-1.5)
+=================================================
+ * Fix adding/removing addresses in address rules
+
+Version 1.19.1 (2021-10-30, rc-1.5)
+=================================================
+ * Revert accidental PHP version requirement change (PHP 7.0 will be required for next version)
+
+Version 1.19 (2021-10-19, rc-1.5)
+=================================================
+ * Support fixed table headers in Elastic skin (req rc 81dcf4a)
+ * Support Dark Mode in Elastic
+ * Support for customizing Elastic skin
+ * Replace references to white/blacklist with allow/block list (WIP see #57)
+ * Drop support for PHP < 5.5
+ * Add basic support for TX Rep AWL plugin
+
+Version 1.18.4 (2021-01-01, rc-1.4)
+=================================================
+ * Fix bug where blank entries could be added to allowlist on contact sync
+
+Version 1.18.3 (2020-11-20, rc-1.4)
+=================================================
+ * Improve address rule input
+ * Fix bug where Delete All was not working on Address Rules
+
+Version 1.18.2 (2020-04-27, rc-1.4)
+=================================================
+ * Revert depreciation of sortedASC & sortedDESC
+
+Version 1.18.1 (2020-01-11, rc-1.4)
+=================================================
+ * (Elastic) Fix display of Delete button in Bayes settings
+
+Version 1.18 (2019-10-27, rc-1.4)
+=================================================
+ * Depreciate sortedASC & sortedDESC class, use sorted-asc & sorted-desc instead
+ * Replace sauserprefs_score_inc config with sauserprefs_score_options
+ * Add use_auto_whitelist option
+ * Add score USER_IN_BLACKLIST option
+ * Add score USER_IN_WHITELIST option
+ * Add method to override any test score, see readme for more info
+ * Make use of icons rather than checkboxes in language option list skin configurable
+ * Remove unnecessary stylesheet (69f50b1)
+ * Add Elastic skin support
+ * Require Roundcube jQueryUI plugin (for import addresses dialog)
+ * Replace with saprefsframe template object contentframe (req rc 647a7e9)
+ * Add sauserprefs_allowed_hosts config option
+ * Add sauserprefs_host_config config option
+ * Replace sauserprefs_languages config with sauserprefs_langs_allowed
+ * Allow for localised langugage names
+ * Add support for Taskwatermark plugin
+ * Change enabled/disabled classes used in langs table to lang-enabled/lang-disabled for better compatibility with skins
+ * Remove support for depreciated config options:
+   * sauserprefs_whitelist_sync
+   * sauserprefs_whitelist_abook_id
+   * sauserprefs_bayes_delete
+ * Remove pagetitle template object
+
+Version 1.17.1 (2017-09-29, rc-1.3)
+=================================================
+ * Fix bug saving locales/langs options
+ * Correct error message text from storage class (#39)
+
+Version 1.17 (2017-06-14, rc-1.3)
+=================================================
+ * "Flattened" the larry theme: fresher look by removing shadows and gradients
+
 Version 1.16 (2017-01-02, rc-1.1)
 =================================================
  * More fixes for bayes learn thresholds

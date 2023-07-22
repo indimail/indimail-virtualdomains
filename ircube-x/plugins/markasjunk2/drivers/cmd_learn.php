@@ -2,12 +2,14 @@
 
 /**
  * Command line learn driver
- * @version 2.0
+ *
+ * @version 3.0
+ *
  * @author Philip Weir
  * Patched by Julien Vehent to support DSPAM
  * Enhanced support for DSPAM by Stevan Bajic <stevan@bajic.ch>
  *
- * Copyright (C) 2009-2014 Philip Weir
+ * Copyright (C) 2009-2018 Philip Weir
  *
  * This driver is part of the MarkASJunk2 plugin for Roundcube.
  *
@@ -22,73 +24,91 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Roundcube. If not, see http://www.gnu.org/licenses/.
+ * along with Roundcube. If not, see https://www.gnu.org/licenses/.
  */
-
 class markasjunk2_cmd_learn
 {
-	public function spam($uids, $mbox)
-	{
-		$this->_do_salearn($uids, true);
-	}
+    public function spam($uids, $src_mbox, $dst_mbox)
+    {
+        $this->_do_salearn($uids, true, $src_mbox);
+    }
 
-	public function ham($uids, $mbox)
-	{
-		$this->_do_salearn($uids, false);
-	}
+    public function ham($uids, $src_mbox, $dst_mbox)
+    {
+        $this->_do_salearn($uids, false, $src_mbox);
+    }
 
-	private function _do_salearn($uids, $spam)
-	{
-		$rcmail = rcube::get_instance();
-		$temp_dir = realpath($rcmail->config->get('temp_dir'));
+    private function _do_salearn($uids, $spam, $src_mbox)
+    {
+        $rcube = rcube::get_instance();
+        $temp_dir = realpath($rcube->config->get('temp_dir'));
+        $command = $rcube->config->get($spam ? 'markasjunk2_spam_cmd' : 'markasjunk2_ham_cmd');
 
-		if ($spam)
-			$command = $rcmail->config->get('markasjunk2_spam_cmd');
-		else
-			$command = $rcmail->config->get('markasjunk2_ham_cmd');
+        if (!$command) {
+            return;
+        }
 
-		if (!$command)
-			return;
+        // backwards compatibility %xds removed in markasjunk2 v1.12
+        $command = str_replace('%xds', '%h:x-dspam-signature', $command);
 
-		$command = str_replace('%u', $_SESSION['username'], $command);
-		$command = str_replace('%l', $rcmail->user->get_username('local'), $command);
-		$command = str_replace('%d', $rcmail->user->get_username('domain'), $command);
-		if (preg_match('/%i/', $command)) {
-			$identity_arr = $rcmail->user->get_identity();
-			$command = str_replace('%i', $identity_arr['email'], $command);
-		}
+        $command = str_replace('%u', $_SESSION['username'], $command);
+        $command = str_replace('%l', $rcube->user->get_username('local'), $command);
+        $command = str_replace('%d', $rcube->user->get_username('domain'), $command);
+        if (strpos($command, '%i') !== false) {
+            $identity_arr = $rcube->user->get_identity();
+            $command = str_replace('%i', $identity_arr['email'], $command);
+        }
 
-		foreach ($uids as $uid) {
-			// reset command for next message
-			$tmp_command = $command;
+        foreach ($uids as $uid) {
+            // reset command for next message
+            $tmp_command = $command;
 
-			// get DSPAM signature from header (if %xds macro is used)
-			if (preg_match('/%xds/', $command)) {
-				if (preg_match('/^X\-DSPAM\-Signature:\s+((\d+,)?([a-f\d]+))\s*$/im', $rcmail->storage->get_raw_headers($uid), $dspam_signature))
-					$tmp_command = str_replace('%xds', $dspam_signature[1], $tmp_command);
-				else
-					continue; // no DSPAM signature found in headers -> continue with next uid/message
-			}
+            if (strpos($tmp_command, '%s') !== false) {
+                $message = new rcube_message($uid);
+                $tmp_command = str_replace('%s', escapeshellarg($message->sender['mailto']), $tmp_command);
+            }
 
-			if (preg_match('/%f/', $command)) {
-				$tmpfname = tempnam($temp_dir, 'rcmSALearn');
-				file_put_contents($tmpfname, $rcmail->storage->get_raw_body($uid));
-				$tmp_command = str_replace('%f', $tmpfname, $tmp_command);
-			}
+            if (strpos($command, '%h') !== false) {
+                $storage = $rcube->get_storage();
+                $storage->check_connection();
+                $storage->conn->select($src_mbox);
 
-			exec($tmp_command, $output);
+                preg_match_all('/%h:([\w-_]+)/', $tmp_command, $header_names, PREG_SET_ORDER);
+                foreach ($header_names as $header) {
+                    $val = null;
+                    if ($msg = $storage->conn->fetchHeader($src_mbox, $uid, true, false, array($header[1]))) {
+                        $val = $msg->{$header[1]} ?: $msg->others[$header[1]];
+                    }
 
-			if ($rcmail->config->get('markasjunk2_debug')) {
-				rcube::write_log('markasjunk2', $tmp_command);
-				rcube::write_log('markasjunk2', $output);
-			}
+                    if (!empty($val)) {
+                        $tmp_command = str_replace($header[0], escapeshellarg($val), $tmp_command);
+                    }
+                    else {
+                        if ($rcube->config->get('markasjunk2_debug')) {
+                            rcube::write_log('markasjunk2', 'header ' . $header[1] . ' not found in message ' . $src_mbox . '/' . $uid);
+                        }
 
-			if (preg_match('/%f/', $command))
-				unlink($tmpfname);
+                        continue 2;
+                    }
+                }
+            }
 
-			$output = '';
-		}
-	}
+            if (strpos($command, '%f') !== false) {
+                $tmpfname = tempnam($temp_dir, 'rcmSALearn');
+                file_put_contents($tmpfname, $rcube->storage->get_raw_body($uid));
+                $tmp_command = str_replace('%f', escapeshellarg($tmpfname), $tmp_command);
+            }
+
+            $output = shell_exec($tmp_command);
+
+            if ($rcube->config->get('markasjunk2_debug')) {
+                rcube::write_log('markasjunk2', $tmp_command);
+                rcube::write_log('markasjunk2', $output);
+            }
+
+            if (strpos($command, '%f') !== false) {
+                unlink($tmpfname);
+            }
+        }
+    }
 }
-
-?>

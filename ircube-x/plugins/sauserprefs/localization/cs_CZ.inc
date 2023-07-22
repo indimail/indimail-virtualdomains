@@ -1,7 +1,7 @@
 <?php
 /* Author: petrduchek */
 
-$labels = array();
+$labels = [];
 $labels['sauserprefs'] = 'Spam';
 $labels['managespam'] = 'Spravovat nastavení detekce spamu';
 $labels['sauserprefssettings'] = 'Nastavení spamu';
@@ -28,9 +28,9 @@ $labels['spamreport0'] = 'Připojit oznámení do hlavičky originální zprávy
 $labels['spamreport1'] = 'Připojit originál jako MIME přílohu k oznámení';
 $labels['spamreport2'] = 'Připojit originál jako textovou přílohu k oznámení';
 $labels['spamaddressrules'] = 'Pravidla adres';
-$labels['whitelist_from'] = 'Přijmout zprávu od';
-$labels['blacklist_from'] = 'Odmítnout zprávu od';
-$labels['whitelist_to'] = 'Přijímat zprávy zaslané pro';
+$labels['welcomelist_from'] = 'Přijmout zprávu od';
+$labels['blocklist_from'] = 'Odmítnout zprávu od';
+$labels['welcomelist_to'] = 'Přijímat zprávy zaslané pro';
 $labels['addrule'] = 'Přidat';
 $labels['rule'] = 'Pravidlo';
 $labels['importfromaddressbook'] = 'Importovat adresy z adresáře';
@@ -38,7 +38,7 @@ $labels['deleteall'] = 'Odstranit vše';
 $labels['autoscore'] = 'Auto';
 $labels['defaultscore'] = 'Výchozí hodnocení';
 $labels['otherscore'] = 'Ostatní (%s)';
-$labels['usedefault'] = 'Obnovit výchozí nastavení';
+$labels['saupusedefault'] = 'Obnovit výchozí nastavení';
 $labels['langoptions'] = 'Jazyková nastavení';
 $labels['bayes'] = 'Nastavení Bayesovského filtru';
 $labels['purgingbayes'] = 'Odstraňuji Bayesovská data';
@@ -50,7 +50,7 @@ $labels['bayesspam'] = 'Hranice pro spam';
 $labels['bayesrules'] = 'Použít Bayesovská pravidla';
 $labels['help'] = 'Nápověda';
 
-$messages = array();
+$messages = [];
 $messages['sauserprefchanged'] = 'Nastavení spamu bylo úspěšně změněno';
 $messages['sauserpreffailed'] = 'Chyba: Nastavení spamu se nepodařilo změnit';
 $messages['spamthresexp'] = 'Veškeré e-maily se skóre vyšším něž je určená hranice budou označeny jako spam. Zvýšením této hranice sa zvýší počet nerozpoznaných spamů, na druhou stranu se sníží počet e-mailů chybně označených jako spam.';
@@ -58,8 +58,8 @@ $messages['spamlangexp'] = 'Vyberte veškeré jazyky ve kterých předpokladáte
 $messages['headersexp'] = 'SpamAssassin přidává do kontrolovaných e-mailů hlavičky s informacemi o výsledcích kontroly. Použijte nasledující volby na jejich přizpůsobení.';
 $messages['spamtestssexp'] = 'Některé testy při detekci spamu používají externí služby na internetu. Vyberte ty, které chcete využívat:';
 $messages['spamreport'] = 'Pokud je e-mail identifikovaný jako spam, vytvoří se report o všech testech a jejich dosáhnutém skóre...';
-$messages['autowhitelist'] = 'E-mailové adresy ve vašem Adresáři jsou automaticky přidány do listu "Přijmout zprávu od".';
-$messages['whitelistexp'] = 'V e-mailových adresách může byť použitý zástupný znak hvězdička (*). Např.: *@domena.cz or *.domena.cz.';
+$messages['autowelcomelist'] = 'E-mailové adresy ve vašem Adresáři jsou automaticky přidány do listu "Přijmout zprávu od".';
+$messages['welcomelistexp'] = 'V e-mailových adresách může byť použitý zástupný znak hvězdička (*). Např.: *@domena.cz or *.domena.cz.';
 $messages['spamaddressexists'] = 'Pravidlo pro tuto adresu již existuje';
 $messages['spamenteraddress'] = 'Prosím zadajte adresu, kterou chcete přidat';
 $messages['spamaddresserror'] = 'Chyba: Adresa se zdá neplatná';

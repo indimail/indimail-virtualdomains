@@ -2,10 +2,12 @@
 /* Author: Philip Weir */
 
 $labels = array();
-$labels['buttonjunk'] = 'Mark as junk';
-$labels['markasjunk'] = 'As junk';
+$labels['buttonjunk'] = 'This message is junk';
+$labels['asjunk'] = 'As junk';
+$labels['markasjunk'] = 'Mark as junk';
 $labels['buttonnotjunk'] = 'This message is not junk';
-$labels['markasnotjunk'] = 'As not junk';
+$labels['asnotjunk'] = 'As not junk';
+$labels['markasnotjunk'] = 'Mark as not junk';
 $labels['notjunk'] = 'Not junk';
 
 $messages = array();

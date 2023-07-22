@@ -2,10 +2,14 @@
 
 /**
  * Email learn driver
- * @version 2.0
+ *
+ * @version 3.0
+ *
  * @author Philip Weir
  *
- * Copyright (C) 2009-2014 Philip Weir
+ * NOTICE: THIS DRIVER REQUIRES ROUNDCUBE 1.4 OR ABOVE
+ *
+ * Copyright (C) 2009-2017 Philip Weir
  *
  * This driver is part of the MarkASJunk2 plugin for Roundcube.
  *
@@ -20,189 +24,152 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Roundcube. If not, see http://www.gnu.org/licenses/.
+ * along with Roundcube. If not, see https://www.gnu.org/licenses/.
  */
-
 class markasjunk2_email_learn
 {
-	public function spam($uids, $mbox)
-	{
-		$this->_do_emaillearn($uids, true);
-	}
+    private $rcube;
 
-	public function ham($uids, $mbox)
-	{
-		$this->_do_emaillearn($uids, false);
-	}
+    public function spam($uids, $src_mbox, $dst_mbox)
+    {
+        $this->_do_emaillearn($uids, true);
+    }
 
-	private function _do_emaillearn($uids, $spam)
-	{
-		$rcmail = rcube::get_instance();
-		$identity_arr = $rcmail->user->get_identity();
-		$from = $identity_arr['email'];
+    public function ham($uids, $src_mbox, $dst_mbox)
+    {
+        $this->_do_emaillearn($uids, false);
+    }
 
-		if ($spam)
-			$mailto = $rcmail->config->get('markasjunk2_email_spam');
-		else
-			$mailto = $rcmail->config->get('markasjunk2_email_ham');
+    private function _do_emaillearn($uids, $spam)
+    {
+        $this->rcube = rcube::get_instance();
+        $identity_arr = $this->rcube->user->get_identity();
+        $from = $identity_arr['email'];
+        $from_string = format_email_recipient($identity_arr['email'], $identity_arr['name']);
+        $attach = $this->rcube->config->get('markasjunk2_email_attach', false);
+        $temp_dir = unslashify($this->rcube->config->get('temp_dir'));
 
-		$mailto = str_replace('%u', $_SESSION['username'], $mailto);
-		$mailto = str_replace('%l', $rcmail->user->get_username('local'), $mailto);
-		$mailto = str_replace('%d', $rcmail->user->get_username('domain'), $mailto);
-		$mailto = str_replace('%i', $from, $mailto);
+        $mailto = $this->rcube->config->get($spam ? 'markasjunk2_email_spam' : 'markasjunk2_email_ham');
+        $mailto = $this->_parse_vars($mailto, $spam, $from);
 
-		if (!$mailto)
-			return;
+        // no address to send to, exit
+        if (!$mailto) {
+            return;
+        }
 
-		$message_charset = $rcmail->output->get_charset();
-		// chose transfer encoding
-		$charset_7bit = array('ASCII', 'ISO-2022-JP', 'ISO-8859-1', 'ISO-8859-2', 'ISO-8859-15');
-		$transfer_encoding = in_array(strtoupper($message_charset), $charset_7bit) ? '7bit' : '8bit';
+        $subject = $this->rcube->config->get('markasjunk2_email_subject');
+        $subject = $this->_parse_vars($subject, $spam, $from);
 
-		$temp_dir = realpath($rcmail->config->get('temp_dir'));
+        foreach ($uids as $uid) {
+            $MESSAGE = new rcube_message($uid);
+            $message_file = null;
 
-		$subject = $rcmail->config->get('markasjunk2_email_subject');
-		$subject = str_replace('%u', $_SESSION['username'], $subject);
-		$subject = str_replace('%t', ($spam) ? 'spam' : 'ham', $subject);
-		$subject = str_replace('%l', $rcmail->user->get_username('local'), $subject);
-		$subject = str_replace('%d', $rcmail->user->get_username('domain'), $subject);
+            // set message charset as default
+            if (!empty($MESSAGE->headers->charset)) {
+                $this->rcube->storage->set_charset($MESSAGE->headers->charset);
+            }
 
-		// compose headers array
-		$headers = array();
-		$headers['Date'] = date('r');
-		$headers['From'] = format_email_recipient($identity_arr['email'], $identity_arr['name']);
-		$headers['To'] = $mailto;
-		$headers['Subject'] = $subject;
+            $OUTPUT = $this->rcube->output;
+            $SENDMAIL = new rcmail_sendmail(null, array(
+                    'sendmail' => true,
+                    'from' => $from,
+                    'mailto' => $mailto,
+                    'dsn_enabled' => false,
+                    'charset' => 'UTF-8',
+                    'error_handler' => function() use ($OUTPUT) {
+                        call_user_func_array(array($OUTPUT, 'show_message'), func_get_args());
+                        $OUTPUT->send();
+                    }
+                ));
 
-		foreach ($uids as $uid) {
-			$MESSAGE = new rcube_message($uid);
+            if ($attach) {
+                $headers = array(
+                    'Date' => $this->rcube->user_date(),
+                    'From' => $from_string,
+                    'To' => $mailto,
+                    'Subject' => $subject,
+                    'User-Agent' => $this->rcube->config->get('useragent'),
+                    'Message-ID' => $this->rcube->gen_message_id($from),
+                    'X-Sender' => $from
+                );
 
-			// set message charset as default
-			if (!empty($MESSAGE->headers->charset))
-				$rcmail->storage->set_charset($MESSAGE->headers->charset);
+                $message_text = ($spam ? 'Spam' : 'Ham') . ' report from ' . $this->rcube->config->get('product_name');
 
-			$MAIL_MIME = new Mail_mime($rcmail->config->header_delimiter());
+                // create attachment
+                $orig_subject = $MESSAGE->get_header('subject');
+                $disp_name = (!empty($orig_subject) ? $orig_subject : 'message_rfc822') . '.eml';
+                $message_file = tempnam($temp_dir, 'rcmMarkAsJunk2');
 
-			if ($rcmail->config->get('markasjunk2_email_attach', false)) {
-				$tmpPath = tempnam($temp_dir, 'rcmMarkASJunk2');
+                $attachment = array();
+                if ($fp = fopen($message_file, 'w')) {
+                    $this->rcube->storage->get_raw_body($uid, $fp);
+                    fclose($fp);
 
-				// send mail as attachment
-				$MAIL_MIME->setTXTBody(($spam ? 'Spam' : 'Ham'). ' report from ' . $rcmail->config->get('product_name'), false, true);
+                    $attachment = array(
+                        'name' => $disp_name,
+                        'mimetype' => 'message/rfc822',
+                        'path' => $message_file,
+                        'size' => filesize($message_file),
+                        'charset' => $MESSAGE->headers->charset
+                    );
+                }
 
-				$raw_message = $rcmail->storage->get_raw_body($uid);
-				$subject = $MESSAGE->get_header('subject');
+                // create message
+                $MAIL_MIME = $SENDMAIL->create_message($headers, $message_text, false, array($attachment));
 
-				if (isset($subject) && $subject !="")
-					$disp_name = $subject . ".eml";
-				else
-					$disp_name = "message_rfc822.eml";
+                if (count($attachment) > 0) { // sanity check incase creating the attachment failed
+                    $folding = (int) $this->rcube->config->get('mime_param_folding');
 
-				if (file_put_contents($tmpPath, $raw_message)) {
-					$MAIL_MIME->addAttachment($tmpPath, "message/rfc822", $disp_name, true,
-						$transfer_encoding, 'attachment', '', '', '',
-						$rcmail->config->get('mime_param_folding') ? 'quoted-printable' : NULL,
-						$rcmail->config->get('mime_param_folding') == 2 ? 'quoted-printable' : NULL,
-						'', RCUBE_CHARSET
-					);
-				}
+                    $MAIL_MIME->addAttachment($attachment['path'],
+                        $attachment['mimetype'], $attachment['name'], true,
+                        '8bit', 'attachment', $attachment['charset'], '', '',
+                        $folding ? 'quoted-printable' : null,
+                        $folding == 2 ? 'quoted-printable' : null,
+                        '', RCUBE_CHARSET
+                    );
+                }
+            }
+            else {
+                $headers = array(
+                    'Resent-From' => $from_string,
+                    'Resent-To' => $mailto,
+                    'Resent-Date' => $this->rcube->user_date(),
+                    'Resent-Message-ID' => $this->rcube->gen_message_id($from)
+                );
 
-				// encoding settings for mail composing
-				$MAIL_MIME->setParam('text_encoding', $transfer_encoding);
-				$MAIL_MIME->setParam('html_encoding', 'quoted-printable');
-				$MAIL_MIME->setParam('head_encoding', 'quoted-printable');
-				$MAIL_MIME->setParam('head_charset', $message_charset);
-				$MAIL_MIME->setParam('html_charset', $message_charset);
-				$MAIL_MIME->setParam('text_charset', $message_charset);
+                // create the bounce message
+                $MAIL_MIME = new rcmail_resend_mail(array(
+                    'bounce_message' => $MESSAGE,
+                    'bounce_headers' => $headers,
+                ));
+            }
 
-				// pass headers to message object
-				$MAIL_MIME->headers($headers);
-			}
-			else {
-				$headers['Resent-From'] = $headers['From'];
-				$headers['Resent-Date'] = $headers['Date'];
-				$headers['Date'] = $MESSAGE->headers->date;
-				$headers['From'] = $MESSAGE->headers->from;
-				$headers['Subject'] = $MESSAGE->headers->subject;
-				$MAIL_MIME->headers($headers);
+            $SENDMAIL->deliver_message($MAIL_MIME);
+            $message_file = $message_file ?: $MAIL_MIME->mailbody_file;
 
-				if ($MESSAGE->has_html_part()) {
-					$body = $MESSAGE->first_html_part();
-					$MAIL_MIME->setHTMLBody($body);
-				}
+            // clean up
+            if ($message_file) {
+                unlink($message_file);
+            }
 
-				$body = $MESSAGE->first_text_part();
-				$MAIL_MIME->setTXTBody($body, false, true);
+            if ($this->rcube->config->get('markasjunk2_debug')) {
+                rcube::write_log('markasjunk2', $uid . ($spam ? ' SPAM ' : ' HAM ') . $mailto . ' (' . $subject . ')');
 
-				foreach ($MESSAGE->attachments as $attachment) {
-					$MAIL_MIME->addAttachment(
-						$MESSAGE->get_part_body($attachment->mime_id, true),
-						$attachment->mimetype,
-						$attachment->filename,
-						false,
-						$attachment->encoding,
-						$attachment->disposition,
-						'', $attachment->charset
-					);
-				}
+                if ($smtp_error['vars']) {
+                    rcube::write_log('markasjunk2', $smtp_error['vars']);
+                }
+            }
+        }
+    }
 
-				foreach ($MESSAGE->mime_parts as $attachment) {
-					if (!empty($attachment->content_id)) {
-						// covert CID to Mail_MIME format
-						$attachment->content_id = str_replace('<', '', $attachment->content_id);
-						$attachment->content_id = str_replace('>', '', $attachment->content_id);
+    private function _parse_vars($data, $spam, $from)
+    {
+        $data = str_replace('%u', $_SESSION['username'], $data);
+        $data = str_replace('%t', $spam ? 'spam' : 'ham', $data);
+        $data = str_replace('%l', $this->rcube->user->get_username('local'), $data);
+        $data = str_replace('%d', $this->rcube->user->get_username('domain'), $data);
+        $data = str_replace('%i', $from, $data);
 
-						if (empty($attachment->filename))
-							$attachment->filename = $attachment->content_id;
-
-						$message_body = $MAIL_MIME->getHTMLBody();
-						$dispurl = 'cid:' . $attachment->content_id;
-						$message_body = str_replace($dispurl, $attachment->filename, $message_body);
-						$MAIL_MIME->setHTMLBody($message_body);
-
-						$MAIL_MIME->addHTMLImage(
-							$MESSAGE->get_part_body($attachment->mime_id, true),
-							$attachment->mimetype,
-							$attachment->filename,
-							false
-						);
-					}
-				}
-
-				// encoding settings for mail composing
-				$MAIL_MIME->setParam('head_encoding', $MESSAGE->headers->encoding);
-				$MAIL_MIME->setParam('head_charset', $MESSAGE->headers->charset);
-
-				foreach ($MESSAGE->mime_parts as $mime_id => $part) {
-					$mimetype = strtolower($part->ctype_primary . '/' . $part->ctype_secondary);
-
-					if ($mimetype == 'text/html') {
-						$MAIL_MIME->setParam('text_encoding', $part->encoding);
-						$MAIL_MIME->setParam('html_charset', $part->charset);
-					}
-					else if ($mimetype == 'text/plain') {
-						$MAIL_MIME->setParam('html_encoding', $part->encoding);
-						$MAIL_MIME->setParam('text_charset', $part->charset);
-					}
-				}
-			}
-
-			$rcmail->deliver_message($MAIL_MIME, $from, $mailto, $smtp_error, $body_file);
-
-			// clean up
-			if (file_exists($tmpPath))
-				unlink($tmpPath);
-
-			if ($rcmail->config->get('markasjunk2_debug')) {
-				if ($spam)
-					rcube::write_log('markasjunk2', $uid . ' SPAM ' . $mailto . ' (' . $subject . ')');
-				else
-					rcube::write_log('markasjunk2', $uid . ' HAM ' . $mailto . ' (' . $subject . ')');
-
-				if ($smtp_error['vars'])
-					rcube::write_log('markasjunk2', $smtp_error['vars']);
-			}
-		}
-	}
+        return $data;
+    }
 }
-
-?>

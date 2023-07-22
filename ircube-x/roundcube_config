@@ -309,6 +309,9 @@ if [ -S $mysqld_sock ] ; then
 		echo "initializing roundcube db"
 		/usr/bin/mysql -u roundcube -psubscribed RoundCube_db < $rcube_base/SQL/mysql.initial.sql
 	fi
+	if [ -f $rcube_base/plugins/sauserprefs/sauserprefs.sql ] ; then
+		/usr/bin/mysql -u roundcube -psubscribed RoundCube_db < $rcube_base/plugins/sauserprefs/sauserprefs.sql
+	fi
 	if [ -x /service/mysql.3306/shutdown ] ; then
 		/service/mysql.3306/shutdown
 		echo "shutdown MySQL server"
@@ -337,8 +340,8 @@ configure_php_conf()
 		echo "    Require all granted"
 		echo "</Directory>"
 		echo ""
-		echo "ProxyPassMatch \"^/(.*\.php(/.*)?)$\" \"unix:$rundir/php-fpm/php-fpm.sock|fcgi://localhost:9000\""
-		echo ""
+		#echo "ProxyPassMatch \"^/(.*\.php(/.*)?)$\" \"unix:$rundir/php-fpm/php-fpm.sock|fcgi://localhost:9000\""
+		#echo ""
 		echo "<FilesMatch \.php$>"
 		echo "    # 2.4.10+ can proxy to unix socket"
 		echo "    SetHandler \"proxy:unix:/run/php-fpm/php-fpm.sock|fcgi://localhost:9000\""

@@ -1,0 +1,363 @@
+/**
+ * SAUserPrefs plugin styles
+ */
+
+@import (reference) "../../../../skins/elastic/styles/variables";
+@import (reference) "../../../../skins/elastic/styles/mixins";
+
+@grid-gutter-height: 15px;
+@scrollbox-height: 400px;
+@color-welcomelist: #28a745;
+@color-blocklist: #dc3545;
+
+.listing.iconized tr {
+  &.general > td.section::before {
+    content: @fa-var-tools;
+  }
+
+  &.tests > td.section::before {
+    content: @fa-var-cloud;
+  }
+
+  &.bayes > td.section::before {
+    content: @fa-var-database;
+  }
+
+  &.headers > td.section::before {
+    content: @fa-var-envelope;
+  }
+
+  &.report > td.section::before {
+    content: @fa-var-file-alt;
+  }
+
+  &.addresses > td.section::before {
+    content: @fa-var-address-card;
+  }
+
+  &.scores > td.section::before {
+    content: @fa-var-tachometer-alt;
+  }
+}
+
+table.fixedcopy {
+  display: table;
+
+  > thead {
+    background-color: @color-layout-list-background;
+  }
+}
+
+table.propform {
+  tr.sauphelp {
+    margin-top: (ceil((@grid-gutter-height / 2) * -1));
+
+    td {
+      color: @color-form-hint;
+    }
+  }
+
+  td.bayesdelete {
+    padding-left: 0;
+  }
+}
+
+table.langprefstable tr > .scroller,
+table.addressprefstable tr > .scroller {
+  width: 100%;
+}
+
+#address-rules-cont,
+#spam-langs-cont {
+  height: @scrollbox-height;
+  overflow: auto;
+  width: 100%;
+
+  html.layout-small &,
+  html.layout-phone & {
+    height: auto;
+  }
+}
+
+table.sortable-table > thead > tr > th {
+  > a {
+    text-decoration: none;
+    color: @color-font;
+    white-space: nowrap;
+  }
+
+  > a::after {
+    &:extend(.font-icon-class);
+    display: inline-block;
+    float: none;
+    margin-left: .1em;
+    font-size: .9rem;
+    color: @color-list-icon;
+  }
+
+  &.sortedASC > a::after {
+    content: @fa-var-long-arrow-alt-down;
+  }
+
+  &.sortedDESC > a::after {
+    content: @fa-var-long-arrow-alt-up;
+  }
+}
+
+table.spam-langs-table,
+table.address-rules-table {
+  margin-bottom: 0;
+  overflow: hidden;
+
+  &.fixedcopy {
+    z-index: 2;
+  }
+
+  > thead {
+    > tr > th {
+      &.lang,
+      &.email {
+        width: auto;
+      }
+
+      &.rule {
+        width: 10em;
+      }
+
+      &.tick {
+        width: 10em;
+        text-align: right;
+      }
+
+      &.control {
+        width: 4em;
+        text-align: right;
+      }
+    }
+  }
+
+  > tbody > tr {
+    > td.rule {
+      white-space: nowrap;
+    }
+
+    > td.lang,
+    > td.email {
+      .overflow-ellipsis();
+      white-space: nowrap;
+      max-width: 1px;
+    }
+
+    > td.tick {
+      text-align: right;
+      padding: 0 .75rem;
+    }
+
+    > td.control {
+      text-align: right;
+      padding: 0 .25rem;
+    }
+  }
+}
+
+html.layout-small,
+html.layout-phone {
+  table.fixedcopy {
+    display: none;
+  }
+}
+
+table.spam-langs-table > tbody > tr > td {
+  vertical-align: middle;
+}
+
+.saup-spam-char-row { // based on forms.less:.row.form-check
+  padding: 0;
+  display: flex;
+  flex-wrap: nowrap;
+
+  @media screen and (max-width: @screen-width-bs-phone) {
+    & > *:last-child {
+      width: 1%;
+      min-width: 2.6rem;
+    }
+  }
+}
+
+table.records-table tr > .tick,
+table.records-table tr > .control {
+  > a::before {
+    &:extend(.font-icon-class);
+    display: inline-block;
+    float: none;
+    text-decoration: none;
+  }
+
+  > a.delete::before {
+    content: @fa-var-trash-alt;
+    color: @color-font;
+  }
+}
+
+.welcomelist_from > td.rule,
+.welcomelist_to > td.rule {
+  color: @color-welcomelist !important;
+}
+
+.blocklist_from > td.rule {
+  color: @color-blocklist !important;
+}
+
+#test-scores-table {
+  tr.form-group {
+    margin-bottom: 0;
+  }
+
+  th {
+    border-top: 0;
+  }
+
+  th, td {
+    padding: .75rem;
+  }
+}
+
+#listcontrols {
+  display: block;
+  text-align: right;
+  width: 100%;
+  font-size: 0.9em;
+  margin-bottom: (ceil((@grid-gutter-height / 2) * -1));
+
+  > a:not(.select) {
+    margin-right: 0.5rem;
+
+    &:last-child {
+      margin-right: 0;
+    }
+
+    &::before {
+      &:extend(.font-icon-class);
+      display: inline;
+      float: none;
+    }
+
+    &.import::before {
+      content: @fa-var-upload;
+    }
+
+    &.delete-all::before {
+      content: @fa-var-trash-alt;
+    }
+  }
+}
+
+span.helpicon::after {
+  &:extend(.font-icon-class);
+  float: none;
+  display: inline-block;
+  content: @fa-var-info-circle;
+  margin-left: 5px;
+}
+
+#rcmfd_spamlevelchar {
+  width: 40px;
+  margin-left: -7px;
+  text-align: center;
+}
+
+div.address-input {
+  margin-bottom: @grid-gutter-height;
+
+  > input,
+  > select {
+    width: auto !important;
+  }
+
+  > #rcmfd_spamaddress {
+    flex-grow: 1;
+    margin: 0 5px;
+    width: 100px !important;
+  }
+
+  html.layout-small &,
+  html.layout-phone & {
+    // stack the inputs on small screens
+    > input,
+    > select {
+      width: 100% !important;
+    }
+
+    > #rcmfd_spamaddress {
+      margin: 5px 0;
+      width: 100% !important;
+    }
+  }
+}
+
+#rcmfd_spamaddress {
+  min-width: 100px;
+}
+
+button.btn.saupusedefault::before,
+div.footer .saupusedefault::before {
+  .font-icon-solid(@fa-var-undo);
+}
+
+html.touch {
+  #rcmfd_spamlevelchar {
+    margin-left: -5px;
+  }
+}
+
+html.layout-phone {
+  table.address-rules-table > thead > tr > th.rule,
+  table.address-rules-table > tbody > tr > td.rule {
+    display: none;
+  }
+
+  .welcomelist_from > td.email,
+  .welcomelist_to > td.email {
+    color: @color-welcomelist !important;
+  }
+
+  .blocklist_from > td.email {
+    color: @color-blocklist !important;
+  }
+}
+
+// dark mode
+& when (@dark-mode-enabled = true) {
+  html.dark-mode {
+    .table-striped tbody tr:nth-of-type(2n+1) {
+      background-color: rgba(0,0,0,.15);
+    }
+
+    .form-control:disabled {
+      background-color: @color-dark-checkbox;
+    }
+
+    table.fixedcopy {
+      > thead {
+        background-color: @color-dark-background;
+      }
+    }
+
+    table.sortable-table > thead > tr > th > a {
+      color: @color-dark-font;
+
+      &::after {
+        color: fadeout(@color-dark-font, 50%);
+      }
+    }
+
+    table.records-table tr > .tick,
+    table.records-table tr > .control {
+      > a.delete::before {
+        color: @color-dark-font;
+      }
+    }
+  }
+}
+
+@import (optional) "_custom";

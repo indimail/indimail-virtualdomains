@@ -1,5 +1,12 @@
 Roundcube Webmail MarkAsJunk2
 =============================
+
+THIS PLUGIN IS NO LONGER MAINTAINED
+-----------------------------------
+The features of this plugin have been integrated into the markasjunk plugin in
+the Roundcube core (v1.4+), via [pull request 6504][pr6504]. This plugin is now
+obsolete.
+
 This plugin adds "mark as spam" or "mark as not spam" button to the message
 menu.
 
@@ -68,14 +75,14 @@ An [example driver][jsevents] is available to show how to use the JS events
 
 Several drivers are provided by default they are:
 
-**cmd_learn:** This driver calls an external command (for example bogo-learn) to
+**cmd_learn:** This driver calls an external command (for example salearn) to
 process the message
 
 **dir_learn:** This driver places a copy of the message in a predefined folder,
 for example to allow for processing later
 
 **email_learn:** This driver emails the message either as an attachment or
-directly to a set address
+directly to a set address. This driver requires Roundcube 1.4 or above.
 
 **sa_blacklist:** This driver adds the sender address of a spam message to the
 users blacklist (or whitelist of ham messages) Requires SAUserPrefs plugin
@@ -139,10 +146,11 @@ $config['markasjunk2_ham_patterns'] = array(
 );
 ```
 
+[pr6504]: https://github.com/roundcube/roundcubemail/pull/6504
 [thomas]: mailto:roundcube@gmail.com
-[rcmaj]: http://github.com/roundcube/roundcubemail/tree/master/plugins/markasjunk
-[rcplugrepo]: http://plugins.roundcube.net/packages/johndoh/markasjunk2
-[releases]: http://github.com/JohnDoh/Roundcube-Plugin-Mark-as-Junk-2/releases
-[gpl]: http://www.gnu.org/licenses/gpl.html
-[multidriver]: http://gist.github.com/JohnDoh/8173505
-[jsevents]: http://gist.github.com/JohnDoh/37ab8610f9fa63052197c89e5ef89266
+[rcmaj]: https://github.com/roundcube/roundcubemail/tree/master/plugins/markasjunk
+[rcplugrepo]: https://plugins.roundcube.net/packages/johndoh/markasjunk2
+[releases]: https://github.com/johndoh/roundcube-markasjunk2/releases
+[gpl]: https://www.gnu.org/licenses/gpl.html
+[multidriver]: https://gist.github.com/johndoh/8173505
+[jsevents]: https://gist.github.com/johndoh/37ab8610f9fa63052197c89e5ef89266

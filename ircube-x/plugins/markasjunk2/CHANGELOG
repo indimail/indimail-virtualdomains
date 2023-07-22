@@ -1,6 +1,27 @@
 Roundcube Webmail MarkAsJunk2
 =============================
 
+ * email_learn driver: use new rcmail_resend_mail class (req RC 040a71e)
+ * Replace classes .markasjunk2Sel/.markasnotjunk2Sel with .pressed
+ * Add Elastic skin support
+ * Add markasjunk2_permanently_remove option (#56)
+ * Integration with Swipe plugin
+ * %xds marco replaced with %h:<header name>
+ * Fix check_request() bypass in places using get_uids() [CVE-2018-9846] (req RC 8e543f8)
+ * Add markasjunk2_allowed_hosts config option
+ * Add markasjunk2_host_config config option
+ * Pass source and destination mbox vars to driver fix save problems in edit_headers and sa_detact drivers (#58)
+ * Make flag defaults match markasjunk plugin from core (config change: to disable flagging set configs to false) (#59)
+ * Add markasjunk2_spam_only option
+
+Version 1.11.1 (2017-07-29, rc-1.3)
+=================================================
+ * Fix icon display on message view screen
+
+Version 1.11 (2017-06-14, rc-1.3)
+=================================================
+ * "Flattened" the larry theme: fresher look by removing shadows and gradients
+
 Version 1.10 (2017-01-02, rc-1.1)
 =================================================
  * Add JS event markasjunk2-update to allow other plugins to influence the spam/ham options show

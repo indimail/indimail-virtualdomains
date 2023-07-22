@@ -1,7 +1,7 @@
 <?php
 /* Author: Simon Tauber */
 
-$labels = array();
+$labels = [];
 $labels['sauserprefs'] = 'Spam';
 $labels['managespam'] = 'Verwalten der Spamfilter-Einstellungen';
 $labels['sauserprefssettings'] = 'Spam Einstellungen';
@@ -28,9 +28,9 @@ $labels['spamreport0'] = 'Bericht in den Header der Orginalnachricht einfügen';
 $labels['spamreport1'] = 'Orginalmeldung dem Bericht als MIME Anhang hinzufügen';
 $labels['spamreport2'] = 'Orginalmeldung dem Bericht als Text Anhang hinzufügen';
 $labels['spamaddressrules'] = 'Adressregeln';
-$labels['whitelist_from'] = 'Mails akzeptieren von';
-$labels['blacklist_from'] = 'Mails ablehnen von';
-$labels['whitelist_to'] = 'Akzeptiere Mails gesendet an';
+$labels['welcomelist_from'] = 'Mails akzeptieren von';
+$labels['blocklist_from'] = 'Mails ablehnen von';
+$labels['welcomelist_to'] = 'Akzeptiere Mails gesendet an';
 $labels['addrule'] = 'Regel hinzufügen';
 $labels['rule'] = 'Regel';
 $labels['importfromaddressbook'] = 'Adressen aus dem Adressbuch importieren';
@@ -38,7 +38,7 @@ $labels['deleteall'] = 'Alle löschen';
 $labels['autoscore'] = 'Automatisch';
 $labels['defaultscore'] = 'Standardscore';
 $labels['otherscore'] = 'Andere (%s)';
-$labels['usedefault'] = 'Standardscore wiederherstellen';
+$labels['saupusedefault'] = 'Standardscore wiederherstellen';
 $labels['langoptions'] = 'Sprachoptionen';
 $labels['bayes'] = 'Bayes Einstellungen';
 $labels['purgingbayes'] = 'Lösche bayesische Daten...';
@@ -50,7 +50,7 @@ $labels['bayesspam'] = '"Spam" Schwellenwert';
 $labels['bayesrules'] = 'Bayesische Regeln verwenden';
 $labels['help'] = 'Hilfe';
 
-$messages = array();
+$messages = [];
 $messages['sauserprefchanged'] = 'Spam Einstellungen erfolgreich geändert';
 $messages['sauserpreffailed'] = 'Fehler: Spam-Einstellungen konnten nicht geändert werden';
 $messages['spamthresexp'] = 'Alles über dem Schwellenwert wird als Spam markiert. Erhöhen des Schwellenwerts minimiert die verpassten Meldungen, aber erhöht die Möglichkeit der falschen Einstufung.';
@@ -58,8 +58,8 @@ $messages['spamlangexp'] = 'Wählen Sie alle Sprachen in denen Mails empfangen w
 $messages['headersexp'] = 'SpamAssassin fügt den verarbeiteten Mitteilungen Header mit Informationen über das Ergebnis zu. Verwende folgende Optionen um diese Header zu konfigurieren.';
 $messages['spamtestssexp'] = 'Einige Checks verwenden Internet-baiserte Dienste um Spam besser identifizieren zu können. Wählen Sie, welche verwendet werden sollen:';
 $messages['spamreport'] = 'Wird eine Mail als Spam identifiziert werden Berichte aller zugewiesenen Tests und Scores hinzugefügt...';
-$messages['autowhitelist'] = 'Email Adressen aus dem Adressbuch werden automatisch zu der "Whitelist" hinzugefügt.';
-$messages['whitelistexp'] = 'Ein (*) kann als Wildcard verwendet werden. Zum Beispiel: *@example.com oder *.example.com.';
+$messages['autowelcomelist'] = 'Email Adressen aus dem Adressbuch werden automatisch zu der "Whitelist" hinzugefügt.';
+$messages['welcomelistexp'] = 'Ein (*) kann als Wildcard verwendet werden. Zum Beispiel: *@example.com oder *.example.com.';
 $messages['spamaddressexists'] = 'Es existiert bereits eine Regel für diese Adresse';
 $messages['spamenteraddress'] = 'Bitte eine hinzuzufügende Adresse eingeben';
 $messages['spamaddresserror'] = 'Fehler: Die Adresse scheint ungültig zu sein';

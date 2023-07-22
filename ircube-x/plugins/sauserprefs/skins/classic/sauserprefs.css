@@ -12,16 +12,10 @@
   width: 510px;
 }
 
-body.address-rules-table,
-body.spam-langs-table
+table.records-table
 {
   margin: 0px;
   background-color: #F9F9F9;
-}
-
-table.address-rules-table,
-table.spam-langs-table
-{
   width: 100%;
   display: table;
   table-layout: fixed;
@@ -39,16 +33,13 @@ table.address-rules-table thead th.control
   width: 40px;
 }
 
-table.address-rules-table thead th a,
-table.spam-langs-table thead th a
+table.sortable-table thead th a
 {
   display: block;
   text-decoration: none;
 }
 
-table.address-rules-table thead th.sortedASC,
-table.address-rules-table thead th.sortedDESC,
-table.spam-langs-table thead th.sortedASC,
+table.sortable-table thead th.sortedASC,
 table.spam-langs-table thead th.sortedDESC
 {
   background-position: 0px -26px;
@@ -69,14 +60,12 @@ table.spam-langs-table thead th.tick a
   padding-right: 24px;
 }
 
-table.address-rules-table thead tr th.sortedASC a,
-table.spam-langs-table thead tr th.sortedASC a
+table.sortable-table thead tr th.sortedASC a
 {
   background: url(images/sort.gif) no-repeat right -14px;
 }
 
-table.address-rules-table thead tr th.sortedDESC a,
-table.spam-langs-table thead tr th.sortedDESC a
+table.sortable-table thead tr th.sortedDESC a
 {
   background: url(images/sort.gif) no-repeat right 0;
 }
@@ -111,18 +100,18 @@ table.address-rules-table tr > .control a.delete
   background-position: 0 0;
 }
 
-table.spam-langs-table tr > .tick a.enabled
+table.spam-langs-table tr > .tick a.lang-enabled
 {
   background-position: 0 -18px;
 }
 
-table.spam-langs-table tr > .tick a.disabled
+table.spam-langs-table tr > .tick a.lang-disabled
 {
   background-position: 0 -36px;
 }
 
-.whitelist_from,
-.whitelist_to
+.welcomelist_from td.rule,
+.welcomelist_to td.rule
 {
   color: #008800;
   text-align: left;
@@ -130,7 +119,7 @@ table.spam-langs-table tr > .tick a.disabled
 
 }
 
-.blacklist_from
+.blocklist_from td.rule
 {
   color: #BB0000;
   text-align: left;
@@ -191,15 +180,12 @@ table.reportprefstable tr > .title
   width: 320px;
 }
 
-table.generalprefstable tr > .help,
-table.langprefstable tr > .help,
-table.headersprefstable tr > .help,
-table.testsprefstable tr > .help,
-table.bayesprefstable tr > .help,
-table.reportprefstable tr > .help,
-table.addressprefstable tr > .help
-{
-  text-align: right;
+div.address-input {
+  margin-bottom: 10px;
+}
+
+div.address-input > input  {
+  margin-left: 10px;
 }
 
 table.addressprefstable tr > .ruletype
@@ -221,16 +207,32 @@ table.addressprefstable tr > .action
   padding-bottom: 10px;
 }
 
-table.langprefstable tr > .scroller,
-table.addressprefstable tr > .scroller
+table.records-table tr > .scroller
 {
   padding: 0;
 }
 
-span.helpicon {
+span.helpicon
+{
   display: inline-block;
   width: 16px;
   height: 16px;
+  margin-left: 10px;
   background-image: url(images/icons.png);
   background-position: 0 -57px;
+}
+
+input.error {
+  background-color: #FFFF88;
+}
+
+#rcmfd_spamlevelchar
+{
+  width: 20px;
+}
+
+#rcmfd_spamsubject,
+#rcmfd_spamaddress
+{
+  width: 200px;
 }

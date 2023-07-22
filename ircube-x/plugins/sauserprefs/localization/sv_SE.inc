@@ -1,7 +1,7 @@
 <?php
 /* Author: Reino Wallin */
 
-$labels = array();
+$labels = [];
 $labels['sauserprefs'] = 'Skräppost';
 $labels['sauserprefssettings'] = 'Inställningar för skräppost';
 $labels['spamgeneralsettings'] = 'Allmänna inställningar';
@@ -27,9 +27,9 @@ $labels['spamreport0'] = 'Lägg till rapporten till originalbrevets brevhuvud';
 $labels['spamreport1'] = 'Sänd rapporten med originalbrevet som en MIME-bilaga';
 $labels['spamreport2'] = 'Sänd rapporten med originalbrevet som en text-bilaga';
 $labels['spamaddressrules'] = 'Adressregler';
-$labels['whitelist_from'] = 'Acceptera brev från';
-$labels['blacklist_from'] = 'Avvisa brev från';
-$labels['whitelist_to'] = 'Acceptera brev till';
+$labels['welcomelist_from'] = 'Acceptera brev från';
+$labels['blocklist_from'] = 'Avvisa brev från';
+$labels['welcomelist_to'] = 'Acceptera brev till';
 $labels['addrule'] = 'Lägg till';
 $labels['rule'] = 'Regel';
 $labels['importfromaddressbook'] = 'Importera adresser från adressboken';
@@ -37,7 +37,7 @@ $labels['deleteall'] = 'Radera alla';
 $labels['autoscore'] = 'Auto';
 $labels['defaultscore'] = 'Använd grundinställningar';
 $labels['otherscore'] = 'Annan (%s)';
-$labels['usedefault'] = 'Återställ grundinställningar';
+$labels['saupusedefault'] = 'Återställ grundinställningar';
 $labels['langoptions'] = 'Språkinställningar';
 $labels['bayes'] = 'Bayesinställningar';
 $labels['purgingbayes'] = 'Raderar bayesdata...';
@@ -49,7 +49,7 @@ $labels['bayesspam'] = 'Tröskelvärde för skräppost';
 $labels['bayesrules'] = 'Använd bayesregler';
 $labels['help'] = 'Hjälp';
 
-$messages = array();
+$messages = [];
 $messages['sauserprefchanged'] = 'Dina inställningar för skräppost har sparats';
 $messages['sauserpreffailed'] = 'Fel: Det går inte att spara dina inställningar för skräppost';
 $messages['spamthresexp'] = 'Alla brev som vid granskningen av SpamAssassin får ett värde som överstiger tröskelvärdet för skräppost blir märkta som skräppost. Ökar man tröskelvärdet innebär det att viss skräppost inte blir märkt som skräppost, men man reducerar också risken att vanliga brev blir märkta som skräppost.';
@@ -57,8 +57,8 @@ $messages['spamlangexp'] = 'Välj de språk du förväntar dig att mottagna brev
 $messages['headersexp'] = 'SpamAssassin lägger till information i brevhuvudet på brev som granskats av SpamAssassin. Informationen beskriver resultatet av granskningen. Använd inställningarna nedan för att konfigurera dessa brevhuvuden.';
 $messages['spamtestssexp'] = 'Vissa kontroller som SpamAssassin utför för att karaktärisera ett brev, baseras på tjänster på Internet. Välj de tjänster du önskar använda dig av:';
 $messages['spamreport'] = 'När ett brev karaktäriseras som skräppost skapas en rapport med alla resulten från granskningen som SpamAssassin gör...';
-$messages['autowhitelist'] = 'Lägg per automatik till adresserna i din adressbok till \'Acceptera brev från\' listan.';
-$messages['whitelistexp'] = 'Du kan använda en asterisk (*) för att skapa ett mer flexibelt regelverk, exempelvis: *@example.com eller *.example.com.';
+$messages['autowelcomelist'] = 'Lägg per automatik till adresserna i din adressbok till \'Acceptera brev från\' listan.';
+$messages['welcomelistexp'] = 'Du kan använda en asterisk (*) för att skapa ett mer flexibelt regelverk, exempelvis: *@example.com eller *.example.com.';
 $messages['spamaddressexists'] = 'En regel finns redan för denna adressen';
 $messages['spamenteraddress'] = 'Ange en adress att lägga till';
 $messages['spamaddresserror'] = 'Fel: Ogiltlig adress';

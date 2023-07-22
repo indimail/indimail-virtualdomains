@@ -1,7 +1,7 @@
 <?php
 /* Author: Alessio Cecchi */
 
-$labels = array();
+$labels = [];
 $labels['sauserprefs'] = 'Spam';
 $labels['managespam'] = 'Gestisci le impostazioni di rilevamento dello Spam';
 $labels['sauserprefssettings'] = 'Impostazioni spam';
@@ -28,9 +28,9 @@ $labels['spamreport0'] = 'Includi report nelle intestazioni del messaggio origin
 $labels['spamreport1'] = 'Includi il messaggio originale come allegato MIME al raporto';
 $labels['spamreport2'] = 'Includi il messeggio originale come allegato TXT al rapporto';
 $labels['spamaddressrules'] = 'Regole su indirizzi';
-$labels['whitelist_from'] = 'Consenti DA ( From: )';
-$labels['blacklist_from'] = 'Nega DA ( From: )';
-$labels['whitelist_to'] = 'Consenti destinatiari ( To: )';
+$labels['welcomelist_from'] = 'Consenti DA ( From: )';
+$labels['blocklist_from'] = 'Nega DA ( From: )';
+$labels['welcomelist_to'] = 'Consenti destinatiari ( To: )';
 $labels['addrule'] = 'Aggiungi regola';
 $labels['rule'] = 'Regola';
 $labels['importfromaddressbook'] = 'Importa indirizzi dalla rubrica online';
@@ -38,7 +38,7 @@ $labels['deleteall'] = 'Cancella tutto';
 $labels['autoscore'] = 'Automatico';
 $labels['defaultscore'] = 'Punteggio standard';
 $labels['otherscore'] = 'Altro (%s)';
-$labels['usedefault'] = 'Ripristina le impostazioni iniziali';
+$labels['saupusedefault'] = 'Ripristina le impostazioni iniziali';
 $labels['langoptions'] = 'Opzioni Lingua';
 $labels['bayes'] = 'Impostazione filtri Bayesiani';
 $labels['purgingbayes'] = 'Cancellazione dei dati Bayesiani...';
@@ -50,7 +50,7 @@ $labels['bayesspam'] = 'Soglia di Spam';
 $labels['bayesrules'] = 'Utilizza i filtri Bayesiani';
 $labels['help'] = 'Aiuto';
 
-$messages = array();
+$messages = [];
 $messages['sauserprefchanged'] = 'Cambiamenti applicati con successo';
 $messages['sauserpreffailed'] = 'Errore: imposibile salvare i cambiamenti';
 $messages['spamthresexp'] = 'Tutto quello che oltre passa il punteggio verrà segnalato come spam. Aumentare il punteggio significa aumentare i messaggi di spam non segnalati, ma riduce il richio di falsi positivi.';
@@ -58,8 +58,8 @@ $messages['spamlangexp'] = 'Selezionare tutte le lingue in cui ci si aspetta pos
 $messages['headersexp'] = 'SpamAssassin aggiunge delle intestazioni al messaggioriguardante il risultato dell\'analisi. Usare questa opzione per configurare queste intestazioni.';
 $messages['spamtestssexp'] = 'Certi controlli utilizzano dei servizi internet per analizzare il messaggio. Selezionare quello che si vuole utilizzare:';
 $messages['spamreport'] = 'Quando un messaggio viene identificato come spam viene creato un rapporto dei test ed il punteggio questo rapporto viene creato...';
-$messages['autowhitelist'] = 'Gli indirizzi Email della Rubrica della Webmail vengono caricati automaticamente ed inseriti nella lista \'Consenti mail DA\'.';
-$messages['whitelistexp'] = 'Un asterisco (*) può essere usato come carattere \'jolly\' per aumentare la flessibilità della regola. Ad esempio: *@dominio.com o *.dominio.com.';
+$messages['autowelcomelist'] = 'Gli indirizzi Email della Rubrica della Webmail vengono caricati automaticamente ed inseriti nella lista \'Consenti mail DA\'.';
+$messages['welcomelistexp'] = 'Un asterisco (*) può essere usato come carattere \'jolly\' per aumentare la flessibilità della regola. Ad esempio: *@dominio.com o *.dominio.com.';
 $messages['spamaddressexists'] = 'Esiste già una regola per questo indirizzo';
 $messages['spamenteraddress'] = 'Inserire un indirizzo da aggiungere';
 $messages['spamaddresserror'] = 'Errore: Indirizzo invalido';

@@ -1,7 +1,7 @@
 <?php
 /* Author: David Garabana Barro */
 
-$labels = array();
+$labels = [];
 $labels['sauserprefs'] = 'Correo lixo';
 $labels['sauserprefssettings'] = 'Axustes de correo lixo';
 $labels['spamgeneralsettings'] = 'Axustes xerais';
@@ -27,9 +27,9 @@ $labels['spamreport0'] = 'Incluir informe nas cabeceiras da mensaxe orixinal';
 $labels['spamreport1'] = 'Incluir a mensaxe orixinal coma anexo MIME ao informe';
 $labels['spamreport2'] = 'Incluir a mensaxe orixinal coma anexo de texto ao informe';
 $labels['spamaddressrules'] = 'Regras de direccións';
-$labels['whitelist_from'] = 'Aceptar correo de';
-$labels['blacklist_from'] = 'Rexeitar correo de';
-$labels['whitelist_to'] = 'Aceptar correo enviado a';
+$labels['welcomelist_from'] = 'Aceptar correo de';
+$labels['blocklist_from'] = 'Rexeitar correo de';
+$labels['welcomelist_to'] = 'Aceptar correo enviado a';
 $labels['addrule'] = 'Engadir regra';
 $labels['rule'] = 'Regra';
 $labels['importfromaddressbook'] = 'Importar direccións dende a libreta de direccións';
@@ -37,7 +37,7 @@ $labels['deleteall'] = 'Eliminar todo';
 $labels['autoscore'] = 'Auto';
 $labels['defaultscore'] = 'Puntuación por omisión';
 $labels['otherscore'] = 'Outro (%s)';
-$labels['usedefault'] = 'Restaurar os valores por omisión';
+$labels['saupusedefault'] = 'Restaurar os valores por omisión';
 $labels['langoptions'] = 'Opcións da linguaxe';
 $labels['bayes'] = 'Axustes de Bayes';
 $labels['purgingbayes'] = 'Eliminando os datos bayesianos';
@@ -49,7 +49,7 @@ $labels['bayesspam'] = 'Umbral de "correo lixo"';
 $labels['bayesrules'] = 'Empregar regras bayesianas';
 $labels['help'] = 'Axuda';
 
-$messages = array();
+$messages = [];
 $messages['sauserprefchanged'] = 'Modificáronse correctamente os axustes de correo lixo';
 $messages['sauserpreffailed'] = 'Produciuse un erro: Non se poden modificar os axustes de correo lixo';
 $messages['spamthresexp'] = 'Calquera puntuación por enbira desde umbral é marcado coma correo lixo. Se sube este umbral, aumentará a cantidade de correo lixo non detectado, pero tamén reducirá o risco de que se produzan falsos positivos.';
@@ -57,8 +57,8 @@ $messages['spamlangexp'] = 'Escolla as linguaxes nas que espera recibir correo e
 $messages['headersexp'] = 'SpamAssassin engade cabeceiras ás mensaxes procesadas informando dos resultados. Empregue as opcións de embaixo para configurar estas cabeceiras.';
 $messages['spamtestssexp'] = 'Algunhas das probas utilizan servicios de Internet para axudar a identificar o correo lixo. Escolla as que lle gostaría empregar:';
 $messages['spamreport'] = 'Cando unha mensaxe se identifica coma correo lixo, créase un informe de tódalas probas probas e puntuacións asignadas...';
-$messages['autowhitelist'] = 'As direccións de correo electrónico na súa libreta de direccións engádense automáticamente á lista de \'Aceptar correo de\'';
-$messages['whitelistexp'] = 'Pódese usar un asterisco (*) coma comodín para ter máis flexibilidade. Por exemplo: *@exemplo.com ou *.exemplo.com.';
+$messages['autowelcomelist'] = 'As direccións de correo electrónico na súa libreta de direccións engádense automáticamente á lista de \'Aceptar correo de\'';
+$messages['welcomelistexp'] = 'Pódese usar un asterisco (*) coma comodín para ter máis flexibilidade. Por exemplo: *@exemplo.com ou *.exemplo.com.';
 $messages['spamaddressexists'] = 'Xa existe una regra para esta dirección';
 $messages['spamenteraddress'] = 'Por favor, introduza unha dirección para engadir';
 $messages['spamaddresserror'] = 'Produciuse un erro: A dirección semella inválida';

@@ -1,7 +1,7 @@
 <?php
 /* Author: Alexandre Correa */
 
-$labels = array();
+$labels = [];
 $labels['sauserprefs'] = 'Spam';
 $labels['sauserprefssettings'] = 'Configurações Spam';
 $labels['spamgeneralsettings'] = 'Configurações Gerais';
@@ -27,9 +27,9 @@ $labels['spamreport0'] = 'Incluir notas nos cabeçalhos da mensagem original';
 $labels['spamreport1'] = 'Incluir mensagem como anexo MIME';
 $labels['spamreport2'] = 'Incluir mensagem como texto plano';
 $labels['spamaddressrules'] = 'Regras de Endereços';
-$labels['whitelist_from'] = 'Aceitar email de';
-$labels['blacklist_from'] = 'Rejeitar email de';
-$labels['whitelist_to'] = 'Aceitar email enviado para';
+$labels['welcomelist_from'] = 'Aceitar email de';
+$labels['blocklist_from'] = 'Rejeitar email de';
+$labels['welcomelist_to'] = 'Aceitar email enviado para';
 $labels['addrule'] = 'Adicionar regra';
 $labels['rule'] = 'Regra';
 $labels['importfromaddressbook'] = 'Importar endereço do Livro de Endereços';
@@ -37,7 +37,7 @@ $labels['deleteall'] = 'Apagar tudo';
 $labels['autoscore'] = 'Auto';
 $labels['defaultscore'] = 'Pontuação Padrão';
 $labels['otherscore'] = 'Outro (%s)';
-$labels['usedefault'] = 'Voltar configuração padrão';
+$labels['saupusedefault'] = 'Voltar configuração padrão';
 $labels['langoptions'] = 'Opções de linguagem';
 $labels['bayes'] = 'Configuração \'Bayes\'';
 $labels['purgingbayes'] = 'Apagar dados da \'Bayes\'';
@@ -49,7 +49,7 @@ $labels['bayesspam'] = 'Potuação de Spam';
 $labels['bayesrules'] = 'Usar regras \'Baysian\'';
 $labels['help'] = 'Ajuda';
 
-$messages = array();
+$messages = [];
 $messages['sauserprefchanged'] = 'Configurações de SPAM salvas';
 $messages['sauserpreffailed'] = 'Erro: Não foi possível alterar configurações de SPAM';
 $messages['spamthresexp'] = 'Qualquer valor acima da pontuação será marcado como SPAM. Aumentando a pontuação pode aumentar a quantidade de SPAM não detectado, mas evita que uma mensagem verdadeira seja marcada como SPAM.';
@@ -57,8 +57,8 @@ $messages['spamlangexp'] = 'Selecione todos os idiomas que você espera receber 
 $messages['headersexp'] = 'SpamAssassin adiciona cabeçalhos nas mensagens processadas com informações sobre os resultados obtidos. Utilize as opções abaixo para configurar:';
 $messages['spamtestssexp'] = 'Algumas verificações fazem consultas on-line afim de ajudar a detectar SPAM. Selecione as opções que deseja utilizar:';
 $messages['spamreport'] = 'Quando uma mensagem é identificada como SPAM, uma notificação de todos os testes e pontuações obtidas é criada...';
-$messages['autowhitelist'] = 'Endereços de email cadastrados em sua agenda são automaticamente adicionados na lista de "Aceitar email de".';
-$messages['whitelistexp'] = 'Asterisco pode ser utilizado como curinga para uma maior flexibilidade. Exemplo: *@exemplo.com.br ou *.exemplo.com.br';
+$messages['autowelcomelist'] = 'Endereços de email cadastrados em sua agenda são automaticamente adicionados na lista de "Aceitar email de".';
+$messages['welcomelistexp'] = 'Asterisco pode ser utilizado como curinga para uma maior flexibilidade. Exemplo: *@exemplo.com.br ou *.exemplo.com.br';
 $messages['spamaddressexists'] = 'Uma regra já existe para este endereço';
 $messages['spamenteraddress'] = 'Digite um endereço para adicionar';
 $messages['spamaddresserror'] = 'Erro: Endereço inválido';

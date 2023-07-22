@@ -1,7 +1,7 @@
 <?php
 /* Author: Ovidiu Bica */
 
-$labels = array();
+$labels = [];
 $labels['sauserprefs'] = 'Spam';
 $labels['sauserprefssettings'] = 'Setari spam';
 $labels['spamgeneralsettings'] = 'Setari generale';
@@ -27,9 +27,9 @@ $labels['spamreport0'] = 'Include raportul in headerul mesajului original';
 $labels['spamreport1'] = 'Include raportul original ca atasament MIME';
 $labels['spamreport2'] = 'Include raportul original ca atasament text';
 $labels['spamaddressrules'] = 'Reguli adrese';
-$labels['whitelist_from'] = 'Accepta mail de la';
-$labels['blacklist_from'] = 'Refuza mail de la';
-$labels['whitelist_to'] = 'Accepta mail trimis la';
+$labels['welcomelist_from'] = 'Accepta mail de la';
+$labels['blocklist_from'] = 'Refuza mail de la';
+$labels['welcomelist_to'] = 'Accepta mail trimis la';
 $labels['addrule'] = 'Adauga regula';
 $labels['rule'] = 'Regula';
 $labels['importfromaddressbook'] = 'Importa adresele din agenda';
@@ -37,7 +37,7 @@ $labels['deleteall'] = 'Sterge tot';
 $labels['autoscore'] = 'Automat';
 $labels['defaultscore'] = 'Scor implicit';
 $labels['otherscore'] = 'Altele (%s)';
-$labels['usedefault'] = 'Restaureaza setarile implicite';
+$labels['saupusedefault'] = 'Restaureaza setarile implicite';
 $labels['langoptions'] = 'Optiuni lingvistice';
 $labels['bayes'] = 'Setari Bayes';
 $labels['purgingbayes'] = 'Sterg datele Bayesian';
@@ -49,7 +49,7 @@ $labels['bayesspam'] = 'Prag limita spam';
 $labels['bayesrules'] = 'Foloseste reguli Bayesian';
 $labels['help'] = 'Ajutor';
 
-$messages = array();
+$messages = [];
 $messages['sauserprefchanged'] = 'Setarile de SPAM au fost setate cu succes.';
 $messages['sauserpreffailed'] = 'Eroare: Nu pot actualiza setarile de spam.';
 $messages['spamthresexp'] = 'Orice mesaj mai mare de acest prag va fi marcat ca spam. Crescand acest prag va mari numarul de mesaje spam nedetectate insa va reduce numarul de mesaje interpretate gresit ca spam.';
@@ -57,8 +57,8 @@ $messages['spamlangexp'] = 'Selecteaza toate limbile in care te astepti sa prime
 $messages['headersexp'] = 'Spamassassin adauga headere la mesajele procesate furnizand informatii despre rezultate. Foloseste optiunile de mai jos pentru a configura aceste headere.';
 $messages['spamtestssexp'] = 'Unele verificari folosesc servicii de pe internet in vederea detectarii spamului. Selecteaza-le pe cele pe care doresti sa le folosesti.';
 $messages['spamreport'] = 'Cand un mesaj este identificat ca spam, este creat un raport al testelor si al scorurilor. ';
-$messages['autowhitelist'] = 'Adresele de email din agenda sunt adaugate automat in lista adreselor acceptate automat.';
-$messages['whitelistexp'] = 'O steluta (*) poate fi folosita ca inlocuitor global pentru o flexibilitate marita. De ex. *@exemplu.com sau *.exemplu.com';
+$messages['autowelcomelist'] = 'Adresele de email din agenda sunt adaugate automat in lista adreselor acceptate automat.';
+$messages['welcomelistexp'] = 'O steluta (*) poate fi folosita ca inlocuitor global pentru o flexibilitate marita. De ex. *@exemplu.com sau *.exemplu.com';
 $messages['spamaddressexists'] = 'Exista deja o regula pentru aceasta adresa.';
 $messages['spamenteraddress'] = 'Te rog sa introduci o adresa pentru a o adauga.';
 $messages['spamaddresserror'] = 'Eroare: Adresa pare invalida.';

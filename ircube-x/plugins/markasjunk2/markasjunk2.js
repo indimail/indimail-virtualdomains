@@ -4,7 +4,7 @@
  * @licstart  The following is the entire license notice for the
  * JavaScript code in this file.
  *
- * Copyright (C) 2009-2014 Philip Weir
+ * Copyright (C) 2009-2018 Philip Weir
  *
  * The JavaScript code in this page is free software: you can redistribute it
  * and/or modify it under the terms of the GNU General Public License
@@ -15,156 +15,142 @@
  * for the JavaScript code in this file.
  */
 
-function rcmail_markasjunk2(prop) {
-	if (!rcmail.env.uid && (!rcmail.message_list || !rcmail.message_list.get_selection().length))
-		return;
+rcube_webmail.prototype.markasjunk2_mark = function(is_spam) {
+    var uids = this.env.uid ? [this.env.uid] : this.message_list.get_selection();
+    if (!uids)
+        return;
 
-	if (!prop || prop == 'markasjunk2')
-		prop = 'junk';
-
-	var prev_sel = null;
-
-	// also select children of (collapsed) threads
-	if (rcmail.message_list) {
-		if (rcmail.env.uid) {
-			if (rcmail.message_list.rows[rcmail.env.uid].has_children && !rcmail.message_list.rows[rcmail.env.uid].expanded) {
-				if (!rcmail.message_list.in_selection(rcmail.env.uid)) {
-					prev_sel = rcmail.message_list.get_selection();
-					rcmail.message_list.select_row(rcmail.env.uid);
-				}
-
-				rcmail.message_list.select_children(rcmail.env.uid);
-				rcmail.env.uid = null;
-			}
-			else if (rcmail.message_list.get_single_selection() == rcmail.env.uid) {
-				rcmail.env.uid = null;
-			}
-		}
-		else {
-			selection = rcmail.message_list.get_selection();
-			for (var i in selection) {
-				if (rcmail.message_list.rows[selection[i]].has_children && !rcmail.message_list.rows[selection[i]].expanded)
-					rcmail.message_list.select_children(selection[i]);
-			}
-		}
-	}
-
-	var uids = rcmail.env.uid ? rcmail.env.uid : rcmail.message_list.get_selection();
-
-	var lock = rcmail.set_busy(true, 'loading');
-	rcmail.http_post('plugin.markasjunk2.' + prop, rcmail.selection_post_data({_uid: uids, _multifolder: rcmail.is_multifolder_listing()}), lock);
-
-	if (prev_sel) {
-		rcmail.message_list.clear_selection();
-
-		for (var i in prev_sel)
-			rcmail.message_list.select_row(prev_sel[i], CONTROL_KEY);
-	}
-}
-
-function rcmail_markasjunk2_notjunk(prop) {
-	rcmail_markasjunk2('not_junk');
+    var lock = this.set_busy(true, 'loading');
+    this.http_post('plugin.markasjunk2.' + (is_spam ? 'junk' : 'not_junk'), this.selection_post_data({_uid: uids}), lock);
 }
 
 rcube_webmail.prototype.rcmail_markasjunk2_move = function(mbox, uids) {
-	var prev_uid = rcmail.env.uid;
-	var prev_sel = null;
-	var a_uids = $.isArray(uids) ? uids : uids.split(",");;
+    var prev_uid = this.env.uid, a_uids = $.isArray(uids) ? uids : uids.split(",");
 
-	if (rcmail.message_list && a_uids.length == 1 && !rcmail.message_list.rows[a_uids[0]]) {
-		rcmail.env.uid = a_uids[0];
-	}
-	else if (rcmail.message_list && a_uids.length == 1 && !rcmail.message_list.in_selection(a_uids[0]) && !rcmail.env.threading) {
-		rcmail.env.uid = a_uids[0];
-		rcmail.message_list.remove_row(rcmail.env.uid, false);
-	}
-	else if (rcmail.message_list && (!rcmail.message_list.in_selection(a_uids[0]) || a_uids.length != rcmail.message_list.selection.length)) {
-		prev_sel = rcmail.message_list.get_selection();
-		rcmail.message_list.clear_selection();
+    if (this.message_list && a_uids.length == 1 && !this.message_list.in_selection([a_uids[0]]))
+        this.env.uid = a_uids[0];
 
-		for (var i in a_uids)
-			rcmail.message_list.select_row(a_uids[i], CONTROL_KEY);
-	}
+    if (mbox)
+        this.move_messages(mbox);
+    else if (this.env.markasjunk2_permanently_remove == true)
+        this.permanently_remove_messages();
+    else
+        this.delete_messages();
 
-	if (mbox)
-		rcmail.move_messages(mbox);
-	else
-		rcmail.delete_messages();
-
-	rcmail.env.uid = prev_uid;
-
-	if (prev_sel) {
-		rcmail.message_list.clear_selection();
-
-		for (var i in prev_sel) {
-			if (prev_sel[i] != uid)
-				rcmail.message_list.select_row(prev_sel[i], CONTROL_KEY);
-		}
-	}
+    this.env.uid = prev_uid;
 }
 
-function rcmail_markasjunk2_update() {
-	var spamobj = $('#' + rcmail.buttons['plugin.markasjunk2.junk'][0].id);
-	var hamobj = $('#' + rcmail.buttons['plugin.markasjunk2.not_junk'][0].id);
+rcube_webmail.prototype.markasjunk2_toggle_button = function() {
+    var spamobj = $('a.markasjunk2');
+    var hamobj = $('a.markasnotjunk2');
 
-	if (spamobj.parent('li').length > 0) {
-		spamobj = spamobj.parent();
-		hamobj = hamobj.parent();
-	}
+    var disp = {'spam': true, 'ham': true};
+    if (this.env.markasjunk2_spam_only) {
+        disp.ham = false;
+    }
+    else if (!this.is_multifolder_listing() && this.env.markasjunk2_spam_mailbox) {
+        if (this.env.mailbox != this.env.markasjunk2_spam_mailbox)
+            disp.ham = false;
+        else
+            disp.spam = false;
+    }
 
-	var disp = {'spam': true, 'ham': true};
-	if (!rcmail.is_multifolder_listing() && rcmail.env.markasjunk2_spam_mailbox) {
-		if (rcmail.env.mailbox != rcmail.env.markasjunk2_spam_mailbox) {
-			disp.ham = false;
-		}
-		else {
-			disp.spam = false;
-		}
-	}
+    // if only 1 button is visible make sure its the last one (for styling)
+    // allow for multiple instances of the buttons, eg toolbar and contextmenu
+    $.each(spamobj, function(i) {
+        var cur_spamobj = spamobj.eq(i),
+          cur_hamobj = hamobj.eq(i),
+          cur_index = spamobj.eq(i).index();
 
-	var evt_rtn = rcmail.triggerEvent('markasjunk2-update', {'objs': {'spamobj': spamobj, 'hamobj': hamobj}, 'disp': disp});
-	if (evt_rtn && evt_rtn.abort)
-		return;
-	disp = evt_rtn ? evt_rtn.disp : disp;
+        if (cur_spamobj.parent('li').length > 0) {
+            cur_spamobj = cur_spamobj.parent();
+            cur_hamobj = cur_hamobj.parent();
+        }
 
-	disp.spam ? spamobj.show() : spamobj.hide();
-	disp.ham ? hamobj.show() : hamobj.hide();
+        var evt_rtn = rcmail.triggerEvent('markasjunk2-update', {'objs': {'spamobj': cur_spamobj, 'hamobj': cur_hamobj}, 'disp': disp});
+        if (evt_rtn && evt_rtn.abort)
+            return;
+
+        disp = evt_rtn ? evt_rtn.disp : disp;
+
+        disp.spam ? cur_spamobj.show() : cur_spamobj.hide();
+        disp.ham ? cur_hamobj.show() : cur_hamobj.hide();
+
+        if (disp.spam && !disp.ham) {
+            if (cur_index < cur_hamobj.index()) {
+                cur_spamobj.insertAfter(cur_hamobj);
+            }
+        }
+        else if (cur_index > cur_hamobj.index()) {
+            cur_hamobj.insertAfter(cur_spamobj);
+        }
+    });
+}
+
+rcube_webmail.prototype.markasjunk2_is_spam_mbox = function() {
+    return !this.is_multifolder_listing() && this.env.mailbox == this.env.markasjunk2_spam_mailbox;
 }
 
 $(document).ready(function() {
-	if (window.rcmail) {
-		rcmail.addEventListener('init', function(evt) {
-			// register command (directly enable in message view mode)
-			rcmail.register_command('plugin.markasjunk2.junk', rcmail_markasjunk2, rcmail.env.uid);
-			rcmail.register_command('plugin.markasjunk2.not_junk', rcmail_markasjunk2_notjunk, rcmail.env.uid);
+    if (window.rcmail) {
+        rcmail.addEventListener('init', function() {
+            // register command (directly enable in message view mode)
+            rcmail.register_command('plugin.markasjunk2.junk', function() { rcmail.markasjunk2_mark(true); }, !rcmail.markasjunk2_is_spam_mbox() && rcmail.env.uid);
+            rcmail.register_command('plugin.markasjunk2.not_junk', function() { rcmail.markasjunk2_mark(false); }, rcmail.env.uid);
 
-			if (rcmail.message_list) {
-				rcmail.message_list.addEventListener('select', function(list) {
-					rcmail.enable_command('plugin.markasjunk2.junk', list.get_selection().length > 0);
-					rcmail.enable_command('plugin.markasjunk2.not_junk', list.get_selection().length > 0);
-				});
-			}
-		});
+            if (rcmail.message_list) {
+                rcmail.message_list.addEventListener('select', function(list) {
+                    rcmail.enable_command('plugin.markasjunk2.junk', !rcmail.markasjunk2_is_spam_mbox() && list.get_selection(false).length > 0);
+                    rcmail.enable_command('plugin.markasjunk2.not_junk', list.get_selection(false).length > 0);
+                });
+            }
 
-		rcmail.addEventListener('listupdate', function(props) { rcmail_markasjunk2_update(); } );
+            // make sure the correct icon is displayed even when there is no listupdate event
+            rcmail.markasjunk2_toggle_button();
+        });
 
-		rcmail.addEventListener('beforemoveto', function(mbox) {
-			if (mbox && typeof mbox === 'object')
-				mbox = mbox.id;
+        rcmail.addEventListener('listupdate', function() { rcmail.markasjunk2_toggle_button(); });
 
-			// check if destination mbox equals junk box (and we're not already in the junk box)
-			if (rcmail.env.markasjunk2_move_spam && mbox && mbox == rcmail.env.markasjunk2_spam_mailbox && mbox != rcmail.env.mailbox) {
-				rcmail_markasjunk2();
-				return false;
+        rcmail.addEventListener('beforemoveto', function(mbox) {
+            if (mbox && typeof mbox === 'object')
+                mbox = mbox.id;
 
-			}
-			// or if destination mbox equals ham box and we are in the junk box
-			else if (rcmail.env.markasjunk2_move_ham && mbox && mbox == rcmail.env.markasjunk2_ham_mailbox && rcmail.env.mailbox == rcmail.env.markasjunk2_spam_mailbox) {
-				rcmail_markasjunk2_notjunk();
-				return false;
-			}
+            var is_spam = null;
+            // check if destination mbox equals junk box (and we're not already in the junk box)
+            if (rcmail.env.markasjunk2_move_spam && mbox && mbox == rcmail.env.markasjunk2_spam_mailbox && mbox != rcmail.env.mailbox)
+                is_spam = true;
+            // or if destination mbox equals ham box and we are in the junk box
+            else if (rcmail.env.markasjunk2_move_ham && mbox && mbox == rcmail.env.markasjunk2_ham_mailbox && rcmail.env.mailbox == rcmail.env.markasjunk2_spam_mailbox)
+                is_spam = false;
 
-			return;
-		} );
-	}
+            if (is_spam !== null) {
+                rcmail.markasjunk2_mark(is_spam);
+                return false;
+            }
+        });
+
+        // integration with Swipe plugin
+        rcmail.addEventListener('swipe-action', function(p) {
+            if (rcmail.env.swipe_actions[p.direction] == 'markasjunk2' && rcmail.env.markasjunk2_spam_mailbox) {
+                var action = {};
+
+                if (!rcmail.env.markasjunk2_spam_only && rcmail.env.mailbox == rcmail.env.markasjunk2_spam_mailbox) {
+                    action = {
+                        'class': 'notjunk',
+                        'text': 'markasjunk2.markasnotjunk',
+                        'callback': function(p) { rcmail.swipe_action_callback('plugin.markasjunk2.not_junk', null, p); }
+                    };
+                }
+                else {
+                    action = {
+                        'class': 'junk',
+                        'text': 'markasjunk2.markasjunk',
+                        'callback': function(p) { rcmail.swipe_action_callback('plugin.markasjunk2.junk', null, p); }
+                    };
+                }
+
+                return action;
+            }
+        });
+    }
 });

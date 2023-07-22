@@ -3,7 +3,7 @@
    Updates: Tomasz Chiliński
 */
 
-$labels = array();
+$labels = [];
 $labels['sauserprefs'] = 'Spam';
 $labels['managespam'] = 'Ustawienia wykrywania spamu';
 $labels['sauserprefssettings'] = 'Ustawienia spamu';
@@ -30,9 +30,9 @@ $labels['spamreport0'] = 'Dołącz raport w nagłówku oryginalnej wiadomości';
 $labels['spamreport1'] = 'Dołącz orginał jako MIME załącznik do raportu';
 $labels['spamreport2'] = 'Dołącz oryginał jako załącznik tekstowy';
 $labels['spamaddressrules'] = 'Reguły Adresów';
-$labels['whitelist_from'] = 'Akceptuj wiadomości od';
-$labels['blacklist_from'] = 'Rejestruj wiadomości od';
-$labels['whitelist_to'] = 'Akceptuj wiadomości wysłane do';
+$labels['welcomelist_from'] = 'Akceptuj wiadomości od';
+$labels['blocklist_from'] = 'Rejestruj wiadomości od';
+$labels['welcomelist_to'] = 'Akceptuj wiadomości wysłane do';
 $labels['addrule'] = 'Dodaj regułę';
 $labels['rule'] = 'Reguła';
 $labels['importfromaddressbook'] = 'Importuj adresy z książki adresowej';
@@ -40,7 +40,7 @@ $labels['deleteall'] = 'Usuń wszystko';
 $labels['autoscore'] = 'Automatycznie';
 $labels['defaultscore'] = 'Domyślny Wynik';
 $labels['otherscore'] = 'Inny (%s)';
-$labels['usedefault'] = 'Przywróć ustawienia domyślne';
+$labels['saupusedefault'] = 'Przywróć ustawienia domyślne';
 $labels['langoptions'] = 'Opcje Językowe';
 $labels['bayes'] = 'Ustawienia sieci bayesowskich';
 $labels['purgingbayes'] = 'Usuwanie sieci bayesowskich';
@@ -52,7 +52,7 @@ $labels['bayesspam'] = 'Próg spamu';
 $labels['bayesrules'] = 'Używaj reguł sieci bayesowskich';
 $labels['help'] = 'Pomoc';
 
-$messages = array();
+$messages = [];
 $messages['sauserprefchanged'] = 'Zmiany ustawień spamu zakończone sukcesem';
 $messages['sauserpreffailed'] = 'Error: Nie można zmienić ustawień spamu';
 $messages['spamthresexp'] = 'Wszystko powyżej progu jest oznaczane jako spam. Po zwiększeniu tego progu wzrośnie ilość spamu nieodebranego, ale zmniejszy się ryzyko fałszywych alarmów.';
@@ -60,8 +60,8 @@ $messages['spamlangexp'] = 'Wybierz wszystkie języki w jakich można oczekiwać
 $messages['headersexp'] = 'SpamAssassin dodaje nagłówki przetworzonych wiadomości, dostarczające informacji o wynikach. Użyj poniższych opcji, aby skonfigurować te nagłówki.';
 $messages['spamtestssexp'] = 'Niektóre kontrole wykorzystania usług internetowych w celu identyfikowania spamu. Wybierz te, których chcesz używać:';
 $messages['spamreport'] = 'Gdy wiadomość jest klasyfikowana jako spam, tworzony jest raport z wszystkich testów.';
-$messages['autowhitelist'] = 'Adresy w Twojej książce adresowej są automatycznie dodawane do listy akceptowanych nadawców.';
-$messages['whitelistexp'] = 'Gwiazdka (*) zapewnia większą elastyczność. Na przykład: * @ example.com lub * @ *. example.com.';
+$messages['autowelcomelist'] = 'Adresy w Twojej książce adresowej są automatycznie dodawane do listy akceptowanych nadawców.';
+$messages['welcomelistexp'] = 'Gwiazdka (*) zapewnia większą elastyczność. Na przykład: * @ example.com lub * @ *. example.com.';
 $messages['spamaddressexists'] = 'Reguła dla tego adresu już istnieje';
 $messages['spamenteraddress'] = 'Wpisz adres, który chcesz dodać';
 $messages['spamaddresserror'] = 'Error: Niewłaściwy adres';

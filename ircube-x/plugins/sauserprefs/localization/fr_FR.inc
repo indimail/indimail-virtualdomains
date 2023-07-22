@@ -1,7 +1,7 @@
 <?php
 /* Author: Jérémy Bobbio based on previous translation by magik_cypress */
 
-$labels = array();
+$labels = [];
 $labels['sauserprefs'] = 'Spam';
 $labels['managespam'] = 'Gérer les paramètres de détection des spams';
 $labels['sauserprefssettings'] = 'Préférences liées au spams';
@@ -28,9 +28,9 @@ $labels['spamreport0'] = 'Inclure le rapport dans les en-têtes du message origi
 $labels['spamreport1'] = 'Inclure tout le message original en pièce-jointe du rapport';
 $labels['spamreport2'] = 'Inclure le texte du message original en pièce-jointe du rapport';
 $labels['spamaddressrules'] = 'Adresses particulières';
-$labels['whitelist_from'] = 'Accepter les messages de';
-$labels['blacklist_from'] = 'Rejeter les messages de';
-$labels['whitelist_to'] = 'Accepter les messages envoyé à';
+$labels['welcomelist_from'] = 'Accepter les messages de';
+$labels['blocklist_from'] = 'Rejeter les messages de';
+$labels['welcomelist_to'] = 'Accepter les messages envoyé à';
 $labels['addrule'] = 'Ajouter';
 $labels['rule'] = 'Règle';
 $labels['importfromaddressbook'] = 'Importer le carnet d\'adresses';
@@ -38,7 +38,7 @@ $labels['deleteall'] = 'Tout supprimer';
 $labels['autoscore'] = 'Auto';
 $labels['defaultscore'] = 'Score par défaut';
 $labels['otherscore'] = 'Autre (%s)';
-$labels['usedefault'] = 'Rétablir les préférences par défaut';
+$labels['saupusedefault'] = 'Rétablir les préférences par défaut';
 $labels['langoptions'] = 'Options de langues';
 $labels['bayes'] = 'Préférences du filtre bayésien';
 $labels['purgingbayes'] = 'Suppression des données du filtre bayésien...';
@@ -50,7 +50,7 @@ $labels['bayesspam'] = 'Seuil des spams';
 $labels['bayesrules'] = 'Utiliser le filtre bayésien pour la détection';
 $labels['help'] = 'Aide';
 
-$messages = array();
+$messages = [];
 $messages['sauserprefchanged'] = 'Préférences modifiées avec succès';
 $messages['sauserpreffailed'] = 'Erreur : impossible de modifier les préférences';
 $messages['spamthresexp'] = 'Tout ce qui se trouve au dessus du seuil sera considéré comme spam. Augmenter le seuil va donc augmenter le nombre de spams qui ne seront pas détectés, mais réduira les risques de faux positifs.';
@@ -58,8 +58,8 @@ $messages['spamlangexp'] = 'Choisir toutes les langues dans lesquelles seront é
 $messages['headersexp'] = 'SpamAssassin ajoute des en-têtes contenant des informations sur les traitements effectués. Les options suivantes permettent de configurer ces en-têtes.';
 $messages['spamtestssexp'] = 'Certains tests utilisent des services Internet externes pour aider à identifier les spams. Choisir ceux qui doivent êtres utilisés :';
 $messages['spamreport'] = 'Quand un message est identifié comme spam, un rapport avec tous les tests et scores est créé...';
-$messages['autowhitelist'] = 'Les adresses qui se trouvent dans le carnet d\'adresses sont automatiquement ajoutées dans la liste des exceptions.';
-$messages['whitelistexp'] = 'Une astérisque (*) peut être utilisé comme joker pour les traitements généraux. Par exemple : *example.com ou *.example.com.';
+$messages['autowelcomelist'] = 'Les adresses qui se trouvent dans le carnet d\'adresses sont automatiquement ajoutées dans la liste des exceptions.';
+$messages['welcomelistexp'] = 'Une astérisque (*) peut être utilisé comme joker pour les traitements généraux. Par exemple : *example.com ou *.example.com.';
 $messages['spamaddressexists'] = 'Une règle existe déjà pour cette addresse';
 $messages['spamenteraddress'] = 'Entrer une adresse à ajouter';
 $messages['spamaddresserror'] = 'Erreur : l\'adresse semble invalide';

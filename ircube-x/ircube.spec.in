@@ -153,6 +153,7 @@ install -m 0644 %{name}-release %{buildroot}%{pluginbase}/%{name}/%{name}-releas
 %attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/localization/sk_SK.inc
 %attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/localization/fr_FR.inc
 %attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/localization/gl_ES.inc
+%attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/sauserprefs.sql
 %dir %attr(0755,root,root) %{pluginbase}/plugins/sauserprefs/skins
 %dir %attr(0755,root,root) %{pluginbase}/plugins/sauserprefs/skins/larry
 %dir %attr(0755,root,root) %{pluginbase}/plugins/sauserprefs/skins/larry/images
@@ -171,13 +172,18 @@ install -m 0644 %{name}-release %{buildroot}%{pluginbase}/%{name}/%{name}-releas
 %dir %attr(0755,root,root) %{pluginbase}/plugins/sauserprefs/skins/classic/templates
 %attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/skins/classic/templates/settingsedit.html
 %attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/skins/classic/templates/sauserprefs.html
-%attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/skins/classic/tabstyles.css
+%attr(644,root,root)       %{pluginbase}/plugins/sauserprefs/skins/elastic/sauserprefs.less
+%attr(644,root,root)       %{pluginbase}/plugins/sauserprefs/skins/elastic/sauserprefs.min.css
+%attr(644,root,root)       %{pluginbase}/plugins/sauserprefs/skins/elastic/tabstyles.less
+%attr(644,root,root)       %{pluginbase}/plugins/sauserprefs/skins/elastic/tabstyles.min.css
+%attr(644,root,root)       %{pluginbase}/plugins/sauserprefs/skins/elastic/templates/sauserprefs.html
+%attr(644,root,root)       %{pluginbase}/plugins/sauserprefs/skins/elastic/templates/settingsedit.html
 %attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/config.inc.php.dist
-%attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/sauserprefs.sql
 %attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/CHANGELOG
 %dir %attr(0755,root,root) %{pluginbase}/plugins/sauserprefs/lib
 %dir %attr(0755,root,root) %{pluginbase}/plugins/sauserprefs/lib/Roundcube
 %attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/lib/Roundcube/rcube_sauserprefs_storage_sql.php
+%attr(644,root,root)       %{pluginbase}/plugins/sauserprefs/lib/Roundcube/rcube_sauserprefs_storage.php
 %attr(0644,root,root)      %{pluginbase}/plugins/sauserprefs/sauserprefs.php
 %dir %attr(0755,root,root) %{pluginbase}/plugins/iwebadmin
 %attr(0664,root,root)      %{pluginbase}/plugins/iwebadmin/config.inc.php
@@ -221,12 +227,14 @@ install -m 0644 %{name}-release %{buildroot}%{pluginbase}/%{name}/%{name}-releas
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/localization/pt_BR.inc
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/localization/en_US.inc
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/localization/es_ES.inc
+%attr(644,root,root)       %{pluginbase}/plugins/markasjunk2/localization/da_DK.inc
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/localization/de_DE.inc
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/localization/sk_SK.inc
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/localization/fa_IR.inc
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/localization/fr_FR.inc
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/localization/nl_NL.inc
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/localization/gl_ES.inc
+%attr(644,root,root)       %{pluginbase}/plugins/markasjunk2/localization/zh_CN.inc
 %dir %attr(0755,root,root) %{pluginbase}/plugins/markasjunk2/skins
 %dir %attr(0755,root,root) %{pluginbase}/plugins/markasjunk2/skins/larry
 %dir %attr(0755,root,root) %{pluginbase}/plugins/markasjunk2/skins/larry/images
@@ -238,11 +246,14 @@ install -m 0644 %{name}-release %{buildroot}%{pluginbase}/%{name}/%{name}-releas
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/skins/classic/images/messageactions.png
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/skins/classic/images/mail_toolbar.png
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/skins/classic/markasjunk2.css
+%attr(644,root,root)       %{pluginbase}/plugins/markasjunk2/skins/elastic/markasjunk2.less
+%attr(644,root,root)       %{pluginbase}/plugins/markasjunk2/skins/elastic/markasjunk2.min.css
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/config.inc.php.dist
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/markasjunk2.js
 %attr(0644,root,root)      %{pluginbase}/plugins/markasjunk2/CHANGELOG
 %attr(644,root,root)       %{pluginbase}/%{name}/%{name}-release
 %attr(644,root,root)       %{pluginbase}/%{name}/%{name}-rpm.info
+
 
 %doc %{_prefix}/share/indimail/doc/README-ircube.md
 %doc %{_prefix}/share/indimail/doc/COPYING.ircube

@@ -1,7 +1,7 @@
 <?php
 /* Author: Joan Riera Pol */
 
-$labels = array();
+$labels = [];
 $labels['sauserprefs'] = 'Spam';
 $labels['sauserprefssettings'] = 'Preferencias de Spam';
 $labels['spamgeneralsettings'] = 'Preferencias Generales';
@@ -27,9 +27,9 @@ $labels['spamreport0'] = 'Incluir informe en la cabecera del mensaje original';
 $labels['spamreport1'] = 'Incluir original como adjunto MIME al informe';
 $labels['spamreport2'] = 'Incluir al informe el original como adjunto de sólo texto';
 $labels['spamaddressrules'] = 'Reglas de direcciones';
-$labels['whitelist_from'] = 'Aceptar correos de';
-$labels['blacklist_from'] = 'Rechazar correos de';
-$labels['whitelist_to'] = 'Aceptar correos mandados a';
+$labels['welcomelist_from'] = 'Aceptar correos de';
+$labels['blocklist_from'] = 'Rechazar correos de';
+$labels['welcomelist_to'] = 'Aceptar correos mandados a';
 $labels['addrule'] = 'Añadir regla';
 $labels['rule'] = 'Regla';
 $labels['importfromaddressbook'] = 'Importar direcciones desde el la lista de contactos';
@@ -37,7 +37,7 @@ $labels['deleteall'] = 'Eliminar todos';
 $labels['autoscore'] = 'Auto';
 $labels['defaultscore'] = 'Puntuación por defecto';
 $labels['otherscore'] = 'Otro (%s)';
-$labels['usedefault'] = 'Restaurar preferencias por defecto';
+$labels['saupusedefault'] = 'Restaurar preferencias por defecto';
 $labels['langoptions'] = 'Opciones de idioma';
 $labels['bayes'] = 'Preferencias Bayesianas';
 $labels['purgingbayes'] = 'Eliminando datos Bayesianos...';
@@ -49,7 +49,7 @@ $labels['bayesspam'] = 'Umbral de Spam';
 $labels['bayesrules'] = 'Usar reglas Bayesianas';
 $labels['help'] = 'Ayuda';
 
-$messages = array();
+$messages = [];
 $messages['sauserprefchanged'] = 'Preferencias de spam modificadas';
 $messages['sauserpreffailed'] = 'Error: No se han podido modificar las preferencias de spam';
 $messages['spamthresexp'] = 'Cualquier correo por encima del umbral será marcado como spam. Ampliando este umbral se incrementará la cantidad de spam no filtrado, pero reducirá el riesgo de falsos positivos.';
@@ -57,8 +57,8 @@ $messages['spamlangexp'] = 'Selecciona los idiomas en los que esperas recibir lo
 $messages['headersexp'] = 'SpamAssassin añade cabeceras a mensajes procesados proporcionando información sobre los resultados. Usar las opciones inferiores para configurar estas cabeceras.';
 $messages['spamtestssexp'] = 'Algunas comprobaciones utilizan servicios en red para ayudar a identificar spam. Selecciona los que deseas utilizar:';
 $messages['spamreport'] = 'Cuando un mensaje es identificado como spam se creará un reporte de las pruebas y las puntuaciones asignadas...';
-$messages['autowhitelist'] = 'Las cuentas de correo en tu lista de contactos son añadidas de forma automática a la lista \'Aceptar correos de\'.';
-$messages['whitelistexp'] = 'Un asterisco (*) puede ser utilizado como wildcard para mayor flexibilidad. Por ejemplo: *@ejemplo.com o *.ejemplo.com.';
+$messages['autowelcomelist'] = 'Las cuentas de correo en tu lista de contactos son añadidas de forma automática a la lista \'Aceptar correos de\'.';
+$messages['welcomelistexp'] = 'Un asterisco (*) puede ser utilizado como wildcard para mayor flexibilidad. Por ejemplo: *@ejemplo.com o *.ejemplo.com.';
 $messages['spamaddressexists'] = 'Ya existe una regla para esta dirección';
 $messages['spamenteraddress'] = 'Por favor, introduce una dirección a añadir';
 $messages['spamaddresserror'] = 'Error: La dirección parece errónea';
