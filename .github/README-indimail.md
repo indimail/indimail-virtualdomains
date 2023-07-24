@@ -3489,7 +3489,7 @@ $ sudo /bin/bash
 $
 ```
 
-indimail-mta allows you many ways to create addresses that will be served by the MTA. In many cases addresses that you will configure which will not be present in the MySQL database. Such addresses can be aliases, autoresponders, forwards, addresses using .qmail files, local users in /etc/passwd. The recipients extension allows you to create rules or databases to accept such addresses and reject all other non-existent addresses. The recipient extension uses the cotrol file <u>/etc/indimail/control/recipients</u>. This control file contains list of external resources providing acceptable, full-qualified envelope addresses ('RCPT TO: <recip@domain>') to be used for recipient verification during the SMTP session. The external sources can be either <b>fastforward</b> compliant cdbs including the envelope addresses, where the path to a cdb has to be referenced relative to <u>/etc/indimail directory</u> - or - <b>checkpassword</b> compatible Plugable Authentication Modules (PAM), receiving the envelope address on FD 3 as 'recip@domain\0\0\0' and returning '0' in case of success and '1' in case of failure. The use of a PAM is indicated with a delimiting '|' and it will be called with up to five additional parameters; while a cdb follows a ':', which can be omitted. The list of external sources is consulted line-by-line for each recipient envelope address until the first positive answer, or a final negative response is encountered. Which external source to be queried, depends on the domain part of the recipient envelope address specified on the left side of the <u>recipients</u> file, while the external resource is provided right from the delimiter.
+indimail-mta allows you many ways to create addresses that will be served by the MTA. In many cases addresses that you will configure which will not be present in the MySQL database. Such addresses can be aliases, autoresponders, forwards, addresses using .qmail files, addresses in ezmlm lists, local users in /etc/passwd. The recipients extension allows you to create rules or databases to accept such addresses and reject all other non-existent addresses. The recipient extension uses the cotrol file <u>/etc/indimail/control/recipients</u>. This control file contains list of external resources providing acceptable, full-qualified envelope addresses ('RCPT TO: <recip@domain>') to be used for recipient verification during the SMTP session. The external sources can be either <b>fastforward</b> compliant cdbs including the envelope addresses, where the path to a cdb has to be referenced relative to <u>/etc/indimail directory</u> - or - <b>checkpassword</b> compatible Plugable Authentication Modules (PAM), receiving the envelope address on FD 3 as 'recip@domain\0\0\0' and returning '0' in case of success and '1' in case of failure. The use of a PAM is indicated with a delimiting '|' and it will be called with up to five additional parameters; while a cdb follows a ':', which can be omitted. The list of external sources is consulted line-by-line for each recipient envelope address until the first positive answer, or a final negative response is encountered. Which external source to be queried, depends on the domain part of the recipient envelope address specified on the left side of the <u>recipients</u> file, while the external resource is provided right from the delimiter.
 
 The address's domain part is evaluated in lower-case.
 
@@ -3522,7 +3522,7 @@ Here is how the above will work
 A simple scheme would be to have your local domain as the line `@localdomain:users/recipients.cdb` in <u>control/recipients</u>. Then add any local users to <u>users/recipients</u> and rebuild the <u>users/recipients.cdb</u> database
 
 ```
-qmail-cdb -r
+$ sudo qmail-cdb -r
 ```
 
 You can use <b>test-recipients</b> to test your addresses in MySQL or through the <b>recipients</b> extension.
@@ -3530,8 +3530,8 @@ You can use <b>test-recipients</b> to test your addresses in MySQL or through th
 ```
 # test if manny@example.com is present in MySQL database
 # This will query the inlookup daemon which requires user
-# to have qmaild privileges. You can also use indimail user
-# provided the FIFO gets create with 0666 file mode
+# to have qmaild privileges. Alternatively you can use the
+# indimail user provided that FIFO gets created with 0666 file mode
 
 $ sudo bash
 # setuidgid -g qmail qmaild test-recipients -s testuser01@example.com
