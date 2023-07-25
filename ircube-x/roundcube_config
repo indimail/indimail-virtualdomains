@@ -529,18 +529,43 @@ if [ -n "$ssl_cnf" -a -f $ssl_cnf ] ; then
 		$ssl_cnf
 	fi
 fi
-if [ -f /etc/centos-release -o -f /etc/almalinux-release -o -f /etc/rockylinux-release -o -f /etc/fedora-release ] ; then
-	t=$(cat /etc/redhat-release|awk '{print $1}')
+if [ -f /etc/centos-release -o -f /etc/almalinux-release -o -f /etc/rockylinux-release -o -f /etc/rocky-release -o -f /etc/fedora-release -o -f /etc/oracle-release ] ; then
+	if [ -f /etc/oracle-release ] ; then
+		t=$(cat /etc/oracle-release|awk '{print $1}')
+	elif [ -f /etc/redhat-release ] ; then
+		t=$(cat /etc/redhat-release|awk '{print $1}')
+	else
+		if [ -f /etc/centos-release ] ; then
+			t="CentOS"
+		elif [ -f /etc/almalinux-release ] ; then
+			t="AlmaLinux"
+		elif [ -f /etc/rockylinux-release ] ; then
+			t="RockyLinux"
+		elif [ -f /etc/rocky-release ] ; then
+			t="Rocky"
+		elif [ -f /etc/fedora-release ] ; then
+			t="Fedora"
+		else
+			t="Unknown"
+		fi
+	fi
 	if [ "$t" = "CentOS" ] ; then
 		os_release=$(cat /etc/centos-release|awk '{print $4}'|cut -d.  -f1)
 	elif [ "$t" = "AlmaLinux" ] ; then
 		os_release=$(cat /etc/almalinux-release|awk '{print $3}'|cut -d.  -f1)
 	elif [ "$t" = "RockyLinux" ] ; then
 		os_release=$(cat /etc/rockylinux-release|awk '{print $3}'|cut -d.  -f1)
+	elif [ "$t" = "Rocky" ] ; then
+		os_release=$(cat /etc/rocky-release|awk '{print $4}'|cut -d.  -f1)
 	elif [ "$t" = "Fedora" ] ; then
 		os_release=$(cat /etc/fedora-release|awk '{print $3}'|cut -d.  -f1)
+	elif [ "$t" = "Oracle" ] ; then
+		os_release=$(cat /etc/oracle-release |awk '{print $5}'|cut -d. -f1)
+	elif [ "$t" = "Red" ] ; then
+		os_release=$(cat /etc/redhat-release |sed -e 's{.*release{{' -e 's{.*Release{{'|awk '{print $1}')
 	else
 		echo "Unknown Redhat OS release" 1>&2
+		exit 1
 	fi
 	configure_php_conf
 
