@@ -27,6 +27,8 @@ Release 3.4.5-1.1 Start 25/04/2023 End XX/XX/XXXX
 14. incrypt.c, mgmtpassfuncs.c, vsetpass.c: set hash method from hash_method
     control file in controldir
 15. vmodinfo.c: display hash method set for a domain
+- 26/07/2023
+16. ilocal_upgrade.in: fixed typo nssd.conf --> nssd.pid
 
 * Sun Apr 23 2023 19:21:03 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.4-1.1%{?dist}
 Release 3.4.4-1.1 Start 26/03/2023 End 23/04/2023

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: ilocal_upgrade.in,v 2.40 2023-06-08 22:26:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.in,v 2.41 2023-07-26 18:29:33+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -22,7 +22,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.in,v 2.40 2023-06-08 22:26:21+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.in,v 2.41 2023-07-26 18:29:33+05:30 Cprogrammer Exp mbhangui $"
 if [ -d @indimaildir@/mysqldb/data/indimail ] ; then
 	if [ ! -f @servicedir@/mysql.3306/down ] ; then
 		for i in mysqld mariadb mysql
@@ -41,7 +41,7 @@ fi
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.in,v 2.40 2023-06-08 22:26:21+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.in,v 2.41 2023-07-26 18:29:33+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in $(ls -d @servicedir@/qmail-imapd* @servicedir@/qmail-pop3d* @servicedir@/proxy-imapd* @servicedir@/proxy-pop3d* 2>/dev/null)
 do
@@ -66,27 +66,19 @@ fi
 # path for /tmp/nssd.sock, /tmp/logfifo have changed to /run/indimail
 if [ -d /run ] ; then
 	logfifo=/run/indimail/logfifo
-	nssd_sock=/run/indimail/pwdlookup/nssd.sock
+	nssd_dir=/run/indimail/pwdlookup
 	inlookup_dir=/run/indimail/inlookup
 	fifo_tmpdir=/run/indimail/inquery
-	mkdir -p /run/indimail/pwdlookup
-	$chmod 775 /run/indimail/pwdlookup
-	$chown root:indimail /run/indimail/pwdlookup
 elif [ -d /var/run ] ; then
 	logfifo=/var/run/indimail/logfifo
-	nssd_sock=/var/run/indimail/pwdlookup/nssd.sock
+	nssd_dir=/var/run/indimail/pwdlookup
 	inlookup_dir=/var/run/indimail/inlookup
 	fifo_tmpdir=/var/run/indimail/inquery
-	mkdir -p /var/run/indimail/pwdlookup
-	$chmod 775 /var/run/indimail/pwdlookup
-	$chown root:indimail /var/run/indimail/pwdlookup
 else
 	logfifo=/tmp/logfifo
-	nssd_sock=/tmp/pwdlookup/nssd.sock
+	nssd_dir=/tmp/pwdlookup
 	inlookup_dir=/tmp/indimail/inlookup
 	fifo_tmpdir=/tmp/indimail/inquery
-	$chmod 775 /tmp/pwdlookup
-	$chown root:indimail /tmp/pwdlookup
 fi
 if [ ! -d @servicedir@/qmail-logfifo ] ; then
 	@prefix@/sbin/svctool --servicedir=@servicedir@ --fifologger=$logfifo
@@ -114,34 +106,28 @@ if [ " $logfifo" != " /tmp/logfifo" ] ; then
 	done
 fi
 update_nssd=0
+if [ ! -d $nssd_dir ] ; then
+	mkdir -p $nssd_dir
+	$chmod 775 $nssd_dir
+	$chown root:indimail $nssd_dir
+fi
 for j in @servicedir@/pwdlookup/run @servicedir@/pwdlookup/variables/.options
 do
 	if [ ! -f $j ] ; then
 		continue
 	fi
-	grep "/tmp/nssd.sock" $j > /dev/null
+	grep "/tmp/nssd.sock" $j > /dev/null || grep "/run/indimail/nssd.sock" $j > /dev/null
 	if [ $? -eq 0 ] ; then
 		update_nssd=1
-		echo "Updating pwdlookup service to use $nssd_sock"
-		sed -i -e "s}/tmp/nssd.sock}$nssd_sock}" $j
-	fi
-	grep "/run/indimail/nssd.sock" $j > /dev/null
-	if [ $? -eq 0 ] ; then
-		update_nssd=1
-		echo "Updating pwdlookup service to use $nssd_sock"
-		sed -i -e "s}/run/indimail/nssd.sock}$nssd_sock}" $j
+		echo "Updating pwdlookup service to use $nssd_dir/nssd.sock"
+		sed -i -e "s}/tmp/nssd.sock}$nssd_dir/nssd.sock}" $j
 	fi
 done
 
-if [ $update_nssd -eq 1 ] ; then
-	echo "Refreshing pwdlookup service"
-	@prefix@/sbin/svctool --servicedir=@servicedir@ --refreshsvc="@servicedir@/pwdlookup" --force
-fi
-
 # update pid file to be in /run or /var/run
 if [ -f @sysconfdir@/nssd.conf ] ; then
-	grep "/tmp/nssd.conf" @sysconfdir@/nssd.conf > /dev/null || \
-		grep "indimail/nssd.conf" @sysconfdir@/nssd.conf > /dev/null
+	grep "/tmp/nssd.pid" @sysconfdir@/nssd.conf > /dev/null || \
+		grep "indimail/nssd.pid" @sysconfdir@/nssd.conf > /dev/null
 	if [ $? -eq 0 ] ; then
 		if [ -d /run ] ; then
 			pidfile=/run/indimail/pwdlookup/nssd.pid
@@ -153,6 +139,14 @@ if [ -f @sysconfdir@/nssd.conf ] ; then
 		sed -i -e "s{^pidfile.*{pidfile     $pidfile{g" @sysconfdir@/nssd.conf
 	fi
 fi
+if [ -f @servicedir@/pwdlookup/variables/NSSD_SOCKET ] ; then
+	check_update_if_diff @servicedir@/pwdlookup/variables/NSSD_SOCKET $nssd_dir/nssd.sock
+fi
+if [ $update_nssd -eq 1 ] ; then
+	echo "Refreshing pwdlookup service"
+	@prefix@/sbin/svctool --servicedir=@servicedir@ --refreshsvc="@servicedir@/pwdlookup" --force
+fi
+
 
 # update inlookup to use INFIFODIR instead of FIFODIR
 if [ ! -d $inlookup_dir ] ; then
@@ -241,6 +235,9 @@ case $1 in
 esac
 #
 # $Log: ilocal_upgrade.in,v $
+# Revision 2.41  2023-07-26 18:29:33+05:30  Cprogrammer
+# fixed typo nssd.conf --> nssd.pid
+#
 # Revision 2.40  2023-06-08 22:26:21+05:30  Cprogrammer
 # fixed errors
 #
