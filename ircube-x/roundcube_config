@@ -178,6 +178,7 @@ echo "# Round Cube Webmail is a browser-based multilingual IMAP client"
 echo "#"
 echo ""
 echo "Alias /indimail \"/srv/www/roundcubemail/public_html\""
+echo "Alias /installer \"/srv/www/roundcubemail/installer\""
 echo ""
 echo "# Define who can access the Webmail"
 echo "# You can enlarge permissions once configured"
@@ -251,7 +252,7 @@ fi
 
 create_mysql_db()
 {
-ps -ef|grep mysqld|egrep -v "systemctl|grep" > /dev/null 2>&1
+ps -ef|grep -E "mariadbd|mysqld"|egrep -v "systemctl|grep" > /dev/null 2>&1
 if [ $? -ne 0 -o ! -S /var/run/mysqld/mysqld.sock ] ; then
 	if [ -x /service/mysql.3306/run ] ; then
 		echo "Starting MySQL server"
@@ -297,6 +298,11 @@ else
 		mysql_sock=/var/run/mysqld/mysqld.sock
 	fi
 fi
+if [ -f /usr/bin/mariadb ] ; then
+	mysql=/usr/bin/mariadb
+else
+	mysql=/usr/bin/mysql
+fi
 if [ -S $mysqld_sock ] ; then
 	echo "adding roundcube user"
 	(
@@ -304,13 +310,13 @@ if [ -S $mysqld_sock ] ; then
 		echo "CREATE USER roundcube IDENTIFIED BY 'subscribed';"
 		echo "GRANT ALL PRIVILEGES ON RoundCube_db.* TO roundcube;"
 		echo "FLUSH PRIVILEGES;"
-	) | /usr/bin/mysql -u mysql -p"$PRIV_PASS" mysql
+	) | $mysql -u mysql -p"$PRIV_PASS" mysql
 	if [ -f $rcube_base/SQL/mysql.initial.sql ] ; then
 		echo "initializing roundcube db"
-		/usr/bin/mysql -u roundcube -psubscribed RoundCube_db < $rcube_base/SQL/mysql.initial.sql
+		$mysql -u roundcube -psubscribed RoundCube_db < $rcube_base/SQL/mysql.initial.sql
 	fi
 	if [ -f $rcube_base/plugins/sauserprefs/sauserprefs.sql ] ; then
-		/usr/bin/mysql -u roundcube -psubscribed RoundCube_db < $rcube_base/plugins/sauserprefs/sauserprefs.sql
+		$mysql -u roundcube -psubscribed RoundCube_db < $rcube_base/plugins/sauserprefs/sauserprefs.sql
 	fi
 	if [ -x /service/mysql.3306/shutdown ] ; then
 		/service/mysql.3306/shutdown
@@ -373,7 +379,6 @@ if [ -n "$MYSQL_SOCKET" ] ; then
 else
 	mysql_sock=$rundir/mysqld/mysqld.sock
 fi
-
 # RoundCube DB setup
 if [ $is_suse -eq 1 ] ; then
 	rcube_base=/srv/www/roundcubemail
@@ -394,7 +399,7 @@ if [ -f /etc/debian_version ] ; then
 elif [ $is_suse -eq 1 ] ; then
 	httpd_user="wwwrun"
 	httpd_group="www"
-	php_ini="/etc/php7/apache2/php.ini"
+	php_ini=$(ls /etc/php*/apache2/php.ini)
 else
 	# CentOS, Fedora
 	httpd_user="apache"
@@ -404,8 +409,9 @@ fi
 
 # RoundCube config
 if [ $is_suse -eq 1 -a -f /etc/roundcubemail/config.inc.php ] ; then
-	if [ ! -f /etc/roundcubemail/config.inc.php.orig ] ; then
-		$mv /etc/roundcubemail/config.inc.php /etc/roundcubemail/config.inc.php.orig
+	if [ ! -f /etc/roundcubemail/config.inc.php.BAK ] ; then
+		echo $mv /etc/roundcubemail/config.inc.php /etc/roundcubemail/config.inc.php.BAK
+		$mv /etc/roundcubemail/config.inc.php /etc/roundcubemail/config.inc.php.BAK
 	fi
 fi
 # same for all distros
@@ -473,6 +479,8 @@ if [ -n "$php" -a -n "$php_ini" -a -f $php_ini ] ; then
       	-e "s};openssl.capath=.*}openssl.capath=/etc/indimail/certs}g" \
 	$php_ini
 	$php -r "print_r(openssl_get_cert_locations());"
+else
+	echo "$php_ini not found"
 fi
 
 if [ -f /etc/httpd/conf.d/roundcubemail.conf ] ; then
@@ -657,15 +665,27 @@ echo "Adding qcerts as supplementary group to $httpd_group"
 # work. So I'm giving up on suse distributions. If anyone of you
 # reads this and can fix things, I owe you beer.
 
-if [ $is_suse -eq 1 ] ; then
-	# I give up
-	exit 0
-fi
+#if [ $is_suse -eq 1 ] ; then
+#	echo I give up
+#	exit 0
+#fi
 
+# if you want to grow old fast, deal with way things
+# are configured when using php
+# today there is php8, tomorrow it will be php9, php10, ...
+# why can't there be a proper standard in the www world.
 if [ -f /etc/php-fpm.d/www.conf ] ; then
 	php_fpm_www_conf=/etc/php-fpm.d/www.conf
+elif [ -f /etc/php9/fpm/php-fpm.d/www.conf.default ] ; then
+	php_fpm_www_conf=/etc/php9/fpm/php-fpm.d/www.conf
+elif [ -f /etc/php8/fpm/php-fpm.d/www.conf.default ] ; then
+	php_fpm_www_conf=/etc/php8/fpm/php-fpm.d/www.conf
 elif [ -f /etc/php7/fpm/php-fpm.d/www.conf.default ] ; then
 	php_fpm_www_conf=/etc/php7/fpm/php-fpm.d/www.conf
+elif [ -f /etc/php9/fpm/php-fpm.d/www.conf ] ; then
+	php_fpm_www_conf=/etc/php9/fpm/php-fpm.d/www.conf
+elif [ -f /etc/php8/fpm/php-fpm.d/www.conf ] ; then
+	php_fpm_www_conf=/etc/php8/fpm/php-fpm.d/www.conf
 elif [ -f /etc/php7/fpm/php-fpm.d/www.conf ] ; then
 	php_fpm_www_conf=/etc/php7/fpm/php-fpm.d/www.conf
 else #debian /etc/php/7.3/fpm/pool.d/www.conf
@@ -681,25 +701,50 @@ if [ -z "$php_fpm_conf" -a -f /etc/php-fpm.conf ] ; then
 		$php_fpm_conf
 fi
 if [ $is_suse -eq 1 ] ; then
-	if [ -f /etc/php7/fpm/php-fpm.conf.default ] ; then
-		$cp /etc/php7/fpm/php-fpm.conf.default /etc/php7/fpm/php-fpm.conf
+	if [ -d /etc/php10 ] ; then #hopefully when suse comes with php10, php9, this script will still work
+		php_ver=php10
+	elif [ -d /etc/php9 ] ; then
+		php_ver=php9
+	elif [ -d /etc/php8 ] ; then
+		php_ver=php8
+	else
+		php_ver=php7
 	fi
-	if [ -f /etc/php7/fpm/php-fpm.conf ] ; then
-		echo "fixing pid in /etc/php7/fpm/php-fpm.conf"
+	if [ -f /etc/$php_ver/fpm/php-fpm.conf.default ] ; then
+		$cp /etc/$php_ver/fpm/php-fpm.conf.default /etc/$php_ver/fpm/php-fpm.conf
+	fi
+	if [ -f /etc/$php_ver/fpm/php-fpm.conf ] ; then
+		echo "fixing pid in /etc/$php_ver/fpm/php-fpm.conf"
 		$sed -i -e "s{^;pid =.*{pid = $rundir/php-fpm/php-fpm.pid{g" \
-			/etc/php7/fpm/php-fpm.conf
+			/etc/$php_ver/fpm/php-fpm.conf
 	fi
 	if [ -f "$php_fpm_www_conf".default ] ; then
+		echo "Copying $php_fpm_www_conf.default to $php_fpm_www_conf"
 		$cp "$php_fpm_www_conf".default $php_fpm_www_conf
 	fi
 
 	if [ -f /etc/apache2/loadmodule.conf ] ; then
-		grep php7_module /etc/apache2/loadmodule.conf > /dev/null
+		echo "Configuring /etc/apache2/loadmodule.conf"
+		grep "php.*"_module /etc/apache2/loadmodule.conf > /dev/null
 		if [ $? -ne 0 ] ; then
 			echo "fixing /etc/apache2/loadmodule.conf"
-			echo "LoadModule php7_module /usr/lib64/apache2/mod_php7.so" \
-				>> /etc/apache2/loadmodule.conf
+			if [ "$php_ver" = "php7" ] ; then
+				echo "LoadModule php7_module /usr/lib64/apache2/mod_php7.so" \
+					>> /etc/apache2/loadmodule.conf
+			else
+				echo "LoadModule php_module /usr/lib64/apache2/mod_"$php_ver".so" \
+					>> /etc/apache2/loadmodule.conf
+			fi
 		fi
+	fi
+	if [ -f /etc/apache2/default-server.conf ] ; then
+		echo "fixing DocumentRoot in /etc/apache2/default-server.conf"
+		if [ ! -f /etc/apache2/default-server.conf.BAK ] ; then
+			mv /etc/apache2/default-server.conf /etc/apache2/default-server.conf.BAK
+			cp /etc/apache2/default-server.conf.BAK /etc/apache2/default-server.conf
+		fi
+		sed -i -e "s}/srv/www}/var/www}g" -e "s}htdocs}html}g"
+			/etc/apache2/default-server.conf
 	fi
 fi
 
@@ -724,12 +769,12 @@ fi
 # have them in down state so that they don't get started when
 # invoked as indimail/indimail-mta containers
 #
-php_fpm=`ls /usr/sbin/php-fpm*`
-if [ ! -d /service/php-fpm ] ; then
+php_fpm=$(ls /usr/sbin/php-fpm* 2>/dev/null)
+if [ -n "$php_fpm" -a ! -d /service/php-fpm ] ; then
 	if [ -n "$php_fpm_www_conf" -a -f "$php_fpm_www_conf" ] ; then
-		sockname=$(grep "listen =" $php_fpm_www_conf |cut -d= -f2)
+		sockname=$(grep "^listen =" $php_fpm_www_conf |cut -d= -f2)
 		sockdir=$(dirname $sockname)
-		echo "Creating supervised service for php-fpm using socket dir $sockdir"
+		echo "Creating supervised service for php-fpm using socket dir [$sockdir]"
 		mkdir -p /service/php-fpm/log
 		touch /service/php-fpm/down
 		(
@@ -749,14 +794,16 @@ if [ ! -d /service/php-fpm ] ; then
 		) > /service/php-fpm/log/run
 		chmod +x /service/php-fpm/log/run
 	else
-		echo "couldn't find php-fpm"
+		echo "couldn't find php-fpm config"
 	fi
+else
+	echo "couldn't find php-fpm"
 fi
 
 if [ ! -d /service/httpd ] ; then
 	if [ -x /usr/sbin/httpd ] ; then
 		echo "Creating supervised service for apache2"
-		mkdir -p /service/httpd
+		mkdir -p /service/httpd/log
 		touch /service/httpd/down
 		(
 		echo "#!/bin/sh"
@@ -771,6 +818,12 @@ if [ ! -d /service/httpd ] ; then
 		echo "exec /usr/sbin/httpd -DFOREGROUND"
 		) > /service/httpd/run
 		chmod +x /service/httpd/run
+		(
+		echo "#!/bin/sh"
+		echo "exec /usr/bin/setuidgid qmaill \\"
+		echo "  /usr/sbin/multilog t /var/log/svc/httpd"
+		) > /service/httpd/log/run
+		chmod +x /service/httpd/log/run
 	elif [ -x /usr/sbin/apache2 ] ; then
 		echo "Creating supervised service for apache2"
 		mkdir -p /service/httpd
@@ -787,6 +840,12 @@ if [ ! -d /service/httpd ] ; then
 		echo "exec fghack /usr/sbin/apachectl -DFOREGROUND"
 		) > /service/httpd/run
 		chmod +x /service/httpd/run
+		(
+		echo "#!/bin/sh"
+		echo "exec /usr/bin/setuidgid qmaill \\"
+		echo "  /usr/sbin/multilog t /var/log/svc/httpd"
+		) > /service/httpd/log/run
+		chmod +x /service/httpd/log/run
 		(
 		echo "#!/bin/sh"
 		echo "# created by roundcube_config for indimail+roundcube docker container"
