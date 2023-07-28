@@ -618,19 +618,26 @@ elif [ -f /etc/debian_version ] ; then
 		# in order for apache2 to use php-fpm
 		tmp=$(mktemp -t apache2.tmp.XXXXXXXXXX)
 		(
+		echo "	ScriptAlias /cgi-bin/ /var/www/cgi-bin/"
 		echo ""
-		echo "    <Directory /var/www/html>"
-		echo "        Options -Indexes +FollowSymLinks +MultiViews"
-		echo "        AllowOverride All"
-		echo "        Require all granted"
-		echo "    </Directory>"
+		echo "	<Directory /var/www/html>"
+		echo "		Options -Indexes +FollowSymLinks +MultiViews"
+		echo "		AllowOverride All"
+		echo "		Require all granted"
+		echo "	</Directory>"
 		echo ""
-		echo "    <FilesMatch \.php$>"
-		echo "        # 2.4.10+ can proxy to unix socket"
-		echo "        SetHandler \"proxy:unix:/run/php-fpm/php-fpm.sock|fcgi://localhost/\""
-		echo "        # Else we can just use a tcp socket:"
-		echo "        #SetHandler \"proxy:fcgi://127.0.0.1:9000\""
-		echo "    </FilesMatch>"
+		echo "	<Directory /var/www/cgi-bin>"
+		echo "		Require all granted"
+		echo "		AllowOverride None"
+		echo "		Options ExecCGI"
+		echo "	</Directory>"
+		echo ""
+		echo "	<FilesMatch \.php$>"
+		echo "		# 2.4.10+ can proxy to unix socket"
+		echo "		SetHandler \"proxy:unix:/run/php-fpm/php-fpm.sock|fcgi://localhost/\""
+		echo "		# Else we can just use a tcp socket:"
+		echo "		#SetHandler \"proxy:fcgi://127.0.0.1:9000\""
+		echo "	</FilesMatch>"
 		) > $tmp
 		$sed -i \
 			-e "/DocumentRoot/ r $tmp" \
@@ -639,6 +646,7 @@ elif [ -f /etc/debian_version ] ; then
 		$fn
 		$rm -f $tmp
 		unset tmp
+		a2enmod cgid
 	fi
 	fn="/etc/apache2/sites-available/default-ssl.conf"
 	if [ -f $fn ] ; then
