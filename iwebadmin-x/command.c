@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.12 2022-10-25 11:52:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: command.c,v 1.13 2023-07-28 22:28:26+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -64,8 +64,7 @@ process_commands(char *cmmd)
 	if (!str_diff(cmmd, "quick")) {
 		/*
 		 * This feature sponsored by PinkRoccade Public Sector, Sept 2004 
-		 */
-		/*
+		 *
 		 * we use global ActionUser here because the functions that
 		 * quickAction calls expect the username in that global.
 		 */
@@ -82,7 +81,7 @@ process_commands(char *cmmd)
 				/*- malformed request -- missing fields */
 				show_menu();
 				iclose();
-				_exit(0);
+				iweb_exit(MALFORMED_FAILURE);
 			}
 		}
 	} else
@@ -314,7 +313,7 @@ process_commands(char *cmmd)
 	if (!str_diff(cmmd, "showcounts"))
 		show_counts();
 	iclose();
-	_exit(0);
+	iweb_exit(0);
 }
 
 void
@@ -403,5 +402,5 @@ setdefaultaccount()
 	}
 	show_users();
 	iclose();
-	_exit(0);
+	iweb_exit(0);
 }

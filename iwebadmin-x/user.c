@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: user.c,v 1.34 2023-07-14 21:52:39+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.35 2023-07-28 22:31:14+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -117,7 +117,7 @@ show_user_lines(char *user, char *dom, time_t mytime, char *dir)
 		out(" .qmail-default</tr></td>");
 		flush();
 		iclose();
-		_exit(0);
+		iweb_exit(SYSTEM_FAILURE);
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
@@ -126,7 +126,7 @@ show_user_lines(char *user, char *dom, time_t mytime, char *dir)
 		out(" .qmail-default 1<BR>\n");
 		flush();
 		iclose();
-		_exit(0);
+		iweb_exit(READ_FAILURE);
 	}
 	if (match) {
 		line.len--;
@@ -366,7 +366,7 @@ adduser()
 		out("\n");
 		flush();
 		iclose();
-		_exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	if (MaxPopAccounts != -1 && CurPopAccounts >= MaxPopAccounts) {
 		if (!stralloc_copys(&StatusMessage, html_text[199]) ||
@@ -377,7 +377,7 @@ adduser()
 		StatusMessage.len--;
 		show_menu();
 		iclose();
-		_exit(0);
+		iweb_exit(LIMIT_FAILURE);
 	}
 	send_template("add_user.html");
 }
@@ -391,7 +391,7 @@ moduser()
 		copy_status_mesg(html_text[142]);
 		show_menu();
 		iclose();
-		_exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	send_template("mod_user.html");
 }
@@ -416,7 +416,7 @@ addusernow()
 		copy_status_mesg(html_text[142]);
 		show_menu();
 		iclose();
-		_exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 
 	if (MaxPopAccounts != -1 && CurPopAccounts >= MaxPopAccounts) {
@@ -428,7 +428,7 @@ addusernow()
 		StatusMessage.len--;
 		show_menu();
 		iclose();
-		_exit(0);
+		iweb_exit(LIMIT_FAILURE);
 	}
 	GetValue(TmpCGI, &Newu, "newu=");
 	if (fixup_local_name(Newu.s)) {
@@ -439,7 +439,7 @@ addusernow()
 		StatusMessage.len--;
 		adduser();
 		iclose();
-		_exit(0);
+		iweb_exit(INPUT_FAILURE);
 	}
 	if (check_local_user(Newu.s)) {
 		len = str_len(html_text[175]) + Newu.len + 28;
@@ -455,7 +455,7 @@ addusernow()
 		}
 		adduser();
 		iclose();
-		_exit(0);
+		iweb_exit(INPUT_FAILURE);
 	}
 #ifdef MODIFY_QUOTA
 	GetValue(TmpCGI, &Quota, "quota=");
@@ -466,14 +466,14 @@ addusernow()
 		copy_status_mesg(html_text[200]);
 		adduser();
 		iclose();
-		_exit(0);
+		iweb_exit(AUTH_FAILURE);
 	}
 #ifndef TRIVIAL_PASSWORD_ENABLED
 	if (str_str(Newu.s, Password1.s)) {
 		copy_status_mesg(html_text[320]);
 		adduser();
 		iclose();
-		_exit(0);
+		iweb_exit(INPUT_FAILURE);
 	}
 #endif
 
@@ -482,7 +482,7 @@ addusernow()
 		copy_status_mesg(html_text[234]);
 		adduser();
 		iclose();
-		_exit(0);
+		iweb_exit(INPUT_FAILURE);
 	}
 #endif
 	if (!stralloc_copy(&email, &Newu) ||
@@ -744,13 +744,13 @@ delusergo()
 		copy_status_mesg(html_text[142]);
 		show_users();
 		iclose();
-		_exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	if (deluser(ActionUser.s, Domain.s, 1) ) {
 		copy_status_mesg(html_text[145]);
 		show_users();
 		iclose();
-		_exit(0);
+		iweb_exit(SYSTEM_FAILURE);
 	}
 	len = ActionUser.len + str_len(html_text[141]) + 28;
 	for (plen = 0;;) {
@@ -815,7 +815,8 @@ set_qmaildefault(char *opt)
 		out(html_text[144]);
 		out(" .qmail-default<br>\n");
 		flush();
-		return;
+		iclose();
+		iweb_exit(SYSTEM_FAILURE);
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
@@ -824,7 +825,8 @@ set_qmaildefault(char *opt)
 		out(" .qmail-default 1<BR>\n");
 		flush();
 		close(fd);
-		return;
+		iclose();
+		iweb_exit(READ_FAILURE);
 	}
 	if (match) {
 		line.len--;
@@ -843,7 +845,8 @@ set_qmaildefault(char *opt)
 		out(" .qmail-default 1<BR>\n");
 		flush();
 		close(fd);
-		return;
+		iclose();
+		iweb_exit(INPUT_FAILURE);
 	}
 	close(fd);
 	use_vfilter = str_str(ptr, "vfilter") ? 1 : 0;
@@ -853,6 +856,8 @@ set_qmaildefault(char *opt)
 		out(html_text[144]);
 		out(" .qmail-default<br>\n");
 		flush();
+		iclose();
+		iweb_exit(SYSTEM_FAILURE);
 	} else {
 		substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
 		if (substdio_put(&ssout, "| ", 2) ||
@@ -868,12 +873,14 @@ set_qmaildefault(char *opt)
 			out(html_text[144]);
 			out(" .qmail-default<br>\n");
 			flush();
+			iclose();
+			iweb_exit(SYSTEM_FAILURE);
 		}
 		close(fd);
 	}
 	show_users();
 	iclose();
-	_exit(0);
+	iweb_exit(0);
 }
 
 void
@@ -896,7 +903,7 @@ setremotecatchallnow()
 			len = plen + 28;
 		}
 		setremotecatchall();
-		_exit(0);
+		iweb_exit(INPUT_FAILURE);
 	}
 	if (Newu.s[0] == '@') {
 		/*- forward all mail to external domain */
@@ -937,7 +944,7 @@ get_catchall()
 		out(" .qmail-default</td><tr>\n");
 		flush();
 		iclose();
-		_exit(0);
+		iweb_exit(SYSTEM_FAILURE);
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
@@ -947,7 +954,7 @@ get_catchall()
 		close(fd);
 		flush();
 		iclose();
-		_exit(0);
+		iweb_exit(READ_FAILURE);
 	}
 	if (match) {
 		line.len--;
@@ -967,7 +974,7 @@ get_catchall()
 		close(fd);
 		flush();
 		iclose();
-		_exit(0);
+		iweb_exit(INPUT_FAILURE);
 	}
 	close(fd);
 	if (str_str(line.s, " bounce-no-mailbox\n")) {
@@ -1171,7 +1178,7 @@ modusergo()
 		copy_status_mesg(html_text[142]);
 		moduser();
 		iclose();
-		_exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	/*
 	 * Password1, Password2, gecos and b64salt
@@ -1182,14 +1189,14 @@ modusergo()
 			copy_status_mesg(html_text[200]);
 			moduser();
 			iclose();
-			_exit(0);
+			iweb_exit(AUTH_FAILURE);
 		}
 #ifndef TRIVIAL_PASSWORD_ENABLED
 		if (str_str(ActionUser.s, Password1.s)) {
 			copy_status_mesg(html_text[320]);
 			moduser();
 			iclose();
-			_exit(0);
+			iweb_exit(INPUT_FAILURE);
 		}
 #endif
 		if (!stralloc_copy(&triv_pass, &RealDir) ||
@@ -1249,7 +1256,7 @@ modusergo()
 			strerr_die1x(1, "iwebadmin: unable to get secrets");
 			copy_status_mesg(html_text[026]);
 			moduser();
-			_exit(0);
+			iweb_exit(AUTH_FAILURE);
 		}
 		vpw->pw_passwd = ptr;
 	} else
@@ -1560,7 +1567,7 @@ parse_users_dotqmail(char newchar)
 						close(fd2);
 						fd2 = -1;
 					}
-					_exit(0);
+					iweb_exit(READ_FAILURE);
 				}
 				if (!line.len)
 					break;
@@ -1669,7 +1676,7 @@ parse_users_dotqmail(char newchar)
 							close(fd2);
 							fd2 = -1;
 						}
-						_exit(0);
+						iweb_exit(READ_FAILURE);
 					}
 					if (!line.len)
 						break;
@@ -1721,7 +1728,7 @@ parse_users_dotqmail(char newchar)
 							close(fd2);
 							fd2 = -1;
 						}
-						_exit(0);
+						iweb_exit(READ_FAILURE);
 					}
 					if (!line.len)
 						break;
@@ -1770,7 +1777,7 @@ parse_users_dotqmail(char newchar)
 							close(fd2);
 							fd2 = -1;
 						}
-						_exit(0);
+						iweb_exit(READ_FAILURE);
 					}
 					if (!line.len)
 						break;
@@ -1794,6 +1801,9 @@ parse_users_dotqmail(char newchar)
 
 /*-
  * $Log: user.c,v $
+ * Revision 1.35  2023-07-28 22:31:14+05:30  Cprogrammer
+ * replaced exit with my_exit
+ *
  * Revision 1.34  2023-07-14 21:52:39+05:30  Cprogrammer
  * set password field to start with {CRAM} when adding/modifying clear text passwords for CRAM authentication
  *

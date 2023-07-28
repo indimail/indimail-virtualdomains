@@ -1,5 +1,5 @@
 /*
- * $Id: util.c,v 1.10 2022-09-16 11:14:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: util.c,v 1.11 2023-07-28 22:31:21+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -363,7 +363,7 @@ ack(char *msg, char *extra)
 	out("</BODY></HTML>\n");
 	flush();
 	iclose();
-	exit(0);
+	iweb_exit(0);
 }
 
 void

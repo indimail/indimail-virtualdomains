@@ -1,5 +1,8 @@
 /*
  * $Log: common.c,v $
+ * Revision 1.5  2023-07-28 22:29:02+05:30  Cprogrammer
+ * added my_exit() function to record source file, line no of exit
+ *
  * Revision 1.4  2022-09-15 23:11:09+05:30  Cprogrammer
  * display out of memory error message in die_nomem()
  *
@@ -31,41 +34,19 @@
 #include <stralloc.h>
 #include <strerr.h>
 #include <subfd.h>
+#include <qprintf.h>
 #include "iwebadmin.h"
 #include "iwebadminx.h"
+#include "common.h"
 
 void
-set_status_mesg_size(int len)
+my_exit(substdio *ss, int ret, int line, char *fn)
 {
-	if (!stralloc_ready(&StatusMessage, len))
-		strerr_die1sys(111, "iwebadmin: out of memory: ");
-}
-
-void
-copy_status_mesg(char *str)
-{
-	if (!stralloc_copys(&StatusMessage, str) ||
-			!stralloc_append(&StatusMessage, "\n") ||
-			!stralloc_0(&StatusMessage))
-		strerr_die1sys(111, "iwebadmin: out of memory: ");
-	StatusMessage.len--;
-}
-
-void
-out(char *str)
-{
-	if (!str || !*str)
-		return;
-	if (substdio_puts(subfdoutsmall, str) == -1)
-		strerr_die1sys(111, "iwebadmin: write: ");
-	return;
-}
-
-void
-flush()
-{
-	if (substdio_flush(subfdoutsmall) == -1)
-		strerr_die1sys(111, "iwebadmin: write: ");
+	if (ss) {
+		subprintf(ss, "%s: exit at line %d ret=%d\nEnd Time=%ld\n\n", fn, line, ret, time(0));
+		substdio_flush(ss);
+	}
+	_exit(ret);
 }
 
 void
@@ -77,7 +58,41 @@ die_nomem()
 	out("1<BR>\n");
 	flush();
 	iclose();
-	_exit(0);
+	iweb_exit(MEMORY_FAILURE);
+}
+
+void
+set_status_mesg_size(int len)
+{
+	if (!stralloc_ready(&StatusMessage, len))
+		die_nomem();
+}
+
+void
+copy_status_mesg(char *str)
+{
+	if (!stralloc_copys(&StatusMessage, str) ||
+			!stralloc_append(&StatusMessage, "\n") ||
+			!stralloc_0(&StatusMessage))
+		die_nomem();
+	StatusMessage.len--;
+}
+
+void
+out(char *str)
+{
+	if (!str || !*str)
+		return;
+	if (substdio_puts(subfdoutsmall, str) == -1)
+		iweb_exit(OUTPUT_FAILURE);
+	return;
+}
+
+void
+flush()
+{
+	if (substdio_flush(subfdoutsmall) == -1)
+		iweb_exit(OUTPUT_FAILURE);
 }
 
 void
@@ -86,7 +101,7 @@ errout(char *str)
 	if (!str || !*str)
 		return;
 	if (substdio_puts(subfderr, str) == -1)
-		strerr_die1sys(111, "iwebadmin: write: ");
+		iweb_exit(OUTPUT_FAILURE);
 	return;
 }
 
@@ -94,5 +109,5 @@ void
 errflush()
 {
 	if (substdio_flush(subfderr) == -1)
-		strerr_die1sys(111, "iwebadmin: write: ");
+		iweb_exit(OUTPUT_FAILURE);
 }

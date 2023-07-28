@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.20 2021-03-14 12:48:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.21 2023-07-28 22:30:31+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -92,7 +92,7 @@ show_mailing_lists()
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 
 	if (!ezmlm_make || MaxMailingLists == 0)
@@ -103,7 +103,7 @@ show_mailing_lists()
 		copy_status_mesg(html_text[231]);
 		show_menu();
 		iclose();
-		exit(0);
+		iweb_exit(0);
 	}
 	send_template("show_mailinglist.html");
 }
@@ -124,7 +124,7 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	if (!ezmlm_make || MaxMailingLists == 0)
 		return;
@@ -307,7 +307,7 @@ show_mailing_list_line2(char *user, char *dom, time_t mytime, char *dir)
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	if (!ezmlm_make || MaxMailingLists == 0)
 		return;
@@ -389,7 +389,7 @@ addmailinglist()
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 
 	if (!ezmlm_make || MaxMailingLists == 0)
@@ -405,7 +405,7 @@ addmailinglist()
 		flush();
 		show_menu();
 		iclose();
-		exit(0);
+		iweb_exit(LIMIT_FAILURE);
 	}
 	/*- set up default options for new list */
 	default_options();
@@ -424,7 +424,7 @@ delmailinglist()
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	send_template("del_mailinglist_confirm.html");
 }
@@ -442,12 +442,12 @@ delmailinglistnow()
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	if (fixup_local_name(ActionUser.s)) {
 		/*- invalid address given, abort */
 		iclose();
-		exit(0);
+		iweb_exit(INPUT_FAILURE);
 	}
 
 	if ((mydir = opendir(".")) == NULL) {
@@ -652,7 +652,7 @@ ezmlmMake(int newlist)
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	if (fixup_local_name(ActionUser.s)) {
 		len = str_len(html_text[188]) + ActionUser.len + 28;
@@ -668,7 +668,7 @@ ezmlmMake(int newlist)
 		}
 		addmailinglist();
 		iclose();
-		exit(0);
+		iweb_exit(INPUT_FAILURE);
 	}
 
 	/*- update listopt based on user selections */
@@ -931,7 +931,7 @@ addmailinglistnow()
 		flush();
 		show_menu();
 		iclose();
-		exit(0);
+		iweb_exit(LIMIT_FAILURE);
 	}
 	if (check_local_user(ActionUser.s)) {
 		len = str_len(html_text[175]) + ActionUser.len + 28;
@@ -947,7 +947,7 @@ addmailinglistnow()
 		}
 		addmailinglist();
 		iclose();
-		exit(0);
+		iweb_exit(INPUT_FAILURE);
 	}
 	ezmlmMake(1);
 	len = str_len(html_text[187]) + ActionUser.len + Domain.len + 28;
@@ -981,13 +981,13 @@ show_list_group_now(int mod)
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 
 	lowerit(ActionUser.s);
 	if (pipe(handles)) {
 		iclose();
-		exit(0);
+		iweb_exit(SYSTEM_FAILURE);
 	}
 
 	pid = fork();
@@ -1118,7 +1118,7 @@ show_list_group(char *template)
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	if (!ezmlm_make || MaxMailingLists == 0)
 		return;
@@ -1133,7 +1133,7 @@ addlistgroup(char *template)
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	send_template(template);
 }
@@ -1201,7 +1201,7 @@ addlistgroupnow(int mod)
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	lowerit(ActionUser.s);
 	if (check_email_addr(Newu.s)) {
@@ -1224,7 +1224,7 @@ addlistgroupnow(int mod)
 		else
 			addlistuser();
 		iclose();
-		exit(0);
+		iweb_exit(INPUT_FAILURE);
 	}
 
 	ezmlm_sub(mod, Newu.s);
@@ -1270,7 +1270,7 @@ addlistgroupnow(int mod)
 		send_template("add_listuser.html");
 	}
 	iclose();
-	exit(0);
+	iweb_exit(0);
 }
 
 void
@@ -1281,7 +1281,7 @@ dellistgroup(char *template)
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	send_template(template);
 }
@@ -1297,7 +1297,7 @@ dellistgroupnow(int mod)
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	lowerit(Newu.s);
 	/*-
@@ -1372,7 +1372,7 @@ dellistgroupnow(int mod)
 	}
 	show_mailing_lists();
 	iclose();
-	exit(0);
+	iweb_exit(0);
 }
 
 void
@@ -1441,7 +1441,7 @@ modmailinglist()
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	Alias.len = 0;
 	/*- get the current listowner and copy it to Alias */

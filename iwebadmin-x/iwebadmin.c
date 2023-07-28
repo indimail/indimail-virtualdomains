@@ -1,47 +1,4 @@
 /*
- * $Log: iwebadmin.c,v $
- * Revision 1.33  2023-07-14 21:47:28+05:30  Cprogrammer
- * set scram to 0 if passwd field starts with {CRAM}
- *
- * Revision 1.32  2022-10-25 11:52:50+05:30  Cprogrammer
- * update b64salt from database
- *
- * Revision 1.31  2022-09-16 21:19:52+05:30  Cprogrammer
- * added more information in debug mode
- * fixed typos
- *
- * Revision 1.30  2022-09-15 17:48:40+05:30  Cprogrammer
- * fixed SIGSEGV
- *
- * Revision 1.29  2022-09-15 12:48:33+05:30  Cprogrammer
- * extract encrypted password using get_scram_secrets
- *
- * Revision 1.28  2022-09-14 13:56:39+05:30  Cprogrammer
- * added u_scram variable for scram checkbox
- * log ip address for authentication failures
- *
- * Revision 1.27  2022-08-28 14:51:11+05:30  Cprogrammer
- * additional docram argument added to gsasl_mkpasswd
- *
- * Revision 1.26  2022-08-07 21:45:41+05:30  Cprogrammer
- * set SCRAM passwords using gsasl_mkpasswd()
- *
- * Revision 1.25  2022-08-06 19:32:32+05:30  Cprogrammer
- * new argument encrypt_flag to ipasswd()
- *
- * Revision 1.24  2022-01-21 22:38:52+05:30  Cprogrammer
- * migrate vacation directory to autoresp
- *
- * Revision 1.23  2021-03-14 12:20:39+05:30  Cprogrammer
- * add ability to include indimail.h without mysql.h
- *
- * Revision 1.22  2020-11-03 10:24:55+05:30  Cprogrammer
- * renamed conf-iwebadmin to iwebadmin-conf
- *
- * Revision 1.21  2020-11-03 09:28:09+05:30  Cprogrammer
- * refactored code
- *
- *
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -58,14 +15,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: iwebadmin.c,v 1.33 2023-07-14 21:47:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.34 2023-07-28 22:30:06+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 /*
  * we don't need mysql but we need indimail.h
- * define HAVE_IWEBADMIN so that
+ * define REMOVE_MYSQL_H so that
  * indimail.h doesn't include mysql.h
  */
 #define REMOVE_MYSQL_H
@@ -92,6 +49,7 @@
 #include <scan.h>
 #include <fmt.h>
 #include <strerr.h>
+#include <qprintf.h>
 #include <get_scram_secrets.h>
 #endif
 #define _USE_XOPEN
@@ -133,6 +91,7 @@ char           *TmpCGI = NULL;
 int             Compressed;
 int             actout = 1, lang_fd = -1, color_table = -1;
 char           *html_text[MAX_LANG_STR + 1];
+struct substdio *ssdbg = NULL;
 
 struct vlimits  Limits;
 int             AdminType;
@@ -169,7 +128,7 @@ iwebadmin_suid(gid_t Gid, uid_t Uid)
 		flush();
 		strerr_warn1("iwebadmin: setgid: ", &strerr_sys);
 		iclose();
-		exit(EXIT_FAILURE);
+		iweb_exit(PERM_FAILURE);
 	}
 #ifdef HAVE_SETREGID
 	if (setreuid(Uid, Uid) != 0)
@@ -183,7 +142,7 @@ iwebadmin_suid(gid_t Gid, uid_t Uid)
 		flush();
 		strerr_warn1("iwebadmin: setuid: ", &strerr_sys);
 		iclose();
-		exit(EXIT_FAILURE);
+		iweb_exit(PERM_FAILURE);
 	}
 }
 
@@ -245,12 +204,12 @@ del_id_files(stralloc *dirname)
 					!stralloc_0(dirname))
 			{
 				iclose();
-				exit(EXIT_FAILURE);
+				iweb_exit(MEMORY_FAILURE);
 			}
 			if (unlink(dirname->s)) {
 				strerr_warn3("iwebadmin: unlink: ", dirname->s, ": ", &strerr_sys);
 				iclose();
-				exit(EXIT_FAILURE);
+				iweb_exit(SYSTEM_FAILURE);
 			}
 			dirname->len = len;
 		}
@@ -330,24 +289,34 @@ main(int argc, char **argv)
 	struct passwd  *pw;
 	int             encrypt_flag = 1;
 	char            strnum[FMT_ULONG], outbuf[2048], dbgbuf[1024];
-	struct substdio ssout, ssdbg;
+	struct substdio ssout, dbg;
 
 	mytime = time(0);
 	conf_iwebadmin();
 	if (debug) {
-		if (access("/tmp/iwebadmin.debug", F_OK))
-			dbgfd = open_trunc("/tmp/iwebadmin.debug");
-		else
-			dbgfd = open_append("/tmp/iwebadmin.debug");
-		if (dbgfd == -1)
+		if (access("/tmp/iwebadmin.debug", F_OK)) {
+			if ((dbgfd = open_trunc("/tmp/iwebadmin.debug")) == -1)
+				strerr_die1sys(111, "iwebadmin: /tmp/iwebadmin.debug: ");
+		} else
+		if ((dbgfd = open_append("/tmp/iwebadmin.debug")) == -1)
 			strerr_die1sys(111, "iwebadmin: /tmp/iwebadmin.debug: ");
-		substdio_fdbuf(&ssdbg, write, dbgfd, dbgbuf, sizeof(dbgbuf));
-
-		for (i = 0; environ[i]; i++) {
-			substdio_puts(&ssdbg, environ[i]);
-			substdio_put(&ssdbg, "\n", 1);
-		}
-		substdio_flush(&ssdbg);
+		substdio_fdbuf(ssdbg = &dbg, write, dbgfd, dbgbuf, sizeof(dbgbuf));
+		subprintf(ssdbg, "Start Time = %ld\n", mytime);
+		for (i = 0; i < argc; i++)
+			subprintf(ssdbg, "argv[%d]=[%s]\n", i, argv[i]);
+		substdio_put(ssdbg, "Environment List = \n", 20);
+		for (i = 0; environ[i]; i++)
+			subprintf(ssdbg, "%s\n", environ[i]);
+		subprintf(ssdbg, "End Environment List\n");
+		substdio_flush(ssdbg);
+		/*-
+		 * If you create /tmp/gdb.wait, iwebadmin
+		 * will wait till this file is removed
+		 * which gives you time to do strace, etc
+		 * once your strace has started, you can
+		 * delete this file to make iwebadmin move
+		 * forward
+		 */
 		while (!access("/tmp/gdb.wait", F_OK))
 			sleep(1);
 	}
@@ -369,21 +338,6 @@ main(int argc, char **argv)
 	else 
 	if (!(TmpCGI = env_get("QUERY_STRING")))
 		TmpCGI = "";
-	if (debug) {
-		if (pi) {
-			substdio_put(&ssdbg, "PATH_INFO=[", 11);
-			substdio_puts(&ssdbg, pi);
-			substdio_put(&ssdbg, "]\n", 2);
-		}
-		substdio_put(&ssdbg, "REQUEST_METHOD=[", 16);
-		substdio_puts(&ssdbg, rm);
-		substdio_put(&ssdbg, "]\n", 2);
-		substdio_put(&ssdbg, "QUERY_STRING=[", 14);
-		substdio_puts(&ssdbg, TmpCGI);
-		substdio_put(&ssdbg, "]\n", 2);
-		substdio_flush(&ssdbg);
-		close(dbgfd);
-	}
 	if (pi && !str_diffn(pi, "/com/", 5)) { /*- all commands minus authentication and password change and */
 		GetValue(TmpCGI, &Username, "user=");
 		GetValue(TmpCGI, &Domain, "dom=");
@@ -393,14 +347,14 @@ main(int argc, char **argv)
 			copy_status_mesg(html_text[198]);
 			iclose();
 			show_login();
-			exit(0);
+			iweb_exit(AUTH_FAILURE);
 		}
 		/*- get the real uid and gid and change to that user */
 		if (!get_assign(Domain.s, &RealDir, &Uid, &Gid)) {
 			copy_status_mesg(html_text[19]);
 			iclose();
 			show_login();
-			exit(0);
+			iweb_exit(ASSIGN_FAILURE);
 		}
 		iwebadmin_suid(Gid, Uid);
 		if (chdir(RealDir.s) < 0) {
@@ -408,14 +362,14 @@ main(int argc, char **argv)
 			strerr_warn3("iwebadmin: chdir: ", RealDir.s, ": ", &strerr_sys);
 			iclose();
 			show_login();
-			exit(0);
+			iweb_exit(SETUP_FAILURE);
 		}
 		if (!access("vacation", F_OK) && rename("vacation", "autoresp")) {
 			copy_status_mesg(html_text[321]);
 			strerr_warn1("iwebadmin: rename: vacation -> autoresp", &strerr_sys);
 			iclose();
 			show_login();
-			exit(0);
+			iweb_exit(SETUP_FAILURE);
 		}
 		load_limits();
 		set_admin_type();
@@ -447,21 +401,21 @@ main(int argc, char **argv)
 			} else {
 				copy_status_mesg(html_text[198]);
 				send_template("change_password.html");
-				return 0;
+				iweb_exit(INPUT_FAILURE);
 			}
 			/*- attempt to authenticate user */
 			if (!get_assign(Domain.s, &RealDir, &Uid, &Gid)) {
 				copy_status_mesg(html_text[19]);
 				strerr_warn3("iwebadmin: get_assign failed for ", Domain.s, ": ", 0);
 				send_template("change_password.html");
-				return 0;
+				iweb_exit(ASSIGN_FAILURE);
 			}
 			iwebadmin_suid(Gid, Uid);
 			if (chdir(RealDir.s) < 0) {
 				copy_status_mesg(html_text[171]);
 				strerr_warn3("iwebadmin: chdir: ", RealDir.s, ": ", &strerr_sys);
 				send_template("change_password.html");
-				return 0;
+				iweb_exit(SETUP_FAILURE);
 			}
 			load_limits();
 			if (!access(".trivial_passwords", F_OK))
@@ -500,19 +454,22 @@ main(int argc, char **argv)
 					break;
 				}
 #endif
-				if ((i = ipasswd(Username.s, Domain.s, Password1.s, encrypt_flag, scram ? result.s : 0)) != 1)
+				if ((i = ipasswd(Username.s, Domain.s, Password1.s, encrypt_flag, scram ? result.s : 0)) != 1) {
 					copy_status_mesg(html_text[140]);
+					send_template("change_password.html");
+					iweb_exit(PASSWD_FAILURE);
+				}
 				else { /* success */
 					copy_status_mesg(html_text[139]);
 					strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": password changed", 0);
 					Password.len = 0;
 					send_template("change_password_success.html");
-					return 0;
+					iweb_exit(0);
 				}
 			}
 		}
 		send_template("change_password.html");
-		return 0;
+		iweb_exit(0);
 	} else
 	if (rm && *rm) { /*- authenticate */
 		GetValue(TmpCGI, &Username, "username=");
@@ -527,20 +484,24 @@ main(int argc, char **argv)
 				Domain.len--;
 			}
 		}
-		get_assign(Domain.s, &RealDir, &Uid, &Gid);
+		if (!get_assign(Domain.s, &RealDir, &Uid, &Gid)) {
+			iclose();
+			show_login();
+			iweb_exit(ASSIGN_FAILURE);
+		}
 		iwebadmin_suid(Gid, Uid);
 		/*- Authenticate a user and domain admin */
 		if (!Domain.len || !Username.len) {
 			iclose();
 			show_login();
-			exit(0);
+			iweb_exit(INPUT_FAILURE);
 		}
 		if (chdir(RealDir.s)) {
 			copy_status_mesg(html_text[171]);
 			strerr_warn3("iwebadmin: chdir: ", RealDir.s, ": ", &strerr_sys);
 			iclose();
 			show_login();
-			exit(0);
+			iweb_exit(SETUP_FAILURE);
 		}
 		load_limits();
 		if (!(pw = sql_getpw(Username.s, Domain.s))) {
@@ -548,14 +509,14 @@ main(int argc, char **argv)
 			strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": No such user", 0);
 			iclose();
 			show_login();
-			exit(0);
+			iweb_exit(AUTH_FAILURE);
 		}
 		if (auth_user(pw, Password.s)) {
 			copy_status_mesg(html_text[198]);
 			strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": incorrect password", 0);
 			iclose();
 			show_login();
-			exit(0);
+			iweb_exit(AUTH_FAILURE);
 		}
 		if (!stralloc_copys(&tmp, pw->pw_dir) ||
 				!stralloc_catb(&tmp, "/Maildir", 8) ||
@@ -572,7 +533,7 @@ main(int argc, char **argv)
 			strerr_warn3("iwebadmin: open: ", tmp.s, ": ", &strerr_sys);
 			iclose();
 			show_login();
-			exit(0);
+			iweb_exit(SESSION_FAILURE);
 		}
 		substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
 		/*- set session vars */
@@ -588,13 +549,13 @@ main(int argc, char **argv)
 			strerr_warn3("iwebadmin: write: ", tmp.s, ": ", &strerr_sys);
 			iclose();
 			show_login();
-			exit(0);
+			iweb_exit(SESSION_FAILURE);
 		} else
 		if (close(fd)) {
 			strerr_warn3("iwebadmin: write: ", tmp.s, ": ", &strerr_sys);
 			iclose();
 			show_login();
-			exit(0);
+			iweb_exit(SESSION_FAILURE);
 		}
 		set_admin_type();
 		/*-
@@ -610,11 +571,11 @@ main(int argc, char **argv)
 			moduser();
 		}
 		iclose();
-		exit(0);
+		iweb_exit(0);
 	}
 	iclose();
 	show_login();
-	return 0;
+	iweb_exit(0);
 }
 
 /*- populate html_text */
@@ -896,3 +857,50 @@ quickAction(char *username, int action)
 		}
 	}
 }
+
+/*
+ * $Log: iwebadmin.c,v $
+ * Revision 1.34  2023-07-28 22:30:06+05:30  Cprogrammer
+ * replaced exit with my_exit
+ *
+ * Revision 1.33  2023-07-14 21:47:28+05:30  Cprogrammer
+ * set scram to 0 if passwd field starts with {CRAM}
+ *
+ * Revision 1.32  2022-10-25 11:52:50+05:30  Cprogrammer
+ * update b64salt from database
+ *
+ * Revision 1.31  2022-09-16 21:19:52+05:30  Cprogrammer
+ * added more information in debug mode
+ * fixed typos
+ *
+ * Revision 1.30  2022-09-15 17:48:40+05:30  Cprogrammer
+ * fixed SIGSEGV
+ *
+ * Revision 1.29  2022-09-15 12:48:33+05:30  Cprogrammer
+ * extract encrypted password using get_scram_secrets
+ *
+ * Revision 1.28  2022-09-14 13:56:39+05:30  Cprogrammer
+ * added u_scram variable for scram checkbox
+ * log ip address for authentication failures
+ *
+ * Revision 1.27  2022-08-28 14:51:11+05:30  Cprogrammer
+ * additional docram argument added to gsasl_mkpasswd
+ *
+ * Revision 1.26  2022-08-07 21:45:41+05:30  Cprogrammer
+ * set SCRAM passwords using gsasl_mkpasswd()
+ *
+ * Revision 1.25  2022-08-06 19:32:32+05:30  Cprogrammer
+ * new argument encrypt_flag to ipasswd()
+ *
+ * Revision 1.24  2022-01-21 22:38:52+05:30  Cprogrammer
+ * migrate vacation directory to autoresp
+ *
+ * Revision 1.23  2021-03-14 12:20:39+05:30  Cprogrammer
+ * add ability to include indimail.h without mysql.h
+ *
+ * Revision 1.22  2020-11-03 10:24:55+05:30  Cprogrammer
+ * renamed conf-iwebadmin to iwebadmin-conf
+ *
+ * Revision 1.21  2020-11-03 09:28:09+05:30  Cprogrammer
+ * refactored code
+ */

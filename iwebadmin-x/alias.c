@@ -1,5 +1,5 @@
 /*
- * $Id: alias.c,v 1.9 2022-10-25 23:49:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: alias.c,v 1.10 2023-07-28 22:27:47+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -70,7 +70,7 @@ show_aliases(void)
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	send_template("show_alias.html");
 	return 0;
@@ -154,7 +154,7 @@ show_dotqmail_lines(char *user, char *dom, time_t mytime)
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	scan_uint(Pagenumber, &page);
 	if (page == 0)
@@ -167,7 +167,7 @@ show_dotqmail_lines(char *user, char *dom, time_t mytime)
 		if (!stralloc_copy(&domain, &Domain) || !stralloc_0(&domain)) {
 			copy_status_mesg(html_text[201]);
 			iclose();
-			exit(0);
+			iweb_exit(MEMORY_FAILURE);
 		}
 		domain.len--;
 		alias_line = valias_select_all(&alias_name, &domain);
@@ -395,7 +395,7 @@ show_dotqmail_file(char *user)
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	for(;;) {
 		if (!(alias_line = valias_select(user, Domain.s)))
@@ -509,7 +509,7 @@ moddotqmail()
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	send_template("mod_dotqmail.html");
 }
@@ -521,7 +521,7 @@ moddotqmailnow()
 
 	if (!str_diffn(ActionUser.s, "default", ActionUser.len)) {
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 
 	if (!str_diff(Action.s, "delentry")) {
@@ -555,7 +555,7 @@ moddotqmailnow()
 		copy_status_mesg(html_text[155]);
 	moddotqmail();
 	iclose();
-	exit(0);
+	iweb_exit(0);
 }
 
 void
@@ -574,7 +574,7 @@ adddotqmail()
 		StatusMessage.len--;
 		show_menu();
 		iclose();
-		exit(0);
+		iweb_exit(LIMIT_FAILURE);
 	}
 	send_template("add_forward.html");
 }
@@ -590,7 +590,7 @@ adddotqmailnow()
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	count_forwards();
 	load_limits();
@@ -603,12 +603,12 @@ adddotqmailnow()
 		StatusMessage.len--;
 		send_template("add_forward.html");
 		iclose();
-		exit(0);
+		iweb_exit(LIMIT_FAILURE);
 	}
 	if (adddotqmail_shared(Alias.s, &ActionUser, -1)) {
 		adddotqmail();
 		iclose();
-		exit(0);
+		iweb_exit(ALIAS_FAILURE);
 	} else {
 		copy_status_mesg(html_text[152]);
 		show_forwards(Username.s, Domain.s, mytime);
@@ -636,7 +636,7 @@ adddotqmail_shared(char *forwardname, stralloc *dest, int create)
 			}
 			len = plen + 28;
 		}
-		return (-1);
+		iweb_exit(ALIAS_FAILURE);
 	} else /*- check to see if we already have a user with this name (only for create) */
 	if (create != 0 && check_local_user(forwardname)) {
 		len = str_len(html_text[175]) + plen + 28;
@@ -721,7 +721,7 @@ deldotqmail()
 		out("\n");
 		flush();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	send_template("del_forward_confirm.html");
 
@@ -736,7 +736,7 @@ deldotqmailnow()
 		copy_status_mesg(html_text[142]);
 		show_menu();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	if (fixup_local_name(ActionUser.s)) {
 		len = str_len(html_text[160]) + ActionUser.len + 28;
@@ -752,7 +752,7 @@ deldotqmailnow()
 		}
 		deldotqmail();
 		iclose();
-		exit(0);
+		iweb_exit(ALIAS_FAILURE);
 	}
 
 	if (!dotqmail_delete_files(ActionUser.s)) {

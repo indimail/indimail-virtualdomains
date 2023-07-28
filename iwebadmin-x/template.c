@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.28 2023-07-14 21:50:08+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.29 2023-07-28 22:30:58+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -525,7 +525,10 @@ send_template_now(char *filename)
 					switch (i)
 					{
 					case '1':
-						printh("%d", iter_count);
+						if (scram == 1 || scram == 2)
+							printh("%d", iter_count);
+						else
+							printh("%H", "XXXX");
 						break;
 					case '2':
 						if (scram == 0)
@@ -536,6 +539,8 @@ send_template_now(char *filename)
 						else
 						if (scram == 2)
 							printh("%H", "scram-sha-256");
+						else
+							printh("%H", "not set");
 						break;
 					case '3':
 						printh("%H", b64salt.len ? b64salt.s : "");

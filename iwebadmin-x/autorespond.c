@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.16 2022-10-24 12:00:41+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.17 2023-07-28 22:28:06+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -133,7 +133,7 @@ addautorespond()
 	if (AdminType != DOMAIN_ADMIN) {
 		copy_status_mesg(html_text[142]);
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	count_autoresponders();
 	load_limits();
@@ -146,7 +146,7 @@ addautorespond()
 		flush();
 		show_menu();
 		iclose();
-		exit(0);
+		iweb_exit(LIMIT_FAILURE);
 	}
 	send_template("add_autorespond.html");
 
@@ -162,7 +162,7 @@ addautorespondnow()
 	if (AdminType != DOMAIN_ADMIN) {
 		copy_status_mesg(html_text[142]);
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	count_autoresponders();
 	load_limits();
@@ -175,7 +175,7 @@ addautorespondnow()
 		flush();
 		show_menu();
 		iclose();
-		exit(0);
+		iweb_exit(LIMIT_FAILURE);
 	}
 	if (fixup_local_name(ActionUser.s)) {
 		len = str_len(html_text[174]) + ActionUser.len + 28;
@@ -249,7 +249,7 @@ addautorespondnow()
 	if (StatusMessage.len) {
 		addautorespond();
 		iclose();
-		exit(0);
+		iweb_exit(INPUT_FAILURE);
 	}
 	/*- Make the autoresponder directory */
 	if (!stralloc_copy(&TmpBuf, &RealDir) ||
@@ -362,7 +362,7 @@ delautorespond()
 	if (AdminType != DOMAIN_ADMIN) {
 		copy_status_mesg(html_text[142]);
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	send_template("del_autorespond_confirm.html");
 }
@@ -374,7 +374,7 @@ delautorespondnow()
 	if (AdminType != DOMAIN_ADMIN) {
 		copy_status_mesg(html_text[142]);
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	/*- delete the alias */
 	valias_delete(ActionUser.s, Domain.s, 0);
@@ -409,7 +409,7 @@ modautorespond()
 	if (AdminType != DOMAIN_ADMIN) {
 		copy_status_mesg(html_text[142]);
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	/*- send_template("show_forwards.html"); -*/
 	send_template("mod_autorespond.html");
@@ -429,7 +429,7 @@ modautorespondnow()
 	if (AdminType != DOMAIN_ADMIN) {
 		copy_status_mesg(html_text[142]);
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	if (fixup_local_name(ActionUser.s)) {
 		len = str_len(html_text[174]) + ActionUser.len;
@@ -487,7 +487,7 @@ modautorespondnow()
 	if (StatusMessage.len) {
 		modautorespond();
 		iclose();
-		exit(0);
+		iweb_exit(INPUT_FAILURE);
 	}
 	/*- Make the autoresponder directory */
 	if (!stralloc_copy(&TmpBuf, &RealDir) ||

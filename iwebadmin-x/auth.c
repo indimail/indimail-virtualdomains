@@ -1,5 +1,5 @@
 /*
- * $Id: auth.c,v 1.7 2022-10-24 11:57:57+05:30 Cprogrammer Exp mbhangui $
+ * $Id: auth.c,v 1.8 2023-07-28 22:27:59+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -68,7 +68,7 @@ auth_system(ip_addr, pw)
 				!stralloc_0(&StatusMessage))
 			die_nomem();
 		iclose();
-		exit(0);
+		iweb_exit(SETUP_FAILURE);
 	}
 
 	if (!stralloc_copys(&TmpBuf, pw->pw_dir) ||
@@ -81,7 +81,7 @@ auth_system(ip_addr, pw)
 		copy_status_mesg(html_text[172]);
 		show_login();
 		iclose();
-		exit(0);
+		iweb_exit(SESSION_FAILURE);
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
@@ -93,7 +93,7 @@ auth_system(ip_addr, pw)
 		close(fd);
 		show_login();
 		iclose();
-		exit(0);
+		iweb_exit(SESSION_FAILURE);
 	}
 	close(fd);
 
@@ -111,7 +111,7 @@ auth_system(ip_addr, pw)
 			die_nomem();
 		show_login();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 #endif
 	scan_ulong(Time.s, (unsigned long *) &time1);
@@ -121,7 +121,7 @@ auth_system(ip_addr, pw)
 		copy_status_mesg(html_text[173]);
 		show_login();
 		iclose();
-		exit(0);
+		iweb_exit(EXPIRE_FAILURE);
 	}
 }
 
@@ -140,7 +140,7 @@ auth_user_domain(const char *ip_addr, struct passwd *pw)
 		copy_status_mesg(html_text[171]);
 		show_login();
 		iclose();
-		exit(0);
+		iweb_exit(SETUP_FAILURE);
 	}
 	if (!stralloc_copys(&TmpBuf, pw->pw_dir) ||
 			!stralloc_catb(&TmpBuf, "/Maildir/", 9) ||
@@ -152,7 +152,7 @@ auth_user_domain(const char *ip_addr, struct passwd *pw)
 		copy_status_mesg(html_text[172]);
 		show_login();
 		iclose();
-		exit(0);
+		iweb_exit(SESSION_FAILURE);
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ssin, &line, &match, '\n') == -1) {
@@ -164,7 +164,7 @@ auth_user_domain(const char *ip_addr, struct passwd *pw)
 		close(fd);
 		show_login();
 		iclose();
-		exit(0);
+		iweb_exit(SESSION_FAILURE);
 	}
 	close(fd);
 #ifdef IPAUTH
@@ -181,7 +181,7 @@ auth_user_domain(const char *ip_addr, struct passwd *pw)
 			die_nomem();
 		show_login();
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 #endif
 	scan_ulong(Time.s, (unsigned long *) &time1);
@@ -191,7 +191,7 @@ auth_user_domain(const char *ip_addr, struct passwd *pw)
 		copy_status_mesg(html_text[173]);
 		show_login();
 		iclose();
-		exit(0);
+		iweb_exit(EXPIRE_FAILURE);
 	}
 }
 

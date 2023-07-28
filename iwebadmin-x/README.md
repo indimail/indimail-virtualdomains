@@ -1,3 +1,5 @@
+<!-- # vim: wrap
+-->
 # What is it?
 
 iwebadmin is a cgi program for administering indimail. This version of iwebadmin is a hack of QmailAdmin https://www.inter7.com/qmailadmin-project
@@ -262,3 +264,16 @@ Note to people who did not read the above paragraph: When you give up on your in
     If you have any questions or comments please email indimail-support@lists.sourceforge.net or join the [mailing list](http://groups.google.com/group/indimail)
 
 $Id: INSTALL,v 1.8 2017-03-18 14:20:57+05:30 Cprogrammer Exp mbhangui $
+
+# Testing
+
+You can use curl to login, logout or do any activity. Three examples below
+
+```
+# login as normal user
+curl http://localhost/cgi-bin/iwebadmin -d "username=postmaster&domain=example.com&password=pass%40%40123&returnhttp=&returntext="
+
+# login as admin user
+curl http://localhost/cgi-bin/iwebadmin -d "username=postmaster&domain=example.com&password=pass&returnhttp=&returntext="
+curl -X GET "http://localhost/cgi-bin/iwebadmin/com/logout?user=testuser01&dom=example.com&time=1690551326"
+```

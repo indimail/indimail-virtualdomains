@@ -1,5 +1,5 @@
 /*
- * $Id: forward.c,v 1.7 2021-03-14 12:47:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: forward.c,v 1.8 2023-07-28 22:29:43+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -43,14 +43,14 @@ show_forwards(char *user, char *dom, time_t mytime)
 	if (AdminType != DOMAIN_ADMIN) {
 		copy_status_mesg(html_text[142]);
 		iclose();
-		exit(0);
+		iweb_exit(PERM_FAILURE);
 	}
 	count_forwards();
 	if (CurForwards == 0 && CurBlackholes == 0) {
 		copy_status_mesg(html_text[232]);
 		show_menu();
 		iclose();
-		exit(0);
+		iweb_exit(LIMIT_FAILURE);
 	} else {
 		send_template("show_forwards.html");
 	}

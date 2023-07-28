@@ -1,5 +1,5 @@
 /*
- * $Id: cgi.c,v 1.5 2021-03-14 12:47:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: cgi.c,v 1.6 2023-07-28 22:28:15+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -113,7 +113,7 @@ GetValue(char *source, stralloc *dest, char *name)
 		if (stralloc_copys(&StatusMessage, html_text[201]))
 			stralloc_0(&StatusMessage);
 		iclose();
-		exit(0);
+		iweb_exit(MEMORY_FAILURE);
 	}
 	dest->len--;
 	s = dest->s;
@@ -150,7 +150,7 @@ GetValue(char *source, stralloc *dest, char *name)
 		if (stralloc_copys(&StatusMessage, html_text[201]))
 			stralloc_0(&StatusMessage);
 		iclose();
-		exit(0);
+		iweb_exit(MEMORY_FAILURE);
 	}
 	dest->len--;
 	/*- uncomment next line to dump cgi values to error log */

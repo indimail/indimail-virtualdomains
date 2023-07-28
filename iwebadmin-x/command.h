@@ -1,6 +1,9 @@
 /*
- * $Id: command.h,v 1.2 2019-06-03 06:46:27+05:30 Cprogrammer Exp mbhangui $
+ * $Id: command.h,v 1.3 2023-07-28 22:28:36+05:30 Cprogrammer Exp mbhangui $
  */
 
+#ifndef _COMMAND_H_
+#define _COMMAND_H_
 void            process_commands(char *);
 void            setdefaultaccount();
+#endif

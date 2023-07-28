@@ -1,3 +1,5 @@
+<!-- # vim: wrap
+-->
 # iwebadmin-hooks
 
 iwebadmin can run user defined hooks using a feature known as iwebadmin-hooks. It just needs you to write simple script/program in any language. These script/programs will be called with certain arguments with environment variables set by your httpd server.

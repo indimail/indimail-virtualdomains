@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.h,v 1.3 2019-06-03 06:47:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.h,v 1.4 2023-07-28 22:30:19+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,28 +29,22 @@
 #define SHOW_VERSION_LINK 1
 
 #ifndef MAX_FILE_NAME
-#define MAX_FILE_NAME 100
+#define MAX_FILE_NAME         100
 #endif
 
 #ifdef MAX_BUFF
 #undef MAX_BUFF
 #endif
-#define MAX_BUFF 500
-#define MAX_BIG_BUFF 5000
-
-#define MAX_LANG_STR 500
-
-#define QMAILADMIN_UNLIMITED -1
-
-#define NO_ADMIN		0
-
-#define DOMAIN_ADMIN	2
-#define USER_ADMIN		3
-
-#define NUM_SQL_OPTIONS	  6
-
-#define ACTION_MODIFY 1
-#define ACTION_DELETE 2
+#define MAX_BUFF              500
+#define MAX_BIG_BUFF         5000
+#define MAX_LANG_STR          500
+#define QMAILADMIN_UNLIMITED   -1
+#define NO_ADMIN		        0
+#define DOMAIN_ADMIN	        2
+#define USER_ADMIN		        3
+#define NUM_SQL_OPTIONS	        6
+#define ACTION_MODIFY           1
+#define ACTION_DELETE           2
 
 void            init_globals();
 void            quickAction(char *username, int action);
