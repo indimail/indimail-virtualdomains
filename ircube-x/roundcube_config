@@ -743,7 +743,7 @@ if [ $is_suse -eq 1 ] ; then
 			mv /etc/apache2/default-server.conf /etc/apache2/default-server.conf.BAK
 			cp /etc/apache2/default-server.conf.BAK /etc/apache2/default-server.conf
 		fi
-		sed -i -e "s}/srv/www}/var/www}g" -e "s}htdocs}html}g"
+		sed -i -e "s}/srv/www}/var/www}g" -e "s}htdocs}html}g" \
 			/etc/apache2/default-server.conf
 	fi
 fi
