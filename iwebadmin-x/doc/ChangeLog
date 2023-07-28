@@ -1,3 +1,10 @@
+* XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <@email@> @version@-@release@%{?dist}
+Release @version@-@release@ Start 28/07/2023 End --/--/20--
+- 28/07/2023
+1. iwebadmin.c: exit with specific error codes defined in iwebadmin.h to
+   indicate the error and help testing iwebadmin with curl
+2. html/mod_user.html: shorted quota input box length
+
 * Tue Jan 31 2023 03:34:39 +0000 Manvendra Bhangui <iwebadmin@indimail.org> 2.1.1-1.1%{?dist}
 Release 2.1.1-1.1 Start 14/09/2022 End 31/01/2023
 - 14/09/2022
