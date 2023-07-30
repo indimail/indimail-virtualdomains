@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 1.11  2023-07-30 19:45:09+05:30  Cprogrammer
+ * updated ip address field lengths
+ *
  * Revision 1.10  2023-03-20 10:04:56+05:30  Cprogrammer
  * removed mailing_list table
  *
@@ -35,7 +38,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 1.10 2023-03-20 10:04:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 1.11 2023-07-30 19:45:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -208,7 +211,7 @@ primary key (pw_name, pw_domain)"
 
 #define HOST_TABLE_LAYOUT "\
 host char(64) not null, \
-ipaddr char(16) not null, \
+ipaddr char(46) not null, \
 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 primary key (host), index ipaddr (ipaddr)"
 
@@ -281,13 +284,13 @@ primary key(pw_name)"
 
 #define RELAY_TABLE_LAYOUT "\
 email char(96) not null, \
-ipaddr char(18) not null, \
+ipaddr char(46) not null, \
 timestamp int, \
 unique index (email, ipaddr), index(ipaddr), index(timestamp)"
 
 #ifdef IP_ALIAS_DOMAINS
 #define IP_ALIAS_TABLE_LAYOUT "\
-ipaddr char(18) not null, \
+ipaddr char(46) not null, \
 domain char(67), \
 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP NOT NULL, \
 primary key(ipaddr)"
@@ -310,7 +313,7 @@ primary key(ipaddr)"
 user char(40) not null, \
 domain char(67) not null,\
 service char(10) not null, \
-remote_ip char(16) not null,  \
+remote_ip char(46) not null,  \
 quota int not null, \
 gecos char(48) not null, \
 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, \

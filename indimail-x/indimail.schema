@@ -1,4 +1,19 @@
+#
+# $Id: indimail.schema,v 1.1 2023-07-30 20:32:58+05:30 Cprogrammer Exp mbhangui $
+#
+# vim: wrap
+#
 1:sql:NO:create ischema table:CREATE TABLE IF NOT EXISTS ischema(id INT NOT NULL AUTO_INCREMENT, comment TEXT NOT NULL, timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL, PRIMARY KEY(id));
 2:sql:YES:add scram column:ALTER TABLE indimail ADD COLUMN scram char(255) AFTER pw_shell;
 3:sql:YES:add scram column:ALTER TABLE indibak  ADD COLUMN scram char(255) AFTER pw_shell;
 4:sql:YES:delete mailing_list column:ALTER TABLE vfilter DROP COLUMN mailing_list;
+5:sql:YES:increase column size for ipv6:ALTER TABLE relay MODIFY ipaddr CHAR(46);
+6:sql:YES:increase column size for ipv6:ALTER TABLE ip_alias_map MODIFY ipaddr CHAR(46);
+7:sql:YES:increase column size for ipv6:ALTER TABLE lastauth MODIFY remote_ip CHAR(46);
+8:sql:YES:increase column size for ipv6:ALTER TABLE host_table MODIFY ipaddr CHAR(46);
+#
+# $Log: indimail.schema,v $
+# Revision 1.1  2023-07-30 20:32:58+05:30  Cprogrammer
+# Initial revision
+#
+#
