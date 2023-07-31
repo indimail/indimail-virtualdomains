@@ -32,6 +32,9 @@ Release 3.4.5-1.1 Start 25/04/2023 End XX/XX/XXXX
 - 30/07/2023
 17. relay, lastauth, ip_alias_table, host_table updated ip address field
     lengths [Feature Request #48](https://sourceforge.net/p/indimail/feature-requests/48/)
+- 31/07/2023
+18. vaddaliasdomain, vadddomain, vdeldomain, vdeluser, vmoduser, vpasswd,
+    vrenamedomain, vrenameuser : cd to root before doing svc -h in post_handle
 
 * Sun Apr 23 2023 19:21:03 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.4-1.1%{?dist}
 Release 3.4.4-1.1 Start 26/03/2023 End 23/04/2023

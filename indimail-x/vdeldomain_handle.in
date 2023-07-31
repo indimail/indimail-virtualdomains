@@ -1,6 +1,9 @@
 #!/bin/sh
 #
 # $Log: vdeldomain_handle.in,v $
+# Revision 2.8  2023-07-31 21:51:28+05:30  Cprogrammer
+# cd to root before doing svc -h.
+#
 # Revision 2.7  2023-03-20 10:35:01+05:30  Cprogrammer
 # use SERVICEDIR, CONTROLDIR env variable if set for service and control directory
 #
@@ -24,7 +27,7 @@
 #
 #
 #
-# $Id: vdeldomain_handle.in,v 2.7 2023-03-20 10:35:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: vdeldomain_handle.in,v 2.8 2023-07-31 21:51:28+05:30 Cprogrammer Exp mbhangui $
 
 # get securely chown, chmod path
 PATH=/usr/bin:/usr/sbin:/bin
@@ -61,5 +64,5 @@ if [ -n "$SERVICEDIR" ] ; then
 else
 	servicedir=@servicedir@*
 fi
-@prefix@/bin/svc -h $servicedir/inlookup.* $servicedir/*-send.* 2>/dev/null
-exit 0
+cd /
+exec @prefix@/bin/svc -h $servicedir/inlookup.* $servicedir/*-send.* 2>/dev/null

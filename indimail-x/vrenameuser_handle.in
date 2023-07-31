@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: vrenameuser_handle.in,v $
+# Revision 2.3  2023-07-31 21:57:09+05:30  Cprogrammer
+# cd to root before doing svc -h
+#
 # Revision 2.2  2023-03-20 10:39:44+05:30  Cprogrammer
 # use SERVICEDIR env variable if set for service directory
 #
@@ -7,7 +10,7 @@
 # post handle script for vrenameuser
 #
 #
-# $Id: vrenameuser_handle.in,v 2.2 2023-03-20 10:39:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: vrenameuser_handle.in,v 2.3 2023-07-31 21:57:09+05:30 Cprogrammer Exp mbhangui $
 #
 # vrenameuser old_email new_email
 # send sighup to inlookup
@@ -16,5 +19,8 @@ if [ -n "$SERVICEDIR" ] ; then
 else
 	servicedir=@servicedir@*
 fi
+cd /
 @prefix@/bin/svc -h $servicedir/inlookup.*
+ret=$?
 @prefix@/bin/vuserinfo $2
+exit $ret
