@@ -41,7 +41,7 @@ clean:
 	/bin/rm -f indimail-access.spec indimail-access.changes \
 	indimail-access-rpmlintrc indimail-access-permissions.easy \
 	indimail-access-permissions.secure indimail-access-permissions.paranoid \
-	perm_list.imap debian/Makefile
+	perm_list.imap debian/Makefile debian/perm_list.imap
 
 indimail-access.spec: indimail-access.spec.in \
 conf-version conf-release doc/ChangeLog conf-email \
@@ -63,6 +63,7 @@ indimail-access-permissions.paranoid: indimail-access-permissions.paranoid.in
 	$(edit) $@.in > $@
 perm_list.imap: perm_list.in
 	$(edit) perm_list.in > $@
+	$(edit) perm_list.in > debian/$@
 debian/Makefile: debian/Makefile.in ../fetchmail-x/conf-version \
 ../courier-imap-x/conf-version conf-release
 	$(edit) $@.in > $@

@@ -51,7 +51,8 @@ debian/Makefile: debian/Makefile.in conf-version conf-release \
 	$(edit) $@.in > $@
 perm_list.auth: perm_list.in
 	$(edit) perm_list.in > $@
+	$(edit) perm_list.in > debian/$@
 clean:
 	/bin/rm -f indimail-auth.spec indimail-auth.changes PKGBUILD \
-	debian/Makefile perm_list.auth
+	debian/Makefile perm_list.auth debian/perm_list.auth
 
