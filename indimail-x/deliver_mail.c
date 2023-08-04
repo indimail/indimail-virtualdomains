@@ -1,44 +1,5 @@
 /*
- * $Log: deliver_mail.c,v $
- * Revision 1.13  2023-03-26 00:32:04+05:30  Cprogrammer
- * fixed code using wait_handler
- *
- * Revision 1.12  2023-03-20 09:58:31+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.11  2022-12-18 19:23:05+05:30  Cprogrammer
- * recoded wait logic
- *
- * Revision 1.10  2022-10-22 12:53:21+05:30  Cprogrammer
- * changed Received: header to qmail style format
- *
- * Revision 1.9  2022-02-23 12:34:49+05:30  Cprogrammer
- * fix message failing with overquota error for users having unlimited quota
- *
- * Revision 1.8  2021-07-27 18:04:55+05:30  Cprogrammer
- * set default domain using vset_default_domain
- *
- * Revision 1.7  2021-06-11 16:59:11+05:30  Cprogrammer
- * replaced makeseekable() with mktempfile() from libqmail
- *
- * Revision 1.6  2020-04-01 18:54:28+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.5  2019-06-18 09:57:41+05:30  Cprogrammer
- * added comments
- *
- * Revision 1.4  2019-06-17 23:23:07+05:30  Cprogrammer
- * fixed SIGSEGV when tmpdate.s was null
- *
- * Revision 1.3  2019-04-22 23:10:19+05:30  Cprogrammer
- * fixed strptime format
- *
- * Revision 1.2  2019-04-21 16:13:42+05:30  Cprogrammer
- * remove '/' from the end
- *
- * Revision 1.1  2019-04-18 08:16:44+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: deliver_mail.c,v 1.14 2023-08-04 18:49:30+05:30 Cprogrammer Exp mbhangui $
  */
 #include <stdio.h>
 #ifdef HAVE_CONFIG_H
@@ -100,7 +61,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 1.13 2023-03-26 00:32:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 1.14 2023-08-04 18:49:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -672,10 +633,10 @@ open_command(char *command, int *write_fd)
 
 	/*- skip over an | sign if there */
 	*write_fd = -1;
-	if (*command == '|')
-		++command;
 	if (pipe(pim) == -1)
 		return (-1);
+	if (*command == '|')
+		for (command++; *command && isspace(*command); command++);
 	if (!stralloc_copys(&cmmd, command) || !stralloc_0(&cmmd))
 		die_nomem();
 	switch (pid = fork())
@@ -1437,3 +1398,49 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 	}
 	return (0);
 }
+
+/*
+ * $Log: deliver_mail.c,v $
+ * Revision 1.14  2023-08-04 18:49:30+05:30  Cprogrammer
+ * skip white space after | and command for DTLINE to be preserved
+ *
+ * Revision 1.13  2023-03-26 00:32:04+05:30  Cprogrammer
+ * fixed code using wait_handler
+ *
+ * Revision 1.12  2023-03-20 09:58:31+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.11  2022-12-18 19:23:05+05:30  Cprogrammer
+ * recoded wait logic
+ *
+ * Revision 1.10  2022-10-22 12:53:21+05:30  Cprogrammer
+ * changed Received: header to qmail style format
+ *
+ * Revision 1.9  2022-02-23 12:34:49+05:30  Cprogrammer
+ * fix message failing with overquota error for users having unlimited quota
+ *
+ * Revision 1.8  2021-07-27 18:04:55+05:30  Cprogrammer
+ * set default domain using vset_default_domain
+ *
+ * Revision 1.7  2021-06-11 16:59:11+05:30  Cprogrammer
+ * replaced makeseekable() with mktempfile() from libqmail
+ *
+ * Revision 1.6  2020-04-01 18:54:28+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.5  2019-06-18 09:57:41+05:30  Cprogrammer
+ * added comments
+ *
+ * Revision 1.4  2019-06-17 23:23:07+05:30  Cprogrammer
+ * fixed SIGSEGV when tmpdate.s was null
+ *
+ * Revision 1.3  2019-04-22 23:10:19+05:30  Cprogrammer
+ * fixed strptime format
+ *
+ * Revision 1.2  2019-04-21 16:13:42+05:30  Cprogrammer
+ * remove '/' from the end
+ *
+ * Revision 1.1  2019-04-18 08:16:44+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

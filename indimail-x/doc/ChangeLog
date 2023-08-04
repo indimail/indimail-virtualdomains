@@ -35,6 +35,10 @@ Release 3.4.5-1.1 Start 25/04/2023 End XX/XX/XXXX
 - 31/07/2023
 18. vaddaliasdomain, vadddomain, vdeldomain, vdeluser, vmoduser, vpasswd,
     vrenamedomain, vrenameuser : cd to root before doing svc -h in post_handle
+- 04/08/2023
+19. deliver_mail.c: skip white space after | and command for DTLINE to be
+    preserved
+20. roundcubemail.te: added missing defintion for class sock_file
 
 * Sun Apr 23 2023 19:21:03 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.4-1.1%{?dist}
 Release 3.4.4-1.1 Start 26/03/2023 End 23/04/2023

@@ -1,5 +1,5 @@
 #
-# $Id: roundcubemail.te,v 1.1 2023-05-06 21:16:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: roundcubemail.te,v 1.2 2023-08-04 18:50:15+05:30 Cprogrammer Exp mbhangui $
 #
 module roundcubemail 1.1;
 
@@ -13,6 +13,7 @@ require {
 	type accountsd_t;
 	type unreserved_port_t;
 	type var_run_t;
+	class sock_file { create write unlink getattr setattr };
 	class unix_stream_socket {read write connectto };
 	class udp_socket { name_bind };
 	class fifo_file { create read write open unlink getattr setattr };
@@ -29,6 +30,9 @@ allow sssd_t accountsd_t:fifo_file read;
 
 #
 # $Log: roundcubemail.te,v $
+# Revision 1.2  2023-08-04 18:50:15+05:30  Cprogrammer
+# added missing definition for class sock_file
+#
 # Revision 1.1  2023-05-06 21:16:20+05:30  Cprogrammer
 # Initial revision
 #
