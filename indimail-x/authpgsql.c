@@ -1,5 +1,8 @@
 /*
  * $Log: authpgsql.c,v $
+ * Revision 1.10  2023-08-04 22:39:42+05:30  Cprogrammer
+ * include errno.h, authmethods.h, subfd.h
+ *
  * Revision 1.9  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -34,6 +37,9 @@
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
 #endif
+#ifdef HAVE_ERRNO_H
+#include <errno.h>
+#endif
 #ifdef ENABLE_DOMAIN_LIMITS
 #include <time.h>
 #include "vlimits.h"
@@ -55,6 +61,8 @@
 #include <pw_comp.h>
 #include <getEnvConfig.h>
 #include <replacestr.h>
+#include <authmethods.h>
+#include <subfd.h>
 #endif
 #include "inquery.h"
 #include "pipe_exec.h"
@@ -65,7 +73,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authpgsql.c,v 1.9 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authpgsql.c,v 1.10 2023-08-04 22:39:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_PGSQL
@@ -326,7 +334,7 @@ main(int argc, char **argv)
 		if (!env_get("QUERY_CACHE")) {
 			if (vget_limits(domain.s, &limits)) {
 				strerr_warn2("authpgsql: unable to get domain limits for for ", domain.s, 0);
-				subprintfe(sufdout, "authpgsql", "454-unable to get domain limits for %s (#4.3.0)\r\n", domain.s);
+				subprintfe(subfdout, "authpgsql", "454-unable to get domain limits for %s (#4.3.0)\r\n", domain.s);
 				flush("authpgsql");
 				_exit(111);
 			}
@@ -336,7 +344,7 @@ main(int argc, char **argv)
 #else
 		if (vget_limits(domain.s, &limits)) {
 			strerr_warn2("authpgsql: unable to get domain limits for for ", domain.s, 0);
-			subprintfe(sufdout, "authpgsql", "454-unable to get domain limits for %s (#4.3.0)\r\n", domain.s);
+			subprintfe(subfdout, "authpgsql", "454-unable to get domain limits for %s (#4.3.0)\r\n", domain.s);
 			flush("authpgsql");
 			_exit(111);
 		}
