@@ -39,6 +39,9 @@ Release 3.4.5-1.1 Start 25/04/2023 End XX/XX/XXXX
 19. deliver_mail.c: skip white space after | and command for DTLINE to be
     preserved
 20. roundcubemail.te: added missing defintion for class sock_file
+- 06/08/2023
+21. vfilter.c: fixed setting emailid from arguments
+22. parseAddress.c: BUGFIX - Fixed logic to parse addresses
 
 * Sun Apr 23 2023 19:21:03 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.4-1.1%{?dist}
 Release 3.4.4-1.1 Start 26/03/2023 End 23/04/2023

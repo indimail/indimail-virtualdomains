@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 1.12  2023-08-06 15:29:48+05:30  Cprogrammer
+ * fixed setting emailid from arguments
+ *
  * Revision 1.11  2023-03-26 00:33:30+05:30  Cprogrammer
  * fixed code using wait_handler
  *
@@ -39,7 +42,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 1.11 2023-03-26 00:33:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 1.12 2023-08-06 15:29:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -175,7 +178,7 @@ static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 1.11 $", *mda;
+	char           *revision = "$Revision: 1.12 $", *mda;
 	static stralloc XFilter = {0};
 	pid_t           pid;
 	int             i, werr, wait_status, _status;
@@ -400,9 +403,9 @@ get_options(int argc, char **argv, char **bounce, stralloc *emailid, stralloc *u
 			}
 		}
 		if (optind < argc) {
-			if (!stralloc_copys(user, argv[optind++]) || !stralloc_0(user))
+			if (!stralloc_copys(emailid, argv[optind++]) || !stralloc_0(emailid))
 				die_nomem();
-			user->len--;
+			emailid->len--;
 		}
 		if (!emailid->len) {
 			strerr_warn1("vfilter: must supply emailid", 0);

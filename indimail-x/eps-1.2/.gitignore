@@ -12,3 +12,5 @@ install-sh
 libeps.la
 ltmain.sh
 missing
+eps_rewrite
+sample

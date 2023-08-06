@@ -1,5 +1,8 @@
 /*-
  * $Log: parseAddress.c,v $
+ * Revision 1.3  2023-08-06 15:35:09+05:30  Cprogrammer
+ * BUGFIX - Fixed logic to parse addresses
+ *
  * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: parseAddress.c,v 1.2 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: parseAddress.c,v 1.3 2023-08-06 15:35:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -42,14 +45,6 @@ parseAddress(struct header_t *h, stralloc *addr_buf)
 	struct address_t *a = (struct address_t *) 0;
 
 	addr_buf->len = 0;
-	if (!(h->atoms)) {
-		strerr_warn1("parseAddress: no atoms", 0);
-		return;
-	}
-	if (!(h->atoms->next)) {
-		strerr_warn1("parseAddress: no atoms", 0);
-		return;
-	}
 	if (!(g = (struct group_t *) address_evaluate((char *) h->data))) {
 		strerr_warn3("parseAddress: ", (char *) h->name, ": no valid addresses", 0);
 		return;
