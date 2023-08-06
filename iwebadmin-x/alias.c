@@ -1,5 +1,5 @@
 /*
- * $Id: alias.c,v 1.10 2023-07-28 22:27:47+05:30 Cprogrammer Exp mbhangui $
+ * $Id: alias.c,v 1.11 2023-08-06 09:02:02+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -156,6 +156,12 @@ show_dotqmail_lines(char *user, char *dom, time_t mytime)
 		iclose();
 		iweb_exit(PERM_FAILURE);
 	}
+	if (!stralloc_copy(&domain, &Domain) || !stralloc_0(&domain)) {
+		copy_status_mesg(html_text[201]);
+		iclose();
+		iweb_exit(MEMORY_FAILURE);
+	}
+	domain.len--;
 	scan_uint(Pagenumber, &page);
 	if (page == 0)
 		page = 1;
@@ -164,12 +170,6 @@ show_dotqmail_lines(char *user, char *dom, time_t mytime)
 #ifdef VALIAS
 	if (SearchUser.len) {
 		startnumber = 0;
-		if (!stralloc_copy(&domain, &Domain) || !stralloc_0(&domain)) {
-			copy_status_mesg(html_text[201]);
-			iclose();
-			iweb_exit(MEMORY_FAILURE);
-		}
-		domain.len--;
 		alias_line = valias_select_all(&alias_name, &domain);
 		while (alias_line) {
 			if (!stralloc_copy(&this_alias, &alias_name) ||
