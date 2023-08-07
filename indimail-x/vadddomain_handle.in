@@ -1,20 +1,20 @@
 #!/bin/sh
 #
-# $Id: vadddomain_handle.in,v 2.23 2023-07-31 21:51:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.24 2023-08-07 17:38:12+05:30 Cprogrammer Exp mbhangui $
 
 domaindir=@domaindir@
-OPTS=$(getopt -o vVRftOCcq:l:E:u:B:d:i:g:T:r:e:h:m:S:I:D:H:U:P:p: -- "$@")
+OPTS=$(getopt -o ateh:T:q:l:bB:E:u:vVRi:g:d:Or:CD:H:U:P:s:p:cfm:S:I: -- "$@")
 eval set -- "$OPTS"
 while true; do
 	case "$1" in
-		-v|-V|-R|-f|-t|-O|-C|-c)
+		-a|-t|-e|-b|-v|-V|-R|-O|-C|-c|-f|-A)
 		shift 1
 		;;
 		-d)
 		domaindir=$2
 		shift 2
 		;;
-		-q|-l|-E|-u|-B|-i|-g|-T|-r|-e|-h|-m|-S|-I|-D|-H|-U|-P|-p)
+		-h|-T|-q|-l|-B|-E|-u|-i|-g|-d|-r|-D|-H|-U|-P|-s|-p|-c|-m|-S|-I)
 		shift 2
 		;;
 		--)
@@ -124,6 +124,9 @@ vuserinfo postmaster@$domain
 exit 0
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.24  2023-08-07 17:38:12+05:30  Cprogrammer
+# updated argument list for getopt
+#
 # Revision 2.23  2023-07-31 21:51:18+05:30  Cprogrammer
 # cd to root before doing svc -h
 #
