@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadminx.h,v 1.5 2022-09-14 13:56:57+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadminx.h,v 1.6 2023-08-06 21:17:15+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,8 @@
 
 extern stralloc Username, Domain, Password, Gecos, Quota, Time, ActionUser, Newu,
 				Password1, Password2, Crypted, Alias, LineData, Action, Message,
-				StatusMessage, SearchUser, TmpBuf, RealDir, line, b64salt, result;
+				StatusMessage, SearchUser, TmpBuf, RealDir, line, b64salt, result,
+				mrtg_url;
 extern int      CGIValues[256];
 extern time_t   mytime;
 extern char     Pagenumber[];

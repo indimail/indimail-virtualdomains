@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: iwebadmin.c,v 1.34 2023-07-28 22:30:06+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.35 2023-08-06 21:16:55+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -82,7 +82,7 @@ stralloc        Username = {0}, Domain = {0}, Password = {0}, Gecos = {0},
 				Password1 = {0}, Password2 = {0}, Crypted = {0}, Alias = {0},
 				LineData = {0}, Action = {0}, Message = {0}, SearchUser = {0},
 				TmpBuf = {0}, RealDir = {0}, line = {0}, StatusMessage = {0},
-				b64salt = {0}, result = {0};
+				b64salt = {0}, result = {0}, mrtg_url = {0};
 int             CGIValues[256];
 int             ezmlm_idx = -1, ezmlm_make = -1, debug = 0, enable_fortune = 1,
 				scram = -1, u_scram = 0, cram = 0, iter_count = 4096;
@@ -266,6 +266,13 @@ conf_iwebadmin()
 			else
 			if (!str_diffn(line.s, "iter-count=", 11))
 				scan_int(line.s + 11, &iter_count);
+			else
+			if (!str_diffn(line.s, "mrtg-url=", 9)) {
+				if (!stralloc_copys(&mrtg_url, line.s + 9) ||
+						!stralloc_0(&mrtg_url))
+					die_nomem();
+				mrtg_url.len--;
+			}
 			else
 			if (!str_diffn(line.s, "salt=", 5)) {
 				if (!stralloc_copyb(&b64salt, line.s + 5, line.len - 5) ||
@@ -860,6 +867,9 @@ quickAction(char *username, int action)
 
 /*
  * $Log: iwebadmin.c,v $
+ * Revision 1.35  2023-08-06 21:16:55+05:30  Cprogrammer
+ * added configurable mrtg url
+ *
  * Revision 1.34  2023-07-28 22:30:06+05:30  Cprogrammer
  * replaced exit with my_exit
  *

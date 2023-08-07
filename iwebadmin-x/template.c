@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.29 2023-07-28 22:30:58+05:30 Cprogrammer Exp mbhangui $
+ * $Id: template.c,v 1.31 2023-08-07 12:32:13+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,6 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
+#include <stdio.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -252,6 +253,12 @@ send_template_now(char *filename)
 					if (!Alias.len)
 						strerr_warn1("Alias is null", 0);
 					printh("%H", Alias.len ? Alias.s : "");
+					break;
+				case 'b': /*- mrtg url */
+					if (mrtg_url.len)
+						out(mrtg_url.s);
+					else
+						out("http://localhost/mailmrtg");
 					break;
 				case 'B': /* show number of pop accounts */
 					load_limits();
@@ -723,7 +730,18 @@ send_template_now(char *filename)
 					out("</a> ");
 					out(VERSION);
 					out("<BR>");
-					out("<a href=\"http://localhost://mailmrtg/\">MRTG Graphs</a><BR>");
+					if (mrtg_url.len) {
+						out("<a href=\"");
+						i = str_rchr(mrtg_url.s, '/');
+						if (mrtg_url.s[i])
+							out(mrtg_url.s);
+						else {
+							out("/");
+							out(mrtg_url.s);
+						}
+						out("\">MRTG Graphs</a><BR>");
+					} else
+						out("<a href=\"http://localhost://mailmrtg/\">MRTG Graphs</a><BR>");
 					break;
 				case 'v': /* display the main menu */
 					printh("<font size=\"2\" color=\"#000000\"><b>%H</b></font><br><br>", Domain.len ? Domain.s : "");

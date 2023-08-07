@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH iwebadmin 1
 .SH NAME
 iwebadmin \- CGI program for indimail administration frontend
@@ -42,11 +43,17 @@ Sets password for SCRAM-SHA-256
 
 .TP
 .I iter-count=xxxx
-Sets iteration count for SCRAM passwords where xxxx is the iteration count. Defaults to 4096.
+Sets iteration count for SCRAM passwords where xxxx is the iteration count.
+Defaults to 4096.
 
 .TP
 .I salt=xxxxxxxxxxxxxxxx
 Sets a fixed 16bytes base64 encoded salt for SCRAM password generation
+
+.TP
+.I mrtg-url
+Sets the link for IndiMail MRTG Graphs. It can be a fully specified link or
+a relatve path to the document root.
 
 .SH FILES
 /usr/share/doc/iwebadmin/AUTHORS

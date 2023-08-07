@@ -5,4 +5,5 @@
 #scram-sha-1
 #scram-sha-256
 #iter-count=4096
+#mrtg-url=http://localhost://mailmrtg/
 #salt=pGpkE9F92zRciuyk
