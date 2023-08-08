@@ -168,8 +168,9 @@ int do_imap_command(const char *tag, int *flushflag)
 		writes("* BYE IMAP4rev1 server shutting down\r\n");
 		cmdsuccess(tag, "LOGOUT completed\r\n");
 		writeflush();
-		fprintf(stderr, "INFO: LOGOUT, ip=[%s], port=[%s], rcvd=%lu, sent=%lu\n",
-			getenv("TCPREMOTEIP"), getenv("TCPREMOTEPORT"), bytes_received_count, bytes_sent_count);
+		fprintf(stderr, "imaplogin: %d: INFO: LOGOUT, ip=[%s], port=[%s], rcvd=%lu, sent=%lu\n",
+			getpid(), getenv("TCPREMOTEIP"), getenv("TCPREMOTEPORT"),
+			bytes_received_count, bytes_sent_count);
 		exit(0);
 	}
 	if (strcmp(curtoken->tokenbuf, "NOOP") == 0)
@@ -325,12 +326,16 @@ const char	*ip, *port;
 		writes("] Courier-IMAP ready. "
 	       "Copyright 1998-2022 Double Precision, Inc.  "
 	       "See COPYING for distribution information.\r\n");
-		fprintf(stderr, "INFO: Connection, ip=[%s], port=[%s]\n", ip, port);
+		fprintf(stderr, "imaplogin: %d: INFO: Connection, ip=[%s], port=[%s]\n", getpid(), ip, port);
 	}
 	else
 	{
+		char *p;
 		cmdfail(tag ? tag:"", "Login failed.\r\n");
-		fprintf(stderr, "ERR: LOGIN FAILED, ip=[%s], port=[%s]\n", ip, port);
+		if ((p = getenv("UNAUTHENTICATED")))
+			fprintf(stderr, "imaplogin: %d: LOGIN FAILED, ip=[%s], port=[%s], user=[%s]\n", getpid(), ip, port, p);
+		else
+			fprintf(stderr, "imaplogin: %d: LOGIN FAILED, ip=[%s], port=[%s]\n", getpid(), ip, port);
 	}
 	writeflush();
 	main_argc=argc;

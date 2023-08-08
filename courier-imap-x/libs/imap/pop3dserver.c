@@ -564,10 +564,8 @@ static void cleanup()
 			}
 
 			if (log_deletions)
-				fprintf(stderr, "INFO: DELETED, user=%s, ip=[%s], port=[%s], filename=%s\n",
-					getenv("AUTHENTICATED"),
-					remoteip,
-					remoteport,
+				fprintf(stderr, "pop3d: %d: INFO: DELETED, user=%s, ip=[%s], port=[%s], filename=%s\n",
+					getpid(), getenv("AUTHENTICATED"), remoteip, remoteport,
 					msglist_a[i]->filename);
 
 			if (unlink(msglist_a[i]->filename))
@@ -1177,8 +1175,8 @@ uid_t  euid, uid;
 
 		if ( stat(".", &buf) < 0 || buf.st_mode & S_ISVTX)
 		{
-			fprintf(stderr, "INFO: LOCKED, user=%s, ip=[%s], port=[%s]\n",
-							authaddr, remoteip, remoteport);
+			fprintf(stderr, "pop3d: %d: INFO: LOCKED, user=%s, ip=[%s], port=[%s]\n",
+							getpid(), authaddr, remoteip, remoteport);
 			printed(printf("-ERR Your account is temporarily unavailable (+t bit set on home directory).\r\n"));
 			exit(0);
 		}
@@ -1221,8 +1219,8 @@ uid_t  euid, uid;
 	} else
 	if (p)
 		free(p);
-	fprintf(stderr, "INFO: LOGIN, user=%s, ip=[%s], port=[%s], protocol=%s\n",
-		authaddr, remoteip, remoteport, protocol);
+	fprintf(stderr, "pop3d: %d: INFO: LOGIN, user=%s, ip=[%s], port=[%s], protocol=%s\n",
+		getpid(), authaddr, remoteip, remoteport, protocol);
 	fflush(stderr);
 	msglist_cnt=0;
 	msglist_l=0;

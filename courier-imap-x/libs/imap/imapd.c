@@ -1468,9 +1468,8 @@ static int doId()
 
 		curtoken = nexttoken();
 
-		fprintf(stderr, "INFO: ID, user=%s, ip=[%s], port=[%s]",
-			getenv("AUTHENTICATED"),
-			getenv("TCPREMOTEIP"),
+		fprintf(stderr, "imapd: %d: INFO: ID, user=%s, ip=[%s], port=[%s]",
+			getpid(), getenv("AUTHENTICATED"), getenv("TCPREMOTEIP"),
 			getenv("TCPREMOTEPORT"));
 
 		while ((k < 30) && (curtoken->tokentype != IT_RPAREN)) {
@@ -1809,9 +1808,8 @@ int log_deletions= cp && *cp != '0';
 			}
 
 			if (log_deletions)
-				fprintf(stderr, "INFO: EXPUNGED, user=%s, ip=[%s], port=[%s], old_name=%s, new_name=%s: only new_name will be left\n",
-					getenv("AUTHENTICATED"),
-					getenv("TCPREMOTEIP"),
+				fprintf(stderr, "imapd: %d: INFO: EXPUNGED, user=%s, ip=[%s], port=[%s], old_name=%s, new_name=%s: only new_name will be left\n",
+					getpid(), getenv("AUTHENTICATED"), getenv("TCPREMOTEIP"),
 					getenv("TCPREMOTEPORT"),
 					old_name, new_name);
 
@@ -1848,10 +1846,8 @@ int log_deletions= cp && *cp != '0';
 		}
 
 		if (log_deletions)
-			fprintf(stderr, "INFO: EXPUNGED, user=%s, ip=[%s], port=[%s], old_name=%s\n",
-				getenv("AUTHENTICATED"),
-				getenv("TCPREMOTEIP"),
-				getenv("TCPREMOTEPORT"),
+			fprintf(stderr, "imapd: %d: INFO: EXPUNGED, user=%s, ip=[%s], port=[%s], old_name=%s\n",
+				getpid(), getenv("AUTHENTICATED"), getenv("TCPREMOTEIP"), getenv("TCPREMOTEPORT"),
 				old_name);
 		free(old_name);
 	}
@@ -6674,8 +6670,8 @@ static void chkdisabled(const char *ip, const char *port)
 	}
 	if (p1)
 		free(p1);
-	fprintf(stderr, "INFO: LOGIN, user=%s, ip=[%s], port=[%s], protocol=%s\n",
-		getenv("AUTHENTICATED"), ip, port, protocol);
+	fprintf(stderr, "imapd: %d: INFO: LOGIN, user=%s, ip=[%s], port=[%s], protocol=%s\n",
+		getpid(), getenv("AUTHENTICATED"), ip, port, protocol);
 }
 
 static int chk_clock_skew()
@@ -6819,8 +6815,8 @@ int main(int argc, char **argv)
 
 		if ( stat(".", &buf) < 0 || buf.st_mode & S_ISVTX)
 		{
-			fprintf(stderr, "INFO: LOCKED, user=%s, ip=[%s], port=[%s]\n",
-				getenv("AUTHENTICATED"), ip, port);
+			fprintf(stderr, "imapd: %d: INFO: LOCKED, user=%s, ip=[%s], port=[%s]\n",
+				getpid(), getenv("AUTHENTICATED"), ip, port);
 			if (is_smap())
 				writes("-ERR ");
 			else

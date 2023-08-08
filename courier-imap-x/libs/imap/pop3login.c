@@ -219,13 +219,13 @@ main(int argc, char **argv)
 #endif
 	if (!ip || !*ip)
 	{
-		fprintf(stderr, "ERR: No IP address\n");
+		fprintf(stderr, "pop3login: %d: ERR: No IP address\n", getpid());
 		fflush(stderr);
 		exit(1);
 	}
 	if (!port || !*port)
 	{
-		fprintf(stderr, "ERR: No TCPREMOTEPORT\n");
+		fprintf(stderr, "pop3login: %d: ERR: No TCPREMOTEPORT\n", getpid());
 		fflush(stderr);
 		exit(1);
 	}
@@ -234,11 +234,15 @@ main(int argc, char **argv)
 	putenv("PROTOCOL=POP3");
 	if (authmoduser(argc, argv, 60, 5))
 	{
-		fprintf(stderr, "INFO: Connection, ip=[%s], port=[%s]\n", ip, port);
+		fprintf(stderr, "pop3login: %d: INFO: Connection, ip=[%s], port=[%s]\n", getpid(), ip, port);
 		printed(printf("+OK POP3 Server Ready.\r\n"));
 	} else
 	{
-		fprintf(stderr, "ERR: LOGIN FAILED, ip=[%s], port=[%s]\n", ip, port);
+		char *p;
+		if ((p = getenv("UNAUTHENTICATED")))
+			fprintf(stderr, "pop3login: %d: ERR LOGIN FAILED, ip=[%s], port=[%s], user=[%s]\n", getpid(), ip, port, p);
+		else
+			fprintf(stderr, "pop3login: %d: ERR LOGIN FAILED, ip=[%s], port=[%s]\n", getpid(), ip, port);
 		printed(printf("-ERR Login failed.\r\n"));
 	}
 	fflush(stdout);
@@ -271,7 +275,8 @@ main(int argc, char **argv)
 			{
 				printed(printf("+OK Phir Kab Miloge?\r\n"));
 				fflush(stdout);
-				fprintf(stderr, "INFO: LOGOUT, ip=[%s], port=[%s], rcvd=%lu, sent=%lu\n", ip, port, bytes_received_count,
+				fprintf(stderr, "pop3login: %d: INFO: LOGOUT, ip=[%s], port=[%s], rcvd=%lu, sent=%lu\n",
+						getpid(), ip, port, bytes_received_count,
 						bytes_sent_count);
 				fflush(stderr);
 				break;

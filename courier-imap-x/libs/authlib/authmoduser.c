@@ -27,6 +27,7 @@ void authmod(int argc, char **argv,
 	const char *authdata)
 {
 int	pipe3fd[2];
+char userid[128];
 pid_t	pid;
 char	*buf;
 int	waitstat;
@@ -55,7 +56,7 @@ int	l;
 
 	if (pid)
 	{
-	char	*prog;
+	char	*prog, *cptr;
 	char	**argvec=authcopyargv(argc, argv, &prog);
 
 		if (!prog)	authexit(1);
@@ -66,6 +67,10 @@ int	l;
 		}
 		close(pipe3fd[0]);
 		close(pipe3fd[1]);
+		for (p = (char *) authdata, cptr = userid;*p && *p != '\n';)
+			*cptr++ = *p++;
+		*cptr = 0;
+		setenv("UNAUTHENTICATED", userid, 1);
 		execv(prog, argvec);
 		perror(prog);
 		authexit(1);
