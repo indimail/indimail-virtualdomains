@@ -1,5 +1,8 @@
 /*
  * $Log: adminclient.c,v $
+ * Revision 1.5  2023-08-08 10:34:36+05:30  Cprogrammer
+ * use strerr_tls for reporting tls error
+ *
  * Revision 1.4  2023-01-03 21:05:41+05:30  Cprogrammer
  * added -r option to specify certification revocation list
  *
@@ -19,7 +22,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: adminclient.c,v 1.4 2023-01-03 21:05:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: adminclient.c,v 1.5 2023-08-08 10:34:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -36,6 +39,7 @@ static char     sccsid[] = "$Id: adminclient.c,v 1.4 2023-01-03 21:05:41+05:30 C
 #include <fmt.h>
 #include <str.h>
 #include <env.h>
+#include <tls.h>
 #endif
 #include "auth_admin.h"
 #include "adminCmmd.h"
@@ -130,7 +134,7 @@ main(int argc, char **argv)
 	if (verbose)
 		strmsg_out7("connecting to ", admin_host, "@", admin_port, " as ", admin_user, "\n");
 	if ((sfd = auth_admin(admin_user, admin_pass, admin_host, admin_port, certfile, cafile, crlfile, match_cn)) == -1) {
-		strerr_warn7("adminclient: auth_admin: ", admin_host, "@", admin_port, " as ", admin_user, ": ", &strerr_sys);
+		strerr_warn7("adminclient: auth_admin: ", admin_host, "@", admin_port, " as ", admin_user, ": ", &strerr_tls);
 		return (1);
 	}
 	if (verbose)

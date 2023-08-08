@@ -1,5 +1,8 @@
 /*
  * $Log: adminCmmd.c,v $
+ * Revision 1.5  2023-08-08 00:34:55+05:30  Cprogrammer
+ * use strerr_tls for reporting tls error
+ *
  * Revision 1.4  2023-01-03 21:04:50+05:30  Cprogrammer
  * renamed ADMIN_TIMEOUT to TIMEOUTDATA
  * replaced safewrite, saferead with tlswrite, tlsread from tls library in libqmail
@@ -54,7 +57,7 @@
 #include "indimail.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: adminCmmd.c,v 1.4 2023-01-03 21:04:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: adminCmmd.c,v 1.5 2023-08-08 00:34:55+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      IOPlex(int, int);
@@ -69,7 +72,7 @@ adminCmmd(int sfd, int inputRead, char *cmdbuf, int len)
 	getEnvConfigInt(&timeoutdata, "TIMEOUTDATA", 120);
 	if ((n = tlswrite(sfd, cmdbuf, len, timeoutdata)) != len) {
 		strnum[fmt_int(strnum, n)] = 0;
-		strerr_warn3("adminCmmd: tlswrite: ", strnum, " bytes: ", &strerr_sys);
+		strerr_warn3("adminCmmd: tlswrite: ", strnum, " bytes: ", &strerr_tls);
 #ifdef HAVE_SSL
 		ssl_free();
 #endif
@@ -77,7 +80,7 @@ adminCmmd(int sfd, int inputRead, char *cmdbuf, int len)
 	}
 	if ((n = tlswrite(sfd, "\n", 1, timeoutdata)) != 1) { /*- To send the command */
 		strnum[fmt_int(strnum, n)] = 0;
-		strerr_warn3("adminCmmd: tlswrite: ", strnum, " bytes: ", &strerr_sys);
+		strerr_warn3("adminCmmd: tlswrite: ", strnum, " bytes: ", &strerr_tls);
 #ifdef HAVE_SSL
 		ssl_free();
 #endif
@@ -85,7 +88,7 @@ adminCmmd(int sfd, int inputRead, char *cmdbuf, int len)
 	}
 	if ((n = tlswrite(sfd, "\n", 1, timeoutdata)) != 1) { /*- to make indisrvr go forward after wait() */
 		strnum[fmt_int(strnum, n)] = 0;
-		strerr_warn3("adminCmmd: tlswrite: ", strnum, " bytes: ", &strerr_sys);
+		strerr_warn3("adminCmmd: tlswrite: ", strnum, " bytes: ", &strerr_tls);
 #ifdef HAVE_SSL
 		ssl_free();
 #endif
@@ -101,7 +104,7 @@ adminCmmd(int sfd, int inputRead, char *cmdbuf, int len)
 			if (errno == EINTR)
 #endif
 				continue;
-			strerr_warn1("adminCmmd: tlsread: ", &strerr_sys);
+			strerr_warn1("adminCmmd: tlsread: ", &strerr_tls);
 #ifdef HAVE_SSL
 			ssl_free();
 #endif
@@ -241,7 +244,7 @@ IOPlex(int sockfd, int timeoutdata)
 				break;
 			/*- Write to Remote Server -*/
 			if (tlswrite(sockfd, sockbuf, retval, timeoutdata) != retval) {
-				strerr_warn1("adminCmmd: tlswrite: ", &strerr_sys);
+				strerr_warn1("adminCmmd: tlswrite: ", &strerr_tls);
 				signal(SIGPIPE, pstat);
 				return (-1);
 			}

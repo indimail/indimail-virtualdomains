@@ -1,5 +1,5 @@
 /*
- * $Id: authindi.c,v 1.17 2023-07-15 12:44:29+05:30 Cprogrammer Exp mbhangui $
+ * $Id: authindi.c,v 1.18 2023-08-08 10:35:53+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -57,7 +57,7 @@
 #define WARN  "authindi: warn: "
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.17 2023-07-15 12:44:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.18 2023-08-08 10:35:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -331,8 +331,8 @@ main(int argc, char **argv)
 	if (argc < 3)
 		strerr_die2x(100, FATAL, "no more modules will be tried");
 	if (debug) {
-		subprintfe(subfderr, "authindi", "debug: authindi: uid[%u] euid[%u] %s %s\n",
-				getuid(), geteuid(), argc > 3 ? "program" : "module", argv[1]);
+		subprintfe(subfderr, "authindi", "debug: authindi: pid %d uid[%u] euid[%u] %s %s\n",
+				getpid(), getuid(), geteuid(), argc > 3 ? "program" : "module", argv[1]);
 		substdio_flush(subfderr);
 	}
 	if (!(authstr = alloc((authlen + 1) * sizeof(char)))) {
@@ -618,7 +618,7 @@ main(int argc, char **argv)
 		pass = crypt_pass = pw->pw_passwd;
 	if ((ptr = env_get("DEBUG_LOGIN")) && *ptr > '0') {
 		subprintfe(subfderr, "authindi",
-				"debug_login: pid[%d] service[%s] login[%s] password[%s] crypted[%s] authmethod[%s]",
+				"debug_login: pid %d service[%s] login[%s] password[%s] crypted[%s] authmethod[%s]",
 				getpid(), service, login, auth_data, crypt_pass ? crypt_pass : "null", auth_type);
 		if (challenge)
 			subprintfe(subfderr, "authindi", " challenge[%s]", challenge);
@@ -628,7 +628,7 @@ main(int argc, char **argv)
 		substdio_flush(subfderr);
 	} else
 	if (debug) {
-		subprintfe(subfderr, "authindi", "debug: authindi: pid [%d] service[%s]: login[%s] authmethod [%s]\n",
+		subprintfe(subfderr, "authindi", "debug: authindi: pid %d service[%s]: login[%s] authmethod [%s]\n",
 			getpid(), service, login, auth_type);
 		substdio_flush(subfderr);
 	}
@@ -683,6 +683,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: authindi.c,v $
+ * Revision 1.18  2023-08-08 10:35:53+05:30  Cprogrammer
+ * display pid in logs
+ *
  * Revision 1.17  2023-07-15 12:44:29+05:30  Cprogrammer
  * authenticate using CRAM when password field starts with {CRAM}
  *

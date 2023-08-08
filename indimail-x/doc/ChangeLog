@@ -44,6 +44,9 @@ Release 3.4.5-1.1 Start 25/04/2023 End XX/XX/XXXX
 22. parseAddress.c: BUGFIX - Fixed logic to parse addresses
 - 07/08/2023
 23. vadddomain_handle.in, vmoduser_handle.in: updated argument list for getopt
+- 08/08/2023
+24. adminclient.c, adminCmmd.c: use strerr_tls for reporting tls error
+25. authindi.c: display pid in logs
 
 * Sun Apr 23 2023 19:21:03 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.4-1.1%{?dist}
 Release 3.4.4-1.1 Start 26/03/2023 End 23/04/2023
