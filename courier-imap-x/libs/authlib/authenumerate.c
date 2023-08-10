@@ -36,7 +36,7 @@ static void enum_cb(const char *name,
 		return;
 	}
 
-	printf("%s\t%s\t\%s\t%s", name,
+	printf("%-25s\t%s\t\%s\t%s", name,
 	       libmail_str_uid_t(uid, buf1),
 	       libmail_str_gid_t(gid, buf2),
 	       homedir);
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 
 	if (getuid())
 	{
-		printf("I must be run as root!\n");
+		fprintf(stderr, "I must be run as root!\n");
 		exit(0);
 	}
 
@@ -96,13 +96,14 @@ int main(int argc, char **argv)
 		if (authstaticmodulelist[i]->auth_enumerate == NULL)
 			continue;
 
-		printf("# %s\n\n", authstaticmodulelist[i]->auth_name);
+		printf("# %s -----------------------\n", authstaticmodulelist[i]->auth_name);
 		exit_code=1;
 		(*authstaticmodulelist[i]->auth_enumerate)(enum_cb,
 							   &exit_code);
 
 		if (exit_code)
 			exit(exit_code);
+		printf("\n");
 	}
 	exit(0);
 	return (0);
