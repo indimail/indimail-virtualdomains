@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH sharedindexinstall 1
 
 .SH NAME
@@ -7,9 +8,11 @@ sharedindexinstall - Installs the shared index files
 \fBsharedindexinstall\fR
 
 .SH DESCRIPTION
-\fBsharedindexinstall\fR installs the shared index files from @sysconfdir@/shared.tmp to @sysconfdir@/shared/.
+\fBsharedindexinstall\fR installs the shared index files from
+@sysconfdir@/shared.tmp to @sysconfdir@/shared.
 
-The full documentation of shared folders with courier-imap is located at @prefix/share/indimail/doc/HOWTO.shared
+The full documentation of shared folders with courier-imap is located at
+@prefix@/share/indimail/doc/courier-imap/README.sharedfolders.txt
 
 .SH SEE ALSO
-authnumerate(8), sharedindexinstall(8)
+authnumerate(1), sharedindexinstall(1), authenumerate(1), maildirmake(1)

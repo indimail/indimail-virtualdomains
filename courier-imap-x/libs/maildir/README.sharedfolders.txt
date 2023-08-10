@@ -33,6 +33,7 @@
       Subscribing to a shared folder
       Unsubscribing to a shared folder
       Opening a shared folder
+   Example Setup
 
                              Virtual shared folders
 
@@ -731,6 +732,24 @@ Opening a shared folder
        message. Copying the message INTO the shared folder means copying the
        message into the underlying sharable folder's tmp/cur directory, and
        it will show up after the next sync.
+
+                  Example
+   Here is an example of quickly creating shared folders Spam and Documents
+
+   - Spam folder can be used by users to move Spam emails for bogofilter
+     learning
+   - Documents folder can be used by users to share emails containing
+     important documents
+ 
+   1. Create Shared Maildir
+      /usr/bin/maildirmake -S /home/shared
+
+   2. Create Folder
+      /usr/bin/maildirmake -s write -f Spam /home/shared
+      /usr/bin/maildirmake -s write -f Docs /home/shared/
+
+   3. Create Entry in /etc/indimail/maildirshared
+      indimail /home/shared
 
 References
 

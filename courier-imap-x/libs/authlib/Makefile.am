@@ -6,7 +6,9 @@ EXTRA_LTLIBRARIES=libauthpam.la libauthpwd.la libauthshadow.la libauthcustom.la
 
 EXTRA_PROGRAMS= authshadow authpam authpwd authcustom
 
-noinst_PROGRAMS= @AUTHMODULES@ authtest authenumerate
+noinst_PROGRAMS= @AUTHMODULES@
+
+sbin_PROGRAMS= authtest authenumerate
 
 noinst_DATA=$(BUILT_SOURCES)
 
@@ -30,8 +32,7 @@ authcustom_DEPENDENCIES=libauthcustom.la libauthmod.la libauth.la ../numlib/libn
 authcustom_LDADD=libauthcustom.la libauthmod.la libauth.la ../numlib/libnumlib.la @HMACLIB@ @MD5LIB@ @SHA1LIB@ $(CRYPTLIBS)
 
 authtest_SOURCES=authtest.c
-authtest_DEPENDENCIES=libauth.la libauthmod.la
-	$(authpamobj) $(authshadowobj) $(authpwdobj) $(authcustomobj) \
+authtest_DEPENDENCIES=libauth.la libauthmod.la $(authpamobj) $(authshadowobj) $(authpwdobj) $(authcustomobj) \
 	../rfc2045/librfc2045.la ../random128/librandom128.la ../numlib/libnumlib.la
 authtest_LDADD=libauth.la libauthmod.la \
 	$(authpamobj) $(authshadowobj) $(authpwdobj) $(authcustomobj) \
@@ -39,8 +40,7 @@ authtest_LDADD=libauth.la libauthmod.la \
 	@HMACLIB@ @MD5LIB@ @SHA1LIB@ $(CRYPTLIBS) -lpam
 
 authenumerate_SOURCES=authenumerate.c
-authenumerate_DEPENDENCIES=libauth.la libauthmod.la
-	$(authpamobj) $(authshadowobj) $(authpwdobj) $(authcustomobj) \
+authenumerate_DEPENDENCIES=libauth.la libauthmod.la $(authpamobj) $(authshadowobj) $(authpwdobj) $(authcustomobj) \
 	../rfc2045/librfc2045.la ../random128/librandom128.la ../numlib/libnumlib.la
 authenumerate_LDADD=libauth.la libauthmod.la \
 	$(authpamobj) $(authshadowobj) $(authpwdobj) $(authcustomobj) \
@@ -147,17 +147,13 @@ EXTRA_DIST=authwait.h authpam.c preauthpam.c authpwd.c preauthpwd.c \
 authchangepwdir.h: config.status
 	echo '#define AUTHCHANGEPWDIR "@authchangepwdir@"' >authchangepwdir.h
 
-man_MANS=authlib.7 authindi.7 $(manpwd) $(manshadow) $(manpam) $(mancustom)
+man_MANS=authlib.7 authindi.7 authenumerate.1 authtest.1 \
+	 $(manpwd) $(manshadow) $(manpam) $(mancustom)
 
 authlib.7: authlib.7.in
 	CONFIG_FILES=authlib.7 CONFIG_HEADERS= $(SHELL) ./config.status
-
-install-data-local: authlib.7
-	$(mkinstalldirs) $(DESTDIR)$(man7dir) ; \
-	for f in $(man_MANS) "" ; do \
-		test "$$f" = "" && continue ; \
-		rm -f $(DESTDIR)$(man7dir)/$$f; \
-		$(INSTALL) -C -m 644 $$f $(DESTDIR)$(man7dir) ; done
+authenumerate.1:authenumerate.1.in
+	./config.status --file=$@
 
 uninstall-local:
 	cd $(DESTDIR)$(man7dir) 2>/dev/null || exit 0 ; \

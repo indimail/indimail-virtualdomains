@@ -150,6 +150,9 @@ libs/authlib/config.h
 libs/authlib/config.log
 libs/authlib/config.status
 libs/authlib/installlist
+libs/authlib/authpasswd
+libs/authlib/authenumerate
+libs/authlib/authenumerate.1
 *.la
 libs/authlib/libtool
 libs/authlib/modulelist

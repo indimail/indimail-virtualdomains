@@ -354,6 +354,9 @@ done
 %attr(755,root,root)                    %{_prefix}/sbin/pop3login
 %attr(755,root,root)                    %{_prefix}/sbin/sharedindexinstall
 %attr(755,root,root)                    %{_prefix}/sbin/sharedindexsplit
+%attr(755,root,root)                    %{_prefix}/sbin/authenumerate
+%attr(755,root,root)                    %{_prefix}/sbin/authtest
+
 %if 0
 %attr(755,root,root)                    %{libexecdir}/imapmodules/authpwd
 %endif
@@ -423,6 +426,8 @@ done
 %attr(0644,root,root) %{mandir}/man1/maildiracl.1.*
 %attr(0644,root,root) %{mandir}/man1/maildirmake.1.*
 %attr(0644,root,root) %{mandir}/man1/maildirwatch.1.*
+%attr(0644,root,root) %{mandir}/man1/authtest.1.*
+%attr(0644,root,root) %{mandir}/man1/authenumerate.1.*
 %attr(0644,root,root) %{mandir}/man7/maildropgdbm.7.*
 %attr(0644,root,root) %{mandir}/man7/maildropfilter.7.*
 %attr(0644,root,root) %{mandir}/man7/maildropex.7.*

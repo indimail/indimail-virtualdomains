@@ -1,0 +1,26 @@
+.\" vim: tw=75
+.TH "authtest" "9" "12 Aug 2023" "Double Precision, Inc." ""
+.SH NAME
+authtest \- Test courier-imap authentication modules
+
+.SH SYNOPSIS
+\fBauthtest\fR [ -s \fIservice\fR ] [ -m \fImodule\fR ] \fIuserid\fR [ \fIpassword\fR ] [ \fInewpassword\fR ]
+
+.SH "DESCRIPTION"
+\fBauthtest\fR is a utility to test courier-imap authentication for
+\fIuserid\fR using the built-in courier-imap auth modules \fBauthpam\fR(7)
+\fBauthshadow\fR(7) \fBauthpwd\fR(7). If \fIpassword\fR is specified, it
+will validate the password. If \fInewpassword\fR is specified, it will
+change the psssword.
+
+.SH "OPTIONS"
+.TP 3
+\-s \fIservice\fR
+\fIservice\fR should be either \fBimap\fR or \fBpop3\fR
+.TP
+\-m \fImodule\fR
+Specify module to be tested. Without this option, authtest will try all
+modules till it succeeds.
+
+.SH SEE ALSO
+authlib(7)
