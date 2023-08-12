@@ -16,8 +16,9 @@ DISTCLEANFILES=stamp-h1 config.h config.log packaging/systemd/courier-imap.sysvi
 #CLEANFILES=$(databin_SCRIPTS) $(man_MANS) $(sysconf_DATA) $(sbin_SCRIPTS)
 CLEANFILES=$(sysconf_DATA)
 
-doc_list= libs/maildir/README.sharedfolders.txt libs/maildir/README.maildirquota.txt \
-	libs/unicode/README.unicode libs/imap/README.imap libs/tcpd/README.couriertls \
+doc_list=libs/maildir/README.sharedfolders.md libs/maildir/README.maildirquota.txt \
+	libs/maildir/README.imapkeywords.txt libs/unicode/README.unicode \
+	libs/imap/README.imap libs/tcpd/README.couriertls \
 	README.courier-imap AUTHORS COPYING COPYING.GPL
 
 EXTRA_DIST=README.courier-imap README.cygwin\

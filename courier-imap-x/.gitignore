@@ -399,3 +399,6 @@ courier-unicode.m4
 INSTALL
 libs/imap/pop3testsuite
 libs/unicode/README
+libs/maildir/README.imapkeywords.txt
+libs/maildir/README.maildirfilter.txt
+libs/maildir/README.sharedfolders.txt

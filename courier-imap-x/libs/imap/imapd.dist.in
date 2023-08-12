@@ -473,3 +473,6 @@ IMAPDSTART=NO
 # MAILDIRPATH - directory name of the maildir directory.
 #
 MAILDIRPATH=Maildir
+
+##NAME: OPTIONS:0
+#OPTIONS=disableimap disableinsecureimap disableshared sharedgroup=groupname

@@ -67,7 +67,12 @@ then
 else
 	links=/usr/bin/links
 fi
+if test -f /usr/bin/pandoc
+then
+	pandoc=/usr/bin/pandoc
+fi
 AC_SUBST(links)
+AC_SUBST(pandoc)
 AC_SUBST(PCRE_LDFLAGS)
 AC_SUBST(PCRE_CFLAGS)
 AC_SUBST(LIBPCRE)

@@ -467,8 +467,9 @@ done
 %attr(644,root,root)                    %{shareddir}/doc/README.NTLM.fetchmail
 %attr(644,root,root)                    %{shareddir}/doc/README.fetchmail
 
-%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.sharedfolders.txt
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.sharedfolders.md
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.maildirquota.txt
+%attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.imapkeywords.txt
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.couriertls
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.unicode
 %attr(644,root,root)                    %{shareddir}/doc/courier-imap/README.imap

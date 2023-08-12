@@ -8,7 +8,7 @@ AM_CFLAGS=@PCRE_CFLAGS@
 noinst_LTLIBRARIES=libmaildir.la
 
 
-DOCS=	deliverquota.html.in deliverquota.8.in \
+DOCS=deliverquota.html.in deliverquota.8.in \
 	maildiracl.1.in \
 	maildir.html maildir.5 \
 	maildiracl.html.in \
@@ -117,10 +117,10 @@ testmaildirsearch_SOURCES=testmaildirsearch.c
 testmaildirsearch_LDADD=libmaildir.la ../unicode/libcourier-unicode.la
 testmaildirsearch_DEPENDENCIES=libmaildir.la
 
-EXTRA_DIST=README.maildirquota.html README.maildirquota.txt \
-	README.imapkeywords.html \
-	README.maildirfilter.html \
-	README.sharedfolders.html README.sharedfolders.txt \
+EXTRA_DIST=README.maildirquota.txt \
+	README.imapkeywords.txt \
+	README.maildirfilter.txt \
+	README.sharedfolders.md \
 	maildirkwtest.txt \
 	testsuite testsuite.txt testsuite2 testsuite2.txt quotawarnmsg $(DOCS)
 
@@ -128,7 +128,13 @@ README.maildirquota.txt: README.maildirquota.html
 	@links@ -dump -no-numbering README.maildirquota.html >README.maildirquota.txt
 
 README.sharedfolders.txt: README.sharedfolders.html
-	@links@ -dump -no-numbering README.sharedfolders.html >README.sharedfolders.txt
+	@pandoc@ -f gfm -t plain README.sharedfolders.md >README.sharedfolders.txt
+
+README.imapkeywords.txt: README.imapkeywords.html
+	@links@ -dump -no-numbering README.imapkeywords.html >README.imapkeywords.txt
+
+README.maildirfilter.txt: README.maildirfilter.html
+	@links@ -dump -no-numbering README.maildirfilter.html >README.maildirfilter.txt
 
 mailbot.h: config.status
 	echo '#define MAILBOT "@MAILBOT@"' >mailbot.h

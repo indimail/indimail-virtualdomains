@@ -190,3 +190,6 @@ MAILDIRPATH=Maildir
 # This can be changed to "message/rfc822" to accomodate older mail clients.
 
 MIME_UNICODE_MESSAGE_TYPE="message/global"
+
+##NAME: OPTIONS:0
+#OPTIONS=disablepop3=1 disableinsecurepop3=1 disableshared=1 sharedgroup=groupname
