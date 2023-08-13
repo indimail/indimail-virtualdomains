@@ -141,4 +141,86 @@ class markasjunk2_sa_blacklist
             }
         }
     }
+
+    private function _do_salearn($uids, $spam)
+    {
+        $rcube = rcube::get_instance();
+        $temp_dir = realpath($rcube->config->get('temp_dir'));
+        $command = $rcube->config->get($spam ? 'markasjunk2_spam_cmd' : 'markasjunk2_ham_cmd');
+
+        if (!$command)
+            return;
+
+        // backwards compatibility %xds removed in markasjunk2 v1.12
+        $command = str_replace('%xds', '%h:x-dspam-signature', $command);
+
+        $command = str_replace('%u', $_SESSION['username'], $command);
+        $command = str_replace('%l', $rcube->user->get_username('local'), $command);
+        $command = str_replace('%d', $rcube->user->get_username('domain'), $command);
+        $command = str_replace('%m', $rcube->config->get('sauserprefs_db_dsnw'), $command);
+        if (preg_match('/%i/', $command)) {
+            $identity_arr = $rcube->user->get_identity();
+            $command = str_replace('%i', $identity_arr['email'], $command);
+        }
+
+        foreach ($uids as $uid) {
+            // reset command for next message
+            $tmp_command = $command;
+
+            // get DSPAM signature from header (if %xds macro is used)
+            if (preg_match('/%xds/', $command)) {
+                if (preg_match('/^X\-DSPAM\-Signature:\s+((\d+,)?([a-f\d]+))\s*$/im', $rcube->storage->get_raw_headers($uid), $dspam_signature))
+                    $tmp_command = str_replace('%xds', $dspam_signature[1], $command);
+                else
+                    continue; // no DSPAM signature found in headers -> continue with next uid/message
+            }
+
+            if (strpos($tmp_command, '%s') !== false) {
+                $message = new rcube_message($uid);
+                $tmp_command = str_replace('%s', escapeshellarg($message->sender['mailto']), $tmp_command);
+            }
+
+            if (strpos($command, '%h') !== false) {
+                $storage = $rcube->get_storage();
+                $storage->check_connection();
+                $storage->conn->select($src_mbox);
+
+                preg_match_all('/%h:([\w-_]+)/', $tmp_command, $header_names, PREG_SET_ORDER);
+                foreach ($header_names as $header) {
+                    $val = null;
+                    if ($msg = $storage->conn->fetchHeader($src_mbox, $uid, true, false, array($header[1]))) {
+                        $val = $msg->{$header[1]} ?: $msg->others[$header[1]];
+                    }
+
+                    if (!empty($val)) {
+                        $tmp_command = str_replace($header[0], escapeshellarg($val), $tmp_command);
+                    }
+                    else {
+                        if ($rcube->config->get('markasjunk2_debug')) {
+                            rcube::write_log('markasjunk2', 'header ' . $header[1] . ' not found in message ' . $src_mbox . '/' . $uid);
+                        }
+
+                        continue 2;
+                    }
+                }
+            }
+
+            if (strpos($command, '%f') !== false) {
+                $tmpfname = tempnam($temp_dir, 'rcmSALearn');
+                file_put_contents($tmpfname, $rcube->storage->get_raw_body($uid));
+                $tmp_command = str_replace('%f', escapeshellarg($tmpfname), $tmp_command);
+            }
+
+            $output = shell_exec($tmp_command);
+
+            if ($rcube->config->get('markasjunk2_debug')) {
+                rcube::write_log('markasjunk2', $tmp_command);
+                rcube::write_log('markasjunk2', $output);
+            }
+
+            if (strpos($command, '%f') !== false) {
+                unlink($tmpfname);
+            }
+        }
+    }
 }

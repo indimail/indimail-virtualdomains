@@ -29,6 +29,8 @@ Release 1.0.0-1.1 Start 13/09/2022 End 20/04/2023
 13. updated markasjunk2, sauserprefs plugins to latest from github
 25/07/2023
 14. updated for rockylinux, oraclelinux
+13/08/2023
+15. markasjunk2: added cmd_learn command to sa_blacklist
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <ircube@indimail.org> 1.0.0-1.1%{?dist}
 Release @version@-@release@ Start 13/03/2017 End 08/09/2022

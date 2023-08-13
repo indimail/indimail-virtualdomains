@@ -5,7 +5,8 @@
  */
 
 // Learning driver
-// Use an external process such as sa-learn to learn from spam/ham messages. Default: null.
+// Use an external process such as sa_learn, sa_blacklist to learn from spam/ham messages. Default: null.
+// sa_blacklist also runs the cmd_learn driver
 // Please see the README for more information
 $config['markasjunk2_learning_driver'] = 'sa_blacklist';
 
@@ -32,7 +33,8 @@ $config['markasjunk2_spam_flag'] = 'Junk';
 
 // Add flag to messages marked as ham (flag will be removed when marking as spam)
 // If you do not want to use message flags set this to false
-$config['markasjunk2_ham_flag'] = 'NonJunk';
+// $config['markasjunk2_ham_flag'] = 'NonJunk';
+$config['markasjunk2_ham_flag'] = false;
 
 // Write output from spam/ham commands to the log for debug
 $config['markasjunk2_debug'] = false;
@@ -52,7 +54,8 @@ $config['markasjunk2_move_spam'] = false;
 $config['markasjunk2_move_ham'] = false;
 
 // Some drivers create new copies of the target message(s), in this case the original message(s) will be deleted
-// Rather than deleting the message(s) (moving to Trash) setting this option true will cause the original message(s) to be permanently removed
+// Rather than deleting the message(s) (moving to Trash) setting this option true will cause the original message(s)
+// to be permanently removed
 $config['markasjunk2_permanently_remove'] = false;
 
 // Display only a mark as spam button
@@ -80,6 +83,7 @@ $config['markasjunk2_host_config'] = null;
 //      %s is replaced with the email address the message is from
 //      %f is replaced with the path to the message file
 //      %h:<header name> is replaced with the content of that header from the message (lower case) eg: %h:x-dspam-signature
+//      %m is replaced with the mysql connect string
 // If you do not want to run the command set this to null
 $config['markasjunk2_spam_cmd'] = '/usr/libexec/indimail/bogo-learn %m %u dummy spam %f';
 
@@ -92,6 +96,7 @@ $config['markasjunk2_spam_cmd'] = '/usr/libexec/indimail/bogo-learn %m %u dummy 
 //      %s is replaced with the email address the message is from
 //      %f is replaced with the path to the message file
 //      %h:<header name> is replaced with the content of that header from the message (lower case) eg: %h:x-dspam-signature
+//      %m is replaced with the mysql connect string
 // If you do not want to run the command set this to null
 $config['markasjunk2_ham_cmd'] = '/usr/libexec/indimail/bogo-learn %m %u dummy ham %f';
 

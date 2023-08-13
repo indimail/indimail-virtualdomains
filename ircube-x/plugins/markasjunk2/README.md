@@ -60,8 +60,8 @@ All config parameters are optional
 The Learning Driver
 -------------------
 The learning driver allows you to perform additional processing on each message
-marked as spam/ham. A driver must contain a class named markasjunk2_{driver
-file name}. The class must contain 3 functions:
+marked as spam/ham. A driver must contain a class named
+markasjunk2\_{driver file name}. The class must contain 3 functions:
 
 **spam:** This function should take 2 arguments: an array of UIDs of message(s)
 being marked as spam, the name of the mailbox containing those messages
@@ -96,7 +96,7 @@ email attached then this is detached and saved in the Inbox, the spam report is
 deleted
 
 **edit_headers:** Edit the message headers. Headers are edited using
-preg_replace.
+preg\_replace.
 
 **WARNING:** Be sure to match the entire header line, including the name of the
 header, and include the ^ and $ and test carefully before use on real messages.
@@ -109,8 +109,8 @@ drivers at your own risk! It may be safer to create one driver that does
 everything you want.
 
 It is possible to run multiple drivers when marking a message as spam/ham. For
-example running sa_blacklist followed by cmd_learn or edit_headers and
-cmd_learn. An [example multi-driver][multidriver] is available. This is a
+example running sa\_blacklist followed by cmd\_learn or edit\_headers and
+cmd\_learn. An [example multi-driver][multidriver] is available. This is a
 starting point only, it requires modification for individual cases.
 
 Spam learning commands
@@ -127,19 +127,19 @@ Spamassassin:
 ```sa-learn --ham --username=%u %f``` or
 ```sa-learn --ham --prefs-file=/var/mail/%d/%l/.spamassassin/user_prefs %f```
 
-edit_headers example config
+edit\_headers example config
 ---------------------------
 **WARNING:** These are simple examples of how to configure the driver options,
 use at your own risk
 
-```php
+```
 $config['markasjunk2_spam_patterns'] = array(
   'patterns' => array('/^(Subject:\s*)(.*)$/m'),
   'replacements' => array('$1[SPAM] $2')
 );
 ```
 
-```php
+```
 $config['markasjunk2_ham_patterns'] = array(
   'patterns' => array('/^(Subject:\s*)\[SPAM\](.*)$/m'),
   'replacements' => array('$1$2')
