@@ -3489,7 +3489,7 @@ $ sudo /bin/bash
 $
 ```
 
-indimail-mta allows you many ways to create addresses that will be served by the MTA. In many cases addresses that you will configure which will not be present in the MySQL database. Such addresses can be aliases, autoresponders, forwards, addresses using .qmail files, addresses in ezmlm lists, local users in /etc/passwd. The recipients extension allows you to create rules or databases to accept such addresses and reject all other non-existent addresses. The recipient extension uses the cotrol file <u>/etc/indimail/control/recipients</u>. This control file contains list of external resources providing acceptable, full-qualified envelope addresses ('RCPT TO: <recip@domain>') to be used for recipient verification during the SMTP session. The external sources can be either <b>fastforward</b> compliant cdbs including the envelope addresses, where the path to a cdb has to be referenced relative to <u>/etc/indimail directory</u> - or - <b>checkpassword</b> compatible Plugable Address Verfication Modules (PAVM), receiving the envelope address on FD 3 as 'recip@domain\0\0\0' and returning '0' in case of success and '1' in case of failure. The use of a PAVM is indicated with a delimiting '|' and it will be called with up to five additional parameters; while a cdb follows a ':', which can be omitted. The list of external sources is consulted line-by-line for each recipient envelope address until the first positive answer, or a final negative response is encountered. Which external source to be queried, depends on the domain part of the recipient envelope address specified on the left side of the <u>recipients</u> file, while the external resource is provided right from the delimiter.
+indimail-mta allows you many ways to create addresses that will be served by the MTA. In many cases addresses that you will configure which will not be present in the MySQL database. Such addresses can be aliases, autoresponders, forwards, addresses using .qmail files, addresses in ezmlm lists, local users in /etc/passwd. The recipients extension allows you to create rules or databases to accept such addresses and reject all other non-existent addresses. The recipient extension uses the cotrol file <u>/etc/indimail/control/recipients</u>. This control file contains list of external resources providing acceptable, full-qualified envelope addresses ('RCPT TO: <recip@domain>') to be used for recipient verification during the SMTP session. The external sources can be either <b>fastforward</b> compliant cdbs including the envelope addresses, where the path to a cdb has to be referenced relative to <u>/etc/indimail directory</u> - or - <b>checkpassword</b> compatible Plugable Address Verfication Modules (PAVM), receiving the envelope address on FD 3 as 'recip@domain\0\0\0' and returning '0' in case of success and '1' in case of failure. The use of a PAVM is indicated with a delimiting '|' and the command and arguments given after '|' will be executed; while a cdb follows a ':', which can be omitted. The list of external sources is consulted line-by-line for each recipient envelope address until the first positive answer, or a final negative response is encountered. Which external source to be queried, depends on the domain part of the recipient envelope address specified on the left side of the <u>recipients</u> file, while the external resource is provided right from the delimiter.
 
 The address's domain part is evaluated in lower-case.
 
@@ -3505,6 +3505,7 @@ The <u>control/recipients</u> file is always constructed like `domain:cdb`, `dom
 !nocheck.com
 @mydomain.com:users/recipients.cdb
 example.com|ldap_pam ldapserver host port DN passwd
+example.org|/usr/libexec/ezmlm/checkrecipient-ezmlm
 *:control/fastforward.cdb
 *|ldap_pam otherserver
 !*
@@ -3515,8 +3516,9 @@ Here is how the above will work
 	* The first line allows all addresses for nocheck.com to be accepted without any query. 
 	* The second example will query all address for mydomain.com to be searched in users/recipients.cdb.
 	* The third example, ldap\_pam will be executed with the arguments following it and the email address written to descriptor 3. If ldap_pam exits 0, the address will be assumed to exist.
-	* In the fourth example, all addresses that do not match the first 3 lines will be searched in control/fastforward.cdb.
-	* In the fifth example, all addresses that don't match the first 4 lines, ldap_pam will be executed and the address sent on descriptor 3.
+    * In the fourth examle, checkrecipient-ezmlm will be executed and the email address written to descripter 3. If checkrecipient-ezmlm exits 0, the address will be assumed to exist. Here, checkrecipient-ezmlm is a module that checks existence of a ezmlm distrubution list.
+	* In the fifth example, all addresses that do not match the first 3 lines will be searched in control/fastforward.cdb.
+	* In the sixth example, all addresses that don't match the first 4 lines, ldap_pam will be executed and the address sent on descriptor 3.
 	* The last line allows all non-matching addresses to passthrough and get accepted.
 
 A simple scheme would be to have your local domain as the line `@localdomain:users/recipients.cdb` in <u>control/recipients</u>. Then add any local users to <u>users/recipients</u> and rebuild the <u>users/recipients.cdb</u> database
