@@ -17,7 +17,7 @@
  */
 
 /*
- * $Id: sock.c,v 1.2 2020-09-24 11:11:45+05:30 Cprogrammer Exp mbhangui $ 
+ * $Id: sock.c,v 1.3 2023-08-13 10:55:34+05:30 Cprogrammer Exp mbhangui $ 
  */
 #include "common.h"
 #include <sys/socket.h>
@@ -45,6 +45,8 @@ _open_socket(int *sock)
 	struct sockaddr_un sock_addr;
 
 	getEnvConfigStr(&socket_file, "NSSD_SOCKET", _PATH_NSSD_SOCKET);
+	if (access(socket_file, F_OK))
+		return 0;
 	if ((*sock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
 		strerror_r(errno, buf, sizeof(buf));
 		nsvs_log(LOG_ALERT, "%s: sock: %s", __FUNCTION__, buf);
@@ -53,8 +55,10 @@ _open_socket(int *sock)
 	sock_addr.sun_family = AF_UNIX;
 	strcpy(sock_addr.sun_path, socket_file);
 	if (connect(*sock, (struct sockaddr *) &sock_addr, sizeof (sock_addr)) < 0) {
-		strerror_r(errno, buf, sizeof(buf));
-		nsvs_log(LOG_ALERT, "%s: connect: %s: (errno %d) %s", __FUNCTION__, socket_file, errno, buf);
+		if (errno != ECONNREFUSED) {
+			strerror_r(errno, buf, sizeof(buf));
+			nsvs_log(LOG_ALERT, "%s: connect: %s: (errno %d) %s", __FUNCTION__, socket_file, errno, buf);
+		}
 		close(*sock);
 		return 0;
 	}
