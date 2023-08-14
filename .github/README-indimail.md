@@ -3465,7 +3465,7 @@ If you use the control file /etc/indimail/control/relaymailfrom, you should real
 
 IndiMail has a feature called <b>CHECKRECIPIENT</b> which allows indimail to check in a SMTP session, if the recipient to whom the mail is being addressed exists. Enabling <b>CHECKRECIPIENT</b> alows qmail-smtpd to reject such users at SMTP rather than later during the actual delivery to the mailbox. Due to spam, in most of the cases, the Return Path will be forged or undeliverable. Hence you will be left with a condition where plenty of bounces will be left on your system, impacting the performance of your messaging system.
 
-**CHECKRECIPIENT** can also be used to reject mails for inactive users, overquota users and users who do not have the privilege to receive mails. **CHECKRECIPIENT** can be enabled by setting the environment variable **CHECKRECIPIENT** to one of the following values
+<b>CHECKRECIPIENT</b> can also be used to reject mails for inactive users, overquota users and users who do not have the privilege to receive mails. <b>CHECKRECIPIENT</b> can be enabled by setting the environment variable <b>CHECKRECIPIENT</b> to one of the following values
 
 1. Reject the user if not present in IndiMail's MySQL database
 2. Reject the user if not present in IndiMail's MySQL database and not found through <u>recipients</u> extension
@@ -3473,11 +3473,11 @@ IndiMail has a feature called <b>CHECKRECIPIENT</b> which allows indimail to che
 
 The recipients extension has been taken from [s/qmail](https://www.fehcom.de/sqmail/sqmail.html), an excellent modern replacement for qmail.
 
-You can selectively turn on **CHECKRECIPIENT** for selective domains by including those domains (prefixing the domain with '@' sign) in the control file <u>/etc/indimail/control/chkrcptdomains</u>.
+You can selectively turn on <b>CHECKRECIPIENT</b> for selective domains by including those domains (prefixing the domain with '@' sign) in the control file <u>/etc/indimail/control/chkrcptdomains</u>.
 
 If the environment variable MAX\_RCPT\_ERRCOUNT is set, <b>qmail-smtpd</b> will reject an email if in a SMTP session, the number of such recipients who do not exist, exceed MAX\_RCPT\_ERRCOUNT.
 
-To make harvesting of email addresses difficult, **CHECKRECIPIENT** causes the RCPT TO command to be delayed by 5 seconds for every non-existent recipient.
+To make harvesting of email addresses difficult, <b>CHECKRECIPIENT</b> causes the RCPT TO command to be delayed by 5 seconds for every non-existent recipient.
 
 If you do not have large number of users
 
