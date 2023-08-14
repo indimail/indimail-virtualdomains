@@ -158,8 +158,7 @@ fi
 %{__rm} -f %{buildroot}%{_libdir}/*.so
 %{__mkdir_p} %{buildroot}%{sysconfdir}
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
-install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
-/bin/rm -f %{name}-rpm.info %{name}-release
+/bin/rm -f %{name}-rpm.info
 
 %files
 %defattr(-, root, root,-)
