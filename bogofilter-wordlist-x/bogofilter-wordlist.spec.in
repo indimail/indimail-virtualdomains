@@ -60,14 +60,6 @@ echo target_vendor  %_target_vendor
 echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
 echo "------------------------------------------------------"
 ) > %{name}-rpm.info
-(
-echo "NAME=%{name}"
-echo "Description=\"bogofilter-wordlist Package\""
-echo "BOGOFILTER_WORDLIST_version=%{version}-%{release}"
-echo "ID=%{name}"
-echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
-echo "PACKAGE_BUGREPORT=\"'@email@'\""
-) > %{name}-release
 %configure --sysconfdir=%{sysconfdir}
 %{__make} %{?_smp_mflags}
 
@@ -75,8 +67,6 @@ echo "PACKAGE_BUGREPORT=\"'@email@'\""
 %make_install
 %{__mkdir_p} %{buildroot}%{sysconfdir}
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
-install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
-/bin/rm -f %{name}-rpm.info %{name}-release
 /bin/rm -f %{name}-rpm.info
 
 %files

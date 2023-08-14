@@ -16,4 +16,6 @@ AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for library functions.
 
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([bogofilter-wordlist-release:bogofilter-wordlist-release.in],[], [])
+AC_OUTPUT

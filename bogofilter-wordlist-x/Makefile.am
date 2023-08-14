@@ -6,7 +6,7 @@ version=@VERSION@
 release=@release@
 
 SYSCONFDIR = @sysconfdir@
-sysconf_DATA = wordlist.db
+sysconf_DATA = wordlist.db bogofilter-wordlist-release
 
 noinst_DATA = bogofilter-wordlist.spec
 

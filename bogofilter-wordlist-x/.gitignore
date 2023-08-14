@@ -1,6 +1,7 @@
 aclocal.m4
 debian/README
 bogofilter-wordlist.spec
+bogofilter-wordlist-release
 bogofilter-wordlist.changes
 configure
 install-sh
