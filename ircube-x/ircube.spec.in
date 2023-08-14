@@ -103,14 +103,6 @@ echo target_vendor  %_target_vendor
 echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} lib=%{_lib} libdir=%{_libdir}
 echo "------------------------------------------------------"
 ) > %{name}-rpm.info
-(
-echo "NAME=%{name}"
-echo "Description=\"ircube Package\""
-echo "IRCUBE_version=%{version}-%{release}"
-echo "ID=%{name}"
-echo "HOME_URL=\"https://github.com/mbhangui/indimail-virtualdomains\""
-echo "PACKAGE_BUGREPORT=\"'@email@'\""
-) > %{name}-release
 %configure --prefix=%{_prefix} --libexecdir=%{_prefix}/libexec/indimail --enable-plugindir=%{pluginbase}
 %{__make} %{?_smp_mflags}
 
@@ -122,8 +114,6 @@ echo "PACKAGE_BUGREPORT=\"'@email@'\""
 %endif
 %{__mkdir_p} %{buildroot}%{pluginbase}/%{name}
 install -m 0644 %{name}-rpm.info %{buildroot}%{pluginbase}/%{name}/%{name}-rpm.info
-install -m 0644 %{name}-release %{buildroot}%{pluginbase}/%{name}/%{name}-release
-/bin/rm -f %{name}-rpm.info %{name}-release
 /bin/rm -f %{name}-rpm.info
 
 %files

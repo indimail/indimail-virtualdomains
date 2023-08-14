@@ -8,6 +8,9 @@ noinst_DATA = ircube.spec ircube.changes PKGBUILD
 ircubelibexecdir=@libexecdir@
 ircubelibexec_SCRIPTS = bogo-learn roundcube_config
 
+ircubereleasedir = @plugindir@/ircube
+ircuberelease_DATA = ircube-release
+
 edit = sed \
 	-e 's,@sysconfdir\@,$(sysconfdir),g' \
 	-e 's,@version\@,$(version),g' \

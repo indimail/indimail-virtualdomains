@@ -25,4 +25,6 @@ AC_ARG_ENABLE(plugindir, [  --enable-plugindir=dir    directory where roundcube 
 AC_DEFINE_UNQUOTED(QMAILDIR,"$plugindir",roundcube's plugin directory)
 AC_SUBST(plugindir)
 
-AC_OUTPUT(Makefile)
+AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([ircube-release:ircube-release.in],[], [])
+AC_OUTPUT
