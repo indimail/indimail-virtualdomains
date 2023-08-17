@@ -62,10 +62,13 @@ indimail-auth.dsc: indimail-auth.dsc.in Makefile ../conf-version ../conf-release
 indimail-auth-xUbuntu_16.04.dsc: indimail-auth-xUbuntu_16.04.dsc.in Makefile \
 ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
+perm_list.auth: ../perm_list.in
+	$(edit) ../perm_list.in > $@
+
 debian.tar.gz: copyright preinst postinst prerm postrm rules changelog compat \
-indimail-auth.install obs_deb_prep Makefile control
+indimail-auth.install obs_deb_prep Makefile control perm_list.auth
 	tar cf - copyright preinst postinst prerm postrm rules changelog \
-		compat indimail-auth.install obs_deb_prep control \
+		compat indimail-auth.install obs_deb_prep control perm_list.auth \
 		| gzip > $@
 
 clean:

@@ -78,10 +78,13 @@ indimail-access-xUbuntu_23.04.dsc: indimail-access-xUbuntu_23.04.dsc.in Makefile
 indimail-access-Debian_12.dsc: indimail-access-xUbuntu_23.04.dsc.in Makefile ../conf-version \
 ../conf-release ../conf-email
 	$(edit) $@.in > $@
+perm_list.imap: ../perm_list.in
+	$(edit) ../perm_list.in > $@
+
 debian.tar.gz: copyright rules prerm postrm preinst postinst changelog compat \
-indimail-access.install obs_deb_prep Makefile control
+indimail-access.install obs_deb_prep Makefile control perm_list.imap
 	tar cf - copyright rules prerm postrm preinst postinst changelog \
-		compat indimail-access.install obs_deb_prep control \
+		compat indimail-access.install obs_deb_prep control perm_list.imap \
 		| gzip > $@
 
 clean:
