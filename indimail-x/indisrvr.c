@@ -1,5 +1,8 @@
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.17  2023-08-22 19:13:27+05:30  Cprogrammer
+ * use TLS_CIPHER_LIST for TLSv1.2 and below, TLS_CIPHER_SUITE for TLSv1.3 and above
+ *
  * Revision 1.16  2023-03-20 10:06:02+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -57,7 +60,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.16 2023-03-20 10:06:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.17 2023-08-22 19:13:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -198,9 +201,9 @@ main(int argc, char **argv)
 		else
 		if (access(certfile, R_OK))
 			strerr_die3sys(1, "indisrvr: ", certfile, ": ");
+		r = get_tls_method(NULL);
+		ciphers = env_get(r < 7 ? "TLS_CIPHER_LIST" : "TLS_CIPHER_SUITE");
     	/* setup SSL context (load key and cert into ctx) */
-		if (!(ciphers = env_get("TLS_CIPHER_LIST")))
-			ciphers = "PROFILE=SYSTEM";
 		if (!(ctx = tls_init(0, certfile, cafile, crlfile, ciphers, server)))
 			return (1);
 		(void) signal(SIGHUP, SigHup);

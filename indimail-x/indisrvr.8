@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH indisrvr 8
 .SH NAME
 indisrvr \- IndiMail administration server
@@ -7,27 +8,39 @@ indisrvr \- IndiMail administration server
   [-c cafile -r crlfile] [-t timeoutdata -T timeoutconn]
 
 .SH DESCRIPTION
-\fBindisrvr\fR is the administration server for administering IndiMail's clustered domains.
-It has a simple mechanism by which administrators can connect to this server and issue
-commands to execute any of the IndiMail programs given above. These commands are issued by
-the \fBadminclient(8)\fR program. e.g. To run \fBvadduser\fR on host phoenix2, run
-\fBadminclient\fR on any host on the network. \fBindisrvr\fR implements simple authentication
-using crypt(3), MD5, SHA256/SHA512. The userid and passwd are maintained in the table
-mgmtaccess. A separate password maintenance tool mgmtpass maintains the passwords in this table.
-On successful validation of password, \fBindisrvr\fR executes the specified IndiMail administration
-program on the localhost. For security reasons, the list of these administration programs are
-hard-coded in the indisrvr executable. On SIGUSR2, verbose option gets toggled (see -v option
-below). For a clustered domain, the table mgmtaccess will be on the hostcntrl db. For a
-non-clustered domain, the table mgmtaccess will be on the local MySQL database.
+\fBindisrvr\fR is the administration server for administering IndiMail's
+clustered domains. It has a simple mechanism by which administrators can
+connect to this server and issue commands to execute any of the IndiMail
+programs given above. These commands are issued by the \fBadminclient(8)\fR
+program. e.g. To run \fBvadduser\fR on host phoenix2, run \fBadminclient\fR
+on any host on the network. \fBindisrvr\fR implements simple authentication
+using crypt(3), MD5, SHA256/SHA512. The userid and passwd are maintained in
+the table mgmtaccess. A separate password maintenance tool mgmtpass
+maintains the passwords in this table. On successful validation of
+password, \fBindisrvr\fR executes the specified IndiMail administration
+program on the localhost. For security reasons, the list of these
+administration programs are hard-coded in the indisrvr executable. On
+SIGUSR2, verbose option gets toggled (see -v option below). For a clustered
+domain, the table mgmtaccess will be on the hostcntrl db. For a
+non-clustered domain, the table mgmtaccess will be on the local MySQL
+database.
 .PP
-Indisrvr uses a privilege table vpriv in MySQl for allowing access to command and
-commandLineSwitches. For a clustered domain, the table vpriv will be on the central database.
-For a non-clustered domain, the table vpriv will be on the local MySQL database. The table
-vpriv can be maintained using the \fBvpriv(8)\fR program.
+Indisrvr uses a privilege table vpriv in MySQl for allowing access to
+command and commandLineSwitches. For a clustered domain, the table vpriv
+will be on the central database.  For a non-clustered domain, the table
+vpriv will be on the local MySQL database. The table vpriv can be
+maintained using the \fBvpriv(8)\fR program.
+.PP
+\fBindisrvr\fR encrypts the communication channel using TLS if \fB\-n\fR
+option specifing a certificate is used. One can use use ciphers by setting
+\fBTLS_CIPHER_LIST\fR environment variable for TLS protocol TLSv1.2 and
+below and \fBTLS_CIPHER_SUITE\fR environment variable for TLS protocol
+TLSv1.3 and above. For multiple ciphers, use ':' separated list of ciphers.
+See openssl-ciphers(1ossl).
 
-.EX
 The following command runs the command vadduser with arguments test@indi.com password.
- adminclient -h phoenix2 -p  4000 -u admin -P adminpass -c ''vadduser test@indi.com password''
+.EX
+adminclient -h phoenix2 -p  4000 -u admin -P adminpass -c ''vadduser test@indi.com password''
 .EE
 
 .SH OPTIONS
@@ -36,13 +49,15 @@ The following command runs the command vadduser with arguments test@indi.com pas
 Sets verbose option.
 .TP
 \fB\-i\fR \fIIP_Address\fR
-The IP address on which indisrvr needs to bind. Useful if a host has multiple IP addresses.
+The IP address on which indisrvr needs to bind. Useful if a host has
+multiple IP addresses.
 .TP
 \fB\-p\fR \fIport\fR
 A TCP/IP port or service in /etc/services on which indisrvr needs to bind.
 .TP
 \fB\-b\fR \fIbacklog\fR
-Max backlog to be maintained after which the client should get connection refused
+Max backlog to be maintained after which the client should get connection
+refused
 .TP
 \fB\-d\fR \fIcertdir\fR
 certificate directory for RSA/DH parameter files
@@ -71,8 +86,9 @@ Quit if read or write to/from commands or application exceeds
 Timeout on TLS/SSL accept if attempt exceeds \fItimeoutconn\fR seconds.
 
 .SH RETURN VALUE
-Always returns non-zero status, which means the server died due to some reasons. Most likely
-of a bug. Will also return on SIGTERM with exit status=0.
+Always returns non-zero status, which means the server died due to some
+reasons. Most likely of a bug. Will also return on SIGTERM with exit
+status=0.
 
 .SH "SEE ALSO"
-adminclient(8), mgmtpass(8), vpriv(8)
+adminclient(8), mgmtpass(8), vpriv(8), openssl-ciphers(1ossl)

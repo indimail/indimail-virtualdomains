@@ -1,5 +1,8 @@
 /*
  * $Log: auth_admin.c,v $
+ * Revision 1.10  2023-08-22 19:11:30+05:30  Cprogrammer
+ * use TLS_CIPHER_LIST for TLSv1.2 and below, TLS_CIPHER_SUITE for TLSv1.3 and above
+ *
  * Revision 1.9  2023-02-14 01:08:37+05:30  Cprogrammer
  * free ctx if tls_session fails
  *
@@ -56,7 +59,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: auth_admin.c,v 1.9 2023-02-14 01:08:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: auth_admin.c,v 1.10 2023-08-22 19:11:30+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int
@@ -65,6 +68,9 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host,
 	int match_cn)
 {
 	int             sfd, port, timeoutdata, timeoutconn;
+#ifdef HAVE_SSL
+	int             i;
+#endif
 	ssize_t         len;
 	SSL            *ssl;
 	SSL_CTX        *ctx;
@@ -80,8 +86,8 @@ auth_admin(char *admin_user, char *admin_pass, char *admin_host,
 	getEnvConfigInt(&timeoutconn, "TIMEOUTCONN", 60);
 #ifdef HAVE_SSL
 	if (clientcert) {
-		if (!(ciphers = env_get("TLS_CIPHER_LIST")))
-			ciphers = "PROFILE=SYSTEM";
+		i = get_tls_method(NULL);
+		ciphers = env_get(i < 7 ? "TLS_CIPHER_LIST" : "TLS_CIPHER_SUITE");
 		if (!(ctx = tls_init(0, clientcert, cafile, crlfile, ciphers, client)))
 			return(-1);
 		if (!(ssl = tls_session(ctx, sfd))) {

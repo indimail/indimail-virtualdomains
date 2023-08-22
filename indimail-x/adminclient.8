@@ -1,31 +1,43 @@
+.\" vim: tw=75
 .TH adminclient 8
 .SH NAME
 adminclient \- Client for running IndiMail programs remotely
 
 .SH SYNOPSYS
-\fBadminclient\fR \fB\-h\fR \fIadminHost\fR \fB\-p\fR \fIport\fR \fB\-u\fR \fIadminUser\fR \fB\-P\fR \fIadminPassword\fR [\fB\-n\fR \fIcertfile\fR] \fB\-c\fR \fICommand\fR
+\fBadminclient\fR \fB\-h\fR \fIadminHost\fR \fB\-p\fR \fIport\fR
+\fB\-u\fR \fIadminUser\fR \fB\-P\fR \fIadminPassword\fR
+[\fB\-n\fR \fIcertfile\fR] \fB\-c\fR \fICommand\fR
 
 .SH DESCRIPTION
 .PP
-\fBadminclient\fR is the administration client for administering IndiMail's clustered domains.
-It has a simple mechanism by which administrators can connect to the administration server,
-\fBindisrvr\fR and issue commands to execute any of the IndiMail programs \fICommand\fR.
-On successful validation of password, \fBadminclient\fR executes the specified IndiMail
-administration program on the remote host by connecting to \fBindisrvr(8)\fR. For security
-reasons, the list of these administration programs are hard-coded in the \fBadminclient\fR
-and \fBindisrvr\fR executable. \fBadminclient\Fr uses environment variable \fBADMIN_TIMEOUT\fR
-to timeout connections to \fBindisrvr\fR.
+\fBadminclient\fR is the administration client for administering IndiMail's
+clustered domains. It has a simple mechanism by which administrators can
+connect to the administration server, \fBindisrvr\fR and issue commands to
+execute any of the IndiMail programs \fICommand\fR.  On successful
+validation of password, \fBadminclient\fR executes the specified IndiMail
+administration program on the remote host by connecting to
+\fBindisrvr(8)\fR. For security reasons, the list of these administration
+programs are hard-coded in the \fBadminclient\fR and \fBindisrvr\fR
+executable. \fBadminclient\Fr uses environment variable \fBADMIN_TIMEOUT\fR
+to timeout connections to \fBindisrvr\fR.  \fBadminclient\fR needs to
+supply credentials of users with administration privileges. These users can
+be created using the \fBmgmtpass(8)\fR program. You can furhter use
+\fBvpriv(8)\fR to control/restrict access of these admin users to certain
+programs (and even command line arguments.
 
-\fBadminclient\fR needs to supply credentials of users with administration privileges. These
-users can be created using the \fBmgmtpass(8)\fR program. You can furhter use \fBvpriv(8)\fR
-to control/restrict access of these admin users to certain programs (and even command line
-arguments)
+.PP
+\fBadminclient\fR encrypts the communication channel using TLS if \fB\-n\fR
+option specifing a certificate is used. One can use use ciphers by setting
+\fBTLS_CIPHER_LIST\fR environment variable for TLS protocol TLSv1.2 and
+below and \fBTLS_CIPHER_SUITE\fR environment variable for TLS protocol
+TLSv1.3 and above. For multiple ciphers, use ':' separated list of ciphers.
+See openssl-ciphers(1ossl).
+
+e.g. The following command runs the command vadduser with arguments 
+test@example.com password.
 
 .EX
- e.g. The following command runs the command vadduser with arguments 
- test@example.com password.
-
- adminclient -h phoenix2 -p  4000 -u admin -P adminpass -c "vadduser test@example.com password"
+adminclient -h phoenix2 -p  4000 -u admin -P adminpass -c "vadduser test@example.com password"
 .EE
 
 .SH OPTIONS
@@ -37,17 +49,19 @@ Sets Verbose option.
 The IP address / hostname of host on which command \fICommand\fR needs to run. 
 .TP
 \fB\-p\fR \fIadminPort\fR
-A TCP/IP port or service in /etc/services on which indisrvr is running on adminHost.
+A TCP/IP port or service in /etc/services on which indisrvr is running on
+adminHost.
 .TP
 \fB\-u\fR \fIadminUser\fR
-The administration user (maintained using \fBmgmtpass(8)\fR) for which indisrvr will
-validate the password.
+The administration user (maintained using \fBmgmtpass(8)\fR) for which
+indisrvr will validate the password.
 .TP
 \fB\-P\fR \fIadminPass\fR
 The password for the user specified by the -u option.
 .TP
 \fB\-n\fR \fIcertificate\fR
-A client certificate which should be provided in case TLS encryption is needed
+A client certificate which should be provided in case TLS encryption is
+needed
 .TP
 \fB\-C\fR \fIcafile\fR
 Specify \fIcafile\fR as the file containing CA certificates. Sometimes,
@@ -66,19 +80,23 @@ will be checked for revocation.
 Match \fIhost\fR with common name in certificate (CN)
 .TP
 \fB\-c\fR \fICommand\fR
-The command that needs to executed on the remote host \fIadminHost\fR. Command should be
-enclosed in quotes for commands requiring multiple arguments on the command line.
+The command that needs to executed on the remote host \fIadminHost\fR.
+Command should be enclosed in quotes for commands requiring multiple
+arguments on the command line.
 
-The -h, -p, -u, -P, -v are optional. If not given, the environment variables ADMIN_HOST,
-ADMIN_PORT, ADMIN_USER, ADMIN_PASS will be used for these variables.
+The -h, -p, -u, -P, -v are optional. If not given, the environment
+variables ADMIN_HOST, ADMIN_PORT, ADMIN_USER, ADMIN_PASS will be used for
+these variables.
 
 .SH RETURN VALUE
-Returns the return status of the remote command executed. All output printed by the remote
-command on stdout/stderr are printed on stdout of adminclient.
+Returns the return status of the remote command executed. All output
+printed by the remote command on stdout/stderr are printed on stdout of
+adminclient.
 
 .SH PROTOCOL
-The adminclient protocol is descibed below. You can connect to port 4000 and execute
-the below sequence of commands to execute. Here 's' denotes server and 'c' denotes client.
+The adminclient protocol is descibed below. You can connect to port 4000
+and execute the below sequence of commands to execute. Here 's' denotes
+server and 'c' denotes client.
 
 .EX
 .B adminclient Protocol
@@ -96,8 +114,8 @@ the below sequence of commands to execute. Here 's' denotes server and 'c' denot
  s: "RETURNSTATUS[return value of command]\\n"
 .EE
 
-The below shows an actual example of vuserinfo getting executed by executing the
-\fBtelnet\fR(1) client on port 4000.
+The below shows an actual example of vuserinfo getting executed by
+executing the \fBtelnet\fR(1) client on port 4000.
 
 .EX
  <lf> - linefeed
@@ -112,5 +130,4 @@ The below shows an actual example of vuserinfo getting executed by executing the
 .EE
 
 .SH "SEE ALSO"
-indisrvr(8), mgmtpass(8), vpriv(8), IndiMail(7)
-
+indisrvr(8), mgmtpass(8), vpriv(8), IndiMail(7), openssl-ciphers(1ossl)
