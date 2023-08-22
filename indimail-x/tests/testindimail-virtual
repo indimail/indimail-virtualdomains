@@ -1,10 +1,11 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.4 2023-08-04 00:11:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.5 2023-08-22 21:23:31+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
 failed=""
+hash_supported="DES MD5 SHA-256 SHA-512"
 domain1=example.com    # virtual domain
 domain2=newexample.com # alias domain
 domain3=example2.com   # remote domain
@@ -85,6 +86,11 @@ setup_maildir()
 
 check_service()
 {
+	if [ $# -eq 2 ] ; then
+		min_up=$2
+	else
+		min_up=10
+	fi
 	count=1
 	while true
 	do
@@ -106,10 +112,10 @@ check_service()
 			continue
 		fi
 		if [ "$t" = "up" ] ; then
-			if [ $s -ge 10 ] ; then
+			if [ $s -ge $min_up ] ; then
 				return 0
 			else
-				sleep $(expr 10 - $s)
+				sleep $(expr $min_up - $s)
 				count=$(expr $count + 1)
 				if [ $count -gt 12 ] ; then
 					break
@@ -425,6 +431,7 @@ setup_svscan()
 	echo /bin:/usr/sbin    > $servicedir/qmail-send.2025/variables/PATH
 	echo 0                 > $servicedir/qmail-send.2025/variables/BIGTODO
 	echo 1                 > $servicedir/qmail-send.2025/variables/QPWGR
+	echo 1                 > $servicedir/qmail-send.2025/variables/MAKE_SEEKABLE
 	echo $confsplit        > $servicedir/qmail-send.2025/variables/CONFSPLIT
 	echo $qmaildir/queue   > $servicedir/qmail-send.2025/variables/QUEUEDIR
 	echo $sysconfdir       > $servicedir/qmail-send.2025/variables/SYSCONFDIR
@@ -515,7 +522,7 @@ do_svscan_start()
 				less $logdir/svscan/current
 			fi
 			echo "  testing command svscan (with svscanlog) startup failed"
-			[ -z "$failed" ] && failed="do_svscan_start" || failed="$failed do_svscan_start"
+			[ -z "$failed" ] && failed="do_svscan_start" || failed="$failed, do_svscan_start"
 			[ $continue_on_err -eq 0 ] && exit 1 || return 1
 		fi
 	else
@@ -524,7 +531,7 @@ do_svscan_start()
 			less $logdir/svscan/current
 		fi
 		echo "  testing command svscan (with svscanlog) startup failed"
-		[ -z "$failed" ] && failed="do_svscan_start" || failed="$failed do_svscan_start"
+		[ -z "$failed" ] && failed="do_svscan_start" || failed="$failed, do_svscan_start"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 1
 	fi
 }
@@ -541,7 +548,7 @@ test_svscan_log()
 			less $logdir/svscan/current
 		fi
 		echo "  testing command svscan log failed"
-		[ -z "$failed" ] && failed="test_svscan_log" || failed="$failed test_svscan_log"
+		[ -z "$failed" ] && failed="test_svscan_log" || failed="$failed, test_svscan_log"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -557,7 +564,7 @@ test_svscan_run()
 			less $logdir/svscan/current
 		fi
 		echo "  testing command svscan run script execution failed"
-		[ -z "$failed" ] && failed="test_svscan_run" || failed="$failed test_svscan_run"
+		[ -z "$failed" ] && failed="test_svscan_run" || failed="$failed, test_svscan_run"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -635,7 +642,7 @@ create_domain()
 			less $logdir/setup/vadddomain.log
 		fi
 		echo "  testing command vadddomain failed"
-		[ -z "$failed" ] && failed="vadddomain" || failed="$failed vadddomain"
+		[ -z "$failed" ] && failed="vadddomain" || failed="$failed, vadddomain"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -666,7 +673,7 @@ create_plain_user()
 			less $logdir/setup/vadduser.log
 		fi
 		echo "  testing command vadduser (plain) hash=$hash failed"
-		[ -z "$failed" ] && failed="create_plain_user" || failed="$failed create_plain_user"
+		[ -z "$failed" ] && failed="create_plain_user" || failed="$failed, create_plain_user"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -698,7 +705,7 @@ create_cram_user()
 			less $logdir/setup/vadduser.log
 		fi
 		echo "  testing command vadduser (cram) hash=$hash failed"
-		[ -z "$failed" ] && failed="vadduser (cram)" || failed="$failed vadduser (cram)"
+		[ -z "$failed" ] && failed="vadduser (cram)" || failed="$failed, vadduser (cram)"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 	pass=$($sudo env - \
@@ -716,7 +723,7 @@ create_cram_user()
 			less $logdir/setup/vadduser.log
 		fi
 		echo "  testing command vadduser (cram format) failed"
-		[ -z "$failed" ] && failed="vadduser (cram format)" || failed="$failed vadduser (cram format)"
+		[ -z "$failed" ] && failed="vadduser (cram format)" || failed="$failed, vadduser (cram format)"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -745,7 +752,7 @@ create_scram_user()
 			less $logdir/setup/vadduser.log
 		fi
 		echo "  testing command vadduser (scram) hash=$4 failed"
-		[ -z "$failed" ] && failed="vadduser (scram)" || failed="$failed vadduser (scram)"
+		[ -z "$failed" ] && failed="vadduser (scram)" || failed="$failed, vadduser (scram)"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -777,7 +784,7 @@ delete_user()
 		fi
 		cat $logdir/setup/vdeluser.log
 		echo "  testing command vdeluser failed"
-		[ -z "$failed" ] && failed="vdeluser" || failed="$failed vdeluser"
+		[ -z "$failed" ] && failed="vdeluser" || failed="$failed, vdeluser"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -805,7 +812,7 @@ delete_domain()
 			less $logdir/setup/vdeldomain.log
 		fi
 		echo "  testing command vdeldomain failed"
-		[ -z "$failed" ] && failed="vdeldomain" || failed="$failed vdeldomain"
+		[ -z "$failed" ] && failed="vdeldomain" || failed="$failed, vdeldomain"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -828,7 +835,7 @@ change_password()
 			less $logdir/setup/vpasswd.log
 		fi
 		echo "  testing command vpasswd failed"
-		[ -z "$failed" ] && failed="vpasswd" || failed="$failed vpasswd"
+		[ -z "$failed" ] && failed="vpasswd" || failed="$failed, vpasswd"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 
@@ -891,7 +898,7 @@ do_inquerytest()
 			less $logdir/setup/inquerytest.log
 		fi
 		echo "  testing command inquerytest failed"
-		[ -z "$failed" ] && failed="inquerytest" || failed="$failed inquerytest"
+		[ -z "$failed" ] && failed="inquerytest" || failed="$failed, inquerytest"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -912,7 +919,7 @@ do_vdominfo()
 			less $logdir/setup/vdominfo.log
 		fi
 		echo "  testing command vdominfo failed"
-		[ -z "$failed" ] && failed="vdominfo" || failed="$failed vdominfo"
+		[ -z "$failed" ] && failed="vdominfo" || failed="$failed, vdominfo"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -933,7 +940,7 @@ do_dbinfo()
 			less $logdir/setup/dbinfo.log
 		fi
 		echo "  testing command dbinfo failed"
-		[ -z "$failed" ] && failed="dbinfo" || failed="$failed dbinfo"
+		[ -z "$failed" ] && failed="dbinfo" || failed="$failed, dbinfo"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -950,7 +957,7 @@ test_services()
 			less $logdir/setup/services.log
 		fi
 		echo "  testing command svscan service startup failed"
-		[ -z "$failed" ] && failed="test_services" || failed="$failed test_services"
+		[ -z "$failed" ] && failed="test_services" || failed="$failed, test_services"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -966,6 +973,8 @@ check_mail()
 		if [ $mcount -gt 0 ] ; then
 			mail_file=$($sudo $setuidgid $1 ls -lt $2/new|head -2|tail -1|awk '{print $9}')
 			echo "Got Mail $mail_file"
+			subject=$($sudo sh -c "822header -I Subject < $2/new/$mail_file")
+			echo $subject > $testdir/subject.tmp
 			if [ $# -eq 2 ] ; then
 				$sudo $setuidgid $1 /bin/rm -f $2/new/$mail_file
 			fi
@@ -986,7 +995,7 @@ check_mail()
 do_smtp_auth_swaks()
 {
 	methods="LOGIN PLAIN CRAM-MD5 DIGEST-MD5"
-	if [ $3 -eq 1 ] ; then
+	if [ $3 -eq 1 -o $3 -eq 3 ] ; then
 		type="cram=no "
 	else
 		type="cram=yes"
@@ -1006,7 +1015,7 @@ do_smtp_auth_swaks()
 			;;
 		esac
 		$sudo svc -r $servicedir/smtpd
-		check_service smtpd
+		check_service smtpd 3
 		for i in $methods
 		do
 			case $i in
@@ -1028,7 +1037,7 @@ do_smtp_auth_swaks()
 					less $logdir/smtpd/current
 				fi
 				printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using swk %s failed\n"    "$i" "$str" "$hash" "$type" "$1"
-				[ -z "$failed" ] && failed="swaks-SMTP-AUTH-$i-hash-$hash" || failed="$failed swaks-SMTP-AUTH-$i-hash-$hash"
+				[ -z "$failed" ] && failed="swaks-SMTP-AUTH-$i-hash-$hash" || failed="$failed, swaks-SMTP-AUTH-$i-hash-$hash"
 				[ $continue_on_err -eq 0 ] && exit 1 || return 0
 			fi
 			check_mail $user $maildir
@@ -1043,7 +1052,7 @@ do_smtp_auth_swaks()
 						less $logdir/smtpd/current
 					fi
 					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using swk %s failed\n"    "$i" "$str" "$hash" "$type" "$1"
-					[ -z "$failed" ] && failed="swaks-SMTP-AUTH-$i-hash-$hash" || failed="$failed swaks-SMTP-AUTH-$i-hash-$hash"
+					[ -z "$failed" ] && failed="swaks-SMTP-AUTH-$i-hash-$hash" || failed="$failed, swaks-SMTP-AUTH-$i-hash-$hash"
 					[ $continue_on_err -eq 0 ] && exit 1 || return 0
 				fi
 			else
@@ -1052,7 +1061,7 @@ do_smtp_auth_swaks()
 					less $logdir/qmail-send/current
 				fi
 				echo "  testing mail delivery in do_smtp_auth_swaks failed - SMTP AUTH $i"
-				[ -z "$failed" ] && failed="check_mail $maildir swaks-SMTP-AUTH-$i-hash-$hash" || failed="$failed check_mail $maildir swaks-SMTP-AUTH-$i-hash-$hash"
+				[ -z "$failed" ] && failed="check_mail $maildir swaks-SMTP-AUTH-$i-hash-$hash" || failed="$failed, check_mail $maildir swaks-SMTP-AUTH-$i-hash-$hash"
 				[ $continue_on_err -eq 0 ] && exit 1 || return 0
 			fi
 		done
@@ -1066,7 +1075,7 @@ do_smtp_auth_swaks()
 					less $logdir/inlookup/current
 				fi
 				echo "  testing command inquery password cache failed"
-				[ -z "$failed" ] && failed="inlookup PWD query" || failed="$failed inlookup PWD query"
+				[ -z "$failed" ] && failed="inlookup PWD query" || failed="$failed, inlookup PWD query"
 				[ $continue_on_err -eq 0 ] && exit 1 || return 0
 			fi
 		fi
@@ -1074,13 +1083,13 @@ do_smtp_auth_swaks()
 	done
 }
 
-do_smtp_auth_qmr()
+do_smtp_auth_qmr_o()
 {
 	# domain   = $1
 	# user     = $2
 	# password = $3
 	# type     = $4
-	if [ $4 -eq 1 ] ; then
+	if [ $4 -eq 1 -o $4 -eq 3 ] ; then
 		type="cram=no "
 	else
 		type="cram=yes"
@@ -1100,7 +1109,7 @@ do_smtp_auth_qmr()
 			;;
 		esac
 		$sudo svc -r $servicedir/smtpd
-		check_service smtpd
+		check_service smtpd 3
 		methods="LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5"
 		for i in $methods
 		do
@@ -1140,7 +1149,7 @@ do_smtp_auth_qmr()
 						less $logdir/smtpd/current
 					fi
 					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using qmr %s failed\n"    "$i" "$str" "$hash" "$type" "$2"
-					[ -z "$failed" ] && failed="qmr-SMTP-AUTH-$i-hash-$hash" || failed="$failed qmr-SMTP-AUTH-$i-hash-$hash"
+					[ -z "$failed" ] && failed="qmr-SMTP-AUTH-$i-hash-$hash" || failed="$failed, qmr-SMTP-AUTH-$i-hash-$hash"
 					[ $continue_on_err -eq 0 ] && exit 1 || return 0
 				fi
 			else
@@ -1148,8 +1157,8 @@ do_smtp_auth_qmr()
 				if [ $prompt -eq 1 ] ; then
 					less $logdir/qremote/qmail-remote.log
 				fi
-				echo "  testing mail delivery in do_smtp_auth_qmr failed - qmr-SMTP-AUTH $i"
-				[ -z "$failed" ] && failed="check_mail $maildir qmr-SMTP-AUTH-$i-hash-$hash" || failed="$failed check_mail $maildir qmr-SMTP-AUTH-$i-hash-$hash"
+				echo "  testing mail delivery in do_smtp_auth_qmr_o failed - qmr-SMTP-AUTH $i"
+				[ -z "$failed" ] && failed="check_mail $maildir qmr-SMTP-AUTH-$i-hash-$hash" || failed="$failed, check_mail $maildir qmr-SMTP-AUTH-$i-hash-$hash"
 				[ $continue_on_err -eq 0 ] && exit 1 || return 0
 			fi
 		done
@@ -1183,7 +1192,7 @@ do_smtp_auth_qmr_scram()
 				less $logdir/smtpd/current
 			fi
 			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s using qmr (plaintext) failed\n" "$1" "$str" "$hash"
-			[ -z "$failed" ] && failed="qmr-SMTP-AUTH-plaintext-$1-hash-$hash" || failed="$failed qmr-SMTP-AUTH-plaintext-$1-hash-$hash"
+			[ -z "$failed" ] && failed="qmr-SMTP-AUTH-plaintext-$1-hash-$hash" || failed="$failed, qmr-SMTP-AUTH-plaintext-$1-hash-$hash"
 			[ $continue_on_err -eq 0 ] && exit 1 || return 0
 		fi
 	else
@@ -1192,7 +1201,7 @@ do_smtp_auth_qmr_scram()
 			less $logdir/qremote/qmail-remote.log
 		fi
 		echo "  testing mail delivery in do_smtp_auth_qmr_scram failed SMTP AUTH $1"
-		[ -z "$failed" ] && failed="check_mail $maildir qmr-SMTP-AUTH-plaintext-$1-hash-$hash" || failed="$failed check_mail $maildir qmr-SMTP-AUTH-plaintext-$1-hash-$hash"
+		[ -z "$failed" ] && failed="check_mail $maildir qmr-SMTP-AUTH-plaintext-$1-hash-$hash" || failed="$failed, check_mail $maildir qmr-SMTP-AUTH-plaintext-$1-hash-$hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 	hexsalted=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -p $3 | cut -d: -f3)
@@ -1221,7 +1230,7 @@ do_smtp_auth_qmr_scram()
 				less $logdir/smtpd/current
 			fi
 			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s using qmr (hexsalted) failed\n" "$1" "$str" "$hash"
-			[ -z "$failed" ] && failed="SMTP-AUTH-hexsalted-$1-hash-$hash" || failed="$failed SMTP-AUTH-hexsalted-$1-hash-$hash"
+			[ -z "$failed" ] && failed="SMTP-AUTH-hexsalted-$1-hash-$hash" || failed="$failed, SMTP-AUTH-hexsalted-$1-hash-$hash"
 			[ $continue_on_err -eq 0 ] && exit 1 || return 0
 		fi
 	else
@@ -1230,7 +1239,7 @@ do_smtp_auth_qmr_scram()
 			less $logdir/qremote/qmail-remote.log
 		fi
 		echo "  testing mail delivery in do_smtp_auth_qmr_scram failed SMTP AUTH $1"
-		[ -z "$failed" ] && failed="check_mail $maildir SMTP-AUTH-hexsalted-$1-hash-$hash" || failed="$failed check_mail $maildir SMTP-AUTH-hexsalted-$1-hash-$hash"
+		[ -z "$failed" ] && failed="check_mail $maildir SMTP-AUTH-hexsalted-$1-hash-$hash" || failed="$failed, check_mail $maildir SMTP-AUTH-hexsalted-$1-hash-$hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -1256,7 +1265,7 @@ do_gsasl_test()
 			less $logdir/gsasl/gsasl.log
 		fi
 		printf "  testing SMTP AUTH %-18s (%s) hash=%-8s using gsasl failed\n" "$1" "$str" "$hash"
-		[ -z "$failed" ] && failed="SMTP-AUTH-gsasl-$1-hash-$hash" || failed="$failed SMTP-AUTH-gsasl-$1-hash-$hash"
+		[ -z "$failed" ] && failed="SMTP-AUTH-gsasl-$1-hash-$hash" || failed="$failed, SMTP-AUTH-gsasl-$1-hash-$hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -1293,7 +1302,7 @@ delete_relay()
 test_pop3()
 {
 	swaks -S --tls --to $1 --from $1 --server localhost --port 2025 -a LOGIN -au $1 -ap "$2"
-	check_mail $1 $4 no-delete
+	check_mail indimail $4 no-delete
 	(
 	echo "#!/bin/sh"
 	echo "exec 0<&6"
@@ -1379,6 +1388,7 @@ test_pop3()
 	echo "fi"
 	) > $testdir/tcpclient.pop3
 	chmod +x $testdir/tcpclient.pop3
+	check_service pop3d
 	tcpclient -a 10 -vDHR 0 1100 /tmp/qmail-test/tcpclient.pop3 2>$logdir/pop3d/pop3d.log
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -1389,7 +1399,7 @@ test_pop3()
 			less $logdir/pop3d/pop3d.log
 		fi
 		printf "  testing POP3  login %s hash=%-8s and mail retrieval (%s) failed\n" "$1" "$hash" "$str"
-		[ -z "$failed" ] && failed="POP3 login $hash" || failed="$failed POP3 login $hash"
+		[ -z "$failed" ] && failed="POP3 login $hash" || failed="$failed, POP3 login $hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 	check_relay > /dev/null 2>>$logdir/pop3d/pop3d.log
@@ -1404,7 +1414,7 @@ test_pop3()
 			less $logdir/pop3d/pop3d.log
 		fi
 		printf "  testing record in relay table failed\n"
-		[ -z "$failed" ] && failed="check relay" || failed="$failed check relay"
+		[ -z "$failed" ] && failed="check relay" || failed="$failed, check relay"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 	swaks -S --to tuser01@$domain3 --from $1 --server ::1 --port 2025 >> $logdir/pop3d/pop3d.log 2>&1
@@ -1422,11 +1432,16 @@ test_pop3()
 			less $logdir/pop3d/pop3d.log
 		fi
 		printf "  testing Open RELAY using POP3  login failed ret1=%d ret2=%d\n" $ret1 $ret2
-		[ -z "$failed" ] && failed="open relay pop3" || failed="$failed open relay pop3"
+		[ -z "$failed" ] && failed="open relay pop3" || failed="$failed, open relay pop3"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 
-	sudo $setuidgid -g qcerts $user tcpclient -a 10 -f $cntrldir/tlsclientciphers \
+	n1=$(openssl ciphers -v | awk '{print $2}' | grep TLS | sort | uniq | tail -1 |cut -c5- |cut -d. -f1)
+	n2=$(openssl ciphers -v | awk '{print $2}' | grep TLS | sort | uniq | tail -1 |cut -c5- |cut -d. -f2)
+	max=$(expr 10 \* $n1 + $n2)
+	[ $max -gt 12 ] && fn=clientciphersuite || fn=clientcipherlist
+	check_service pop3d-ssl 3
+	sudo $setuidgid -g qcerts $user tcpclient -a 10 -f $cntrldir/$fn \
 		-n $certdir/clientcert.pem -vDHR 0 9950 \
 		/tmp/qmail-test/tcpclient.pop3 2>$logdir/pop3d-ssl/pop3d-ssl.log
 	if [ $? -eq 0 ] ; then
@@ -1439,7 +1454,7 @@ test_pop3()
 			less $logdir/pop3d-ssl/pop3d-ssl.log
 		fi
 		printf "  testing POP3S login %s hash=%-8s and mail retrieval (%s) failed\n" "$1" "$hash" "$str"
-		[ -z "$failed" ] && failed="POP3S login $hash" || failed="$failed POP3S login $hash"
+		[ -z "$failed" ] && failed="POP3S login $hash" || failed="$failed, POP3S login $hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 	swaks -S --to tuser01@$domain3 --from $1 --server ::1 --port 2025 >> $logdir/pop3d-ssl/pop3d-ssl.log 2>&1
@@ -1458,7 +1473,7 @@ test_pop3()
 			less $logdir/pop3d-ssl/pop3d-ssl.log
 		fi
 		printf "  testing Open RELAY using POP3S login failed ret1=%d ret2=%d\n" $ret1 $ret2
-		[ -z "$failed" ] && failed="open relay pop3s" || failed="$failed open relay pop3s"
+		[ -z "$failed" ] && failed="open relay pop3s" || failed="$failed, open relay pop3s"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -1466,7 +1481,7 @@ test_pop3()
 test_imap()
 {
 	swaks -S --tls --to $1 --from $1 --server localhost --port 2025 -a LOGIN -au $1 -ap "$2"
-	check_mail $1 $4 no-delete
+	check_mail indimail $4 no-delete
 	(
 	echo "#!/bin/sh"
 	echo "exec 0<&6"
@@ -1529,6 +1544,7 @@ test_imap()
 	echo "fi"
 	) > $testdir/tcpclient.imap
 	chmod +x $testdir/tcpclient.imap
+	check_service imapd 3
 	tcpclient -a 10 -vDHR 0 1430 /tmp/qmail-test/tcpclient.imap 2>$logdir/imapd/imapd.log
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -1538,7 +1554,7 @@ test_imap()
 			less $logdir/imapd/imapd.log
 		fi
 		printf "  testing IMAP  login %s hash=%-8s and mail retrieval (%s) failed\n" "$1" "$hash" "$str"
-		[ -z "$failed" ] && failed="IMAP login $hash" || failed="$failed IMAP login $hash"
+		[ -z "$failed" ] && failed="IMAP login $hash" || failed="$failed, IMAP login $hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 	check_relay > /dev/null 2>>$logdir/pop3d/pop3d.log
@@ -1553,7 +1569,7 @@ test_imap()
 			less $logdir/imapd/imapd.log
 		fi
 		printf "  testing record in relay table failed\n"
-		[ -z "$failed" ] && failed="check relay" || failed="$failed check relay"
+		[ -z "$failed" ] && failed="check relay" || failed="$failed, check relay"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 	swaks -S --to tuser01@$domain3 --from $1 --server ::1 --port 2025 >> $logdir/imapd/imapd.log 2>&1
@@ -1571,11 +1587,16 @@ test_imap()
 			less $logdir/imapd/imapd.log
 		fi
 		printf "  testing Open RELAY using IMAP  login failed ret1=%d ret2=%d\n" $ret1 $ret2
-		[ -z "$failed" ] && failed="open relay imap" || failed="$failed open relay imap"
+		[ -z "$failed" ] && failed="open relay imap" || failed="$failed, open relay imap"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 
-	sudo $setuidgid -g qcerts $user tcpclient -a 10 -f $cntrldir/tlsclientciphers \
+	n1=$(openssl ciphers -v | awk '{print $2}' | grep TLS | sort | uniq | tail -1 |cut -c5- |cut -d. -f1)
+	n2=$(openssl ciphers -v | awk '{print $2}' | grep TLS | sort | uniq | tail -1 |cut -c5- |cut -d. -f2)
+	max=$(expr 10 \* $n1 + $n2)
+	[ $max -gt 12 ] && fn=clientciphersuite || fn=clientcipherlist
+	check_service imapd-ssl 3
+	sudo $setuidgid -g qcerts $user tcpclient -a 10 -f $cntrldir/$fn  \
 		-n $certdir/clientcert.pem -vDHR 0 9930 /tmp/qmail-test/tcpclient.imap \
 		2>$logdir/pop3d-ssl/imapd-ssl.log
 	if [ $? -eq 0 ] ; then
@@ -1589,7 +1610,7 @@ test_imap()
 			less $logdir/imapd-ssl/imapd-ssl.log
 		fi
 		printf "  testing IMAPS login %s hash=%-8s and mail retrieval (%s) failed\n" "$1" "$hash" "$str"
-		[ -z "$failed" ] && failed="IMAPS login $hash" || failed="$failed IMAPS login $hash"
+		[ -z "$failed" ] && failed="IMAPS login $hash" || failed="$failed, IMAPS login $hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 	swaks -S --to tuser01@$domain3 --from $1 --server ::1 --port 2025 >> $logdir/imapd-ssl/imapd-ssl.log 2>&1
@@ -1608,7 +1629,7 @@ test_imap()
 			less $logdir/imapd-ssl/imapd-ssl.log
 		fi
 		printf "  testing Open RELAY using IMAPS login failed ret1=%d ret2=%d\n" $ret1 $ret2
-		[ -z "$failed" ] && failed="open relay imaps" || failed="$failed open relay imaps"
+		[ -z "$failed" ] && failed="open relay imaps" || failed="$failed, open relay imaps"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -1697,7 +1718,7 @@ do_post_handle()
 					less $logdir/setup/test"$i".log
 				fi
 				printf "  testing POST HANDLE for $prog failed\n"
-				[ -z "$failed" ] && failed="post handle $prog" || failed="$failed post handle $prog"
+				[ -z "$failed" ] && failed="post handle $prog" || failed="$failed, post handle $prog"
 				[ $continue_on_err -eq 0 ] && exit 1 || return 0
 			fi
 		else
@@ -1706,7 +1727,7 @@ do_post_handle()
 				less $logdir/setup/test"$i".log
 			fi
 			printf "  testing command $prog failed\n"
-			[ -z "$failed" ] && failed="$prog failed" || failed="$failed $prog failed"
+			[ -z "$failed" ] && failed="$prog failed" || failed="$failed, $prog failed"
 			[ $continue_on_err -eq 0 ] && exit 1 || return 0
 		fi
 	done
@@ -1717,10 +1738,15 @@ do_qmail_inject()
 	# $1 - user
 	# $2 - From
 	# $3 - To
+	if [ $# -eq 4 ] ; then
+		subj=$4
+	else
+		subj="Testing qmail-inject"
+	fi
 	(
 	echo "From: $2"
 	echo "To: $3"
-	echo "Subject: Test"
+	echo "Subject: $subj"
 	echo "Date: $(date -R)"
 	echo
 	echo "Test message"
@@ -1735,7 +1761,7 @@ do_qmail_inject()
 		return 0
 	else
 		fcount=$(expr $fcount + 1)
-		[ -z "$failed" ] && failed="do_qmail_inject" || failed="$failed do_qmail_inject"
+		[ -z "$failed" ] && failed="do_qmail_inject" || failed="$failed, do_qmail_inject"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -1760,7 +1786,7 @@ do_valias()
 	else
 		fcount=$(expr $fcount + 1)
 		printf "  testing command valias insert failed\n"
-		[ -z "$failed" ] && failed="valias insert" || failed="$failed valias insert"
+		[ -z "$failed" ] && failed="valias insert" || failed="$failed, valias insert"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 	do_qmail_inject $user $user@$HOSTNAME $1 # send email to testuser1 from $user@$HOSTNAME
@@ -1771,7 +1797,7 @@ do_valias()
 	else
 		fcount=$(expr $fcount + 1)
 		echo "  testing valias forwarding failed"
-		[ -z "$failed" ] && failed="valias forward" || failed="$failed valias forward"
+		[ -z "$failed" ] && failed="valias forward" || failed="$failed, valias forward"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 	$sudo $setuidgid indimail env - \
@@ -1787,7 +1813,7 @@ do_valias()
 	else
 		fcount=$(expr $fcount + 1)
 		printf "  testing command valias update failed\n"
-		[ -z "$failed" ] && failed="valias update" || failed="$failed valias update"
+		[ -z "$failed" ] && failed="valias update" || failed="$failed, valias update"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 	$sudo chown -R $INUID:$INGID $maildir
@@ -1801,7 +1827,7 @@ do_valias()
 	else
 		fcount=$(expr $fcount + 1)
 		echo "  testing valias maildir delivery failed"
-		[ -z "$failed" ] && failed="valias maildir delivery" || failed="$failed valias maildir delivery"
+		[ -z "$failed" ] && failed="valias maildir delivery" || failed="$failed, valias maildir delivery"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 
@@ -1818,14 +1844,13 @@ do_valias()
 	else
 		fcount=$(expr $fcount + 1)
 		printf "  testing command valias delete failed\n"
-		[ -z "$failed" ] && failed="valias delete" || failed="$failed valias delete"
+		[ -z "$failed" ] && failed="valias delete" || failed="$failed, valias delete"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
 
 do_pwdlookup()
 {
-	#echo "Starting pwdlookup test"
 	enc_pass1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -p $1 | awk '{print $3}')
 	t=$(echo $1|cut -d@ -f1)
 	mkdir -p $testdir/pwdlookup
@@ -1842,7 +1867,7 @@ do_pwdlookup()
 		fcount=$(expr $fcount + 1)
 		echo "pass $t:$enc_pass1 $enc_pass2"
 		printf "  testing pwdlookup failed\n"
-		[ -z "$failed" ] && failed="pwdlookup" || failed="$failed pwdlookup"
+		[ -z "$failed" ] && failed="pwdlookup" || failed="$failed, pwdlookup"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -1886,6 +1911,61 @@ do_cleanup()
 	#$sudo /bin/rm -f $in_cnf
 }
 
+do_autoresponder()
+{
+	destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $1 | awk '{print $3}')
+	destdir2=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $2 | awk '{print $3}')
+	echo "Testing Autoresponder" > /tmp/vacation.$$
+	$sudo env - \
+		PATH=/bin:/usr/bin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		SERVICEDIR=$servicedir \
+	vmoduser -l + $2 > $logdir/setup/vmoduser.log < /tmp/vacation.$$
+	if [ $status -eq 0 ] ; then
+		/bin/rm -f /tmp/vacation.$$
+		tcount=$(expr $tcount + 1)
+	else
+		/bin/rm -f /tmp/vacation.$$
+		fcount=$(expr $fcount + 1)
+		echo "  testing vmoduser set vacation failed"
+		if [ $prompt -eq 1 ] ; then
+			less $logdir/setup/vmoduser.log
+		fi
+		[ -z "$failed" ] && failed="autoresponder" || failed="$failed, autoresponder"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	subj="Testing Autoresponder"
+	do_qmail_inject $user $1 $2 "$subj" # send email to testuser2 from $testuser1
+	check_mail indimail $destdir2/Maildir
+	if [ $? -ne 0 ] ; then
+		echo "Check $destdir2/Maildir [$subject]"
+		fcount=$(expr $fcount + 1)
+		echo "  testing autoresponder failed"
+		[ -z "$failed" ] && failed="autoresponder send_mail $2" || failed="$failed, autoresponder send_mail $2"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	check_mail indimail $destdir1/Maildir
+	if [ $? -ne 0 ] ; then
+		fcount=$(expr $fcount + 1)
+		echo "  testing autoresponder failed2"
+		[ -z "$failed" ] && failed="autoresponder" || failed="$failed, autoresponder"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	subject=$(cat $testdir/subject.tmp)
+	if [ "$subject" = "Subject: Autoreply: Re: $subj" ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing autoresponder succeeded"
+	else
+		fcount=$(expr $fcount + 1)
+		echo "[$subject] [Subject: Autoreply: Re: $subj]"
+		echo "  testing autoresponder failed (subject mismatch)"
+		[ -z "$failed" ] && failed="autoresponder subject" || failed="$failed, autoresponder subject"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+}
+
 ## begin getopt
 usage()
 {
@@ -1895,6 +1975,14 @@ usage()
 
 prompt=1
 continue_on_err=0
+sudo grep '\$y\$' /etc/shadow > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+	if [ -n "$hash_supported" ] ; then
+		hash_supported="$hash_supported YESCRYPT"
+	else
+		hash_supported="YESCRYPT"
+	fi
+fi
 options=$(getopt -a -n testindimail-virtual -o "hyc" -l help,noprompt,continue -- "$@")
 if [ $? != 0 ]; then
   usage
@@ -1960,29 +2048,24 @@ do_inquerytest $testuser1
 do_inquerytest $testuser2
 echo
 hash="default"
-check_service smtpd
-check_service qmail-send.2025
+check_service smtpd 3
+check_service qmail-send.2025 3
 do_smtp_auth_swaks $testuser1 $password2 1
-do_smtp_auth_qmr $domain1 $testuser1 $password2 1
+do_smtp_auth_qmr_o $domain1 $testuser1 $password2 1
 
 > $servicedir/smtpd/variables/ENABLE_CRAM
 do_smtp_auth_swaks $testuser2 $password3 2
-do_smtp_auth_qmr $domain1 $testuser2 $password3 2
+do_smtp_auth_qmr_o $domain1 $testuser2 $password3 2
 delete_user $testuser1
 delete_user $testuser2
 echo
 
 delete_relay >/dev/null
-hash_supported="DES MD5 SHA-256 SHA-512"
-sudo grep '\$y\$' /etc/shadow > /dev/null 2>&1
-if [ $? -eq 0 ] ; then
-	hash_supported="$hash_supported YESCRYPT"
-fi
 check_service inlookup.infifo
-check_service pop3d
-check_service pop3d-ssl
-check_service imapd
-check_service imapd-ssl
+check_service pop3d 3
+check_service pop3d-ssl 3
+check_service imapd 3
+check_service imapd-ssl 3
 for hash in $hash_supported
 do
 	t1="$password2""$hash"
@@ -1999,10 +2082,10 @@ do
 		> $servicedir/smtpd/variables/PASSWORD_HASH
 	fi
 	do_smtp_auth_swaks $testuser1 $t1 1
-	do_smtp_auth_qmr $domain1 $testuser1 $t1 1
+	do_smtp_auth_qmr_o $domain1 $testuser1 $t1 1
 	> $servicedir/smtpd/variables/ENABLE_CRAM
 	do_smtp_auth_swaks $testuser2 $t2 2
-	do_smtp_auth_qmr $domain1 $testuser2 $t2 2
+	do_smtp_auth_qmr_o $domain1 $testuser2 $t2 2
 	for j in 1 2
 	do
 		case $j in
@@ -2045,7 +2128,6 @@ do
 			for k in d d-ssl
 			do
 				$sudo svc -r $servicedir/"$i"$k
-				check_service "$i"$k
 			done
 		done
 		destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser1 | awk '{print $3}')
@@ -2076,6 +2158,7 @@ fi
 delete_user $testuser1
 
 echo
+echo 1 > $servicedir/smtpd/variables/ENABLE_CRAM
 for hash in $hash_supported
 do
 	echo "Starting SMTP AUTH, IMAP/POP3 login tests for hash $hash"
@@ -2138,31 +2221,32 @@ do
 			;;
 		esac
 		$sudo svc -r $servicedir/smtpd
-		check_service smtpd
 		for i in imap pop3
 		do
 			for k in d d-ssl
 			do
 				$sudo svc -r $servicedir/"$i"$k
-				check_service "$i"$k
 			done
 		done
-		check_service smtpd
 		test_pop3 $testuser1 $t1 $testuser2
 		echo
 		test_imap $testuser1 $t1 $testuser2
 		echo
+		check_service smtpd 3
 		if [ -x $gsasl ] ; then
 			do_gsasl_test                   "SCRAM-SHA-1"        $testuser1 $t1
 			do_gsasl_test                   "SCRAM-SHA-1-PLUS"   $testuser1 $t1
 			do_gsasl_test                   "SCRAM-SHA-256"      $testuser2 $t2
 			do_gsasl_test                   "SCRAM-SHA-256-PLUS" $testuser2 $t2
 		fi
+		do_smtp_auth_swaks $testuser1 $t1 3
 		echo
 		do_smtp_auth_qmr_scram "SCRAM-SHA-1"        $domain1 $testuser1 $t1
 		do_smtp_auth_qmr_scram "SCRAM-SHA-1-PLUS"   $domain1 $testuser1 $t1
 		do_smtp_auth_qmr_scram "SCRAM-SHA-256"      $domain1 $testuser2 $t2
 		do_smtp_auth_qmr_scram "SCRAM-SHA-256-PLUS" $domain1 $testuser2 $t2
+		echo
+		do_smtp_auth_qmr_o $domain1 $testuser1 $t1 3
 		echo
 	done
 	echo "  testing SMTP AUTH, IMAP/POP3 login tests for hash $hash succeeded"
@@ -2177,6 +2261,10 @@ printf "  testing command tcpclient non-encrypted succeeded\n"
 printf "  testing command tcpclient encrypted     succeeded\n"
 create_scram_user SCRAM-SHA-1   $testuser1 $password1 SHA-512 1
 create_scram_user SCRAM-SHA-256 $testuser2 $password2 SHA-512 1
+
+echo
+do_autoresponder $testuser1 $testuser2
+
 echo
 do_valias $testuser1 $testuser2
 echo
@@ -2206,6 +2294,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.5  2023-08-22 21:23:31+05:30  Cprogrammer
+# added test for autoresponder
+#
 # Revision 1.4  2023-08-04 00:11:14+05:30  Cprogrammer
 # updated test script
 #
