@@ -2190,7 +2190,9 @@ The TLS/SSL connection can be customized by the following control files
 
 *tlsservermethod* - The TLS protocol list. Accepted values are SSLv23, SSLv3, TLSv1, TLSv1\_1, TLSv1\_2, TLSv1\_3. The default is TLSv1.2 for OpenSSL Version \< 1.0.1. OpenSSL Version >= 1.0.1 uses TLS\_server\_method() where the actual protocol version used will be negotiated to the highest version mutually supported by the client and the server. The supported protocols are SSLv3, TLSv1, TLSv1.1, TLSv1.2 and TLSv1.3
 
-*tlsserverciphers* - A set of OpenSSL cipher strings. Multiple ciphers contained in a string should be separated by a colon. If the environment variable **TLS\_CIPHER\_LIST** is set to such a string, it takes precedence.  *tlsclients*  A list of email addresses. When relay rules would reject an incoming message, **qmail-smtpd** can allow it if the client presents a certificate that can be verified against the CA list in *clientca.pem* and the certificate email address is in *tlsclients*.
+*servercipherlist*, *serverciphersuite* - A set of OpenSSL cipher strings. Multiple ciphers contained in a string should be separated by a colon. If the environment variable **TLS\_CIPHER\_LIST** is set to such a string, it takes precedence. <u>servercipherlist</u> is used for TLSv1.2 and below. <u>clientciphersuite</u> is used for TLSv1.3 and above.
+
+*tlsclients*  A list of email addresses. When relay rules would reject an incoming message, **qmail-smtpd** can allow it if the client presents a certificate that can be verified against the CA list in *clientca.pem* and the certificate email address is in *tlsclients*.
 
 *servercert.pem* - SSL certificate to be presented to clients in TLS-encrypted sessions.  Should contain both the certificate and the private key. Certifying Authority (CA) and intermediate certificates can be added at the end of the file. The filename can be overriden by the environment variable **SERVERCERT**. The default location of /etc/indimail/certs can be overriden by environment variable CERTDIR.
 
@@ -2246,7 +2248,7 @@ The TLS/SSL connection can be customized by the following control files
 
 *tlsclientmethod* - The TLS protocol list. Accepted values are SSLv23, SSLv3, TLSv1, TLSv1\_1, TLSv1\_2, TLSv1\_3. The default is TLSv1\_2 for OpenSSL Version \< 1.0.1. Without this control file OpenSSL Version >= 1.0.1 uses TLS\_client\_method(3ossl) where the actual protocol version used will be negotiated to the highest version mutually supported by the client and the server. The supported protocols are SSLv3, TLSv1, TLSv1.1, TLSv1.2 and TLSv1.3. The default location of /etc/indimail/control can be overriden by environment variable **CONTROLDIR**.
 
-*tlsclientciphers* - A set of OpenSSL client cipher strings. Multiple ciphers contained in a string should be separated by a colon. The default location of /etc/indimail/control can be overriden by environment variable **CONTROLDIR**
+*clientcipherlist*, *clientciphersuite* - A set of OpenSSL client cipher strings. Multiple ciphers contained in a string should be separated by a colon. The default location of /etc/indimail/control can be overriden by environment variable **CONTROLDIR**. <u>clientcipherlist</u> is used for TLSv1.2 and below. <u>clientciphersuite</u> is used for TLSv1.3 and above.
 
 *notlhosts* - domains for which **qmail-remote** will not initiate TLS sesson. This file in /etc/indimail/control or directory defined by the **CONTROLDIR** envirnoment variable, shouldn't be confused with /etc/indimail/certs/*notlshosts* directory in the directory or the directory defined by the **CERTDIR** environment variable.
 
