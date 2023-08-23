@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.5 2023-08-22 21:23:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.6 2023-08-23 13:09:26+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -650,7 +650,11 @@ create_domain()
 create_plain_user()
 {
 	if [ $# -eq 3 ] ; then
-		extra="-h $3"
+		if [ "$3" = "default" ] ; then
+			extra=""
+		else
+			extra="-h $3"
+		fi
 		hash="$3"
 	else
 		extra=""
@@ -681,7 +685,11 @@ create_plain_user()
 create_cram_user()
 {
 	if [ $# -eq 3 ] ; then
-		extra="-h $3"
+		if [ "$3" = "default" ] ; then
+			extra=""
+		else
+			extra="-h $3"
+		fi
 		hash="$3"
 	else
 		extra=""
@@ -996,9 +1004,9 @@ do_smtp_auth_swaks()
 {
 	methods="LOGIN PLAIN CRAM-MD5 DIGEST-MD5"
 	if [ $3 -eq 1 -o $3 -eq 3 ] ; then
-		type="cram=no "
+		type="CRAM-NO "
 	else
-		type="cram=yes"
+		type="CRAM=YES"
 	fi
 	for j in 1 2
 	do
@@ -1036,7 +1044,7 @@ do_smtp_auth_swaks()
 				if [ $prompt -eq 1 ] ; then
 					less $logdir/smtpd/current
 				fi
-				printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using swk %s failed\n"    "$i" "$str" "$hash" "$type" "$1"
+				printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-7s using swk %s failed\n"    "$i" "$str" "$hash" "$type" "$1"
 				[ -z "$failed" ] && failed="swaks-SMTP-AUTH-$i-hash-$hash" || failed="$failed, swaks-SMTP-AUTH-$i-hash-$hash"
 				[ $continue_on_err -eq 0 ] && exit 1 || return 0
 			fi
@@ -1045,13 +1053,13 @@ do_smtp_auth_swaks()
 				last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $i:")
 				if [ $? -eq 0 ] ; then
 					tcount=$(expr $tcount + 1)
-					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using swk %s succeeded\n" "$i" "$str" "$hash" "$type" "$1"
+					printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-7s using swk %s succeeded\n" "$i" "$str" "$hash" "$type" "$1"
 				else
 					fcount=$(expr $fcount + 1)
 					if [ $prompt -eq 1 ] ; then
 						less $logdir/smtpd/current
 					fi
-					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using swk %s failed\n"    "$i" "$str" "$hash" "$type" "$1"
+					printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-7s using swk %s failed\n"    "$i" "$str" "$hash" "$type" "$1"
 					[ -z "$failed" ] && failed="swaks-SMTP-AUTH-$i-hash-$hash" || failed="$failed, swaks-SMTP-AUTH-$i-hash-$hash"
 					[ $continue_on_err -eq 0 ] && exit 1 || return 0
 				fi
@@ -1078,8 +1086,8 @@ do_smtp_auth_swaks()
 				[ -z "$failed" ] && failed="inlookup PWD query" || failed="$failed, inlookup PWD query"
 				[ $continue_on_err -eq 0 ] && exit 1 || return 0
 			fi
+			echo
 		fi
-		echo
 	done
 }
 
@@ -1088,11 +1096,11 @@ do_smtp_auth_qmr_o()
 	# domain   = $1
 	# user     = $2
 	# password = $3
-	# type     = $4
+	# type     = $4 1 - CRAM=NO (plain user), 2 - CRAM=YES (plain user), 3 - CRAM=YES (scram user)
 	if [ $4 -eq 1 -o $4 -eq 3 ] ; then
-		type="cram=no "
+		type="CRAM=NO "
 	else
-		type="cram=yes"
+		type="CRAM=YES"
 	fi
 	for j in 1 2
 	do
@@ -1142,13 +1150,13 @@ do_smtp_auth_qmr_o()
 				last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $i:")
 				if [ $? -eq 0 ] ; then
 					tcount=$(expr $tcount + 1)
-					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using qmr %s succeeded\n" "$i" "$str" "$hash" "$type" "$2"
+					printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-7s using qmr %s succeeded\n" "$i" "$str" "$hash" "$type" "$2"
 				else
 					fcount=$(expr $fcount + 1)
 					if [ $prompt -eq 1 ] ; then
 						less $logdir/smtpd/current
 					fi
-					printf "  testing SMTP AUTH %-12s (%s) hash=%-8s %-7s using qmr %s failed\n"    "$i" "$str" "$hash" "$type" "$2"
+					printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-7s using qmr %s failed\n"    "$i" "$str" "$hash" "$type" "$2"
 					[ -z "$failed" ] && failed="qmr-SMTP-AUTH-$i-hash-$hash" || failed="$failed, qmr-SMTP-AUTH-$i-hash-$hash"
 					[ $continue_on_err -eq 0 ] && exit 1 || return 0
 				fi
@@ -1162,7 +1170,6 @@ do_smtp_auth_qmr_o()
 				[ $continue_on_err -eq 0 ] && exit 1 || return 0
 			fi
 		done
-		echo
 	done
 }
 
@@ -1185,13 +1192,13 @@ do_smtp_auth_qmr_scram()
 		last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $1:")
 		if [ $? -eq 0 ] ; then
 			tcount=$(expr $tcount + 1)
-			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s using qmr (plaintext) succeeded\n" "$1" "$str" "$hash"
+			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using qmr (plaintext) succeeded\n" "$1" "$str" "$hash"
 		else
 			fcount=$(expr $fcount + 1)
 			if [ $prompt -eq 1 ] ; then
 				less $logdir/smtpd/current
 			fi
-			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s using qmr (plaintext) failed\n" "$1" "$str" "$hash"
+			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using qmr (plaintext) failed\n" "$1" "$str" "$hash"
 			[ -z "$failed" ] && failed="qmr-SMTP-AUTH-plaintext-$1-hash-$hash" || failed="$failed, qmr-SMTP-AUTH-plaintext-$1-hash-$hash"
 			[ $continue_on_err -eq 0 ] && exit 1 || return 0
 		fi
@@ -1223,13 +1230,13 @@ do_smtp_auth_qmr_scram()
 		last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $1:")
 		if [ $? -eq 0 ] ; then
 			tcount=$(expr $tcount + 1)
-			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s using qmr (hexsalted) succeeded\n" "$1" "$str" "$hash"
+			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using qmr (hexsalted) succeeded\n" "$1" "$str" "$hash"
 		else
 			fcount=$(expr $fcount + 1)
 			if [ $prompt -eq 1 ] ; then
 				less $logdir/smtpd/current
 			fi
-			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s using qmr (hexsalted) failed\n" "$1" "$str" "$hash"
+			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using qmr (hexsalted) failed\n" "$1" "$str" "$hash"
 			[ -z "$failed" ] && failed="SMTP-AUTH-hexsalted-$1-hash-$hash" || failed="$failed, SMTP-AUTH-hexsalted-$1-hash-$hash"
 			[ $continue_on_err -eq 0 ] && exit 1 || return 0
 		fi
@@ -1258,13 +1265,13 @@ do_gsasl_test()
 		--mechanism "$1" --smtp --connect localhost:2025 >> $logdir/gsasl/gsasl.log 2>&1
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
-		printf "  testing SMTP AUTH %-18s (%s) hash=%-8s using gsasl succeeded\n" "$1" "$str" "$hash"
+		printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using gsasl succeeded\n" "$1" "$str" "$hash"
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/gsasl/gsasl.log
 		fi
-		printf "  testing SMTP AUTH %-18s (%s) hash=%-8s using gsasl failed\n" "$1" "$str" "$hash"
+		printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using gsasl failed\n" "$1" "$str" "$hash"
 		[ -z "$failed" ] && failed="SMTP-AUTH-gsasl-$1-hash-$hash" || failed="$failed, SMTP-AUTH-gsasl-$1-hash-$hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
@@ -1853,9 +1860,10 @@ do_pwdlookup()
 {
 	enc_pass1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -p $1 | awk '{print $3}')
 	t=$(echo $1|cut -d@ -f1)
-	mkdir -p $testdir/pwdlookup
+	mkdir -p $testdir/pwdlookup $logdir/pwdlookup
 	env NSSD_SOCKET=$testdir/pwdlookup/nssd.sock \
-		/usr/sbin/nssd -f $sysconfdir/nssd.conf -d debug >$logdir/nssd.log 2>&1 &
+		/usr/sbin/nssd -f $sysconfdir/nssd.conf -d debug >$logdir/pwdlookup/nssd.log 2>&1 &
+	sleep 1
 	enc_pass2=$(env NSSD_SOCKET=$testdir/pwdlookup/nssd.sock /usr/libexec/indimail/check_getpw $1 | \
 		awk -F: '{print $1":"$2}')
 	ret=$?
@@ -1865,8 +1873,9 @@ do_pwdlookup()
 		printf "  testing pwdlookup succeeded\n"
 	else
 		fcount=$(expr $fcount + 1)
-		echo "pass $t:$enc_pass1 $enc_pass2"
 		printf "  testing pwdlookup failed\n"
+		echo "ret=$? pass [$t:$enc_pass1] [$enc_pass2]"
+		cat $logdir/pwdlookup/nssd.log
 		[ -z "$failed" ] && failed="pwdlookup" || failed="$failed, pwdlookup"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
@@ -2038,35 +2047,26 @@ check_service mysql.3307
 create_domain $domain1 pass
 do_vdominfo
 do_dbinfo
-
 echo
+
 create_plain_user $testuser1 $password2
-create_cram_user  $testuser2 $password3
-$sudo svc -2 $servicedir/inlookup.infifo
-
-do_inquerytest $testuser1
-do_inquerytest $testuser2
-echo
-hash="default"
-check_service smtpd 3
-check_service qmail-send.2025 3
-do_smtp_auth_swaks $testuser1 $password2 1
-do_smtp_auth_qmr_o $domain1 $testuser1 $password2 1
-
-> $servicedir/smtpd/variables/ENABLE_CRAM
-do_smtp_auth_swaks $testuser2 $password3 2
-do_smtp_auth_qmr_o $domain1 $testuser2 $password3 2
+change_password $testuser1 $password1
+do_vmoduser $testuser1
+if [ -f /etc/nsswitch.conf ] ; then
+	if (grep ^passwd /etc/nsswitch.conf|grep nssd >/dev/null 2>&1 && \
+			grep ^shadow /etc/nsswitch.conf|grep nssd >/dev/null 2>&1 && \
+			grep ^group /etc/nsswitch.conf|grep nssd >/dev/null 2>&1) ; then
+		do_pwdlookup $testuser1
+	fi
+fi
 delete_user $testuser1
-delete_user $testuser2
 echo
 
-delete_relay >/dev/null
+echo "Starting SMTP AUTH, qmail-remote, IMAP/POP3 login tests for plain/cram users"
+$sudo svc -2 $servicedir/inlookup.infifo
 check_service inlookup.infifo
-check_service pop3d 3
-check_service pop3d-ssl 3
-check_service imapd 3
-check_service imapd-ssl 3
-for hash in $hash_supported
+
+for hash in "default" $hash_supported
 do
 	t1="$password2""$hash"
 	t2="$password3""$hash"
@@ -2083,9 +2083,11 @@ do
 	fi
 	do_smtp_auth_swaks $testuser1 $t1 1
 	do_smtp_auth_qmr_o $domain1 $testuser1 $t1 1
+	#echo
 	> $servicedir/smtpd/variables/ENABLE_CRAM
 	do_smtp_auth_swaks $testuser2 $t2 2
 	do_smtp_auth_qmr_o $domain1 $testuser2 $t2 2
+	echo
 	for j in 1 2
 	do
 		case $j in
@@ -2132,10 +2134,14 @@ do
 		done
 		destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser1 | awk '{print $3}')
 		destdir2=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser2 | awk '{print $3}')
+		check_service pop3d 3
+		check_service pop3d-ssl 3
 		test_pop3 $testuser2 $t2 $testuser1 $destdir2/Maildir
 		echo
 		test_pop3 $testuser1 $t1 $testuser2 $destdir1/Maildir
 		echo
+		check_service imapd 3
+		check_service imapd-ssl 3
 		test_imap $testuser2 $t2 $testuser1 $destdir2/Maildir
 		echo
 		test_imap $testuser1 $t1 $testuser2 $destdir1/Maildir
@@ -2143,25 +2149,15 @@ do
 	done
 	delete_user $testuser1
 	delete_user $testuser2
+	echo
 done
-
-create_plain_user $testuser1 $password2
-change_password $testuser1 $password1
-do_vmoduser $testuser1
-if [ -f /etc/nsswitch.conf ] ; then
-	if (grep ^passwd /etc/nsswitch.conf|grep nssd >/dev/null 2>&1 && \
-			grep ^shadow /etc/nsswitch.conf|grep nssd >/dev/null 2>&1 && \
-			grep ^group /etc/nsswitch.conf|grep nssd >/dev/null 2>&1) ; then
-		do_pwdlookup $testuser1
-	fi
-fi
-delete_user $testuser1
-
+echo "  testing SMTP AUTH, qmail-remote, IMAP/POP3 login tests for plain/cram users succeeded"
 echo
+
 echo 1 > $servicedir/smtpd/variables/ENABLE_CRAM
 for hash in $hash_supported
 do
-	echo "Starting SMTP AUTH, IMAP/POP3 login tests for hash $hash"
+	echo "Starting SMTP AUTH, IMAP/POP3 login, GSASL tests for hash $hash scram users"
 	t1="$password1""$hash"
 	t2="$password2""$hash"
 	create_scram_user SCRAM-SHA-1   $testuser1 $t1 $hash
@@ -2228,9 +2224,12 @@ do
 				$sudo svc -r $servicedir/"$i"$k
 			done
 		done
-		test_pop3 $testuser1 $t1 $testuser2
+		destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser1 | awk '{print $3}')
+		check_service pop3d 3
+		test_pop3 $testuser1 $t1 $testuser2 $destdir1
 		echo
-		test_imap $testuser1 $t1 $testuser2
+		check_service pop3d-ssl 3
+		test_imap $testuser1 $t1 $testuser2 $destdir1
 		echo
 		check_service smtpd 3
 		if [ -x $gsasl ] ; then
@@ -2240,7 +2239,7 @@ do
 			do_gsasl_test                   "SCRAM-SHA-256-PLUS" $testuser2 $t2
 		fi
 		do_smtp_auth_swaks $testuser1 $t1 3
-		echo
+		#echo
 		do_smtp_auth_qmr_scram "SCRAM-SHA-1"        $domain1 $testuser1 $t1
 		do_smtp_auth_qmr_scram "SCRAM-SHA-1-PLUS"   $domain1 $testuser1 $t1
 		do_smtp_auth_qmr_scram "SCRAM-SHA-256"      $domain1 $testuser2 $t2
@@ -2249,10 +2248,11 @@ do
 		do_smtp_auth_qmr_o $domain1 $testuser1 $t1 3
 		echo
 	done
-	echo "  testing SMTP AUTH, IMAP/POP3 login tests for hash $hash succeeded"
 	tcount=$(expr $tcount + 1)
 	delete_user $testuser1
 	delete_user $testuser2
+	echo
+	echo "  testing SMTP AUTH, IMAP/POP3 login, GSASL tests for hash $hash scram users succeeded"
 	echo
 done
 tcount=$(expr $tcount + 3)
@@ -2294,6 +2294,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.6  2023-08-23 13:09:26+05:30  Cprogrammer
+# formated messages
+#
 # Revision 1.5  2023-08-22 21:23:31+05:30  Cprogrammer
 # added test for autoresponder
 #
