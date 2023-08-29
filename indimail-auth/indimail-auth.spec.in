@@ -295,13 +295,6 @@ chmod -R 755 %{buildroot}/%{pam_moduledir}
 %attr(755,root,root)                    %{_libdir}/libnss_nssd.so.2.0.0
                                         %{_libdir}/libnss_nssd.so.2
 
-%clean
-%if %{undefined nodebug}
-%{__rm} -f %{_builddir}/debugfiles.list %{_builddir}/debuglinks.list \
-  %{_builddir}/debugsourcefiles.list %{_builddir}/debugsources.list \
-  %{_builddir}/elfbins.list
-%endif
-
 ### SCRIPTLET ###############################################################################
 %pretrans
 if [ -d /run ] ; then
