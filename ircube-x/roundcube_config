@@ -822,7 +822,14 @@ if [ ! -d /service/httpd ] ; then
 		echo "  echo \"ln -s /etc/roundcubemail /usr/share/roundcubemail/config\""
 		echo "  ln -s /etc/roundcubemail /usr/share/roundcubemail/config"
 		echo "fi"
-		echo "mkdir -p $rundir/httpd"
+		echo ""
+		echo "if [ ! -d $rundir/lock ] ; then"
+		echo "  mkdir -p $rundir/lock"
+		echo "fi"
+		echo "if [ ! -d $rundir/httpd ] ; then"
+		echo "  mkdir -p $rundir/httpd"
+		echo "fi"
+		echo ""
 		echo "exec /usr/sbin/httpd -DFOREGROUND"
 		) > /service/httpd/run
 		chmod +x /service/httpd/run
@@ -834,7 +841,7 @@ if [ ! -d /service/httpd ] ; then
 		chmod +x /service/httpd/log/run
 	elif [ -x /usr/sbin/apache2 ] ; then
 		echo "Creating supervised service for apache2"
-		mkdir -p /service/httpd
+		mkdir -p /service/httpd/log
 		touch /service/httpd/down
 		(
 		echo "#!/bin/sh"
@@ -845,6 +852,11 @@ if [ ! -d /service/httpd ] ; then
 		echo "  echo \"ln -s /etc/roundcubemail /usr/share/roundcubemail/config\""
 		echo "  ln -s /etc/roundcubemail /usr/share/roundcubemail/config"
 		echo "fi"
+		echo ""
+		echo "if [ ! -d $rundir/lock ] ; then"
+		echo "  mkdir -p $rundir/lock"
+		echo "fi"
+		echo ""
 		echo "exec fghack /usr/sbin/apachectl -DFOREGROUND"
 		) > /service/httpd/run
 		chmod +x /service/httpd/run
