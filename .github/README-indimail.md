@@ -2269,19 +2269,25 @@ For TLS sessions, the default location of /etc/indimail/certs can be overriden b
 
 ## Note on setting ciphers
 
-As mentioned earlier, ciphers can be set using the control files <u>servercipherlist</u>, <u>serverciphersuite</u>, <u>clientcipherlist</u>, <u>clientciphersuite</u> and environment variables TLS\_CIPHER\_LIST and TLS\_CIPHER\_SUITE. Depending on the openssl library version, the tls\_init function form libqmail will use servercipherlist, clientcipherlist, TLS\_CIPHER\_LIST for TLSv1.2 and below and serverciphersuite, clientciphersuite, TLS\_CIPHER\_SUITE for TSLv1.3 and above. However things are not that simple.
+As mentioned earlier, ciphers can be set using the control files <u>servercipherlist</u>, <u>serverciphersuite</u>, <u>clientcipherlist</u>, <u>clientciphersuite</u> and environment variables <b>TLS\_CIPHER\_LIST</b> and <b>TLS\_CIPHER\_SUITE</b>. Depending on the openssl library version, the <b>tls\_init()</b> function from libqmail will use control files <u>servercipherlist</u>, <u>clientcipherlist</u>, environment variable <b>TLS\_CIPHER\_LIST</b> for TLSv1.2 and below and control files <u>serverciphersuite</u>, <u>clientciphersuite</u>, environment variable <b>TLS\_CIPHER\_SUITE</b> for TSLv1.3 and above. However things are not that simple.
 
 This is what the man page says.
 
-`The control string str for SSL\_CTX\_set\_cipher\_list(), SSL\_set\_cipher\_list(), SSL\_CTX\_set\_ciphersuites() and SSL\_set\_ciphersuites() should be universally usable and not depend on details of the library configuration (ciphers compiled in). Thus no syntax checking takes place. <u>Items that are not recognized, because the corresponding ciphers are not compiled in or because they are mistyped, are simply ignored.</u> Failure is only flagged if no ciphers could be collected at all`
+- The control string str for <b>SSL\_CTX\_set\_cipher\_list()</b>, <b>SSL\_set\_cipher\_list()</b>, <b>SSL\_CTX\_set\_ciphersuites()</b> and <b>SSL\_set\_ciphersuites()</b> should be universally usable and not depend on details of the library configuration (ciphers compiled in). Thus no syntax checking takes place. <u>Items that are not recognized, because the corresponding ciphers are not compiled in or because they are mistyped, are simply ignored. Failure is only flagged if no ciphers could be collected at all</u>.
 
-The portion underlined above isn't true as written in the manual. In some of the openssl versions you cannot combine the TLSv1.2 and TLSv1.3 ciphers in <u>serverciphersuite</u>, <u>clientciphersuite</u>, <b>TLS\_CIPHER\_SUITE</b>. In few version you need to have both TLSv1.2 ciphers and TLSv1.3 ciphers and in few versions, mixing TLSv1.2 and TLSv1.3 ciphers results in SSL\_set\_ciphersuites(), SSL\_set\_cipher\_suites() to fail.
+The portion underlined above isn't true as written in the man page above (openssl 3.0.9). In some of the openssl versions you cannot combine the TLSv1.2 and TLSv1.3 ciphers in <u>serverciphersuite</u>, <u>clientciphersuite</u>, <b>TLS\_CIPHER\_SUITE</b>. In few version you need to have both TLSv1.2 ciphers and TLSv1.3 ciphers and in few versions, mixing TLSv1.2 and TLSv1.3 ciphers results in <b>SSL\_set\_ciphersuites()</b>, <b>SSL\_set\_cipher\_suites()</b> to fail (contrary to what the man page says).
 
-The table below shows the situation. So for archlinux, tumbleweed, alpine, fc37, fc38, debian12, gentoo, almalinux9, oracle9, rockylinux9, stream9 ubi9,jammy you need not modify the install timed defaults for \*ciphersuite control files. For debian10, debian11, leap15.4 almalinux8, oracle8, rockylinux8, stream8, ubi8, do not combine the TLSv1.2 and TLSv1.3 ciphers in \*suite control files. For focal and bionic you need to combine TLSv1.2 and TLSv1.3 ciphes in \*ciphersuite control files for both TLSv1.2 and TLSv1.3 to work.
+The table below shows the situation. So for ArchLinux, openSUSE Tumbleweed, alpine, Fedora 37, Fedora 38, Debian 12, Gentoo, AlmaLinux 9, Oracle 9, RockyLinux 9, CentOS Stream 9 Ubi 9, Ubuntu jammy you need not modify the install time defaults for <u>[server|client]ciphersuite</u> control files. For debian10, debian11, leap15.4 almalinux8, oracle8, rockylinux8, stream8, ubi8, do not combine the TLSv1.2 and TLSv1.3 ciphers in <u>[server|client]suite</u> control files. Just leave the install time defaults. For focal and bionic you need to combine TLSv1.2 and TLSv1.3 ciphes in <u>[server|client]ciphersuite</u> control files for both TLSv1.2 and TLSv1.3 to work. e.g. This is what you need to do immediately after installing indimail-mta for systems having openssl library version 1.1.1f and below. The TLS control files are created by the post install script using the command `svctool --config=qmail`.
 
-OpenSSL library version|Status|Distribution
------------------------|------------|-------
-3.1.2|TLSv1.2+TLSv1.3 works but not needed|archlinux, openSUSE tumbleweed, alpine
+```
+$ t1=$(cat /etc/indimail/control/servercipherlist)
+$ t2=$(cat /etc/indimail/control/serverciphersuite)
+$ sudo sh -c "echo $t1:$t2 > /etc/indimail/control/serverciphersuite"
+```
+
+OpenSSL library version|Cipher Status|Linux OS Distribution
+-----------------------|-------------|---------------------
+3.1.2|TLSv1.2+TLSv1.3 works but not needed|ArchLinux, openSUSE Tumbleweed, alpine
 3.0.9|TLSv1.2+TLSv1.3 works but not needed|Fedora 37, Fedora 38, Debian 12, Gentoo
 3.0.8|TLSv1.2+TLSv1.3 works but not needed|Ubuntu lunar
 3.0.7|TLSv1.2+TLSv1.3 works but not needed|AlmaLinux 9, Oracle 9, RockyLinux 9, CentOS Stream 9, Ubi 9
@@ -2289,13 +2295,13 @@ OpenSSL library version|Status|Distribution
 1.1.1n|TLSv1.2+TLSv1.3 results in failure|Debian 10, Debian 11
 1.1.1l|TLSv1.2+TLSv1.3 results in failure|openSUSE leap15.4
 1.1.1k|TLSv1.2+TLSv1.3 results in failure|AlmaLinux 8, Oracle 8, RockyLinux 8, CentOS Stream 8, Ubi 8
-1.1.1f|TLSv1.2+TLSv1.3 needed|Ubuntu focal
-1.1.1|TLSv1.2+TLSv1.3 needed|Ubuntu bionic
+1.1.1f|TLSv1.2+TLSv1.3 needed to have both TLSv1.2 and TLSv1.3 work|Ubuntu focal
+1.1.1|TLSv1.2+TLSv1.3 needed to have both TLSv1.2 and TLSv1.3 work|Ubuntu bionic
 1.0.2k-fips|TLSv1.3 not supported|CentOS 7
 
 ## Updating RSA and DH parameters
 
-A script *update\_tmprsadh* in cron uses the following openssl commands to pre-generate 2048 bites RSA and DH parameters. You can pass --maxbits argument to *update\_tmprsadh* to generate these with higher bits. You can set the environment variable **SSL\_BITS** to make tcpclient choose specific bits for the RSA/DH parameters. These files are generated in /etc/indimail/certs. *update\_rmprsadh* is installed to be run by cron if you have installed indimail from Open Build Service.
+A script <b>update\_tmprsadh</b> in cron uses the following openssl commands to pre-generate 2048 bites RSA and DH parameters. You can pass --maxbits argument to <b>update\_tmprsadh</b> to generate these with higher bits. You can set the environment variable <b>SSL\_BITS</b> to make tcpclient choose specific bits for the RSA/DH parameters. These files are generated in /etc/indimail/certs. <b>update\_rmprsadh</b> is installed to be run by cron if you have installed indimail from Open Build Service.
 
 ```
 cd /etc/indimail/certs
