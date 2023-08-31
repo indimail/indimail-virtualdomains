@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -18,23 +17,17 @@ main(int argc, char *argv[])
 
 	if (argc < 2)
 		return 1;
-	stream = fopen(argv[1], "r");
-	if (stream == NULL)
+	if (!(stream = fopen(argv[1], "r")))
 		return 1;
 	base64_init(&b);
-	ld = line_alloc();
-	if (ld == NULL)
-	{
+	if (!(ld = line_alloc())) {
 		fclose(stream);
 		return 1;
 	}
-	while (!(feof(stream)))
-	{
+	while (!(feof(stream))) {
 		memset(buf, 0, 500);
 		fgets(buf, 500, stream);
-		ret = base64_decode(&b, ld, buf);
-		if (!ret)
-		{
+		if (!(ret = base64_decode(&b, ld, buf))) {
 			printf("Error decoding\n");
 			return 1;
 		}

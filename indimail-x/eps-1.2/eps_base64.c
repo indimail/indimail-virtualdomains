@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <unistd.h>
 #include "eps.h"
 
@@ -9,8 +8,7 @@ base64_init(struct base64_t *b)
 {
 	int             i = 0;
 
-	for (i = (sizeof alphabet) - 1; i >= 0; i--)
-	{
+	for (i = (sizeof alphabet) - 1; i >= 0; i--) {
 		b->inalphabet[alphabet[i]] = 1;
 		b->decoder[alphabet[i]] = i;
 	}
@@ -25,48 +23,36 @@ base64_decode(struct base64_t *b, struct line_t *l, char *data)
 	p = (unsigned char *) data;
 	char_count = bits = 0;
 
-	while (*p)
-	{
+	while (*p) {
 		if (*p == '=')
 			break;
-		if (!b->inalphabet[*p])
-		{
+		if (!b->inalphabet[*p]) {
 			p++;
 			continue;
 		}
-
 		bits += b->decoder[*p];
 		char_count++;
-
-		if (char_count == 4)
-		{
+		if (char_count == 4) {
 			buf[0] = (bits >> 16);
 			buf[1] = ((bits >> 8) & 0xff);
 			buf[2] = (bits & 0xff);
 			line_inject(l, (char *) buf, 3);
 			bits = 0;
 			char_count = 0;
-		}
-
-		else
+		} else
 			bits <<= 6;
 
 		p++;
 	}
 
-	if (!(*p))
-	{
-		if (char_count)
-		{
+	if (!(*p)) {
+		if (char_count) {
 #ifdef DECODE_DEBUG
 			fprintf(stderr, "base64 encoding incomplete: at least %d bits truncated", ((4 - char_count) * 6));
 #endif
 			errors++;
 		}
-	}
-
-	else
-	{
+	} else {
 		switch (char_count)
 		{
 		case 1:
@@ -87,10 +73,8 @@ base64_decode(struct base64_t *b, struct line_t *l, char *data)
 			break;
 		}
 	}
-
 	if (errors)
 		return 0;
-
 	return 1;
 }
 
@@ -104,87 +88,52 @@ base64_encode(int fd, struct line_t *l)
 	bytes = 0;
 	p = (unsigned char *) l->data;
 	bits = cols = char_count = c = 0;
-
-	while (bytes < l->bytes)
-	{
+	while (bytes < l->bytes) {
 		bits += *p;
 		char_count++;
-
-		if (char_count == 3)
-		{
+		if (char_count == 3) {
 			buf[0] = alphabet[bits >> 18];
 			buf[1] = alphabet[(bits >> 12) & 0x3f];
 			buf[2] = alphabet[(bits >> 6) & 0x3f];
 			buf[3] = alphabet[bits & 0x3f];
-
-			ret = write(fd, buf, 4);
-			if (ret < 4)
+			if ((ret = write(fd, buf, 4)) < 4)
 				return 0;
-
 			cols += 4;
-
-			if (cols == 72)
-			{
+			if (cols == 72) {
 				c = '\n';
-
-				ret = write(fd, &c, 1);
-				if (ret < 1)
+				if ((ret = write(fd, &c, 1)) < 1)
 					return 0;
-
 				cols = 0;
 			}
-
 			bits = 0;
 			char_count = 0;
-		}
-
-		else
+		} else
 			bits <<= 8;
-
 		p++;
 		bytes++;
 	}
-
-	if (char_count != 0)
-	{
+	if (char_count != 0) {
 		bits <<= (16 - (8 * char_count));
-
 		buf[0] = alphabet[bits >> 18];
 		buf[1] = alphabet[(bits >> 12) & 0x3f];
-
-		ret = write(fd, buf, 2);
-		if (ret < 2)
+		if ((ret = write(fd, buf, 2)) < 2)
 			return 0;
-
-		if (char_count == 1)
-		{
+		if (char_count == 1) {
 			buf[0] = '=';
 			buf[1] = '=';
-
-			ret = write(fd, buf, 2);
-			if (ret < 2)
+			if ((ret = write(fd, buf, 2)) < 2)
 				return 0;
-		}
-
-		else
-		{
+		} else {
 			buf[0] = alphabet[(bits >> 6) & 0x3f];
 			buf[1] = '=';
-
-			ret = write(fd, buf, 2);
-			if (ret < 2)
+			if ((ret = write(fd, buf, 2)) < 2)
 				return 0;
 		}
-
-		if (cols > 0)
-		{
+		if (cols > 0) {
 			c = '\n';
-
-			ret = write(fd, &c, 1);
-			if (ret < 1)
+			if ((ret = write(fd, &c, 1)) < 1)
 				return 0;
 		}
 	}
-
 	return 1;
 }

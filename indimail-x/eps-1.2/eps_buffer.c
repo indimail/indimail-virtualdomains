@@ -1,4 +1,6 @@
+#ifdef DEBUG
 #include <stdio.h>
+#endif
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -12,16 +14,14 @@ buffer_alloc(void)
 	int             ret = 0;
 	struct buffer_t *b = NULL;
 
-	if(!(b = (struct buffer_t *) mmalloc(sizeof(struct buffer_t), "buffer_alloc")))
+	if (!(b = (struct buffer_t *) mmalloc(sizeof(struct buffer_t), "buffer_alloc")))
 		return NULL;
 	memset((struct buffer_t *) b, 0, sizeof(struct buffer_t));
-	if((b->l = line_alloc()) == NULL)
-	{
+	if ((b->l = line_alloc()) == NULL) {
 		mfree(b);
 		return NULL;
 	}
-	if(!(ret = line_init(b->l, NULL, 0)))
-	{
+	if (!(ret = line_init(b->l, NULL, 0))) {
 		line_kill(b->l);
 		mfree(b);
 		return NULL;
@@ -39,10 +39,9 @@ buffer_init(int fd, unsigned long blen)
 	 */
 	if (blen < 2)
 		return NULL;
-	if(!(b = buffer_alloc()))
+	if (!(b = buffer_alloc()))
 		return NULL;
-	if(!(b->b = (char *) mmalloc(blen + 1, "buffer_init")))
-	{
+	if (!(b->b = (char *) mmalloc(blen + 1, "buffer_init"))) {
 		buffer_kill(b);
 		return NULL;
 	}
@@ -66,8 +65,7 @@ buffer_restart(struct buffer_t *b, int fd)
 	line_restart(b->l);
 	if (b->fd == -1)
 		b->bp = b->b;
-	else
-	{
+	else {
 		b->bp = NULL;
 		memset((char *) b->b, 0, b->blen);
 	}
@@ -94,10 +92,9 @@ buffer_next_line(struct buffer_t *bb)
 	/*
 	 * Call line_restart?
 	 */
-	if (bb->restart)
-	{
+	if (bb->restart) {
 #ifdef DEBUG
-		printf("restarting\n");
+		fprintf(stderr, "restarting\n");
 #endif
 		line_restart(bb->l);
 		bb->restart = 0;
@@ -105,74 +102,60 @@ buffer_next_line(struct buffer_t *bb)
 	/*
 	 * Buffer is empty
 	 */
-	if (bb->cin == 0)
-	{
-		if (bb->fd != -1)
-		{
-			ret = read(bb->fd, bb->b, (bb->blen - 1));
-			if (!ret)
-			{
+	if (bb->cin == 0) {
+		if (bb->fd != -1) {
+			if (!(ret = read(bb->fd, bb->b, (bb->blen - 1)))) {
 #ifdef DEBUG
-				printf("read returns NULL %lu[%s]\n", bb->l->bytes, bb->l->data);
+				fprintf(stderr, "read returns NULL %lu[%s]\n", bb->l->bytes, bb->l->data);
 #endif
 				bb->eof = 1;
 				return NULL;
-			}
-
-			else
+			} else
 				bb->cin = ret;
-		} else
-		{
+		} else {
 			bb->eof = 1;
 			return NULL;
 		}
 	}
 #ifdef DEBUG
-	printf("BUFFER: [%s] RESTART:%d\n", bb->b, bb->restart);
+	fprintf(stderr, "BUFFER: [%s] RESTART:%d\n", bb->b, bb->restart);
 #endif
-	while (1)
-	{
+	while (1) {
 		fn = 0;
 		if (bb->fd == -1)
 			bp = p = t = bb->bp;
 		else
 			bp = p = t = bb->b;
-		for (bb->clen = bb->ulen = 0;; p++)
-		{
-			if (*p == '\0')
-			{
+		for (bb->clen = bb->ulen = 0;; p++) {
+			if (*p == '\0') {
 				p = NULL;
 				break;
 			} else
-			if (*p == '\n')
-			{
+			if (*p == '\n') {
 				if (bb->ulen && *(p - 1) == '\r')
 					bb->ulen--;
 				fn = 1;
 				bb->clen++;
 				break;
-			} else
-			{
+			} else {
 				bb->ulen++;
 				bb->clen++;
 			}
 		}
 #ifdef DEBUG
-		printf("EXAMINING: [%s]\n", bp);
+		fprintf(stderr, "EXAMINING: [%s]\n", bp);
 #endif
 		/*
 		 * No newline found.
 		 */
-		if (!fn)
-		{
+		if (!fn) {
 #ifdef DEBUG
-			printf("No newline\n");
-			printf("Injecting from newline: [");
+			fprintf(stderr, "No newline\n");
+			fprintf(stderr, "Injecting from newline: [");
 			line_print(bp, bb->ulen);
-			printf("]\n");
+			fprintf(stderr, "]\n");
 #endif
-			ret = line_inject(bb->l, bp, bb->ulen);
-			if (!ret)
+			if (!(ret = line_inject(bb->l, bp, bb->ulen)))
 				return NULL;
 			if (bb->fd == -1)
 				bb->bp += bb->clen;
@@ -186,12 +169,11 @@ buffer_next_line(struct buffer_t *bb)
 			return buffer_next_line(bb);
 		}
 #ifdef DEBUG
-		printf("Injecting from base: [");
+		fprintf(stderr, "Injecting from base: [");
 		line_print(bp, bb->ulen);
-		printf("]\n");
+		fprintf(stderr, "]\n");
 #endif
-		if (bb->ulen)
-		{
+		if (bb->ulen) {
 			ret = line_inject(bb->l, bp, bb->ulen);
 			if (!ret)
 				return NULL;
@@ -207,7 +189,7 @@ buffer_next_line(struct buffer_t *bb)
 		bb->ulen = 0;
 		bb->clen = 0;
 #ifdef DEBUG
-		printf("bottom returns line\n");
+		fprintf(stderr, "bottom returns line\n");
 #endif
 		return bb->l->data;
 	}

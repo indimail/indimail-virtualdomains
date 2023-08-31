@@ -1,4 +1,6 @@
+#ifdef MIME_DEBUG
 #include <stdio.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -20,16 +22,12 @@ mime_new_instance(void)
 {
 	struct mime_t  *m = NULL;
 
-	m = (struct mime_t *) mmalloc(sizeof(struct mime_t), "mime_new_instance");
-	if (m == NULL)
+	if (!(m = (struct mime_t *) mmalloc(sizeof(struct mime_t), "mime_new_instance")))
 		return NULL;
-
 	memset((struct mime_t *) m, 0, sizeof(struct mime_t));
-
 	m->content_type = CON_TEXT;
 	m->encoding = ENC_TEXT;
 	m->disposition = DIS_INLINE;
-
 	return m;
 }
 
@@ -38,15 +36,12 @@ mime_header(struct eps_t *eps, struct mime_t *m, struct header_t *h)
 {
 	int             i = 0;
 
-	for (i = 0; _m_i_headers[i].name; i++)
-	{
-		if (!(strcasecmp((const char *) _m_i_headers[i].name, (const char *) h->name)))
-		{
+	for (i = 0; _m_i_headers[i].name; i++) {
+		if (!strcasecmp((const char *) _m_i_headers[i].name, (const char *) h->name)) {
 			_m_i_headers[i].func(eps, h, (void *) m);
 			return 1;
 		}
 	}
-
 	return 0;
 }
 
@@ -56,23 +51,16 @@ mime_content_type(struct eps_t *eps, struct header_t *h, void *mx)
 	char           *p = NULL;
 	struct mime_t  *m = (struct mime_t *) mx;
 
-	if ((!h) || (!h->atoms) || (!h->atoms->next) || (!h->atoms->next->data))
+	if (!h || !h->atoms || !h->atoms->next || !h->atoms->next->data)
 		m->content_type = CON_TEXT;
-
 	else
 		m->content_type = content_parse((char *) h->atoms->next->data, TYP_CON);
-
-	if (!(m->filename))
-	{
-		p = (char *) header_fetch_atom(h, (unsigned char *) "name");
-		if (p)
+	if (!(m->filename)) {
+		if ((p = (char *) header_fetch_atom(h, (unsigned char *) "name")))
 			m->filename = (char *) mstrdup((unsigned char *) p);
 	}
-
-	if (m->content_type & CON_MULTI)
-	{
-		p = (char *) header_fetch_atom(h, (unsigned char *) "boundary");
-		if (p)
+	if (m->content_type & CON_MULTI) {
+		if ((p = (char *) header_fetch_atom(h, (unsigned char *) "boundary")))
 			boundary_add(eps, p);
 	}
 }
@@ -82,9 +70,8 @@ mime_transfer_encoding(struct eps_t *eps, struct header_t *h, void *mx)
 {
 	struct mime_t  *m = (struct mime_t *) mx;
 
-	if ((!h) || (!h->atoms) || (!h->atoms->next) || (!h->atoms->next->data))
+	if (!h || !h->atoms || !h->atoms->next || !h->atoms->next->data)
 		m->encoding = ENC_TEXT;
-
 	else
 		m->encoding = content_parse((char *) h->atoms->next->data, TYP_ENC);
 }
@@ -95,16 +82,12 @@ mime_content_disposition(struct eps_t *eps, struct header_t *h, void *mx)
 	char           *p = NULL;
 	struct mime_t  *m = (struct mime_t *) mx;
 
-	if ((!h) || (!h->atoms) || (!h->atoms->next) || (!h->atoms->next->data))
+	if (!h || !h->atoms || !h->atoms->next || !h->atoms->next->data)
 		m->disposition = DIS_INLINE;
-
 	else
 		m->disposition = content_parse((char *) h->atoms->next->data, TYP_DIS);
-
-	if (!(m->filename))
-	{
-		p = (char *) header_fetch_atom(h, (unsigned char *) "filename");
-		if (p)
+	if (!m->filename) {
+		if ((p = (char *) header_fetch_atom(h, (unsigned char *) "filename")))
 			m->filename = (char *) mstrdup((unsigned char *) p);
 	}
 }
@@ -114,13 +97,10 @@ mime_kill(struct mime_t *m)
 {
 	if (m->filename)
 		mfree(m->filename);
-
 	if (m->boundary)
 		mfree(m->boundary);
-
 	if (m->orig)
 		mfree(m->orig);
-
 	mfree(m);
 }
 
@@ -131,24 +111,17 @@ mime_init_stream(struct eps_t *eps)
 
 	if (eps->m)
 		mime_kill(eps->m);
-
 	eps->u->eof = 0;
 	eps->m = mime_new_instance();
 
-	p = boundary_fetch(eps, eps->b->cdepth);
-	if (p)
-	{
+	if ((p = boundary_fetch(eps, eps->b->cdepth))) {
 		eps->m->boundary = (char *) mstrdup((unsigned char *) p);
 		eps->m->depth = eps->b->cdepth;
-	}
-
-	else
+	} else
 		eps->m->depth = -1;
-
 #ifdef MIME_DEBUG
-	printf("New MIME: [%s](%d)\n", p ? p : "NONE", eps->m->depth);
+	fprintf(stderr, "New MIME: [%s](%d)\n", p ? p : "NONE", eps->m->depth);
 #endif
-
 	return 1;
 }
 
@@ -158,22 +131,16 @@ mime_next_header(struct eps_t *eps)
 	unsigned char  *l = NULL;
 	struct header_t *h = NULL;
 
-	l = (unsigned char *) unroll_next_line(eps->u);
-	if (l == NULL)
-	{
+	if (!(l = (unsigned char *) unroll_next_line(eps->u))) {
 #ifdef MIME_DEBUG
-		printf("Unroll ends\n");
+		fprintf(stderr, "Unroll ends\n");
 #endif
 		return NULL;
 	}
-
-	h = header_parse(l);
-	if (h)
-	{
-		if ((h->name) && (h->data))
+	if ((h = header_parse(l))) {
+		if (h->name && h->data)
 			mime_header(eps, eps->m, h);
 	}
-
 	return h;
 }
 
@@ -183,65 +150,43 @@ mime_next_line(struct eps_t *eps)
 	int             ret = 0;
 	unsigned char  *l = NULL;
 
-	l = (unsigned char *) buffer_next_line(eps->u->b);
-	if (l == NULL)
+	if (!(l = (unsigned char *) buffer_next_line(eps->u->b)))
 		return NULL;
-
-	if ((*l == '-') && (*(l + 1) == '-'))
-	{
+	if (*l == '-' && *(l + 1) == '-') {
 		ret = boundary_is(eps, (char *) (l + 2));
-		if (ret == 1)
-		{
+		if (ret == 1) {
 			if (eps->m->orig)
 				mfree(eps->m->orig);
-
-			eps->m->orig = (char *) mmalloc(strlen((const char *) l) + 1, "mime_next_line");
-			if (eps->m->orig)
-			{
+			if ((eps->m->orig = (char *) mmalloc(strlen((const char *) l) + 1, "mime_next_line"))) {
 				memset((char *) eps->m->orig, 0, strlen((const char *) l) + 1);
 				memcpy((char *) eps->m->orig, (char *) l, strlen((const char *) l));
 			}
-
 			return NULL;
-		}
-
-		else
-		if (ret == 2)
-		{
+		} else
+		if (ret == 2) {
 #ifdef MIME_DEBUG
-			printf("Boundary [%s] terminates; removing\n", eps->m->boundary);
+			fprintf(stderr, "Boundary [%s] terminates; removing\n", eps->m->boundary);
 #endif
 			eps->m->depth = -1;
-
 			boundary_remove_last(eps);
-
-			if (eps->b->cdepth == 0)
-			{
+			if (eps->b->cdepth == 0) {
 #ifdef MIME_DEBUG
-				printf("Reached 0 depth: EOF\n");
+				fprintf(stderr, "Reached 0 depth: EOF\n");
 #endif
 				eps->u->b->eof = 1;
 			}
-
 			if (eps->m->orig)
 				mfree(eps->m->orig);
-
-			eps->m->orig = (char *) mmalloc(strlen((const char *) l) + 1, "mime_next_line");
-			if (eps->m->orig)
-			{
+			if ((eps->m->orig = (char *) mmalloc(strlen((const char *) l) + 1, "mime_next_line"))) {
 				memset((char *) eps->m->orig, 0, strlen((const char *) l) + 1);
 				memcpy((char *) eps->m->orig, (char *) l, strlen((const char *) l));
 			}
-
 			return NULL;
 		}
 	}
-
-	if (eps->m->orig)
-	{
+	if (eps->m->orig) {
 		mfree(eps->m->orig);
 		eps->m->orig = NULL;
 	}
-
-	return l;
+return l;
 }

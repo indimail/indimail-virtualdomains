@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <string.h>
 #include "eps_content.h"
 
@@ -36,18 +35,14 @@ content_parse(char *d, char type)
 
 	if (type == TYP_CON)
 		c = content_prefs;
-
 	else
 	if (type == TYP_ENC)
 		c = encoding_prefs;
-
 	else
 	if (type == TYP_DIS)
 		c = disposition_prefs;
-
 	else
 		return 0;
-
 	/*
 	 * Header data is empty, so we
 	 * just return the default type
@@ -56,20 +51,15 @@ content_parse(char *d, char type)
 	 */
 	if (d == NULL)
 		return c[0].type;
-
-	for (i = 1; c[i].data; i++)
-	{
-		if (c[i].data)
-		{
+	for (i = 1; c[i].data; i++) {
+		if (c[i].data) {
 			if (!(strncasecmp(c[i].data, d, strlen(c[i].data))))
 				return c[i].type;
 		}
 	}
-
 	/*
 	 * Return our default encoding type
 	 * since we didnt find a match.
 	 */
-
 	return c[0].type;
 }

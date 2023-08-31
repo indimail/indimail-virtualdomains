@@ -15,26 +15,20 @@ main(int argc, char *argv[])
 
 	if (argc < 2)
 		return 1;
-	fd = open(argv[1], O_RDONLY);
-	if (fd == -1)
+	if ((fd = open(argv[1], O_RDONLY)) == -1)
 		return 1;
-	l = line_alloc();
-	if (l == NULL)
-	{
+	if (!(l = line_alloc())) {
 		close(fd);
 		return 1;
 	}
 	line_init(l, NULL, 5000);
-	while (1)
-	{
+	while (1) {
 		memset((char *) buf, 0, 500);
-		ret = read(fd, buf, 500);
-		if (ret < 1)
+		if ((ret = read(fd, buf, 500)) < 1)
 			break;
 		line_inject(l, buf, ret);
 	}
-	ret = base64_encode(1, l);
-	if (!ret)
+	if (!(ret = base64_encode(1, l)))
 		printf("Error encoding\n");
 	line_kill(l);
 	close(fd);

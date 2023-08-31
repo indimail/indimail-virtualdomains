@@ -1,4 +1,6 @@
+#ifdef MIME_DEBUG
 #include <stdio.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include "eps.h"
@@ -8,19 +10,14 @@ boundary_alloc(void)
 {
 	struct boundary_t *b = NULL;
 
-	b = (struct boundary_t *) mmalloc(sizeof(struct boundary_t), "boundary_alloc");
-	if (b == NULL)
+	if (!(b = (struct boundary_t *) mmalloc(sizeof(struct boundary_t), "boundary_alloc")))
 		return NULL;
-
 	memset((struct boundary_t *) b, 0, sizeof(struct boundary_t));
-
 	b->boundaries = member_alloc();
-	if (b->boundaries == NULL)
-	{
+	if (b->boundaries == NULL) {
 		boundary_kill(b);
 		return NULL;
 	}
-
 	b->last = NULL;
 	return b;
 }
@@ -30,10 +27,8 @@ member_alloc(void)
 {
 	struct member_t *m = NULL;
 
-	m = (struct member_t *) mmalloc(sizeof(struct boundary_t), "member_alloc");
-	if (m == NULL)
+	if (!(m = (struct member_t *) mmalloc(sizeof(struct boundary_t), "member_alloc")))
 		return NULL;
-
 	memset((struct member_t *) m, 0, sizeof(struct member_t));
 	return m;
 }
@@ -42,31 +37,21 @@ int
 boundary_add(struct eps_t *e, char *boundary)
 {
 	struct member_t *m = NULL, *ms = NULL;
-
 	if (e->b == NULL)
 		return 0;
 
-	m = member_alloc();
-	if (m == NULL)
+	if (!(m = member_alloc()))
 		return 0;
-
-	m->boundary = (char *) mstrdup((unsigned char *) boundary);
-	if (m->boundary == NULL)
-	{
+	if (!(m->boundary = (char *) mstrdup((unsigned char *) boundary))) {
 		member_kill(e, m);
 		return 0;
 	}
-
 	for (ms = e->b->boundaries; ms->next; ms = ms->next);
-
 	ms->next = m;
-
 	m->next = NULL;
 	m->depth = (e->b->cdepth + 1);
-
 	e->b->cdepth++;
 	e->b->last = m;
-
 	return 1;
 }
 
@@ -75,24 +60,17 @@ boundary_kill(struct boundary_t *b)
 {
 	struct member_t *m = NULL, *om = NULL;
 
-	if (b->boundaries)
-	{
+	if (b->boundaries) {
 		m = b->boundaries;
-
-		while (m->next)
-		{
+		while (m->next) {
 			om = m->next;
 			m->next = m->next->next;
-
 			if (om->boundary)
 				mfree(om->boundary);
-
 			mfree(om);
 		}
-
 		mfree(b->boundaries);
 	}
-
 	mfree(b);
 }
 
@@ -103,20 +81,15 @@ member_kill(struct eps_t *e, struct member_t *m)
 
 	if (m->boundary)
 		mfree(m->boundary);
-
-	for (ms = e->b->boundaries; ms->next; ms = ms->next)
-	{
-		if (ms->next == m)
-		{
+	for (ms = e->b->boundaries; ms->next; ms = ms->next) {
+		if (ms->next == m) {
 			ms->next = m->next;
 			e->b->cdepth--;
 			break;
 		}
 	}
-
 	if (e->b->last == m)
 		e->b->last = NULL;
-
 	mfree(m);
 }
 
@@ -129,34 +102,24 @@ boundary_is(struct eps_t *e, char *boundary)
 
 	if (e->b == NULL)
 		return 0;
-
 	blen = strlen(boundary);
-
-	for (m = e->b->boundaries; m->next; m = m->next)
-	{
-		if (!(strcasecmp(m->next->boundary, boundary)))
-		{
+	for (m = e->b->boundaries; m->next; m = m->next) {
+		if (!strcasecmp(m->next->boundary, boundary)) {
 			if (m->next->depth != e->b->cdepth)
 				return 0;
-
 			e->b->last = m->next;
-
 #ifdef MIME_DEBUG
-			printf("boundary_is[%s]: 1(%d)\n", boundary, m->next->depth);
+			fprintf(stderr, "boundary_is[%s]: 1(%d)\n", boundary, m->next->depth);
 #endif
 			return 1;
 		}
-
 		len = strlen(m->next->boundary);
-		if (blen == (len + 2))
-		{
+		if (blen == (len + 2)) {
 			p = (boundary + len);
-			if ((*p == '-') && (*(p + 1) == '-'))
-			{
-				if (!(strncasecmp(m->next->boundary, boundary, len)))
-				{
+			if (*p == '-' && *(p + 1) == '-') {
+				if (!strncasecmp(m->next->boundary, boundary, len)) {
 #ifdef MIME_DEBUG
-					printf("boundary_is[%s]: 2(%d)\n", boundary, m->next->depth);
+					fprintf(stderr, "boundary_is[%s]: 2(%d)\n", boundary, m->next->depth);
 #endif
 					e->b->last = m->next;
 					return 2;
@@ -164,7 +127,6 @@ boundary_is(struct eps_t *e, char *boundary)
 			}
 		}
 	}
-
 	return 0;
 }
 
@@ -173,7 +135,6 @@ boundary_remove_last(struct eps_t *e)
 {
 	if (e->b->last == NULL)
 		return 0;
-
 	member_kill(e, e->b->last);
 	return 1;
 }
@@ -185,33 +146,28 @@ boundary_fetch(struct eps_t *e, char depth)
 
 	if (e->b == NULL)
 		return NULL;
-
 	if (e->b->boundaries == NULL)
 		return NULL;
-
 	if ((depth > e->b->cdepth) || (depth < 1))
 		return NULL;
-
-	for (b = e->b->boundaries; b->next; b = b->next)
-	{
-		if (b->next->depth == depth)
-		{
+	for (b = e->b->boundaries; b->next; b = b->next) {
+		if (b->next->depth == depth) {
 			e->b->last = b->next;
 			return b->next->boundary;
 		}
 	}
-
 	return NULL;
 }
 
+#ifdef MIME_DEBUG
 void
 boundary_debug(struct eps_t *e)
 {
 	struct member_t *m = NULL;
 
-	printf("BOUNDARY_DEBUG:\nCurrent depth: %d\n", e->b->cdepth);
-	printf("  Current boundaries:\n");
-
+	fprintf(stderr, "BOUNDARY_DEBUG:\nCurrent depth: %d\n", e->b->cdepth);
+	fprintf(stderr, "  Current boundaries:\n");
 	for (m = e->b->boundaries; m->next; m = m->next)
-		printf("    [%s](Depth: %d)\n", m->next->boundary, m->next->depth);
+		fprintf(stderr, "    [%s](Depth: %d)\n", m->next->boundary, m->next->depth);
 }
+#endif

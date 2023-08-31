@@ -1,4 +1,6 @@
+#ifdef DEBUG
 #include <stdio.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include "eps_line.h"
@@ -9,10 +11,8 @@ line_alloc(void)
 {
 	struct line_t  *l = NULL;
 
-	l = (struct line_t *) mmalloc(sizeof(struct line_t), "line_alloc");
-	if (l == NULL)
+	if (!(l = (struct line_t *) mmalloc(sizeof(struct line_t), "line_alloc")))
 		return NULL;
-
 	memset((struct line_t *) l, 0, sizeof(struct line_t));
 	return l;
 }
@@ -30,40 +30,26 @@ line_init(struct line_t *l, char *buffer, unsigned long size)
 	/*
 	 * Pre-allocated buffer
 	 */
-	if (buffer)
-	{
-		if ((buffer != l->data) || (l->size != size))
-		{
+	if (buffer) {
+		if (buffer != l->data || l->size != size) {
 			if (l->data)
 				mfree(l->data);
-
 			l->data = buffer;
 			l->size = size;
 		}
-	}
-
-	/*
-	 * Allocate default space
-	 */
-	else
-	{
+	} else {
+		/*
+		 * Allocate default space
+		 */
 		if (size == 0)
 			s = DEFAULT_BUFFER_SIZE;
 		else
 			s = size;
-
-		l->data = (char *) mmalloc(s + 1, "line_init");
-		if (l->data == NULL)
+		if (!(l->data = (char *) mmalloc(s + 1, "line_init")))
 			return 0;
-
 		l->size = s;
-		*(l->data) = '\0';
-
-#if 0
-		memset((char *) l->data, 0, (s + 1));
-#endif
+		*l->data = '\0';
 	}
-
 	return 1;
 }
 
@@ -76,64 +62,42 @@ line_inject(struct line_t *l, char *data, unsigned long bytes)
 	/*
 	 * Reallocate space
 	 */
-	if ((l->bytes + bytes) > l->size)
-	{
+	if ((l->bytes + bytes) > l->size) {
 		if (DEFAULT_BUFFER_ADD < ((l->bytes + bytes) - l->size))
 			addum = (((l->bytes + bytes) - l->size) + DEFAULT_BUFFER_ADD + 1);
-
 		else
 			addum = DEFAULT_BUFFER_ADD;
-
 #ifdef DEBUG
-		printf("line_inject: Reallocating: %d -> %d\n", l->size, l->size + addum + 1);
+		fprintf(stderr, "line_inject: Reallocating: %d -> %d\n", l->size, l->size + addum + 1);
 #endif
-		p = realloc((char *) l->data, (l->size + addum + 1));
-		if (p == NULL)
+		if (!(p = realloc((char *) l->data, (l->size + addum + 1))))
 			return 0;
-
 		if (p != l->data)
 			l->data = p;
-
-#if 0
-		memset((char *) (l->data + l->bytes), 0, addum + 1);
-#endif
 		l->size += addum;
-
 #ifdef DEBUG
-		printf("line_inject: Reallocated %p %lu -> %lu\n", l->data, (l->size - addum), l->size);
+		fprintf(stderr, "line_inject: Reallocated %p %lu -> %lu\n", l->data, (l->size - addum), l->size);
 #endif
 	}
 #ifdef DEBUG
-	printf("line_inject: Injected %d [", bytes);
+	fprintf(stderr, "line_inject: Injected %d [", bytes);
 	line_print(data, bytes);
-	printf("] -> [");
+	fprintf(stderr, " -> [");
 #endif
-
 	memcpy((char *) (l->data + l->bytes), (char *) data, bytes);
 	l->bytes += bytes;
-
 	*(l->data + l->bytes) = '\0';
-
 #ifdef DEBUG
 	line_print(data, bytes);
-	printf("]\n");
+	fprintf(stderr, "\n");
 #endif
-
 	return 1;
 }
 
 void
 line_restart(struct line_t *l)
 {
-#if 0
-	if (l->data)
-		memset((char *) l->data, 0, l->size);
-
-	l->bytes = 0;
-#endif
-
-	if (l->bytes)
-	{
+	if (l->bytes) {
 		*(l->data) = '\0';
 		l->bytes = 0;
 	}
@@ -144,15 +108,16 @@ line_kill(struct line_t *l)
 {
 	if (l->data)
 		mfree(l->data);
-
 	mfree(l);
 }
 
+#ifdef DEBUG
 void
 line_print(char *b, unsigned long len)
 {
 	char           *p = NULL;
 
-	for (p = b; ((*p) && (p < (b + len))); p++)
-		putchar(*p);
+	for (p = b; (*p && p < (b + len)); p++)
+		putc(*p, stderr);
 }
+#endif

@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "eps.h"
@@ -8,7 +7,7 @@ eps_alloc(void)
 {
 	struct eps_t   *e = NULL;
 
-	if(!(e = (struct eps_t *) mmalloc(sizeof(struct eps_t), "eps_alloc")))
+	if (!(e = (struct eps_t *) mmalloc(sizeof(struct eps_t), "eps_alloc")))
 		return NULL;
 	memset((struct eps_t *) e, 0, sizeof(struct eps_t));
 	return e;
@@ -20,7 +19,7 @@ eps_begin(int interface, void *args)
 	int             ret = 0, fd = 0;
 	struct eps_t   *e = NULL;
 
-	if(!(e = eps_alloc()))
+	if (!(e = eps_alloc()))
 		return NULL;
 	e->interface = interface;
 	/*
@@ -30,25 +29,20 @@ eps_begin(int interface, void *args)
 	if (interface == INTERFACE_NONE)
 		return e;
 	else
-	if (interface & INTERFACE_STREAM)
-	{
-		if(!(ret = int_stream_init(e, (int *) args)))
-		{
+	if (interface & INTERFACE_STREAM) {
+		if (!(ret = int_stream_init(e, (int *) args))) {
 			eps_end(e);
 			return NULL;
 		}
 		return e;
 	} else
-	if (interface & INTERFACE_BUFFER)
-	{
+	if (interface & INTERFACE_BUFFER) {
 		fd = -1;
-		if(!(ret = int_stream_init(e, (int *) &fd)))
-		{
+		if (!(ret = int_stream_init(e, (int *) &fd))) {
 			eps_end(e);
 			return NULL;
 		}
-		if(!(ret = int_buffer_init(e, (struct line_t *) args)))
-		{
+		if (!(ret = int_buffer_init(e, (struct line_t *) args))) {
 			eps_end(e);
 			return NULL;
 		}
@@ -66,13 +60,11 @@ eps_restart(struct eps_t *e, void *args)
 	if (e->interface & INTERFACE_BUFFER)
 		int_buffer_restart(e, (struct line_t *) args);
 	e->content_type = CON_NONE;
-	if (e->h)
-	{
+	if (e->h) {
 		header_kill(e->h);
 		e->h = NULL;
 	}
-	if (e->b)
-	{
+	if (e->b) {
 		boundary_kill(e->b);
 		e->b = NULL;
 	}
@@ -83,7 +75,7 @@ eps_next_header(struct eps_t *e)
 {
 	unsigned char  *l = NULL;
 
-	if(!(l = (unsigned char *) unroll_next_line(e->u)))
+	if (!(l = (unsigned char *) unroll_next_line(e->u)))
 		return NULL;
 	e->h = header_parse(l);
 	email_header_internal(e);
@@ -98,16 +90,13 @@ eps_next_line(struct eps_t *e)
 
 	if (e->u->b->eof)
 		return NULL;
-	if(!(l = (unsigned char *) buffer_next_line(e->u->b)))
-	{
+	if (!(l = (unsigned char *) buffer_next_line(e->u->b))) {
 		e->u->b->eof = 1;
 		return NULL;
 	}
-	if (e->content_type & CON_MULTI)
-	{
-		if ((*l == '-') && (*(l + 1) == '-'))
-		{
-			if((ret = boundary_is(e, (char *) (l + 2))))
+	if (e->content_type & CON_MULTI) {
+		if (*l == '-' && *(l + 1) == '-') {
+			if ((ret = boundary_is(e, (char *) (l + 2))))
 				return NULL;
 		}
 	}
