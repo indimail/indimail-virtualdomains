@@ -1,5 +1,8 @@
 /*-
  * $Log: storeHeader.c,v $
+ * Revision 1.2  2023-08-31 22:37:07+05:30  Cprogrammer
+ * return error if parseAddress is unsuccessful
+ *
  * Revision 1.1  2019-04-18 08:36:27+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: storeHeader.c,v 1.1 2019-04-18 08:36:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: storeHeader.c,v 1.2 2023-08-31 22:37:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -66,6 +69,8 @@ storeHeader(struct header ***Hptr, struct header_t *h)
 		for (i = 0; i_headers[i]; i++) {
 			if (!case_diffs(i_headers[i], (char *) h->name)) {
 				parseAddress(h, &tmp);
+				if (!tmp.len)
+					return 1;
 				break;
 			}
 		}
@@ -94,6 +99,8 @@ storeHeader(struct header ***Hptr, struct header_t *h)
 		for (i = 0; i_headers[i]; i++) {
 			if (!case_diffs(i_headers[i], (char *) h->name)) {
 				parseAddress(h, &tmp);
+				if (!tmp.len)
+					return 1;
 				break;
 			}
 		}

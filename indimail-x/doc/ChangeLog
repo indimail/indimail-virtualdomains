@@ -50,6 +50,12 @@ Release 3.4.5-1.1 Start 25/04/2023 End XX/XX/XXXX
 - 22/08/2023
 26. adminclient.c, indisrvr.c: Use TLS_CIPHER_LIST for TLSv1.2 and below,
     TLS_CIPHER_SUITE for TLSv1.3 and above
+- 31/08/2023
+27. eps-1.2/eps_address.c: BUG: Fix assignment of user component, when address
+    doesn't have domain
+28. parseAddress.c: handle address without domain component
+29. storeHeader.c: return error if parseAddress is unsuccessful
+30. vfilter.c: run vdelivermail if storeHeader is unsuccessful
 
 * Sun Apr 23 2023 19:21:03 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.4-1.1%{?dist}
 Release 3.4.4-1.1 Start 26/03/2023 End 23/04/2023

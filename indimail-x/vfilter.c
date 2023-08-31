@@ -1,5 +1,8 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 1.13  2023-08-31 23:17:40+05:30  Cprogrammer
+ * run vdelivermail if storeHeader is unsuccessful
+ *
  * Revision 1.12  2023-08-06 15:29:48+05:30  Cprogrammer
  * fixed setting emailid from arguments
  *
@@ -42,7 +45,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 1.12 2023-08-06 15:29:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 1.13 2023-08-31 23:17:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -178,7 +181,7 @@ static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 1.12 $", *mda;
+	char           *revision = "$Revision: 1.13 $", *mda;
 	static stralloc XFilter = {0};
 	pid_t           pid;
 	int             i, werr, wait_status, _status;
@@ -598,7 +601,7 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 		flush("vfilter");
 		/*
 		 * comparision 5 - Sender not in Address Book
-		 * comparision 6 - ID not in To, Cc, Bcc
+		 * comparision 6 - recipient email not in To, Cc, Bcc
 		 */
 		if (!global_filter && (*comparision == 5 || *comparision == 6)) {
 			address_list = getAddressBook(filterid);
@@ -815,7 +818,8 @@ main(int argc, char **argv)
 	}
 	for (h = eps_next_header(eps), hptr = (struct header **) 0; h; h = eps_next_header(eps)) {
 		if ((h->name) && h->data) {
-			storeHeader(&hptr, h);
+			if (storeHeader(&hptr, h))
+				myExit(argc, argv, -1, 0, 0, 0);
 			if (interactive && verbose) {
 				subprintfe(subfdout, "vfilter", "%s: %s\n", (char *) h->name, (char *) h->data);
 				flush("vfilter");
@@ -842,7 +846,8 @@ main(int argc, char **argv)
 			break;
 		for (h = mime_next_header(eps); h; h = mime_next_header(eps)) {
 			if ((h->name) && (h->data)) {
-				storeHeader(&hptr, h);
+				if (storeHeader(&hptr, h))
+					myExit(argc, argv, -1, 0, 0, 0);
 				if (interactive && verbose) {
 					subprintfe(subfdout, "vfilter", "%s: %s\n", (char *) h->name, (char *) h->data);
 					flush("vfilter");
@@ -866,10 +871,13 @@ main(int argc, char **argv)
 	for (ptr = hptr; ptr && *ptr; ptr++) {
 		if (verbose && interactive)
 			subprintfe(subfdout, "vfilter", "%-25s", (*ptr)->name);
-		for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
+		for (tmp_ptr = (*ptr)->data, i = 0; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 			lowerit(*tmp_ptr);
 			if (verbose && interactive) {
-				subprintfe(subfdout, "vfilter", "                          -> %s\n", *tmp_ptr);
+				if (!i++)
+					subprintfe(subfdout, "vfilter", " -> %s\n", *tmp_ptr);
+				else
+					subprintfe(subfdout, "vfilter", "%25s -> %s\n", " ", *tmp_ptr);
 				flush("vfilter");
 			}
 		}

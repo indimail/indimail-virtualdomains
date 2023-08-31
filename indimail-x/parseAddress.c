@@ -1,5 +1,8 @@
 /*-
  * $Log: parseAddress.c,v $
+ * Revision 1.4  2023-08-31 22:36:43+05:30  Cprogrammer
+ * handle address without domain component
+ *
  * Revision 1.3  2023-08-06 15:35:09+05:30  Cprogrammer
  * BUGFIX - Fixed logic to parse addresses
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: parseAddress.c,v 1.3 2023-08-06 15:35:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: parseAddress.c,v 1.4 2023-08-31 22:36:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -57,7 +60,7 @@ parseAddress(struct header_t *h, stralloc *addr_buf)
 		flush("parseAddress");
 	}
 	for (a = g->members; a->next; a = a->next) {
-		if (a->next->user && a->next->domain) {
+		if (a->next->user && a->next->domain && *(a->next->domain)) {
 			if (verbose) {
 				if (a->next->name)
 					subprintfe(subfdout, "parseAddress", "  (%s) { [%s] @ [%s] }\n",
@@ -70,19 +73,34 @@ parseAddress(struct header_t *h, stralloc *addr_buf)
 							a->next->domain ? a->next->domain : "N/A");
 				flush("parseAddress");
 			}
-			if (a->next->user) {
-				if (!stralloc_copys(addr_buf, a->next->user) ||
-						!stralloc_0(addr_buf))
+			if (!stralloc_copys(addr_buf, a->next->user) ||
+					!stralloc_0(addr_buf))
+				die_nomem();
+			addr_buf->len--;
+			if (!stralloc_append(addr_buf, "@") ||
+					!stralloc_cats(addr_buf, a->next->domain) ||
+					!stralloc_0(addr_buf))
+				die_nomem();
+			addr_buf->len--;
+			if (a->next->next) {
+				if (!stralloc_append(addr_buf, ",") || !stralloc_0(addr_buf))
 					die_nomem();
 				addr_buf->len--;
 			}
-			if (a->next->domain) {
-				if (!stralloc_append(addr_buf, "@") ||
-						!stralloc_cats(addr_buf, a->next->domain) ||
-						!stralloc_0(addr_buf))
-					die_nomem();
-				addr_buf->len--;
-			}
+		} else /*- no domain */
+		if (a->next->user) {
+			if (a->next->name)
+				subprintfe(subfdout, "parseAddress", "  (%s) { [%s] @ [null] }\n",
+						a->next->name ? a->next->name : "",
+						a->next->user ? a->next->user : "N/A");
+			else
+				subprintfe(subfdout, "parseAddress", "  { [%s] @ [null] }\n",
+						a->next->user ? a->next->user : "N/A");
+			flush("parseAddress");
+			if (!stralloc_copys(addr_buf, a->next->user) ||
+					!stralloc_0(addr_buf))
+				die_nomem();
+			addr_buf->len--;
 			if (a->next->next) {
 				if (!stralloc_append(addr_buf, ",") || !stralloc_0(addr_buf))
 					die_nomem();
