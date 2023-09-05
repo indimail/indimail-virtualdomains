@@ -804,6 +804,7 @@ command(int *waitpid, int makepipe, int *pipepfd)
 }	/*- of command */
 
 #ifndef HAVE_GETHOSTNAME
+int
 gethostname(char *host, int len)
 {
 	struct utsname  name;

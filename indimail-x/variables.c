@@ -73,12 +73,9 @@ char           *vfilter_comparision[] = {
 	"Does not contain",
 	"Starts with",
 	"Ends with",
-	"Sender Not in Address Book",
 	"My id not in To, CC, Bcc",
 	"Numerical Logical Expression",
-#ifdef HAVE_FNMATCH
 	"RegExp",
-#endif
 	0
 };
 

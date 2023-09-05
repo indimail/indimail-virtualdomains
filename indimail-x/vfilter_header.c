@@ -48,6 +48,18 @@ die_nomem()
 	_exit(111);
 }
 
+int
+headerNumber(char **hlist, char *headerName)
+{
+	int             i, len;
+
+	len = str_len(headerName);
+	for (i = 0; hlist[i]; i++)
+		if (!str_diffn(headerName, hlist[i], len + 1))
+			return i;
+	return -1;
+}
+
 char          **
 headerList()
 {

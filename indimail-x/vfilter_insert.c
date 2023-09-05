@@ -51,7 +51,7 @@ vfilter_insert(char *emailid, char *filter_name, int header_name, int comparisio
 
 	if (iopen((char *) 0))
 		return (-1);
-	if(comparision == 5 || comparision == 6)
+	if(comparision == 5)
 		filter_no = comparision - 5;
 	else
 	if((filter_no = vfilter_filterNo(emailid)) == -1) {

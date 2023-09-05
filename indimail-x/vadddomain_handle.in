@@ -74,12 +74,12 @@ done
 
 # create rule for moving spam, virus emails to folders
 echo "creating rules for spam, virus detected emails"
-@prefix@/bin/vcfilter -i -t  spamFilter -c 3 -k "Yes, spamicity=" -f Spam   -b 0 -h 32 \
+@prefix@/bin/vcfilter -i -t  spamFilter -c "Starts with" -k "Yes, spamicity=" -f Spam   -b 0 -h "X-Bogosity" \
 	prefilt@$domain
 if [ $? -eq 0 ] ; then
 	echo "Created prefilter to filter SPAM"
 fi
-@prefix@/bin/vcfilter -i -t virusFilter -c 0 -k "virus found" -f Quarantine -b 0 -h 28 \
+@prefix@/bin/vcfilter -i -t virusFilter -c "Equals" -k "virus found" -f Quarantine -b 0 -h "X-QHPSI" \
 	prefilt@$domain
 if [ $? -eq 0 ] ; then
 	echo "Created prefilter to filter virus"

@@ -12,6 +12,7 @@
 
 #ifdef VFILTER
 char          **headerList();
+int             headerNumber(char **, char *);
 #endif
 
 #endif

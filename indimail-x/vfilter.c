@@ -61,10 +61,6 @@ static char     sccsid[] = "$Id: vfilter.c,v 1.13 2023-08-31 23:17:40+05:30 Cpro
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#ifdef HAVE_FNMATCH_H
-#define _GNU_SOURCE
-#include <fnmatch.h>
-#endif
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <strerr.h>
@@ -80,6 +76,7 @@ static char     sccsid[] = "$Id: vfilter.c,v 1.13 2023-08-31 23:17:40+05:30 Cpro
 #include <makeargs.h>
 #include <evaluate.h>
 #include <wait.h>
+#include <matchregex.h>
 #endif
 #include "common.h"
 #include "get_real_domain.h"
@@ -126,9 +123,8 @@ printBounce(char *bounce)
 		subprintfe(subfdout, "vfilter", "Hi. This is the IndiMail MDA for %s\n",
 				(ptr = env_get("HOST")) ? ptr : vset_default_domain());
 		subprintfe(subfdout, "vfilter",
-				"I'm afraid I cannot accept your message as a configured filter has decided\n"
-				"to reject this mail\n"
-				"Please refrain from sending such mail in future\n");
+				"I'm afraid I cannot accept your message as it violates a system policy\n"
+				"set by the administrator. Sorry that I cannot accept your email\n");
 	} else {
 		/*- get the last parameter in the .qmail-default file */
 		if (!(ptr = env_get("EXT")))
@@ -554,7 +550,7 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 	int             i, j, email_len, filter_opt, ret = 0, global_filter = 0,
 					max_header_value;
 	char           *str, *real_domain;
-	char          **tmp_ptr, **address_list;
+	char          **tmp_ptr;
 	static char   **header_list;
 	struct header **ptr;
 	static stralloc tmpUser = {0}, tmpDomain = {0};
@@ -600,11 +596,9 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 				keyword, folder, forward, *bounce_action);
 		flush("vfilter");
 		/*
-		 * comparision 5 - Sender not in Address Book
-		 * comparision 6 - recipient email not in To, Cc, Bcc
+		 * comparision 5 - recipient email not in To, Cc, Bcc
 		 */
-		if (!global_filter && (*comparision == 5 || *comparision == 6)) {
-			address_list = getAddressBook(filterid);
+		if (!global_filter && *comparision == 5) {
 			if (interactive && verbose)
 				print_hyphen(subfdout, "=", 137);
 			for (ret = 0, ptr = hptr; ptr && *ptr && !ret; ptr++) {
@@ -617,28 +611,8 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 				else
 					continue;
 				for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr && !ret; tmp_ptr++) {
-					/*- Sender not in Address Book */
-					if (*comparision == 5 && filter_opt == 1) {
-						for (rewindAddrToken();;) {
-							if (!(str = addressToken(*tmp_ptr, &email_len)))
-								break;
-							if (!case_diffb(str, email_len + 1, filterid)) {
-								/*- Allow the user to send himself mail */
-								ret = 1;
-								break;
-							}
-							for (i = 0; address_list && address_list[i]; i++) {
-								if (!address_list[i] || !*address_list[i])
-									continue;
-								if (!case_diffb(str, email_len + 1, address_list[i])) {
-									ret = 1;
-									break;
-								}
-							}
-						}
-					}
 					/*- ID not in To, Cc, Bcc */
-					if (*comparision == 6 && filter_opt == 2) {
+					if (filter_opt == 2) {
 						for (rewindAddrToken();;) {
 							if (!(str = addressToken(*tmp_ptr, &email_len)))
 								break;
@@ -670,15 +644,16 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 				myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
 			}
 		} else
-		if (*comparision < 5 || *comparision == 7 || *comparision == 8) {
+		if (*comparision != 5) {
 			/*
 			 * 0 - Equals
 			 * 1 - Contains
 			 * 2 - Does not contain
 			 * 3 - Starts with
 			 * 4 - Ends with
-			 * 7 - Numerical logical expression
-			 * 8 - Regular expression
+			 * 5 - Not in To, Cc, Bcc
+			 * 6 - Numerical logical expression
+			 * 7 - Regular expression
 			 */
 			if (*header_name > max_header_value) /*- Invalid header value in vfilter table */
 				continue;
@@ -748,7 +723,7 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 							}
 						}
 						break;
-					case 7:	/*- Float */
+					case 6:	/*- Float */
 						/*- e.g. tmp_ptr = 0.7, keyword = %p < 0.4 */
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if (numerical_compare(*tmp_ptr, keyword->s)) {
@@ -761,15 +736,9 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 							}
 						}
 						break;
-#ifdef HAVE_FNMATCH
-					case 8:	/*- Regular Expressions */
+					case 7:	/*- Regular Expressions */
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
-#ifdef FNM_CASEFOLD
-							if (!fnmatch(keyword->s, *tmp_ptr, FNM_PATHNAME | FNM_CASEFOLD))
-#else
-							if (!fnmatch(keyword->s, *tmp_ptr, FNM_PATHNAME))
-#endif
-							{
+							if (matchregex(*tmp_ptr, keyword->s, 0) == 1) {
 								if (interactive && verbose) {
 									subprintfe(subfdout, "vfilter", "Matched Filter No %d Comparision %s Keyword %s\n",
 											*filter_no, vfilter_comparision[*comparision], keyword->s);
@@ -779,11 +748,10 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 							}
 						}
 						break;
-#endif
 					} /*- switch(comparision) */
 				} /*- if (!case_diffb((*ptr)->name, MAX_LINE_LENGTH, header_list[header_name])) */
 			} /*- for(ptr = hptr;ptr && *ptr;ptr++) */
-		} /*- if (comparision < 5 || comparision == 7 || comparision == 8) */
+		} /* if (*comparision != 5) */
 	} /*- for (j = 0;;) */
 	return;
 }
