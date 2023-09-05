@@ -42,6 +42,14 @@ Table of Contents
          * [QMAILQUEUE script](#qmailqueue-script)
          * [QMAILREMOTE script](#qmailremote-script)
          * [QMAILLOCAL script](#qmaillocal-script)
+   * [SPAM and Virus Filtering](#spam-and-virus-filtering)
+         * [SPAM Control using bogofilter](#spam-control-using-bogofilter)
+         * [Training bogofilter](#training-bogofilter)
+         * [SPAM Control using badip control file](#spam-control-using-badip-control-file)
+         * [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi)
+            * [Using tcprules](#using-tcprules)
+            * [Using envdir for SMTP service under supervise(8)](#using-envdir-for-smtp-service-under-supervise8)
+         * [Using spamassasin with IndiMail](#using-spamassasin-with-indimail)
    * [IndiMail Delivery mechanism explained](#indimail-delivery-mechanism-explained)
       * [Delivery Mode](#delivery-mode)
       * [Addresses](#addresses)
@@ -100,14 +108,6 @@ Table of Contents
       * [Name Service Switch Daemon - nssd](#name-service-switch-daemon---nssd)
       * [PAM Multi Framework](#pam-multi-framework)
    * [Setting limits for your domain](#setting-limits-for-your-domain)
-   * [SPAM and Virus Filtering](#spam-and-virus-filtering)
-   * [SPAM Control using bogofilter](#spam-control-using-bogofilter)
-   * [Training bogofilter](#training-bogofilter)
-   * [SPAM Control using badip control file](#spam-control-using-badip-control-file)
-   * [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi)
-      * [Using tcprules](#using-tcprules)
-      * [Using envdir for SMTP service under supervise(8)](#using-envdir-for-smtp-service-under-supervise8)
-   * [Using spamassasin with IndiMail](#using-spamassasin-with-indimail)
    * [SPF implementation in IndiMail](#spf-implementation-in-indimail)
       * [SPF Macro Support](#spf-macro-support)
       * [SPF Macro Syntax](#spf-macro-syntax)
@@ -1743,6 +1743,308 @@ if [ $? -ne 0 -o " $dir" = " " ] ; then
 fi
 exec /usr/bin/maildirdeliver "$dir"/Maildir
 exit 111
+```
+
+# SPAM and Virus Filtering
+
+IndiMail has multiple methods to insert your script anywhere before the queue, after the queue, before local delivery, before remote deliver or call a script to do local or remote delivery. Refer to the chapter [Writing Filters for IndiMail](#writing-filters-for-indimail) for more details.
+
+# SPAM Control using bogofilter
+
+If you have installed indimail-spamfilter package, you will have [bogofilter](https://bogofilter.sourceforge.io/ "bogofilter") providing a bayesian spam filter.
+
+bogofilter requires training to work. The next section tells you how to carry out this training. You can also have a pre-trained database installed by installing the **bogofilter-wordlist** package, but it is possible that this may not work well in your setup.
+
+On of the easiest method to enable bogofilter is to set few environment variable for indimail's [<b>qmail-spamfilter</b>(8)](https://github.com/mbhangui/indimail-mta/wiki/qmail-spamfilter.8) the frontend for <b>qmail-queue</b>(8) program. e.g. to enable spam filter on the incoming SMTP on port 25:
+
+```
+$ sudo /bin/bash
+
+Move QMAILQUEUE to SPAMQUEUE only if QMAILQUEUE doesn't have
+/usr/sbin/qmail-spamfilter
+
+# cd /service/qmail-smtpd.25/variables
+# mv QMAILQUEUE SPAMQUEUE
+# echo /usr/sbin/qmail-spamfilter > QMAILQUEUE
+# echo "/usr/bin/bogofilter -p -d /etc/indimail" > SPAMFILTER
+# echo "0" > SPAMEXITCODE
+# echo "0" > REJECTSPAM
+# echo "1" > MAKESEEKABLE
+exit
+$
+
+The below command will create an indimail filter that will automatically move
+during delivery, mails marked as spam by bogofilter 
+$ sudo vcfilter -i -t spamFilter -c 3 -k "Yes, spamicity=" -f Spam -b 0 -h 33 prefilt@$1
+```
+
+Now <b>qmail-spamfilter</b>(8) will pass every mail through bogofilter before it gets passed to <b>qmail-queue</b>(8). You can refer to chapter [IndiMail Queue Mechanism](#indimail-queue-mechanism) and look at the picture to understand how it works. bogofilter(1) will add X-Bogosity in each and every mail. A spam mail will have the value `Yes` along with a probabality number (e.g. 0.999616 below). You can configure bogofilter in /etc/indimail/bogofilter.cf. The SMTP logs will also have lines having this X-Bogosity field. A detailed mechanism is depicted pictorially in the chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi).
+
+```
+X-Bogosity: Yes, spamicity=0.999616, cutoff=9.90e-01, ham_cutoff=0.00e+00, queueID=6cs66604wfk,
+```
+
+The method describe above is a global SPAM filter. It will happen for all users, unless you use something like **envrules** to unset **SPAMFILTER** environment variable. You can use **envrules** to set **SPAMFILTER** for few specific email addresses. You can refer to the chapter [Envrules](#envrules) for more details.
+
+There is another way you can do spam filtering - during local delivery (you could do for remote delivery, but what would be the point?). IndiMail allows you to call an external program during local/remote delivery by settting **QMAILLOCAL** / **QMAILREMOTE** environment variable. You could use any method to call bogofilter (either directly in *filterargs* control file, or your own script). You can see a Pictorial representation of how this happens. ![LocalFilter](indimail_spamfilter_local.png)
+
+You can also use <b>vcfilter</b>(1) to set up a filter that will place your spam emails in a designated folder for SPAM. Refer to the chapter [Writing Filters for IndiMail](#writing-filters-for-indiMail) for more details.
+
+## Training bogofilter
+
+Training bogofilter requires creating a bogofilter databases with corpus of HAM and SPAM emails with SPAM comprising roughly 30% of the total. A good way to start is download an initial corpus from the spamassasin database. Do not run the below curl command with root privileges.
+
+```
+$ mkdir /home/manny/bogofilter
+$ cd /home/manny/bogofilter
+$ curl -s https://raw.githubusercontent.com/mbhangui/indimail-virtualdomains/master/bogofilter-wordlist-x/download.sh | sh
+$ curl -s https://raw.githubusercontent.com/mbhangui/indimail-virtualdomains/master/bogofilter-wordlist-x/training.sh | sh
+$ sudo cp wordlist.db /etc/indimail
+$ sudo chmod 644 /etc/indimail/wordlist.db
+$ sudo chown indimail:indimail /etc/indimail/wordlist.db
+```
+
+The above steps will download the spamasassin corpus in the directory /home/manny/bogofilter/training and also create a bogofilter spam database wordlist.db trained from spamassasin corpus at http://spamassassin.apache.org/old/publiccorpus. The `vcfilter` command above creates a rule to automatically move emails marked as spam to Spam subfolder in your Maildir.
+
+You can keep on updating the subfolders easy\_ham\_2 and spam\_2 subfolders in /home/manny/bogofilter/training directory and run the training.sh script. One possible method could be to have a script that uses the find command to copy ham emails from your Maildir subfolders, that you know for sure have non-spam emails, to the easy\_ham\_2 subfolder in the training directory. You can have folder named `Spam` in your Maildir where you move spam emails using your mail client. This will be spam emails not caught by bogofilter. You can have the same script copy spam mails from `Spam` folder to spam\_2 subfolder in the training directory.
+
+## SPAM Control using badip control file
+
+IndiMail has many methods to help deal with spam. For detecting spam, IndiMail uses bogofilter a fast bayesian spam filter. IndiMail's <b>qmail-smtpd</b> which provides SMTP protocol is neatly integrated with bogofilter. When bogofilter detects spam, <b>qmail-smtpd</b> prints the X-Bogosity header as part of SMTP transaction log
+
+```
+$ grep "X-Bogosity, Yes" /var/log/svc/smtpd.25/current
+@400000004bc8183f01fcbc54 qmail-smtpd: pid 16158 from ::ffff:88.191.35.203 HELO X-Bogosity: Yes, spamicity=0.999616, cutoff=9.90e-01, ham_cutoff=0.00e+00, queueID=6cs66604wfk,
+```
+
+The value "Yes" in X-Bogosity indicates spam. You can tell <b>qmail-smtpd</b> to reject such mails at SMTP just by doing
+
+```
+# echo 1 > /service/qmail-smtpd.25/variables/REJECTSPAM
+# svc -r /service/qmail-smtpd.25
+```
+
+SMTP clients which tries to send a spam mail will get the following error at the end of the SMTP transaction
+554 SPAM or junk mail threshold exceeded (#5.7.1)
+The mail will get bounced. In some cases you would want to issue temporary error to such clients. In the above SMTP transaction log, the IP address of the client was 88.191.35.203. To put such client's into IndiMail's SPAM blacklist, you just need to put the IP address in the control file /etc/indimail/control/badip
+
+`# echo 88.191.35.203 >> /etc/indimail/control/badip`
+
+For turning on the BADIP functionality, you need to set the BADIPCHECK or the BADIP environment variable. i.e.
+
+```
+# echo badip > /service/qmail-smtpd.25/variables/BADIP
+# svc -r /service/qmail-smtpd.25
+```
+
+Clients whose IP match an entry in badip will be greeted as below
+
+```
+421 indimail.org sorry, your IP (::ffff:88.191.35.203) is temporarily denied (#4.7.1)
+```
+
+Also the client will not be able to carry out any SMTP transactions like ehlo, MAIL FROM, RCPT TO, etc. A large ISP can run the following command every day once in cron
+
+```
+grep "X-Bogosity, Yes" /var/log/svc/qmail.smtpd.25/current > /etc/indimail/control/badip
+```
+
+If your badip files becomes very large, you can also take advantage of IndiMail's ability to use cdb (or you could use MySQL too)
+
+`$ sudo /usr/bin/qmail-cdb badip`
+
+## Virus Scanning using QHPSI
+
+A large fraction of today’s emails is infected by a virus or a worm. It is necessary to recognize those malicious emails as soon as possible already in the DATA phase of the SMTP conversation and to reject them.
+
+When you use IndiMail, it is ultimately <b>qmail-queue</b> which is responsible for queueing your messages. <b>qmail-queue</b> stores the message component of queued mails (captured duing DATA phase of the SMTP conversation) under the mess subdirectory.
+
+Files under the mess subdirectory are named after their i-node number. Let us look at a typical log sequence for a message received on the local system.
+
+```
+@400000004b9da2f03b424bb4 new msg 660188
+@400000004b9da2f03b426324 info msg 660188: bytes 2794 from fogcreek_xxx@response.whatcounts.com qp 3223 uid 555
+@400000004b9da2f03b42c0e4 starting delivery 6: msg 660188 to local mailstore@indimail.org
+@400000004b9da2f03b42dc3c status: local 1/10 remote 0/20
+@400000004b9da2f106a1e234 delivery 6: success: did_1+0+0/
+@400000004b9da2f1091e676c status: local 0/10 remote 0/20
+@400000004b9da2f1091fa3d4 end msg 660188
+```
+
+The above lines indicates that indimail-mta has received a new message, and its queue ID is 660188. What this means is that is <b>qmail-queue</b> has created a file named /var/indimail/queue/mess/NN/660188. The i-node number of the file is 660188. This is the queue file that contains the message. The queue ID is guaranteed to be unique as long as the message remains in the queue (you can't have two files with the same i-node in a filesystem).
+
+To perform virus scanning, it would be trivial to do virus scanning on the mess file above in <b>qmail-queue</b> itself. That is exactly what IndiMail does by using a feature called Qmail High Performance Virus Scanner (**QHPSI**). **QHPSI** was conceptualized by Erwin Hoffman. You can read here for more details.
+
+IndiMail takes **QHPSI** forward by adding the ability to add plugins. The **QHPSI** extension for <b>qmail-queue</b> allows to call an arbitary virus scanner directly, scanning the incoming data-stream on STDIN. Alternatively, it allows plugins to be loaded from the /usr/lib/indimail/plugins directory. This directory can be changed by defining PLUGINDIR environment variable. **QHPSI** can be advised to pass multiple arguments to the virus scanner for customization. To run external scanner or load scanner plugins, <b>qmail-queue</b> calls <b>qhpsi</b>, a program setuid to qscand. By default, <b>qhpsi</b> looks for the symbol virusscan to invoke the scanner. The symbol can be changed by setting the environment variable QUEUE_PLUGIN to the desired symbol.
+
+Today’s virus scanner -- in particluar Clam AV -- work in resource efficient client/server mode (clamd/clamdscan) and include the feature to detect virii/worms in the base64 encoded data stream. Thus, there is no necessity to call additional programs (like reformime or ripmime) except for the virus scanner itself.
+
+You can see how the scanning works ![Pictorially](indimail_spamfilter_global.png)
+
+To enable virus scanning in IndiMail during the SMTP data phase, you can implement either of the two methods below
+
+### Using tcprules
+
+Define QHPSI in tcp.smtp and rebuild tcp.smtp.cdb using tcprules.
+
+`:allow,QHPSI=’/usr/bin/clamdscan %s --quiet --no-summary’`
+
+### Using envdir for SMTP service under supervise(8)
+
+Define QHPSI in SMTP service's variable directory
+
+```
+$ sudo /bin/bash
+# echo "/usr/bin/clamdscan %s --quiet --no-summary" > /service/qmail-smtpd.25/variables/QHPSI
+```
+
+If you have installed IndiMail using RPM/Debian/Arch packages from [OBS](http://download.opensuse.org/repositories/home:/indimail/ "Stable Build Repository") or RPM packages from [COPR](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail), QHPSI is enabled by default by defining it in the qmail-smtpd.25 variables directory. If you have clamd, clamav already installed on your server, the binary installation of inidmail-mta also installs two services under supervise.
+
+* freshclam - service to update the clamd virus databases
+* clamd - service to run the clamd scanner
+
+You may need to disable clamd, freshclam startup by your system boot process and enable the startup under indimail. Do have the clamd, freshclam service started up by indimail, remove the down file. i.e.
+
+```
+$ sudo /bin/rm /service/freshclam/down /service/clamd/down
+$ sudo /usr/bin/svc -u /service/clamd /service/freshclam
+```
+
+```
+$ tail -f /var/log/indimail/freshclam/current
+@400000004b9da034170f6394 cdiff_apply: Parsed 17 lines and executed 17 commands
+@400000004b9da03417103e54 Retrieving http://database.clamav.net/daily-10574.cdiff
+@400000004b9da0342261b83c Trying to download http://database.clamav.net/daily-10574.cdiff (IP: 130.59.10.36)
+Downloading daily-10574.cdiff [100%]g daily-10574.cdiff [ 13%]
+@400000004b9da03509c39c64 cdiff_apply: Parsed 436 lines and executed 436 commands
+@400000004b9da03510c3485c daily.cld updated (version: 10574, sigs: 24611, f-level: 44, builder: ccordes)
+@400000004b9da03510c4d2e4 bytecode.cvd version from DNS: 2
+@400000004b9da03510c4de9c bytecode.cvd is up to date (version: 2, sigs: 2, f-level: 44, builder: nervous)
+@400000004b9da03510c82e44 Database updated (729340 signatures) from database.clamav.net (IP: 130.59.10.36)
+```
+
+```
+$ cat /var/log/indimail/clamd/current
+@400000004b9da0260d6c1a94 Limits: Global size limit set to 104857600 bytes.
+@400000004b9da0260d6c264c Limits: File size limit set to 26214400 bytes.
+@400000004b9da0260d6c3204 Limits: Recursion level limit set to 16.
+@400000004b9da0260d6c3dbc Limits: Files limit set to 10000.
+@400000004b9da0260d6c4974 Archive support enabled.
+@400000004b9da0260d6c5144 Algorithmic detection enabled.
+@400000004b9da0260d6c5cfc Portable Executable support enabled.
+@400000004b9da0260d6c68b4 ELF support enabled.
+@400000004b9da0260d6c7084 Detection of broken executables enabled.
+@400000004b9da0260e7abfbc Mail files support enabled.
+@400000004b9da0260e7acb74 OLE2 support enabled.
+@400000004b9da0260e7ad344 PDF support enabled.
+@400000004b9da0260e7adefc HTML support enabled.
+@400000004b9da0260e7ae6cc Self checking every 600 seconds.
+@400000004b9da2a3116a177c No stats for Database check - forcing reload
+@400000004b9da2a3206deb04 Reading databases from /var/indimail/share/clamd
+@400000004b9da2a70489facc Database correctly reloaded (728651 signatures)
+@400000004b9da2a7061e372c /var/indimail/queue/queue2/mess/16/660188: OK
+```
+
+Once you have **QHPSI** enabled, <b>qmail-queue</b> will add the header **X-QHPSI** in the mail. You will have the following header
+
+`X-QHPSI: clean`
+
+in case the email is clean and the following header if a virus is found
+
+`X-QHPSI: virus found`
+
+The default configuration of IndiMail will allow these emails to be delivered to the inbox. This is because some sites have have legislations like SOX, etc to enforce archiving of all emails that come into the system. In case you want to reject the email at SMTP you can do the following
+
+```
+$ sudo /bin/bash
+# echo 1 > /service/qmail.smtpd/variables/REJECTVIRUS
+# svc -r /service/qmail-smtpd.25
+```
+
+One can also create a vfilter to deliver such email to the quarantine folder
+
+```
+/usr/bin/vcfilter -i -t virusFilter -c 0 -k "virus found" -f Quarantine -b 0 -h 28 prefilt@$1
+```
+
+If you implement different method, than explained above, let me know.
+
+## Using spamassasin with IndiMail
+
+Just few days back a user asked me whether spamassassin can be used with IndiMail.
+
+IndiMail uses environment variables **SPAMFILTER**, **SPAMEXITCODE** to configure any spam filter to be used. All that is required for the spam filter is to read a mail message on stdin, output the message back on stdout and exit with a number which indicates whether the message is ham or spam.
+
+The default installation of IndiMail creates a configuration where mails get scanned by bogofilter for spam filtering. bogofilter exits with value '0' in case the message is spam and with value '1' when message is ham. The settings for **SPAMFILTER**, **SPAMEXITCODE** is as below
+
+```
+SPAMFILTER="/usr/bin/bogofilter -p -u -d /etc/indimail"
+SPAMEXITCODE=0 # what return value from spam filter should be treated as spam?
+```
+
+Assuming that you have installed, setup and trained spamassassin, you can follow the instructions below to have IndiMail use spamassassin.
+
+spamassasin has a client spamc which exits 1 when message is spam and exits 0 if the message is ham. To use spamassassin, just use the following for SPAMFILTER, SPAMEXITCODE
+
+```
+SPAMFILTER="path_to_spamc_program -E-d host -p port -u user"
+SPAMEXITCODE=1
+```
+
+(see the documentation on spamc for description of arguments to spamc program). You an also use -U socket_path, to use unix domain socket instead of -d host, which uses tcp/ip
+
+Since IndiMail uses <b>envdir</b> program to set environment variable, a simple way would be to set SPAMFILTER, SPAMEXITCODE is to do the following
+
+```
+$ sudo /bin/bash
+# echo "spamcPath -E -d host -p port -u user" > /service/qmail-smtpd.25/variables/SPAMFILTER
+# echo 1 > /service/qmail-smtpd.25/variables/SPAMEXITCODE
+```
+
+What if you want to use both bogofilter and spamasssin. You can use a simple script like below as the SPAMFILTER program
+
+```
+#!/bin/bash
+#
+# you can -U option in spamc, pointing to a unix domain path instead of -d
+#
+DESTHOST=x.x.x.x
+
+#
+# pass the output of bogofilter to spamc and passthrough spamc output to stdout
+# store the exit status of bogofilter in status1 and spamc in status2
+#
+/usr/bin/bogofilter -p -d /etc/indimail | /usr/bin/spamc -E -d $DESTHOST -p 783
+STATUS=("${PIPESTATUS[@]}")
+status1=${STATUS[0]}
+status2=${STATUS[1]}
+
+# bogofilter returned error
+if [ $status1 -eq 2 ] ; then
+  exit 2
+fi
+# spamc returned error see the man page for spamc
+if [ $status2 -ge 64 -a $status2 -le 78 ] ; then
+  exit 2
+fi
+
+#
+# message is spam
+# bogofilter returns 0 on spam, spamc returns 1 on spam
+#
+if [ $status1 -eq 0 -o $status2 -eq 1 ] ; then
+  exit 0
+fi
+exit 1
+```
+
+
+Let us call the above script as bogospamc and let us place it in /usr/bin
+
+```
+$ sudo /bin/bash
+# echo /usr/bin/bogospamc > /service/qmail-smtpd.25/variables/SPAMFILTER
+# echo 0 > /service/qmail-smtpd.25/variables/SPAMEXITCODE
 ```
 
 # IndiMail Delivery mechanism explained
@@ -4114,308 +4416,6 @@ mailinglist users : ALLOW_CREATE ALLOW_MODIFY ALLOW_DELETE
 mailinglist moderators: ALLOW_CREATE ALLOW_MODIFY ALLOW_DELETE
 domain quota : ALLOW_CREATE ALLOW_MODIFY ALLOW_DELETE
 default quota : ALLOW_CREATE ALLOW_MODIFY
-```
-
-# SPAM and Virus Filtering
-
-IndiMail has multiple methods to insert your script anywhere before the queue, after the queue, before local delivery, before remote deliver or call a script to do local or remote delivery. Refer to the chapter [Writing Filters for IndiMail](#writing-filters-for-indimail) for more details.
-
-# SPAM Control using bogofilter
-
-If you have installed indimail-spamfilter package, you will have [bogofilter](https://bogofilter.sourceforge.io/ "bogofilter") providing a bayesian spam filter.
-
-bogofilter requires training to work. The next section tells you how to carry out this training. You can also have a pre-trained database installed by installing the **bogofilter-wordlist** package, but it is possible that this may not work well in your setup.
-
-On of the easiest method to enable bogofilter is to set few environment variable for indimail's [<b>qmail-spamfilter</b>(8)](https://github.com/mbhangui/indimail-mta/wiki/qmail-spamfilter.8) the frontend for <b>qmail-queue</b>(8) program. e.g. to enable spam filter on the incoming SMTP on port 25:
-
-```
-$ sudo /bin/bash
-
-Move QMAILQUEUE to SPAMQUEUE only if QMAILQUEUE doesn't have
-/usr/sbin/qmail-spamfilter
-
-# cd /service/qmail-smtpd.25/variables
-# mv QMAILQUEUE SPAMQUEUE
-# echo /usr/sbin/qmail-spamfilter > QMAILQUEUE
-# echo "/usr/bin/bogofilter -p -d /etc/indimail" > SPAMFILTER
-# echo "0" > SPAMEXITCODE
-# echo "0" > REJECTSPAM
-# echo "1" > MAKESEEKABLE
-exit
-$
-
-The below command will create an indimail filter that will automatically move
-during delivery, mails marked as spam by bogofilter 
-$ sudo vcfilter -i -t spamFilter -c 3 -k "Yes, spamicity=" -f Spam -b 0 -h 33 prefilt@$1
-```
-
-Now <b>qmail-spamfilter</b>(8) will pass every mail through bogofilter before it gets passed to <b>qmail-queue</b>(8). You can refer to chapter [IndiMail Queue Mechanism](#indimail-queue-mechanism) and look at the picture to understand how it works. bogofilter(1) will add X-Bogosity in each and every mail. A spam mail will have the value `Yes` along with a probabality number (e.g. 0.999616 below). You can configure bogofilter in /etc/indimail/bogofilter.cf. The SMTP logs will also have lines having this X-Bogosity field. A detailed mechanism is depicted pictorially in the chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi).
-
-```
-X-Bogosity: Yes, spamicity=0.999616, cutoff=9.90e-01, ham_cutoff=0.00e+00, queueID=6cs66604wfk,
-```
-
-The method describe above is a global SPAM filter. It will happen for all users, unless you use something like **envrules** to unset **SPAMFILTER** environment variable. You can use **envrules** to set **SPAMFILTER** for few specific email addresses. You can refer to the chapter [Envrules](#envrules) for more details.
-
-There is another way you can do spam filtering - during local delivery (you could do for remote delivery, but what would be the point?). IndiMail allows you to call an external program during local/remote delivery by settting **QMAILLOCAL** / **QMAILREMOTE** environment variable. You could use any method to call bogofilter (either directly in *filterargs* control file, or your own script). You can see a Pictorial representation of how this happens. ![LocalFilter](indimail_spamfilter_local.png)
-
-You can also use <b>vcfilter</b>(1) to set up a filter that will place your spam emails in a designated folder for SPAM. Refer to the chapter [Writing Filters for IndiMail](#writing-filters-for-indiMail) for more details.
-
-# Training bogofilter
-
-Training bogofilter requires creating a bogofilter databases with corpus of HAM and SPAM emails with SPAM comprising roughly 30% of the total. A good way to start is download an initial corpus from the spamassasin database. Do not run the below curl command with root privileges.
-
-```
-$ mkdir /home/manny/bogofilter
-$ cd /home/manny/bogofilter
-$ curl -s https://raw.githubusercontent.com/mbhangui/indimail-virtualdomains/master/bogofilter-wordlist-x/download.sh | sh
-$ curl -s https://raw.githubusercontent.com/mbhangui/indimail-virtualdomains/master/bogofilter-wordlist-x/training.sh | sh
-$ sudo cp wordlist.db /etc/indimail
-$ sudo chmod 644 /etc/indimail/wordlist.db
-$ sudo chown indimail:indimail /etc/indimail/wordlist.db
-```
-
-The above steps will download the spamasassin corpus in the directory /home/manny/bogofilter/training and also create a bogofilter spam database wordlist.db trained from spamassasin corpus at http://spamassassin.apache.org/old/publiccorpus. The `vcfilter` command above creates a rule to automatically move emails marked as spam to Spam subfolder in your Maildir.
-
-You can keep on updating the subfolders easy\_ham\_2 and spam\_2 subfolders in /home/manny/bogofilter/training directory and run the training.sh script. One possible method could be to have a script that uses the find command to copy ham emails from your Maildir subfolders, that you know for sure have non-spam emails, to the easy\_ham\_2 subfolder in the training directory. You can have folder named `Spam` in your Maildir where you move spam emails using your mail client. This will be spam emails not caught by bogofilter. You can have the same script copy spam mails from `Spam` folder to spam\_2 subfolder in the training directory.
-
-# SPAM Control using badip control file
-
-IndiMail has many methods to help deal with spam. For detecting spam, IndiMail uses bogofilter a fast bayesian spam filter. IndiMail's <b>qmail-smtpd</b> which provides SMTP protocol is neatly integrated with bogofilter. When bogofilter detects spam, <b>qmail-smtpd</b> prints the X-Bogosity header as part of SMTP transaction log
-
-```
-$ grep "X-Bogosity, Yes" /var/log/svc/smtpd.25/current
-@400000004bc8183f01fcbc54 qmail-smtpd: pid 16158 from ::ffff:88.191.35.203 HELO X-Bogosity: Yes, spamicity=0.999616, cutoff=9.90e-01, ham_cutoff=0.00e+00, queueID=6cs66604wfk,
-```
-
-The value "Yes" in X-Bogosity indicates spam. You can tell <b>qmail-smtpd</b> to reject such mails at SMTP just by doing
-
-```
-# echo 1 > /service/qmail-smtpd.25/variables/REJECTSPAM
-# svc -r /service/qmail-smtpd.25
-```
-
-SMTP clients which tries to send a spam mail will get the following error at the end of the SMTP transaction
-554 SPAM or junk mail threshold exceeded (#5.7.1)
-The mail will get bounced. In some cases you would want to issue temporary error to such clients. In the above SMTP transaction log, the IP address of the client was 88.191.35.203. To put such client's into IndiMail's SPAM blacklist, you just need to put the IP address in the control file /etc/indimail/control/badip
-
-`# echo 88.191.35.203 >> /etc/indimail/control/badip`
-
-For turning on the BADIP functionality, you need to set the BADIPCHECK or the BADIP environment variable. i.e.
-
-```
-# echo badip > /service/qmail-smtpd.25/variables/BADIP
-# svc -r /service/qmail-smtpd.25
-```
-
-Clients whose IP match an entry in badip will be greeted as below
-
-```
-421 indimail.org sorry, your IP (::ffff:88.191.35.203) is temporarily denied (#4.7.1)
-```
-
-Also the client will not be able to carry out any SMTP transactions like ehlo, MAIL FROM, RCPT TO, etc. A large ISP can run the following command every day once in cron
-
-```
-grep "X-Bogosity, Yes" /var/log/svc/qmail.smtpd.25/current > /etc/indimail/control/badip
-```
-
-If your badip files becomes very large, you can also take advantage of IndiMail's ability to use cdb (or you could use MySQL too)
-
-`$ sudo /usr/bin/qmail-cdb badip`
-
-# Virus Scanning using QHPSI
-
-A large fraction of today’s emails is infected by a virus or a worm. It is necessary to recognize those malicious emails as soon as possible already in the DATA phase of the SMTP conversation and to reject them.
-
-When you use IndiMail, it is ultimately <b>qmail-queue</b> which is responsible for queueing your messages. <b>qmail-queue</b> stores the message component of queued mails (captured duing DATA phase of the SMTP conversation) under the mess subdirectory.
-
-Files under the mess subdirectory are named after their i-node number. Let us look at a typical log sequence for a message received on the local system.
-
-```
-@400000004b9da2f03b424bb4 new msg 660188
-@400000004b9da2f03b426324 info msg 660188: bytes 2794 from fogcreek_xxx@response.whatcounts.com qp 3223 uid 555
-@400000004b9da2f03b42c0e4 starting delivery 6: msg 660188 to local mailstore@indimail.org
-@400000004b9da2f03b42dc3c status: local 1/10 remote 0/20
-@400000004b9da2f106a1e234 delivery 6: success: did_1+0+0/
-@400000004b9da2f1091e676c status: local 0/10 remote 0/20
-@400000004b9da2f1091fa3d4 end msg 660188
-```
-
-The above lines indicates that indimail-mta has received a new message, and its queue ID is 660188. What this means is that is <b>qmail-queue</b> has created a file named /var/indimail/queue/mess/NN/660188. The i-node number of the file is 660188. This is the queue file that contains the message. The queue ID is guaranteed to be unique as long as the message remains in the queue (you can't have two files with the same i-node in a filesystem).
-
-To perform virus scanning, it would be trivial to do virus scanning on the mess file above in <b>qmail-queue</b> itself. That is exactly what IndiMail does by using a feature called Qmail High Performance Virus Scanner (**QHPSI**). **QHPSI** was conceptualized by Erwin Hoffman. You can read here for more details.
-
-IndiMail takes **QHPSI** forward by adding the ability to add plugins. The **QHPSI** extension for <b>qmail-queue</b> allows to call an arbitary virus scanner directly, scanning the incoming data-stream on STDIN. Alternatively, it allows plugins to be loaded from the /usr/lib/indimail/plugins directory. This directory can be changed by defining PLUGINDIR environment variable. **QHPSI** can be advised to pass multiple arguments to the virus scanner for customization. To run external scanner or load scanner plugins, <b>qmail-queue</b> calls <b>qhpsi</b>, a program setuid to qscand. By default, <b>qhpsi</b> looks for the symbol virusscan to invoke the scanner. The symbol can be changed by setting the environment variable QUEUE_PLUGIN to the desired symbol.
-
-Today’s virus scanner -- in particluar Clam AV -- work in resource efficient client/server mode (clamd/clamdscan) and include the feature to detect virii/worms in the base64 encoded data stream. Thus, there is no necessity to call additional programs (like reformime or ripmime) except for the virus scanner itself.
-
-You can see how the scanning works ![Pictorially](indimail_spamfilter_global.png)
-
-To enable virus scanning in IndiMail during the SMTP data phase, you can implement either of the two methods below
-
-## Using tcprules
-
-Define QHPSI in tcp.smtp and rebuild tcp.smtp.cdb using tcprules.
-
-`:allow,QHPSI=’/usr/bin/clamdscan %s --quiet --no-summary’`
-
-## Using envdir for SMTP service under supervise(8)
-
-Define QHPSI in SMTP service's variable directory
-
-```
-$ sudo /bin/bash
-# echo "/usr/bin/clamdscan %s --quiet --no-summary" > /service/qmail-smtpd.25/variables/QHPSI
-```
-
-If you have installed IndiMail using RPM/Debian/Arch packages from [OBS](http://download.opensuse.org/repositories/home:/indimail/ "Stable Build Repository") or RPM packages from [COPR](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail), QHPSI is enabled by default by defining it in the qmail-smtpd.25 variables directory. If you have clamd, clamav already installed on your server, the binary installation of inidmail-mta also installs two services under supervise.
-
-* freshclam - service to update the clamd virus databases
-* clamd - service to run the clamd scanner
-
-You may need to disable clamd, freshclam startup by your system boot process and enable the startup under indimail. Do have the clamd, freshclam service started up by indimail, remove the down file. i.e.
-
-```
-$ sudo /bin/rm /service/freshclam/down /service/clamd/down
-$ sudo /usr/bin/svc -u /service/clamd /service/freshclam
-```
-
-```
-$ tail -f /var/log/indimail/freshclam/current
-@400000004b9da034170f6394 cdiff_apply: Parsed 17 lines and executed 17 commands
-@400000004b9da03417103e54 Retrieving http://database.clamav.net/daily-10574.cdiff
-@400000004b9da0342261b83c Trying to download http://database.clamav.net/daily-10574.cdiff (IP: 130.59.10.36)
-Downloading daily-10574.cdiff [100%]g daily-10574.cdiff [ 13%]
-@400000004b9da03509c39c64 cdiff_apply: Parsed 436 lines and executed 436 commands
-@400000004b9da03510c3485c daily.cld updated (version: 10574, sigs: 24611, f-level: 44, builder: ccordes)
-@400000004b9da03510c4d2e4 bytecode.cvd version from DNS: 2
-@400000004b9da03510c4de9c bytecode.cvd is up to date (version: 2, sigs: 2, f-level: 44, builder: nervous)
-@400000004b9da03510c82e44 Database updated (729340 signatures) from database.clamav.net (IP: 130.59.10.36)
-```
-
-```
-$ cat /var/log/indimail/clamd/current
-@400000004b9da0260d6c1a94 Limits: Global size limit set to 104857600 bytes.
-@400000004b9da0260d6c264c Limits: File size limit set to 26214400 bytes.
-@400000004b9da0260d6c3204 Limits: Recursion level limit set to 16.
-@400000004b9da0260d6c3dbc Limits: Files limit set to 10000.
-@400000004b9da0260d6c4974 Archive support enabled.
-@400000004b9da0260d6c5144 Algorithmic detection enabled.
-@400000004b9da0260d6c5cfc Portable Executable support enabled.
-@400000004b9da0260d6c68b4 ELF support enabled.
-@400000004b9da0260d6c7084 Detection of broken executables enabled.
-@400000004b9da0260e7abfbc Mail files support enabled.
-@400000004b9da0260e7acb74 OLE2 support enabled.
-@400000004b9da0260e7ad344 PDF support enabled.
-@400000004b9da0260e7adefc HTML support enabled.
-@400000004b9da0260e7ae6cc Self checking every 600 seconds.
-@400000004b9da2a3116a177c No stats for Database check - forcing reload
-@400000004b9da2a3206deb04 Reading databases from /var/indimail/share/clamd
-@400000004b9da2a70489facc Database correctly reloaded (728651 signatures)
-@400000004b9da2a7061e372c /var/indimail/queue/queue2/mess/16/660188: OK
-```
-
-Once you have **QHPSI** enabled, <b>qmail-queue</b> will add the header **X-QHPSI** in the mail. You will have the following header
-
-`X-QHPSI: clean`
-
-in case the email is clean and the following header if a virus is found
-
-`X-QHPSI: virus found`
-
-The default configuration of IndiMail will allow these emails to be delivered to the inbox. This is because some sites have have legislations like SOX, etc to enforce archiving of all emails that come into the system. In case you want to reject the email at SMTP you can do the following
-
-```
-$ sudo /bin/bash
-# echo 1 > /service/qmail.smtpd/variables/REJECTVIRUS
-# svc -r /service/qmail-smtpd.25
-```
-
-One can also create a vfilter to deliver such email to the quarantine folder
-
-```
-/usr/bin/vcfilter -i -t virusFilter -c 0 -k "virus found" -f Quarantine -b 0 -h 28 prefilt@$1
-```
-
-If you implement different method, than explained above, let me know.
-
-# Using spamassasin with IndiMail
-
-Just few days back a user asked me whether spamassassin can be used with IndiMail.
-
-IndiMail uses environment variables **SPAMFILTER**, **SPAMEXITCODE** to configure any spam filter to be used. All that is required for the spam filter is to read a mail message on stdin, output the message back on stdout and exit with a number which indicates whether the message is ham or spam.
-
-The default installation of IndiMail creates a configuration where mails get scanned by bogofilter for spam filtering. bogofilter exits with value '0' in case the message is spam and with value '1' when message is ham. The settings for **SPAMFILTER**, **SPAMEXITCODE** is as below
-
-```
-SPAMFILTER="/usr/bin/bogofilter -p -u -d /etc/indimail"
-SPAMEXITCODE=0 # what return value from spam filter should be treated as spam?
-```
-
-Assuming that you have installed, setup and trained spamassassin, you can follow the instructions below to have IndiMail use spamassassin.
-
-spamassasin has a client spamc which exits 1 when message is spam and exits 0 if the message is ham. To use spamassassin, just use the following for SPAMFILTER, SPAMEXITCODE
-
-```
-SPAMFILTER="path_to_spamc_program -E-d host -p port -u user"
-SPAMEXITCODE=1
-```
-
-(see the documentation on spamc for description of arguments to spamc program). You an also use -U socket_path, to use unix domain socket instead of -d host, which uses tcp/ip
-
-Since IndiMail uses <b>envdir</b> program to set environment variable, a simple way would be to set SPAMFILTER, SPAMEXITCODE is to do the following
-
-```
-$ sudo /bin/bash
-# echo "spamcPath -E -d host -p port -u user" > /service/qmail-smtpd.25/variables/SPAMFILTER
-# echo 1 > /service/qmail-smtpd.25/variables/SPAMEXITCODE
-```
-
-What if you want to use both bogofilter and spamasssin. You can use a simple script like below as the SPAMFILTER program
-
-```
-#!/bin/bash
-#
-# you can -U option in spamc, pointing to a unix domain path instead of -d
-#
-DESTHOST=x.x.x.x
-
-#
-# pass the output of bogofilter to spamc and passthrough spamc output to stdout
-# store the exit status of bogofilter in status1 and spamc in status2
-#
-/usr/bin/bogofilter -p -d /etc/indimail | /usr/bin/spamc -E -d $DESTHOST -p 783
-STATUS=("${PIPESTATUS[@]}")
-status1=${STATUS[0]}
-status2=${STATUS[1]}
-
-# bogofilter returned error
-if [ $status1 -eq 2 ] ; then
-  exit 2
-fi
-# spamc returned error see the man page for spamc
-if [ $status2 -ge 64 -a $status2 -le 78 ] ; then
-  exit 2
-fi
-
-#
-# message is spam
-# bogofilter returns 0 on spam, spamc returns 1 on spam
-#
-if [ $status1 -eq 0 -o $status2 -eq 1 ] ; then
-  exit 0
-fi
-exit 1
-```
-
-
-Let us call the above script as bogospamc and let us place it in /usr/bin
-
-```
-$ sudo /bin/bash
-# echo /usr/bin/bogospamc > /service/qmail-smtpd.25/variables/SPAMFILTER
-# echo 0 > /service/qmail-smtpd.25/variables/SPAMEXITCODE
 ```
 
 # SPF implementation in IndiMail
