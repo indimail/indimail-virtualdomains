@@ -1,5 +1,8 @@
 /*
  * $Log: spam.c,v $
+ * Revision 1.6  2023-09-05 21:47:40+05:30  Cprogrammer
+ * use matchregex from libqmail
+ *
  * Revision 1.5  2023-03-20 10:18:16+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -54,7 +57,7 @@
 #include "lowerit.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: spam.c,v 1.5 2023-03-20 10:18:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: spam.c,v 1.6 2023-09-05 21:47:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define BADMAIL 1

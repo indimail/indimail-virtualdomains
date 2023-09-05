@@ -1,5 +1,9 @@
 /*-
  * $Log: vfilter.c,v $
+ * Revision 1.14  2023-09-05 21:49:54+05:30  Cprogrammer
+ * removed dependency on fnmatch
+ * removed "sender not in addressbook"
+ *
  * Revision 1.13  2023-08-31 23:17:40+05:30  Cprogrammer
  * run vdelivermail if storeHeader is unsuccessful
  *
@@ -45,7 +49,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 1.13 2023-08-31 23:17:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 1.14 2023-09-05 21:49:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -177,7 +181,7 @@ static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 1.13 $", *mda;
+	char           *revision = "$Revision: 1.14 $", *mda;
 	static stralloc XFilter = {0};
 	pid_t           pid;
 	int             i, werr, wait_status, _status;

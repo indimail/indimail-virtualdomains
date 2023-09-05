@@ -1,5 +1,8 @@
 /*
  * $Log: variables.c,v $
+ * Revision 1.5  2023-09-05 21:48:48+05:30  Cprogrammer
+ * removed dependency on fnmatch
+ *
  * Revision 1.4  2023-03-24 19:05:16+05:30  Cprogrammer
  * vmoveuser renamed to vmoveuserdir
  *
@@ -24,7 +27,7 @@
 #include "dir_control.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: variables.c,v 1.4 2023-03-24 19:05:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: variables.c,v 1.5 2023-09-05 21:48:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 vdir_type       vdir;

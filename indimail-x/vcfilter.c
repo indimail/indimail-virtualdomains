@@ -1,5 +1,9 @@
 /*
  * $Log: vcfilter.c,v $
+ * Revision 1.7  2023-09-05 21:49:15+05:30  Cprogrammer
+ * allow both textual and numberical values for -c and -h option
+ * removed use of "sender not in addressbook"
+ *
  * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -24,7 +28,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 1.6 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 1.7 2023-09-05 21:49:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER

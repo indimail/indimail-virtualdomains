@@ -1,5 +1,8 @@
 /*
  * $Log: vfilter_header.c,v $
+ * Revision 1.4  2023-09-05 21:50:44+05:30  Cprogrammer
+ * added headerNumber function to convert textual header name to number
+ *
  * Revision 1.3  2023-03-20 10:36:29+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter_header.c,v 1.3 2023-03-20 10:36:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter_header.c,v 1.4 2023-09-05 21:50:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER

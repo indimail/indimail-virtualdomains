@@ -1,5 +1,8 @@
 /*
  * $Log: vfilter_insert.c,v $
+ * Revision 1.3  2023-09-05 21:51:14+05:30  Cprogrammer
+ * removed "sender not in address book"
+ *
  * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter_insert.c,v 1.2 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter_insert.c,v 1.3 2023-09-05 21:51:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
