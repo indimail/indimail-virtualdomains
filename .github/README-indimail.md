@@ -1456,7 +1456,7 @@ NOTE: you can exit with value 0 instead of calling the maildirdeliver program to
 IndiMail's vfilter(8) mechanism allows you to create rule based filter based on any keyword in the message headers or message body. You can create a vfilter by calling the <b>vcfilter</b>(1) program.
 
 ```
-$ vcfilter -i -t myfilter -h 2 -c 0 -k "failure notice" -f /NoDeliver -b "2|/usr/local/bin/myfilter" testuser01@example.com
+$ vcfilter -i -t myfilter -h Subject -c 0 -k "failure notice" -f /NoDeliver -b "2|/usr/local/bin/myfilter" testuser01@example.com
 ```
 
 NOTE: you can exit with value 0 instead of putting anything on standard output to discard the mail completely (blackhole).
@@ -1747,23 +1747,26 @@ exit 111
 
 # SPAM and Virus Filtering
 
-IndiMail has multiple methods to insert your script anywhere before the queue, after the queue, before local delivery, before remote deliver or call a script to do local or remote delivery. Refer to the chapter [Writing Filters for IndiMail](#writing-filters-for-indimail) for more details.
+IndiMail has multiple methods to insert your script anywhere before or after queueing, before local or remote delivery. Refer to the chapter [Writing Filters for IndiMail](#writing-filters-for-indimail) on how to do this. SPAM and Virus filtering use the same techniques involved in filtering emails describled in the previous chapter.
 
 # SPAM Control using bogofilter
 
 If you have installed indimail-spamfilter package, you will have [bogofilter](https://bogofilter.sourceforge.io/ "bogofilter") providing a bayesian spam filter.
 
-bogofilter requires training to work. The next section tells you how to carry out this training. You can also have a pre-trained database installed by installing the **bogofilter-wordlist** package, but it is possible that this may not work well in your setup.
+bogofilter requires training to be able to classify emails as spam or ham. The next section tells you how to carry out this training. You can also have a pre-trained database installed by installing the **bogofilter-wordlist** package, but it is possible that this may not work well in your setup.
 
-On of the easiest method to enable bogofilter is to set few environment variable for indimail's [<b>qmail-spamfilter</b>(8)](https://github.com/mbhangui/indimail-mta/wiki/qmail-spamfilter.8) the frontend for <b>qmail-queue</b>(8) program. e.g. to enable spam filter on the incoming SMTP on port 25:
+On of the easiest method to enable bogofilter is to set few environment variable for indimail's [<b>qmail-spamfilter</b>(8)](https://github.com/mbhangui/indimail-mta/wiki/qmail-spamfilter.8). <b>qmail-spamfilter</b> is a frontend for <b>qmail-queue</b>(8) program. e.g. to enable spam filter on the incoming SMTP on port 25:
 
 ```
 $ sudo /bin/bash
+# cd /service/qmail-smtpd.25/variables
 
 Move QMAILQUEUE to SPAMQUEUE only if QMAILQUEUE doesn't have
 /usr/sbin/qmail-spamfilter
 
-# cd /service/qmail-smtpd.25/variables
+# cat QMAILQUEUE
+/usr/sbin/qmailqueue
+
 # mv QMAILQUEUE SPAMQUEUE
 # echo /usr/sbin/qmail-spamfilter > QMAILQUEUE
 # echo "/usr/bin/bogofilter -p -d /etc/indimail" > SPAMFILTER
@@ -1774,8 +1777,10 @@ exit
 $
 
 The below command will create an indimail filter that will automatically move
-during delivery, mails marked as spam by bogofilter 
-$ sudo vcfilter -i -t spamFilter -c 3 -k "Yes, spamicity=" -f Spam -b 0 -h 33 prefilt@$1
+during delivery, mails marked as spam by bogofilter for delivery to virtual domain
+<u>domain</u>.
+
+$ sudo vcfilter -i -t spamFilter -c "Starts with" -k "Yes, spamicity=" -f Spam -b 0 -h X-Bogosity prefilt@domain
 ```
 
 Now <b>qmail-spamfilter</b>(8) will pass every mail through bogofilter before it gets passed to <b>qmail-queue</b>(8). You can refer to chapter [IndiMail Queue Mechanism](#indimail-queue-mechanism) and look at the picture to understand how it works. bogofilter(1) will add X-Bogosity in each and every mail. A spam mail will have the value `Yes` along with a probabality number (e.g. 0.999616 below). You can configure bogofilter in /etc/indimail/bogofilter.cf. The SMTP logs will also have lines having this X-Bogosity field. A detailed mechanism is depicted pictorially in the chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi).
@@ -1964,7 +1969,7 @@ $ sudo /bin/bash
 One can also create a vfilter to deliver such email to the quarantine folder
 
 ```
-/usr/bin/vcfilter -i -t virusFilter -c 0 -k "virus found" -f Quarantine -b 0 -h 28 prefilt@$1
+/usr/bin/vcfilter -i -t virusFilter -c "Equals" -k "virus found" -f Quarantine -b 0 -h 28 prefilt@$1
 ```
 
 If you implement different method, than explained above, let me know.
@@ -3342,7 +3347,7 @@ $ cat /usr/libexec/indimail/vadddomain
 /usr/bin/valias -i '&ham' ham@$1
 /usr/bin/vadduser -e prefilt@$1 xxxxxxxx
 /usr/bin/vadduser -e postfilt@$1 xxxxxxxx
-/usr/bin/vcfilter -i -t spamFilter -c 3 -k "Yes, spamicity=" -f Spam -b 0 -h 33 prefilt@$1
+/usr/bin/vcfilter -i -t spamFilter -c "Starts with" -k "Yes, spamicity=" -f Spam -b 0 -h "X-Bogosity" prefilt@$1
 /bin/ls -dl /var/indimail/domains/$1
 /bin/ls -al /var/indimail/domains/$1
 exit 0
@@ -5144,6 +5149,15 @@ $ mkdir ~/.defaultqueue
 $ cd ~/.defaultqueue
 $ echo "/home/user1/domainkeys/default" > DKIMSIGN
 ```
+
+## Moving mails to SPAM folder for failed DKIM verification
+
+For DKIM verification we spoke about setting <b>DKIMVERIFY</b> environment variable, where we can permanently or temporarily reject mails for DKIM verification failures. We could instead accept all emails but put them in the Spam folder. To do that set DKIMVERIFY to an empty string and use <b>vcfilter</b> to create a vfilter using the following command
+
+```
+$ sudo vcfilter -i -t dkimFilter -c "Does not contain" -k "good" -f Spam -b 0 -h DKIM-Status prefilt@domain
+```
+
 
 ## DKIM Author Domain Signing Practices
 
