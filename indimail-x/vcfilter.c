@@ -1,34 +1,12 @@
 /*
- * $Log: vcfilter.c,v $
- * Revision 1.7  2023-09-05 21:49:15+05:30  Cprogrammer
- * allow both textual and numberical values for -c and -h option
- * removed use of "sender not in addressbook"
- *
- * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.5  2021-07-08 11:47:52+05:30  Cprogrammer
- * add check for misconfigured assign file
- *
- * Revision 1.4  2020-06-16 17:56:23+05:30  Cprogrammer
- * moved setuserid function to libqmail
- *
- * Revision 1.3  2019-06-07 15:54:31+05:30  mbhangui
- * use sgetopt library for getopt()
- *
- * Revision 1.2  2019-04-22 23:16:58+05:30  Cprogrammer
- * added missing strerr.h
- *
- * Revision 1.1  2019-04-18 08:38:43+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: vcfilter.c,v 1.7 2023-09-06 18:47:05+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 1.7 2023-09-05 21:49:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 1.7 2023-09-06 18:47:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -250,7 +228,7 @@ get_options(int argc, char **argv, char **email, stralloc *faddr,
 			break;
 		case 'k':
 			*keyword = optarg;
-			if (*comparision == 7) {
+			if (*comparision == 6) {
 				for (ptr1 = *keyword, ptr2 = *keyword; *ptr1; ptr1++) {
 					if (!isspace((int) *ptr1))
 						*ptr2++ = *ptr1;
@@ -478,3 +456,29 @@ main()
 	return (0);
 }
 #endif
+
+/*
+ * $Log: vcfilter.c,v $
+ * Revision 1.7  2023-09-06 18:47:05+05:30  Cprogrammer
+ * allow both textual and numberical values for -c and -h option
+ * removed "Sender not in addressbook"
+ *
+ * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.5  2021-07-08 11:47:52+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
+ * Revision 1.4  2020-06-16 17:56:23+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
+ * Revision 1.3  2019-06-07 15:54:31+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.2  2019-04-22 23:16:58+05:30  Cprogrammer
+ * added missing strerr.h
+ *
+ * Revision 1.1  2019-04-18 08:38:43+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,5 +1,8 @@
 /*
  * $Log: vfilter_insert.c,v $
+ * Revision 1.4  2023-09-06 18:52:25+05:30  Cprogrammer
+ * handle negative header_num, empty keyword for 'My ID not in To, Cc, Bcc'
+ *
  * Revision 1.3  2023-09-05 21:51:14+05:30  Cprogrammer
  * removed "sender not in address book"
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter_insert.c,v 1.3 2023-09-05 21:51:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter_insert.c,v 1.4 2023-09-06 18:52:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -45,7 +48,8 @@ die_nomem()
 }
 
 int
-vfilter_insert(char *emailid, char *filter_name, int header_name, int comparision, char *keyword, char *folder, int bounce_action,
+vfilter_insert(char *emailid, char *filter_name, int header_num,
+		int comparision, char *keyword, char *folder, int bounce_action,
 	char *faddr)
 {
 	int             err, filter_no;
@@ -55,7 +59,7 @@ vfilter_insert(char *emailid, char *filter_name, int header_name, int comparisio
 	if (iopen((char *) 0))
 		return (-1);
 	if(comparision == 5)
-		filter_no = comparision - 5;
+		filter_no = 0;
 	else
 	if((filter_no = vfilter_filterNo(emailid)) == -1) {
 		strerr_warn1("vfilter_insert: failed to obtain filter No", 0);
@@ -70,11 +74,11 @@ vfilter_insert(char *emailid, char *filter_name, int header_name, int comparisio
 			!stralloc_catb(&SqlBuf, ", \"", 3) ||
 			!stralloc_cats(&SqlBuf, filter_name) ||
 			!stralloc_catb(&SqlBuf, "\", ", 3) ||
-			!stralloc_catb(&SqlBuf,  strnum, fmt_uint(strnum, (unsigned int) header_name)) ||
+			!stralloc_catb(&SqlBuf,  strnum, fmt_int(strnum, header_num)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
 			!stralloc_catb(&SqlBuf,  strnum, fmt_uint(strnum, (unsigned int) comparision)) ||
 			!stralloc_catb(&SqlBuf, ", \"", 3) ||
-			!stralloc_cats(&SqlBuf, keyword) ||
+			!stralloc_cats(&SqlBuf, keyword ? keyword : "") ||
 			!stralloc_catb(&SqlBuf, "\", \"", 4) ||
 			!stralloc_cats(&SqlBuf, folder) ||
 			!stralloc_catb(&SqlBuf, "\", \"", 4) ||

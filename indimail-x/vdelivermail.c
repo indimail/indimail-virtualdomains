@@ -1,5 +1,8 @@
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 1.12  2023-09-06 18:49:19+05:30  Cprogrammer
+ * prepend dot '.' to delivery folder if folder doesn't start with dot
+ *
  * Revision 1.11  2023-03-20 10:35:05+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -101,7 +104,7 @@
 #include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 1.11 2023-03-20 10:35:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 1.12 2023-09-06 18:49:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vdelivermail: fatal: "
@@ -229,6 +232,8 @@ prepare_maildir(char *dir, uid_t uid, gid_t gid)
 		die_nomem();
 	/*- vfilter sets MAILDIRFOLDER to the Maildir where mail needs to be delivered */
 	if ((maildirfolder = env_get("MAILDIRFOLDER"))) {
+		if (*maildirfolder != '.' && !stralloc_append(&TheDir, "."))
+			die_nomem();
 		if (!stralloc_cats(&TheDir, maildirfolder) ||
 				!stralloc_append(&TheDir, "/"))
 			die_nomem();
@@ -497,6 +502,8 @@ processMail(struct passwd *pw, char *user, char *domain, mdir_t MsgSize)
 					die_nomem();
 				/*- Call overquota command with 5 arguments */
 				if ((maildirfolder = env_get("MAILDIRFOLDER"))) {
+					if (*maildirfolder != '.' && !stralloc_append(&TheDir, "."))
+						die_nomem();
 					if (!stralloc_append(&TheDir, "/") ||
 							!stralloc_cats(&TheDir, maildirfolder))
 						die_nomem();

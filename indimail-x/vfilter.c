@@ -1,55 +1,12 @@
-/*-
- * $Log: vfilter.c,v $
- * Revision 1.14  2023-09-05 21:49:54+05:30  Cprogrammer
- * removed dependency on fnmatch
- * removed "sender not in addressbook"
- *
- * Revision 1.13  2023-08-31 23:17:40+05:30  Cprogrammer
- * run vdelivermail if storeHeader is unsuccessful
- *
- * Revision 1.12  2023-08-06 15:29:48+05:30  Cprogrammer
- * fixed setting emailid from arguments
- *
- * Revision 1.11  2023-03-26 00:33:30+05:30  Cprogrammer
- * fixed code using wait_handler
- *
- * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.9  2022-12-18 19:28:05+05:30  Cprogrammer
- * recoded wait logic
- *
- * Revision 1.8  2022-05-10 20:01:51+05:30  Cprogrammer
- * use headers from include path
- *
- * Revision 1.7  2021-09-12 20:17:58+05:30  Cprogrammer
- * moved replacestr to libqmail
- *
- * Revision 1.6  2021-07-27 18:07:39+05:30  Cprogrammer
- * set default domain using vset_default_domain
- *
- * Revision 1.5  2021-06-11 17:01:55+05:30  Cprogrammer
- * replaced Makeargs(), makeseekable() with makeargs(), mktempfile() from libqmail
- *
- * Revision 1.4  2020-04-01 18:58:43+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.3  2019-06-07 15:52:44+05:30  mbhangui
- * use sgetopt library for getopt()
- *
- * Revision 1.2  2019-04-22 23:17:07+05:30  Cprogrammer
- * added missing strerr.h
- *
- * Revision 1.1  2019-04-20 08:59:26+05:30  Cprogrammer
- * Initial revision
- *
+/*
+ * $Id: vfilter.c,v 1.14 2023-09-06 18:48:33+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 1.14 2023-09-05 21:49:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 1.14 2023-09-06 18:48:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -581,19 +538,18 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 		if (interactive && verbose && !j++) {
 			if (global_filter) {
 				subprintfe(subfdout, "vfilter",
-							"No  global Filter                 "
-							"FilterName Header          "
-							"Comparision                "
-							"Keyword         Folder          Action\n");
+					"No  global Filter                 FilterName"
+					"           Header          Comparision      "
+					"          Keyword         Folder          "
+					"Bounce Forward\n");
 			} else {
 				subprintfe(subfdout, "vfilter",
-							"No  EmailId                       "
-							"FilterName Header          "
-							"Comparision                "
-							"Keyword         Folder          "
-							"Action\n");
+					"No  EmailId                       FilterName"
+					"           Header          Comparision      "
+					"          Keyword         Folder          "
+					"Bounce Forward\n");
 			}
-			print_hyphen(subfdout, "=", 137);
+			print_hyphen(subfdout, "=", 144);
 		}
 		if (interactive && verbose)
 			format_filter_display(0, *filter_no, filterid, filter_name, *header_name, *comparision,
@@ -604,7 +560,7 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 		 */
 		if (!global_filter && *comparision == 5) {
 			if (interactive && verbose)
-				print_hyphen(subfdout, "=", 137);
+				print_hyphen(subfdout, "=", 144);
 			for (ret = 0, ptr = hptr; ptr && *ptr && !ret; ptr++) {
 				if (!case_diffb((*ptr)->name, 4, "From") || !case_diffb((*ptr)->name, 11, "Return-Path"))
 					filter_opt = 1;
@@ -631,7 +587,7 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 									!stralloc_cats(&tmpUser, real_domain) ||
 									!stralloc_0(&tmpUser))
 								die_nomem();
-							if (!case_diffb(tmpUser.s, tmpUser.len + 1, filterid)) {
+							if (!case_diffb(tmpUser.s, tmpUser.len, filterid)) {
 								ret = 1;
 								break;
 							}
@@ -663,14 +619,15 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 				continue;
 			lowerit(keyword->s);
 			for (ptr = hptr; ptr && *ptr; ptr++) {
-				if (!case_diffb((*ptr)->name, MAX_LINE_LENGTH, header_list[*header_name])) {
+				if (!case_diffb((*ptr)->name, str_len((*ptr)->name), header_list[*header_name])) {
 					switch (*comparision)
 					{
 					case 0:	/*- Equals */
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if (!case_diffb(*tmp_ptr, keyword->len, keyword->s)) {
 								if (interactive && verbose) {
-									subprintfe(subfdout, "vfilter", "Matched Filter No %d Data %s Keyword %s\n", *filter_no, *tmp_ptr, keyword->s);
+									subprintfe(subfdout, "vfilter", "Matched Filter No %d Data %s Keyword %s\n",
+											*filter_no, *tmp_ptr, keyword->s);
 									flush("vfilter");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
@@ -753,7 +710,7 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						}
 						break;
 					} /*- switch(comparision) */
-				} /*- if (!case_diffb((*ptr)->name, MAX_LINE_LENGTH, header_list[header_name])) */
+				} /*- if (!case_diffb((*ptr)->name, str_len((*ptr)->name), header_list[header_name])) */
 			} /*- for(ptr = hptr;ptr && *ptr;ptr++) */
 		} /* if (*comparision != 5) */
 	} /*- for (j = 0;;) */
@@ -929,3 +886,50 @@ main(int argc, char **argv)
 	return (1);
 }
 #endif /*- #ifdef VFILTER */
+
+/*-
+ * $Log: vfilter.c,v $
+ * Revision 1.14  2023-09-06 18:48:33+05:30  Cprogrammer
+ * replace fnmatch with matchregex from libqmail
+ * removed "sender not in addressbook"
+ *
+ * Revision 1.13  2023-08-31 23:17:40+05:30  Cprogrammer
+ * run vdelivermail if storeHeader is unsuccessful
+ *
+ * Revision 1.12  2023-08-06 15:29:48+05:30  Cprogrammer
+ * fixed setting emailid from arguments
+ *
+ * Revision 1.11  2023-03-26 00:33:30+05:30  Cprogrammer
+ * fixed code using wait_handler
+ *
+ * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.9  2022-12-18 19:28:05+05:30  Cprogrammer
+ * recoded wait logic
+ *
+ * Revision 1.8  2022-05-10 20:01:51+05:30  Cprogrammer
+ * use headers from include path
+ *
+ * Revision 1.7  2021-09-12 20:17:58+05:30  Cprogrammer
+ * moved replacestr to libqmail
+ *
+ * Revision 1.6  2021-07-27 18:07:39+05:30  Cprogrammer
+ * set default domain using vset_default_domain
+ *
+ * Revision 1.5  2021-06-11 17:01:55+05:30  Cprogrammer
+ * replaced Makeargs(), makeseekable() with makeargs(), mktempfile() from libqmail
+ *
+ * Revision 1.4  2020-04-01 18:58:43+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.3  2019-06-07 15:52:44+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.2  2019-04-22 23:17:07+05:30  Cprogrammer
+ * added missing strerr.h
+ *
+ * Revision 1.1  2019-04-20 08:59:26+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
