@@ -73,6 +73,9 @@ Release 3.4.5-1.1 Start 25/04/2023 End XX/XX/XXXX
     not in To, Cc, Bcc'
 39. vfilter_insert.c: handle negative header_num, empty keyword for 'My ID not
     in To, Cc, Bcc'
+07/09/2023
+40. vdelivermail: Bounce mail if env variable BOUNCE_MAIL is set
+41. vfilter.c: set BOUNCE_MAIL env variable to bounce mail using vdelivermail
 
 * Sun Apr 23 2023 19:21:03 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.4-1.1%{?dist}
 Release 3.4.4-1.1 Start 26/03/2023 End 23/04/2023

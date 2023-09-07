@@ -1,12 +1,12 @@
 /*
- * $Id: vfilter.c,v 1.14 2023-09-06 18:48:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vfilter.c,v 1.14 2023-09-07 21:09:50+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 1.14 2023-09-06 18:48:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 1.14 2023-09-07 21:09:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -75,33 +75,6 @@ die_nomem()
 	_exit(111);
 }
 
-static void
-printBounce(char *bounce)
-{
-	char           *ptr, *user, *domain;
-
-	if (str_diffn(bounce, BOUNCE_ALL, str_len(BOUNCE_ALL) + 1)) {
-		subprintfe(subfdout, "vfilter", "Hi. This is the IndiMail MDA for %s\n",
-				(ptr = env_get("HOST")) ? ptr : vset_default_domain());
-		subprintfe(subfdout, "vfilter",
-				"I'm afraid I cannot accept your message as it violates a system policy\n"
-				"set by the administrator. Sorry that I cannot accept your email\n");
-	} else {
-		/*- get the last parameter in the .qmail-default file */
-		if (!(ptr = env_get("EXT")))
-			user = "<>";
-		else
-			user = ptr;
-		if (!(ptr = env_get("HOST")))
-			domain = (ptr = env_get("DEFAULT_DOMAIN")) ? ptr : DEFAULT_DOMAIN;
-		else
-			domain = ptr;
-		subprintfe(subfdout, "vfilter", "No Account %s@%s here by that name. indimail (#5.1.5)", user, domain);
-	}
-	flush("vfilter");
-	return;
-}
-
 int
 execMda(char **argptr, char **mda)
 {
@@ -144,8 +117,6 @@ myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *fo
 	int             i, werr, wait_status, _status;
 
 	_status = status;
-	if (interactive)
-		_exit(_status ? 1 : 0);
 	if (!stralloc_copyb(&XFilter, "XFILTER=X-Filter: xFilter/IndiMail Revision ", 44) ||
 			!stralloc_cats(&XFilter, revision + 11))
 		die_nomem();
@@ -234,8 +205,14 @@ myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *fo
 						; /*- we disregard qutoas */
 				}
 				if (bounce == 1 || bounce == 3) {
-					printBounce(argv[2]);
-					_exit(100);
+					if (!env_put2("BOUNCE_MAIL", "1")) {
+						strerr_warn1("vfilter: env_put2: BOUNCE_MAIL=1: ", &strerr_sys);
+						if (interactive)
+							return (1);
+						_exit(111);
+					}
+					execMda(argv, &mda);
+					_exit(111);
 				}
 			}
 			if (DestFolder && *DestFolder && !case_diffb(DestFolder, 10, "/NoDeliver")) {
@@ -598,7 +575,8 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 			} /*- for(ret = 0, ptr = hptr;ptr && *ptr && !ret;ptr++) */
 			if (!ret) {
 				if (interactive && verbose) {
-					subprintfe(subfdout, "vfilter", "Matched Filter No %d Comparision %s\n", *filter_no, vfilter_comparision[*comparision]);
+					subprintfe(subfdout, "vfilter", "Matched local Filter No %d Comparision %s Folder %s Bounce %d Forward %s \n",
+							*filter_no, vfilter_comparision[*comparision], folder->s, *bounce_action, forward->s);
 					flush("vfilter");
 				}
 				myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
@@ -626,8 +604,9 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if (!case_diffb(*tmp_ptr, keyword->len, keyword->s)) {
 								if (interactive && verbose) {
-									subprintfe(subfdout, "vfilter", "Matched Filter No %d Data %s Keyword %s\n",
-											*filter_no, *tmp_ptr, keyword->s);
+									subprintfe(subfdout, "vfilter", "Matched %s Filter No %d Type Equals Data %s Keyword %s Bounce %d Folder %s Forward %s\n",
+											global_filter ? "global" : "local", *filter_no, *tmp_ptr,
+											keyword->s, *bounce_action, folder->s, forward->s ? forward->s : "noforward");
 									flush("vfilter");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
@@ -638,7 +617,8 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if (str_str(*tmp_ptr, keyword->s)) {
 								if (interactive && verbose) {
-									subprintfe(subfdout, "vfilter", "Matched Filter No %d Data %s Keyword %s\n", *filter_no, *tmp_ptr, keyword->s);
+									subprintfe(subfdout, "vfilter", "Matched %s Filter No %d Data %s Keyword %s\n",
+											global_filter ? "global" : "local", *filter_no, *tmp_ptr, keyword->s);
 									flush("vfilter");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
@@ -654,7 +634,8 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						}
 						if (!ret) {
 							if (interactive && verbose) {
-								subprintfe(subfdout, "vfilter", "Matched Filter No %d Data %s Keyword %s\n", *filter_no, *tmp_ptr, keyword->s);
+								subprintfe(subfdout, "vfilter", "Matched %s Filter No %d Data %s Keyword %s\n",
+										global_filter ? "global" : "local", *filter_no, *tmp_ptr, keyword->s);
 								flush("vfilter");
 							}
 							myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
@@ -665,7 +646,8 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 							if (!str_diffn(*tmp_ptr, keyword->s, keyword->len))
 							{
 								if (interactive && verbose) {
-									subprintfe(subfdout, "vfilter", "Matched Filter No %d Data %s Keyword %s\n", *filter_no, *tmp_ptr, keyword->s);
+									subprintfe(subfdout, "vfilter", "Matched %s Filter No %d Data %s Keyword %s\n", 
+											global_filter ? "global" : "local", *filter_no, *tmp_ptr, keyword->s);
 									flush("vfilter");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
@@ -676,8 +658,8 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if ((str = str_str(*tmp_ptr, keyword->s)) && !case_diffb(str, keyword->len, keyword->s)) {
 								if (interactive && verbose) {
-									subprintfe(subfdout, "vfilter", "Matched Filter No %d Comparision %s Data %s Keyword %s\n",
-											*filter_no, vfilter_comparision[*comparision], *tmp_ptr, keyword->s);
+									subprintfe(subfdout, "vfilter", "Matched %s Filter No %d Comparision %s Data %s Keyword %s\n",
+											global_filter ? "global" : "local", *filter_no, vfilter_comparision[*comparision], *tmp_ptr, keyword->s);
 									flush("vfilter");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
@@ -687,10 +669,10 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 					case 6:	/*- Float */
 						/*- e.g. tmp_ptr = 0.7, keyword = %p < 0.4 */
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
-							if (numerical_compare(*tmp_ptr, keyword->s)) {
+							if (numerical_compare(*tmp_ptr, keyword->s) > 0) {
 								if (interactive && verbose) {
-									subprintfe(subfdout, "vfilter", "Matched Filter No %d Data %s Keyword %s Folder %s\n",
-											*filter_no, *tmp_ptr, keyword->s, folder->s);
+									subprintfe(subfdout, "vfilter", "Matched %s Filter No %d Data %s Keyword %s Folder %s\n",
+											global_filter ? "global" : "local", *filter_no, *tmp_ptr, keyword->s, folder->s);
 									flush("vfilter");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
@@ -701,8 +683,8 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if (matchregex(*tmp_ptr, keyword->s, 0) == 1) {
 								if (interactive && verbose) {
-									subprintfe(subfdout, "vfilter", "Matched Filter No %d Comparision %s Keyword %s\n",
-											*filter_no, vfilter_comparision[*comparision], keyword->s);
+									subprintfe(subfdout, "vfilter", "Matched %s Filter No %d Comparision %s Keyword %s\n",
+											global_filter ? "global" : "local", *filter_no, vfilter_comparision[*comparision], keyword->s);
 									flush("vfilter");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
@@ -889,9 +871,10 @@ main(int argc, char **argv)
 
 /*-
  * $Log: vfilter.c,v $
- * Revision 1.14  2023-09-06 18:48:33+05:30  Cprogrammer
+ * Revision 1.14  2023-09-07 21:09:50+05:30  Cprogrammer
  * replace fnmatch with matchregex from libqmail
  * removed "sender not in addressbook"
+ * when bouncing email set BOUNCE_MAIL to have vdelivermail bounce
  *
  * Revision 1.13  2023-08-31 23:17:40+05:30  Cprogrammer
  * run vdelivermail if storeHeader is unsuccessful
