@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.7 2023-09-08 08:57:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.8 2023-09-08 11:19:10+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -256,7 +256,6 @@ setup_config()
 			exit 1
 		fi
 	fi
-	#unshare mount --bind $in_cnf /etc/mysql/indimail.cnf
 
   	# MySQL Database Creation
 	if [ ! -d $qmaildir/mysqldb/data/mysql ] ; then
@@ -1932,7 +1931,6 @@ do_cleanup_failed()
 do_cleanup()
 {
 	touch $testdir/cleanup.done
-	#$sudo umount /etc/mysql/indimail.cnf
 	delete_domain $domain1 1 >/dev/null 2>&1
 	do_svscan_stop
 	# Cleanup
@@ -1956,12 +1954,11 @@ do_cleanup()
 	/bin/rm -f $sysconfdir/nssd.conf
 	$sudo /bin/rm -rf $qmaildir/domains
 	$sudo /bin/rm -rf $testdir/mail
-	#$sudo /bin/rm -rf $qmaildir/mysqldb
-	#$sudo /bin/rm -f $in_cnf
 }
 
 do_autoresponder()
 {
+	echo "Starting Autoresponder test"
 	destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $1 | awk '{print $3}')
 	destdir2=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $2 | awk '{print $3}')
 	echo "Testing Autoresponder" > /tmp/vacation.$$
@@ -2017,7 +2014,6 @@ do_autoresponder()
 
 run_vcfilter()
 {
-	#set "$@"
 	$sudo env - \
 		PATH=/bin:/usr/bin:/usr/sbin \
 		ASSIGNDIR=$sysconfdir/users \
@@ -2028,9 +2024,6 @@ run_vcfilter()
 
 do_plain_user_tests()
 {
-	$sudo svc -2 $servicedir/inlookup.infifo
-	check_service inlookup.infifo
-
 	for hash in "default" $hash_supported
 	do
 		echo
@@ -2125,7 +2118,16 @@ do_scram_user_tests()
 		create_scram_user SCRAM-SHA-1   $testuser1 $t1 $hash
 		create_scram_user SCRAM-SHA-256 $testuser2 $t2 $hash
 		$sudo svc -h $servicedir/inlookup.infifo
+		if [ "$hash" = "DES" ] ; then
+			echo -1 > $servicedir/smtpd/variables/PASSWORD_HASH
+		else
+			> $servicedir/smtpd/variables/PASSWORD_HASH
+		fi
+		$sudo svc -r $servicedir/smtpd
 		sleep $sleep_int
+		check_service smtpd 3
+		do_smtp_auth_swaks $testuser1 $t1 3
+		do_smtp_auth_qmr_o $domain1 $testuser1 $t1 3
 		for j in 1 2
 		do
 			case $j in
@@ -2133,11 +2135,6 @@ do_scram_user_tests()
 				str="incache=0"
 				> $servicedir/smtpd/variables/PASSWD_CACHE
 				> $servicedir/smtpd/variables/QUERY_CACHE
-				if [ "$hash" = "DES" ] ; then
-					echo -1 > $servicedir/smtpd/variables/PASSWORD_HASH
-				else
-					> $servicedir/smtpd/variables/PASSWORD_HASH
-				fi
 				for i in imap pop3
 				do
 					for k in d d-ssl
@@ -2156,11 +2153,6 @@ do_scram_user_tests()
 				str="incache=1"
 				echo 1 > $servicedir/smtpd/variables/PASSWD_CACHE
 				echo 1 > $servicedir/smtpd/variables/QUERY_CACHE
-				if [ "$hash" = "DES" ] ; then
-					echo -1 > $servicedir/smtpd/variables/PASSWORD_HASH
-				else
-					> $servicedir/smtpd/variables/PASSWORD_HASH
-				fi
 				for i in imap pop3
 				do
 					for k in d d-ssl
@@ -2184,12 +2176,10 @@ do_scram_user_tests()
 				do_gsasl_test                   "SCRAM-SHA-256"      $testuser2 $t2
 				do_gsasl_test                   "SCRAM-SHA-256-PLUS" $testuser2 $t2
 			fi
-			do_smtp_auth_swaks $testuser1 $t1 3
 			do_smtp_auth_qmr_scram "SCRAM-SHA-1"        $domain1 $testuser1 $t1
 			do_smtp_auth_qmr_scram "SCRAM-SHA-1-PLUS"   $domain1 $testuser1 $t1
 			do_smtp_auth_qmr_scram "SCRAM-SHA-256"      $domain1 $testuser2 $t2
 			do_smtp_auth_qmr_scram "SCRAM-SHA-256-PLUS" $domain1 $testuser2 $t2
-			do_smtp_auth_qmr_o $domain1 $testuser1 $t1 3
 
 			for i in imap pop3
 			do
@@ -2521,8 +2511,6 @@ check_service mysql.3307
 create_domain $domain1 pass
 do_vdominfo
 do_dbinfo
-
-echo
 create_plain_user $testuser1 $password2
 change_password $testuser1 $password1
 do_vmoduser $testuser1
@@ -2540,23 +2528,26 @@ create_plain_user $testuser1 $password1 >/dev/null 2>&1
 create_plain_user $testuser2 $password2 >/dev/null 2>&1
 create_plain_user $testuser3 $password3 >/dev/null 2>&1
 do_vfilter
+
+echo
+do_autoresponder $testuser1 $testuser2
+
+echo
+do_valias $testuser1 $testuser2
 delete_user $testuser1 >/dev/null 2>&1
 delete_user $testuser2 >/dev/null 2>&1
+
+$sudo svc -2 $servicedir/inlookup.infifo
+check_service inlookup.infifo
 
 do_plain_user_tests
 
 do_scram_user_tests
 
 echo
-create_scram_user SCRAM-SHA-1   $testuser1 $password1 SHA-512 1
-create_scram_user SCRAM-SHA-256 $testuser2 $password2 SHA-512 1
-do_autoresponder $testuser1 $testuser2
-
-echo
-do_valias $testuser1 $testuser2
-echo
 echo "Testing domain deletion"
 delete_domain $domain1
+
 echo
 echo "Starting POST Handle tests"
 do_post_handle $domain1 pass $domain2 $testuser3 $testuser4 $domain3
@@ -2581,7 +2572,10 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
-# Revision 1.7  2023-09-08 08:57:33+05:30  Cprogrammer
+# Revision 1.8  2023-09-08 11:19:10+05:30  Cprogrammer
+# removed duplicate tests
+#
+# Revision 1.7  2023-09-08 09:31:04+05:30  Cprogrammer
 # added vfilter tests
 #
 # Revision 1.6  2023-08-23 13:09:26+05:30  Cprogrammer
