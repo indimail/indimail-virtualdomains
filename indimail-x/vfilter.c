@@ -1,51 +1,12 @@
-/*-
- * $Log: vfilter.c,v $
- * Revision 1.13  2023-08-31 23:17:40+05:30  Cprogrammer
- * run vdelivermail if storeHeader is unsuccessful
- *
- * Revision 1.12  2023-08-06 15:29:48+05:30  Cprogrammer
- * fixed setting emailid from arguments
- *
- * Revision 1.11  2023-03-26 00:33:30+05:30  Cprogrammer
- * fixed code using wait_handler
- *
- * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.9  2022-12-18 19:28:05+05:30  Cprogrammer
- * recoded wait logic
- *
- * Revision 1.8  2022-05-10 20:01:51+05:30  Cprogrammer
- * use headers from include path
- *
- * Revision 1.7  2021-09-12 20:17:58+05:30  Cprogrammer
- * moved replacestr to libqmail
- *
- * Revision 1.6  2021-07-27 18:07:39+05:30  Cprogrammer
- * set default domain using vset_default_domain
- *
- * Revision 1.5  2021-06-11 17:01:55+05:30  Cprogrammer
- * replaced Makeargs(), makeseekable() with makeargs(), mktempfile() from libqmail
- *
- * Revision 1.4  2020-04-01 18:58:43+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.3  2019-06-07 15:52:44+05:30  mbhangui
- * use sgetopt library for getopt()
- *
- * Revision 1.2  2019-04-22 23:17:07+05:30  Cprogrammer
- * added missing strerr.h
- *
- * Revision 1.1  2019-04-20 08:59:26+05:30  Cprogrammer
- * Initial revision
- *
+/*
+ * $Id: vfilter.c,v 1.14 2023-09-07 21:09:50+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 1.13 2023-08-31 23:17:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 1.14 2023-09-07 21:09:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -60,10 +21,6 @@ static char     sccsid[] = "$Id: vfilter.c,v 1.13 2023-08-31 23:17:40+05:30 Cpro
 #endif
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
-#endif
-#ifdef HAVE_FNMATCH_H
-#define _GNU_SOURCE
-#include <fnmatch.h>
 #endif
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
@@ -80,6 +37,7 @@ static char     sccsid[] = "$Id: vfilter.c,v 1.13 2023-08-31 23:17:40+05:30 Cpro
 #include <makeargs.h>
 #include <evaluate.h>
 #include <wait.h>
+#include <matchregex.h>
 #endif
 #include "common.h"
 #include "get_real_domain.h"
@@ -115,34 +73,6 @@ die_nomem()
 {
 	strerr_warn1("vfilter: out of memory", 0);
 	_exit(111);
-}
-
-static void
-printBounce(char *bounce)
-{
-	char           *ptr, *user, *domain;
-
-	if (str_diffn(bounce, BOUNCE_ALL, str_len(BOUNCE_ALL) + 1)) {
-		subprintfe(subfdout, "vfilter", "Hi. This is the IndiMail MDA for %s\n",
-				(ptr = env_get("HOST")) ? ptr : vset_default_domain());
-		subprintfe(subfdout, "vfilter",
-				"I'm afraid I cannot accept your message as a configured filter has decided\n"
-				"to reject this mail\n"
-				"Please refrain from sending such mail in future\n");
-	} else {
-		/*- get the last parameter in the .qmail-default file */
-		if (!(ptr = env_get("EXT")))
-			user = "<>";
-		else
-			user = ptr;
-		if (!(ptr = env_get("HOST")))
-			domain = (ptr = env_get("DEFAULT_DOMAIN")) ? ptr : DEFAULT_DOMAIN;
-		else
-			domain = ptr;
-		subprintfe(subfdout, "vfilter", "No Account %s@%s here by that name. indimail (#5.1.5)", user, domain);
-	}
-	flush("vfilter");
-	return;
 }
 
 int
@@ -181,14 +111,12 @@ static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 1.13 $", *mda;
+	char           *revision = "$Revision: 1.14 $", *mda;
 	static stralloc XFilter = {0};
 	pid_t           pid;
 	int             i, werr, wait_status, _status;
 
 	_status = status;
-	if (interactive)
-		_exit(_status ? 1 : 0);
 	if (!stralloc_copyb(&XFilter, "XFILTER=X-Filter: xFilter/IndiMail Revision ", 44) ||
 			!stralloc_cats(&XFilter, revision + 11))
 		die_nomem();
@@ -277,8 +205,14 @@ myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *fo
 						; /*- we disregard qutoas */
 				}
 				if (bounce == 1 || bounce == 3) {
-					printBounce(argv[2]);
-					_exit(100);
+					if (!env_put2("BOUNCE_MAIL", "1")) {
+						strerr_warn1("vfilter: env_put2: BOUNCE_MAIL=1: ", &strerr_sys);
+						if (interactive)
+							return (1);
+						_exit(111);
+					}
+					execMda(argv, &mda);
+					_exit(111);
 				}
 			}
 			if (DestFolder && *DestFolder && !case_diffb(DestFolder, 10, "/NoDeliver")) {
@@ -554,7 +488,7 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 	int             i, j, email_len, filter_opt, ret = 0, global_filter = 0,
 					max_header_value;
 	char           *str, *real_domain;
-	char          **tmp_ptr, **address_list;
+	char          **tmp_ptr;
 	static char   **header_list;
 	struct header **ptr;
 	static stralloc tmpUser = {0}, tmpDomain = {0};
@@ -581,32 +515,29 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 		if (interactive && verbose && !j++) {
 			if (global_filter) {
 				subprintfe(subfdout, "vfilter",
-							"No  global Filter                 "
-							"FilterName Header          "
-							"Comparision                "
-							"Keyword         Folder          Action\n");
+					"No  global Filter                 FilterName"
+					"           Header          Comparision      "
+					"          Keyword         Folder          "
+					"Bounce Forward\n");
 			} else {
 				subprintfe(subfdout, "vfilter",
-							"No  EmailId                       "
-							"FilterName Header          "
-							"Comparision                "
-							"Keyword         Folder          "
-							"Action\n");
+					"No  EmailId                       FilterName"
+					"           Header          Comparision      "
+					"          Keyword         Folder          "
+					"Bounce Forward\n");
 			}
-			print_hyphen(subfdout, "=", 137);
+			print_hyphen(subfdout, "=", 144);
 		}
 		if (interactive && verbose)
 			format_filter_display(0, *filter_no, filterid, filter_name, *header_name, *comparision,
 				keyword, folder, forward, *bounce_action);
 		flush("vfilter");
 		/*
-		 * comparision 5 - Sender not in Address Book
-		 * comparision 6 - recipient email not in To, Cc, Bcc
+		 * comparision 5 - recipient email not in To, Cc, Bcc
 		 */
-		if (!global_filter && (*comparision == 5 || *comparision == 6)) {
-			address_list = getAddressBook(filterid);
+		if (!global_filter && *comparision == 5) {
 			if (interactive && verbose)
-				print_hyphen(subfdout, "=", 137);
+				print_hyphen(subfdout, "=", 144);
 			for (ret = 0, ptr = hptr; ptr && *ptr && !ret; ptr++) {
 				if (!case_diffb((*ptr)->name, 4, "From") || !case_diffb((*ptr)->name, 11, "Return-Path"))
 					filter_opt = 1;
@@ -617,28 +548,8 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 				else
 					continue;
 				for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr && !ret; tmp_ptr++) {
-					/*- Sender not in Address Book */
-					if (*comparision == 5 && filter_opt == 1) {
-						for (rewindAddrToken();;) {
-							if (!(str = addressToken(*tmp_ptr, &email_len)))
-								break;
-							if (!case_diffb(str, email_len + 1, filterid)) {
-								/*- Allow the user to send himself mail */
-								ret = 1;
-								break;
-							}
-							for (i = 0; address_list && address_list[i]; i++) {
-								if (!address_list[i] || !*address_list[i])
-									continue;
-								if (!case_diffb(str, email_len + 1, address_list[i])) {
-									ret = 1;
-									break;
-								}
-							}
-						}
-					}
 					/*- ID not in To, Cc, Bcc */
-					if (*comparision == 6 && filter_opt == 2) {
+					if (filter_opt == 2) {
 						for (rewindAddrToken();;) {
 							if (!(str = addressToken(*tmp_ptr, &email_len)))
 								break;
@@ -653,7 +564,7 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 									!stralloc_cats(&tmpUser, real_domain) ||
 									!stralloc_0(&tmpUser))
 								die_nomem();
-							if (!case_diffb(tmpUser.s, tmpUser.len + 1, filterid)) {
+							if (!case_diffb(tmpUser.s, tmpUser.len, filterid)) {
 								ret = 1;
 								break;
 							}
@@ -664,34 +575,38 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 			} /*- for(ret = 0, ptr = hptr;ptr && *ptr && !ret;ptr++) */
 			if (!ret) {
 				if (interactive && verbose) {
-					subprintfe(subfdout, "vfilter", "Matched Filter No %d Comparision %s\n", *filter_no, vfilter_comparision[*comparision]);
+					subprintfe(subfdout, "vfilter", "Matched local Filter No %d Comparision %s Folder %s Bounce %d Forward %s \n",
+							*filter_no, vfilter_comparision[*comparision], folder->s, *bounce_action, forward->s);
 					flush("vfilter");
 				}
 				myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
 			}
 		} else
-		if (*comparision < 5 || *comparision == 7 || *comparision == 8) {
+		if (*comparision != 5) {
 			/*
 			 * 0 - Equals
 			 * 1 - Contains
 			 * 2 - Does not contain
 			 * 3 - Starts with
 			 * 4 - Ends with
-			 * 7 - Numerical logical expression
-			 * 8 - Regular expression
+			 * 5 - Not in To, Cc, Bcc
+			 * 6 - Numerical logical expression
+			 * 7 - Regular expression
 			 */
 			if (*header_name > max_header_value) /*- Invalid header value in vfilter table */
 				continue;
 			lowerit(keyword->s);
 			for (ptr = hptr; ptr && *ptr; ptr++) {
-				if (!case_diffb((*ptr)->name, MAX_LINE_LENGTH, header_list[*header_name])) {
+				if (!case_diffb((*ptr)->name, str_len((*ptr)->name), header_list[*header_name])) {
 					switch (*comparision)
 					{
 					case 0:	/*- Equals */
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if (!case_diffb(*tmp_ptr, keyword->len, keyword->s)) {
 								if (interactive && verbose) {
-									subprintfe(subfdout, "vfilter", "Matched Filter No %d Data %s Keyword %s\n", *filter_no, *tmp_ptr, keyword->s);
+									subprintfe(subfdout, "vfilter", "Matched %s Filter No %d Type Equals Data %s Keyword %s Bounce %d Folder %s Forward %s\n",
+											global_filter ? "global" : "local", *filter_no, *tmp_ptr,
+											keyword->s, *bounce_action, folder->s, forward->s ? forward->s : "noforward");
 									flush("vfilter");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
@@ -702,7 +617,8 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if (str_str(*tmp_ptr, keyword->s)) {
 								if (interactive && verbose) {
-									subprintfe(subfdout, "vfilter", "Matched Filter No %d Data %s Keyword %s\n", *filter_no, *tmp_ptr, keyword->s);
+									subprintfe(subfdout, "vfilter", "Matched %s Filter No %d Data %s Keyword %s\n",
+											global_filter ? "global" : "local", *filter_no, *tmp_ptr, keyword->s);
 									flush("vfilter");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
@@ -718,7 +634,8 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						}
 						if (!ret) {
 							if (interactive && verbose) {
-								subprintfe(subfdout, "vfilter", "Matched Filter No %d Data %s Keyword %s\n", *filter_no, *tmp_ptr, keyword->s);
+								subprintfe(subfdout, "vfilter", "Matched %s Filter No %d Data %s Keyword %s\n",
+										global_filter ? "global" : "local", *filter_no, *tmp_ptr, keyword->s);
 								flush("vfilter");
 							}
 							myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
@@ -729,7 +646,8 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 							if (!str_diffn(*tmp_ptr, keyword->s, keyword->len))
 							{
 								if (interactive && verbose) {
-									subprintfe(subfdout, "vfilter", "Matched Filter No %d Data %s Keyword %s\n", *filter_no, *tmp_ptr, keyword->s);
+									subprintfe(subfdout, "vfilter", "Matched %s Filter No %d Data %s Keyword %s\n", 
+											global_filter ? "global" : "local", *filter_no, *tmp_ptr, keyword->s);
 									flush("vfilter");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
@@ -740,50 +658,43 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
 							if ((str = str_str(*tmp_ptr, keyword->s)) && !case_diffb(str, keyword->len, keyword->s)) {
 								if (interactive && verbose) {
-									subprintfe(subfdout, "vfilter", "Matched Filter No %d Comparision %s Data %s Keyword %s\n",
-											*filter_no, vfilter_comparision[*comparision], *tmp_ptr, keyword->s);
+									subprintfe(subfdout, "vfilter", "Matched %s Filter No %d Comparision %s Data %s Keyword %s\n",
+											global_filter ? "global" : "local", *filter_no, vfilter_comparision[*comparision], *tmp_ptr, keyword->s);
 									flush("vfilter");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
 							}
 						}
 						break;
-					case 7:	/*- Float */
+					case 6:	/*- Float */
 						/*- e.g. tmp_ptr = 0.7, keyword = %p < 0.4 */
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
-							if (numerical_compare(*tmp_ptr, keyword->s)) {
+							if (numerical_compare(*tmp_ptr, keyword->s) > 0) {
 								if (interactive && verbose) {
-									subprintfe(subfdout, "vfilter", "Matched Filter No %d Data %s Keyword %s Folder %s\n",
-											*filter_no, *tmp_ptr, keyword->s, folder->s);
+									subprintfe(subfdout, "vfilter", "Matched %s Filter No %d Data %s Keyword %s Folder %s\n",
+											global_filter ? "global" : "local", *filter_no, *tmp_ptr, keyword->s, folder->s);
 									flush("vfilter");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
 							}
 						}
 						break;
-#ifdef HAVE_FNMATCH
-					case 8:	/*- Regular Expressions */
+					case 7:	/*- Regular Expressions */
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
-#ifdef FNM_CASEFOLD
-							if (!fnmatch(keyword->s, *tmp_ptr, FNM_PATHNAME | FNM_CASEFOLD))
-#else
-							if (!fnmatch(keyword->s, *tmp_ptr, FNM_PATHNAME))
-#endif
-							{
+							if (matchregex(*tmp_ptr, keyword->s, 0) == 1) {
 								if (interactive && verbose) {
-									subprintfe(subfdout, "vfilter", "Matched Filter No %d Comparision %s Keyword %s\n",
-											*filter_no, vfilter_comparision[*comparision], keyword->s);
+									subprintfe(subfdout, "vfilter", "Matched %s Filter No %d Comparision %s Keyword %s\n",
+											global_filter ? "global" : "local", *filter_no, vfilter_comparision[*comparision], keyword->s);
 									flush("vfilter");
 								}
 								myExit(argc, argv, 1, *bounce_action, folder->s, forward->s);
 							}
 						}
 						break;
-#endif
 					} /*- switch(comparision) */
-				} /*- if (!case_diffb((*ptr)->name, MAX_LINE_LENGTH, header_list[header_name])) */
+				} /*- if (!case_diffb((*ptr)->name, str_len((*ptr)->name), header_list[header_name])) */
 			} /*- for(ptr = hptr;ptr && *ptr;ptr++) */
-		} /*- if (comparision < 5 || comparision == 7 || comparision == 8) */
+		} /* if (*comparision != 5) */
 	} /*- for (j = 0;;) */
 	return;
 }
@@ -957,3 +868,51 @@ main(int argc, char **argv)
 	return (1);
 }
 #endif /*- #ifdef VFILTER */
+
+/*-
+ * $Log: vfilter.c,v $
+ * Revision 1.14  2023-09-07 21:09:50+05:30  Cprogrammer
+ * replace fnmatch with matchregex from libqmail
+ * removed "sender not in addressbook"
+ * when bouncing email set BOUNCE_MAIL to have vdelivermail bounce
+ *
+ * Revision 1.13  2023-08-31 23:17:40+05:30  Cprogrammer
+ * run vdelivermail if storeHeader is unsuccessful
+ *
+ * Revision 1.12  2023-08-06 15:29:48+05:30  Cprogrammer
+ * fixed setting emailid from arguments
+ *
+ * Revision 1.11  2023-03-26 00:33:30+05:30  Cprogrammer
+ * fixed code using wait_handler
+ *
+ * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.9  2022-12-18 19:28:05+05:30  Cprogrammer
+ * recoded wait logic
+ *
+ * Revision 1.8  2022-05-10 20:01:51+05:30  Cprogrammer
+ * use headers from include path
+ *
+ * Revision 1.7  2021-09-12 20:17:58+05:30  Cprogrammer
+ * moved replacestr to libqmail
+ *
+ * Revision 1.6  2021-07-27 18:07:39+05:30  Cprogrammer
+ * set default domain using vset_default_domain
+ *
+ * Revision 1.5  2021-06-11 17:01:55+05:30  Cprogrammer
+ * replaced Makeargs(), makeseekable() with makeargs(), mktempfile() from libqmail
+ *
+ * Revision 1.4  2020-04-01 18:58:43+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.3  2019-06-07 15:52:44+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.2  2019-04-22 23:17:07+05:30  Cprogrammer
+ * added missing strerr.h
+ *
+ * Revision 1.1  2019-04-20 08:59:26+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

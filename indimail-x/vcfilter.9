@@ -20,31 +20,55 @@ has the gid of the domain as a supplementary group.
 .TP
 \fB\-v\fR
 Sets verbose option
+
 .TP
 \fB\-C\fR
 Connect to cluster. Allows vcfilter to operate on users belonging to any
 cluster rather than just the local users.
+
 .TP
 \fB\-s\fR
 Show Filters
+
 .TP
 \fB\-r\fR
 unformatted display (for -s option)
+
 .TP
 \fB\-i\fR
 add filter
+
 .TP
 \fB\-d\fR \fIfilter_no\fR
 delete filter(s)
+
 .TP
 \fB\-u\fR \fIfilter_no\fR
 update filter
+
 .TP
 \fB\-t\fR \fIfilter_name\fR
 Textual name for the filter
+
+.TP 
+\fB\-c\fR
+Comparison with the headers to make. This could be one of the following
+textual name or number.
+
+ 0 - Equals
+ 1 - Contains
+ 2 - Does not contain
+ 3 - Starts with
+ 4 - Ends with
+ 5 - Sender not in address book
+ 6 - My ID not in To, Cc, Bcc
+ 7 - Numerical or Logical Expression
+     %p in keyword is replaced with value of data of the Header Field
+ 8 - RegExp
+
 .TP
 \fB\-h\fR
-header value. A number denoting the following
+header value. textual name or number denoting the following
 
  -1  - If comparision (-c option) is 5 or 6
   0  - Return-Path                       1 - From
@@ -73,22 +97,6 @@ header value. A number denoting the following
 
 You can add your own headers by appending headers to
 @sysconfdir@/headerlist.
-.TP 
-\fB\-c\fR
-Comparison with the headers to make. This could be one of the following
-number.
-
- 0 - Equals
- 1 - Contains
- 2 - Does not contain
- 3 - Starts with
- 4 - Ends with
- 5 - Sender not in address book
- 6 - My ID not in To, Cc, Bcc
- 7 - Numerical or Logical Expression
- 8 - RegExp
-
- Note: Mailing List can be specified for Comparison 5 or 6
 
 .TP
 \fB\-k\fR \fIkeyword\fR
@@ -96,6 +104,7 @@ A keyword or string which will be used in comparison with the header value
 (depending on -c option). The string should be a NULL "" string if -c
 option is either 5 or 6. The keyword can also be any Regular Expression
 (i.e. *, ? [], etc) if comparison equals 7..
+
 .TP
 \fB\-f\fR \fIFolder\fR
 Folder to which the mail should be delivered if a filter match occurs. This
@@ -110,9 +119,8 @@ completely.
  0 - Do not bounce
  1 - Bounce mail to sender with the following custom message
      "Hi. This is the IndiMail MDA for <domain_name>.
-     I'm afraid I cannot accept your message as my SPAM filter
-     has decided to reject this email.
-     Please refrain from sending such mail in future."
+     "I'm afraid I cannot accept your message as it violates a system policy"
+     "set by the administrator. Sorry that I cannot accept your email"
  2 - Forward mail to address following the number. An ampersand
      '&' sign must separate the number and the address.
      i.e. 2&editor@indimail.org will forward all emails

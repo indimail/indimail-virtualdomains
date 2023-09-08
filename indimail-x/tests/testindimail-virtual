@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.6 2023-08-23 13:09:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.8 2023-09-08 11:19:10+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -256,7 +256,6 @@ setup_config()
 			exit 1
 		fi
 	fi
-	#unshare mount --bind $in_cnf /etc/mysql/indimail.cnf
 
   	# MySQL Database Creation
 	if [ ! -d $qmaildir/mysqldb/data/mysql ] ; then
@@ -302,6 +301,8 @@ setup_config()
 	if [ ! -f $sysconfdir/headerlist ] ; then
 		cp /etc/indimail/headerlist $sysconfdir
 	fi
+	$sudo chown $user $sysconfdir/headerlist
+	$sudo chmod 644 $sysconfdir/headerlist
 	# nssd config
 	$sudo $svctool --sysconfdir=$sysconfdir --config=nssd \
 		--threads=5 --timeout=-1 \
@@ -625,6 +626,11 @@ create_domain()
 {
 	mkdir -p $sysconfdir/users
 	mkdir -p $testdir/mail
+	if [ $# -eq 3 ] ; then
+		opt="-f"
+	else
+		opt=""
+	fi
 	$sudo env - \
 		PATH=/bin:/usr/bin \
 		ASSIGNDIR=$sysconfdir/users \
@@ -632,7 +638,7 @@ create_domain()
 		CONTROLDIR=$cntrldir \
 		DOMAINDIR=$qmaildir \
 		SERVICEDIR=$servicedir \
-		vadddomain -B $testdir/mail -d $qmaildir $1 $2 > $logdir/setup/vadddomain.log
+		vadddomain $opt -B $testdir/mail -d $qmaildir $1 $2 > $logdir/setup/vadddomain.log
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vadddomain succeeded"
@@ -972,6 +978,8 @@ test_services()
 
 check_mail()
 {
+	# $1 - user
+	# $2 - Maildir
 	count=0
 	ret=1
 	(
@@ -1086,7 +1094,6 @@ do_smtp_auth_swaks()
 				[ -z "$failed" ] && failed="inlookup PWD query" || failed="$failed, inlookup PWD query"
 				[ $continue_on_err -eq 0 ] && exit 1 || return 0
 			fi
-			echo
 		fi
 	done
 }
@@ -1743,21 +1750,53 @@ do_post_handle()
 do_qmail_inject()
 {
 	# $1 - user
-	# $2 - From
-	# $3 - To
+	# $2 - envelope From
+	# $3 - envelope To
+	# $4 - subject
+	# $5 - header
+	# $6 - from
+	# $7 - to
+	# $8 - cc
+	if [ $# -eq 8 ] ; then
+		cc=$8
+	else
+		cc=""
+	fi
+	if [ $# -eq 7 ] ; then
+		to=$7
+	else
+		to=$3
+	fi
+	if [ $# -eq 6 ] ; then
+		from=$6
+	else
+		from=$2
+	fi
+	if [ $# -eq 5 ] ; then
+		header=$5
+	else
+		header=""
+	fi
 	if [ $# -eq 4 ] ; then
 		subj=$4
 	else
 		subj="Testing qmail-inject"
 	fi
 	(
-	echo "From: $2"
-	echo "To: $3"
+	echo "From: $from"
+	echo "To: $to"
+	if [ -n "$cc" ] ; then
+		echo "Cc: $cc"
+	fi
 	echo "Subject: $subj"
+	if [ -n "$header" ] ; then
+		echo $header
+	fi
 	echo "Date: $(date -R)"
 	echo
 	echo "Test message"
-	) | $sudo $setuidgid -g qcerts $1 env - \
+	) > /tmp/mail.txt
+	cat /tmp/mail.txt | $sudo $setuidgid -g qcerts $1 env - \
 		CONTROLDIR=$cntrldir \
 		QUEUEDIR=$qmaildir/queue \
 		QMAILQUEUE=$qmail_queue \
@@ -1892,7 +1931,6 @@ do_cleanup_failed()
 do_cleanup()
 {
 	touch $testdir/cleanup.done
-	#$sudo umount /etc/mysql/indimail.cnf
 	delete_domain $domain1 1 >/dev/null 2>&1
 	do_svscan_stop
 	# Cleanup
@@ -1916,12 +1954,11 @@ do_cleanup()
 	/bin/rm -f $sysconfdir/nssd.conf
 	$sudo /bin/rm -rf $qmaildir/domains
 	$sudo /bin/rm -rf $testdir/mail
-	#$sudo /bin/rm -rf $qmaildir/mysqldb
-	#$sudo /bin/rm -f $in_cnf
 }
 
 do_autoresponder()
 {
+	echo "Starting Autoresponder test"
 	destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $1 | awk '{print $3}')
 	destdir2=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $2 | awk '{print $3}')
 	echo "Testing Autoresponder" > /tmp/vacation.$$
@@ -1971,6 +2008,433 @@ do_autoresponder()
 		echo "[$subject] [Subject: Autoreply: Re: $subj]"
 		echo "  testing autoresponder failed (subject mismatch)"
 		[ -z "$failed" ] && failed="autoresponder subject" || failed="$failed, autoresponder subject"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+}
+
+run_vcfilter()
+{
+	$sudo env - \
+		PATH=/bin:/usr/bin:/usr/sbin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		"$@"
+}
+
+do_plain_user_tests()
+{
+	for hash in "default" $hash_supported
+	do
+		echo
+		echo "Starting SMTP AUTH, qmail-remote, IMAP/POP3 login tests for hash $hash plain/cram users"
+		t1="$password2""$hash"
+		t2="$password3""$hash"
+		create_plain_user $testuser1 $t1 $hash
+		create_cram_user  $testuser2 $t2 $hash
+		do_inquerytest $testuser1
+		do_inquerytest $testuser2
+		echo  1 > $servicedir/smtpd/variables/ENABLE_CRAM
+		if [ "$hash" = "DES" ] ; then
+			echo -1 > $servicedir/smtpd/variables/PASSWORD_HASH
+		else
+			> $servicedir/smtpd/variables/PASSWORD_HASH
+		fi
+		do_smtp_auth_swaks $testuser1 $t1 1
+		do_smtp_auth_qmr_o $domain1 $testuser1 $t1 1
+		> $servicedir/smtpd/variables/ENABLE_CRAM
+		do_smtp_auth_swaks $testuser2 $t2 2
+		do_smtp_auth_qmr_o $domain1 $testuser2 $t2 2
+		for j in 1 2
+		do
+			case $j in
+				1)
+				str="incache=0"
+				for i in imap pop3
+				do
+					for k in d d-ssl
+					do
+						> $servicedir/"$i"$k/variables/PASSWD_CACHE
+						> $servicedir/"$i"$k/variables/QUERY_CACHE
+						if [ "$hash" = "DES" ] ; then
+							echo -1 > $servicedir/"$i"$k/variables/PASSWORD_HASH
+						else
+							> $servicedir/"$i"$k/variables/PASSWORD_HASH
+						fi
+					done
+				done
+				;;
+				2)
+				str="incache=1"
+				for i in imap pop3
+				do
+					for k in d d-ssl
+					do
+						echo 1 > $servicedir/"$i"$k/variables/PASSWD_CACHE
+						echo 1 > $servicedir/"$i"$k/variables/QUERY_CACHE
+						echo 1 > $servicedir/"$i"$k/variables/OPEN_SMTP
+						if [ "$hash" = "DES" ] ; then
+							echo -1 > $servicedir/"$i"$k/variables/PASSWORD_HASH
+						else
+							> $servicedir/"$i"$k/variables/PASSWORD_HASH
+						fi
+					done
+				done
+				;;
+			esac
+			for i in imap pop3
+			do
+				for k in d d-ssl
+				do
+					$sudo svc -r $servicedir/"$i"$k
+				done
+			done
+			destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser1 | awk '{print $3}')
+			destdir2=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser2 | awk '{print $3}')
+			check_service pop3d 3
+			check_service pop3d-ssl 3
+			test_pop3 $testuser2 $t2 $testuser1 $destdir2/Maildir
+			test_pop3 $testuser1 $t1 $testuser2 $destdir1/Maildir
+			check_service imapd 3
+			check_service imapd-ssl 3
+			test_imap $testuser2 $t2 $testuser1 $destdir2/Maildir
+			test_imap $testuser1 $t1 $testuser2 $destdir1/Maildir
+			echo "  testing SMTP AUTH, qmail-remote, IMAP/POP3 login tests for hash $hash plain/cram users succeeded"
+		done
+		delete_user $testuser1
+		delete_user $testuser2
+	done
+}
+
+do_scram_user_tests()
+{
+	echo 1 > $servicedir/smtpd/variables/ENABLE_CRAM
+	for hash in $hash_supported
+	do
+		echo
+		echo "Starting SMTP AUTH, IMAP/POP3 login, GSASL tests for hash $hash scram users"
+		t1="$password1""$hash"
+		t2="$password2""$hash"
+		create_scram_user SCRAM-SHA-1   $testuser1 $t1 $hash
+		create_scram_user SCRAM-SHA-256 $testuser2 $t2 $hash
+		$sudo svc -h $servicedir/inlookup.infifo
+		if [ "$hash" = "DES" ] ; then
+			echo -1 > $servicedir/smtpd/variables/PASSWORD_HASH
+		else
+			> $servicedir/smtpd/variables/PASSWORD_HASH
+		fi
+		$sudo svc -r $servicedir/smtpd
+		sleep $sleep_int
+		check_service smtpd 3
+		do_smtp_auth_swaks $testuser1 $t1 3
+		do_smtp_auth_qmr_o $domain1 $testuser1 $t1 3
+		for j in 1 2
+		do
+			case $j in
+				1)
+				str="incache=0"
+				> $servicedir/smtpd/variables/PASSWD_CACHE
+				> $servicedir/smtpd/variables/QUERY_CACHE
+				for i in imap pop3
+				do
+					for k in d d-ssl
+					do
+						> $servicedir/"$i"$k/variables/PASSWD_CACHE
+						> $servicedir/"$i"$k/variables/QUERY_CACHE
+						if [ "$hash" = "DES" ] ; then
+							echo -1 > $servicedir/"$i"$k/variables/PASSWORD_HASH
+						else
+							> $servicedir/"$i"$k/variables/PASSWORD_HASH
+						fi
+					done
+				done
+				;;
+				2)
+				str="incache=1"
+				echo 1 > $servicedir/smtpd/variables/PASSWD_CACHE
+				echo 1 > $servicedir/smtpd/variables/QUERY_CACHE
+				for i in imap pop3
+				do
+					for k in d d-ssl
+					do
+						echo 1 > $servicedir/"$i"$k/variables/PASSWD_CACHE
+						echo 1 > $servicedir/"$i"$k/variables/QUERY_CACHE
+						if [ "$hash" = "DES" ] ; then
+							echo -1 > $servicedir/"$i"$k/variables/PASSWORD_HASH
+						else
+							> $servicedir/"$i"$k/variables/PASSWORD_HASH
+						fi
+					done
+				done
+				;;
+			esac
+			$sudo svc -r $servicedir/smtpd
+			check_service smtpd 3
+			if [ -x $gsasl ] ; then
+				do_gsasl_test                   "SCRAM-SHA-1"        $testuser1 $t1
+				do_gsasl_test                   "SCRAM-SHA-1-PLUS"   $testuser1 $t1
+				do_gsasl_test                   "SCRAM-SHA-256"      $testuser2 $t2
+				do_gsasl_test                   "SCRAM-SHA-256-PLUS" $testuser2 $t2
+			fi
+			do_smtp_auth_qmr_scram "SCRAM-SHA-1"        $domain1 $testuser1 $t1
+			do_smtp_auth_qmr_scram "SCRAM-SHA-1-PLUS"   $domain1 $testuser1 $t1
+			do_smtp_auth_qmr_scram "SCRAM-SHA-256"      $domain1 $testuser2 $t2
+			do_smtp_auth_qmr_scram "SCRAM-SHA-256-PLUS" $domain1 $testuser2 $t2
+
+			for i in imap pop3
+			do
+				for k in d d-ssl
+				do
+					$sudo svc -r $servicedir/"$i"$k
+				done
+			done
+			destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser1 | awk '{print $3}')
+			check_service pop3d 3
+			test_pop3 $testuser1 $t1 $testuser2 $destdir1
+			check_service pop3d-ssl 3
+			test_imap $testuser1 $t1 $testuser2 $destdir1
+		done
+		delete_user $testuser1
+		delete_user $testuser2
+		echo "  testing SMTP AUTH, IMAP/POP3 login, GSASL tests for hash $hash scram users succeeded"
+	done
+	tcount=$(expr $tcount + 3)
+	printf "  testing command tcpserver non-encrypted succeeded\n"
+	printf "  testing command tcpclient non-encrypted succeeded\n"
+	printf "  testing command tcpclient encrypted     succeeded\n"
+}
+
+do_vfilter()
+{
+	echo "Starting VFILTER tests"
+	$sudo env - \
+		PATH=/bin:/usr/bin:/usr/sbin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vmoddomain -f 1 -h bounce-no-mailbox $domain1 > $logdir/setup/vmoddomain.log
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command vmoddomain set vfilter succeeded"
+	else
+		fcount=$(expr $fcount + 1)
+		if [ $prompt -eq 1 ] ; then
+			less $logdir/setup/vadddomain.log
+		fi
+		echo "  testing command vmoddomain set vfilter failed"
+		[ -z "$failed" ] && failed="vmoddomain set vfilter" || failed="$failed, vmoddomain set vfilter"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+
+	# Comparisions tets
+	# 0 - Equals                                  1 - Contains
+	# 2 - Does not contain                        3 - Starts with
+	# 4 - Ends with                               5 - My id not in To, CC, Bcc
+	# 6 - Numerical Logical Expression            7 - RegExp
+
+	destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser1 | awk '{print $3}')
+	destdir2=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser2 | awk '{print $3}')
+	vcount=1
+	for i in "Equals" "Contains" "Does not contain" "Starts with" "Ends with" \
+		"My id not in To, CC, Bcc" "Numerical Logical Expression" "RegExp"
+	do
+		sudo /bin/rm -rf $destdir1/Maildir/.Quarantine
+		# Test delivery to folder after matching folder
+		case $i in
+			"Equals")
+			run_vcfilter vcfilter -i -t "$i-Test" -c "$i" -k "virus found" -f Quarantine -b 0 -h "X-QHPSI" $testuser2
+			do_qmail_inject $user $testuser1 $testuser2 "Testing Vfilter" "X-QHPSI: virus found"
+			run_vcfilter vcfilter -d 1 $testuser2
+			;;
+			"Contains")
+			run_vcfilter vcfilter -i -t "$i-Test" -c "$i" -k "Vfilter $vcount" -f Quarantine -b 0 -h "X-QHPSI" $testuser2
+			do_qmail_inject $user $testuser1 $testuser2 "Testing Vfilter" "X-QHPSI: Test Vfilter $vcount"
+			run_vcfilter vcfilter -d 1 $testuser2
+			;;
+			"Does not contain")
+			run_vcfilter vcfilter -i -t "$i-Test" -c "$i" -k "xxx yyyy zzz" -f Quarantine -b 0 -h "X-QHPSI" $testuser2
+			do_qmail_inject $user $testuser1 $testuser2 "Testing Vfilter" "X-QHPSI: abcdefgh"
+			run_vcfilter vcfilter -d 1 $testuser2
+			;;
+			"Starts with")
+			run_vcfilter vcfilter -i -t "$i-Test" -c "$i" -k "yyy xxxx zzz" -f Quarantine -b 0 -h "X-QHPSI" $testuser2
+			do_qmail_inject $user $testuser1 $testuser2 "Testing Vfilter" "X-QHPSI: yyy xxxx zzz"
+			run_vcfilter vcfilter -d 1 $testuser2
+			;;
+			"Ends with")
+			run_vcfilter vcfilter -i -t "$i-Test" -c "$i" -k "yyy1 zzz" -f Quarantine -b 0 -h "X-QHPSI" $testuser2
+			do_qmail_inject $user $testuser1 $testuser2 "Testing Vfilter" "X-QHPSI: yyy yyy1 zzz"
+			run_vcfilter vcfilter -d 1 $testuser2
+			;;
+			"My id not in To, CC, Bcc")
+			run_vcfilter vcfilter -i -t "$i-Test" -c "$i" -f Quarantine -b 0  $testuser2
+			do_qmail_inject $user $testuser1 $testuser2 "Testing Vfilter" "" abcd@$domain1 efgh@$domain1 hijk@$domain1
+			run_vcfilter vcfilter -d 0 $testuser2
+			;;
+			"Numerical Logical Expression")
+			run_vcfilter vcfilter -i -t "Numerical Logical Expression" -c "$i" -k "%p >= 11.2" -f Quarantine -b 0 -h "X-QHPSI" $testuser2
+			do_qmail_inject $user $testuser1 $testuser2 "Testing Vfilter" "X-QHPSI: 12.24"
+			run_vcfilter vcfilter -d 1 $testuser2
+			;;
+			"RegExp")
+			run_vcfilter vcfilter -i -t "Regular Expression" -c "$i" -k "abd.*efgh $count" -f Quarantine -b 0 -h "X-QHPSI" $testuser2
+			do_qmail_inject $user $testuser1 $testuser2 "Testing Vfilter" "X-QHPSI: abd.dfkdjf...efgh $count"
+			run_vcfilter vcfilter -d 1 $testuser2
+			;;
+		esac
+		check_mail indimail $destdir2/Maildir/.Quarantine
+		if [ $? -eq 0 ] ; then
+			tcount=$(expr $tcount + 1)
+			echo "  testing vfilter delivery to matched folder comparision=$i succeeded"
+		else
+			fcount=$(expr $fcount + 1)
+			echo "  testing vfilter delivery to matched folder comparision=$i failed"
+			[ -z "$failed" ] && failed="do_vfilter folder comparision=$i" || failed="$failed, do_vfilter folder comparision=$i"
+			[ $continue_on_err -eq 0 ] && exit 1 || return 0
+		fi
+		vcount=$(expr $vcount + 1)
+	done
+
+    # -b bounce action
+	#    0               - Do not Bounce to sender
+	#    3'&user@domain' - Forward to another id and Bounce
+	#    3'|program'     - Feed mail to another program and Bounce
+	echo "X-Header" >> $sysconfdir/headerlist
+
+	# bounce to sender test
+	#    1               - Bounce to sender
+	run_vcfilter vcfilter -i -t "Test bounce" -c "Equals" -k "Test Header" -f /NoDeliver -b 1 -h "X-Header" $testuser2
+	do_qmail_inject $user $testuser1 $testuser2 "Testing Vfilter" "X-Header: Test Header"
+	run_vcfilter vcfilter -d 1 $testuser2
+	check_mail indimail $destdir1/Maildir
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing vfilter delivery for bounce  on match succeeded"
+	else
+		fcount=$(expr $fcount + 1)
+		echo "  testing vfilter delivery for bounce  on match failed"
+		[ -z "$failed" ] && failed="do_vfilter bounce on match" || failed="$failed, do_vfilter bounce on match"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+
+	# forward to another id test
+	#    2'&user@domain' - Forward to another id
+	run_vcfilter vcfilter -i -t "Test bounce" -c "Equals" -k "Test Header" -f /NoDeliver -b "2&$testuser1" -h "X-Header" $testuser2
+	do_qmail_inject $user $testuser1 $testuser2 "Testing Vfilter" "X-Header: Test Header"
+	run_vcfilter vcfilter -d 1 $testuser2
+	check_mail indimail $destdir1/Maildir
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing vfilter delivery for forward on match succeeded"
+	else
+		fcount=$(expr $fcount + 1)
+		echo "  testing vfilter delivery for forward on match failed"
+		[ -z "$failed" ] && failed="do_vfilter forward on match" || failed="$failed, do_vfilter forward on match"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+
+	# feed to another program test
+	#    2'|program'     - Feed mail to another program
+	(
+		echo "#!/bin/sh"
+		echo "$qmail_inject $testuser1"
+	)  > $testdir/forwarder
+	chmod +x $testdir/forwarder
+	run_vcfilter vcfilter -i -t "Test bounce" -c "Equals" -k "Test Header" -f /NoDeliver -b "2|$testdir/forwarder" -h "X-Header" $testuser2
+	do_qmail_inject $user $testuser1 $testuser2 "Testing Vfilter" "X-Header: Test Header"
+	run_vcfilter vcfilter -d 1 $testuser2
+	check_mail indimail $destdir1/Maildir
+	if [ $? -eq 0 ] ; then
+		/bin/rm -rf $testdir/forwarder
+		tcount=$(expr $tcount + 1)
+		echo "  testing vfilter delivery for feed program on match succeeded"
+	else
+		/bin/rm -rf $testdir/forwarder
+		fcount=$(expr $fcount + 1)
+		echo "  testing vfilter delivery for feed program on match failed"
+		[ -z "$failed" ] && failed="do_vfilter feed program on match" || failed="$failed, do_vfilter feed program on match"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+
+	# forward to another id and bounce test
+	#    3'&user@domain' - Forward to another id and Bounce
+	destdir3=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser3 | awk '{print $3}')
+	run_vcfilter vcfilter -i -t "Test bounce" -c "Equals" -k "Test Header" -f /NoDeliver -b "3&$testuser3" -h "X-Header" $testuser2
+	do_qmail_inject $user $testuser1 $testuser2 "Testing Vfilter" "X-Header: Test Header"
+	run_vcfilter vcfilter -d 1 $testuser2
+	check_mail indimail $destdir1/Maildir
+	ret1=$?
+	if [ $ret1 -eq 0 ] ; then
+		check_mail indimail $destdir3/Maildir
+		if [ $? -ne 0 ] ; then
+			echo failed to forward to $testuser3
+			ret1=1
+		fi
+	else
+		echo failed to bounce to $testuser1
+	fi
+	if [ $ret1 -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing vfilter delivery for forward and bounce on match succeeded"
+	else
+		fcount=$(expr $fcount + 1)
+		echo "  testing vfilter delivery for forward and bounce on match failed"
+	echo "Press ENTER2"
+	read key
+		[ -z "$failed" ] && failed="do_vfilter forward and bounce on match" || failed="$failed, do_vfilter forward and bounce on match"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+
+
+	# feed to another program and bounce test
+	#    3'|program'     - Feed mail to another program and Bounce
+	(
+		echo "#!/bin/sh"
+		echo "$qmail_inject $testuser3"
+	)  > $testdir/forwarder
+	chmod +x $testdir/forwarder
+	run_vcfilter vcfilter -i -t "Test bounce" -c "Equals" -k "Test Header" -f /NoDeliver -b "3|$testdir/forwarder" -h "X-Header" $testuser2
+	do_qmail_inject $user $testuser1 $testuser2 "Testing Vfilter" "X-Header: Test Header"
+	run_vcfilter vcfilter -d 1 $testuser2
+	check_mail indimail $destdir1/Maildir
+	ret1=$?
+	if [ $ret1 -eq 0 ] ; then
+		check_mail indimail $destdir3/Maildir
+		if [ $? -ne 0 ] ; then
+			echo failed to forward to $testuser3
+			ret1=1
+		fi
+	else
+		echo failed to bounce to $testuser1
+	fi
+	if [ $ret1 -eq 0 ] ; then
+		/bin/rm -rf $testdir/forwarder
+		tcount=$(expr $tcount + 1)
+		echo "  testing vfilter delivery for feed program and bounce on match succeeded"
+	else
+		/bin/rm -rf $testdir/forwarder
+		fcount=$(expr $fcount + 1)
+		echo "  testing vfilter delivery for feed program and bounce on match failed"
+		[ -z "$failed" ] && failed="do_vfilter feed program and bounce on match" || failed="$failed, do_vfilter feed program and bounce on match"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+
+	$sudo env - \
+		PATH=/bin:/usr/bin:/usr/sbin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vmoddomain -f 0 -h bounce-no-mailbox $domain1 > $logdir/setup/vmoddomain.log
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing command vmoddomain unset vfilter succeeded"
+	else
+		fcount=$(expr $fcount + 1)
+		if [ $prompt -eq 1 ] ; then
+			less $logdir/setup/vadddomain.log
+		fi
+		echo "  testing command vmoddomain unset vfilter failed"
+		[ -z "$failed" ] && failed="vmoddomain unset vfilter" || failed="$failed, vmoddomain unset vfilter"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
@@ -2047,8 +2511,6 @@ check_service mysql.3307
 create_domain $domain1 pass
 do_vdominfo
 do_dbinfo
-echo
-
 create_plain_user $testuser1 $password2
 change_password $testuser1 $password1
 do_vmoduser $testuser1
@@ -2060,216 +2522,32 @@ if [ -f /etc/nsswitch.conf ] ; then
 	fi
 fi
 delete_user $testuser1
+
 echo
-
-echo "Starting SMTP AUTH, qmail-remote, IMAP/POP3 login tests for plain/cram users"
-$sudo svc -2 $servicedir/inlookup.infifo
-check_service inlookup.infifo
-
-for hash in "default" $hash_supported
-do
-	t1="$password2""$hash"
-	t2="$password3""$hash"
-	create_plain_user $testuser1 $t1 $hash
-	create_cram_user  $testuser2 $t2 $hash
-	do_inquerytest $testuser1
-	do_inquerytest $testuser2
-	echo
-	echo  1 > $servicedir/smtpd/variables/ENABLE_CRAM
-	if [ "$hash" = "DES" ] ; then
-		echo -1 > $servicedir/smtpd/variables/PASSWORD_HASH
-	else
-		> $servicedir/smtpd/variables/PASSWORD_HASH
-	fi
-	do_smtp_auth_swaks $testuser1 $t1 1
-	do_smtp_auth_qmr_o $domain1 $testuser1 $t1 1
-	#echo
-	> $servicedir/smtpd/variables/ENABLE_CRAM
-	do_smtp_auth_swaks $testuser2 $t2 2
-	do_smtp_auth_qmr_o $domain1 $testuser2 $t2 2
-	echo
-	for j in 1 2
-	do
-		case $j in
-			1)
-			str="incache=0"
-			for i in imap pop3
-			do
-				for k in d d-ssl
-				do
-					> $servicedir/"$i"$k/variables/PASSWD_CACHE
-					> $servicedir/"$i"$k/variables/QUERY_CACHE
-					if [ "$hash" = "DES" ] ; then
-						echo -1 > $servicedir/"$i"$k/variables/PASSWORD_HASH
-					else
-						> $servicedir/"$i"$k/variables/PASSWORD_HASH
-					fi
-				done
-			done
-			;;
-			2)
-			str="incache=1"
-			for i in imap pop3
-			do
-				for k in d d-ssl
-				do
-					echo 1 > $servicedir/"$i"$k/variables/PASSWD_CACHE
-					echo 1 > $servicedir/"$i"$k/variables/QUERY_CACHE
-					echo 1 > $servicedir/"$i"$k/variables/OPEN_SMTP
-					if [ "$hash" = "DES" ] ; then
-						echo -1 > $servicedir/"$i"$k/variables/PASSWORD_HASH
-					else
-						> $servicedir/"$i"$k/variables/PASSWORD_HASH
-					fi
-				done
-			done
-			;;
-		esac
-		for i in imap pop3
-		do
-			for k in d d-ssl
-			do
-				$sudo svc -r $servicedir/"$i"$k
-			done
-		done
-		destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser1 | awk '{print $3}')
-		destdir2=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser2 | awk '{print $3}')
-		check_service pop3d 3
-		check_service pop3d-ssl 3
-		test_pop3 $testuser2 $t2 $testuser1 $destdir2/Maildir
-		echo
-		test_pop3 $testuser1 $t1 $testuser2 $destdir1/Maildir
-		echo
-		check_service imapd 3
-		check_service imapd-ssl 3
-		test_imap $testuser2 $t2 $testuser1 $destdir2/Maildir
-		echo
-		test_imap $testuser1 $t1 $testuser2 $destdir1/Maildir
-		echo
-	done
-	delete_user $testuser1
-	delete_user $testuser2
-	echo
-done
-echo "  testing SMTP AUTH, qmail-remote, IMAP/POP3 login tests for plain/cram users succeeded"
-echo
-
-echo 1 > $servicedir/smtpd/variables/ENABLE_CRAM
-for hash in $hash_supported
-do
-	echo "Starting SMTP AUTH, IMAP/POP3 login, GSASL tests for hash $hash scram users"
-	t1="$password1""$hash"
-	t2="$password2""$hash"
-	create_scram_user SCRAM-SHA-1   $testuser1 $t1 $hash
-	create_scram_user SCRAM-SHA-256 $testuser2 $t2 $hash
-	$sudo svc -h $servicedir/inlookup.infifo
-	echo
-	sleep $sleep_int
-
-	for j in 1 2
-	do
-		case $j in
-			1)
-			str="incache=0"
-			> $servicedir/smtpd/variables/PASSWD_CACHE
-			> $servicedir/smtpd/variables/QUERY_CACHE
-			if [ "$hash" = "DES" ] ; then
-				echo -1 > $servicedir/smtpd/variables/PASSWORD_HASH
-			else
-				> $servicedir/smtpd/variables/PASSWORD_HASH
-			fi
-			for i in imap pop3
-			do
-				for k in d d-ssl
-				do
-					> $servicedir/"$i"$k/variables/PASSWD_CACHE
-					> $servicedir/"$i"$k/variables/QUERY_CACHE
-					if [ "$hash" = "DES" ] ; then
-						echo -1 > $servicedir/"$i"$k/variables/PASSWORD_HASH
-					else
-						> $servicedir/"$i"$k/variables/PASSWORD_HASH
-					fi
-				done
-			done
-			;;
-			2)
-			str="incache=1"
-			echo 1 > $servicedir/smtpd/variables/PASSWD_CACHE
-			echo 1 > $servicedir/smtpd/variables/QUERY_CACHE
-			if [ "$hash" = "DES" ] ; then
-				echo -1 > $servicedir/smtpd/variables/PASSWORD_HASH
-			else
-				> $servicedir/smtpd/variables/PASSWORD_HASH
-			fi
-			for i in imap pop3
-			do
-				for k in d d-ssl
-				do
-					echo 1 > $servicedir/"$i"$k/variables/PASSWD_CACHE
-					echo 1 > $servicedir/"$i"$k/variables/QUERY_CACHE
-					if [ "$hash" = "DES" ] ; then
-						echo -1 > $servicedir/"$i"$k/variables/PASSWORD_HASH
-					else
-						> $servicedir/"$i"$k/variables/PASSWORD_HASH
-					fi
-				done
-			done
-			;;
-		esac
-		$sudo svc -r $servicedir/smtpd
-		for i in imap pop3
-		do
-			for k in d d-ssl
-			do
-				$sudo svc -r $servicedir/"$i"$k
-			done
-		done
-		destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser1 | awk '{print $3}')
-		check_service pop3d 3
-		test_pop3 $testuser1 $t1 $testuser2 $destdir1
-		echo
-		check_service pop3d-ssl 3
-		test_imap $testuser1 $t1 $testuser2 $destdir1
-		echo
-		check_service smtpd 3
-		if [ -x $gsasl ] ; then
-			do_gsasl_test                   "SCRAM-SHA-1"        $testuser1 $t1
-			do_gsasl_test                   "SCRAM-SHA-1-PLUS"   $testuser1 $t1
-			do_gsasl_test                   "SCRAM-SHA-256"      $testuser2 $t2
-			do_gsasl_test                   "SCRAM-SHA-256-PLUS" $testuser2 $t2
-		fi
-		do_smtp_auth_swaks $testuser1 $t1 3
-		#echo
-		do_smtp_auth_qmr_scram "SCRAM-SHA-1"        $domain1 $testuser1 $t1
-		do_smtp_auth_qmr_scram "SCRAM-SHA-1-PLUS"   $domain1 $testuser1 $t1
-		do_smtp_auth_qmr_scram "SCRAM-SHA-256"      $domain1 $testuser2 $t2
-		do_smtp_auth_qmr_scram "SCRAM-SHA-256-PLUS" $domain1 $testuser2 $t2
-		echo
-		do_smtp_auth_qmr_o $domain1 $testuser1 $t1 3
-		echo
-	done
-	tcount=$(expr $tcount + 1)
-	delete_user $testuser1
-	delete_user $testuser2
-	echo
-	echo "  testing SMTP AUTH, IMAP/POP3 login, GSASL tests for hash $hash scram users succeeded"
-	echo
-done
-tcount=$(expr $tcount + 3)
-printf "  testing command tcpserver non-encrypted succeeded\n"
-printf "  testing command tcpclient non-encrypted succeeded\n"
-printf "  testing command tcpclient encrypted     succeeded\n"
-create_scram_user SCRAM-SHA-1   $testuser1 $password1 SHA-512 1
-create_scram_user SCRAM-SHA-256 $testuser2 $password2 SHA-512 1
+create_plain_user $testuser1 $password1 >/dev/null 2>&1
+create_plain_user $testuser2 $password2 >/dev/null 2>&1
+create_plain_user $testuser3 $password3 >/dev/null 2>&1
+do_vfilter
 
 echo
 do_autoresponder $testuser1 $testuser2
 
 echo
 do_valias $testuser1 $testuser2
+delete_user $testuser1 >/dev/null 2>&1
+delete_user $testuser2 >/dev/null 2>&1
+
+$sudo svc -2 $servicedir/inlookup.infifo
+check_service inlookup.infifo
+
+do_plain_user_tests
+
+do_scram_user_tests
+
 echo
 echo "Testing domain deletion"
 delete_domain $domain1
+
 echo
 echo "Starting POST Handle tests"
 do_post_handle $domain1 pass $domain2 $testuser3 $testuser4 $domain3
@@ -2294,6 +2572,12 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.8  2023-09-08 11:19:10+05:30  Cprogrammer
+# removed duplicate tests
+#
+# Revision 1.7  2023-09-08 09:31:04+05:30  Cprogrammer
+# added vfilter tests
+#
 # Revision 1.6  2023-08-23 13:09:26+05:30  Cprogrammer
 # formated messages
 #

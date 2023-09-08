@@ -56,6 +56,26 @@ Release 3.4.5-1.1 Start 25/04/2023 End XX/XX/XXXX
 28. parseAddress.c: handle address without domain component
 29. storeHeader.c: return error if parseAddress is unsuccessful
 30. vfilter.c: run vdelivermail if storeHeader is unsuccessful
+05/09/2023
+31. vcfilter.c: allow both textual and numberical values for -c and -h option
+32. vfilter_header.c: added function headerNumber() to convert textual filter
+    name to filter number
+33. vadddomain_handle.in: replace header, comparision numbers with textual
+    names
+34. vfilter.c, spam.c: replace fnmatch with matchregex from libqmail
+35. configure.ac: Removed check for fnmatch
+36. vfilter.c, vcfilter.c, variables.c, vfilter_insert.c: removed "Sender not
+    in addressbook"
+06/09/2023
+37. vdelivermail.c: prepend dot '.' to delivery folder if folder doesn't start
+    with dot
+38. vfilter_filterNo.c: start with filter no 1 for filter not matching 'My ID
+    not in To, Cc, Bcc'
+39. vfilter_insert.c: handle negative header_num, empty keyword for 'My ID not
+    in To, Cc, Bcc'
+07/09/2023
+40. vdelivermail: Bounce mail if env variable BOUNCE_MAIL is set
+41. vfilter.c: set BOUNCE_MAIL env variable to bounce mail using vdelivermail
 
 * Sun Apr 23 2023 19:21:03 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.4-1.1%{?dist}
 Release 3.4.4-1.1 Start 26/03/2023 End 23/04/2023

@@ -1,5 +1,8 @@
 /*
  * $Log: osh.c,v $
+ * Revision 1.4  2023-09-05 21:47:22+05:30  Cprogrammer
+ * added return type for gethostname
+ *
  * Revision 1.3  2022-10-20 11:58:04+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -33,7 +36,7 @@
  */
 
 #ifndef lint
-static char    *rcsid = "@(#) $Id: osh.c,v 1.3 2022-10-20 11:58:04+05:30 Cprogrammer Exp mbhangui $";
+static char    *rcsid = "@(#) $Id: osh.c,v 1.4 2023-09-05 21:47:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -804,6 +807,7 @@ command(int *waitpid, int makepipe, int *pipepfd)
 }	/*- of command */
 
 #ifndef HAVE_GETHOSTNAME
+int
 gethostname(char *host, int len)
 {
 	struct utsname  name;

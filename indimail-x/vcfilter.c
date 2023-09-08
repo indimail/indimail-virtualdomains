@@ -1,30 +1,12 @@
 /*
- * $Log: vcfilter.c,v $
- * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.5  2021-07-08 11:47:52+05:30  Cprogrammer
- * add check for misconfigured assign file
- *
- * Revision 1.4  2020-06-16 17:56:23+05:30  Cprogrammer
- * moved setuserid function to libqmail
- *
- * Revision 1.3  2019-06-07 15:54:31+05:30  mbhangui
- * use sgetopt library for getopt()
- *
- * Revision 1.2  2019-04-22 23:16:58+05:30  Cprogrammer
- * added missing strerr.h
- *
- * Revision 1.1  2019-04-18 08:38:43+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: vcfilter.c,v 1.7 2023-09-06 18:47:05+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 1.6 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 1.7 2023-09-06 18:47:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -88,19 +70,8 @@ usage()
 			"         -i add filter\n"
 			"         -d filter_no delete filter(s)\n"
 			"         -u filter_no update filter\n"
-			"         -t Filter Name (textual description of filter)\n"
-			"         -h header value\n"
-			"             -1 - If comparision (-c option) is 5 or 6\n");
-	for (i = 0; header_list[i];) {
-		if (header_list[i + 1]) {
-			subprintfe(subfderr, "vcfilter", "%11s %3d - %-28s %8s %3d - %s\n",
-					" ", i, header_list[i], " ", i + 1, header_list[i + 1]);
-			i += 2;
-		} else {
-			subprintfe(subfderr, "vcfilter", "%11s %3d - %s\n", " ", i, header_list[i]);
-			i++;
-		}
-	}
+			"         -t Filter Name (textual description of filter)\n");
+
 	subprintfe(subfderr, "vcfilter", "         -c comparision\n");
 	for (i = 0; vfilter_comparision[i];) {
 		if (vfilter_comparision[i + 1]) {
@@ -111,8 +82,24 @@ usage()
 			i++;
 		}
 	}
+
+	subprintfe(subfderr, "vcfilter", "         -h header value\n"
+			"             -1 - If comparision (-c) option is 5\n");
+	if (!(header_list = headerList()))
+		header_list = vfilter_header;
+	for (i = 0; header_list[i];) {
+		if (header_list[i + 1]) {
+			subprintfe(subfderr, "vcfilter", "%11s %3d - %-28s %8s %3d - %s\n",
+					" ", i, header_list[i], " ", i + 1, header_list[i + 1]);
+			i += 2;
+		} else {
+			subprintfe(subfderr, "vcfilter", "%11s %3d - %s\n", " ", i, header_list[i]);
+			i++;
+		}
+	}
+
 	subprintfe(subfderr, "vcfilter",
-			"         -k keyword [\"\" string if comparision (-c option) is 5 or 6]\n"
+			"         -k keyword [\"\" string if comparision (-c) option is 5]\n"
 			"         -f folder [Specify /NoDeliver for delivery to be junked]\n"
 			"         -b bounce action\n"
 			"              0               - Do not Bounce to sender\n"
@@ -133,23 +120,17 @@ die_nomem()
 
 int
 get_options(int argc, char **argv, char **email, stralloc *faddr,
-		char **filter_name, char **keyword, stralloc *folder, int *header_name,
+		char **filter_name, char **keyword, stralloc *folder, int *header_num,
 		int *comparision, int *bounce_action, int *filter_no, int *raw, int *cluster_conn)
 {
-	int             i, c, max_header, max_comparision;
+	int             i, len, c, max_header_num, max_comparision;
 	char           *ptr, *ptr1, *ptr2;
 	char            strnum[FMT_ULONG];
 
-	*header_name = *comparision = *bounce_action = *filter_no = -1;
+	*header_num = *comparision = *bounce_action = *filter_no = -1;
 	*email = *filter_name = *keyword = 0;
 	FilterAction = -1;
 	
-	if (!(header_list = headerList()))
-		header_list = vfilter_header;
-	for (max_header = 0;header_list[max_header];max_header++);
-	for (max_comparision = 0; vfilter_comparision[max_comparision];max_comparision++);
-	max_header--;
-	max_comparision--;
 	*cluster_conn = 0;
 	while ((c = getopt(argc, argv, "vCsird:u:h:c:b:k:f:t:")) != opteof) {
 		switch (c)
@@ -186,26 +167,40 @@ get_options(int argc, char **argv, char **email, stralloc *faddr,
 				*filter_no = -1;
 			break;
 		case 'h':
+			if (!(header_list = headerList()))
+				header_list = vfilter_header;
+			for (max_header_num = 0; header_list[max_header_num]; max_header_num++);
+			max_header_num--;
 			if (isnum(optarg)) {
-				scan_uint(optarg, (unsigned int *) header_name);
-				if (*header_name < 0 || *header_name > max_header) {
+				scan_uint(optarg, (unsigned int *) header_num);
+				if (*header_num < 0 || *header_num > max_header_num) {
 					strerr_warn3("vcfilter: header value ", optarg, " out of range", 0);
 					usage();
 					return (1);
 				}
 			} else
-				*header_name = -1;
+				*header_num = headerNumber(header_list, optarg);
 			break;
 		case 'c':
 			if (isnum(optarg)) {
 				scan_uint(optarg, (unsigned int *) comparision);
-				if (*comparision < 0 || *comparision > max_comparision) {
-					strerr_warn3("vcfilter: comparision value ", optarg, " out of range", 0);
-					usage();
-					return (1);
-				}
-			} else
+			} else {
+				len = str_len(optarg);
 				*comparision = -1;
+				for (i = 0; vfilter_comparision[i]; i++) {
+					if (!str_diffn(optarg, vfilter_comparision[i], len + 1)) {
+						*comparision = i;
+						break;
+					}
+				}
+			}
+			for (max_comparision = 0; vfilter_comparision[max_comparision];max_comparision++);
+			max_comparision--;
+			if (*comparision < 0 || *comparision > max_comparision) {
+				strerr_warn3("vcfilter: comparision value ", optarg, " out of range", 0);
+				usage();
+				return (1);
+			}
 			break;
 		case 'b':
 			if (isdigit((int) *optarg)) {
@@ -233,7 +228,7 @@ get_options(int argc, char **argv, char **email, stralloc *faddr,
 			break;
 		case 'k':
 			*keyword = optarg;
-			if (*comparision == 7) {
+			if (*comparision == 6) {
 				for (ptr1 = *keyword, ptr2 = *keyword; *ptr1; ptr1++) {
 					if (!isspace((int) *ptr1))
 						*ptr2++ = *ptr1;
@@ -291,8 +286,8 @@ get_options(int argc, char **argv, char **email, stralloc *faddr,
 			}
 		}
 	}
-	if (*comparision == 5 || *comparision == 6) {
-		*header_name = -1;
+	if (*comparision == 5) {
+		*header_num = -1;
 		*keyword = 0;
 	}
 	switch(FilterAction)
@@ -322,9 +317,9 @@ get_options(int argc, char **argv, char **email, stralloc *faddr,
 			usage();
 			return (1);
 		}
-		if (*comparision != 5 && *comparision != 6) {
-			if (*header_name == -1 || !*keyword) {
-				if (*header_name == -1)
+		if (*comparision != 5) {
+			if (*header_num == -1 || !*keyword) {
+				if (*header_num == -1)
 					strerr_warn1("vcfilter: -h option not specified", 0);
 				if (!*keyword)
 					strerr_warn1("vcfilter: -k option not specified", 0);
@@ -340,7 +335,7 @@ get_options(int argc, char **argv, char **email, stralloc *faddr,
 int
 main(int argc, char **argv)
 {
-	int             i, status = -1, raw = 0, cluster_conn = 0, header_name,
+	int             i, status = -1, raw = 0, cluster_conn = 0, header_num,
 					comparision, bounce_action, filter_no;
 	uid_t           uid, uidtmp;
 	gid_t           gid, gidtmp;
@@ -350,7 +345,7 @@ main(int argc, char **argv)
 	static stralloc user = {0}, domain = {0}, folder = {0}, vfilter_file = {0}, faddr = {0};
 
 	if (get_options(argc, argv, &emailid, &faddr, &filter_name, &keyword, &folder,
-			&header_name, &comparision, &bounce_action, &filter_no, &raw,
+			&header_num, &comparision, &bounce_action, &filter_no, &raw,
 			&cluster_conn))
 		return (1);
 	parse_email(emailid, &user, &domain);
@@ -412,7 +407,7 @@ main(int argc, char **argv)
 		status = vfilter_display(emailid, raw);
 		break;
 	case FILTER_INSERT:
-		status = vfilter_insert(emailid, filter_name, header_name,
+		status = vfilter_insert(emailid, filter_name, header_num,
 			comparision, keyword, folder.s, bounce_action, faddr.s);
 		if (!status && str_diffn(emailid, "prefilt@", 8) && str_diffn(emailid, "postfilt@", 9)
 			&& access(vfilter_file.s, F_OK)) {
@@ -432,7 +427,7 @@ main(int argc, char **argv)
 		/*
 		 * int
 		 * vfilter_select(char *emailid, int *filter_no, stralloc *filter_name,
-		 *		int *header_name, int *comparision, stralloc *keyword,
+		 *		int *header_num, int *comparision, stralloc *keyword,
 		 *		stralloc *destination, int *bounce_action, stralloc *forward)
 		 */
 		if (!(status = vfilter_delete(emailid, filter_no))) {
@@ -441,12 +436,12 @@ main(int argc, char **argv)
 		}
 		break;
 	case FILTER_UPDATE:
-		status = vfilter_update(emailid, filter_no, header_name, comparision, keyword, folder.s, bounce_action, faddr.s);
+		status = vfilter_update(emailid, filter_no, header_num, comparision, keyword, folder.s, bounce_action, faddr.s);
 		break;
 	}
 #ifdef DEBUG
 	printf("action %d, header %d keyword [%s] comparision %d folder [%s] bounce_action %d Forward %s email [%s]\n",
-			FilterAction, header_name, keyword, comparision, folder, bounce_action, bounce_action == 2 ? faddr.s : "N/A", emailid);
+			FilterAction, header_num, keyword, comparision, folder, bounce_action, bounce_action == 2 ? faddr.s : "N/A", emailid);
 #endif
 	if (cluster_conn)
 		iclose();
@@ -461,3 +456,29 @@ main()
 	return (0);
 }
 #endif
+
+/*
+ * $Log: vcfilter.c,v $
+ * Revision 1.7  2023-09-06 18:47:05+05:30  Cprogrammer
+ * allow both textual and numberical values for -c and -h option
+ * removed "Sender not in addressbook"
+ *
+ * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.5  2021-07-08 11:47:52+05:30  Cprogrammer
+ * add check for misconfigured assign file
+ *
+ * Revision 1.4  2020-06-16 17:56:23+05:30  Cprogrammer
+ * moved setuserid function to libqmail
+ *
+ * Revision 1.3  2019-06-07 15:54:31+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.2  2019-04-22 23:16:58+05:30  Cprogrammer
+ * added missing strerr.h
+ *
+ * Revision 1.1  2019-04-18 08:38:43+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

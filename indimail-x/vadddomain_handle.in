@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: vadddomain_handle.in,v 2.24 2023-08-07 17:38:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.25 2023-09-05 21:48:01+05:30 Cprogrammer Exp mbhangui $
 
 domaindir=@domaindir@
 OPTS=$(getopt -o ateh:T:q:l:bB:E:u:vVRi:g:d:Or:CD:H:U:P:s:p:cfm:S:I: -- "$@")
@@ -74,12 +74,12 @@ done
 
 # create rule for moving spam, virus emails to folders
 echo "creating rules for spam, virus detected emails"
-@prefix@/bin/vcfilter -i -t  spamFilter -c 3 -k "Yes, spamicity=" -f Spam   -b 0 -h 32 \
+@prefix@/bin/vcfilter -i -t  spamFilter -c "Starts with" -k "Yes, spamicity=" -f Spam   -b 0 -h "X-Bogosity" \
 	prefilt@$domain
 if [ $? -eq 0 ] ; then
 	echo "Created prefilter to filter SPAM"
 fi
-@prefix@/bin/vcfilter -i -t virusFilter -c 0 -k "virus found" -f Quarantine -b 0 -h 28 \
+@prefix@/bin/vcfilter -i -t virusFilter -c "Equals" -k "virus found" -f Quarantine -b 0 -h "X-QHPSI" \
 	prefilt@$domain
 if [ $? -eq 0 ] ; then
 	echo "Created prefilter to filter virus"
@@ -124,6 +124,9 @@ vuserinfo postmaster@$domain
 exit 0
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.25  2023-09-05 21:48:01+05:30  Cprogrammer
+# allow both textual and numberical values for -c and -h option
+#
 # Revision 2.24  2023-08-07 17:38:12+05:30  Cprogrammer
 # updated argument list for getopt
 #

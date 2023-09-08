@@ -1,5 +1,8 @@
 /*
  * $Log: spam.c,v $
+ * Revision 1.6  2023-09-05 21:47:40+05:30  Cprogrammer
+ * use matchregex from libqmail
+ *
  * Revision 1.5  2023-03-20 10:18:16+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -46,6 +49,7 @@
 #include <error.h>
 #include <subfd.h>
 #include <getEnvConfig.h>
+#include <matchregex.h>
 #endif
 #include "common.h"
 #include "spam.h"
@@ -53,14 +57,12 @@
 #include "lowerit.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: spam.c,v 1.5 2023-03-20 10:18:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: spam.c,v 1.6 2023-09-05 21:47:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define BADMAIL 1
 #define BADRCPT 2
 #define SPAMDB  3
-#define REGCOMP(X,Y)    regcomp(&X, Y, REG_EXTENDED|REG_ICASE)
-#define REGEXEC(X,Y)    regexec(&X, Y, (size_t)0, (regmatch_t *)0, (int)0)
 
 static char    *parseLine1(char *);
 static char    *parseLine2(char *);
@@ -69,35 +71,6 @@ static char    *parseLine3(char *);
 static maddr  **spammer_hash;
 static maddr  **ignored_hash;
 static int      bounce, maxaddr;
-
-static int
-matchregex(char *text, char *regex)
-{
-	regex_t         qreg;
-	char            errbuf[512];
-	int             retval = 0;
-
-	/*- build the regex */
-	if ((retval = REGCOMP(qreg, regex)) != 0) {
-		regerror(retval, &qreg, errbuf, sizeof(errbuf));
-		regfree(&qreg);
-		strerr_warn5(text, ": ", regex, ": ", errbuf, 0);
-		return (-retval);
-	}
-	/*- execute the regex */
-	if ((retval = REGEXEC(qreg, text)) != 0) {
-		/*- did we just not match anything?  */
-		if (retval == REG_NOMATCH) {
-			regfree(&qreg);
-			return (0);
-		}
-		regfree(&qreg);
-		return (-retval);
-	}
-	/*- signal the match */
-	regfree(&qreg);
-	return (1);
-}
 
 static void
 die_nomem()
@@ -497,7 +470,7 @@ isIgnored(char *email)
 							!stralloc_0(&pattern))
 						die_nomem();
 				}
-				if (matchregex(email, pattern.s) == 1)
+				if (matchregex(email, pattern.s, 0) == 1)
 					return (1);
 			} else {
 				if (*(p->mail) == '@')

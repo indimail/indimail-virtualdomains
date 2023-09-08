@@ -1,5 +1,8 @@
 /*
  * $Log: vfilter_filterNo.c,v $
+ * Revision 1.2  2023-09-06 18:50:58+05:30  Cprogrammer
+ * start with filter no 1 for filter not matching 'My ID not in To, Cc, Bcc'
+ *
  * Revision 1.1  2019-04-15 10:35:01+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter_filterNo.c,v 1.1 2019-04-15 10:35:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter_filterNo.c,v 1.2 2023-09-06 18:50:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -46,14 +49,14 @@ vfilter_filterNo(char *emailid)
 		return (-1);
 	if (!stralloc_copyb(&SqlBuf, "select high_priority filter_no from vfilter where emailid=\"", 59) ||
 			!stralloc_cats(&SqlBuf, emailid) ||
-			!stralloc_catb(&SqlBuf, "\" and filter_no > 1 order by filter_no", 38) ||
+			!stralloc_catb(&SqlBuf, "\" and filter_no > 0 order by filter_no", 38) ||
 			!stralloc_0(&SqlBuf))
 		die_nomem();
 	if (mysql_query(&mysql[1], SqlBuf.s)) {
 		if (in_mysql_errno(&mysql[1]) == ER_NO_SUCH_TABLE) {
 			if (create_table(ON_LOCAL, "vfilter", FILTER_TABLE_LAYOUT))
 				return (-1);
-			return (2);
+			return (1);
 		}
 		strerr_warn4("vfilter_filterNo: ", SqlBuf.s, ": ", (char *) in_mysql_error(&mysql[1]), 0);
 		return (-1);
@@ -62,9 +65,9 @@ vfilter_filterNo(char *emailid)
 		return (-1);
 	if (!in_mysql_num_rows(res)) {
 		in_mysql_free_result(res);
-		return (2);
+		return (1);
 	}
-	for(i = 2; (row = in_mysql_fetch_row(res)); i++) {
+	for(i = 1; (row = in_mysql_fetch_row(res)); i++) {
 		scan_uint(row[0], (unsigned int *) &filter_no);
 		if (i != filter_no) {
 			in_mysql_free_result(res);

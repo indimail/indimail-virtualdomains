@@ -1,38 +1,5 @@
 /*
- * $Log: vdelivermail.c,v $
- * Revision 1.11  2023-03-20 10:35:05+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.9  2021-07-27 18:07:23+05:30  Cprogrammer
- * set default domain using vset_default_domain
- *
- * Revision 1.8  2021-06-11 17:01:38+05:30  Cprogrammer
- * replaced makeseekable() with mktempfile() from libqmail
- *
- * Revision 1.7  2020-10-20 13:59:43+05:30  Cprogrammer
- * skip creation of maildirfolder file for user's Maildir (INBOX)
- *
- * Revision 1.6  2020-04-01 18:58:38+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.5  2019-06-17 23:24:18+05:30  Cprogrammer
- * fixed SMTPROUTE, QMTPROUTE env variable
- *
- * Revision 1.4  2019-04-22 23:18:56+05:30  Cprogrammer
- * replaced exit with _exit
- *
- * Revision 1.3  2019-04-21 16:16:04+05:30  Cprogrammer
- * fixed directory length returned by prepare_maildir()
- *
- * Revision 1.2  2019-04-21 11:41:58+05:30  Cprogrammer
- * fixed directory lengths
- *
- * Revision 1.1  2019-04-18 08:15:56+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: vdelivermail.c,v 1.13 2023-09-07 21:09:36+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -101,7 +68,7 @@
 #include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 1.11 2023-03-20 10:35:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 1.13 2023-09-07 21:09:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vdelivermail: fatal: "
@@ -229,6 +196,8 @@ prepare_maildir(char *dir, uid_t uid, gid_t gid)
 		die_nomem();
 	/*- vfilter sets MAILDIRFOLDER to the Maildir where mail needs to be delivered */
 	if ((maildirfolder = env_get("MAILDIRFOLDER"))) {
+		if (*maildirfolder != '.' && !stralloc_append(&TheDir, "."))
+			die_nomem();
 		if (!stralloc_cats(&TheDir, maildirfolder) ||
 				!stralloc_append(&TheDir, "/"))
 			die_nomem();
@@ -497,6 +466,8 @@ processMail(struct passwd *pw, char *user, char *domain, mdir_t MsgSize)
 					die_nomem();
 				/*- Call overquota command with 5 arguments */
 				if ((maildirfolder = env_get("MAILDIRFOLDER"))) {
+					if (*maildirfolder != '.' && !stralloc_append(&TheDir, "."))
+						die_nomem();
 					if (!stralloc_append(&TheDir, "/") ||
 							!stralloc_cats(&TheDir, maildirfolder))
 						die_nomem();
@@ -618,6 +589,9 @@ reject_mail(char *user, char *domain, int status, mdir_t MsgSize, char *bounce)
 	else
 	if (status == 1)
 		strerr_warn7("no account ", user, "@", domain, " - delivering to ", bounce, ". indimail (#5.1.6) ", 0);
+	else
+	if (status == 2)
+		strerr_warn7("vfilter bounce ", user, "@", domain, " - delivering to ", bounce, ". indimail (#5.1.6) ", 0);
 	if (!stralloc_copys(&_bounce, bounce))
 		die_nomem();
 	i = str_chr(bounce, '@');
@@ -954,6 +928,11 @@ main(int argc, char **argv)
 		 * in duplicate mails in case
 		 * of vset_lastauth() error
 		 */
+		if (env_get("BOUNCE_MAIL")) {
+			reject_mail(pw->pw_name, TheDomain, 2, MsgSize, Bounce);
+			iclose();
+			_exit(0);
+		}
 #ifdef ENABLE_AUTH_LOGGING
 		if (env_get("ALLOW_INACTIVE")) {
 			processMail(pw, pw->pw_name, TheDomain, MsgSize);
@@ -986,3 +965,46 @@ main(int argc, char **argv)
 	iclose();
 	_exit(0);
 }
+
+/*
+ * $Log: vdelivermail.c,v $
+ * Revision 1.13  2023-09-07 21:09:36+05:30  Cprogrammer
+ * bounce mail if BOUNCE_MAIL environment variable is set
+ *
+ * Revision 1.12  2023-09-06 18:49:19+05:30  Cprogrammer
+ * prepend dot '.' to delivery folder if folder doesn't start with dot
+ *
+ * Revision 1.11  2023-03-20 10:35:05+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.10  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.9  2021-07-27 18:07:23+05:30  Cprogrammer
+ * set default domain using vset_default_domain
+ *
+ * Revision 1.8  2021-06-11 17:01:38+05:30  Cprogrammer
+ * replaced makeseekable() with mktempfile() from libqmail
+ *
+ * Revision 1.7  2020-10-20 13:59:43+05:30  Cprogrammer
+ * skip creation of maildirfolder file for user's Maildir (INBOX)
+ *
+ * Revision 1.6  2020-04-01 18:58:38+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.5  2019-06-17 23:24:18+05:30  Cprogrammer
+ * fixed SMTPROUTE, QMTPROUTE env variable
+ *
+ * Revision 1.4  2019-04-22 23:18:56+05:30  Cprogrammer
+ * replaced exit with _exit
+ *
+ * Revision 1.3  2019-04-21 16:16:04+05:30  Cprogrammer
+ * fixed directory length returned by prepare_maildir()
+ *
+ * Revision 1.2  2019-04-21 11:41:58+05:30  Cprogrammer
+ * fixed directory lengths
+ *
+ * Revision 1.1  2019-04-18 08:15:56+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
