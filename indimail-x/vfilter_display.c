@@ -130,7 +130,8 @@ vfilter_display(char *emailid, int disp_type)
 		format_filter_display(disp_type, filter_no, emailid, &filter_name, header_name, comparision, &keyword, &folder,
 			&forward, bounce_action);
 	}
-	print_hyphen(subfdout, "-", 144);
+	if (!disp_type)
+		print_hyphen(subfdout, "-", 144);
 	flush("vfilter");
 	if (status == -1 && i == -2)
 		return(-2);
