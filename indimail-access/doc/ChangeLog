@@ -1,5 +1,5 @@
 * Tue Jan 31 2023 08:19:46 +0000 Manvendra Bhangui <indimail-access@indimail.org> 1.1.1-1.1%{?dist}
-Release 1.1.1-1.1 Start 01/03/2021 End 23/04/2023
+Release 1.1.1-1.1 Start 01/03/2021 End XX/XX/XXXX
 - 05/12/2022
 39. upgraded maildrop to 3.1.0
 40. upgraded courier-imap to 5.2.0
@@ -33,6 +33,7 @@ Release 1.1.1-1.1 Start 01/03/2021 End 23/04/2023
     authlib/authmoduser.c: display userid for failed login in logs
 - 01/09/2023
 54. upgraded courier-imap to 5.2.5
+- 08/09/2023 - indimail-3.4.5
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail-access@indimail.org> 1.1.0-1.1%{?dist}
 Release 1.1.0-1.1 Start 01/03/2021 End 08/09/2022

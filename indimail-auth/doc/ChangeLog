@@ -9,6 +9,7 @@ Release 1.0.1-1.1 Start 07/06/2023 End XX/XX/XXXX
 - 01/07/2023
 05. updated indimail-auth.spec, debian/preinst, debian/postinst
 06. nssd/sock.c: be silent on missing socket file or connection refused
+- 08/09/2023 - indimail-3.4.5
 
 * Sun 14 May 2023 11:24:48 +0000 Manvendra Bhangui <indimail-auth@indimail.org> 1.0.0-1.1%{?dist}
 Release 1.0.0-1.1 Start 21/05/2020 End 14/05/2023
