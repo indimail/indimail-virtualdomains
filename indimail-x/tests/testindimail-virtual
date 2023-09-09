@@ -2443,7 +2443,39 @@ do_vfilter()
 usage()
 {
 	echo "testindimail [-y|--nprompt]" 1>&2
-	exit 1
+}
+
+display_tests()
+{
+	echo "svscan startup"
+	echo "svscan log by creating .svscan/log/run"
+	echo "svscan execute run script in /service/.svscan/run"
+	echo "svscan start services configured in /service"
+	echo "test domain creation using vadddomain"
+	echo "test getting domain information using vdominfo"
+	echo "test getting mysql db info using dbinfo"
+	echo "test user creation with normal UNIX password by using vadduser"
+	echo "test user modification using vmoduser to update quota"
+	echo "test pwdlookup by using nssd or passwd, shadow, group in /etc/nsswitch.conf"
+	echo "test user deletion using vdeluser"
+	echo "test vfilter test match on header and deliver to a folder with various conditions"
+	echo "  equals, contains, does not contain, starts with, ends with, numerical expression, regexp"
+	echo "  my id not in to, cc, bcc"
+	echo "test autoesponder"
+	echo "test valias by creating a valias forward and sending mail to it"
+	echo "test setting inlookup in debug mode"
+	echo "test inlookup caching"
+	echo "Test authenticated SMTP using swaks with auth methods PLAIN, LOGIN CRAM-MD5, DIGEST-MD5"
+	echo "Test authenticated SMTP using qmail-remote with auth methods LOGIN PLAIN CRAM-MD5"
+	echo "  CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5"
+	echo "Test IMAP, IMAPS, POP3, POP3S login with the user created to support non-SCRAM methods"
+	echo "Test authenticated SMTP using gsasl to use SCRAM methods SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS"
+	echo "  SCRAM-SHA-256-PLUS"
+	echo "Test authenticated SMTP using qmail to use SCRAM methods SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS"
+	echo "  SCRAM-SHA-256-PLUS"
+	echo "Test IMAP, IMAPS, POP3, POP3S login with the user created to support SCRAM methods"
+	echo "Test domain deletion"
+	echo "Test execution of post handle scripts"
 }
 
 prompt=1
@@ -2459,6 +2491,7 @@ fi
 options=$(getopt -a -n testindimail-virtual -o "hyc" -l help,noprompt,continue -- "$@")
 if [ $? != 0 ]; then
   usage
+  exit 1
 fi
 eval set -- "$options"
 while :
@@ -2475,7 +2508,8 @@ do
 		;;
 		-h | --help)
 		usage
-		shift
+		display_tests
+  		exit 1
 		;;
 		--) # end of options
 		shift
@@ -2484,6 +2518,7 @@ do
 		*)
 		echo "Unexpected option: $1 - this should'nt happen." 1>&2
 		usage
+  		exit 1
 		;;
 	esac
 done
