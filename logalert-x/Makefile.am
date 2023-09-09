@@ -22,6 +22,7 @@ DISTCLEANFILES = *~
 SYSCONFDIR = @sysconfdir@
 sysconf_DATA = logalert.perms logalert-release
 
+BUILT_SOURCES = parser.h
 AM_LFLAGS  = -Pc
 AM_YFLAGS  = -d
 
@@ -37,7 +38,7 @@ edit = sed \
 	-e 's,@DATE\@,$(DATE),g' \
 	-e 's,@prefix\@,$(prefix),g'
 
-logalert_SOURCES = lex.c utils.c log.c parser.y process.c monitor.c action.c log_sig.c user.c main.c 
+logalert_SOURCES = lex.l utils.c log.c parser.y process.c monitor.c action.c log_sig.c user.c main.c
 logalert_LDADD = @LEXLIB@ @LIBPCRE_LIBS@
 
 logclient_SOURCES=logclient.c
@@ -57,16 +58,9 @@ incrmesg_LDADD = $(LIB_QMAIL)
 showbytes_SOURCES=showbytes.c
 showbytes_LDADD = $(LIB_QMAIL)
 
-lex.o: lex.c
-	$(COMPILE) -Wno-implicit-function-declaration -Wno-unused-function -c lex.c -o lex.o
-parser.o: parser.c
-	$(COMPILE) -Wno-implicit-function-declaration -Wno-unused-function -c parser.c -o parser.o
-
-#$(am__skiplex) $(SHELL) $(YLWRAP) $< $(LEX_OUTPUT_ROOT).c $@ -- flex
 lex.c: lex.l parser.h
 	 $(LEX) $(LFLAGS) -o $@ lex.l parser.h
 
-parser.h: parser.c
 logalert-rpmlintrc: logalert-rpmlintrc.in
 	$(edit) logalert-rpmlintrc.in > $@
 logalert.spec: logalert.spec.in doc/ChangeLog conf-version \
