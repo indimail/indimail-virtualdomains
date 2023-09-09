@@ -284,7 +284,7 @@ splint.check: $(version_sources) $(bogofilter_SOURCES) $(bogolexer_SOURCES) $(bo
 	$(bogofilter_SOURCES)	\
 	$(bogolexer_SOURCES)	\
 	$(bogoutil_SOURCES)	\
-	$(bogotune_SOURCES) ; do echo $(srcdir)/$$i ; done | sort -u | egrep -v "(lexer_v3.l|db_handle_props.h)"` > splint.tmp || :
+	$(bogotune_SOURCES) ; do echo $(srcdir)/$$i ; done | sort -u | grep -E -v "(lexer_v3.l|db_handle_props.h)"` > splint.tmp || :
 	grep ^F splint.tmp
 	wc -l splint.tmp
 

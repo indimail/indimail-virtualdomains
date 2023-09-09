@@ -20,7 +20,7 @@
 
 VERSION=$(grep define.VERSION config.h | awk '{print $3}' | tr -d '"')
 
-SUFFIX=$(echo $VERSION | egrep "\.svn$")
+SUFFIX=$(echo $VERSION | grep -E "\.svn$")
 
 srcdir=$1
 shift
