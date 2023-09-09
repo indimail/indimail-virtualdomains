@@ -19,9 +19,8 @@ Table of Contents
                * [Retry Schedules](#retry-schedules)
             * [Cleanup](#cleanup)
             * [Global &amp; Queue Specific Concurrency, Parallelism limits](#global--queue-specific-concurrency-parallelism-limits)
-      * [Setting Environment Variables](#setting-environment-variables)
-      * [Taking Backups](#taking-backups)
       * [Notes](#notes)
+   * [Setting Environment Variables](#setting-environment-variables)
    * [IndiMail Queue Mechanism](#indimail-queue-mechanism)
    * [Using systemd to start IndiMail](#using-systemd-to-start-indimail)
    * [Eliminating Duplicate Emails during local delivery](#eliminating-duplicate-emails-during-local-delivery)
@@ -156,6 +155,7 @@ Table of Contents
       * [Configuring MySQL/MariaDB to use SSL/TLS](#configuring-mysqlmariadb-to-use-ssltls)
       * [Configure MySQL/MariaDB access for svctool](#configure-mysqlmariadb-access-for-svctool)
    * [Using Docker Engine to Run IndiMail / IndiMail-MTA](#using-docker-engine-to-run-indimail--indimail-mta)
+   * [Taking Backups](#taking-backups)
    * [Installation &amp; Repositories](#installation--repositories)
       * [Setting up DNF/YUM/APT Repository for installation](#setting-up-dnfyumapt-repository-for-installation)
       * [Installing packages from the repository](#installing-packages-from-the-repository)
@@ -657,7 +657,13 @@ Cleanups are not necessary if the computer crashes while <b>qmail-send</b> is de
 
 <b>qmail-lspawn</b> and <b>qmail-rspawn</b> can do multiple concurrent deliveries. The default concurrency limit is 5 for local deliveries and 10 for remote deliveries. These can be increased upto a maximum of 500 by setting it in the control files <b>concurrencylocal</b> for local deliveries and <b>concurrencyremote</b> for remote deliveries. These two (like any other indimail control files) lie in <u>/etc/indimail/control</u> directory. These concurrency limits are inherited by each of the indimail's multiple queues. Additionally indimail allows you to have queue specific concurrency limits. e.g. You can have the control files <b>concurrencyl.queue2</b>, <b>concurrencyr.queue2</b> for setting local, remote concurrency specific to <u>/var/indimail/queue/queue2</u>.
 
-## Setting Environment Variables
+## Notes
+
+Currently queueX/info/split/<u>inode</u> serves two purposes: first, it records the envelope sender; second, its modification time is used to decide when a message has been in the queue too long. In the future queueX/info/split/<u>inode</u> may store more information. Any non-backwards-compatible changes will be identified by version numbers.
+
+When <b>qmail-queue</b> has successfully placed a message into the queue, it pulls a trigger offered by <b>qmail-send</b>. Here is the current triggering mechanism: lock/trigger is a named pipe. Before scanning todo/, <b>qmail-send</b> opens lock/trigger O\_NDELAY for reading. It then selects for readability on lock/trigger. <b>qmail-queue</b> pulls the trigger by writing a byte O\_NDELAY to lock/trigger. This makes lock/trigger readable and wakes up <b>qmail-send</b>. Before scanning todo/ again, <b>qmail-send</b> closes and reopens lock/trigger. When you use dynamic queues using <b>qscheduler</b>, instead of the trigger mechanism, <b>qmail-queue</b> uses posix message queues to communicate with <b>todo-proc</b>.
+
+# Setting Environment Variables
 
 indimail-mta can be fine tuned and configured using environment variables (> 250) of them. See the man page for indimail-env(5) and tcp-environ(5). This feature gives a significant edge to indimail-mta over other MTAs. It gives you the total flexibility to configure and customize indimail-mta. There are many methods of setting them.
 
@@ -802,39 +808,6 @@ You just need to set the HOME environment variable to the home directory of the 
 NOTE: The program <b>envdir</b> that indimail-mta uses, is powerful because of it's recursive feature. It has the ability to hyperlink additional directories/files having environment variables using .<u>envdir</u> and .<u>envfile</u>.
 
 NOTE: The following clients use <u>defaultqueue</u> from <b>/etc/indimail/control</b> and .<u>defaultqueue</u> from $HOME - <b>condredirect</b>, <b>dot-forward</b>, <b>fastforward</b>, <b>filterto</b>, <b>forward</b>, <b>maildirserial</b>, <b>new-inject</b>, <b>qmail-inject</b>, <b>qmail-qread</b>, <b>qmail-showctl</b>, <b>qmta-send</b>, <b>qnotify</b>, <b>qreceipt</b>, <b>queue-fix</b>, <b>replier</b>, <b>rrforward</b>, <b>rrt</b>, <b>qmail-tcpto</b>, <b>qmail-tcpok</b>.
-
-## Taking Backups
-
-Once you have setup your indimail-mta system, you need to take regular backups. There are three types of backup.
-
-1. Backup of the mails. If you are using indimail-mta alone, you will need to backup the home directory of users for which indimail-mta does local deliveries. If you are using IndiMail Virtual Domains, the program <b>vadduser</b> will be creating home directories for users in the filesystem that <u>/home/mail</u> directory belongs to. You can run `df -k /home/mail` to know the filesystem. You can use a different parent directory for the users by setting the BASE_PATH environment variable in $HOME/.defaultqueue or /etc/indimail/control/defaultqueue. You need to backup these directories using your backup tool, script or commands like tar, rsync, etc. indimail/indimail-mta doesn't provide you a tool to backup the user mails. Consult your system administrator if you have any doubts regarding backup up the base directory.
-
-2. Backup of IndiMail, indimail-mta configuration, services configuration. If you are using the IndiMail Virtual Domains, then your data in the MySQL indimail database needs to be backed up too. This can be done by running the command
-
-   ```
-   $ sudo /usr/sbin/svctool --backup=/backup_path_to_dir --mysqlPrefix=/usr --servicedir=/service
-   ```
-3. You also need to take a snapshot of your current configuration and keep it safe somewhere. This can be useful if you change something and things do not work. The entire configuration for indimail, indimail-mta and all services can be obtained by running the command
-
-   ```
-   Use The below command for an exhaustive configuration dump of
-   indimail/indimail-mta. You can redirect the output to a file.
-   This option requires root privileges
-
-   $ sudo /usr/sbin/svctool --dumpconfig
-
-   Use the below command for displaying the most routine
-   configuration. This option doesn't require root privileges
-   unless you use the -s option.
-
-   $ qmail-showctl -a
-   ```
-
-## Notes
-
-Currently queueX/info/split/<u>inode</u> serves two purposes: first, it records the envelope sender; second, its modification time is used to decide when a message has been in the queue too long. In the future queueX/info/split/<u>inode</u> may store more information. Any non-backwards-compatible changes will be identified by version numbers.
-
-When <b>qmail-queue</b> has successfully placed a message into the queue, it pulls a trigger offered by <b>qmail-send</b>. Here is the current triggering mechanism: lock/trigger is a named pipe. Before scanning todo/, <b>qmail-send</b> opens lock/trigger O\_NDELAY for reading. It then selects for readability on lock/trigger. <b>qmail-queue</b> pulls the trigger by writing a byte O\_NDELAY to lock/trigger. This makes lock/trigger readable and wakes up <b>qmail-send</b>. Before scanning todo/ again, <b>qmail-send</b> closes and reopens lock/trigger. When you use dynamic queues using <b>qscheduler</b>, instead of the trigger mechanism, <b>qmail-queue</b> uses posix message queues to communicate with <b>todo-proc</b>.
 
 # IndiMail Queue Mechanism
 
@@ -6238,6 +6211,33 @@ I am also a newbie as far as docker is concerned. Do let me know your experience
 
 NOTE:
 Currently IndiMail supports both docker and podman. Both commands are interchangeble. There is much that has happened since this chapter was written in Apr 2016. You should be actually reading [this](https://github.com/mbhangui/indimail-docker/blob/master/README.md "Docker README ").
+
+# Taking Backups
+
+Once you have setup your indimail-mta system, you need to take regular backups. There are three types of backup.
+
+1. Backup of the mails. If you are using indimail-mta alone, you will need to backup the home directory of users for which indimail-mta does local deliveries. If you are using IndiMail Virtual Domains, the program <b>vadduser</b> will be creating home directories for users in the filesystem that <u>/home/mail</u> directory belongs to. You can run `df -k /home/mail` to know the filesystem. You can use a different parent directory for the users by setting the BASE_PATH environment variable in $HOME/.defaultqueue or /etc/indimail/control/defaultqueue. You need to backup these directories using your backup tool, script or commands like tar, rsync, etc. indimail/indimail-mta doesn't provide you a tool to backup the user mails. Consult your system administrator if you have any doubts regarding backup up the base directory.
+
+2. Backup of IndiMail, indimail-mta configuration, services configuration. If you are using the IndiMail Virtual Domains, then your data in the MySQL indimail database needs to be backed up too. This can be done by running the command
+
+   ```
+   $ sudo /usr/sbin/svctool --backup=/backup_path_to_dir --mysqlPrefix=/usr --servicedir=/service
+   ```
+3. You also need to take a snapshot of your current configuration and keep it safe somewhere. This can be useful if you change something and things do not work. The entire configuration for indimail, indimail-mta and all services can be obtained by running the command
+
+   ```
+   Use The below command for an exhaustive configuration dump of
+   indimail/indimail-mta. You can redirect the output to a file.
+   This option requires root privileges
+
+   $ sudo /usr/sbin/svctool --dumpconfig
+
+   Use the below command for displaying the most routine
+   configuration. This option doesn't require root privileges
+   unless you use the -s option.
+
+   $ qmail-showctl -a
+   ```
 
 # Installation & Repositories
 
