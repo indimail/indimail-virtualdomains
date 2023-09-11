@@ -383,6 +383,7 @@ done
 %attr(755,root,root)                    %{libexecdir}/mkimapdcert
 %attr(755,root,root)                    %{libexecdir}/mkpop3dcert
 %attr(755,root,root)                    %{libexecdir}/mkdhparams
+%attr(755,root,root)                    %{libexecdir}/courierlogins
 
 %lang(eo) /usr/share/indimail/locale/eo/LC_MESSAGES/fetchmail.mo
 %lang(sq) /usr/share/indimail/locale/sq/LC_MESSAGES/fetchmail.mo
@@ -418,6 +419,7 @@ done
 %attr(0644,root,root) %{mandir}/man1/makedat.1.*
 %attr(0644,root,root) %{mandir}/man1/maildrop.1.*
 %attr(0644,root,root) %{mandir}/man1/mailbot.1.*
+%attr(0644,root,root) %{mandir}/man1/courierlogins.1.*
 %attr(0644,root,root) %{mandir}/man1/couriertls.1.*
 %attr(0644,root,root) %{mandir}/man1/couriertcpd.1.*
 %attr(0644,root,root) %{mandir}/man1/maildirkw.1.*

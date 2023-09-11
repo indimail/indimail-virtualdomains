@@ -32,8 +32,8 @@
 .SH "NAME"
 mkimapdcert \- create a test SSL certificate for IMAP over SSL
 .SH "SYNOPSIS"
-.HP \w'\fB@sbindir@/mkimapdcert\fR\ 'u
-\fB@sbindir@/mkimapdcert\fR
+.HP \w'\fB@libexecdir@/mkimapdcert\fR\ 'u
+\fB@libexecdir@/mkimapdcert\fR
 .SH "DESCRIPTION"
 .PP
 IMAP over SSL requires a valid, signed, X\&.509 certificate\&. The default location for the certificate file is

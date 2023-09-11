@@ -1,0 +1,31 @@
+.\" vim: tw=75
+.TH "courierlogins" "1" "11/09/2023"
+.SH "NAME"
+courierlogins \- Display stats for POP3/IMAP logins from log files
+
+.SH "SYNOPSIS"
+@libexecdir@/courierlogins [-r] [-s] [-l] [-L] logfile
+
+.SH "DESCRIPTION"
+courierlogins displays all POP3/IMAP login logout entries in \fIlogfile\fR
+along with bytes received and sent.
+
+.SH "OPTIONS"
+.TP 3
+\fB\-r\fR
+Sort on bytes received from client
+
+.TP 3
+\fB\-s\fR
+Sort on bytes sent to client
+
+.TP 3
+\fB\-l\fR
+Sort on number of logins
+
+.TP 3
+\fB\-L\fR
+Sort on number of logins
+
+.SH "SEE ALSO"
+imapd(8), pop3d(8), imaplogin(8), pop3login(8)

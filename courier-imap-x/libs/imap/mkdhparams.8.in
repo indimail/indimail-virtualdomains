@@ -32,8 +32,8 @@
 .SH "NAME"
 mkdhparams \- create DH parameter file
 .SH "SYNOPSIS"
-.HP \w'\fB@sbindir@/mkdhparams\fR\ 'u
-\fB@sbindir@/mkdhparams\fR
+.HP \w'\fB@libexecdir@/mkdhparams\fR\ 'u
+\fB@libexecdir@/mkdhparams\fR
 .SH "DESCRIPTION"
 .PP
 This script creates new DH parameters and saves them in

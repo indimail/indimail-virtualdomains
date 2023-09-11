@@ -24,13 +24,13 @@ EXTRA_DIST=testsuite testsuite.txt smaptestsuite smaptestsuite.txt \
 
 bin_PROGRAMS=imapd pop3d
 sbin_PROGRAMS=imaplogin pop3login
-libexec_SCRIPTS=mkimapdcert mkpop3dcert mkdhparams
+libexec_SCRIPTS=mkimapdcert mkpop3dcert mkdhparams courierlogins
 
 sysconf_DATA = imapd.dist imapd-ssl.dist pop3d.dist pop3d-ssl.dist imapd.cnf pop3d.cnf
 noinst_DATA=imapd.html makeimapaccess.html mkdhparams.html mkimapdcert.html \
 	mkpop3dcert.html pop3d.html README.imap
 man_MANS=mkdhparams.8 mkimapdcert.8 mkpop3dcert.8 imapd.8 pop3d.8 imaplogin.8 pop3login.8 \
-		 makeimapaccess.8
+		 makeimapaccess.8 courierlogins.1
 
 imapd.cnf: imapd.cnf.@ssllib@
 	cp imapd.cnf.@ssllib@ imapd.cnf
@@ -135,6 +135,9 @@ mkimapdcert.html: mkimapdcert.html.in
 
 mkimapdcert.8: mkimapdcert.8.in
 	./config.status --file=mkimapdcert.8
+
+courierlogins.1: courierlogins.1.in
+	./config.status --file=courierlogins.1
 
 mkpop3dcert.html: mkpop3dcert.html.in
 	./config.status --file=mkpop3dcert.html

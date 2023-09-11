@@ -1,0 +1,90 @@
+#!/bin/sh
+#
+imaptop()
+{
+  (
+  echo "Received Sent Logins Logouts User"
+  echo "Bytes Bytes Count Count Name"
+  cat $* | cut -c 27- | sed -e 's{,{{g' -e 's{user={{' -e 's{rcvd={{' -e 's{sent={{' | awk '
+    /^INFO: LOGOUT/ {
+      user = $3
+      rcvd[user] += $8
+      send[user] += $9
+      logouts[user] += 1
+      totalr += $8
+      totals += $9
+      totallogin += 1
+      totallogout += 1
+      totaluser += 1
+    }
+    /INFO: LOGIN/ {
+      user = $5
+      logins[user] += 1
+    }
+    END {
+      for (user in rcvd) {
+        count += 1
+        print rcvd[user] " " send[user] " " logins[user] " " logouts[user] " " user
+      }
+      print totalr " " totals " " totallogin " " totallogout " " count " Users"
+    }' | sort -n -r -k $keydef 
+  ) | /usr/libexec/indimail/columnt
+}
+
+usage()
+{
+  (
+  echo "USAGE: `basename $0` -r -s -l -L filename"
+  echo "               -r : sort on bytes rcvd"
+  echo "               -s : sort on bytes sent"
+  echo "               -l : sort on logins"
+  echo "               -L : sort on logouts"
+  ) 1>&2
+}
+
+options=$(getopt -a -n imaptop -o "hrslL" -l help,rcvd,sent,login,logout -- "$@")
+if [ $? != 0 ]; then
+  usage
+  exit 1
+fi
+keydef="1.1"
+eval set -- "$options"
+while :
+do
+  case "$1" in
+  -r | --rcvd)
+  keydef="1.1"
+  shift
+  ;;
+  -s | --sent)
+  keydef="2.1"
+  shift
+  ;;
+  -l | --login)
+  keydef="3.1"
+  shift
+  ;;
+  -L | --logout)
+  keydef="4.1"
+  shift
+  ;;
+  -h | --help)
+  usage
+  exit 0
+  ;;
+  --) # end of options
+  shift
+  break
+  ;;
+  *)
+  echo "Unexpected option: $1 - this should'nt happen." 1>&2
+  usage
+  exit 1
+  ;;
+  esac
+done
+if [ $# -lt 1 ] ; then
+  usage
+  exit 1
+fi
+imaptop $*

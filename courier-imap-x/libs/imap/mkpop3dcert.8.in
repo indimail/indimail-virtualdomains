@@ -32,8 +32,8 @@
 .SH "NAME"
 mkpop3dcert \- create a test SSL certificate for POP3 over SSL
 .SH "SYNOPSIS"
-.HP \w'\fB@sbindir@/mkpop3dcert\fR\ 'u
-\fB@sbindir@/mkpop3dcert\fR
+.HP \w'\fB@libexecdir@/mkpop3dcert\fR\ 'u
+\fB@libexecdir@/mkpop3dcert\fR
 .SH "DESCRIPTION"
 .PP
 POP3 over SSL requires a valid, signed, X\&.509 certificate\&. The default location for the certificate file is
