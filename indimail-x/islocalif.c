@@ -1,5 +1,8 @@
 /*
  * $Log: islocalif.c,v $
+ * Revision 1.7  2023-09-11 09:08:48+05:30  Cprogrammer
+ * incorrect use of localiphost instead of hostip
+ *
  * Revision 1.6  2023-03-20 10:10:38+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -79,7 +82,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: islocalif.c,v 1.6 2023-03-20 10:10:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: islocalif.c,v 1.7 2023-09-11 09:08:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -133,13 +136,13 @@ islocalif(char *hostptr)
 
 	getEnvConfigStr(&controldir, "CONTROLDIR", CONTROLDIR);
 	if (*controldir == '/') {
-		if (!stralloc_copys(&filename, controldir) || !stralloc_catb(&filename, "/localiphost", 12) ||
+		if (!stralloc_copys(&filename, controldir) || !stralloc_catb(&filename, "/hostip", 7) ||
 				!stralloc_0(&filename))
 			die_nomem();
 	} else {
 		getEnvConfigStr(&sysconfdir, "SYSCONFDIR", SYSCONFDIR);
 		if (!stralloc_copys(&filename, sysconfdir) || !stralloc_append(&filename, "/") ||
-				!stralloc_cats(&filename, controldir) || !stralloc_catb(&filename, "/localiphost", 12) ||
+				!stralloc_cats(&filename, controldir) || !stralloc_catb(&filename, "/hostip", 7) ||
 				!stralloc_0(&filename))
 			die_nomem();
 	}

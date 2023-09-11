@@ -1,5 +1,8 @@
 /*
  * $Log: LoadDbInfo.c,v $
+ * Revision 1.15  2023-09-11 09:09:41+05:30  Cprogrammer
+ * incorrect use of localiphost instead of hostip
+ *
  * Revision 1.14  2023-03-20 10:12:22+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -103,7 +106,7 @@
 #include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.14 2023-03-20 10:12:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: LoadDbInfo.c,v 1.15 2023-09-11 09:09:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static DBINFO **loadMCDInfo(int *);
@@ -914,7 +917,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 		(*rhostsptr)->last_error = 0;
 		(*rhostsptr)->last_error_len = 0;
 		(*rhostsptr)->failed_attempts = 0;
-		if (!(localhost = get_local_ip(AF_INET))) /*- entry in control/localiphost */
+		if (!(localhost = get_local_ip(AF_INET))) /*- entry in control/hostip */
 			localhost = "localhost";
 		str_copyb((*rhostsptr)->mdahost, localhost, DBINFO_BUFF);
 		str_copyb((*rhostsptr)->server, mysqlhost, DBINFO_BUFF);
@@ -998,7 +1001,7 @@ localDbInfo(int *total, DBINFO ***rhosts)
 		(*rhostsptr)->last_error = 0;
 		(*rhostsptr)->last_error_len = 0;
 		(*rhostsptr)->failed_attempts = 0;
-		if (!(localhost = get_local_ip(AF_INET))) /*- entry in control/localiphost */
+		if (!(localhost = get_local_ip(AF_INET))) /*- entry in control/hostip */
 			localhost = "localhost";
 		str_copyb((*rhostsptr)->mdahost, localhost, DBINFO_BUFF);
 		str_copyb((*rhostsptr)->server, mysqlhost, DBINFO_BUFF);
