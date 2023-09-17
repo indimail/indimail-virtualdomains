@@ -1,5 +1,8 @@
 /*
  * $Log: qmailmrtg.c,v $
+ * Revision 1.7  2023-09-17 22:36:34+05:30  Cprogrammer
+ * removed leading white space to correct current concurrency
+ *
  * Revision 1.6  2023-04-09 22:26:02+05:30  Cprogrammer
  * read from stdin if logdir is -
  *
@@ -46,6 +49,7 @@
  */
 #include <unistd.h>
 #include <time.h>
+#include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -66,7 +70,7 @@
 #include <no_of_days.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg.c,v 1.6 2023-04-09 22:26:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg.c,v 1.7 2023-09-17 22:36:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "qmailmrtg: fatal: "
@@ -222,6 +226,7 @@ process_file(char *file_name, char type, char inquery_type)
 				++p1;
 			++p1;
 
+			while (isspace(*p1)) p1++;
 			for (p2 = p1 + 1; *p2 != '/'; ++p2);
 			*p2 = 0;
 			scan_ulong(p1, &tmpulong);
