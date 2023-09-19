@@ -34,7 +34,8 @@ Table of Contents
          * [Using FILTERARGS environment variable](#using-filterargs-environment-variable-1)
          * [Using control file filterargs](#using-control-file-filterargs)
          * [Using QMAILLOCAL or QMAILREMOTE environment variables](#using-qmaillocal-or-qmailremote-environment-variables)
-      * [Using dot-qmail(5) or valias(1)](#using-dot-qmail5-or-valias1)
+      * [Using dot-qmail(5) and filterit(1)](#using-dot-qmail5-and-filterit1)
+      * [Using valias(1)](#using-valias1)
       * [Using IndiMail rule based filter - vfilter](#using-indimail-rule-based-filter---vfilter)
       * [Examples Filters](#examples-filters)
          * [FILTERARGS script](#filterargs-script)
@@ -1318,9 +1319,21 @@ You can replace maildirdeliver in the last line with <b>vdelivermail</b>(8)
 
 IndiMail provides multiple methods by which you can intercept an email in transit and modify the email headers or the email body. A filter is a simple program that expects the raw email on standard input and outputs the message text back on standard output. The program /bin/cat can be used as a filter which simply copies the standard input to standard output without modifying anything. Some methods can be used before the mail gets queued and some methods can be used before the execution of local / remote delivery.
 
-It is not necessary for a filter to modify the email. You can have a filter just to extract the headers or body and use that information for some purpose. IndiMail also provides the following programs - 822addr(1), 822headerfilter(1), 822bodyfilter(1), 822field(1), 822fields(1), 822header(1), 822body(1), 822headerok(1), 822received(1), 822date(1), 822fields(1) to help in processing emails.
+It is not necessary for a filter to modify the email. You can have a filter just to extract the headers or body and use that information for some purpose. IndiMail also provides the following programs - 822addr(1), 822headerfilter(1), 822bodyfilter(1), 822field(1), 822fields(1), 822header(1), 822body(1), 822headerok(1), 822received(1), 822date(1) to help in processing emails.
 
-Let us say that we have written a script /usr/local/bin/myfilter. The myfilter program expects the raw email on stdin and outputs the email back (maybe modiying it) on stdout.
+Let us say that we have written a script /usr/local/bin/myfilter. The myfilter program expects the raw email on stdin and outputs the email back (maybe modiying it) on stdout. A simple filter which simply passes the mail without modifying would be like this
+
+```
+#!/bin/sh
+exec /bin/cat
+```
+
+Another example of a filter that simply removes the header X-SomeHeader would be like this
+
+```
+#!/bin/sh
+sed '0,/^X-SomeHeader:/{/X-SomeHeader:/d;}'
+```
 
 ## Filtering during SMTP (before mail gets queued)
 
@@ -1414,10 +1427,18 @@ exec qmail-remote "$@"     #(for remote deliveries)
 
 NOTE: You can exit with value 0 instead of calling <b>qmail-local</b> / <b>qmail-remote</b> to discard the mail completely (blackhole)
 
-## Using dot-qmail(5) or valias(1)
+## Using dot-qmail(5) and filterit(1)
 
-Both .qmail files and valias mechanism allows you to execute your own programs for local deliveries. See the man pages for dot-qmail(5) and valias(1) for more details. After manipulating the original raw email on stdin, you can pipe the out to the program maildirdeliver(1) for the final delivery.
+The .qmail files allows you to control local message deliveries. See the man pages for dot-qmail(5), qmail-command(8) for more details. You can have the following in a .qmail file.
+
+After manipulating the original raw email on stdin, you can pipe the out to the program maildirdeliver(1) for the final delivery.
 Assuming you write the program myscript to call maildirdeliver program, you can use the valias command to add the following alias
+
+## Using valias(1)
+
+The <b>valias</b> mechanism allows you to execute your own programs for local deliveries to your virtual domain. See the man pages for [valias(1)](https://github.com/mbhangui/indimail-mta/wiki/valias.1) for more details. After manipulating the original raw email on stdin, you can pipe the out to the program [maildirdeliver(1)](https://github.com/mbhangui/indimail-mta/wiki/maildirdeliver.1) for the final delivery to any Maildir of any virtual user. You can use the vuserinfo command to get the Maildir for any virtual user.
+
+Assuming you write the program myscript to call <b>maildirdeliver</b> program, you can use the <b>valias</b> command to add the following alias
 
 `$ valias -i "|/usr/local/bin/myfilter" testuser01@example.com`
 
