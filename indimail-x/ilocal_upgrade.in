@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: ilocal_upgrade.in,v 2.41 2023-07-26 18:29:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: ilocal_upgrade.in,v 2.42 2023-09-22 23:58:24+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chgrp=$(which chgrp)
@@ -22,7 +22,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.in,v 2.41 2023-07-26 18:29:33+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.in,v 2.42 2023-09-22 23:58:24+05:30 Cprogrammer Exp mbhangui $"
 if [ -d @indimaildir@/mysqldb/data/indimail ] ; then
 	if [ ! -f @servicedir@/mysql.3306/down ] ; then
 		for i in mysqld mariadb mysql
@@ -38,10 +38,49 @@ fi
 @prefix@/sbin/svctool --fixsharedlibs
 }
 
+mysql_opt_reconnect()
+{
+mysqlPrefix=/usr
+if [ -x $mysqlPrefix/sbin/mariadbd ] ; then
+	mysqld=sbin/mariadbd
+elif [ -x $mysqlPrefix/libexec/mysqld ] ; then
+	mysqld=libexec/mysqld
+elif [ -x $mysqlPrefix/sbin/mysqld ] ; then
+	mysqld=sbin/mysqld
+elif [ -x $mysqlPrefix/bin/mysqld ] ; then
+	mysqld=bin/mysqld
+else
+	return 1
+fi
+mysql_version=`$mysqlPrefix/$mysqld --version 2>&1 | grep Ver | awk '{print $3}'`
+echo $mysql_version |grep MariaDB > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+	mysql_version=`echo $mysql_version|cut -d- -f1`
+	return 0
+else
+	major=$(echo $mysql_version|cut -d. -f1)
+	minor1=$(echo $mysql_version|cut -d. -f2)
+	minor2=$(echo $mysql_version|cut -d. -f3)
+	if [ $major -lt 8 ] ; then
+		return 0
+	elif [ $major -gt 8 ] ; then
+		return 1
+	elif [ $major -eq 8 ] ; then
+		if [ $minor1 -gt 0 ] ; then
+			return 1
+		fi
+		if [ $minor2 -gt 34 ] ; then
+			return 1
+		fi
+		return 0
+	fi
+fi
+}
+
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: ilocal_upgrade.in,v 2.41 2023-07-26 18:29:33+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: ilocal_upgrade.in,v 2.42 2023-09-22 23:58:24+05:30 Cprogrammer Exp mbhangui $"
 # Fix CERT locations
 for i in $(ls -d @servicedir@/qmail-imapd* @servicedir@/qmail-pop3d* @servicedir@/proxy-imapd* @servicedir@/proxy-pop3d* 2>/dev/null)
 do
@@ -211,13 +250,17 @@ fi
 # upgrade indimail.mrtg to use qmailmrtg instead of qmailmrtg7
 #
 if [ -f @servicedir@/mrtg@sysconfdir@.mrtg.cfg ] ; then
-	grep qmailmrtg7 @servicedir@/mrtg@sysconfdir@.mrtg.cfg >/dev/null 2>&1
+	grep indimail/qmailmrtg7 @servicedir@/mrtg@sysconfdir@.mrtg.cfg >/dev/null 2>&1
 	if [ $? -eq 0 ] ; then
 		echo "Refreshing mrtg service"
 		@prefix@/sbin/svctool --servicedir=@servicedir@ --refreshsvc=@servicedir@/mrtg --force
 	fi
 fi
 
+mysql_opt_reconnect
+if [ $? -ne 0 ] ; then
+	/bin/rm -f @servicedir@/*/variables/MYSQL_OPT_RECONNECT
+fi
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in @sysconfdir@/control/mysql_lib
 @prefix@/sbin/svctool --fixsharedlibs
@@ -235,6 +278,9 @@ case $1 in
 esac
 #
 # $Log: ilocal_upgrade.in,v $
+# Revision 2.42  2023-09-22 23:58:24+05:30  Cprogrammer
+# remove MYSQL_OPT_RECONNECT for mysql version > 8.0.34
+#
 # Revision 2.41  2023-07-26 18:29:33+05:30  Cprogrammer
 # fixed typo nssd.conf --> nssd.pid
 #
