@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.8 2023-09-08 11:19:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.9 2023-09-25 18:39:23+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -2509,7 +2509,7 @@ do
 		-h | --help)
 		usage
 		display_tests
-  		exit 1
+		exit 1
 		;;
 		--) # end of options
 		shift
@@ -2518,7 +2518,7 @@ do
 		*)
 		echo "Unexpected option: $1 - this should'nt happen." 1>&2
 		usage
-  		exit 1
+	exit 1
 		;;
 	esac
 done
@@ -2607,6 +2607,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.9  2023-09-25 18:39:23+05:30  Cprogrammer
+# updated RCS
+#
 # Revision 1.8  2023-09-08 11:19:10+05:30  Cprogrammer
 # removed duplicate tests
 #
