@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.11 2023-09-29 13:56:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.12 2023-09-29 19:38:37+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -82,7 +82,7 @@ setup_maildir()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing create maildir succeeded [$secs sec]"
+		printf "  testing create maildir succeeded %78s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		echo "  testing create maildir failed"
@@ -170,7 +170,7 @@ setup_assign()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing $qmail_newu succeeded [$secs sec]"
+		printf "  testing %-30s succeeded %-62s [%.4f sec]\n" $qmail_newu " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		echo "  testing $qmail_newu failed"
@@ -191,7 +191,7 @@ setup_queue()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing queue-fix succeeded [$secs sec]"
+		printf "  testing queue-fix succeeded %-83s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		echo "  testing queue-fix failed"
@@ -219,7 +219,7 @@ setup_config()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing svctool create indimail-mta config succeeded [$secs sec]"
+		printf "  testing svctool create indimail-mta config succeeded %-58s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		echo "  testing svctool create indimail-mta config failed"
@@ -235,7 +235,7 @@ setup_config()
 			tm2=$(date +"%s.%4N")
 			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
-			echo "  testing svctool create certificate succeeded [$secs sec]"
+			printf "  testing svctool create certificate succeeded %66s [%.4f sec]\n" " " $secs
 		else
 			fcount=$(expr $fcount + 1)
 			echo "  testing svctool create certificate failed"
@@ -255,7 +255,7 @@ setup_config()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing svctool create indimail config succeeded [$secs sec]"
+		printf "  testing svctool create indimail config succeeded %62s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		echo "  testing svctool create indimail config failed"
@@ -273,7 +273,7 @@ setup_config()
 			tm2=$(date +"%s.%4N")
 			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
-			echo "  testing svctool create MySQL config $in_cnf succeeded [$secs sec]"
+			printf "  testing svctool create MySQL config %-35s %39s [%.4f sec]\n" $in_cnf " " $secs
 		else
 			fcount=$(expr $fcount + 1)
 			echo "  testing svctool create MySQL config $in_cnf failed"
@@ -293,7 +293,7 @@ setup_config()
 			tm2=$(date +"%s.%4N")
 			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
-			echo "  testing svctool create MySQL Database succeeded [$secs sec]"
+			printf "  testing svctool create MySQL Database succeeded %63s [%.4f sec]\n" " " $secs
 		else
 			fcount=$(expr $fcount + 1)
 			echo "  testing svctool create MySQL Database failed"
@@ -304,7 +304,7 @@ setup_config()
 			tm2=$(date +"%s.%4N")
 			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
-			echo "  testing for indimail MySQL database succeeded [$secs sec]"
+			printf "  testing for indimail MySQL database succeeded %65s [%.4f sec]\n" " " $secs
 		else
 			echo "  testing for indimail MySQL database failed"
 			echo "Disabling mysqld service"
@@ -322,7 +322,7 @@ setup_config()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing svctool create MySQL service succeeded [$secs sec]"
+		printf "  testing svctool create MySQL service succeeded %64s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		echo "  testing svctool create MySQL service failed"
@@ -552,7 +552,7 @@ do_svscan_start()
 			tm2=$(date +"%s.%4N")
 			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
-			echo "  testing command svscan (with svscanlog) startup succeeded with pid [$svpid] [$secs sec]"
+			printf "  testing command svscan (with svscanlog) startup succeeded with pid [%9d] %32s [%.4f sec]\n" $svpid " " $secs
 			tty -s && stty sane
 		else
 			fcount=$(expr $fcount + 1)
@@ -582,7 +582,7 @@ test_svscan_log()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command svscan log succeeded [$secs sec]"
+		printf "  testing command svscan log succeeded %74s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -601,7 +601,7 @@ test_svscan_run()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command svscan run script execution succeeded [$secs sec]"
+		printf "  testing command svscan run script execution succeeded %57s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -688,7 +688,7 @@ create_domain()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command vadddomain succeeded [$secs sec]"
+		printf "  testing command vadddomain succeeded %74s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -726,7 +726,7 @@ create_plain_user()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command vadduser (plain) hash=$hash succeeded [$secs sec]"
+		printf "  testing command vadduser (plain) hash=%-8s succeeded %54s [%.4f sec]\n" "$hash" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -765,7 +765,7 @@ create_cram_user()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command vadduser (cram) hash=$hash succeeded [$secs sec]"
+		printf "  testing command vadduser (cram)  hash=%-8s succeeded %54s [%.4f sec]\n" $hash " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -786,7 +786,7 @@ create_cram_user()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command vadduser (cram format) succeeded [$secs sec]"
+		printf "  testing command vadduser (cram format) succeeded %62s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -818,7 +818,7 @@ create_scram_user()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command vadduser (scram) hash=$4 succeeded [$secs sec]"
+		printf "  testing command vadduser (scram) hash=%-8s succeeded %54s [%.4f sec]\n" $4 " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -852,7 +852,7 @@ delete_user()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command vdeluser succeeded [$secs sec]"
+		printf "  testing command vdeluser succeeded %76s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -884,7 +884,7 @@ delete_domain()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command vdeldomain succeeded [$secs sec]"
+		printf "  testing command vdeldomain succeeded %74s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -910,7 +910,7 @@ change_password()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command vpasswd succeeded [$secs sec]"
+		printf "  testing command vpasswd succeeded %77s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -936,7 +936,7 @@ do_vmoduser()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command vuserinfo get quota ($quota) succeeded [$secs sec]"
+		printf "  testing command vuserinfo get quota (%9d) succeeded %53s [%.4f sec]\n" $quota " " $secs
 	else
 		echo "  testing command vuserinfo get quota ($quota) failed"
 	fi
@@ -952,7 +952,7 @@ do_vmoduser()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command vmoduser increase quota by 100m succeeded [$secs sec]"
+		printf "  testing command vmoduser increase quota by 100m succeeded %53s [%.4f sec]\n" " " $secs
 	else
 		echo "  testing command vmoduser increase quota by 100m failed"
 	fi
@@ -966,7 +966,7 @@ do_vmoduser()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command vmoduser update quota to ($quota) succeeded [$secs sec]"
+		printf "  testing command vmoduser update quota to (%9d) succeeded %48s [%.4f sec]\n" $quota " " $secs
 	else
 		echo "  testing command vmoduser update quota to ($quota) failed"
 	fi
@@ -987,7 +987,7 @@ do_inquerytest()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command inquerytest succeeded [$secs sec]"
+		printf "  testing command inquerytest succeeded %73s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -1011,7 +1011,7 @@ do_vdominfo()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command vdominfo succeeded [$secs sec]"
+		printf "  testing command vdominfo succeeded %76s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -1035,7 +1035,7 @@ do_dbinfo()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command dbinfo succeeded [$secs sec]"
+		printf "  testing command dbinfo succeeded %78s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -1055,7 +1055,7 @@ test_services()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command svscan service startup succeeded [$secs sec]"
+		printf "  testing command svscan service startup succeeded %62s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -1184,7 +1184,7 @@ do_smtp_auth_swaks()
 				tm2=$(tail -1 $logdir/inlookup/current|awk '{print $1}'|tai64nunix)
 				secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 				tcount=$(expr $tcount + 1)
-				printf "  testing command inquery password cache succeded %63s [%0.4f sec]\n" " " $secs
+				printf "  testing command inquery password cache succeeded %62s [%0.4f sec]\n" " " $secs
 			else
 				fcount=$(expr $fcount + 1)
 				if [ $prompt -eq 1 ] ; then
@@ -1260,7 +1260,7 @@ do_smtp_auth_qmr_o()
 					tm2=$(date +"%s.%4N")
 					secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 					tcount=$(expr $tcount + 1)
-					printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-7s using qmr %s succeeded [%.4f sec]\n" "$i" "$str" "$hash" "$type" "$2" "$secs"
+					printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-8s using qmr %19s succeeded [%.4f sec]\n" "$i" "$str" "$hash" "$type" "$2" "$secs"
 				else
 					fcount=$(expr $fcount + 1)
 					if [ $prompt -eq 1 ] ; then
@@ -1305,7 +1305,7 @@ do_smtp_auth_qmr_scram()
 			tm2=$(date +"%s.%4N")
 			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
-			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using qmr (plaintext) succeeded [%.4f sec]\n" "$1" "$str" "$hash" "$secs"
+			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using qmr (plaintext) succeeded %7s [%.4f sec]\n" "$1" "$str" "$hash" " " "$secs"
 		else
 			fcount=$(expr $fcount + 1)
 			if [ $prompt -eq 1 ] ; then
@@ -1346,7 +1346,7 @@ do_smtp_auth_qmr_scram()
 			tm2=$(date +"%s.%4N")
 			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
-			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using qmr (hexsalted) succeeded [%.4f sec]\n" "$1" "$str" "$hash" "$secs"
+			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using qmr (hexsalted) succeeded %7s [%.4f sec]\n" "$1" "$str" "$hash" " " "$secs"
 		else
 			fcount=$(expr $fcount + 1)
 			if [ $prompt -eq 1 ] ; then
@@ -1384,7 +1384,7 @@ do_gsasl_test()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using gsasl succeeded [%.4f sec]\n" "$1" "$str" "$hash" "$secs"
+		printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using gsasl succeeded %17s [%.4f sec]\n" "$1" "$str" "$hash" " " "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -1522,7 +1522,7 @@ test_pop3()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing POP3  login %s hash=%-8s and mail retrieval (%s) succeeded [%.4f sec]\n" "$1" "$hash" "$str" "$secs"
+		printf "  testing POP3  login %-25s hash=%-8s and mail retrieval (%s) succeeded %10s [%.4f sec]\n" "$1" "$hash" "$str" " " "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -1538,7 +1538,7 @@ test_pop3()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing record in relay table succeeded [%.4f sec]\n" "$secs"
+		printf "  testing record in relay table succeeded %71s [%.4f sec]\n" " " "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
@@ -1559,7 +1559,7 @@ test_pop3()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing Open RELAY using POP3  login succeeded [%.4f sec]\n" "$secs"
+		printf "  testing Open RELAY using POP3  login succeeded %64s [%.4f sec]\n" " " "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
@@ -1585,7 +1585,7 @@ test_pop3()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing POP3S login %s hash=%-8s and mail retrieval (%s) succeeded [%.4f sec]\n" "$1" "$hash" "$str" "$secs"
+		printf "  testing POP3S login %-25s hash=%-8s and mail retrieval (%s) succeeded %10s [%.4f sec]\n" "$1" "$hash" "$str" " " "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		delete_relay 2>>$logdir/pop3d/pop3d.log
@@ -1606,7 +1606,7 @@ test_pop3()
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		delete_relay 2>>$logdir/pop3d/pop3d.log
-		printf "  testing Open RELAY using POP3S login succeeded [%.4f sec]\n" "$secs"
+		printf "  testing Open RELAY using POP3S login succeeded %64s [%.4f sec]\n" " " "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
@@ -1694,7 +1694,7 @@ test_imap()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing IMAP  login %s hash=%-8s and mail retrieval (%s) succeeded [%.4f sec]\n" "$1" "$hash" "$str" "$secs"
+		printf "  testing IMAP  login %-25s hash=%-8s and mail retrieval (%s) succeeded %10s [%.4f sec]\n" "$1" "$hash" "$str" " " "$secs"
 	else
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/imapd/imapd.log
@@ -1709,7 +1709,7 @@ test_imap()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing record in relay table succeeded [%.4f sec]\n" "$secs"
+		printf "  testing record in relay table succeeded %71s [%.4f sec]\n" " " "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
@@ -1730,7 +1730,7 @@ test_imap()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing Open RELAY using IMAP login succeeded [%.4f sec]\n" "$secs"
+		printf "  testing Open RELAY using IMAP  login succeeded %64s [%.4f sec]\n" " " "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
@@ -1756,7 +1756,7 @@ test_imap()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing IMAPS login %s hash=%-8s and mail retrieval (%s) succeeded [%.4f sec]\n" "$1" "$hash" "$str" "$secs"
+		printf "  testing IMAPS login %-25s hash=%-8s and mail retrieval (%s) succeeded %10s [%.4f sec]\n" "$1" "$hash" "$str" " " "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
@@ -1778,7 +1778,7 @@ test_imap()
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		delete_relay 2>>$logdir/pop3d/pop3d.log
-		printf "  testing Open RELAY using IMAPS login succeeded [%.4f sec]\n" "$secs"
+		printf "  testing Open RELAY using IMAPS login succeeded %64s [%.4f sec]\n" " " "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
@@ -1868,13 +1868,13 @@ do_post_handle()
 			tm2=$(date +"%s.%4N")
 			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
-			printf "  testing command $prog succeeded [%.4f sec]\n" "$secs"
+			printf "  testing command %-17s succeeded %67s [%.4f sec]\n" "$prog" " " "$secs"
 			id=$(grep MYUID $logdir/setup/test"$i".log | grep MYUID | cut -d= -f2)
 			if [ $id -eq $uid ] ; then
 				tm2=$(date +"%s.%4N")
 				secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 				tcount=$(expr $tcount + 1)
-				printf "  testing POST HANDLE for $prog succeeded [%.4f sec]\n" "$secs"
+				printf "  testing POST HANDLE for %-17s succeeded %59s [%.4f sec]\n" "$prog" " " "$secs"
 			else
 				fcount=$(expr $fcount + 1)
 				if [ $prompt -eq 1 ] ; then
@@ -1980,7 +1980,7 @@ do_valias()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing command valias insert succeeded [%.4f sec]\n" "$secs"
+		printf "  testing command valias insert succeeded %71s [%.4f sec]\n" " " "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		printf "  testing command valias insert failed\n"
@@ -1994,7 +1994,7 @@ do_valias()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing valias forwarding succeeded [$secs sec]"
+		printf "  testing valias forwarding succeeded %75s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		echo "  testing valias forwarding failed"
@@ -2013,7 +2013,7 @@ do_valias()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing command valias update succeeded [%.4f sec]\n" "$secs"
+		printf "  testing command valias update succeeded %71s [%.4f sec]\n" " " "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		printf "  testing command valias update failed\n"
@@ -2030,7 +2030,7 @@ do_valias()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 $sleep_int $sleep_secs| awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing valias maildir delivery succeeded [$secs sec]"
+		printf "  testing valias maildir delivery succeeded %69s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		echo "  testing valias maildir delivery failed"
@@ -2050,7 +2050,7 @@ do_valias()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing command valias delete succeeded [%.4f sec]\n" "$secs"
+		printf "  testing command valias delete succeeded %71s [%.4f sec]\n" " " "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		printf "  testing command valias delete failed\n"
@@ -2076,7 +2076,7 @@ do_pwdlookup()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1-1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing pwdlookup succeeded [%.4f sec]\n" "$secs"
+		printf "  testing pwdlookup succeeded %83s [%.4f sec]\n" " " "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		printf "  testing pwdlookup failed\n"
@@ -2173,7 +2173,7 @@ do_autoresponder()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 $sleep_secs| awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing autoresponder succeeded [$secs sec]"
+		printf "  testing autoresponder succeeded %79s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		echo "[$subject] [Subject: Autoreply: Re: $subj]"
@@ -2389,7 +2389,7 @@ do_vfilter()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command vmoddomain set vfilter succeeded [$secs sec]"
+		printf "  testing command vmoddomain set vfilter succeeded %62s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -2462,7 +2462,7 @@ do_vfilter()
 			tm2=$(date +"%s.%4N")
 			secs=$(echo $tm1 $tm2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 			tcount=$(expr $tcount + 1)
-			echo "  testing vfilter delivery to matched folder comparision=$i succeeded [$secs sec]"
+			printf "  testing vfilter delivery to matched folder comparision=%-28s succeeded %17s [%.4f sec]\n" "$i" " " $secs
 		else
 			fcount=$(expr $fcount + 1)
 			echo "  testing vfilter delivery to matched folder comparision=$i failed"
@@ -2489,7 +2489,7 @@ do_vfilter()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing vfilter delivery for bounce  on match succeeded [$secs sec]"
+		printf "  testing vfilter delivery for bounce  on match succeeded %55s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		echo "  testing vfilter delivery for bounce  on match failed"
@@ -2508,7 +2508,7 @@ do_vfilter()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing vfilter delivery for forward on match succeeded [$secs sec]"
+		printf "  testing vfilter delivery for forward on match succeeded %55s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		echo "  testing vfilter delivery for forward on match failed"
@@ -2533,7 +2533,7 @@ do_vfilter()
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		/bin/rm -rf $testdir/forwarder
 		tcount=$(expr $tcount + 1)
-		echo "  testing vfilter delivery for feed program on match succeeded [$secs sec]"
+		printf "  testing vfilter delivery for feed program on match succeeded %50s [%.4f sec]\n" " " $secs
 	else
 		/bin/rm -rf $testdir/forwarder
 		fcount=$(expr $fcount + 1)
@@ -2564,7 +2564,7 @@ do_vfilter()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing vfilter delivery for forward and bounce on match succeeded [$secs sec]"
+		printf "  testing vfilter delivery for forward and bounce on match succeeded %44s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		echo "  testing vfilter delivery for forward and bounce on match failed"
@@ -2600,7 +2600,7 @@ do_vfilter()
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		/bin/rm -rf $testdir/forwarder
 		tcount=$(expr $tcount + 1)
-		echo "  testing vfilter delivery for feed program and bounce on match succeeded [$secs sec]"
+		printf "  testing vfilter delivery for feed program and bounce on match succeeded %39s [%.4f sec]\n" " " $secs
 	else
 		/bin/rm -rf $testdir/forwarder
 		fcount=$(expr $fcount + 1)
@@ -2620,7 +2620,7 @@ do_vfilter()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing command vmoddomain unset vfilter succeeded [$secs sec]"
+		printf "  testing command vmoddomain unset vfilter succeeded %60s [%.4f sec]\n" " " $secs
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -2708,7 +2708,7 @@ test_recipients()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing recipient extension (positive match) succeeded [$secs sec]"
+		printf "  testing recipient extension (positive match) succeeded %56s [%.4f sec]\n" " " $secs
 	else
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
@@ -2737,7 +2737,7 @@ test_recipients()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1-5)}')
 		tcount=$(expr $tcount + 1)
-		echo "  testing recipient extension (negative match) succeeded [$secs sec]"
+		printf "  testing recipient extension (negative match) succeeded %56s [%.4f sec]\n" " " $secs
 	else
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1-5)}')
@@ -2759,9 +2759,9 @@ test_smtp_chk_sender()
 	sudo svc -r $servicedir/smtpd
 	sleep $sleep_int
 	> $servicedir/smtpd/variables/CHECKSENDER
-	# CHECKSENDER: unauthenticated local SENDER address:
 
-	# First: This should work
+	# delivery to external domain
+	# First: This should work as from matches authenticated user
 	swaks -S --to $user@$ext_domain --from $testuser1 --server localhost \
 		--port $smtp_port --a LOGIN -au $testuser1 -ap "$password1"
 	ret1=$?
@@ -2769,7 +2769,8 @@ test_smtp_chk_sender()
 	check_mail indimail $destdir1/Maildir
 	s1=$sleep_secs
 
-	# Second: This should be denied
+	# delivery to local domain
+	# Second: This should be denied as from does not match the authenticated user
 	swaks -S --to $user@$HOSTNAME --from $user@$ext_domain --server localhost \
 		--port $smtp_port --a LOGIN -au $testuser1 -ap "$password1" >/tmp/swaks.$$
 	ret2=$?
@@ -2782,14 +2783,17 @@ test_smtp_chk_sender()
 		ret3=1
 	fi
 
-	# Third: This should work
+	# delivery to local domain
+	# Third: This should work as from matches authenticated user
 	swaks -S --to $user@$HOSTNAME --from $testuser1 --server localhost \
 		--port $smtp_port --a LOGIN -au $testuser1 -ap "$password1"
 	check_mail $user $maildir
 	ret4=$?
 	s2=$sleep_secs
 
-	# fourth: This should be denied
+	# delivery to local domain
+	# fourth: This should be denied as from is in rcpthosts and user
+	# has not authenticated
 	swaks -S --to $testuser1 --from $testuser1 --server localhost \
 		--port $smtp_port >/tmp/swaks.$$
 	ret5=$?
@@ -2805,7 +2809,7 @@ test_smtp_chk_sender()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 $s1 $s2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4-$5)}')
 		tcount=$(expr $tcount + 4)
-		echo "  testing mail using SMTP with CHECKSENDER succeeded [$secs sec]"
+		printf "  testing mail using SMTP with CHECKSENDER succeeded %60s [%.4f sec]\n" " " $secs
 	else
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 $s1 $s2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4-$5)}')
@@ -3001,6 +3005,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.12  2023-09-29 19:38:37+05:30  Cprogrammer
+# formated display for time taken to be displayed in the same column for all tests
+#
 # Revision 1.11  2023-09-29 13:56:26+05:30  Cprogrammer
 # updated decimal digits for times to 4 places
 #
