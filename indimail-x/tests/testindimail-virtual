@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.10 2023-09-29 02:19:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.11 2023-09-29 13:56:26+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -65,7 +65,7 @@ trap do_cleanup_failed EXIT
 
 setup_maildir()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	if [ -d $maildir/new ] ; then
 		find $maildir/new -type f -exec /bin/rm -f {} \;
 	fi
@@ -79,8 +79,8 @@ setup_maildir()
 		fi
 	done
 	if [ $status -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing create maildir succeeded [$secs sec]"
 	else
@@ -152,7 +152,7 @@ check_service()
 
 setup_assign()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	if [ ! -f $sysconfdir/users/assign ] ; then
 		mkdir -p $sysconfdir/users
 		(
@@ -167,8 +167,8 @@ setup_assign()
 	echo "Creating $sysconfdir/users/cdb"
 	$qmail_newu $sysconfdir/users
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing $qmail_newu succeeded [$secs sec]"
 	else
@@ -180,7 +180,7 @@ setup_assign()
 
 setup_queue()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	echo "Creating queue in $qmaildir/queue"
 	mkdir -p $qmaildir
 	$sudo env BIGTODO=0 queue-fix -s $confsplit $qmaildir/queue
@@ -188,8 +188,8 @@ setup_queue()
 	t1=$($sudo ls $qmaildir/queue/todo|wc -l)
 	t2=$($sudo ls $qmaildir/queue/intd|wc -l)
 	if [ $ret -eq 0 -a $t1 -eq 0 -a $t2 -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing queue-fix succeeded [$secs sec]"
 	else
@@ -201,7 +201,7 @@ setup_queue()
 
 setup_config()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	mkdir -p $cntrldir
 	mkdir -p $testdir/run/mysqld
 	cd $testdir
@@ -216,8 +216,8 @@ setup_config()
 	echo TLSv1_3      > $cntrldir/tlsservermethod
 	$sudo $svctool --cntrldir=$cntrldir --config=qmail 1>&3
 	if [ $t1 -eq 0 -a $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing svctool create indimail-mta config succeeded [$secs sec]"
 	else
@@ -226,14 +226,14 @@ setup_config()
 		exit 1
 	fi
 
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	if [ ! -f $certdir/servercert.pem ] ; then
 		echo "Creating certificates"
 		$sudo $svctool --certdir=$certdir --config=cert \
 			--postmaster=postmaster@$HOSTNAME --common_name=$HOSTNAME 1>&3 2>&1
 		if [ $? -eq 0 ] ; then
-			tm2=$(date +"%s.%3N")
-			secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+			tm2=$(date +"%s.%4N")
+			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
 			echo "  testing svctool create certificate succeeded [$secs sec]"
 		else
@@ -243,7 +243,7 @@ setup_config()
 		fi
 	fi
 
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	# indimail config
 	echo "Creating indimail config"
 	mkdir -p $qmaildir/alias
@@ -252,8 +252,8 @@ setup_config()
 		--mysqluser="$MYSQL_USER" --mysqlpass="$MYSQL_PASS" \
 		--mysqlhost=localhost --mysqlsocket=$MYSQL_SOCK --mysqlport=$MYSQL_PORT 1>&3
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing svctool create indimail config succeeded [$secs sec]"
 	else
@@ -262,7 +262,7 @@ setup_config()
 		exit 1
 	fi
 
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	# mysql cnf file
 	if [ ! -f $in_cnf ] ; then
 		echo "Creating mysql config $in_cnf"
@@ -270,8 +270,8 @@ setup_config()
 			--sysconfdir=$sysconfdir --mysqlsocket=$MYSQL_SOCK --mysqlport=$MYSQL_PORT \
 			--databasedir=$qmaildir/mysqldb 1>&3 2>&1
 		if [ $? -eq 0 -a -f $in_cnf ] ; then
-			tm2=$(date +"%s.%3N")
-			secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+			tm2=$(date +"%s.%4N")
+			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
 			echo "  testing svctool create MySQL config $in_cnf succeeded [$secs sec]"
 		else
@@ -281,7 +281,7 @@ setup_config()
 		fi
 	fi
 
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
   	# MySQL Database Creation
 	if [ ! -d $qmaildir/mysqldb/data/mysql ] ; then
 		echo "Creating mysql db"
@@ -290,8 +290,8 @@ setup_config()
 			--databasedir=$qmaildir/mysqldb --base_path=$testdir/mail \
 			--mysqlsocket="$MYSQL_SOCK".tmp 1>&3 2>&1
 		if [ $? -eq 0 ] ; then
-			tm2=$(date +"%s.%3N")
-			secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+			tm2=$(date +"%s.%4N")
+			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
 			echo "  testing svctool create MySQL Database succeeded [$secs sec]"
 		else
@@ -301,8 +301,8 @@ setup_config()
 		fi
 		t=$($sudo ls $qmaildir/mysqldb/data/indimail/indimail.frm -a $qmaildir/mysqldb/data/indimail/indimail.ibd 2>/dev/null)
 		if [ -n "$t" ] ; then
-			tm2=$(date +"%s.%3N")
-			secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+			tm2=$(date +"%s.%4N")
+			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
 			echo "  testing for indimail MySQL database succeeded [$secs sec]"
 		else
@@ -312,15 +312,15 @@ setup_config()
 		fi
 	fi
 
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
   	# MySQL service Creation
 	mkdir -p $servicedir
 	echo "Creating mysqld service"
   	$sudo $svctool --mysql=3307 --servicedir=$servicedir --mysqlPrefix=/usr \
 		--databasedir=$qmaildir/mysqldb --config=$in_cnf 1>&3
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing svctool create MySQL service succeeded [$secs sec]"
 	else
@@ -335,13 +335,15 @@ setup_config()
 	fi
 	$sudo chown $user $sysconfdir/headerlist
 	$sudo chmod 644 $sysconfdir/headerlist
-	# nssd config
-	$sudo $svctool --sysconfdir=$sysconfdir --config=nssd \
-		--threads=5 --timeout=-1 \
-		--mysqluser="$MYSQL_USER" --mysqlpass="$MYSQL_PASS" \
-		--mysqlhost=localhost --mysqlsocket=$MYSQL_SOCK --mysqlport=$MYSQL_PORT
-	$sudo chown $user $sysconfdir/nssd.conf
-	sed -i "s{pidfile.*{pidfile     $testdir/pwdlookup/nssd.pid{g" $sysconfdir/nssd.conf
+	if [ ! -f $sysconfdir/nssd.conf ] ; then
+		# nssd config
+		$sudo $svctool --sysconfdir=$sysconfdir --config=nssd \
+			--threads=5 --timeout=-1 \
+			--mysqluser="$MYSQL_USER" --mysqlpass="$MYSQL_PASS" \
+			--mysqlhost=localhost --mysqlsocket=$MYSQL_SOCK --mysqlport=$MYSQL_PORT
+		$sudo chown $user $sysconfdir/nssd.conf
+		sed -i "s{pidfile.*{pidfile     $testdir/pwdlookup/nssd.pid{g" $sysconfdir/nssd.conf
+	fi
 }
 
 create_authimap()
@@ -533,7 +535,7 @@ setup_svscan()
 
 do_svscan_start()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	echo
 	echo "Starting svscan"
 	(
@@ -547,8 +549,8 @@ do_svscan_start()
 	if [ -n "$svpid" ] ; then
 		$sudo kill -0 $svpid >/dev/null 2>&1
 		if [ $? -eq 0 ] ; then
-			tm2=$(date +"%s.%3N")
-			secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+			tm2=$(date +"%s.%4N")
+			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
 			echo "  testing command svscan (with svscanlog) startup succeeded with pid [$svpid] [$secs sec]"
 			tty -s && stty sane
@@ -574,11 +576,11 @@ do_svscan_start()
 
 test_svscan_log()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	grep "@.* svscan: info: pid: .*: starting..." $logdir/svscan/current >/dev/null
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command svscan log succeeded [$secs sec]"
 	else
@@ -594,10 +596,10 @@ test_svscan_log()
 
 test_svscan_run()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	if [ "$(cat $testdir/svscan1.out 2>/dev/null)" = "hello world" ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command svscan run script execution succeeded [$secs sec]"
 	else
@@ -666,7 +668,7 @@ do_setup()
 
 create_domain()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	mkdir -p $sysconfdir/users
 	mkdir -p $testdir/mail
 	if [ $# -eq 3 ] ; then
@@ -683,8 +685,8 @@ create_domain()
 		SERVICEDIR=$servicedir \
 		vadddomain $opt -B $testdir/mail -d $qmaildir $1 $2 > $logdir/setup/vadddomain.log
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vadddomain succeeded [$secs sec]"
 	else
@@ -700,7 +702,7 @@ create_domain()
 
 create_plain_user()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	if [ $# -eq 3 ] ; then
 		if [ "$3" = "default" ] ; then
 			extra=""
@@ -721,8 +723,8 @@ create_plain_user()
 		SERVICEDIR=$servicedir \
 		vadduser -d $extra $1 $2 >> $logdir/setup/vadduser.log 2>&1
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vadduser (plain) hash=$hash succeeded [$secs sec]"
 	else
@@ -738,7 +740,7 @@ create_plain_user()
 
 create_cram_user()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	if [ $# -eq 3 ] ; then
 		if [ "$3" = "default" ] ; then
 			extra=""
@@ -760,8 +762,8 @@ create_cram_user()
 		vadduser -C -m CRAM -d $extra $1 $2 >> $logdir/setup/vadduser.log 2>&1
 	status=$?
 	if [ $status -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vadduser (cram) hash=$hash succeeded [$secs sec]"
 	else
@@ -773,7 +775,7 @@ create_cram_user()
 		[ -z "$failed" ] && failed="vadduser (cram)" || failed="$failed, vadduser (cram)"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	pass=$($sudo env - \
 		PATH=/bin:/usr/bin \
 		ASSIGNDIR=$sysconfdir/users \
@@ -781,8 +783,8 @@ create_cram_user()
 		CONTROLDIR=$cntrldir \
 		vuserinfo -p $testuser2 | awk '{print $3}' | cut -c1-6)
 	if [ "$pass" = "{CRAM}" ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vadduser (cram format) succeeded [$secs sec]"
 	else
@@ -798,7 +800,7 @@ create_cram_user()
 
 create_scram_user()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	$sudo env - \
 		PATH=/bin:/usr/bin \
 		ASSIGNDIR=$sysconfdir/users \
@@ -813,8 +815,8 @@ create_scram_user()
 		return $status
 	fi
 	if [ $status -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vadduser (scram) hash=$4 succeeded [$secs sec]"
 	else
@@ -830,7 +832,7 @@ create_scram_user()
 
 delete_user()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	$sudo chown -R indimail:indimail $servicedir/inlookup.infifo
 	$sudo chmod 660 $servicedir/inlookup.infifo/supervise/control
 	$sudo env - \
@@ -847,8 +849,8 @@ delete_user()
 		return $status
 	fi
 	if [ $status -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vdeluser succeeded [$secs sec]"
 	else
@@ -865,7 +867,7 @@ delete_user()
 
 delete_domain()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	$sudo env - \
 		PATH=/bin:/usr/bin \
 		ASSIGNDIR=$sysconfdir/users \
@@ -879,8 +881,8 @@ delete_domain()
 		return $status
 	fi
 	if [ $status -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vdeldomain succeeded [$secs sec]"
 	else
@@ -896,7 +898,7 @@ delete_domain()
 
 change_password()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	$sudo env - \
 		PATH=/bin:/usr/bin \
 		ASSIGNDIR=$sysconfdir/users \
@@ -905,8 +907,8 @@ change_password()
 		SERVICEDIR=$servicedir \
 	vpasswd $1 $2 > $logdir/setup/vpasswd.log
 	if [ $status -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vpasswd succeeded [$secs sec]"
 	else
@@ -923,7 +925,7 @@ change_password()
 
 do_vmoduser()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	quota=$($sudo env - \
 		PATH=/bin:/usr/bin \
 		ASSIGNDIR=$sysconfdir/users \
@@ -931,14 +933,14 @@ do_vmoduser()
 		CONTROLDIR=$cntrldir \
 		vuserinfo -q $1 | grep MiB | awk '{print $3}')
 	if [ $quota -eq 524288000 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vuserinfo get quota ($quota) succeeded [$secs sec]"
 	else
 		echo "  testing command vuserinfo get quota ($quota) failed"
 	fi
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	$sudo env - \
 		PATH=/bin:/usr/bin \
 		ASSIGNDIR=$sysconfdir/users \
@@ -947,8 +949,8 @@ do_vmoduser()
 		SERVICEDIR=$servicedir \
 	vmoduser -q +100m $1 > $logdir/setup/vmoduser.log
 	if [ $status -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vmoduser increase quota by 100m succeeded [$secs sec]"
 	else
@@ -961,8 +963,8 @@ do_vmoduser()
 		CONTROLDIR=$cntrldir \
 		vuserinfo -q $1 | grep MiB | awk '{print $3}')
 	if [ $quota -eq 629145600 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vmoduser update quota to ($quota) succeeded [$secs sec]"
 	else
@@ -973,7 +975,7 @@ do_vmoduser()
 
 do_inquerytest()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	$sudo $setuidgid indimail env - \
 		SYSCONFDIR=$sysconfdir \
 		CONTROLDIR=$cntrldir \
@@ -982,8 +984,8 @@ do_inquerytest()
 		FIFO_MODE=0666 \
 		/usr/sbin/inquerytest -v -q 3 -i "" $1 > $logdir/setup/inquerytest.log
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command inquerytest succeeded [$secs sec]"
 	else
@@ -999,15 +1001,15 @@ do_inquerytest()
 
 do_vdominfo()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	env - \
 		SYSCONFDIR=$sysconfdir \
 		CONTROLDIR=$cntrldir \
 		ASSIGNDIR=$sysconfdir/users \
 		/usr/bin/vdominfo > $logdir/setup/vdominfo.log 2>&1
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vdominfo succeeded [$secs sec]"
 	else
@@ -1023,15 +1025,15 @@ do_vdominfo()
 
 do_dbinfo()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	$sudo $setuidgid indimail env - \
 		SYSCONFDIR=$sysconfdir \
 		CONTROLDIR=$cntrldir \
 		ASSIGNDIR=$sysconfdir/users \
 		/usr/bin/dbinfo -s 	> $logdir/setup/dbinfo.log
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command dbinfo succeeded [$secs sec]"
 	else
@@ -1047,11 +1049,11 @@ do_dbinfo()
 
 test_services()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	$sudo svstat $servicedir/* > $logdir/setup/services.log
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command svscan service startup succeeded [$secs sec]"
 	else
@@ -1067,7 +1069,7 @@ test_services()
 
 check_mail()
 {
-	tx1=$(date +"%s.%3N")
+	tx1=$(date +"%s.%4N")
 	# $1 - user
 	# $2 - Maildir
 	count=0
@@ -1093,8 +1095,8 @@ check_mail()
 			return 1
 		fi
 	done
-	tx2=$(date +"%s.%3N")
-	sleep_secs=$(echo $tx1 $tx2 | awk '{print $2-$1}')
+	tx2=$(date +"%s.%4N")
+	sleep_secs=$(echo $tx1 $tx2 | awk '{printf("%0.4f\n", $2-$1)}')
 	return 0
 }
 
@@ -1124,7 +1126,7 @@ do_smtp_auth_swaks()
 		check_service smtpd 3
 		for i in $methods
 		do
-			tm1=$(date +"%s.%3N")
+			tm1=$(date +"%s.%4N")
 			case $i in
 				LOGIN|PLAIN)
 				pass=$2
@@ -1151,10 +1153,10 @@ do_smtp_auth_swaks()
 			if [ $? -eq 0 ] ; then
 				last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $i:")
 				if [ $? -eq 0 ] ; then
-					tm2=$(date +"%s.%3N")
-					secs=$(echo $tm1 $tm2 $sleep_secs | awk '{print $2-$1-$3}')
+					tm2=$(date +"%s.%4N")
+					secs=$(echo $tm1 $tm2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 					tcount=$(expr $tcount + 1)
-					printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-7s using swk %s succeeded [%f sec]\n" "$i" "$str" "$hash" "$type" "$1" "$secs"
+					printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-7s using swk %s succeeded [%.4f sec]\n" "$i" "$str" "$hash" "$type" "$1" "$secs"
 				else
 					fcount=$(expr $fcount + 1)
 					if [ $prompt -eq 1 ] ; then
@@ -1174,14 +1176,15 @@ do_smtp_auth_swaks()
 				[ $continue_on_err -eq 0 ] && exit 1 || return 0
 			fi
 		done
-		tm1=$(date +"%s.%3N")
+		tm1=$(date +"%s.%4N")
 		if [ $j -eq 2 ] ; then
 			t=$(tail -2 $logdir/inlookup/current |head -1|awk '{print $6" "$7}')
 			if [ "$t" = "['Password Query']," ] ; then
-				tm2=$(date +"%s.%3N")
-				secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+				tm1=$(tail -2 $logdir/inlookup/current|head -1|awk '{print $1}'|tai64nunix)
+				tm2=$(tail -1 $logdir/inlookup/current|awk '{print $1}'|tai64nunix)
+				secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 				tcount=$(expr $tcount + 1)
-				echo "  testing command inquery password cache succeeded [$secs sec]"
+				printf "  testing command inquery password cache succeded %63s [%0.4f sec]\n" " " $secs
 			else
 				fcount=$(expr $fcount + 1)
 				if [ $prompt -eq 1 ] ; then
@@ -1237,7 +1240,7 @@ do_smtp_auth_qmr_o()
 				fi
 				;;
 			esac
-			tm1=$(date +"%s.%3N")
+			tm1=$(date +"%s.%4N")
 			(
 			echo "From: $2"
 			echo "To: $user@$HOSTNAME"
@@ -1254,10 +1257,10 @@ do_smtp_auth_qmr_o()
 			if [ $? -eq 0 ] ; then
 				last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $i:")
 				if [ $? -eq 0 ] ; then
-					tm2=$(date +"%s.%3N")
-					secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+					tm2=$(date +"%s.%4N")
+					secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 					tcount=$(expr $tcount + 1)
-					printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-7s using qmr %s succeeded [%f sec]\n" "$i" "$str" "$hash" "$type" "$2" "$secs"
+					printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-7s using qmr %s succeeded [%.4f sec]\n" "$i" "$str" "$hash" "$type" "$2" "$secs"
 				else
 					fcount=$(expr $fcount + 1)
 					if [ $prompt -eq 1 ] ; then
@@ -1282,7 +1285,7 @@ do_smtp_auth_qmr_o()
 
 do_smtp_auth_qmr_scram()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	(
 	echo "From: $3"
 	echo "To: $user@$HOSTNAME"
@@ -1299,10 +1302,10 @@ do_smtp_auth_qmr_scram()
 	if [ $? -eq 0 ] ; then
 		last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $1:")
 		if [ $? -eq 0 ] ; then
-			tm2=$(date +"%s.%3N")
-			secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+			tm2=$(date +"%s.%4N")
+			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
-			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using qmr (plaintext) succeeded [%f sec]\n" "$1" "$str" "$hash" "$secs"
+			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using qmr (plaintext) succeeded [%.4f sec]\n" "$1" "$str" "$hash" "$secs"
 		else
 			fcount=$(expr $fcount + 1)
 			if [ $prompt -eq 1 ] ; then
@@ -1321,7 +1324,7 @@ do_smtp_auth_qmr_scram()
 		[ -z "$failed" ] && failed="check_mail $maildir qmr-SMTP-AUTH-plaintext-$1-hash-$hash" || failed="$failed, check_mail $maildir qmr-SMTP-AUTH-plaintext-$1-hash-$hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	hexsalted=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -p $3 | cut -d: -f3)
 	(
 	echo "From: $3"
@@ -1340,10 +1343,10 @@ do_smtp_auth_qmr_scram()
 	if [ $? -eq 0 ] ; then
 		last_line=$(tail -1 $logdir/smtpd/current|grep "AUTH $1:")
 		if [ $? -eq 0 ] ; then
-			tm2=$(date +"%s.%3N")
-			secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+			tm2=$(date +"%s.%4N")
+			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
-			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using qmr (hexsalted) succeeded [%f sec]\n" "$1" "$str" "$hash" "$secs"
+			printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using qmr (hexsalted) succeeded [%.4f sec]\n" "$1" "$str" "$hash" "$secs"
 		else
 			fcount=$(expr $fcount + 1)
 			if [ $prompt -eq 1 ] ; then
@@ -1366,7 +1369,7 @@ do_smtp_auth_qmr_scram()
 
 do_gsasl_test()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	case $1 in
 		SCRAM-SHA-1-PLUS|SCRAM-SHA-256-PLUS)
 		opt=""
@@ -1378,10 +1381,10 @@ do_gsasl_test()
 	$gsasl -d $opt --hostname=$HOSTNAME --x509-ca-file="" -a $2 --password "$3" \
 		--mechanism "$1" --smtp --connect localhost:$smtp_port >> $logdir/gsasl/gsasl.log 2>&1
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using gsasl succeeded [%f sec]\n" "$1" "$str" "$hash" "$secs"
+		printf "  testing SMTP AUTH %-18s (%s) hash=%-8s          using gsasl succeeded [%.4f sec]\n" "$1" "$str" "$hash" "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -1424,7 +1427,7 @@ delete_relay()
 
 test_pop3()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a LOGIN -au $1 -ap "$2"
 	check_mail indimail $4 no-delete
 	(
@@ -1513,13 +1516,13 @@ test_pop3()
 	) > $testdir/tcpclient.pop3
 	chmod +x $testdir/tcpclient.pop3
 	check_service pop3d
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	tcpclient -a 10 -vDHR 0 1100 /tmp/qmail-test/tcpclient.pop3 2>$logdir/pop3d/pop3d.log
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing POP3  login %s hash=%-8s and mail retrieval (%s) succeeded [%f sec]\n" "$1" "$hash" "$str" "$secs"
+		printf "  testing POP3  login %s hash=%-8s and mail retrieval (%s) succeeded [%.4f sec]\n" "$1" "$hash" "$str" "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
@@ -1529,13 +1532,13 @@ test_pop3()
 		[ -z "$failed" ] && failed="POP3 login $hash" || failed="$failed, POP3 login $hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	check_relay > /dev/null 2>>$logdir/pop3d/pop3d.log
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing record in relay table succeeded [%f sec]\n" "$secs"
+		printf "  testing record in relay table succeeded [%.4f sec]\n" "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
@@ -1547,16 +1550,16 @@ test_pop3()
 		[ -z "$failed" ] && failed="check relay" || failed="$failed, check relay"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	swaks -S --to tuser01@$domain3 --from $1 --server ::1 --port $smtp_port >> $logdir/pop3d/pop3d.log 2>&1
 	ret1=$?
 	swaks -S --to tuser01@$domain3 --from $3 --server ::1 --port $smtp_port >> $logdir/pop3d/pop3d.log 2>&1
 	ret2=$?
 	if [ $ret1 -eq 0 -a $ret2 -ne 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing Open RELAY using POP3  login succeeded [%f sec]\n" "$secs"
+		printf "  testing Open RELAY using POP3  login succeeded [%.4f sec]\n" "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
@@ -1574,15 +1577,15 @@ test_pop3()
 	max=$(expr 10 \* $n1 + $n2)
 	[ $max -gt 12 ] && fn=clientciphersuite || fn=clientcipherlist
 	check_service pop3d-ssl 3
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	sudo $setuidgid -g qcerts $user tcpclient -a 10 -f $cntrldir/$fn \
 		-n $certdir/clientcert.pem -vDHR 0 9950 \
 		/tmp/qmail-test/tcpclient.pop3 2>$logdir/pop3d-ssl/pop3d-ssl.log
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing POP3S login %s hash=%-8s and mail retrieval (%s) succeeded [%f sec]\n" "$1" "$hash" "$str" "$secs"
+		printf "  testing POP3S login %s hash=%-8s and mail retrieval (%s) succeeded [%.4f sec]\n" "$1" "$hash" "$str" "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		delete_relay 2>>$logdir/pop3d/pop3d.log
@@ -1593,17 +1596,17 @@ test_pop3()
 		[ -z "$failed" ] && failed="POP3S login $hash" || failed="$failed, POP3S login $hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	swaks -S --to tuser01@$domain3 --from $1 --server ::1 --port $smtp_port >> $logdir/pop3d-ssl/pop3d-ssl.log 2>&1
 	ret1=$?
 	swaks -S --to tuser01@$domain3 --from $3 --server ::1 --port $smtp_port >> $logdir/pop3d-ssl/pop3d-ssl.log 2>&1
 	ret2=$?
 	if [ $ret1 -eq 0 -a $ret2 -ne 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		delete_relay 2>>$logdir/pop3d/pop3d.log
-		printf "  testing Open RELAY using POP3S login succeeded [%f sec]\n" "$secs"
+		printf "  testing Open RELAY using POP3S login succeeded [%.4f sec]\n" "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
@@ -1619,7 +1622,7 @@ test_pop3()
 
 test_imap()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a LOGIN -au $1 -ap "$2"
 	check_mail indimail $4 no-delete
 	(
@@ -1685,13 +1688,13 @@ test_imap()
 	) > $testdir/tcpclient.imap
 	chmod +x $testdir/tcpclient.imap
 	check_service imapd 3
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	tcpclient -a 10 -vDHR 0 1430 /tmp/qmail-test/tcpclient.imap 2>$logdir/imapd/imapd.log
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing IMAP  login %s hash=%-8s and mail retrieval (%s) succeeded [%f sec]\n" "$1" "$hash" "$str" "$secs"
+		printf "  testing IMAP  login %s hash=%-8s and mail retrieval (%s) succeeded [%.4f sec]\n" "$1" "$hash" "$str" "$secs"
 	else
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/imapd/imapd.log
@@ -1700,13 +1703,13 @@ test_imap()
 		[ -z "$failed" ] && failed="IMAP login $hash" || failed="$failed, IMAP login $hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	check_relay > /dev/null 2>>$logdir/pop3d/pop3d.log
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing record in relay table succeeded [%f sec]\n" "$secs"
+		printf "  testing record in relay table succeeded [%.4f sec]\n" "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
@@ -1718,16 +1721,16 @@ test_imap()
 		[ -z "$failed" ] && failed="check relay" || failed="$failed, check relay"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	swaks -S --to tuser01@$domain3 --from $1 --server ::1 --port $smtp_port >> $logdir/imapd/imapd.log 2>&1
 	ret1=$?
 	swaks -S --to tuser01@$domain3 --from $3 --server ::1 --port $smtp_port >> $logdir/imapd/imapd.log 2>&1
 	ret2=$?
 	if [ $ret1 -eq 0 -a $ret2 -ne 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing Open RELAY using IMAP login succeeded [%f sec]\n" "$secs"
+		printf "  testing Open RELAY using IMAP login succeeded [%.4f sec]\n" "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
@@ -1745,15 +1748,15 @@ test_imap()
 	max=$(expr 10 \* $n1 + $n2)
 	[ $max -gt 12 ] && fn=clientciphersuite || fn=clientcipherlist
 	check_service imapd-ssl 3
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	sudo $setuidgid -g qcerts $user tcpclient -a 10 -f $cntrldir/$fn  \
 		-n $certdir/clientcert.pem -vDHR 0 9930 /tmp/qmail-test/tcpclient.imap \
 		2>$logdir/pop3d-ssl/imapd-ssl.log
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing IMAPS login %s hash=%-8s and mail retrieval (%s) succeeded [%f sec]\n" "$1" "$hash" "$str" "$secs"
+		printf "  testing IMAPS login %s hash=%-8s and mail retrieval (%s) succeeded [%.4f sec]\n" "$1" "$hash" "$str" "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
@@ -1765,17 +1768,17 @@ test_imap()
 		[ -z "$failed" ] && failed="IMAPS login $hash" || failed="$failed, IMAPS login $hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	swaks -S --to tuser01@$domain3 --from $1 --server ::1 --port $smtp_port >> $logdir/imapd-ssl/imapd-ssl.log 2>&1
 	ret1=$?
 	swaks -S --to tuser01@$domain3 --from $3 --server ::1 --port $smtp_port >> $logdir/imapd-ssl/imapd-ssl.log 2>&1
 	ret2=$?
 	if [ $ret1 -eq 0 -a $ret2 -ne 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		delete_relay 2>>$logdir/pop3d/pop3d.log
-		printf "  testing Open RELAY using IMAPS login succeeded [%f sec]\n" "$secs"
+		printf "  testing Open RELAY using IMAPS login succeeded [%.4f sec]\n" "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
@@ -1851,7 +1854,7 @@ do_post_handle()
 		if [ "$1" = "notset" ] ; then
 			continue
 		fi
-		tm1=$(date +"%s.%3N")
+		tm1=$(date +"%s.%4N")
 		echo "Executing $prog $*"
 		$sudo $setuidgid indimail env - \
 			PATH=/usr/bin:/usr/sbin \
@@ -1862,16 +1865,16 @@ do_post_handle()
 			DOMAINDIR=$qmaildir \
 		$prog $* > $logdir/setup/test"$i".log
 		if [ $? -eq 0 ] ; then
-			tm2=$(date +"%s.%3N")
-			secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+			tm2=$(date +"%s.%4N")
+			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
-			printf "  testing command $prog succeeded [%f sec]\n" "$secs"
+			printf "  testing command $prog succeeded [%.4f sec]\n" "$secs"
 			id=$(grep MYUID $logdir/setup/test"$i".log | grep MYUID | cut -d= -f2)
 			if [ $id -eq $uid ] ; then
-				tm2=$(date +"%s.%3N")
-				secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+				tm2=$(date +"%s.%4N")
+				secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 				tcount=$(expr $tcount + 1)
-				printf "  testing POST HANDLE for $prog succeeded [%f sec]\n" "$secs"
+				printf "  testing POST HANDLE for $prog succeeded [%.4f sec]\n" "$secs"
 			else
 				fcount=$(expr $fcount + 1)
 				if [ $prompt -eq 1 ] ; then
@@ -1960,7 +1963,7 @@ do_qmail_inject()
 
 do_valias()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	# $1 is testuser1
 	# $2 is testuser2
 	echo "Starting valias tests"
@@ -1974,22 +1977,22 @@ do_valias()
 		DOMAINDIR=$qmaildir \
 	valias -i "&$2" $1 # forward mails to testuser1 to testuser2
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing command valias insert succeeded [%f sec]\n" "$secs"
+		printf "  testing command valias insert succeeded [%.4f sec]\n" "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		printf "  testing command valias insert failed\n"
 		[ -z "$failed" ] && failed="valias insert" || failed="$failed, valias insert"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	do_qmail_inject $user $user@$HOSTNAME $1 # send email to testuser1 from $user@$HOSTNAME
 	check_mail indimail $destdir2/Maildir
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 $sleep_secs | awk '{print $2-$1-$3}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing valias forwarding succeeded [$secs sec]"
 	else
@@ -1998,7 +2001,7 @@ do_valias()
 		[ -z "$failed" ] && failed="valias forward" || failed="$failed, valias forward"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	$sudo $setuidgid indimail env - \
 		PATH=/usr/bin:/usr/sbin \
 		ASSIGNDIR=$sysconfdir/users \
@@ -2007,10 +2010,10 @@ do_valias()
 		DOMAINDIR=$qmaildir \
 	valias -u "&$2" -i "$maildir/" $1
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing command valias update succeeded [%f sec]\n" "$secs"
+		printf "  testing command valias update succeeded [%.4f sec]\n" "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		printf "  testing command valias update failed\n"
@@ -2018,14 +2021,14 @@ do_valias()
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 	$sudo chown -R $INUID:$INGID $maildir
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	do_qmail_inject $user $user@$HOSTNAME $1
 	sleep $sleep_int
 	$sudo chown -R $MYUID:$MYUID $maildir
 	check_mail $user $maildir
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 $sleep_int $sleep_secs| awk '{print $2-$1-$3-$4}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 $sleep_int $sleep_secs| awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing valias maildir delivery succeeded [$secs sec]"
 	else
@@ -2035,7 +2038,7 @@ do_valias()
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	$sudo $setuidgid indimail env - \
 		PATH=/usr/bin:/usr/sbin \
 		ASSIGNDIR=$sysconfdir/users \
@@ -2044,10 +2047,10 @@ do_valias()
 		DOMAINDIR=$qmaildir \
 	valias -d "&$2" $1
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing command valias delete succeeded [%f sec]\n" "$secs"
+		printf "  testing command valias delete succeeded [%.4f sec]\n" "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		printf "  testing command valias delete failed\n"
@@ -2058,7 +2061,7 @@ do_valias()
 
 do_pwdlookup()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	enc_pass1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -p $1 | awk '{print $3}')
 	t=$(echo $1|cut -d@ -f1)
 	mkdir -p $testdir/pwdlookup $logdir/pwdlookup
@@ -2070,10 +2073,10 @@ do_pwdlookup()
 	ret=$?
 	kill $(cat $testdir/pwdlookup/nssd.pid)
 	if [ $ret -eq 0 -a "$t:$enc_pass1" = "$enc_pass2" ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1-1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1-1)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing pwdlookup succeeded [%f sec]\n" "$secs"
+		printf "  testing pwdlookup succeeded [%.4f sec]\n" "$secs"
 	else
 		fcount=$(expr $fcount + 1)
 		printf "  testing pwdlookup failed\n"
@@ -2116,14 +2119,14 @@ do_cleanup()
 	$sudo /bin/rm  -f $testdir/tcpclient.imap $testdir/tcpclient.pop3 \
 		$testdir/tcpclient.smtp $testdir/post_handle
 	$sudo /bin/rm -rf $sysconfdir/users
-	/bin/rm -f $sysconfdir/nssd.conf
+	#/bin/rm -f $sysconfdir/nssd.conf
 	$sudo /bin/rm -rf $qmaildir/domains
 	$sudo /bin/rm -rf $testdir/mail
 }
 
 do_autoresponder()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	echo "Starting Autoresponder test"
 	destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $1 | awk '{print $3}')
 	destdir2=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $2 | awk '{print $3}')
@@ -2167,8 +2170,8 @@ do_autoresponder()
 	fi
 	subject=$(cat $testdir/subject.tmp)
 	if [ "$subject" = "Subject: Autoreply: Re: $subj" ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 $sleep_secs| awk '{print $2-$1-$3}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 $sleep_secs| awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing autoresponder succeeded [$secs sec]"
 	else
@@ -2374,7 +2377,7 @@ do_scram_user_tests()
 
 do_vfilter()
 {
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	echo "Starting VFILTER tests"
 	$sudo env - \
 		PATH=/bin:/usr/bin:/usr/sbin \
@@ -2383,8 +2386,8 @@ do_vfilter()
 		CONTROLDIR=$cntrldir \
 	vmoddomain -f 1 -h bounce-no-mailbox $domain1 > $logdir/setup/vmoddomain.log
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vmoddomain set vfilter succeeded [$secs sec]"
 	else
@@ -2409,7 +2412,7 @@ do_vfilter()
 	for i in "Equals" "Contains" "Does not contain" "Starts with" "Ends with" \
 		"My id not in To, CC, Bcc" "Numerical Logical Expression" "RegExp"
 	do
-		tm1=$(date +"%s.%3N")
+		tm1=$(date +"%s.%4N")
 		sudo /bin/rm -rf $destdir1/Maildir/.Quarantine
 		# Test delivery to folder after matching folder
 		case $i in
@@ -2456,8 +2459,8 @@ do_vfilter()
 		esac
 		check_mail indimail $destdir2/Maildir/.Quarantine
 		if [ $? -eq 0 ] ; then
-			tm2=$(date +"%s.%3N")
-			secs=$(echo $tm1 $tm2 $sleep_secs | awk '{print $2-$1-$3}')
+			tm2=$(date +"%s.%4N")
+			secs=$(echo $tm1 $tm2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 			tcount=$(expr $tcount + 1)
 			echo "  testing vfilter delivery to matched folder comparision=$i succeeded [$secs sec]"
 		else
@@ -2477,14 +2480,14 @@ do_vfilter()
 
 	# bounce to sender test
 	#    1               - Bounce to sender
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	run_vcfilter vcfilter -i -t "Test bounce" -c "Equals" -k "Test Header" -f /NoDeliver -b 1 -h "X-Header" $testuser2
 	do_qmail_inject $user $testuser1 $testuser2 "Testing Vfilter" "X-Header: Test Header"
 	run_vcfilter vcfilter -d 1 $testuser2
 	check_mail indimail $destdir1/Maildir
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing vfilter delivery for bounce  on match succeeded [$secs sec]"
 	else
@@ -2496,14 +2499,14 @@ do_vfilter()
 
 	# forward to another id test
 	#    2'&user@domain' - Forward to another id
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	run_vcfilter vcfilter -i -t "Test bounce" -c "Equals" -k "Test Header" -f /NoDeliver -b "2&$testuser1" -h "X-Header" $testuser2
 	do_qmail_inject $user $testuser1 $testuser2 "Testing Vfilter" "X-Header: Test Header"
 	run_vcfilter vcfilter -d 1 $testuser2
 	check_mail indimail $destdir1/Maildir
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing vfilter delivery for forward on match succeeded [$secs sec]"
 	else
@@ -2513,7 +2516,7 @@ do_vfilter()
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	# feed to another program test
 	#    2'|program'     - Feed mail to another program
 	(
@@ -2526,8 +2529,8 @@ do_vfilter()
 	run_vcfilter vcfilter -d 1 $testuser2
 	check_mail indimail $destdir1/Maildir
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		/bin/rm -rf $testdir/forwarder
 		tcount=$(expr $tcount + 1)
 		echo "  testing vfilter delivery for feed program on match succeeded [$secs sec]"
@@ -2539,7 +2542,7 @@ do_vfilter()
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	# forward to another id and bounce test
 	#    3'&user@domain' - Forward to another id and Bounce
 	destdir3=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser3 | awk '{print $3}')
@@ -2558,8 +2561,8 @@ do_vfilter()
 		echo failed to bounce to $testuser1
 	fi
 	if [ $ret1 -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing vfilter delivery for forward and bounce on match succeeded [$secs sec]"
 	else
@@ -2570,7 +2573,7 @@ do_vfilter()
 	fi
 
 
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	# feed to another program and bounce test
 	#    3'|program'     - Feed mail to another program and Bounce
 	(
@@ -2593,8 +2596,8 @@ do_vfilter()
 		echo failed to bounce to $testuser1
 	fi
 	if [ $ret1 -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		/bin/rm -rf $testdir/forwarder
 		tcount=$(expr $tcount + 1)
 		echo "  testing vfilter delivery for feed program and bounce on match succeeded [$secs sec]"
@@ -2606,7 +2609,7 @@ do_vfilter()
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	$sudo env - \
 		PATH=/bin:/usr/bin:/usr/sbin \
 		ASSIGNDIR=$sysconfdir/users \
@@ -2614,8 +2617,8 @@ do_vfilter()
 		CONTROLDIR=$cntrldir \
 	vmoddomain -f 0 -h bounce-no-mailbox $domain1 > $logdir/setup/vmoddomain.log
 	if [ $? -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing command vmoddomain unset vfilter succeeded [$secs sec]"
 	else
@@ -2690,7 +2693,7 @@ test_recipients()
 {
 	echo "Starting CHECKRECIPIENT tests"
 	fromuser=$user@$HOSTNAME
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	echo 1 > $servicedir/smtpd/variables/CHECKRECIPIENT
 	mkdir -p $logdir/tcpclient
 	svc -r $servicedir/smtpd
@@ -2702,13 +2705,13 @@ test_recipients()
 	tcpclient -vDHR 0 $smtp_port $testdir/tcpclient.smtp > $logdir/tcpclient/tcpclient.log 2>&1
 	ret1=$?
 	if [ $ret1 -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 $sleep_int | awk '{print $2-$1-$3}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing recipient extension (positive match) succeeded [$secs sec]"
 	else
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 $sleep_int | awk '{print $2-$1-$3}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/tcpclient/tcpclient.log
@@ -2719,7 +2722,7 @@ test_recipients()
 	fi
 
 	# Pass2: This should fail
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	create_tcpclient_smtp $nouser
 	tcpclient -vDHR 0 $smtp_port $testdir/tcpclient.smtp > $logdir/tcpclient/tcpclient.log 2>&1
 	ret2=$?
@@ -2731,13 +2734,13 @@ test_recipients()
 		ret3=1
 	fi
 	if [ $ret2 -eq 1 -a $ret3 -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1-5}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1-5)}')
 		tcount=$(expr $tcount + 1)
 		echo "  testing recipient extension (negative match) succeeded [$secs sec]"
 	else
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1-5}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1-5)}')
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/tcpclient/tcpclient.log
@@ -2751,7 +2754,7 @@ test_recipients()
 test_smtp_chk_sender()
 {
 	echo "Starting CHECKSENDER tests"
-	tm1=$(date +"%s.%3N")
+	tm1=$(date +"%s.%4N")
 	echo 0 > $servicedir/smtpd/variables/CHECKSENDER
 	sudo svc -r $servicedir/smtpd
 	sleep $sleep_int
@@ -2784,6 +2787,7 @@ test_smtp_chk_sender()
 		--port $smtp_port --a LOGIN -au $testuser1 -ap "$password1"
 	check_mail $user $maildir
 	ret4=$?
+	s2=$sleep_secs
 
 	# fourth: This should be denied
 	swaks -S --to $testuser1 --from $testuser1 --server localhost \
@@ -2798,13 +2802,13 @@ test_smtp_chk_sender()
 		ret6=1
 	fi
 	if [ $ret1 -eq 0 -a $ret2 -ne 0 -a $ret3 -eq 0 -a $ret4 -eq 0 -a $ret5 -ne 0 -a $ret6 -eq 0 ] ; then
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 $sleep_secs $sleep_int | awk '{print $2-$1-(2*$3)-$4}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 $s1 $s2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4-$5)}')
 		tcount=$(expr $tcount + 4)
 		echo "  testing mail using SMTP with CHECKSENDER succeeded [$secs sec]"
 	else
-		tm2=$(date +"%s.%3N")
-		secs=$(echo $tm1 $tm2 | awk '{print $2-$1-5}')
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 $s1 $s2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4-$5)}')
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
 			(
@@ -2844,6 +2848,7 @@ display_tests()
 	echo "  equals, contains, does not contain, starts with, ends with, numerical expression, regexp"
 	echo "  my id not in to, cc, bcc"
 	echo "test CHECKRECIPIENT"
+	echo "test CHECKSENDER"
 	echo "test autoesponder"
 	echo "test valias by creating a valias forward and sending mail to it"
 	echo "test setting inlookup in debug mode"
@@ -2996,6 +3001,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.11  2023-09-29 13:56:26+05:30  Cprogrammer
+# updated decimal digits for times to 4 places
+#
 # Revision 1.10  2023-09-29 02:19:04+05:30  Cprogrammer
 # added test times
 # added CHECKRECIPIENT, CHECKSENDER
