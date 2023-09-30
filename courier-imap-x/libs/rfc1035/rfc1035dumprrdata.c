@@ -3,6 +3,7 @@
 ** See COPYING for distribution information.
 */
 
+#define _POSIX_C_SOURCE 200112L
 #include	"rfc1035.h"
 #include	"rfc822/encode.h"
 #include	<string.h>

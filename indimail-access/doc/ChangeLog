@@ -36,6 +36,9 @@ Release 1.1.1-1.1 Start 01/03/2021 End XX/XX/XXXX
 - 08/09/2023 - indimail-3.4.5
 - 11/09/2023
 55. added courierlogins script to show all pop3/imap logins
+- 11/09/2023
+56. courier-imap-x/libs/rfc1035/rfc1035dumprrdata.c: #define _POSIX_C_SOURCE 200112L
+    for gmtime_r
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail-access@indimail.org> 1.1.0-1.1%{?dist}
 Release 1.1.0-1.1 Start 01/03/2021 End 08/09/2022
