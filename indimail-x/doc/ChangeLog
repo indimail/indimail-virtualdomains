@@ -11,6 +11,8 @@ Release @version@-@release@ Start XX/XX/XXXX End --/--/----
 03. qmailmrtg.c: removed leading white space to correct current concurrency
 - 22/09/2023
 04. ilocal_upgrade: remove MYSQL_OPT_RECONNECT for mysql version > 8.0.34
+- 30/09/2023
+05. parseAddress.c: fixed verbosity
 
 * Fri Sep 08 2023 12:47:55 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.5-1.1%{?dist}
 Release 3.4.5-1.1 Start 25/04/2023 End 08/09/2023

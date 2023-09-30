@@ -1,5 +1,8 @@
 /*-
  * $Log: parseAddress.c,v $
+ * Revision 1.5  2023-09-30 22:38:13+05:30  Cprogrammer
+ * fixed verbosity
+ *
  * Revision 1.4  2023-08-31 22:36:43+05:30  Cprogrammer
  * handle address without domain component
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: parseAddress.c,v 1.4 2023-08-31 22:36:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: parseAddress.c,v 1.5 2023-09-30 22:38:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -62,12 +65,12 @@ parseAddress(struct header_t *h, stralloc *addr_buf)
 	for (a = g->members; a->next; a = a->next) {
 		if (a->next->user && a->next->domain && *(a->next->domain)) {
 			if (verbose) {
-				if (a->next->name)
+				if (a->next->name) {
 					subprintfe(subfdout, "parseAddress", "  (%s) { [%s] @ [%s] }\n",
 							a->next->name ? a->next->name : "",
 							a->next->user ? a->next->user : "N/A",
 							a->next->domain ? a->next->domain : "N/A");
-				else
+				} else
 					subprintfe(subfdout, "parseAddress", "  { [%s] @ [%s] }\n",
 							a->next->user ? a->next->user : "N/A",
 							a->next->domain ? a->next->domain : "N/A");
@@ -89,14 +92,16 @@ parseAddress(struct header_t *h, stralloc *addr_buf)
 			}
 		} else /*- no domain */
 		if (a->next->user) {
-			if (a->next->name)
-				subprintfe(subfdout, "parseAddress", "  (%s) { [%s] @ [null] }\n",
-						a->next->name ? a->next->name : "",
-						a->next->user ? a->next->user : "N/A");
-			else
-				subprintfe(subfdout, "parseAddress", "  { [%s] @ [null] }\n",
-						a->next->user ? a->next->user : "N/A");
-			flush("parseAddress");
+			if (verbose) {
+				if (a->next->name) {
+					subprintfe(subfdout, "parseAddress", "  (%s) { [%s] @ [null] }\n",
+							a->next->name ? a->next->name : "",
+							a->next->user ? a->next->user : "N/A");
+				} else
+					subprintfe(subfdout, "parseAddress", "  { [%s] @ [null] }\n",
+							a->next->user ? a->next->user : "N/A");
+				flush("parseAddress");
+			}
 			if (!stralloc_copys(addr_buf, a->next->user) ||
 					!stralloc_0(addr_buf))
 				die_nomem();
