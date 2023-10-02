@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.12 2023-09-29 19:38:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.13 2023-09-30 20:56:53+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -2122,6 +2122,7 @@ do_cleanup()
 	#/bin/rm -f $sysconfdir/nssd.conf
 	$sudo /bin/rm -rf $qmaildir/domains
 	$sudo /bin/rm -rf $testdir/mail
+	$sudo /bin/rm -f $testdir/subject.tmp
 }
 
 do_autoresponder()
@@ -3005,6 +3006,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.13  2023-09-30 20:56:53+05:30  Cprogrammer
+# clear temp file
+#
 # Revision 1.12  2023-09-29 19:38:37+05:30  Cprogrammer
 # formated display for time taken to be displayed in the same column for all tests
 #
