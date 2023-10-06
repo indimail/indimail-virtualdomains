@@ -1,6 +1,85 @@
 <!-- # vim: wrap
 -->
+Table of Contents
+=================
+
+* [IndiMail Frequently Answered Questions](#indimail-frequently-answered-questions)
+   * [Intro](#intro)
+   * [How can I set one virtual domain to be the primary domain for the machine? We don't want to have any /etc/passwd users.](#how-can-i-set-one-virtual-domain-to-be-the-primary-domain-for-the-machine-we-dont-want-to-have-any-etcpasswd-users)
+   * [How do I  pick up my virtual domain email? Virtual domain users need to use the following format for their user name when popping in:](#how-do-i--pick-up-my-virtual-domain-email-virtual-domain-users-need-to-use-the-following-format-for-their-user-name-when-popping-in)
+   * [How do I forward all mail that doesn't match any users or .qmail files for a particular domain?](#how-do-i-forward-all-mail-that-doesnt-match-any-users-or-qmail-files-for-a-particular-domain)
+   * [How do I bounce all mail that doesn't match any users or .qmail files for a particular domain?](#how-do-i-bounce-all-mail-that-doesnt-match-any-users-or-qmail-files-for-a-particular-domain)
+   * [I don't want to bounce emails for non existent users. Instead I want to delete them, how?](#i-dont-want-to-bounce-emails-for-non-existent-users-instead-i-want-to-delete-them-how)
+   * [How do hard quota's for users work? How do I set a default quota for new user creation](#how-do-hard-quotas-for-users-work-how-do-i-set-a-default-quota-for-new-user-creation)
+   * [I want to use a different file name than /etc/indimail/tcp/tcp.smtp for my static IPs for permanent relay.](#i-want-to-use-a-different-file-name-than-etcindimailtcptcpsmtp-for-my-static-ips-for-permanent-relay)
+   * [How can we use an IP address per domain, so that users don't need to authenticate with user%domain or user@domain,they just want to use "user"?](#how-can-we-use-an-ip-address-per-domain-so-that-users-dont-need-to-authenticate-with-userdomain-or-userdomainthey-just-want-to-use-user)
+   * [How do I alias a new virtual domain to a current virtualdomain?](#how-do-i-alias-a-new-virtual-domain-to-a-current-virtualdomain)
+   * [How do I post a email to all users of a virtualdomain or a set of domains?](#how-do-i-post-a-email-to-all-users-of-a-virtualdomain-or-a-set-of-domains)
+   * [How do I setup IndiMail to talk to MySQL](#how-do-i-setup-indimail-to-talk-to-mysql)
+   * [I want to upgrade IndiMail, what do I need to worry about?](#i-want-to-upgrade-indimail-what-do-i-need-to-worry-about)
+   * [How do I log when people authenticate with pop/imap?](#how-do-i-log-when-people-authenticate-with-popimap)
+   * [How can I uninstall IndiMail?](#how-can-i-uninstall-indimail)
+   * [I get errors about not finding a .so library, how to fix?](#i-get-errors-about-not-finding-a-so-library-how-to-fix)
+   * [What is the relationship between /etc/indimail/tcp/open-smtp /etc/indimail/tcp/tcp.smtp and /etc/indimail/tcp/tcp.smtp.cdb and how do they work qmail-smtpd?](#what-is-the-relationship-between-etcindimailtcpopen-smtp-etcindimailtcptcpsmtp-and-etcindimailtcptcpsmtpcdb-and-how-do-they-work-qmail-smtpd)
+   * [I want to have IndiMail access mysql as indimail and not root. What sql commands to I run?](#i-want-to-have-indimail-access-mysql-as-indimail-and-not-root-what-sql-commands-to-i-run)
+   * [I have changed my IP address on a clustered setup. What gets affected](#i-have-changed-my-ip-address-on-a-clustered-setup-what-gets-affected)
+   * [How to put your custom filters before queuing mail](#how-to-put-your-custom-filters-before-queuing-mail)
+   * [I have an atrn domain. I want to set quota while delivering](#i-have-an-atrn-domain-i-want-to-set-quota-while-delivering)
+   * [I have an atrn domain called etrn.dom. My users are split across multiple servers. How do I distribute mails for my users according to the server on which they belong?](#i-have-an-atrn-domain-called-etrndom-my-users-are-split-across-multiple-servers-how-do-i-distribute-mails-for-my-users-according-to-the-server-on-which-they-belong)
+   * [How do I setup stupid disclaimers](#how-do-i-setup-stupid-disclaimers)
+   * [How do i delete mails lying in a queue having a certain pattern. Can I use regex](#how-do-i-delete-mails-lying-in-a-queue-having-a-certain-pattern-can-i-use-regex)
+   * [I have been hit by virus. My virus scanner is not able to handle the load. What should I do?](#i-have-been-hit-by-virus-my-virus-scanner-is-not-able-to-handle-the-load-what-should-i-do)
+   * [How do I control access to SMTP for specific domains from specific or set of IP addresses](#how-do-i-control-access-to-smtp-for-specific-domains-from-specific-or-set-of-ip-addresses)
+   * [How do I restrict and control mail transactions between senders and recipients](#how-do-i-restrict-and-control-mail-transactions-between-senders-and-recipients)
+   * [I want to run a program every time post imap/pop3 authentication for every user.](#i-want-to-run-a-program-every-time-post-imappop3-authentication-for-every-user)
+   * [I want to run a program just once in a lifetime post imap/pop3 authentication for every user.](#i-want-to-run-a-program-just-once-in-a-lifetime-post-imappop3-authentication-for-every-user)
+   * [How do I have a wildcard smtp route?](#how-do-i-have-a-wildcard-smtp-route)
+   * [How do I use postfix with IndiMail?](#how-do-i-use-postfix-with-indimail)
+   * [Controlling the appearance of outgoing messages (using qmail-inject/sendmail)](#controlling-the-appearance-of-outgoing-messages-using-qmail-injectsendmail)
+   * [Routing outgoing messages](#routing-outgoing-messages)
+   * [Routing incoming messages by host](#routing-incoming-messages-by-host)
+   * [Routing incoming messages by user](#routing-incoming-messages-by-user)
+   * [How do I use procmail with qmail?](#how-do-i-use-procmail-with-qmail)
+   * [Setting up servers](#setting-up-servers)
+   * [How do I fix up messages from broken SMTP clients?](#how-do-i-fix-up-messages-from-broken-smtp-clients)
+   * [How do I set up qmail-qmqpd? I'd like to allow fast queueing of outgoing mail from authorized clients.](#how-do-i-set-up-qmail-qmqpd-id-like-to-allow-fast-queueing-of-outgoing-mail-from-authorized-clients)
+   * [How do I set up closed user group mailing](#how-do-i-set-up-closed-user-group-mailing)
+   * [How do I reject mails from open relays](#how-do-i-reject-mails-from-open-relays)
+   * [How do I use a MDA different from vdelivermail](#how-do-i-use-a-mda-different-from-vdelivermail)
+   * [How do I implement an efficient virus scanner using clamav](#how-do-i-implement-an-efficient-virus-scanner-using-clamav)
+   * [How do I setup SSL encryption for SMTP, IMAP, POP3](#how-do-i-setup-ssl-encryption-for-smtp-imap-pop3)
+   * [Configuring MUAs to work with qmail](#configuring-muas-to-work-with-qmail)
+   * [Managing the mail system](#managing-the-mail-system)
+   * [How do I organize a big network? I have a lot of machines, and I don't know where to start.](#how-do-i-organize-a-big-network-i-have-a-lot-of-machines-and-i-dont-know-where-to-start)
+   * [How do I back up and restore the queue disk?](#how-do-i-back-up-and-restore-the-queue-disk)
+   * [How do i immediately schedule messages](#how-do-i-immediately-schedule-messages)
+   * [Is it safe to simply delete old file, or is there a cleaner way?](#is-it-safe-to-simply-delete-old-file-or-is-there-a-cleaner-way)
+   * [How to have a different per-IP-concurrency for some hosts.](#how-to-have-a-different-per-ip-concurrency-for-some-hosts)
+   * [Miscellany](#miscellany)
+   * [How do i test vchkpass, systpass or any other checkpassword implementation for authenticated SMTP](#how-do-i-test-vchkpass-systpass-or-any-other-checkpassword-implementation-for-authenticated-smtp)
+   * [The entire world uses crazy attachments. Any idea on how to block them](#the-entire-world-uses-crazy-attachments-any-idea-on-how-to-block-them)
+   * [How to I prevent spoofing of my domain in mails.](#how-to-i-prevent-spoofing-of-my-domain-in-mails)
+   * [qmail doesn't deliver mail to superusers](#qmail-doesnt-deliver-mail-to-superusers)
+   * [qmail doesn't deliver mail to users who don't own their home directory](#qmail-doesnt-deliver-mail-to-users-who-dont-own-their-home-directory)
+   * [qmail doesn't deliver mail to users whose usernames contain uppercase letters](#qmail-doesnt-deliver-mail-to-users-whose-usernames-contain-uppercase-letters)
+   * [qmail replaces dot(.) in extension addresses with colons(:)](#qmail-replaces-dot-in-extension-addresses-with-colons)
+   * [qmail converts uppercase characters in extension addresses to lowercase](#qmail-converts-uppercase-characters-in-extension-addresses-to-lowercase)
+   * [qmail doesn't use /etc/hosts](#qmail-doesnt-use-etchosts)
+   * [qmail doesn't generate deferral notices](#qmail-doesnt-generate-deferral-notices)
+   * [qmail is slow if queue/lock/trigger is gone/has the wrong permissions/is a regular file](#qmail-is-slow-if-queuelocktrigger-is-gonehas-the-wrong-permissionsis-a-regular-file)
+   * [DNS or IDENT lookups can make SMTP slow](#dns-or-ident-lookups-can-make-smtp-slow)
+   * [Carriage Return/Linefeed (CRLF) line breaks don't work](#carriage-returnlinefeed-crlf-line-breaks-dont-work)
+   * [qmail-send or tcpserver stop working if logs back up](#qmail-send-or-tcpserver-stop-working-if-logs-back-up)
+   * [qmail-inject sets From field to anonymous if USER and LOGNAME aren't set](#qmail-inject-sets-from-field-to-anonymous-if-user-and-logname-arent-set)
+   * [How do i disable qmail from adding any headers related to my host when it relays.](#how-do-i-disable-qmail-from-adding-any-headers-related-to-my-host-when-it-relays)
+   * [Is there a mailing list available for IndiMail package?](#is-there-a-mailing-list-available-for-indimail-package)
+   * [What should I do if I have trouble with IndiMail](#what-should-i-do-if-i-have-trouble-with-indimail)
+
+<!-- Created by https://github.com/ekalinin/github-markdown-toc -->
+
 # IndiMail Frequently Answered Questions
+
+Last updated on Fri Oct  6 07:27:53 PM IST 2023
 
 ## Intro
 
@@ -16,15 +95,19 @@ Create the default domain with
 
 Setup your imap/pop3 services with DEFAULT\_DOMAIN=<u>vdomain</u>
 
-    $ sudo sh -c "echo vdomain > /service/qmail-imapd-ssl.993/variables/DEFAULT_DOMAIN"
-    $ sudo sh -c "echo vdomain > /service/qmail-imapd.143/variables/DEFAULT_DOMAIN"
-    $ sudo sh -c "echo vdomain > /service/qmail-pop3d-ssl.995/variables/DEFAULT_DOMAIN"
-    $ sudo sh -c "echo vdomain > /service/qmail-pop3d.110/variables/DEFAULT_DOMAIN"
+```
+$ sudo sh -c "echo vdomain > /service/qmail-imapd-ssl.993/variables/DEFAULT_DOMAIN"
+$ sudo sh -c "echo vdomain > /service/qmail-imapd.143/variables/DEFAULT_DOMAIN"
+$ sudo sh -c "echo vdomain > /service/qmail-pop3d-ssl.995/variables/DEFAULT_DOMAIN"
+$ sudo sh -c "echo vdomain > /service/qmail-pop3d.110/variables/DEFAULT_DOMAIN"
+```
 
 Then restart the services for the variable to take effect
 
-    $ sudo svc -r /service/qmail-imapd-ssl.993 /service/qmail-imapd.143 \
-        /service/qmail-pop3d-995 /service/qmail-pop3d.110
+```
+$ sudo svc -r /service/qmail-imapd-ssl.993 /service/qmail-imapd.143 \
+    /service/qmail-pop3d-995 /service/qmail-pop3d.110
+```
 
 If you have your own scripts to start these services, then you need to set the DEFAULT\_DOMIAN environment variable in your script.
 
@@ -138,8 +221,10 @@ However, none of the users or domain get touched. So to upgrade IndiMail, you ju
 
 If you want to backup the programs, libraries and include files then run the svctool program with the --backup option. This will backup your configuration, service configuration and also create a MySQL export file.
 
-    $ sudo svctool --backup=/home/mail/backup --mysqlPrefix=/usr \
-        --servicedir=/service
+```
+$ sudo svctool --backup=/home/mail/backup --mysqlPrefix=/usr \
+    --servicedir=/service
+```
 
 [svctool](https://github.com/mbhangui/indimail-mta/wiki/svctool.8) is the main configuration tool for IndiMail.
 
@@ -151,10 +236,12 @@ Make sure you include this configuration option when building IndiMail
 
 You can turn of auth logging by setting <b>NOLASTAUTHLOGGING</b>. e.g.
 
-    $ sudo sh -c "echo 1 > /service/qmail-imapd-ssl.993/variables/NOLASTAUTHLOGGING"
-    $ sudo sh -c "echo 1 > /service/qmail-imapd.143/variables/NOLASTAUTHLOGGING"
-    $ sudo sh -c "echo 1 > /service/qmail-pop3d-ssl.995/variables/NOLASTAUTHLOGGING"
-    $ sudo sh -c "echo 1 > /service/qmail-pop3d.110/variables/NOLASTAUTHLOGGING"
+```
+$ sudo sh -c "echo 1 > /service/qmail-imapd-ssl.993/variables/NOLASTAUTHLOGGING"
+$ sudo sh -c "echo 1 > /service/qmail-imapd.143/variables/NOLASTAUTHLOGGING"
+$ sudo sh -c "echo 1 > /service/qmail-pop3d-ssl.995/variables/NOLASTAUTHLOGGING"
+$ sudo sh -c "echo 1 > /service/qmail-pop3d.110/variables/NOLASTAUTHLOGGING"
+```
 
 Restart the above services using the `svc -r` command. If you have your own scripts to start these services, then you need to set the NOLASTAUTHLOGGING environment variable in your script.
 
@@ -172,15 +259,19 @@ For source installations
 
 On Gnu/Linux type systems as root: This will completely wipe your data and some configuration.
 
-    $ sudo userdel -r indimail
-    $ sudo groupdel indimail
+```
+$ sudo userdel -r indimail
+$ sudo groupdel indimail
+```
 
 To completly clean your indimail installation of virtual domains
 
-    $ sudo rm -rf /etc/indimail /usr/libexec/indimail /usr/share/indimail
-    $ sudo rm -rf /var/indimail/domains/*
-    $ sudo cp /etc/indimail/control/locals /etc/indimail/control/rcpthosts
-    $ sudo rm -rf /etc/indimail/users/*
+```
+$ sudo rm -rf /etc/indimail /usr/libexec/indimail /usr/share/indimail
+$ sudo rm -rf /var/indimail/domains/*
+$ sudo cp /etc/indimail/control/locals /etc/indimail/control/rcpthosts
+$ sudo rm -rf /etc/indimail/users/*
+```
 
 If enable roaming users and your tcp.smtp file was not in the /etc/indimail/tcp directory, you will need to remove the open-smtp* files, where ever they are. Remove shared library libindimail.so* from /usr/lib or /usr/lib64 and remove /etc/indimail/control/libindimail /etc/indimail/control/libmysql
 
@@ -228,9 +319,11 @@ Read this chapter on [filters](https://github.com/mbhangui/indimail-mta/wiki/0-I
 
 ## I have an atrn domain. I want to set quota while delivering
 
-    $ sudo vadddomain -t etrn.dom
-    $ sudo vadduser postmaster@etrn.dom pass -q quota_in_bytes
-    $ sudo vatrn -i etrn.dom postmaster@etrn.dom
+```
+$ sudo vadddomain -t etrn.dom
+$ sudo vadduser postmaster@etrn.dom pass -q quota_in_bytes
+$ sudo vatrn -i etrn.dom postmaster@etrn.dom
+```
 
 Have the following entry in .qmail-default
 
@@ -242,41 +335,49 @@ where <u>homedir</u> is the home directory created by vadduser for the user post
 
 1. Create a virtual domain (e.g. mysme.com). This domain will just act as a container domain for atrn MAPS.
 
-    $ sudo vadddomain -t mysme.com
+```
+$ sudo vadddomain -t mysme.com
+```
 
 2. Create artificial ATRN domains for each server with ATRN access.
 
-    $ vadddomain -t chn.mysme.com
-    $ vadddomain -t mum.mysme.com
+```
+$ vadddomain -t chn.mysme.com
+$ vadddomain -t mum.mysme.com
+```
 
-    NOTE: If you want to set quota, edit the file /var/indimail/autoturn/chn.mysme.com/Maildir/maildirsize
+NOTE: If you want to set quota, edit the file /var/indimail/autoturn/chn.mysme.com/Maildir/maildirsize
 
 3. Create rule for each user's mail to get distributed to the subdomain Maildir
 
-    $ valias -i /var/indimail/autoturn/chn.mysme.com/Maildir/ chn_user1@mysme.com
-    $ valias -i /var/indimail/autoturn/mum.mysme.com/Maildir/ mum_user1@mysme.com
-    $ valias -i /var/indimail/autoturn/mum.mysme.com/Maildir/ mum_user2@mysme.com
-
-    See the documentation for [valias](https://github.com/mbhangui/indimail-mta/wiki/valias.1) for all options.
+```
+$ valias -i /var/indimail/autoturn/chn.mysme.com/Maildir/ chn_user1@mysme.com
+$ valias -i /var/indimail/autoturn/mum.mysme.com/Maildir/ mum_user1@mysme.com
+$ valias -i /var/indimail/autoturn/mum.mysme.com/Maildir/ mum_user2@mysme.com
+```
+See the documentation for [valias](https://github.com/mbhangui/indimail-mta/wiki/valias.1) for all options.
 
 4. Create the .qvirtual file in each of these subdomains to etrn.dom
 
-    echo mysme.com > /var/indimail/autoturn/chn.mysme.com/.qvirtual
-    echo mysme.com > /var/indimail/autoturn/mum.mysme.com/.qvirtual
+```
+echo mysme.com > /var/indimail/autoturn/chn.mysme.com/.qvirtual
+echo mysme.com > /var/indimail/autoturn/mum.mysme.com/.qvirtual
+```
 
 5. Create atrn maps (users having access to the above atrn domains)
 
-    $ vadduser master_chn@mysme.com xxxxxxxx # For auth and atrn
-    $ vatrn -i chn.mysme.com master_chn@mysme.com
+```
+$ vadduser master_chn@mysme.com xxxxxxxx # For auth and atrn
+$ vatrn -i chn.mysme.com master_chn@mysme.com
+$ vadduser master_mum@mysme.com xxxxxxxx
+$ vatrn -i mum.mysme.com master_mum@mysme.com
+```
 
-    $ vadduser master_mum@mysme.com xxxxxxxx
-    $ vatrn -i mum.mysme.com master_mum@mysme.com
+* .qvirtual allows mails for a main domain to be distributed across multiple directories in /var/indimail/autoturn directory. i.e. if etrn.dom is the main domain and mails have been split into directories location1.etrn.dom and location2.etrn.dom specify .qvirtual having etrn.dom in /var/indimail/autoturn/location1.etrn.dom and /var/indimail/autoturn/location2.etrn.dom.
+* .qvirtual also allows mails for a domain to be delivered to any directory and the domain identified by looking up the .qvirtual file
+* xxxxxxxx is the password for the above users.
 
-    .qvirtual allows mails for a main domain to be distributed across multiple directories in /var/indimail/autoturn directory. i.e. if etrn.dom is the main domain and mails have been split into directories location1.etrn.dom and location2.etrn.dom specify .qvirtual having etrn.dom in /var/indimail/autoturn/location1.etrn.dom and /var/indimail/autoturn/location2.etrn.dom.
-    .qvirtual also allows mails for a domain to be delivered to any directory and the domain identified by looking up the .qvirtual file
-    xxxxxxxx is the password for the above users.
-
-    See the documentation on [vatrn](https://github.com/mbhangui/indimail-mta/wiki/vatrn.1) for all options.
+See the documentation on [vatrn](https://github.com/mbhangui/indimail-mta/wiki/vatrn.1) for all options.
 
 ## How do I setup stupid disclaimers
 
@@ -310,10 +411,12 @@ Read this [SMTP Access List](https://github.com/mbhangui/indimail-mta/wiki/0-Ind
 
 Define the environment variable POSTAUTH pointing to an executable which you desire to run. This can be defined in the IMAP/POP3 variables directory. e.g. to enable it for IMAPS, do the following.
 
-    $ sudo sh -c "echo "path_to_program" > /service/qmail-imapd-ssl.993/variables/POSTAUTH"
-    $ sudo sh -c "echo "path_to_program" > /service/qmail-imapd.143/variables/POSTAUTH"
-    $ sudo sh -c "echo "path_to_program" > /service/qmail-pop3d-ssl.995/variables/POSTAUTH"
-    $ sudo sh -c "echo "path_to_program" > /service/qmail-pop3d.110/variables/POSTAUTH"
+```
+$ sudo sh -c "echo "path_to_program" > /service/qmail-imapd-ssl.993/variables/POSTAUTH"
+$ sudo sh -c "echo "path_to_program" > /service/qmail-imapd.143/variables/POSTAUTH"
+$ sudo sh -c "echo "path_to_program" > /service/qmail-pop3d-ssl.995/variables/POSTAUTH"
+$ sudo sh -c "echo "path_to_program" > /service/qmail-pop3d.110/variables/POSTAUTH"
+```
 
 Restart the above services using the `svc -r` command. If you have your own scripts to start these services, then you need to set the POSTAUTH environment variable in your script.
 
@@ -337,38 +440,48 @@ IndiMail has a wrapper to vdelivermail called 'postdel' for postfix.
 
 1. Add the following two lines to main.cf
 
-    mydestination=indimail.org,satyam.net.in # domains added by vadddomain
-    local_transport=vdel
-    vdel_destination_recipient_limit=1
+```
+mydestination=indimail.org,satyam.net.in # domains added by vadddomain
+local_transport=vdel
+vdel_destination_recipient_limit=1
+```
 
 2. Add the following to master.cf
 
-    vdel     unix  -       n       n       -       100       pipe
-    flags=Fq. user=indimail argv=/usr/sbin/postdel -f -u $user -d $recipient -r $sender
+```
+vdel     unix  -       n       n       -       100       pipe
+flags=Fq. user=indimail argv=/usr/sbin/postdel -f -u $user -d $recipient -r $sender
+```
 
 
 ## Controlling the appearance of outgoing messages (using qmail-inject/sendmail)
 
-1. How do I set up host masquerading? All the users on this host, webmail1.indimail.org, are users on indimail.org. When raj sends a message to prem, the message should say ``From: raj@indimail.org'' and ``To: prem@indimail.org'', without ``webmail1'' anywhere.
+1. How do I set up host masquerading? All the users on this host, webmail1.indimail.org, are users on indimail.org. When raj sends a message to prem, the message should say `From: raj@indimail.org` and `To: prem@indimail.org`, without `webmail1` anywhere.
 
-    $ sudo sh -c "echo indimail.org > /etc/indimail/control/defaulthost"
-    $ sudo chmod 644 /etc/indimail/control/defaulthost.
+```
+$ sudo sh -c "echo indimail.org > /etc/indimail/control/defaulthost"
+$ sudo chmod 644 /etc/indimail/control/defaulthost.
+```
 
 2. How do I set up user masquerading? I'd like my own From lines to show "The Boss" <boss@indimail.org> rather than god@heaven.indimail.org.
 
 Add MAILHOST=indimail.org, MAILNAME="The Boss" and MAILUSER=boss to your environment. To override From lines supplied by your MUA, add QMAILINJECT=f to your environment.
 
-    $ echo indimail.org > ~/.defaultqueue/MAILHOST
-    $ echo boss         > ~/.defaultqueue/MAILUSER
-    $ echo "The Boss"   > ~/.defaultqueue/MAILNAME
-    $ echo f            > ~/.defaultqueue/QMAILINJECT
+```
+$ echo indimail.org > ~/.defaultqueue/MAILHOST
+$ echo boss         > ~/.defaultqueue/MAILUSER
+$ echo "The Boss"   > ~/.defaultqueue/MAILNAME
+$ echo f            > ~/.defaultqueue/QMAILINJECT
+```
 
-3. How do I set up Mail-Followup-To automatically? When I send a message to the sos@heaven.indimail.org mailing list, I'd like to include ``Mail-Followup-To: sos@heaven.indimail.org''
+3. How do I set up Mail-Followup-To automatically? When I send a message to the sos@heaven.indimail.org mailing list, I'd like to include `Mail-Followup-To: sos@heaven.indimail.org`.
 
 Add QMAILMFTFILE=$HOME/.lists to your environment, and put sos@heaven.indimail.org into ~/.lists.
 
-    $ echo $HOME/.lists > ~/.defaultqueue/QMAILMFTFILE
-    $ echo sos@heaven.indimail.org > ~/.lists
+```
+$ echo $HOME/.lists > ~/.defaultqueue/QMAILMFTFILE
+$ echo sos@heaven.indimail.org > ~/.lists
+```
 
 ## Routing outgoing messages
 
@@ -378,10 +491,19 @@ Remove indimail.org from /etc/indimail/control/locals. If qmail-send is running,
 
 2. How do I set up a null client? I'd like zippy.indimail.org to send all mail to bigbang.indimail.org
 
-    $ sudo sh -c "echo :bigbang.indimail.org > /etc/indimail/control/smtproutes"
-    $ sudo chmod 644 /etc/indimail/control/smtproutes.
+```
+$ sudo sh -c "echo :bigbang.indimail.org > /etc/indimail/control/smtproutes"
+$ sudo chmod 644 /etc/indimail/control/smtproutes.
+```
 
-Disable local delivery as in question 50.1. Turn off qmail-smtpd in /service*/qmail.smtpd*.
+Disable local delivery. Turn off SMTP
+
+```
+$ sudo touch /service/qmail-send.25/down /service/qmail-smtpd.25/down \
+    /service/qmail-smtpd.587/down /service/qmail-smtpd.465/down
+$ sudo svc -d /service/qmail-send.25/down /service/qmail-smtpd.25/down \
+    /service/qmail-smtpd.587/down /service/qmail-smtpd.465/down
+```
 
 3. How do I send outgoing mail through UUCP? I need qmail to send all outgoing mail via UUCP to my upstream UUCP site, gonzo.
 
@@ -407,15 +529,15 @@ The SMTP standard does not permit aliased hostnames, so qmail has to do a CNAME 
 
 1. How do I receive mail for another host name? I'd like our disk server, pokey.indimail.org, to receive mail addressed to indimail.org. I've set up an MX from indimail.org to pokey.indimail.org, but how do I get pokey to treat indimail.org as a name for the local host?
 
-Add indimail.org to /etc/indimail/control/locals and to /etc/indimail/control/rcpthosts. If qmail-send is running, give it a HUP(or do svc -h /service/*-send.* if qmail-send is supervised).
+	Add indimail.org to /etc/indimail/control/locals and to /etc/indimail/control/rcpthosts. If qmail-send is running, give it a HUP(or do svc -h /service/*-send.* if qmail-send is supervised).
 
 2. How do I set up a virtual domain? I'd like any mail for indimail.org, including root@indimail.org and postmaster@indimail.org and so on, to be delivered to Manny. I've set up the MX already.
 
-Answer: Put
+	Answer: Put
 
     indimail.org:manny
 
-into /etc/indimail/control/virtualdomains. Add indimail.org to /etc/indimail/control/rcpthosts. If qmail-send is running, give it a HUP (or do svc -h /service/*-send.* if qmail-send is supervised).
+	into /etc/indimail/control/virtualdomains. Add indimail.org to /etc/indimail/control/rcpthosts. If qmail-send is running, give it a HUP (or do svc -h /service/*-send.* if qmail-send is supervised).
 
 Now mail for whatever@indimail.org will be delivered locally to `manny-whatever`. Manny can set up `~manny/.qmail-default` to catch all the possible addresses, `~manny/.qmail-info` to catch info@indimail.org, etc.
 
@@ -436,37 +558,37 @@ Now Manny can set up separate .qmail-nowhere-* and everywhere-* files. He can ev
 
 1. How do I forward unrecognized usernames to another host? I'd like to set up a LUSER\_RELAY pointing at bigbang.indimail.org.
 
-Put
+	Put
 
     | forward "$LOCAL"@bigbang.indimail.org
 
-into ~alias/.qmail-default.
+	into ~alias/.qmail-default.
 
 2. How do I set up a mailing list? I'd like me-sos@my.host.name to be forwarded to a bunch of people.
 
-Put a list of addresses into ~me/.qmail-sos, one per line. Then incoming mail for me-sos will be forwarded to each of those addresses. You should also touch ~me/.qmail-sos-owner so that bounces come back to you rather than the original sender.
+	Put a list of addresses into ~me/.qmail-sos, one per line. Then incoming mail for me-sos will be forwarded to each of those addresses. You should also touch ~me/.qmail-sos-owner so that bounces come back to you rather than the original sender.
 
-Alternative: ezmlm (http://pobox.com/~djb/ezmlm.html) is a modern mailing list manager, supporting automatic subscriptions, confirmations, archives, fully automatic bounce handling (including warnings to subscribers saying which messages they've missed), and more.
+	Alternative: ezmlm (http://pobox.com/~djb/ezmlm.html) is a modern mailing list manager, supporting automatic subscriptions, confirmations, archives, fully automatic bounce handling (including warnings to subscribers saying which messages they've missed), and more.
 
 ## How do I use procmail with qmail?
 
-Put
+	Put
 
     | preline procmail
 
-into ~/.qmail. You'll have to use a full path for procmail unless procmail is in the system's startup PATH. Note that procmail will try to deliver to /var/spool/mail/$USER by default; to change this, see INSTALL.mbox.
+	into ~/.qmail. You'll have to use a full path for procmail unless procmail is in the system's startup PATH. Note that procmail will try to deliver to /var/spool/mail/$USER by default; to change this, see INSTALL.mbox.
 
 4. How do I use elm's filter with qmail?
 
-Put
+	Put
 
     | preline filter
 
-into ~/.qmail. You'll have to use a full path for filter unless filter is in the system's startup PATH.
+	into ~/.qmail. You'll have to use a full path for filter unless filter is in the system's startup PATH.
 
 5. How do I create aliases with dots? I tried setting up ~alias/.qmail-P.D.Q.Bach, but it doesn't do anything.
 
-Use .qmail-p:d:q:bach. Dots are converted to colons, and uppercase is converted to lowercase.
+	Use .qmail-p:d:q:bach. Dots are converted to colons, and uppercase is converted to lowercase.
 
 6. How do I use sendmail's .forward files with qmail?
 
@@ -478,79 +600,79 @@ Use .qmail-p:d:q:bach. Dots are converted to colons, and uppercase is converted 
 
 8. How do I make qmail defer messages during NFS or NIS outages? If ~joe suddenly disappears, I'd like mail for joe to be deferred.
 
-Build a qmail-users database, so that qmail no longer checks home directories and the password database. This takes three steps.
+	Build a qmail-users database, so that qmail no longer checks home directories and the password database. This takes three steps.
 
-First, put your complete user list (including local and NIS passwords) into /etc/indimail/users/passwd.
+	First, put your complete user list (including local and NIS passwords) into /etc/indimail/users/passwd.
 
-Second, run qmail-pw2u
+	Second, run qmail-pw2u
 
     $ sudo qmail-pw2u -h < /etc/indimail/users/passwd > /etc/indimail/users/assign
 
-Here -h means that every user must have a home directory; if you happen to run qmail-pw2u during an NFS outage, it will print an error message and stop.
+	Here -h means that every user must have a home directory; if you happen to run qmail-pw2u during an NFS outage, it will print an error message and stop.
 
-Third, run qmail-newu
+	Third, run qmail-newu
 
     $ sudo qmail-newu
 
-Make sure to rebuild the database whenever you change your user list.
+	Make sure to rebuild the database whenever you change your user list.
 
 9. How do I change which account controls an address? I set up ~alias/.qmail-www, but qmail is looking at ~www/.qmail instead.
 
-If you do
+	If you do
 
     $ sudo chown root ~www
 
-then qmail will no longer consider www to be a user; see qmail-getpw.0. For more precise control over address assignments, see qmail-users.0.
+	then qmail will no longer consider www to be a user; see qmail-getpw.0. For more precise control over address assignments, see qmail-users.0.
 
 ## Setting up servers
 
 1. How do I run qmail-smtpd under tcpserver? inetd is barfing at high loads, cutting off service for ten-minute stretches. I'd also like better connection logging.
 
-tcpserver -u 7770 -g 2108 0 smtp /usr/sbin/qmail-smtpd &
+	tcpserver -u 7770 -g 2108 0 smtp /usr/sbin/qmail-smtpd &
 
-into your system startup files. Replace 7770 and 2108 with your indimail uid, gid. Don't forget the &. The change will take effect at your next reboot.
+	into your system startup files. Replace 7770 and 2108 with your indimail uid, gid. Don't forget the &. The change will take effect at your next reboot.
 
-By default, tcpserver allows at most 40 simultaneous qmail-smtpd
+	By default, tcpserver allows at most 40 simultaneous qmail-smtpd
 processes. To raise this limit to 400, use tcpserver -c 400. To keep track of who's connecting and for how long, run (on two lines)
 
     tcpserver -v -u 7770 -g 2108 0 smtp /usr/sbin/qmail-smtpd 2>&1 | /usr/sbin/splogger smtpd 3 &
 
 2. How do I set up qmail-qmtpd?
 
-If you have tcpserver installed, set up
+	If you have tcpserver installed, set up
 
     tcpserver -u 7770 -g 2108 0 qmtp /usr/sbin/qmail-qmtpd &
 
-replacing 7770 and 2108 with the indimail uid and gid.
+	replacing 7770 and 2108 with the indimail uid and gid.
 
 3. How do I allow selected clients to use this host as a relay? I see that qmail-smtpd rejects messages to any host not listed in /etc/indimail/control/rcpthosts.
 
-Three steps. First, install tcp-wrappers, available separately, including hosts\_options. Second, change your qmail-smtpd line in inetd.conf to
+		Three steps. First, install tcp-wrappers, available separately, including hosts\_options. Second, change your qmail-smtpd line in inetd.conf to
 
     smtp stream tcp nowait qmaild /usr/local/bin/tcpd /bin/tcp-env /usr/sbin/qmail-smtpd
 
-(all on one line) and give inetd a HUP. Third, in tcpd's hosts.allow, make a line setting the environment variable RELAYCLIENT to the empty string for the selected clients:
+	(all on one line) and give inetd a HUP. Third, in tcpd's hosts.allow, make a line setting the environment variable RELAYCLIENT to the empty string for the selected clients:
 
     tcp-env: 1.2.3.4, 1.2.3.5: setenv = RELAYCLIENT
 
-Here 1.2.3.4 and 1.2.3.5 are the clients' IP addresses. qmail-smtpd ignores /etc/indimail/control/rcpthosts when RELAYCLIENT is set. (It also appends RELAYCLIENT to each envelope recipient address. See question 53.4 for an application.)
+	Here 1.2.3.4 and 1.2.3.5 are the clients' IP addresses. qmail-smtpd ignores /etc/indimail/control/rcpthosts when RELAYCLIENT is set. (It also appends RELAYCLIENT to each envelope recipient address. See question 53.4 for an application.)
 
-Alternative procedure, if you are using tcpserver: Create /etc/indimail/tcp/tcp.smtp containing
+	Alternative procedure, if you are using tcpserver: Create /etc/indimail/tcp/tcp.smtp containing
 
     1.2.3.6:allow,RELAYCLIENT=""
     127.:allow,RELAYCLIENT=""
 
-to allow clients with IP addresses 1.2.3.6 and 127.*.
+	to allow clients with IP addresses 1.2.3.6 and 127.*.
 
-After creating the above entry run tcprules by executing
+	After creating the above entry run tcprules by executing
 
     $ sudo qmailctl cdb
 
-Finally, insert
+	Finally, insert
 
     -x /etc/indimail/tcp/tcp.smtp.cdb
 
-after tcpserver in your qmail-smtpd invocation.
+	after tcpserver in your qmail-smtpd invocation.
 
 ## How do I fix up messages from broken SMTP clients?
 
@@ -591,7 +713,7 @@ Convert /etc/indimail/tcp/qmqp.tcp to /etc/indimail/tcp/qmqp.cdb:
 
 Finally, set up
 
-tcpserver -x /etc/indimail/tcp/qmqp.cdb -u 7770 -g 2108 0 628 /usr/sbin/qmail-qmqpd &
+	tcpserver -x /etc/indimail/tcp/qmqp.cdb -u 7770 -g 2108 0 628 /usr/sbin/qmail-qmqpd &
 
 replacing 7770 and 2108 with the indimail uid and gid.
 
@@ -688,45 +810,45 @@ Just run the command
 
 1. How do I make BSD mail generate a Date with the local time zone? When I send mail, I'd rather use the local time zone than GMT, since some MUAs don't know how to display Date in the receiver's time zone.
 
-Put
+	Put
 
     set sendmail=/bin/datemail
 
-into your .mailrc or your system-wide Mail.rc. Beware that BSD mail is neither secure nor reliable.
+	into your .mailrc or your system-wide Mail.rc. Beware that BSD mail is neither secure nor reliable.
 
 2. How do I make pine work with qmail?
 
-Put
+	Put
 
     sendmail-path=/usr/lib/sendmail -oem -oi -t
 
-into /usr/local/lib/pine.conf. (This will work with sendmail too.) Beware that pine is neither secure nor reliable.
+	into /usr/local/lib/pine.conf. (This will work with sendmail too.) Beware that pine is neither secure nor reliable.
 
 3. How do I make MH work with qmail?
 
-Put
+	Put
 
     postproc: /usr/mh/lib/spost
 
-into each user's .mh\_profile. (This will work with sendmail too.) Beware that MH is neither secure nor reliable.
+	into each user's .mh\_profile. (This will work with sendmail too.) Beware that MH is neither secure nor reliable.
 
 ## Managing the mail system
 
 1. How do I safely stop qmail-send? Back when we were running sendmail, it was always tricky to kill sendmail without risking the loss of current deliveries; what should I do with qmail-send?
 
-Go ahead and kill the qmail-send process. It will shut down cleanly. Wait for ``exiting'' to show up in the log. To restart qmail, do svc -t /service*/*-send.* The supervise process will kill qmail, wait for it to stop, and restart it.  Use -d instead of -t if you don't want qmail to restart automatically; to manually restart it, use -u.
+	Go ahead and kill the qmail-send process. It will shut down cleanly. Wait for ``exiting'' to show up in the log. To restart qmail, do svc -t /service*/*-send.* The supervise process will kill qmail, wait for it to stop, and restart it.  Use -d instead of -t if you don't want qmail to restart automatically; to manually restart it, use -u.
 
 2. How do I manually run the queue? I'd like qmail to try delivering all the remote messages right now.
 
-Give the qmail-daemon process an ALRM.
+	Give the qmail-daemon process an ALRM.
 
     $ sudo svc -a /service/*-send.*
 
-You may want to run qmail-tcpok first, to guarantee that qmail-remote will try all addresses. Normally, if an address fails repeatedly, qmail-remote leaves it alone for an hour.
+	You may want to run qmail-tcpok first, to guarantee that qmail-remote will try all addresses. Normally, if an address fails repeatedly, qmail-remote leaves it alone for an hour.
 
 3. How do I rejuvenate a message? Somebody broke into indimail's computer again; it's going to be down for at least another two days. I know Ramraj has been expecting an important message---in fact, I see it sitting here in /queue/queue1/mess/15/26902. It's been in the queue for six days; how can I make sure it isn't bounced tomorrow?
 
-Just touch /queue/queue1/info/15/26902. (This is the only form of queue modification that's safe while qmail is running.)
+	Just touch /queue/queue1/info/15/26902. (This is the only form of queue modification that's safe while qmail is running.)
 
 ## How do I organize a big network? I have a lot of machines, and I don't know where to start.
 
@@ -836,44 +958,44 @@ Don't forget to run tcprules after modifying the rules file.
 
 1. How do I tell qmail to do more deliveries at once? It's running only 20 parallel qmail-remote processes.
 
-Decide how many deliveries you want to allow at once. Put that number into /etc/indimail/control/concurrencyremote. Restart qmail-send as in question 55.1. If your system has resource limits, make sure you set the descriptors limit to at least double the concurrency plus 5; otherwise you'll get lots of unnecessary deferrals whenever a big burst of mail shows up. Note that qmail also imposes a compile-time concurrency limit, 120 by default; this is set in conf-spawn.
+	Decide how many deliveries you want to allow at once. Put that number into /etc/indimail/control/concurrencyremote. Restart qmail-send as in question 55.1. If your system has resource limits, make sure you set the descriptors limit to at least double the concurrency plus 5; otherwise you'll get lots of unnecessary deferrals whenever a big burst of mail shows up. Note that qmail also imposes a compile-time concurrency limit, 120 by default; this is set in conf-spawn.
 
 2. How do I keep a copy of all incoming and outgoing mail messages?
 
-Set EXTRAQUEUE environment variable to log.
+	Set EXTRAQUEUE environment variable to log.
 
     echo log > /service/qmail-send.25/variables/EXTRAQUEUE
 
-Put ./msg-log into ~alias/.qmail-log.
+	Put ./msg-log into ~alias/.qmail-log.
 
-You can also use EXTRAQUEUE to, e.g., record the Message-ID of every message: run
+	You can also use EXTRAQUEUE to, e.g., record the Message-ID of every message: run
 
     | awk '/^$/ { exit } /^[mM][eE][sS][sS][aA][gG][eE]-/ { print }'
 
-You can also forward all mails to external@domain.com
+	You can also forward all mails to external@domain.com
 
     | awk '/^$/{exit}/^X-Queue-Extra: yes$/{exit 99}'
     |(echo 'X-Qmail-Extra: yes'; cat ) |forward external@domain.com
     ./Maildir/
 
-from ~alias/.qmail-log.
+	from ~alias/.qmail-log.
 
 3. How do I switch slowly from sendmail to qmail? I'm thinking of moving the heaven.indimail.org network over to qmail, but first I'd like to give my users a chance to try out qmail without affecting current sendmail deliveries. We're using NFS.
 
-Find a host in your network, say pc.heaven.indimail.org, that isn't
+	Find a host in your network, say pc.heaven.indimail.org, that isn't
 running an SMTP server. (If addresses at pc.heaven.indimail.org are used, you should already have an MX pointing pc.heaven.indimail.org to your mail hub.)
 
-Set up a new MX record pointing lists.heaven.indimail.org to pc.heaven.indimail.org.
+	Set up a new MX record pointing lists.heaven.indimail.org to pc.heaven.indimail.org.
 
-Install qmail on pc.heaven.indimail.org. Replace pc with lists in the control files. Make the qmail man pages available on all your machines.
+	Install qmail on pc.heaven.indimail.org. Replace pc with lists in the control files. Make the qmail man pages available on all your machines.
 
-Now tell your users about qmail. A user can forward joe@heaven.indimail.org to joe@lists.heaven.indimail.org to get ~/Mailbox delivery; he can set up .qmail files; he can start running his own mailing lists @lists.heaven.indimail.org.
+	Now tell your users about qmail. A user can forward joe@heaven.indimail.org to joe@lists.heaven.indimail.org to get ~/Mailbox delivery; he can set up .qmail files; he can start running his own mailing lists @lists.heaven.indimail.org.
 
-When you're ready to turn sendmail off, you can set up pc.heaven.indimail.org as your new mail hub. Add heaven.indimail.org to /etc/indimail/control/locals, and change the heaven.indimail.org MX to point to pc.heaven.indimail.org. Make sure you leave lists.heaven.indimail.org in /etc/indimail/control/locals so that transition addresses will continue to work.
+	When you're ready to turn sendmail off, you can set up pc.heaven.indimail.org as your new mail hub. Add heaven.indimail.org to /etc/indimail/control/locals, and change the heaven.indimail.org MX to point to pc.heaven.indimail.org. Make sure you leave lists.heaven.indimail.org in /etc/indimail/control/locals so that transition addresses will continue to work.
 
 4. How do I send mails from a Maildir
 
-Learn how to use maildirsmtp. It will use the Delivered-To header for the prefix. e.g. Assuming all mails for indimail.org have been delivered to the directory /mail/tempMaildir, the following will deliver all mails to the host mx.indimail.org
+	Learn how to use maildirsmtp. It will use the Delivered-To header for the prefix. e.g. Assuming all mails for indimail.org have been delivered to the directory /mail/tempMaildir, the following will deliver all mails to the host mx.indimail.org
 
     maildirsmtp /mail/tmpMaildir indimail.org mx.indimail.org `hostname`
 
@@ -891,11 +1013,11 @@ You can set the environment variable DEBUG, PASSWD\_CACHE to change the behavior
 
 1. Using badext, badextpatterns control filename
 
-You can have extensions listed in the badext control file to block them (use badextpatterns for wildcards). Set VIRUSCHECK to one of the four values - 3,4,5 or 7
+	You can have extensions listed in the badext control file to block them (use badextpatterns for wildcards). Set VIRUSCHECK to one of the four values - 3,4,5 or 7
 
 2. Using bodycheck control file
 
-Have the following in the bodycheck control file to block 54 attachments (please note the line wrap)
+	Have the following in the bodycheck control file to block 54 attachments (please note the line wrap)
 
     ^Content-Disposition:.*filename=.*(document|readme|doc|text|file|data|test|message|body).(pif|scr|exe|cmd|bat|zip).*:Bad Attachments-header
 
@@ -926,7 +1048,7 @@ Note: There are two different tools called "stripmime".
 
 In principle you could use them in conjunction through procmail. There is also the "no-alternative" package of Russell Nelson, which has only basic functionality (no attempt at transforminh other formats to plain text):
 
-http://www.qmail.org/no-alternative
+	http://www.qmail.org/no-alternative
 
 ## How to I prevent spoofing of my domain in mails.
 
@@ -1010,7 +1132,7 @@ To cause your cron jobs to have a valid From field, set one these environment va
 
 Set the following in your tcp.smtp file
 
-    1.2.3.4:allow,RELAYCLIENT=””,TCPREMOTEIP=””,TCPREMOTEHOST=””
+    1.2.3.4:allow,HIDE_IP=1
 
 ## Is there a mailing list available for IndiMail package?
 

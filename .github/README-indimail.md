@@ -274,12 +274,13 @@ IndiMail administrators can use a web administration tool called **iwebadmin**. 
 
 IndiMail comes with a tcl/tk administration client called [**indium**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indium-x "indium"). It can be installed from source from [here](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indium-x "indium") or from the [DNF/YUM/Debian Repository](https://build.opensuse.org/package/show/home:indimail/indium "indium repository") on the openSUSE Build Service.
 
-To install IndiMail you can take the help of the following documents in the [indimail-x/doc subdirectory](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-x/doc "Documents Subdirectory") of [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains "indimail-virtualdomains") github repository. You can also jump to the section [Installing Indimail using DNF/YUM/APT Repository](#installing-indimail-using-dnfyumapt-repository) towards the bottom of this document.
+To install/configure IndiMail you can take the help of the following documents in the [indimail-x/doc subdirectory](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-x/doc "Documents Subdirectory") of [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains "indimail-virtualdomains") github repository. You can also jump to the section [Installing Indimail using DNF/YUM/APT Repository](#installing-indimail-using-dnfyumapt-repository) towards the bottom of this document.
 
 File | Description
 ---- | --------------------
-README-indimail.md|Introduction to IndiMail (this file which is also available as a wiki)
+README-indimail.md|Introduction to IndiMail (this file which is also available as the indimail/indimail-mta Wiki)
 [INSTALL-indimail.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/INSTALL-indimail.md)|Detailed Source Installation Instructions. A simpler version is [this](https://github.com/mbhangui/indimail-virtualdomains/blob/master/README.md)
+[FAQ](https://github.com/mbhangui/indimail-virtualdomains/blob/master/indimail-x/doc/FAQ.md)|Some quesions not answered by the wiki
 [INSTALL-RPM.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/INSTALL-RPM.md)|Install Instructions using RPM
 [INSTALL-MYSQL.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/INSTALL-MYSQL.md)|MySQL specific Installation Instructions
 [README-CLUSTER.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-CLUSTER.md)|Steps on configuring a clustered setup
