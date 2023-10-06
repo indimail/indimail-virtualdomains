@@ -721,35 +721,6 @@ case $POPRELAY in
 	;;
 esac
 
-AC_ARG_ENABLE(logging, [  --enable-logging=e|y|n|p|v    Turn on (y) or off (n) logging to syslog, (e) only log errors, include passwords in errors (p),
-	(v) verbose errors with passwords],
-	ENABLE_LOGGING=$enableval,
-	[
-		ENABLE_LOGGING=e
-	])
-case $ENABLE_LOGGING in
-1*|y*|Y*)
-	ENABLE_LOGGING=1
-	AC_DEFINE_UNQUOTED(ENABLE_LOGGING,$ENABLE_LOGGING,Enable Log Level 1)
-	;;
-e*|E*)
-	ENABLE_LOGGING=2
-	AC_DEFINE_UNQUOTED(ENABLE_LOGGING,$ENABLE_LOGGING,Enable Log Level 2)
-	;;
-p*|P*)
-	ENABLE_LOGGING=3
-	AC_DEFINE_UNQUOTED(ENABLE_LOGGING,$ENABLE_LOGGING,Enable Log Level 3)
-	;;
-v*|V*)
-	ENABLE_LOGGING=4
-	AC_DEFINE_UNQUOTED(ENABLE_LOGGING,$ENABLE_LOGGING,Enable Log Level 4)
-	;;
-*)
-	ENABLE_LOGGING=0
-	AC_DEFINE_UNQUOTED(ENABLE_LOGGING,$ENABLE_LOGGING,Disable Logging)
-	;;
-esac
-
 AC_ARG_ENABLE(mysql-logging, [  --enable-mysql-logging=y|n    Turn on (y) or off (n, default) logging detailed authentication attempts],
 	ENABLE_MYSQL_LOGGING=$enableval,
 	[

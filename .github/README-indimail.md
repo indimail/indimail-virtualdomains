@@ -78,10 +78,11 @@ Table of Contents
       * [using control file mailarchive](#using-control-file-mailarchive)
    * [Envrules](#envrules)
    * [Domain Specific Queues](#domain-specific-queues)
-   * [indimail-mini / qmta Installation](#indimail-mini--qmta-installation)
+   * [indimail-mini / qmail-qmtpd / qmta Installation](#indimail-mini--qmail-qmtpd--qmta-installation)
       * [indimail-mini - Using QMQP protocol provided by qmail-qmqpc / qmail-qmqpd](#indimail-mini---using-qmqp-protocol-provided-by-qmail-qmqpc--qmail-qmqpd)
          * [How do I set up a QMQP service?](#how-do-i-set-up-a-qmqp-service)
          * [Client Setup - How do I install indimail-mini to use qmail-qmqpc](#client-setup---how-do-i-install-indimail-mini-to-use-qmail-qmqpc)
+      * [qmail-qmtpd - Provide QMTP service](#qmail-qmtpd---provide-qmtp-service)
       * [qmta - Using a minimal standalone qmta-send MTA](#qmta---using-a-minimal-standalone-qmta-send-mta)
          * [How do I set up a standalone MTA using qmta-send](#how-do-i-set-up-a-standalone-mta-using-qmta-send)
    * [Using /usr/sbin/alternatives](#using-usrsbinalternatives)
@@ -99,6 +100,7 @@ Table of Contents
       * [Set up Authenticated SMTP](#set-up-authenticated-smtp)
       * [Using control file relaydomains](#using-control-file-relaydomains)
       * [Using control file relaymailfrom](#using-control-file-relaymailfrom)
+   * [CHECKSENDER - Check Senders during SMTP](#checksender---check-senders-during-smtp)
    * [CHECKRECIPIENT - Check Recipients during SMTP](#checkrecipient---check-recipients-during-smtp)
    * [SMTP Access List](#smtp-access-list)
    * [IndiMail Control Files Formats](#indimail-control-files-formats)
@@ -107,6 +109,7 @@ Table of Contents
       * [Inlookup database connection pooling service](#inlookup-database-connection-pooling-service)
       * [Name Service Switch Daemon - nssd](#name-service-switch-daemon---nssd)
       * [PAM Multi Framework](#pam-multi-framework)
+   * [Maildir Quotas](#maildir-quotas)
    * [Setting limits for your domain](#setting-limits-for-your-domain)
    * [SPF implementation in IndiMail](#spf-implementation-in-indimail)
       * [SPF Macro Support](#spf-macro-support)
@@ -1429,10 +1432,63 @@ NOTE: You can exit with value 0 instead of calling <b>qmail-local</b> / <b>qmail
 
 ## Using dot-qmail(5) and filterit(1)
 
-The .qmail files allows you to control local message deliveries. See the man pages for dot-qmail(5), qmail-command(8) for more details. You can have the following in a .qmail file.
+The .qmail (known as dot-qmail) files allows you to control local message deliveries. See the man pages for [dot-qmail(5)](https://github.com/mbhangui/indimail-mta/wiki/dot-qmail.5), [qmail-command(8)](https://github.com/mbhangui/indimail-mta/wiki/qmail-command.8) for more details. You can have the following in a .qmail file.
 
-After manipulating the original raw email on stdin, you can pipe the out to the program maildirdeliver(1) for the final delivery.
-Assuming you write the program myscript to call maildirdeliver program, you can use the valias command to add the following alias
+1. A comment line begins with the '#' sign:
+   >  #This is a comment
+2. A program line begins with a veritical bar:
+   >  | maildirdeliver /home/manny/Maildir/.Important/
+3. A forward line begins with an ampersand:
+   >  &user@domain
+4. An mbox line begins with a slash or dot, and does not end with a slash:
+   >  /home/manny/Mailbox
+5. A maildir line begins with a slash or dot, and ends with a slash:
+   >  /home/manny/Maildir/
+6. A branch line begins with a question mark, and ends with a label. Read the [dot-qmail(5)](https://github.com/mbhangui/indimail-mta/wiki/dot-qmail.5) man page for details.
+7. A envdir line begins with the '%' sign:
+   >  %/home/manny/envdir. If you define envdir variables, <b>qmail-local</b> will run programs defined in program line with these environment variables in addition to existing environment variables. You can clear existing environment variables (set for qmail-start when it was invoked) by setting the <b>SANITIZE_ENV</b>. You can decide which environment variables to preserve from the existing list by define <b>SANITIZE_ENV<b> as a list of colon separated list of variables that you want to retain.
+
+The program line `| maildirdeliver /home/mannny/Maildir/.Important` can also be written as `/home/manny/Maildir/.Important/` in which case <b>qmail-local</b> will use it's internal maildir delivery function which will be faster as it eliminates a call to exec(2).
+
+One can use `| /bin/filterit <args> ...` to use a configurable filter to do some real easy filtering. The program line `|/bin/filterit <args> ...` can replaced with `|filterit <arguments> ...` to make <b>qmail-local</b> use it's internal filter function, which has the same arguments as the external <b>filterit</b> program, but will be slightly faster due to elimination of the exec(2) system call.
+
+The <b>filterit</b> program accepts many arguments, with -h <u>header</u> argument being the defining argument. The <b>filterit</b> program can perform a match on any header in your email and take action like deliver to a Maildir, bounce or drop the mail, or forward the mail to any address. The match criteria is based on -k <u>keyword</u> and -c <u>comparision</u> arguments. The -k specifies a keyword to be used against the header specified by -h argument. The argument -c <u>comparision</u> specifies what type of match you want to perform. It is one of "Equals", "Starts with", "Ends with", "Contains". The -a <u>type</u> and -A <u>action</u> specifies what action to take when a match occurs. Here <u>type</u> can be one of "Exit", "Maildir" or "Forward". e.g. `-a Maildir -A "./Maildir/.Spam/"` says that when a match occurs, deliver the mail to the Maildir `./Maildir/.Spam` folder. Apart from -a, -A argument, one needs to specify -d <u>type</u> -D <u>action</u> which specify the default action to take when a match doesn't occur. The match criteria can be reversed by using -r argument. If -r is used -c "Equals" becomes the opposite of -c "Equals". By default, <b>filterit</b> exits with the value 99 when a match occurs. So if, <b>filterit</b> is used in dot-qmail, a match will stop further processing of the dot-qmail file. You can use -x argument to insert <b>X-FilterIT</b> header having the original invocation arguments as the header value. You can also test <b>filterit</b> on the command line by feeding it a RFC822 email on descriptor 0. You can pass the -n argument to make <b>filterit</b> display the action it would take without actually taking any action. Here are examples (which are also in the man page of [filterit(1)](https://github.com/mbhangui/indimail-mta/wiki/filterit.1)).
+
+```
+# Move mail to Quarantine folder and exit 99, else exit 0
+# when used with clamav, qmail-queue qhspi puts the header
+#   X-QHPSI: clean.
+# passing -r option to filterit makes the filter match when the header
+# does not have "clean" as the header value
+# this filter will exit 99 on match, causing qmail-local to
+# stop at this line
+
+| filterit -xr -h X-QHPSI -k "clean" -c "Equals" -a Maildir -A ./Maildir/.Quarantine/ -d exit -D 0
+
+# Move mail to Spam folder and exit 99, else exit 0
+# bogofilter inserts the X-bogosity header like below
+#   X-Bogosity: No, spamicity=0.520000, cutoff=9.90e-01, ...
+# The filter below will move the mail to Spam folder if X-Bogosity
+# value starts with "Yes".
+# additionally -e 0 is passed which makes the filter exit 0 on a
+# match. This allows qmail-local to go to the next filter even
+# though the filter has a match
+
+| filterit -x -h X-Bogosity -k "Yes" -c "Starts with" -a Maildir -A ./Maildir/.Spam/ -d exit -D 0 -e 0
+
+# match criteria same as above, but this filter forwards spam mails
+# to spam_collection@yourdomain.org instead of putting it in Maildir
+# this filter will exit 99 on match, causing qmail-local to
+# stop at this line
+
+| filterit -x -h X-Bogosity -k "Yes" -c "Starts with" -a forward -A spam_collection@yourdomain.org -d exit -D 0
+
+# If the mail passes through the above filters, deliver it to Maildir
+
+./Maildir/
+```
+
+If you want to manipulate the original mail, read it on descriptor 0 and pipe the output to maildirdeliver(1) for the final delivery to a Maildir folder.
 
 ## Using valias(1)
 
@@ -2062,9 +2118,13 @@ e.g., to select the standard qmail Maildir delivery, do:
 
 ## Addresses
 Once you have decided the delivery mode above, one needs to have some mechanism to assign a local address for the delivery. qmail (which is what IndiMail uses) offers the following mechanism
-locals
-Any email addressed to user@domain listed in the file /etc/indimail/control/locals will be delivered to the local user user. If you have Maildir as the delivery mode and an email to user kanimoji@domain, with home directory /home/blackmoney, will be delivered to /home/blackmoney/Maildir/new
-virtualdomains
+
+<b>locals</b>
+
+Any email addressed to user@domain listed in the file /etc/indimail/control/locals will be delivered to the local user user. If you have Maildir as the delivery mode and an email to user kanimoji@domain with home directory /home/blackmoney, will be delivered to /home/blackmoney/Maildir/new. <b>qmail-lspawn</b> uses the program <b>qmail-getpw</b> to the uid, gid, home, dash and extension for any user in the /etc/passwd file. You can set the environment variable <b>QMAILGETPW</b> to an alternate qmail-getpw program. See the [qmail-getpw man page](https://github.com/mbhangui/indimail-mta/wiki/qmail-getpw.8) for more details.
+
+<b>virtualdomains</b>
+
 The control file /etc/indimail/control/virtualdomains allows you to have multiple domains configured on a single server. Entries in virtualdomains are of the form:
 
 `user@domain:prepend`
@@ -2768,6 +2828,7 @@ disables bounces system-wide. Though disabling bounces may not be the right thin
 # Setting Disclaimers in your emails
 
 In my earlier article, I showed how to set up automatic rule based archival. I had discussed email archival as one of the many compliance requirements you might have. Sometimes you may also require to configure disclaimers in your messaging system. e.g for UK Companies Act 2006, IRS Circular 230.
+
 IndiMail provides a utility called altermime(1) to add your own disclaimers on each and every mail that goes out through your IndiMail messaging server. You can use any of the two options below to configure disclaimers
 
 ## Option 1 - using /etc/indimail/control/filterargs
@@ -2797,7 +2858,15 @@ $ sudo /bin/bash
 # svc -r /service/qmail-smtpd.587
 ```
 
-Read **altermime**(1) man page for more details
+Read **altermime**(1) man page for more details. Here are other use cases for altermime
+
+```
+/bin/altermime --multipart-insert --input=- --replace=disclaimer.txt --with /etc/indimail/control/disclaimer.txt"
+
+/bin/altermime --input=- --disclaimer=/etc/indimail/control/disclaimer.txt \
+	--disclaimer-html=/etc/indimail/control/disclaimer.txt \
+	--xheader=\"X-Copyrighted-Material: Please visit http://www.indimail.org/privacy.htm\""
+```
 
 # Email Archiving
 
@@ -2891,7 +2960,7 @@ The **OUTGOINGIP** environment variable is used by <b>qmail-remote</b> to bind o
 For SMTP service the following the following list of environment variables can be modified using envrules
 
 ```
-REQUIREAUTH, QREGEX, ENFORCE_FQDN_HELO, DATABYTES, BADHELOCHECK, BADHELO, BADHOST, BADHOSTCHECK, TCPPARANOID, NODNSCHECK, VIRUSCHECK, VIRUSFORWARD, REMOVEHEADERS, ENVHEADERS, LOGHEADERS, LOGHEADERFD, SIGNATURES, BODYCHECK, BADMAILFROM, BADMAILFROMPATTERNS, BOUNCEMAIL, CUGMAIL, MASQUERADE, BADRCPTTO, BADRCPTPATTERNS, GOODRCPTTO, GOODRCPTPATTERNS, GREYIP, GREETDELAY, CLIENTCA, TLSCIPHERS, SERVERCERT, BLACKHOLERCPT, BLACKHOLERCPTPATTERNS, SIGNKEY, SIGNKEYSTALE, SPFBEHAVIOR, SPFIPV6, SPFRULES, SPFGUESS, SPFEXP, TMPDIR, TARPITCOUNT, TARPITDELAY, MAXRECIPIENTS, MAX_RCPT_ERRCOUNT, AUTH_ALL, CHECKRELAY, CONTROLDIR, ANTISPOOFING, CHECKRECIPIENT, SPAMFILTER, LOGFILTER, SPAMFILTERARGS, SPAMEXITCODE, REJECTSPAM, SPAMREDIRECT, SPAMIGNORE, SPAMIGNOREPATTERNS, FILTERARGS, QUEUEDIR, QUEUE_BASE, QUEUE_START, QUEUE_COUNT, QMAILQUEUE, QUEUEPROG, RELAYCLIENT, QQEH, BADEXT, BADEXTPATTERNS, ACCESSLIST, EXTRAQUEUE, QUARANTINE, QHPSI, QHPSIMINSIZE, QHPSIMAXSIZE, QHPSIRC, QHPSIRN, USE_FSYNC, SCANCMD, PLUGINDIR, QUEUE_PLUGIN, PASSWORD_HASH, MAKESEEKABLE, MIN_FREE, ERROR_FD, DKSIGN, DKVERIFY, DKSIGNOPTIONS, DKQUEUE, DKEXCLUDEHEADERS, DKIMSIGN, DKIMVERIFY, DKIMPRACTICE, DKIMIDENTITY, DKIMEXPIRE, SIGN_PRACTICE DKIMQUEUE, BATVKEY, BATVKEYSTALE, BATVNOSIGNLOCALS, BATVNOSIGNREMOTE, SRS_DOMAIN, SRS_SECRETS, SRS_MAXAGE, SRS_HASHLENGTH, SRS_HASHMIN, SRS_ALWAYSREWRITE, SRS_SEPARATOR, SIGNATUREDOMAINS, and NOSIGNATUREDOMAINS
+REQUIREAUTH, QREGEX, ENFORCE_FQDN_HELO, DATABYTES, BADHELOCHECK, BADHELO, BADHOST, BADHOSTCHECK, TCPPARANOID, NODNSCHECK, VIRUSCHECK, VIRUSFORWARD, REMOVEHEADERS, ENVHEADERS, LOGHEADERS, LOGHEADERFD, SIGNATURES, BODYCHECK, BADMAILFROM, BADMAILFROMPATTERNS, BOUNCEMAIL, CUGMAIL, MASQUERADE, BADRCPTTO, BADRCPTPATTERNS, GOODRCPTTO, GOODRCPTPATTERNS, GREYIP, GREETDELAY, CLIENTCA, TLSCIPHERS, SERVERCERT, BLACKHOLERCPT, BLACKHOLERCPTPATTERNS, SIGNKEY, SIGNKEYSTALE, SPFBEHAVIOR, SPFIPV6, SPFRULES, SPFGUESS, SPFEXP, TMPDIR, TARPITCOUNT, TARPITDELAY, MAXRECIPIENTS, MAX_RCPT_ERRCOUNT, AUTH_ALL, CHECKRELAY, CONTROLDIR, CHECKRECIPIENT, CHECKSENDER, SPAMFILTER, LOGFILTER, SPAMFILTERARGS, SPAMEXITCODE, REJECTSPAM, SPAMREDIRECT, SPAMIGNORE, SPAMIGNOREPATTERNS, FILTERARGS, QUEUEDIR, QUEUE_BASE, QUEUE_START, QUEUE_COUNT, QMAILQUEUE, QUEUEPROG, RELAYCLIENT, QQEH, BADEXT, BADEXTPATTERNS, ACCESSLIST, EXTRAQUEUE, QUARANTINE, QHPSI, QHPSIMINSIZE, QHPSIMAXSIZE, QHPSIRC, QHPSIRN, USE_FSYNC, SCANCMD, PLUGINDIR, QUEUE_PLUGIN, PASSWORD_HASH, MAKESEEKABLE, MIN_FREE, ERROR_FD, DKSIGN, DKVERIFY, DKSIGNOPTIONS, DKQUEUE, DKEXCLUDEHEADERS, DKIMSIGN, DKIMVERIFY, DKIMPRACTICE, DKIMIDENTITY, DKIMEXPIRE, SIGN_PRACTICE DKIMQUEUE, BATVKEY, BATVKEYSTALE, BATVNOSIGNLOCALS, BATVNOSIGNREMOTE, SRS_DOMAIN, SRS_SECRETS, SRS_MAXAGE, SRS_HASHLENGTH, SRS_HASHMIN, SRS_ALWAYSREWRITE, SRS_SEPARATOR, SIGNATUREDOMAINS, and NOSIGNATUREDOMAINS
 ```
 
 The following list of environment variables can be modified using envrules if QMAILLOCAL and QMAILREMOTE is set to /usr/sbin/spawn-filter.
@@ -2924,9 +2993,9 @@ When the domain for an email being injected into the queue by <b>qmail-smtpd</b>
 
 This feature becomes useful when setting domain specific delivery rate controls as mentioned in the chapter [Controlling Delivery Rates](#controlling-delivery-rates)
 
-# indimail-mini / qmta Installation
+# indimail-mini / qmail-qmtpd / qmta Installation
 
-indimail-mta has multiple daemons qscheduler/qmail-start, qmail-send, qmail-lspawn, qmail-rspawn and qmail-clean for processing a queue. The standard indimail-mta installation is meant for servers that can withstand high loads resulting from high inbound/outbound mail traffic. For small servers which have minimal or sporadic traffic, the full indimail-mta installation isn't required or necessary. In such cases you can either install indimail-mini to use QMQP protocol or qmta to use standard delivery mechanisms. indimail-mini comprises of just 10 binaries, whereas qmta comprises of 25 binaries. For most cases, you just require one binary <b>qmail-qmqpc</b> if you use indimail-mini. If you use qmta, for most cases you just require <b>qmta-send</b> and <b>qmail-queue</b> to process and send mails.
+indimail-mta has multiple daemons qscheduler/qmail-start, qmail-send, qmail-lspawn, qmail-rspawn and qmail-clean for processing a queue. The standard indimail-mta installation is meant for servers that can withstand high loads resulting from high inbound/outbound mail traffic. For small servers which have minimal or sporadic traffic, the full indimail-mta installation isn't required or necessary. In such cases you can either install indimail-mini to use QMQP protocol, configure qmail-qmtpd to provide QMTP protocol.  You can configure qmail-qmtpd service to provide QMTP protocol. QMTP is the "Quick Mail Transport Protocol", developed by Daniel J. Bernstein. It is an alternative to SMTP, with a simpler and vastly more efficient client/server connection dialogue. Bernstein describes QMTP in this [short document](http://cr.yp.to/proto/qmtp.txt). You can also use qmta to use standard delivery mechanisms. indimail-mini comprises of just 10 binaries, whereas qmta comprises of 25 binaries. For most cases, you just require one binary <b>qmail-qmqpc</b> if you use indimail-mini. For using QMTP you just need to setup qmail-qmtpd service and setup <u>qmtproutes</u>. If you use qmta, for most cases you just require <b>qmta-send</b> and <b>qmail-queue</b> to process and send mails.
 
 ## indimail-mini - Using QMQP protocol provided by qmail-qmqpc / qmail-qmqpd
 
@@ -3038,12 +3107,45 @@ Note that users can still use all the <b>qmail-inject</b> environment variables 
 If you want to setup a SMTP service, you can setup mini-smtpd service. In case you setup SMTP service, you may want to handle tasks is dkim, virus and spam filtering. You can use QHPSI along with a virus scanner like clamav. You can also choose not to have these tasks done at the client end, but rather have it carried out by the QMQP service. For virus scanning refer to chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi). You can set QMAILQUEUE to qmail-multi, qmail-dkim, etc. However, you must remember to have qmail-qmqpc called at the end in case you change QMAILQUEUE to something other than qmail-qmqpc. If you need to setup mini-smtpd, here can be an option
 
 ```
-sudo ./svctool --smtp=25 --servicedir=/service --skipsend --no-multi \
+sudo /usr/sbin/svctool --smtp=25 --servicedir=/service --skipsend --no-multi \
     --qmailqueue=/usr/sbin/qmail-qmqpc --qmailsmtpd=/usr/sbin/mini-smtpd \
     --cntrldir=control --localip=0 --maxdaemons=20 --maxperip=5 \
     --memory=104857600 --min-free=52428800 \
     --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net
 ```
+
+## qmail-qmtpd - Provide QMTP service
+
+QMTP protocol is provided by [qmail-qmtpd](https://github.com/mbhangui/indimail-mta/wiki/qmail-qmtpd.8). You can create a QMTP service by running svctool as below.
+
+```
+sudo /usr/sbin/svctool --qmtp="209" --servicedir="/service" \
+  --qbase="/var/indimail/queue" --qcount="5" --qstart="1" \
+  --cntrldir="control" --localip="0" --maxdaemons="75" \
+  --maxperip="25" --memory="104857600" --min-free="52428800"
+```
+
+The above command will create a QMTP service with TCP access control rules file in <u>/etc/indimail/tcp/tcp.qmtp</u>. You need to edit this file to provide access to each client that needs access to the QMTP service. If this file is missing, first create <u>/etc/indimail/tcp/tcp.qmtp</u> in tcprules format to allow qccess from the authorized hosts. Make sure to deny connections from unauthorized hosts. for example, if access is allowed from 1.2.3.\*:
+
+```
+1.2.3.:allow
+:deny
+```
+
+Then create /etc/indimail/tcp/tcp.qmtp.cdb:
+
+```
+$ sudo qmailctl cdb
+building /etc/indimail/tcp/tcp.qmtp.cdb:                   [  OK  ]
+```
+
+You can change /etc/indimail/tcp/tcp.qmtp and run tcprules again at any time. Once you have setup the QMTP service you can create the file <u>/etc/indimail/control/qmtproutes</u> on each client as below.
+
+Here w.x.y.z is the IP of the server running qmail-qmtpd and example.com is the domain for which you want to deliver mails using QMTP.
+
+`example.com:w.x.y.z:209`
+
+Once you create the above file, <b>qmail-remote</b> will use QMTP to deliver mails using QMTP to w.x.y.z using QMTP. If you have both <u>qmtproutes</u> and <u>smtproutes</u> files, <u>qmtproutes</u> takes precedence.
 
 ## qmta - Using a minimal standalone qmta-send MTA
 
@@ -3145,7 +3247,7 @@ As you can see above that qmta-send is very easy to setup and consumes very litt
 Just like for indimail-mini installation, If you want to setup a SMTP service, you can setup mini-smtpd service. In case you setup SMTP service, you may want to handle tasks is dkim, virus and spam filtering. You can use QHPSI along with a virus scanner like clamav. You can also choose not to have these tasks done at the client end, but rather have it carried out by the QMQP service. For virus scanning refer to chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi). You can set QMAILQUEUE to qmail-multi, qmail-dkim, etc. However, you must remember to have qmail-qmqpc called at the end in case you change QMAILQUEUE to something other than qmail-qmqpc. If you need to setup mini-smtpd, here can be an option
 
 ```
-sudo ./svctool --smtp=25 --servicedir=/service --skipsend --no-multi \
+sudo /usr/sbin/svctool --smtp=25 --servicedir=/service --skipsend --no-multi \
     --qmailqueue=/usr/sbin/qmail-qmqpc --qmailsmtpd=/usr/sbin/mini-smtpd \
     --cntrldir=control --localip=0 --maxdaemons=20 --maxperip=5 \
     --memory=104857600 --min-free=52428800 \
@@ -3750,10 +3852,8 @@ NOTE: Remember that you are exposed to unrestricted relaying from any of the IP 
 IP addresses of clients allowed to relay mail through this host. Each address should be followed by a colon and an (optional) string that should be appended to each incoming recipient address, just as with the RELAYCLIENT environment variable. Nearly always, the optional string should be null. The filename can be overriden by the environment variable RELAYCLIENTS.
 Addresses in relayclients may be wildcarded (2nd line in the example below):
 
-```
-192.168.0.1:
-192.168.1.:
-```
+    192.168.0.1:
+    192.168.1.:
 
 ## Using MySQL relay table
 
@@ -3796,6 +3896,16 @@ joeblow@domain1.com
 ```
 
 If you use the control file /etc/indimail/control/relaymailfrom, you should really know what you are doing. Any mail from having a domain component of the address matching any domain in this file, relaying will be allowed without any authentication. You can most probably use this only if you have a closed SMTP server to which access from outside is not possible.
+
+# CHECKSENDER - Check Senders during SMTP
+
+Setting <b>CHECKSENDER</b> environment variable enforces few checks when the domain component of return path address (MAIL FROM) is present in your <u>rcpthosts</u> control file. Setting this to a non-empty value enables for for all domains present in the <u>rcpthosts</u> control file. If you need to enable this only for few domains or a particular domain, have the domain (prefixed by the '@' symbol) in <u>chksenderdomains</u> control file. Refer to [setting environment variables](#setting-environment-variables) on how to set environment variables. This is what happens when you set the <b>CHECKSENDER</b> environment variables.
+
+* The SMTP session will proceed only after some kind of authentication. The authentication method supported are Authenticated SMTP, POP or IMAP before SMTP. This implies that users who don't have an account in /etc/passwd (or MySQL database for indimail virtualdomains), will not be able to send emails with domains present in the <b>rcpthosts</b> control file. You can also force authentication by setting <b>REQUIREAUTH</b>, <b>AUTH_ALL</b> environment variabls or by having the domain (prefixed by '@' symbol) in <u>authdomains</u> control file. However, <b>CHECKSENDER</b> is very different than the other methods. It enforces only your local users to authenticate and can be safely set for your incoming SMTP server. Using other methods for your incoming server (port 25) will basically make your SMTP server rejecting mails for all outside domains (domains not listed in <u>rcpthosts</u>.
+* For virtual users (if you are using IndiMail and not just the indimail-mta package), the SMTP session will proceed only if the user is an active user and doesn't have the <b>NO_SMTP</b> flag set by <b>vmoduser</b> program.
+* Since authenticaition is now enforced, the SMTP session will be rejected if the user uses a envelope return path address different from the authenticated username. This enforces an ANTISPOOFING check. You can however allow this by setting <b>MASQUERADE</b> environment variable. Since you have enforced authentication, the SMTP log will show log the SMTP transaction along with the authenticated username and if your users are spoofing the envelope return address, the fact will be visible in the logs. So setting <b>MASQUERADE</b> is ok (all other SMTP servers allow any envelope sender address anyways).
+
+You can refer to [qmail-smtpd](https://github.com/mbhangui/indimail-mta/wiki/qmail-smtpd.8) man page for more details.
 
 # CHECKRECIPIENT - Check Recipients during SMTP
 
@@ -3884,6 +3994,8 @@ test-recipient: user found in cdb
 
 Once can use the script <b>make-recipients</b> to create a database for <b>recipients</b> extension.
 
+You can refer to [qmail-smtpd](https://github.com/mbhangui/indimail-mta/wiki/qmail-smtpd.8) man page for more details.
+
 # SMTP Access List
 
 One of the feature that IndiMail adds to <b>qmail-smtpd</b> is accesslist between senders and recipients. Accesslist can be enabled by creating a control file /etc/indimail/control/accesslist. A line in accesslist is of the form
@@ -3936,6 +4048,8 @@ matched sender [test@example1.com] with [*@example1.com]
 recipient not matched [manvendra@indimail.org] --&gt; access denied
 $
 ```
+
+You can refer to [qmail-smtpd](https://github.com/mbhangui/indimail-mta/wiki/qmail-smtpd.8) man page for more details.
 
 # IndiMail Control Files Formats
 
@@ -4324,6 +4438,12 @@ session    include      postlogin
 -session   optional     pam_ck_connector.so
 ```
 
+# Maildir Quotas
+
+When mail is delivered to a virtual domain, vdelivermail delivers it to the users home directory. vdelivermail will enter the users Maildir and add up the sizes of all the files in these directories. If the size is greater than the quota set by the vadduser command, the email is bounced back to the sender. The quota for a user can be changed by using the [vmoduser](https://github.com/mbhangui/indimail-mta/wiki/vmoduser.1) command.
+
+For new users when they are created by the vadduser command, the default quota set is determinted by the compile HARD_QUOTA defition set by `./configure --enable-hardquota` option. You can override the the value set at configuration time by setting the environment variable HARD_QUOTA when running the vadduser command. IndiMail uses maildir++ format which uses [maildirquotas](https://github.com/mbhangui/indimail-mta/wiki/maildirquota.7).
+
 # Setting limits for your domain
 
 IndiMail comes with a program vlimit(1), which allows you to set global limits for your domain. Before using vlimit, you need to enable domain limits for a domain using vmoddomain(1).
@@ -4493,13 +4613,21 @@ SPF macros are represented by different single characters, surrounded by curly b
 # SRS implementation in IndiMail
 
 Hosts which adopt the [Sender Permitted From [SPF)](https://en.wikipedia.org/wiki/Sender_Policy_Framework) convention face a challenge when required to forward mail. If the forwarding host does not change the sender domain, it will fail the SPF test and may not be able to hand the message off to the recipient. 
-The [Sender Rewriting Scheme (SRS)](https://en.wikipedia.org/wiki/Sender_Rewriting_Scheme) is a scheme for bypassing the Sender Policy Framework's (SPF) methods of preventing forged sender addresses. SPF "breaks" email forwarding. SRS is a way to fix it. SRS is a simple way for forwarding MTAs to rewrite the sender address. The original concept was published in [draft-mengwong-sender-rewrite](http://www.open-spf.org/svn/project/specs/drafts/draft-mengwong-sender-rewrite-01.txt) and further expanded on in a [paper by Shevek](http://www.open-spf.org/srs/srs.pdf). IndiMail's SRS implementation has been adapted from Marcelo Coelho's [qmail SRS patch](http://www.mco2.com.br/opensource/qmail/srs/), which uses a [forked](https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x) version of the [libsrs2](https://www.libsrs2.org/) library. The Sender Rewriting Scheme is depicted pictorially below, taken from [open-spf.org](http://www.open-spf.org/SRS/).
+The [Sender Rewriting Scheme (SRS)](https://en.wikipedia.org/wiki/Sender_Rewriting_Scheme) is a scheme for bypassing the Sender Policy Framework's (SPF) methods of preventing forged sender addresses. SPF "breaks" email forwarding. SRS is a way to fix it. SRS is a simple way for forwarding MTAs to rewrite the sender address. The original concept was published in [draft-mengwong-sender-rewrite](http://www.open-spf.org/svn/project/specs/drafts/draft-mengwong-sender-rewrite-01.txt) and further expanded on in a [paper by Shevek](http://www.open-spf.org/srs/srs.pdf). IndiMail's SRS implementation has been adapted from Marcelo Coelho's [qmail SRS patch](http://www.mco2.com.br/opensource/qmail/srs/) and uses a [forked](https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x) version of the [libsrs2](https://www.libsrs2.org/) library. The Sender Rewriting Scheme is depicted pictorially below, taken from [open-spf.org](http://www.open-spf.org/SRS/).
 
 ![Sender Rewriting Scheme](Sender-Rewriting-Scheme.png "SRS")
 
 ## Configuration Parameters
 
-SRS is configured by setting libsrs2 parameters. To configure SRS in IndiMail you need to at the least configure the control files <u>srs_domain</u> and <u>srs_secrets</u>. The various SRS control files are given in the table below. Each control file controls SRS parameter of the same name as the control file. e.g. The control file <u>srs_domain</u> controls the libsrs2 parameter <b>srs_domain</b>. Each control filename can be overriden by corresponding environment variable with capital letters. e.g. The environment variable <b>SRS_DOMAIN</b> overrides the the control file <u>srs_domain</u>
+SRS is configured by setting libsrs2 parameters. To configure SRS in IndiMail you need to at the least configure the control files <u>srs_domain</u> and <u>srs_secrets</u>. The various SRS control files are given in the table below. Each control file controls SRS parameter of the same name as the control file. e.g. The control file <u>srs_domain</u> controls the libsrs2 parameter <b>srs_domain</b>. Each control filename can be overriden by corresponding environment variable with capital letters. e.g. The environment variable <b>SRS_DOMAIN</b> overrides the the control file <u>srs_domain</u>.
+
+To support SRS, an MTA needs to do two kind of operations, and needs programs that can do one of the two operations. The SRS operation and the programs from the indimail-mta suite, that support that operation are listed below
+
+1. Rewrite the sender address using SRS.
+    * condredirect, filterit, forward, qmail-inject, qmail-local
+2. Rewrite a converted SRS address back to original.
+    * autoresponder, srsfilter, qmail-send, qmta-send, slowq-send, qmail-smtpd
+
 
 Parameters|Description|Example
 ----------|-----------|-------
@@ -4546,13 +4674,16 @@ Now that we have described the SRS parameters, we can go ahead and configure SRS
 		itself has the ability to decode a SRS address. But you can do the below
 		steps in case you are using mini-smtpd or other methods to receive mails
 		from outside like ofmipd, qmail-smtpd from qmail, netqmail, notqmail, etc.
-		In such cases you require srsfilter to decode SRS addresses.
+		In such cases you require srsfilter to decode SRS addresses. But in any
+        case it is good have this if there are any non-SRS compliant programs
+        on your system that will inject emails with the recipient address as a
+        SRS encoded address.
 
 		$ cd /etc/indimail/control
 		$ sudo bash
-		# echo srs.domain.tld:srs     > virtualdomains
+		# echo srs.domain.tld:srs > virtualdomains
 		# cd /var/indimail/alias
-		# echo "|/usr/bin/srsfilter" > .qmail-srs-default
+		# echo "|/bin/srsfilter"  > .qmail-srs-default
 		# svc -h /service/qmail-send.25
 
 # Greylisting in IndiMail
@@ -4564,7 +4695,7 @@ IndiMail 1.6 onwards implements greylisting using <b>qmail-greyd</b> daemon. You
 ## Enabling qmail-greyd greylisting server
 
 ```
-$ sudo /ur/sbin/svctool --greylist=1999 --servicedir=/service --min-resend-min=2 \
+$ sudo /usr/sbin/svctool --greylist=1999 --servicedir=/service --min-resend-min=2 \
    --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
    --save-interval=5 --whitelist=greylist.whitelist
 ```
@@ -6536,7 +6667,7 @@ Note: todo-proc is a dedicated todo processor whose basic working comes from the
  * Content Filtering and blocking of prohibited attachments via control file bodycheck
  * Ability to reject/bounce mails for unknown/inactive users (CHECKRECIPIENT)
  * ability to have the RECIPIENT check for selective domains using control file chkrcptdomains
- * Antispoofing mode (turned on by environment variable ANTISPOOFING)
+ * Antispoofing mode (turned on by environment variable CHECKSENDER)
  * Masquerading ability.
  * Multiline greetings via control file smtpgreeting
  * Message Submission Agent – MSA (RFC 2476)
