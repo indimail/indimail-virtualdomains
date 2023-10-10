@@ -8,6 +8,8 @@ Release @version@-@release@ Start 28/07/2023 End --/--/20--
 3. alias.c: fixed null domain getting passed to valias_select_all()
 4. iwebadmin.c, iwebadminx.h, template.c: added configurable mrtg url
 - 08/09/2023 indimail-3.4.5
+5. user.c: fixed user addition to mailing list in "New Email Account"
+6. user.c: remove user from mailing list subscriptions in 'Delete User"
 
 * Tue Jan 31 2023 03:34:39 +0000 Manvendra Bhangui <iwebadmin@indimail.org> 2.1.1-1.1%{?dist}
 Release 2.1.1-1.1 Start 14/09/2022 End 31/01/2023

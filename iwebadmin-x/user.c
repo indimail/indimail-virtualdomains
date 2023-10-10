@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: user.c,v 1.35 2023-07-28 22:31:14+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.36 2023-10-10 18:06:45+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -34,6 +34,9 @@
 #endif
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
+#endif
+#ifdef HAVE_DIRENT_H
+#include <dirent.h>
 #endif
 #ifdef HAVE_PWD_H
 #include <pwd.h>
@@ -508,6 +511,7 @@ addusernow()
 			for (cnt = 0; cnt < num; cnt++) {
 				if (!stralloc_copys(&tmp1, "subscribe") ||
 						!stralloc_catb(&tmp1, strnum, fmt_int(strnum, cnt)) ||
+						!stralloc_append(&tmp1, "=") ||
 						!stralloc_0(&tmp1))
 					die_nomem();
 				if ((error = GetValue(TmpCGI, &tmp2, tmp1.s)) != -1) {
@@ -735,6 +739,62 @@ ideluser()
 }
 
 void
+unsubscribe_user(char *user, char *domain)
+{
+	DIR            *mydir;
+	struct dirent  *mydirent;
+	struct stat     st;
+	static stralloc email = {0}, tmp1 = {0}, tmp2 = {0};
+	pid_t           pid;
+	extern int      ezmlm_make;
+
+	if (!ezmlm_make || MaxMailingLists == 0)
+		return;
+	if (!(mydir = opendir(".")))
+		return;
+	while ((mydirent = readdir(mydir))) {
+		if (stat(mydirent->d_name, &st) == 1)
+			continue;
+		if (!str_diff(mydirent->d_name, ".") || !str_diff(mydirent->d_name, ".."))
+			continue;
+		if ((st.st_mode & S_IFMT) != S_IFDIR)
+			continue;
+		if (!stralloc_copyb(&tmp1, ".qmail-", 7) ||
+				!stralloc_copys(&tmp1, mydirent->d_name) ||
+				!stralloc_0(&tmp1))
+			die_nomem();
+		if (access(tmp1.s, F_OK))
+			continue;
+		if (!stralloc_copys(&tmp1, mydirent->d_name) ||
+				!stralloc_catb(&tmp1, "/subscribers", 12) ||
+				!stralloc_0(&tmp1))
+			die_nomem();
+		if (access(tmp1.s, F_OK))
+			continue;
+		pid = fork();
+		if (pid == 0) {
+			if (!stralloc_copys(&tmp1, EZMLMDIR) ||
+					!stralloc_catb(&tmp1, "/ezmlm-unsub", 12) ||
+					!stralloc_0(&tmp1))
+				die_nomem();
+			if (!stralloc_copy(&tmp2, &RealDir) ||
+					!stralloc_append(&tmp2, "/") ||
+					!stralloc_cats(&tmp2, mydirent->d_name) ||
+					!stralloc_0(&tmp2))
+				die_nomem();
+			if (!stralloc_copys(&email, user) ||
+					!stralloc_append(&email, "@") ||
+					!stralloc_cats(&email, domain) ||
+					!stralloc_0(&email))
+				die_nomem();
+			execl(tmp1.s, "ezmlm-unsub", tmp2.s, email.s, (char *) 0);
+		} else
+			wait(&pid);
+	}
+	return;
+}
+
+void
 delusergo()
 {
 	static stralloc forward = {0}, forwardto = {0};
@@ -781,6 +841,7 @@ delusergo()
 				die_nomem();
 		}
 	}
+	unsubscribe_user(ActionUser.s, Domain.s);
 	call_hooks(HOOK_DELUSER, ActionUser.s, Domain.s, forwardto.s, "");
 	show_users();
 }
@@ -1801,6 +1862,10 @@ parse_users_dotqmail(char newchar)
 
 /*-
  * $Log: user.c,v $
+ * Revision 1.36  2023-10-10 18:06:45+05:30  Cprogrammer
+ * fixed user subscription to mailing list when adding user
+ * delete user subscription from mailing list when deleting user
+ *
  * Revision 1.35  2023-07-28 22:31:14+05:30  Cprogrammer
  * replaced exit with my_exit
  *
