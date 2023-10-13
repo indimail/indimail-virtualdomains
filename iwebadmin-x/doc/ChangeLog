@@ -3,7 +3,7 @@ Release @version@-@release@ Start 28/07/2023 End --/--/20--
 - 28/07/2023
 1. iwebadmin.c: exit with specific error codes defined in iwebadmin.h to
    indicate the error and help testing iwebadmin with curl
-2. html/mod_user.html: shorted quota input box length
+2. html/mod_user.html: shortened quota input box length
 - 06/08/2023
 3. alias.c: fixed null domain getting passed to valias_select_all()
 4. iwebadmin.c, iwebadminx.h, template.c: added configurable mrtg url
