@@ -1,6 +1,8 @@
 #
 #
 # $Id: indimail.spec.in,v 1.42 2020-06-02 22:38:20+05:30 Cprogrammer Exp mbhangui $
+#
+# vim: wrap ic
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -203,6 +205,9 @@ if [ -d courier-imap-%{courier_version} ] ; then
     aclocal -I m4
     autoreconf -fiv
     %{__cp} libs/unicode/depcomp .
+  fi
+  if [ -f /etc/fedora-release ] ; then
+    export CFLAGS="${CFLAGS} -Wno-implicit-function-declaration"
   fi
   %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} --bindir=%{_prefix}/bin \
     --mandir=%{mandir} --sysconfdir=%{sysconfdir} --libdir=%{_libdir} \
