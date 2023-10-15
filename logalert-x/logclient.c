@@ -45,6 +45,7 @@
 #include <error.h>
 #include <env.h>
 #include <getEnvConfig.h>
+#include <qmail/tls.h>
 #endif
 
 #define SEEKDIR PREFIX"/tmp/"
@@ -52,7 +53,7 @@
 #define FATAL   "logclient: fatal: " 
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logclient.c,v 1.14 2023-04-14 22:30:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logclient.c,v 1.15 2023-10-15 18:10:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -549,6 +550,9 @@ getversion_logclient_c()
 
 /*
  * $Log: logclient.c,v $
+ * Revision 1.15  2023-10-15 18:10:43+05:30  Cprogrammer
+ * ensure qmail/tls.h gets included
+ *
  * Revision 1.14  2023-04-14 22:30:27+05:30  Cprogrammer
  * added -v, -p option
  *

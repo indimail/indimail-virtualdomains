@@ -56,6 +56,10 @@ case "$host" in
 *-*-linux*)
 	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -Wall -I/usr/include/qmail"
 	CFLAGS="$CFLAGS -O4 -Wall"
+	if test -f /etc/fedora-release
+	then
+		CFLAGS="$CFLAGS -Wno-implicit-function-declaration"
+	fi
     ;;
 
 *-*-freebsd*)
