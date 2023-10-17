@@ -401,6 +401,8 @@ where:
 * Received: indimail-mta smtpd 37166 (HELO argos.indimail.org) (testuser01@example.com@::1) by argos.indimail.org with ESMTPSA (TLSv1.3 TLS_AES_256_GCM_SHA384 bits=256) - This is the Received line put by <b>qmail-smtpd</b> which tells the HELO argument was argos.indimail.org, using bits=256 channel with TLSv1.3 and TLS_AES_256_GCM_SHA384 cipher. Also this was an authenticated SMTP session using the account testuser01@example.com
 * Fri, 21 Oct 2022 23:04:36 +0530 is time and date (RFC 5322 format) at which <b>qmail-queue</b> created the message.
 
+NOTE: You can hide hosts/IP addresses in the received header by setting <b>HIDE_HOST</b> environment variable to any non-empty string. You may want to do that to hide your internal IP addresses and hosts.
+
 <b>qmail-queue</b> places a messages in the queue in four stages:
 
 1. To add a message to the queue, <b>qmail-queue</b> first creates a file in a separate directory, queueX/pid, with a unique name. The filesystem assigns that file a unique inode number. <b>qmail-queue</b> looks at that number, say 3016451. By the guarantee above, message 3016451 must be in state S1.
