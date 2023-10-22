@@ -182,10 +182,39 @@ address. The second line of this file should have the line port port_num
 where port_num is an integer.
 
 .SH Discarding Duplicate Emails
-You can discard duplicate emails received within 15 minutes, by setting
-\fBELIMINATE_DUPS\fR environment variable. You can change the default time
-interval of 900 seconds by setting the \fBDUPLICATE_INTERVAL\fR environment
-variable in seconds.
+You can discard duplicate emails by setting \fBELIMINATE_DUPS\fR
+environment variable. You can change the default time interval of 900
+seconds by setting the \fBELIMINATE_DUPS_INT\fR environment variable in
+seconds. You need to have the environment variable \fBMAKESEEKABLE\fR set
+for duplicate elimination to work. The duplicate elimination works exactly
+like \fBismaildup\fR(1) and uses the same code.
+
+\fBvdelivermail\fR uses \fB822header\fR(1) to get the headers and calculate
+32 character md5sum of the headers. It excludes the \fBReceived\fR and
+\fBDelivered-To\fR headers from the md5sum calculation. The result is
+written to the file \fIdir/dupmd5\fR in the following format.
+
+.EX
+unix_time md5sum
+.EE
+
+\fBvdelivermail\fR automatically updates the \fIdupmd5\fR file with the
+latest timestamps, expired records are automatically removed. Hence there
+is no maintenance required for this file. \fBismaildup\fR uses uses the
+following command to get the headers for md5sum calculation.
+
+.EX
+  @prefix@/bin/822header -X Received -X Delivered-To -X X-Delivered-To
+.EE
+
+You can set \fBELIMINATE_DUPS_ARGS\fR environment variable to set your own
+program and arguments for md5sum computation. The below command will use
+822header program and use just the Subject and Date headers to decide if
+the mail is a duplicate.
+
+.EX
+  @prefix@/bin/822header -I Subject -I Date
+.EE
 
 .SH OPTIONS
 .TP

@@ -1,0 +1,60 @@
+.\" vim: tw=75
+.TH ismaildup 1
+.SH NAME
+ismaildup \- Duplicate Email eliminator
+
+.SH SYNOPSYS
+\fBismaildup\fR \fIdir\fR \fIcmd\fR [\fIargs\fR]
+
+.SH DESCRIPTION
+\fBismaildup\fR takes email on stdin. It exits with status 0 if the email
+is duplicate. A mail is treated as duplicate if it has been received
+previously in a given time interval. The default time interval is 900
+seconds (15 mins) and can be changed by setting \fBELIMINATE_DUPS_INT\fR
+environment variable. If the email is not a duplicate, it executes the
+command \fIcmd\fR with \fIargs\fR as command line arguments.
+
+You can put the following in .qmail file to eliminate duplicates
+
+.EX
+  |@prefix@/bin/ismaildup \fIMaildir\fR @prefix@/bin/maildirdeliver \fIMaildir\fR
+.EE
+
+Where \fIMaildir\fR is the path to user's Maildir.
+
+You need to set the environment variables \fBMAKESEEKABLE\fR,
+\fBELIMINATE_DUPS\fR to turn on the duplicate elimination logic. The time
+interval in seconds (default 900 seconds) within which the duplicates are
+checked can be set by the \fBELIMINATE_DUPS_INT\fR environment variable.
+
+\fBismaildup\fR uses \fB822header\fR(1) to get the headers and calculate
+32 character md5sum of the headers. It excludes the \fBReceived\fR and
+\fBDelivered-To\fR headers from the md5sum calculation. The result is
+written to the file \fIdir/dupmd5\fR in the following format.
+
+.EX
+unix_time md5sum
+.EE
+
+\fBismaildup\fR automatically updates the \fIdupmd5\fR file with the latest
+timestamps, expired records are automatically removed. Hence there is no
+maintenance required for this file. \fBismaildup\fR uses uses the following
+command to get the headers for md5sum calculation.
+
+.EX
+  @prefix@/bin/822header -X Received -X Delivered-To -X X-Delivered-To
+.EE
+
+You can set \fBELIMINATE_DUPS_ARGS\fR environment variable to set your own
+program and arguments for md5sum computation. The below command will use
+822header program and use just the Subject and Date headers to decide if
+the mail is a duplicate.
+
+.EX
+  @prefix@/bin/822header -I Subject -I Date
+.EE
+
+.SH SEE ALSO
+vdelivermail(8),
+822header(1),
+md5sum(1)

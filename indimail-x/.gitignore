@@ -229,3 +229,4 @@ depcomp
 ilocal_upgrade.sh
 qmailmrtg.1
 journal2mrtg
+ismaildup.1
