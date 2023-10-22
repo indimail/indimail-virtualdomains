@@ -1264,20 +1264,22 @@ $ sudo /bin/bash
 # svc -r /service/qmail-send.25
 ```
 
-If you do not use <b>vdelivermail</b> and want to use your own delivery agent? Fear not by using <b>ismaildup</b>(1). <b>ismaildup</b> expects the email on standard input and is easily scriptable like the example below in a .qmail file.
+If you do not use <b>vdelivermail</b>(8) and want to use your own delivery agent? Fear not by using <b>ismaildup</b>(1). <b>ismaildup</b>(1) expects the email on standard input and is easily scriptable like the example below in a .qmail file.
 
-`|ismaildup /usr/bin/maildirdeliver /home/manny/Maildir/`
+`|ismaildup /home/manny/Maildir/ /usr/bin/maildirdeliver /home/manny/Maildir/`
 
 will deliver mails to /home/manny/Maildir while discarding duplicates.
 
-If you are not happy with the 900 seconds (15 minutes) time interval for checking duplicates, you can change it by setting the DUPLICATE_INTERVAL environment variable. The following will not allow a single duplicate to be entertained within 24 hours
+If you are not happy with the 900 seconds (15 minutes) time interval for checking duplicates, you can change it by setting the **ELIMINATE_DUPS_INT** environment variable. The following will not allow a single duplicate to be entertained within 24 hours.
 
 ```
 $ sudo /bin/bash
-# echo 86400 > /service/qmail-send.25/variables/DUPLICATE_INTERVAL
+# echo 86400 > /service/qmail-send.25/variables/ELIMINATE_DUPS_INT
 # svc -r /service/qmail-send.25
 # exit
 ```
+
+The duplicate eliminator uses <b>822header</b>(1) program to extract all headers other than <b>Received</b>, <b>Delivered-To</b> and <b>X-Delivered-To</b>. The duplicate elimination is based on the md5sum values of these headers. You can alter this by running your own program (and arguments) by setting <b>ELIMINATE_DUPS_ARGS</b> environment variable. The program can read descriptor 0 to get the email content.
 
 # Using procmail with IndiMail
 
