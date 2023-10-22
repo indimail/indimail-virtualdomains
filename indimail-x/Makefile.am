@@ -661,6 +661,8 @@ inquerytest.8: inquerytest.9
 	$(editman) inquerytest.9 > $@
 qmailmrtg.1: qmailmrtg.9
 	$(editman) qmailmrtg.9 > $@
+ismaildup.1: ismaildup.9
+	$(editman) ismaildup.9 > $@
 
 mytcplookup.c: tcplookup.c
 	cp tcplookup.c mytcplookup.c

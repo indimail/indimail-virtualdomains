@@ -1,29 +1,5 @@
 /*
- * $Log: ismaildup.c,v $
- * Revision 1.8  2023-03-26 00:32:38+05:30  Cprogrammer
- * fixed code using wait_handler
- *
- * Revision 1.7  2023-03-20 10:10:50+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.6  2022-12-18 19:26:39+05:30  Cprogrammer
- * recoded wait logic
- *
- * Revision 1.5  2022-05-10 20:01:31+05:30  Cprogrammer
- * use headers from include path
- *
- * Revision 1.4  2021-06-11 17:00:40+05:30  Cprogrammer
- * replaced makeseekable(), MakeArgs() with mktempfile(), makeargs() from libqmail
- *
- * Revision 1.3  2020-10-01 18:25:44+05:30  Cprogrammer
- * fixed compiler warning
- *
- * Revision 1.2  2020-04-01 18:56:39+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.1  2019-04-18 08:21:46+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -79,6 +55,31 @@ die_nomem()
 	_exit(111);
 }
 
+void
+remove_lock(char *fn, int fd, int lockfd)
+{
+	close(fd);
+#ifdef FILE_LOCKING
+	delDbLock(lockfd, fn, 1);
+#endif
+}
+
+int
+fix_size(char *fn, int fd, int lockfd, size_t size)
+{
+	if (lseek(fd, 0l, SEEK_SET) < 0) {
+		strerr_warn1("ismaildup: lseek: ", &strerr_sys);
+		remove_lock(fn, fd, lockfd);
+		return -1;
+	}
+	if (ftruncate(fd, size) == -1) {
+		strerr_warn3("ismaildup: ftruncate: ", fn, ": ", &strerr_sys);
+		remove_lock(fn, fd, lockfd);
+		return -1;
+	}
+	return 0;
+}
+
 /*-
  * opens Maildir/dupmd5
  * returns
@@ -87,13 +88,14 @@ die_nomem()
  * -1 for error
  */
 static int
-duplicateMD5(char *fileName, char *md5buffer)
+duplicateMD5(char *fileName, char *md5val)
 {
 	static stralloc line = {0};
 	char           *ptr;
 	unsigned long   interval;
 	char            inbuf[512], outbuf[512];
-	int             i, fd, match;
+	int             i, fd, match, flag;
+	size_t          size;
 #ifdef FILE_LOCKING
 	int             lockfd;
 #endif
@@ -104,7 +106,7 @@ duplicateMD5(char *fileName, char *md5buffer)
 #ifdef FILE_LOCKING
 	if ((lockfd = getDbLock(fileName, 1)) == -1) {
 		strerr_warn3("ismaildup: getDbLock: ", fileName, ": ", &strerr_sys);
-		return (-1);
+		return -1;
 	}
 #endif
 	if (access(fileName, F_OK))
@@ -113,70 +115,65 @@ duplicateMD5(char *fileName, char *md5buffer)
 		fd = open(fileName, O_RDWR);
 	if (fd == -1) {
 		strerr_warn3("ismaildup: open: ", fileName, ": ", &strerr_sys);
-#ifdef FILE_LOCKING
-		delDbLock(lockfd, fileName, 1);
-#endif
-		return (-1);
+		remove_lock(fileName, fd, lockfd);
+		return -1;
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
-	getEnvConfigStr(&ptr, "DUPLICATE_INTERVAL", "900");
+	getEnvConfigStr(&ptr, "ELIMINATE_DUPS_INT", "900");
 	scan_ulong(ptr, &interval);
-	for (;;) {
+	for (size = 0, flag = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("ismaildup: read: ", fileName, ": ", &strerr_sys);
-			close(fd);
-#ifdef FILE_LOCKING
-			delDbLock(lockfd, fileName, 1);
-#endif
-			return (-2);
+			remove_lock(fileName, fd, lockfd);
+			return -2;
 		}
 		if (!line.len)
 			break;
 		if (match) 
 			line.len--;
 		else {
-			if (!stralloc_0(&line))
+			if (!stralloc_append(&line, "\n"))
 				die_nomem();
 			line.len--;
 		}
 		if (!line.len)
 			continue;
 		scan_long(line.s, &recTime);
-		if (curTime > recTime + interval) {
-			for (ptr = line.s; *ptr && !isspace(*ptr); ptr++);
-			if (!*ptr || !isspace(*ptr))
-				continue;
-			for (; *ptr && isspace(*ptr); ptr++);
-			if (!*ptr)
-				continue;
-			if (!byte_diff(md5buffer, 32, ptr)) {
-				close(fd);
-#ifdef FILE_LOCKING
-				delDbLock(lockfd, fileName, 1);
-#endif
-				return (1); /*- duplicate md5 sum */
-			}
-		} else
-			continue; /*- expired records in Maildir/dupmd5 */
-	}
-	if (lseek(fd, 0 - line.len, SEEK_END) == -1) {
-		strerr_warn3("ismaildup: lseek: ", fileName, ": ", &strerr_sys);
-		return (-1);
-	}
+		if (curTime > recTime + interval)
+			continue;
+		/*- skip past unix_time and wsp */
+		for (ptr = line.s; *ptr && !isspace(*ptr); ptr++);
+		if (!*ptr || !isspace(*ptr))
+			continue;
+		for (; *ptr && isspace(*ptr); ptr++);
+		if (!*ptr)
+			continue;
+		if (!byte_diff(md5val, 32, ptr)) {
+			flag = 1;
+			continue;
+		}
+		size += (line.len + 1);
+		if (substdio_put(&ssout, line.s, line.len + 1) == -1) {
+			strerr_warn3("ismaildup: write error: ", fileName, ": ", &strerr_sys);
+			remove_lock(fileName, fd, lockfd);
+			return -1;
+		}
+	} /*- for (;;) */
+	if (fix_size(fileName, fd, lockfd, size) == -1)
+		return -1;
+	/*- update with the latest timestamp */
 	strnum[i = fmt_ulong(strnum, curTime)] = 0;
-	if (substdio_put(&ssout, strnum, i) ||
-			substdio_put(&ssout, " ", 1) ||
-			substdio_puts(&ssout, md5buffer) ||
-			substdio_flush(&ssout)) {
+	if (substdio_put(&ssout, strnum, i) == -1 ||
+			substdio_put(&ssout, " ", 1) == -1 ||
+			substdio_puts(&ssout, md5val) == -1 ||
+			substdio_put(&ssout, "\n", 1) == -1 ||
+			substdio_flush(&ssout)== -1 ) {
 		strerr_warn3("ismaildup: write error: ", fileName, ": ", &strerr_sys);
-		return (-1);
+		return -1;
 	}
-	close(fd);
-#ifdef FILE_LOCKING
-	delDbLock(lockfd, fileName, 1);
-#endif
-	return (0); /*- new message */
+	remove_lock(fileName, fd, lockfd);
+	return flag ? 1 : 0;
 }
 
 int
@@ -212,14 +209,15 @@ ismaildup(char *maildir)
 		close(pim[0]);
 		if (dup2(pim[1], 1) == -1)
 			_exit(111);
-		binqqargs[0] = PREFIX"/bin/822header";
 		if ((ptr = env_get("ELIMINATE_DUPS_ARGS")) && !(argv = makeargs(ptr))) {
 			strerr_warn1("ismaildup: makeargs: ", &strerr_sys);
 			_exit(111);
 		}
-		if (ptr)
+		if (ptr) {
+			binqqargs[0] = argv[0];
 			execv(*binqqargs, argv);
-		else {
+		} else {
+			binqqargs[0] = PREFIX"/bin/822header";
 			binqqargs[1] = "-X";
 			binqqargs[2] = "received";
 			binqqargs[3] = "-X";
@@ -340,7 +338,7 @@ ismaildup(char *maildir)
 #endif
 	if (error || code)
 		_exit(111);
-	return (0);
+	return 0;
 }
 #endif
 
@@ -385,3 +383,31 @@ main(int argc, char **argv)
 	_exit(111);
 }
 #endif
+
+/*
+ * $Log: ismaildup.c,v $
+ * Revision 1.8  2023-03-26 00:32:38+05:30  Cprogrammer
+ * fixed code using wait_handler
+ *
+ * Revision 1.7  2023-03-20 10:10:50+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.6  2022-12-18 19:26:39+05:30  Cprogrammer
+ * recoded wait logic
+ *
+ * Revision 1.5  2022-05-10 20:01:31+05:30  Cprogrammer
+ * use headers from include path
+ *
+ * Revision 1.4  2021-06-11 17:00:40+05:30  Cprogrammer
+ * replaced makeseekable(), MakeArgs() with mktempfile(), makeargs() from libqmail
+ *
+ * Revision 1.3  2020-10-01 18:25:44+05:30  Cprogrammer
+ * fixed compiler warning
+ *
+ * Revision 1.2  2020-04-01 18:56:39+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.1  2019-04-18 08:21:46+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
