@@ -1,5 +1,5 @@
-* XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <@email@> @version@-@release@%{?dist}
-Release 1.0.1-1.1 Start 07/06/2023 End XX/XX/XXXX
+* Mon 23 Oct 2023 08:30:33 +0000 Manvendra Bhangui <@email@> @version@-@release@%{?dist}
+Release 1.0.1-1.1 Start 07/06/2023 End 23/10/2023
 - 07/06/2023
 01. nssd: Use /run/indimail/pwdlookup for nssd.sock, nssd.pid
 02. nssd/nssd.c: use asprintf instead of snprintf
