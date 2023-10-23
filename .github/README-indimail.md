@@ -1255,18 +1255,17 @@ $ sudo svps -a
 
 # Eliminating Duplicate Emails during local delivery
 
-Often you will find program like MS outlook, notorious for sending duplicate emails, flooding your inbox. IndiMail allows you to quickly deal with this proprietary nonsense by turning on duplicate eliminator in **vdelivermail**(8) - the default MDA. To turn on the duplicate eliminator in <b>vdelivermail</b>, you need to set **ELIMINATE_DUPS** and **MAKE_SEEKABLE** environment variables.
+Often you will find program like MS outlook, notorious for sending duplicate emails, flooding your inbox. IndiMail allows you to quickly deal with this proprietary nonsense by turning on duplicate eliminator in **vdelivermail**(8) - the default MDA. To turn on the duplicate eliminator in <b>vdelivermail</b>, you need to set **ELIMINATE_DUPS** environment variable.
 
 ```
 $ sudo /bin/bash
 # echo 1>/service/qmail-send.25/variables/ELIMINATE_DUPS
-# echo 1>/service/qmail-send.25/variables/MAKE_SEEKABLE
 # svc -r /service/qmail-send.25
 ```
 
-If you do not use <b>vdelivermail</b>(8) and want to use your own delivery agent? Fear not by using <b>ismaildup</b>(1). <b>ismaildup</b>(1) expects the email on standard input and is easily scriptable like the example below in a .qmail file.
+If you do not use <b>vdelivermail</b>(8) and want to use your own delivery agent? Fear not by using [ismaildup(1)](https://github.com/mbhangui/indimail-mta/wiki/ismaildup.1). <b>ismaildup</b>(1) expects the entire email on standard input and is easily scriptable like the example below in a [dot-qmail](https://github.com/mbhangui/indimail-mta/wiki/dot-qmail.5) file.
 
-`|ismaildup /home/manny/Maildir/ /usr/bin/maildirdeliver /home/manny/Maildir/`
+`|/bin/ismaildup /home/manny/Maildir/ /usr/bin/maildirdeliver /home/manny/Maildir/`
 
 will deliver mails to /home/manny/Maildir while discarding duplicates.
 
@@ -1279,7 +1278,7 @@ $ sudo /bin/bash
 # exit
 ```
 
-The duplicate eliminator uses <b>822header</b>(1) program to extract all headers other than <b>Received</b>, <b>Delivered-To</b> and <b>X-Delivered-To</b>. The duplicate elimination is based on the md5sum values of these headers. You can alter this by running your own program (and arguments) by setting <b>ELIMINATE_DUPS_ARGS</b> environment variable. The program can read descriptor 0 to get the email content.
+The duplicate eliminator uses [822header(1)](https://github.com/mbhangui/indimail-mta/wiki/822header.1) program to extract all headers other than <b>Received</b>, <b>Delivered-To</b> and <b>X-Delivered-To</b>. The duplicate elimination is based on the md5sum values of these headers. You can alter this by running your own program (and arguments) by setting <b>ELIMINATE_DUPS_ARGS</b> environment variable. The program needs to read descriptor 0 to get the entire email.
 
 # Using procmail with IndiMail
 
