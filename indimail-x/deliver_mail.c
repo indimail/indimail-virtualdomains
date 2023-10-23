@@ -1,5 +1,5 @@
 /*
- * $Id: deliver_mail.c,v 1.14 2023-08-04 18:49:30+05:30 Cprogrammer Exp mbhangui $
+ * $Id: deliver_mail.c,v 1.15 2023-10-23 18:40:18+05:30 Cprogrammer Exp mbhangui $
  */
 #include <stdio.h>
 #ifdef HAVE_CONFIG_H
@@ -61,7 +61,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deliver_mail.c,v 1.14 2023-08-04 18:49:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deliver_mail.c,v 1.15 2023-10-23 18:40:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -1252,7 +1252,7 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 		}
 	}
 	/*- start the the begining of the email file */
-	if ((ptr = env_get("MAKE_SEEKABLE")) && *ptr != '0' && lseek(0, 0L, SEEK_SET) < 0) {
+	if (lseek(0, 0L, SEEK_SET) < 0) {
 		strerr_warn1("deliver_mail: lseek: ", &strerr_sys);
 		close(write_fd);
 		return (-2);
@@ -1401,6 +1401,9 @@ deliver_mail(char *address, mdir_t MsgSize, char *quota, uid_t uid, gid_t gid,
 
 /*
  * $Log: deliver_mail.c,v $
+ * Revision 1.15  2023-10-23 18:40:18+05:30  Cprogrammer
+ * rewind descriptor 0 regardless of MAKE_SEEKABLE setting
+ *
  * Revision 1.14  2023-08-04 18:49:30+05:30  Cprogrammer
  * skip white space after | and command for DTLINE to be preserved
  *

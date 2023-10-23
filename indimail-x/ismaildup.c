@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: ismaildup.c,v 1.8 2023-10-23 18:45:17+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -42,7 +42,7 @@
 #include "dblock.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ismaildup.c,v 1.8 2023-03-26 00:32:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ismaildup.c,v 1.8 2023-10-23 18:45:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char     strnum[FMT_ULONG];
@@ -202,17 +202,13 @@ ismaildup(char *maildir)
 		close(pim[1]);
 		_exit(111);
 	case 0:
-		if (lseek(0, 0l, SEEK_SET) < 0) {
-			strerr_warn1("ismaildup: lseek: ", &strerr_sys);
-			_exit(111);
-		}
+		if (lseek(0, 0l, SEEK_SET) < 0)
+			strerr_die1sys(111, "ismaildup: lseek: ");
 		close(pim[0]);
 		if (dup2(pim[1], 1) == -1)
 			_exit(111);
-		if ((ptr = env_get("ELIMINATE_DUPS_ARGS")) && !(argv = makeargs(ptr))) {
-			strerr_warn1("ismaildup: makeargs: ", &strerr_sys);
-			_exit(111);
-		}
+		if ((ptr = env_get("ELIMINATE_DUPS_ARGS")) && !(argv = makeargs(ptr)))
+			die_nomem();
 		if (ptr) {
 			binqqargs[0] = argv[0];
 			execv(*binqqargs, argv);
@@ -233,15 +229,11 @@ ismaildup(char *maildir)
 	}
 	close(pim[1]);
 	OpenSSL_add_all_digests();
-	if (!(md = EVP_get_digestbyname("md5"))) {
-		strerr_warn1("ismaildup: Unknown message digest md5", 0);
-		_exit (111);
-	}
+	if (!(md = EVP_get_digestbyname("md5")))
+		strerr_die1x(111, "ismaildup: Unknown message digest md5");
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	if (!(mdctx = EVP_MD_CTX_new())) {
-		strerr_warn1("ismaildup: Digest create failure", 0);
-		_exit (111);
-	}
+	if (!(mdctx = EVP_MD_CTX_new()))
+		strerr_die1x(111, "ismaildup: Digest create failure");
 #else
 	mdctx = &mdctxO;
 #endif
@@ -354,31 +346,19 @@ main(int argc, char **argv)
 	char           *str;
 #endif
 
-	if (argc != 3) {
-		strerr_warn1("USAGE: ismaildup directory program", 0);
-		_exit (100);
-	}
+	if (argc < 3)
+		strerr_die1x(100, "USAGE: ismaildup directory program");
 #ifdef MAKE_SEEKABLE
-	if ((str = env_get("MAKE_SEEKABLE")) && *str != '0' && mktempfile(0)) {
-		strerr_warn1("ismaildup: mktempfile: ", &strerr_sys);
-		_exit(111);
-	}
+	if ((str = env_get("MAKE_SEEKABLE")) && *str != '0' && mktempfile(0))
+		strerr_die1sys(111, "ismaildup: mktempfile: ");
 #endif
 	/*- if we don't know the message size then read it */
-	if (!(MsgSize = get_message_size())) {
-		strerr_warn1("ismaildup: discarding 0 size message", 0);
-		_exit(0);
-	}
+	if (!(MsgSize = get_message_size()))
+		strerr_die1x(0, "ismaildup: discarding 0 size message");
 #ifdef HAVE_SSL
-	if (env_get("ELIMINATE_DUPS") && ismaildup(argv[1])) {
-		strerr_warn1("ismaildup: discarding duplicate msg", 0);
-		_exit (0);
-	}
+	if (env_get("ELIMINATE_DUPS") && ismaildup(argv[1]))
+		strerr_die1x(0, "ismaildup: discarding duplicate msg");
 #endif
-	if (lseek(0, 0, SEEK_SET) == -1) {
-		strerr_warn1("ismaildup: lseek: ", &strerr_sys);
-		_exit(111);
-	}
 	execv(argv[2], argv + 2);
 	_exit(111);
 }
@@ -386,6 +366,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: ismaildup.c,v $
+ * Revision 1.8  2023-10-23 18:45:17+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.8  2023-03-26 00:32:38+05:30  Cprogrammer
  * fixed code using wait_handler
  *
