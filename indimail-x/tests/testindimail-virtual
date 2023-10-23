@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.17 2023-10-23 18:47:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.18 2023-10-23 21:52:19+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -1977,18 +1977,32 @@ do_qmail_inject()
 	# $6 - from
 	# $7 - to
 	# $8 - cc
+	# $9 - body
+	if [ $# -eq 9 ] ; then
+		body=$9
+	else
+		body=""
+	fi
 	if [ $# -eq 8 ] ; then
 		cc=$8
 	else
 		cc=""
 	fi
 	if [ $# -eq 7 ] ; then
-		to=$7
+		if [ -n "$7" ] ; then
+			to=$7
+		else
+			to=$3
+		fi
 	else
 		to=$3
 	fi
 	if [ $# -eq 6 ] ; then
-		from=$6
+		if [ -n "$6" ] ; then
+			from=$6
+		else
+			from=$2
+		fi
 	else
 		from=$2
 	fi
@@ -1998,7 +2012,11 @@ do_qmail_inject()
 		header=""
 	fi
 	if [ $# -eq 4 ] ; then
-		subj=$4
+		if [ -n "$4" ] ; then
+			subj=$4
+		else
+			subj="Testing qmail-inject"
+		fi
 	else
 		subj="Testing qmail-inject"
 	fi
@@ -2014,7 +2032,11 @@ do_qmail_inject()
 	fi
 	echo "Date: $(date -R)"
 	echo
-	echo "Test message"
+	if [ -n "$body" ] ; then
+		echo "$body"
+	else
+		echo "Test message"
+	fi
 	) > /tmp/mail.txt
 	cat /tmp/mail.txt | $sudo $setuidgid -g qcerts $1 env - \
 		CONTROLDIR=$cntrldir \
@@ -2205,6 +2227,8 @@ do_cleanup()
 
 do_autoresponder()
 {
+	# $1=$testuser1
+	# $2=$testuser2
 	tm1=$(date +"%s.%4N")
 	echo "Starting Autoresponder test"
 	destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $1 | awk '{print $3}')
@@ -2231,7 +2255,7 @@ do_autoresponder()
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 	subj="Testing Autoresponder"
-	do_qmail_inject $user $1 $2 "$subj" # send email to testuser2 from $testuser1
+	do_qmail_inject $user $1 $2 "$subj" # send email from testuser1 to $testuser2
 	check_mail indimail $destdir2/Maildir
 	if [ $? -ne 0 ] ; then
 		echo "Check $destdir2/Maildir [$subject]"
@@ -2263,11 +2287,53 @@ do_autoresponder()
 		[ -z "$failed" ] && failed="autoresponder subject" || failed="$failed, autoresponder subject"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
+	$sudo env - \
+		PATH=/bin:/usr/bin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		SERVICEDIR=$servicedir \
+	vmoduser -l - $2 >> $logdir/setup/vmoduser.log
+}
+
+do_dot_qmail_vdelivermail()
+{
+	destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser1 | awk '{print $3}')
+	destdir2=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser2 | awk '{print $3}')
+	tm1=$(date +"%s.%4N")
+	echo "Starting dot-qmail multi-instruction test for vdelivermail"
+	(
+	echo "&$testuser2"
+	echo "$destdir1/Maildir"
+	) > /tmp/dot-qmail.$$
+	sudo mv /tmp/dot-qmail.$$ $destdir1/.qmail
+	sudo chown indimail:indimail $destdir1/.qmail
+	do_qmail_inject $user $user@$HOSTNAME $testuser1 "" "" "" "" "" "Test dot-qmail" # send email to testuser1 from $user@$HOSTNAME
+	check_mail indimail $destdir1/Maildir no-delete
+	fn1=$(sudo ls $destdir1/Maildir/new)
+	t1=$(sudo sh -c "/bin/822body < $destdir1/Maildir/new/$fn1")
+	check_mail indimail $destdir2/Maildir no-delete
+	fn2=$(sudo ls $destdir2/Maildir/new)
+	t2=$(sudo sh -c "/bin/822body < $destdir2/Maildir/new/$fn2")
+	if [ "$t1" = "$t2" -a "$t1" = "Test dot-qmail" ] ; then
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-(2 * $3))}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing dot-qmail multi-instruction in vdelivermail succeeded %49s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		echo "fn1=$fn1, fn2=$fn2, t1=[$t1], t2=[$t2]"
+		fcount=$(expr $fcount + 1)
+		echo "testing dot-qmail multi-instruction in vdelivermail failed"
+		[ -z "$failed" ] && failed="dot-qmail multi-instruction" || failed="$failed, dot-qmail multi-instruction"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	sudo /bin/rm -f $destdir1/.qmail $destdir1/Maildir/new/$fn1 $destdir2/Maildir/new/$fn2
 }
 
 do_eliminate_dups()
 {
-	destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $1 | awk '{print $3}')
+	destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser1 | awk '{print $3}')
 	tm1=$(date +"%s.%4N")
 	echo "Starting Duplicate Eliminator tests"
 	echo  1 > $servicedir/qmail-send.2025/variables/ELIMINATE_DUPS
@@ -2276,11 +2342,11 @@ do_eliminate_dups()
 		> $servicedir/qmail-send.2025/variables/ELIMINATE_DUPS_ARGS
 	sudo svc -r $servicedir/qmail-send.2025
 	sleep $sleep_int
-	do_qmail_inject $user $user@$HOSTNAME $1 # send email to testuser1 from $user@$HOSTNAME
+	do_qmail_inject $user $user@$HOSTNAME $testuser1 # send email to testuser1 from $user@$HOSTNAME
 	sleep 1
-	do_qmail_inject $user $user@$HOSTNAME $1 # send email to testuser1 from $user@$HOSTNAME
+	do_qmail_inject $user $user@$HOSTNAME $testuser1 # send email to testuser1 from $user@$HOSTNAME
 	sleep 1
-	do_qmail_inject $user $user@$HOSTNAME $1 # send email to testuser1 from $user@$HOSTNAME
+	do_qmail_inject $user $user@$HOSTNAME $testuser1 # send email to testuser1 from $user@$HOSTNAME
 	count1=$(sudo ls $destdir1/Maildir/new | wc -l)
 	count2=$(sudo cat $destdir1/Maildir/dupmd5 2>/dev/null| wc -l)
 	if [ $count1 -eq $count2 -a $count1 -eq 1 ] ; then
@@ -2290,8 +2356,9 @@ do_eliminate_dups()
 		printf "\r  testing duplicate mail eliminator in vdelivermail succeeded %51s [%.4f sec]\n" " " $secs
 		print_pct
 	else
+		echo count1=$count1, count2=$count2
 		fcount=$(expr $fcount + 1)
-		echo "  testing duplicate mail eliminator failed"
+		echo "  testing duplicate mail eliminator in vdelivermail failed"
 		[ -z "$failed" ] && failed="duplicate eliminator vdelivermail" || failed="$failed, duplicate eliminator vdelivermail"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
@@ -2313,8 +2380,11 @@ do_eliminate_dups()
 		printf "\r  testing duplicate mail eliminator in ismaildup succeeded %54s [%.4f sec]\n" " " $secs
 		print_pct
 	else
+		printf "\r"
+		echo count1=$count1, count2=$count2
+		read key
 		fcount=$(expr $fcount + 1)
-		echo "  testing duplicate mail eliminator failed"
+		echo "  testing duplicate mail eliminator in ismaildup failed"
 		[ -z "$failed" ] && failed="duplicate eliminator ismaildup" || failed="$failed, duplicate eliminator ismaildup"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
@@ -3072,6 +3142,25 @@ print_pct()
 	printf "%101s Test No %5d [%6.2f %%]" " " $tcount $pct
 }
 
+test_mysql()
+{
+	tm1=$(date +"%s.%4N")
+	printf "\r  testing MySQL Service startup"
+	check_service mysql.3307
+	if [ $? -eq 0 ] ; then
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing MySQL service startup succeeded %71s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		fcount=$(expr $fcount + 1)
+		failed=1
+		echo "  testing MySQL service startup failed"
+		exit 1
+	fi
+}
+
 ## end getopt
 tty -s && stty sane
 ID=$(id -u)
@@ -3085,7 +3174,7 @@ current_dir=$(pwd)
 if [ -f $testdir/itotal.count ] ; then
 	total_tests=$(cat $testdir/itotal.count)
 else
-	total_tests=1091
+	total_tests=1093
 fi
 if [ -x /usr/bin/mariadb ] ; then
 	mysql=/usr/bin/mariadb
@@ -3098,7 +3187,7 @@ svpid=$(sed -n '$p' $servicedir/.svscan.pid)
 test_svscan_log
 test_svscan_run
 test_services
-check_service mysql.3307
+test_mysql
 create_domain $domain1 pass
 do_vdominfo
 do_dbinfo
@@ -3130,7 +3219,10 @@ printf "\r%126s\n" " "
 do_autoresponder $testuser1 $testuser2
 
 printf "\r%126s\n" " "
-do_eliminate_dups $testuser1
+do_dot_qmail_vdelivermail
+
+printf "\r%126s\n" " "
+do_eliminate_dups
 
 printf "\r%126s\n" " "
 do_valias $testuser1 $testuser2
@@ -3174,6 +3266,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.18  2023-10-23 21:52:19+05:30  Cprogrammer
+# added test for .qmail handling by vdelivermail
+#
 # Revision 1.17  2023-10-23 18:47:37+05:30  Cprogrammer
 # added test for ismaildup
 #
