@@ -50,6 +50,7 @@
 #include <strerr.h>
 #include <error.h>
 #include <get_scram_secrets.h>
+#include <qprintf.h>
 #endif
 #include "alias.h"
 #include "autorespond.h"
@@ -72,7 +73,7 @@ void            ignore_to_end_tag(substdio *ss);
 void            get_calling_host();
 char           *get_session_val(char *session_var);
 
-extern int      ezmlm_make, enable_fortune;
+extern int      ezmlm_make, enable_fortune, debug;
 
 /*
  * send an html template to the browser 
@@ -85,6 +86,10 @@ send_template(char *actualfile)
 	static stralloc line = {0};
 	struct substdio ssin;
 
+	if (debug) {
+		subprintf(ssdbg, "function=send_template, emplate=[%s]\n", actualfile);
+		substdio_flush(ssdbg);
+	}
 	send_template_now("header.html");
 	send_template_now(actualfile);
 	if (!enable_fortune || access("/usr/bin/fortune", X_OK)) {

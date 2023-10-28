@@ -345,11 +345,16 @@ main(int argc, char **argv)
 	else 
 	if (!(TmpCGI = env_get("QUERY_STRING")))
 		TmpCGI = "";
-	if (pi && !str_diffn(pi, "/com/", 5)) { /*- all commands minus authentication and password change and */
+	if (pi && !str_diffn(pi, "/com/", 5)) { /*- all commands minus authentication and password change */
 		GetValue(TmpCGI, &Username, "user=");
 		GetValue(TmpCGI, &Domain, "dom=");
 		GetValue(TmpCGI, &Time, "time=");
 		scan_ulong(Time.s, (unsigned long *) &mytime);
+		if (debug) {
+			subprintf(ssdbg, "function=com, Username=[%s], Domain=%s, Time=%s, curtime=%ld\n",
+					Username.s, Domain.s, Time.s, mytime);
+			substdio_flush(ssdbg);
+		}
 		if (!(pw = sql_getpw(Username.s, Domain.s))) {
 			copy_status_mesg(html_text[198]);
 			iclose();
@@ -391,6 +396,11 @@ main(int argc, char **argv)
 		GetValue(TmpCGI, &Password, "oldpass=");
 		GetValue(TmpCGI, &Password1, "newpass1=");
 		GetValue(TmpCGI, &Password2, "newpass2=");
+		if (debug) {
+			subprintf(ssdbg, "function=passwd, address=[%s], oldpass=%s, newpass1=%s, newpass2=%s\n",
+					Username.s, Password.s, Password1.s, Password2.s);
+			substdio_flush(ssdbg);
+		}
 		if (Username.len && !Password.len && (Password1.len || Password2.len)) {
 			/*- username entered, but no password */
 			copy_status_mesg(html_text[198]);
@@ -482,6 +492,11 @@ main(int argc, char **argv)
 		GetValue(TmpCGI, &Username, "username=");
 		GetValue(TmpCGI, &Domain, "domain=");
 		GetValue(TmpCGI, &Password, "password=");
+		if (debug) {
+			subprintf(ssdbg, "function=auth, username=[%s], domain=%s, passwrd=%s\n",
+					Username.s, Domain.s, Password.s);
+			substdio_flush(ssdbg);
+		}
 		if (Username.len) {
 			i = str_chr(Username.s, '@');
 			if (Username.s[i]) {
