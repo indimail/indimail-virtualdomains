@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.18 2023-10-23 21:52:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.19 2023-11-13 08:47:33+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -3174,7 +3174,7 @@ current_dir=$(pwd)
 if [ -f $testdir/itotal.count ] ; then
 	total_tests=$(cat $testdir/itotal.count)
 else
-	total_tests=1093
+	total_tests=1096
 fi
 if [ -x /usr/bin/mariadb ] ; then
 	mysql=/usr/bin/mariadb
@@ -3266,6 +3266,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.19  2023-11-13 08:47:33+05:30  Cprogrammer
+# updated total test count
+#
 # Revision 1.18  2023-10-23 21:52:19+05:30  Cprogrammer
 # added test for .qmail handling by vdelivermail
 #
