@@ -1,68 +1,4 @@
 /*
- * $Log: pam-multi.c,v $
- * Revision 1.20  2021-07-18 08:27:16+05:30  Cprogrammer
- * fixed salt size
- *
- * Revision 1.19  2020-10-04 09:21:32+05:30  Cprogrammer
- * set optreset=1 for Darwin
- *
- * Revision 1.18  2020-10-03 12:29:44+05:30  Cprogrammer
- * Darwin Port
- *
- * Revision 1.17  2020-09-29 11:07:05+05:30  Cprogrammer
- * replaced LOG_EMERG with LOG_INFO
- * changed/added debug statements
- *
- * Revision 1.16  2020-09-23 11:01:37+05:30  Cprogrammer
- * fold braces for readability
- *
- * Revision 1.15  2020-09-22 00:17:52+05:30  Cprogrammer
- * FreeBSD port
- *
- * Revision 1.14  2019-07-03 19:35:49+05:30  Cprogrammer
- * load libmysqlclient/libmariadb dynamically using load_mysql.c
- *
- * Revision 1.13  2018-09-12 12:55:04+05:30  Cprogrammer
- * fixed SIGSEGV in _pam_log()
- *
- * Revision 1.12  2010-05-05 20:13:41+05:30  Cprogrammer
- * use environment variable AUTHSERVICE for service identifier
- *
- * Revision 1.11  2010-04-10 14:50:16+05:30  Cprogrammer
- * changed all units to seconds to avoid mistakes during comparision
- *
- * Revision 1.10  2009-10-17 20:14:09+05:30  Cprogrammer
- * duplicate definition of pam_err removed
- *
- * Revision 1.9  2009-10-17 16:53:45+05:30  Cprogrammer
- * fix for DARWIN
- *
- * Revision 1.8  2009-10-12 08:33:41+05:30  Cprogrammer
- * rearranged functions
- * completed run_command() function
- *
- * Revision 1.7  2009-10-11 11:34:57+05:30  Cprogrammer
- * prevent doS
- *
- * Revision 1.6  2009-10-11 09:38:51+05:30  Cprogrammer
- * completed acct_mgmt
- *
- * Revision 1.5  2009-10-08 16:53:31+05:30  Cprogrammer
- * added code for account management
- *
- * Revision 1.4  2009-10-07 11:51:38+05:30  Cprogrammer
- * added option 'D' to use non-escaped mysql string
- *
- * Revision 1.3  2009-10-07 09:59:18+05:30  Cprogrammer
- * initialize optind
- *
- * Revision 1.2  2009-10-06 22:23:46+05:30  Cprogrammer
- * use config.h to include correct pam header files
- *
- * Revision 1.1  2009-10-06 12:01:31+05:30  Cprogrammer
- * Initial revision
- *
- *
  * pam-multi.c - Generic PAM Authentication module
  * Copyright (C) <2008>  Manvendra Bhangui <mbhangui@gmail.com>
  *
@@ -98,7 +34,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifdef HAVE_PWD_H
 #include <pwd.h>
+#endif
+#ifdef HAVE_CRYPT_H
+#include <crypt.h>
+#endif
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
 #endif
@@ -1377,3 +1318,68 @@ struct pam_module _pam_multi = {
 	pam_sm_chauthtok
 };
 #endif
+
+/*
+ * $Log: pam-multi.c,v $
+ * Revision 1.20  2021-07-18 08:27:16+05:30  Cprogrammer
+ * fixed salt size
+ *
+ * Revision 1.19  2020-10-04 09:21:32+05:30  Cprogrammer
+ * set optreset=1 for Darwin
+ *
+ * Revision 1.18  2020-10-03 12:29:44+05:30  Cprogrammer
+ * Darwin Port
+ *
+ * Revision 1.17  2020-09-29 11:07:05+05:30  Cprogrammer
+ * replaced LOG_EMERG with LOG_INFO
+ * changed/added debug statements
+ *
+ * Revision 1.16  2020-09-23 11:01:37+05:30  Cprogrammer
+ * fold braces for readability
+ *
+ * Revision 1.15  2020-09-22 00:17:52+05:30  Cprogrammer
+ * FreeBSD port
+ *
+ * Revision 1.14  2019-07-03 19:35:49+05:30  Cprogrammer
+ * load libmysqlclient/libmariadb dynamically using load_mysql.c
+ *
+ * Revision 1.13  2018-09-12 12:55:04+05:30  Cprogrammer
+ * fixed SIGSEGV in _pam_log()
+ *
+ * Revision 1.12  2010-05-05 20:13:41+05:30  Cprogrammer
+ * use environment variable AUTHSERVICE for service identifier
+ *
+ * Revision 1.11  2010-04-10 14:50:16+05:30  Cprogrammer
+ * changed all units to seconds to avoid mistakes during comparision
+ *
+ * Revision 1.10  2009-10-17 20:14:09+05:30  Cprogrammer
+ * duplicate definition of pam_err removed
+ *
+ * Revision 1.9  2009-10-17 16:53:45+05:30  Cprogrammer
+ * fix for DARWIN
+ *
+ * Revision 1.8  2009-10-12 08:33:41+05:30  Cprogrammer
+ * rearranged functions
+ * completed run_command() function
+ *
+ * Revision 1.7  2009-10-11 11:34:57+05:30  Cprogrammer
+ * prevent doS
+ *
+ * Revision 1.6  2009-10-11 09:38:51+05:30  Cprogrammer
+ * completed acct_mgmt
+ *
+ * Revision 1.5  2009-10-08 16:53:31+05:30  Cprogrammer
+ * added code for account management
+ *
+ * Revision 1.4  2009-10-07 11:51:38+05:30  Cprogrammer
+ * added option 'D' to use non-escaped mysql string
+ *
+ * Revision 1.3  2009-10-07 09:59:18+05:30  Cprogrammer
+ * initialize optind
+ *
+ * Revision 1.2  2009-10-06 22:23:46+05:30  Cprogrammer
+ * use config.h to include correct pam header files
+ *
+ * Revision 1.1  2009-10-06 12:01:31+05:30  Cprogrammer
+ * Initial revision
+ */

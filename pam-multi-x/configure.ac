@@ -31,7 +31,7 @@ saveCPPFLAGS="$CPPFLAGS"
 CPPFLAGS="${CPPFLAGS} -Dlint -I/usr/include/mysql -I/usr/local/include/mysql -I/usr/local/mysql/include -I/usr/include/qmail -I/usr/local/include/qmail"
 AC_CHECK_HEADERS([arpa/inet.h netinet/in.h netdb.h string.h strings.h sys/socket.h sys/types.h sys/stat.h])
 AC_CHECK_HEADERS([sys/param.h fcntl.h syslog.h unistd.h stdarg.h errno.h crypt.h shadow.h dlfcn.h mysql.h])
-AC_CHECK_HEADERS([endian.h sys/endian.h])
+AC_CHECK_HEADERS([pwd.h endian.h sys/endian.h])
 AC_CHECK_TYPE([bool],AC_DEFINE(HAVE_BOOL, 1, have bool typedef),,[#include <mysql.h>])
 CPPFLAGS=$saveCPPFLAGS
 
