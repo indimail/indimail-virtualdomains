@@ -1,20 +1,29 @@
 #!/bin/sh
 #
-# $Id: vadddomain_handle.in,v 2.25 2023-09-05 21:48:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.26 2023-11-26 19:55:28+05:30 Cprogrammer Exp mbhangui $
 
 domaindir=@domaindir@
+use_etrn=0
 OPTS=$(getopt -o ateh:T:q:l:bB:E:u:vVRi:g:d:Or:CD:H:U:P:s:p:cfm:S:I: -- "$@")
 eval set -- "$OPTS"
 while true; do
 	case "$1" in
-		-a|-t|-e|-b|-v|-V|-R|-O|-C|-c|-f|-A)
+		-t)
+		use_etrn=1
+		shift 1
+		;;
+		-a|-e|-b|-v|-V|-R|-O|-C|-c|-f|-A)
 		shift 1
 		;;
 		-d)
 		domaindir=$2
 		shift 2
 		;;
-		-h|-T|-q|-l|-B|-E|-u|-i|-g|-d|-r|-D|-H|-U|-P|-s|-p|-c|-m|-S|-I)
+		-T)
+		use_etrn=2
+		shift 2
+		;;
+		-h|-q|-l|-B|-E|-u|-i|-g|-d|-r|-D|-H|-U|-P|-s|-p|-c|-m|-S|-I)
 		shift 2
 		;;
 		--)
@@ -45,8 +54,11 @@ if [ -n "$SERVICEDIR" ] ; then
 else
 	servicedir=@servicedir@*
 fi
-/bin/ls $servicedir/qmail-smtpd.*/variables/PLUGIN*init 2>/dev/null | sed s'{/variables/.*{{'g 
-/bin/ls -d $servicedir/inlookup.* $servicedir/*-send.*
+if [ $use_etrn -eq 0 ] ; then
+	/bin/ls $servicedir/qmail-smtpd.*/variables/PLUGIN*init 2>/dev/null | sed s'{/variables/.*{{'g 
+	/bin/ls -d $servicedir/inlookup.*
+fi
+/bin/ls -d $servicedir/*-send.*
 ) | while read line
 do
 	echo "Sending SIGHUP to $line"
@@ -55,42 +67,50 @@ done
 # print domain information
 @prefix@/bin/vdominfo $domain
 
-# create user for bogofilter
-echo "Creating standard users for spam filter (bogofilter)"
-for i in ham spam register-ham register-spam
-do
-	@prefix@/bin/valias -i '&'"B"$i $i@$domain
-	if [ $? -eq 0 ] ; then
-		printf "Created alias %30s --> &B%s\n" $i@$domain $i
-	fi
-done
-echo
-echo "Creating pre and post filters prefilt@$domain, postfilt@$domain"
-for i in prefilt postfilt
-do
-	@prefix@/bin/vadduser -d -e $i@$domain  xxxxxxxx
+if [ $use_etrn -eq 0 ] ; then
+	# create user for bogofilter
+	echo "Creating standard users for spam filter (bogofilter)"
+	for i in ham spam register-ham register-spam
+	do
+		@prefix@/bin/valias -i '&'"B"$i $i@$domain
+		if [ $? -eq 0 ] ; then
+			printf "Created alias %30s --> &B%s\n" $i@$domain $i
+		fi
+	done
 	echo
-done
+	echo "Creating pre and post filters prefilt@$domain, postfilt@$domain"
+	for i in prefilt postfilt
+	do
+		@prefix@/bin/vadduser -d -e $i@$domain  xxxxxxxx
+		echo
+	done
 
-# create rule for moving spam, virus emails to folders
-echo "creating rules for spam, virus detected emails"
-@prefix@/bin/vcfilter -i -t  spamFilter -c "Starts with" -k "Yes, spamicity=" -f Spam   -b 0 -h "X-Bogosity" \
-	prefilt@$domain
-if [ $? -eq 0 ] ; then
-	echo "Created prefilter to filter SPAM"
-fi
-@prefix@/bin/vcfilter -i -t virusFilter -c "Equals" -k "virus found" -f Quarantine -b 0 -h "X-QHPSI" \
-	prefilt@$domain
-if [ $? -eq 0 ] ; then
-	echo "Created prefilter to filter virus"
-fi
-echo
+	# create rule for moving spam, virus emails to folders
+	echo "creating rules for spam, virus detected emails"
+	@prefix@/bin/vcfilter -i -t  spamFilter -c "Starts with" -k "Yes, spamicity=" -f Spam   -b 0 -h "X-Bogosity" \
+		prefilt@$domain
+	if [ $? -eq 0 ] ; then
+		echo "Created prefilter to filter SPAM"
+	fi
+	@prefix@/bin/vcfilter -i -t virusFilter -c "Equals" -k "virus found" -f Quarantine -b 0 -h "X-QHPSI" \
+		prefilt@$domain
+	if [ $? -eq 0 ] ; then
+		echo "Created prefilter to filter virus"
+	fi
+	echo
 
-echo "Domain Directory content"
-# display domain directory
-/bin/ls -dl $domaindir/domains/$domain
-/bin/ls -al $domaindir/domains/$domain
-echo
+	echo "Domain Directory content"
+	# display domain directory
+	/bin/ls -dl $domaindir/domains/$domain
+	/bin/ls -al $domaindir/domains/$domain
+	echo
+else
+	echo "Domain Directory content"
+	# display domain directory
+	/bin/ls -dl $domaindir/autoturn/$domain
+	/bin/ls -al $domaindir/autoturn/$domain
+	echo
+fi
 
 # get securely chown, chmod path
 PATH=/usr/bin:/usr/sbin:/bin
@@ -120,10 +140,15 @@ do
 	fi
 done
 echo
-vuserinfo postmaster@$domain
+if [ $use_etrn -eq 0 ] ; then
+	vuserinfo postmaster@$domain
+fi
 exit 0
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.26  2023-11-26 19:55:28+05:30  Cprogrammer
+# handle etrn/atrn domain creation
+#
 # Revision 2.25  2023-09-05 21:48:01+05:30  Cprogrammer
 # allow both textual and numberical values for -c and -h option
 #

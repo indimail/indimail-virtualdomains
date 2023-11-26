@@ -1,5 +1,5 @@
 /*
- * $Id: vadddomain.c,v 1.17 2023-07-17 11:46:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vadddomain.c,v 1.18 2023-11-26 19:53:52+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -73,7 +73,7 @@
 #include "get_hashmethod.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.17 2023-07-17 11:46:59+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.18 2023-11-26 19:53:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -418,13 +418,43 @@ write_file(char *domain, char *fn, int fnlen, char *str, int len)
 }
 
 int
+do_posthandle(int argc, char **argv)
+{
+	char           *ptr, *base_argv0;
+	int             i;
+
+	for (i = 1, tmp1.len = 0; i < argc; i++) {
+		if (!stralloc_append(&tmp1, " ") ||
+				!stralloc_cats(&tmp1, argv[i]))
+			die_nomem();
+	}
+	if (!stralloc_0(&tmp1))
+		die_nomem();
+	if (!(ptr = env_get("POST_HANDLE"))) {
+		i = str_rchr(argv[0], '/');
+		if (!*(base_argv0 = (argv[0] + i)))
+			base_argv0 = argv[0];
+		else
+			base_argv0++;
+		return (post_handle("%s/%s%s", LIBEXECDIR, base_argv0, tmp1.s));
+	} else {
+		if (setuser_privileges(Uid, Gid, "indimail")) {
+			strnum1[fmt_ulong(strnum1, Uid)] = 0;
+			strnum2[fmt_ulong(strnum2, Gid)] = 0;
+			strerr_die5sys(111, "vadddomain: setuser_privilege: (", strnum1, "/", strnum2, "): ");
+		}
+		return (post_handle("%s%s", ptr, tmp1.s));
+	}
+}
+
+int
 main(int argc, char **argv)
 {
 	int             err, i, encrypt_flag, random, docram;
 	uid_t           uid;
 	gid_t           gid;
 	extern int      create_flag;
-	char           *domaindir, *ptr, *base_argv0, *base_path, *dir_t, *passwd, *domain, *user,
+	char           *domaindir, *ptr, *base_path, *dir_t, *passwd, *domain, *user,
 				   *bounceEmail, *quota, *ipaddr, *s, *hash;
 	char            dbuf[FMT_ULONG + FMT_ULONG + 21];
 	char           *auto_ids[] = {
@@ -577,7 +607,7 @@ main(int argc, char **argv)
 	}
 #endif
 	if (use_etrn)
-		return (0);
+		return (do_posthandle(argc, argv));
 	if (bounceEmail) {
 		if (bounceEmail[i = str_chr(bounceEmail, '@')] || *bounceEmail == '/') {
 			if (!stralloc_copyb(&tmp2, "| ", 2) || !stralloc_cats(&tmp2, PREFIX) ||
@@ -689,25 +719,14 @@ main(int argc, char **argv)
 	}
 	if (!stralloc_0(&tmp1))
 		die_nomem();
-	if (!(ptr = env_get("POST_HANDLE"))) {
-		i = str_rchr(argv[0], '/');
-		if (!*(base_argv0 = (argv[0] + i)))
-			base_argv0 = argv[0];
-		else
-			base_argv0++;
-		return (post_handle("%s/%s%s", LIBEXECDIR, base_argv0, tmp1.s));
-	} else {
-		if (setuser_privileges(Uid, Gid, "indimail")) {
-			strnum1[fmt_ulong(strnum1, Uid)] = 0;
-			strnum2[fmt_ulong(strnum2, Gid)] = 0;
-			strerr_die5sys(111, "vadddomain: setuser_privilege: (", strnum1, "/", strnum2, "): ");
-		}
-		return (post_handle("%s%s", ptr, tmp1.s));
-	}
+	return (do_posthandle(argc, argv));
 }
 
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.18  2023-11-26 19:53:52+05:30  Cprogrammer
+ * do post handle when creating etrn, atrn domains
+ *
  * Revision 1.17  2023-07-17 11:46:59+05:30  Cprogrammer
  * set hash method from hash_method control file in controldir, domaindir
  *

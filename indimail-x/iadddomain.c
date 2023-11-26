@@ -1,11 +1,5 @@
 /*
- * $Log: iadddomain.c,v $
- * Revision 1.2  2020-10-19 12:46:12+05:30  Cprogrammer
- * use /var/indomain/domains for domain/bulk_mail
- *
- * Revision 1.1  2019-04-14 18:31:49+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: iadddomain.c,v 1.3 2023-11-26 19:52:49+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -51,7 +45,7 @@
 #include "vdelfiles.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iadddomain.c,v 1.2 2020-10-19 12:46:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iadddomain.c,v 1.3 2023-11-26 19:52:49+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -195,7 +189,7 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 		if (substdio_puts(&ssout, dir) ||
 				substdio_put(&ssout, "/", 1) ||
 				substdio_puts(&ssout, domain) ||
-				substdio_put(&ssout, "/Maildir\n", 9)) {
+				substdio_put(&ssout, "/Maildir/\n", 10)) {
 			strerr_warn3("adddomain: write error: ", tmpbuf.s, ": ", &strerr_sys);
 			return (-1);
 		}
@@ -203,7 +197,7 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 	if (use_etrn == 2) {
 		if (substdio_put(&ssout, "./", 2) ||
 				substdio_puts(&ssout, ipaddr) ||
-				substdio_put(&ssout, "/Maildir\n", 9)) {
+				substdio_put(&ssout, "/Maildir/\n", 10)) {
 			strerr_warn3("adddomain: write error: ", tmpbuf.s, ": ", &strerr_sys);
 			return (-1);
 		}
@@ -290,3 +284,16 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 	}
 	return (0);
 }
+
+/*
+ * $Log: iadddomain.c,v $
+ * Revision 1.3  2023-11-26 19:52:49+05:30  Cprogrammer
+ * fix .qmail-default for etrn, atrn domains
+ *
+ * Revision 1.2  2020-10-19 12:46:12+05:30  Cprogrammer
+ * use /var/indomain/domains for domain/bulk_mail
+ *
+ * Revision 1.1  2019-04-14 18:31:49+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
