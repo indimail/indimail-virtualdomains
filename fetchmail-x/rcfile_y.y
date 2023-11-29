@@ -10,25 +10,15 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/file.h>
-#if defined(HAVE_SYS_WAIT_H)
 #include <sys/wait.h>
-#endif
 #include <sys/stat.h>
 #include <errno.h>
-#if defined(STDC_HEADERS)
 #include <stdlib.h>
-#endif
-#if defined(HAVE_UNISTD_H)
 #include <unistd.h>
-#endif
 #include <string.h>
 
-#if defined(__CYGWIN__)
-#include <sys/cygwin.h>
-#endif /* __CYGWIN__ */
-
-#include "fetchmail.h"
 #include "i18n.h"
+#include "rcfile_l.h"
   
 /* parser reads these */
 char *rcfile;			/* path name of rc file */
@@ -49,9 +39,16 @@ static void reset_server(const char *name, int skip);
 /* these should be of size PATH_MAX */
 char currentwd[1024] = "", rcfiledir[1024] = "";
 
-/* using Bison, this arranges that yydebug messages will show actual tokens */
-extern char * yytext;
-#define YYPRINT(fp, type, val)	fprintf(fp, " = \"%s\"", yytext)
+/* lexer interface */
+extern int prc_lineno;
+void yyerror (const char *s)
+/* report a syntax or out-of-memory error */
+{
+    report_at_line(stderr, 0, rcfile, prc_lineno, GT_("%s at %s"), s, 
+		   (yytext && yytext[0]) ? yytext : GT_("end of input"));
+    prc_errflag++;
+}
+
 %}
 
 %union {
@@ -61,7 +58,7 @@ extern char * yytext;
 }
 
 %token DEFAULTS POLL SKIP VIA AKA LOCALDOMAINS PROTOCOL
-%token AUTHENTICATE TIMEOUT KPOP SDPS ENVELOPE QVIRTUAL
+%token AUTHENTICATE TIMEOUT IDLETIMEOUT KPOP SDPS ENVELOPE QVIRTUAL
 %token USERNAME PASSWORD FOLDER SMTPHOST FETCHDOMAINS MDA BSMTP LMTP
 %token SMTPADDRESS SMTPNAME SPAMRESPONSE PRECONNECT POSTCONNECT LIMIT WARNINGS
 %token INTERFACE MONITOR PLUGIN PLUGOUT
@@ -73,11 +70,11 @@ extern char * yytext;
 %token <proto> PROTO AUTHTYPE
 %token <sval>  STRING
 %token <number> NUMBER
-%token NO KEEP FLUSH LIMITFLUSH FETCHALL REWRITE FORCECR STRIPCR PASS8BITS 
-%token DROPSTATUS DROPDELIVERED
+%token NO KEEP MOVETO FLUSH LIMITFLUSH FETCHALL REWRITE FORCECR STRIPCR PASS8BITS
+%token DROPSTATUS DROPDELIVERED FORCEIDLE
 %token DNS SERVICE PORT UIDL INTERVAL MIMEDECODE IDLE CHECKALIAS 
 %token SSL SSLKEY SSLCERT SSLPROTO SSLCERTCK SSLCERTFILE SSLCERTPATH SSLCOMMONNAME SSLFINGERPRINT
-%token PRINCIPAL ESMTPNAME ESMTPPASSWORD AUTHMETH
+%token PRINCIPAL ESMTPNAME ESMTPPASSWORD AUTHMETHOD
 %token TRACEPOLLS
 
 %expect 2
@@ -86,12 +83,9 @@ extern char * yytext;
 
 %%
 
-rcfile		: /* empty */
-		| statement_list
-		;
-
-statement_list	: statement
+statement_list	: /* EMPTY */
 		| statement_list statement
+		| error
 		;
 
 optmap		: MAP | /* EMPTY */;
@@ -124,10 +118,10 @@ statement	: SET LOGFILE optmap STRING	{run.logfile = prependdir ($4, rcfiledir);
  */
 		| define_server serverspecs		{record_current();}
 		| define_server serverspecs userspecs
-
-/* detect and complain about the most common user error */
+/* detect and complain about the most common user error
+ * - note this causes 2 Shift/Reduce conflicts */
 		| define_server serverspecs userspecs serv_option
-			{yyerror(GT_("server option after user options"));}
+			{yyerror(GT_("server option after user options")); yyerrok; }
 		;
 
 define_server	: POLL STRING		{reset_server($2, FALSE); free($2);}
@@ -163,6 +157,7 @@ serv_option	: AKA alias_list
 					    current.server.service = KPOP_PORT;
 					}
 		| PRINCIPAL STRING	{current.server.principal = $2;}
+		| AUTHMETHOD STRING	{current.server.authmethod = $2;}
 		| ESMTPNAME STRING	{current.server.esmtp_name = $2;}
 		| ESMTPPASSWORD STRING	{current.server.esmtp_password = $2;}
 		| PROTOCOL SDPS		{
@@ -198,6 +193,8 @@ serv_option	: AKA alias_list
 			{current.server.authenticate = $2;}
 		| TIMEOUT NUMBER
 			{current.server.timeout = $2;}
+		| IDLETIMEOUT NUMBER
+			{current.server.idle_timeout = $2;}
 		| ENVELOPE NUMBER STRING
 					{
 					    current.server.envelope = $3;
@@ -320,6 +317,7 @@ user_option	: TO mapping_list HERE
 		| POSTCONNECT STRING	{current.postconnect = $2;}
 
 		| KEEP			{current.keep        = FLAG_TRUE;}
+		| MOVETO STRING		{current.moveto      = $2;}
 		| FLUSH			{current.flush       = FLAG_TRUE;}
 		| LIMITFLUSH		{current.limitflush  = FLAG_TRUE;}
 		| FETCHALL		{current.fetchall    = FLAG_TRUE;}
@@ -331,6 +329,7 @@ user_option	: TO mapping_list HERE
                 | DROPDELIVERED         {current.dropdelivered = FLAG_TRUE;}
 		| MIMEDECODE		{current.mimedecode  = FLAG_TRUE;}
 		| IDLE			{current.idle        = FLAG_TRUE;}
+		| FORCEIDLE		{current.forceidle   = FLAG_TRUE;}
 
 		| SSL 	                {
 #ifdef SSL_ENABLE
@@ -360,6 +359,7 @@ user_option	: TO mapping_list HERE
                 | NO DROPDELIVERED      {current.dropdelivered = FLAG_FALSE;}
 		| NO MIMEDECODE		{current.mimedecode  = FLAG_FALSE;}
 		| NO IDLE		{current.idle        = FLAG_FALSE;}
+		| NO FORCEIDLE		{current.forceidle   = FLAG_FALSE;}
 
 		| NO SSL		{current.use_ssl     = FLAG_FALSE;}
 		| NO SSLCERTCK		{current.sslcertck   = FLAG_FALSE;}
@@ -376,27 +376,12 @@ user_option	: TO mapping_list HERE
 		;
 %%
 
-/* lexer interface */
-extern char *rcfile;
-extern int prc_lineno;
-extern char *yytext;
-extern FILE *yyin;
-
 static struct query *hosttail;	/* where to add new elements */
-
-void yyerror (const char *s)
-/* report a syntax error */
-{
-    report_at_line(stderr, 0, rcfile, prc_lineno, GT_("%s at %s"), s, 
-		   (yytext && yytext[0]) ? yytext : GT_("end of input"));
-    prc_errflag++;
-}
 
 /** check that a configuration file is secure, returns PS_* status codes */
 int prc_filecheck(const char *pathname,
 		  const flag securecheck /** shortcuts permission, filetype and uid tests if false */)
 {
-#ifndef __EMX__
     struct stat statbuf;
 
     errno = 0;
@@ -430,28 +415,18 @@ int prc_filecheck(const char *pathname,
 	return(PS_IOERR);
     }
 
-#ifndef __BEOS__
-#ifdef __CYGWIN__
-    if (cygwin_internal(CW_CHECK_NTSEC, pathname))
-#endif /* __CYGWIN__ */
     if (statbuf.st_mode & (S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH | S_IXOTH))
     {
 	fprintf(stderr, GT_("File %s must have no more than -rwx------ (0700) permissions.\n"), 
 		pathname);
 	return(PS_IOERR);
     }
-#endif /* __BEOS__ */
 
-#ifdef HAVE_GETEUID
     if (statbuf.st_uid != geteuid())
-#else
-    if (statbuf.st_uid != getuid())
-#endif /* HAVE_GETEUID */
     {
 	fprintf(stderr, GT_("File %s must be owned by you.\n"), pathname);
 	return(PS_IOERR);
     }
-#endif
     return(PS_SUCCESS);
 }
 
@@ -488,15 +463,20 @@ int prc_parse_file (const char *pathname, const flag securecheck)
 	return(PS_IOERR);
     }
 
-    yyparse();		/* parse entire file */
+    int parseerr = yyparse();		/* parse entire file */
+
+    if (2 == parseerr) {
+	report(stderr, GT_("%s: parsing rcfile %s: memory exhausted\n"), program_name, pathname);
+	return PS_IOERR;
+    }
 
     if (yyin != stdin)
        fclose(yyin);	/* not checking this should be safe, file mode was r */
 
-    if (prc_errflag) 
-	return(PS_SYNTAX);
-    else
-	return(PS_SUCCESS);
+    if (prc_errflag || parseerr)
+	return PS_SYNTAX;
+
+    return PS_SUCCESS;
 }
 
 static void reset_server(const char *name, int skip)
@@ -507,7 +487,6 @@ static void reset_server(const char *name, int skip)
     current.smtp_socket = -1;
     current.server.pollname = xstrdup(name);
     current.server.skip = skip;
-    current.server.principal = (char *)NULL;
 }
 
 

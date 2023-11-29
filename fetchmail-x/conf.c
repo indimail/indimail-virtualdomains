@@ -5,21 +5,17 @@
  */
 
 #include "config.h"
+#include "fetchmail.h"
 #include "tunable.h"
 
 #include <stdio.h>
 #include <ctype.h>
-#if defined(STDC_HEADERS)
 #include <stdlib.h>
-#endif
-#if defined(HAVE_UNISTD_H)
 #include <unistd.h>
-#endif
 #include <string.h>
 #include <pwd.h>
 #include <errno.h>
 
-#include "fetchmail.h"
 
 /* Python prettyprinting functions */
 
@@ -282,8 +278,8 @@ void dump_config(struct runctl *runp, struct query *querylist)
 		stringdump("auth", "kerberos_v4");
 	    else if (ctl->server.authenticate == A_KERBEROS_V5)
 		stringdump("auth", "kerberos_v5");
-	    else if (ctl->server.authenticate == A_SSH)
-		stringdump("auth", "ssh");
+	    else if (ctl->server.authenticate == A_IMPLICIT)
+		stringdump("auth", "implicit");
 	    else if (ctl->server.authenticate == A_OTP)
 		stringdump("auth", "otp");
 	    else if (ctl->server.authenticate == A_MSN)
@@ -310,8 +306,8 @@ void dump_config(struct runctl *runp, struct query *querylist)
 	    if (ctl->server.esmtp_password)
 	        stringdump("esmtppassword",ctl->server.esmtp_password);
 #ifdef INDIMAIL
-		if (ctl->server.authmeth)
-	    	stringdump("authmethod", ctl->server.authmeth);
+		if (ctl->server.authmethod)
+	    	stringdump("authmethod", ctl->server.authmethod);
 #endif
 	    booldump("tracepolls", ctl->server.tracepolls);
 	    indent(0);
@@ -321,6 +317,8 @@ void dump_config(struct runctl *runp, struct query *querylist)
 		case BHREJECT: puts("'badheader': FALSE,"); break;
 		case BHACCEPT: puts("'badheader': TRUE,"); break;
 	    }
+
+	    numdump("idletimeout", ctl->server.idle_timeout);
 
 	    indent(0);
 	    fputs("'users': ", stdout);
@@ -362,6 +360,7 @@ void dump_config(struct runctl *runp, struct query *querylist)
 	booldump("dropdelivered", ctl->dropdelivered);
 	booldump("mimedecode", ctl->mimedecode);
 	booldump("idle", ctl->idle);
+	booldump("forceidle", ctl->forceidle);
 
 	stringdump("mda", ctl->mda);
 	stringdump("bsmtp", ctl->bsmtp);

@@ -1,18 +1,14 @@
 # Makefile for fetchmail
 
 SUBDIRS=		. po
-AUTOMAKE_OPTIONS=	1.12 foreign no-dist-gzip dist-xz subdir-objects dist-lzip
+AUTOMAKE_OPTIONS=	1.12 foreign no-dist-gzip dist-xz color-tests parallel-tests subdir-objects
 
 .DELETE_ON_ERROR:	# yes please
 .PRECIOUS:		test-suite.log
 
-AM_CPPFLAGS=		-I$(srcdir)/libesmtp
 ACLOCAL_AMFLAGS=	-I m4 -I m4-local
 AM_YFLAGS=		-t -d
-# listing socket.$(OBJEXT) here is a hack to compile socket.c pretty
-# early in order to fail it early on outdated OpenSSL libraries,
-# without building a few dozen other files first.
-BUILT_SOURCES=		rcfile_y.h socket.$(OBJEXT)
+BUILT_SOURCES=		rcfile_y.h rcfile_l.h
 
 bin_PROGRAMS=		fetchmail
 
@@ -53,19 +49,12 @@ DEPENDENCIES=		libfm.a $(LIBOBJS)
 
 check_PROGRAMS=
 
-TESTS=			t.smoke t.validate-xhtml10 t.validate-xhtml t.x509_name_match t.realpath t.tls-aux
+TESTS=			t.smoke t.validate-xhtml10 t.validate-xhtml t.x509_name_match t.realpath t.tls-aux \
+			t.operation
 LOG_COMPILER=		env LC_ALL=C TZ=UTC $(SHELL)
 
-if NEED_TRIO
-noinst_LIBRARIES+=	libtrio.a
-libtrio_a_SOURCES=	trio/triostr.c trio/trio.c trio/trionan.c \
-			trio/trio.h trio/triop.h trio/triodef.h \
-			trio/trionan.h trio/triostr.h
-check_PROGRAMS+=	regression
-regression_SOURCES=	trio/regression.c
-LDADD+=			libtrio.a -lm
-TESTS+=			t.regression
-endif
+rcfile_l.h:	rcfile_l.l
+	$(SHELL) $(YLWRAP) $(srcdir)/rcfile_l.l lex.yy.c $(srcdir)/rcfile_l.c rcfile_l.h $(srcdir)/rcfile_l.h -- $(LEXCOMPILE)
 
 fetchmail_SOURCES=	fetchmail.h getopt.h \
 		gettext.h i18n.h kerberos.h fm_md5.h mx.h netrc.h smtp.h \
@@ -101,12 +90,6 @@ endif
 if RPA_ENABLE
 fetchmail_SOURCES += rpa.c
 endif
-if NEED_GETNAMEINFO
-fetchmail_SOURCES += KAME/getnameinfo.c
-endif
-if NEED_GETADDRINFO
-fetchmail_SOURCES += libesmtp/getaddrinfo.h libesmtp/getaddrinfo.c
-endif
 
 tls_aux_SOURCES = 	tls-aux.c
 
@@ -119,7 +102,7 @@ rfc2047e_CFLAGS=	-DTEST
 
 rfc822valid_CFLAGS=	-DTEST
 
-rfc822_CFLAGS=		-DMAIN
+rfc822_CFLAGS=		-DTEST
 
 tls_aux_CFLAGS=		-DTEST
 
@@ -170,8 +153,8 @@ distdirs = rh-config contrib beos
 
 EXTRA_DIST=	$(DISTDOCS) $(distdirs) \
 		fetchmail.spec fetchmail.xpm \
-		trio/CHANGES trio/README \
 		strlcpy.3 bighand.png \
+		rcfile_l.h \
 		m4/codeset.m4 \
 		m4/gettext.m4 \
 		m4/glibc2.m4 \
@@ -203,9 +186,10 @@ EXTRA_DIST=	$(DISTDOCS) $(distdirs) \
 		m4/xsize.m4 \
 		m4-local/ac-archive-license.txt \
 		m4-local/ac_ma_search_package.m4 \
-		$(TESTS) t.rc t.regression \
+		$(TESTS) t.rc t.operation.mock-pop3-server.py \
 		dist-tools/html2txt \
 		dist-tools/git-commit-po-updates.sh \
+		delete-colgroup.sed \
 		Doxyfile
 
 fetchmailconf:
@@ -232,8 +216,8 @@ NOTES: design-notes.html esrs-design-notes.html $(srcdir)/dist-tools/html2txt
 TODO: todo.html $(srcdir)/dist-tools/html2txt
 	AWK=$(AWK) $(SHELL) $(srcdir)/dist-tools/html2txt $(srcdir)/todo.html >$@
 
-fetchmail-man.html: fetchmail.html
-	sed -Ee '/<colgroup>/,/<\/colgroup>/d' $< >$@
+fetchmail-man.html: fetchmail.html delete-colgroup.sed
+	sed -E -f $(srcdir)/delete-colgroup.sed $< >$@
 
 dist-hook: fetch-translations
 	cd $(distdir) && find $(distdirs) po -name .git -type d -prune -exec rm -rf '{}' ';'
@@ -241,6 +225,7 @@ dist-hook: fetch-translations
 	if ! $(top_srcdir)/dist-tools/git-commit-po-updates.sh -n ; then \
 		printf '\n*** There are new translations. Please add them to the distribution. ***\n\n' ; exit 1 ; \
 	fi
+	test -r $(distdir)/rcfile_l.h && touch $(distdir)/rcfile_l.h # mark updated to avoid distcheck from breaking
 
 # this target expects a .rsyncs file with lines of this format:
 # host:directory/

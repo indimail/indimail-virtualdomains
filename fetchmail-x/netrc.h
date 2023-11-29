@@ -1,4 +1,4 @@
-/* netrc.h -- declarations for netrc.c
+/** \file netrc.h -- declarations and documentation for netrc.c
  * For license terms, see the file COPYING in this directory.
  */
 
@@ -15,40 +15,38 @@
 # define __END_DECLS /* empty */
 #endif
 
-#undef __P
-#if defined (__STDC__) || defined (_AIX) || (defined (__mips) && defined (_SYSTYPE_SVR4)) || defined(WIN32) || defined(__cplusplus)
-# define __P(protos) protos
-#else
-# define __P(protos) ()
-#endif
-
-/* The structure used to return account information from the .netrc. */
+/** netrc structure used to carry account information from the .netrc. */
 typedef struct _netrc_entry {
-  /* The exact host name given in the .netrc, NULL if default. */
+  /** The exact host name given in the .netrc, NULL if default. */
   char *host;
 
-  /* The login name of the user. */
+  /** The login name of the user. */
   char *login;
 
-  /* Password for the account (NULL, if none). */
+  /** Password for the account (NULL, if none). */
   char *password;
 
-  /* Pointer to the next entry in the list. */
+  /** Pointer to the next entry in the list. */
   struct _netrc_entry *next;
 } netrc_entry;
 
 __BEGIN_DECLS
-/* Parse FILE as a .netrc file (as described in ftp(1)), and return a
-   list of entries.  NULL is returned if the file could not be
-   parsed. Diagnostic messages are through report(), except for fopen() errors with ENOENT. */
-netrc_entry *parse_netrc __P((char *file));
+/** Parse FILE as a .netrc file (as described in ftp(1)), and return a
+   singly-linked list of entries.
+   Diagnostic messages are through report(), except for fopen() errors with ENOENT.
+   \return NULL is returned if the file could not be
+   parsed.  */
+netrc_entry *parse_netrc (char *file);
 
-/* Return the netrc entry from LIST corresponding to HOST.  NULL is
-   returned if no such entry exists. */
-netrc_entry *search_netrc __P((netrc_entry *list, char *host, char *account));
+/** Search the netrc database for an account password.
+ * The DEFAULT entry is never matched, it is designed for anonftp auto-logins.
+ * \return the \a netrc_entry from \a list corresponding to \a host and user \a account.
+ * \return NULL is returned if no such entry exists.
+ */
+const netrc_entry *search_netrc (netrc_entry *list, char *host, char *account);
 
-/* Free the netrc list structure */
-void free_netrc __P((netrc_entry *list));
+/** Free memory for the entire \a list netrc_entry database */
+void free_netrc (netrc_entry *list);
 __END_DECLS
 
 #endif /* _NETRC_H_ */

@@ -6,34 +6,22 @@
  */
 
 #include  "config.h"
+#include "fetchmail.h"
+
 #include  <stdio.h>
 #include  <setjmp.h>
 #include  <errno.h>
 #include  <string.h>
-#ifdef HAVE_MEMORY_H
-#include  <memory.h>
-#endif /* HAVE_MEMORY_H */
-#if defined(STDC_HEADERS)
 #include  <stdlib.h>
 #include  <limits.h>
-#endif
-#if defined(HAVE_UNISTD_H)
 #include <unistd.h>
-#endif
 #if defined(HAVE_SYS_ITIMER_H)
 #include <sys/itimer.h>
 #endif
 #include  <signal.h>
-#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
-#endif
 
-#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
-#ifdef HAVE_NET_SOCKET_H
-#include <net/socket.h>
-#endif
 #include <netdb.h>
 #ifdef HAVE_PKG_hesiod
 #ifdef __cplusplus
@@ -55,8 +43,6 @@ extern "C" {
 #include "i18n.h"
 #include "socket.h"
 
-#include "fetchmail.h"
-#include "getaddrinfo.h"
 #include "tunable.h"
 
 #include "sdump.h"
@@ -98,7 +84,6 @@ void resetidletimeout(void)
 void set_timeout(int timeleft)
 /* reset the nonresponse-timeout */
 {
-#if !defined(__EMX__) && !defined(__BEOS__)
     struct itimerval ntimeout;
 
     if (timeleft == 0)
@@ -108,10 +93,9 @@ void set_timeout(int timeleft)
     ntimeout.it_value.tv_sec  = timeleft;
     ntimeout.it_value.tv_usec = 0;
     setitimer(ITIMER_REAL, &ntimeout, (struct itimerval *)NULL);
-#endif
 }
 
-static RETSIGTYPE timeout_handler (int signal)
+static void timeout_handler (int signal)
 /* handle SIGALRM signal indicating a server timeout */
 {
     (void)signal;
@@ -949,7 +933,7 @@ static int do_session(
     {
 	/* sigsetjmp returned zero -> normal operation */
 	char buf[MSGBUFSIZE+1], *realhost;
-	int count, newm, bytes;
+	int count, newm;
 	int fetches, dispatches, transient_errors, oldphase;
 	struct idlist *idp;
 
@@ -1336,6 +1320,7 @@ is restored."));
 
 		/* compute # of messages and number of new messages waiting */
 		stage = STAGE_GETRANGE;
+		unsigned long long bytes;
 		err = (ctl->server.base_protocol->getrange)(mailserver_socket, ctl, idp->id, &count, &newm, &bytes);
 		if (err != 0)
 		    goto cleanUp;
@@ -1365,10 +1350,10 @@ is restored."));
 							  "%d messages for %s",
 							  count), 
 				  count, buf);
-			if (bytes == -1)
+			if (bytes == (unsigned long long)-1) // mailbox size unsupported
 			    report_complete(stdout, ".\n");
 			else
-			    report_complete(stdout, GT_(" (%d octets).\n"), bytes);
+			    report_complete(stdout, GT_(" (%llu octets).\n"), bytes);
 		    }
 		    else
 		    {
@@ -1435,7 +1420,7 @@ is restored."));
 			if (err != 0)
 			    goto cleanUp;
 
-			if (bytes == -1)
+			if (bytes == (unsigned long long)-1)
 			{
 			    bytes = 0;
 			    for (i = 0; i < count; i++)
@@ -1571,7 +1556,7 @@ is restored."));
 	msg = GT_("missing or bad RFC822 header");
 	break;
     case PS_IOERR:
-	msg = GT_("MDA");
+	msg = get_sink_type(ctl);
 	break;
     case PS_ERROR:
 	msg = GT_("client/server synchronization");
@@ -1595,8 +1580,9 @@ is restored."));
     if (msg) {
 	if (phase == FORWARDING_WAIT || phase == LISTENER_WAIT
 		|| err == PS_SMTP)
-	    report(stderr, GT_("%s error while fetching from %s@%s and delivering to SMTP host %s\n"),
+	    report(stderr, GT_("%s error while fetching from %s@%s and delivering to %s host %s\n"),
 		    msg, ctl->remotename, ctl->server.pollname,
+		    get_sink_type(ctl),
 		    ctl->smtphost ? ctl->smtphost : GT_("unknown"));
 	else
 	    report(stderr, GT_("%s error while fetching from %s@%s\n"),

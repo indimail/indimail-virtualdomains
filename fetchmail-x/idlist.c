@@ -11,13 +11,10 @@
 #include <errno.h>
 #include <stdio.h>
 #include <limits.h>
-#if defined(STDC_HEADERS)
 #include <stdlib.h>
 #include <string.h>
-#endif
-#if defined(HAVE_UNISTD_H)
+#include <strings.h>
 #include <unistd.h>
-#endif
 
 
 /** Save string \a str to idlist \a idl with status \a status.

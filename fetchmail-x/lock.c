@@ -7,15 +7,9 @@
 #include "fetchmail.h"
 
 #include <stdio.h>
-#ifdef HAVE_STRING_H
 #include <string.h> /* strcat() */
-#endif
-#if defined(STDC_HEADERS)
 #include <stdlib.h>
-#endif
-#if defined(HAVE_UNISTD_H)
 #include <unistd.h>
-#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -67,16 +61,18 @@ void fm_lock_setup(struct runctl *ctl)
 static void unlockit(void)
 /* must-do actions for exit (but we can't count on being able to do malloc) */
 {
-    if (lockfile && lock_acquired && unlink(lockfile) && truncate(lockfile, (off_t)0))
-		;
+    if (lockfile && lock_acquired) {
+	if (unlink(lockfile)) {
+		int dummy = truncate(lockfile, (off_t)0);
+		(void)dummy;
+	}
+    }
 }
 
 void fm_lock_dispose(void)
 /* arrange for a lock to be removed on process exit */
 {
-#ifdef HAVE_ATEXIT
     atexit(unlockit);
-#endif
 }
 
 int fm_lock_state(void)
@@ -121,8 +117,8 @@ int fm_lock_state(void)
 		       /* but if we cannot truncate the file either,
 			* assume that we cannot write to it later,
 			* complain and quit. */
-		       report(stderr, GT_("fetchmail: cannot write to lockfile \"%s\" (%s), exiting\n"),
-			       lockfile, strerror(errno));
+		       report(stderr, GT_("fetchmail: cannot write to lockfile \"%s\" either (%s), exiting\n"),
+			       strerror(errno), lockfile);
 		       exit(PS_EXCLUDE);
 		   }
 	       }

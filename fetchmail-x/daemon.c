@@ -5,83 +5,43 @@
  */
 
 #include "config.h"
+#include "fetchmail.h"
 
 #include <stdio.h>
 #include <errno.h>
 #include <signal.h>
 #include <string.h>
 #include <sys/types.h>
-#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
-#endif
-#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
-#else /* !HAVE_FCNTL_H */
-#ifdef HAVE_SYS_FCNTL_H
-#include <sys/fcntl.h>
-#endif /* HAVE_SYS_FCNTL_H */
-#endif /* !HAVE_FCNTL_H */
 #include <sys/stat.h>	/* get umask(2) prototyped */
 
-#if defined(HAVE_UNISTD_H)
 #include <unistd.h>
-#endif
 
-#if defined(STDC_HEADERS)
 #include <stdlib.h>
-#endif
 
-#if defined(QNX)
-#include <unix.h>
-#endif
-
-#if !defined(HAVE_SETSID) && defined(SIGTSTP)
-#if defined(HAVE_TERMIOS_H)
-#  include <termios.h>		/* for TIOCNOTTY under Linux */
-#endif
-
-#if !defined(TIOCNOTTY) && defined(HAVE_SGTTY_H)
-#  include <sgtty.h>		/* for TIOCNOTTY under NEXTSTEP */
-#endif
-#endif /* !defined(HAVE_SETSID) && defined(SIGTSTP) */
+#include <termios.h>		/* for TIOCNOTTY under Linux */
 
 /* BSD portability hack */
 #if !defined(SIGCHLD) && defined(SIGCLD)
 #define SIGCHLD	SIGCLD
 #endif
 
-#include "fetchmail.h"
 #include "tunable.h"
 
-static RETSIGTYPE
+static void
 sigchld_handler (int sig)
 /* process SIGCHLD to obtain the exit code of the terminating process */
 {
-#if 	defined(HAVE_WAITPID)				/* the POSIX way */
     int status;
 
     while (waitpid(-1, &status, WNOHANG) > 0)
 	continue; /* swallow 'em up. */
-#elif 	defined(HAVE_WAIT3)				/* the BSD way */
-    pid_t pid;
-#if defined(HAVE_UNION_WAIT) && !defined(__FreeBSD__)
-    union wait status;
-#else
-    int status;
-#endif
-
-    while ((pid = wait3(&status, WNOHANG, 0)) > 0)
-	continue; /* swallow 'em up. */
-#else	/* Zooks! Nothing to do but wait(), and hope we don't block... */
-    int status;
-
-    wait(&status);
-#endif
     lastsig = SIGCHLD;
     (void)sig;
 }
 
-RETSIGTYPE null_signal_handler(int sig) { (void)sig; }
+void null_signal_handler(int sig) { (void)sig; }
 
 SIGHANDLERTYPE set_signal_handler(int sig, SIGHANDLERTYPE handler)
 /* 
@@ -92,37 +52,23 @@ SIGHANDLERTYPE set_signal_handler(int sig, SIGHANDLERTYPE handler)
  */
 {
   SIGHANDLERTYPE rethandler;
-#ifdef HAVE_SIGACTION
   struct sigaction sa_new, sa_old;
 
   memset (&sa_new, 0, sizeof sa_new);
   sigemptyset (&sa_new.sa_mask);
   sa_new.sa_handler = handler;
   sa_new.sa_flags = 0;
-#ifdef SA_RESTART	/* SunOS 4.1 portability hack */
   /* system call should restart on all signals except SIGALRM */
   if (sig != SIGALRM)
       sa_new.sa_flags |= SA_RESTART;
-#endif
-#ifdef SA_NOCLDSTOP	/* SunOS 4.1 portability hack */
   if (sig == SIGCHLD)
       sa_new.sa_flags |= SA_NOCLDSTOP;
-#endif
   sigaction(sig, &sa_new, &sa_old);
   rethandler = sa_old.sa_handler;
 #if defined(SIGPWR)
   if (sig == SIGCHLD)
      sigaction(SIGPWR, &sa_new, NULL);
 #endif
-#else /* HAVE_SIGACTION */
-  rethandler = signal(sig, handler);
-#if defined(SIGPWR)
-  if (sig == SIGCHLD)
-      signal(SIGPWR, handler);
-#endif
-  /* system call should restart on all signals except SIGALRM */
-  siginterrupt(sig, sig == SIGALRM);
-#endif /* HAVE_SIGACTION */
   return rethandler;
 }
 
@@ -170,38 +116,11 @@ daemonize (const char *logfile)
   /* Make ourselves the leader of a new process group with no
      controlling terminal */
 
-#if	defined(HAVE_SETSID)		/* POSIX */
   /* POSIX makes this soooo easy to do */
   if (setsid() < 0) {
     report(stderr, "setsid (%s)\n", strerror(errno));
     return(PS_IOERR);
   }
-#elif	defined(SIGTSTP)		/* BSD */
-  /* change process group */
-#ifndef __EMX__
-  setpgrp(0, getpid());
-#endif
-  /* lose controlling tty */
-  if ((fd = open("/dev/tty", O_RDWR)) >= 0) {
-    ioctl(fd, TIOCNOTTY, (char *) 0);
-    close(fd);	/* not checking should be safe, there were no writes */
-  }
-#else					/* SVR3 and older */
-  /* change process group */
-#ifndef __EMX__
-  setpgrp();
-#endif
-  
-  /* lose controlling tty */
-  set_signal_handler(SIGHUP, SIG_IGN);
-  if ((childpid = fork()) < 0) {
-    report(stderr, "fork (%s)\n", strerror(errno));
-    return(PS_IOERR);
-  }
-  else if (childpid > 0) {
-    exit(0); 	/* parent */
-  }
-#endif
 
 nottyDetach:
 
@@ -223,13 +142,7 @@ nottyDetach:
       logfd = 0;    /* else use /dev/null */
 
   /* Close any/all open file descriptors */
-#if 	defined(HAVE_GETDTABLESIZE)
-  fd = getdtablesize() - 1;
-#elif	defined(NOFILE)
-  fd = NOFILE - 1;
-#else		/* make an educated guess */
-  fd = 1023;
-#endif
+  fd = sysconf(_SC_OPEN_MAX);
   while (fd >= 1) {
       if (fd != logfd)
 	  close(fd);	/* not checking this should be safe, no writes */

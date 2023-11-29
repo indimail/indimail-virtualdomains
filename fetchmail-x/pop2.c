@@ -8,14 +8,10 @@
 #include  "config.h"
 
 #ifdef POP2_ENABLE
-#include  <stdio.h>
-#if defined(STDC_HEADERS)
-#include <stdlib.h>
-#endif
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
 #include  "fetchmail.h"
+#include  <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include  "socket.h"
 #include  "i18n.h"
 
@@ -84,7 +80,7 @@ static int pop2_getauth(int sock, struct query *ctl, char *buf)
 }
 
 static int pop2_getrange(int sock, struct query *ctl, const char *folder, 
-			 int *countp, int *newp, int *bytes)
+			 int *countp, int *newp, unsigned long long *bytes)
 /* get range of messages to be fetched */
 {
     (void)ctl;

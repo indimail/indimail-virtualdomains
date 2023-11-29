@@ -16,7 +16,7 @@ Really perverse combinations of quoting and commenting could break it.
 AUTHOR:
    Eric S. Raymond <esr@thyrsus.com>, 1997.  This source code example
 is part of fetchmail and the Unix Cookbook, and are released under the
-MIT license.  Compile with -DMAIN to build the demonstrator.
+MIT license.  Compile with -DTEST to build the demonstrator.
 
 ******************************************************************************/
 
@@ -31,13 +31,13 @@ MIT license.  Compile with -DMAIN to build the demonstrator.
 
 #include "sdump.h"
 
-#ifndef MAIN
+#ifndef TEST
 #include "i18n.h"
 #else
 #include  <unistd.h>
 static int verbose;
 const char *program_name = "rfc822";
-#endif /* MAIN */
+#endif /* TEST */
 
 #ifndef TRUE
 #define TRUE 1
@@ -56,9 +56,9 @@ char *reply_hack(
 {
     char *from, *cp, last_nws = '\0', *parens_from = NULL;
     int parendepth, state, has_bare_name_part, has_host_part;
-#ifndef MAIN
+#ifndef TEST
     int addresscount = 1;
-#endif /* MAIN */
+#endif /* TEST */
 
     if (strncasecmp("From:", buf, 5)
 	&& strncasecmp("To:", buf, 3)
@@ -78,7 +78,7 @@ char *reply_hack(
 	return(buf);
     }
 
-#ifndef MAIN
+#ifndef TEST
     if (outlevel >= O_DEBUG) {
 	report_build(stdout, GT_("About to rewrite %s...\n"), (cp = sdump(buf, BEFORE_EOL(buf))));
 	xfree(cp);
@@ -89,7 +89,7 @@ char *reply_hack(
 	if (*cp == ',' || isspace((unsigned char)*cp))
 	    addresscount++;
     buf = (char *)xrealloc(buf, strlen(buf) + addresscount * (strlen(host) + 1) + 1);
-#endif /* MAIN */
+#endif /* TEST */
 
     /*
      * This is going to foo up on some ill-formed addresses.
@@ -101,13 +101,13 @@ char *reply_hack(
     has_host_part = has_bare_name_part = FALSE;
     for (from = buf; *from; from++)
     {
-#ifdef MAIN
+#ifdef TEST
 	if (verbose)
 	{
 	    printf("state %d: %s", state, buf);
 	    printf("%*s^\n", (int)(from - buf + 10), " ");
 	}
-#endif /* MAIN */
+#endif /* TEST */
 	if (state != 2)
 	{
 	    if (*from == '(')
@@ -216,14 +216,14 @@ char *reply_hack(
 	}
     }
 
-#ifndef MAIN
+#ifndef TEST
     if (outlevel >= O_DEBUG) {
 	report_complete(stdout, GT_("...rewritten version is %s.\n"),
 			(cp = sdump(buf, BEFORE_EOL(buf))));
 	xfree(cp)
     }
 
-#endif /* MAIN */
+#endif /* TEST */
     *length = strlen(buf);
     return(buf);
 }
@@ -235,9 +235,9 @@ char *nxtaddr(const char *hdr /* header to be parsed, NUL to continue previous h
     static size_t tp;
     static const char *hp;
     static int	state, oldstate;
-#ifdef MAIN
+#ifdef TEST
     static const char *orighdr;
-#endif /* MAIN */
+#endif /* TEST */
     int parendepth = 0;
 
 #define START_HDR	0	/* before header colon */
@@ -254,9 +254,9 @@ char *nxtaddr(const char *hdr /* header to be parsed, NUL to continue previous h
     {
 	hp = hdr;
 	state = START_HDR;
-#ifdef MAIN
+#ifdef TEST
 	orighdr = hdr;
-#endif /* MAIN */
+#endif /* TEST */
 	tp = 0;
     }
 
@@ -264,13 +264,13 @@ char *nxtaddr(const char *hdr /* header to be parsed, NUL to continue previous h
 
     for (; *hp; hp++)
     {
-#ifdef MAIN
+#ifdef TEST
 	if (verbose)
 	{
 	    printf("state %d: %s", state, orighdr);
 	    printf("%*s^\n", (int)(hp - orighdr + 10), " ");
 	}
-#endif /* MAIN */
+#endif /* TEST */
 
 	if (state == ENDIT_ALL)		/* after last address */
 	    return(NULL);
@@ -400,7 +400,7 @@ char *nxtaddr(const char *hdr /* header to be parsed, NUL to continue previous h
     return(NULL);
 }
 
-#ifdef MAIN
+#ifdef TEST
 static void parsebuf(char *longbuf, int reply)
 {
     char	*cp;
@@ -467,6 +467,6 @@ int main(int argc, char *argv[])
     }
     exit(0);
 }
-#endif /* MAIN */
+#endif /* TEST */
 
 /* rfc822.c end */

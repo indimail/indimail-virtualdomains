@@ -18,6 +18,12 @@
 # ifdef LIBWOLFSSL_VERSION_HEX
 #  define USING_WOLFSSL 1
 #  define OSSL110_API 1
+#  ifndef OPENSSL_COMPATIBLE_DEFAULTS
+#   error "wolfSSL was compiled without -DOPENSSL_COMPATIBLE_DEFAULTS. Recompile and reinstall wolfSSL!"
+#  endif
+#  ifndef HAVE_EX_DATA
+#   error "wolfSSL was configured without --enable-context-extra-user-data. Recompile and reinstall wolfSSL!"
+#  endif
 # else
 #  if OPENSSL_VERSION_NUMBER < 0x1010000fL
 #   undef OSSL110_API

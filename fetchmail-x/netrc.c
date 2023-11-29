@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "netrc.h"
 #include "i18n.h"
@@ -33,8 +35,8 @@
 const char *program_name = "netrc";
 #endif
 
-/* Maybe add NEWENTRY to the account information list, LIST.  NEWENTRY is
-   set to a ready-to-use netrc_entry, in any event. */
+/** Maybe add NEWENTRY to the account information list, LIST.
+ * NEWENTRY is set to a ready-to-use netrc_entry, in any event. */
 static void
 maybe_add_to_list (netrc_entry **newentry, netrc_entry **list)
 {
@@ -73,10 +75,6 @@ maybe_add_to_list (netrc_entry **newentry, netrc_entry **list)
     return;
 }
 
-
-/* Parse FILE as a .netrc file (as described in ftp(1)), and return a
-   list of entries.  NULL is returned if the file could not be
-   parsed. */
 netrc_entry *
 parse_netrc (char *file)
 {
@@ -86,6 +84,9 @@ parse_netrc (char *file)
     netrc_entry *current, *retval;
     int ln;
     int error_flag = 0;
+    int have_default = 0;
+    int filedes = -1;
+    struct stat st;
 
     /* The latest token we've seen in the file. */
     enum
@@ -94,15 +95,30 @@ parse_netrc (char *file)
     } last_token = tok_nothing;
 
     current = retval = NULL;
+    memset(&st, 0, sizeof(st));
 
-    fp = fopen (file, "r");
+    fp = fopen(file, "r");
     if (!fp)
     {
 	/* Just return NULL if we can't open the file. */
 	if (ENOENT != errno) {
-	    report(stderr, "%s: cannot open file for reading: %s\n", file, strerror(errno));
+	    report(stderr, GT_("%s: cannot open file for reading: %s\n"), file, strerror(errno));
 	}
 	return NULL;
+    }
+
+    /* stat the file, but only check mode if it contains passwords */
+    filedes = fileno(fp);
+    if (-1 == filedes) {
+	    report(stderr, GT_("%s: rejecting file, cannot get file descriptor number for fstat: %s\n"),
+		   file, strerror(errno));
+	    error_flag = 1;
+    } else {
+	    if (-1 == fstat(filedes, &st)) {
+		    report(stderr, GT_("%s: rejecting file, cannot fstat(%d): %s\n"),
+			   file, filedes, strerror(errno));
+		    error_flag = 1;
+	    }
     }
 
     /* Initialize the file data. */
@@ -158,9 +174,9 @@ parse_netrc (char *file)
 		    }
 		    else
 		    {
-			*pp = *p;
-			p ++;
-			pp ++;
+			if ('\\' == *p) ++p;
+			*pp++ = *p;
+			if (*p) ++p;
 		    }
 		}
 		else
@@ -196,6 +212,12 @@ parse_netrc (char *file)
 		break;
 
 	    case tok_password:
+		if (st.st_size && st.st_mode & 077) { /* numeric values sanctioned by SUSv4 in retrospect */
+		    report(stderr, GT_("%s: rejecting file because it is group or other accessible (mode %#o) and contains passwords.\n"),
+			   file, st.st_mode & 0777);
+		    error_flag = 1;
+		    st.st_size = 0; /* zero out file size so we only warn once */
+		}
 		if (current)
 		    current->password = (char *) xstrdup (tok);
 		else
@@ -236,6 +258,7 @@ parse_netrc (char *file)
 		if (!strcmp (tok, "default"))
 		{
 		    maybe_add_to_list (&current, &retval);
+		    have_default = 1;
 		}
 		else if (!strcmp (tok, "login"))
 		    last_token = tok_login;
@@ -246,9 +269,14 @@ parse_netrc (char *file)
 		else if (!strcmp (tok, "macdef"))
 		    last_token = tok_macdef;
 
-		else if (!strcmp (tok, "machine"))
+		else if (!strcmp (tok, "machine")) {
 		    last_token = tok_machine;
-
+		    if (have_default) {
+			    error_flag = 1;
+			    report(stderr, GT_("%s:%d: machine entry not permitted after default, rejecting file.\n"),
+			    file, ln);
+		    }
+		}
 		else if (!strcmp (tok, "password"))
 		    last_token = tok_password;
 
@@ -306,17 +334,14 @@ parse_netrc (char *file)
     return retval;
 }
 
-
-/* Return the netrc entry from LIST corresponding to HOST.  NULL is
-   returned if no such entry exists. */
-netrc_entry *
+const netrc_entry *
 search_netrc (netrc_entry *list, char *host, char *login)
 {
     /* Look for the HOST in LIST. */
     while (list)
     {
 	if (list->host && !strcmp(list->host, host))
-	    if (!list->login || !strcmp(list->login, login))
+	    if (list->login && !strcmp(list->login, login))
 		/* We found a matching entry. */
 		break;
 
@@ -343,16 +368,12 @@ free_netrc(netrc_entry *a) {
 }
 
 #ifdef STANDALONE
-#include <sys/types.h>
-#include <sys/stat.h>
-
-#include <errno.h>
-
 int main (int argc, char **argv)
 {
     struct stat sb;
     char *file, *host, *login;
-    netrc_entry *head, *a;
+    netrc_entry *head;
+    const netrc_entry *a;
 
     program_name = argv[0];
     file = argv[1];
@@ -389,7 +410,7 @@ int main (int argc, char **argv)
 	status = EXIT_SUCCESS;
 
 	printf("Host: %s, Login: %s\n", host, login);
-	    
+	
 	a = search_netrc (head, host, login);
 	if (a)
 	{
@@ -406,8 +427,7 @@ int main (int argc, char **argv)
     }
 
     /* Print out the entire contents of the netrc. */
-    a = head;
-    while (a)
+    for (a = head; a; a = a->next)
     {
 	/* Print the host name. */
 	if (a->host)
@@ -415,7 +435,7 @@ int main (int argc, char **argv)
 	else
 	    fputs ("DEFAULT", stdout);
 
-	fputc (' ', stdout);
+	fputc ('|', stdout);
 
 	/* Print the login name. */
 	fputs (a->login, stdout);
@@ -423,12 +443,11 @@ int main (int argc, char **argv)
 	if (a->password)
 	{
 	    /* Print the password, if there is any. */
-	    fputc (' ', stdout);
+	    fputc ('|', stdout);
 	    fputs (a->password, stdout);
 	}
 
-	fputc ('\n', stdout);
-	a = a->next;
+	fputs ("|\n", stdout);
     }
 
     free_netrc(head);

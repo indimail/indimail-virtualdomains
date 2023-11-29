@@ -30,14 +30,10 @@ int prc_lineno = 1;
  * LSAN_OPTIONS=report_objects=1 to identify where the leaked strings go. */
 #undef STRING_DEBUG
 
-#ifdef __cplusplus
-extern "C"
-#endif
-int yywrap(void) { return 1; }
-
 %}
 
-%option nounput yywrap warn nodefault 8bit batch
+%option nounput noyywrap warn nodefault 8bit batch
+%option header-file="rcfile_l.h"
 
 %s NAME AUTH
 
@@ -99,7 +95,8 @@ gssapi		{ SETSTATE(0); yylval.proto = A_GSSAPI; return AUTHTYPE;}
 kerberos(_v)?4	{ SETSTATE(0); yylval.proto = A_KERBEROS_V4; return AUTHTYPE;}
 kerberos(_v)?5	{ SETSTATE(0); yylval.proto = A_KERBEROS_V5; return AUTHTYPE;}
 kerberos	{ SETSTATE(0); yylval.proto = A_KERBEROS_V4; return AUTHTYPE;}
-ssh		{ SETSTATE(0); yylval.proto = A_SSH; return AUTHTYPE;}
+ssh		{ SETSTATE(0); yylval.proto = A_IMPLICIT; return AUTHTYPE;}
+implicit	{ SETSTATE(0); yylval.proto = A_IMPLICIT; return AUTHTYPE;}
 external	{ SETSTATE(0); yylval.proto = A_EXTERNAL; return AUTHTYPE;}
 (otp|opie)	{ SETSTATE(0); yylval.proto = A_OTP; return AUTHTYPE;}
 cram(-md5)?	{ SETSTATE(0); yylval.proto = A_CRAM_MD5; return AUTHTYPE;}
@@ -107,12 +104,13 @@ msn		{ SETSTATE(0); yylval.proto = A_MSN; return AUTHTYPE;}
 ntlm		{ SETSTATE(0); yylval.proto = A_NTLM; return AUTHTYPE;}
 <AUTH>password	{ SETSTATE(0); yylval.proto = A_PASSWORD; return AUTHTYPE;}
 timeout		{ return TIMEOUT;}
+idletimeout	{ return IDLETIMEOUT;}
 envelope	{ return ENVELOPE; }
 qvirtual	{ return QVIRTUAL; }
 principal	{ return PRINCIPAL; }
 esmtpname	{ return ESMTPNAME; }
 esmtppassword	{ return ESMTPPASSWORD; }
-authmeth	{ return AUTHMETH; }
+authmethod	{ return AUTHMETHOD; }
 bad-header	{ return BADHEADER; }
 accept		{ return ACCEPT; }
 reject		{ return REJECT_; }
@@ -164,7 +162,8 @@ nodropstatus	|
 nodropdelivered	|
 nomimedec(ode)? |
 nospambounce	|
-noidle	        {
+noidle	        |
+noforceidle	{
                    yyless(2);
                    return NO;
                 }
@@ -172,6 +171,7 @@ noidle	        {
 no		{return NO;}
 
 keep		{ return KEEP; }
+moveto		{ return MOVETO; }
 flush		{ return FLUSH; }
 limitflush	{ return LIMITFLUSH; }
 fetchall	{ return FETCHALL; }
@@ -183,6 +183,7 @@ dropstatus	{ return DROPSTATUS; }
 dropdelivered   { return DROPDELIVERED; }
 mimedec(ode)?   { return MIMEDECODE; }
 idle		{ return IDLE; }
+forceidle	{ return FORCEIDLE; }
 dns		{ return DNS; }
 uidl		{ return UIDL; }
 ssl		{ return SSL; }

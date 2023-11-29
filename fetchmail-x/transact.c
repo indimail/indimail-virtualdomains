@@ -9,27 +9,14 @@
 #include "fetchmail.h"
 #include  <stdio.h>
 #include  <string.h>
+#include  <strings.h>
 #include  <ctype.h>
-#ifdef HAVE_MEMORY_H
-#include  <memory.h>
-#endif /* HAVE_MEMORY_H */
-#if defined(STDC_HEADERS)
 #include  <stdlib.h>
-#endif
-#if defined(HAVE_UNISTD_H)
 #include <unistd.h>
-#endif
-#if defined(HAVE_STDARG_H)
 #include  <stdarg.h>
-#else
-#include  <varargs.h>
-#endif
 #include <limits.h>
 #include <assert.h>
 
-#ifdef HAVE_NET_SOCKET_H
-#include <net/socket.h>
-#endif
 #include <sys/socket.h>
 #include <netdb.h>
 #include "fm_md5.h"
@@ -54,7 +41,7 @@ int suppress_tags = FALSE;	/**< emit tags in the protocol? */
 char tag[TAGLEN];		/**< buffer for the tag */
 static unsigned int tagnum;	/**< local counter for the tag */
 /** Macro to generate the tag and store it in #tag. */
-#define GENSYM	(sprintf(tag, "A%04u", ++tagnum % TAGMOD), tag)
+#define GENSYM	(snprintf(tag, sizeof tag, "A%04u", ++tagnum % TAGMOD), tag)
 static const struct method *protocol; /**< description of the protocol used for the current poll */
 char shroud[PASSWORDLEN*2+3];	/**< string to shroud in debug output */
 
@@ -1543,15 +1530,10 @@ static void enshroud(char *buf)
     }
 }
 
-#if defined(HAVE_STDARG_H)
 /** assemble command in printf(3) style and send to the server */
-void gen_send(int sock, const char *fmt, ... )
-#else
-void gen_send(sock, fmt, va_alist)
-int sock;		/** socket to which server is connected */
-const char *fmt;	/** printf-style format */
-va_dcl
-#endif
+void gen_send(int sock/** socket to which server is connected */,
+	      const char *fmt /** printf-style format */,
+	      ...)
 {
     char buf [MSGBUFSIZE+1];
     va_list ap;
@@ -1561,11 +1543,7 @@ va_dcl
     else
 	buf[0] = '\0';
 
-#if defined(HAVE_STDARG_H)
     va_start(ap, fmt);
-#else
-    va_start(ap);
-#endif
     vsnprintf(buf + strlen(buf), sizeof(buf)-2-strlen(buf), fmt, ap);
     va_end(ap);
 
@@ -1743,15 +1721,10 @@ int gen_recv_split(int sock  /** socket to which server is connected */,
 }
 /** @} */
 
-#if defined(HAVE_STDARG_H)
-int gen_transact(int sock, const char *fmt, ... )
-#else
-int gen_transact(int sock, fmt, va_alist)
-int sock;		/** socket to which server is connected */
-const char *fmt;	/** printf-style format */
-va_dcl
-#endif
 /** assemble command in printf(3) style, send to server, fetch a response */
+int gen_transact(int sock	 /** socket to which server is connected */,
+		 const char *fmt /** printf-style format */,
+		 ...)
 {
     int ok;
     char buf [MSGBUFSIZE+1];
@@ -1765,11 +1738,7 @@ va_dcl
     else
 	buf[0] = '\0';
 
-#if defined(HAVE_STDARG_H)
     va_start(ap, fmt) ;
-#else
-    va_start(ap);
-#endif
     vsnprintf(buf + strlen(buf), sizeof(buf)-2-strlen(buf), fmt, ap);
     va_end(ap);
 

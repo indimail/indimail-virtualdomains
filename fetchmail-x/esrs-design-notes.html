@@ -336,7 +336,7 @@ with GT_() or N_() -- the former in function arguments, the latter
 in static initializers and other non-function-argument
 contexts.</p>
 
-<h1>Checklist for Adding Options</h1>
+<h1 id="adding-options">Checklist for Adding Options</h1>
 
 <p>Adding a control option is not complicated in principle, but
 there are a lot of fiddly details in the process. You'll need to do
@@ -375,6 +375,9 @@ corresponding "run." field, see the existing code for models.</li>
 <li>Document the option in fetchmail.man. This will require at
 least two changes; one to the collected table of options, and one
 full text description of the option.</li>
+
+<li>Document the option in fetchmail's --help output, in
+options.c's parsecmdline.</li>
 
 <li>Hack fetchmailconf to configure it. Bump the fetchmailconf
 version.</li>

@@ -18,15 +18,14 @@
  */
 
 #include "config.h"
-#include "fetchmail.h"
-
-#include <sys/types.h>
-#include <assert.h>
-#include <string.h>
 
 #include "fm_strl.h"
 
 #ifndef HAVE_STRLCAT
+#include <sys/types.h>
+#include <assert.h>
+#include <string.h>
+
 /*
  * Appends src to string dst of size siz (unlike strncat, siz is the
  * full size of dst, not space left).  At most siz-1 characters

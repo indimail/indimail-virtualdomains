@@ -404,6 +404,8 @@ Multiple concurrent instances of fetchmail
      * Document the option in fetchmail.man. This will require at least
        two changes; one to the collected table of options, and one full
        text description of the option.
+     * Document the option in fetchmail's --help output, in options.c's
+       parsecmdline.
      * Hack fetchmailconf to configure it. Bump the fetchmailconf version.
      * Hack conf.c to dump the option so we won't have a version-skew
        problem.

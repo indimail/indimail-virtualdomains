@@ -11,16 +11,9 @@
 #include <stdio.h>
 #include <string.h>
 #ifdef HAVE_RES_SEARCH
-#ifdef HAVE_NET_SOCKET_H
-#include <net/socket.h>
-#endif
 #include <netdb.h>
 #include <sys/types.h>
 #include <netinet/in.h>
-
-#ifdef __BEOS__
-#include "beos/beos_nameser.h"
-#endif
 
 #ifdef HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
@@ -76,7 +69,6 @@ struct mxentry *getmxrecords(const char *name)
     hp = (HEADER *)&answer;
     cp = answer + HFIXEDSZ;
     eom = answer + n;
-    h_errno = 0;
     for (qdcount = ntohs(hp->qdcount); qdcount--; cp += n + QFIXEDSZ)
       if ((n = dn_skipname((unsigned char *)cp, (unsigned char *)eom)) < 0)
 	    return((struct mxentry *)NULL);

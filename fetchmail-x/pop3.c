@@ -8,18 +8,15 @@
 #include  "config.h"
 
 #ifdef POP3_ENABLE
+#include  "fetchmail.h"
 #include  <stdio.h>
 #include  <string.h>
+#include  <strings.h>
 #include  <ctype.h>
-#if defined(HAVE_UNISTD_H)
 #include <unistd.h>
-#endif
-#if defined(STDC_HEADERS)
 #include  <stdlib.h>
-#endif
 #include  <errno.h>
 
-#include  "fetchmail.h"
 #include  "socket.h"
 #include  "i18n.h"
 #include  "uid_db.h"
@@ -478,7 +475,7 @@ static int pop3_getauth(int sock, struct query *ctl, char *greeting)
 	} /* maybe_starttls() */
 #endif /* SSL_ENABLE */
 
-	if (ctl->server.authenticate == A_SSH) {
+	if (ctl->server.authenticate == A_IMPLICIT) {
 		return PS_SUCCESS;
 	}
 
@@ -978,7 +975,7 @@ static int pop3_slowuidl( int sock,  struct query *ctl, int *countp, int *newp)
 static int pop3_getrange(int sock, 
 			 struct query *ctl,
 			 const char *folder,
-			 int *countp, int *newp, int *bytes)
+			 int *countp, int *newp, unsigned long long *bytes)
 /* get range of messages to be fetched */
 {
     int ok;
@@ -1001,7 +998,7 @@ static int pop3_getrange(int sock,
     if (ok == 0) {
 	int asgn;
 
-	asgn = sscanf(buf,"%d %d", countp, bytes);
+	asgn = sscanf(buf,"%d %llu", countp, bytes);
 	if (asgn != 2)
 		return PS_PROTOCOL;
     } else

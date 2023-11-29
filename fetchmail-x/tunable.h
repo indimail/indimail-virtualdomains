@@ -10,6 +10,9 @@
 /* default timeout period in seconds if server connection dies */
 #define	CLIENT_TIMEOUT		300
 
+/* default timeout period in seconds when IDLE (28 min) */
+#define	CLIENT_IDLE_TIMEOUT	1680
+
 /* maximum consecutive timeouts to accept */
 #define MAX_TIMEOUTS		20
 

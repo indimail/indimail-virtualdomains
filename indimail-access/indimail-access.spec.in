@@ -249,12 +249,47 @@ do
     cd ..
   fi
 done
+%if ( %{defined fedora_version} && (0%{?fedora_version} <= 30 || 0%{?fedora} <= 30) )
+echo "Removing pyc for fedora"
+%{__rm} -f %{buildroot}%{pythondir}/fetchmailconf.py
+%endif
+%if ( %{defined centos_version} && (0%{?centos_version} <= 700 || 0%{?centos_ver} <= 7) )
+echo "Removing pyc for centos"
+%{__rm} -f %{buildroot}%{pythondir}/fetchmailconf.py
+%endif
+%if ( %{defined rhel_version} && (0%{?rhel_version} <= 700 || 0%{?rhel} <= 7) )
+echo "Removing pyc for rhel"
+%{__rm} -f %{buildroot}%{pythondir}/fetchmailconf.py
+%endif
+%if ( %{defined almalinux_version} && 0%{?almalinux_version} <= 700 )
+echo "Removing pyc for almalinux"
+%{__rm} -f %{buildroot}%{pythondir}/fetchmailconf.py
+%endif
+%if ( %{defined rocky_version} && 0%{?rocky_version} <= 700 )
+echo "Removing pyc for rocky"
+%{__rm} -f %{buildroot}%{pythondir}/fetchmailconf.py
+%endif
+%if ( %{defined scientificlinux_version} && 0%{?scientificlinux_version} <= 700 )
+echo "Removing pyc for scientificlinux"
+%{__rm} -f %{buildroot}%{pythondir}/fetchmailconf.py
+%endif
+%if ( 0%{?sle_version} < 150400 && 0%{?is_opensuse} )
+echo "Removing pyc for opensuse version 150400"
+%{__rm} -f %{buildroot}%{pythondir}/fetchmailconf.py
+%endif
+
+%if %{undefined rhel_version} && %{undefined rhel} && %{undefined fedora_version} && %{undefined centos_version} && %{undefined centos_ver} && %{undefined almalinux_version} && %{undefined rocky_version} && %{undefined scientificlinux_version}
+%if 0%{?suse_version} <= 150400 && !0%{?is_opensuse}
+echo "Removing pyc for SLE version 15"
+%{__rm} -f %{buildroot}%{pythondir}/fetchmailconf.py
+%endif
+%endif
 
 %{__mkdir_p} %{buildroot}%{sysconfdir}
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
 install -m 0644 %{name}-release %{buildroot}%{sysconfdir}/%{name}-release
-/bin/rm -f %{name}-rpm.info %{name}-release
-/bin/rm -f %{name}-rpm.info
+%{__rm} -f %{name}-rpm.info %{name}-release
+%{__rm} -f %{name}-rpm.info
 %if 0%{?suse_version} >= 1120
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
 install -m 644 %{S:4} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
@@ -404,15 +439,8 @@ done
 %lang(sr) /usr/share/indimail/locale/sr/LC_MESSAGES/fetchmail.mo
 
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7 || %{defined mgaversion} || %{defined amzn} || %{defined openEuler} || ( 0%{?sle_version} >= 150400 && 0%{?is_opensuse} )
-%attr(644,root,root)                    %{python3_sitelib}/__pycache__/*.pyc
-%attr(755,root,root)                    %{python3_sitelib}/fetchmailconf.py
-%else
-%if 0%{?centos_version} > 600 || 0%{?rhel_version} > 600 || %{defined fedora_version} || %{defined sles_version} || 0%{?scientificlinux_version} > 600
-# fetchmailconf is not installed in fetchmail > 6.4.6 if python version < 2.7
-%attr(644,root,root)                    %{pythondir}/fetchmailconf.pyo
-%attr(644,root,root)                    %{pythondir}/fetchmailconf.pyc
+%attr(644,root,root)                    %{pythondir}/__pycache__/*.pyc
 %attr(755,root,root)                    %{pythondir}/fetchmailconf.py
-%endif
 %endif
 
 %docdir %{shareddir}/doc

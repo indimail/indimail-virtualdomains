@@ -13,32 +13,16 @@ struct addrinfo;
 #include <sys/types.h>
 
 /* We need this for time_t */
-#if TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# if HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
+#include <sys/time.h>
+#include <time.h>
 
-#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
-#ifdef HAVE_NET_SOCKET_H
-#include <net/socket.h>
-#endif
 #include <netdb.h>
 #include <stdio.h>
-
-/* Import Trio if needed */
-#if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF)
-#  include "trio/trio.h"
-#endif
+#include <stdbool.h>
 
 #include "fm_strl.h"
+
 #include "uid_db.h"
 
 /* constants designating the various supported protocols */
@@ -76,7 +60,7 @@ struct addrinfo;
 #define		A_KERBEROS_V4	5	/* authenticate w/ Kerberos V4 */
 #define		A_KERBEROS_V5	6	/* authenticate w/ Kerberos V5 */
 #define 	A_GSSAPI	7	/* authenticate with GSSAPI */
-#define		A_SSH		8	/* authentication at session level */
+#define		A_IMPLICIT	8	/* authentication at session level */
 #define		A_MSN		9	/* same as NTLM with keyword MSN */
 #define		A_EXTERNAL	10	/* external authentication (client cert) */
 
@@ -87,7 +71,7 @@ struct addrinfo;
      || (ctl)->server.authenticate == A_KERBEROS_V4 \
      || (ctl)->server.authenticate == A_KERBEROS_V5 \
      || (ctl)->server.authenticate == A_GSSAPI \
-     || (ctl)->server.authenticate == A_SSH \
+     || (ctl)->server.authenticate == A_IMPLICIT \
      || (ctl)->server.authenticate == A_EXTERNAL \
      || (ctl)->server.protocol == P_ETRN)
 
@@ -226,7 +210,7 @@ struct method		/* describe methods for protocol state machine */
 				/* response_parsing function */
     int (*getauth)(int, struct query *, char *);
 				/* authorization fetcher */
-    int (*getrange)(int, struct query *, const char *, int *, int *, int *);
+    int (*getrange)(int, struct query *, const char *, int *, int *, unsigned long long *);
 				/* get message range to fetch */
     int (*getsizes)(int, int, int *);
 				/* get sizes of messages */
@@ -267,6 +251,7 @@ struct hostdata		/* shared among all user connections to given server */
     int interval;			/* # cycles to skip between polls */
     int authenticate;			/* authentication mode to try */
     int timeout;			/* inactivity timout in seconds */
+    int idle_timeout;			/* inactivity timout with IDLE'ing */
     char *envelope;			/* envelope address list header - WARNING - can take value STRING_DISABLED (-1)! */
     int envskip;			/* skip to numbered envelope header */
     char *qvirtual;			/* prefix removed from local user id */
@@ -280,7 +265,7 @@ struct hostdata		/* shared among all user connections to given server */
     flag tracepolls;			/* if TRUE, add poll trace info to Received */
     char *principal;			/* Kerberos principal for mail service */
 #ifdef INDIMAIL
-	char *authmeth;
+	char *authmethod;
 #endif
     char *esmtp_name, *esmtp_password;	/* ESMTP AUTH information */
     enum badheader badheader;		/* bad-header {pass|reject} */
@@ -346,6 +331,7 @@ struct query
     /* per-user control flags */
     flag keep;			/* if TRUE, leave messages undeleted */
     flag fetchall;		/* if TRUE, fetch all (not just unseen) */
+    char *moveto;		/* move message to this IMAP folder instead of deleting it */
     flag flush;			/* if TRUE, delete messages already seen */
     flag limitflush;		/* if TRUE, delete oversized mails */
     flag rewrite;		/* if TRUE, canonicalize recipient addresses */
@@ -356,6 +342,7 @@ struct query
     flag dropdelivered;         /* if TRUE, drop Delivered-To lines in mail */
     flag mimedecode;		/* if TRUE, decode MIME-armored messages */
     flag idle;			/* if TRUE, idle after each poll */
+    flag forceidle;		/* if TRUE, force idle even if not in capabilities */
     int	limit;			/* limit size of retrieved messages */
     int warnings;		/* size warning interval */
     int	fetchlimit;		/* max # msgs to get in single poll */
@@ -367,8 +354,7 @@ struct query
     flag use_ssl;		/* use SSL encrypted session */
     char *sslkey;		/* optional SSL private key file */
     char *sslcert;		/* optional SSL certificate file */
-    char *sslproto;		/** force transport protocol (ssl2|ssl3|ssl23|tls1) - if NULL,
-				  use ssl23 for SSL and opportunistic tls1 for non-SSL connections. */
+    char *sslproto;		/** force transport protocol (tls*) - if NULL, see socket.c for the default */
     char *sslcertfile;		/* Trusted certificate file for checking the server cert */
     char *sslcertpath;		/* Trusted certificate directory for checking the server cert */
     flag sslcertck;		/* Strictly check the server cert. */
@@ -482,12 +468,11 @@ extern const char *iana_charset;	/* IANA assigned charset name */
 /* prototypes for globally callable functions */
 
 /* from /usr/include/sys/cdefs.h */
-#if !defined __GNUC__ || __GNUC__ < 2
+#if !defined __GNUC__
 # define __attribute__(xyz)    /* Ignore. */
 #endif
 
 /* error.c: Error reporting */
-#if defined(HAVE_STDARG_H)
 void report_init(int foreground);
  /** Flush partial message, suppress program name tag for next report printout. */
 void report_flush(FILE *fp);
@@ -503,12 +488,6 @@ void report_complete (FILE *fp, const char *format, ...)
 void report_at_line (FILE *fp, int, const char *, unsigned int, const char *, ...)
     __attribute__ ((format (printf, 5, 6)))
     ;
-#else
-void report ();
-void report_build ();
-void report_complete ();
-void report_at_line ();
-#endif
 
 /* driver.c -- main driver loop */
 void set_timeout(int);
@@ -535,7 +514,6 @@ int readheaders(int sock,
 		       int num,
 		       flag *suppress_readbody);
 int readbody(int sock, struct query *ctl, flag forward, int len);
-#if defined(HAVE_STDARG_H)
 void gen_send(int sock, const char *, ... )
     __attribute__ ((format (printf, 2, 3)))
     ;
@@ -545,13 +523,6 @@ int gen_recv_split(int sock, char *buf, int size, struct RecvSplit *rs);
 int gen_transact(int sock, const char *, ... )
     __attribute__ ((format (printf, 2, 3)))
     ;
-#else
-void gen_send();
-int gen_recv();
-void gen_recv_split_init();
-int gen_recv_split();
-int gen_transact();
-#endif
 extern struct msgblk msgblk;
 
 /* use these to track what was happening when the nonresponse timer fired */
@@ -583,6 +554,7 @@ int interruptible_idle(int interval);
 extern volatile int lastsig;
 
 /* sink.c: forwarding */
+const char* get_sink_type(const struct query *);
 void smtp_close(struct query *, int);
 int smtp_open(struct query *);
 int smtp_setup(struct query *);
@@ -592,16 +564,12 @@ int open_sink(struct query*, struct msgblk *, int*, int*);
 void release_sink(struct query *);
 int close_sink(struct query *, struct msgblk *, flag); /**< \returns TRUE for successful delivery and FALSE for failure. */
 int open_warning_by_mail(struct query *);
-#if defined(HAVE_STDARG_H)
 void stuff_warning(const char *,
                    struct query *,
                    const char *pfx,
                    const char *fmt, ...)
     __attribute__ ((format (printf, 4, 5)))
     ;
-#else
-void stuff_warning();
-#endif
 void close_warning_by_mail(struct query *, struct msgblk *);
 
 /* rfc822.c: RFC822 header parsing */
@@ -685,10 +653,9 @@ char *prependdir (const char *, const char *);
 char *MD5Digest (unsigned const char *);
 void hmac_md5 (const unsigned char *, size_t, const unsigned char *, size_t, unsigned char *, size_t);
 int POP3_auth_rpa(char *, char *, int socket);
-#define RETSIGTYPE void
-typedef RETSIGTYPE (*SIGHANDLERTYPE) (int);
+typedef void (*SIGHANDLERTYPE) (int);
 void deal_with_sigchld(void);
-RETSIGTYPE null_signal_handler(int sig);
+void null_signal_handler(int sig);
 SIGHANDLERTYPE set_signal_handler(int sig, SIGHANDLERTYPE handler);
 int daemonize(const char *);
 char *fm_getpassword(char *);
@@ -709,50 +676,18 @@ extern struct addrinfo *ai0, *ai1;
  * - unqualified or fully qualified hostname if \a required is zero (0).
  */
 char *host_fqdn(int required /** exit with PS_DNS if the name cannot be qualified */);
-char *rfc822timestamp(void);
+const char *rfc822timestamp(void);
 flag is_a_file(int);
 char *rfc2047e(const char*, const char *);
 
-void yyerror(const char *);
-int yylex(void);
-
-#ifdef __EMX__
-void itimerthread(void*);
-/* Have to include these first to avoid errors from redefining getcwd
-   and chdir.  They're re-include protected in EMX, so it's okay, I
-   guess.  */
-#include <stdlib.h>
-#include <unistd.h>
-/* Redefine getcwd and chdir to get drive-letter support so we can
-   find all of our lock files and stuff. */
-#define getcwd _getcwd2
-#define chdir _chdir2
-#endif /* _EMX_ */
-
-#ifdef HAVE_STRERROR
-#  if !defined(strerror) && !HAVE_DECL_STRERROR	/* On some systems, strerror is a macro */
-char *strerror (int);
-#  endif
-#endif /* HAVE_STRERROR */
-
 #define STRING_DISABLED	(char *)-1
 #define STRING_DUMMY	""
-
-#ifdef NeXT
-#ifndef S_IXGRP
-#define S_IXGRP 0000010
-#endif
-#endif
 
 #ifndef HAVE_STPCPY
 char *stpcpy(char *, const char*);
 #endif
 
-#ifdef __CYGWIN__
-#define ROOT_UID 18
-#else /* !__CYGWIN__ */
 #define ROOT_UID 0
-#endif /* __CYGWIN__ */
 
 extern int mailserver_socket_temp;
 extern const char *program_name;
@@ -765,20 +700,12 @@ extern const char *program_name;
  * positive integer to a port number. Returns -1 for error. */
 int servport(const char *service);
 
-#ifndef HAVE_GETNAMEINFO
-# define NI_NUMERICHOST	1
-# define NI_NUMERICSERV	2
-# define NI_NOFQDN	4
-# define NI_NAMEREQD	8
-# define NI_DGRAM	16
-#endif
-
 int fm_getaddrinfo(const char *node, const char *serv, const struct addrinfo *hints, struct addrinfo **res);
 void fm_freeaddrinfo(struct addrinfo *ai);
 
 /* prototypes from starttls.c */
-int maybe_starttls(struct query *ctl);
-int must_starttls(struct query *ctl);
+bool maybe_starttls(struct query *ctl);
+bool must_starttls(struct query *ctl);
 
 /* prototype from rfc822valid.c */
 int rfc822_valid_msgid(const unsigned char *);
@@ -796,6 +723,9 @@ int ntlm_helper(int sock, struct query *ctl, const char *protocol);
 	((outlevel >= O_VERBOSE || (outlevel > O_SILENT && run.showdots)) \
 	&& !run.use_syslog \
 	&& (run.showdots || !is_a_file(1)))
+
+/* macro to derive, as compile-time constant, the number of elements in a static vector */
+#define countof(ary) (sizeof(ary)/sizeof(ary[0]))
 
 #endif
 

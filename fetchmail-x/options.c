@@ -11,17 +11,15 @@
 #include <stdio.h>
 #include <pwd.h>
 #include <string.h>
+#include <strings.h>
 #include <errno.h>
-#if defined(STDC_HEADERS)
-#include  <stdlib.h>
-#include  <limits.h>
-#else
-#include  <ctype.h>
-#endif
+#include <stdlib.h>
+#include <limits.h>
 
 #include "getopt.h"
-#include "fetchmail.h"
 #include "i18n.h"
+
+#include "tunable.h"
 
 enum {
     LA_INVISIBLE = 256,
@@ -55,12 +53,15 @@ enum {
     LA_FASTUIDL,
     LA_LIMITFLUSH,
     LA_IDLE,
+    LA_FORCEIDLE,
     LA_NOSOFTBOUNCE,
     LA_SOFTBOUNCE,
 #ifdef INDIMAIL
-    LA_AUTHMETH,
+    LA_AUTHMETHOD,
 #endif
-    LA_BADHEADER
+    LA_BADHEADER,
+    LA_IDLETIMEOUT,
+    LA_MOVETO
 };
 
 /* options still left: ACgGhHjJoORTWxXYz */
@@ -94,6 +95,8 @@ static const struct option longoptions[] = {
   {"proto",	required_argument, (int *) 0, 'p' },
   {"uidl",	no_argument,	   (int *) 0, 'U' },
   {"idle",	no_argument,	   (int *) 0, LA_IDLE},
+  {"forceidle",	no_argument,	   (int *) 0, LA_FORCEIDLE},
+  {"idletimeout",required_argument,(int *) 0, LA_IDLETIMEOUT },
   {"port",	required_argument, (int *) 0, 'P' },
   {"service",	required_argument, (int *) 0, 'P' },
   {"auth",	required_argument, (int *) 0, LA_AUTH},
@@ -101,7 +104,7 @@ static const struct option longoptions[] = {
   {"envelope",	required_argument, (int *) 0, 'E' },
   {"qvirtual",	required_argument, (int *) 0, 'Q' },
 #ifdef INDIMAIL
-  {"authmeth",	required_argument, (int *) 0, 'O' },
+  {"authmethod", required_argument, (int *) 0, 'O' },
 #endif
   {"bad-header",required_argument, (int *) 0, LA_BADHEADER},
 
@@ -112,6 +115,7 @@ static const struct option longoptions[] = {
   {"fetchall",	no_argument,	   (int *) 0, 'a' },
   {"nokeep",	no_argument,	   (int *) 0, 'K' },
   {"keep",	no_argument,	   (int *) 0, 'k' },
+  {"moveto",    required_argument, (int *) 0, LA_MOVETO },
   {"flush",	no_argument,	   (int *) 0, 'F' },
   {"limitflush",	no_argument, (int *) 0, LA_LIMITFLUSH },
   {"norewrite",	no_argument,	   (int *) 0, 'n' },
@@ -168,7 +172,6 @@ static const struct option longoptions[] = {
 static int xatoi(char *s, int *errflagptr)
 /* do safe conversion from string to number */
 {
-#if defined (STDC_HEADERS) && defined (LONG_MAX) && defined (INT_MAX)
     /* parse and convert numbers, but also check for invalid characters in
      * numbers
      */
@@ -199,41 +202,6 @@ static int xatoi(char *s, int *errflagptr)
     }
 
     return (int) value;  /* shut up, I know what I'm doing */
-#else
-    int	i;
-    char *dp;
-# if defined (STDC_HEADERS)
-    size_t	len;
-# else
-    int		len;
-# endif
-
-    /* We do only base 10 conversions here (atoi)! */
-
-    len = strlen(s);
-    /* check for leading white spaces */
-    for (i = 0; (i < len) && isspace((unsigned char)s[i]); i++)
-    	;
-
-    dp = &s[i];
-
-    /* check for +/- */
-    if (i < len && (s[i] == '+' || s[i] == '-'))	i++;
-
-    /* skip over digits */
-    for ( /* no init */ ; (i < len) && isdigit((unsigned char)s[i]); i++)
-    	;
-
-    /* check for trailing garbage */
-    if (i != len) {
-    	(void) fprintf(stderr, GT_("String '%s' is not a valid number string.\n"), s);
-    	(*errflagptr)++;
-	return 0;
-    }
-
-    /* atoi should be safe by now, except for number range over/underflow */
-    return atoi(dp);
-#endif
 }
 
 /** parse and validate the command line options */
@@ -294,7 +262,8 @@ int parsecmdline (int argc /** argument count */,
 	    option_safe = TRUE;
 	    break;
 	case 'd':
-	    rctl->poll_interval = xatoi(optarg, &errflag);
+	    c = xatoi(optarg, &errflag);
+	    rctl->poll_interval = NUM_VALUE_IN(c);
 	    break;
 	case 'N':
 	    nodetach = TRUE;
@@ -391,6 +360,9 @@ int parsecmdline (int argc /** argument count */,
 	case LA_IDLE:
 	    ctl->idle = FLAG_TRUE;
 	    break;
+	case LA_FORCEIDLE:
+	    ctl->forceidle = FLAG_TRUE;
+	    break;
 	case 'P':
 	    ctl->server.service = optarg;
 	    break;
@@ -407,8 +379,8 @@ int parsecmdline (int argc /** argument count */,
 		ctl->server.authenticate = A_KERBEROS_V5;
 	    else if (strcmp(optarg, "kerberos_v4") == 0)
 		ctl->server.authenticate = A_KERBEROS_V4;
-	    else if (strcmp(optarg, "ssh") == 0)
-		ctl->server.authenticate = A_SSH;
+	    else if (0 == strcmp(optarg, "implicit") || 0 == strcmp(optarg, "ssh"))
+		ctl->server.authenticate = A_IMPLICIT;
 	    else if (strcasecmp(optarg, "external") == 0)
 		ctl->server.authenticate = A_EXTERNAL;
 	    else if (strcmp(optarg, "otp") == 0)
@@ -446,7 +418,7 @@ int parsecmdline (int argc /** argument count */,
 
 #ifdef INDIMAIL
 	case 'O':    
-	    ctl->server.authmeth = xstrdup(optarg);
+	    ctl->server.authmethod = xstrdup(optarg);
 	    break;
 #endif
 	case 'u':
@@ -638,6 +610,15 @@ int parsecmdline (int argc /** argument count */,
 	    ctl->server.tracepolls = FLAG_TRUE;
 	    break;
 
+	case LA_IDLETIMEOUT:
+	    c = xatoi(optarg, &errflag);
+	    ctl->server.idle_timeout = NUM_VALUE_IN(c);
+	    break;
+
+	case LA_MOVETO:
+	    ctl->moveto = xstrdup(optarg);
+	    break;
+
 	case '?':
 	    helpflag = 1;
 	default:
@@ -649,6 +630,7 @@ int parsecmdline (int argc /** argument count */,
     if (errflag || ocount > 1 || helpflag) {
 	/* squawk if syntax errors were detected */
 #define P(s)    fputs(s, helpflag ? stdout : stderr)
+#define PS()    (helpflag ? stdout : stderr)
 	P(GT_("usage:  fetchmail [options] [server ...]\n"));
 	P(GT_("  Options are as follows:\n"));
 	P(GT_("  -?, --help        display this option help\n"));
@@ -695,6 +677,8 @@ int parsecmdline (int argc /** argument count */,
 	P(GT_("  -p, --proto[col]  specify retrieval protocol (see man page)\n"));
 	P(GT_("  -U, --uidl        force the use of UIDLs (pop3 only)\n"));
 	P(GT_("      --idle        tells the IMAP server to send notice of new messages\n"));
+	P(GT_("      --forceidle   Force idle mode, even if server does not advertise the capability\n"));
+	fprintf(PS(), GT_("      --idletimeout specify timeout before refreshing --idle (%d s)\n"), CLIENT_IDLE_TIMEOUT);
 	P(GT_("      --port        TCP port to connect to (obsolete, use --service)\n"));
 	P(GT_("  -P, --service     TCP service to connect to (can be numeric TCP port)\n"));
 	P(GT_("      --auth        authentication type (see manual)\n"));
@@ -711,6 +695,7 @@ int parsecmdline (int argc /** argument count */,
 	P(GT_("  -a, --[fetch]all  retrieve old and new messages\n"));
 	P(GT_("  -K, --nokeep      delete new messages after retrieval\n"));
 	P(GT_("  -k, --keep        save new messages after retrieval\n"));
+	P(GT_("      --moveto      move message to the given IMAP folder instead of deleting it\n"));
 	P(GT_("  -F, --flush       delete old messages from server\n"));
 	P(GT_("      --limitflush  delete oversized messages\n"));
 	P(GT_("  -n, --norewrite   don't rewrite header addresses\n"));

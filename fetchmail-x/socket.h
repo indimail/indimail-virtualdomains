@@ -9,12 +9,8 @@
 
 struct addrinfo;
 
-#include <config.h>
-#ifdef HAVE_SYS_SOCKET_H
+#include "config.h"
 #include <sys/socket.h>
-#elif HAVE_NET_SOCKET_H
-#include <net/socket.h>
-#endif
 #include <netdb.h>
 
 /** Create a new client socket; returns -1 on error */
@@ -40,7 +36,7 @@ Returns number of bytes successfully written.
 int SockWrite(int sock, const char *buf, int size);
 
 /* from /usr/include/sys/cdefs.h */
-#if !defined __GNUC__ || __GNUC__ < 2
+#if !defined __GNUC__
 # define __attribute__(xyz)    /* Ignore. */
 #endif
 
@@ -48,13 +44,9 @@ int SockWrite(int sock, const char *buf, int size);
 Send formatted output to the socket (matches interface of fprintf).
 Returns number of bytes successfully written.
 */
-#if defined(HAVE_STDARG_H)
 int SockPrintf(int sock, const char *format, ...)
     __attribute__ ((format (printf, 2, 3)))
     ;
-#else
-int SockPrintf();
-#endif
  
 /**
 Close a socket previously opened by SockOpen.  This allows for some

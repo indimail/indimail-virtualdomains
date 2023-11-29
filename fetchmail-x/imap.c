@@ -12,11 +12,9 @@
 #include  <string.h>
 #include  <strings.h>
 #include  <ctype.h>
-#if defined(STDC_HEADERS)
 #include  <stdlib.h>
 #include  <limits.h>
 #include  <errno.h>
-#endif
 #include  "socket.h"
 
 #include  "i18n.h"
@@ -103,10 +101,8 @@ static void copy_capabilities(const char *buf)
      * Handle idling.  We depend on coming through here on startup
      * and after each timeout (including timeouts during idles).
      */
-    if (strstr(capabilities, "IDLE"))
+    if (has_idle == FALSE && strstr(capabilities, "IDLE"))
        has_idle = TRUE;
-    else
-       has_idle = FALSE;
     if (outlevel >= O_VERBOSE)
        report(stdout, GT_("will idle after poll\n")); /* FIXME: rename this to can... idle for next release */
 
@@ -204,7 +200,7 @@ static int imap_untagged_response(int sock, const char *buf)
 	errno = 0;
 	u = strtoul(buf+2, &t, 10);
 	if (errno /* conversion error */ || t == buf+2 /* no number found */) {
-	    report(stderr, GT_("bogus EXPUNGE count in \"%s\"!"), buf);
+	    report(stderr, GT_("bogus EXPUNGE message number in untagged response \"%s\"!"), buf);
 	    return PS_PROTOCOL;
 	}
 	if (u > 0)
@@ -349,7 +345,9 @@ static int imap_response(int sock, char *argbuf, struct RecvSplit *rs)
 		return(PS_SUCCESS);	/* see comments in imap_getpartialsizes() */
 	    else
 		return(PS_ERROR);
-	}
+	} /* broken servers that return a tagged BYE */
+	else if (strncasecmp(cp, "BYE", 3) == 0 && stage == STAGE_LOGOUT)
+	    return(PS_SUCCESS);
 	else
 	    return(PS_PROTOCOL);
     }
@@ -416,8 +414,6 @@ static int capa_probe(int sock, struct query *ctl)
 {
     int	err;
 
-    (void)ctl;
-
     /* probe to see if we're running IMAP4 and can use RFC822.PEEK */
     memset(capabilities, 0, sizeof capabilities);
     err = gen_transact(sock, "CAPABILITY");
@@ -426,6 +422,9 @@ static int capa_probe(int sock, struct query *ctl)
 	/* this is OK for IMAP2 which did not support a CAPABILITY command */
 	err = PS_SUCCESS;
     }
+
+    if (has_idle == FALSE && ctl->forceidle)
+        has_idle = TRUE;
 
     return err;
 }
@@ -480,6 +479,9 @@ static int imap_getauth(int sock, struct query *ctl, char *greeting)
 	if (err) return err;
     }
 
+    if (has_idle == FALSE && ctl->forceidle)
+        has_idle = TRUE;
+
     commonname = ctl->server.pollname;
     if (ctl->server.via)
 	commonname = ctl->server.via;
@@ -489,7 +491,7 @@ static int imap_getauth(int sock, struct query *ctl, char *greeting)
 #ifdef SSL_ENABLE
     /* Defend against a PREAUTH-prevents-STARTTLS attack */
     if (preauth && must_starttls(ctl)) {
-	if (ctl->server.plugin && A_SSH == ctl->server.authenticate) {
+	if (ctl->server.plugin && A_IMPLICIT == ctl->server.authenticate) {
 		report(stderr, GT_("%s: configuration requires TLS, but STARTTLS is not permitted "
 					"because of authenticated state (PREAUTH). Aborting connection.  If your plugin is secure, you can defeat STARTTLS with --sslproto '' (see manual).\n"), commonname);
 	} else {
@@ -567,7 +569,7 @@ static int imap_getauth(int sock, struct query *ctl, char *greeting)
      * If either (a) we saw a PREAUTH token in the greeting, or
      * (b) the user specified ssh preauthentication, then we're done.
      */
-    if (preauth || ctl->server.authenticate == A_SSH)
+    if (preauth || ctl->server.authenticate == A_IMPLICIT)
     {
         preauth = FALSE;  /* reset for the next session */
         return(PS_SUCCESS);
@@ -782,7 +784,7 @@ static int internal_expunge(int sock)
     return(PS_SUCCESS);
 }
 
-static int imap_idle(int sock)
+static int imap_idle(int sock, int server_idle_timeout)
 /* start an RFC2177 IDLE, or fake one if unsupported */
 {
     int ok;
@@ -793,7 +795,7 @@ static int imap_idle(int sock)
 	/* special timeout to terminate the IDLE and re-issue it
 	 * at least every 28 minutes:
 	 * (the server may have an inactivity timeout) */
-	mytimeout = idle_timeout = 1680; /* 28 min */
+	mytimeout = idle_timeout = server_idle_timeout;
 	time(&idle_start_time);
 	stage = STAGE_IDLE;
 	/* enter IDLE mode */
@@ -822,7 +824,7 @@ static int imap_idle(int sock)
 	     * notification out of the blue. This is in compliance
 	     * with RFC 2060 section 5.3. Wait for that with a low
 	     * timeout */
-	    mytimeout = idle_timeout = 28;
+	    mytimeout = idle_timeout = (server_idle_timeout < 28 ? server_idle_timeout : 28);
 	    time(&idle_start_time);
 	    stage = STAGE_IDLE;
 	    /* We are waiting for notification; no tag needed */
@@ -954,7 +956,7 @@ static int imap_search(int sock, struct query *ctl, int count)
 static int imap_getrange(int sock, 
 			 struct query *ctl, 
 			 const char *folder, 
-			 int *countp, int *newp, int *bytes)
+			 int *countp, int *newp, unsigned long long *bytes)
 /* get range of messages to be fetched */
 {
     int ok;
@@ -975,7 +977,7 @@ static int imap_getrange(int sock,
 	 * mailbox changes also */
 	while (recentcount == 0 && ctl->idle && has_idle) {
 	    smtp_close(ctl, 1);
-	    ok = imap_idle(sock);
+	    ok = imap_idle(sock, ctl->server.idle_timeout);
 	    if (ok)
 	    {
 		report(stderr, GT_("re-poll failed\n"));
@@ -1034,7 +1036,7 @@ static int imap_getrange(int sock,
 	{
 	    /* no messages?  then we may need to idle until we get some */
 	    while (count == 0) {
-		ok = imap_idle(sock);
+		ok = imap_idle(sock, ctl->server.idle_timeout);
 		if (ok)
 		{
 		    report(stderr, GT_("re-poll failed\n"));
@@ -1375,7 +1377,7 @@ static int imap_trail(int sock, struct query *ctl, const char *tag)
 static int imap_delete(int sock, struct query *ctl, int number)
 /* set delete flag for given message */
 {
-    int	ok;
+    int	err;
     /* Select which flags to set on message deletion: */
     static const char delflags[] = "\\Seen \\Deleted";
 
@@ -1383,39 +1385,47 @@ static int imap_delete(int sock, struct query *ctl, int number)
     /* expunges change the fetch numbers */
     number -= expunged;
 
-    /*
-     * Use SILENT if possible as a minor throughput optimization.
-     * Note: this has been dropped from IMAP4rev1.
-     *
-     * We set \Seen because there are some IMAP servers (notably HP
-     * OpenMail and MS Exchange) do message-receipt DSNs,
-     * but only when the seen bit gets set.
-     * This is the appropriate time -- we get here right
-     * after the local SMTP response that says delivery was
-     * successful.
-     */
-    if ((ok = gen_transact(sock,
-			imap_version == IMAP4 
-				? "STORE %d +FLAGS.SILENT (%s)"
-				: "STORE %d +FLAGS (%s)",
-			number, delflags)))
-	return(ok);
-    else
-	deletions++;
-
-    /*
-     * We do an expunge after expunge_period messages, rather than
-     * just before quit, so that a line hit during a long session
-     * won't result in lots of messages being fetched again during
-     * the next session.
-     */
-    if (NUM_NONZERO(expunge_period) && (deletions % expunge_period) == 0)
+    if (ctl->moveto)
     {
-	if ((ok = internal_expunge(sock)))
-	    return(ok);
+	if ((err = gen_transact(sock, "MOVE %d %s", number, ctl->moveto)))
+	    return err;
+	expunged++;
     }
+    else
+    {
+	/*
+	 * Use SILENT if possible as a minor throughput optimization.
+	 * Note: this has been dropped from IMAP4rev1.
+	 *
+	 * We set \Seen because there are some IMAP servers (notably HP
+	 * OpenMail and MS Exchange) do message-receipt DSNs,
+	 * but only when the seen bit gets set.
+	 * This is the appropriate time -- we get here right
+	 * after the local SMTP response that says delivery was
+	 * successful.
+	 */
+	if ((err = gen_transact(sock,
+				imap_version == IMAP4 
+					? "STORE %d +FLAGS.SILENT (%s)"
+					: "STORE %d +FLAGS (%s)",
+				number, delflags)))
+	    return err;
+	else
+	    deletions++;
 
-    return(PS_SUCCESS);
+	/*
+	 * We do an expunge after expunge_period messages, rather than
+	 * just before quit, so that a line hit during a long session
+	 * won't result in lots of messages being fetched again during
+	 * the next session.
+	 */
+	if (NUM_NONZERO(expunge_period) && (deletions % expunge_period) == 0)
+	{
+	    if ((err = internal_expunge(sock)))
+		return err;
+	}
+    }
+    return PS_SUCCESS;
 }
 
 static int imap_mark_seen(int sock, struct query *ctl, int number)

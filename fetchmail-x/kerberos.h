@@ -6,13 +6,15 @@
 
 #ifndef H_KERBEROS__
 #define H_KERBEROS__
+
 #include  "config.h"
+
 #if defined(KERBEROS_V4) || defined(KERBEROS_V5)
 
 #ifdef KERBEROS_V5
 #include <krb5.h>
 /* #include <com_err.h> */
-#endif
+#endif /* KERBEROS_V5 */
 
 #ifdef KERBEROS_V4
 #  ifdef KERBEROS_V4_V5

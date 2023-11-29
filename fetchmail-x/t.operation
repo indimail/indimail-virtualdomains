@@ -1,0 +1,65 @@
+#!/bin/sh
+
+###########################
+### Test fetching email ###
+###########################
+
+set -e
+
+# skip test if python3 not present
+python3 -V || exit 77
+
+POP3_SERVER=127.0.0.1
+POP3_PORT=11110
+USER=${USER:-user}
+PASSWORD=ubuntu
+WORKDIR=$(mktemp -d)
+SERVER_PID=
+trap 'set +e ; test -z $SERVER_PID || kill $SERVER_PID ; rm -rf $WORKDIR' 0 INT QUIT ABRT PIPE TERM
+
+LOG="${WORKDIR}/fetchmail.log"
+MBOX="${WORKDIR}/test-mbox-$(date +%''s_%N)"
+CONFIG="${WORKDIR}/fetchmailrc"
+STARTMARKER="${WORKDIR}/started"
+
+echo "Configuring a functional local mail system"
+
+export STARTMARKER
+rm -f "${STARTMARKER}"
+python3 "$(dirname ${0})/t.operation.mock-pop3-server.py" &
+SERVER_PID=$!
+running=0
+for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 ; do
+  echo >&2 "waiting for server to start... $i"
+  sleep 1
+  if test -r "${STARTMARKER}" ; then
+    running=1
+    break
+  fi
+done
+[ $running -eq 1 ] || { echo >&2 "mock-pop3-server.py has not started, skipping test." ; SERVER_PID= ; exit 77 ; }
+kill -0 $SERVER_PID || { echo >&2 "mock-pop3-server.py has gone away, skipping test." ; SERVER_PID= ; exit 77 ; }
+
+# Configure fetchmail
+cat > "${CONFIG}" <<EOF
+poll ${POP3_SERVER} port ${POP3_PORT} no uidl with protocol POP3:
+  auth password
+  user '${USER}' there with password '${PASSWORD}'
+  is ${USER} here
+  sslproto ''
+  mda "/bin/sh -c 'cat > ${MBOX}'"
+EOF
+chmod 700 "${CONFIG}"
+
+# Run fetchmail
+echo "Checking fetchmail operates"
+unset FETCHMAILUSER LANG LANGUAGE
+LC_ALL=C FETCHMAILHOME=${WORKDIR} ./fetchmail -d0 -vvv -f "${CONFIG}" "${POP3_SERVER}"
+
+# TODO: Verify the test email was delivered to expected destination
+echo "Checking test email was received"
+grep "Received: from " "${MBOX}"
+
+kill ${SERVER_PID} || exit 77
+SERVER_PID= # blank so trap doesn't re-kill
+echo "OK"

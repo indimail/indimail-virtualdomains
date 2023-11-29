@@ -6,7 +6,6 @@
  * For license terms, see the file COPYING in this directory.
  */
 #include "fetchmail.h"
-#include "getaddrinfo.h"
 #include "i18n.h"
 
 #include <errno.h>
@@ -14,12 +13,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <netdb.h>
-#if defined(HAVE_NETINET_IN_H)
 #include <netinet/in.h>
-#endif
-#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
-#endif
 #include <sys/socket.h>
 
 int servport(const char *service) {

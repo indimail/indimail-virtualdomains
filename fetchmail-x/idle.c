@@ -42,7 +42,7 @@ volatile int lastsig;		/* last signal received */
  */
 static sig_atomic_t	alarm_latch = FALSE;
 
-RETSIGTYPE gotsigalrm(int sig)
+void gotsigalrm(int sig)
 {
     set_signal_handler(sig, gotsigalrm);
     lastsig = sig;
@@ -50,29 +50,11 @@ RETSIGTYPE gotsigalrm(int sig)
 }
 #endif /* SLEEP_WITH_ALARM */
 
-#ifdef __EMX__
-/* Various EMX-specific definitions */
-static int itimerflag;
-
-void itimerthread(void* dummy)
-{
-    if (outlevel >= O_VERBOSE)
-	report(stderr, 
-	       GT_("fetchmail: thread sleeping for %d sec.\n"), poll_interval);
-    while(1)
-    {
-	_sleep2(poll_interval*1000);
-	kill((getpid()), SIGALRM);
-    }
-}
-#endif
-
 int interruptible_idle(int seconds)
 /* time for a pause in the action; return TRUE if awakened by signal */
 {
     int awoken = FALSE;
 
-#ifndef __EMX__
 #ifdef SLEEP_WITH_ALARM		/* not normally on */
     /*
      * We can't use sleep(3) here because we need an alarm(3)
@@ -144,15 +126,7 @@ int interruptible_idle(int seconds)
     } while (lastsig == SIGCHLD);
     }
 #endif
-#else /* EMX */
-    alarm_latch = FALSE;
-    set_signal_handler(SIGALRM, gotsigalrm);
-    _beginthread(itimerthread, NULL, 32768, NULL);
-    /* see similar code above */
-    if (!alarm_latch)
-	pause();
-    set_signal_handler(SIGALRM, SIG_IGN);
-#endif /* ! EMX */
+
     if (lastsig == SIGUSR1 || ((seconds && getuid() == ROOT_UID)
 	&& lastsig == SIGHUP))
        awoken = TRUE;

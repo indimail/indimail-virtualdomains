@@ -9,26 +9,28 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <strings.h>
 #include <sys/types.h>
-#ifdef HAVE_NET_SOCKET_H
-#include <net/socket.h>
-#else
 #include <sys/socket.h>
-#endif
 #include <netinet/in.h>
-#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
-#endif
 #include <netdb.h>
 #include "i18n.h"
 #include "mx.h"
-#include "getaddrinfo.h"
 
 #define MX_RETRIES	3
 
 typedef unsigned char address_t[sizeof (struct in_addr)];
 
 #ifdef HAVE_RES_SEARCH
+
+/* We need to define h_errno only if it is not already */
+#ifndef h_errno
+# if !HAVE_DECL_H_ERRNO
+   extern int h_errno;
+# endif
+#endif /* ndef h_errno */
+
 static int getaddresses(struct addrinfo **result, const char *name)
 {
     struct addrinfo hints;

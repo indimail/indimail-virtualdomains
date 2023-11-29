@@ -1,4 +1,5 @@
 '\" t
+.\" vim: tw=75
 .\" ** The above line should force tbl to be used as a preprocessor **
 .\"
 .\" Manual page in man(7) format with tbl(1) and groff_www(7)
@@ -10,7 +11,7 @@
 .\"
 .\" The date is the last change of actual content, the version should match
 .\" the distribution (configure.ac).
-.TH FETCHMAIL 1 2022-07-16 "fetchmail 6.4.36" "fetchmail reference manual"
+.TH FETCHMAIL 1 2022-11-27 "fetchmail 6.5.0.beta9" "fetchmail reference manual"
 
 .SH NAME
 fetchmail \- fetch mail from a POP, IMAP, ETRN, or ODMR-capable server
@@ -70,7 +71,55 @@ language (if supported). However if you are posting to mailing lists,
 please leave it in. The maintainers do not necessarily understand your
 language, please use English.
 
-.SH "TLS (SSL) QUICKSTART"
+.SS QUICKSTART
+
+1. Set up a local SMTP mail server, or command-line based mail delivery agent
+such as maildrop or dovecot-lda, configure and test and debug it. Make sure
+that mail you deliver to yourself through it ends up in the right place.
+Do NOT continue unless and until this works or you risk losing mail!
+.PP
+2. Create a .fetchmailrc file in your home directory that looks
+roughly like this, for POP3 fetches.
+.IP
+.nf
+poll mailserver.example.org proto POP3 uidl
+user joe.sixpack
+keep ssl
+.fi
+.PP
+You need to adjust several elements here:
+mailserver.example.org is the server's name. joe.sixpack is the login name to use for the server.
+keep states that messages should be left on the server, rather than deleted.
+ssl states that the connection should be encrypted. If you need to use IMAP instead of POP3,
+change "proto POP3 uidl" to "proto IMAP".
+.PP
+If you chose to deliver through a command-line program, add an mda option, for instance:
+.IP
+.nf
+mda "/usr/bin/maildrop -d %T"
+.fi
+.PP
+3. And then make sure the ~/.fetchmailrc file is not readable or writable
+to anyone but yourself:
+.IP
+.nf
+chmod 0600 ~/.fetchmailrc
+.fi
+
+.PP
+4. Finally, run fetchmail in verbose mode and see that it works. To limit impact, if something goes wrong, we just try two messages:
+.IP
+.nf
+fetchmail -v --fetchlimit 2
+.fi
+
+.PP
+If then the POP3 server refuses UIDL, you cannot use the "keep" option
+on that server and you need to remove the uidl and keep options, but note
+that then fetchmail will remove messages it has successfully
+delivered from the server.
+
+.SH TLS (SSL) QUICKSTART
 Your fetchmail distribution should have come with a README.SSL file, which see.
 It is recommended to configure all polls with --ssl --sslproto tls1.2+
 if supported by the server, which configures fetchmail along recent IETF
@@ -265,6 +314,16 @@ option forces retrieved mail to be deleted.  It may be useful if
 you have specified a default of \fBkeep\fP in your
 \&\fI.fetchmailrc\fP.  This option is forced on with ETRN and ODMR.
 .TP
+.B \-\-moveto <folder>
+(Keyword: moveto)
+.br
+In IMAP mode, instead of flushing a message, move it to the given IMAP folder 
+instead. This is useful for avoiding data loss while testing, and is the 
+preferred way to delete emails on certain implementations, for example Google 
+wants you to delete mails by moving them to [Gmail]/Trash. Only available for 
+IMAP servers. This option is only accepted with \fB\-\-proto imap\fR, but not 
+if IMAP is chosen automatically. It is ineffective when \fB\-\-keep\fR is in effect.
+.TP
 .B \-F | \-\-flush
 (Keyword: flush)
 .br
@@ -353,6 +412,19 @@ keyword had been supported for a long time, the \-\-idle command-line
 option was added in version 6.3.3. IDLE use means that fetchmail tells
 the IMAP server to send notice of new messages, so they can be retrieved
 sooner than would be possible with regular polls.
+.TP
+.B \-\-forceidle (since 6.5.0)
+(Keyword: forceidle, since 6.5.0)
+.br
+Use IDLE even if the server does not advertise it in their capabilities. This
+is a dangerous option, use carefully.
+.TP
+.B \-\-idletimeout (since 6.5.0)
+(Keyword: idletimeout, since 6.5.0)
+.br
+Set the timeout (in seconds) for the IDLE command because too many servers break the
+protocol (which requires 30 minutes) and hang up after a few minutes. Default 
+value: 1680 s (= 28 min).
 .TP
 .B \-P <portnumber> | \-\-service <servicename>
 (Keyword: service) Since version 6.3.0.
@@ -522,36 +594,31 @@ Note that depending on OpenSSL library version and configuration, some options
 cause run-time errors because the requested SSL or TLS versions are not
 supported by the particular installed OpenSSL library.
 .RS
-.IP '\fBTLS1.2+\fP'
-(recommended). Since v6.4.0. Require TLS. Auto-negotiate TLSv1.2 or newer.
 .IP '\fBauto\fP'
-(default). Since v6.4.0. Require TLS. Auto-negotiate TLSv1 or newer, disable
-SSLv3 downgrade.
-(fetchmail 6.3.26 and older have auto-negotiated all protocols that
-their OpenSSL library supported, including the broken SSLv3).
+(default, the same as TLS1.2+). Since v6.4.0, changed in v6.5.0. Require TLS. 
+Auto-negotiate TLSv1.2 or newer, disable downgrade below.
+(older fetchmail versions than v6.5.0 have auto-negotiated older protocols, 
+v6.4.x would permit TLSv1.0 by default, v6.3.x would permit SSLv3).
 .IP "\fB''\fP, the empty string"
 Disable STARTTLS. If \-\-ssl is given for the same server, log an error
 and pretend that '\fBauto\fP' had been used instead.
 .IP \&'\fBSSL23\fP'
-see '\fBauto\fP'.
-.IP \&'\fBSSL3\fP'
-Require SSLv3 exactly. SSLv3 is broken, not supported on all systems, avoid it
-if possible.  This will make fetchmail negotiate SSLv3 only, and is the
-only way besides '\fBSSL3+\fP' to have fetchmail 6.4.0 or newer permit SSLv3.
-.IP \&'\fBSSL3+\fP'
-same as '\fBauto\fP', but permit SSLv3 as well. This is the only way
-besides '\fBSSL3\fP' to have fetchmail 6.4.0 or newer permit SSLv3.
+see '\fBauto\fP'. Deprecated, recognized for backwards compatibility.
+.IP \&'\fBTLS\fP'
+see '\fBauto\fP'. For symmetry with OpenSSL client method names.
 .IP \&'\fBTLS1\fP'
 Require TLSv1. This does not negotiate TLSv1.1 or newer, and is
 discouraged. Replace by TLS1+ unless the latter chokes your server.
 .IP \&'\fBTLS1+\fP'
-Since v6.4.0. See '\fBauto\fP'.
+Since v6.4.0. This is an auto-negotiation feature that will permit TLSv1.0 and newer.
 .IP \&'\fBTLS1.1\fP'
 Since v6.4.0. Require TLS v1.1 exactly.
 .IP \&'\fBTLS1.1+\fP'
 Since v6.4.0. Require TLS. Auto-negotiate TLSv1.1 or newer.
 .IP \&'\fBTLS1.2\fP'
 Since v6.4.0. Require TLS v1.2 exactly.
+.IP '\fBTLS1.2+\fP'
+Since v6.4.0. Require TLS. Auto-negotiate TLSv1.2 or newer. This is the default in fetchmail v6.5.x.
 .IP \&'\fBTLS1.3\fP'
 Since v6.4.0. Require TLS v1.3 exactly.
 .IP '\fBTLS1.3+\fP'
@@ -720,8 +787,8 @@ as a spam-block response from the listener.  A value of \-1 disables
 this option.  For the command-line option, the list values should
 be comma-separated.  Note that the antispam values only apply to "MAIL
 FROM" responses in the SMTP/LMTP dialogue, but several MTAs (Postfix in
-its default configuration, qmail) defer the anti-spam response code
-until after the RCPT TO. \-\-antispam does not work in these
+its default configuration, qmail, netqmail) defer the anti-spam response
+code until after the RCPT TO. \-\-antispam does not work in these
 circumstances.  Also see \-\-softbounce (default) and its inverse.
 .TP
 .B \-m <command> | \-\-mda <command>
@@ -1004,7 +1071,8 @@ AUTHENTICATION below for details).  The possible values are \fBany\fP,
 \&\fBpassword\fP, \fBkerberos_v5\fP, \fBkerberos\fP (or, for
 excruciating exactness, \fBkerberos_v4\fP), \fBgssapi\fP,
 \fBcram\-md5\fP, \fBotp\fP, \fBntlm\fP, \fBmsn\fP (only for POP3),
-\fBexternal\fP (only IMAP) and \fBssh\fP.
+\fBexternal\fP (only IMAP) and \fBimplicit\fP (\fBssh\fP is understood 
+as alias for \fBimplicit\fP).
 When \fBany\fP (the default) is specified, fetchmail tries
 first methods that do not require a password (EXTERNAL, GSSAPI, KERBEROS\ IV,
 KERBEROS\ 5); then it looks for methods that mask your password
@@ -1012,14 +1080,14 @@ KERBEROS\ 5); then it looks for methods that mask your password
 auto-probed); and only if the server does not
 support any of those will it ship your password unencrypted.  Other values
 may be used to force various authentication methods:
-\fBssh\fP suppresses authentication and is thus useful for IMAP PREAUTH
+\fBimplicit\fP suppresses authentication and is thus useful for IMAP PREAUTH
 (if you are using a secure \-\-plugin, for instance, a properly configured
 ssh, you may also need to set \-\-sslproto\ '' or, in the rcfile, sslproto\ '',
 in order to avoid fetchmail negotiating STARTTLS over SSH).
 \fBexternal\fP suppresses authentication and is thus useful for IMAP EXTERNAL.
 Any value other than \fBpassword\fP, \fBcram\-md5\fP, \fBntlm\fP,
 \&\fBmsn\fP or \fBotp\fP suppresses fetchmail's normal inquiry for a
-password.  Specify \fBssh\fP when you are using an end-to-end secure
+password.  Specify \fBimplicit\fP when you are using an end-to-end secure
 connection such as an ssh tunnel (in this case you may also want to specify
 \&\fB\-\-sslproto\ ''\fP, which see); specify \fBexternal\fP when you use
 TLS with client authentication and specify \fBgssapi\fP or
@@ -1108,14 +1176,15 @@ name found in the header specified with the \fIenvelope\fP option
 (\fIbefore\fP doing multidrop name mapping or localdomain checking,
 if either is applicable). This option is useful if you are using
 \fBfetchmail\fP to collect the mail for an entire domain and your ISP
-(or your mail redirection provider) is using qmail.
-One of the basic features of qmail is the \fIDelivered\-To:\fP
-message header.  Whenever qmail delivers a message to a local mailbox
-it puts the username and host name of the envelope recipient on this
-line.  The major reason for this is to prevent mail loops.  To set up
-qmail to batch mail for a disconnected site the ISP-mailhost will have
-normally put that site in its 'Virtualhosts' control file so it will
-add a prefix to all mail addresses for this site. This results in mail
+(or your mail redirection provider) is using indimail-mta, qmail, netqmail
+One of the basic features of indimail-mta, qmail, netqmail is the
+\fIDelivered\-To:\fP message header. Whenever indimail-mta, qmail, netqmail
+delivers a message to a local mailbox it puts the username and host name of
+the envelope recipient on this line.  The major reason for this is to
+prevent mail loops.  To set up indimail-mta, qmail, netqmail to batch mail
+for a disconnected site the ISP-mailhost will have normally put that site
+in its 'Virtualhosts' control file so it will add a prefix to all mail
+addresses for this site. This results in mail
 .\" The \&@\& tries to stop HTML converters from making a mailto: URL here:
 sent to 'username\&@\&userhost.userdom.dom.com' having a
 \fIDelivered\-To:\fR line of the form:
@@ -1183,11 +1252,8 @@ from your \fI~/.fetchmailrc\fP file, it will look for a \fI~/.netrc\fP
 file in your home directory before requesting one interactively; if an
 entry matching the mail server is found in that file, the password will
 be used.  Fetchmail first looks for a match on poll name; if it finds none,
-it checks for a match on via name.  See the
-.BR ftp (1)
-man page for details of the syntax of the \fI~/.netrc\fP
-file.  To show a practical example, a .netrc might look like
-this:
+it checks for a match on via name. To show a practical example,
+a .netrc might look like this:
 .IP
 .nf
 machine hermes.example.org
@@ -1200,6 +1266,41 @@ provide more than one password.
 .PP
 This feature may allow you to avoid duplicating password
 information in more than one file.
+.PP
+The netrc file contains login information originally set for
+.BR ftp (1)
+but fetchmail understands typical constructs of this file to use it for
+passwords.  The syntax consists of tokens (usually in pairs with strings).
+Strings can be quoted with single or double quotes, as in "quoted string", to 
+allow enclosing blanks, and a backslash \\ within a quoted string will escape 
+the following character, so that a password can contain quote marks themselves. 
+Tokens are separated by spaces, tabs or newline characters.
+
+These tokens are understood:
+.TP
+.BI "machine " name
+Identify a remote computer name for which the following tokens apply.
+It needs to match either fetchmail's \fBpoll\fR or \fBvia\fR name.
+.TP
+.BI "login " name
+Defines the user name that fetchmail would match when looking for entries.
+Fetchmail ignores zero-length names or entries without \fBlogin\fR.
+.TP
+.BI "password " string
+Defines the password that fetchmail will use when machine and login match the
+poll/via name and the username.
+.TP
+.B default
+This is like \fBmachine\fR, but would match any name. Fetchmail ignores it.
+After this, no more \fBmachine\fR sections are permitted.
+.TP
+.BI "account " string
+Fetchmail ignores this token/string pair.
+.TP
+.BI "macdef " macro\_name
+Fetchmail ignores this macro definition, meaning this, the remainder
+of the lines, and all following lines until a blank line is found
+(i. e., two consecutive new-line characters). Then .netrc parsing resumes.
 .PP
 On mail servers that do not provide ordinary user accounts, your user-id and
 password are usually assigned by the server administrator when you apply for
@@ -1338,7 +1439,7 @@ option \fBuser\fP.
 If your IMAP daemon returns the PREAUTH response in its greeting line,
 fetchmail will notice this and skip the normal authentication step.
 This can be useful, e.g., if you start imapd explicitly using ssh.
-In this case you can declare the authentication value 'ssh' on that
+In this case you can declare the authentication value 'implicit' on that
 site entry to stop \fI.fetchmail\fP from asking you for a password
 when it starts up.
 .PP
@@ -1443,6 +1544,10 @@ is primarily useful for debugging configurations. Note that fetchmail
 does not detect if the logfile is rotated, the logfile is only opened
 once when fetchmail starts. You need to restart fetchmail after rotating
 the logfile and before compressing it (if applicable).
+.br
+Since v6.5.0, the log file is prefixed with time stamps, in local time
+and in the format "Jun 20 23:45:01 fetchmail: ". It will be localized through
+the environment variables LC_TIME (or LC_ALL) and TZ.
 .PP
 The
 .B \-\-syslog
@@ -1858,7 +1963,8 @@ no envelope	\&	m	T{
 Disable looking for envelope address
 T}
 qvirtual	\-Q	m	T{
-Qmail virtual domain prefix to remove from user name
+indimail-mta, qmail, netqmail virtual domain prefix to remove from user
+name
 T}
 aka      	\&	m	T{
 Specify alternate DNS names of mail server
@@ -1911,6 +2017,9 @@ T}
 bad-header	\&	\&	T{
 How to treat messages with a bad header. Can be reject (default) or accept.
 T}
+idletimeout    	\&	\&	T{
+Idle waiting timeout (in seconds), see --idle.
+T}
 .TE
 
 Here are the legal user descriptions and options:
@@ -1956,7 +2065,7 @@ T}
 sslcertpath	\&	\&	T{
 Specify c_rehash-ed directory with trusted CA certificates.
 T}
-sslfingerprint  \&	\&	T{
+sslfingerprint	<HASH> \&	\&	T{
 Specify the expected server certificate finger print from an MD5 hash. Fetchmail will
 disconnect and log an error if it does not match.
 T}
@@ -2031,6 +2140,9 @@ Convert quoted-printable to 8-bit in MIME messages
 T}
 idle     	\&	\&	T{
 Idle waiting for new messages after each poll (IMAP only)
+T}
+forceidle     	\&	\&	T{
+Idle waiting for new messages after each poll (IMAP only, forced)
 T}
 no keep  	\-K	\&	T{
 Delete seen messages from server (default)
@@ -2233,8 +2345,8 @@ connection is taken down.
 The 'forcecr' option controls whether lines terminated by LF only are
 given CRLF termination before forwarding.  Strictly speaking RFC821
 requires this, but few MTAs enforce the requirement so this option
-is normally off (only one such MTA, qmail, is in significant use at
-time of writing).
+is normally off (only few MTAs, indimail-mta, qmail, netqmail enforce
+this).
 .PP
 The 'stripcr' option controls whether carriage returns are stripped
 out of retrieved mail before it is forwarded.  It is normally not
@@ -2266,9 +2378,9 @@ inserted by some buggy POP servers are unconditionally discarded.)
 .PP
 The 'dropdelivered' option controls whether Delivered\-To headers will
 be kept in fetched mail (the default) or discarded. These headers are
-added by qmail and Postfix mail servers in order to avoid mail loops but
-may get in your way if you try to "mirror" a mail server within the same
-domain. Use with caution.
+added by indimail-mta, qmail, netqmail and Postfix mail servers in order to
+avoid mail loops but may get in your way if you try to "mirror" a mail
+server within the same domain. Use with caution.
 .PP
 The 'mimedecode' option controls whether MIME messages using the
 quoted-printable encoding are automatically converted into pure 8-bit
@@ -2323,7 +2435,7 @@ Legal protocol identifiers for use with the 'protocol' keyword are:
 .PP
 Legal authentication types are 'any', 'password', 'kerberos',
 \&'kerberos_v4', 'kerberos_v5' and 'gssapi', 'cram\-md5', 'otp', 'msn'
-(only for POP3), 'ntlm', 'ssh', 'external' (only IMAP).
+(only for POP3), 'ntlm', 'implicit', 'external' (only IMAP).
 The 'password' type specifies
 authentication by normal transmission of a password (the password may be
 plain text or subject to protocol-specific encryption as in CRAM-MD5);
@@ -2597,7 +2709,7 @@ Note that in this setup, IMAP authentication can be skipped.
 .IP
 .nf
 poll mailhost.net with proto imap:
-     plugin "ssh %h /usr/sbin/imapd" auth ssh;
+     plugin "ssh %h /usr/sbin/imapd" auth implicit;
      user esr is esr here
 .fi
 
@@ -2657,11 +2769,11 @@ one copy of the message per recipient to avoid becoming a privacy problem.
 Postfix, since version 2.0, writes an X\-Original\-To: header which
 contains a copy of the envelope as it was received.
 .PP
-Qmail and Postfix generally write a 'Delivered\-To' header upon
-delivering the message to the mail spool and use it to avoid mail loops.
-Qmail virtual domains however will prefix the user name with a string
-that normally matches the user's domain. To remove this prefix you can
-use the \-Q or 'qvirtual' option.
+indimail-mta, qmail, netqmail and Postfix generally write a 'Delivered\-To'
+header upon delivering the message to the mail spool and use it to avoid
+mail loops. indimail-mta, qmail, netqmail virtual domains however will
+prefix the user name with a string that normally matches the user's domain.
+To remove this prefix you can use the \-Q or 'qvirtual' option.
 .PP
 Sometimes, unfortunately, neither of these methods works.  That is the
 point when you should contact your ISP and ask them to provide such an
@@ -2998,6 +3110,9 @@ If using another library's OpenSSL compatibility interface, this may not work.
 Since this variable only specifies a default value, the option \-\-sslcertfile
 takes precedence if given.
 
+.IP "other system default variables"
+such as TZ or the locale LC_XXX variables, will also influence program behaviour.
+
 .SH SIGNALS
 If a \fBfetchmail\fP daemon is running as root, SIGUSR1 wakes it up from its
 sleep phase and forces a poll of all non-skipped servers. For compatibility
@@ -3123,7 +3238,7 @@ This program is descended from and replaces
 by
 .UR "mailto:ceharris@mal.com"
 Carl Harris
-.UE ;
+.UE ; 
 the internals have become quite different, but some of its interface
 design is directly traceable to that ancestral program.
 .PP

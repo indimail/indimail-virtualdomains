@@ -1,39 +1,14 @@
 README.packaging
 ================
 
-fetchmail 6.4 changes relevant for packagers
+fetchmail 6.5 changes relevant for packagers
 --------------------------------------------
 
 Greetings, dear packager!
 
 The bullet points below mention a few useful hints for package(r)s:
 
-- Mind the license difficulties around GPL'd software mixing in 
-  OpenSSL/SSLeay licensed or Apache licensed code! 
-  You cannot use OpenSSL derivative works such as LibreSSL that incur the 
-  OpenSSL or SSLeay licensing terms, see COPYING for details.
-
-- Note OpenSSL's license changes between v1.1.1 and v3.0. See COPYING.
-
-- Fetchmail requires OpenSSL or wolfSSL, for details, see README.SSL.
-  Fetchmail 6.4 tolerates 1.0.2f for now but assumes the distributor backports
-  security fixes for it.  Only link against SSL/TLS library versions
-
-- Your configuration and examples MUST NOT encourage setups running
-  fetchmail as the root user.  For system-wide setups, a separate user, 
-  possibly in a dedicated group of its own, should be used.
-  If you want to support --mda setups that impersonate other users,
-  DO NOT suggest or endorse unmaintained software such as procmail.
-  Instead, suggest maintained software that supports a "delivery mode",
-  for instance, Sam Varshavchik's maildrop (which is part of the Courier-MTA
-  and available separately) and which was designed to be installed set-uid.
-
-- Fetchmail uses GNU automake/autoconf and supports all common targets and 
-  overrides such as "make install-strip" or "DESTDIR=..." for staging areas.
-
-- The fetchmailconf script is named fetchmailconf.py, automake will install it
-  into Python's top-level site-packages directory and byte-compile it (so you
-  need to package or remove fetchmailconf.pyc and fetchmailconf.pyo as well).
+- Fetchmail requires OpenSSL v1.1.1 or newer.
 
   > If you want to defeat Python byte-code compilation and would rather like to 
     install fetchmailconf.py yourself, you can add

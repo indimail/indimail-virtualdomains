@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <strings.h>
 #include <signal.h>
 #include "socket.h"
 #include "smtp.h"

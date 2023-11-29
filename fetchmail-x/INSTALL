@@ -54,8 +54,10 @@ If you are installing wolfSSL yourself, be sure to use a hardened build
 with all OpenSSL APIs (as of 5.1.1) - you may add --enable-debug,
 and note that --enable-opensslextra does NOT suffice.
 
-	./configure --enable-opensslall --enable-harden
-	make && make test && make install
+  env "CFLAGS=-DOPENSSL_COMPATIBLE_DEFAULTS -O" \
+	./configure --enable-opensslall --enable-harden \
+  	--enable-context-extra-user-data
+  make && make test && make install
 
 fetchmail's configure option --with-wolfssl takes precedence over --with-ssl.
 
@@ -79,7 +81,7 @@ a valid USER id.  If the OK response includes the string "otp-",
 you should install OPIE.  You need version 2.32 or better.
 
 The OPIE library sources are available at http://www.inner.net/pub/opie/
-You can also find OPIE and IPV6-capable servers there.
+You can also find OPIE and IPv6-capable servers there.
 
 1.4 IPv6
 
@@ -89,6 +91,15 @@ be fine.
 
 If you have trouble with intl or gettext functions, try using the
 configure option '--with-included-gettext'.
+
+1.5 Optional requisites
+
+Python 3 (which needs to provide a "python3" command) can be used to run a few
+additional tests in "make check" and tries fetching from a local mock POP3
+server currently.
+
+Python 3 and the Tk or Tkinter package are required to run fetchmailconf,
+a graphical configuration utility.
 
 
 2. CONFIGURE
@@ -123,7 +134,7 @@ on Fedora Linux:  /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
 on Debian/Ubuntu: /etc/ssl/certs/ca-certificates.crt
 on FreeBSD:       /usr/local/share/certs/ca-root-nss.crt
 
-The autoconfiguration script will spend a bit of time figuring out the
+The auto-configuration script will spend a bit of time figuring out the
 specifics of your system.  If you want to specify a particular compiler
 (e.g. you have gcc but want to compile with cc), set the environment
 variable CC before you run configure.
@@ -133,7 +144,7 @@ These include --prefix, --exec-prefix, --bindir, --infodir, --mandir,
 and --srcdir.  Run 'configure --help' for more.
 
 POP2 support is no longer compiled in by default, as POP2 is way obsolete
-and there don't seem to be any live servers for it anymore.  You can
+and there don't seem to be any live servers for it any more.  You can
 configure it back in if you want with 'configure --enable-POP2', but
 leaving it out cuts the executable's size slightly.
 
@@ -186,14 +197,14 @@ POP3, IMAP, and ETRN (with configure arguments of --disable-POP3,
 
 Run
 
-	make
+	make check
 
 This should compile fetchmail for your system.  If fetchmail fails to build
 properly, see the FAQ section B on build-time problems.
 
 On multi-core computers, run
 
-	make -j8
+	make -j8 check
 
 on a computer that supports 8 CPU threads at the same time (for instance,
 Octocore computers or Quad-core computers supporting two threads per core).

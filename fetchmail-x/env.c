@@ -6,27 +6,20 @@
  */
 
 #include "config.h"
+#include "fetchmail.h"
+
 #include <stdio.h>
 #include <ctype.h>
-#if defined(STDC_HEADERS)
 #include <stdlib.h>
-#endif
-#if defined(HAVE_UNISTD_H)
 #include <unistd.h>
-#endif
 #include <pwd.h>
 #include <string.h>
-#ifdef HAVE_NET_SOCKET_H
-#include <net/socket.h>
-#endif
 #include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include "fetchmail.h"
-#include "getaddrinfo.h"
 
 #include "i18n.h"
-#if defined(HAVE_SETLOCALE) && defined(ENABLE_NLS) && defined(HAVE_STRFTIME)
+#if defined(ENABLE_NLS)
 #include <locale.h>
 #endif
 #include <limits.h>
@@ -240,7 +233,7 @@ char *host_fqdn(int required)
 }
 
 static char *tzoffset(time_t *now)
-/* calculate timezone offset */
+/* calculate timezone offset, minute precision */
 {
     static char offset_string[6];
     struct tm gmt, *lt;
@@ -269,14 +262,13 @@ static char *tzoffset(time_t *now)
     return (offset_string);
 }
 
-char *rfc822timestamp(void)
+const char *rfc822timestamp(void)
 /* return a timestamp in RFC822 form */
 {
     time_t	now;
     static char buf[50];
 
     time(&now);
-#ifdef HAVE_STRFTIME
     /*
      * Conform to RFC822.  We generate a 4-digit year here, avoiding
      * Y2K hassles.  Max length of this timestamp in an English locale
@@ -285,24 +277,25 @@ char *rfc822timestamp(void)
      * weird multibyte i18n characters (such as kanji) from showing up
      * in your Received headers.
      */
-#if defined(HAVE_SETLOCALE) && defined(ENABLE_NLS)
+#if defined(ENABLE_NLS)
     setlocale (LC_TIME, "C");
 #endif
-    strftime(buf, sizeof(buf)-1, 
-	     "%a, %d %b %Y %H:%M:%S XXXXX (%Z)", localtime(&now));
-#if defined(HAVE_SETLOCALE) && defined(ENABLE_NLS)
+
+    int local_s = localtime(&now)->tm_sec;
+    int gmt_s = gmtime(&now)->tm_sec;
+
+    if (local_s == gmt_s) {
+        strftime(buf, sizeof(buf),
+	         "%a, %d %b %Y %H:%M:%S XXXXX (%Z)", localtime(&now));
+        memcpy(strstr(buf, "XXXXX"), tzoffset(&now), 5);
+    } else {
+        strftime(buf, sizeof(buf),
+	         "%a, %d %b %Y %H:%M:%S -0000", gmtime(&now));
+    }
+
+#if defined(ENABLE_NLS)
     setlocale (LC_TIME, "");
 #endif
-    memcpy(strstr(buf, "XXXXX"), tzoffset(&now), 5);
-#else
-    /*
-     * This is really just a portability fallback, as the
-     * date format ctime(3) emits is not RFC822
-     * conformant.
-     */
-    strlcpy(buf, ctime(&now), sizeof(buf));
-    buf[strlen(buf)-1] = '\0';	/* remove trailing \n */
-#endif /* HAVE_STRFTIME */
 
     return(buf);
 }

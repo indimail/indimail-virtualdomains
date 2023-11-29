@@ -9,11 +9,12 @@ Abbreviations in parentheses are the maintainers who committed the respective
 change.  MA = Matthias Andree, ESR = Eric S. Raymond, RF = Rob Funk.)
 
 # ADVANCE WARNING OF FEATURES TO BE REMOVED OR CHANGED IN FUTURE VERSIONS
-(There are no plans to remove features from a 6.4.X release, but they may be
-removed from a 6.5.0 or newer release.)
+(There are no plans to remove features from a 6.5.X release, but they may be
+removed from a 6.6.0 or newer release.)
+* Support for operating systems that are not sufficiently POSIX compliant may be
+  removed or operation on such systems may be suboptimal for future releases.
 * Future fetchmail releases may require compilers and operating systems
-  that adhere to standards issued 2011 or later.
-  (Currently, C89 and Single Unix Specification V2 should suffice.)
+  that adhere to standards issued 2011 or later. (See README for requirements.)
 * Future fetchmail releases may tighten up security and lean towards
   it a bit more by, for instance, implementing recommendations from
   RFC-7817 or RFC-8314. This may, for instance, require that TLS v1.1
@@ -37,34 +38,27 @@ removed from a 6.5.0 or newer release.)
   unreliable undertaking. The envelope option as such will remain though, in
   order to support Delivered-To, X-Envelope-To, X-Original-To and similar.
   See also <http://home.pages.de/~mandree/mail/multidrop>.
-* The --enable-fallback (fall back to MDA if MTA unavailable) will be removed
-  from a future fetchmail release, because it makes fetchmail's behavior
-  inconsistent and confusing.
 * The "protocol auto" default inside fetchmail may be removed from a future
   fetchmail release. Explicit configuration of the protocol is recommended.
 * Kerberos IV support may be removed from a future fetchmail release.
 * Kerberos 5 support may be removed from a future fetchmail release.
+  (Although GSS-API support should remain as long as it's viable.)
 * The --principal option may be removed from a future fetchmail release.
 * SIGHUP wakeup support may be removed from a future fetchmail release and
   cause fetchmail to terminate - it was broken for many years.
-* Support for operating systems that are not sufficiently POSIX compliant may be
-  removed or operation on such systems may be suboptimal for future releases.
-  This means that fetchmail may only continue to work on C99 and POSIX 2001
-  based systems.
 * The maintainer may migrate fetchmail to C++ with STL or C#, and impose further
   requirements (dependencies), such as Boost or other class libraries.
 * The softbounce option default will change to "false" in the next release.
 * The --bsmtp - mode of operation may be removed in a future release.
-* SSLv3 support may be removed from a future fetchmail release. It has been
-  obsolete for many years and found insecure. Use TLS.
 * Fetchmailconf is deprecated and will be removed from a future release.
 * Fetchmail does not guarantee compatibility with EOL OpenSSL versions. Support
   for end-of-life OpenSSL versions may be removed even from patchlevel releases.
 * Nonstandard authentication schemes (such as RPA) may be removed from future
   fetchmail versions.
-* Nonstandard protocol extensions (such as SDPS/*ENV) may be removed from future 
+* Nonstandard protocol extensions (such as SDPS/*ENV) may be removed from future
   fetchmail versions.
-* Future fetchmail releases (even minor ones) may change undocumented parts of 
+* --auth ssh may be removed from future fetchmail versions. Use --auth implicit.
+* Future fetchmail releases (even minor ones) may change undocumented parts of
   the .netrc parser in incompatible ways to enhance compatibility with typical
   ftp(1) .netrc parsers.
 * Apparently OPIE is dying. I only have this support on FreeBSD, and
@@ -74,9 +68,7 @@ removed from a 6.5.0 or newer release.)
 * Fetchmail does not handle messages without Message-ID header well
   (See sourceforge.net bug #780933)
 * Fetchmail currently uses 31-bit signed integers in several places
-  where unsigned and/or wider types should have been used, for instance,
-  for mailbox sizes, and misreports sizes of 2 GibiB and beyond.
-  Fixing this requires C89 compatibility to be relinquished.
+  where unsigned and/or wider types should have been used.
 * BSMTP is mostly untested and errors can cause corrupt output.
 * Fetchmail does not track pending deletes across crashes.
 * The command line interface is sometimes a bit stubborn, for instance,
@@ -87,33 +79,135 @@ removed from a 6.5.0 or newer release.)
 * Kerberos 5 may be broken, particularly on Heimdal, and provide bogus error
   messages. This will not be fixed, because the maintainer has no Kerberos 5
   server to test against. Use GSSAPI.
-* For IMAP connections, fetchmail will print "will idle after poll" in 
-  verbose mode even though --idle is not given, as an artifact of the 6.4.22 
+* For IMAP connections, fetchmail will print "will idle after poll" in
+  verbose mode even though --idle is not given, as an artifact of the 6.4.22
   security fixes. Fetchmail means "could idle after poll", but this would
   have required another loop through the translators.
 * aka ... hostnames are not considered for upstream server X.509 certificate
   verification, aka was meant for alias detection with multidrop mailboxes.
-* When compiled against wolfSSL, some diagnostics and messages of fetchmail are 
-  hardcoded to read "OpenSSL"; this was found only after the call for 
+* When compiled against wolfSSL, some diagnostics and messages of fetchmail are
+  hardcoded to read "OpenSSL"; this was found only after the call for
   translations had been sent out already.
 * FreeBSD's OPIE implementation cannot be found when using a C++ compiler.
   This should not affect the normal build, which uses a C compiler.
+* Using ccache may trigger "implicit fallthrough" warnings because
+  the comments that, for instance, GCC understands, are removed by ccache's
+  separate preprocessing.  Fixing this portably requires C++17.
 
 --------------------------------------------------------------------------------
-fetchmail-6.4.36 (released 2023-01-28, 31710 LoC):
+fetchmail-6.5.0 (not yet released):
 
-# TRANSLATIONS: language translations were updated by these fine people:
-(in alphabetical order of language codes):
-* cs:    Petr Pisar [Czech]
-* es:    Cristian Othón Martínez Vera [Spanish]
-* fr:    Frédéric Marchal [French]
-* ja:    Takeshi Hamasaki [Japanese]
-* pl:    Jakub Bogusz [Polish]
-* ro:    Remus-Gabriel Chelu [Romanian]
-* sq:    Besnik Bleta [Albanian]
-* sv:    Göran Uddeborg [Swedish]
+# SECURITY FIX:
+* .netrc now may not have more than 0700 permission if it contains passwords,
+  else fetchmail will warn and ignore the file.
 
---------------------------------------------------------------------------------
+## REMOVED FEATURES
+* fetchmail no longer supports using an MDA as SMTP fallback. This is required
+  to make deliveries consistent.
+  The --enable-fallback configure option is gone.
+* fetchmail no longer supports SSLv3. --sslproto ssl3 and ssl3+ options have
+  been removed and behave as though "--sslproto auto" had been given.
+
+## INCOMPATIBLE CHANGES
+* fetchmail by default only negotiates TLS v1.2 or higher. (RFC-7525)
+* fetchmail can auto-negotiate TLS v1.1 through the --sslproto tls1.1+ option.
+* fetchmail can auto-negotiate TLS v1.0 through the --sslproto tls1+ option.
+* fetchmailconf now requires Python 3.7.0 or newer.
+* fetchmail, with --logfile, now logs time stamps into the file, in localtime
+  and in the format "Jun 20 23:45:01 fetchmail: ". It will be localized through
+  the environment variables LC_TIME (or LC_ALL) and TZ.
+  Contributed by Holger Hoffstätte.
+* fetchmail sets the OPENSSL security level to 2 by default.
+  Override is possible from an environment variable,
+  see EXPERIMENTAL CHANGES below.
+* The ca, da, en_GB, id, it, nl, ru, zh_CN translations have been disabled,
+  they are too far behind.
+
+## CHANGED REQUIREMENTS
+* fetchmail 6.5.0 is written in C99 and requires a SUSv3 (Single Unix
+  Specification v3, a superset of POSIX.1-2001 aka. IEEE Std 1003.1-2001 with
+  XSI extension) compliant system.
+
+  In particular, older fetchmail versions had workarounds or replacement code
+  for several functions standardized in the Single Unix Specification v3, these
+  have been removed. Hence:
+  - The trio/ library has been removed from the distribution.
+  - The libesmtp/getaddrinfo.? library has been removed from the distribution.
+  - The KAME/getnameinfo.c file has been removed from the distribution.
+
+* fetchmail 6.5.0 requires a TLSv1.3-capable version of OpenSSL or wolfSSL,
+  at a minimum OpenSSL v1.1.1 or wolfSSL v5.5.1.
+
+## BUG FIXES
+* fetchmail can now report mailbox sizes of 2^31 octets and beyond.
+  This required C99 support (for the long long type).
+  Fixes Debian Bug#873668, reported by Andreas Schmidt.
+* fetchmail now defines its OpenSSL API level (1.1.1, or 10101) so
+  as to compile with OpenSSL 3.0. (fetchmail was requesting to hide
+  deprecated APIs.)
+* The .netrc parser no longer permits "machine" after "default".
+* Add manpage info on the .netrc syntax, as ftp(1) is not standardized and
+  may not be installed. Fixes Launchpad Bug #1976361 reported by Bill Yikes.
+* Received: lines now return GMT time if the tzoffset cannot be represented
+  as whole minutes. Reported by @rriddicc via Gitlab #49.
+
+## CHANGES
+* When fetchmail attempts to log out from an IMAP4 server and the server messes
+  up its responses (it is supposed to send an untagged * BYE and a tagged
+  A4711 OK) and sends a tagged A4711 BYE response, tolerate that, rather than
+  reporting a protocol error. We don't intend to chat any more so the protocol
+  violation is harmless, and we know the server cannot send more untagged
+  status responses.
+  Analysis and fix courtesy of Maciej S. Szmigiero, GitLab merge request !20.
+* The configure script now spends more effort for getting --with-ssl right, by
+  running pkg-config in the right environment, and using the AC_LIB_LINKFLAGS
+  macro to obtain run-time library path setting flags.
+* For typical POP3/IMAP ports 110, 143, 993, 995, if port and --ssl option
+  do not match, emit a warning and continue. Closes Gitlab #31.
+* There is now a --idletimeout feature contributed by Eric Durand, to
+  permit setting a shorter timeout for the --idle option, because many
+  servers violate the protocol (requiring 30 minutes) and hang up sooner than
+  the 28 minutes fetchmail waits before refreshing IDLE.
+  GitLab merge request !35.
+* There is now a --forceidle feature to force idle mode even if not advertised
+  in the server capabilities. This is a dangerous option, use it carefully.
+  Courtesy of Eric Durand, GitLab merge request !39.
+* There is now a --moveto feature (only feasible in IMAP) that, instead of
+  flushing mail, moves it to a user-specified folder. This is to assist with
+  archiving, or when providers (G...) break the IMAP model.
+  Courteously provided by Damjan Jovanovic.
+* rcfile parsing errors are now reported in more detail, and with -vv mode,
+  also lead to a non-importable Python dump of what was obtained, for debugging.
+* fetchmail's --auth option ssh was renamed to implicit, to make clear that it
+  does *NOT* imply any particular type or features of the --plugin.  --auth ssh
+  will be understood for a while for compatibility but fetchmail will report it
+  as implicit.
+
+## EXPERIMENTAL CHANGES - these are not documented anywhere else, only here:
+* fetchmail supports a FETCHMAIL_SSL_SECLEVEL environment variable that
+  can be used to override the OpenSSL security level. Fetchmail by default
+  raises the security level to 2 if lower. This variable can be used to lower it.
+  Use with extreme caution. Note that levels 3 or higher will frequently cause
+  incompabilities with servers because server-side data sizes are often too low.
+  Valid range: 0 to 5 for OpenSSL 1.1.1 and 3.0.
+* fetchmail supports a FETCHMAIL_SSL_CIPHERS environment variable that
+  sets the cipher string (through two different OpenSSL functions) for SSL and
+  TLS versions up to TLSv1.2.
+  If setting the ciphers fails, fetchmail will not connect.
+  If not given, defaults to Postfix's "medium" list,
+  "aNULL:-aNULL:HIGH:MEDIUM:+RC4:@STRENGTH".
+* fetchmail supports a FETCHMAIL_TLS13_CIPHERSUITES environment variable
+  that sets the ciphersuites (a colon-separated list, without + ! -) for
+  TLSv1.3. If not given, defaults to OpenSSL's built-in list. If setting the
+  ciphersuites fails, fetchmail refuses to connect.
+* NOTE the features above are simplistic. For instance, even though you
+  configure --sslproto tls1.3, a failure to set tls1.2 ciphers could cause
+  a connection abort.
+* fetchmail can be built with meson 0.60 or newer <https://mesonbuild.com/>.
+  fetchmail is not currently written in a way that supports unity
+  (amalgamated) builds.
+
+================================================================================
 fetchmail-6.4.35 (released 2023-01-04, 31707 LoC):
 
 # BREAKING CHANGES:
@@ -244,16 +338,16 @@ fetchmail-6.4.25 (released 2021-12-10, 31653 LoC):
 * Since distributions continue patching for LibreSSL use, which cannot be
   linked legally, block out LibreSSL in configure.ac and socket.c, and
   refer to COPYING, unless on OpenBSD (which ships it in the base system).
-  OpenSSL and wolfSSL 5 can be used.  SSL-related documentation was updated, do 
+  OpenSSL and wolfSSL 5 can be used.  SSL-related documentation was updated, do
   re-read COPYING, INSTALL, README, README.packaging, README.SSL.
 * Bump OpenSSL version requirement to 1.0.2f in order to safely remove
-  the obsolete OpenSSL flag SSL_OP_SINGLE_DH_USE. This blocks out 1.0.2e and 
-  older 1.0.2 versions. 1.0.2f was a security fix release, and 1.0.2u is 
+  the obsolete OpenSSL flag SSL_OP_SINGLE_DH_USE. This blocks out 1.0.2e and
+  older 1.0.2 versions. 1.0.2f was a security fix release, and 1.0.2u is
   publicly available from https://www.openssl.org/source/old/1.0.2/
 * Some of the configure.ac fiddling MIGHT have broken cross-compilation
   again. The maintainer does not test cross-compiling fetchmail; if you
   have difficulties, try setting PKG_CONFIG_LIBDIR to the pkg-config path
-  containing your target/host libraries, or see if --with-ssl-prefix or 
+  containing your target/host libraries, or see if --with-ssl-prefix or
   --with-wolfssl-prefix, or overriding LDFLAGS/LIBS/CPPFLAGS, can help.
   Feedback solicited on compliant systems that are before end-of-life.
 
@@ -300,9 +394,9 @@ fetchmail-6.4.24 (released 2021-11-20, 30218 LoC):
 * Bison 3.8 dropped yytoknum altogether, breaking compilation due to a
   warning workaround. Remove the cast of yytoknum to void.  This may cause
   a compiler warning to reappear with older Bison versions.
-* OpenSSL 1.0.2: Workaround for systems that keep the expired DST Root CA X3 
-  certificate in its trust store because OpenSSL by default prefers the 
-  untrusted certificate and fails.  Fetchmail now sets the 
+* OpenSSL 1.0.2: Workaround for systems that keep the expired DST Root CA X3
+  certificate in its trust store because OpenSSL by default prefers the
+  untrusted certificate and fails.  Fetchmail now sets the
   X509_V_FLAG_TRUSTED_FIRST flag (on OpenSSL 1.0.2 only).
   This is workaround #2 from the OpenSSL Blog.  For details, see both:
   https://www.openssl.org/blog/blog/2021/09/13/LetsEncryptRootCertExpire/
@@ -329,7 +423,7 @@ fetchmail-6.4.23 (released 2021-10-31, 30206 LoC):
 
 # USABILITY:
 * For common ssh-based IMAP PREAUTH setups (i. e. those that use a plugin
-  - no matter its contents - and that set auth ssh), change the STARTTLS 
+  - no matter its contents - and that set auth ssh), change the STARTTLS
   error message to suggest sslproto '' instead.
   This is a commonly reported issue after the CVE-2021-39272 fix in 6.4.22.
   Fixes Redhat Bugzilla 2008160. Fixes GitLab #39.
@@ -343,57 +437,57 @@ fetchmail-6.4.22 (released 2021-09-13, 30201 LoC):
 
 # OPENSSL AND LICENSING NOTE:
 * fetchmail 6.4.22 is compatible with OpenSSL 1.1.1 and 3.0.0.
-  OpenSSL's licensing changed between these releases from dual OpenSSL/SSLeay 
-  license to Apache License v2.0, which is considered incompatible with GPL v2 
+  OpenSSL's licensing changed between these releases from dual OpenSSL/SSLeay
+  license to Apache License v2.0, which is considered incompatible with GPL v2
   by the FSF.  For implications and details, see the file COPYING.
 
 # SECURITY FIXES:
-* CVE-2021-39272: fetchmail-SA-2021-02: On IMAP connections, without --ssl and 
-  with nonempty --sslproto, meaning that fetchmail is to enforce TLS, and when 
-  the server or an attacker sends a PREAUTH greeting, fetchmail used to continue 
+* CVE-2021-39272: fetchmail-SA-2021-02: On IMAP connections, without --ssl and
+  with nonempty --sslproto, meaning that fetchmail is to enforce TLS, and when
+  the server or an attacker sends a PREAUTH greeting, fetchmail used to continue
   an unencrypted connection.  Now, log the error and abort the connection.
   --Recommendation for servers that support SSL/TLS-wrapped or "implicit" mode on
   a dedicated port (default 993): use --ssl, or the ssl user option in an rcfile.
-  --Reported by: Andrew C. Aitchison, based on the USENIX Security 21 paper "Why 
-  TLS is better without STARTTLS - A Security Analysis of STARTTLS in the Email 
-  Context" by Damian Poddebniak, Fabian Ising, Hanno Böck, and Sebastian 
+  --Reported by: Andrew C. Aitchison, based on the USENIX Security 21 paper "Why
+  TLS is better without STARTTLS - A Security Analysis of STARTTLS in the Email
+  Context" by Damian Poddebniak, Fabian Ising, Hanno Böck, and Sebastian
   Schinzel.  The paper did not mention fetchmail.
 
-* On IMAP and POP3 connections, --auth ssh no longer prevents STARTTLS 
+* On IMAP and POP3 connections, --auth ssh no longer prevents STARTTLS
   negotiation.
-* On IMAP connections, fetchmail does not permit overriding a server-side 
+* On IMAP connections, fetchmail does not permit overriding a server-side
   LOGINDISABLED with --auth password any more.
-* On POP3 connections, the possibility for RPA authentication (by probing with 
+* On POP3 connections, the possibility for RPA authentication (by probing with
   an AUTH command without arguments) no longer prevents STARTTLS negotiation.
 * For POP3 connections, only attempt RPA if the authentication type is "any".
 
 # BUG FIXES:
-* On IMAP connections, when AUTHENTICATE EXTERNAL fails and we have received the 
+* On IMAP connections, when AUTHENTICATE EXTERNAL fails and we have received the
   tagged (= final) response, do not send "*".
-* On IMAP connections, AUTHENTICATE EXTERNAL without username will properly send 
+* On IMAP connections, AUTHENTICATE EXTERNAL without username will properly send
   a "=" for protocol compliance.
-* On IMAP connections, AUTHENTICATE EXTERNAL will now check if the server 
-  advertised SASL-IR (RFC-4959) support and otherwise refuse (fetchmail <= 6.4 
-  has not supported and does not support the separate challenge/response with 
+* On IMAP connections, AUTHENTICATE EXTERNAL will now check if the server
+  advertised SASL-IR (RFC-4959) support and otherwise refuse (fetchmail <= 6.4
+  has not supported and does not support the separate challenge/response with
   command continuation)
-* On IMAP connections, when --auth external is requested but not advertised by 
+* On IMAP connections, when --auth external is requested but not advertised by
   the server, log a proper error message.
-* Fetchmail no longer crashes when attempting a connection with --plugin "" or 
+* Fetchmail no longer crashes when attempting a connection with --plugin "" or
   --plugout "".
-* Fetchmail no longer leaks memory when processing the arguments of --plugin or 
+* Fetchmail no longer leaks memory when processing the arguments of --plugin or
   --plugout on connections.
 * On POP3 connections, the CAPAbilities parser is now caseblind.
-* Fix segfault on configurations with "defaults ... no envelope". Reported by  
+* Fix segfault on configurations with "defaults ... no envelope". Reported by
   Bjørn Mork. Fixes Debian Bug#992400.  This is a regression in fetchmail 6.4.3
-  and happened when plugging memory leaks, which did not account for that the 
+  and happened when plugging memory leaks, which did not account for that the
   envelope parameter is special when set as "no envelope". The segfault happens
   in a constant strlen(-1), triggered by trusted local input => no vulnerability.
-* Fix program abort (SIGABRT) with "internal error" when invalid sslproto is 
+* Fix program abort (SIGABRT) with "internal error" when invalid sslproto is
   given with OpenSSL 1.1.0 API compatible SSL implementations.
 
 # CHANGES:
-* IMAP: When fetchmail is in not-authenticated state and the server volunteers 
-  CAPABILITY information, use it and do not re-probe. (After STARTTLS, fetchmail 
+* IMAP: When fetchmail is in not-authenticated state and the server volunteers
+  CAPABILITY information, use it and do not re-probe. (After STARTTLS, fetchmail
   must and will re-probe explicitly.)
 * For typical POP3/IMAP ports 110, 143, 993, 995, if port and --ssl option
   do not match, emit a warning and continue. Closes Gitlab #31.
@@ -437,12 +531,12 @@ fetchmail-6.4.21 (released 2021-08-09, 30042 LoC):
 fetchmail-6.4.20 (released 2021-07-28, 30042 LoC):
 
 # SECURITY FIX:
-* When a log message exceeds c. 2 kByte in size, for instance, with very long 
+* When a log message exceeds c. 2 kByte in size, for instance, with very long
   header contents, and depending on verbosity option, fetchmail can crash or
   misreport each first log message that requires a buffer reallocation.
-  fetchmail then reallocates memory and re-runs vsnprintf() without another 
-  call to va_start(), so it reads garbage. The exact impact depends on 
-  many factors around the compiler and operating system configurations used and 
+  fetchmail then reallocates memory and re-runs vsnprintf() without another
+  call to va_start(), so it reads garbage. The exact impact depends on
+  many factors around the compiler and operating system configurations used and
   the implementation details of the stdarg.h interfaces of the two functions
   mentioned before. To fix CVE-2021-36386.
 
@@ -458,7 +552,7 @@ fetchmail-6.4.19 (released 2021-04-24, 30026 LoC):
 * fetchmailconf: properly catch and report option parsing errors
 
 # BUG FIX:
-* LMTP: do not try to validate the last component of a UNIX-domain LMTP socket 
+* LMTP: do not try to validate the last component of a UNIX-domain LMTP socket
   as though it were a TCP port.  Reported by Christoph Heitkamp, Gitlab issue #33.
 
 # TRANSLATION UPDATE:
@@ -479,7 +573,7 @@ fetchmail-6.4.18 (released 2021-03-27, 30011 LoC):
   for -d option. This is to fail more gracefully on incomplete installs.
 * TLS code: remove OPENSSL_NO_DEPRECATED macros to avoid portability issues
   with OpenSSL v3 - these are for development purposes, not production.
-* TLS futureproofing: use SSL_use_PrivateKey_file instead of 
+* TLS futureproofing: use SSL_use_PrivateKey_file instead of
   SSL_use_RSAPrivateKey_file, the latter will be deprecated with OpenSSL v3,
   and the user's key file might be something else than RSA.
 
@@ -569,15 +663,15 @@ fetchmail-6.4.14 (released 2020-11-26, 27608 LoC):
 fetchmail-6.4.13 (released 2020-10-25, 27608 LoC):
 
 # BUG FIXES:
-* Errors about lock file (= pidfile) creation could be lost in daemon 
-  configurations (-d option, or set daemon) when using syslog. Now they are also 
-  logged to syslog.  Found verifying a pidfile creation issue on 6.4.12 that was 
+* Errors about lock file (= pidfile) creation could be lost in daemon
+  configurations (-d option, or set daemon) when using syslog. Now they are also
+  logged to syslog.  Found verifying a pidfile creation issue on 6.4.12 that was
   previously reported by Alex Hall of Automatic Distributors.
 * If the lock file cannot be removed (no write permission on directory), try
   to truncate it, and if that fails, report error.
 * If the pidfile was non-default, fetchmail -q or --quit would malfunction and
-  claim no other fetchmail were running, because it did not read the 
-  configuration files or merge the command line options, thus it would look for 
+  claim no other fetchmail were running, because it did not read the
+  configuration files or merge the command line options, thus it would look for
   the PID in the wrong file.
 
 # CHANGES:
@@ -624,10 +718,10 @@ fetchmail-6.4.9: (not announced by e-mail, withdrawn)
 * manpage: mention that the SSL/TLS certificate fingerprint uses an MD5 hash.
 
 ## CHANGES:
-* configure: try to use AC_LIB_LINKFLAGS to obtain proper link flags for 
+* configure: try to use AC_LIB_LINKFLAGS to obtain proper link flags for
   libcrypto and libssl if pkg-config failed.
-  This is an attempt to fix borderline issues when users building on systems 
-  with obsolete OpenSSL try to use a local newer OpenSSL from a separate 
+  This is an attempt to fix borderline issues when users building on systems
+  with obsolete OpenSSL try to use a local newer OpenSSL from a separate
   directory.
 
 ## NEW TRANSLATION, with thanks to the translator:
@@ -654,7 +748,6 @@ fetchmail-6.4.6 (released 2020-05-29, 27596 LoC):
 * eo:    Felipe Castro [Esperanto]
 
 --------------------------------------------------------------------------------
-
 fetchmail-6.4.5 (released 2020-05-07, 27596 LoC):
 
 ## REGRESSION FIX:
@@ -686,18 +779,16 @@ fetchmail-6.4.5 (released 2020-05-07, 27596 LoC):
 * cs:    Petr Pisar [Czech]
 
 --------------------------------------------------------------------------------
-
 fetchmail-6.4.4 (released 2020-04-26, 27530 LoC):
 
 ## UPDATED TRANSLATIONS - WITH THANKS TO THE TRANSLATOR:
 * ja:    Takeshi Hamasaki [Japanese]
 
 --------------------------------------------------------------------------------
-
 fetchmail-6.4.3 (released 2020-04-05, 27530 LoC):
 
 ## BUGFIXES:
-* Plug memory leaks when parts of the configuration (defaults, rcfile, command 
+* Plug memory leaks when parts of the configuration (defaults, rcfile, command
   line) override one another.
 * Merge esmtpname and esmtppassword defaults properly.
 * fetchmail terminated the placeholder command string too late and included
@@ -708,23 +799,23 @@ fetchmail-6.4.3 (released 2020-04-05, 27530 LoC):
   Reported by Stefan Thurner, Gitlab issue #16.
 * Fetchmail now checks for errors when trying to read the .idfile,
   Gitlab issue #3.
-* Fetchmail's error messages that reports that the defaults entry isn't the 
+* Fetchmail's error messages that reports that the defaults entry isn't the
   first was made more precise. It could be misleading if there was a poll or
   skip statement before the defaults.
 
 ## CHANGES:
 * Fetchmail documentation was updated to require OpenSSL 1.1.1.
   OpenSSL 1.0.2 reached End Of Life status at the end of the year 2019.
-  Fetchmail will tolerate, but warn about, 1.0.2 for now on the assumption that 
+  Fetchmail will tolerate, but warn about, 1.0.2 for now on the assumption that
   distributors backport security fixes as the need arises.
   Fetchmail will also warn if another SSL library that is API-compatible
   with OpenSSL lacks TLS v1.3 support.
 * If the trust anchor is missing, fetchmail refers the user to README.SSL.
 
 ## INTERNAL CHANGES:
-* The AC_DECLS(getenv) check was removed, its only user was broken and not 
+* The AC_DECLS(getenv) check was removed, its only user was broken and not
   accounting for that AC_DECLS always defines HAVE_DECL_... to 0 or 1, so
-  fetchmail never declared a missing getenv() symbol (it was testing with 
+  fetchmail never declared a missing getenv() symbol (it was testing with
   #ifdef).  Remove the backup declaration. getenv is mandated by SUSv2 anyways.
 
 ## UPDATED TRANSLATIONS - WITH THANKS TO THE TRANSLATORS:
@@ -737,17 +828,16 @@ fetchmail-6.4.3 (released 2020-04-05, 27530 LoC):
 * eo:    Felipe Castro [Esperanto]
 
 --------------------------------------------------------------------------------
-
 fetchmail-6.4.2 (released 2020-02-14, 27473 LoC):
 
 ## BREAKING CHANGES:
-* fetchmailconf now supports Python 3 and currently requires the "future" 
+* fetchmailconf now supports Python 3 and currently requires the "future"
   package, see https://pypi.org/project/future/.
-* fetchmailconf: The minimum supported version is now Python 2.7.13, but it is 
+* fetchmailconf: The minimum supported version is now Python 2.7.13, but it is
   recommended to use at least 2.7.16 (due to its massive SSL updates).
   Older Python versions may check SSL certificates not strictly enough,
   which may cause fetchmail to complain later, if the certificate verify fails.
-* fetchmailconf now autoprobes SSL-wrapped connections (ports 993 and 995 for 
+* fetchmailconf now autoprobes SSL-wrapped connections (ports 993 and 995 for
   IMAP and POP3) as well and by preference.
 * fetchmailconf now defaults newly created users to "ssl" if either of the
   existing users sets ssl, or if the server has freshly been probed and
@@ -757,15 +847,15 @@ fetchmail-6.4.2 (released 2020-02-14, 27473 LoC):
 
 ## BUG FIXES:
 * Fix three bugs in fetchmail.man (one unterminated string to .IP macro, one
-  line that ran into a .PP macro, .TH date format), and remove one .br request 
-  from inside the table, which is unsupported by FreeBSD 12's mandoc(1) 
+  line that ran into a .PP macro, .TH date format), and remove one .br request
+  from inside the table, which is unsupported by FreeBSD 12's mandoc(1)
   formatter.  FreeBSD Bug#241032, reported by Helge Oldach.
 * Further man page fixes and additions by Chris Mayo and Gregor Zattler.
-* When evaluating the need for STARTTLS in non-default configurations (SSL 
-  certificate validation turned off), fetchmail would only consider --sslproto 
+* When evaluating the need for STARTTLS in non-default configurations (SSL
+  certificate validation turned off), fetchmail would only consider --sslproto
   tls1 as requiring STARTTLS, now all non-empty protocol versions do.
 * fetchmailconf now properly writes "no sslcertck" if sslcertck is disabled.
-* fetchmailconf now catches and reports OS errors (including DNS errors) when 
+* fetchmailconf now catches and reports OS errors (including DNS errors) when
   autoprobing.  Reported as Gitlab issue #12 by Sergey Alirzaev.
 * fetchmailconf received a host of other bugfixes, see the Git commit log.
 
@@ -779,7 +869,6 @@ fetchmail-6.4.2 (released 2020-02-14, 27473 LoC):
 * zh_CN: Boyuan Yang [Chinese (simplified)]
 
 --------------------------------------------------------------------------------
-
 fetchmail 6.4.1 (released 2019-09-28, 27473 LoC):
 
 ## REGRESSION FIXES:
@@ -790,7 +879,6 @@ fetchmail 6.4.1 (released 2019-09-28, 27473 LoC):
   + a regression under _FORTIFY_SOURCE where PATH_MAX > minimal _POSIX_PATH_MAX.
 
 --------------------------------------------------------------------------------
-
 fetchmail 6.4.0 (released 2019-09-27, 27429 LoC):
 
 # NOTE THAT FETCHMAIL IS NO LONGER PUBLISHED THROUGH IBIBLIO.
@@ -864,7 +952,7 @@ fetchmail 6.4.0 (released 2019-09-27, 27429 LoC):
 * fetchmail, when setting up TLS connections, now uses SSL_set_tlsext_host_name()
   to set up the SNI (Server Name Indication). Some servers (for instance
   googlemail) require SNI when using newer SSL protocols.
-* Fetchmail now sets the expected hostname through OpenSSL 1.0.2's new 
+* Fetchmail now sets the expected hostname through OpenSSL 1.0.2's new
   X509_VERIFY_PARAM_set1_host() function to enable OpenSSL's native certificate
   verification features.
 * fetchmail will drop the connection when fetching with IMAP and receiving an
@@ -1060,16 +1148,16 @@ fetchmail-6.3.22 (released 2012-08-29, 26077 LoC):
   Reported by J. Porter Clark.
 
 * for CVE-2011-3389:
-  SSL/TLS (wrapped and STARTTLS): fetchmail used to disable a countermeasure 
-  against a certain kind of attack against cipher block chaining initialization 
+  SSL/TLS (wrapped and STARTTLS): fetchmail used to disable a countermeasure
+  against a certain kind of attack against cipher block chaining initialization
   vectors (SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS).
-  Whether this creates an exploitable situation, depends on the server and the 
+  Whether this creates an exploitable situation, depends on the server and the
   negotiated ciphers.
-  As a precaution, fetchmail 6.3.22 enables the countermeasure, by clearing 
+  As a precaution, fetchmail 6.3.22 enables the countermeasure, by clearing
   SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS.
 
-  NOTE that this can cause connections to certain non-conforming servers to 
-  fail, in which case you can set the environment variable 
+  NOTE that this can cause connections to certain non-conforming servers to
+  fail, in which case you can set the environment variable
   FETCHMAIL_DISABLE_CBC_IV_COUNTERMEASURE to any non-empty value when starting
   fetchmail to re-instate the compatibility option at the expense of security.
 
@@ -1089,7 +1177,7 @@ fetchmail-6.3.22 (released 2012-08-29, 26077 LoC):
 # CHANGES
 * On systems where SSLv2_client_method isn't defined in OpenSSL (such as
   newer Debian, and Ubuntu starting with 11.10 oneiric ocelot), don't
-  reference it (to fix the build) and if configured, print a run-time error 
+  reference it (to fix the build) and if configured, print a run-time error
   that the OS does not support SSLv2. Fixes Debian Bug #622054,
   but note that that bug report has a more thorough patch that does away with
   SSLv2 altogether.
@@ -1586,8 +1674,8 @@ fetchmail 6.3.10 (released 2009-07-02):
   termination signal properly through sys/wait.h macros.
 * When acquiring a body, understand NIL ("no such data item"), as returned by
   some MS Exchange versions. Fixes BerliOS Bug #11980 by KB Sriram.
-* Make progress tickers (-v/--showdots) consistent, and update documentation 
-  accordingly ("." for each 1024 octets read, "#" for a header written, and "*" 
+* Make progress tickers (-v/--showdots) consistent, and update documentation
+  accordingly ("." for each 1024 octets read, "#" for a header written, and "*"
   for each body line written.)
   The conditions under which these had been printed were inconsistent,
   illogical, and documentation hadn't matched real behaviour for long.
@@ -1680,7 +1768,7 @@ fetchmail 6.3.9 (released 2008-11-16):
   random memory location (it calls va_arg() too often without
   resetting it with va_start()). Based on a patch (BerliOS patch #2492)
   by Petr Uzel, fixes Novell Bug #354291.
-  Note 6.3.9-rc1 did not completely fix this issue, so it was redrawn a few 
+  Note 6.3.9-rc1 did not completely fix this issue, so it was redrawn a few
   hours after its release.
   See also fetchmail-SA-2008-01.txt.
 * When expunging, mark the right messages as seen to avoid message loss in "keep
@@ -1716,8 +1804,8 @@ fetchmail 6.3.9 (released 2008-11-16):
 # CHANGES:
 * autoconf 2.60 is now required to build fetchmail; it uses
   AC_USE_SYSTEM_EXTENSIONS to replace AC_AIX, AC_MINIX, and the like.
-* Removed dead FETCHMAIL_DEBUG code from fetchmail.h that was disabled by 
-  default with no switches in configure to enable it. However, the macro would 
+* Removed dead FETCHMAIL_DEBUG code from fetchmail.h that was disabled by
+  default with no switches in configure to enable it. However, the macro would
   have been prone to a symlink attack. Found by Nico Golde.
 * Removed dead FORCE_STUFFING code from socket.c that was disabled by default
   with no switches in configure to enable it.
@@ -1749,10 +1837,10 @@ fetchmail 6.3.9 (released 2008-11-16):
 
 # DOCUMENTATION:
 * Add fetchmail-SA-2007-02.txt and fetchmail-SA-2008-01.txt.
-* Re-add two lines to the manual page that had accidentally become comments 
-  to nroff. One was part of the --sslproto documentation, and one in the 
+* Re-add two lines to the manual page that had accidentally become comments
+  to nroff. One was part of the --sslproto documentation, and one in the
   "Awakening the background daemon" section.
-* The manual page no longer asserts that .fetchids were for exclusive POP3 use, 
+* The manual page no longer asserts that .fetchids were for exclusive POP3 use,
   since it is planned to use the file with IMAP4 later.
 * Add grammar fixes from Dan Jacobson to fetchmail.man. Debian Bug #461642.
 * The manual page now mentions that user descriptions need to come before user
@@ -1772,7 +1860,7 @@ fetchmail 6.3.9 (released 2008-11-16):
   silently accept additional g=x permissions for compatibility with previous
   6.2.X and 6.3.X versions.
   Inconsistency (program 0710, manpage 0600) reported by Petr Uzel.
-* The --logfile documentation is now clearer about requiring detached daemon 
+* The --logfile documentation is now clearer about requiring detached daemon
   mode.
 
 # TRANSLATION UPDATES AND ADDITIONS (ordered by language name):
@@ -1817,16 +1905,16 @@ fetchmail 6.3.8 (released 2007-04-06):
 
 # BUG FIXES:
 * Fix pluralization of oversized-message warning mails.
-* Fix manual page: --sslcheck -> --sslcertck, and do not set trailing 
+* Fix manual page: --sslcheck -> --sslcertck, and do not set trailing
   "recommended:" in bold. Fixes Debian Bug #413059, reported by Rafal Czlonka.
-* Repoll immediately if a protocol error happens during the authentication 
+* Repoll immediately if a protocol error happens during the authentication
   attempt after a failed opportunistic TLS upgrade.
   Fixes comment #9 in Gentoo Bug #163782, reported by Takuto Matsuu.
-* Fix rendering of the "24 - 26, 28, 29" paragraph in the exit codes section. 
+* Fix rendering of the "24 - 26, 28, 29" paragraph in the exit codes section.
   Reported by Nico Golde.
 * If SOCKS support was compiled in, add 'socks' to the feature_options Python
   list emitted in --configdump. Reported by Rob MacGregor.
-* Do not crash with a null pointer dereference when opening the BSMTP file 
+* Do not crash with a null pointer dereference when opening the BSMTP file
   fails. Improve error checking and reporting. Reported by Reto Schüttel,
   Debian Bug#416625. Fix based on a patch by Nico Golde.
 * Make BSMTP output actually work, it would persistently fail with SOCKET error
@@ -2410,7 +2498,7 @@ Escalated to "incompatible", 2006-01-13:
   Darwin. NetBSD PR#28543 (pkg/28543). Matthias Andree.
 * The RFC-822 parser no longer strips the last character of bare addresses.
   Matthias Andree
-* The IP address matching code was broken and 
+* The IP address matching code was broken and
   1. didn't search exhaustively, but matched only the first IP address of the
   server's queryname against the IP addresses of the server name to match.
   2. didn't match IP aliases versus MX hosts.  Matthias Andree
@@ -2545,7 +2633,7 @@ fetchmail-6.2.5 (Wed Oct 15 18:39:22 EDT 2003), 23079 lines:
 * OpenSSL cleanup patches from levinedl@acm.org.
 * Benjamin Drieu's patch to fix Debian bug #212240, no oversized-message
   flushing if both "flush" and "limit" were specified.
-* Benjamin Drieu's patch for Debian bug #156592, incorrect handing of 
+* Benjamin Drieu's patch for Debian bug #156592, incorrect handing of
   host/port option.
 * Smash all NULs out of headers right after the socket read.
 * Dup-killer code now keys on an MD5 hash of the raw headers.
@@ -2587,7 +2675,7 @@ There are 580 people on fetchmail-friends and 750 on fetchmail-announce.
 fetchmail-6.2.2 (Fri Feb 28 21:34:26 EST 2003), 22345 lines:
 
 * Sunil Shetye's patch to improve behavior on empty messages.
-* Conform to RFC2595; reissue capability probes after successful 
+* Conform to RFC2595; reissue capability probes after successful
   STARTTLS negotiation.
 * Sunil's patch to make handling of failed STARTTLS more graceful.
 * Sunil's JF2 fix patch for .fetchmailrc security.
@@ -2604,7 +2692,7 @@ fetchmail-6.2.1 (Tue Jan 14 08:17:19 EST 2003), 22219 lines:
 
 * Updated German, Turkish, Spanish, and Danish translation files.
 * Integrated Sunil Shetye's patch to make mark_seen an explicit method.
-* Removed FAQ warning about GMX and associated fetchmailconf check, 
+* Removed FAQ warning about GMX and associated fetchmailconf check,
   we have a report that its servers are conformant now.
 * Another Sunil patch to fix a minor bug in bouncemail generation.
 
@@ -2624,12 +2712,12 @@ fetchmail-6.1.3 (Thu Nov 28 05:35:15 EST 2002), 22203 lines:
 
 * Updated Turkish, Danish, German, Spanish, Catalan po files.
 * Added Slovak support.
-* Configure.in update for autoconf 2.5 (Art Haas). 
+* Configure.in update for autoconf 2.5 (Art Haas).
 * Be case-insensitive when looking for IMAP responses.
 * Fix logout-after-idle-delivery bug (Sunil Shetye).
 * Sunil Shetye's patch to bulletproof end-of-header detection.
 * Sunil's fix for the STARTTLS problem -- repoll if TLS nabdshake
-  fails.  The attempt to set up STARTTLS can be suppressed with 'sslproto ""'.
+  fails. The attempt to set up STARTTLS can be suppressed with 'sslproto ""'.
 
 There are 540 people on fetchmail-friends and 701 on fetchmail-announce.
 

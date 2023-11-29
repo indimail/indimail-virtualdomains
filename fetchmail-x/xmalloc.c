@@ -6,24 +6,22 @@
  */
 
 #include "config.h"
+#include "fetchmail.h"
+
 #include "xmalloc.h"
 #include <sys/types.h>
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
-#if defined(STDC_HEADERS)
 #include  <stdlib.h>
-#endif
-#include "fetchmail.h"
 #include "i18n.h"
 
-XMALLOCTYPE *
-xmalloc (size_t n)
+void *xmalloc (size_t n)
 {
-    XMALLOCTYPE *p;
+    void *p;
 
-    p = (XMALLOCTYPE *) malloc(n);
-    if (p == (XMALLOCTYPE *) 0)
+    p = (void *) malloc(n);
+    if (p == (void *) 0)
     {
 	report(stderr, GT_("malloc failed\n"));
 	abort();
@@ -31,13 +29,12 @@ xmalloc (size_t n)
     return(p);
 }
 
-XMALLOCTYPE *
-xrealloc (XMALLOCTYPE *p, size_t n)
+void *xrealloc (void *p, size_t n)
 {
     if (p == 0)
 	return xmalloc (n);
-    p = (XMALLOCTYPE *) realloc(p, n);
-    if (p == (XMALLOCTYPE *) 0)
+    p = (void *) realloc(p, n);
+    if (p == (void *) 0)
     {
 	report(stderr, GT_("realloc failed\n"));
 	abort();
@@ -52,17 +49,6 @@ char *xstrdup(const char *s)
     strcpy(p,s);
     return p;
 }
-
-#if !defined(HAVE_STRDUP)
-char *strdup(const char *s)
-{
-    char *p;
-    p = (char *) malloc(strlen(s)+1);
-    if (p)
-	    strcpy(p,s);
-    return p;
-}
-#endif /* !HAVE_STRDUP */
 
 char *xstrndup(const char *s, size_t len)
 {

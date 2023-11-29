@@ -17,9 +17,12 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include <string.h>
+#include "config.h"
 
+#ifndef HAVE_STPCPY
+#include <string.h>
 char *stpcpy(char *dest, const char *src) {
     strcpy(dest, src);
-    return strchr(dest, 0);
+    return strchr(dest, '\0');
 }
+#endif

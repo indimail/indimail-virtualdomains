@@ -9,15 +9,6 @@
 # WARNING: this needs to be updated for fetchmail 6.4's SSL options,
 # and other recent new options;
 
-from __future__ import print_function
-from __future__ import division
-from past.builtins import execfile
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
-from builtins import range
-from past.utils import old_div
-from builtins import object
 import sys
 import time
 import os
@@ -35,9 +26,9 @@ except:
     # define a dummy class to inherit from
     class Frame: pass
 
-VERSION = "1.63.5"
+VERSION = "1.66.0"
 
-MIN_PY = (2, 7, 13)
+MIN_PY = (3, 7, 0)
 if sys.version_info < MIN_PY:
     sys.exit("fetchmailconf: Python %s.%s.%s or later is required.\n" % MIN_PY)
 
@@ -145,13 +136,14 @@ class Server(object):
         self.plugin = None		# Plugin command for going to server
         self.plugout = None		# Plugin command for going to listener
         self.principal = None		# Kerberos principal
+#INDIMAIL
+        self.authmethod = 'PLAIN'		# OMDR Authentication
         self.esmtpname = None		# ESMTP 2554 name
         self.esmtppassword = None	# ESMTP 2554 password
-#INDIMAIL
-        self.authmeth = "PLAIN"		# OMDR Authentication
         self.tracepolls = FALSE		# Add trace-poll info to headers
         self.badheader = FALSE		# Pass messages with bad headers on?
         self.users = []			# List of user entries for site
+        self.idletimeout = 1680	   # IDLE timeout (in seconds, see CLIENT_IDLE_TIMEOUT in tunable.h)
 
         self.ssldefault = False         # this is a helper for autoprobing to initialize user defaults
 
@@ -175,12 +167,15 @@ class Server(object):
             ('monitor',   'String'),
             ('plugin',	  'String'),
             ('plugout',   'String'),
+#INDIMAIL
+            ('authmethod', 'String'),
             ('esmtpname', 'String'),
             ('esmtppassword', 'String'),
             ('principal', 'String'),
             ('tracepolls','Boolean'),
             ('badheader', 'Boolean'),
-            ('ssldefault','Boolean'))
+            ('ssldefault','Boolean'),
+            ('idletimeout',	'Int'))
 
     def dump(self, folded):
         res = "poll" if self.active else "skip"
@@ -239,6 +234,9 @@ class Server(object):
             res = res + " plugout " + repr(self.plugout)
         if self.principal:
             res = res + " principal " + repr(self.principal)
+#INDIMAIL
+        if self.authmethod:
+            res = res + " authmethod " + repr(self.authmethod)
         if self.esmtpname:
             res = res + " esmtpname " + repr(self.esmtpname)
         if self.esmtppassword:
@@ -248,7 +246,8 @@ class Server(object):
                 res = res + "\n"
         if self.badheader:
             res = res + "bad-header accept "
-
+        if self.idletimeout != ServerDefaults.idletimeout:
+            res = res + " idletimeout " + repr(self.idletimeout)
         if res[-1] == " ":
             res = res[0:-1]
 
@@ -303,6 +302,7 @@ class User(object):
         self.dropstatus = FALSE	# Drop incoming Status lines
         self.dropdelivered = FALSE     # Drop incoming Delivered-To lines
         self.idle = FALSE	       # IDLE after poll
+        self.forceidle = FALSE  # Force IDLE
         self.limit = 0		# Message size limit
         self.warnings = 3600	# Size warning interval (see tunable.h)
         self.fetchlimit = 0	# Max messages fetched per batch
@@ -345,6 +345,7 @@ class User(object):
             ('dropstatus',  'Boolean'),
             ('dropdelivered', 'Boolean'),
             ('idle',	'Boolean'),
+            ('forceidle',	'Boolean'),
             ('limit',	    'Int'),
             ('warnings',    'Int'),
             ('fetchlimit',  'Int'),
@@ -383,7 +384,8 @@ class User(object):
                 or self.mimedecode != UserDefaults.mimedecode
                 or self.dropstatus != UserDefaults.dropstatus
                 or self.dropdelivered != UserDefaults.dropdelivered
-                or self.idle != UserDefaults.idle):
+                or self.idle != UserDefaults.idle
+                or self.forceidle != UserDefaults.forceidle):
             res = res + " options"
         if self.keep != UserDefaults.keep:
             res = res + flag2str(self.keep, 'keep')
@@ -409,6 +411,8 @@ class User(object):
             res = res + flag2str(self.dropdelivered, 'dropdelivered')
         if self.idle != UserDefaults.idle:
             res = res + flag2str(self.idle, 'idle')
+        if self.forceidle != UserDefaults.forceidle:
+            res = res + flag2str(self.forceidle, 'forceidle')
         if self.limit != UserDefaults.limit:
             res = res + " limit " + repr(self.limit)
         if self.warnings != UserDefaults.warnings:
@@ -501,7 +505,7 @@ defaultports = {"auto":None,
                 "ETRN":"smtp",
                 "ODMR":"odmr"}
 
-authlist = ("any", "password", "gssapi", "kerberos", "ssh", "otp",
+authlist = ("any", "password", "gssapi", "kerberos", "implicit", "otp",
             "msn", "ntlm")
 
 listboxhelp = {
@@ -537,7 +541,7 @@ class LabeledEntry(Frame):
 def ButtonBar(frame, legend, ref, alternatives, depth, command):
 # array of radio buttons, caption to left, picking from a string list
     bbar = Frame(frame)
-    width = old_div((len(alternatives)+1), depth)
+    width = (len(alternatives)+1) // depth
     Label(bbar, text=legend).pack(side=LEFT)
     for column in range(width):
         subframe = Frame(bbar)
@@ -1193,7 +1197,7 @@ class ServerEdit(Frame, MyWidget):
 
     def save(self):
         self.fetch(Server, 'server')
-        for username, userdata in self.subwidgets.items():
+        for username, userdata in list(self.subwidgets.items()):
             userdata.save()
         self.destruct()
 
@@ -1236,6 +1240,8 @@ class ServerEdit(Frame, MyWidget):
                          self.interval, leftwidth).pack(side=TOP, fill=X)
             LabeledEntry(ctlwin, 'Server timeout (seconds):',
                          self.timeout, leftwidth).pack(side=TOP, fill=X)
+            LabeledEntry(ctlwin, "Idle timeout (seconds):",
+                         self.idletimeout, leftwidth).pack(side=TOP, fill=X)
             Button(ctlwin, text='Help', fg='blue',
                    command=lambda: helpwin(controlhelp)).pack(side=RIGHT)
             ctlwin.pack(fill=X)
@@ -1320,6 +1326,9 @@ class ServerEdit(Frame, MyWidget):
                 if 'kerberos' in feature_options:
                     LabeledEntry(secwin, 'Principal:',
                                  self.principal, '12').pack(side=TOP, fill=X)
+#INDIMAIL
+                LabeledEntry(secwin, 'Auth Method:',
+                             self.authmethod, '15').pack(side=TOP, fill=X)
                 # ESMTP authentication
                 LabeledEntry(secwin, 'ESMTP name:',
                              self.esmtpname, '12').pack(side=TOP, fill=X)
@@ -2108,7 +2117,7 @@ def copy_instance(toclass, fromdict):
 # conformability checking; they'll still get copied if they are
 # present in the dictionary.
     optional = ('interface', 'monitor',
-                'esmtpname', 'esmtppassword',
+                'esmtpname', 'esmtppassword', 'authmethod',
                 'ssl', 'sslkey', 'sslcert', 'sslproto', 'sslcertck',
                 'sslcertpath', 'sslcommonname', 'sslfingerprint', 'showdots',
                 'ssldefault')
@@ -2239,7 +2248,7 @@ COPYING in the source or documentation directory for details.""")
     if not '.' in hostname:
         sys.exit('Cannot qualify my own hostname, "{}".\nFix /etc/hosts, see man 5 hosts, or add the host to DNS.'.format(hostname))
 
-   # Read the existing configuration.
+    # Read the existing configuration.
     cmd = ['fetchmail', '--configdump', '--nosyslog']
     if rcfile:
         cmd += ['-f', rcfile]

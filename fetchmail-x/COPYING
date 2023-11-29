@@ -84,23 +84,6 @@ Markus Kuhn, with a liberal license as follows:
  | for any purpose and without fee is hereby granted. The author
  | disclaims all warranties with regard to this software.
 
-The trio/ code is Copyright (C) 1998-2001 by Bjorn Reese and Daniel
-Stenberg and also under a liberal license:
- | Permission to use, copy, modify, and distribute this software for any
- | purpose with or without fee is hereby granted, provided that the above
- | copyright notice and this permission notice appear in all copies.
- |
- | THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
- | WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
- | MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE AUTHORS AND
- | CONTRIBUTORS ACCEPT NO RESPONSIBILITY IN ANY CONCEIVABLE MANNER.
-
-The libesmtp/* files functions are (C) by Brian Stafford, see the respective
-file headers for details (LGPL v2.1 or later).
-
-The KAME/* files are (C) Copyright (C) 1995, 1996, 1997, and 1998 WIDE
-Project, see the respective file headers for details.
-
 All other code in the distribution incorporates the copy of GPL version 2
 below by reference.
 

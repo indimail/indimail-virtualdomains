@@ -5,28 +5,19 @@
  */
 
 #include  "config.h"
+
 #ifdef ODMR_ENABLE
+#include  "fetchmail.h"
 #include  <stdio.h>
 #include  <stdlib.h>
 #include  <assert.h>
-#ifdef HAVE_STRING_H /* strcat() */
-#include <string.h>
-#endif
-#ifdef HAVE_NET_SOCKET_H /* BeOS needs this */
-#include <net/socket.h>
-#endif
+#include  <string.h>
 #include  <sys/types.h>
-#ifdef HAVE_NET_SELECT_H /* AIX needs this */
-#include <net/select.h>
-#endif
-#ifdef HAVE_SYS_SELECT_H /* AIX 4.1, at least, needs this */
 #include  <sys/select.h>
-#endif
 #include  <netdb.h>
 #include  <errno.h>
 #include  <unistd.h>
 #include  "i18n.h"
-#include  "fetchmail.h"
 #include  "sdump.h"
 #include  "smtp.h"
 #include  "socket.h"
@@ -49,7 +40,7 @@ static int odmr_ok (int sock, char *argbuf)
 }
 
 static int odmr_getrange(int sock, struct query *ctl, const char *id, 
-			 int *countp, int *newp, int *bytes)
+			 int *countp, int *newp, unsigned long long *bytes)
 /* send ODMR and then run a reverse SMTP session */
 {
     int ok, opts, smtp_sock;
@@ -81,7 +72,7 @@ static int odmr_getrange(int sock, struct query *ctl, const char *id,
     *bytes = *countp = *newp = -1;
 
 #ifdef INDIMAIL
-	if ((ok = SMTP_auth(sock, SMTP_MODE, ctl->remotename, ctl->password, !(ptr = getenv("AUTHMETHOD")) ? ctl->server.authmeth : ptr)))
+	if ((ok = SMTP_auth(sock, SMTP_MODE, ctl->remotename, ctl->password, !(ptr = getenv("AUTHMETHOD")) ? ctl->server.authmethod : ptr)))
 		return (1);
 #else
     /* authenticate via CRAM-MD5 */
@@ -180,12 +171,7 @@ static int odmr_getrange(int sock, struct query *ctl, const char *id,
 	    if (select(maxfd+1, &readfds, NULL, NULL, &timeout) == -1)
 		return(PS_PROTOCOL);		/* timeout */
 
-#ifdef INDIMAIL
-		/*- Remote SMTP - ODMR */
-		if (odmr_up && FD_ISSET(sock, &readfds))
-#else
 	    if (FD_ISSET(sock, &readfds))
-#endif
 	    {
 		int n = SockRead(sock, buf, sizeof(buf));
 		if (n <= 0)
@@ -195,7 +181,12 @@ static int odmr_getrange(int sock, struct query *ctl, const char *id,
 		if (outlevel >= O_MONITOR && !doing_smtp_data)
 		    report(stdout, "ODMR< %s", buf);
 	    }
+#ifdef INDIMAIL
+		/*- Remote SMTP - ODMR */
+		if (odmr_up && FD_ISSET(sock, &readfds))
+#else
 	    if (FD_ISSET(smtp_sock, &readfds))
+#endif
 	    {
 		int n = SockRead(smtp_sock, buf, sizeof(buf));
 		if (n <= 0)

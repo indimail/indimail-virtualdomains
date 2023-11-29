@@ -24,31 +24,25 @@
 
 #include <stdio.h>
 #include <string.h>
-#if defined(STDC_HEADERS)
 #include <stdlib.h>
-#endif
-#if defined(HAVE_UNISTD_H)
 #include <unistd.h>
-#endif
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <net/if.h>
 #if defined(__FreeBSD__)
-#if defined __FreeBSD_USE_KVM
-#if __FreeBSD_version >= 300001
-#include <net/if_var.h>
-#endif
-#include <kvm.h>
-#include <nlist.h>
-#include <sys/fcntl.h>
+# if defined __FreeBSD_USE_KVM
+#  include <net/if_var.h>
+#  include <kvm.h>
+#  include <nlist.h>
+#  include <sys/fcntl.h>
 #else
-#include <sys/sysctl.h>
-#include <net/route.h>
-#include <net/if_dl.h>
-#endif
-#endif
+#  include <sys/sysctl.h>
+#  include <net/route.h>
+#  include <net/if_dl.h>
+# endif /* defined __FreeBSD_USE_KVM */
+#endif /* defined __FreeBSD__ */
 #include "socket.h"
 #include "i18n.h"
 #include "tunable.h"
@@ -231,10 +225,8 @@ get_ifinfo(const char *ifname, ifinfo_t *ifinfo)
 	char			iname[16];
 	struct ifnet		ifnet;
 	unsigned long   	ifnet_addr = ifnet_savedaddr;
-#if __FreeBSD_version >= 300001
 	struct ifnethead	ifnethead;
 	struct ifaddrhead	ifaddrhead;
-#endif
 	struct ifaddr		ifaddr;
 	unsigned long		ifaddr_addr;
 	struct sockaddr		sa;
@@ -260,12 +252,8 @@ get_ifinfo(const char *ifname, ifinfo_t *ifinfo)
 		}
 	}
 
-#if __FreeBSD_version >= 300001
 	kvm_read(kvmfd, ifnet_savedaddr, (char *) &ifnethead, sizeof ifnethead);
 	ifnet_addr = (u_long) ifnethead.tqh_first;
-#else
-	ifnet_addr = ifnet_savedaddr;
-#endif
 
 	while (ifnet_addr)
 	{
@@ -285,11 +273,7 @@ get_ifinfo(const char *ifname, ifinfo_t *ifinfo)
 			ifinfo->rx_packets = ifnet.if_ipackets;
 			ifinfo->tx_packets = ifnet.if_opackets;
 
-#if __FreeBSD_version >= 300001
 			ifaddr_addr = (u_long) ifnet.if_addrhead.tqh_first;
-#else
-			ifaddr_addr = (u_long) ifnet.if_addrlist;
-#endif
 			
 			while(ifaddr_addr)
 			{
@@ -298,11 +282,7 @@ get_ifinfo(const char *ifname, ifinfo_t *ifinfo)
 				
 				if (sa.sa_family != AF_INET)
 				{
-#if __FreeBSD_version >= 300001
 					ifaddr_addr = (u_long) ifaddr.ifa_link.tqe_next;
-#else
-					ifaddr_addr = (u_long) ifaddr.ifa_next;
-#endif
 					continue;
 				}
 			
@@ -324,11 +304,7 @@ get_ifinfo(const char *ifname, ifinfo_t *ifinfo)
 			return 0;
 		}
 
-#if __FreeBSD_version >= 300001
 		ifnet_addr = (u_long) ifnet.if_link.tqe_next;
-#else
-		ifnet_addr = (unsigned long) ifnet.if_next;
-#endif
 	}
 
 	if (if_egid)

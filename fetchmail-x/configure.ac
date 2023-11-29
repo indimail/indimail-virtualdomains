@@ -3,7 +3,7 @@ dnl Autoconfigure input file for fetchmail
 # Fetchmail automatic configuration support
 #
 # Eric S. Raymond <esr@thyrsus.com>
-# 2004 - 2021 Matthias Andree <matthias.andree@gmx.de>
+# 2004 - 2022 Matthias Andree <matthias.andree@gmx.de>
 #
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -17,7 +17,7 @@ AC_CONFIG_LIBOBJ_DIR([.])
 AC_CANONICAL_HOST
 
 dnl automake options are in Makefile.am
-AC_PREREQ(2.60)
+AC_PREREQ([2.71])
 dnl 2.60 required for AC_USE_SYSTEM_EXTENSIONS
 AM_INIT_AUTOMAKE([silent-rules -Wall])
 AM_SILENT_RULES
@@ -28,8 +28,6 @@ dnl python is optional
 # to disable python detection and continue without building/installing
 # fetchmail.conf -- be sure to check README.packaging, too!
 #
-# recent Python 3.x versions are supported.
-#
 AM_PATH_PYTHON(2.7,,AC_MSG_WARN([Disabling fetchmailconf: python 2.7 or greater not found]))
 AM_CONDITIONAL([HAVE_PYTHON], [test "$PYTHON" != :])
 
@@ -39,23 +37,26 @@ AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_INSTALL
 AC_PROG_CPP			dnl Later checks need this.
+AC_PROG_CPP_WERROR
 AM_PROG_AR
 AC_PROG_RANLIB
-AM_PROG_CC_C_O
 PKG_PROG_PKG_CONFIG
+
+case "$ac_prog_cc_stdc" in
+no|c89)
+    echo "$CC $CPPFLAGS $CFLAGS"
+    case "$CC $CPPFLAGS $CFLAGS" in
+	*c++*|*g++*) : ;;
+        *)        AC_MSG_ERROR([fetchmail requires a C99 capable compiler!])
+        ;;
+    esac
+    ;;
+esac
 
 AC_CHECK_PROGS([RST2HTML], [rst2html5.py rst2html5], [false])
 AC_CHECK_PROGS([HTMLDOC],  [htmldoc], [${srcdir}/dist-tools/htmldoc])
 
 AC_LIB_RPATH
-
-AC_ISC_POSIX
-dnl AC_ISC_POSIX: - XXX FIXME: remove in fetchmail 6.4.
-dnl This macro adds `-lcposix' to output variable `LIBS' if necessary
-dnl for Posix facilities.  Sun dropped support for the obsolete
-dnl INTERACTIVE Systems Corporation Unix on 2006-07-23.  New programs
-dnl need not use this macro.  It is implemented as
-dnl `AC_SEARCH_LIBS([strerror], [cposix])'
 
 dnl check for b0rked Solaris (and other shells) and find one that works
 AC_MSG_CHECKING(for a working shell...)
@@ -74,20 +75,12 @@ if test "x$SHELL" = "x" ; then
     AC_MSG_ERROR(no SUS compliant shell found - on Solaris, install SUNWxcu4)
 fi
 
+AC_C_RESTRICT
 
-AC_HEADER_STDC
-AC_HEADER_TIME
 AC_TYPE_SIZE_T
 AC_TYPE_PID_T
-AC_CHECK_HEADERS([unistd.h termios.h termio.h sgtty.h stdarg.h \
-	sys/itimer.h fcntl.h sys/fcntl.h memory.h sys/wait.h \
-	arpa/inet.h arpa/nameser.h netinet/in.h net/socket.h netdb.h \
-	sys/select.h sys/socket.h sys/time.h langinfo.h])
-if test _$ac_cv_header_stdarg_h != _yes ; then
-AC_MSG_WARN([stdarg.h is not defined. Unsupported configuration, proceed at your own risk.])
-fi
-
 AC_TYPE_UINT32_T
+AC_CHECK_HEADERS([sys/itimer.h sys/fcntl.h arpa/nameser.h langinfo.h])
 
 AC_CHECK_HEADERS([resolv.h],,,[
 #include <sys/types.h>
@@ -99,20 +92,21 @@ AC_CHECK_HEADERS([resolv.h],,,[
 
 AC_CHECK_DECLS([h_errno],,,[
 	AC_INCLUDES_DEFAULT
-	#ifdef HAVE_NETDB_H
 	#include <netdb.h>
-	#endif
 ])
 
-AC_C_CONST			dnl getopt needs this.
-AC_C_INLINE			dnl uid_db.? need this.
-AC_C_RESTRICT			dnl fm_realpath needs this.
-AC_C_VOLATILE			dnl check for ANSI volatile
-
-
-AM_PROG_LEX
+AM_MISSING_PROG([LEX], [flex])
+AC_PROG_LEX([noyywrap])
+case "$ac_cv_prog_LEX" in
+	*flex*) ;; # we like that
+	*) AC_MSG_WARN([Fetchmail requires flex to rebuild rcfile_l.*!]) ;;
+esac
 AC_PROG_MAKE_SET
 AC_PROG_YACC
+case "$ac_cv_prog_YACC" in
+	*bison*) ;; # we like that
+	*) AC_MSG_WARN([Fetchmail requires bison to rebuild rcfile_y.*!]) ;;
+esac
 
 # Check for OS special cases
 case $host_os in
@@ -124,20 +118,6 @@ darwin*)
 freebsd*)
     AC_MSG_NOTICE(found FreeBSD - Adding -lkvm -lcom_err to standard libraries)
     LIBS="$LIBS -lkvm -lcom_err"
-    ;;
-# Check for LynxOS special case: -lbsd needed (at least on 2.3.0) and -s
-# not working.
-lynxos*)
-    AC_MSG_NOTICE(found LynxOS - Adding -lbsd to standard libraries)
-    LIBS="$LIBS -lbsd"
-    LDFLAGS=`echo $LDFLAGS | sed "s/-s //"`
-    AC_MSG_NOTICE(found LynxOS - Prepending standard include path to gcc flags)
-    CPPFLAGS="$CPPFLAGS -I/usr/include"
-    ;;
-# Check for Rhapsody special case: it doesn't like -s
-rhapsody*)
-    AC_MSG_NOTICE(found Rhapsody - Removing -s load flag)
-    LDFLAGS=`echo $LDFLAGS | sed "s/-s //"`
     ;;
 esac
 
@@ -151,68 +131,27 @@ dnl end i18n
 # Under sysV68, socket and friends are provided by the C library.
 # -linet does not provide socket, but causes multiple definition
 # errors at link-time.  It is thus better to only use the C library.
-# So don't add -linet to the link list unless it's necessary
+# So do not add -linet to the link list unless it is necessary
 AC_CHECK_FUNC(socket,
     AC_MSG_RESULT(using libc's socket),
     AC_CHECK_LIB(socket,socket)
     AC_CHECK_LIB(inet,socket))
 
-# The condition in this test copes with the presence of inet_addr in libc6.
-AC_CHECK_FUNC(inet_addr,
-    AC_MSG_RESULT(using libc's inet_addr),
-    AC_CHECK_LIB(nsl,inet_addr))
-
-dnl Port hack for Interactive UNIX System V/386 Release 3.2
-AC_CHECK_LIB(cposix, strchr,
-		[DEFS="$DEFS -D_SYSV3"
-		LIBS="$LIBS -lcposix"])
-
-dnl Port hack for Sparc/NetBSD-1.5
-dnl
-dnl NB: this has been disabled as it causes the unconditional
-dnl addition of libintl to the build, which is both undesired
-dnl and breaks on Solaris/Blastwave.org machines.
-dnl
-dnl AC_CHECK_LIB(intl, gettext,
-dnl		[LIBS="$LIBS -lintl"])
-
-AC_REPLACE_FUNCS([strstr strcasecmp memmove stpcpy strlcpy strlcat])
+AC_REPLACE_FUNCS([stpcpy strlcpy strlcat])
 
 AC_CHECK_FUNC(getopt_long, [],
               [AC_LIBSOURCES([getopt.c, getopt1.c])
 	       EXTRAOBJ="$EXTRAOBJ getopt.\$(OBJEXT) getopt1.\$(OBJEXT)"])
 
-AC_FUNC_VPRINTF
-
 AC_SUBST(EXTRAOBJ)
 
-AC_CHECK_FUNCS(tcsetattr stty setsid geteuid seteuid dnl
-  strerror syslog snprintf vprintf vsnprintf vsyslog dnl
-  atexit inet_aton strftime setrlimit socketpair dnl
-  sigaction strdup setlocale)
-
-AC_CHECK_DECLS([strerror])
-AC_CHECK_DECLS([PATH_MAX],,,[#include <limits.h>])
-dnl INET6 is used by KAME/getnameinfo
-AC_CACHE_CHECK(for AF_INET6/PF_INET6,ac_cv_inet6,
-AC_COMPILE_IFELSE([
-  AC_LANG_PROGRAM([[
-    #include <sys/types.h>
-    #include <sys/socket.h>
-  ]],[[
-    int foo = AF_INET6;
-    int bar = PF_INET6;
-  ]])],
-  ac_cv_inet6=yes , ac_cv_inet6=no
-))
-if test "x$ac_cv_inet6" = xyes
-then
-    AC_DEFINE(INET6,1,Define to 1 if your system defines AF_INET6 and PF_INET6.)
-fi
+AC_CHECK_FUNCS(vsyslog inet_aton strsignal)
+dnl vsyslog, inet_aton: not in POSIX
+dnl strsignal: only in POSIX 2008 (not in 2001)
 
 # Under Red Hat 4.0 (and many other Linuxes) -lresolv is seriously flaky
 # and breaks gethostbyname(2).  It's better to use the bind stuff in the C
-# library.  So don't add -lresolv to the link list unless it's necessary
+# library.  So do not add -lresolv to the link list unless it is necessary
 # (It will be necessary when using GNU libc6).
 old_LIBS="$LIBS"
 for lib in '' -lresolv; do
@@ -240,135 +179,31 @@ extern int res_search();
      LIBS=$old_LIBS
 done
 
-dnl Check for usable void pointer type
-AC_MSG_CHECKING(use of void pointer type)
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[char *p;
-    void *xmalloc();
-    p = (char *) xmalloc(1);
-   ]])],[AC_DEFINE(HAVE_VOIDPOINTER,1,[Define if your C compiler allows void * as a function result]) AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
-
-dnl Check out the wait reality.  We have to assume sys/wait.h is present.
-AC_CHECK_FUNCS(waitpid wait3)
-AC_MSG_CHECKING(for union wait);
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <sys/wait.h>]], [[union wait status; int pid; pid = wait (&status);
-#ifdef WEXITSTATUS
-/* Some POSIXoid systems have both the new-style macros and the old
-   union wait type, and they do not work together.  If union wait
-   conflicts with WEXITSTATUS et al, we don't want to use it at all.  */
-if (WEXITSTATUS (status) != 0) pid = -1;
-#endif
-#ifdef HAVE_WAITPID
-/* Make sure union wait works with waitpid.  */
-pid = waitpid (-1, &status, 0);
-#endif
-]])],[AC_DEFINE(HAVE_UNION_WAIT,1,Define if 'union wait' is the type of the first arg to wait functions.) AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
-
 AC_MSG_CHECKING(sys_siglist declaration in signal.h or unistd.h)
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <signal.h>
+AC_LINK_IFELSE([
+	AC_LANG_PROGRAM([[
+	    #include <signal.h>
 /* NetBSD declares sys_siglist in <unistd.h>.  */
 #include <unistd.h>
-]], [[char *msg = *(sys_siglist + 1);]])],[AC_DEFINE(SYS_SIGLIST_DECLARED,1,[Define if 'sys_siglist' is declared by <signal.h>.]) AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+	]], [[
+	    char *msg = *(sys_siglist + 1);
+	]]
+	)
+],
+[AC_DEFINE(SYS_SIGLIST_DECLARED,1,[Define if 'sys_siglist' is declared by <signal.h>.])
+ AC_MSG_RESULT(yes)],
+[AC_MSG_RESULT(no)])
 
 # Find the right directory to put the root-mode PID file in
 for dir in "/var/run" "/etc"
 do
-	if test -d $dir 
+	if test -d $dir
 	then
 		break;
 	fi
 done
 AC_MSG_RESULT(root-mode pid file will go in $dir)
 AC_DEFINE_UNQUOTED(PID_DIR, "$dir", directory for PID lock files)
-
-# We may have a fallback MDA available in case the socket open to the 
-# local SMTP listener fails.  Best to use procmail for this, as we know
-# it won't try delivering through local SMTP and cause a mail loop.
-# Sendmail without the -t option to use the message headers will work too,
-# not just for sendmail itself but for workalikes like exim.
-#
-# Note1: A disadvantage of using procmail is that local alias expansion
-# according to /etc/aliases won't get done if we fall back.  This doesn't
-# matter in single-drop mode.
-#
-# Note2: it would be a very bad idea to use any MDA that doesn't return
-# a refuse-to-deliver status on disk- or process-table-full
-# conditions; mail could get lost that way.  Sendmail and all of the MDAs
-# like exim that might be lurking under a sendmail alias) do the right 
-# thing in this circumstance.  Matthias Andree warns that procmail does
-# not.  
-#
-# Note3: Defalt value of fallback is now off.  Matthias writes:
-#
-# 1. there is no way to predict when the fallback is used. With some MTAs
-#    (such as those limiting load average), outer circumstances can cause
-#    the fallback to kick in.
-# 
-# 2. the fallback changes fetchmail behaviour in unpredictable ways. It's
-#    not only about alias expansion, .forwards to special filters won't
-#    work, mail may end up in a different place (users claim "mail loss"
-#    for that).
-# 
-# 3. The claim procmail did the right thing with its exit codes is plain
-#    wrong. I've seen procmail exit with code 1 when it should have exited
-#    with code 75, like, configuration errors. Procmail is a dangerous
-#    beast and is best replaced by maildrop.
-# 
-# 4. if multiple choices exist (like procmail and maildrop), fetchmail
-#    cannot tell which one it should choose. Say, your MTA is configured
-#    to use maildrop to deliver to user's mailboxes, if fetchmail then
-#    chooses procmail, this is plain wrong.
-#
-
-AC_PATH_PROG(procmail, procmail, "", $PATH:/usr/sbin)
-AC_PATH_PROG(sendmail, sendmail, "", $PATH:/usr/sbin:/usr/lib)
-AC_PATH_PROG(maildrop, maildrop, "", $PATH:/usr/local/bin)
-
-###	use option --disable-fallback to disable fallback MDA
-###	use option --enable-fallback=procmail or 
-###		   --enable-fallback=sendmail to select
-AC_ARG_ENABLE(fallback,
-	[  --enable-fallback=procmail    enable procmail as fallback
-  --enable-fallback=sendmail    enable /usr/sbin/sendmail as fallback
-  --enable-fallback=maildrop    enable maildrop as fallback
-  --enable-fallback=no          disable fallback],,[enable_fallback=no])
-
-case "$enable_fallback" in
-	sendmail)	if test -z "$sendmail" ; then 
-				AC_MSG_ERROR([Sendmail selected as fallback, but not found])
-				#not reached
-			fi
-			AC_DEFINE_UNQUOTED(FALLBACK_MDA, "$sendmail -i %T", Fallback MTA to use if defined)
-			AC_MSG_NOTICE(Will use $sendmail as fallback MDA.)
-			;;
-	procmail)	if test -z "$procmail" ; then
-				AC_MSG_ERROR([procmail selected as fallback, but not found])
-				#not reached
-			fi
-			AC_DEFINE_UNQUOTED(FALLBACK_MDA, "$procmail -d %T")
-			AC_MSG_NOTICE(Will use $procmail as fallback MDA.)
-			;;
-	maildrop)	if test -z "$maildrop" ; then
-				AC_MSG_ERROR([maildrop selected as fallback, but not found])
-				#not reached
-			fi
-			AC_DEFINE_UNQUOTED(FALLBACK_MDA, "$maildrop -d %T")
-			AC_MSG_NOTICE(Will use $maildrop as fallback MDA.)
-			;;
-	no|unset)	AC_MSG_NOTICE(Will not use a fallback MDA.)
-			;;
-	auto|yes|set)	if test -n "$sendmail" ; then
-				AC_DEFINE_UNQUOTED(FALLBACK_MDA,"$sendmail -i %T")
-				AC_MSG_NOTICE(Will use $sendmail as fallback MDA.)
-			else
-				AC_MSG_WARN(No fallback MDA available.  procmail and maildrop are not eligible)
-				AC_MSG_WARN(for automatic fallback MDA configuration for reliability reasons.)
-			fi
-			;;
-	*)		AC_MSG_ERROR([unkown value for --enable-fallback given: $enable_fallback])
-			#notreached
-			;;
-esac
 
 AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
@@ -475,56 +310,11 @@ AC_ARG_ENABLE(opie,
 	[with_opie=no])
 test "$with_opie" = "yes" && AC_DEFINE(OPIE_ENABLE,1,Define if you want OPIE support compiled in)
 
-dnl Mostly stolen from gnulib's getaddrinfo.m4
-AC_SEARCH_LIBS(getaddrinfo, [nsl socket])
-AC_CACHE_CHECK([for getaddrinfo],[fm_cv_getaddrinfo],[
-  AC_TRY_LINK([
-#include <sys/types.h>
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif
-  ], [getaddrinfo(0, 0, 0, 0);],
-    [ fm_cv_getaddrinfo=yes],
-    [ fm_cv_getaddrinfo=no ])
-])
-
-if test x"$fm_cv_getaddrinfo" = "xyes"; then  
-     AC_DEFINE(HAVE_GETADDRINFO, 1,
-      [Define to 1 if you have the getaddrinfo function.])
-fi
-
-AC_CACHE_CHECK([for getnameinfo],[fm_cv_getnameinfo],[
-  AC_TRY_LINK([
-#include <sys/types.h>
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif
-#ifndef NULL
-#define NULL 0
-#endif
-  ], [getnameinfo(NULL,0, NULL,0, NULL, 0, 0);],
-    [ fm_cv_getnameinfo=yes],
-    [ fm_cv_getnameinfo=no ])
-])
-if test $fm_cv_getnameinfo = yes ; then
-    AC_DEFINE(HAVE_GETNAMEINFO,1,[Define to 1 if your system has getnameinfo()])
-fi
-
-AM_CONDITIONAL(NEED_GETADDRINFO, test "$fm_cv_getaddrinfo" != yes)
-AM_CONDITIONAL(NEED_GETNAMEINFO, test "$fm_cv_getnameinfo"   != yes)
-
-AC_CHECK_FUNCS(inet_ntop)
 dnl Check if getaddrinfo is async-signal-safe - most implementations aren't
-if test "$fm_cv_getaddrinfo" = yes ; then
+
     AC_MSG_CHECKING(if your getaddrinfo is async-signal-safe)
     gai_ts=no
-    dnl we have getaddrinfo() - check if the OS is known to have a async-signal-safe implementation
+dnl we have getaddrinfo() - check if the OS is known to have a async-signal-safe/thread-safe implementation
     case $host_os in
     darwin*)				gai_ts=yes ;;
     linux*)				gai_ts=yes ;;
@@ -535,10 +325,9 @@ if test "$fm_cv_getaddrinfo" = yes ; then
     if test $gai_ts = yes ; then
 	AC_DEFINE(GETADDRINFO_ASYNCSAFE, 1, [define to 1 if you know your getaddrinfo function is async-signal-safe])
     fi
-fi
 
 # This version of the Kerberos 4 and 5 options addresses the follwing issues:
-# 
+#
 # * Build correctly under Heimdal kerberos if it is compiled with db2 and
 #   OpenSSL support (Debian's is)
 # * Build the kerberos.c stuff (KPOP) only for kerberosIV, to avoid breakage.
@@ -547,7 +336,7 @@ fi
 # * Build without any fuss for both kerberosIV and V at the same time.
 # * Move all the kerberos header mess to kerberos.h, and #include that
 #   in driver.c and kerberos.c.
-# 
+#
 # Tested using the Heimdal Kerberos V libs, Kungliga Tekniska Högskolan (the
 # Royal Institute of Technology in Stockholm, Sweden)'s kerberos IV libs, and
 # the MIT reference implementation of KerberosV (all as packaged in Debian).
@@ -580,7 +369,7 @@ elif krb5-config 2> /dev/null >/dev/null ; then
   LIBS="$LIBS `krb5-config --libs krb5`"
   AC_DEFINE(KERBEROS_V5)
 else
-  if test "$with_kerberos5" != "yes" 
+  if test "$with_kerberos5" != "yes"
   then
       LDFLAGS="$LDFLAGS -L${with_kerberos5}/lib"
       searchdirs="$with_kerberos5"
@@ -902,7 +691,7 @@ AS_MESSAGE([
   LIBS:     $LIBS])
 
 case "$LIBS" in *-lssl*|*libssl*|*-lwolfssl*|*libwolfssl*)
-	case $host_os in 
+	case $host_os in
 	openbsd*) ;; dnl OpenBSD ships LibreSSL in the base operating system
 		     dnl so makes use of the GPL2 clause 3 exception.
 	*)
@@ -1030,58 +819,6 @@ then
     #endif
     ])
 fi])
-
-dnl ,------------------------------------------------------------------
-dnl Check if we need TRIO
-needtrio=0
-if test "$FORCE_TRIO" = "yes" ; then
-    needtrio=1
-    ac_cv_func_vsnprintf=no
-    ac_cv_func_snprintf=no
-fi
-if test "x$ac_cv_func_snprintf" != "xyes" ; then
-    AC_DEFINE(snprintf, trio_snprintf,
-	      [Define to trio_snprintf if your system lacks snprintf])
-    needtrio=1
-fi
-if test "x$ac_cv_func_vsnprintf" != "xyes" ; then
-    AC_DEFINE(vsnprintf, trio_vsnprintf,
-	      [Define to trio_vsnprintf if your system lacks vsnprintf])
-    needtrio=1
-fi
-AM_CONDITIONAL(NEED_TRIO, test "$needtrio" = 1)
-
-dnl TRIO IEEE compiler option for Alpha
-dnl
-if test "$needtrio" = 1 ; then
-    AC_MSG_CHECKING(for IEEE compilation options)
-    AC_CACHE_VAL(ac_cv_ieee_option, [
-    AC_TRY_COMPILE(,[
-    #if !(defined(__alpha) && (defined(__DECC) || defined(__DECCXX) || (defined(__osf__) && defined(__LANGUAGE_C__))) && (defined(VMS) || defined(__VMS)))
-    # error "Option needed"
-    #endif
-    ],ac_cv_ieee_option="/IEEE_MODE=UNDERFLOW_TO_ZERO/FLOAT=IEEE",
-    AC_TRY_COMPILE(,[
-    #if !(defined(__alpha) && (defined(__DECC) || defined(__DECCXX) || (defined(__osf__) && defined(__LANGUAGE_C__))) && !(defined(VMS) || defined(__VMS)) && !defined(_CFE))
-    # error "Option needed"
-    #endif
-    ],ac_cv_ieee_option="-ieee",
-    AC_TRY_COMPILE(,[
-    #if !(defined(__alpha) && (defined(__GNUC__) && (defined(__osf__) || defined(__linux__))))
-    # error "Option needed"
-    #endif
-    ],ac_cv_ieee_option="-mieee",
-    ac_cv_ieee_option="none"
-    )
-    )
-    )
-    ])
-    AC_MSG_RESULT($ac_cv_ieee_option)
-    if test $ac_cv_ieee_option != none; then
-      CFLAGS="${CFLAGS} ${ac_cv_ieee_option}"
-    fi
-fi
-dnl ----------------------------------------------------------------'
 
 AC_CONFIG_FILES([Makefile po/Makefile.in])
 AC_OUTPUT

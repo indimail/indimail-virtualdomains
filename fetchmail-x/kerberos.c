@@ -10,9 +10,7 @@
 #include  <stdio.h>
 #include  <string.h>
 #include  <ctype.h>
-#if defined(STDC_HEADERS)
 #include  <stdlib.h>
-#endif
 #include  "fetchmail.h"
 #include  "socket.h"
 #include  "kerberos.h"

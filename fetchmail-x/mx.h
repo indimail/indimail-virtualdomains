@@ -4,9 +4,7 @@
 
 #include "config.h"
 
-#ifdef HAVE_NETDB_H
 #include <netdb.h>
-#endif
 
 struct mxentry
 {
@@ -15,9 +13,5 @@ struct mxentry
 };
 
 extern struct mxentry * getmxrecords(const char *);
-
-#if !HAVE_DECL_H_ERRNO
-extern int h_errno;
-#endif
 
 /* mx.h ends here */

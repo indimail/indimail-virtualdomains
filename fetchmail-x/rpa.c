@@ -36,23 +36,21 @@ extern unsigned char line3[];
 extern int linecount;
 #endif
 
-#ifndef NO_PROTO
-  /* prototypes for internal functions */
-  static int  POP3_rpa_resp(char* argbuf, int socket );
-  static void LenAppend(char** pptr, int len);
-  static int  LenSkip(char** pptr, int rxlen);
-  static int  DecBase64(char* bufp);
-  static void EncBase64(char* bufp, int len);
-  static void ToUnicode(char** pptr, char delim, unsigned char* buf, int* plen,
-			int conv);
-  static int  SetRealmService(char* bufp);
-  static void GenChallenge(unsigned char* buf, int len);
-  static int  DigestPassphrase(char* passphrase,
-			       unsigned char* rbuf, int unicodeit);
-  static void CompUserResp(void);
-  static int  CheckUserAuth(void);
-  static void md5(const void* in, int len, unsigned char* out);
-#endif
+/* prototypes for internal functions */
+static int  POP3_rpa_resp(char* argbuf, int socket );
+static void LenAppend(char** pptr, int len);
+static int  LenSkip(char** pptr, int rxlen);
+static int  DecBase64(char* bufp);
+static void EncBase64(char* bufp, int len);
+static void ToUnicode(char** pptr, char delim, unsigned char* buf, int* plen,
+		      int conv);
+static int  SetRealmService(char* bufp);
+static void GenChallenge(unsigned char* buf, int len);
+static int  DigestPassphrase(char* passphrase,
+			     unsigned char* rbuf, int unicodeit);
+static void CompUserResp(void);
+static int  CheckUserAuth(void);
+static void md5(const void* in, int len, unsigned char* out);
 
 /* RPA protocol definitions */
 

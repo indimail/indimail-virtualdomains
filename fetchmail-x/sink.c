@@ -16,21 +16,11 @@
 #include  <stdio.h>
 #include  <errno.h>
 #include  <string.h>
+#include  <strings.h>
 #include  <signal.h>
-#ifdef HAVE_MEMORY_H
-#include  <memory.h>
-#endif /* HAVE_MEMORY_H */
-#if defined(STDC_HEADERS)
 #include  <stdlib.h>
-#endif
-#if defined(HAVE_UNISTD_H)
 #include  <unistd.h>
-#endif
-#if defined(HAVE_STDARG_H)
 #include  <stdarg.h>
-#else
-#include  <varargs.h>
-#endif
 #include  <ctype.h>
 #include  <langinfo.h>
 
@@ -1075,9 +1065,7 @@ static int open_mda_sink(struct query *ctl, struct msgblk *msg,
 	      int *good_addresses, int *bad_addresses)
 /* open a stream to a local MDA */
 {
-#ifdef HAVE_SETEUID
     uid_t orig_uid;
-#endif /* HAVE_SETEUID */
     struct	idlist *idp;
     int	length = 0, fromlen = 0, nameslen = 0;
     char	*names = NULL, *before, *after, *from = NULL;
@@ -1210,7 +1198,6 @@ static int open_mda_sink(struct query *ctl, struct msgblk *msg,
     if (outlevel >= O_DEBUG)
 	report(stdout, GT_("about to deliver with: %s\n"), before);
 
-#ifdef HAVE_SETEUID
     /*
      * Arrange to run with user's permissions if we're root.
      * This will initialize the ownership of any files the
@@ -1222,19 +1209,16 @@ static int open_mda_sink(struct query *ctl, struct msgblk *msg,
 	report(stderr, GT_("Cannot switch effective user id to %ld: %s\n"), (long)ctl->uid, strerror(errno));
 	return PS_IOERR;
     }
-#endif /* HAVE_SETEUID */
 
     sinkfp = popen(before, "w");
     free(before);
     before = NULL;
 
-#ifdef HAVE_SETEUID
     /* this will fail quietly if we didn't start as root */
     if (seteuid(orig_uid)) {
 	report(stderr, GT_("Cannot switch effective user id back to original %ld: %s\n"), (long)orig_uid, strerror(errno));
 	return PS_IOERR;
     }
-#endif /* HAVE_SETEUID */
 
     if (!sinkfp)
     {
@@ -1250,6 +1234,18 @@ static int open_mda_sink(struct query *ctl, struct msgblk *msg,
     set_signal_handler(SIGCHLD, SIG_DFL);
 
     return(PS_SUCCESS);
+}
+
+/** return a constant string that describes the sink type */
+const char* get_sink_type(const struct query *ctl)
+{
+    if (ctl->bsmtp) 	return GT_("BSMTP");
+    if (ctl->mda)	return GT_("MDA");
+    if (ctl->listener == LMTP_MODE)
+	    		return GT_("LMTP");
+    if (ctl->listener == SMTP_MODE)
+	    		return GT_("SMTP");
+    return GT_("sink"); // generic return value before smtp_setup
 }
 
 int open_sink(struct query *ctl, struct msgblk *msg,
@@ -1281,29 +1277,7 @@ int open_sink(struct query *ctl, struct msgblk *msg,
 	       ctl->smtphostmode,
 	       ctl->smtphost ? ctl->smtphost : "localhost");
 
-#ifndef FALLBACK_MDA
-	/* No fallback MDA declared.  Bail out. */
 	return(PS_SMTP);
-#else
-	/*
-	 * If user had things set up to forward offsite, no way
-	 * we want to deliver locally!
-	 */
-	if (ctl->smtphost && strcmp(ctl->smtphost, "localhost"))
-	    return(PS_SMTP);
-
-	/* 
-	 * User was delivering locally.  We have a fallback MDA.
-	 * Latch it in place, logging the error, and fall through.
-	 * Set stripcr as we would if MDA had been the initial transport
-	 */
-	ctl->mda = FALLBACK_MDA;
-	if (!ctl->forcecr)
-	    ctl->stripcr = TRUE;
-
-	report(stderr, GT_("can't raise the listener; falling back to %s"),
-			 FALLBACK_MDA);
-#endif
     }
 
     if (ctl->mda)		/* must deliver through an MDA */
@@ -1573,16 +1547,7 @@ int open_warning_by_mail(struct query *ctl)
 /* if rfc2047charset is non-NULL, encode the line (that is assumed to be
  * a header line) as per RFC-2047 using rfc2047charset as the character
  * set field */
-#if defined(HAVE_STDARG_H)
 void stuff_warning(const char *rfc2047charset, struct query *ctl, const char *pfx, const char *fmt, ... )
-#else
-void stuff_warning(rfc2047charset, ctl, pfx, fmt, va_alist)
-const char *charset;
-const char *pfx;	/* constant, non-translated prefix (such as "Subject: ") */
-struct query *ctl;
-const char *fmt;	/* printf-style format */
-va_dcl
-#endif
 {
     /* make huge -- i18n can bulk up error messages a lot */
     char	buf[3*MSGBUFSIZE+4];
@@ -1596,11 +1561,7 @@ va_dcl
      * case it was a string constant.  We make a virtue of that necessity
      * here by supporting stdargs/varargs.
      */
-#if defined(HAVE_STDARG_H)
     va_start(ap, fmt) ;
-#else
-    va_start(ap);
-#endif
     vsnprintf(buf+strlen(buf), sizeof(buf)-strlen(buf)-2, fmt, ap);
     va_end(ap);
 

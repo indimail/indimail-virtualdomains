@@ -18,15 +18,14 @@
  */
 
 #include "config.h"
-#include "fetchmail.h"
-
-#include <sys/types.h>
-#include <assert.h>
-#include <string.h>
 
 #include "fm_strl.h"
 
 #ifndef HAVE_STRLCPY
+#include <sys/types.h>
+#include <assert.h>
+#include <string.h>
+
 /*
  * Copy src to string dst of size siz.  At most siz-1 characters
  * will be copied.  Always NUL terminates (unless siz == 0).

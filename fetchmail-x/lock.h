@@ -30,8 +30,7 @@ void fm_lock_release(void);
  */
 int  fm_lock_state(void);
 
-/** If atexit(3) is available on the system this software is compiled on,
- * register an exit handler to dipose of the lock on process exit. */
+/** Register an atexit() exit handler to dipose of the lock on process exit. */
 void fm_lock_dispose(void);
 
 #endif
