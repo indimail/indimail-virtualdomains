@@ -101,7 +101,7 @@ odmr_getrange(int sock, struct query *ctl, const char *id, int *countp, int *new
 	/*- this switch includes all response codes described in RFC2645 */
 	switch (atoi(buf))
 	{
-	case 250:	/* OK, turnaround is about to happe */
+	case 250:	/* OK, turnaround is about to happen */
 		if (outlevel > O_SILENT)
 			report(stdout, GT_("Turnaround now...\n"));
 		break;
@@ -120,6 +120,13 @@ odmr_getrange(int sock, struct query *ctl, const char *id, int *countp, int *new
 			report(stderr, GT_("You have no mail.\n"));
 		return (PS_NOMAIL);
 
+#ifdef INDIMAIL
+	case 458:	/* Message already being processed */
+		if (outlevel > O_SILENT)
+			report(stderr, GT_("Message already being processed.\n"));
+		return (PS_LOCKBUSY);
+#endif
+
 	case 502:	/* Command not implemented */
 		report(stderr, GT_("Command not implemented\n"));
 		return (PS_PROTOCOL);
@@ -127,6 +134,13 @@ odmr_getrange(int sock, struct query *ctl, const char *id, int *countp, int *new
 	case 530:	/* Authentication required */
 		report(stderr, GT_("Authentication required.\n"));
 		return (PS_AUTHFAIL);
+
+#ifdef INDIMAIL
+	case 553:	/* ATRN request rejected */
+		if (outlevel > O_SILENT)
+			report(stdout, GT_("ATRN request rejected.\n"));
+		return (PS_PROTOCOL);
+#endif
 
 	default:
 		{
