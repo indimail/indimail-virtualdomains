@@ -41,6 +41,8 @@ Release 1.1.1-1.1 Start 01/03/2021 End XX/XX/XXXX
     for gmtime_r
 - 28/11/2023
 57. fetchmail version upgraded to 6.5.0-beta9
+- 03/12/2023
+58. fetchmail/odmr.c: Fixed communication between SMTP and ODMR port
 
 * Thu 08 Sep 2022 14:38:16 +0000 Manvendra Bhangui <indimail-access@indimail.org> 1.1.0-1.1%{?dist}
 Release 1.1.0-1.1 Start 01/03/2021 End 08/09/2022
