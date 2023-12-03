@@ -2501,7 +2501,7 @@ quit
 Connection closed by foreign host.
 ```
 
-Seeing the examples above where we have used telnet, demonstrates the ETRN doesn't require special software. You can automate the process of pulling mails using ETRN by having a cron script that uses [tcpclient(1)](https://github.com/mbhangui/indimail-mta/wiki/tcpclient.1) or the [netcat command](https://en.wikipedia.org/wiki/Netcat#:~:text=netcat%20(often%20abbreviated%20to%20nc,by%20other%20programs%20and%20scripts.). Using nc is trivial like this snippet `printf "ETRN etrn2.dom\r\nQUIT\r\n" | nc argos2 25`. This however doesn't check if the SMTP server has ETRN capability.
+Seeing the examples above where we have used telnet, demonstrates the ETRN doesn't require special software. You can automate the process of pulling mails using ETRN by having a cron script that uses [tcpclient(1)](https://github.com/mbhangui/indimail-mta/wiki/tcpclient.1) or the [netcat command](https://en.wikipedia.org/wiki/Netcat). Using nc is trivial like this snippet `printf "ETRN etrn2.dom\r\nQUIT\r\n" | nc argos2 25`. This however doesn't check if the SMTP server has ETRN capability.
 
 Here is a more sophisticated example of a script that uses tcpclient. Assuming this script is named tcpclient.atrn, then you need to execute the command `tcpclient -vDHR 192.168.2.102 25 /usr/local/bin/tcpclient.atrn`. The script needs to have executable bit set.
 
