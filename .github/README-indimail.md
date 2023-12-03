@@ -57,6 +57,12 @@ Table of Contents
       * [Extension Addresses](#extension-addresses)
    * [Controlling Delivery Rates](#controlling-delivery-rates)
    * [Delivery Instructions for a virtual domain](#delivery-instructions-for-a-virtual-domain)
+   * [TURN Mechanisms](#turn-mechanisms)
+      * [Setting Extended TURN (ETRN)](#setting-extended-turn-etrn)
+         * [Setup ETRN for a domain mapped to a fixed IP address](#setup-etrn-for-a-domain-mapped-to-a-fixed-ip-address)
+         * [Setup ETRN for a domain without IP address](#setup-etrn-for-a-domain-without-ip-address)
+      * [Setup ODMR (ATRN) for a domain](#setup-odmr-atrn-for-a-domain)
+      * [Setup AUTOTURN](#setup-autoturn)
    * [Setting up TLS for SMTP (qmail-smtpd) and Remote Delivery (qmail-remote)](#setting-up-tls-for-smtp-qmail-smtpd-and-remote-delivery-qmail-remote)
       * [Using tcpserver to provide encrypted SMTPS service](#using-tcpserver-to-provide-encrypted-smtps-service)
       * [Using dotls provide encrypted SMTPS service or STARTTLS capability](#using-dotls-provide-encrypted-smtps-service-or-starttls-capability)
@@ -2343,6 +2349,358 @@ The `delivery_instruction_for_non_existing_user` can have one of the following 5
 * The instruction **IPaddress** causes emails to be addressed to non-existing users to be redirected to a remote SMTP server at IP IPaddress. The format of IPaddress is domain:ip:port where domain is the domain name, ip is the IP address of the remote SMTP server and port is the SMTP port on the remote SMTP server. It is expected that the non-existing user is present on the remote system. This type of delivery is used by IndiMail on a clustered setup. In a clustered setup, users are distributed across multiple server. A particular user will be located only on one particular server. However, the same domain will be present on multiple servers.
 
 In the delivery instruction in .**qmail-default**, you can replace **vdelivermail** with **vfilter** to perform in-line filtering use IndiMail's poweful vfilter. You can create filters using the program **vcfilter**.
+
+# TURN Mechanisms
+
+indimail supports **ETRN**, **ATRN** and **AUTOTURN** mechanisms to fetch emails for a domain. These mechanisms are used by hosts that have **part-time** connectivity and have the services of an ISP or a host with **full-time** connectivity. For the same of brevity, I'm going to to refer to the ISP server as **isp-server** and the host with part-time connectivity as **part-time-host** throughout this document. The permanent connectivity allows the **isp-server** receive mails all the time and store mails temporarily. Once you have the mails stored somewhere on the **isp-server**, these can be delivered to **part-time-host** using either of the below two methods.
+
+   1. The **part-time-host** wakes up the **isp-server** which then deliver's the mail to the **part-time-host** using SMTP. This is typically the case supported by ETRN or AUTOTURN. indimail-mta supports this mechanism if the **part-time-host** IP address is listed in the mail exchanger (MX) records for the domain.
+   2. If **isp-server** SMTP server supports ETRN, ATRN then any software on the **part-time-host** (that supports ETRN, ATRN) can connect to **isp-server** SMTP port and reverse the connection. i.e. The **isp-server** becomes an SMTP client and the **part-time-host** becomes a SMTP server. The connection gets reversed by simply issuing the ETRN or ATRN smtp command. The ETRN and ATRN command requires the domain name for which mails needs to be fetched as an argument. One of the few software that supports both ETRN and ATRN is fetchmail.
+
+You can read [this document](https://cr.yp.to/smtp/turn.html) to understand more about TURN mechanisms. The original TURN mechanism had serious security implications. The Extended TURN (ETRN) was deviced to fix the security concerns with TURN and is defined by [RFC-1985](https://www.rfc-editor.org/rfc/rfc1985.html). The ATRN requrires SMTP authentication to work and hence is more secure. ATRN is also known as **On-Demand Mail Relay** (**ODMR**) and is defined by [RFC-2645](https://datatracker.ietf.org/doc/html/rfc2645). To support ETRN all that is required is to issue the ETRN command. No other client side support is needed other than having a SMTP server running on the client to accept mails. However, it is upto the server to accept the request. In general only those IP addresses that are part of the MX records for a domain are allowed to feth mails from a server supporting ETRN, AUTOTURN. AUTOTURN is even much more simpler and requires no special command or client-side software. All you need is to connect to the SMTP server from the client to trigger the server to send queued mails meant for the client. indimail-mta supports all the methods ETRN, ATRN and AUTOTURN. ETRN and ATRN is directly supported. AUTOTURN requires a simple modification to the SMTP run script in /service/qmail-smtpd.25/run. Now let us talk about setting up an indimail-mta server for ETRN, AUTOTURN and ODMR.
+
+## Setting Extended TURN (ETRN)
+
+ETRN can be setup for a domain in two ways.
+
+1. One method is to map the ETRN domain to the fixed IP address of the **part-time-host**. When qmail-smtpd is triggered for the ETRN domain, it will always send queued mails to the configured fixed IP address of the **part-time-host**. An important point to realize is that the ETRN command can be issued by any host connecting to the SMTP port of the **isp-server**.
+
+2. The other method is not to have the domain mapped to a fixed IP address. This method requires to have the IP address of the **part-time-host** configured as a MX record for the ETRN domain in the DNS. When the **part-time-host** connects to the **isp-server**, the queued mails will be sent by SMTP to the IP address of the host that connects to the **isp-server**. An important point to realizes is that the ETRN command can be issued by any host that serves as a MX record for the ETRN domain. The ETRN command will be rejected for any host that does not serves as a MX record for the ETRN domain.
+
+### Setup ETRN for a domain mapped to a fixed IP address
+
+We will use the <b>vadddomain</b> command from indimail-virtualdomains and will explain what it does. If you understand the steps than you can setup ETRN manually without using <b>vadddomain</b> command. The below shows an usage to create an ETRN domain that will receive mails in the directory <u>/var/indimail/autoturn/192.168.2.108/Maildir</u>.
+
+```
+# add the domain with qmaild permissions. This is because
+# we are running qmail-smtpd under tcpserver with qmaild uid
+$ sudo vadddomain -u qmaild -T 192.168.2.108 etrn1.dom
+domain=etrn1.dom domaindir=/var/indimail, controldir=/etc/indimail/control
+Sending SIGHUP to /service/qmail-send.25
+Domain Directory content
+drwxr-s--- 1 qmaild nofiles 14 Dec  3 17:45 /var/indimail/autoturn/192.168.2.108
+total 0
+drwxr-s--- 1 qmaild   nofiles 14 Dec  3 17:45 .
+drwxrwsr-x 1 indimail qmail   82 Dec  3 17:45 ..
+drwxr-s--- 1 qmaild   nofiles 18 Dec  3 17:45 Maildir
+
+adding etrn1.dom to /etc/indimail/control/spamignore control file
+adding etrn1.dom to /etc/indimail/control/nodnscheck control file
+
+#
+# assign address autoturn-192.168.2.108-local@etrn1.dom
+#
+$ cat /etc/indimail/control/virtualdomains
+etrn1.dom:autoturn-192.168.2.108
+
+#
+# now any mails to autoturn-user will be handled by .qmail-user-default in
+# /var/indimail/autoturn
+#
+$ cat /etc/indimail/users/assign
++autoturn-:autoturn:1003:1001:/var/indimail/autoturn:-::
+.
+
+$ cat /var/indimail/autoturn/.qmail-192:168:2:108-default
+./192.168.2.108/Maildir/
+
+$ grep qmaild /etc/passwd
+qmaild:x:1003:1001::/var/indimail:/sbin/nologin
+
+$ grep nofiles /etc/group
+nofiles:x:1001:
+```
+
+Now let is dissect what has been done. The <b>vadddomain</b> has done the following
+
+1. Added an entry to <u>/etc/indimail/users/assign</u> to create an autoturn user `autoturn` using [qmail-users(5)](https://github.com/mbhangui/indimail-mta/wiki/qmail-users.5) mechanism. The entry for autoturn is done only the first time any ETRN or ATRN domain is created.
+2. added entry `etrn1.dom:autoturn-192.168.2.108` to <u>/etc/indimail/control/virtualdomains</u>
+3. Now any email to `etrn1.dom` will be controlled by <u>/var/indimail/autoturn/.qmail-192:168:2:108-default</u>, which has the entry <u>./192.168.2.108/Maildir/`</u>. This will result in <b>qmail-send</b>(8) delivering all emails for `etrn1.dom` to <u>/var/indimail/autoturn/192.168.2.108/Maildir</u>.
+
+Now all that is required is for the host with IP 192.168.2.108 issues the ETRN command like this
+
+```
+$ telnet 192.168.2.100 25
+Trying 192.168.2.108...
+Connected to argos2.
+Escape character is '^]'.
+220 argos.indimail.org (NO UCE) ESMTP IndiMail 1.313 Sun, 3 Dec 2023 18:31:08 +0530
+etrn etrn1.dom
+250 OK, queueing for node <etrn1.dom> started
+quit
+221 argos.indimail.org closing connection
+Connection closed by foreign host.
+```
+
+Now if you look at the qmail-smtpd and qmail-send logs you will find the delivery happening
+
+### Setup ETRN for a domain without IP address
+
+This method requires your **part-time-host** IP address to be setup as a MX record in your DNS. We again use the <b>vadddomain</b> command as before, but without the **-T** argument.
+
+```
+$ sudo vadddomain -u qmaild -t etrn2.dom
+domain=etrn2.dom domaindir=/var/indimail, controldir=/etc/indimail/control
+Sending SIGHUP to /service/qmail-send.25
+Domain Directory content
+drwxr-s--- 1 qmaild nofiles 14 Dec  3 18:52 /var/indimail/autoturn/etrn2.dom
+total 0
+drwxr-s--- 1 qmaild   nofiles  14 Dec  3 18:52 .
+drwxrwsr-x 1 indimail qmail   106 Dec  3 18:52 ..
+drwxr-s--- 1 qmaild   nofiles  18 Dec  3 18:52 Maildir
+
+adding etrn2.dom to /etc/indimail/control/spamignore control file
+adding etrn2.dom to /etc/indimail/control/nodnscheck control file
+
+$ cat /etc/indimail/control/virtualdomains
+etrn1.dom:autoturn-192.168.2.108
+etrn2.dom:autoturn-etrn2.dom
+
+$ cat /etc/indimail/users/assign
++autoturn-:autoturn:1003:1001:/var/indimail/autoturn:-::
+.
+
+$ cat /var/indimail/autoturn/.qmail-etrn2:dom-default
+/var/indimail/autoturn/etrn2.dom/Maildir/
+```
+
+Now let us again dissect what has been done. The <b>vadddomain</b> has done the following
+
+1. It has changed nothing in the file <u>/etc/indimail/users/assign</u>.
+2. added entry `etrn2.dom:autoturn-etrn2.dom` to <u>/etc/indimail/control/virtualdomains</u>
+3. Now any email to `etrn2.dom` will be controlled by <u>/var/indimail/autoturn/.qmail-etrn2:dom-default</u>, which has the entry <u>/var/indimail/autoturn/etrn2.dom/Maildir/`</u>. This will result in <b>qmail-send</b>(8) delivering all emails for `etrn1.dom` to <u>/var/indimail/autoturn/etrn2.dom/Maildir</u>.
+
+Now let us see what happens when we issue the ETRN command from a host that is not a MX record for the ETRN domain.
+
+```
+$ telnet argos2 smtp
+Trying 192.168.2.100...
+Connected to argos2.
+Escape character is '^]'.
+220 argos.indimail.org (NO UCE) ESMTP IndiMail 1.313 Sun, 3 Dec 2023 19:10:24 +0530
+ETRN etrn2.dom
+451 Unable to queue messages (#4.3.0)
+quit
+221 argos.indimail.org closing connection
+Connection closed by foreign host.
+```
+
+The ETRN request as expected is denied. One can however bypass the requirement of the **part-time-host** to be a MX record by creating a whitelist file with the IP address of the connecting client on the **isp-server**. The whitelist filename is <u>/var/indimail/autoturn/etrn2.dom/ipauth</u>. Now, the ETRN request will be accepted as shown below.
+
+```
+$ sudo sh -c "echo 191.168.2.108 > /var/indimail/autoturn/etrn2.dom/ipauth"
+$ telnet argos2 smtp
+Trying 192.168.2.108...
+Connected to argos2.
+Escape character is '^]'.
+220 argos.indimail.org (NO UCE) ESMTP IndiMail 1.313 Sun, 3 Dec 2023 19:23:18 +0530
+etrn etrn2.dom
+250 OK, queueing for node <etrn2.dom> started
+quit
+221 argos.indimail.org closing connection
+Connection closed by foreign host.
+```
+
+Seeing the examples above where we have used telnet, demonstrates the ETRN doesn't require special software. You can automate the process of pulling mails using ETRN by having a cron script that uses [tcpclient(1)](https://github.com/mbhangui/indimail-mta/wiki/tcpclient.1) or the [netcat command](https://en.wikipedia.org/wiki/Netcat#:~:text=netcat%20(often%20abbreviated%20to%20nc,by%20other%20programs%20and%20scripts.). Using nc is trivial like this snippet `printf "ETRN etrn2.dom\r\nQUIT\r\n" | nc argos2 25`. This however doesn't check if the SMTP server has ETRN capability.
+
+Here is a more sophisticated example of a script that uses tcpclient. Assuming this script is named tcpclient.atrn, then you need to execute the command `tcpclient -vDHR 192.168.2.102 25 /usr/local/bin/tcpclient.atrn`. The script needs to have executable bit set.
+
+```
+#!/bin/sh
+exec 0<&6
+exec 1>&7
+read key
+greeting=$(echo $key | awk '{print $1}')
+if [ $greeting -ne 220 ] ; then
+	echo "Greeting failed" 1>&2
+	printf "QUIT\r\n"
+fi
+printf "EHLO\r\n"
+etrn_capa=0
+while true
+do
+	read line
+	echo $line | grep "250 " >/dev/null
+	ret=$?
+	echo $line | grep ETRN >/dev/null
+	if [ $? -eq 0 ] ; then
+		etrn_capa=1
+	fi
+	if [ $ret -eq 0 ] ; then
+		echo $line 1>&2
+		break
+	fi
+	echo $line 1>&2
+done
+if [ $etrn_capa -eq 1 ] ; then
+	printf "ETRN $1\r\n"
+fi
+read line
+echo $line | grep "^250 " >/dev/null
+if [ $? -eq 0 ] ; then
+	echo "ETRN triggered for $1" 1>&2
+else
+	echo "failed to triggered ETRN for $1" 1>&2
+fi
+echo $line 1>&2
+printf "QUIT\r\n"
+```
+
+## Setup ODMR (ATRN) for a domain
+
+ATRN stands for Authenticated Turn. ATRN requires indimail-virtualdomains to be installed. This is because a mapping needs to be maintained for ATRN domains against users. And ATRN domain can be fetched by any host that can authenticate. Unlike ETRN, ATRN requires special client-side software that can act as the SMTP server on the same channel that it used as a client. ATRN happens in multiple steps. It is just the requirement of a database to maintain the mapping necessitates indimail-virtualdomains.
+
+1. The client authenticates using some username. Let's say <u>user</u>.
+2. The client issues the ATRN command for a domain. Let's say <u>domain</u>
+3. The server checks if the <u>user</u> has the permission to access the domain.
+4. The server then replies with 250 OK and becomes a SMTP client immediately after that
+5. The client becomes a SMTP client and starts receiving SMTP commands and transaction from the server and starts acting on them.
+6. The server keeps on pushing all mails in the queue for <u>domain</u> to the client using SMTP. For each mail that the client accepts successfully or results in a permanent failure, the server removes the mail from the queue. For temporary failures, the mail is not removed from the queue.
+7. The client quits when the server issues the SMTP QUIT command.
+
+Now let us look at the steps to create a ATRN domain. You can see that it is the same as create an ETRN domain. The extra stip is using the [vatrn](https://github.com/mbhangui/indimail-mta/wiki/vatrn.1) command which adds access to the atrn domain for the user `odmr@localhost`. <u>odmr</u> is a normal user in system password database without shell access. It can also be any user in indimail's virtual domain database. You can use a software like [fetchmail](https://github.com/mbhangui/indimail-mta/wiki/fetchmail.1). The indimail-access package comes with a version of [fetchmail](https://github.com/mbhangui/indimail-virtualdomains/tree/master/fetchmail-x) that is optimized for ODMR and ETRN. The original fetchmail is unusable for ODMR unless setup for CRAM-MD5 authentication. The version that comes with indimail-access allows other authentication methods supported by indimail-mta.
+
+```
+$ sudo vadddomain -u qmaild -t atrn.dom
+domain=atrn.dom domaindir=/var/indimail, controldir=/etc/indimail/control
+Sending SIGHUP to /service/qmail-send.25
+Domain Directory content
+drwxr-s--- 1 qmaild nofiles 14 Dec  3 20:46 /var/indimail/autoturn/atrn.dom
+total 0
+drwxr-s--- 1 qmaild   nofiles  14 Dec  3 20:46 .
+drwxrwsr-x 1 indimail qmail   128 Dec  3 20:46 ..
+drwxr-s--- 1 qmaild   nofiles  18 Dec  3 20:46 Maildir
+
+adding atrn.dom to /etc/indimail/control/spamignore control file
+adding atrn.dom to /etc/indimail/control/nodnscheck control file
+
+$ cat /etc/indimail/control/virtualdomains
+etrn1.dom:autoturn-192.168.2.108
+etrn2.dom:autoturn-etrn2.dom
+atrn.dom:autoturn-atrn.dom
+
+$ cat /var/indimail/autoturn/.qmail-atrn:dom-default
+/var/indimail/autoturn/atrn.dom/Maildir/
+
+$ vatrn -i atrn.dom odmr@localhost
+```
+
+Once you have done the above, you can use fetchmail. To use fetchmail, you have to create a config file, which is usually $HOME/.fetchmailrc. Here is an example that supports ETRN and ATRN for etrn1.dom, etrn2.dom and atrn.dom domains that we created above as an example
+
+```
+# Configuration created Sun Dec  3 09:17:01 2023 by fetchmailconf 1.66.0
+set postmaster "mbhangui"
+set bouncemail
+set no spambounce
+set no softbounce
+set properties ""
+
+# ODMR config
+poll 192.168.2.100 with proto ODMR port 366 timeout 120 interval 1 and options no dns
+user 'odmr@example.com' there with password 'xxxxyyyyzzzz' options
+	no rewrite forcecr pass8bits fetchlimit 50 batchlimit 250 expunge 50
+    fetchdomains atrn.dom
+
+# Config for ETRN
+poll 192.168.2.100 with proto ETRN port 25 timeout 120 interval 1 and options no dns
+    fetchdomains etrn1.dom
+
+poll 192.168.2.100 with proto ETRN port 25 timeout 120 interval 1 and options no dns
+    fetchdomains etrn2.dom
+```
+
+To fetch the mails you just need to execute the fetchmail command. The output will be something like below.
+
+```
+# This is when there are no mails for atrn.dom in the queue
+$ fetchmail -v
+Dec 03 21:00:49 fetchmail: 6.5.0.beta9 querying argos2 (protocol ODMR) at Sun 03 Dec 2023 09:00:49 PM IST: poll started
+Trying to connect to 192.168.2.108/366...connected.
+Dec 03 21:00:49 fetchmail: SMTP< 220 argos.indimail.org (NO UCE) ESMTP IndiMail 1.313 Sun, 3 Dec 2023 21:00:22 +0530
+Dec 03 21:00:49 fetchmail: SMTP> EHLO argos.indimail.org
+Dec 03 21:00:49 fetchmail: SMTP< 250-argos.indimail.org
+Dec 03 21:00:49 fetchmail: SMTP< 250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRA
+M-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256
+Dec 03 21:00:49 fetchmail: SMTP< 250-ATRN
+Dec 03 21:00:49 fetchmail: SMTP< 250-STARTTLS
+Dec 03 21:00:49 fetchmail: SMTP< 250 HELP
+Dec 03 21:00:49 fetchmail: ESMTP> AUTH PLAIN
+Dec 03 21:00:49 fetchmail: ESMTP> AG9kbXJAbG9jYWxob3N0AHh4eHh5eXl5enp6eg==
+Dec 03 21:00:49 fetchmail: SMTP< 235 ok, go ahead (#2.0.0)
+Dec 03 21:00:49 fetchmail: ODMR> ATRN atrn.dom
+Dec 03 21:00:49 fetchmail: ODMR< 453 No message waiting for node(s) <atrn.dom> (#4.3.0)
+Dec 03 21:00:49 fetchmail: You have no mail.
+Dec 03 21:00:49 fetchmail: ODMR> QUIT
+Dec 03 21:00:49 fetchmail: SMTP< 221 argos.indimail.org closing connection
+Dec 03 21:00:49 fetchmail: 6.5.0.beta9 querying argos2 (protocol ODMR) at Sun 03 Dec 2023 09:00:49 PM IST: poll completed
+Dec 03 21:00:49 fetchmail: normal termination, status 0
+
+# This is when there are mails in the queue
+$ fetchmail -v
+Dec 03 21:06:12 fetchmail: 6.5.0.beta9 querying argos2 (protocol ODMR) at Sun 03 Dec 2023 09:06:12 PM IST: poll started
+Trying to connect to 192.168.2.108/366...connected.
+Dec 03 21:06:12 fetchmail: SMTP< 220 argos.indimail.org (NO UCE) ESMTP IndiMail 1.313 Sun, 3 Dec 2023 21:05:45 +0530
+Dec 03 21:06:12 fetchmail: SMTP> EHLO argos.indimail.org
+Dec 03 21:06:12 fetchmail: SMTP< 250-argos.indimail.org
+Dec 03 21:06:12 fetchmail: SMTP< 250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRA
+M-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256
+Dec 03 21:06:12 fetchmail: SMTP< 250-ATRN
+Dec 03 21:06:12 fetchmail: SMTP< 250-STARTTLS
+Dec 03 21:06:12 fetchmail: SMTP< 250 HELP
+Dec 03 21:06:12 fetchmail: ESMTP> AUTH PLAIN
+Dec 03 21:00:49 fetchmail: ESMTP> AG9kbXJAbG9jYWxob3N0AHh4eHh5eXl5enp6eg==
+Dec 03 21:06:12 fetchmail: SMTP< 235 ok, go ahead (#2.0.0)
+Dec 03 21:06:12 fetchmail: ODMR> ATRN atrn.dom
+Dec 03 21:06:12 fetchmail: ODMR< 250 OK now reversing the connection
+Dec 03 21:06:12 fetchmail: Turnaround now...
+Trying to connect to 127.0.0.1/25...connected.
+Dec 03 21:06:12 fetchmail: ODMR> 220 argos.indimail.org (NO UCE) ESMTP IndiMail 1.313 Sun, 3 Dec 2023 21:05:45 +0530
+Dec 03 21:06:12 fetchmail: ODMR< EHLO AutoTURN
+Dec 03 21:06:12 fetchmail: ODMR> 250-argos.indimail.org
+Dec 03 21:06:12 fetchmail: ODMR> 250-PIPELINING
+Dec 03 21:06:12 fetchmail: ODMR> 250-8BITMIME
+Dec 03 21:06:12 fetchmail: ODMR> 250-SIZE 20971520
+Dec 03 21:06:12 fetchmail: ODMR> 250-ETRN
+Dec 03 21:06:12 fetchmail: ODMR> 250-STARTTLS
+Dec 03 21:06:12 fetchmail: ODMR> 250 HELP
+Dec 03 21:06:12 fetchmail: ODMR< MAIL FROM:<mbhangui@argos.indimail.org>
+Dec 03 21:06:12 fetchmail: ODMR< RCPT TO:<test@atrn.dom>
+Dec 03 21:06:12 fetchmail: ODMR< DATA
+Dec 03 21:06:12 fetchmail: ODMR> 250 ok
+Dec 03 21:06:12 fetchmail: ODMR> 250 ok
+Dec 03 21:06:13 fetchmail: ODMR> 354 go ahead
+Dec 03 21:06:13 fetchmail: receiving message data
+Dec 03 21:06:13 fetchmail: ODMR> 250 ok 1701617773 qp 741611
+Dec 03 21:06:13 fetchmail: ODMR< QUIT
+Dec 03 21:06:13 fetchmail: ODMR> 221 argos.indimail.org closing connection
+Dec 03 21:06:13 fetchmail: ODMR> QUIT
+Dec 03 21:06:13 fetchmail: Polling argos2
+Dec 03 21:06:13 fetchmail: 6.5.0.beta9 querying argos2 (protocol ODMR) at Sun 03 Dec 2023 09:06:13 PM IST: poll completed
+Dec 03 21:06:13 fetchmail: normal termination, status 0
+```
+
+The advantage of ATRN is that the **part-time-host** need not be configured as a MX destination for the domain and can be accessed only by users granted access by the **vatrn(1)** command. The disadvantage is that it requires special software like fetchmail to pull mails from the queue.
+
+# Setup AUTOTURN
+
+This method will require you to setup maidir delivery to <u>/var/indimail/autoturn/$TCPREMOTEIP/Maildir</u> as described [here](#setup-etrn-for-a-domain-mapped-to-a-fixed-ip-address). Like ETRN, AUTOTURN is very simple. It doesn't require any special software on the **part-time-host**. Also, unlike ETRN and ATRN, it doesn't require any SMTP verb to initiate it. If setup, just a connect to the SMTP port, on the **isp-server** by the **part-time-host**, should trigger mail delivery to the **part-time-host**. To setup you need to create, modify your qmail-smtpd run script to something like this
+
+```
+#!/bin/sh
+sh -c '
+  /usr/sbin/qmail-smtpd
+  cd /var/indimail/autoturn 
+  exec setlock -nx $TCPREMOTEIP/seriallock \
+    maildirsmtp $TCPREMOTEIP autoturn-$TCPREMOTEIP- $TCPREMOTEIP AutoTURN
+'
+```
+Let's say this script is named as /usr/local/bin/autoturn. Then you can do this on port port 8025 or any other port that is free. You could also modify your existing run script for port 25.
+
+```
+$ sudo tcpserver -u qmaild -vHR -l $(uname -n) 0 8025 /usr/local/bin/autoturn
+```
+
+Now any client on the **part-time-host** can connect to port 8025 on the **isp-server** and when it quits, the script will initiate SMTP to the **part-time-host** using [maildirsmtp](https://github.com/mbhangui/indimail-mta/wiki/maildirsmtp.1).
 
 # Setting up TLS for SMTP (qmail-smtpd) and Remote Delivery (qmail-remote)
 
