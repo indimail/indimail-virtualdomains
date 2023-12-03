@@ -1,5 +1,8 @@
 /*
  * $Log: remove_line.c,v $
+ * Revision 1.2  2023-12-03 16:09:24+05:30  Cprogrammer
+ * new function remove_line_p() for partial match
+ *
  * Revision 1.1  2019-04-18 08:36:17+05:30  Cprogrammer
  * Initial revision
  *
@@ -35,7 +38,7 @@
 #include "dblock.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: remove_line.c,v 1.1 2019-04-18 08:36:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: remove_line.c,v 1.2 2023-12-03 16:09:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -44,7 +47,6 @@ die_nomem()
 	strerr_warn1("remove_line: out of memory", 0);
 	_exit(111);
 }
-
 /*
  * Generic remove a line from a file utility
  * input: template to search for
@@ -55,13 +57,13 @@ die_nomem()
  *         1 if match found
  */
 int
-remove_line(char *template, char *filename, int once_only, mode_t mode)
+remove_line_int(char *template, char *filename, int once_only, mode_t mode, int partial)
 {
 	struct substdio ssin, ssout;
 	static stralloc fname = {0}, line = {0};
 	struct stat     statbuf;
 	char            inbuf[4096], outbuf[4096];
-	int             fd1, fd2, match, found;
+	int             fd1, fd2, match, found, tlen;
 #ifdef FILE_LOCKING
 	int             lockfd;
 #endif
@@ -107,6 +109,8 @@ remove_line(char *template, char *filename, int once_only, mode_t mode)
 	substdio_fdbuf(&ssin, read, fd1, inbuf, sizeof(inbuf));
 	substdio_fdbuf(&ssout, write, fd2, outbuf, sizeof(outbuf));
 	/*- pound away on the files run the search algorithm */
+	if (partial)
+		tlen = str_len(template);
 	for (found = 0;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1) {
 			strerr_warn3("remove_line: read: ", filename, ": ", &strerr_sys);
@@ -129,7 +133,7 @@ remove_line(char *template, char *filename, int once_only, mode_t mode)
 			}
 			continue;
 		}
-		if (str_diffn(line.s, template, line.len - 1)) {
+		if (str_diffn(line.s, template, partial ? tlen : line.len - 1)) {
 			if (substdio_put(&ssout, line.s, line.len)) {
 				strerr_warn3("remove_line: write error: ", fname.s, ": ", &strerr_sys);
 				close(fd2);
@@ -162,4 +166,16 @@ remove_line(char *template, char *filename, int once_only, mode_t mode)
 	 *        1 = everything went okay and we found a match
 	 */
 	return (found);
+}
+
+int
+remove_line(char *template, char *filename, int once_only, mode_t mode)
+{
+	return (remove_line_int(template, filename, once_only, mode, 0));
+}
+
+int
+remove_line_p(char *template, char *filename, int once_only, mode_t mode)
+{
+	return (remove_line_int(template, filename, once_only, mode, 1));
 }

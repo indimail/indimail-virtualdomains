@@ -1,5 +1,5 @@
 /*
- * $Id: vadddomain.c,v 1.18 2023-11-26 19:53:52+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vadddomain.c,v 1.19 2023-12-03 15:43:17+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -73,7 +73,7 @@
 #include "get_hashmethod.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.18 2023-11-26 19:53:52+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.19 2023-12-03 15:43:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -106,7 +106,7 @@ static char    *usage =
 	"  -g gid                     - sets the gid to use for this domain\n"
 	"  -f                         - sets the Domain with VFILTER capability\n"
 	"  -t                         - sets the Domain for ETRN/ATRN\n"
-	"  -T ipaddr                  - sets the Domain for AUTOTURN from IP ipaddr\n"
+	"  -T ipaddr                  - sets the Domain for ETRN/AUTOTURN from IP ipaddr\n"
 	"  -O                         - optimize adding, for bulk adds set this for all\n"
 	"                               except the last one\n"
 	"  -r len                     - generate a random password of length=len\n"
@@ -552,6 +552,8 @@ main(int argc, char **argv)
 		iclose();
 		return (err);
 	}
+	if (use_etrn)
+		return (do_posthandle(argc, argv));
 	if (users_per_level) {
 		s = dbuf;
 		s += (i = fmt_uint(s, (unsigned int) users_per_level));
@@ -606,8 +608,6 @@ main(int argc, char **argv)
 		LoadDbInfo_TXT(&total);
 	}
 #endif
-	if (use_etrn)
-		return (do_posthandle(argc, argv));
 	if (bounceEmail) {
 		if (bounceEmail[i = str_chr(bounceEmail, '@')] || *bounceEmail == '/') {
 			if (!stralloc_copyb(&tmp2, "| ", 2) || !stralloc_cats(&tmp2, PREFIX) ||
@@ -724,6 +724,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.19  2023-12-03 15:43:17+05:30  Cprogrammer
+ * exit early for post_handle for ETRN, ATRN domains
+ *
  * Revision 1.18  2023-11-26 19:53:52+05:30  Cprogrammer
  * do post handle when creating etrn, atrn domains
  *

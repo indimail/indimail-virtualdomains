@@ -23,6 +23,15 @@ Release @version@-@release@ Start XX/XX/XXXX End --/--/----
 10. iadddomain.c: fix .qmail-default for etrn, atrn domains
 11. vadddomain.c: do post handle when creating etrn, atrn domains
 12. vadddomain_handle.in: handle etrn/atrn domain creation
+- 03/12/2023
+13. add_domain_assign.c, del_control.c, deldomain.c, iadddomain.c: use same
+    logic for ETRN, ATRN domains
+14. vadddomain.c: exit early for post_handle for ETRN, ATRN domains
+15. vadddomain_handle.in: fix for ETRN, ATRN domains
+16. vdeldomain.c: use entry for autoturn in users/assign for ETRN, ATRN
+    domains
+17. remove_line.c: Added function remove_line_p() to remove line on partial
+    match
 
 * Fri Sep 08 2023 12:47:55 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.5-1.1%{?dist}
 Release 3.4.5-1.1 Start 25/04/2023 End 08/09/2023

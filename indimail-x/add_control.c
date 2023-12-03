@@ -134,7 +134,7 @@ add_control(char *domain, char *target)
 	if (remove_line(domain, filename.s, 0, INDIMAIL_QMAIL_MODE) == -1)
 		return (-1);
 	if (use_etrn) {
-		/*- Add to etrndomains file and remove duplicates  and set mode */
+		/*- Add to etrnhosts file and remove duplicates and set mode */
 		if (relative)  {
 			if (!stralloc_copys(&filename, sysconfdir) ||
 					!stralloc_append(&filename, "/") ||

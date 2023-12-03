@@ -1,5 +1,8 @@
 /*
  * $Log: vdeldomain.c,v $
+ * Revision 1.7  2023-12-03 15:44:34+05:30  Cprogrammer
+ * use entry for autoturn in users/assign for ETRN, ATRN domains
+ *
  * Revision 1.6  2023-03-22 10:42:23+05:30  Cprogrammer
  * run POST_HANDLE program (if set) with domain user uid/gid
  *
@@ -62,7 +65,7 @@
 #include "get_assign.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeldomain.c,v 1.6 2023-03-22 10:42:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeldomain.c,v 1.7 2023-12-03 15:44:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static char    *usage =
@@ -94,7 +97,7 @@ get_options(int argc, char **argv, stralloc *Domain, int *mcd_remove)
 			verbose = 1;
 			break;
 		case 'T':
-			use_etrn = 2;
+			use_etrn = 1;
 			break;
 		case 'c':
 			*mcd_remove = 1;
@@ -132,8 +135,12 @@ main(int argc, char **argv)
 
 	if (get_options(argc, argv, &Domain, &mcd_remove))
 		return (0);
-	if (!(ptr = get_assign(Domain.s, 0, &domainuid, &domaingid)))
-		strerr_die4x(1, WARN, "domain ", Domain.s, " does not exist");
+	if (use_etrn)
+		ptr = get_assign("autoturn", 0, &domainuid, &domaingid);
+	else
+		ptr = get_assign(Domain.s, 0, &domainuid, &domaingid);
+	if (!ptr)
+		strerr_die4x(1, WARN, use_etrn ? "autoturn domain " : "domain ", Domain.s, " does not exist");
 	if (!domainuid)
 		strerr_die4x(100, WARN, "domain ", Domain.s, " with uid 0");
 	uid = getuid();

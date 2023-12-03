@@ -1,5 +1,5 @@
 /*
- * $Id: iadddomain.c,v 1.3 2023-11-26 19:52:49+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iadddomain.c,v 1.4 2023-12-03 15:41:05+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -45,7 +45,7 @@
 #include "vdelfiles.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iadddomain.c,v 1.3 2023-11-26 19:52:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iadddomain.c,v 1.4 2023-12-03 15:41:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -152,10 +152,16 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 	if (use_etrn == 1) {
 		if (!stralloc_copys(&tmpbuf, dir) ||
 				!stralloc_append(&tmpbuf, "/") ||
+				!stralloc_catb(&tmpbuf, "/.qmail-", 8) ||
 				!stralloc_cats(&tmpbuf, domain) ||
-				!stralloc_catb(&tmpbuf, "/.qmail-default", 15) ||
+				!stralloc_catb(&tmpbuf, "-default", 8) ||
 				!stralloc_0(&tmpbuf))
 			die_nomem();
+		i = str_len(dir);
+		for (ptr = tmpbuf.s + i + 8; *ptr; ptr++) {
+			if (*ptr == '.')
+				*ptr = ':';
+		}
 	} else
 	if (use_etrn == 2) {
 		if (!stralloc_copys(&tmpbuf, dir) ||
@@ -168,8 +174,7 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 			if (*ptr == '.')
 				*ptr = ':';
 		}
-	} else
-	if (!use_etrn) {
+	} else {
 		if (!stralloc_copys(&tmpbuf, dir) ||
 				!stralloc_catb(&tmpbuf, "/domains/", 9) ||
 				!stralloc_cats(&tmpbuf, domain) ||
@@ -238,15 +243,16 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 		strerr_warn7("adddomain: chown(", tmpbuf.s, ", ", strnum1, ", ", strnum2, "): ", &strerr_sys);
 		return (-1);
 	}
-	if (add_domain_assign(domain, dir, uid, gid))
+	if (!use_etrn && add_domain_assign(domain, dir, uid, gid))
 		return (-1);
-	if (!use_etrn || use_etrn == 1) {
+	if (!use_etrn) {
 		if (add_control(domain, domain))
 			return (-1);
 	} else
-	if (use_etrn == 2) {
+	if (use_etrn) {
 		if (!stralloc_copyb(&tmpbuf, "autoturn-", 9) ||
-				!stralloc_cats(&tmpbuf, ipaddr) || !stralloc_0(&tmpbuf))
+				!stralloc_cats(&tmpbuf, use_etrn == 1 ? domain : ipaddr) ||
+				!stralloc_0(&tmpbuf))
 			die_nomem();
 		if (add_control(domain, tmpbuf.s))
 			return (-1);
@@ -287,6 +293,9 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 
 /*
  * $Log: iadddomain.c,v $
+ * Revision 1.4  2023-12-03 15:41:05+05:30  Cprogrammer
+ * use same logic for ETRN, ATRN domains
+ *
  * Revision 1.3  2023-11-26 19:52:49+05:30  Cprogrammer
  * fix .qmail-default for etrn, atrn domains
  *

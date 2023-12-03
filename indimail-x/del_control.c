@@ -1,5 +1,8 @@
 /*
  * $Log: del_control.c,v $
+ * Revision 1.4  2023-12-03 16:10:48+05:30  Cprogrammer
+ * use same logic for ETRN, ATRN domains
+ *
  * Revision 1.3  2023-03-25 14:15:26+05:30  Cprogrammer
  * refactored code
  *
@@ -32,7 +35,7 @@
 #include "compile_morercpthosts.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: del_control.c,v 1.3 2023-03-25 14:15:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: del_control.c,v 1.4 2023-12-03 16:10:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -111,7 +114,7 @@ del_control(char *domain)
 
 	if (!stralloc_catb(&filename, "virtualdomains\0", 15) )
 		die_nomem();
-	if (use_etrn == 2) {
+	if (use_etrn) {
 		if (!stralloc_copys(&tmp, domain) ||
 				!stralloc_catb(&tmp, ":autoturn-", 10) ||
 				!stralloc_0(&tmp))
@@ -127,7 +130,7 @@ del_control(char *domain)
 		if (errno != error_noent)
 			status = -1;
 	} else
-	if (remove_line(tmp.s, filename.s, 0, INDIMAIL_QMAIL_MODE) == -1)
+	if (remove_line_p(tmp.s, filename.s, 0, INDIMAIL_QMAIL_MODE) == -1)
 		status = -1;
 	return (status);
 }

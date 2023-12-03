@@ -1,5 +1,8 @@
 /*
  * $Log: deldomain.c,v $
+ * Revision 1.6  2023-12-03 15:40:29+05:30  Cprogrammer
+ * use same logic for ETRN, ATRN domains
+ *
  * Revision 1.5  2023-03-25 14:32:08+05:30  Cprogrammer
  * multiple bug fixes
  *
@@ -58,7 +61,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deldomain.c,v 1.5 2023-03-25 14:32:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deldomain.c,v 1.6 2023-12-03 15:40:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -130,13 +133,13 @@ deldomain(char *domain)
 		return (-1);
 	}
 	lowerit(domain);
-	if (use_etrn == 2) {
+	if (use_etrn) {
 		if (!(ptr = autoturn_dir(domain))) {
-			strerr_warn3("deldomain: domain ", domain, " does not exist", 0);
+			strerr_warn3("deldomain: autoturn domain ", domain, " does not exist", 0);
 			return (-1);
 		} else
 		if (!(tmpstr = get_assign("autoturn", 0, &uid, &gid))) {
-			strerr_warn3("deldomain: domain ", domain, " does not exist: No entry for autoturn in assign", 0);
+			strerr_warn3("deldomain: autoturn domain ", domain, " does not exist: No entry for autoturn in assign", 0);
 			return (-1);
 		}
 		if (!stralloc_copys(&tmpbuf, tmpstr) ||

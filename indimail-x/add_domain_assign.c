@@ -1,5 +1,8 @@
 /*
  * $Log: add_domain_assign.c,v $
+ * Revision 1.5  2023-12-03 15:38:52+05:30  Cprogrammer
+ * use same logic for ETRN, ATRN domains
+ *
  * Revision 1.4  2023-03-22 07:59:53+05:30  Cprogrammer
  * BUG - set uid, gid variables before creating assign file
  *
@@ -36,7 +39,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_domain_assign.c,v 1.4 2023-03-22 07:59:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: add_domain_assign.c,v 1.5 2023-12-03 15:38:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -80,11 +83,11 @@ add_domain_assign(char *domain, char *domain_base_dir, uid_t uid, gid_t gid)
 			return (-1);
 		}
 	}
-	if (use_etrn == 2  && !get_assign("autoturn", 0, 0, 0)) {
+	if (use_etrn && !get_assign("autoturn", 0, 0, 0)) {
 		get_indimailuidgid(&indimailuid, &indimailgid);
 		strnum1[i = fmt_ulong(strnum1, indimailuid)] = 0;
 		strnum2[j = fmt_ulong(strnum2, indimailgid)] = 0;
-		if (!stralloc_copyb(&tmpstr, "+autoturn-:indimail:", 20) ||
+		if (!stralloc_copyb(&tmpstr, "+autoturn-:autoturn:", 20) ||
 				!stralloc_catb(&tmpstr, strnum1, i) ||
 				!stralloc_append(&tmpstr, ":") ||
 				!stralloc_catb(&tmpstr, strnum2, j) ||
@@ -98,29 +101,28 @@ add_domain_assign(char *domain, char *domain_base_dir, uid_t uid, gid_t gid)
 			return (-1);
 		if (!OptimizeAddDomain)
 			update_newu();
-	} else {
-		strnum1[i = fmt_ulong(strnum1, uid)] = 0;
-		strnum2[j = fmt_ulong(strnum2, gid)] = 0;
-		if (!stralloc_copyb(&tmpstr, "+", 1) ||
-				!stralloc_cats(&tmpstr, domain) ||
-				!stralloc_catb(&tmpstr, "-:", 2) ||
-				!stralloc_cats(&tmpstr, domain) ||
-				!stralloc_append(&tmpstr, ":") ||
-				!stralloc_catb(&tmpstr, strnum1, i) ||
-				!stralloc_append(&tmpstr, ":") ||
-				!stralloc_catb(&tmpstr, strnum2, j) ||
-				!stralloc_append(&tmpstr, ":") ||
-				!stralloc_cats(&tmpstr, domain_base_dir) ||
-				!stralloc_catb(&tmpstr, use_etrn ? "/" : "/domains/", use_etrn ? 1 : 9) ||
-				!stralloc_cats(&tmpstr, domain) ||
-				!stralloc_catb(&tmpstr, ":-::", 4) ||
-				!stralloc_0(&tmpstr))
-			die_nomem();
-		if (update_file(filename.s, tmpstr.s, INDIMAIL_QMAIL_MODE))
-			return (-1);
-		/*- compile the assign file */
-		if (!OptimizeAddDomain)
-			update_newu();
 	}
+	strnum1[i = fmt_ulong(strnum1, uid)] = 0;
+	strnum2[j = fmt_ulong(strnum2, gid)] = 0;
+	if (!stralloc_copyb(&tmpstr, "+", 1) ||
+			!stralloc_cats(&tmpstr, domain) ||
+			!stralloc_catb(&tmpstr, "-:", 2) ||
+			!stralloc_cats(&tmpstr, domain) ||
+			!stralloc_append(&tmpstr, ":") ||
+			!stralloc_catb(&tmpstr, strnum1, i) ||
+			!stralloc_append(&tmpstr, ":") ||
+			!stralloc_catb(&tmpstr, strnum2, j) ||
+			!stralloc_append(&tmpstr, ":") ||
+			!stralloc_cats(&tmpstr, domain_base_dir) ||
+			!stralloc_catb(&tmpstr, use_etrn ? "/" : "/domains/", use_etrn ? 1 : 9) ||
+			!stralloc_cats(&tmpstr, domain) ||
+			!stralloc_catb(&tmpstr, ":-::", 4) ||
+			!stralloc_0(&tmpstr))
+		die_nomem();
+	if (update_file(filename.s, tmpstr.s, INDIMAIL_QMAIL_MODE))
+		return (-1);
+	/*- compile the assign file */
+	if (!OptimizeAddDomain)
+		update_newu();
 	return(0);
 }

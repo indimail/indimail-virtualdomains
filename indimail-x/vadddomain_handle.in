@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: vadddomain_handle.in,v 2.26 2023-11-26 19:55:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: vadddomain_handle.in,v 2.27 2023-12-03 15:43:38+05:30 Cprogrammer Exp mbhangui $
 
 domaindir=@domaindir@
 use_etrn=0
@@ -64,10 +64,11 @@ do
 	echo "Sending SIGHUP to $line"
 	@prefix@/bin/svc -h $line
 done
-# print domain information
-@prefix@/bin/vdominfo $domain
 
 if [ $use_etrn -eq 0 ] ; then
+	# print domain information
+	@prefix@/bin/vdominfo $domain
+
 	# create user for bogofilter
 	echo "Creating standard users for spam filter (bogofilter)"
 	for i in ham spam register-ham register-spam
@@ -107,8 +108,14 @@ if [ $use_etrn -eq 0 ] ; then
 else
 	echo "Domain Directory content"
 	# display domain directory
-	/bin/ls -dl $domaindir/autoturn/$domain
-	/bin/ls -al $domaindir/autoturn/$domain
+	if [ -d $domaindir/autoturn/$domain ] ; then
+		/bin/ls -dl $domaindir/autoturn/$domain
+		/bin/ls -al $domaindir/autoturn/$domain
+	else
+		d=$(grep $domain: $controldir/virtualdomains | cut -d: -f2 | sed 's/autoturn-//')
+		/bin/ls -dl $domaindir/autoturn/$d
+		/bin/ls -al $domaindir/autoturn/$d
+	fi
 	echo
 fi
 
@@ -146,6 +153,9 @@ fi
 exit 0
 #
 # $Log: vadddomain_handle.in,v $
+# Revision 2.27  2023-12-03 15:43:38+05:30  Cprogrammer
+# fix for ETRN, ATRN domains
+#
 # Revision 2.26  2023-11-26 19:55:28+05:30  Cprogrammer
 # handle etrn/atrn domain creation
 #
