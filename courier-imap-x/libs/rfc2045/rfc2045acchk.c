@@ -60,8 +60,9 @@ int	is8bitte;
 		if (p->mime_version
 
 			&& p->firstpart == 0 /* sam - don't trigger rewrites on changes to multipart headers */
+		    && !p->firstpart /* sam - don't trigger rewrites on changes to multipart headers */
+		    )
 
-			)
 		{
 			flag=1;
 		}

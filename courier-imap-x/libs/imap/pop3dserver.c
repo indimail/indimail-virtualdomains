@@ -1219,8 +1219,9 @@ uid_t  euid, uid;
 	} else
 	if (p)
 		free(p);
-	fprintf(stderr, "pop3d: %d: INFO: LOGIN, user=%s, ip=[%s], port=[%s], protocol=%s\n",
-		getpid(), authaddr, remoteip, remoteport, protocol);
+	fprintf(stderr, "pop3d: %d: INFO: LOGIN, user=%s, ip=[%s], port=[%s], protocol=%s%s\n",
+		getpid(), authaddr, remoteip, remoteport, protocol,
+					(p=getenv("POP3_TLS")) != 0 && atoi(p) ? ", stls=1" : "");
 	fflush(stderr);
 	msglist_cnt=0;
 	msglist_l=0;
