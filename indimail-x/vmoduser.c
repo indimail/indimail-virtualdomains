@@ -378,7 +378,7 @@ main(int argc, char **argv)
 #else
 	if (get_options(argc, argv, &User, &Email, &Gecos, &DateFormat, &Quota,
 			&vacation_file, &toggle, &GidFlag, &ClearFlags, &QuotaFlag,
-			&set_vacation, &docram, &clear_text, 0, 0, 0, &hash, eflag))
+			&set_vacation, &docram, &clear_text, 0, 0, 0, &hash, &eflag))
 		return (1);
 #endif
 	parse_email(Email.s, &User, &Domain);
