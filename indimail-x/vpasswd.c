@@ -220,11 +220,11 @@ main(int argc, char **argv)
 	if (get_options(argc, argv, &email, &clear_text, &encrypt_flag, &docram, &scram, &iter, &b64salt))
 		return (1);
 #else
-	if (get_options(argc, argv, &email, &clear_text, &encrypt_flag, docram, 0, 0, 0))
+	if (get_options(argc, argv, &email, &clear_text, &encrypt_flag, &docram, 0, 0, 0))
 		return (1);
 #endif
 #else
-	if (get_options(argc, argv, &email, &clear_text, &encrypt_flag, docram, 0, 0, 0))
+	if (get_options(argc, argv, &email, &clear_text, &encrypt_flag, &docram, 0, 0, 0))
 		return (1);
 #endif
 	parse_email(email, &user, &domain);
