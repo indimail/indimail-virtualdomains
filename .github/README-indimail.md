@@ -2717,7 +2717,56 @@ $ sudo tcpserver -u qmaild -vHR -l $(uname -n) 0 8025 /usr/local/bin/autoturn
 
 Now any client on the **part-time-host** can connect to port 8025 on the **isp-server** and when it quits, the script will initiate SMTP to the **part-time-host** using [maildirsmtp](https://github.com/mbhangui/indimail-mta/wiki/maildirsmtp.1).
 
-There is a better way to do **AUTOTURN** with indimail. But I will not write a detailed tutorial and is left for you to try this on your own. You can setup **domainqueue** (see chapter [Controlling Delivery Rates](#controlling-delivery-rates)). Once you have configured mails for a domain to be delivered to a specific queue, you can setup a qmail-send delivery service in down mode by using **svctool**. You can use `svc -u` to start the service and `svc -d` to stop the service when the mail queue has been processed. Instead of using qmail-send you could use [qmta-send](https://github.com/mbhangui/indimail-mta/wiki/qmta-send.8) in non-daemon mode and run 2-3 passes. You could then write a 2 liner shell script which either invokes `svc -u` command or the `qmta-send` command. The shell script can be configured to run under tcpserver. Just a connect from the client the PORT will then trigger mail deliver.
+There is another way to do **AUTOTURN** with indimail. Using the **domainqueue** control file (see chapter [Controlling Delivery Rates](#controlling-delivery-rates)), you can queue emails for a domain to any queue directory. When you want to deliver the mails, instead of using qmail-send, you could use [qmta-send](https://github.com/mbhangui/indimail-mta/wiki/qmta-send.8) in non-daemon mode and run 2-3 passes. Here is one example of setting up **AUTOTURN**
+
+```
+# create few directories
+mkdir -p /service/smtpd/variables
+mkdir -p /var/log/smtpd
+mkdir -p /var/log/tcpclient
+
+# create a queue for the AUTOTURN domain
+$ sudo queue-fix -m -s 23 -b 0 /var/indimail/queue/atrn.dom
+
+# create domainqueue control file
+# now all mails to atrn.dom will go to
+# /var/indimail/queue/atrn.dom
+echo "atrn.dom:QUEUEDIR=/var/indimail/queue/atrn.dom,BIGTODO=0,CONFSPLIT=23" > /etc/indimail/control/domainqueue
+
+# create a script which runs qmta-send which
+# will process /var/indimail/queue/atrn.dom
+(
+	echo "env - \\"
+	echo "	PATH=/bin:/usr/sbin \\"
+	echo "	QUEUEDIR=/var/indimail/queue/atrn.dom \\"
+	echo "	BIGTODO=0 \\"
+	echo "	CONFSPLIT=23 \\"
+	echo "	$sbindir/qmta-send ./Maildir/"
+) > /usr/local/bin/qmta
+chmod +x /usr/local/bin/qmta
+
+# Create a qmail-smtpd service which calls qmta-send
+# when client connects to the SMTP port and quits
+
+$ echo 1                            > /service/smtpd/variables/USE_QPWGR
+$ echo 0                            > /service/smtpd/variables/BIGTODO
+$ echo 23                           > /service/smtpd/variables/CONFSPLIT
+$ echo /var/indimail/queue/atrn.dom > /service/smtpd/variables/QUEUEDIR
+$ echo 25                           > /service/smtpd/variables/PORT
+$ echo 1                            > /service/smtpd/variables/MAKE_SEEKABLE
+$ echo "/usr/sbin/qmail-queue"      > /service/smtpd/variables/QMAILQUEUE
+
+# write the below script to provide SMTP service on port 25
+#!/bin/sh
+(
+HOSTNAME=$(uname -s)
+sudo envdir -c /service/smtpd/variables \
+	tcpserver -l $HOSTNAME -HR 0 25 sh -c "setuidgid -g qmail qmaild /usr/sbin/qmail-smtpd;/usr/local/bin/qmta"
+) > /var/log/smtpd/smtpd.log 2>&1 &
+
+# trigger AUTOTURN
+printf "QUIT\r\n" | nc smtp_host 25
+```
 
 # Setting up TLS for SMTP (qmail-smtpd) and Remote Delivery (qmail-remote)
 
