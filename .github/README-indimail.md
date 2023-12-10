@@ -2270,7 +2270,7 @@ CurrentTime: Tue, 1 Jun 2021 10:23:01 +0530
 CurrentRate: 0.0002298473 OK
 ```
 
-Now that we have configured a separate queue <b>slowq</b> for rate controlled delivery, we need to queue emails for the configured domain in this queue rather than the any of the regular indimail-mta's multiple queues. To do that we must have any entry in the control file <b>domainqueue</b> to set the <b>QUEUEDIR</b> environment variable when using <b>qmail-inject</b> for sendmail. You can create, edit, delete entries from <b>domainqueue</b> using your favourite text editor.
+Now that we have configured a separate queue <b>slowq</b> for rate controlled delivery, we need to queue emails for the configured domain in this queue rather than the any of the regular indimail-mta's multiple queues. To do that we must have any entry in the control file <b>domainqueue</b> to set the <b>QUEUEDIR</b> environment variable when using SMTP (<b>qmail-smtpd</b>). You can create, edit, delete entries from <b>domainqueue</b> using your favourite text editor. 
 
 ```
 $ cat /etc/indimail/control/domainqueue
@@ -2282,8 +2282,9 @@ $ cat /etc/indimail/control/domainqueue
 argos.indimail.org:QUEUEDIR=/var/indimail/queue/slowq
 yahoo.com:QUEUEDIR=/var/indimail/queue/slowq
 ```
-
 Once the delivery rate for a configured domain reaches the configured rate, emails will get queued but will not be picked up immediately for delivery. The <b>slowq-send</b> logs will display when this happens. As you can see, the delivery finally happens when the delivery rate becomes lesser than the configured rate.
+
+NOTE: <u>domain</u> in the example above is interpreted differently by the programs **qmail-smtpd** and **qmail-inject**. **qmail-smtpd** treats <u>domain</u> as the recipient domain while **qmail-inject** treats that as the sender domain.
 
 ```
 2021-06-05 20:42:52.803287500 new msg 932523
