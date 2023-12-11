@@ -3585,7 +3585,7 @@ Once you create the above file, <b>qmail-remote</b> will use QMTP to deliver mai
 A qmta installation using qmta-send is just like an indimail-mini installation, except that it has a single queue named <u>qmta</u>. This queue is processed by a single daemon <b>qmta-send</b>. <b>qmta-send</b> is like <b>qmail-send</b> provided by indimail-mta, except that it doesn't require multiple daemons - <b>todo-proc</b>, <b>qmail-lspawn</b>/<b>qmail-rspawn</b>, <b>qmail-clean</b>. Just like indimail-mini,
 
 * You don't require MySQL
-* You don't require daemontools, ucspi-tcp. You don't need to add anything to inetd.conf. A null client doesn't receive incoming mail.
+* You don't require daemontools, ucspi-tcp. You don't need to add anything to inetd.conf.
 
 Installation and setup is trivial if you use the RPM package (See the chapter [Installing Indimail using DNF/YUM/APT Repository](#installing-indimail-using-dnfyumapt-repository)).
 
@@ -3649,7 +3649,7 @@ $ systemctl status qmta-send
      Active: active (running) since Fri 2021-07-16 21:30:35 IST; 57s ago
    Main PID: 258421 (qmta-send)
       Tasks: 4 (limit: 9421)
-     Memory: 1.9M
+     Memory: 3.5M
      CGroup: /system.slice/qmta-send.service
              ├─258421 /usr/sbin/qmta-send -d ./Maildir/ splogger qmta-send
              ├─258422 splogger qmta-send
@@ -3667,9 +3667,31 @@ Jul 16 21:31:27 argos.indimail.org qmta-send[258422]: 1626451287.573755 delivery
 Jul 16 21:31:27 argos.indimail.org qmta-send[258422]: 1626451287.573809 status: local 0/10 remote 0/20
 Jul 16 21:31:27 argos.indimail.org qmta-send[258422]: 1626451287.573876 end msg 1049084
 $ You have mail in /home/mbhangui/Maildir
+
+At anytime if you want to view the logs you can use the journalctl command
+
+$ journalctl -u qmta-send
+Dec 08 08:28:36 argos.indimail.org systemd[1]: Started qmta-send.service - qmta Mail Transport Agent.
+Dec 08 08:28:37 argos.indimail.org qmta-send[1197]: info: qmta-send: /var/indimail/queue/qmta: conf split=23, bigtodo=0
+Dec 08 08:28:37 argos.indimail.org qmta-send[1197]: status: local 0/10 remote 0/20
+Dec 08 09:10:19 argos.indimail.org qmta-send[1197]: new msg 13096002
+Dec 08 09:10:19 argos.indimail.org qmta-send[1197]: info msg 13096002: bytes 12924 from <root@argos.indimail.org> qp 14024 uid 0
+Dec 08 09:10:19 argos.indimail.org qmta-send[1197]: local: root@argos.indimail.org root@argos.indimail.org 13096002 12924 bytes qmta
+Dec 08 09:10:19 argos.indimail.org qmta-send[1197]: starting delivery 1: msg 13096002 to local root@argos.indimail.org
+Dec 08 09:10:19 argos.indimail.org qmta-send[1197]: status: local 1/10 remote 0/20
+Dec 08 09:10:19 argos.indimail.org qmta-send[1197]: new msg 13096020
+Dec 08 09:10:19 argos.indimail.org qmta-send[1197]: info msg 13096020: bytes 13144 from <root@argos.indimail.org> qp 14030 uid 1002
+Dec 08 09:10:19 argos.indimail.org qmta-send[1197]: local: root@argos.indimail.org mbhangui 13096020 13144 bytes qmta
+Dec 08 09:10:19 argos.indimail.org qmta-send[1197]: starting delivery 2: msg 13096020 to local mbhangui@argos.indimail.org
+Dec 08 09:10:19 argos.indimail.org qmta-send[1197]: status: local 2/10 remote 0/20
+Dec 08 09:10:19 argos.indimail.org qmta-send[1197]: delivery 1: success: did_0+1+0/qp_14030/
+Dec 08 09:10:19 argos.indimail.org qmta-send[1197]: status: local 1/10 remote 0/20
+Dec 08 09:10:19 argos.indimail.org qmta-send[1197]: end msg 13096002
+Dec 08 09:10:19 argos.indimail.org qmta-send[1197]: delivery 2: success: did_1+0+2/
+Dec 08 09:10:19 argos.indimail.org qmta-send[1197]: status: local 0/10 remote 0/20
 ```
 
-As you can see above that qmta-send is very easy to setup and consumes very little resource (1.9M in this case). In the above case, /usr/sbin/MTAlspawn and /usr/sbin/MTArspawn are in fact qmta-send processes with exactly the same code as qmail-lspawn and qmail-rspawn. The only external process in the above case is the splogger command running with pid 258422. In future versions, I might make splogger too an internal process and eliminate the requirement of a separate binary. My ultimate goal for qmta-send is to subsume qmail-local and qmail-remote too.
+As you can see above that qmta-send is very easy to setup and consumes very little resource (3.5M in this case). In the above case, /usr/sbin/MTAlspawn and /usr/sbin/MTArspawn are in fact qmta-send processes with exactly the same code as qmail-lspawn and qmail-rspawn. The only external process in the above case is the splogger command running with pid 258422. In future versions, I might make splogger too an internal process and eliminate the requirement of a separate binary. My ultimate goal for qmta-send is to subsume qmail-local and qmail-remote too.
 
 Just like for indimail-mini installation, If you want to setup a SMTP service, you can setup mini-smtpd service. In case you setup SMTP service, you may want to handle tasks is dkim, virus and spam filtering. You can use QHPSI along with a virus scanner like clamav. You can also choose not to have these tasks done at the client end, but rather have it carried out by the QMQP service. For virus scanning refer to chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi). You can set QMAILQUEUE to qmail-multi, qmail-dkim, etc. However, you must remember to have qmail-qmqpc called at the end in case you change QMAILQUEUE to something other than qmail-qmqpc. If you need to setup mini-smtpd, here can be an option
 
@@ -3721,6 +3743,7 @@ If you are doing a source installation then you need to manually copy few binari
 * Following users in /etc/passwd (for source installation only).
   indimail
   alias
+  qmaill
   qmailq
   qmailr
   qmails
@@ -3730,9 +3753,10 @@ If you are doing a source installation then you need to manually copy few binari
   ```
   # useradd -r -g indimail -d /var/indimail indimail
   # useradd -M -g nofiles  -d /var/indimail/alias  -s /sbin/nologin alias
-  # useradd -M -g qmail    -d /var/indimail/       -s /sbin/nologin qmailq
-  # useradd -M -g qmail    -d /var/indimail/       -s /sbin/nologin qmailr
-  # useradd -M -g qmail    -d /var/indimail/       -s /sbin/nologin qmails
+  # useradd -M -g nofiles  -d /var/indimail        -s /sbin/nologin qmaill
+  # useradd -M -g qmail    -d /var/indimail        -s /sbin/nologin qmailq
+  # useradd -M -g qmail    -d /var/indimail        -s /sbin/nologin qmailr
+  # useradd -M -g qmail    -d /var/indimail        -s /sbin/nologin qmails
   # useradd -M -g qscand   -d /var/indimail/qscanq -G qmail,qscand -s /sbin/nologin qscand
   ```
 * Setup QMAILQUEUE environment variable to have qmail-qmqpc called instead of qmail-queue when any client injects mails in the queue (for source installation only).
@@ -3777,7 +3801,7 @@ If you are doing a source installation then you need to manually copy few binari
        Active: active (running) since Tue 2021-07-06 22:53:32 IST; 7s ago
      Main PID: 39977 (qmta-send)
         Tasks: 4 (limit: 9421)
-       Memory: 1.9M
+       Memory: 3.5M
        CGroup: /system.slice/qmta-send.service
                ├─39977 /usr/sbin/qmta-send -d ./Maildir/ splogger qmta-send
                ├─39978 splogger qmta-send
@@ -7347,6 +7371,7 @@ Some of the features available in this package
 84. Redirect remote mails using control file redirectremote
 85. configurable message filters using filterit
 86. TLS/SSL Support in tcpserver, tcpclient, dotls, qmail-smtpd, qmail-remote
+87. qmta-send - standalone mail delivery agent (like sendmail, postfix) without the security partition of qmail.
 
 # Current Compilation status of all IndiMail & related packages
 
