@@ -688,7 +688,7 @@ indimail-mta can be fine tuned and configured using environment variables (> 250
 
 4. Using control files <b>from.envrules</b>, <b>fromd.envrules</b>, <b>rcpt.envrules</b>, <b>auth.envrules</b> - These are control files used by programs like <b>qmail-smtpd</b>, <b>qmail-inject</b>. They match on the sender or recipient address. Here you can set or unset environment variables for a sender, recipient. You can also use any regular expression to match multipler sender or recipients. To know these environment variables, read the man pages for <b>qmail-smtpd</b>, <b>qmail-inject</b>, <b>spawn-filter</b>.
 
-5. Using control file <b>domainqueue</b> - This can be used to set environment variable for any recipient domain. Read the man page for <b>qmail-smtpd</b>, <b>qmail-inject</b>. You can configure <b>domainqueue</b> to have indimail-mta configure itself differently for different domains.
+5. Using control file <b>domainqueue</b> - This can be used to set environment variable for any recipient domain. Read the man page for <b>qmail-smtpd</b>, <b>qmail-inject</b>. Like **envrules**, You can configure <b>domainqueue</b> to have indimail-mta configure itself differently for different domains.
 
 6. If you have installed ezmlm / ezmlm-idx, then you have an additional directory for configuring environment variables in <u>/etc/indimail/ezmlm/global_vars</u>.
 
@@ -2284,8 +2284,6 @@ yahoo.com:QUEUEDIR=/var/indimail/queue/slowq
 ```
 Once the delivery rate for a configured domain reaches the configured rate, emails will get queued but will not be picked up immediately for delivery. The <b>slowq-send</b> logs will display when this happens. As you can see, the delivery finally happens when the delivery rate becomes lesser than the configured rate.
 
-NOTE: <u>domain</u> in the example above is interpreted differently by the programs **qmail-smtpd** and **qmail-inject**. **qmail-smtpd** treats <u>domain</u> as the recipient domain while **qmail-inject** treats that as the sender domain.
-
 ```
 2021-06-05 20:42:52.803287500 new msg 932523
 2021-06-05 20:42:52.803328500 info msg 932523: bytes 792 from <mbhangui@argos.indimail.org> qp 116584 uid 1000 slowq
@@ -2718,7 +2716,7 @@ $ sudo tcpserver -u qmaild -vHR -l $(uname -n) 0 8025 /usr/local/bin/autoturn
 
 Now any client on the **part-time-host** can connect to port 8025 on the **isp-server** and when it quits, the script will initiate SMTP to the **part-time-host** using [maildirsmtp](https://github.com/mbhangui/indimail-mta/wiki/maildirsmtp.1).
 
-There is another way to do **AUTOTURN** with indimail. Using the **domainqueue** control file (see chapter [Controlling Delivery Rates](#controlling-delivery-rates)), you can queue emails for a domain to any queue directory. When you want to deliver the mails, instead of using qmail-send, you could use [qmta-send](https://github.com/mbhangui/indimail-mta/wiki/qmta-send.8) in non-daemon mode and run 2-3 passes. Here is one example of setting up **AUTOTURN**
+There is another way to do **AUTOTURN** with indimail. Using the **domainqueue** control file (see chapter [Domain Specific queue](#domain-specific-queues)), you can queue emails for a domain to any queue directory. When you want to deliver the mails, instead of using qmail-send, you could use [qmta-send](https://github.com/mbhangui/indimail-mta/wiki/qmta-send.8) in non-daemon mode and run 2-3 passes. Here is one example of setting up **AUTOTURN**
 
 ```
 # create few directories
@@ -7220,7 +7218,7 @@ Note: todo-proc is a dedicated todo processor whose basic working comes from the
 
    tcpserver plugin allows you to load qmail-smtpd, rblsmtpd once in memory
  * IPv4 CIDR extension and support for compact IPv6 addresses and CIDR notation
- * TLS/SSL Support in ''tcpserver''
+ * TLS/SSL Support in ''tcpserver'', ''tcpclient''
  * STARTTLS extension in IMAP, STLS extension in POP3
  * Ability to restrict connection per IP (MAXPERIP)
  * run shutdown script if present on svc -d
@@ -7266,7 +7264,7 @@ Some of the features available in this package
     * Ability to do User Based Routing via SMTPROUTE environment. This gives the ability to split a domain across multiple hosts without using NFS to mount multiple filesystems on any host. One can even use a shell script, set the environment variable and deliver mails to users across multiple hosts. I call this dynamic SMTPROUTE.
     * Additionally <b>qmail-rspawn</b> has the ability to connect to MySQL and set SMTPROUTES based on values in a MySQL table. The connection to MySQL is kept open. This gives <b>qmail-rspawn</b> to do high speed user lookups in MySQL and to deliver the mail for a single domain split across multiple mail stores.
 7.  Proxy for IMAP and POP3. Allows IMAP/POP3 protocol for users in a domain to be split across multiple hosts. Also allows seamless integration of proprietary email servers with indimail.  The proxy is generic and works with any IMAP/POP3 server. The proxy comes useful when you want to move out of a headache causing mail server like x-change and want to retain the same domain on the proprietary server. In conjunction with dynamic SMTPROUTES, you can migrate all your users to indimail, without any downtime/disruption to email service. The proxy and dynamic SMTPROUTES allow you to scale your email server horizontally without using NFS across geographical locations.
-8.  ETRN, ATRN, ODMR (RFC 2645) support
+8.  ETRN, ATRN ODMR (RFC 2645), AUTOTURN support
 9.  accesslist - restrictions between mail transactions between email ids (you can decide who can send mails to whom)
 10. bodycheck - checks on header/body on incoming emails (for spam, virus security and other needs)
 11. hostaccess - provides domain, IP address pair access list control. e.g. you can define from which set of addresses mail from yahoo.com will be accepted.
@@ -7345,6 +7343,10 @@ Some of the features available in this package
     tcpserver plugin allows you to load qmail-smtpd, rblsmtpd once in memory
 81. tcpserver - enable mysql support by loading mysql library configured in /etc/indimail/control/mysql\_lib
 82. indimail-mta - enable virtual domain support by loading indimail shared library configured in /etc/indimail/control/libindimail
+83. dynamic queues using qscheduler. instead of the trigger mechanism, qmail-queue uses posix message queues to communicate with todo-proc.
+84. Redirect remote mails using control file redirectremote
+85. configurable message filters using filterit
+86. TLS/SSL Support in tcpserver, tcpclient, dotls, qmail-smtpd, qmail-remote
 
 # Current Compilation status of all IndiMail & related packages
 
