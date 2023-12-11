@@ -18,7 +18,8 @@ Table of Contents
             * [Delivery](#delivery)
                * [Retry Schedules](#retry-schedules)
             * [Cleanup](#cleanup)
-            * [Global &amp; Queue Specific Concurrency, Parallelism limits](#global--queue-specific-concurrency-parallelism-limits)
+            * [qmail-send, todo-proc detached mode](#qmail-send-todo-proc-detached-mode)
+         * [Global &amp; Queue Specific Concurrency, Parallelism limits](#global--queue-specific-concurrency-parallelism-limits)
       * [Notes](#notes)
    * [Setting Environment Variables](#setting-environment-variables)
    * [IndiMail Queue Mechanism](#indimail-queue-mechanism)
@@ -666,7 +667,11 @@ Similarly, when <b>qmail-send</b> sees a file in the queueX/pid directory that i
 
 Cleanups are not necessary if the computer crashes while <b>qmail-send</b> is delivering a message. At worst a message may be delivered twice. (There is no way for a distributed mail system to eliminate the possibility of duplication. What if an SMTP connection is broken just before the server acknowledges successful receipt of the message. The client must assume the worst and send the message again. Similarly, if the computer crashes just before <b>qmail-send</b> marks a message as DONE, the new <b>qmail-send</b> must assume the worst and send the message again. The usual solutions in the database literature e.g., keeping log files amount to saying that it's the recipient's computer's job to discard duplicate messages.)
 
-#### Global & Queue Specific Concurrency, Parallelism limits
+#### qmail-send, todo-proc detached mode
+
+**qmail-send** and **todo-proc** has the ability to enter what is known as <u>detached mode</u>. In <u>detached mode</u>, **todo-proc** stops communicating with **qmail-send** and hence new jobs are not sent to **qmail-send**. **todo-proc** continues to preprocess message and classify them. **qmail-send** continues to schedule existing delivery jobs by communicating with **qmail-lspawn** and **qmail-rspawn** for local and remote deliveries respectively. When **qmail-send** runs out of delivery jobs, it instructs **todo-proc** to go back into <u>attached mode</u>. You can make **qmail-send**, **todo-proc** enter <u>detached mode</u> by sending signal **SIGUSR1** to **qmail-send**. When **qmail-send** finishes schedling jobs for delivery, it instructs **todo-proc** to revert back to <u>attached mode</u>. You can also come out of <u>detached mode</u> by sending **SIGUSR2** to **qmail-send**. Thus sending **SIGUSR1** when there are existing delivery jobs will make **qmail-send**, **todo-proc** to enter <u>detached mode</u> but revert back to <u>attached mode</u> when **qmail-send** has no new deliveries to schedule. If there are no pending deliveries when **SIGUSR1** is issued, **qmail-send** and **todo-proc** enters what is known as <u>half-detached mode</u>. In <u>half-detached mode</u> **todo-proc** continues to process incoming mails but doesn't send the job to **qmail-send**. In <u>half-detached mode</u>, **qmail-send** will remain idle until **SIGUSR2** is issued. Entering <u>detached mode</u> is usefull when you have high injection rate.
+
+### Global & Queue Specific Concurrency, Parallelism limits
 
 <b>qmail-lspawn</b> and <b>qmail-rspawn</b> can do multiple concurrent deliveries. The default concurrency limit is 5 for local deliveries and 10 for remote deliveries. These can be increased upto a maximum of 500 by setting it in the control files <b>concurrencylocal</b> for local deliveries and <b>concurrencyremote</b> for remote deliveries. These two (like any other indimail control files) lie in <u>/etc/indimail/control</u> directory. These concurrency limits are inherited by each of the indimail's multiple queues. Additionally indimail allows you to have queue specific concurrency limits. e.g. You can have the control files <b>concurrencyl.queue2</b>, <b>concurrencyr.queue2</b> for setting local, remote concurrency specific to <u>/var/indimail/queue/queue2</u>.
 
