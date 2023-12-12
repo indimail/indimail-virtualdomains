@@ -1,5 +1,5 @@
 /*
- * $Id: iadddomain.c,v 1.4 2023-12-03 15:41:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iadddomain.c,v 1.5 2023-12-13 00:34:13+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -45,7 +45,7 @@
 #include "vdelfiles.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iadddomain.c,v 1.4 2023-12-03 15:41:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iadddomain.c,v 1.5 2023-12-13 00:34:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -151,7 +151,6 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 	}
 	if (use_etrn == 1) {
 		if (!stralloc_copys(&tmpbuf, dir) ||
-				!stralloc_append(&tmpbuf, "/") ||
 				!stralloc_catb(&tmpbuf, "/.qmail-", 8) ||
 				!stralloc_cats(&tmpbuf, domain) ||
 				!stralloc_catb(&tmpbuf, "-default", 8) ||
@@ -190,7 +189,7 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 	}
 	umask(omask);
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
-	if (use_etrn == 1) {
+	if (use_etrn == 1) { /*- etrn, atrn */
 		if (substdio_puts(&ssout, dir) ||
 				substdio_put(&ssout, "/", 1) ||
 				substdio_puts(&ssout, domain) ||
@@ -199,7 +198,7 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 			return (-1);
 		}
 	} else
-	if (use_etrn == 2) {
+	if (use_etrn == 2) { /*- autoturn */
 		if (substdio_put(&ssout, "./", 2) ||
 				substdio_puts(&ssout, ipaddr) ||
 				substdio_put(&ssout, "/Maildir/\n", 10)) {
@@ -243,7 +242,7 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 		strerr_warn7("adddomain: chown(", tmpbuf.s, ", ", strnum1, ", ", strnum2, "): ", &strerr_sys);
 		return (-1);
 	}
-	if (!use_etrn && add_domain_assign(domain, dir, uid, gid))
+	if (add_domain_assign(use_etrn == 0 ? domain : NULL, dir, uid, gid))
 		return (-1);
 	if (!use_etrn) {
 		if (add_control(domain, domain))
@@ -293,6 +292,9 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 
 /*
  * $Log: iadddomain.c,v $
+ * Revision 1.5  2023-12-13 00:34:13+05:30  Cprogrammer
+ * call add_domain_assign for etrn/atrn domains
+ *
  * Revision 1.4  2023-12-03 15:41:05+05:30  Cprogrammer
  * use same logic for ETRN, ATRN domains
  *

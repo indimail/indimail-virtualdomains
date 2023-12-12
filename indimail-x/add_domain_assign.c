@@ -1,5 +1,8 @@
 /*
  * $Log: add_domain_assign.c,v $
+ * Revision 1.6  2023-12-13 00:32:10+05:30  Cprogrammer
+ * fixed dir, uid, gid for autoturn entry in assign file
+ *
  * Revision 1.5  2023-12-03 15:38:52+05:30  Cprogrammer
  * use same logic for ETRN, ATRN domains
  *
@@ -39,7 +42,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_domain_assign.c,v 1.5 2023-12-03 15:38:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: add_domain_assign.c,v 1.6 2023-12-13 00:32:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -84,16 +87,15 @@ add_domain_assign(char *domain, char *domain_base_dir, uid_t uid, gid_t gid)
 		}
 	}
 	if (use_etrn && !get_assign("autoturn", 0, 0, 0)) {
-		get_indimailuidgid(&indimailuid, &indimailgid);
-		strnum1[i = fmt_ulong(strnum1, indimailuid)] = 0;
-		strnum2[j = fmt_ulong(strnum2, indimailgid)] = 0;
+		strnum1[i = fmt_ulong(strnum1, uid)] = 0;
+		strnum2[j = fmt_ulong(strnum2, gid)] = 0;
 		if (!stralloc_copyb(&tmpstr, "+autoturn-:autoturn:", 20) ||
 				!stralloc_catb(&tmpstr, strnum1, i) ||
 				!stralloc_append(&tmpstr, ":") ||
 				!stralloc_catb(&tmpstr, strnum2, j) ||
 				!stralloc_append(&tmpstr, ":") ||
-				!stralloc_cats(&tmpstr, QMAILDIR) ||
-				!stralloc_catb(&tmpstr, "/autoturn:-::", 13) ||
+				!stralloc_cats(&tmpstr, domain_base_dir) ||
+				!stralloc_catb(&tmpstr, ":-::", 4) ||
 				!stralloc_0(&tmpstr))
 			die_nomem();
 		/*- update the file and add the above line and remove duplicates */
@@ -102,6 +104,8 @@ add_domain_assign(char *domain, char *domain_base_dir, uid_t uid, gid_t gid)
 		if (!OptimizeAddDomain)
 			update_newu();
 	}
+	if (!domain)
+		return (0);
 	strnum1[i = fmt_ulong(strnum1, uid)] = 0;
 	strnum2[j = fmt_ulong(strnum2, gid)] = 0;
 	if (!stralloc_copyb(&tmpstr, "+", 1) ||
@@ -124,5 +128,5 @@ add_domain_assign(char *domain, char *domain_base_dir, uid_t uid, gid_t gid)
 	/*- compile the assign file */
 	if (!OptimizeAddDomain)
 		update_newu();
-	return(0);
+	return (0);
 }
