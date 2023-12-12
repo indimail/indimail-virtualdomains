@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.19 2023-11-13 08:47:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.20 2023-12-13 00:31:27+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -1114,12 +1114,12 @@ check_mail()
 	# $2 - Maildir
 	count=0
 	ret=1
+	mail_file=""
 	while true
 	do
 		mcount=$($sudo $setuidgid $1 ls $2/new 2>/dev/null | wc -l)
 		if [ $mcount -gt 0 ] ; then
 			mail_file=$($sudo $setuidgid $1 ls -lt $2/new 2>/dev/null|head -2|tail -1|awk '{print $9}')
-			#echo "Got Mail $mail_file"
 			subject=$($sudo sh -c "822header -I Subject < $2/new/$mail_file")
 			echo $subject > $testdir/subject.tmp
 			if [ $# -eq 2 ] ; then
@@ -1129,7 +1129,6 @@ check_mail()
 		fi
 		sleep 1
 		count=$(expr "$count" + 1)
-		#echo count=$count
 		if [ $count -gt 5 ] ; then
 			#echo "Failed to receive Mail" 1>&2
 			return 1
@@ -1179,7 +1178,7 @@ do_smtp_auth_swaks()
 				fi
 				;;
 			esac
-			swaks -S --tls --to $user@$HOSTNAME --from $1 --server localhost --port $smtp_port -a $i -au $1 -ap "$pass"
+			swaks -S --tls --to $user@$HOSTNAME --from $1 --server localhost --port $smtp_port -a $i -au $1 -ap "$pass" 2>/dev/null
 			if [ $? -ne 0 ] ; then
 				fcount=$(expr $fcount + 1)
 				if [ $prompt -eq 1 ] ; then
@@ -2223,6 +2222,7 @@ do_cleanup()
 	$sudo /bin/rm -rf $testdir/mail
 	$sudo /bin/rm -f $testdir/subject.tmp
 	$sudo /bin/rm -f $testdir/.vacation.msg
+	$sudo /bin/rm -rf $qmaildir/autoturn
 }
 
 do_autoresponder()
@@ -3161,6 +3161,173 @@ test_mysql()
 	fi
 }
 
+test_atrn()
+{
+	tm1=$(date +"%s.%4N")
+	$sudo env - \
+		PATH=/bin:/usr/bin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		DOMAINDIR=$qmaildir \
+		SERVICEDIR=$servicedir \
+		vadddomain -u qmaild -t atrn.dom > $logdir/setup/vadddomain.log
+	if [ $? -eq 0 ] ; then
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing command vadddomain atrn domain succeeded %62s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		failed_code=1
+		fcount=$(expr $fcount + 1)
+		if [ $prompt -eq 1 ] ; then
+			less $logdir/setup/vadddomain.log
+		fi
+		echo "  testing command vadddomain atrn domain failed"
+		[ -z "$failed" ] && failed="vadddomain-atrn" || failed="$failed, vadddomain-atrn"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	do_qmail_inject $user $user@$HOSTNAME test@atrn.dom  # send email to test@atrn.dom from $user@$HOSTNAME
+	check_mail qmaild $qmaildir/autoturn/atrn.dom/Maildir 1
+	if [ $? -ne 0 ] ; then
+		echo "Failed to receive mail in $qmaildir/autoturn/atrn.dom/Maildir"
+		fcount=$(expr $fcount + 1)
+		if [ $prompt -eq 1 ] ; then
+			less $logdir/qmail-send/current
+		fi
+		echo "  testing receive mail for atrn domain failed"
+		[ -z "$failed" ] && failed="inject-atrn" || failed="$failed, inject-atrn"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	mailfile1=$mail_file
+	tm1=$(date +"%s.%4N")
+	$sudo setuidgid indimail env - \
+		PATH=/bin:/usr/bin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		DOMAINDIR=$qmaildir \
+		SERVICEDIR=$servicedir \
+	vatrn -i atrn.dom $testuser1
+	if [ $? -eq 0 ] ; then
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing command vatrn access atrn domain succeeded %60s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		echo "failed to give access for atrn.dom to $testuser1"
+		fcount=$(expr $fcount + 1)
+		echo "  testing command vatrn failed"
+		[ -z "$failed" ] && failed="vatrn-atrn" || failed="$failed, vatrn-atrn"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	(
+	echo "set postmaster \"$user\""
+	echo "set bouncemail"
+	echo "set no spambounce"
+	echo "set no softbounce"
+	echo "set properties \"\""
+	echo "poll 127.0.0.1 with proto ODMR port $smtp_port timeout 120 interval 1 and options no dns"
+	echo "user '$testuser1' there with password '$password1' smtphost 127.0.0.1/$smtp_port options"
+	echo "	no rewrite forcecr pass8bits fetchlimit 50 batchlimit 250 expunge 50"
+   	echo "	fetchdomains atrn.dom"
+	) > $sysconfdir/fetchmailrc
+	chmod 600 $sysconfdir/fetchmailrc
+	echo 1 > $testdir/service/smtpd/variables/ODMR
+	$sudo svc -r $servicedir/smtpd
+	check_service smtpd 3
+	tm1=$(date +"%s.%4N")
+	fetchmail -f $sysconfdir/fetchmailrc -s
+	ret1=$?
+	mail_file=""
+	if [ $ret1 -eq 0 ] ; then
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing command fetchmail fetch atrn domain succeeded %57s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		echo "fetchmail failed"
+		fcount=$(expr $fcount + 1)
+		if [ $prompt -eq 1 ] ; then
+			less $logdir/qmail-send/current
+		fi
+		echo "  testing command fetchmail atrn domain failed"
+		[ -z "$failed" ] && failed="fetchmail-atrn" || failed="$failed, fetchmail-atrn"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	check_mail qmaild $qmaildir/autoturn/atrn.dom/Maildir 1
+	ret1=$?
+	mailfile2=$mail_file
+	if [ $ret1 -eq 0 -a -n $mailfile1 -a -n $mailfile2 -a "$mailfile1" != "$mailfile2" ] ; then
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing ATRN (ODMR) succeeded %81s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		echo "fetchmail failed"
+		fcount=$(expr $fcount + 1)
+		if [ $prompt -eq 1 ] ; then
+			less $logdir/qmail-send/current
+		fi
+		echo "  testing ATRN (ODMR) failed"
+		[ -z "$failed" ] && failed="receive-mail-atrn" || failed="$failed, receive-mail-atrn"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	tm1=$(date +"%s.%4N")
+	$sudo env - \
+		PATH=/bin:/usr/bin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		DOMAINDIR=$qmaildir \
+		SERVICEDIR=$servicedir \
+	vdeldomain -T atrn.dom > /dev/null
+	if [ $? -eq 0 ] ; then
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing command vdeldomain atrn domain succeeded %62s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		echo "vdeldomain atrn domain failed"
+		fcount=$(expr $fcount + 1)
+		if [ $prompt -eq 1 ] ; then
+			less $logdir/qmail-send/current
+		fi
+		echo "  testing command vdeldomain atrn domain failed"
+		[ -z "$failed" ] && failed="vdeldomain-atrn" || failed="$failed, vdeldomain-atrn"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	tm1=$(date +"%s.%4N")
+	$sudo setuidgid indimail env - \
+		PATH=/bin:/usr/bin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		DOMAINDIR=$qmaildir \
+		SERVICEDIR=$servicedir \
+	vatrn -d atrn.dom $testuser1
+	if [ $? -eq 0 ] ; then
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing command vatrn delete access atrn domain succeeded %53s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		echo "vatrn delete atrn domain access failed"
+		fcount=$(expr $fcount + 1)
+		if [ $prompt -eq 1 ] ; then
+			less $logdir/qmail-send/current
+		fi
+		echo "  testing command vatrn delete atrn domain access failed"
+		[ -z "$failed" ] && failed="vdeldomain-atrn" || failed="$failed, vdeldomain-atrn"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+}
+
 ## end getopt
 tty -s && stty sane
 ID=$(id -u)
@@ -3174,7 +3341,7 @@ current_dir=$(pwd)
 if [ -f $testdir/itotal.count ] ; then
 	total_tests=$(cat $testdir/itotal.count)
 else
-	total_tests=1096
+	total_tests=1099
 fi
 if [ -x /usr/bin/mariadb ] ; then
 	mysql=/usr/bin/mariadb
@@ -3203,10 +3370,12 @@ if [ -f /etc/nsswitch.conf ] ; then
 fi
 delete_user $testuser1
 
-printf "\r%126s\n" " "
 create_plain_user $testuser1 $password1 >/dev/null 2>&1
 create_plain_user $testuser2 $password2 >/dev/null 2>&1
 create_plain_user $testuser3 $password3 >/dev/null 2>&1
+test_atrn
+
+printf "\r%126s\n" " "
 do_vfilter
 
 printf "\r%126s\n" " "
@@ -3266,6 +3435,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.20  2023-12-13 00:31:27+05:30  Cprogrammer
+# added tests for ATRN
+#
 # Revision 1.19  2023-11-13 08:47:33+05:30  Cprogrammer
 # updated total test count
 #
