@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.142 2023-10-06 18:13:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.143 2023-12-13 08:41:56+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -315,7 +315,7 @@ fi
 install -p -m 0644 doc/COPYING-indimail %{buildroot}%{_prefix}/share/doc/indimail-devel/COPYING
 install -p -m 0644 doc/COPYING-indimail %{buildroot}%{_prefix}/share/doc/libindimail/COPYING
 install -m 0644 %{name}-rpm.info %{buildroot}%{sysconfdir}/%{name}-rpm.info
-/bin/rm -f %{name}-rpm.info
+%{__rm} -f %{name}-rpm.info
 for i in eps cdb indimail
 do
   %{__rm} -f %{buildroot}%{_libdir}/lib"$i".la
@@ -464,11 +464,11 @@ done
 
 %attr(444,root,root)                              %{sysconfdir}/%{name}-release
 %attr(444,root,root)                              %{sysconfdir}/%{name}-rpm.info
-%attr(444,root,root) %config(noreplace)           %{sysconfdir}/cronlist.i
-%attr(444,root,root) %config(noreplace)           %{sysconfdir}/indimail.mrtg.cfg
-%attr(444,root,root) %config(noreplace)           %{sysconfdir}/headerlist
-%attr(444,root,root) %config(noreplace)           %{sysconfdir}/indimail.settings
-%attr(444,root,root) %config(noreplace)           %{sysconfdir}/indimail.schema
+%attr(444,root,root)  %config(noreplace)          %{sysconfdir}/cronlist.i
+%attr(444,root,root)  %config(noreplace)          %{sysconfdir}/indimail.mrtg.cfg
+%attr(444,root,root)  %config(noreplace)          %{sysconfdir}/headerlist
+%attr(444,root,root)  %config(noreplace)          %{sysconfdir}/indimail.settings
+%attr(444,root,root)  %config(noreplace)          %{sysconfdir}/indimail.schema
 
 %attr(644,root,root)  %config(noreplace)          %{sysconfdir}/indimail.te
 %attr(644,root,root)  %config(noreplace)          %{sysconfdir}/roundcubemail.te
@@ -1073,7 +1073,7 @@ if [ -d %{_prefix}/lib/tmpfiles.d -a -n "%{_rundir}" ] ; then
   else
     cmp -s /tmp/indimail/indimail.conf.$$ %{_prefix}/lib/tmpfiles.d/indimail.conf 2>/dev/null
     if [ $? -eq 0 ] ; then
-      rm -f /tmp/indimail/indimail.conf.$$
+      %{__rm} -f /tmp/indimail/indimail.conf.$$
     else
       mv /tmp/indimail/indimail.conf.$$ %{_prefix}/lib/tmpfiles.d/indimail.conf 
     fi
