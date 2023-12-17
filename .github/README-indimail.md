@@ -4291,13 +4291,16 @@ env - PATH="/usr/bin" tcpserver -H -R -x /etc/indimail/tcp/tcp.smtp.cdb \
 IndiMail uses -x option to tcpserver and hence you need not bother about the above line. You however need to edit /etc/indimail/tcp.smtp and put in lines for all static IP's that you will always want to relay access to.
 
 ```
-127.0.0.:allow,RELAYCLIENT=””
-10.1.1.:allow,RELAYCLIENT=””
+127.0.0.:allow,RELAYCLIENT=""
+::ffff:127.0.0.:allow,RELAYCLIENT=""
+::1:allow,RELAYCLIENT=""
+10.1.1.:allow,RELAYCLIENT=""
+::ffff:10.147.20.102:allow,RELAYCLIENT=""
 ```
 
-The above lines will cause **RELAYCLIENT** environment variable to be set for localhost and all machines on the 10.1.1 class and hence allow to relay through. Remember that any user on hosts on 10.1.1 class will be able to relay mails. You many not want this. The line having 127.0.0. will allow any client on the IndiMail host to use SMTP and relay mails.
+The above lines will cause **RELAYCLIENT** environment variable to be set for localhost, all machines on the 10.1.1 class and the IP 10.147.20.102. Haveing RELAYCLIENT environment variable allows mails to relay through. Remember that any user on hosts on 10.1.1 class will be able to relay mails. You many not want this. The lines having 127.0.0., ::1 will allow any client on the IndiMail host (localhost) to use SMTP and relay mails. You can see some IPv4 addresses prefixed with `::ffff`. `::ffff` is a subnet prefix for IPv4 addresses that are placed inside an IPv6 space. It is the IPv6 prefix for an IPv4 address mapped into IPv6 space. It means that it is an IPv6 socket that is used for IPv4 communication. You need to do this if you are using indimail's ipv6 [tcpserver](https://github.com/mbhangui/indimail-mta/wiki/tcpserver.1). However this prefix shouldn't be used if you are running tcpserver in ipv4 mode (tcpserver -4).
 
-If you add any IP to tcp.smtp, you have to rebuild a cdb database tcp.smtp.cdb. You can run the following command
+If you modify the tcp.smtp file, you have to rebuild a cdb database tcp.smtp.cdb. You can run the following command
 
 `$ sudo /usr/bin/qmailctl cdb`
 
