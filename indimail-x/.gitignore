@@ -14,7 +14,7 @@ cputime
 crc
 crcdiff
 create_services
-cronlist.i
+indimail.cron
 incrypt
 dbinfo
 dbinfo.8

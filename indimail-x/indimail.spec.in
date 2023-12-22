@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.143 2023-12-13 08:41:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.144 2023-12-23 00:12:33+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -464,7 +464,7 @@ done
 
 %attr(444,root,root)                              %{sysconfdir}/%{name}-release
 %attr(444,root,root)                              %{sysconfdir}/%{name}-rpm.info
-%attr(444,root,root)  %config(noreplace)          %{sysconfdir}/cronlist.i
+%attr(444,root,root)  %config(noreplace)          %{sysconfdir}/indimail.cron
 %attr(444,root,root)  %config(noreplace)          %{sysconfdir}/indimail.mrtg.cfg
 %attr(444,root,root)  %config(noreplace)          %{sysconfdir}/headerlist
 %attr(444,root,root)  %config(noreplace)          %{sysconfdir}/indimail.settings
@@ -1427,9 +1427,9 @@ fi
 # selinux
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=iselinux | tai64n | tai64nlocal
 
-if [ -f %{sysconfdir}/cronlist.i -a -d %{_sysconfdir}/cron.d ] ; then
+if [ -f %{sysconfdir}/indimail.cron -a -d %{_sysconfdir}/cron.d ] ; then
   log_it "adding cron entries"
-  %{__cp} %{sysconfdir}/cronlist.i %{_sysconfdir}/cron.d
+  %{__cp} %{sysconfdir}/indimail.cron %{_sysconfdir}/cron.d
 fi
 
 if [ -f %{libexecdir}/iupgrade.sh ] ; then
@@ -1600,7 +1600,7 @@ fi
 
 if [ -d %{_sysconfdir}/cron.d ] ; then
   log_it "removing cron entries"
-  %{__rm} -f %{_sysconfdir}/cron.d/cronlist.i
+  %{__rm} -f %{_sysconfdir}/cron.d/indimail.cron
 fi
 
 log_it "removing logs"
