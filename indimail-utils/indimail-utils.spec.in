@@ -14,6 +14,7 @@
 %global _hardened_build    1
 %endif
 
+#global nodebug            1
 %if %{defined nodebug}
 %global debug_package %{nil}
 %endif
@@ -99,7 +100,7 @@ For more details visit %{url}
 
 %prep
 %{__mkdir_p} %{_builddir}/%{name}-%{version}
-cd %{name}-%{version}
+cd %{_builddir}/%{name}-%{version}
 for i in altermime-%{altermime_version} ripmime-%{ripmime_version} \
 fortune-%{fortune_version} mpack-%{mpack_version} flash-%{flash_version}
 do
@@ -121,6 +122,7 @@ do
 done
 
 %build
+cd %{_builddir}/%{name}-%{version}
 (
 echo "---------------- INFORMATION ------------------------"
 echo target         %_target
@@ -159,7 +161,7 @@ do
 done
 
 %install
-%{__mkdir_p} %{buildroot}%{_prefix}
+cd %{_builddir}/%{name}-%{version}
 for i in altermime-%{altermime_version} ripmime-%{ripmime_version} \
 fortune-%{fortune_version} mpack-%{mpack_version} flash-%{flash_version}
 do
@@ -200,14 +202,10 @@ if [ -x /usr/bin/chrpath ] ; then
 fi
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
-
-if [ -x /bin/touch ] ; then
-  TOUCH=/bin/touch
-elif [ -x /usr/bin/touch ] ; then
-  TOUCH=/usr/bin/touch
-else
-  TOUCH=/bin/touch
-fi
+%if %{undefined nodebug}
+  /bin/chmod -R 0755 %{buildroot}%{_prefix}/bin %{buildroot}%{_prefix}/sbin
+  ln -sf %{_builddir}/%{name}-%{version}/debugsourcefiles.list %{_builddir}/debugsourcefiles.list
+%endif
 
 %files
 %defattr(-, root, root,-)

@@ -7,3 +7,5 @@ config.in~
 config.guess~
 config.sub~
 configure.ac~
+.repo-build
+.repo-build.tmp

@@ -14,6 +14,7 @@
 %global _hardened_build    1
 %endif
 
+#global nodebug            1
 %if %{defined nodebug}
 %global debug_package %{nil}
 %endif
@@ -37,10 +38,8 @@
 # in the prep section have a problem in enabling debuginfo.
 # This isn't documented clearly anywhere. A workaround is
 # to define buildsubdir
-%if 1
 %if %{undefined nodebug}
 %global buildsubdir        %{name}-%{version}
-%endif
 %endif
 
 %if %build_on_obs == 1
@@ -241,9 +240,9 @@ touch %{buildroot}%{logdir}/pwdlookup/current
 # Compress the man pages
 find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %if %{undefined nodebug}
-chmod -R 755 %{buildroot}%{_prefix}/sbin
-chmod -R 755 %{buildroot}%{_libdir}
-chmod -R 755 %{buildroot}/%{pam_moduledir}
+  chmod -R 755 %{buildroot}%{_prefix}/sbin %{buildroot}%{_libdir} \
+    %{buildroot}/%{pam_moduledir}
+  ln -sf %{_builddir}/%{name}-%{version}/debugsourcefiles.list %{_builddir}/debugsourcefiles.list
 %endif
 
 %files
@@ -294,6 +293,13 @@ chmod -R 755 %{buildroot}/%{pam_moduledir}
 
 %attr(755,root,root)                    %{_libdir}/libnss_nssd.so.2.0.0
                                         %{_libdir}/libnss_nssd.so.2
+
+%clean
+%if %{undefined nodebug}
+%{__rm} -f %{_builddir}/debugfiles.list %{_builddir}/debuglinks.list \
+  %{_builddir}/debugsourcefiles.list %{_builddir}/debugsources.list \
+  %{_builddir}/elfbins.list
+%endif
 
 ### SCRIPTLET ###############################################################################
 %pretrans

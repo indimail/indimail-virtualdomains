@@ -20,7 +20,7 @@
 %global _hardened_build    1
 %endif
 
-%global xxxxxxxx           1
+#global nodebug            1
 %if %{defined nodebug}
 %global debug_package %{nil}
 %endif
@@ -44,10 +44,8 @@
 # in the prep section have a problem in enabling debuginfo.
 # This isn't documented clearly anywhere. A workaround is
 # to define buildsubdir
-%if 1
 %if %{undefined nodebug}
 %global buildsubdir        %{name}-%{version}
-%endif
 %endif
 
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7 || %{defined mgaversion} || %{defined amzn} || %{defined openEuler} || ( 0%{?sle_version} >= 150400 && 0%{?is_opensuse} )
@@ -331,6 +329,7 @@ done
 %if %{undefined nodebug}
   /bin/chmod -R 0755 %{buildroot}%{_prefix}/bin %{buildroot}%{_prefix}/sbin \
     %{buildroot}%{libexecdir}
+  ln -sf %{_builddir}/%{name}-%{version}/debugsourcefiles.list %{_builddir}/debugsourcefiles.list
 %endif
 
 %files
