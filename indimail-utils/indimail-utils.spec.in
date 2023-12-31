@@ -205,6 +205,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %if %{undefined nodebug}
   /bin/chmod -R 0755 %{buildroot}%{_prefix}/bin %{buildroot}%{_prefix}/sbin
   ln -sf %{_builddir}/%{name}-%{version}/debugsourcefiles.list %{_builddir}/debugsourcefiles.list
+  ln -sf %{_builddir}/%{name}-%{version}/debugsources.list %{_builddir}/debugsources.list
 %endif
 
 %files
