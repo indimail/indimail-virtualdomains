@@ -203,12 +203,12 @@ Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 IndiMail is a messaging Platform comprising of multiple software packages including
 
-[**indimail-virtualdomains**](https://github.com/mbhangui/indimail-virtualdomains "indimail-virtualdomains")
+[**indimail-virtualdomains**](https://github.com/indimail/indimail-virtualdomains "indimail-virtualdomains")
 
-* [virtualdomains](https://github.com/mbhangui/indimail-virtualdomains "indimail-virtualdomains")
+* [virtualdomains](https://github.com/indimail/indimail-virtualdomains "indimail-virtualdomains")
 * [Email Parsing System](http://www.inter7.com/software/ "eps")
 
-[**indimail-mta**](https://github.com/mbhangui/indimail-mta "indimail-mta")
+[**indimail-mta**](https://github.com/indimail/indimail-mta "indimail-mta")
 
 * [qmail](http://cr.yp.to/qmail.html "qmail")
 * [daemontools](https://cr.yp.to/daemontools.html "daemontools")
@@ -222,36 +222,36 @@ IndiMail is a messaging Platform comprising of multiple software packages includ
 * [dkim](https://en.wikipedia.org/wiki/DomainKeys_Identified_Mail "DKIM")
 * [SRS2](https://en.wikipedia.org/wiki/Sender_Rewriting_Scheme "SRS2")
 
-[**ezmlm-idx**](https://github.com/mbhangui/ezmlm-idx "ezmlm-idx")
+[**ezmlm-idx**](https://github.com/indimail/ezmlm-idx "ezmlm-idx")
 
 * [ezmlm-idx mailing list manager](https://untroubled.org/ezmlm/ "ezmlm-idx")
 
-[indimail-access](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-access "indimail-access")
+[indimail-access](https://github.com/indimail/indimail-virtualdomains/tree/master/indimail-access "indimail-access")
 
 * [courier IMAP/POP3](https://www.courier-mta.org/imap/ "courier-imap")
 * [fetchmail](https://www.fetchmail.info "fetchmail")
 
-[**indimail-auth**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-auth "indimail-auth")
+[**indimail-auth**](https://github.com/indimail/indimail-virtualdomains/tree/master/indimail-auth "indimail-auth")
 
-* [nssd - providing Name Service Switch](https://github.com/mbhangui/indimail-virtualdomains/tree/master/nssd-x "nssd")
-* [pam-multi - PAM modules for flexible, configurable authentication methods](https://github.com/mbhangui/indimail-virtualdomains/tree/master/pam-multi-x "pam-multi")
+* [nssd - providing Name Service Switch](https://github.com/indimail/indimail-virtualdomains/tree/master/nssd-x "nssd")
+* [pam-multi - PAM modules for flexible, configurable authentication methods](https://github.com/indimail/indimail-virtualdomains/tree/master/pam-multi-x "pam-multi")
 
-[**indimail-utils**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils "indimail-utils")
+[**indimail-utils**](https://github.com/indimail/indimail-virtualdomains/tree/master/indimail-utils "indimail-utils")
 
-* Utilities ([altermime](http://pldaniels.com/altermime/ "altermime"), [ripMIME](https://pldaniels.com/ripmime/ "ripmime"), [mpack](https://github.com/mbhangui/indimail-virtualdomains/tree/master/mpack-x "mpack"), [fortune](https://en.wikipedia.org/wiki/Fortune_\(Unix\ "fortune") and [flash](https://github.com/mbhangui/indimail-virtualdomains/tree/master/flash-x "flash"))
-* [logalert](https://github.com/mbhangui/indimail-virtualdomains/tree/master/logalert-x "logalert")
+* Utilities ([altermime](http://pldaniels.com/altermime/ "altermime"), [ripMIME](https://pldaniels.com/ripmime/ "ripmime"), [mpack](https://github.com/indimail/indimail-virtualdomains/tree/master/mpack-x "mpack"), [fortune](https://en.wikipedia.org/wiki/Fortune_\(Unix\ "fortune") and [flash](https://github.com/indimail/indimail-virtualdomains/tree/master/flash-x "flash"))
+* [logalert](https://github.com/indimail/indimail-virtualdomains/tree/master/logalert-x "logalert")
 
-[**indimail-spamfilter**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/bogofilter-x "bogofilter")
+[**indimail-spamfilter**](https://github.com/indimail/indimail-virtualdomains/tree/master/bogofilter-x "bogofilter")
 
 * [bogofilter - A Bayesian Spam Filter](https://bogofilter.sourceforge.io/ "bogofilter")
 
-Core **IndiMail** consists of three main packages - [indimail-mta](https://github.com/mbhangui/indimail-mta "indimail-mta"), [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains "indimail-virtualdomains") and [indimail-access](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-access "indimail-access")
+Core **IndiMail** consists of three main packages - [indimail-mta](https://github.com/indimail/indimail-mta "indimail-mta"), [indimail-virtualdomains](https://github.com/indimail/indimail-virtualdomains "indimail-virtualdomains") and [indimail-access](https://github.com/indimail/indimail-virtualdomains/tree/master/indimail-access "indimail-access")
 
 * **indimail-mta** is a re-engineered version of [qmail](http://cr.yp.to/qmail.html "qmail"). **indimail-mta** provides you a MTA with all the features and functionality of **[qmail](http://cr.yp.to/qmail.html "qmail")** plus many additional features. <b>indimail-mta</b> is an independent package. You can install it without requiring <b>indimail-virtualdomains</b> or <b>indimail-access</b>.
 * **indimail-virtualdomains** provides you tools to create and manage multiple virtual domains with its own set of users, who can send and receive mails. <b>indimail-virtualdomains</b> is dependent on <b>indimail-mta</b> to function.
 * **indimail-access** provides you IMAP/POP3 protocols using [courier-imap](https://www.courier-mta.org/imap/) & mail retrieval using [fetchmail](https://www.fetchmail.info/) program. It allows the users to access their emails delivered by <b>indimail-mta</b> locally on a host to users in /etc/passwd or to <b>virtual users</b> on a host (or multiple hosts) on the network having <b>virtual domains</b> created by <b>indimail-virtualdomains</b>. It is not a **MUST** that you have to install the indimail-access package. Since indimail-mta provides multiple authentication methods, protocols, PAM, NSS modules/plugins, you should be able to use your favourite IMAP/POP3 server with indimail.
 
-This document will refer to **IndiMail** as a combined package of indimail-virtualdomains, indimail-mta & other packages namely indimail-access, indimail-auth, indimail-utils, indimail-spamfilter. This is a reference document and mostly deals with the design of IndiMail. The setup and configuration examples, the usernames and passwords used are for demonstration purposes only. The setup and configuration is mostly automated when you install indimail using dnf, yum, apt-get, pkg etc or when you run the `create_services` script after you complete the build in each of the source directories (see [IndiMail Setup and Configuration](https://github.com/mbhangui/indimail-virtualdomains#setup--configuration)). Most of the setup is done using a super script named [svctool(8)](https://github.com/mbhangui/indimail-mta/wiki/svctool.8). The primary purpose of this document is to know indimail with intimate details while having fun trying out new commands. You will do well if you especially know how UNIX works. This is not a user guide and I suspect that the document will be incomprehensible for those who don't know UNIX and have been stuck their entire lives using GUIs surfing the web, creating documents, power point presentation for excel sheets. But if you are someone who knows what vt100, tvi955 means and not just the gnome-terminal, you will have some fun here.
+This document will refer to **IndiMail** as a combined package of indimail-virtualdomains, indimail-mta & other packages namely indimail-access, indimail-auth, indimail-utils, indimail-spamfilter. This is a reference document and mostly deals with the design of IndiMail. The setup and configuration examples, the usernames and passwords used are for demonstration purposes only. The setup and configuration is mostly automated when you install indimail using dnf, yum, apt-get, pkg etc or when you run the `create_services` script after you complete the build in each of the source directories (see [IndiMail Setup and Configuration](https://github.com/indimail/indimail-virtualdomains#setup--configuration)). Most of the setup is done using a super script named [svctool(8)](https://github.com/indimail/indimail-mta/wiki/svctool.8). The primary purpose of this document is to know indimail with intimate details while having fun trying out new commands. You will do well if you especially know how UNIX works. This is not a user guide and I suspect that the document will be incomprehensible for those who don't know UNIX and have been stuck their entire lives using GUIs surfing the web, creating documents, power point presentation for excel sheets. But if you are someone who knows what vt100, tvi955 means and not just the gnome-terminal, you will have some fun here.
 
 When you install indimail-virtualdomains, a shared library from the package is dynamically loaded by indimail-mta to provide virtual domain support in indimail-mta, along with the ability to work with IMAP/POP3 retrieval daemons (provided by the indimail-access package). The shared library is a file named <u>indimail.so</u> and is placed in your system directory for shared libraries (<u>/lib</u>, <u>/lib64</u>, etc). Without indimail-virtualdomains packge you can still use the IMAP/POP3 retrieval daemons for accessing your local Maildirs.
 
@@ -277,24 +277,24 @@ IndiMail is highly configurable. No hard-coded directories of qmail like /var/qm
 
 IndiMail is a pure messaging solution. It does not provide calendars, todo lists, address books, meeting requests and a web mail front-end. However, you can use [RoundCubemail](https://roundcube.net/ "RoundCubemail") or any web mail front-end that works with IMAP or POP3 protocol with IndiMail. If you decide to install [RoundCubemail](https://roundcube.net/ "RoundCubemail"), you can install the **ircube** package from the IndiMail's DNF/YUM/Debian [Repository](https://build.opensuse.org/package/show/home:indimail/ircube "ircube") to have a fully functional web mail front-end. The ircube package provides plugins for Rouncube Mail to manage your passwords, vacation and SPAM filters.
 
-IndiMail administrators can use a web administration tool called **iwebadmin**. It can be installed from source from [here](https://github.com/mbhangui/indimail-virtualdomains/tree/master/iwebadmin-x "iwebadmin") or from the [DNF/YUM/Debian Repository](https://build.opensuse.org/package/show/home:indimail/iwebadmin "iwebadmin Repository") on the openSUSE build Service.
+IndiMail administrators can use a web administration tool called **iwebadmin**. It can be installed from source from [here](https://github.com/indimail/indimail-virtualdomains/tree/master/iwebadmin-x "iwebadmin") or from the [DNF/YUM/Debian Repository](https://build.opensuse.org/package/show/home:indimail/iwebadmin "iwebadmin Repository") on the openSUSE build Service.
 
-IndiMail comes with a tcl/tk administration client called [**indium**](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indium-x "indium"). It can be installed from source from [here](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indium-x "indium") or from the [DNF/YUM/Debian Repository](https://build.opensuse.org/package/show/home:indimail/indium "indium repository") on the openSUSE Build Service.
+IndiMail comes with a tcl/tk administration client called [**indium**](https://github.com/indimail/indimail-virtualdomains/tree/master/indium-x "indium"). It can be installed from source from [here](https://github.com/indimail/indimail-virtualdomains/tree/master/indium-x "indium") or from the [DNF/YUM/Debian Repository](https://build.opensuse.org/package/show/home:indimail/indium "indium repository") on the openSUSE Build Service.
 
-To install/configure IndiMail you can take the help of the following documents in the [indimail-x/doc subdirectory](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-x/doc "Documents Subdirectory") of [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains "indimail-virtualdomains") github repository. You can also jump to the section [Installing Indimail using DNF/YUM/APT Repository](#installing-indimail-using-dnfyumapt-repository) towards the bottom of this document.
+To install/configure IndiMail you can take the help of the following documents in the [indimail-x/doc subdirectory](https://github.com/indimail/indimail-virtualdomains/tree/master/indimail-x/doc "Documents Subdirectory") of [indimail-virtualdomains](https://github.com/indimail/indimail-virtualdomains "indimail-virtualdomains") github repository. You can also jump to the section [Installing Indimail using DNF/YUM/APT Repository](#installing-indimail-using-dnfyumapt-repository) towards the bottom of this document.
 
 File | Description
 ---- | --------------------
 README-indimail.md|Introduction to IndiMail (this file which is also available as the indimail/indimail-mta Wiki)
-[INSTALL-indimail.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/INSTALL-indimail.md)|Detailed Source Installation Instructions. A simpler version is [this](https://github.com/mbhangui/indimail-virtualdomains/blob/master/README.md)
-[FAQ](https://github.com/mbhangui/indimail-virtualdomains/blob/master/indimail-x/doc/FAQ.md)|Some quesions not answered by the wiki
-[INSTALL-RPM.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/INSTALL-RPM.md)|Install Instructions using RPM
-[INSTALL-MYSQL.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/INSTALL-MYSQL.md)|MySQL specific Installation Instructions
-[README-CLUSTER.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-CLUSTER.md)|Steps on configuring a clustered setup
-[Quick-INSTALL.md](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/Quick-INSTALL.md)|A minimal documentation on Installation/Configuration
-[Man Pages](https://github.com/mbhangui/indimail-virtualdomains/wiki/1-Man-Pages)|Link to Man Pages for all General commands, administrative commands, file formats, APIs and Miscelleneous topics
+[INSTALL-indimail.md](https://github.com/indimail/indimail-virtualdomains/blob/master/.github/INSTALL-indimail.md)|Detailed Source Installation Instructions. A simpler version is [this](https://github.com/indimail/indimail-virtualdomains/blob/master/README.md)
+[FAQ](https://github.com/indimail/indimail-virtualdomains/blob/master/indimail-x/doc/FAQ.md)|Some quesions not answered by the wiki
+[INSTALL-RPM.md](https://github.com/indimail/indimail-virtualdomains/blob/master/.github/INSTALL-RPM.md)|Install Instructions using RPM
+[INSTALL-MYSQL.md](https://github.com/indimail/indimail-virtualdomains/blob/master/.github/INSTALL-MYSQL.md)|MySQL specific Installation Instructions
+[README-CLUSTER.md](https://github.com/indimail/indimail-virtualdomains/blob/master/.github/README-CLUSTER.md)|Steps on configuring a clustered setup
+[Quick-INSTALL.md](https://github.com/indimail/indimail-virtualdomains/blob/master/.github/Quick-INSTALL.md)|A minimal documentation on Installation/Configuration
+[Man Pages](https://github.com/indimail/indimail-virtualdomains/wiki/1-Man-Pages)|Link to Man Pages for all General commands, administrative commands, file formats, APIs and Miscelleneous topics
 
-If you desire to do a full source installation and have enough experience on your belt, you can dive into this [document](https://github.com/mbhangui/indimail-virtualdomains/blob/master/README.md "README").
+If you desire to do a full source installation and have enough experience on your belt, you can dive into this [document](https://github.com/indimail/indimail-virtualdomains/blob/master/README.md "README").
 
 Once you have installed IndiMail, you will find all man pages in /usr/share/man and documents in /usr/share/indimail/doc. You can do read the man page for indimail-mta, indimail in section 7 of man pages, to get started with understanding IndiMail.
 
@@ -310,7 +310,7 @@ There is no warranty implied or otherwise with this package. I believe in OpenSo
 
 # LICENSING
 
-IndiMail uses GPLv3 License. See file [LICENSE](https://github.com/mbhangui/indimail-virtualdomains/blob/master/LICENSE "GPLv3"). Additional licenses (if any) may be found in subfolder of each component that IndiMail uses. If you need some other license for your use, let me know.
+IndiMail uses GPLv3 License. See file [LICENSE](https://github.com/indimail/indimail-virtualdomains/blob/master/LICENSE "GPLv3"). Additional licenses (if any) may be found in subfolder of each component that IndiMail uses. If you need some other license for your use, let me know.
 
 # TERMINOLOGY used for commands
 
@@ -336,7 +336,7 @@ qmail-inject _/                                  /     \___ qmail-clean
 
 ```
 
-As a minimum, you an go through the following online man pages - [qmail-smtpd](https://github.com/mbhangui/indimail-mta/wiki/qmail-smtpd.8), [qmail-inject](https://github.com/mbhangui/indimail-mta/wiki/qmail-inject.8), [sendmail](https://github.com/mbhangui/indimail-mta/wiki/isendmail.8), [qmail-queue](https://github.com/mbhangui/indimail-mta/wiki/qmail-queue.8), [qmail-multi](https://github.com/mbhangui/indimail-mta/wiki/qmail-multi.8), [qmail-queue-clients](https://github.com/mbhangui/indimail-mta/wiki/qmail-queue-clients.7), [qmail-internals](https://github.com/mbhangui/indimail-mta/wiki/qmail-internals.8), [qmail-send](https://github.com/mbhangui/indimail-mta/wiki/qmail-send.8), [todo-proc](https://github.com/mbhangui/indimail-mta/wiki/todo-proc.8), [qmail-lspawn](https://github.com/mbhangui/indimail-mta/wiki/qmail-lspawn.8), [qmail-local](https://github.com/mbhangui/indimail-mta/wiki/qmail-local.8), [qmail-rspawn](https://github.com/mbhangui/indimail-mta/wiki/qmail-rspawn.8), [qmail-remote](https://github.com/mbhangui/indimail-mta/wiki/qmail-remote.8), [dot-qmail](https://github.com/mbhangui/indimail-mta/wiki/dot-qmail.5), [qmail-clean](https://github.com/mbhangui/indimail-mta/wiki/qmail-clean.8), [qscheduler](https://github.com/mbhangui/indimail-mta/wiki/qscheduler.8) and [indimail-control](https://github.com/mbhangui/indimail-mta/wiki/indimail-control.5).
+As a minimum, you an go through the following online man pages - [qmail-smtpd](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8), [qmail-inject](https://github.com/indimail/indimail-mta/wiki/qmail-inject.8), [sendmail](https://github.com/indimail/indimail-mta/wiki/isendmail.8), [qmail-queue](https://github.com/indimail/indimail-mta/wiki/qmail-queue.8), [qmail-multi](https://github.com/indimail/indimail-mta/wiki/qmail-multi.8), [qmail-queue-clients](https://github.com/indimail/indimail-mta/wiki/qmail-queue-clients.7), [qmail-internals](https://github.com/indimail/indimail-mta/wiki/qmail-internals.8), [qmail-send](https://github.com/indimail/indimail-mta/wiki/qmail-send.8), [todo-proc](https://github.com/indimail/indimail-mta/wiki/todo-proc.8), [qmail-lspawn](https://github.com/indimail/indimail-mta/wiki/qmail-lspawn.8), [qmail-local](https://github.com/indimail/indimail-mta/wiki/qmail-local.8), [qmail-rspawn](https://github.com/indimail/indimail-mta/wiki/qmail-rspawn.8), [qmail-remote](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8), [dot-qmail](https://github.com/indimail/indimail-mta/wiki/dot-qmail.5), [qmail-clean](https://github.com/indimail/indimail-mta/wiki/qmail-clean.8), [qscheduler](https://github.com/indimail/indimail-mta/wiki/qscheduler.8) and [indimail-control](https://github.com/indimail/indimail-mta/wiki/indimail-control.5).
 
 The diagram below shows how <b>qmail-multi</b>(8) and <b>qmail-queue</b>(8) works ![qmail-multi](qmail_multi.png)
 
@@ -1274,7 +1274,7 @@ $ sudo /bin/bash
 # svc -r /service/qmail-send.25
 ```
 
-If you do not use <b>vdelivermail</b>(8) and want to use your own delivery agent? Fear not by using [ismaildup(1)](https://github.com/mbhangui/indimail-mta/wiki/ismaildup.1). <b>ismaildup</b>(1) expects the entire email on standard input and is easily scriptable like the example below in a [dot-qmail](https://github.com/mbhangui/indimail-mta/wiki/dot-qmail.5) file.
+If you do not use <b>vdelivermail</b>(8) and want to use your own delivery agent? Fear not by using [ismaildup(1)](https://github.com/indimail/indimail-mta/wiki/ismaildup.1). <b>ismaildup</b>(1) expects the entire email on standard input and is easily scriptable like the example below in a [dot-qmail](https://github.com/indimail/indimail-mta/wiki/dot-qmail.5) file.
 
 `|/bin/ismaildup /home/manny/Maildir/ /usr/bin/maildirdeliver /home/manny/Maildir/`
 
@@ -1289,7 +1289,7 @@ $ sudo /bin/bash
 # exit
 ```
 
-The duplicate eliminator uses [822header(1)](https://github.com/mbhangui/indimail-mta/wiki/822header.1) program to extract all headers other than <b>Received</b>, <b>Delivered-To</b> and <b>X-Delivered-To</b>. The duplicate elimination is based on the md5sum values of these headers. You can alter this by running your own program (and arguments) by setting <b>ELIMINATE_DUPS_ARGS</b> environment variable. The program needs to read descriptor 0 to get the entire email.
+The duplicate eliminator uses [822header(1)](https://github.com/indimail/indimail-mta/wiki/822header.1) program to extract all headers other than <b>Received</b>, <b>Delivered-To</b> and <b>X-Delivered-To</b>. The duplicate elimination is based on the md5sum values of these headers. You can alter this by running your own program (and arguments) by setting <b>ELIMINATE_DUPS_ARGS</b> environment variable. The program needs to read descriptor 0 to get the entire email.
 
 # Using procmail with IndiMail
 
@@ -1447,7 +1447,7 @@ NOTE: You can exit with value 0 instead of calling <b>qmail-local</b> / <b>qmail
 
 ## Using dot-qmail(5) and filterit(1)
 
-The .qmail (known as dot-qmail) files allows you to control local message deliveries. See the man pages for [dot-qmail(5)](https://github.com/mbhangui/indimail-mta/wiki/dot-qmail.5), [qmail-command(8)](https://github.com/mbhangui/indimail-mta/wiki/qmail-command.8) for more details. You can have the following in a .qmail file.
+The .qmail (known as dot-qmail) files allows you to control local message deliveries. See the man pages for [dot-qmail(5)](https://github.com/indimail/indimail-mta/wiki/dot-qmail.5), [qmail-command(8)](https://github.com/indimail/indimail-mta/wiki/qmail-command.8) for more details. You can have the following in a .qmail file.
 
 1. A comment line begins with the '#' sign:
    >  #This is a comment
@@ -1459,7 +1459,7 @@ The .qmail (known as dot-qmail) files allows you to control local message delive
    >  /home/manny/Mailbox
 5. A maildir line begins with a slash or dot, and ends with a slash:
    >  /home/manny/Maildir/
-6. A branch line begins with a question mark, and ends with a label. Read the [dot-qmail(5)](https://github.com/mbhangui/indimail-mta/wiki/dot-qmail.5) man page for details.
+6. A branch line begins with a question mark, and ends with a label. Read the [dot-qmail(5)](https://github.com/indimail/indimail-mta/wiki/dot-qmail.5) man page for details.
 7. A envdir line begins with the '%' sign:
    >  %/home/manny/envdir. If you define envdir variables, <b>qmail-local</b> will run programs defined in program line with these environment variables in addition to existing environment variables. You can clear existing environment variables (set for qmail-start when it was invoked) by setting the <b>SANITIZE_ENV</b>. You can decide which environment variables to preserve from the existing list by define <b>SANITIZE_ENV<b> as a list of colon separated list of variables that you want to retain.
 
@@ -1467,7 +1467,7 @@ The program line `| maildirdeliver /home/mannny/Maildir/.Important` can also be 
 
 One can use `| /bin/filterit <args> ...` to use a configurable filter to do some real easy filtering. The program line `|/bin/filterit <args> ...` can replaced with `|filterit <arguments> ...` to make <b>qmail-local</b> use it's internal filter function, which has the same arguments as the external <b>filterit</b> program, but will be slightly faster due to elimination of the exec(2) system call.
 
-The <b>filterit</b> program accepts many arguments, with -h <u>header</u> argument being the defining argument. The <b>filterit</b> program can perform a match on any header in your email and take action like deliver to a Maildir, bounce or drop the mail, or forward the mail to any address. The match criteria is based on -k <u>keyword</u> and -c <u>comparision</u> arguments. The -k specifies a keyword to be used against the header specified by -h argument. The argument -c <u>comparision</u> specifies what type of match you want to perform. It is one of "Equals", "Starts with", "Ends with", "Contains". The -a <u>type</u> and -A <u>action</u> specifies what action to take when a match occurs. Here <u>type</u> can be one of "Exit", "Maildir" or "Forward". e.g. `-a Maildir -A "./Maildir/.Spam/"` says that when a match occurs, deliver the mail to the Maildir `./Maildir/.Spam` folder. Apart from -a, -A argument, one needs to specify -d <u>type</u> -D <u>action</u> which specify the default action to take when a match doesn't occur. The match criteria can be reversed by using -r argument. If -r is used -c "Equals" becomes the opposite of -c "Equals". By default, <b>filterit</b> exits with the value 99 when a match occurs. So if, <b>filterit</b> is used in dot-qmail, a match will stop further processing of the dot-qmail file. You can use -x argument to insert <b>X-FilterIT</b> header having the original invocation arguments as the header value. You can also test <b>filterit</b> on the command line by feeding it a RFC822 email on descriptor 0. You can pass the -n argument to make <b>filterit</b> display the action it would take without actually taking any action. Here are examples (which are also in the man page of [filterit(1)](https://github.com/mbhangui/indimail-mta/wiki/filterit.1)).
+The <b>filterit</b> program accepts many arguments, with -h <u>header</u> argument being the defining argument. The <b>filterit</b> program can perform a match on any header in your email and take action like deliver to a Maildir, bounce or drop the mail, or forward the mail to any address. The match criteria is based on -k <u>keyword</u> and -c <u>comparision</u> arguments. The -k specifies a keyword to be used against the header specified by -h argument. The argument -c <u>comparision</u> specifies what type of match you want to perform. It is one of "Equals", "Starts with", "Ends with", "Contains". The -a <u>type</u> and -A <u>action</u> specifies what action to take when a match occurs. Here <u>type</u> can be one of "Exit", "Maildir" or "Forward". e.g. `-a Maildir -A "./Maildir/.Spam/"` says that when a match occurs, deliver the mail to the Maildir `./Maildir/.Spam` folder. Apart from -a, -A argument, one needs to specify -d <u>type</u> -D <u>action</u> which specify the default action to take when a match doesn't occur. The match criteria can be reversed by using -r argument. If -r is used -c "Equals" becomes the opposite of -c "Equals". By default, <b>filterit</b> exits with the value 99 when a match occurs. So if, <b>filterit</b> is used in dot-qmail, a match will stop further processing of the dot-qmail file. You can use -x argument to insert <b>X-FilterIT</b> header having the original invocation arguments as the header value. You can also test <b>filterit</b> on the command line by feeding it a RFC822 email on descriptor 0. You can pass the -n argument to make <b>filterit</b> display the action it would take without actually taking any action. Here are examples (which are also in the man page of [filterit(1)](https://github.com/indimail/indimail-mta/wiki/filterit.1)).
 
 ```
 # Move mail to Quarantine folder and exit 99, else exit 0
@@ -1507,7 +1507,7 @@ If you want to manipulate the original mail, read it on descriptor 0 and pipe th
 
 ## Using valias(1)
 
-The <b>valias</b> mechanism allows you to execute your own programs for local deliveries to your virtual domain. See the man pages for [valias(1)](https://github.com/mbhangui/indimail-mta/wiki/valias.1) for more details. After manipulating the original raw email on stdin, you can pipe the out to the program [maildirdeliver(1)](https://github.com/mbhangui/indimail-mta/wiki/maildirdeliver.1) for the final delivery to any Maildir of any virtual user. You can use the vuserinfo command to get the Maildir for any virtual user.
+The <b>valias</b> mechanism allows you to execute your own programs for local deliveries to your virtual domain. See the man pages for [valias(1)](https://github.com/indimail/indimail-mta/wiki/valias.1) for more details. After manipulating the original raw email on stdin, you can pipe the out to the program [maildirdeliver(1)](https://github.com/indimail/indimail-mta/wiki/maildirdeliver.1) for the final delivery to any Maildir of any virtual user. You can use the vuserinfo command to get the Maildir for any virtual user.
 
 Assuming you write the program myscript to call <b>maildirdeliver</b> program, you can use the <b>valias</b> command to add the following alias
 
@@ -1820,7 +1820,7 @@ If you have installed indimail-spamfilter package, you will have [bogofilter](ht
 
 bogofilter requires training to be able to classify emails as spam or ham. The next section tells you how to carry out this training. You can also have a pre-trained database installed by installing the **bogofilter-wordlist** package, but it is possible that this may not work well in your setup.
 
-On of the easiest method to enable bogofilter is to set few environment variable for indimail's [<b>qmail-spamfilter</b>(8)](https://github.com/mbhangui/indimail-mta/wiki/qmail-spamfilter.8). <b>qmail-spamfilter</b> is a frontend for <b>qmail-queue</b>(8) program. e.g. to enable spam filter on the incoming SMTP on port 25:
+On of the easiest method to enable bogofilter is to set few environment variable for indimail's [<b>qmail-spamfilter</b>(8)](https://github.com/indimail/indimail-mta/wiki/qmail-spamfilter.8). <b>qmail-spamfilter</b> is a frontend for <b>qmail-queue</b>(8) program. e.g. to enable spam filter on the incoming SMTP on port 25:
 
 ```
 $ sudo /bin/bash
@@ -2136,7 +2136,7 @@ Once you have decided the delivery mode above, one needs to have some mechanism 
 
 <b>locals</b>
 
-Any email addressed to user@domain listed in the file /etc/indimail/control/locals will be delivered to the local user user. If you have Maildir as the delivery mode and an email to user kanimoji@domain with home directory /home/blackmoney, will be delivered to /home/blackmoney/Maildir/new. <b>qmail-lspawn</b> uses the program <b>qmail-getpw</b> to the uid, gid, home, dash and extension for any user in the /etc/passwd file. You can set the environment variable <b>QMAILGETPW</b> to an alternate qmail-getpw program. See the [qmail-getpw man page](https://github.com/mbhangui/indimail-mta/wiki/qmail-getpw.8) for more details.
+Any email addressed to user@domain listed in the file /etc/indimail/control/locals will be delivered to the local user user. If you have Maildir as the delivery mode and an email to user kanimoji@domain with home directory /home/blackmoney, will be delivered to /home/blackmoney/Maildir/new. <b>qmail-lspawn</b> uses the program <b>qmail-getpw</b> to the uid, gid, home, dash and extension for any user in the /etc/passwd file. You can set the environment variable <b>QMAILGETPW</b> to an alternate qmail-getpw program. See the [qmail-getpw man page](https://github.com/indimail/indimail-mta/wiki/qmail-getpw.8) for more details.
 
 <b>virtualdomains</b>
 
@@ -2420,7 +2420,7 @@ nofiles:x:1001:
 
 Now let is dissect what has been done. The <b>vadddomain</b> has done the following
 
-1. Added an entry to <u>/etc/indimail/users/assign</u> to create an autoturn user `autoturn` using [qmail-users(5)](https://github.com/mbhangui/indimail-mta/wiki/qmail-users.5) mechanism. The entry for autoturn is done only the first time any ETRN or ATRN domain is created.
+1. Added an entry to <u>/etc/indimail/users/assign</u> to create an autoturn user `autoturn` using [qmail-users(5)](https://github.com/indimail/indimail-mta/wiki/qmail-users.5) mechanism. The entry for autoturn is done only the first time any ETRN or ATRN domain is created.
 2. added entry `etrn1.dom:autoturn-192.168.2.108` to <u>/etc/indimail/control/virtualdomains</u>
 3. Now any email to `etrn1.dom` will be controlled by <u>/var/indimail/autoturn/.qmail-192:168:2:108-default</u>, which has the entry <u>./192.168.2.108/Maildir/`</u>. This will result in <b>qmail-send</b>(8) delivering all emails for `etrn1.dom` to <u>/var/indimail/autoturn/192.168.2.108/Maildir</u>.
 
@@ -2512,7 +2512,7 @@ quit
 Connection closed by foreign host.
 ```
 
-Seeing the examples above where we have used telnet, demonstrates the ETRN doesn't require special software. You can automate the process of pulling mails using ETRN by having a cron script that uses [tcpclient(1)](https://github.com/mbhangui/indimail-mta/wiki/tcpclient.1) or the [netcat command](https://en.wikipedia.org/wiki/Netcat). Using nc is trivial like this snippet `printf "ETRN etrn2.dom\r\nQUIT\r\n" | nc argos2 25`. This however doesn't check if the SMTP server has ETRN capability.
+Seeing the examples above where we have used telnet, demonstrates the ETRN doesn't require special software. You can automate the process of pulling mails using ETRN by having a cron script that uses [tcpclient(1)](https://github.com/indimail/indimail-mta/wiki/tcpclient.1) or the [netcat command](https://en.wikipedia.org/wiki/Netcat). Using nc is trivial like this snippet `printf "ETRN etrn2.dom\r\nQUIT\r\n" | nc argos2 25`. This however doesn't check if the SMTP server has ETRN capability.
 
 Here is a more sophisticated example of a script that uses tcpclient. Assuming this script is named tcpclient.atrn, then you need to execute the command `tcpclient -vDHR 192.168.2.102 25 /usr/local/bin/tcpclient.atrn`. The script needs to have executable bit set.
 
@@ -2569,7 +2569,7 @@ ATRN stands for Authenticated Turn. ATRN requires indimail-virtualdomains to be 
 6. The server keeps on pushing all mails in the queue for <u>domain</u> to the client using SMTP. For each mail that the client accepts successfully or results in a permanent failure, the server removes the mail from the queue. For temporary failures, the mail is not removed from the queue.
 7. The client quits when the server issues the SMTP QUIT command.
 
-Now let us look at the steps (listed below) to create a ATRN domain. You can see that steps needed are the same needed to create an ETRN domain. The extra stip is either creating the <u>atrnaccess</u> control file or using the [vatrn](https://github.com/mbhangui/indimail-mta/wiki/vatrn.1) command. The **vatrn** commands is used to add access to the atrn domain for the user `odmr@localhost`. <u>odmr</u> is a normal user in system password database without shell access. It can also be any user in indimail's virtual domain database. You can use a software like [fetchmail](https://github.com/mbhangui/indimail-mta/wiki/fetchmail.1). The indimail-access package comes with a version of [fetchmail](https://github.com/mbhangui/indimail-virtualdomains/tree/master/fetchmail-x) that is optimized for ODMR and ETRN. The original fetchmail is unusable for ODMR unless setup for CRAM-MD5 authentication. The version that comes with indimail-access allows other authentication methods supported by indimail-mta.
+Now let us look at the steps (listed below) to create a ATRN domain. You can see that steps needed are the same needed to create an ETRN domain. The extra stip is either creating the <u>atrnaccess</u> control file or using the [vatrn](https://github.com/indimail/indimail-mta/wiki/vatrn.1) command. The **vatrn** commands is used to add access to the atrn domain for the user `odmr@localhost`. <u>odmr</u> is a normal user in system password database without shell access. It can also be any user in indimail's virtual domain database. You can use a software like [fetchmail](https://github.com/indimail/indimail-mta/wiki/fetchmail.1). The indimail-access package comes with a version of [fetchmail](https://github.com/indimail/indimail-virtualdomains/tree/master/fetchmail-x) that is optimized for ODMR and ETRN. The original fetchmail is unusable for ODMR unless setup for CRAM-MD5 authentication. The version that comes with indimail-access allows other authentication methods supported by indimail-mta.
 
 ```
 # Assumption
@@ -2719,9 +2719,9 @@ Let's say this script is named as /usr/local/bin/autoturn. Then you can do this 
 $ sudo tcpserver -u qmaild -vHR -l $(uname -n) 0 8025 /usr/local/bin/autoturn
 ```
 
-Now any client on the **part-time-host** can connect to port 8025 on the **isp-server** and when it quits, the script will initiate SMTP to the **part-time-host** using [maildirsmtp](https://github.com/mbhangui/indimail-mta/wiki/maildirsmtp.1).
+Now any client on the **part-time-host** can connect to port 8025 on the **isp-server** and when it quits, the script will initiate SMTP to the **part-time-host** using [maildirsmtp](https://github.com/indimail/indimail-mta/wiki/maildirsmtp.1).
 
-There is another way to do **AUTOTURN** with indimail. Using the **domainqueue** control file (see chapter [Domain Specific queue](#domain-specific-queues)), you can queue emails for a domain to any queue directory. When you want to deliver the mails, instead of using qmail-send, you could use [qmta-send](https://github.com/mbhangui/indimail-mta/wiki/qmta-send.8) in non-daemon mode and run 2-3 passes. Here is one example of setting up **AUTOTURN**
+There is another way to do **AUTOTURN** with indimail. Using the **domainqueue** control file (see chapter [Domain Specific queue](#domain-specific-queues)), you can queue emails for a domain to any queue directory. When you want to deliver the mails, instead of using qmail-send, you could use [qmta-send](https://github.com/indimail/indimail-mta/wiki/qmta-send.8) in non-daemon mode and run 2-3 passes. Here is one example of setting up **AUTOTURN**
 
 ```
 # create few directories
@@ -2774,13 +2774,13 @@ printf "QUIT\r\n" | nc smtp_host 25
 
 # Setting up TLS for SMTP (qmail-smtpd) and Remote Delivery (qmail-remote)
 
-indimail-mta supports multiple methods to achieve Transport Layer Security for both incoming and outgoing delivery through SMTP. It all depends on how you configure few variables. We will discuss below various methods along with examples. The example will demonstrate the versality of programs like [tcpserver(1)](https://github.com/mbhangui/indimail-mta/wiki/tcpserver.1), [tcpclient(1)](https://github.com/mbhangui/indimail-mta/wiki/tcpclient.1), [qmail-smtpd(8)](https://github.com/mbhangui/indimail-mta/wiki/qmail-smtpd.8) and [qmail-remote(8)](https://github.com/mbhangui/indimail-mta/wiki/qmail-remote.8). You can also use [dotls(1)](https://github.com/mbhangui/indimail-mta/wiki/dotls.1) - A transparent TLS/SSL proxy that can help you to secure traffic for non-tls distributions like qmail, netqmail and others.
+indimail-mta supports multiple methods to achieve Transport Layer Security for both incoming and outgoing delivery through SMTP. It all depends on how you configure few variables. We will discuss below various methods along with examples. The example will demonstrate the versality of programs like [tcpserver(1)](https://github.com/indimail/indimail-mta/wiki/tcpserver.1), [tcpclient(1)](https://github.com/indimail/indimail-mta/wiki/tcpclient.1), [qmail-smtpd(8)](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) and [qmail-remote(8)](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8). You can also use [dotls(1)](https://github.com/indimail/indimail-mta/wiki/dotls.1) - A transparent TLS/SSL proxy that can help you to secure traffic for non-tls distributions like qmail, netqmail and others.
 
 ## Using tcpserver to provide encrypted SMTPS service
 
 tcpserver which comes with indimail-mta, can by itself provides TLS. All you have to do is use -n option and provide a Privacy Enhanced Mail (PEM) file as the certificate. The below example shows how to do that. It also shows the flexibility of indimail-mta to queue the mail anywhere of your chosing and deliver the mail to its destination.
 
-First let us create a queue and start an encrypted ucspi-tcp service using tcpserver on port 2025. You can use port 25 too, but then you will have to run tcpserver as root. We will use queue-fix to create a queue in the home directory. For me it is /home/manny. The [queue-fix](https://github.com/mbhangui/indimail-mta/wiki/queue-fix.8) command will create a queue named demo. We will use two terminals. One for running tcpserver to accept mail using SMTP protocol and another for running tcpclient to carry out a simple SMTP transaction.
+First let us create a queue and start an encrypted ucspi-tcp service using tcpserver on port 2025. You can use port 25 too, but then you will have to run tcpserver as root. We will use queue-fix to create a queue in the home directory. For me it is /home/manny. The [queue-fix](https://github.com/indimail/indimail-mta/wiki/queue-fix.8) command will create a queue named demo. We will use two terminals. One for running tcpserver to accept mail using SMTP protocol and another for running tcpclient to carry out a simple SMTP transaction.
 
 **Terminal 1** run tcpserver
 
@@ -2969,7 +2969,7 @@ ehlo
 250 HELP
 help
 214-This is IndiMail SMTP Version 1.284
-214-https://github.com/mbhangui/indimail-mta
+214-https://github.com/indimail/indimail-mta
 214-This server supports the following commands:
 214 HELO EHLO RSET NOOP MAIL RCPT DATA VRFY ETRN HELP QUIT
 ```
@@ -3002,7 +3002,7 @@ The TLS/SSL connection can be customized by the following control files
 
 ## Setting up qmail-remote to do STARTTLS
 
-[qmail-remote](https://github.com/mbhangui/indimail-mta/wiki/qmail-remote.8) will issue the STARTTLS command if it finds the remote server supports STARTTLS and it finds a valid certificate in <u>/etc/indimail/certs/clientcert.pem</u>. qmail-remote will revert to non-encrypted session if the TLS connection fails. Let's us invoke qmail-remote on the command line to simulate sending an email through a TLS session.
+[qmail-remote](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) will issue the STARTTLS command if it finds the remote server supports STARTTLS and it finds a valid certificate in <u>/etc/indimail/certs/clientcert.pem</u>. qmail-remote will revert to non-encrypted session if the TLS connection fails. Let's us invoke qmail-remote on the command line to simulate sending an email through a TLS session.
 
 ```
 # create a sample rfc-822 email in /tmp/mail.txt
@@ -3548,7 +3548,7 @@ sudo /usr/sbin/svctool --smtp=25 --servicedir=/service --skipsend --no-multi \
 
 ## qmail-qmtpd - Provide QMTP service
 
-QMTP protocol is provided by [qmail-qmtpd](https://github.com/mbhangui/indimail-mta/wiki/qmail-qmtpd.8). You can create a QMTP service by running svctool as below.
+QMTP protocol is provided by [qmail-qmtpd](https://github.com/indimail/indimail-mta/wiki/qmail-qmtpd.8). You can create a QMTP service by running svctool as below.
 
 ```
 sudo /usr/sbin/svctool --qmtp="209" --servicedir="/service" \
@@ -4163,7 +4163,7 @@ NOTES:
 
 ## Enabling authentication methods for qmail-remote
 
-qmail-remote supports the same authentication mechanism that qmail-smtpd supports. It requires the user credentials to be present in the file <u>/etc/indimail/control/smtproutes</u> or the environment variable <b>SMTPROUTE</b>. The format of this file can be any one of the below forms. You can read in more detail in the [qmail-remote](https://github.com/mbhangui/indimail-mta/wiki/qmail-remote.8) man page.
+qmail-remote supports the same authentication mechanism that qmail-smtpd supports. It requires the user credentials to be present in the file <u>/etc/indimail/control/smtproutes</u> or the environment variable <b>SMTPROUTE</b>. The format of this file can be any one of the below forms. You can read in more detail in the [qmail-remote](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8) man page.
 
 ```
 domain:relay username password
@@ -4237,7 +4237,7 @@ rFrom: <manny@example.com> RCPT: <testuser@example.com> K127.0.0.1 accepted mess
 Remote host said: 250 ok 1667151965 qp 136468
 ```
 
-There is much more you can do with <u>remote_auth.cdb</u>. Please look at the [CONTROL FILES](https://github.com/mbhangui/indimail-mta/wiki/qmail-remote.8#control-files) section in the man page for [qmail-remote](https://github.com/mbhangui/indimail-mta/wiki/qmail-remote.8).
+There is much more you can do with <u>remote_auth.cdb</u>. Please look at the [CONTROL FILES](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8#control-files) section in the man page for [qmail-remote](https://github.com/indimail/indimail-mta/wiki/qmail-remote.8).
 
 Here is an another example of doing the same thing as above, but using <b>ctrlenv</b> program to set environment variables based on an address. Here we create a cdb file <u>ctrlenvdemo.cdb</u> for fast lookups using the <b>cdb-database</b> program.
 
@@ -4298,7 +4298,7 @@ IndiMail uses -x option to tcpserver and hence you need not bother about the abo
 ::ffff:10.147.20.102:allow,RELAYCLIENT=""
 ```
 
-The above lines will cause **RELAYCLIENT** environment variable to be set for localhost, all machines on the 10.1.1 class and the IP 10.147.20.102. Haveing RELAYCLIENT environment variable allows mails to relay through. Remember that any user on hosts on 10.1.1 class will be able to relay mails. You many not want this. The lines having 127.0.0., ::1 will allow any client on the IndiMail host (localhost) to use SMTP and relay mails. You can see some IPv4 addresses prefixed with `::ffff`. `::ffff` is a subnet prefix for IPv4 addresses that are placed inside an IPv6 space. It is the IPv6 prefix for an IPv4 address mapped into IPv6 space. It means that it is an IPv6 socket that is used for IPv4 communication. You need to do this if you are using indimail's ipv6 [tcpserver](https://github.com/mbhangui/indimail-mta/wiki/tcpserver.1). However this prefix shouldn't be used if you are running tcpserver in ipv4 mode (tcpserver -4).
+The above lines will cause **RELAYCLIENT** environment variable to be set for localhost, all machines on the 10.1.1 class and the IP 10.147.20.102. Haveing RELAYCLIENT environment variable allows mails to relay through. Remember that any user on hosts on 10.1.1 class will be able to relay mails. You many not want this. The lines having 127.0.0., ::1 will allow any client on the IndiMail host (localhost) to use SMTP and relay mails. You can see some IPv4 addresses prefixed with `::ffff`. `::ffff` is a subnet prefix for IPv4 addresses that are placed inside an IPv6 space. It is the IPv6 prefix for an IPv4 address mapped into IPv6 space. It means that it is an IPv6 socket that is used for IPv4 communication. You need to do this if you are using indimail's ipv6 [tcpserver](https://github.com/indimail/indimail-mta/wiki/tcpserver.1). However this prefix shouldn't be used if you are running tcpserver in ipv4 mode (tcpserver -4).
 
 If you modify the tcp.smtp file, you have to rebuild a cdb database tcp.smtp.cdb. You can run the following command
 
@@ -4364,7 +4364,7 @@ Setting <b>CHECKSENDER</b> environment variable enforces few checks when the dom
 * For virtual users (if you are using IndiMail and not just the indimail-mta package), the SMTP session will proceed only if the user is an active user and doesn't have the <b>NO_SMTP</b> flag set by <b>vmoduser</b> program.
 * Since authenticaition is now enforced, the SMTP session will be rejected if the user uses a envelope return path address different from the authenticated username. This enforces an ANTISPOOFING check. You can however allow this by setting <b>MASQUERADE</b> environment variable. Since you have enforced authentication, the SMTP log will show log the SMTP transaction along with the authenticated username and if your users are spoofing the envelope return address, the fact will be visible in the logs. So setting <b>MASQUERADE</b> is ok (all other SMTP servers allow any envelope sender address anyways).
 
-You can refer to [qmail-smtpd](https://github.com/mbhangui/indimail-mta/wiki/qmail-smtpd.8) man page for more details.
+You can refer to [qmail-smtpd](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) man page for more details.
 
 # CHECKRECIPIENT - Check Recipients during SMTP
 
@@ -4453,7 +4453,7 @@ test-recipient: user found in cdb
 
 Once can use the script <b>make-recipients</b> to create a database for <b>recipients</b> extension.
 
-You can refer to [qmail-smtpd](https://github.com/mbhangui/indimail-mta/wiki/qmail-smtpd.8) man page for more details.
+You can refer to [qmail-smtpd](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) man page for more details.
 
 # SMTP Access List
 
@@ -4508,7 +4508,7 @@ recipient not matched [manvendra@indimail.org] --&gt; access denied
 $
 ```
 
-You can refer to [qmail-smtpd](https://github.com/mbhangui/indimail-mta/wiki/qmail-smtpd.8) man page for more details.
+You can refer to [qmail-smtpd](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) man page for more details.
 
 # IndiMail Control Files Formats
 
@@ -4572,17 +4572,17 @@ indimail-mta provides pam-checkpwd(8), a checkpassword compliant module for auth
 
 **PAM Service**
 
-indimail-mta provides a configurable PAM service implmented using [pam-multi(8)](https://github.com/mbhangui/indimail-mta/wiki/pam-multi.8). pam-multi can be used by any of the PAM configuration files in /etc/pam.d to authenticate against any database on your local system. pam-multi is discussed in detail in the [pam-multi framework](#pam-multi-framework) chapter. The default indimail setup doesn't use PAM and use authentication modules instead. However the default installation does provide PAM configuration using pam-multi in <u>/etc/pam.d/pam-multi</u>, <u>/etc/pam.d/imap</u>, <u>/etc/pam.d/pop3</u>. You can configure indimail to authenticate using PAM. See this [example](#using-pam-multi) to see how you can configure dovecot to use pam-multi(8) service for authentication.
+indimail-mta provides a configurable PAM service implmented using [pam-multi(8)](https://github.com/indimail/indimail-mta/wiki/pam-multi.8). pam-multi can be used by any of the PAM configuration files in /etc/pam.d to authenticate against any database on your local system. pam-multi is discussed in detail in the [pam-multi framework](#pam-multi-framework) chapter. The default indimail setup doesn't use PAM and use authentication modules instead. However the default installation does provide PAM configuration using pam-multi in <u>/etc/pam.d/pam-multi</u>, <u>/etc/pam.d/imap</u>, <u>/etc/pam.d/pop3</u>. You can configure indimail to authenticate using PAM. See this [example](#using-pam-multi) to see how you can configure dovecot to use pam-multi(8) service for authentication.
 
 # Authentication Modules
 
 indimail uses authentication modules as a default for authentication tasks. indimail-mta provides two categories of authentcation modules - checkpassword and non-checkpassword based modules. To configure authentication you will need to set few environment variables like AUTHMODULE, IMAPMODULE, QUERY\_CACHE, etc. Read [Setting Environment Variables](#setting-environment-variables) to learn how to set environment variables.
 
-* checkpassword based authentication modules are [vchkpass(8)](https://github.com/mbhangui/indimail-mta/wiki/vchkpass.8), [ldap-checkpwd(8)](https://github.com/mbhangui/indimail-mta/wiki/ldap-checkpwd.8), [pam-checkpwd(8)](https://github.com/mbhangui/indimail-mta/wiki/pam-checkpwd.8), [sys-checkpwd(8)](https://github.com/mbhangui/indimail-mta/wiki/sys-checkpwd.8). [qmail-smtpd](https://github.com/mbhangui/indimail-mta/wiki/qmail-smtpd.8) can use checkpassword authentication modules. These modules are all part of the indmail-mta package, except for pam-multi which is provided by the indimail-auth package.
+* checkpassword based authentication modules are [vchkpass(8)](https://github.com/indimail/indimail-mta/wiki/vchkpass.8), [ldap-checkpwd(8)](https://github.com/indimail/indimail-mta/wiki/ldap-checkpwd.8), [pam-checkpwd(8)](https://github.com/indimail/indimail-mta/wiki/pam-checkpwd.8), [sys-checkpwd(8)](https://github.com/indimail/indimail-mta/wiki/sys-checkpwd.8). [qmail-smtpd](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8) can use checkpassword authentication modules. These modules are all part of the indmail-mta package, except for pam-multi which is provided by the indimail-auth package.
 
-* non-checkpassword based modules are [authindi](https://github.com/mbhangui/indimail-mta/wiki/authlib.7), [authpam](https://github.com/mbhangui/indimail-mta/wiki/authlib.7), [authshadow](https://github.com/mbhangui/indimail-mta/wiki/authlib.7) used by [imapd](https://github.com/mbhangui/indimail-mta/wiki/imapd.8) and [pop3d](https://github.com/mbhangui/indimail-mta/wiki/pop3d.8). authindi is provided by the indimail package while the remaining are part of the indimail-access package.
+* non-checkpassword based modules are [authindi](https://github.com/indimail/indimail-mta/wiki/authlib.7), [authpam](https://github.com/indimail/indimail-mta/wiki/authlib.7), [authshadow](https://github.com/indimail/indimail-mta/wiki/authlib.7) used by [imapd](https://github.com/indimail/indimail-mta/wiki/imapd.8) and [pop3d](https://github.com/indimail/indimail-mta/wiki/pop3d.8). authindi is provided by the indimail package while the remaining are part of the indimail-access package.
 
-The vchkpass(8) helps qmail-smtpd and authindi(7) helps imapd,pop3d authenticate against IndiMail's MySQL database for virtual domain users. It can directly connnect to the MySQL database or can use a connection caching/pooling daemon [inlookup(8)](https://github.com/mbhangui/indimail-mta/wiki/inlookup.8) described in this [chapter](#inlookup-database-connection-pooling-service). For using inlookup daemon, the environment variable <b>QUERY_CACHE</b> needs to be set. Using inlookup can significantly boost performance and reduce time taken to perform authentication.
+The vchkpass(8) helps qmail-smtpd and authindi(7) helps imapd,pop3d authenticate against IndiMail's MySQL database for virtual domain users. It can directly connnect to the MySQL database or can use a connection caching/pooling daemon [inlookup(8)](https://github.com/indimail/indimail-mta/wiki/inlookup.8) described in this [chapter](#inlookup-database-connection-pooling-service). For using inlookup daemon, the environment variable <b>QUERY_CACHE</b> needs to be set. Using inlookup can significantly boost performance and reduce time taken to perform authentication.
 
 The ldap-checkpwd(8) module can authenticate against a LDAP server. This module is limited by the options provided by the ldap-checkpwd module.
 
@@ -4590,7 +4590,7 @@ The sys-checkpwd(8), authshadow(7) modules use libc/glibc functions getpwnam(3),
 
 The pam-checkpwd(8), authpam(8) modules are PAM modules. PAM, or Pluggable Authentication Modules, is a modular approach to authentication. It allows (third party) services to provide an authentication module for their service which can then be used on PAM enabled systems. Services that use PAM for authentication can immediately use these modules without the need for a rebuild. pam-checkpwd(8) is highly configurable and can use any PAM(8) service like the linux PAM configuration in /etc/pam.d/login to authenticate against system users configured by you or your system administrator. authpam(8) can authenticate using the pam service file /etc/pam.d/imap or /etc/pam.d/pop3. authpam(8) can be used by indimail's own imapd/pop3d to authenticate local users.
 
-These authentication modules can be called as a chain of modules belonging to a particular category. For checkpassword based modules, you can have a chain consisting of vchkpass, ldap-checkpwd, sys-checkpwd to authenticate against indimail's MySQL database, ldap database and the system passwd(5) database. Similary, for non-checkpassword based modules you can have a chain consisting of authindi, authshadow, authpam to authenticate against indimail's MySQL database, /etc/shadow and PAM. The way the chain gets executed is different for checkpassword based module and non-checkpassword based module. For using these modules, the application just needs to call the first module in the chain. For the checkpassword based modules, the module which gets called is responsible for calling the next authentication module only when authentication fails. If authentication succeeds, it simply needs to exit with non-zero status.  For non-checkpassword based module each module calls the next module in succession, regardless of the authentication result (success or failure). When a module succeeds, it sets the environment variable AUTHENTICATED before calling the next module. When a module sees this environment variable, it simply calls the next module in the chain without performing any authentication task. The last module always needs to be [imapd](https://github.com/mbhangui/indimail-mta/wiki/imapd.8) for IMAP and [pop3d](https://github.com/mbhangui/indimail-mta/wiki/pop3d.8) for POP3. This is how the courier-imap authentication module works and is implemented by two programs [imaplogin](https://github.com/mbhangui/indimail-mta/wiki/imaplogin.8) and [pop3login](https://github.com/mbhangui/indimail-mta/wiki/pop3login.8). So the major difference is that the checkpassword based modules return when the first successful authentication happens, whereas all modules in the chain get called for non-checkpassword based modules used for courier-imap.
+These authentication modules can be called as a chain of modules belonging to a particular category. For checkpassword based modules, you can have a chain consisting of vchkpass, ldap-checkpwd, sys-checkpwd to authenticate against indimail's MySQL database, ldap database and the system passwd(5) database. Similary, for non-checkpassword based modules you can have a chain consisting of authindi, authshadow, authpam to authenticate against indimail's MySQL database, /etc/shadow and PAM. The way the chain gets executed is different for checkpassword based module and non-checkpassword based module. For using these modules, the application just needs to call the first module in the chain. For the checkpassword based modules, the module which gets called is responsible for calling the next authentication module only when authentication fails. If authentication succeeds, it simply needs to exit with non-zero status.  For non-checkpassword based module each module calls the next module in succession, regardless of the authentication result (success or failure). When a module succeeds, it sets the environment variable AUTHENTICATED before calling the next module. When a module sees this environment variable, it simply calls the next module in the chain without performing any authentication task. The last module always needs to be [imapd](https://github.com/indimail/indimail-mta/wiki/imapd.8) for IMAP and [pop3d](https://github.com/indimail/indimail-mta/wiki/pop3d.8) for POP3. This is how the courier-imap authentication module works and is implemented by two programs [imaplogin](https://github.com/indimail/indimail-mta/wiki/imaplogin.8) and [pop3login](https://github.com/indimail/indimail-mta/wiki/pop3login.8). So the major difference is that the checkpassword based modules return when the first successful authentication happens, whereas all modules in the chain get called for non-checkpassword based modules used for courier-imap.
 
 To configure SMTP service to use these modules you need to setup <b>AUTHMODULE</b> environment variable. To configure IMAP/POP3 service to use these authentication modules you need to configure <b>IMAPMODULE</b> environment variable. This is how IndiMail uses these modules for authentication for qmail-smtpd on port 465, 587 and courier-imap on ports 110, 143, 993, 995, 4143, 9143, 4110, 9110. For both types of modules, the module gets called by the invocation scripts. Below are examples for SMTP on port 587 and IMAP on port 143.
 
@@ -4676,7 +4676,7 @@ shadow: files nssd
 
 nssd(8) doesn't provide caching of requests, but along with nssd(8), you can use nscd(8) daemon which provides caching for access of the passwd(5), group(5), databases through standard libc interfaces, such as getpwnam(3), getpwuid(3), getgrnam(3), getgrgid(3). Consult the man pages nscd(8) and nscd(5) to configure nscd(8).
 
-Now let's have some fun with the MySQL database that IndiMail uses. Let us create a user for this demonstration. I'm assumeing we have already created a domain named example.com using the [vadddomain](https://github.com/mbhangui/indimail-mta/wiki/vadddomain.1) program. We will use the [vadduser](https://github.com/mbhangui/indimail-mta/wiki/vadduser.1) program to add a user named testuser01@example.com
+Now let's have some fun with the MySQL database that IndiMail uses. Let us create a user for this demonstration. I'm assumeing we have already created a domain named example.com using the [vadddomain](https://github.com/indimail/indimail-mta/wiki/vadddomain.1) program. We will use the [vadduser](https://github.com/indimail/indimail-mta/wiki/vadduser.1) program to add a user named testuser01@example.com
 
 ```
 # Create a user named testuser01
@@ -4749,7 +4749,7 @@ mysql> WHERE pw_name='testuser01'and pw_domain='example.com' LIMIT 1;
 +------------+-----------------------------------------------------------------+---+---+-------+---+---+----+---+
 ```
 
-With the information above and having the details on how to connect to the MySQL database we can configure nssd by creating /etc/indimail/nssd.conf configuration file. Note that nssd.conf uses `%1$s` and `%2$s` as placeholders for username and password respectively. getpwnam entry configures the getpwnam(3) libc call to fetch user details from the MySQL database using the correspoinding SELECT query. Read [nssd.conf(5)](https://github.com/mbhangui/indimail-mta/wiki/nssd.conf.5) for more details.
+With the information above and having the details on how to connect to the MySQL database we can configure nssd by creating /etc/indimail/nssd.conf configuration file. Note that nssd.conf uses `%1$s` and `%2$s` as placeholders for username and password respectively. getpwnam entry configures the getpwnam(3) libc call to fetch user details from the MySQL database using the correspoinding SELECT query. Read [nssd.conf(5)](https://github.com/indimail/indimail-mta/wiki/nssd.conf.5) for more details.
 
 ```
 getpwnam    SELECT pw_name,'x',555,555,pw_gecos,pw_dir,pw_shell \
@@ -4846,7 +4846,7 @@ And that ends the fun we had making libc functions which have nothing to do with
 
 ## PAM Multi Framework
 
-[pam-multi](#https://github.com/mbhangui/indimail-mta/wiki/pam-multi.8) is a framework that allows multiple configurable methods for authentication using PAM. pam-multi is a system to handle the authentication tasks of applications (services) on systems which use PAM, against any proprietary database. The system provides a stable general interface, that privilege granting programs (such  as pam-checkpwd(8), authpam(7), login(1) and su(1)) can defer to, to perform standard authentication tasks. The primary goal of pam-multi was to allow authentication of IMAP/POP3 servers like courier-imap, dovecot against IndiMail(5)'s MySQL database. However, tt can be used for any application which can authenticate using pam(8) to authenticate against any proprietary database that you have. pam-multi supports four methods for password hashing schemes. crypt (DES), MD5, SHA256, SHA512. To use pam-multi for any application (which currently uses PAM), you need to modify the PAM  configuration  file  for that application. Simply  put, pam-multi extends an existing pam module to authenticate against any database using any one of the three methods described below. Apart from supporting authentication, pam-multi supports account management like password expiry and account expiry.
+[pam-multi](#https://github.com/indimail/indimail-mta/wiki/pam-multi.8) is a framework that allows multiple configurable methods for authentication using PAM. pam-multi is a system to handle the authentication tasks of applications (services) on systems which use PAM, against any proprietary database. The system provides a stable general interface, that privilege granting programs (such  as pam-checkpwd(8), authpam(7), login(1) and su(1)) can defer to, to perform standard authentication tasks. The primary goal of pam-multi was to allow authentication of IMAP/POP3 servers like courier-imap, dovecot against IndiMail(5)'s MySQL database. However, tt can be used for any application which can authenticate using pam(8) to authenticate against any proprietary database that you have. pam-multi supports four methods for password hashing schemes. crypt (DES), MD5, SHA256, SHA512. To use pam-multi for any application (which currently uses PAM), you need to modify the PAM  configuration  file  for that application. Simply  put, pam-multi extends an existing pam module to authenticate against any database using any one of the three methods described below. Apart from supporting authentication, pam-multi supports account management like password expiry and account expiry.
 
 1. Using a SQL statement. This is provided by using the -m option to pam-multi. Currently only MySQL database is supported. You also need to pass connection parameters using -u, -p, -D, -H and -P options to connect to the MySQL database. When pam-multi is used for authentication,  it is  expected  that  the  sql\_statement will return a row containing the encrypted password for the user. When used for account management, it is expected that the sql\_statement will return the expiry date (as a long data  type)  for the account. The password expiry can be returned along with the account expiry separated by a ',' comma sign. If you are using this, make sure that your pam configuration file in /etc/pam.d is not world readable as it will expose your MySQL database password. In any case do not use a privileged MySQL user in the pam configuration. If is advised to use a MySQL user that has only SELECT privileges for your MySQL database.
 
@@ -4899,9 +4899,9 @@ session    include      postlogin
 
 # Maildir Quotas
 
-When mail is delivered to a virtual domain, vdelivermail delivers it to the users home directory. vdelivermail will enter the users Maildir and add up the sizes of all the files in these directories. If the size is greater than the quota set by the vadduser command, the email is bounced back to the sender. The quota for a user can be changed by using the [vmoduser](https://github.com/mbhangui/indimail-mta/wiki/vmoduser.1) command.
+When mail is delivered to a virtual domain, vdelivermail delivers it to the users home directory. vdelivermail will enter the users Maildir and add up the sizes of all the files in these directories. If the size is greater than the quota set by the vadduser command, the email is bounced back to the sender. The quota for a user can be changed by using the [vmoduser](https://github.com/indimail/indimail-mta/wiki/vmoduser.1) command.
 
-For new users when they are created by the vadduser command, the default quota set is determinted by the compile HARD_QUOTA defition set by `./configure --enable-hardquota` option. You can override the the value set at configuration time by setting the environment variable HARD_QUOTA when running the vadduser command. IndiMail uses maildir++ format which uses [maildirquotas](https://github.com/mbhangui/indimail-mta/wiki/maildirquota.7).
+For new users when they are created by the vadduser command, the default quota set is determinted by the compile HARD_QUOTA defition set by `./configure --enable-hardquota` option. You can override the the value set at configuration time by setting the environment variable HARD_QUOTA when running the vadduser command. IndiMail uses maildir++ format which uses [maildirquotas](https://github.com/indimail/indimail-mta/wiki/maildirquota.7).
 
 # Setting limits for your domain
 
@@ -5072,7 +5072,7 @@ SPF macros are represented by different single characters, surrounded by curly b
 # SRS implementation in IndiMail
 
 Hosts which adopt the [Sender Permitted From [SPF)](https://en.wikipedia.org/wiki/Sender_Policy_Framework) convention face a challenge when required to forward mail. If the forwarding host does not change the sender domain, it will fail the SPF test and may not be able to hand the message off to the recipient. 
-The [Sender Rewriting Scheme (SRS)](https://en.wikipedia.org/wiki/Sender_Rewriting_Scheme) is a scheme for bypassing the Sender Policy Framework's (SPF) methods of preventing forged sender addresses. SPF "breaks" email forwarding. SRS is a way to fix it. SRS is a simple way for forwarding MTAs to rewrite the sender address. The original concept was published in [draft-mengwong-sender-rewrite](http://www.open-spf.org/svn/project/specs/drafts/draft-mengwong-sender-rewrite-01.txt) and further expanded on in a [paper by Shevek](http://www.open-spf.org/srs/srs.pdf). IndiMail's SRS implementation has been adapted from Marcelo Coelho's [qmail SRS patch](http://www.mco2.com.br/opensource/qmail/srs/) and uses a [forked](https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x) version of the [libsrs2](https://www.libsrs2.org/) library. The Sender Rewriting Scheme is depicted pictorially below, taken from [open-spf.org](http://www.open-spf.org/SRS/).
+The [Sender Rewriting Scheme (SRS)](https://en.wikipedia.org/wiki/Sender_Rewriting_Scheme) is a scheme for bypassing the Sender Policy Framework's (SPF) methods of preventing forged sender addresses. SPF "breaks" email forwarding. SRS is a way to fix it. SRS is a simple way for forwarding MTAs to rewrite the sender address. The original concept was published in [draft-mengwong-sender-rewrite](http://www.open-spf.org/svn/project/specs/drafts/draft-mengwong-sender-rewrite-01.txt) and further expanded on in a [paper by Shevek](http://www.open-spf.org/srs/srs.pdf). IndiMail's SRS implementation has been adapted from Marcelo Coelho's [qmail SRS patch](http://www.mco2.com.br/opensource/qmail/srs/) and uses a [forked](https://github.com/indimail/indimail-mta/tree/master/libsrs2-x) version of the [libsrs2](https://www.libsrs2.org/) library. The Sender Rewriting Scheme is depicted pictorially below, taken from [open-spf.org](http://www.open-spf.org/SRS/).
 
 ![Sender Rewriting Scheme](Sender-Rewriting-Scheme.png "SRS")
 
@@ -5198,9 +5198,9 @@ $ sudo /bin/bash
 # Configuring dovecot as the IMAP/POP3 server
 
 IndiMail stores it's virtual user information in MySQL. However, IndiMail can work with virtually any IMAP/POP3 server which has a mechanism to authenticate using [checkpassword](https://cr.yp.to/checkpwd/interface.html) interface or has PAM, which can use the system's password database for user's home directory. This is because IndiMail provides checkpassword, PAM module and a NSS service, all independent of each other. The beauty of providing checkpassword, PAM module and NSS mechansism, is that you do not have to modify a single line of code anywhere. In this respect, IndiMail is probably the most flexible messaging server available at the moment.
- * checkpassword module is [vchkpass](https://github.com/mbhangui/indimail-mta/wiki/vchkpass.8) which is a checkpassword based authentication module. Authentication modules are discussed [here](#authentication-modules).
- * PAM module is [pam-multi - PAM modules for flexible, configurable authentication methods](https://github.com/mbhangui/indimail-virtualdomains/tree/master/pam-multi-x "pam-multi"). This is discussed in detail [here](#pam-multi-framework).
- * NSS is through [nssd - providing Name Service Switch](https://github.com/mbhangui/indimail-virtualdomains/tree/master/nssd-xi "nssd"). This is discussed in detail [here](#name-service-switch-daemon---nssd).
+ * checkpassword module is [vchkpass](https://github.com/indimail/indimail-mta/wiki/vchkpass.8) which is a checkpassword based authentication module. Authentication modules are discussed [here](#authentication-modules).
+ * PAM module is [pam-multi - PAM modules for flexible, configurable authentication methods](https://github.com/indimail/indimail-virtualdomains/tree/master/pam-multi-x "pam-multi"). This is discussed in detail [here](#pam-multi-framework).
+ * NSS is through [nssd - providing Name Service Switch](https://github.com/indimail/indimail-virtualdomains/tree/master/nssd-xi "nssd"). This is discussed in detail [here](#name-service-switch-daemon---nssd).
 
 
 [Dovecot](https://www.dovecot.org/) is an open source IMAP and POP3 server for Linux/UNIX-like systems, written with security primarily in mind. Dovecot is an excellent choice for both small and large installations. It's fast, simple to set up, requires no special administration and it uses very little memory. Though I do not use dovecot, I have heard excellent reviews from users about dovecot. It took me less than 20 minutes to download dovecot today and have it working with IndiMail with all existing mails intact and accessible. So at the moment, my IndiMail installation is working with both courier-imap and dovecot simultaneously (with different IMAP/POP3 ports assigned to courier-imap and dovecot). dovecot isn't as modular and pluggable as courier-imap. Also it isn'textremely supervise friendly like courier-imap and you will need to install and configure it outside supervise.
@@ -5833,7 +5833,7 @@ You can now configure MRTG Graphs to show statistics for IndiMail. You need to h
 
 `$ sudo yum install mrtg`
 
-Bulk of the statistics is generated by a utility [qmailmrtg](https://github.com/mbhangui/indimail-mta/wiki/qmailmrtg.1) that reads log files created by <b>multilog</b> in <u>/var/log/svc</u> directory. The statistics generated by qmailmrtg includes service uptimes. At the moment the graphs display status of SMTP, IMAP, POP3 (plain and encrypted) services, inlookup cache service, MySQL service, tinydns and dnscache services. Few of the graphs (load, disk, network and memory utilization) come from snmpd. If you don't have snmpd installed, these graphs won't be shown
+Bulk of the statistics is generated by a utility [qmailmrtg](https://github.com/indimail/indimail-mta/wiki/qmailmrtg.1) that reads log files created by <b>multilog</b> in <u>/var/log/svc</u> directory. The statistics generated by qmailmrtg includes service uptimes. At the moment the graphs display status of SMTP, IMAP, POP3 (plain and encrypted) services, inlookup cache service, MySQL service, tinydns and dnscache services. Few of the graphs (load, disk, network and memory utilization) come from snmpd. If you don't have snmpd installed, these graphs won't be shown
 
 You need to execute the following steps (assuming your web server document root is /var/www/html)
 
@@ -6821,7 +6821,7 @@ You can make your changes to the container and commit changes by using the docke
 I am also a newbie as far as docker is concerned. Do let me know your experience with network settings and other advanced docker topics, that you may be familiar with. Do send few bottles of beer my way if you can.
 
 NOTE:
-Currently IndiMail supports both docker and podman. Both commands are interchangeble. There is much that has happened since this chapter was written in Apr 2016. You should be actually reading [this](https://github.com/mbhangui/indimail-docker/blob/master/README.md "Docker README ").
+Currently IndiMail supports both docker and podman. Both commands are interchangeble. There is much that has happened since this chapter was written in Apr 2016. You should be actually reading [this](https://github.com/indimail/indimail-docker/blob/master/README.md "Docker README ").
 
 # Taking Backups
 
@@ -7024,15 +7024,15 @@ $ sudo svps -a
 
 ## Docker / Podman Repository
 
-The [docker repository](https://github.com/mbhangui?tab=packages) can be used to pull docker/podman images for indimail/indimail-mta
+The [docker repository](https://github.com/orgs/indimail/packages) can be used to pull docker/podman images for indimail/indimail-mta
 
-For latest details refer to [README](https://github.com/mbhangui/indimail-docker/blob/master/README.md "Docker README ")
+For latest details refer to [README](https://github.com/indimail/indimail-docker/blob/master/README.md "Docker README ")
 
-Earlier I used to provide docker / podman container images on [docker hub](https://hub.docker.com/u/cprogrammer) alone. But recently (Jul 25, 2021) docker, without any warning or communication, on the sly, has removed the ability to connect with a github account unless you pay them dollars every month - a questionable business practice. Lucky for me we have github. I now mirror the containers to [Github Container Registry](https://github.blog/2020-09-01-introducing-github-container-registry/). The containers are built and pushed to both docker and github container registry automatically using action scripts. You can also build your own images by referring to [README](https://github.com/mbhangui/indimail-docker/blob/master/README.md).
+Earlier I used to provide docker / podman container images on [docker hub](https://hub.docker.com/u/cprogrammer) alone. But recently (Jul 25, 2021) docker, without any warning or communication, on the sly, has removed the ability to connect with a github account unless you pay them dollars every month - a questionable business practice. Lucky for me we have github. I now mirror the containers to [Github Container Registry](https://github.blog/2020-09-01-introducing-github-container-registry/). The containers are built and pushed to both docker and github container registry automatically using action scripts. You can also build your own images by referring to [README](https://github.com/indimail/indimail-docker/blob/master/README.md).
 
 ## GIT Repository
 
-IndiMail has a git repository at [here](https://github.com/mbhangui/indimail-virtualdomains "IndiMail")
+IndiMail has a git repository at [here](https://github.com/indimail/indimail-virtualdomains "IndiMail")
 
 # Support Information
 
@@ -7386,49 +7386,49 @@ Some of the features available in this package
 
 This is obtained from github actions defined in each of the indimail repository. If during the development process, anything breaks, it will be visible here.
 
-[![indimail ubuntu, mac osx ci](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-c-cpp.yml)
-[![indimail freebsd ci](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-freebsd.yml)
-[![pam-multi Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/pam-multi-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/pam-multi-c-cpp.yml)
-[![pam-multi FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/pam-multi-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/pam-multi-freebsd.yml)
-[![nssd Ubuntu CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/nssd-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/nssd-c-cpp.yml)
-[![nssd FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/nssd-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/nssd-freebsd.yml)
-[![iwebadmin Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-c-cpp.yml)
-[![iwebadmin FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/iwebadmin-freebsd.yml)
-[![courier-imap Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-c-cpp.yml)
-[![courier-imap FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/courier-imap-freebsd.yml)
-[![fetchmail Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/fetchmail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/fetchmail-c-cpp.yml)
-[![fetchmail FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/fetchmail-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/fetchmail-freebsd.yml)
-[![indimail-spamfilter Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-spamfilter-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-spamfilter-c-cpp.yml)
-[![indimail-spamfilter FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-spamfilter-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-spamfilter-freebsd.yml)
-[![bogofilter-wordlist Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-c-cpp.yml)
-[![bogofilter-wordlist FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-freebsd.yml)
-[![indimail-utils Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml)
-[![indimail-utils FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indimail-utils-freebsd.yml)
-[![procmail Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/procmail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/procmail-c-cpp.yml)
-[![procmail FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/procmail-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/procmail-freebsd.yml)
-[![logalert Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-c-cpp.yml)
-[![logalert FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/logalert-freebsd.yml)
-[![indium Ubuntu CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-c-cpp.yml)
-[![indium FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/indium-freebsd.yml)
-[![ircube Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-ubuntu-osx.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-ubuntu-osx.yml)
-[![ircube FreeBSD CI](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-virtualdomains/actions/workflows/ircube-freebsd.yml)
+[![indimail ubuntu, mac osx ci](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indimail-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indimail-c-cpp.yml)
+[![indimail freebsd ci](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indimail-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indimail-freebsd.yml)
+[![pam-multi Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/pam-multi-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/pam-multi-c-cpp.yml)
+[![pam-multi FreeBSD CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/pam-multi-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/pam-multi-freebsd.yml)
+[![nssd Ubuntu CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/nssd-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/nssd-c-cpp.yml)
+[![nssd FreeBSD CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/nssd-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/nssd-freebsd.yml)
+[![iwebadmin Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/iwebadmin-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/iwebadmin-c-cpp.yml)
+[![iwebadmin FreeBSD CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/iwebadmin-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/iwebadmin-freebsd.yml)
+[![courier-imap Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/courier-imap-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/courier-imap-c-cpp.yml)
+[![courier-imap FreeBSD CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/courier-imap-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/courier-imap-freebsd.yml)
+[![fetchmail Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/fetchmail-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/fetchmail-c-cpp.yml)
+[![fetchmail FreeBSD CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/fetchmail-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/fetchmail-freebsd.yml)
+[![indimail-spamfilter Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indimail-spamfilter-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indimail-spamfilter-c-cpp.yml)
+[![indimail-spamfilter FreeBSD CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indimail-spamfilter-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indimail-spamfilter-freebsd.yml)
+[![bogofilter-wordlist Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-c-cpp.yml)
+[![bogofilter-wordlist FreeBSD CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/bogofilter-wordlist-freebsd.yml)
+[![indimail-utils Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indimail-utils-c-cpp.yml)
+[![indimail-utils FreeBSD CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indimail-utils-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indimail-utils-freebsd.yml)
+[![procmail Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/procmail-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/procmail-c-cpp.yml)
+[![procmail FreeBSD CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/procmail-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/procmail-freebsd.yml)
+[![logalert Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/logalert-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/logalert-c-cpp.yml)
+[![logalert FreeBSD CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/logalert-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/logalert-freebsd.yml)
+[![indium Ubuntu CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indium-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indium-c-cpp.yml)
+[![indium FreeBSD CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indium-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/indium-freebsd.yml)
+[![ircube Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/ircube-ubuntu-osx.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/ircube-ubuntu-osx.yml)
+[![ircube FreeBSD CI](https://github.com/indimail/indimail-virtualdomains/actions/workflows/ircube-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-virtualdomains/actions/workflows/ircube-freebsd.yml)
 
-[![libqmail Ubuntu, Mac OSX](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-c-cpp.yml)
-[![libqmail FreeBSD](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-freebsd.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-freebsd.yml)
-[![libdkim2 Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim2-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim2-c-cpp.yml)
-[![libdkim2 FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim2-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim2-freebsd.yml)
-[![libsrs2 Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-c-cpp.yml)
-[![libsrs2 FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-freebsd.yml)
-[![indimail-mta Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml)
-[![indimail-mta FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-freebsd.yml)
-[![daemontools Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-c-cpp.yml)
-[![daemontools FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-freebsd.yml)
-[![ucspi-tcp Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-c-cpp.yml)
-[![ucspi-tcp FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-freebsd.yml)
+[![libqmail Ubuntu, Mac OSX](https://github.com/indimail/libqmail/actions/workflows/libqmail-c-cpp.yml/badge.svg)](https://github.com/indimail/libqmail/actions/workflows/libqmail-c-cpp.yml)
+[![libqmail FreeBSD](https://github.com/indimail/libqmail/actions/workflows/libqmail-freebsd.yml/badge.svg)](https://github.com/indimail/libqmail/actions/workflows/libqmail-freebsd.yml)
+[![libdkim2 Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-mta/actions/workflows/libdkim2-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-mta/actions/workflows/libdkim2-c-cpp.yml)
+[![libdkim2 FreeBSD CI](https://github.com/indimail/indimail-mta/actions/workflows/libdkim2-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-mta/actions/workflows/libdkim2-freebsd.yml)
+[![libsrs2 Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-mta/actions/workflows/libsrs2-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-mta/actions/workflows/libsrs2-c-cpp.yml)
+[![libsrs2 FreeBSD CI](https://github.com/indimail/indimail-mta/actions/workflows/libsrs2-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-mta/actions/workflows/libsrs2-freebsd.yml)
+[![indimail-mta Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml)
+[![indimail-mta FreeBSD CI](https://github.com/indimail/indimail-mta/actions/workflows/indimail-mta-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-mta/actions/workflows/indimail-mta-freebsd.yml)
+[![daemontools Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-mta/actions/workflows/daemontools-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-mta/actions/workflows/daemontools-c-cpp.yml)
+[![daemontools FreeBSD CI](https://github.com/indimail/indimail-mta/actions/workflows/daemontools-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-mta/actions/workflows/daemontools-freebsd.yml)
+[![ucspi-tcp Ubuntu, Mac OSX CI](https://github.com/indimail/indimail-mta/actions/workflows/ucspi-tcp-c-cpp.yml/badge.svg)](https://github.com/indimail/indimail-mta/actions/workflows/ucspi-tcp-c-cpp.yml)
+[![ucspi-tcp FreeBSD CI](https://github.com/indimail/indimail-mta/actions/workflows/ucspi-tcp-freebsd.yml/badge.svg)](https://github.com/indimail/indimail-mta/actions/workflows/ucspi-tcp-freebsd.yml)
 
 # Performance / Benchmarks
 
-As stated earlier, indimal-mta was built for supporting few million users with as little hardware as possible. The queue design gives indimail-mta unparalled performance. All details are available [here](https://github.com/mbhangui/indimail-mta/tree/master/indimail-mta-x/qmail-perf).
+As stated earlier, indimal-mta was built for supporting few million users with as little hardware as possible. The queue design gives indimail-mta unparalled performance. All details are available [here](https://github.com/indimail/indimail-mta/tree/master/indimail-mta-x/qmail-perf).
 
 ## Observations
 
@@ -7449,7 +7449,7 @@ Results on [Google Sheet](https://docs.google.com/spreadsheets/d/1Dfr1c1RXh18Lc4
 
 # Credits
 
-This project has been built on the work of many. If I have missed out anyone, do let me know and I will be glad to add it to the [list](https://github.com/mbhangui/indimail-mta/blob/master/indimail-mta-x/doc/CREDITS.md). This is a comprehensive list and I have tried by best to list all contributions made by other whose work I have picked up to build bits and pieces of IndiMail.
+This project has been built on the work of many. If I have missed out anyone, do let me know and I will be glad to add it to the [list](https://github.com/indimail/indimail-mta/blob/master/indimail-mta-x/doc/CREDITS.md). This is a comprehensive list and I have tried by best to list all contributions made by other whose work I have picked up to build bits and pieces of IndiMail.
 
 # History
 
@@ -7457,7 +7457,7 @@ Both indimail-mta and indimail-virtualdomains started in late 1999 as a combined
 
 indimail-mta started as a unmodified qmail-1.03. This was when I was employed by an ISP in late 1999. The ISP was using [Critical Path's ISOCOR](https://www.wsj.com/articles/SB940514435217077581) for providing Free and Paid email service. Then the dot com burst happened and ISP didn't have money to spend on upgrading the E3500, E450 [Sun Enterprise servers](https://en.wikipedia.org/wiki/Sun_Enterprise). The mandate was to move to an OSS/FS solution. After evaluating sendmail, postfix and qmail, we chose qmail. During production deployment, qmail couldn't scale on these servers. The issue was the queue's todo count kept on increasing. We applied the <b>todo-proc</b> and the <b>big-todo</b> patch, but still we couldn't handle the incoming email rate. By now the customers were screaming, the corporate users were shooting out nasty emails. We tried a small hack which solved this problem. Compiled 20 different qmail setups, with conf-qmail as /var/qmail1, /var/qmail2, etc. Run <b>qmail-send</b> for each of these instance. A small shim was written which would get the current time and divide by 20. The remainder was used to do exec of /var/qmail1/bin/qmail-queue, /var/qmail2/bin/qmail-queue, etc. The shim was copied as /var/qmail/bin/qmail-queue. The IO problem got solved. But the problem with this solution was compiling the qmail source 20 times and copying the shim as <b>qmail-queue</b>. You couldn't compile qmail on one machine and use the backup of binaries on another machine. Things like uid, gid, the paths were all hardcoded in the source. That is how the base of indimail-mta took form by removing each and every hard coded uids, gids and paths. indimail-mta still does the same thing that was done in the year 2000. The installation creates multiple queues - /var/indimail/queue/queue1, /var/indimail/queue/queue2, etc. A new daemon named qscheduler uses QUEUE\_COUNT env variable to run multiple <b>qmail-send</b> instances. Each <b>qmail-send</b> instance picks up mail from a particular queue. All client programs use <b>qmail-queue</b> to load balance the incoming email across multiple queues. At one point of time in late 2000, indimail was handling 3.2 million users with two E450 server as relay servers (indimail-mta), one E3500 Sun Microsystem servers and 5 Compaq Proliant DL380 running indimail-virtualdomains.
 
-indimail-virtualdomain started with a modified vpopmail base that could handle a distributed setup - Same domain on multiple servers. Having this kind of setup made the control file smtproutes unviable. email would arrive at a relay server for user@domain. But the domain '@domain' was present on multiple hosts, with each host having it's own set of users. This required special routing and modification of qmail (especially <b>qmail-remote</b>) to route the traffic to the correct host. <b>vdelivermail</b> to had to be written to deliver email for a local domain to a remote host, in case the user wasn't present on the current host. New MySQL tables were created to store the host information for a user. This table would be used by <b>qmail-local</b>, <b>qmail-remote</b>, <b>vdelivermail</b> to route the mail to the write host. All this complicated stuff had to be done because the ISP where I worked, had no money to buy/upgrade costly servers to cater to users, who were multiplying at an exponential rate. The govt had just opened the license for providing internet services to private players. These were Indians who were tasting internet and free email for the first time. So the solution we decided was to buy multiple intel servers [Compaq Proliant](https://en.wikipedia.org/wiki/ProLiant) running Linux and make the qmail/vpopmail solution horizontally scalable. This was the origin of indimail-1.x which borrowed code from vpopmail, modified it for a domain on multiple hosts. indimail-2.x was a complete rewrite using djb style, using [libqmail](https://github.com/mbhangui/libqmail) as the standard library for all basic operations. All functions were discarded because they used the standard C library. The problem with indimail-2.x was linking with MySQL libraries, which caused significant issues building binary packages on [openSUSE build service](https://build.opensuse.org/). Binaries got built with MySQL/MariaDB libraries pulled by OBS, but when installed on a target machine, the user would have a completely different MySQL/MariaDB setup. Hence a decision was taken to load the library at runtime using dlopen/dlsym. This was the start of indimail-3.x. The source was moved from sourceforge.net to github and the project renamed as indimail-virtualdomains from the original name IndiMail. The modified source code of qmail was moved to github as indimail-mta.
+indimail-virtualdomain started with a modified vpopmail base that could handle a distributed setup - Same domain on multiple servers. Having this kind of setup made the control file smtproutes unviable. email would arrive at a relay server for user@domain. But the domain '@domain' was present on multiple hosts, with each host having it's own set of users. This required special routing and modification of qmail (especially <b>qmail-remote</b>) to route the traffic to the correct host. <b>vdelivermail</b> to had to be written to deliver email for a local domain to a remote host, in case the user wasn't present on the current host. New MySQL tables were created to store the host information for a user. This table would be used by <b>qmail-local</b>, <b>qmail-remote</b>, <b>vdelivermail</b> to route the mail to the write host. All this complicated stuff had to be done because the ISP where I worked, had no money to buy/upgrade costly servers to cater to users, who were multiplying at an exponential rate. The govt had just opened the license for providing internet services to private players. These were Indians who were tasting internet and free email for the first time. So the solution we decided was to buy multiple intel servers [Compaq Proliant](https://en.wikipedia.org/wiki/ProLiant) running Linux and make the qmail/vpopmail solution horizontally scalable. This was the origin of indimail-1.x which borrowed code from vpopmail, modified it for a domain on multiple hosts. indimail-2.x was a complete rewrite using djb style, using [libqmail](https://github.com/indimail/libqmail) as the standard library for all basic operations. All functions were discarded because they used the standard C library. The problem with indimail-2.x was linking with MySQL libraries, which caused significant issues building binary packages on [openSUSE build service](https://build.opensuse.org/). Binaries got built with MySQL/MariaDB libraries pulled by OBS, but when installed on a target machine, the user would have a completely different MySQL/MariaDB setup. Hence a decision was taken to load the library at runtime using dlopen/dlsym. This was the start of indimail-3.x. The source was moved from sourceforge.net to github and the project renamed as indimail-virtualdomains from the original name IndiMail. The modified source code of qmail was moved to github as indimail-mta.
 
 # See also
 
