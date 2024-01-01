@@ -35,7 +35,7 @@ jobs:
     - name: build indimail-spamfilter
       run: |
         cd indimail-spamfilter-x
-        if [ "${OS}" = "macos-latest" ] ; then env CPPFLAGS="-I/opt/local/include -I/usr/local/Cellar/berkeley-db/18.1.40_1/include" LDFLAGS=-L/usr/local/Cellar/berkeley-db/18.1.40_1/lib ./default.configure --with-libdb-prefix=/usr/local/Cellar/berkeley-db/18.1.40_1/lib; else ./default.configure; fi
+        if [ "${OS}" = "macos-latest" ] ; then env CPPFLAGS="-I/opt/local/include -I/usr/local/Cellar/berkeley-db/18.1.40_2/include" LDFLAGS=-L/usr/local/Cellar/berkeley-db/18.1.40_2/lib ./default.configure --with-libdb-prefix=/usr/local/Cellar/berkeley-db/18.1.40_2/lib; else ./default.configure; fi
         if [ "${OS}" = "macos-latest" ] ; then env XML_CATALOG_FILES=/usr/local/etc/xml/catalog make; else make; fi
       env:
         OS: ${{ matrix.host }}
