@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  *
- * $Id: iwebadmin.c,v 1.35 2023-08-06 21:16:55+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.36 2023-10-24 11:11:57+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -882,6 +882,9 @@ quickAction(char *username, int action)
 
 /*
  * $Log: iwebadmin.c,v $
+ * Revision 1.36  2023-10-24 11:11:57+05:30  Cprogrammer
+ * added few configurable debug statements
+ *
  * Revision 1.35  2023-08-06 21:16:55+05:30  Cprogrammer
  * added configurable mrtg url
  *

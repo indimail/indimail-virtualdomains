@@ -139,7 +139,7 @@ static int      update_passwd(pam_handle_t *, const char *, const char *);
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: pam-multi.c,v 1.20 2021-07-18 08:27:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: pam-multi.c,v 1.21 2023-11-13 10:26:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 /*
@@ -1321,6 +1321,9 @@ struct pam_module _pam_multi = {
 
 /*
  * $Log: pam-multi.c,v $
+ * Revision 1.21  2023-11-13 10:26:36+05:30  Cprogrammer
+ * include crypt.h
+ *
  * Revision 1.20  2021-07-18 08:27:16+05:30  Cprogrammer
  * fixed salt size
  *
