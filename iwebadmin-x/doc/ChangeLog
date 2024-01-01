@@ -1,5 +1,5 @@
 * XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <@email@> @version@-@release@%{?dist}
-Release @version@-@release@ Start 28/07/2023 End --/--/20--
+Release @version@-@release@ Start 28/07/2023 End 23/10/2023
 - 28/07/2023
 1. iwebadmin.c: exit with specific error codes defined in iwebadmin.h to
    indicate the error and help testing iwebadmin with curl
@@ -12,6 +12,7 @@ Release @version@-@release@ Start 28/07/2023 End --/--/20--
 6. user.c: remove user from mailing list subscriptions in 'Delete User"
 - 24/10/2023 indimail-3.4.5
 7. iwebadmin.c, template.c: added few configurable debug statements
+- 01/01/2024 - indimail-3.4.6
 
 * Tue Jan 31 2023 03:34:39 +0000 Manvendra Bhangui <iwebadmin@indimail.org> 2.1.1-1.1%{?dist}
 Release 2.1.1-1.1 Start 14/09/2022 End 31/01/2023
