@@ -113,7 +113,7 @@ If you have your own scripts to start these services, then you need to set the D
 
 This will allow users of the primary domain to set their pop user name to <b>user</b> instead of <b>user%vdomain</b> / <b>user@vdomain</b>.
 
-See the documentation for [vadddomain](https://github.com/mbhangui/indimail-mta/wiki/vadddomain.1) for all options.
+See the documentation for [vadddomain](https://github.com/indimail/indimail-mta/wiki/vadddomain.1) for all options.
 
 ## How do I  pick up my virtual domain email? Virtual domain users need to use the following format for their user name when popping in:
 
@@ -127,7 +127,7 @@ Microsoft clients may the following syntax:
 
     user@vdomain
 
-If you don't include the %vdomain or @vdomain, IndiMail will assume it is either a /etc/passwd user or a user in /etc/indimail/users (See [qmail-users(5)](https://github.com/mbhangui/indimail-mta/wiki/qmail-users.5)) or configured with "default domain".
+If you don't include the %vdomain or @vdomain, IndiMail will assume it is either a /etc/passwd user or a user in /etc/indimail/users (See [qmail-users(5)](https://github.com/indimail/indimail-mta/wiki/qmail-users.5)) or configured with "default domain".
 
 ## How do I forward all mail that doesn't match any users or .qmail files for a particular domain?
 
@@ -139,7 +139,7 @@ or
 
     |/sbin/vdelivermail '' user@domain
 
-See the documentation for [vfilter](https://github.com/mbhangui/indimail-mta/wiki/vfilter.8) and [vdelivermail](https://github.com/mbhangui/indimail-mta/wiki/vdelivermail.8)
+See the documentation for [vfilter](https://github.com/indimail/indimail-mta/wiki/vfilter.8) and [vdelivermail](https://github.com/indimail/indimail-mta/wiki/vdelivermail.8)
 
 ## How do I bounce all mail that doesn't match any users or .qmail files for a particular domain?
 
@@ -163,7 +163,7 @@ or
 
 ## How do hard quota's for users work? How do I set a default quota for new user creation
 
-Read this [document](https://github.com/mbhangui/indimail-mta/wiki/0-IndiMail-Wiki#maildir-quotas)
+Read this [document](https://github.com/indimail/indimail-mta/wiki/0-IndiMail-Wiki#maildir-quotas)
 
 ## I want to use a different file name than /etc/indimail/tcp/tcp.smtp for my static IPs for permanent relay.
 
@@ -173,7 +173,7 @@ For compile time configuration, pass --enable-tcpsever-file to ./configure
 
 For binary installations, edit your tcpserver run file and change the -x option.
 
-See the documentation for [tcpserver](https://github.com/mbhangui/indimail-mta/wiki/tcpserver.1) for all options.
+See the documentation for [tcpserver](https://github.com/indimail/indimail-mta/wiki/tcpserver.1) for all options.
 
 ## How can we use an IP address per domain, so that users don't need to authenticate with user%domain or user@domain,they just want to use "user"?
 
@@ -183,13 +183,13 @@ Then run the below command for each IP you want to link to a domain.
 
     $ vipmap -a IP vdomain
 
-Consult the documentation for [vipmap](https://github.com/mbhangui/indimail-mta/wiki/vipmap.1) for all options
+Consult the documentation for [vipmap](https://github.com/indimail/indimail-mta/wiki/vipmap.1) for all options
 
 ## How do I alias a new virtual domain to a current virtualdomain?
 
     $ sudo vaddaliasdomain newdomain olddomain
 
-See [vaddaliasdomain](https://github.com/mbhangui/indimail-mta/wiki/vaddaliasdomain.1)
+See [vaddaliasdomain](https://github.com/indimail/indimail-mta/wiki/vaddaliasdomain.1)
 
 ## How do I post a email to all users of a virtualdomain or a set of domains?
 
@@ -197,18 +197,18 @@ use the new vbulletin program:
 
     $ vbulletin -f email_file vdomain1 vdomain2 ...
 
-To see all the available options see this documentation on [vbulletin](https://github.com/mbhangui/indimail-mta/wiki/vbulletin.1).
+To see all the available options see this documentation on [vbulletin](https://github.com/indimail/indimail-mta/wiki/vbulletin.1).
 
 ## How do I setup IndiMail to talk to MySQL
 
 Learn how to use dbinfo or the control file mcdinfo. A non-distributed setup uses the control file host.mysql
-Read this [document](https://github.com/mbhangui/indimail-mta/wiki/0-IndiMail-Wiki#mysql-control-file)
+Read this [document](https://github.com/indimail/indimail-mta/wiki/0-IndiMail-Wiki#mysql-control-file)
 
 ## I want to upgrade IndiMail, what do I need to worry about?
 
 Following things happen in any upgrade that involves software
 
-Binaries, library change. Sometimes database table structure change, sometimes files get new permissions. The right way to for any software to do is to handle changes seamlessly. In few cases this may not be possible where existing software configuration needs to be modified for the new software to run. Usually this gets taken care by the upgrade post install scripts. This is how indimail does it either through the upgrade scripts <b>qlocal\_upgrade</b> and <b>ilocal\_upgrade</b>. IndiMail also has a utility [ischema](https://github.com/mbhangui/indimail-mta/wiki/ischema.1), which allows custom action on every upgrade. <b>ischema</b> has the ability to update MySQL tables, run commands, edit configuration files.
+Binaries, library change. Sometimes database table structure change, sometimes files get new permissions. The right way to for any software to do is to handle changes seamlessly. In few cases this may not be possible where existing software configuration needs to be modified for the new software to run. Usually this gets taken care by the upgrade post install scripts. This is how indimail does it either through the upgrade scripts <b>qlocal\_upgrade</b> and <b>ilocal\_upgrade</b>. IndiMail also has a utility [ischema](https://github.com/indimail/indimail-mta/wiki/ischema.1), which allows custom action on every upgrade. <b>ischema</b> has the ability to update MySQL tables, run commands, edit configuration files.
 
 However, none of the users or domain get touched. So to upgrade IndiMail, you just need to run yum/dnf update, apt-get update && apt-get upgrade, zypper upgrade, etc (depending on your OS). For Source installation you need to
 
@@ -226,7 +226,7 @@ $ sudo svctool --backup=/home/mail/backup --mysqlPrefix=/usr \
     --servicedir=/service
 ```
 
-[svctool](https://github.com/mbhangui/indimail-mta/wiki/svctool.8) is the main configuration tool for IndiMail.
+[svctool](https://github.com/indimail/indimail-mta/wiki/svctool.8) is the main configuration tool for IndiMail.
 
 ## How do I log when people authenticate with pop/imap?
 
@@ -285,7 +285,7 @@ Your operating system does not know where those shared object libraries are. On 
 
 If you are running qmail-smtpd under tcpserver, you should add a -x /etc/indimail/tcp/tcp.smtp.cdb option to it. This makes sure that qmail-smtpd checks in that file for allowed relaying (on top of the ones in /etc/indimail/control/rcpthosts).
 
-The file /etc/indimail/tcp/tcp.smtpd needs to be created manually first. After that run the [qmailctl](https://github.com/mbhangui/indimail-mta/wiki/qmailctl.8) command to create the cdb file (/etc/indimail/tcp/tcp.smtp.cdb)
+The file /etc/indimail/tcp/tcp.smtpd needs to be created manually first. After that run the [qmailctl](https://github.com/indimail/indimail-mta/wiki/qmailctl.8) command to create the cdb file (/etc/indimail/tcp/tcp.smtp.cdb)
 
     $ sudo qmailctl cdb
 
@@ -297,7 +297,7 @@ Everytime a user logs into the POP3/IMAP server, his ip and a timestamp gets wri
 
 ## I want to have IndiMail access mysql as indimail and not root. What sql commands to I run?
 
-Read this [document](https://github.com/mbhangui/indimail-mta/wiki/0-IndiMail-Wiki#setting-up-mysql)
+Read this [document](https://github.com/indimail/indimail-mta/wiki/0-IndiMail-Wiki#setting-up-mysql)
 
 ## I have changed my IP address on a clustered setup. What gets affected
 
@@ -315,7 +315,7 @@ Read this [document](https://github.com/mbhangui/indimail-mta/wiki/0-IndiMail-Wi
 
 ## How to put your custom filters before queuing mail
 
-Read this chapter on [filters](https://github.com/mbhangui/indimail-mta/wiki/0-IndiMail-Wiki#writing-filters-for-indimail)
+Read this chapter on [filters](https://github.com/indimail/indimail-mta/wiki/0-IndiMail-Wiki#writing-filters-for-indimail)
 
 ## I have an atrn domain. I want to set quota while delivering
 
@@ -329,7 +329,7 @@ Have the following entry in .qmail-default
 
     |/usr/sbin/vfilter '' homedir/Maildir
 
-where <u>homedir</u> is the home directory created by vadduser for the user postmaster. See the documentation on [vatrn](https://github.com/mbhangui/indimail-mta/wiki/vatrn.1) for all options.
+where <u>homedir</u> is the home directory created by vadduser for the user postmaster. See the documentation on [vatrn](https://github.com/indimail/indimail-mta/wiki/vatrn.1) for all options.
 
 ## I have an atrn domain called etrn.dom. My users are split across multiple servers. How do I distribute mails for my users according to the server on which they belong?
 
@@ -355,7 +355,7 @@ $ valias -i /var/indimail/autoturn/chn.mysme.com/Maildir/ chn_user1@mysme.com
 $ valias -i /var/indimail/autoturn/mum.mysme.com/Maildir/ mum_user1@mysme.com
 $ valias -i /var/indimail/autoturn/mum.mysme.com/Maildir/ mum_user2@mysme.com
 ```
-See the documentation for [valias](https://github.com/mbhangui/indimail-mta/wiki/valias.1) for all options.
+See the documentation for [valias](https://github.com/indimail/indimail-mta/wiki/valias.1) for all options.
 
 4. Create the .qvirtual file in each of these subdomains to etrn.dom
 
@@ -377,7 +377,7 @@ $ vatrn -i mum.mysme.com master_mum@mysme.com
 * .qvirtual also allows mails for a domain to be delivered to any directory and the domain identified by looking up the .qvirtual file
 * xxxxxxxx is the password for the above users.
 
-See the documentation on [vatrn](https://github.com/mbhangui/indimail-mta/wiki/vatrn.1) for all options.
+See the documentation on [vatrn](https://github.com/indimail/indimail-mta/wiki/vatrn.1) for all options.
 
 ## How do I setup stupid disclaimers
 
@@ -385,11 +385,11 @@ Disclaimers are stupid and organizations too if they want disclaimers.
 
     http://www.goldmark.org/jeff/stupid-disclaimers
 
-However if your organization still insists on stupidity read this [Setting Disclaimers in your emails](https://github.com/mbhangui/indimail-mta/wiki/0-IndiMail-Wiki#setting-disclaimers-in-your-emails)
+However if your organization still insists on stupidity read this [Setting Disclaimers in your emails](https://github.com/indimail/indimail-mta/wiki/0-IndiMail-Wiki#setting-disclaimers-in-your-emails)
 
 ## How do i delete mails lying in a queue having a certain pattern. Can I use regex
 
-Use [qmail-rm](https://github.com/mbhangui/indimail-mta/wiki/qmail-rm.1) command. It can quickly delete mails matching a given pattern.
+Use [qmail-rm](https://github.com/indimail/indimail-mta/wiki/qmail-rm.1) command. It can quickly delete mails matching a given pattern.
 
 ## I have been hit by virus. My virus scanner is not able to handle the load. What should I do?
 
@@ -405,7 +405,7 @@ The behaviour of hostaccess can be modified by setting the PARANOID or DOMAIN\_M
 
 ## How do I restrict and control mail transactions between senders and recipients
 
-Read this [SMTP Access List](https://github.com/mbhangui/indimail-mta/wiki/0-IndiMail-Wiki#smtp-access-list)
+Read this [SMTP Access List](https://github.com/indimail/indimail-mta/wiki/0-IndiMail-Wiki#smtp-access-list)
 
 ## I want to run a program every time post imap/pop3 authentication for every user.
 
@@ -1150,9 +1150,9 @@ There is also a [Project Tracker](http://sourceforge.net/tracker/?group_id=23068
 Read the documentation! Most questions are answered by
 
 1. this list of frequently answered questions
-2. the [IndiMail Wiki](https://github.com/mbhangui/indimail-mta/wiki/0-IndiMail-Wiki)
+2. the [IndiMail Wiki](https://github.com/indimail/indimail-mta/wiki/0-IndiMail-Wiki)
 3. the other README pages in /usr/share/indimail/doc; and
-4. the man pages in your system man directory and [Online Man Pages](https://github.com/mbhangui/indimail-mta/wiki/1-Man-Pages).
+4. the man pages in your system man directory and [Online Man Pages](https://github.com/indimail/indimail-mta/wiki/1-Man-Pages).
 
 Your system includes a wide variety of monitoring tools to show  you what IndiMail is doing
 

@@ -323,9 +323,9 @@ Create a Work Directory
 Clone the following github repositories
 
 ```
-% git clone https://github.com/mbhangui/libqmail.git
-% git clone https://github.com/mbhangui/indimail-virtualdomains.git
-% git clone https://github.com/mbhangui/indimail-mta.git
+% git clone https://github.com/indimail/libqmail.git
+% git clone https://github.com/indimail/indimail-virtualdomains.git
+% git clone https://github.com/indimail/indimail-mta.git
 
 % cd /home/local/src
 ```

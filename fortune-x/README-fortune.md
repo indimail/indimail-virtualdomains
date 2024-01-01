@@ -6,13 +6,13 @@ The potentially offensive fortunes are not installed by default. If you're absol
 
 ## Getting this Software
 
-You will get this software as part of [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains/tree/master/fortune-x) software
+You will get this software as part of [indimail-virtualdomains](https://github.com/indimail/indimail-virtualdomains/tree/master/fortune-x) software
 
 To install 
 
 ```
 $ cd /usr/local/src
-$ git clone https://github.com/mbhangui/indimail-virtualdomains.git
+$ git clone https://github.com/indimail/indimail-virtualdomains.git
 $ cd /usr/local/src/indimail-virtualdomains/fortune-x
 $ ./default.configure
 $ make
@@ -35,7 +35,7 @@ The changes in fortune.c and fortune.man are copyrighted by me but freely distri
 
 ## Getting this Software
 
-You can get this software [here](https://github.com/mbhangui/indimail-virtualdomains/tree/master/fortune-x)
+You can get this software [here](https://github.com/indimail/indimail-virtualdomains/tree/master/fortune-x)
 
 
 ## Amy's README.Linux
@@ -132,6 +132,6 @@ Needs be.
 
 ## NOTE
 
-This version has been packaged as part of [indimail-utils package](https://github.com/mbhangui/indimail-virtualdomains)
+This version has been packaged as part of [indimail-utils package](https://github.com/indimail/indimail-virtualdomains)
 
 Send all bug reports to indimail-utils@indimail.org 

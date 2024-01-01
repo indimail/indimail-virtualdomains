@@ -6,7 +6,7 @@ This source has been hacked to extract the username, domain component from an em
 
 NSSD is experimental and without warranty.
 
-NSSD can be downloaded from [here](https://github.com/mbhangui/indimail-virtualdomains/tree/master/nssd-x)
+NSSD can be downloaded from [here](https://github.com/indimail/indimail-virtualdomains/tree/master/nssd-x)
 
 NSSD has been modified to have user and domain in the query e.g.
 
@@ -50,7 +50,7 @@ If installing from source:
 
 ```
 $ cd /usr/local/src
-$ git clone https://github.com/mbhangui/indimail-virtualdomains.git
+$ git clone https://github.com/indimail/indimail-virtualdomains.git
 $ cd /usr/local/src/indimail-virtualdomains/nssd-x
 $ ./default.configure
 $ make
@@ -232,6 +232,6 @@ Note: IndiMail's pam-multi is installed in /lib/security, lib64/security or /usr
 
 ## NOTE
 
-This version has been packaged as part of [indimail-auth package](https://github.com/mbhangui/indimail-virtualdomains)
+This version has been packaged as part of [indimail-auth package](https://github.com/indimail/indimail-virtualdomains)
 
 Send all bug reports to indimail-auth@indimail.org 

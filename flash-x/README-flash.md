@@ -38,7 +38,7 @@ The creation of the binaries should be as simple as "./configure;make" on a Linu
 
 ```
 $ cd /usr/local/src
-$ git clone https://github.com/mbhangui/indimail-virtualdomains.git
+$ git clone https://github.com/indimail/indimail-virtualdomains.git
 $ cd /usr/local/src/indimail-virtualdomains/flash-x
 $ ./default.configure
 $ make
@@ -129,8 +129,8 @@ A sample menu is provided with this distribution, please examine it.
 
 ## NOTE
 
-The latest stable version of flash should always be available [here](https://github.com/mbhangui/indimail-virtualdomains/tree/master/flash-x)
+The latest stable version of flash should always be available [here](https://github.com/indimail/indimail-virtualdomains/tree/master/flash-x)
 
-This version has been packaged as part of [indimail-utils package](https://github.com/mbhangui/indimail-virtualdomains)
+This version has been packaged as part of [indimail-utils package](https://github.com/indimail/indimail-virtualdomains)
 
 Send all bug reports to indimail-utils@indimail.org 

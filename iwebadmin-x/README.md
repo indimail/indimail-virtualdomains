@@ -10,16 +10,16 @@ Requirements
 
 - A web server [Apache](http://www.apache.org/)
 
-- [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains)
+- [indimail-virtualdomains](https://github.com/indimail/indimail-virtualdomains)
 
 - ezmlm / ezmlm-idx installed in /usr/bin
     - http://cr.yp.to/ezmlm.html
     - http://www.ezmlm.org/
-    - https://github.com/mbhangui/ezmlm-idx
+    - https://github.com/indimail/ezmlm-idx
 
 # Updates?
 
-Latest version is available at https://github.com/mbhangui/indimail-virtualdomains/tree/master/iwebadmin-x. Please refer your suggestions/bug reports to iwebadmin@indimail.org
+Latest version is available at https://github.com/indimail/indimail-virtualdomains/tree/master/iwebadmin-x. Please refer your suggestions/bug reports to iwebadmin@indimail.org
 
 # Install guide 
 

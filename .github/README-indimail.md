@@ -1867,8 +1867,8 @@ Training bogofilter requires creating a bogofilter databases with corpus of HAM 
 ```
 $ mkdir /home/manny/bogofilter
 $ cd /home/manny/bogofilter
-$ curl -s https://raw.githubusercontent.com/mbhangui/indimail-virtualdomains/master/bogofilter-wordlist-x/download.sh | sh
-$ curl -s https://raw.githubusercontent.com/mbhangui/indimail-virtualdomains/master/bogofilter-wordlist-x/training.sh | sh
+$ curl -s https://raw.githubusercontent.com/indimail/indimail-virtualdomains/master/bogofilter-wordlist-x/download.sh | sh
+$ curl -s https://raw.githubusercontent.com/indimail/indimail-virtualdomains/master/bogofilter-wordlist-x/training.sh | sh
 $ sudo cp wordlist.db /etc/indimail
 $ sudo chmod 644 /etc/indimail/wordlist.db
 $ sudo chown indimail:indimail /etc/indimail/wordlist.db

@@ -15,13 +15,13 @@ alterMIME is part of the suite of software which includes Inflex email scanner, 
 
 ## Getting this Software
 
-You will get this software as part of [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains/tree/master/fortune-x) software
+You will get this software as part of [indimail-virtualdomains](https://github.com/indimail/indimail-virtualdomains/tree/master/fortune-x) software
 
 To install 
 
 ```
 $ cd /usr/local/src
-$ git clone https://github.com/mbhangui/indimail-virtualdomains.git
+$ git clone https://github.com/indimail/indimail-virtualdomains.git
 $ cd /usr/local/src/indimail-virtualdomains/altermime-x
 $ ./default.configure
 $ make
@@ -30,6 +30,6 @@ $ sudo make install-strip
 
 ## NOTE
 
-This version has been packaged as part of [indimail-utils package](https://github.com/mbhangui/indimail-virtualdomains)
+This version has been packaged as part of [indimail-utils package](https://github.com/indimail/indimail-virtualdomains)
 
 Send all bug reports to indimail-utils@indimail.org 

@@ -2,7 +2,7 @@
 
 mpack and munpack are utilities for encoding and decoding (respectively) binary files in MIME (Multipurpose Internet Mail Extensions) format mail messages.  For compatibility with older forms of transferring binary files, the munpack program can also decode messages in split-uuencoded format. The Macintosh version can also decode messages in split-BinHex format.
 
-The canonical [FTP site for this software](ftp.andrew.cmu.edu:pub/mpack/) is dead. Binaries are no longer provided. The pc, os2, amiga and archimedes ports have been removed. The mac version probably doesn't compile anymore, but is still included (MacOS X users can use the unix version...). You can however download mpack [here](https://github.com/mbhangui/indimail-virtualdomains/tree/master/mpack-x). mpack also comes as part of indimail-utils package from [indimail-virtualdomains](https://github.com/mbhangui/indimail-virtualdomains)
+The canonical [FTP site for this software](ftp.andrew.cmu.edu:pub/mpack/) is dead. Binaries are no longer provided. The pc, os2, amiga and archimedes ports have been removed. The mac version probably doesn't compile anymore, but is still included (MacOS X users can use the unix version...). You can however download mpack [here](https://github.com/indimail/indimail-virtualdomains/tree/master/mpack-x). mpack also comes as part of indimail-utils package from [indimail-virtualdomains](https://github.com/indimail/indimail-virtualdomains)
 
 This MIME implementation is intended to be as simple and portable as possible.  For a slightly more sophisticated MIME implementation, see the program MetaMail, available via anonymous FTP to thumper.bellcore.com, in directory pub/nsb
 
@@ -39,7 +39,7 @@ mpack uses autoconf and automake on unix.  refer to INSTALL for more information
 
 ```
 $ cd /usr/local/src
-$ git clone https://github.com/mbhangui/indimail-virtualdomains.git
+$ git clone https://github.com/indimail/indimail-virtualdomains.git
 $ cd /usr/local/src/indimail-virtualdomains/mpack-x
 $ ./default.configure
 $ make
@@ -180,7 +180,7 @@ Written by John G. Myers, jgm+@cmu.edu
 
 The mac version was written by Christopher J. Newman, chrisn+@cmu.edu
 
-This version has been packaged as part of [indimail-utils package](https://github.com/mbhangui/indimail-virtualdomains)
+This version has been packaged as part of [indimail-utils package](https://github.com/indimail/indimail-virtualdomains)
 
 Send all bug reports to indimail-utils@indimail.org 
 
