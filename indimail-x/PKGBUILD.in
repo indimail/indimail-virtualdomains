@@ -1,5 +1,8 @@
 # Maintainer: @email@
 # $Log: PKGBUILD.in,v $
+# Revision 1.10  2024-01-02 18:54:10+05:30  Cprogrammer
+# renamed cronlist.i to indimail.cron
+#
 # Revision 1.9  2022-11-22 19:10:48+05:30  Cprogrammer
 # added gzip to makedepends
 #
@@ -28,7 +31,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.9 2022-11-22 19:10:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.10 2024-01-02 18:54:10+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail' 'libindimail')
 pkgver=@version@
@@ -88,7 +91,7 @@ build() {
 package_indimail() {
   backup=(${_myconfdir}/{'host.mysql','host.master','host.cntrl'}
         ${_myconfdir}/{'osh.table','controfiles.i','procailrc','indimail.cnf'}
-        ${_myconfdir}/{'cronlist.i','indimail.mrtg.cfg','headerlist'}
+        ${_myconfdir}/{'indimail.cron','indimail.mrtg.cfg','headerlist'}
         ${_myconfdir}/tcp/tcp.poppass)
   depends=('shadow' 'mysql' 'indimail-mta>2.6' 'libindimail' 'gsasl')
   install=archpkg1.install
@@ -507,9 +510,9 @@ post_install() {
 
   ${_prefix}/sbin/svctool --servicedir=${_servicedir} --autorefresh="0 $svc_list"
 
-  if [ -f ${_sysconfdir}/cronlist.i -a -d ${confdir}/cron.d ] ; then
+  if [ -f ${_sysconfdir}/indimail.cron -a -d ${confdir}/cron.d ] ; then
     echo "adding cron entries"
-    cp ${_sysconfdir}/cronlist.i ${confdir}/cron.d
+    cp ${_sysconfdir}/indimail.cron ${confdir}/cron.d
   fi
 
   if [ -f ${_libexecdir}/iupgrade.sh ] ; then
@@ -728,7 +731,7 @@ post_remove() {
 
   if [ -d ${confdir}/cron.d ] ; then
     echo "removing cron entries"
-    rm -f ${confdir}/cron.d/cronlist.i
+    rm -f ${confdir}/cron.d/indimail.cron
   fi
 
   echo "removing logs"
