@@ -141,7 +141,11 @@
 #    d - if ham or unsure, the spamicity
 #        if spam, difference of spamicity from 1.0
 #
-#    r - runtype
+#    r - runtype 
+#        n - registered as ham
+#        s - registered as spam
+#        N - regisered as ham  + unregistered as spam
+#        S - regisered as spam + unregistered as ham
 #    w - word count
 #    m - message count
 #
