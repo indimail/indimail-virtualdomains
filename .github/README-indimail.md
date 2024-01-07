@@ -149,10 +149,13 @@ Table of Contents
       * [DKIM verification during SMTP](#dkim-verification-during-smtp)
       * [DKIM verification during local delivery](#dkim-verification-during-local-delivery)
       * [DKIM signing during SMTP](#dkim-signing-during-smtp)
-      * [DKIM signing during remote delivery](#dkim-signing-during-remote-delivery)
+      * [DKIM signing, verification during remote,local delivery](#dkim-signing-verification-during-remote-local-delivery)
+         * [Using FILTERARGS environment variable](#using-filterargs-environment-variable)
+         * [Using filterargs control file](#using-filterargs-control-file)
       * [DKIM signing during mail injection](#dkim-signing-during-mail-injection)
       * [DKIM Author Domain Signing Practices](#dkim-author-domain-signing-practices)
       * [Testing outbound signatures](#testing-outbound-signatures)
+      * [DKIM signing for bounces](#dkim-signing-for-bounces)
    * [iwebadmin – Web Administration of IndiMail](#iwebadmin--web-administration-of-indimail)
    * [Publishing statistics for IndiMail Server](#publishing-statistics-for-indimail-server)
    * [RoundCube Installation for IndiMail](#roundcube-installation-for-indimail)
@@ -1518,7 +1521,7 @@ NOTE: you can exit with value 0 instead of calling the maildirdeliver program to
 
 ## Using IndiMail rule based filter - vfilter
 
-IndiMail's vfilter(8) mechanism allows you to create rule based filter based on any keyword in the message headers or message body. You can create a vfilter by calling the <b>vcfilter</b>(1) program.
+indimail-mta's [filterit](https://github.com/indimail/indimail-mta/wiki/filterit.1) or IndiMail's [vfilter](https://github.com/indimail/indimail-mta/wiki/vfilter.8) mechanism allows you to create rule based filter based on any keyword in the message headers or message body. You can create a vfilter by calling the [vcfilter](https://github.com/indimail/indimail-mta/wiki/vcfilter.1) program.
 
 ```
 $ vcfilter -i -t myfilter -h Subject -c 0 -k "failure notice" -f /NoDeliver -b "2|/usr/local/bin/myfilter" testuser01@example.com
@@ -1840,12 +1843,17 @@ Move QMAILQUEUE to SPAMQUEUE only if QMAILQUEUE doesn't have
 # echo "1" > MAKE_SEEKABLE
 exit
 $
+```
 
-The below command will create an indimail filter that will automatically move
-during delivery, mails marked as spam by bogofilter for delivery to virtual domain
-<u>domain</u>.
+We can reject mails identified as spam. We could instead accept all emails but put them in the Spam folder by using [vcfilter](https://github.com/indimail/indimail-mta/wiki/vcfilter.1) to create a vfilter, or by using [filterit](https://github.com/indimail/indimail-mta/wiki/filterit.1) in [dot-qmail](https://github.com/indimail/indimail-mta/wiki/dot-qmail.5). <b>vcfilter</b> can be used only if you have <b>indimail-virtualdomains</b> installed. Examples for using both are shown below.
 
+```
 $ sudo vcfilter -i -t spamFilter -c "Starts with" -k "Yes, spamicity=" -f Spam -b 0 -h X-Bogosity prefilt@domain
+
+or
+
+in dot-qmail
+| filterit -x -h X-Bogosity -k "Yes" -c "Starts with" -a Maildir -A ./Maildir/.Spam/ -d exit -D 0 -e 0
 ```
 
 Now <b>qmail-spamfilter</b>(8) will pass every mail through bogofilter before it gets passed to <b>qmail-queue</b>(8). You can refer to chapter [IndiMail Queue Mechanism](#indimail-queue-mechanism) and look at the picture to understand how it works. bogofilter(1) will add X-Bogosity in each and every mail. A spam mail will have the value `Yes` along with a probabality number (e.g. 0.999616 below). You can configure bogofilter in /etc/indimail/bogofilter.cf. The SMTP logs will also have lines having this X-Bogosity field. A detailed mechanism is depicted pictorially in the chapter [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi).
@@ -1857,8 +1865,6 @@ X-Bogosity: Yes, spamicity=0.999616, cutoff=9.90e-01, ham_cutoff=0.00e+00, queue
 The method describe above is a global SPAM filter. It will happen for all users, unless you use something like **envrules** to unset **SPAMFILTER** environment variable. You can use **envrules** to set **SPAMFILTER** for few specific email addresses. You can refer to the chapter [Envrules](#envrules) for more details.
 
 There is another way you can do spam filtering - during local delivery (you could do for remote delivery, but what would be the point?). IndiMail allows you to call an external program during local/remote delivery by settting **QMAILLOCAL** / **QMAILREMOTE** environment variable. You could use any method to call bogofilter (either directly in *filterargs* control file, or your own script). You can see a Pictorial representation of how this happens. ![LocalFilter](indimail_spamfilter_local.png)
-
-You can also use <b>vcfilter</b>(1) to set up a filter that will place your spam emails in a designated folder for SPAM. Refer to the chapter [Writing Filters for IndiMail](#writing-filters-for-indiMail) for more details.
 
 ## Training bogofilter
 
@@ -1874,7 +1880,7 @@ $ sudo chmod 644 /etc/indimail/wordlist.db
 $ sudo chown indimail:indimail /etc/indimail/wordlist.db
 ```
 
-The above steps will download the spamasassin corpus in the directory /home/manny/bogofilter/training and also create a bogofilter spam database wordlist.db trained from spamassasin corpus at http://spamassassin.apache.org/old/publiccorpus. The `vcfilter` command above creates a rule to automatically move emails marked as spam to Spam subfolder in your Maildir.
+The above steps will download the spamasassin corpus in the directory /home/manny/bogofilter/training and also create a bogofilter spam database wordlist.db trained from spamassasin corpus at http://spamassassin.apache.org/old/publiccorpus.
 
 You can keep on updating the subfolders easy\_ham\_2 and spam\_2 subfolders in /home/manny/bogofilter/training directory and run the training.sh script. One possible method could be to have a script that uses the find command to copy ham emails from your Maildir subfolders, that you know for sure have non-spam emails, to the easy\_ham\_2 subfolder in the training directory. You can have folder named `Spam` in your Maildir where you move spam emails using your mail client. This will be spam emails not caught by bogofilter. You can have the same script copy spam mails from `Spam` folder to spam\_2 subfolder in the training directory.
 
@@ -2031,10 +2037,14 @@ $ sudo /bin/bash
 # svc -r /service/qmail-smtpd.25
 ```
 
-One can also create a vfilter to deliver such email to the quarantine folder
+One can use [filterit](https://github.com/indimail/indimail-mta/wiki/filterit.1) in [dot-qmail](https://github.com/indimail/indimail-mta/wiki/dot-qmail.5) or create a vfilter using [vcfilter](https://github.com/indimail/indimail-mta/wiki/vcfilter.1) to create a vfilter, to deliver such email to the quarantine folder. <b>vcfilter</b> can be used only if you have <b>indimail-virtualdomains</b> installed. Examples for using both are shown below.
 
 ```
 /usr/bin/vcfilter -i -t virusFilter -c "Equals" -k "virus found" -f Quarantine -b 0 -h 28 prefilt@$1
+
+or in dot-qmail
+
+| filterit -xr -h X-QHPSI -k "clean" -c "Equals" -a Maildir -A ./Maildir/.Quarantine/ -d exit -D 0
 ```
 
 If you implement different method, than explained above, let me know.
@@ -5617,9 +5627,9 @@ indimail-mta comes with a drop-in replacement for <b>qmail-queue</b> for DKIM si
 
 For DKIM verification two methods have been described - one during SMTP and one during local delivery. You need to select just one of the methods
 
-For DKIM signing, three methods have been described - one during SMTP, one during remote delivery and one during mail injection. You need to select just one of the methods, else you will send out emails with multiple DKIM signatures.
+For DKIM signing, three methods have been described - one during SMTP, one during remote delivery and one during mail injection. You need to select just one of the methods, else you will send out emails with multiple DKIM signatures. DKIM signing uses DKIMSIGN environment variable. Any '%' in this environment variable gets replaced by the domain name in the Return-Path, SENDER, X-Bounce-Address or the From header (which ever header is found first).
 
-You may want to look at an excellent [setup instructions](http://notes.sagredo.eu/node/92 "Roberto's Notes") by Roberto Puzzanghera for configuring dkim for qmail.
+You may want to look at an excellent [setup instructions](http://notes.sagredo.eu/node/92 "Roberto's Notes") by Roberto Puzzanghera for configuring dkim for qmail. Much of indimail's DKIM comes from practical experience of supporting Roberto's users using [qmail-dkim](https://github.com/indimail/indimail-mta/wiki/qmail-dkim.8) [dkim](https://github.com/indimail/indimail-mta/wiki/dkim.8) and [dk-filter](https://github.com/indimail/indimail-mta/wiki/dk-filter.8).
 
 ## Create your DKIM private/public keys
 
@@ -5632,7 +5642,7 @@ $ sudo /bin/bash
 # dknewkey -b 2048 /etc/indimail/control/domainkeys/default
 ```
 
-The private key <b>default</b> created by <b>dknewkey</b> can be read only by the <b>root</b> UNIX user or a user who is part of the <b>qcerts</b> UNIX group. This means that only the <b>root</b> user or users who are part of the <b>qcerts</b> group can sign messages to have a DKIM signature. This is required because you don't want someone else to send out emails with your signature.
+The private key <b>default</b> created by <b>dknewkey</b> can be read only by the <b>root</b> UNIX user or a user who is part of the <b>qcerts</b> UNIX group. This means that only the <b>root</b> user or users who are part of the <b>qcerts</b> group can sign messages to have a DKIM signature. This is required because you don't want someone else to send out emails with your signature. You are free to chose your own name for the private key instead of using the name <b>default</b>.
 
 ## Create your DNS records
 
@@ -5648,9 +5658,9 @@ $ printf "default._domainkey.indimail.org\tIN\tTXT\t\"v=DKIM1; k=rsa; p=%s\"\n" 
 default._domainkey.indimail.org IN      TXT     "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC2dvktnCXRavyuuoy2NUcHWpMp/Ia7Y5Y9tTwjjby7hS9wIvgecBz6UEMunOJdAZ2RVvSXKxPlxO4/rUgW6ow7vlEPY3IKagy+VFW1oHmvj4WU+BxZTJA2d8VrW9S9O1JMuPGGwdeYOC/Gcle/EviQtGYsz3jL/HrJb9rXXl4/gwIDAQAB"
 ```
 
-choose the selector (some\_name) and publish this into DNS TXT record for:
+choose the selector (e.g. my\_selector) and publish this into DNS TXT record for:
 
-`selector._domainkey.indimail.org` (e.g. selector can be named 'default')
+`my_selector._domainkey.indimail.org` (e.g. selector can be named 'default')
 
 Wait until it's on all DNS servers and that's it.
 
@@ -5691,7 +5701,11 @@ $ sudo /bin/bash
 # svc -r /service/qmail-smtpd.25
 ```
 
-## DKIM signing during remote delivery
+In the above example you can use <u>/etc/indimail/control/domainkeys/%/default</u> for <b>DKIMSIGN</b>. During signing the '%' in the <b>DKIMSIGN</b> variable gets replaced with the domain name, allowing you to have different private keys for each domain.
+
+## DKIM signing, verification during remote,local delivery
+
+### Using FILTERARGS environment variable
 
 ```
 $ sudo /bin/bash
@@ -5699,9 +5713,29 @@ $ sudo /bin/bash
 # echo "/usr/bin/spawn-filter" > QMAILREMOTE
 # echo "/usr/bin/dk-filter" > FILTERARGS
 # echo "/etc/indimail/control/domainkeys/default" > DKIMSIGN
-# echo "-h" > DKSIGNOPTIONS
+# echo "-h" > DKIMSIGNOPTIONS
 # svc -r /service/qmail-send.25
 ```
+
+In the above example you can use <u>/etc/indimail/control/domainkeys/%/default</u> for <b>DKIMSIGN</b>. During signing the '%' in the <b>DKIMSIGN</b> variable gets replaced with the domain name, allowing you to have different private keys for each domain.
+
+### Using filterargs control file
+
+```
+$ sudo /bin/bash
+# cd /service/qmail-send.25/variables
+# echo "/usr/bin/spawn-filter" > QMAILREMOTE
+# svc -r /service/qmail-send.25
+
+# cat > /etc/indimail/control/filterargs <<EOF
+# Insert DKIM signature for email during remote delivery
+*:remote:/usr/bin/dk-filter:DKIMSIGN=/etc/indimail/control/domainkeys/default,DKIMSIGNOPTIONS=-h
+# Insert DKIM-Status header for email during local delivery
+*:local:/usr/bin/dk-filter:DKIMVERIFY=FGHIKLMNOQRTUVWjp,DKIMSIGN=
+EOF
+```
+
+In the above example you can use <u>/etc/indimail/control/domainkeys/%/default</u> for <b>DKIMSIGN</b>. During signing the '%' in the <b>DKIMSIGN</b> variable gets replaced with the domain name, allowing you to have different private keys for each domain.
 
 ## DKIM signing during mail injection
 
@@ -5736,12 +5770,15 @@ $ echo "/home/user1/domainkeys/default" > DKIMSIGN
 
 ## Moving mails to SPAM folder for failed DKIM verification
 
-For DKIM verification we spoke about setting <b>DKIMVERIFY</b> environment variable, where we can permanently or temporarily reject mails for DKIM verification failures. We could instead accept all emails but put them in the Spam folder. To do that set DKIMVERIFY to an empty string and use <b>vcfilter</b> to create a vfilter using the following command
+For DKIM verification we spoke about setting <b>DKIMVERIFY</b> environment variable, where we can permanently or temporarily reject mails for DKIM verification failures. We could instead accept all emails but put them in the Spam folder. To do that set DKIMVERIFY to an empty string and use [vcfilter](https://github.com/indimail/indimail-mta/wiki/vcfilter.1) to create a vfilter. You can also use [filterit](https://github.com/indimail/indimail-mta/wiki/filterit.1) in [dot-qmail](https://github.com/indimail/indimail-mta/wiki/dot-qmail.5). <b>vcfilter</b> can be used only if you have <b>indimail-virtualdomains</b> installed. Examples for using both are shown below.
 
 ```
-$ sudo vcfilter -i -t dkimFilter -c "Does not contain" -k "good" -f Spam -b 0 -h DKIM-Status prefilt@domain
-```
+$ sudo vcfilter -i -t dkimFilter -h DKIM-Status -c "Does not contain" -k "good" -f Spam -b 0 prefilt@domain
 
+or in dot-qmail
+
+| filterit -x -h DKIM-Status -c "Does not contain" -k "good" -a Maildir -A ./Maildir/.Spam/ -e 0 -d exit -D 0
+```
 
 ## DKIM Author Domain Signing Practices
 
@@ -5777,6 +5814,16 @@ References
 1. http://www.brandonturner.net/blog/2009/03/dkim-and-domainkeys-for-qmail/
 2. http://qmail.jms1.net/patches/domainkeys.shtml
 3. http://notes.sagredo.eu/node/82
+
+## DKIM signing for bounces
+
+Bounces have NULL as the value for the Return-Path header. Due to this you cannot generate a signature from the original email using <b>qmail-dkim</b> or <b>dk-filter</b>. However both of them allow you to set a fixed domain (d=) tag in the DKIM signature for bounces, by setting environment variable <b>BOUNCEDOMAIN</b>. A simple way to set this is to use the <u>bounce.envrules</u> control file.
+
+```
+$ sudo bash
+$ cd /etc/indimail/control
+# echo "*:DKIMSIGN=/etc/indimail/control/domainkeys/default,BOUNCEQUEUE=/usr/sbin/qmail-dkim" > bounce.envrules
+```
 
 # iwebadmin – Web Administration of IndiMail
 
