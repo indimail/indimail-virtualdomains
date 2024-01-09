@@ -5623,17 +5623,17 @@ DomainKeys Identified Mail (DKIM) lets an organization take responsibility for a
 
 DKIM uses public-key cryptography to allow the sender to electronically sign legitimate emails in a way that can be verified by recipients. Prominent email service providers implementing DKIM (or its slightly different predecessor, DomainKeys) include Yahoo and Gmail. Any mail from these domains should carry a DKIM signature, and if the recipient knows this, they can discard mail that hasn't been signed, or has an invalid signature.
 
-indimail-mta comes with a drop-in replacement for <b>qmail-queue</b> for DKIM signature signing and verification (see <b>qmail-dkim</b>(8) for more details). You need the following steps to enable DKIM. Setting DKIMQUEUE to /bin/cat, qmail-dkim can read from descriptor 0 and write to descriptor 1 for both signing and verification and can be enabled before mail is handed over to <b>qmail-local</b> or <b>qmail-remote</b> (see <b>spawn-filter</b>(8) for more details).
+indimail-mta comes with a drop-in replacement [qmail-dkim](https://github.com/indimail/indimail-mta/wiki/qmail-dkim.8) for <b>qmail-queue</b>, for DKIM signature signing and verification. Steps needed to enable DKIM are given below. Apart from being a <b>qmail-queue</b> frontend, setting DKIMQUEUE to /bin/cat, qmail-dkim can read from descriptor 0 and write to descriptor 1, for both signing and verification before mail is handed over to <b>qmail-local</b> or <b>qmail-remote</b> by using [spawn-filter(8](https://github.com/indimail/indimail-mta/wiki/spawn-filter.8).
 
 For DKIM verification two methods have been described - one during SMTP and one during local delivery. You need to select just one of the methods
 
-For DKIM signing, three methods have been described - one during SMTP, one during remote delivery and one during mail injection. You need to select just one of the methods, else you will send out emails with multiple DKIM signatures. DKIM signing uses DKIMSIGN environment variable. Any '%' in this environment variable gets replaced by the domain name in the Return-Path, SENDER, X-Bounce-Address or the From header (which ever header is found first).
+For DKIM signing, three methods have been described - one during SMTP, one during remote delivery and one during mail injection. You need to select just one of the methods, else you will send out emails with multiple DKIM signatures. DKIM signing uses DKIMSIGN environment variable. Any '%' in this environment variable gets replaced by the domain name in the <b>Return-Path</b>, <b>SENDER</b>, <b>X-Bounce-Address</b> or the <b>From</b> header (which ever header is found first).
 
-You may want to look at an excellent [setup instructions](http://notes.sagredo.eu/node/92 "Roberto's Notes") by Roberto Puzzanghera for configuring dkim for qmail. Much of indimail's DKIM comes from practical experience of supporting Roberto's users using [qmail-dkim](https://github.com/indimail/indimail-mta/wiki/qmail-dkim.8) and [dkim](https://github.com/indimail/indimail-mta/wiki/dkim.8).
+You may want to look at an excellent [setup instructions](http://notes.sagredo.eu/node/92 "Roberto's Notes") by Roberto Puzzanghera for configuring dkim for qmail/netqmail. Much of indimail's DKIM comes from practical experience of supporting Roberto's users using [qmail-dkim](https://github.com/indimail/indimail-mta/wiki/qmail-dkim.8) and [dkim](https://github.com/indimail/indimail-mta/wiki/dkim.8).
 
 ## Create your DKIM private/public keys
 
-To able to sign emails with a DKIM signature, you need to create a private/public key pair using openssl. indimail-mta provides a script <b>dknewkey</b> to help you create this private/public key pair.
+To able to sign emails with a DKIM signature, you need to create a private/public key pair using openssl. indimail-mta provides a script [dknewkey](https://github.com/indimail/indimail-mta/wiki/dknewkey.8) to help you create this private/public key pair.
 
 ```
 $ sudo /bin/bash
@@ -5642,7 +5642,7 @@ $ sudo /bin/bash
 # dknewkey -b 2048 /etc/indimail/control/domainkeys/default
 ```
 
-The private key <b>default</b> created by <b>dknewkey</b> can be read only by the <b>root</b> UNIX user or a user who is part of the <b>qcerts</b> UNIX group. This means that only the <b>root</b> user or users who are part of the <b>qcerts</b> group can sign messages to have a DKIM signature. This is required because you don't want someone else to send out emails with your signature. You are free to chose your own name for the private key instead of using the name <b>default</b>.
+The private key <b>default</b> created by <b>dknewkey</b> can be read only by the <b>root</b> UNIX user or a user who is part of the <b>qcerts</b> UNIX group. This means that only the <b>root</b> user or users who are part of the <b>qcerts</b> group can sign messages to have a DKIM signature. This is required because you don't want someone else to send out emails with your signature using your private key. You are free to chose your own name for the private key instead of using the name <b>default</b>.
 
 ## Create your DNS records
 
@@ -5662,31 +5662,31 @@ choose the selector (e.g. my\_selector) and publish this into DNS TXT record for
 
 `my_selector._domainkey.indimail.org` (e.g. selector can be named 'default')
 
-Wait until it's on all DNS servers and that's it.
+Wait until it's on all DNS servers and that's it. If all your domains can use <b>my\_selector</b> you can set <b>DKIMSIGN</b> as <u>/etc/indimail/control/domainkeys/%/my\_selector</u>. More in <b>DKIMSIGN</b> environment variable later.
 
 ## DKIM verification during SMTP
 
-You can setup <b>qmail-smtpd</b> for verification by setting DKIMIVERIFY environment variable instead of DKIMSIGN environment variable.
+You can setup <b>qmail-smtpd</b> for verification by setting <b>DKIMVERIFY</b> environment variable instead of <b>DKIMSIGN</b>.
 
 ```
 $ sudo /bin/bash
 # cd /service/qmail-smtpd.25/variables
 # echo "/usr/bin/qmail-dkim" > QMAILQUEUE
-# echo FGHIKLMNOQRTUVWjp > DKIMVERIFY
+# echo FGHIKLMNOQRTUVWjp     > DKIMVERIFY
 # svc -r /service/qmail-smtpd.25
 ```
 
 ## DKIM verification during local delivery
 
-On your host which serves as your incoming gateway for your local domains, it only makes sense to do DKIM verification with <b>qmail-local</b>
+It makes sense just to do DKIM verification with <b>qmail-local</b> on the host which serves as your incoming gateway for your local domains.
 
 ```
 $ sudo /bin/bash
 # cd /service/qmail-send.25/variables
 # echo "/usr/bin/spawn-filter" > QMAILLOCAL
-# echo "/bin/cat" > DKIMQUEUE
-# echo "/usr/sbin/qmail-dkim" > FILTERARGS
-# echo FGHIKLMNOQRTUVWjp > DKIMVERIFY
+# echo "/bin/cat"              > DKIMQUEUE
+# echo "/usr/sbin/qmail-dkim"  > FILTERARGS
+# echo FGHIKLMNOQRTUVWjp       > DKIMVERIFY
 # svc -r /service/qmail-send.25
 ```
 
@@ -5697,7 +5697,7 @@ $ sudo /bin/bash
 ```
 $ sudo /bin/bash
 # cd /service/qmail-smtpd.25/variables
-# echo "/usr/bin/qmail-dkim" > QMAILQUEUE
+# echo "/usr/bin/qmail-dkim"                      > QMAILQUEUE
 # echo "/etc/indimail/control/domainkeys/default" > DKIMSIGN
 # svc -r /service/qmail-smtpd.25
 ```
@@ -5711,11 +5711,11 @@ In the above example you can use <u>/etc/indimail/control/domainkeys/%/default</
 ```
 $ sudo /bin/bash
 # cd /service/qmail-send.25/variables
-# echo "/usr/bin/spawn-filter" > QMAILREMOTE
-# echo "/bin/cat" > DKIMQUEUE
-# echo "/usr/sbin/qmail-dkim" > FILTERARGS
+# echo "/usr/bin/spawn-filter"                    > QMAILREMOTE
+# echo "/bin/cat"                                 > DKIMQUEUE
+# echo "/usr/sbin/qmail-dkim"                     > FILTERARGS
 # echo "/etc/indimail/control/domainkeys/default" > DKIMSIGN
-# echo "-h" > DKIMSIGNOPTIONS
+# echo "-h"                                       > DKIMSIGNOPTIONS
 # svc -r /service/qmail-send.25
 ```
 
@@ -5730,9 +5730,9 @@ $ sudo /bin/bash
 # svc -r /service/qmail-send.25
 
 # cat > /etc/indimail/control/filterargs <<EOF
-# Insert DKIM signature for email during remote delivery
+# Sign emails by inserting DKIM-Signature in the email during remote delivery
 *:remote:/usr/sbin/qmail-dkim:DKIMQUEUE=/bin/cat, DKIMSIGN=/etc/indimail/control/domainkeys/default,DKIMSIGNOPTIONS=-h
-# Insert DKIM-Status header for email during local delivery
+# Verify DKIM-Signature and Insert DKIM-Status header for email during local delivery
 *:local:/usr/sbin/qmail-dkim:DKIMQUEUE=/bin/cat, DKIMVERIFY=FGHIKLMNOQRTUVWjp,DKIMSIGN=
 EOF
 ```
@@ -5741,19 +5741,20 @@ In the above example you can use <u>/etc/indimail/control/domainkeys/%/default</
 
 ## DKIM signing during mail injection
 
-Any UNIX user on the system can sign their outbound emails with DKIM signature during mail injection itself. All that is required is to have a DKIM public/private key created using dknewkey as given in [Create your DKIM signature](#create-your-dkim-signature). Once you have done that, the user injecting the mail, will require read access to the private key. We have two unique cases. One for system users and another for users having shell accounts.
+Any UNIX user on the system can sign their outbound emails with DKIM signature during mail injection itself. All that is required is to have a DKIM public/private key created using dknewkey as given in [Create your DKIM signature](#create-your-dkim-signature). Once you have done that, the user injecting the mail will require read access to the private key. We have two unique cases. One for system users and another for users having shell accounts.
 
 <b>System Users</b>
 
-If this is a system user (users without shell access) that will be sending out the email then you just need to add this user to the <b>qcerts</b> group. e.g. for php scripts sending out emails, the following command will add the user <b>apache</b> to have <b>qcerts</b> as a supplementary group.
+If this is a system user (users without shell access) that will be sending out the email then you just need to add this user to the <b>qcerts</b> group. e.g. for php scripts sending out emails and beng served by the apache web server, the following command will add the user <b>apache</b> to have <b>qcerts</b> as a supplementary group. Since <b>QMAILQUEUE</b> is set to <b>qmail-dkim</b>, <b>qmail-inject</b> or <b>sendmail</b> will call <b>qmail-dkim</b> as <<u>apache</u> user and will be able to access the private keys. You are free to set your own UNIX level permissions for the private keys to allow access to <b>qmail-dkim</b> but restrict access to non-authorized users.
 
+To add <u>qcerts</u> group as a supplementary group for <u>apache</u>, execute
 ```
 $ sudo /usr/sbin/usermod -aG qcerts apache
 ```
 
 <b>Non-System users</b>
 
-If you want actual UNIX users who have shell access to the system, have the DKIM private key have the read permission for the primary group of the user. e.g. A UNIX user with <b>user1</b> as the username and <b>group1</b> as the primary group, do the following
+If you want actual UNIX users who have shell access to the system, have the DKIM private key to have the read permission for the primary group of the user. e.g. A UNIX user with username <b>user1</b> and primary group <b>group1</b>, do the following
 
 ```
 $ sudo /bin/bash
@@ -5762,17 +5763,48 @@ $ sudo /bin/bash
 # dknewkey -b 2048 ~/domainkeys/default
 ```
 
-Now to use the above DKIM key, we need to set few environment variables specific to <b>user1</b>. To do that we just use the envdir property of indimail-mta where any file in ~/.defaultqueue becomes an environment variable set by programs like <b>qmail-inject</b>. Refer to point 3 in [Setting Environment Variables](#setting-environment-variables) for reference. Assuming <u>/home/user1</u> is the home directory for <b>user1</b>, we can create DKIMSIGN environment variable as below.
+Now to use the above DKIM key, we need to set few environment variables specific to <b>user1</b>. To do that we just use the envdir property of indimail-mta where any file in ~/.defaultqueue becomes an environment variable. This is done by programs like <b>qmail-inject</b> and <b>sendmail</b> amongst many other programs. Refer to point 3 in [Setting Environment Variables](#setting-environment-variables) for reference. Assuming <u>/home/user1</u> is the home directory for <b>user1</b>, we can create DKIMSIGN environment variable using the below steps.
 
 ```
 $ mkdir ~/.defaultqueue
 $ cd ~/.defaultqueue
+$ echo "/usr/sbin/qmail-dkim"           > QMAILQUEUE
 $ echo "/home/user1/domainkeys/default" > DKIMSIGN
 ```
 
 ## Moving mails to SPAM folder for failed DKIM verification
 
-For DKIM verification we spoke about setting <b>DKIMVERIFY</b> environment variable, where we can permanently or temporarily reject mails for DKIM verification failures. We could instead accept all emails but put them in the Spam folder. To do that set DKIMVERIFY to an empty string and use [vcfilter](https://github.com/indimail/indimail-mta/wiki/vcfilter.1) to create a vfilter. You can also use [filterit](https://github.com/indimail/indimail-mta/wiki/filterit.1) in [dot-qmail](https://github.com/indimail/indimail-mta/wiki/dot-qmail.5). <b>vcfilter</b> can be used only if you have <b>indimail-virtualdomains</b> installed. Examples for using both are shown below.
+To verify a message, set the DKIMVERIFY environment variable to a desired set of letters. Precisely, if you want a qmail-dkim return status to generate an error, include that letter, where A is the first return status (DKIM\_SUCCESS), B is the second (DKIM\_FINISHED\_BODY), etc. The letter should be uppercase if you want a permanent error to be returned, and lowercase if you want a temporary error to be returned (exit code 88). If you omit the letter, qmail-dkim will not issue any error inspite of DKIM verification failure. It will return success and the email will get delivered. The complete set of letters with the corresponding return status is given below
+
+Letter|DKIM code|Description
+------|---------|-----------
+A|DKIM\_SUCCESS|Function executed successfully
+B|DKIM\_FINISHED\_BODY|process result: no more message body is needed
+C|DKIM\_PARTIAL\_SUCCESS|verify result: at least one but not all signatures verified
+D|DKIM\_NEUTRAL|verify result: no signatures verified but message is not suspicious
+E|DKIM\_SUCCESS\_BUT\_EXTRA|signature result: signature verified but it did not include all of the body
+F|DKIM\_3PS_SIGNATURE|3rd-party signature
+G|DKIM\_FAIL|Function failed to execute
+H|DKIM\_BAD\_SYNTAX|signature error: DKIM-Signature could not parse or has bad tags/values
+I|DKIM\_SIGNATURE\_BAD|signature error: RSA verify failed
+J|DKIM\_SIGNATURE\_BAD_BUT_TESTING|signature error: RSA verify failed but testing
+K|DKIM\_SIGNATURE\_EXPIRED|signature error: x= is old
+L|DKIM\_SELECTOR\_INVALID|signature error: selector doesn't parse or contains invalid values
+M|DKIM\_SELECTOR\_GRANULARITY\_MISMATCH|signature error: selector g= doesn't match i=
+N|DKIM\_SELECTOR\_KEY\_REVOKED|signature error: selector p= empty
+O|DKIM\_SELECTOR\_DOMAIN\_NAME\_TOO\_LONG|signature error: selector domain name too long to request
+P|DKIM\_SELECTOR\_DNS\_TEMP\_FAILURE|signature error: temporary dns failure requesting selector
+Q|DKIM\_SELECTOR\_DNS\_PERM\_FAILURE|signature error: permanent dns failure requesting selector
+R|DKIM\_SELECTOR\_PUBLIC\_KEY\_INVALID|signature error: selector p= value invalid or wrong format
+S|DKIM\_NO\_SIGNATURES|no signatures
+T|DKIM\_NO\_VALID\_SIGNATURES|no valid signatures
+U|DKIM\_BODY\_HASH\_MISMATCH|sigature verify error: message body does not hash to bh value
+V|DKIM\_SELECTOR\_ALGORITHM\_MISMATCH|signature error: selector h= doesn't match signature a=
+W|DKIM\_STAT\_INCOMPAT|signature error: incompatible v=
+X|DKIM\_UNSIGNED\_FROM|signature error: not found message From headers in signature
+Y|DKIM\_BAD\_IDENTITY|signature error: invalid identity in signature
+
+Instead of permanently or temporarily rejecting mails, we could instead accept all emails but put them in the Spam folder. To do that set DKIMVERIFY to an empty string and use [vcfilter](https://github.com/indimail/indimail-mta/wiki/vcfilter.1) to create a vfilter. You can also use [filterit](https://github.com/indimail/indimail-mta/wiki/filterit.1) in [dot-qmail](https://github.com/indimail/indimail-mta/wiki/dot-qmail.5). <b>vcfilter</b> can be used only if you have <b>indimail-virtualdomains</b> installed. Examples for using both are shown below.
 
 ```
 $ sudo vcfilter -i -t dkimFilter -h DKIM-Status -c "Does not contain" -k "good" -f Spam -b 0 prefilt@domain
