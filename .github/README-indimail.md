@@ -1431,8 +1431,8 @@ exit 0
 ### Using control file filterargs
 
 The control file filterargs gives you control to run filters individually for local or remote deliveries. It also allows you to run your filter for both local and remote deliveries. See <b>spawn-filter</b>(8) for full description on this control file.
-e.g. The following entry in /etc/indimail/control/filterargs causes all mails to yahoo.com be fed through the filter dk-filter(8) for DK/DKIM signing.
-yahoo.com:remote:/usr/bin/dk-filter
+e.g. The following entry in /etc/indimail/control/filterargs causes all mails to yahoo.com be fed through the qmail-dkim(8) for DKIM signing.
+yahoo.com:remote:/usr/sbin/qmail-dkim:DKIMQUEUE=/bin/cat
 NOTE: If the program myfilter returns 100, the message will be bounced. If it returns 2, the message will be discarded (blackholed).
 
 ### Using QMAILLOCAL or QMAILREMOTE environment variables
@@ -5623,13 +5623,13 @@ DomainKeys Identified Mail (DKIM) lets an organization take responsibility for a
 
 DKIM uses public-key cryptography to allow the sender to electronically sign legitimate emails in a way that can be verified by recipients. Prominent email service providers implementing DKIM (or its slightly different predecessor, DomainKeys) include Yahoo and Gmail. Any mail from these domains should carry a DKIM signature, and if the recipient knows this, they can discard mail that hasn't been signed, or has an invalid signature.
 
-indimail-mta comes with a drop-in replacement for <b>qmail-queue</b> for DKIM signature signing and verification (see <b>qmail-dkim</b>(8) for more details). You need the following steps to enable DKIM. indimail-mta also comes with a filter dk-filter, which can do both signing and verification and can be enabled before mail is handed over to <b>qmail-local</b> or <b>qmail-remote</b> (see <b>spawn-filter</b>(8) for more details).
+indimail-mta comes with a drop-in replacement for <b>qmail-queue</b> for DKIM signature signing and verification (see <b>qmail-dkim</b>(8) for more details). You need the following steps to enable DKIM. Setting DKIMQUEUE to /bin/cat, qmail-dkim can read from descriptor 0 and write to descriptor 1 for both signing and verification and can be enabled before mail is handed over to <b>qmail-local</b> or <b>qmail-remote</b> (see <b>spawn-filter</b>(8) for more details).
 
 For DKIM verification two methods have been described - one during SMTP and one during local delivery. You need to select just one of the methods
 
 For DKIM signing, three methods have been described - one during SMTP, one during remote delivery and one during mail injection. You need to select just one of the methods, else you will send out emails with multiple DKIM signatures. DKIM signing uses DKIMSIGN environment variable. Any '%' in this environment variable gets replaced by the domain name in the Return-Path, SENDER, X-Bounce-Address or the From header (which ever header is found first).
 
-You may want to look at an excellent [setup instructions](http://notes.sagredo.eu/node/92 "Roberto's Notes") by Roberto Puzzanghera for configuring dkim for qmail. Much of indimail's DKIM comes from practical experience of supporting Roberto's users using [qmail-dkim](https://github.com/indimail/indimail-mta/wiki/qmail-dkim.8) [dkim](https://github.com/indimail/indimail-mta/wiki/dkim.8) and [dk-filter](https://github.com/indimail/indimail-mta/wiki/dk-filter.8).
+You may want to look at an excellent [setup instructions](http://notes.sagredo.eu/node/92 "Roberto's Notes") by Roberto Puzzanghera for configuring dkim for qmail. Much of indimail's DKIM comes from practical experience of supporting Roberto's users using [qmail-dkim](https://github.com/indimail/indimail-mta/wiki/qmail-dkim.8) and [dkim](https://github.com/indimail/indimail-mta/wiki/dkim.8).
 
 ## Create your DKIM private/public keys
 
@@ -5684,7 +5684,8 @@ On your host which serves as your incoming gateway for your local domains, it on
 $ sudo /bin/bash
 # cd /service/qmail-send.25/variables
 # echo "/usr/bin/spawn-filter" > QMAILLOCAL
-# echo "/usr/bin/dk-filter" > FILTERARGS
+# echo "/bin/cat" > DKIMQUEUE
+# echo "/usr/sbin/qmail-dkim" > FILTERARGS
 # echo FGHIKLMNOQRTUVWjp > DKIMVERIFY
 # svc -r /service/qmail-send.25
 ```
@@ -5711,7 +5712,8 @@ In the above example you can use <u>/etc/indimail/control/domainkeys/%/default</
 $ sudo /bin/bash
 # cd /service/qmail-send.25/variables
 # echo "/usr/bin/spawn-filter" > QMAILREMOTE
-# echo "/usr/bin/dk-filter" > FILTERARGS
+# echo "/bin/cat" > DKIMQUEUE
+# echo "/usr/sbin/qmail-dkim" > FILTERARGS
 # echo "/etc/indimail/control/domainkeys/default" > DKIMSIGN
 # echo "-h" > DKIMSIGNOPTIONS
 # svc -r /service/qmail-send.25
@@ -5729,9 +5731,9 @@ $ sudo /bin/bash
 
 # cat > /etc/indimail/control/filterargs <<EOF
 # Insert DKIM signature for email during remote delivery
-*:remote:/usr/bin/dk-filter:DKIMSIGN=/etc/indimail/control/domainkeys/default,DKIMSIGNOPTIONS=-h
+*:remote:/usr/sbin/qmail-dkim:DKIMQUEUE=/bin/cat, DKIMSIGN=/etc/indimail/control/domainkeys/default,DKIMSIGNOPTIONS=-h
 # Insert DKIM-Status header for email during local delivery
-*:local:/usr/bin/dk-filter:DKIMVERIFY=FGHIKLMNOQRTUVWjp,DKIMSIGN=
+*:local:/usr/sbin/qmail-dkim:DKIMQUEUE=/bin/cat, DKIMVERIFY=FGHIKLMNOQRTUVWjp,DKIMSIGN=
 EOF
 ```
 
@@ -5817,7 +5819,7 @@ References
 
 ## DKIM signing for bounces
 
-Bounces have NULL as the value for the Return-Path header. Due to this you cannot generate a signature from the original email using <b>qmail-dkim</b> or <b>dk-filter</b>. However both of them allow you to set a fixed domain (d=) tag in the DKIM signature for bounces, by setting environment variable <b>BOUNCEDOMAIN</b>. A simple way to set this is to use the <u>bounce.envrules</u> control file.
+Bounces have NULL as the value for the Return-Path header. Due to this you cannot generate a signature from the original email using <b>qmail-dkim</b>. However both of them allow you to set a fixed domain (d=) tag in the DKIM signature for bounces, by setting environment variable <b>BOUNCEDOMAIN</b>. A simple way to set this is to use the <u>bounce.envrules</u> control file.
 
 ```
 $ sudo bash
