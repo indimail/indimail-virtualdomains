@@ -325,15 +325,12 @@ argv1=$1
 if [ -d /run ] ; then
   rundir=/run/svscan
   nssd_sock="/run/indimail/pwdlookup/nssd.sock"
-  %{__mkdir_p} /run/indimail/pwdlookup
 elif [ -d /var/run ] ; then
   rundir=/var/run/svscan
   nssd_sock="/var/run/indimail/pwdlookup/nssd.sock"
-  %{__mkdir_p} /var/run/indimail/pwdlookup
 else
   rundir=%{servicedir}
   nssd_sock="/tmp/pwdlookup/nssd.sock"
-  %{__mkdir_p} /tmp/pwdlookup
 fi
 
 if [ -z "$argv1" ] ; then
