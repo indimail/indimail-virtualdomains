@@ -10,6 +10,7 @@
 #include	<ctype.h>
 #include	<stdlib.h>
 #include	<string.h>
+#include	<strings.h>
 #include	<errno.h>
 #include	<sys/types.h>
 #include	<time.h>
@@ -21,6 +22,8 @@
 #elif defined(LIBIDN2)
 #include	<idn2.h>
 #endif
+
+extern char *strdup(const char *s);
 
 struct rfc1035_spf_info {
 	const char *mailfrom;

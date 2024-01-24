@@ -275,12 +275,9 @@ echo "Removing pyc for scientificlinux"
 echo "Removing pyc for opensuse version 150400"
 %{__rm} -f %{buildroot}%{pythondir}/fetchmailconf.py
 %endif
-
-%if %{undefined rhel_version} && %{undefined rhel} && %{undefined fedora_version} && %{undefined centos_version} && %{undefined centos_ver} && %{undefined almalinux_version} && %{undefined rocky_version} && %{undefined scientificlinux_version}
-%if 0%{?suse_version} <= 150400 && !0%{?is_opensuse}
+%if %{defined suse_version} && 0%{?suse_version} <= 150400 && !0%{?is_opensuse}
 echo "Removing pyc for SLE version 15"
 %{__rm} -f %{buildroot}%{pythondir}/fetchmailconf.py
-%endif
 %endif
 
 %{__mkdir_p} %{buildroot}%{sysconfdir}
