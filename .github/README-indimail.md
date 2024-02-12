@@ -45,7 +45,9 @@ Table of Contents
          * [QMAILLOCAL script](#qmaillocal-script)
    * [SPAM and Virus Filtering](#spam-and-virus-filtering)
       * [SPAM Control using bogofilter](#spam-control-using-bogofilter)
-      * [Training bogofilter](#training-bogofilter)
+         * [SPAM filtering during SMTP](#spam-filtering-during-smtp)
+         * [SPAM filtering during local/remote delivery](#spam-filtering-during-localremote-delivery)
+         * [Training bogofilter](#training-bogofilter)
       * [SPAM Control using badip control file](#spam-control-using-badip-control-file)
       * [Virus Scanning using QHPSI](#virus-scanning-using-qhpsi)
          * [Using tcprules](#using-tcprules)
@@ -244,7 +246,7 @@ IndiMail is a messaging Platform comprising of multiple software packages includ
 * Utilities ([altermime](http://pldaniels.com/altermime/ "altermime"), [ripMIME](https://pldaniels.com/ripmime/ "ripmime"), [mpack](https://github.com/indimail/indimail-virtualdomains/tree/master/mpack-x "mpack"), [fortune](https://en.wikipedia.org/wiki/Fortune_\(Unix\ "fortune") and [flash](https://github.com/indimail/indimail-virtualdomains/tree/master/flash-x "flash"))
 * [logalert](https://github.com/indimail/indimail-virtualdomains/tree/master/logalert-x "logalert")
 
-[**indimail-spamfilter**](https://github.com/indimail/indimail-virtualdomains/tree/master/bogofilter-x "bogofilter")
+[**indimail-spamfilter**](https://github.com/indimail/indimail-virtualdomains/tree/master/indimail-spamfilter-x "indimail-spamfilter")
 
 * [bogofilter - A Bayesian Spam Filter](https://bogofilter.sourceforge.io/ "bogofilter")
 
@@ -307,7 +309,7 @@ $ man indimail
 $ man indimail-control
 ```
 
-#DISCLAIMER
+**DISCLAIMER**
 
 There is no warranty implied or otherwise with this package. I believe in OpenSource Philosophy and this is an attempt to give back to the OpenSource community. I welcome anyone who can report bugs or provide some assistance for building few missing features (building new features, testing and documentation).
 
@@ -1817,11 +1819,13 @@ exit 111
 
 IndiMail has multiple methods to insert your script anywhere before or after queueing, before local or remote delivery. Refer to the chapter [Writing Filters for IndiMail](#writing-filters-for-indimail) on how to do this. SPAM and Virus filtering use the same techniques involved in filtering emails describled in the previous chapter.
 
-# SPAM Control using bogofilter
+## SPAM Control using bogofilter
 
 If you have installed indimail-spamfilter package, you will have [bogofilter](https://bogofilter.sourceforge.io/ "bogofilter") providing a bayesian spam filter.
 
 bogofilter requires training to be able to classify emails as spam or ham. The next section tells you how to carry out this training. You can also have a pre-trained database installed by installing the **bogofilter-wordlist** package, but it is possible that this may not work well in your setup.
+
+### SPAM filtering during SMTP
 
 On of the easiest method to enable bogofilter is to set few environment variable for indimail's [<b>qmail-spamfilter</b>(8)](https://github.com/indimail/indimail-mta/wiki/qmail-spamfilter.8). <b>qmail-spamfilter</b> is a frontend for <b>qmail-queue</b>(8) program. e.g. to enable spam filter on the incoming SMTP on port 25:
 
@@ -1845,6 +1849,34 @@ exit
 $
 ```
 
+### SPAM filtering during local/remote delivery
+
+You can also do spam filtering during local or remote delivery by using [spawn-filter](https://github.com/indimail/indimail-mta/wiki/spawn-filter.8) by either setting <b>SPAMFILTER</b> environment variable or creating a control file <u>/etc/indimail/control/spamfilter</u>. Few examples are as below
+
+```
+# do spam filtering during all local deliveries
+*:local:/bin/bogofilter -p -d /etc/indimail -u:SPAMEXITCODE=0
+
+# do spam filtering during all remote deliveries
+*:remote:/bin/bogofilter -p -d /etc/indimail -u:SPAMEXITCODE=0
+
+# do spam filtering during all local deliveries to domain *.indimail.org
+*.indimail.org:local:/bin/bogofilter -p -d /etc/indimail -u:SPAMEXITCODE=0
+
+# do spam filtering during all remote deliveries from domain *.indimail.org
+*.indimail.org:remote:/bin/bogofilter -p -d /etc/indimail -u:SPAMEXITCODE=0
+```
+
+If you don't want to use the <u>spamfilter</u> control file you can set <b>SPAMFILTER</b>, <b>SPAMEXITCODE</b> environment variables for qmail-send service.
+
+```
+$ sudo bash
+$ cd /service/qmail-send.25/variables
+$ echo "/bin/bogofilter -p -d /etc/indimail" > SPAMFILTER
+$ echo "0" > SPAMEXITCODE
+$ echo "0" > REJECTSPAM
+```
+
 We can reject mails identified as spam. We could instead accept all emails but put them in the Spam folder by using [vcfilter](https://github.com/indimail/indimail-mta/wiki/vcfilter.1) to create a vfilter, or by using [filterit](https://github.com/indimail/indimail-mta/wiki/filterit.1) in [dot-qmail](https://github.com/indimail/indimail-mta/wiki/dot-qmail.5). <b>vcfilter</b> can be used only if you have <b>indimail-virtualdomains</b> installed. Examples for using both are shown below.
 
 ```
@@ -1866,7 +1898,7 @@ The method describe above is a global SPAM filter. It will happen for all users,
 
 There is another way you can do spam filtering - during local delivery (you could do for remote delivery, but what would be the point?). IndiMail allows you to call an external program during local/remote delivery by settting **QMAILLOCAL** / **QMAILREMOTE** environment variable. You could use any method to call bogofilter (either directly in *filterargs* control file, or your own script). You can see a Pictorial representation of how this happens. ![LocalFilter](indimail_spamfilter_local.png)
 
-## Training bogofilter
+### Training bogofilter
 
 Training bogofilter requires creating a bogofilter databases with corpus of HAM and SPAM emails with SPAM comprising roughly 30% of the total. A good way to start is download an initial corpus from the spamassasin database. Do not run the below curl command with root privileges.
 
