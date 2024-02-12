@@ -1434,7 +1434,9 @@ exit 0
 
 The control file filterargs gives you control to run filters individually for local or remote deliveries. It also allows you to run your filter for both local and remote deliveries. See <b>spawn-filter</b>(8) for full description on this control file.
 e.g. The following entry in /etc/indimail/control/filterargs causes all mails to yahoo.com be fed through the qmail-dkim(8) for DKIM signing.
+
 yahoo.com:remote:/usr/sbin/qmail-dkim:DKIMQUEUE=/bin/cat
+
 NOTE: If the program myfilter returns 100, the message will be bounced. If it returns 2, the message will be discarded (blackholed).
 
 ### Using QMAILLOCAL or QMAILREMOTE environment variables
