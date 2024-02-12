@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.20 2023-12-13 00:31:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.21 2024-02-12 22:03:26+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -2576,6 +2576,7 @@ do_scram_user_tests()
 		done
 		delete_user $testuser1
 		delete_user $testuser2
+		printf "\r%126s" " "
 		printf "\r  testing SMTP AUTH, IMAP/POP3 login, GSASL tests for hash $hash scram users succeeded\n"
 	done
 	tcount=$(expr $tcount + 3)
@@ -3435,6 +3436,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.21  2024-02-12 22:03:26+05:30  Cprogrammer
+# fix clearing of progress percentage
+#
 # Revision 1.20  2023-12-13 00:31:27+05:30  Cprogrammer
 # added tests for ATRN
 #
