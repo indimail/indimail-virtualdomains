@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.21 2024-02-12 22:03:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.22 2024-02-18 16:37:52+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -48,6 +48,7 @@ qmail_inject=$bindir/qmail-inject
 setuidgid=$bindir/setuidgid
 tcpserver=$bindir/tcpserver
 qmail_queue=$sbindir/qmail-queue
+authcram=/usr/libexec/indimail/authcram
 gsasl=$bindir/gsasl
 in_cnf=$sysconfdir/indimail.cnf
 MYSQL_USER=indimail
@@ -207,6 +208,7 @@ setup_config()
 	tm1=$(date +"%s.%4N")
 	mkdir -p $cntrldir
 	mkdir -p $testdir/run/mysqld
+	mkdir -p $testdir/bin
 	cd $testdir
 	$sudo chown mysql:mysql $testdir/run/mysqld
 	sudo mkdir -p $qmaildir/mysqldb
@@ -495,7 +497,6 @@ setup_svscan()
 	echo 1                 > $servicedir/smtpd/variables/STARTTLS
 	echo 0                 > $servicedir/smtpd/variables/BIGTODO
 	echo $confsplit        > $servicedir/smtpd/variables/CONFSPLIT
-	echo 1                 > $servicedir/smtpd/variables/ENABLE_CRAM
 	echo 1                 > $servicedir/smtpd/variables/CHECKRELAY
 	echo $qmaildir/queue   > $servicedir/smtpd/variables/QUEUEDIR
 	echo $cntrldir         > $servicedir/smtpd/variables/CONTROLDIR
@@ -769,61 +770,65 @@ create_cram_user()
 {
 	tm1=$(date +"%s.%4N")
 	if [ $# -eq 3 ] ; then
-		if [ "$3" = "default" ] ; then
-			extra=""
-		else
-			extra="-h $3"
-		fi
-		hash="$3"
+		type="cram+plain"
+		$sudo env - \
+			PATH=/bin:/usr/bin \
+			ASSIGNDIR=$sysconfdir/users \
+			SYSCONFDIR=$sysconfdir \
+			CONTROLDIR=$cntrldir \
+			DOMAINDIR=$qmaildir \
+			SERVICEDIR=$servicedir \
+			vadduser -C -m CRAM -d $1 $2 >> $logdir/setup/vadduser.log 2>&1
 	else
-		extra=""
-		hash="default"
+		type="cram-only"
+		$sudo env - \
+			PATH=/bin:/usr/bin \
+			ASSIGNDIR=$sysconfdir/users \
+			SYSCONFDIR=$sysconfdir \
+			CONTROLDIR=$cntrldir \
+			DOMAINDIR=$qmaildir \
+			SERVICEDIR=$servicedir \
+			vadduser -e $1 $2 >> $logdir/setup/vadduser.log 2>&1
 	fi
-	$sudo env - \
-		PATH=/bin:/usr/bin \
-		ASSIGNDIR=$sysconfdir/users \
-		SYSCONFDIR=$sysconfdir \
-		CONTROLDIR=$cntrldir \
-		DOMAINDIR=$qmaildir \
-		SERVICEDIR=$servicedir \
-		vadduser -C -m CRAM -d $extra $1 $2 >> $logdir/setup/vadduser.log 2>&1
 	status=$?
 	if [ $status -eq 0 ] ; then
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing command vadduser (cram)  hash=%-8s succeeded %54s [%.4f sec]\n" $hash " " $secs
+		printf "\r  testing command vadduser (cram)  type=%-10s succeeded %52s [%.4f sec]\n" $type " " $secs
 		print_pct
 	else
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/setup/vadduser.log
 		fi
-		echo "  testing command vadduser (cram) hash=$hash failed"
+		echo "  testing command vadduser (cram) type=$type failed"
 		[ -z "$failed" ] && failed="vadduser (cram)" || failed="$failed, vadduser (cram)"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
-	tm1=$(date +"%s.%4N")
-	pass=$($sudo env - \
-		PATH=/bin:/usr/bin \
-		ASSIGNDIR=$sysconfdir/users \
-		SYSCONFDIR=$sysconfdir \
-		CONTROLDIR=$cntrldir \
-		vuserinfo -p $testuser2 | awk '{print $3}' | cut -c1-6)
-	if [ "$pass" = "{CRAM}" ] ; then
-		tm2=$(date +"%s.%4N")
-		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
-		tcount=$(expr $tcount + 1)
-		printf "\r  testing command vadduser (cram format) succeeded %62s [%.4f sec]\n" " " $secs
-		print_pct
-	else
-		fcount=$(expr $fcount + 1)
-		if [ $prompt -eq 1 ] ; then
-			less $logdir/setup/vadduser.log
+	if [ $# -eq 3 ] ; then
+		tm1=$(date +"%s.%4N")
+		pass=$($sudo env - \
+			PATH=/bin:/usr/bin \
+			ASSIGNDIR=$sysconfdir/users \
+			SYSCONFDIR=$sysconfdir \
+			CONTROLDIR=$cntrldir \
+			vuserinfo -p $testuser2 | awk '{print $3}' | cut -c1-6)
+		if [ "$pass" = "{CRAM}" ] ; then
+			tm2=$(date +"%s.%4N")
+			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+			tcount=$(expr $tcount + 1)
+			printf "\r  testing command vadduser (cram format) succeeded %62s [%.4f sec]\n" " " $secs
+			print_pct
+		else
+			fcount=$(expr $fcount + 1)
+			if [ $prompt -eq 1 ] ; then
+				less $logdir/setup/vadduser.log
+			fi
+			echo "  testing command vadduser (cram format) failed"
+			[ -z "$failed" ] && failed="vadduser (cram format)" || failed="$failed, vadduser (cram format)"
+			[ $continue_on_err -eq 0 ] && exit 1 || return 0
 		fi
-		echo "  testing command vadduser (cram format) failed"
-		[ -z "$failed" ] && failed="vadduser (cram format)" || failed="$failed, vadduser (cram format)"
-		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
 }
 
@@ -956,7 +961,7 @@ change_password()
 
 }
 
-do_vmoduser()
+do_vmoduser_quota()
 {
 	tm1=$(date +"%s.%4N")
 	quota=$($sudo env - \
@@ -1141,11 +1146,18 @@ check_mail()
 
 do_smtp_auth_swaks()
 {
-	methods="LOGIN PLAIN CRAM-MD5 DIGEST-MD5"
-	if [ $3 -eq 1 -o $3 -eq 3 ] ; then
-		type="CRAM-NO "
-	else
-		type="CRAM=YES"
+	if [ $3 -eq 1 ] ; then
+		methods="LOGIN PLAIN CRAM-MD5 DIGEST-MD5"
+		type=" "
+	elif [ $3 -eq 2 ] ; then
+		methods="LOGIN PLAIN CRAM-MD5 DIGEST-MD5"
+		type=" "
+	elif [ $3 -eq 3 ] ; then
+		methods="LOGIN PLAIN CRAM-MD5 DIGEST-MD5"
+		type=" "
+	elif [ $3 -eq 4 ] ; then
+		methods="CRAM-MD5 DIGEST-MD5"
+		type="CRAMONLY"
 	fi
 	for j in 1 2
 	do
@@ -1161,30 +1173,37 @@ do_smtp_auth_swaks()
 			echo 1 > $servicedir/smtpd/variables/QUERY_CACHE
 			;;
 		esac
+		$sudo svc -a $servicedir/smtpd/log
 		$sudo svc -r $servicedir/smtpd
 		check_service smtpd 3
 		for i in $methods
 		do
 			tm1=$(date +"%s.%4N")
-			case $i in
-				LOGIN|PLAIN)
-				pass=$2
-				;;
-				*)
-				if [ $3 -eq 1 ] ; then
-					pass=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -p $1 | awk '{print $3}')
-				else
+			if [ $3 -eq 1 ] ; then
+				case $i in
+					LOGIN|PLAIN)
 					pass=$2
-				fi
-				;;
-			esac
+					;;
+					*)
+					pass=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -p $1 | awk '{print $3}')
+					;;
+				esac
+			else
+				pass=$2
+			fi
 			swaks -S --tls --to $user@$HOSTNAME --from $1 --server localhost --port $smtp_port -a $i -au $1 -ap "$pass" 2>/dev/null
 			if [ $? -ne 0 ] ; then
 				fcount=$(expr $fcount + 1)
 				if [ $prompt -eq 1 ] ; then
 					less $logdir/smtpd/current
 				fi
-				printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-7s using swk %s failed\n"    "$i" "$str" "$hash" "$type" "$1"
+				case $i in
+				LOGIN|PLAIN)
+				printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-8s using swk %s failed\n"    "$i" "$str" "$hash" "$type" "$1"
+				;;
+				*)
+				printf "  testing SMTP AUTH %-18s (%s) hash=xxxxxxxx %-8s using swk %s failed\n"    "$i" "$str" "$type" "$1"
+				esac
 				[ -z "$failed" ] && failed="swaks-SMTP-AUTH-$i-hash-$hash" || failed="$failed, swaks-SMTP-AUTH-$i-hash-$hash"
 				[ $continue_on_err -eq 0 ] && exit 1 || return 0
 			fi
@@ -1195,7 +1214,14 @@ do_smtp_auth_swaks()
 					tm2=$(date +"%s.%4N")
 					secs=$(echo $tm1 $tm2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 					tcount=$(expr $tcount + 1)
-					printf "\r  testing SMTP AUTH %-18s (%s) hash=%-8s %-7s using swk %s succeeded [%.4f sec]\n" "$i" "$str" "$hash" "$type" "$1" "$secs"
+					case $i in
+					LOGIN|PLAIN)
+					printf "\r  testing SMTP AUTH %-18s (%s) hash=%-8s %-8s using swk %s succeeded [%.4f sec]\n" "$i" "$str" "$hash" "$type" "$1" "$secs"
+					;;
+					*)
+					printf "\r  testing SMTP AUTH %-18s (%s) hash=xxxxxxxx %-8s using swk %s succeeded [%.4f sec]\n" "$i" "$str" "$type" "$1" "$secs"
+					;;
+					esac
 					print_pct
 				else
 					fcount=$(expr $fcount + 1)
@@ -1208,7 +1234,14 @@ do_smtp_auth_swaks()
 						cat $logdir/qmail-send/current
 						)
 					fi
-					printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-7s using swk %s failed\n"    "$i" "$str" "$hash" "$type" "$1"
+					case $i in
+					LOGIN|PLAIN)
+					printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-8s using swk %s failed\n"    "$i" "$str" "$hash" "$type" "$1"
+					;;
+					*)
+					printf "  testing SMTP AUTH %-18s (%s) hash=xxxxxxxx %-8s using swk %s failed\n"    "$i" "$str" "$type" "$1"
+					;;
+					esac
 					[ -z "$failed" ] && failed="swaks-SMTP-AUTH-$i-hash-$hash" || failed="$failed, swaks-SMTP-AUTH-$i-hash-$hash"
 					[ $continue_on_err -eq 0 ] && exit 1 || return 0
 				fi
@@ -1257,11 +1290,24 @@ do_smtp_auth_qmr_o()
 	# user     = $2
 	# password = $3
 	# type     = $4 1 - CRAM=NO (plain user), 2 - CRAM=YES (plain user), 3 - CRAM=YES (scram user)
-	if [ $4 -eq 1 -o $4 -eq 3 ] ; then
-		type="CRAM=NO "
-	else
-		type="CRAM=YES"
-	fi
+	case $4 in
+		1)
+		methods="LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5"
+		type=" "
+		;;
+		2)
+		methods="LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5"
+		type=" "
+		;;
+		3)
+		methods="LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5"
+		type=" "
+		;;
+		4)
+		methods="CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5"
+		type="CRAMONLY"
+		;;
+	esac
 	for j in 1 2
 	do
 		case $j in
@@ -1278,21 +1324,20 @@ do_smtp_auth_qmr_o()
 		esac
 		$sudo svc -r $servicedir/smtpd
 		check_service smtpd 3
-		methods="LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5"
 		for i in $methods
 		do
-			case $i in
-				LOGIN|PLAIN)
-				pass=$3
-				;;
-				*)
-				if [ $4 -eq 1 ] ; then
-					pass=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -p $2 | awk '{print $3}')
-				else
+			if [ $4 -eq 1 ] ; then
+				case $i in
+					LOGIN|PLAIN)
 					pass=$3
-				fi
-				;;
-			esac
+					;;
+					*)
+					pass=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -p $2 | awk '{print $3}')
+					;;
+				esac
+			else
+				pass=$3
+			fi
 			tm1=$(date +"%s.%4N")
 			(
 			echo "From: $2"
@@ -1313,14 +1358,29 @@ do_smtp_auth_qmr_o()
 					tm2=$(date +"%s.%4N")
 					secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 					tcount=$(expr $tcount + 1)
-					printf "\r  testing SMTP AUTH %-18s (%s) hash=%-8s %-8s using qmr %19s succeeded [%.4f sec]\n" "$i" "$str" "$hash" "$type" "$2" "$secs"
+					case $i in
+						LOGIN|PLAIN)
+						printf "\r  testing SMTP AUTH %-18s (%s) hash=%-8s %-8s using qmr %19s succeeded [%.4f sec]\n" "$i" "$str" "$hash" "$type" "$2" "$secs"
+						;;
+						*)
+						printf "\r  testing SMTP AUTH %-18s (%s) hash=xxxxxxxx %-8s using qmr %19s succeeded [%.4f sec]\n" "$i" "$str" "$type" "$2" "$secs"
+						;;
+					esac
+
 					print_pct
 				else
 					fcount=$(expr $fcount + 1)
 					if [ $prompt -eq 1 ] ; then
 						less $logdir/smtpd/current
 					fi
-					printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-7s using qmr %s failed\n"    "$i" "$str" "$hash" "$type" "$2"
+					case $i in
+						LOGIN|PLAIN)
+						printf "  testing SMTP AUTH %-18s (%s) hash=%-8s %-7s using qmr %s failed\n"    "$i" "$str" "$hash" "$type" "$2"
+						;;
+						*)
+						printf "  testing SMTP AUTH %-18s (%s) hash=xxxxxxxx %-7s using qmr %s failed\n"    "$i" "$str" "$type" "$2"
+						;;
+					esac
 					[ -z "$failed" ] && failed="qmr-SMTP-AUTH-$i-hash-$hash" || failed="$failed, qmr-SMTP-AUTH-$i-hash-$hash"
 					[ $continue_on_err -eq 0 ] && exit 1 || return 0
 				fi
@@ -1485,7 +1545,11 @@ delete_relay()
 test_pop3()
 {
 	tm1=$(date +"%s.%4N")
-	swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a LOGIN -au $1 -ap "$2"
+	if [ "$5" = "CRAM-SHA256" ] ; then
+	swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a "CRAM-MD5" -au $1 -ap "$2"
+	else
+	swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a $5 -au $1 -ap "$2"
+	fi
 	check_mail indimail $4 no-delete
 	(
 	echo "#!/bin/sh"
@@ -1493,22 +1557,26 @@ test_pop3()
 	echo "exec 1>&7"
 	echo "read line"
 	echo "printf \"%s\n\" \"\$line\" 1>&2"
-	echo "printf \"user $1\r\n\" 1>&2"
-	echo "printf \"user $1\r\n\""
+	if [ "$5" = "PLAIN" ] ; then
+		b64=$(printf "\0$1\0$2" | base64)
+		echo "printf \"AUTH PLAIN\r\n\" 1>&2"
+		echo "printf \"AUTH PLAIN\r\n\""
+		echo "read line"
+		echo "printf \"%s\n\" \"\$line\" 1>&2"
+		echo "printf \"$b64\r\n\" 1>&2"
+		echo "printf \"$b64\r\n\""
+	elif [ "$5" = "CRAM-MD5" -o "$5" = "CRAM-SHA1" -o "$5" = "CRAM-SHA256" ] ; then
+		echo "printf \"AUTH $5\r\n\" 1>&2"
+		echo "printf \"AUTH $5\r\n\""
+		echo "read line"
+		echo "line=\$(echo \$line | cut -c3- | sed -e 's/\r//g')"
+		echo "b64=\$($authcram -t $5 $1 $2 \$line | sed -e 's/\r//g')"
+		echo "printf \"%s\r\n\" \"\$b64\" 1>&2"
+		echo "printf \"%s\r\n\" \"\$b64\""
+	fi
 	echo "read line"
 	echo "printf \"%s\n\" \"\$line\" 1>&2"
-	echo "printf \"%s\" \"\$line\" |grep \"+OK Password required.\" >/dev/null"
-	echo "if [ \$? -ne 0 ] ; then"
-	echo "	printf \"%s\n\" \"\$line\" 1>&2"
-	echo "	echo \"Failed to get password prompt\" 1>&2"
-	echo "	exit 1"
-	echo "else"
-	echo "	printf \"pass %s\n\" \"$2\" 1>&2"
-	echo "	printf \"pass %s\n\" \"$2\""
-	echo "fi"
-	echo "read line"
-	echo "printf \"%s\n\" \"\$line\" 1>&2"
-	echo "printf \"%s\" \"\$line\" | grep \"+OK logged in.\" > /dev/null"
+	echo "printf \"%s\" \"\$line\" | grep -E \"+OK logged in.\" >/dev/null 2>&1"
 	echo "if [ \$? -ne 0 ] ; then"
 	echo "	echo \"Failed to login\" 1>&2"
 	echo "	exit 1"
@@ -1516,7 +1584,7 @@ test_pop3()
 	echo "printf \"LIST\r\n\" 1>&2"
 	echo "printf \"LIST\r\n\""
 	echo "read line"
-	echo "printf \"%s\" \"\$line\" |grep \"+OK POP3 clients that break here, they violate STD53.\" > /dev/null"
+	echo "printf \"%s\" \"\$line\" |grep -E \"+OK POP3 clients that break here, they violate STD53.\" > /dev/null"
 	echo "if [ \$? -ne 0 ] ; then"
 	echo "	echo \"LIST command failed\" 1>&2"
 	echo "	exit 1"
@@ -1579,14 +1647,22 @@ test_pop3()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing POP3  login %-25s hash=%-8s and mail retrieval (%s) succeeded %10s [%.4f sec]\n" "$1" "$hash" "$str" " " "$secs"
+		if [ "$5" = "PLAIN" -o "$5" = "LOGIN" ] ; then
+		printf "\r  testing POP3  login %-15s hash=%-8s %-11s and mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$hash" "$5" "$str" " " "$secs"
+		else
+		printf "\r  testing POP3  login %-15s hash=xxxxxxxx %-11s and mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$5" "$str" " " "$secs"
+		fi
 		print_pct
 	else
 		fcount=$(expr $fcount + 1)
+		if [ "$5" = "PLAIN" -o "$5" = "LOGIN" ] ; then
+		printf "  testing POP3  login %s hash=%-8s %-11s and mail retrieval (%s) failed\n" "$1" "$hash" "$5" "$str"
+		else
+		printf "  testing POP3  login %s hash=xxxxxxxx %-11s and mail retrieval (%s) failed\n" "$1" "$5" "$str"
+		fi
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/pop3d/pop3d.log
 		fi
-		printf "  testing POP3  login %s hash=%-8s and mail retrieval (%s) failed\n" "$1" "$hash" "$str"
 		[ -z "$failed" ] && failed="POP3 login $hash" || failed="$failed, POP3 login $hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
@@ -1602,10 +1678,10 @@ test_pop3()
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
 		delete_relay 2>>$logdir/pop3d/pop3d.log
+		printf "  testing record in relay table failed\n"
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/pop3d/pop3d.log
 		fi
-		printf "  testing record in relay table failed\n"
 		[ -z "$failed" ] && failed="check relay" || failed="$failed, check relay"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
@@ -1624,10 +1700,10 @@ test_pop3()
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
 		delete_relay 2>>$logdir/pop3d/pop3d.log
+		printf "  testing Open RELAY using POP3  login failed ret1=%d ret2=%d\n" $ret1 $ret2
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/pop3d/pop3d.log
 		fi
-		printf "  testing Open RELAY using POP3  login failed ret1=%d ret2=%d\n" $ret1 $ret2
 		[ -z "$failed" ] && failed="open relay pop3" || failed="$failed, open relay pop3"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
@@ -1645,15 +1721,23 @@ test_pop3()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing POP3S login %-25s hash=%-8s and mail retrieval (%s) succeeded %10s [%.4f sec]\n" "$1" "$hash" "$str" " " "$secs"
+		if [ "$5" = "PLAIN" -o "$5" = "LOGIN" ] ; then
+		printf "\r  testing POP3S login %-15s hash=%-8s %-11s and mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$hash" "$5" "$str" " " "$secs"
+		else
+		printf "\r  testing POP3S login %-15s hash=xxxxxxxx %-11s and mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$5" "$str" " " "$secs"
+		fi
 		print_pct
 	else
 		fcount=$(expr $fcount + 1)
 		delete_relay 2>>$logdir/pop3d/pop3d.log
+		if [ "$5" = "PLAIN" -o "$5" = "LOGIN" ] ; then
+		printf "  testing POP3S login %s hash=%s %s and mail retrieval (%s) failed\n" "$1" "$hash" "$5" "$str"
+		else
+		printf "  testing POP3S login %s hash=xxxxxxxx %s and mail retrieval (%s) failed\n" "$1" "$5" "$str"
+		fi
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/pop3d-ssl/pop3d-ssl.log
 		fi
-		printf "  testing POP3S login %s hash=%-8s and mail retrieval (%s) failed\n" "$1" "$hash" "$str"
 		[ -z "$failed" ] && failed="POP3S login $hash" || failed="$failed, POP3S login $hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
@@ -1673,10 +1757,10 @@ test_pop3()
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
 		delete_relay 2>>$logdir/pop3d/pop3d.log
+		printf "  testing Open RELAY using POP3S login failed ret1=%d ret2=%d\n" $ret1 $ret2
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/pop3d-ssl/pop3d-ssl.log
 		fi
-		printf "  testing Open RELAY using POP3S login failed ret1=%d ret2=%d\n" $ret1 $ret2
 		[ -z "$failed" ] && failed="open relay pop3s" || failed="$failed, open relay pop3s"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
@@ -1685,15 +1769,35 @@ test_pop3()
 test_imap()
 {
 	tm1=$(date +"%s.%4N")
-	swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a LOGIN -au $1 -ap "$2"
+	if [ "$5" = "CRAM-SHA256" ] ; then
+	swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a "CRAM-MD5" -au $1 -ap "$2"
+	else
+	swaks -S --tls --to $1 --from $1 --server localhost --port $smtp_port -a $5 -au $1 -ap "$2"
+	fi
 	check_mail indimail $4 no-delete
+	b64=$(printf "\0$1\0$2" | base64)
 	(
 	echo "#!/bin/sh"
 	echo "exec 0<&6"
 	echo "exec 1>&7"
 	echo "read key"
 	echo "printf \"%s\n\" \"\$key\" 1>&2"
-	echo "printf \"a1 login $1 $2\r\n\""
+	if [ "$5" = "PLAIN" ] ; then
+		echo "printf \"a1 AUTHENTICATE PLAIN\r\n\" 1>&2"
+		echo "printf \"a1 AUTHENTICATE PLAIN\r\n\""
+		echo "read line"
+		echo "printf \"%s\n\" \"\$line\" 1>&2"
+		echo "printf \"%s\r\n\" $b64 1>&2"
+		echo "printf \"%s\r\n\" $b64"
+	elif [ "$5" = "CRAM-MD5" -o "$5" = "CRAM-SHA1" -o "$5" = "CRAM-SHA256" ] ; then
+		echo "printf \"a1 AUTHENTICATE $5\r\n\" 1>&2"
+		echo "printf \"a1 AUTHENTICATE $5\r\n\""
+		echo "read line"
+		echo "line=\$(echo \$line | cut -c3- | sed -e 's/\r//g')"
+		echo "b64=\$($authcram -t $5 $1 $2 \$line | sed -e 's/\r//g')"
+		echo "printf \"%s\r\n\" \"\$b64\" 1>&2"
+		echo "printf \"%s\r\n\" \"\$b64\""
+	fi
 	echo "read key"
 	echo "printf \"%s\" \"\$key\" |grep \"a1 OK LOGIN Ok.\" >/dev/null"
 	echo "if [ \$? -ne 0 ] ; then"
@@ -1756,13 +1860,21 @@ test_imap()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing IMAP  login %-25s hash=%-8s and mail retrieval (%s) succeeded %10s [%.4f sec]\n" "$1" "$hash" "$str" " " "$secs"
+		if [ "$5" = "PLAIN" -o "$5" = "LOGIN" ] ; then
+		printf "\r  testing IMAP  login %-15s hash=%-8s %-11s and mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$hash" "$5" "$str" " " "$secs"
+		else
+		printf "\r  testing IMAP  login %-15s hash=xxxxxxxx %-11s and mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$5" "$str" " " "$secs"
+		fi
 		print_pct
 	else
+		if [ "$5" = "PLAIN" -o "$5" = "LOGIN" ] ; then
+		printf "  testing IMAP  login %s hash=%-8s and mail retrieval (%s) failed\n" "$1" "$hash" "$str"
+		else
+		printf "  testing IMAP  login %s hash=xxxxxxxx and mail retrieval (%s) failed\n" "$1" "$str"
+		fi
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/imapd/imapd.log
 		fi
-		printf "  testing IMAP  login %s hash=%-8s and mail retrieval (%s) failed\n" "$1" "$hash" "$str"
 		[ -z "$failed" ] && failed="IMAP login $hash" || failed="$failed, IMAP login $hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
@@ -1778,10 +1890,10 @@ test_imap()
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
 		delete_relay 2>>$logdir/pop3d/pop3d.log
+		printf "  testing record in relay table failed\n"
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/imapd/imapd.log
 		fi
-		printf "  testing record in relay table failed\n"
 		[ -z "$failed" ] && failed="check relay" || failed="$failed, check relay"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
@@ -1800,10 +1912,10 @@ test_imap()
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
 		delete_relay 2>>$logdir/pop3d/pop3d.log
+		printf "  testing Open RELAY using IMAP  login failed ret1=%d ret2=%d\n" $ret1 $ret2
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/imapd/imapd.log
 		fi
-		printf "  testing Open RELAY using IMAP  login failed ret1=%d ret2=%d\n" $ret1 $ret2
 		[ -z "$failed" ] && failed="open relay imap" || failed="$failed, open relay imap"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
@@ -1821,16 +1933,24 @@ test_imap()
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing IMAPS login %-25s hash=%-8s and mail retrieval (%s) succeeded %10s [%.4f sec]\n" "$1" "$hash" "$str" " " "$secs"
+		if [ "$5" = "PLAIN" -o "$5" = "LOGIN" ] ; then
+		printf "\r  testing IMAPS login %-15s hash=%-8s %-11s and mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$hash" "$5" "$str" " " "$secs"
+		else
+		printf "\r  testing IMAPS login %-15s hash=xxxxxxxx %-11s and mail retrieval (%s) succeeded %4s [%.4f sec]\n" "$1" "$5" "$str" " " "$secs"
+		fi
 		print_pct
 	else
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
 		delete_relay 2>>$logdir/pop3d/pop3d.log
+		if [ "$5" = "PLAIN" -o "$5" = "LOGIN" ] ; then
+		printf "  testing IMAPS login %s hash=%-8s and mail retrieval (%s) failed\n" "$1" "$hash" "$str"
+		else
+		printf "  testing IMAPS login %s hash=xxxxxxxx and mail retrieval (%s) failed\n" "$1" "$str"
+		fi
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/imapd-ssl/imapd-ssl.log
 		fi
-		printf "  testing IMAPS login %s hash=%-8s and mail retrieval (%s) failed\n" "$1" "$hash" "$str"
 		[ -z "$failed" ] && failed="IMAPS login $hash" || failed="$failed, IMAPS login $hash"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
@@ -1850,10 +1970,10 @@ test_imap()
 		fcount=$(expr $fcount + 1)
 		select_relay 2>>$logdir/pop3d/pop3d.log
 		delete_relay 2>>$logdir/pop3d/pop3d.log
+		printf "  testing Open RELAY using IMAPS login failed ret1=%d ret2=%d\n" $ret1 $ret2
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/imapd-ssl/imapd-ssl.log
 		fi
-		printf "  testing Open RELAY using IMAPS login failed ret1=%d ret2=%d\n" $ret1 $ret2
 		[ -z "$failed" ] && failed="open relay imaps" || failed="$failed, open relay imaps"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
@@ -2402,7 +2522,7 @@ run_vcfilter()
 		"$@"
 }
 
-do_plain_user_tests()
+do_plain_cram_user_tests()
 {
 	for hash in "default" $hash_supported
 	do
@@ -2410,21 +2530,29 @@ do_plain_user_tests()
 		echo "Starting SMTP AUTH, qmail-remote, IMAP/POP3 login tests for hash $hash plain/cram users"
 		t1="$password2""$hash"
 		t2="$password3""$hash"
+		t3="$password1""$hash"
 		create_plain_user $testuser1 $t1 $hash
-		create_cram_user  $testuser2 $t2 $hash
+		create_cram_user  $testuser2 $t2 cram # both non-cram + cram
+		create_cram_user  $testuser3 $t3      # only cram
 		do_inquerytest $testuser1
 		do_inquerytest $testuser2
-		echo  1 > $servicedir/smtpd/variables/ENABLE_CRAM
+		do_inquerytest $testuser3
 		if [ "$hash" = "DES" ] ; then
 			echo -1 > $servicedir/smtpd/variables/PASSWORD_HASH
 		else
 			> $servicedir/smtpd/variables/PASSWORD_HASH
 		fi
-		do_smtp_auth_swaks $testuser1 $t1 1
+		echo 1 > $servicedir/smtpd/variables/ENABLE_CRAM
+		do_smtp_auth_swaks $testuser1 $t1 1 # LOGIN, PLAIN
 		do_smtp_auth_qmr_o $domain1 $testuser1 $t1 1
+
 		> $servicedir/smtpd/variables/ENABLE_CRAM
-		do_smtp_auth_swaks $testuser2 $t2 2
+		do_smtp_auth_swaks $testuser2 $t2 2 # LOGIN, PLAIN, CRAM
 		do_smtp_auth_qmr_o $domain1 $testuser2 $t2 2
+
+		echo 1 > $servicedir/smtpd/variables/ENABLE_CRAM
+		do_smtp_auth_swaks $testuser3 $t3 4 # CRAM only
+		do_smtp_auth_qmr_o $domain1 $testuser3 $t3 4
 		for j in 1 2
 		do
 			case $j in
@@ -2471,18 +2599,30 @@ do_plain_user_tests()
 			done
 			destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser1 | awk '{print $3}')
 			destdir2=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser2 | awk '{print $3}')
+			destdir3=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser3 | awk '{print $3}')
 			check_service pop3d 3
 			check_service pop3d-ssl 3
-			test_pop3 $testuser2 $t2 $testuser1 $destdir2/Maildir
-			test_pop3 $testuser1 $t1 $testuser2 $destdir1/Maildir
+			test_pop3 $testuser2 $t2 $testuser1 $destdir2/Maildir "PLAIN"
+			test_pop3 $testuser1 $t1 $testuser2 $destdir1/Maildir "PLAIN"
+			if [ "$hash" = "default" ] ; then
+			test_pop3 $testuser3 $t3 $testuser1 $destdir3/Maildir "CRAM-MD5"
+			test_pop3 $testuser3 $t3 $testuser1 $destdir3/Maildir "CRAM-SHA1"
+			test_pop3 $testuser3 $t3 $testuser1 $destdir3/Maildir "CRAM-SHA256"
+			fi
 			check_service imapd 3
 			check_service imapd-ssl 3
-			test_imap $testuser2 $t2 $testuser1 $destdir2/Maildir
-			test_imap $testuser1 $t1 $testuser2 $destdir1/Maildir
+			test_imap $testuser2 $t2 $testuser1 $destdir2/Maildir "PLAIN"
+			test_imap $testuser1 $t1 $testuser2 $destdir1/Maildir "PLAIN"
+			if [ "$hash" = "default" ] ; then
+			test_imap $testuser3 $t3 $testuser1 $destdir3/Maildir "CRAM-MD5"
+			test_imap $testuser3 $t3 $testuser1 $destdir3/Maildir "CRAM-SHA1"
+			test_imap $testuser3 $t3 $testuser1 $destdir3/Maildir "CRAM-SHA256"
+			fi
 			printf "\r  testing SMTP AUTH, qmail-remote, IMAP/POP3 login tests for hash $hash plain/cram users succeeded"
 		done
 		delete_user $testuser1
 		delete_user $testuser2
+		delete_user $testuser3
 	done
 }
 
@@ -2506,7 +2646,7 @@ do_scram_user_tests()
 		$sudo svc -r $servicedir/smtpd
 		sleep $sleep_int
 		check_service smtpd 3
-		do_smtp_auth_swaks $testuser1 $t1 3
+		do_smtp_auth_swaks $testuser1 $t1 3 # SCRAM
 		do_smtp_auth_qmr_o $domain1 $testuser1 $t1 3
 		for j in 1 2
 		do
@@ -2570,9 +2710,9 @@ do_scram_user_tests()
 			done
 			destdir1=$($sudo $setuidgid indimail envdir $servicedir/smtpd/variables vuserinfo -d $testuser1 | awk '{print $3}')
 			check_service pop3d 3
-			test_pop3 $testuser1 $t1 $testuser2 $destdir1
+			test_pop3 $testuser1 $t1 $testuser2 $destdir1 "PLAIN"
 			check_service pop3d-ssl 3
-			test_imap $testuser1 $t1 $testuser2 $destdir1
+			test_imap $testuser1 $t1 $testuser2 $destdir1 "PLAIN"
 		done
 		delete_user $testuser1
 		delete_user $testuser2
@@ -3136,6 +3276,7 @@ do
 		;;
 	esac
 done
+## end getopt
 
 print_pct()
 {
@@ -3329,7 +3470,6 @@ test_atrn()
 	fi
 }
 
-## end getopt
 tty -s && stty sane
 ID=$(id -u)
 [ $ID -eq 0 ] && echo "This script cannot be run as root" 1>&2 && exit 1
@@ -3342,13 +3482,14 @@ current_dir=$(pwd)
 if [ -f $testdir/itotal.count ] ; then
 	total_tests=$(cat $testdir/itotal.count)
 else
-	total_tests=1099
+	total_tests=1304
 fi
 if [ -x /usr/bin/mariadb ] ; then
 	mysql=/usr/bin/mariadb
 else
 	mysql=/usr/bin/mysql
 fi
+t=$(dirname $0)
 do_setup
 do_svscan_start
 svpid=$(sed -n '$p' $servicedir/.svscan.pid)
@@ -3361,7 +3502,7 @@ do_vdominfo
 do_dbinfo
 create_plain_user $testuser1 $password2
 change_password $testuser1 $password1
-do_vmoduser $testuser1
+do_vmoduser_quota $testuser1
 if [ -f /etc/nsswitch.conf ] ; then
 	if (grep ^passwd /etc/nsswitch.conf|grep nssd >/dev/null 2>&1 && \
 			grep ^shadow /etc/nsswitch.conf|grep nssd >/dev/null 2>&1 && \
@@ -3398,11 +3539,12 @@ printf "\r%126s\n" " "
 do_valias $testuser1 $testuser2
 delete_user $testuser1 >/dev/null 2>&1
 delete_user $testuser2 >/dev/null 2>&1
+delete_user $testuser3 >/dev/null 2>&1
 
 $sudo svc -2 $servicedir/inlookup.infifo
 check_service inlookup.infifo
 
-do_plain_user_tests
+do_plain_cram_user_tests
 
 do_scram_user_tests
 
@@ -3436,6 +3578,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.22  2024-02-18 16:37:52+05:30  Cprogrammer
+# added imap, pop3 cram login tests
+#
 # Revision 1.21  2024-02-12 22:03:26+05:30  Cprogrammer
 # fix clearing of progress percentage
 #
