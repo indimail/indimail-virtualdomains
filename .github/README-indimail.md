@@ -290,6 +290,10 @@ IndiMail comes with a tcl/tk administration client called [**indium**](https://g
 
 To install/configure IndiMail you can take the help of the following documents in the [indimail-x/doc subdirectory](https://github.com/indimail/indimail-virtualdomains/tree/master/indimail-x/doc "Documents Subdirectory") of [indimail-virtualdomains](https://github.com/indimail/indimail-virtualdomains "indimail-virtualdomains") github repository. You can also jump to the section [Installing Indimail using DNF/YUM/APT Repository](#installing-indimail-using-dnfyumapt-repository) towards the bottom of this document to install indimail without having to build and compile various components.
 
+**NOTE**
+This file exceeds github's [README size limit](https://github.com/isaacs/github/issues/1610) (also [here](https://github.community/t/does-readme-md-have-max-characters/128124)). Click [Here](https://github.com/indimail/indimail-virtualdomains/blob/master/.github/README-indimail.md) to access the full content of this wiki.
+
+
 File | Description
 ---- | --------------------
 README-indimail.md|Introduction to IndiMail (this file which is also available as the indimail/indimail-mta Wiki)
