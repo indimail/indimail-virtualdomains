@@ -29,9 +29,6 @@ log_it "Checking for mandatory user/group mysql.."
 
 case "$1" in
     install)
-	mkdir -p /tmp/indimail
-	chmod 700 /tmp/indimail
-	touch /tmp/indimail/.install
 	if [ -f ${libexecdir}/iupgrade.sh ] ; then
 		(
 		log_it "Running Custom Upgrade Script for pre $1"

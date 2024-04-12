@@ -42,9 +42,6 @@ case "$1" in
 	set -e
 	;;
     install)
-	mkdir -p /tmp/indimail-access
-	chmod 700 /tmp/indimail-access
-	touch /tmp/indimail-access/.install
 	;;
 
     abort-upgrade)

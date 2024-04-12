@@ -96,13 +96,8 @@ fi
 upgrade=0
 case "$1" in
 	configure)
-	if [ -f /tmp/indimail-access/.install ] ; then
-		/bin/rm -rf /tmp/indimail-access
-		upgrade=0
-	else
-		if [ -n "$2" ] ; then
-			upgrade=1
-		fi
+	if [ -n "$2" ] ; then
+		upgrade=1
 	fi
 	;;
 
