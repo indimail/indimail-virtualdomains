@@ -26,8 +26,8 @@
 #ifdef HAVE_SSL
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-#include <tls.h>
 #endif
+#include <tls.h>
 #ifdef HAVE_QMAIL
 #include <substdio.h>
 #include <subfd.h>
@@ -356,7 +356,7 @@ consclnt(char *remote, char **argv, char *clientcert, char *cafile, char *crlfil
 		switch (fork())
 		{
 		case -1:
-			perror("fork");
+			strerr_die2sys(111, FATAL, "fork: ");
 			return 1;
 		case 0:
 			close(0);
