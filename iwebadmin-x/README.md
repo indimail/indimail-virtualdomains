@@ -33,7 +33,7 @@ iwebadmin needs root to install into directories
 - /var/www/cg-bin      - the web server's cgi-bin directory
 - /var/www/html/image  - web server's image directory.
 
-Since iwebadmin is a suid binary, make sure it's installed on a volume that isn't mounted with the 'nosuid' option in /etc/fstab.
+Since iwebadmin is a setuid binary, make sure it's installed on a volume that isn't mounted with the 'nosuid' option in /etc/fstab.
 
 Be root before you follow the rest of the instructions or your installation will fail. 
 
@@ -258,8 +258,15 @@ Note to people who did not read the above paragraph: When you give up on your in
     # systemctl start  fcgiwrap@nginx.socket
     # systemctl start nginx
     ```
+- For using httpd with systemd configuration that protects /home, /root you need to do the following
 
-8 .  Enjoy
+    ```
+    systemcl edit httpd.service
+    [Service]
+    ProtectHome=false
+    ```
+
+9 .  Enjoy
 
     If you have any questions or comments please email indimail-support@lists.sourceforge.net or join the [mailing list](http://groups.google.com/group/indimail)
 
