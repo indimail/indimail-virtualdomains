@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH CRC "1" "May 2016" "IndiMail" "General Commands"
 
 .SH NAME
@@ -8,29 +9,44 @@ crcdiff \- compare two crc lists and report the difference
 
 .SH SYNOPSYS
 .PP
-crc file \.\.\.
+\fBcrc\fR [-dv] [-i \fIinitial_crc\fR] file ...
 .PP
-crcdiff crclist1 crclist2
+\fBcrcdiff\fR [-s] [-c critical_list] \fIcrclist\fR \fIcrclist\fR
 
 .SH DESCRIPTION
-For each file, \fBcrc\fR calculates and prints a 32-bit CRC, the byte count, and the file name. It is typically
-used to validate files transferred between different systems, and is useful in detecting subtle disk corruption.
-\fBcrc\fR uses a checksum compatible with the DOS version of \fBcrc\fR, the 32 bit CRC used by PKZIP version 0.9,
-as well as the "crc" command in ZCOMM and Professional-YAM (high reliability communications programs).
+For each file, \fBcrc\fR calculates and prints a 32-bit CRC in hexadecimal.
+With the -v optin it additionally prints file permissions, file owner,
+group and the file name. It is typically used to validate files transferred
+between different systems, and is useful in detecting subtle disk
+corruption. \fBcrc\fR uses a checksum compatible with the DOS version of
+\fBcrc\fR, the 32 bit CRC used by PKZIP version 0.9. as well as the "crc"
+command in ZCOMM and Professional-YAM (high reliability communications
+programs). With the -d option, the 32-bit CRC is printed in decimal. You
+can use -i option to initialize CRC with \fIinitial_crc\fR instead of 0.
 
-The 32-bit CRC used is the frame check sequence in ADCCP (ANSI X3.66, also known as FIPS PUB 71 and FED-STD-1003,
-the U.S. version of CCITT's X.25 link-level protocol).
+The 32-bit CRC used is the frame check sequence in ADCCP (ANSI X3.66, also
+known as FIPS PUB 71 and FED-STD-1003, the U.S. version of CCITT's X.25
+link-level protocol).
 
-\fBcrcdiff\fR compares two crc lists and reports the differences.
- report:
-     corrupt  - crc changed w/o date change 
-     replaced - crc + date changed
-     perm     - permissions changed
-     own/grp  - owner or group changed
-     removed  - 
-     added    - Print the info for the new file except for deleted.
+\fBcrcdiff\fR compares two crc lists and reports the differences. If -c
+option is used, directories/files listed in \fIcritical_list\fR will be
+used to give L2 warnings for changes to such files.
 
-To generate crclist you can use
+.EX
+  corrupt    - crc changed without date change 
+  replaced   - crc + date changed
+  perm       - permissions changed
+  own/grp    - owner or group changed
+  deleted    - 
+  added      - Print the info for the new file
+  WARNING L1 - Changes to setuid, setgid files
+  WARNING L2 - Changes to file in \fIcritical_list\fR
+.EE
+
+If \fIcrclist\fR files are sorted you can use the -s option which makes
+\fBcrcdiff\fR(1) run faster.
+
+To generate \fIcrclist\fR you can use
 
 .EX
  find / -print | sort | xargs crc -v > crc_file
@@ -39,7 +55,8 @@ To generate crclist you can use
 to generate a crc list.  Assume that no files have tabs or spaces in the name.
 
 .SH BUGS
-Altough extremely unlikely, files with different data may still produce the same crc value.
+Altough extremely unlikely, files with different data may still produce the
+same crc value.
 
 .SH SEE ALSO
-sum(1), md5sum(1), 
+sum(1), md5sum(1), sha1sum, sha224sum, sha256sum, sha284sum, sha512sum

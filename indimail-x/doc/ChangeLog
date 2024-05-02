@@ -1,3 +1,10 @@
+* XXX XXX XX XXXX XX:XX:XX +0000 @email@ @version@-@release@%{?dist}
+Release @version@-@release@ Start 02/05/2024 End XX/XX/XXXX
+1. crc.c: fixed bug with -d option
+2. crc.c: fixed bug with printing group permissions
+3. crcdiff.c: display L1, L2 changes
+4. crcdiff.c: added -s, -c option
+
 * Mon Jan 01 2024 09:24:41 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.6-1.1%{?dist}
 Release 3.4.6-1.1 Start 09/09/2023 End 01/01/2024
 ======= Release Highlights ================================================

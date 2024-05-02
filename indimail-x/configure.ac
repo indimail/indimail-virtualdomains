@@ -609,6 +609,7 @@ then
 		CPPFLAGS="$CPPFLAGS -Wformat=2 $flags"
 	fi
 	echo done
+	/bin/rm -f testccflags.o
 fi
 
 DATE=`date`

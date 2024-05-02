@@ -1,5 +1,9 @@
 /*
  * $Log: crc.c,v $
+ * Revision 1.5  2024-05-02 20:40:01+05:30  Cprogrammer
+ * fixed bug with -d option
+ * fixed bug with printing group permissions
+ *
  * Revision 1.4  2023-05-11 22:43:45+05:30  Cprogrammer
  * crc.c: define SYS_OPEN on the basis of openat is present or not
  *
@@ -10,25 +14,6 @@
  * replaced atoi() with scan_long()
  *
  * Revision 1.1  2019-04-14 20:58:06+05:30  Cprogrammer
- * Initial revision
- *
- * Revision 1.5  2018-12-04 07:46:33+05:30  Cprogrammer
- * pad with zeros to make 8 digit hex numbers
- * use stat instead of lstat
- *
- * Revision 1.5  2018-11-26 23:40:57+05:30  Cprogrammer
- * pad with zeros to make 8 digit hex numbers
- *
- * Revision 1.4  2018-11-24 16:29:38+05:30  Cprogrammer
- * pad number with zero to have 8 digit length
- *
- * Revision 1.3  2018-11-19 20:52:17+05:30  Cprogrammer
- * BUG fix
- *
- * Revision 1.2  2018-10-22 21:54:32+05:30  Cprogrammer
- * removed unused functions
- *
- * Revision 1.1  2018-10-15 16:46:32+05:30  Cprogrammer
  * Initial revision
  *
  */
@@ -80,7 +65,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: crc.c,v 1.4 2023-05-11 22:43:45+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: crc.c,v 1.5 2024-05-02 20:40:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define MAXBUF 4096
@@ -126,8 +111,7 @@ fill_r()
 }
 
 static unsigned long
-_remainder(m)
-	int             m;
+_remainder(int m)
 {
 	unsigned long   rem = 0;
 	int             i;
@@ -236,8 +220,7 @@ static unsigned long const crctab[256] = {
 };
 
 static int
-print_perm(perm)
-	unsigned int    perm;
+print_perm(unsigned int perm)
 {
 
 	char            string[20];
@@ -276,6 +259,7 @@ print_perm(perm)
 		string[0] = 's';
 		break;
 	}
+	/* owner */
 	if (perm & S_IREAD)
 		string[1] = 'r';
 	if (perm & S_IWRITE)
@@ -288,18 +272,22 @@ print_perm(perm)
 	else
 	if (perm & S_ISUID)
 		string[3] = 'S';
+
+	/* group */
 	if (perm & S_IRGRP)
 		string[4] = 'r';
 	if (perm & S_IWGRP)
 		string[5] = 'w';
-	if (perm & S_ISUID && perm & S_IXGRP)
+	if (perm & S_ISGID && perm & S_IXGRP)
 		string[6] = 's';
 	else
 	if (perm & S_IXGRP)
 		string[6] = 'x';
 	else
-	if (perm & S_ISUID)
+	if (perm & S_ISGID)
 		string[6] = 'l';
+
+	/* others */
 	if (perm & S_IROTH)
 		string[7] = 'r';
 	if (perm & S_IWOTH)
@@ -426,9 +414,8 @@ printcrc(const char *file, unsigned long *lcount, int statflag, int displayhex)
 		statbuf_t.st_ctime = statbuf.st_ctime;
 #endif
 		nr = sizeof(struct stat);
-		for (crc = initial_crc, ptr = (char *) &statbuf_t;nr > 0; ptr++, nr--) {
+		for (crc = initial_crc, ptr = (char *) &statbuf_t;nr > 0; ptr++, nr--)
 			crc = (crc << 8) ^ crctab[((crc >> 24) ^ *ptr) & 0xFF];
-		}
 		bytes_read = sizeof(struct stat);
 		while (bytes_read > 0) {
 			crc = (crc << 8) ^ crctab[((crc >> 24) ^ bytes_read) & 0xFF];
@@ -437,11 +424,13 @@ printcrc(const char *file, unsigned long *lcount, int statflag, int displayhex)
 		crc = ~crc & 0xFFFFFFFF;
 		if (statflag != -1) {
 			strnum[nr = (displayhex ? fmt_xlong : fmt_ulong) (strnum, crc)] = 0;
-			if (displayhex && substdio_put(subfdout, "0x", 2) == -1)
-				strerr_die2sys(111, FATAL, "unable to write to stdout: ");
-			for (nr = 8 - nr; nr; nr--) {
-				if (substdio_put(subfdout, "0", 1) == -1)
+			if (displayhex){
+				if (substdio_put(subfdout, "0x", 2) == -1)
 					strerr_die2sys(111, FATAL, "unable to write to stdout: ");
+				for (nr = 8 - nr; nr; nr--) {
+					if (substdio_put(subfdout, "0", 1) == -1)
+						strerr_die2sys(111, FATAL, "unable to write to stdout: ");
+				}
 			}
 			if (substdio_puts(subfdout, strnum) == -1)
 				strerr_die2sys(111, FATAL, "unable to write to stdout: ");
@@ -498,11 +487,13 @@ printcrc(const char *file, unsigned long *lcount, int statflag, int displayhex)
 	(void) close(fd);
 	if (statflag != -1) {
 		strnum[nr = (displayhex ? fmt_xlong : fmt_ulong) (strnum, crc)] = 0;
-		if (displayhex && substdio_put(subfdout, "0x", 2) == -1)
-			strerr_die2sys(111, FATAL, "unable to write to stdout: ");
-		for (nr = 8 - nr; nr; nr--) {
-			if (substdio_put(subfdout, "0", 1) == -1)
+		if (displayhex) {
+			if (substdio_put(subfdout, "0x", 2) == -1)
 				strerr_die2sys(111, FATAL, "unable to write to stdout: ");
+			for (nr = 8 - nr; nr; nr--) {
+				if (substdio_put(subfdout, "0", 1) == -1)
+					strerr_die2sys(111, FATAL, "unable to write to stdout: ");
+			}
 		}
 		if (substdio_puts(subfdout, strnum) == -1)
 			strerr_die2sys(111, FATAL, "unable to write to stdout: ");
@@ -545,7 +536,7 @@ main(argc, argv)
 	if (argc == 1)
 		usage(0);
 	/*- process all arguments */
-	while ((c = getopt(argc, argv, "VvdI:i:")) != opteof) {
+	while ((c = getopt(argc, argv, "vdi:")) != opteof) {
 		switch (c)
 		{
 		case 'd':
