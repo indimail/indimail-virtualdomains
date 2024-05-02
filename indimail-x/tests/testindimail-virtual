@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.22 2024-02-18 16:37:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.23 2024-05-02 17:41:16+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -274,7 +274,7 @@ setup_config()
 	# mysql cnf file
 	if [ ! -f $in_cnf ] ; then
 		printf "\rCreating mysql config %-33s %100s\n" "$in_cnf" " "
-  		$sudo $svctool --cntrldir=$cntrldir --config=mysql --mysqlPrefix=/usr \
+		$sudo $svctool --cntrldir=$cntrldir --config=mysql --mysqlPrefix=/usr \
 			--sysconfdir=$sysconfdir --mysqlsocket=$MYSQL_SOCK --mysqlport=$MYSQL_PORT \
 			--databasedir=$qmaildir/mysqldb 1>&3 2>&1
 		if [ $? -eq 0 -a -f $in_cnf ] ; then
@@ -291,10 +291,10 @@ setup_config()
 	fi
 
 	tm1=$(date +"%s.%4N")
-  	# MySQL Database Creation
+	# MySQL Database Creation
 	if [ ! -d $qmaildir/mysqldb/data/mysql ] ; then
 		printf "\rCreating mysql db %108s\n" " "
-  		$sudo $svctool --cntrldir=$cntrldir --config=mysqldb --mysqlPrefix=/usr \
+		$sudo $svctool --cntrldir=$cntrldir --config=mysqldb --mysqlPrefix=/usr \
 			--mysqluser="$MYSQL_USER" --mysqlpass="$MYSQL_PASS" \
 			--databasedir=$qmaildir/mysqldb --base_path=$testdir/mail \
 			--mysqlsocket="$MYSQL_SOCK".tmp 1>&3 2>&1
@@ -319,15 +319,15 @@ setup_config()
 		else
 			echo "  testing for indimail MySQL database failed"
 			echo "Disabling mysqld service"
-			touch $servicedir/mysql.3307/down
+			touch $servicedir/mysql.$MYSQL_PORT/down
 		fi
 	fi
 
 	tm1=$(date +"%s.%4N")
-  	# MySQL service Creation
+	# MySQL service Creation
 	mkdir -p $servicedir
 	printf "\rCreating mysqld service %102s\n" " "
-  	$sudo $svctool --mysql=3307 --servicedir=$servicedir --mysqlPrefix=/usr \
+	$sudo $svctool --mysql=$MYSQL_PORT --servicedir=$servicedir --mysqlPrefix=/usr \
 		--databasedir=$qmaildir/mysqldb --config=$in_cnf 1>&3
 	if [ $? -eq 0 ] ; then
 		tm2=$(date +"%s.%4N")
@@ -340,8 +340,8 @@ setup_config()
 		echo "  testing svctool create MySQL service failed"
 		exit 1
 	fi
-	$sudo chown -R $user $servicedir/mysql.3307
-	printf "#!/bin/sh\nexec $setuidgid $user $multilog t $logdir/mysqld\n" > $servicedir/mysql.3307/log/run
+	$sudo chown -R $user $servicedir/mysql.$MYSQL_PORT
+	printf "#!/bin/sh\nexec $setuidgid $user $multilog t $logdir/mysqld\n" > $servicedir/mysql.$MYSQL_PORT/log/run
 	if [ ! -f $sysconfdir/headerlist ] ; then
 		cp /etc/indimail/headerlist $sysconfdir
 	fi
@@ -538,7 +538,7 @@ setup_svscan()
 	echo "for i in \$(seq 1 \$count); do f=$qmaildir/inquery/infifo.\$i; mkfifo \$f && /bin/chmod 660 \$f && /bin/chown qmaild:indimail \$f; done"
 	echo "exec /usr/bin/envdir -c variables sh -c \""
 	echo "exec /usr/bin/setuidgid -g qmail,indimail qmaild /usr/sbin/inlookup \\"
-  	echo "-i \\\$THREAD_COUNT -c \\\$CACHE_COUNT\""
+	echo "-i \\\$THREAD_COUNT -c \\\$CACHE_COUNT\""
 	) > $servicedir/inlookup.infifo/run
 	printf "#!/bin/sh\nexec $setuidgid $user $multilog t $logdir/inlookup\n" > $servicedir/inlookup.infifo/log/run
 	chmod +x $servicedir/inlookup.infifo/run
@@ -2825,7 +2825,7 @@ do_vfilter()
 		vcount=$(expr $vcount + 1)
 	done
 
-    # -b bounce action
+	# -b bounce action
 	#    0               - Do not Bounce to sender
 	#    3'&user@domain' - Forward to another id and Bounce
 	#    3'|program'     - Feed mail to another program and Bounce
@@ -3244,8 +3244,8 @@ if [ $? -eq 0 ] ; then
 fi
 options=$(getopt -a -n testindimail-virtual -o "hyc" -l help,noprompt,continue -- "$@")
 if [ $? != 0 ]; then
-  usage
-  exit 1
+	usage
+	exit 1
 fi
 eval set -- "$options"
 while :
@@ -3288,7 +3288,7 @@ test_mysql()
 {
 	tm1=$(date +"%s.%4N")
 	printf "\r  testing MySQL Service startup"
-	check_service mysql.3307
+	check_service mysql.$MYSQL_PORT
 	if [ $? -eq 0 ] ; then
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
@@ -3374,7 +3374,7 @@ test_atrn()
 	echo "poll 127.0.0.1 with proto ODMR port $smtp_port timeout 120 interval 1 and options no dns"
 	echo "user '$testuser1' there with password '$password1' smtphost 127.0.0.1/$smtp_port options"
 	echo "	no rewrite forcecr pass8bits fetchlimit 50 batchlimit 250 expunge 50"
-   	echo "	fetchdomains atrn.dom"
+	echo "	fetchdomains atrn.dom"
 	) > $sysconfdir/fetchmailrc
 	chmod 600 $sysconfdir/fetchmailrc
 	echo 1 > $testdir/service/smtpd/variables/ODMR
@@ -3578,6 +3578,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.23  2024-05-02 17:41:16+05:30  Cprogrammer
+# use MYSQL_PORT variable instead of hardcoded number
+#
 # Revision 1.22  2024-02-18 16:37:52+05:30  Cprogrammer
 # added imap, pop3 cram login tests
 #
