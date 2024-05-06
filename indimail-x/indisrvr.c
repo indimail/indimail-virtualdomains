@@ -1,66 +1,12 @@
 /*
- * $Log: indisrvr.c,v $
- * Revision 1.17  2023-08-22 19:13:27+05:30  Cprogrammer
- * use TLS_CIPHER_LIST for TLSv1.2 and below, TLS_CIPHER_SUITE for TLSv1.3 and above
- *
- * Revision 1.16  2023-03-20 10:06:02+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.15  2023-02-14 01:09:55+05:30  Cprogrammer
- * free ctx if tls_session fails
- *
- * Revision 1.14  2023-01-22 10:35:30+05:30  Cprogrammer
- * fixed incorrectly passed stralloc * instead of char *
- *
- * Revision 1.13  2023-01-21 13:29:53+05:30  Cprogrammer
- * replaced SSL_shutdown, SSL_free iwth ssl_free
- *
- * Revision 1.12  2023-01-03 21:35:28+05:30  Cprogrammer
- * replaced tls code with TLS library from libqmail
- * added -T option to specify connection timeout
- * added -r option to specify crl file
- * added -d option to specify certificate dir
- *
- * Revision 1.11  2022-12-18 19:24:01+05:30  Cprogrammer
- * log additional wait status
- *
- * Revision 1.10  2022-10-20 11:57:41+05:30  Cprogrammer
- * converted function prototype to ansic
- *
- * Revision 1.9  2022-05-10 20:00:52+05:30  Cprogrammer
- * use headers from include path
- *
- * Revision 1.8  2021-06-11 17:03:47+05:30  Cprogrammer
- * replaced MakeArgs() with makeargs() from libqmail()
- *
- * Revision 1.7  2021-03-09 19:58:25+05:30  Cprogrammer
- * use functions from tls.c
- *
- * Revision 1.6  2021-03-09 15:33:58+05:30  Cprogrammer
- * renamed SSL_CIPHER to TLS_CIPHER_LIST
- *
- * Revision 1.5  2020-10-01 18:23:48+05:30  Cprogrammer
- * fixed compiler warning
- *
- * Revision 1.4  2020-04-01 18:55:43+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.3  2019-06-07 16:00:18+05:30  mbhangui
- * use sgetopt library for getopt()
- *
- * Revision 1.2  2019-04-22 23:11:33+05:30  Cprogrammer
- * replaced atoi() with scan_int()
- *
- * Revision 1.1  2019-04-18 08:23:42+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: indisrvr.c,v 1.18 2024-05-06 09:29:07+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.17 2023-08-22 19:13:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.18 2024-05-06 09:29:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -162,6 +108,7 @@ static int      usessl = 0;
 unsigned long   dtimeout = 300;
 unsigned long   ctimeout = 60;
 static char    *certfile, *cafile, *crlfile, *certdir;
+static int      use_tcpserver;
 #endif
 
 char            tbuf[2048];
@@ -170,7 +117,7 @@ int
 main(int argc, char **argv)
 {
 	int             n, socket_desc, pid, backlog;
-	char           *port, *ipaddr;
+	char           *port, *ipaddr, *p1, *p2;
 	struct sockaddr_in cliaddress;
 	int             addrlen, len, new;
 	struct linger   linger;
@@ -209,6 +156,20 @@ main(int argc, char **argv)
 		(void) signal(SIGHUP, SigHup);
 	}
 #endif
+	if (use_tcpserver) {
+		if (!(port = env_get("TCPLOCALPORT")))
+			port = "unknown";
+		if (!(ipaddr = env_get("TCPLOCALIP")))
+			ipaddr = "unknown";
+		if (!(p1 = env_get("TCPREMOTEIP")))
+			p1 = "unknown";
+		if (!(p2 = env_get("TCPREMOTEPORT")))
+			p2 = "unknown";
+		filewrt(3, "%d: Connection from ip %s, port %s to ip %s, port %s\n",
+				getpid(), p1, p2, ipaddr, port);
+		n = call_prg();
+		_exit(n);
+	}
 	linger.l_onoff = 1;
 	linger.l_linger = 1;
 	if ((socket_desc = tcpbind(ipaddr, port, backlog)) == -1) {
@@ -451,18 +412,17 @@ call_prg()
 		(void) signal(SIGCHLD, SIG_DFL);
 		if (!(Argv = makeargs(ptr))) {
 			strerr_warn1("makeargs failed: ", &strerr_sys);
-			filewrt(3, "%d: makeargs failed: %s\n", getpid(), error_str(errno));
+			filewrt(3, "%d: makeargs failed: %s\n", getppid(), error_str(errno));
 			return (-1);
 		}
 		if (checkPerm(username.s, adminCommands[i].name, Argv)) {
 			strerr_warn6(username.s, ": ", adminCommands[i].name, " args [", ptr, "]: permission denied", 0);
-			filewrt(3, "%s: %s args [%s]: permission denied\n", username.s, adminCommands[i].name, ptr);
+			filewrt(3, "%d: %s: %s args [%s]: permission denied\n", getppid(), username.s, adminCommands[i].name, ptr);
 			_exit(1);
 		}
-		if (verbose)
-			filewrt(3, "%d: command %s args %s\n", getpid(), adminCommands[i].name, ptr);
+		filewrt(3, "%d: command %s args %s\n", getppid(), adminCommands[i].name, ptr);
 		execv(adminCommands[i].name, Argv);
-		filewrt(3, "%d: %s args [%s]: %s\n", getpid(), adminCommands[i].name, ptr, error_str(errno));
+		filewrt(3, "%d: %s args [%s]: %s\n", getppid(), adminCommands[i].name, ptr, error_str(errno));
 		_exit(1);
 	default:
 		break;
@@ -572,7 +532,8 @@ Login_User(stralloc *username, stralloc *password)
 			strerr_warn1("indisrvr: write stdout: ", &strerr_sys);
 			return (1);
 		}
-		filewrt(3, "%d: user %s logged in\n", getpid(), username->s);
+		if (verbose)
+			filewrt(3, "%d: user %s logged in\n", getpid(), username->s);
 		return (0);
 	}
 	filewrt(3, "%d: user %s password incorrect\n", getpid(), username->s);
@@ -593,11 +554,12 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 	certdir = SYSCONFDIR"/certs";
 #endif
 	*ipaddr = *port = 0;
+	use_tcpserver = 0;
 	*backlog = -1;
 #ifdef HAVE_SSL
-	while ((c = getopt(argc, argv, "vt:T:i:p:b:n:c:r:d:")) != opteof)
+	while ((c = getopt(argc, argv, "vt:T:i:p:b:n:c:r:d:l")) != opteof)
 #else
-	while ((c = getopt(argc, argv, "vt:T:i:p:b:")) != opteof)
+	while ((c = getopt(argc, argv, "vt:T:i:p:b:l")) != opteof)
 #endif
 	{
 		switch (c)
@@ -635,6 +597,9 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 			crlfile = optarg;
 			break;
 #endif
+		case 'l':
+			use_tcpserver = 1;
+			break;
 		default:
 #ifdef HAVE_SSL
 			strerr_warn1("usage: indisrvr -i ipaddr -p port [-d certdir] -n certfile [-c cafile -r crlfile] -t timeoutdata -T timeoutconn -b backlog", 0);
@@ -644,7 +609,7 @@ get_options(int argc, char **argv, char **ipaddr, char **port, int *backlog)
 			break;
 		}
 	}
-	if (!*ipaddr || !*port || *backlog == -1) {
+	if (!use_tcpserver && (!*ipaddr || !*port || *backlog == -1)) {
 #ifdef HAVE_SSL
 		strerr_warn1("usage: indisrvr -i ipaddr -p port [-d certdir] -n certfile [-c cafile -r crlfile] -t timeoutdata -T timeoutconn -b backlog", 0);
 #else
@@ -716,3 +681,64 @@ main()
 	return (1);
 }
 #endif
+
+/*
+ * $Log: indisrvr.c,v $
+ * Revision 1.18  2024-05-06 09:29:07+05:30  Cprogrammer
+ * added option -l to run under tcpserver
+ *
+ * Revision 1.17  2023-08-22 19:13:27+05:30  Cprogrammer
+ * use TLS_CIPHER_LIST for TLSv1.2 and below, TLS_CIPHER_SUITE for TLSv1.3 and above
+ *
+ * Revision 1.16  2023-03-20 10:06:02+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.15  2023-02-14 01:09:55+05:30  Cprogrammer
+ * free ctx if tls_session fails
+ *
+ * Revision 1.14  2023-01-22 10:35:30+05:30  Cprogrammer
+ * fixed incorrectly passed stralloc * instead of char *
+ *
+ * Revision 1.13  2023-01-21 13:29:53+05:30  Cprogrammer
+ * replaced SSL_shutdown, SSL_free iwth ssl_free
+ *
+ * Revision 1.12  2023-01-03 21:35:28+05:30  Cprogrammer
+ * replaced tls code with TLS library from libqmail
+ * added -T option to specify connection timeout
+ * added -r option to specify crl file
+ * added -d option to specify certificate dir
+ *
+ * Revision 1.11  2022-12-18 19:24:01+05:30  Cprogrammer
+ * log additional wait status
+ *
+ * Revision 1.10  2022-10-20 11:57:41+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
+ * Revision 1.9  2022-05-10 20:00:52+05:30  Cprogrammer
+ * use headers from include path
+ *
+ * Revision 1.8  2021-06-11 17:03:47+05:30  Cprogrammer
+ * replaced MakeArgs() with makeargs() from libqmail()
+ *
+ * Revision 1.7  2021-03-09 19:58:25+05:30  Cprogrammer
+ * use functions from tls.c
+ *
+ * Revision 1.6  2021-03-09 15:33:58+05:30  Cprogrammer
+ * renamed SSL_CIPHER to TLS_CIPHER_LIST
+ *
+ * Revision 1.5  2020-10-01 18:23:48+05:30  Cprogrammer
+ * fixed compiler warning
+ *
+ * Revision 1.4  2020-04-01 18:55:43+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.3  2019-06-07 16:00:18+05:30  mbhangui
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.2  2019-04-22 23:11:33+05:30  Cprogrammer
+ * replaced atoi() with scan_int()
+ *
+ * Revision 1.1  2019-04-18 08:23:42+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

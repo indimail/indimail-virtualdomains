@@ -129,24 +129,26 @@ if [ -z "$release" ] ; then
 		if [ " $dist" = " $idist" ] ; then
 			iversion=$(rpm -qf /usr/bin/vuserinfo|cut -d- -f2)
 			if [ "$iversion" = "$version" ] ; then
-				release=$(rpm -qf /usr/bin/vuserinfo | cut -d- -f3 | cut -d. -f2)
-				release=$(expr $release + 1)
+				t1=$(rpm -qf /usr/bin/vuserinfo | cut -d- -f3 | cut -d. -f1)
+				t2=$(rpm -qf /usr/bin/vuserinfo | cut -d- -f3 | cut -d. -f2)
+				t2=$(expr $t2 + 1)
+				release="$t1.$t2"
 			else
-				release=1
+				release=0.1
 			fi
 		else
-			release=1
+			release=0.1
 		fi
 	else
-		release=1
+		release=0.1
 	fi
 fi
-echo -n "Build RPM for indimail-"$version"-1."$release" (Y/N) - "
+echo -n "Build RPM for indimail-"$version"-"$release" (Y/N) - "
 read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	tmprel=`cat indimail-x/conf-release 2>/dev/null`
-	if [ ! " $tmprel" = " 1.$release" ] ; then
-		echo 1.$release > indimail-x/conf-release
+	if [ ! " $tmprel" = " $release" ] ; then
+		echo $release > indimail-x/conf-release
 		cd indimail-x
 		make indimail.spec
 		cp indimail.spec /tmp
@@ -168,10 +170,10 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
 		for i in indimail indimail-devel libindimail
 		do
-			rpm --addsign $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
+			rpm --addsign $rpmbuild/RPMS/$build_arch/$i-"$version"-"$release".$dist.$build_arch.rpm
 		done
-		rpm --addsign $rpmbuild/SRPMS/indimail-"$version"-"1.$release".$dist.src.rpm
-		echo -n "RPM lint for indimail-"$version"-1."$release" (Y/N) - "
+		rpm --addsign $rpmbuild/SRPMS/indimail-"$version"-"$release".$dist.src.rpm
+		echo -n "RPM lint for indimail-"$version"-"$release" (Y/N) - "
 		read key
 		if [ " $key" = " Y" -o " $key" = " y" ] ; then
 			(
@@ -179,14 +181,14 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 			do
 				echo $i
 				if [ -f $HOME/.config/$i.rpmlintrc ] ; then
-					rpmlint -r $HOME/.config/$i.rpmlintrc $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
+					rpmlint -r $HOME/.config/$i.rpmlintrc $rpmbuild/RPMS/$build_arch/$i-"$version"-"$release".$dist.$build_arch.rpm
 				else
-					rpmlint $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
+					rpmlint $rpmbuild/RPMS/$build_arch/$i-"$version"-"$release".$dist.$build_arch.rpm
 				fi
 				echo ------------------------
 			done
-			echo indimail-"$version"-"1.$release".$dist.src.rpm
-			rpmlint $rpmbuild/SRPMS/indimail-"$version"-"1.$release".$dist.src.rpm
+			echo indimail-"$version"-"$release".$dist.src.rpm
+			rpmlint $rpmbuild/SRPMS/indimail-"$version"-"$release".$dist.src.rpm
 			echo ------------------------
 			) 2>&1 | less
 		fi
