@@ -35,9 +35,9 @@ static char     sccsid[] = "$Id: parse_email.c,v 1.3 2021-07-27 18:06:44+05:30 C
  *         -1 if either user or domain was truncated due to buff_size being reached
  */
 int
-parse_email(char *email, stralloc *user, stralloc *domain)
+parse_email(const char *email, stralloc *user, stralloc *domain)
 {
-	char           *ptr;
+	const char     *ptr;
 	int             i, len;
 
 	for (len = 0, ptr = email; *ptr; ptr++, len++) {

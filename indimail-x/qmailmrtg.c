@@ -430,7 +430,7 @@ process_file(char *file_name, char type, char inquery_type)
  * -3 - name too long
  */
 int
-run_init(char *service_dir)
+run_init(const char *service_dir)
 {
 	char           *run_dir, *p, *s;
 	char            buf[256], dirbuf[256];
@@ -529,7 +529,7 @@ run_init(char *service_dir)
 }
 
 void
-print_status(char *dir, char status[])
+print_status(const char *dir, char status[])
 {
 	unsigned long   pid;
 	unsigned char   want, paused;
@@ -611,9 +611,9 @@ print_status(char *dir, char status[])
 }
 
 void
-print_uptime(char *sdir, char status[], int len)
+print_uptime(const char *sdir, char status[], int len)
 {
-	char           *x;
+	const char     *x;
 	int             fd, r;
 
 	if (!sdir) {

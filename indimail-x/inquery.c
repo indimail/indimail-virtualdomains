@@ -95,7 +95,7 @@ cleanup(int rfd, int wfd, void (*sig_pipe_save)(), char *fifo)
  *  (len of string: int|QueryType: 1|NULL: 1|EmailId: len1|NULL: 1|Fifo: len2|NULL: 1|IP: len3|NULL: 1)
  */
 void           *
-inquery(char query_type, char *email, char *ip)
+inquery(char query_type, const char *email, const char *ip)
 {
 	int             rfd, wfd, len, bytes, idx, readTimeout, writeTimeout,
 					pipe_size, fd;

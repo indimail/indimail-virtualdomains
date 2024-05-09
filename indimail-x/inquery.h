@@ -7,6 +7,6 @@
 #ifndef INQUERY_H
 #define INQUERY_H
 
-void           *inquery(char, char *, char *);
+void           *inquery(char, const char *, const char *);
 
 #endif

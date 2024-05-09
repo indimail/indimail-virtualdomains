@@ -13,6 +13,6 @@
 #include <stralloc.h>
 #endif
 
-int             parse_email(char *, stralloc *, stralloc *);
+int             parse_email(const char *, stralloc *, stralloc *);
 
 #endif

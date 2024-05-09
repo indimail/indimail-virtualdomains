@@ -34,7 +34,7 @@ die_nomem()
 }
 
 int
-atrn_access(char *email, char *domain)
+atrn_access(const char *email, const char *domain)
 {
 	static stralloc SqlBuf = {0}, User = {0}, Domain = {0}, Email = {0};
 	int             len, num;

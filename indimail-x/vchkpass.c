@@ -333,14 +333,14 @@ main(int argc, char **argv)
 	}
 	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	if ((ptr = env_get("DEBUG_LOGIN")) && *ptr > '0') {
-		ptr = get_authmethod(auth_method);
+		ptr = (char *) get_authmethod(auth_method);
 		strerr_warn16("vchkpass: ", "pid [", module_pid, "]: login [", login,
 				"] challenge [", challenge, "] response [", response,
 				"] password [", pass ? pass : "cram-disabled", "] crypted [",
 				crypt_pass, "] authmethod [", ptr, "]", 0);
 	} else
 	if (env_get("DEBUG")) {
-		ptr = get_authmethod(auth_method);
+		ptr = (char *) get_authmethod(auth_method);
 		strerr_warn8("vchkpass: ", "pid [", module_pid, "]: login [", login,
 				"] authmethod [", ptr, "]", 0);
 	}
