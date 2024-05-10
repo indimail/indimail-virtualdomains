@@ -4,7 +4,7 @@
 */
 
 #include	"rfc1035.h"
-#include	<string.h>
+#include	<strings.h>
 
 
 static struct { const char *name; int num; } typetab[]={

@@ -98,6 +98,7 @@ void            handle_entry_args(unsigned int a_id, char *value);
 int             new_entry_conf(struct entry_conf **new, char *name);
 int             handle_entry_conf(char *pname);
 int             yyerror(char *fmt, ...);
+int             yylex (void);
 int             handle_conf_file(const char *file);
 int             exec_parser(struct entry_conf *p, char *value);
 int             regex_parser(struct entry_conf *p, char *value);

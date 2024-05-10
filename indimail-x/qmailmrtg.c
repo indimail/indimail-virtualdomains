@@ -1,5 +1,8 @@
 /*
  * $Log: qmailmrtg.c,v $
+ * Revision 1.8  2024-05-10 11:44:24+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2023-09-17 22:36:34+05:30  Cprogrammer
  * removed leading white space to correct current concurrency
  *
@@ -70,7 +73,7 @@
 #include <no_of_days.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg.c,v 1.7 2023-09-17 22:36:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg.c,v 1.8 2024-05-10 11:44:24+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL "qmailmrtg: fatal: "
@@ -430,7 +433,7 @@ process_file(char *file_name, char type, char inquery_type)
  * -3 - name too long
  */
 int
-run_init(char *service_dir)
+run_init(const char *service_dir)
 {
 	char           *run_dir, *p, *s;
 	char            buf[256], dirbuf[256];
@@ -529,7 +532,7 @@ run_init(char *service_dir)
 }
 
 void
-print_status(char *dir, char status[])
+print_status(const char *dir, char status[])
 {
 	unsigned long   pid;
 	unsigned char   want, paused;
@@ -611,9 +614,9 @@ print_status(char *dir, char status[])
 }
 
 void
-print_uptime(char *sdir, char status[], int len)
+print_uptime(const char *sdir, char status[], int len)
 {
-	char           *x;
+	const char     *x;
 	int             fd, r;
 
 	if (!sdir) {

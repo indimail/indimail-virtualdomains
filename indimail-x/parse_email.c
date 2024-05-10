@@ -1,5 +1,8 @@
 /*
  * $Log: parse_email.c,v $
+ * Revision 1.4  2024-05-10 11:43:51+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2021-07-27 18:06:44+05:30  Cprogrammer
  * set default domain using vset_default_domain
  *
@@ -22,7 +25,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: parse_email.c,v 1.3 2021-07-27 18:06:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: parse_email.c,v 1.4 2024-05-10 11:43:51+05:30 mbhangui Exp mbhangui $";
 #endif
 
 /*
@@ -35,9 +38,9 @@ static char     sccsid[] = "$Id: parse_email.c,v 1.3 2021-07-27 18:06:44+05:30 C
  *         -1 if either user or domain was truncated due to buff_size being reached
  */
 int
-parse_email(char *email, stralloc *user, stralloc *domain)
+parse_email(const char *email, stralloc *user, stralloc *domain)
 {
-	char           *ptr;
+	const char     *ptr;
 	int             i, len;
 
 	for (len = 0, ptr = email; *ptr; ptr++, len++) {

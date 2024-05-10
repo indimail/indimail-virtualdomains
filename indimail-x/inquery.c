@@ -1,5 +1,8 @@
 /*
  * $Log: inquery.c,v $
+ * Revision 1.12  2024-05-10 11:43:51+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.11  2023-06-08 17:46:57+05:30  Cprogrammer
  * renamed fifo directory from FIFODIR to INFIFODIR
  *
@@ -67,7 +70,7 @@
 #include "strToPw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 1.11 2023-06-08 17:46:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 1.12 2024-05-10 11:43:51+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL "inquery: fatal: "
@@ -95,7 +98,7 @@ cleanup(int rfd, int wfd, void (*sig_pipe_save)(), char *fifo)
  *  (len of string: int|QueryType: 1|NULL: 1|EmailId: len1|NULL: 1|Fifo: len2|NULL: 1|IP: len3|NULL: 1)
  */
 void           *
-inquery(char query_type, char *email, char *ip)
+inquery(char query_type, const char *email, const char *ip)
 {
 	int             rfd, wfd, len, bytes, idx, readTimeout, writeTimeout,
 					pipe_size, fd;

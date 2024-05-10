@@ -1,5 +1,5 @@
 /*
- * $Id: vchkpass.c,v 1.19 2023-07-15 12:50:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vchkpass.c,v 1.20 2024-05-10 11:43:51+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -44,7 +44,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.19 2023-07-15 12:50:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.20 2024-05-10 11:43:51+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -333,14 +333,14 @@ main(int argc, char **argv)
 	}
 	module_pid[fmt_ulong(module_pid, getpid())] = 0;
 	if ((ptr = env_get("DEBUG_LOGIN")) && *ptr > '0') {
-		ptr = get_authmethod(auth_method);
+		ptr = (char *) get_authmethod(auth_method);
 		strerr_warn16("vchkpass: ", "pid [", module_pid, "]: login [", login,
 				"] challenge [", challenge, "] response [", response,
 				"] password [", pass ? pass : "cram-disabled", "] crypted [",
 				crypt_pass, "] authmethod [", ptr, "]", 0);
 	} else
 	if (env_get("DEBUG")) {
-		ptr = get_authmethod(auth_method);
+		ptr = (char *) get_authmethod(auth_method);
 		strerr_warn8("vchkpass: ", "pid [", module_pid, "]: login [", login,
 				"] authmethod [", ptr, "]", 0);
 	}
@@ -428,6 +428,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.20  2024-05-10 11:43:51+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.19  2023-07-15 12:50:01+05:30  Cprogrammer
  * authenticate using CRAM when password field starts with {CRAM}
  *

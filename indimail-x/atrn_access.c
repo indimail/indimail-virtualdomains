@@ -1,5 +1,8 @@
 /*
  * $Log: atrn_access.c,v $
+ * Revision 1.2  2024-05-10 11:43:51+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2019-04-14 23:09:14+05:30  Cprogrammer
  * Initial revision
  *
@@ -23,7 +26,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: atrn_access.c,v 1.1 2019-04-14 23:09:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: atrn_access.c,v 1.2 2024-05-10 11:43:51+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -34,7 +37,7 @@ die_nomem()
 }
 
 int
-atrn_access(char *email, char *domain)
+atrn_access(const char *email, const char *domain)
 {
 	static stralloc SqlBuf = {0}, User = {0}, Domain = {0}, Email = {0};
 	int             len, num;
