@@ -34,7 +34,8 @@ all: rules changelog prerm postrm preinst postinst indimail-access.install \
 	indimail-access-Univention_4.3.dsc \
 	indimail-access-Univention_4.4.dsc \
 	indimail-access-xUbuntu_22.04.dsc indimail-access-xUbuntu_22.10.dsc \
-	indimail-access-xUbuntu_23.04.dsc indimail-access-Debian_12.dsc debian.tar.gz
+	indimail-access-xUbuntu_23.04.dsc indimail-access-xUbuntu_24.04.dsc \
+	indimail-access-Debian_12.dsc debian.tar.gz
 
 prerm: prerm.in Makefile
 	$(edit) $@.in > $@
@@ -78,7 +79,10 @@ indimail-access-xUbuntu_22.10.dsc: indimail-access-xUbuntu_22.10.dsc.in Makefile
 indimail-access-xUbuntu_23.04.dsc: indimail-access-xUbuntu_23.04.dsc.in Makefile ../conf-version \
 ../conf-release ../conf-email
 	$(edit) $@.in > $@
-indimail-access-Debian_12.dsc: indimail-access-xUbuntu_23.04.dsc.in Makefile ../conf-version \
+indimail-access-xUbuntu_24.04.dsc: indimail-access-xUbuntu_24.04.dsc.in Makefile ../conf-version \
+../conf-release ../conf-email
+	$(edit) $@.in > $@
+indimail-access-Debian_12.dsc: indimail-access-Debian_12.dsc.in Makefile ../conf-version \
 ../conf-release ../conf-email
 	$(edit) $@.in > $@
 perm_list.imap: ../perm_list.in
