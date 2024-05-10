@@ -1,5 +1,8 @@
 /*
  * $Log: parse_email.c,v $
+ * Revision 1.4  2024-05-10 11:43:51+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2021-07-27 18:06:44+05:30  Cprogrammer
  * set default domain using vset_default_domain
  *
@@ -22,7 +25,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: parse_email.c,v 1.3 2021-07-27 18:06:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: parse_email.c,v 1.4 2024-05-10 11:43:51+05:30 mbhangui Exp mbhangui $";
 #endif
 
 /*

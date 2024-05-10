@@ -1,5 +1,8 @@
 /*
  * $Log: qmailmrtg.c,v $
+ * Revision 1.8  2024-05-10 11:44:24+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2023-09-17 22:36:34+05:30  Cprogrammer
  * removed leading white space to correct current concurrency
  *
@@ -70,7 +73,7 @@
 #include <no_of_days.h>
 
 #ifndef lint
-static char     sccsid[] = "$Id: qmailmrtg.c,v 1.7 2023-09-17 22:36:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: qmailmrtg.c,v 1.8 2024-05-10 11:44:24+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL "qmailmrtg: fatal: "

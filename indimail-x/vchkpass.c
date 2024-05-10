@@ -1,5 +1,5 @@
 /*
- * $Id: vchkpass.c,v 1.19 2023-07-15 12:50:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vchkpass.c,v 1.20 2024-05-10 11:43:51+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -44,7 +44,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.19 2023-07-15 12:50:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.20 2024-05-10 11:43:51+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -428,6 +428,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.20  2024-05-10 11:43:51+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.19  2023-07-15 12:50:01+05:30  Cprogrammer
  * authenticate using CRAM when password field starts with {CRAM}
  *

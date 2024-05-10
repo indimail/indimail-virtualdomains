@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include "parser.h"
+#include "parsers.h"
 
 unsigned int in_block = 0;
 extern unsigned int lineno;
@@ -26,7 +27,7 @@ extern unsigned int lineno;
 		in_block = 0;
 		printf("finished block\n"); 
         } else {
-		yyerror("ERRO: NOT in block"); 
+		yyerror("ERROR: NOT in block"); 
 	}
 }
 <INBLOCK>match|regex { printf("OPA MATCH %d\n",in_block); return MATCH; }
