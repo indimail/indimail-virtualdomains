@@ -1,6 +1,6 @@
 debian.tar.gz
 dummy.tar.gz
-logalert.dsc
+*.dsc
 obs.mk
 postinst
 postrm
