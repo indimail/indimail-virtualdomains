@@ -298,7 +298,7 @@ File | Description
 ---- | --------------------
 README-indimail.md|Introduction to IndiMail (this file which is also available as the indimail/indimail-mta Wiki)
 [INSTALL-indimail.md](https://github.com/indimail/indimail-virtualdomains/blob/master/.github/INSTALL-indimail.md)|Detailed Source Installation Instructions. A simpler version is [this](https://github.com/indimail/indimail-virtualdomains/blob/master/README.md)
-[FAQ](https://github.com/indimail/indimail-virtualdomains/blob/master/indimail-x/doc/FAQ.md)|Some quesions not answered by the wiki
+[FAQ](https://github.com/indimail/indimail-virtualdomains/blob/master/.github/FAQ.md)|Some quesions not answered by the wiki
 [INSTALL-RPM.md](https://github.com/indimail/indimail-virtualdomains/blob/master/.github/INSTALL-RPM.md)|Install Instructions using RPM
 [INSTALL-MYSQL.md](https://github.com/indimail/indimail-virtualdomains/blob/master/.github/INSTALL-MYSQL.md)|MySQL specific Installation Instructions
 [README-CLUSTER.md](https://github.com/indimail/indimail-virtualdomains/blob/master/.github/README-CLUSTER.md)|Steps on configuring a clustered setup
