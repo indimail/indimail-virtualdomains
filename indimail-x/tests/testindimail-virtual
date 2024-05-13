@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.23 2024-05-02 17:41:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.24 2024-05-14 00:34:02+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -507,6 +507,7 @@ setup_svscan()
 	echo $qmaildir         > $servicedir/smtpd/variables/DOMAINDIR
 	echo 1                 > $servicedir/smtpd/variables/DEBUG
 	echo 1                 > $servicedir/smtpd/variables/DEBUG_LOGIN
+	echo 0                 > $servicedir/smtpd/variables/PENALTY
 	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail,indimail -HR 0 $smtp_port $qmail_smtpd $HOSTNAME /usr/sbin/vchkpass /bin/false 2>&1\n" > $servicedir/smtpd/run
 	printf "#!/bin/sh\nexec $setuidgid $user $multilog t $logdir/smtpd\n" > $servicedir/smtpd/log/run
 	chmod +x $servicedir/smtpd/run
@@ -3095,13 +3096,13 @@ test_recipients()
 	fi
 	if [ $ret2 -eq 1 -a $ret3 -eq 0 ] ; then
 		tm2=$(date +"%s.%4N")
-		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1-5)}')
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		printf "\r  testing recipient extension (negative match) succeeded %56s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		tm2=$(date +"%s.%4N")
-		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1-5)}')
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
 		fcount=$(expr $fcount + 1)
 		if [ $prompt -eq 1 ] ; then
 			less $logdir/tcpclient/tcpclient.log
@@ -3578,6 +3579,10 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.24  2024-05-14 00:34:02+05:30  Cprogrammer
+# fixed elapsed time
+# new env variable PENALTY for qmail-smtpd
+#
 # Revision 1.23  2024-05-02 17:41:16+05:30  Cprogrammer
 # use MYSQL_PORT variable instead of hardcoded number
 #
