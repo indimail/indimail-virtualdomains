@@ -389,7 +389,7 @@ However if your organization still insists on stupidity read this [Setting Discl
 
 ## How do i delete mails lying in a queue having a certain pattern. Can I use regex
 
-Use [qmail-rm](https://github.com/indimail/indimail-mta/wiki/qmail-rm.1) command. It can quickly delete mails matching a given pattern.
+Use [qmail-rm](https://github.com/indimail/indimail-mta/wiki/qmail-rm.1) command. It can quickly delete mails matching a given pattern. You can use -e and -p pattern to remove mails that have a certain text in the body.
 
 ## I have been hit by virus. My virus scanner is not able to handle the load. What should I do?
 
@@ -402,6 +402,20 @@ Use the hostaccess control file. e.g. to allow mails from yahoo.com from 2 IP ad
     yahoo.com:210.210.122.80-81
 
 The behaviour of hostaccess can be modified by setting the PARANOID or DOMAIN\_MASQUERADE environment variables. See qmail-smtpd(8) for more details
+
+## How do I control access to SMTP for specific domains from specific or set of IP addresses for certain users
+
+Use <u>from.envrules</u> control file to restrict hostaccess control file for specfic MAIL FROM addresses. You can also use <u>auth.envrules</u> control file to restrict hostaccess control file use for SMTP authentication by specific users.
+
+e.g. The below set of control files <u>/etc/indimail/control/auth.envrules</u> and <u>/etc/indimail/control/hostaccess.local</u> will restrict user mahesh@indimail.org to authenticate from 2 IP address - 210.210.122.80 and 210.210.122.81.
+
+```
+$ cat /etc/indimail/control/auth.envrules
+mahesh@indimail.org:HOSTACESS=/etc/indimail/control/hostaccess.local
+
+$ cat /etc/indimail/control/hostaccess.local
+indimail.org:210.210.122.80.81
+```
 
 ## How do I restrict and control mail transactions between senders and recipients
 
