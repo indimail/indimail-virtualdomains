@@ -1,5 +1,8 @@
 /*
  * $Log: sql_active.c,v $
+ * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2021-02-06 22:41:51+05:30  Cprogrammer
  * fixed loop
  *
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_active.c,v 1.4 2021-02-06 22:41:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_active.c,v 1.5 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING

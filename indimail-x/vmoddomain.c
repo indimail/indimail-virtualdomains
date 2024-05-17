@@ -1,5 +1,8 @@
 /*
  * $Log: vmoddomain.c,v $
+ * Revision 1.5  2024-05-17 16:24:31+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2023-03-22 09:46:49+05:30  Cprogrammer
  * updated error messages
  *
@@ -51,7 +54,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomain.c,v 1.4 2023-03-22 09:46:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoddomain.c,v 1.5 2024-05-17 16:24:31+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define WARN    "vmoddomain: warning: "

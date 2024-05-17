@@ -1,5 +1,5 @@
 /*
- * $Id: vpasswd.c,v 1.19 2023-07-17 12:27:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vpasswd.c,v 1.20 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -39,7 +39,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.19 2023-07-17 12:27:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.20 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -296,6 +296,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vpasswd.c,v $
+ * Revision 1.20  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.19  2023-07-17 12:27:25+05:30  Cprogrammer
  * added YESCRYPT hash
  *

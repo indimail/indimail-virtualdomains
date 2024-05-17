@@ -1,5 +1,5 @@
 /*
- * $Id: limits.h,v 1.1 2010-04-26 12:07:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: limits.h,v 1.2 2024-05-17 16:19:20+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify

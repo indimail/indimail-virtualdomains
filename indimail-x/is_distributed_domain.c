@@ -1,5 +1,8 @@
 /*
  * $Log: is_distributed_domain.c,v $
+ * Revision 1.2  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2019-04-14 22:53:47+05:30  Cprogrammer
  * Initial revision
  *
@@ -31,7 +34,7 @@ static char     _cacheSwitch = 1;
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: is_distributed_domain.c,v 1.1 2019-04-14 22:53:47+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: is_distributed_domain.c,v 1.2 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

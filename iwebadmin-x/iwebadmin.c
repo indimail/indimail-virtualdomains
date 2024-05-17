@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.c,v 1.36 2023-10-24 11:11:57+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.37 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -881,6 +881,9 @@ quickAction(const char *username, int action)
 
 /*
  * $Log: iwebadmin.c,v $
+ * Revision 1.37  2024-05-17 16:17:42+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.36  2023-10-24 11:11:57+05:30  Cprogrammer
  * added few configurable debug statements
  *

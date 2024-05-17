@@ -1,5 +1,5 @@
 /*
- * $Id: sql_getpw.c,v 1.4 2023-07-15 00:21:26+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sql_getpw.c,v 1.5 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -27,7 +27,7 @@
 #include "strToPw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_getpw.c,v 1.4 2023-07-15 00:21:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_getpw.c,v 1.5 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef QUERY_CACHE
@@ -222,6 +222,9 @@ sql_getpw_cache(char cache_switch)
 
 /*
  * $Log: sql_getpw.c,v $
+ * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2023-07-15 00:21:26+05:30  Cprogrammer
  * updated comments
  *

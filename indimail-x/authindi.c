@@ -1,5 +1,5 @@
 /*
- * $Id: authindi.c,v 1.18 2023-08-08 10:35:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: authindi.c,v 1.19 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -57,7 +57,7 @@
 #define WARN  "authindi: warn: "
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.18 2023-08-08 10:35:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.19 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -684,6 +684,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: authindi.c,v $
+ * Revision 1.19  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.18  2023-08-08 10:35:53+05:30  Cprogrammer
  * display pid in logs
  *

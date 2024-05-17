@@ -1,5 +1,8 @@
 /*
  * $Log: del_control.c,v $
+ * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2023-12-03 16:10:48+05:30  Cprogrammer
  * use same logic for ETRN, ATRN domains
  *
@@ -35,7 +38,7 @@
 #include "compile_morercpthosts.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: del_control.c,v 1.4 2023-12-03 16:10:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: del_control.c,v 1.5 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

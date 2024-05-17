@@ -1,5 +1,8 @@
 /*
  * $Log: vdeluser.c,v $
+ * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2023-03-22 14:48:12+05:30  Cprogrammer
  * updated error strings
  *
@@ -52,7 +55,7 @@
 #include "check_group.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeluser.c,v 1.6 2023-03-22 14:48:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeluser.c,v 1.7 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define WARN    "vdeluser: warning: "

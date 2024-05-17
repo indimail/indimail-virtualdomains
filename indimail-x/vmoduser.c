@@ -1,5 +1,5 @@
 /*
- * $Id: vmoduser.c,v 1.21 2023-07-17 11:48:51+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vmoduser.c,v 1.22 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -60,7 +60,7 @@
 #include "get_hashmethod.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.21 2023-07-17 11:48:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.22 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -665,6 +665,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.22  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.21  2023-07-17 11:48:51+05:30  Cprogrammer
  * set hash method from hash_method control file in controldir, domaindir
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: iadduser.c,v $
+ * Revision 1.10  2024-05-17 16:24:31+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2023-07-17 11:44:10+05:30  Cprogrammer
  * set hash method from hash_method control file in controldir, domaindir
  *
@@ -77,7 +80,7 @@
 #define ALLOWCHARS              " .!#$%&'*+-/=?^_`{|}~\""
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iadduser.c,v 1.9 2023-07-17 11:44:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iadduser.c,v 1.10 2024-05-17 16:24:31+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

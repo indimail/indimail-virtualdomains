@@ -1,5 +1,8 @@
 /*
  * $Log: sql_passwd.c,v $
+ * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2022-10-27 17:16:08+05:30  Cprogrammer
  * refactored sql code into do_sql()
  *
@@ -33,7 +36,7 @@
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_passwd.c,v 1.4 2022-10-27 17:16:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_passwd.c,v 1.5 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

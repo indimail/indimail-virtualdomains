@@ -1,5 +1,8 @@
 /*
  * $Log: sql_getall.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2020-10-18 07:53:54+05:30  Cprogrammer
  * use alloc_re() only for expansion of memory
  *
@@ -33,7 +36,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_getall.c,v 1.3 2020-10-18 07:53:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_getall.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static int      storeSql(int *, int, MYSQL_RES *);

@@ -1,5 +1,8 @@
 /*
  * $Log: limits.c,v $
+ * Revision 1.6  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-03-23 22:08:24+05:30  Cprogrammer
  * removed spurious warning message when limits doesn't exist
  *
@@ -22,7 +25,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: limits.c,v 1.5 2023-03-23 22:08:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: limits.c,v 1.6 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS

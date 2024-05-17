@@ -1,5 +1,8 @@
 /*
  * $Log: vmoveuserdir.c,v $
+ * Revision 1.8  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2023-03-23 22:23:13+05:30  Cprogrammer
  * remove domain component from User
  *
@@ -61,7 +64,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoveuserdir.c,v 1.7 2023-03-23 22:23:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoveuserdir.c,v 1.8 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoveuserdir: fatal: "

@@ -1,12 +1,12 @@
 /*
- * $Id: indisrvr.c,v 1.18 2024-05-06 09:29:07+05:30 Cprogrammer Exp mbhangui $
+ * $Id: indisrvr.c,v 1.19 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.18 2024-05-06 09:29:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.19 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -681,6 +681,9 @@ main()
 
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.19  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.18  2024-05-06 09:29:07+05:30  Cprogrammer
  * added option -l to run under tcpserver
  *

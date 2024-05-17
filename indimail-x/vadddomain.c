@@ -1,5 +1,5 @@
 /*
- * $Id: vadddomain.c,v 1.19 2023-12-03 15:43:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vadddomain.c,v 1.20 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -76,7 +76,7 @@
 #include "get_hashmethod.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.19 2023-12-03 15:43:17+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.20 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -733,6 +733,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.20  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.19  2023-12-03 15:43:17+05:30  Cprogrammer
  * exit early for post_handle for ETRN, ATRN domains
  *

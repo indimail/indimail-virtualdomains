@@ -1,5 +1,8 @@
 /*
  * $Log: valias_insert.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2023-03-26 22:37:44+05:30  Cprogrammer
  * return 0 if rows updated
  *
@@ -38,7 +41,7 @@
 #include <mysqld_error.h>
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias_insert.c,v 1.2 2023-03-26 22:37:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valias_insert.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

@@ -1,5 +1,8 @@
 /*
  * $Log: vacation.c,v $
+ * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2021-07-08 15:18:37+05:30  Cprogrammer
  * fixed argument handling
  *
@@ -60,7 +63,7 @@
 #include "runcmmd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vacation.c,v 1.6 2021-07-08 15:18:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vacation.c,v 1.7 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL   "vacation: fatal: "

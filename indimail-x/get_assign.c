@@ -1,5 +1,8 @@
 /*
  * $Log: get_assign.c,v $
+ * Revision 1.6  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2020-10-18 07:47:19+05:30  Cprogrammer
  * use alloc() instead of alloc_re()
  *
@@ -40,7 +43,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_assign.c,v 1.5 2020-10-18 07:47:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_assign.c,v 1.6 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 extern int      cdb_seek(int, unsigned char *, unsigned int, int *);

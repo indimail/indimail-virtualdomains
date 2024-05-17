@@ -1,12 +1,12 @@
 /*
- * $Id: vgroup.c,v 1.8 2023-07-17 12:28:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vgroup.c,v 1.9 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 1.8 2023-07-17 12:28:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 1.9 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -573,6 +573,9 @@ main()
 
 /*
  * $Log: vgroup.c,v $
+ * Revision 1.9  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.8  2023-07-17 12:28:44+05:30  Cprogrammer
  * added YESCRYPT hash
  *

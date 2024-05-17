@@ -1,5 +1,8 @@
 /*
  * $Log: sql_adduser.c,v $
+ * Revision 1.6  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2022-11-02 12:44:30+05:30  Cprogrammer
  * added feature to add scram password during user addition
  *
@@ -44,7 +47,7 @@
 #include "getpeer.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_adduser.c,v 1.5 2022-11-02 12:44:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_adduser.c,v 1.6 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

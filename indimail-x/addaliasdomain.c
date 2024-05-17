@@ -1,5 +1,8 @@
 /*
  * $Log: addaliasdomain.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2019-04-14 23:18:40+05:30  Cprogrammer
  * changed mode to 0640
  *
@@ -29,7 +32,7 @@
 #include "update_file.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: addaliasdomain.c,v 1.2 2019-04-14 23:18:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: addaliasdomain.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

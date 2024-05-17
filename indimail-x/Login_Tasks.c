@@ -1,5 +1,8 @@
 /*
  * $Log: Login_Tasks.c,v $
+ * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2023-04-23 00:29:27+05:30  Cprogrammer
  * record IPv6 address if present in lastauth table
  *
@@ -73,7 +76,7 @@
 #include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: Login_Tasks.c,v 1.6 2023-04-23 00:29:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: Login_Tasks.c,v 1.7 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 int

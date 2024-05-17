@@ -1,5 +1,5 @@
 /*
- * $Id: vdelivermail.c,v 1.13 2023-09-07 21:09:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vdelivermail.c,v 1.14 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -68,7 +68,7 @@
 #include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdelivermail.c,v 1.13 2023-09-07 21:09:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdelivermail.c,v 1.14 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL   "vdelivermail: fatal: "
@@ -968,6 +968,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vdelivermail.c,v $
+ * Revision 1.14  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.13  2023-09-07 21:09:36+05:30  Cprogrammer
  * bounce mail if BOUNCE_MAIL environment variable is set
  *

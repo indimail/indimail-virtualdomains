@@ -1,5 +1,5 @@
 /*
- * $Id: vadduser.c,v 1.14 2023-07-17 12:25:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vadduser.c,v 1.15 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -64,7 +64,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadduser.c,v 1.14 2023-07-17 12:25:48+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadduser.c,v 1.15 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -588,6 +588,9 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 
 /*
  * $Log: vadduser.c,v $
+ * Revision 1.15  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.14  2023-07-17 12:25:48+05:30  Cprogrammer
  * added YESCRYPT hash
  *

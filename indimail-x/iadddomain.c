@@ -1,5 +1,5 @@
 /*
- * $Id: iadddomain.c,v 1.5 2023-12-13 00:34:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iadddomain.c,v 1.6 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -45,7 +45,7 @@
 #include "vdelfiles.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iadddomain.c,v 1.5 2023-12-13 00:34:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iadddomain.c,v 1.6 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -294,6 +294,9 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 
 /*
  * $Log: iadddomain.c,v $
+ * Revision 1.6  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-12-13 00:34:13+05:30  Cprogrammer
  * call add_domain_assign for etrn/atrn domains
  *

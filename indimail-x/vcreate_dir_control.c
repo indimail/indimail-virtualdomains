@@ -1,5 +1,8 @@
 /*
  * $Log: vcreate_dir_control.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2019-07-04 00:02:44+05:30  Cprogrammer
  * fixed filename
  *
@@ -26,7 +29,7 @@
 #include "dir_control.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcreate_dir_control.c,v 1.2 2019-07-04 00:02:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcreate_dir_control.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

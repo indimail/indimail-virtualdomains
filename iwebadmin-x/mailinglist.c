@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.21 2023-07-28 22:30:31+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.22 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify

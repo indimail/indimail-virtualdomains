@@ -1,5 +1,8 @@
 /*
  * $Log: sql_get_realdomain.c,v $
+ * Revision 1.2  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2019-04-18 15:46:35+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_get_realdomain.c,v 1.1 2019-04-18 15:46:35+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_get_realdomain.c,v 1.2 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE

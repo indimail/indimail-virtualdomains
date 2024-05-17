@@ -1,5 +1,8 @@
 /*
  * $Log: GetSMTProute.c,v $
+ * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2023-03-20 10:02:16+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -40,7 +43,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: GetSMTProute.c,v 1.4 2023-03-20 10:02:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: GetSMTProute.c,v 1.5 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 int

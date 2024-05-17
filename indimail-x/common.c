@@ -1,5 +1,8 @@
 /*
  * $Log: common.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: remove_line.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2023-12-03 16:09:24+05:30  Cprogrammer
  * new function remove_line_p() for partial match
  *
@@ -38,7 +41,7 @@
 #include "dblock.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: remove_line.c,v 1.2 2023-12-03 16:09:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: remove_line.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

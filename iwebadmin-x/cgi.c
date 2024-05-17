@@ -1,5 +1,5 @@
 /*
- * $Id: cgi.c,v 1.6 2023-07-28 22:28:15+05:30 Cprogrammer Exp mbhangui $
+ * $Id: cgi.c,v 1.7 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify

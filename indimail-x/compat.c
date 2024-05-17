@@ -1,5 +1,8 @@
 /*
  * $Log: compat.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2019-05-02 14:39:55+05:30  Cprogrammer
  * added header get_assign.h
  *

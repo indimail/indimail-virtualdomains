@@ -1,5 +1,8 @@
 /*
  * $Log: sql_updateflag.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2022-10-27 17:28:55+05:30  Cprogrammer
  * refactored sql code into do_sql()
  *
@@ -23,7 +26,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_updateflag.c,v 1.3 2022-10-27 17:28:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_updateflag.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

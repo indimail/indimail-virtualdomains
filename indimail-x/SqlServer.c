@@ -1,5 +1,8 @@
 /*
  * $Log: SqlServer.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2019-06-27 16:30:23+05:30  Cprogrammer
  * set ssl parameter in the returned mysql connection string
  *
@@ -28,7 +31,7 @@
 #include "LoadDbInfo.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: SqlServer.c,v 1.3 2019-06-27 16:30:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: SqlServer.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

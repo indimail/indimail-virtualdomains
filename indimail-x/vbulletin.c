@@ -1,5 +1,8 @@
 /*
  * $Log: vbulletin.c,v $
+ * Revision 1.10  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2023-03-26 00:33:27+05:30  Cprogrammer
  * fixed code using wait_handler
  *
@@ -81,7 +84,7 @@
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vbulletin.c,v 1.9 2023-03-26 00:33:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vbulletin.c,v 1.10 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL            "vbulletin: fatal: "

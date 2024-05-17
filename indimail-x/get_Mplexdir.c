@@ -1,5 +1,8 @@
 /*
  * $Log: get_Mplexdir.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2020-04-01 18:54:53+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -34,7 +37,7 @@
 #include "r_mkdir.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_Mplexdir.c,v 1.2 2020-04-01 18:54:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_Mplexdir.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

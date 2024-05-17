@@ -1,5 +1,8 @@
 /*
  * $Log: close_big_dir.c,v $
+ * Revision 1.2  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2019-04-18 08:25:21+05:30  Cprogrammer
  * Initial revision
  *
@@ -11,7 +14,7 @@
 #include "dir_control.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: close_big_dir.c,v 1.1 2019-04-18 08:25:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: close_big_dir.c,v 1.2 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 int

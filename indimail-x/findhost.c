@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 1.13  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.12  2023-04-01 13:29:19+05:30  Cprogrammer
  * display mysql error for mysql_options()
  *
@@ -58,7 +61,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 1.12 2023-04-01 13:29:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 1.13 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

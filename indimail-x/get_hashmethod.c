@@ -1,5 +1,5 @@
 /*
- * $Id: get_hashmethod.c,v 1.1 2023-07-17 11:26:56+05:30 Cprogrammer Exp mbhangui $
+ * $Id: get_hashmethod.c,v 1.2 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -180,6 +180,9 @@ print_hashmethod(int method)
 
 /*
  * $Log: get_hashmethod.c,v $
+ * Revision 1.2  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2023-07-17 11:26:56+05:30  Cprogrammer
  * Initial revision
  *

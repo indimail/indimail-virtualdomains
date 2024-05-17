@@ -1,12 +1,12 @@
 /*
- * $Id: vcfilter.c,v 1.7 2023-09-06 18:47:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vcfilter.c,v 1.8 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcfilter.c,v 1.7 2023-09-06 18:47:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcfilter.c,v 1.8 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -468,6 +468,9 @@ main()
 
 /*
  * $Log: vcfilter.c,v $
+ * Revision 1.8  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2023-09-06 18:47:05+05:30  Cprogrammer
  * allow both textual and numberical values for -c and -h option
  * removed "Sender not in addressbook"

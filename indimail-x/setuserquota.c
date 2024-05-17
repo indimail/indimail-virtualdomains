@@ -1,5 +1,8 @@
 /*
  * $Log: setuserquota.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2022-01-31 17:34:19+05:30  Cprogrammer
  * fixed setting of quota=NOQUOTA
  *
@@ -33,7 +36,7 @@
 #include "sql_setquota.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: setuserquota.c,v 1.3 2022-01-31 17:34:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: setuserquota.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

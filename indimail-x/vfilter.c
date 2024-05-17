@@ -1,12 +1,12 @@
 /*
- * $Id: vfilter.c,v 1.14 2023-09-07 21:09:50+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vfilter.c,v 1.15 2024-05-17 16:24:31+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vfilter.c,v 1.14 2023-09-07 21:09:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vfilter.c,v 1.15 2024-05-17 16:24:31+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef VFILTER
@@ -111,7 +111,7 @@ static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 static int
 myExit(int argc, char **argv, int status, int bounce, char *DestFolder, char *forward)
 {
-	char           *revision = "$Revision: 1.14 $", *mda;
+	char           *revision = "$Revision: 1.15 $", *mda;
 	static stralloc XFilter = {0};
 	pid_t           pid;
 	int             i, werr, wait_status, _status;
@@ -871,6 +871,9 @@ main(int argc, char **argv)
 
 /*-
  * $Log: vfilter.c,v $
+ * Revision 1.15  2024-05-17 16:24:31+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.14  2023-09-07 21:09:50+05:30  Cprogrammer
  * replace fnmatch with matchregex from libqmail
  * removed "sender not in addressbook"

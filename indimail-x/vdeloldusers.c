@@ -1,5 +1,8 @@
 /*
  * $Log: vdeloldusers.c,v $
+ * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -24,7 +27,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeloldusers.c,v 1.6 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeloldusers.c,v 1.7 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING

@@ -1,5 +1,8 @@
 /*
  * $Log: is_alias_domain.c,v $
+ * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2023-03-25 17:49:16+05:30  Cprogrammer
  * bug fix - fixed using resolved link
  *
@@ -40,7 +43,7 @@
 #include "get_assign.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: is_alias_domain.c,v 1.4 2023-03-25 17:49:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: is_alias_domain.c,v 1.5 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

@@ -1,5 +1,8 @@
 /*
  * $Log: iadduser.h,v $
+ * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2022-11-02 12:44:14+05:30  Cprogrammer
  * added feature to add scram password during user addition
  *

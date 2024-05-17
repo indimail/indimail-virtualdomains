@@ -1,5 +1,8 @@
 /*
  * $Log: lockfile.c,v $
+ * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2020-10-01 18:26:16+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -19,7 +22,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: lockfile.c,v 1.4 2020-10-01 18:26:16+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: lockfile.c,v 1.5 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef FILE_LOCKING

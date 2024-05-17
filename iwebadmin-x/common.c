@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: common.c,v 1.6 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -96,6 +96,9 @@ errflush()
 
 /*
  * $Log: common.c,v $
+ * Revision 1.6  2024-05-17 16:17:42+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-07-28 22:29:02+05:30  Cprogrammer
  * added my_exit() function to record source file, line no of exit
  *

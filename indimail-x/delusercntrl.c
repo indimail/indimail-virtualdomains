@@ -1,5 +1,8 @@
 /*
  * $Log: delusercntrl.c,v $
+ * Revision 1.2  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2019-04-14 22:44:18+05:30  Cprogrammer
  * Initial revision
  *
@@ -25,7 +28,7 @@
 #include "open_master.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: delusercntrl.c,v 1.1 2019-04-14 22:44:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: delusercntrl.c,v 1.2 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

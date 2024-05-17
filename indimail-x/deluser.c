@@ -1,5 +1,8 @@
 /*
  * $Log: deluser.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2023-03-23 22:06:55+05:30  Cprogrammer
  * skip vdelfiles when directory doesn't exist
  *
@@ -54,7 +57,7 @@
 #include "valias_delete.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deluser.c,v 1.2 2023-03-23 22:06:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deluser.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

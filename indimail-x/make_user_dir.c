@@ -1,5 +1,8 @@
 /*
  * $Log: make_user_dir.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2021-09-11 13:39:42+05:30  Cprogrammer
  * use getEnvConfig for domain directory
  *
@@ -34,7 +37,7 @@
 #include "SendWelcomeMail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: make_user_dir.c,v 1.2 2021-09-11 13:39:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: make_user_dir.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

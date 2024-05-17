@@ -1,5 +1,8 @@
 /*
  * $Log: vsetuserquota.c,v $
+ * Revision 1.4  2024-05-17 16:24:31+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2022-10-20 11:59:18+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -45,7 +48,7 @@
 #include "setuserquota.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsetuserquota.c,v 1.3 2022-10-20 11:59:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetuserquota.c,v 1.4 2024-05-17 16:24:31+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL   "vsetuserquota: fatal: "

@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.19  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.18  2023-06-08 17:48:50+05:30  Cprogrammer
  * renamed fifo directory from FIFODIR to INFIFODIR.
  *
@@ -131,7 +134,7 @@
 #include "FifoCreate.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.18 2023-06-08 17:48:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.19 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;

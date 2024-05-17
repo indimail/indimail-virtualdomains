@@ -1,5 +1,8 @@
 /*
  * $Log: add_vacation.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2021-07-08 15:14:46+05:30  Cprogrammer
  * add missing error check
  *
@@ -43,7 +46,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_vacation.c,v 1.2 2021-07-08 15:14:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: add_vacation.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

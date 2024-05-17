@@ -1,5 +1,8 @@
 /*
  * $Log: vget_lastauth.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2020-10-13 22:49:15+05:30  Cprogrammer
  * null terminate ipaddr
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vget_lastauth.c,v 1.3 2020-10-13 22:49:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vget_lastauth.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING

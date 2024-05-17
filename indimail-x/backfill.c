@@ -1,5 +1,8 @@
 /*
  * $Log: backfill.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2023-03-20 09:48:42+05:30  Cprogrammer
  * documented backfill code
  *
@@ -36,7 +39,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: backfill.c,v 1.3 2023-03-20 09:48:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: backfill.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

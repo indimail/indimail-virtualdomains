@@ -1,5 +1,5 @@
 /*
- * $Id: renameuser.c,v 1.8 2023-07-15 00:19:31+05:30 Cprogrammer Exp mbhangui $
+ * $Id: renameuser.c,v 1.9 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -39,7 +39,7 @@
 #include "deluser.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: renameuser.c,v 1.8 2023-07-15 00:19:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: renameuser.c,v 1.9 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -321,6 +321,9 @@ renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *
 
 /*
  * $Log: renameuser.c,v $
+ * Revision 1.9  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.8  2023-07-15 00:19:31+05:30  Cprogrammer
  * copy scram field from old user to new user when renaming user
  *

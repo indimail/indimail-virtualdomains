@@ -1,5 +1,8 @@
 /*
  * $Log: deldomain.c,v $
+ * Revision 1.7  2024-05-17 16:24:31+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2023-12-03 15:40:29+05:30  Cprogrammer
  * use same logic for ETRN, ATRN domains
  *
@@ -60,7 +63,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deldomain.c,v 1.6 2023-12-03 15:40:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deldomain.c,v 1.7 2024-05-17 16:24:31+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void

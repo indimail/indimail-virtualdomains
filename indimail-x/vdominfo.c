@@ -1,5 +1,8 @@
 /*
  * $Log: vdominfo.c,v $
+ * Revision 1.11  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.10  2023-07-18 17:05:51+05:30  Cprogrammer
  * fixed using a static location that was being overwritten
  *
@@ -73,7 +76,7 @@
 #include "get_hashmethod.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdominfo.c,v 1.10 2023-07-18 17:05:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdominfo.c,v 1.11 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define VDOMTOKENS ":\n"

@@ -1,5 +1,8 @@
 /*
  * $Log: dec_dir_control.c,v $
+ * Revision 1.2  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2019-04-18 08:37:44+05:30  Cprogrammer
  * Initial revision
  *
@@ -13,7 +16,7 @@
 #include "backfill.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dec_dir_control.c,v 1.1 2019-04-18 08:37:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dec_dir_control.c,v 1.2 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 int

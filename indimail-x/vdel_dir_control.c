@@ -1,5 +1,8 @@
 /*
  * $Log: vdel_dir_control.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2023-03-20 10:33:37+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -29,7 +32,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdel_dir_control.c,v 1.2 2023-03-20 10:33:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdel_dir_control.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
