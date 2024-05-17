@@ -1,5 +1,8 @@
 /*
  * $Log: SendWelcomeMail.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2020-10-19 12:46:58+05:30  Cprogrammer
  * use /var/indomain/domains for domain/bulk_mail
  *
@@ -25,7 +28,7 @@
 #include "CopyEmailFile.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: SendWelcomeMail.c,v 1.2 2020-10-19 12:46:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: SendWelcomeMail.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -36,7 +39,7 @@ die_nomem()
 }
 
 void
-SendWelcomeMail(char *homedir, char *username, char *domain, int inactFlag, char *subject)
+SendWelcomeMail(const char *homedir, const char *username, const char *domain, int inactFlag, const char *subject)
 {
 	static stralloc email = {0}, tmpbuf = {0}, bulkdir = {0};
 	char           *ptr;

@@ -1,5 +1,8 @@
 /*
  * $Log: UserInLookup.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2021-01-26 00:29:14+05:30  Cprogrammer
  * renamed sql_init() to in_sql_init() to avoid clash with dovecot sql authentication driver
  *
@@ -39,7 +42,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: UserInLookup.c,v 1.3 2021-01-26 00:29:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: UserInLookup.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 /*
@@ -50,10 +53,10 @@ static char     sccsid[] = "$Id: UserInLookup.c,v 1.3 2021-01-26 00:29:14+05:30 
  * -1: System Error
  */
 int
-UserInLookup(char *email)
+UserInLookup(const char *email)
 {
 	static stralloc user = {0}, domain = {0};
-	char           *real_domain;
+	const char     *real_domain;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 #ifdef VALIAS
 	int             valias_count;

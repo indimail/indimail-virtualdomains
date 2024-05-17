@@ -1,5 +1,8 @@
 /*
  * $Log: ipasswd.c,v $
+ * Revision 1.6  2024-05-17 16:24:31+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-07-17 11:46:13+05:30  Cprogrammer
  * set hash method from hash_method control file in controldir, domaindir
  *
@@ -32,7 +35,6 @@
 #include <fmt.h>
 #include <env.h>
 #endif
-#include "lowerit.h"
 #include "iopen.h"
 #include "iclose.h"
 #include "sqlOpen_user.h"
@@ -45,7 +47,7 @@
 #include "get_hashmethod.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ipasswd.c,v 1.5 2023-07-17 11:46:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ipasswd.c,v 1.6 2024-05-17 16:24:31+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -59,7 +61,7 @@ die_nomem()
  * update a users virtual password file entry with a different password
  */
 int
-ipasswd(char *username, char *domain, char *password, int encrypt_flag, char *scram_passwd)
+ipasswd(const char *username, const char *domain, const char *password, int encrypt_flag, const char *scram_passwd)
 {
 	struct passwd  *pw;
 	char           *ptr;
@@ -68,8 +70,6 @@ ipasswd(char *username, char *domain, char *password, int encrypt_flag, char *sc
 	static stralloc Dir = {0}, Crypted = {0}, email = {0};
 	mdir_t          quota;
 
-	lowerit(username);
-	lowerit(domain);
 	if (!stralloc_copys(&email, username) ||
 			!stralloc_append(&email, "@") ||
 			!stralloc_cats(&email, domain) ||

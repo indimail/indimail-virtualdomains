@@ -1,5 +1,8 @@
 /*
  * $Log: setuserquota.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2022-01-31 17:34:19+05:30  Cprogrammer
  * fixed setting of quota=NOQUOTA
  *
@@ -27,14 +30,13 @@
 #include <getEnvConfig.h>
 #include <str.h>
 #endif
-#include "lowerit.h"
 #include "sql_getpw.h"
 #include "parse_quota.h"
 #include "recalc_quota.h"
 #include "sql_setquota.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: setuserquota.c,v 1.3 2022-01-31 17:34:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: setuserquota.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -46,9 +48,9 @@ die_nomem()
 
 /*- Update a users quota */
 int
-setuserquota(char *username, char *domain, char *quota)
+setuserquota(const char *username, const char *domain, const char *quota)
 {
-	char           *domain_ptr;
+	const char     *domain_ptr;
 	char            strnum[FMT_ULONG];
 	static stralloc tmp = {0};
 	int             i;
@@ -61,12 +63,10 @@ setuserquota(char *username, char *domain, char *quota)
 		strerr_warn1("setuserquota: username cannot be null", 0);
 		return (-1);
 	}
-	lowerit(username);
 	if (domain && *domain)
 		domain_ptr = domain;
 	else
-		getEnvConfigStr(&domain_ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
-	lowerit(domain_ptr);
+		getEnvConfigStr((char **) &domain_ptr, "DEFAULT_DOMAIN", DEFAULT_DOMAIN);
 	if (!str_diffn(quota, "NOQUOTA", 7)) {
 		if (!stralloc_copyb(&tmp, "NOQUOTA", 7) || !stralloc_0(&tmp))
 			die_nomem();

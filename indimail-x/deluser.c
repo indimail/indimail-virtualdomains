@@ -1,5 +1,8 @@
 /*
  * $Log: deluser.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2023-03-23 22:06:55+05:30  Cprogrammer
  * skip vdelfiles when directory doesn't exist
  *
@@ -33,7 +36,6 @@
 #include <str.h>
 #include <scan.h>
 #endif
-#include "lowerit.h"
 #include "common.h"
 #include "get_real_domain.h"
 #include "get_assign.h"
@@ -55,7 +57,7 @@
 #include "valias_delete.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deluser.c,v 1.2 2023-03-23 22:06:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deluser.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -84,11 +86,12 @@ getch(ch)
  *     indimail to indibak. make the user inactive
  */
 int
-deluser(char *user, char *domain, int remove_db)
+deluser(const char *user, const char *domain, int remove_db)
 {
 	struct passwd  *passent;
 	static stralloc user_dir = {0}, domain_dir = {0}, tmp = {0}, SqlBuf = {0};
-	char           *real_domain, *ptr;
+	const char     *real_domain;
+	char           *ptr;
 	char            ch;
 	char            buf[1];
 	mdir_t          quota;
@@ -127,9 +130,6 @@ deluser(char *user, char *domain, int remove_db)
 			}
 		}
 	}
-	lowerit(user);
-	if (domain && *domain)
-		lowerit(domain);
 	if (domain && *domain) {
 		if (!(real_domain = get_real_domain(domain))) {
 			strerr_warn3("deluser: ", domain, " does not exist", 0);

@@ -1,5 +1,5 @@
 /*
- * $Id: vadduser.c,v 1.14 2023-07-17 12:25:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vadduser.c,v 1.15 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -20,6 +20,9 @@
 #endif
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
+#endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
 #endif
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
@@ -61,7 +64,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadduser.c,v 1.14 2023-07-17 12:25:48+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadduser.c,v 1.15 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -127,7 +130,8 @@ main(int argc, char **argv)
 	int             i, j, random, users_per_level = 0, fd, match,
 					encrypt_flag, docram;
 	mdir_t          q, c;
-	char           *real_domain, *ptr, *base_argv0, *base_path, *domain_dir;
+	const char     *real_domain;
+	char           *ptr, *base_argv0, *base_path, *domain_dir;
 	static stralloc tmpbuf = {0}, quotaVal = {0}, line = {0}, result = {0};
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG], inbuf[512];
 	uid_t           uid, uidtmp;
@@ -392,6 +396,7 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 		char **salt)
 {
 	int             c, i, r;
+	char           *ptr;
 	char            strnum[FMT_ULONG], optstr[30];
 
 	Email.len = Passwd.len = Domain.len = Quota.len = 0;
@@ -544,6 +549,10 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 	}
 
 	if (optind < argc) {
+		for (ptr = argv[optind]; *ptr; ptr++) {
+			if (isupper(*ptr))
+				strerr_die4x(100, WARN, "email [", argv[optind], "] has an uppercase character");
+		}
 		if (!stralloc_copys(&Email, argv[optind++]) || !stralloc_0(&Email))
 			die_nomem();
 		Email.len--;
@@ -579,6 +588,9 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 
 /*
  * $Log: vadduser.c,v $
+ * Revision 1.15  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.14  2023-07-17 12:25:48+05:30  Cprogrammer
  * added YESCRYPT hash
  *

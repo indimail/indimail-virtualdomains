@@ -1,5 +1,8 @@
 /*
  * $Log: dir_control.h,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2019-04-15 21:56:05+05:30  Cprogrammer
  * added vdir struct definition
  *
@@ -40,12 +43,12 @@ extern char    *rfc_ids[];
 
 void            init_dir_control(vdir_type *);
 char           *inc_dir(vdir_type *, int);
-int             vcreate_dir_control(char *, char *);
-int             vdel_dir_control(char *);
+int             vcreate_dir_control(const char *, const char *);
+int             vdel_dir_control(const char *);
 int             inc_dir_control(vdir_type *, int);
-int             dec_dir_control(char *, char *, char *, uid_t, gid_t);
-int             vread_dir_control(char *, vdir_type *, char *);
-int             vwrite_dir_control(char *, vdir_type *, char *, uid_t, gid_t);
-int             dec_dir_control(char *, char *, char *, uid_t, gid_t);
+int             dec_dir_control(const char *, const char *, const char *, uid_t, gid_t);
+int             vread_dir_control(const char *, vdir_type *, const char *);
+int             vwrite_dir_control(const char *, vdir_type *, const char *, uid_t, gid_t);
+int             dec_dir_control(const char *, const char *, const char *, uid_t, gid_t);
 
 #endif

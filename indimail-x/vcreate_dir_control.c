@@ -1,5 +1,8 @@
 /*
  * $Log: vcreate_dir_control.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2019-07-04 00:02:44+05:30  Cprogrammer
  * fixed filename
  *
@@ -26,7 +29,7 @@
 #include "dir_control.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vcreate_dir_control.c,v 1.2 2019-07-04 00:02:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vcreate_dir_control.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -37,13 +40,13 @@ die_nomem()
 }
 
 int
-vcreate_dir_control(char *filename, char *domain)
+vcreate_dir_control(const char *filename, const char *domain)
 {
 	static stralloc SqlBuf = {0}, tmpbuf = {0};
 	char            strnum[FMT_ULONG];
 	uid_t           uid;
 	gid_t           gid;
-	char           *ptr = (char *) 0;
+	const char     *ptr = (char *) 0;
 
 	if (domain && *domain && !(ptr = get_assign(domain, 0, &uid, &gid))) {
 		strerr_warn2(domain, ": No such domain", 0);

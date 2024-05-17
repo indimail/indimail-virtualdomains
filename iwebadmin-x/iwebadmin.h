@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.h,v 1.4 2023-07-28 22:30:19+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadmin.h,v 1.5 2024-05-17 16:20:51+05:30 mbhangui Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -47,7 +47,7 @@
 #define ACTION_DELETE           2
 
 void            init_globals();
-void            quickAction(char *username, int action);
+void            quickAction(const char *username, int action);
 void            del_id_files(stralloc *);
 
 /*

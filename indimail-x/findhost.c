@@ -1,5 +1,8 @@
 /*
  * $Log: findhost.c,v $
+ * Revision 1.13  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.12  2023-04-01 13:29:19+05:30  Cprogrammer
  * display mysql error for mysql_options()
  *
@@ -58,7 +61,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findhost.c,v 1.12 2023-04-01 13:29:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findhost.c,v 1.13 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -114,7 +117,7 @@ iclose_cntrl()
 }
 
 int
-open_central_db(char *dbhost)
+open_central_db(const char *dbhost)
 {
 	struct substdio ssin;
 	static stralloc host_path = {0}, SqlBuf = {0};
@@ -316,11 +319,12 @@ open_central_db(char *dbhost)
  * 3 - connect and do not look for '*'
  */
 char           *
-findhost(char *email, int connect_primarydb)
+findhost(const char *email, int connect_primarydb)
 {
 	static stralloc mailhost = {0}, prevEmail = {0},
 					user = {0}, domain = {0}, SqlBuf = {0}, hostid = {0};
-	char           *ptr, *real_domain, *ip_addr;
+	char           *ptr;
+	const char     *real_domain, *ip_addr;
 	int             len, port, err, attempt = 0;
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;

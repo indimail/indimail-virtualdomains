@@ -1,5 +1,8 @@
 /*
  * $Log: limits.c,v $
+ * Revision 1.6  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-03-23 22:08:24+05:30  Cprogrammer
  * removed spurious warning message when limits doesn't exist
  *
@@ -22,7 +25,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: limits.c,v 1.5 2023-03-23 22:08:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: limits.c,v 1.6 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -66,7 +69,7 @@ die_nomem(char *str)
 }
 
 int
-vget_limits(char *domain, struct vlimits *limits)
+vget_limits(const char *domain, struct vlimits *limits)
 {
 	int             err, perm;
 	MYSQL_ROW       row;
@@ -176,7 +179,7 @@ vget_limits(char *domain, struct vlimits *limits)
 }
 
 int
-vdel_limits(char *domain)
+vdel_limits(const char *domain)
 {
 	int             err;
 
@@ -214,7 +217,7 @@ vdel_limits(char *domain)
 }
 
 int
-vset_limits(char *domain, struct vlimits *limits)
+vset_limits(const char *domain, struct vlimits *limits)
 {
 	int             err;
 	char            strnum[FMT_ULONG];

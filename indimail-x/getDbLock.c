@@ -1,5 +1,8 @@
 /*
  * $Log: getDbLock.c,v $
+ * Revision 1.2  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2019-04-20 09:18:06+05:30  Cprogrammer
  * Initial revision
  *
@@ -19,18 +22,18 @@
 #include "lockfile.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: getDbLock.c,v 1.1 2019-04-20 09:18:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: getDbLock.c,v 1.2 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
-die_nomem(char *str)
+die_nomem(const char *str)
 {
 	strerr_warn2(str, ": out of memory", 0);
 	_exit(111);
 }
 
 int
-delDbLock(int lockfd, char *filename, char proj)
+delDbLock(int lockfd, const char *filename, char proj)
 {
 #ifdef FILE_LOCKING
 	if (RemoveLock(filename, proj) == -1) {
@@ -44,7 +47,7 @@ delDbLock(int lockfd, char *filename, char proj)
 }
 
 int
-getDbLock(char *filename, char proj)
+getDbLock(const char *filename, char proj)
 {
 #ifdef FILE_LOCKING
 	int             lockfd;
@@ -68,7 +71,7 @@ getDbLock(char *filename, char proj)
 }
 
 int
-readPidLock(char *filename, char proj)
+readPidLock(const char *filename, char proj)
 {
 	static stralloc fname = {0};
 	int             fd;

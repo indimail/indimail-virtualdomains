@@ -1,5 +1,5 @@
 /*
- * $Id: vadddomain.c,v 1.19 2023-12-03 15:43:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vadddomain.c,v 1.20 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -21,6 +21,9 @@
 #endif
 #ifdef HAVE_PWD_H
 #include <pwd.h>
+#endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
 #endif
 #ifdef HAVE_QMAIL
 #include <substdio.h>
@@ -73,7 +76,7 @@
 #include "get_hashmethod.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadddomain.c,v 1.19 2023-12-03 15:43:17+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadddomain.c,v 1.20 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define WARN    "vadddomain: warning: "
@@ -153,6 +156,7 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 	int             c, i, r;
 	struct passwd  *mypw;
 	char            optstr[51];
+	char           *ptr;
 
 	Uid = indimailuid;
 	Gid = indimailgid;
@@ -348,8 +352,13 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 			strerr_die2x(100, WARN, usage);
 		}
 	}
-	if (optind < argc)
+	if (optind < argc) {
+		for (ptr = argv[optind]; *ptr; ptr++) {
+			if (isupper(*ptr))
+				strerr_die4x(100, WARN, "domain [", argv[optind], "] has an uppercase character");
+		}
 		*domain = argv[optind++];
+	}
 	if (optind < argc)
 		*passwd = argv[optind++];
 	if (!*domain)
@@ -724,6 +733,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vadddomain.c,v $
+ * Revision 1.20  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.19  2023-12-03 15:43:17+05:30  Cprogrammer
  * exit early for post_handle for ETRN, ATRN domains
  *

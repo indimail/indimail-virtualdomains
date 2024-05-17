@@ -1,5 +1,8 @@
 /*
  * $Log: del_user_assign.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2020-04-01 18:54:31+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -25,7 +28,7 @@
 #include "update_newu.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: del_user_assign.c,v 1.2 2020-04-01 18:54:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: del_user_assign.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -39,7 +42,7 @@ die_nomem()
  * remove a local user from the users/assign file and recompile
  */
 int
-del_user_assign(char *user, char *dir)
+del_user_assign(const char *user, const char *dir)
 {
 	static stralloc tmp1 = {0}, tmp2 = {0}, fname = {0};
 	char            strnum[FMT_ULONG];

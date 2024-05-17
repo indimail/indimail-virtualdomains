@@ -1,5 +1,8 @@
 /*
  * $Log: valias_delete.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias_delete.c,v 1.2 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valias_delete.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -42,11 +45,11 @@ die_nomem()
 }
 
 int
-valias_delete(char *alias, char *domain, char *alias_line)
+valias_delete(const char *alias, const char *domain, const char *alias_line)
 {
 	int             err;
 	static stralloc SqlBuf = {0};
-	char           *real_domain;
+	const char     *real_domain;
 
 	if (!domain || !*domain)
 		return (1);

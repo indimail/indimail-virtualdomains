@@ -1,5 +1,8 @@
 /*
  * $Log: sql_updateflag.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2022-10-27 17:28:55+05:30  Cprogrammer
  * refactored sql code into do_sql()
  *
@@ -23,7 +26,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_updateflag.c,v 1.3 2022-10-27 17:28:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_updateflag.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -34,7 +37,7 @@ die_nomem()
 }
 
 static int
-do_sql(char *user, char *domain, int flag, char *table)
+do_sql(const char *user, const char *domain, int flag, const char *table)
 {
 	static stralloc SqlBuf = {0};
 	char            strnum[FMT_ULONG];
@@ -71,7 +74,7 @@ do_sql(char *user, char *domain, int flag, char *table)
 }
 
 int
-sql_updateflag(char *user, char *domain, int flag)
+sql_updateflag(const char *user, const char *domain, int flag)
 {
 	int             err;
 

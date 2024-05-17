@@ -1,5 +1,8 @@
 /*
  * $Log: valias_select.h,v $
+ * Revision 1.2  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2019-04-13 23:39:28+05:30  Cprogrammer
  * valias_select.h
  *
@@ -13,8 +16,8 @@
 #include <stralloc.h>
 #endif
 
-char           *valias_select(char *, char *);
-int             valias_track(char*, stralloc *, stralloc *);
+char           *valias_select(const char *, const char *);
+int             valias_track(const char*, stralloc *, stralloc *);
 char           *valias_select_all(stralloc *, stralloc *);
 
 #endif

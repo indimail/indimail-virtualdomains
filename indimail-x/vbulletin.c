@@ -1,5 +1,8 @@
 /*
  * $Log: vbulletin.c,v $
+ * Revision 1.10  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2023-03-26 00:33:27+05:30  Cprogrammer
  * fixed code using wait_handler
  *
@@ -81,7 +84,7 @@
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vbulletin.c,v 1.9 2023-03-26 00:33:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vbulletin.c,v 1.10 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL            "vbulletin: fatal: "
@@ -113,6 +116,7 @@ static int
 get_options(int argc, char **argv, char **email, char **domain, char **emailFile, char **excludeFile, char **subscriberList)
 {
 	int             c, i;
+	char           *ptr;
 
 	*email = *domain = *emailFile = *excludeFile = *subscriberList = 0;
 	verbose = 0;
@@ -185,10 +189,19 @@ get_options(int argc, char **argv, char **email, char **domain, char **emailFile
 	if (optind < argc) {
 		i = str_chr(argv[optind], '@');
 		if (argv[optind][i]) {
+			for (ptr = argv[optind]; *ptr; ptr++) {
+				if (isupper(*ptr))
+					strerr_die4x(100, WARN, "email [", argv[optind], "] has an uppercase character");
+			}
 			DeliveryMethod = USER_BULLETIN;
 			*email = argv[optind++];
-		} else
+		} else {
+			for (ptr = argv[optind]; *ptr; ptr++) {
+				if (isupper(*ptr))
+					strerr_die4x(100, WARN, "domain [", argv[optind], "] has an uppercase character");
+			}
 			*domain = argv[optind++];
+		}
 	}
 	if (DeliveryMethod == BULK_BULLETIN || DeliveryMethod == DOMAIN_BULLETIN) {
 		if (*excludeFile || *email) {
@@ -397,7 +410,8 @@ static int
 spost(char *EmailOrDomain, int method, char *emailFile, int bulk)
 {
 	static stralloc bulkdir = {0}, User = {0}, Domain = {0};
-	char           *ptr, *domain = 0;
+	char           *ptr;
+	const char     *domain = NULL;
 	int             i, copy_method;
 	uid_t           uid;
 	gid_t           gid;

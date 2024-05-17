@@ -1,5 +1,8 @@
 /*
  * $Log: findmdahost.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2021-01-26 00:28:43+05:30  Cprogrammer
  * renamed sql_init() to in_sql_init() to avoid clash with dovecot sql authentication driver
  *
@@ -34,19 +37,20 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: findmdahost.c,v 1.3 2021-01-26 00:28:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: findmdahost.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
 #include <errno.h>
 
 char           *
-findmdahost(char *email, int *total)
+findmdahost(const char *email, int *total)
 {
 	int             is_dist, count, port, connect_all, i;
 	static stralloc user = {0}, domain = {0}, mailhost = {0};
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
-	char           *real_domain, *ip;
+	const char     *real_domain;
+	char           *ip;
 	DBINFO        **rhostsptr;
 	MYSQL         **mysqlptr;
 	struct passwd *pw;

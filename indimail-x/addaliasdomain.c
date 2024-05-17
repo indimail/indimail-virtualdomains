@@ -1,5 +1,8 @@
 /*
  * $Log: addaliasdomain.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2019-04-14 23:18:40+05:30  Cprogrammer
  * changed mode to 0640
  *
@@ -20,7 +23,6 @@
 #include <fmt.h>
 #include <open.h>
 #endif
-#include "lowerit.h"
 #include "get_assign.h"
 #include "is_distributed_domain.h"
 #include "open_master.h"
@@ -30,7 +32,7 @@
 #include "update_file.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: addaliasdomain.c,v 1.2 2019-04-14 23:18:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: addaliasdomain.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -41,7 +43,7 @@ die_nomem()
 }
 
 int
-addaliasdomain(char *old_domain, char *new_domain)
+addaliasdomain(const char *old_domain, const char *new_domain)
 {
 	static stralloc dirstr = {0}, tmpbuf = {0};
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
@@ -56,12 +58,10 @@ addaliasdomain(char *old_domain, char *new_domain)
 	}
 	if ((fdsourcedir = open_read(".")) == -1)
 		strerr_die1sys(111, "addaliasdomain: unable to open current directory: ");
-	lowerit(new_domain);
 	if (get_assign(new_domain, 0, 0, 0)) {
 		strerr_warn3("addaliasdomain: domain ", new_domain, " exists", 0);
 		return (-1);
 	}
-	lowerit(old_domain);
 	if (!get_assign(old_domain, &dirstr, &uid, &gid)) {
 		strerr_warn3("addaliasdomain: Domain ", old_domain, " does not exist", 0);
 		return (-1);

@@ -1,5 +1,8 @@
 /*
  * $Log: iadduser.h,v $
+ * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2022-11-02 12:44:14+05:30  Cprogrammer
  * added feature to add scram password during user addition
  *
@@ -16,6 +19,6 @@
 #ifndef IADDUSER_H
 #define IADDUSER_H
 
-int             iadduser(char *, char *, char *, char *, char *, char *, int, int, int, char *);
+int             iadduser(const char *, const char *, const char *, const char *, const char *, const char *, int, int, int, const char *);
 
 #endif

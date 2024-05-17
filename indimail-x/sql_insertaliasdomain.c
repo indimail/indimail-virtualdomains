@@ -1,5 +1,8 @@
 /*
  * $Log: sql_insertaliasdomain.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2021-09-11 13:40:52+05:30  Cprogrammer
  * added missing round brace
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_insertaliasdomain.c,v 1.2 2021-09-11 13:40:52+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_insertaliasdomain.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -37,7 +40,7 @@ die_nomem()
 }
 
 int
-sql_insertaliasdomain(char *old_domain, char *new_domain)
+sql_insertaliasdomain(const char *old_domain, const char *new_domain)
 {
 #ifdef CLUSTERED_SITE
 	int             err;

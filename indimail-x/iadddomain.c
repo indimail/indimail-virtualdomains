@@ -1,5 +1,5 @@
 /*
- * $Id: iadddomain.c,v 1.5 2023-12-13 00:34:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iadddomain.c,v 1.6 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -45,7 +45,7 @@
 #include "vdelfiles.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: iadddomain.c,v 1.5 2023-12-13 00:34:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iadddomain.c,v 1.6 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -92,8 +92,10 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 			strerr_warn4("adddomain: invalid char ", "'", tmp, "'", 0);
 			return (-1);
 		}
-		if (isupper((int) *ptr))
-			*ptr = tolower(*ptr);
+		if (isupper((int) *ptr)) {
+			strerr_warn3("adddomain: domain [", domain, "] has an uppercase character", 0);
+			return (-1);
+		}
 	}
 	if ((*(ptr - 1)) == '-') {
 		strerr_warn1("adddomain: Last component cannot be '-'", 0);
@@ -292,6 +294,9 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 
 /*
  * $Log: iadddomain.c,v $
+ * Revision 1.6  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-12-13 00:34:13+05:30  Cprogrammer
  * call add_domain_assign for etrn/atrn domains
  *

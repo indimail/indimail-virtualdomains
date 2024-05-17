@@ -1,5 +1,8 @@
 /*
  * $Log: sql_setquota.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2022-10-27 17:21:57+05:30  Cprogrammer
  * refactored sql code into do_sql()
  *
@@ -28,7 +31,7 @@
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_setquota.c,v 1.2 2022-10-27 17:21:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_setquota.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -39,7 +42,7 @@ die_nomem()
 }
 
 static int
-do_sql(char *user, char *domain, char *quota, char *table)
+do_sql(const char *user, const char *domain, const char *quota, const char *table)
 {
 	static stralloc SqlBuf = {0};
 
@@ -66,7 +69,7 @@ do_sql(char *user, char *domain, char *quota, char *table)
 }
 
 int
-sql_setquota(char *user, char *domain, char *quota)
+sql_setquota(const char *user, const char *domain, const char *quota)
 {
 	char           *tmpstr;
 	unsigned long   q1, q2;

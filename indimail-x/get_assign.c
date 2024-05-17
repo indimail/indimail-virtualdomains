@@ -1,5 +1,8 @@
 /*
  * $Log: get_assign.c,v $
+ * Revision 1.6  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2020-10-18 07:47:19+05:30  Cprogrammer
  * use alloc() instead of alloc_re()
  *
@@ -22,9 +25,6 @@
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_CTYPE_H
-#include <ctype.h>
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -43,7 +43,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_assign.c,v 1.5 2020-10-18 07:47:19+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_assign.c,v 1.6 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 extern int      cdb_seek(int, unsigned char *, unsigned int, int *);
@@ -63,7 +63,7 @@ die_nomem()
 }
 
 char *
-get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
+get_assign(const char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 {
 	int             dlen, i, fd;
 	char           *s, *ptr, *assigndir, *tmpstr, *tmpbuf;
@@ -76,10 +76,6 @@ get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 
 	if (!domain || !*domain)
 		return ((char *) 0);
-	for (s = domain; *s; s++) {
-		if (isupper(*s))
-			*s = tolower(*s);
-	}
 #ifdef QUERY_CACHE
 	if (_cacheSwitch && env_get("QUERY_CACHE")) {
 		if (in_domain_size && in_domain && in_dir &&

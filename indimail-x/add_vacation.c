@@ -1,5 +1,8 @@
 /*
  * $Log: add_vacation.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2021-07-08 15:14:46+05:30  Cprogrammer
  * add missing error check
  *
@@ -43,7 +46,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_vacation.c,v 1.2 2021-07-08 15:14:46+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: add_vacation.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -59,7 +62,7 @@ add_vacation(char *email, char *fname)
 	static stralloc tmpbuf = {0}, line = {0}, user = {0}, domain = {0};
 	uid_t           uid;
 	gid_t           gid;
-	char           *real_domain;
+	const char     *real_domain;
 	char            inbuf[512], outbuf[512];
 	struct passwd  *pw;
 	int             err, match, fd1, fd2;

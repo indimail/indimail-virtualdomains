@@ -1,5 +1,5 @@
 /*
- * $Id: sql_setpw.c,v 1.8 2023-07-15 00:47:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sql_setpw.c,v 1.9 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -31,7 +31,7 @@
 #include "create_table.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_setpw.c,v 1.8 2023-07-15 00:47:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_setpw.c,v 1.9 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -42,7 +42,7 @@ die_nomem()
 }
 
 static int
-do_sql(struct passwd *inpw, char *domain, char *scram, char *table)
+do_sql(struct passwd *inpw, const char *domain, const char *scram, const char *table)
 {
 	static stralloc SqlBuf = {0};
 	char            strnum1[FMT_ULONG];
@@ -93,7 +93,7 @@ do_sql(struct passwd *inpw, char *domain, char *scram, char *table)
 }
 
 int
-sql_setpw(struct passwd *inpw, char *domain, char *scram)
+sql_setpw(struct passwd *inpw, const char *domain, const char *scram)
 {
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	struct passwd  *pw, *t;
@@ -193,6 +193,9 @@ sql_setpw(struct passwd *inpw, char *domain, char *scram)
 
 /*
  * $Log: sql_setpw.c,v $
+ * Revision 1.9  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.8  2023-07-15 00:47:44+05:30  Cprogrammer
  * extract encrypted password from pw->pw_passwd starting with {CRAM}
  *

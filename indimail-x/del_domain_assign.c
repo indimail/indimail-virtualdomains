@@ -1,5 +1,8 @@
 /*
  * $Log: del_domain_assign.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2020-04-01 18:54:23+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -27,7 +30,7 @@
 #include "update_newu.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: del_domain_assign.c,v 1.2 2020-04-01 18:54:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: del_domain_assign.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -45,7 +48,7 @@ die_nomem()
  *
  */
 int
-del_domain_assign(char *domain, char *dir, gid_t uid, gid_t gid)
+del_domain_assign(const char *domain, const char *dir, gid_t uid, gid_t gid)
 {
 	static stralloc tmpstr = {0}, fname = {0};
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];

@@ -1,5 +1,8 @@
 /*
  * $Log: sql_setpw.h,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2022-08-07 13:02:50+05:30  Cprogrammer
  * added scram argument to set scram password
  *
@@ -16,6 +19,6 @@
 #include <pwd.h>
 #endif
 
-int             sql_setpw(struct passwd *, char *, char *);
+int             sql_setpw(struct passwd *, const char *, const char *);
 
 #endif

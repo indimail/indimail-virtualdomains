@@ -1,5 +1,8 @@
 /*
  * $Log: valias_select.c,v $
+ * Revision 1.2  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2019-04-22 23:21:55+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias_select.c,v 1.1 2019-04-22 23:21:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valias_select.c,v 1.2 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -37,9 +40,9 @@ die_nomem()
 }
 
 char           *
-valias_select(char *alias, char *domain)
+valias_select(const char *alias, const char *domain)
 {
-	char           *real_domain;
+	const char     *real_domain;
 	MYSQL_ROW       row;
 	static MYSQL_RES *select_res;
 
@@ -76,7 +79,7 @@ valias_select(char *alias, char *domain)
 }
 
 int
-valias_track(char *valias_line, stralloc *alias, stralloc *domain)
+valias_track(const char *valias_line, stralloc *alias, stralloc *domain)
 {
 	int             err;
 	MYSQL_ROW       row;
@@ -124,7 +127,7 @@ valias_select_all(stralloc *alias, stralloc *domain)
 {
 	int             err;
 	static stralloc SqlBuf = {0};
-	char           *real_domain;
+	const char     *real_domain;
 	MYSQL_ROW       row;
 	static MYSQL_RES *res;
 

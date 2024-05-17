@@ -1,5 +1,8 @@
 /*
  * $Log: vmoddomain.c,v $
+ * Revision 1.5  2024-05-17 16:24:31+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2023-03-22 09:46:49+05:30  Cprogrammer
  * updated error messages
  *
@@ -29,6 +32,9 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
 #ifdef HAVE_QMAIL
 #include <sgetopt.h>
 #include <stralloc.h>
@@ -48,7 +54,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomain.c,v 1.4 2023-03-22 09:46:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoddomain.c,v 1.5 2024-05-17 16:24:31+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define WARN    "vmoddomain: warning: "
@@ -94,6 +100,7 @@ get_options(int argc, char **argv, int *use_vfilter, int *domain_limits,
 	char **handler, char **domain)
 {
 	int             c;
+	char           *ptr;
 
 	*use_vfilter = -1;
 	*domain_limits = -1;
@@ -123,9 +130,13 @@ get_options(int argc, char **argv, int *use_vfilter, int *domain_limits,
 		usage();
 		return (1);
 	} else
-	if (optind < argc)
+	if (optind < argc) {
+		for (ptr = argv[optind]; *ptr; ptr++) {
+			if (isupper(*ptr))
+				strerr_die4x(100, WARN, "domain [", argv[optind], "] has an uppercase character");
+		}
 		*domain = argv[optind++];
-	else {
+	} else {
 		usage();
 		return (1);
 	}

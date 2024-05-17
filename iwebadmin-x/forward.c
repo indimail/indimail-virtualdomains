@@ -1,5 +1,5 @@
 /*
- * $Id: forward.c,v 1.8 2023-07-28 22:29:43+05:30 Cprogrammer Exp mbhangui $
+ * $Id: forward.c,v 1.9 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@
 #include "common.h"
 
 int
-show_forwards(char *user, char *dom, time_t mytime)
+show_forwards(const char *user, const char *dom, time_t mytime)
 {
 	if (AdminType != DOMAIN_ADMIN) {
 		copy_status_mesg(html_text[142]);

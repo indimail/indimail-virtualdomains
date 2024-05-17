@@ -1,5 +1,8 @@
 /*
  * $Log: vrenamedomain.c,v $
+ * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2023-03-23 22:27:49+05:30  Cprogrammer
  * multiple bug fixes
  *
@@ -38,6 +41,9 @@
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
 #ifdef HAVE_QMAIL
 #include <substdio.h>
 #include <subfd.h>
@@ -70,7 +76,7 @@
 #include "post_handle.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vrenamedomain.c,v 1.6 2023-03-23 22:27:49+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vrenamedomain.c,v 1.7 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define WARN    "vrenamedomain: warning: "
@@ -100,7 +106,8 @@ main(int argc, char **argv)
 	int             fd, i, match;
 	static stralloc OldDir = {0}, NewDir = {0}, TmpDir = {0},
 					tmpbuf = {0}, line = {0};
-	char           *real_domain, *ptr, *tmpstr, *base_argv0;
+	const char     *real_domain;
+	char           *ptr, *tmpstr, *base_argv0;
 	struct passwd  *pw;
 	struct stat     statbuf;
 	char            inbuf[4096], outbuf[512], linkbuf[512],
@@ -110,6 +117,16 @@ main(int argc, char **argv)
 	if (argc != 3) {
 		strerr_warn1("USAGE: vrenamedomain old_domain_name new_domain_name", 0);
 		return (1);
+	}
+	for (ptr = argv[1]; *ptr; ptr++) {
+		if (isupper((int) *ptr)) {
+			strerr_die4x(100, WARN, "domain [", argv[1], "] has an uppercase character");
+		}
+	}
+	for (ptr = argv[2]; *ptr; ptr++) {
+		if (isupper((int) *ptr)) {
+			strerr_die4x(100, WARN, "domain [", argv[2], "] has an uppercase character");
+		}
 	}
 	if (!get_assign(argv[1], &OldDir, &domainuid, &domaingid))
 		strerr_die3x(1, WARN, argv[1], ": domain does not exist");

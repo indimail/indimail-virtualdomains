@@ -1,5 +1,8 @@
 /*
  * $Log: vaddaliasdomain.c,v $
+ * Revision 1.6  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-03-22 08:16:59+05:30  Cprogrammer
  * run POST_HANDLE program (if set) with domain user uid/gid
  *
@@ -25,6 +28,9 @@
 #ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
 #ifdef HAVE_QMAIL
 #include <strerr.h>
 #include <fmt.h>
@@ -42,7 +48,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vaddaliasdomain.c,v 1.5 2023-03-22 08:16:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vaddaliasdomain.c,v 1.6 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL   "vaddaliasdomain: fatal: "
@@ -59,6 +65,7 @@ int
 get_options(int argc, char **argv, char **domain_new, char **domain_old)
 {
 	int             c;
+	char          *ptr;
 
 	*domain_old = *domain_new = 0;
 	while ((c = getopt(argc, argv, "v")) != opteof) {
@@ -79,6 +86,16 @@ get_options(int argc, char **argv, char **domain_new, char **domain_old)
 	if (!*domain_new || !*domain_old || !**domain_new || !**domain_old) {
 		strerr_warn2(WARN, usage, 0);
 		return (100);
+	}
+	for (ptr = *domain_old; *ptr; ptr++) {
+		if (isupper((int) *ptr)) {
+			strerr_die4x(100, WARN, "domain [", *domain_old, "] has an uppercase character");
+		}
+	}
+	for (ptr = *domain_new; *ptr; ptr++) {
+		if (isupper((int) *ptr)) {
+			strerr_die4x(100, WARN, "domain [", *domain_new, "] has an uppercase character");
+		}
 	}
 	return (0);
 }

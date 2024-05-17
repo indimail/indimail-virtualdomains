@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.13 2023-07-28 22:28:26+05:30 Cprogrammer Exp mbhangui $
+ * $Id: command.c,v 1.14 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -53,7 +53,7 @@
 #include "common.h"
 
 void
-process_commands(char *cmmd)
+process_commands(const char *cmmd)
 {
 	static stralloc tmp = {0};
 	struct passwd  *pw;

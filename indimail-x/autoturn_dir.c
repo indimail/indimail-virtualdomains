@@ -1,5 +1,8 @@
 /*
  * $Log: autoturn_dir.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2023-03-20 09:41:36+05:30  Cprogrammer
  * standardize getln handling
  *
@@ -33,7 +36,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: autoturn_dir.c,v 1.3 2023-03-20 09:41:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: autoturn_dir.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -44,7 +47,7 @@ die_nomem()
 }
 
 char           *
-autoturn_dir(char *domain)
+autoturn_dir(const char *domain)
 {
 	static stralloc filename = {0}, template = {0}, line = {0};
 	char            inbuf[512];

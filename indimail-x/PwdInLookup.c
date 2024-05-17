@@ -1,5 +1,8 @@
 /*
  * $Log: PwdInLookup.c,v $
+ * Revision 1.2  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2019-04-18 07:56:24+05:30  Cprogrammer
  * Initial revision
  *
@@ -24,14 +27,14 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: PwdInLookup.c,v 1.1 2019-04-18 07:56:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: PwdInLookup.c,v 1.2 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 struct passwd *
-PwdInLookup(char *email)
+PwdInLookup(const char *email)
 {
 	static stralloc user = {0}, domain = {0};
-	char           *real_domain;
+	const char     *real_domain;
 	struct passwd  *pw;
 
 #ifdef CLUSTERED_SITE

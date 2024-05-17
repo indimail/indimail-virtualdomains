@@ -1,5 +1,8 @@
 /*
  * $Log: add_control.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2020-04-01 18:52:05+05:30  Cprogrammer
  * moved getEnvConfig to libqmail
  *
@@ -26,7 +29,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_control.c,v 1.2 2020-04-01 18:52:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: add_control.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -37,7 +40,7 @@ die_nomem()
 }
 
 int
-add_control(char *domain, char *target)
+add_control(const char *domain, const char *target)
 {
 	int             count, relative;
 	static stralloc filename = {0}, tmpstr = {0};

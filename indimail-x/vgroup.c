@@ -1,18 +1,21 @@
 /*
- * $Id: vgroup.c,v 1.8 2023-07-17 12:28:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vgroup.c,v 1.9 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vgroup.c,v 1.8 2023-07-17 12:28:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vgroup.c,v 1.9 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
 #define XOPEN_SOURCE = 600
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
 #endif
 #ifdef HAVE_QMAIL
 #include <sgetopt.h>
@@ -100,6 +103,7 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos,
 {
 	int             c, i, r;
 	char            optstr[27], strnum[FMT_ULONG];
+	char           *ptr;
 
 	*group = *gecos = *member = *old_member = *passwd = *hostid =
 		*mdahost = *quota = 0;
@@ -287,9 +291,13 @@ get_options(int argc, char **argv, int *option, char **group, char **gecos,
 			return (1);
 		}
 	}
-	if (optind < argc)
+	if (optind < argc) {
+		for (ptr = argv[optind]; *ptr; ptr++) {
+			if (isupper(*ptr))
+				strerr_die4x(100, WARN, "email [", argv[optind], "] has an uppercase character");
+		}
 		*group = argv[optind++];
-	else {
+	} else {
 		strerr_warn2(WARN, usage, 0);
 		return (1);
 	}
@@ -320,8 +328,9 @@ die_nomem()
 }
 
 int
-addGroup(char *user, char *domain, char *mdahost, char *gecos,
-		char *passwd, char *quota, int encrypt_flag, char *scram)
+addGroup(const char *user, const char *domain, const char *mdahost,
+		const char *gecos, const char *passwd, const char *quota,
+		int encrypt_flag, const char *scram)
 {
 	struct passwd  *pw;
 	static stralloc tmpbuf = {0};
@@ -346,7 +355,8 @@ main(int argc, char **argv)
 	static stralloc User = {0}, Domain = {0}, alias_line = {0}, old_alias = {0},
 					quotaVal = {0}, result = {0};
 	char           *group, *gecos, *member, *old_member, *passwd, *hostid,
-				   *mdahost, *Quota, *real_domain, *ptr;
+				   *mdahost, *Quota, *ptr;
+	const char     *real_domain;
 	char            strnum[FMT_ULONG];
 	mdir_t          q;
 	int             i, option, ignore = 0, ret = -1, encrypt_flag, random, docram;
@@ -563,6 +573,9 @@ main()
 
 /*
  * $Log: vgroup.c,v $
+ * Revision 1.9  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.8  2023-07-17 12:28:44+05:30  Cprogrammer
  * added YESCRYPT hash
  *

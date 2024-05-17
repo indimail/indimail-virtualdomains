@@ -1,5 +1,8 @@
 /*
  * $Log: update_file.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2020-03-20 15:12:01+05:30  Cprogrammer
  * BUG Fix. Virtualdomains not created when it doesn't exist
  *
@@ -40,7 +43,7 @@
 #include "dblock.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: update_file.c,v 1.3 2020-03-20 15:12:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: update_file.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -51,7 +54,7 @@ die_nomem()
 }
 
 int
-update_file(char *filename, char *update_line, mode_t mode)
+update_file(const char *filename, const char *update_line, mode_t mode)
 {
 	struct substdio ssin, ssout;
 	int             fd1, fd2, i, found = 0, user_assign = 0, match;

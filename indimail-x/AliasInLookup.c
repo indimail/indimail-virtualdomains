@@ -1,5 +1,8 @@
 /*
  * $Log: AliasInLookup.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2019-07-04 09:15:20+05:30  Cprogrammer
  * BUG - aliasbuffer wasn't initialized
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: AliasInLookup.c,v 1.2 2019-07-04 09:15:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: AliasInLookup.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -42,10 +45,11 @@ die_nomem()
 }
 
 char *
-AliasInLookup(char *email)
+AliasInLookup(const char *email)
 {
 	static stralloc user = {0}, domain = {0}, aliasbuf = {0};
-	char           *ptr, *real_domain;
+	char           *ptr;
+	const char     *real_domain;
 
 #ifdef CLUSTERED_SITE
 	if (sqlOpen_user(email, 1))

@@ -1,5 +1,8 @@
 /*
  * $Log: add_user_assign.c,v $
+ * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2021-09-11 13:24:41+05:30  Cprogrammer
  * use getEnvConfig for domain directory
  *
@@ -33,7 +36,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_user_assign.c,v 1.4 2021-09-11 13:24:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: add_user_assign.c,v 1.5 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -43,8 +46,8 @@ die_nomem()
 	_exit(111);
 }
 
-void
-do_assign1(stralloc *s, char *user, char *dir)
+static void
+do_assign1(stralloc *s, const char *user, const char *dir)
 {
 	char            strnum[FMT_ULONG];
 	char           *ptr;
@@ -76,8 +79,8 @@ do_assign1(stralloc *s, char *user, char *dir)
 	return;
 }
 
-void
-do_assign2(stralloc *s, char *user, char *dir)
+static void
+do_assign2(stralloc *s, const char *user, const char *dir)
 {
 	char            strnum[FMT_ULONG];
 	char           *ptr;
@@ -113,7 +116,7 @@ do_assign2(stralloc *s, char *user, char *dir)
  * add a local user to the users/assign file and compile it
  */
 int
-add_user_assign(char *user, char *dir)
+add_user_assign(const char *user, const char *dir)
 {
 	static stralloc filename = {0}, tmpstr1 = {0}, tmpstr2 = {0};
 	char           *assigndir;

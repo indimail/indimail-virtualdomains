@@ -1,5 +1,5 @@
 /*
- * $Id: vpasswd.c,v 1.19 2023-07-17 12:27:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vpasswd.c,v 1.20 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -9,6 +9,9 @@
 #endif
 #ifdef HAVE_PWD_H
 #include <pwd.h>
+#endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
 #endif
 #ifdef HAVE_QMAIL
 #include <sgetopt.h>
@@ -36,7 +39,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vpasswd.c,v 1.19 2023-07-17 12:27:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vpasswd.c,v 1.20 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL   "vpasswd: fatal: "
@@ -177,8 +180,13 @@ get_options(int argc, char **argv, char **email, char **clear_text,
 			return (1);
 		}
 	}
-	if (optind < argc)
+	if (optind < argc) {
+		for (ptr = argv[optind]; *ptr; ptr++) {
+			if (isupper(*ptr))
+				strerr_die4x(100, WARN, "email [", argv[optind], "] has an uppercase character");
+		}
 		*email = argv[optind++];
+	}
 	if (*email) {
 		if (optind < argc)
 			*clear_text = argv[optind++];
@@ -207,7 +215,8 @@ int
 main(int argc, char **argv)
 {
 	int             i, encrypt_flag, docram;
-	char           *real_domain, *ptr, *email, *clear_text, *base_argv0;
+	const char     *real_domain;
+	char           *ptr, *email, *clear_text, *base_argv0;
 	static stralloc user = {0}, domain = {0}, result = {0};
 #ifdef HAVE_GSASL
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
@@ -287,6 +296,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vpasswd.c,v $
+ * Revision 1.20  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.19  2023-07-17 12:27:25+05:30  Cprogrammer
  * added YESCRYPT hash
  *

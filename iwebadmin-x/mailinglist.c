@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.21 2023-07-28 22:30:31+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailinglist.c,v 1.22 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -109,7 +109,7 @@ show_mailing_lists()
 }
 
 void
-show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
+show_mailing_list_line(const char *user, const char *dom, time_t mytime, const char *dir)
 {
 	DIR            *mydir;
 	struct dirent  *mydirent;
@@ -292,7 +292,7 @@ show_mailing_list_line(char *user, char *dom, time_t mytime, char *dir)
  * mailing list lines on the add user page 
  */
 void
-show_mailing_list_line2(char *user, char *dom, time_t mytime, char *dir)
+show_mailing_list_line2(const char *user, const char *dom, time_t mytime, const char *dir)
 {
 	DIR            *mydir;
 	struct dirent  *mydirent;
@@ -523,7 +523,7 @@ delmailinglistnow()
  * Replaces the "Reply-To" line in <filename> with <newtext>.
  */
 void
-ezmlm_setreplyto(char *filename, char *newtext)
+ezmlm_setreplyto(const char *filename, const char *newtext)
 {
 	int             hfd, tmp_fd, match;
 	static stralloc realfn = {0}, tempfn = {0}, line = {0};
@@ -589,7 +589,9 @@ ezmlm_setreplyto(char *filename, char *newtext)
 
 #ifdef ENABLE_MYSQL
 void
-write_mysql(char *mysql_host, char *mysql_socket, char *mysql_user, char *mysql_passwd, char *mysql_database, char *mysql_table)
+write_mysql(const char *mysql_host, const char *mysql_socket,
+		const char *mysql_user, const char *mysql_passwd,
+		const char *mysql_database, const char *mysql_table)
 {
 	char            outbuf[1024];
 	int             fd;
@@ -1111,7 +1113,7 @@ show_list_group_now(int mod)
 }
 
 void
-show_list_group(char *template)
+show_list_group(const char *template)
 {
 	if (AdminType != DOMAIN_ADMIN) {
 		out(html_text[142]);
@@ -1126,7 +1128,7 @@ show_list_group(char *template)
 }
 
 void
-addlistgroup(char *template)
+addlistgroup(const char *template)
 {
 	if (AdminType != DOMAIN_ADMIN) {
 		out(html_text[142]);
@@ -1160,7 +1162,7 @@ addlistdig()
  * returns 0 for success 
  */
 int
-ezmlm_sub(int mod, char *email)
+ezmlm_sub(int mod, const char *email)
 {
 	int             pid;
 	static stralloc subpath = {0}, listpath = {0};
@@ -1274,7 +1276,7 @@ addlistgroupnow(int mod)
 }
 
 void
-dellistgroup(char *template)
+dellistgroup(const char *template)
 {
 	if (AdminType != DOMAIN_ADMIN) {
 		out(html_text[142]);
@@ -1555,7 +1557,8 @@ modmailinglistnow()
 }
 
 void
-build_list_value(char *param, char *color, char *opt1, int desc1, char *opt2, int desc2, int checked)
+build_list_value(const char *param, const char *color, const char *opt1,
+		int desc1, const char *opt2, int desc2, int checked)
 {
 	out("<tr bgcolor=");
 	out(get_color_text(color));
@@ -1587,10 +1590,11 @@ build_list_value(char *param, char *color, char *opt1, int desc1, char *opt2, in
 }
 
 void
-build_option_str(char *type, char *param, char *options, char *description)
+build_option_str(const char *type, const char *param,
+		const char *options, const char *description)
 {
 	int             selected;
-	char           *optptr;
+	const char     *optptr;
 
 	selected = 1;
 	for (optptr = options; *optptr; optptr++) {
@@ -1601,15 +1605,15 @@ build_option_str(char *type, char *param, char *options, char *description)
 }
 
 int
-file_exists(char *filename)
+file_exists(const char *filename)
 {
 	return (!access(filename, F_OK));
 }
 
 int
-get_ezmlmidx_line_arguments(char *line, char *program, char argument)
+get_ezmlmidx_line_arguments(const char *line, const char *program, char argument)
 {
-	char           *begin = 0, *end = 0, *arg = 0;
+	const char     *begin = 0, *end = 0, *arg = 0;
 	int             i;
 
 	/*- does line contain program name? */

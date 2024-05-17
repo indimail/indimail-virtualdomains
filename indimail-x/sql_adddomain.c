@@ -1,5 +1,8 @@
 /*
  * $Log: sql_adddomain.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2021-02-23 21:40:48+05:30  Cprogrammer
  * replaced CREATE TABLE statements with create_table() function
  *
@@ -23,11 +26,11 @@
 #include "create_table.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_adddomain.c,v 1.2 2021-02-23 21:40:48+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_adddomain.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 int
-sql_adddomain(char *domain)
+sql_adddomain(const char *domain)
 {
 	int             err;
 

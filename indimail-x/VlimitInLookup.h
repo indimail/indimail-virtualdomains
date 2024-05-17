@@ -1,5 +1,8 @@
 /*
  * $Log: VlimitInLookup.h,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2019-04-15 22:00:16+05:30  Cprogrammer
  * added vlimits.h for vlimit struct definition
  *
@@ -15,7 +18,7 @@
 #include "vlimits.h"
 
 #ifdef ENABLE_DOMAIN_LIMITS
-int             VlimitInLookup(char *, struct vlimits *);
+int             VlimitInLookup(const char *, struct vlimits *);
 #endif
 
 #endif

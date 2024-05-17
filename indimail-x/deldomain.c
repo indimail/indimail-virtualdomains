@@ -1,5 +1,8 @@
 /*
  * $Log: deldomain.c,v $
+ * Revision 1.7  2024-05-17 16:24:31+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2023-12-03 15:40:29+05:30  Cprogrammer
  * use same logic for ETRN, ATRN domains
  *
@@ -44,7 +47,6 @@
 #endif
 #include "variables.h"
 #include "vlimits.h"
-#include "lowerit.h"
 #include "open_master.h"
 #include "is_alias_domain.h"
 #include "sql_deldomain.h"
@@ -61,7 +63,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: deldomain.c,v 1.6 2023-12-03 15:40:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: deldomain.c,v 1.7 2024-05-17 16:24:31+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -72,7 +74,7 @@ die_nomem()
 }
 
 int
-remove_alias_domain(char *domain, char *alias_domain_file)
+remove_alias_domain(const char *domain, const char *alias_domain_file)
 {
 	int             i;
 	uid_t           uid;
@@ -111,7 +113,7 @@ remove_alias_domain(char *domain, char *alias_domain_file)
 }
 
 int
-deldomain(char *domain)
+deldomain(const char *domain)
 {
 	char            inbuf[512];
 	static stralloc Dir = {0}, tmpbuf = {0}, BasePath = {0}, line = {0};
@@ -132,7 +134,6 @@ deldomain(char *domain)
 		strerr_warn1("deldomain: domain name cannot be null", 0);
 		return (-1);
 	}
-	lowerit(domain);
 	if (use_etrn) {
 		if (!(ptr = autoturn_dir(domain))) {
 			strerr_warn3("deldomain: autoturn domain ", domain, " does not exist", 0);

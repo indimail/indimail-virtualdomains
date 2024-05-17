@@ -1,5 +1,8 @@
 /*
  * $Log: sql_passwd.c,v $
+ * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2022-10-27 17:16:08+05:30  Cprogrammer
  * refactored sql code into do_sql()
  *
@@ -33,7 +36,7 @@
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_passwd.c,v 1.4 2022-10-27 17:16:08+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_passwd.c,v 1.5 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -44,7 +47,7 @@ die_nomem()
 }
 
 static int
-do_sql(char *user, char *domain, char *pass, char *scram, char *table)
+do_sql(const char *user, const char *domain, const char *pass, const char *scram, const char *table)
 {
 	static stralloc SqlBuf = {0};
 
@@ -84,7 +87,7 @@ do_sql(char *user, char *domain, char *pass, char *scram, char *table)
 }
 
 int
-sql_passwd(char *user, char *domain, char *pass, char *scram)
+sql_passwd(const char *user, const char *domain, const char *pass, const char *scram)
 {
 	char           *tmpstr;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];

@@ -1,4 +1,5 @@
 /*
+ * $Id: user.c,v 1.37 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -14,8 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
- *
- * $Id: user.c,v 1.36 2023-10-10 18:06:45+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -96,7 +95,7 @@ show_users()
 
 
 int
-show_user_lines(char *user, char *dom, time_t mytime, char *dir)
+show_user_lines(const char *user, const char *dom, time_t mytime, const char *dir)
 {
 	int             fd, i, k, startnumber, moreusers = 1, totalpages,
 					bounced, colspan = 7, allowdelete, bars, match;
@@ -639,7 +638,8 @@ addusernow()
 }
 
 int
-call_hooks(char *hook_type, char *p1, char *p2, char *p3, char *p4)
+call_hooks(const char *hook_type, const char *p1, const char *p2,
+		const char *p3, const char *p4)
 {
 	int             fd, pid, match;
 	char           *cmd = 0, *ptr;
@@ -1072,7 +1072,7 @@ get_catchall()
 }
 
 int
-migrate_vacation(char *dir, char *user)
+migrate_vacation(const char *dir, const char *user)
 {
 	int             len;
 
@@ -1862,6 +1862,9 @@ parse_users_dotqmail(char newchar)
 
 /*-
  * $Log: user.c,v $
+ * Revision 1.37  2024-05-17 16:17:42+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.36  2023-10-10 18:06:45+05:30  Cprogrammer
  * fixed user subscription to mailing list when adding user
  * delete user subscription from mailing list when deleting user

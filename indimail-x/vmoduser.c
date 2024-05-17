@@ -1,5 +1,5 @@
 /*
- * $Id: vmoduser.c,v 1.21 2023-07-17 11:48:51+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vmoduser.c,v 1.22 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -13,6 +13,9 @@
 #endif
 #ifdef HAVE_PWD_H
 #include <pwd.h>
+#endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
 #endif
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
@@ -57,7 +60,7 @@
 #include "get_hashmethod.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.21 2023-07-17 11:48:51+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.22 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -127,6 +130,7 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email,
 		char **salt, int *iter, int *scram, char **hash, int *eflag)
 {
 	int             c, i, r;
+	char           *ptr;
 	char            optstr[56], strnum[FMT_ULONG];
 
 	*toggle = *ClearFlags = 0;
@@ -319,6 +323,10 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email,
 		}
 	}
 	if (optind < argc) {
+		for (ptr = argv[optind]; *ptr; ptr++) {
+			if (isupper(*ptr))
+				strerr_die4x(100, WARN, "email [", argv[optind], "] has an uppercase character");
+		}
 		if (!stralloc_copys(Email, argv[optind++]) ||
 				!stralloc_0(Email))
 			die_nomem();
@@ -345,7 +353,8 @@ main(int argc, char **argv)
 	gid_t           gid, domaingid;
 	struct passwd   PwTmp;
 	struct passwd  *pw;
-	char           *real_domain, *ptr, *clear_text, *hash;
+	const char     *real_domain;
+	char           *ptr, *clear_text, *hash;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	mdir_t          quota = 0, ul;
 #ifdef USE_MAILDIRQUOTA
@@ -656,6 +665,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.22  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.21  2023-07-17 11:48:51+05:30  Cprogrammer
  * set hash method from hash_method control file in controldir, domaindir
  *

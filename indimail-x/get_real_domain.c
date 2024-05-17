@@ -1,5 +1,8 @@
 /*
  * $Log: get_real_domain.c,v $
+ * Revision 1.6  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-03-25 16:33:11+05:30  Cprogrammer
  * refactored code
  *
@@ -48,7 +51,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: get_real_domain.c,v 1.5 2023-03-25 16:33:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: get_real_domain.c,v 1.6 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -69,7 +72,7 @@ die_nomem()
 
 #ifdef CLUSTERED_SITE
 static char *
-is_in_rcpthosts(char *domain)
+is_in_rcpthosts(const char *domain)
 {
 	int             fd, match;
 	char            inbuf[512];
@@ -186,7 +189,7 @@ is_in_rcpthosts(char *domain)
 #endif
 
 static char *
-is_in_env(char *domain, char *envstr)
+is_in_env(const char *domain, const char *envstr)
 {
 	char           *ptr, *cptr;
 	int             len;
@@ -222,8 +225,8 @@ is_in_env(char *domain, char *envstr)
 	return ((char *) 0);
 }
 
-char *
-get_real_domain(char *domain)
+const char     *
+get_real_domain(const char *domain)
 {
 	static stralloc dir = {0};
 	char            Dir[1024];

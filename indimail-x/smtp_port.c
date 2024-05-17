@@ -1,5 +1,8 @@
 /*
  * $Log: smtp_port.c,v $
+ * Revision 1.6  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2021-07-27 18:07:11+05:30  Cprogrammer
  * set default domain using vset_default_domain
  *
@@ -40,7 +43,7 @@
 #include "vset_default_domain.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: smtp_port.c,v 1.5 2021-07-27 18:07:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: smtp_port.c,v 1.6 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -51,10 +54,11 @@ die_nomem()
 }
 
 int
-smtp_port(char *srchost, char *domain, char *hostid)
+smtp_port(const char *srchost, const char *domain, const char *hostid)
 {
 	static stralloc Domain = {0}, SqlBuf = {0};
-	char           *ptr, *srchost_t;
+	char           *ptr;
+	const char     *srchost_t;
 	int             i;
 	int             default_port;
 	MYSQL_RES      *res;

@@ -1,5 +1,8 @@
 /*
  * $Log: sql_getpw.h,v $
+ * Revision 1.2  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2019-04-13 23:39:28+05:30  Cprogrammer
  * sql_getpw.h
  *
@@ -13,7 +16,7 @@
 #include <pwd.h>
 #endif
 
-struct passwd  *sql_getpw(char *, char *);
+struct passwd  *sql_getpw(const char *, const char *);
 #ifdef QUERY_CACHE
 void            sql_getpw_cache(char);
 #endif

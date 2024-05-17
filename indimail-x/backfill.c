@@ -1,5 +1,8 @@
 /*
  * $Log: backfill.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2023-03-20 09:48:42+05:30  Cprogrammer
  * documented backfill code
  *
@@ -12,10 +15,6 @@
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
-
-#ifdef HAVE_CTYPE_H
-#include <ctype.h>
 #endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -40,7 +39,7 @@
 #include "indimail.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: backfill.c,v 1.3 2023-03-20 09:48:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: backfill.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -51,7 +50,7 @@ die_nomem()
 }
 
 char           *
-backfill(char *username, char *domain, char *path, int operation)
+backfill(const char *username, const char *domain, const char *path, int operation)
 {
 	char           *filesys_prefix, *ptr = (char *) 0;
 	static stralloc filename = {0}, line = {0};

@@ -1,5 +1,8 @@
 /*
  * $Log: open_smtp_relay.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2023-04-23 00:47:58+05:30  Cprogrammer
  * record IPv6 address if present in relay table
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: open_smtp_relay.c,v 1.3 2023-04-23 00:47:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: open_smtp_relay.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY
@@ -58,7 +61,8 @@ open_smtp_relay(char *user, char *domain)
 	static stralloc SqlBuf = {0};
 	int             i;
 	char            strnum[FMT_ULONG];
-	char           *ipaddr, *relay_table, *real_domain;
+	char           *ipaddr, *relay_table;
+	const char     *real_domain;
 
 #ifdef ENABLE_IPV6
 	if (!(ipaddr = env_get("TCP6REMOTEIP")) && !(ipaddr = env_get("TCPREMOTEIP")))

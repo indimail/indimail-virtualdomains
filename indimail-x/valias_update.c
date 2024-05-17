@@ -1,5 +1,8 @@
 /*
  * $Log: valias_update.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2023-03-26 22:39:04+05:30  Cprogrammer
  * return 0 if rows updated
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: valias_update.c,v 1.3 2023-03-26 22:39:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: valias_update.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef VALIAS
@@ -43,10 +46,10 @@ die_nomem()
 }
 
 int
-valias_update(char *alias, char *domain, char *old_alias_line, char *alias_line)
+valias_update(const char *alias, const char *domain, const char *old_alias_line, const char *alias_line)
 {
 	int             err;
-	char           *real_domain;
+	const char     *real_domain;
 	static stralloc SqlBuf = {0};
 
 	if (!domain || !*domain)

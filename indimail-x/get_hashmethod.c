@@ -1,5 +1,5 @@
 /*
- * $Id: get_hashmethod.c,v 1.1 2023-07-17 11:26:56+05:30 Cprogrammer Exp mbhangui $
+ * $Id: get_hashmethod.c,v 1.2 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -58,12 +58,13 @@ get_default_fn()
 }
 
 int
-get_hashmethod(char *domain)
+get_hashmethod(const char *domain)
 {
 	struct substdio ssin;
 	static stralloc line = {0};
 	char            inbuf[4096];
-	char           *ptr, *real_domain;
+	char           *ptr;
+	const char     *real_domain;
 	int             match, fd, i, r;
 	static int      hash_m = -1;
 
@@ -179,6 +180,9 @@ print_hashmethod(int method)
 
 /*
  * $Log: get_hashmethod.c,v $
+ * Revision 1.2  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2023-07-17 11:26:56+05:30  Cprogrammer
  * Initial revision
  *

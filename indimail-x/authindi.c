@@ -1,5 +1,5 @@
 /*
- * $Id: authindi.c,v 1.18 2023-08-08 10:35:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: authindi.c,v 1.19 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -57,7 +57,7 @@
 #define WARN  "authindi: warn: "
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.18 2023-08-08 10:35:53+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.19 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -191,10 +191,10 @@ next_module(char **argv, char *buf, int offset, int auth_method, char *authstr, 
 }
 
 no_return void
-exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *service)
+exec_local(char **argv, const char *userid, const char *TheDomain, struct passwd *pw, const char *service)
 {
 	static stralloc Maildir = {0}, TheUser = {0}, line = {0};
-	char           *ptr;
+	const char     *ptr;
 	int             i, status, fd, match;
 	char            inbuf[4096];
 	struct substdio ssin;
@@ -303,7 +303,8 @@ int
 main(int argc, char **argv)
 {
 	char           *buf, *authstr, *login, *challenge, *response, *cleartxt, *crypt_pass, *ptr,
-				   *real_domain, *service, *auth_type, *auth_data, *mailstore, *pass;
+				   *service, *auth_type, *auth_data, *mailstore, *pass;
+	const char     *real_domain;
 	char           *(imapargs[]) = { PREFIX"/sbin/imaplogin", LIBEXECDIR"/imapmodules/authindi",
 					PREFIX"/bin/imapd", "Maildir", 0 };
 	char           *(pop3args[]) = { PREFIX"/sbin/pop3login", LIBEXECDIR"/imapmodules/authindi",
@@ -683,6 +684,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: authindi.c,v $
+ * Revision 1.19  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.18  2023-08-08 10:35:53+05:30  Cprogrammer
  * display pid in logs
  *

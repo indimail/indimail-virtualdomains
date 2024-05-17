@@ -1,5 +1,8 @@
 /*
  * $Log: vacation.c,v $
+ * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2021-07-08 15:18:37+05:30  Cprogrammer
  * fixed argument handling
  *
@@ -60,7 +63,7 @@
 #include "runcmmd.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vacation.c,v 1.6 2021-07-08 15:18:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vacation.c,v 1.7 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL   "vacation: fatal: "
@@ -83,9 +86,16 @@ static stralloc tmpbuf = {0};
 int
 get_options(int argc, char **argv, char **email, char **vacation_file)
 {
+	char           *ptr;
+
 	*email = *vacation_file = 0;
-	if (optind < argc)
+	if (optind < argc) {
+		for (ptr = argv[optind]; *ptr; ptr++) {
+			if (isupper(*ptr))
+				strerr_die4x(100, WARN, "email [", argv[optind], "] has an uppercase character");
+		}
 		*email = argv[optind++];
+	}
 	if (optind < argc)
 		*vacation_file = argv[optind++];
 	if (!*email || !*vacation_file)
@@ -103,7 +113,7 @@ die_nomem()
 int
 getuserinfo(char *username, stralloc *homedir, stralloc *user, stralloc *domain)
 {
-	char           *real_domain;
+	const char     *real_domain;
 	struct passwd  *mypw;
 
 	parse_email(username, user, domain);

@@ -1,5 +1,8 @@
 /*
  * $Log: vdeloldusers.c,v $
+ * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -24,7 +27,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vdeloldusers.c,v 1.6 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vdeloldusers.c,v 1.7 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_AUTH_LOGGING
@@ -39,6 +42,9 @@ static char     sccsid[] = "$Id: vdeloldusers.c,v 1.6 2023-01-22 10:40:03+05:30 
 #endif
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
 #endif
 #ifdef HAVE_QMAIL
 #include <sgetopt.h>
@@ -121,6 +127,10 @@ get_options(int argc, char **argv, char **Domain, int *Age, int *mailAge,
 		switch (c)
 		{
 		case 'd':
+			for (ptr = optarg; *ptr; ptr++) {
+				if (isupper(*ptr))
+					strerr_die4x(100, WARN, "domain [", optarg, "] has an uppercase character");
+			}
 			*Domain = optarg;
 			break;
 		case 's':

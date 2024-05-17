@@ -1,5 +1,8 @@
 /*
  * $Log: vread_dir_control.c,v $
+ * Revision 1.6  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2019-04-22 23:26:23+05:30  Cprogrammer
  * use scan_ulong instead of scan_long
  *
@@ -40,7 +43,7 @@
 #include "dir_control.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vread_dir_control.c,v 1.5 2019-04-22 23:26:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vread_dir_control.c,v 1.6 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -51,7 +54,7 @@ die_nomem()
 }
 
 int
-vread_dir_control(char *filename, vdir_type *vdir, char *domain)
+vread_dir_control(const char *filename, vdir_type *vdir, const char *domain)
 {
 	int             found = 0;
 	static stralloc SqlBuf = {0};

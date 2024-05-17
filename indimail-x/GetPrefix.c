@@ -1,5 +1,8 @@
 /*
  * $Log: GetPrefix.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2020-04-01 18:54:56+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -25,7 +28,7 @@
 #include "pathToFilesystem.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: GetPrefix.c,v 1.2 2020-04-01 18:54:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: GetPrefix.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -36,9 +39,10 @@ die_nomem()
 }
 
 char           *
-GetPrefix(char *user, char *path)
+GetPrefix(const char *user, const char *path)
 {
-	char           *ptr, *suffix_ptr, *base_path;
+	char           *ptr;
+	const char     *base_path, *suffix_ptr;
 	int             ch;
 	static stralloc PathPrefix = {0};
 
@@ -47,7 +51,7 @@ GetPrefix(char *user, char *path)
 	if (path && *path)
 		base_path = path;
 	else
-		getEnvConfigStr(&base_path, "BASE_PATH", BASE_PATH);
+		getEnvConfigStr((char **) &base_path, "BASE_PATH", BASE_PATH);
 	ch = tolower(*user);
 	if (ch >= 'a' && ch <= 'e')
 		suffix_ptr = "A2E";

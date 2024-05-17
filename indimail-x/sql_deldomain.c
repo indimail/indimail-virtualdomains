@@ -1,5 +1,8 @@
 /*
  * $Log: sql_deldomain.c,v $
+ * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2022-10-27 17:28:29+05:30  Cprogrammer
  * refactored sql code into do_sql()
  *
@@ -35,7 +38,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_deldomain.c,v 1.3 2022-10-27 17:28:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_deldomain.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #include <mysqld_error.h>
@@ -48,7 +51,7 @@ die_nomem()
 }
 
 static int
-do_sql(char *domain, char *table, stralloc *sqlbuf)
+do_sql(const char *domain, const char *table, stralloc *sqlbuf)
 {
 	if (site_size == LARGE_SITE) {
 		if (!stralloc_copyb(sqlbuf, "drop table ", 11) ||
@@ -72,7 +75,7 @@ do_sql(char *domain, char *table, stralloc *sqlbuf)
 }
 
 int
-sql_deldomain(char *domain)
+sql_deldomain(const char *domain)
 {
 	char           *tmpstr;
 	struct passwd  *pw;

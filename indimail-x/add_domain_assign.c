@@ -1,5 +1,8 @@
 /*
  * $Log: add_domain_assign.c,v $
+ * Revision 1.7  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2023-12-13 00:32:10+05:30  Cprogrammer
  * fixed dir, uid, gid for autoturn entry in assign file
  *
@@ -42,7 +45,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: add_domain_assign.c,v 1.6 2023-12-13 00:32:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: add_domain_assign.c,v 1.7 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 static void
@@ -57,7 +60,7 @@ die_nomem()
  * And signal qmail
  */
 int
-add_domain_assign(char *domain, char *domain_base_dir, uid_t uid, gid_t gid)
+add_domain_assign(const char *domain, const char *domain_base_dir, uid_t uid, gid_t gid)
 {
 	static stralloc filename = {0}, tmpstr = {0};
 	int             fd;

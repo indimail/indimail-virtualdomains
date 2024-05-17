@@ -1,5 +1,8 @@
 /*
  * $Log: sql_gethostid.c,v $
+ * Revision 1.2  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2019-04-14 23:05:20+05:30  Cprogrammer
  * Initial revision
  *
@@ -9,7 +12,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_gethostid.c,v 1.1 2019-04-14 23:05:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_gethostid.c,v 1.2 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -35,10 +38,10 @@ die_nomem()
 }
 
 char           *
-sql_gethostid(char *ipaddr)
+sql_gethostid(const char *ipaddr)
 {
 	static stralloc hostid = {0}, SqlBuf = {0};
-	char           *ptr;
+	const char     *ptr;
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;
 

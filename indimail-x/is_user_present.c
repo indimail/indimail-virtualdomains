@@ -1,5 +1,8 @@
 /*
  * $Log: is_user_present.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2022-10-27 17:07:22+05:30  Cprogrammer
  * make variables static to avoid clash
  *
@@ -28,7 +31,7 @@
 #include "findhost.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: is_user_present.c,v 1.2 2022-10-27 17:07:22+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: is_user_present.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 /*
@@ -54,11 +57,11 @@ die_nomem()
 }
 
 int
-is_user_present(char *user, char *domain)
+is_user_present(const char *user, const char *domain)
 {
 	int             ret;
 	static int      is_present;
-	char           *real_domain;
+	const char     *real_domain;
 	MYSQL_RES      *res;
 
 	if (!user || !*user || !domain || !*domain)

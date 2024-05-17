@@ -1,5 +1,8 @@
 /*
  * $Log: relay_select.c,v $
+ * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2020-04-01 18:57:42+05:30  Cprogrammer
  * moved authentication functions to libqmail
  *
@@ -12,7 +15,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: relay_select.c,v 1.2 2020-04-01 18:57:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: relay_select.c,v 1.3 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY
@@ -42,7 +45,7 @@ die_nomem()
 }
 
 int
-relay_select(char *email, char *remoteip)
+relay_select(const char *email, const char *remoteip)
 {
 	static stralloc SqlBuf = {0};
 	char            strnum[FMT_ULONG];

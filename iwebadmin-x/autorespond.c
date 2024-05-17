@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.17 2023-07-28 22:28:06+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autorespond.c,v 1.18 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -49,9 +49,7 @@
 #include "common.h"
 
 void
-show_autoresponders(user, dom, mytime)
-	char           *user, *dom;
-	time_t          mytime;
+show_autoresponders(const char *user, const char *dom, time_t mytime)
 {
 	if (MaxAutoResponders == 0)
 		return;
@@ -65,9 +63,9 @@ show_autoresponders(user, dom, mytime)
 }
 
 void
-show_autorespond_line(char *user, char *dom, time_t mytime, char *dir)
+show_autorespond_line(const char *user, const char *dom, time_t mytime, const char *dir)
 {
-	char           *addr, *domptr;
+	const char     *addr, *domptr;
 	int             i;
 	DIR            *mydir;
 	struct dirent  *mydirent;

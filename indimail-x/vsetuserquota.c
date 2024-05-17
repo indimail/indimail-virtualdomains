@@ -1,5 +1,8 @@
 /*
  * $Log: vsetuserquota.c,v $
+ * Revision 1.4  2024-05-17 16:24:31+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2022-10-20 11:59:18+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -22,6 +25,9 @@
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/stat.h>
 #endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <strerr.h>
@@ -29,7 +35,6 @@
 #include <sgetopt.h>
 #endif
 #include "get_indimailuidgid.h"
-#include "lowerit.h"
 #include "parse_email.h"
 #include "get_real_domain.h"
 #include "sqlOpen_user.h"
@@ -43,7 +48,7 @@
 #include "setuserquota.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsetuserquota.c,v 1.3 2022-10-20 11:59:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetuserquota.c,v 1.4 2024-05-17 16:24:31+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #define FATAL   "vsetuserquota: fatal: "
@@ -60,6 +65,7 @@ int
 get_options(int argc, char **argv, char **email, char **quota)
 {
 	int             c;
+	char           *ptr;
 
 	*email = *quota = 0;
 	while ((c = getopt(argc, argv, "v")) != opteof) {
@@ -73,8 +79,13 @@ get_options(int argc, char **argv, char **email, char **quota)
 			return (1);
 		}
 	}
-	if (optind < argc)
+	if (optind < argc) {
+		for (ptr = argv[optind]; *ptr; ptr++) {
+			if (isupper(*ptr))
+				strerr_die4x(100, WARN, "email [", argv[optind], "] has an uppercase character");
+		}
 		*email = argv[optind++];
+	}
 	if (optind < argc)
 		*quota = argv[optind++];
 	if (!*email || !*quota) {
@@ -98,7 +109,7 @@ main(int argc, char **argv)
 	uid_t           uid;
 	gid_t           gid;
 	char           *email, *quota;
-	char           *real_domain;
+	const char     *real_domain;
 	struct passwd  *pw;
 	static stralloc User = {0}, Domain = {0};
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -117,7 +128,6 @@ main(int argc, char **argv)
 		strerr_die1x(100, "you must be root or indimail to run this program");
 	if (uid && setuid(0))
 		strerr_die2sys(111, FATAL, "setuid: ");
-	lowerit(email);
 	parse_email(email, &User, &Domain);
 	if (!(real_domain = get_real_domain(Domain.s))) {
 		strerr_warn2(Domain.s, ": No such domain", 0);

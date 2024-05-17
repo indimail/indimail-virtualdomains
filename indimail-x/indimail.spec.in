@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.144 2023-12-23 00:12:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.145 2024-05-17 16:28:13+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -605,7 +605,6 @@ done
 %endif
 
 %attr(644,root,root)                    %{shareddir}/doc/ChangeLog-indimail
-%attr(644,root,root)                    %{shareddir}/doc/FAQ.md
 %attr(644,root,root)                    %{shareddir}/doc/README-indimail.md
 %attr(644,root,root)                    %{shareddir}/doc/README-ldap.md
 %attr(644,root,root)                    %{shareddir}/doc/README-vlimits.md

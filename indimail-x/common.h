@@ -5,10 +5,10 @@
 #endif
 #include <substdio.h>
 
-void            out(char *, char *);
-void            flush(char *);
-void            errout(char *, char *);
-void            errflush(char *);
+void            out(const char *, const char *);
+void            flush(const char *);
+void            errout(const char *, const char *);
+void            errflush(const char *);
 #ifdef HAVE_STDARG_H
 int             subprintfe(substdio *ss, const char *ident, const char *__restrict __format, ...)
 					__attribute__ ((format (printf, 3, 4)));

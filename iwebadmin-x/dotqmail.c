@@ -1,5 +1,5 @@
 /*
- * $Id: dotqmail.c,v 1.5 2021-03-14 12:47:45+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotqmail.c,v 1.6 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,20 +27,20 @@
 
 #ifdef VALIAS
 int
-dotqmail_delete_files(char *user)
+dotqmail_delete_files(const char *user)
 {
 	return (!valias_delete(user, Domain.s, 0));
 }
 
 int
-dotqmail_add_line(char *user, char *line)
+dotqmail_add_line(const char *user, const char *line)
 {
-	return (valias_insert(user, Domain.s, line, 1));
+	return (valias_insert(user, Domain.s, (char *) line, 1));
 }
 
 int
-dotqmail_del_line(char *user, char *line)
+dotqmail_del_line(const char *user, const char *line)
 {
-	return (valias_delete(user, Domain.s, line));
+	return (valias_delete(user, Domain.s, (char *) line));
 }
 #endif
