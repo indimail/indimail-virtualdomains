@@ -48,7 +48,7 @@ die_nomem()
 }
 
 static int
-do_sql(char *domain, char *table, stralloc *sqlbuf)
+do_sql(const char *domain, const char *table, stralloc *sqlbuf)
 {
 	if (site_size == LARGE_SITE) {
 		if (!stralloc_copyb(sqlbuf, "drop table ", 11) ||
@@ -72,7 +72,7 @@ do_sql(char *domain, char *table, stralloc *sqlbuf)
 }
 
 int
-sql_deldomain(char *domain)
+sql_deldomain(const char *domain)
 {
 	char           *tmpstr;
 	struct passwd  *pw;

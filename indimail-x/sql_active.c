@@ -51,7 +51,7 @@ die_nomem()
 }
 
 int
-sql_active(struct passwd *pw, char *domain, int type)
+sql_active(struct passwd *pw, const char *domain, int type)
 {
 	char           *table1 = NULL, *table2 = NULL;
 	int             row_count, i;

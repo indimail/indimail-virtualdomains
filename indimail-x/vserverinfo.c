@@ -16,6 +16,9 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
 #ifdef HAVE_QMAIL
 #include <sgetopt.h>
 #include <stralloc.h>
@@ -39,11 +42,13 @@ static int      display_user, display_passwd, display_database, display_port,
 				display_server, display_mdahost, display_all;
 
 static int
-get_options(int argc, char **argv, char **mdahost, char **server, char **domain, char **email)
+get_options(int argc, char **argv, char **mdahost, char **server, const char **domain, char **email)
 {
 	int             c;
+	char           *ptr;
 
-	*email = *mdahost = *server = *domain = (char *) 0;
+	*email = *mdahost = *server = NULL;
+	*domain = NULL;
 	display_all = 0;
 	display_user = display_passwd = display_server = display_mdahost = display_port = display_database = 0;
 	while ((c = getopt(argc, argv, "vdsmupPD:M:S:a")) != opteof) {
@@ -77,6 +82,10 @@ get_options(int argc, char **argv, char **mdahost, char **server, char **domain,
 			display_database = 1;
 			break;
 		case 'D':
+			for (ptr = optarg; *ptr; ptr++) {
+				if (isupper(*ptr))
+					strerr_die3x(100, "vserverinfo: domain [", optarg, "] has an uppercase character");
+			}
 			*domain = optarg;
 			break;
 		case 'M':
@@ -97,9 +106,13 @@ get_options(int argc, char **argv, char **mdahost, char **server, char **domain,
 		&& !display_port && !display_database && !display_all)
 		display_all = 1;
 	if ((!*mdahost && !*server) || !*domain) {
-		if (optind < argc)
+		if (optind < argc) {
+			for (ptr = argv[optind]; *ptr; ptr++) {
+				if (isupper(*ptr))
+					strerr_die3x(100, "vserverinfo: email [", argv[optind], "] has an uppercase character");
+			}
 			*email = argv[optind++];
-		else {
+		} else {
 			strerr_warn1("usage: vserserverinfo [-upPsmd] [-D domain -M host | -S server] | [email]", 0);
 			return (1);
 		}
@@ -112,7 +125,8 @@ main(int argc, char **argv)
 {
 	DBINFO        **rhostsptr;
 	int             i, total, found;
-	char           *mdahost, *server, *domain, *email, *mailstore, *real_domain;
+	char           *mdahost, *server, *email, *mailstore;
+	const char     *domain, *real_domain;
 	static stralloc User = {0}, Domain = {0};
 
 	if (get_options(argc, argv, &mdahost, &server, &domain, &email))

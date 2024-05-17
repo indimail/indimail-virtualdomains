@@ -39,7 +39,7 @@ die_nomem()
  * remove a local user from the users/assign file and recompile
  */
 int
-del_user_assign(char *user, char *dir)
+del_user_assign(const char *user, const char *dir)
 {
 	static stralloc tmp1 = {0}, tmp2 = {0}, fname = {0};
 	char            strnum[FMT_ULONG];

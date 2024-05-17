@@ -7,6 +7,7 @@
 #ifndef GETSMTPROUTE_H
 #define GETSMTPROUTE_H
 
-int             GetSMTProute(char *);
+int             GetSMTProute(const char *);
+int             get_smtp_qmtp_port(const char *, const char *, int);
 
 #endif

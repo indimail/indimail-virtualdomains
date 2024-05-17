@@ -54,11 +54,11 @@ die_nomem()
 }
 
 int
-is_user_present(char *user, char *domain)
+is_user_present(const char *user, const char *domain)
 {
 	int             ret;
 	static int      is_present;
-	char           *real_domain;
+	const char     *real_domain;
 	MYSQL_RES      *res;
 
 	if (!user || !*user || !domain || !*domain)

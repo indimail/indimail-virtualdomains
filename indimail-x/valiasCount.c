@@ -36,10 +36,10 @@ die_nomem()
 }
 
 long
-valiasCount(char *alias, char *domain)
+valiasCount(const char *alias, const char *domain)
 {
 	static stralloc SqlBuf = {0};
-	char           *real_domain;
+	const char     *real_domain;
 	unsigned long   row_count;
 	MYSQL_ROW       row;
 	MYSQL_RES      *select_res;

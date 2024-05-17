@@ -7,6 +7,6 @@
 #ifndef LOGIN_TASKS_H
 #define LOGIN_TASKS_H
 
-int             Login_Tasks(struct passwd *, const char *, char *);
+int             Login_Tasks(struct passwd *, const char *, const char *);
 
 #endif

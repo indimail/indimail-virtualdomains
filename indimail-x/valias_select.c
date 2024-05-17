@@ -37,9 +37,9 @@ die_nomem()
 }
 
 char           *
-valias_select(char *alias, char *domain)
+valias_select(const char *alias, const char *domain)
 {
-	char           *real_domain;
+	const char     *real_domain;
 	MYSQL_ROW       row;
 	static MYSQL_RES *select_res;
 
@@ -76,7 +76,7 @@ valias_select(char *alias, char *domain)
 }
 
 int
-valias_track(char *valias_line, stralloc *alias, stralloc *domain)
+valias_track(const char *valias_line, stralloc *alias, stralloc *domain)
 {
 	int             err;
 	MYSQL_ROW       row;
@@ -124,7 +124,7 @@ valias_select_all(stralloc *alias, stralloc *domain)
 {
 	int             err;
 	static stralloc SqlBuf = {0};
-	char           *real_domain;
+	const char     *real_domain;
 	MYSQL_ROW       row;
 	static MYSQL_RES *res;
 

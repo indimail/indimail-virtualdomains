@@ -13,6 +13,6 @@
 #include <pwd.h>
 #endif
 
-struct passwd  *PwdInLookup(char *);
+struct passwd  *PwdInLookup(const char *);
 
 #endif

@@ -7,6 +7,6 @@
 #ifndef SQL_ADDDOMAIN_H
 #define SQL_ADDDOMAIN_H
 
-int             sql_adddomain(char *);
+int             sql_adddomain(const char *);
 
 #endif /*- SQL_ADDDOMAIN_H */

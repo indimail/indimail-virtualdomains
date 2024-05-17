@@ -7,6 +7,6 @@
 #ifndef SQLOPENUSER_H
 #define SQLOPENUSER_H
 
-int             sqlOpen_user(char *, int);
+int             sqlOpen_user(const char *, int);
 
 #endif

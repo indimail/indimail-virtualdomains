@@ -13,6 +13,6 @@
 #include <pwd.h>
 #endif
 
-int             sql_active(struct passwd *, char *, int);
+int             sql_active(struct passwd *, const char *, int);
 
 #endif

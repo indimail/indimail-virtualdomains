@@ -7,6 +7,6 @@
 #ifndef USERINLOOKUP_H
 #define USERINLOOKUP_H
 
-int             UserInLookup(char *);
+int             UserInLookup(const char *);
 
 #endif

@@ -44,7 +44,7 @@ static char     sccsid[] = "$Id: GetSMTProute.c,v 1.4 2023-03-20 10:02:16+05:30 
 #endif
 
 int
-get_smtp_qmtp_port(char *file, char *domain, int default_port)
+get_smtp_qmtp_port(const char *file, const char *domain, int default_port)
 {
 	static stralloc line = {0};
 	char            inbuf[512];
@@ -132,7 +132,7 @@ get_smtp_qmtp_port(char *file, char *domain, int default_port)
  * If relay is blank, it means MX lookup should be done
  */
 int
-GetSMTProute(char *domain)
+GetSMTProute(const char *domain)
 {
 	char           *sysconfdir, *controldir, *routes;
 	int             default_port, relative;

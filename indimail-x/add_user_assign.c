@@ -43,8 +43,8 @@ die_nomem()
 	_exit(111);
 }
 
-void
-do_assign1(stralloc *s, char *user, char *dir)
+static void
+do_assign1(stralloc *s, const char *user, const char *dir)
 {
 	char            strnum[FMT_ULONG];
 	char           *ptr;
@@ -76,8 +76,8 @@ do_assign1(stralloc *s, char *user, char *dir)
 	return;
 }
 
-void
-do_assign2(stralloc *s, char *user, char *dir)
+static void
+do_assign2(stralloc *s, const char *user, const char *dir)
 {
 	char            strnum[FMT_ULONG];
 	char           *ptr;
@@ -113,7 +113,7 @@ do_assign2(stralloc *s, char *user, char *dir)
  * add a local user to the users/assign file and compile it
  */
 int
-add_user_assign(char *user, char *dir)
+add_user_assign(const char *user, const char *dir)
 {
 	static stralloc filename = {0}, tmpstr1 = {0}, tmpstr2 = {0};
 	char           *assigndir;

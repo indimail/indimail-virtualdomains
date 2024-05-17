@@ -7,6 +7,6 @@
 #ifndef ALIASINLOOKUP_H
 #define ALIASINLOOKUP_H
 
-char           *AliasInLookup(char *);
+char           *AliasInLookup(const char *);
 
 #endif

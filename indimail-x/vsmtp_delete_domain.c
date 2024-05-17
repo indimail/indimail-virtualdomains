@@ -34,7 +34,7 @@ die_nomem()
 }
 
 int
-vsmtp_delete_domain(char *domain)
+vsmtp_delete_domain(const char *domain)
 {
 	static stralloc SqlBuf = {0};
 

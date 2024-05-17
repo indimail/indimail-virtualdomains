@@ -59,7 +59,7 @@ add_vacation(char *email, char *fname)
 	static stralloc tmpbuf = {0}, line = {0}, user = {0}, domain = {0};
 	uid_t           uid;
 	gid_t           gid;
-	char           *real_domain;
+	const char     *real_domain;
 	char            inbuf[512], outbuf[512];
 	struct passwd  *pw;
 	int             err, match, fd1, fd2;

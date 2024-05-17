@@ -7,6 +7,6 @@
 #ifndef ADDUSERCNTRL_H
 #define ADDUSERCNTRL_H
 
-int             addusercntrl(char *, char *, char *, char *, int);
+int             addusercntrl(const char *, const char *, const char *, const char *, int);
 
 #endif /*- ADDUSERCNTRL_H */

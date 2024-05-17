@@ -1,3 +1,6 @@
+/*
+ * $Id: $
+ */
 #ifndef COMMON_H
 #define COMMON_H
 #ifdef HAVE_CONFIG_H
@@ -24,14 +27,14 @@
 #define  SYSTEM_FAILURE       111 /*- SYSTEM_FAILURE */
 
 
-void            out(char *);
+void            out(const char *);
 void            flush(void);
-void            errout(char *);
+void            errout(const char *);
 void            errflush(void);
-void            copy_status_mesg(char *);
+void            copy_status_mesg(const char *);
 void            set_status_mesg_size(int);
 void            die_nomem();
-void            my_exit(substdio *, int, int, char *);
+void            my_exit(substdio *, int, int, const char *);
 
 extern substdio *ssdbg;
 

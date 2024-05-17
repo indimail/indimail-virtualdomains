@@ -66,7 +66,7 @@ die_nomem(char *str)
 }
 
 int
-vget_limits(char *domain, struct vlimits *limits)
+vget_limits(const char *domain, struct vlimits *limits)
 {
 	int             err, perm;
 	MYSQL_ROW       row;
@@ -176,7 +176,7 @@ vget_limits(char *domain, struct vlimits *limits)
 }
 
 int
-vdel_limits(char *domain)
+vdel_limits(const char *domain)
 {
 	int             err;
 
@@ -214,7 +214,7 @@ vdel_limits(char *domain)
 }
 
 int
-vset_limits(char *domain, struct vlimits *limits)
+vset_limits(const char *domain, struct vlimits *limits)
 {
 	int             err;
 	char            strnum[FMT_ULONG];

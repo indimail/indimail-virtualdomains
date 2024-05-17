@@ -7,6 +7,6 @@
 #ifndef ADD_CONTROL_H
 #define ADD_CONTROL_H
 
-int             add_control(char *, char *);
+int             add_control(const char *, const char *);
 
 #endif

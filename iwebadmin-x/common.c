@@ -1,23 +1,5 @@
 /*
- * $Log: common.c,v $
- * Revision 1.5  2023-07-28 22:29:02+05:30  Cprogrammer
- * added my_exit() function to record source file, line no of exit
- *
- * Revision 1.4  2022-09-15 23:11:09+05:30  Cprogrammer
- * display out of memory error message in die_nomem()
- *
- * Revision 1.3  2021-03-14 12:47:42+05:30  Cprogrammer
- * prevent including mysql.h in indimail.h
- *
- * Revision 1.2  2020-10-30 12:43:40+05:30  Cprogrammer
- * add newline to separate functions
- *
- * Revision 1.1  2019-06-08 18:15:55+05:30  Cprogrammer
- * Initial revision
- *
- * Revision 1.1  2019-04-14 20:57:45+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -40,7 +22,7 @@
 #include "common.h"
 
 void
-my_exit(substdio *ss, int ret, int line, char *fn)
+my_exit(substdio *ss, int ret, int line, const char *fn)
 {
 	if (ss) {
 		subprintf(ss, "%s: exit at line %d ret=%d\nEnd Time=%ld\n\n", fn, line, ret, time(0));
@@ -69,7 +51,7 @@ set_status_mesg_size(int len)
 }
 
 void
-copy_status_mesg(char *str)
+copy_status_mesg(const char *str)
 {
 	if (!stralloc_copys(&StatusMessage, str) ||
 			!stralloc_append(&StatusMessage, "\n") ||
@@ -79,7 +61,7 @@ copy_status_mesg(char *str)
 }
 
 void
-out(char *str)
+out(const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -96,7 +78,7 @@ flush()
 }
 
 void
-errout(char *str)
+errout(const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -111,3 +93,25 @@ errflush()
 	if (substdio_flush(subfderr) == -1)
 		iweb_exit(OUTPUT_FAILURE);
 }
+
+/*
+ * $Log: common.c,v $
+ * Revision 1.5  2023-07-28 22:29:02+05:30  Cprogrammer
+ * added my_exit() function to record source file, line no of exit
+ *
+ * Revision 1.4  2022-09-15 23:11:09+05:30  Cprogrammer
+ * display out of memory error message in die_nomem()
+ *
+ * Revision 1.3  2021-03-14 12:47:42+05:30  Cprogrammer
+ * prevent including mysql.h in indimail.h
+ *
+ * Revision 1.2  2020-10-30 12:43:40+05:30  Cprogrammer
+ * add newline to separate functions
+ *
+ * Revision 1.1  2019-06-08 18:15:55+05:30  Cprogrammer
+ * Initial revision
+ *
+ * Revision 1.1  2019-04-14 20:57:45+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

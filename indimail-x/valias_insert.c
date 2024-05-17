@@ -49,11 +49,11 @@ die_nomem()
 }
 
 int
-valias_insert(char *alias, char *domain, char *alias_line, int ignore)
+valias_insert(const char *alias, const char *domain, const char *alias_line, int ignore)
 {
 	int             err, i;
 	static stralloc SqlBuf = {0};
-	char           *real_domain;
+	const char     *real_domain;
 #ifdef CLUSTERED_SITE
 	char           *mailstore, *ptr;
 	static stralloc emailid = {0};

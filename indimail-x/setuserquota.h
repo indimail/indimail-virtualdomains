@@ -7,6 +7,6 @@
 #ifndef SETUSERQUOTA_H
 #define SETUSERQUOTA_H
 
-int             setuserquota(char *, char *, char *);
+int             setuserquota(const char *, const char *, const char *);
 
 #endif /*- SETUSERQUOTA_H */

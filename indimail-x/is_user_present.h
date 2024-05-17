@@ -4,7 +4,7 @@
 #include "config.h"
 #endif
 
-int             is_user_present(char *, char *);
+int             is_user_present(const char *, const char *);
 #ifdef QUERY_CACHE
 void            is_user_present_cache(char);
 #endif

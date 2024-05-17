@@ -191,10 +191,10 @@ next_module(char **argv, char *buf, int offset, int auth_method, char *authstr, 
 }
 
 no_return void
-exec_local(char **argv, char *userid, char *TheDomain, struct passwd *pw, char *service)
+exec_local(char **argv, const char *userid, const char *TheDomain, struct passwd *pw, const char *service)
 {
 	static stralloc Maildir = {0}, TheUser = {0}, line = {0};
-	char           *ptr;
+	const char     *ptr;
 	int             i, status, fd, match;
 	char            inbuf[4096];
 	struct substdio ssin;
@@ -303,7 +303,8 @@ int
 main(int argc, char **argv)
 {
 	char           *buf, *authstr, *login, *challenge, *response, *cleartxt, *crypt_pass, *ptr,
-				   *real_domain, *service, *auth_type, *auth_data, *mailstore, *pass;
+				   *service, *auth_type, *auth_data, *mailstore, *pass;
+	const char     *real_domain;
 	char           *(imapargs[]) = { PREFIX"/sbin/imaplogin", LIBEXECDIR"/imapmodules/authindi",
 					PREFIX"/bin/imapd", "Maildir", 0 };
 	char           *(pop3args[]) = { PREFIX"/sbin/pop3login", LIBEXECDIR"/imapmodules/authindi",

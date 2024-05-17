@@ -16,6 +16,6 @@
 #include <pwd.h>
 #endif
 
-int             sql_setpw(struct passwd *, char *, char *);
+int             sql_setpw(struct passwd *, const char *, const char *);
 
 #endif

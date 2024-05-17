@@ -39,7 +39,7 @@ die_nomem()
 }
 
 char *
-SqlServer(char *mdahost, char *domain)
+SqlServer(const char *mdahost, const char *domain)
 {
 	DBINFO        **rhostsptr;
 	char            strnum[FMT_ULONG];
@@ -80,7 +80,7 @@ SqlServer(char *mdahost, char *domain)
 }
 
 char *
-MdaServer(char *sqlhost, char *domain)
+MdaServer(const char *sqlhost, const char *domain)
 {
 	DBINFO        **rhostsptr;
 	int             total;

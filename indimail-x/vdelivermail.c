@@ -165,7 +165,7 @@ get_arguments(int argc, char **argv, char **user, char **domain, char **user_ext
 		*user_ext = _user_ext.s;
 	}
 #endif
-	if (!(tmpstr = get_real_domain(*domain))) {
+	if (!(tmpstr = (char *) get_real_domain(*domain))) {
 		strerr_warn3("vdelivermail: ", "No such domain ", *domain, 0);
 		if (userNotFound)
 			vdl_exit(100);

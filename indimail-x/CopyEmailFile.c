@@ -53,7 +53,7 @@ die_nomem()
  */
 int
 CopyEmailFile(const char *homedir, char *fname, const char *email,
-		char *To, char *From, char *Subject, int setDate,
+		const char *To, const char *From, const char *Subject, int setDate,
 		int copy_method, long message_size)
 {
 	time_t          tm;

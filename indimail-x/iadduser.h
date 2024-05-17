@@ -16,6 +16,6 @@
 #ifndef IADDUSER_H
 #define IADDUSER_H
 
-int             iadduser(char *, char *, char *, char *, char *, char *, int, int, int, char *);
+int             iadduser(const char *, const char *, const char *, const char *, const char *, const char *, int, int, int, const char *);
 
 #endif

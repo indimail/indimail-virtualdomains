@@ -47,7 +47,7 @@
 #define ACTION_DELETE           2
 
 void            init_globals();
-void            quickAction(char *username, int action);
+void            quickAction(const char *username, int action);
 void            del_id_files(stralloc *);
 
 /*

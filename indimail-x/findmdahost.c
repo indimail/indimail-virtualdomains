@@ -41,12 +41,13 @@ static char     sccsid[] = "$Id: findmdahost.c,v 1.3 2021-01-26 00:28:43+05:30 C
 #include <errno.h>
 
 char           *
-findmdahost(char *email, int *total)
+findmdahost(const char *email, int *total)
 {
 	int             is_dist, count, port, connect_all, i;
 	static stralloc user = {0}, domain = {0}, mailhost = {0};
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
-	char           *real_domain, *ip;
+	const char     *real_domain;
+	char           *ip;
 	DBINFO        **rhostsptr;
 	MYSQL         **mysqlptr;
 	struct passwd *pw;

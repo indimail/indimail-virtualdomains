@@ -7,10 +7,10 @@
 #ifndef LOCKFILE_H
 #define LOCKFILE_H
 
-int             lockcreate(char *, char);
+int             lockcreate(const char *, char);
 int             lockremove(int);
 int             get_write_lock(int);
 int             ReleaseLock(int);
-int             RemoveLock(char *, char);
+int             RemoveLock(const char *, char);
 
 #endif

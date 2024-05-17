@@ -45,7 +45,7 @@ die_nomem()
  */
 
 int
-addusercntrl(char *user, char *domain, char *hostid, char *pass, int force)
+addusercntrl(const char *user, const char *domain, const char *hostid, const char *pass, int force)
 {
 	static stralloc SqlBuf = {0};
 	char            strnum[FMT_ULONG];

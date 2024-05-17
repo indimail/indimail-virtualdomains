@@ -77,7 +77,7 @@ static char     sccsid[] = "$Id: Login_Tasks.c,v 1.6 2023-04-23 00:29:27+05:30 C
 #endif
 
 int
-Login_Tasks(struct passwd *pw, const char *User, char *ServiceType)
+Login_Tasks(struct passwd *pw, const char *User, const char *ServiceType)
 {
 	char           *domain, *ptr, *migrateflag, *migrateuser, *postauth;
 	static stralloc fqemail = {0}, Maildir = {0}, tmpbuf = {0}, pwbuf = {0},
@@ -196,7 +196,7 @@ Login_Tasks(struct passwd *pw, const char *User, char *ServiceType)
 	if (!(ptr = env_get("TCPREMOTEIP")) && !(ptr = GetPeerIPaddr()))
 #endif
 		ptr = "unknown";
-	vset_lastauth(pw->pw_name, domain, (char *) ServiceType, ptr, pw->pw_gecos, quota);
+	vset_lastauth(pw->pw_name, domain, ServiceType, ptr, pw->pw_gecos, quota);
 #else
 	quota = check_quota(Maildir.s);
 #ifdef ENABLE_IPV6
@@ -205,7 +205,7 @@ Login_Tasks(struct passwd *pw, const char *User, char *ServiceType)
 	if (!(ptr = env_get("TCPREMOTEIP")) && !(ptr = GetPeerIPaddr()))
 #endif
 		ptr = "unknown";
-	vset_lastauth(pw->pw_name, domain, (char *) ServiceType, ptr, pw->pw_gecos, quota);
+	vset_lastauth(pw->pw_name, domain, ServiceType, ptr, pw->pw_gecos, quota);
 #endif /*- USE_MAILDIRQUOTA */
 #endif /*- ENABLE_AUTH_LOGGING */
 	if ((postauth = (char *) env_get("POSTAUTH")) && !access(postauth, X_OK)) {

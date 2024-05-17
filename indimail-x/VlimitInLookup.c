@@ -31,10 +31,10 @@ static char     sccsid[] = "$Id: VlimitInLookup.c,v 1.1 2019-04-18 07:56:47+05:3
 #include "vlimits.h"
 
 int
-VlimitInLookup(char *email, struct vlimits *lim)
+VlimitInLookup(const char *email, struct vlimits *lim)
 {
 	static stralloc user = {0}, domain = {0};
-	char           *real_domain;
+	const char     *real_domain;
 #ifdef ENABLE_DOMAIN_LIMITS
 	struct vlimits  limits;
 #endif

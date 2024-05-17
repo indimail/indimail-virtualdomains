@@ -6,5 +6,5 @@
  */
 #ifndef ADD_USER_ASSIGN_H
 #define ADD_USER_ASSIGN_H
-int             add_user_assign(char *, char *dir);
+int             add_user_assign(const char *, const char *dir);
 #endif

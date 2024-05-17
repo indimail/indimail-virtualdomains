@@ -7,7 +7,7 @@
 #ifndef DBLOCK_H
 #define DBLOCK_H
 
-int             getDbLock(char *, char);
-int             delDbLock(int, char *, char);
-int             readPidLock(char *, char);
+int             getDbLock(const char *, const char);
+int             delDbLock(int, const char *, char);
+int             readPidLock(const char *, char);
 #endif

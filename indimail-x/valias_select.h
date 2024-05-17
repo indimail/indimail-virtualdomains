@@ -13,8 +13,8 @@
 #include <stralloc.h>
 #endif
 
-char           *valias_select(char *, char *);
-int             valias_track(char*, stralloc *, stralloc *);
+char           *valias_select(const char *, const char *);
+int             valias_track(const char*, stralloc *, stralloc *);
 char           *valias_select_all(stralloc *, stralloc *);
 
 #endif

@@ -16,6 +16,9 @@ static char     sccsid[] = "$Id: vcfilter.c,v 1.7 2023-09-06 18:47:05+05:30 Cpro
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
 #ifdef HAVE_QMAIL
 #include <sgetopt.h>
 #include <stralloc.h>
@@ -269,8 +272,13 @@ get_options(int argc, char **argv, char **email, stralloc *faddr,
 		usage();
 		return (1);
 	}
-	if (optind < argc)
+	if (optind < argc) {
+		for (ptr = argv[optind]; *ptr; ptr++) {
+			if (isupper(*ptr))
+				strerr_die4x(100, WARN, "email [", argv[optind], "] has an uppercase character");
+		}
 		*email = argv[optind++];
+	}
 	if (!*email) {
 		strerr_warn1("vcfilter: must supply emailid", 0);
 		usage();
@@ -340,7 +348,8 @@ main(int argc, char **argv)
 	uid_t           uid, uidtmp;
 	gid_t           gid, gidtmp;
 	struct passwd  *pw;
-	char           *real_domain, *emailid, *filter_name, *keyword;
+	const char     *real_domain;
+	char           *emailid, *filter_name, *keyword;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	static stralloc user = {0}, domain = {0}, folder = {0}, vfilter_file = {0}, faddr = {0};
 

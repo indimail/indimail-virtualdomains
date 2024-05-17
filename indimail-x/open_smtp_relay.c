@@ -58,7 +58,8 @@ open_smtp_relay(char *user, char *domain)
 	static stralloc SqlBuf = {0};
 	int             i;
 	char            strnum[FMT_ULONG];
-	char           *ipaddr, *relay_table, *real_domain;
+	char           *ipaddr, *relay_table;
+	const char     *real_domain;
 
 #ifdef ENABLE_IPV6
 	if (!(ipaddr = env_get("TCP6REMOTEIP")) && !(ipaddr = env_get("TCPREMOTEIP")))

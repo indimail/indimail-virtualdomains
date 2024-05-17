@@ -7,6 +7,6 @@
 #ifndef DEL_USER_ASSIGN_H
 #define DEL_USER_ASSIGN_H
 
-int             del_user_assign(char *, char *);
+int             del_user_assign(const char *, const char *);
 
 #endif

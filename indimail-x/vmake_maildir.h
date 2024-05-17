@@ -7,6 +7,6 @@
 #ifndef VMAKE_MAILDIR_H
 #define VMAKE_MAILDIR_H
 
-int             vmake_maildir(char *, uid_t, gid_t, char *);
+int             vmake_maildir(char *, uid_t, gid_t, const char *);
 
 #endif

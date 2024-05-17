@@ -7,6 +7,6 @@
 #ifndef MUNCH_DOMAIN_H
 #define MUNCH_DOMAIN_H
 
-char           *munch_domain(char *domain);
+char           *munch_domain(const char *domain);
 
 #endif /*- MUNCH_DOMAIN_H */

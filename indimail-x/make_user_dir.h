@@ -7,6 +7,6 @@
 #ifndef MAKE_USER_DIR
 #define MAKE_USER_DIR
 
-char           *make_user_dir(char *, char *, uid_t, gid_t, int);
+char           *make_user_dir(const char *, const char *, uid_t, gid_t, int);
 
 #endif

@@ -7,6 +7,6 @@
 #ifndef VALIAS_UPDATE_H
 #define VALIAS_UPDATE_H
 
-int             valias_update(char *, char *, char *, char *);
+int             valias_update(const char *, const char *, const char *, const char *);
 
 #endif

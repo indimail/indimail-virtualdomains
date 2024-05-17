@@ -19,7 +19,7 @@ static char     sccsid[] = "$Id: inc_dir_control.c,v 1.1 2019-04-18 08:23:40+05:
 #endif
 
 int
-inc_dir_control(vdir_type * vdir, int max_users_per_level)
+inc_dir_control(vdir_type *vdir, int max_users_per_level)
 {
 	int             users_per_level, len;
 

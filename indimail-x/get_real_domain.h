@@ -10,7 +10,7 @@
 #include "config.h"
 #endif
 
-char           *get_real_domain(char *);
+const char     *get_real_domain(const char *);
 #ifdef QUERY_CACHE
 void            get_real_domain_cache(char);
 #endif

@@ -45,7 +45,7 @@ die_nomem()
 }
 
 char           *
-get_Mplexdir(char *username, char *domain, int creflag, uid_t uid, gid_t gid)
+get_Mplexdir(const char *username, const char *domain, int creflag, uid_t uid, gid_t gid)
 {
 	int             ch;
 	static stralloc dirbuf = {0};

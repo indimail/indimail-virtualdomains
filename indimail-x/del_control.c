@@ -49,7 +49,7 @@ die_nomem()
  * delete a domain from the control files
  */
 int
-del_control(char *domain)
+del_control(const char *domain)
 {
 	static stralloc filename = {0}, tmp = {0};
 	char           *sysconfdir, *controldir;

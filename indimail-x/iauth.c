@@ -100,10 +100,11 @@ close_connection()
 struct passwd  *_global_pw;
 
 static char *
-i_auth(char *email, char *service, int *size, int debug)
+i_auth(const char *email, const char *service, int *size, int debug)
 {
 	static stralloc User = {0}, Domain = {0};
-	char           *real_domain, *crypt_pass;
+	const char     *real_domain;
+	char           *crypt_pass;
 	char            strnum[FMT_ULONG];
 	int             i;
 	uid_t           uid;
@@ -211,7 +212,8 @@ char           *
 i_acctmgmt(char *email, char *service, int *size, int *nitems, int debug)
 {
 	static stralloc User = {0}, Domain = {0}, SqlBuf = {0};
-	char           *ptr, *real_domain;
+	char           *ptr;
+	const char     *real_domain;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	int             i, exp_day;
 	static long     exp_times[NO_OF_ITEMS];

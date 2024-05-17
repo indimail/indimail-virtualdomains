@@ -7,6 +7,6 @@
 #ifndef COPYEMAILFILE_H
 #define COPYEMAILFILE_H
 
-int             CopyEmailFile(const char *, char *, const char *, char *, char *, char *, int, int, long);
+int             CopyEmailFile(const char *, const char *, const char *, const char *, const char *, const char *, int, int, long);
 
 #endif

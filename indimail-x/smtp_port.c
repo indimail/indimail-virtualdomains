@@ -51,10 +51,11 @@ die_nomem()
 }
 
 int
-smtp_port(char *srchost, char *domain, char *hostid)
+smtp_port(const char *srchost, const char *domain, const char *hostid)
 {
 	static stralloc Domain = {0}, SqlBuf = {0};
-	char           *ptr, *srchost_t;
+	char           *ptr;
+	const char     *srchost_t;
 	int             i;
 	int             default_port;
 	MYSQL_RES      *res;

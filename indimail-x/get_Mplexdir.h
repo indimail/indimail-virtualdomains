@@ -13,6 +13,6 @@
 #include <sys/types.h>
 #endif
 
-char           *get_Mplexdir(char *, char *, int, uid_t, gid_t);
+char           *get_Mplexdir(const char *, const char *, int, uid_t, gid_t);
 
 #endif

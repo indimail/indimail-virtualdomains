@@ -22,6 +22,9 @@
 #ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
 #ifdef HAVE_QMAIL
 #include <substdio.h>
 #include <subfd.h>
@@ -153,6 +156,7 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 	int             c, i, r;
 	struct passwd  *mypw;
 	char            optstr[51];
+	char           *ptr;
 
 	Uid = indimailuid;
 	Gid = indimailgid;
@@ -348,8 +352,13 @@ get_options(int argc, char **argv, char **base_path, char **dir_t, char **passwd
 			strerr_die2x(100, WARN, usage);
 		}
 	}
-	if (optind < argc)
+	if (optind < argc) {
+		for (ptr = argv[optind]; *ptr; ptr++) {
+			if (isupper(*ptr))
+				strerr_die4x(100, WARN, "domain [", argv[optind], "] has an uppercase character");
+		}
 		*domain = argv[optind++];
+	}
 	if (optind < argc)
 		*passwd = argv[optind++];
 	if (!*domain)

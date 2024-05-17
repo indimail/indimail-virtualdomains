@@ -36,9 +36,10 @@ die_nomem()
 }
 
 char           *
-GetPrefix(char *user, char *path)
+GetPrefix(const char *user, const char *path)
 {
-	char           *ptr, *suffix_ptr, *base_path;
+	char           *ptr;
+	const char     *base_path, *suffix_ptr;
 	int             ch;
 	static stralloc PathPrefix = {0};
 
@@ -47,7 +48,7 @@ GetPrefix(char *user, char *path)
 	if (path && *path)
 		base_path = path;
 	else
-		getEnvConfigStr(&base_path, "BASE_PATH", BASE_PATH);
+		getEnvConfigStr((char **) &base_path, "BASE_PATH", BASE_PATH);
 	ch = tolower(*user);
 	if (ch >= 'a' && ch <= 'e')
 		suffix_ptr = "A2E";

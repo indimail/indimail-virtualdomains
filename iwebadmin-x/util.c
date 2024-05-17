@@ -99,7 +99,7 @@ sort_init()
  * 'end' 
  */
 int
-sort_add_entry(char *entry, char end)
+sort_add_entry(const char *entry, char end)
 {
 	int             len;
 
@@ -170,7 +170,7 @@ str_replace(char *s, char orig, char repl)
 }
 
 void
-qmail_button(char *modu, char *command, char *user, char *dom, time_t mytime, char *png)
+qmail_button(const char *modu, const char *command, const char *user, const char *dom, time_t mytime, const char *png)
 {
 	out("<td align=center>");
 	printh("<a href=\"%s&modu=%C\">", cgiurl(command), modu);
@@ -184,7 +184,7 @@ qmail_button(char *modu, char *command, char *user, char *dom, time_t mytime, ch
 }
 
 int
-check_local_user(char *user)
+check_local_user(const char *user)
 {
 	char           *ptr;
 
@@ -243,7 +243,7 @@ show_counts()
 }
 
 int
-check_indimail_alias(char *addr, stralloc *dest)
+check_indimail_alias(const char *addr, stralloc *dest)
 {
 	static stralloc line = {0};
 	char            inbuf[1024];
@@ -297,7 +297,7 @@ check_indimail_alias(char *addr, stralloc *dest)
 int
 check_email_addr(char *addr)
 {
-	char           *atpos = 0;
+	const char     *atpos = 0;
 	int             i, dotpos, len;
 	char            allowed_char[] = ".-+=_&";
 
@@ -354,7 +354,7 @@ fixup_local_name(char *addr)
 }
 
 void
-ack(char *msg, char *extra)
+ack(const char *msg, const char *extra)
 {
 	out(get_html_text(msg));
 	out(" ");
@@ -367,8 +367,7 @@ ack(char *msg, char *extra)
 }
 
 void
-upperit(instr)
-	char           *instr;
+upperit(char *instr)
 {
 	while (*instr != 0) {
 		if (islower(*instr))
@@ -377,8 +376,8 @@ upperit(instr)
 	}
 }
 
-char           *
-safe_getenv(char *var)
+const char     *
+safe_getenv(const char *var)
 {
 	char           *s;
 
@@ -387,12 +386,10 @@ safe_getenv(char *var)
 	return (s);
 }
 
-char           *
-strstart(sstr, tstr)
-	char           *sstr;
-	char           *tstr;
+const char     *
+strstart(const char *sstr, const char *tstr)
 {
-	char           *ret_str;
+	const char     *ret_str;
 
 	ret_str = sstr;
 	if (!sstr || !tstr)
@@ -449,8 +446,8 @@ open_lang(char *lang)
 	return (lang_fd);
 }
 
-char           *
-get_html_text(char *index)
+const char     *
+get_html_text(const char *index)
 {
 	int             i;
 
@@ -475,8 +472,8 @@ open_colortable()
 	return (0);
 }
 
-char           *
-get_color_text(char *index)
+const char     *
+get_color_text(const char *index)
 {
 	static stralloc line = {0};
 	char            inbuf[1024];
@@ -516,7 +513,7 @@ get_color_text(char *index)
  * return value: 0 for success, 1 for failure
  */
 int
-quota_to_bytes(char returnval[], char *quota)
+quota_to_bytes(char returnval[], const char *quota)
 {
 	mdir_t          tmp;
 	int             i;
@@ -544,7 +541,7 @@ quota_to_bytes(char returnval[], char *quota)
  * return value: 0 for success, 1 for failure
  */
 int
-quota_to_megabytes(char *returnval, char *quota)
+quota_to_megabytes(char returnval[], const char *quota)
 {
 	mdir_t          tmp;
 	int             i;
@@ -577,7 +574,7 @@ quota_to_megabytes(char *returnval, char *quota)
 	return 0;
 }
 void
-print_user_index(char *action, int colspan, char *user, char *dom, time_t mytime)
+print_user_index(const char *action, int colspan, const char *user, const char *dom, time_t mytime)
 {
 #ifdef USER_INDEX
 	int             k;
@@ -633,7 +630,7 @@ print_user_index(char *action, int colspan, char *user, char *dom, time_t mytime
 }
 
 char           *
-cgiurl(char *action)
+cgiurl(const char *action)
 {
 	int             len, plen;
 	static stralloc url = {0};

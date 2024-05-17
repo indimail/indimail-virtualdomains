@@ -40,6 +40,9 @@ static char     sccsid[] = "$Id: vdeloldusers.c,v 1.6 2023-01-22 10:40:03+05:30 
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
 #ifdef HAVE_QMAIL
 #include <sgetopt.h>
 #include <alloc.h>
@@ -121,6 +124,10 @@ get_options(int argc, char **argv, char **Domain, int *Age, int *mailAge,
 		switch (c)
 		{
 		case 'd':
+			for (ptr = optarg; *ptr; ptr++) {
+				if (isupper(*ptr))
+					strerr_die4x(100, WARN, "domain [", optarg, "] has an uppercase character");
+			}
 			*Domain = optarg;
 			break;
 		case 's':

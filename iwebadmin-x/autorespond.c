@@ -49,9 +49,7 @@
 #include "common.h"
 
 void
-show_autoresponders(user, dom, mytime)
-	char           *user, *dom;
-	time_t          mytime;
+show_autoresponders(const char *user, const char *dom, time_t mytime)
 {
 	if (MaxAutoResponders == 0)
 		return;
@@ -65,9 +63,9 @@ show_autoresponders(user, dom, mytime)
 }
 
 void
-show_autorespond_line(char *user, char *dom, time_t mytime, char *dir)
+show_autorespond_line(const char *user, const char *dom, time_t mytime, const char *dir)
 {
-	char           *addr, *domptr;
+	const char     *addr, *domptr;
 	int             i;
 	DIR            *mydir;
 	struct dirent  *mydirent;

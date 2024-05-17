@@ -7,6 +7,6 @@
 #ifndef VSMTP_DELETE_DOMAIN_H
 #define VSMTP_DELETE_DOMAIN_H
 
-int             vsmtp_delete_domain(char *);
+int             vsmtp_delete_domain(const char *);
 
 #endif

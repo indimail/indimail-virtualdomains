@@ -41,7 +41,7 @@ die_nomem()
  */
 
 int
-delusercntrl(char *user, char *domain, int force)
+delusercntrl(const char *user, const char *domain, int force)
 {
 	static stralloc SqlBuf = {0};
 	int             err;

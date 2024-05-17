@@ -50,10 +50,10 @@ static char     sccsid[] = "$Id: UserInLookup.c,v 1.3 2021-01-26 00:29:14+05:30 
  * -1: System Error
  */
 int
-UserInLookup(char *email)
+UserInLookup(const char *email)
 {
 	static stralloc user = {0}, domain = {0};
-	char           *real_domain;
+	const char     *real_domain;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 #ifdef VALIAS
 	int             valias_count;

@@ -49,7 +49,7 @@ die_nomem()
 }
 
 struct passwd *
-sql_getall(char *domain, int first, int sortit)
+sql_getall(const char *domain, int first, int sortit)
 {
 	char           *domstr;
 	static int      more, flag;

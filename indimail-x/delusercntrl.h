@@ -7,6 +7,6 @@
 #ifndef DELUSERCNTRL_H
 #define DELUSERCNTRL_H
 
-int             delusercntrl(char *, char *, int);
+int             delusercntrl(const char *, const char *, int);
 
 #endif

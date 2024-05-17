@@ -33,7 +33,6 @@
 #include <str.h>
 #include <scan.h>
 #endif
-#include "lowerit.h"
 #include "common.h"
 #include "get_real_domain.h"
 #include "get_assign.h"
@@ -84,11 +83,12 @@ getch(ch)
  *     indimail to indibak. make the user inactive
  */
 int
-deluser(char *user, char *domain, int remove_db)
+deluser(const char *user, const char *domain, int remove_db)
 {
 	struct passwd  *passent;
 	static stralloc user_dir = {0}, domain_dir = {0}, tmp = {0}, SqlBuf = {0};
-	char           *real_domain, *ptr;
+	const char     *real_domain;
+	char           *ptr;
 	char            ch;
 	char            buf[1];
 	mdir_t          quota;
@@ -127,9 +127,6 @@ deluser(char *user, char *domain, int remove_db)
 			}
 		}
 	}
-	lowerit(user);
-	if (domain && *domain)
-		lowerit(domain);
 	if (domain && *domain) {
 		if (!(real_domain = get_real_domain(domain))) {
 			strerr_warn3("deluser: ", domain, " does not exist", 0);

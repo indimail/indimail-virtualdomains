@@ -7,6 +7,6 @@
 #ifndef OPEN_BIG_DIR_H
 #define OPEN_BIG_DIR_H
 
-char            *open_big_dir(char *, char *, char *);
+char            *open_big_dir(const char *, const char *, const char *);
 
 #endif

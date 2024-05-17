@@ -56,7 +56,7 @@ static struct sembuf op_unlock[1] = {
 static void     SigAlarm();
 
 int
-lockcreate(char *filename, char proj)
+lockcreate(const char *filename, char proj)
 {
 	key_t           key;
 	int             semid;
@@ -128,7 +128,7 @@ ReleaseLock(int fd)
 
 /*- Dummy Function */
 int
-RemoveLock(char *filename, char proj)
+RemoveLock(const char *filename, char proj)
 {
 	return (0);
 }
@@ -172,7 +172,7 @@ die_nomem()
 }
 
 int
-lockcreate(char *filename, char proj)
+lockcreate(const char *filename, char proj)
 {
 	struct stat     statbuf;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
@@ -314,7 +314,7 @@ ReleaseLock(int fd)
 }
 
 int
-RemoveLock(char *filename, char proj)
+RemoveLock(const char *filename, char proj)
 {
 	int             i;
 
@@ -349,7 +349,7 @@ die_nomem()
 }
 
 int
-lockcreate(char *filename, char proj)
+lockcreate(const char *filename, char proj)
 {
 	int             fd, i;
 	struct flock    fl = {0};
@@ -405,7 +405,7 @@ ReleaseLock(int fd)
 }
 
 int
-RemoveLock(char *filename, char proj)
+RemoveLock(const char *filename, char proj)
 {
 	int             i;
 
@@ -421,7 +421,7 @@ RemoveLock(char *filename, char proj)
 }
 #elif defined(USE_LOCKF)
 int
-lockcreate(char *filename, char proj)
+lockcreate(const char *filename, char proj)
 {
 	int             fd, i;
 
@@ -456,7 +456,7 @@ ReleaseLock(int fd)
 }
 
 int
-RemoveLock(char *filename, char proj)
+RemoveLock(const char *filename, char proj)
 {
 	int             i;
 

@@ -26,7 +26,7 @@
 #include "common.h"
 
 void
-out(char *prefix, char *str)
+out(const char *prefix, const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -36,14 +36,14 @@ out(char *prefix, char *str)
 }
 
 void
-flush(char *prefix)
+flush(const char *prefix)
 {
 	if (substdio_flush(subfdout) == -1)
 		strerr_die2sys(111, prefix, ": write: ");
 }
 
 void
-errout(char *prefix, char *str)
+errout(const char *prefix, const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -53,7 +53,7 @@ errout(char *prefix, char *str)
 }
 
 void
-errflush(char *prefix)
+errflush(const char *prefix)
 {
 	if (substdio_flush(subfderr) == -1)
 		strerr_die2sys(111, prefix, ": write: ");

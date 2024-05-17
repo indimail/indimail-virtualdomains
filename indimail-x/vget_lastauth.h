@@ -13,6 +13,6 @@
 #include <time.h>
 #endif
 
-time_t          vget_lastauth(struct passwd *, char *, int, char *);
+time_t          vget_lastauth(struct passwd *, const char *, int, char *);
 
 #endif

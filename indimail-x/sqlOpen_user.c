@@ -43,12 +43,13 @@ static char     sccsid[] = "$Id: sqlOpen_user.c,v 1.3 2021-01-26 00:29:08+05:30 
 #include "load_mysql.h"
 
 int
-sqlOpen_user(char *email, int connect_all)
+sqlOpen_user(const char *email, int connect_all)
 {
 	int             count, total = 0;
 	static stralloc user = {0}, domain = {0}, mdahost = {0};
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
-	char           *ptr, *cptr, *real_domain;
+	char           *ptr, *cptr;
+	const char     *real_domain;
 	DBINFO        **rhostsptr;
 	MYSQL         **mysqlptr;
 

@@ -60,9 +60,9 @@ struct vlimits {
       short     perm_defaultquota;
 };
 
-int             vget_limits(char *, struct vlimits *);
-int             vdel_limits(char *);
-int             vset_limits(char *, struct vlimits *);
+int             vget_limits(const char *, struct vlimits *);
+int             vdel_limits(const char *);
+int             vset_limits(const char *, struct vlimits *);
 int             vlimits_get_flag_mask(struct vlimits *);
 
 #endif

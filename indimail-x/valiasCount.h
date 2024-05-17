@@ -11,7 +11,7 @@
 #endif
 
 #ifdef VALIAS
-long            valiasCount(char *, char *);
+long            valiasCount(const char *, const char *);
 #endif
 
 #endif

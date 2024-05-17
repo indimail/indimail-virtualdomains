@@ -35,10 +35,10 @@ die_nomem()
 }
 
 char           *
-sql_gethostid(char *ipaddr)
+sql_gethostid(const char *ipaddr)
 {
 	static stralloc hostid = {0}, SqlBuf = {0};
-	char           *ptr;
+	const char     *ptr;
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;
 

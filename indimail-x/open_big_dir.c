@@ -15,7 +15,7 @@ static char     sccsid[] = "$Id: open_big_dir.c,v 1.1 2019-04-18 08:31:45+05:30 
 #endif
 
 char *
-open_big_dir(char *username, char *domain, char *path)
+open_big_dir(const char *username, const char *domain, char *path)
 {
 	char           *filesys_prefix;
 

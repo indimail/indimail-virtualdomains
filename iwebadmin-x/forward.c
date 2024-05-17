@@ -38,7 +38,7 @@
 #include "common.h"
 
 int
-show_forwards(char *user, char *dom, time_t mytime)
+show_forwards(const char *user, const char *dom, time_t mytime)
 {
 	if (AdminType != DOMAIN_ADMIN) {
 		copy_status_mesg(html_text[142]);

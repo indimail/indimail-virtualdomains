@@ -122,9 +122,9 @@ die_nomem()
  * in the 3696 errata.
  */
 int
-iadduser(char *username, char *domain, char *mdahost, char *password,
-		 char *gecos, char *quota, int max_users_per_level, int actFlag,
-		 int encrypt_flag, char *scram_passwd)
+iadduser(const char *username, const char *domain, const char *mdahost, const char *password,
+		 const char *gecos, char *quota, int max_users_per_level, int actFlag,
+		 int encrypt_flag, const char *scram_passwd)
 {
 	static stralloc Dir = {0}, Crypted = {0}, tmpbuf = {0}, line = {0};
 	char            estr[2], inbuf[512], strnum[FMT_ULONG];
@@ -146,7 +146,7 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 	if (*username == '.' || username[ulen - 1] == '.')
 		strerr_die1x(100, "iadduser: Trailing/Leading periods not allowed");
 	getEnvConfigStr(&allow_chars, "ALLOWCHARS", ALLOWCHARS);
-	for (ptr = username;*ptr;ptr++) {
+	for (ptr = (char *) username; *ptr; ptr++) {
 		if (*ptr == ':')
 			strerr_die1x(100, "iadduser: ':' not allowed in names");
 		if (*ptr == '.' && *(ptr + 1) == '.')
@@ -160,16 +160,16 @@ iadduser(char *username, char *domain, char *mdahost, char *password,
 			strerr_die3x(100, "iadduser: [", estr, "] not allowed in local-part See RFC-5322");
 		}
 		if (isupper((int) *ptr))
-			*ptr = tolower((int) *ptr);
+			strerr_die3x(100, "iadduser: user [", username, "] has an uppercase character");
 	}
 	if (domain && *domain) {
-		for (ptr = domain;*ptr;ptr++) {
+		for (ptr = (char *) domain; *ptr; ptr++) {
 			if (*ptr == ':') {
 				strerr_die1x(100, "iadduser: ':' not allowed in names");
 				return (-1);
 			} else
 			if (isupper((int) *ptr))
-				*ptr = tolower(*ptr);
+				strerr_die3x(100, "iadduser: domain [", domain, "] has an uppercase character");
 		}
 		uid_flag = 1;
 #ifdef CLUSTERED_SITE

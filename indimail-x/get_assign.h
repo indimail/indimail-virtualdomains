@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #endif
 
-char           *get_assign(char *, stralloc *, uid_t *, gid_t *);
+char           *get_assign(const char *, stralloc *, uid_t *, gid_t *);
 #ifdef QUERY_CACHE
 void            get_assign_cache(char);
 #endif

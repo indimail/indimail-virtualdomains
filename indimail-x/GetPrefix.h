@@ -7,6 +7,6 @@
 #ifndef GETPREFIX_H
 #define GETPREFIX_H
 
-char           *GetPrefix(char *, char *);
+char           *GetPrefix(const char *, const char *);
 
 #endif

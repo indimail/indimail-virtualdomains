@@ -7,6 +7,6 @@
 #ifndef GET_SMTP_SERVICE_PORT_H
 #define GET_SMTP_SERVICE_PORT_H
 
-int             smtp_port(char *, char *, char *);
+int             smtp_port(const char *, const char *, const char *);
 
 #endif

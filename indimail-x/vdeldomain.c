@@ -40,6 +40,9 @@
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <sgetopt.h>
@@ -89,6 +92,7 @@ int
 get_options(int argc, char **argv, stralloc *Domain, int *mcd_remove)
 {
 	int             c;
+	char           *ptr;
 
 	while ((c = getopt(argc, argv, "cTv")) != opteof) {
 		switch (c)
@@ -108,6 +112,10 @@ get_options(int argc, char **argv, stralloc *Domain, int *mcd_remove)
 		}
 	}
 	if (optind < argc) {
+		for (ptr = argv[optind]; *ptr; ptr++) {
+			if (isupper(*ptr))
+				strerr_die4x(100, WARN, "domain [", argv[optind], "] has an uppercase character");
+		}
 		if (!stralloc_copys(Domain, argv[optind]) ||
 				!stralloc_0(Domain))
 			die_nomem();

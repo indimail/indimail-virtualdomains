@@ -45,7 +45,7 @@ die_nomem()
  *
  */
 int
-del_domain_assign(char *domain, char *dir, gid_t uid, gid_t gid)
+del_domain_assign(const char *domain, const char *dir, gid_t uid, gid_t gid)
 {
 	static stralloc tmpstr = {0}, fname = {0};
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];

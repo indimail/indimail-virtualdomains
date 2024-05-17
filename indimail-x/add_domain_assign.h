@@ -13,6 +13,6 @@
 #include <sys/types.h>
 #endif
 
-int             add_domain_assign(char *, char *, uid_t, gid_t);
+int             add_domain_assign(const char *, const char *, uid_t, gid_t);
 
 #endif

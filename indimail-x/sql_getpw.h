@@ -13,7 +13,7 @@
 #include <pwd.h>
 #endif
 
-struct passwd  *sql_getpw(char *, char *);
+struct passwd  *sql_getpw(const char *, const char *);
 #ifdef QUERY_CACHE
 void            sql_getpw_cache(char);
 #endif

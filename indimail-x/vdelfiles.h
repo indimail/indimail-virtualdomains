@@ -7,6 +7,6 @@
 #ifndef VDELFILES_h
 #define VDELFILES_h
 
-int             vdelfiles(char *, char *, char *);
+int             vdelfiles(const char *, const char *, const char *);
 
 #endif

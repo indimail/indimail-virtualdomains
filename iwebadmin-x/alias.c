@@ -60,7 +60,7 @@
 #include "template.h"
 #include "common.h"
 
-char           *dotqmail_alias_command(char *command);
+char           *dotqmail_alias_command(const char *command);
 
 int
 show_aliases(void)
@@ -85,7 +85,7 @@ struct aliasentry {
 struct aliasentry *firstalias = (struct aliasentry *) 0, *curalias = (struct aliasentry *) 0;
 
 void
-add_alias_entry(char *alias_name, char *alias_command)
+add_alias_entry(const char *alias_name, char *alias_command)
 {
 	int             len;
 
@@ -132,7 +132,7 @@ int str_casecmpn(char *s1, char *s2, register int n)
 }
 
 void
-show_dotqmail_lines(char *user, char *dom, time_t mytime)
+show_dotqmail_lines(const char *user, const char *dom, time_t mytime)
 {
 	int             moreusers = 0, stop, i, k, startnumber, len, plen;
 	unsigned int    page;
@@ -384,7 +384,7 @@ show_dotqmail_lines(char *user, char *dom, time_t mytime)
  * with the edit mode
  */
 void
-show_dotqmail_file(char *user)
+show_dotqmail_file(const char *user)
 {
 	static stralloc alias_user = {0};
 	char           *alias_domain, *alias_name_from_command, *alias_line;
@@ -795,7 +795,7 @@ deldotqmailnow()
 }
 
 char           *
-dotqmail_alias_command(char *line)
+dotqmail_alias_command(const char *line)
 {
 	int             len, plen, i;
 	static stralloc user = {0}, command = {0}, dot_qmail = {0};

@@ -36,7 +36,7 @@ die_nomem()
 }
 
 int
-sql_delaliasdomain(char *aliasdomain)
+sql_delaliasdomain(const char *aliasdomain)
 {
 	char           *mailstore;
 	int             i;

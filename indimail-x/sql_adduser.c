@@ -55,8 +55,9 @@ die_nomem()
 }
 
 char           *
-sql_adduser(char *user, char *domain, char *pass, char *gecos, char *dir,
-		char *Quota, int uid_flag, int actFlag, char *scram)
+sql_adduser(const char *user, const char *domain, const char *pass,
+		const char *gecos, const char *dir, const char *Quota, int uid_flag,
+		int actFlag, const char *scram)
 {
 	static stralloc dirbuf = {0}, quota = {0}, dom_dir = {0}, SqlBuf = {0};
 	char           *domstr, *ptr;

@@ -10,8 +10,8 @@
 #include "config.h"
 #endif
 
-int             open_central_db(char *);
-char           *findhost(char *, int);
+int             open_central_db(const char *);
+char           *findhost(const char *, int);
 #ifdef QUERY_CACHE
 void            findhost_cache(char);
 #endif

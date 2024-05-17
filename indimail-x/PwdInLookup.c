@@ -28,10 +28,10 @@ static char     sccsid[] = "$Id: PwdInLookup.c,v 1.1 2019-04-18 07:56:24+05:30 C
 #endif
 
 struct passwd *
-PwdInLookup(char *email)
+PwdInLookup(const char *email)
 {
 	static stralloc user = {0}, domain = {0};
-	char           *real_domain;
+	const char     *real_domain;
 	struct passwd  *pw;
 
 #ifdef CLUSTERED_SITE

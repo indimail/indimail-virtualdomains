@@ -7,6 +7,6 @@
 #ifndef RELAYINLOOKUP_H
 #define RELAYINLOOKUP_H
 
-int             RelayInLookup(char *, char *);
+int             RelayInLookup(const char *, const char *);
 
 #endif

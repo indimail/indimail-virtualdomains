@@ -42,7 +42,7 @@ die_nomem()
 }
 
 int
-relay_select(char *email, char *remoteip)
+relay_select(const char *email, const char *remoteip)
 {
 	static stralloc SqlBuf = {0};
 	char            strnum[FMT_ULONG];

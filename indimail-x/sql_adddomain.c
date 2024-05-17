@@ -27,7 +27,7 @@ static char     sccsid[] = "$Id: sql_adddomain.c,v 1.2 2021-02-23 21:40:48+05:30
 #endif
 
 int
-sql_adddomain(char *domain)
+sql_adddomain(const char *domain)
 {
 	int             err;
 

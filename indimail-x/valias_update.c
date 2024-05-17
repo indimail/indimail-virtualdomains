@@ -43,10 +43,10 @@ die_nomem()
 }
 
 int
-valias_update(char *alias, char *domain, char *old_alias_line, char *alias_line)
+valias_update(const char *alias, const char *domain, const char *old_alias_line, const char *alias_line)
 {
 	int             err;
-	char           *real_domain;
+	const char     *real_domain;
 	static stralloc SqlBuf = {0};
 
 	if (!domain || !*domain)

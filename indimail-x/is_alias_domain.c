@@ -51,7 +51,7 @@ die_nomem()
 }
 
 int
-is_alias_domain(char *domain)
+is_alias_domain(const char *domain)
 {
 	int             fd, match, t;
 	char            inbuf[512];

@@ -37,7 +37,7 @@ die_nomem()
 }
 
 int
-sql_insertaliasdomain(char *old_domain, char *new_domain)
+sql_insertaliasdomain(const char *old_domain, const char *new_domain)
 {
 #ifdef CLUSTERED_SITE
 	int             err;

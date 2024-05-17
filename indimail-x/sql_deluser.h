@@ -7,6 +7,6 @@
 #ifndef SQL_DELUSER_H
 #define SQL_DELUSER_H
 
-int             sql_deluser(char *, char *);
+int             sql_deluser(const char *, const char *);
 
 #endif

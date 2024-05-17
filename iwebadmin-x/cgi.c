@@ -84,7 +84,7 @@ get_cgi()
  * copies value of fieldname into dest
  */
 int
-GetValue(char *source, stralloc *dest, char *name)
+GetValue(const char *source, stralloc *dest, const char *name)
 {
 	int             i, j, k, l, len;
 	char           *s;

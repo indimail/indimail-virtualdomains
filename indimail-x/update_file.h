@@ -13,6 +13,6 @@
 #include <sys/types.h>
 #endif
 
-int              update_file(char *, char *, mode_t);
+int              update_file(const char *, const char *, mode_t);
 
 #endif

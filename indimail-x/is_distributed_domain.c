@@ -42,7 +42,7 @@ die_nomem()
 }
 
 int
-is_distributed_domain(char *Domain)
+is_distributed_domain(const char *Domain)
 {
 	static stralloc savedomain = {0};
 	static int      dist_flag;

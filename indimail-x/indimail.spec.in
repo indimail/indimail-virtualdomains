@@ -605,7 +605,6 @@ done
 %endif
 
 %attr(644,root,root)                    %{shareddir}/doc/ChangeLog-indimail
-%attr(644,root,root)                    %{shareddir}/doc/FAQ.md
 %attr(644,root,root)                    %{shareddir}/doc/README-indimail.md
 %attr(644,root,root)                    %{shareddir}/doc/README-ldap.md
 %attr(644,root,root)                    %{shareddir}/doc/README-vlimits.md

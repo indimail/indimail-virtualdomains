@@ -7,6 +7,6 @@
 #ifndef AUTOTURN_DIR_H
 #define AUTOTURN_DIR_H
 
-char           *autoturn_dir(char *);
+char           *autoturn_dir(const char *);
 
 #endif

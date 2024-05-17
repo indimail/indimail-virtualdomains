@@ -14,6 +14,9 @@
 #ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <strerr.h>
@@ -127,6 +130,7 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email,
 		char **salt, int *iter, int *scram, char **hash, int *eflag)
 {
 	int             c, i, r;
+	char           *ptr;
 	char            optstr[56], strnum[FMT_ULONG];
 
 	*toggle = *ClearFlags = 0;
@@ -319,6 +323,10 @@ get_options(int argc, char **argv, stralloc *User, stralloc *Email,
 		}
 	}
 	if (optind < argc) {
+		for (ptr = argv[optind]; *ptr; ptr++) {
+			if (isupper(*ptr))
+				strerr_die4x(100, WARN, "email [", argv[optind], "] has an uppercase character");
+		}
 		if (!stralloc_copys(Email, argv[optind++]) ||
 				!stralloc_0(Email))
 			die_nomem();
@@ -345,7 +353,8 @@ main(int argc, char **argv)
 	gid_t           gid, domaingid;
 	struct passwd   PwTmp;
 	struct passwd  *pw;
-	char           *real_domain, *ptr, *clear_text, *hash;
+	const char     *real_domain;
+	char           *ptr, *clear_text, *hash;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	mdir_t          quota = 0, ul;
 #ifdef USE_MAILDIRQUOTA

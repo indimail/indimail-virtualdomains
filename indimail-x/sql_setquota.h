@@ -7,6 +7,6 @@
 #ifndef SQL_SETQUOTA_H
 #define SQL_SETQUOTA_H
 
-int             sql_setquota(char *, char *, char *);
+int             sql_setquota(const char *, const char *, const char *);
 
 #endif /*- SQL_SETQUOTA_H */

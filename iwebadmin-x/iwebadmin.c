@@ -1,4 +1,5 @@
 /*
+ * $Id: iwebadmin.c,v 1.36 2023-10-24 11:11:57+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -14,8 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
- *
- * $Id: iwebadmin.c,v 1.36 2023-10-24 11:11:57+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -782,7 +781,7 @@ init_globals()
  * This feature sponsored by PinkRoccade Public Sector, Sept 2004 
  */
 void
-quickAction(char *username, int action)
+quickAction(const char *username, int action)
 {
 	char           *space, *ar, *ez;
 	char           *aliasline;

@@ -13,6 +13,6 @@
 #include <sys/types.h>
 #endif
 
-int             close_big_dir(char *, char *, uid_t, gid_t);
+int             close_big_dir(const char *, const char *, uid_t, gid_t);
 
 #endif

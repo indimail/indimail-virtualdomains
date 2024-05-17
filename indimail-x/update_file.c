@@ -51,7 +51,7 @@ die_nomem()
 }
 
 int
-update_file(char *filename, char *update_line, mode_t mode)
+update_file(const char *filename, const char *update_line, mode_t mode)
 {
 	struct substdio ssin, ssout;
 	int             fd1, fd2, i, found = 0, user_assign = 0, match;

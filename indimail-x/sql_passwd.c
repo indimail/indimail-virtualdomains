@@ -44,7 +44,7 @@ die_nomem()
 }
 
 static int
-do_sql(char *user, char *domain, char *pass, char *scram, char *table)
+do_sql(const char *user, const char *domain, const char *pass, const char *scram, const char *table)
 {
 	static stralloc SqlBuf = {0};
 
@@ -84,7 +84,7 @@ do_sql(char *user, char *domain, char *pass, char *scram, char *table)
 }
 
 int
-sql_passwd(char *user, char *domain, char *pass, char *scram)
+sql_passwd(const char *user, const char *domain, const char *pass, const char *scram)
 {
 	char           *tmpstr;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];

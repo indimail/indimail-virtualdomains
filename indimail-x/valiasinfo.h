@@ -7,6 +7,6 @@
 #ifndef VALIASINFO_H
 #define VALIASINFO_H
 
-int             valiasinfo(char *, char *);
+int             valiasinfo(const char *, const char *);
 
 #endif

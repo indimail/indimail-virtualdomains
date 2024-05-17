@@ -7,6 +7,6 @@
 #ifndef CHECK_LOGIN_H
 #define CHECK_LOGIN_H
 
-int             Check_Login(char *, char *, char *);
+int             Check_Login(const char *, const char *, const char *);
 
 #endif

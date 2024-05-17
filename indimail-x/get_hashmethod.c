@@ -58,12 +58,13 @@ get_default_fn()
 }
 
 int
-get_hashmethod(char *domain)
+get_hashmethod(const char *domain)
 {
 	struct substdio ssin;
 	static stralloc line = {0};
 	char            inbuf[4096];
-	char           *ptr, *real_domain;
+	char           *ptr;
+	const char     *real_domain;
 	int             match, fd, i, r;
 	static int      hash_m = -1;
 

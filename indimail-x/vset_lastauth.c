@@ -38,7 +38,8 @@ die_nomem()
 }
 
 int
-vset_lastauth(char *user, char *domain, char *service, char *remoteip, char *gecos, int quota)
+vset_lastauth(const char *user, const char *domain, const char *service,
+		const char *remoteip, const char *gecos, int quota)
 {
 	int             err, i, j;
 	static stralloc SqlBuf = {0};

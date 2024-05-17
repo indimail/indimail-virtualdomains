@@ -7,6 +7,6 @@
 #ifndef FINDMDAHOST_H
 #define FINDMDAHOST_H
 
-char           *findmdahost(char *, int *);
+char           *findmdahost(const char *, int *);
 
 #endif

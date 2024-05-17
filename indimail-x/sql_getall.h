@@ -7,6 +7,6 @@
 #ifndef SQL_GETALL_H
 #define SQL_GETALL_H
 
-struct passwd *sql_getall(char *, int, int);
+struct passwd *sql_getall(const char *, int, int);
 
 #endif

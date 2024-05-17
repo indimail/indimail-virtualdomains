@@ -10,7 +10,7 @@
 #include "config.h"
 #endif
 
-char           *sql_get_realdomain(char *);
+char           *sql_get_realdomain(const char *);
 #ifdef QUERY_CACHE
 void            sql_get_realdomain_cache(char);
 #endif

@@ -15,7 +15,7 @@
 #include "vlimits.h"
 
 #ifdef ENABLE_DOMAIN_LIMITS
-int             VlimitInLookup(char *, struct vlimits *);
+int             VlimitInLookup(const char *, struct vlimits *);
 #endif
 
 #endif

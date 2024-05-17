@@ -13,10 +13,6 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
-#ifdef HAVE_CTYPE_H
-#include <ctype.h>
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -51,7 +47,7 @@ die_nomem()
 }
 
 char           *
-backfill(char *username, char *domain, char *path, int operation)
+backfill(const char *username, const char *domain, const char *path, int operation)
 {
 	char           *filesys_prefix, *ptr = (char *) 0;
 	static stralloc filename = {0}, line = {0};

@@ -17,9 +17,9 @@ static char     sccsid[] = "$Id: dec_dir_control.c,v 1.1 2019-04-18 08:37:44+05:
 #endif
 
 int
-dec_dir_control(char *path, char *user, char *domain, uid_t uid, gid_t gid)
+dec_dir_control(const char *path, const char *user, const char *domain, uid_t uid, gid_t gid)
 {
-	char           *ptr;
+	const char     *ptr;
 
 	if (!(ptr = GetPrefix(user, path)))
 		return (-1);

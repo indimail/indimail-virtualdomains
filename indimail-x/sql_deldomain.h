@@ -7,6 +7,6 @@
 #ifndef SQL_DELDOMAIN_H
 #define SQL_DELDOMAIN_H
 
-int             sql_deldomain(char *);
+int             sql_deldomain(const char *);
 
 #endif /*- SQL_DELDOMAIN_H */

@@ -7,6 +7,6 @@
 #ifndef DELUSER_H
 #define DELUSER_H
 
-int             deluser(char *, char *, int);
+int             deluser(const char *, const char *, int);
 
 #endif

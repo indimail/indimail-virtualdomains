@@ -232,7 +232,8 @@ static int
 get_options(int argc, char **argv, char **bounce, stralloc *emailid, stralloc *user, stralloc *domain, stralloc *Maildir)
 {
 	int             c, local;
-	char           *tmpstr, *real_domain = 0;
+	char           *tmpstr;
+	const char     *real_domain = 0;
 	static stralloc pwstruct = {0};
 	struct passwd  *pw;
 
@@ -327,8 +328,7 @@ get_options(int argc, char **argv, char **bounce, stralloc *emailid, stralloc *u
 		 *
 		 */
 		interactive = 1;
-		while ((c = getopt(argc, argv, "v")) != opteof)
-		{
+		while ((c = getopt(argc, argv, "v")) != opteof) {
 			switch (c)
 			{
 			case 'v':
@@ -487,7 +487,8 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 {
 	int             i, j, email_len, filter_opt, ret = 0, global_filter = 0,
 					max_header_value;
-	char           *str, *real_domain;
+	char           *str;
+	const char     *real_domain;
 	char          **tmp_ptr;
 	static char   **header_list;
 	struct header **ptr;
@@ -643,8 +644,7 @@ process_filter(int argc, char **argv, struct header **hptr, char *filterid, int 
 						break;
 					case 3:	/*- Starts with */
 						for (tmp_ptr = (*ptr)->data; tmp_ptr && *tmp_ptr; tmp_ptr++) {
-							if (!str_diffn(*tmp_ptr, keyword->s, keyword->len))
-							{
+							if (!str_diffn(*tmp_ptr, keyword->s, keyword->len)) {
 								if (interactive && verbose) {
 									subprintfe(subfdout, "vfilter", "Matched %s Filter No %d Data %s Keyword %s\n", 
 											global_filter ? "global" : "local", *filter_no, *tmp_ptr, keyword->s);

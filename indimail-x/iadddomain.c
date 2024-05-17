@@ -92,8 +92,10 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 			strerr_warn4("adddomain: invalid char ", "'", tmp, "'", 0);
 			return (-1);
 		}
-		if (isupper((int) *ptr))
-			*ptr = tolower(*ptr);
+		if (isupper((int) *ptr)) {
+			strerr_warn3("adddomain: domain [", domain, "] has an uppercase character", 0);
+			return (-1);
+		}
 	}
 	if ((*(ptr - 1)) == '-') {
 		strerr_warn1("adddomain: Last component cannot be '-'", 0);

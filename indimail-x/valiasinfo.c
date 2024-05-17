@@ -63,7 +63,7 @@ die_nomem()
 }
 
 int
-valiasinfo(char *user, char *domain)
+valiasinfo(const char *user, const char *domain)
 {
 	int             flag1, fd, match;
 	static stralloc tmpbuf = {0}, Dir = {0}, line = {0};

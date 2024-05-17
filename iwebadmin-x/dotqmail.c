@@ -27,20 +27,20 @@
 
 #ifdef VALIAS
 int
-dotqmail_delete_files(char *user)
+dotqmail_delete_files(const char *user)
 {
 	return (!valias_delete(user, Domain.s, 0));
 }
 
 int
-dotqmail_add_line(char *user, char *line)
+dotqmail_add_line(const char *user, const char *line)
 {
-	return (valias_insert(user, Domain.s, line, 1));
+	return (valias_insert(user, Domain.s, (char *) line, 1));
 }
 
 int
-dotqmail_del_line(char *user, char *line)
+dotqmail_del_line(const char *user, const char *line)
 {
-	return (valias_delete(user, Domain.s, line));
+	return (valias_delete(user, Domain.s, (char *) line));
 }
 #endif

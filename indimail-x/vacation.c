@@ -83,9 +83,16 @@ static stralloc tmpbuf = {0};
 int
 get_options(int argc, char **argv, char **email, char **vacation_file)
 {
+	char           *ptr;
+
 	*email = *vacation_file = 0;
-	if (optind < argc)
+	if (optind < argc) {
+		for (ptr = argv[optind]; *ptr; ptr++) {
+			if (isupper(*ptr))
+				strerr_die4x(100, WARN, "email [", argv[optind], "] has an uppercase character");
+		}
 		*email = argv[optind++];
+	}
 	if (optind < argc)
 		*vacation_file = argv[optind++];
 	if (!*email || !*vacation_file)
@@ -103,7 +110,7 @@ die_nomem()
 int
 getuserinfo(char *username, stralloc *homedir, stralloc *user, stralloc *domain)
 {
-	char           *real_domain;
+	const char     *real_domain;
 	struct passwd  *mypw;
 
 	parse_email(username, user, domain);

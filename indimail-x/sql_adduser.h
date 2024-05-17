@@ -10,6 +10,6 @@
 #ifndef SQL_ADDUSER_H
 #define SQL_ADDUSER_H
 
-char           *sql_adduser(char *, char *, char *, char *, char *, char *, int, int, char *);
+char           *sql_adduser(const char *, const char *, const char *, const char *, const char *, const char *, int, int, const char *);
 
 #endif

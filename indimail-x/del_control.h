@@ -7,6 +7,6 @@
 #ifndef DEL_CONTROL_H
 #define DEL_CONTROL_H
 
-int             del_control(char *);
+int             del_control(const char *);
 
 #endif

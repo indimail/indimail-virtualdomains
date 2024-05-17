@@ -45,7 +45,7 @@ die_nomem()
 }
 
 time_t
-vget_lastauth(struct passwd *pw, char *domain, int type, char *ipaddr)
+vget_lastauth(struct passwd *pw, const char *domain, int type, char *ipaddr)
 {
 	int             err, n;
 	time_t          tmval1, tmval2;

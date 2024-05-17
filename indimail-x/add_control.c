@@ -37,7 +37,7 @@ die_nomem()
 }
 
 int
-add_control(char *domain, char *target)
+add_control(const char *domain, const char *target)
 {
 	int             count, relative;
 	static stralloc filename = {0}, tmpstr = {0};

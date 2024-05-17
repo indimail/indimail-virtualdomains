@@ -7,6 +7,6 @@
 #ifndef BACKFILL_H
 #define BACKFILL_H
 
-char           *backfill(char *, char *, char *, int);
+char           *backfill(const char *, const char *, const char *, int);
 
 #endif

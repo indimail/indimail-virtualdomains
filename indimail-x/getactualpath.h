@@ -7,6 +7,6 @@
 #ifndef GETACTUALPATH_H
 #define GETACTUALPATH_H
 
-char           *getactualpath(char *);
+char           *getactualpath(const char *);
 
 #endif

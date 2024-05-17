@@ -8,6 +8,6 @@
 #ifndef IS_ALIAS_DOMAIN_H
 #define IS_ALIAS_DOMAIN_H
 
-int             is_alias_domain(char *);
+int             is_alias_domain(const char *);
 
 #endif

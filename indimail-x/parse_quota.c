@@ -42,7 +42,7 @@ die_nomem()
 }
 
 mdir_t
-parse_quota(char *quota, mdir_t *count)
+parse_quota(const char *quota, mdir_t *count)
 {
 	static stralloc tmpbuf = {0};
 	mdir_t          per_user_limit;

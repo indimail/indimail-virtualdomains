@@ -11,6 +11,6 @@
 #endif
 #include "indimail.h"
 
-mdir_t          parse_quota(char *, mdir_t *);
+mdir_t          parse_quota(const char *, mdir_t *);
 
 #endif

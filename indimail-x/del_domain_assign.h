@@ -13,6 +13,6 @@
 #include <sys/types.h>
 #endif
 
-int             del_domain_assign(char *, char *, gid_t, gid_t);
+int             del_domain_assign(const char *, const char *, gid_t, gid_t);
 
 #endif

@@ -39,7 +39,7 @@ die_nomem()
 }
 
 static int
-do_sql(char *user, char *domain, char *quota, char *table)
+do_sql(const char *user, const char *domain, const char *quota, const char *table)
 {
 	static stralloc SqlBuf = {0};
 
@@ -66,7 +66,7 @@ do_sql(char *user, char *domain, char *quota, char *table)
 }
 
 int
-sql_setquota(char *user, char *domain, char *quota)
+sql_setquota(const char *user, const char *domain, const char *quota)
 {
 	char           *tmpstr;
 	unsigned long   q1, q2;

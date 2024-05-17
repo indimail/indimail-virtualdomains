@@ -11,7 +11,7 @@
 #endif
 
 #ifdef POP_AUTH_OPEN_RELAY
-int             relay_select(char *, char *);
+int             relay_select(const char *, const char *);
 #endif
 
 #endif

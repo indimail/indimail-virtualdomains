@@ -11,7 +11,7 @@
 #endif
 
 #ifdef CLUSTERED_SITE
-int             sql_insertaliasdomain(char *, char *);
+int             sql_insertaliasdomain(const char *, const char *);
 #endif
 
 #endif

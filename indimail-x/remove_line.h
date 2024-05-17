@@ -16,7 +16,7 @@
 #include <sys/types.h>
 #endif
 
-int             remove_line(char *, char *, int, mode_t mode);
-int             remove_line_p(char *, char *, int, mode_t mode);
+int             remove_line(const char *, const char *, int, mode_t mode);
+int             remove_line_p(const char *, const char *, int, mode_t mode);
 
 #endif

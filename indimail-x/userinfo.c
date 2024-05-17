@@ -84,8 +84,8 @@ userinfo(Email, User, Domain, DisplayName, DisplayPasswd, DisplayUid,
 					DisplayLastAuth, DisplayFilter, DisplayAll;
 {
 	struct passwd  *mypw;
-	char           *ptr, *real_domain, *mailstore, *sysconfdir, *controldir,
-				   *passwd_hash = "unknown";
+	char           *ptr, *mailstore, *sysconfdir, *controldir;
+	const char     *real_domain, *passwd_hash = "unknown";
 	MYSQL          *mptr;
 #ifdef CLUSTERED_SITE
 	int             is_dist = 0;

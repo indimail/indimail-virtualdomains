@@ -37,7 +37,7 @@ die_nomem()
 }
 
 int
-valias_delete_domain(char *domain)
+valias_delete_domain(const char *domain)
 {
 	int             err;
 	static stralloc SqlBuf = {0};

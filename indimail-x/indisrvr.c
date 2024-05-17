@@ -37,9 +37,6 @@ static char     sccsid[] = "$Id: indisrvr.c,v 1.18 2024-05-06 09:29:07+05:30 Cpr
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>
 #endif
-#ifdef HAVE_CTYPE_H
-#include <ctype.h>
-#endif
 #ifdef HAVE_SSL
 #include <openssl/ssl.h>
 #include <openssl/err.h>

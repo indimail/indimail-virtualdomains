@@ -40,7 +40,7 @@ die_nomem()
 }
 
 char *
-sql_get_realdomain(char *aliasdomain)
+sql_get_realdomain(const char *aliasdomain)
 {
 	static stralloc prevDomainVal = {0}, SqlBuf = {0}, buf = {0};
 	MYSQL_RES      *res;

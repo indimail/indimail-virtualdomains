@@ -51,7 +51,7 @@ die_nomem()
 }
 
 int
-vread_dir_control(char *filename, vdir_type *vdir, char *domain)
+vread_dir_control(const char *filename, vdir_type *vdir, const char *domain)
 {
 	int             found = 0;
 	static stralloc SqlBuf = {0};

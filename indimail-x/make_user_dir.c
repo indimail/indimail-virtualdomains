@@ -49,7 +49,7 @@ die_nomem()
  * make the directories if needed
  */
 char           *
-make_user_dir(char *username, char *domain, uid_t uid, gid_t gid, int users_per_level)
+make_user_dir(const char *username, const char *domain, uid_t uid, gid_t gid, int users_per_level)
 {
 	char           *tmpstr, *fname;
 	static stralloc tmp1 = {0}, tmp2 = {0};

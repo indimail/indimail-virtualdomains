@@ -42,10 +42,11 @@ die_nomem()
 }
 
 char *
-AliasInLookup(char *email)
+AliasInLookup(const char *email)
 {
 	static stralloc user = {0}, domain = {0}, aliasbuf = {0};
-	char           *ptr, *real_domain;
+	char           *ptr;
+	const char     *real_domain;
 
 #ifdef CLUSTERED_SITE
 	if (sqlOpen_user(email, 1))

@@ -10,6 +10,6 @@
 #ifndef SQL_PASSWD_H
 #define SQL_PASSWD_H
 
-int             sql_passwd(char *, char *, char *, char *);
+int             sql_passwd(const char *, const char *, const char *, const char *);
 
 #endif

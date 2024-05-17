@@ -118,6 +118,7 @@ get_options(int argc, char **argv, int *DisplayName, int *DisplayUid, int *Displ
 {
 	int             c;
 	extern int      optind;
+	char           *ptr;
 
 	*DisplayName =  *DisplayUid = *DisplayGid = *DisplayDir = *DisplayBaseDir =
 		*DisplayTotalUsers = *DisplayAliasDomains = 0;
@@ -172,6 +173,10 @@ get_options(int argc, char **argv, int *DisplayName, int *DisplayUid, int *Displ
 		}
 	}
 	if (optind < argc) {
+		for (ptr = argv[optind]; *ptr; ptr++) {
+			if (isupper(*ptr))
+				strerr_die4x(100, WARN, "domain [", argv[optind], "] has an uppercase character");
+		}
 		if (!stralloc_copys(Domain, argv[optind++]) ||
 				!stralloc_0(Domain))
 			die_nomem();
@@ -193,7 +198,8 @@ display_domain(char *domain, char *dir, uid_t uid, gid_t gid, int DisplayName,
 		int DisplayTotalUsers, int DisplayAliasDomains)
 #endif
 {
-	char           *real_domain, *base_path;
+	const char     *real_domain;
+	char           *base_path;
 	char            inbuf[512];
 	struct substdio ssin;
 	unsigned long   total;

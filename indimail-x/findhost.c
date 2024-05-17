@@ -114,7 +114,7 @@ iclose_cntrl()
 }
 
 int
-open_central_db(char *dbhost)
+open_central_db(const char *dbhost)
 {
 	struct substdio ssin;
 	static stralloc host_path = {0}, SqlBuf = {0};
@@ -316,11 +316,12 @@ open_central_db(char *dbhost)
  * 3 - connect and do not look for '*'
  */
 char           *
-findhost(char *email, int connect_primarydb)
+findhost(const char *email, int connect_primarydb)
 {
 	static stralloc mailhost = {0}, prevEmail = {0},
 					user = {0}, domain = {0}, SqlBuf = {0}, hostid = {0};
-	char           *ptr, *real_domain, *ip_addr;
+	char           *ptr;
+	const char     *real_domain, *ip_addr;
 	int             len, port, err, attempt = 0;
 	MYSQL_RES      *res;
 	MYSQL_ROW       row;

@@ -36,7 +36,7 @@ die_nomem()
 }
 
 void
-SendWelcomeMail(char *homedir, char *username, char *domain, int inactFlag, char *subject)
+SendWelcomeMail(const char *homedir, const char *username, const char *domain, int inactFlag, const char *subject)
 {
 	static stralloc email = {0}, tmpbuf = {0}, bulkdir = {0};
 	char           *ptr;

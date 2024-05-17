@@ -10,6 +10,6 @@
 #ifndef IPASSWD_H
 #define IPASSWD_H
 
-int             ipasswd(char *, char *, char *, int, char *);
+int             ipasswd(const char *, const char *, const char *, int, const char *);
 
 #endif

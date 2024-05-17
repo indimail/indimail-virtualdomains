@@ -11,7 +11,7 @@
 #include "config.h"
 #endif
 
-int             is_distributed_domain(char *);
+int             is_distributed_domain(const char *);
 #ifdef QUERY_CACHE
 void            is_distributed_domain_cache(char);
 #endif

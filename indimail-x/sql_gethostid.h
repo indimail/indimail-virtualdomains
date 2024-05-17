@@ -7,6 +7,6 @@
 #ifndef SQL_HOSTID_H
 #define SQL_HOSTID_H
 
-char           *sql_gethostid(char *);
+char           *sql_gethostid(const char *);
 
 #endif

@@ -27,8 +27,8 @@ die_nomem()
 	_exit(111);
 }
 
-char           *
-munch_domain(char *domain)
+const char     *
+munch_domain(const char *domain)
 {
 	int             i;
 	static stralloc tmpbuf = {0};

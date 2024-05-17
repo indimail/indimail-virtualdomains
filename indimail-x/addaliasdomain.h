@@ -7,6 +7,6 @@
 #ifndef ADDALIASDOMAIN_H
 #define ADDALIASDOMAIN_H
 
-int             addaliasdomain(char *, char *);
+int             addaliasdomain(const char *, const char *);
 
 #endif

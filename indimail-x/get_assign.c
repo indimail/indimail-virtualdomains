@@ -22,9 +22,6 @@
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_CTYPE_H
-#include <ctype.h>
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -63,7 +60,7 @@ die_nomem()
 }
 
 char *
-get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
+get_assign(const char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 {
 	int             dlen, i, fd;
 	char           *s, *ptr, *assigndir, *tmpstr, *tmpbuf;
@@ -76,10 +73,6 @@ get_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 
 	if (!domain || !*domain)
 		return ((char *) 0);
-	for (s = domain; *s; s++) {
-		if (isupper(*s))
-			*s = tolower(*s);
-	}
 #ifdef QUERY_CACHE
 	if (_cacheSwitch && env_get("QUERY_CACHE")) {
 		if (in_domain_size && in_domain && in_dir &&

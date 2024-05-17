@@ -7,7 +7,7 @@
 #ifndef SQLSERVER_H
 #define SQLSERVER_H
 
-char           *SqlServer(char *, char *);
-char           *MdaServer(char *, char *);
+char           *SqlServer(const char *, const char *);
+char           *MdaServer(const char *, const char *);
 
 #endif

@@ -44,7 +44,7 @@ die_nomem()
 }
 
 char           *
-autoturn_dir(char *domain)
+autoturn_dir(const char *domain)
 {
 	static stralloc filename = {0}, template = {0}, line = {0};
 	char            inbuf[512];

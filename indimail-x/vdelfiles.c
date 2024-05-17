@@ -47,7 +47,7 @@ static char     sccsid[] = "$Id: vdelfiles.c,v 1.3 2023-01-22 10:40:03+05:30 Cpr
  *        -1 on failer
  */
 int
-vdelfiles(char *dir, char *user, char *domain)
+vdelfiles(const char *dir, const char *user, const char *domain)
 {
 	DIR            *entry;
 	struct dirent  *dp;

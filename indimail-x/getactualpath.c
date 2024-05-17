@@ -33,7 +33,7 @@ die_nomem()
 }
 
 char    *
-getactualpath(char *path)
+getactualpath(const char *path)
 {
 	char           *ptr;
 	static stralloc pathbuf = {0};

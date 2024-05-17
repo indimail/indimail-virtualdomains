@@ -42,11 +42,11 @@ die_nomem()
 }
 
 int
-valias_delete(char *alias, char *domain, char *alias_line)
+valias_delete(const char *alias, const char *domain, const char *alias_line)
 {
 	int             err;
 	static stralloc SqlBuf = {0};
-	char           *real_domain;
+	const char     *real_domain;
 
 	if (!domain || !*domain)
 		return (1);

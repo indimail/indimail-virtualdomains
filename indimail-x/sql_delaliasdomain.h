@@ -7,6 +7,6 @@
 #ifndef SQL_DELALIASDOMAIN_H
 #define SQL_DELALIASDOMAIN_H
 
-int             sql_delaliasdomain(char *);
+int             sql_delaliasdomain(const char *);
 
 #endif

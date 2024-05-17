@@ -57,7 +57,7 @@ die_nomem()
  *         1 if match found
  */
 int
-remove_line_int(char *template, char *filename, int once_only, mode_t mode, int partial)
+remove_line_int(const char *template, const char *filename, int once_only, mode_t mode, int partial)
 {
 	struct substdio ssin, ssout;
 	static stralloc fname = {0}, line = {0};
@@ -169,13 +169,13 @@ remove_line_int(char *template, char *filename, int once_only, mode_t mode, int 
 }
 
 int
-remove_line(char *template, char *filename, int once_only, mode_t mode)
+remove_line(const char *template, const char *filename, int once_only, mode_t mode)
 {
 	return (remove_line_int(template, filename, once_only, mode, 0));
 }
 
 int
-remove_line_p(char *template, char *filename, int once_only, mode_t mode)
+remove_line_p(const char *template, const char *filename, int once_only, mode_t mode)
 {
 	return (remove_line_int(template, filename, once_only, mode, 1));
 }

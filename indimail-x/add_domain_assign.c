@@ -57,7 +57,7 @@ die_nomem()
  * And signal qmail
  */
 int
-add_domain_assign(char *domain, char *domain_base_dir, uid_t uid, gid_t gid)
+add_domain_assign(const char *domain, const char *domain_base_dir, uid_t uid, gid_t gid)
 {
 	static stralloc filename = {0}, tmpstr = {0};
 	int             fd;

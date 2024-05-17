@@ -20,7 +20,6 @@
 #include <fmt.h>
 #include <open.h>
 #endif
-#include "lowerit.h"
 #include "get_assign.h"
 #include "is_distributed_domain.h"
 #include "open_master.h"
@@ -41,7 +40,7 @@ die_nomem()
 }
 
 int
-addaliasdomain(char *old_domain, char *new_domain)
+addaliasdomain(const char *old_domain, const char *new_domain)
 {
 	static stralloc dirstr = {0}, tmpbuf = {0};
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
@@ -56,12 +55,10 @@ addaliasdomain(char *old_domain, char *new_domain)
 	}
 	if ((fdsourcedir = open_read(".")) == -1)
 		strerr_die1sys(111, "addaliasdomain: unable to open current directory: ");
-	lowerit(new_domain);
 	if (get_assign(new_domain, 0, 0, 0)) {
 		strerr_warn3("addaliasdomain: domain ", new_domain, " exists", 0);
 		return (-1);
 	}
-	lowerit(old_domain);
 	if (!get_assign(old_domain, &dirstr, &uid, &gid)) {
 		strerr_warn3("addaliasdomain: Domain ", old_domain, " does not exist", 0);
 		return (-1);

@@ -13,6 +13,6 @@
 #include <time.h>
 #endif
 
-int             vset_lastauth(char *, char *, char *, char *, char *, int);
+int             vset_lastauth(const char *, const char *, const char *, const char *, const char *, int);
 
 #endif

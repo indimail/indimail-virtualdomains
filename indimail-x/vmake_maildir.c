@@ -38,7 +38,7 @@ die_nomem()
 }
 
 int
-vmake_maildir(char *dir, uid_t uid, gid_t gid, char *domain)
+vmake_maildir(char *dir, uid_t uid, gid_t gid, const char *domain)
 {
 	int             i, fd;
 	static stralloc tmp = {0};

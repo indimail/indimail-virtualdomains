@@ -7,6 +7,6 @@
 #ifndef VALIAS_DELETE_DOMAIN_H
 #define VALIAS_DELETE_DOMAIN_H
 
-int             valias_delete_domain(char *);
+int             valias_delete_domain(const char *);
 
 #endif

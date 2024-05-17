@@ -38,7 +38,7 @@ die_nomem()
 }
 
 static int
-do_sql(char *user, char *domain, char *table)
+do_sql(const char *user, const char *domain, const char *table)
 {
 	static stralloc SqlBuf = {0};
 
@@ -63,9 +63,9 @@ do_sql(char *user, char *domain, char *table)
 }
 
 int
-sql_deluser(char *user, char *domain)
+sql_deluser(const char *user, const char *domain)
 {
-	char           *tmpstr;
+	const char     *tmpstr;
 	int             err;
 
 	if ((err = iopen((char *) 0)) != 0)

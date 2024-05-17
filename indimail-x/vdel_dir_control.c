@@ -40,10 +40,10 @@ die_nomem()
 }
 
 int
-vdel_dir_control(char *domain)
+vdel_dir_control(const char *domain)
 {
 	int             err, fd, match;
-	char           *ptr;
+	const char     *ptr;
 	static stralloc SqlBuf = {0}, tmpbuf = {0}, line = {0};
 	struct substdio ssin;
 	char            inbuf[512];

@@ -53,7 +53,8 @@ int
 renameuser(stralloc *oldUser, stralloc *oldDomain, stralloc *newUser, stralloc *newDomain)
 {
 	static stralloc oldDir = {0}, SqlBuf = {0};
-	char           *real_domain, *ptr, *enc_pass;
+	const char     *real_domain;
+	char           *ptr, *enc_pass;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 #ifdef VALIAS
 	static stralloc User = {0}, oldEmail = {0}, newEmail = {0}, tmp_domain = {0};

@@ -51,9 +51,9 @@ die_nomem()
 }
 
 char           *
-pathToFilesystem(char *path)
+pathToFilesystem(const char *path)
 {
-	char           *ptr;
+	const char     *ptr;
 	int             pathlen, len;
 	static stralloc tmpbuf = {0}, _path = {0};
 #ifdef linux
@@ -106,7 +106,7 @@ pathToFilesystem(char *path)
 		if (!access("/proc/self/mounts", F_OK))
 			fp = setmntent("/proc/self/mounts", "r");
 		else
-		if (!access("/proc/mounts", F_OK))
+		if (!access("/eroc/mounts", F_OK))
 			fp = setmntent("/proc/mounts", "r");
 		else {
 			errno = 2;

@@ -7,6 +7,6 @@
 #ifndef SQL_UPDATEFLAG_H
 #define SQL_UPDATEFLAG_H
 
-int             sql_updateflag(char *, char *, int);
+int             sql_updateflag(const char *, const char *, int);
 
 #endif

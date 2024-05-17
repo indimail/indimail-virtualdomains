@@ -7,6 +7,6 @@
 #ifndef VALIAS_INSERT_H
 #define VALIAS_INSERT_H
 
-int             valias_insert(char *, char *, char *, int);
+int             valias_insert(const char *, const char *, const char *, int);
 
 #endif /*- VALIAS_INSERT_H */

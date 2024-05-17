@@ -34,7 +34,7 @@ die_nomem()
 }
 
 static int
-do_sql(char *user, char *domain, int flag, char *table)
+do_sql(const char *user, const char *domain, int flag, const char *table)
 {
 	static stralloc SqlBuf = {0};
 	char            strnum[FMT_ULONG];
@@ -71,7 +71,7 @@ do_sql(char *user, char *domain, int flag, char *table)
 }
 
 int
-sql_updateflag(char *user, char *domain, int flag)
+sql_updateflag(const char *user, const char *domain, int flag)
 {
 	int             err;
 

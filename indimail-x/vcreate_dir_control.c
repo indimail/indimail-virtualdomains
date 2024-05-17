@@ -37,13 +37,13 @@ die_nomem()
 }
 
 int
-vcreate_dir_control(char *filename, char *domain)
+vcreate_dir_control(const char *filename, const char *domain)
 {
 	static stralloc SqlBuf = {0}, tmpbuf = {0};
 	char            strnum[FMT_ULONG];
 	uid_t           uid;
 	gid_t           gid;
-	char           *ptr = (char *) 0;
+	const char     *ptr = (char *) 0;
 
 	if (domain && *domain && !(ptr = get_assign(domain, 0, &uid, &gid))) {
 		strerr_warn2(domain, ": No such domain", 0);

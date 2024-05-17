@@ -43,10 +43,10 @@ die_nomem()
 }
 
 int
-RelayInLookup(char *mailfrom, char *remoteip)
+RelayInLookup(const char *mailfrom, const char *remoteip)
 {
 	static stralloc user = {0}, domain = {0}, email = {0};
-	char           *real_domain;
+	const char     *real_domain;
 	int             retval;
 
 #ifdef CLUSTERED_SITE

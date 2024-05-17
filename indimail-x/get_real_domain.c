@@ -69,7 +69,7 @@ die_nomem()
 
 #ifdef CLUSTERED_SITE
 static char *
-is_in_rcpthosts(char *domain)
+is_in_rcpthosts(const char *domain)
 {
 	int             fd, match;
 	char            inbuf[512];
@@ -186,7 +186,7 @@ is_in_rcpthosts(char *domain)
 #endif
 
 static char *
-is_in_env(char *domain, char *envstr)
+is_in_env(const char *domain, const char *envstr)
 {
 	char           *ptr, *cptr;
 	int             len;
@@ -222,8 +222,8 @@ is_in_env(char *domain, char *envstr)
 	return ((char *) 0);
 }
 
-char *
-get_real_domain(char *domain)
+const char     *
+get_real_domain(const char *domain)
 {
 	static stralloc dir = {0};
 	char            Dir[1024];

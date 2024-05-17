@@ -15,7 +15,7 @@ static char     sccsid[] = "$Id: close_big_dir.c,v 1.1 2019-04-18 08:25:21+05:30
 #endif
 
 int
-close_big_dir(char *table_name, char *domain, uid_t uid, gid_t gid)
+close_big_dir(const char *table_name, const char *domain, uid_t uid, gid_t gid)
 {
 	return (vwrite_dir_control(table_name, &vdir, domain, uid, gid));
 }

@@ -207,7 +207,7 @@ noinst_DATA = indimail-permissions.easy indimail-permissions.paranoid \
 post_handle_list = vadddomain vadduser vdeldomain vaddaliasdomain vrenamedomain vmoduser vpasswd \
 	vdeluser vrenameuser
 
-doc_list= ChangeLog FAQ.md README-indimail.md README-ldap.md  \
+doc_list= ChangeLog README-indimail.md README-ldap.md  \
 	README-vlimits.md COPYING-indimail
 
 MOSTLYCLEANFILES=vcaliasrev myslave controlsync bogofilter-qfe \

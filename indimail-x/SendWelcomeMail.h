@@ -7,6 +7,6 @@
 #ifndef SENDWELCOMEMAIL_H
 #define SENDWELCOMEMAIL_H
 
-void            SendWelcomeMail(char *, char *, char *, int, char *);
+void            SendWelcomeMail(const char *, const char *, const char *, int, const char *);
 
 #endif

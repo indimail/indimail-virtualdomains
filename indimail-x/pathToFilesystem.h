@@ -7,6 +7,6 @@
 #ifndef PATHTOFILESYSTEM_H
 #define PATHTOFILESYSTEM_H
 
-char           *pathToFilesystem(char *);
+char           *pathToFilesystem(const char *);
 
 #endif

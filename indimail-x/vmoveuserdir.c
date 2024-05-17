@@ -31,6 +31,9 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <strerr.h>
@@ -75,12 +78,11 @@ main(int argc, char **argv)
 {
 	struct passwd  *pw;
 	struct passwd   PwTmp;
-	char           *tmpstr, *Domain, *NewDir, *User, *real_domain, *base_argv0;
+	char           *tmpstr, *Domain, *NewDir, *User, *base_argv0;
+	const char     *real_domain;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	static stralloc OldDir = {0}, Dir = {0};
-#if defined(CLUSTERED_SITE) || defined(VALIAS)
 	char           *ptr;
-#endif
 #ifdef VALIAS
 	static stralloc tmp_domain = {0};
 #endif
@@ -96,6 +98,10 @@ main(int argc, char **argv)
 	if (argc != 3) {
 		strerr_warn1("usage: vmoveuserdir user new_dir", 0);
 		return (1);
+	}
+	for (ptr = argv[1]; *ptr; ptr++) {
+		if (isupper(*ptr))
+			strerr_die4x(100, WARN, "email [", argv[1], "] has an uppercase character");
 	}
 	User = argv[1];
 	NewDir = argv[2];

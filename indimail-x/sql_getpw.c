@@ -42,7 +42,7 @@ die_nomem()
 }
 
 static int
-do_sql(stralloc *user, char *domain, char *table, MYSQL_RES **res)
+do_sql(stralloc *user, const char *domain, const char *table, MYSQL_RES **res)
 {
 	static stralloc SqlBuf = {0};
 	int             err;
@@ -76,9 +76,10 @@ do_sql(stralloc *user, char *domain, char *table, MYSQL_RES **res)
 }
 
 struct passwd  *
-sql_getpw(char *user, char *domain)
+sql_getpw(const char *user, const char *domain)
 {
-	char           *domstr, *pwstruct, *real_domain, *ptr;
+	char           *domstr, *pwstruct, *ptr;
+	const char     *real_domain;
 	int             row_count;
 	MYSQL_RES      *res = (MYSQL_RES *) NULL;
 	MYSQL_ROW       row;

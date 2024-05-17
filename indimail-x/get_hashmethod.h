@@ -4,7 +4,7 @@
 #ifndef _GET_HASH_METHOD_H_
 #define _GET_HASH_METHOD_H_
 
-int             get_hashmethod(char *);
+int             get_hashmethod(const char *);
 char           *print_hashmethod(int);
 
 #endif

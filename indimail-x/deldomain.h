@@ -7,6 +7,6 @@
 #ifndef DELDOMAIN_H
 #define DELDOMAIN_H
 
-int             deldomain(char *);
+int             deldomain(const char *);
 
 #endif /*- DELDOMAIN_H */

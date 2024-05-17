@@ -11,7 +11,7 @@
 #endif
 #ifdef VALIAS
 
-int             valias_delete(char *, char *, char *);
+int             valias_delete(const char *, const char *, const char *);
 
 #endif
 #endif

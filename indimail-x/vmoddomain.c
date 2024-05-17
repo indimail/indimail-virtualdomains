@@ -29,6 +29,9 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
 #ifdef HAVE_QMAIL
 #include <sgetopt.h>
 #include <stralloc.h>
@@ -94,6 +97,7 @@ get_options(int argc, char **argv, int *use_vfilter, int *domain_limits,
 	char **handler, char **domain)
 {
 	int             c;
+	char           *ptr;
 
 	*use_vfilter = -1;
 	*domain_limits = -1;
@@ -123,9 +127,13 @@ get_options(int argc, char **argv, int *use_vfilter, int *domain_limits,
 		usage();
 		return (1);
 	} else
-	if (optind < argc)
+	if (optind < argc) {
+		for (ptr = argv[optind]; *ptr; ptr++) {
+			if (isupper(*ptr))
+				strerr_die4x(100, WARN, "domain [", argv[optind], "] has an uppercase character");
+		}
 		*domain = argv[optind++];
-	else {
+	} else {
 		usage();
 		return (1);
 	}

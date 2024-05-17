@@ -39,7 +39,7 @@ vauth_getpw(char *user, char *domain)
 char           *
 vget_real_domain(char *domain)
 {
-	return (get_real_domain(domain));
+	return ((char *) get_real_domain(domain));
 }
 
 char           *

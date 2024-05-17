@@ -71,7 +71,7 @@ int             check_mailbox_flags(char newchar);
 void            transmit_block(substdio *ss);
 void            ignore_to_end_tag(substdio *ss);
 void            get_calling_host();
-char           *get_session_val(char *session_var);
+char           *get_session_val(const char *session_var);
 
 extern int      ezmlm_make, enable_fortune, debug;
 
@@ -79,7 +79,7 @@ extern int      ezmlm_make, enable_fortune, debug;
  * send an html template to the browser 
  */
 int
-send_template(char *actualfile)
+send_template(const char *actualfile)
 {
 	int             pipe_fd[2], pid, match;
 	char            inbuf[1024];
@@ -159,7 +159,7 @@ putch(int ch, substdio *ss)
 }
 
 int
-send_template_now(char *filename)
+send_template_now(const char *filename)
 {
 	int             i, fd1, fd2, match, inchar, migflag = 0;
 	char           *ptr, *alias_line, *qnote = " MB";
@@ -1169,7 +1169,7 @@ get_calling_host()
  * value, or the TmpCGI if it's not yet been saved                         
  */
 char           *
-get_session_val(char *session_var)
+get_session_val(const char *session_var)
 {
 	static stralloc value = {0};
 	int             fd, match;

@@ -53,7 +53,7 @@
 #include "common.h"
 
 void
-process_commands(char *cmmd)
+process_commands(const char *cmmd)
 {
 	static stralloc tmp = {0};
 	struct passwd  *pw;
