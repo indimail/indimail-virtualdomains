@@ -45,7 +45,7 @@ case "$host" in
 		idcommand="/usr/bin/id -u mail"
 	fi
 	CPPFLAGS="$CPPFLAGS -Dlint -DLINUX -I/usr/include/qmail -Wall"
-	EXTRACPPFLAGS="-Wformat=2 -Wformat-security -Wformat-signedness -Wformat-overflow -Wsuggest-attribute=format -Wmissing-format-attribute -Wdfkdjf"
+	EXTRACPPFLAGS="-Wformat=2 -Wformat-security -Wformat-signedness -Wformat-overflow -Wsuggest-attribute=format -Wmissing-format-attribute"
 	CFLAGS="$CFLAGS -O4 -fPIC -fpie -Wall"
 	LDFLAGS="$LDFLAGS -pie"
 	MODFLAGS="-O4 -fPIC -shared -Wall"
