@@ -110,6 +110,7 @@ if [ $force -eq 0 -a -f Makefile ] ; then
 fi
 ./configure --prefix=$prefix \
   --enable-indimail \
+  --with-charset=utf-8 \
   --sbindir=$sbindir --sysconfdir=$sysconfdir \
   --datarootdir=$prefix/share/indimail \
   --libexecdir=$prefix/libexec/indimail \

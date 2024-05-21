@@ -94,6 +94,9 @@ BuildRequires: -post-build-checks
 %endif
 ################################# OBS ###############################
 
+%if 0%{?suse_version}
+Requires: glibc-locale-base
+%endif
 Requires: procps /usr/bin/awk /usr/bin/which
 Requires: sed findutils
 Requires: coreutils grep /bin/sh glibc
@@ -147,9 +150,16 @@ if [ %{reconf_bogofilter} -eq 1 ] ; then
 fi
 (
 HOME='.';export HOME
+%if %{defined mgaversion} || %{defined suse_version}
+%configure --prefix=%{_prefix} --libexecdir=%{libexecdir} \
+  --sysconfdir=%{sysconfdir} --mandir=%{mandir} \
+  --datarootdir=%{shareddir} --enable-indimail \
+  --with-charset=utf-8
+%else
 %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} \
   --sysconfdir=%{sysconfdir} --mandir=%{mandir} \
   --datarootdir=%{shareddir} --enable-indimail
+%endif
 )
 
 %install
