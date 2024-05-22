@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.24 2024-05-14 00:34:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.25 2024-05-23 01:51:33+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -21,6 +21,12 @@ password1="abcdefgh1234"
 password2="abcdefgh2345"
 password3="abcdefgh3456"
 domain=indimail.org
+
+adminhost=localhost
+adminport=4050
+adminuser=admin
+adminpass=benhur30
+
 testdir=/tmp/qmail-test
 servicedir=$testdir/service
 maildir=$testdir/$user/Maildir
@@ -357,6 +363,18 @@ setup_config()
 		$sudo chown $user $sysconfdir/nssd.conf
 		sed -i "s{pidfile.*{pidfile     $testdir/pwdlookup/nssd.pid{g" $sysconfdir/nssd.conf
 	fi
+	# create admin server
+	sudo $svctool --indisrvr=$adminport --servicedir=$servicedir \
+  		--localip=0 --maxdaemons=40 --maxperip=25 --avguserquota=2097152 \
+  		--certfile=$certdir/servercert.pem --ssl \
+		--sysconfdir=$sysconfdir --logdir=$logdir \
+  		--hardquota=52428800 --base_path=$testdir/mail
+	$sudo chown -R $user $servicedir/indisrvr.$adminport
+	$sudo chmod 755 $servicedir/indisrvr.$adminport/variables
+	echo $sysconfdir       > $servicedir/indisrvr.$adminport/variables/SYSCONFDIR
+	echo $cntrldir         > $servicedir/indisrvr.$adminport/variables/CONTROLDIR
+	echo $sysconfdir/users > $servicedir/indisrvr.$adminport/variables/ASSIGNDIR
+	sed -i "s{qmaill{$user{g" $servicedir/indisrvr.$adminport/log/run
 }
 
 create_authimap()
@@ -3192,6 +3210,160 @@ test_smtp_chk_sender()
 	fi
 }
 
+do_admin_server_tests()
+{
+	ln -sf $cntrldir/host.mysql $cntrldir/host.master
+	ln -sf $cntrldir/host.mysql $cntrldir/host.cntrl
+	printf "\r%126s\n" " "
+	echo "Starting admin server tests"
+	$sudo env - \
+			PATH=/usr/bin:/usr/sbin \
+			SYSCONFDIR=$sysconfdir \
+			CONTROLDIR=$cntrldir \
+		vpriv -D admin '*'
+	tm1=$(date +"%s.%4N")
+	$sudo env - \
+			PATH=/usr/bin:/usr/sbin \
+			SYSCONFDIR=$sysconfdir \
+			CONTROLDIR=$cntrldir \
+		vpriv -i /usr/bin/vuserinfo admin '*'
+	if [ $? -eq 0 ] ; then
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing vpriv       command %-17s succeeded %55s [%.4f sec]\n" " " " " "$secs"
+		print_pct
+	else
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		fcount=$(expr $fcount + 1)
+		echo "  testing vpriv command succeeded failed [%.4f sec]\n" "$secs"
+		[ -z "$failed" ] && failed="test vpriv" || failed="$failed, test vpriv"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	$sudo env - \
+			PATH=/usr/bin:/usr/sbin \
+			SYSCONFDIR=$sysconfdir \
+			CONTROLDIR=$cntrldir \
+		vpriv -d /usr/bin/vuserinfo admin
+	tm1=$(date +"%s.%4N")
+	$sudo env - \
+			PATH=/usr/bin:/usr/sbin \
+			SYSCONFDIR=$sysconfdir \
+			CONTROLDIR=$cntrldir \
+		mgmtpass -u admin -p $adminpass
+	if [ $? -eq 0 ] ; then
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing mgmtpass    command %-17s succeeded %55s [%.4f sec]\n" " " " " "$secs"
+		print_pct
+	else
+		tm2=$(date +"%s.%4N")
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		fcount=$(expr $fcount + 1)
+		echo "  testing mgmtpass command succeeded failed [%.4f sec]\n" "$secs"
+		[ -z "$failed" ] && failed="test vpriv" || failed="$failed, test vpriv"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+
+	tm1=$(date +"%s.%4N")
+	for cmd in /usr/bin/vuserinfo /usr/bin/vsetuserquota \
+		/usr/bin/vipmap /usr/bin/crc /usr/bin/printdir \
+		/usr/bin/vlimit /usr/sbin/resetquota /usr/sbin/ipchange \
+		/usr/sbin/vfstab /usr/libexec/indimail/updatefile
+	do
+		d=$(dirname $cmd)
+		prog=$(basename $cmd)
+		$sudo env - \
+				PATH=/usr/bin:/usr/sbin \
+				SYSCONFDIR=$sysconfdir \
+				CONTROLDIR=$cntrldir \
+			vpriv -i $d/$prog admin '*'
+		case $prog in
+			vuserinfo)
+			#set -- -q $testuser1
+			# head -1 |cut -d: -f2|awk '{print $1}'
+			set "$testuser1"
+			;;
+			vsetuserquota)
+			set "$testuser1" "300m"
+			#set -- -B $testdir/qmail -d $qmaildir $arg1 $arg2
+			;;
+			vipmap)
+			set -- -i "192.168.1.100" "$domain1"
+			;;
+			crc)
+			set -- -v /etc/hosts
+			;;
+			printdir)
+			set $domain1
+			;;
+			kvlimit)
+			;;
+			kresetquota)
+			;;
+			kvfstab)
+			;;
+			kupdatefile)
+			;;
+			*)
+			set "notset"
+			;;
+		esac
+		if [ "$1" = "notset" ] ; then
+			continue
+		fi
+		tm1=$(date +"%s.%4N")
+		$sudo $setuidgid -g indimail,qcerts indimail env - \
+			PATH=/usr/bin:/usr/sbin \
+			SYSCONFDIR=$sysconfdir \
+			CONTROLDIR=$cntrldir \
+		adminclient -n $certdir/servercert.pem  -h $adminhost -p $adminport \
+			-u $adminuser -P $adminpass -c "$prog $*" > $logdir/setup/adminclient"$prog".log 2>&1
+		if [ $? -eq 0 ] ; then
+			tm2=$(date +"%s.%4N")
+			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+			if [ "$prog" = "vsetuserquota" ] ; then
+				#ASSIGNDIR=$sysconfdir/users
+				quota=$($sudo env - \
+					PATH=/bin:/usr/bin \
+					SYSCONFDIR=$sysconfdir \
+					CONTROLDIR=$cntrldir \
+					vuserinfo -q $testuser1 | head -1 |cut -d: -f2|awk '{print $1}')
+				if [ $quota -eq 314572800 ] ; then
+					tcount=$(expr $tcount + 1)
+					printf "\r  testing adminclient command %-17s succeeded %55s [%.4f sec]\n" "$prog" " " "$secs"
+					print_pct
+				else
+					fcount=$(expr $fcount + 1)
+					printf "\r  testing adminclient command %-17s    failed %55s [%.4f sec]\n" "$prog" " " "$secs"
+					print_pct
+					if [ $prompt -eq 1 ] ; then
+						less $logdir/setup/adminclient"$prog".log
+					fi
+					[ -z "$failed" ] && failed="adminclient $prog failed" || failed="$failed, adminclient $prog failed"
+				fi
+			else
+				tcount=$(expr $tcount + 1)
+				printf "\r  testing adminclient command %-17s succeeded %55s [%.4f sec]\n" "$prog" " " "$secs"
+				print_pct
+			fi
+		else
+			tm2=$(date +"%s.%4N")
+			secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+			fcount=$(expr $fcount + 1)
+			printf "\r  testing adminclient command %-17s    failed %55s [%.4f sec]\n" "$prog" " " "$secs"
+			print_pct
+			if [ $prompt -eq 1 ] ; then
+				less $logdir/setup/adminclient"$prog".log
+			fi
+			[ -z "$failed" ] && failed="adminclient $prog failed" || failed="$failed, adminclient $prog failed"
+		fi
+	done
+	/bin/rm -f $cntrldir/host.master $cntrldir/host.cntrl
+}
+
 ## begin getopt
 usage()
 {
@@ -3229,6 +3401,7 @@ display_tests()
 	echo "Test authenticated SMTP using qmail to use SCRAM methods SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS"
 	echo "  SCRAM-SHA-256-PLUS"
 	echo "Test IMAP, IMAPS, POP3, POP3S login with the user created to support SCRAM methods"
+	echo "Test Admin Server"
 	echo "Test domain deletion"
 	echo "Test execution of post handle scripts"
 }
@@ -3483,7 +3656,7 @@ current_dir=$(pwd)
 if [ -f $testdir/itotal.count ] ; then
 	total_tests=$(cat $testdir/itotal.count)
 else
-	total_tests=1304
+	total_tests=1312
 fi
 if [ -x /usr/bin/mariadb ] ; then
 	mysql=/usr/bin/mariadb
@@ -3549,6 +3722,10 @@ do_plain_cram_user_tests
 
 do_scram_user_tests
 
+t1="$password1""md5"
+create_plain_user $testuser1 $t1 MD5 >/dev/null 2>&1
+do_admin_server_tests
+
 printf "\r%126s\n" " "
 echo "Testing domain deletion"
 delete_domain $domain1
@@ -3579,6 +3756,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.25  2024-05-23 01:51:33+05:30  Cprogrammer
+# added test for adminclient/indisrvr
+#
 # Revision 1.24  2024-05-14 00:34:02+05:30  Cprogrammer
 # fixed elapsed time
 # new env variable PENALTY for qmail-smtpd
