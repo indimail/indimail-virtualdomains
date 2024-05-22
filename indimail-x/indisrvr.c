@@ -1,12 +1,12 @@
 /*
- * $Id: indisrvr.c,v 1.19 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
+ * $Id: indisrvr.c,v 1.20 2024-05-22 22:37:59+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.19 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.20 2024-05-22 22:37:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -193,7 +193,7 @@ main(int argc, char **argv)
 #endif
 				continue;
 			default:
-				strerr_warn1("indisrver: accept: ", &strerr_sys);
+				strerr_warn1("indisrvr: accept: ", &strerr_sys);
 				close(socket_desc);
 				_exit(1);
 			}
@@ -205,7 +205,7 @@ main(int argc, char **argv)
 			hostname, sizeof(hostname), servicename, sizeof(servicename), NI_NUMERICHOST|NI_NUMERICSERV)))
 			filewrt(3, "%d: Connection from %s:%s\n", getpid(), hostname, servicename);
 		else
-			strerr_warn2("indisrver: getnameinfo: ", (char *) gai_strerror(n), 0);
+			strerr_warn2("indisrvr: getnameinfo: ", (char *) gai_strerror(n), 0);
 #else
 		filewrt(3, "%d: Connection from %s:%d\n", getpid(), inet_ntoa(cliaddress.sin_addr), ntohs(cliaddress.sin_port));
 #endif
@@ -246,7 +246,7 @@ main(int argc, char **argv)
 				break;
 			}
 			if (dup2(new, 0) == -1 || dup2(new, 1) == -1 || dup2(new, 2) == -1)
-				strerr_die1sys(1, "indisrver: dup2 (0, 1, 2): ");
+				strerr_die1sys(1, "indisrvr: dup2 (0, 1, 2): ");
 			if (new != 0 && new != 1 && new != 2)
 				close(new);
 #ifdef HAVE_SSL
@@ -534,7 +534,7 @@ Login_User(stralloc *username, stralloc *password)
 		return (0);
 	}
 	filewrt(3, "%d: user %s password incorrect\n", getpid(), username->s);
-	strerr_warn1("indisrver: Password incorrect", 0);
+	strerr_warn1("indisrvr: Password incorrect", 0);
 	if (updateLoginFailed(username->s)) {
 		strerr_warn1("failed to update login status", 0);
 	}
@@ -681,6 +681,9 @@ main()
 
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.20  2024-05-22 22:37:59+05:30  Cprogrammer
+ * fixed typo
+ *
  * Revision 1.19  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

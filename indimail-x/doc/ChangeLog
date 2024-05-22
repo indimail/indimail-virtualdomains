@@ -1,12 +1,18 @@
 * XXX XXX XX XXXX XX:XX:XX +0000 @email@ @version@-@release@%{?dist}
 Release @version@-@release@ Start 02/05/2024 End XX/XX/XXXX
 - 02/05/2024
-1. crc.c: fixed bug with -d option
-2. crc.c: fixed bug with printing group permissions
-3. crcdiff.c: display L1, L2 changes
-4. crcdiff.c: added -s, -c option
+01. crc.c: fixed bug with -d option
+02. crc.c: fixed bug with printing group permissions
+03. crcdiff.c: display L1, L2 changes
+04. crcdiff.c: added -s, -c option
 - 06/05/2024
-5. indisrvr.c: added -l option for running under tcpserver
+05. indisrvr.c: added -l option for running under tcpserver
+- 22/05/2024
+06. dbload.c: fixed setting of (*ptr)->fd
+07. dbinfoSelect.c: fix SIGSEGV when mysql is down
+08. mgmtpass.c: fixed handling of command line arguments
+09. mgmtpassfuncs.c: added missing new line
+10. indisrvr.c: Fixed typos
 
 * Mon Jan 01 2024 09:24:41 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.6-1.1%{?dist}
 Release 3.4.6-1.1 Start 09/09/2023 End 01/01/2024

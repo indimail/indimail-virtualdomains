@@ -1,5 +1,8 @@
 /*
  * $Log: dbload.c,v $
+ * Revision 1.15  2024-05-22 22:35:48+05:30  Cprogrammer
+ * fixed setting of (*ptr)->fd
+ *
  * Revision 1.14  2023-04-01 13:28:55+05:30  Cprogrammer
  * display mysql error for mysql_options()
  *
@@ -73,7 +76,7 @@
 #include "load_mysql.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbload.c,v 1.14 2023-04-01 13:28:55+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbload.c,v 1.15 2024-05-22 22:35:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static MYSQL   *is_duplicate_conn(MYSQL **, DBINFO **);
@@ -280,8 +283,7 @@ OpenDatabases()
 					continue;
 				} else
 					(*ptr)->fd = (*mysqlptr)->net.fd;
-			} else
-				(*ptr)->fd = (*mysqlptr)->net.fd;
+			} 
 			if (verbose) {
 				subprintfe(subfdout, "dbload", "connection %03d fd %d: %-30s database %s server %s user %s %d\n",
 						count, (*ptr)->fd, (*ptr)->domain, (*ptr)->database, (*ptr)->server, (*ptr)->user, (*ptr)->port);
@@ -324,6 +326,7 @@ is_duplicate_conn(MYSQL **mysqlptr, DBINFO **rhostsptr)
 		else
 		if ((*ptr)->port != (*rhostsptr)->port)
 			continue;
+		(*rhostsptr)->fd = (*ptr)->fd;
 		return ((*mptr));
 	}
 	return ((MYSQL *) 0);

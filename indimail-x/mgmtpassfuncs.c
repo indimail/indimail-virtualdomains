@@ -1,5 +1,8 @@
 /*
  * $Log: mgmtpassfuncs.c,v $
+ * Revision 1.9  2024-05-22 22:38:31+05:30  Cprogrammer
+ * added missing newline
+ *
  * Revision 1.8  2023-07-17 11:46:36+05:30  Cprogrammer
  * set hash method from hash_method control file in controldir
  *
@@ -30,7 +33,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.8 2023-07-17 11:46:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: mgmtpassfuncs.c,v 1.9 2024-05-22 22:38:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -207,6 +210,7 @@ mgmtlist()
 		if (!(row = in_mysql_fetch_row(res)))
 			break;
 		out("mgmtlist", row[0]);
+		out("mgmtlist", "\n");
 	}
 	flush("mgmtlist");
 	in_mysql_free_result(res);

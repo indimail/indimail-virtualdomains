@@ -1,5 +1,8 @@
 /*
  * $Log: dbinfoSelect.c,v $
+ * Revision 1.4  2024-05-22 22:36:48+05:30  Cprogrammer
+ * fix SIGSEGV when mysql is down
+ *
  * Revision 1.3  2023-01-22 10:40:03+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dbinfoSelect.c,v 1.3 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dbinfoSelect.c,v 1.4 2024-05-22 22:36:48+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -79,56 +82,40 @@ dbinfoSelect(char *filename, char *domain, char *mdahost, int row_format)
 			continue;
 		}
 		if (!first_flag++)
-			subprintfe(subfdout, "dbinfoSelect", "MySQL Client Version: %s\n",
-					(char *) in_mysql_get_client_info());
-		subprintfe(subfdout, "dbinfoSelect", "connection to  %s\n",
-				(char *) in_mysql_get_host_info(*mysqlptr));
-		subprintfe(subfdout, "dbinfoSelect", "protocol       %u\n",
-				in_mysql_get_proto_info(*mysqlptr));
-		subprintfe(subfdout, "dbinfoSelect", "server version %s\n",
-			(char *) in_mysql_get_server_info(*mysqlptr));
+			subprintfe(subfdout, "dbinfoSelect", "MySQL Client Version: %s\n", (char *) in_mysql_get_client_info());
 		subprintfe(subfdout, "dbinfoSelect", "domain         %s", (*rhostsptr)->domain);
 		if ((is_dist = is_distributed_domain((*rhostsptr)->domain)) == -1)
 			subprintfe(subfdout, "dbinfoSelect", " - can't figure out dist flag\n");
 		else
-			subprintfe(subfdout, "dbinfoSelect", " - %s\n",
-					is_dist == 1 ? "Distributed" : "Non Distributed");
-		subprintfe(subfdout, "dbinfoSelect", "sqlserver[%03d] %s\n",
-				count, (*rhostsptr)->server);
-		if (*((*rhostsptr)->mdahost))
-			subprintfe(subfdout, "dbinfoSelect", "mda host       %s\n",
-					(*rhostsptr)->mdahost);
+			subprintfe(subfdout, "dbinfoSelect", " - %s\n", is_dist == 1 ? "Distributed" : "Non Distributed");
+		subprintfe(subfdout, "dbinfoSelect", "sqlserver[%03d] %s\n", count, (*rhostsptr)->server);
 		if ((*mysqlptr)->unix_socket)
-			subprintfe(subfdout, "dbinfoSelect", "Unix   Socket  %s\n",
-					(*mysqlptr)->unix_socket);
-		else {
-			subprintfe(subfdout, "dbinfoSelect", "TCP/IP Port    %d\n",
-					(*rhostsptr)->port);
-			subprintfe(subfdout, "dbinfoSelect", "Use SSL        %s\n",
-					(*rhostsptr)->use_ssl ? "Yes" : "No");
-			if ((*rhostsptr)->use_ssl)
-   				subprintfe(subfdout, "dbinfoSelect", "SSL Cipher     %s\n",
-						(char *) in_mysql_get_ssl_cipher(*mysqlptr));
+			subprintfe(subfdout, "dbinfoSelect", "Unix   Socket  %s\n", (*mysqlptr)->unix_socket);
+		else
+			subprintfe(subfdout, "dbinfoSelect", "TCP/IP Port    %d\n", (*rhostsptr)->port);
+		subprintfe(subfdout, "dbinfoSelect", "database       %s\n", (*rhostsptr)->database);
+		subprintfe(subfdout, "dbinfoSelect", "user           %s\n", (*rhostsptr)->user);
+		subprintfe(subfdout, "dbinfoSelect", "password       %s\n", (*rhostsptr)->password);
+		subprintfe(subfdout, "dbinfoSelect", "fd             %d\n", (*rhostsptr)->fd);
+		subprintfe(subfdout, "dbinfoSelect", "DBINFO Method  %s\n", (*rhostsptr)->isLocal ? "Auto" : "DBINFO");
+		if (*((*rhostsptr)->mdahost))
+			subprintfe(subfdout, "dbinfoSelect", "mda host       %s\n", (*rhostsptr)->mdahost);
+		if ((*rhostsptr)->fd == -1) {
+			subprintfe(subfdout, "dbinfoSelect", "MySQL Status   mysql_real_connect: %s\n", (char *) in_mysql_error((*mysqlptr)));
+			out("dbinfoSelect", "--------------------------\n");
+			flush("dbinfoSelect");
+			continue;
 		}
-		subprintfe(subfdout, "dbinfoSelect", "database       %s\n",
-				(*rhostsptr)->database);
-		subprintfe(subfdout, "dbinfoSelect", "user           %s\n",
-				(*rhostsptr)->user);
-		subprintfe(subfdout, "dbinfoSelect", "password       %s\n",
-				(*rhostsptr)->password);
-		subprintfe(subfdout, "dbinfoSelect", "fd             %d\n",
-				(*rhostsptr)->fd);
-		subprintfe(subfdout, "dbinfoSelect", "DBINFO Method  %s\n",
-				(*rhostsptr)->isLocal ? "Auto" : "DBINFO");
-		if ((*rhostsptr)->fd == -1)
-			subprintfe(subfdout, "dbinfoSelect", "MySQL Stat     mysql_real_connect: %s\n",
-					(char *) in_mysql_error((*mysqlptr)));
-		else
 		if ((ptr = (char *) in_mysql_stat((*mysqlptr))))
-			subprintfe(subfdout, "dbinfoSelect", "MySQL Stat     %s\n", ptr);
+			subprintfe(subfdout, "dbinfoSelect", "MySQL Status   %s\n", ptr);
 		else
-			subprintfe(subfdout, "dbinfoSelect", "MySQL Stat     %s\n",
-					(char *) in_mysql_error((*mysqlptr)));
+			subprintfe(subfdout, "dbinfoSelect", "MySQL Status   %s\n", (char *) in_mysql_error((*mysqlptr)));
+		subprintfe(subfdout, "dbinfoSelect", "connection to  %s\n", (char *) in_mysql_get_host_info(*mysqlptr));
+		subprintfe(subfdout, "dbinfoSelect", "protocol       %u\n", in_mysql_get_proto_info(*mysqlptr));
+		subprintfe(subfdout, "dbinfoSelect", "server version %s\n", (char *) in_mysql_get_server_info(*mysqlptr));
+		subprintfe(subfdout, "dbinfoSelect", "Use SSL        %s\n", (*rhostsptr)->use_ssl ? "Yes" : "No");
+		if (!(*mysqlptr)->unix_socket && (*rhostsptr)->use_ssl)
+			subprintfe(subfdout, "dbinfoSelect", "SSL Cipher     %s\n", (char *) in_mysql_get_ssl_cipher(*mysqlptr));
 		out("dbinfoSelect", "--------------------------\n");
 		flush("dbinfoSelect");
 	}
