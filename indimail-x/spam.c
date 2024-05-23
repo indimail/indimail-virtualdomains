@@ -1,5 +1,8 @@
 /*
  * $Log: spam.c,v $
+ * Revision 1.7  2024-05-23 17:23:15+05:30  Cprogrammer
+ * moved wildmat.h to libqmail
+ *
  * Revision 1.6  2023-09-05 21:47:40+05:30  Cprogrammer
  * use matchregex from libqmail
  *
@@ -50,14 +53,14 @@
 #include <subfd.h>
 #include <getEnvConfig.h>
 #include <matchregex.h>
+#include <wildmat.h>
 #endif
 #include "common.h"
 #include "spam.h"
-#include "wildmat.h"
 #include "lowerit.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: spam.c,v 1.6 2023-09-05 21:47:40+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: spam.c,v 1.7 2024-05-23 17:23:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define BADMAIL 1

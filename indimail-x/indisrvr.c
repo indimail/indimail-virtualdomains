@@ -1,17 +1,20 @@
 /*
- * $Id: indisrvr.c,v 1.20 2024-05-22 22:37:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: indisrvr.c,v 1.21 2024-05-23 20:56:56+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: indisrvr.c,v 1.20 2024-05-22 22:37:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: indisrvr.c,v 1.21 2024-05-23 20:56:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
 #endif
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -354,9 +357,9 @@ main(int argc, char **argv)
 int
 call_prg()
 {
-	char           *ptr;
+	char           *ptr, *cmdptr1, *cmdptr2;
 	char          **Argv;
-	int             i, status, cmdcount, retval, match;
+	int             i, j, k, status, cmdcount, retval, match, len1, len2;
 	static stralloc username = {0}, pass = {0}, line = {0};
 	pid_t           pid;
 	char            strnum[FMT_ULONG];
@@ -393,11 +396,40 @@ call_prg()
 	for (cmdcount = 0; adminCommands[cmdcount].name; cmdcount++);
 	match = str_chr(line.s, ' ');
 	if (i > cmdcount || !line.s[match]) {
-		filewrt(2, "indisrvr: incorrect syntax %d[%s]\n", i, line.s);
-		filewrt(3, "indisrvr: %d: incorrect syntax %d[%s]\n", getpid(), i, line.s);
+		filewrt(2, "indisrvr: incorrect syntax [%s]%d\n", line.s, i);
+		filewrt(3, "indisrvr: %d: incorrect syntax [%s]%d\n", getpid(), line.s, i);
 		return (1);
 	}
 	ptr = line.s + match + 1; /*- command */
+	for (; *ptr && isspace(*ptr); ptr++, len1--);
+	k = str_chr(ptr, ' ');
+	if (ptr[k]) {
+		ptr[k] = '\0';
+	} else
+		k = -1;
+	j = str_rchr(ptr, '/');
+	if (ptr[j]) {
+		cmdptr1 = ptr + j + 1;
+		for (len1 = 0; *cmdptr1 && !isspace(*cmdptr1); cmdptr1++, len1++);
+		cmdptr1 = ptr + j + 1;
+	} else {
+		cmdptr1 = ptr; 
+		for (len1 = 0; *cmdptr1 && !isspace(*cmdptr1); cmdptr1++, len1++);
+		cmdptr1 = ptr; 
+	}
+	if (k != -1)
+		ptr[k] = ' ';
+	k = str_rchr(adminCommands[i].name, '/');
+	if (adminCommands[i].name[k])
+		cmdptr2 = adminCommands[i].name + k + 1;
+	else
+		cmdptr2 = adminCommands[i].name;
+	len2 = str_len(cmdptr2);
+	if (len1 != len2 || str_diffn(cmdptr1, cmdptr2, len1 > len2 ? len1 : len2)) {
+		filewrt(2, "indisrvr: command mismatch [%s]%d [%s]%d\n", cmdptr1, len1, cmdptr2, len2);
+		filewrt(3, "indisrvr: %d: command mismatch [%s]%d\n", getpid(), line.s, i);
+		return (1);
+	}
 	(void) signal(SIGCHLD, SIG_DFL);
 	switch (pid = fork())
 	{
@@ -412,12 +444,12 @@ call_prg()
 			filewrt(3, "%d: makeargs failed: %s\n", getppid(), error_str(errno));
 			return (-1);
 		}
-		if (checkPerm(username.s, adminCommands[i].name, Argv)) {
+		if (checkPerm(username.s, adminCommands[i].name, ptr)) {
 			strerr_warn6(username.s, ": ", adminCommands[i].name, " args [", ptr, "]: permission denied", 0);
 			filewrt(3, "%d: %s: %s args [%s]: permission denied\n", getppid(), username.s, adminCommands[i].name, ptr);
 			_exit(1);
 		}
-		filewrt(3, "%d: command %s args %s\n", getppid(), adminCommands[i].name, ptr);
+		filewrt(3, "%d: executing command no %d [%s]\n", getppid(), i, ptr);
 		execv(adminCommands[i].name, Argv);
 		filewrt(3, "%d: %s args [%s]: %s\n", getppid(), adminCommands[i].name, ptr, error_str(errno));
 		_exit(1);
@@ -681,6 +713,9 @@ main()
 
 /*
  * $Log: indisrvr.c,v $
+ * Revision 1.21  2024-05-23 20:56:56+05:30  Cprogrammer
+ * added paranoid check for command mismatch
+ *
  * Revision 1.20  2024-05-22 22:37:59+05:30  Cprogrammer
  * fixed typo
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: adminclient.c,v $
+ * Revision 1.6  2024-05-23 17:06:27+05:30  Cprogrammer
+ * added paranoid check for command mismatch
+ *
  * Revision 1.5  2023-08-08 10:34:36+05:30  Cprogrammer
  * use strerr_tls for reporting tls error
  *
@@ -22,7 +25,7 @@
 #endif
 
 #ifndef lint
-static char     sccsid[] = "$Id: adminclient.c,v 1.5 2023-08-08 10:34:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: adminclient.c,v 1.6 2024-05-23 17:06:27+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef CLUSTERED_SITE
@@ -60,7 +63,7 @@ main(int argc, char **argv)
 	char           *admin_user, *admin_pass, *admin_host, *admin_port, *cmmd,
 				   *cmdptr1, *cmdptr2, *certfile, *cafile, *crlfile;
 	static stralloc cmdbuf = {0}, cmdName = {0};
-	int             sfd, i, j, k, input_read, match_cn = 0;
+	int             sfd, i, j, k, input_read, match_cn = 0, cmdlen1, cmdlen2;
 
 	certfile = cafile = crlfile = NULL;
 	admin_user = admin_pass = admin_host = admin_port = cmmd = NULL;
@@ -142,22 +145,27 @@ main(int argc, char **argv)
 	for (cmdptr1 = cmmd; *cmdptr1 && isspace((int) *cmdptr1); cmdptr1++);
 	cmdptr2 = cmdptr1;
 	for (; *cmdptr2 && !isspace((int) *cmdptr2); cmdptr2++);
+	/*- copy program path without arguments */
 	if (!stralloc_copyb(&cmdName, cmdptr1, cmdptr2 - cmdptr1) ||
 			!stralloc_0(&cmdName))
 		die_nomem();
 	cmdName.len--;
 	i = str_rchr(cmdName.s, '/');
-	if (cmdName.s[i])
+	if (cmdName.s[i]) {
 		cmdptr1 = cmdName.s + i + 1;
-	else
+		cmdlen1 = cmdName.len - i - 1;
+	} else {
 		cmdptr1 = cmdName.s;
+		cmdlen1 = cmdName.len;
+	}
 	for (k = 0; adminCommands[k].name; k++) {
 		j = str_rchr(adminCommands[k].name, '/');
 		if (adminCommands[k].name[j])
 			cmdptr2 = adminCommands[k].name + j + 1;
 		else
 			cmdptr2 = adminCommands[k].name;
-		if (!str_diffn(cmdptr1, cmdptr2, cmdName.len - (i + 2))) {
+		cmdlen2 = str_len(cmdptr2);
+		if (!str_diffn(cmdptr1, cmdptr2, cmdlen1 > cmdlen2 ? cmdlen1 : cmdlen2)) {
 			if (!stralloc_copyb(&cmdbuf, strnum, fmt_uint(strnum, (unsigned int) k)) ||
 					!stralloc_append(&cmdbuf, " ") ||
 					!stralloc_cats(&cmdbuf, cmmd) ||

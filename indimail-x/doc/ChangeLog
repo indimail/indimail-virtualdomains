@@ -13,6 +13,10 @@ Release @version@-@release@ Start 02/05/2024 End XX/XX/XXXX
 08. mgmtpass.c: fixed handling of command line arguments
 09. mgmtpassfuncs.c: added missing new line
 10. indisrvr.c: Fixed typos
+- 23/05/2024
+11. adminclient.c, indisrvr.c: added paranoid check for command mismatch
+12. checkPerm.c: added feature to match command line args using
+    regex/wildmatch
 
 * Mon Jan 01 2024 09:24:41 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.6-1.1%{?dist}
 Release 3.4.6-1.1 Start 09/09/2023 End 01/01/2024

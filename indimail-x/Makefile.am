@@ -100,7 +100,7 @@ include_HEADERS = addaliasdomain.h add_control.h add_domain_assign.h addressToke
 	vhostid_delete.h vhostid_insert.h vhostid_select.h vhostid_update.h VlimitInLookup.h \
 	vlimits.h vmake_maildir.h vpriv.h vquota_select.h vset_default_domain.h \
 	vset_lastauth.h vset_lastdeliver.h vsmtp_delete_domain.h vsmtp_delete.h vsmtp_insert.h \
-	vsmtp_select.h vsmtp_update.h vupdate_rules.h wildmat.h indimail_config.h
+	vsmtp_select.h vsmtp_update.h vupdate_rules.h indimail_config.h
 includedir=@prefix@/include/indimail
 
 COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.c add_ip_map.c \
@@ -149,8 +149,7 @@ COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.
 	vpriv_select.c vpriv_update.c vquota_select.c vread_dir_control.c \
 	vset_default_domain.c vset_lastauth.c vset_lastdeliver.c vsmtp_delete.c \
 	vsmtp_delete_domain.c vsmtp_insert.c vsmtp_select.c vsmtp_update.c \
-	vupdate_rules.c vwrite_dir_control.c wildmat.c \
-	load_mysql.c
+	vupdate_rules.c vwrite_dir_control.c load_mysql.c
 
 libindimail.la: $(libindimail_la_OBJECTS) $(libindimail_la_DEPENDENCIES)
 	$(LIBTOOL) --mode=link --tag=CC gcc $(libindimail_la_LDFLAGS) \
