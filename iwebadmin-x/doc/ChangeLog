@@ -1,5 +1,5 @@
 * XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <@email@> @version@-@release@%{?dist}
-Release @version@-@release@ Start 28/07/2023 End 23/10/2023
+Release @version@-@release@ Start 28/07/2023 End 24/05/2024
 - 28/07/2023
 1. iwebadmin.c: exit with specific error codes defined in iwebadmin.h to
    indicate the error and help testing iwebadmin with curl
