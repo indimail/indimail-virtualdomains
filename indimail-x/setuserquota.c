@@ -1,5 +1,8 @@
 /*
  * $Log: setuserquota.c,v $
+ * Revision 1.5  2024-05-24 14:48:06+05:30  Cprogrammer
+ * changed return type of setuserquota to 64bit int
+ *
  * Revision 1.4  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -36,7 +39,7 @@
 #include "sql_setquota.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: setuserquota.c,v 1.4 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: setuserquota.c,v 1.5 2024-05-24 14:48:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -47,7 +50,7 @@ die_nomem()
 }
 
 /*- Update a users quota */
-int
+mdir_t
 setuserquota(const char *username, const char *domain, const char *quota)
 {
 	const char     *domain_ptr;

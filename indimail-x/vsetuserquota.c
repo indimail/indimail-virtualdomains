@@ -1,5 +1,8 @@
 /*
  * $Log: vsetuserquota.c,v $
+ * Revision 1.5  2024-05-24 14:52:01+05:30  Cprogrammer
+ * print current usage in bytes on stdout
+ *
  * Revision 1.4  2024-05-17 16:24:31+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -33,6 +36,8 @@
 #include <strerr.h>
 #include <env.h>
 #include <sgetopt.h>
+#include <qprintf.h>
+#include <subfd.h>
 #endif
 #include "get_indimailuidgid.h"
 #include "parse_email.h"
@@ -48,7 +53,7 @@
 #include "setuserquota.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsetuserquota.c,v 1.4 2024-05-17 16:24:31+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetuserquota.c,v 1.5 2024-05-24 14:52:01+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vsetuserquota: fatal: "
@@ -105,7 +110,7 @@ die_nomem()
 int
 main(int argc, char **argv)
 {
-	int             i;
+	mdir_t          i;
 	uid_t           uid;
 	gid_t           gid;
 	char           *email, *quota;
@@ -178,5 +183,7 @@ main(int argc, char **argv)
 #endif
 	i = setuserquota(User.s, real_domain, quota);
 	iclose();
-	return (i);
+	subprintf(subfdout, "usage %ld bytes\n", i);
+	substdio_flush(subfdout);
+	return (i < 0 ? 1 : 0);
 }
