@@ -1,5 +1,11 @@
-* XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <@email@> @version@-@release@%{?dist}
-Release @version@-@release@ Start 28/11/2024 End 03/12/2023
+* XXX XXX XX XXXX XX:XX:XX +0000 <@email@> @version@-@release@%{?dist}
+Release @version@-@release@ Start 10/05/2024 End XX/XX/XXXX
+- 10/05/2024
+01. courier-imap/libs/rfc1035/rfc1035str.c: Fix missing prototype for
+    strcasecmp
+
+* Sun Dec 03 2023 12:34:44 +0000 Manvendra Bhangui <indimail-access@indimail.org> 1.2-1.2%{?dist}
+Release 1.2-1.1 Start 28/11/2024 End 03/12/2023
 - 28/11/2023
 01. fetchmail version upgraded to 6.5.0-beta9
 - 03/12/2023
@@ -8,9 +14,6 @@ Release @version@-@release@ Start 28/11/2024 End 03/12/2023
 04. upgraded courier-imap to 5.2.6
 05. upgraded maildrop to 3.1.6
 - 01/01/2024 - indimail-3.4.6
-- 10/05/2024
-06. courier-imap/libs/rfc1035/rfc1035str.c: Fix missing prototype for
-    strcasecmp
 
 * Tue Nov 28 2023 11:04:28 +0000 Manvendra Bhangui <indimail-access@indimail.org> 1.1.1-1.1%{?dist}
 Release 1.1.1-1.1 Start 01/03/2021 End 28/11/2023
