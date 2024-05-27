@@ -1,5 +1,8 @@
 /*
  * $Log: authpgsql.c,v $
+ * Revision 1.11  2024-05-27 22:51:10+05:30  Cprogrammer
+ * initialize struct vlimits
+ *
  * Revision 1.10  2023-08-04 22:39:42+05:30  Cprogrammer
  * include errno.h, authmethods.h, subfd.h
  *
@@ -73,7 +76,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authpgsql.c,v 1.10 2023-08-04 22:39:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authpgsql.c,v 1.11 2024-05-27 22:51:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_PGSQL
@@ -108,7 +111,7 @@ pg_getpw(char *user, char *domain)
 	int             i;
 	PGresult       *pgres;
 #ifdef ENABLE_DOMAIN_LIMITS
-	struct vlimits  limits;
+	struct vlimits  limits = { 0 };
 #endif
 
 	lowerit(user);
@@ -199,7 +202,7 @@ main(int argc, char **argv)
 	struct passwd  *pw;
 #ifdef ENABLE_DOMAIN_LIMITS
 	time_t          curtime;
-	struct vlimits  limits;
+	struct vlimits  limits = { 0 };
 #endif
 
 	if (argc < 2)

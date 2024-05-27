@@ -1,5 +1,8 @@
 /*
  * $Log: limits.c,v $
+ * Revision 1.7  2024-05-28 00:20:32+05:30  Cprogrammer
+ * fixed data types to fix stack smashing
+ *
  * Revision 1.6  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -25,7 +28,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: limits.c,v 1.6 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: limits.c,v 1.7 2024-05-28 00:20:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -71,7 +74,8 @@ die_nomem(char *str)
 int
 vget_limits(const char *domain, struct vlimits *limits)
 {
-	int             err, perm;
+	int             err;
+	int             perm;
 	MYSQL_ROW       row;
 	MYSQL_RES      *res;
 
@@ -109,11 +113,11 @@ vget_limits(const char *domain, struct vlimits *limits)
 	if ((row = in_mysql_fetch_row(res))) {
 		scan_long(row[0], &(limits->domain_expiry));
 		scan_long(row[1], &(limits->passwd_expiry));
-		scan_int(row[2], &(limits->maxpopaccounts));
-		scan_int(row[3], &(limits->maxaliases));
-		scan_int(row[4], &(limits->maxforwards));
-		scan_int(row[5], &(limits->maxautoresponders));
-		scan_int(row[6], &(limits->maxmailinglists));
+		scan_long(row[2], &(limits->maxpopaccounts));
+		scan_long(row[3], &(limits->maxaliases));
+		scan_long(row[4], &(limits->maxforwards));
+		scan_long(row[5], &(limits->maxautoresponders));
+		scan_long(row[6], &(limits->maxmailinglists));
 		limits->diskquota = strtoll(row[7], 0, 0);
 #if defined(LLONG_MIN) && defined(LLONG_MAX)
 		if (limits->diskquota == LLONG_MIN || limits->diskquota == LLONG_MAX)
@@ -154,25 +158,25 @@ vget_limits(const char *domain, struct vlimits *limits)
 			in_mysql_free_result(res);
 			return (-1);
 		}
-		scan_int(row[11], (int *) &(limits->disable_pop));
-		scan_int(row[12], (int *) &(limits->disable_imap));
-		scan_int(row[13], (int *) &(limits->disable_dialup));
-		scan_int(row[14], (int *) &(limits->disable_passwordchanging));
-		scan_int(row[15], (int *) &(limits->disable_webmail));
-		scan_int(row[16], (int *) &(limits->disable_relay));
-		scan_int(row[17], (int *) &(limits->disable_smtp));
-		scan_int(row[18], (int *) &(limits->perm_account));
-		scan_int(row[19], (int *) &(limits->perm_alias));
-		scan_int(row[20], (int *) &(limits->perm_forward));
-		scan_int(row[21], (int *) &(limits->perm_autoresponder));
+		scan_short(row[11], &(limits->disable_pop));
+		scan_short(row[12], &(limits->disable_imap));
+		scan_short(row[13], &(limits->disable_dialup));
+		scan_short(row[14], &(limits->disable_passwordchanging));
+		scan_short(row[15], &(limits->disable_webmail));
+		scan_short(row[16], &(limits->disable_relay));
+		scan_short(row[17], &(limits->disable_smtp));
+		scan_short(row[18], &(limits->perm_account));
+		scan_short(row[19], &(limits->perm_alias));
+		scan_short(row[20], &(limits->perm_forward));
+		scan_short(row[21], &(limits->perm_autoresponder));
 		scan_int(row[22], &perm);
 		limits->perm_maillist = perm & VLIMIT_DISABLE_ALL;
 		perm >>= VLIMIT_DISABLE_BITS;
 		limits->perm_maillist_users = perm & VLIMIT_DISABLE_ALL;
 		perm >>= VLIMIT_DISABLE_BITS;
 		limits->perm_maillist_moderators = perm & VLIMIT_DISABLE_ALL;
-		scan_int(row[23], (int *) &(limits->perm_quota));
-		scan_int(row[24], (int *) &(limits->perm_defaultquota));
+		scan_short(row[23], &(limits->perm_quota));
+		scan_short(row[24], &(limits->perm_defaultquota));
 	}
 	in_mysql_free_result(res);
 	return (0);
@@ -233,57 +237,57 @@ vset_limits(const char *domain, struct vlimits *limits)
 		"perm_defaultquota) VALUES (\"", 425) ||
 			!stralloc_cats(&SqlBuf, domain) ||
 			!stralloc_catb(&SqlBuf, "\", ", 3) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_ulong(strnum, limits->domain_expiry)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_long(strnum, limits->domain_expiry)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_ulong(strnum, limits->passwd_expiry)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_long(strnum, limits->passwd_expiry)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->maxpopaccounts)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_long(strnum, limits->maxpopaccounts)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->maxaliases)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_long(strnum, limits->maxaliases)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->maxforwards)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_long(strnum, limits->maxforwards)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->maxautoresponders)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_long(strnum, limits->maxautoresponders)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->maxmailinglists)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_long(strnum, limits->maxmailinglists)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->diskquota)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_long(strnum, limits->diskquota)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->maxmsgcount)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_long(strnum, limits->maxmsgcount)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->defaultquota)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_long(strnum, limits->defaultquota)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->defaultmaxmsgcount)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_long(strnum, limits->defaultmaxmsgcount)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->disable_pop)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_int(strnum, limits->disable_pop)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->disable_imap)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_int(strnum, limits->disable_imap)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->disable_dialup)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_int(strnum, limits->disable_dialup)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->disable_passwordchanging)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_int(strnum, limits->disable_passwordchanging)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->disable_webmail)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_int(strnum, limits->disable_webmail)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->disable_relay)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_int(strnum, limits->disable_relay)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->disable_smtp)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_int(strnum, limits->disable_smtp)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->perm_account)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_int(strnum, limits->perm_account)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->perm_alias)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_int(strnum, limits->perm_alias)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->perm_forward)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_int(strnum, limits->perm_forward)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->perm_autoresponder)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_int(strnum, limits->perm_autoresponder)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->perm_maillist |
+			!stralloc_catb(&SqlBuf, strnum, fmt_int(strnum, limits->perm_maillist |
 						(limits->perm_maillist_users << VLIMIT_DISABLE_BITS) |
 						(limits->perm_maillist_moderators << (VLIMIT_DISABLE_BITS * 2)))) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->perm_quota)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_int(strnum, limits->perm_quota)) ||
 			!stralloc_catb(&SqlBuf, ", ", 2) ||
-			!stralloc_catb(&SqlBuf, strnum, fmt_uint(strnum, limits->perm_defaultquota)) ||
+			!stralloc_catb(&SqlBuf, strnum, fmt_int(strnum, limits->perm_defaultquota)) ||
 			!stralloc_catb(&SqlBuf, ")", 1) ||
 			!stralloc_0(&SqlBuf))
 		die_nomem("vset_limits");
@@ -339,8 +343,6 @@ static void
 vdefault_limits(struct vlimits *limits)
 {
 	/*- initialize structure */
-	byte_zero((char *) limits, sizeof(*limits));
-
 	limits->domain_expiry = -1;
 	limits->passwd_expiry = -1;
 	limits->maxpopaccounts = -1;

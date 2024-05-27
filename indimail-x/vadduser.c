@@ -1,5 +1,5 @@
 /*
- * $Id: vadduser.c,v 1.15 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
+ * $Id: vadduser.c,v 1.16 2024-05-27 22:53:14+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -64,7 +64,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadduser.c,v 1.15 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     rcsid[] = "$Id: vadduser.c,v 1.16 2024-05-27 22:53:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -138,7 +138,7 @@ main(int argc, char **argv)
 	gid_t           gid, gidtmp;
 #ifdef ENABLE_DOMAIN_LIMITS
 	int             domain_limits;
-	struct vlimits  limits;
+	struct vlimits  limits = { 0 };
 #endif
 	struct substdio ssin;
 #ifdef HAVE_GSASL
@@ -179,10 +179,10 @@ main(int argc, char **argv)
 		strerr_die3x(100, "vadduser: domain ", real_domain, " with uid 0");
 #ifdef ENABLE_DOMAIN_LIMITS
 	if (!stralloc_copys(&tmpbuf, domain_dir) ||
-			!stralloc_catb(&tmpbuf, ".domain_limits", 14) ||
+			!stralloc_catb(&tmpbuf, "/.domain_limits", 15) ||
 			!stralloc_0(&tmpbuf))
 		die_nomem();
-	domain_limits = ((access(tmpbuf.s, F_OK) && !env_get("DOMAIN_LIMITS")) ? 0 : 1);
+	domain_limits = !access(tmpbuf.s, F_OK);
 	if (domain_limits && vget_limits(real_domain, &limits)) {
 		strerr_warn2("vadduser: Unable to get domain limits for ", real_domain, 0);
 		return (1);
@@ -588,6 +588,10 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 
 /*
  * $Log: vadduser.c,v $
+ * Revision 1.16  2024-05-27 22:53:14+05:30  Cprogrammer
+ * initialize struct vlimits
+ * fix .domain_limits path
+ *
  * Revision 1.15  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

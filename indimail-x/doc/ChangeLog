@@ -20,6 +20,16 @@ Release @version@-@release@ Start 02/05/2024 End XX/XX/XXXX
 - 24/05/2024
 13. vsetuserquota.c: print current usage in bytes on stdout
 14. setuserquota.c: changed return type of setuserquota to 64bit int
+- 28/05/2024
+15.  ProcessInFifo.c, VlimitInLookup.c, authindi.c, authpgsql.c, iauth.c,
+     sql_getpw.c, vadduser.c, vchkpass.c, vlimit.c, vmoduser.c,
+     vsetuserquota.c: initialize struct vlimits
+16. limits.c: fix data types to fix stack smashing
+17. vlimits.h: changed data types to long
+18. vlimit.c: added -T option to toggle bit field
+19. vlimit.c: fixed data types
+20. inquerytest: change data type to long
+21. vadduser.c: fix .domain_limits path
 
 * Mon Jan 01 2024 09:24:41 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.6-1.1%{?dist}
 Release 3.4.6-1.1 Start 09/09/2023 End 01/01/2024

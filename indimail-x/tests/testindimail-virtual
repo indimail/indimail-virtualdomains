@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.27 2024-05-24 14:53:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.28 2024-05-28 00:23:38+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -37,6 +37,7 @@ tmpfifodir=$testdir/inquery
 logdir=$testdir/logs
 bindir=/usr/bin
 sbindir=/usr/sbin
+tmpdir=$testdir/tmp
 SOFT_MEM=104857600
 confsplit=23
 HOSTNAME=$(uname -n)
@@ -548,6 +549,7 @@ setup_svscan()
 	echo inlookup           > $servicedir/inlookup.infifo/variables/MYSQL_READ_GROUP
 	echo                    > $servicedir/inlookup.infifo/variables/PASSWD_CACHE
 	echo                    > $servicedir/inlookup.infifo/variables/QUERY_CACHE
+	echo 1                  > $servicedir/inlookup.infifo/variables/DOMAIN_LIMITS
 	(
 	echo "#!/bin/sh"
 	echo "count=5"
@@ -694,7 +696,7 @@ do_setup()
 		mysql=/usr/bin/mysql
 	fi
 	# basic setup for maildir, assign config and queue
-	$sudo /bin/rm -rf $logdir
+	$sudo /bin/rm -rf $logdir $tmpdir
 	mkdir -p $logdir/setup
 	mkdir -p $logdir/qremote
 	mkdir -p $logdir/gsasl
@@ -708,6 +710,7 @@ do_setup()
 	mkdir -p $logdir/imapd-ssl
 	mkdir -p $logdir/pop3d-ssl
 	mkdir -p $logdir/tcpclient
+	mkdir -p $tmpdir
 	setup_maildir
 	setup_assign
 	setup_queue
@@ -771,7 +774,7 @@ create_plain_user()
 		CONTROLDIR=$cntrldir \
 		DOMAINDIR=$qmaildir \
 		SERVICEDIR=$servicedir \
-		vadduser -d $extra $1 $2 >> $logdir/setup/vadduser.log 2>&1
+		vadduser -d $extra $1 $2 > $logdir/setup/vadduser.log 2>&1
 	if [ $? -eq 0 ] ; then
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
@@ -1565,6 +1568,102 @@ delete_relay()
 	return $?
 }
 
+auth_pop3()
+{
+	(
+	echo "#!/bin/sh"
+	echo "exec 0<&6"
+	echo "exec 1>&7"
+	echo "read line"
+	echo "printf \"%s\n\" \"\$line\" 1>&2"
+	if [ "$3" = "PLAIN" ] ; then
+		b64=$(printf "\0$1\0$2" | base64)
+		echo "printf \"AUTH PLAIN\r\n\" 1>&2"
+		echo "printf \"AUTH PLAIN\r\n\""
+		echo "read line"
+		echo "printf \"%s\n\" \"\$line\" 1>&2"
+		echo "printf \"$b64\r\n\" 1>&2"
+		echo "printf \"$b64\r\n\""
+	elif [ "$3" = "CRAM-MD5" -o "$3" = "CRAM-SHA1" -o "$3" = "CRAM-SHA256" ] ; then
+		echo "printf \"AUTH $3\r\n\" 1>&2"
+		echo "printf \"AUTH $3\r\n\""
+		echo "read line"
+		echo "line=\$(echo \$line | cut -c3- | sed -e 's/\r//g')"
+		echo "b64=\$($authcram -t $3 $1 $2 \$line | sed -e 's/\r//g')"
+		echo "printf \"%s\r\n\" \"\$b64\" 1>&2"
+		echo "printf \"%s\r\n\" \"\$b64\""
+	fi
+	echo "read line"
+	echo "printf \"%s\n\" \"\$line\" 1>&2"
+	echo "printf \"%s\" \"\$line\" | grep -E \"+OK logged in.\" >/dev/null 2>&1"
+	echo "if [ \$? -ne 0 ] ; then"
+	echo "	echo \"Failed to login\" 1>&2"
+	echo "	exit 1"
+	echo "fi"
+	echo "printf \"LIST\r\n\" 1>&2"
+	echo "printf \"LIST\r\n\""
+	echo "read line"
+	echo "printf \"%s\" \"\$line\" |grep -E \"+OK POP3 clients that break here, they violate STD53.\" > /dev/null"
+	echo "if [ \$? -ne 0 ] ; then"
+	echo "	echo \"LIST command failed\" 1>&2"
+	echo "	exit 1"
+	echo "fi"
+	echo "read line"
+	echo "printf \"%s\n\" \"\$line\" 1>&2"
+	echo "octets=\$(printf \"%s\n\" \"\$line\"|awk '{print \$2}')"
+	echo "while true"
+	echo "do"
+	echo "	read line"
+	echo "	if [ -z \"\$line\" ] ; then"
+	echo "		break"
+	echo "	fi"
+	echo "	printf \"%s\n\" \"\$line\" 1>&2"
+	echo "	line=\$(echo \"\$line\"|tr -d '\r')"
+	echo "	if [ -z \"\$line\" -o \"\$line\" = \".\" ] ; then"
+	echo "		break"
+	echo "	fi"
+	echo "done"
+	echo "printf \"RETR 1\r\n\" 1>&2"
+	echo "printf \"RETR 1\r\n\""
+	echo "read line"
+	echo "printf \"%s\n\" \"\$line\" 1>&2"
+	echo "printf \"%s\" \"\$line\" | grep -E \"+OK .* octets follow.\" > /dev/null"
+	echo "if [ \$? -ne 0 ] ; then"
+	echo "	echo \"RETR command failed\" 1>&2"
+	echo "	exit 1"
+	echo "fi"
+	echo "found=0"
+	echo "while true"
+	echo "do"
+	echo "	read line"
+	echo "	if [ -z \"\$line\" ] ; then"
+	echo "		break"
+	echo "	fi"
+	echo "	printf \"%s\n\" \"\$line\" 1>&2"
+	echo "	line=\$(echo \"\$line\"|tr -d '\r')"
+	echo "	if [ \"\$line\" = \".\" ] ; then"
+	echo "		break"
+	echo "	fi"
+	echo "	echo \"\$line\" | grep \"This is a test mailing\" > /dev/null"
+	echo "	if [ \$? -eq 0 ] ; then"
+	echo "		found=1"
+	echo "	fi"
+	echo "done"
+	echo "printf \"QUIT\r\n\""
+	echo "read line"
+	echo "printf \"%s\n\" \"\$line\" 1>&2"
+	echo "if [ \$found -eq 1 ] ; then"
+	echo "	exit 0"
+	echo "else"
+	echo "	exit 1"
+	echo "fi"
+	) > $testdir/tcpclient.pop3
+	chmod +x $testdir/tcpclient.pop3
+	check_service pop3d
+	tcpclient -a 10 -vDHR 0 1100 $testdir/tcpclient.pop3
+	return $?
+}
+
 test_pop3()
 {
 	tm1=$(date +"%s.%4N")
@@ -1665,7 +1764,7 @@ test_pop3()
 	chmod +x $testdir/tcpclient.pop3
 	check_service pop3d
 	tm1=$(date +"%s.%4N")
-	tcpclient -a 10 -vDHR 0 1100 /tmp/qmail-test/tcpclient.pop3 2>$logdir/pop3d/pop3d.log
+	tcpclient -a 10 -vDHR 0 1100 $testdir/tcpclient.pop3 2>$logdir/pop3d/pop3d.log
 	if [ $? -eq 0 ] ; then
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
@@ -1739,7 +1838,7 @@ test_pop3()
 	tm1=$(date +"%s.%4N")
 	sudo $setuidgid -g qcerts $user tcpclient -a 10 -f $cntrldir/$fn \
 		-n $certdir/clientcert.pem -vDHR 0 9950 \
-		/tmp/qmail-test/tcpclient.pop3 2>$logdir/pop3d-ssl/pop3d-ssl.log
+		$testdir/tcpclient.pop3 2>$logdir/pop3d-ssl/pop3d-ssl.log
 	if [ $? -eq 0 ] ; then
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
@@ -1787,6 +1886,93 @@ test_pop3()
 		[ -z "$failed" ] && failed="open relay pop3s" || failed="$failed, open relay pop3s"
 		[ $continue_on_err -eq 0 ] && exit 1 || return 0
 	fi
+}
+
+auth_imap()
+{
+	b64=$(printf "\0$1\0$2" | base64)
+	(
+	echo "#!/bin/sh"
+	echo "exec 0<&6"
+	echo "exec 1>&7"
+	echo "read key"
+	echo "printf \"%s\n\" \"\$key\" 1>&2"
+	if [ "$3" = "PLAIN" ] ; then
+		echo "printf \"a1 AUTHENTICATE PLAIN\r\n\" 1>&2"
+		echo "printf \"a1 AUTHENTICATE PLAIN\r\n\""
+		echo "read line"
+		echo "printf \"%s\n\" \"\$line\" 1>&2"
+		echo "printf \"%s\r\n\" $b64 1>&2"
+		echo "printf \"%s\r\n\" $b64"
+	elif [ "$3" = "CRAM-MD5" -o "$3" = "CRAM-SHA1" -o "$3" = "CRAM-SHA256" ] ; then
+		echo "printf \"a1 AUTHENTICATE $3\r\n\" 1>&2"
+		echo "printf \"a1 AUTHENTICATE $3\r\n\""
+		echo "read line"
+		echo "line=\$(echo \$line | cut -c3- | sed -e 's/\r//g')"
+		echo "b64=\$($authcram -t $3 $1 $2 \$line | sed -e 's/\r//g')"
+		echo "printf \"%s\r\n\" \"\$b64\" 1>&2"
+		echo "printf \"%s\r\n\" \"\$b64\""
+	fi
+	echo "read key"
+	echo "printf \"%s\" \"\$key\" |grep \"a1 OK LOGIN Ok.\" >/dev/null"
+	echo "if [ \$? -ne 0 ] ; then"
+	echo "	printf \"%s\n\" \"\$key\" 1>&2"
+	echo "	echo \"LOGIN Failed\" 1>&2"
+	echo "	exit 1"
+	echo "else"
+	echo "	printf \"%s\n\" \"\$key\" 1>&2"
+	echo "fi"
+	echo "printf \"a1 select inbox\r\n\""
+	echo "while true"
+	echo "do"
+	echo "	read line"
+	echo "	if [ -z \"\$line\" ] ; then"
+	echo "		break"
+	echo "	fi"
+	echo "	t=\$(echo \"\$line\" | cut -d' ' -f1)"
+	echo "	if [ \"\$t\" = \"*\" ] ; then"
+	echo "		echo \"\$line\" 1>&2"
+	echo "		continue"
+	echo "	elif [ \"\$t\" = \"a1\" ] ; then"
+	echo "		break"
+	echo "	else"
+	echo "		echo \"\$line\" 1>&2"
+	echo "	fi"
+	echo "done"
+	echo ""
+	echo "printf \"a1 fetch 1 RFC822\r\n\""
+	echo "found=0"
+	echo "while true"
+	echo "do"
+	echo "	read line"
+	echo "	if [ -z \"\$line\" ] ; then"
+	echo "		break"
+	echo "	fi"
+	echo "	echo \"\$line\" | grep \"a1 OK FETCH completed.\" > /dev/null"
+	echo "	if [ \$? -eq 0 ] ; then"
+	echo "		break"
+	echo "	fi"
+	echo "	echo \"\$line\" | grep \"This is a test mailing\" > /dev/null"
+	echo "	if [ \$? -eq 0 ] ; then"
+	echo "		found=1"
+	echo "	fi"
+	echo "	echo \"\$line\" 1>&2"
+	echo "done"
+	echo "printf \"a1 logout\r\n\""
+	echo "read line"
+	echo "printf \"%s\n\" \"\$line\""
+	echo "if [ \$found -eq 1 ] ; then"
+	echo "	exit 0"
+	echo "else"
+	echo "	exit 1"
+	echo "fi"
+	) > $testdir/tcpclient.imap
+	chmod +x $testdir/tcpclient.imap
+	check_service imapd 3
+	chmod +x $testdir/tcpclient.imap
+	check_service imapd 3
+	tcpclient -a 10 -vDHR 0 1430 $testdir/tcpclient.imap
+	return $?
 }
 
 test_imap()
@@ -1878,7 +2064,7 @@ test_imap()
 	chmod +x $testdir/tcpclient.imap
 	check_service imapd 3
 	tm1=$(date +"%s.%4N")
-	tcpclient -a 10 -vDHR 0 1430 /tmp/qmail-test/tcpclient.imap 2>$logdir/imapd/imapd.log
+	tcpclient -a 10 -vDHR 0 1430 $testdir/tcpclient.imap 2>$logdir/imapd/imapd.log
 	if [ $? -eq 0 ] ; then
 		tm2=$(date +"%s.%4N")
 		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
@@ -1950,7 +2136,7 @@ test_imap()
 	check_service imapd-ssl 3
 	tm1=$(date +"%s.%4N")
 	sudo $setuidgid -g qcerts $user tcpclient -a 10 -f $cntrldir/$fn  \
-		-n $certdir/clientcert.pem -vDHR 0 9930 /tmp/qmail-test/tcpclient.imap \
+		-n $certdir/clientcert.pem -vDHR 0 9930 $testdir/tcpclient.imap \
 		2>$logdir/pop3d-ssl/imapd-ssl.log
 	if [ $? -eq 0 ] ; then
 		tm2=$(date +"%s.%4N")
@@ -3484,6 +3670,459 @@ do_admin_server_tests()
 	/bin/rm -f $cntrldir/host.master $cntrldir/host.cntrl
 }
 
+do_vlimit_tests()
+{
+	# Test the following
+	# authindi, vchkpass: domain expiry, password expiry
+	# authpgsql: gid mask
+	# iauth: size, count limit
+	# inquerytest: display limits
+	# ProcessInFifo.c: get limits
+	# sql_getpw: gid mask
+	# vadduser, vmoduser: defaultquota, defaultmaxmsgcount
+	# vsetuserquota: defaultquota
+	#
+	printf "\r%126s\n" " "
+	echo "Starting domain limit tests"
+
+	tm1=$(date +"%s.%4N")
+	sudo touch $qmaildir/domains/$domain1/.domain_limits
+	sudo chown indimail:indimail $qmaildir/domains/$domain1/.domain_limits
+	$sudo env - \
+		PATH=/bin:/usr/bin:/usr/sbin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vmoddomain -l 0 $domain1
+	ret1=$?
+	$sudo ls $qmaildir/domains/$domain1/.domain_limits >/dev/null 2>&1
+	[ $? -ne 0 ] && l1=0 || l1=1
+	$sudo env - \
+		PATH=/bin:/usr/bin:/usr/sbin \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vmoddomain -l 1 $domain1
+	ret2=$?
+	$sudo ls $qmaildir/domains/$domain1/.domain_limits >/dev/null
+	[ $? -eq 0 ] && l2=0 || l2=1
+	tm2=$(date +"%s.%4N")
+	if [ $ret1 -eq 0 -a $ret2 -eq 0 -a $l1 -eq 0 -a $l2 -eq 0 ] ; then
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing vmoddomain enable domain limits       succeeded %55s [%.4f sec]\n" " " "$secs"
+		print_pct
+	else
+		echo "ret1=$ret1, ret2=$ret2, l1=$l1, l2=$l2"
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		fcount=$(expr $fcount + 1)
+		echo  " testing vmoddomain enable domain limits       failed [%.4f sec]" "$secs"
+		[ -z "$failed" ] && failed="test vmoddomain limits" || failed="$failed, test vmoddomain limits"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	tm1=$(date +"%s.%4N")
+	$sudo setuidgid indimail env - \
+		PATH="/bin:/usr/bin" \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vlimit -Q 50m $domain1
+	ret1=$?
+	$sudo setuidgid indimail env - \
+		PATH="/bin:/usr/bin" \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vlimit -q 5m $domain1
+	ret2=$?
+	$sudo setuidgid indimail env - \
+		PATH="/bin:/usr/bin" \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vlimit -s $domain1 > $tmpdir/vlimit.out
+	ret3=$?
+	tm2=$(date +"%s.%4N")
+	t1=$(grep "Max Domain Quota" $tmpdir/vlimit.out|awk '{print $5}')
+	t2=$(grep "Default User Quota" $tmpdir/vlimit.out|awk '{print $5}')
+	#Max Domain Quota     :     104857600
+	#Default User Quota   :       5242880
+	if [ $ret1 -eq 0 -a $ret2 -eq 0 -a $ret3 -eq 0 -a "$t1" = "52428800" -a "$t2" = "5242880" ] ; then
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing vlimit set domain/user quota          succeeded %55s [%.4f sec]\n" " " "$secs"
+		print_pct
+	else
+		echo "ret1=$ret1, ret2=$ret2, ret3=$ret3, t1=$t1, t2=$t2"
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		fcount=$(expr $fcount + 1)
+		echo "  testing vlimit set domain/user quota failed [%.4f sec]" "$secs"
+		[ -z "$failed" ] && failed="test vlimit -qQ" || failed="$failed, test vlimit -qQ"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	/bin/rm -f $tmpdir/vlimit.out
+
+	# test setting default user quota
+	tm1=$(date +"%s.%4N")
+	t1="$password1""md5"
+	create_plain_user $testuser1 $t1 MD5 >/dev/null 2>&1
+	quota=$($sudo env - \
+		PATH=/bin:/usr/bin \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vuserinfo -q $testuser1 | head -1 |cut -d: -f2|awk '{print $1}')
+	tm2=$(date +"%s.%4N")
+
+	if [ "$quota" = "5242880" ] ; then
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing vadduser set default user quota       succeeded %55s [%.4f sec]\n" " " "$secs"
+		print_pct
+	else
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		fcount=$(expr $fcount + 1)
+		echo
+		echo "quota=$quota"
+		echo "  testing vadduser set default user quota failed [%.4f sec]" "$secs"
+		[ -z "$failed" ] && failed="test vadduser set defaultquota" || failed="$failed, test vadduser set defaultquota"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+
+	# test disable change passwd
+	tm1=$(date +"%s.%4N")
+	$sudo setuidgid indimail env - \
+		PATH="/bin:/usr/bin" \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vlimit -g d $domain1
+	ret1=$?
+	$sudo setuidgid indimail env - \
+		PATH="/bin:/usr/bin" \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+		DOMAIN_LIMITS=1 \
+	vpasswd $testuser1 $password1 2>$tmpdir/vpasswd.out
+	ret2=$?
+	cat $tmpdir/vpasswd.out | grep "User not allowed to change passwd" >/dev/null 2>&1
+	ret3=$?
+	tm2=$(date +"%s.%4N")
+	if [ $ret1 -eq 0 -a $ret2 -ne 0 -a $ret3 -eq 0 ] ; then
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing vlimit disable password change        succeeded %55s [%.4f sec]\n" " " "$secs"
+		print_pct
+		/bin/rm -f $tmpdir/vpasswd.out
+	else
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		fcount=$(expr $fcount + 1)
+		echo "  testing vlimit disable password change failed [%.4f sec]" "$secs"
+		if [ $prompt -eq 1 ] ; then
+			(
+			echo "ret1=$ret1, ret2=$ret2, ret3=$ret3"
+			cat $tmpdir/vpasswd.out
+			) |less
+		fi
+		/bin/rm -f $tmpdir/vpasswd.out
+		[ -z "$failed" ] && failed="test vlimit disable change password" || failed="$failed, test vlimit disable change password"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+
+	> $servicedir/smtpd/variables/CHECKSENDER
+	echo 1 > $servicedir/smtpd/variables/DOMAIN_LIMITS
+	echo 1 > $servicedir/imapd/variables/DOMAIN_LIMITS
+	echo 1 > $servicedir/pop3d/variables/DOMAIN_LIMITS
+	/bin/rm -f $servicedir/smtpd/variables/QUERY_CACHE \
+		$servicedir/imapd/variables/QUERY_CACHE \
+		$servicedir/pop3d/variables/QUERY_CACHE
+	$sudo svc -r $servicedir/smtpd $servicedir/imapd $servicedir/pop3d
+	check_service pop3d 3
+	/bin/rm -f $servicedir/smtpd/variables/DOMAIN_LIMITS \
+		$servicedir/imapd/variables/DOMAIN_LIMITS \
+		$servicedir/pop3d/variables/DOMAIN_LIMITS
+
+	# disable SMTP check
+	$sudo svc -a $servicedir/smtpd/log
+	swaks -S --to $testuser1 --from $testuser1 --server 127.0.0.1 \
+		--port $smtp_port --a LOGIN -au $testuser1 -ap "$t1" > $tmpdir/swaks.out
+	ret1=$?
+	# disable smtp
+	tm1=$(date +"%s.%4N")
+	$sudo setuidgid indimail env - \
+		PATH="/bin:/usr/bin" \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vlimit -g s $domain1
+	ret2=$?
+	swaks -S --to $testuser1 --from $testuser1 --server 127.0.0.1 \
+		--port $smtp_port --a LOGIN -au $testuser1 -ap "$t1" > $tmpdir/swaks.out 2>&1
+	ret3=$?
+	grep "553-Sorry, this account cannot use SMTP (#5.7.1)" $tmpdir/swaks.out >/dev/null
+	ret4=$?
+	tm2=$(date +"%s.%4N")
+	if [ $ret1 -eq 0 -a $ret2 -eq 0 -a $ret3 -ne 0 -a $ret4 -eq 0 ] ; then
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing vlimit disable SMTP authentication    succeeded %55s [%.4f sec]\n" " " "$secs"
+		print_pct
+		/bin/rm -f $tmpdir/swaks.out
+	else
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		fcount=$(expr $fcount + 1)
+		echo "  testing vlimit disable SMTP authentication failed [%.4f sec]" "$secs"
+		if [ $prompt -eq 1 ] ; then
+			(
+			echo "ret1=$ret1, ret2=$ret2, ret3=$ret3, ret4=$ret4"
+			cat $tmpdir/swaks.out
+			) |less
+		fi
+		/bin/rm -f $tmpdir/swaks.out
+		[ -z "$failed" ] && failed="test vlimit disable smtp" || failed="$failed, test vlimit disable smtp"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+
+	# disable IMAP authentication
+	delete_relay 2>$tmpdir/relay.out
+	auth_imap $testuser1 $t1 "PLAIN" 2>$tmpdir/imapd.out
+	ret1=$?
+	# disable imap
+	tm1=$(date +"%s.%4N")
+	$sudo setuidgid indimail env - \
+		PATH="/bin:/usr/bin" \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vlimit -g i $domain1
+	ret2=$?
+	tm2=$(date +"%s.%4N")
+	$sudo svc -a $servicedir/imapd/log
+	auth_imap $testuser1 $t1 "PLAIN" 2>$tmpdir/imapd.out
+	grep "authindi: warn: imap disabled for this account" $logdir/imapd/current >/dev/null
+	ret4=$?
+	if [ $ret1 -eq 0 -a $ret2 -eq 0 -a $ret3 -ne 0 -a $ret4 -eq 0 ] ; then
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing vlimit disable IMAP authentication    succeeded %55s [%.4f sec]\n" " " "$secs"
+		print_pct
+		/bin/rm -f $tmpdir/imapd.out $tmpdir/relay.out
+	else
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		fcount=$(expr $fcount + 1)
+		echo "  testing vlimit disable IMAP authentication failed [%.4f sec]" "$secs"
+		if [ $prompt -eq 1 ] ; then
+			(
+			echo "ret1=$ret1, ret2=$ret2, ret3=$ret3, ret4=$ret4"
+			cat $tmpdir/imapd.out
+			) |less
+		fi
+		/bin/rm -f $tmpdir/imapd.out $tmpdir/relay.out
+		[ -z "$failed" ] && failed="test vlimit disable imap" || failed="$failed, test vlimit disable imap"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	r1=$(check_relay 2>/dev/null|awk '{print $1}')
+	ret6=$?
+	
+	# disable POP3 authentication
+	delete_relay 2>$tmpdir/relay.out
+	auth_pop3 $testuser1 $t1 "PLAIN" 2>$tmpdir/pop3d.out
+	ret1=$?
+	# disable pop3
+	tm1=$(date +"%s.%4N")
+	$sudo setuidgid indimail env - \
+		PATH="/bin:/usr/bin" \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vlimit -g p $domain1
+	ret2=$?
+	tm2=$(date +"%s.%4N")
+	$sudo svc -a $servicedir/pop3d/log
+	auth_pop3 $testuser1 $t1 "PLAIN" 2>$tmpdir/pop3d.out
+	grep "authindi: warn: pop3 disabled for this account" $logdir/pop3d/current >/dev/null
+	ret4=$?
+	if [ $ret1 -eq 0 -a $ret2 -eq 0 -a $ret3 -ne 0 -a $ret4 -eq 0 ] ; then
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing vlimit disable POP3 authentication    succeeded %55s [%.4f sec]\n" " " "$secs"
+		print_pct
+		/bin/rm -f $tmpdir/pop3d.out $tmpdir/relay.out
+	else
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		fcount=$(expr $fcount + 1)
+		echo "  testing vlimit disable POP3 authentication failed [%.4f sec]" "$secs"
+		if [ $prompt -eq 1 ] ; then
+			(
+			echo "ret1=$ret1, ret2=$ret2, ret3=$ret3, ret4=$ret4"
+			cat $tmpdir/pop3d.out
+			echo ====================
+			cat $logdir/pop3d/current
+			) |less
+		fi
+		/bin/rm -f $tmpdir/pop3d.out $tmpdir/relay.out
+		[ -z "$failed" ] && failed="test vlimit disable pop3" || failed="$failed, test vlimit disable pop3"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	r2=$(check_relay 2>/dev/null|awk '{print $1}')
+	ret7=$?
+
+	# disable RELAY
+	$sudo setuidgid indimail env - \
+		PATH="/bin:/usr/bin" \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vlimit -g i -T $domain1
+	ret1=$?
+	$sudo setuidgid indimail env - \
+		PATH="/bin:/usr/bin" \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vlimit -g p -T $domain1
+	ret2=$?
+
+	delete_relay 2>$tmpdir/relay.out
+	tm1=$(date +"%s.%4N")
+	$sudo setuidgid indimail env - \
+		PATH="/bin:/usr/bin" \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vlimit -g r $domain1
+	ret3=$?
+	$sudo svc -a $servicedir/imapd/log
+	auth_imap $testuser1 $t1 "PLAIN" 2>$tmpdir/imapd.out
+	ret4=$?
+	$sudo svc -a $servicedir/pop3d/log
+	auth_pop3 $testuser1 $t1 "PLAIN" 2>$tmpdir/pop3d.out
+	ret5=$?
+	r3=$(check_relay 2>/dev/null |awk '{print $1}')
+	ret8=$?
+	/bin/rm -f $tmpdir/relay.out $tmpdir/imapd.out $tmpdir/pop3d.out
+	tm2=$(date +"%s.%4N")
+	if [ $ret1 -eq 0 -a $ret2 -eq 0 -a $ret3 -eq 0 -a $ret4 -eq 0 -a $ret4 -eq 0 \
+			-a $ret6 -eq 0 -a $ret7 -eq 0 -a $ret8 -eq 0 -a "$r1" = "$testuser1" \
+				-a "$r2" = "$testuser1" -a -z "$r3"] ; then
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing vlimit disable relaying               succeeded %55s [%.4f sec]\n" " " "$secs"
+		print_pct
+	else
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		fcount=$(expr $fcount + 1)
+		echo "  testing vlimit disable relaying            failed [%.4f sec]\n" "$secs"
+		if [ $prompt -eq 1 ] ; then
+			(
+			echo "ret1=$ret1, ret2=$ret2, ret3=$ret3, ret4=$ret4, ret5=$ret5, ret6=$ret6, ret7=$ret7, ret8=$ret8"
+			echo "r1=$r1"
+			echo "r2=$r2"
+			echo "r3=$r3"
+			)|less
+		fi
+		[ -z "$failed" ] && failed="test vlimit disable relay" || failed="$failed, test vlimit disable relay"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+
+	$sudo setuidgid indimail env - \
+		PATH="/bin:/usr/bin" \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vlimit -g s -T $domain1
+
+	# domain expiry
+	tm1=$(date +"%s.%4N")
+	$sudo setuidgid indimail env - \
+		PATH="/bin:/usr/bin" \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vlimit -n -1 $domain1
+	ret1=$?
+	swaks -S --to $testuser1 --from $testuser1 --server 127.0.0.1 \
+		--port $smtp_port --a LOGIN -au $testuser1 -ap "$t1" > $tmpdir/swaks.out 2>&1
+	ret2=$?
+	grep "553-Sorry, your domain has expired (#5.7.1)" $tmpdir/swaks.out >/dev/null
+	ret3=$?
+	$sudo setuidgid indimail env - \
+		PATH="/bin:/usr/bin" \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vlimit -e -1 $domain1
+	ret4=$?
+	tm2=$(date +"%s.%4N")
+	if [ $ret1 -eq 0 -a $ret2 -ne 0 -a $ret3 -eq 0 -a $ret4 -eq 0 ] ; then
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing vlimit set domain expiry              succeeded %55s [%.4f sec]\n" " " "$secs"
+		print_pct
+		/bin/rm -f $tmpdir/swaks.out
+	else
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		fcount=$(expr $fcount + 1)
+		echo "  testing vlimit set domain expiry failed [%.4f sec]" "$secs"
+		if [ $prompt -eq 1 ] ; then
+			(
+			echo "ret1=$ret1, ret2=$ret2, ret3=$ret3, ret4=$ret4"
+			cat $tmpdir/swaks.out
+			echo ====================
+			cat $logdir/smtpd/current
+			) |less
+		fi
+		/bin/rm -f $tmpdir/swaks.out
+		[ -z "$failed" ] && failed="test vlimit set domain expiry" || failed="$failed, test vlimit set domain expiry"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+	
+	# password expiry
+	tm1=$(date +"%s.%4N")
+	$sudo setuidgid indimail env - \
+		PATH="/bin:/usr/bin" \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vlimit -N -1 $domain1
+	ret1=$?
+	swaks -S --to $testuser1 --from $testuser1 --server 127.0.0.1 \
+		--port $smtp_port --a LOGIN -au $testuser1 -ap "$t1" > $tmpdir/swaks.out 2>&1
+	ret2=$?
+	grep "553-Sorry, your password has expired (#5.7.1)" $tmpdir/swaks.out >/dev/null
+	ret3=$?
+	$sudo setuidgid indimail env - \
+		PATH="/bin:/usr/bin" \
+		ASSIGNDIR=$sysconfdir/users \
+		SYSCONFDIR=$sysconfdir \
+		CONTROLDIR=$cntrldir \
+	vlimit -t -1 $domain1
+	ret4=$?
+	tm2=$(date +"%s.%4N")
+	if [ $ret1 -eq 0 -a $ret2 -ne 0 -a $ret3 -eq 0 -a $ret4 -eq 0 ] ; then
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing vlimit set password expiry            succeeded %55s [%.4f sec]\n" " " "$secs"
+		print_pct
+		/bin/rm -f $tmpdir/swaks.out
+	else
+		secs=$(echo $tm1 $tm2 | awk '{printf("%0.4f\n", $2-$1)}')
+		fcount=$(expr $fcount + 1)
+		echo "  testing vlimit set password expiry failed [%.4f sec]" "$secs"
+		if [ $prompt -eq 1 ] ; then
+			(
+			echo "ret1=$ret1, ret2=$ret2, ret3=$ret3, ret4=$ret4"
+			cat $tmpdir/swaks.out
+			echo ====================
+			cat $logdir/smtpd/current
+			) |less
+		fi
+		/bin/rm -f $tmpdir/swaks.out
+		[ -z "$failed" ] && failed="test vlimit set password expiry" || failed="$failed, test vlimit set password expiry"
+		[ $continue_on_err -eq 0 ] && exit 1 || return 0
+	fi
+}
+
 usage()
 {
 	echo "testindimail [-y|--nprompt]" 1>&2
@@ -3731,7 +4370,7 @@ failed=""
 if [ -f $testdir/itotal.count ] ; then
 	total_tests=$(cat $testdir/itotal.count)
 else
-	total_tests=1315
+	total_tests=1328
 fi
 prompt=1
 continue_on_err=0
@@ -3830,13 +4469,25 @@ delete_user $testuser3 >/dev/null 2>&1
 $sudo svc -2 $servicedir/inlookup.infifo
 check_service inlookup.infifo
 
+$sudo setuidgid indimail env - \
+	PATH="/bin:/usr/bin" \
+	ASSIGNDIR=$sysconfdir/users \
+	SYSCONFDIR=$sysconfdir \
+	CONTROLDIR=$cntrldir \
+vlimit -D $domain1 >/dev/null 2>&1
 do_plain_cram_user_tests
 
 do_scram_user_tests
 
+# create testuser1, testuser2 for do_admin_server_tests and do_vlimit_tests
 t1="$password1""md5"
+t2="$password2""md5"
 create_plain_user $testuser1 $t1 MD5 >/dev/null 2>&1
+create_plain_user $testuser2 $t2 MD5 >/dev/null 2>&1
 do_admin_server_tests
+
+delete_user $testuser1 >/dev/null 2>&1
+do_vlimit_tests
 
 printf "\r%126s\n" " "
 echo "Testing domain deletion"
@@ -3875,6 +4526,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.28  2024-05-28 00:23:38+05:30  Cprogrammer
+# added tests for vlimits
+#
 # Revision 1.27  2024-05-24 14:53:22+05:30  Cprogrammer
 # updated test script
 #

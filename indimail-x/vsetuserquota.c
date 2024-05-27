@@ -1,5 +1,8 @@
 /*
  * $Log: vsetuserquota.c,v $
+ * Revision 1.6  2024-05-27 22:54:09+05:30  Cprogrammer
+ * initialize struct vlimits
+ *
  * Revision 1.5  2024-05-24 14:52:01+05:30  Cprogrammer
  * print current usage in bytes on stdout
  *
@@ -34,7 +37,6 @@
 #ifdef HAVE_QMAIL
 #include <stralloc.h>
 #include <strerr.h>
-#include <env.h>
 #include <sgetopt.h>
 #include <qprintf.h>
 #include <subfd.h>
@@ -53,7 +55,7 @@
 #include "setuserquota.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsetuserquota.c,v 1.5 2024-05-24 14:52:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetuserquota.c,v 1.6 2024-05-27 22:54:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vsetuserquota: fatal: "
@@ -120,7 +122,7 @@ main(int argc, char **argv)
 #ifdef ENABLE_DOMAIN_LIMITS
 	static stralloc tmpbuf = {0}, TheDir = {0};
 	int             domain_limits;
-	struct vlimits  limits;
+	struct vlimits  limits = { 0 };
 #endif
 
 	if (get_options(argc, argv, &email, &quota))
@@ -147,7 +149,7 @@ main(int argc, char **argv)
 			!stralloc_catb(&tmpbuf, "/.domain_limits", 15) ||
 			!stralloc_0(&tmpbuf))
 		die_nomem();
-	domain_limits = ((access(tmpbuf.s, F_OK) && !env_get("DOMAIN_LIMITS")) ? 0 : 1);
+	domain_limits = !access(tmpbuf.s, F_OK);
 #endif
 #ifdef CLUSTERED_SITE
 	if (sqlOpen_user(email, 0))

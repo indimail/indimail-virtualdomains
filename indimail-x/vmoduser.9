@@ -46,7 +46,7 @@ the existing quota by amount specified by \fIquota\fR. You can use k/K,
 m/M, g/G for kibibytes, mebibytes and gibibytes respectively, when
 specifying a value for \fIquota\fR.
 
-If the domain has domain limits set using vmoddomlimits(1), then domain
+If the domain has domain limits set using vlimit(1), then domain
 limits apply. Also, this option will not be allowed if permission for
 modifying quota is disabled in domain limits.
 
@@ -241,5 +241,5 @@ V_USER3	0x800
 0 in case of success and non-zero in case of any failure.
 
 .SH "SEE ALSO"
-vsetuserquota(1), vpasswd(1), vmoddomlimits(1), resetquota(8),
+vsetuserquota(1), vpasswd(1), vlimit(1), resetquota(8),
 vdelivermail(8), strftime(3), incrypt(1), crypt(3), gsasl(1)

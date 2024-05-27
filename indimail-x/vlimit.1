@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH vlimit 1
 .SH NAME
 vlimit \- Set / Modify Domain wide Limits
@@ -11,104 +12,147 @@ vlimit \- Set / Modify Domain wide Limits
 
 .SH OPTIONS
 .PP
-.TP
+
+.TP 3
 \fB\-v\fR
 display the indimail version number
+
 .TP
-\fB\-S\fR
+\fB\-s\fR
 show current settings
+
 .TP
 \fB\-D\fR
 delete limits for this domain, i.e. switch to default limits)
+
+.TP
+\fB\-e\fR \fIedate\fR | \fB\-n\fR \fIdays\fR
+Set the domain expiry date to \fIedate\fR in \fBddmmyyyyHHMMSS\fR format or
+\fIdays\fR from today. Use -1 for \fIedate\fR to disable domain expiry.
+\fIdays\fR can be negative to expire the domain in the past.
+
+.TP
+\fB\-t\fR \fIedate\fR | \fB\-N\fR \fIdays\fR
+Set the password expiry date to \fIedate\fR in \fBddmmyyyyHHMMSS\fR format or
+\fIdays\fR from today. Use -1 for \fIedate\fR to disable password expiry.
+\fIdays\fR can be negative to expire the password in the past.
+
 .TP
 \fB\-Q\fR \fIquota\fR
-set domain quota limit. You can use the suffix k/K, m/M, g/G to specify the quota
-in Kb, Mb, or Gb.
+set domain quota limit. You can use the suffix k/K, m/M, g/G to specify the
+quota in Kb, Mb, or Gb.
+
 .TP
 \fB\-M\fR \fIcount\fR
 set domain max msg count limit
+
 .TP
 \fB\-q\fR \fIquota\fR
-set default user quota limit. You can use the suffix k/K, m/M, g/G to specify the quota
-in Kb, Mb, or Gb. Specify \fBNOQUOTA\fR if you want to have unlimited quota.
+set default user quota limit. You can use the suffix k/K, m/M, g/G to
+specify the quota in Kb, Mb, or Gb. Specify \fBNOQUOTA\fR if you want to
+have unlimited quota.
+
 .TP
 \fB\-m\fR \fIcount\fR
 set default user max msg count limit
+
 .TP
 \fB\-P\fR \fIcount\fR
 set max amount of pop accounts limit
+
 .TP
 \fB\-A\fR \fIcount\fR
 set max amount of aliases limit
+
 .TP
 \fB\-F\fR \fIcount\fR
 set max amount of forwards limit
+
 .TP
 \fB\-R\fR \fIcount\fR
 set max amount of autoresponders
+
 .TP
 \fB\-L\fR \fIcount\fR
 set max amount of mailing lists
-.PP
-the following options are bit flags in the gid int field
 
-\fB\-g\fR \fIgid_flags\fR
-set flags, see below
 .PP
+The following options are bit flags in the gid int field
+
+.TP 3
+\fB\-g\fR \fIgid_flags\fR
+set flags. See below
+
 gid_flags:
- u set no dialup flag
- d set no password changing flag
- p set no pop access flag
- s set no smtp access flag
- w set no web mail access flag
- i set no imap access flag
- r set no external relay flag
- x clear all flags
+ u - set no dialup flag
+ d - set no password changing flag
+ s - set no smtp access flag
+ i - set no imap access flag
+ p - set no pop access flag
+ w - set no web mail access flag
+ r - set no external relay flag
+ x - clear all flags
+
+.PP
+.TP 3
+\fB\-T\fR
+Toggle bit flag for -g option
 
 .PP
 the following options are bit flags for non postmaster admins
-.TP
+
+.TP 3
 \fB\-p\fR \fIperm_flags\fR
 set pop account flags
+
 .TP
 \fB\-a\fR \fIperm_flags\fR
 set alias flags
+
 .TP
 \fB\-f\fR \fIperm_flags\fR
 set forward flags
+
 .TP
 \fB\-r\fR \fIperm_flags\fR
 set autoresponder flags
+
 .TP
 \fB\-l\fR \fIperm_flags\fR
 set mailing list flags
+
 .TP
 \fB\-u\fR \fIperm_flags\fR
 set mailing list users flags
+
 .TP
 \fB\-o\fR \fIperm_flags\fR
 set mailing list moderators flags
+
 .TP
 \fB\-x\fR \fIperm_flags\fR
 set domain quota flags
+
 .TP
 \fB\-z\fR \fIperm_flags\fR
 set default quota flags
 
 .PP
+.TP 2
 perm_flags:
- a set deny all flag
- c set deny create flag
- m set deny modify flag
- d set deny delete flag
+ a - set deny all flag
+ c - set deny create flag
+ m - set deny modify flag
+ d - set deny delete flag
 
 .SH RETURN VALUE
  0 if all steps were successful. 
  1 if any error occurred
 
 .SH NOTES
-domain limits is work in progress and not fully implemented. For \fBvlimit\fR to work, domain
-limits need to be enabled for a domain using \fBvmoddomain(1)\fR.
+domain limits is work in progress and not fully implemented. For
+\fBvlimit\fR(1) to work, domain limits need to be enabled for a domain
+using \fBvmoddomain(1)\fR.
 
 .SH "SEE ALSO"
 vmoddomain(1)
