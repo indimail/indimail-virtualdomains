@@ -1,5 +1,8 @@
 /*
  * $Log: ProcessInFifo.c,v $
+ * Revision 1.20  2024-05-27 22:52:54+05:30  Cprogrammer
+ * initialize struct vlimits
+ *
  * Revision 1.19  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -134,7 +137,7 @@
 #include "FifoCreate.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.19 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.20 2024-05-27 22:52:54+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -929,7 +932,7 @@ ProcessInFifo(int instNum)
 	time_t          prev_time = 0l;
 	substdio        ssin;
 #ifdef ENABLE_DOMAIN_LIMITS
-	struct vlimits  limits;
+	struct vlimits  limits = { 0 };
 #endif
 
 	_debug = (env_get("DEBUG") ? 1 : 0);

@@ -1,5 +1,5 @@
 /*
- * $Id: sql_getpw.c,v 1.5 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
+ * $Id: sql_getpw.c,v 1.6 2024-05-27 22:53:02+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -27,7 +27,7 @@
 #include "strToPw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_getpw.c,v 1.5 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_getpw.c,v 1.6 2024-05-27 22:53:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef QUERY_CACHE
@@ -88,7 +88,7 @@ sql_getpw(const char *user, const char *domain)
 	static stralloc _user = {0}, _domain = {0};
 	static stralloc IUser = {0}, IDomain = {0};
 #ifdef ENABLE_DOMAIN_LIMITS
-	struct vlimits  limits;
+	struct vlimits  limits = { 0 };
 #endif
 
 	if (!domain || !*domain || !user || !*user)
@@ -222,6 +222,9 @@ sql_getpw_cache(char cache_switch)
 
 /*
  * $Log: sql_getpw.c,v $
+ * Revision 1.6  2024-05-27 22:53:02+05:30  Cprogrammer
+ * initialize struct vlimits
+ *
  * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

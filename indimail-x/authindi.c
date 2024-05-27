@@ -1,5 +1,5 @@
 /*
- * $Id: authindi.c,v 1.19 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $
+ * $Id: authindi.c,v 1.20 2024-05-27 22:50:29+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -57,7 +57,7 @@
 #define WARN  "authindi: warn: "
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.19 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.20 2024-05-27 22:50:29+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -317,7 +317,7 @@ main(int argc, char **argv)
 	struct passwd  *pw;
 #ifdef ENABLE_DOMAIN_LIMITS
 	time_t          curtime;
-	struct vlimits  limits;
+	struct vlimits  limits = { 0 };
 #endif
 
 	if (argc < 2)
@@ -684,6 +684,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: authindi.c,v $
+ * Revision 1.20  2024-05-27 22:50:29+05:30  Cprogrammer
+ * initialize struct vlimits
+ *
  * Revision 1.19  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: inquerytest.c,v $
+ * Revision 1.11  2024-05-27 22:51:37+05:30  Cprogrammer
+ * change data type to long
+ *
  * Revision 1.10  2023-06-08 17:48:31+05:30  Cprogrammer
  * renamed fifo directory from FIFODIR to INFIFODIR
  *
@@ -76,7 +79,7 @@
 #include "vlimits.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 1.10 2023-06-08 17:48:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 1.11 2024-05-27 22:51:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "inquerytest: fatal: "
@@ -114,11 +117,11 @@ print_limits(struct vlimits *limits)
 	subprintfe(subfdout, "inquerytest", "Max Domain Messages  : %13lu\n", limits->maxmsgcount);
 	subprintfe(subfdout, "inquerytest", "Default User Quota   : %13ld\n", limits->defaultquota);
 	subprintfe(subfdout, "inquerytest", "Default User Messages: %13lu\n", limits->defaultmaxmsgcount);
-	subprintfe(subfdout, "inquerytest", "Max Pop Accounts     : %13d\n", limits->maxpopaccounts);
-	subprintfe(subfdout, "inquerytest", "Max Aliases          : %13d\n", limits->maxaliases);
-	subprintfe(subfdout, "inquerytest", "Max Forwards         : %13d\n", limits->maxforwards);
-	subprintfe(subfdout, "inquerytest", "Max Autoresponders   : %13d\n", limits->maxautoresponders);
-	subprintfe(subfdout, "inquerytest", "Max Mailinglists     : %13d\n", limits->maxmailinglists);
+	subprintfe(subfdout, "inquerytest", "Max Pop Accounts     : %13ld\n", limits->maxpopaccounts);
+	subprintfe(subfdout, "inquerytest", "Max Aliases          : %13ld\n", limits->maxaliases);
+	subprintfe(subfdout, "inquerytest", "Max Forwards         : %13ld\n", limits->maxforwards);
+	subprintfe(subfdout, "inquerytest", "Max Autoresponders   : %13ld\n", limits->maxautoresponders);
+	subprintfe(subfdout, "inquerytest", "Max Mailinglists     : %13ld\n", limits->maxmailinglists);
 	out("inquerytest", "\n");
 	subprintfe(subfdout, "inquerytest", "GID Flags:\n");
 	subprintfe(subfdout, "inquerytest", "  %s\n", limits->disable_imap ? "NO_IMAP" : "IMAP");

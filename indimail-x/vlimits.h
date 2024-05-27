@@ -1,5 +1,8 @@
 /*
  * $Log: vlimits.h,v $
+ * Revision 1.4  2024-05-27 08:05:16+05:30  Cprogrammer
+ * changed data type of variables to long
+ *
  * Revision 1.3  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -30,11 +33,11 @@ struct vlimits {
       /* max service limits */
       long      domain_expiry;
       long      passwd_expiry;
-      int       maxpopaccounts;
-      int       maxaliases;
-      int       maxforwards;
-      int       maxautoresponders;
-      int       maxmailinglists;
+      long      maxpopaccounts;
+      long      maxaliases;
+      long      maxforwards;
+      long      maxautoresponders;
+      long      maxmailinglists;
 
       /* quota & message count limits */
       umdir_t   diskquota;			/*- domain quota */

@@ -1,33 +1,12 @@
 /*
- * $Log: vlimit.c,v $
- * Revision 1.7  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.6  2021-07-22 15:17:39+05:30  Cprogrammer
- * conditional define of _XOPEN_SOURCE
- *
- * Revision 1.5  2020-10-13 18:35:44+05:30  Cprogrammer
- * initialize struct tm for strptime() value too big error
- *
- * Revision 1.4  2019-06-07 15:46:15+05:30  Cprogrammer
- * use sgetopt library for getopt()
- *
- * Revision 1.3  2019-05-02 14:39:12+05:30  Cprogrammer
- * fixed SIGSEGV
- *
- * Revision 1.2  2019-04-22 23:19:46+05:30  Cprogrammer
- * added missing strerr.h
- *
- * Revision 1.1  2019-04-18 07:59:42+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: vlimit.c,v 1.8 2024-05-28 00:21:32+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vlimit.c,v 1.7 2023-01-22 10:40:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vlimit.c,v 1.8 2024-05-28 00:21:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -57,11 +36,13 @@ static char     sccsid[] = "$Id: vlimit.c,v 1.7 2023-01-22 10:40:03+05:30 Cprogr
 #include <scan.h>
 #include <str.h>
 #include <subfd.h>
+#include <fmt.h>
 #endif
 #include "vlimits.h"
 #include "get_assign.h"
 #include "common.h"
 #include "parse_quota.h"
+#include "check_group.h"
 
 #define FATAL   "vlimits: fatal: "
 #define WARN    "vlimits: warning: "
@@ -87,12 +68,13 @@ static char    *usage =
 	"          gid flags:\n"
 	"            u ( set no dialup flag )\n"
 	"            d ( set no password changing flag )\n"
-	"            p ( set no pop access flag )\n"
 	"            s ( set no smtp access flag )\n"
-	"            w ( set no web mail access flag )\n"
 	"            i ( set no imap access flag )\n"
+	"            p ( set no pop access flag )\n"
+	"            w ( set no web mail access flag )\n"
 	"            r ( set no external relay flag )\n"
 	"            x ( clear all flags )\n"
+	"         -T toggle bit flag for -g option\n"
 	"the following options are bit flags for non postmaster admins\n"
 	"         -p \"flags\"  (set pop account flags)\n"
 	"         -a \"flags\"  (set alias flags)\n"
@@ -109,6 +91,7 @@ static char    *usage =
 	"            m ( set deny modify flag )\n"
 	"            d ( set deny delete flag )"
 	;
+static int      toggle;
 
 int
 get_options(int argc, char **argv, char **Domain, char **DomainQuota, char **DefaultUserQuota,
@@ -147,7 +130,7 @@ get_options(int argc, char **argv, char **Domain, char **DomainQuota, char **Def
 	*domain_expiry = *passwd_expiry = 0l;
 
 	flag[0] = flag[1] = flag[2] = flag[3] = 0;
-	while ((c = getopt(argc, argv, "vst:e:n:N:DQ:q:M:m:P:A:F:R:L:g:p:a:f:r:l:u:o:x:z:h")) != opteof) {
+	while ((c = getopt(argc, argv, "vst:e:n:N:DQ:q:M:m:P:A:F:R:L:Tg:p:a:f:r:l:u:o:x:z:h")) != opteof) {
 		switch (c)
 		{
 		case 'v':
@@ -157,7 +140,7 @@ get_options(int argc, char **argv, char **Domain, char **DomainQuota, char **Def
 		case 's':
 			*ShowLimits = 1;
 			break;
-		case 'e':
+		case 'e': /*- domain expiry */
 			*ShowLimits = 0;
 			flag[0] = 1;
 			if (str_diffn(optarg, "-1", 3)) {
@@ -174,14 +157,14 @@ get_options(int argc, char **argv, char **Domain, char **DomainQuota, char **Def
 			} else
 				*domain_expiry = -1; /* Disable check on expiry date*/
 			break;
-		case 'n':
+		case 'n': /*- domain expiry */
 			*ShowLimits = 0;
 			flag[1] = 1;
-			scan_ulong(optarg, (unsigned long *) domain_expiry);
+			scan_long(optarg, domain_expiry);
 			*domain_expiry *= 86400;
 			*domain_expiry += time(0);
 			break;
-		case 't':
+		case 't': /*- password expiry */
 			*ShowLimits = 0;
 			flag[2] = 1;
 			if (str_diffn(optarg, "-1", 3)) {
@@ -198,10 +181,10 @@ get_options(int argc, char **argv, char **Domain, char **DomainQuota, char **Def
 			} else
 				*passwd_expiry = -1; /* Disable check on expiry date*/
 			break;
-		case 'N':
+		case 'N': /*- password expiry */
 			*ShowLimits = 0;
 			flag[3] = 1;
-			scan_ulong(optarg, (unsigned long *) passwd_expiry);
+			scan_long(optarg, passwd_expiry);
 			*passwd_expiry *= 86400;
 			*passwd_expiry += time(0);
 			break;
@@ -249,6 +232,9 @@ get_options(int argc, char **argv, char **Domain, char **DomainQuota, char **Def
 			*ShowLimits = 0;
 			*GidFlagString = optarg;
 			*GidFlag = 1;
+			break;
+		case 'T':
+			toggle = 1;
 			break;
 		case 'p':
 			*ShowLimits = 0;
@@ -326,21 +312,23 @@ get_options(int argc, char **argv, char **Domain, char **DomainQuota, char **Def
 int
 main(int argc, char *argv[])
 {
-	int             i;
-	struct vlimits  limits;
-	char          *Domain, *DomainQuota, *DefaultUserQuota, *DomainMaxMsgCount,
-				  *DefaultUserMaxMsgCount, *MaxPopAccounts, *MaxAliases,
-				  *MaxForwards, *MaxAutoresponders, *MaxMailinglists,
-				  *GidFlagString, *PermAccountFlagString, *PermAliasFlagString,
-				  *PermForwardFlagString, *PermAutoresponderFlagString,
-				  *PermMaillistFlagString, *PermMaillistUsersFlagString,
-				  *PermMaillistModeratorsFlagString, *PermQuotaFlagString,
-				  *PermDefaultQuotaFlagString;
+	struct vlimits  limits = { 0 };
+	char           *Domain, *DomainQuota, *DefaultUserQuota, *DomainMaxMsgCount,
+				   *DefaultUserMaxMsgCount, *MaxPopAccounts, *MaxAliases,
+				   *MaxForwards, *MaxAutoresponders, *MaxMailinglists,
+				   *GidFlagString, *PermAccountFlagString, *PermAliasFlagString,
+				   *PermForwardFlagString, *PermAutoresponderFlagString,
+				   *PermMaillistFlagString, *PermMaillistUsersFlagString,
+				   *PermMaillistModeratorsFlagString, *PermQuotaFlagString,
+				   *PermDefaultQuotaFlagString;
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	int             QuotaFlag, GidFlag, PermAccountFlag, PermAliasFlag,
 					PermForwardFlag, PermAutoresponderFlag, PermMaillistFlag,
 					PermMaillistUsersFlag, PermMaillistModeratorsFlag,
 					PermQuotaFlag, PermDefaultQuotaFlag, ShowLimits,
-					DeleteLimits;
+					DeleteLimits, i;
+	uid_t           Uid, myuid;
+	gid_t           Gid, mygid;
 	long            domain_expiry = 0, passwd_expiry = 0;
 
 
@@ -355,12 +343,22 @@ main(int argc, char *argv[])
 				&PermMaillistUsersFlag, &PermMaillistModeratorsFlag, &PermQuotaFlag,
 				&PermDefaultQuotaFlag, &ShowLimits, &DeleteLimits, &domain_expiry, &passwd_expiry))
 		return (1);
-	if (!get_assign(Domain, 0, 0, 0)) {
-		strerr_warn2(Domain, ": No such domain\n", 0);
+	myuid = getuid();
+	mygid = getgid();
+	if (!get_assign(Domain, 0, &Uid, &Gid)) {
+		strerr_warn2(Domain, ": No such domain", 0);
 		return (1);
 	}
+	if (!Uid)
+		strerr_die4x(100, FATAL, "domain ", Domain, " with uid 0");
+	if (myuid != Uid && mygid != Gid && myuid != 0 && check_group(Gid, FATAL) != 1) {
+		strnum1[fmt_ulong(strnum1, Uid)] = 0;
+		strnum2[fmt_ulong(strnum2, Gid)] = 0;
+		strerr_warn6(WARN, "you must be root or domain user (uid=", strnum1, "/gid=", strnum2, ") to run this program", 0);
+		return(1);
+	}
 	if (vget_limits(Domain, &limits)) {
-		strerr_warn1("vlimits: vget_limits: Failed to get limits: ", 0);
+		strerr_warn2(FATAL, "Failed to get limits: ", 0);
 		return (-1);
 	}
 	if (DeleteLimits) {
@@ -369,7 +367,7 @@ main(int argc, char *argv[])
 			flush("vlimits");
 			return (0);
 		} else {
-			strerr_warn1("vlimits: failed to delete limits", 0);
+			strerr_warn2(FATAL, "failed to delete limits", 0);
 			return (-1);
 		}
 	}
@@ -378,24 +376,24 @@ main(int argc, char *argv[])
 	if (passwd_expiry)
 		limits.passwd_expiry = passwd_expiry;
 	if (MaxPopAccounts)
-		scan_int(MaxPopAccounts, &limits.maxpopaccounts);
+		scan_long(MaxPopAccounts, &limits.maxpopaccounts);
 	if (MaxAliases)
-		scan_int(MaxAliases, &limits.maxaliases);
+		scan_long(MaxAliases, &limits.maxaliases);
 	if (MaxForwards)
-		scan_int(MaxForwards, &limits.maxforwards);
+		scan_long(MaxForwards, &limits.maxforwards);
 	if (MaxAutoresponders)
-		scan_int(MaxAutoresponders, &limits.maxautoresponders);
+		scan_long(MaxAutoresponders, &limits.maxautoresponders);
 	if (MaxMailinglists)
-		scan_int(MaxMailinglists, &limits.maxmailinglists);
+		scan_long(MaxMailinglists, &limits.maxmailinglists);
 	/*- quota & message count limits */
 	if (DomainQuota && (limits.diskquota = parse_quota(DomainQuota, 0)) == -1) {
-		strerr_warn1("vlimits: diskquota: ", &strerr_sys);
+		strerr_warn2(FATAL, "diskquota: ", &strerr_sys);
 		return (-1);
 	}
 	if (DomainMaxMsgCount &&
 		(limits.maxmsgcount = strtoll(DomainMaxMsgCount, 0, 0)) == -1)
 	{
-		strerr_warn1("vlimits: maxmsgcount: ", &strerr_sys);
+		strerr_warn2(FATAL, "maxmsgcount: ", &strerr_sys);
 		return (-1);
 	}
 #if defined(LLONG_MIN) && defined(LLONG_MAX)
@@ -404,7 +402,7 @@ main(int argc, char *argv[])
 	if (errno == ERANGE)
 #endif
 	{
-		strerr_warn1("vlimits: maxmsgcount: ", &strerr_sys);
+		strerr_warn2(FATAL, "maxmsgcount: ", &strerr_sys);
 		return (-1);
 	}
 
@@ -413,14 +411,14 @@ main(int argc, char *argv[])
 			limits.defaultquota = -1;
 		else
 		if ((limits.defaultquota = parse_quota(DefaultUserQuota, 0)) == -1) {
-			strerr_warn1("vlimits: defaultquota: ", &strerr_sys);
+			strerr_warn2(FATAL, "defaultquota: ", &strerr_sys);
 			return (-1);
 		}
 	}
 	if (DefaultUserMaxMsgCount &&
 			(limits.defaultmaxmsgcount = strtoll(DefaultUserMaxMsgCount, 0, 0)) == -1)
 	{
-		strerr_warn1("vlimits: defaultmaxmsgcount: ", &strerr_sys);
+		strerr_warn2(FATAL, "defaultmaxmsgcount: ", &strerr_sys);
 		return (-1);
 	}
 #if defined(LLONG_MIN) && defined(LLONG_MAX)
@@ -429,7 +427,7 @@ main(int argc, char *argv[])
 	if (errno == ERANGE)
 #endif
 	{
-		strerr_warn1("vlimits: defaultmaxmsgcount: ", &strerr_sys);
+		strerr_warn2(FATAL, "defaultmaxmsgcount: ", &strerr_sys);
 		return (-1);
 	}
 	if (GidFlag == 1) {
@@ -445,25 +443,25 @@ main(int argc, char *argv[])
 			switch (GidFlagString[i])
 			{
 			case 'u':
-				limits.disable_dialup = 1;
+				limits.disable_dialup = toggle ? 0 : 1;
 				break;
 			case 'd':
-				limits.disable_passwordchanging = 1;
+				limits.disable_passwordchanging = toggle ? 0 : 1;
 				break;
 			case 'p':
-				limits.disable_pop = 1;
+				limits.disable_pop = toggle ? 0 : 1;
 				break;
 			case 's':
-				limits.disable_smtp = 1;
+				limits.disable_smtp = toggle ? 0 : 1;
 				break;
 			case 'w':
-				limits.disable_webmail = 1;
+				limits.disable_webmail = toggle ? 0 : 1;
 				break;
 			case 'i':
-				limits.disable_imap = 1;
+				limits.disable_imap = toggle ? 0 : 1;
 				break;
 			case 'r':
-				limits.disable_relay = 1;
+				limits.disable_relay = toggle ? 0 : 1;
 				break;
 			case 'x':
 				limits.disable_dialup = 0;
@@ -670,20 +668,20 @@ main(int argc, char *argv[])
 		else
 			subprintfe(subfdout, "vlimits", "Default User Quota   : %13lu\n", (unsigned long) limits.defaultquota);
 		subprintfe(subfdout, "vlimits", "Default User Messages: %13lu\n", (unsigned long) limits.defaultmaxmsgcount);
-		subprintfe(subfdout, "vlimits", "Max Pop Accounts     : %13d\n", limits.maxpopaccounts);
-		subprintfe(subfdout, "vlimits", "Max Aliases          : %13d\n", limits.maxaliases);
-		subprintfe(subfdout, "vlimits", "Max Forwards         : %13d\n", limits.maxforwards);
-		subprintfe(subfdout, "vlimits", "Max Autoresponders   : %13d\n", limits.maxautoresponders);
-		subprintfe(subfdout, "vlimits", "Max Mailinglists     : %13d\n", limits.maxmailinglists);
+		subprintfe(subfdout, "vlimits", "Max Pop Accounts     : %13ld\n", limits.maxpopaccounts);
+		subprintfe(subfdout, "vlimits", "Max Aliases          : %13ld\n", limits.maxaliases);
+		subprintfe(subfdout, "vlimits", "Max Forwards         : %13ld\n", limits.maxforwards);
+		subprintfe(subfdout, "vlimits", "Max Autoresponders   : %13ld\n", limits.maxautoresponders);
+		subprintfe(subfdout, "vlimits", "Max Mailinglists     : %13ld\n", limits.maxmailinglists);
 		out("vlimits", "\n");
 		subprintfe(subfdout, "vlimits", "GID Flags:\n");
-		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_imap ? "NO_IMAP" : "IMAP");
+		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_dialup ? "NO_DIALUP" : "DIALUP");
+		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_passwordchanging ? "NO_PASSWD_CHNG" : "PASSWD CHNG");
 		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_smtp ? "NO_SMTP" : "SMTP");
+		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_imap ? "NO_IMAP" : "IMAP");
 		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_pop ? "NO_POP" : "POP3");
 		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_webmail ? "NO_WEBMAIL" : "WEBMAIL");
-		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_passwordchanging ? "NO_PASSWD_CHNG" : "PASSWD CHNG");
 		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_relay ? "NO_RELAY" : "RELAY");
-		subprintfe(subfdout, "vlimits", "  %s\n", limits.disable_dialup ? "NO_DIALUP" : "DIALUP");
 		out("vlimits", "\n");
 		subprintfe(subfdout, "vlimits", "Flags for non postmaster accounts:\n");
 		subprintfe(subfdout, "vlimits", "  pop account           : %12s %12s %12s\n",
@@ -735,3 +733,32 @@ main()
 	return(0);
 }
 #endif
+/*
+ * $Log: vlimit.c,v $
+ * Revision 1.8  2024-05-28 00:21:32+05:30  Cprogrammer
+ * fixed data types
+ * added -T option to toggle gid flags
+ * initialize struct vlimits
+ *
+ * Revision 1.7  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.6  2021-07-22 15:17:39+05:30  Cprogrammer
+ * conditional define of _XOPEN_SOURCE
+ *
+ * Revision 1.5  2020-10-13 18:35:44+05:30  Cprogrammer
+ * initialize struct tm for strptime() value too big error
+ *
+ * Revision 1.4  2019-06-07 15:46:15+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.3  2019-05-02 14:39:12+05:30  Cprogrammer
+ * fixed SIGSEGV
+ *
+ * Revision 1.2  2019-04-22 23:19:46+05:30  Cprogrammer
+ * added missing strerr.h
+ *
+ * Revision 1.1  2019-04-18 07:59:42+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

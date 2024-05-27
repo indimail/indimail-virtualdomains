@@ -1,5 +1,5 @@
 /*
- * $Id: vchkpass.c,v 1.20 2024-05-10 11:43:51+05:30 mbhangui Exp mbhangui $
+ * $Id: vchkpass.c,v 1.21 2024-05-27 22:53:42+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -44,7 +44,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.20 2024-05-10 11:43:51+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.21 2024-05-27 22:53:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -82,7 +82,7 @@ main(int argc, char **argv)
 	struct passwd  *pw;
 #ifdef ENABLE_DOMAIN_LIMITS
 	time_t          curtime;
-	struct vlimits  limits;
+	struct vlimits  limits = { 0 };
 #endif
 
 	if (argc < 2)
@@ -428,6 +428,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.21  2024-05-27 22:53:42+05:30  Cprogrammer
+ * initialize struct vlimits
+ *
  * Revision 1.20  2024-05-10 11:43:51+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
