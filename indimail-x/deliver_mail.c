@@ -423,7 +423,7 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
 					substdio_put(subfderr, strnum1, fmt_ulong(strnum1, size_limit)) ||
 					substdio_put(subfderr, ". indimail (#5.1.4)", 19))
 			{
-				strerr_warn1("deliver_mail: unable to write to stderr", &strerr_sys);
+				strerr_warn1("deliver_mail: unable to write to descriptor 2", &strerr_sys);
 				close(fd);
 #ifdef FILE_LOCKING
 				delDbLock(lockfd, fileName.s, 1);
@@ -438,7 +438,7 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
 					substdio_put(subfderr, strnum1, fmt_ulong(strnum1, mail_limit)) ||
 					substdio_put(subfderr, ". indimail (#5.1.4)", 19))
 				{
-					strerr_warn1("deliver_mail: unable to write to stderr", &strerr_sys);
+					strerr_warn1("deliver_mail: unable to write to descriptor 2", &strerr_sys);
 					close(fd);
 #ifdef FILE_LOCKING
 					delDbLock(lockfd, fileName.s, 1);
@@ -453,7 +453,7 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
 					substdio_put(subfderr, strnum1, fmt_ulong(strnum1, size_limit)) ||
 					substdio_put(subfderr, ". indimail (#5.1.4)", 19))
 				{
-					strerr_warn1("deliver_mail: unable to write to stderr", &strerr_sys);
+					strerr_warn1("deliver_mail: unable to write to descriptor 2", &strerr_sys);
 					close(fd);
 #ifdef FILE_LOCKING
 					delDbLock(lockfd, fileName.s, 1);
@@ -463,7 +463,7 @@ recordMailcount(char *maildir, mdir_t curmsgsize, mdir_t *dailyMsgSize, mdir_t *
 			}
 		}
 		if (substdio_flush(subfderr)) {
-			strerr_warn1("deliver_mail: unable to write to stderr", &strerr_sys);
+			strerr_warn1("deliver_mail: unable to write to descriptor 2", &strerr_sys);
 			close(fd);
 #ifdef FILE_LOCKING
 			delDbLock(lockfd, fileName.s, 1);
