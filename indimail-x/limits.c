@@ -1,5 +1,8 @@
 /*
  * $Log: limits.c,v $
+ * Revision 1.8  2024-05-28 19:27:57+05:30  Cprogrammer
+ * fetch entry for domain when entry not found for user
+ *
  * Revision 1.7  2024-05-28 00:20:32+05:30  Cprogrammer
  * fixed data types to fix stack smashing
  *
@@ -28,7 +31,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: limits.c,v 1.7 2024-05-28 00:20:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: limits.c,v 1.8 2024-05-28 19:27:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -53,6 +56,7 @@ static char     sccsid[] = "$Id: limits.c,v 1.7 2024-05-28 00:20:32+05:30 Cprogr
 #include <strerr.h>
 #include <stralloc.h>
 #include <subfd.h>
+#include <str.h>
 #endif
 #include "indimail.h"
 #include "create_table.h"
@@ -74,8 +78,7 @@ die_nomem(char *str)
 int
 vget_limits(const char *domain, struct vlimits *limits)
 {
-	int             err;
-	int             perm;
+	int             err, perm, num_rows;
 	MYSQL_ROW       row;
 	MYSQL_RES      *res;
 
@@ -106,7 +109,7 @@ vget_limits(const char *domain, struct vlimits *limits)
 		strerr_warn2("vget_limits: mysql_store_results: ", (char *) in_mysql_error(&mysql[1]), 0);
 		return (-1);
 	}
-	if (!in_mysql_num_rows(res)) {
+	if (!(num_rows = in_mysql_num_rows(res))) {
 		in_mysql_free_result(res);
 		return (0);
 	}
@@ -179,7 +182,12 @@ vget_limits(const char *domain, struct vlimits *limits)
 		scan_short(row[24], &(limits->perm_defaultquota));
 	}
 	in_mysql_free_result(res);
-	return (0);
+	err = str_rchr(domain, '@');
+	if (domain[err] && domain[err + 1])
+		limits->limit_type = 2;
+	else
+		limits->limit_type = 1;
+	return (num_rows);
 }
 
 int

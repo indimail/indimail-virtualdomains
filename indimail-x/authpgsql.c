@@ -1,5 +1,8 @@
 /*
  * $Log: authpgsql.c,v $
+ * Revision 1.12  2024-05-28 19:14:12+05:30  Cprogrammer
+ * handle -1 return code for vget_limits()
+ *
  * Revision 1.11  2024-05-27 22:51:10+05:30  Cprogrammer
  * initialize struct vlimits
  *
@@ -76,7 +79,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: authpgsql.c,v 1.11 2024-05-27 22:51:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authpgsql.c,v 1.12 2024-05-28 19:14:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_PGSQL
@@ -177,10 +180,10 @@ pg_getpw(char *user, char *domain)
 	pwent.pw_shell = IShell.s;
 #ifdef ENABLE_DOMAIN_LIMITS
 	if (env_get("DOMAIN_LIMITS") && !(pwent.pw_gid & V_OVERRIDE)) {
-		if (!vget_limits(domain, &limits))
-			pwent.pw_gid |= vlimits_get_flag_mask(&limits);
-		else
+		if (vget_limits(domain, &limits) == -1)
 			return ((struct passwd *) 0);
+		else
+			pwent.pw_gid |= vlimits_get_flag_mask(&limits);
 	}
 #endif
 	return (&pwent);
@@ -335,7 +338,7 @@ main(int argc, char **argv)
 		struct vlimits *lmt;
 #ifdef QUERY_CACHE
 		if (!env_get("QUERY_CACHE")) {
-			if (vget_limits(domain.s, &limits)) {
+			if (vget_limits(domain.s, &limits) == -1) {
 				strerr_warn2("authpgsql: unable to get domain limits for for ", domain.s, 0);
 				subprintfe(subfdout, "authpgsql", "454-unable to get domain limits for %s (#4.3.0)\r\n", domain.s);
 				flush("authpgsql");
@@ -345,7 +348,7 @@ main(int argc, char **argv)
 		} else
 			lmt = inquery(LIMIT_QUERY, login, 0);
 #else
-		if (vget_limits(domain.s, &limits)) {
+		if (vget_limits(domain.s, &limits) == -1) {
 			strerr_warn2("authpgsql: unable to get domain limits for for ", domain.s, 0);
 			subprintfe(subfdout, "authpgsql", "454-unable to get domain limits for %s (#4.3.0)\r\n", domain.s);
 			flush("authpgsql");

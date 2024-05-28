@@ -1,5 +1,8 @@
 /*
  * $Log: tcplookup.c,v $
+ * Revision 1.7  2024-05-28 19:30:02+05:30  Cprogrammer
+ * Use INFIFODIR #define from inquery.h for infifo
+ *
  * Revision 1.6  2023-06-08 17:49:14+05:30  Cprogrammer
  * renamed fifo directory from FIFODIR to INFIFODIR
  *
@@ -56,9 +59,10 @@
 #include "FifoCreate.h"
 #include "common.h"
 #include "variables.h"
+#include "inquery.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: tcplookup.c,v 1.6 2023-06-08 17:49:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcplookup.c,v 1.7 2024-05-28 19:30:02+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 char            strnum[FMT_ULONG];
@@ -179,7 +183,7 @@ prepare_wfifo(int *wfd, int *fifo_len, int *pipe_size, int bytes)
 		if (!stralloc_copys(&InFifo, infifo) || !stralloc_0(&InFifo))
 			die_nomem();
 	} else {
-		getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/indimail/inlookup");
+		getEnvConfigStr(&infifo_dir, "INFIFODIR", INFIFODIR);
 		if (*infifo_dir == '/') {
 			if (!stralloc_copys(&InFifo, infifo_dir) ||
 					!stralloc_catb(&InFifo, "/", 1) ||

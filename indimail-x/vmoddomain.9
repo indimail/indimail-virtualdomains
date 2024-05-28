@@ -5,17 +5,14 @@ vmoddomain - Modify delivery instruction for a virtual domain or set domain
 limits
 
 .SH SYNOPSYS
-.B vmoddomain
-[
-.I options
-]
-.I virtual_domain
+\fBvmoddomain [ \fIoptions\fR ] \fIvirtual_domain\fR
 
 .SH DESCRIPTION
 .PP
 \fBvmoddomain\fR modifies delivery instructions for a virtual domain by
 modifying \fB.qmail-default\fR. \fBvmoddomain\fR can also be used to set
-domain limits when using the -\fBl\fR option.
+domain limits when using the -\fBl\fR option or hash method using -\fBH\fR
+option.
 
 .SH OPTIONS
 .PP
@@ -23,12 +20,15 @@ domain limits when using the -\fBl\fR option.
 .TP
 \fB\-v\fR
 verbose
-.TP
+
+.TP 3
 \fB\-l\fR \fI0\fR | \fI1\fR
 Set domain limit. 0 to turn off, 1 to turn on.
+
 .TP
 \fB\-f\fR \fI0\fR | \fI1\fR
 Sets the domain with VFILTER capability. 0 to turn off, 1 to turn on.
+
 .TP
 \fB\-h\fR \fIhandler\fR
 Sets the handler for delivery instruction for non-existing local users. The
@@ -54,10 +54,16 @@ which has the user.
 .RE
 
 .EX
-Example Usage
+   Example Usage
 
-vmoddomain -f 1 bounce-no-mailbox example.com
+   vmoddomain -f 1 bounce-no-mailbox example.com
 .EE
+
+.TP
+\fB\-H\fR \fIhash_method\fR
+You can set domain specific hash method to override hash method configured
+in \fI@controldir@/hash_method\fR. It has to be one of DES, MD5, SHA-256,
+SHA-512 or YESCRYPT at the moment
 
 .SH RETURN VALUE
 0 if all steps were successful, non-zero otherwise. If any of the steps

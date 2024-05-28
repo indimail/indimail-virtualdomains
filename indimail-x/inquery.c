@@ -1,41 +1,5 @@
 /*
- * $Log: inquery.c,v $
- * Revision 1.12  2024-05-10 11:43:51+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.11  2023-06-08 17:46:57+05:30  Cprogrammer
- * renamed fifo directory from FIFODIR to INFIFODIR
- *
- * Revision 1.10  2023-04-23 19:19:32+05:30  Cprogrammer
- * write error messages for all errors
- *
- * Revision 1.9  2023-02-14 01:10:39+05:30  Cprogrammer
- * use FIFOTMPDIR instead of TMPDIR for inquery fifo
- *
- * Revision 1.8  2022-08-04 14:39:07+05:30  Cprogrammer
- * refactored code
- *
- * Revision 1.7  2022-07-31 10:06:35+05:30  Cprogrammer
- * use TMPDIR for /tmp
- *
- * Revision 1.6  2021-09-12 11:52:36+05:30  Cprogrammer
- * removed redundant multiple initialization of InFifo.len
- *
- * Revision 1.5  2021-02-07 19:55:54+05:30  Cprogrammer
- * make request over TCP/IP (tcpclient) using fd 6 and 7.
- *
- * Revision 1.4  2020-10-18 07:49:06+05:30  Cprogrammer
- * use alloc() instead of alloc_re()
- *
- * Revision 1.3  2020-04-01 18:55:52+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-04-22 23:12:30+05:30  Cprogrammer
- * replaced realloc() with alloc()
- *
- * Revision 1.1  2019-04-17 19:00:32+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: inquery.c,v 1.13 2024-05-28 19:23:45+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -68,9 +32,10 @@
 #include "common.h"
 #include "variables.h"
 #include "strToPw.h"
+#include "inquery.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquery.c,v 1.12 2024-05-10 11:43:51+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: inquery.c,v 1.13 2024-05-28 19:23:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "inquery: fatal: "
@@ -208,7 +173,7 @@ inquery(char query_type, const char *email, const char *ip)
 				return ((void *) 0);
 			}
 		} else {
-			getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/indimail/inlookup");
+			getEnvConfigStr(&infifo_dir, "INFIFODIR", INFIFODIR);
 			if (*infifo_dir == '/') {
 				if (!stralloc_copys(&InFifo, infifo_dir) ||
 						!stralloc_catb(&InFifo, "/", 1) ||
@@ -474,3 +439,45 @@ inquery(char query_type, const char *email, const char *ip)
 	}
 	return ((void *) 0);
 }
+/*
+ * $Log: inquery.c,v $
+ * Revision 1.13  2024-05-28 19:23:45+05:30  Cprogrammer
+ * Use INFIFODIR #define from inquery.h for infifo
+ *
+ * Revision 1.12  2024-05-10 11:43:51+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.11  2023-06-08 17:46:57+05:30  Cprogrammer
+ * renamed fifo directory from FIFODIR to INFIFODIR
+ *
+ * Revision 1.10  2023-04-23 19:19:32+05:30  Cprogrammer
+ * write error messages for all errors
+ *
+ * Revision 1.9  2023-02-14 01:10:39+05:30  Cprogrammer
+ * use FIFOTMPDIR instead of TMPDIR for inquery fifo
+ *
+ * Revision 1.8  2022-08-04 14:39:07+05:30  Cprogrammer
+ * refactored code
+ *
+ * Revision 1.7  2022-07-31 10:06:35+05:30  Cprogrammer
+ * use TMPDIR for /tmp
+ *
+ * Revision 1.6  2021-09-12 11:52:36+05:30  Cprogrammer
+ * removed redundant multiple initialization of InFifo.len
+ *
+ * Revision 1.5  2021-02-07 19:55:54+05:30  Cprogrammer
+ * make request over TCP/IP (tcpclient) using fd 6 and 7.
+ *
+ * Revision 1.4  2020-10-18 07:49:06+05:30  Cprogrammer
+ * use alloc() instead of alloc_re()
+ *
+ * Revision 1.3  2020-04-01 18:55:52+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-04-22 23:12:30+05:30  Cprogrammer
+ * replaced realloc() with alloc()
+ *
+ * Revision 1.1  2019-04-17 19:00:32+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

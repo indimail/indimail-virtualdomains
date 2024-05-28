@@ -1,5 +1,5 @@
 /*
- * $Id: authindi.c,v 1.20 2024-05-27 22:50:29+05:30 Cprogrammer Exp mbhangui $
+ * $Id: authindi.c,v 1.21 2024-05-28 19:13:20+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -57,7 +57,7 @@
 #define WARN  "authindi: warn: "
 
 #ifndef lint
-static char     sccsid[] = "$Id: authindi.c,v 1.20 2024-05-27 22:50:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: authindi.c,v 1.21 2024-05-28 19:13:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static stralloc tmpbuf = {0};
@@ -653,7 +653,7 @@ main(int argc, char **argv)
 		struct vlimits *lmt;
 #ifdef QUERY_CACHE
 		if (!env_get("QUERY_CACHE")) {
-			if (vget_limits(real_domain, &limits)) {
+			if (vget_limits(real_domain, &limits) == -1) {
 				strerr_warn3(FATAL, "unable to get domain limits for for ", real_domain, 0);
 				failure1(argv, auth_method, service, imapargs, pop3args, authstr, 0);
 			}
@@ -661,7 +661,7 @@ main(int argc, char **argv)
 		} else
 			lmt = inquery(LIMIT_QUERY, login, 0);
 #else
-		if (vget_limits(real_domain, &limits)) {
+		if (vget_limits(real_domain, &limits) == -1) {
 			strerr_warn3(FATAL, "unable to get domain limits for for ", real_domain, 0);
 			failure1(argv, auth_method, service, imapargs, pop3args, authstr, 0);
 		}
@@ -684,6 +684,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: authindi.c,v $
+ * Revision 1.21  2024-05-28 19:13:20+05:30  Cprogrammer
+ * handle -1 return code for vget_limits()
+ *
  * Revision 1.20  2024-05-27 22:50:29+05:30  Cprogrammer
  * initialize struct vlimits
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: vadduser.c,v 1.16 2024-05-27 22:53:14+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vadduser.c,v 1.17 2024-05-28 19:30:32+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -64,7 +64,7 @@
 #include "common.h"
 
 #ifndef	lint
-static char     rcsid[] = "$Id: vadduser.c,v 1.16 2024-05-27 22:53:14+05:30 Cprogrammer Exp mbhangui $";
+static char     rcsid[] = "$Id: vadduser.c,v 1.17 2024-05-28 19:30:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vadduser: fatal: "
@@ -183,12 +183,8 @@ main(int argc, char **argv)
 			!stralloc_0(&tmpbuf))
 		die_nomem();
 	domain_limits = !access(tmpbuf.s, F_OK);
-	if (domain_limits && vget_limits(real_domain, &limits)) {
+	if (domain_limits && vget_limits(real_domain, &limits) == -1) {
 		strerr_warn2("vadduser: Unable to get domain limits for ", real_domain, 0);
-		return (1);
-	}
-	if (Quota.len && (limits.perm_defaultquota & VLIMIT_DISABLE_CREATE)) {
-		strerr_warn2("vadduser: -q option not allowed for ", real_domain, 0);
 		return (1);
 	}
 #endif
@@ -588,6 +584,10 @@ get_options(int argc, char **argv, char **base_path, int *users_per_level,
 
 /*
  * $Log: vadduser.c,v $
+ * Revision 1.17  2024-05-28 19:30:32+05:30  Cprogrammer
+ * removed check for perms_defaultquota
+ * handle -1 return code for vget_limits()
+ *
  * Revision 1.16  2024-05-27 22:53:14+05:30  Cprogrammer
  * initialize struct vlimits
  * fix .domain_limits path

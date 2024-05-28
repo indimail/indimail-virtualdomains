@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail.spec.in,v 1.146 2024-05-23 17:39:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.spec.in,v 1.147 2024-05-28 19:16:01+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -762,6 +762,7 @@ done
 %attr(644,root,root)                    %{_prefix}/include/indimail/pipe_exec.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/post_handle.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/print_control.h
+%attr(644,root,root)                    %{_prefix}/include/indimail/print_limits.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/ProcessInFifo.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/proxylogin.h
 %attr(644,root,root)                    %{_prefix}/include/indimail/purge_files.h
