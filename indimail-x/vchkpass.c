@@ -1,5 +1,5 @@
 /*
- * $Id: vchkpass.c,v 1.21 2024-05-27 22:53:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vchkpass.c,v 1.22 2024-05-28 19:31:53+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -44,7 +44,7 @@
 #include "runcmmd.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: vchkpass.c,v 1.21 2024-05-27 22:53:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vchkpass.c,v 1.22 2024-05-28 19:31:53+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef AUTH_SIZE
@@ -361,7 +361,7 @@ main(int argc, char **argv)
 		struct vlimits *lmt;
 #ifdef QUERY_CACHE
 		if (!env_get("QUERY_CACHE")) {
-			if (vget_limits(domain.s, &limits)) {
+			if (vget_limits(domain.s, &limits) == -1) {
 				strerr_warn2("vchkpass: unable to get domain limits for for ", domain.s, 0);
 				subprintfe(subfdout, "vchkpass", "454-unable to get domain limits for %s (#4.3.0)\r\n", domain.s);
 				flush("vchkpass");
@@ -371,7 +371,7 @@ main(int argc, char **argv)
 		} else
 			lmt = inquery(LIMIT_QUERY, login, 0);
 #else
-		if (vget_limits(domain.s, &limits)) {
+		if (vget_limits(domain.s, &limits) == -1) {
 			strerr_warn2("vchkpass: unable to get domain limits for for ", domain.s, 0);
 			subprintfe(subfdout, "vchkpass", "454-unable to get domain limits for %s (#4.3.0)\r\n", domain.s);
 			flush("vchkpass");
@@ -428,6 +428,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: vchkpass.c,v $
+ * Revision 1.22  2024-05-28 19:31:53+05:30  Cprogrammer
+ * handle -1 return code for vget_limits()
+ *
  * Revision 1.21  2024-05-27 22:53:42+05:30  Cprogrammer
  * initialize struct vlimits
  *

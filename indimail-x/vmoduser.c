@@ -1,5 +1,5 @@
 /*
- * $Id: vmoduser.c,v 1.23 2024-05-27 22:53:57+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vmoduser.c,v 1.24 2024-05-28 19:37:25+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -60,7 +60,7 @@
 #include "get_hashmethod.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoduser.c,v 1.23 2024-05-27 22:53:57+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoduser.c,v 1.24 2024-05-28 19:37:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vmoduser: fatal: "
@@ -438,10 +438,8 @@ main(int argc, char **argv)
 		strerr_die5x(1, WARN, "no such user ", User.s, "@", real_domain);
 #ifdef ENABLE_DOMAIN_LIMITS
 	if (!(pw->pw_gid & V_OVERRIDE) && domain_limits) {
-		if (vget_limits(real_domain, &limits))
+		if (vget_limits(real_domain, &limits) == -1)
 			strerr_die3x(1, WARN, "Unable to get domain limits for ", real_domain);
-		if (QuotaFlag && (limits.perm_defaultquota & VLIMIT_DISABLE_MODIFY))
-			strerr_die3x(1, WARN, "quota modification not allowed for ", Email.s);
 	}
 #endif
 	if (clear_text) {
@@ -665,6 +663,10 @@ main(int argc, char **argv)
 
 /*
  * $Log: vmoduser.c,v $
+ * Revision 1.24  2024-05-28 19:37:25+05:30  Cprogrammer
+ * removed check for perms_defaultquota
+ * handle -1 return code for vget_limits()
+ *
  * Revision 1.23  2024-05-27 22:53:57+05:30  Cprogrammer
  * initialize struct vlimits
  *

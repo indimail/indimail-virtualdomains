@@ -1,5 +1,9 @@
 /*
  * $Log: vsetuserquota.c,v $
+ * Revision 1.7  2024-05-28 19:37:57+05:30  Cprogrammer
+ * handle -1 return code for vget_limits()
+ * removed check for perms_defaultquota
+ *
  * Revision 1.6  2024-05-27 22:54:09+05:30  Cprogrammer
  * initialize struct vlimits
  *
@@ -55,7 +59,7 @@
 #include "setuserquota.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vsetuserquota.c,v 1.6 2024-05-27 22:54:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vsetuserquota.c,v 1.7 2024-05-28 19:37:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "vsetuserquota: fatal: "
@@ -171,13 +175,8 @@ main(int argc, char **argv)
 	}
 #ifdef ENABLE_DOMAIN_LIMITS
 	if (!(pw->pw_gid & V_OVERRIDE) && domain_limits) {
-		if (vget_limits(real_domain, &limits)) {
+		if (vget_limits(real_domain, &limits) == -1) {
 			strerr_warn2("Unable to get domain limits for ", real_domain, 0);
-			iclose();
-			return (1);
-		}
-		if (limits.perm_defaultquota & VLIMIT_DISABLE_MODIFY) {
-			strerr_warn2("quota modification not allowed for ", email, 0);
 			iclose();
 			return (1);
 		}

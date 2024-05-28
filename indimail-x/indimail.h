@@ -1,5 +1,8 @@
 /*
  * $Log: indimail.h,v $
+ * Revision 1.12  2024-05-28 19:15:18+05:30  Cprogrammer
+ * changed value of V_OVERRIDE
+ *
  * Revision 1.11  2023-07-30 19:45:09+05:30  Cprogrammer
  * updated ip address field lengths
  *
@@ -38,7 +41,7 @@
 #define INDIMAILH_H
 
 #ifndef	lint
-static char     sccsidh[] = "$Id: indimail.h,v 1.11 2023-07-30 19:45:09+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidh[] = "$Id: indimail.h,v 1.12 2024-05-28 19:15:18+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_CONFIG_H
@@ -503,12 +506,12 @@ primary key(id)"
 #define NO_RELAY                0x20
 #define NO_DIALUP               0x40
 #define QA_ADMIN                0x80
-#define V_OVERRIDE              0x100
-#define NO_SMTP                 0x200
-#define V_USER0                 0x400
-#define V_USER1                 0x800
-#define V_USER2                 0x1000
-#define V_USER3                 0x2000
+#define NO_SMTP                 0x100
+#define V_USER0                 0x200
+#define V_USER1                 0x400
+#define V_USER2                 0x800
+#define V_USER3                 0x1000
+#define V_OVERRIDE              0x2000 /*- not subject to vlimits */
 
 /* modes for indimail dirs, files and qmail files */
 #define OVERQUOTA_MAILSIZE      1000

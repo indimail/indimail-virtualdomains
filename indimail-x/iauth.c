@@ -1,5 +1,5 @@
 /*
- * $Id: iauth.c,v 1.11 2024-05-27 22:51:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iauth.c,v 1.12 2024-05-28 19:14:50+05:30 Cprogrammer Exp mbhangui $
  *
  * authenticate.c - Generic PAM Authentication module for pam_multi
  * Copyright (C) <2008-2023>  Manvendra Bhangui <manvendra@indimail.org>
@@ -81,7 +81,7 @@
 #include "common.h"
 
 #ifndef lint
-static char     sccsid[] = "$Id: iauth.c,v 1.11 2024-05-27 22:51:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: iauth.c,v 1.12 2024-05-28 19:14:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static int      defaultTask(char *, char *, struct passwd *, char *, int);
@@ -246,7 +246,7 @@ i_acctmgmt(char *email, char *service, int *size, int *nitems, int debug)
 		struct vlimits *lmt;
 #ifdef QUERY_CACHE
 		if (!env_get("QUERY_CACHE")) {
-			if (vget_limits(real_domain, &limits)) {
+			if (vget_limits(real_domain, &limits) == -1) {
 				strerr_warn2("iauth.so: i_acctmgmt: unable to get domain limits for for ", real_domain, 0);
 				out("iauth.so", "454-unable to get domain limits for ");
 				out("iauth.so", real_domain);
@@ -258,7 +258,7 @@ i_acctmgmt(char *email, char *service, int *size, int *nitems, int debug)
 		} else
 			lmt = inquery(LIMIT_QUERY, email, 0);
 #else
-		if (vget_limits(real_domain, &limits)) {
+		if (vget_limits(real_domain, &limits) == -1) {
 			strerr_warn2("iauth.so: i_acctmgmt: unable to get domain limits for for ", real_domain, 0);
 			return ((char *) 0);
 		}
@@ -470,6 +470,9 @@ defaultTask(char *email, char *TheDomain, struct passwd *pw, char *service, int 
 
 /*
  * $Log: iauth.c,v $
+ * Revision 1.12  2024-05-28 19:14:50+05:30  Cprogrammer
+ * handle -1 return code for vget_limits()
+ *
  * Revision 1.11  2024-05-27 22:51:20+05:30  Cprogrammer
  * initialize struct vlimits
  *

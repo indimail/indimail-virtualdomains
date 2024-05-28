@@ -30,6 +30,21 @@ Release @version@-@release@ Start 02/05/2024 End XX/XX/XXXX
 19. vlimit.c: fixed data types
 20. inquerytest: change data type to long
 21. vadduser.c: fix .domain_limits path
+22. vmoddomain.c: added -H method to configure hash method for domain
+23. authindi.c, authpgsql.c, iauth.c, vchkpass.c, sql_getpw.c, vadduser.c,
+	vmoduser.c: handle -1 return code for vget_limits()
+24. indimail.h: re-arranged gid bit field masks
+25. added print_limits() common function for inquerytest.c, vlimit.c
+26. inquery.c, tcplookup.c, ProcessInFifo: Use INFIFODIR #define from inquery.h for infifo
+27. inquery.h: define INFIFODIR for infifo
+28. limits.c: fetch entry for domain when entry not found for user
+29. vadduser.c, vmoduser.c, vsetuserquota.c: removed check for perms_defaultquota
+30. vlimit.c: use print_limits() from print_limits.c to print domain limits
+    information
+31. vlimit.c: handle both domain and user level records
+32. VlimitInLookup.c: return domain level record of user level record not found
+33. vlimits.h: added limit_type member to vlimits sructure
+34. ProcessInFifo.c: use vget_limits when argument is domain instead of email
 
 * Mon Jan 01 2024 09:24:41 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.6-1.1%{?dist}
 Release 3.4.6-1.1 Start 09/09/2023 End 01/01/2024

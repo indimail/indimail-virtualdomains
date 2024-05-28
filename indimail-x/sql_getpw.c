@@ -1,5 +1,5 @@
 /*
- * $Id: sql_getpw.c,v 1.6 2024-05-27 22:53:02+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sql_getpw.c,v 1.7 2024-05-28 19:29:33+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -27,7 +27,7 @@
 #include "strToPw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_getpw.c,v 1.6 2024-05-27 22:53:02+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_getpw.c,v 1.7 2024-05-28 19:29:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef QUERY_CACHE
@@ -199,10 +199,10 @@ sql_getpw(const char *user, const char *domain)
 		pwent.pw_shell = IShell.s;
 #ifdef ENABLE_DOMAIN_LIMITS
 		if (env_get("DOMAIN_LIMITS") && !(pwent.pw_gid & V_OVERRIDE)) {
-			if (!vget_limits(_domain.s, &limits))
-				pwent.pw_gid |= vlimits_get_flag_mask(&limits);
-			else
+			if (vget_limits(_domain.s, &limits) == -1)
 				return ((struct passwd *) 0);
+			else
+				pwent.pw_gid |= vlimits_get_flag_mask(&limits);
 		}
 #endif
 		return (&pwent);
@@ -222,6 +222,9 @@ sql_getpw_cache(char cache_switch)
 
 /*
  * $Log: sql_getpw.c,v $
+ * Revision 1.7  2024-05-28 19:29:33+05:30  Cprogrammer
+ * handle -1 return code for vget_limits()
+ *
  * Revision 1.6  2024-05-27 22:53:02+05:30  Cprogrammer
  * initialize struct vlimits
  *

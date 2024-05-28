@@ -1,5 +1,8 @@
 /*
  * $Log: vlimits.h,v $
+ * Revision 1.5  2024-05-28 19:35:50+05:30  Cprogrammer
+ * added limit_type member to vlimits sructure
+ *
  * Revision 1.4  2024-05-27 08:05:16+05:30  Cprogrammer
  * changed data type of variables to long
  *
@@ -42,7 +45,7 @@ struct vlimits {
       /* quota & message count limits */
       umdir_t   diskquota;			/*- domain quota */
       umdir_t   maxmsgcount;		/*- domain quota total message count */
-      mdir_t    defaultquota;		/*- user quota total message size */
+      umdir_t   defaultquota;		/*- user quota total message size */
       umdir_t   defaultmaxmsgcount;	/* -user quota total message count */
 
       /* the following are 0 (false) or 1 (true) */
@@ -64,6 +67,7 @@ struct vlimits {
       short     perm_maillist_moderators;
       short     perm_quota;
       short     perm_defaultquota;
+	  short     limit_type;
 };
 
 int             vget_limits(const char *, struct vlimits *);

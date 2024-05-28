@@ -1,38 +1,5 @@
 /*
- * $Log: inquerytest.c,v $
- * Revision 1.11  2024-05-27 22:51:37+05:30  Cprogrammer
- * change data type to long
- *
- * Revision 1.10  2023-06-08 17:48:31+05:30  Cprogrammer
- * renamed fifo directory from FIFODIR to INFIFODIR
- *
- * Revision 1.9  2023-01-22 10:40:03+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.8  2021-09-12 11:53:22+05:30  Cprogrammer
- * removed unused variable controldir
- *
- * Revision 1.7  2021-09-01 18:29:48+05:30  Cprogrammer
- * mark functions not returning as __attribute__ ((noreturn))
- *
- * Revision 1.6  2021-06-09 18:59:10+05:30  Cprogrammer
- * test fifo for read to ensure inlookup process has opened fifo in write mode
- *
- * Revision 1.5  2021-06-09 17:03:49+05:30  Cprogrammer
- * BUG: Fixed SIGSEGV
- *
- * Revision 1.4  2021-02-07 20:30:25+05:30  Cprogrammer
- * minor code optimization
- *
- * Revision 1.3  2020-04-01 18:55:55+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.2  2019-06-07 16:05:57+05:30  Cprogrammer
- * use sgetopt library for getopt()
- *
- * Revision 1.1  2019-04-18 08:19:53+05:30  Cprogrammer
- * Initial revision
- *
+ * $id: $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -77,9 +44,10 @@
 #include "FifoCreate.h"
 #include "ProcessInFifo.h"
 #include "vlimits.h"
+#include "print_limits.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: inquerytest.c,v 1.11 2024-05-27 22:51:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: inquerytest.c,v 1.12 2024-05-28 19:25:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL   "inquerytest: fatal: "
@@ -104,72 +72,6 @@ die_nomem()
 {
 	strerr_warn1("inquerytest: out of memory", 0);
 	_exit(111);
-}
-
-void
-print_limits(struct vlimits *limits)
-{
-	subprintfe(subfdout, "inquerytest", "Domain Expiry Date   : %s",
-			limits->domain_expiry == -1 ? "Never Expires\n" : ctime(&limits->domain_expiry));
-	subprintfe(subfdout, "inquerytest", "Password Expiry Date : %s\n",
-			limits->passwd_expiry == -1 ? "Never Expires\n" : ctime(&limits->passwd_expiry));
-	subprintfe(subfdout, "inquerytest", "Max Domain Quota     : %13lu\n", limits->diskquota);
-	subprintfe(subfdout, "inquerytest", "Max Domain Messages  : %13lu\n", limits->maxmsgcount);
-	subprintfe(subfdout, "inquerytest", "Default User Quota   : %13ld\n", limits->defaultquota);
-	subprintfe(subfdout, "inquerytest", "Default User Messages: %13lu\n", limits->defaultmaxmsgcount);
-	subprintfe(subfdout, "inquerytest", "Max Pop Accounts     : %13ld\n", limits->maxpopaccounts);
-	subprintfe(subfdout, "inquerytest", "Max Aliases          : %13ld\n", limits->maxaliases);
-	subprintfe(subfdout, "inquerytest", "Max Forwards         : %13ld\n", limits->maxforwards);
-	subprintfe(subfdout, "inquerytest", "Max Autoresponders   : %13ld\n", limits->maxautoresponders);
-	subprintfe(subfdout, "inquerytest", "Max Mailinglists     : %13ld\n", limits->maxmailinglists);
-	out("inquerytest", "\n");
-	subprintfe(subfdout, "inquerytest", "GID Flags:\n");
-	subprintfe(subfdout, "inquerytest", "  %s\n", limits->disable_imap ? "NO_IMAP" : "IMAP");
-	subprintfe(subfdout, "inquerytest", "  %s\n", limits->disable_smtp ? "NO_SMTP" : "SMTP");
-	subprintfe(subfdout, "inquerytest", "  %s\n", limits->disable_pop ? "NO_POP" : "POP3");
-	subprintfe(subfdout, "inquerytest", "  %s\n", limits->disable_webmail ? "NO_WEBMAIL" : "WEBMAIL");
-	subprintfe(subfdout, "inquerytest", "  %s\n", limits->disable_passwordchanging ? "NO_PASSWD_CHNG" : "PASSWD CHNG");
-	subprintfe(subfdout, "inquerytest", "  %s\n", limits->disable_relay ? "NO_RELAY" : "RELAY");
-	subprintfe(subfdout, "inquerytest", "  %s\n", limits->disable_dialup ? "NO_DIALUP" : "DIALUP");
-	out("inquerytest", "\n");
-	subprintfe(subfdout, "inquerytest", "Flags for non postmaster accounts:\n");
-	subprintfe(subfdout, "inquerytest", "  pop account           : %12s %12s %12s\n",
-			limits->perm_account & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
-			limits->perm_account & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
-			limits->perm_account & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
-	subprintfe(subfdout, "inquerytest", "  alias                 : %12s %12s %12s\n",
-			limits->perm_alias & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
-			limits->perm_alias & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
-			limits->perm_alias & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
-	subprintfe(subfdout, "inquerytest", "  forward               : %12s %12s %12s\n",
-			limits->perm_forward & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
-			limits->perm_forward & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
-			limits->perm_forward & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
-	subprintfe(subfdout, "inquerytest", "  autoresponder         : %12s %12s %12s\n",
-			limits->perm_autoresponder & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
-			limits->perm_autoresponder & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
-			limits->perm_autoresponder & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
-	subprintfe(subfdout, "inquerytest", "  mailinglist           : %12s %12s %12s\n",
-			limits->perm_maillist & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
-			limits->perm_maillist & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
-			limits->perm_maillist & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
-	subprintfe(subfdout, "inquerytest", "  mailinglist users     : %12s %12s %12s\n",
-			limits->perm_maillist_users & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
-			limits->perm_maillist_users & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
-			limits->perm_maillist_users & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
-	subprintfe(subfdout, "inquerytest", "  mailinglist moderators: %12s %12s %12s\n",
-			limits->perm_maillist_moderators & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
-			limits->perm_maillist_moderators & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
-			limits->perm_maillist_moderators & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
-	subprintfe(subfdout, "inquerytest", "  domain quota          : %12s %12s %12s\n",
-			limits->perm_quota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
-			limits->perm_quota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY",
-			limits->perm_quota & VLIMIT_DISABLE_DELETE ? "DENY_DELETE" : "ALLOW_DELETE");
-	subprintfe(subfdout, "inquerytest", "  default quota         : %12s %12s\n",
-			limits->perm_defaultquota & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
-			limits->perm_defaultquota & VLIMIT_DISABLE_MODIFY ? "DENY_MODIFY" : "ALLOW_MODIFY");
-	flush("inquerytest");
-	return;
 }
 
 #ifdef HAVE_QMAIL
@@ -252,7 +154,7 @@ main(int argc, char **argv)
 				die_nomem();
 			InFifo.len--;
 		} else {
-			getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/indimail/inlookup");
+			getEnvConfigStr(&infifo_dir, "INFIFODIR", INFIFODIR);
 			if (*infifo_dir == '/') {
 				if (indimailuid == -1 || indimailgid == -1)
 					get_indimailuidgid(&indimailuid, &indimailgid);
@@ -307,7 +209,7 @@ main(int argc, char **argv)
 				die_nomem();
 			InFifo.len--;
 		} else {
-			getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/indimail/inlookup");
+			getEnvConfigStr(&infifo_dir, "INFIFODIR", INFIFODIR);
 			if (*infifo_dir == '/') {
 				if (!stralloc_copys(&InFifo, infifo_dir) ||
 						!stralloc_append(&InFifo, "/") ||
@@ -441,3 +343,43 @@ main(int argc, char **argv)
 	wait(&status);
 	return (0);
 }
+
+/*
+ * $Log: inquerytest.c,v $
+ * Revision 1.12  2024-05-28 19:25:06+05:30  Cprogrammer
+ * use print_limit function from print_limit.c
+ *
+ * Revision 1.11  2024-05-27 22:51:37+05:30  Cprogrammer
+ * change data type to long
+ *
+ * Revision 1.10  2023-06-08 17:48:31+05:30  Cprogrammer
+ * renamed fifo directory from FIFODIR to INFIFODIR
+ *
+ * Revision 1.9  2023-01-22 10:40:03+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.8  2021-09-12 11:53:22+05:30  Cprogrammer
+ * removed unused variable controldir
+ *
+ * Revision 1.7  2021-09-01 18:29:48+05:30  Cprogrammer
+ * mark functions not returning as __attribute__ ((noreturn))
+ *
+ * Revision 1.6  2021-06-09 18:59:10+05:30  Cprogrammer
+ * test fifo for read to ensure inlookup process has opened fifo in write mode
+ *
+ * Revision 1.5  2021-06-09 17:03:49+05:30  Cprogrammer
+ * BUG: Fixed SIGSEGV
+ *
+ * Revision 1.4  2021-02-07 20:30:25+05:30  Cprogrammer
+ * minor code optimization
+ *
+ * Revision 1.3  2020-04-01 18:55:55+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.2  2019-06-07 16:05:57+05:30  Cprogrammer
+ * use sgetopt library for getopt()
+ *
+ * Revision 1.1  2019-04-18 08:19:53+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

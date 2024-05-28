@@ -1,5 +1,8 @@
 /*
  * $Log: VlimitInLookup.c,v $
+ * Revision 1.4  2024-05-28 19:34:57+05:30  Cprogrammer
+ * return domain level record of user level record not found
+ *
  * Revision 1.3  2024-05-27 22:53:54+05:30  Cprogrammer
  * initialize struct vlimits
  *
@@ -15,7 +18,7 @@
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: VlimitInLookup.c,v 1.3 2024-05-27 22:53:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: VlimitInLookup.c,v 1.4 2024-05-28 19:34:57+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -36,14 +39,14 @@ static char     sccsid[] = "$Id: VlimitInLookup.c,v 1.3 2024-05-27 22:53:54+05:3
 #include "variables.h"
 #include "vlimits.h"
 
+static struct vlimits limits = { 0 };
+
 int
 VlimitInLookup(const char *email, struct vlimits *lim)
 {
 	static stralloc user = {0}, domain = {0};
 	const char     *real_domain;
-#ifdef ENABLE_DOMAIN_LIMITS
-	struct vlimits  limits = { 0 };
-#endif
+	int             r;
 
 #ifdef CLUSTERED_SITE
 	if (sqlOpen_user(email, 1))
@@ -52,18 +55,24 @@ VlimitInLookup(const char *email, struct vlimits *lim)
 #endif
 	{
 		if(userNotFound)
-			return(1);
+			return 1;
 		else
-			return(-1);
+			return -1;
 	}
-	parse_email(email, &user, &domain);
-	if (!(real_domain = get_real_domain(domain.s)))
-		real_domain = domain.s;
-	if (vget_limits(real_domain, &limits)) {
-		strerr_warn3("VlimitInLookup: ", real_domain, ": failed to get domain limits", 0);
-		return (-1);
+	if ((r = vget_limits(email, &limits)) == -1) {
+		strerr_warn3("VlimitInLookup: ", email, ": failed to get domain limits", 0);
+		return -1;
+	} else
+	if (!r) {
+		parse_email(email, &user, &domain);
+		if (!(real_domain = get_real_domain(domain.s)))
+			real_domain = domain.s;
+		if (vget_limits(real_domain, &limits) == -1) {
+			strerr_warn3("VlimitInLookup: ", real_domain, ": failed to get domain limits", 0);
+			return -1;
+		}
 	}
 	*lim = limits;
-	return (0);
+	return 0;
 }
 #endif

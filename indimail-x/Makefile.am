@@ -83,7 +83,7 @@ include_HEADERS = addaliasdomain.h add_control.h add_domain_assign.h addressToke
 	pipe_exec.h post_handle.h print_control.h ProcessInFifo.h proxylogin.h \
 	purge_files.h pwcomp.h PwdInLookup.h qmail_remote.h recalc_quota.h \
 	RelayInLookup.h relay_select.h RemoteBulkMail.h remove_line.h remove_quotes.h \
-	renameuser.h runcmmd.h SendWelcomeMail.h \
+	renameuser.h runcmmd.h SendWelcomeMail.h print_limits.h \
 	set_mysql_options.h setuserquota.h skip_relay.h \
 	skip_system_files.h sockwrite.h smtp_port.h spam.h sql_active.h sql_adddomain.h \
 	sql_adduser.h sql_delaliasdomain.h sql_deldomain.h sql_deluser.h sql_getall.h \
@@ -111,7 +111,7 @@ COMMONSOURCES = addaliasdomain.c add_atrn_map.c add_control.c add_domain_assign.
 	CreateDomainDirs.c create_table.c dbinfoAdd.c dbinfoDel.c dbinfoSelect.c \
 	dbinfoUpdate.c dbload.c dec_dir_control.c del_atrn_map.c del_control.c \
 	del_domain_assign.c deldomain.c del_ip_map.c del_user_assign.c compat.c \
-	deluser.c delusercntrl.c fappend.c \
+	deluser.c delusercntrl.c fappend.c print_limits.c \
 	FifoCreate.c filewrt.c findhost.c findmdahost.c fstabChangeCounters.c \
 	getactualpath.c get_assign.c getDbLock.c \
 	get_indimailuidgid.c get_local_hostid.c get_local_ip.c get_localtime.c \
@@ -640,6 +640,8 @@ vadduser.1: vadduser.9
 	$(editman) vadduser.9 > $@
 vdeluser.1: vdeluser.9
 	$(editman) vdeluser.9 > $@
+vmoddomain.1: vmoddomain.9
+	$(editman) vmoddomain.9 > $@
 vrenamedomain.1: vrenamedomain.9
 	$(editman) vrenamedomain.9 > $@
 vrenameuser.1: vrenameuser.9

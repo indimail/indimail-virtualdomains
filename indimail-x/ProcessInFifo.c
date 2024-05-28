@@ -1,65 +1,5 @@
 /*
- * $Log: ProcessInFifo.c,v $
- * Revision 1.20  2024-05-27 22:52:54+05:30  Cprogrammer
- * initialize struct vlimits
- *
- * Revision 1.19  2024-05-17 16:25:48+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.18  2023-06-08 17:48:50+05:30  Cprogrammer
- * renamed fifo directory from FIFODIR to INFIFODIR.
- *
- * Revision 1.17  2023-04-09 11:57:57+05:30  Cprogrammer
- * skip logging of binary search walk on SIGUSR1 (log only when debug is set)
- *
- * Revision 1.16  2023-04-08 23:46:28+05:30  Cprogrammer
- * modified for qmailmrtg inlookup stats
- *
- * Revision 1.15  2023-03-20 10:16:03+05:30  Cprogrammer
- * standardize getln handling
- *
- * Revision 1.14  2022-08-04 14:41:01+05:30  Cprogrammer
- * fetch scram password
- *
- * Revision 1.13  2022-07-04 22:23:56+05:30  Cprogrammer
- * fixed typo
- *
- * Revision 1.12  2021-07-28 12:19:56+05:30  Cprogrammer
- * shortened display in logs on signal
- *
- * Revision 1.11  2021-07-27 18:10:43+05:30  Cprogrammer
- * use getEnvConfigStr to set default domain
- *
- * Revision 1.10  2021-06-09 17:04:06+05:30  Cprogrammer
- * BUG: Fixed read failing on fifo because of O_NDELAY flag
- *
- * Revision 1.9  2021-02-07 19:54:52+05:30  Cprogrammer
- * respond to TCP/IP request when run under tcpserver
- *
- * Revision 1.8  2020-10-11 23:13:41+05:30  Cprogrammer
- * replace deprecated sys_siglist with strsignal
- *
- * Revision 1.7  2020-10-01 18:27:59+05:30  Cprogrammer
- * Darwin Port
- *
- * Revision 1.6  2020-09-17 14:48:15+05:30  Cprogrammer
- * FreeBSD fix for missing tdestroy
- *
- * Revision 1.5  2020-04-01 18:57:29+05:30  Cprogrammer
- * moved authentication functions to libqmail
- *
- * Revision 1.4  2019-05-28 17:41:50+05:30  Cprogrammer
- * added load_mysql.h for mysql interceptor function prototypes
- *
- * Revision 1.3  2019-05-02 14:37:54+05:30  Cprogrammer
- * added argument to specify a 'where clause'
- *
- * Revision 1.2  2019-04-22 23:18:33+05:30  Cprogrammer
- * replaced exit with _exit
- *
- * Revision 1.1  2019-04-20 08:27:23+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: ProcessInFifo.c,v 1.21 2024-05-28 19:45:25+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -135,9 +75,10 @@
 #include "get_assign.h"
 #include "dbload.h"
 #include "FifoCreate.h"
+#include "inquery.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.20 2024-05-27 22:52:54+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: ProcessInFifo.c,v 1.21 2024-05-28 19:45:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             user_query_count, relay_query_count, pwd_query_count, alias_query_count;
@@ -207,7 +148,7 @@ getFifo_name()
 		if (!stralloc_copys(&inFifo, infifo) || !stralloc_0(&inFifo))
 			die_nomem();
 	} else {
-		getEnvConfigStr(&infifo_dir, "INFIFODIR", "/tmp/indimail/inlookup");
+		getEnvConfigStr(&infifo_dir, "INFIFODIR", INFIFODIR);
 		if (*infifo_dir == '/') {
 			if (indimailuid == -1 || indimailgid == -1)
 				get_indimailuidgid(&indimailuid, &indimailgid);
@@ -1461,7 +1402,18 @@ ProcessInFifo(int instNum)
 				break;
 #ifdef ENABLE_DOMAIN_LIMITS
 			case LIMIT_QUERY:
-				if ((status = VlimitInLookup(email, &limits)) == -1)
+				i = str_rchr(email, '@');
+				if (!email[i]) {
+					status = vget_limits(email, &limits);
+					if (!status)
+						status = 1;
+					else
+					if (status > 0)
+						status = 0;
+				} else
+					status = VlimitInLookup(email, &limits);
+
+				if (status == -1)
 					bytes = -1;
 				else
 				if (status) /*- user not found */
@@ -1521,3 +1473,70 @@ ProcessInFifo(int instNum)
 	signal(SIGPIPE, pstat);
 	return (1);
 }
+/*
+ * $Log: ProcessInFifo.c,v $
+ * Revision 1.21  2024-05-28 19:45:25+05:30  Cprogrammer
+ * Use INFIFODIR #define from inquery.h for infifo
+ * use vget_limits when argument is domain instead of email
+ *
+ * Revision 1.20  2024-05-27 22:52:54+05:30  Cprogrammer
+ * initialize struct vlimits
+ *
+ * Revision 1.19  2024-05-17 16:25:48+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.18  2023-06-08 17:48:50+05:30  Cprogrammer
+ * renamed fifo directory from FIFODIR to INFIFODIR.
+ *
+ * Revision 1.17  2023-04-09 11:57:57+05:30  Cprogrammer
+ * skip logging of binary search walk on SIGUSR1 (log only when debug is set)
+ *
+ * Revision 1.16  2023-04-08 23:46:28+05:30  Cprogrammer
+ * modified for qmailmrtg inlookup stats
+ *
+ * Revision 1.15  2023-03-20 10:16:03+05:30  Cprogrammer
+ * standardize getln handling
+ *
+ * Revision 1.14  2022-08-04 14:41:01+05:30  Cprogrammer
+ * fetch scram password
+ *
+ * Revision 1.13  2022-07-04 22:23:56+05:30  Cprogrammer
+ * fixed typo
+ *
+ * Revision 1.12  2021-07-28 12:19:56+05:30  Cprogrammer
+ * shortened display in logs on signal
+ *
+ * Revision 1.11  2021-07-27 18:10:43+05:30  Cprogrammer
+ * use getEnvConfigStr to set default domain
+ *
+ * Revision 1.10  2021-06-09 17:04:06+05:30  Cprogrammer
+ * BUG: Fixed read failing on fifo because of O_NDELAY flag
+ *
+ * Revision 1.9  2021-02-07 19:54:52+05:30  Cprogrammer
+ * respond to TCP/IP request when run under tcpserver
+ *
+ * Revision 1.8  2020-10-11 23:13:41+05:30  Cprogrammer
+ * replace deprecated sys_siglist with strsignal
+ *
+ * Revision 1.7  2020-10-01 18:27:59+05:30  Cprogrammer
+ * Darwin Port
+ *
+ * Revision 1.6  2020-09-17 14:48:15+05:30  Cprogrammer
+ * FreeBSD fix for missing tdestroy
+ *
+ * Revision 1.5  2020-04-01 18:57:29+05:30  Cprogrammer
+ * moved authentication functions to libqmail
+ *
+ * Revision 1.4  2019-05-28 17:41:50+05:30  Cprogrammer
+ * added load_mysql.h for mysql interceptor function prototypes
+ *
+ * Revision 1.3  2019-05-02 14:37:54+05:30  Cprogrammer
+ * added argument to specify a 'where clause'
+ *
+ * Revision 1.2  2019-04-22 23:18:33+05:30  Cprogrammer
+ * replaced exit with _exit
+ *
+ * Revision 1.1  2019-04-20 08:27:23+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
