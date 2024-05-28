@@ -1,6 +1,6 @@
 /*
  * $Log: vmoddomain.c,v $
- * Revision 1.6  2024-05-28 17:09:05+05:30  Cprogrammer
+ * Revision 1.6  2024-05-28 21:20:22+05:30  Cprogrammer
  * added -H option to configure hash method for a domain
  *
  * Revision 1.5  2024-05-17 16:24:31+05:30  mbhangui
@@ -58,7 +58,7 @@
 #include "variables.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vmoddomain.c,v 1.6 2024-05-28 17:09:05+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vmoddomain.c,v 1.6 2024-05-28 21:20:22+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define WARN    "vmoddomain: warning: "
@@ -108,6 +108,7 @@ get_options(int argc, char **argv, int *use_vfilter, int *domain_limits,
 	int *hash_method, char **handler, char **domain)
 {
 	int             c;
+	int             do_hash = 0;
 	char           *ptr;
 
 	*use_vfilter = -1;
@@ -130,6 +131,7 @@ get_options(int argc, char **argv, int *use_vfilter, int *domain_limits,
 			*handler = optarg;
 			break;
 		case 'H':
+			do_hash = 1;
 			if (!str_diffn(optarg, "DES", 4) || !str_diffn(optarg, "0", 2))
 				*hash_method = DES_HASH;
 			else
@@ -154,7 +156,7 @@ get_options(int argc, char **argv, int *use_vfilter, int *domain_limits,
 	}
 	if ((*use_vfilter != -1 && !*handler) || (*handler && *use_vfilter == -1) ||
 			(!*handler && *domain_limits == -1 && *use_vfilter == -1 && *hash_method == -1) ||
-			(*hash_method < DES_HASH || *hash_method > YESCRYPT_HASH)) {
+			(do_hash && (*hash_method < DES_HASH || *hash_method > YESCRYPT_HASH))) {
 		usage();
 		return (1);
 	} else
