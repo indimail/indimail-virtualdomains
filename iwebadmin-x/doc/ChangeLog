@@ -13,6 +13,7 @@ Release @version@-@release@ Start 28/07/2023 End 24/05/2024
 - 24/10/2023 indimail-3.4.5
 7. iwebadmin.c, template.c: added few configurable debug statements
 - 01/01/2024 - indimail-3.4.6
+8. user.c: fixed enabling of catch-all button
 
 * Tue Jan 31 2023 03:34:39 +0000 Manvendra Bhangui <iwebadmin@indimail.org> 2.1.1-1.1%{?dist}
 Release 2.1.1-1.1 Start 14/09/2022 End 31/01/2023

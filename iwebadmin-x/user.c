@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.37 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
+ * $Id: user.c,v 1.38 2024-05-29 11:37:25+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,6 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
+#include <stdio.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -286,7 +287,12 @@ show_user_lines(const char *user, const char *dom, time_t mytime, const char *di
 
 				/*- display button in the 'set catchall' column */
 				out("<td align=\"center\">");
-				if (bounced == 0 && !str_diffn(pw->pw_name, dest.s, dest.len)) {
+				if (!stralloc_copys(&TmpBuf, pw->pw_name) ||
+						!stralloc_append(&TmpBuf, "@") ||
+						!stralloc_cats(&TmpBuf, dom) ||
+						!stralloc_0(&TmpBuf))
+					die_nomem();
+				if (bounced == 0 && !str_diffn(TmpBuf.s, dest.s, TmpBuf.len)) {
 					out("<img src=\"");
 					out(IMAGEURL);
 					out("/radio-on.png\" border=\"0\"></a>");
@@ -1862,6 +1868,9 @@ parse_users_dotqmail(char newchar)
 
 /*-
  * $Log: user.c,v $
+ * Revision 1.38  2024-05-29 11:37:25+05:30  Cprogrammer
+ * fixed enabling catch-all button
+ *
  * Revision 1.37  2024-05-17 16:17:42+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
