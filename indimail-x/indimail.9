@@ -395,7 +395,7 @@ domain user can not be found. Basically, it can be one of the following
 
 .nr step 1 1
 .IP \n[step] 3
-Full path to a indimail user directory 
+Full path to a indimail user directory
 .sp -1
 .IP \n+[step]
 email address to forward email to
@@ -509,15 +509,15 @@ In a single file system, the default directory setup allows for 62 directories i
 and 100 user directories per directory. The total number of user directories is equal to
 (62 * 100) + (62 * 62 * 100) + (62 * 62 * 62 * 100) = over 24 million directories per filesystem.
 This should be more than sufficient for any site and probably goes beyond the technology
-of directory structures. 
+of directory structures.
 
 If you are going to be storing large numbers of user directories, make sure you set your
-file system to have a higher than normal percentage of inodes. 
+file system to have a higher than normal percentage of inodes.
 
 IndiMail will automatically create these directories and sub directories as needed and
 populate each directory with up to 100 user accounts. As soon as a directory reaches
 100 users it will create the next directory or sub directory and store the new users
-directory there. 
+directory there.
 
 You can use the \fBvreorg(8)\fR program to recreate the \fIdir-control\fR table.
 
@@ -665,7 +665,7 @@ LOGHEADERFD         qmail-queue   used     This defines the file descriptor to b
                                            is used.
 REMOVEHEADERS       qmail-queue   used     Name of control file containing a list
                                            of email headers that should be removed
-                                           before putting into the queue. If not 
+                                           before putting into the queue. If not
                                            supplied, qmail-queue uses the control
                                            file removeheaders.
 QQEH                qmail-queue   used     qmail-queue passes this variable into
@@ -874,7 +874,7 @@ DKSIGN              qmail-dk      used     If set to the path of a private key,
                                            qmail-dk signs the message using the
                                            private key. This variable should be set
                                            when a host is authorized to relay.
-DKVERIFY            qmail-dk      used     If set, messages are verified and 
+DKVERIFY            qmail-dk      used     If set, messages are verified and
                                            qmail-dk will insert the
                                            DomainKey-Status header. The behaviour
                                            depends on the set of letters to which
@@ -911,7 +911,7 @@ BOUNCEQUEUE         qmail-send             Queue to be used for injecting bounce
 TODO_INTERVAL       qmail-send             To set the minumum time interval between
                     todo-proc              two todo runs. By increasing this you
                                            can reduce the disk IO. But there is a
-                                           latency on mail delivery times 
+                                           latency on mail delivery times
 _
 TMPDIR              qmail-multi   used     Sets directory to use for temporary
                     qmail-qfilter          files. Default is /tmp
@@ -958,7 +958,7 @@ CHECKRECIPIENT                             Used for checking the status of the
                                              2.Check both MySQL and recipients.cdb
                                              3.Check recipients.cdb
 MASQUERADE                                 Allows the authenticated userid in AUTH
-                                           SMTP to be different from the 
+                                           SMTP to be different from the
 CUGMAIL                                    Return-Path. Turns of relaying to
 ANTISPOOFING                               foreign domains. Turns of spoofing of
                                            Return-Path for local users.
@@ -982,7 +982,7 @@ BOUNCEMAIL                                 When this is set, SMTP server issues
                                            this as a message to the client with a
                                            permanent error.
 WARNMAIL                                   Enables warn_mail function.
-WARNMAIL                                   X-Spam-Warning: lines inserted in 
+WARNMAIL                                   X-Spam-Warning: lines inserted in
 \.. WARNMAIL9                               message if these are set.
 SHUTDOWN                                   Issues temporary errors for all commands
 BADMAILFROM                                Override the default name for the
@@ -1007,7 +1007,7 @@ VIRUSCHECK                                 Enables in-built virus scanning engin
                                            bad attachments
                                              1.Internal scanner
                                              2.Internal+External+attachment scan.
-                                             3.Internal+attachment scan 
+                                             3.Internal+attachment scan
                                              4.External+attachment scan
                                              5.External scanner
                                              6.Attachment scan
@@ -1323,7 +1323,7 @@ DOMAIN_LIMITS       authindi      used     The vlimit structure is checked and t
                     inlookup                     
                     vmoduser               
                     vsetuserquota          
-                    vcfilter                     
+                    vcfilter               
                     vfilter                
 _
 IMAPCLIENT          proxyimap     used     If set, access to IMAP is granted
@@ -1621,7 +1621,7 @@ any of the following two commands to start IndiMail on all systems
 
 .EX
  # service indimail start
- or 
+ or
  # initsvc -on
 .EE
 
