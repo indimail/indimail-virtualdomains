@@ -184,7 +184,7 @@ iadddomain(char *domain, char *ipaddr, char *dir, uid_t uid, gid_t gid, int chk_
 			die_nomem();
 	}
 	omask = umask(0007);
-	if ((fd = open(tmpbuf.s, O_CREAT|O_EXCL|O_WRONLY, 0660)) == -1) {
+	if ((fd = open(tmpbuf.s, O_CREAT|O_EXCL|O_WRONLY, 0600)) == -1) {
 		strerr_warn3("adddomain: open: ", tmpbuf.s, ": ", &strerr_sys);
 		umask(omask);
 		return (-1);

@@ -259,7 +259,7 @@ set_handler(char *dir, char *handler, uid_t uid, gid_t gid, int use_vfilter)
 	if ((lockfd = getDbLock(tmpbuf.s, 1)) == -1)
 		strerr_die4sys(111, FATAL, "get_write_lock: ", tmpbuf.s, ": ");
 #endif
-	if ((fd = open(tmpbuf.s, O_CREAT|O_TRUNC|O_WRONLY, 0400)) == -1) {
+	if ((fd = open(tmpbuf.s, O_CREAT|O_TRUNC|O_WRONLY, 0600)) == -1) {
 		strerr_warn4(FATAL, "open: ", tmpbuf.s, ": ", &strerr_sys);
 #ifdef FILE_LOCKING
 		delDbLock(lockfd, tmpbuf.s, 1);
@@ -346,7 +346,7 @@ set_domain_limits(char *dir, uid_t uid, gid_t gid, int domain_limits)
 		}
 		return (0);
 	}
-	if ((fd = open(tmpbuf.s, O_CREAT|O_TRUNC|O_WRONLY, 0400)) == -1)
+	if ((fd = open(tmpbuf.s, O_CREAT|O_TRUNC|O_WRONLY, 0644)) == -1)
 	{
 		strerr_warn4(FATAL, "open: ", tmpbuf.s, ": ", &strerr_sys);
 		return (1);
@@ -387,7 +387,7 @@ set_hash_method(char *dir, uid_t uid, gid_t gid, int hash_method)
 	if ((lockfd = getDbLock(tmpbuf.s, 1)) == -1)
 		strerr_die4sys(111, FATAL, "get_write_lock: ", tmpbuf.s, ": ");
 #endif
-	if ((fd = open(tmpbuf.s, O_CREAT|O_TRUNC|O_WRONLY, 0400)) == -1) {
+	if ((fd = open(tmpbuf.s, O_CREAT|O_TRUNC|O_WRONLY, 0600)) == -1) {
 		strerr_warn4(FATAL, "open: ", tmpbuf.s, ": ", &strerr_sys);
 #ifdef FILE_LOCKING
 		delDbLock(lockfd, tmpbuf.s, 1);
