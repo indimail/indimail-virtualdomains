@@ -1,5 +1,5 @@
 /*
- * $Id: auth.h,v 1.2 2024-05-17 16:18:52+05:30 Cprogrammer Exp mbhangui $
+ * $Id: auth.h,v 1.3 2024-05-30 22:54:25+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,6 +17,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
+#ifndef _AUTH_H
+#define _AUTH_H
 void            auth_system(const char *ip_addr, struct passwd *pw);
 void            auth_user_domain(const char *ip_addr, struct passwd *pw);
-void            set_admin_type();
+void            set_admin_type(struct passwd *pw);
+#endif

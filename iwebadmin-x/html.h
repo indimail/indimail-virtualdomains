@@ -1,5 +1,5 @@
 /*
- * $Id: html.h,v 1.1 2010-04-26 12:07:51+05:30 Cprogrammer Exp mbhangui $
+ * $Id: html.h,v 1.2 2024-05-30 22:59:17+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2006 Inter7 Internet Technologies, Inc.
  * Copyright (C) 2006 Tom Logic LLC
  *
@@ -17,6 +17,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
+
+#ifndef _HTML_H
+#define _HTML_H
 
 #define HTML_MENU_START			"[&nbsp;"
 #define HTML_MENU_SEP			"&nbsp;|&nbsp;"
@@ -61,3 +64,5 @@
 #define HTML_ALIAS_MOD_DEST		"<td align=\"center\" valign=\"top\">%s</td>\n"
 #define HTML_ALIAS_MOD_DELETE		"<td align=\"center\" valign=\"top\">" \
 	"<a href=\"%s&modu=%C&linedata=%C&action=delentry\">" HTML_BTN_DELETE "</a></td>\n"
+
+#endif

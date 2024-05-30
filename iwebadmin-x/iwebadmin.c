@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadmin.c,v 1.37 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
+ * $Id: iwebadmin.c,v 1.38 2024-05-30 22:59:50+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -66,7 +66,6 @@
 #include "autorespond.h"
 #include "cgi.h"
 #include "command.h"
-#include "limits.h"
 #include "mailinglist.h"
 #include "printh.h"
 #include "iwebadmin.h"
@@ -92,7 +91,7 @@ int             actout = 1, lang_fd = -1, color_table = -1;
 char           *html_text[MAX_LANG_STR + 1];
 struct substdio *ssdbg = NULL;
 
-struct vlimits  Limits;
+struct vlimits  domain_limits, user_limits;
 int             AdminType;
 int             MaxPopAccounts;
 int             MaxAliases;
@@ -136,7 +135,7 @@ iwebadmin_suid(gid_t Gid, uid_t Uid)
 #endif
 	{
 		out("<h2>");
-		out(html_text[319]);
+		out(html_text[318]);
 		out("</h2>\n");
 		flush();
 		strerr_warn1("iwebadmin: setuid: ", &strerr_sys);
@@ -284,6 +283,17 @@ conf_iwebadmin()
 	return;
 }
 
+void
+load_limits()
+{
+
+	MaxPopAccounts = domain_limits.maxpopaccounts;
+	MaxAliases = domain_limits.maxaliases;
+	MaxForwards = domain_limits.maxforwards;
+	MaxAutoResponders = domain_limits.maxautoresponders;
+	MaxMailingLists = domain_limits.maxmailinglists;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -291,7 +301,7 @@ main(int argc, char **argv)
 	const char     *x_forward = env_get("HTTP_X_FORWARDED_FOR");
 	static stralloc tmp = {0}, returnhttp = {0}, returntext = {0};
 	char           *pi, *rm;
-	int             i, fd, len, dbgfd = -1;
+	int             i, at, fd, len, dbgfd = -1;
 	struct passwd  *pw;
 	int             encrypt_flag = 1;
 	char            strnum[FMT_ULONG], outbuf[2048], dbgbuf[1024];
@@ -335,8 +345,7 @@ main(int argc, char **argv)
 		ezmlm_make = !access(EZMLMDIR"/ezmlm-make", X_OK);
 	if (ezmlm_make && ezmlm_idx == -1)
 		ezmlm_idx = !access(EZMLMDIR"/ezmlm-idx", X_OK);
-	if ((pi = env_get("PATH_INFO")) && (!stralloc_copys(&tmp, pi + 5) || !stralloc_0(&tmp)))
-		die_nomem();
+	pi = env_get("PATH_INFO");
 	if (!(rm = env_get("REQUEST_METHOD")))
 		rm = "";
 	if (rm && !str_diffn(rm, "POST", 4))
@@ -354,12 +363,6 @@ main(int argc, char **argv)
 					Username.s, Domain.s, Time.s, mytime);
 			substdio_flush(ssdbg);
 		}
-		if (!(pw = sql_getpw(Username.s, Domain.s))) {
-			copy_status_mesg(html_text[198]);
-			iclose();
-			show_login();
-			iweb_exit(AUTH_FAILURE);
-		}
 		/*- get the real uid and gid and change to that user */
 		if (!get_assign(Domain.s, &RealDir, &Uid, &Gid)) {
 			copy_status_mesg(html_text[19]);
@@ -375,6 +378,8 @@ main(int argc, char **argv)
 			show_login();
 			iweb_exit(SETUP_FAILURE);
 		}
+		if (!access(".domain_limits", F_OK) && !env_put2("DOMAIN_LIMITS", "1"))
+			die_nomem();
 		if (!access("vacation", F_OK) && rename("vacation", "autoresp")) {
 			copy_status_mesg(html_text[321]);
 			strerr_warn1("iwebadmin: rename: vacation -> autoresp", &strerr_sys);
@@ -382,15 +387,42 @@ main(int argc, char **argv)
 			show_login();
 			iweb_exit(SETUP_FAILURE);
 		}
+		if (!(pw = sql_getpw(Username.s, Domain.s))) {
+			copy_status_mesg(html_text[198]);
+			iclose();
+			show_login();
+			iweb_exit(AUTH_FAILURE);
+		}
+		if ((i = vget_limits(Domain.s, &domain_limits)) == -1) {
+			copy_status_mesg(html_text[319]);
+			strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": failed to get domain limits", 0);
+			iclose();
+			show_login();
+			iweb_exit(AUTH_FAILURE);
+		}
 		load_limits();
-		set_admin_type();
+		if (!stralloc_copy(&tmp, &Username) ||
+				!stralloc_append(&tmp, "@") ||
+				!stralloc_cat(&tmp, &Domain) ||
+				!stralloc_0(&tmp))
+			die_nomem();
+		if ((i = vget_limits(tmp.s, &user_limits)) == -1) {
+			copy_status_mesg(html_text[319]);
+			strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": failed to get user limits", 0);
+			iclose();
+			show_login();
+			iweb_exit(AUTH_FAILURE);
+		}
+		set_admin_type(pw);
 		if (AdminType == USER_ADMIN || AdminType == DOMAIN_ADMIN)
 			auth_user_domain(ip_addr, pw);
 		else
 			auth_system(ip_addr, pw);
+		if (!stralloc_copys(&tmp, pi + 5) || !stralloc_0(&tmp))
+			die_nomem();
 		process_commands(tmp.s);
-	} else /*- password change */
-	if (pi && !str_diffn(pi, "/passwd/", 7)) {
+	} else
+	if (pi && !str_diffn(pi, "/passwd/", 7)) { /*- password change */
 		GetValue(TmpCGI, &Username, "address=");
 		GetValue(TmpCGI, &Password, "oldpass=");
 		GetValue(TmpCGI, &Password1, "newpass1=");
@@ -400,90 +432,150 @@ main(int argc, char **argv)
 					Username.s, Password.s, Password1.s, Password2.s);
 			substdio_flush(ssdbg);
 		}
-		if (Username.len && !Password.len && (Password1.len || Password2.len)) {
+		if (!Username.len) {
+			send_template("change_password.html");
+			iweb_exit(INPUT_FAILURE);
+		}
+		at = str_rchr(Username.s, '@');
+		if (Username.s[at]) {
+			len = Username.len;
+			Username.s[at] = 0;
+			Username.len = at;
+			if (!stralloc_copyb(&Domain, Username.s + at + 1, len - Username.len) || !stralloc_0(&Domain))
+				die_nomem();
+			Domain.len--;
+		} else {
+			copy_status_mesg(html_text[198]); /*- invalid login */
+			send_template("change_password.html");
+			iweb_exit(INPUT_FAILURE);
+		}
+		if (!Password.len) {
+			Username.s[at] = '@';
 			/*- username entered, but no password */
-			copy_status_mesg(html_text[198]);
+			copy_status_mesg(html_text[234]); /*- password not entered */
 			strerr_warn7("iwebadmin: IP ", ip_addr, ":", Username.s, "@", Domain.s, ": No password", 0);
+			send_template("change_password.html");
+			iweb_exit(PASSWD_FAILURE);
+		}
+		if (!Password1.len || !Password2.len) {
+			Username.s[at] = '@';
+			copy_status_mesg(html_text[234]); /*- password not entered */
+			strerr_warn7("iwebadmin: IP ", ip_addr, ":", Username.s, "@", Domain.s, ": No new password", 0);
+			send_template("change_password.html");
+			iweb_exit(PASSWD_FAILURE);
 		} else
-		if (Username.len && Password.len) {
-			i = str_chr(Username.s, '@');
-			if (Username.s[i]) {
-				len = Username.len;
-				Username.s[i] = 0;
-				Username.len = i;
-				if (!stralloc_copyb(&Domain, Username.s + i + 1, len - Username.len) || !stralloc_0(&Domain))
-					die_nomem();
-				Domain.len--;
-			} else {
-				copy_status_mesg(html_text[198]);
-				send_template("change_password.html");
-				iweb_exit(INPUT_FAILURE);
-			}
-			/*- attempt to authenticate user */
-			if (!get_assign(Domain.s, &RealDir, &Uid, &Gid)) {
-				copy_status_mesg(html_text[19]);
-				strerr_warn3("iwebadmin: get_assign failed for ", Domain.s, ": ", 0);
-				send_template("change_password.html");
-				iweb_exit(ASSIGN_FAILURE);
-			}
-			iwebadmin_suid(Gid, Uid);
-			if (chdir(RealDir.s) < 0) {
-				copy_status_mesg(html_text[171]);
-				strerr_warn3("iwebadmin: chdir: ", RealDir.s, ": ", &strerr_sys);
-				send_template("change_password.html");
-				iweb_exit(SETUP_FAILURE);
-			}
-			load_limits();
-			if (!access(".trivial_passwords", F_OK))
-				encrypt_flag = 0;
-			if (!(pw = sql_getpw(Username.s, Domain.s))) {
-				copy_status_mesg(html_text[198]);
-				strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": No such user", 0);
-			} else
-			if (pw->pw_gid & NO_PASSWD_CHNG) {
-				copy_status_mesg(html_text[20]);
-				strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": password change denied", 0);
-			} else
-			if (auth_user(pw, Password.s)) {
-				copy_status_mesg(html_text[198]);
-				strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": incorrect password", 0);
-			} else
-			if (str_diffn(Password1.s, Password2.s, Password1.len > Password2.len ? Password1.len : Password2.len) != 0)
-				copy_status_mesg(html_text[200]);
-			else
-			if (!Password1.len)
-				copy_status_mesg(html_text[234]);
+		if (str_diffn(Password1.s, Password2.s, Password1.len > Password2.len ? Password1.len : Password2.len) != 0) {
+			Username.s[at] = '@';
+			copy_status_mesg(html_text[200]); /*- passwords don't match */
+			strerr_warn7("iwebadmin: IP ", ip_addr, ":", Username.s, "@", Domain.s, ": passwords don't match", 0);
+			send_template("change_password.html");
+			iweb_exit(PASSWD_FAILURE);
+		} 
 #ifndef TRIVIAL_PASSWORD_ENABLED
-			else
-			if (str_str(Username.s, Password1.s) != NULL)
-				copy_status_mesg(html_text[320]);
+		else
+		if (str_str(Username.s, Password1.s) != NULL) {
+			Username.s[at] = '@';
+			copy_status_mesg(html_text[320]);
+			strerr_warn7("iwebadmin: IP ", ip_addr, ":", Username.s, "@", Domain.s, ": trivial password entered", 0);
+			send_template("change_password.html");
+			iweb_exit(PASSWD_FAILURE);
+		}
 #endif
-			else {
+		/*- attempt to authenticate user */
+		if (!get_assign(Domain.s, &RealDir, &Uid, &Gid)) {
+			Username.s[at] = '@';
+			copy_status_mesg(html_text[19]);
+			strerr_warn3("iwebadmin: get_assign failed for ", Domain.s, ": ", 0);
+			send_template("change_password.html");
+			Username.s[at] = '@';
+			iweb_exit(ASSIGN_FAILURE);
+		}
+		iwebadmin_suid(Gid, Uid);
+		if (chdir(RealDir.s) < 0) {
+			copy_status_mesg(html_text[171]);
+			strerr_warn3("iwebadmin: chdir: ", RealDir.s, ": ", &strerr_sys);
+			send_template("change_password.html");
+			Username.s[at] = '@';
+			iweb_exit(SETUP_FAILURE);
+		}
+		if (!access(".trivial_passwords", F_OK))
+			encrypt_flag = 0;
+		if (!access(".domain_limits", F_OK) && !env_put2("DOMAIN_LIMITS", "1"))
+			die_nomem();
+		if (!(pw = sql_getpw(Username.s, Domain.s))) {
+			copy_status_mesg(html_text[198]);
+			strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": No such user", 0);
+			send_template("change_password.html");
+			Username.s[at] = '@';
+			iweb_exit(AUTH_FAILURE);
+		}
+		if (pw->pw_gid & NO_PASSWD_CHNG) {
+			copy_status_mesg(html_text[20]);
+			strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": password change denied", 0);
+			send_template("change_password.html");
+			Username.s[at] = '@';
+			iweb_exit(PASSWD_FAILURE);
+		}
+		if ((i = vget_limits(Domain.s, &domain_limits)) == -1) {
+			copy_status_mesg(html_text[319]);
+			strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": failed to get domain limits", 0);
+			send_template("change_password.html");
+			Username.s[at] = '@';
+			iweb_exit(SETUP_FAILURE);
+		}
+		load_limits();
+		if (!stralloc_copy(&tmp, &Username) ||
+				!stralloc_append(&tmp, "@") ||
+				!stralloc_cat(&tmp, &Domain) ||
+				!stralloc_0(&tmp))
+			die_nomem();
+		if ((i = vget_limits(tmp.s, &user_limits)) == -1) {
+			copy_status_mesg(html_text[319]);
+			strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": failed to get user limits", 0);
+			send_template("change_password.html");
+			Username.s[at] = '@';
+			iweb_exit(SETUP_FAILURE);
+		}
+		pw->pw_gid |= vlimits_get_flag_mask(&user_limits);
+		if (pw->pw_gid & NO_PASSWD_CHNG) {
+			copy_status_mesg(html_text[20]);
+			strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": password change denied", 0);
+			send_template("change_password.html");
+			Username.s[at] = '@';
+			iweb_exit(PASSWD_FAILURE);
+		}
+		if (auth_user(pw, Password.s)) {
+			copy_status_mesg(html_text[198]); /*- invalid login */
+			strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": incorrect password", 0);
+			send_template("change_password.html");
+			Username.s[at] = '@';
+			iweb_exit(AUTH_FAILURE);
+		} else {
 #ifdef HAVE_GSASL_MKPASSWD
-				switch (scram)
-				{
-				case 1: /*- SCRAM-SHA-1 */
-					gsasl_mkpasswd(0, "SCRAM-SHA-1", iter_count, b64salt.len ? b64salt.s : 0, 0, Password1.s, &result);
-					break;
-				case 2: /*- SCRAM-SHA-256 */
-					gsasl_mkpasswd(0, "SCRAM-SHA-256", iter_count, b64salt.len ? b64salt.s : 0, 0, Password1.s, &result);
-					break;
-				}
+			switch (scram)
+			{
+			case 1: /*- SCRAM-SHA-1 */
+				gsasl_mkpasswd(0, "SCRAM-SHA-1", iter_count, b64salt.len ? b64salt.s : 0, 0, Password1.s, &result);
+				break;
+			case 2: /*- SCRAM-SHA-256 */
+				gsasl_mkpasswd(0, "SCRAM-SHA-256", iter_count, b64salt.len ? b64salt.s : 0, 0, Password1.s, &result);
+				break;
+			}
 #endif
-				if ((i = ipasswd(Username.s, Domain.s, Password1.s, encrypt_flag, scram ? result.s : 0)) != 1) {
-					copy_status_mesg(html_text[140]);
-					send_template("change_password.html");
-					iweb_exit(PASSWD_FAILURE);
-				}
-				else { /* success */
-					copy_status_mesg(html_text[139]);
-					strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": password changed", 0);
-					Password.len = 0;
-					send_template("change_password_success.html");
-					iweb_exit(0);
-				}
+			if ((i = ipasswd(Username.s, Domain.s, Password1.s, encrypt_flag, scram ? result.s : 0)) != 1) {
+				copy_status_mesg(html_text[140]);
+				send_template("change_password.html");
+				iweb_exit(PASSWD_FAILURE);
+			} else { /* success */
+				copy_status_mesg(html_text[139]);
+				strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": password changed", 0);
+				Password.len = 0;
+				send_template("change_password_success.html");
+				Username.s[at] = '@';
+				iweb_exit(0);
 			}
 		}
+		Username.s[at] = '@';
 		send_template("change_password.html");
 		iweb_exit(0);
 	} else
@@ -496,27 +588,26 @@ main(int argc, char **argv)
 					Username.s, Domain.s, Password.s);
 			substdio_flush(ssdbg);
 		}
-		if (Username.len) {
-			i = str_chr(Username.s, '@');
-			if (Username.s[i]) {
-				if (!stralloc_copyb(&Domain, Username.s + i + 1, Username.len - (i + 1)) ||
-						!stralloc_0(&Domain))
-					die_nomem();
-				Domain.len--;
-			}
+		if (!Domain.len || !Username.len) {
+			show_login();
+			iweb_exit(INPUT_FAILURE);
+		}
+		i = str_rchr(Username.s, '@');
+		if (Username.s[i]) {
+			if (!stralloc_copyb(&Domain, Username.s + i + 1, Username.len - (i + 1)) ||
+					!stralloc_0(&Domain))
+				die_nomem();
+			Domain.len--;
 		}
 		if (!get_assign(Domain.s, &RealDir, &Uid, &Gid)) {
+			copy_status_mesg(html_text[19]);
+			strerr_warn3("iwebadmin: get_assign failed for ", Domain.s, ": ", 0);
 			iclose();
 			show_login();
 			iweb_exit(ASSIGN_FAILURE);
 		}
 		iwebadmin_suid(Gid, Uid);
 		/*- Authenticate a user and domain admin */
-		if (!Domain.len || !Username.len) {
-			iclose();
-			show_login();
-			iweb_exit(INPUT_FAILURE);
-		}
 		if (chdir(RealDir.s)) {
 			copy_status_mesg(html_text[171]);
 			strerr_warn3("iwebadmin: chdir: ", RealDir.s, ": ", &strerr_sys);
@@ -524,13 +615,34 @@ main(int argc, char **argv)
 			show_login();
 			iweb_exit(SETUP_FAILURE);
 		}
-		load_limits();
+		if (!access(".domain_limits", F_OK) && !env_put2("DOMAIN_LIMITS", "1"))
+			die_nomem();
 		if (!(pw = sql_getpw(Username.s, Domain.s))) {
 			copy_status_mesg(html_text[198]);
 			strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": No such user", 0);
 			iclose();
 			show_login();
 			iweb_exit(AUTH_FAILURE);
+		}
+		if ((i = vget_limits(Domain.s, &domain_limits)) == -1) {
+			copy_status_mesg(html_text[319]);
+			strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": failed to get domain limits", 0);
+			iclose();
+			show_login();
+			iweb_exit(SETUP_FAILURE);
+		}
+		load_limits();
+		if (!stralloc_copy(&tmp, &Username) ||
+				!stralloc_append(&tmp, "@") ||
+				!stralloc_cat(&tmp, &Domain) ||
+				!stralloc_0(&tmp))
+			die_nomem();
+		if ((i = vget_limits(tmp.s, &user_limits)) == -1) {
+			copy_status_mesg(html_text[319]);
+			strerr_warn7("iwebadmin: IP ", ip_addr, ": ", Username.s, "@", Domain.s, ": failed to get user limits", 0);
+			iclose();
+			show_login();
+			iweb_exit(SETUP_FAILURE);
 		}
 		if (auth_user(pw, Password.s)) {
 			copy_status_mesg(html_text[198]);
@@ -578,7 +690,7 @@ main(int argc, char **argv)
 			show_login();
 			iweb_exit(SESSION_FAILURE);
 		}
-		set_admin_type();
+		set_admin_type(pw);
 		/*-
 		 * show the main menu for domain admins, modify user page
 		 * for regular users 
@@ -881,6 +993,10 @@ quickAction(const char *username, int action)
 
 /*
  * $Log: iwebadmin.c,v $
+ * Revision 1.38  2024-05-30 22:59:50+05:30  Cprogrammer
+ * fetch vlimit records
+ * refactored code
+ *
  * Revision 1.37  2024-05-17 16:17:42+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

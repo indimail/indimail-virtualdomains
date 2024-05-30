@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.38 2024-05-29 11:37:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.39 2024-05-30 23:05:16+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
-#include <stdio.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -60,7 +59,6 @@
 #include "alias.h"
 #include "cgi.h"
 #include "config.h"
-#include "limits.h"
 #include "printh.h"
 #include "iwebadmin.h"
 #include "iwebadminx.h"
@@ -368,7 +366,6 @@ adduser()
 	char            strnum[FMT_ULONG];
 
 	count_users();
-	load_limits();
 	if (AdminType != DOMAIN_ADMIN) {
 		out(html_text[142]);
 		out("\n");
@@ -419,7 +416,6 @@ addusernow()
 	static stralloc box = {0};
 
 	count_users();
-	load_limits();
 	if (AdminType != DOMAIN_ADMIN) {
 		copy_status_mesg(html_text[142]);
 		show_menu();
@@ -1868,6 +1864,9 @@ parse_users_dotqmail(char newchar)
 
 /*-
  * $Log: user.c,v $
+ * Revision 1.39  2024-05-30 23:05:16+05:30  Cprogrammer
+ * removed limits.c, limits.h
+ *
  * Revision 1.38  2024-05-29 11:37:25+05:30  Cprogrammer
  * fixed enabling catch-all button
  *

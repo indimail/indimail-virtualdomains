@@ -1,5 +1,5 @@
 /*
- * $Id: forward.h,v 1.2 2024-05-17 16:20:51+05:30 mbhangui Exp mbhangui $
+ * $Id: forward.h,v 1.3 2024-05-30 22:59:06+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,5 +17,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
+#ifndef _FORWARD_H
+#define _FORWARD_H
+
 int             show_forwards(const char *user, const char *dom, time_t mytime);
 void            count_forwards();
+
+#endif

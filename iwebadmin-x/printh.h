@@ -1,5 +1,5 @@
 /*
- * $Id: printh.h,v 1.1 2010-04-26 12:07:58+05:30 Cprogrammer Exp mbhangui $
+ * $Id: printh.h,v 1.2 2024-05-30 23:02:38+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 2004 Tom Logic LLC 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,9 +17,14 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
+#ifndef _PRINTH_H
+#define _PRINTH_H
+
 #include <stdlib.h>
 #include <stdarg.h>
 
 int             vsnprinth(char *buffer, size_t size, const char *format, va_list ap);
 int             snprinth(char *buffer, size_t size, const char *format, ...);
 int             printh(const char *format, ...);
+
+#endif
