@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: testindimail-virtual,v 1.29 2024-05-28 22:27:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: testindimail-virtual,v 1.30 2024-05-30 22:50:59+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -3807,7 +3807,7 @@ do_vlimit_tests()
 		DOMAIN_LIMITS=1 \
 	vpasswd $testuser1 $password1 2>$tmpdir/vpasswd.out
 	ret2=$?
-	cat $tmpdir/vpasswd.out | grep "User not allowed to change passwd" >/dev/null 2>&1
+	cat $tmpdir/vpasswd.out | grep "User not allowed to change password" >/dev/null 2>&1
 	ret3=$?
 	tm2=$(date +"%s.%4N")
 	if [ $ret1 -eq 0 -a $ret2 -ne 0 -a $ret3 -eq 0 ] ; then
@@ -4580,6 +4580,9 @@ exit 0
 
 #
 # $Log: testindimail-virtual,v $
+# Revision 1.30  2024-05-30 22:50:59+05:30  Cprogrammer
+# fixed typo
+#
 # Revision 1.29  2024-05-28 22:27:51+05:30  Cprogrammer
 # added vlimit tests using inquery caching
 #
