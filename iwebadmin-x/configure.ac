@@ -3,13 +3,11 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT([iwebadmin],m4_normalize(m4_include([conf-version])),m4_normalize(m4_include(conf-email)),iwebadmin, [https://github.com/mbhangui/indimail-virtualdomains])
 AC_CANONICAL_TARGET
 LT_INIT
-AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE([foreign no-dist])
+AC_CONFIG_HEADERS(config.h)
 
 dnl Checks for programs.
-AC_PROG_LIBTOOL
 AC_PROG_CC
-AC_PROG_CC_C99
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
@@ -17,8 +15,6 @@ AC_PROG_MAKE_SET
 dnl Needed for per-target flags
 AM_PROG_CC_C_O
 AC_CONFIG_MACRO_DIR([m4])
-
-AC_ISC_POSIX
 
 CPPFLAGS="${CPPFLAGS} -Dlint"
 
@@ -59,7 +55,6 @@ case "$host" in
 	;;
 esac
 
-AC_HEADER_STDC
 AC_CHECK_HEADERS([errno.h signal.h unistd.h])
 AC_CHECK_HEADERS([pwd.h ctype.h time.h stdlib.h limits.h sys/wait.h])
 dnl Checks for libraries.

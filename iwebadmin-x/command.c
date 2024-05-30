@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.14 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
+ * $Id: command.c,v 1.15 2024-05-30 22:56:37+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -71,12 +71,26 @@ process_commands(const char *cmmd)
 		GetValue(TmpCGI, &ActionUser, "modu=");
 		lowerit(ActionUser.s);	/* convert username to lower case */
 		GetValue(TmpCGI, &tmp, "MODIFY=");
-		if (tmp.len)
-			quickAction(ActionUser.s, ACTION_MODIFY);
+		if (tmp.len) {
+			if (user_limits.perm_account & VLIMIT_DISABLE_MODIFY) {
+				copy_status_mesg(html_text[324]);
+				iclose();
+				show_menu();
+				iweb_exit(0);
+			} else
+				quickAction(ActionUser.s, ACTION_MODIFY);
+		}
 		else {
 			GetValue(TmpCGI, &tmp, "DELETE=");
-			if (tmp.len)
-				quickAction(ActionUser.s, ACTION_DELETE);
+			if (tmp.len) {
+				if (user_limits.perm_account & VLIMIT_DISABLE_DELETE) {
+					copy_status_mesg(html_text[325]);
+					show_menu();
+					iclose();
+					iweb_exit(0);
+				} else
+					quickAction(ActionUser.s, ACTION_DELETE);
+			}
 			else {
 				/*- malformed request -- missing fields */
 				show_menu();
@@ -102,59 +116,133 @@ process_commands(const char *cmmd)
 		GetValue(TmpCGI, &SearchUser, "searchuser=");
 		show_forwards(Username.s, Domain.s, mytime);
 	} else
-	if (!str_diff(cmmd, "showmailinglists"))
+	if (!str_diff(cmmd, "showmailinglists")) {
 		show_mailing_lists();
-	else
+	} else
 	if (!str_diff(cmmd, "showautoresponders"))
 		show_autoresponders(Username.s, Domain.s, mytime);
 	else
-	if (!str_diff(cmmd, "adduser"))
-		adduser();
-	else
-	if (!str_diff(cmmd, "addusernow"))
-		addusernow();
+	if (!str_diff(cmmd, "adduser")) {
+		if (user_limits.perm_account & VLIMIT_DISABLE_CREATE) {
+			copy_status_mesg(html_text[323]);
+			iclose();
+			show_menu();
+			iweb_exit(0);
+		} else
+			adduser();
+	} else
+	if (!str_diff(cmmd, "addusernow")) {
+		if (user_limits.perm_account & VLIMIT_DISABLE_CREATE) {
+			copy_status_mesg(html_text[323]);
+			iclose();
+			show_menu();
+			iweb_exit(0);
+		} else
+			addusernow();
+	}
 #ifdef CATCHALL_ENABLED
 	else
 	if (!str_diff(cmmd, "setdefault")) {
 		GetValue(TmpCGI, &ActionUser, "deluser=");
 		GetValue(TmpCGI, &tmp, "page=");
 		str_copy(Pagenumber, tmp.s);
-		setdefaultaccount();
+		if (user_limits.perm_account & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[325]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			setdefaultaccount();
 	} else
-	if (!str_diff(cmmd, "bounceall"))
-		bounceall();
+	if (!str_diff(cmmd, "bounceall")) {
+		if (user_limits.perm_account & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[325]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			bounceall();
+	} else
+	if (!str_diff(cmmd, "deleteall")) {
+		if (user_limits.perm_account & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[325]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			deleteall();
+	}
 	else
-	if (!str_diff(cmmd, "deleteall"))
-		deleteall();
+	if (!str_diff(cmmd, "setremotecatchall")) {
+		if (user_limits.perm_account & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[325]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			setremotecatchall();
+	}
 	else
-	if (!str_diff(cmmd, "setremotecatchall"))
-		setremotecatchall();
-	else
-	if (!str_diff(cmmd, "setremotecatchallnow"))
-		setremotecatchallnow();
+	if (!str_diff(cmmd, "setremotecatchallnow")) {
+		if (user_limits.perm_account & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[325]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			setremotecatchallnow();
+	}
 #endif
 	else
+	if (!str_diff(cmmd, "showlistmod")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		show_list_group("show_moderators.html");
+	} else
+	if (!str_diff(cmmd, "addlistmod")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		if (user_limits.perm_maillist_moderators & VLIMIT_DISABLE_CREATE) {
+			copy_status_mesg(html_text[341]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			addlistgroup("add_listmod.html");
+	} else
 	if (!str_diff(cmmd, "addlistmodnow")) {
 		GetValue(TmpCGI, &ActionUser, "modu=");
 		GetValue(TmpCGI, &Newu, "newu=");
-		addlistgroupnow(1);
+		if (user_limits.perm_maillist_moderators & VLIMIT_DISABLE_CREATE) {
+			copy_status_mesg(html_text[341]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			addlistgroupnow(1);
 	} else
 	if (!str_diff(cmmd, "dellistmod")) {
 		GetValue(TmpCGI, &ActionUser, "modu=");
-		dellistgroup("del_listmod.html");
+		if (user_limits.perm_maillist_moderators & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[343]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			dellistgroup("del_listmod.html");
 	} else
 	if (!str_diff(cmmd, "dellistmodnow")) {
 		GetValue(TmpCGI, &ActionUser, "modu=");
 		GetValue(TmpCGI, &Newu, "newu=");
-		dellistgroupnow(1);
+		if (user_limits.perm_maillist_moderators & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[343]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			dellistgroupnow(1);
 	} else
-	if (!str_diff(cmmd, "addlistmod")) {
+	if (!str_diff(cmmd, "showlistdig")) {
 		GetValue(TmpCGI, &ActionUser, "modu=");
-		addlistgroup("add_listmod.html");
-	} else
-	if (!str_diff(cmmd, "showlistmod")) {
-		GetValue(TmpCGI, &ActionUser, "modu=");
-		show_list_group("show_moderators.html");
+		show_list_group("show_digest_subscribers.html");
 	} else
 	if (!str_diff(cmmd, "addlistdig")) {
 		GetValue(TmpCGI, &ActionUser, "modu=");
@@ -174,13 +262,15 @@ process_commands(const char *cmmd)
 		GetValue(TmpCGI, &Newu, "newu=");
 		dellistgroupnow(2);
 	} else
-	if (!str_diff(cmmd, "showlistdig")) {
-		GetValue(TmpCGI, &ActionUser, "modu=");
-		show_list_group("show_digest_subscribers.html");
-	} else
 	if (!str_diff(cmmd, "moduser")) {
 		GetValue(TmpCGI, &ActionUser, "moduser=");
-		moduser();
+		if (user_limits.perm_account & VLIMIT_DISABLE_MODIFY) {
+			copy_status_mesg(html_text[324]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			moduser();
 	} else
 	if (!str_diff(cmmd, "modusernow")) {
 		GetValue(TmpCGI, &ActionUser, "modu=");
@@ -188,116 +278,266 @@ process_commands(const char *cmmd)
 		GetValue(TmpCGI, &Password2, "password2=");
 		GetValue(TmpCGI, &Gecos, "gecos=");
 		GetValue(TmpCGI, &b64salt, "b64salt=");
+		if (user_limits.perm_account & VLIMIT_DISABLE_MODIFY) {
+			copy_status_mesg(html_text[324]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
 		modusergo();
 	} else
 	if (!str_diff(cmmd, "deluser")) {
 		GetValue(TmpCGI, &ActionUser, "deluser=");
-		ideluser();
+		if (user_limits.perm_account & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[325]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			ideluser();
 	} else
 	if (!str_diff(cmmd, "delusernow")) {
 		GetValue(TmpCGI, &ActionUser, "deluser=");
-		delusergo();
+		if (user_limits.perm_account & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[325]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			delusergo();
 	} else
 	if (!str_diff(cmmd, "moddotqmail")) {
 		GetValue(TmpCGI, &ActionUser, "modu=");
-		moddotqmail();
+		if (user_limits.perm_forward & VLIMIT_DISABLE_MODIFY) {
+			copy_status_mesg(html_text[330]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			moddotqmail();
 	} else
 	if (!str_diff(cmmd, "moddotqmailnow")) {
 		GetValue(TmpCGI, &ActionUser, "modu=");
 		GetValue(TmpCGI, &Newu, "newu=");
 		GetValue(TmpCGI, &LineData, "linedata=");
 		GetValue(TmpCGI, &Action, "action=");
-		moddotqmailnow();
+		if (user_limits.perm_forward & VLIMIT_DISABLE_MODIFY) {
+			copy_status_mesg(html_text[330]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			moddotqmailnow();
 	} else
 	if (!str_diff(cmmd, "deldotqmail")) {
 		GetValue(TmpCGI, &ActionUser, "modu=");
-		deldotqmail();
+		if (user_limits.perm_forward & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[331]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			deldotqmail();
 	} else
 	if (!str_diff(cmmd, "deldotqmailnow")) {
 		GetValue(TmpCGI, &ActionUser, "modu=");
-		deldotqmailnow();
+		if (user_limits.perm_forward & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[331]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			deldotqmailnow();
 	} else
-	if (!str_diff(cmmd, "adddotqmail"))
-		adddotqmail();
-	else
+	if (!str_diff(cmmd, "adddotqmail")) {
+		if (user_limits.perm_forward & VLIMIT_DISABLE_CREATE) {
+			copy_status_mesg(html_text[329]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			adddotqmail();
+	} else
 	if (!str_diff(cmmd, "adddotqmailnow")) {
 		GetValue(TmpCGI, &ActionUser, "newu=");
 		GetValue(TmpCGI, &Alias, "alias=");
-		adddotqmailnow();
+		if (user_limits.perm_forward & VLIMIT_DISABLE_CREATE) {
+			copy_status_mesg(html_text[329]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			adddotqmailnow();
 	} else
-	if (!str_diff(cmmd, "addmailinglist"))
-		addmailinglist();
-	else
-	if (!str_diff(cmmd, "delmailinglist")) {
-		GetValue(TmpCGI, &ActionUser, "modu=");
-		delmailinglist();
-	} else
-	if (!str_diff(cmmd, "delmailinglistnow")) {
-		GetValue(TmpCGI, &ActionUser, "modu=");
-		delmailinglistnow();
-	} else
-	if (!str_diff(cmmd, "addlistusernow")) {
-		GetValue(TmpCGI, &ActionUser, "modu=");
-		GetValue(TmpCGI, &Newu, "newu=");
-		addlistgroupnow(0);
-	} else
-	if (!str_diff(cmmd, "dellistuser")) {
-		GetValue(TmpCGI, &ActionUser, "modu=");
-		dellistgroup("del_listuser.html");
-	} else
-	if (!str_diff(cmmd, "dellistusernow")) {
-		GetValue(TmpCGI, &ActionUser, "modu=");
-		GetValue(TmpCGI, &Newu, "newu=");
-		dellistgroupnow(0);
-	} else
-	if (!str_diff(cmmd, "addlistuser")) {
-		GetValue(TmpCGI, &ActionUser, "modu=");
-		addlistgroup("add_listuser.html");
+	if (!str_diff(cmmd, "addmailinglist")) {
+		if (user_limits.perm_maillist & VLIMIT_DISABLE_CREATE) {
+			copy_status_mesg(html_text[335]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			addmailinglist();
 	} else
 	if (!str_diff(cmmd, "addmailinglistnow")) {
 		GetValue(TmpCGI, &ActionUser, "newu=");
+		if (user_limits.perm_maillist & VLIMIT_DISABLE_CREATE) {
+			copy_status_mesg(html_text[335]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
 		addmailinglistnow();
 	} else
 	if (!str_diff(cmmd, "modmailinglist")) {
 		GetValue(TmpCGI, &ActionUser, "modu=");
-		modmailinglist();
+		if (user_limits.perm_maillist & VLIMIT_DISABLE_MODIFY) {
+			copy_status_mesg(html_text[336]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			modmailinglist();
 	} else
 	if (!str_diff(cmmd, "modmailinglistnow")) {
 		GetValue(TmpCGI, &ActionUser, "newu=");
-		modmailinglistnow();
+		if (user_limits.perm_maillist & VLIMIT_DISABLE_MODIFY) {
+			copy_status_mesg(html_text[336]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			modmailinglistnow();
 	} else
-	if (!str_diff(cmmd, "modautorespond")) {
+	if (!str_diff(cmmd, "delmailinglist")) {
 		GetValue(TmpCGI, &ActionUser, "modu=");
-		modautorespond();
+		if (user_limits.perm_maillist & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[337]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			delmailinglist();
 	} else
-	if (!str_diff(cmmd, "addautorespond"))
-		addautorespond();
-	else
+	if (!str_diff(cmmd, "delmailinglistnow")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		if (user_limits.perm_maillist & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[337]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			delmailinglistnow();
+	} else
+	if (!str_diff(cmmd, "addlistuser")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		if (user_limits.perm_maillist_users & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[338]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			addlistgroup("add_listuser.html");
+	} else
+	if (!str_diff(cmmd, "addlistusernow")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		GetValue(TmpCGI, &Newu, "newu=");
+		if (user_limits.perm_maillist_users & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[338]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			addlistgroupnow(0);
+	} else
+	if (!str_diff(cmmd, "dellistuser")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		if (user_limits.perm_maillist_users & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[340]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			dellistgroup("del_listuser.html");
+	} else
+	if (!str_diff(cmmd, "dellistusernow")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		GetValue(TmpCGI, &Newu, "newu=");
+		if (user_limits.perm_maillist_users & VLIMIT_DISABLE_DELETE) {
+			copy_status_mesg(html_text[340]);
+			show_menu();
+			iclose();
+			iweb_exit(0);
+		} else
+			dellistgroupnow(0);
+	} else
+	if (!str_diff(cmmd, "addautorespond")) {
+		if (user_limits.perm_autoresponder & VLIMIT_DISABLE_CREATE) {
+			copy_status_mesg(html_text[332]);
+			iclose();
+			show_menu();
+			iweb_exit(0);
+		} else
+			addautorespond();
+	} else
 	if (!str_diff(cmmd, "addautorespondnow")) {
 		GetValue(TmpCGI, &ActionUser, "newu=");
 		GetValue(TmpCGI, &Alias, "alias="); /* subject */
 		GetValue(TmpCGI, &Message, "message=");
 		GetValue(TmpCGI, &Newu, "owner=");
-		addautorespondnow();
+		if (user_limits.perm_autoresponder & VLIMIT_DISABLE_CREATE) {
+			copy_status_mesg(html_text[332]);
+			iclose();
+			show_menu();
+			iweb_exit(0);
+		} else
+			addautorespondnow();
+	} else
+	if (!str_diff(cmmd, "modautorespond")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		if (user_limits.perm_autoresponder & VLIMIT_DISABLE_MODIFY) {
+			copy_status_mesg(html_text[333]);
+			iclose();
+			show_menu();
+			iweb_exit(0);
+		} else
+			modautorespond();
 	} else
 	if (!str_diff(cmmd, "modautorespondnow")) {
 		GetValue(TmpCGI, &ActionUser, "newu=");
 		GetValue(TmpCGI, &Alias, "alias="); /* subject */
 		GetValue(TmpCGI, &Message, "message=");
 		GetValue(TmpCGI, &Newu, "owner=");
-		modautorespondnow();
+		if (user_limits.perm_autoresponder & VLIMIT_DISABLE_MODIFY) {
+			copy_status_mesg(html_text[333]);
+			iclose();
+			show_menu();
+			iweb_exit(0);
+		} else
+			modautorespondnow();
+	} else
+	if (!str_diff(cmmd, "delautorespond")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		if (user_limits.perm_autoresponder & VLIMIT_DISABLE_MODIFY) {
+			copy_status_mesg(html_text[334]);
+			iclose();
+			show_menu();
+			iweb_exit(0);
+		} else
+			delautorespond();
+	} else
+	if (!str_diff(cmmd, "delautorespondnow")) {
+		GetValue(TmpCGI, &ActionUser, "modu=");
+		if (user_limits.perm_autoresponder & VLIMIT_DISABLE_MODIFY) {
+			copy_status_mesg(html_text[334]);
+			iclose();
+			show_menu();
+			iweb_exit(0);
+		} else
+			delautorespondnow();
 	} else
 	if (!str_diff(cmmd, "showlistusers")) {
 		GetValue(TmpCGI, &ActionUser, "modu=");
 		show_list_group("show_subscribers.html");
-	} else
-	if (!str_diff(cmmd, "delautorespond")) {
-		GetValue(TmpCGI, &ActionUser, "modu=");
-		delautorespond();
-	} else
-	if (!str_diff(cmmd, "delautorespondnow")) {
-		GetValue(TmpCGI, &ActionUser, "modu=");
-		delautorespondnow();
 	} else
 	if (!str_diff(cmmd, "logout")) {
 		if ((pw = sql_getpw(Username.s, Domain.s))) {

@@ -1,5 +1,5 @@
 /*
- * $Id: alias.c,v 1.12 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
+ * $Id: alias.c,v 1.13 2024-05-30 22:51:32+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -53,7 +53,6 @@
 #include "iwebadminx.h"
 #include "dotqmail.h"
 #include "html.h"
-#include "limits.h"
 #include "util.h"
 #include "printh.h"
 #include "show.h"
@@ -564,7 +563,6 @@ adddotqmail()
 	char             strnum[FMT_ULONG];
 
 	count_forwards();
-	load_limits();
 	if (MaxForwards != -1 && CurForwards >= MaxForwards) {
 		copy_status_mesg(html_text[157]);
 		if (!stralloc_append(&StatusMessage, " ") ||
@@ -593,7 +591,6 @@ adddotqmailnow()
 		iweb_exit(PERM_FAILURE);
 	}
 	count_forwards();
-	load_limits();
 	if (MaxForwards != -1 && CurForwards >= MaxForwards) {
 		copy_status_mesg(html_text[157]);
 		if (!stralloc_append(&StatusMessage, " ") ||

@@ -1,5 +1,5 @@
 /*
- * $Id: common.c,v 1.6 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
+ * $Id: common.c,v 1.7 2024-05-30 22:57:43+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -28,6 +28,7 @@ my_exit(substdio *ss, int ret, int line, const char *fn)
 		subprintf(ss, "%s: exit at line %d ret=%d\nEnd Time=%ld\n\n", fn, line, ret, time(0));
 		substdio_flush(ss);
 	}
+	flush();
 	_exit(ret);
 }
 
@@ -96,6 +97,9 @@ errflush()
 
 /*
  * $Log: common.c,v $
+ * Revision 1.7  2024-05-30 22:57:43+05:30  Cprogrammer
+ * iweb_exit - flush output before exit
+ *
  * Revision 1.6  2024-05-17 16:17:42+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

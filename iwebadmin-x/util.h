@@ -1,5 +1,5 @@
 /*
- * $Id: util.h,v 1.3 2024-05-17 16:20:51+05:30 mbhangui Exp mbhangui $
+ * $Id: util.h,v 1.4 2024-05-30 23:06:02+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,6 +16,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
+
+#ifndef _UTIL_H
+#define _UTIL_H
+
 #include <stralloc.h>
 
 int             check_local_user(const char *user);
@@ -49,3 +53,5 @@ int             quota_to_megabytes(char[], const char *);	//jhopper prototype
 
 void            print_user_index(const char *action, int colspan, const char *user, const char *dom, time_t mytime);
 char           *cgiurl(const char *action);
+
+#endif

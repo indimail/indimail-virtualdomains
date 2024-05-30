@@ -1,5 +1,5 @@
 /*
- * $Id: iwebadminx.h,v 1.6 2023-08-06 21:17:15+05:30 Cprogrammer Exp mbhangui $
+ * $Id: iwebadminx.h,v 1.7 2024-05-30 23:00:55+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,6 +16,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
+
+#ifndef _IWEBADMINX_H
+#define _IWEBADMINX_H
+
 #include <sys/types.h>
 #include <iwebadmin.h>
 
@@ -30,7 +34,7 @@ extern char    *TmpCGI;
 extern int      Compressed, actout;
 extern char    *html_text[MAX_LANG_STR + 1];
 
-extern struct vlimits Limits;
+extern struct vlimits domain_limits, user_limits;
 extern int      AdminType;
 extern int      MaxPopAccounts;
 extern int      MaxAliases;
@@ -56,3 +60,5 @@ extern int      Uid;
 extern int      Gid;
 extern char     Lang[40];
 extern int      scram, u_scram, cram, iter_count;
+
+#endif

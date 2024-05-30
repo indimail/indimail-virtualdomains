@@ -1,5 +1,5 @@
 /*
- * $Id: template.c,v 1.33 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
+ * $Id: template.c,v 1.34 2024-05-30 23:03:24+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
-#include <stdio.h>
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -56,7 +55,6 @@
 #include "autorespond.h"
 #include "cgi.h"
 #include "forward.h"
-#include "limits.h"
 #include "mailinglist.h"
 #include "printh.h"
 #include "iwebadmin.h"
@@ -92,7 +90,10 @@ send_template(const char *actualfile)
 	}
 	send_template_now("header.html");
 	send_template_now(actualfile);
-	if (!enable_fortune || access("/usr/bin/fortune", X_OK)) {
+	if (!enable_fortune) {
+		return 0;
+	}
+	if (access("/usr/bin/fortune", X_OK)) {
 		send_template_now("footer.html");
 		return 0;
 	}
@@ -238,26 +239,19 @@ send_template_now(const char *filename)
 				switch (inchar)
 				{
 				case '&': /* send stock (user, dom, time) cgi parameters */
-					if (!Username.len || !Domain.len) {
-						if (!Username.len)
-							strerr_warn1("Username is null", 0);
-						if (!Domain.len)
-							strerr_warn1("Domain is null", 0);
-					} else
+					if (Username.len && Domain.len)
 						printh("user=%C&dom=%C&time=%d&", Username.s, Domain.s, mytime);
 					break;
 				case '~':
 					out(Lang);
 					break;
 				case 'A': /* send the action user parameter */
-					if (!ActionUser.len)
-						strerr_warn1("User is null", 0);
-					printh("%H", ActionUser.len ? ActionUser.s : "");
+					if (ActionUser.len)
+						printh("%H", ActionUser.len ? ActionUser.s : "");
 					break;
 				case 'a': /* send the Alias parameter */
-					if (!Alias.len)
-						strerr_warn1("Alias is null", 0);
-					printh("%H", Alias.len ? Alias.s : "");
+					if (Alias.len)
+						printh("%H", Alias.len ? Alias.s : "");
 					break;
 				case 'b': /*- mrtg url */
 					if (mrtg_url.len)
@@ -266,7 +260,6 @@ send_template_now(const char *filename)
 						out("http://localhost/mailmrtg");
 					break;
 				case 'B': /* show number of pop accounts */
-					load_limits();
 					count_users();
 					if (MaxPopAccounts > -1) {
 						strnum1[fmt_int(strnum1, CurPopAccounts)] = 0;
@@ -277,53 +270,35 @@ send_template_now(const char *filename)
 						strnum1[fmt_int(strnum1, CurPopAccounts)] = 0;
 						out(strnum1);
 						out("/");
-						out(html_text[229]);
+						out(html_text[229]); /*- unlimited */
 					}
 					break;
 				case 'C': /* send the CGIPATH parameter */
 					out(CGIPATH);
 					break;
 				case 'c': /* show the lines inside a mailing list table */
-					show_mailing_list_line2(Username.s, Domain.s, mytime, RealDir.s);
+					if (Username.len && Domain.len && RealDir.len)
+						show_mailing_list_line2(Username.s, Domain.s, mytime, RealDir.s);
 					break;
 				case 'D': /* send the domain parameter */
-					if (!Domain.len)
-						strerr_warn1("Domain is null", 0);
-					else
+					if (Domain.len)
 						printh("%H", Domain.s);
 					break;
 				case 'd': /* show the lines inside a forward table */
-					if (!Username.len || !Domain.len) {
-						if (!Username.len)
-							strerr_warn1("Username is null", 0);
-						if (!Domain.len)
-							strerr_warn1("Domain is null", 0);
-					} else
+					if (Username.len && Domain.len)
 						show_dotqmail_lines(Username.s, Domain.s, mytime);
 					break;
 				case 'E': /* this will be used to parse mod_mailinglist-idx.html */
 					show_current_list_values();
 					break;
 				case 'e': /* show the lines inside a mailing list table */
-					if (!Username.len || !Domain.len || !RealDir.len) {
-						if (!Username.len)
-							strerr_warn1("Username is null", 0);
-						if (!Domain.len)
-							strerr_warn1("Domain is null", 0);
-						if (!RealDir.len)
-							strerr_warn1("RealDir is null", 0);
-					} else
+					if (Username.len && Domain.len && RealDir.len)
 						show_mailing_list_line(Username.s, Domain.s, mytime, RealDir.s);
 					break;
 				case 'F': /* display a file (used for mod_autorespond ONLY) */
 					/* should verify here that alias_line contains "/autorespond " */
-					if (!ActionUser.len || !Domain.len) {
-						if (!ActionUser.len)
-							strerr_warn1("Username is null", 0);
-						if (!Domain.len)
-							strerr_warn1("Domain is null", 0);
+					if (!ActionUser.len || !Domain.len)
 						break;
-					}
 					/*
 					 * autoresponse@example.com -> &testuser01@example.com
 					 * autoresponse@example.com -> |/usr/bin/autoresponder -q
@@ -432,7 +407,8 @@ send_template_now(const char *filename)
 						show_list_group_now(2);
 					break;
 				case 'g': /* show the lines inside a autorespond table */
-					show_autorespond_line(Username.s, Domain.s, mytime, RealDir.s);
+					if (Username.len && Domain.len && RealDir.len)
+						show_autorespond_line(Username.s, Domain.s, mytime, RealDir.s);
 					break;
 				case 'H': /* show returnhttp (from TmpCGI) */
 					GetValue(TmpCGI, &value1, "returnhttp=");
@@ -444,18 +420,15 @@ send_template_now(const char *filename)
 					break;
 #endif
 				case 'I':
-					if (!ActionUser.len)
-						strerr_warn1("User is null", 0);
-					show_dotqmail_file(ActionUser.s);
+					if (ActionUser.len)
+						show_dotqmail_file(ActionUser.s);
 					break;
 				case 'i': /* check for user forward and forward/store autoresponder */
-					if (!ActionUser.len)
-						strerr_warn1("User is null", 0);
-					if (!RealDir.len)
-						strerr_warn1("RealDir is null", 0);
-					if (!migflag++)
-						migrate_vacation(RealDir.s, ActionUser.s);
-					parse_users_dotqmail(getch(&ssin1));
+					if (ActionUser.len && RealDir.len) {
+						if (!migflag++)
+							migrate_vacation(RealDir.s, ActionUser.s);
+						parse_users_dotqmail(getch(&ssin1));
+					}
 					break;
 				case 'J': /* show mailbox flag status */
 					if (check_mailbox_flags(getch(&ssin1))) {
@@ -466,7 +439,6 @@ send_template_now(const char *filename)
 					}
 					break;
 				case 'j': /* show number of mailing lists */
-					load_limits();
 					count_mailinglists();
 					if (MaxMailingLists > -1) {
 						strnum1[fmt_int(strnum1, CurMailingLists)] = 0;
@@ -482,7 +454,6 @@ send_template_now(const char *filename)
 					}
 					break;
 				case 'k': /* show number of forwards */
-					load_limits();
 					count_forwards();
 					if (MaxForwards > -1) {
 						strnum1[fmt_int(strnum1, CurForwards)] = 0;
@@ -498,7 +469,6 @@ send_template_now(const char *filename)
 					}
 					break;
 				case 'K': /* show number of autoresponders */
-					load_limits();
 					count_autoresponders();
 					if (MaxAutoResponders > -1) {
 						strnum1[fmt_int(strnum1, CurAutoResponders)] = 0;
@@ -623,24 +593,12 @@ send_template_now(const char *filename)
 					printh("%H", TmpBuf.s);
 					break;
 				case 'p': /* show POP/IMAP users */
-					if (!Username.len || !Domain.len || !RealDir.len) {
-						if (!Username.len)
-							strerr_warn1("Username is null", 0);
-						if (!Domain.len)
-							strerr_warn1("Domain is null", 0);
-						if (!RealDir.len)
-							strerr_warn1("RealDir is null", 0);
-					} else
+					if (Username.len && Domain.len && RealDir.len)
 						show_user_lines(Username.s, Domain.s, mytime, RealDir.s);
 					break;
 				case 'Q': /* show quota usage */
-					if (!ActionUser.len || !Domain.len) {
-						if (!ActionUser.len)
-							strerr_warn1("User null", 0);
-						if (!Domain.len)
-							strerr_warn1("Domain is null", 0);
+					if (!ActionUser.len || !Domain.len)
 						break;
-					}
 					if (!(vpw = sql_getpw(ActionUser.s, Domain.s))) {
 						strerr_warn4("no records for user", ActionUser.s, "@", Domain.s, 0);
 						out("<p>no records for user ");
@@ -667,13 +625,8 @@ send_template_now(const char *filename)
 					}
 					break;
 				case 'q': /* display user's quota (mod user page) */
-					if (!ActionUser.len || !Domain.len) {
-						if (!ActionUser.len)
-							strerr_warn1("User null", 0);
-						if (!Domain.len)
-							strerr_warn1("Domain is null", 0);
+					if (!ActionUser.len || !Domain.len)
 						break;
-					}
 					if (!(vpw = sql_getpw(ActionUser.s, Domain.s))) {
 						strerr_warn4("no records for user", ActionUser.s, "@", Domain.s, 0);
 						out("<p>no records for user ");
@@ -700,12 +653,6 @@ send_template_now(const char *filename)
 					if (value1.len)
 						printh("<A HREF=\"%C\">%H</A>", value2.s, value1.s);
 					break;
-#if 0
-				case '#r': /* show the autoresponder stuff */
-					if (AdminType == DOMAIN_ADMIN)
-						show_autoresponders(Username.s, Domain.s, mytime);
-					break;
-#endif
 				case 'S': /* send the status message parameter */
 					out(StatusMessage.s);
 					break;
@@ -787,13 +734,8 @@ send_template_now(const char *filename)
 						mdir_t          diskquota = 0;
 						mdir_t          maxmsg = 0;
 
-						if (!Username.len || !Domain.len) {
-							if (!Username.len)
-								strerr_warn1("User null", 0);
-							if (!Domain.len)
-								strerr_warn1("Domain is null", 0);
+						if (!Username.len || !Domain.len)
 							break;
-						}
 						if (!(vpw = sql_getpw(Username.s, Domain.s))) {
 							strerr_warn4("no records for user", Username.s, "@", Domain.s, 0);
 							out("<p>no records for user ");

@@ -1,5 +1,5 @@
 /*
- * $Id: user.h,v 1.5 2024-05-17 16:20:51+05:30 mbhangui Exp mbhangui $
+ * $Id: user.h,v 1.6 2024-05-30 23:05:44+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,6 +16,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
+
+#ifndef _USER_H
+#define _USER_H
 
 void            adduser();
 void            addusernow();
@@ -36,3 +39,5 @@ void            setremotecatchall();
 void            setremotecatchallnow();
 void            show_users();
 int             show_user_lines(const char *user, const char *dom, time_t mytime, const char *dir);
+
+#endif

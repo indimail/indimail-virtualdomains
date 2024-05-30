@@ -17,7 +17,7 @@
 016 Mailing List Name:
 017 List owner email address:
 018 Archived
-019 Unable to get domain details from assign file
+019 Unable to get domain details
 020 You don't have permission to change password
 021 Challenge Response Setup
 022 Store clear text Passwords
@@ -292,11 +292,31 @@
 315 User deleted.  Unable to set forward to '%s'.
 316 Change Password
 317 You cannot delete the postmaster account.
-318 setgid() failed, unable to continue
-319 setuid() failed, unable to continue
+318 system failure setting permission, unable to continue
+319 Failed to get user/domain limits
 320 Invalid password: it can be easily guessed from the username
 321 Unable to migrate vacation dir to autoresp dir
 322 Unable to migrate vacation.msg to autoresp.msg
-323 Unable to rename temp file to .qmail
+323 No role to add users
+324 No role to modify users
+325 No role to delete users
+326 No role to add aliases
+327 No role to modify aliases
+328 No role to delete aliases
+329 No role to add forwards
+330 No role to modify forwards
+331 No role to delete forwards
+332 No role to add autoresponders
+333 No role to modify autoresponders
+334 No role to delete autoresponders
+335 No role to add mailling list
+336 No role to modify mailling list
+337 No role to delete mailling list
+338 No role to add mailling list users
+339 No role to modify mailling list users
+340 No role to delete mailling list users
+341 No role to add mailling list moderators
+342 No role to modify mailling list moderators
+343 No role to delete mailling list moderators
 400 Content-type: text/plain
 401 Content-transfer-encoding: 7bit

@@ -1,5 +1,5 @@
 /*
- * $Id: mailinglist.c,v 1.22 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
+ * $Id: mailinglist.c,v 1.23 2024-05-30 23:01:23+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -46,7 +46,6 @@
 #include <open.h>
 #endif
 #include "cgi.h"
-#include "limits.h"
 #include "mailinglist.h"
 #include "printh.h"
 #include "iwebadminx.h"
@@ -395,7 +394,6 @@ addmailinglist()
 	if (!ezmlm_make || MaxMailingLists == 0)
 		return;
 	count_mailinglists();
-	load_limits();
 	if (MaxMailingLists != -1 && CurMailingLists >= MaxMailingLists) {
 		out(html_text[184]);
 		strnum[fmt_int(strnum, MaxMailingLists)] = 0;
@@ -923,7 +921,6 @@ addmailinglistnow()
 	if (!ezmlm_make || MaxMailingLists == 0)
 		return;
 	count_mailinglists();
-	load_limits();
 	if (MaxMailingLists != -1 && CurMailingLists >= MaxMailingLists) {
 		strnum[fmt_int(strnum, MaxMailingLists)] = 0;
 		out(html_text[184]);

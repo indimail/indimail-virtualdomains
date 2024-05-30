@@ -19,7 +19,7 @@ iwebadmin_DEPENDENCIES=$(COMMONDEPENDENCIES)
 
 COMMONSOURCES=iwebadmin.c alias.c autorespond.c forward.c mailinglist.c \
 	      user.c util.c printh.c auth.c template.c \
-	      command.c show.c cgi.c limits.c dotqmail.c \
+	      command.c show.c cgi.c dotqmail.c \
 		  common.c iwebadmin.h iwebadminx.h
 
 iwebadmin_SOURCES=$(COMMONSOURCES) 
@@ -51,22 +51,6 @@ edit = sed \
 	-e "s|@release\@|"`cat conf-release`"|g" \
 	-e 's|@email\@|'"`cat conf-email`"'|g' \
 	-e 's,@prefix\@,$(prefix),g'
-
-iwebadmin.o: config.h iwebadmin.h 
-alias.o: config.h iwebadmin.h iwebadmin.h 
-autorespond.o: config.h iwebadmin.h iwebadmin.h 
-forward.o: config.h iwebadmin.h iwebadminx.h 
-mailinglist.o: config.h iwebadmin.h iwebadminx.h 
-user.o: config.h iwebadmin.h iwebadminx.h 
-util.o: config.h iwebadmin.h iwebadminx.h 
-printh.o: printh.h
-auth.o: config.h iwebadmin.h iwebadminx.h 
-template.o: config.h iwebadmin.h iwebadminx.h 
-command.o: iwebadmin.h iwebadminx.h 
-show.o: config.h iwebadmin.h iwebadminx.h 
-cgi.o: config.h iwebadmin.h iwebadminx.h 
-limits.o: config.h iwebadmin.h iwebadminx.h 
-dotqmail.o: config.h iwebadmin.h iwebadminx.h 
 
 iwebadmin.spec: iwebadmin.spec.in conf-version conf-release doc/ChangeLog conf-email
 	(cat $@.in;./catChangeLog --spec doc/ChangeLog) | $(edit)> $@
@@ -125,5 +109,3 @@ install-data-hook:
 	$(INSTALL_DATA) README-hooks.md $(DESTDIR)@docdir@/README-hooks.md || exit 1
 	$(INSTALL_DATA) COPYING         $(DESTDIR)@docdir@/COPYING || exit 1
 	$(INSTALL_DATA) AUTHORS         $(DESTDIR)@docdir@/AUTHORS || exit 1
-
-AUTOMAKE_OPTIONS = foreign no-dependencies

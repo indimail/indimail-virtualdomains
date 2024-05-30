@@ -1,5 +1,5 @@
 /*
- * $Id: auth.c,v 1.8 2023-07-28 22:27:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: auth.c,v 1.9 2024-05-30 22:51:54+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -196,24 +196,16 @@ auth_user_domain(const char *ip_addr, struct passwd *pw)
 }
 
 void
-set_admin_type()
+set_admin_type(struct passwd *pw)
 {
-	struct passwd  *vpw = NULL;
-
-	vpw = sql_getpw(Username.s, Domain.s);
-	AdminType = NO_ADMIN;
 	if (Domain.len) {
 		if (!str_diffn(Username.s, "postmaster", Username.len))
 			AdminType = DOMAIN_ADMIN;
-#ifdef VQPASSWD_HAS_PW_FLAGS
 		else
-		if (vpw->pw_flags & QA_ADMIN)
-#else
-		else
-		if (vpw->pw_gid & QA_ADMIN)
-#endif
+		if (pw->pw_gid & QA_ADMIN)
 			AdminType = DOMAIN_ADMIN;
 		else
 			AdminType = USER_ADMIN;
-	}
+	} else
+		AdminType = NO_ADMIN;
 }

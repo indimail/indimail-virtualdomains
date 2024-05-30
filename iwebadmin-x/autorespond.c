@@ -1,5 +1,5 @@
 /*
- * $Id: autorespond.c,v 1.18 2024-05-17 16:17:42+05:30 mbhangui Exp mbhangui $
+ * $Id: autorespond.c,v 1.19 2024-05-30 22:55:32+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,7 +39,6 @@
 #include <open.h>
 #endif
 #include "autorespond.h"
-#include "limits.h"
 #include "printh.h"
 #include "iwebadmin.h"
 #include "iwebadminx.h"
@@ -134,7 +133,6 @@ addautorespond()
 		iweb_exit(PERM_FAILURE);
 	}
 	count_autoresponders();
-	load_limits();
 	if (MaxAutoResponders != -1 && CurAutoResponders >= MaxAutoResponders) {
 		out(html_text[158]);
 		out(" ");
@@ -163,7 +161,6 @@ addautorespondnow()
 		iweb_exit(PERM_FAILURE);
 	}
 	count_autoresponders();
-	load_limits();
 	if (MaxAutoResponders != -1 && CurAutoResponders >= MaxAutoResponders) {
 		out(html_text[158]);
 		out(" ");
