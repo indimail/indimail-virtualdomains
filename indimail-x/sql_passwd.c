@@ -1,5 +1,8 @@
 /*
  * $Log: sql_passwd.c,v $
+ * Revision 1.6  2024-05-30 22:08:20+05:30  Cprogrammer
+ * BUG: fixed wrong condition for sql query
+ *
  * Revision 1.5  2024-05-17 16:25:48+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -36,7 +39,7 @@
 #include "sql_getpw.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: sql_passwd.c,v 1.5 2024-05-17 16:25:48+05:30 mbhangui Exp mbhangui $";
+static char     sccsid[] = "$Id: sql_passwd.c,v 1.6 2024-05-30 22:08:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 static void
@@ -69,11 +72,10 @@ do_sql(const char *user, const char *domain, const char *pass, const char *scram
 			!stralloc_cats(&SqlBuf, user) ||
 			!stralloc_append(&SqlBuf, "\""))
 		die_nomem();
-	if (!stralloc_0(&SqlBuf))
-		die_nomem();
 	if (site_size == SMALL_SITE) {
 		if (!stralloc_catb(&SqlBuf, " and pw_domain = \"", 18) ||
-				!stralloc_cats(&SqlBuf, domain))
+				!stralloc_cats(&SqlBuf, domain) ||
+				!stralloc_append(&SqlBuf, "\""))
 			die_nomem();
 	}
 	if (!stralloc_0(&SqlBuf))

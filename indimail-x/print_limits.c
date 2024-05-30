@@ -1,12 +1,12 @@
 /*
- * $Id: $
+ * $Id: print_limits.c,v 1.1 2024-05-30 22:11:19+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     rcsid[] = "$Id: $";
+static char     rcsid[] = "$Id: print_limits.c,v 1.1 2024-05-30 22:11:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef HAVE_QMAIL
@@ -20,7 +20,7 @@ static char     rcsid[] = "$Id: $";
 void
 print_limits(struct vlimits *lmt)
 {
-	if (lmt->limit_type == 1) {
+	if (lmt->limit_type == 1 || lmt->limit_type == 2) {
 		subprintfe(subfdout, "vlimits", "Domain Expiry   Date : %s",
 			lmt->domain_expiry == -1 ? "Never Expires\n" : ctime(&lmt->domain_expiry));
 		subprintfe(subfdout, "vlimits", "Password Expiry Date : %s",
@@ -70,7 +70,8 @@ print_limits(struct vlimits *lmt)
 		subprintfe(subfdout, "vlimits", "  %s\n", lmt->disable_pop ? "NO_POP" : "POP3");
 		subprintfe(subfdout, "vlimits", "  %s\n", lmt->disable_webmail ? "NO_WEBMAIL" : "WEBMAIL");
 		subprintfe(subfdout, "vlimits", "  %s\n", lmt->disable_relay ? "NO_RELAY" : "RELAY");
-	} else {
+	}
+	if (lmt->limit_type == 2) {
 		subprintfe(subfdout, "vlimits", "Flags for non postmaster accounts:\n");
 		subprintfe(subfdout, "vlimits", "  pop account           : %12s %12s %12s\n",
 			lmt->perm_account & VLIMIT_DISABLE_CREATE ? "DENY_CREATE" : "ALLOW_CREATE",
@@ -113,5 +114,8 @@ print_limits(struct vlimits *lmt)
 }
 
 /*
- * $Log: $
+ * $Log: print_limits.c,v $
+ * Revision 1.1  2024-05-30 22:11:19+05:30  Cprogrammer
+ * Initial revision
+ *
  */

@@ -1,12 +1,12 @@
 /*
- * $Id: vlimit.c,v 1.9 2024-05-28 19:34:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: vlimit.c,v 1.10 2024-05-30 22:11:58+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #ifndef	lint
-static char     sccsid[] = "$Id: vlimit.c,v 1.9 2024-05-28 19:34:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: vlimit.c,v 1.10 2024-05-30 22:11:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef ENABLE_DOMAIN_LIMITS
@@ -87,6 +87,7 @@ static char    *usage =
 	"         -x \"flags\"  (set domain  quota flags)\n"
 	"         -z \"flags\"  (set default quota flags)\n"
 	"         perm flags:\n"
+	"            0 ( clear all flags )\n"
 	"            a ( set deny all flag )\n"
 	"            c ( set deny create flag )\n"
 	"            m ( set deny modify flag )\n"
@@ -341,11 +342,13 @@ main(int argc, char *argv[])
 	}
 	if ((i = vget_limits(User, &limits)) == -1)
 		strerr_die2x(111, FATAL, "Failed to get limits: ");
+	if (!i && (DeleteLimits || ShowLimits))
+		strerr_die3x(1, WARN, "No records found for ", User);
 	if (DeleteLimits) {
 		if (vdel_limits(User) == 0) {
 			out("vlimits", "Limits deleted\n");
 			flush("vlimits");
-			return (0);
+			return 0;
 		} else
 			strerr_die2x(111, FATAL, "failed to delete limits");
 	} else
@@ -353,95 +356,95 @@ main(int argc, char *argv[])
 		print_limits(&limits);
 		return 0;
 	}
-	if (limit_type == 1) {
-		if (domain_expiry)
-			limits.domain_expiry = domain_expiry;
-		if (passwd_expiry)
-			limits.passwd_expiry = passwd_expiry;
-		if (MaxPopAccounts)
-			scan_long(MaxPopAccounts, &limits.maxpopaccounts);
-		if (MaxAliases)
-			scan_long(MaxAliases, &limits.maxaliases);
-		if (MaxForwards)
-			scan_long(MaxForwards, &limits.maxforwards);
-		if (MaxAutoresponders)
-			scan_long(MaxAutoresponders, &limits.maxautoresponders);
-		if (MaxMailinglists)
-			scan_long(MaxMailinglists, &limits.maxmailinglists);
-		/*- quota & message count limits */
-		if (DomainQuota && (limits.diskquota = parse_quota(DomainQuota, 0)) == -1)
-			strerr_die2sys(111, WARN, "diskquota: ");
-		if (DomainMaxMsgCount &&
-			(limits.maxmsgcount = strtoll(DomainMaxMsgCount, 0, 0)) == -1)
-			strerr_die2sys(111, WARN, "maxmsgcount: ");
+	if (domain_expiry)
+		limits.domain_expiry = domain_expiry;
+	if (passwd_expiry)
+		limits.passwd_expiry = passwd_expiry;
+	if (MaxPopAccounts)
+		scan_long(MaxPopAccounts, &limits.maxpopaccounts);
+	if (MaxAliases)
+		scan_long(MaxAliases, &limits.maxaliases);
+	if (MaxForwards)
+		scan_long(MaxForwards, &limits.maxforwards);
+	if (MaxAutoresponders)
+		scan_long(MaxAutoresponders, &limits.maxautoresponders);
+	if (MaxMailinglists)
+		scan_long(MaxMailinglists, &limits.maxmailinglists);
+	/*- quota & message count limits */
+	if (DomainQuota && (limits.diskquota = parse_quota(DomainQuota, 0)) == -1)
+		strerr_die2sys(111, WARN, "diskquota: ");
+	if (DomainMaxMsgCount &&
+		(limits.maxmsgcount = strtoll(DomainMaxMsgCount, 0, 0)) == -1)
+		strerr_die2sys(111, WARN, "maxmsgcount: ");
 #if defined(LLONG_MIN) && defined(LLONG_MAX)
-		if (limits.maxmsgcount == LLONG_MIN || limits.maxmsgcount == LLONG_MAX)
+	if (limits.maxmsgcount == LLONG_MIN || limits.maxmsgcount == LLONG_MAX)
 #else
-		if (errno == ERANGE)
+	if (errno == ERANGE)
 #endif
-			strerr_die2sys(100, FATAL, "maxmsgcount: ");
+		strerr_die2sys(100, FATAL, "maxmsgcount: ");
 
-		if (DefaultUserQuota) {
-			if (!str_diffn(DefaultUserQuota, "NOQUOTA", 8))
-				limits.defaultquota = -1;
-			else
-			if ((limits.defaultquota = parse_quota(DefaultUserQuota, 0)) == -1)
-				strerr_die2sys(111, WARN, "defaultquota: ");
-		}
-		if (DefaultUserMaxMsgCount &&
-				(limits.defaultmaxmsgcount = strtoll(DefaultUserMaxMsgCount, 0, 0)) == -1)
-			strerr_die2sys(100, FATAL, "defaultmaxmsgcount: ");
+	if (DefaultUserQuota) {
+		if (!str_diffn(DefaultUserQuota, "NOQUOTA", 8))
+			limits.defaultquota = -1;
+		else
+		if ((limits.defaultquota = parse_quota(DefaultUserQuota, 0)) == -1)
+			strerr_die2sys(111, WARN, "defaultquota: ");
+	}
+	if (DefaultUserMaxMsgCount &&
+			(limits.defaultmaxmsgcount = strtoll(DefaultUserMaxMsgCount, 0, 0)) == -1)
+		strerr_die2sys(100, FATAL, "defaultmaxmsgcount: ");
 #if defined(LLONG_MIN) && defined(LLONG_MAX)
-		if (limits.defaultmaxmsgcount == LLONG_MIN || limits.defaultmaxmsgcount == LLONG_MAX)
+	if (limits.defaultmaxmsgcount == LLONG_MIN || limits.defaultmaxmsgcount == LLONG_MAX)
 #else
-		if (errno == ERANGE)
+	if (errno == ERANGE)
 #endif
-			strerr_die2sys(100, FATAL, "defaultmaxmsgcount: ");
-		if (GidFlag == 1) {
-			GidFlag = 0;
-			limits.disable_dialup = 0;
-			limits.disable_passwordchanging = 0;
-			limits.disable_pop = 0;
-			limits.disable_smtp = 0;
-			limits.disable_webmail = 0;
-			limits.disable_imap = 0;
-			limits.disable_relay = 0;
-			for (i = 0; i < str_len(GidFlagString); i++) {
-				switch (GidFlagString[i])
-				{
-				case 'u':
-					limits.disable_dialup = toggle ? 0 : 1;
-					break;
-				case 'd':
-					limits.disable_passwordchanging = toggle ? 0 : 1;
-					break;
-				case 'p':
-					limits.disable_pop = toggle ? 0 : 1;
-					break;
-				case 's':
-					limits.disable_smtp = toggle ? 0 : 1;
-					break;
-				case 'w':
-					limits.disable_webmail = toggle ? 0 : 1;
-					break;
-				case 'i':
-					limits.disable_imap = toggle ? 0 : 1;
-					break;
-				case 'r':
-					limits.disable_relay = toggle ? 0 : 1;
-					break;
-				case 'x':
-					limits.disable_dialup = 0;
-					limits.disable_passwordchanging = 0;
-					limits.disable_pop = 0;
-					limits.disable_smtp = 0;
-					limits.disable_webmail = 0;
-					limits.disable_imap = 0;
-					limits.disable_relay = 0;
-					break;
-				}
+		strerr_die2sys(100, FATAL, "defaultmaxmsgcount: ");
+	if (GidFlag == 1) {
+		GidFlag = 0;
+		limits.disable_dialup = 0;
+		limits.disable_passwordchanging = 0;
+		limits.disable_pop = 0;
+		limits.disable_smtp = 0;
+		limits.disable_webmail = 0;
+		limits.disable_imap = 0;
+		limits.disable_relay = 0;
+		for (i = 0; i < str_len(GidFlagString); i++) {
+			switch (GidFlagString[i])
+			{
+			case 'u':
+				limits.disable_dialup = toggle ? 0 : 1;
+				break;
+			case 'd':
+				limits.disable_passwordchanging = toggle ? 0 : 1;
+				break;
+			case 'p':
+				limits.disable_pop = toggle ? 0 : 1;
+				break;
+			case 's':
+				limits.disable_smtp = toggle ? 0 : 1;
+				break;
+			case 'w':
+				limits.disable_webmail = toggle ? 0 : 1;
+				break;
+			case 'i':
+				limits.disable_imap = toggle ? 0 : 1;
+				break;
+			case 'r':
+				limits.disable_relay = toggle ? 0 : 1;
+				break;
+			case 'x':
+				limits.disable_dialup = 0;
+				limits.disable_passwordchanging = 0;
+				limits.disable_pop = 0;
+				limits.disable_smtp = 0;
+				limits.disable_webmail = 0;
+				limits.disable_imap = 0;
+				limits.disable_relay = 0;
+				break;
 			}
 		}
+	}
+	if (limit_type == 1) {
 		if (vset_limits(User, &limits) != 0)
 			strerr_die2x(1, FATAL, "vset_limits: Failed to set limits");
 		return 0;
@@ -451,6 +454,9 @@ main(int argc, char *argv[])
 		for (i = 0; i < str_len(PermAccountFlagString); i++) {
 			switch (PermAccountFlagString[i])
 			{
+			case '0':
+				limits.perm_account = 0;
+				break;
 			case 'a':
 				limits.perm_account |= VLIMIT_DISABLE_ALL;
 				break;
@@ -471,6 +477,9 @@ main(int argc, char *argv[])
 		for (i = 0; i < str_len(PermAliasFlagString); i++) {
 			switch (PermAliasFlagString[i])
 			{
+			case '0':
+				limits.perm_alias = 0;
+				break;
 			case 'a':
 				limits.perm_alias |= VLIMIT_DISABLE_ALL;
 				break;
@@ -491,6 +500,9 @@ main(int argc, char *argv[])
 		for (i = 0; i < str_len(PermForwardFlagString); i++) {
 			switch (PermForwardFlagString[i])
 			{
+			case '0':
+				limits.perm_forward = 0;
+				break;
 			case 'a':
 				limits.perm_forward |= VLIMIT_DISABLE_ALL;
 				break;
@@ -511,6 +523,9 @@ main(int argc, char *argv[])
 		for (i = 0; i < str_len(PermAutoresponderFlagString); i++) {
 			switch (PermAutoresponderFlagString[i])
 			{
+			case '0':
+				limits.perm_autoresponder = 0;
+				break;
 			case 'a':
 				limits.perm_autoresponder |= VLIMIT_DISABLE_ALL;
 				break;
@@ -531,6 +546,9 @@ main(int argc, char *argv[])
 		for (i = 0; i < str_len(PermMaillistFlagString); i++) {
 			switch (PermMaillistFlagString[i])
 			{
+			case '0':
+				limits.perm_maillist = 0;
+				break;
 			case 'a':
 				limits.perm_maillist |= VLIMIT_DISABLE_ALL;
 				break;
@@ -551,6 +569,9 @@ main(int argc, char *argv[])
 		for (i = 0; i < str_len(PermMaillistUsersFlagString); i++) {
 			switch (PermMaillistUsersFlagString[i])
 			{
+			case '0':
+				limits.perm_maillist_users = 0;
+				break;
 			case 'a':
 				limits.perm_maillist_users |= VLIMIT_DISABLE_ALL;
 				break;
@@ -571,6 +592,9 @@ main(int argc, char *argv[])
 		for (i = 0; i < str_len(PermMaillistModeratorsFlagString); i++) {
 			switch (PermMaillistModeratorsFlagString[i])
 			{
+			case '0':
+				limits.perm_maillist_moderators = 0;
+				break;
 			case 'a':
 				limits.perm_maillist_moderators |= VLIMIT_DISABLE_ALL;
 				break;
@@ -591,6 +615,9 @@ main(int argc, char *argv[])
 		for (i = 0; i < str_len(PermQuotaFlagString); i++) {
 			switch (PermQuotaFlagString[i])
 			{
+			case '0':
+				limits.perm_quota = 0;
+				break;
 			case 'a':
 				limits.perm_quota |= VLIMIT_DISABLE_ALL;
 				break;
@@ -611,6 +638,9 @@ main(int argc, char *argv[])
 		for (i = 0; i < str_len(PermDefaultQuotaFlagString); i++) {
 			switch (PermDefaultQuotaFlagString[i])
 			{
+			case '0':
+				limits.perm_defaultquota = 0;
+				break;
 			case 'a':
 				limits.perm_defaultquota |= VLIMIT_DISABLE_ALL;
 				break;
@@ -638,6 +668,9 @@ main()
 #endif
 /*
  * $Log: vlimit.c,v $
+ * Revision 1.10  2024-05-30 22:11:58+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.9  2024-05-28 19:34:10+05:30  Cprogrammer
  * handle both domain and user level records
  * use print_limits() from print_limits.c to print domain limits information

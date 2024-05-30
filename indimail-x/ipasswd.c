@@ -89,7 +89,7 @@ ipasswd(const char *username, const char *domain, const char *password, int encr
 	if (!(pw = sql_getpw(username, domain)))
 		return (0);
 	if (pw->pw_gid & NO_PASSWD_CHNG) {
-		strerr_warn1("ipasswd: User not allowed to change passwd", 0);
+		strerr_warn1("ipasswd: User not allowed to change password", 0);
 		return (-1);
 	}
 	if (!(ptr = env_get("PASSWORD_HASH"))) {
