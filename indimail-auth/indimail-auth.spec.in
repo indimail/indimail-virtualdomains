@@ -120,12 +120,12 @@ do
   if [ -d $i ] ; then
     %{__rm} -rf $i
   fi
-  if [ -f ../../SOURCES/$i.tar.bz2 ] ; then
-    %{__bzip2} -d -c ../../SOURCES/$i.tar.bz2 | tar xf -
-  elif [ -f ../../SOURCES/$i.tar.xz ] ; then
-    xz -d -c ../../SOURCES/$i.tar.xz |tar xf -
-  elif [ -f ../../SOURCES/$i.tar.gz ] ; then
-    gunzip -c ../../SOURCES/$i.tar.gz | tar xf -
+  if [ -f $HOME/rpmbuild/SOURCES/$i.tar.bz2 ] ; then
+    %{__bzip2} -d -c $HOME/rpmbuild/SOURCES/$i.tar.bz2 | tar xf -
+  elif [ -f $HOME/rpmbuild/SOURCES/$i.tar.xz ] ; then
+    xz -d -c $HOME/rpmbuild/SOURCES/$i.tar.xz |tar xf -
+  elif [ -f $HOME/rpmbuild/SOURCES/$i.tar.gz ] ; then
+    gunzip -c $HOME/rpmbuild/SOURCES/$i.tar.gz | tar xf -
   else
     echo "No Source Archive for $i"
     exit 1

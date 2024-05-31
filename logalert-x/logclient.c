@@ -53,7 +53,7 @@
 #define FATAL   "logclient: fatal: " 
 
 #ifndef	lint
-static char     sccsid[] = "$Id: logclient.c,v 1.15 2023-10-15 18:10:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: logclient.c,v 1.16 2024-05-31 09:01:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 
@@ -550,6 +550,9 @@ getversion_logclient_c()
 
 /*
  * $Log: logclient.c,v $
+ * Revision 1.16  2024-05-31 09:01:34+05:30  Cprogrammer
+ * replaced perror with strerr_die2sys
+ *
  * Revision 1.15  2023-10-15 18:10:43+05:30  Cprogrammer
  * ensure qmail/tls.h gets included
  *

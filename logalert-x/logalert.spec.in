@@ -49,13 +49,13 @@ BuildRequires: gcc gcc-c++ make autoconf automake
 %if %{defined suse_version} || %{defined sles_version}
 BuildRequires: bison
 %endif
-%if 0%{?fedora_version} > 27 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7 || %{defined amzn} || %{defined mgaversion} || %{defined openEuler}
+%if 0%{?fedora_version} > 27 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7 || %{defined amzn} || %{defined mgaversion} || %{defined openEuler} || 0%{?mageia}
 BuildRequires: libtirpc libtirpc-devel
 %endif
 %if 0%{?suse_version} >= 1550 || 0%{?sle_version} >= 150300
 BuildRequires: libtirpc3 libtirpc-devel
 %endif
-BuildRequires: pcre2-devel libqmail-devel
+BuildRequires: pcre-devel libqmail-devel
 BuildRequires: flex coreutils bison
 Requires: coreutils grep /bin/sh glibc
 
