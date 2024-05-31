@@ -12,14 +12,56 @@ with virtual domains. It provides admin for adding/deleting users, Aliases,
 Forwards, ezmlm Mailing lists and Autoresponders. It also features automatic
 International language support via the language settings on their browser.
 
+\fBiwebadmin\fR allows role based administration. You can use
+\fBvlimit\fR(1) to set the roles. Typically the usage will be
+
+.EX
+  \fBvlimit\fR -\fIperm\fR \fIrole\fR \fIuser@domain\fR
+.EE
+
+Here \fIperm\fR is one of following
+
+.EX
+  -p \fIrole\fR - for create, modify, delete permissions on user accounts
+  -a \fIrole\fR - for create, modify, delete permissions on aliases
+  -f \fIrole\fR - for create, modify, delete permissions on forwards
+  -r \fIrole\fR - for create, modify, delete permissions on autoresponders
+  -l \fIrole\fR - for create, modify, delete permissions on mailinglists
+  -u \fIrole\fR - for create, modify, delete permissions on mailinglist
+            users and mailing list digest users.
+  -o \fIrole\fR - for create, modify, delete permissions on mailinglist
+            moderators
+.EE
+
+and \fIrole\fR is one of the following
+
+.EX
+  0 - Allow all roles
+  a - Deny all roles
+  c - Deny create role
+  m - Deny modify role
+  d - Deny delete role
+.EE
+
+The command
+
+\fBvlimit\fR -p d \fIuser@domain\fR
+
+will deny user \fIuser@domain\fR to delete any user when using
+the \fBiwebadmin\fR web interface. You can use the command
+
+\fBvlimit\fR -s \fIuser@domain\fR
+
+to see the current role configured for \fIuser@domain\fR
+
+
 iwebadmin is configured to run under a web server. See README on instructions
 to set this up. It uses configuration file /etc/indimail/iwebadmin-conf to
 set various options as given below.
 
-.TP
+.TP 4
 .I no-fortune
-
-Unset disply of fortune cookies on the main page
+Unset display of fortune cookies on the main page
 
 .TP
 .I no-ezmlm
@@ -60,3 +102,7 @@ a relatve path to the document root.
 /usr/share/doc/iwebadmin/COPYING
 /usr/share/doc/iwebadmin/README-hooks.md
 /usr/share/doc/iwebadmin/README.md
+
+.SH SEE ALSO
+vlimit(1), vadduser(1), vpasswd(1), vmoduser(1), vsetuserquota(1),
+valias(1), indimail(7)

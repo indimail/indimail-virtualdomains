@@ -28,9 +28,10 @@ Release @version@-@release@ Start 28/07/2023 End 24/05/2024
 15. iwebadmin.c: refactored code
 16. Makefile.am: enabled auto dependency tracking
 17. template.c: removed uneccessary output on descriptor 2
-- 32/05/2024
+- 31/05/2024
 18. iwebadmin.spec, debian/*.dsc.in: updated indimail, indimail-devel minimum
     version requirement
+19. command.c: corrected defines used for role based access
 
 * Tue Jan 31 2023 03:34:39 +0000 Manvendra Bhangui <iwebadmin@indimail.org> 2.1.1-1.1%{?dist}
 Release 2.1.1-1.1 Start 14/09/2022 End 31/01/2023

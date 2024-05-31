@@ -59,7 +59,7 @@ BuildRequires: glibc glibc-devel procps cpio
 BuildRequires: sed gettext-devel
 BuildRequires: findutils libqmail-devel libgsasl-devel
 BuildRequires: gzip autoconf automake libtool
-BuildRequires indimail-devel > 3.4.6
+BuildRequires: indimail-devel > 3.4.6
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 Requires: permissions
