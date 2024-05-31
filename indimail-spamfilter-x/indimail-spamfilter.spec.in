@@ -70,7 +70,7 @@ BuildRequires: flex bison
 %if 0%{?suse_version}
 BuildRequires: db-devel
 %else
-%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 600 || 0%{?rhel_version} > 600 || 0%{?centos_ver} > 6 || 0%{?scientificlinux_version} > 600 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7 || %{defined amzn} || %{defined mgaversion} || %{defined openEuler}
+%if 0%{?fedora_version} > 30 || 0%{?centos_version} > 600 || 0%{?rhel_version} > 600 || 0%{?centos_ver} > 6 || 0%{?scientificlinux_version} > 600 || 0%{?almalinux_version} > 700 || 0%{?rocky_version} > 700 || 0%{?fedora} > 30 || 0%{?rhel} > 7 || %{defined amzn} || %{defined mgaversion} || %{defined openEuler} || 0%{?mageia}
 BuildRequires: libdb-devel
 %else
 BuildRequires: db4-devel
@@ -150,7 +150,7 @@ if [ %{reconf_bogofilter} -eq 1 ] ; then
 fi
 (
 HOME='.';export HOME
-%if %{defined mgaversion} || %{defined suse_version}
+%if %{defined mgaversion} || %{defined suse_version} || 0%{?mageia}
 %configure --prefix=%{_prefix} --libexecdir=%{libexecdir} \
   --sysconfdir=%{sysconfdir} --mandir=%{mandir} \
   --datarootdir=%{shareddir} --enable-indimail \

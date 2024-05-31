@@ -3,6 +3,9 @@ Release @version@-@release@ Start 10/05/2024 End XX/XX/XXXX
 - 10/05/2024
 01. courier-imap/libs/rfc1035/rfc1035str.c: Fix missing prototype for
     strcasecmp
+- 31/05/2024
+02. indimail-access.spec: use $HOME/rpmbuild/SOURCES for source directory
+03. indimail-access.spec: use python3-devel for mageia
 
 * Sun Dec 03 2023 12:34:44 +0000 Manvendra Bhangui <indimail-access@indimail.org> 1.2-1.2%{?dist}
 Release 1.2-1.1 Start 28/11/2024 End 03/12/2023
