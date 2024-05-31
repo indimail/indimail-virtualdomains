@@ -7088,6 +7088,7 @@ Currently, the list of supported distributions for IndiMail is
     * SUSE
           o openSUSE_Leap_15.4
           o openSUSE_Leap_15.5
+          o openSUSE_Leap_15.6
           o openSUSE_Tumbleweed
           o SUSE Linux Enterprise 12
           o SUSE Linux Enterprise 12 SP1
@@ -7100,10 +7101,13 @@ Currently, the list of supported distributions for IndiMail is
           o SUSE Linux Enterprise 15 SP2
           o SUSE Linux Enterprise 15 SP3
           o SUSE Linux Enterprise 15 SP4
+          o SUSE Linux Enterprise 15 SP5
+          o SUSE Linux Enterprise 15 SP6
 
     * Red Hat
-          o Fedora 38
           o Fedora 39
+          o Fedora 40
+          o Fedora Rawhide
           o Red Hat Enterprise Linux 7
           o Red Hat Enterprise Linux 8 +
           o Red Hat Enterprise Linux 9 +
@@ -7112,14 +7116,16 @@ Currently, the list of supported distributions for IndiMail is
           o Scientific Linux 7
           o CentOS 7
           o CentOS 8
-          o CentOS 8 Stream
-          o CentOS 9 Stream
+          o CentOS 8  Stream
+          o CentOS 9  Stream
+          o CentOS 10 Stream
           o RockyLinux 8
           o RockyLinux 9
           o OracleLinux 8
           o OracleLinux 9
           o AlmaLinux 8
           o AlmaLinux 9
+          o AmazonLinux 2023
 
           +: Some of the above Red Hat flavoured distributions are available
              only on copr (RHEL 8, RHEL9, EPEL9, EPEL9)
@@ -7133,6 +7139,12 @@ Currently, the list of supported distributions for IndiMail is
           o Ubuntu 18.04
           o Ubuntu 20.04
           o Ubuntu 22.04
+          o Ubuntu 23.04
+          o Ubuntu 24.04
+
+    * Mageia
+          o Mageia 8
+          o Mageia 9
 ```
 
 ## Installing packages from the repository
