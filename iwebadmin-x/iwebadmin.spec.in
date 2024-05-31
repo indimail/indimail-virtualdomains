@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.53 2023-07-14 21:49:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.54 2024-05-31 15:51:12+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -57,8 +57,9 @@ AutoReq: Yes
 BuildRequires: rpm gcc make coreutils grep
 BuildRequires: glibc glibc-devel procps cpio
 BuildRequires: sed gettext-devel
-BuildRequires: findutils libqmail-devel libqmail
-BuildRequires: gzip autoconf automake libtool indimail-devel libgsasl-devel
+BuildRequires: findutils libqmail-devel libgsasl-devel
+BuildRequires: gzip autoconf automake libtool
+BuildRequires indimail-devel > 3.4.6
 %if %noperms == 0
 %if 0%{?suse_version} >= 1120
 Requires: permissions
@@ -73,7 +74,7 @@ BuildRequires: -post-build-checks
 ################################# OBS ###############################
 
 Requires: coreutils grep /bin/sh glibc /usr/sbin/useradd /usr/sbin/groupadd
-Requires: procps /usr/bin/awk indimail > 1.6
+Requires: procps /usr/bin/awk indimail > 3.4.6
 Requires: ezmlm-idx > 7.2
 
 %description

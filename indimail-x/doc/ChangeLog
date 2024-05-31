@@ -52,6 +52,9 @@ Release @version@-@release@ Start 02/05/2024 End XX/XX/XXXX
 36. sql_passwd.c: BUG: fixed wrong condition for sql query
 37. ipasswd.c: fixed typo
 38. vlimit.c: refactored code
+- 31/05/2024
+39. indimail.spec, debian/*.dsc: updated libqmail-devel minimum version
+    requirement
 
 * Mon Jan 01 2024 09:24:41 +0000 Manvendra Bhangui <indimail-virtualdomains@indimail.org> 3.4.6-1.1%{?dist}
 Release 3.4.6-1.1 Start 09/09/2023 End 01/01/2024
