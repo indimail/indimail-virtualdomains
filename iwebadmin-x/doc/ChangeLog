@@ -32,6 +32,10 @@ Release @version@-@release@ Start 28/07/2023 End 24/05/2024
 18. iwebadmin.spec, debian/*.dsc.in: updated indimail, indimail-devel minimum
     version requirement
 19. command.c: corrected defines used for role based access
+- 02/06/2024
+20. created mod_user1.html, mod_user2.html for scram, non-scram setup
+21. user.c: fix search by index
+22. user.c: use mod_user1.html, mod_user2.html for scram, non-scram setup
 
 * Tue Jan 31 2023 03:34:39 +0000 Manvendra Bhangui <iwebadmin@indimail.org> 2.1.1-1.1%{?dist}
 Release 2.1.1-1.1 Start 14/09/2022 End 31/01/2023

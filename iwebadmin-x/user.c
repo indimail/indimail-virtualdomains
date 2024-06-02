@@ -1,5 +1,5 @@
 /*
- * $Id: user.c,v 1.39 2024-05-30 23:05:16+05:30 Cprogrammer Exp mbhangui $
+ * $Id: user.c,v 1.40 2024-06-02 18:54:55+05:30 Cprogrammer Exp mbhangui $
  * Copyright (C) 1999-2004 Inter7 Internet Technologies, Inc. 
  *
  * This program is free software; you can redistribute it and/or modify
@@ -96,7 +96,7 @@ show_users()
 int
 show_user_lines(const char *user, const char *dom, time_t mytime, const char *dir)
 {
-	int             fd, i, k, startnumber, moreusers = 1, totalpages,
+	int             fd, i, k, skip_user_count, moreusers = 1, totalpages,
 					bounced, colspan = 7, allowdelete, bars, match;
 	struct passwd  *pw;
 	char            qconvert[FMT_DOUBLE], strnum[FMT_ULONG];
@@ -139,34 +139,6 @@ show_user_lines(const char *user, const char *dom, time_t mytime, const char *di
 	}
 	close(fd);
 
-	if (SearchUser.len) {
-		pw = sql_getall(dom, 1, 1);
-		for (k = 0; pw; k++) {
-			if ((!SearchUser.s[1] && pw->pw_name[0] >= SearchUser.s[0]) || !str_diff(SearchUser.s, pw->pw_name))
-				break;
-			pw = sql_getall(dom, 0, 0);
-		}
-		if (k == 0)
-			str_copy(Pagenumber, "1");
-		else
-			Pagenumber[fmt_int(Pagenumber, (k / MAXUSERSPERPAGE) + 1)] = 0;
-	}
-
-	if (!stralloc_copyb(&TmpBuf, "where pw_domain=\"", 17) ||
-			!stralloc_cats(&TmpBuf, dom) ||
-			!stralloc_append(&TmpBuf, "\"") ||
-			!stralloc_0(&TmpBuf))
-		die_nomem();
-	k = count_table("indimail", TmpBuf.s) + count_table("indibak", TmpBuf.s);
-	/*- Determine number of pages */
-	if (k == 0)
-		totalpages = 1;
-	else
-		totalpages = (k / MAXUSERSPERPAGE) + 1;
-	scan_int(*Pagenumber ? Pagenumber : "1", &i);
-	startnumber = MAXUSERSPERPAGE * (i - 1);
-	if (i == 0)
-		str_copy(Pagenumber, "1");
 	if (str_str(line.s, " bounce-no-mailbox\n"))
 		bounced = 1;
 	else
@@ -188,17 +160,53 @@ show_user_lines(const char *user, const char *dom, time_t mytime, const char *di
 		dest.len--;
 	}
 
-	/*
+	if (SearchUser.len) {
+		pw = sql_getall(dom, 1, 1);
+		for (k = 0; pw; k++) {
+			if ((!SearchUser.s[1] && pw->pw_name[0] >= SearchUser.s[0]) || !str_diffn(SearchUser.s, pw->pw_name, SearchUser.len))
+				break;
+			pw = sql_getall(dom, 0, 0);
+		}
+		if (k == 0)
+			str_copy(Pagenumber, "1");
+		else
+			Pagenumber[fmt_int(Pagenumber, (k / MAXUSERSPERPAGE) + 1)] = 0;
+	}
+
+	/*- Determine number of pages */
+	if (!stralloc_copyb(&TmpBuf, "where pw_domain=\"", 17) ||
+			!stralloc_cats(&TmpBuf, dom) ||
+			!stralloc_append(&TmpBuf, "\"") ||
+			!stralloc_0(&TmpBuf))
+		die_nomem();
+	k = count_table("indimail", TmpBuf.s) + count_table("indibak", TmpBuf.s);
+	if (k == 0)
+		totalpages = 1;
+	else
+		totalpages = (k / MAXUSERSPERPAGE) + 1;
+	scan_int(*Pagenumber ? Pagenumber : "1", &i);
+	/* start one page before */
+	skip_user_count = MAXUSERSPERPAGE * (i - 1);
+	if (i == 0)
+		str_copy(Pagenumber, "1");
+
+	/*-
 	 * check to see if there are any users to list, 
 	 * otherwise repeat previous page
 	 */
 	pw = sql_getall(dom, 1, 1);
-	if (AdminType == DOMAIN_ADMIN || (AdminType == USER_ADMIN && !str_diffn(pw->pw_name, Username.s, Username.len + 1))) {
-		for (k = 0; k < startnumber; ++k) {
+	if (AdminType == DOMAIN_ADMIN) {
+		for (k = 0; pw; k++) {
+			if (SearchUser.len) {
+				if ((!SearchUser.s[1] && pw->pw_name[0] >= SearchUser.s[0]) || !str_diffn(SearchUser.s, pw->pw_name, SearchUser.len))
+					break;
+			} else
+			if (k >= skip_user_count)
+				break;
 			pw = sql_getall(dom, 0, 0);
 		}
 	}
-	if (pw == NULL) {
+	if (!pw) {
 		out("<tr><td colspan=\"");
 		strnum[fmt_int(strnum, colspan)] = 0;
 		out(strnum);
@@ -211,8 +219,9 @@ show_user_lines(const char *user, const char *dom, time_t mytime, const char *di
 		flush();
 	} else {
 		while (pw &&
-				((k < MAXUSERSPERPAGE + startnumber) ||
-				 (AdminType != DOMAIN_ADMIN || (AdminType == USER_ADMIN && !str_diffn(pw->pw_name, Username.s, Username.len + 1)))))
+				(k < (MAXUSERSPERPAGE + skip_user_count) ||
+				 (AdminType != DOMAIN_ADMIN ||
+				  (AdminType == USER_ADMIN && !str_diffn(pw->pw_name, Username.s, Username.len + 1)))))
 		{
 			if (AdminType == DOMAIN_ADMIN || (AdminType == USER_ADMIN && !str_diffn(pw->pw_name, Username.s, Username.len + 1))) {
 				mdir_t          diskquota = 0;
@@ -398,7 +407,7 @@ moduser()
 		iclose();
 		iweb_exit(PERM_FAILURE);
 	}
-	send_template("mod_user.html");
+	send_template(scram != -1 ? "mod_user1.html" : "mod_user2.html");
 }
 
 void
@@ -1864,6 +1873,10 @@ parse_users_dotqmail(char newchar)
 
 /*-
  * $Log: user.c,v $
+ * Revision 1.40  2024-06-02 18:54:55+05:30  Cprogrammer
+ * fix search by index
+ * use mod_user1.html, mod_user2.html for scram, non-scram setup
+ *
  * Revision 1.39  2024-05-30 23:05:16+05:30  Cprogrammer
  * removed limits.c, limits.h
  *

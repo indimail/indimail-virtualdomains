@@ -1,6 +1,6 @@
 #
 #
-# $Id: iwebadmin.spec.in,v 1.54 2024-05-31 15:51:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: iwebadmin.spec.in,v 1.55 2024-06-02 18:54:07+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %define _unpackaged_files_terminate_build 1
 
@@ -191,7 +191,8 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(444,root,root)                     @htmllibdir@/html/mod_autorespond.html
 %attr(444,root,root)                     @htmllibdir@/html/mod_dotqmail.html
 %attr(444,root,root)                     @htmllibdir@/html/mod_mailinglist-idx.html
-%attr(444,root,root)                     @htmllibdir@/html/mod_user.html
+%attr(444,root,root)                     @htmllibdir@/html/mod_user1.html
+%attr(444,root,root)                     @htmllibdir@/html/mod_user2.html
 %attr(444,root,root)                     @htmllibdir@/html/setremotecatchall.html
 %attr(444,root,root)                     @htmllibdir@/html/show_autorespond.html
 %attr(444,root,root)                     @htmllibdir@/html/show_digest_subscribers.html
