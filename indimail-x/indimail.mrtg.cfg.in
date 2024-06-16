@@ -1,5 +1,5 @@
 #
-# $Id: indimail.mrtg.cfg.in,v 1.5 2023-04-09 22:24:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail.mrtg.cfg.in,v 1.6 2024-06-16 21:56:57+05:30 Cprogrammer Exp mbhangui $
 #
 # Generate index.html using below command
 #
@@ -257,7 +257,7 @@ YSize[spam]: 150
 Title[load]: system load - MRTGHOSTNAME
 Target[load]: `uptime | sed 's/,//g' | awk '{print $8*100; print $9*100 ; print ""}'`
 PageTop[load]: system load - MRTGHOSTNAME
-Options[load]: gauge,growright,pngdate
+Options[load]: gauge,growright,pngdate,nopercent
 MaxBytes[load]: 100000
 Ylegend[load]: load x100
 ShortLegend[load]: load
@@ -425,6 +425,9 @@ LegendO[swap]: free&nbsp;
 WithPeak[swap]: ymwd
 #
 # $Log: indimail.mrtg.cfg.in,v $
+# Revision 1.6  2024-06-16 21:56:57+05:30  Cprogrammer
+# changed load graph to nopercent
+#
 # Revision 1.5  2023-04-09 22:24:34+05:30  Cprogrammer
 # rearranged graphs
 #
