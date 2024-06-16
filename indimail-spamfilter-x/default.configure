@@ -59,7 +59,6 @@ if [ ! -d m4 -a -f configure.ac -a -f Makefile.am ] ; then
   mkdir -p m4
 fi
 echo "default.configure called with $# args [$*]"
-prefix=/usr
 if [ ! -f conf-release ] ; then
   echo 1.1 > conf-release
 fi

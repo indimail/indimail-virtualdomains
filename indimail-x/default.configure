@@ -5,7 +5,6 @@ case "$SYSTEM" in
   prefix=/usr/local
   sbindir=/usr/local/sbin
   sysconfdir=/usr/local/etc/indimail
-  sysconfdir=/usr/local/etc/indimail
   mandir=/usr/local/man
   servicedir=/usr/local/etc/indimail/sv
   base_path=/home/mail
@@ -58,7 +57,6 @@ case "$SYSTEM" in
   *)
   prefix=/usr
   sbindir=/usr/sbin
-  sysconfdir=/usr/local/etc/indimail
   sysconfdir=/etc/indimail
   mandir=/usr/man
   servicedir=/service
