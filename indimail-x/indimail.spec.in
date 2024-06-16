@@ -266,7 +266,7 @@ if [ %{reconfigure_mode} -eq 1 ] ; then
   echo "reconfiguring..."
   %{__mkdir_p} m4
   aclocal -I m4
-  autoreconf -fiv
+  autoreconf -fis
 fi
 
 %if %build_on_obs == 0
